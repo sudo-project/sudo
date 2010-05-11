@@ -107,7 +107,7 @@ struct io_buffer {
 };
 
 static int script_fds[6] = { -1, -1, -1, -1, -1, -1};
-static int ttyin = TRUE;
+static int pipeline = FALSE;
 
 static sig_atomic_t recvsig[NSIG];
 static sig_atomic_t ttymode = TERM_COOKED;
@@ -563,7 +563,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	 */
 	memset(io_pipe, 0, sizeof(io_pipe));
 	if (!isatty(STDIN_FILENO)) {
-	    ttyin = FALSE;
+	    pipeline = TRUE;
 	    if (pipe(io_pipe[STDIN_FILENO]) != 0)
 		error(1, "unable to create pipe");
 	    iobufs = io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
@@ -571,6 +571,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	    script_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
 	}
 	if (!isatty(STDOUT_FILENO)) {
+	    pipeline = TRUE;
 	    if (pipe(io_pipe[STDOUT_FILENO]) != 0)
 		error(1, "unable to create pipe");
 	    iobufs = io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
@@ -601,8 +602,8 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		sync_ttysize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
 	    }
 
-	    /* Start out in raw mode is stdin is a tty. */
-	    if (ttyin) {
+	    /* Start out in raw mode if we are not part of a pipeline. */
+	    if (!pipeline) {
 		ttymode = TERM_RAW;
 		do {
 		    n = term_raw(script_fds[SFD_USERTTY], 0);
@@ -971,12 +972,12 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 #endif
 
     /*
-     * If stdin is not a tty, start command in the background since
-     * it might be part of a pipeline that reads from /dev/tty.
+     * If stdin/stdout is not a tty, start command in the background
+     * since it might be part of a pipeline that reads from /dev/tty.
      * In this case, we rely on the command receiving SIGTTOU or SIGTTIN
      * when it needs access to the controlling tty.
      */
-    if (foreground && !ttyin)
+    if (pipeline)
 	foreground = 0;
 
     /* Start command and wait for it to stop or exit */
