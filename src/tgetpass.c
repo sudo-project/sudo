@@ -104,7 +104,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     }
 
 restart:
-    for (i = 0; i < _NSIG; i++)
+    for (i = 0; i < NSIG; i++)
 	signo[i] = 0;
     pass = NULL;
     save_errno = 0;
@@ -171,10 +171,10 @@ restart:
      * If we were interrupted by a signal, resend it to ourselves
      * now that we have restored the signal handlers.
      */
-    for (i = 0; i < _NSIG; i++) {
+    for (i = 0; i < NSIG; i++) {
 	if (signo[i]) {
-	    kill(getpid(), signo[i]);
-	    switch (signo[i]) {
+	    kill(getpid(), i);
+	    switch (i) {
 		case SIGTSTP:
 		case SIGTTIN:
 		case SIGTTOU:
