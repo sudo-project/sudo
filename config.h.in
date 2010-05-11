@@ -179,6 +179,9 @@
    passwords) */
 #undef HAVE_GETPWANAM
 
+/* Define to 1 if you have the `getresuid' function. */
+#undef HAVE_GETRESUID
+
 /* Define to 1 if you have the `getspnam' function (SVR4-style shadow
    passwords) */
 #undef HAVE_GETSPNAM

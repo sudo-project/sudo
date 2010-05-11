@@ -140,6 +140,7 @@ set_perms(int perm)
     switch (perm) {
     case PERM_INITIAL:
 	/* Stash initial state */
+#ifdef HAVE_GETRESUID
 	if (getresuid(&state->ruid, &state->euid, &state->suid)) {
 	    errstr = "getresuid";
 	    goto bad;
@@ -148,8 +149,16 @@ set_perms(int perm)
 	if (getresgid(&state->rgid, &state->egid, &state->sgid)) {
 	    errstr = "getresgid";
 	    goto bad;
-
 	}
+#else
+	state->ruid = getuid();
+	state->euid = geteuid();
+	state->suid = state->euid; /* in case we are setuid */
+
+	state->rgid = getgid();
+	state->egid = getegid();
+	state->sgid = state->egid; /* in case we are setgid */
+#endif
 	state->groups = user_groups;
 	state->ngroups = user_ngroups;
 	break;

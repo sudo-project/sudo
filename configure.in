@@ -1919,7 +1919,10 @@ AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(util.h pty.h, [break])], [
 AC_CHECK_FUNCS(unsetenv, SUDO_FUNC_UNSETENV_VOID)
 SUDO_FUNC_PUTENV_CONST
 if test -z "$SKIP_SETRESUID"; then
-    AC_CHECK_FUNCS(setresuid, [SKIP_SETREUID=yes])
+    AC_CHECK_FUNCS(setresuid, [
+	SKIP_SETREUID=yes
+	AC_CHECK_FUNCS(getresuid)
+    ])
 fi
 if test -z "$SKIP_SETREUID"; then
     AC_CHECK_FUNCS(setreuid, [SKIP_SETEUID=yes])
