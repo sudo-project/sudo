@@ -25,6 +25,9 @@
 #include <sys/param.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#ifdef __linux__
+#include <sys/vfs.h>
+#endif
 #ifndef __TANDEM
 # include <sys/file.h>
 #endif
@@ -84,6 +87,7 @@ static int   timestamp_status(char *, char *, char *, int);
 static char *expand_prompt(char *, char *, char *);
 static void  lecture(int);
 static void  update_timestamp(char *, char *);
+static int   tty_is_devpts(const char *);
 
 /*
  * This function only returns if the user can successfully
@@ -104,20 +108,8 @@ check_user(int validated, int mode)
 	tty_info.dev = sb.st_dev;
 	tty_info.ino = sb.st_ino;
 	tty_info.rdev = sb.st_rdev;
-#ifdef notyet
-    	ctim_get(&sb, &tty_info.ctime);
-	if (stat("/", &sb) == 0) {
-	    /*
-	     * If tty does not reside on root partition, we assume it lives
-	     * on a devfs without real ctime values (FreeBSD, Mac OS X).
-	     * XXX - would like a smarter way to check this.
-	     */
-	    if (sb.st_dev != tty_info.dev) {
-		tty_info.ctime.tv_sec = 0;
-		tty_info.ctime.tv_usec = 0;
-	    }
-	}
-#endif
+	if (tty_is_devpts(user_ttypath))
+	    ctim_get(&sb, &tty_info.ctime);
     }
 
     /* Always prompt for a password when -k was specified with the command. */
@@ -668,4 +660,31 @@ remove_timestamp(int remove)
 
     efree(timestampdir);
     efree(timestampfile);
+}
+
+/*
+ * Returns TRUE if tty lives on a devpts filesystem, else FALSE.
+ * Unlike most filesystems, the ctime of devpts nodes is not updated when
+ * the device node is written to, only when the inode's status changes,
+ * typically via the chmod, chown, link, rename, or utimes system calls.
+ * Since the ctime is "stable" in this case, we can stash it the tty ticket
+ * file and use it to determine whether the tty ticket file is stale.
+ */
+static int
+tty_is_devpts(const char *tty)
+{
+    int retval = FALSE;
+#ifdef __linux__
+    struct statfs sfs;
+
+#ifndef DEVPTS_SUPER_MAGIC
+# define DEVPTS_SUPER_MAGIC 0x1cd1
+#endif
+
+    if (statfs(tty, &sfs) == 0) {
+	if (sfs.f_type == DEVPTS_SUPER_MAGIC)
+	    retval = TRUE;
+    }
+#endif /* __linux__ */
+    return retval;
 }
