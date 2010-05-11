@@ -22240,68 +22240,8 @@ if test -z "${AUTH_EXCL}${AUTH_REG}" -a -n "$AUTH_EXCL_DEF"; then
 fi
 
 if test ${with_pam-"no"} != "no"; then
-                { echo "$as_me:$LINENO: checking for main in -ldl" >&5
-echo $ECHO_N "checking for main in -ldl... $ECHO_C" >&6; }
-if test "${ac_cv_lib_dl_main+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-ldl  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_dl_main=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_cv_lib_dl_main=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_dl_main" >&5
-echo "${ECHO_T}$ac_cv_lib_dl_main" >&6; }
-if test $ac_cv_lib_dl_main = yes; then
-  SUDO_LIBS="${SUDO_LIBS} -lpam -ldl"
-else
-  SUDO_LIBS="${SUDO_LIBS} -lpam"
-fi
-
-    ac_cv_lib_dl=ac_cv_lib_dl_main
+    # Note: we already link the main sudo program with -ldl as needed
+    SUDOERS_LIBS="${SUDOERS_LIBS} -lpam"
 
 
 
@@ -26402,6 +26342,14 @@ echo "$as_me: WARNING: Unable to locate gssapi.h, you will have to edit the Make
     SUDOERS_LIBS="${SUDOERS_LIBS} ${LDAP_LIBS}"
     LIBS="$_LIBS"
     LDFLAGS="$_LDFLAGS"
+fi
+
+#
+# Add library needed for dynamic linking, if any.
+# XXX - using the cache value like this is ugly
+#
+if test X"$lt_cv_dlopen_libs" != X""; then
+    SUDO_LIBS="${SUDO_LIBS} $lt_cv_dlopen_libs"
 fi
 
 # On HP-UX, you cannot dlopen() a shared object that uses pthreads
