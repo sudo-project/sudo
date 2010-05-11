@@ -413,12 +413,13 @@ io_buf_new(int rfd, int wfd, int (*action)(char *, unsigned int),
 
 /*
  * Read/write iobufs depending on fdsr and fdsw.
+ * Returns the number of errors.
  */
 static int
 perform_io(struct io_buffer *iobufs, fd_set *fdsr, fd_set *fdsw)
 {
     struct io_buffer *iob;
-    int n = 0;
+    int n, errors = 0;
 
     for (iob = iobufs; iob; iob = iob->next) {
 	if (iob->rfd != -1 && FD_ISSET(iob->rfd, fdsr)) {
@@ -445,14 +446,24 @@ perform_io(struct io_buffer *iobufs, fd_set *fdsr, fd_set *fdsw)
 		    iob->len - iob->off);
 	    } while (n == -1 && errno == EINTR);
 	    if (n == -1) {
+		if (errno == EPIPE) {
+		    /* other end of pipe closed */
+		    if (iob->rfd != -1) {
+			close(iob->rfd);
+			iob->rfd = -1;
+		    }
+		    close(iob->wfd);
+		    iob->wfd = -1;
+		    continue;
+		}
 		if (errno != EAGAIN)
-		    break;
+		    errors++;
 	    } else {
 		iob->off += n;
 	    }
 	}
     }
-    return n == -1 ? -1 : 0;
+    return errors;
 }
 
 /*
@@ -511,11 +522,6 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
 
-    /* Ignore SIGPIPE, check errno instead... */
-    sa.sa_flags = SA_RESTART;
-    sa.sa_handler = SIG_IGN;
-    sigaction(SIGPIPE, &sa, NULL);
-
     /* Note: HP-UX select() will not be interrupted if SA_RESTART set */
     sa.sa_flags = 0; /* do not restart syscalls */
     sa.sa_handler = handler;
@@ -523,6 +529,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     sigaction(SIGCHLD, &sa, NULL);
     sigaction(SIGHUP, &sa, NULL);
     sigaction(SIGINT, &sa, NULL);
+    sigaction(SIGPIPE, &sa, NULL);
     sigaction(SIGQUIT, &sa, NULL);
     sigaction(SIGTERM, &sa, NULL);
 
@@ -811,7 +818,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		}
 	    }
 	}
-	if (perform_io(iobufs, fdsr, fdsw) == -1)
+	if (perform_io(iobufs, fdsr, fdsw) != 0)
 	    break;
     }
 
@@ -860,6 +867,7 @@ deliver_signal(pid_t pid, int signo)
     case SIGKILL:
 	_exit(1); /* XXX */
 	/* NOTREACHED */
+    case SIGPIPE:
     case SIGHUP:
     case SIGTERM:
     case SIGINT:
@@ -929,9 +937,8 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
     sigaction(SIGWINCH, &sa, NULL);
     sigaction(SIGALRM, &sa, NULL);
 
-    /* Ignore any SIGTT{IN,OU} or SIGPIPE we get. */
+    /* Ignore any SIGTTIN or SIGTTOU we get. */
     sa.sa_handler = SIG_IGN;
-    sigaction(SIGPIPE, &sa, NULL);
     sigaction(SIGTTIN, &sa, NULL);
     sigaction(SIGTTOU, &sa, NULL);
 
@@ -1198,7 +1205,7 @@ flush_output(struct io_buffer *iobufs)
 		continue;
 	    error(1, "select failed");
 	}
-	if (perform_io(iobufs, fdsr, fdsw) == -1)
+	if (perform_io(iobufs, fdsr, fdsw) != 0)
 	    break;
     }
     efree(fdsr);
