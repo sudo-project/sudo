@@ -647,7 +647,7 @@ remove_timestamp(int remove)
 
     status = timestamp_status(timestampdir, timestampfile, user_name,
 	TS_REMOVE);
-    if (status == TS_OLD || status == TS_CURRENT) {
+    if (status != TS_MISSING && status != TS_ERROR) {
 	path = timestampfile ? timestampfile : timestampdir;
 	if (remove) {
 	    if (timestampfile)
