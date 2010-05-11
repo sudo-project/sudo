@@ -115,7 +115,7 @@ REPLAY_OBJS = getdate.o sudoreplay.o term.o error.o
 
 TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o error.o
 
-LINKS = alloc.c atobool.c audit.c error.c fileops.c fmt_string.c lbuf.c \
+LINKS = alloc.c atobool.c error.c fileops.c fmt_string.c lbuf.c \
 	list.c term.c zero_bytes.c
 
 VERSION = @PACKAGE_VERSION@
