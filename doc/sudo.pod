@@ -70,7 +70,7 @@ the same as the invoking user, no password is required.  Otherwise,
 B<sudo> requires that users authenticate themselves with a password
 by default (NOTE: in the default configuration this is the user's
 password, not the root password).  Once a user has been authenticated,
-a timestamp is updated and the user may then use sudo without a
+a time stamp is updated and the user may then use sudo without a
 password for a short period of time (C<@timeout@> minutes unless
 overridden in I<sudoers>).
 
@@ -246,23 +246,23 @@ All other environment variables are removed.
 =item -K
 
 The B<-K> (sure I<kill>) option is like B<-k> except that it removes
-the user's timestamp entirely and may not be used in conjunction
+the user's time stamp entirely and may not be used in conjunction
 with a command or other option.  This option does not require a
 password.
 
 =item -k
 
 When used by itself, the B<-k> (I<kill>) option to B<sudo> invalidates
-the user's timestamp by setting the time on it to the Epoch.  The
+the user's time stamp by setting the time on it to the Epoch.  The
 next time B<sudo> is run a password will be required.  This option
 does not require a password and was added to allow a user to revoke
 B<sudo> permissions from a .logout file.
 
 When used in conjunction with a command or an option that may require
 a password, the B<-k> option will cause B<sudo> to ignore the user's
-timestamp file.  As a result, B<sudo> will prompt for a password
+time stamp file.  As a result, B<sudo> will prompt for a password
 (if one is required by I<sudoers>) and will not update the user's
-timestamp file.
+time stamp file.
 
 =item -L
 
@@ -389,7 +389,7 @@ with as well as the machine's local network addresses.
 =item -v
 
 If given the B<-v> (I<validate>) option, B<sudo> will update the
-user's timestamp, prompting for the user's password if necessary.
+user's time stamp, prompting for the user's password if necessary.
 This extends the B<sudo> timeout for another C<@timeout@> minutes
 (or whatever the timeout is set to in I<sudoers>) but does not run
 a command.
@@ -465,28 +465,46 @@ PATH (if one or both are in the PATH).  Note, however, that the
 actual C<PATH> environment variable is I<not> modified and is passed
 unchanged to the program that B<sudo> executes.
 
-B<sudo> will check the ownership of its timestamp directory
+B<sudo> will check the ownership of its time stamp directory
 (F<@timedir@> by default) and ignore the directory's contents if
 it is not owned by root or if it is writable by a user other than
 root.  On systems that allow non-root users to give away files via
-L<chown(2)>, if the timestamp directory is located in a directory
+L<chown(2)>, if the time stamp directory is located in a directory
 writable by anyone (e.g., F</tmp>), it is possible for a user to
-create the timestamp directory before B<sudo> is run.  However,
+create the time stamp directory before B<sudo> is run.  However,
 because B<sudo> checks the ownership and mode of the directory and
 its contents, the only damage that can be done is to "hide" files
-by putting them in the timestamp dir.  This is unlikely to happen
-since once the timestamp dir is owned by root and inaccessible by
+by putting them in the time stamp dir.  This is unlikely to happen
+since once the time stamp dir is owned by root and inaccessible by
 any other user, the user placing files there would be unable to get
 them back out.  To get around this issue you can use a directory
-that is not world-writable for the timestamps (F</var/adm/sudo> for
+that is not world-writable for the time stamps (F</var/adm/sudo> for
 instance) or create F<@timedir@> with the appropriate owner (root)
 and permissions (0700) in the system startup files.
 
-B<sudo> will not honor timestamps set far in the future.
+B<sudo> will not honor time stamps set far in the future.
 Timestamps with a date greater than current_time + 2 * C<TIMEOUT>
 will be ignored and sudo will log and complain.  This is done to
-keep a user from creating his/her own timestamp with a bogus
+keep a user from creating his/her own time stamp with a bogus
 date on systems that allow users to give away files.
+
+On systems where the boot time is available, B<sudo> will also not
+honor time stamps from before the machine booted.
+
+Since time stamp files live in the file system, they can outlive a
+user's login session.  As a result, a user may be able to login,
+run a command with B<sudo> after authenticating, logout, login
+again, and run B<sudo> without authenticating so long as the time
+stamp file's modification time is within C<@timeout@> minutes (or
+whatever the timeout is set to in I<sudoers>).  When the I<tty_tickets>
+option is enabled in I<sudoers>, the time stamp has per-tty granularity
+but still may outlive the user's session.  On Linux systems where
+the devpts filesystem is used, as well as other systems that utilize
+a devfs filesystem that monotonically increase the inode number of
+devices as they are created (such as Mac OS X), B<sudo> is able to
+determine when a tty-based time stamp file is stale and will ignore
+it.  Administrators should not rely on this feature as it is not
+universally available.
 
 Please note that B<sudo> will normally only log the command it
 explicitly runs.  If a user runs a command such as C<sudo su> or
@@ -577,7 +595,7 @@ List of who can run what
 
 =item F<@timedir@>
 
-Directory containing timestamps
+Directory containing time stamps
 
 =item F</etc/environment>
 
