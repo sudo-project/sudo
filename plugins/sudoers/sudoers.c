@@ -208,6 +208,9 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     sudo_setpwent();
     sudo_setgrent();
 
+    /* Initialize environment functions (including replacements). */
+    env_init(envp);
+
     /* Setup defaults data structures. */
     init_defaults();
 
@@ -259,9 +262,6 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 
     /* Set login class if applicable. */
     set_loginclass(sudo_user.pw);
-
-    /* Initialize environment functions (including replacements). */
-    env_init(envp);
 
     restore_perms();
 
