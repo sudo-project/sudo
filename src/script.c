@@ -766,6 +766,8 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	    }
 	}
 
+	if (recvsig[SIGCHLD])
+	    continue;
 	nready = select(maxfd + 1, fdsr, fdsw, NULL, NULL);
 	if (nready == -1) {
 	    if (errno == EINTR)
@@ -1050,7 +1052,7 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
     zero_bytes(&cstat, sizeof(cstat));
     for (;;) {
 	/* Read child status */
-	while (recvsig[SIGCHLD]) {
+	if (recvsig[SIGCHLD]) {
 	    recvsig[SIGCHLD] = FALSE;
 	    /* read child status and relay to parent */
 	    do {
@@ -1087,6 +1089,9 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 	if (errpipe[0] != -1)
 	    FD_SET(errpipe[0], fdsr);
 	maxfd = MAX(errpipe[0], backchannel);
+
+	if (recvsig[SIGCHLD])
+	    continue;
 	n = select(maxfd + 1, fdsr, NULL, NULL, NULL);
 	if (n == -1) {
 	    if (errno == EINTR)
