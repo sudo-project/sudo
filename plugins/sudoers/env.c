@@ -223,6 +223,7 @@ env_init(char * const envp[])
 	continue;
     len = (size_t)(ep - envp);
 
+    env.env_len = len;
     env.env_size = len + 1 + 128;
     env.envp = emalloc2(env.env_size, sizeof(char *));
 #ifdef ENV_DEBUG
