@@ -122,7 +122,7 @@ static void set_runaspw(char *);
 static int sudoers_policy_version(int verbose);
 static struct passwd *get_authpw(void);
 static int deserialize_info(char * const settings[], char * const user_info[]);
-static char *find_editor(char ***argv_out);
+static char *find_editor(int nfiles, char **files, char ***argv_out);
 
 /* XXX */
 extern int runas_ngroups;
@@ -561,7 +561,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     sudo_endgrent();
 
     if (ISSET(sudo_mode, MODE_EDIT)) {
-	char *editor = find_editor(&edit_argv);
+	char *editor = find_editor(NewArgc - 1, NewArgv + 1, &edit_argv);
 	if (!editor)
 	    goto done;
 	command_info[info_len++] = fmt_string("command", editor);
@@ -1324,10 +1324,10 @@ deserialize_info(char * const settings[], char * const user_info[])
 }
 
 static char *
-resolve_editor(char *editor, char ***argv_out)
+resolve_editor(char *editor, int nfiles, char **files, char ***argv_out)
 {
     char *cp, **nargv, *editor_path = NULL;
-    int ac, nargc, wasblank;
+    int ac, i, nargc, wasblank;
 
     /*
      * Split editor into an argument vector; editor is reused (do not free).
@@ -1349,11 +1349,14 @@ resolve_editor(char *editor, char ***argv_out)
 	find_path(cp, &editor_path, NULL, getenv("PATH"), 0) != FOUND) {
 	return NULL;
     }
-    nargv = (char **) emalloc2(nargc + 1, sizeof(char *));
+    nargv = (char **) emalloc2(nargc + 1 + nfiles + 1, sizeof(char *));
     for (ac = 0; cp != NULL && ac < nargc; ac++) {
 	nargv[ac] = cp;
 	cp = strtok(NULL, " \t");
     }
+    nargv[ac++] = "--";
+    for (i = 0; i < nfiles; )
+	nargv[ac++] = files[i++];
     nargv[ac] = NULL;
 
     *argv_out = nargv;
@@ -1366,7 +1369,7 @@ resolve_editor(char *editor, char ***argv_out)
  * not the runas (privileged) user.
  */
 static char *
-find_editor(char ***argv_out)
+find_editor(int nfiles, char **files, char ***argv_out)
 {
     char *cp, *editor, *editor_path = NULL, **ev, *ev0[4];
 
@@ -1379,7 +1382,7 @@ find_editor(char ***argv_out)
     ev0[3] = NULL;
     for (ev = ev0; *ev != NULL; ev++) {
 	if ((editor = getenv(*ev)) != NULL && *editor != '\0') {
-	    editor_path = resolve_editor(editor, argv_out);
+	    editor_path = resolve_editor(editor, nfiles, files, argv_out);
 	    if (editor_path != NULL)
 		break;
 	}
@@ -1388,7 +1391,7 @@ find_editor(char ***argv_out)
 	editor = estrdup(def_editor);
 	if ((cp = strchr(editor, ':')) != NULL)
 	    *cp = '\0';			/* def_editor could be a path */
-	editor_path = resolve_editor(cp, argv_out);
+	editor_path = resolve_editor(cp, nfiles, files, argv_out);
     }
     if (!editor_path) {
 	audit_failure(NewArgv, "%s: command not found", editor);

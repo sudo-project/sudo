@@ -83,15 +83,15 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
  * Wrapper to allow users to edit privileged files with their own uid.
  */
 int
-sudo_edit(struct command_details *command_details, char *argv[], char *files[],
-    char *envp[])
+sudo_edit(struct command_details *command_details, char *argv[], char *envp[])
 {
     struct command_details editor_details;
     ssize_t nread, nwritten;
     const char *tmpdir;
-    char **nargv, **ap, *cp;
+    char *cp, **nargv, **ap, **files = NULL;
     char buf[BUFSIZ];
-    int retval, i, j, ac, ofd, tfd, nargc, nfiles, rval, tmplen;
+    int rc, i, j, ac, ofd, tfd, nargc, rval, tmplen;
+    int editor_argc = 0, nfiles = 0;
     struct stat sb;
     struct timeval tv, tv1, tv2;
     struct tempfile {
@@ -130,33 +130,46 @@ sudo_edit(struct command_details *command_details, char *argv[], char *files[],
     endgrent();
 
     /*
+     * The user's editor must be separated from the files to be
+     * edited by a "--" option.
+     */
+    for (ap = argv; *ap != NULL; ap++) {
+	if (files)
+	    nfiles++;
+	else if (strcmp(*ap, "--") == 0)
+	    files = ap + 1;
+	else
+	    editor_argc++;
+    }
+    if (nfiles == 0)
+	return 1;
+
+    /*
      * For each file specified by the user, make a temporary version
      * and copy the contents of the original to it.
      */
-    for (nfiles = 0; files[nfiles] != NULL; nfiles++)
-    	continue;
     tf = emalloc2(nfiles, sizeof(*tf));
     zero_bytes(tf, nfiles * sizeof(*tf));
     for (i = 0, j = 0; i < nfiles; i++) {
-	retval = -1;
+	rc = -1;
 	switch_user(command_details->euid, command_details->egid,
 	    command_details->ngroups, command_details->groups);
 	if ((ofd = open(files[i], O_RDONLY, 0644)) != -1 || errno == ENOENT) {
 	    if (ofd == -1) {
 		zero_bytes(&sb, sizeof(sb));		/* new file */
-		retval = 0;
+		rc = 0;
 	    } else {
 #ifdef HAVE_FSTAT
-		retval = fstat(ofd, &sb);
+		rc = fstat(ofd, &sb);
 #else
-		retval = stat(tf[j].ofile, &sb);
+		rc = stat(tf[j].ofile, &sb);
 #endif
 	    }
 	}
 	switch_user(ROOT_UID, user_details.egid,
 	    user_details.ngroups, user_details.groups);
-	if (retval || (ofd != -1 && !S_ISREG(sb.st_mode))) {
-	    if (retval)
+	if (rc || (ofd != -1 && !S_ISREG(sb.st_mode))) {
+	    if (rc)
 		warning("%s", files[i]);
 	    else
 		warningx("%s: not a regular file", files[i]);
@@ -202,30 +215,27 @@ sudo_edit(struct command_details *command_details, char *argv[], char *files[],
 	 */
 	(void) touch(tfd, NULL, &tf[j].omtim);
 #ifdef HAVE_FSTAT
-	retval = fstat(tfd, &sb);
+	rc = fstat(tfd, &sb);
 #else
-	retval = stat(tf[j].tfile, &sb);
+	rc = stat(tf[j].tfile, &sb);
 #endif
-	if (!retval)
+	if (!rc)
 	    mtim_get(&sb, &tf[j].omtim);
 	close(tfd);
 	j++;
     }
-    if (nfiles == 0)
+    if ((nfiles = j) == 0)
 	return(1);			/* no files readable, you lose */
 
     /*
      * Allocate space for the new argument vector and fill it in.
-     * We concatenate argv (the editor with its args) and the file list
+     * We concatenate the editor with its args and the file list
      * to create a new argv.
      */
-    for (ap = argv; *ap != NULL; ap++)
-	continue;
-    nargc = (int)(ap - argv) + nfiles;
+    nargc = editor_argc + nfiles;
     nargv = (char **) emalloc2(nargc + 1, sizeof(char *));
-    ac = 0;
-    for (ap = argv; *ap != NULL; ap++)
-	nargv[ac++] = *ap;
+    for (ac = 0; ac < editor_argc; ac++)
+	nargv[ac] = argv[ac];
     for (i = 0; i < nfiles && ac < nargc; )
 	nargv[ac++] = tf[i++].tfile;
     nargv[ac] = NULL;
@@ -247,20 +257,20 @@ sudo_edit(struct command_details *command_details, char *argv[], char *files[],
 
     /* Copy contents of temp files to real ones */
     for (i = 0; i < nfiles; i++) {
-	retval = -1;
+	rc = -1;
 	if (seteuid(user_details.uid) != 0)
 	    error(1, "seteuid(%d)", (int)user_details.uid);
 	if ((tfd = open(tf[i].tfile, O_RDONLY, 0644)) != -1) {
 #ifdef HAVE_FSTAT
-	    retval = fstat(tfd, &sb);
+	    rc = fstat(tfd, &sb);
 #else
-	    retval = stat(tf[i].tfile, &sb);
+	    rc = stat(tf[i].tfile, &sb);
 #endif
 	}
 	if (seteuid(ROOT_UID) != 0)
 	    error(1, "seteuid(ROOT_UID)");
-	if (retval || !S_ISREG(sb.st_mode)) {
-	    if (retval)
+	if (rc || !S_ISREG(sb.st_mode)) {
+	    if (rc)
 		warning("%s", tf[i].tfile);
 	    else
 		warningx("%s: not a regular file", tf[i].tfile);

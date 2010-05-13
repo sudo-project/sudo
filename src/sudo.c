@@ -246,7 +246,7 @@ main(int argc, char *argv[], char *envp[])
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
 	    /* run_command will call the close method for us */
 	    if (sudo_mode & MODE_EDIT) {
-		exitcode = sudo_edit(&command_details, argv_out, nargv + 1, user_env_out);
+		exitcode = sudo_edit(&command_details, argv_out, user_env_out);
 	    } else {
 		exitcode = run_command(&command_details, argv_out, user_env_out);
 	    }

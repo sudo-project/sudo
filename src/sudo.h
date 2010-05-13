@@ -192,8 +192,7 @@ extern int debug_level;
 extern struct plugin_container_list io_plugins;
 
 /* sudo_edit.c */
-int sudo_edit(struct command_details *details, char *argv[], char *files[],
-    char *envp[]);
+int sudo_edit(struct command_details *details, char *argv[], char *envp[]);
 
 /* parse_args.c */
 void usage(int) __attribute__((__noreturn__));
