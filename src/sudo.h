@@ -75,19 +75,6 @@
 #define MODE_LONG_LIST		0x01000000
 
 /*
- * Used with set_perms()
- */
-#define PERM_ROOT                0x00
-#define PERM_USER                0x01
-#define PERM_FULL_USER           0x02
-#define PERM_SUDOERS             0x03
-#define PERM_RUNAS               0x04
-#define PERM_FULL_RUNAS          0x05
-#define PERM_TIMESTAMP           0x06
-#define PERM_NOEXIT              0x10 /* flag */
-#define PERM_MASK                0xf0
-
-/*
  * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
  * but that caused problems with various alternate authentication
  * methods.  So, we just define our own and assume that it is >= the
@@ -199,11 +186,20 @@ void get_ttysize(int *linep, int *colp);
 
 /* sudo.c */
 int exec_setup(struct command_details *details);
+int run_command(struct command_details *details, char *argv[],   
+    char *envp[]);
 extern int debug_level;
 extern struct plugin_container_list io_plugins;
 
+/* sudo_edit.c */
+int sudo_edit(struct command_details *details, char *argv[], char *files[],
+    char *envp[]);
+
 /* parse_args.c */
 void usage(int) __attribute__((__noreturn__));
+
+/* gettime.c */
+int gettime(struct timeval *);
 
 #ifndef errno
 extern int errno;

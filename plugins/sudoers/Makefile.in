@@ -115,7 +115,7 @@ REPLAY_OBJS = getdate.o sudoreplay.o term.o error.o
 
 TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o error.o
 
-LINKS = alloc.c atobool.c error.c fileops.c fmt_string.c lbuf.c \
+LINKS = alloc.c atobool.c error.c gettime.c fileops.c fmt_string.c lbuf.c \
 	list.c term.c zero_bytes.c
 
 VERSION = @PACKAGE_VERSION@
@@ -192,7 +192,6 @@ defaults.lo: $(srcdir)/defaults.c $(SUDODEP) $(srcdir)/def_data.c $(authdir)/sud
 env.lo: $(srcdir)/env.c $(SUDODEP)
 find_path.lo: $(srcdir)/find_path.c $(SUDODEP)
 getspwuid.lo: $(srcdir)/getspwuid.c $(SUDODEP)
-gettime.lo: $(srcdir)/gettime.c $(SUDODEP)
 goodpath.lo: $(srcdir)/goodpath.c $(SUDODEP)
 gram.lo: $(devdir)/gram.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir)/gram.h
 interfaces.lo: $(srcdir)/interfaces.c $(SUDODEP) $(srcdir)/interfaces.h
@@ -226,6 +225,9 @@ fileops.lo: fileops.c $(SUDODEP)
 fmt_string.c: $(top_srcdir)/src/fmt_string.c
 	@$(LN_S) -f $(top_srcdir)/src/$@ $@
 fmt_string.lo: fmt_string.c $(incdir)/compat.h $(top_builddir)/config.h
+gettime.c: $(top_srcdir)/src/gettime.c
+	@$(LN_S) -f $(top_srcdir)/src/$@ $@
+gettime.lo: gettime.c $(incdir)/compat.h $(top_builddir)/config.h
 list.c: $(top_srcdir)/src/list.c
 	@$(LN_S) -f $(top_srcdir)/src/$@ $@
 list.lo: list.c $(SUDODEP)

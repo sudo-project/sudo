@@ -68,6 +68,9 @@ struct policy_plugin {
 	const char *list_user);
     int (*validate)(void);
     void (*invalidate)(int remove);
+    int (*check_sudoedit)(int argc, char * const argv[],
+	char *env_add[], char **command_info[],
+	char **argv_out[], char **user_env_out[]);
 };
 
 /* I/O plugin type and defines */

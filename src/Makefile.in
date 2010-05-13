@@ -72,11 +72,9 @@ SHELL = /bin/sh
 
 PROGS = @PROGS@
 
-# XXX - add back missing ones:
-#	sudo_edit.o
-OBJS =	sudo.o parse_args.o lbuf.o alloc.o error.o zero_bytes.o \
-	load_plugins.o conversation.o list.o fmt_string.o tgetpass.o \
-	fileops.o term.o ttysize.o atobool.o script.o pty.o @SUDO_OBJS@
+OBJS = alloc.o atobool.o conversation.o error.o fileops.o fmt_string.o \
+       gettime.o lbuf.o list.o load_plugins.o parse_args.o pty.o script.o \
+       sudo.o sudo_edit.o term.o tgetpass.o ttysize.o zero_bytes.o @SUDO_OBJS@
 
 LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
 
@@ -115,6 +113,7 @@ conversation.o: $(srcdir)/conversation.c $(SUDODEP)
 error.o: $(srcdir)/error.c $(incdir)/compat.h $(incdir)/error.h $(top_builddir)/config.h
 fileops.o: $(srcdir)/fileops.c $(SUDODEP)
 fmt_string.o: $(srcdir)/fmt_string.c $(incdir)/compat.h $(top_builddir)/config.h
+gettime.o: $(srcdir)/gettime.c $(incdir)/compat.h $(top_builddir)/config.h
 lbuf.o: $(srcdir)/lbuf.c $(SUDODEP)
 list.o: $(srcdir)/list.c $(SUDODEP)
 load_plugins.o: $(srcdir)/load_plugins.c $(SUDODEP)

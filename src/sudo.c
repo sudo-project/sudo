@@ -93,8 +93,6 @@ static void disable_coredumps(void);
 static char **get_user_info(struct user_details *);
 static void command_info_to_details(char * const info[],
     struct command_details *details);
-static int run_command(struct command_details *details, char *argv[],
-    char *envp[]);
 
 /* XXX - header file */
 extern const char *list_user, *runas_user, *runas_group;
@@ -109,7 +107,7 @@ static struct rlimit corelimit;
 int
 main(int argc, char *argv[], char *envp[])
 {
-    int nargc, sudo_mode;
+    int nargc, sudo_mode, exitcode = 0;
     char **nargv, **settings, **env_add;
     char **user_info, **command_info, **argv_out, **user_env_out;
     struct plugin_container *plugin, *next;
@@ -200,9 +198,22 @@ main(int argc, char *argv[], char *envp[])
 		    ISSET(sudo_mode, MODE_LONG_LIST), list_user);
 	    }
 	    exit(ok != TRUE);
+	case MODE_EDIT:
+	    if (!policy_plugin.u.policy->check_sudoedit)
+		errorx(1, "policy plugin %s does not support sudoedit",
+		    policy_plugin.name);
+	    /* FALLTHROUGH */
 	case MODE_RUN:
-	    ok = policy_plugin.u.policy->check_policy(nargc, nargv, env_add,
-		&command_info, &argv_out, &user_env_out);
+	    if (sudo_mode & MODE_EDIT) {
+		/* XXX - must be able to tell which are the files in argv */
+		/*       as opposed to editor flags; could use original argv */
+		/*       and only use argv_out for the command path + args */
+		ok = policy_plugin.u.policy->check_sudoedit(nargc, nargv,
+		    env_add, &command_info, &argv_out, &user_env_out);
+	    } else {
+		ok = policy_plugin.u.policy->check_policy(nargc, nargv, env_add,
+		    &command_info, &argv_out, &user_env_out);
+	    }
 	    sudo_debug(8, "policy plugin returns %d", ok);
 	    if (ok != TRUE) {
 		if (ok == -2)
@@ -234,15 +245,16 @@ main(int argc, char *argv[], char *envp[])
 	    (void) setrlimit(RLIMIT_CORE, &corelimit);
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
 	    /* run_command will call the close method for us */
-	    run_command(&command_details, argv_out, user_env_out);
-	    break;
-	case MODE_EDIT:
-	    /* XXX - fill in */
+	    if (sudo_mode & MODE_EDIT) {
+		exitcode = sudo_edit(&command_details, argv_out, nargv + 1, user_env_out);
+	    } else {
+		exitcode = run_command(&command_details, argv_out, user_env_out);
+	    }
 	    break;
 	default:
 	    errorx(1, "unexpected sudo mode 0x%x", sudo_mode);
     }
-    exit(0);
+    exit(exitcode);
 }
 
 /*
@@ -744,7 +756,7 @@ done:
 /*
  * Run the command and wait for it to complete.
  */
-static int
+int
 run_command(struct command_details *details, char *argv[], char *envp[])
 {
     struct plugin_container *plugin;
@@ -790,7 +802,7 @@ run_command(struct command_details *details, char *argv[], char *envp[])
 	warningx("unexpected child termination condition: %d", cstat.type);
 	break;
     }
-    exit(exitcode);
+    return exitcode;
 }
 
 /*

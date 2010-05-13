@@ -418,6 +418,13 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     }
     settings[j] = NULL;
 
+    /* Must have the command in argv[0]. */
+    if (mode == MODE_EDIT) {
+	argc++;
+	argv--;
+	argv[0] = "sudoedit";
+    }
+
     *settingsp = settings;
     *env_addp = env_add;
     *nargc = argc;

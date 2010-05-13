@@ -97,6 +97,7 @@
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
 # include <membership.h>
 #endif
+#include <ctype.h>
 #include <setjmp.h>
 
 #include "sudo_plugin.h"
@@ -121,6 +122,7 @@ static void set_runaspw(char *);
 static int sudoers_policy_version(int verbose);
 static struct passwd *get_authpw(void);
 static int deserialize_info(char * const settings[], char * const user_info[]);
+static char *find_editor(char ***argv_out);
 
 /* XXX */
 extern int runas_ngroups;
@@ -281,6 +283,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     char **command_infop[], char **argv_out[], char **user_env_out[])
 {
     static char *command_info[32]; /* XXX */
+    char **edit_argv = NULL;
     struct sudo_nss *nss;
     int cmnd_status = -1, validated;
     int info_len = 0;
@@ -308,8 +311,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /*
      * Make a local copy of argc/argv, with special handling
-     * for the '-e', '-i' or '-s' options.
-     * XXX - handle sudoedit
+     * for the '-i' option.
      */
     NewArgv = emalloc2(argc + 1, sizeof(char *));
     memcpy(NewArgv, argv, argc * sizeof(char *));
@@ -408,8 +410,12 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    (void) close(fd);
     }
 
-    /* User may have overridden environment resetting via the -E flag. */
-    if (ISSET(sudo_mode, MODE_PRESERVE_ENV) && def_setenv)
+    /*
+     * We don't reset the environment for sudoedit or if the user
+     * specified the -E command line flag and they have setenv privs.
+     */
+    if (ISSET(sudo_mode, MODE_EDIT) ||
+	(ISSET(sudo_mode, MODE_PRESERVE_ENV) && def_setenv))
 	def_env_reset = FALSE;
 
     /* Build a new environment that avoids any nasty bits. */
@@ -554,7 +560,14 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     sudo_endpwent();
     sudo_endgrent();
 
-    command_info[info_len++] = fmt_string("command", safe_cmnd);
+    if (ISSET(sudo_mode, MODE_EDIT)) {
+	char *editor = find_editor(&edit_argv);
+	if (!editor)
+	    goto done;
+	command_info[info_len++] = fmt_string("command", editor);
+    } else {
+	command_info[info_len++] = fmt_string("command", safe_cmnd);
+    }
     if (def_stay_setuid) {
 	easprintf(&command_info[info_len++], "runas_uid=%u", user_uid);
 	easprintf(&command_info[info_len++], "runas_gid=%u", user_gid);
@@ -589,7 +602,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     *command_infop = command_info;
 
-    *argv_out = NewArgv;
+    *argv_out = edit_argv ? edit_argv : NewArgv;
     *user_env_out = env_get(); /* our private copy */
 
     rval = TRUE;
@@ -605,6 +618,16 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     char **command_infop[], char **argv_out[], char **user_env_out[])
 {
     SET(sudo_mode, MODE_RUN);
+
+    return sudoers_policy_main(argc, argv, 0, env_add, command_infop,
+	argv_out, user_env_out);
+}
+
+static int
+sudoers_policy_sudoedit(int argc, char * const argv[], char *env_add[],
+    char **command_infop[], char **argv_out[], char **user_env_out[])
+{
+    SET(sudo_mode, MODE_EDIT);
 
     return sudoers_policy_main(argc, argv, 0, env_add, command_infop,
 	argv_out, user_env_out);
@@ -658,7 +681,7 @@ init_vars(char * const envp[])
 {
     char * const * ep;
 
-#if 0
+#if 0 /* XXX */
     /* Sanity check command from user. */
     if (user_cmnd == NULL && strlen(NewArgv[0]) >= PATH_MAX)
 	errorx(1, "%s: File name too long", NewArgv[0]);
@@ -1300,6 +1323,80 @@ deserialize_info(char * const settings[], char * const user_info[])
     return flags;
 }
 
+static char *
+resolve_editor(char *editor, char ***argv_out)
+{
+    char *cp, **nargv, *editor_path = NULL;
+    int ac, nargc, wasblank;
+
+    /*
+     * Split editor into an argument vector; editor is reused (do not free).
+     * The EDITOR and VISUAL environment variables may contain command
+     * line args so look for those and alloc space for them too.
+     */
+    nargc = 1;
+    for (wasblank = FALSE, cp = editor; *cp != '\0'; cp++) {
+	if (isblank((unsigned char) *cp))
+	    wasblank = TRUE;
+	else if (wasblank) {
+	    wasblank = FALSE;
+	    nargc++;
+	}
+    }
+    /* If we can't find the editor in the user's PATH, give up. */
+    cp = strtok(editor, " \t");
+    if (cp == NULL ||
+	find_path(cp, &editor_path, NULL, getenv("PATH"), 0) != FOUND) {
+	return NULL;
+    }
+    nargv = (char **) emalloc2(nargc + 1, sizeof(char *));
+    for (ac = 0; cp != NULL && ac < nargc; ac++) {
+	nargv[ac] = cp;
+	cp = strtok(NULL, " \t");
+    }
+    nargv[ac] = NULL;
+
+    *argv_out = nargv;
+    return editor_path;
+}
+
+/*
+ * Determine which editor to use.  We don't need to worry about restricting
+ * this to a "safe" editor since it runs with the uid of the invoking user,
+ * not the runas (privileged) user.
+ */
+static char *
+find_editor(char ***argv_out)
+{
+    char *cp, *editor, *editor_path = NULL, **ev, *ev0[4];
+
+    /*
+     * If any of SUDO_EDITOR, VISUAL or EDITOR are set, choose the first one.
+     */
+    ev0[0] = "SUDO_EDITOR";
+    ev0[1] = "VISUAL";
+    ev0[2] = "EDITOR";
+    ev0[3] = NULL;
+    for (ev = ev0; *ev != NULL; ev++) {
+	if ((editor = getenv(*ev)) != NULL && *editor != '\0') {
+	    editor_path = resolve_editor(editor, argv_out);
+	    if (editor_path != NULL)
+		break;
+	}
+    }
+    if (editor_path == NULL) {
+	editor = estrdup(def_editor);
+	if ((cp = strchr(editor, ':')) != NULL)
+	    *cp = '\0';			/* def_editor could be a path */
+	editor_path = resolve_editor(cp, argv_out);
+    }
+    if (!editor_path) {
+	audit_failure(NewArgv, "%s: command not found", editor);
+	warningx("%s: command not found", editor);
+    }
+    return editor_path;
+}
+
 struct policy_plugin sudoers_policy = {
     SUDO_POLICY_PLUGIN,
     SUDO_API_VERSION,
@@ -1309,7 +1406,8 @@ struct policy_plugin sudoers_policy = {
     sudoers_policy_check,
     sudoers_policy_list,
     sudoers_policy_validate,
-    sudoers_policy_invalidate
+    sudoers_policy_invalidate,
+    sudoers_policy_sudoedit
 };
 
 struct io_plugin sudoers_io = {

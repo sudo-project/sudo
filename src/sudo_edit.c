@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2008 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2008, 2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -42,6 +42,7 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <ctype.h>
+#include <grp.h>
 #include <pwd.h>
 #include <signal.h>
 #include <errno.h>
@@ -49,36 +50,62 @@
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#ifndef HAVE_TIMESPEC
-# include <compat/timespec.h>
-#endif
 
 #include "sudo.h"
 
-extern char **environ;
+extern struct user_details user_details;
 
-static char *find_editor();
+static void
+switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
+{
+    int serrno = errno;
+
+    /* When restoring root, change euid first; otherwise change it last. */
+    if (euid == ROOT_UID) {
+	if (seteuid(ROOT_UID) != 0)
+	    error(1, "seteuid(ROOT_UID)");
+    }
+    if (ngroups != -1) {
+	if (setgroups(ngroups, groups) != 0)
+	    error(1, "setgroups");
+    }
+    if (setegid(egid) != 0)
+	error(1, "setegid(%d)", (int)egid);
+    if (euid != ROOT_UID) {
+	if (seteuid(euid) != 0)
+	    error(1, "seteuid(%d)", (int)euid);
+    }
+
+    errno = serrno;
+}
 
 /*
  * Wrapper to allow users to edit privileged files with their own uid.
  */
 int
-sudo_edit(int argc, char **argv, char **envp)
+sudo_edit(struct command_details *command_details, char *argv[], char *files[],
+    char *envp[])
 {
+    struct command_details editor_details;
     ssize_t nread, nwritten;
-    pid_t kidpid, pid;
     const char *tmpdir;
-    char **nargv, **ap, *editor, *cp;
+    char **nargv, **ap, *cp;
     char buf[BUFSIZ];
-    int error, i, ac, ofd, tfd, nargc, rval, tmplen, wasblank;
+    int retval, i, j, ac, ofd, tfd, nargc, nfiles, rval, tmplen;
     struct stat sb;
-    struct timespec ts1, ts2;
+    struct timeval tv, tv1, tv2;
     struct tempfile {
 	char *tfile;
 	char *ofile;
-	struct timespec omtim;
+	struct timeval omtim;
 	off_t osize;
     } *tf;
+
+    /*
+     * Set real, effective and saved uids to root.
+     * We will change the euid as needed below.
+     */
+    setuid(ROOT_UID);
 
     /*
      * Find our temporary directory, one of /var/tmp, /usr/tmp, or /tmp
@@ -99,54 +126,57 @@ sudo_edit(int argc, char **argv, char **envp)
      * Close password, shadow, and group files before we try to open
      * user-specified files to prevent the opening of things like /dev/fd/4
      */
-    sudo_endpwent();
-    sudo_endgrent();
+    endpwent();
+    endgrent();
 
     /*
      * For each file specified by the user, make a temporary version
      * and copy the contents of the original to it.
      */
-    tf = emalloc2(argc - 1, sizeof(*tf));
-    zero_bytes(tf, (argc - 1) * sizeof(*tf));
-    for (i = 0, ap = argv + 1; i < argc - 1 && *ap != NULL; i++, ap++) {
-	error = -1;
-	set_perms(PERM_RUNAS);
-	if ((ofd = open(*ap, O_RDONLY, 0644)) != -1 || errno == ENOENT) {
+    for (nfiles = 0; files[nfiles] != NULL; nfiles++)
+    	continue;
+    tf = emalloc2(nfiles, sizeof(*tf));
+    zero_bytes(tf, nfiles * sizeof(*tf));
+    for (i = 0, j = 0; i < nfiles; i++) {
+	retval = -1;
+	switch_user(command_details->euid, command_details->egid,
+	    command_details->ngroups, command_details->groups);
+	if ((ofd = open(files[i], O_RDONLY, 0644)) != -1 || errno == ENOENT) {
 	    if (ofd == -1) {
 		zero_bytes(&sb, sizeof(sb));		/* new file */
-		error = 0;
+		retval = 0;
 	    } else {
 #ifdef HAVE_FSTAT
-		error = fstat(ofd, &sb);
+		retval = fstat(ofd, &sb);
 #else
-		error = stat(tf[i].ofile, &sb);
+		retval = stat(tf[j].ofile, &sb);
 #endif
 	    }
 	}
-	set_perms(PERM_ROOT);
-	if (error || (ofd != -1 && !S_ISREG(sb.st_mode))) {
-	    if (error)
-		warning("%s", *ap);
+	switch_user(ROOT_UID, user_details.egid,
+	    user_details.ngroups, user_details.groups);
+	if (retval || (ofd != -1 && !S_ISREG(sb.st_mode))) {
+	    if (retval)
+		warning("%s", files[i]);
 	    else
-		warningx("%s: not a regular file", *ap);
+		warningx("%s: not a regular file", files[i]);
 	    if (ofd != -1)
 		close(ofd);
-	    argc--;
-	    i--;
 	    continue;
 	}
-	tf[i].ofile = *ap;
-	tf[i].omtim.tv_sec = mtim_getsec(sb);
-	tf[i].omtim.tv_nsec = mtim_getnsec(sb);
-	tf[i].osize = sb.st_size;
-	if ((cp = strrchr(tf[i].ofile, '/')) != NULL)
+	tf[j].ofile = files[i];
+	tf[j].osize = sb.st_size;
+	mtim_get(&sb, &tf[j].omtim);
+	if ((cp = strrchr(tf[j].ofile, '/')) != NULL)
 	    cp++;
 	else
-	    cp = tf[i].ofile;
-	easprintf(&tf[i].tfile, "%.*s/%s.XXXXXXXX", tmplen, tmpdir, cp);
-	set_perms(PERM_USER);
-	tfd = mkstemp(tf[i].tfile);
-	set_perms(PERM_ROOT);
+	    cp = tf[j].ofile;
+	easprintf(&tf[j].tfile, "%.*s/%s.XXXXXXXX", tmplen, tmpdir, cp);
+	if (seteuid(user_details.uid) != 0)
+	    error(1, "seteuid(%d)", (int)user_details.uid);
+	tfd = mkstemp(tf[j].tfile);
+	if (seteuid(ROOT_UID) != 0)
+	    error(1, "seteuid(ROOT_UID)");
 	if (tfd == -1) {
 	    warning("mkstemp");
 	    goto cleanup;
@@ -155,9 +185,9 @@ sudo_edit(int argc, char **argv, char **envp)
 	    while ((nread = read(ofd, buf, sizeof(buf))) != 0) {
 		if ((nwritten = write(tfd, buf, nread)) != nread) {
 		    if (nwritten == -1)
-			warning("%s", tf[i].tfile);
+			warning("%s", tf[j].tfile);
 		    else
-			warningx("%s: short write", tf[i].tfile);
+			warningx("%s: short write", tf[j].tfile);
 		    goto cleanup;
 		}
 	    }
@@ -170,104 +200,67 @@ sudo_edit(int argc, char **argv, char **envp)
 	 * resides.  It is OK if touch() fails since we only use the info
 	 * to determine whether or not a file has been modified.
 	 */
-	(void) touch(tfd, NULL, &tf[i].omtim);
+	(void) touch(tfd, NULL, &tf[j].omtim);
 #ifdef HAVE_FSTAT
-	error = fstat(tfd, &sb);
+	retval = fstat(tfd, &sb);
 #else
-	error = stat(tf[i].tfile, &sb);
+	retval = stat(tf[j].tfile, &sb);
 #endif
-	if (!error) {
-	    tf[i].omtim.tv_sec = mtim_getsec(sb);
-	    tf[i].omtim.tv_nsec = mtim_getnsec(sb);
-	}
+	if (!retval)
+	    mtim_get(&sb, &tf[j].omtim);
 	close(tfd);
+	j++;
     }
-    if (argc == 1)
+    if (nfiles == 0)
 	return(1);			/* no files readable, you lose */
-
-    environ = envp;
-    editor = find_editor();
 
     /*
      * Allocate space for the new argument vector and fill it in.
-     * The EDITOR and VISUAL environment variables may contain command
-     * line args so look for those and alloc space for them too.
+     * We concatenate argv (the editor with its args) and the file list
+     * to create a new argv.
      */
-    nargc = argc;
-    for (wasblank = FALSE, cp = editor; *cp != '\0'; cp++) {
-	if (isblank((unsigned char) *cp))
-	    wasblank = TRUE;
-	else if (wasblank) {
-	    wasblank = FALSE;
-	    nargc++;
-	}
-    }
+    for (ap = argv; *ap != NULL; ap++)
+	continue;
+    nargc = (int)(ap - argv) + nfiles;
     nargv = (char **) emalloc2(nargc + 1, sizeof(char *));
     ac = 0;
-    for ((cp = strtok(editor, " \t")); cp != NULL; (cp = strtok(NULL, " \t")))
-	nargv[ac++] = cp;
-    for (i = 0; i < argc - 1 && ac < nargc; )
+    for (ap = argv; *ap != NULL; ap++)
+	nargv[ac++] = *ap;
+    for (i = 0; i < nfiles && ac < nargc; )
 	nargv[ac++] = tf[i++].tfile;
     nargv[ac] = NULL;
 
     /*
-     * Fork and exec the editor with the invoking user's creds,
+     * Run the editor with the invoking user's creds,
      * keeping track of the time spent in the editor.
      */
-    gettime(&ts1);
-    kidpid = fork();
-    if (kidpid == -1) {
-	warning("fork");
-	goto cleanup;
-    } else if (kidpid == 0) {
-	/* child */
-	set_perms(PERM_FULL_USER);
-	closefrom(def_closefrom);
-	execvp(nargv[0], nargv);
-	warning("unable to execute %s", nargv[0]);
-	_exit(127);
-    }
-
-    /*
-     * Wait for status from the child.  Most modern kernels
-     * will not let an unprivileged child process send a
-     * signal to its privileged parent so we have to request
-     * status when the child is stopped and then send the
-     * same signal to our own pid.
-     */
-    do {
-#ifdef sudo_waitpid
-        pid = sudo_waitpid(kidpid, &i, WUNTRACED);
-#else
-	pid = wait(&i);
-#endif
-	if (pid == kidpid) {
-	    if (WIFSTOPPED(i))
-		kill(getpid(), WSTOPSIG(i));
-	    else
-		break;
-	}
-    } while (pid != -1 || errno == EINTR);
-    gettime(&ts2);
-    if (pid == -1 || !WIFEXITED(i))
-	rval = 1;
-    else
-	rval = WEXITSTATUS(i);
+    gettime(&tv1);
+    memcpy(&editor_details, command_details, sizeof(editor_details));
+    editor_details.uid = user_details.uid;
+    editor_details.euid = user_details.uid;
+    editor_details.gid = user_details.gid;
+    editor_details.egid = user_details.gid;
+    editor_details.ngroups = user_details.ngroups;
+    editor_details.groups = user_details.groups;
+    rval = run_command(&editor_details, nargv, envp);
+    gettime(&tv2);
 
     /* Copy contents of temp files to real ones */
-    for (i = 0; i < argc - 1; i++) {
-	error = -1;
-	set_perms(PERM_USER);
+    for (i = 0; i < nfiles; i++) {
+	retval = -1;
+	if (seteuid(user_details.uid) != 0)
+	    error(1, "seteuid(%d)", (int)user_details.uid);
 	if ((tfd = open(tf[i].tfile, O_RDONLY, 0644)) != -1) {
 #ifdef HAVE_FSTAT
-	    error = fstat(tfd, &sb);
+	    retval = fstat(tfd, &sb);
 #else
-	    error = stat(tf[i].tfile, &sb);
+	    retval = stat(tf[i].tfile, &sb);
 #endif
 	}
-	set_perms(PERM_ROOT);
-	if (error || !S_ISREG(sb.st_mode)) {
-	    if (error)
+	if (seteuid(ROOT_UID) != 0)
+	    error(1, "seteuid(ROOT_UID)");
+	if (retval || !S_ISREG(sb.st_mode)) {
+	    if (retval)
 		warning("%s", tf[i].tfile);
 	    else
 		warningx("%s: not a regular file", tf[i].tfile);
@@ -276,27 +269,29 @@ sudo_edit(int argc, char **argv, char **envp)
 		close(tfd);
 	    continue;
 	}
-	if (tf[i].osize == sb.st_size && tf[i].omtim.tv_sec == mtim_getsec(sb)
-	    && tf[i].omtim.tv_nsec == mtim_getnsec(sb)) {
+	mtim_get(&sb, &tv);
+	if (tf[i].osize == sb.st_size && timercmp(&tf[i].omtim, &tv, ==)) {
 	    /*
 	     * If mtime and size match but the user spent no measurable
 	     * time in the editor we can't tell if the file was changed.
 	     */
-#ifdef HAVE_TIMESPECSUB2
-	    timespecsub(&ts1, &ts2);
+#ifdef HAVE_TIMERSUB2
+	    timersub(&tv1, &tv2);
 #else
-	    timespecsub(&ts1, &ts2, &ts2);
+	    timersub(&tv1, &tv2, &tv2);
 #endif
-	    if (timespecisset(&ts2)) {
+	    if (timerisset(&tv2)) {
 		warningx("%s unchanged", tf[i].ofile);
 		unlink(tf[i].tfile);
 		close(tfd);
 		continue;
 	    }
 	}
-	set_perms(PERM_RUNAS);
+	switch_user(command_details->euid, command_details->egid,
+	    command_details->ngroups, command_details->groups);
 	ofd = open(tf[i].ofile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
-	set_perms(PERM_ROOT);
+	switch_user(ROOT_UID, user_details.egid,
+	    user_details.ngroups, user_details.groups);
 	if (ofd == -1) {
 	    warning("unable to write to %s", tf[i].ofile);
 	    warningx("contents of edit session left in %s", tf[i].tfile);
@@ -328,46 +323,9 @@ sudo_edit(int argc, char **argv, char **envp)
     return(rval);
 cleanup:
     /* Clean up temp files and return. */
-    for (i = 0; i < argc - 1; i++) {
+    for (i = 0; i < nfiles; i++) {
 	if (tf[i].tfile != NULL)
 	    unlink(tf[i].tfile);
     }
     return(1);
-}
-
-/*
- * Determine which editor to use.  We don't bother restricting this
- * based on def_env_editor or def_editor since the editor runs with
- * the uid of the invoking user, not the runas (privileged) user.
- */
-static char *
-find_editor(void)
-{
-    char *cp, *editor = NULL, **ev, *ev0[4];
-
-    ev0[0] = "SUDO_EDITOR";
-    ev0[1] = "VISUAL";
-    ev0[2] = "EDITOR";
-    ev0[3] = NULL;
-    for (ev = ev0; *ev != NULL; ev++) {
-	if ((editor = getenv(*ev)) != NULL && *editor != '\0') {
-	    if ((cp = strrchr(editor, '/')) != NULL)
-		cp++;
-	    else
-		cp = editor;
-	    /* Ignore "sudoedit" and "sudo" to avoid an endless loop. */
-	    if (strncmp(cp, "sudo", 4) != 0 ||
-		(cp[4] != ' ' && cp[4] != '\0' && strcmp(cp + 4, "edit") != 0)) {
-		editor = estrdup(editor);
-		break;
-	    }
-	}
-	editor = NULL;
-    }
-    if (editor == NULL) {
-	editor = estrdup(def_editor);
-	if ((cp = strchr(editor, ':')) != NULL)
-	    *cp = '\0';			/* def_editor could be a path */
-    }
-    return(editor);
 }
