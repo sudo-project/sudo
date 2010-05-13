@@ -266,6 +266,22 @@ sudo_setenv(const char *var, const char *val, int dupcheck)
 }
 
 /*
+ * Version of getenv(3) that uses our own environ pointer.
+ */
+char *
+getenv(const char *var)
+{
+    char *cp, **ev;
+    size_t vlen = strlen(var);
+
+    for (ev = env.envp; (cp = *ev) != NULL; ev++) {
+	if (strncmp(var, cp, vlen) == 0 && cp[vlen] == '=')
+	    return cp + vlen + 1;
+    }
+    return NULL;
+}
+
+/*
  * Version of setenv(3) that uses our own environ pointer.
  */
 int
