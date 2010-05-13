@@ -199,7 +199,7 @@ struct passwd;
 char *sudo_goodpath(const char *, struct stat *);
 
 /* findpath.c */
-int find_path(char *, char **, struct stat *, char *);
+int find_path(char *, char **, struct stat *, char *, int);
 
 /* check.c */
 int check_user(int, int);
