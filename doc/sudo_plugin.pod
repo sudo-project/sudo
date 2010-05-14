@@ -571,18 +571,19 @@ support credential caching.
                        char **argv_out[], char **user_env_out[]);
 
 The I<check_sudoedit> function is called instead of I<check_policy>
-when B<sudo> is invoked as B<sudoedit> or with the C<-e> flag.
-B<sudoedit> is a mechanism for editing one or more files where the
-user's editor is run with the user's credentials instead of elevated
-privileges.  B<sudo> does this by creating user-writable temporary
-copies of the files to be edited and then overwriting the originals
-with the temporary copies after editing is complete.
+when B<sudo> is invoked as B<sudoedit> or when the C<-e> flag is
+specified.  B<sudoedit> is a mechanism for editing one or more files
+where an editor is run with the user's credentials instead of with
+elevated privileges.  B<sudo> achieves this by creating user-writable
+temporary copies of the files to be edited and then overwriting the
+originals with the temporary copies after editing is complete.
 
 The plugin should choose the editor to be used, potentially from a
-variable in the user's environment, and include it in I<argv_out>.
-The files to be edited should be copied from I<argv> into I<argv_out>,
-separated from the editor and its arguments by a C<"--"> element.
-The C<"--"> will be removed by B<sudo> before the editor is executed.
+variable in the user's environment, such as C<EDITOR>, and include
+it in I<argv_out>.  The files to be edited should be copied from
+I<argv> into I<argv_out>, separated from the editor and its arguments
+by a C<"--"> element.  The C<"--"> will be removed by B<sudo> before
+the editor is executed.
 
 Returns 1 if the command is allowed, 0 if not allowed, -1 for a
 general error, or -2 for a usage error.  In the latter case, B<sudo>
@@ -591,7 +592,8 @@ the plugin may optionally call the conversation or plugin_printf
 function with C<SUDO_CONF_ERROR_MSG> to present additional error
 information to the user.
 
-The function arguments are the same as for I<check_policy>.
+The function arguments are the same as for I<check_policy>, except
+that I<argv[0]> will always be the string "sudoedit".
 
 =back
 

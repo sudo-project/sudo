@@ -61,7 +61,7 @@ SSuuddoo PPlluuggiinn AAPPII
 
 
 
-1.8.0a1                    May 13, 2010                         1
+1.8.0a1                    May 14, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                    May 13, 2010                         2
+1.8.0a1                    May 14, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                    May 13, 2010                         3
+1.8.0a1                    May 14, 2010                         3
 
 
 
@@ -259,7 +259,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                    May 13, 2010                         4
+1.8.0a1                    May 14, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                    May 13, 2010                         5
+1.8.0a1                    May 14, 2010                         5
 
 
 
@@ -391,7 +391,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                    May 13, 2010                         6
+1.8.0a1                    May 14, 2010                         6
 
 
 
@@ -457,7 +457,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                    May 13, 2010                         7
+1.8.0a1                    May 14, 2010                         7
 
 
 
@@ -523,7 +523,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                    May 13, 2010                         8
+1.8.0a1                    May 14, 2010                         8
 
 
 
@@ -562,18 +562,19 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                                   char **argv_out[], char **user_env_out[]);
 
            The _c_h_e_c_k___s_u_d_o_e_d_i_t function is called instead of _c_h_e_c_k___p_o_l_i_c_y when
-           ssuuddoo is invoked as ssuuddooeeddiitt or with the -e flag.  ssuuddooeeddiitt is a
-           mechanism for editing one or more files where the user's editor is
-           run with the user's credentials instead of elevated privileges.
-           ssuuddoo does this by creating user-writable temporary copies of the
-           files to be edited and then overwriting the originals with the
-           temporary copies after editing is complete.
+           ssuuddoo is invoked as ssuuddooeeddiitt or when the -e flag is specified.
+           ssuuddooeeddiitt is a mechanism for editing one or more files where an
+           editor is run with the user's credentials instead of with elevated
+           privileges.  ssuuddoo achieves this by creating user-writable temporary
+           copies of the files to be edited and then overwriting the originals
+           with the temporary copies after editing is complete.
 
            The plugin should choose the editor to be used, potentially from a
-           variable in the user's environment, and include it in _a_r_g_v___o_u_t.
-           The files to be edited should be copied from _a_r_g_v into _a_r_g_v___o_u_t,
-           separated from the editor and its arguments by a "--" element.  The
-           "--" will be removed by ssuuddoo before the editor is executed.
+           variable in the user's environment, such as EDITOR, and include it
+           in _a_r_g_v___o_u_t.  The files to be edited should be copied from _a_r_g_v
+           into _a_r_g_v___o_u_t, separated from the editor and its arguments by a
+           "--" element.  The "--" will be removed by ssuuddoo before the editor
+           is executed.
 
            Returns 1 if the command is allowed, 0 if not allowed, -1 for a
            general error, or -2 for a usage error.  In the latter case, ssuuddoo
@@ -582,14 +583,13 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            function with SUDO_CONF_ERROR_MSG to present additional error
            information to the user.
 
-           The function arguments are the same as for _c_h_e_c_k___p_o_l_i_c_y.
-
-       _C_o_n_v_e_r_s_a_t_i_o_n _A_P_I
-
+           The function arguments are the same as for _c_h_e_c_k___p_o_l_i_c_y, except
+           that _a_r_g_v_[_0_] will always be the string "sudoedit".
 
 
 
-1.8.0a1                    May 13, 2010                         9
+
+1.8.0a1                    May 14, 2010                         9
 
 
 
@@ -597,6 +597,8 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
+
+       _C_o_n_v_e_r_s_a_t_i_o_n _A_P_I
 
        If the plugin needs to interact with the user, it may do so via the
        conversation function.  A plugin should not attempt to read directly
@@ -653,9 +655,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-
-
-1.8.0a1                    May 13, 2010                        10
+1.8.0a1                    May 14, 2010                        10
 
 
 
@@ -721,7 +721,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                    May 13, 2010                        11
+1.8.0a1                    May 14, 2010                        11
 
 
 
@@ -787,7 +787,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                    May 13, 2010                        12
+1.8.0a1                    May 14, 2010                        12
 
 
 
@@ -853,7 +853,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                    May 13, 2010                        13
+1.8.0a1                    May 14, 2010                        13
 
 
 
@@ -919,7 +919,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                    May 13, 2010                        14
+1.8.0a1                    May 14, 2010                        14
 
 
 
@@ -985,6 +985,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                    May 13, 2010                        15
+1.8.0a1                    May 14, 2010                        15
 
 

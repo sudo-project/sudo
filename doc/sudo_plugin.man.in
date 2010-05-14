@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO_PLUGIN @mansectsu@"
-.TH SUDO_PLUGIN @mansectsu@ "May 13, 2010" "1.8.0a1" "MAINTENANCE COMMANDS"
+.TH SUDO_PLUGIN @mansectsu@ "May 14, 2010" "1.8.0a1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -647,18 +647,19 @@ support credential caching.
 .Ve
 .Sp
 The \fIcheck_sudoedit\fR function is called instead of \fIcheck_policy\fR
-when \fBsudo\fR is invoked as \fBsudoedit\fR or with the \f(CW\*(C`\-e\*(C'\fR flag.
-\&\fBsudoedit\fR is a mechanism for editing one or more files where the
-user's editor is run with the user's credentials instead of elevated
-privileges.  \fBsudo\fR does this by creating user-writable temporary
-copies of the files to be edited and then overwriting the originals
-with the temporary copies after editing is complete.
+when \fBsudo\fR is invoked as \fBsudoedit\fR or when the \f(CW\*(C`\-e\*(C'\fR flag is
+specified.  \fBsudoedit\fR is a mechanism for editing one or more files
+where an editor is run with the user's credentials instead of with
+elevated privileges.  \fBsudo\fR achieves this by creating user-writable
+temporary copies of the files to be edited and then overwriting the
+originals with the temporary copies after editing is complete.
 .Sp
 The plugin should choose the editor to be used, potentially from a
-variable in the user's environment, and include it in \fIargv_out\fR.
-The files to be edited should be copied from \fIargv\fR into \fIargv_out\fR,
-separated from the editor and its arguments by a \f(CW"\-\-"\fR element.
-The \f(CW"\-\-"\fR will be removed by \fBsudo\fR before the editor is executed.
+variable in the user's environment, such as \f(CW\*(C`EDITOR\*(C'\fR, and include
+it in \fIargv_out\fR.  The files to be edited should be copied from
+\&\fIargv\fR into \fIargv_out\fR, separated from the editor and its arguments
+by a \f(CW"\-\-"\fR element.  The \f(CW"\-\-"\fR will be removed by \fBsudo\fR before
+the editor is executed.
 .Sp
 Returns 1 if the command is allowed, 0 if not allowed, \-1 for a
 general error, or \-2 for a usage error.  In the latter case, \fBsudo\fR
@@ -667,7 +668,8 @@ the plugin may optionally call the conversation or plugin_printf
 function with \f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present additional error
 information to the user.
 .Sp
-The function arguments are the same as for \fIcheck_policy\fR.
+The function arguments are the same as for \fIcheck_policy\fR, except
+that \fIargv[0]\fR will always be the string \*(L"sudoedit\*(R".
 .PP
 \fIConversation \s-1API\s0\fR
 .IX Subsection "Conversation API"
