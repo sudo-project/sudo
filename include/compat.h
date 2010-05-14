@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2008
+ * Copyright (c) 1996, 1998-2005, 2008, 2010
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -298,5 +298,17 @@ void setprogname(const char *);
 #  define NGROUPS_MAX 16
 # endif
 #endif
+
+#ifndef HAVE_SETEUID
+#  if defined(HAVE_SETRESUID)
+#    define seteuid(u)	setresuid(-1, (u), -1)
+#    define setegid(g)	setresgid(-1, (g), -1)
+#    HAVE_SETEUID 1
+#  elif defined(HAVE_SETREUID)
+#    define seteuid(u)	setreuid(-1, (u))
+#    define setegid(g)	setregid(-1, (g))
+#    HAVE_SETEUID 1
+#  endif
+#endif /* HAVE_SETEUID */
 
 #endif /* _SUDO_COMPAT_H */
