@@ -303,11 +303,11 @@ void setprogname(const char *);
 #  if defined(HAVE_SETRESUID)
 #    define seteuid(u)	setresuid(-1, (u), -1)
 #    define setegid(g)	setresgid(-1, (g), -1)
-#    HAVE_SETEUID 1
+#    define HAVE_SETEUID 1
 #  elif defined(HAVE_SETREUID)
 #    define seteuid(u)	setreuid(-1, (u))
 #    define setegid(g)	setregid(-1, (g))
-#    HAVE_SETEUID 1
+#    define HAVE_SETEUID 1
 #  endif
 #endif /* HAVE_SETEUID */
 
