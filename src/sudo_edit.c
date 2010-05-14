@@ -16,6 +16,8 @@
 
 #include <config.h>
 
+#if defined(HAVE_SETRESUID) || defined(HAVE_SETREUID) || defined(HAVE_SETEUID)
+
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
@@ -237,7 +239,7 @@ sudo_edit(struct command_details *command_details, char *argv[], char *envp[])
 	j++;
     }
     if ((nfiles = j) == 0)
-	return(1);			/* no files readable, you lose */
+	return 1;			/* no files readable, you lose */
 
     /*
      * Allocate space for the new argument vector and fill it in.
@@ -342,12 +344,25 @@ sudo_edit(struct command_details *command_details, char *argv[], char *envp[])
 	close(ofd);
     }
 
-    return(rval);
+    return rval;
 cleanup:
     /* Clean up temp files and return. */
     for (i = 0; i < nfiles; i++) {
 	if (tf[i].tfile != NULL)
 	    unlink(tf[i].tfile);
     }
-    return(1);
+    return 1;
 }
+
+#else /* HAVE_SETRESUID || HAVE_SETREUID || HAVE_SETEUID */
+
+/*
+ * Must have the ability to change the effective uid to use sudoedit.
+ */
+int
+sudo_edit(struct command_details *command_details, char *argv[], char *envp[])
+{
+    return 1;
+}
+
+#endif /* HAVE_SETRESUID || HAVE_SETREUID || HAVE_SETEUID */

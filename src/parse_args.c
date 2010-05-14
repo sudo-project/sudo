@@ -418,11 +418,15 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     }
     settings[j] = NULL;
 
-    /* Must have the command in argv[0]. */
     if (mode == MODE_EDIT) {
+#if defined(HAVE_SETRESUID) || defined(HAVE_SETREUID) || defined(HAVE_SETEUID)
+	/* Must have the command in argv[0]. */
 	argc++;
 	argv--;
 	argv[0] = "sudoedit";
+#else
+	errorx(1, "sudoedit is not supported on this platform");
+#endif
     }
 
     *settingsp = settings;
