@@ -18,6 +18,7 @@
 
 #include <sys/types.h>
 #include <sys/param.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 
 #include <stdio.h>
@@ -42,6 +43,7 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#include <ctype.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <grp.h>
@@ -51,6 +53,7 @@
 #include <sudo_plugin.h>
 #include <compat.h>
 #include <missing.h>
+#include <pathnames.h>
 
 /*
  * Sample plugin module that allows any user who knows the password
@@ -168,6 +171,41 @@ policy_open(unsigned int version, sudo_conv_t conversation,
     return 1;
 }
 
+static char *
+find_in_path(char *command, char **envp)
+{
+    struct stat sb;
+    char *path, *path0, **ep, *cp;
+    char pathbuf[PATH_MAX], *qualified = NULL;
+
+    if (strchr(command, '/') != NULL)
+	return command;
+
+    path = _PATH_DEFPATH;
+    for (ep = plugin_state.envp; *ep != NULL; ep++) {
+	if (strncmp(*ep, "PATH=", 5) == 0) {
+	    path = *ep + 5;
+	    break;
+	}
+    }
+    path = path0 = strdup(path);
+    do {
+	if ((cp = strchr(path, ':')))
+	    *cp = '\0';
+	snprintf(pathbuf, sizeof(pathbuf), "%s/%s", *path ? path : ".",
+	    command);
+	if (stat(pathbuf, &sb) == 0) {
+	    if (S_ISREG(sb.st_mode) && (sb.st_mode & 0000111)) {
+		qualified = pathbuf;
+		break;
+	    }
+	}
+	path = cp + 1;
+    } while (cp != NULL);
+    free(path0);
+    return qualified ? strdup(qualified) : NULL;
+}
+
 /*
  * Plugin policy check function.
  * Simple example that prompts for a password, hard-coded to "test".
@@ -179,17 +217,17 @@ policy_check(int argc, char * const argv[],
 {
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
-    char **command_info;
+    char **command_info, *command;
     int i = 0;
 
     if (!argc || argv[0] == NULL) {
 	sudo_log(SUDO_CONV_ERROR_MSG, "no command specified\n");
 	return FALSE;
     }
-    /* Only allow fully qualified paths to keep things simple. */
-    if (argv[0][0] != '/') {
-	sudo_log(SUDO_CONV_ERROR_MSG,
-	    "only fully qualified pathnames may be specified\n");
+
+    command = find_in_path(argv[0], plugin_state.envp);
+    if (command == NULL) {
+	sudo_log(SUDO_CONV_ERROR_MSG, "%s: command not found\n", argv[0]);
 	return FALSE;
     }
 
@@ -218,7 +256,137 @@ policy_check(int argc, char * const argv[],
 	sudo_log(SUDO_CONV_ERROR_MSG, "out of memory\n");
 	return ERROR;
     }
-    if ((command_info[i++] = fmt_string("command", argv[0])) == NULL ||
+    if ((command_info[i++] = fmt_string("command", command)) == NULL ||
+	asprintf(&command_info[i++], "runas_euid=%ld", (long)runas_uid) == -1 ||
+	asprintf(&command_info[i++], "runas_uid=%ld", (long)runas_uid) == -1) {
+	sudo_log(SUDO_CONV_ERROR_MSG, "out of memory\n");
+	return ERROR;
+    }
+    if (runas_gid != -1) {
+	if (asprintf(&command_info[i++], "runas_gid=%ld", (long)runas_gid) == -1 ||
+	    asprintf(&command_info[i++], "runas_egid=%ld", (long)runas_gid) == -1) {
+	    sudo_log(SUDO_CONV_ERROR_MSG, "out of memory\n");
+	    return ERROR;
+	}
+    }
+#ifdef USE_TIMEOUT
+    command_info[i++] = "timeout=30";
+#endif
+
+    *command_info_out = command_info;
+
+    return TRUE;
+}
+
+static char *
+find_editor(int nfiles, char * const files[], char **argv_out[])
+{
+    char *cp, **ep, **nargv, *editor, *editor_path;
+    int ac, i, nargc, wasblank;
+
+    /* Lookup EDITOR in user's environment. */
+    editor = _PATH_VI;
+    for (ep = plugin_state.envp; *ep != NULL; ep++) {
+	if (strncmp(*ep, "EDITOR=", 7) == 0) {
+	    editor = *ep + 7;
+	    break;
+	}
+    }
+    editor = strdup(editor);
+    if (editor == NULL) {
+	sudo_log(SUDO_CONV_ERROR_MSG, "unable to allocate memory\n");
+	return NULL;
+    }
+
+    /*
+     * Split editor into an argument vector; editor is reused (do not free).
+     * The EDITOR environment variables may contain command
+     * line args so look for those and alloc space for them too.
+     */
+    nargc = 1;
+    for (wasblank = 0, cp = editor; *cp != '\0'; cp++) {
+	if (isblank((unsigned char) *cp))
+	    wasblank = 1;
+	else if (wasblank) {
+	    wasblank = 0;
+	    nargc++;
+	}
+    }
+    /* If we can't find the editor in the user's PATH, give up. */
+    cp = strtok(editor, " \t");
+    if (cp == NULL ||
+	(editor_path = find_in_path(editor, plugin_state.envp)) == NULL) {
+	return NULL;
+    }
+    nargv = (char **) malloc((nargc + 1 + nfiles + 1) * sizeof(char *));
+    if (nargv == NULL) {
+	sudo_log(SUDO_CONV_ERROR_MSG, "unable to allocate memory\n");
+	return NULL;
+    }
+    for (ac = 0; cp != NULL && ac < nargc; ac++) {
+	nargv[ac] = cp;
+	cp = strtok(NULL, " \t");
+    }
+    nargv[ac++] = "--";
+    for (i = 0; i < nfiles; )
+	nargv[ac++] = files[i++];
+    nargv[ac] = NULL;
+
+    *argv_out = nargv;
+    return editor_path;
+}
+
+/*
+ * Plugin policy edit function.
+ * Simple example that prompts for a password, hard-coded to "test".
+ */
+static int 
+policy_edit(int argc, char * const argv[],
+    char *env_add[], char **command_info_out[],
+    char **argv_out[], char **user_env_out[])
+{
+    struct sudo_conv_message msg;
+    struct sudo_conv_reply repl;
+    char **command_info, *editor;
+    int i = 0;
+
+    if (!argc || argv[0] == NULL) {
+	sudo_log(SUDO_CONV_ERROR_MSG, "no command specified\n");
+	return FALSE;
+    }
+
+    /* Prompt user for password via conversation function. */
+    memset(&msg, 0, sizeof(msg));
+    msg.msg_type = SUDO_CONV_PROMPT_ECHO_OFF;
+    msg.msg = "Password: ";
+    memset(&repl, 0, sizeof(repl));
+    sudo_conv(1, &msg, &repl);
+    if (repl.reply == NULL) {
+	sudo_log(SUDO_CONV_ERROR_MSG, "missing password\n");
+	return FALSE;
+    }
+    if (strcmp(repl.reply, "test") != 0) {
+	sudo_log(SUDO_CONV_ERROR_MSG, "incorrect password\n");
+	return FALSE;
+    }
+
+    /* Rebuild argv using editor */
+    editor = find_editor(argc - 1, argv + 1, argv_out);
+    if (editor == NULL) {
+	sudo_log(SUDO_CONV_ERROR_MSG, "unable to find valid editor\n");
+	return ERROR;
+    }
+
+    /* No changes envp */
+    *user_env_out = plugin_state.envp;
+
+    /* Setup command info. */
+    command_info = calloc(32, sizeof(char *));
+    if (command_info == NULL) {
+	sudo_log(SUDO_CONV_ERROR_MSG, "out of memory\n");
+	return ERROR;
+    }
+    if ((command_info[i++] = fmt_string("command", editor)) == NULL ||
 	asprintf(&command_info[i++], "runas_euid=%ld", (long)runas_uid) == -1 ||
 	asprintf(&command_info[i++], "runas_uid=%ld", (long)runas_uid) == -1) {
 	sudo_log(SUDO_CONV_ERROR_MSG, "out of memory\n");
@@ -347,7 +515,7 @@ struct policy_plugin sample_policy = {
     policy_list,
     NULL, /* validate */
     NULL, /* invalidate */
-    NULL /* sudoedit */
+    policy_edit
 };
 
 /*
