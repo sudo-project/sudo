@@ -159,7 +159,8 @@ testsudoers: $(TEST_OBJS)
 @DEV@GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate.c
 
 # Uncomment the lines before -@true if you intend to modify gram.y
-gram.c gram.h: $(srcdir)/gram.y
+# Note to prevent unnecessary changes to gram.h it does not depend on gram.y
+gram.c: $(srcdir)/gram.y
 @DEV@	$(YACC) -d $(srcdir)/gram.y
 @DEV@	mv -f y.tab.c gram.c
 @DEV@	if cmp -s y.tab.h gram.h; then rm -f y.tab.h; else mv -f y.tab.h gram.h; fi
