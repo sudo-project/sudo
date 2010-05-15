@@ -206,30 +206,11 @@ find_in_path(char *command, char **envp)
     return qualified ? strdup(qualified) : NULL;
 }
 
-/*
- * Plugin policy check function.
- * Simple example that prompts for a password, hard-coded to "test".
- */
-static int 
-policy_check(int argc, char * const argv[],
-    char *env_add[], char **command_info_out[],
-    char **argv_out[], char **user_env_out[])
+static int
+check_passwd(void)
 {
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
-    char **command_info, *command;
-    int i = 0;
-
-    if (!argc || argv[0] == NULL) {
-	sudo_log(SUDO_CONV_ERROR_MSG, "no command specified\n");
-	return FALSE;
-    }
-
-    command = find_in_path(argv[0], plugin_state.envp);
-    if (command == NULL) {
-	sudo_log(SUDO_CONV_ERROR_MSG, "%s: command not found\n", argv[0]);
-	return FALSE;
-    }
 
     /* Prompt user for password via conversation function. */
     memset(&msg, 0, sizeof(msg));
@@ -245,35 +226,71 @@ policy_check(int argc, char * const argv[],
 	sudo_log(SUDO_CONV_ERROR_MSG, "incorrect password\n");
 	return FALSE;
     }
+    return TRUE;
+}
+
+static char **
+build_command_info(char *command)
+{
+    static char **command_info;
+    int i = 0;
+
+    /* Setup command info. */
+    command_info = calloc(32, sizeof(char *));
+    if (command_info == NULL)
+	return NULL;
+    if ((command_info[i++] = fmt_string("command", command)) == NULL ||
+	asprintf(&command_info[i++], "runas_euid=%ld", (long)runas_uid) == -1 ||
+	asprintf(&command_info[i++], "runas_uid=%ld", (long)runas_uid) == -1) {
+	return NULL;
+    }
+    if (runas_gid != -1) {
+	if (asprintf(&command_info[i++], "runas_gid=%ld", (long)runas_gid) == -1 ||
+	    asprintf(&command_info[i++], "runas_egid=%ld", (long)runas_gid) == -1) {
+	    return NULL;
+	}
+    }
+#ifdef USE_TIMEOUT
+    command_info[i++] = "timeout=30";
+#endif
+    return command_info;
+}
+
+/*
+ * Plugin policy check function.
+ * Simple example that prompts for a password, hard-coded to "test".
+ */
+static int 
+policy_check(int argc, char * const argv[],
+    char *env_add[], char **command_info_out[],
+    char **argv_out[], char **user_env_out[])
+{
+    char *command;
+
+    if (!argc || argv[0] == NULL) {
+	sudo_log(SUDO_CONV_ERROR_MSG, "no command specified\n");
+	return FALSE;
+    }
+
+    if (!check_passwd())
+	return FALSE;
+
+    command = find_in_path(argv[0], plugin_state.envp);
+    if (command == NULL) {
+	sudo_log(SUDO_CONV_ERROR_MSG, "%s: command not found\n", argv[0]);
+	return FALSE;
+    }
 
     /* No changes to argv or envp */
     *argv_out = (char **)argv;
     *user_env_out = plugin_state.envp;
 
     /* Setup command info. */
-    command_info = calloc(32, sizeof(char *));
-    if (command_info == NULL) {
+    *command_info_out = build_command_info(command);
+    if (*command_info_out == NULL) {
 	sudo_log(SUDO_CONV_ERROR_MSG, "out of memory\n");
 	return ERROR;
     }
-    if ((command_info[i++] = fmt_string("command", command)) == NULL ||
-	asprintf(&command_info[i++], "runas_euid=%ld", (long)runas_uid) == -1 ||
-	asprintf(&command_info[i++], "runas_uid=%ld", (long)runas_uid) == -1) {
-	sudo_log(SUDO_CONV_ERROR_MSG, "out of memory\n");
-	return ERROR;
-    }
-    if (runas_gid != -1) {
-	if (asprintf(&command_info[i++], "runas_gid=%ld", (long)runas_gid) == -1 ||
-	    asprintf(&command_info[i++], "runas_egid=%ld", (long)runas_gid) == -1) {
-	    sudo_log(SUDO_CONV_ERROR_MSG, "out of memory\n");
-	    return ERROR;
-	}
-    }
-#ifdef USE_TIMEOUT
-    command_info[i++] = "timeout=30";
-#endif
-
-    *command_info_out = command_info;
 
     return TRUE;
 }
@@ -345,30 +362,10 @@ policy_edit(int argc, char * const argv[],
     char *env_add[], char **command_info_out[],
     char **argv_out[], char **user_env_out[])
 {
-    struct sudo_conv_message msg;
-    struct sudo_conv_reply repl;
-    char **command_info, *editor;
-    int i = 0;
+    char *editor;
 
-    if (!argc || argv[0] == NULL) {
-	sudo_log(SUDO_CONV_ERROR_MSG, "no command specified\n");
+    if (!check_passwd())
 	return FALSE;
-    }
-
-    /* Prompt user for password via conversation function. */
-    memset(&msg, 0, sizeof(msg));
-    msg.msg_type = SUDO_CONV_PROMPT_ECHO_OFF;
-    msg.msg = "Password: ";
-    memset(&repl, 0, sizeof(repl));
-    sudo_conv(1, &msg, &repl);
-    if (repl.reply == NULL) {
-	sudo_log(SUDO_CONV_ERROR_MSG, "missing password\n");
-	return FALSE;
-    }
-    if (strcmp(repl.reply, "test") != 0) {
-	sudo_log(SUDO_CONV_ERROR_MSG, "incorrect password\n");
-	return FALSE;
-    }
 
     /* Rebuild argv using editor */
     editor = find_editor(argc - 1, argv + 1, argv_out);
@@ -377,33 +374,15 @@ policy_edit(int argc, char * const argv[],
 	return ERROR;
     }
 
-    /* No changes envp */
+    /* No changes to envp */
     *user_env_out = plugin_state.envp;
 
     /* Setup command info. */
-    command_info = calloc(32, sizeof(char *));
-    if (command_info == NULL) {
+    *command_info_out = build_command_info(editor);
+    if (*command_info_out == NULL) {
 	sudo_log(SUDO_CONV_ERROR_MSG, "out of memory\n");
 	return ERROR;
     }
-    if ((command_info[i++] = fmt_string("command", editor)) == NULL ||
-	asprintf(&command_info[i++], "runas_euid=%ld", (long)runas_uid) == -1 ||
-	asprintf(&command_info[i++], "runas_uid=%ld", (long)runas_uid) == -1) {
-	sudo_log(SUDO_CONV_ERROR_MSG, "out of memory\n");
-	return ERROR;
-    }
-    if (runas_gid != -1) {
-	if (asprintf(&command_info[i++], "runas_gid=%ld", (long)runas_gid) == -1 ||
-	    asprintf(&command_info[i++], "runas_egid=%ld", (long)runas_gid) == -1) {
-	    sudo_log(SUDO_CONV_ERROR_MSG, "out of memory\n");
-	    return ERROR;
-	}
-    }
-#ifdef USE_TIMEOUT
-    command_info[i++] = "timeout=30";
-#endif
-
-    *command_info_out = command_info;
 
     return TRUE;
 }
