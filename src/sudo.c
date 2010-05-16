@@ -240,16 +240,18 @@ main(int argc, char *argv[], char *envp[])
 		}
 	    }
 	    command_info_to_details(command_info, &command_details);
+	    if (ISSET(sudo_mode, MODE_EDIT))
+		SET(command_details.flags, CD_SUDOEDIT);
 	    /* Restore coredumpsize resource limit before running. */
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 	    (void) setrlimit(RLIMIT_CORE, &corelimit);
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
-	    /* run_command will call the close method for us */
-	    if (sudo_mode & MODE_EDIT) {
+	    if (ISSET(command_details.flags, CD_SUDOEDIT)) {
 		exitcode = sudo_edit(&command_details, argv_out, user_env_out);
 	    } else {
 		exitcode = run_command(&command_details, argv_out, user_env_out);
 	    }
+	    /* The close method was called by sudo_edit/run_command. */
 	    break;
 	default:
 	    errorx(1, "unexpected sudo mode 0x%x", sudo_mode);
@@ -538,6 +540,11 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 's':
 		SET_STRING("selinux_role=", selinux_role)
 		SET_STRING("selinux_type=", selinux_type)
+		if (strncmp("sudoedit=", info[i], sizeof("sudoedit=") - 1) == 0) {
+		    if (atobool(info[i] + sizeof("sudoedit=") - 1) == TRUE)
+			SET(details->flags, CD_SUDOEDIT);
+		    break;
+		}
 		break;
 	    case 't':
 		if (strncmp("timeout=", info[i], sizeof("timeout=") - 1) == 0) {

@@ -115,6 +115,7 @@ struct user_details {
 #define CD_SET_PRIORITY		0x0040
 #define CD_SET_UMASK		0x0080
 #define CD_SET_TIMEOUT		0x0100
+#define CD_SUDOEDIT		0x0200
 
 struct command_details {
     uid_t uid;
