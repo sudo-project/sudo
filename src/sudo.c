@@ -199,21 +199,9 @@ main(int argc, char *argv[], char *envp[])
 	    }
 	    exit(ok != TRUE);
 	case MODE_EDIT:
-	    if (!policy_plugin.u.policy->check_sudoedit)
-		errorx(1, "policy plugin %s does not support sudoedit",
-		    policy_plugin.name);
-	    /* FALLTHROUGH */
 	case MODE_RUN:
-	    if (sudo_mode & MODE_EDIT) {
-		/* XXX - must be able to tell which are the files in argv */
-		/*       as opposed to editor flags; could use original argv */
-		/*       and only use argv_out for the command path + args */
-		ok = policy_plugin.u.policy->check_sudoedit(nargc, nargv,
-		    env_add, &command_info, &argv_out, &user_env_out);
-	    } else {
-		ok = policy_plugin.u.policy->check_policy(nargc, nargv, env_add,
-		    &command_info, &argv_out, &user_env_out);
-	    }
+	    ok = policy_plugin.u.policy->check_policy(nargc, nargv, env_add,
+		&command_info, &argv_out, &user_env_out);
 	    sudo_debug(8, "policy plugin returns %d", ok);
 	    if (ok != TRUE) {
 		if (ok == -2)
@@ -240,8 +228,6 @@ main(int argc, char *argv[], char *envp[])
 		}
 	    }
 	    command_info_to_details(command_info, &command_details);
-	    if (ISSET(sudo_mode, MODE_EDIT))
-		SET(command_details.flags, CD_SUDOEDIT);
 	    /* Restore coredumpsize resource limit before running. */
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 	    (void) setrlimit(RLIMIT_CORE, &corelimit);

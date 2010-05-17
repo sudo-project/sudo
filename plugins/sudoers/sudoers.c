@@ -565,6 +565,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	if (!editor)
 	    goto done;
 	command_info[info_len++] = fmt_string("command", editor);
+	command_info[info_len++] = estrdup("sudoedit=true");
     } else {
 	command_info[info_len++] = fmt_string("command", safe_cmnd);
     }
@@ -618,16 +619,6 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     char **command_infop[], char **argv_out[], char **user_env_out[])
 {
     SET(sudo_mode, MODE_RUN);
-
-    return sudoers_policy_main(argc, argv, 0, env_add, command_infop,
-	argv_out, user_env_out);
-}
-
-static int
-sudoers_policy_sudoedit(int argc, char * const argv[], char *env_add[],
-    char **command_infop[], char **argv_out[], char **user_env_out[])
-{
-    SET(sudo_mode, MODE_EDIT);
 
     return sudoers_policy_main(argc, argv, 0, env_add, command_infop,
 	argv_out, user_env_out);
@@ -1226,6 +1217,11 @@ deserialize_info(char * const settings[], char * const user_info[])
 		SET(flags, MODE_IGNORE_TICKET);
 	    continue;
 	}
+	if (MATCHES(*cur, "sudoedit=")) {
+	    if (atobool(*cur + sizeof("sudoedit=") - 1) == TRUE)
+		SET(flags, MODE_EDIT);
+	    continue;
+	}
 	if (MATCHES(*cur, "login_class=")) {
 	    login_class = *cur + sizeof("login_class=") - 1;
 	    def_use_loginclass = TRUE;
@@ -1409,8 +1405,7 @@ struct policy_plugin sudoers_policy = {
     sudoers_policy_check,
     sudoers_policy_list,
     sudoers_policy_validate,
-    sudoers_policy_invalidate,
-    sudoers_policy_sudoedit
+    sudoers_policy_invalidate
 };
 
 struct io_plugin sudoers_io = {

@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO_PLUGIN @mansectsu@"
-.TH SUDO_PLUGIN @mansectsu@ "May 14, 2010" "1.8.0a1" "MAINTENANCE COMMANDS"
+.TH SUDO_PLUGIN @mansectsu@ "May 17, 2010" "1.8.0a1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -219,9 +219,6 @@ so that \fBsudo\fR can load it.
 \&                 const char *list_user);
 \&     int (*validate)(void);
 \&     void (*invalidate)(int remove);
-\&     int (*check_sudoedit)(int argc, char * const argv[],
-\&                           char *env_add[], char **command_info[],
-\&                           char **argv_out[], char **user_env_out[]);
 \& };
 .Ve
 .PP
@@ -348,6 +345,13 @@ systems where \s-1BSD\s0 authentication is supported.
 .IP "progname=string" 4
 .IX Item "progname=string"
 The command name that sudo was run as, typically \*(L"sudo\*(R" or \*(L"sudoedit\*(R".
+.IP "sudoedit=bool" 4
+.IX Item "sudoedit=bool"
+Set to true when the \f(CW\*(C`\-e\*(C'\fR flag is is specified or if invoked as
+\&\fBsudoedit\fR.  The plugin shall substitute an editor into \fIargv\fR
+in the \fIcheck_policy\fR function or return \f(CW\*(C`\-2\*(C'\fR with a usage error
+if the plugin does not support \fIsudoedit\fR.  For more information,
+see the \fIcheck_policy\fR section.
 .RE
 .RS 4
 .Sp
@@ -455,13 +459,31 @@ information, the verbose flag will be set.
 .Ve
 .Sp
 The \fIcheck_policy\fR function is called by \fBsudo\fR to determine
-whether the user is allowed to run the specified commands.  Returns
-1 if the command is allowed, 0 if not allowed, \-1 for a general
-error, or \-2 for a usage error.  In the latter case, \fBsudo\fR will
-print a usage message before it exits.  If an error occurs, the
-plugin may optionally call the conversation or plugin_printf function
-with \f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present additional error information
-to the user.
+whether the user is allowed to run the specified commands.
+.Sp
+If the \fIsudoedit\fR option was enabled in the \fIsettings\fR array
+passed to the \fIopen\fR function, the user has requested \fIsudoedit\fR
+mode.  \fIsudoedit\fR is a mechanism for editing one or more files
+where an editor is run with the user's credentials instead of with
+elevated privileges.  \fBsudo\fR achieves this by creating user-writable
+temporary copies of the files to be edited and then overwriting the
+originals with the temporary copies after editing is complete.  If
+the plugin supports \fBsudoedit\fR, it should choose the editor to be
+used, potentially from a variable in the user's environment, such
+as \f(CW\*(C`EDITOR\*(C'\fR, and include it in \fIargv_out\fR (note that environment
+variables may include command line flags).  The files to be edited
+should be copied from \fIargv\fR into \fIargv_out\fR, separated from the
+editor and its arguments by a \f(CW"\-\-"\fR element.  The \f(CW"\-\-"\fR will
+be removed by \fBsudo\fR before the editor is executed.  The plugin
+should also set \fIsudoedit=true\fR in the \fIcommand_info\fR list.
+.Sp
+The \fIcheck_policy\fR function returns 1 if the command is allowed,
+0 if not allowed, \-1 for a general error, or \-2 for a usage error
+or if \fBsudoedit\fR was specified but is unsupported by the plugin.
+In the latter case, \fBsudo\fR will print a usage message before it
+exits.  If an error occurs, the plugin may optionally call the
+conversation or plugin_printf function with \f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR
+to present additional error information to the user.
 .Sp
 The function arguments are as follows:
 .RS 4
@@ -550,6 +572,12 @@ SELinux type to use when executing the command.
 .IX Item "timeout=int"
 Command timeout.  If non-zero then when the timeout expires the
 command will be killed.
+.IP "sudoedit=bool" 4
+.IX Item "sudoedit=bool"
+Set to true when in \fIsudoedit\fR mode.  The plugin may enable
+\&\fIsudoedit\fR mode even if \fBsudo\fR was not invoked as \fBsudoedit\fR.
+This allows the plugin to perform command substitution and transparently
+enable \fIsudoedit\fR when the user attempts to run an editor.
 .RE
 .RS 4
 .Sp
@@ -638,38 +666,6 @@ the credentials instead of simply invalidating them.
 .Sp
 The \f(CW\*(C`invalidate\*(C'\fR function should be \f(CW\*(C`NULL\*(C'\fR if the plugin does not
 support credential caching.
-.IP "check_sudoedit" 4
-.IX Item "check_sudoedit"
-.Vb 3
-\& int (*check_sudoedit)(int argc, char * const argv[]
-\&                       char *env_add[], char **command_info[],
-\&                       char **argv_out[], char **user_env_out[]);
-.Ve
-.Sp
-The \fIcheck_sudoedit\fR function is called instead of \fIcheck_policy\fR
-when \fBsudo\fR is invoked as \fBsudoedit\fR or when the \f(CW\*(C`\-e\*(C'\fR flag is
-specified.  \fBsudoedit\fR is a mechanism for editing one or more files
-where an editor is run with the user's credentials instead of with
-elevated privileges.  \fBsudo\fR achieves this by creating user-writable
-temporary copies of the files to be edited and then overwriting the
-originals with the temporary copies after editing is complete.
-.Sp
-The plugin should choose the editor to be used, potentially from a
-variable in the user's environment, such as \f(CW\*(C`EDITOR\*(C'\fR, and include
-it in \fIargv_out\fR.  The files to be edited should be copied from
-\&\fIargv\fR into \fIargv_out\fR, separated from the editor and its arguments
-by a \f(CW"\-\-"\fR element.  The \f(CW"\-\-"\fR will be removed by \fBsudo\fR before
-the editor is executed.
-.Sp
-Returns 1 if the command is allowed, 0 if not allowed, \-1 for a
-general error, or \-2 for a usage error.  In the latter case, \fBsudo\fR
-will print a usage message before it exits.  If an error occurs,
-the plugin may optionally call the conversation or plugin_printf
-function with \f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present additional error
-information to the user.
-.Sp
-The function arguments are the same as for \fIcheck_policy\fR, except
-that \fIargv[0]\fR will always be the string \*(L"sudoedit\*(R".
 .PP
 \fIConversation \s-1API\s0\fR
 .IX Subsection "Conversation API"
@@ -1035,3 +1031,9 @@ the plugin type.
 \&     struct io_plugin io;
 \& };
 .Ve
+.SH "POD ERRORS"
+.IX Header "POD ERRORS"
+Hey! \fBThe above document had some coding errors, which are explained below:\fR
+.IP "Around line 597:" 4
+.IX Item "Around line 597:"
+You forgot a '=back' before '=head3'

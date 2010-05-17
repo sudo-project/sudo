@@ -107,7 +107,9 @@ static struct sudo_settings {
     { "preserve_groups" },
 #define ARG_NONINTERACTIVE 15
     { "noninteractive" },
-#define NUM_SETTINGS 16
+#define ARG_SUDOEDIT 16
+    { "sudoedit" },
+#define NUM_SETTINGS 17
     { NULL }
 };
 
@@ -135,8 +137,10 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     sudo_settings[ARG_PROGNAME].value = getprogname();
 
     /* First, check to see if we were invoked as "sudoedit". */
-    if (strcmp(getprogname(), "sudoedit") == 0)
+    if (strcmp(getprogname(), "sudoedit") == 0) {
 	mode = MODE_EDIT;
+	sudo_settings[ARG_SUDOEDIT].value = "true";
+    }
 
     /* Returns true if the last option string was "--" */
 #define got_end_of_args	(optind > 1 && argv[optind - 1][0] == '-' && \
@@ -194,6 +198,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    if (mode && mode != MODE_EDIT)
 			usage_excl(1);
 		    mode = MODE_EDIT;
+		    sudo_settings[ARG_SUDOEDIT].value = "true";
 		    valid_flags = MODE_NONINTERACTIVE;
 		    break;
 		case 'g':

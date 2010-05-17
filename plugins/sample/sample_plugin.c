@@ -84,6 +84,7 @@ static sudo_printf_t sudo_log;
 static FILE *input, *output;
 static uid_t runas_uid = ROOT_UID;
 static gid_t runas_gid = -1;
+static int use_sudoedit = FALSE;
 
 /*
  * Allocate storage for a name=value string and return it.
@@ -147,6 +148,11 @@ policy_open(unsigned int version, sudo_conv_t conversation,
 	    setprogname(*ui + sizeof("progname=") - 1);
 	}
 #endif
+	/* Check to see if sudo was called as sudoedit or with -e flag. */
+	if (strncmp(*ui, "sudoedit=", sizeof("sudoedit=") - 1) == 0) {
+	    if (strcasecmp(*ui + sizeof("sudoedit=") - 1, "true") == 0)
+		use_sudoedit = TRUE;
+	}
     }
     if (runas_user != NULL) {
 	if ((pw = getpwnam(runas_user)) == NULL) {
@@ -230,7 +236,7 @@ check_passwd(void)
 }
 
 static char **
-build_command_info(char *command, int sudoedit)
+build_command_info(char *command)
 {
     static char **command_info;
     int i = 0;
@@ -250,7 +256,7 @@ build_command_info(char *command, int sudoedit)
 	    return NULL;
 	}
     }
-    if (sudoedit) {
+    if (use_sudoedit) {
 	command_info[i] = strdup("sudoedit=true");
 	if (command_info[i++] == NULL)
 		return NULL;
@@ -344,18 +350,20 @@ policy_check(int argc, char * const argv[],
 	return FALSE;
     }
 
-    /*
-     * If "sudo vi" is run, auto-convert to sudoedit.
-     */
-    if (strcmp(command, _PATH_VI) == 0) {
+    /* If "sudo vi" is run, auto-convert to sudoedit.  */
+    if (strcmp(command, _PATH_VI) == 0)
+	use_sudoedit = TRUE;
+
+    if (use_sudoedit) {
 	/* Rebuild argv using editor */
 	command = find_editor(argc - 1, argv + 1, argv_out);
 	if (command == NULL) {
 	    sudo_log(SUDO_CONV_ERROR_MSG, "unable to find valid editor\n");
 	    return ERROR;
 	}
+	use_sudoedit = TRUE;
     } else {
-	/* No changes to argv */
+	/* No changes needd to argv */
 	*argv_out = (char **)argv;
     }
 
@@ -363,41 +371,7 @@ policy_check(int argc, char * const argv[],
     *user_env_out = plugin_state.envp;
 
     /* Setup command info. */
-    *command_info_out = build_command_info(command, *argv_out != argv);
-    if (*command_info_out == NULL) {
-	sudo_log(SUDO_CONV_ERROR_MSG, "out of memory\n");
-	return ERROR;
-    }
-
-    return TRUE;
-}
-
-/*
- * Plugin policy edit function.
- * Simple example that prompts for a password, hard-coded to "test".
- */
-static int 
-policy_edit(int argc, char * const argv[],
-    char *env_add[], char **command_info_out[],
-    char **argv_out[], char **user_env_out[])
-{
-    char *editor;
-
-    if (!check_passwd())
-	return FALSE;
-
-    /* Rebuild argv using editor */
-    editor = find_editor(argc - 1, argv + 1, argv_out);
-    if (editor == NULL) {
-	sudo_log(SUDO_CONV_ERROR_MSG, "unable to find valid editor\n");
-	return ERROR;
-    }
-
-    /* No changes to envp */
-    *user_env_out = plugin_state.envp;
-
-    /* Setup command info. */
-    *command_info_out = build_command_info(editor, TRUE);
+    *command_info_out = build_command_info(command);
     if (*command_info_out == NULL) {
 	sudo_log(SUDO_CONV_ERROR_MSG, "out of memory\n");
 	return ERROR;
@@ -512,8 +486,7 @@ struct policy_plugin sample_policy = {
     policy_check,
     policy_list,
     NULL, /* validate */
-    NULL, /* invalidate */
-    policy_edit
+    NULL /* invalidate */
 };
 
 /*

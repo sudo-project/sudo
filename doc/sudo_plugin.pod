@@ -89,9 +89,6 @@ so that B<sudo> can load it.
                  const char *list_user);
      int (*validate)(void);
      void (*invalidate)(int remove);
-     int (*check_sudoedit)(int argc, char * const argv[],
-                           char *env_add[], char **command_info[],
-                           char **argv_out[], char **user_env_out[]);
  };
 
 The policy_plugin struct has the following fields:
@@ -243,6 +240,14 @@ systems where BSD authentication is supported.
 
 The command name that sudo was run as, typically "sudo" or "sudoedit".
 
+=item sudoedit=bool
+
+Set to true when the C<-e> flag is is specified or if invoked as
+B<sudoedit>.  The plugin shall substitute an editor into I<argv>
+in the I<check_policy> function or return C<-2> with a usage error
+if the plugin does not support I<sudoedit>.  For more information,
+see the I<check_policy> section.
+
 =back
 
 Additional settings may be added in the future so the plugin should
@@ -357,13 +362,31 @@ information, the verbose flag will be set.
                      char **argv_out[], char **user_env_out[]);
 
 The I<check_policy> function is called by B<sudo> to determine
-whether the user is allowed to run the specified commands.  Returns
-1 if the command is allowed, 0 if not allowed, -1 for a general
-error, or -2 for a usage error.  In the latter case, B<sudo> will
-print a usage message before it exits.  If an error occurs, the
-plugin may optionally call the conversation or plugin_printf function
-with C<SUDO_CONF_ERROR_MSG> to present additional error information
-to the user.
+whether the user is allowed to run the specified commands.
+
+If the I<sudoedit> option was enabled in the I<settings> array
+passed to the I<open> function, the user has requested I<sudoedit>
+mode.  I<sudoedit> is a mechanism for editing one or more files
+where an editor is run with the user's credentials instead of with
+elevated privileges.  B<sudo> achieves this by creating user-writable
+temporary copies of the files to be edited and then overwriting the
+originals with the temporary copies after editing is complete.  If
+the plugin supports B<sudoedit>, it should choose the editor to be
+used, potentially from a variable in the user's environment, such
+as C<EDITOR>, and include it in I<argv_out> (note that environment
+variables may include command line flags).  The files to be edited
+should be copied from I<argv> into I<argv_out>, separated from the
+editor and its arguments by a C<"--"> element.  The C<"--"> will
+be removed by B<sudo> before the editor is executed.  The plugin
+should also set I<sudoedit=true> in the I<command_info> list.
+
+The I<check_policy> function returns 1 if the command is allowed,
+0 if not allowed, -1 for a general error, or -2 for a usage error
+or if B<sudoedit> was specified but is unsupported by the plugin.
+In the latter case, B<sudo> will print a usage message before it
+exits.  If an error occurs, the plugin may optionally call the
+conversation or plugin_printf function with C<SUDO_CONF_ERROR_MSG>
+to present additional error information to the user.
 
 The function arguments are as follows:
 
@@ -475,6 +498,13 @@ SELinux type to use when executing the command.
 Command timeout.  If non-zero then when the timeout expires the
 command will be killed.
 
+=item sudoedit=bool
+
+Set to true when in I<sudoedit> mode.  The plugin may enable
+I<sudoedit> mode even if B<sudo> was not invoked as B<sudoedit>.
+This allows the plugin to perform command substitution and transparently
+enable I<sudoedit> when the user attempts to run an editor.
+
 =back
 
 Unsupported values will be ignored.
@@ -563,39 +593,6 @@ the credentials instead of simply invalidating them.
 
 The C<invalidate> function should be C<NULL> if the plugin does not
 support credential caching.
-
-=item check_sudoedit
-
- int (*check_sudoedit)(int argc, char * const argv[]
-                       char *env_add[], char **command_info[],
-                       char **argv_out[], char **user_env_out[]);
-
-The I<check_sudoedit> function is called instead of I<check_policy>
-when B<sudo> is invoked as B<sudoedit> or when the C<-e> flag is
-specified.  B<sudoedit> is a mechanism for editing one or more files
-where an editor is run with the user's credentials instead of with
-elevated privileges.  B<sudo> achieves this by creating user-writable
-temporary copies of the files to be edited and then overwriting the
-originals with the temporary copies after editing is complete.
-
-The plugin should choose the editor to be used, potentially from a
-variable in the user's environment, such as C<EDITOR>, and include
-it in I<argv_out>.  The files to be edited should be copied from
-I<argv> into I<argv_out>, separated from the editor and its arguments
-by a C<"--"> element.  The C<"--"> will be removed by B<sudo> before
-the editor is executed.
-
-Returns 1 if the command is allowed, 0 if not allowed, -1 for a
-general error, or -2 for a usage error.  In the latter case, B<sudo>
-will print a usage message before it exits.  If an error occurs,
-the plugin may optionally call the conversation or plugin_printf
-function with C<SUDO_CONF_ERROR_MSG> to present additional error
-information to the user.
-
-The function arguments are the same as for I<check_policy>, except
-that I<argv[0]> will always be the string "sudoedit".
-
-=back
 
 =head3 Conversation API
 

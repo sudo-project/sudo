@@ -143,8 +143,10 @@ sudo_edit(struct command_details *command_details, char *argv[], char *envp[])
 	else
 	    editor_argc++;
     }
-    if (nfiles == 0)
+    if (nfiles == 0) {
+	warningx("plugin error: missing file list for sudoedit");
 	return 1;
+    }
 
     /*
      * For each file specified by the user, make a temporary version
