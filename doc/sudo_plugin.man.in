@@ -728,7 +728,8 @@ See the sample plugin for an example of the conversation function usage.
 \&     unsigned int version; /* always SUDO_API_VERSION */
 \&     int (*open)(unsigned int version, sudo_conv_t conversation
 \&                 sudo_printf_t plugin_printf, char * const settings[],
-\&                 char * const user_info[], char * const user_env[]);
+\&                 char * const user_info[], int argc, char * const argv[],
+\&                 char * const user_env[]);
 \&     void (*close)(int exit_status, int error); /* wait status or error */
 \&     int (*show_version)(int verbose);
 \&     int (*log_ttyin)(const char *buf, unsigned int len);
@@ -770,10 +771,11 @@ This allows \fBsudo\fR to determine the \s-1API\s0 version the plugin was
 built against.
 .IP "open" 4
 .IX Item "open"
-.Vb 3
+.Vb 4
 \& int (*open)(unsigned int version, sudo_conv_t conversation
 \&             sudo_printf_t plugin_printf, char * const settings[],
-\&             char * const user_info[], char * const user_env[]);
+\&             char * const user_info[], int argc, char * const argv[],
+\&             char * const user_env[]);
 .Ve
 .Sp
 The \fIopen\fR function is run before the \fIlog_input\fR, \fIlog_output\fR
@@ -828,6 +830,15 @@ equal sign ('=') since the \fIname\fR field will never include one
 itself but the \fIvalue\fR might.
 .Sp
 See the \*(L"Policy Plugin \s-1API\s0\*(R" section for a list of all possible strings.
+.IP "argc" 4
+.IX Item "argc"
+The number of elements in \fIargv\fR, not counting the final \f(CW\*(C`NULL\*(C'\fR
+pointer.
+.IP "argv" 4
+.IX Item "argv"
+If non\-\f(CW\*(C`NULL\*(C'\fR, an argument vector describing a command the user
+wishes to run in the same form as what would be passed to the
+\&\fIexecve()\fR system call.
 .IP "user_env" 4
 .IX Item "user_env"
 The user's environment in the form of a \f(CW\*(C`NULL\*(C'\fR\-terminated vector of

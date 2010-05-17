@@ -77,7 +77,8 @@ struct io_plugin {
     unsigned int version; /* always SUDO_API_VERSION */
     int (*open)(unsigned int version, sudo_conv_t conversation,
 	sudo_printf_t sudo_printf, char * const settings[],
-	char * const user_info[], char * const user_env[]);
+	char * const user_info[], int argc, char * const argv[],
+	char * const user_env[]);
     void (*close)(int exit_status, int error); /* wait status or error */
     int (*show_version)(int verbose);
     int (*log_ttyin)(const char *buf, unsigned int len);

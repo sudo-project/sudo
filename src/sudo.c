@@ -160,7 +160,7 @@ main(int argc, char *argv[], char *envp[])
 	    policy_plugin.u.policy->show_version(!user_details.uid);
 	    tq_foreach_fwd(&io_plugins, plugin) {
 		ok = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation,
-		    sudo_printf, settings, user_info, envp);
+		    sudo_printf, settings, user_info, nargc, nargv, envp);
 		if (ok == TRUE)
 		    plugin->u.io->show_version(user_details.uid == ROOT_UID);
 	    }
@@ -212,7 +212,7 @@ main(int argc, char *argv[], char *envp[])
 	    for (plugin = io_plugins.first; plugin != NULL; plugin = next) {
 		next = plugin->next;
 		ok = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation,
-		    sudo_printf, settings, user_info, envp);
+		    sudo_printf, settings, user_info, nargc, nargv, envp);
 		switch (ok) {
 		case TRUE:
 		    break;
