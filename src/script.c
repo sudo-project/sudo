@@ -433,7 +433,8 @@ perform_io(struct io_buffer *iobufs, fd_set *fdsr, fd_set *fdsw)
 		    break;
 	    } else if (n == 0) {
 		/* got EOF */
-		close(iob->rfd);
+		if (iob->rfd != script_fds[SFD_USERTTY])
+		    close(iob->rfd);
 		iob->rfd = -1;
 	    } else {
 		if (!iob->action(iob->buf + iob->len, n))
@@ -450,10 +451,12 @@ perform_io(struct io_buffer *iobufs, fd_set *fdsr, fd_set *fdsw)
 		if (errno == EPIPE) {
 		    /* other end of pipe closed */
 		    if (iob->rfd != -1) {
-			close(iob->rfd);
+			if (iob->rfd != script_fds[SFD_USERTTY])
+			    close(iob->rfd);
 			iob->rfd = -1;
 		    }
-		    close(iob->wfd);
+		    if (iob->wfd != script_fds[SFD_USERTTY])
+			close(iob->wfd);
 		    iob->wfd = -1;
 		    continue;
 		}
@@ -1173,7 +1176,7 @@ flush_output(struct io_buffer *iobufs)
     struct io_buffer *iob;
     struct timeval tv;
     fd_set *fdsr, *fdsw;
-    int nready, maxfd = -1;
+    int nready, nwriters, maxfd = -1;
 
     /* Determine maxfd */
     for (iob = iobufs; iob; iob = iob->next) {
@@ -1189,9 +1192,10 @@ flush_output(struct io_buffer *iobufs)
 	zero_bytes(fdsw, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
 	zero_bytes(fdsr, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
 
+	nwriters = 0;
 	for (iob = iobufs; iob; iob = iob->next) {
 	    /* Don't read from /dev/tty while flushing. */
-	    if (iob->rfd == script_fds[SFD_USERTTY])
+	    if (script_fds[SFD_USERTTY] != -1 && iob->rfd == script_fds[SFD_USERTTY])
 		continue;
 	    if (iob->rfd == -1 && iob->wfd == -1)
 	    	continue;
@@ -1209,15 +1213,17 @@ flush_output(struct io_buffer *iobufs)
 		    FD_SET(iob->rfd, fdsr);
 	    }
 	    if (iob->wfd != -1) {
-		if (iob->len > iob->off)
+		if (iob->len > iob->off) {
+		    nwriters++;
 		    FD_SET(iob->wfd, fdsw);
+		}
 	    }
 	}
 
-	/* Effect a poll (no sleeping in select) */
+	/* Don't sleep in select if there are no buffers that need writing. */
 	tv.tv_sec = 0;
 	tv.tv_usec = 0;
-	nready = select(maxfd + 1, fdsr, fdsw, NULL, &tv);
+	nready = select(maxfd + 1, fdsr, fdsw, NULL, nwriters ? NULL : &tv);
 	if (nready <= 0) {
 	    if (nready == 0)
 		break; /* all I/O flushed */
