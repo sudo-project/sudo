@@ -121,7 +121,7 @@ static int foreground;
 
 static char slavename[PATH_MAX];
 
-static int suspend_parent(int signo, int fd, struct io_buffer *output);
+static int suspend_parent(int signo, struct io_buffer *iobufs);
 static void flush_output(struct io_buffer *iobufs);
 static int perform_io(struct io_buffer *iobufs, fd_set *fdsr, fd_set *fdsw);
 static void handler(int s);
@@ -138,12 +138,11 @@ void
 script_setup(uid_t uid)
 {
     script_fds[SFD_USERTTY] = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
-    if (script_fds[SFD_USERTTY] == -1)
-	errorx(1, "tty required for transcript support");
-
-    if (!get_pty(&script_fds[SFD_MASTER], &script_fds[SFD_SLAVE],
-	slavename, sizeof(slavename), uid))
-	error(1, "Can't get pty");
+    if (script_fds[SFD_USERTTY] != -1) {
+	if (!get_pty(&script_fds[SFD_MASTER], &script_fds[SFD_SLAVE],
+	    slavename, sizeof(slavename), uid))
+	    error(1, "Can't get pty");
+    }
 }
 
 /* Call I/O plugin tty input log method. */
@@ -264,11 +263,13 @@ log_stderr(char *buf, unsigned int n)
 static void
 check_foreground(void)
 {
-    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == ppgrp;
-    if (foreground && !tty_initialized) {
-	if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE])) {
-	    tty_initialized = 1;
-	    sync_ttysize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
+    if (script_fds[SFD_USERTTY] != -1) {
+	foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == ppgrp;
+	if (foreground && !tty_initialized) {
+	    if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE])) {
+		tty_initialized = 1;
+		sync_ttysize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
+	    }
 	}
     }
 }
@@ -278,7 +279,7 @@ check_foreground(void)
  * Returns SIGUSR1 if the child should be resume in foreground else SIGUSR2.
  */
 static int
-suspend_parent(int signo, int fd, struct io_buffer *iobufs)
+suspend_parent(int signo, struct io_buffer *iobufs)
 {
     sigaction_t sa, osa;
     int n, oldmode = ttymode, rval = 0;
@@ -534,9 +535,11 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     sigaction(SIGTERM, &sa, NULL);
 
     if (log_io) {
-	sa.sa_flags = SA_RESTART;
-	sa.sa_handler = sigwinch;
-	sigaction(SIGWINCH, &sa, NULL);
+	if (script_fds[SFD_USERTTY] != -1) {
+	    sa.sa_flags = SA_RESTART;
+	    sa.sa_handler = sigwinch;
+	    sigaction(SIGWINCH, &sa, NULL);
+	}
 
 	/* So we can block tty-generated signals */
 	sigemptyset(&ttyblock);
@@ -546,9 +549,6 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	sigaddset(&ttyblock, SIGTTIN);
 	sigaddset(&ttyblock, SIGTTOU);
 
-	/* Are we the foreground process? */
-	foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == ppgrp;
-
 	/*
 	 * Setup stdin/stdout/stderr for child, to be duped after forking.
 	 */
@@ -557,12 +557,17 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	script_fds[SFD_STDERR] = script_fds[SFD_SLAVE];
 
 	/* Copy /dev/tty -> pty master */
-	iobufs = io_buf_new(script_fds[SFD_USERTTY], script_fds[SFD_MASTER],
-	    log_ttyin, iobufs);
+	if (script_fds[SFD_USERTTY] != -1) {
+	    iobufs = io_buf_new(script_fds[SFD_USERTTY], script_fds[SFD_MASTER],
+		log_ttyin, iobufs);
 
-	/* Copy pty master -> /dev/tty */
-	iobufs = io_buf_new(script_fds[SFD_MASTER], script_fds[SFD_USERTTY],
-	    log_ttyout, iobufs);
+	    /* Copy pty master -> /dev/tty */
+	    iobufs = io_buf_new(script_fds[SFD_MASTER], script_fds[SFD_USERTTY],
+		log_ttyout, iobufs);
+
+	    /* Are we the foreground process? */
+	    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == ppgrp;
+	}
 
 	/*
 	 * If either stdin, stdout or stderr is not a tty we use a pipe
@@ -790,7 +795,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		if (WIFSTOPPED(cstat->val)) {
 		    /* Suspend parent and tell child how to resume on return. */
 		    sudo_debug(8, "child stopped, suspending parent");
-		    n = suspend_parent(WSTOPSIG(cstat->val), script_fds[SFD_USERTTY], iobufs);
+		    n = suspend_parent(WSTOPSIG(cstat->val), iobufs);
 		    recvsig[n] = TRUE;
 		    continue;
 		} else {
@@ -826,25 +831,31 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 
     if (log_io) {
 	/* Flush any remaining output (the plugin already got it) */
-	n = fcntl(script_fds[SFD_USERTTY], F_GETFL, 0);
-	if (n != -1 && ISSET(n, O_NONBLOCK)) {
-	    CLR(n, O_NONBLOCK);
-	    (void) fcntl(script_fds[SFD_USERTTY], F_SETFL, n);
+	if (script_fds[SFD_USERTTY] != -1) {
+	    n = fcntl(script_fds[SFD_USERTTY], F_GETFL, 0);
+	    if (n != -1 && ISSET(n, O_NONBLOCK)) {
+		CLR(n, O_NONBLOCK);
+		(void) fcntl(script_fds[SFD_USERTTY], F_SETFL, n);
+	    }
 	}
 	flush_output(iobufs);
 
-	do {
-	    n = term_restore(script_fds[SFD_USERTTY], 0);
-	} while (!n && errno == EINTR);
+	if (script_fds[SFD_USERTTY] != -1) {
+	    do {
+		n = term_restore(script_fds[SFD_USERTTY], 0);
+	    } while (!n && errno == EINTR);
+	}
 
 	if (cstat->type == CMD_WSTATUS && WIFSIGNALED(cstat->val)) {
 	    int signo = WTERMSIG(cstat->val);
 	    if (signo && signo != SIGINT && signo != SIGPIPE) {
 		char *reason = strsignal(signo);
-		write(script_fds[SFD_USERTTY], reason, strlen(reason));
+		n = script_fds[SFD_USERTTY] != -1 ?
+		    script_fds[SFD_USERTTY] : STDOUT_FILENO;
+		write(n, reason, strlen(reason));
 		if (WCOREDUMP(cstat->val))
-		    write(script_fds[SFD_USERTTY], " (core dumped)", 14);
-		write(script_fds[SFD_USERTTY], "\n", 1);
+		    write(n, " (core dumped)", 14);
+		write(n, "\n", 1);
 	    }
 	}
     }
@@ -928,8 +939,10 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
     int alive = TRUE;
 
     /* Close unused fds. */
-    close(script_fds[SFD_MASTER]);
-    close(script_fds[SFD_USERTTY]);
+    if (script_fds[SFD_MASTER] != -1)
+	close(script_fds[SFD_MASTER]);
+    if (script_fds[SFD_USERTTY] != -1)
+	close(script_fds[SFD_USERTTY]);
 
     /* Reset signal handlers. */
     zero_bytes(&sa, sizeof(sa));
@@ -971,14 +984,16 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 # endif
     setpgrp(0, 0);
 #endif
+    if (script_fds[SFD_SLAVE] != -1) {
 #ifdef TIOCSCTTY
-    if (ioctl(script_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0)
-	error(1, "unable to set controlling tty");
+	if (ioctl(script_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0)
+	    error(1, "unable to set controlling tty");
 #else
-    /* Set controlling tty by reopening slave. */
-    if ((n = open(slavename, O_RDWR)) >= 0)
-	close(n);
+	/* Set controlling tty by reopening slave. */
+	if ((n = open(slavename, O_RDWR)) >= 0)
+	    close(n);
 #endif
+    }
 
     /*
      * If stdin/stdout is not a tty, start command in the background
@@ -1237,7 +1252,8 @@ script_run(const char *path, char *argv[], char *envp[], int rbac_enabled)
     }
 
     /* We have guaranteed that the slave fd > 3 */
-    close(script_fds[SFD_SLAVE]);
+    if (script_fds[SFD_SLAVE] != -1)
+	close(script_fds[SFD_SLAVE]);
 
 #ifdef HAVE_SELINUX
     if (rbac_enabled)
