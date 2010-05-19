@@ -178,8 +178,8 @@ verify_user(struct passwd *pw, char *prompt)
 		goto cleanup;
 	}
 #ifndef AUTH_STANDALONE
-	if (repl.reply)
-	    zero_bytes(p, strlen(repl.reply));
+	if (p)
+	    zero_bytes(p, strlen(p));
 #endif
 	/* XXX - need way to know if askpass was used */
 	//if (!ISSET(tgetpass_flags, TGP_ASKPASS))
