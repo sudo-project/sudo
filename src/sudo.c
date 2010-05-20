@@ -766,7 +766,7 @@ run_command(struct command_details *details, char *argv[], char *envp[])
 
     /* If there are I/O plugins, allocate a pty and exec */
     if (!tq_empty(&io_plugins)) {
-	sudo_debug(8, "script mode");
+	sudo_debug(8, "setup I/O logging");
 	script_setup(details->euid);
     }
     script_execve(details, argv, envp, &cstat);
@@ -774,17 +774,21 @@ run_command(struct command_details *details, char *argv[], char *envp[])
     switch (cstat.type) {
     case CMD_ERRNO:
 	/* exec_setup() or execve() returned an error. */
+	sudo_debug(9, "calling policy close with errno");
 	policy_plugin.u.policy->close(0, cstat.val);
 	tq_foreach_fwd(&io_plugins, plugin) {
+	    sudo_debug(9, "calling I/O close with errno");
 	    plugin->u.io->close(0, cstat.val);
 	}
 	exitcode = 1;
 	break;
     case CMD_WSTATUS:
 	/* Command ran, exited or was killed. */
+	sudo_debug(9, "calling policy close with wait status");
 	policy_plugin.u.policy->close(cstat.val, 0);
 	tq_foreach_fwd(&io_plugins, plugin) {
-	    plugin->u.io->close(0, cstat.val);
+	    sudo_debug(9, "calling I/O close with wait status");
+	    plugin->u.io->close(cstat.val, 0);
 	}
 	if (WIFEXITED(cstat.val))
 	    exitcode = WEXITSTATUS(cstat.val);
