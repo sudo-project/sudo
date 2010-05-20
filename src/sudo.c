@@ -494,19 +494,22 @@ command_info_to_details(char * const info[], struct command_details *details)
 			    break;
 			cp++;
 		    }
-		    details->groups = emalloc2(details->ngroups, sizeof(GETGROUPS_T));
-		    cp = info[i] + sizeof("runas_groups=") - 1;
-		    for (j = 0; j < details->ngroups;) {
-			errno = 0;
-			ulval = strtoul(cp, &ep, 0);
-			if (*cp == '\0' || (*ep != ',' && *ep != '\0') ||
-			    (ulval == ULONG_MAX && errno == ERANGE)) {
-			    break;
+		    if (details->ngroups != 0) {
+			details->groups =
+			    emalloc2(details->ngroups, sizeof(GETGROUPS_T));
+			cp = info[i] + sizeof("runas_groups=") - 1;
+			for (j = 0; j < details->ngroups;) {
+			    errno = 0;
+			    ulval = strtoul(cp, &ep, 0);
+			    if (*cp == '\0' || (*ep != ',' && *ep != '\0') ||
+				(ulval == ULONG_MAX && errno == ERANGE)) {
+				break;
+			    }
+			    details->groups[j++] = (gid_t)ulval;
+			    cp = ep + 1;
 			}
-			details->groups[j++] = (gid_t)ulval;
-			cp = ep + 1;
+			details->ngroups = j;
 		    }
-		    details->ngroups = j;
 		    break;
 		}
 		if (strncmp("runas_uid=", info[i], sizeof("runas_uid=") - 1) == 0) {
