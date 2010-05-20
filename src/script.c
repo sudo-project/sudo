@@ -1122,6 +1122,8 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 	if (errpipe[0] != -1)
 	    FD_SET(errpipe[0], fdsr);
 	maxfd = MAX(errpipe[0], backchannel);
+	if (maxfd == -1)
+	    goto done;
 
 	if (recvsig[SIGCHLD])
 	    continue;
