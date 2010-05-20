@@ -1122,8 +1122,6 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 	if (errpipe[0] != -1)
 	    FD_SET(errpipe[0], fdsr);
 	maxfd = MAX(errpipe[0], backchannel);
-	if (maxfd == -1)
-	    goto done;
 
 	if (recvsig[SIGCHLD])
 	    continue;
@@ -1201,6 +1199,8 @@ flush_output(struct io_buffer *iobufs)
 	if (iob->wfd > maxfd)
 	    maxfd = iob->wfd;
     }
+    if (maxfd == -1)
+	return;
 
     fdsr = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
     fdsw = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
