@@ -130,6 +130,7 @@ static void script_run(const char *path, char *argv[], char *envp[], int);
 static void sigwinch(int s);
 static void sync_ttysize(int src, int dst);
 static void deliver_signal(pid_t pid, int signo);
+static int safe_close(int fd);
 
 /* sudo.c */
 extern struct plugin_container_list io_plugins;
@@ -433,8 +434,7 @@ perform_io(struct io_buffer *iobufs, fd_set *fdsr, fd_set *fdsw)
 		    break;
 	    } else if (n == 0) {
 		/* got EOF */
-		if (iob->rfd != script_fds[SFD_USERTTY])
-		    close(iob->rfd);
+		safe_close(iob->rfd);
 		iob->rfd = -1;
 	    } else {
 		if (!iob->action(iob->buf + iob->len, n))
@@ -451,12 +451,10 @@ perform_io(struct io_buffer *iobufs, fd_set *fdsr, fd_set *fdsw)
 		if (errno == EPIPE) {
 		    /* other end of pipe closed */
 		    if (iob->rfd != -1) {
-			if (iob->rfd != script_fds[SFD_USERTTY])
-			    close(iob->rfd);
+			safe_close(iob->rfd);
 			iob->rfd = -1;
 		    }
-		    if (iob->wfd != script_fds[SFD_USERTTY])
-			close(iob->wfd);
+		    safe_close(iob->wfd);
 		    iob->wfd = -1;
 		    continue;
 		}
@@ -741,8 +739,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		iob->off = iob->len = 0;
 		/* Forward the EOF from reader to writer. */
 		if (iob->rfd == -1) {
-		    if (iob->wfd != script_fds[SFD_USERTTY])
-			close(iob->wfd);
+		    safe_close(iob->wfd);
 		    iob->wfd = -1;
 		}
 	    }
@@ -1220,8 +1217,7 @@ flush_output(struct io_buffer *iobufs)
 		iob->off = iob->len = 0;
 		/* Forward the EOF from reader to writer. */
 		if (iob->rfd == -1) {
-		    if (iob->wfd != script_fds[SFD_USERTTY])
-			close(iob->wfd);
+		    safe_close(iob->wfd);
 		    iob->wfd = -1;
 		}
 	    }
@@ -1322,4 +1318,15 @@ sigwinch(int s)
 
     sync_ttysize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
     errno = serrno;
+}
+
+/*
+ * Only close the fd if it is not /dev/tty or std{in,out,err}
+ */
+static int
+safe_close(int fd)
+{
+    if (fd < 3 || fd == script_fds[SFD_USERTTY])
+	return -1;
+    return close(fd);
 }
