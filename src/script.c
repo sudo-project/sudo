@@ -496,7 +496,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     int rbac_enabled = 0;
     int log_io, maxfd;
 
-    cstat->type = 0; /* XXX */
+    cstat->type = CMD_INVALID;
 
     log_io = !tq_empty(&io_plugins);
 
@@ -918,26 +918,69 @@ deliver_signal(pid_t pid, int signo)
 static int
 send_status(int fd, struct command_status *cstat)
 {
-    int n;
+    int n = -1;
 
-    do {
-	n = send(fd, cstat, sizeof(*cstat), 0);
-    } while (n == -1 && errno == EINTR);
-    if (n != sizeof(*cstat)) {
-	sudo_debug(8, "unable to send status to parent: %s", strerror(errno));
-    } else {
-	sudo_debug(8, "sent status to parent");
+    if (cstat->type != CMD_INVALID) {
+	do {
+	    n = send(fd, cstat, sizeof(*cstat), 0);
+	} while (n == -1 && errno == EINTR);
+	if (n != sizeof(*cstat)) {
+	    sudo_debug(8, "unable to send status to parent: %s", strerror(errno));
+	} else {
+	    sudo_debug(8, "sent status to parent");
+	}
+	cstat->type = CMD_INVALID; /* prevent re-sending */
     }
     return n;
+}
+
+/*
+ * Wait for child status after receiving SIGCHLD.
+ * If the child was stopped, the status is send back
+ * to the parent.
+ * Otherwise, cstat is filled in but not sent.
+ * Returns TRUE if child is still alive, else false.
+ */
+static int
+handle_sigchld(int backchannel, struct command_status *cstat)
+{
+    int status, alive = TRUE;
+    pid_t pid;
+
+    /* read child status */
+    do {
+	pid = waitpid(child, &status, WUNTRACED|WNOHANG);
+    } while (pid == -1 && errno == EINTR);
+    if (pid == child) {
+	if (cstat->type != CMD_ERRNO) {
+	    cstat->type = CMD_WSTATUS;
+	    cstat->val = status;
+	    if (WIFSTOPPED(status)) {
+		sudo_debug(8, "command stopped, signal %d",
+		    WSTOPSIG(status));
+		if (send_status(backchannel, cstat) == -1)
+		    return alive; /* XXX */
+	    } else if (WIFSIGNALED(status)) {
+		sudo_debug(8, "command killed, signal %d",
+		    WTERMSIG(status));
+	    } else {
+		sudo_debug(8, "command exited: %d",
+		    WEXITSTATUS(status));
+	    }
+	}
+	if (!WIFSTOPPED(status))
+	    alive = FALSE;
+    }
+    return alive;
 }
 
 int
 script_child(const char *path, char *argv[], char *envp[], int backchannel, int rbac)
 {
     struct command_status cstat;
+    struct timeval tv;
     fd_set *fdsr;
     sigaction_t sa;
-    pid_t pid;
     int errpipe[2], maxfd, n, status;
     int alive = TRUE;
 
@@ -1068,38 +1111,13 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
     fdsr = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
     zero_bytes(fdsr, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
     zero_bytes(&cstat, sizeof(cstat));
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
     for (;;) {
-	/* Read child status */
+	/* Read child status. */
 	if (recvsig[SIGCHLD]) {
 	    recvsig[SIGCHLD] = FALSE;
-	    /* read child status and relay to parent */
-	    do {
-		pid = waitpid(child, &status, WUNTRACED|WNOHANG);
-	    } while (pid == -1 && errno == EINTR);
-	    if (pid == child) {
-		if (WIFSTOPPED(status)) {
-		    sudo_debug(8, "command stopped, signal %d",
-			WSTOPSIG(status));
-		} else {
-		    if (WIFSIGNALED(status))
-			sudo_debug(8, "command killed, signal %d",
-			    WTERMSIG(status));
-		    else
-			sudo_debug(8, "command exited: %d",
-			    WEXITSTATUS(status));
-		    alive = FALSE;
-		}
-		/* Send wait status unless we previously sent errno. */
-		if (cstat.type != CMD_ERRNO) {
-		    cstat.type = CMD_WSTATUS;
-		    cstat.val = status;
-		    n = send_status(backchannel, &cstat);
-		    if (n == -1)
-			goto done;
-		}
-		if (!alive)
-		    goto done;
-	    }
+	    alive = handle_sigchld(backchannel, &cstat);
 	}
 
 	/* Check for signal on backchannel or errno on errpipe. */
@@ -1110,8 +1128,11 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 
 	if (recvsig[SIGCHLD])
 	    continue;
-	n = select(maxfd + 1, fdsr, NULL, NULL, NULL);
-	if (n == -1) {
+	/* If command exited we just poll, there may be data on errpipe. */
+	n = select(maxfd + 1, fdsr, NULL, NULL, alive ? NULL : &tv);
+	if (n <= 0) {
+	    if (n == 0)
+		goto done;
 	    if (errno == EINTR)
 		continue;
 	    error(1, "select failed");
@@ -1125,15 +1146,6 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 		    continue;
 		warning("error reading from pipe");
 		goto done;
-	    }
-	    if (n == sizeof(cstat)) {
-		/* execve() failed, relay errno back to parent */
-		if (cstat.type == CMD_ERRNO) {
-		    n = send_status(backchannel, &cstat);
-		    if (n == -1)
-			goto done;
-		} else
-		    warningx("unexpected reply type on pipe: %d", cstat.type);
 	    }
 	    /* Got errno or EOF, either way we are done with errpipe. */
 	    FD_CLR(errpipe[0], fdsr);
@@ -1158,8 +1170,13 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
     }
 
 done:
-    if (alive)
+    if (alive) {
+	/* XXX An error occurred, should send an error back. */
 	kill(child, SIGKILL);
+    } else {
+	/* Send parent status. */
+	send_status(backchannel, &cstat);
+    }
     _exit(1);
 
 bad:
