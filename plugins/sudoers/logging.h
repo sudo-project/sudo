@@ -52,6 +52,6 @@ void audit_failure(char **, char const * const, ...);
 void log_allowed(int);
 void log_denial(int, int);
 void log_error(int flags, const char *fmt, ...) __printflike(2, 3);
-RETSIGTYPE reapchild(int);
+void reapchild(int);
 
 #endif /* _LOGGING_H */

@@ -680,9 +680,6 @@
 /* Define to 1 if the `putenv' has a const argument. */
 #undef PUTENV_CONST
 
-/* Define as the return type of signal handlers (`int' or `void'). */
-#undef RETSIGTYPE
-
 /* The user sudo should run commands as by default. */
 #undef RUNAS_DEFAULT
 

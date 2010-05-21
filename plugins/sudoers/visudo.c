@@ -96,7 +96,7 @@ struct sudoersfile {
 /*
  * Function prototypes
  */
-static RETSIGTYPE quit(int);
+static void quit(int);
 static char *get_args(char *);
 static char *get_editor(char **);
 static void get_hostname(void);
@@ -1141,7 +1141,7 @@ cleanup(int gotsignal)
 /*
  * Unlink sudoers temp files (if any) and exit.
  */
-static RETSIGTYPE
+static void
 quit(int signo)
 {
     cleanup(signo);
