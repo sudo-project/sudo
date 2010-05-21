@@ -1,7 +1,7 @@
 dnl
 dnl Process this file with GNU autoconf to produce a configure script.
 dnl
-dnl Copyright (c) 1994-1996,1998-2009 Todd C. Miller <Todd.Miller@courtesan.com>
+dnl Copyright (c) 1994-1996,1998-2010 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_INIT([sudo], [1.8.0a1], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER(config.h pathnames.h)
@@ -1475,8 +1475,12 @@ case "$host" in
 		CFLAGS="$CFLAGS +DAportable"
 		AC_CACHE_CHECK([whether $CC understands +DAportable],
 		    [sudo_cv_var_daportable],
-		    [AC_TRY_LINK([], [], [sudo_cv_var_daportable=yes],
-				 [sudo_cv_var_daportable=no])]
+		    [AC_LINK_IFELSE(
+			[AC_LANG_PROGRAM([[]], [[]])],
+			    [sudo_cv_var_daportable=yes],
+			    [sudo_cv_var_daportable=no]
+			)
+		    ]
 		)
 		if test X"$sudo_cv_var_daportable" != X"yes"; then
 		    CFLAGS="$_CFLAGS"
@@ -1980,8 +1984,8 @@ dnl
 dnl Check for the dirfd function/macro.  If not found, look for dd_fd in DIR.
 dnl
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <$ac_header_dirent>]], [[DIR *d; (void)dirfd(d);]])], [AC_DEFINE(HAVE_DIRFD)], [AC_TRY_LINK([#include <sys/types.h>
-#include <$ac_header_dirent>], [DIR d; memset(&d, 0, sizeof(d)); return(d.dd_fd);], [AC_DEFINE(HAVE_DD_FD)])])
+#include <$ac_header_dirent>]], [[DIR *d; (void)dirfd(d);]])], [AC_DEFINE(HAVE_DIRFD)], [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
+#include <$ac_header_dirent>]], [[DIR d; memset(&d, 0, sizeof(d)); return(d.dd_fd);]])], [AC_DEFINE(HAVE_DD_FD)], [])])
 dnl
 dnl If NEED_SNPRINTF is set, add snprintf.c to LIBOBJS
 dnl (it contains snprintf, vsnprintf, asprintf, and vasprintf)
@@ -2346,8 +2350,11 @@ if test ${with_kerb5-'no'} != "no" -a -z "$KRB5CONFIG"; then
     AC_CHECK_FUNCS(krb5_get_init_creds_opt_alloc, [
 	AC_CACHE_CHECK([whether krb5_get_init_creds_opt_free takes a context],
 	    sudo_cv_krb5_get_init_creds_opt_free_two_args, [
-		AC_TRY_COMPILE([#include <krb5.h>],
-		    [krb5_get_init_creds_opt_free(NULL, NULL);],
+		AC_COMPILE_IFELSE(
+		    [AC_LANG_PROGRAM(
+			[[#include <krb5.h>]],
+			[[krb5_get_init_creds_opt_free(NULL, NULL);]]
+		    )],
 		    [sudo_cv_krb5_get_init_creds_opt_free_two_args=yes],
 		    [sudo_cv_krb5_get_init_creds_opt_free_two_args=no]
 		)

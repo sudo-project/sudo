@@ -12534,10 +12534,12 @@ else
 sed 's/^/| /' conftest.$ac_ext >&5
 
 	sudo_cv_var_daportable=no
+
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
+
 
 fi
 { echo "$as_me:$LINENO: result: $sudo_cv_var_daportable" >&5
@@ -24080,6 +24082,7 @@ int
 main ()
 {
 krb5_get_init_creds_opt_free(NULL, NULL);
+
   ;
   return 0;
 }
