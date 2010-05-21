@@ -103,7 +103,7 @@ check:
 	@echo nothing to check
 
 clean:
-	-rm -f *.a *.o *.lo *.la stamp-* core *.core core.*
+	-$(LIBTOOL) --mode=clean rm -f *.a *.o *.lo *.la stamp-* core *.core core.*
 
 mostlyclean: clean
 

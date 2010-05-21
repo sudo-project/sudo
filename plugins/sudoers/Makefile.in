@@ -301,7 +301,7 @@ check:
 	@echo nothing to check
 
 clean:
-	-rm -f sudoreplay testsudoers visudo *.a *.o *.lo *.la stamp-* core *.core core.*
+	-$(LIBTOOL) --mode=clean rm -f sudoreplay testsudoers visudo *.a *.o *.lo *.la stamp-* core *.core core.*
 
 mostlyclean: clean
 
