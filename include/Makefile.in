@@ -1,0 +1,73 @@
+#
+# Copyright (c) 2010 Todd C. Miller <Todd.Miller@courtesan.com>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# @configure_input@
+#
+
+#### Start of system configuration section. ####
+
+srcdir = @srcdir@
+top_builddir = @top_builddir@
+top_srcdir = @top_srcdir@
+
+# Our install program supports extra flags...
+INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
+
+# Where to install things...
+prefix = @prefix@
+datarootdir = @datarootdir@
+
+# User and group ids the installed files should be "owned" by
+install_uid = 0
+install_gid = 0
+
+#### End of system configuration section. ####
+
+SHELL = /bin/sh
+
+all:
+
+.SUFFIXES: .h
+
+install: install-dirs install-includes
+
+install-dirs:
+	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(prefix)/include
+
+install-binaries:
+
+install-man:
+
+install-includes: install-dirs
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $(srcdir)/sudo_plugin.h $(DESTDIR)$(prefix)/include
+
+install-plugin:
+
+check:
+	@echo nothing to check
+
+clean:
+
+mostlyclean: clean
+
+distclean: clean
+	-rm -rf Makefile
+
+clobber: distclean
+
+realclean: distclean
+
+cleandir: distclean
