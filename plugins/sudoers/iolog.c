@@ -209,6 +209,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     fd = open(pathbuf, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR);
     if (fd == -1)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+    fcntl(fd, F_SETFD, FD_CLOEXEC);
     io_logfile = fdopen(fd, "w");
     if (io_logfile == NULL)
         log_error(USE_ERRNO, "fdopen");
@@ -217,6 +218,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     fd = open(pathbuf, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR);
     if (fd == -1)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+    fcntl(fd, F_SETFD, FD_CLOEXEC);
 #ifdef HAVE_ZLIB
     if (def_compress_transcript)
         io_outfile.g = gzdopen(fd, "w");
@@ -231,6 +233,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     fd = open(pathbuf, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR);
     if (fd == -1)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+    fcntl(fd, F_SETFD, FD_CLOEXEC);
 #ifdef HAVE_ZLIB
     if (def_compress_transcript)
         io_timfile.g = gzdopen(fd, "w");
