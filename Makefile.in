@@ -44,7 +44,7 @@ config.status:
 	fi
 
 libtool: $(LIBTOOL_DEPS)
-    $(SHELL) ./config.status --recheck
+	$(SHELL) ./config.status --recheck
 
 dist: ChangeLog $(srcdir)/MANIFEST
 	pax -w -x ustar -s '/^/sudo-$(VERSION)\//' -f ../sudo-$(VERSION).tar \
