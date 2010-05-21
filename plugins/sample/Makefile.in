@@ -97,7 +97,7 @@ install-includes:
 install-man:
 
 install-plugin: install-dirs sample_plugin.la
-	$(LIBTOOL) --mode=install $(INSTALL) sample_plugin.la $(plugindir)
+	$(LIBTOOL) --mode=install --quiet $(INSTALL) sample_plugin.la $(plugindir)
 
 check:
 	@echo nothing to check

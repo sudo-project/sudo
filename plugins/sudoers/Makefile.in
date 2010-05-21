@@ -290,7 +290,7 @@ install-includes:
 install-man:
 
 install-plugin: sudoers.la install-dirs
-	$(LIBTOOL) --mode=install $(INSTALL) sudoers.la $(DESTDIR)$(plugindir)
+	$(LIBTOOL) --mode=install --quiet $(INSTALL) sudoers.la $(DESTDIR)$(plugindir)
 
 install-sudoers: install-dirs
 	test -f $(DESTDIR)$(sudoersdir)/sudoers || \

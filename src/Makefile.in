@@ -98,7 +98,7 @@ all: $(PROGS)
 sudo: $(OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS) $(LDFLAGS) $(LIBS) -static-libtool-libs
 
-sudo_noexec.la: sudo_noexec.lo
+libsudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
 
 sesh: sesh.o
@@ -144,8 +144,10 @@ install-binaries: install-dirs $(PROGS)
 
 install-includes:
 
-install-noexec: install-dirs sudo_noexec.la
-	if [ -f .libs/$(noexecfile) ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0755 .libs/$(noexecfile) $(DESTDIR)$(noexecdir); fi
+# We install sudo_noexec by hand so we can avoid a "lib" prefix
+# and a version number.  Since we use LD_PRELOAD, neither is needed.
+install-noexec: install-dirs libsudo_noexec.la
+	if [ -f .libs/lib$(noexecfile) ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0755 .libs/lib$(noexecfile) $(DESTDIR)$(noexecdir)/$(noexecfile); fi
 
 install-plugin:
 

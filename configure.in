@@ -55,6 +55,7 @@ AC_SUBST(LDAP)
 AC_SUBST(LOGINCAP_USAGE)
 AC_SUBST(NONUNIX_GROUPS_IMPL)
 AC_SUBST(ZLIB)
+AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST(ac_config_libobj_dir)
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
@@ -1312,14 +1313,16 @@ if test "x$ac_cv_prog_cc_c89" = "xno"; then
 fi
 
 dnl
-dnl Libtool magic; enable shared libs and disable static libs
+dnl Libtool setup, we require libtool 2.2.6b or higher
 dnl
 AC_CANONICAL_HOST
-AC_LIBTOOL_DLOPEN
-AC_PROG_LIBTOOL
+AC_CONFIG_MACRO_DIR([m4])
+LT_PREREQ([2.2.6b])
+LT_INIT([dlopen])
 
 dnl
 dnl Defer with_noexec until after libtool magic runs
+dnl XXX - also disable plugins if enable_shared=no
 dnl
 if test "$enable_shared" = "no"; then
     with_noexec=no
@@ -2724,7 +2727,7 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no"; then
 	fi
     fi
     if test X"$with_noexec" != X"no"; then
-	PROGS="${PROGS} sudo_noexec.la"
+	PROGS="${PROGS} libsudo_noexec.la"
 	INSTALL_NOEXEC="install-noexec"
 
 	eval noexec_file="$with_noexec"

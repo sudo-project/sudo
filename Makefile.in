@@ -24,8 +24,15 @@ SUBDIRS = compat src plugins/sample plugins/sudoers include doc
 
 VERSION = @PACKAGE_VERSION@
 
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
+
+SHELL = /bin/sh
+
 all install install-dirs install-binaries install-includes install-man install-plugin: config.status
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) || break; done
+
+autoconf:
+	autoconf -I m4
 
 ChangeLog:
 	hg log --style=changelog -b default > $@
@@ -35,6 +42,9 @@ config.status:
 		echo "Please run configure first"; \
 		exit 1; \
 	fi
+
+libtool: $(LIBTOOL_DEPS)
+    $(SHELL) ./config.status --recheck
 
 dist: ChangeLog $(srcdir)/MANIFEST
 	pax -w -x ustar -s '/^/sudo-$(VERSION)\//' -f ../sudo-$(VERSION).tar \

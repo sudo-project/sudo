@@ -394,3 +394,12 @@ m4_define([SUDO_DEFINE_UNQUOTED],
 [@%:@define] $1 m4_if($#, 2, [$2], $#, 3, [$2], 1)
 EOF
 ])
+
+dnl
+dnl Pull in libtool macros
+dnl
+m4_include([libtool.m4])
+m4_include([ltoptions.m4])
+m4_include([ltsugar.m4])
+m4_include([ltversion.m4])
+m4_include([lt~obsolete.m4])
