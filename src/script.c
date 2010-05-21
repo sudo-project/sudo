@@ -89,6 +89,7 @@
 #define TERM_COOKED	0
 #define TERM_RAW	1
 
+/* Compatibility with older tty systems. */
 #if !defined(TIOCGSIZE) && defined(TIOCGWINSZ)
 # define TIOCGSIZE	TIOCGWINSZ
 # define TIOCSSIZE	TIOCSWINSZ
@@ -116,7 +117,6 @@ static sig_atomic_t tty_initialized = 0;
 static sigset_t ttyblock;
 
 static pid_t ppgrp, child;
-static int child_status;
 static int foreground;
 
 static char slavename[PATH_MAX];
@@ -131,9 +131,6 @@ static void sigwinch(int s);
 static void sync_ttysize(int src, int dst);
 static void deliver_signal(pid_t pid, int signo);
 static int safe_close(int fd);
-
-/* sudo.c */
-extern struct plugin_container_list io_plugins;
 
 void
 script_setup(uid_t uid)
@@ -492,7 +489,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     int io_pipe[3][2], sv[2];
     fd_set *fdsr, *fdsw;
     int rbac_enabled = 0;
-    int log_io, maxfd;
+    int log_io, maxfd, status;
 
     cstat->type = CMD_INVALID;
 
@@ -716,13 +713,13 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	     */
 	    recvsig[SIGCHLD] = FALSE;
 	    do {
-		pid = waitpid(child, &child_status, WNOHANG);
+		pid = waitpid(child, &status, WNOHANG);
 	    } while (pid == -1 && errno == EINTR);
 	    if (pid == child) {
 		/* If not logging I/O and child has exited we are done. */
 		if (!log_io) {
 		    cstat->type = CMD_WSTATUS;
-		    cstat->val = child_status;
+		    cstat->val = status;
 		    return 0;
 		}
 	    }
@@ -912,6 +909,10 @@ deliver_signal(pid_t pid, int signo)
     }
 }
 
+/*
+ * Send status to parent over socketpair.
+ * Return value is the same as send(2).
+ */
 static int
 send_status(int fd, struct command_status *cstat)
 {
@@ -933,10 +934,9 @@ send_status(int fd, struct command_status *cstat)
 
 /*
  * Wait for child status after receiving SIGCHLD.
- * If the child was stopped, the status is send back
- * to the parent.
+ * If the child was stopped, the status is send back to the parent.
  * Otherwise, cstat is filled in but not sent.
- * Returns TRUE if child is still alive, else false.
+ * Returns TRUE if child is still alive, else FALSE.
  */
 static int
 handle_sigchld(int backchannel, struct command_status *cstat)
@@ -971,6 +971,13 @@ handle_sigchld(int backchannel, struct command_status *cstat)
     return alive;
 }
 
+/*
+ * Child process that creates a new session with the controlling tty,
+ * resets signal handlers and forks a child to call script_run().
+ * Waits for status changes from the command and relays them to the
+ * parent and relays signals from the parent to the command.
+ * Returns an error if fork(2) fails, else calls _exit(2).
+ */
 int
 script_child(const char *path, char *argv[], char *envp[], int backchannel, int rbac)
 {
@@ -1253,6 +1260,10 @@ flush_output(struct io_buffer *iobufs)
     efree(fdsw);
 }
 
+/*
+ * Sets up file descriptors and executes the actual command.
+ * Returns only if execve() fails.
+ */
 static void
 script_run(const char *path, char *argv[], char *envp[], int rbac_enabled)
 {
@@ -1284,6 +1295,9 @@ script_run(const char *path, char *argv[], char *envp[], int rbac_enabled)
     my_execve(path, argv, envp);
 }
 
+/*
+ * Propagates tty size change signals to pty being used by the command.
+ */
 static void
 sync_ttysize(int src, int dst)
 {
@@ -1302,7 +1316,8 @@ sync_ttysize(int src, int dst)
 }
 
 /*
- * Generic handler for signals passed from parent -> child
+ * Generic handler for signals passed from parent -> child.
+ * The recvsig[] array is checked in the main event loop.
  */
 static void
 handler(int s)
@@ -1311,7 +1326,7 @@ handler(int s)
 }
 
 /*
- * Handler for SIGWINCH in parent
+ * Handler for SIGWINCH in parent.
  */
 static void
 sigwinch(int s)
@@ -1323,12 +1338,16 @@ sigwinch(int s)
 }
 
 /*
- * Only close the fd if it is not /dev/tty or std{in,out,err}
+ * Only close the fd if it is not /dev/tty or std{in,out,err}.
+ * Return value is the same as send(2).
  */
 static int
 safe_close(int fd)
 {
-    if (fd < 3 || fd == script_fds[SFD_USERTTY])
+    /* Avoid closing /dev/tty or std{in,out,err}. */
+    if (fd < 3 || fd == script_fds[SFD_USERTTY]) {
+	errno = EINVAL;
 	return -1;
+    }
     return close(fd);
 }

@@ -157,7 +157,6 @@ int tty_present(void);
 void zero_bytes(volatile void *, size_t);
 
 /* script.c */
-int script_duplow(int);
 int script_execve(struct command_details *details, char *argv[], char *envp[],
     struct command_status *cstat);
 void script_setup(uid_t);
@@ -189,8 +188,9 @@ void get_ttysize(int *linep, int *colp);
 int exec_setup(struct command_details *details);
 int run_command(struct command_details *details, char *argv[],   
     char *envp[]);
+void sudo_debug(int level, const char *format, ...) __printflike(2, 3);
+
 extern int debug_level;
-extern struct plugin_container_list io_plugins;
 
 /* sudo_edit.c */
 int sudo_edit(struct command_details *details, char *argv[], char *envp[]);
@@ -204,12 +204,5 @@ int gettime(struct timeval *);
 #ifndef errno
 extern int errno;
 #endif
-
-/*
- * Sudo logging/debugging, printf-style.
- * The debug level may be set on the command line via the -D flag.
- * A higher debug level yields more verbose debugging.
- */
-void sudo_debug(int level, const char *format, ...) __printflike(2, 3);
 
 #endif /* _SUDO_SUDO_H */
