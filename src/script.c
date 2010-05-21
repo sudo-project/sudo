@@ -1283,9 +1283,15 @@ script_run(const char *path, char *argv[], char *envp[], int rbac_enabled)
 	    ; /* spin */
     }
 
-    /* We have guaranteed that the slave fd > 3 */
+    /* We have guaranteed that the slave fd is > 2 */
     if (script_fds[SFD_SLAVE] != -1)
 	close(script_fds[SFD_SLAVE]);
+    if (script_fds[SFD_STDIN] != script_fds[SFD_SLAVE])
+	close(script_fds[SFD_STDIN]);
+    if (script_fds[SFD_STDOUT] != script_fds[SFD_SLAVE])
+	close(script_fds[SFD_STDOUT]);
+    if (script_fds[SFD_STDERR] != script_fds[SFD_SLAVE])
+	close(script_fds[SFD_STDERR]);
 
 #ifdef HAVE_SELINUX
     if (rbac_enabled)
