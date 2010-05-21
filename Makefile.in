@@ -20,11 +20,11 @@ devdir = @devdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
-SUBDIRS = compat src plugins/sample plugins/sudoers doc
+SUBDIRS = compat src plugins/sample plugins/sudoers include doc
 
 VERSION = @PACKAGE_VERSION@
 
-all install: config.status
+all install install-dirs install-binaries install-includes install-man install-plugin: config.status
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) || break; done
 
 ChangeLog:

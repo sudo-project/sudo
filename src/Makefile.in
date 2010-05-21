@@ -142,8 +142,12 @@ install-binaries: install-dirs $(PROGS)
 	ln $(DESTDIR)$(bindir)/sudo $(DESTDIR)$(bindir)/sudoedit
 	if [ -f sesh ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s sesh $(DESTDIR)$(libexecdir)/sesh; fi
 
+install-includes:
+
 install-noexec: install-dirs sudo_noexec.la
 	if [ -f .libs/$(noexecfile) ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0755 .libs/$(noexecfile) $(DESTDIR)$(noexecdir); fi
+
+install-plugin:
 
 check:
 	@echo nothing to check

@@ -285,10 +285,12 @@ install-binaries: visudo sudoreplay install-dirs
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s sudoreplay $(DESTDIR)$(replaydir)/sudoreplay
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s visudo $(DESTDIR)$(visudodir)/visudo
 
-install-plugin: sudoers.la install-dirs
-	$(LIBTOOL) --mode=install $(INSTALL) sudoers.la $(DESTDIR)$(plugindir)
+install-includes:
 
 install-man:
+
+install-plugin: sudoers.la install-dirs
+	$(LIBTOOL) --mode=install $(INSTALL) sudoers.la $(DESTDIR)$(plugindir)
 
 install-sudoers: install-dirs
 	test -f $(DESTDIR)$(sudoersdir)/sudoers || \

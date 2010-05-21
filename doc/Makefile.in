@@ -154,6 +154,8 @@ install-dirs:
 
 install-binaries:
 
+install-includes:
+
 install-man: install-dirs
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/sudo.$(mantype) $(DESTDIR)$(mandirsu)/sudo.$(mansectsu)
 	@rm -f $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)
@@ -164,6 +166,8 @@ install-man: install-dirs
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/sudoers.$(mantype) $(DESTDIR)$(mandirform)/sudoers.$(mansectform)
 	@LDAP@$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/sudoers.ldap.$(mantype) $(DESTDIR)$(mandirform)/sudoers.ldap.$(mansectform)
 @MAN_POSTINSTALL@
+
+install-plugin:
 
 check:
 	@echo nothing to check

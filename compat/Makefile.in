@@ -99,9 +99,15 @@ utimes.lo: $(compat)/utimes.c $(incdir)/compat.h $(compat)/utime.h $(top_builddi
 
 install:
 
+install-dirs:
+
 install-binaries:
 
+install-includes:
+
 install-man:
+
+install-plugin:
 
 check:
 	@echo nothing to check

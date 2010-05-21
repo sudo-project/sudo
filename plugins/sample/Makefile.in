@@ -92,6 +92,8 @@ install-dirs:
 
 install-binaries:
 
+install-includes:
+
 install-man:
 
 install-plugin: install-dirs sample_plugin.la
