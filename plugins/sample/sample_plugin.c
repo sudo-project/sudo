@@ -153,6 +153,11 @@ policy_open(unsigned int version, sudo_conv_t conversation,
 	    if (strcasecmp(*ui + sizeof("sudoedit=") - 1, "true") == 0)
 		use_sudoedit = TRUE;
 	}
+	/* This plugin doesn't support running sudo with no arguments. */
+	if (strncmp(*ui, "implied_shell=", sizeof("implied_shell=") - 1) == 0) {
+	    if (strcasecmp(*ui + sizeof("implied_shell=") - 1, "true") == 0)
+		return -2; /* usage error */
+	}
     }
     if (runas_user != NULL) {
 	if ((pw = getpwnam(runas_user)) == NULL) {
