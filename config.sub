@@ -152,7 +152,7 @@ case $os in
 	-convergent* | -ncr* | -news | -32* | -3600* | -3100* | -hitachi* |\
 	-c[123]* | -convex* | -sun | -crds | -omron* | -dg | -ultra | -tti* | \
 	-harris | -dolphin | -highlevel | -gould | -cbm | -ns | -masscomp | \
-	-apple | -axis | -knuth | -cray | -microblaze -sr2201*)
+	-apple | -axis | -knuth | -cray | -microblaze | -sr2201*)
 		os=
 		basic_machine=$1
 		;;
