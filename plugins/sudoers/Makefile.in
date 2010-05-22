@@ -95,7 +95,7 @@ DEFS = @OSDEFS@ -D_PATH_SUDOERS=\"$(sudoersdir)/sudoers\" -DSUDOERS_UID=$(sudoer
 
 #### End of system configuration section. ####
 
-SHELL = /bin/sh
+SHELL = @SHELL@
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 

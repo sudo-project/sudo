@@ -62,7 +62,7 @@ DEFS = @OSDEFS@
 
 #### End of system configuration section. ####
 
-SHELL = /bin/sh
+SHELL = @SHELL@
 
 OBJS =	sample_plugin.lo
 

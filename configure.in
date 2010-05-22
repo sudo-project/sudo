@@ -13,6 +13,7 @@ dnl
 dnl Variables that get substituted in the Makefile and man pages
 dnl
 AC_SUBST([HAVE_BSM_AUDIT])
+AC_SUBST([SHELL])
 AC_SUBST([LIBTOOL])
 AC_SUBST([CFLAGS])
 AC_SUBST([PROGS])

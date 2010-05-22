@@ -26,7 +26,7 @@ VERSION = @PACKAGE_VERSION@
 
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 
-SHELL = /bin/sh
+SHELL = @SHELL@
 
 all install install-dirs install-binaries install-includes install-man install-plugin: config.status
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) || break; done

@@ -47,7 +47,7 @@ install_gid = 0
 
 #### End of system configuration section. ####
 
-SHELL = /bin/sh
+SHELL = @SHELL@
 
 DOCS =	sudo.man visudo.man sudoers.man sudoers.ldap.man sudoers.man \
 	sudoreplay.man sudo_plugin.man
