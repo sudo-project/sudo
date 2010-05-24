@@ -240,7 +240,7 @@ selinux_prefork(char *role, char *type, int ttyfd)
 }
 
 void
-selinux_execv(char *path, char **argv)
+selinux_execve(const char *path, char *argv[], char *envp[])
 {
     if (setexeccon(new_context)) {
 	warning("unable to set exec context to %s", new_context);
@@ -260,11 +260,12 @@ selinux_execv(char *path, char **argv)
 #endif
 
     /* We use the "spare" slot in argv to store sesh. */
+    /* XXX - no longer can do this XXX */
     --argv;
     argv[0] = *argv[1] == '-' ? "-sesh" : "sesh";
-    argv[1] = path;
+    argv[1] = (char *)path;
 
-    execv(_PATH_SUDO_SESH, argv);
+    execve(_PATH_SUDO_SESH, argv, envp);
     warning("%s", path);
 }
 

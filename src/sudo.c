@@ -393,6 +393,7 @@ command_info_to_details(char * const info[], struct command_details *details)
     char *cp, *ep;
 
     memset(details, 0, sizeof(*details));
+    details->closefrom = -1;
 
 #define SET_STRING(s, n) \
     if (strncmp(s, info[i], sizeof(s) - 1) == 0 && info[i][sizeof(s) - 1]) { \
@@ -407,6 +408,20 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_STRING("chroot=", chroot)
 		SET_STRING("command=", command)
 		SET_STRING("cwd=", cwd)
+		if (strncmp("closefrom=", info[i], sizeof("closefrom=") - 1) == 0) {
+		    cp = info[i] + sizeof("closefrom=") - 1;
+		    if (*cp == '\0')
+			break;
+		    errno = 0;
+		    lval = strtol(cp, &ep, 0);
+		    if (*cp != '\0' && *ep == '\0' &&
+			!(errno == ERANGE &&
+			(lval == LONG_MAX || lval == LONG_MIN)) &&
+			lval < INT_MAX && lval > INT_MIN) {
+			details->closefrom = (int)lval;
+		    }
+		    break;
+		}
 		break;
 	    case 'l':
 		SET_STRING("login_class=", login_class)

@@ -125,8 +125,12 @@ static int suspend_parent(int signo, struct io_buffer *iobufs);
 static void flush_output(struct io_buffer *iobufs);
 static int perform_io(struct io_buffer *iobufs, fd_set *fdsr, fd_set *fdsw);
 static void handler(int s);
-static int script_child(const char *path, char *argv[], char *envp[], int, int);
-static void script_run(const char *path, char *argv[], char *envp[], int);
+static int my_execve(const char *path, char *const argv[],
+    char *const envp[]);
+static int script_child(struct command_details *details, char *argv[],
+    char *envp[], int, int);
+static void script_run(struct command_details *detail, char *argv[],
+    char *envp[], int);
 static void sigwinch(int s);
 static void sync_ttysize(int src, int dst);
 static void deliver_signal(pid_t pid, int signo);
@@ -353,7 +357,7 @@ suspend_parent(int signo, struct io_buffer *iobufs)
 
 /*
  * Like execve(2) but falls back to running through /bin/sh
- * like execvp(3) if we get ENOEXEC.
+ * ala execvp(3) if we get ENOEXEC.
  */
 static int
 my_execve(const char *path, char *const argv[], char *const envp[])
@@ -637,6 +641,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	/* child */
 	close(sv[0]);
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
+	/* XXX - defer call to exec_setup() until my_execve()? */
 	if (exec_setup(details) == 0) {
 	    /* headed for execve() */
 	    if (log_io) {
@@ -647,8 +652,10 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		    close(io_pipe[STDOUT_FILENO][0]);
 		if (io_pipe[STDERR_FILENO][0])
 		    close(io_pipe[STDERR_FILENO][0]);
-		script_child(details->command, argv, envp, sv[1], rbac_enabled);
+		script_child(details, argv, envp, sv[1], rbac_enabled);
 	    } else {
+		if (details->closefrom >= 0)
+		    closefrom(details->closefrom);
 #ifdef HAVE_SELINUX
 		if (rbac_enabled)
 		    selinux_execve(details->command, argv, envp);
@@ -979,7 +986,8 @@ handle_sigchld(int backchannel, struct command_status *cstat)
  * Returns an error if fork(2) fails, else calls _exit(2).
  */
 int
-script_child(const char *path, char *argv[], char *envp[], int backchannel, int rbac)
+script_child(struct command_details *details, char *argv[], char *envp[],
+    int backchannel, int rbac)
 {
     struct command_status cstat;
     struct timeval tv;
@@ -1083,7 +1091,7 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 	fcntl(errpipe[1], F_SETFD, FD_CLOEXEC);
 
 	/* setup tty and exec command */
-	script_run(path, argv, envp, rbac);
+	script_run(details, argv, envp, rbac);
 	cstat.type = CMD_ERRNO;
 	cstat.val = errno;
 	write(errpipe[1], &cstat, sizeof(cstat));
@@ -1265,7 +1273,8 @@ flush_output(struct io_buffer *iobufs)
  * Returns only if execve() fails.
  */
 static void
-script_run(const char *path, char *argv[], char *envp[], int rbac_enabled)
+script_run(struct command_details *details, char *argv[], char *envp[],
+    int rbac_enabled)
 {
     pid_t self = getpid();
 
@@ -1293,12 +1302,14 @@ script_run(const char *path, char *argv[], char *envp[], int rbac_enabled)
     if (script_fds[SFD_STDERR] != script_fds[SFD_SLAVE])
 	close(script_fds[SFD_STDERR]);
 
+    if (details->closefrom >= 0)
+	closefrom(details->closefrom);
 #ifdef HAVE_SELINUX
     if (rbac_enabled)
-	selinux_execve(path, argv, envp);
+	selinux_execve(details->command, argv, envp);
     else
 #endif
-    my_execve(path, argv, envp);
+	my_execve(details->command, argv, envp);
 }
 
 /*

@@ -60,7 +60,6 @@ extern struct user_details user_details;
 
 /* XXX - better home for these and extern in header file */
 int tgetpass_flags;
-int user_closefrom = -1;
 const char *list_user, *runas_user, *runas_group;
 
 /*
@@ -109,7 +108,9 @@ static struct sudo_settings {
     { "noninteractive" },
 #define ARG_SUDOEDIT 16
     { "sudoedit" },
-#define NUM_SETTINGS 17
+#define ARG_CLOSEFROM 17
+    { "closefrom" },
+#define NUM_SETTINGS 18
     { NULL }
 };
 
@@ -174,10 +175,11 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    SET(flags, MODE_BACKGROUND);
 		    break;
 		case 'C':
-		    if ((user_closefrom = atoi(optarg)) < 3) {
+		    if (atoi(optarg) < 3) {
 			warningx("the argument to -C must be at least 3");
 			usage(1);
 		    }
+		    sudo_settings[ARG_CLOSEFROM].value = optarg;
 		    break;
 #ifdef HAVE_LOGIN_CAP_H
 		case 'c':

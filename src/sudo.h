@@ -127,6 +127,7 @@ struct command_details {
     int priority;
     int timeout;
     int ngroups;
+    int closefrom;
     GETGROUPS_T *groups;
     const char *command;
     const char *cwd;

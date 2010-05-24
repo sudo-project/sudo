@@ -289,13 +289,20 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     int info_len = 0;
     int rval = FALSE;
 
-    /* refactor so list can use it too */
-
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
         warningx("sudoers specifies that root is not allowed to sudo");
         goto done;
     }    
+
+    /* Check for -C overriding def_closefrom. */
+    if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
+	if (!def_closefrom_override) {
+	    warningx("you are not permitted to use the -C option");
+	    goto done;
+	}
+	def_closefrom = user_closefrom;
+    }
 
     if (sigsetjmp(error_jmp, 1)) {
 	/* error recovery via error(), errorx() or log_error() */
@@ -599,6 +606,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	}
 	command_info[info_len++] = gid_list;
     }
+    if (def_closefrom >= 0)
+	easprintf(&command_info[info_len++], "closefrom=%d", def_closefrom);
 
     /* Must audit before uid change. */
     audit_success(NewArgv);
@@ -1169,7 +1178,12 @@ deserialize_info(char * const settings[], char * const user_info[])
 #define MATCHES(s, v) (strncmp(s, v, sizeof(v) - 1) == 0)
 
     /* Parse command line settings. */
+    user_closefrom = -1;
     for (cur = settings; *cur != NULL; cur++) {
+	if (MATCHES(*cur, "closefrom=")) {
+	    user_closefrom = atoi(*cur + sizeof("closefrom=") - 1);
+	    continue;
+	}
 	if (MATCHES(*cur, "debug_level=")) {
 	    debug_level = atoi(*cur + sizeof("debug_level=") - 1);
 	    continue;

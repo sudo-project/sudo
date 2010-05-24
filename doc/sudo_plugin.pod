@@ -248,6 +248,13 @@ in the I<check_policy> function or return C<-2> with a usage error
 if the plugin does not support I<sudoedit>.  For more information,
 see the I<check_policy> section.
 
+=item closefrom=number
+
+If specified, the user has requested via the C<-C> flag that B<sudo>
+close all files descriptors with a value of I<number> or higher.
+The plugin may optionally pass this, or another value, back in the
+I<command_info> list.
+
 =back
 
 Additional settings may be added in the future so the plugin should
@@ -504,6 +511,11 @@ Set to true when in I<sudoedit> mode.  The plugin may enable
 I<sudoedit> mode even if B<sudo> was not invoked as B<sudoedit>.
 This allows the plugin to perform command substitution and transparently
 enable I<sudoedit> when the user attempts to run an editor.
+
+=item closefrom=number
+
+If specified, B<sudo> will close all files descriptors with a value
+of I<number> or higher.
 
 =back
 

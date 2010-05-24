@@ -62,6 +62,7 @@ struct sudo_user {
     char *krb5_ccname;
     char *display;
     char *askpass;
+    int   closefrom;
     int   ngroups;
     uid_t uid;
     uid_t gid;
@@ -178,6 +179,7 @@ struct sudo_user {
 #define runas_gr		(sudo_user._runas_gr)
 #define user_role		(sudo_user.role)
 #define user_type		(sudo_user.type)
+#define user_closefrom		(sudo_user.closefrom)
 
 /*
  * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
