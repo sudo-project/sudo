@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2009-2010 Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 2008 Dan Walsh <dwalsh@redhat.com>
  *
  * Borrowed heavily from newrole source code
@@ -58,37 +59,40 @@ static int enforcing;
  * This function attempts to revert the relabeling done to the tty.
  * fd		   - referencing the opened ttyn
  * ttyn		   - name of tty to restore
- * tty_context	   - original context of the tty
- * new_tty_context - context tty was relabeled to
  *
  * Returns zero on success, non-zero otherwise
  */
-static int
-restore_tty_label(int fd, const char *ttyn, security_context_t tty_context,
-    security_context_t new_tty_context)
+/* XXX - should be called as part of cleanup() */
+int
+selinux_restore_tty(const char *ttyn)
 {
-    int rc = 0;
+    int fd, rc = 0;
     security_context_t chk_tty_context = NULL;
 
-    if (!ttyn)
-	    goto skip_relabel;
+    if (ttyn == NULL || new_tty_context == NULL)
+	goto skip_relabel;
 
-    if (!new_tty_context)
-	    goto skip_relabel;
+    /* Re-open TTY descriptor */
+    fd = open(ttyn, O_RDWR | O_NONBLOCK);
+    if (fd == -1)
+	error(EXIT_FAILURE, "unable to open %s", ttyn);
+    (void)fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
 
     /* Verify that the tty still has the context set by sudo. */
     if ((rc = fgetfilecon(fd, &chk_tty_context)) < 0) {
-	    warning("unable to fgetfilecon %s", ttyn);
-	    goto skip_relabel;
+	warning("unable to fgetfilecon %s", ttyn);
+	goto skip_relabel;
     }
 
     if ((rc = strcmp(chk_tty_context, new_tty_context))) {
-	    warningx("%s changed labels.", ttyn);
-	    goto skip_relabel;
+	warningx("%s changed labels.", ttyn);
+	goto skip_relabel;
     }
 
     if ((rc = fsetfilecon(fd, tty_context)) < 0)
 	warning("unable to restore context for %s", ttyn);
+
+    close(fd);
 
 skip_relabel:
     freecon(chk_tty_context);
@@ -146,7 +150,7 @@ error:
  * specified role and type.
  */
 security_context_t
-get_exec_context(security_context_t old_context, char *role, char *type)
+get_exec_context(security_context_t old_context, const char *role, const char *type)
 {
     security_context_t new_context = NULL;
     context_t context = NULL;
@@ -211,7 +215,7 @@ error:
  * Set the tty context in preparation for fork/exec.
  */
 void
-selinux_prefork(char *role, char *type, int ttyfd)
+selinux_prefork(const char *role, const char *type, int ttyfd)
 {
     /* Store the caller's SID in old_context. */
     if (getprevcon(&old_context))
@@ -228,17 +232,20 @@ selinux_prefork(char *role, char *type, int ttyfd)
     if (!new_context)
 	error(EXIT_FAILURE, "unable to get exec context");
     
-    ttyfd = relabel_tty(ttyfd, new_context, &tty_context,
-	&new_tty_context, enforcing);
-    if (ttyfd < 0)
-	error(EXIT_FAILURE, "unable to setup tty context for %s", new_context);
-
+    if (ttyfd != -1) {
+	ttyfd = relabel_tty(ttyfd, new_context, &tty_context,
+	    &new_tty_context, enforcing);
+	if (ttyfd < 0)
+	    error(EXIT_FAILURE, "unable to setup tty context for %s",
+		new_context);
 #ifdef DEBUG
-    warningx("your old tty context is %s", tty_context);
-    warningx("your new tty context is %s", new_tty_context);
+	warningx("your old tty context is %s", tty_context);
+	warningx("your new tty context is %s", new_tty_context);
 #endif
+    }
 }
 
+/* XXX - pass in ttyn for audit support */
 void
 selinux_execve(const char *path, char *argv[], char *envp[])
 {
@@ -255,7 +262,7 @@ selinux_execve(const char *path, char *argv[], char *envp[])
     }
 
 #ifdef WITH_AUDIT
-    if (send_audit_message(1, old_context, new_context, user_ttypath)) 
+    if (send_audit_message(1, old_context, new_context, ttyn)) 
 	return;
 #endif
 
@@ -269,6 +276,7 @@ selinux_execve(const char *path, char *argv[], char *envp[])
     warning("%s", path);
 }
 
+#if 0 /* XXX */
 /* 
  * If the program is being run with a different security context we
  * need to go through an intermediary process for the transition to
@@ -301,7 +309,7 @@ selinux_exec(char *role, char *type, char **argv)
     if (childPid < 0) {
 	/* fork failed, no child to worry about */
 	warning("unable to fork");
-	if (restore_tty_label(ttyfd, user_ttypath, tty_context, new_tty_context))
+	if (selinux_restore_tty(user_ttypath);
 	    warningx("unable to restore tty label");
 	exit(EXIT_FAILURE);
     } else if (childPid) {
@@ -316,7 +324,7 @@ selinux_exec(char *role, char *type, char **argv)
 	if (pid == -1)
 	    error(EXIT_FAILURE, "waitpid");
 	
-	if (restore_tty_label(ttyfd, user_ttypath, tty_context, new_tty_context))
+	if (selinux_restore_tty(user_ttypath);
 	    errorx(EXIT_FAILURE, "unable to restore tty label");
 
 	/* Preserve child exit status. */
@@ -348,3 +356,4 @@ selinux_exec(char *role, char *type, char **argv)
 error:
     _exit(EXIT_FAILURE);
 }
+#endif /* XXX */

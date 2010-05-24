@@ -202,6 +202,11 @@ void usage(int) __attribute__((__noreturn__));
 /* gettime.c */
 int gettime(struct timeval *);
 
+/* selinux.c */
+void selinux_execve(const char *path, char *argv[], char *envp[]);
+void selinux_prefork(const char *role, const char *type, int ttyfd);
+int selinux_restore_tty(const char *ttyn);
+
 #ifndef errno
 extern int errno;
 #endif
