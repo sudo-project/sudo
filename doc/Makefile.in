@@ -69,7 +69,7 @@ all: $(DOCS)
 @DEV@	( cd $(srcdir); mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' sudo.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" sudo.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" | perl -p sudo.man.pl >> $@ )
 
 sudo.man: $(srcdir)/sudo.man.in
-	(cd $(top_builddir) && CONFIG_FILES=doc/$@ CONFIG_HEADERS= sh config.status)
+	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 @DEV@sudo.cat: $(srcdir)/sudo.cat
 
@@ -82,7 +82,7 @@ sudo.man: $(srcdir)/sudo.man.in
 @DEV@	( cd $(srcdir); mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' visudo.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" visudo.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@ )
 
 visudo.man: $(srcdir)/visudo.man.in
-	(cd $(top_builddir) && CONFIG_FILES=doc/$@ CONFIG_HEADERS= sh config.status)
+	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 @DEV@visudo.cat: $(srcdir)/visudo.cat
 
@@ -95,7 +95,7 @@ visudo.man: $(srcdir)/visudo.man.in
 @DEV@	( cd $(srcdir); mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' sudoers.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectform --release=$(VERSION) --center="MAINTENANCE COMMANDS" sudoers.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" | perl -p sudoers.man.pl >> $@ )
 
 sudoers.man:: $(srcdir)/sudoers.man.in
-	(cd $(top_builddir) && CONFIG_FILES=doc/$@ CONFIG_HEADERS= sh config.status)
+	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 @DEV@sudoers.cat: $(srcdir)/sudoers.cat
 
@@ -108,7 +108,7 @@ sudoers.man:: $(srcdir)/sudoers.man.in
 @DEV@	( cd $(srcdir); mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' sudoers.ldap.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectform --release=$(VERSION) --center="MAINTENANCE COMMANDS" sudoers.ldap.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@ )
 
 sudoers.ldap.man:: $(srcdir)/sudoers.ldap.man.in
-	(cd $(top_builddir) && CONFIG_FILES=doc/$@ CONFIG_HEADERS= sh config.status)
+	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 @DEV@sudoers.ldap.cat: $(srcdir)/sudoers.ldap.cat
 
@@ -121,7 +121,7 @@ sudoers.ldap.man:: $(srcdir)/sudoers.ldap.man.in
 @DEV@	( cd $(srcdir); mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' sudoreplay.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" sudoreplay.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@ )
 
 sudoreplay.man:: $(srcdir)/sudoreplay.man.in
-	(cd $(top_builddir) && CONFIG_FILES=doc/$@ CONFIG_HEADERS= sh config.status)
+	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 @DEV@sudoreplay.cat: $(srcdir)/sudoreplay.cat
 
@@ -134,7 +134,7 @@ sudoreplay.man:: $(srcdir)/sudoreplay.man.in
 @DEV@	( cd $(srcdir); mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' sudo_plugin.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" sudo_plugin.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@ )
 
 sudo_plugin.man:: $(srcdir)/sudo_plugin.man.in
-	(cd $(top_builddir) && CONFIG_FILES=doc/$@ CONFIG_HEADERS= sh config.status)
+	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 @DEV@sudo_plugin.cat: $(srcdir)/sudo_plugin.cat
 
