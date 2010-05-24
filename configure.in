@@ -1358,9 +1358,9 @@ fi
 dnl
 dnl Find programs we use
 dnl
-AC_CHECK_PROG(UNAMEPROG, uname, uname)
-AC_CHECK_PROG(TRPROG, tr, tr)
-AC_CHECK_PROG(NROFFPROG, nroff, nroff)
+AC_CHECK_PROG(UNAMEPROG, [uname], [uname])
+AC_CHECK_PROG(TRPROG, [tr], [tr])
+AC_CHECK_PROGS(NROFFPROG, [nroff mandoc])
 if test -z "$NROFFPROG"; then
     MANTYPE="cat"
     mansrcdir='$(srcdir)'
