@@ -295,6 +295,7 @@ int sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 void sudoers_io_close(int exit_status, int error);
 int sudoers_io_version(int verbose);
 int sudoers_io_log_output(const char *buf, unsigned int len);
+void io_nextid(void);
 
 /* env.c */
 char **env_get(void);

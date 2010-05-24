@@ -71,7 +71,7 @@ static sigset_t ttyblock;
 static struct timeval last_time;
 static union script_fd io_outfile, io_timfile;
 
-static void
+void
 io_nextid(void)
 {
     struct stat sb;
@@ -197,7 +197,6 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
      * Build a path containing the session id split into two-digit subdirs,
      * so ID 000001 becomes /var/log/sudo-session/00/00/01.
      */
-    io_nextid();
     len = build_idpath(pathbuf, sizeof(pathbuf));
     if (len == -1)
 	return -1;
