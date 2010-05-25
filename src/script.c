@@ -504,24 +504,9 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 #ifdef HAVE_SELINUX
     rbac_enabled = is_selinux_enabled() > 0 && details->selinux_role != NULL;
     if (rbac_enabled) {
-	if (log_io) {
-	    selinux_prefork(details->selinux_role, details->selinux_type,
-		script_fds[SFD_SLAVE]);
-	    /* Re-open slave fd after it has been relabeled */
-	    close(script_fds[SFD_SLAVE]);
-	    script_fds[SFD_SLAVE] = open(slavename, O_RDWR|O_NOCTTY, 0);
-	    if (script_fds[SFD_SLAVE] == -1)
-	    error(1, "cannot open %s", slavename);
-	} else if (user_details.tty != NULL) {
-	    /* XXX - push this down into selinux_prefork */
-	    int ttyfd = open(user_details.tty, O_RDWR|O_NONBLOCK);
-	    if (ttyfd == -1)
-		error(1, "unable to open %s", user_details.tty);
-	    (void)fcntl(ttyfd, F_SETFL, fcntl(ttyfd, F_GETFL, 0) & ~O_NONBLOCK);
-	    selinux_prefork(details->selinux_role, details->selinux_type,
-		ttyfd);
-	    close(ttyfd);
-	}
+	/* Must do SELinux setup before changing uid. */
+	selinux_setup(details->selinux_role, details->selinux_type,
+	    log_io ? slavename : user_details.tty, script_fds[SFD_SLAVE]);
     }
 #endif
 
@@ -877,9 +862,9 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     }
 
 #ifdef HAVE_SELINUX
-    /* If I/O logging the label was on the pty which is now gone. */
-    if (rbac_enabled && !log_io) {
-	if (selinux_restore_tty(user_details.tty) != 0)
+    if (rbac_enabled) {
+	/* This is probably not needed in log_io mode. */
+	if (selinux_restore_tty() != 0)
 	    warningx("unable to restore tty label");
     }
 #endif

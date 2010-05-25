@@ -49,11 +49,15 @@
 #include "sudo.h"
 #include "pathnames.h"
 
-static security_context_t old_context;
-static security_context_t new_context;
-static security_context_t tty_context;
-static security_context_t new_tty_context;
-static int enforcing;
+static struct selinux_state {
+    security_context_t old_context;
+    security_context_t new_context;
+    security_context_t tty_context;
+    security_context_t new_tty_context;
+    const char *ttyn;
+    int ttyfd;
+    int enforcing;
+} se_state;
 
 /*
  * This function attempts to revert the relabeling done to the tty.
@@ -62,41 +66,35 @@ static int enforcing;
  *
  * Returns zero on success, non-zero otherwise
  */
-/* XXX - should be called as part of cleanup() */
+/* XXX - should also be called as part of cleanup() */
 int
-selinux_restore_tty(const char *ttyn)
+selinux_restore_tty(void)
 {
-    int fd, rc = 0;
+    int retval = 0;
     security_context_t chk_tty_context = NULL;
 
-    if (ttyn == NULL || new_tty_context == NULL)
+    if (se_state.ttyfd == -1 || se_state.new_tty_context == NULL)
 	goto skip_relabel;
-
-    /* Re-open TTY descriptor */
-    fd = open(ttyn, O_RDWR | O_NONBLOCK);
-    if (fd == -1)
-	error(EXIT_FAILURE, "unable to open %s", ttyn);
-    (void)fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
 
     /* Verify that the tty still has the context set by sudo. */
-    if ((rc = fgetfilecon(fd, &chk_tty_context)) < 0) {
-	warning("unable to fgetfilecon %s", ttyn);
+    if ((retval = fgetfilecon(se_state.ttyfd, &chk_tty_context)) < 0) {
+	warning("unable to fgetfilecon %s", se_state.ttyn);
 	goto skip_relabel;
     }
 
-    if ((rc = strcmp(chk_tty_context, new_tty_context))) {
-	warningx("%s changed labels.", ttyn);
+    if ((retval = strcmp(chk_tty_context, se_state.new_tty_context))) {
+	warningx("%s changed labels.", se_state.ttyn);
 	goto skip_relabel;
     }
 
-    if ((rc = fsetfilecon(fd, tty_context)) < 0)
-	warning("unable to restore context for %s", ttyn);
-
-    close(fd);
+    if ((retval = fsetfilecon(se_state.ttyfd, se_state.tty_context)) < 0)
+	warning("unable to restore context for %s", se_state.ttyn);
 
 skip_relabel:
+    if (se_state.ttyfd != -1)
+	close(se_state.ttyfd);
     freecon(chk_tty_context);
-    return(rc);
+    return retval;
 }
 
 /*
@@ -108,41 +106,90 @@ skip_relabel:
  * in permissive mode.
  */
 static int
-relabel_tty(int ttyfd, security_context_t new_context,
-    security_context_t *tty_context, security_context_t *new_tty_context,
-    int enforcing)
+relabel_tty(const char *ttyn, int ptyfd)
 {
     security_context_t tty_con = NULL;
     security_context_t new_tty_con = NULL;
 
-    if (fgetfilecon(ttyfd, &tty_con) < 0) {
-	warning("unable to get current tty context, not relabeling tty");
-	if (enforcing)
-	    goto error;
+    se_state.ttyfd = ptyfd;
+
+    /* It is perfectly legal to have no tty. */
+    if (ptyfd == -1 && ttyn == NULL)
+	return 0;
+
+    /* If sudo is not allocating a pty for the command, open current tty. */
+    if (ptyfd == -1) {
+	se_state.ttyfd = open(ttyn, O_RDWR|O_NONBLOCK);
+	if (se_state.ttyfd == -1) {
+	    warning("unable to open %s, not relabeling tty", ttyn);
+	    if (se_state.enforcing)
+		goto bad;
+	}
+	(void)fcntl(se_state.ttyfd, F_SETFL,
+	    fcntl(se_state.ttyfd, F_GETFL, 0) & ~O_NONBLOCK);
     }
 
-    if (tty_con && (security_compute_relabel(new_context, tty_con,
+    if (fgetfilecon(se_state.ttyfd, &tty_con) < 0) {
+	warning("unable to get current tty context, not relabeling tty");
+	if (se_state.enforcing)
+	    goto bad;
+    }
+
+    if (tty_con && (security_compute_relabel(se_state.new_context, tty_con,
 	SECCLASS_CHR_FILE, &new_tty_con) < 0)) {
 	warning("unable to get new tty context, not relabeling tty");
-	if (enforcing)
-	    goto error;
+	if (se_state.enforcing)
+	    goto bad;
     }
 
     if (new_tty_con != NULL) {
-	if (fsetfilecon(ttyfd, new_tty_con) < 0) {
+	if (fsetfilecon(se_state.ttyfd, new_tty_con) < 0) {
 	    warning("unable to set new tty context");
-	    if (enforcing)
-		goto error;
+	    if (se_state.enforcing)
+		goto bad;
 	}
     }
 
-    *tty_context = tty_con;
-    *new_tty_context = new_tty_con;
-    return(0);
+    if (ptyfd != -1) {
+	/* Reopen pty that was relabeled, std{in,out,err} are reset later. */
+	se_state.ttyfd = open(ttyn, O_RDWR|O_NOCTTY, 0);
+	if (se_state.ttyfd == -1) {
+	    warning("cannot open %s", ttyn);
+	    if (se_state.enforcing)
+		goto bad;
+	}
+	dup2(se_state.ttyfd, ptyfd);
+    } else {
+	/* Re-open tty to get new label and reset std{in,out,err} */
+	close(se_state.ttyfd);
+	se_state.ttyfd = open(ttyn, O_RDWR|O_NONBLOCK);
+	if (se_state.ttyfd == -1)
+	    warning("unable to open %s", ttyn);
+	else
+	    (void)fcntl(se_state.ttyfd, F_SETFL,
+		fcntl(se_state.ttyfd, F_GETFL, 0) & ~O_NONBLOCK);
+	if (isatty(STDIN_FILENO))
+	    dup2(se_state.ttyfd, STDIN_FILENO);
+	if (isatty(STDOUT_FILENO))
+	    dup2(se_state.ttyfd, STDOUT_FILENO);
+	if (isatty(STDERR_FILENO))
+	    dup2(se_state.ttyfd, STDERR_FILENO);
+    }
+    /* Retain se_state.ttyfd so we can restore label when command finishes. */
+    (void)fcntl(se_state.ttyfd, F_SETFD, FD_CLOEXEC);
 
-error:
+    se_state.ttyn = ttyn;
+    se_state.tty_context = tty_con;
+    se_state.new_tty_context = new_tty_con;
+    return 0;
+
+bad:
+    if (se_state.ttyfd != -1 && se_state.ttyfd != ptyfd) {
+	close(se_state.ttyfd);
+	se_state.ttyfd = -1;
+    }
     freecon(tty_con);
-    return(-1);
+    return -1;
 }
 
 /*
@@ -159,12 +206,12 @@ get_exec_context(security_context_t old_context, const char *role, const char *t
     /* We must have a role, the type is optional (we can use the default). */
     if (!role) {
 	warningx("you must specify a role.");
-	return(NULL);
+	return NULL;
     }
     if (!type) {
 	if (get_default_type(role, &typebuf)) {
 	    warningx("unable to get default type");
-	    return(NULL);
+	    return NULL;
 	}
 	type = typebuf;
     }
@@ -181,11 +228,11 @@ get_exec_context(security_context_t old_context, const char *role, const char *t
      */
     if (context_role_set(context, role)) {
 	warningx("failed to set new role %s", role);
-	goto error;
+	goto bad;
     }
     if (context_type_set(context, type)) {
 	warningx("failed to set new type %s", type);
-	goto error;
+	goto bad;
     }
       
     /*
@@ -194,7 +241,7 @@ get_exec_context(security_context_t old_context, const char *role, const char *t
     new_context = estrdup(context_str(context));
     if (security_check_context(new_context) < 0) {
 	warningx("%s is not a valid context", new_context);
-	goto error;
+	goto bad;
     }
 
 #ifdef DEBUG
@@ -202,158 +249,86 @@ get_exec_context(security_context_t old_context, const char *role, const char *t
 #endif
 
     context_free(context);
-    return(new_context);
+    return new_context;
 
-error:
+bad:
     free(typebuf);
     context_free(context);
     freecon(new_context);
-    return(NULL);
+    return NULL;
 }
 
 /* 
- * Set the tty context in preparation for fork/exec.
+ * Set the exec and tty contexts in preparation for fork/exec.
+ * Must run as root, before the uid change.
+ * If ptyfd is not -1, it indicates we are running
+ * in a pty and do not need to reset std{in,out,err}.
  */
 void
-selinux_prefork(const char *role, const char *type, int ttyfd)
+selinux_setup(const char *role, const char *type, const char *ttyn,
+    int ptyfd)
 {
     /* Store the caller's SID in old_context. */
-    if (getprevcon(&old_context))
+    if (getprevcon(&se_state.old_context))
 	error(EXIT_FAILURE, "failed to get old_context");
 
-    enforcing = security_getenforce();
-    if (enforcing < 0)
+    se_state.enforcing = security_getenforce();
+    if (se_state.enforcing < 0)
 	error(EXIT_FAILURE, "unable to determine enforcing mode.");
 
 #ifdef DEBUG
-    warningx("your old context was %s", old_context);
+    warningx("your old context was %s", se_state.old_context);
 #endif
-    new_context = get_exec_context(old_context, role, type);
-    if (!new_context)
+    se_state.new_context = get_exec_context(se_state.old_context, role, type);
+    if (!se_state.new_context)
 	error(EXIT_FAILURE, "unable to get exec context");
     
-    if (ttyfd != -1) {
-	ttyfd = relabel_tty(ttyfd, new_context, &tty_context,
-	    &new_tty_context, enforcing);
-	if (ttyfd < 0)
-	    error(EXIT_FAILURE, "unable to setup tty context for %s",
-		new_context);
+    if (relabel_tty(ttyn, ptyfd) < 0)
+	error(EXIT_FAILURE, "unable to setup tty context for %s", se_state.new_context);
+
 #ifdef DEBUG
-	warningx("your old tty context is %s", tty_context);
-	warningx("your new tty context is %s", new_tty_context);
-#endif
+    if (se_state.ttyfd != -1) {
+	warningx("your old tty context is %s", se_state.tty_context);
+	warningx("your new tty context is %s", se_state.new_tty_context);
     }
+#endif
+
 }
 
-/* XXX - pass in ttyn for audit support */
 void
 selinux_execve(const char *path, char *argv[], char *envp[])
 {
-    if (setexeccon(new_context)) {
-	warning("unable to set exec context to %s", new_context);
-	if (enforcing)
+    char **nargv;
+    int argc, serrno;
+
+    if (setexeccon(se_state.new_context)) {
+	warning("unable to set exec context to %s", se_state.new_context);
+	if (se_state.enforcing)
 	    return;
     }
 
-    if (setkeycreatecon(new_context)) {
-	warning("unable to set key creation context to %s", new_context);
-	if (enforcing)
+    if (setkeycreatecon(se_state.new_context)) {
+	warning("unable to set key creation context to %s", se_state.new_context);
+	if (se_state.enforcing)
 	    return;
     }
 
 #ifdef WITH_AUDIT
-    if (send_audit_message(1, old_context, new_context, ttyn)) 
+    if (send_audit_message(1, se_state.old_context, se_state.new_context, se_state.ttyn)) 
 	return;
 #endif
 
-    /* We use the "spare" slot in argv to store sesh. */
-    /* XXX - no longer can do this XXX */
-    --argv;
-    argv[0] = *argv[1] == '-' ? "-sesh" : "sesh";
-    argv[1] = (char *)path;
+    for (argc = 0; argv[argc] != NULL; argc++)
+	continue;
 
-    execve(_PATH_SUDO_SESH, argv, envp);
-    warning("%s", path);
+    /* Build new argv with sesh as argv[0]. */
+    nargv = emalloc2(argc + 2, sizeof(char *));
+    nargv[0] = *argv[0] == '-' ? "-sesh" : "sesh";
+    nargv[1] = (char *)path;
+    memcpy(&nargv[2], &argv[1], argc * sizeof(char *)); /* copies NULL */
+
+    execve(_PATH_SUDO_SESH, nargv, envp);
+    serrno = errno;
+    free(nargv);
+    errno = serrno;
 }
-
-#if 0 /* XXX */
-/* 
- * If the program is being run with a different security context we
- * need to go through an intermediary process for the transition to
- * be allowed by the policy.  We use the "sesh" shell for this, which
- * will simply execute the command pass to it on the command line.
- */
-void
-selinux_exec(char *role, char *type, char **argv)
-{
-    pid_t childPid;
-    int ttyfd;
-
-    /* Must have a tty. */
-    if (user_ttypath == NULL || *user_ttypath == '\0')
-	error(EXIT_FAILURE, "unable to determine tty");
-
-    /* Re-open TTY descriptor */
-    ttyfd = open(user_ttypath, O_RDWR | O_NONBLOCK);
-    if (ttyfd == -1)
-	error(EXIT_FAILURE, "unable to open %s", user_ttypath);
-    (void)fcntl(ttyfd, F_SETFL, fcntl(ttyfd, F_GETFL, 0) & ~O_NONBLOCK);
-
-    /*
-     * Get the old and new security and tty contexts, sets the new
-     * tty context on ttyfd.
-     */
-    selinux_prefork(role, type, ttyfd);
-
-    childPid = fork();
-    if (childPid < 0) {
-	/* fork failed, no child to worry about */
-	warning("unable to fork");
-	if (selinux_restore_tty(user_ttypath);
-	    warningx("unable to restore tty label");
-	exit(EXIT_FAILURE);
-    } else if (childPid) {
-	pid_t pid;
-	int status;
-	
-	/* Parent, wait for child to finish. */
-	do {
-		pid = waitpid(childPid, &status, 0);
-	} while (pid == -1 && errno == EINTR);
-
-	if (pid == -1)
-	    error(EXIT_FAILURE, "waitpid");
-	
-	if (selinux_restore_tty(user_ttypath);
-	    errorx(EXIT_FAILURE, "unable to restore tty label");
-
-	/* Preserve child exit status. */
-	if (WIFEXITED(status))
-	    exit(WEXITSTATUS(status));
-	exit(EXIT_FAILURE);
-    }
-    /* Child */
-    /* Close the tty and reopen descriptors 0 through 2 */
-    if (close(ttyfd) || close(STDIN_FILENO) || close(STDOUT_FILENO) ||
-	close(STDERR_FILENO)) {
-	warning("could not close descriptors");
-	goto error;
-    }
-    ttyfd = open(user_ttypath, O_RDONLY | O_NONBLOCK);
-    if (ttyfd != STDIN_FILENO)
-	goto error;
-    fcntl(ttyfd, F_SETFL, fcntl(ttyfd, F_GETFL, 0) & ~O_NONBLOCK);
-    ttyfd = open(user_ttypath, O_RDWR | O_NONBLOCK);
-    if (ttyfd != STDOUT_FILENO)
-	goto error;
-    fcntl(ttyfd, F_SETFL, fcntl(ttyfd, F_GETFL, 0) & ~O_NONBLOCK);
-    ttyfd = dup(STDOUT_FILENO);
-    if (ttyfd != STDERR_FILENO)
-	goto error;
-
-    selinux_execv(safe_cmnd, argv);
-
-error:
-    _exit(EXIT_FAILURE);
-}
-#endif /* XXX */

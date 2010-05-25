@@ -204,8 +204,9 @@ int gettime(struct timeval *);
 
 /* selinux.c */
 void selinux_execve(const char *path, char *argv[], char *envp[]);
-void selinux_prefork(const char *role, const char *type, int ttyfd);
-int selinux_restore_tty(const char *ttyn);
+void selinux_setup(const char *role, const char *type, const char *ttyn,
+    int ttyfd);
+int selinux_restore_tty(void);
 
 #ifndef errno
 extern int errno;
