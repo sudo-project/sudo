@@ -275,9 +275,11 @@ See L<"SUDOERS OPTIONS"> for a list of supported Defaults parameters.
  Cmnd_Spec_List ::= Cmnd_Spec |
 		    Cmnd_Spec ',' Cmnd_Spec_List
 
- Cmnd_Spec ::= Runas_Spec? Tag_Spec* Cmnd
+ Cmnd_Spec ::= Runas_Spec? SELinux_Spec? Tag_Spec* Cmnd
 
  Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
+
+ SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
  Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
 	       'SETENV:' | 'NOSETENV:' | 'TRANSCRIPT:' | 'NOTRANSCRIPT:')
@@ -337,6 +339,14 @@ only the group will be set, the command still runs as user B<tcm>.
 
  tcm	boulder = (:dialer) /usr/bin/tip, /usr/bin/cu, \
 	/usr/local/bin/minicom
+
+=head2 SELinux_Spec
+
+On systems with SELinux support, I<sudoers> entries may optionally have
+an SELinux role and/or type associated with a command.  If a role or
+type is specified with the command it will override any default values
+specified in I<sudoers>.  A role or type specified on the command line,
+however, will supercede the values in I<sudoers>.
 
 =head2 Tag_Spec
 
