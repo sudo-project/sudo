@@ -608,6 +608,12 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
     if (def_closefrom >= 0)
 	easprintf(&command_info[info_len++], "closefrom=%d", def_closefrom);
+#ifdef HAVE_SELINUX
+    if (user_role != NULL)
+	command_info[info_len++] = fmt_string("selinux_role", user_role);
+    if (user_type != NULL)
+	command_info[info_len++] = fmt_string("selinux_type", user_type);
+#endif /* HAVE_SELINUX */
 
     /* Must audit before uid change. */
     audit_success(NewArgv);
