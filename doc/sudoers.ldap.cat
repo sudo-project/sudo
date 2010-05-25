@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.3b2                 December 19, 2009                       1
+1.8.0a1                    May 25, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.3b2                 December 19, 2009                       2
+1.8.0a1                    May 25, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.3b2                 December 19, 2009                       3
+1.8.0a1                    May 25, 2010                         3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.3b2                 December 19, 2009                       4
+1.8.0a1                    May 25, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.3b2                 December 19, 2009                       5
+1.8.0a1                    May 25, 2010                         5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.3b2                 December 19, 2009                       6
+1.8.0a1                    May 25, 2010                         6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.3b2                 December 19, 2009                       7
+1.8.0a1                    May 25, 2010                         7
 
 
 
@@ -523,7 +523,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.3b2                 December 19, 2009                       8
+1.8.0a1                    May 25, 2010                         8
 
 
 
@@ -589,7 +589,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.7.3b2                 December 19, 2009                       9
+1.8.0a1                    May 25, 2010                         9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.3b2                 December 19, 2009                      10
+1.8.0a1                    May 25, 2010                        10
 
 
 
@@ -721,7 +721,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.3b2                 December 19, 2009                      11
+1.8.0a1                    May 25, 2010                        11
 
 
 
@@ -745,7 +745,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            )
 
 SSEEEE AALLSSOO
-       _l_d_a_p_._c_o_n_f(4), _s_u_d_o_e_r_s(5)
+       _l_d_a_p_._c_o_n_f(4), _s_u_d_o_e_r_s(4)
 
 CCAAVVEEAATTSS
        The way that _s_u_d_o_e_r_s is parsed differs between Note that there are
@@ -787,6 +787,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.3b2                 December 19, 2009                      12
+1.8.0a1                    May 25, 2010                        12
 
 

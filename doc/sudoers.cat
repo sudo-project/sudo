@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0a1                   April  7, 2010                        1
+1.8.0a1                    May 25, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                        2
+1.8.0a1                    May 25, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                        3
+1.8.0a1                    May 25, 2010                         3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                        4
+1.8.0a1                    May 25, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                        5
+1.8.0a1                    May 25, 2010                         5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                        6
+1.8.0a1                    May 25, 2010                         6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                        7
+1.8.0a1                    May 25, 2010                         7
 
 
 
@@ -523,7 +523,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                        8
+1.8.0a1                    May 25, 2010                         8
 
 
 
@@ -589,7 +589,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
 
 
-1.8.0a1                   April  7, 2010                        9
+1.8.0a1                    May 25, 2010                         9
 
 
 
@@ -615,7 +615,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        alternative is to place a colon-separated list of
                        editors in the editor variable.  vviissuuddoo will then only
                        use the EDITOR or VISUAL if they match a value
-                       specified in editor.  This flag is _o_n by default.
+                       specified in editor.  This flag is _o_f_f by default.
 
        env_reset       If set, ssuuddoo will reset the environment to only contain
                        the LOGNAME, SHELL, USER, USERNAME and the SUDO_*
@@ -655,7 +655,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                       10
+1.8.0a1                    May 25, 2010                        10
 
 
 
@@ -675,7 +675,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        ignore_dot      If set, ssuuddoo will ignore '.' or '' (current dir) in the
                        PATH environment variable; the PATH itself is not
-                       modified.  This flag is _o_n by default.
+                       modified.  This flag is _o_f_f by default.
 
        ignore_local_sudoers
                        If set via LDAP, parsing of _/_e_t_c_/_s_u_d_o_e_r_s will be
@@ -691,7 +691,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        _o_f_f by default.
 
        insults         If set, ssuuddoo will insult users when they enter an
-                       incorrect password.  This flag is _o_n by default.
+                       incorrect password.  This flag is _o_f_f by default.
 
        log_host        If set, the host name will be logged in the (non-
                        syslog) ssuuddoo log file.  This flag is _o_f_f by default.
@@ -721,7 +721,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                       11
+1.8.0a1                    May 25, 2010                        11
 
 
 
@@ -758,10 +758,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        passprompt_override
                        The password prompt specified by _p_a_s_s_p_r_o_m_p_t will
-                       normally only be used if the password prompt provided by
-                       systems such as PAM matches the string "Password:".  If
-                       _p_a_s_s_p_r_o_m_p_t___o_v_e_r_r_i_d_e is set, _p_a_s_s_p_r_o_m_p_t will always be
-                       used.  This flag is _o_f_f by default.
+                       normally only be used if the password prompt provided
+                       by systems such as PAM matches the string "Password:".
+                       If _p_a_s_s_p_r_o_m_p_t___o_v_e_r_r_i_d_e is set, _p_a_s_s_p_r_o_m_p_t will always
+                       be used.  This flag is _o_f_f by default.
 
        preserve_groups By default, ssuuddoo will initialize the group vector to
                        the list of groups the target user is in.  When
@@ -787,7 +787,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                       12
+1.8.0a1                    May 25, 2010                        12
 
 
 
@@ -853,7 +853,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                       13
+1.8.0a1                    May 25, 2010                        13
 
 
 
@@ -919,7 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                       14
+1.8.0a1                    May 25, 2010                        14
 
 
 
@@ -985,7 +985,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                       15
+1.8.0a1                    May 25, 2010                        15
 
 
 
@@ -1051,7 +1051,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                       16
+1.8.0a1                    May 25, 2010                        16
 
 
 
@@ -1117,7 +1117,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                       17
+1.8.0a1                    May 25, 2010                        17
 
 
 
@@ -1183,7 +1183,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                       18
+1.8.0a1                    May 25, 2010                        18
 
 
 
@@ -1196,7 +1196,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    option is not set by default.
 
        syslog      Syslog facility if syslog is being used for logging (negate
-                   to disable syslog logging).  Defaults to authpriv.
+                   to disable syslog logging).  Defaults to local2.
 
        verifypw    This option controls when a password will be required when
                    a user runs ssuuddoo with the --vv option.  It has the following
@@ -1249,7 +1249,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                       19
+1.8.0a1                    May 25, 2010                        19
 
 
 
@@ -1315,7 +1315,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.8.0a1                   April  7, 2010                       20
+1.8.0a1                    May 25, 2010                        20
 
 
 
@@ -1381,7 +1381,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                       21
+1.8.0a1                    May 25, 2010                        21
 
 
 
@@ -1447,7 +1447,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                       22
+1.8.0a1                    May 25, 2010                        22
 
 
 
@@ -1513,7 +1513,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.8.0a1                   April  7, 2010                       23
+1.8.0a1                    May 25, 2010                        23
 
 
 
@@ -1579,7 +1579,7 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 
 
-1.8.0a1                   April  7, 2010                       24
+1.8.0a1                    May 25, 2010                        24
 
 
 
@@ -1616,7 +1616,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        approach is to give the user permission to run ssuuddooeeddiitt.
 
 SSEEEE AALLSSOO
-       _r_s_h(1), _s_u(1), _f_n_m_a_t_c_h(3), _g_l_o_b(3), _s_u_d_o(1m), _v_i_s_u_d_o(8)
+       _r_s_h(1), _s_u(1), _f_n_m_a_t_c_h(3), _g_l_o_b(3), _s_u_d_o(1m), _v_i_s_u_d_o(1m)
 
 CCAAVVEEAATTSS
        The _s_u_d_o_e_r_s file should aallwwaayyss be edited by the vviissuuddoo command which
@@ -1645,7 +1645,7 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.0a1                   April  7, 2010                       25
+1.8.0a1                    May 25, 2010                        25
 
 
 
@@ -1711,6 +1711,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0a1                   April  7, 2010                       26
+1.8.0a1                    May 25, 2010                        26
 
 

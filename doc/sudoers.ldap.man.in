@@ -140,7 +140,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "December 19, 2009" "1.7.3b2" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "May 25, 2010" "1.8.0a1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -790,7 +790,7 @@ schema directory (e.g. \fI/etc/openldap/schema\fR), add the proper
 .Ve
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fIldap.conf\fR\|(@mansectform@), \fIsudoers\fR\|(5)
+\&\fIldap.conf\fR\|(@mansectform@), \fIsudoers\fR\|(@mansectform@)
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 The way that \fIsudoers\fR is parsed differs between Note that there

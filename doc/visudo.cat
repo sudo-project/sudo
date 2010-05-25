@@ -61,7 +61,7 @@ OOPPTTIIOONNSS
 
 
 
-1.7.3b2                 December 19, 2009                       1
+1.8.0a1                    May 25, 2010                         1
 
 
 
@@ -120,14 +120,14 @@ DDIIAAGGNNOOSSTTIICCSS
            --ss (strict) mode this is an error, not a warning.
 
 SSEEEE AALLSSOO
-       _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(8)
+       _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(1m)
 
 AAUUTTHHOORR
        Many people have worked on _s_u_d_o over the years; this version of vviissuuddoo
 
 
 
-1.7.3b2                 December 19, 2009                       2
+1.8.0a1                    May 25, 2010                         2
 
 
 
@@ -193,6 +193,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.3b2                 December 19, 2009                       3
+1.8.0a1                    May 25, 2010                         3
 
 

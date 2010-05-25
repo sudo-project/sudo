@@ -144,7 +144,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "December 19, 2009" "1.7.3b2" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "May 25, 2010" "1.8.0a1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -268,7 +268,7 @@ used.  You may wish to comment out or remove the unused alias.  In
 \&\fB\-s\fR (strict) mode this is an error, not a warning.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fIvi\fR\|(1), \fIsudoers\fR\|(@mansectform@), \fIsudo\fR\|(@mansectsu@), \fIvipw\fR\|(8)
+\&\fIvi\fR\|(1), \fIsudoers\fR\|(@mansectform@), \fIsudo\fR\|(@mansectsu@), \fIvipw\fR\|(@mansectsu@)
 .SH "AUTHOR"
 .IX Header "AUTHOR"
 Many people have worked on \fIsudo\fR over the years; this version of

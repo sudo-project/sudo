@@ -2811,9 +2811,9 @@ PROGS="sudo"
 : ${SUDOERS_GID='0'}
 DEV="#"
 LDAP="#"
-BAMAN='.\" '
-LCMAN='.\" '
-SEMAN='.\" '
+BAMAN=0
+LCMAN=0
+SEMAN=0
 ZLIB=
 AUTH_OBJS=
 AUTH_REG=
@@ -5421,7 +5421,7 @@ if test "${with_selinux+set}" = set; then :
 		SUDO_LIBS="${SUDO_LIBS} -lselinux"
 		SUDO_OBJS="${SUDO_OBJS} selinux.o"
 		PROGS="${PROGS} sesh"
-		SEMAN=""
+		SEMAN=1
 		;;
     no)		;;
     *)		as_fn_error "\"--with-selinux does not take an argument.\"" "$LINENO" 5
@@ -13969,7 +13969,7 @@ if test "x$ac_cv_header_login_cap_h" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_LOGIN_CAP_H 1
 _ACEOF
- LOGINCAP_USAGE='[-c class|-] '; LCMAN=""
+ LOGINCAP_USAGE='[-c class|-] '; LCMAN=1
 	case "$OS" in
 	    freebsd|netbsd)	SUDO_LIBS="${SUDO_LIBS} -lutil"
 	    ;;
@@ -16143,7 +16143,7 @@ if test "x$ac_cv_header_bsd_auth_h" = x""yes; then :
 
 	AUTH_OBJS="$AUTH_OBJS bsdauth.lo"
 	BSDAUTH_USAGE='[-a auth_type] '
-	AUTH_EXCL=BSD_AUTH; BAMAN=""
+	AUTH_EXCL=BSD_AUTH; BAMAN=1
 else
   as_fn_error "BSD authentication was specified but bsd_auth.h could not be found" "$LINENO" 5
 fi
