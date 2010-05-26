@@ -791,6 +791,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		    cstat->type = CMD_ERRNO;
 		    cstat->val = errno;
 		}
+		break;
 	    }
 	    if (cstat->type == CMD_WSTATUS) {
 		if (WIFSTOPPED(cstat->val)) {
@@ -1171,19 +1172,21 @@ script_child(struct command_details *details, char *argv[], char *envp[],
 	    errpipe[0] = -1;
 	}
 	if (FD_ISSET(backchannel, fdsr)) {
+	    struct command_status cstmp;
+
 	    /* read command from backchannel, should be a signal */
-	    n = recv(backchannel, &cstat, sizeof(cstat), 0);
+	    n = recv(backchannel, &cstmp, sizeof(cstmp), 0);
 	    if (n == -1) {
 		if (errno == EINTR)
 		    continue;
 		warning("error reading from socketpair");
 		goto done;
 	    }
-	    if (cstat.type != CMD_SIGNO) {
-		warningx("unexpected reply type on backchannel: %d", cstat.type);
+	    if (cstmp.type != CMD_SIGNO) {
+		warningx("unexpected reply type on backchannel: %d", cstmp.type);
 		continue;
 	    }
-	    deliver_signal(child, cstat.val);
+	    deliver_signal(child, cstmp.val);
 	}
     }
 
