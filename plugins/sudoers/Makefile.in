@@ -140,6 +140,11 @@ all: sudoers.la visudo sudoreplay testsudoers
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
 
+# Prevent default rules from building .c files from .l and .y files
+.l.c:
+
+.y.c:
+
 libsudoers.la: $(LIBSUDOERS_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LIBSUDOERS_OBJS) -no-install
 
@@ -159,28 +164,28 @@ testsudoers: $(TEST_OBJS)
 @DEV@GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate.c
 
 # Uncomment the lines before -@true if you intend to modify gram.y
-gram.c gram.h: $(srcdir)/gram.y
+$(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y
 @DEV@	$(YACC) -d $(srcdir)/gram.y
-@DEV@	mv -f y.tab.c gram.c
-@DEV@	mv -f y.tab.h gram.h
+@DEV@	mv -f y.tab.c $(devdir)/gram.c
+@DEV@	mv -f y.tab.h $(devdir)/gram.h
 	-@true
 
 # Uncomment the lines before -@true if you intend to modify toke.l
-toke.c: $(srcdir)/toke.l
+$(devdir)/toke.c: $(srcdir)/toke.l
 @DEV@	$(FLEX) $(srcdir)/toke.l
-@DEV@	mv -f lex.yy.c toke.c
+@DEV@	mv -f lex.yy.c $(devdir)/toke.c
 	-@true
 
 # Uncomment the lines before -@true if you intend to modify getdate.y
-getdate.c: $(srcdir)/getdate.y
+$(devdir)/getdate.c: $(srcdir)/getdate.y
 @DEV@	echo "expect 10 shift/reduce conflicts"
 @DEV@	$(YACC) $(srcdir)/getdate.y
-@DEV@	mv -f y.tab.c getdate.c
+@DEV@	mv -f y.tab.c $(devdir)/getdate.c
 	-@true
 
 # Uncomment the following if you intend to modify def_data.in
-@DEV@def_data.c def_data.h: $(srcdir)/def_data.in
-@DEV@	perl $(srcdir)/mkdefaults -o def_data $(srcdir)/def_data.in
+@DEV@$(devdir)/def_data.c $(devdir)/def_data.h: $(srcdir)/def_data.in
+@DEV@	perl $(srcdir)/mkdefaults -o $(devdir)/def_data $(srcdir)/def_data.in
 
 # Sudoers dependencies
 alias.lo: $(srcdir)/alias.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/redblack.h
@@ -188,25 +193,25 @@ audit.lo: audit.c $(SUDODEP)
 bsm_audit.lo: bsm_audit.c $(SUDODEP) $(srcdir)/bsm_audit.h
 boottime.lo: $(srcdir)/boottime.c $(top_builddir)/config.h
 check.lo: $(srcdir)/check.c $(SUDODEP)
-defaults.lo: $(srcdir)/defaults.c $(SUDODEP) $(srcdir)/def_data.c $(authdir)/sudo_auth.h gram.h
+defaults.lo: $(srcdir)/defaults.c $(SUDODEP) $(devdir)/def_data.c $(authdir)/sudo_auth.h $(devdir)/gram.h
 env.lo: $(srcdir)/env.c $(SUDODEP)
 find_path.lo: $(srcdir)/find_path.c $(SUDODEP)
 getspwuid.lo: $(srcdir)/getspwuid.c $(SUDODEP)
 goodpath.lo: $(srcdir)/goodpath.c $(SUDODEP)
-gram.lo: gram.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h gram.h
+gram.lo: $(devdir)/gram.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir)/gram.h
 interfaces.lo: $(srcdir)/interfaces.c $(SUDODEP) $(srcdir)/interfaces.h
 iolog.lo: $(srcdir)/iolog.c $(SUDODEP)
 ldap.lo: $(srcdir)/ldap.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h
 logging.lo: $(srcdir)/logging.c $(SUDODEP)
-match.lo: $(srcdir)/match.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/interfaces.h gram.h
-parse.lo: $(srcdir)/parse.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h gram.h
+match.lo: $(srcdir)/match.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/interfaces.h $(devdir)/gram.h
+parse.lo: $(srcdir)/parse.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir)/gram.h
 pwutil.lo: $(srcdir)/pwutil.c $(SUDODEP)
 redblack.lo: $(srcdir)/redblack.c $(SUDODEP) $(srcdir)/redblack.h
 set_perms.lo: $(srcdir)/set_perms.c $(SUDODEP)
 sudo_nss.lo: $(srcdir)/sudo_nss.c $(SUDODEP)
 sudoers.lo: $(srcdir)/sudoers.c $(SUDODEP) $(srcdir)/interfaces.h
 timestr.lo: $(srcdir)/timestr.c $(incdir)/compat.h $(top_builddir)/config.h
-toke.lo: toke.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h gram.h
+toke.lo: $(devdir)/toke.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir)/gram.h
 tsgetgrpw.lo: $(srcdir)/tsgetgrpw.c $(SUDODEP)
 vasgroups.lo: $(srcdir)/vasgroups.c $(srcdir)/nonunix.h $(SUDODEP)
 plugin_error.lo: $(srcdir)/plugin_error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
@@ -261,7 +266,7 @@ error.c: $(top_srcdir)/src/error.c
 error.o: error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
 fileops.o: fileops.lo
 find_path.o: find_path.lo
-getdate.o: getdate.c $(incdir)/compat.h $(top_builddir)/config.h
+getdate.o: $(devdir)/getdate.c $(incdir)/compat.h $(top_builddir)/config.h
 gettime.o: gettime.lo
 goodpath.o: goodpath.lo
 interfaces.o: interfaces.lo
@@ -269,9 +274,9 @@ sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/alloc.h $(incdir)/compat.h $(incd
 term.c: $(top_srcdir)/src/term.c
 	@$(LN_S) -f $(top_srcdir)/src/$@ $@
 term.o: term.c $(incdir)/compat.h $(top_builddir)/config.h
-testsudoers.o: $(srcdir)/testsudoers.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/interfaces.h gram.h
+testsudoers.o: $(srcdir)/testsudoers.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/interfaces.h $(devdir)/gram.h
 tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(SUDODEP)
-visudo.o: $(srcdir)/visudo.c $(SUDODEP) gram.h
+visudo.o: $(srcdir)/visudo.c $(SUDODEP) $(devdir)/gram.h
 
 install: install-dirs install-plugin install-binaries install-sudoers
 
