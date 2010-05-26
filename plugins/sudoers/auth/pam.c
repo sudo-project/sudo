@@ -81,7 +81,7 @@ static int gotintr;
 #define PAM_DATA_SILENT	0
 #endif
 
-static pam_handle_t *pamh;	/* global due to pam_prep_user() */
+static pam_handle_t *pamh;
 
 int
 pam_init(pw, promptp, auth)
@@ -189,7 +189,7 @@ pam_cleanup(pw, auth)
 {
     int *pam_status = (int *) auth->data;
 
-    /* If successful, we can't close the session until pam_prep_user() */
+    /* If successful, we can't close the session until pam_end_session() */
     if (auth->status == AUTH_SUCCESS)
 	return(AUTH_SUCCESS);
 
@@ -198,10 +198,11 @@ pam_cleanup(pw, auth)
 }
 
 int
-pam_prep_user(pw)
+pam_begin_session(pw, auth)
     struct passwd *pw;
+    sudo_auth *auth;
 {
-    int eval;
+    int status;
 
     if (pamh == NULL)
 	pam_init(pw, NULL, NULL);
@@ -229,17 +230,25 @@ pam_prep_user(pw)
      * can at least cause pam_limits to be run by opening and then
      * immediately closing the session.
      */
-    if ((eval = pam_open_session(pamh, 0)) != PAM_SUCCESS) {
-	(void) pam_end(pamh, eval | PAM_DATA_SILENT);
-	return(AUTH_FAILURE);
-    }
+    status = pam_open_session(pamh, 0);
+    if (status != PAM_SUCCESS)
+	(void) pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
+#endif
+    return(status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
+}
+
+int
+pam_end_session(auth)
+    sudo_auth *auth;
+{
+    int status;
+
+#ifndef NO_PAM_SESSION
     (void) pam_close_session(pamh, 0);
 #endif
 
-    if (pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT) == PAM_SUCCESS)
-	return(AUTH_SUCCESS);
-    else
-	return(AUTH_FAILURE);
+    status = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
+    return(status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
 }
 
 /*

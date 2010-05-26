@@ -60,9 +60,6 @@
 /*
  * Prototypes
  */
-#if 0
-static void runas_setup(void);
-#endif
 static void runas_setgroups(void);
 
 /*
@@ -969,51 +966,3 @@ runas_setgroups()
 }
 
 #endif /* HAVE_INITGROUPS */
-
-#if 0
-static void
-runas_setup()
-{
-    gid_t gid;
-#ifdef HAVE_LOGIN_CAP_H
-    int flags;
-    extern login_cap_t *lc;
-#endif
-
-    if (runas_pw->pw_name != NULL) {
-	gid = runas_gr ? runas_gr->gr_gid : runas_pw->pw_gid;
-#ifdef HAVE_GETUSERATTR
-	aix_setlimits(runas_pw->pw_name);
-#endif
-#ifdef HAVE_PAM
-	/* XXX - move this */
-	pam_prep_user(runas_pw);
-#endif /* HAVE_PAM */
-
-#ifdef HAVE_LOGIN_CAP_H
-	if (def_use_loginclass) {
-	    /*
-             * We only use setusercontext() to set the nice value and rlimits.
-	     */
-	    flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
-	    if (setusercontext(lc, runas_pw, runas_pw->pw_uid, flags)) {
-		if (runas_pw->pw_uid != ROOT_UID)
-		    error(1, "unable to set user context");
-		else
-		    warning("unable to set user context");
-	    }
-	}
-#endif /* HAVE_LOGIN_CAP_H */
-	/*
-	 * Initialize group vector
-	 */
-	runas_setgroups();
-#ifdef HAVE_SETEUID
-	if (setegid(gid))
-	    warning("cannot set egid to runas gid");
-#endif
-	if (setgid(gid))
-	    warning("cannot set gid to runas gid");
-    }
-}
-#endif

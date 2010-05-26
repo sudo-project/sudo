@@ -276,6 +276,7 @@ sudoers_policy_close(int exit_status, int error_code)
     /* We do not currently log the exit status. */
     if (error_code)
 	warningx("unable to execute %s: %s", safe_cmnd, strerror(error_code));
+    end_session();
 }
 
 static int
@@ -626,6 +627,15 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     rval = TRUE;
 
     restore_perms();
+
+    /*
+     * Ideally we would like to do session setup (currently only PAM)
+     * from inside sudo itself, but this should be close enough.
+     */
+    if (ISSET(sudo_mode, MODE_RUN))
+	rval = begin_session(runas_pw);
+    if (ISSET(sudo_mode, MODE_EDIT))
+	rval = begin_session(sudo_user.pw);
 
 done:
     return rval;

@@ -32,6 +32,8 @@ typedef struct sudo_auth {
     int (*setup)(struct passwd *pw, char **prompt, struct sudo_auth *auth);
     int (*verify)(struct passwd *pw, char *p, struct sudo_auth *auth);
     int (*cleanup)(struct passwd *pw, struct sudo_auth *auth);
+    int (*begin_session)(struct passwd *pw, struct sudo_auth *auth);
+    int (*end_session)(struct sudo_auth *auth);
 } sudo_auth;
 
 /* Values for sudo_auth.flags.  */
@@ -58,6 +60,8 @@ int fwtk_cleanup(struct passwd *pw, sudo_auth *auth);
 int pam_init(struct passwd *pw, char **prompt, sudo_auth *auth);
 int pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth);
 int pam_cleanup(struct passwd *pw, sudo_auth *auth);
+int pam_begin_session(struct passwd *pw, sudo_auth *auth);
+int pam_end_session(sudo_auth *auth);
 int sia_setup(struct passwd *pw, char **prompt, sudo_auth *auth);
 int sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth);
 int sia_cleanup(struct passwd *pw, sudo_auth *auth);
@@ -86,34 +90,34 @@ int securid_setup(struct passwd *pw, char **prompt, sudo_auth *auth);
 int securid_verify(struct passwd *pw, char *pass, sudo_auth *auth);
 
 /* Fields: need_root, name, init, setup, verify, cleanup */
-#define AUTH_ENTRY(r, n, i, s, v, c) \
-	{ (r|FLAG_CONFIGURED), AUTH_FAILURE, n, NULL, i, s, v, c },
+#define AUTH_ENTRY(r, n, i, s, v, c, b, e) \
+	{ (r|FLAG_CONFIGURED), AUTH_FAILURE, n, NULL, i, s, v, c , b, e },
 
-/* Some methods cannots (or should not) interoperate with any others */
+/* Some methods cannot (or should not) interoperate with any others */
 #if defined(HAVE_PAM)
 #  define AUTH_STANDALONE \
 	AUTH_ENTRY(0, "pam", \
-	    pam_init, NULL, pam_verify, pam_cleanup)
+	    pam_init, NULL, pam_verify, pam_cleanup, pam_begin_session, pam_end_session)
 #elif defined(HAVE_SECURID)
 #  define AUTH_STANDALONE \
 	AUTH_ENTRY(0, "SecurId", \
-	    securid_init, securid_setup, securid_verify, NULL)
+	    securid_init, securid_setup, securid_verify, NULL, NULL, NULL)
 #elif defined(HAVE_SIA_SES_INIT)
 #  define AUTH_STANDALONE \
 	AUTH_ENTRY(0, "sia", \
-	    NULL, sia_setup, sia_verify, sia_cleanup)
+	    NULL, sia_setup, sia_verify, sia_cleanup, NULL, NULL)
 #elif defined(HAVE_AIXAUTH)
 #  define AUTH_STANDALONE \
 	AUTH_ENTRY(0, "aixauth", \
-	    NULL, NULL, aixauth_verify, aixauth_cleanup)
+	    NULL, NULL, aixauth_verify, aixauth_cleanup, NULL, NULL)
 #elif defined(HAVE_FWTK)
 #  define AUTH_STANDALONE \
 	AUTH_ENTRY(0, "fwtk", \
-	    fwtk_init, NULL, fwtk_verify, fwtk_cleanup)
+	    fwtk_init, NULL, fwtk_verify, fwtk_cleanup, NULL, NULL)
 #elif defined(HAVE_BSD_AUTH_H)
 #  define AUTH_STANDALONE \
 	AUTH_ENTRY(0, "bsdauth", \
-	    bsdauth_init, NULL, bsdauth_verify, bsdauth_cleanup)
+	    bsdauth_init, NULL, bsdauth_verify, bsdauth_cleanup, NULL, NULL)
 #endif
 
 #endif /* SUDO_AUTH_H */

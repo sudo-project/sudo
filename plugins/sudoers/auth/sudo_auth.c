@@ -57,32 +57,36 @@ sudo_auth auth_switch[] = {
     AUTH_STANDALONE
 #else
 #  ifndef WITHOUT_PASSWD
-    AUTH_ENTRY(0, "passwd", passwd_init, NULL, passwd_verify, NULL)
+    AUTH_ENTRY(0, "passwd", passwd_init, NULL, passwd_verify, NULL, NULL, NULL)
 #  endif
 #  if defined(HAVE_GETPRPWNAM) && !defined(WITHOUT_PASSWD)
-    AUTH_ENTRY(0, "secureware", secureware_init, NULL, secureware_verify, NULL)
+    AUTH_ENTRY(0, "secureware", secureware_init, NULL, secureware_verify, NULL, NULL, NULL)
 #  endif
 #  ifdef HAVE_AFS
-    AUTH_ENTRY(0, "afs", NULL, NULL, afs_verify, NULL)
+    AUTH_ENTRY(0, "afs", NULL, NULL, afs_verify, NULL, NULL, NULL)
 #  endif
 #  ifdef HAVE_DCE
-    AUTH_ENTRY(0, "dce", NULL, NULL, dce_verify, NULL)
+    AUTH_ENTRY(0, "dce", NULL, NULL, dce_verify, NULL, NULL, NULL)
 #  endif
 #  ifdef HAVE_KERB4
-    AUTH_ENTRY(0, "kerb4", kerb4_init, NULL, kerb4_verify, NULL)
+    AUTH_ENTRY(0, "kerb4", kerb4_init, NULL, kerb4_verify, NULL, NULL, NULL)
 #  endif
 #  ifdef HAVE_KERB5
-    AUTH_ENTRY(0, "kerb5", kerb5_init, NULL, kerb5_verify, kerb5_cleanup)
+    AUTH_ENTRY(0, "kerb5", kerb5_init, NULL, kerb5_verify, kerb5_cleanup, NULL, NULL)
 #  endif
 #  ifdef HAVE_SKEY
-    AUTH_ENTRY(0, "S/Key", NULL, rfc1938_setup, rfc1938_verify, NULL)
+    AUTH_ENTRY(0, "S/Key", NULL, rfc1938_setup, rfc1938_verify, NULL, NULL, NULL)
 #  endif
 #  ifdef HAVE_OPIE
-    AUTH_ENTRY(0, "OPIE", NULL, rfc1938_setup, rfc1938_verify, NULL)
+    AUTH_ENTRY(0, "OPIE", NULL, rfc1938_setup, rfc1938_verify, NULL, NULL, NULL)
 #  endif
 #endif /* AUTH_STANDALONE */
-    AUTH_ENTRY(0, NULL, NULL, NULL, NULL, NULL)
+    AUTH_ENTRY(0, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
 };
+
+extern char **NewArgv; /* XXX - for auditing */
+
+static void pass_warn(void);
 
 int
 verify_user(struct passwd *pw, char *prompt)
@@ -93,7 +97,6 @@ verify_user(struct passwd *pw, char *prompt)
     char *p;
     sudo_auth *auth;
     sigaction_t sa, osa;
-    extern char **NewArgv; /* XXX */
 
     /* Enable suspend during password entry. */
     sigemptyset(&sa.sa_mask);
@@ -181,9 +184,7 @@ verify_user(struct passwd *pw, char *prompt)
 	if (p)
 	    zero_bytes(p, strlen(p));
 #endif
-	/* XXX - need way to know if askpass was used */
-	//if (!ISSET(tgetpass_flags, TGP_ASKPASS))
-	    pass_warn();
+	pass_warn();
     }
 
 cleanup:
@@ -233,7 +234,40 @@ cleanup:
     return rval;
 }
 
-void
+int begin_session(struct passwd *pw)
+{
+    sudo_auth *auth;
+    int status;
+
+    for (auth = auth_switch; auth->name; auth++) {
+	if (auth->begin_session && IS_CONFIGURED(auth)) {
+	    status = (auth->begin_session)(pw, auth);
+	    if (status == AUTH_FATAL) {	/* XXX log */
+		audit_failure(NewArgv, "authentication failure");
+		return -1;		/* assume error msg already printed */
+	    }
+	}
+    }
+    return TRUE;
+}
+
+int end_session(void)
+{
+    sudo_auth *auth;
+    int status;
+
+    for (auth = auth_switch; auth->name; auth++) {
+	if (auth->end_session && IS_CONFIGURED(auth)) {
+	    status = (auth->end_session)(auth);
+	    if (status == AUTH_FATAL) {	/* XXX log */
+		return -1;		/* assume error msg already printed */
+	    }
+	}
+    }
+    return TRUE;
+}
+
+static void
 pass_warn(void)
 {
     struct sudo_conv_message msg[2];
