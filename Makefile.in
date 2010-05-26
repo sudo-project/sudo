@@ -58,9 +58,9 @@ clean: config.status
 mostlyclean: clean
 
 distclean: config.status
+	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done
 	-rm -rf Makefile pathnames.h config.h config.status config.cache \
 		config.log libtool stamp-* autom4te.cache ChangeLog
-	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done
 
 cleandir: distclean
 
