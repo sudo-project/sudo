@@ -267,6 +267,7 @@ error.o: error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
 fileops.o: fileops.lo
 find_path.o: find_path.lo
 getdate.o: $(devdir)/getdate.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
 gettime.o: gettime.lo
 goodpath.o: goodpath.lo
 interfaces.o: interfaces.lo
