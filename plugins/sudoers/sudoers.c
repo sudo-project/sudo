@@ -691,12 +691,6 @@ init_vars(char * const envp[])
 {
     char * const * ep;
 
-#if 0 /* XXX */
-    /* Sanity check command from user. */
-    if (user_cmnd == NULL && strlen(NewArgv[0]) >= PATH_MAX)
-	errorx(1, "%s: File name too long", NewArgv[0]);
-#endif
-
 #ifdef HAVE_TZSET
     (void) tzset();		/* set the timezone if applicable */
 #endif /* HAVE_TZSET */
@@ -813,13 +807,16 @@ set_cmnd(int sudo_mode)
 	    for (to = user_args, from = NewArgv + 1; *from; from++) {
 		n = strlcpy(to, *from, size - (to - user_args));
 		if (n >= size - (to - user_args))
-		    errorx(1, "internal error, init_vars() overflow");
+		    errorx(1, "internal error, set_cmnd() overflow");
 		to += n;
 		*to++ = ' ';
 	    }
 	    *--to = '\0';
 	}
     }
+    if (strlen(user_cmnd) >= PATH_MAX)
+	errorx(1, "%s: file name too long", user_cmnd);
+
     if ((user_base = strrchr(user_cmnd, '/')) != NULL)
 	user_base++;
     else
