@@ -1,0 +1,103 @@
+#
+# Copyright (c) 2010 Todd C. Miller <Todd.Miller@courtesan.com>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# @configure_input@
+#
+
+#### Start of system configuration section. ####
+
+srcdir = @srcdir@
+devdir = @devdir@
+top_builddir = @top_builddir@
+top_srcdir = @top_srcdir@
+incdir = $(top_srcdir)/include
+
+# For out of tree builds
+VPATH = $(srcdir)
+
+# Compiler & tools to use
+CC = @CC@
+LIBTOOL = @LIBTOOL@
+AR=@AR@
+SED=@SED@
+RANLIB=@RANLIB@
+
+# C preprocessor flags
+CPPFLAGS = -I. -I$(top_builddir) -I$(incdir) @CPPFLAGS@
+
+# Usually -O and/or -g
+CFLAGS = @CFLAGS@
+
+# Pass in paths and uid/gid + OS dependent defined
+DEFS = @OSDEFS@
+
+#### End of system configuration section. ####
+
+SHELL = @SHELL@
+
+LTOBJS = alloc.lo atobool.lo fileops.lo fmt_string.lo gettime.lo \
+	 lbuf.lo list.lo term.lo zero_bytes.lo
+
+all: libcommon.la
+
+.SUFFIXES: .c .h .lo
+
+.c.lo:
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
+
+libcommon.la: $(LTOBJS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(LTOBJS) -no-install
+
+# Dependencies
+alloc.lo: $(srcdir)/alloc.c $(incdir)/compat.h $(incdir)/alloc.h $(incdir)/error.h $(top_builddir)/config.h
+atobool.lo: $(srcdir)/atobool.c $(incdir)/compat.h $(incdir)/missing.h $(top_builddir)/config.h
+fileops.lo: $(srcdir)/fileops.c $(incdir)/fileops.h $(top_builddir)/config.h
+fmt_string.lo: $(srcdir)/fmt_string.c $(incdir)/compat.h $(top_builddir)/config.h
+gettime.lo: $(srcdir)/gettime.c $(incdir)/compat.h $(top_builddir)/config.h
+lbuf.lo: $(srcdir)/lbuf.c $(incdir)/compat.h $(incdir)/alloc.h $(incdir)/error.h $(incdir)/missing.h $(incdir)/lbuf.h $(top_builddir)/config.h
+list.lo: $(srcdir)/list.c $(incdir)/compat.h $(incdir)/list.h $(incdir)/error.h $(top_builddir)/config.h
+term.lo: $(srcdir)/term.c $(incdir)/compat.h $(top_builddir)/config.h
+zero_bytes.lo: $(srcdir)/zero_bytes.c $(incdir)/compat.h $(top_builddir)/config.h
+
+install:
+
+install-dirs:
+
+install-binaries:
+
+install-includes:
+
+install-man:
+
+install-plugin:
+
+check:
+	@echo nothing to check
+
+clean:
+	-$(LIBTOOL) --mode=clean rm -f *.a *.o *.lo *.la stamp-* core *.core core.*
+
+mostlyclean: clean
+
+distclean: clean
+	-rm -rf Makefile .libs
+
+clobber: distclean
+
+realclean: distclean
+	rm -f TAGS tags
+
+cleandir: realclean
