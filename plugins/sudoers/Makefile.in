@@ -98,9 +98,8 @@ SHELL = @SHELL@
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
-LIBSUDOERS_OBJS = alias.lo audit.lo defaults.lo gram.lo \
-		  match.lo pwutil.lo timestr.lo toke.lo redblack.lo \
-		  @NONUNIX_GROUPS_IMPL@
+LIBSUDOERS_OBJS = alias.lo audit.lo defaults.lo gram.lo match.lo pwutil.lo \
+		  timestr.lo toke.lo redblack.lo @NONUNIX_GROUPS_IMPL@
 
 SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo \
 	       plugin_error.lo env.lo getspwuid.lo \
@@ -195,6 +194,7 @@ find_path.lo: $(srcdir)/find_path.c $(SUDODEP)
 getspwuid.lo: $(srcdir)/getspwuid.c $(SUDODEP)
 goodpath.lo: $(srcdir)/goodpath.c $(SUDODEP)
 gram.lo: $(devdir)/gram.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir)/gram.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 interfaces.lo: $(srcdir)/interfaces.c $(SUDODEP) $(srcdir)/interfaces.h
 iolog.lo: $(srcdir)/iolog.c $(SUDODEP)
 ldap.lo: $(srcdir)/ldap.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h
@@ -208,6 +208,7 @@ sudo_nss.lo: $(srcdir)/sudo_nss.c $(SUDODEP)
 sudoers.lo: $(srcdir)/sudoers.c $(SUDODEP) $(srcdir)/interfaces.h
 timestr.lo: $(srcdir)/timestr.c $(incdir)/compat.h $(top_builddir)/config.h
 toke.lo: $(devdir)/toke.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir)/gram.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 tsgetgrpw.lo: $(srcdir)/tsgetgrpw.c $(SUDODEP)
 vasgroups.lo: $(srcdir)/vasgroups.c $(srcdir)/nonunix.h $(SUDODEP)
 plugin_error.lo: $(srcdir)/plugin_error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
