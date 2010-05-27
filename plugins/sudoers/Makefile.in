@@ -194,7 +194,7 @@ find_path.lo: $(srcdir)/find_path.c $(SUDODEP)
 getspwuid.lo: $(srcdir)/getspwuid.c $(SUDODEP)
 goodpath.lo: $(srcdir)/goodpath.c $(SUDODEP)
 gram.lo: $(devdir)/gram.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir)/gram.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/gram.c
 interfaces.lo: $(srcdir)/interfaces.c $(SUDODEP) $(srcdir)/interfaces.h
 iolog.lo: $(srcdir)/iolog.c $(SUDODEP)
 ldap.lo: $(srcdir)/ldap.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h
@@ -208,7 +208,7 @@ sudo_nss.lo: $(srcdir)/sudo_nss.c $(SUDODEP)
 sudoers.lo: $(srcdir)/sudoers.c $(SUDODEP) $(srcdir)/interfaces.h
 timestr.lo: $(srcdir)/timestr.c $(incdir)/compat.h $(top_builddir)/config.h
 toke.lo: $(devdir)/toke.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir)/gram.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/toke.c
 tsgetgrpw.lo: $(srcdir)/tsgetgrpw.c $(SUDODEP)
 vasgroups.lo: $(srcdir)/vasgroups.c $(srcdir)/nonunix.h $(SUDODEP)
 plugin_error.lo: $(srcdir)/plugin_error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
@@ -232,10 +232,10 @@ sia.lo: $(authdir)/sia.c $(AUTHDEP)
 
 # Command dependencies (sudoreplay, testsudoers, visudo)
 error.o: $(top_srcdir)/src/error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(top_srcdir)/src/error.c
 find_path.o: find_path.lo
 getdate.o: $(devdir)/getdate.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/getdate.c
 goodpath.o: goodpath.lo
 interfaces.o: interfaces.lo
 sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/alloc.h $(incdir)/compat.h $(incdir)/error.h $(incdir)/missing.h $(top_builddir)/config.h
