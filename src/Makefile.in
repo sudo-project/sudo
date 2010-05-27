@@ -73,7 +73,7 @@ SHELL = @SHELL@
 PROGS = @PROGS@
 
 OBJS = alloc.o atobool.o conversation.o error.o fileops.o fmt_string.o \
-       gettime.o lbuf.o list.o load_plugins.o parse_args.o pty.o script.o \
+       gettime.o lbuf.o list.o load_plugins.o parse_args.o pty.o exec.o \
        sudo.o sudo_edit.o term.o tgetpass.o ttysize.o zero_bytes.o @SUDO_OBJS@
 
 LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
@@ -119,7 +119,7 @@ list.o: $(srcdir)/list.c $(SUDODEP)
 load_plugins.o: $(srcdir)/load_plugins.c $(SUDODEP)
 parse_args.o: $(srcdir)/parse_args.c sudo_usage.h $(SUDODEP)
 pty.o: $(srcdir)/pty.c $(SUDODEP)
-script.o: $(srcdir)/script.c $(SUDODEP)
+exec.o: $(srcdir)/exec.c $(SUDODEP)
 selinux.o: $(srcdir)/selinux.c $(SUDODEP)
 sesh.o: $(srcdir)/sesh.c $(incdir)/compat.h $(top_builddir)/config.h
 sudo.o: $(srcdir)/sudo.c $(SUDODEP)

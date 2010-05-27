@@ -7,7 +7,6 @@ README
 README.LDAP
 WHATSNEW
 aclocal.m4
-acsite.m4
 compat/Makefile.in
 compat/charclass.h
 compat/closefrom.c
@@ -84,6 +83,11 @@ include/sudo_plugin.h
 indent.pro
 install-sh
 ltmain.sh
+m4/libtool.m4
+m4/ltoptions.m4
+m4/ltsugar.m4
+m4/ltversion.m4
+m4/lt~obsolete.m4
 mkinstalldirs
 pathnames.h.in
 plugins/sample/Makefile.in
@@ -169,6 +173,7 @@ src/alloc.c
 src/atobool.c
 src/conversation.c
 src/error.c
+src/exec.c
 src/fileops.c
 src/fmt_string.c
 src/lbuf.c
@@ -176,7 +181,6 @@ src/list.c
 src/load_plugins.c
 src/parse_args.c
 src/pty.c
-src/script.c
 src/selinux.c
 src/sesh.c
 src/sudo.c
