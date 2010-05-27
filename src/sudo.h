@@ -160,7 +160,6 @@ void zero_bytes(volatile void *, size_t);
 /* script.c */
 int script_execve(struct command_details *details, char *argv[], char *envp[],
     struct command_status *cstat);
-void script_setup(uid_t);
 
 /* term.c */
 int term_cbreak(int);

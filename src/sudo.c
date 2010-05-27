@@ -789,15 +789,9 @@ run_command(struct command_details *details, char *argv[], char *envp[])
     cstat.val = 0;
 
     /*
-     * XXX - missing closefrom(), may not be possible in new scheme
-     *       also no background support
+     * XXX - no background support
      */
 
-    /* If there are I/O plugins, allocate a pty and exec */
-    if (!tq_empty(&io_plugins)) {
-	sudo_debug(8, "setup I/O logging");
-	script_setup(details->euid);
-    }
     script_execve(details, argv, envp, &cstat);
 
     switch (cstat.type) {

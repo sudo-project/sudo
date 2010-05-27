@@ -138,8 +138,8 @@ static int safe_close(int fd);
 
 extern struct user_details user_details; /* XXX */
 
-void
-script_setup(uid_t uid)
+static void
+pty_setup(uid_t uid)
 {
     script_fds[SFD_USERTTY] = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
     if (script_fds[SFD_USERTTY] != -1) {
@@ -500,6 +500,10 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     cstat->type = CMD_INVALID;
 
     log_io = !tq_empty(&io_plugins);
+    if (log_io) {
+	sudo_debug(8, "allocate pty for I/O logging");
+	pty_setup(details->euid);
+    }
 
 #ifdef HAVE_SELINUX
     rbac_enabled = is_selinux_enabled() > 0 && details->selinux_role != NULL;
