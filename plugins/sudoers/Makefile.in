@@ -44,7 +44,7 @@ YACC = @YACC@
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 
 # Libraries
-LIBS = $(top_builddir)/@ac_config_libobj_dir@/libreplace.la $(top_builddir)/common/libcommon.la
+LIBS = $(top_builddir)/common/libcommon.la $(top_builddir)/@ac_config_libobj_dir@/libreplace.la
 NET_LIBS = @NET_LIBS@
 SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(LIBS) $(NET_LIBS) @ZLIB@
 REPLAY_LIBS = @REPLAY_LIBS@ @ZLIB@

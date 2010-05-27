@@ -37,7 +37,7 @@ INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 
 # Libraries
 LIBS = @LIBS@ @SUDO_LIBS@ @GETGROUPS_LIB@ @NET_LIBS@ \
-       $(LIBOBJDIR)libreplace.la $(top_builddir)/common/libcommon.la
+       $(top_builddir)/common/libcommon.la $(LIBOBJDIR)libreplace.la
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) -I. @CPPFLAGS@
