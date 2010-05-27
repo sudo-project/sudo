@@ -33,7 +33,6 @@ incdir = $(top_srcdir)/include
 
 # For out of tree builds
 VPATH = $(devdir):$(srcdir):$(srcdir)/auth
-LN_S = @LN_S@
 
 # Compiler & tools to use
 CC = @CC@
@@ -45,7 +44,7 @@ YACC = @YACC@
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 
 # Libraries
-LIBS = $(top_builddir)/@ac_config_libobj_dir@/libreplace.la
+LIBS = $(top_builddir)/@ac_config_libobj_dir@/libreplace.la $(top_builddir)/common/libcommon.la
 NET_LIBS = @NET_LIBS@
 SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(LIBS) $(NET_LIBS) @ZLIB@
 REPLAY_LIBS = @REPLAY_LIBS@ @ZLIB@
@@ -99,24 +98,21 @@ SHELL = @SHELL@
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
-LIBSUDOERS_OBJS = alias.lo alloc.lo atobool.lo audit.lo defaults.lo gram.lo \
-		  list.lo match.lo pwutil.lo timestr.lo toke.lo redblack.lo \
-		  zero_bytes.lo @NONUNIX_GROUPS_IMPL@
+LIBSUDOERS_OBJS = alias.lo audit.lo defaults.lo gram.lo \
+		  match.lo pwutil.lo timestr.lo toke.lo redblack.lo \
+		  @NONUNIX_GROUPS_IMPL@
 
-SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo fmt_string.lo \
-	       plugin_error.lo env.lo getspwuid.lo gettime.lo \
-	       goodpath.lo fileops.lo find_path.lo interfaces.lo lbuf.lo \
+SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo \
+	       plugin_error.lo env.lo getspwuid.lo \
+	       goodpath.lo find_path.lo interfaces.lo \
 	       logging.lo parse.lo set_perms.lo sudoers.lo sudo_nss.lo \
 	       iolog.lo @SUDOERS_OBJS@
 
-VISUDO_OBJS = visudo.o fileops.o gettime.o goodpath.o find_path.o error.o
+VISUDO_OBJS = visudo.o goodpath.o find_path.o error.o
 
-REPLAY_OBJS = getdate.o sudoreplay.o term.o error.o
+REPLAY_OBJS = getdate.o sudoreplay.o error.o
 
 TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o error.o
-
-LINKS = alloc.c atobool.c error.c gettime.c fileops.c fmt_string.c lbuf.c \
-	list.c term.c zero_bytes.c
 
 VERSION = @PACKAGE_VERSION@
 
@@ -135,10 +131,10 @@ all: sudoers.la visudo sudoreplay testsudoers
 .SUFFIXES: .o .c .h .l .y .lo
 
 .c.o:
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 
 .c.lo:
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 
 # Prevent default rules from building .c files from .l and .y files
 .l.c:
@@ -155,7 +151,7 @@ visudo: libsudoers.la $(VISUDO_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)
 
 sudoreplay: libsudoers.la $(REPLAY_OBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) alloc.lo timestr.lo zero_bytes.lo $(REPLAY_LIBS) $(LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) timestr.lo $(REPLAY_LIBS) $(LIBS)
 
 testsudoers: $(TEST_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)
@@ -216,33 +212,6 @@ tsgetgrpw.lo: $(srcdir)/tsgetgrpw.c $(SUDODEP)
 vasgroups.lo: $(srcdir)/vasgroups.c $(srcdir)/nonunix.h $(SUDODEP)
 plugin_error.lo: $(srcdir)/plugin_error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
 
-# Upper level sudo dependencies
-# We need to use links because of differences in VPATH semantics
-alloc.c: $(top_srcdir)/src/alloc.c
-	@$(LN_S) -f $(top_srcdir)/src/$@ $@
-alloc.lo: alloc.c $(SUDODEP)
-atobool.c: $(top_srcdir)/src/atobool.c
-	@$(LN_S) -f $(top_srcdir)/src/$@ $@
-atobool.lo: atobool.c $(SUDODEP)
-fileops.c: $(top_srcdir)/src/fileops.c
-	@$(LN_S) -f $(top_srcdir)/src/$@ $@
-fileops.lo: fileops.c $(SUDODEP)
-fmt_string.c: $(top_srcdir)/src/fmt_string.c
-	@$(LN_S) -f $(top_srcdir)/src/$@ $@
-fmt_string.lo: fmt_string.c $(incdir)/compat.h $(top_builddir)/config.h
-gettime.c: $(top_srcdir)/src/gettime.c
-	@$(LN_S) -f $(top_srcdir)/src/$@ $@
-gettime.lo: gettime.c $(incdir)/compat.h $(top_builddir)/config.h
-list.c: $(top_srcdir)/src/list.c
-	@$(LN_S) -f $(top_srcdir)/src/$@ $@
-list.lo: list.c $(SUDODEP)
-lbuf.c: $(top_srcdir)/src/lbuf.c
-	@$(LN_S) -f $(top_srcdir)/src/$@ $@
-lbuf.lo: lbuf.c $(SUDODEP)
-zero_bytes.c: $(top_srcdir)/src/zero_bytes.c
-	@$(LN_S) -f $(top_srcdir)/src/$@ $@
-zero_bytes.lo: zero_bytes.c $(incdir)/compat.h $(top_builddir)/config.h
-
 # Auth dependencies
 sudo_auth.lo: $(authdir)/sudo_auth.c $(AUTHDEP) $(INSDEP)
 afs.lo: $(authdir)/afs.c $(AUTHDEP)
@@ -261,20 +230,14 @@ securid5.lo: $(authdir)/securid5.c $(AUTHDEP)
 sia.lo: $(authdir)/sia.c $(AUTHDEP)
 
 # Command dependencies (sudoreplay, testsudoers, visudo)
-error.c: $(top_srcdir)/src/error.c
-	@$(LN_S) -f $(top_srcdir)/src/$@ $@
-error.o: error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
-fileops.o: fileops.lo
+error.o: $(top_srcdir)/src/error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 find_path.o: find_path.lo
 getdate.o: $(devdir)/getdate.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
-gettime.o: gettime.lo
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 goodpath.o: goodpath.lo
 interfaces.o: interfaces.lo
 sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/alloc.h $(incdir)/compat.h $(incdir)/error.h $(incdir)/missing.h $(top_builddir)/config.h
-term.c: $(top_srcdir)/src/term.c
-	@$(LN_S) -f $(top_srcdir)/src/$@ $@
-term.o: term.c $(incdir)/compat.h $(top_builddir)/config.h
 testsudoers.o: $(srcdir)/testsudoers.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/interfaces.h $(devdir)/gram.h
 tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(SUDODEP)
 visudo.o: $(srcdir)/visudo.c $(SUDODEP) $(devdir)/gram.h

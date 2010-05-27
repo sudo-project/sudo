@@ -37,7 +37,7 @@ INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 
 # Libraries
 LIBS = @LIBS@ @SUDO_LIBS@ @GETGROUPS_LIB@ @NET_LIBS@ \
-       $(LIBOBJDIR)libreplace.la
+       $(LIBOBJDIR)libreplace.la $(top_builddir)/common/libcommon.la
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) -I. @CPPFLAGS@
@@ -72,9 +72,8 @@ SHELL = @SHELL@
 
 PROGS = @PROGS@
 
-OBJS = alloc.o atobool.o conversation.o error.o fileops.o fmt_string.o \
-       gettime.o lbuf.o list.o load_plugins.o parse_args.o pty.o exec.o \
-       sudo.o sudo_edit.o term.o tgetpass.o ttysize.o zero_bytes.o @SUDO_OBJS@
+OBJS = conversation.o error.o load_plugins.o parse_args.o pty.o exec.o \
+       sudo.o sudo_edit.o tgetpass.o ttysize.o @SUDO_OBJS@
 
 LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
 
@@ -90,10 +89,10 @@ all: $(PROGS)
 .SUFFIXES: .c .h .lo .o
 
 .c.o:
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 
 .c.lo:
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 
 sudo: $(OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS) $(LDFLAGS) $(LIBS) -static-libtool-libs
@@ -107,15 +106,8 @@ sesh: sesh.o
 # Dependencies
 # XXX - SUDODEP is overkill for some of these
 aix.o: $(srcdir)/aix.c $(top_builddir)/config.h $(incdir)/compat.h
-alloc.o: $(srcdir)/alloc.c $(SUDODEP)
-atobool.o: $(srcdir)/atobool.c $(SUDODEP)
 conversation.o: $(srcdir)/conversation.c $(SUDODEP)
 error.o: $(srcdir)/error.c $(incdir)/compat.h $(incdir)/error.h $(top_builddir)/config.h
-fileops.o: $(srcdir)/fileops.c $(SUDODEP)
-fmt_string.o: $(srcdir)/fmt_string.c $(incdir)/compat.h $(top_builddir)/config.h
-gettime.o: $(srcdir)/gettime.c $(incdir)/compat.h $(top_builddir)/config.h
-lbuf.o: $(srcdir)/lbuf.c $(SUDODEP)
-list.o: $(srcdir)/list.c $(SUDODEP)
 load_plugins.o: $(srcdir)/load_plugins.c $(SUDODEP)
 parse_args.o: $(srcdir)/parse_args.c sudo_usage.h $(SUDODEP)
 pty.o: $(srcdir)/pty.c $(SUDODEP)
@@ -125,10 +117,8 @@ sesh.o: $(srcdir)/sesh.c $(incdir)/compat.h $(top_builddir)/config.h
 sudo.o: $(srcdir)/sudo.c $(SUDODEP)
 sudo_edit.o: $(srcdir)/sudo_edit.c $(SUDODEP)
 sudo_noexec.lo: $(srcdir)/sudo_noexec.c $(incdir)/compat.h $(top_builddir)/config.h
-term.o: $(srcdir)/term.c $(incdir)/compat.h $(top_builddir)/config.h
 tgetpass.o: $(srcdir)/tgetpass.c $(SUDODEP)
 ttysize.o: $(srcdir)/ttysize.c $(incdir)/compat.h $(top_builddir)/config.h
-zero_bytes.o: $(srcdir)/zero_bytes.c $(incdir)/compat.h $(top_builddir)/config.h
 
 install: install-dirs install-binaries @INSTALL_NOEXEC@
 

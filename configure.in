@@ -2741,7 +2741,7 @@ dnl
 dnl Substitute into the Makefile and man pages
 dnl
 dnl AC_CONFIG_FILES([doc/sudo.man doc/visudo.man doc/sudoers.man doc/sudoers.ldap.man doc/sudoreplay.man src/Makefile src/sudo_usage.h])
-AC_CONFIG_FILES([Makefile compat/Makefile doc/Makefile include/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/sudoers/Makefile])
+AC_CONFIG_FILES([Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/sudoers/Makefile])
 AC_OUTPUT
 
 dnl

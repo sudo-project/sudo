@@ -75,10 +75,10 @@ all: sample_plugin.la
 .SUFFIXES: .o .c .h .lo
 
 .c.o:
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 
 .c.lo:
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 
 sample_plugin.lo: $(srcdir)/sample_plugin.c
 
