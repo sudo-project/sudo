@@ -7,15 +7,17 @@ Purpose: to provide a simple API for authentication methods that
 The sudo_auth struct looks like this:
 
 typedef struct sudo_auth {
-    short flags;                /* various flags, see below */
-    short status;               /* status from verify routine */
+    int flags;                  /* various flags, see below */
+    int status;                 /* status from verify routine */
     char *name;			/* name of the method in string form */
     void *data;                 /* method-specific data pointer */
 
-    int (*init) __P((struct passwd *pw, char **prompt, sudo_auth *auth));
-    int (*setup) __P((struct passwd *pw, char **prompt, sudo_auth *auth));
-    int (*verify) __P((struct passwd *pw, char *p, sudo_auth *auth));
-    int (*cleanup) __P((struct passwd *pw, sudo_auth *auth));
+    int (*init)(struct passwd *pw, char **prompt, sudo_auth *auth);
+    int (*setup)(struct passwd *pw, char **prompt, sudo_auth *auth);
+    int (*verify)(struct passwd *pw, char *p, sudo_auth *auth);
+    int (*cleanup)(struct passwd *pw, sudo_auth *auth);
+    int (*begin_session)(struct passwd *pw, sudo_auth *auth);
+    int (*end_session)(sudo_auth *auth);
 } sudo_auth;
 
 The variables in the struct are as follows:
@@ -34,10 +36,11 @@ Possible values of sudo_auth.flags:
     FLAG_USER		Whether or not the auth functions should run with
 			the euid of the invoking user instead of 0.
 
-    FLAG_CONFIGURED	If set then the auth method is assumed to have been
-			configured successfully.  All auth methods start out
-			with this set.  If an "init" or "setup" function
-			fails, this bit is cleared.
+    FLAG_DISABLED	Set if an "init" or "setup" function fails.
+
+    FLAG_STANDALONE	If set, this indicates that the method must
+			be the only auth method configured, and that
+			it will prompt for the password itself.
 
     FLAG_ONEANDONLY	If set, this indicates that the method is the
 			only one in use.  Can be used by auth functions
@@ -97,32 +100,23 @@ Adding a new authentication method:
 Each method should live in its own file.  Add prototypes for the functions
 in sudo_auth.h.
 
-If this is a standalone method, add it to the standalone #if cascade
-in sudo_auth.h.  For instance, for a method, ``fooauth'', add:
+Add the method to the ``auth_switch'' in sudo_auth.c.  Note that
+standalone methods must go first.  If ``fooauth'' is a normal auth
+method, its entry would look like:
 
-#elif defined(HAVE_FOOAUTH)
-#  define AUTH_STANDALONE \
-        AUTH_ENTRY(0, "foo", \
-	    foo_init, foo_setup, foo_verify, foo_cleanup)
+#ifdef HAVE_FOOAUTH
+AUTH_ENTRY("foo", 0, foo_init, foo_setup, foo_verify,
+    foo_cleanup, foo_begin_session, foo_end_session)
+#endif
 
-If the method needs to run as the user, not root, replace the first
-parameter to AUTH_ENTRY (0) with FLAG_USER.  If you don't have a
-init/setup/cleanup routine, just use a NULL for that field.
+If this is a standalone method, it would be:
 
-For a normal authentication method, add it to the ``auth_switch'' in
-sudo_auth.c.  If ``fooauth'' is a normal auth method, its entry
-would look like:
+#ifdef HAVE_FOOAUTH
+AUTH_ENTRY("foo", FLAG_STANDALONE, foo_init, foo_setup, foo_verify,
+    foo_cleanup, foo_begin_session, foo_end_session)
+#endif
 
-#  ifdef HAVE_FOOAUTH
-    AUTH_ENTRY(0, "foo", foo_init, foo_setup, foo_verify, foo_cleanup)
-#  endif
-
-Again, if the method doesn't need to run as root, replace the 0 with
-FLAG_USER.  Likewise, if you don't have a init/setup/cleanup routine,
-just use a NULL for that field.
-
-NOTE:  You should not make a method both ``standalone'' and
-       ``normal''.  Just use the --without-passwd configure argument
-       to disable passwd/shadow file checking and then have your
-       auth routines check the FLAG_ONEANDONLY flag to see if
-       they are running standalone and act accordingly.
+If the method needs to run as the user, not root, add FLAG_USER to
+the second argument in the  AUTH_ENTRY line.  If you don't have an
+init/setup/cleanup/begin/end routine, just use a NULL for that
+field.

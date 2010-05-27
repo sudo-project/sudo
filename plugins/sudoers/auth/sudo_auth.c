@@ -52,36 +52,53 @@
 #include "sudo_auth.h"
 #include "insults.h"
 
-sudo_auth auth_switch[] = {
-#ifdef AUTH_STANDALONE
-    AUTH_STANDALONE
-#else
-#  ifndef WITHOUT_PASSWD
-    AUTH_ENTRY(0, "passwd", passwd_init, NULL, passwd_verify, NULL, NULL, NULL)
-#  endif
-#  if defined(HAVE_GETPRPWNAM) && !defined(WITHOUT_PASSWD)
-    AUTH_ENTRY(0, "secureware", secureware_init, NULL, secureware_verify, NULL, NULL, NULL)
-#  endif
-#  ifdef HAVE_AFS
-    AUTH_ENTRY(0, "afs", NULL, NULL, afs_verify, NULL, NULL, NULL)
-#  endif
-#  ifdef HAVE_DCE
-    AUTH_ENTRY(0, "dce", NULL, NULL, dce_verify, NULL, NULL, NULL)
-#  endif
-#  ifdef HAVE_KERB4
-    AUTH_ENTRY(0, "kerb4", kerb4_init, NULL, kerb4_verify, NULL, NULL, NULL)
-#  endif
-#  ifdef HAVE_KERB5
-    AUTH_ENTRY(0, "kerb5", kerb5_init, NULL, kerb5_verify, kerb5_cleanup, NULL, NULL)
-#  endif
-#  ifdef HAVE_SKEY
-    AUTH_ENTRY(0, "S/Key", NULL, rfc1938_setup, rfc1938_verify, NULL, NULL, NULL)
-#  endif
-#  ifdef HAVE_OPIE
-    AUTH_ENTRY(0, "OPIE", NULL, rfc1938_setup, rfc1938_verify, NULL, NULL, NULL)
-#  endif
-#endif /* AUTH_STANDALONE */
-    AUTH_ENTRY(0, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
+static sudo_auth auth_switch[] = {
+/* Standalone entries first */
+#ifdef HAVE_PAM
+    AUTH_ENTRY("pam", FLAG_STANDALONE, pam_init, NULL, pam_verify, pam_cleanup, pam_begin_session, pam_end_session)
+#endif
+#ifdef HAVE_SECURID
+    AUTH_ENTRY("SecurId", FLAG_STANDALONE, securid_init, securid_setup, securid_verify, NULL, NULL, NULL)
+#endif
+#ifdef HAVE_SIA_SES_INIT
+    AUTH_ENTRY("sia", FLAG_STANDALONE, NULL, sia_setup, sia_verify, sia_cleanup, NULL, NULL)
+#endif
+#ifdef HAVE_AIXAUTH
+    AUTH_ENTRY("aixauth", FLAG_STANDALONE, NULL, NULL, aixauth_verify, aixauth_cleanup, NULL, NULL)
+#endif
+#ifdef HAVE_FWTK
+    AUTH_ENTRY("fwtk", FLAG_STANDALONE, fwtk_init, NULL, fwtk_verify, fwtk_cleanup, NULL, NULL)
+#endif
+#ifdef HAVE_BSD_AUTH_H
+    AUTH_ENTRY("bsdauth", FLAG_STANDALONE, bsdauth_init, NULL, bsdauth_verify, bsdauth_cleanup, NULL, NULL)
+#endif
+
+/* Non-standalone entries */
+#ifndef WITHOUT_PASSWD
+    AUTH_ENTRY("passwd", 0, passwd_init, NULL, passwd_verify, NULL, NULL, NULL)
+#endif
+#if defined(HAVE_GETPRPWNAM) && !defined(WITHOUT_PASSWD)
+    AUTH_ENTRY("secureware", 0, secureware_init, NULL, secureware_verify, NULL, NULL, NULL)
+#endif
+#ifdef HAVE_AFS
+    AUTH_ENTRY("afs", 0, NULL, NULL, afs_verify, NULL, NULL, NULL)
+#endif
+#ifdef HAVE_DCE
+    AUTH_ENTRY("dce", 0, NULL, NULL, dce_verify, NULL, NULL, NULL)
+#endif
+#ifdef HAVE_KERB4
+    AUTH_ENTRY("kerb4", 0, kerb4_init, NULL, kerb4_verify, NULL, NULL, NULL)
+#endif
+#ifdef HAVE_KERB5
+    AUTH_ENTRY("kerb5", 0, kerb5_init, NULL, kerb5_verify, kerb5_cleanup, NULL, NULL)
+#endif
+#ifdef HAVE_SKEY
+    AUTH_ENTRY("S/Key", 0, NULL, rfc1938_setup, rfc1938_verify, NULL, NULL, NULL)
+#endif
+#ifdef HAVE_OPIE
+    AUTH_ENTRY("OPIE", 0, NULL, rfc1938_setup, rfc1938_verify, NULL, NULL, NULL)
+#endif
+    AUTH_ENTRY(NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL)
 };
 
 extern char **NewArgv; /* XXX - for auditing */
@@ -93,7 +110,7 @@ verify_user(struct passwd *pw, char *prompt)
 {
     int counter = def_passwd_tries + 1;
     int success = AUTH_FAILURE;
-    int flags, status, rval;
+    int flags, status, standalone, rval;
     char *p;
     sudo_auth *auth;
     sigaction_t sa, osa;
@@ -114,19 +131,28 @@ verify_user(struct passwd *pw, char *prompt)
 	return -1;
     }
 
+    /* Make sure we haven't mixed standalone and shared auth methods. */
+    standalone = IS_STANDALONE(&auth_switch[0]);
+    if (standalone && auth_switch[1].name != NULL) {
+	audit_failure(NewArgv, "invalid authentication methods");
+    	log_error(0, "Invalid authentication methods compiled into sudo!  "
+	    "You cannot mix standalone and non-standalone authentication.");
+	return -1;
+    }
+
     /* Set FLAG_ONEANDONLY if there is only one auth method. */
     if (auth_switch[1].name == NULL)
 	SET(auth_switch[0].flags, FLAG_ONEANDONLY);
 
     /* Initialize auth methods and unconfigure the method if necessary. */
     for (auth = auth_switch; auth->name; auth++) {
-	if (auth->init && IS_CONFIGURED(auth)) {
+	if (auth->init && !IS_DISABLED(auth)) {
 	    if (NEEDS_USER(auth))
 		set_perms(PERM_USER);
 
 	    status = (auth->init)(pw, &prompt, auth);
 	    if (status == AUTH_FAILURE)
-		CLR(auth->flags, FLAG_CONFIGURED);
+		SET(auth->flags, FLAG_DISABLED);
 	    else if (status == AUTH_FATAL) {	/* XXX log */
 		audit_failure(NewArgv, "authentication failure");
 		return -1;		/* assume error msg already printed */
@@ -140,13 +166,13 @@ verify_user(struct passwd *pw, char *prompt)
     while (--counter) {
 	/* Do any per-method setup and unconfigure the method if needed */
 	for (auth = auth_switch; auth->name; auth++) {
-	    if (auth->setup && IS_CONFIGURED(auth)) {
+	    if (auth->setup && !IS_DISABLED(auth)) {
 		if (NEEDS_USER(auth))
 		    set_perms(PERM_USER);
 
 		status = (auth->setup)(pw, &prompt, auth);
 		if (status == AUTH_FAILURE)
-		    CLR(auth->flags, FLAG_CONFIGURED);
+		    SET(auth->flags, FLAG_DISABLED);
 		else if (status == AUTH_FATAL) {/* XXX log */
 		    audit_failure(NewArgv, "authentication failure");
 		    return -1;		/* assume error msg already printed */
@@ -158,21 +184,20 @@ verify_user(struct passwd *pw, char *prompt)
 	}
 
 	/* Get the password unless the auth function will do it for us */
-#ifdef AUTH_STANDALONE
-	p = prompt;
-#else
-	p = auth_getpass(prompt, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF);
-#endif /* AUTH_STANDALONE */
+	if (standalone)
+	    p = prompt;
+	else
+	    p = auth_getpass(prompt, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF);
 
 	/* Call authentication functions. */
 	for (auth = auth_switch; p && auth->name; auth++) {
-	    if (!IS_CONFIGURED(auth))
+	    if (IS_DISABLED(auth))
 		continue;
 
 	    if (NEEDS_USER(auth))
 		set_perms(PERM_USER);
 
-	    success = auth->status = (auth->verify)(pw, (char *)p, auth);
+	    success = auth->status = (auth->verify)(pw, p, auth);
 
 	    if (NEEDS_USER(auth))
 		restore_perms();
@@ -180,17 +205,15 @@ verify_user(struct passwd *pw, char *prompt)
 	    if (auth->status != AUTH_FAILURE)
 		goto cleanup;
 	}
-#ifndef AUTH_STANDALONE
-	if (p)
+	if (!standalone && p != NULL)
 	    zero_bytes(p, strlen(p));
-#endif
 	pass_warn();
     }
 
 cleanup:
     /* Call cleanup routines. */
     for (auth = auth_switch; auth->name; auth++) {
-	if (auth->cleanup && IS_CONFIGURED(auth)) {
+	if (auth->cleanup && !IS_DISABLED(auth)) {
 	    if (NEEDS_USER(auth))
 		set_perms(PERM_USER);
 
@@ -240,7 +263,7 @@ int auth_begin_session(struct passwd *pw)
     int status;
 
     for (auth = auth_switch; auth->name; auth++) {
-	if (auth->begin_session && IS_CONFIGURED(auth)) {
+	if (auth->begin_session && !IS_DISABLED(auth)) {
 	    status = (auth->begin_session)(pw, auth);
 	    if (status == AUTH_FATAL) {	/* XXX log */
 		audit_failure(NewArgv, "authentication failure");
@@ -257,7 +280,7 @@ int auth_end_session(void)
     int status;
 
     for (auth = auth_switch; auth->name; auth++) {
-	if (auth->end_session && IS_CONFIGURED(auth)) {
+	if (auth->end_session && !IS_DISABLED(auth)) {
 	    status = (auth->end_session)(auth);
 	    if (status == AUTH_FATAL) {	/* XXX log */
 		return -1;		/* assume error msg already printed */
