@@ -89,6 +89,7 @@ so that B<sudo> can load it.
                  const char *list_user);
      int (*validate)(void);
      void (*invalidate)(int remove);
+     int (*init_session)(struct passwd *pwd);
  };
 
 The policy_plugin struct has the following fields:
@@ -605,6 +606,27 @@ the credentials instead of simply invalidating them.
 
 The C<invalidate> function should be C<NULL> if the plugin does not
 support credential caching.
+
+=item init_session
+
+ int (*init_session)(struct passwd *pwd);
+
+The C<init_session> function is called when B<sudo> sets up the
+execution environment for the command, immediately before the
+contents of the I<command_info> list are applied (before the uid
+changes).  This can be used to do session setup that is not supported
+by I<command_info>, such as opening the PAM session.
+
+The I<pwd> argument points to a passwd struct for the user the
+command will be run as if the uid the command will run as was found
+in the password database, otherwise it will be NULL.
+
+Returns 1 on success, 0 on failure and -1 on error.
+On error, the plugin may optionally call the conversation or plugin_printf
+function with C<SUDO_CONF_ERROR_MSG> to present additional
+error information to the user.
+
+=back
 
 =head3 Conversation API
 

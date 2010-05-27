@@ -61,7 +61,7 @@ SSuuddoo PPlluuggiinn AAPPII
 
 
 
-1.8.0a1                    May 24, 2010                         1
+1.8.0a1                    May 27, 2010                         1
 
 
 
@@ -86,6 +86,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                         const char *list_user);
             int (*validate)(void);
             void (*invalidate)(int remove);
+            int (*init_session)(struct passwd *pwd);
         };
 
        The policy_plugin struct has the following fields:
@@ -122,12 +123,11 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                A pointer to the conversation function that can be used by the
                plugin to interact with the user (see below).
 
-           plugin_printf
-               A pointer to a printf-style function that may be used to
 
 
 
-1.8.0a1                    May 24, 2010                         2
+
+1.8.0a1                    May 27, 2010                         2
 
 
 
@@ -136,6 +136,8 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
+           plugin_printf
+               A pointer to a printf-style function that may be used to
                display informational or error messages (see below).
 
            settings
@@ -187,13 +189,11 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                    from the check_policy function, which will cause ssuuddoo to
                    print a usage message and exit.
 
-               preserve_groups=bool
-                   Set to true if the user specified the -P flag, indicating
-                   that the user wishes to preserve the group vector instead
 
 
 
-1.8.0a1                    May 24, 2010                         3
+
+1.8.0a1                    May 27, 2010                         3
 
 
 
@@ -202,6 +202,9 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
+               preserve_groups=bool
+                   Set to true if the user specified the -P flag, indicating
+                   that the user wishes to preserve the group vector instead
                    of setting it based on the runas user.
 
                ignore_ticket=bool
@@ -253,13 +256,10 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
            user_info
                A vector of information about the user running the command in
-               the form of "name=value" strings.  The vector is terminated by
-               a NULL pointer.
 
 
 
-
-1.8.0a1                    May 24, 2010                         4
+1.8.0a1                    May 27, 2010                         4
 
 
 
@@ -267,6 +267,9 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
+
+               the form of "name=value" strings.  The vector is terminated by
+               a NULL pointer.
 
                When parsing _u_s_e_r___i_n_f_o, the plugin should split on the ffiirrsstt
                equal sign ('=') since the _n_a_m_e field will never include one
@@ -319,13 +322,10 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
             void (*close)(int exit_status, int error);
 
            The close function is called when the command being run by ssuuddoo
-           finishes.
-
-           The function arguments are as follows:
 
 
 
-1.8.0a1                    May 24, 2010                         5
+1.8.0a1                    May 27, 2010                         5
 
 
 
@@ -333,6 +333,10 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
+
+           finishes.
+
+           The function arguments are as follows:
 
            exit_status
                The command's exit status, as returned by the _w_a_i_t(2) system
@@ -384,14 +388,10 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            ssuuddooeeddiitt was specified but is unsupported by the plugin.  In the
            latter case, ssuuddoo will print a usage message before it exits.  If
            an error occurs, the plugin may optionally call the conversation or
-           plugin_printf function with SUDO_CONF_ERROR_MSG to present
-           additional error information to the user.
-
-           The function arguments are as follows:
 
 
 
-1.8.0a1                    May 24, 2010                         6
+1.8.0a1                    May 27, 2010                         6
 
 
 
@@ -399,6 +399,11 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
+
+           plugin_printf function with SUDO_CONF_ERROR_MSG to present
+           additional error information to the user.
+
+           The function arguments are as follows:
 
            argc
                The number of elements in _a_r_g_v, not counting the final NULL
@@ -450,14 +455,9 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                    the form of a comma-separated list of group IDs.  If
                    _p_r_e_s_e_r_v_e___g_r_o_u_p_s is set, this option is ignored.
 
-               login_class=login_class
-                   BSD login class to use when setting resource limits and
-                   nice value (optional).  This option is only set on systems
-                   that support login classes.
 
 
-
-1.8.0a1                    May 24, 2010                         7
+1.8.0a1                    May 27, 2010                         7
 
 
 
@@ -465,6 +465,11 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
+
+               login_class=login_class
+                   BSD login class to use when setting resource limits and
+                   nice value (optional).  This option is only set on systems
+                   that support login classes.
 
                preserve_groups=bool
                    If set, ssuuddoo will preserve the user's group vector instead
@@ -516,14 +521,9 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                system call when executing the command.  The plugin is
                responsible for allocating and populating the vector.
 
-           user_env_out
-               The NULL-terminated environment vector to use when executing
-               the command.  The plugin is responsible for allocating and
-               populating the vector.
 
 
-
-1.8.0a1                    May 24, 2010                         8
+1.8.0a1                    May 27, 2010                         8
 
 
 
@@ -531,6 +531,11 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
+
+           user_env_out
+               The NULL-terminated environment vector to use when executing
+               the command.  The plugin is responsible for allocating and
+               populating the vector.
 
        list
             int (*list)(int verbose, const char *list_user,
@@ -580,16 +585,11 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            function with SUDO_CONF_ERROR_MSG to present additional error
            information to the user.
 
-       invalidate
-            void (*invalidate)(int remove);
-
-           The invalidate function is called when ssuuddoo is called with the -k
-           or -K flag.  For policy plugins such as _s_u_d_o_e_r_s that cache
-           authentication credentials, this function will invalidate the
 
 
 
-1.8.0a1                    May 24, 2010                         9
+
+1.8.0a1                    May 27, 2010                         9
 
 
 
@@ -598,11 +598,35 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
+       invalidate
+            void (*invalidate)(int remove);
+
+           The invalidate function is called when ssuuddoo is called with the -k
+           or -K flag.  For policy plugins such as _s_u_d_o_e_r_s that cache
+           authentication credentials, this function will invalidate the
            credentials.  If the _r_e_m_o_v_e flag is set, the plugin may remove the
            credentials instead of simply invalidating them.
 
            The invalidate function should be NULL if the plugin does not
            support credential caching.
+
+       init_session
+            int (*init_session)(struct passwd *pwd);
+
+           The init_session function is called when ssuuddoo sets up the execution
+           environment for the command, immediately before the contents of the
+           _c_o_m_m_a_n_d___i_n_f_o list are applied (before the uid changes).  This can
+           be used to do session setup that is not supported by _c_o_m_m_a_n_d___i_n_f_o,
+           such as opening the PAM session.
+
+           The _p_w_d argument points to a passwd struct for the user the command
+           will be run as if the uid the command will run as was found in the
+           password database, otherwise it will be NULL.
+
+           Returns 1 on success, 0 on failure and -1 on error.  On error, the
+           plugin may optionally call the conversation or plugin_printf
+           function with SUDO_CONF_ERROR_MSG to present additional error
+           information to the user.
 
        _C_o_n_v_e_r_s_a_t_i_o_n _A_P_I
 
@@ -628,6 +652,18 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
         struct sudo_conv_reply {
             char *reply;
+
+
+
+1.8.0a1                    May 27, 2010                        10
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
         };
 
         typedef int (*sudo_conv_t)(int num_msgs,
@@ -652,18 +688,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
        needed and supports standard _p_r_i_n_t_f_(_) escape sequences.
 
        See the sample plugin for an example of the conversation function
-
-
-
-1.8.0a1                    May 24, 2010                        10
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
        usage.
 
    II//OO PPlluuggiinn AAPPII
@@ -694,6 +718,18 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
        device (note that this will include input even when echo is disabled,
        such as when a password is read). The log_ttyout function receives
        output from the pseudo-tty that is suitable for replaying the user's
+
+
+
+1.8.0a1                    May 27, 2010                        11
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
        session at a later time.  The log_stdin, log_stdout and log_stderr
        functions are only called if the standard input, standard output or
        standard error respectively correspond to something other than a tty.
@@ -718,17 +754,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                         sudo_printf_t plugin_printf, char * const settings[],
                         char * const user_info[], int argc, char * const argv[],
                         char * const user_env[]);
-
-
-
-1.8.0a1                    May 24, 2010                        11
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
 
            The _o_p_e_n function is run before the _l_o_g___i_n_p_u_t, _l_o_g___o_u_t_p_u_t or
            _s_h_o_w___v_e_r_s_i_o_n functions are called.  It is only called if the
@@ -759,6 +784,18 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                show_version below).  The plugin_printf function may also be
                used to display additional error message to the user.
 
+
+
+
+1.8.0a1                    May 27, 2010                        12
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
            settings
                A vector of user-supplied ssuuddoo settings in the form of
                "name=value" strings.  The vector is terminated by a NULL
@@ -784,17 +821,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
                See the "Policy Plugin API" section for a list of all possible
                strings.
-
-
-
-1.8.0a1                    May 24, 2010                        12
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
 
            argc
                The number of elements in _a_r_g_v, not counting the final NULL
@@ -824,6 +850,18 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            exit_status
                The command's exit status, as returned by the _w_a_i_t(2) system
                call.  The value of exit_status is undefined if error is non-
+
+
+
+1.8.0a1                    May 27, 2010                        13
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
                zero.
 
            error
@@ -849,18 +887,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            input contains banned content).  Returns 1 if the data should be
            passed to the command, 0 if the data is rejected (which will
            terminate the command) or -1 if an error occurred.
-
-
-
-
-1.8.0a1                    May 24, 2010                        13
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
 
            The function arguments are as follows:
 
@@ -890,6 +916,18 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            The _l_o_g___s_t_d_i_n function is only used if the standard input does not
            correspond to a tty device.  It is called whenever data can be read
            from the standard input but before it is passed to the running
+
+
+
+1.8.0a1                    May 27, 2010                        14
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
            command.  This allows the plugin to reject data if it chooses to
            (for instance if the input contains banned content).  Returns 1 if
            the data should be passed to the command, 0 if the data is rejected
@@ -915,18 +953,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            The function arguments are as follows:
 
            buf The buffer containing command output.
-
-
-
-
-1.8.0a1                    May 24, 2010                        14
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
 
            len The length of _b_u_f in bytes.
 
@@ -954,6 +980,20 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
    SSuuddoo iimmpplleemmeennttaattiioonn ddeettaaiillss
        Version macros:
 
+
+
+
+
+
+1.8.0a1                    May 27, 2010                        15
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
         #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
         #define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
         #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \
@@ -975,16 +1015,42 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
             struct io_plugin io;
         };
 
-PPOODD EERRRROORRSS
-       Hey! TThhee aabboovvee ddooccuummeenntt hhaadd ssoommee ccooddiinngg eerrrroorrss,, wwhhiicchh aarree eexxppllaaiinneedd
-       bbeellooww::
-
-       Around line 609:
-           You forgot a '=back' before '=head3'
 
 
 
 
-1.8.0a1                    May 24, 2010                        15
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1.8.0a1                    May 27, 2010                        16
 
 
