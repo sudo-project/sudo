@@ -202,8 +202,22 @@ pam_begin_session(pw, auth)
     struct passwd *pw;
     sudo_auth *auth;
 {
-    int status;
+    int status = PAM_SUCCESS;
 
+    /*
+     * If there is no valid user we cannot open a PAM session.
+     * This is not an error as sudo can run commands with arbitrary
+     * uids, it just means we are done from a session management standpoint.
+     */
+    if (pw == NULL) {
+	if (pamh != NULL) {
+	    (void) pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
+	    pamh = NULL;
+	}
+	goto done;
+    }
+
+    /* If the user did not have to authenticate there is no pam handle yet. */
     if (pamh == NULL)
 	pam_init(pw, NULL, NULL);
 
@@ -224,16 +238,14 @@ pam_begin_session(pw, auth)
     (void) pam_setcred(pamh, PAM_ESTABLISH_CRED);
 
 #ifndef NO_PAM_SESSION
-    /*
-     * To fully utilize PAM sessions we would need to keep a
-     * sudo process around until the command exits.  However, we
-     * can at least cause pam_limits to be run by opening and then
-     * immediately closing the session.
-     */
     status = pam_open_session(pamh, 0);
-    if (status != PAM_SUCCESS)
+    if (status != PAM_SUCCESS) {
 	(void) pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
+	pamh = NULL;
+    }
 #endif
+
+done:
     return(status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
 }
 
@@ -241,13 +253,14 @@ int
 pam_end_session(auth)
     sudo_auth *auth;
 {
-    int status;
+    int status = PAM_SUCCESS;
 
+    if (pamh) {
 #ifndef NO_PAM_SESSION
-    (void) pam_close_session(pamh, 0);
+	(void) pam_close_session(pamh, PAM_SILENT);
 #endif
-
-    status = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
+	status = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
+    }
     return(status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
 }
 

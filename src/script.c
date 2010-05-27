@@ -639,7 +639,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	close(sv[0]);
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
 	/* XXX - defer call to exec_setup() until my_execve()? */
-	if (exec_setup(details) == 0) {
+	if (exec_setup(details) == TRUE) {
 	    /* headed for execve() */
 	    if (log_io) {
 		/* Close the other end of the stdin/stdout/stderr pipes. */

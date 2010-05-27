@@ -210,8 +210,8 @@ int user_is_exempt(void);
 
 /* sudo_auth.c */
 int verify_user(struct passwd *, char *);
-int begin_session(struct passwd *);
-int end_session();
+int auth_begin_session(struct passwd *);
+int auth_end_session();
 
 #ifdef HAVE_LDAP
 /* ldap.c */

@@ -52,6 +52,7 @@ typedef int (*sudo_conv_t)(int num_msgs, const struct sudo_conv_message msgs[],
 typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
 
 /* Policy plugin type and defines */
+struct passwd;
 struct policy_plugin {
 #define SUDO_POLICY_PLUGIN     1
     unsigned int type; /* always SUDO_POLICY_PLUGIN */
@@ -68,6 +69,7 @@ struct policy_plugin {
 	const char *list_user);
     int (*validate)(void);
     void (*invalidate)(int remove);
+    int (*init_session)(struct passwd *pwd);
 };
 
 /* I/O plugin type and defines */

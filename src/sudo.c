@@ -651,13 +651,23 @@ cleanup(int gotsignal)
 
 /*
  * Setup the execution environment immediately prior to the call to execve()
+ * Returns TRUE on success and FALSE on failure.
  */
 int
 exec_setup(struct command_details *details)
 {
+    int rval = FALSE;
     struct passwd *pw;
 
     pw = getpwuid(details->euid);
+
+    /* Call policy plugin's session init before other setup occurs. */
+    if (policy_plugin.u.policy->init_session) {
+	/* The session init code is expected to print an error as needed. */
+	if (policy_plugin.u.policy->init_session(pw) != TRUE)
+	    goto done;
+    }
+
     if (pw != NULL) {
 #ifdef HAVE_GETUSERATTR
 	aix_setlimits(pw->pw_name);
@@ -732,15 +742,7 @@ exec_setup(struct command_details *details)
 	    goto done;
 	}
     }
-    if (details->cwd) {
-	/* cwd is relative to the new root, if any */
-	if (chdir(details->cwd) != 0) {
-	    warning("unable to change directory to %s", details->cwd);
-	    goto done;
-	}
-    }
 
-    /* Must set uids last */
 #ifdef HAVE_SETRESUID
     if (setresuid(details->uid, details->euid, details->euid) != 0) {
 	warning("unable to change to runas uid");
@@ -758,10 +760,19 @@ exec_setup(struct command_details *details)
     }
 #endif /* !HAVE_SETRESUID && !HAVE_SETREUID */
 
-    errno = 0;
+    /* Set cwd after uid to avoid permissions problems. */
+    if (details->cwd) {
+	/* Note: cwd is relative to the new root, if any. */
+	if (chdir(details->cwd) != 0) {
+	    warning("unable to change directory to %s", details->cwd);
+	    goto done;
+	}
+    }
+
+    rval = TRUE;
 
 done:
-    return errno;
+    return rval;
 }
 
 /*

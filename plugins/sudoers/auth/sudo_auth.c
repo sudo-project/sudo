@@ -234,7 +234,7 @@ cleanup:
     return rval;
 }
 
-int begin_session(struct passwd *pw)
+int auth_begin_session(struct passwd *pw)
 {
     sudo_auth *auth;
     int status;
@@ -251,7 +251,7 @@ int begin_session(struct passwd *pw)
     return TRUE;
 }
 
-int end_session(void)
+int auth_end_session(void)
 {
     sudo_auth *auth;
     int status;
