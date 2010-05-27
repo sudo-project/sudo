@@ -792,7 +792,7 @@ run_command(struct command_details *details, char *argv[], char *envp[])
      * XXX - no background support
      */
 
-    script_execve(details, argv, envp, &cstat);
+    sudo_execve(details, argv, envp, &cstat);
 
     switch (cstat.type) {
     case CMD_ERRNO:

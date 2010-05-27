@@ -157,8 +157,8 @@ int tty_present(void);
 /* zero_bytes.c */
 void zero_bytes(volatile void *, size_t);
 
-/* script.c */
-int script_execve(struct command_details *details, char *argv[], char *envp[],
+/* exec.c */
+int sudo_execve(struct command_details *details, char *argv[], char *envp[],
     struct command_status *cstat);
 
 /* term.c */
