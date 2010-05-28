@@ -8,7 +8,7 @@ NNAAMMEE
        sudo, sudoedit - execute a command as another user
 
 SSYYNNOOPPSSIISS
-       ssuuddoo [--DD _l_e_v_e_l] --hh | --KK | --kk | --LL | --VV
+       ssuuddoo [--DD _l_e_v_e_l] --hh | --KK | --kk | --VV
 
        ssuuddoo --vv [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--DD _l_e_v_e_l] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d]
        [--pp _p_r_o_m_p_t] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d]
@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0a1                    May 11, 2010                         1
+1.8.0a2                    May 28, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.8.0a1                    May 11, 2010                         2
+1.8.0a2                    May 28, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0a1                    May 11, 2010                         3
+1.8.0a2                    May 28, 2010                         3
 
 
 
@@ -230,11 +230,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    prompt for a password (if one is required by _s_u_d_o_e_r_s) and
                    will not update the user's time stamp file.
 
-       -L          The --LL (_l_i_s_t defaults) option will list the parameters that
-                   may be set in a _D_e_f_a_u_l_t_s line along with a short
-                   description for each.  This option will be removed from a
-                   future version of ssuuddoo.
-
        -l[l] [_c_o_m_m_a_n_d]
                    If no _c_o_m_m_a_n_d is specified, the --ll (_l_i_s_t) option will list
                    the allowed (and forbidden) commands for the invoking user
@@ -256,10 +251,15 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    preserve the invoking user's group vector unaltered.  By
                    default, ssuuddoo will initialize the group vector to the list
                    of groups the target user is in.  The real and effective
+                   group IDs, however, are still set to match the target user.
+
+       -p _p_r_o_m_p_t   The --pp (_p_r_o_m_p_t) option allows you to override the default
+                   password prompt and use a custom one.  The following
+                   percent (`%') escapes are supported:
 
 
 
-1.8.0a1                    May 11, 2010                         4
+1.8.0a2                    May 28, 2010                         4
 
 
 
@@ -267,12 +267,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
-
-                   group IDs, however, are still set to match the target user.
-
-       -p _p_r_o_m_p_t   The --pp (_p_r_o_m_p_t) option allows you to override the default
-                   password prompt and use a custom one.  The following
-                   percent (`%') escapes are supported:
 
                    %H  expanded to the local host name including the domain
                        name (on if the machine's host name is fully qualified
@@ -322,10 +316,16 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
        -V          The --VV (_v_e_r_s_i_o_n) option causes ssuuddoo to print the version
                    number and exit.  If the invoking user is already root the
+                   --VV option will print out a list of the defaults ssuuddoo was
+                   compiled with as well as the machine's local network
+                   addresses.
+
+       -v          If given the --vv (_v_a_l_i_d_a_t_e) option, ssuuddoo will update the
+                   user's time stamp, prompting for the user's password if
 
 
 
-1.8.0a1                    May 11, 2010                         5
+1.8.0a2                    May 28, 2010                         5
 
 
 
@@ -334,12 +334,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
-                   --VV option will print out a list of the defaults ssuuddoo was
-                   compiled with as well as the machine's local network
-                   addresses.
-
-       -v          If given the --vv (_v_a_l_i_d_a_t_e) option, ssuuddoo will update the
-                   user's time stamp, prompting for the user's password if
                    necessary.  This extends the ssuuddoo timeout for another 5
                    minutes (or whatever the timeout is set to in _s_u_d_o_e_r_s) but
                    does not run a command.
@@ -389,9 +383,15 @@ SSEECCUURRIITTYY NNOOTTEESS
        blacklist all potentially dangerous environment variables, use of the
        default _e_n_v___r_e_s_e_t behavior is encouraged.
 
+       In all cases, environment variables with a value beginning with () are
+       removed as they could be interpreted as bbaasshh functions.  The list of
+       environment variables that ssuuddoo allows or denies is contained in the
+       output of sudo -V when run as root.
 
 
-1.8.0a1                    May 11, 2010                         6
+
+
+1.8.0a2                    May 28, 2010                         6
 
 
 
@@ -399,11 +399,6 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
-
-       In all cases, environment variables with a value beginning with () are
-       removed as they could be interpreted as bbaasshh functions.  The list of
-       environment variables that ssuuddoo allows or denies is contained in the
-       output of sudo -V when run as root.
 
        Note that the dynamic linker on most operating systems will remove
        variables that can control dynamic linking from the environment of
@@ -454,10 +449,15 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        time stamp has per-tty granularity but still may outlive the user's
        session.  On Linux systems where the devpts filesystem is used, as well
        as other systems that utilize a devfs filesystem that monotonically
+       increase the inode number of devices as they are created (such as Mac
+       OS X), ssuuddoo is able to determine when a tty-based time stamp file is
+       stale and will ignore it.  Administrators should not rely on this
+       feature as it is not universally available.
 
 
 
-1.8.0a1                    May 11, 2010                         7
+
+1.8.0a2                    May 28, 2010                         7
 
 
 
@@ -465,11 +465,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
-
-       increase the inode number of devices as they are created (such as Mac
-       OS X), ssuuddoo is able to determine when a tty-based time stamp file is
-       stale and will ignore it.  Administrators should not rely on this
-       feature as it is not universally available.
 
        Please note that ssuuddoo will normally only log the command it explicitly
        runs.  If a user runs a command such as sudo su or sudo sh, subsequent
@@ -521,9 +516,14 @@ EENNVVIIRROONNMMEENNTT
        VISUAL          Default editor to use in --ee (sudoedit) mode if
                        SUDO_EDITOR is not set
 
+FFIILLEESS
+       _/_e_t_c_/_s_u_d_o_e_r_s            List of who can run what
+
+       _/_v_a_r_/_r_u_n_/_s_u_d_o           Directory containing time stamps
 
 
-1.8.0a1                    May 11, 2010                         8
+
+1.8.0a2                    May 28, 2010                         8
 
 
 
@@ -531,11 +531,6 @@ EENNVVIIRROONNMMEENNTT
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
-
-FFIILLEESS
-       _/_e_t_c_/_s_u_d_o_e_r_s            List of who can run what
-
-       _/_v_a_r_/_r_u_n_/_s_u_d_o           Directory containing time stamps
 
        _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t        Initial environment for --ii mode on Linux and
                                AIX
@@ -587,9 +582,14 @@ AAUUTTHHOORRSS
        See the HISTORY file in the ssuuddoo distribution or visit
        http://www.sudo.ws/sudo/history.html for a short history of ssuuddoo.
 
+CCAAVVEEAATTSS
+       There is no easy way to prevent a user from gaining a root shell if
+       that user is allowed to run arbitrary commands via ssuuddoo.  Also, many
+       programs (such as editors) allow the user to run commands via shell
 
 
-1.8.0a1                    May 11, 2010                         9
+
+1.8.0a2                    May 28, 2010                         9
 
 
 
@@ -598,10 +598,6 @@ AAUUTTHHOORRSS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
-CCAAVVEEAATTSS
-       There is no easy way to prevent a user from gaining a root shell if
-       that user is allowed to run arbitrary commands via ssuuddoo.  Also, many
-       programs (such as editors) allow the user to run commands via shell
        escapes, thus avoiding ssuuddoo's checks.  However, on most systems it is
        possible to prevent shell escapes with ssuuddoo's _n_o_e_x_e_c functionality.
        See the _s_u_d_o_e_r_s(4) manual for details.
@@ -655,6 +651,10 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.0a1                    May 11, 2010                        10
+
+
+
+
+1.8.0a2                    May 28, 2010                        10
 
 

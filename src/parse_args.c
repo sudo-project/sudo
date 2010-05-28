@@ -161,7 +161,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	 * Some trickiness is required to allow environment variables
 	 * to be interspersed with command line options.
 	 */
-	if ((ch = getopt(argc, argv, "+Aa:bC:c:D:Eeg:HhiKkLlnPp:r:Sst:U:u:Vv")) != -1) {
+	if ((ch = getopt(argc, argv, "+Aa:bC:c:D:Eeg:HhiKklnPp:r:Sst:U:u:Vv")) != -1) {
 	    switch (ch) {
 		case 'A':
 		    SET(tgetpass_flags, TGP_ASKPASS);

@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "May 25, 2010" "1.8.0a1" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "May 28, 2010" "1.8.0a2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -157,7 +157,7 @@
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBsudo\fR [\fB\-D\fR\ \fIlevel\fR] \fB\-h\fR | \fB\-K\fR | \fB\-k\fR | \fB\-L\fR | \fB\-V\fR
+\&\fBsudo\fR [\fB\-D\fR\ \fIlevel\fR] \fB\-h\fR | \fB\-K\fR | \fB\-k\fR | \fB\-V\fR
 .PP
 \&\fBsudo\fR \fB\-v\fR [\fB\-AknS\fR]
 .if \n(BA [\fB\-a\fR\ \fIauth_type\fR]
@@ -374,11 +374,6 @@ a password, the \fB\-k\fR option will cause \fBsudo\fR to ignore the user's
 time stamp file.  As a result, \fBsudo\fR will prompt for a password
 (if one is required by \fIsudoers\fR) and will not update the user's
 time stamp file.
-.IP "\-L" 12
-.IX Item "-L"
-The \fB\-L\fR (\fIlist\fR defaults) option will list the parameters that
-may be set in a \fIDefaults\fR line along with a short description for
-each.  This option will be removed from a future version of \fBsudo\fR.
 .IP "\-l[l] [\fIcommand\fR]" 12
 .IX Item "-l[l] [command]"
 If no \fIcommand\fR is specified, the \fB\-l\fR (\fIlist\fR) option will list
