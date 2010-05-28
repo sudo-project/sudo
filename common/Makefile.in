@@ -41,7 +41,7 @@ CPPFLAGS = -I. -I$(top_builddir) -I$(incdir) @CPPFLAGS@
 # Usually -O and/or -g
 CFLAGS = @CFLAGS@
 
-# Pass in paths and uid/gid + OS dependent defined
+# OS dependent defines
 DEFS = @OSDEFS@
 
 #### End of system configuration section. ####
@@ -88,7 +88,7 @@ check:
 	@echo nothing to check
 
 clean:
-	-$(LIBTOOL) --mode=clean rm -f *.a *.o *.lo *.la stamp-* core *.core core.*
+	-$(LIBTOOL) --mode=clean rm -f *.lo *.o *.la *.a stamp-* core *.core core.*
 
 mostlyclean: clean
 

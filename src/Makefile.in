@@ -63,7 +63,7 @@ noexecdir = @NOEXECDIR@
 install_uid = 0
 install_gid = 0
 
-# Pass in paths and OS dependent defines
+# OS dependent defines
 DEFS = @OSDEFS@
 
 #### End of system configuration section. ####
@@ -145,7 +145,7 @@ check:
 	@echo nothing to check
 
 clean:
-	-$(LIBTOOL) --mode=clean rm -f *.a *.o *.lo *.la $(PROGS) core *.core core.*
+	-$(LIBTOOL) --mode=clean rm -f $(PROGS) *.lo *.o *.la *.a stamp-* core *.core core.*
 
 mostlyclean: clean
 

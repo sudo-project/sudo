@@ -50,7 +50,7 @@ SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(LIBS) $(NET_LIBS) @ZL
 REPLAY_LIBS = @REPLAY_LIBS@ @ZLIB@
 
 # C preprocessor flags
-CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) -I$(top_srcdir) @CPPFLAGS@
+CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) @CPPFLAGS@
 
 # Usually -O and/or -g
 CFLAGS = @CFLAGS@
@@ -89,12 +89,14 @@ sudoers_uid = @SUDOERS_UID@
 sudoers_gid = @SUDOERS_GID@
 sudoers_mode = @SUDOERS_MODE@
 
-# Pass in paths and uid/gid + OS dependent defined
+# Pass in paths and uid/gid + OS dependent defines
 DEFS = @OSDEFS@ -D_PATH_SUDOERS=\"$(sudoersdir)/sudoers\" -DSUDOERS_UID=$(sudoers_uid) -DSUDOERS_GID=$(sudoers_gid) -DSUDOERS_MODE=$(sudoers_mode)
 
 #### End of system configuration section. ####
 
 SHELL = @SHELL@
+
+PROGS = sudoers.la visudo sudoreplay testsudoers
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
@@ -125,7 +127,7 @@ AUTHDEP = $(SUDODEP) $(authdir)/sudo_auth.h
 INSDEP = $(srcdir)/ins_2001.h $(srcdir)/ins_classic.h $(srcdir)/ins_csops.h \
 	 $(srcdir)/ins_goons.h $(srcdir)/insults.h
 
-all: sudoers.la visudo sudoreplay testsudoers
+all: $(PROGS)
 
 .SUFFIXES: .o .c .h .l .y .lo
 
@@ -270,7 +272,7 @@ check:
 	@echo nothing to check
 
 clean:
-	-$(LIBTOOL) --mode=clean rm -f sudoreplay testsudoers visudo *.a *.o *.lo *.la stamp-* core *.core core.*
+	-$(LIBTOOL) --mode=clean rm -f $(PROGS) *.lo *.o *.la *.a stamp-* core *.core core.*
 
 mostlyclean: clean
 
