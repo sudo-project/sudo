@@ -1149,9 +1149,6 @@ cleanup(int gotsignal)
 static int
 sudoers_policy_version(int verbose)
 {
-    struct sudo_conv_message msg;
-    struct sudo_conv_reply repl;
-
     sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers plugin version %s\n",
 	PACKAGE_VERSION);
 
