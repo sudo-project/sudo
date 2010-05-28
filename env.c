@@ -270,6 +270,7 @@ insert_env(str, e, dupcheck)
 {
     char **nep;
     size_t varlen;
+    int found = FALSE;
 
     /* Make sure there is room for the new entry plus a NULL. */
     if (e->env_len + 2 > e->env_size) {
@@ -278,20 +279,34 @@ insert_env(str, e, dupcheck)
     }
 
     if (dupcheck) {
-	    varlen = (strchr(str, '=') - str) + 1;
+	varlen = (strchr(str, '=') - str) + 1;
 
-	    for (nep = e->envp; *nep; nep++) {
+	for (nep = e->envp; !found && *nep != NULL; nep++) {
+	    if (strncmp(str, *nep, varlen) == 0) {
+		*nep = str;
+		found = TRUE;
+	    }
+	}
+	/* Prune out duplicate variables. */
+	if (found) {
+	    while (*nep != NULL) {
 		if (strncmp(str, *nep, varlen) == 0) {
-		    *nep = str;
-		    return;
+		    memmove(nep, nep + 1,
+			(e->env_len - (nep - e->envp)) * sizeof(char *));
+		    e->env_len--;
+		} else {
+		    nep++;
 		}
 	    }
-    } else
-	nep = e->envp + e->env_len;
+	}
+    }
 
-    e->env_len++;
-    *nep++ = str;
-    *nep = NULL;
+    if (!found) {
+	nep = e->envp + e->env_len;
+	e->env_len++;
+	*nep++ = str;
+	*nep = NULL;
+    }
 }
 
 /*
