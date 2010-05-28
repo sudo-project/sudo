@@ -182,10 +182,10 @@ main(int argc, char *argv[])
 #else
     FILE *tfile, *sfile;
 #endif
-    fd_set *fdsr;
+    fd_set *fdsw;
     sigaction_t sa;
     unsigned long nbytes;
-    size_t len, nread;
+    size_t len, nread, off;
     ssize_t nwritten;
     double seconds;
     double speed = 1.0;
@@ -300,7 +300,7 @@ main(int argc, char *argv[])
 	if (!term_raw(STDIN_FILENO, 1))
 	    error(1, "cannot set tty to raw mode");
     }
-    fdsr = (fd_set *)emalloc2(howmany(STDOUT_FILENO + 1, NFDBITS),
+    fdsw = (fd_set *)emalloc2(howmany(STDOUT_FILENO + 1, NFDBITS),
 	sizeof(fd_mask));
 
     /*
@@ -342,27 +342,28 @@ main(int argc, char *argv[])
 	    nread = fread(buf, 1, len, sfile);
 #endif
 	    nbytes -= nread;
+	    off = 0;
 	    do {
 		/* no stdio, must be unbuffered */
-		nwritten = write(STDOUT_FILENO, buf, nread);
+		nwritten = write(STDOUT_FILENO, buf + off, nread - off);
 		if (nwritten == -1) {
 		    if (errno == EINTR)
 			continue;
 		    if (errno == EAGAIN) {
-			FD_SET(STDOUT_FILENO, fdsr);
+			FD_SET(STDOUT_FILENO, fdsw);
 			do {
-			    nready = select(STDOUT_FILENO + 1, fdsr, NULL, NULL, NULL);
+			    nready = select(STDOUT_FILENO + 1, NULL, fdsw, NULL, NULL);
 			} while (nready == -1 && errno == EINTR);
 			if (nready == 1)
 			    continue;
 		    }
 		    error(1, "writing to standard output");
 		}
-		nread -= nwritten;
-	    } while (nread);
+		off += nwritten;
+	    } while (nread > off);
 	}
     }
-    term_restore(STDOUT_FILENO, 0);
+    term_restore(STDIN_FILENO, 1);
     exit(0);
 }
 
@@ -803,7 +804,7 @@ usage(void)
 void
 cleanup(int signo)
 {
-    term_restore(STDOUT_FILENO, 0);
+    term_restore(STDIN_FILENO, 0);
     if (signo)
 	kill(getpid(), signo);
 }
