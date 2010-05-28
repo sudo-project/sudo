@@ -125,54 +125,60 @@ dump_defaults(void)
 	    switch (cur->type & T_MASK) {
 		case T_FLAG:
 		    if (cur->sd_un.flag)
-			puts(cur->desc);
+			sudo_printf(SUDO_CONV_INFO_MSG, "%s\n", cur->desc);
 		    break;
 		case T_STR:
 		    if (cur->sd_un.str) {
-			(void) printf(cur->desc, cur->sd_un.str);
-			putchar('\n');
+			sudo_printf(SUDO_CONV_INFO_MSG,
+			    cur->desc, cur->sd_un.str);
+			sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    }
 		    break;
 		case T_LOGFAC:
 		    if (cur->sd_un.ival) {
-			(void) printf(cur->desc, logfac2str(cur->sd_un.ival));
-			putchar('\n');
+			sudo_printf(SUDO_CONV_INFO_MSG,
+			    cur->desc, logfac2str(cur->sd_un.ival));
+			sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    }
 		    break;
 		case T_LOGPRI:
 		    if (cur->sd_un.ival) {
-			(void) printf(cur->desc, logpri2str(cur->sd_un.ival));
-			putchar('\n');
+			sudo_printf(SUDO_CONV_INFO_MSG,
+			    cur->desc, logpri2str(cur->sd_un.ival));
+			sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    }
 		    break;
 		case T_UINT:
 		case T_INT:
-		    (void) printf(cur->desc, cur->sd_un.ival);
-		    putchar('\n');
+		    sudo_printf(SUDO_CONV_INFO_MSG, cur->desc, cur->sd_un.ival);
+		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    break;
 		case T_FLOAT:
-		    (void) printf(cur->desc, cur->sd_un.fval);
-		    putchar('\n');
+		    sudo_printf(SUDO_CONV_INFO_MSG, cur->desc, cur->sd_un.fval);
+		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    break;
 		case T_MODE:
-		    (void) printf(cur->desc, cur->sd_un.mode);
-		    putchar('\n');
+		    sudo_printf(SUDO_CONV_INFO_MSG, cur->desc, cur->sd_un.mode);
+		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    break;
 		case T_LIST:
 		    if (cur->sd_un.list) {
-			puts(cur->desc);
-			for (item = cur->sd_un.list; item; item = item->next)
-			    printf("\t%s\n", item->value);
+			sudo_printf(SUDO_CONV_INFO_MSG, "%s\n", cur->desc);
+			for (item = cur->sd_un.list; item; item = item->next) {
+			    sudo_printf(SUDO_CONV_INFO_MSG,
+				"\t%s\n", item->value);
+			}
 		    }
 		    break;
 		case T_TUPLE:
 		    for (def = cur->values; def->sval; def++) {
 			if (cur->sd_un.ival == def->ival) {
-			    (void) printf(cur->desc, def->sval);
+			    sudo_printf(SUDO_CONV_INFO_MSG,
+				cur->desc, def->sval);
 			    break;
 			}
 		    }
-		    putchar('\n');
+		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    break;
 	    }
 	}
@@ -188,20 +194,24 @@ list_options(void)
     struct sudo_defs_types *cur;
     char *p;
 
-    (void) puts("Available options in a sudoers ``Defaults'' line:\n");
+    sudo_printf(SUDO_CONV_INFO_MSG,
+	"Available options in a sudoers ``Defaults'' line:\n\n");
     for (cur = sudo_defs_table; cur->name; cur++) {
 	if (cur->name && cur->desc) {
 	    switch (cur->type & T_MASK) {
 		case T_FLAG:
-		    (void) printf("%s: %s\n", cur->name, cur->desc);
+		    sudo_printf(SUDO_CONV_INFO_MSG,
+			"%s: %s\n", cur->name, cur->desc);
 		    break;
 		default:
 		    p = strrchr(cur->desc, ':');
-		    if (p)
-			(void) printf("%s: %.*s\n", cur->name,
-			    (int) (p - cur->desc), cur->desc);
-		    else
-			(void) printf("%s: %s\n", cur->name, cur->desc);
+		    if (p) {
+			sudo_printf(SUDO_CONV_INFO_MSG, "%s: %.*s\n",
+			    cur->name, (int) (p - cur->desc), cur->desc);
+		    } else {
+			sudo_printf(SUDO_CONV_INFO_MSG,
+			    "%s: %s\n", cur->name, cur->desc);
+		    }
 		    break;
 	    }
 	}

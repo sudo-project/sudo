@@ -523,7 +523,7 @@ display_bound_defaults(int dtype, struct lbuf *lbuf)
 	default:
 	    return(-1);
     }
-    /* printf("Per-%s Defaults entries:\n", dname); */
+    /* sudo_printf(SUDO_CONV_INFO_MSG, "Per-%s Defaults entries:\n", dname); */
     tq_foreach_fwd(&defaults, d) {
 	if (d->type != dtype)
 	    continue;
@@ -590,8 +590,8 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
     }
     matched:
     if (match != NULL && !match->negated) {
-	printf("%s%s%s\n", safe_cmnd, user_args ? " " : "",
-	    user_args ? user_args : "");
+	sudo_printf(SUDO_CONV_INFO_MSG, "%s%s%s\n",
+	    safe_cmnd, user_args ? " " : "", user_args ? user_args : "");
 	rval = 0;
     }
     return(rval);

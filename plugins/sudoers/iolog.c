@@ -190,6 +190,10 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (!sudo_printf)
 	sudo_printf = plugin_printf;
 
+    /* If we have no command (because -V was specified) just return. */
+    if (argc == 0)
+	return TRUE;
+
     if (!def_transcript)
 	return FALSE;
 

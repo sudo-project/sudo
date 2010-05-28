@@ -108,6 +108,7 @@ static int install_sudoers(struct sudoersfile *, int);
 static int print_unused(void *, void *);
 static int reparse_sudoers(char *, char *, int, int);
 static int run_command(char *, char **);
+static int visudo_printf(int msg_type, const char *fmt, ...);
 static void print_selfref(char *name, int, int, int);
 static void print_undefined(char *name, int, int, int);
 static void setup_signals(void);
@@ -136,6 +137,7 @@ int num_interfaces;
 struct interface *interfaces;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
+sudo_printf_t sudo_printf = visudo_printf;
 static struct sudoerslist {
     struct sudoersfile *first, *last;
 } sudoerslist;
@@ -1157,4 +1159,29 @@ usage(void)
     (void) fprintf(stderr, "usage: %s [-c] [-q] [-s] [-V] [-f sudoers]\n",
 	getprogname());
     exit(1);
+}
+
+static int
+visudo_printf(int msg_type, const char *fmt, ...)
+{
+    va_list ap;
+    FILE *fp;
+            
+    switch (msg_type) {
+    case SUDO_CONV_INFO_MSG:
+	fp = stdout;
+	break;
+    case SUDO_CONV_ERROR_MSG:
+	fp = stderr;
+	break;
+    default:
+	errno = EINVAL;
+	return -1;
+    }
+   
+    va_start(ap, fmt);
+    vfprintf(fp, fmt, ap);
+    va_end(ap);
+   
+    return 0;
 }

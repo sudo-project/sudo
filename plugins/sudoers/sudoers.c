@@ -1156,34 +1156,25 @@ sudoers_policy_version(int verbose)
 {
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
-    char *str;
 
-    easprintf(&str, "Sudoers plugin version %s\n", PACKAGE_VERSION);
+    sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers plugin version %s\n",
+	PACKAGE_VERSION);
 
-    /* Call conversation function */
-    memset(&msg, 0, sizeof(msg));
-    msg.msg_type = SUDO_CONV_INFO_MSG;
-    msg.msg = str;
-    memset(&repl, 0, sizeof(repl));
-    sudo_conv(1, &msg, &repl);
-    free(str);
-
-#ifdef notyet
     if (verbose) {
-	putchar('\n');
-	(void) printf("Sudoers path: %s\n", _PATH_SUDOERS);
+	sudo_printf(SUDO_CONV_INFO_MSG, "\nSudoers path: %s\n", _PATH_SUDOERS);
 #ifdef HAVE_LDAP
 # ifdef _PATH_NSSWITCH_CONF
-	(void) printf("nsswitch path: %s\n", _PATH_NSSWITCH_CONF);
+	sudo_printf(SUDO_CONV_INFO_MSG, "nsswitch path: %s\n", _PATH_NSSWITCH_CONF);
 # endif
-	(void) printf("ldap.conf path: %s\n", _PATH_LDAP_CONF);
-	(void) printf("ldap.secret path: %s\n", _PATH_LDAP_SECRET);
+	sudo_printf(SUDO_CONV_INFO_MSG, "ldap.conf path: %s\n", _PATH_LDAP_CONF);
+	sudo_printf(SUDO_CONV_INFO_MSG, "ldap.secret path: %s\n", _PATH_LDAP_SECRET);
 #endif
 	dump_auth_methods();
 	dump_defaults();
+	sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 	dump_interfaces();
+	sudo_printf(SUDO_CONV_INFO_MSG, "\n");
     }
-#endif
     return TRUE;
 }
 

@@ -55,6 +55,7 @@
 # include <netgroup.h>
 #endif /* HAVE_NETGROUP_H */
 #include <ctype.h>
+#include <errno.h>
 #include <pwd.h>
 #include <grp.h>
 #include <netinet/in.h>
@@ -71,27 +72,8 @@
 #endif /* HAVE_FNMATCH */
 
 /*
- * Globals
+ * Function Prototypes
  */
-int  Argc, NewArgc;
-char **Argv, **NewArgv;
-int num_interfaces;
-struct interface *interfaces;
-struct sudo_user sudo_user;
-struct passwd *list_pw;
-extern int parse_error;
-
-/* For getopt(3) */
-extern char *optarg;
-extern int optind;
-
-#if defined(SUDO_DEVEL) && defined(__OpenBSD__)
-extern char *malloc_options;
-#endif
-#ifdef YYDEBUG
-extern int yydebug;
-#endif
-
 int  print_alias(void *, void *);
 void dump_sudoers(void);
 void print_defaults(void);
@@ -100,6 +82,7 @@ void print_userspecs(void);
 void usage(void) __attribute__((__noreturn__));
 void set_runasgr(char *);
 void set_runaspw(char *);
+static int testsudoers_printf(int msg_type, const char *fmt, ...);
 
 extern void setgrfile(const char *);
 extern void setgrent(void);
@@ -113,6 +96,29 @@ extern void endpwent(void);
 extern struct passwd *getpwent(void);
 extern struct passwd *getpwnam(const char *);
 extern struct passwd *getpwuid(uid_t);
+
+/*
+ * Globals
+ */
+int  Argc, NewArgc;
+char **Argv, **NewArgv;
+int num_interfaces;
+struct interface *interfaces;
+struct sudo_user sudo_user;
+struct passwd *list_pw;
+extern int parse_error;
+sudo_printf_t sudo_printf = testsudoers_printf;
+
+/* For getopt(3) */
+extern char *optarg;
+extern int optind;
+
+#if defined(SUDO_DEVEL) && defined(__OpenBSD__)
+extern char *malloc_options;
+#endif
+#ifdef YYDEBUG
+extern int yydebug;
+#endif
 
 int
 main(int argc, char *argv[])
@@ -525,6 +531,31 @@ print_userspecs(void)
 	print_privilege(us->privileges.first); /* XXX */
 	putchar('\n');
     }
+}
+
+static int
+testsudoers_printf(int msg_type, const char *fmt, ...)
+{
+    va_list ap;
+    FILE *fp;
+            
+    switch (msg_type) {
+    case SUDO_CONV_INFO_MSG:
+	fp = stdout;
+	break;
+    case SUDO_CONV_ERROR_MSG:
+	fp = stderr;
+	break;
+    default:
+	errno = EINVAL;
+	return -1;
+    }
+   
+    va_start(ap, fmt);
+    vfprintf(fp, fmt, ap);
+    va_end(ap);
+   
+    return 0;
 }
 
 void

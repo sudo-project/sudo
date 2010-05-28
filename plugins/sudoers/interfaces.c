@@ -333,12 +333,14 @@ dump_interfaces(void)
     char addrbuf[INET6_ADDRSTRLEN], maskbuf[INET6_ADDRSTRLEN];
 #endif
 
-    puts("Local IP address and netmask pairs:");
+    sudo_printf(SUDO_CONV_INFO_MSG, "Local IP address and netmask pairs:\n");
     for (i = 0; i < num_interfaces; i++) {
 	switch(interfaces[i].family) {
 	    case AF_INET:
-		printf("\t%s / ", inet_ntoa(interfaces[i].addr.ip4));
-		puts(inet_ntoa(interfaces[i].netmask.ip4));
+		sudo_printf(SUDO_CONV_INFO_MSG,
+		    "\t%s / ", inet_ntoa(interfaces[i].addr.ip4));
+		sudo_printf(SUDO_CONV_INFO_MSG, "%s\n",
+		    inet_ntoa(interfaces[i].netmask.ip4));
 		break;
 #ifdef HAVE_IN6_ADDR
 	    case AF_INET6:
@@ -346,7 +348,8 @@ dump_interfaces(void)
 		    addrbuf, sizeof(addrbuf));
 		inet_ntop(AF_INET6, &interfaces[i].netmask.ip6,
 		    maskbuf, sizeof(maskbuf));
-		printf("\t%s / %s\n", addrbuf, maskbuf);
+		sudo_printf(SUDO_CONV_INFO_MSG,
+		    "\t%s / %s\n", addrbuf, maskbuf);
 		break;
 #endif /* HAVE_IN6_ADDR */
 	}

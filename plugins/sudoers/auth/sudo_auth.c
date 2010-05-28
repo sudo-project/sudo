@@ -293,22 +293,13 @@ int auth_end_session(void)
 static void
 pass_warn(void)
 {
-    struct sudo_conv_message msg[2];
-    struct sudo_conv_reply repl[2];
+    const char *warning = def_badpass_message;
 
-    /* Call conversation function */
-    memset(msg, 0, sizeof(msg));
-    msg[0].msg_type = SUDO_CONV_ERROR_MSG;
 #ifdef INSULT
     if (def_insults)
-	msg[0].msg = INSULT;
-    else
+	warning = INSULT;
 #endif
-	msg[0].msg = def_badpass_message;
-    msg[1].msg_type = SUDO_CONV_ERROR_MSG;
-    msg[1].msg = "\n";
-    memset(&repl, 0, sizeof(repl));
-    sudo_conv(2, msg, repl);
+    sudo_printf(SUDO_CONV_ERROR_MSG, "%s\n", warning);
 }
 
 char *
@@ -328,16 +319,13 @@ auth_getpass(const char *prompt, int timeout, int type)
     return repl.reply;
 }
 
-#ifdef notyet
 void
 dump_auth_methods(void)
 {
     sudo_auth *auth;
 
-    /* XXX - conversation function */
-    (void) fputs("Authentication methods:", stdout);
+    sudo_printf(SUDO_CONV_INFO_MSG, "Authentication methods:");
     for (auth = auth_switch; auth->name; auth++)
-        (void) printf(" '%s'", auth->name);
-    (void) putchar('\n');
+	sudo_printf(SUDO_CONV_INFO_MSG, " '%s'", auth->name);
+    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 }
-#endif
