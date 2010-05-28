@@ -1144,11 +1144,6 @@ cleanup(int gotsignal)
 	sudo_endpwent();
 	sudo_endgrent();
     }
-#ifdef notyet
-    /* XXX */
-    if (def_transcript)
-	term_restore(STDIN_FILENO, 0);
-#endif
 }
 
 static int

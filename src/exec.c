@@ -149,6 +149,16 @@ pty_setup(uid_t uid)
     }
 }
 
+/*
+ * Cleanup hook for error()/errorx()
+ */
+void
+cleanup(int gotsignal)
+{
+    if (!tq_empty(&io_plugins))
+	term_restore(io_fds[SFD_USERTTY], 0);
+}
+
 /* Call I/O plugin tty input log method. */
 static int
 log_ttyin(char *buf, unsigned int n)

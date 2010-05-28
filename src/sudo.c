@@ -626,30 +626,6 @@ disable_coredumps(void)
 }
 
 /*
- * Cleanup hook for error()/errorx()
- */
-void
-cleanup(int gotsignal)
-{
-#if 0 /* XXX */
-    struct sudo_nss *nss;
-
-    if (!gotsignal) {
-	if (snl != NULL) {
-	    tq_foreach_fwd(snl, nss)
-		nss->close(nss);
-	}
-	sudo_endpwent();
-	sudo_endgrent();
-    }
-#ifdef _PATH_SUDO_TRANSCRIPT
-    if (def_transcript)
-	term_restore(STDIN_FILENO, 0);
-#endif
-#endif
-}
-
-/*
  * Setup the execution environment immediately prior to the call to execve()
  * Returns TRUE on success and FALSE on failure.
  */
