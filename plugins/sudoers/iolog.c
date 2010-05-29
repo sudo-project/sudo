@@ -67,9 +67,17 @@ struct script_buf {
     char buf[16 * 1024];
 };
 
+#define IOFD_STDIN	0
+#define IOFD_STDOUT	1
+#define IOFD_STDERR	2
+#define IOFD_TTYIN	3
+#define IOFD_TTYOUT	4
+#define IOFD_TIMING	5
+#define IOFD_MAX	6
+
 static sigset_t ttyblock;
 static struct timeval last_time;
-static union script_fd io_outfile, io_timfile;
+static union script_fd io_fds[IOFD_MAX];
 
 void
 io_nextid(void)
@@ -175,6 +183,27 @@ build_idpath(char *pathbuf, size_t pathsize)
     return(len);
 }
 
+static void *
+open_io_fd(char *pathbuf, int len, const char *suffix, int docompress)
+{
+    void *vfd = NULL;
+    int fd;
+
+    pathbuf[len] = '\0';
+    strlcat(pathbuf, suffix, PATH_MAX);
+    fd = open(pathbuf, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR);
+    if (fd != -1) {
+	fcntl(fd, F_SETFD, FD_CLOEXEC);
+#ifdef HAVE_ZLIB
+	if (docompress)
+	    vfd = gzdopen(fd, "w");
+	else
+#endif
+	    vfd = fdopen(fd, "w");
+    }
+    return vfd;
+}
+
 int
 static sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t plugin_printf, char * const settings[],
@@ -183,7 +212,7 @@ static sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 {
     char pathbuf[PATH_MAX];
     FILE *io_logfile;
-    int fd, len;
+    int len;
 
     if (!sudo_conv)
 	sudo_conv = conversation;
@@ -205,46 +234,39 @@ static sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (len == -1)
 	return -1;
 
+    if (mkdir(pathbuf, S_IRUSR|S_IWUSR|S_IXUSR) != 0)
+	log_error(USE_ERRNO, "Can't mkdir %s", pathbuf);
+
     /*
-     * We create 3 files: a log file, one for the raw session data,
-     * and one for the timing info.
+     * We create 7 files: a log file, a timing file and 5 for input/output.
      */
-    fd = open(pathbuf, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR);
-    if (fd == -1)
-	log_error(USE_ERRNO, "Can't create %s", pathbuf);
-    fcntl(fd, F_SETFD, FD_CLOEXEC);
-    io_logfile = fdopen(fd, "w");
+    io_logfile = open_io_fd(pathbuf, len, "/log", FALSE);
     if (io_logfile == NULL)
-        log_error(USE_ERRNO, "fdopen");
-
-    strlcat(pathbuf, ".scr", sizeof(pathbuf));
-    fd = open(pathbuf, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR);
-    if (fd == -1)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
-    fcntl(fd, F_SETFD, FD_CLOEXEC);
-#ifdef HAVE_ZLIB
-    if (def_compress_transcript)
-        io_outfile.g = gzdopen(fd, "w");
-    else
-#endif
-	io_outfile.f = fdopen(fd, "w");
-    if (io_outfile.v == NULL)
-	log_error(USE_ERRNO, "Can't open %s", pathbuf);
 
-    pathbuf[len] = '\0';
-    strlcat(pathbuf, ".tim", sizeof(pathbuf));
-    fd = open(pathbuf, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR);
-    if (fd == -1)
+    io_fds[IOFD_TIMING].v = open_io_fd(pathbuf, len, "/timing", def_compress_transcript);
+    if (io_fds[IOFD_TIMING].v == NULL)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
-    fcntl(fd, F_SETFD, FD_CLOEXEC);
-#ifdef HAVE_ZLIB
-    if (def_compress_transcript)
-        io_timfile.g = gzdopen(fd, "w");
-    else
-#endif
-	io_timfile.f = fdopen(fd, "w");
-    if (io_timfile.v == NULL)
-	log_error(USE_ERRNO, "Can't open %s", pathbuf);
+
+    io_fds[IOFD_TTYIN].v = open_io_fd(pathbuf, len, "/ttyin", def_compress_transcript);
+    if (io_fds[IOFD_TTYIN].v == NULL)
+	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+
+    io_fds[IOFD_TTYOUT].v = open_io_fd(pathbuf, len, "/ttyout", def_compress_transcript);
+    if (io_fds[IOFD_TTYOUT].v == NULL)
+	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+
+    io_fds[IOFD_STDIN].v = open_io_fd(pathbuf, len, "/stdin", def_compress_transcript);
+    if (io_fds[IOFD_STDIN].v == NULL)
+	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+
+    io_fds[IOFD_STDOUT].v = open_io_fd(pathbuf, len, "/stdout", def_compress_transcript);
+    if (io_fds[IOFD_STDOUT].v == NULL)
+	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+
+    io_fds[IOFD_STDERR].v = open_io_fd(pathbuf, len, "/stderr", def_compress_transcript);
+    if (io_fds[IOFD_STDERR].v == NULL)
+	log_error(USE_ERRNO, "Can't create %s", pathbuf);
 
     /* So we can block tty-generated signals */
     sigemptyset(&ttyblock);
@@ -271,15 +293,15 @@ static sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 void
 static sudoers_io_close(int exit_status, int error)
 {
+    int i;
+
+    for (i = 0; i < IOFD_MAX; i++) {
 #ifdef HAVE_ZLIB
-    if (def_compress_transcript) {
-	gzclose(io_outfile.g);
-	gzclose(io_timfile.g);
-    } else
+	if (def_compress_transcript)
+	    gzclose(io_fds[i].g);
+	else
 #endif
-    {
-	fclose(io_outfile.f);
-	fclose(io_timfile.f);
+	    fclose(io_fds[i].f);
     }
 }
 
@@ -303,8 +325,8 @@ static sudoers_io_version(int verbose)
     return TRUE;
 }
 
-int
-static sudoers_io_log_output(const char *buf, unsigned int len)
+static int
+sudoers_io_log(const char *buf, unsigned int len, int idx)
 {
     struct timeval now, tv;
     sigset_t omask;
@@ -315,18 +337,18 @@ static sudoers_io_log_output(const char *buf, unsigned int len)
 
 #ifdef HAVE_ZLIB
     if (def_compress_transcript)
-	gzwrite(io_outfile.g, buf, len);
+	gzwrite(io_fds[idx].g, buf, len);
     else
 #endif
-	fwrite(buf, 1, len, io_outfile.f);
+	fwrite(buf, 1, len, io_fds[idx].f);
     timersub(&now, &last_time, &tv);
 #ifdef HAVE_ZLIB
     if (def_compress_transcript)
-	gzprintf(io_timfile.g, "%f %d\n",
+	gzprintf(io_fds[IOFD_TIMING].g, "%d %f %d\n", idx,
 	    tv.tv_sec + ((double)tv.tv_usec / 1000000), len);
     else
 #endif
-	fprintf(io_timfile.f, "%f %d\n",
+	fprintf(io_fds[IOFD_TIMING].f, "%d %f %d\n", idx,
 	    tv.tv_sec + ((double)tv.tv_usec / 1000000), len);
     last_time.tv_sec = now.tv_sec;
     last_time.tv_usec = now.tv_usec;
@@ -336,6 +358,35 @@ static sudoers_io_log_output(const char *buf, unsigned int len)
     return TRUE;
 }
 
+int
+static sudoers_io_log_ttyin(const char *buf, unsigned int len)
+{
+    return sudoers_io_log(buf, len, IOFD_TTYIN);
+}
+
+int
+static sudoers_io_log_ttyout(const char *buf, unsigned int len)
+{
+    return sudoers_io_log(buf, len, IOFD_TTYOUT);
+}
+
+int
+static sudoers_io_log_stdin(const char *buf, unsigned int len)
+{
+    return sudoers_io_log(buf, len, IOFD_STDIN);
+}
+
+int
+static sudoers_io_log_stdout(const char *buf, unsigned int len)
+{
+    return sudoers_io_log(buf, len, IOFD_STDOUT);
+}
+
+int
+static sudoers_io_log_stderr(const char *buf, unsigned int len)
+{
+    return sudoers_io_log(buf, len, IOFD_STDERR);
+}
 
 struct io_plugin sudoers_io = {
     SUDO_IO_PLUGIN,
@@ -343,9 +394,9 @@ struct io_plugin sudoers_io = {
     sudoers_io_open,
     sudoers_io_close,
     sudoers_io_version,
-    NULL,			/* log_ttyin */
-    sudoers_io_log_output,	/* log_ttyout */
-    NULL,			/* log_stdin */
-    sudoers_io_log_output,	/* log_stdout */
-    sudoers_io_log_output	/* log_stderr */
+    sudoers_io_log_ttyin,
+    sudoers_io_log_ttyout,
+    sudoers_io_log_stdin,
+    sudoers_io_log_stdout,
+    sudoers_io_log_stderr
 };
