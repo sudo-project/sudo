@@ -176,7 +176,7 @@ build_idpath(char *pathbuf, size_t pathsize)
 }
 
 int
-sudoers_io_open(unsigned int version, sudo_conv_t conversation,
+static sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t plugin_printf, char * const settings[],
     char * const user_info[], int argc, char * const argv[],
     char * const user_env[])
@@ -269,7 +269,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 }
 
 void
-sudoers_io_close(int exit_status, int error)
+static sudoers_io_close(int exit_status, int error)
 {
 #ifdef HAVE_ZLIB
     if (def_compress_transcript) {
@@ -284,7 +284,7 @@ sudoers_io_close(int exit_status, int error)
 }
 
 int
-sudoers_io_version(int verbose)
+static sudoers_io_version(int verbose)
 {
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
@@ -304,7 +304,7 @@ sudoers_io_version(int verbose)
 }
 
 int
-sudoers_io_log_output(const char *buf, unsigned int len)
+static sudoers_io_log_output(const char *buf, unsigned int len)
 {
     struct timeval now, tv;
     sigset_t omask;
@@ -335,3 +335,17 @@ sudoers_io_log_output(const char *buf, unsigned int len)
 
     return TRUE;
 }
+
+
+struct io_plugin sudoers_io = {
+    SUDO_IO_PLUGIN,
+    SUDO_API_VERSION,
+    sudoers_io_open,
+    sudoers_io_close,
+    sudoers_io_version,
+    NULL,			/* log_ttyin */
+    sudoers_io_log_output,	/* log_ttyout */
+    NULL,			/* log_stdin */
+    sudoers_io_log_output,	/* log_stdout */
+    sudoers_io_log_output	/* log_stderr */
+};

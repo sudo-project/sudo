@@ -1428,16 +1428,3 @@ struct policy_plugin sudoers_policy = {
     sudoers_policy_invalidate,
     sudoers_policy_init_session
 };
-
-struct io_plugin sudoers_io = {
-    SUDO_IO_PLUGIN,
-    SUDO_API_VERSION,
-    sudoers_io_open,
-    sudoers_io_close,
-    sudoers_io_version,
-    NULL,			/* log_ttyin */
-    sudoers_io_log_output,	/* log_ttyout */
-    NULL,			/* log_stdin */
-    sudoers_io_log_output,	/* log_stdout */
-    sudoers_io_log_output	/* log_stderr */
-};

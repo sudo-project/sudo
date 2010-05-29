@@ -291,13 +291,6 @@ int atobool(const char *str);
 int get_boottime(struct timeval *);
 
 /* iolog.c */
-int sudoers_io_open(unsigned int version, sudo_conv_t conversation,
-    sudo_printf_t sudo_printf, char * const settings[],
-    char * const user_info[], int argc, char * const argv[],
-    char * const user_env[]);
-void sudoers_io_close(int exit_status, int error);
-int sudoers_io_version(int verbose);
-int sudoers_io_log_output(const char *buf, unsigned int len);
 void io_nextid(void);
 
 /* env.c */
