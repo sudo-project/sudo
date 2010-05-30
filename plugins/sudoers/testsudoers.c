@@ -100,8 +100,8 @@ extern struct passwd *getpwuid(uid_t);
 /*
  * Globals
  */
-int  Argc, NewArgc;
-char **Argv, **NewArgv;
+int  NewArgc;
+char **NewArgv;
 int num_interfaces;
 struct interface *interfaces;
 struct sudo_user sudo_user;
@@ -137,8 +137,9 @@ main(int argc, char *argv[])
     yydebug = 1;
 #endif
 
-    Argv = argv;
-    Argc = argc;
+#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
+    setprogname(argc > 0 argv[0] ? "testsudoers");
+#endif
 
     dflag = 0;
     grfile = pwfile = runas_group = runas_user = NULL;

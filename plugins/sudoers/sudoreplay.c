@@ -101,10 +101,6 @@
 extern char *optarg;
 extern int optind;
 
-int Argc;
-char **Argv;
-const char *session_dir = _PATH_SUDO_TRANSCRIPT;
-
 union io_fd {
     FILE *f;
 #ifdef HAVE_ZLIB
@@ -165,6 +161,8 @@ struct search_node {
 static struct search_node *node_stack[32];
 static int stack_top;
 
+static const char *session_dir = _PATH_SUDO_TRANSCRIPT;
+
 static union io_fd io_fds[IOFD_MAX];
 static const char *io_fnames[IOFD_MAX] = {
     "/stdin",
@@ -212,8 +210,9 @@ main(int argc, char *argv[])
     size_t len, nread, off;
     ssize_t nwritten;
 
-    Argc = argc;
-    Argv = argv;
+#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
+    setprogname(argc > 0 argv[0] ? "sudoreplay");
+#endif
 
     while ((ch = getopt(argc, argv, "d:lm:s:V")) != -1) {
 	switch(ch) {

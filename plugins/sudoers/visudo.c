@@ -131,8 +131,6 @@ extern int optind;
 /*
  * Globals
  */
-int Argc;
-char **Argv;
 int num_interfaces;
 struct interface *interfaces;
 struct sudo_user sudo_user;
@@ -154,8 +152,10 @@ main(int argc, char *argv[])
     malloc_options = "AFGJPR";
 #endif
 
-    Argv = argv;
-    if ((Argc = argc) < 1)
+#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
+    setprogname(argc > 0 argv[0] ? "visudo");
+#endif
+    if (argc < 1)
 	usage();
 
     /*
