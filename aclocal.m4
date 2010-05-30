@@ -158,22 +158,22 @@ fi
 ])dnl
 
 dnl
-dnl Where the transcript files go, use /var/log/sudo-transcript if
-dnl /var/log exists, else /{var,usr}/adm/sudo-transcript
+dnl Where the I/O log files go, use /var/log/sudo-io if
+dnl /var/log exists, else /{var,usr}/adm/sudo-io
 dnl
-AC_DEFUN(SUDO_TRANSCRIPT, [
-    AC_MSG_CHECKING(for transcript dir location)
-    if test "${with_transcript-yes}" != "yes"; then
+AC_DEFUN(SUDO_IO_LOGDIR, [
+    AC_MSG_CHECKING(for I/O log dir location)
+    if test "${with_iologdir-yes}" != "yes"; then
 	:
     elif test -d "/var/log"; then
-	with_transcript="/var/log/sudo-transcript"
+	with_iologdir="/var/log/sudo-io"
     elif test -d "/var/adm"; then
-	with_transcript="/var/adm/sudo-transcript"
+	with_iologdir="/var/adm/sudo-io"
     else
-	with_transcript="/usr/adm/sudo-transcript"
+	with_iologdir="/usr/adm/sudo-io"
     fi
-    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_TRANSCRIPT, "$with_transcript")
-    AC_MSG_RESULT($with_transcript)
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_IO_LOGDIR, "$with_iologdir")
+    AC_MSG_RESULT($with_iologdir)
 ])dnl
 
 dnl

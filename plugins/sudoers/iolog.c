@@ -91,20 +91,20 @@ io_nextid(void)
     char pathbuf[PATH_MAX];
 
     /*
-     * Create _PATH_SUDO_TRANSCRIPT if it doesn't already exist.
+     * Create _PATH_SUDO_IO_LOGDIR if it doesn't already exist.
      */
-    if (stat(_PATH_SUDO_TRANSCRIPT, &sb) != 0) {
-	if (mkdir(_PATH_SUDO_TRANSCRIPT, S_IRWXU) != 0)
-	    log_error(USE_ERRNO, "Can't mkdir %s", _PATH_SUDO_TRANSCRIPT);
+    if (stat(_PATH_SUDO_IO_LOGDIR, &sb) != 0) {
+	if (mkdir(_PATH_SUDO_IO_LOGDIR, S_IRWXU) != 0)
+	    log_error(USE_ERRNO, "Can't mkdir %s", _PATH_SUDO_IO_LOGDIR);
     } else if (!S_ISDIR(sb.st_mode)) {
 	log_error(0, "%s exists but is not a directory (0%o)",
-	    _PATH_SUDO_TRANSCRIPT, (unsigned int) sb.st_mode);
+	    _PATH_SUDO_IO_LOGDIR, (unsigned int) sb.st_mode);
     }
 
     /*
      * Open sequence file
      */
-    len = snprintf(pathbuf, sizeof(pathbuf), "%s/seq", _PATH_SUDO_TRANSCRIPT);
+    len = snprintf(pathbuf, sizeof(pathbuf), "%s/seq", _PATH_SUDO_IO_LOGDIR);
     if (len <= 0 || len >= sizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
 	log_error(USE_ERRNO, "%s/seq", pathbuf);
@@ -158,12 +158,12 @@ build_idpath(char *pathbuf, size_t pathsize)
     /*
      * Path is of the form /var/log/sudo-session/00/00/01.
      */
-    len = snprintf(pathbuf, pathsize, "%s/%c%c/%c%c/%c%c", _PATH_SUDO_TRANSCRIPT,
+    len = snprintf(pathbuf, pathsize, "%s/%c%c/%c%c/%c%c", _PATH_SUDO_IO_LOGDIR,
 	sudo_user.sessid[0], sudo_user.sessid[1], sudo_user.sessid[2],
 	sudo_user.sessid[3], sudo_user.sessid[4], sudo_user.sessid[5]);
     if (len <= 0 && len >= pathsize) {
 	errno = ENAMETOOLONG;
-	log_error(USE_ERRNO, "%s/%s", _PATH_SUDO_TRANSCRIPT, sudo_user.sessid);
+	log_error(USE_ERRNO, "%s/%s", _PATH_SUDO_IO_LOGDIR, sudo_user.sessid);
     }
 
     /*
@@ -223,7 +223,7 @@ static sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (argc == 0)
 	return TRUE;
 
-    if (!def_transcript)
+    if (!def_log_input && !def_log_output)
 	return FALSE;
 
     /*
@@ -244,27 +244,27 @@ static sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (io_logfile == NULL)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
 
-    io_fds[IOFD_TIMING].v = open_io_fd(pathbuf, len, "/timing", def_compress_transcript);
+    io_fds[IOFD_TIMING].v = open_io_fd(pathbuf, len, "/timing", def_compress_io);
     if (io_fds[IOFD_TIMING].v == NULL)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
 
-    io_fds[IOFD_TTYIN].v = open_io_fd(pathbuf, len, "/ttyin", def_compress_transcript);
+    io_fds[IOFD_TTYIN].v = open_io_fd(pathbuf, len, "/ttyin", def_compress_io);
     if (io_fds[IOFD_TTYIN].v == NULL)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
 
-    io_fds[IOFD_TTYOUT].v = open_io_fd(pathbuf, len, "/ttyout", def_compress_transcript);
+    io_fds[IOFD_TTYOUT].v = open_io_fd(pathbuf, len, "/ttyout", def_compress_io);
     if (io_fds[IOFD_TTYOUT].v == NULL)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
 
-    io_fds[IOFD_STDIN].v = open_io_fd(pathbuf, len, "/stdin", def_compress_transcript);
+    io_fds[IOFD_STDIN].v = open_io_fd(pathbuf, len, "/stdin", def_compress_io);
     if (io_fds[IOFD_STDIN].v == NULL)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
 
-    io_fds[IOFD_STDOUT].v = open_io_fd(pathbuf, len, "/stdout", def_compress_transcript);
+    io_fds[IOFD_STDOUT].v = open_io_fd(pathbuf, len, "/stdout", def_compress_io);
     if (io_fds[IOFD_STDOUT].v == NULL)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
 
-    io_fds[IOFD_STDERR].v = open_io_fd(pathbuf, len, "/stderr", def_compress_transcript);
+    io_fds[IOFD_STDERR].v = open_io_fd(pathbuf, len, "/stderr", def_compress_io);
     if (io_fds[IOFD_STDERR].v == NULL)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
 
@@ -297,7 +297,7 @@ static sudoers_io_close(int exit_status, int error)
 
     for (i = 0; i < IOFD_MAX; i++) {
 #ifdef HAVE_ZLIB
-	if (def_compress_transcript)
+	if (def_compress_io)
 	    gzclose(io_fds[i].g);
 	else
 #endif
@@ -336,14 +336,14 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
 
 #ifdef HAVE_ZLIB
-    if (def_compress_transcript)
+    if (def_compress_io)
 	gzwrite(io_fds[idx].g, buf, len);
     else
 #endif
 	fwrite(buf, 1, len, io_fds[idx].f);
     timersub(&now, &last_time, &tv);
 #ifdef HAVE_ZLIB
-    if (def_compress_transcript)
+    if (def_compress_io)
 	gzprintf(io_fds[IOFD_TIMING].g, "%d %f %d\n", idx,
 	    tv.tv_sec + ((double)tv.tv_usec / 1000000), len);
     else

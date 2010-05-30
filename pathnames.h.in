@@ -74,12 +74,12 @@
 #endif /* _PATH_SUDO_TIMEDIR */
 
 /*
- * Where to put the session files.  Defaults to /var/log/sudo-session,
- * /var/adm/sudo-session or /usr/adm/sudo-session depending on what exists.
+ * Where to put the I/O log files.  Defaults to /var/log/sudo-io,
+ * /var/adm/sudo-io or /usr/adm/sudo-io depending on what exists.
  */
-#ifndef _PATH_SUDO_TRANSCRIPT
-#undef _PATH_SUDO_TRANSCRIPT
-#endif /* _PATH_SUDO_TRANSCRIPT */
+#ifndef _PATH_SUDO_IO_LOGDIR
+#undef _PATH_SUDO_IO_LOGDIR
+#endif /* _PATH_SUDO_IO_LOGDIR */
 
 /*
  * Where to put the sudo log file when logging to a file.  Defaults to

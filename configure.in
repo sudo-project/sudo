@@ -704,11 +704,11 @@ AC_ARG_WITH(timedir, [AS_HELP_STRING([--with-timedir], [path to the sudo timesta
 		;;
 esac])
 
-AC_ARG_WITH(transcript, [AS_HELP_STRING([--with-transcript=DIR], [directory
-to store sudo transcript files in])],
-[case $with_transcript in
+AC_ARG_WITH(iologdir, [AS_HELP_STRING([--with-iologdir=DIR], [directory
+to store sudo I/O log files in])],
+[case $with_iologdir in
     yes)    ;;
-    no)     AC_MSG_ERROR(["--without-transcript not supported."])
+    no)     AC_MSG_ERROR(["--without-iologfir not supported."])
 	    ;;
 esac])
 
@@ -2663,11 +2663,11 @@ if test -n "$blibpath"; then
 fi
 
 dnl
-dnl Check for log file, timestamp and transcript locations
+dnl Check for log file, timestamp and iolog locations
 dnl
 SUDO_LOGFILE
 SUDO_TIMEDIR
-SUDO_TRANSCRIPT
+SUDO_IOLOGDIR
 
 dnl
 dnl Use passwd (and secureware) auth modules?

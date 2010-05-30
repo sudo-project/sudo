@@ -518,7 +518,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    validate_env_vars(sudo_user.env_vars);
     }
 
-    if (def_transcript && (sudo_mode & (MODE_RUN | MODE_EDIT)))
+    if (ISSET(sudo_mode, (MODE_RUN| MODE_EDIT)) && (def_log_input || def_log_output))
 	io_nextid();
     log_allowed(validated);
     if (ISSET(sudo_mode, MODE_CHECK))

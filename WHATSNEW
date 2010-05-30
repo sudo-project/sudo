@@ -8,9 +8,10 @@ What's new in Sudo 1.8.0?
 
 What's new in Sudo 1.7.3?
 
- * Support for logging a transcript of the command being run.
-   For more information, see the documentation for the "transcript"
-   Defaults option in the sudoers manual and the sudoreplay manual.
+ * Support for logging I/O for the command being run.
+   For more information, see the documentation for the "log_input"
+   and "log_output" Defaults options in the sudoers manual.  Also
+   see the sudoreplay manual for how to replay I/O log sessions.
 
  * The passwd_timeout and timestamp_timeout options may now be
    specified as floating point numbers for more granular timeout

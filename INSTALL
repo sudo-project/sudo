@@ -557,11 +557,10 @@ The following options are also configurable at runtime:
         prompt as an argument and print the received password to
         the standard output.
 
-  --with-transcript[=DIR]
-        By default, sudo stores transcript files in either
-        /var/log/sudo-transcript, /var/adm/sudo-transcript, or
-        /usr/log/sudo-transcript.  If this option is specified,
-        transcripts will be stored in the indicated directory
+  --with-iologdir[=DIR]
+        By default, sudo stores I/O log files in either /var/log/sudo-io,
+        /var/adm/sudo-io, or /usr/log/sudo-io.  If this option is
+        specified, I/O logs will be stored in the indicated directory
         instead.
 
   --disable-authentication
@@ -607,13 +606,13 @@ The following options are also configurable at runtime:
 
   --enable-zlib[=DIR]
         Enable the use of the zlib compress library when storing
-        transcript files.  If specified, DIR is the base directory
+        I/O log files.  If specified, DIR is the base directory
         containing the zlib include and lib directories.  By default
         zlib is used if it is found on the system.
 
   --disable-zlib
         Disable the use of the zlib compress library when storing
-        transcript files.
+        I/O log files.
 
 Shadow password and C2 support
 ==============================

@@ -243,8 +243,10 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 		def_noexec = tags->noexec;
 	    if (tags->setenv != UNSPEC)
 		def_setenv = tags->setenv;
-	    if (tags->transcript != UNSPEC)
-		def_transcript = tags->transcript;
+	    if (tags->log_input != UNSPEC)
+		def_log_input = tags->log_input;
+	    if (tags->log_output != UNSPEC)
+		def_log_output = tags->log_output;
 	}
     } else if (match == DENY) {
 	SET(validated, VALIDATE_NOT_OK);
@@ -284,10 +286,15 @@ sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
 	    "PASSWD: ", NULL);
 	tags->nopasswd = cs->tags.nopasswd;
     }
-    if (TAG_CHANGED(transcript)) {
-	lbuf_append(lbuf, cs->tags.transcript ? "SCRIPT: " :
-	    "NOSCRIPT: ", NULL);
-	tags->transcript = cs->tags.transcript;
+    if (TAG_CHANGED(log_input)) {
+	lbuf_append(lbuf, cs->tags.log_input ? "LOG_INPUT: " :
+	    "NOLOG_INPUT: ", NULL);
+	tags->log_input = cs->tags.log_input;
+    }
+    if (TAG_CHANGED(log_output)) {
+	lbuf_append(lbuf, cs->tags.log_output ? "LOG_OUTPUT: " :
+	    "NOLOG_OUTPUT: ", NULL);
+	tags->log_output = cs->tags.log_output;
     }
     m = cs->cmnd;
     print_member(lbuf, m->name, m->type, m->negated,
@@ -310,7 +317,8 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
 	tags.noexec = UNSPEC;
 	tags.setenv = UNSPEC;
 	tags.nopasswd = UNSPEC;
-	tags.transcript = UNSPEC;
+	tags.log_input = UNSPEC;
+	tags.log_output = UNSPEC;
 	lbuf_append(lbuf, "    ", NULL);
 	tq_foreach_fwd(&priv->cmndlist, cs) {
 	    if (cs != tq_first(&priv->cmndlist))
@@ -362,7 +370,8 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 	tags.noexec = UNSPEC;
 	tags.setenv = UNSPEC;
 	tags.nopasswd = UNSPEC;
-	tags.transcript = UNSPEC;
+	tags.log_input = UNSPEC;
+	tags.log_output = UNSPEC;
 	lbuf_append(lbuf, "\nSudoers entry:\n", NULL);
 	tq_foreach_fwd(&priv->cmndlist, cs) {
 	    lbuf_append(lbuf, "    RunAsUsers: ", NULL);
