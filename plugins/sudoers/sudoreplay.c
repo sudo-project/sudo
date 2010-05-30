@@ -88,6 +88,15 @@
 #include <error.h>
 #include <missing.h>
 
+/* Must match the defines in iolog.c */
+#define IOFD_STDIN      0
+#define IOFD_STDOUT     1
+#define IOFD_STDERR     2
+#define IOFD_TTYIN      3
+#define IOFD_TTYOUT     4
+#define IOFD_TIMING     5
+#define IOFD_MAX        6
+
 /* For getopt(3) */
 extern char *optarg;
 extern int optind;
@@ -95,6 +104,14 @@ extern int optind;
 int Argc;
 char **Argv;
 const char *session_dir = _PATH_SUDO_TRANSCRIPT;
+
+union io_fd {
+    FILE *f;
+#ifdef HAVE_ZLIB
+    gzFile g;
+#endif
+    void *v;
+};
 
 /*
  * Info present in the transcript log file
@@ -148,6 +165,16 @@ struct search_node {
 static struct search_node *node_stack[32];
 static int stack_top;
 
+static union io_fd io_fds[IOFD_MAX];
+static const char *io_fnames[IOFD_MAX] = {
+    "/stdin",
+    "/stdout",
+    "/stderr",
+    "/ttyin",
+    "/ttyout",
+    "/timing"
+};
+
 extern time_t get_date(char *);
 extern char *get_timestr(time_t, int);
 extern int term_raw(int, int);
@@ -160,6 +187,7 @@ static int parse_expr(struct search_node **, char **);
 static void check_input(int, double *);
 static void delay(double);
 static void usage(void);
+static void *open_io_fd(char *pathbuf, int len, const char *suffix);
 
 #ifdef HAVE_REGCOMP
 # define REGEX_T	regex_t
@@ -176,21 +204,13 @@ main(int argc, char *argv[])
     int ch, plen, nready, interactive = 0, listonly = 0;
     const char *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
+    double seconds, to_wait, speed = 1.0, max_wait = 0;
     FILE *lfile;
-#ifdef HAVE_ZLIB
-    gzFile tfile, sfile;
-#else
-    FILE *tfile, *sfile;
-#endif
     fd_set *fdsw;
     sigaction_t sa;
-    unsigned long nbytes;
+    unsigned long nbytes, idx;
     size_t len, nread, off;
     ssize_t nwritten;
-    double seconds;
-    double speed = 1.0;
-    double max_wait = 0;
-    double to_wait;
 
     Argc = argc;
     Argv = argv;
@@ -238,37 +258,29 @@ main(int argc, char *argv[])
     if (!VALID_ID(id))
 	errorx(1, "invalid ID %s", id);
 
-    plen = snprintf(path, sizeof(path), "%s/%.2s/%.2s/%.2s.tim",
+    plen = snprintf(path, sizeof(path), "%s/%.2s/%.2s/%.2s/timing",
 	session_dir, id, &id[2], &id[4]);
     if (plen <= 0 || plen >= sizeof(path))
-	errorx(1, "%s/%.2s/%.2s/%.2s/%.2s.tim: %s", session_dir,
+	errorx(1, "%s/%.2s/%.2s/%.2s/%.2s/timing: %s", session_dir,
 	    id, &id[2], &id[4], strerror(ENAMETOOLONG));
+    plen -= 7;
 
-    /* timing file */
-#ifdef HAVE_ZLIB
-    tfile = gzopen(path, "r");
-#else
-    tfile = fopen(path, "r");
-#endif
-    if (tfile == NULL)
-	error(1, "unable to open %s", path);
+    /* Open files for replay */
+    for (idx = 0; idx < IOFD_MAX; idx++) {
+	/* Don't support replaying input. */
+	if (idx == IOFD_STDIN || idx == IOFD_TTYIN)
+	    continue;
+	io_fds[idx].v = open_io_fd(path, plen, io_fnames[idx]);
+	if (io_fds[idx].v == NULL)
+	    error(1, "unable to open %s", path);
+    }
 
-    /* script file */
-    memcpy(&path[plen - 3], "scr", 3);
-#ifdef HAVE_ZLIB
-    sfile = gzopen(path, "r");
-#else
-    sfile = fopen(path, "r");
-#endif
-    if (sfile == NULL)
-	error(1, "unable to open %s", path);
-
-    /* log file */
-    path[plen - 4] = '\0';
+    /* Read log file. */
+    path[plen] = '\0';
+    strlcat(path, "/log", sizeof(path));
     lfile = fopen(path, "r");
     if (lfile == NULL)
 	error(1, "unable to open %s", path);
-
     cp = NULL;
     getline(&cp, &len, lfile); /* log */
     getline(&cp, &len, lfile); /* cwd */
@@ -291,6 +303,7 @@ main(int argc, char *argv[])
     (void) sigaction(SIGTSTP, &sa, NULL);
     (void) sigaction(SIGQUIT, &sa, NULL);
 
+    /* XXX - read user input from /dev/tty and set STDOUT to raw if not a pipe */
     /* Set stdin to raw mode if it is a tty */
     interactive = isatty(STDIN_FILENO);
     if (interactive) {
@@ -307,16 +320,23 @@ main(int argc, char *argv[])
      * Timing file consists of line of the format: "%f %d\n"
      */
 #ifdef HAVE_ZLIB
-    while (gzgets(tfile, buf, sizeof(buf)) != NULL) {
+    while (gzgets(io_fds[IOFD_TIMING].g, buf, sizeof(buf)) != NULL) {
 #else
-    while (fgets(buf, sizeof(buf), tfile) != NULL) {
+    while (fgets(buf, sizeof(buf), io_fds[IOFD_TIMING].f) != NULL) {
 #endif
+	idx = strtoul(buf, &ep, 10);
+	if (idx > IOFD_MAX)
+	    error(1, "invalid timing file index: %s", cp);
+	for (cp = ep + 1; isspace((unsigned char) *cp); cp++)
+	    continue;
+
 	errno = 0;
-	seconds = strtod(buf, &ep);
+	seconds = strtod(cp, &ep);
 	if (errno != 0 || !isspace((unsigned char) *ep))
 	    error(1, "invalid timing file line: %s", buf);
 	for (cp = ep + 1; isspace((unsigned char) *cp); cp++)
 	    continue;
+
 	errno = 0;
 	nbytes = strtoul(cp, &ep, 10);
 	if (errno == ERANGE && nbytes == ULONG_MAX)
@@ -331,15 +351,21 @@ main(int argc, char *argv[])
 	    to_wait = max_wait;
 	delay(to_wait);
 
+	/* We don't replay input (but we still have to delay). */
+	if (idx == IOFD_STDIN || idx == IOFD_TTYIN)
+	    continue;
+
+	/* All output is sent to stdout. */
+	/* XXX - add flags to allow use to select which ones */
 	while (nbytes != 0) {
 	    if (nbytes > sizeof(buf))
 		len = sizeof(buf);
 	    else
 		len = nbytes;
 #ifdef HAVE_ZLIB
-	    nread = gzread(sfile, buf, len);
+	    nread = gzread(io_fds[idx].g, buf, len);
 #else
-	    nread = fread(buf, 1, len, sfile);
+	    nread = fread(buf, 1, len, io_fds[idx].f);
 #endif
 	    nbytes -= nread;
 	    off = 0;
@@ -388,6 +414,19 @@ delay(double secs)
     } while (rval == -1 && errno == EINTR);
     if (rval == -1)
 	error(1, "nanosleep: tv_sec %ld, tv_nsec %ld", ts.tv_sec, ts.tv_nsec);
+}
+
+static void *
+open_io_fd(char *path, int len, const char *suffix)
+{
+    path[len] = '\0';
+    strlcat(path, suffix, PATH_MAX);
+
+#ifdef HAVE_ZLIB
+    return gzopen(path, "r");
+#else
+    return fopen(path, "r");
+#endif
 }
 
 /*

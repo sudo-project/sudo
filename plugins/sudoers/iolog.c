@@ -53,7 +53,7 @@
 
 #include "sudoers.h"
 
-union script_fd {
+union io_fd {
     FILE *f;
 #ifdef HAVE_ZLIB
     gzFile g;
@@ -77,7 +77,7 @@ struct script_buf {
 
 static sigset_t ttyblock;
 static struct timeval last_time;
-static union script_fd io_fds[IOFD_MAX];
+static union io_fd io_fds[IOFD_MAX];
 
 void
 io_nextid(void)
