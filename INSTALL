@@ -614,6 +614,9 @@ The following options are also configurable at runtime:
         Disable the use of the zlib compress library when storing
         I/O log files.
 
+  --enable-warnings
+	Enable compiler warnings when building sudo with gcc.
+
 Shadow password and C2 support
 ==============================
 

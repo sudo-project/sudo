@@ -989,6 +989,7 @@ enable_shell_sets_home
 enable_path_info
 enable_env_debug
 enable_zlib
+enable_warnings
 with_selinux
 enable_gss_krb5_ccache_name
 enable_shared
@@ -1641,6 +1642,7 @@ Optional Features:
   --disable-path-info     Print 'command not allowed' not 'command not found'
   --enable-env-debug      Whether to enable environment debugging.
   --enable-zlib[=PATH]    Whether to enable or disable zlib
+  --enable-warnings       Whether to enable compiler warnings
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -5411,6 +5413,22 @@ fi
 
 fi
 
+# Check whether --enable-warnings was given.
+if test "${enable_warnings+set}" = set; then :
+  enableval=$enable_warnings;  case "$enableval" in
+    yes)    if test X"$with_devel" != X"yes" -a -n "$GCC"; then
+		CFLAGS="${CFLAGS} -Wall"
+	    fi
+	    ;;
+    no)	    ;;
+    *)	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-warnings: $enableval" >&5
+$as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-warnings: $enableval" >&2;}
+	    ;;
+  esac
+
+fi
+
+
 
 # Check whether --with-selinux was given.
 if test "${with_selinux+set}" = set; then :
@@ -5479,7 +5497,7 @@ if test -z "$EGREPPROG"; then
     as_fn_error "Sorry, configure requires egrep to run." "$LINENO" 5
 fi
 
-if test "$with_devel" != "yes"; then
+if test X"$with_devel" != X"yes"; then
     ac_cv_prog_cc_g=no
 fi
 
@@ -6570,13 +6588,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6573: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6591: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6576: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6594: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6579: output\"" >&5)
+  (eval echo "\"\$as_me:6597: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -7781,7 +7799,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7784 "configure"' > conftest.$ac_ext
+  echo '#line 7802 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9173,11 +9191,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9176: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9194: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9180: \$? = $ac_status" >&5
+   echo "$as_me:9198: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9512,11 +9530,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9515: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9533: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9519: \$? = $ac_status" >&5
+   echo "$as_me:9537: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9617,11 +9635,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9620: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9638: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9624: \$? = $ac_status" >&5
+   echo "$as_me:9642: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9672,11 +9690,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9675: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9693: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9679: \$? = $ac_status" >&5
+   echo "$as_me:9697: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12039,7 +12057,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12042 "configure"
+#line 12060 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12135,7 +12153,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12138 "configure"
+#line 12156 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12394,7 +12412,7 @@ $as_echo "$with_noexec" >&6; }
 NOEXECFILE="sudo_noexec$_shrext"
 NOEXECDIR="`echo $with_noexec|sed 's:^\(.*\)/[^/]*:\1:'`"
 
-if test "$with_devel" = "yes" -a -n "$GCC"; then
+if test X"$with_devel" = X"yes" -a -n "$GCC"; then
     CFLAGS="${CFLAGS} -Wall"
 fi
 
