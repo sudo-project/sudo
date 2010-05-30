@@ -282,7 +282,8 @@ See L<"SUDOERS OPTIONS"> for a list of supported Defaults parameters.
  SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
  Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
-	       'SETENV:' | 'NOSETENV:' | 'TRANSCRIPT:' | 'NOTRANSCRIPT:')
+	       'SETENV:' | 'NOSETENV:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
+               'LOG_OUTPUT:' | 'NOLOG_OUTPUT:')
 
 A B<user specification> determines which commands a user may run
 (and as what user) on specified hosts.  By default, commands are
@@ -352,11 +353,11 @@ however, will supercede the values in I<sudoers>.
 
 A command may have zero or more tags associated with it.  There are
 eight possible tag values, C<NOPASSWD>, C<PASSWD>, C<NOEXEC>,
-C<EXEC>, C<SETENV>, C<NOSETENV>, C<TRANSCRIPT> and C<NOTRANSCRIPT>.
-Once a tag is set on a C<Cmnd>, subsequent C<Cmnd>s in the
-C<Cmnd_Spec_List>, inherit the tag unless it is overridden by the
-opposite tag (i.e.: C<PASSWD> overrides C<NOPASSWD> and C<NOEXEC>
-overrides C<EXEC>).
+C<EXEC>, C<SETENV>, C<NOSETENV>, C<LOG_INPUT>, C<NOLOG_INPUT>,
+C<LOG_OUTPUT> and C<NOLOG_OUTPUT>.  Once a tag is set on a C<Cmnd>,
+subsequent C<Cmnd>s in the C<Cmnd_Spec_List>, inherit the tag unless
+it is overridden by the opposite tag (i.e.: C<PASSWD> overrides
+C<NOPASSWD> and C<NOEXEC> overrides C<EXEC>).
 
 =head3 NOPASSWD and PASSWD
 
@@ -411,11 +412,17 @@ variables in this manner.  If the command matched is B<ALL>, the
 C<SETENV> tag is implied for that command; this default may
 be overridden by use of the C<UNSETENV> tag.
 
-=head3 TRANSCRIPT and NOTRANSCRIPT
+=head3 LOG_INPUT and NOLOG_INPUT
 
-These tags override the value of the I<transcript> option on a
+These tags override the value of the I<log_input> option on a
 per-command basis.  For more information, see the description of
-I<transcript> in the L<"SUDOERS OPTIONS"> section below.
+I<log_input> in the L<"SUDOERS OPTIONS"> section below.
+
+=head3 LOG_OUTPUT and NOLOG_OUTPUT
+
+These tags override the value of the I<log_output> option on a
+per-command basis.  For more information, see the description of
+I<log_output> in the L<"SUDOERS OPTIONS"> section below.
 
 =head2 Wildcards
 
@@ -600,11 +607,11 @@ If set, the user may use B<sudo>'s B<-C> option which
 overrides the default starting point at which B<sudo> begins
 closing open file descriptors.  This flag is I<off> by default.
 
-=item compress_transcript
+=item compress_io
 
-If set, and the I<transcript> flag is also set, B<sudo> will compress
-the transcript logs using B<zlib>.  This flag is I<on> by default
-when B<sudo> is compiled with B<zlib> support.
+If set, and B<sudo> is configured to log a command's input or output,
+the I/O logs will be compressed using B<zlib>.  This flag is I<on>
+by default when B<sudo> is compiled with B<zlib> support.
 
 =item env_editor
 
@@ -857,24 +864,33 @@ include the target user's name.  Note that this flag precludes the
 use of a uid not listed in the passwd database as an argument to
 the B<-u> option.  This flag is I<off> by default.
 
-=item transcript
+=item log_input
 
-If set, B<sudo> will log a transcript of the command being run,
-similar to the script(1) command.  In this mode B<sudo> will allocate
-a new I<pseudo tty> and log all input and output for the command (except
-when echo is turned off as when a password is entered).  Transcripts
-are logged to the F</var/log/sudo-session> directory with a unique
-transcript ID that is included in the normal B<sudo> log line,
-prefixed with I<TSID=>.
+If set, B<sudo> will run the command in a I<pseudo tty> and log all
+user input.
+If the standard input is not connected to the user's tty, due to
+I/O redirection or because the command is part of a pipeline, that
+input is also captured and stored in a separate log file.
 
-Transcripts may be viewed with the L<sudoreplay(8)> utility, which
-can also be used to list or search the available transcripts.
+Input is logged to the F</var/log/sudo-io> directory using a unique
+session ID that is included in the normal B<sudo> log line, prefixed
+with I<TSID=>.
 
-A side effect of this mode is that it will not be possible to suspend
-the command being run (because it is running in a different tty
-with its own job control).  If a shell is being run, commands
-executed by that shell will have normal job control but the shell
-itself may not be suspended.
+=item log_output
+
+If set, B<sudo> will run the command in a I<pseudo tty> and log all
+output that is sent to the screen, similar to the script(1) command.
+If the standard output or standard error is not connected to the
+user's tty, due to I/O redirection or because the command is part
+of a pipeline, that output is also captured and stored in separate
+log files.
+
+Output is logged to the
+F</var/log/sudo-io> directory using a unique session ID that is
+included in the normal B<sudo> log line, prefixed with I<TSID=>.
+
+Output logs may be viewed with the L<sudoreplay(8)> utility, which
+can also be used to list or search the available logs.
 
 =item tty_tickets
 
@@ -1324,9 +1340,9 @@ Local groups file
 
 List of network groups
 
-=item F</var/log/sudo-session>
+=item F</var/log/sudo-io>
 
-Transcript logs
+I/O log files
 
 =back
 

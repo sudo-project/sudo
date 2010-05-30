@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "May 25, 2010" "1.8.0a1" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "May 30, 2010" "1.8.0a2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -417,7 +417,8 @@ See \*(L"\s-1SUDOERS\s0 \s-1OPTIONS\s0\*(R" for a list of supported Defaults par
 \&
 \}
 \& Tag_Spec ::= (\*(AqNOPASSWD:\*(Aq | \*(AqPASSWD:\*(Aq | \*(AqNOEXEC:\*(Aq | \*(AqEXEC:\*(Aq |
-\&               \*(AqSETENV:\*(Aq | \*(AqNOSETENV:\*(Aq | \*(AqTRANSCRIPT:\*(Aq | \*(AqNOTRANSCRIPT:\*(Aq)
+\&               \*(AqSETENV:\*(Aq | \*(AqNOSETENV:\*(Aq | \*(AqLOG_INPUT:\*(Aq | \*(AqNOLOG_INPUT:\*(Aq |
+\&               \*(AqLOG_OUTPUT:\*(Aq | \*(AqNOLOG_OUTPUT:\*(Aq)
 .Ve
 .PP
 A \fBuser specification\fR determines which commands a user may run
@@ -497,11 +498,11 @@ however, will supercede the values in \fIsudoers\fR.
 .IX Subsection "Tag_Spec"
 A command may have zero or more tags associated with it.  There are
 eight possible tag values, \f(CW\*(C`NOPASSWD\*(C'\fR, \f(CW\*(C`PASSWD\*(C'\fR, \f(CW\*(C`NOEXEC\*(C'\fR,
-\&\f(CW\*(C`EXEC\*(C'\fR, \f(CW\*(C`SETENV\*(C'\fR, \f(CW\*(C`NOSETENV\*(C'\fR, \f(CW\*(C`TRANSCRIPT\*(C'\fR and \f(CW\*(C`NOTRANSCRIPT\*(C'\fR.
-Once a tag is set on a \f(CW\*(C`Cmnd\*(C'\fR, subsequent \f(CW\*(C`Cmnd\*(C'\fRs in the
-\&\f(CW\*(C`Cmnd_Spec_List\*(C'\fR, inherit the tag unless it is overridden by the
-opposite tag (i.e.: \f(CW\*(C`PASSWD\*(C'\fR overrides \f(CW\*(C`NOPASSWD\*(C'\fR and \f(CW\*(C`NOEXEC\*(C'\fR
-overrides \f(CW\*(C`EXEC\*(C'\fR).
+\&\f(CW\*(C`EXEC\*(C'\fR, \f(CW\*(C`SETENV\*(C'\fR, \f(CW\*(C`NOSETENV\*(C'\fR, \f(CW\*(C`LOG_INPUT\*(C'\fR, \f(CW\*(C`NOLOG_INPUT\*(C'\fR,
+\&\f(CW\*(C`LOG_OUTPUT\*(C'\fR and \f(CW\*(C`NOLOG_OUTPUT\*(C'\fR.  Once a tag is set on a \f(CW\*(C`Cmnd\*(C'\fR,
+subsequent \f(CW\*(C`Cmnd\*(C'\fRs in the \f(CW\*(C`Cmnd_Spec_List\*(C'\fR, inherit the tag unless
+it is overridden by the opposite tag (i.e.: \f(CW\*(C`PASSWD\*(C'\fR overrides
+\&\f(CW\*(C`NOPASSWD\*(C'\fR and \f(CW\*(C`NOEXEC\*(C'\fR overrides \f(CW\*(C`EXEC\*(C'\fR).
 .PP
 \fI\s-1NOPASSWD\s0 and \s-1PASSWD\s0\fR
 .IX Subsection "NOPASSWD and PASSWD"
@@ -565,12 +566,19 @@ variables in this manner.  If the command matched is \fB\s-1ALL\s0\fR, the
 \&\f(CW\*(C`SETENV\*(C'\fR tag is implied for that command; this default may
 be overridden by use of the \f(CW\*(C`UNSETENV\*(C'\fR tag.
 .PP
-\fI\s-1TRANSCRIPT\s0 and \s-1NOTRANSCRIPT\s0\fR
-.IX Subsection "TRANSCRIPT and NOTRANSCRIPT"
+\fI\s-1LOG_INPUT\s0 and \s-1NOLOG_INPUT\s0\fR
+.IX Subsection "LOG_INPUT and NOLOG_INPUT"
 .PP
-These tags override the value of the \fItranscript\fR option on a
+These tags override the value of the \fIlog_input\fR option on a
 per-command basis.  For more information, see the description of
-\&\fItranscript\fR in the \*(L"\s-1SUDOERS\s0 \s-1OPTIONS\s0\*(R" section below.
+\&\fIlog_input\fR in the \*(L"\s-1SUDOERS\s0 \s-1OPTIONS\s0\*(R" section below.
+.PP
+\fI\s-1LOG_OUTPUT\s0 and \s-1NOLOG_OUTPUT\s0\fR
+.IX Subsection "LOG_OUTPUT and NOLOG_OUTPUT"
+.PP
+These tags override the value of the \fIlog_output\fR option on a
+per-command basis.  For more information, see the description of
+\&\fIlog_output\fR in the \*(L"\s-1SUDOERS\s0 \s-1OPTIONS\s0\*(R" section below.
 .SS "Wildcards"
 .IX Subsection "Wildcards"
 \&\fBsudo\fR allows shell-style \fIwildcards\fR (aka meta or glob characters)
@@ -738,11 +746,11 @@ This flag is \fIon\fR by default.
 If set, the user may use \fBsudo\fR's \fB\-C\fR option which
 overrides the default starting point at which \fBsudo\fR begins
 closing open file descriptors.  This flag is \fIoff\fR by default.
-.IP "compress_transcript" 16
-.IX Item "compress_transcript"
-If set, and the \fItranscript\fR flag is also set, \fBsudo\fR will compress
-the transcript logs using \fBzlib\fR.  This flag is \fIon\fR by default
-when \fBsudo\fR is compiled with \fBzlib\fR support.
+.IP "compress_io" 16
+.IX Item "compress_io"
+If set, and \fBsudo\fR is configured to log a command's input or output,
+the I/O logs will be compressed using \fBzlib\fR.  This flag is \fIon\fR
+by default when \fBsudo\fR is compiled with \fBzlib\fR support.
 .IP "env_editor" 16
 .IX Item "env_editor"
 If set, \fBvisudo\fR will use the value of the \s-1EDITOR\s0 or \s-1VISUAL\s0
@@ -964,24 +972,32 @@ of the invoking user.  In addition, the timestamp file name will
 include the target user's name.  Note that this flag precludes the
 use of a uid not listed in the passwd database as an argument to
 the \fB\-u\fR option.  This flag is \fIoff\fR by default.
-.IP "transcript" 16
-.IX Item "transcript"
-If set, \fBsudo\fR will log a transcript of the command being run,
-similar to the \fIscript\fR\|(1) command.  In this mode \fBsudo\fR will allocate
-a new \fIpseudo tty\fR and log all input and output for the command (except
-when echo is turned off as when a password is entered).  Transcripts
-are logged to the \fI/var/log/sudo\-session\fR directory with a unique
-transcript \s-1ID\s0 that is included in the normal \fBsudo\fR log line,
-prefixed with \fITSID=\fR.
+.IP "log_input" 16
+.IX Item "log_input"
+If set, \fBsudo\fR will run the command in a \fIpseudo tty\fR and log all
+user input.
+If the standard input is not connected to the user's tty, due to
+I/O redirection or because the command is part of a pipeline, that
+input is also captured and stored in a separate log file.
 .Sp
-Transcripts may be viewed with the \fIsudoreplay\fR\|(@mansectsu@) utility, which
-can also be used to list or search the available transcripts.
+Input is logged to the \fI/var/log/sudo\-io\fR directory using a unique
+session \s-1ID\s0 that is included in the normal \fBsudo\fR log line, prefixed
+with \fITSID=\fR.
+.IP "log_output" 16
+.IX Item "log_output"
+If set, \fBsudo\fR will run the command in a \fIpseudo tty\fR and log all
+output that is sent to the screen, similar to the \fIscript\fR\|(1) command.
+If the standard output or standard error is not connected to the
+user's tty, due to I/O redirection or because the command is part
+of a pipeline, that output is also captured and stored in separate
+log files.
 .Sp
-A side effect of this mode is that it will not be possible to suspend
-the command being run (because it is running in a different tty
-with its own job control).  If a shell is being run, commands
-executed by that shell will have normal job control but the shell
-itself may not be suspended.
+Output is logged to the
+\&\fI/var/log/sudo\-io\fR directory using a unique session \s-1ID\s0 that is
+included in the normal \fBsudo\fR log line, prefixed with \fITSID=\fR.
+.Sp
+Output logs may be viewed with the \fIsudoreplay\fR\|(@mansectsu@) utility, which
+can also be used to list or search the available logs.
 .IP "tty_tickets" 16
 .IX Item "tty_tickets"
 If set, users must authenticate on a per-tty basis.  Normally,
@@ -1359,9 +1375,9 @@ Local groups file
 .IP "\fI/etc/netgroup\fR" 24
 .IX Item "/etc/netgroup"
 List of network groups
-.IP "\fI/var/log/sudo\-session\fR" 24
-.IX Item "/var/log/sudo-session"
-Transcript logs
+.IP "\fI/var/log/sudo\-io\fR" 24
+.IX Item "/var/log/sudo-io"
+I/O log files
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 Below are example \fIsudoers\fR entries.  Admittedly, some of

@@ -1,4 +1,4 @@
-.\" Copyright (c) 2009 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 2009-2010 Todd C. Miller <Todd.Miller@courtesan.com>
 .\" 
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOREPLAY @mansectsu@"
-.TH SUDOREPLAY @mansectsu@ "May 25, 2010" "1.8.0a1" "MAINTENANCE COMMANDS"
+.TH SUDOREPLAY @mansectsu@ "May 30, 2010" "1.8.0a2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -179,7 +179,7 @@ Double the playback speed.
 .IP "\-d \fIdirectory\fR" 12
 .IX Item "-d directory"
 Use \fIdirectory\fR to for the session logs instead of the default,
-\&\fI/var/log/sudo\-sessions\fR.
+\&\fI/var/log/sudo\-io\fR.
 .IP "\-l" 12
 .IX Item "-l"
 Enable \*(L"list mode\*(R".  In this mode, \fBsudoreplay\fR will list available
@@ -320,18 +320,34 @@ The current time but 14 days ago.
 10:01 am, September 17, 2009.
 .SH "FILES"
 .IX Header "FILES"
-.IP "\fI/var/log/sudo\-session\fR" 24
-.IX Item "/var/log/sudo-session"
-The default session directory.
-.IP "\fI/var/log/sudo\-session/00/00/01\fR" 24
-.IX Item "/var/log/sudo-session/00/00/01"
+.IP "\fI/var/log/sudo\-io\fR" 24
+.IX Item "/var/log/sudo-io"
+The default I/O log directory.
+.IP "\fI/var/log/sudo\-io/00/00/01/log\fR" 24
+.IX Item "/var/log/sudo-io/00/00/01/log"
 Example session log info.
-.IP "\fI/var/log/sudo\-session/00/00/01.scr\fR" 24
-.IX Item "/var/log/sudo-session/00/00/01.scr"
-Example session transcript file.
-.IP "\fI/var/log/sudo\-session/00/00/01.tim\fR" 24
-.IX Item "/var/log/sudo-session/00/00/01.tim"
+.IP "\fI/var/log/sudo\-io/00/00/01/stdin\fR" 24
+.IX Item "/var/log/sudo-io/00/00/01/stdin"
+Example session standard input log.
+.IP "\fI/var/log/sudo\-io/00/00/01/stdout\fR" 24
+.IX Item "/var/log/sudo-io/00/00/01/stdout"
+Example session standard output log.
+.IP "\fI/var/log/sudo\-io/00/00/01/stderr\fR" 24
+.IX Item "/var/log/sudo-io/00/00/01/stderr"
+Example session standard error log.
+.IP "\fI/var/log/sudo\-io/00/00/01/ttyin\fR" 24
+.IX Item "/var/log/sudo-io/00/00/01/ttyin"
+Example session tty input file.
+.IP "\fI/var/log/sudo\-io/00/00/01/ttyout\fR" 24
+.IX Item "/var/log/sudo-io/00/00/01/ttyout"
+Example session tty output file.
+.IP "\fI/var/log/sudo\-io/00/00/01/timing\fR" 24
+.IX Item "/var/log/sudo-io/00/00/01/timing"
 Example session timing file.
+.PP
+Note that the \fIstdin\fR, \fIstdout\fR and \fIstderr\fR files will be empty
+unless \fBsudo\fR was used as part of a pipeline for a particular
+command.
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 List sessions run by user \fImillert\fR:
