@@ -546,7 +546,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    mask |= omask;
 	    umask(omask);
 	}
-	easprintf(&command_info[info_len++], "umask=0%o", mask);
+	easprintf(&command_info[info_len++], "umask=0%o", (unsigned int)mask);
     }
 
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
@@ -593,13 +593,19 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	command_info[info_len++] = fmt_string("command", safe_cmnd);
     }
     if (def_stay_setuid) {
-	easprintf(&command_info[info_len++], "runas_uid=%u", user_uid);
-	easprintf(&command_info[info_len++], "runas_gid=%u", user_gid);
-	easprintf(&command_info[info_len++], "runas_euid=%u", runas_pw->pw_uid);
-	easprintf(&command_info[info_len++], "runas_egid=%u", runas_pw->pw_gid);
+	easprintf(&command_info[info_len++], "runas_uid=%u",
+	    (unsigned int)user_uid);
+	easprintf(&command_info[info_len++], "runas_gid=%u",
+	    (unsigned int)user_gid);
+	easprintf(&command_info[info_len++], "runas_euid=%u",
+	    (unsigned int)runas_pw->pw_uid);
+	easprintf(&command_info[info_len++], "runas_egid=%u",
+	    (unsigned int)runas_pw->pw_gid);
     } else {
-	easprintf(&command_info[info_len++], "runas_uid=%u", runas_pw->pw_uid);
-	easprintf(&command_info[info_len++], "runas_gid=%u", runas_pw->pw_gid);
+	easprintf(&command_info[info_len++], "runas_uid=%u",
+	    (unsigned int)runas_pw->pw_uid);
+	easprintf(&command_info[info_len++], "runas_gid=%u",
+	    (unsigned int)runas_pw->pw_gid);
     }
     if (def_preserve_groups) {
 	command_info[info_len++] = "preserve_groups=true";

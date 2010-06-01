@@ -47,6 +47,7 @@
 #endif
 
 #include <compat.h>
+#include <missing.h>
 #include <alloc.h>
 #include <error.h>
 
