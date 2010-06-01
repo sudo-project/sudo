@@ -799,12 +799,11 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
 	    if (n == -1) {
 		if (errno == EINTR)
 		    continue;
-		if (log_io && errno != EAGAIN) {
-		    /* Did the other end of the pipe go away? */
+		if (errno != EAGAIN) {
 		    cstat->type = CMD_ERRNO;
 		    cstat->val = errno;
+		    break;
 		}
-		break;
 	    }
 	    if (cstat->type == CMD_WSTATUS) {
 		if (WIFSTOPPED(cstat->val)) {
@@ -840,8 +839,11 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
 		}
 	    }
 	}
-	if (perform_io(iobufs, fdsr, fdsw) != 0)
+	if (perform_io(iobufs, fdsr, fdsw) != 0) {
+	    cstat->type = CMD_ERRNO;
+	    cstat->val = errno;
 	    break;
+	}
     }
 
     if (log_io) {
