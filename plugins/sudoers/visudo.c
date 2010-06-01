@@ -153,7 +153,7 @@ main(int argc, char *argv[])
 #endif
 
 #if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
-    setprogname(argc > 0 argv[0] ? "visudo");
+    setprogname(argc > 0 ? argv[0] : "visudo");
 #endif
     if (argc < 1)
 	usage();

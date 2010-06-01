@@ -211,7 +211,7 @@ main(int argc, char *argv[])
     ssize_t nwritten;
 
 #if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
-    setprogname(argc > 0 argv[0] ? "sudoreplay");
+    setprogname(argc > 0 ? argv[0] : "sudoreplay");
 #endif
 
     while ((ch = getopt(argc, argv, "d:lm:s:V")) != -1) {
