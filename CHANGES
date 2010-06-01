@@ -2185,3 +2185,8 @@ Sudo 1.6.9p21 released.
      possible pseudo-commands in command matching
 
 Sudo 1.6.9p22 released.
+
+689) Sudo will now check for and remove duplicate environment variables
+     when it changes the value of an existing variable.
+
+Sudo 1.6.9p23 released.
