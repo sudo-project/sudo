@@ -799,7 +799,11 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
 	    if (n == -1) {
 		if (errno == EINTR)
 		    continue;
-		if (errno != EAGAIN) {
+		/*
+		 * If not logging I/O we will receive ECONNRESET when
+		 * the command is executed.  It is safe to ignore this.
+		 */
+		if (log_io && errno != EAGAIN) {
 		    cstat->type = CMD_ERRNO;
 		    cstat->val = errno;
 		    break;
