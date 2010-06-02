@@ -49,9 +49,6 @@
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#ifndef HAVE_TIMESPEC
-# include <emul/timespec.h>
-#endif
 
 #include "sudo.h"
 
@@ -74,13 +71,13 @@ sudo_edit(argc, argv, envp)
     const char *tmpdir;
     char **nargv, **ap, *editor, *cp;
     char buf[BUFSIZ];
-    int error, i, ac, ofd, tfd, nargc, rval, tmplen, wasblank;
+    int rc, i, ac, ofd, tfd, nargc, rval, tmplen, wasblank;
     struct stat sb;
-    struct timespec ts1, ts2;
+    struct timeval tv, tv1, tv2;
     struct tempfile {
 	char *tfile;
 	char *ofile;
-	struct timespec omtim;
+	struct timeval omtim;
 	off_t osize;
     } *tf;
 
@@ -113,23 +110,23 @@ sudo_edit(argc, argv, envp)
     tf = emalloc2(argc - 1, sizeof(*tf));
     zero_bytes(tf, (argc - 1) * sizeof(*tf));
     for (i = 0, ap = argv + 1; i < argc - 1 && *ap != NULL; i++, ap++) {
-	error = -1;
+	rc = -1;
 	set_perms(PERM_RUNAS);
 	if ((ofd = open(*ap, O_RDONLY, 0644)) != -1 || errno == ENOENT) {
 	    if (ofd == -1) {
 		zero_bytes(&sb, sizeof(sb));		/* new file */
-		error = 0;
+		rc = 0;
 	    } else {
 #ifdef HAVE_FSTAT
-		error = fstat(ofd, &sb);
+		rc = fstat(ofd, &sb);
 #else
-		error = stat(tf[i].ofile, &sb);
+		rc = stat(tf[i].ofile, &sb);
 #endif
 	    }
 	}
 	set_perms(PERM_ROOT);
-	if (error || (ofd != -1 && !S_ISREG(sb.st_mode))) {
-	    if (error)
+	if (rc || (ofd != -1 && !S_ISREG(sb.st_mode))) {
+	    if (rc)
 		warning("%s", *ap);
 	    else
 		warningx("%s: not a regular file", *ap);
@@ -140,8 +137,7 @@ sudo_edit(argc, argv, envp)
 	    continue;
 	}
 	tf[i].ofile = *ap;
-	tf[i].omtim.tv_sec = mtim_getsec(sb);
-	tf[i].omtim.tv_nsec = mtim_getnsec(sb);
+	mtim_get(&sb, &tf[i].omtim);
 	tf[i].osize = sb.st_size;
 	if ((cp = strrchr(tf[i].ofile, '/')) != NULL)
 	    cp++;
@@ -176,14 +172,12 @@ sudo_edit(argc, argv, envp)
 	 */
 	(void) touch(tfd, NULL, &tf[i].omtim);
 #ifdef HAVE_FSTAT
-	error = fstat(tfd, &sb);
+	rc = fstat(tfd, &sb);
 #else
-	error = stat(tf[i].tfile, &sb);
+	rc = stat(tf[i].tfile, &sb);
 #endif
-	if (!error) {
-	    tf[i].omtim.tv_sec = mtim_getsec(sb);
-	    tf[i].omtim.tv_nsec = mtim_getnsec(sb);
-	}
+	if (!rc)
+	    mtim_get(&sb, &tf[i].omtim);
 	close(tfd);
     }
     if (argc == 1)
@@ -221,7 +215,7 @@ sudo_edit(argc, argv, envp)
      * Fork and exec the editor with the invoking user's creds,
      * keeping track of the time spent in the editor.
      */
-    gettime(&ts1);
+    gettime(&tv1);
     kidpid = fork();
     if (kidpid == -1) {
 	warning("fork");
@@ -257,7 +251,7 @@ sudo_edit(argc, argv, envp)
 		break;
 	}
     } while (pid != -1 || errno == EINTR);
-    gettime(&ts2);
+    gettime(&tv2);
     if (pid == -1 || !WIFEXITED(i))
 	rval = 1;
     else
@@ -265,18 +259,18 @@ sudo_edit(argc, argv, envp)
 
     /* Copy contents of temp files to real ones */
     for (i = 0; i < argc - 1; i++) {
-	error = -1;
+	rc = -1;
 	set_perms(PERM_USER);
 	if ((tfd = open(tf[i].tfile, O_RDONLY, 0644)) != -1) {
 #ifdef HAVE_FSTAT
-	    error = fstat(tfd, &sb);
+	    rc = fstat(tfd, &sb);
 #else
-	    error = stat(tf[i].tfile, &sb);
+	    rc = stat(tf[i].tfile, &sb);
 #endif
 	}
 	set_perms(PERM_ROOT);
-	if (error || !S_ISREG(sb.st_mode)) {
-	    if (error)
+	if (rc || !S_ISREG(sb.st_mode)) {
+	    if (rc)
 		warning("%s", tf[i].tfile);
 	    else
 		warningx("%s: not a regular file", tf[i].tfile);
@@ -285,18 +279,18 @@ sudo_edit(argc, argv, envp)
 		close(tfd);
 	    continue;
 	}
-	if (tf[i].osize == sb.st_size && tf[i].omtim.tv_sec == mtim_getsec(sb)
-	    && tf[i].omtim.tv_nsec == mtim_getnsec(sb)) {
+	mtim_get(&sb, &tv);
+	if (tf[i].osize == sb.st_size && timercmp(&tf[i].omtim, &tv, ==)) {
 	    /*
 	     * If mtime and size match but the user spent no measurable
 	     * time in the editor we can't tell if the file was changed.
 	     */
-#ifdef HAVE_TIMESPECSUB2
-	    timespecsub(&ts1, &ts2);
+#ifdef HAVE_TIMERSUB2
+	    timersub(&tv1, &tv2);
 #else
-	    timespecsub(&ts1, &ts2, &ts2);
+	    timersub(&tv1, &tv2, &tv2);
 #endif
-	    if (timespecisset(&ts2)) {
+	    if (timerisset(&tv2)) {
 		warningx("%s unchanged", tf[i].ofile);
 		unlink(tf[i].tfile);
 		close(tfd);

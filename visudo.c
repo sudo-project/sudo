@@ -76,9 +76,6 @@
 #else
 # include <varargs.h>
 #endif
-#ifndef HAVE_TIMESPEC
-# include <emul/timespec.h>
-#endif
 
 #include "sudo.h"
 #include "interfaces.h"
@@ -267,8 +264,8 @@ edit_sudoers(sp, editor, args, lineno)
     char *cp;				/* scratch char pointer */
     char buf[PATH_MAX*2];		/* buffer used for copying files */
     char linestr[64];			/* string version of lineno */
-    struct timespec ts1, ts2;		/* time before and after edit */
-    struct timespec orig_mtim;		/* starting mtime of sudoers file */
+    struct timeval tv, tv1, tv2;	/* time before and after edit */
+    struct timeval orig_mtim;		/* starting mtime of sudoers file */
     off_t orig_size;			/* starting size of sudoers file */
     ssize_t nread;			/* number of bytes read */
     struct stat sb;			/* stat buffer */
@@ -280,8 +277,7 @@ edit_sudoers(sp, editor, args, lineno)
 #endif
 	error(1, "can't stat %s", sp->path);
     orig_size = sb.st_size;
-    orig_mtim.tv_sec = mtim_getsec(sb);
-    orig_mtim.tv_nsec = mtim_getnsec(sb);
+    mtim_get(&sb, &orig_mtim);
 
     /* Create the temp file if needed and set timestamp. */
     if (sp->tpath == NULL) {
@@ -347,9 +343,9 @@ edit_sudoers(sp, editor, args, lineno)
      *  XPG4 specifies that vi's exit value is a function of the
      *  number of errors during editing (?!?!).
      */
-    gettime(&ts1);
+    gettime(&tv1);
     if (run_command(editor, av) != -1) {
-	gettime(&ts2);
+	gettime(&tv2);
 	/*
 	 * Sanity checks.
 	 */
@@ -371,19 +367,20 @@ edit_sudoers(sp, editor, args, lineno)
 
     /* Set modified bit if use changed the file. */
     modified = TRUE;
+    mtim_get(&sb, &tv);
     if (orig_size == sb.st_size &&
-	orig_mtim.tv_sec == mtim_getsec(sb) &&
-	orig_mtim.tv_nsec == mtim_getnsec(sb)) {
+	orig_mtim.tv_sec == tv.tv_sec &&
+	orig_mtim.tv_usec == tv.tv_usec) {
 	/*
 	 * If mtime and size match but the user spent no measurable
 	 * time in the editor we can't tell if the file was changed.
 	 */
-#ifdef HAVE_TIMESPECSUB2
-	timespecsub(&ts1, &ts2);
+#ifdef HAVE_TIMERSUB2
+	timersub(&tv1, &tv2);
 #else
-	timespecsub(&ts1, &ts2, &ts2);
+	timersub(&tv1, &tv2, &tv2);
 #endif
-	if (timespecisset(&ts2))
+	if (timerisset(&tv2))
 	    modified = FALSE;
     }
 

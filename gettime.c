@@ -22,9 +22,6 @@
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#ifndef HAVE_TIMESPEC
-# include <emul/timespec.h>
-#endif
 
 #include <compat.h>
 
@@ -33,19 +30,15 @@
  * timespecs in struct stat or, otherwise, using time().
  */
 int
-gettime(ts)
-    struct timespec *ts;
+gettime(tv)
+    struct timeval *tv;
 {
     int rval;
 #if defined(HAVE_GETTIMEOFDAY) && (defined(HAVE_ST_MTIM) || defined(HAVE_ST_MTIMESPEC))
-    struct timeval tv;
-
-    rval = gettimeofday(&tv, NULL);
-    ts->tv_sec = tv.tv_sec;
-    ts->tv_nsec = tv.tv_usec * 1000;
+    rval = gettimeofday(tv, NULL);
 #else
-    rval = (int)time(&ts->tv_sec);
-    ts->tv_nsec = 0;
+    rval = (int)time(&tv->tv_sec);
+    tv->tv_usec = 0;
 #endif
     return (rval);
 }

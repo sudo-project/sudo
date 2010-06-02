@@ -23,6 +23,7 @@
 
 #include <sys/types.h>
 #include <sys/param.h>
+#include <sys/time.h>
 #include <sys/stat.h>
 #ifndef __TANDEM
 # include <sys/file.h>
@@ -46,15 +47,14 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#if TIME_WITH_SYS_TIME
+# include <time.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <time.h>
 #include <pwd.h>
 #include <grp.h>
-#ifndef HAVE_TIMESPEC
-# include <emul/timespec.h>
-#endif
 
 #include "sudo.h"
 
@@ -534,7 +534,7 @@ timestamp_status(timestampdir, timestampfile, user, flags)
 	if (def_timestamp_timeout < 0 && sb.st_mtime != 0)
 	    status = TS_CURRENT;
 	else {
-	    /* XXX - should use timespec here */
+	    /* XXX - should use timeval here */
 	    now = time(NULL);
 	    boottime = get_boottime();
 	    if (def_timestamp_timeout &&
@@ -574,7 +574,7 @@ void
 remove_timestamp(remove)
     int remove;
 {
-    struct timespec ts;
+    struct timeval tv;
     char *timestampdir, *timestampfile, *path;
     int status;
 
@@ -594,8 +594,8 @@ remove_timestamp(remove)
 		remove = FALSE;
 	    }
 	} else {
-	    timespecclear(&ts);
-	    if (touch(-1, path, &ts) == -1)
+	    timerclear(&tv);
+	    if (touch(-1, path, &tv) == -1)
 		error(1, "can't reset %s to Epoch", path);
 	}
     }

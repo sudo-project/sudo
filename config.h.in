@@ -530,7 +530,7 @@
 
 /* Define to 1 if you have a timespecsub macro or function that takes two
    arguments (not three) */
-#undef HAVE_TIMESPECSUB2
+#undef HAVE_TIMERSUB2
 
 /* Define to 1 if you have the `tzset' function. */
 #undef HAVE_TZSET
@@ -770,25 +770,28 @@
 #undef volatile
 
 /*
- * Macros to pull sec and nsec parts of mtime from struct stat.
- * We need to be able to convert between timeval and timespec
- * so the last 3 digits of tv_nsec are not significant.
+ * Macros to convert ctime and mtime into timevals.
  */
+#define timespec2timeval(_ts, _tv) do {					\
+    (_tv)->tv_sec = (_ts)->tv_sec;					\
+    (_tv)->tv_usec = (_ts)->tv_nsec / 1000;				\
+} while (0)
+
 #ifdef HAVE_ST_MTIM
 # ifdef HAVE_ST__TIM
-#  define mtim_getsec(_x)	((_x).st_mtim.st__tim.tv_sec)
-#  define mtim_getnsec(_x)	(((_x).st_mtim.st__tim.tv_nsec / 1000) * 1000)
+#  define ctim_get(_x, _y)	timespec2timeval(&(_x)->st_ctim.st__tim, (_y))
+#  define mtim_get(_x, _y)	timespec2timeval(&(_x)->st_mtim.st__tim, (_y))
 # else
-#  define mtim_getsec(_x)	((_x).st_mtim.tv_sec)
-#  define mtim_getnsec(_x)	(((_x).st_mtim.tv_nsec / 1000) * 1000)
+#  define ctim_get(_x, _y)	timespec2timeval(&(_x)->st_ctim, (_y))
+#  define mtim_get(_x, _y)	timespec2timeval(&(_x)->st_mtim, (_y))
 # endif
 #else
 # ifdef HAVE_ST_MTIMESPEC
-#  define mtim_getsec(_x)	((_x).st_mtimespec.tv_sec)
-#  define mtim_getnsec(_x)	(((_x).st_mtimespec.tv_nsec / 1000) * 1000)
+#  define ctim_get(_x, _y)	timespec2timeval(&(_x)->st_ctimespec, (_y))
+#  define mtim_get(_x, _y)	timespec2timeval(&(_x)->st_mtimespec, (_y))
 # else
-#  define mtim_getsec(_x)	((_x).st_mtime)
-#  define mtim_getnsec(_x)	(0)
+#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctime; (_y)->tv_usec = 0; } while (0)
+#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtime; (_y)->tv_usec = 0; } while (0)
 # endif /* HAVE_ST_MTIMESPEC */
 #endif /* HAVE_ST_MTIM */
 
