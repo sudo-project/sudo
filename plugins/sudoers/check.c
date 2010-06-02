@@ -28,6 +28,9 @@
 #ifdef __linux__
 #include <sys/vfs.h>
 #endif
+#if defined(__sun) && defined(__SVR4)
+#include <sys/statvfs.h>
+#endif
 #ifndef __TANDEM
 # include <sys/file.h>
 #endif
@@ -663,7 +666,7 @@ remove_timestamp(int remove)
 }
 
 /*
- * Returns TRUE if tty lives on a devpts filesystem, else FALSE.
+ * Returns TRUE if tty lives on a devpts or /devices filesystem, else FALSE.
  * Unlike most filesystems, the ctime of devpts nodes is not updated when
  * the device node is written to, only when the inode's status changes,
  * typically via the chmod, chown, link, rename, or utimes system calls.
@@ -683,6 +686,13 @@ tty_is_devpts(const char *tty)
 
     if (statfs(tty, &sfs) == 0) {
 	if (sfs.f_type == DEVPTS_SUPER_MAGIC)
+	    retval = TRUE;
+    }
+#elif defined(__sun) && defined(__SVR4)
+    struct statvfs sfs;
+
+    if (statvfs(tty, &sfs) == 0) {
+	if (strcmp(sfs.f_fstr, "devices") == 0)
 	    retval = TRUE;
     }
 #endif /* __linux__ */
