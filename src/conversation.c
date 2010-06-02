@@ -107,7 +107,7 @@ err:
 }
 
 int
-sudo_printf(int msg_type, const char *fmt, ...)
+_sudo_printf(int msg_type, const char *fmt, ...)
 {
     va_list ap;
     FILE *fp;
