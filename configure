@@ -4253,7 +4253,7 @@ if test "${with_libvas+set}" = set; then :
     no)		;;
     *)
 cat >>confdefs.h <<_ACEOF
-#define LIBVAS_SO "$with_with_libvas"
+#define LIBVAS_SO "$with_libvas"
 _ACEOF
 
 		;;
@@ -4560,7 +4560,12 @@ if test "${enable_zlib+set}" = set; then :
 	    CPPFLAGS="${CPPFLAGS} -I${enableval}/include"
 
     if test X"$with_rpath" = X"yes"; then
-	ZLIB="${ZLIB} -L$enableval/lib -R$enableval/lib"
+	case "$host" in
+	    *-*-hpux*)	ZLIB="${ZLIB} -L$enableval/lib -Wl,+b,$enableval/lib"
+			;;
+	    *)		ZLIB="${ZLIB} -L$enableval/lib -Wl,-R$enableval/lib"
+			;;
+	esac
     else
 	ZLIB="${ZLIB} -L$enableval/lib"
     fi
@@ -6588,13 +6593,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6591: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6596: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6594: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6599: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6597: output\"" >&5)
+  (eval echo "\"\$as_me:6602: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -7799,7 +7804,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7802 "configure"' > conftest.$ac_ext
+  echo '#line 7807 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9191,11 +9196,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9194: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9199: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9198: \$? = $ac_status" >&5
+   echo "$as_me:9203: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9530,11 +9535,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9533: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9538: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9537: \$? = $ac_status" >&5
+   echo "$as_me:9542: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9635,11 +9640,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9638: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9643: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9642: \$? = $ac_status" >&5
+   echo "$as_me:9647: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9690,11 +9695,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9693: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9698: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9697: \$? = $ac_status" >&5
+   echo "$as_me:9702: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12057,7 +12062,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12060 "configure"
+#line 12065 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12153,7 +12158,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12156 "configure"
+#line 12161 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13154,7 +13159,12 @@ if test -n "$with_libpath"; then
     for i in ${with_libpath}; do
 
     if test X"$with_rpath" = X"yes"; then
-	LDFLAGS="${LDFLAGS} -L$i -R$i"
+	case "$host" in
+	    *-*-hpux*)	LDFLAGS="${LDFLAGS} -L$i -Wl,+b,$i"
+			;;
+	    *)		LDFLAGS="${LDFLAGS} -L$i -Wl,-R$i"
+			;;
+	esac
     else
 	LDFLAGS="${LDFLAGS} -L$i"
     fi
@@ -16193,7 +16203,12 @@ if test ${with_fwtk-'no'} != "no"; then
     if test "$with_fwtk" != "yes"; then
 
     if test X"$with_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_fwtk} -R${with_fwtk}"
+	case "$host" in
+	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_fwtk} -Wl,+b,${with_fwtk}"
+			;;
+	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_fwtk} -Wl,-R${with_fwtk}"
+			;;
+	esac
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_fwtk}"
     fi
@@ -16220,7 +16235,12 @@ if test ${with_SecurID-'no'} != "no"; then
     _LDFLAGS="${LDFLAGS}"
 
     if test X"$with_rpath" = X"yes"; then
-	LDFLAGS="${LDFLAGS} -L${with_SecurID} -R${with_SecurID}"
+	case "$host" in
+	    *-*-hpux*)	LDFLAGS="${LDFLAGS} -L${with_SecurID} -Wl,+b,${with_SecurID}"
+			;;
+	    *)		LDFLAGS="${LDFLAGS} -L${with_SecurID} -Wl,-R${with_SecurID}"
+			;;
+	esac
     else
 	LDFLAGS="${LDFLAGS} -L${with_SecurID}"
     fi
@@ -16278,7 +16298,12 @@ if test "x$ac_cv_lib_aceclnt_SD_Init_______lpthread_______" = x""yes; then :
 
 
     if test X"$with_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_SecurID} -R${with_SecurID}"
+	case "$host" in
+	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_SecurID} -Wl,+b,${with_SecurID}"
+			;;
+	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_SecurID} -Wl,-R${with_SecurID}"
+			;;
+	esac
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_SecurID}"
     fi
@@ -16328,7 +16353,12 @@ rm -f conftest.err conftest.$ac_ext
     else
 
     if test X"$with_rpath" = X"yes"; then
-	LDFLAGS="${LDFLAGS} -L${with_kerb4}/lib -R${with_kerb4}/lib"
+	case "$host" in
+	    *-*-hpux*)	LDFLAGS="${LDFLAGS} -L${with_kerb4}/lib -Wl,+b,${with_kerb4}/lib"
+			;;
+	    *)		LDFLAGS="${LDFLAGS} -L${with_kerb4}/lib -Wl,-R${with_kerb4}/lib"
+			;;
+	esac
     else
 	LDFLAGS="${LDFLAGS} -L${with_kerb4}/lib"
     fi
@@ -16338,7 +16368,12 @@ rm -f conftest.err conftest.$ac_ext
 
 
     if test X"$with_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb4}/lib -R${with_kerb4}/lib"
+	case "$host" in
+	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb4}/lib -Wl,+b,${with_kerb4}/lib"
+			;;
+	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb4}/lib -Wl,-R${with_kerb4}/lib"
+			;;
+	esac
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb4}/lib"
     fi
@@ -16694,7 +16729,12 @@ $as_echo "$as_me: WARNING: Unable to locate Kerberos V include files, you will h
     else
 
     if test X"$with_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb5}/lib -R${with_kerb5}/lib"
+	case "$host" in
+	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb5}/lib -Wl,+b,${with_kerb5}/lib"
+			;;
+	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb5}/lib -Wl,-R${with_kerb5}/lib"
+			;;
+	esac
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb5}/lib"
     fi
@@ -16876,7 +16916,12 @@ if test ${with_AFS-'no'} = "yes"; then
 	if test -d ${i}; then
 
     if test X"$with_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i -R$i"
+	case "$host" in
+	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i -Wl,+b,$i"
+			;;
+	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i -Wl,-R$i"
+			;;
+	esac
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i"
     fi
@@ -16935,7 +16980,12 @@ if test ${with_skey-'no'} = "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_skey}/include"
 
     if test X"$with_rpath" = X"yes"; then
-	LDFLAGS="${LDFLAGS} -L${with_skey}/lib -R${with_skey}/lib"
+	case "$host" in
+	    *-*-hpux*)	LDFLAGS="${LDFLAGS} -L${with_skey}/lib -Wl,+b,${with_skey}/lib"
+			;;
+	    *)		LDFLAGS="${LDFLAGS} -L${with_skey}/lib -Wl,-R${with_skey}/lib"
+			;;
+	esac
     else
 	LDFLAGS="${LDFLAGS} -L${with_skey}/lib"
     fi
@@ -16945,7 +16995,12 @@ if test ${with_skey-'no'} = "yes"; then
 
 
     if test X"$with_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib -R${with_skey}/lib"
+	case "$host" in
+	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib -Wl,+b,${with_skey}/lib"
+			;;
+	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib -Wl,-R${with_skey}/lib"
+			;;
+	esac
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib"
     fi
@@ -16982,7 +17037,12 @@ rm -f conftest.err conftest.$ac_ext
 	else
 
     if test X"$with_rpath" = X"yes"; then
-	LDFLAGS="${LDFLAGS} -L${dir}/lib -R${dir}/lib"
+	case "$host" in
+	    *-*-hpux*)	LDFLAGS="${LDFLAGS} -L${dir}/lib -Wl,+b,${dir}/lib"
+			;;
+	    *)		LDFLAGS="${LDFLAGS} -L${dir}/lib -Wl,-R${dir}/lib"
+			;;
+	esac
     else
 	LDFLAGS="${LDFLAGS} -L${dir}/lib"
     fi
@@ -16992,7 +17052,12 @@ rm -f conftest.err conftest.$ac_ext
 
 
     if test X"$with_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -R${dir}/lib"
+	case "$host" in
+	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -Wl,+b,${dir}/lib"
+			;;
+	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -Wl,-R${dir}/lib"
+			;;
+	esac
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib"
     fi
@@ -17095,7 +17160,12 @@ if test ${with_opie-'no'} = "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_opie}/include"
 
     if test X"$with_rpath" = X"yes"; then
-	LDFLAGS="${LDFLAGS} -L${with_opie}/lib -R${with_opie}/lib"
+	case "$host" in
+	    *-*-hpux*)	LDFLAGS="${LDFLAGS} -L${with_opie}/lib -Wl,+b,${with_opie}/lib"
+			;;
+	    *)		LDFLAGS="${LDFLAGS} -L${with_opie}/lib -Wl,-R${with_opie}/lib"
+			;;
+	esac
     else
 	LDFLAGS="${LDFLAGS} -L${with_opie}/lib"
     fi
@@ -17105,7 +17175,12 @@ if test ${with_opie-'no'} = "yes"; then
 
 
     if test X"$with_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib -R${with_opie}/lib"
+	case "$host" in
+	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib -Wl,+b,${with_opie}/lib"
+			;;
+	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib -Wl,-R${with_opie}/lib"
+			;;
+	esac
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib"
     fi
@@ -17142,7 +17217,12 @@ rm -f conftest.err conftest.$ac_ext
 	else
 
     if test X"$with_rpath" = X"yes"; then
-	LDFLAGS="${LDFLAGS} -L${dir}/lib -R${dir}/lib"
+	case "$host" in
+	    *-*-hpux*)	LDFLAGS="${LDFLAGS} -L${dir}/lib -Wl,+b,${dir}/lib"
+			;;
+	    *)		LDFLAGS="${LDFLAGS} -L${dir}/lib -Wl,-R${dir}/lib"
+			;;
+	esac
     else
 	LDFLAGS="${LDFLAGS} -L${dir}/lib"
     fi
@@ -17152,7 +17232,12 @@ rm -f conftest.err conftest.$ac_ext
 
 
     if test X"$with_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -R${dir}/lib"
+	case "$host" in
+	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -Wl,+b,${dir}/lib"
+			;;
+	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -Wl,-R${dir}/lib"
+			;;
+	esac
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib"
     fi
@@ -17457,7 +17542,12 @@ if test ${with_ldap-'no'} != "no"; then
     if test "$with_ldap" != "yes"; then
 
     if test X"$with_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib -R${with_ldap}/lib"
+	case "$host" in
+	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib -Wl,+b,${with_ldap}/lib"
+			;;
+	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib -Wl,-R${with_ldap}/lib"
+			;;
+	esac
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib"
     fi
@@ -17467,7 +17557,12 @@ if test ${with_ldap-'no'} != "no"; then
 
 
     if test X"$with_rpath" = X"yes"; then
-	LDFLAGS="${LDFLAGS} -L${with_ldap}/lib -R${with_ldap}/lib"
+	case "$host" in
+	    *-*-hpux*)	LDFLAGS="${LDFLAGS} -L${with_ldap}/lib -Wl,+b,${with_ldap}/lib"
+			;;
+	    *)		LDFLAGS="${LDFLAGS} -L${with_ldap}/lib -Wl,-R${with_ldap}/lib"
+			;;
+	esac
     else
 	LDFLAGS="${LDFLAGS} -L${with_ldap}/lib"
     fi
@@ -17869,7 +17964,12 @@ if test X"$LIBVAS_RPATH" != X""; then
     if test -n "$blibpath"; then
 	blibpath_add="${blibpath_add}:$LIBVAS_RPATH"
     else
-	LDFLAGS="$LDFLAGS -R$LIBVAS_RPATH"
+	case "$host" in
+	    *-*-hpux*)	LDFLAGS="$LDFLAGS -Wl,+b,$LIBVAS_RPATH"
+			;;
+	    *)		LDFLAGS="$LDFLAGS -Wl,-R$LIBVAS_RPATH"
+			;;
+	esac
     fi
 fi
 
@@ -20223,6 +20323,7 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+
 
 
 

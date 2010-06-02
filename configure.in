@@ -1063,7 +1063,7 @@ AC_ARG_WITH(libvas, [AS_HELP_STRING([--with-libvas=NAME], [Name of the libvas sh
     yes)	with_libvas=libvas.so
 		;;
     no)		;;
-    *)		AC_DEFINE_UNQUOTED([LIBVAS_SO], ["$with_with_libvas"], [The name of libvas.so])
+    *)		AC_DEFINE_UNQUOTED([LIBVAS_SO], ["$with_libvas"], [The name of libvas.so])
 		;;
 esac
 if test X"$with_libvas" != X"no"; then
@@ -2659,7 +2659,12 @@ if test X"$LIBVAS_RPATH" != X""; then
     if test -n "$blibpath"; then
 	blibpath_add="${blibpath_add}:$LIBVAS_RPATH"
     else
-	LDFLAGS="$LDFLAGS -R$LIBVAS_RPATH"
+	case "$host" in
+	    *-*-hpux*)	LDFLAGS="$LDFLAGS -Wl,+b,$LIBVAS_RPATH"
+			;;
+	    *)		LDFLAGS="$LDFLAGS -Wl,-R$LIBVAS_RPATH"
+			;;
+	esac
     fi
 fi
 
@@ -2778,6 +2783,7 @@ AH_TEMPLATE(SUDOERS_PLUGIN, [The name of the sudoers plugin, including extension
 AH_TEMPLATE(DONT_LEAK_PATH_INFO, [Define to 1 if you want sudo to display "command not allowed" instead of "command not found" when a command cannot be found.])
 AH_TEMPLATE(ENV_DEBUG, [Define to 1 to enable environment function debugging.])
 AH_TEMPLATE(ENV_EDITOR, [Define to 1 if you want visudo to honor the EDITOR and VISUAL env variables.])
+AH_TEMPLATE(ENV_DEBUG, [Whether to enable environment debugging.])
 AH_TEMPLATE(FQDN, [Define to 1 if you want to require fully qualified hosts in sudoers.])
 AH_TEMPLATE(GOONS_INSULTS, [Define to 1 if you want insults from the "Goon Show".])
 AH_TEMPLATE(HAL_INSULTS, [Define to 1 if you want 2001-like insults.])
