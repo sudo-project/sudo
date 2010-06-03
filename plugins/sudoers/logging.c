@@ -271,7 +271,7 @@ log_denial(int status, int inform_user)
     logline = new_logline(message, 0);
 
     if (should_mail(status))
-	send_mail(logline);	/* send mail based on status */
+	send_mail("%s", logline);	/* send mail based on status */
 
     /* Inform the user if they failed to authenticate.  */
     if (inform_user) {
@@ -318,7 +318,7 @@ log_allowed(int status)
     logline = new_logline(NULL, 0);
 
     if (should_mail(status))
-	send_mail(logline);	/* send mail based on status */
+	send_mail("%s", logline);	/* send mail based on status */
 
     /*
      * Log via syslog and/or a file.
@@ -368,7 +368,7 @@ log_error(int flags, const char *fmt, ...)
      * Send a copy of the error via mail.
      */
     if (!ISSET(flags, NO_MAIL))
-	send_mail(logline);
+	send_mail("%s", logline);
 
     /*
      * Log to syslog and/or a file.
