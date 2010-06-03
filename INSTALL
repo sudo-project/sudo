@@ -619,6 +619,9 @@ The following options are also configurable at runtime:
         zlib is used if it is found on the system and transcript
         support is not disabled.
 
+  --enable-warnings
+	Enable compiler warnings when building sudo with gcc.
+
 Shadow password and C2 support
 ==============================
 

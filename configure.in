@@ -1228,6 +1228,19 @@ dnl we check enable_transcript later
 AC_ARG_ENABLE(transcript,
 [AS_HELP_STRING([--enable-transcript[[=DIR]]], [Enable Sudo's transcript support, storing them in DIR])])
 
+AC_ARG_ENABLE(warnings,
+[AS_HELP_STRING([--enable-warnings], [Whether to enable compiler warnings])],
+[ case "$enableval" in
+    yes)    if test X"$with_devel" != X"yes" -a -n "$GCC"; then
+		CFLAGS="${CFLAGS} -Wall"
+	    fi
+	    ;;
+    no)	    ;;
+    *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-warnings: $enableval])
+	    ;;
+  esac
+])
+
 AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])],
 [case $with_selinux in
     yes)	SELINUX_USAGE="[[-r role]] [[-t type]] "
