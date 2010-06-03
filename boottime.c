@@ -44,11 +44,16 @@
 #include "compat.h"
 #include "missing.h"
 
+/*
+ * Fill in a struct timeval with the time the system booted.
+ * Returns TRUE on success and FALSE on failure.
+ */
+
 #if defined(__linux__)
-time_t
-get_boottime()
+int
+get_boottime(tv)
+    struct timeval *tv;
 {
-    time_t boottime = 0;
     char *line = NULL;
     size_t linesize = 0;
     ssize_t len;
@@ -59,77 +64,80 @@ get_boottime()
     if (fp != NULL) {
 	while ((len = getline(&line, &linesize, fp)) != -1) {
 	    if (strncmp(line, "btime ", 6) == 0) {
-		boottime = atoi(line + 6);
-		break;
+		tv->tv_sec = atoi(line + 6);
+		tv->tv_usec = 0;
+		return TRUE;
 	    }
 	}
 	fclose(fp);
 	free(line);
     }
 
-    return(boottime);
+    return FALSE;
 }
 
 #elif defined(HAVE_SYSCTL) && defined(KERN_BOOTTIME)
 
-time_t
-get_boottime()
+int
+get_boottime(tv)
+    struct timeval *tv;
 {
-    struct timeval tv;
-    time_t boottime = 0;
     size_t size;
     int mib[2];
 
     mib[0] = CTL_KERN;
     mib[1] = KERN_BOOTTIME;
-    size = sizeof(tv);
-    if (sysctl(mib, 2, &tv, &size, NULL, 0) != -1)
-	boottime = tv.tv_sec;
+    size = sizeof(*tv);
+    if (sysctl(mib, 2, tv, &size, NULL, 0) != -1)
+	return TRUE;
 
-    return(boottime);
+    return FALSE;
 }
 
 #elif defined(HAVE_GETUTXID)
 
 #include <utmpx.h>
-time_t
-get_boottime()
+int
+get_boottime(tv)
+    struct timeval *tv;
 {
-    time_t boottime = 0;
     struct utmpx *ut, key;
 
     zero_bytes(&key, sizeof(key));
-    key.ut_type =  BOOT_TIME;
+    key.ut_type = BOOT_TIME;
     if ((ut = getutxid(&key)) != NULL) {
-	boottime = ut->ut_tv.tv_sec;
+	tv->tv_sec = ut->ut_tv.tv_sec;
+	tv->tv_usec = ut->ut_tv.tv_usec;
 	endutxent();
     }
-    return(boottime);
+    return ut != NULL;
 }
 
 #elif defined(HAVE_GETUTID)
 
 #include <utmp.h>
-time_t
-get_boottime()
+int
+get_boottime(tv)
+    struct timeval *tv;
 {
-    time_t boottime = 0;
     struct utmp *ut, key;
 
     zero_bytes(&key, sizeof(key));
-    key.ut_type =  BOOT_TIME;
+    key.ut_type = BOOT_TIME;
     if ((ut = getutid(&key)) != NULL) {
-	boottime = ut->ut_time;
+	tv->tv_sec = ut->ut_time;
+	tv->tv_usec = 0;
 	endutent();
     }
-    return(boottime);
+    return ut != NULL;
 }
 
 #else
 
-time_t
-get_boottime()
+int
+get_boottime(tv)
+    struct timeval *tv
 {
-    return(0);
+    return FALSE;
 }
 #endif

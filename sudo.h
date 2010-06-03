@@ -284,7 +284,7 @@ int term_noecho __P((int));
 int term_raw __P((int, int, int));
 int term_restore __P((int, int));
 char *get_timestr __P((time_t, int));
-time_t get_boottime __P((void));
+int get_boottime __P((struct timeval *));
 int user_in_group __P((struct passwd *, const char *));
 YY_DECL;
 
