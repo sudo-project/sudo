@@ -23,14 +23,16 @@
  * Line buffer struct.
  */
 struct lbuf {
+    int (*output)(const char *);
     char *buf;
-    int continuation;
+    const char *continuation;
     int indent;
     int len;
     int size;
+    int cols;
 };
 
-void lbuf_init		__P((struct lbuf *, char *, int, int));
+void lbuf_init		__P((struct lbuf *, int (*)(const char *), int, const char *));
 void lbuf_destroy	__P((struct lbuf *));
 void lbuf_append	__P((struct lbuf *, ...));
 void lbuf_append_quoted	__P((struct lbuf *, const char *, ...));
