@@ -53,11 +53,12 @@
  * but it is in '.' and IGNORE_DOT is set.
  */
 int
-find_path(infile, outfile, sbp, path)
+find_path(infile, outfile, sbp, path, ignore_dot)
     char *infile;		/* file to find */
     char **outfile;		/* result parameter */
     struct stat *sbp;		/* stat result parameter */
     char *path;			/* path to search */
+    int ignore_dot;		/* don't check cwd */
 {
     static char command[PATH_MAX]; /* qualified filename */
     char *n;			/* for traversing path */
@@ -82,10 +83,7 @@ find_path(infile, outfile, sbp, path)
 	    return(NOT_FOUND);
     }
 
-    /* Use PATH passed in unless SECURE_PATH is in effect.  */
-    if (def_secure_path && !user_is_exempt())
-	path = def_secure_path;
-    else if (path == NULL)
+    if (path == NULL)
 	return(NOT_FOUND);
     path = estrdup(path);
     origpath = path;
@@ -126,7 +124,7 @@ find_path(infile, outfile, sbp, path)
 	if (len <= 0 || len >= sizeof(command))
 	    errorx(1, "%s: File name too long", infile);
 	result = sudo_goodpath(command, sbp);
-	if (result && def_ignore_dot)
+	if (result && ignore_dot)
 	    return(NOT_FOUND_DOT);
     }
 

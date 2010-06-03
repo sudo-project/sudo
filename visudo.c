@@ -825,7 +825,7 @@ get_editor(args)
 	UserEditor = NULL;
     else if (UserEditor) {
 	UserEditorArgs = get_args(UserEditor);
-	if (find_path(UserEditor, &Editor, NULL, getenv("PATH")) == FOUND) {
+	if (find_path(UserEditor, &Editor, NULL, getenv("PATH"), 0) == FOUND) {
 	    UserEditor = Editor;
 	} else {
 	    if (def_env_editor) {

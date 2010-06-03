@@ -813,6 +813,7 @@ set_cmnd(sudo_mode)
     int sudo_mode;
 {
     int rval;
+    char *path = user_path;
 
     /* Set project if applicable. */
     set_project(runas_pw);
@@ -822,13 +823,17 @@ set_cmnd(sudo_mode)
     user_stat = emalloc(sizeof(struct stat));
     if (sudo_mode & (MODE_RUN | MODE_EDIT | MODE_CHECK)) {
 	if (ISSET(sudo_mode, MODE_RUN | MODE_CHECK)) {
+	    if (def_secure_path && !user_is_exempt())
+		path = def_secure_path;
 	    set_perms(PERM_RUNAS);
-	    rval = find_path(NewArgv[0], &user_cmnd, user_stat, user_path);
+	    rval = find_path(NewArgv[0], &user_cmnd, user_stat, path,
+		def_ignore_dot);
 	    set_perms(PERM_ROOT);
 	    if (rval != FOUND) {
 		/* Failed as root, try as invoking user. */
 		set_perms(PERM_USER);
-		rval = find_path(NewArgv[0], &user_cmnd, user_stat, user_path);
+		rval = find_path(NewArgv[0], &user_cmnd, user_stat, path,
+		    def_ignore_dot);
 		set_perms(PERM_ROOT);
 	    }
 	}
