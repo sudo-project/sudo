@@ -1,9 +1,9 @@
 dnl
 dnl Process this file with GNU autoconf to produce a configure script.
 dnl
-dnl Copyright (c) 1994-1996,1998-2009 Todd C. Miller <Todd.Miller@courtesan.com>
+dnl Copyright (c) 1994-1996,1998-2010 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
-AC_INIT([sudo], [1.7.3b2], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.7.3b3], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER(config.h pathnames.h)
 dnl
 dnl This won't work before AC_INIT
@@ -12,81 +12,81 @@ AC_MSG_NOTICE([Configuring Sudo version $PACKAGE_VERSION])
 dnl
 dnl Variables that get substituted in the Makefile and man pages
 dnl
-AC_SUBST(HAVE_BSM_AUDIT)
-AC_SUBST(SHELL)
-AC_SUBST(LIBTOOL)
-AC_SUBST(CFLAGS)
-AC_SUBST(PROGS)
-AC_SUBST(CPPFLAGS)
-AC_SUBST(LDFLAGS)
-AC_SUBST(SUDO_LDFLAGS)
-AC_SUBST(SUDO_OBJS)
-AC_SUBST(LIBS)
-AC_SUBST(SUDO_LIBS)
-AC_SUBST(NET_LIBS)
-AC_SUBST(AFS_LIBS)
-AC_SUBST(GETGROUPS_LIB)
-AC_SUBST(OSDEFS)
-AC_SUBST(AUTH_OBJS)
-AC_SUBST(MANTYPE)
-AC_SUBST(MAN_POSTINSTALL)
-AC_SUBST(SUDOERS_MODE)
-AC_SUBST(SUDOERS_UID)
-AC_SUBST(SUDOERS_GID)
-AC_SUBST(DEV)
-AC_SUBST(BAMAN)
-AC_SUBST(LCMAN)
-AC_SUBST(SEMAN)
-AC_SUBST(devdir)
-AC_SUBST(mansectsu)
-AC_SUBST(mansectform)
-AC_SUBST(mansrcdir)
-AC_SUBST(NOEXECFILE)
-AC_SUBST(NOEXECDIR)
-AC_SUBST(noexec_file)
-AC_SUBST(INSTALL_NOEXEC)
-AC_SUBST(DONT_LEAK_PATH_INFO)
-AC_SUBST(BSDAUTH_USAGE)
-AC_SUBST(SELINUX_USAGE)
-AC_SUBST(LDAP)
-AC_SUBST(REPLAY)
-AC_SUBST(LOGINCAP_USAGE)
-AC_SUBST(NONUNIX_GROUPS_IMPL)
-AC_SUBST(ZLIB)
+AC_SUBST([HAVE_BSM_AUDIT])
+AC_SUBST([SHELL])
+AC_SUBST([LIBTOOL])
+AC_SUBST([CFLAGS])
+AC_SUBST([PROGS])
+AC_SUBST([CPPFLAGS])
+AC_SUBST([LDFLAGS])
+AC_SUBST([SUDO_LDFLAGS])
+AC_SUBST([SUDO_OBJS])
+AC_SUBST([LIBS])
+AC_SUBST([SUDO_LIBS])
+AC_SUBST([NET_LIBS])
+AC_SUBST([AFS_LIBS])
+AC_SUBST([GETGROUPS_LIB])
+AC_SUBST([OSDEFS])
+AC_SUBST([AUTH_OBJS])
+AC_SUBST([MANTYPE])
+AC_SUBST([MAN_POSTINSTALL])
+AC_SUBST([SUDOERS_MODE])
+AC_SUBST([SUDOERS_UID])
+AC_SUBST([SUDOERS_GID])
+AC_SUBST([DEV])
+AC_SUBST([BAMAN])
+AC_SUBST([LCMAN])
+AC_SUBST([SEMAN])
+AC_SUBST([devdir])
+AC_SUBST([mansectsu])
+AC_SUBST([mansectform])
+AC_SUBST([mansrcdir])
+AC_SUBST([NOEXECFILE])
+AC_SUBST([NOEXECDIR])
+AC_SUBST([noexec_file])
+AC_SUBST([INSTALL_NOEXEC])
+AC_SUBST([DONT_LEAK_PATH_INFO])
+AC_SUBST([BSDAUTH_USAGE])
+AC_SUBST([SELINUX_USAGE])
+AC_SUBST([LDAP])
+AC_SUBST([REPLAY])
+AC_SUBST([LOGINCAP_USAGE])
+AC_SUBST([NONUNIX_GROUPS_IMPL])
+AC_SUBST([ZLIB])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
-AC_SUBST(timedir)dnl initial value from SUDO_TIMEDIR
-AC_SUBST(timeout)
-AC_SUBST(password_timeout)
-AC_SUBST(sudo_umask)
-AC_SUBST(passprompt)
-AC_SUBST(long_otp_prompt)
-AC_SUBST(lecture)
-AC_SUBST(logfac)
-AC_SUBST(goodpri)
-AC_SUBST(badpri)
-AC_SUBST(loglen)
-AC_SUBST(ignore_dot)
-AC_SUBST(mail_no_user)
-AC_SUBST(mail_no_host)
-AC_SUBST(mail_no_perms)
-AC_SUBST(mailto)
-AC_SUBST(mailsub)
-AC_SUBST(badpass_message)
-AC_SUBST(fqdn)
-AC_SUBST(runas_default)
-AC_SUBST(env_editor)
-AC_SUBST(passwd_tries)
-AC_SUBST(tty_tickets)
-AC_SUBST(insults)
-AC_SUBST(root_sudo)
-AC_SUBST(path_info)
-AC_SUBST(ldap_conf)
-AC_SUBST(ldap_secret)
-AC_SUBST(nsswitch_conf)
-AC_SUBST(netsvc_conf)
-AC_SUBST(secure_path)
+AC_SUBST([timedir])dnl initial value from SUDO_TIMEDIR
+AC_SUBST([timeout])
+AC_SUBST([password_timeout])
+AC_SUBST([sudo_umask])
+AC_SUBST([passprompt])
+AC_SUBST([long_otp_prompt])
+AC_SUBST([lecture])
+AC_SUBST([logfac])
+AC_SUBST([goodpri])
+AC_SUBST([badpri])
+AC_SUBST([loglen])
+AC_SUBST([ignore_dot])
+AC_SUBST([mail_no_user])
+AC_SUBST([mail_no_host])
+AC_SUBST([mail_no_perms])
+AC_SUBST([mailto])
+AC_SUBST([mailsub])
+AC_SUBST([badpass_message])
+AC_SUBST([fqdn])
+AC_SUBST([runas_default])
+AC_SUBST([env_editor])
+AC_SUBST([passwd_tries])
+AC_SUBST([tty_tickets])
+AC_SUBST([insults])
+AC_SUBST([root_sudo])
+AC_SUBST([path_info])
+AC_SUBST([ldap_conf])
+AC_SUBST([ldap_secret])
+AC_SUBST([nsswitch_conf])
+AC_SUBST([netsvc_conf])
+AC_SUBST([secure_path])
 dnl
 dnl Initial values for above
 dnl
@@ -1260,25 +1260,25 @@ fi
 dnl
 dnl Prevent configure from adding the -g flag unless in devel mode
 dnl
-if test "$with_devel" != "yes"; then
+if test X"$with_devel" != X"yes"; then
     ac_cv_prog_cc_g=no
 fi
 
 dnl
 dnl C compiler checks
 dnl
-AC_ISC_POSIX
+AC_SEARCH_LIBS([strerror], [cposix])
 AC_PROG_CPP
 AC_CHECK_TOOL(AR, ar, false)
 AC_CHECK_TOOL(RANLIB, ranlib, :)
 
 dnl
-dnl Libtool magic; enable shared libs and disable static libs
+dnl Libtool setup, we require libtool 2.2.6b or higher
 dnl
 AC_CANONICAL_HOST
-AC_DISABLE_STATIC
-AC_LIBTOOL_DLOPEN
-AC_PROG_LIBTOOL
+AC_CONFIG_MACRO_DIR([m4])
+LT_PREREQ([2.2.6b])
+LT_INIT
 
 dnl
 dnl Defer with_noexec until after libtool magic runs
@@ -1303,16 +1303,16 @@ NOEXECDIR="`echo $with_noexec|sed 's:^\(.*\)/[[^/]]*:\1:'`"
 dnl
 dnl It is now safe to modify CFLAGS and CPPFLAGS
 dnl
-if test "$with_devel" = "yes" -a -n "$GCC"; then
+if test X"$with_devel" = X"yes" -a -n "$GCC"; then
     CFLAGS="${CFLAGS} -Wall"
 fi
 
 dnl
 dnl Find programs we use
 dnl
-AC_CHECK_PROG(UNAMEPROG, uname, uname)
-AC_CHECK_PROG(TRPROG, tr, tr)
-AC_CHECK_PROG(NROFFPROG, nroff, nroff)
+AC_CHECK_PROG(UNAMEPROG, [uname], [uname])
+AC_CHECK_PROG(TRPROG, [tr], [tr])
+AC_CHECK_PROGS(NROFFPROG, [nroff mandoc])
 if test -z "$NROFFPROG"; then
     MANTYPE="cat"
     mansrcdir='$(srcdir)'
@@ -1436,8 +1436,12 @@ case "$host" in
 		CFLAGS="$CFLAGS +DAportable"
 		AC_CACHE_CHECK([whether $CC understands +DAportable],
 		    [sudo_cv_var_daportable],
-		    [AC_TRY_LINK([], [], [sudo_cv_var_daportable=yes],
-				 [sudo_cv_var_daportable=no])]
+		    [AC_LINK_IFELSE(
+			[AC_LANG_PROGRAM([[]], [[]])],
+			    [sudo_cv_var_daportable=yes],
+			    [sudo_cv_var_daportable=no]
+			)
+		    ]
 		)
 		if test X"$sudo_cv_var_daportable" != X"yes"; then
 		    CFLAGS="$_CFLAGS"
@@ -1697,7 +1701,10 @@ case "$host" in
 		CHECKSHADOW="false"
 		;;
     *-*-darwin*)
-		SKIP_SETREUID=yes
+		# Darwin has a real setreuid(2) starting with 9.0
+		if test $OSMAJOR -lt 9; then
+		    SKIP_SETREUID=yes
+		fi
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
@@ -1794,14 +1801,11 @@ AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_TIME
 AC_CHECK_HEADERS(malloc.h paths.h utime.h netgroup.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h)
-dnl ultrix termio/termios are broken
-if test "$OS" != "ultrix"; then
-    AC_SYS_POSIX_TERMIOS
-    if test "$ac_cv_sys_posix_termios" = "yes"; then
-	AC_DEFINE(HAVE_TERMIOS_H)
-    else
-	AC_CHECK_HEADERS(termio.h)
-    fi
+AC_SYS_POSIX_TERMIOS
+if test "$ac_cv_sys_posix_termios" = "yes"; then
+    AC_DEFINE(HAVE_TERMIOS_H)
+else
+    AC_CHECK_HEADERS(termio.h)
 fi
 if test ${with_logincap-'no'} != "no"; then
     AC_CHECK_HEADERS(login_cap.h, [LOGINCAP_USAGE='[[-c class|-]] '; LCMAN=""
@@ -1936,8 +1940,8 @@ dnl
 dnl Check for the dirfd function/macro.  If not found, look for dd_fd in DIR.
 dnl
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <$ac_header_dirent>]], [[DIR *d; (void)dirfd(d);]])], [AC_DEFINE(HAVE_DIRFD)], [AC_TRY_LINK([#include <sys/types.h>
-#include <$ac_header_dirent>], [DIR d; memset(&d, 0, sizeof(d)); return(d.dd_fd);], [AC_DEFINE(HAVE_DD_FD)])])
+#include <$ac_header_dirent>]], [[DIR *d; (void)dirfd(d);]])], [AC_DEFINE(HAVE_DIRFD)], [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
+#include <$ac_header_dirent>]], [[DIR d; memset(&d, 0, sizeof(d)); return(d.dd_fd);]])], [AC_DEFINE(HAVE_DD_FD)], [])])
 dnl
 dnl If NEED_SNPRINTF is set, add snprintf.c to LIBOBJS
 dnl (it contains snprintf, vsnprintf, asprintf, and vasprintf)
@@ -2307,8 +2311,11 @@ if test ${with_kerb5-'no'} != "no" -a -z "$KRB5CONFIG"; then
     AC_CHECK_FUNCS(krb5_get_init_creds_opt_alloc, [
 	AC_CACHE_CHECK([whether krb5_get_init_creds_opt_free takes a context],
 	    sudo_cv_krb5_get_init_creds_opt_free_two_args, [
-		AC_TRY_COMPILE([#include <krb5.h>],
-		    [krb5_get_init_creds_opt_free(NULL, NULL);],
+	       AC_COMPILE_IFELSE(
+		   [AC_LANG_PROGRAM(
+		       [[#include <krb5.h>]],
+		       [[krb5_get_init_creds_opt_free(NULL, NULL);]]
+                   )],
 		    [sudo_cv_krb5_get_init_creds_opt_free_two_args=yes],
 		    [sudo_cv_krb5_get_init_creds_opt_free_two_args=no]
 		)
@@ -2700,7 +2707,7 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no"; then
 	fi
     fi
     if test X"$with_noexec" != X"no"; then
-	PROGS="${PROGS} sudo_noexec.la"
+	PROGS="${PROGS} libsudo_noexec.la"
 	INSTALL_NOEXEC="install-noexec"
 
 	eval noexec_file="$with_noexec"
@@ -2738,7 +2745,7 @@ AH_TEMPLATE(CLASSIC_INSULTS, [Define to 1 if you want the insults from the "clas
 AH_TEMPLATE(CSOPS_INSULTS, [Define to 1 if you want insults culled from the twisted minds of CSOps.])
 AH_TEMPLATE(DONT_LEAK_PATH_INFO, [Define to 1 if you want sudo to display "command not allowed" instead of "command not found" when a command cannot be found.])
 AH_TEMPLATE(ENV_EDITOR, [Define to 1 if you want visudo to honor the EDITOR and VISUAL env variables.])
-AH_TEMPLATE(ENV_DEBUG, [Whether to enable environment debugging.])
+AH_TEMPLATE(ENV_DEBUG, [Define to 1 to enable environment function debugging.])
 AH_TEMPLATE(FQDN, [Define to 1 if you want to require fully qualified hosts in sudoers.])
 AH_TEMPLATE(GOONS_INSULTS, [Define to 1 if you want insults from the "Goon Show".])
 AH_TEMPLATE(HAL_INSULTS, [Define to 1 if you want 2001-like insults.])
@@ -2784,6 +2791,7 @@ AH_TEMPLATE(HAVE_SKEYACCESS, [Define to 1 if your S/Key library has skeyaccess()
 AH_TEMPLATE(HAVE_ST__TIM, [Define to 1 if your struct stat uses an st__tim union])
 AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member])
 AH_TEMPLATE(HAVE_ST_MTIMESPEC, [Define to 1 if your struct stat has an st_mtimespec member])
+AH_TEMPLATE(HAVE_SYS_SIGLIST, [Define to 1 if you have the 'sys_siglist' symbol in libc.])
 AH_TEMPLATE(HAVE_TERMIOS_H, [Define to 1 if you have the <termios.h> header file and the `tcgetattr' function.])
 AH_TEMPLATE(HAVE_TIMESPEC, [Define to 1 if you have struct timespec in sys/time.h])
 AH_TEMPLATE(HAVE_TIMERSUB2, [Define to 1 if you have a timersub macro or function that takes two arguments (not three)])
@@ -2794,6 +2802,7 @@ AH_TEMPLATE(LOGGING, [Define to SLOG_SYSLOG, SLOG_FILE, or SLOG_BOTH.])
 AH_TEMPLATE(LONG_OTP_PROMPT, [Define to 1 if you want a two line OTP (S/Key or OPIE) prompt.])
 AH_TEMPLATE(NO_AUTHENTICATION, [Define to 1 if you don't want sudo to prompt for a password by default.])
 AH_TEMPLATE(NO_LECTURE, [Define to 1 if you don't want users to get the lecture the first they user sudo.])
+AH_TEMPLATE(NO_PAM_SESSION, [Define to 1 if you don't want to use sudo's PAM session support])
 AH_TEMPLATE(NO_ROOT_MAILER, [Define to avoid runing the mailer as root.])
 AH_TEMPLATE(NO_ROOT_SUDO, [Define to 1 if root should not be allowed to use sudo.])
 AH_TEMPLATE(PC_INSULTS, [Define to 1 to replace politically incorrect insults with less offensive ones.])

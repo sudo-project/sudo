@@ -210,7 +210,7 @@ testsudoers: $(TEST_OBJS)
 sudo_noexec.lo: $(srcdir)/sudo_noexec.c
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_noexec.c
 
-sudo_noexec.la: sudo_noexec.lo
+libsudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
 
 # Uncomment the following if you want "make distclean" to clean the parser
@@ -468,8 +468,8 @@ install-binaries: install-dirs $(PROGS)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s visudo $(DESTDIR)$(visudodir)/visudo
 	if [ -f sesh ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s sesh $(DESTDIR)$(libexecdir)/sesh; fi
 
-install-noexec: install-dirs sudo_noexec.la
-	if [ -f .libs/$(noexecfile) ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0755 .libs/$(noexecfile) $(DESTDIR)$(noexecdir); fi
+install-noexec: install-dirs libsudo_noexec.la
+	if [ -f .libs/$(noexecfile) ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0755 .libs/lib$(noexecfile) $(DESTDIR)$(noexecdir)/$(noexecfile); fi
 
 install-sudoers: install-dirs
 	test -f $(DESTDIR)$(sudoersdir)/sudoers || \
@@ -497,8 +497,8 @@ mostlyclean: clean
 distclean: clean
 	-rm -rf Makefile pathnames.h config.h config.status config.cache \
 		config.log libtool sudo_noexec.lo .libs $(GENERATED) \
-		sudo.man sudoers.man sudoers.ldap.man visudo.man sudo_usage.h \
-		Makefile.binary
+		sudo.man sudoers.man sudoers.ldap.man sudoreplay.man \
+		visudo.man sudo_usage.h Makefile.binary
 
 clobber: distclean
 
@@ -529,11 +529,8 @@ bindist: ChangeLog
 	      exit 1 ; \
 	    fi ; \
 	  done ; \
-	  if [ -f sudo_noexec.la ]; then \
-	    cp libtool $$tdir ; \
-	    $(LIBTOOL) --mode=install $(INSTALL) sudo_noexec.la `pwd`/$$tdir ; \
-	    ln $$tdir/sudo_noexec.la $$tdir/sudo_noexec.lai ; \
-	    ln -s . $$tdir/.libs ; \
+	  if [ -f .libs/lib$(noexecfile) ]; then \
+	    cp .libs/lib$(noexecfile) $$tdir/$(noexecfile) ; \
 	  fi ; \
 	  cp $(srcdir)/INSTALL.binary $$tdir/INSTALL ; \
 	  sh ./config.status --file=Makefile.binary && cp Makefile.binary $$tdir/Makefile ; \
@@ -558,9 +555,9 @@ depot:
 	      exit 1 ; \
 	    fi ; \
 	  done ; \
-	  if [ -f sudo_noexec.la ]; then \
+	  if [ -f libsudo_noexec.la ]; then \
 	    cp libtool $$tdir ; \
-	    $(LIBTOOL) --mode=install $(INSTALL) sudo_noexec.la `pwd`/$$tdir ; \
+	    $(LIBTOOL) --mode=install $(INSTALL) libsudo_noexec.la `pwd`/$$tdir ; \
 	  fi ; \
 	  sed 's/@VERSION@/$(VERSION)/g' <$(srcdir)/sudo.psf >$$tdir/sudo.psf ; \
 	  printf '#!/sbin/sh\nrm -f /usr/local/bin/sudoedit\nln /usr/local/bin/sudo /usr/local/bin/sudoedit\n' > $$tdir/sudo-exec.postinstall ; \

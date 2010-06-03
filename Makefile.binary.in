@@ -20,9 +20,6 @@ srcdir = .
 # Which install program?
 INSTALL = $(srcdir)/install-sh -c
 
-# For installing the shared lib
-LIBTOOL = $(srcdir)/libtool
-
 # Where to install things...
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -30,6 +27,7 @@ bindir = @bindir@
 sbindir = @sbindir@
 sysconfdir = @sysconfdir@
 mandir = @mandir@
+noexecfile = @NOEXECFILE@
 noexecdir = @NOEXECDIR@
 
 # Directory in which to install sudo.
@@ -78,8 +76,8 @@ install-binaries: $(PROGS)
 	ln $(DESTDIR)$(sudodir)/sudo $(DESTDIR)$(sudodir)/sudoedit
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 visudo $(DESTDIR)$(visudodir)/visudo
 
-install-noexec: sudo_noexec.la
-	$(LIBTOOL) --mode=install $(INSTALL) sudo_noexec.la $(DESTDIR)$(noexecdir)
+install-noexec: $(noexecfile)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0755 $(noexecfile) $(DESTDIR)$(noexecdir)
 
 install-sudoers:
 	test -f $(DESTDIR)$(sudoersdir)/sudoers || \
