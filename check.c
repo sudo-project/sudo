@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996,1998-2005, 2007-2009
+ * Copyright (c) 1993-1996,1998-2005, 2007-2010
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -25,6 +25,12 @@
 #include <sys/param.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#ifdef __linux__
+# include <sys/vfs.h>
+#endif
+#if defined(__sun) && defined(__SVR4)
+# include <sys/statvfs.h>
+#endif
 #ifndef __TANDEM
 # include <sys/file.h>
 #endif
@@ -69,11 +75,22 @@
 #define TS_MAKE_DIRS		1
 #define TS_REMOVE		2
 
+/*
+ * Info stored in tty ticket from stat(2) to help with tty matching.
+ */
+static struct tty_info {
+    dev_t dev;			/* ID of device tty resides on */
+    dev_t rdev;			/* tty device ID */
+    ino_t ino;			/* tty inode number */
+    struct timeval ctime;	/* tty inode change time */
+} tty_info;
+
 static void  build_timestamp	__P((char **, char **));
 static int   timestamp_status	__P((char *, char *, char *, int));
 static char *expand_prompt	__P((char *, char *, char *));
 static void  lecture		__P((int));
 static void  update_timestamp	__P((char *, char *));
+static int   tty_is_devpts	__P((const char *));
 
 /*
  * This function only returns if the user can successfully
@@ -87,7 +104,17 @@ check_user(validated, mode)
     char *timestampdir = NULL;
     char *timestampfile = NULL;
     char *prompt;
+    struct stat sb;
     int status;
+
+    /* Stash the tty's ctime for tty ticket comparison. */
+    if (def_tty_tickets && user_ttypath && stat(user_ttypath, &sb) == 0) {
+	tty_info.dev = sb.st_dev;
+	tty_info.ino = sb.st_ino;
+	tty_info.rdev = sb.st_rdev;
+	if (tty_is_devpts(user_ttypath))
+	    ctim_get(&sb, &tty_info.ctime);
+    }
 
     /* Always prompt for a password when -k was specified with the command. */
     if (ISSET(mode, MODE_INVALIDATE)) {
@@ -180,15 +207,20 @@ update_timestamp(timestampdir, timestampfile)
 {
     if (timestamp_uid != 0)
 	set_perms(PERM_TIMESTAMP);
-    if (touch(-1, timestampfile ? timestampfile : timestampdir, NULL) == -1) {
-	if (timestampfile) {
-	    int fd = open(timestampfile, O_WRONLY|O_CREAT|O_TRUNC, 0600);
-
-	    if (fd == -1)
-		log_error(NO_EXIT|USE_ERRNO, "Can't open %s", timestampfile);
-	    else
-		close(fd);
-	} else {
+    if (timestampfile) {
+	/*
+	 * Store tty info in timestamp file
+	 */
+	int fd = open(timestampfile, O_WRONLY|O_CREAT, 0600);
+	if (fd == -1)
+	    log_error(NO_EXIT|USE_ERRNO, "Can't open %s", timestampfile);
+	else {
+	    lock_file(fd, SUDO_LOCK);
+	    write(fd, &tty_info, sizeof(tty_info));
+	    close(fd);
+	}
+    } else {
+	if (touch(-1, timestampdir, NULL) == -1) {
 	    if (mkdir(timestampdir, 0700) == -1)
 		log_error(NO_EXIT|USE_ERRNO, "Can't mkdir %s", timestampdir);
 	}
@@ -518,7 +550,22 @@ timestamp_status(timestampdir, timestampfile, user, flags)
 		    if ((sb.st_mode & 0000777) != 0600)
 			(void) chmod(timestampfile, 0600);
 
-		    status = TS_OLD;	/* actually check mtime below */
+		    /*
+		     * Check for stored tty info.  If the file is zero-sized
+		     * it is an old-style timestamp with no tty info in it.
+		     * The actual mtime check is done later.
+		     */
+		    if (sb.st_size != 0) {
+			struct tty_info info;
+			int fd = open(timestampfile, O_RDONLY, 0644);
+			if (fd != -1) {
+			    if (read(fd, &info, sizeof(info)) == sizeof(info) &&
+				memcmp(&info, &tty_info, sizeof(info)) == 0) {
+				status = TS_OLD;
+			    }
+			    close(fd);
+			}
+		    }
 		}
 	    }
 	} else if (errno != ENOENT) {
@@ -603,4 +650,38 @@ remove_timestamp(remove)
 
     efree(timestampdir);
     efree(timestampfile);
+}
+
+/*
+ * Returns TRUE if tty lives on a devpts or /devices filesystem, else FALSE.
+ * Unlike most filesystems, the ctime of devpts nodes is not updated when
+ * the device node is written to, only when the inode's status changes,
+ * typically via the chmod, chown, link, rename, or utimes system calls.
+ * Since the ctime is "stable" in this case, we can stash it the tty ticket
+ * file and use it to determine whether the tty ticket file is stale.
+ */
+static int
+tty_is_devpts(const char *tty)
+{
+    int retval = FALSE;
+#ifdef __linux__
+    struct statfs sfs;
+
+#ifndef DEVPTS_SUPER_MAGIC
+# define DEVPTS_SUPER_MAGIC 0x1cd1
+#endif
+
+    if (statfs(tty, &sfs) == 0) {
+	if (sfs.f_type == DEVPTS_SUPER_MAGIC)
+	    retval = TRUE;
+    }
+#elif defined(__sun) && defined(__SVR4)
+    struct statvfs sfs;
+
+    if (statvfs(tty, &sfs) == 0) {
+	if (strcmp(sfs.f_fstr, "devices") == 0)
+	    retval = TRUE;
+    }
+#endif /* __linux__ */
+    return retval;
 }
