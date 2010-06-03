@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.3b2                 December 19, 2009                       1
+1.7.3b2                   June  3, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.7.3b2                 December 19, 2009                       2
+1.7.3b2                   June  3, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.7.3b2                 December 19, 2009                       3
+1.7.3b2                   June  3, 2010                         3
 
 
 
@@ -259,7 +259,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.7.3b2                 December 19, 2009                       4
+1.7.3b2                   June  3, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.7.3b2                 December 19, 2009                       5
+1.7.3b2                   June  3, 2010                         5
 
 
 
@@ -391,7 +391,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.7.3b2                 December 19, 2009                       6
+1.7.3b2                   June  3, 2010                         6
 
 
 
@@ -440,6 +440,36 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        his/her own timestamp with a bogus date on systems that allow users to
        give away files.
 
+       On systems where the boot time is available, ssuuddoo will also not honor
+       time stamps from before the machine booted.
+
+       Since time stamp files live in the file system, they can outlive a
+       user's login session.  As a result, a user may be able to login, run a
+       command with ssuuddoo after authenticating, logout, login again, and run
+       ssuuddoo without authenticating so long as the time stamp file's
+       modification time is within 5 minutes (or whatever the timeout is set
+       to in _s_u_d_o_e_r_s).  When the _t_t_y___t_i_c_k_e_t_s option is enabled in _s_u_d_o_e_r_s, the
+       time stamp has per-tty granularity but still may outlive the user's
+       session.  On Linux systems where the devpts filesystem is used, Solaris
+       systems with the devices filesystem, as well as other systems that
+       utilize a devfs filesystem that monotonically increase the inode number
+       of devices as they are created (such as Mac OS X), ssuuddoo is able to
+
+
+
+1.7.3b2                   June  3, 2010                         7
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
+       determine when a tty-based time stamp file is stale and will ignore it.
+       Administrators should not rely on this feature as it is not universally
+       available.
+
        Please note that ssuuddoo will normally only log the command it explicitly
        runs.  If a user runs a command such as sudo su or sudo sh, subsequent
        commands run from that shell will _n_o_t be logged, nor will ssuuddoo's access
@@ -454,18 +484,6 @@ EENNVVIIRROONNMMEENNTT
        ssuuddoo utilizes the following environment variables:
 
        EDITOR          Default editor to use in --ee (sudoedit) mode if neither
-
-
-
-1.7.3b2                 December 19, 2009                       7
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
                        SUDO_EDITOR nor VISUAL is set
 
        HOME            In --ss or --HH mode (or if sudo was configured with the
@@ -502,6 +520,18 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        VISUAL          Default editor to use in --ee (sudoedit) mode if
                        SUDO_EDITOR is not set
 
+
+
+
+1.7.3b2                   June  3, 2010                         8
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
 FFIILLEESS
        _/_e_t_c_/_s_u_d_o_e_r_s            List of who can run what
 
@@ -519,18 +549,6 @@ EEXXAAMMPPLLEESS
 
        To list the home directory of user yaz on a machine where the file
        system holding ~yaz is not exported as root:
-
-
-
-
-1.7.3b2                 December 19, 2009                       8
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
         $ sudo -u yaz ls ~yaz
 
@@ -569,6 +587,17 @@ AAUUTTHHOORRSS
        See the HISTORY file in the ssuuddoo distribution or visit
        http://www.sudo.ws/sudo/history.html for a short history of ssuuddoo.
 
+
+
+1.7.3b2                   June  3, 2010                         9
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
 CCAAVVEEAATTSS
        There is no easy way to prevent a user from gaining a root shell if
        that user is allowed to run arbitrary commands via ssuuddoo.  Also, many
@@ -586,18 +615,6 @@ CCAAVVEEAATTSS
 
        If users have sudo ALL there is nothing to prevent them from creating
        their own program that gives them a root shell regardless of any '!'
-
-
-
-1.7.3b2                 December 19, 2009                       9
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        elements in the user specification.
 
        Running shell scripts via ssuuddoo can expose the same kernel bugs that
@@ -638,23 +655,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.7.3b2                 December 19, 2009                      10
+1.7.3b2                   June  3, 2010                        10
 
 

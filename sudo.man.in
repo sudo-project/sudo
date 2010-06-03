@@ -1,4 +1,4 @@
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2009
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2010
 .\" 	Todd C. Miller <Todd.Miller@courtesan.com>
 .\" 
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -144,7 +144,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "December 19, 2009" "1.7.3b2" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "June  3, 2010" "1.7.3b2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -429,7 +429,7 @@ password prompt on systems that support \s-1PAM\s0 unless the
 .RE
 @SEMAN@.IP "\-r \fIrole\fR" 12
 @SEMAN@.IX Item "-r role"
-@SEMAN@The \fB\-r\fR (\fIrole\fR) option causes the new (SELinux) security context to 
+@SEMAN@The \fB\-r\fR (\fIrole\fR) option causes the new (SELinux) security context to
 @SEMAN@have the role specified by \fIrole\fR.
 .IP "\-S" 12
 .IX Item "-S"
@@ -444,7 +444,7 @@ environment variable if it is set or the shell as specified in
 for execution.  Otherwise, an interactive shell is executed.
 @SEMAN@.IP "\-t \fItype\fR" 12
 @SEMAN@.IX Item "-t type"
-@SEMAN@The \fB\-t\fR (\fItype\fR) option causes the new (SELinux) security context to 
+@SEMAN@The \fB\-t\fR (\fItype\fR) option causes the new (SELinux) security context to
 @SEMAN@have the type specified by \fItype\fR.  If no type is specified, the default
 @SEMAN@type is derived from the specified role.
 .IP "\-U \fIuser\fR" 12
@@ -563,6 +563,24 @@ Timestamps with a date greater than current_time + 2 * \f(CW\*(C`TIMEOUT\*(C'\fR
 will be ignored and sudo will log and complain.  This is done to
 keep a user from creating his/her own timestamp with a bogus
 date on systems that allow users to give away files.
+.PP
+On systems where the boot time is available, \fBsudo\fR will also not
+honor time stamps from before the machine booted.
+.PP
+Since time stamp files live in the file system, they can outlive a
+user's login session.  As a result, a user may be able to login,
+run a command with \fBsudo\fR after authenticating, logout, login
+again, and run \fBsudo\fR without authenticating so long as the time
+stamp file's modification time is within \f(CW\*(C`@timeout@\*(C'\fR minutes (or
+whatever the timeout is set to in \fIsudoers\fR).  When the \fItty_tickets\fR
+option is enabled in \fIsudoers\fR, the time stamp has per-tty granularity
+but still may outlive the user's session.  On Linux systems where
+the devpts filesystem is used, Solaris systems with the devices
+filesystem, as well as other systems that utilize a devfs filesystem
+that monotonically increase the inode number of devices as they are
+created (such as Mac \s-1OS\s0 X), \fBsudo\fR is able to determine when a
+tty-based time stamp file is stale and will ignore it.  Administrators
+should not rely on this feature as it is not universally available.
 .PP
 Please note that \fBsudo\fR will normally only log the command it
 explicitly runs.  If a user runs a command such as \f(CW\*(C`sudo su\*(C'\fR or

@@ -1,4 +1,4 @@
-Copyright (c) 1994-1996, 1998-2005, 2007-2009
+Copyright (c) 1994-1996, 1998-2005, 2007-2010
 	Todd C. Miller <Todd.Miller@courtesan.com>
 
 Permission to use, copy, modify, and distribute this software for any
@@ -331,7 +331,7 @@ I<passprompt_override> flag is disabled in I<sudoers>.
 
 =item -r I<role>
 
-The B<-r> (I<role>) option causes the new (SELinux) security context to 
+The B<-r> (I<role>) option causes the new (SELinux) security context to
 have the role specified by I<role>.
 
 =item -S
@@ -349,7 +349,7 @@ for execution.  Otherwise, an interactive shell is executed.
 
 =item -t I<type>
 
-The B<-t> (I<type>) option causes the new (SELinux) security context to 
+The B<-t> (I<type>) option causes the new (SELinux) security context to
 have the type specified by I<type>.  If no type is specified, the default
 type is derived from the specified role.
 
@@ -478,6 +478,24 @@ Timestamps with a date greater than current_time + 2 * C<TIMEOUT>
 will be ignored and sudo will log and complain.  This is done to
 keep a user from creating his/her own timestamp with a bogus
 date on systems that allow users to give away files.
+
+On systems where the boot time is available, B<sudo> will also not
+honor time stamps from before the machine booted.
+
+Since time stamp files live in the file system, they can outlive a
+user's login session.  As a result, a user may be able to login,
+run a command with B<sudo> after authenticating, logout, login
+again, and run B<sudo> without authenticating so long as the time
+stamp file's modification time is within C<@timeout@> minutes (or
+whatever the timeout is set to in I<sudoers>).  When the I<tty_tickets>
+option is enabled in I<sudoers>, the time stamp has per-tty granularity
+but still may outlive the user's session.  On Linux systems where
+the devpts filesystem is used, Solaris systems with the devices
+filesystem, as well as other systems that utilize a devfs filesystem
+that monotonically increase the inode number of devices as they are
+created (such as Mac OS X), B<sudo> is able to determine when a
+tty-based time stamp file is stale and will ignore it.  Administrators
+should not rely on this feature as it is not universally available.
 
 Please note that B<sudo> will normally only log the command it
 explicitly runs.  If a user runs a command such as C<sudo su> or
