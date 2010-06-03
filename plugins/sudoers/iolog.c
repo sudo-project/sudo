@@ -204,8 +204,8 @@ open_io_fd(char *pathbuf, int len, const char *suffix, int docompress)
     return vfd;
 }
 
-int
-static sudoers_io_open(unsigned int version, sudo_conv_t conversation,
+static int
+sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t plugin_printf, char * const settings[],
     char * const user_info[], int argc, char * const argv[],
     char * const user_env[])
@@ -290,8 +290,8 @@ static sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     return TRUE;
 }
 
-void
-static sudoers_io_close(int exit_status, int error)
+static void
+sudoers_io_close(int exit_status, int error)
 {
     int i;
 
@@ -305,8 +305,8 @@ static sudoers_io_close(int exit_status, int error)
     }
 }
 
-int
-static sudoers_io_version(int verbose)
+static int
+sudoers_io_version(int verbose)
 {
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
@@ -358,32 +358,32 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     return TRUE;
 }
 
-int
-static sudoers_io_log_ttyin(const char *buf, unsigned int len)
+static int
+sudoers_io_log_ttyin(const char *buf, unsigned int len)
 {
     return sudoers_io_log(buf, len, IOFD_TTYIN);
 }
 
-int
-static sudoers_io_log_ttyout(const char *buf, unsigned int len)
+static int
+sudoers_io_log_ttyout(const char *buf, unsigned int len)
 {
     return sudoers_io_log(buf, len, IOFD_TTYOUT);
 }
 
-int
-static sudoers_io_log_stdin(const char *buf, unsigned int len)
+static int
+sudoers_io_log_stdin(const char *buf, unsigned int len)
 {
     return sudoers_io_log(buf, len, IOFD_STDIN);
 }
 
-int
-static sudoers_io_log_stdout(const char *buf, unsigned int len)
+static int
+sudoers_io_log_stdout(const char *buf, unsigned int len)
 {
     return sudoers_io_log(buf, len, IOFD_STDOUT);
 }
 
-int
-static sudoers_io_log_stderr(const char *buf, unsigned int len)
+static int
+sudoers_io_log_stderr(const char *buf, unsigned int len)
 {
     return sudoers_io_log(buf, len, IOFD_STDERR);
 }
