@@ -23,7 +23,7 @@
  * Line buffer struct.
  */
 struct lbuf {
-    int (*output)(const char *);
+    int (*output)__P((const char *));
     char *buf;
     const char *continuation;
     int indent;

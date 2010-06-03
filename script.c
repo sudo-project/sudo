@@ -184,7 +184,7 @@ script_nextid()
 	if (nread == -1)
 	    log_error(USE_ERRNO, "cannot read %s", pathbuf);
 	id = strtoul(buf, &ep, 36);
-	if (buf == ep || id >= 2176782336U)
+	if (buf == ep || id >= (unsigned long)2176782336)
 	    log_error(0, "invalid sequence number %s", pathbuf);
     }
     id++;

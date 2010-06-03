@@ -1521,7 +1521,8 @@ usage_excl(exit_val)
 }
 
 static int
-usage_out(const char *buf)
+usage_out(buf)
+    const char *buf;
 {
     return fputs(buf, stderr);
 }

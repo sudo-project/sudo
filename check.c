@@ -661,7 +661,8 @@ remove_timestamp(remove)
  * file and use it to determine whether the tty ticket file is stale.
  */
 static int
-tty_is_devpts(const char *tty)
+tty_is_devpts(tty)
+    const char *tty;
 {
     int retval = FALSE;
 #ifdef __linux__

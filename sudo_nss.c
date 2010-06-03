@@ -225,11 +225,10 @@ reset_groups(pw)
 }
 
 static int
-output(const char *buf)
+output(buf)
+    const char *buf;
 {
-    if (fputs(buf, stdout) == 0)
-	return (int)strlen(buf);
-    return 0;
+    return fputs(buf, stdout);
 }
 
 /*
