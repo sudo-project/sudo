@@ -818,44 +818,6 @@ sudo_ldap_build_pass1(struct passwd *pw)
     return(buf);
 }
 
-/*
- * Map yes/true/on to TRUE, no/false/off to FALSE, else -1
- */
-int
-_atobool(const char *s)
-{
-    switch (*s) {
-	case 'y':
-	case 'Y':
-	    if (strcasecmp(s, "yes") == 0)
-		return(TRUE);
-	    break;
-	case 't':
-	case 'T':
-	    if (strcasecmp(s, "true") == 0)
-		return(TRUE);
-	    break;
-	case 'o':
-	case 'O':
-	    if (strcasecmp(s, "on") == 0)
-		return(TRUE);
-	    if (strcasecmp(s, "off") == 0)
-		return(FALSE);
-	    break;
-	case 'n':
-	case 'N':
-	    if (strcasecmp(s, "no") == 0)
-		return(FALSE);
-	    break;
-	case 'f':
-	case 'F':
-	    if (strcasecmp(s, "false") == 0)
-		return(FALSE);
-	    break;
-    }
-    return(-1);
-}
-
 static void
 sudo_ldap_read_secret(const char *path)
 {
@@ -917,7 +879,7 @@ sudo_ldap_read_config(void)
 	    if (strcasecmp(keyword, cur->conf_str) == 0) {
 		switch (cur->type) {
 		case CONF_BOOL:
-		    *(int *)(cur->valp) = _atobool(value);
+		    *(int *)(cur->valp) = atobool(value) == TRUE;
 		    break;
 		case CONF_INT:
 		    *(int *)(cur->valp) = atoi(value);
@@ -1025,7 +987,7 @@ sudo_ldap_read_config(void)
     if (ldap_conf.ssl != NULL) {
 	if (strcasecmp(ldap_conf.ssl, "start_tls") == 0)
 	    ldap_conf.ssl_mode = SUDO_LDAP_STARTTLS;
-	else if (_atobool(ldap_conf.ssl))
+	else if (atobool(ldap_conf.ssl) == TRUE)
 	    ldap_conf.ssl_mode = SUDO_LDAP_SSL;
     }
 

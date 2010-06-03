@@ -45,9 +45,39 @@
 int
 atobool(const char *str)
 {
-    if (strcasecmp(str, "true") == 0 || strcmp(str, "1") == 0)
-	return 1;
-    if (strcasecmp(str, "false") == 0 || strcmp(str, "0") == 0)
-	return 0;
+    switch (*str) {
+	case '0':
+	case '1':
+	    if (str[1] == '\0')
+		return *str - '0';
+	    break;
+	case 'y':
+	case 'Y':
+	    if (strcasecmp(str, "yes") == 0)
+		return 1;
+	    break;
+	case 't':
+	case 'T':
+	    if (strcasecmp(str, "true") == 0)
+		return 1;
+	    break;
+	case 'o':
+	case 'O':
+	    if (strcasecmp(str, "on") == 0)
+		return 1;
+	    if (strcasecmp(str, "off") == 0)
+		return 0;
+	    break;
+	case 'n':
+	case 'N':
+	    if (strcasecmp(str, "no") == 0)
+		return 0;
+	    break;
+	case 'f':
+	case 'F':
+	    if (strcasecmp(str, "false") == 0)
+		return 0;
+	    break;
+    }
     return -1;
 }
