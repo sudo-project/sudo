@@ -130,8 +130,8 @@ get_boottime(struct timeval *tv)
 
 #else
 
-time_t
-get_boottime()
+int
+get_boottime(struct timeval *tv)
 {
     return 0;
 }
