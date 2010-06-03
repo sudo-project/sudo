@@ -59,7 +59,7 @@
 
 static void do_syslog		__P((int, char *));
 static void do_logfile		__P((char *));
-static void send_mail		__P((char *));
+static void send_mail		__P((const char *fmt, ...));
 static int should_mail		__P((int));
 static void mysyslog		__P((int, const char *, ...));
 static char *new_logline	__P((const char *, int));
@@ -184,15 +184,9 @@ do_logfile(msg)
     fp = fopen(def_logfile, "a");
     (void) umask(oldmask);
     if (fp == NULL) {
-	easprintf(&full_line, "Can't open log file: %s: %s",
-	    def_logfile, strerror(errno));
-	send_mail(full_line);
-	efree(full_line);
+	send_mail("Can't open log file: %s: %s", def_logfile, strerror(errno));
     } else if (!lock_file(fileno(fp), SUDO_LOCK)) {
-	easprintf(&full_line, "Can't lock log file: %s: %s",
-	    def_logfile, strerror(errno));
-	send_mail(full_line);
-	efree(full_line);
+	send_mail("Can't lock log file: %s: %s", def_logfile, strerror(errno));
     } else {
 	time_t now;
 
@@ -290,7 +284,7 @@ log_denial(status, inform_user)
     logline = new_logline(message, 0);
 
     if (should_mail(status))
-	send_mail(logline);	/* send mail based on status */
+	send_mail("%s", logline);	/* send mail based on status */
 
     /* Inform the user if they failed to authenticate.  */
     if (inform_user) {
@@ -336,7 +330,7 @@ log_allowed(status)
     logline = new_logline(NULL, 0);
 
     if (should_mail(status))
-	send_mail(logline);	/* send mail based on status */
+	send_mail("%s", logline);	/* send mail based on status */
 
     /*
      * Log via syslog and/or a file.
@@ -397,7 +391,7 @@ log_error(flags, fmt, va_alist)
      * Send a copy of the error via mail.
      */
     if (!ISSET(flags, NO_MAIL))
-	send_mail(logline);
+	send_mail("%s", logline);
 
     /*
      * Log to syslog and/or a file.
@@ -421,14 +415,20 @@ log_error(flags, fmt, va_alist)
  * Send a message to MAILTO user
  */
 static void
-send_mail(line)
-    char *line;
+#ifdef __STDC__
+send_mail(const char *fmt, ...)
+#else
+send_mail(fmt, va_alist)
+    const char *fmt;
+    va_dcl
+#endif
 {
     FILE *mail;
     char *p;
     int fd, pfd[2], status;
     pid_t pid, rv;
     sigaction_t sa;
+    va_list ap;
 #ifndef NO_ROOT_MAILER
     static char *root_envp[] = {
 	"HOME=/",
@@ -589,8 +589,18 @@ send_mail(line)
 	} else
 	    (void) fputc(*p, mail);
     }
-    (void) fprintf(mail, "\n\n%s : %s : %s : %s\n\n", user_host,
-	get_timestr(time(NULL), def_log_year), user_name, line);
+
+    (void) fprintf(mail, "\n\n%s : %s : %s : ", user_host,
+	get_timestr(time(NULL), def_log_year), user_name);
+#ifdef __STDC__
+    va_start(ap, fmt);
+#else
+    va_start(ap);
+#endif
+    (void) vfprintf(mail, fmt, ap);
+    va_end(ap);
+    fputs("\n\n", mail);
+
     fclose(mail);
     do {
 #ifdef HAVE_WAITPID
