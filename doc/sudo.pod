@@ -493,12 +493,12 @@ stamp file's modification time is within C<@timeout@> minutes (or
 whatever the timeout is set to in I<sudoers>).  When the I<tty_tickets>
 option is enabled in I<sudoers>, the time stamp has per-tty granularity
 but still may outlive the user's session.  On Linux systems where
-the devpts filesystem is used, as well as other systems that utilize
-a devfs filesystem that monotonically increase the inode number of
-devices as they are created (such as Mac OS X), B<sudo> is able to
-determine when a tty-based time stamp file is stale and will ignore
-it.  Administrators should not rely on this feature as it is not
-universally available.
+the devpts filesystem is used, Solaris systems with the devices
+filesystem, as well as other systems that utilize a devfs filesystem
+that monotonically increase the inode number of devices as they are
+created (such as Mac OS X), B<sudo> is able to determine when a
+tty-based time stamp file is stale and will ignore it.  Administrators
+should not rely on this feature as it is not universally available.
 
 Please note that B<sudo> will normally only log the command it
 explicitly runs.  If a user runs a command such as C<sudo su> or

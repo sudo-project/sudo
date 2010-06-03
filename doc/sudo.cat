@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0a2                    May 28, 2010                         1
+1.8.0a2                   June  3, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.8.0a2                    May 28, 2010                         2
+1.8.0a2                   June  3, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0a2                    May 28, 2010                         3
+1.8.0a2                   June  3, 2010                         3
 
 
 
@@ -259,7 +259,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0a2                    May 28, 2010                         4
+1.8.0a2                   June  3, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0a2                    May 28, 2010                         5
+1.8.0a2                   June  3, 2010                         5
 
 
 
@@ -391,7 +391,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.8.0a2                    May 28, 2010                         6
+1.8.0a2                   June  3, 2010                         6
 
 
 
@@ -447,17 +447,17 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        modification time is within 5 minutes (or whatever the timeout is set
        to in _s_u_d_o_e_r_s).  When the _t_t_y___t_i_c_k_e_t_s option is enabled in _s_u_d_o_e_r_s, the
        time stamp has per-tty granularity but still may outlive the user's
-       session.  On Linux systems where the devpts filesystem is used, as well
-       as other systems that utilize a devfs filesystem that monotonically
-       increase the inode number of devices as they are created (such as Mac
-       OS X), ssuuddoo is able to determine when a tty-based time stamp file is
-       stale and will ignore it.  Administrators should not rely on this
-       feature as it is not universally available.
+       session.  On Linux systems where the devpts filesystem is used, Solaris
+       systems with the devices filesystem, as well as other systems that
+       utilize a devfs filesystem that monotonically increase the inode number
+       of devices as they are created (such as Mac OS X), ssuuddoo is able to
+       determine when a tty-based time stamp file is stale and will ignore it.
+       Administrators should not rely on this feature as it is not universally
+       available.
 
 
 
-
-1.8.0a2                    May 28, 2010                         7
+1.8.0a2                   June  3, 2010                         7
 
 
 
@@ -523,7 +523,7 @@ FFIILLEESS
 
 
 
-1.8.0a2                    May 28, 2010                         8
+1.8.0a2                   June  3, 2010                         8
 
 
 
@@ -589,7 +589,7 @@ CCAAVVEEAATTSS
 
 
 
-1.8.0a2                    May 28, 2010                         9
+1.8.0a2                   June  3, 2010                         9
 
 
 
@@ -655,6 +655,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.0a2                    May 28, 2010                        10
+1.8.0a2                   June  3, 2010                        10
 
 
