@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005,2008 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2005, 2008, 2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -43,6 +43,7 @@
 #  include <strings.h>
 # endif
 #endif /* HAVE_STRING_H */
+#include <fcntl.h>
 #include <limits.h>
 #include <pwd.h>
 #include <grp.h>
@@ -90,10 +91,13 @@ setpwfile(file)
 void
 setpwent()
 {
-    if (pwf == NULL)
+    if (pwf == NULL) {
 	pwf = fopen(pwfile, "r");
-    else
+	if (pwf != NULL)
+	    fcntl(fileno(pwf), F_SETFD, FD_CLOEXEC);
+    } else {
 	rewind(pwf);
+    }
     pw_stayopen = 1;
 }
 
@@ -156,10 +160,13 @@ getpwnam(name)
 {
     struct passwd *pw;
 
-    if (pwf != NULL)
+    if (pwf == NULL) {
+	if ((pwf = fopen(pwfile, "r")) == NULL)
+	    return(NULL);
+	fcntl(fileno(pwf), F_SETFD, FD_CLOEXEC);
+    } else {
 	rewind(pwf);
-    else if ((pwf = fopen(pwfile, "r")) == NULL)
-	return(NULL);
+    }
     while ((pw = getpwent()) != NULL) {
 	if (strcmp(pw->pw_name, name) == 0)
 	    break;
@@ -177,10 +184,13 @@ getpwuid(uid)
 {
     struct passwd *pw;
 
-    if (pwf != NULL)
+    if (pwf == NULL) {
+	if ((pwf = fopen(pwfile, "r")) == NULL)
+	    return(NULL);
+	fcntl(fileno(pwf), F_SETFD, FD_CLOEXEC);
+    } else {
 	rewind(pwf);
-    else if ((pwf = fopen(pwfile, "r")) == NULL)
-	return(NULL);
+    }
     while ((pw = getpwent()) != NULL) {
 	if (pw->pw_uid == uid)
 	    break;
@@ -204,10 +214,13 @@ setgrfile(file)
 void
 setgrent()
 {
-    if (grf == NULL)
+    if (grf == NULL) {
 	grf = fopen(grfile, "r");
-    else
+	if (grf != NULL)
+	    fcntl(fileno(grf), F_SETFD, FD_CLOEXEC);
+    } else {
 	rewind(grf);
+    }
     gr_stayopen = 1;
 }
 
@@ -268,10 +281,13 @@ getgrnam(name)
 {
     struct group *gr;
 
-    if (grf != NULL)
+    if (grf == NULL) {
+	if ((grf = fopen(grfile, "r")) == NULL)
+	    return(NULL);
+	fcntl(fileno(grf), F_SETFD, FD_CLOEXEC);
+    } else {
 	rewind(grf);
-    else if ((grf = fopen(grfile, "r")) == NULL)
-	return(NULL);
+    }
     while ((gr = getgrent()) != NULL) {
 	if (strcmp(gr->gr_name, name) == 0)
 	    break;
@@ -289,10 +305,13 @@ getgrgid(gid)
 {
     struct group *gr;
 
-    if (grf != NULL)
+    if (grf == NULL) {
+	if ((grf = fopen(grfile, "r")) == NULL)
+	    return(NULL);
+	fcntl(fileno(grf), F_SETFD, FD_CLOEXEC);
+    } else {
 	rewind(grf);
-    else if ((grf = fopen(grfile, "r")) == NULL)
-	return(NULL);
+    }
     while ((gr = getgrent()) != NULL) {
 	if (gr->gr_gid == gid)
 	    break;
