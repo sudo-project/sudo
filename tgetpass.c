@@ -56,7 +56,17 @@
 
 #include "sudo.h"
 
-static volatile sig_atomic_t signo;
+#if !defined(NSIG)
+# if defined(_NSIG)
+#  define NSIG _NSIG
+# elif defined(__NSIG)
+#  define NSIG __NSIG
+# else
+#  define NSIG 64
+# endif
+#endif
+
+static volatile sig_atomic_t signo[NSIG];
 
 static void handler __P((int));
 static char *getln __P((int, char *, size_t, int));
@@ -75,7 +85,7 @@ tgetpass(prompt, timeout, flags)
     sigaction_t savetstp, savettin, savettou;
     char *pass;
     static char buf[SUDO_PASS_MAX + 1];
-    int input, output, save_errno, neednl;;
+    int i, input, output, save_errno, neednl, need_restart;
 
     (void) fflush(stdout);
 
@@ -84,15 +94,26 @@ tgetpass(prompt, timeout, flags)
 	return(sudo_askpass(prompt));
 
 restart:
-    signo = 0;
+    for (i = 0; i < NSIG; i++)
+	signo[i] = 0;
     pass = NULL;
     save_errno = 0;
+    need_restart = 0;
     /* Open /dev/tty for reading/writing if possible else use stdin/stderr. */
     if (ISSET(flags, TGP_STDIN) ||
 	(input = output = open(_PATH_TTY, O_RDWR|O_NOCTTY)) == -1) {
 	input = STDIN_FILENO;
 	output = STDERR_FILENO;
     }
+
+    /*
+     * If we are using a tty but are not the foreground pgrp this will
+     * generate SIGTTOU, so do it *before* installing the signal handlers.
+     */
+    if (def_pwfeedback)
+	neednl = term_cbreak(input);
+    else
+	neednl = term_noecho(input);
 
     /*
      * Catch signals that would otherwise cause the user to end
@@ -111,25 +132,17 @@ restart:
     (void) sigaction(SIGTTIN, &sa, &savettin);
     (void) sigaction(SIGTTOU, &sa, &savettou);
 
-    if (def_pwfeedback)
-	neednl = term_cbreak(input);
-    else
-	neednl = term_noecho(input);
+    if (prompt)
+	(void) write(output, prompt, strlen(prompt));
 
-    /* No output if we are already backgrounded. */
-    if (signo != SIGTTOU && signo != SIGTTIN) {
-	if (prompt)
-	    (void) write(output, prompt, strlen(prompt));
+    if (timeout > 0)
+	alarm(timeout);
+    pass = getln(input, buf, sizeof(buf), def_pwfeedback);
+    alarm(0);
+    save_errno = errno;
 
-	if (timeout > 0)
-	    alarm(timeout);
-	pass = getln(input, buf, sizeof(buf), def_pwfeedback);
-	alarm(0);
-	save_errno = errno;
-
-	if (neednl)
-	    (void) write(output, "\n", 1);
-    }
+    if (neednl)
+	(void) write(output, "\n", 1);
 
     /* Restore old tty settings and signals. */
     term_restore(input, 1);
@@ -148,15 +161,20 @@ restart:
      * If we were interrupted by a signal, resend it to ourselves
      * now that we have restored the signal handlers.
      */
-    if (signo) {
-	kill(getpid(), signo);
-	switch (signo) {
-	    case SIGTSTP:
-	    case SIGTTIN:
-	    case SIGTTOU:
-		goto restart;
+    for (i = 0; i < NSIG; i++) {
+	if (signo[i]) {
+	    kill(getpid(), i);
+	    switch (i) {
+		case SIGTSTP:
+		case SIGTTIN:
+		case SIGTTOU:
+		    need_restart = 1;
+		    break;
+	    }
 	}
     }
+    if (need_restart)
+	goto restart;
 
     if (save_errno)
 	errno = save_errno;
@@ -267,7 +285,7 @@ handler(s)
     int s;
 {
     if (s != SIGALRM)
-	signo = s;
+	signo[s] = 1;
 }
 
 int
