@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2005, 2007-2009
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2010
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -207,98 +207,46 @@ struct command_status {
 
 struct lbuf;
 struct passwd;
+struct stat;
 
-/*
- * Function prototypes
- */
-#define YY_DECL int yylex __P((void))
+/* aix.c */
+void aix_setlimits __P((char *));
 
-char *sudo_goodpath	__P((const char *, struct stat *));
-char *tgetpass		__P((const char *, int, int));
-int find_path		__P((char *, char **, struct stat *, char *, int));
-int tty_present		__P((void));
+/* boottime.c */
+int get_boottime __P((struct timeval *));
+
+/* check.c */
+int user_is_exempt	__P((void));
 void check_user		__P((int, int));
-void verify_user	__P((struct passwd *, char *));
-#ifdef HAVE_LDAP
-int sudo_ldap_open	__P((struct sudo_nss *));
-int sudo_ldap_close	__P((struct sudo_nss *));
-int sudo_ldap_setdefs	__P((struct sudo_nss *));
-int sudo_ldap_lookup	__P((struct sudo_nss *, int, int));
-int sudo_ldap_parse	__P((struct sudo_nss *));
-int sudo_ldap_display_cmnd __P((struct sudo_nss *, struct passwd *));
-int sudo_ldap_display_defaults __P((struct sudo_nss *, struct passwd *, struct lbuf *));
-int sudo_ldap_display_bound_defaults __P((struct sudo_nss *, struct passwd *, struct lbuf *));
-int sudo_ldap_display_privs __P((struct sudo_nss *, struct passwd *, struct lbuf *));
-#endif
-int sudo_file_open	__P((struct sudo_nss *));
-int sudo_file_close	__P((struct sudo_nss *));
-int sudo_file_setdefs	__P((struct sudo_nss *));
-int sudo_file_lookup	__P((struct sudo_nss *, int, int));
-int sudo_file_parse	__P((struct sudo_nss *));
-int sudo_file_display_cmnd __P((struct sudo_nss *, struct passwd *));
-int sudo_file_display_defaults __P((struct sudo_nss *, struct passwd *, struct lbuf *));
-int sudo_file_display_bound_defaults __P((struct sudo_nss *, struct passwd *, struct lbuf *));
-int sudo_file_display_privs __P((struct sudo_nss *, struct passwd *, struct lbuf *));
-int set_perms		__P((int));
 void remove_timestamp	__P((int));
-int check_secureware	__P((char *));
-void sia_attempt_auth	__P((void));
-void pam_attempt_auth	__P((void));
-int yyparse		__P((void));
-void pass_warn		__P((FILE *));
-void dump_defaults	__P((void));
-void dump_auth_methods	__P((void));
+
+/* env.c */
 void init_envtables	__P((void));
 void read_env_file	__P((const char *, int));
-int lock_file		__P((int, int));
-int touch		__P((int, char *, struct timeval *));
-int user_is_exempt	__P((void));
-void set_fqdn		__P((void));
-char *sudo_getepw	__P((const struct passwd *));
-int pam_prep_user	__P((struct passwd *));
-void zero_bytes		__P((volatile void *, size_t));
-int gettime		__P((struct timeval *));
-FILE *open_sudoers	__P((const char *, int, int *));
-void display_privs	__P((struct sudo_nss_list *, struct passwd *));
-int display_cmnd	__P((struct sudo_nss_list *, struct passwd *));
-int get_ttycols		__P((void));
-char *sudo_parseln	__P((FILE *));
-void sudo_setgrent	__P((void));
-void sudo_endgrent	__P((void));
-void sudo_setpwent	__P((void));
-void sudo_endpwent	__P((void));
-void sudo_setspent	__P((void));
-void sudo_endspent	__P((void));
-void cleanup		__P((int));
-struct passwd *sudo_getpwnam __P((const char *));
-struct passwd *sudo_fakepwnam __P((const char *, gid_t));
-struct passwd *sudo_getpwuid __P((uid_t));
-struct group *sudo_getgrnam __P((const char *));
-struct group *sudo_fakegrnam __P((const char *));
-struct group *sudo_getgrgid __P((gid_t));
-#ifdef HAVE_SELINUX
-void selinux_exec __P((char *, char *, char **));
-void selinux_execv __P((char *, char **));
-void selinux_prefork __P((char *, char *, int));
-#endif
-#ifdef HAVE_GETUSERATTR
-void aix_setlimits __P((char *));
-#endif
-int term_cbreak __P((int));
-int term_copy __P((int, int));
-int term_noecho __P((int));
-int term_raw __P((int, int));
-int term_restore __P((int, int));
-char *get_timestr __P((time_t, int));
-int get_boottime __P((struct timeval *));
-int user_in_group __P((struct passwd *, const char *));
-int exec_setup __P((void));
-int parse_args __P((int, char **));
-YY_DECL;
 
 /* exec.c */
 int sudo_execve __P((const char *path, char *argv[], char *envp[], uid_t uid,
     struct command_status *cstat));
+
+/* fileops.c */
+char *sudo_parseln	__P((FILE *));
+int lock_file		__P((int, int));
+int touch		__P((int, char *, struct timeval *));
+
+/* find_path.c */
+int find_path		__P((char *, char **, struct stat *, char *, int));
+
+/* getspwuid.c */
+char *sudo_getepw	__P((const struct passwd *));
+
+/* gettime.c */
+int gettime		__P((struct timeval *));
+
+/* goodpath.c */
+char *sudo_goodpath	__P((const char *, struct stat *));
+
+/* gram.y */
+int yyparse		__P((void));
 
 /* iolog.c */
 int io_log_open __P((void));
@@ -310,8 +258,96 @@ int log_ttyout __P((const char *buf, unsigned int len));
 void io_log_close __P((void));
 void io_nextid __P((void));
 
+/* ldap.c */
+int sudo_ldap_open	__P((struct sudo_nss *));
+int sudo_ldap_close	__P((struct sudo_nss *));
+int sudo_ldap_setdefs	__P((struct sudo_nss *));
+int sudo_ldap_lookup	__P((struct sudo_nss *, int, int));
+int sudo_ldap_parse	__P((struct sudo_nss *));
+int sudo_ldap_display_cmnd __P((struct sudo_nss *, struct passwd *));
+int sudo_ldap_display_defaults __P((struct sudo_nss *, struct passwd *, struct lbuf *));
+int sudo_ldap_display_bound_defaults __P((struct sudo_nss *, struct passwd *, struct lbuf *));
+int sudo_ldap_display_privs __P((struct sudo_nss *, struct passwd *, struct lbuf *));
+
+/* pam.c */
+int pam_prep_user	__P((struct passwd *));
+
+/* parse.c */
+int sudo_file_open	__P((struct sudo_nss *));
+int sudo_file_close	__P((struct sudo_nss *));
+int sudo_file_setdefs	__P((struct sudo_nss *));
+int sudo_file_lookup	__P((struct sudo_nss *, int, int));
+int sudo_file_parse	__P((struct sudo_nss *));
+int sudo_file_display_cmnd __P((struct sudo_nss *, struct passwd *));
+int sudo_file_display_defaults __P((struct sudo_nss *, struct passwd *, struct lbuf *));
+int sudo_file_display_bound_defaults __P((struct sudo_nss *, struct passwd *, struct lbuf *));
+int sudo_file_display_privs __P((struct sudo_nss *, struct passwd *, struct lbuf *));
+
+/* parse_args.c */
+int parse_args __P((int, char **));
+
 /* pty.c */
 int get_pty __P((int *master, int *slave, char *name, size_t namesz, uid_t uid));
+
+/* pwutil.c */
+int user_in_group	__P((struct passwd *, const char *));
+struct group *sudo_fakegrnam __P((const char *));
+struct group *sudo_getgrgid __P((gid_t));
+struct group *sudo_getgrnam __P((const char *));
+struct passwd *sudo_fakepwnam __P((const char *, gid_t));
+struct passwd *sudo_getpwnam __P((const char *));
+struct passwd *sudo_getpwuid __P((uid_t));
+void sudo_endgrent	__P((void));
+void sudo_endpwent	__P((void));
+void sudo_endspent	__P((void));
+void sudo_setgrent	__P((void));
+void sudo_setpwent	__P((void));
+void sudo_setspent	__P((void));
+
+/* selinux.c */
+void selinux_execve __P((const char *path, char *argv[], char *envp[]));
+void selinux_setup __P((const char *role, const char *type, const char *ttyn,
+    int ttyfd));
+int selinux_restore_tty __P((void));
+
+/* set_perms.c */
+int set_perms		__P((int));
+
+/* sudo.c */
+FILE *open_sudoers	__P((const char *, int, int *));
+int exec_setup __P((void));
+void cleanup		__P((int));
+void set_fqdn		__P((void));
+
+/* sudo_auth.c */
+void verify_user	__P((struct passwd *, char *));
+void pass_warn		__P((FILE *));
+void dump_auth_methods	__P((void));
+
+/* sudo_nss.c */
+void display_privs	__P((struct sudo_nss_list *, struct passwd *));
+int display_cmnd	__P((struct sudo_nss_list *, struct passwd *));
+
+/* term.c */
+int term_cbreak __P((int));
+int term_copy __P((int, int));
+int term_noecho __P((int));
+int term_raw __P((int, int));
+int term_restore __P((int, int));
+
+/* tgetpass.c */
+char *tgetpass		__P((const char *, int, int));
+int tty_present		__P((void));
+
+/* timestr.c */
+char *get_timestr __P((time_t, int));
+
+/* toke.l */
+#define YY_DECL int yylex __P((void))
+YY_DECL;
+
+/* zero_bytes.c */
+void zero_bytes		__P((volatile void *, size_t));
 
 /* Only provide extern declarations outside of sudo.c. */
 #ifndef _SUDO_MAIN
