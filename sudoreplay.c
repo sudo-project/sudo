@@ -94,10 +94,10 @@ extern int optind;
 
 int Argc;
 char **Argv;
-const char *session_dir = _PATH_SUDO_TRANSCRIPT;
+const char *session_dir = _PATH_SUDO_IO_LOGDIR;
 
 /*
- * Info present in the transcript log file
+ * Info present in the I/O log file
  */
 struct log_info {
     char *cwd;
@@ -614,7 +614,11 @@ list_session_dir(pathbuf, re, user, tty)
 	pathbuf[plen + 0] = '/';
 	pathbuf[plen + 1] = dp->d_name[0];
 	pathbuf[plen + 2] = dp->d_name[1];
-	pathbuf[plen + 3] = '\0';
+	pathbuf[plen + 3] = '/';
+	pathbuf[plen + 4] = 'l';
+	pathbuf[plen + 5] = 'o';
+	pathbuf[plen + 6] = 'g';
+	pathbuf[plen + 7] = '\0';
 	fp = fopen(pathbuf, "r");
 	if (fp == NULL) {
 	    warning("unable to open %s", pathbuf);
@@ -720,6 +724,10 @@ list_sessions(argc, argv, pattern, user, tty)
 #endif /* HAVE_REGCOMP */
 
     sdlen = strlcpy(pathbuf, session_dir, sizeof(pathbuf));
+    if (sdlen + sizeof("/00/00/00/log") >= sizeof(pathbuf)) {
+	errno = ENAMETOOLONG;
+	error(1, "%s/00/00/00/log", session_dir);
+    }
 
     /*
      * Three levels of directory, e.g. 00/00/00 .. ZZ/ZZ/ZZ

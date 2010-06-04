@@ -1,5 +1,5 @@
 #
-# Copyright (c) 1996, 1998-2005, 2007-2009
+# Copyright (c) 1996, 1998-2005, 2007-2010
 #	Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -33,7 +33,7 @@ top_builddir = .
 CC = @CC@
 FLEX = @FLEX@
 YACC = @YACC@
-NROFF = nroff -Tascii
+NROFF = @NROFFPROG@ -Tascii
 LIBTOOL = @LIBTOOL@
 AR=@AR@
 RANLIB=@RANLIB@
@@ -103,11 +103,11 @@ SHELL = @SHELL@
 PROGS = @PROGS@
 
 SRCS = aix.c alias.c alloc.c audit.c boottime.c bsm_audit.c check.c \
-       closefrom.c def_data.c defaults.c env.c error.c fileops.c find_path.c \
-       fnmatch.c getcwd.c getprogname.c getspwuid.c gettime.c glob.c \
-       goodpath.c gram.c gram.y interfaces.c isblank.c lbuf.c ldap.c list.c \
-       logging.c match.c mkstemp.c memrchr.c nanosleep.c parse.c pwutil.c \
-       pty.c script.c set_perms.c sigaction.c snprintf.c strcasecmp.c \
+       closefrom.c def_data.c defaults.c env.c error.c exec.c fileops.c \
+       find_path.c fnmatch.c getcwd.c getprogname.c getspwuid.c gettime.c \
+       glob.c goodpath.c gram.c gram.y interfaces.c iolog.c isblank.c lbuf.c \
+       ldap.c list.c logging.c match.c mkstemp.c memrchr.c nanosleep.c \
+       parse.c pwutil.c pty.c set_perms.c sigaction.c snprintf.c strcasecmp.c \
        strerror.c strlcat.c strlcpy.c strsignal.c sudo.c sudo_noexec.c \
        sudo_edit.c sudo_nss.c term.c testsudoers.c tgetpass.c toke.c toke.l \
        tsgetgrpw.c utimes.c vasgroups.c visudo.c zero_bytes.c redblack.c \
@@ -131,8 +131,8 @@ COMMON_OBJS = alias.o alloc.o defaults.o error.o getline.o gram.o \
 	      list.o match.o pwutil.o timestr.o toke.o redblack.o \
 	      term.o zero_bytes.o @NONUNIX_GROUPS_IMPL@
 
-SUDO_OBJS = $(AUTH_OBJS) @SUDO_OBJS@ audit.o boottime.o check.o \
-	    env.o getspwuid.o gettime.o goodpath.o fileops.o find_path.o \
+SUDO_OBJS = $(AUTH_OBJS) @SUDO_OBJS@ audit.o boottime.o check.o env.o \
+	    exec.o getspwuid.o gettime.o goodpath.o fileops.o find_path.o \
 	    interfaces.o lbuf.o logging.o parse.o set_perms.o sudo.o \
 	    sudo_edit.o sudo_nss.o tgetpass.o
 
@@ -157,7 +157,7 @@ DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
             sudoers.man.in sudoers.pod sudoers.ldap.cat sudoers.ldap.man.in \
 	    sudoers.ldap.pod sudoers2ldif sudoreplay.cat sudoreplay.man.in \
 	    sudoreplay.pod visudo.cat visudo.man.in visudo.pod auth/API \
-	    sudo.man.pl sudoers.man.pl 
+	    sudo.man.pl sudoers.man.pl
 
 BINFILES= ChangeLog HISTORY LICENSE README TROUBLESHOOTING \
 	  UPGRADE install-sh mkinstalldirs sample.syslog.conf sample.sudoers \
@@ -263,6 +263,8 @@ env.o: $(srcdir)/env.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/env.c
 error.o: $(srcdir)/error.c $(srcdir)/compat.h $(srcdir)/error.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/error.c
+exec.o: $(srcdir)/exec.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/exec.c
 fileops.o: $(srcdir)/fileops.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fileops.c
 find_path.o: $(srcdir)/find_path.c $(SUDODEP)
@@ -289,6 +291,8 @@ gram.o: $(devdir)/gram.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(devdir)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(devdir)/gram.c
 interfaces.o: $(srcdir)/interfaces.c $(SUDODEP) $(srcdir)/interfaces.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/interfaces.c
+iolog.o: $(srcdir)/iolog.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/iolog.c
 isblank.o: $(srcdir)/isblank.c $(srcdir)/compat.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/isblank.c
 lbuf.o: $(srcdir)/lbuf.c $(SUDODEP)
@@ -315,8 +319,6 @@ pty.o: $(srcdir)/pty.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/pty.c
 redblack.o: $(srcdir)/redblack.c $(SUDODEP) $(srcdir)/redblack.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/redblack.c
-script.o: $(srcdir)/script.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/script.c
 set_perms.o: $(srcdir)/set_perms.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/set_perms.c
 sigaction.o: $(srcdir)/sigaction.c $(srcdir)/compat.h

@@ -696,6 +696,13 @@ AC_ARG_WITH(timedir, [AS_HELP_STRING([--with-timedir], [path to the sudo timesta
 		;;
 esac])
 
+AC_ARG_WITH(iologdir, [AS_HELP_STRING([--with-iologdir=DIR], [directory to store sudo I/O log files in])],
+[case $with_iologdir in
+    yes)	;;
+    no)		AC_MSG_ERROR(["--without-iologdir not supported."])
+		;;
+esac])
+
 AC_ARG_WITH(sendmail, [AS_HELP_STRING([--with-sendmail], [set path to sendmail])
 AS_HELP_STRING([--without-sendmail], [do not send mail at all])],
 [case $with_sendmail in
@@ -1223,10 +1230,6 @@ AC_ARG_ENABLE(env_debug,
 		;;
   esac
 ], AC_MSG_RESULT(no))
-
-dnl we check enable_transcript later
-AC_ARG_ENABLE(transcript,
-[AS_HELP_STRING([--enable-transcript[[=DIR]]], [Enable Sudo's transcript support, storing them in DIR])])
 
 AC_ARG_ENABLE(warnings,
 [AS_HELP_STRING([--enable-warnings], [Whether to enable compiler warnings])],
@@ -2626,19 +2629,19 @@ if test -n "$blibpath"; then
 fi
 
 dnl
-dnl Check for log file, timestamp and transcript locations
+dnl Check for log file, timestamp and iolog locations
 dnl
 SUDO_LOGFILE
 SUDO_TIMEDIR
-SUDO_TRANSCRIPT
+SUDO_IO_LOGDIR
 
 dnl
-dnl If transcript is enabled, build sudoreplay and add pty.o script.o for sudo
+dnl If I/O logging is enabled, build sudoreplay and add iolog.o pty.o for sudo
 dnl
-if test "${enable_transcript-yes}" != "no"; then
-    # currently require POSIX job control for transcript support
+if test "${with_iologdir-yes}" != "no"; then
+    # Require POSIX job control for I/O log support
     AC_CHECK_FUNCS(tcsetpgrp, [
-	SUDO_OBJS="${SUDO_OBJS} pty.o script.o"
+	SUDO_OBJS="${SUDO_OBJS} iolog.o pty.o"
 	PROGS="$PROGS sudoreplay"
 	REPLAY=""
 
@@ -2663,8 +2666,8 @@ if test "${enable_transcript-yes}" != "no"; then
 	    ])
 	fi
     ], [
-	AC_MSG_WARN([Disabling transcript support due to lack of tcsetpgrp function])
-	enable_transcript=no
+	AC_MSG_WARN([Disabling I/O log support due to lack of tcsetpgrp function])
+	with_iologdir=no
     ])
 fi
 

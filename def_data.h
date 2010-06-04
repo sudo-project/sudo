@@ -144,10 +144,12 @@
 #define I_FAST_GLOB             71
 #define def_umask_override      (sudo_defs_table[72].sd_un.flag)
 #define I_UMASK_OVERRIDE        72
-#define def_transcript          (sudo_defs_table[73].sd_un.flag)
-#define I_TRANSCRIPT            73
-#define def_compress_transcript (sudo_defs_table[74].sd_un.flag)
-#define I_COMPRESS_TRANSCRIPT   74
+#define def_log_input           (sudo_defs_table[73].sd_un.flag)
+#define I_LOG_INPUT             73
+#define def_log_output          (sudo_defs_table[74].sd_un.flag)
+#define I_LOG_OUTPUT            74
+#define def_compress_io         (sudo_defs_table[75].sd_un.flag)
+#define I_COMPRESS_IO           75
 
 enum def_tupple {
 	never,

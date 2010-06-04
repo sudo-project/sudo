@@ -939,6 +939,7 @@ with_passprompt
 with_badpass_message
 with_fqdn
 with_timedir
+with_iologdir
 with_sendmail
 with_sudoers_mode
 with_sudoers_uid
@@ -980,7 +981,6 @@ enable_noargs_shell
 enable_shell_sets_home
 enable_path_info
 enable_env_debug
-enable_transcript
 enable_warnings
 with_selinux
 enable_gss_krb5_ccache_name
@@ -1634,9 +1634,6 @@ Optional Features:
                           Set $HOME to target user in shell mode
   --disable-path-info     Print 'command not allowed' not 'command not found'
   --enable-env-debug      Whether to enable environment debugging.
-  --enable-transcript[=DIR]
-                          Enable Sudo's transcript support, storing them in
-                          DIR
   --enable-warnings       Whether to enable compiler warnings
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
@@ -1697,6 +1694,7 @@ Optional Packages:
   --with-badpass-message  message the user sees when the password is wrong
   --with-fqdn             expect fully qualified hosts in sudoers
   --with-timedir          path to the sudo timestamp dir
+  --with-iologdir=DIR     directory to store sudo I/O log files in
   --with-sendmail         set path to sendmail
   --without-sendmail      do not send mail at all
   --with-sudoers-mode     mode of sudoers file (defaults to 0440)
@@ -3656,6 +3654,17 @@ fi
 
 
 
+# Check whether --with-iologdir was given.
+if test "${with_iologdir+set}" = set; then :
+  withval=$with_iologdir; case $with_iologdir in
+    yes)	;;
+    no)		as_fn_error "\"--without-iologdir not supported.\"" "$LINENO" 5
+		;;
+esac
+fi
+
+
+
 # Check whether --with-sendmail was given.
 if test "${with_sendmail+set}" = set; then :
   withval=$with_sendmail; case $with_sendmail in
@@ -5344,12 +5353,6 @@ $as_echo "no" >&6; }
 fi
 
 
-# Check whether --enable-transcript was given.
-if test "${enable_transcript+set}" = set; then :
-  enableval=$enable_transcript;
-fi
-
-
 # Check whether --enable-warnings was given.
 if test "${enable_warnings+set}" = set; then :
   enableval=$enable_warnings;  case "$enableval" in
@@ -6521,13 +6524,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6524: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6527: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6527: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6530: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6530: output\"" >&5)
+  (eval echo "\"\$as_me:6533: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -7732,7 +7735,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7735 "configure"' > conftest.$ac_ext
+  echo '#line 7738 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9125,11 +9128,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9128: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9131: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9132: \$? = $ac_status" >&5
+   echo "$as_me:9135: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9464,11 +9467,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9467: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9470: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9471: \$? = $ac_status" >&5
+   echo "$as_me:9474: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9569,11 +9572,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9572: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9575: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9576: \$? = $ac_status" >&5
+   echo "$as_me:9579: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9624,11 +9627,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9627: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9630: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9631: \$? = $ac_status" >&5
+   echo "$as_me:9634: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11991,7 +11994,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11994 "configure"
+#line 11997 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12087,7 +12090,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12090 "configure"
+#line 12093 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -17918,29 +17921,27 @@ EOF
 fi
 
 
-    if test "${enable_transcript-yes}" != "no"; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for transcript dir location" >&5
-$as_echo_n "checking for transcript dir location... " >&6; }
-	if test "${enable_transcript-yes}" != "yes"; then
-	    :
-	elif test -d "/var/log"; then
-	    enable_transcript="/var/log/sudo-transcript"
-	elif test -d "/var/adm"; then
-	    enable_transcript="/var/adm/sudo-transcript"
-	else
-	    enable_transcript="/usr/adm/sudo-transcript"
-	fi
-	cat >>confdefs.h <<EOF
-#define _PATH_SUDO_TRANSCRIPT "$enable_transcript"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for I/O log dir location" >&5
+$as_echo_n "checking for I/O log dir location... " >&6; }
+    if test "${with_iologdir-yes}" != "yes"; then
+	:
+    elif test -d "/var/log"; then
+	with_iologdir="/var/log/sudo-io"
+    elif test -d "/var/adm"; then
+	with_iologdir="/var/adm/sudo-io"
+    else
+	with_iologdir="/usr/adm/sudo-io"
+    fi
+    cat >>confdefs.h <<EOF
+#define _PATH_SUDO_IO_LOGDIR "$with_iologdir"
 EOF
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_transcript" >&5
-$as_echo "$enable_transcript" >&6; }
-    fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_iologdir" >&5
+$as_echo "$with_iologdir" >&6; }
 
 
-if test "${enable_transcript-yes}" != "no"; then
-    # currently require POSIX job control for transcript support
+if test "${with_iologdir-yes}" != "no"; then
+    # Require POSIX job control for I/O log support
     for ac_func in tcsetpgrp
 do :
   ac_fn_c_check_func "$LINENO" "tcsetpgrp" "ac_cv_func_tcsetpgrp"
@@ -17949,7 +17950,7 @@ if test "x$ac_cv_func_tcsetpgrp" = x""yes; then :
 #define HAVE_TCSETPGRP 1
 _ACEOF
 
-	SUDO_OBJS="${SUDO_OBJS} pty.o script.o"
+	SUDO_OBJS="${SUDO_OBJS} exec.o iolog.o pty.o"
 	PROGS="$PROGS sudoreplay"
 	REPLAY=""
 
@@ -18034,9 +18035,9 @@ fi
 
 else
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling transcript support due to lack of tcsetpgrp function" >&5
-$as_echo "$as_me: WARNING: Disabling transcript support due to lack of tcsetpgrp function" >&2;}
-	enable_transcript=no
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling I/O log support due to lack of tcsetpgrp function" >&5
+$as_echo "$as_me: WARNING: Disabling I/O log support due to lack of tcsetpgrp function" >&2;}
+	with_iologdir=no
 
 fi
 done

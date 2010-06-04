@@ -1,4 +1,4 @@
-Copyright (c) 2009 Todd C. Miller <Todd.Miller@courtesan.com>
+Copyright (c) 2009-2010 Todd C. Miller <Todd.Miller@courtesan.com>
 
 Permission to use, copy, modify, and distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
@@ -66,7 +66,7 @@ B<sudoreplay> accepts the following command line options:
 =item -d I<directory>
 
 Use I<directory> to for the session logs instead of the default,
-F</var/log/sudo-sessions>.
+F</var/log/sudo-io>.
 
 =item -l
 
@@ -249,23 +249,43 @@ The current time but 14 days ago.
 
 =over 24
 
-=item F</var/log/sudo-session>
+=item F</var/log/sudo-io>
 
-The default session directory.
+The default I/O log directory.
 
-=item F</var/log/sudo-session/00/00/01>
+=item F</var/log/sudo-io/00/00/01/log>
 
 Example session log info.
 
-=item F</var/log/sudo-session/00/00/01.scr>
+=item F</var/log/sudo-io/00/00/01/stdin>
 
-Example session transcript file.
+Example session standard input log.
 
-=item F</var/log/sudo-session/00/00/01.tim>
+=item F</var/log/sudo-io/00/00/01/stdout>
+
+Example session standard output log.
+
+=item F</var/log/sudo-io/00/00/01/stderr>
+
+Example session standard error log.
+
+=item F</var/log/sudo-io/00/00/01/ttyin>
+
+Example session tty input file.
+
+=item F</var/log/sudo-io/00/00/01/ttyout>
+
+Example session tty output file.
+
+=item F</var/log/sudo-io/00/00/01/timing>
 
 Example session timing file.
 
 =back
+
+Note that the I<stdin>, I<stdout> and I<stderr> files will be empty
+unless B<sudo> was used as part of a pipeline for a particular
+command.
 
 =head1 EXAMPLES
 

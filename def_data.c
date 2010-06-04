@@ -315,12 +315,16 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"The umask specified in sudoers will override the user's, even if it is more permissive",
 	NULL,
     }, {
-	"transcript", T_FLAG,
-	"Log a transcript of the command being run",
+	"log_input", T_FLAG,
+	"Log user's input for the command being run",
 	NULL,
     }, {
-	"compress_transcript", T_FLAG,
-	"Compress session transcripts with zlib",
+	"log_output", T_FLAG,
+	"Log the output of the command being run",
+	NULL,
+    }, {
+	"compress_io", T_FLAG,
+	"Compress I/O logs using zlib",
 	NULL,
     }, {
 	NULL, 0, NULL

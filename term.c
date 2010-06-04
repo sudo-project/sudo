@@ -140,9 +140,8 @@ term_noecho(fd)
 #if defined(HAVE_TERMIOS_H) || defined(HAVE_TERMIO_H)
 
 int
-term_raw(fd, opost, isig)
+term_raw(fd, isig)
     int fd;
-    int opost;
     int isig;
 {
     struct termios term;
@@ -157,9 +156,6 @@ term_raw(fd, opost, isig)
     if (isig)
 	SET(term.c_lflag, ISIG);
     CLR(term.c_iflag, ICRNL | IGNCR | INLCR | IUCLC | IXON);
-    /* Only retain output post-processing opost flag set. */
-    if (!opost)
-	CLR(term.c_oflag, OPOST);
     if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
     	return(1);
@@ -192,18 +188,14 @@ term_cbreak(fd)
 }
 
 int
-term_copy(src, dst, opost)
+term_copy(src, dst)
     int src;
     int dst;
-    int opost;
 {
     struct termios tt;
 
     if (tcgetattr(src, &tt) != 0)
 	return(0);
-    /* Do not do post-processing unless opost set. */
-    if (!opost)
-	CLR(tt.c_oflag, OPOST);
     /* XXX - add TCSANOW compat define */
     if (tcsetattr(dst, TCSANOW|TCSASOFT, &tt) != 0)
 	return(0);
@@ -213,19 +205,17 @@ term_copy(src, dst, opost)
 #else /* SGTTY */
 
 int
-term_raw(fd, onlcr)
+term_raw(fd, isig)
     int fd;
-    int onlcr;
+    int isig;
 {
     if (!changed && ioctl(fd, TIOCGETP, &oterm) != 0)
 	return(0);
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to raw mode */
+    /* XXX - how to support isig? */
     CLR(term.c_lflag, ECHO);
     SET(term.sg_flags, RAW);
-    /* Retain NL to NLCR conversion if onlcr flag set. */
-    if (onlcr)
-	SET(term.sg_flags, CRMOD);
     if (ioctl(fd, TIOCSETP, &term) == 0) {
 	changed = 1;
 	return(1);
@@ -253,10 +243,9 @@ term_cbreak(fd)
 }
 
 int
-term_copy(src, dst, onlcr)
+term_copy(src, dst)
     int src;
     int dst;
-    int onlcr;
 {
     struct sgttyb b;
     struct tchars tc;
@@ -268,9 +257,6 @@ term_copy(src, dst, onlcr)
 	ioctl(src, TIOCLGET, &lb)) {
 	return(0);
     }
-    /* Do not convert line endings from NL to NLCR. */
-    if (!onlcr)
-	CLR(b.sg_flags, CRMOD);
     if (ioctl(dst, TIOCSETP, &b) != 0 || ioctl(dst, TIOCSETC, &tc) != 0 ||
 	ioctl(dst, TIOCSLTC, &lc) != 0 || ioctl(dst, TIOCLSET, &lb) != 0 ||
 	ioctl(dst, TIOCSETD, &l) != 0) {

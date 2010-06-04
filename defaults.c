@@ -470,7 +470,7 @@ init_defaults()
     def_passwd_timeout = PASSWORD_TIMEOUT;
     def_passwd_tries = TRIES_FOR_PASSWORD;
 #ifdef HAVE_ZLIB
-    def_compress_transcript = TRUE;
+    def_compress_io = TRUE;
 #endif
 
     /* Now do the strings */

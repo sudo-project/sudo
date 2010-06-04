@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2009 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -31,6 +31,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <sys/param.h>
 #include <sys/socket.h>
 #ifdef HAVE_SETRLIMIT
@@ -159,6 +160,7 @@ sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp;
 static char *runas_user;
 static char *runas_group;
 static struct sudo_nss_list *snl;
+static int sudo_mode;
 
 /* For getopt(3) */
 extern char *optarg;
@@ -171,7 +173,7 @@ main(argc, argv, envp)
     char **envp;
 {
     int sources = 0, validated;
-    int fd, cmnd_status, sudo_mode, pwflag, rc = 0;
+    int fd, cmnd_status, pwflag, rc = 0;
     sigaction_t sa;
     struct sudo_nss *nss;
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -445,6 +447,9 @@ main(argc, argv, envp)
     }
 
     if (ISSET(validated, VALIDATE_OK)) {
+	struct command_status cstat;
+	int exitcode = 1;
+
 	/* Finally tell the user if the command did not exist. */
 	if (cmnd_status == NOT_FOUND_DOT) {
 	    audit_failure(NewArgv, "command in current directory");
@@ -463,12 +468,11 @@ main(argc, argv, envp)
 		validate_env_vars(sudo_user.env_vars);
 	}
 
-#ifdef _PATH_SUDO_TRANSCRIPT
+#ifdef _PATH_SUDO_IO_LOGDIR
 	/* Get next session ID so we can log it. */
-	if (def_transcript && ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)))
-	    script_nextid();
+	if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)) && (def_log_input || def_log_output))
+	    io_nextid();
 #endif
-
 	log_allowed(validated);
 	if (ISSET(sudo_mode, MODE_CHECK))
 	    rc = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw);
@@ -483,39 +487,10 @@ main(argc, argv, envp)
 	if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST)))
 	    exit(rc);
 
-	/*
-	 * Set umask based on sudoers.
-	 * If user's umask is more restrictive, OR in those bits too
-	 * unless umask_override is set.
-	 */
-	if (def_umask != 0777) {
-	    if (def_umask_override) {
-		umask(def_umask);
-	    } else {
-		mode_t mask = umask(def_umask);
-		mask |= def_umask;
-		if (mask != def_umask)
-		    umask(mask);
-	    }
-	}
-
-	/* Restore coredumpsize resource limit. */
-#if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
-	(void) setrlimit(RLIMIT_CORE, &corelimit);
-#endif /* RLIMIT_CORE && !SUDO_DEVEL */
-
 	/* Must audit before uid change. */
 	audit_success(NewArgv);
 
-#ifdef _PATH_SUDO_TRANSCRIPT
-	/* Open tty as needed */
-	if (def_transcript)
-	    script_setup();
-#endif
-
 	/* Become specified user or root if executing a command. */
-	if (ISSET(sudo_mode, MODE_RUN))
-	    set_perms(PERM_FULL_RUNAS);
 
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	    char *p;
@@ -525,10 +500,6 @@ main(argc, argv, envp)
 		p = NewArgv[0];
 	    *p = '-';
 	    NewArgv[0] = p;
-
-	    /* Change to target user's homedir. */
-	    if (chdir(runas_pw->pw_dir) == -1)
-		warning("unable to change directory to %s", runas_pw->pw_dir);
 
 #if defined(__linux__) || defined(_AIX)
 	    /* Insert system-wide environment variables. */
@@ -555,43 +526,31 @@ main(argc, argv, envp)
 	sudo_endpwent();
 	sudo_endgrent();
 
-	/* Move pty master/slave to low numbered fd and close the rest. */
-#ifdef _PATH_SUDO_TRANSCRIPT
-	fd = def_transcript ? script_duplow(def_closefrom) : def_closefrom;
-	closefrom(fd);
-#else
-	closefrom(def_closefrom);
-#endif
-
 #ifdef PROFILING
 	exit(0);
 #endif
-	if (ISSET(sudo_mode, MODE_BACKGROUND) && fork() > 0) {
-	    syslog(LOG_AUTH|LOG_ERR, "fork"); /* XXX */
-	    exit(0);
+	sudo_execve(safe_cmnd, NewArgv, environ, &cstat);
+	switch (cstat.type) {
+	case CMD_ERRNO:
+	    /* exec_setup() or execve() returned an error. */
+	    warningx("unable to execute %s: %s", safe_cmnd, strerror(cstat.val));
+	    exitcode = 127;
+	    break;
+	case CMD_WSTATUS:
+	    /* Command ran, exited or was killed. */
+	    if (WIFEXITED(cstat.val))
+		exitcode = WEXITSTATUS(cstat.val);
+	    else if (WIFSIGNALED(cstat.val))
+		exitcode = WTERMSIG(cstat.val) | 128;
+	    break;
+	default:
+	    warningx("unexpected child termination condition: %d", cstat.type);
+	    break;
 	}
-#ifdef _PATH_SUDO_TRANSCRIPT
-	if (def_transcript)
-	    script_execv(safe_cmnd, NewArgv);
-	else
+#ifdef _PATH_SUDO_IO_LOGDIR
+	io_log_close();
 #endif
-#ifdef HAVE_SELINUX
-	if (is_selinux_enabled() > 0 && user_role != NULL)
-	    selinux_exec(user_role, user_type, NewArgv);
-	else
-#endif
-	execv(safe_cmnd, NewArgv);
-	/*
-	 * If we got here then execve() failed...
-	 */
-	if (errno == ENOEXEC) {
-	    NewArgv--;			/* at least one extra slot... */
-	    NewArgv[0] = "sh";
-	    NewArgv[1] = safe_cmnd;
-	    execv(_PATH_BSHELL, NewArgv);
-	}
-	warning("unable to execute %s", safe_cmnd);
-	exit(127);
+	exit(exitcode);
     } else if (ISSET(validated, FLAG_NO_USER | FLAG_NO_HOST)) {
 	audit_failure(NewArgv, "No user or host");
 	log_denial(validated, 1);
@@ -875,6 +834,66 @@ set_cmnd(sudo_mode)
     if (!runas_user && !runas_group)
 	set_runaspw(def_runas_default);	/* may have been updated above */
 
+    return(rval);
+}
+
+/*
+ * Setup the execution environment immediately prior to the call to execve()
+ * Returns TRUE on success and FALSE on failure.
+ */
+int
+exec_setup()
+{
+    int rval = FALSE;
+
+    /*
+     * Set umask based on sudoers.
+     * If user's umask is more restrictive, OR in those bits too
+     * unless umask_override is set.
+     */
+    if (def_umask != 0777) {
+	if (def_umask_override) {
+	    umask(def_umask);
+	} else {
+	    mode_t mask = umask(def_umask);
+	    mask |= def_umask;
+	    if (mask != def_umask)
+		umask(mask);
+	}
+    }
+
+    /* Restore coredumpsize resource limit. */
+#if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
+    (void) setrlimit(RLIMIT_CORE, &corelimit);
+#endif /* RLIMIT_CORE && !SUDO_DEVEL */
+
+    if (ISSET(sudo_mode, MODE_RUN))
+	set_perms(PERM_FULL_RUNAS);
+
+    if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+	/* Change to target user's homedir. */
+	if (chdir(runas_pw->pw_dir) == -1)
+	    warning("unable to change directory to %s", runas_pw->pw_dir);
+	    goto done;
+    }
+
+    if (ISSET(sudo_mode, MODE_BACKGROUND)) {
+	switch (fork()) {
+	    case -1:
+		warning("fork");
+		goto done;
+	    case 0:
+		/* child continues */
+		break;
+	    default:
+		/* parent exists */
+		exit(0);
+	}
+    }
+
+    rval = TRUE;
+
+done:
     return(rval);
 }
 
@@ -1481,11 +1500,11 @@ cleanup(gotsignal)
 	}
 	sudo_endpwent();
 	sudo_endgrent();
-    }
-#ifdef _PATH_SUDO_TRANSCRIPT
-    if (def_transcript)
-	term_restore(STDIN_FILENO, 0);
+#ifdef _PATH_SUDO_IO_LOGDIR
+	io_log_close();
 #endif
+    }
+    term_restore(STDIN_FILENO, 0);
 }
 
 static void

@@ -598,26 +598,26 @@ The following options are also configurable at runtime:
 	if the executable is simply not in the user's path, sudo will tell
 	the user that they are not allowed to run it, which can be confusing.
 
-  --disable-transcript
-        Disable sudo's transcript support.  This can be used to allow sudo
+  --disable-iologdir
+	Disable sudo's I/O logging support.  This can be used to allow sudo
 	to be compiled on systems without pseudo-tty support.
 
-  --enable-transcript[=DIR]
-	By default, sudo stores transcript files in either
-	/var/log/sudo-transcript, /var/adm/sudo-transcript, or
-	/usr/log/sudo-transcript.  If DIR is specified, transcripts
-	will be stored in the indicated directory instead.
+  --enable-iologdir[=DIR]
+	By default, sudo stores I/O log files in either /var/log/sudo-io,
+	/var/adm/sudo-sudo-io or /usr/log/sudo-io.  If DIR is
+	specified, I/O logs will be stored in the indicated directory
+	instead.
+
+  --enable-zlib[=DIR]
+	Enable the use of the zlib compress library when storing
+	I/O log files.  If specified, DIR is the base directory
+	containing the zlib include and lib directories.  By default
+	zlib is used if it is found on the system and I/O logging
+	support is not disabled.
 
   --disable-zlib
         Disable the use of the zlib compress library when storing
-        transcript files.
-
-  --enable-zlib[=DIR]
-        Enable the use of the zlib compress library when storing
-        transcript files.  If specified, DIR is the base directory
-        containing the zlib include and lib directories.  By default
-        zlib is used if it is found on the system and transcript
-        support is not disabled.
+        I/O log files.
 
   --enable-warnings
 	Enable compiler warnings when building sudo with gcc.

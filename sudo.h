@@ -74,6 +74,16 @@ struct sudo_user {
 #endif
 };
 
+/* Status passed between parent and child via socketpair */
+struct command_status {
+#define CMD_INVALID 0
+#define CMD_ERRNO 1
+#define CMD_WSTATUS 2
+#define CMD_SIGNO 3
+    int type;
+    int val;
+};
+
 /*
  * Return values for sudoers_lookup(), also used as arguments for log_auth()
  * Note: cannot use '0' as a value here.
@@ -274,19 +284,32 @@ void selinux_prefork __P((char *, char *, int));
 #ifdef HAVE_GETUSERATTR
 void aix_setlimits __P((char *));
 #endif
-int script_duplow __P((int));
-int script_execv __P((char *, char **));
-void script_nextid __P((void));
-void script_setup __P((void));
 int term_cbreak __P((int));
-int term_copy __P((int, int, int));
+int term_copy __P((int, int));
 int term_noecho __P((int));
-int term_raw __P((int, int, int));
+int term_raw __P((int, int));
 int term_restore __P((int, int));
 char *get_timestr __P((time_t, int));
 int get_boottime __P((struct timeval *));
 int user_in_group __P((struct passwd *, const char *));
+int exec_setup __P((void));
 YY_DECL;
+
+/* exec.c */
+int sudo_execve __P((const char *, char *[], char *[], struct command_status *cstat));
+
+/* iolog.c */
+int io_log_open __P((void));
+int log_stderr __P((const char *buf, unsigned int len));
+int log_stdin __P((const char *buf, unsigned int len));
+int log_stdout __P((const char *buf, unsigned int len));
+int log_ttyin __P((const char *buf, unsigned int len));
+int log_ttyout __P((const char *buf, unsigned int len));
+void io_log_close __P((void));
+void io_nextid __P((void));
+
+/* pty.c */
+int get_pty __P((int *master, int *slave, char *name, size_t namesz));
 
 /* Only provide extern declarations outside of sudo.c. */
 #ifndef _SUDO_MAIN
@@ -300,5 +323,6 @@ extern uid_t timestamp_uid;
 #ifndef errno
 extern int errno;
 #endif
+extern char **environ; /* XXX */
 
 #endif /* _SUDO_SUDO_H */
