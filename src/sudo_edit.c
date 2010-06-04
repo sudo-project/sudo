@@ -125,13 +125,6 @@ sudo_edit(struct command_details *command_details, char *argv[], char *envp[])
 	tmplen--;
 
     /*
-     * Close password, shadow, and group files before we try to open
-     * user-specified files to prevent the opening of things like /dev/fd/4
-     */
-    endpwent();
-    endgrent();
-
-    /*
      * The user's editor must be separated from the files to be
      * edited by a "--" option.
      */
