@@ -58,7 +58,7 @@
 
 #if defined(HAVE_OPENPTY)
 int
-get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid)
+get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 {
     struct group *gr;
     gid_t ttygid = -1;
@@ -68,13 +68,13 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid)
 
     if (openpty(master, slave, name, NULL, NULL) != 0)
 	return(0);
-    (void) chown(name, uid, ttygid);
+    (void) chown(name, ttyuid, ttygid);
     return(1);
 }
 
 #elif defined(HAVE__GETPTY)
 int
-get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid)
+get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 {
     char *line;
 
@@ -87,7 +87,7 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid)
 	close(*master);
 	return(0);
     }
-    (void) chown(line, uid, -1);
+    (void) chown(line, ttyuid, -1);
     strlcpy(name, line, namesz);
     return(1);
 }
@@ -108,7 +108,7 @@ posix_openpt(int oflag)
 # endif /* HAVE_POSIX_OPENPT */
 
 int
-get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid)
+get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 {
     char *line;
 
@@ -135,7 +135,7 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid)
     ioctl(*slave, I_PUSH, "ptem");	/* pseudo tty emulation module */
     ioctl(*slave, I_PUSH, "ldterm");	/* line discipline module */
 # endif
-    (void) chown(line, uid, -1);
+    (void) chown(line, ttyuid, -1);
     strlcpy(name, line, namesz);
     return(1);
 }
@@ -145,7 +145,7 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid)
 static char line[] = "/dev/ptyXX";
 
 int
-get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid)
+get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 {
     char *bank, *cp;
     struct group *gr;
@@ -165,7 +165,7 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid)
 		continue; /* already in use */
 	    }
 	    line[sizeof("/dev/p") - 2] = 't';
-	    (void) chown(line, uid, ttygid);
+	    (void) chown(line, ttyuid, ttygid);
 	    (void) chmod(line, S_IRUSR|S_IWUSR|S_IWGRP);
 # ifdef HAVE_REVOKE
 	    (void) revoke(line);
