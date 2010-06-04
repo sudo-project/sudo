@@ -103,7 +103,7 @@ struct io_buffer {
     int off; /* write position (how much already consumed) */
     int rfd;  /* reader (producer) */
     int wfd; /* writer (consumer) */
-    int (*action)(char *buf, unsigned int len);
+    int (*action)(const char *buf, unsigned int len);
     char buf[16 * 1024];
 };
 
@@ -412,7 +412,7 @@ terminate_child(pid_t pid, int use_pgrp)
 }
 
 static struct io_buffer *
-io_buf_new(int rfd, int wfd, int (*action)(char *, unsigned int),
+io_buf_new(int rfd, int wfd, int (*action)(const char *, unsigned int),
     struct io_buffer *head)
 {
     struct io_buffer *iob;
