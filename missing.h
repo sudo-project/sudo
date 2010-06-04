@@ -83,7 +83,7 @@ int setenv		__P((const char *, const char *, int));
 #ifndef HAVE_UNSETENV
 int unsetenv		__P((const char *));
 #endif
-#ifdef HAVE_SYS_SIGLIST
+#ifndef HAVE_STRSIGNAL
 char *strsignal		__P((int));
 #endif
 

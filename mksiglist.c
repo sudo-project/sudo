@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,10 +14,20 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <stdio.h>
-#include <signal.h>
 
 #include <config.h>
+
+#include <stdio.h>
+#ifdef STDC_HEADERS
+# include <stdlib.h>
+# include <stddef.h>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif /* STDC_HEADERS */
+#include <signal.h>
+
 #include <compat.h>
 
 #if !defined(NSIG)
@@ -30,24 +40,28 @@
 # endif
 #endif
 
-#if defined(HAVE_DECL_SYS_SIGLIST) && HAVE_DECL_SYS_SIGLIST == 1
-# define my_sys_siglist	sys_siglist
-#elif defined(HAVE_DECL__SYS_SIGLIST) && HAVE_DECL__SYS_SIGLIST == 1
-# define my_sys_siglist	_sys_siglist
-#elif defined(HAVE_DECL___SYS_SIGLIST) && HAVE_DECL___SYS_SIGLIST == 1
-# define my_sys_siglist	__sys_siglist
-#else
-extern const char *const my_sys_siglist[NSIG];
-#endif
-
-/*
- * Get signal description string
- */
-char *
-strsignal(signo)
-    int signo;
+int
+main(argc, argv)
+    int argc;
+    char *argv[];
 {
-    if (signo > 0 && signo < NSIG)
-	return((char *)my_sys_siglist[signo]);
-    return("Unknown signal");
+    static char *my_sys_siglist[NSIG];
+    int i;
+
+#include "mksiglist.h"
+
+    printf("#include <config.h>\n");
+    printf("#include <signal.h>\n");
+    printf("#include <compat.h>\n\n");
+    printf("const char *const my_sys_siglist[NSIG] = {\n");
+    for (i = 0; i < NSIG; i++) {
+	if (my_sys_siglist[i] != NULL) {
+	    printf("    \"%s\",\n", my_sys_siglist[i]);
+	} else {
+	    printf("    \"Signal %d\",\n", i);
+	}
+    }
+    printf("};\n");
+
+    exit(0);
 }

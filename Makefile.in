@@ -106,12 +106,12 @@ SRCS = aix.c alias.c alloc.c audit.c boottime.c bsm_audit.c check.c \
        closefrom.c def_data.c defaults.c env.c error.c exec.c fileops.c \
        find_path.c fnmatch.c getcwd.c getprogname.c getspwuid.c gettime.c \
        glob.c goodpath.c gram.c gram.y interfaces.c iolog.c isblank.c lbuf.c \
-       ldap.c list.c logging.c match.c mkstemp.c memrchr.c nanosleep.c \
-       parse.c pwutil.c pty.c set_perms.c sigaction.c snprintf.c strcasecmp.c \
-       strerror.c strlcat.c strlcpy.c strsignal.c sudo.c sudo_noexec.c \
-       sudo_edit.c sudo_nss.c term.c testsudoers.c tgetpass.c toke.c toke.l \
-       tsgetgrpw.c utimes.c vasgroups.c visudo.c zero_bytes.c redblack.c \
-       selinux.c sesh.c sudoreplay.c getdate.c getdate.y getline.c \
+       ldap.c list.c logging.c match.c mksiglist.c mkstemp.c memrchr.c \
+       nanosleep.c parse.c pwutil.c pty.c set_perms.c sigaction.c snprintf.c \
+       strcasecmp.c strerror.c strlcat.c strlcpy.c strsignal.c sudo.c \
+       sudo_noexec.c sudo_edit.c sudo_nss.c term.c testsudoers.c tgetpass.c \
+       toke.c toke.l tsgetgrpw.c utimes.c vasgroups.c visudo.c zero_bytes.c \
+       redblack.c selinux.c sesh.c sudoreplay.c getdate.c getdate.y getline.c \
        timestr.c $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
@@ -121,9 +121,9 @@ AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 
 HDRS = alloc.h bsm_audit.h compat.h def_data.h defaults.h error.h ins_2001.h \
        ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.h lbuf.h \
-       list.h logging.h missing.h nonunix.h redblack.h parse.h sudo.h \
-       sudo_nss.h gram.h auth/sudo_auth.h emul/charclass.h emul/fnmatch.h \
-       emul/glob.h emul/timespec.h emul/utime.h
+       list.h logging.h missing.h mksiglist.h nonunix.h redblack.h parse.h \
+       sudo.h sudo_nss.h gram.h auth/sudo_auth.h emul/charclass.h \
+       emul/fnmatch.h emul/glob.h emul/timespec.h emul/utime.h
 
 AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
@@ -148,16 +148,17 @@ VERSION = @PACKAGE_VERSION@
 
 DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
             LICENSE Makefile.in PORTING README README.LDAP TROUBLESHOOTING \
-	    UPGRADE WHATSNEW aclocal.m4 acsite.m4 aixcrypt.exp config.guess \
-	    config.h.in config.sub configure configure.in def_data.in \
-	    indent.pro install-sh ltmain.sh mkdefaults mkinstalldirs \
-	    pathnames.h.in sample.pam sample.syslog.conf sample.sudoers \
-	    schema.ActiveDirectory schema.OpenLDAP schema.iPlanet sudo.cat \
-	    sudo.man.in sudo.pod sudo.psf sudo_usage.h.in sudoers sudoers.cat \
-            sudoers.man.in sudoers.pod sudoers.ldap.cat sudoers.ldap.man.in \
-	    sudoers.ldap.pod sudoers2ldif sudoreplay.cat sudoreplay.man.in \
-	    sudoreplay.pod visudo.cat visudo.man.in visudo.pod auth/API \
-	    sudo.man.pl sudoers.man.pl
+            UPGRADE WHATSNEW aclocal.m4 acsite.m4 aixcrypt.exp config.guess \
+            config.h.in config.sub configure configure.in def_data.in \
+            indent.pro install-sh ltmain.sh mkdefaults mkinstalldirs \
+            mksiglist.in pathnames.h.in sample.pam sample.syslog.conf \
+            sample.sudoers schema.ActiveDirectory schema.OpenLDAP \
+            schema.iPlanet sudo.cat sudo.man.in sudo.pod sudo.psf \
+            sudo_usage.h.in sudoers sudoers.cat sudoers.man.in sudoers.pod \
+            sudoers.ldap.cat sudoers.ldap.man.in sudoers.ldap.pod \
+            sudoers2ldif sudoreplay.cat sudoreplay.man.in sudoreplay.pod \
+            visudo.cat visudo.man.in visudo.pod auth/API sudo.man.pl \
+            sudoers.man.pl
 
 BINFILES= ChangeLog HISTORY LICENSE README TROUBLESHOOTING \
 	  UPGRADE install-sh mkinstalldirs sample.syslog.conf sample.sudoers \
@@ -239,6 +240,15 @@ $(devdir)/getdate.c: $(srcdir)/getdate.y
 # Uncomment the following if you intend to modify def_data.in
 @DEV@$(devdir)/def_data.h $(devdir)/def_data.c: $(srcdir)/def_data.in
 @DEV@	perl $(srcdir)/mkdefaults -o def_data $(srcdir)/def_data.in
+
+siglist.c: mksiglist
+	./mksiglist > $@
+
+mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(srcdir)/compat.h $(top_builddir)/config.h
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/mksiglist.c -o $@
+
+@DEV@$(srcdir)/mksiglist.h: $(srcdir)/siglist.in
+@DEV@	awk 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (my_sys_siglist[SIG%s] == NULL)\n\tmy_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@
 
 # Dependencies (not counting auth functions)
 aix.o: $(srcdir)/aix.c
@@ -323,6 +333,8 @@ set_perms.o: $(srcdir)/set_perms.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/set_perms.c
 sigaction.o: $(srcdir)/sigaction.c $(srcdir)/compat.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sigaction.c
+siglist.o: siglist.c $(srcdir)/compat.h config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/siglist.c
 snprintf.o: $(srcdir)/snprintf.c $(srcdir)/compat.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/snprintf.c
 strcasecmp.o: $(srcdir)/strcasecmp.c $(srcdir)/compat.h  config.h
