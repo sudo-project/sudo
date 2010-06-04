@@ -293,6 +293,7 @@ char *get_timestr __P((time_t, int));
 int get_boottime __P((struct timeval *));
 int user_in_group __P((struct passwd *, const char *));
 int exec_setup __P((void));
+int parse_args __P((int, char **));
 YY_DECL;
 
 /* exec.c */
