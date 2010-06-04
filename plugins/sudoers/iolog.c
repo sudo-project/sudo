@@ -75,7 +75,6 @@ struct script_buf {
 #define IOFD_TIMING	5
 #define IOFD_MAX	6
 
-static sigset_t ttyblock;
 static struct timeval last_time;
 static union io_fd io_fds[IOFD_MAX];
 
@@ -268,14 +267,6 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (io_fds[IOFD_STDERR].v == NULL)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
 
-    /* So we can block tty-generated signals */
-    sigemptyset(&ttyblock);
-    sigaddset(&ttyblock, SIGINT);
-    sigaddset(&ttyblock, SIGQUIT);
-    sigaddset(&ttyblock, SIGTSTP);
-    sigaddset(&ttyblock, SIGTTIN);
-    sigaddset(&ttyblock, SIGTTOU);
-
     gettimeofday(&last_time, NULL);
 
     /* XXX - log more stuff?  window size? environment? */
@@ -329,11 +320,8 @@ static int
 sudoers_io_log(const char *buf, unsigned int len, int idx)
 {
     struct timeval now, tv;
-    sigset_t omask;
 
     gettimeofday(&now, NULL);
-
-    sigprocmask(SIG_BLOCK, &ttyblock, &omask);
 
 #ifdef HAVE_ZLIB
     if (def_compress_io)
@@ -352,8 +340,6 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 	    tv.tv_sec + ((double)tv.tv_usec / 1000000), len);
     last_time.tv_sec = now.tv_sec;
     last_time.tv_usec = now.tv_usec;
-
-    sigprocmask(SIG_SETMASK, &omask, NULL);
 
     return TRUE;
 }
