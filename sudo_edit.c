@@ -299,7 +299,10 @@ cleanup:
 }
 
 static char *
-resolve_editor(char *editor, int *argc_out, char ***argv_out)
+resolve_editor(editor, argc_out, argv_out)
+    char *editor;
+    int *argc_out;
+    char ***argv_out;
 {
     char *cp, **nargv, *editor_path = NULL;
     int ac, nargc, wasblank;
@@ -347,7 +350,9 @@ resolve_editor(char *editor, int *argc_out, char ***argv_out)
  * includes the editor with the specified files.
  */
 static char *
-find_editor(int *argc_out, char ***argv_out)
+find_editor(argc_out, argv_out)
+    int *argc_out;
+    char ***argv_out;
 {
     char *cp, *editor, *editor_path = NULL, **ev, *ev0[4];
 
@@ -389,7 +394,10 @@ find_editor(int *argc_out, char ***argv_out)
  * Must have the ability to change the effective uid to use sudoedit.
  */
 int
-sudo_edit(int argc, char *argv[], char *envp[])
+sudo_edit(argc, argv, envp)
+    int argc;
+    char *argv[];
+    char *envp[];
 {
     return 1;
 }

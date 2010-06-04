@@ -143,7 +143,7 @@ pty_setup(uid)
 }
 
 static void
-check_foreground(void)
+check_foreground()
 {
     if (io_fds[SFD_USERTTY] != -1) {
 	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
@@ -161,7 +161,9 @@ check_foreground(void)
  * Returns SIGUSR1 if the child should be resume in foreground else SIGUSR2.
  */
 static int
-suspend_parent(int signo, struct io_buffer *iobufs)
+suspend_parent(signo, iobufs)
+    int signo;
+    struct io_buffer *iobufs;
 {
     sigaction_t sa, osa;
     int n, oldmode = ttymode, rval = 0;
@@ -236,7 +238,10 @@ suspend_parent(int signo, struct io_buffer *iobufs)
  * ala execvp(3) if we get ENOEXEC.
  */
 static int
-my_execve(const char *path, char *argv[], char *envp[])
+my_execve(path, argv, envp)
+    const char *path;
+    char *argv[];
+    char *envp[];
 {
     execve(path, argv, envp);
     if (errno == ENOEXEC) {
@@ -249,7 +254,9 @@ my_execve(const char *path, char *argv[], char *envp[])
 }
 
 static void
-terminate_child(pid_t pid, int use_pgrp)
+terminate_child(pid, use_pgrp)
+    pid_t pid;
+    int use_pgrp;
 {
     /*
      * Kill child with increasing urgency.
@@ -269,8 +276,11 @@ terminate_child(pid_t pid, int use_pgrp)
 }
 
 static struct io_buffer *
-io_buf_new(int rfd, int wfd, int (*action)(const char *, unsigned int),
-    struct io_buffer *head)
+io_buf_new(rfd, wfd, action, head)
+    int rfd;
+    int wfd;
+    int (*action) __P((const char *, unsigned int));
+    struct io_buffer *head;
 {
     struct io_buffer *iob;
 
@@ -288,7 +298,10 @@ io_buf_new(int rfd, int wfd, int (*action)(const char *, unsigned int),
  * Returns the number of errors.
  */
 static int
-perform_io(struct io_buffer *iobufs, fd_set *fdsr, fd_set *fdsw)
+perform_io(iobufs, fdsr, fdsw)
+    struct io_buffer *iobufs;
+    fd_set *fdsr;
+    fd_set *fdsw;
 {
     struct io_buffer *iob;
     int n, errors = 0;
@@ -353,8 +366,12 @@ perform_io(struct io_buffer *iobufs, fd_set *fdsr, fd_set *fdsw)
  *     controlling tty, belongs to child's session but has its own pgrp.
  */
 int
-sudo_execve(const char *path, char *argv[], char *envp[], uid_t uid,
-    struct command_status *cstat)
+sudo_execve(path, argv, envp, uid, cstat)
+    const char *path;
+    char *argv[];
+    char *envp[];
+    uid_t uid;
+    struct command_status *cstat;
 {
     sigaction_t sa;
     struct io_buffer *iob, *iobufs = NULL;
@@ -742,7 +759,9 @@ sudo_execve(const char *path, char *argv[], char *envp[], uid_t uid,
 }
 
 static void
-deliver_signal(pid_t pid, int signo)
+deliver_signal(pid, signo)
+    pid_t pid;
+    int signo;
 {
     int status;
 
@@ -788,7 +807,9 @@ deliver_signal(pid_t pid, int signo)
  * Return value is the same as send(2).
  */
 static int
-send_status(int fd, struct command_status *cstat)
+send_status(fd, cstat)
+    int fd;
+    struct command_status *cstat;
 {
     int n = -1;
 
@@ -808,7 +829,9 @@ send_status(int fd, struct command_status *cstat)
  * Returns TRUE if child is still alive, else FALSE.
  */
 static int
-handle_sigchld(int backchannel, struct command_status *cstat)
+handle_sigchld(backchannel, cstat)
+    int backchannel;
+    struct command_status *cstat;
 {
     int status, alive = TRUE;
     pid_t pid;
@@ -840,8 +863,12 @@ handle_sigchld(int backchannel, struct command_status *cstat)
  * Returns an error if fork(2) fails, else calls _exit(2).
  */
 int
-exec_monitor(const char *path, char *argv[], char *envp[],
-    int backchannel, int rbac)
+exec_monitor(path, argv, envp, backchannel, rbac)
+    const char *path;
+    char *argv[];
+    char *envp[];
+    int backchannel;
+    int rbac;
 {
     struct command_status cstat;
     struct timeval tv;
@@ -1042,7 +1069,8 @@ bad:
  * Does not read from /dev/tty.
  */
 static void
-flush_output(struct io_buffer *iobufs)
+flush_output(iobufs)
+    struct io_buffer *iobufs;
 {
     struct io_buffer *iob;
     struct timeval tv;
@@ -1115,8 +1143,11 @@ flush_output(struct io_buffer *iobufs)
  * Returns only if execve() fails.
  */
 static void
-exec_pty(const char *path, char *argv[], char *envp[],
-    int rbac_enabled)
+exec_pty(path, argv, envp, rbac_enabled)
+    const char *path;
+    char *argv[];
+    char *envp[];
+    int rbac_enabled;
 {
     sigaction_t sa;
     pid_t self = getpid();
@@ -1174,7 +1205,9 @@ exec_pty(const char *path, char *argv[], char *envp[],
  * Propagates tty size change signals to pty being used by the command.
  */
 static void
-sync_ttysize(int src, int dst)
+sync_ttysize(src, dst)
+    int src;
+    int dst;
 {
 #ifdef TIOCGSIZE
     struct ttysize tsize;
@@ -1195,7 +1228,8 @@ sync_ttysize(int src, int dst)
  * The recvsig[] array is checked in the main event loop.
  */
 static void
-handler(int s)
+handler(s)
+    int s;
 {
     recvsig[s] = TRUE;
 }
@@ -1204,7 +1238,8 @@ handler(int s)
  * Handler for SIGWINCH in parent.
  */
 static void
-sigwinch(int s)
+sigwinch(s)
+    int s;
 {
     int serrno = errno;
 
@@ -1217,7 +1252,8 @@ sigwinch(int s)
  * Return value is the same as send(2).
  */
 static int
-safe_close(int fd)
+safe_close(fd)
+    int fd;
 {
     /* Avoid closing /dev/tty or std{in,out,err}. */
     if (fd < 3 || fd == io_fds[SFD_USERTTY]) {

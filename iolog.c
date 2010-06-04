@@ -80,7 +80,7 @@ static struct timeval last_time;
 static union io_fd io_fds[IOFD_MAX];
 
 void
-io_nextid(void)
+io_nextid()
 {
     struct stat sb;
     char buf[32], *ep;
@@ -147,7 +147,9 @@ io_nextid(void)
 }
 
 static int
-build_idpath(char *pathbuf, size_t pathsize)
+build_idpath(pathbuf, pathsize)
+    char *pathbuf;
+    size_t pathsize;
 {
     struct stat sb;
     int i, len;
@@ -184,7 +186,11 @@ build_idpath(char *pathbuf, size_t pathsize)
 }
 
 static void *
-open_io_fd(char *pathbuf, int len, const char *suffix, int docompress)
+open_io_fd(pathbuf, len, suffix, docompress)
+    char *pathbuf;
+    int len;
+    const char *suffix;
+    int docompress;
 {
     void *vfd = NULL;
     int fd;
@@ -295,7 +301,10 @@ io_log_close()
 }
 
 static int
-log_io(const char *buf, unsigned int len, int idx)
+log_io(buf, len, idx)
+    const char *buf;
+    unsigned int len;
+    int idx;
 {
     struct timeval now, tv;
     sigset_t omask;
@@ -328,31 +337,41 @@ log_io(const char *buf, unsigned int len, int idx)
 }
 
 int
-log_ttyin(const char *buf, unsigned int len)
+log_ttyin(buf, len)
+    const char *buf;
+    unsigned int len;
 {
     return log_io(buf, len, IOFD_TTYIN);
 }
 
 int
-log_ttyout(const char *buf, unsigned int len)
+log_ttyout(buf, len)
+    const char *buf;
+    unsigned int len;
 {
     return log_io(buf, len, IOFD_TTYOUT);
 }
 
 int
-log_stdin(const char *buf, unsigned int len)
+log_stdin(buf, len)
+    const char *buf;
+    unsigned int len;
 {
     return log_io(buf, len, IOFD_STDIN);
 }
 
 int
-log_stdout(const char *buf, unsigned int len)
+log_stdout(buf, len)
+    const char *buf;
+    unsigned int len;
 {
     return log_io(buf, len, IOFD_STDOUT);
 }
 
 int
-log_stderr(const char *buf, unsigned int len)
+log_stderr(buf, len)
+    const char *buf;
+    unsigned int len;
 {
     return log_io(buf, len, IOFD_STDERR);
 }
