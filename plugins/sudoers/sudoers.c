@@ -1351,6 +1351,8 @@ resolve_editor(char *editor, int nfiles, char **files, char ***argv_out)
     char *cp, **nargv, *editor_path = NULL;
     int ac, i, nargc, wasblank;
 
+    editor = estrdup(editor); /* becomes part of argv_out */
+
     /*
      * Split editor into an argument vector; editor is reused (do not free).
      * The EDITOR and VISUAL environment variables may contain command
@@ -1369,6 +1371,7 @@ resolve_editor(char *editor, int nfiles, char **files, char ***argv_out)
     cp = strtok(editor, " \t");
     if (cp == NULL ||
 	find_path(cp, &editor_path, NULL, getenv("PATH"), 0) != FOUND) {
+	efree(editor);
 	return NULL;
     }
     nargv = (char **) emalloc2(nargc + 1 + nfiles + 1, sizeof(char *));
@@ -1410,10 +1413,15 @@ find_editor(int nfiles, char **files, char ***argv_out)
 	}
     }
     if (editor_path == NULL) {
+	/* def_editor could be a path, split it up */
 	editor = estrdup(def_editor);
-	if ((cp = strchr(editor, ':')) != NULL)
-	    *cp = '\0';			/* def_editor could be a path */
-	editor_path = resolve_editor(cp, nfiles, files, argv_out);
+	cp = strtok(editor, ":");
+	while (cp != NULL && editor_path == NULL) {
+	    editor_path = resolve_editor(cp, nfiles, files, argv_out);
+	    cp = strtok(NULL, ":");
+	}
+	if (editor_path)
+	    efree(editor);
     }
     if (!editor_path) {
 	audit_failure(NewArgv, "%s: command not found", editor);
