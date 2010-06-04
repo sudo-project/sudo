@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996,1998-2005, 2007-2009
+ * Copyright (c) 1993-1996,1998-2005, 2007-2010
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -26,10 +26,10 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #ifdef __linux__
-#include <sys/vfs.h>
+# include <sys/vfs.h>
 #endif
 #if defined(__sun) && defined(__SVR4)
-#include <sys/statvfs.h>
+# include <sys/statvfs.h>
 #endif
 #ifndef __TANDEM
 # include <sys/file.h>
