@@ -3671,7 +3671,7 @@ fi
 if test "${with_iologdir+set}" = set; then :
   withval=$with_iologdir; case $with_iologdir in
     yes)    ;;
-    no)     as_fn_error "\"--without-iologfir not supported.\"" "$LINENO" 5
+    no)     as_fn_error "\"--without-iologdir not supported.\"" "$LINENO" 5
 	    ;;
 esac
 fi
