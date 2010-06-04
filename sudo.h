@@ -296,7 +296,8 @@ int exec_setup __P((void));
 YY_DECL;
 
 /* exec.c */
-int sudo_execve __P((const char *, char *[], char *[], struct command_status *cstat));
+int sudo_execve __P((const char *path, char *argv[], char *envp[], uid_t uid,
+    struct command_status *cstat));
 
 /* iolog.c */
 int io_log_open __P((void));
@@ -309,7 +310,7 @@ void io_log_close __P((void));
 void io_nextid __P((void));
 
 /* pty.c */
-int get_pty __P((int *master, int *slave, char *name, size_t namesz));
+int get_pty __P((int *master, int *slave, char *name, size_t namesz, uid_t uid));
 
 /* Only provide extern declarations outside of sudo.c. */
 #ifndef _SUDO_MAIN
@@ -319,6 +320,8 @@ extern struct passwd *auth_pw, *list_pw;
 extern int tgetpass_flags;
 extern int long_list;
 extern uid_t timestamp_uid;
+/* XXX - conflicts with the one in visudo */
+int run_command __P((const char *path, char *argv[], char *envp[], uid_t uid));
 #endif
 #ifndef errno
 extern int errno;

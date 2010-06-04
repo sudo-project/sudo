@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2008 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2008, 2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,6 +15,8 @@
  */
 
 #include <config.h>
+
+#if defined(HAVE_SETRESUID) || defined(HAVE_SETREUID) || defined(HAVE_SETEUID)
 
 #include <sys/types.h>
 #include <sys/param.h>
@@ -42,6 +44,7 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <ctype.h>
+#include <grp.h>
 #include <pwd.h>
 #include <signal.h>
 #include <errno.h>
@@ -52,10 +55,9 @@
 
 #include "sudo.h"
 
-extern sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp;
-extern char **environ;
+static char *find_editor __P((int *argc_out, char ***argv_out));
 
-static char *find_editor();
+extern char **NewArgv; /* XXX */
 
 /*
  * Wrapper to allow users to edit privileged files with their own uid.
@@ -63,15 +65,16 @@ static char *find_editor();
 int
 sudo_edit(argc, argv, envp)
     int argc;
-    char **argv;
-    char **envp;
+    char *argv[];
+    char *envp[];
 {
     ssize_t nread, nwritten;
-    pid_t kidpid, pid;
     const char *tmpdir;
-    char **nargv, **ap, *editor, *cp;
+    char *cp, **nargv, *editor, **files;
+    char **editor_argv = NULL;
     char buf[BUFSIZ];
-    int rc, i, ac, ofd, tfd, nargc, rval, tmplen, wasblank;
+    int rc, i, j, ac, ofd, tfd, nargc, rval, nfiles, tmplen;
+    int editor_argc = 0;
     struct stat sb;
     struct timeval tv, tv1, tv2;
     struct tempfile {
@@ -80,6 +83,11 @@ sudo_edit(argc, argv, envp)
 	struct timeval omtim;
 	off_t osize;
     } *tf;
+
+    /* Determine user's editor. */
+    editor = find_editor(&editor_argc, &editor_argv);
+    if (editor == NULL)
+	return 1;
 
     /*
      * Find our temporary directory, one of /var/tmp, /usr/tmp, or /tmp
@@ -96,23 +104,27 @@ sudo_edit(argc, argv, envp)
     while (tmplen > 0 && tmpdir[tmplen - 1] == '/')
 	tmplen--;
 
+#if 0 /* XXX - already done */
     /*
      * Close password, shadow, and group files before we try to open
      * user-specified files to prevent the opening of things like /dev/fd/4
      */
     sudo_endpwent();
     sudo_endgrent();
+#endif
 
     /*
      * For each file specified by the user, make a temporary version
      * and copy the contents of the original to it.
      */
-    tf = emalloc2(argc - 1, sizeof(*tf));
-    zero_bytes(tf, (argc - 1) * sizeof(*tf));
-    for (i = 0, ap = argv + 1; i < argc - 1 && *ap != NULL; i++, ap++) {
+    files = argv + 1;
+    nfiles = argc - 1;
+    tf = emalloc2(nfiles, sizeof(*tf));
+    zero_bytes(tf, nfiles * sizeof(*tf));
+    for (i = 0, j = 0; i < nfiles; i++) {
 	rc = -1;
 	set_perms(PERM_RUNAS);
-	if ((ofd = open(*ap, O_RDONLY, 0644)) != -1 || errno == ENOENT) {
+	if ((ofd = open(files[i], O_RDONLY, 0644)) != -1 || errno == ENOENT) {
 	    if (ofd == -1) {
 		zero_bytes(&sb, sizeof(sb));		/* new file */
 		rc = 0;
@@ -120,32 +132,30 @@ sudo_edit(argc, argv, envp)
 #ifdef HAVE_FSTAT
 		rc = fstat(ofd, &sb);
 #else
-		rc = stat(tf[i].ofile, &sb);
+		rc = stat(tf[j].ofile, &sb);
 #endif
 	    }
 	}
 	set_perms(PERM_ROOT);
 	if (rc || (ofd != -1 && !S_ISREG(sb.st_mode))) {
 	    if (rc)
-		warning("%s", *ap);
+		warning("%s", files[i]);
 	    else
-		warningx("%s: not a regular file", *ap);
+		warningx("%s: not a regular file", files[i]);
 	    if (ofd != -1)
 		close(ofd);
-	    argc--;
-	    i--;
 	    continue;
 	}
-	tf[i].ofile = *ap;
-	mtim_get(&sb, &tf[i].omtim);
-	tf[i].osize = sb.st_size;
-	if ((cp = strrchr(tf[i].ofile, '/')) != NULL)
+	tf[j].ofile = files[i];
+	tf[j].osize = sb.st_size;
+	mtim_get(&sb, &tf[j].omtim);
+	if ((cp = strrchr(tf[j].ofile, '/')) != NULL)
 	    cp++;
 	else
-	    cp = tf[i].ofile;
-	easprintf(&tf[i].tfile, "%.*s/%s.XXXXXXXX", tmplen, tmpdir, cp);
+	    cp = tf[j].ofile;
+	easprintf(&tf[j].tfile, "%.*s/%s.XXXXXXXX", tmplen, tmpdir, cp);
 	set_perms(PERM_USER);
-	tfd = mkstemp(tf[i].tfile);
+	tfd = mkstemp(tf[j].tfile);
 	set_perms(PERM_ROOT);
 	if (tfd == -1) {
 	    warning("mkstemp");
@@ -155,9 +165,9 @@ sudo_edit(argc, argv, envp)
 	    while ((nread = read(ofd, buf, sizeof(buf))) != 0) {
 		if ((nwritten = write(tfd, buf, nread)) != nread) {
 		    if (nwritten == -1)
-			warning("%s", tf[i].tfile);
+			warning("%s", tf[j].tfile);
 		    else
-			warningx("%s: short write", tf[i].tfile);
+			warningx("%s: short write", tf[j].tfile);
 		    goto cleanup;
 		}
 	    }
@@ -170,95 +180,45 @@ sudo_edit(argc, argv, envp)
 	 * resides.  It is OK if touch() fails since we only use the info
 	 * to determine whether or not a file has been modified.
 	 */
-	(void) touch(tfd, NULL, &tf[i].omtim);
+	(void) touch(tfd, NULL, &tf[j].omtim);
 #ifdef HAVE_FSTAT
 	rc = fstat(tfd, &sb);
 #else
-	rc = stat(tf[i].tfile, &sb);
+	rc = stat(tf[j].tfile, &sb);
 #endif
 	if (!rc)
-	    mtim_get(&sb, &tf[i].omtim);
+	    mtim_get(&sb, &tf[j].omtim);
 	close(tfd);
+	j++;
     }
-    if (argc == 1)
-	return(1);			/* no files readable, you lose */
-
-    environ = envp;
-    editor = find_editor();
+    if ((nfiles = j) == 0)
+	return 1;			/* no files readable, you lose */
 
     /*
      * Allocate space for the new argument vector and fill it in.
-     * The EDITOR and VISUAL environment variables may contain command
-     * line args so look for those and alloc space for them too.
+     * We concatenate the editor with its args and the file list
+     * to create a new argv.
+     * We allocate an extra slot to be used if execve() fails.
      */
-    nargc = argc;
-    for (wasblank = FALSE, cp = editor; *cp != '\0'; cp++) {
-	if (isblank((unsigned char) *cp))
-	    wasblank = TRUE;
-	else if (wasblank) {
-	    wasblank = FALSE;
-	    nargc++;
-	}
-    }
-    nargv = (char **) emalloc2(nargc + 1, sizeof(char *));
-    ac = 0;
-    for ((cp = strtok(editor, " \t")); cp != NULL; (cp = strtok(NULL, " \t")))
-	nargv[ac++] = cp;
-    for (i = 0; i < argc - 1 && ac < nargc; )
+    nargc = editor_argc + nfiles;
+    nargv = (char **) emalloc2(1 + nargc + 1, sizeof(char *));
+    nargv++;
+    for (ac = 0; ac < editor_argc; ac++)
+	nargv[ac] = editor_argv[ac];
+    for (i = 0; i < nfiles && ac < nargc; )
 	nargv[ac++] = tf[i++].tfile;
     nargv[ac] = NULL;
 
-    /* Allow the editor to be suspended. */
-    (void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
-
     /*
-     * Fork and exec the editor with the invoking user's creds,
+     * Run the editor with the invoking user's creds,
      * keeping track of the time spent in the editor.
      */
     gettime(&tv1);
-    kidpid = fork();
-    if (kidpid == -1) {
-	warning("fork");
-	goto cleanup;
-    } else if (kidpid == 0) {
-	/* child */
-	(void) sigaction(SIGINT, &saved_sa_int, NULL);
-	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
-	set_perms(PERM_FULL_USER);
-	closefrom(def_closefrom);
-	execvp(nargv[0], nargv);
-	warning("unable to execute %s", nargv[0]);
-	_exit(127);
-    }
-
-    /*
-     * Wait for status from the child.  Most modern kernels
-     * will not let an unprivileged child process send a
-     * signal to its privileged parent so we have to request
-     * status when the child is stopped and then send the
-     * same signal to our own pid.
-     */
-    do {
-#ifdef sudo_waitpid
-        pid = sudo_waitpid(kidpid, &i, WUNTRACED);
-#else
-	pid = wait(&i);
-#endif
-	if (pid == kidpid) {
-	    if (WIFSTOPPED(i))
-		kill(getpid(), WSTOPSIG(i));
-	    else
-		break;
-	}
-    } while (pid != -1 || errno == EINTR);
+    rval = run_command(editor, nargv, envp, user_uid);
     gettime(&tv2);
-    if (pid == -1 || !WIFEXITED(i))
-	rval = 1;
-    else
-	rval = WEXITSTATUS(i);
 
     /* Copy contents of temp files to real ones */
-    for (i = 0; i < argc - 1; i++) {
+    for (i = 0; i < nfiles; i++) {
 	rc = -1;
 	set_perms(PERM_USER);
 	if ((tfd = open(tf[i].tfile, O_RDONLY, 0644)) != -1) {
@@ -328,49 +288,110 @@ sudo_edit(argc, argv, envp)
 	close(ofd);
     }
 
-    return(rval);
+    return rval;
 cleanup:
     /* Clean up temp files and return. */
-    for (i = 0; i < argc - 1; i++) {
+    for (i = 0; i < nfiles; i++) {
 	if (tf[i].tfile != NULL)
 	    unlink(tf[i].tfile);
     }
-    return(1);
+    return 1;
+}
+
+static char *
+resolve_editor(char *editor, int *argc_out, char ***argv_out)
+{
+    char *cp, **nargv, *editor_path = NULL;
+    int ac, nargc, wasblank;
+
+    editor = estrdup(editor); /* becomes part of argv_out */
+
+    /*
+     * Split editor into an argument vector; editor is reused (do not free).
+     * The EDITOR and VISUAL environment variables may contain command
+     * line args so look for those and alloc space for them too.
+     */
+    nargc = 1;
+    for (wasblank = FALSE, cp = editor; *cp != '\0'; cp++) {
+	if (isblank((unsigned char) *cp))
+	    wasblank = TRUE;
+	else if (wasblank) {
+	    wasblank = FALSE;
+	    nargc++;
+	}
+    }
+    /* If we can't find the editor in the user's PATH, give up. */
+    cp = strtok(editor, " \t");
+    if (cp == NULL ||
+	find_path(cp, &editor_path, NULL, getenv("PATH"), 0) != FOUND) {
+	efree(editor);
+	return NULL;
+    }
+    nargv = (char **) emalloc2(nargc + 1, sizeof(char *));
+    for (ac = 0; cp != NULL && ac < nargc; ac++) {
+	nargv[ac] = cp;
+	cp = strtok(NULL, " \t");
+    }
+    nargv[ac] = NULL;
+
+    *argc_out = nargc;
+    *argv_out = nargv;
+    return editor_path;
 }
 
 /*
- * Determine which editor to use.  We don't bother restricting this
- * based on def_env_editor or def_editor since the editor runs with
- * the uid of the invoking user, not the runas (privileged) user.
+ * Determine which editor to use.  We don't need to worry about restricting
+ * this to a "safe" editor since it runs with the uid of the invoking user,
+ * not the runas (privileged) user.
+ * Fills in argv_out with an argument vector suitable for execve() that
+ * includes the editor with the specified files.
  */
 static char *
-find_editor()
+find_editor(int *argc_out, char ***argv_out)
 {
-    char *cp, *editor = NULL, **ev, *ev0[4];
+    char *cp, *editor, *editor_path = NULL, **ev, *ev0[4];
 
+    /*
+     * If any of SUDO_EDITOR, VISUAL or EDITOR are set, choose the first one.
+     */
     ev0[0] = "SUDO_EDITOR";
     ev0[1] = "VISUAL";
     ev0[2] = "EDITOR";
     ev0[3] = NULL;
     for (ev = ev0; *ev != NULL; ev++) {
 	if ((editor = getenv(*ev)) != NULL && *editor != '\0') {
-	    if ((cp = strrchr(editor, '/')) != NULL)
-		cp++;
-	    else
-		cp = editor;
-	    /* Ignore "sudoedit" and "sudo" to avoid an endless loop. */
-	    if (strncmp(cp, "sudo", 4) != 0 ||
-		(cp[4] != ' ' && cp[4] != '\0' && strcmp(cp + 4, "edit") != 0)) {
-		editor = estrdup(editor);
+	    editor_path = resolve_editor(editor, argc_out, argv_out);
+	    if (editor_path != NULL)
 		break;
-	    }
 	}
-	editor = NULL;
     }
-    if (editor == NULL) {
+    if (editor_path == NULL) {
+	/* def_editor could be a path, split it up */
 	editor = estrdup(def_editor);
-	if ((cp = strchr(editor, ':')) != NULL)
-	    *cp = '\0';			/* def_editor could be a path */
+	cp = strtok(editor, ":");
+	while (cp != NULL && editor_path == NULL) {
+	    editor_path = resolve_editor(cp, argc_out, argv_out);
+	    cp = strtok(NULL, ":");
+	}
+	if (editor_path)
+	    efree(editor);
     }
-    return(editor);
+    if (!editor_path) {
+	audit_failure(NewArgv, "%s: command not found", editor);
+	warningx("%s: command not found", editor);
+    }
+    return editor_path;
 }
+
+#else /* HAVE_SETRESUID || HAVE_SETREUID || HAVE_SETEUID */
+
+/*
+ * Must have the ability to change the effective uid to use sudoedit.
+ */
+int
+sudo_edit(int argc, char *argv[], char *envp[])
+{
+    return 1;
+}
+
+#endif /* HAVE_SETRESUID || HAVE_SETREUID || HAVE_SETEUID */

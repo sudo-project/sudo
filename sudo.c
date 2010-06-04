@@ -129,6 +129,7 @@ extern int sudo_edit			__P((int, char **, char **));
 extern void rebuild_env			__P((int, int));
 void validate_env_vars			__P((struct list_member *));
 void insert_env_vars			__P((struct list_member *));
+int run_command __P((const char *path, char *argv[], char *envp[], uid_t uid)); /* XXX should be in sudo.h */
 
 /*
  * Globals
@@ -417,9 +418,13 @@ main(argc, argv, envp)
     if (def_askpass && !user_askpass)
 	user_askpass = def_askpass;
 
-    /* User may have overridden environment resetting via the -E flag. */
-    if (ISSET(sudo_mode, MODE_PRESERVE_ENV) && def_setenv)
-	def_env_reset = FALSE;
+    /*
+     * We don't reset the environment for sudoedit or if the user
+     * specified the -E command line flag and they have setenv privs.
+     */
+    if (ISSET(sudo_mode, MODE_EDIT) ||
+        (ISSET(sudo_mode, MODE_PRESERVE_ENV) && def_setenv))
+        def_env_reset = FALSE;
 
     /* Build a new environment that avoids any nasty bits. */
     rebuild_env(sudo_mode, def_noexec);
@@ -447,9 +452,6 @@ main(argc, argv, envp)
     }
 
     if (ISSET(validated, VALIDATE_OK)) {
-	struct command_status cstat;
-	int exitcode = 1;
-
 	/* Finally tell the user if the command did not exist. */
 	if (cmnd_status == NOT_FOUND_DOT) {
 	    audit_failure(NewArgv, "command in current directory");
@@ -490,8 +492,6 @@ main(argc, argv, envp)
 	/* Must audit before uid change. */
 	audit_success(NewArgv);
 
-	/* Become specified user or root if executing a command. */
-
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	    char *p;
 
@@ -507,15 +507,14 @@ main(argc, argv, envp)
 #endif
 	}
 
-	if (ISSET(sudo_mode, MODE_EDIT))
-	    exit(sudo_edit(NewArgc, NewArgv, envp));
+	if (ISSET(sudo_mode, MODE_RUN)) {
+	    /* Insert system-wide environment variables. */
+	    if (def_env_file)
+		read_env_file(def_env_file, FALSE);
 
-	/* Insert system-wide environment variables. */
-	if (def_env_file)
-	    read_env_file(def_env_file, FALSE);
-
-	/* Insert user-specified environment variables. */
-	insert_env_vars(sudo_user.env_vars);
+	    /* Insert user-specified environment variables. */
+	    insert_env_vars(sudo_user.env_vars);
+	}
 
 	/* Restore signal handlers before we exec. */
 	(void) sigaction(SIGINT, &saved_sa_int, NULL);
@@ -523,34 +522,14 @@ main(argc, argv, envp)
 	(void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
 
 	/* Close the password and group files and free up memory. */
+	/* XXX - too early, pty code uses sudo_getgrnam */
 	sudo_endpwent();
 	sudo_endgrent();
 
-#ifdef PROFILING
-	exit(0);
-#endif
-	sudo_execve(safe_cmnd, NewArgv, environ, &cstat);
-	switch (cstat.type) {
-	case CMD_ERRNO:
-	    /* exec_setup() or execve() returned an error. */
-	    warningx("unable to execute %s: %s", safe_cmnd, strerror(cstat.val));
-	    exitcode = 127;
-	    break;
-	case CMD_WSTATUS:
-	    /* Command ran, exited or was killed. */
-	    if (WIFEXITED(cstat.val))
-		exitcode = WEXITSTATUS(cstat.val);
-	    else if (WIFSIGNALED(cstat.val))
-		exitcode = WTERMSIG(cstat.val) | 128;
-	    break;
-	default:
-	    warningx("unexpected child termination condition: %d", cstat.type);
-	    break;
-	}
-#ifdef _PATH_SUDO_IO_LOGDIR
-	io_log_close();
-#endif
-	exit(exitcode);
+	if (ISSET(sudo_mode, MODE_EDIT))
+	    exit(sudo_edit(NewArgc, NewArgv, envp));
+	else
+	    exit(run_command(safe_cmnd, NewArgv, environ, runas_pw->pw_uid));
     } else if (ISSET(validated, FLAG_NO_USER | FLAG_NO_HOST)) {
 	audit_failure(NewArgv, "No user or host");
 	log_denial(validated, 1);
@@ -847,6 +826,15 @@ exec_setup()
     int rval = FALSE;
 
     /*
+     * For sudoedit, the command runas a the user with no additional setup.
+     */
+    if (ISSET(sudo_mode, MODE_EDIT)) {
+	set_perms(PERM_FULL_USER);
+	rval = TRUE;
+	goto done;
+    }
+
+    /*
      * Set umask based on sudoers.
      * If user's umask is more restrictive, OR in those bits too
      * unless umask_override is set.
@@ -895,6 +883,47 @@ exec_setup()
 
 done:
     return(rval);
+}
+
+/*
+ * Run the command and wait for it to complete.
+ */
+int
+run_command(const char *path, char *argv[], char *envp[], uid_t uid)
+{
+    struct command_status cstat;
+    int exitcode = 1;
+
+#ifdef PROFILING
+    exit(0);
+#endif
+
+    cstat.type = CMD_INVALID;
+    cstat.val = 0;
+
+    sudo_execve(path, argv, envp, uid, &cstat);
+
+    switch (cstat.type) {
+    case CMD_ERRNO:
+	/* exec_setup() or execve() returned an error. */
+	warningx("unable to execute %s: %s", path, strerror(cstat.val));
+	exitcode = 127;
+	break;
+    case CMD_WSTATUS:
+	/* Command ran, exited or was killed. */
+	if (WIFEXITED(cstat.val))
+	    exitcode = WEXITSTATUS(cstat.val);
+	else if (WIFSIGNALED(cstat.val))
+	    exitcode = WTERMSIG(cstat.val) | 128;
+	break;
+    default:
+	warningx("unexpected child termination condition: %d", cstat.type);
+	break;
+    }
+#ifdef _PATH_SUDO_IO_LOGDIR
+    io_log_close();
+#endif
+    return(exitcode);
 }
 
 /*

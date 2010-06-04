@@ -131,12 +131,13 @@ static void deliver_signal(pid_t pid, int signo);
 static int safe_close(int fd);
 
 static void
-pty_setup()
+pty_setup(uid)
+    uid_t uid;
 {
     io_fds[SFD_USERTTY] = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
     if (io_fds[SFD_USERTTY] != -1) {
 	if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
-	    slavename, sizeof(slavename)))
+	    slavename, sizeof(slavename), uid))
 	    error(1, "Can't get pty");
     }
 }
@@ -352,7 +353,7 @@ perform_io(struct io_buffer *iobufs, fd_set *fdsr, fd_set *fdsw)
  *     controlling tty, belongs to child's session but has its own pgrp.
  */
 int
-sudo_execve(const char *path, char *argv[], char *envp[],
+sudo_execve(const char *path, char *argv[], char *envp[], uid_t uid,
     struct command_status *cstat)
 {
     sigaction_t sa;
@@ -367,7 +368,7 @@ sudo_execve(const char *path, char *argv[], char *envp[],
 
     log_io = def_log_output || def_log_input;
     if (log_io) {
-	pty_setup();
+	pty_setup(uid);
 	io_log_open();
     }
 
