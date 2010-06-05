@@ -48,9 +48,9 @@
 #include <pwd.h>
 #include <grp.h>
 
-#include <sudo_usage.h>
 #include "sudo.h"
 #include "lbuf.h"
+#include <sudo_usage.h>
 
 /*
  * Local functions

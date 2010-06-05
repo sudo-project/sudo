@@ -99,7 +99,6 @@
 # include <membership.h>
 #endif
 
-#include <sudo_usage.h>
 #include "sudo.h"
 #include "lbuf.h"
 #include "interfaces.h"
