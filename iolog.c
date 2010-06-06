@@ -242,25 +242,35 @@ io_log_open()
     if (io_fds[IOFD_TIMING].v == NULL)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
 
-    io_fds[IOFD_TTYIN].v = open_io_fd(pathbuf, len, "/ttyin", def_compress_io);
-    if (io_fds[IOFD_TTYIN].v == NULL)
-	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+    if (def_log_input) {
+	io_fds[IOFD_TTYIN].v = open_io_fd(pathbuf, len, "/ttyin", def_compress_io);
+	if (io_fds[IOFD_TTYIN].v == NULL)
+	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+    }
 
-    io_fds[IOFD_TTYOUT].v = open_io_fd(pathbuf, len, "/ttyout", def_compress_io);
-    if (io_fds[IOFD_TTYOUT].v == NULL)
-	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+    if (def_log_output) {
+	io_fds[IOFD_TTYOUT].v = open_io_fd(pathbuf, len, "/ttyout", def_compress_io);
+	if (io_fds[IOFD_TTYOUT].v == NULL)
+	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+    }
 
-    io_fds[IOFD_STDIN].v = open_io_fd(pathbuf, len, "/stdin", def_compress_io);
-    if (io_fds[IOFD_STDIN].v == NULL)
-	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+    if (def_log_input) {
+	io_fds[IOFD_STDIN].v = open_io_fd(pathbuf, len, "/stdin", def_compress_io);
+	if (io_fds[IOFD_STDIN].v == NULL)
+	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+    }
 
-    io_fds[IOFD_STDOUT].v = open_io_fd(pathbuf, len, "/stdout", def_compress_io);
-    if (io_fds[IOFD_STDOUT].v == NULL)
-	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+    if (def_log_output) {
+	io_fds[IOFD_STDOUT].v = open_io_fd(pathbuf, len, "/stdout", def_compress_io);
+	if (io_fds[IOFD_STDOUT].v == NULL)
+	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+    }
 
-    io_fds[IOFD_STDERR].v = open_io_fd(pathbuf, len, "/stderr", def_compress_io);
-    if (io_fds[IOFD_STDERR].v == NULL)
-	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+    if (def_log_output) {
+	io_fds[IOFD_STDERR].v = open_io_fd(pathbuf, len, "/stderr", def_compress_io);
+	if (io_fds[IOFD_STDERR].v == NULL)
+	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+    }
 
     /* So we can block tty-generated signals */
     sigemptyset(&ttyblock);
@@ -341,6 +351,8 @@ log_ttyin(buf, len)
     const char *buf;
     unsigned int len;
 {
+    if (!io_fds[IOFD_TTYIN].v)
+	return TRUE;
     return log_io(buf, len, IOFD_TTYIN);
 }
 
@@ -349,6 +361,8 @@ log_ttyout(buf, len)
     const char *buf;
     unsigned int len;
 {
+    if (!io_fds[IOFD_TTYOUT].v)
+	return TRUE;
     return log_io(buf, len, IOFD_TTYOUT);
 }
 
@@ -357,6 +371,8 @@ log_stdin(buf, len)
     const char *buf;
     unsigned int len;
 {
+    if (!io_fds[IOFD_STDIN].v)
+	return TRUE;
     return log_io(buf, len, IOFD_STDIN);
 }
 
@@ -365,6 +381,8 @@ log_stdout(buf, len)
     const char *buf;
     unsigned int len;
 {
+    if (!io_fds[IOFD_STDOUT].v)
+	return TRUE;
     return log_io(buf, len, IOFD_STDOUT);
 }
 
@@ -373,5 +391,7 @@ log_stderr(buf, len)
     const char *buf;
     unsigned int len;
 {
+    if (!io_fds[IOFD_STDOUT].v)
+	return TRUE;
     return log_io(buf, len, IOFD_STDERR);
 }
