@@ -296,7 +296,7 @@ int sudo_file_display_privs __P((struct sudo_nss *, struct passwd *, struct lbuf
 /* parse_args.c */
 int parse_args __P((int, char **));
 
-/* pty.c */
+/* get_pty.c */
 int get_pty __P((int *master, int *slave, char *name, size_t namesz, uid_t uid));
 
 /* pwutil.c */
