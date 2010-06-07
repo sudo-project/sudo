@@ -75,6 +75,8 @@ struct script_buf {
 #define IOFD_TIMING	5
 #define IOFD_MAX	6
 
+#define SESSID_MAX	2176782336U
+
 static struct timeval last_time;
 static union io_fd io_fds[IOFD_MAX];
 extern struct io_plugin sudoers_io;
@@ -120,7 +122,7 @@ io_nextid(void)
 	if (nread == -1)
 	    log_error(USE_ERRNO, "cannot read %s", pathbuf);
 	id = strtoul(buf, &ep, 36);
-	if (buf == ep || id >= 2176782336U)
+	if (buf == ep || id >= SESSID_MAX)
 	    log_error(0, "invalid sequence number %s", pathbuf);
     }
     id++;
