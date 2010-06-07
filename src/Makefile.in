@@ -72,7 +72,7 @@ SHELL = @SHELL@
 
 PROGS = @PROGS@
 
-OBJS = conversation.o error.o load_plugins.o parse_args.o pty.o exec.o \
+OBJS = conversation.o error.o exec.o get_pty.o load_plugins.o parse_args.o \
        sudo.o sudo_edit.o tgetpass.o ttysize.o @SUDO_OBJS@
 
 LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
@@ -108,10 +108,10 @@ sesh: sesh.o
 aix.o: $(srcdir)/aix.c $(top_builddir)/config.h $(incdir)/compat.h
 conversation.o: $(srcdir)/conversation.c $(SUDODEP)
 error.o: $(srcdir)/error.c $(incdir)/compat.h $(incdir)/error.h $(top_builddir)/config.h
+exec.o: $(srcdir)/exec.c $(SUDODEP)
+get_pty.o: $(srcdir)/get_pty.c $(SUDODEP)
 load_plugins.o: $(srcdir)/load_plugins.c $(SUDODEP)
 parse_args.o: $(srcdir)/parse_args.c sudo_usage.h $(SUDODEP)
-pty.o: $(srcdir)/pty.c $(SUDODEP)
-exec.o: $(srcdir)/exec.c $(SUDODEP)
 selinux.o: $(srcdir)/selinux.c $(SUDODEP)
 sesh.o: $(srcdir)/sesh.c $(incdir)/compat.h $(top_builddir)/config.h
 sudo.o: $(srcdir)/sudo.c $(SUDODEP)
