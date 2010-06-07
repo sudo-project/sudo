@@ -75,6 +75,12 @@ struct script_buf {
 #define IOFD_TIMING	5
 #define IOFD_MAX	6
 
+#ifdef __STDC__
+# define SESSID_MAX	2176782336U
+#else
+# define SESSID_MAX	(unsigned long)2176782336
+#endif
+
 static sigset_t ttyblock;
 static struct timeval last_time;
 static union io_fd io_fds[IOFD_MAX];
@@ -120,7 +126,7 @@ io_nextid()
 	if (nread == -1)
 	    log_error(USE_ERRNO, "cannot read %s", pathbuf);
 	id = strtoul(buf, &ep, 36);
-	if (buf == ep || id >= (unsigned long)2176782336)
+	if (buf == ep || id >= SESSID_MAX)
 	    log_error(0, "invalid sequence number %s", pathbuf);
     }
     id++;
