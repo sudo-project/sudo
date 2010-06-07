@@ -17987,7 +17987,7 @@ if test "x$ac_cv_func_tcsetpgrp" = x""yes; then :
 #define HAVE_TCSETPGRP 1
 _ACEOF
 
-	SUDO_OBJS="${SUDO_OBJS} get_pty.o iolog.o:
+	SUDO_OBJS="${SUDO_OBJS} exec_pty.o get_pty.o iolog.o"
 	PROGS="$PROGS sudoreplay"
 	REPLAY=""
 

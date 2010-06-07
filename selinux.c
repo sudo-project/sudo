@@ -298,8 +298,6 @@ selinux_setup(const char *role, const char *type, const char *ttyn,
 void
 selinux_execve(const char *path, char *argv[], char *envp[])
 {
-    int serrno;
-
     if (setexeccon(se_state.new_context)) {
 	warning("unable to set exec context to %s", se_state.new_context);
 	if (se_state.enforcing)
@@ -320,7 +318,7 @@ selinux_execve(const char *path, char *argv[], char *envp[])
     /* We use the "spare" slot in argv to store sesh. */
     --argv;
     argv[0] = *argv[1] == '-' ? "-sesh" : "sesh";
-    argv[1] = path;
+    argv[1] = (char *)path;
 
     execve(_PATH_SUDO_SESH, argv, envp);
 }

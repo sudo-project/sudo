@@ -2638,12 +2638,12 @@ SUDO_TIMEDIR
 SUDO_IO_LOGDIR
 
 dnl
-dnl If I/O logging is enabled, build sudoreplay and add get_pty.o iolog.o
+dnl If I/O logging is enabled, build sudoreplay and exec_pty get_pty.o iolog.o
 dnl
 if test "${with_iologdir-yes}" != "no"; then
     # Require POSIX job control for I/O log support
     AC_CHECK_FUNCS(tcsetpgrp, [
-	SUDO_OBJS="${SUDO_OBJS} get_pty.o iolog.o:
+	SUDO_OBJS="${SUDO_OBJS} exec_pty.o get_pty.o iolog.o"
 	PROGS="$PROGS sudoreplay"
 	REPLAY=""
 

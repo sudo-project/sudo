@@ -102,6 +102,7 @@
 #include "sudo.h"
 #include "lbuf.h"
 #include "interfaces.h"
+#include <sudo_usage.h>
 
 #ifdef USING_NONUNIX_GROUPS
 # include "nonunix.h"
@@ -123,7 +124,7 @@ extern int sudo_edit			__P((int, char **, char **));
 extern void rebuild_env			__P((int, int));
 void validate_env_vars			__P((struct list_member *));
 void insert_env_vars			__P((struct list_member *));
-int run_command __P((const char *path, char *argv[], char *envp[], uid_t uid)); /* XXX should be in sudo.h */
+int run_command __P((const char *path, char *argv[], char *envp[], uid_t uid, int dowait)); /* XXX should be in sudo.h */
 
 /*
  * Globals
@@ -512,15 +513,10 @@ main(argc, argv, envp)
 	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
 	(void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
 
-	/* Close the password and group files and free up memory. */
-	/* XXX - too early, pty code uses sudo_getgrnam */
-	sudo_endpwent();
-	sudo_endgrent();
-
 	if (ISSET(sudo_mode, MODE_EDIT))
 	    exit(sudo_edit(NewArgc, NewArgv, envp));
 	else
-	    exit(run_command(safe_cmnd, NewArgv, environ, runas_pw->pw_uid));
+	    exit(run_command(safe_cmnd, NewArgv, environ, runas_pw->pw_uid, FALSE));
     } else if (ISSET(validated, FLAG_NO_USER | FLAG_NO_HOST)) {
 	audit_failure(NewArgv, "No user or host");
 	log_denial(validated, 1);
@@ -816,6 +812,10 @@ exec_setup()
 {
     int rval = FALSE;
 
+    /* Close the password and group files and free up memory. */
+    sudo_endpwent();
+    sudo_endgrent();
+
     /*
      * For sudoedit, the command runas a the user with no additional setup.
      */
@@ -880,7 +880,12 @@ done:
  * Run the command and wait for it to complete.
  */
 int
-run_command(const char *path, char *argv[], char *envp[], uid_t uid)
+run_command(path, argv, envp, uid, dowait)
+    const char *path;
+    char *argv[];
+    char *envp[];
+    uid_t uid;
+    int dowait;
 {
     struct command_status cstat;
     int exitcode = 1;
@@ -892,7 +897,7 @@ run_command(const char *path, char *argv[], char *envp[], uid_t uid)
     cstat.type = CMD_INVALID;
     cstat.val = 0;
 
-    sudo_execve(path, argv, envp, uid, &cstat);
+    sudo_execve(path, argv, envp, uid, &cstat, dowait);
 
     switch (cstat.type) {
     case CMD_ERRNO:

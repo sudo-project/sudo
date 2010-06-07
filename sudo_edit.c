@@ -104,15 +104,6 @@ sudo_edit(argc, argv, envp)
     while (tmplen > 0 && tmpdir[tmplen - 1] == '/')
 	tmplen--;
 
-#if 0 /* XXX - already done */
-    /*
-     * Close password, shadow, and group files before we try to open
-     * user-specified files to prevent the opening of things like /dev/fd/4
-     */
-    sudo_endpwent();
-    sudo_endgrent();
-#endif
-
     /*
      * For each file specified by the user, make a temporary version
      * and copy the contents of the original to it.
@@ -214,7 +205,7 @@ sudo_edit(argc, argv, envp)
      * keeping track of the time spent in the editor.
      */
     gettime(&tv1);
-    rval = run_command(editor, nargv, envp, user_uid);
+    rval = run_command(editor, nargv, envp, user_uid, TRUE);
     gettime(&tv2);
 
     /* Copy contents of temp files to real ones */

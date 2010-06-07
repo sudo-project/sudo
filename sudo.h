@@ -226,7 +226,17 @@ void read_env_file	__P((const char *, int));
 
 /* exec.c */
 int sudo_execve __P((const char *path, char *argv[], char *envp[], uid_t uid,
-    struct command_status *cstat));
+    struct command_status *cstat, int dowait));
+int my_execve __P((const char *path, char *argv[], char *envp[]));
+
+/* exec_pty.c */
+int fork_pty __P((const char *path, char *argv[], char *envp[], int sv[],
+    int rbac_enabled, int *maxfd));
+int perform_io __P((fd_set *fdsr, fd_set *fdsw, struct command_status *cstat));
+void pty_close __P((struct command_status *cstat));
+void fd_set_iobs __P((fd_set *fdsr, fd_set *fdsw));
+void pty_setup __P((uid_t uid));
+int suspend_parent __P((int signo));
 
 /* fileops.c */
 char *sudo_parseln	__P((FILE *));
@@ -358,7 +368,7 @@ extern int tgetpass_flags;
 extern int long_list;
 extern uid_t timestamp_uid;
 /* XXX - conflicts with the one in visudo */
-int run_command __P((const char *path, char *argv[], char *envp[], uid_t uid));
+int run_command __P((const char *path, char *argv[], char *envp[], uid_t uid, int dowait));
 #endif
 #ifndef errno
 extern int errno;

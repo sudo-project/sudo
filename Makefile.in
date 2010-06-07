@@ -275,6 +275,8 @@ error.o: $(srcdir)/error.c $(srcdir)/compat.h $(srcdir)/error.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/error.c
 exec.o: $(srcdir)/exec.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/exec.c
+exec_pty.o: $(srcdir)/exec.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/exec_pty.c
 fileops.o: $(srcdir)/fileops.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fileops.c
 find_path.o: $(srcdir)/find_path.c $(SUDODEP)
