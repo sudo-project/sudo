@@ -172,7 +172,9 @@ AC_DEFUN(SUDO_IO_LOGDIR, [
     else
 	with_iologdir="/usr/adm/sudo-io"
     fi
-    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_IO_LOGDIR, "$with_iologdir")
+    if test "${with_iologdir-yes}" != "no"; then
+	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_IO_LOGDIR, "$with_iologdir")
+    fi
     AC_MSG_RESULT($with_iologdir)
 ])dnl
 

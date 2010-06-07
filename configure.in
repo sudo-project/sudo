@@ -699,8 +699,7 @@ esac])
 AC_ARG_WITH(iologdir, [AS_HELP_STRING([--with-iologdir=DIR], [directory to store sudo I/O log files in])],
 [case $with_iologdir in
     yes)	;;
-    no)		AC_MSG_ERROR(["--without-iologdir not supported."])
-		;;
+    no)		;;
 esac])
 
 AC_ARG_WITH(sendmail, [AS_HELP_STRING([--with-sendmail], [set path to sendmail])
