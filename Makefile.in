@@ -104,10 +104,10 @@ PROGS = @PROGS@
 
 SRCS = aix.c alias.c alloc.c audit.c boottime.c bsm_audit.c check.c \
        closefrom.c def_data.c defaults.c env.c error.c exec.c fileops.c \
-       find_path.c fnmatch.c getcwd.c getprogname.c getspwuid.c gettime.c \
-       glob.c goodpath.c gram.c gram.y interfaces.c iolog.c isblank.c lbuf.c \
-       ldap.c list.c logging.c match.c mksiglist.c mkstemp.c memrchr.c \
-       nanosleep.c parse.c parse_args.c pwutil.c pty.c set_perms.c \
+       find_path.c fnmatch.c get_pty.c getcwd.c getprogname.c getspwuid.c \
+       gettime.c glob.c goodpath.c gram.c gram.y interfaces.c iolog.c \
+       isblank.c lbuf.c ldap.c list.c logging.c match.c mksiglist.c mkstemp.c \
+       memrchr.c nanosleep.c parse.c parse_args.c pwutil.c set_perms.c \
        sigaction.c snprintf.c strcasecmp.c strerror.c strlcat.c strlcpy.c \
        strsignal.c sudo.c sudo_noexec.c sudo_edit.c sudo_nss.c term.c \
        testsudoers.c tgetpass.c toke.c toke.l tsgetgrpw.c utimes.c \
@@ -281,6 +281,8 @@ find_path.o: $(srcdir)/find_path.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/find_path.c
 fnmatch.o: $(srcdir)/fnmatch.c $(srcdir)/emul/fnmatch.h $(srcdir)/compat.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fnmatch.c
+get_pty.o: $(srcdir)/get_pty.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/get_pty.c
 getcwd.o: $(srcdir)/getcwd.c $(srcdir)/compat.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getcwd.c
 getdate.o: $(srcdir)/getdate.c $(srcdir)/compat.h config.h
@@ -327,8 +329,6 @@ parse_args.o: $(srcdir)/parse_args.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/parse_args.c
 pwutil.o: $(srcdir)/pwutil.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/pwutil.c
-pty.o: $(srcdir)/pty.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/pty.c
 redblack.o: $(srcdir)/redblack.c $(SUDODEP) $(srcdir)/redblack.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/redblack.c
 set_perms.o: $(srcdir)/set_perms.c $(SUDODEP)
