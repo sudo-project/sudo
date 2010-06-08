@@ -89,9 +89,6 @@
 #undef KEPT_MAX
 #define KEPT_MAX    	0xff00
 
-#undef VNULL
-#define	VNULL	(void *)NULL
-
 struct environment {
     char **envp;		/* pointer to the new environment */
     size_t env_size;		/* size of new_environ in char **'s */
