@@ -322,17 +322,17 @@ void sudo_setpwent	__P((void));
 void sudo_setspent	__P((void));
 
 /* selinux.c */
-void selinux_execve __P((const char *path, char *argv[], char *envp[]));
-void selinux_setup __P((const char *role, const char *type, const char *ttyn,
-    int ttyfd));
 int selinux_restore_tty __P((void));
+int selinux_setup __P((const char *role, const char *type, const char *ttyn,
+    int ttyfd));
+void selinux_execve __P((const char *path, char *argv[], char *envp[]));
 
 /* set_perms.c */
 int set_perms		__P((int));
 
 /* sudo.c */
 FILE *open_sudoers	__P((const char *, int, int *));
-int exec_setup		__P((int));
+int exec_setup		__P((int, int, const char *, int));
 void cleanup		__P((int));
 void set_fqdn		__P((void));
 

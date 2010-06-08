@@ -92,9 +92,6 @@
 # include <project.h>
 # include <sys/task.h>
 #endif
-#ifdef HAVE_SELINUX
-# include <selinux/selinux.h>
-#endif
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
 # include <membership.h>
 #endif
@@ -808,10 +805,20 @@ set_cmnd(sudo_mode)
  * Returns TRUE on success and FALSE on failure.
  */
 int
-exec_setup(flags)
+exec_setup(flags, rbac_enabled, ttyname, ttyfd)
     int flags;
+    int rbac_enabled;
+    const char *ttyname;
+    int ttyfd;
 {
     int rval = FALSE;
+
+#ifdef HAVE_SELINUX
+    if (rbac_enabled) {
+       if (selinux_setup(user_role, user_type, ttyname, ttyfd) == -1)
+	   goto done;
+    }
+#endif
 
     /* Close the password and group files and free up memory. */
     sudo_endpwent();
