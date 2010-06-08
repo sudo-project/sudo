@@ -241,7 +241,7 @@ pam_begin_session(pw, auth)
 #ifndef NO_PAM_SESSION
     status = pam_open_session(pamh, 0);
     if (status != PAM_SUCCESS) {
-	(void) pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
+	(void) pam_end(pamh, status | PAM_DATA_SILENT);
 	pamh = NULL;
     }
 #endif
