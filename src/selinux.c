@@ -205,12 +205,14 @@ get_exec_context(security_context_t old_context, const char *role, const char *t
     
     /* We must have a role, the type is optional (we can use the default). */
     if (!role) {
-	warningx("you must specify a role.");
+	warningx("you must specify a role for type %s", type);
+	errno = EINVAL;
 	return NULL;
     }
     if (!type) {
 	if (get_default_type(role, &typebuf)) {
-	    warningx("unable to get default type");
+	    warningx("unable to get default type for role %s", role);
+	    errno = EINVAL;
 	    return NULL;
 	}
 	type = typebuf;
@@ -227,11 +229,11 @@ get_exec_context(security_context_t old_context, const char *role, const char *t
      * type we will be running the command as.
      */
     if (context_role_set(context, role)) {
-	warningx("failed to set new role %s", role);
+	warning("failed to set new role %s", role);
 	goto bad;
     }
     if (context_type_set(context, type)) {
-	warningx("failed to set new type %s", type);
+	warning("failed to set new type %s", type);
 	goto bad;
     }
       
@@ -241,6 +243,7 @@ get_exec_context(security_context_t old_context, const char *role, const char *t
     new_context = estrdup(context_str(context));
     if (security_check_context(new_context) < 0) {
 	warningx("%s is not a valid context", new_context);
+	errno = EINVAL;
 	goto bad;
     }
 
@@ -263,28 +266,37 @@ bad:
  * Must run as root, before the uid change.
  * If ptyfd is not -1, it indicates we are running
  * in a pty and do not need to reset std{in,out,err}.
+ * Returns 0 on success and -1 on failure.
  */
-void
+int
 selinux_setup(const char *role, const char *type, const char *ttyn,
     int ptyfd)
 {
+    int rval = -1;
+
     /* Store the caller's SID in old_context. */
-    if (getprevcon(&se_state.old_context))
-	error(EXIT_FAILURE, "failed to get old_context");
+    if (getprevcon(&se_state.old_context)) {
+	warning("failed to get old_context");
+	goto done;
+    }
 
     se_state.enforcing = security_getenforce();
-    if (se_state.enforcing < 0)
-	error(EXIT_FAILURE, "unable to determine enforcing mode.");
+    if (se_state.enforcing < 0) {
+	warning("unable to determine enforcing mode.");
+	goto done;
+    }
 
 #ifdef DEBUG
     warningx("your old context was %s", se_state.old_context);
 #endif
     se_state.new_context = get_exec_context(se_state.old_context, role, type);
     if (!se_state.new_context)
-	error(EXIT_FAILURE, "unable to get exec context");
+	goto done;
     
-    if (relabel_tty(ttyn, ptyfd) < 0)
-	error(EXIT_FAILURE, "unable to setup tty context for %s", se_state.new_context);
+    if (relabel_tty(ttyn, ptyfd) < 0) {
+	warning("unable to setup tty context for %s", se_state.new_context);
+	goto done;
+    }
 
 #ifdef DEBUG
     if (se_state.ttyfd != -1) {
@@ -293,6 +305,10 @@ selinux_setup(const char *role, const char *type, const char *ttyn,
     }
 #endif
 
+    rval = 0;
+
+done:
+    return rval;
 }
 
 void

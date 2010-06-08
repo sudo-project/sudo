@@ -118,9 +118,9 @@ static struct io_buffer *iobufs;
 
 static void flush_output(void);
 static int exec_monitor(struct command_details *details, char *argv[],
-    char *envp[], int, int);
+    char *envp[], int backchannel);
 static void exec_pty(struct command_details *detail, char *argv[],
-    char *envp[], int);
+    char *envp[]);
 static void sigwinch(int s);
 static void sync_ttysize(int src, int dst);
 static void deliver_signal(pid_t pid, int signo);
@@ -470,7 +470,7 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
  */
 int
 fork_pty(struct command_details *details, char *argv[], char *envp[],
-    int sv[], int rbac_enabled, int *maxfd)
+    int sv[], int *maxfd)
 {
     struct command_status cstat;
     struct io_buffer *iob;
@@ -581,13 +581,7 @@ fork_pty(struct command_details *details, char *argv[], char *envp[],
 	/* child */
 	close(sv[0]);
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
-#ifdef HAVE_SELINUX
-        if (rbac_enabled) {
-	    selinux_setup(details->selinux_role, details->selinux_type,
-		slavename, io_fds[SFD_SLAVE]);
-	}
-#endif
-	if (exec_setup(details) == TRUE) {
+	if (exec_setup(details, slavename, io_fds[SFD_SLAVE]) == TRUE) {
 	    /* Close the other end of the stdin/stdout/stderr pipes and exec. */
 	    if (io_pipe[STDIN_FILENO][1])
 		close(io_pipe[STDIN_FILENO][1]);
@@ -595,7 +589,7 @@ fork_pty(struct command_details *details, char *argv[], char *envp[],
 		close(io_pipe[STDOUT_FILENO][0]);
 	    if (io_pipe[STDERR_FILENO][0])
 		close(io_pipe[STDERR_FILENO][0]);
-	    exec_monitor(details, argv, envp, sv[1], rbac_enabled);
+	    exec_monitor(details, argv, envp, sv[1]);
 	}
 	cstat.type = CMD_ERRNO;
 	cstat.val = errno;
@@ -814,7 +808,7 @@ handle_sigchld(int backchannel, struct command_status *cstat)
  */
 int
 exec_monitor(struct command_details *details, char *argv[], char *envp[],
-    int backchannel, int rbac)
+    int backchannel)
 {
     struct command_status cstat;
     struct timeval tv;
@@ -904,7 +898,7 @@ exec_monitor(struct command_details *details, char *argv[], char *envp[],
 	fcntl(errpipe[1], F_SETFD, FD_CLOEXEC);
 
 	/* setup tty and exec command */
-	exec_pty(details, argv, envp, rbac);
+	exec_pty(details, argv, envp);
 	cstat.type = CMD_ERRNO;
 	cstat.val = errno;
 	write(errpipe[1], &cstat, sizeof(cstat));
@@ -1088,8 +1082,7 @@ flush_output(void)
  * Returns only if execve() fails.
  */
 static void
-exec_pty(struct command_details *details, char *argv[], char *envp[],
-    int rbac_enabled)
+exec_pty(struct command_details *details, char *argv[], char *envp[])
 {
     sigaction_t sa;
     pid_t self = getpid();
@@ -1137,7 +1130,7 @@ exec_pty(struct command_details *details, char *argv[], char *envp[],
     if (details->closefrom >= 0)
 	closefrom(details->closefrom);
 #ifdef HAVE_SELINUX
-    if (rbac_enabled)
+    if (details->selinux_enabled)
 	selinux_execve(details->command, argv, envp);
     else
 #endif

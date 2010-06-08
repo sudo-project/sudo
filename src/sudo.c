@@ -69,6 +69,9 @@
 #ifdef HAVE_LOGIN_CAP_H
 # include <login_cap.h>
 #endif
+#ifdef HAVE_SELINUX
+# include <selinux/selinux.h>
+#endif
 
 #include "sudo.h"
 #include "sudo_plugin.h"
@@ -586,6 +589,11 @@ command_info_to_details(char * const info[], struct command_details *details)
 
     if (!ISSET(details->flags, CD_SET_EUID))
 	details->euid = details->uid;
+
+#ifdef HAVE_SELINUX
+    if (details->selinux_role != NULL && is_selinux_enabled() > 0)
+	details->selinux_enabled = TRUE;
+#endif
 }
 
 /*
@@ -630,7 +638,7 @@ disable_coredumps(void)
  * Returns TRUE on success and FALSE on failure.
  */
 int
-exec_setup(struct command_details *details)
+exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 {
     int rval = FALSE;
     struct passwd *pw;
@@ -643,6 +651,14 @@ exec_setup(struct command_details *details)
 	if (policy_plugin.u.policy->init_session(pw) != TRUE)
 	    goto done;
     }
+
+#ifdef HAVE_SELINUX
+    if (details->selinux_enabled) {
+	if (selinux_setup(details->selinux_role, details->selinux_type,
+	    ptyname ? ptyname : user_details.tty, ptyfd) == -1)
+	    goto done;
+    }
+#endif
 
     if (pw != NULL) {
 #ifdef HAVE_GETUSERATTR

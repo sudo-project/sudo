@@ -59,9 +59,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-#ifdef HAVE_SELINUX
-# include <selinux/selinux.h>
-#endif
 
 /* XXX - move to compat */
 #if !defined(NSIG)
@@ -113,7 +110,7 @@ my_execve(const char *path, char *const argv[], char *const envp[])
  * Sends errno back on sv[1] if execve() fails.
  */
 static int fork_cmnd(struct command_details *details, char *argv[],
-    char *envp[], int sv[2], int rbac_enabled)
+    char *envp[], int sv[2])
 {
     struct command_status cstat;
     int pid;
@@ -127,18 +124,12 @@ static int fork_cmnd(struct command_details *details, char *argv[],
 	/* child */
 	close(sv[0]);
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
-#ifdef HAVE_SELINUX
-	if (rbac_enabled) {
-	    selinux_setup(details->selinux_role, details->selinux_type,
-		user_details.tty, -1);
-	}
-#endif
-	if (exec_setup(details) == TRUE) {
+	if (exec_setup(details, NULL, -1) == TRUE) {
 	    /* headed for execve() */
 	    if (details->closefrom >= 0)
 		closefrom(details->closefrom);
 #ifdef HAVE_SELINUX
-	    if (rbac_enabled)
+	    if (details->selinux_enabled)
 		selinux_execve(details->command, argv, envp);
 	    else
 #endif
@@ -164,7 +155,6 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
     sigaction_t sa;
     fd_set *fdsr, *fdsw;
     int maxfd, n, nready, status, sv[2];
-    int rbac_enabled = 0;
     int log_io = 0;
     pid_t child;
 
@@ -175,10 +165,6 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
 	sudo_debug(8, "allocate pty for I/O logging");
 	pty_setup(details->euid);
     }
-
-#ifdef HAVE_SELINUX
-    rbac_enabled = is_selinux_enabled() > 0 && details->selinux_role != NULL;
-#endif
 
     /*
      * We communicate with the child over a bi-directional pair of sockets.
@@ -209,9 +195,9 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
      * to and from pty.  Adjusts maxfd as needed.
      */
     if (log_io)
-	child = fork_pty(details, argv, envp, sv, rbac_enabled, &maxfd);
+	child = fork_pty(details, argv, envp, sv, &maxfd);
     else
-	child = fork_cmnd(details, argv, envp, sv, rbac_enabled);
+	child = fork_cmnd(details, argv, envp, sv);
     close(sv[1]);
 
     /* Set command timeout if specified. */
@@ -343,7 +329,7 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
    }
 
 #ifdef HAVE_SELINUX
-    if (rbac_enabled) {
+    if (details->selinux_enabled) {
 	/* This is probably not needed in log_io mode. */
 	if (selinux_restore_tty() != 0)
 	    warningx("unable to restore tty label");

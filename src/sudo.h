@@ -123,11 +123,12 @@ struct command_details {
     gid_t gid;
     gid_t egid;
     mode_t umask;
-    int flags;
     int priority;
     int timeout;
     int ngroups;
     int closefrom;
+    short flags;
+    short selinux_enabled;
     GETGROUPS_T *groups;
     const char *command;
     const char *cwd;
@@ -164,7 +165,7 @@ int my_execve(const char *path, char *const argv[], char *const envp[]);
 
 /* exec_pty.c */
 int fork_pty(struct command_details *details, char *argv[], char *envp[],
-    int sv[], int rbac_enabled, int *maxfd);
+    int sv[], int *maxfd);
 int perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat);
 int suspend_parent(int signo);
 void fd_set_iobs(fd_set *fdsr, fd_set *fdsw);
@@ -196,7 +197,7 @@ int get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid);
 void get_ttysize(int *linep, int *colp);
 
 /* sudo.c */
-int exec_setup(struct command_details *details);
+int exec_setup(struct command_details *details, const char *ptyname, int ptyfd);
 int run_command(struct command_details *details, char *argv[],   
     char *envp[]);
 void sudo_debug(int level, const char *format, ...) __printflike(2, 3);
@@ -213,10 +214,10 @@ void usage(int) __attribute__((__noreturn__));
 int gettime(struct timeval *);
 
 /* selinux.c */
-void selinux_execve(const char *path, char *argv[], char *envp[]);
-void selinux_setup(const char *role, const char *type, const char *ttyn,
-    int ttyfd);
 int selinux_restore_tty(void);
+int selinux_setup(const char *role, const char *type, const char *ttyn,
+    int ttyfd);
+void selinux_execve(const char *path, char *argv[], char *envp[]);
 
 #ifndef errno
 extern int errno;
