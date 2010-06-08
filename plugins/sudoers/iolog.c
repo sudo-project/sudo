@@ -303,6 +303,8 @@ sudoers_io_close(int exit_status, int error)
     int i;
 
     for (i = 0; i < IOFD_MAX; i++) {
+	if (io_fds[i].v == NULL)
+	    continue;
 #ifdef HAVE_ZLIB
 	if (def_compress_io)
 	    gzclose(io_fds[i].g);
