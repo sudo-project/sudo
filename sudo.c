@@ -121,9 +121,6 @@ static void set_runaspw			__P((char *));
 static void show_version		__P((void));
 static struct passwd *get_authpw	__P((void));
 extern int sudo_edit			__P((int, char **, char **));
-extern void rebuild_env			__P((int, int));
-void validate_env_vars			__P((struct list_member *));
-void insert_env_vars			__P((struct list_member *));
 int run_command __P((const char *path, char *argv[], char *envp[], uid_t uid, int dowait)); /* XXX should be in sudo.h */
 
 /*
@@ -162,8 +159,8 @@ extern int optind;
 int
 main(argc, argv, envp)
     int argc;
-    char **argv;
-    char **envp;
+    char *argv[];
+    char *envp[];
 {
     int sources = 0, validated;
     int fd, cmnd_status, pwflag, rc = 0;
@@ -206,6 +203,9 @@ main(argc, argv, envp)
     (void) sigaction(SIGINT, &sa, &saved_sa_int);
     (void) sigaction(SIGQUIT, &sa, &saved_sa_quit);
     (void) sigaction(SIGTSTP, &sa, &saved_sa_tstp);
+
+    /* Initialize environment functions (including replacements). */
+    env_init(envp);
 
     /*
      * Turn off core dumps and make sure fds 0-2 are open.
@@ -516,7 +516,7 @@ main(argc, argv, envp)
 	if (ISSET(sudo_mode, MODE_EDIT))
 	    exit(sudo_edit(NewArgc, NewArgv, envp));
 	else
-	    exit(run_command(safe_cmnd, NewArgv, environ, runas_pw->pw_uid, FALSE));
+	    exit(run_command(safe_cmnd, NewArgv, env_get(), runas_pw->pw_uid, FALSE));
     } else if (ISSET(validated, FLAG_NO_USER | FLAG_NO_HOST)) {
 	audit_failure(NewArgv, "No user or host");
 	log_denial(validated, 1);

@@ -86,9 +86,6 @@
 #undef KEPT_MAX
 #define KEPT_MAX    	0xff00
 
-#undef VNULL
-#define	VNULL	(void *)NULL
-
 struct environment {
     char **envp;		/* pointer to the new environment */
     size_t env_size;		/* size of new_environ in char **'s */
@@ -98,7 +95,6 @@ struct environment {
 /*
  * Prototypes
  */
-void rebuild_env		__P((int, int));
 static void sudo_setenv		__P((const char *, const char *, int));
 static void sudo_putenv		__P((char *, int, int));
 
@@ -210,6 +206,39 @@ static const char *initial_keepenv_table[] = {
 };
 
 /*
+ * Initialize env based on envp.
+ */
+void
+env_init(envp)
+    char * const envp[];
+{
+    /* May have gotten initialized lazily. */
+    if (env.envp == NULL) {
+	char * const *ep;
+	size_t len;
+
+	for (ep = envp; *ep != NULL; ep++)
+	    continue;
+	len = (size_t)(ep - envp);
+
+	env.env_len = len;
+	env.env_size = len + 1 + 128;
+	env.envp = emalloc2(env.env_size, sizeof(char *));
+#ifdef ENV_DEBUG
+	memset(env.envp, 0, env.env_size * sizeof(char *));
+#endif
+	memcpy(env.envp, envp, len * sizeof(char *));
+	env.envp[len] = '\0';
+    }
+}
+
+char **
+env_get()
+{
+    return env.envp;
+}
+
+/*
  * Similar to setenv(3) but operates on sudo's private copy of the environment
  * (not environ) and it always overwrites.  The dupcheck param determines
  * whether we need to verify that the variable is not already set.
@@ -237,8 +266,26 @@ sudo_setenv(var, val, dupcheck)
 }
 
 /*
+ * Version of getenv(3) that uses our own environ pointer.
+ */
+char *
+getenv(const char *var)
+{
+    char *cp, **ev;
+    size_t vlen = strlen(var);
+
+    if (env.envp == NULL)
+	env_init(environ);
+
+    for (ev = env.envp; (cp = *ev) != NULL; ev++) {
+	if (strncmp(var, cp, vlen) == 0 && cp[vlen] == '=')
+	    return cp + vlen + 1;
+    }
+    return NULL;
+}
+
+/*
  * Version of setenv(3) that uses our own environ pointer.
- * Will sync with environ as needed.
  */
 int
 setenv(var, val, overwrite)
@@ -249,6 +296,9 @@ setenv(var, val, overwrite)
     char *estring, *ep;
     const char *cp;
     size_t esize;
+
+    if (env.envp == NULL)
+	env_init(environ);
 
     if (!var || *var == '\0') {
 	errno = EINVAL;
@@ -277,39 +327,16 @@ setenv(var, val, overwrite)
     }
     *ep = '\0';
 
-    /* Sync env.envp with environ as needed. */
-    if (env.envp != environ) {
-	char **ep;
-	size_t len;
-
-	for (ep = environ; *ep != NULL; ep++)
-	    continue;
-	len = ep - environ;
-	if (len + 2 > env.env_size) {
-	    efree(env.envp);
-	    env.env_size = len + 2 + 128;
-	    env.envp = emalloc2(env.env_size, sizeof(char *));
 #ifdef ENV_DEBUG
-	    memset(env.envp, 0, env.env_size * sizeof(char *));
+    if (env.envp[env.env_len] != NULL)
+	errorx(1, "setenv: corrupted envp, len mismatch");
 #endif
-	}
-	memcpy(env.envp, environ, len * sizeof(char *));
-	env.envp[len] = NULL;
-	env.env_len = len;
-	environ = env.envp;
-#ifdef ENV_DEBUG
-    } else {
-	if (env.envp[env.env_len] != NULL)
-	    errorx(1, "setenv: corrupted envp, len mismatch");
-#endif
-    }
     sudo_putenv(estring, TRUE, overwrite);
     return(0);
 }
 
 /*
  * Version of unsetenv(3) that uses our own environ pointer.
- * Will sync with environ as needed.
  */
 #ifdef UNSETENV_VOID
 void
@@ -322,6 +349,9 @@ unsetenv(var)
     char **ep = env.envp;
     size_t len;
 
+    if (env.envp == NULL)
+	env_init(environ);
+
     if (strchr(var, '=') != NULL) {
 	errno = EINVAL;
 #ifdef UNSETENV_VOID
@@ -331,30 +361,10 @@ unsetenv(var)
 #endif
     }
 
-    /* Make sure we are operating on the current environment. */
-    /* XXX - this could be optimized to include the search */
-    if (env.envp != environ) {
-	for (ep = environ; *ep != NULL; ep++)
-	    continue;
-	len = ep - environ;
-	if (len + 1 > env.env_size) {
-	    efree(env.envp);
-	    env.env_size = len + 1 + 128;
-	    env.envp = emalloc2(env.env_size, sizeof(char *));
 #ifdef ENV_DEBUG
-	    memset(env.envp, 0, env.env_size * sizeof(char *));
+    if (env.envp[env.env_len] != NULL)
+	errorx(1, "unsetenv: corrupted envp, len mismatch");
 #endif
-	}
-	memcpy(env.envp, environ, len * sizeof(char *));
-	env.envp[len] = NULL;
-	env.env_len = len;
-	environ = env.envp;
-#ifdef ENV_DEBUG
-    } else {
-	if (env.envp[env.env_len] != NULL)
-	    errorx(1, "unsetenv: corrupted envp, len mismatch");
-#endif
-    }
 
     len = strlen(var);
     while (*ep != NULL) {
@@ -375,7 +385,6 @@ unsetenv(var)
 
 /*
  * Version of putenv(3) that uses our own environ pointer.
- * Will sync with environ as needed.
  */
 int
 #ifdef PUTENV_CONST
@@ -385,36 +394,17 @@ putenv(string)
     char *string;
 #endif
 {
+    if (env.envp == NULL)
+	env_init(environ);
+
     if (strchr(string, '=') == NULL) {
 	errno = EINVAL;
 	return(-1);
     }
-    /* Sync env.envp with environ as needed. */
-    if (env.envp != environ) {
-	char **ep;
-	size_t len;
-
-	for (ep = environ; *ep != NULL; ep++)
-	    continue;
-	len = ep - environ;
-	if (len + 2 > env.env_size) {
-	    efree(env.envp);
-	    env.env_size = len + 2 + 128;
-	    env.envp = emalloc2(env.env_size, sizeof(char *));
 #ifdef ENV_DEBUG
-	    memset(env.envp, 0, env.env_size * sizeof(char *));
+    if (env.envp[env.env_len] != NULL)
+	errorx(1, "putenv: corrupted envp, len mismatch");
 #endif
-	}
-	memcpy(env.envp, environ, len * sizeof(char *));
-	env.envp[len] = NULL;
-	env.env_len = len;
-	environ = env.envp;
-#ifdef ENV_DEBUG
-    } else {
-	if (env.envp[env.env_len] != NULL)
-	    errorx(1, "putenv: corrupted envp, len mismatch");
-#endif
-    }
     sudo_putenv((char *)string, TRUE, TRUE);
     return(0);
 }
@@ -443,7 +433,6 @@ sudo_putenv(str, dupcheck, overwrite)
 	memset(env.envp + env.env_len, 0,
 	    (env.env_size - env.env_len) * sizeof(char *));
 #endif
-	environ = env.envp;
     }
 
 #ifdef ENV_DEBUG
@@ -599,7 +588,7 @@ rebuild_env(sudo_mode, noexec)
 #endif
     if (def_env_reset || ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	/* Pull in vars we want to keep from the old environment. */
-	for (ep = environ; *ep; ep++) {
+	for (ep = old_envp; *ep; ep++) {
 	    int keepit;
 
 	    /* Skip variables with values beginning with () (bash functions) */
@@ -686,7 +675,7 @@ rebuild_env(sudo_mode, noexec)
 	 * Copy environ entries as long as they don't match env_delete or
 	 * env_check.
 	 */
-	for (ep = environ; *ep; ep++) {
+	for (ep = old_envp; *ep; ep++) {
 	    int okvar;
 
 	    /* Skip variables with values beginning with () (bash functions) */
@@ -779,8 +768,9 @@ rebuild_env(sudo_mode, noexec)
 	easprintf(&cp, "%s %s", user_cmnd, user_args);
 	sudo_setenv("SUDO_COMMAND", cp, TRUE);
 	efree(cp);
-    } else
+    } else {
 	sudo_setenv("SUDO_COMMAND", user_cmnd, TRUE);
+    }
 
     /* Add the SUDO_USER, SUDO_UID, SUDO_GID environment variables. */
     sudo_setenv("SUDO_USER", user_name, TRUE);
@@ -789,8 +779,7 @@ rebuild_env(sudo_mode, noexec)
     snprintf(idbuf, sizeof(idbuf), "%lu", (unsigned long) user_gid);
     sudo_setenv("SUDO_GID", idbuf, TRUE);
 
-    /* Install new environment. */
-    environ = env.envp;
+    /* Free old environment. */
     efree(old_envp);
 }
 
@@ -799,9 +788,6 @@ insert_env_vars(env_vars)
     struct list_member *env_vars;
 {
     struct list_member *cur;
-
-    if (env_vars == NULL)
-	return;
 
     /* Add user-specified environment variables. */
     for (cur = env_vars; cur != NULL; cur = cur->next)
@@ -822,6 +808,7 @@ validate_env_vars(env_vars)
     size_t len, blen = 0, bsize = 0;
     int okvar;
 
+    /* Add user-specified environment variables. */
     for (var = env_vars; var != NULL; var = var->next) {
 	if (def_secure_path && !user_is_exempt() &&
 	    strncmp(var->value, "PATH=", 5) == 0) {

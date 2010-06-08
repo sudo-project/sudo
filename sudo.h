@@ -221,8 +221,13 @@ void check_user		__P((int, int));
 void remove_timestamp	__P((int));
 
 /* env.c */
+char **env_get		__P((void));
+void env_init		__P((char * const envp[]));
 void init_envtables	__P((void));
+void insert_env_vars	__P((struct list_member *));
 void read_env_file	__P((const char *, int));
+void rebuild_env	__P((int, int));
+void validate_env_vars	__P((struct list_member *));
 
 /* exec.c */
 int sudo_execve __P((const char *path, char *argv[], char *envp[], uid_t uid,
@@ -373,6 +378,5 @@ int run_command __P((const char *path, char *argv[], char *envp[], uid_t uid, in
 #ifndef errno
 extern int errno;
 #endif
-extern char **environ; /* XXX */
 
 #endif /* _SUDO_SUDO_H */
