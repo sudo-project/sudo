@@ -291,14 +291,6 @@ void setprogname(const char *);
 # define WCOREDUMP(x)	((x) & 0x80)
 #endif
 
-#ifndef NGROUPS_MAX
-# ifdef NGROUPS
-#  define NGROUPS_MAX NGROUPS
-# else
-#  define NGROUPS_MAX 16
-# endif
-#endif
-
 #ifndef HAVE_SETEUID
 #  if defined(HAVE_SETRESUID)
 #    define seteuid(u)	setresuid(-1, (u), -1)
