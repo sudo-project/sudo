@@ -150,6 +150,8 @@
 #define I_LOG_OUTPUT            74
 #define def_compress_io         (sudo_defs_table[75].sd_un.flag)
 #define I_COMPRESS_IO           75
+#define def_use_pty             (sudo_defs_table[76].sd_un.flag)
+#define I_USE_PTY               76
 
 enum def_tupple {
 	never,

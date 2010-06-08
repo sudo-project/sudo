@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.3b3                   June  3, 2010                         1
+1.7.3b3                   June  8, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.3b3                   June  3, 2010                         2
+1.7.3b3                   June  8, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.3b3                   June  3, 2010                         3
+1.7.3b3                   June  8, 2010                         3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.3b3                   June  3, 2010                         4
+1.7.3b3                   June  8, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.3b3                   June  3, 2010                         5
+1.7.3b3                   June  8, 2010                         5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.3b3                   June  3, 2010                         6
+1.7.3b3                   June  8, 2010                         6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.3b3                   June  3, 2010                         7
+1.7.3b3                   June  8, 2010                         7
 
 
 
@@ -523,7 +523,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.3b3                   June  3, 2010                         8
+1.7.3b3                   June  8, 2010                         8
 
 
 
@@ -576,7 +576,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
        earlier.  A list of all supported Defaults parameters, grouped by type,
        are listed below.
 
-       FFllaaggss:
+       BBoooolleeaann FFllaaggss:
 
        always_set_home If set, ssuuddoo will set the HOME environment variable to
                        the home directory of the target user (which is root
@@ -589,7 +589,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
 
 
-1.7.3b3                   June  3, 2010                         9
+1.7.3b3                   June  8, 2010                         9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.3b3                   June  3, 2010                        10
+1.7.3b3                   June  8, 2010                        10
 
 
 
@@ -721,7 +721,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.3b3                   June  3, 2010                        11
+1.7.3b3                   June  8, 2010                        11
 
 
 
@@ -787,7 +787,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.3b3                   June  3, 2010                        12
+1.7.3b3                   June  8, 2010                        12
 
 
 
@@ -853,7 +853,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.3b3                   June  3, 2010                        13
+1.7.3b3                   June  8, 2010                        13
 
 
 
@@ -919,7 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.3b3                   June  3, 2010                        14
+1.7.3b3                   June  8, 2010                        14
 
 
 
@@ -940,6 +940,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        target user's login class if one exists.  Only
                        available if ssuuddoo is configured with the
                        --with-logincap option.  This flag is _o_f_f by default.
+
+       use_pty         If set, ssuuddoo will run the command in a pseudo-pty even
+                       if no I/O logging is being gone.  A malicious program
+                       run under ssuuddoo could conceivably fork a background
+                       process that retains to the user's terminal device
+                       after the main program has finished executing.  Use of
+                       this option will make that impossible.
 
        visiblepw       By default, ssuuddoo will refuse to run if the user must
                        enter a password but it is not possible to disable echo
@@ -976,16 +983,9 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        The default is 5; set this to 0 for no password
                        timeout.
 
-       timestamp_timeout
-                       Number of minutes that can elapse before ssuuddoo will ask
-                       for a passwd again.  The timeout may include a
-                       fractional component if minute granularity is
-                       insufficient, for example 2.5.  The default is 5.  Set
-                       this to 0 to always prompt for a password.  If set to a
 
 
-
-1.7.3b3                   June  3, 2010                        15
+1.7.3b3                   June  8, 2010                        15
 
 
 
@@ -994,6 +994,12 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       timestamp_timeout
+                       Number of minutes that can elapse before ssuuddoo will ask
+                       for a passwd again.  The timeout may include a
+                       fractional component if minute granularity is
+                       insufficient, for example 2.5.  The default is 5.  Set
+                       this to 0 to always prompt for a password.  If set to a
                        value less than 0 the user's timestamp will never
                        expire.  This can be used to allow users to create or
                        delete their own timestamps via sudo -v and sudo -k
@@ -1042,16 +1048,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                            qualified or the _f_q_d_n option is set)
 
                        %h  expanded to the local host name without the domain
-                           name
-
-                       %p  expanded to the user whose password is being asked
-                           for (respects the _r_o_o_t_p_w, _t_a_r_g_e_t_p_w and _r_u_n_a_s_p_w
-                           flags in _s_u_d_o_e_r_s)
 
 
 
-
-1.7.3b3                   June  3, 2010                        16
+1.7.3b3                   June  8, 2010                        16
 
 
 
@@ -1059,6 +1059,12 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+                           name
+
+                       %p  expanded to the user whose password is being asked
+                           for (respects the _r_o_o_t_p_w, _t_a_r_g_e_t_p_w and _r_u_n_a_s_p_w
+                           flags in _s_u_d_o_e_r_s)
 
                        %U  expanded to the login name of the user the command
                            will be run as (defaults to root)
@@ -1108,16 +1114,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    the program being run.  Entries in this file should either
                    be of the form VARIABLE=value or export VARIABLE=value.
                    The value may optionally be surrounded by single or double
-                   quotes.  Variables in this file are subject to other ssuuddoo
-                   environment settings such as _e_n_v___k_e_e_p and _e_n_v___c_h_e_c_k.
-
-       exempt_group
-                   Users in this group are exempt from password and PATH
-                   requirements.  This is not set by default.
 
 
 
-1.7.3b3                   June  3, 2010                        17
+1.7.3b3                   June  8, 2010                        17
 
 
 
@@ -1125,6 +1125,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+                   quotes.  Variables in this file are subject to other ssuuddoo
+                   environment settings such as _e_n_v___k_e_e_p and _e_n_v___c_h_e_c_k.
+
+       exempt_group
+                   Users in this group are exempt from password and PATH
+                   requirements.  This is not set by default.
 
        lecture     This option controls when a short lecture will be printed
                    along with the password prompt.  It has the following
@@ -1173,17 +1180,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        mailerflags Flags to use when invoking mailer. Defaults to --tt.
 
-       mailerpath  Path to mail program used to send warning mail.  Defaults
-                   to the path to sendmail found at configure time.
-
-       mailfrom    Address to use for the "from" address when sending warning
-                   and error mail.  The address should be enclosed in double
-                   quotes (") to protect against ssuuddoo interpreting the @ sign.
-                   Defaults to the name of the user running ssuuddoo.
 
 
 
-1.7.3b3                   June  3, 2010                        18
+1.7.3b3                   June  8, 2010                        18
 
 
 
@@ -1191,6 +1191,14 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+       mailerpath  Path to mail program used to send warning mail.  Defaults
+                   to the path to sendmail found at configure time.
+
+       mailfrom    Address to use for the "from" address when sending warning
+                   and error mail.  The address should be enclosed in double
+                   quotes (") to protect against ssuuddoo interpreting the @ sign.
+                   Defaults to the name of the user running ssuuddoo.
 
        mailto      Address to send warning and error mail to.  The address
                    should be enclosed in double quotes (") to protect against
@@ -1238,18 +1246,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        programs.  The argument may be a double-quoted, space-
                        separated list or a single value without double-quotes.
                        The list can be replaced, added to, deleted from, or
-                       disabled by using the =, +=, -=, and ! operators
-                       respectively.  Regardless of whether the env_reset
-                       option is enabled or disabled, variables specified by
-                       env_check will be preserved in the environment if they
-                       pass the aforementioned check.  The default list of
-                       environment variables to check is displayed when ssuuddoo
-                       is run by root with the _-_V option.
 
 
 
-
-1.7.3b3                   June  3, 2010                        19
+1.7.3b3                   June  8, 2010                        19
 
 
 
@@ -1257,6 +1257,14 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+                       disabled by using the =, +=, -=, and ! operators
+                       respectively.  Regardless of whether the env_reset
+                       option is enabled or disabled, variables specified by
+                       env_check will be preserved in the environment if they
+                       pass the aforementioned check.  The default list of
+                       environment variables to check is displayed when ssuuddoo
+                       is run by root with the _-_V option.
 
        env_delete      Environment variables to be removed from the user's
                        environment when the _e_n_v___r_e_s_e_t option is not in effect.
@@ -1301,6 +1309,21 @@ EEXXAAMMPPLLEESS
        Below are example _s_u_d_o_e_r_s entries.  Admittedly, some of these are a bit
        contrived.  First, we define our _a_l_i_a_s_e_s:
 
+
+
+
+
+
+
+1.7.3b3                   June  8, 2010                        20
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
         # User alias specification
         User_Alias     FULLTIMERS = millert, mikef, dowdy
         User_Alias     PARTTIMERS = bostley, jwfox, crawl
@@ -1312,18 +1335,6 @@ EEXXAAMMPPLLEESS
         Runas_Alias    ADMINGRP = adm, oper
 
         # Host alias specification
-
-
-
-1.7.3b3                   June  3, 2010                        20
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
         Host_Alias     SPARC = bigtime, eclipse, moet, anchor :\
                        SGI = grolsch, dandelion, black :\
                        ALPHA = widget, thalamus, foobar :\
@@ -1367,6 +1378,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
         Defaults!PAGERS        noexec
 
        The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually determines who may run
+
+
+
+1.7.3b3                   June  8, 2010                        21
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        what.
 
         root           ALL = (ALL) ALL
@@ -1378,18 +1401,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
         FULLTIMERS     ALL = NOPASSWD: ALL
 
        Full time sysadmins (mmiilllleerrtt, mmiikkeeff, and ddoowwddyy) may run any command on
-
-
-
-1.7.3b3                   June  3, 2010                        21
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
        any host without authenticating themselves.
 
         PARTTIMERS     ALL = ALL
@@ -1434,6 +1445,17 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        the _H_P_P_A machines.  Note that this assumes _p_a_s_s_w_d(1) does not take
        multiple user names on the command line.
 
+
+
+1.7.3b3                   June  8, 2010                        22
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
         bob            SPARC = (OP) ALL : SGI = (OP) ALL
 
        The user bboobb may run anything on the _S_P_A_R_C and _S_G_I machines as any user
@@ -1443,18 +1465,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        The user jjiimm may run any command on machines in the _b_i_g_l_a_b netgroup.
        ssuuddoo knows that "biglab" is a netgroup due to the '+' prefix.
-
-
-
-
-1.7.3b3                   June  3, 2010                        22
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
 
         +secretaries   ALL = PRINTING, /usr/bin/adduser, /usr/bin/rmuser
 
@@ -1499,6 +1509,19 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        and wim), may run any command as user www (which owns the web pages) or
        simply _s_u(1) to www.
 
+
+
+
+
+1.7.3b3                   June  8, 2010                        23
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
         ALL            CDROM = NOPASSWD: /sbin/umount /CDROM,\
                        /sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
 
@@ -1510,18 +1533,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SSEECCUURRIITTYY NNOOTTEESS
        It is generally not effective to "subtract" commands from ALL using the
        '!' operator.  A user can trivially circumvent this by copying the
-
-
-
-1.7.3b3                   June  3, 2010                        23
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
        desired command to a different name and then executing that.  For
        example:
 
@@ -1565,6 +1576,18 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
                  number of programs that offer shell escapes, restricting
                  users to the set of programs that do not if often unworkable.
 
+
+
+
+1.7.3b3                   June  8, 2010                        24
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        noexec    Many systems that support shared libraries have the ability
                  to override default library functions by pointing an
                  environment variable (usually LD_PRELOAD) to an alternate
@@ -1576,18 +1599,6 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
                  emulation are not affected.
 
                  To tell whether or not ssuuddoo supports _n_o_e_x_e_c, you can run the
-
-
-
-1.7.3b3                   June  3, 2010                        24
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
                  following as root:
 
                      sudo -V | grep "dummy exec"
@@ -1631,6 +1642,18 @@ SSEEEE AALLSSOO
 
 CCAAVVEEAATTSS
        The _s_u_d_o_e_r_s file should aallwwaayyss be edited by the vviissuuddoo command which
+
+
+
+1.7.3b3                   June  8, 2010                        25
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        locks the file and does grammatical checking. It is imperative that
        _s_u_d_o_e_r_s be free of syntax errors since ssuuddoo will not run with a
        syntactically incorrect _s_u_d_o_e_r_s file.
@@ -1642,18 +1665,6 @@ CCAAVVEEAATTSS
 
 BBUUGGSS
        If you feel you have found a bug in ssuuddoo, please submit a bug report at
-
-
-
-1.7.3b3                   June  3, 2010                        25
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
        http://www.sudo.ws/sudo/bugs/
 
 SSUUPPPPOORRTT
@@ -1700,17 +1711,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-1.7.3b3                   June  3, 2010                        26
+1.7.3b3                   June  8, 2010                        26
 
 

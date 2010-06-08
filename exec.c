@@ -169,7 +169,7 @@ sudo_execve(path, argv, envp, uid, cstat, dowait)
     cstat->type = CMD_INVALID;
 
 #ifdef _PATH_SUDO_IO_LOGDIR
-    log_io = def_log_output || def_log_input;
+    log_io = def_log_output || def_log_input || def_use_pty;
     if (log_io) {
 	pty_setup(uid);
 	io_log_open();
