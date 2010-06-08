@@ -582,8 +582,10 @@ fork_pty(struct command_details *details, char *argv[], char *envp[],
 	close(sv[0]);
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
 #ifdef HAVE_SELINUX
-        if (rbac_enabled)
-	    selinux_setup(user_role, user_type, slavename, io_fds[SFD_SLAVE]);
+        if (rbac_enabled) {
+	    selinux_setup(details->selinux_role, details->selinux_type,
+		slavename, io_fds[SFD_SLAVE]);
+	}
 #endif
 	if (exec_setup(details) == TRUE) {
 	    /* Close the other end of the stdin/stdout/stderr pipes and exec. */
@@ -735,11 +737,6 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
 
 #ifdef HAVE_SELINUX
     rbac_enabled = is_selinux_enabled() > 0 && details->selinux_role != NULL;
-    if (rbac_enabled) {
-	/* Must do SELinux setup before changing uid. */
-	selinux_setup(details->selinux_role, details->selinux_type,
-	    log_io ? slavename : user_details.tty, io_fds[SFD_SLAVE]);
-    }
 #endif
 
     ppgrp = getpgrp(); /* parent's pgrp, so child can signal us */
