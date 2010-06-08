@@ -43,9 +43,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE__NSGETENVIRON
-#include <crt_externs.h>
-#endif
 #include <ctype.h>
 #include <errno.h>
 #include <pwd.h>
