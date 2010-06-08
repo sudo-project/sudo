@@ -612,7 +612,7 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 		    else
 			(void) rmdir(timestampdir);
 		    status = TS_MISSING;
-		} else if (get_boottime(&boottime) && timercmp(&mtime, &boottime, <)) {
+		} else if (get_boottime(&boottime) && timevalcmp(&mtime, &boottime, <)) {
 		    status = TS_OLD;
 		} else {
 		    status = TS_CURRENT;
@@ -655,7 +655,7 @@ remove_timestamp(int remove)
 		remove = FALSE;
 	    }
 	} else {
-	    timerclear(&tv);
+	    timevalclear(&tv);
 	    if (touch(-1, path, &tv) == -1)
 		error(1, "can't reset %s to Epoch", path);
 	}

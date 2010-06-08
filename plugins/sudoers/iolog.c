@@ -335,7 +335,7 @@ sudoers_io_version(int verbose)
 static int
 sudoers_io_log(const char *buf, unsigned int len, int idx)
 {
-    struct timeval now, tv;
+    struct timeval now, delay;
 
     gettimeofday(&now, NULL);
 
@@ -345,15 +345,17 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     else
 #endif
 	fwrite(buf, 1, len, io_fds[idx].f);
-    timersub(&now, &last_time, &tv);
+    delay.tv_sec = now.tv_sec;
+    delay.tv_usec = now.tv_usec;
+    timevalsub(&delay, &last_time);
 #ifdef HAVE_ZLIB
     if (def_compress_io)
 	gzprintf(io_fds[IOFD_TIMING].g, "%d %f %d\n", idx,
-	    tv.tv_sec + ((double)tv.tv_usec / 1000000), len);
+	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len);
     else
 #endif
 	fprintf(io_fds[IOFD_TIMING].f, "%d %f %d\n", idx,
-	    tv.tv_sec + ((double)tv.tv_usec / 1000000), len);
+	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len);
     last_time.tv_sec = now.tv_sec;
     last_time.tv_usec = now.tv_usec;
 

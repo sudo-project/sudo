@@ -541,10 +541,6 @@
 /* Define to 1 if you have the <termio.h> header file. */
 #undef HAVE_TERMIO_H
 
-/* Define to 1 if you have a timersub macro or function that takes two
-   arguments (not three) */
-#undef HAVE_TIMERSUB2
-
 /* Define to 1 if you have struct timespec in sys/time.h */
 #undef HAVE_TIMESPEC
 
