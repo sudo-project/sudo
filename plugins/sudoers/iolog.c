@@ -225,7 +225,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (argc == 0)
 	return TRUE;
 
-    if (!def_log_input && !def_log_output)
+    if (!def_log_input && !def_log_output && !def_use_pty)
 	return FALSE;
 
     /*

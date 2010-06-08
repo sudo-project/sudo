@@ -241,3 +241,6 @@ log_output
 compress_io
 	T_FLAG
 	"Compress I/O logs using zlib"
+use_pty
+	T_FLAG
+	"Always run commands in a pseudo-tty"

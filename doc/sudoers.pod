@@ -583,7 +583,7 @@ B<sudo>'s behavior can be modified by C<Default_Entry> lines, as
 explained earlier.  A list of all supported Defaults parameters,
 grouped by type, are listed below.
 
-B<Flags>:
+B<Boolean Flags>:
 
 =over 16
 
@@ -914,6 +914,14 @@ I<sudoers>.  This flag is I<off> by default.
 If set, B<sudo> will apply the defaults specified for the target user's
 login class if one exists.  Only available if B<sudo> is configured with
 the --with-logincap option.  This flag is I<off> by default.
+
+=item use_pty
+
+If set, B<sudo> will run the command in a pseudo-pty even if no I/O
+logging is being gone.  A malicious program run under B<sudo> could
+conceivably fork a background process that retains to the user's
+terminal device after the main program has finished executing.  Use
+of this option will make that impossible.
 
 =item visiblepw
 

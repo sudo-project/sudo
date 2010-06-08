@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "May 30, 2010" "1.8.0a2" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "June  8, 2010" "1.8.0a2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -728,7 +728,7 @@ used as part of a word (e.g.\ a user name or host name):
 explained earlier.  A list of all supported Defaults parameters,
 grouped by type, are listed below.
 .PP
-\&\fBFlags\fR:
+\&\fBBoolean Flags\fR:
 .IP "always_set_home" 16
 .IX Item "always_set_home"
 If set, \fBsudo\fR will set the \f(CW\*(C`HOME\*(C'\fR environment variable to the home
@@ -1020,6 +1020,13 @@ If set, \fBsudo\fR will apply the defaults specified for the target user's
 login class if one exists.  Only available if \fBsudo\fR is configured with
 the \-\-with\-logincap option.  This flag is \fIoff\fR by default.
 \}
+.IP "use_pty" 16
+.IX Item "use_pty"
+If set, \fBsudo\fR will run the command in a pseudo-pty even if no I/O
+logging is being gone.  A malicious program run under \fBsudo\fR could
+conceivably fork a background process that retains to the user's
+terminal device after the main program has finished executing.  Use
+of this option will make that impossible.
 .IP "visiblepw" 16
 .IX Item "visiblepw"
 By default, \fBsudo\fR will refuse to run if the user must enter a

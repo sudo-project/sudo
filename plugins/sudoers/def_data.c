@@ -327,6 +327,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"Compress I/O logs using zlib",
 	NULL,
     }, {
+	"use_pty", T_FLAG,
+	"Always run commands in a pseudo-tty",
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };
