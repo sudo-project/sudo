@@ -295,7 +295,7 @@ void io_nextid(void);
 
 /* env.c */
 char **env_get(void);
-int env_init(char * const envp[]);
+void env_init(char * const envp[]);
 void init_envtables(void);
 void insert_env_vars(char * const envp[]);
 void read_env_file(const char *, int);

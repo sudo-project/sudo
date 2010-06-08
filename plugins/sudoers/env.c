@@ -206,12 +206,11 @@ static const char *initial_keepenv_table[] = {
 /*
  * Initialize env based on envp.
  */
-int
+void
 env_init(char * const envp[])
 {
     char * const *ep;
     size_t len;
-    int rval = -1;
 
     for (ep = envp; *ep != NULL; ep++)
 	continue;
@@ -225,8 +224,6 @@ env_init(char * const envp[])
 #endif
     memcpy(env.envp, envp, len * sizeof(char *));
     env.envp[len] = '\0';
-    rval = 0;
-    return rval;
 }
 
 char **
