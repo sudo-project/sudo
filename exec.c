@@ -127,7 +127,7 @@ static int fork_cmnd(path, argv, envp, sv, rbac_enabled)
 	if (rbac_enabled)
 	    selinux_setup(user_role, user_type, user_ttypath, -1);
 #endif
-	if (exec_setup() == TRUE) {
+	if (exec_setup(PERM_DOWAIT) == TRUE) {
 	    /* headed for execve() */
 	    closefrom(def_closefrom);
 #ifdef HAVE_SELINUX
@@ -187,7 +187,7 @@ sudo_execve(path, argv, envp, uid, cstat, dowait)
      * If we don't need to wait for the command to finish, just exec it.
      */
     if (!dowait) {
-	exec_setup();
+	exec_setup(0);
 	closefrom(def_closefrom);
 	my_execve(path, argv, envp);
 	cstat->type = CMD_ERRNO;

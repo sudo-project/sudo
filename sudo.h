@@ -148,6 +148,7 @@ struct command_status {
 #define PERM_FULL_RUNAS          0x05
 #define PERM_TIMESTAMP           0x06
 #define PERM_NOEXIT              0x10 /* flag */
+#define PERM_DOWAIT              0x20 /* flag */
 #define PERM_MASK                0xf0
 
 /*
@@ -285,7 +286,8 @@ int sudo_ldap_display_bound_defaults __P((struct sudo_nss *, struct passwd *, st
 int sudo_ldap_display_privs __P((struct sudo_nss *, struct passwd *, struct lbuf *));
 
 /* pam.c */
-int pam_prep_user	__P((struct passwd *));
+int pam_begin_session	__P((struct passwd *));
+int pam_end_session	__P((void));
 
 /* parse.c */
 int sudo_file_open	__P((struct sudo_nss *));
@@ -330,7 +332,7 @@ int set_perms		__P((int));
 
 /* sudo.c */
 FILE *open_sudoers	__P((const char *, int, int *));
-int exec_setup __P((void));
+int exec_setup		__P((int));
 void cleanup		__P((int));
 void set_fqdn		__P((void));
 

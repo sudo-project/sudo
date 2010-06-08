@@ -463,7 +463,7 @@ fork_pty(path, argv, envp, sv, rbac_enabled, maxfd)
 	if (rbac_enabled)
 	    selinux_setup(user_role, user_type, slavename, io_fds[SFD_SLAVE]);
 #endif
-	if (exec_setup() == TRUE) {
+	if (exec_setup(PERM_DOWAIT) == TRUE) {
 	    /* Close the other end of the stdin/stdout/stderr pipes and exec. */
 	    if (io_pipe[STDIN_FILENO][1])
 		close(io_pipe[STDIN_FILENO][1]);

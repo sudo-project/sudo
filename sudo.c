@@ -808,7 +808,8 @@ set_cmnd(sudo_mode)
  * Returns TRUE on success and FALSE on failure.
  */
 int
-exec_setup()
+exec_setup(flags)
+    int flags;
 {
     int rval = FALSE;
 
@@ -847,7 +848,7 @@ exec_setup()
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
 
     if (ISSET(sudo_mode, MODE_RUN))
-	set_perms(PERM_FULL_RUNAS);
+	set_perms(PERM_FULL_RUNAS|flags);
 
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	/* Change to target user's homedir. */
@@ -916,6 +917,9 @@ run_command(path, argv, envp, uid, dowait)
 	warningx("unexpected child termination condition: %d", cstat.type);
 	break;
     }
+#ifdef HAVE_PAM
+    pam_end_session();
+#endif /* HAVE_PAM */
 #ifdef _PATH_SUDO_IO_LOGDIR
     io_log_close();
 #endif

@@ -199,11 +199,12 @@ pam_cleanup(pw, auth)
 }
 
 int
-pam_prep_user(pw)
+pam_begin_session(pw)
     struct passwd *pw;
 {
-    int eval;
+    int status =  PAM_SUCCESS;
 
+    /* If the user did not have to authenticate there is no pam handle yet. */
     if (pamh == NULL)
 	pam_init(pw, NULL, NULL);
 
@@ -224,23 +225,27 @@ pam_prep_user(pw)
     (void) pam_setcred(pamh, PAM_ESTABLISH_CRED);
 
 #ifndef NO_PAM_SESSION
-    /*
-     * To fully utilize PAM sessions we would need to keep a
-     * sudo process around until the command exits.  However, we
-     * can at least cause pam_limits to be run by opening and then
-     * immediately closing the session.
-     */
-    if ((eval = pam_open_session(pamh, 0)) != PAM_SUCCESS) {
-	(void) pam_end(pamh, eval | PAM_DATA_SILENT);
-	return(AUTH_FAILURE);
+    status = pam_open_session(pamh, 0);
+     if (status != PAM_SUCCESS) {
+	(void) pam_end(pamh, status | PAM_DATA_SILENT);
+	pamh = NULL;
     }
-    (void) pam_close_session(pamh, 0);
 #endif
+    return(status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
+}
 
-    if (pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT) == PAM_SUCCESS)
-	return(AUTH_SUCCESS);
-    else
-	return(AUTH_FAILURE);
+int
+pam_end_session()
+{
+    int status = PAM_SUCCESS;
+
+    if (pamh != NULL) {
+#ifndef NO_PAM_SESSION
+	(void) pam_close_session(pamh, 0);
+#endif
+	status = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
+    }
+    return(status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
 }
 
 /*
