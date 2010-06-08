@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2008
+ * Copyright (c) 1996, 1998-2005, 2008, 2010
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -260,31 +260,37 @@ const char *getprogname __P((void));
 #endif /* HAVE___PROGNAME */
 #endif /* !HAVE_GETPROGNAME */
 
-#ifndef timerclear
-# define timerclear(ts)	(ts)->tv_sec = (ts)->tv_nsec = 0
+#ifndef timevalclear
+# define timevalclear(tv)	((tv)->tv_sec = (tv)->tv_usec = 0)
 #endif
-#ifndef timerisset
-# define timerisset(ts)	((ts)->tv_sec || (ts)->tv_nsec)
+#ifndef timevalisset
+# define timevalisset(tv)	((tv)->tv_sec || (tv)->tv_usec)
 #endif
-#ifndef timeradd
-# define timeradd(tv1, tv2, total)					       \
+#ifndef timevalcmp
+# define timevalcmp(tv1, tv2, op)					       \
+    (((tv1)->tv_sec == (tv2)->tv_sec) ?					       \
+	((tv1)->tv_usec op (tv2)->tv_usec) :				       \
+	((tv1)->tv_sec op (tv2)->tv_sec))
+#endif
+#ifndef timevaladd
+# define timevaladd(tv1, tv2)						       \
     do {								       \
-	(total)->tv_sec = (tv1)->tv_sec + (tv2)->tv_sec;		       \
-	(total)->tv_usec = (tv1)->tv_usec + (tv2)->tv_usec;		       \
-	if ((total)->tv_usec >= 1000000) {				       \
-	    (total)->tv_sec++;						       \
-	    (total)->tv_usec -= 1000000;				       \
+	(tv1)->tv_sec += (tv2)->tv_sec;					       \
+	(tv1)->tv_usec += (tv2)->tv_usec;				       \
+	if ((tv1)->tv_usec >= 1000000) {				       \
+	    (tv1)->tv_sec++;						       \
+	    (tv1)->tv_usec -= 1000000;					       \
 	}								       \
     } while (0)
 #endif
-#ifndef timersub
-# define timersub(minuend, subrahend, difference)			       \
+#ifndef timevalsub
+# define timevalsub(tv1, tv2)						       \
     do {								       \
-	(difference)->tv_sec = (minuend)->tv_sec - (subrahend)->tv_sec;	       \
-	(difference)->tv_usec = (minuend)->tv_usec - (subrahend)->tv_usec;     \
-	if ((difference)->tv_usec < 0) {				       \
-	    (difference)->tv_sec--;					       \
-	    (difference)->tv_usec += 1000000;				       \
+	(tv1)->tv_sec -= (tv2)->tv_sec;					       \
+	(tv1)->tv_usec -= (tv2)->tv_usec;				       \
+	if ((tv1)->tv_usec < 0) {					       \
+	    (tv1)->tv_sec--;						       \
+	    (tv1)->tv_usec += 1000000;					       \
 	}								       \
     } while (0)
 #endif

@@ -368,19 +368,13 @@ edit_sudoers(sp, editor, args, lineno)
     /* Set modified bit if use changed the file. */
     modified = TRUE;
     mtim_get(&sb, &tv);
-    if (orig_size == sb.st_size &&
-	orig_mtim.tv_sec == tv.tv_sec &&
-	orig_mtim.tv_usec == tv.tv_usec) {
+    if (orig_size == sb.st_size && timevalcmp(&orig_mtim, &tv, ==)) {
 	/*
 	 * If mtime and size match but the user spent no measurable
 	 * time in the editor we can't tell if the file was changed.
 	 */
-#ifdef HAVE_TIMERSUB2
-	timersub(&tv1, &tv2);
-#else
-	timersub(&tv1, &tv2, &tv2);
-#endif
-	if (timerisset(&tv2))
+	timevalsub(&tv1, &tv2);
+	if (timevalisset(&tv2))
 	    modified = FALSE;
     }
 

@@ -1941,15 +1941,6 @@ if test X"$ac_cv_type_struct_timespec" != X"no"; then
     AC_CHECK_MEMBER([struct stat.st_mtim], [AC_DEFINE(HAVE_ST_MTIM)]
 	[AC_CHECK_MEMBER([struct stat.st_mtim.st__tim], AC_DEFINE(HAVE_ST__TIM))],
 	[AC_CHECK_MEMBER([struct stat.st_mtimespec], AC_DEFINE([HAVE_ST_MTIMESPEC]))])
-    AC_MSG_CHECKING([for two-parameter timersub])
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <sys/time.h>]], [[struct timeval ts1, ts2;
-ts1.tv_sec = 1; ts1.tv_usec = 0; ts2.tv_sec = 0; ts2.tv_usec = 0;
-#ifndef timersub
-#error missing timersub
-#endif
-timersub(&ts1, &ts2);]])], [AC_DEFINE(HAVE_TIMERSUB2)
-    AC_MSG_RESULT(yes)], [AC_MSG_RESULT(no)])
 fi
 dnl
 dnl Check for the dirfd function/macro.  If not found, look for dd_fd in DIR.
@@ -2811,7 +2802,6 @@ AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member
 AH_TEMPLATE(HAVE_ST_MTIMESPEC, [Define to 1 if your struct stat has an st_mtimespec member])
 AH_TEMPLATE(HAVE_TERMIOS_H, [Define to 1 if you have the <termios.h> header file and the `tcgetattr' function.])
 AH_TEMPLATE(HAVE_TIMESPEC, [Define to 1 if you have struct timespec in sys/time.h])
-AH_TEMPLATE(HAVE_TIMERSUB2, [Define to 1 if you have a timersub macro or function that takes two arguments (not three)])
 AH_TEMPLATE(HAVE___PROGNAME, [Define to 1 if your crt0.o defines the __progname symbol for you.])
 AH_TEMPLATE(HOST_IN_LOG, [Define to 1 if you want the hostname to be entered into the log file.])
 AH_TEMPLATE(IGNORE_DOT_PATH, [Define to 1 if you want to ignore '.' and empty PATH elements])
