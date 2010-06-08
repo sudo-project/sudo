@@ -1257,7 +1257,7 @@ deserialize_info(char * const settings[], char * const user_info[])
 	    continue;
 	}
 	if (MATCHES(*cur, "selinux_type=")) {
-	    user_role = *cur + sizeof("selinux_type=") - 1;
+	    user_type = *cur + sizeof("selinux_type=") - 1;
 	    continue;
 	}
 #endif /* HAVE_SELINUX */
