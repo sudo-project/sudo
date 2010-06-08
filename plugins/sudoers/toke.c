@@ -3476,6 +3476,7 @@ _push_include(path, isdir)
     char *path;
     int isdir;
 {
+    struct path_list *pl;
     FILE *fp;
 
     /* push current state onto stack */
@@ -3497,9 +3498,14 @@ _push_include(path, isdir)
 	    /* switch_dir() called yyerror() for us */
 	    return(FALSE);
 	}
-	if ((fp = open_sudoers(path, FALSE, &keepopen)) == NULL) {
-	    yyerror(path);
-	    return(FALSE); /* XXX - just to go next one */
+	while ((fp = open_sudoers(path, FALSE, &keepopen)) == NULL) {
+	    /* Unable to open path in includedir, go to next one, if any. */
+	    efree(path);
+	    if ((pl = istack[idepth].more) == NULL)
+		return(FALSE);
+	    path = pl->path;
+	    istack[idepth].more = pl->next;
+	    efree(pl);
 	}
     } else {
 	if ((fp = open_sudoers(path, TRUE, &keepopen)) == NULL) {
@@ -3534,19 +3540,25 @@ pop_include()
 	fclose(YY_CURRENT_BUFFER->yy_input_file);
     yy_delete_buffer(YY_CURRENT_BUFFER);
     keepopen = FALSE;
-    if ((pl = istack[idepth - 1].more) != NULL) {
-	/* Move to next file in the dir. */
-	istack[idepth - 1].more = pl->next;
-	if ((fp = open_sudoers(pl->path, FALSE, &keepopen)) == NULL) {
-	    yyerror(pl->path);
-	    return(FALSE); /* XXX - just to go next one */
+    /* If we are in an include dir, move to the next file. */
+    while ((pl = istack[idepth - 1].more) != NULL) {
+	fp = open_sudoers(pl->path, FALSE, &keepopen);
+	if (fp != NULL) {
+	    istack[idepth - 1].more = pl->next;
+	    efree(sudoers);
+	    sudoers = pl->path;
+	    sudolineno = 1;
+	    yy_switch_to_buffer(yy_create_buffer(fp, YY_BUF_SIZE));
+	    efree(pl);
+	    break;
 	}
-	efree(sudoers);
-	sudoers = pl->path;
-	sudolineno = 1;
-	yy_switch_to_buffer(yy_create_buffer(fp, YY_BUF_SIZE));
+	/* Unable to open path in include dir, go to next one. */
+	istack[idepth - 1].more = pl->next;
+	efree(pl->path);
 	efree(pl);
-    } else {
+    }
+    /* If no path list, just pop the last dir on the stack. */
+    if (pl == NULL) {
 	idepth--;
 	yy_switch_to_buffer(istack[idepth].bs);
 	efree(sudoers);
