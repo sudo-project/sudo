@@ -85,7 +85,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     char *pass;
     static char *askpass;
     static char buf[SUDO_PASS_MAX + 1];
-    int i, input, output, save_errno, neednl, need_restart;
+    int i, input, output, save_errno, neednl = 0, need_restart;
 
     (void) fflush(stdout);
 
@@ -153,7 +153,7 @@ restart:
     alarm(0);
     save_errno = errno;
 
-    if (neednl)
+    if (neednl || pass == NULL)
 	(void) write(output, "\n", 1);
 
     /* Restore old tty settings and signals. */
