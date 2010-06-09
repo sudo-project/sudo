@@ -140,13 +140,27 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
     sigaction_t sa;
     fd_set *fdsr, *fdsw;
     int maxfd, n, nready, status, sv[2];
-    int log_io = 0;
+    int log_io;
     pid_t child;
 
-    cstat->type = CMD_INVALID;
+    /* If running in background mode, fork and exit. */
+    if (ISSET(details->flags, CD_BACKGROUND)) {
+	switch (fork()) {
+	    case -1:
+		cstat->type = CMD_ERRNO;
+		cstat->val = errno;
+		return -1;
+	    case 0:
+		/* child continues */   
+		break;
+	    default:
+		/* parent exits */
+		exit(0);
+	}
+    }
 
     log_io = !tq_empty(&io_plugins);
-    if (log_io) {
+    if (log_io && !ISSET(details->flags, CD_BACKGROUND)) {
 	sudo_debug(8, "allocate pty for I/O logging");
 	pty_setup(details->euid);
     }

@@ -231,6 +231,8 @@ main(int argc, char *argv[], char *envp[])
 		}
 	    }
 	    command_info_to_details(command_info, &command_details);
+	    if (ISSET(sudo_mode, MODE_BACKGROUND))
+		SET(command_details.flags, CD_BACKGROUND);
 	    /* Restore coredumpsize resource limit before running. */
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 	    (void) setrlimit(RLIMIT_CORE, &corelimit);
@@ -779,10 +781,6 @@ run_command(struct command_details *details, char *argv[], char *envp[])
 
     cstat.type = CMD_INVALID;
     cstat.val = 0;
-
-    /*
-     * XXX - no background support
-     */
 
     sudo_execve(details, argv, envp, &cstat);
 
