@@ -64,7 +64,7 @@ install_uid = 0
 install_gid = 0
 
 # OS dependent defines
-DEFS = @OSDEFS@
+DEFS = @OSDEFS@ -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\"
 
 #### End of system configuration section. ####
 
