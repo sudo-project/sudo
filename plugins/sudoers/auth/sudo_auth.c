@@ -308,9 +308,13 @@ auth_getpass(const char *prompt, int timeout, int type)
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
 
+    /* Mask user input if pwfeedback set and echo is off. */
+    if (type == SUDO_CONV_PROMPT_ECHO_OFF && def_pwfeedback)
+	type = SUDO_CONV_PROMPT_MASK;
+
     /* Call conversation function */
     memset(&msg, 0, sizeof(msg));
-    msg.msg_type = SUDO_CONV_PROMPT_ECHO_OFF;
+    msg.msg_type = type;
     msg.timeout = def_passwd_timeout * 60;
     msg.msg = prompt;
     memset(&repl, 0, sizeof(repl));

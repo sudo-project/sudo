@@ -88,7 +88,7 @@
 #define TGP_ECHO	0x01		/* leave echo on when reading passwd */
 #define TGP_STDIN	0x02		/* read from stdin, not /dev/tty */
 #define TGP_ASKPASS	0x04		/* read from askpass helper program */
-#define TGP_FEEDBACK	0x08		/* visual feedback during input */
+#define TGP_MASK	0x08		/* mask user input when reading */
 
 struct user_details {
     uid_t uid;

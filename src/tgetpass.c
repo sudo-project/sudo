@@ -120,9 +120,9 @@ restart:
      * If we are using a tty but are not the foreground pgrp this will
      * generate SIGTTOU, so do it *before* installing the signal handlers.
      */
-    if (ISSET(flags, TGP_FEEDBACK))
+    if (ISSET(flags, TGP_MASK))
 	neednl = term_cbreak(input);
-    else
+    else if (!ISSET(flags, TGP_ECHO))
 	neednl = term_noecho(input);
 
     /*
@@ -147,7 +147,7 @@ restart:
 
     if (timeout > 0)
 	alarm(timeout);
-    pass = getln(input, buf, sizeof(buf), ISSET(flags, TGP_FEEDBACK));
+    pass = getln(input, buf, sizeof(buf), ISSET(flags, TGP_MASK));
     alarm(0);
     save_errno = errno;
 
