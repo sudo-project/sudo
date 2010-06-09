@@ -22,7 +22,7 @@ for policy and session logging.  By default, the I<sudoers> policy
 plugin and an associated I/O logging plugin are used.  Via the plugin
 API, B<sudo> can be configured to use alternate policy and/or I/O
 logging plugins provided by third parties.  The plugins to be used
-are specified via the F</etc/sudo.conf> file.
+are specified via the F<@sysconfdir@/sudo.conf> file.
 
 The API is versioned with a major and minor number.  The minor
 version number is incremented when additions are made.  The major
@@ -34,7 +34,7 @@ The plugin API is defined by the C<sudo_plugin.h> header file.
 
 =head2 The sudo.conf File
 
-The F</etc/sudo.conf> file contains plugin configuration directives.
+The F<@sysconfdir@/sudo.conf> file contains plugin configuration directives.
 Currently, the only supported keyword is the C<Plugin> directive,
 which causes a plugin plugin to be loaded.
 
@@ -43,8 +43,8 @@ I<symbol_name> and the I<path> to the shared object containing the
 plugin.  The I<symbol_name> is the name of the C<struct policy_plugin>
 or C<struct io_plugin> in the plugin shared object.  The I<path>
 may be fully qualified or relative.  If not fully qualified it is
-relative to the $prefix/libexec directory where the prefix is
-specified at build time (/usr/local by default).
+relative to the F<@prefix@/libexec> directory.  Any additional parameters
+after the I<path> are ignored.
 
 The same shared object may contain multiple plugins, each with a
 different symbol name.  The shared object file must be owned by uid
@@ -53,14 +53,15 @@ from composite policies, only a single policy plugin may be specified.
 This limitation does not apply to I/O plugins.
 
  #
- # Default /etc/sudo.conf file
+ # Default @sysconfdir@/sudo.conf file
  #
  # Format:
  #   Plugin plugin_name plugin_path
  #
- # The plugin_path relative to prefix/libexec unless fully qualified
+ # The plugin_path is relative to @prefix@/libexec unless
+ #   fully qualified.
  # The plugin_name corresponds to a global symbol in the plugin
- #   that contains the plugin interface.
+ #   that contains the plugin interface structure.
  #
  Plugin policy_plugin sudoers.so
  Plugin io_plugin sudoers.so
@@ -70,7 +71,7 @@ This limitation does not apply to I/O plugins.
 A policy plugin must declare and populate a C<policy_plugin> struct
 in the global scope.  This structure contains pointers to the functions
 that implement the B<sudo> policy checks.  The name of the symbol should
-be specified in F</etc/sudo.conf> along with a path to the plugin
+be specified in F<@sysconfdir@/sudo.conf> along with a path to the plugin
 so that B<sudo> can load it.
 
  struct policy_plugin {

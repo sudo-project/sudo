@@ -11,7 +11,7 @@ SSYYNNOOPPSSIISS
        ssuuddoo [--DD _l_e_v_e_l] --hh | --KK | --kk | --VV
 
        ssuuddoo --vv [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--DD _l_e_v_e_l] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d]
-       [--pp _p_r_o_m_p_t] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d]
+       [--pp _p_r_o_m_p_t] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d]
 
        ssuuddoo --ll[[ll]] [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--DD _l_e_v_e_l] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d]
        [--pp _p_r_o_m_p_t] [--UU _u_s_e_r _n_a_m_e] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [_c_o_m_m_a_n_d]
@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0a2                   June  3, 2010                         1
+1.8.0a2                   June  9, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.8.0a2                   June  3, 2010                         2
+1.8.0a2                   June  9, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0a2                   June  3, 2010                         3
+1.8.0a2                   June  9, 2010                         3
 
 
 
@@ -259,7 +259,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0a2                   June  3, 2010                         4
+1.8.0a2                   June  9, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0a2                   June  3, 2010                         5
+1.8.0a2                   June  9, 2010                         5
 
 
 
@@ -351,8 +351,55 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        matched is ALL, the user may set variables that would overwise be
        forbidden.  See _s_u_d_o_e_r_s(4) for more information.
 
+PPLLUUGGIINNSS
+       ssuuddoo supports a plugin architecture for security policies and
+       input/output logging.  Third parties can develop and distribute their
+       own policy and I/O logging modules to work seemlessly with the ssuuddoo
+       front end.
+
+       Plugins are dynamically loaded based on the contents of the
+       _/_e_t_c_/_s_u_d_o_._c_o_n_f file.  If no _/_e_t_c_/_s_u_d_o_._c_o_n_f file is present, ssuuddoo will
+       use the traditional _s_u_d_o_e_r_s security policy and I/O logging, which
+       corresponds to the following _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
+
+        #
+        # Default /etc/sudo.conf file
+        #
+        # Format:
+        #   Plugin plugin_name plugin_path
+        #
+        # The plugin_path is relative to /usr/local/libexec unless
+        #   fully qualified.
+        # The plugin_name corresponds to a global symbol in the plugin
+        #   that contains the plugin interface structure.
+        #
+        Plugin policy_plugin sudoers.so
+        Plugin io_plugin sudoers.so
+
+       A Plugin line consists of the Plugin keyword, followed by the
+       _s_y_m_b_o_l___n_a_m_e and the _p_a_t_h to the shared object containing the plugin.
+       The _s_y_m_b_o_l___n_a_m_e is the name of the struct policy_plugin or struct
+       io_plugin in the plugin shared object.  The _p_a_t_h may be fully qualified
+       or relative.  If not fully qualified it is relative to the
+       _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c directory.  Any additional parameters after the _p_a_t_h
+       are ignored.
+
+       For more information, see the "_s_u_d_o___p_l_u_g_i_n(1m) manual."
+
 RREETTUURRNN VVAALLUUEESS
        Upon successful execution of a program, the exit status from ssuuddoo will
+
+
+
+1.8.0a2                   June  9, 2010                         6
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
        simply be the exit status of the program that was executed.
 
        Otherwise, ssuuddoo quits with an exit value of 1 if there is a
@@ -388,18 +435,6 @@ SSEECCUURRIITTYY NNOOTTEESS
        environment variables that ssuuddoo allows or denies is contained in the
        output of sudo -V when run as root.
 
-
-
-
-1.8.0a2                   June  3, 2010                         6
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        Note that the dynamic linker on most operating systems will remove
        variables that can control dynamic linking from the environment of
        setuid executables, including ssuuddoo.  Depending on the operating system
@@ -419,6 +454,18 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        not owned by root or if it is writable by a user other than root.  On
        systems that allow non-root users to give away files via _c_h_o_w_n(2), if
        the time stamp directory is located in a directory writable by anyone
+
+
+
+1.8.0a2                   June  9, 2010                         7
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
        (e.g., _/_t_m_p), it is possible for a user to create the time stamp
        directory before ssuuddoo is run.  However, because ssuuddoo checks the
        ownership and mode of the directory and its contents, the only damage
@@ -431,9 +478,9 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        appropriate owner (root) and permissions (0700) in the system startup
        files.
 
-       ssuuddoo will not honor time stamps set far in the future.  Timestamps with
-       a date greater than current_time + 2 * TIMEOUT will be ignored and sudo
-       will log and complain.  This is done to keep a user from creating
+       ssuuddoo will not honor time stamps set far in the future.  Time stamps
+       with a date greater than current_time + 2 * TIMEOUT will be ignored and
+       sudo will log and complain.  This is done to keep a user from creating
        his/her own time stamp with a bogus date on systems that allow users to
        give away files.
 
@@ -455,17 +502,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        Administrators should not rely on this feature as it is not universally
        available.
 
-
-
-1.8.0a2                   June  3, 2010                         7
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        Please note that ssuuddoo will normally only log the command it explicitly
        runs.  If a user runs a command such as sudo su or sudo sh, subsequent
        commands run from that shell will _n_o_t be logged, nor will ssuuddoo's access
@@ -484,6 +520,18 @@ EENNVVIIRROONNMMEENNTT
 
        HOME            In --ss or --HH mode (or if sudo was configured with the
                        --enable-shell-sets-home option), set to homedir of the
+
+
+
+1.8.0a2                   June  9, 2010                         8
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
                        target user
 
        PATH            Set to a sane value if the _s_e_c_u_r_e___p_a_t_h sudoers option
@@ -517,20 +565,11 @@ EENNVVIIRROONNMMEENNTT
                        SUDO_EDITOR is not set
 
 FFIILLEESS
+       _/_e_t_c_/_s_u_d_o_._c_o_n_f          ssuuddoo plugin configuration
+
        _/_e_t_c_/_s_u_d_o_e_r_s            List of who can run what
 
        _/_v_a_r_/_r_u_n_/_s_u_d_o           Directory containing time stamps
-
-
-
-1.8.0a2                   June  3, 2010                         8
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
        _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t        Initial environment for --ii mode on Linux and
                                AIX
@@ -546,6 +585,18 @@ EEXXAAMMPPLLEESS
        system holding ~yaz is not exported as root:
 
         $ sudo -u yaz ls ~yaz
+
+
+
+
+1.8.0a2                   June  9, 2010                         9
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
 
        To edit the _i_n_d_e_x_._h_t_m_l file as user www:
 
@@ -571,7 +622,7 @@ EEXXAAMMPPLLEESS
 
 SSEEEE AALLSSOO
        _g_r_e_p(1), _s_u(1), _s_t_a_t(2), _l_o_g_i_n___c_a_p(3), _p_a_s_s_w_d(4), _s_u_d_o_e_r_s(4),
-       _v_i_s_u_d_o(1m)
+       "_s_u_d_o___p_l_u_g_i_n(1m), "_s_u_d_o_r_e_p_l_a_y(1m), _v_i_s_u_d_o(1m)""
 
 AAUUTTHHOORRSS
        Many people have worked on ssuuddoo over the years; this version consists
@@ -586,18 +637,6 @@ CCAAVVEEAATTSS
        There is no easy way to prevent a user from gaining a root shell if
        that user is allowed to run arbitrary commands via ssuuddoo.  Also, many
        programs (such as editors) allow the user to run commands via shell
-
-
-
-1.8.0a2                   June  3, 2010                         9
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        escapes, thus avoiding ssuuddoo's checks.  However, on most systems it is
        possible to prevent shell escapes with ssuuddoo's _n_o_e_x_e_c functionality.
        See the _s_u_d_o_e_r_s(4) manual for details.
@@ -612,6 +651,18 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        If users have sudo ALL there is nothing to prevent them from creating
        their own program that gives them a root shell regardless of any '!'
        elements in the user specification.
+
+
+
+
+1.8.0a2                   June  9, 2010                        10
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
 
        Running shell scripts via ssuuddoo can expose the same kernel bugs that
        make setuid shell scripts unsafe on some operating systems (if your OS
@@ -633,6 +684,15 @@ DDIISSCCLLAAIIMMEERR
        See the LICENSE file distributed with ssuuddoo or
        http://www.sudo.ws/sudo/license.html for complete details.
 
+PPOODD EERRRROORRSS
+       Hey! TThhee aabboovvee ddooccuummeenntt hhaadd ssoommee ccooddiinngg eerrrroorrss,, wwhhiicchh aarree eexxppllaaiinneedd
+       bbeellooww::
+
+       Around line 442:
+           Unterminated L<...> sequence
+
+       Around line 678:
+           Unterminated L<L<...>> sequence
 
 
 
@@ -655,6 +715,12 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.0a2                   June  3, 2010                        10
+
+
+
+
+
+
+1.8.0a2                   June  9, 2010                        11
 
 

@@ -30,8 +30,8 @@ SSuuddoo PPlluuggiinn AAPPII
        The _s_y_m_b_o_l___n_a_m_e is the name of the struct policy_plugin or struct
        io_plugin in the plugin shared object.  The _p_a_t_h may be fully qualified
        or relative.  If not fully qualified it is relative to the
-       $prefix/libexec directory where the prefix is specified at build time
-       (/usr/local by default).
+       _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c directory.  Any additional parameters after the _p_a_t_h
+       are ignored.
 
        The same shared object may contain multiple plugins, each with a
        different symbol name.  The shared object file must be owned by uid 0
@@ -45,9 +45,10 @@ SSuuddoo PPlluuggiinn AAPPII
         # Format:
         #   Plugin plugin_name plugin_path
         #
-        # The plugin_path relative to prefix/libexec unless fully qualified
+        # The plugin_path is relative to /usr/local/libexec unless
+        #   fully qualified.
         # The plugin_name corresponds to a global symbol in the plugin
-        #   that contains the plugin interface.
+        #   that contains the plugin interface structure.
         #
         Plugin policy_plugin sudoers.so
         Plugin io_plugin sudoers.so
@@ -57,7 +58,6 @@ SSuuddoo PPlluuggiinn AAPPII
        global scope.  This structure contains pointers to the functions that
        implement the ssuuddoo policy checks.  The name of the symbol should be
        specified in _/_e_t_c_/_s_u_d_o_._c_o_n_f along with a path to the plugin so that
-       ssuuddoo can load it.
 
 
 
@@ -69,6 +69,8 @@ SSuuddoo PPlluuggiinn AAPPII
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
+
+       ssuuddoo can load it.
 
         struct policy_plugin {
         #define SUDO_POLICY_PLUGIN     1
@@ -122,8 +124,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            conversation
                A pointer to the conversation function that can be used by the
                plugin to interact with the user (see below).
-
-
 
 
 

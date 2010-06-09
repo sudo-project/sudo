@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "June  3, 2010" "1.8.0a2" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "June  9, 2010" "1.8.0a2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -163,7 +163,7 @@ sudo, sudoedit \- execute a command as another user
 .if \n(BA [\fB\-a\fR\ \fIauth_type\fR]
 [\fB\-D\fR\ \fIlevel\fR]
 [\fB\-g\fR\ \fIgroup\ name\fR|\fI#gid\fR] [\fB\-p\fR\ \fIprompt\fR]
-[\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
+[\fB\-u\fR\ \fIuser\ name\fR|\fI#uid\fR]
 .PP
 \&\fBsudo\fR \fB\-l[l]\fR [\fB\-AknS\fR]
 .if \n(BA [\fB\-a\fR\ \fIauth_type\fR]
@@ -502,6 +502,44 @@ variables with one important exception.  If the \fIsetenv\fR option
 is set in \fIsudoers\fR, the command to be run has the \f(CW\*(C`SETENV\*(C'\fR tag
 set or the command matched is \f(CW\*(C`ALL\*(C'\fR, the user may set variables
 that would overwise be forbidden.  See \fIsudoers\fR\|(@mansectform@) for more information.
+.SH "PLUGINS"
+.IX Header "PLUGINS"
+\&\fBsudo\fR supports a plugin architecture for security policies and
+input/output logging.  Third parties can develop and distribute
+their own policy and I/O logging modules to work seemlessly with
+the \fBsudo\fR front end.
+.PP
+Plugins are dynamically loaded based on the contents of the
+\&\fI@sysconfdir@/sudo.conf\fR file.  If no \fI@sysconfdir@/sudo.conf\fR
+file is present, \fBsudo\fR will use the traditional \fIsudoers\fR security
+policy and I/O logging, which corresponds to the following
+\&\fI@sysconfdir@/sudo.conf\fR file.
+.PP
+.Vb 10
+\& #
+\& # Default @sysconfdir@/sudo.conf file
+\& #
+\& # Format:
+\& #   Plugin plugin_name plugin_path
+\& #
+\& # The plugin_path is relative to @prefix@/libexec unless
+\& #   fully qualified.
+\& # The plugin_name corresponds to a global symbol in the plugin
+\& #   that contains the plugin interface structure.
+\& #
+\& Plugin policy_plugin sudoers.so
+\& Plugin io_plugin sudoers.so
+.Ve
+.PP
+A \f(CW\*(C`Plugin\*(C'\fR line consists of the \f(CW\*(C`Plugin\*(C'\fR keyword, followed by the
+\&\fIsymbol_name\fR and the \fIpath\fR to the shared object containing the
+plugin.  The \fIsymbol_name\fR is the name of the \f(CW\*(C`struct policy_plugin\*(C'\fR
+or \f(CW\*(C`struct io_plugin\*(C'\fR in the plugin shared object.  The \fIpath\fR
+may be fully qualified or relative.  If not fully qualified it is
+relative to the \fI@prefix@/libexec\fR directory.  Any additional parameters
+after the \fIpath\fR are ignored.
+.PP
+For more information, see the \*(L"\fIsudo_plugin\fR\|(@mansectsu@) manual.\*(R"
 .SH "RETURN VALUES"
 .IX Header "RETURN VALUES"
 Upon successful execution of a program, the exit status from \fBsudo\fR
@@ -574,7 +612,7 @@ instance) or create \fI@timedir@\fR with the appropriate owner (root)
 and permissions (0700) in the system startup files.
 .PP
 \&\fBsudo\fR will not honor time stamps set far in the future.
-Timestamps with a date greater than current_time + 2 * \f(CW\*(C`TIMEOUT\*(C'\fR
+Time stamps with a date greater than current_time + 2 * \f(CW\*(C`TIMEOUT\*(C'\fR
 will be ignored and sudo will log and complain.  This is done to
 keep a user from creating his/her own time stamp with a bogus
 date on systems that allow users to give away files.
@@ -672,6 +710,10 @@ Default editor to use in \fB\-e\fR (sudoedit) mode if \f(CW\*(C`SUDO_EDITOR\*(C'
 is not set
 .SH "FILES"
 .IX Header "FILES"
+.ie n .IP "\fI@sysconfdir@/sudo.conf\fR" 24
+.el .IP "\fI@sysconfdir@/sudo.conf\fR" 24
+.IX Item "@sysconfdir@/sudo.conf"
+\&\fBsudo\fR plugin configuration
 .ie n .IP "\fI@sysconfdir@/sudoers\fR" 24
 .el .IP "\fI@sysconfdir@/sudoers\fR" 24
 .IX Item "@sysconfdir@/sudoers"
@@ -735,7 +777,7 @@ to make the \f(CW\*(C`cd\*(C'\fR and file redirection work.
 .IX Header "SEE ALSO"
 \&\fIgrep\fR\|(1), \fIsu\fR\|(1), \fIstat\fR\|(2),
 .if \n(LC \&\fIlogin_cap\fR\|(3),
-\&\fIpasswd\fR\|(@mansectform@), \fIsudoers\fR\|(@mansectform@), \fIvisudo\fR\|(@mansectsu@)
+\&\fIpasswd\fR\|(@mansectform@), \fIsudoers\fR\|(@mansectform@), "\fIsudo_plugin\fR\|(@mansectsu@), "\fIsudoreplay\fR\|(@mansectsu@), \fIvisudo\fR\|(@mansectsu@)""
 .SH "AUTHORS"
 .IX Header "AUTHORS"
 Many people have worked on \fBsudo\fR over the years; this
@@ -790,3 +832,12 @@ including, but not limited to, the implied warranties of merchantability
 and fitness for a particular purpose are disclaimed.  See the \s-1LICENSE\s0
 file distributed with \fBsudo\fR or http://www.sudo.ws/sudo/license.html
 for complete details.
+.SH "POD ERRORS"
+.IX Header "POD ERRORS"
+Hey! \fBThe above document had some coding errors, which are explained below:\fR
+.IP "Around line 442:" 4
+.IX Item "Around line 442:"
+Unterminated L<...> sequence
+.IP "Around line 678:" 4
+.IX Item "Around line 678:"
+Unterminated L<L<...>> sequence

@@ -32,7 +32,7 @@ B<sudo> B<-v> [B<-AknS>]
 S<[B<-a> I<auth_type>]>
 S<[B<-D> I<level>]>
 S<[B<-g> I<group name>|I<#gid>]> S<[B<-p> I<prompt>]>
-S<[B<-u> I<username>|I<#uid>]>
+S<[B<-u> I<user name>|I<#uid>]>
 
 B<sudo> B<-l[l]> [B<-AknS>]
 S<[B<-a> I<auth_type>]>
@@ -404,6 +404,43 @@ is set in I<sudoers>, the command to be run has the C<SETENV> tag
 set or the command matched is C<ALL>, the user may set variables
 that would overwise be forbidden.  See L<sudoers(5)> for more information.
 
+=head1 PLUGINS
+
+B<sudo> supports a plugin architecture for security policies and
+input/output logging.  Third parties can develop and distribute
+their own policy and I/O logging modules to work seemlessly with
+the B<sudo> front end.
+
+Plugins are dynamically loaded based on the contents of the
+F<@sysconfdir@/sudo.conf> file.  If no F<@sysconfdir@/sudo.conf>
+file is present, B<sudo> will use the traditional I<sudoers> security
+policy and I/O logging, which corresponds to the following
+F<@sysconfdir@/sudo.conf> file.
+
+ #
+ # Default @sysconfdir@/sudo.conf file
+ #
+ # Format:
+ #   Plugin plugin_name plugin_path
+ #
+ # The plugin_path is relative to @prefix@/libexec unless
+ #   fully qualified.
+ # The plugin_name corresponds to a global symbol in the plugin
+ #   that contains the plugin interface structure.
+ #
+ Plugin policy_plugin sudoers.so
+ Plugin io_plugin sudoers.so 
+
+A C<Plugin> line consists of the C<Plugin> keyword, followed by the
+I<symbol_name> and the I<path> to the shared object containing the
+plugin.  The I<symbol_name> is the name of the C<struct policy_plugin>
+or C<struct io_plugin> in the plugin shared object.  The I<path>
+may be fully qualified or relative.  If not fully qualified it is
+relative to the F<@prefix@/libexec> directory.  Any additional parameters
+after the I<path> are ignored.
+
+For more information, see the L<sudo_plugin(8) manual.
+
 =head1 RETURN VALUES
 
 Upon successful execution of a program, the exit status from B<sudo>
@@ -477,7 +514,7 @@ instance) or create F<@timedir@> with the appropriate owner (root)
 and permissions (0700) in the system startup files.
 
 B<sudo> will not honor time stamps set far in the future.
-Timestamps with a date greater than current_time + 2 * C<TIMEOUT>
+Time stamps with a date greater than current_time + 2 * C<TIMEOUT>
 will be ignored and sudo will log and complain.  This is done to
 keep a user from creating his/her own time stamp with a bogus
 date on systems that allow users to give away files.
@@ -583,6 +620,10 @@ is not set
 
 =over 24
 
+=item F<@sysconfdir@/sudo.conf>
+
+B<sudo> plugin configuration
+
 =item F<@sysconfdir@/sudoers>
 
 List of who can run what
@@ -636,7 +677,7 @@ to make the C<cd> and file redirection work.
 
 L<grep(1)>, L<su(1)>, L<stat(2)>,
 L<login_cap(3)>,
-L<passwd(5)>, L<sudoers(5)>, L<visudo(8)>
+L<passwd(5)>, L<sudoers(5)>, L<sudo_plugin(8), L<sudoreplay(8), L<visudo(8)>
 
 =head1 AUTHORS
 
