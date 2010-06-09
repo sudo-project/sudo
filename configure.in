@@ -1858,10 +1858,8 @@ AC_HEADER_DIRENT
 AC_HEADER_TIME
 AC_CHECK_HEADERS(malloc.h paths.h utime.h netgroup.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h)
 AC_SYS_POSIX_TERMIOS
-if test "$ac_cv_sys_posix_termios" = "yes"; then
-    AC_DEFINE(HAVE_TERMIOS_H)
-else
-    AC_CHECK_HEADERS(termio.h, [], [AC_MSG_ERROR([Must have either termios.h or termio.h to build sudo])])
+if test "$ac_cv_sys_posix_termios" != "yes"; then
+    AC_MSG_ERROR([Must have POSIX termios to build sudo])
 fi
 if test ${with_logincap-'no'} != "no"; then
     AC_CHECK_HEADERS(login_cap.h, [LOGINCAP_USAGE='[[-c class|-]] '; LCMAN=1

@@ -21,11 +21,6 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/wait.h>
-#ifdef HAVE_TERMIOS_H
-# include <termios.h>
-#else
-# include <termio.h>
-#endif /* HAVE_TERMIOS_H */
 #include <sys/ioctl.h>
 #ifdef HAVE_SYS_SELECT_H
 # include <sys/select.h>
@@ -58,6 +53,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <termios.h>
 
 /* XXX - move to compat.h */
 #if !defined(NSIG)

@@ -37,11 +37,7 @@
 #  include <strings.h>
 # endif
 #endif /* HAVE_STRING_H */
-#ifdef HAVE_TERMIOS_H
-# include <termios.h>
-#else
-# include <termio.h>
-#endif /* HAVE_TERMIOS_H */
+#include <termios.h>
 
 #include <compat.h>
 
@@ -65,20 +61,6 @@
 #  define _POSIX_VDISABLE	0
 # endif
 #endif
-
-/*
- * Emulate POSIX termios using termio
- */
-#ifndef HAVE_TERMIOS_H
-# undef termios
-# define termios		termio
-# define tcgetattr(f, t)	ioctl(f, TCGETA, t)
-# define tcsetattr(f, a, t)	ioctl(f, a, t)
-# undef TCSAFLUSH
-# define TCSAFLUSH		TCSETAF
-# undef TCSADRAIN
-# define TCSADRAIN		TCSETAW
-#endif /* HAVE_TERMIOS_H */
 
 static struct termios term, oterm;
 static int changed;
@@ -167,7 +149,6 @@ term_copy(int src, int dst)
 
     if (tcgetattr(src, &tt) != 0)
 	return(0);
-    /* XXX - add TCSANOW compat define */
     if (tcsetattr(dst, TCSANOW|TCSASOFT, &tt) != 0)
 	return(0);
     return(1);

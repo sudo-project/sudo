@@ -32,11 +32,7 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_TERMIOS_H
-# include <termios.h>
-#else
-# include <termio.h>
-#endif
+#include <termios.h>
 
 #include <compat.h>
 
