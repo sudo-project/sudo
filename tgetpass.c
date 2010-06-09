@@ -82,7 +82,7 @@ tgetpass(prompt, timeout, flags)
     int flags;
 {
     sigaction_t sa, savealrm, saveint, savehup, savequit, saveterm;
-    sigaction_t savetstp, savettin, savettou;
+    sigaction_t savetstp, savettin, savettou, savepipe;
     char *pass;
     static char buf[SUDO_PASS_MAX + 1];
     int i, input, output, save_errno, neednl = 0, need_restart;
@@ -134,6 +134,10 @@ restart:
     (void) sigaction(SIGTTIN, &sa, &savettin);
     (void) sigaction(SIGTTOU, &sa, &savettou);
 
+    /* Ignore SIGPIPE in case stdin is a pipe and TGP_STDIN is set */
+    sa.sa_handler = SIG_IGN;
+    (void) sigaction(SIGPIPE, &sa, &savepipe);
+
     if (prompt)
 	(void) write(output, prompt, strlen(prompt));
 
@@ -157,6 +161,7 @@ restart:
     (void) sigaction(SIGTSTP, &savetstp, NULL);
     (void) sigaction(SIGTTIN, &savettin, NULL);
     (void) sigaction(SIGTTOU, &savettou, NULL);
+    (void) sigaction(SIGTTOU, &savepipe, NULL);
     if (input != STDIN_FILENO)
 	(void) close(input);
 
