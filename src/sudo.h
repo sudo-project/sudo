@@ -117,6 +117,7 @@ struct user_details {
 #define CD_SET_TIMEOUT		0x0100
 #define CD_SUDOEDIT		0x0200
 #define CD_BACKGROUND		0x0400
+#define CD_RBAC_ENABLED		0x0800
 
 struct command_details {
     uid_t uid;
@@ -128,8 +129,7 @@ struct command_details {
     int timeout;
     int ngroups;
     int closefrom;
-    short flags;
-    short selinux_enabled;
+    int flags;
     GETGROUPS_T *groups;
     const char *command;
     const char *cwd;

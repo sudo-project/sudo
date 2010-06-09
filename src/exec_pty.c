@@ -1116,7 +1116,7 @@ exec_pty(struct command_details *details, char *argv[], char *envp[])
     if (details->closefrom >= 0)
 	closefrom(details->closefrom);
 #ifdef HAVE_SELINUX
-    if (details->selinux_enabled)
+    if (ISSET(details->flags, CD_RBAC_ENABLED))
 	selinux_execve(details->command, argv, envp);
     else
 #endif

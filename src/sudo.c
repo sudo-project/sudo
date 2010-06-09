@@ -594,7 +594,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 
 #ifdef HAVE_SELINUX
     if (details->selinux_role != NULL && is_selinux_enabled() > 0)
-	details->selinux_enabled = TRUE;
+	SET(details->flags, CD_RBAC_ENABLED);
 #endif
 }
 
@@ -655,7 +655,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     }
 
 #ifdef HAVE_SELINUX
-    if (details->selinux_enabled) {
+    if (ISSET(details->flags, CD_RBAC_ENABLED)) {
 	if (selinux_setup(details->selinux_role, details->selinux_type,
 	    ptyname ? ptyname : user_details.tty, ptyfd) == -1)
 	    goto done;
