@@ -232,7 +232,7 @@ void validate_env_vars	__P((struct list_member *));
 
 /* exec.c */
 int sudo_execve __P((const char *path, char *argv[], char *envp[], uid_t uid,
-    struct command_status *cstat, int dowait));
+    struct command_status *cstat, int dowait, int bgmode));
 int my_execve __P((const char *path, char *argv[], char *envp[]));
 
 /* exec_pty.c */

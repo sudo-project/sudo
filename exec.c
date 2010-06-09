@@ -136,27 +136,43 @@ static int fork_cmnd(path, argv, envp, sv, rbac_enabled)
  * we fact that we have two different controlling terminals to deal with.
  */
 int
-sudo_execve(path, argv, envp, uid, cstat, dowait)
+sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
     const char *path;
     char *argv[];
     char *envp[];
     uid_t uid;
     struct command_status *cstat;
     int dowait;
+    int bgmode;
 {
     sigaction_t sa;
     fd_set *fdsr, *fdsw;
     int maxfd, n, nready, status, sv[2];
     int rbac_enabled = 0;
-    int log_io = 0;
+    int log_io;
     pid_t child;
 
-    cstat->type = CMD_INVALID;
+    /* If running in background mode, fork and exit. */
+    if (bgmode) {
+	switch (fork()) {
+	    case -1:
+		cstat->type = CMD_ERRNO;
+		cstat->val = errno;
+		return -1;
+	    case 0:
+		/* child continues */   
+		break;
+	    default:
+		/* parent exits */
+		exit(0);
+	}
+    }
 
 #ifdef _PATH_SUDO_IO_LOGDIR
     log_io = def_log_output || def_log_input || def_use_pty;
     if (log_io) {
-	pty_setup(uid);
+	if (!bgmode)
+	    pty_setup(uid);
 	io_log_open();
 	dowait = TRUE;
     }

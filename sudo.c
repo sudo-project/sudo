@@ -864,20 +864,6 @@ exec_setup(flags, rbac_enabled, ttyname, ttyfd)
 	    goto done;
     }
 
-    if (ISSET(sudo_mode, MODE_BACKGROUND)) {
-	switch (fork()) {
-	    case -1:
-		warning("fork");
-		goto done;
-	    case 0:
-		/* child continues */
-		break;
-	    default:
-		/* parent exists */
-		exit(0);
-	}
-    }
-
     rval = TRUE;
 
 done:
@@ -905,7 +891,8 @@ run_command(path, argv, envp, uid, dowait)
     cstat.type = CMD_INVALID;
     cstat.val = 0;
 
-    sudo_execve(path, argv, envp, uid, &cstat, dowait);
+    sudo_execve(path, argv, envp, uid, &cstat, dowait,
+	ISSET(sudo_mode, MODE_BACKGROUND));
 
     switch (cstat.type) {
     case CMD_ERRNO:

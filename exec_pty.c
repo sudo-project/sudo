@@ -195,7 +195,8 @@ suspend_parent(signo)
 	/* Suspend self and continue child when we resume. */
 	sa.sa_handler = SIG_DFL;
 	sigaction(signo, &sa, &osa);
-	killpg(ppgrp, signo);
+	if (killpg(ppgrp, signo) != 0)
+	    warning("killpg(%d, %d)", ppgrp, signo);
 
 	/* Check foreground/background status on resume. */
 	check_foreground();
@@ -388,7 +389,7 @@ fork_pty(path, argv, envp, sv, rbac_enabled, maxfd)
      * to interpose ourselves instead of duping the pty fd.
      */
     memset(io_pipe, 0, sizeof(io_pipe));
-    if (!isatty(STDIN_FILENO)) {
+    if (io_fds[SFD_STDIN] == -1 || !isatty(STDIN_FILENO)) {
 	pipeline = TRUE;
 	if (pipe(io_pipe[STDIN_FILENO]) != 0)
 	    error(1, "unable to create pipe");
@@ -396,7 +397,7 @@ fork_pty(path, argv, envp, sv, rbac_enabled, maxfd)
 	    log_stdin, iobufs);
 	io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
     }
-    if (!isatty(STDOUT_FILENO)) {
+    if (io_fds[SFD_STDOUT] == -1 || !isatty(STDOUT_FILENO)) {
 	pipeline = TRUE;
 	if (pipe(io_pipe[STDOUT_FILENO]) != 0)
 	    error(1, "unable to create pipe");
@@ -404,7 +405,7 @@ fork_pty(path, argv, envp, sv, rbac_enabled, maxfd)
 	    log_stdout, iobufs);
 	io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
     }
-    if (!isatty(STDERR_FILENO)) {
+    if (io_fds[SFD_STDERR] == -1 || !isatty(STDERR_FILENO)) {
 	if (pipe(io_pipe[STDERR_FILENO]) != 0)
 	    error(1, "unable to create pipe");
 	iobufs = io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
