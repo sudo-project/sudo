@@ -79,16 +79,25 @@ tgetpass(const char *prompt, int timeout, int flags)
 
     (void) fflush(stdout);
 
-    /* If using a helper program to get the password, run it instead. */
-    /* XXX - askpass may be set by policy */
-    if (ISSET(flags, TGP_ASKPASS)) {
-	if (!askpass) {
-	    askpass = getenv("SUDO_ASKPASS");
+    if (askpass == NULL) {
+	askpass = getenv("SUDO_ASKPASS");
 #ifdef _PATH_SUDO_ASKPASS
-	    if (!askpass)
-		askpass = _PATH_SUDO_ASKPASS;
+	if (askpass == NULL)
+	    askpass = _PATH_SUDO_ASKPASS;
 #endif
+    }
+
+    /* If no tty present and we need to disable echo, try askpass. */
+    if (!ISSET(flags, TGP_STDIN|TGP_ECHO|TGP_ASKPASS) && !tty_present()) {
+	if (askpass == NULL || getenv("DISPLAY") == NULL) {
+	    warningx("no tty present and no askpass program specified");
+	    return(NULL);
 	}
+	SET(flags, TGP_ASKPASS);
+    }
+
+    /* If using a helper program to get the password, run it instead. */
+    if (ISSET(flags, TGP_ASKPASS)) {
 	if (askpass && *askpass)
 	    return(sudo_askpass(askpass, prompt));
     }

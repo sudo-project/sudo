@@ -82,22 +82,35 @@ sudo_read_conf(const char *conf_file)
 	if (*cp == '\0')
 	    continue;
 
-	/* Look for a line starting with "Plugin" */
-	if (strncasecmp(cp, "Plugin", 6) != 0)
-	    continue;
-
-	/* Parse line */
-	if ((name = strtok(cp + 6, " \t")) == NULL ||
-	    (path = strtok(NULL, " \t")) == NULL) {
+	/* Look for a line starting with "Path" */
+	if (strncasecmp(cp, "Path", 4) == 0) {
+	    /* Parse line */
+	    if ((name = strtok(cp + 4, " \t")) == NULL ||
+		(path = strtok(NULL, " \t")) == NULL) {
+		continue;
+	    }
+	    if (strcasecmp(name, "askpass") != 0)
+		continue;
+	    /* XXX - Just set in environment for now */
+	    setenv("SUDO_ASKPASS", path, 0);
 	    continue;
 	}
 
-	info = emalloc(sizeof(*info));
-	info->symbol_name = estrdup(name);
-	info->path = estrdup(path);
-	info->prev = info;
-	info->next = NULL;
-	tq_append(&pil, info);
+	/* Look for a line starting with "Plugin" */
+	if (strncasecmp(cp, "Plugin", 6) == 0) {
+	    /* Parse line */
+	    if ((name = strtok(cp + 6, " \t")) == NULL ||
+		(path = strtok(NULL, " \t")) == NULL) {
+		continue;
+	    }
+	    info = emalloc(sizeof(*info));
+	    info->symbol_name = estrdup(name);
+	    info->path = estrdup(path);
+	    info->prev = info;
+	    info->next = NULL;
+	    tq_append(&pil, info);
+	    continue;
+	}
     }
     fclose(fp);
 

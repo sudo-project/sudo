@@ -60,8 +60,6 @@ struct sudo_user {
     char *cmnd_safe;
     char *class_name;
     char *krb5_ccname;
-    char *display;
-    char *askpass;
     int   closefrom;
     int   ngroups;
     uid_t uid;
@@ -171,8 +169,6 @@ struct sudo_user {
 #define user_host		(sudo_user.host)
 #define user_shost		(sudo_user.shost)
 #define user_ccname		(sudo_user.krb5_ccname)
-#define user_display		(sudo_user.display)
-#define user_askpass		(sudo_user.askpass)
 #define safe_cmnd		(sudo_user.cmnd_safe)
 #define login_class		(sudo_user.class_name)
 #define runas_pw		(sudo_user._runas_pw)

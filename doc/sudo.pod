@@ -115,11 +115,17 @@ B<sudo> accepts the following command line options:
 
 Normally, if B<sudo> requires a password, it will read it from the
 current terminal.  If the B<-A> (I<askpass>) option is specified,
-a (possibly graphical) helper program is executed to read the
-user's password and output the password to the standard output.  If
-the C<SUDO_ASKPASS> environment variable is set, it specifies the
-path to the helper program.  Otherwise, the value specified by the
-I<askpass> option in L<sudoers(5)> is used.
+a (possibly graphical) helper program is executed to read the user's
+password and output the password to the standard output.  If the
+C<SUDO_ASKPASS> environment variable is set, it specifies the path
+to the helper program.  Otherwise, if F<@sysconfdir@/sudo.conf>
+contains a line specifying the askpass program that value will be
+used.  For example:
+
+    # Path to askpass helper program
+    Path askpass /usr/X11R6/bin/ssh-askpass
+
+If no askpass program is available, sudo will exit with an error.
 
 =item -a I<type>
 
@@ -422,6 +428,7 @@ F<@sysconfdir@/sudo.conf> file.
  #
  # Format:
  #   Plugin plugin_name plugin_path
+ #   Path askpass path/to/askpass
  #
  # The plugin_path is relative to @prefix@/libexec unless
  #   fully qualified.
@@ -436,10 +443,11 @@ I<symbol_name> and the I<path> to the shared object containing the
 plugin.  The I<symbol_name> is the name of the C<struct policy_plugin>
 or C<struct io_plugin> in the plugin shared object.  The I<path>
 may be fully qualified or relative.  If not fully qualified it is
-relative to the F<@prefix@/libexec> directory.  Any additional parameters
-after the I<path> are ignored.
+relative to the F<@prefix@/libexec> directory.  Any additional
+parameters after the I<path> are ignored.  Lines that don't begin
+with C<Plugin> or C<Path> are silently ignored
 
-For more information, see the L<sudo_plugin(8) manual.
+For more information, see the L<sudo_plugin(8)> manual.
 
 =head1 RETURN VALUES
 
@@ -622,7 +630,7 @@ is not set
 
 =item F<@sysconfdir@/sudo.conf>
 
-B<sudo> plugin configuration
+B<sudo> plugin and path configuration
 
 =item F<@sysconfdir@/sudoers>
 
@@ -677,7 +685,7 @@ to make the C<cd> and file redirection work.
 
 L<grep(1)>, L<su(1)>, L<stat(2)>,
 L<login_cap(3)>,
-L<passwd(5)>, L<sudoers(5)>, L<sudo_plugin(8), L<sudoreplay(8), L<visudo(8)>
+L<passwd(5)>, L<sudoers(5)>, L<sudo_plugin(8)>, L<sudoreplay(8)>, L<visudo(8)>
 
 =head1 AUTHORS
 

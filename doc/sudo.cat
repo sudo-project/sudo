@@ -86,8 +86,15 @@ OOPPTTIIOONNSS
                    executed to read the user's password and output the
                    password to the standard output.  If the SUDO_ASKPASS
                    environment variable is set, it specifies the path to the
-                   helper program.  Otherwise, the value specified by the
-                   _a_s_k_p_a_s_s option in _s_u_d_o_e_r_s(4) is used.
+                   helper program.  Otherwise, if _/_e_t_c_/_s_u_d_o_._c_o_n_f contains a
+                   line specifying the askpass program that value will be
+                   used.  For example:
+
+                       # Path to askpass helper program
+                       Path askpass /usr/X11R6/bin/ssh-askpass
+
+                   If no askpass program is available, sudo will exit with an
+                   error.
 
        -a _t_y_p_e     The --aa (_a_u_t_h_e_n_t_i_c_a_t_i_o_n _t_y_p_e) option causes ssuuddoo to use the
                    specified authentication type when validating the user, as
@@ -117,13 +124,6 @@ OOPPTTIIOONNSS
                    Specifying a _c_l_a_s_s of - indicates that the command should
                    be run restricted by the default login capabilities for the
                    user the command is run as.  If the _c_l_a_s_s argument
-                   specifies an existing user class, the command must be run
-                   as root, or the ssuuddoo command must be run from a shell that
-                   is already root.  This option is only available on systems
-                   with BSD login classes.
-
-       -D _l_e_v_e_l    Enable debugging of ssuuddoo plugins and ssuuddoo itself.  The
-                   _l_e_v_e_l may be a value from 1 through 9.
 
 
 
@@ -135,6 +135,14 @@ OOPPTTIIOONNSS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+                   specifies an existing user class, the command must be run
+                   as root, or the ssuuddoo command must be run from a shell that
+                   is already root.  This option is only available on systems
+                   with BSD login classes.
+
+       -D _l_e_v_e_l    Enable debugging of ssuuddoo plugins and ssuuddoo itself.  The
+                   _l_e_v_e_l may be a value from 1 through 9.
 
        -E          The --EE (_p_r_e_s_e_r_v_e _e_n_v_i_r_o_n_m_e_n_t) option will override the
                    _e_n_v___r_e_s_e_t option in _s_u_d_o_e_r_s(4)).  It is only available when
@@ -183,14 +191,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    specified in _p_a_s_s_w_d(4).  By default, ssuuddoo does not modify
                    HOME (see _s_e_t___h_o_m_e and _a_l_w_a_y_s___s_e_t___h_o_m_e in _s_u_d_o_e_r_s(4)).
 
-       -h          The --hh (_h_e_l_p) option causes ssuuddoo to print a usage message
-                   and exit.
-
-       -i [command]
-                   The --ii (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs the shell
-                   specified in the _p_a_s_s_w_d(4) entry of the target user as a
-                   login shell.  This means that login-specific resource files
-
 
 
 1.8.0a2                   June  9, 2010                         3
@@ -202,6 +202,13 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       -h          The --hh (_h_e_l_p) option causes ssuuddoo to print a usage message
+                   and exit.
+
+       -i [command]
+                   The --ii (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs the shell
+                   specified in the _p_a_s_s_w_d(4) entry of the target user as a
+                   login shell.  This means that login-specific resource files
                    such as .profile or .login will be read by the shell.  If a
                    command is specified, it is passed to the shell for
                    execution.  Otherwise, an interactive shell is executed.
@@ -249,13 +256,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
        -P          The --PP (_p_r_e_s_e_r_v_e _g_r_o_u_p _v_e_c_t_o_r) option causes ssuuddoo to
                    preserve the invoking user's group vector unaltered.  By
-                   default, ssuuddoo will initialize the group vector to the list
-                   of groups the target user is in.  The real and effective
-                   group IDs, however, are still set to match the target user.
-
-       -p _p_r_o_m_p_t   The --pp (_p_r_o_m_p_t) option allows you to override the default
-                   password prompt and use a custom one.  The following
-                   percent (`%') escapes are supported:
 
 
 
@@ -267,6 +267,14 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+                   default, ssuuddoo will initialize the group vector to the list
+                   of groups the target user is in.  The real and effective
+                   group IDs, however, are still set to match the target user.
+
+       -p _p_r_o_m_p_t   The --pp (_p_r_o_m_p_t) option allows you to override the default
+                   password prompt and use a custom one.  The following
+                   percent (`%') escapes are supported:
 
                    %H  expanded to the local host name including the domain
                        name (on if the machine's host name is fully qualified
@@ -314,14 +322,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    is set (see _s_u_d_o_e_r_s(4)) it is not possible to run commands
                    with a uid not listed in the password database.
 
-       -V          The --VV (_v_e_r_s_i_o_n) option causes ssuuddoo to print the version
-                   number and exit.  If the invoking user is already root the
-                   --VV option will print out a list of the defaults ssuuddoo was
-                   compiled with as well as the machine's local network
-                   addresses.
-
-       -v          If given the --vv (_v_a_l_i_d_a_t_e) option, ssuuddoo will update the
-                   user's time stamp, prompting for the user's password if
 
 
 
@@ -334,6 +334,14 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       -V          The --VV (_v_e_r_s_i_o_n) option causes ssuuddoo to print the version
+                   number and exit.  If the invoking user is already root the
+                   --VV option will print out a list of the defaults ssuuddoo was
+                   compiled with as well as the machine's local network
+                   addresses.
+
+       -v          If given the --vv (_v_a_l_i_d_a_t_e) option, ssuuddoo will update the
+                   user's time stamp, prompting for the user's password if
                    necessary.  This extends the ssuuddoo timeout for another 5
                    minutes (or whatever the timeout is set to in _s_u_d_o_e_r_s) but
                    does not run a command.
@@ -367,6 +375,7 @@ PPLLUUGGIINNSS
         #
         # Format:
         #   Plugin plugin_name plugin_path
+        #   Path askpass path/to/askpass
         #
         # The plugin_path is relative to /usr/local/libexec unless
         #   fully qualified.
@@ -379,15 +388,6 @@ PPLLUUGGIINNSS
        A Plugin line consists of the Plugin keyword, followed by the
        _s_y_m_b_o_l___n_a_m_e and the _p_a_t_h to the shared object containing the plugin.
        The _s_y_m_b_o_l___n_a_m_e is the name of the struct policy_plugin or struct
-       io_plugin in the plugin shared object.  The _p_a_t_h may be fully qualified
-       or relative.  If not fully qualified it is relative to the
-       _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c directory.  Any additional parameters after the _p_a_t_h
-       are ignored.
-
-       For more information, see the "_s_u_d_o___p_l_u_g_i_n(1m) manual."
-
-RREETTUURRNN VVAALLUUEESS
-       Upon successful execution of a program, the exit status from ssuuddoo will
 
 
 
@@ -400,6 +400,16 @@ RREETTUURRNN VVAALLUUEESS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       io_plugin in the plugin shared object.  The _p_a_t_h may be fully qualified
+       or relative.  If not fully qualified it is relative to the
+       _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c directory.  Any additional parameters after the _p_a_t_h
+       are ignored.  Lines that don't begin with Plugin or Path are silently
+       ignored
+
+       For more information, see the _s_u_d_o___p_l_u_g_i_n(1m) manual.
+
+RREETTUURRNN VVAALLUUEESS
+       Upon successful execution of a program, the exit status from ssuuddoo will
        simply be the exit status of the program that was executed.
 
        Otherwise, ssuuddoo quits with an exit value of 1 if there is a
@@ -444,16 +454,6 @@ SSEECCUURRIITTYY NNOOTTEESS
        ssuuddoo to preserve them.
 
        To prevent command spoofing, ssuuddoo checks "." and "" (both denoting
-       current directory) last when searching for a command in the user's PATH
-       (if one or both are in the PATH).  Note, however, that the actual PATH
-       environment variable is _n_o_t modified and is passed unchanged to the
-       program that ssuuddoo executes.
-
-       ssuuddoo will check the ownership of its time stamp directory
-       (_/_v_a_r_/_r_u_n_/_s_u_d_o by default) and ignore the directory's contents if it is
-       not owned by root or if it is writable by a user other than root.  On
-       systems that allow non-root users to give away files via _c_h_o_w_n(2), if
-       the time stamp directory is located in a directory writable by anyone
 
 
 
@@ -466,6 +466,16 @@ SSEECCUURRIITTYY NNOOTTEESS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       current directory) last when searching for a command in the user's PATH
+       (if one or both are in the PATH).  Note, however, that the actual PATH
+       environment variable is _n_o_t modified and is passed unchanged to the
+       program that ssuuddoo executes.
+
+       ssuuddoo will check the ownership of its time stamp directory
+       (_/_v_a_r_/_r_u_n_/_s_u_d_o by default) and ignore the directory's contents if it is
+       not owned by root or if it is writable by a user other than root.  On
+       systems that allow non-root users to give away files via _c_h_o_w_n(2), if
+       the time stamp directory is located in a directory writable by anyone
        (e.g., _/_t_m_p), it is possible for a user to create the time stamp
        directory before ssuuddoo is run.  However, because ssuuddoo checks the
        ownership and mode of the directory and its contents, the only damage
@@ -510,16 +520,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        when giving users access to commands via ssuuddoo to verify that the
        command does not inadvertently give the user an effective root shell.
        For more information, please see the PREVENTING SHELL ESCAPES section
-       in _s_u_d_o_e_r_s(4).
-
-EENNVVIIRROONNMMEENNTT
-       ssuuddoo utilizes the following environment variables:
-
-       EDITOR          Default editor to use in --ee (sudoedit) mode if neither
-                       SUDO_EDITOR nor VISUAL is set
-
-       HOME            In --ss or --HH mode (or if sudo was configured with the
-                       --enable-shell-sets-home option), set to homedir of the
 
 
 
@@ -532,6 +532,16 @@ EENNVVIIRROONNMMEENNTT
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       in _s_u_d_o_e_r_s(4).
+
+EENNVVIIRROONNMMEENNTT
+       ssuuddoo utilizes the following environment variables:
+
+       EDITOR          Default editor to use in --ee (sudoedit) mode if neither
+                       SUDO_EDITOR nor VISUAL is set
+
+       HOME            In --ss or --HH mode (or if sudo was configured with the
+                       --enable-shell-sets-home option), set to homedir of the
                        target user
 
        PATH            Set to a sane value if the _s_e_c_u_r_e___p_a_t_h sudoers option
@@ -565,7 +575,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                        SUDO_EDITOR is not set
 
 FFIILLEESS
-       _/_e_t_c_/_s_u_d_o_._c_o_n_f          ssuuddoo plugin configuration
+       _/_e_t_c_/_s_u_d_o_._c_o_n_f          ssuuddoo plugin and path configuration
 
        _/_e_t_c_/_s_u_d_o_e_r_s            List of who can run what
 
@@ -577,16 +587,6 @@ FFIILLEESS
 EEXXAAMMPPLLEESS
        Note: the following examples assume suitable _s_u_d_o_e_r_s(4) entries.
 
-       To get a file listing of an unreadable directory:
-
-        $ sudo ls /usr/local/protected
-
-       To list the home directory of user yaz on a machine where the file
-       system holding ~yaz is not exported as root:
-
-        $ sudo -u yaz ls ~yaz
-
-
 
 
 1.8.0a2                   June  9, 2010                         9
@@ -597,6 +597,15 @@ EEXXAAMMPPLLEESS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+       To get a file listing of an unreadable directory:
+
+        $ sudo ls /usr/local/protected
+
+       To list the home directory of user yaz on a machine where the file
+       system holding ~yaz is not exported as root:
+
+        $ sudo -u yaz ls ~yaz
 
        To edit the _i_n_d_e_x_._h_t_m_l file as user www:
 
@@ -622,7 +631,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 SSEEEE AALLSSOO
        _g_r_e_p(1), _s_u(1), _s_t_a_t(2), _l_o_g_i_n___c_a_p(3), _p_a_s_s_w_d(4), _s_u_d_o_e_r_s(4),
-       "_s_u_d_o___p_l_u_g_i_n(1m), "_s_u_d_o_r_e_p_l_a_y(1m), _v_i_s_u_d_o(1m)""
+       _s_u_d_o___p_l_u_g_i_n(1m), _s_u_d_o_r_e_p_l_a_y(1m), _v_i_s_u_d_o(1m)
 
 AAUUTTHHOORRSS
        Many people have worked on ssuuddoo over the years; this version consists
@@ -643,15 +652,6 @@ CCAAVVEEAATTSS
 
        It is not meaningful to run the cd command directly via sudo, e.g.,
 
-        $ sudo cd /usr/local/protected
-
-       since when the command exits the parent process (your shell) will still
-       be the same.  Please see the EXAMPLES section for more information.
-
-       If users have sudo ALL there is nothing to prevent them from creating
-       their own program that gives them a root shell regardless of any '!'
-       elements in the user specification.
-
 
 
 
@@ -663,6 +663,15 @@ CCAAVVEEAATTSS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+        $ sudo cd /usr/local/protected
+
+       since when the command exits the parent process (your shell) will still
+       be the same.  Please see the EXAMPLES section for more information.
+
+       If users have sudo ALL there is nothing to prevent them from creating
+       their own program that gives them a root shell regardless of any '!'
+       elements in the user specification.
 
        Running shell scripts via ssuuddoo can expose the same kernel bugs that
        make setuid shell scripts unsafe on some operating systems (if your OS
@@ -684,15 +693,6 @@ DDIISSCCLLAAIIMMEERR
        See the LICENSE file distributed with ssuuddoo or
        http://www.sudo.ws/sudo/license.html for complete details.
 
-PPOODD EERRRROORRSS
-       Hey! TThhee aabboovvee ddooccuummeenntt hhaadd ssoommee ccooddiinngg eerrrroorrss,, wwhhiicchh aarree eexxppllaaiinneedd
-       bbeellooww::
-
-       Around line 442:
-           Unterminated L<...> sequence
-
-       Around line 678:
-           Unterminated L<L<...>> sequence
 
 
 

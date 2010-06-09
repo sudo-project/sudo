@@ -718,10 +718,6 @@ init_vars(char * const envp[])
     for (ep = envp; *ep; ep++) {
 	/* XXX - don't fill in if empty string */
 	switch (**ep) {
-	    case 'D':
-		if (strncmp("DISPLAY=", *ep, 8) == 0)
-		    user_display = *ep + 8;
-		break;
 	    case 'K':
 		if (strncmp("KRB5CCNAME=", *ep, 11) == 0)
 		    user_ccname = *ep + 11;
@@ -735,8 +731,6 @@ init_vars(char * const envp[])
 		    user_prompt = *ep + 12;
 		else if (strncmp("SUDO_USER=", *ep, 10) == 0)
 		    prev_user = *ep + 10;
-		else if (strncmp("SUDO_ASKPASS=", *ep, 13) == 0)
-		    user_askpass = *ep + 13;
 		break;
 	    }
     }

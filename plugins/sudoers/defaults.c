@@ -445,9 +445,6 @@ init_defaults(void)
 #ifdef ENV_EDITOR
     def_env_editor = TRUE;
 #endif
-#ifdef _PATH_SUDO_ASKPASS
-    def_askpass = estrdup(_PATH_SUDO_ASKPASS);
-#endif
     def_sudoers_locale = estrdup("C");
     def_env_reset = TRUE;
     def_set_logname = TRUE;

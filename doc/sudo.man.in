@@ -241,11 +241,19 @@ or via the \fIsudoers\fR file.
 .IX Item "-A"
 Normally, if \fBsudo\fR requires a password, it will read it from the
 current terminal.  If the \fB\-A\fR (\fIaskpass\fR) option is specified,
-a (possibly graphical) helper program is executed to read the
-user's password and output the password to the standard output.  If
-the \f(CW\*(C`SUDO_ASKPASS\*(C'\fR environment variable is set, it specifies the
-path to the helper program.  Otherwise, the value specified by the
-\&\fIaskpass\fR option in \fIsudoers\fR\|(@mansectform@) is used.
+a (possibly graphical) helper program is executed to read the user's
+password and output the password to the standard output.  If the
+\&\f(CW\*(C`SUDO_ASKPASS\*(C'\fR environment variable is set, it specifies the path
+to the helper program.  Otherwise, if \fI@sysconfdir@/sudo.conf\fR
+contains a line specifying the askpass program that value will be
+used.  For example:
+.Sp
+.Vb 2
+\&    # Path to askpass helper program
+\&    Path askpass /usr/X11R6/bin/ssh\-askpass
+.Ve
+.Sp
+If no askpass program is available, sudo will exit with an error.
 .if \n(BA \{\
 .IP "\-a \fItype\fR" 12
 .IX Item "-a type"
@@ -521,6 +529,7 @@ policy and I/O logging, which corresponds to the following
 \& #
 \& # Format:
 \& #   Plugin plugin_name plugin_path
+\& #   Path askpass path/to/askpass
 \& #
 \& # The plugin_path is relative to @prefix@/libexec unless
 \& #   fully qualified.
@@ -536,10 +545,11 @@ A \f(CW\*(C`Plugin\*(C'\fR line consists of the \f(CW\*(C`Plugin\*(C'\fR keyword
 plugin.  The \fIsymbol_name\fR is the name of the \f(CW\*(C`struct policy_plugin\*(C'\fR
 or \f(CW\*(C`struct io_plugin\*(C'\fR in the plugin shared object.  The \fIpath\fR
 may be fully qualified or relative.  If not fully qualified it is
-relative to the \fI@prefix@/libexec\fR directory.  Any additional parameters
-after the \fIpath\fR are ignored.
+relative to the \fI@prefix@/libexec\fR directory.  Any additional
+parameters after the \fIpath\fR are ignored.  Lines that don't begin
+with \f(CW\*(C`Plugin\*(C'\fR or \f(CW\*(C`Path\*(C'\fR are silently ignored
 .PP
-For more information, see the \*(L"\fIsudo_plugin\fR\|(@mansectsu@) manual.\*(R"
+For more information, see the \fIsudo_plugin\fR\|(@mansectsu@) manual.
 .SH "RETURN VALUES"
 .IX Header "RETURN VALUES"
 Upon successful execution of a program, the exit status from \fBsudo\fR
@@ -713,7 +723,7 @@ is not set
 .ie n .IP "\fI@sysconfdir@/sudo.conf\fR" 24
 .el .IP "\fI@sysconfdir@/sudo.conf\fR" 24
 .IX Item "@sysconfdir@/sudo.conf"
-\&\fBsudo\fR plugin configuration
+\&\fBsudo\fR plugin and path configuration
 .ie n .IP "\fI@sysconfdir@/sudoers\fR" 24
 .el .IP "\fI@sysconfdir@/sudoers\fR" 24
 .IX Item "@sysconfdir@/sudoers"
@@ -777,7 +787,7 @@ to make the \f(CW\*(C`cd\*(C'\fR and file redirection work.
 .IX Header "SEE ALSO"
 \&\fIgrep\fR\|(1), \fIsu\fR\|(1), \fIstat\fR\|(2),
 .if \n(LC \&\fIlogin_cap\fR\|(3),
-\&\fIpasswd\fR\|(@mansectform@), \fIsudoers\fR\|(@mansectform@), "\fIsudo_plugin\fR\|(@mansectsu@), "\fIsudoreplay\fR\|(@mansectsu@), \fIvisudo\fR\|(@mansectsu@)""
+\&\fIpasswd\fR\|(@mansectform@), \fIsudoers\fR\|(@mansectform@), \fIsudo_plugin\fR\|(@mansectsu@), \fIsudoreplay\fR\|(@mansectsu@), \fIvisudo\fR\|(@mansectsu@)
 .SH "AUTHORS"
 .IX Header "AUTHORS"
 Many people have worked on \fBsudo\fR over the years; this
@@ -832,12 +842,3 @@ including, but not limited to, the implied warranties of merchantability
 and fitness for a particular purpose are disclaimed.  See the \s-1LICENSE\s0
 file distributed with \fBsudo\fR or http://www.sudo.ws/sudo/license.html
 for complete details.
-.SH "POD ERRORS"
-.IX Header "POD ERRORS"
-Hey! \fBThe above document had some coding errors, which are explained below:\fR
-.IP "Around line 442:" 4
-.IX Item "Around line 442:"
-Unterminated L<...> sequence
-.IP "Around line 678:" 4
-.IX Item "Around line 678:"
-Unterminated L<L<...>> sequence

@@ -171,8 +171,9 @@ A \f(CW\*(C`Plugin\*(C'\fR line consists of the \f(CW\*(C`Plugin\*(C'\fR keyword
 plugin.  The \fIsymbol_name\fR is the name of the \f(CW\*(C`struct policy_plugin\*(C'\fR
 or \f(CW\*(C`struct io_plugin\*(C'\fR in the plugin shared object.  The \fIpath\fR
 may be fully qualified or relative.  If not fully qualified it is
-relative to the \fI@prefix@/libexec\fR directory.  Any additional parameters
-after the \fIpath\fR are ignored.
+relative to the \fI@prefix@/libexec\fR directory.  Any additional
+parameters after the \fIpath\fR are ignored.  Lines that don't begin
+with \f(CW\*(C`Plugin\*(C'\fR or \f(CW\*(C`Path\*(C'\fR are silently ignored.
 .PP
 The same shared object may contain multiple plugins, each with a
 different symbol name.  The shared object file must be owned by uid
@@ -186,6 +187,7 @@ This limitation does not apply to I/O plugins.
 \& #
 \& # Format:
 \& #   Plugin plugin_name plugin_path
+\& #   Path askpass /path/to/askpass
 \& #
 \& # The plugin_path is relative to @prefix@/libexec unless
 \& #   fully qualified.

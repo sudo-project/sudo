@@ -136,27 +136,8 @@ check_user(int validated, int mode)
 	    return -1;
 	}
 
-#if 0 /* XXX - checks need to be done in main driver */
-	/* If user specified -A, make sure we have an askpass helper. */
-	if (ISSET(tgetpass_flags, TGP_ASKPASS)) {
-	    if (user_askpass == NULL)
-		log_error(NO_MAIL,
-		    "no askpass program specified, try setting SUDO_ASKPASS");
-	} else if (!ISSET(tgetpass_flags, TGP_STDIN)) {
-	    /* If no tty but DISPLAY is set, use askpass if we have it. */
-	    if (!user_ttypath && !tty_present()) {
-		if (user_askpass && user_display && *user_display != '\0') {
-		    SET(tgetpass_flags, TGP_ASKPASS);
-		} else if (!def_visiblepw) {
-		    log_error(NO_MAIL,
-			"no tty present and no askpass program specified");
-		}
-	    }
-	}
-
-	if (!ISSET(tgetpass_flags, TGP_ASKPASS))
-#endif
-	    lecture(status);
+	/* XXX - should not lecture if askpass help is being used. */
+	lecture(status);
 
 	/* Expand any escapes in the prompt. */
 	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
