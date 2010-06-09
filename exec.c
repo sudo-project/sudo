@@ -63,17 +63,6 @@
 # include <selinux/selinux.h>
 #endif
 
-/* XXX - move to compat */
-#if !defined(NSIG)
-# if defined(_NSIG)
-#  define NSIG _NSIG
-# elif defined(__NSIG)
-#  define NSIG __NSIG
-# else
-#  define NSIG 64
-# endif
-#endif
-
 #include "sudo.h"
 
 /* shared with exec_pty.c */

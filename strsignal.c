@@ -20,16 +20,6 @@
 #include <config.h>
 #include <compat.h>
 
-#if !defined(NSIG)
-# if defined(_NSIG)
-#  define NSIG _NSIG
-# elif defined(__NSIG)
-#  define NSIG __NSIG
-# else
-#  error one of NSIG, _NSIG, or __NSIG must be defined
-# endif
-#endif
-
 #if defined(HAVE_DECL_SYS_SIGLIST) && HAVE_DECL_SYS_SIGLIST == 1
 # define my_sys_siglist	sys_siglist
 #elif defined(HAVE_DECL__SYS_SIGLIST) && HAVE_DECL__SYS_SIGLIST == 1

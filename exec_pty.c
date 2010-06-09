@@ -59,17 +59,6 @@
 #include <fcntl.h>
 #include <signal.h>
 
-/* XXX - move to compat.h */
-#if !defined(NSIG)
-# if defined(_NSIG)
-#  define NSIG _NSIG
-# elif defined(__NSIG)
-#  define NSIG __NSIG
-# else
-#  define NSIG 64
-# endif
-#endif
-
 #include "sudo.h"
 
 #define SFD_STDIN	0

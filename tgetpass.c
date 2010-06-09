@@ -56,16 +56,6 @@
 
 #include "sudo.h"
 
-#if !defined(NSIG)
-# if defined(_NSIG)
-#  define NSIG _NSIG
-# elif defined(__NSIG)
-#  define NSIG __NSIG
-# else
-#  define NSIG 64
-# endif
-#endif
-
 static volatile sig_atomic_t signo[NSIG];
 
 static void handler __P((int));
