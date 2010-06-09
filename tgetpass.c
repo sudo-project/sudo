@@ -85,7 +85,7 @@ tgetpass(prompt, timeout, flags)
     sigaction_t savetstp, savettin, savettou;
     char *pass;
     static char buf[SUDO_PASS_MAX + 1];
-    int i, input, output, save_errno, neednl, need_restart;
+    int i, input, output, save_errno, neednl = 0, need_restart;
 
     (void) fflush(stdout);
 
@@ -110,10 +110,12 @@ restart:
      * If we are using a tty but are not the foreground pgrp this will
      * generate SIGTTOU, so do it *before* installing the signal handlers.
      */
-    if (def_pwfeedback)
-	neednl = term_cbreak(input);
-    else
-	neednl = term_noecho(input);
+    if (!ISSET(flags, TGP_ECHO)) {
+	if (def_pwfeedback)
+	    neednl = term_cbreak(input);
+	else
+	    neednl = term_noecho(input);
+    }
 
     /*
      * Catch signals that would otherwise cause the user to end
@@ -141,11 +143,12 @@ restart:
     alarm(0);
     save_errno = errno;
 
-    if (neednl)
+    if (neednl || pass == NULL)
 	(void) write(output, "\n", 1);
 
     /* Restore old tty settings and signals. */
-    term_restore(input, 1);
+    if (!ISSET(flags, TGP_ECHO))
+	term_restore(input, 1);
     (void) sigaction(SIGALRM, &savealrm, NULL);
     (void) sigaction(SIGINT, &saveint, NULL);
     (void) sigaction(SIGHUP, &savehup, NULL);
