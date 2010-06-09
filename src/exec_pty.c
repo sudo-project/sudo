@@ -1149,10 +1149,8 @@ sync_ttysize(int src, int dst)
 
     if (ioctl(src, TIOCGSIZE, &tsize) == 0) {
 	    ioctl(dst, TIOCSSIZE, &tsize);
-#ifdef TIOCGPGRP
-	    if (ioctl(dst, TIOCGPGRP, &pgrp) == 0)
-		    killpg(pgrp, SIGWINCH);
-#endif
+	    if ((pgrp = tcgetpgrp(dst)) != -1)
+		killpg(pgrp, SIGWINCH);
     }
 #endif
 }
