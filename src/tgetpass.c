@@ -120,10 +120,12 @@ restart:
      * If we are using a tty but are not the foreground pgrp this will
      * generate SIGTTOU, so do it *before* installing the signal handlers.
      */
-    if (ISSET(flags, TGP_MASK))
-	neednl = term_cbreak(input);
-    else if (!ISSET(flags, TGP_ECHO))
-	neednl = term_noecho(input);
+    if (!ISSET(flags, TGP_ECHO)) {
+	if (ISSET(flags, TGP_MASK))
+	    neednl = term_cbreak(input);
+	else
+	    neednl = term_noecho(input);
+    }
 
     /*
      * Catch signals that would otherwise cause the user to end
@@ -155,7 +157,8 @@ restart:
 	(void) write(output, "\n", 1);
 
     /* Restore old tty settings and signals. */
-    term_restore(input, 1);
+    if (!ISSET(flags, TGP_ECHO))
+	term_restore(input, 1);
     (void) sigaction(SIGALRM, &savealrm, NULL);
     (void) sigaction(SIGINT, &saveint, NULL);
     (void) sigaction(SIGHUP, &savehup, NULL);
