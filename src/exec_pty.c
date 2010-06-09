@@ -55,18 +55,7 @@
 #include <signal.h>
 #include <termios.h>
 
-/* XXX - move to compat.h */
-#if !defined(NSIG)
-# if defined(_NSIG)
-#  define NSIG _NSIG
-# elif defined(__NSIG)
-#  define NSIG __NSIG
-# else
-#  define NSIG 64
-# endif
-#endif
-
-#include "sudo.h" /* XXX? */
+#include "sudo.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 

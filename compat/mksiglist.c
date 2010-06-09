@@ -30,16 +30,6 @@
 
 #include <compat.h>
 
-#if !defined(NSIG)
-# if defined(_NSIG)
-#  define NSIG _NSIG
-# elif defined(__NSIG)
-#  define NSIG __NSIG
-# else
-#  error one of NSIG, _NSIG, or __NSIG must be defined
-# endif
-#endif
-
 int
 main(int argc, char *argv[])
 {

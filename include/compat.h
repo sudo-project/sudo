@@ -287,6 +287,17 @@ void setprogname(const char *);
     } while (0)
 #endif
 
+/* Not all systems define NSIG in signal.h */
+#if !defined(NSIG)
+# if defined(_NSIG)
+#  define NSIG _NSIG
+# elif defined(__NSIG)
+#  define NSIG __NSIG
+# else
+#  define NSIG 64
+# endif
+#endif
+
 #ifndef WCOREDUMP
 # define WCOREDUMP(x)	((x) & 0x80)
 #endif
