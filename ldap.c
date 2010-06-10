@@ -269,7 +269,8 @@ sudo_ldap_conf_add_ports()
 	if (strlcat(hostbuf, host, sizeof(hostbuf)) >= sizeof(hostbuf))
 	    goto toobig;
 	/* Append port if there is not one already. */
-	if ((port = strrchr(host, ':')) == NULL || !isdigit(port[1])) {
+	if ((port = strrchr(host, ':')) == NULL ||
+	    !isdigit((unsigned char)port[1])) {
 	    if (strlcat(hostbuf, defport, sizeof(hostbuf)) >= sizeof(hostbuf))
 		goto toobig;
 	}
@@ -331,7 +332,8 @@ sudo_ldap_parse_uri(uri_list)
 
 	/* If using SSL and no port specified, add port 636 */
 	if (nldaps) {
-	    if ((port = strrchr(host, ':')) == NULL || !isdigit(port[1]))
+	    if ((port = strrchr(host, ':')) == NULL ||
+		!isdigit((unsigned char)port[1]))
 		if (strlcat(hostbuf, ":636", sizeof(hostbuf)) >= sizeof(hostbuf))
 		    goto toobig;
 	}
@@ -1575,9 +1577,11 @@ sudo_ldap_bind_s(ld)
     LDAP *ld;
 {
     int rc;
+#ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     const char *old_ccname = user_ccname;
-#ifdef HAVE_GSS_KRB5_CCACHE_NAME
+# ifdef HAVE_GSS_KRB5_CCACHE_NAME
     unsigned int status;
+# endif
 #endif
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
@@ -1587,28 +1591,28 @@ sudo_ldap_bind_s(ld)
 	    ldap_conf.rootsasl_auth_id : ldap_conf.sasl_auth_id;
 
 	if (ldap_conf.krb5_ccname != NULL) {
-#ifdef HAVE_GSS_KRB5_CCACHE_NAME
+# ifdef HAVE_GSS_KRB5_CCACHE_NAME
 	    if (gss_krb5_ccache_name(&status, ldap_conf.krb5_ccname, &old_ccname)
 		!= GSS_S_COMPLETE) {
 		old_ccname = NULL;
 		DPRINTF(("gss_krb5_ccache_name() failed: %d", status), 1);
 	    }
-#else
+# else
 	    setenv("KRB5CCNAME", ldap_conf.krb5_ccname, TRUE);
-#endif
+# endif
 	}
 	rc = ldap_sasl_interactive_bind_s(ld, ldap_conf.binddn, "GSSAPI",
 	    NULL, NULL, LDAP_SASL_QUIET, sudo_ldap_sasl_interact, auth_id);
 	if (ldap_conf.krb5_ccname != NULL) {
-#ifdef HAVE_GSS_KRB5_CCACHE_NAME
+# ifdef HAVE_GSS_KRB5_CCACHE_NAME
 	    if (gss_krb5_ccache_name(&status, old_ccname, NULL) != GSS_S_COMPLETE)
 		    DPRINTF(("gss_krb5_ccache_name() failed: %d", status), 1);
-#else
+# else
 	    if (old_ccname != NULL)
 		setenv("KRB5CCNAME", old_ccname, TRUE);
 	    else
 		unsetenv("KRB5CCNAME");
-#endif
+# endif
 	}
 	if (rc != LDAP_SUCCESS) {
 	    warningx("ldap_sasl_interactive_bind_s(): %s", ldap_err2string(rc));
