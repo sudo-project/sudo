@@ -317,19 +317,8 @@ sudoers_io_close(int exit_status, int error)
 static int
 sudoers_io_version(int verbose)
 {
-    struct sudo_conv_message msg;
-    struct sudo_conv_reply repl;
-    char *str;
-
-    easprintf(&str, "Sudoers I/O plugin version %s\n", PACKAGE_VERSION);
-
-    /* Call conversation function */
-    memset(&msg, 0, sizeof(msg));
-    msg.msg_type = SUDO_CONV_INFO_MSG;
-    msg.msg = str;
-    memset(&repl, 0, sizeof(repl));
-    sudo_conv(1, &msg, &repl);
-    free(str);
+    sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers I/O plugin version %s\n",
+	PACKAGE_VERSION);
 
     return TRUE;
 }
