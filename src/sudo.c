@@ -160,6 +160,7 @@ main(int argc, char *argv[], char *envp[])
     sudo_debug(9, "sudo_mode %d", sudo_mode);
     switch (sudo_mode & MODE_MASK) {
 	case MODE_VERSION:
+	    printf("Sudo version %s\n", PACKAGE_VERSION);
 	    policy_plugin.u.policy->show_version(!user_details.uid);
 	    tq_foreach_fwd(&io_plugins, plugin) {
 		ok = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation,
