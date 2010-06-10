@@ -176,7 +176,7 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
     sigemptyset(&sa.sa_mask);
 
     /* Note: HP-UX select() will not be interrupted if SA_RESTART set */
-    sa.sa_flags = 0; /* do not restart syscalls */
+    sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
     sa.sa_handler = handler;
     sigaction(SIGALRM, &sa, NULL);
     sigaction(SIGCHLD, &sa, NULL);

@@ -478,7 +478,7 @@ send_mail(const char *fmt, ...)
     /* Ignore SIGPIPE in case mailer exits prematurely (or is missing). */
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
+    sa.sa_flags = SA_INTERRUPT;
     sa.sa_handler = SIG_IGN;
     (void) sigaction(SIGPIPE, &sa, NULL);
 

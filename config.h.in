@@ -433,9 +433,6 @@
 /* Define to 1 if you have the `sia_ses_init' function. */
 #undef HAVE_SIA_SES_INIT
 
-/* Define to 1 if you have the `sigaction' function. */
-#undef HAVE_SIGACTION
-
 /* Define to 1 if <signal.h> has the sigaction_t typedef. */
 #undef HAVE_SIGACTION_T
 

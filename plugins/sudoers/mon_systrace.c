@@ -113,7 +113,7 @@ systrace_attach(pid)
 	error(1, "sigprocmask");
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
+    sa.sa_flags = SA_INTERRUPT;
     sa.sa_handler = catchsig;
     if (sigaction(SIGUSR1, &sa, &osa) != 0)
 	error(1, "sigaction");
@@ -151,7 +151,7 @@ systrace_attach(pid)
     dodetach = 0;
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
+    sa.sa_flags = SA_INTERRUPT;
     sa.sa_handler = catchsig;
     if (sigaction(SIGUSR1, &osa, NULL) != 0 ||
 	sigaction(SIGHUP, &sa, NULL) != 0 ||
