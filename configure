@@ -14601,38 +14601,6 @@ done
 fi
 done
 
-for ac_func in getgrset
-do :
-  ac_fn_c_check_func "$LINENO" "getgrset" "ac_cv_func_getgrset"
-if test "x$ac_cv_func_getgrset" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_GETGRSET 1
-_ACEOF
-
-else
-  for ac_func in getgrouplist
-do :
-  ac_fn_c_check_func "$LINENO" "getgrouplist" "ac_cv_func_getgrouplist"
-if test "x$ac_cv_func_getgrouplist" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_GETGROUPLIST 1
-_ACEOF
-
-else
-  case " $LIBOBJS " in
-  *" $ac_func.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS $ac_func.$ac_objext"
- ;;
-esac
-
-fi
-done
-
-
-fi
-done
-
-
 for ac_func in sysctl getutid getutxid
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
