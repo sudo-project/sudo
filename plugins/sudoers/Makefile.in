@@ -148,13 +148,13 @@ libsudoers.la: $(LIBSUDOERS_OBJS)
 sudoers.la: $(SUDOERS_OBJS) libsudoers.la
 	$(LIBTOOL) --tag=disable-static --mode=link $(CC) $(SUDOERS_LDFLAGS) -o $@ $(SUDOERS_OBJS) libsudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir)
 
-visudo: libsudoers.la $(VISUDO_OBJS)
+visudo: libsudoers.la $(VISUDO_OBJS) $(LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)
 
-sudoreplay: libsudoers.la $(REPLAY_OBJS)
+sudoreplay: libsudoers.la $(REPLAY_OBJS) $(LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) timestr.lo $(REPLAY_LIBS) $(LIBS)
 
-testsudoers: $(TEST_OBJS)
+testsudoers: $(TEST_OBJS) $(LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)
 
 # Uncomment the following if you want "make distclean" to clean the parser
