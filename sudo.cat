@@ -33,17 +33,18 @@ DDEESSCCRRIIPPTTIIOONN
        password is required.  Otherwise, ssuuddoo requires that users authenticate
        themselves with a password by default (NOTE: in the default
        configuration this is the user's password, not the root password).
-       Once a user has been authenticated, a timestamp is updated and the user
-       may then use sudo without a password for a short period of time (5
+       Once a user has been authenticated, a time stamp is updated and the
+       user may then use sudo without a password for a short period of time (5
        minutes unless overridden in _s_u_d_o_e_r_s).
 
        When invoked as ssuuddooeeddiitt, the --ee option (described below), is implied.
 
        ssuuddoo determines who is an authorized user by consulting the file
        _/_e_t_c_/_s_u_d_o_e_r_s.  By running ssuuddoo with the --vv option, a user can update
-       the time stamp without running a _c_o_m_m_a_n_d. The password prompt itself
-       will also time out if the user's password is not entered within 5
-       minutes (unless overridden via _s_u_d_o_e_r_s).
+       the time stamp without running a _c_o_m_m_a_n_d.  If a password is required,
+       ssuuddoo will exit if the user's password is not entered within a
+       configurable time limit.  The default password prompt timeout is 5
+       minutes.
 
        If a user who is not listed in the _s_u_d_o_e_r_s file tries to run a command
        via ssuuddoo, mail is sent to the proper authorities, as defined at
@@ -57,11 +58,10 @@ DDEESSCCRRIIPPTTIIOONN
        be used by a user to log commands through sudo even when a root shell
        has been invoked.  It also allows the --ee option to remain useful even
        when being run via a sudo-run script or program.  Note however, that
-       the sudoers lookup is still done for root, not the user specified by
 
 
 
-1.7.3b2                   June  3, 2010                         1
+1.7.3b3                   June 10, 2010                         1
 
 
 
@@ -70,6 +70,7 @@ DDEESSCCRRIIPPTTIIOONN
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       the sudoers lookup is still done for root, not the user specified by
        SUDO_USER.
 
        ssuuddoo can log both successful and unsuccessful attempts (as well as
@@ -123,11 +124,10 @@ OOPPTTIIOONNSS
                    with BSD login classes.
 
        -E          The --EE (_p_r_e_s_e_r_v_e _e_n_v_i_r_o_n_m_e_n_t) option will override the
-                   _e_n_v___r_e_s_e_t option in _s_u_d_o_e_r_s(4)).  It is only available when
 
 
 
-1.7.3b2                   June  3, 2010                         2
+1.7.3b3                   June 10, 2010                         2
 
 
 
@@ -136,6 +136,7 @@ OOPPTTIIOONNSS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+                   _e_n_v___r_e_s_e_t option in _s_u_d_o_e_r_s(4)).  It is only available when
                    either the matching command has the SETENV tag or the
                    _s_e_t_e_n_v option is set in _s_u_d_o_e_r_s(4).
 
@@ -189,11 +190,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    specified in the _p_a_s_s_w_d(4) entry of the target user as a
                    login shell.  This means that login-specific resource files
                    such as .profile or .login will be read by the shell.  If a
-                   command is specified, it is passed to the shell for
 
 
 
-1.7.3b2                   June  3, 2010                         3
+1.7.3b3                   June 10, 2010                         3
 
 
 
@@ -202,6 +202,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+                   command is specified, it is passed to the shell for
                    execution.  Otherwise, an interactive shell is executed.
                    ssuuddoo attempts to change to that user's home directory
                    before running the shell.  It also initializes the
@@ -211,12 +212,12 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    other environment variables are removed.
 
        -K          The --KK (sure _k_i_l_l) option is like --kk except that it removes
-                   the user's timestamp entirely and may not be used in
+                   the user's time stamp entirely and may not be used in
                    conjunction with a command or other option.  This option
                    does not require a password.
 
        -k          When used by itself, the --kk (_k_i_l_l) option to ssuuddoo
-                   invalidates the user's timestamp by setting the time on it
+                   invalidates the user's time stamp by setting the time on it
                    to the Epoch.  The next time ssuuddoo is run a password will be
                    required.  This option does not require a password and was
                    added to allow a user to revoke ssuuddoo permissions from a
@@ -224,9 +225,9 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
                    When used in conjunction with a command or an option that
                    may require a password, the --kk option will cause ssuuddoo to
-                   ignore the user's timestamp file.  As a result, ssuuddoo will
+                   ignore the user's time stamp file.  As a result, ssuuddoo will
                    prompt for a password (if one is required by _s_u_d_o_e_r_s) and
-                   will not update the user's timestamp file.
+                   will not update the user's time stamp file.
 
        -L          The --LL (_l_i_s_t defaults) option will list the parameters that
                    may be set in a _D_e_f_a_u_l_t_s line along with a short
@@ -258,8 +259,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-
-1.7.3b2                   June  3, 2010                         4
+1.7.3b3                   June 10, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.7.3b2                   June  3, 2010                         5
+1.7.3b3                   June 10, 2010                         5
 
 
 
@@ -337,7 +337,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    addresses.
 
        -v          If given the --vv (_v_a_l_i_d_a_t_e) option, ssuuddoo will update the
-                   user's timestamp, prompting for the user's password if
+                   user's time stamp, prompting for the user's password if
                    necessary.  This extends the ssuuddoo timeout for another 5
                    minutes (or whatever the timeout is set to in _s_u_d_o_e_r_s) but
                    does not run a command.
@@ -391,7 +391,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.7.3b2                   June  3, 2010                         6
+1.7.3b3                   June 10, 2010                         6
 
 
 
@@ -418,26 +418,27 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        environment variable is _n_o_t modified and is passed unchanged to the
        program that ssuuddoo executes.
 
-       ssuuddoo will check the ownership of its timestamp directory (_/_v_a_r_/_r_u_n_/_s_u_d_o
-       by default) and ignore the directory's contents if it is not owned by
-       root or if it is writable by a user other than root.  On systems that
-       allow non-root users to give away files via _c_h_o_w_n(2), if the timestamp
-       directory is located in a directory writable by anyone (e.g., _/_t_m_p), it
-       is possible for a user to create the timestamp directory before ssuuddoo is
-       run.  However, because ssuuddoo checks the ownership and mode of the
-       directory and its contents, the only damage that can be done is to
-       "hide" files by putting them in the timestamp dir.  This is unlikely to
-       happen since once the timestamp dir is owned by root and inaccessible
-       by any other user, the user placing files there would be unable to get
-       them back out.  To get around this issue you can use a directory that
-       is not world-writable for the timestamps (_/_v_a_r_/_a_d_m_/_s_u_d_o for instance)
-       or create _/_v_a_r_/_r_u_n_/_s_u_d_o with the appropriate owner (root) and
-       permissions (0700) in the system startup files.
+       ssuuddoo will check the ownership of its time stamp directory
+       (_/_v_a_r_/_r_u_n_/_s_u_d_o by default) and ignore the directory's contents if it is
+       not owned by root or if it is writable by a user other than root.  On
+       systems that allow non-root users to give away files via _c_h_o_w_n(2), if
+       the time stamp directory is located in a directory writable by anyone
+       (e.g., _/_t_m_p), it is possible for a user to create the time stamp
+       directory before ssuuddoo is run.  However, because ssuuddoo checks the
+       ownership and mode of the directory and its contents, the only damage
+       that can be done is to "hide" files by putting them in the time stamp
+       dir.  This is unlikely to happen since once the time stamp dir is owned
+       by root and inaccessible by any other user, the user placing files
+       there would be unable to get them back out.  To get around this issue
+       you can use a directory that is not world-writable for the time stamps
+       (_/_v_a_r_/_a_d_m_/_s_u_d_o for instance) or create _/_v_a_r_/_r_u_n_/_s_u_d_o with the
+       appropriate owner (root) and permissions (0700) in the system startup
+       files.
 
-       ssuuddoo will not honor timestamps set far in the future.  Timestamps with
+       ssuuddoo will not honor time stamps set far in the future.  Timestamps with
        a date greater than current_time + 2 * TIMEOUT will be ignored and sudo
        will log and complain.  This is done to keep a user from creating
-       his/her own timestamp with a bogus date on systems that allow users to
+       his/her own time stamp with a bogus date on systems that allow users to
        give away files.
 
        On systems where the boot time is available, ssuuddoo will also not honor
@@ -453,11 +454,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        session.  On Linux systems where the devpts filesystem is used, Solaris
        systems with the devices filesystem, as well as other systems that
        utilize a devfs filesystem that monotonically increase the inode number
-       of devices as they are created (such as Mac OS X), ssuuddoo is able to
 
 
 
-1.7.3b2                   June  3, 2010                         7
+1.7.3b3                   June 10, 2010                         7
 
 
 
@@ -466,6 +466,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       of devices as they are created (such as Mac OS X), ssuuddoo is able to
        determine when a tty-based time stamp file is stale and will ignore it.
        Administrators should not rely on this feature as it is not universally
        available.
@@ -522,8 +523,7 @@ EENNVVIIRROONNMMEENNTT
 
 
 
-
-1.7.3b2                   June  3, 2010                         8
+1.7.3b3                   June 10, 2010                         8
 
 
 
@@ -535,7 +535,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 FFIILLEESS
        _/_e_t_c_/_s_u_d_o_e_r_s            List of who can run what
 
-       _/_v_a_r_/_r_u_n_/_s_u_d_o           Directory containing timestamps
+       _/_v_a_r_/_r_u_n_/_s_u_d_o           Directory containing time stamps
 
        _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t        Initial environment for --ii mode on Linux and
                                AIX
@@ -589,7 +589,7 @@ AAUUTTHHOORRSS
 
 
 
-1.7.3b2                   June  3, 2010                         9
+1.7.3b3                   June 10, 2010                         9
 
 
 
@@ -655,6 +655,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.3b2                   June  3, 2010                        10
+1.7.3b3                   June 10, 2010                        10
 
 
