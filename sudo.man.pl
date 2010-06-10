@@ -7,7 +7,7 @@ BEGIN {
 
 # Initialize the numeric register we use for conditionals
 if ($cond == -1) {
-    $_ = ".nr SL \@SEMAN\@\n.nr BA \@BAMAN\@\n.nr LC \@LCMAN\@\n.\\\"\n$_";
+    $_ = ".nr SL \@SEMAN\@\n.nr BA \@BAMAN\@\n.nr LC \@LCMAN\@\n.nr PT \@password_timeout\@\n.\\\"\n$_";
     $cond = 0;
 }
 
@@ -30,3 +30,6 @@ if (/-a.*auth_type/) {
 
 # Fix up broken pod2man formatting of F<@foo@/bar>
 s/\\fI\\f(\(C)?I\@([^\@]*)\\fI\@/\\fI\@$2\@/g;
+
+# Try to deal sensibly with password_timeout being set to 0 by default
+s/([^ ]*\@password_timeout\@[^ ]* minutes.$)/\n.ie \\n(PT $1\n.el unlimited./;
