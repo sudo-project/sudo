@@ -45,6 +45,9 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
+/* tgetpass.c */
+extern const char *askpass_path;
+
 /*
  * Read in /etc/sudo.conf
  * Returns a list of plugins.
@@ -91,8 +94,7 @@ sudo_read_conf(const char *conf_file)
 	    }
 	    if (strcasecmp(name, "askpass") != 0)
 		continue;
-	    /* XXX - Just set in environment for now */
-	    setenv("SUDO_ASKPASS", path, 0);
+	    askpass_path = estrdup(path);
 	    continue;
 	}
 

@@ -64,6 +64,12 @@ static char *sudo_askpass(const char *, const char *);
 
 extern struct user_details user_details; /* XXX */
 
+#ifdef _PATH_SUDO_ASKPASS
+const char *askpass_path = _PATH_SUDO_ASKPASS;
+#else
+const char *askpass_path;
+#endif
+
 /*
  * Like getpass(3) but with timeout and echo flags.
  */
@@ -73,7 +79,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     sigaction_t sa, savealrm, saveint, savehup, savequit, saveterm;
     sigaction_t savetstp, savettin, savettou, savepipe;
     char *pass;
-    static char *askpass;
+    static const char *askpass;
     static char buf[SUDO_PASS_MAX + 1];
     int i, input, output, save_errno, neednl = 0, need_restart;
 
@@ -81,10 +87,8 @@ tgetpass(const char *prompt, int timeout, int flags)
 
     if (askpass == NULL) {
 	askpass = getenv("SUDO_ASKPASS");
-#ifdef _PATH_SUDO_ASKPASS
-	if (askpass == NULL)
-	    askpass = _PATH_SUDO_ASKPASS;
-#endif
+	if (askpass == NULL || *askpass == '\0')
+	    askpass = askpass_path;
     }
 
     /* If no tty present and we need to disable echo, try askpass. */
