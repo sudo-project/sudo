@@ -966,10 +966,10 @@ C<@loglen@> (use 0 or negate the option to disable word wrap).
 
 =item passwd_timeout
 
-Number of minutes before the B<sudo> password prompt times out.
-The timeout may include a fractional component if minute granularity
-is insufficient, for example C<2.5>.  The default is C<@password_timeout@>;
-set this to C<0> for no password timeout.
+Number of minutes before the B<sudo> password prompt times out, or
+C<0> for no timeout.  The timeout may include a fractional component
+if minute granularity is insufficient, for example C<2.5>.  The
+default is C<@password_timeout@>.
 
 =item timestamp_timeout
 
