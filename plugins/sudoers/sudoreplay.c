@@ -193,8 +193,10 @@ static void *open_io_fd(char *pathbuf, int len, const char *suffix);
 # define REGEX_T	char
 #endif
 
-#define VALID_ID(s) (isalnum((s)[0]) && isalnum((s)[1]) && isalnum((s)[2]) && \
-    isalnum((s)[3]) && isalnum((s)[4]) && isalnum((s)[5]) && (s)[6] == '\0')
+#define VALID_ID(s) (isalnum((unsigned char)(s)[0]) && \
+    isalnum((unsigned char)(s)[1]) && isalnum((unsigned char)(s)[2]) && \
+    isalnum((unsigned char)(s)[3]) && isalnum((unsigned char)(s)[4]) && \
+    isalnum((unsigned char)(s)[5]) && (s)[6] == '\0')
 
 int
 main(int argc, char *argv[])
@@ -634,8 +636,8 @@ list_session_dir(char *pathbuf, REGEX_T *re, const char *user, const char *tty)
 	return(-1);
     }
     while ((dp = readdir(d)) != NULL) {
-	if (NAMLEN(dp) != 2 || !isalnum(dp->d_name[0]) ||
-	    !isalnum(dp->d_name[1]))
+	if (NAMLEN(dp) != 2 || !isalnum((unsigned char)dp->d_name[0]) ||
+	    !isalnum((unsigned char)dp->d_name[1]))
 	    continue;
 
 	/* open log file, print id and command */
@@ -758,8 +760,8 @@ list_sessions(int argc, char **argv, const char *pattern, const char *user,
      * We do a depth-first traversal.
      */
     while ((dp1 = readdir(d1)) != NULL) {
-	if (NAMLEN(dp1) != 2 || !isalnum(dp1->d_name[0]) ||
-	    !isalnum(dp1->d_name[1]))
+	if (NAMLEN(dp1) != 2 || !isalnum((unsigned char)dp1->d_name[0]) ||
+	    !isalnum((unsigned char)dp1->d_name[1]))
 	    continue;
 
 	pathbuf[sdlen + 0] = '/';
@@ -771,8 +773,8 @@ list_sessions(int argc, char **argv, const char *pattern, const char *user,
 	    continue;
 
 	while ((dp2 = readdir(d2)) != NULL) {
-	    if (NAMLEN(dp2) != 2 || !isalnum(dp2->d_name[0]) ||
-		!isalnum(dp2->d_name[1]))
+	    if (NAMLEN(dp2) != 2 || !isalnum((unsigned char)dp2->d_name[0]) ||
+		!isalnum((unsigned char)dp2->d_name[1]))
 		continue;
 
 	    pathbuf[sdlen + 3] = '/';
