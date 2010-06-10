@@ -16,6 +16,12 @@ What's new in Sudo 1.7.3?
  * The use_pty sudoers option can be used to force a command to be
    run in a pseudo-pty, even when I/O logging is not enabled.
 
+ * On some systems, sudo can now detect when a user has logged out
+   and back in again when tty-based time stamps are in use.  Supported
+   systems include Solaris systems with the devices file system,
+   Mac OS X, and Linux systems with the devpts filesystem (pseudo-ttys
+   only).
+
  * The passwd_timeout and timestamp_timeout options may now be
    specified as floating point numbers for more granular timeout
    values.
