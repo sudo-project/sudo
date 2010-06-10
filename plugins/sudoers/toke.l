@@ -221,7 +221,7 @@ DEFVAR			[a-z_]+
 			    return(COMMAND);
 			}			/* end of command line args */
 
-    [^\\:, \t\n]+ 	{
+    [^#\\:, \t\n]+ 	{
 			    LEXTRACE("ARG ");
 			    if (!fill_args(yytext, yyleng, sawspace))
 				yyterminate();
