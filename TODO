@@ -11,201 +11,196 @@ TODO list (most will be addressed in sudo 2.0)
 
 05) Add Prog_Alias facility (Prog_Alias VI = /usr/secure/bin/vi +args).
 
-06) Add generic STREAMS support for getting interfaces and netmasks.
-
-07) Add support for "safe scripts" by checking for shell script
+06) Add support for "safe scripts" by checking for shell script
     cookie (first two bytes are "#!") and execing the shell outselves
     after doing the stat to guard against spoofing.  This should avoid
     the race condition caused by going through namei() twice...
 
-08) Should be able to mix Cmnd_Alias's and command args.  Ie:
+07) Should be able to mix Cmnd_Alias's and command args.  Ie:
 	pete   ALL=PASSWD [A-z]*,!PASSWD root
     where PASSWD was defined to be /usr/bin/passwd.
     This requires the arg parsing to happen in the yacc grammer.
     At the very least, commands and args have to become separate
     tokens in the lexer.
 
-09) Add a per-tty restriction?  Ie: only can run foo from /dev/console.
+08) Add a per-tty restriction?  Ie: only can run foo from /dev/console.
 
-10) Add test for how to read ether interfaces in configure script
+09) Add test for how to read ether interfaces in configure script
 
-11) Use strtol() and strtoul(), not atoi()
+10) Use strtol() and strtoul(), not atoi()
 
-12) Implement date_format and log_format options.
+11) Implement date_format and log_format options.
 
-13) Add support for: Default:user@host
+12) Add support for: Default:user@host
 
-14) Some people want to be able to specify a special password in sudoers
+13) Some people want to be able to specify a special password in sudoers
     in addition or instead of the normal one.  The best argument for
     this so far is to be able to use separate passwords for the
     target users that are not the passwd file ones.
 
-15) Add support for trusted users.  E.g. allow user to run a certain
+14) Add support for trusted users.  E.g. allow user to run a certain
     command regardless of what dir it is in if it is owned by the
     trusted user.
 
-16) Add a flag similar to '-l' but that spits out sudo commands in
+15) Add a flag similar to '-l' but that spits out sudo commands in
     a format suitable for cut & paste into sudoers.
 
-17) Someone wants a recursive version of the dir specifier.  Ie:
+16) Someone wants a recursive version of the dir specifier.  Ie:
     SOME_MODIFIER:/usr/local/ to allow anything under /usr/local to be run.
 
-18) An option to set the shell to the target user would make sense.
-    See other target user-related issues above.
-
-19) Add an option (-D) to dump the defaults after the sudoers file
+17) Add an option (-D) to dump the defaults after the sudoers file
     has been parsed.  Should only be available to root and should
     allow a -u user modifier.  Maybe dump all of sudoers?
 
-20) Allow /etc/sudoers to be a symlink but require the parent dir to
+18) Allow /etc/sudoers to be a symlink but require the parent dir to
     be root-owned and not writable by anything else.  Should really
     traverse the tree to the root doing this.
 
-21) Improve interfaces.c STREAMS code (see ntpd's ntp_io.c for hints)
+19) Improve interfaces.c STREAMS code (see ntpd's ntp_io.c for hints)
 
-22) If root_sudo is off, still allow sudo -u to non-root users?
+20) If root_sudo is off, still allow sudo -u to non-root users?
 
-23) For AIX, use setpenv() and setpcred() if they exist
+21) For AIX, use setpenv() and setpcred() if they exist
     http://publibn.boulder.ibm.com/doc_link/en_US/a_doc_lib/libs/basetrf2/setpenv.htm
     http://publib16.boulder.ibm.com/pseries/en_US/libs/basetrf2/setpcred.htm
 
-24) Add an insult_path variable that is intialized to "builtin" but that
+22) Add an insult_path variable that is intialized to "builtin" but that
     can point to other files containing an insult count as the first
     line and that have a constant record length (sparse files) for
     easy seeking.
 
-25) Some way of using a new pty for the program run via sudo would prevent
+23) Some way of using a new pty for the program run via sudo would prevent
     access to the caller's /dev/tty (but probably makes job control tricky).
 
-26) Maybe have a database of checksums that commands are verified against.
+24) Maybe have a database of checksums that commands are verified against.
     Basically replace the st_ino/st_dev check with a checksum lookup.
 
-27) Look into testing writability of a file via sudoedit *before* doing
+25) Look into testing writability of a file via sudoedit *before* doing
     the edit; e.g., try opening with O_APPEND.
 
-28) Add Makefile.in bits to autogenerate Solaris and Irix packages
+26) Add Makefile.in bits to autogenerate Solaris and Irix packages
 
-29) Use pam_open_session() and pam_close_session() (requires a persistent
-    sudo process to call pam_close_session()).  Maybe add xauth support for
-    the non-pam case?
+28) Add substitution mechanism in sudoers to subst, e.g. editors for sudoedit
 
-30) Add substitution mechanism in sudoers to subst, e.g. editors for sudoedit
+29) Move prototypes to extern.h?
 
-31) Move prototypes to extern.h?
+30) Use AC_CHECK_DECLS for systems w/o proper prototypes?  Maybe errno too?
 
-32) Use AC_CHECK_DECLS for systems w/o proper prototypes?  Maybe errno too?
-
-33) Flesh out testsudoers and fix glob/opendir issues.  Use custom netgroup
+31) Flesh out testsudoers and fix glob/opendir issues.  Use custom netgroup
     code too?
 
-34) Think some more about giving admins a way to test commands for a user
+32) Think some more about giving admins a way to test commands for a user
     on a specific host with a different sudoers file.
 
-35) Refactor duplicated code in ldap.c into wrapper functions.
+33) Refactor duplicated code in ldap.c into wrapper functions.
 
-36) Return command from command_matches() instead of setting safe_cmnd directly.
+34) Return command from command_matches() instead of setting safe_cmnd directly.
 
-37) Roll visudo into sudo ala sudoedit?
+35) Roll visudo into sudo ala sudoedit?
 
-38) Add ticket file to ticket dir in non-tty tickets case so we
+36) Add ticket file to ticket dir in non-tty tickets case so we
     can mix tty and non-tty ticket schemes.
 
-39) Add support for NOEXEC w/ 64-bit AIX executables.
+37) Add support for NOEXEC w/ 64-bit AIX executables.
     http://publib.boulder.ibm.com/infocenter/pseries/v5r3/index.jsp?topic=/com.ibm.xlf91a.doc/xlfug/comp64.htm
     Note that it is possible to create shared libs w/ both 32bit and 64bit
     objects.
 
-40) Revisit debian fqdn diffs.
+38) Revisit debian fqdn diffs.
 
-41) Add gettext() support.  Can borrow some translations from PAM.
+39) Add gettext() support.  Can borrow some translations from PAM.
 
-42) Convert the other capitalized files into .pod so we can get decent html
+40) Convert the other capitalized files into .pod so we can get decent html
     form them?  E.g. README, etc.  E.g.
 	pod2text -l -i0 history.pod > HISTORY
 	pod2html --noindex history.pod > history.html
+    Partially done.
 
-43) Use mkstemp() for visudo temp files?  Also re-examine locking.
+41) Use mkstemp() for visudo temp files?  Also re-examine locking.
 
-44) Consolidate line wrap code.
+42) Consolidate line wrap code.  Use lbuf for sudo log file?
 
-45) How can we distinguish between a bare '\\' and one that is escaping
+43) How can we distinguish between a bare '\\' and one that is escaping
     glob chars?  Right now we convert \\ -> \ in the lexer which
     causes the confusion.
 
-46) For LDAP entries, should be able to parse the per-command options
+44) For LDAP entries, should be able to parse the per-command options
     since they may affect the outcome (e.g. default_runas).
 
-47) Set usrinfo for AIX, see openssh.
+45) Set usrinfo for AIX, see openssh.
 
-48) Consider adding -d (debug) flag for both LDAP and files sudoers lookups.
-    Is it safe to allow normal users to use it?
+46) Why does testsudoers give wrong line number for parse error?
 
-49) Why does testsudoers give wrong line number for parse error?
+47) Should send mail if sudoers does not parse
 
-50) Should send mail if sudoers does not parse
-
-51) Add arg markup to indicate that an arg is a path and treat it specially
+48) Add arg markup to indicate that an arg is a path and treat it specially
     regarding cwd.
 
-52) Should -k/-K clear *all* timestamps in tty_ticket mode?
+49) Should -k/-K clear *all* timestamps in tty_ticket mode?
     http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=306919
     Perhaps change the meaning of -k vs. -K in 1.7.
 
-53) Dan says Pam activity should probably be happening after
+50) Dan says Pam activity should probably be happening after
     setkeycreatecon and setexeccon (which may use the keyring or
     run external commands).  However, this means sendmail
     will be executed w/ the new context if user is denied.
 
-54) Add report program (or mode) to print out all permissions on a
+51) Add report program (or mode) to print out all permissions on a
     per-user basis.  Would also be nice to have a diff facility given
     two sudoers files.
 
-55) Add rpm spec file that works on suse and redhat
+52) Add rpm spec file that works on suse and redhat
 
-56) Store configure args in sudo binary for -V
+53) Store configure args in sudo binary for -V
     Make -V operate in verbose mode with -VV instead of as root?
 
-57) Verify consumers of *list_matches do not treat UNSPEC as true
+54) Verify consumers of *list_matches do not treat UNSPEC as true
 
-58) Add FOO=BAR env settings to sudoers.  Also m/regexp/ where '/' can be
+55) Add FOO=BAR env settings to sudoers.  Also m/regexp/ where '/' can be
     any char.
 
-59) Consider a more fine-grained setenv option.  Perhaps have setenv
+56) Consider a more fine-grained setenv option.  Perhaps have setenv
     and setenv_all where the latter lets you override the blacklist?
     Maybe just make it clear that setenv allows the user to run
     anything.
 
-60) Merge in Linux audit support but use AUDIT_EXECVE instead of AUDIT_USER_CMD
+57) Merge in Linux audit support but use AUDIT_EXECVE instead of AUDIT_USER_CMD
 
-61) Add setenv_all and SETENV_ALL?
+58) Add setenv_all and SETENV_ALL?
 
-63) Expand prompt early and set def_prompt in pam_init() so that
+59) Expand prompt early and set def_prompt in pam_init() so that
     session modules that prompt can use it.
 
-64) Should sudo remove KRB5CCNAME from the env?
+60) Should sudo remove KRB5CCNAME from the env?
     It was added to the keep list for password lookups that use GSSAPI.
     Probably best to remove it from the env before exec.
 
-65) See http://iase.disa.mil/stigs/whitepaper/sudowhitepaper-042304.doc
+61) See http://iase.disa.mil/stigs/whitepaper/sudowhitepaper-042304.doc
 
-66) Add manifest file that gets used to build the dist
+62) in configure distinguish between CPPFLAGS and SUDOERS_CPPFLAGS
 
-67) Rename script_execve -> sudo_execve and make sudoedit use it
+63) As part of "make dist" verify that generated files are up to date:
+    parser, man and cat docs, ChangeLog.
 
-69) better handling of two sudo processes constantly signaling each other
+64) Should get_time() fill in tv_usec even if no timespec in stat?
+    Yes, but then mtime/ctime checks will fail if mtime only has seconds.
+    Could add mtime_cmp macro.
 
-70) Merge 549f8f7c2463
+65) Fix dependencies in devel mode with build dir in doc
 
-71) selinux stuff in non-script case
+66) Factor out select code so we can optionally use poll.
 
-73) ANSIfy sudoers
+67) bad siglist depedency on hp712?
 
-74) in configure distinguish between CPPFLAGS and SUDOERS_CPPFLAGS
+68) split policy and logging in sample plugin
 
-76) Handle -i and -s flags and implied shell
-    Do the argv munging in sudo and set a flag if implied shell.
-    Plugin can then decide what to do.  Make a return val of -2 mean
-    usage error.  Document this.
+69) Use libltdl to emulate dlopen on systems without it?
 
-77) Move io plugin open to be after the policy plugin has said ok?
-    That way it has the right path/argv.  Document this.
+70) In "csh -i" with no tty, any sudo command causes exit after done.
+    Works on some platforms, not on OpenBSD
+
+71) Better askpass support that includes dialog/warnings
+
+72) Add flag to sudoreplay to select which streams to replay
+
+73) Can we read pending input before closing pty and replay?
