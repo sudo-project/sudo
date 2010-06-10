@@ -3539,7 +3539,6 @@ pop_include()
     if (!keepopen)
 	fclose(YY_CURRENT_BUFFER->yy_input_file);
     yy_delete_buffer(YY_CURRENT_BUFFER);
-    keepopen = FALSE;
     /* If we are in an include dir, move to the next file. */
     while ((pl = istack[idepth - 1].more) != NULL) {
 	fp = open_sudoers(pl->path, FALSE, &keepopen);
@@ -3564,6 +3563,7 @@ pop_include()
 	efree(sudoers);
 	sudoers = istack[idepth].path;
 	sudolineno = istack[idepth].lineno;
+	keepopen = istack[idepth].keepopen;
     }
     return(TRUE);
 }
