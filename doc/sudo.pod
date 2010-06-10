@@ -79,10 +79,10 @@ is implied.
 
 B<sudo> determines who is an authorized user by consulting the file
 F<@sysconfdir@/sudoers>.  By running B<sudo> with the B<-v> option,
-a user can update the time stamp without running a I<command>. The
-password prompt itself will also time out if the user's password
-is not entered within C<@password_timeout@> minutes (unless overridden
-via I<sudoers>).
+a user can update the time stamp without running a I<command>.  If
+a password is required, B<sudo> will exit if the user's password
+is not entered within a configurable time limit.  The default
+password prompt timeout is C<@password_timeout@> minutes.
 
 If a user who is not listed in the I<sudoers> file tries to run a
 command via B<sudo>, mail is sent to the proper authorities, as
