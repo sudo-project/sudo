@@ -210,7 +210,7 @@ sudo_askpass(prompt)
     /* Ignore SIGPIPE in case child exits prematurely */
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
+    sa.sa_flags = SA_INTERRUPT;
     sa.sa_handler = SIG_IGN;
     (void) sigaction(SIGPIPE, &sa, &saved_sa_pipe);
 

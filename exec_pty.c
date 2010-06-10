@@ -414,7 +414,7 @@ fork_pty(path, argv, envp, sv, rbac_enabled, maxfd)
     }
 
     /* Job control signals to relay from parent to child. */
-    sa.sa_flags = 0; /* do not restart syscalls */
+    sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
     sa.sa_handler = handler;
     sigaction(SIGTSTP, &sa, NULL);
 #if 0 /* XXX - add these? */
@@ -712,7 +712,7 @@ exec_monitor(path, argv, envp, backchannel, rbac)
     sigaction(SIGTTOU, &sa, NULL);
 
     /* Note: HP-UX select() will not be interrupted if SA_RESTART set */
-    sa.sa_flags = 0;
+    sa.sa_flags = SA_INTERRUPT;
     sa.sa_handler = handler;
     sigaction(SIGCHLD, &sa, NULL);
 
