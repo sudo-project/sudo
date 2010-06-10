@@ -92,7 +92,8 @@ tgetpass(const char *prompt, int timeout, int flags)
     }
 
     /* If no tty present and we need to disable echo, try askpass. */
-    if (!ISSET(flags, TGP_STDIN|TGP_ECHO|TGP_ASKPASS) && !tty_present()) {
+    if (!ISSET(flags, TGP_STDIN|TGP_ECHO|TGP_ASKPASS|TGP_NOECHO_TRY) &&
+	!tty_present()) {
 	if (askpass == NULL || getenv("DISPLAY") == NULL) {
 	    warningx("no tty present and no askpass program specified");
 	    return(NULL);

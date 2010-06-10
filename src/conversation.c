@@ -66,7 +66,7 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     for (n = 0; n < num_msgs; n++) {
 	msg = &msgs[n];
 	repl = &replies[n];
-	switch (msg->msg_type) {
+	switch (msg->msg_type & 0xff) {
 	    case SUDO_CONV_PROMPT_ECHO_ON:
 	    case SUDO_CONV_PROMPT_MASK:
 		if (msg->msg_type == SUDO_CONV_PROMPT_ECHO_ON)
@@ -75,6 +75,8 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		    SET(flags, TGP_MASK);
 		/* FALLTHROUGH */
 	    case SUDO_CONV_PROMPT_ECHO_OFF:
+		if (ISSET(msg->msg_type, SUDO_CONV_PROMPT_ECHO_OK))
+		    SET(flags, TGP_NOECHO_TRY);
 		/* Read the password unless interrupted. */
 		pass = tgetpass(msg->msg, msg->timeout, flags);
 		if (pass == NULL)

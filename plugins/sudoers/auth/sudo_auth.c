@@ -312,6 +312,10 @@ auth_getpass(const char *prompt, int timeout, int type)
     if (type == SUDO_CONV_PROMPT_ECHO_OFF && def_pwfeedback)
 	type = SUDO_CONV_PROMPT_MASK;
 
+    /* If visiblepw set, do not error out if there is no tty. */
+    if (def_visiblepw)
+	type |= SUDO_CONV_PROMPT_ECHO_OK;
+
     /* Call conversation function */
     memset(&msg, 0, sizeof(msg));
     msg.msg_type = type;

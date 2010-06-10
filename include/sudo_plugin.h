@@ -34,11 +34,12 @@
 
 /* Conversation function types and defines */
 struct sudo_conv_message {
-#define SUDO_CONV_PROMPT_ECHO_OFF	1	/* do not echo user input */
-#define SUDO_CONV_PROMPT_ECHO_ON	2	/* echo user input */
-#define SUDO_CONV_ERROR_MSG		3	/* error message */
-#define SUDO_CONV_INFO_MSG		4	/* informational message */
-#define SUDO_CONV_PROMPT_MASK		5	/* mask user input */
+#define SUDO_CONV_PROMPT_ECHO_OFF   0x0001  /* do not echo user input */
+#define SUDO_CONV_PROMPT_ECHO_ON    0x0002  /* echo user input */
+#define SUDO_CONV_ERROR_MSG	    0x0003  /* error message */
+#define SUDO_CONV_INFO_MSG	    0x0004  /* informational message */
+#define SUDO_CONV_PROMPT_MASK	    0x0005  /* mask user input */
+#define SUDO_CONV_PROMPT_ECHO_OK    0x1000  /* flag: allow echo if no tty */
     int msg_type;
     int timeout;
     const char *msg;

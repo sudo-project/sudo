@@ -85,10 +85,12 @@
 /*
  * Flags for tgetpass()
  */
+#define TGP_NOECHO	0x00		/* turn echo off reading pw (default) */
 #define TGP_ECHO	0x01		/* leave echo on when reading passwd */
 #define TGP_STDIN	0x02		/* read from stdin, not /dev/tty */
 #define TGP_ASKPASS	0x04		/* read from askpass helper program */
 #define TGP_MASK	0x08		/* mask user input when reading */
+#define TGP_NOECHO_TRY	0x10		/* turn off echo if possible */
 
 struct user_details {
     uid_t uid;
