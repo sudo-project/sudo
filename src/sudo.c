@@ -76,6 +76,7 @@
 #include "sudo.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
+#include <sudo_usage.h>
 
 #ifdef USING_NONUNIX_GROUPS
 # include "nonunix.h"
@@ -161,6 +162,8 @@ main(int argc, char *argv[], char *envp[])
     switch (sudo_mode & MODE_MASK) {
 	case MODE_VERSION:
 	    printf("Sudo version %s\n", PACKAGE_VERSION);
+	    if (user_details.uid == ROOT_UID)
+		(void) printf("Configure args: %s\n", CONFIGURE_ARGS);
 	    policy_plugin.u.policy->show_version(!user_details.uid);
 	    tq_foreach_fwd(&io_plugins, plugin) {
 		ok = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation,

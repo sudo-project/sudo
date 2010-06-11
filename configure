@@ -816,6 +816,7 @@ sudo_umask
 password_timeout
 timeout
 timedir
+CONFIGURE_ARGS
 ac_config_libobj_dir
 LIBTOOL_DEPS
 ZLIB
@@ -2777,6 +2778,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 timeout=5
 password_timeout=5
 sudo_umask=0022
@@ -2828,6 +2830,7 @@ shadow_defs=
 shadow_funcs=
 shadow_libs=
 shadow_libs_optional=
+CONFIGURE_ARGS="$@"
 
 if test X"$prefix" = X"NONE"; then
     test "$mandir" = '${datarootdir}/man' && mandir='$(prefix)/man'
@@ -6593,13 +6596,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6596: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6599: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6599: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6602: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6602: output\"" >&5)
+  (eval echo "\"\$as_me:6605: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -7804,7 +7807,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7807 "configure"' > conftest.$ac_ext
+  echo '#line 7810 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9196,11 +9199,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9199: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9202: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9203: \$? = $ac_status" >&5
+   echo "$as_me:9206: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9535,11 +9538,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9538: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9541: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9542: \$? = $ac_status" >&5
+   echo "$as_me:9545: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9640,11 +9643,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9643: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9646: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9647: \$? = $ac_status" >&5
+   echo "$as_me:9650: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9695,11 +9698,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9698: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9701: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9702: \$? = $ac_status" >&5
+   echo "$as_me:9705: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12062,7 +12065,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12065 "configure"
+#line 12068 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12158,7 +12161,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12161 "configure"
+#line 12164 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15167,7 +15170,7 @@ esac
 
   fi
 
-for ac_func in memrchr strerror strcasecmp sigaction strlcpy strlcat
+for ac_func in memrchr strerror strcasecmp strlcpy strlcat
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
