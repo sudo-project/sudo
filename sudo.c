@@ -1301,6 +1301,7 @@ show_version()
     (void) printf("Sudo version %s\n", PACKAGE_VERSION);
     if (getuid() == 0) {
 	putchar('\n');
+	(void) printf("Configure args: %s\n", CONFIGURE_ARGS);
 	(void) printf("Sudoers path: %s\n", _PATH_SUDOERS);
 #ifdef HAVE_LDAP
 # ifdef _PATH_NSSWITCH_CONF

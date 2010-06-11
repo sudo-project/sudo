@@ -53,6 +53,7 @@ AC_SUBST([REPLAY])
 AC_SUBST([LOGINCAP_USAGE])
 AC_SUBST([NONUNIX_GROUPS_IMPL])
 AC_SUBST([ZLIB])
+AC_SUBST([CONFIGURE_ARGS])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -149,6 +150,8 @@ shadow_defs=
 shadow_funcs=
 shadow_libs=
 shadow_libs_optional=
+
+CONFIGURE_ARGS="$@"
 
 dnl
 dnl Override default configure dirs...
