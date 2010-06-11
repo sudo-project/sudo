@@ -204,3 +204,7 @@ TODO list (most will be addressed in sudo 2.0)
 72) Add flag to sudoreplay to select which streams to replay
 
 73) Can we read pending input before closing pty and replay?
+
+74) Replace "sudoers" will "policy" in sudo.pod sensibly
+
+75) Check for accessing closed fds w/ valgrind
