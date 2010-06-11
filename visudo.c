@@ -84,14 +84,14 @@
 #include <gram.h>
 
 struct sudoersfile {
+    struct sudoersfile *prev, *next;
     char *path;
     char *tpath;
     int fd;
-    int tfd;
     int modified;
     int doedit;
-    struct sudoersfile *next;
 };
+TQ_DECLARE(sudoersfile);
 
 /*
  * Function prototypes
@@ -136,9 +136,7 @@ int num_interfaces;
 struct interface *interfaces;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-static struct sudoerslist {
-    struct sudoersfile *first, *last;
-} sudoerslist;
+static struct sudoersfile_list sudoerslist;
 static struct rbtree *alias_freelist;
 
 int
@@ -763,10 +761,10 @@ open_sudoers(path, doedit, keepopen)
 	entry = emalloc(sizeof(*entry));
 	entry->path = estrdup(path);
 	entry->modified = 0;
+	entry->prev = entry;
 	entry->next = NULL;
 	entry->fd = open(entry->path, O_RDWR | O_CREAT, SUDOERS_MODE);
 	entry->tpath = NULL;
-	entry->tfd = -1;
 	entry->doedit = doedit;
 	if (entry->fd == -1) {
 	    warning("%s", entry->path);
@@ -777,13 +775,7 @@ open_sudoers(path, doedit, keepopen)
 	    errorx(1, "%s busy, try again later", entry->path);
 	if ((fp = fdopen(entry->fd, "r")) == NULL)
 	    error(1, "%s", entry->path);
-	/* XXX - macro here? */
-	if (sudoerslist.last == NULL)
-	    sudoerslist.first = sudoerslist.last = entry;
-	else {
-	    sudoerslist.last->next = entry;
-	    sudoerslist.last = entry;
-	}
+	tq_append(&sudoerslist, entry);
     } else {
 	/* Already exists, open .tmp version if there is one. */
 	if (entry->tpath != NULL) {
