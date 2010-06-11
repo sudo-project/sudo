@@ -62,7 +62,7 @@ AC_SUBST([CONFIGURE_ARGS])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
-AC_SUBST([timedir])dnl initial value from SUDO_TIMEDIR
+AC_SUBST([timedir])dnl real initial value from SUDO_TIMEDIR
 AC_SUBST([timeout])
 AC_SUBST([password_timeout])
 AC_SUBST([sudo_umask])
@@ -93,9 +93,10 @@ AC_SUBST([ldap_secret])
 AC_SUBST([nsswitch_conf])
 AC_SUBST([netsvc_conf])
 AC_SUBST([secure_path])
-dnl
-dnl Initial values for above
-dnl
+#
+# Begin initial values for man page substitution
+#
+timedir=/var/run/sudo
 timeout=5
 password_timeout=5
 sudo_umask=0022
@@ -111,8 +112,8 @@ mail_no_user=on
 mail_no_host=off
 mail_no_perms=off
 mailto=root
-mailsub='*** SECURITY information for %h ***'
-badpass_message='Sorry, try again.'
+mailsub="*** SECURITY information for %h ***"
+badpass_message="Sorry, try again."
 fqdn=off
 runas_default=root
 env_editor=off
@@ -121,13 +122,21 @@ tty_tickets=off
 insults=off
 root_sudo=on
 path_info=on
+ldap_conf=/etc/ldap.conf
+ldap_secret=/etc/ldap.secret
+netsvc_conf=/etc/netsvc.conf
+noexec_file=/usr/local/libexec/sudo_noexec.so
+nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
-INSTALL_NOEXEC=
-devdir='$(srcdir)'
+#
+# End initial values for man page substitution
+#
 dnl
 dnl Initial values for Makefile variables listed above
 dnl May be overridden by environment variables..
 dnl
+INSTALL_NOEXEC=
+devdir='$(srcdir)'
 PROGS="sudo"
 : ${MANTYPE='man'}
 : ${mansrcdir='.'}
@@ -980,12 +989,12 @@ AC_ARG_WITH(ldap, [AS_HELP_STRING([--with-ldap[[=DIR]]], [enable LDAP support])]
 esac])
 
 AC_ARG_WITH(ldap-conf-file, [AS_HELP_STRING([--with-ldap-conf-file], [path to LDAP configuration file])])
-SUDO_DEFINE_UNQUOTED(_PATH_LDAP_CONF, "${with_ldap_conf_file-/etc/ldap.conf}", [Path to the ldap.conf file])
-ldap_conf=${with_ldap_conf_file-'/etc/ldap.conf'}
+test -n "$with_ldap_conf_file" && ldap_conf="$with_ldap_conf_file"
+SUDO_DEFINE_UNQUOTED(_PATH_LDAP_CONF, "$ldap_conf", [Path to the ldap.conf file])
 
 AC_ARG_WITH(ldap-secret-file, [AS_HELP_STRING([--with-ldap-secret-file], [path to LDAP secret password file])])
-SUDO_DEFINE_UNQUOTED(_PATH_LDAP_SECRET, "${with_ldap_secret_file-/etc/ldap.secret}", [Path to the ldap.secret file])
-ldap_secret=${with_ldap_secret_file-'/etc/ldap.secret'}
+test -n "$with_ldap_secret_file" && ldap_secret="$with_ldap_secret_file"
+SUDO_DEFINE_UNQUOTED(_PATH_LDAP_SECRET, "$ldap_secret", [Path to the ldap.secret file])
 
 AC_ARG_WITH(pc-insults, [AS_HELP_STRING([--with-pc-insults], [replace politically incorrect insults with less offensive ones])],
 [case $with_pc_insults in
@@ -2045,8 +2054,6 @@ AC_INCLUDES_DEFAULT
 dnl
 dnl nsswitch.conf and its equivalents
 dnl
-netsvc_conf='/etc/netsvc.conf'
-nsswitch_conf='/etc/nsswitch.conf'
 if test ${with_netsvc-"no"} != "no"; then
     SUDO_DEFINE_UNQUOTED(_PATH_NETSVC_CONF, "${with_netsvc-/etc/netsvc.conf}")
     netsvc_conf=${with_netsvc-/etc/netsvc.conf}

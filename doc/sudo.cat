@@ -17,8 +17,8 @@ SSYYNNOOPPSSIISS
        [--pp _p_r_o_m_p_t] [--UU _u_s_e_r _n_a_m_e] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [_c_o_m_m_a_n_d]
 
        ssuuddoo [--AAbbEEHHnnPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--DD _l_e_v_e_l] [--cc _c_l_a_s_s|_-]
-       [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [VVAARR=_v_a_l_u_e]
-       [--ii | --ss] [_c_o_m_m_a_n_d]
+       [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--rr _r_o_l_e] [--tt _t_y_p_e]
+       [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [VVAARR=_v_a_l_u_e] [--ii | --ss] [_c_o_m_m_a_n_d]
 
        ssuuddooeeddiitt [--AAnnSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-] [--DD _l_e_v_e_l]
        [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] file ...
@@ -41,9 +41,10 @@ DDEESSCCRRIIPPTTIIOONN
 
        ssuuddoo determines who is an authorized user by consulting the file
        _/_e_t_c_/_s_u_d_o_e_r_s.  By running ssuuddoo with the --vv option, a user can update
-       the time stamp without running a _c_o_m_m_a_n_d. The password prompt itself
-       will also time out if the user's password is not entered within 5
-       minutes (unless overridden via _s_u_d_o_e_r_s).
+       the time stamp without running a _c_o_m_m_a_n_d.  If a password is required,
+       ssuuddoo will exit if the user's password is not entered within a
+       configurable time limit.  The default password prompt timeout is 5
+       minutes.
 
        If a user who is not listed in the _s_u_d_o_e_r_s file tries to run a command
        via ssuuddoo, mail is sent to the proper authorities, as defined at
@@ -57,11 +58,10 @@ DDEESSCCRRIIPPTTIIOONN
        be used by a user to log commands through sudo even when a root shell
        has been invoked.  It also allows the --ee option to remain useful even
        when being run via a sudo-run script or program.  Note however, that
-       the sudoers lookup is still done for root, not the user specified by
 
 
 
-1.8.0a2                   June  9, 2010                         1
+1.8.0b1                   June 11, 2010                         1
 
 
 
@@ -70,6 +70,7 @@ DDEESSCCRRIIPPTTIIOONN
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       the sudoers lookup is still done for root, not the user specified by
        SUDO_USER.
 
        ssuuddoo can log both successful and unsuccessful attempts (as well as
@@ -123,11 +124,10 @@ OOPPTTIIOONNSS
                    defined in _/_e_t_c_/_l_o_g_i_n_._c_o_n_f, or a single '-' character.
                    Specifying a _c_l_a_s_s of - indicates that the command should
                    be run restricted by the default login capabilities for the
-                   user the command is run as.  If the _c_l_a_s_s argument
 
 
 
-1.8.0a2                   June  9, 2010                         2
+1.8.0b1                   June 11, 2010                         2
 
 
 
@@ -136,6 +136,7 @@ OOPPTTIIOONNSS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+                   user the command is run as.  If the _c_l_a_s_s argument
                    specifies an existing user class, the command must be run
                    as root, or the ssuuddoo command must be run from a shell that
                    is already root.  This option is only available on systems
@@ -189,11 +190,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        -H          The --HH (_H_O_M_E) option sets the HOME environment variable to
                    the homedir of the target user (root by default) as
                    specified in _p_a_s_s_w_d(4).  By default, ssuuddoo does not modify
-                   HOME (see _s_e_t___h_o_m_e and _a_l_w_a_y_s___s_e_t___h_o_m_e in _s_u_d_o_e_r_s(4)).
 
 
 
-1.8.0a2                   June  9, 2010                         3
+1.8.0b1                   June 11, 2010                         3
 
 
 
@@ -201,6 +201,8 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+                   HOME (see _s_e_t___h_o_m_e and _a_l_w_a_y_s___s_e_t___h_o_m_e in _s_u_d_o_e_r_s(4)).
 
        -h          The --hh (_h_e_l_p) option causes ssuuddoo to print a usage message
                    and exit.
@@ -254,12 +256,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    required for the command to run, ssuuddoo will display an error
                    messages and exit.
 
-       -P          The --PP (_p_r_e_s_e_r_v_e _g_r_o_u_p _v_e_c_t_o_r) option causes ssuuddoo to
-                   preserve the invoking user's group vector unaltered.  By
 
 
 
-1.8.0a2                   June  9, 2010                         4
+1.8.0b1                   June 11, 2010                         4
 
 
 
@@ -268,6 +268,8 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       -P          The --PP (_p_r_e_s_e_r_v_e _g_r_o_u_p _v_e_c_t_o_r) option causes ssuuddoo to
+                   preserve the invoking user's group vector unaltered.  By
                    default, ssuuddoo will initialize the group vector to the list
                    of groups the target user is in.  The real and effective
                    group IDs, however, are still set to match the target user.
@@ -298,6 +300,9 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    system password prompt on systems that support PAM unless
                    the _p_a_s_s_p_r_o_m_p_t___o_v_e_r_r_i_d_e flag is disabled in _s_u_d_o_e_r_s.
 
+       -r _r_o_l_e     The --rr (_r_o_l_e) option causes the new (SELinux) security
+                   context to have the role specified by _r_o_l_e.
+
        -S          The --SS (_s_t_d_i_n) option causes ssuuddoo to read the password from
                    the standard input instead of the terminal device.  The
                    password must be followed by a newline character.
@@ -309,9 +314,26 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    the shell for execution.  Otherwise, an interactive shell
                    is executed.
 
+       -t _t_y_p_e     The --tt (_t_y_p_e) option causes the new (SELinux) security
+                   context to have the type specified by _t_y_p_e.  If no type is
+                   specified, the default type is derived from the specified
+                   role.
+
        -U _u_s_e_r     The --UU (_o_t_h_e_r _u_s_e_r) option is used in conjunction with the
                    --ll option to specify the user whose privileges should be
                    listed.  Only root or a user with ssuuddoo ALL on the current
+
+
+
+1.8.0b1                   June 11, 2010                         5
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
                    host may use this option.
 
        -u _u_s_e_r     The --uu (_u_s_e_r) option causes ssuuddoo to run the specified
@@ -321,18 +343,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    backslash ('\').  Note that if the _t_a_r_g_e_t_p_w Defaults option
                    is set (see _s_u_d_o_e_r_s(4)) it is not possible to run commands
                    with a uid not listed in the password database.
-
-
-
-
-1.8.0a2                   June  9, 2010                         5
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
        -V          The --VV (_v_e_r_s_i_o_n) option causes ssuuddoo to print the version
                    number and exit.  If the invoking user is already root the
@@ -370,6 +380,26 @@ PPLLUUGGIINNSS
        use the traditional _s_u_d_o_e_r_s security policy and I/O logging, which
        corresponds to the following _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
 
+
+
+
+
+
+
+
+
+
+
+
+1.8.0b1                   June 11, 2010                         6
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
         #
         # Default /etc/sudo.conf file
         #
@@ -388,18 +418,6 @@ PPLLUUGGIINNSS
        A Plugin line consists of the Plugin keyword, followed by the
        _s_y_m_b_o_l___n_a_m_e and the _p_a_t_h to the shared object containing the plugin.
        The _s_y_m_b_o_l___n_a_m_e is the name of the struct policy_plugin or struct
-
-
-
-1.8.0a2                   June  9, 2010                         6
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        io_plugin in the plugin shared object.  The _p_a_t_h may be fully qualified
        or relative.  If not fully qualified it is relative to the
        _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c directory.  Any additional parameters after the _p_a_t_h
@@ -436,6 +454,18 @@ SSEECCUURRIITTYY NNOOTTEESS
        If, however, the _e_n_v___r_e_s_e_t option is disabled in _s_u_d_o_e_r_s, any variables
        not explicitly denied by the _e_n_v___c_h_e_c_k and _e_n_v___d_e_l_e_t_e options are
        inherited from the invoking process.  In this case, _e_n_v___c_h_e_c_k and
+
+
+
+1.8.0b1                   June 11, 2010                         7
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
        _e_n_v___d_e_l_e_t_e behave like a blacklist.  Since it is not possible to
        blacklist all potentially dangerous environment variables, use of the
        default _e_n_v___r_e_s_e_t behavior is encouraged.
@@ -454,18 +484,6 @@ SSEECCUURRIITTYY NNOOTTEESS
        ssuuddoo to preserve them.
 
        To prevent command spoofing, ssuuddoo checks "." and "" (both denoting
-
-
-
-1.8.0a2                   June  9, 2010                         7
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        current directory) last when searching for a command in the user's PATH
        (if one or both are in the PATH).  Note, however, that the actual PATH
        environment variable is _n_o_t modified and is passed unchanged to the
@@ -502,6 +520,18 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        command with ssuuddoo after authenticating, logout, login again, and run
        ssuuddoo without authenticating so long as the time stamp file's
        modification time is within 5 minutes (or whatever the timeout is set
+
+
+
+1.8.0b1                   June 11, 2010                         8
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
        to in _s_u_d_o_e_r_s).  When the _t_t_y___t_i_c_k_e_t_s option is enabled in _s_u_d_o_e_r_s, the
        time stamp has per-tty granularity but still may outlive the user's
        session.  On Linux systems where the devpts filesystem is used, Solaris
@@ -520,18 +550,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        when giving users access to commands via ssuuddoo to verify that the
        command does not inadvertently give the user an effective root shell.
        For more information, please see the PREVENTING SHELL ESCAPES section
-
-
-
-1.8.0a2                   June  9, 2010                         8
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        in _s_u_d_o_e_r_s(4).
 
 EENNVVIIRROONNMMEENNTT
@@ -568,6 +586,18 @@ EENNVVIIRROONNMMEENNTT
 
        SUDO_USER       Set to the login of the user who invoked sudo
 
+
+
+
+1.8.0b1                   June 11, 2010                         9
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
        USER            Set to the target user (root unless the --uu option is
                        specified)
 
@@ -586,17 +616,6 @@ FFIILLEESS
 
 EEXXAAMMPPLLEESS
        Note: the following examples assume suitable _s_u_d_o_e_r_s(4) entries.
-
-
-
-1.8.0a2                   June  9, 2010                         9
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
        To get a file listing of an unreadable directory:
 
@@ -633,6 +652,18 @@ SSEEEE AALLSSOO
        _g_r_e_p(1), _s_u(1), _s_t_a_t(2), _l_o_g_i_n___c_a_p(3), _p_a_s_s_w_d(4), _s_u_d_o_e_r_s(4),
        _s_u_d_o___p_l_u_g_i_n(1m), _s_u_d_o_r_e_p_l_a_y(1m), _v_i_s_u_d_o(1m)
 
+
+
+
+1.8.0b1                   June 11, 2010                        10
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
 AAUUTTHHOORRSS
        Many people have worked on ssuuddoo over the years; this version consists
        of code written primarily by:
@@ -651,18 +682,6 @@ CCAAVVEEAATTSS
        See the _s_u_d_o_e_r_s(4) manual for details.
 
        It is not meaningful to run the cd command directly via sudo, e.g.,
-
-
-
-
-1.8.0a2                   June  9, 2010                        10
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
         $ sudo cd /usr/local/protected
 
@@ -702,25 +721,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.8.0a2                   June  9, 2010                        11
+1.8.0b1                   June 11, 2010                        11
 
 
