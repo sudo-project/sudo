@@ -17,8 +17,8 @@ SSYYNNOOPPSSIISS
        [--UU _u_s_e_r _n_a_m_e] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [_c_o_m_m_a_n_d]
 
        ssuuddoo [--AAbbEEHHnnPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-]
-       [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [VVAARR=_v_a_l_u_e]
-       [--ii | --ss] [_c_o_m_m_a_n_d]
+       [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--rr _r_o_l_e] [--tt _t_y_p_e]
+       [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [VVAARR=_v_a_l_u_e] [--ii | --ss] [_c_o_m_m_a_n_d]
 
        ssuuddooeeddiitt [--AAnnSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-]
        [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] file ...
@@ -294,6 +294,9 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    system password prompt on systems that support PAM unless
                    the _p_a_s_s_p_r_o_m_p_t___o_v_e_r_r_i_d_e flag is disabled in _s_u_d_o_e_r_s.
 
+       -r _r_o_l_e     The --rr (_r_o_l_e) option causes the new (SELinux) security
+                   context to have the role specified by _r_o_l_e.
+
        -S          The --SS (_s_t_d_i_n) option causes ssuuddoo to read the password from
                    the standard input instead of the terminal device.  The
                    password must be followed by a newline character.
@@ -305,6 +308,11 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    the shell for execution.  Otherwise, an interactive shell
                    is executed.
 
+       -t _t_y_p_e     The --tt (_t_y_p_e) option causes the new (SELinux) security
+                   context to have the type specified by _t_y_p_e.  If no type is
+                   specified, the default type is derived from the specified
+                   role.
+
        -U _u_s_e_r     The --UU (_o_t_h_e_r _u_s_e_r) option is used in conjunction with the
                    --ll option to specify the user whose privileges should be
                    listed.  Only root or a user with ssuuddoo ALL on the current
@@ -314,14 +322,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    command as a user other than _r_o_o_t.  To specify a _u_i_d
                    instead of a _u_s_e_r _n_a_m_e, use _#_u_i_d.  When running commands as
                    a _u_i_d, many shells require that the '#' be escaped with a
-                   backslash ('\').  Note that if the _t_a_r_g_e_t_p_w Defaults option
-                   is set (see _s_u_d_o_e_r_s(4)) it is not possible to run commands
-                   with a uid not listed in the password database.
-
-       -V          The --VV (_v_e_r_s_i_o_n) option causes ssuuddoo to print the version
-                   number and exit.  If the invoking user is already root the
-                   --VV option will print out a list of the defaults ssuuddoo was
-                   compiled with as well as the machine's local network
 
 
 
@@ -334,6 +334,14 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+                   backslash ('\').  Note that if the _t_a_r_g_e_t_p_w Defaults option
+                   is set (see _s_u_d_o_e_r_s(4)) it is not possible to run commands
+                   with a uid not listed in the password database.
+
+       -V          The --VV (_v_e_r_s_i_o_n) option causes ssuuddoo to print the version
+                   number and exit.  If the invoking user is already root the
+                   --VV option will print out a list of the defaults ssuuddoo was
+                   compiled with as well as the machine's local network
                    addresses.
 
        -v          If given the --vv (_v_a_l_i_d_a_t_e) option, ssuuddoo will update the
@@ -380,14 +388,6 @@ SSEECCUURRIITTYY NNOOTTEESS
        invoking process permitted by the _e_n_v___c_h_e_c_k and _e_n_v___k_e_e_p _s_u_d_o_e_r_s
        options.  There is effectively a whitelist for environment variables.
 
-       If, however, the _e_n_v___r_e_s_e_t option is disabled in _s_u_d_o_e_r_s, any variables
-       not explicitly denied by the _e_n_v___c_h_e_c_k and _e_n_v___d_e_l_e_t_e options are
-       inherited from the invoking process.  In this case, _e_n_v___c_h_e_c_k and
-       _e_n_v___d_e_l_e_t_e behave like a blacklist.  Since it is not possible to
-       blacklist all potentially dangerous environment variables, use of the
-       default _e_n_v___r_e_s_e_t behavior is encouraged.
-
-       In all cases, environment variables with a value beginning with () are
 
 
 
@@ -400,6 +400,14 @@ SSEECCUURRIITTYY NNOOTTEESS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       If, however, the _e_n_v___r_e_s_e_t option is disabled in _s_u_d_o_e_r_s, any variables
+       not explicitly denied by the _e_n_v___c_h_e_c_k and _e_n_v___d_e_l_e_t_e options are
+       inherited from the invoking process.  In this case, _e_n_v___c_h_e_c_k and
+       _e_n_v___d_e_l_e_t_e behave like a blacklist.  Since it is not possible to
+       blacklist all potentially dangerous environment variables, use of the
+       default _e_n_v___r_e_s_e_t behavior is encouraged.
+
+       In all cases, environment variables with a value beginning with () are
        removed as they could be interpreted as bbaasshh functions.  The list of
        environment variables that ssuuddoo allows or denies is contained in the
        output of sudo -V when run as root.
@@ -446,14 +454,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
        Since time stamp files live in the file system, they can outlive a
        user's login session.  As a result, a user may be able to login, run a
-       command with ssuuddoo after authenticating, logout, login again, and run
-       ssuuddoo without authenticating so long as the time stamp file's
-       modification time is within 5 minutes (or whatever the timeout is set
-       to in _s_u_d_o_e_r_s).  When the _t_t_y___t_i_c_k_e_t_s option is enabled in _s_u_d_o_e_r_s, the
-       time stamp has per-tty granularity but still may outlive the user's
-       session.  On Linux systems where the devpts filesystem is used, Solaris
-       systems with the devices filesystem, as well as other systems that
-       utilize a devfs filesystem that monotonically increase the inode number
 
 
 
@@ -466,6 +466,14 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       command with ssuuddoo after authenticating, logout, login again, and run
+       ssuuddoo without authenticating so long as the time stamp file's
+       modification time is within 5 minutes (or whatever the timeout is set
+       to in _s_u_d_o_e_r_s).  When the _t_t_y___t_i_c_k_e_t_s option is enabled in _s_u_d_o_e_r_s, the
+       time stamp has per-tty granularity but still may outlive the user's
+       session.  On Linux systems where the devpts filesystem is used, Solaris
+       systems with the devices filesystem, as well as other systems that
+       utilize a devfs filesystem that monotonically increase the inode number
        of devices as they are created (such as Mac OS X), ssuuddoo is able to
        determine when a tty-based time stamp file is stale and will ignore it.
        Administrators should not rely on this feature as it is not universally
@@ -513,14 +521,6 @@ EENNVVIIRROONNMMEENNTT
 
        SUDO_UID        Set to the user ID of the user who invoked sudo
 
-       SUDO_USER       Set to the login of the user who invoked sudo
-
-       USER            Set to the target user (root unless the --uu option is
-                       specified)
-
-       VISUAL          Default editor to use in --ee (sudoedit) mode if
-                       SUDO_EDITOR is not set
-
 
 
 1.7.3b3                   June 10, 2010                         8
@@ -531,6 +531,14 @@ EENNVVIIRROONNMMEENNTT
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+       SUDO_USER       Set to the login of the user who invoked sudo
+
+       USER            Set to the target user (root unless the --uu option is
+                       specified)
+
+       VISUAL          Default editor to use in --ee (sudoedit) mode if
+                       SUDO_EDITOR is not set
 
 FFIILLEESS
        _/_e_t_c_/_s_u_d_o_e_r_s            List of who can run what
@@ -578,14 +586,6 @@ SSEEEE AALLSSOO
        _g_r_e_p(1), _s_u(1), _s_t_a_t(2), _l_o_g_i_n___c_a_p(3), _p_a_s_s_w_d(4), _s_u_d_o_e_r_s(5),
        _v_i_s_u_d_o(1m)
 
-AAUUTTHHOORRSS
-       Many people have worked on ssuuddoo over the years; this version consists
-       of code written primarily by:
-
-               Todd C. Miller
-
-       See the HISTORY file in the ssuuddoo distribution or visit
-       http://www.sudo.ws/sudo/history.html for a short history of ssuuddoo.
 
 
 
@@ -597,6 +597,15 @@ AAUUTTHHOORRSS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+AAUUTTHHOORRSS
+       Many people have worked on ssuuddoo over the years; this version consists
+       of code written primarily by:
+
+               Todd C. Miller
+
+       See the HISTORY file in the ssuuddoo distribution or visit
+       http://www.sudo.ws/sudo/history.html for a short history of ssuuddoo.
 
 CCAAVVEEAATTSS
        There is no easy way to prevent a user from gaining a root shell if
@@ -636,15 +645,6 @@ DDIISSCCLLAAIIMMEERR
        merchantability and fitness for a particular purpose are disclaimed.
        See the LICENSE file distributed with ssuuddoo or
        http://www.sudo.ws/sudo/license.html for complete details.
-
-
-
-
-
-
-
-
-
 
 
 
