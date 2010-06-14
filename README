@@ -1,4 +1,4 @@
-This is Sudo version 1.7.2
+This is Sudo version 1.7.3
 
 The sudo philosophy
 ===================
@@ -9,8 +9,10 @@ privileges as possible but still allow people to get their work done.
 Where to find sudo
 ==================
 Before you try and build sudo, *please* make sure you have the current
-version.  The latest sudo may always be gotten via anonymous ftp
-from ftp.sudo.ws in the directory /pub/sudo/.
+version.  The latest sudo may always be gotten via anonymous ftp from
+ftp.sudo.ws in the directory /pub/sudo/ or from the sudo web site,
+http://www.sudo.ws/
+
 The distribution is sudo-M.m.tar.gz where `M' is the major
 version number and `m' is the minor version number.
 BETA versions of sudo may also be available.  If you join
@@ -19,24 +21,19 @@ the `sudo-workers' mailing list you will get the BETA announcements
 
 What's new
 ==========
-For a history of sudo please see the HISTORY file that came with this
-release.
-
-For a complete list of changes, see the CHANGES file.  For a summary,
-see the web page, http://www.sudo.ws/sudo/.
+See the WHATSNEW file for a list of major changes in this release.
+For a complete list of changes, see the ChangeLog file.  For a
+summary, see the web page, http://www.sudo.ws/sudo/.
 
 If you are upgrading from an earlier version of Sudo, please see
 the UPGRADE file.
 
-NOTE: Starting with sudo 1.5.7 the configuration method has changed
-      significantly as compared to previous versions.  All options
-      are now set via the configure script.  See the `INSTALL' file
-      for a list of all the configure options.
+For a history of sudo please see the HISTORY file.
 
 System requirements
 ===================
 To build sudo from the source distribution you need a machine running
-UN*X (most flavors of BSD, SYSV, or POSIX will do), a working C
+Unix (most flavors of BSD, SYSV, or POSIX will do), a working C
 compiler, and the make utility.
 
 If you wish to modify the parser then you will need flex version
@@ -51,7 +48,8 @@ mirror.
 Building the release
 ====================
 Please read the installation guide in the `INSTALL' file before
-trying to build sudo.
+trying to build sudo.  Pay special attention to the "OS dependent notes"
+section.
 
 Copyright
 =========
@@ -70,6 +68,10 @@ sudo-users	This list is for questions and general discussion about sudo.
 sudo-workers	This list is for people working on and porting sudo.
 		http://www.sudo.ws/mailman/listinfo/sudo-workers
 
+sudo-commits	This list receives a message for each commit made to
+		the sudo source repository.
+		http://www.sudo.ws/mailman/listinfo/sudo-commits
+
 To subscribe to a list, visit its url (as listed above) and enter
 your email address to subscribe.  Digest versions are available but
 these are fairly low traffic lists so the digest versions are not
@@ -80,16 +82,15 @@ for the appropriate links.
 
 Web page
 ========
-There is a sudo web page at http://www.sudo.ws/sudo/ that contains
+There is a sudo web page at http://www.sudo.ws/ that contains
 an overview of sudo, documentation, downloads, information about
 beta versions and other useful info.
 
 Bug reports
 ===========
 If you have found what you believe to be a bug, you can file a bug
-report with the sudo bug database, on at web at http://www.sudo.ws/bugs/.
+report in the sudo bug database, on the web at http://www.sudo.ws/bugs/.
 
-Please read over the `TROUBLESHOOTING' file *before* submitting a
-bug report.  When reporting bugs, please be sure to include the
-version of sudo you are using as well as the platform you are running
-it on.
+Please read over the `TROUBLESHOOTING' file *before* submitting a bug
+report.  When reporting bugs, please be sure to include the version of
+sudo you are using as well as the platform you are running it on.
