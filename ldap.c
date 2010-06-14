@@ -440,7 +440,7 @@ done:
  * Walk through search results and return TRUE if we have a matching
  * netgroup, else FALSE.
  */
-int
+static int
 sudo_ldap_check_user_netgroup(ld, entry, user)
     LDAP *ld;
     LDAPMessage *entry;
@@ -477,7 +477,7 @@ sudo_ldap_check_user_netgroup(ld, entry, user)
  * Walk through search results and return TRUE if we have a
  * host match, else FALSE.
  */
-int
+static int
 sudo_ldap_check_host(ld, entry)
     LDAP *ld;
     LDAPMessage *entry;
@@ -511,7 +511,7 @@ sudo_ldap_check_host(ld, entry)
     return(ret);
 }
 
-int
+static int
 sudo_ldap_check_runas_user(ld, entry)
     LDAP *ld;
     LDAPMessage *entry;
@@ -584,7 +584,7 @@ sudo_ldap_check_runas_user(ld, entry)
     return(ret);
 }
 
-int
+static int
 sudo_ldap_check_runas_group(ld, entry)
     LDAP *ld;
     LDAPMessage *entry;
@@ -620,7 +620,7 @@ sudo_ldap_check_runas_group(ld, entry)
  * Walk through search results and return TRUE if we have a runas match,
  * else FALSE.  RunAs info is optional.
  */
-int
+static int
 sudo_ldap_check_runas(ld, entry)
     LDAP *ld;
     LDAPMessage *entry;
@@ -640,7 +640,7 @@ sudo_ldap_check_runas(ld, entry)
  * Walk through search results and return TRUE if we have a command match,
  * FALSE if disallowed and UNSPEC if not matched.
  */
-int
+static int
 sudo_ldap_check_command(ld, entry, setenv_implied)
     LDAP *ld;
     LDAPMessage *entry;
@@ -705,7 +705,7 @@ sudo_ldap_check_command(ld, entry, setenv_implied)
  * Search for boolean "option" in sudoOption.
  * Returns TRUE if found and allowed, FALSE if negated, else UNSPEC.
  */
-int
+static int
 sudo_ldap_check_bool(ld, entry, option)
     LDAP *ld;
     LDAPMessage *entry;
@@ -742,7 +742,7 @@ sudo_ldap_check_bool(ld, entry, option)
  * Read sudoOption and modify the defaults as we go.  This is used once
  * from the cn=defaults entry and also once when a final sudoRole is matched.
  */
-void
+static void
 sudo_ldap_parse_options(ld, entry)
     LDAP *ld;
     LDAPMessage *entry;
@@ -791,7 +791,7 @@ sudo_ldap_parse_options(ld, entry)
 /*
  * builds together a filter to check against ldap
  */
-char *
+static char *
 sudo_ldap_build_pass1(pw)
     struct passwd *pw;
 {
@@ -847,7 +847,7 @@ sudo_ldap_build_pass1(pw)
 /*
  * Map yes/true/on to TRUE, no/false/off to FALSE, else -1
  */
-int
+static int
 _atobool(s)
     const char *s;
 {
@@ -905,7 +905,7 @@ sudo_ldap_read_secret(path)
     }
 }
 
-int
+static int
 sudo_ldap_read_config()
 {
     FILE *fp;
@@ -1181,7 +1181,7 @@ sudo_ldap_display_bound_defaults(nss, pw, lbuf)
 /*
  * Print a record in the short form, ala file sudoers.
  */
-int
+static int
 sudo_ldap_display_entry_short(ld, entry, lbuf)
     LDAP *ld;
     LDAPMessage *entry;
@@ -1264,7 +1264,7 @@ sudo_ldap_display_entry_short(ld, entry, lbuf)
 /*
  * Print a record in the long form.
  */
-int
+static int
 sudo_ldap_display_entry_long(ld, entry, lbuf)
     LDAP *ld;
     LDAPMessage *entry;
@@ -1485,7 +1485,7 @@ sudo_ldap_sasl_interact(ld, flags, _auth_id, _interact)
 /*
  * Set LDAP options based on the config table.
  */
-int
+static int
 sudo_ldap_set_options(ld)
     LDAP *ld;
 {
