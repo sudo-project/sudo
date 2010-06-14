@@ -229,6 +229,20 @@ static struct ldap_config_table ldap_conf_table[] = {
     { NULL }
 };
 
+/* sudo_nss implementation */
+static int sudo_ldap_open(struct sudo_nss *nss);
+static int sudo_ldap_close(struct sudo_nss *nss);
+static int sudo_ldap_parse(struct sudo_nss *nss);
+static int sudo_ldap_setdefs(struct sudo_nss *nss);
+static int sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag);
+static int sudo_ldap_display_cmnd(struct sudo_nss *nss, struct passwd *pw);
+static int sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
+    struct lbuf *lbuf);
+static int sudo_ldap_display_bound_defaults(struct sudo_nss *nss,
+    struct passwd *pw, struct lbuf *lbuf);
+static int sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
+    struct lbuf *lbuf);
+
 struct sudo_nss sudo_nss_ldap = {
     &sudo_nss_ldap,
     NULL,
@@ -436,7 +450,7 @@ done:
  * Walk through search results and return TRUE if we have a matching
  * netgroup, else FALSE.
  */
-int
+static int
 sudo_ldap_check_user_netgroup(LDAP *ld, LDAPMessage *entry, char *user)
 {
     struct berval **bv, **p;
@@ -470,7 +484,7 @@ sudo_ldap_check_user_netgroup(LDAP *ld, LDAPMessage *entry, char *user)
  * Walk through search results and return TRUE if we have a
  * host match, else FALSE.
  */
-int
+static int
 sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry)
 {
     struct berval **bv, **p;
@@ -502,7 +516,7 @@ sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry)
     return(ret);
 }
 
-int
+static int
 sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
 {
     struct berval **bv, **p;
@@ -573,7 +587,7 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
     return(ret);
 }
 
-int
+static int
 sudo_ldap_check_runas_group(LDAP *ld, LDAPMessage *entry)
 {
     struct berval **bv, **p;
@@ -607,7 +621,7 @@ sudo_ldap_check_runas_group(LDAP *ld, LDAPMessage *entry)
  * Walk through search results and return TRUE if we have a runas match,
  * else FALSE.  RunAs info is optional.
  */
-int
+static int
 sudo_ldap_check_runas(LDAP *ld, LDAPMessage *entry)
 {
     int ret;
@@ -625,7 +639,7 @@ sudo_ldap_check_runas(LDAP *ld, LDAPMessage *entry)
  * Walk through search results and return TRUE if we have a command match,
  * FALSE if disallowed and UNSPEC if not matched.
  */
-int
+static int
 sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
 {
     struct berval **bv, **p;
@@ -687,7 +701,7 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
  * Search for boolean "option" in sudoOption.
  * Returns TRUE if found and allowed, FALSE if negated, else UNSPEC.
  */
-int
+static int
 sudo_ldap_check_bool(LDAP *ld, LDAPMessage *entry, char *option)
 {
     struct berval **bv, **p;
@@ -721,7 +735,7 @@ sudo_ldap_check_bool(LDAP *ld, LDAPMessage *entry, char *option)
  * Read sudoOption and modify the defaults as we go.  This is used once
  * from the cn=defaults entry and also once when a final sudoRole is matched.
  */
-void
+static void
 sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 {
     struct berval **bv, **p;
@@ -768,7 +782,7 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 /*
  * builds together a filter to check against ldap
  */
-char *
+static char *
 sudo_ldap_build_pass1(struct passwd *pw)
 {
     struct group *grp;
@@ -841,7 +855,7 @@ sudo_ldap_read_secret(const char *path)
     }
 }
 
-int
+static int
 sudo_ldap_read_config(void)
 {
     FILE *fp;
@@ -1087,7 +1101,7 @@ sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry)
 /*
  * Fetch and display the global Options.
  */
-int
+static int
 sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     struct lbuf *lbuf)
 {
@@ -1125,7 +1139,7 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 /*
  * STUB
  */
-int
+static int
 sudo_ldap_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
     struct lbuf *lbuf)
 {
@@ -1135,7 +1149,7 @@ sudo_ldap_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
 /*
  * Print a record in the short form, ala file sudoers.
  */
-int
+static int
 sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
 {
     struct berval **bv, **p;
@@ -1215,7 +1229,7 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
 /*
  * Print a record in the long form.
  */
-int
+static int
 sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
 {
     struct berval **bv, **p;
@@ -1287,7 +1301,7 @@ sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
 /*
  * Like sudo_ldap_lookup(), except we just print entries.
  */
-int
+static int
 sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
     struct lbuf *lbuf)
 {
@@ -1340,7 +1354,7 @@ sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
     return(count);
 }
 
-int
+static int
 sudo_ldap_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 {
     LDAP *ld = (LDAP *) nss->handle;
@@ -1426,7 +1440,7 @@ sudo_ldap_sasl_interact(LDAP *ld, unsigned int flags, void *_auth_id,
 /*
  * Set LDAP options based on the config table.
  */
-int
+static int
 sudo_ldap_set_options(LDAP *ld)
 {
     struct ldap_config_table *cur;
@@ -1592,7 +1606,7 @@ sudo_ldap_bind_s(LDAP *ld)
  * Open a connection to the LDAP server.
  * Returns 0 on success and non-zero on failure.
  */
-int
+static int
 sudo_ldap_open(struct sudo_nss *nss)
 {
     LDAP *ld;
@@ -1659,7 +1673,7 @@ sudo_ldap_open(struct sudo_nss *nss)
     return(0);
 }
 
-int
+static int
 sudo_ldap_setdefs(struct sudo_nss *nss)
 {
     LDAP *ld = (LDAP *) nss->handle;
@@ -1686,7 +1700,7 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
 /*
  * like sudoers_lookup() - only LDAP style
  */
-int
+static int
 sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 {
     LDAP *ld = (LDAP *) nss->handle;
@@ -1854,7 +1868,7 @@ done:
 /*
  * shut down LDAP connection
  */
-int
+static int
 sudo_ldap_close(struct sudo_nss *nss)
 {
     if (nss->handle != NULL) {
@@ -1867,7 +1881,7 @@ sudo_ldap_close(struct sudo_nss *nss)
 /*
  * STUB
  */
-int
+static int
 sudo_ldap_parse(struct sudo_nss *nss)
 {
     return(0);

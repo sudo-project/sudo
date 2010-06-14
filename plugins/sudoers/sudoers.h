@@ -209,19 +209,6 @@ int verify_user(struct passwd *, char *);
 int auth_begin_session(struct passwd *);
 int auth_end_session();
 
-#ifdef HAVE_LDAP
-/* ldap.c */
-int sudo_ldap_open(struct sudo_nss *);
-int sudo_ldap_close(struct sudo_nss *);
-int sudo_ldap_setdefs(struct sudo_nss *);
-int sudo_ldap_lookup(struct sudo_nss *, int, int);
-int sudo_ldap_parse(struct sudo_nss *);
-int sudo_ldap_display_cmnd(struct sudo_nss *, struct passwd *);
-int sudo_ldap_display_defaults(struct sudo_nss *, struct passwd *, struct lbuf *);
-int sudo_ldap_display_bound_defaults(struct sudo_nss *, struct passwd *, struct lbuf *);
-int sudo_ldap_display_privs(struct sudo_nss *, struct passwd *, struct lbuf *);
-#endif
-
 /* parse.c */
 int sudo_file_open(struct sudo_nss *);
 int sudo_file_close(struct sudo_nss *);
