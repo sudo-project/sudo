@@ -53,13 +53,13 @@ DOCS =	sudo.man visudo.man sudoers.man sudoers.ldap.man sudoers.man \
 	sudoreplay.man sudo_plugin.man
 
 @DEV@DEVDOCS =	$(srcdir)/sudo.man.in $(srcdir)/sudo.cat \
-		$(srcdir)/visudo.man.in $(srcdir)/visudo.cat \
-		$(srcdir)/sudoers.man.in $(srcdir)/sudoers.cat \
-		$(srcdir)/sudoers.ldap.man.in $(srcdir)/sudoers.ldap.cat \
-		$(srcdir)/sudoers.man.in $(srcdir)/sudoers.cat \
-		$(srcdir)/sudoreplay.man.in $(srcdir)/sudoreplay.cat \
-		$(srcdir)/sudo_plugin.man.in $(srcdir)/sudo_plugin.cat \
-		$(srcdir)/HISTORY $(srcdir)/LICENSE
+@DEV@		$(srcdir)/visudo.man.in $(srcdir)/visudo.cat \
+@DEV@		$(srcdir)/sudoers.man.in $(srcdir)/sudoers.cat \
+@DEV@		$(srcdir)/sudoers.ldap.man.in $(srcdir)/sudoers.ldap.cat \
+@DEV@		$(srcdir)/sudoers.man.in $(srcdir)/sudoers.cat \
+@DEV@		$(srcdir)/sudoreplay.man.in $(srcdir)/sudoreplay.cat \
+@DEV@		$(srcdir)/sudo_plugin.man.in $(srcdir)/sudo_plugin.cat \
+@DEV@		$(srcdir)/HISTORY $(srcdir)/LICENSE
 
 VERSION = @PACKAGE_VERSION@
 
