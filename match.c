@@ -105,6 +105,13 @@ static int command_matches_normal __P((char *, char *));
  */
 #define has_meta(s)	(strpbrk(s, "\\?*[]") != NULL)
 
+union sudo_in_addr_un {
+    struct in_addr ip4;
+#ifdef HAVE_IN6_ADDR
+    struct in6_addr ip6;
+#endif
+};
+
 /*
  * Check for user described by pw in a list of members.
  * Returns ALLOW, DENY or UNSPEC.
@@ -605,22 +612,21 @@ addr_matches_if(n)
     char *n;
 {
     int i;
-    struct in_addr addr;
+    union sudo_in_addr_un addr;
     struct interface *ifp;
 #ifdef HAVE_IN6_ADDR
-    struct in6_addr addr6;
     int j;
 #endif
     int family;
 
 #ifdef HAVE_IN6_ADDR
-    if (inet_pton(AF_INET6, n, &addr6) > 0) {
+    if (inet_pton(AF_INET6, n, &addr.ip6) > 0) {
 	family = AF_INET6;
     } else
 #endif
     {
 	family = AF_INET;
-	addr.s_addr = inet_addr(n);
+	addr.ip4.s_addr = inet_addr(n);
     }
 
     for (i = 0; i < num_interfaces; i++) {
@@ -629,21 +635,21 @@ addr_matches_if(n)
 	    continue;
 	switch(family) {
 	    case AF_INET:
-		if (ifp->addr.ip4.s_addr == addr.s_addr ||
+		if (ifp->addr.ip4.s_addr == addr.ip4.s_addr ||
 		    (ifp->addr.ip4.s_addr & ifp->netmask.ip4.s_addr)
-		    == addr.s_addr)
+		    == addr.ip4.s_addr)
 		    return(TRUE);
 		break;
 #ifdef HAVE_IN6_ADDR
 	    case AF_INET6:
-		if (memcmp(ifp->addr.ip6.s6_addr, addr6.s6_addr,
-		    sizeof(addr6.s6_addr)) == 0)
+		if (memcmp(ifp->addr.ip6.s6_addr, addr.ip6.s6_addr,
+		    sizeof(addr.ip6.s6_addr)) == 0)
 		    return(TRUE);
-		for (j = 0; j < sizeof(addr6.s6_addr); j++) {
-		    if ((ifp->addr.ip6.s6_addr[j] & ifp->netmask.ip6.s6_addr[j]) != addr6.s6_addr[j])
+		for (j = 0; j < sizeof(addr.ip6.s6_addr); j++) {
+		    if ((ifp->addr.ip6.s6_addr[j] & ifp->netmask.ip6.s6_addr[j]) != addr.ip6.s6_addr[j])
 			break;
 		}
-		if (j == sizeof(addr6.s6_addr))
+		if (j == sizeof(addr.ip6.s6_addr))
 		    return(TRUE);
 #endif
 	}
@@ -658,46 +664,45 @@ addr_matches_if_netmask(n, m)
     char *m;
 {
     int i;
-    struct in_addr addr, mask;
+    union sudo_in_addr_un addr, mask;
     struct interface *ifp;
 #ifdef HAVE_IN6_ADDR
-    struct in6_addr addr6, mask6;
     int j;
 #endif
     int family;
 
 #ifdef HAVE_IN6_ADDR
-    if (inet_pton(AF_INET6, n, &addr6) > 0)
+    if (inet_pton(AF_INET6, n, &addr.ip6) > 0)
 	family = AF_INET6;
     else
 #endif
     {
 	family = AF_INET;
-	addr.s_addr = inet_addr(n);
+	addr.ip4.s_addr = inet_addr(n);
     }
 
     if (family == AF_INET) {
 	if (strchr(m, '.'))
-	    mask.s_addr = inet_addr(m);
+	    mask.ip4.s_addr = inet_addr(m);
 	else {
 	    i = 32 - atoi(m);
-	    mask.s_addr = 0xffffffff;
-	    mask.s_addr >>= i;
-	    mask.s_addr <<= i;
-	    mask.s_addr = htonl(mask.s_addr);
+	    mask.ip4.s_addr = 0xffffffff;
+	    mask.ip4.s_addr >>= i;
+	    mask.ip4.s_addr <<= i;
+	    mask.ip4.s_addr = htonl(mask.ip4.s_addr);
 	}
     }
 #ifdef HAVE_IN6_ADDR
     else {
-	if (inet_pton(AF_INET6, m, &mask6) <= 0) {
+	if (inet_pton(AF_INET6, m, &mask.ip6) <= 0) {
 	    j = atoi(m);
 	    for (i = 0; i < 16; i++) {
 		if (j < i * 8)
-		    mask6.s6_addr[i] = 0;
+		    mask.ip6.s6_addr[i] = 0;
 		else if (i * 8 + 8 <= j)
-		    mask6.s6_addr[i] = 0xff;
+		    mask.ip6.s6_addr[i] = 0xff;
 		else
-		    mask6.s6_addr[i] = 0xff00 >> (j - i * 8);
+		    mask.ip6.s6_addr[i] = 0xff00 >> (j - i * 8);
 	    }
 	}
     }
@@ -709,15 +714,15 @@ addr_matches_if_netmask(n, m)
 	    continue;
 	switch(family) {
 	    case AF_INET:
-		if ((ifp->addr.ip4.s_addr & mask.s_addr) == addr.s_addr)
+		if ((ifp->addr.ip4.s_addr & mask.ip4.s_addr) == addr.ip4.s_addr)
 		    return(TRUE);
 #ifdef HAVE_IN6_ADDR
 	    case AF_INET6:
-		for (j = 0; j < sizeof(addr6.s6_addr); j++) {
-		    if ((ifp->addr.ip6.s6_addr[j] & mask6.s6_addr[j]) != addr6.s6_addr[j])
+		for (j = 0; j < sizeof(addr.ip6.s6_addr); j++) {
+		    if ((ifp->addr.ip6.s6_addr[j] & mask.ip6.s6_addr[j]) != addr.ip6.s6_addr[j])
 			break;
 		}
-		if (j == sizeof(addr6.s6_addr))
+		if (j == sizeof(addr.ip6.s6_addr))
 		    return(TRUE);
 #endif /* HAVE_IN6_ADDR */
 	}
