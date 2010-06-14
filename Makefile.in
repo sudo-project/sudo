@@ -507,7 +507,7 @@ check:
 	@echo nothing to check
 
 clean:
-	-rm -f *.a *.o *.lo stamp-* $(PROGS) testsudoers core *.core core.*
+	-rm -f *.a *.o *.lo stamp-* varsub $(PROGS) testsudoers core *.core core.*
 
 mostlyclean: clean
 
