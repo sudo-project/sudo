@@ -103,14 +103,14 @@ SHELL = @SHELL@
 PROGS = @PROGS@
 
 SRCS = aix.c alias.c alloc.c audit.c boottime.c bsm_audit.c check.c \
-       closefrom.c def_data.c defaults.c env.c error.c exec.c fileops.c \
-       find_path.c fnmatch.c get_pty.c getcwd.c getprogname.c getspwuid.c \
-       gettime.c glob.c goodpath.c gram.c gram.y interfaces.c iolog.c \
-       isblank.c lbuf.c ldap.c list.c logging.c match.c mksiglist.c mkstemp.c \
-       memrchr.c nanosleep.c parse.c parse_args.c pwutil.c set_perms.c \
-       sigaction.c snprintf.c strcasecmp.c strerror.c strlcat.c strlcpy.c \
-       strsignal.c sudo.c sudo_noexec.c sudo_edit.c sudo_nss.c term.c \
-       testsudoers.c tgetpass.c toke.c toke.l tsgetgrpw.c utimes.c \
+       closefrom.c def_data.c defaults.c env.c error.c exec.c exec_pty.c \
+       fileops.c find_path.c fnmatch.c get_pty.c getcwd.c getprogname.c \
+       getspwuid.c gettime.c glob.c goodpath.c gram.c gram.y interfaces.c \
+       iolog.c isblank.c lbuf.c ldap.c list.c logging.c match.c mksiglist.c \
+       mkstemp.c memrchr.c nanosleep.c parse.c parse_args.c pwutil.c \
+       set_perms.c sigaction.c snprintf.c strcasecmp.c strerror.c strlcat.c \
+       strlcpy.c strsignal.c sudo.c sudo_noexec.c sudo_edit.c sudo_nss.c \
+       term.c testsudoers.c tgetpass.c toke.c toke.l tsgetgrpw.c utimes.c \
        vasgroups.c visudo.c zero_bytes.c redblack.c selinux.c sesh.c \
        sudoreplay.c getdate.c getdate.y getline.c timestr.c $(AUTH_SRCS)
 
@@ -148,12 +148,12 @@ VERSION = @PACKAGE_VERSION@
 
 DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
             LICENSE Makefile.in PORTING README README.LDAP TROUBLESHOOTING \
-            UPGRADE WHATSNEW aclocal.m4 acsite.m4 aixcrypt.exp config.guess \
+            UPGRADE WHATSNEW aclocal.m4 aixcrypt.exp config.guess \
             config.h.in config.sub configure configure.in def_data.in \
-            indent.pro install-sh ltmain.sh mkdefaults mkinstalldirs \
-            mksiglist.in pathnames.h.in sample.pam sample.syslog.conf \
+            indent.pro install-sh ltmain.sh m4 mkdefaults mkinstalldirs \
+            pathnames.h.in sample.pam sample.syslog.conf \
             sample.sudoers schema.ActiveDirectory schema.OpenLDAP \
-            schema.iPlanet sudo.cat sudo.man.in sudo.pod sudo.psf \
+            schema.iPlanet siglist.in sudo.cat sudo.man.in sudo.pod sudo.psf \
             sudo_usage.h.in sudoers sudoers.cat sudoers.man.in sudoers.pod \
             sudoers.ldap.cat sudoers.ldap.man.in sudoers.ldap.pod \
             sudoers2ldif sudoreplay.cat sudoreplay.man.in sudoreplay.pod \
