@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 1999-2005, 2007 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2007, 2010
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -58,12 +59,8 @@ static char *def_prompt;
  * prompts and (possibly) setting a custom prompt.
  */
 static int
-sudo_collect(timeout, rendition, title, nprompts, prompts)
-    int timeout;
-    int rendition;
-    uchar_t *title;
-    int nprompts;
-    prompt_t *prompts;
+sudo_collect(int timeout, int rendition, uchar_t *title, int nprompts,
+    prompt_t *prompts)
 {
     switch (rendition) {
 	case SIAFORM:
@@ -87,10 +84,7 @@ sudo_collect(timeout, rendition, title, nprompts, prompts)
 }
 
 int
-sia_setup(pw, promptp, auth)
-    struct passwd *pw;
-    char **promptp;
-    sudo_auth *auth;
+sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     SIAENTITY *siah = NULL;
     extern int Argc;
@@ -109,10 +103,7 @@ sia_setup(pw, promptp, auth)
 }
 
 int
-sia_verify(pw, prompt, auth)
-    struct passwd *pw;
-    char *prompt;
-    sudo_auth *auth;
+sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 {
     SIAENTITY *siah = (SIAENTITY *) auth->data;
 
@@ -126,9 +117,7 @@ sia_verify(pw, prompt, auth)
 }
 
 int
-sia_cleanup(pw, auth)
-    struct passwd *pw;
-    sudo_auth *auth;
+sia_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     SIAENTITY *siah = (SIAENTITY *) auth->data;
 

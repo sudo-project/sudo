@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 1999-2005, 2008 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2008, 2010
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -50,10 +51,7 @@
 #include "sudo_auth.h"
 
 int
-fwtk_init(pw, promptp, auth)
-    struct passwd *pw;
-    char **promptp;
-    sudo_auth *auth;
+fwtk_init(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     static Cfg *confp;			/* Configuration entry struct */
     char resp[128];			/* Response from the server */
@@ -82,10 +80,7 @@ fwtk_init(pw, promptp, auth)
 }
 
 int
-fwtk_verify(pw, prompt, auth)
-    struct passwd *pw;
-    char *prompt;
-    sudo_auth *auth;
+fwtk_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 {
     char *pass;				/* Password from the user */
     char buf[SUDO_PASS_MAX + 12];	/* General prupose buffer */
@@ -150,9 +145,7 @@ done:
 }
 
 int
-fwtk_cleanup(pw, auth)
-    struct passwd *pw;
-    sudo_auth *auth;
+fwtk_cleanup(struct passwd *pw, sudo_auth *auth)
 {
 
     auth_close();

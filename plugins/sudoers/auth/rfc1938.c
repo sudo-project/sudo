@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996, 1998-2005
+ * Copyright (c) 1994-1996, 1998-2005, 2010
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -64,10 +64,7 @@
 #include "sudo_auth.h"
 
 int
-rfc1938_setup(pw, promptp, auth)
-    struct passwd *pw;
-    char **promptp;
-    sudo_auth *auth;
+rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     char challenge[256];
     static char *orig_prompt = NULL, *new_prompt = NULL;
@@ -128,10 +125,7 @@ rfc1938_setup(pw, promptp, auth)
 }
 
 int
-rfc1938_verify(pw, pass, auth)
-    struct passwd *pw;
-    char *pass;
-    sudo_auth *auth;
+rfc1938_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
 
     if (rfc1938verify((struct RFC1938 *) auth->data, pass) == 0)

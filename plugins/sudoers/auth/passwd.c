@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -50,10 +50,7 @@
 #define HAS_AGEINFO(p, l)	(l == 18 && p[DESLEN] == ',')
 
 int
-passwd_init(pw, promptp, auth)
-    struct passwd *pw;
-    char **promptp;
-    sudo_auth *auth;
+passwd_init(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
 #ifdef HAVE_SKEYACCESS
     if (skeyaccess(pw, user_tty, NULL, NULL) == 0)
@@ -63,10 +60,7 @@ passwd_init(pw, promptp, auth)
 }
 
 int
-passwd_verify(pw, pass, auth)
-    struct passwd *pw;
-    char *pass;
-    sudo_auth *auth;
+passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
     char sav, *epass;
     size_t pw_len;

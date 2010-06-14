@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2009 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2007-2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -51,10 +51,7 @@
  * http://publib16.boulder.ibm.com/doc_link/en_US/a_doc_lib/libs/basetrf1/authenticate.htm
  */
 int
-aixauth_verify(pw, prompt, auth)
-    struct passwd *pw;
-    char *prompt;
-    sudo_auth *auth;
+aixauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 {
     char *pass;
     char *message = NULL;
@@ -73,9 +70,7 @@ aixauth_verify(pw, prompt, auth)
 }
 
 int
-aixauth_cleanup(pw, auth)
-    struct passwd *pw;
-    sudo_auth *auth;
+aixauth_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     /* Unset AUTHSTATE as it may not be correct for the runas user. */
     unsetenv("AUTHSTATE");

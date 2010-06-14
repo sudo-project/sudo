@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1998-2005, 2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -54,10 +54,7 @@
 #include "sudo_auth.h"
 
 int
-secureware_init(pw, promptp, auth)
-    struct passwd *pw;
-    char **promptp;
-    sudo_auth *auth;
+secureware_init(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
 #ifdef __alpha
     extern int crypt_type;
@@ -69,10 +66,7 @@ secureware_init(pw, promptp, auth)
 }
 
 int
-secureware_verify(pw, pass, auth)
-    struct passwd *pw;
-    char *pass;
-    sudo_auth *auth;
+secureware_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
 #ifdef __alpha
     extern int crypt_type;

@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 1999-2005, 2007-2008 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2007-2008, 2010
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -72,9 +73,8 @@ typedef struct _sudo_krb5_data *sudo_krb5_datap;
 
 #ifndef HAVE_KRB5_GET_INIT_CREDS_OPT_ALLOC
 static krb5_error_code
-krb5_get_init_creds_opt_alloc(context, opts)
-    krb5_context		context;
-    krb5_get_init_creds_opt   **opts;
+krb5_get_init_creds_opt_alloc(krb5_context context,
+    krb5_get_init_creds_opt **opts)
 {
     *opts = emalloc(sizeof(krb5_get_init_creds_opt));
     krb5_get_init_creds_opt_init(*opts);
@@ -82,18 +82,14 @@ krb5_get_init_creds_opt_alloc(context, opts)
 }
 
 static void
-krb5_get_init_creds_opt_free(opts)
-    krb5_get_init_creds_opt *opts;
+krb5_get_init_creds_opt_free(krb5_get_init_creds_opt *opts)
 {
     free(opts);
 }
 #endif
 
 int
-kerb5_init(pw, promptp, auth)
-    struct passwd *pw;
-    char **promptp;
-    sudo_auth *auth;
+kerb5_init(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     krb5_context	sudo_context;
     krb5_ccache		ccache;
@@ -157,10 +153,7 @@ kerb5_init(pw, promptp, auth)
 
 #ifdef HAVE_KRB5_VERIFY_USER
 int
-kerb5_verify(pw, pass, auth)
-    struct passwd *pw;
-    char *pass;
-    sudo_auth *auth;
+kerb5_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
     krb5_context	sudo_context;
     krb5_principal	princ;
@@ -176,10 +169,7 @@ kerb5_verify(pw, pass, auth)
 }
 #else
 int
-kerb5_verify(pw, pass, auth)
-    struct passwd *pw;
-    char *pass;
-    sudo_auth *auth;
+kerb5_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
     krb5_context	sudo_context;
     krb5_principal	princ;
@@ -248,9 +238,7 @@ done:
 #endif
 
 int
-kerb5_cleanup(pw, auth)
-    struct passwd *pw;
-    sudo_auth *auth;
+kerb5_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     krb5_context	sudo_context;
     krb5_principal	princ;
@@ -281,10 +269,7 @@ kerb5_cleanup(pw, auth)
  * Returns 0 for successful authentication, non-zero for failure.
  */
 static int
-verify_krb_v5_tgt(sudo_context, cred, auth_name)
-    krb5_context	sudo_context;
-    krb5_creds		*cred;
-    char		*auth_name; /* For error reporting */
+verify_krb_v5_tgt(krb5_context sudo_context, krb5_creds *cred, char *auth_name)
 {
     krb5_error_code	error;
     krb5_principal	server;

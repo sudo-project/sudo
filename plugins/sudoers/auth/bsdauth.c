@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2000-2005, 2007-2008 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2000-2005, 2007-2008, 2010
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -54,10 +55,7 @@
 extern char *login_style;		/* from sudo.c */
 
 int
-bsdauth_init(pw, promptp, auth)
-    struct passwd *pw;
-    char **promptp;
-    sudo_auth *auth;
+bsdauth_init(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     static auth_session_t *as;
     extern login_cap_t *lc;			/* from sudo.c */
@@ -89,10 +87,7 @@ bsdauth_init(pw, promptp, auth)
 }
 
 int
-bsdauth_verify(pw, prompt, auth)
-    struct passwd *pw;
-    char *prompt;
-    sudo_auth *auth;
+bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 {
     char *pass;
     char *s;
@@ -157,9 +152,7 @@ bsdauth_verify(pw, prompt, auth)
 }
 
 int
-bsdauth_cleanup(pw, auth)
-    struct passwd *pw;
-    sudo_auth *auth;
+bsdauth_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     auth_session_t *as = (auth_session_t *) auth->data;
 

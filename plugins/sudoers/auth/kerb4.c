@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 1999-2005, 2007 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2007, 2010
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -48,10 +49,7 @@
 #include "sudo_auth.h"
 
 int
-kerb4_init(pw, promptp, auth)
-    struct passwd *pw;
-    char **promptp;
-    sudo_auth *auth;
+kerb4_init(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     static char realm[REALM_SZ];
 
@@ -70,10 +68,7 @@ kerb4_init(pw, promptp, auth)
 }
 
 int
-kerb4_verify(pw, pass, auth)
-    struct passwd *pw;
-    char *pass;
-    sudo_auth *auth;
+kerb4_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
     char tkfile[sizeof(_PATH_SUDO_TIMEDIR) + 4 + MAX_UID_T_LEN];
     char *realm = (char *) auth->data;

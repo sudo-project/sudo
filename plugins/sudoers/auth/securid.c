@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 1999-2005, 2007 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2007, 2010
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -56,10 +57,7 @@
 union config_record configure;
 
 int
-securid_init(pw, promptp, auth)
-    struct passwd *pw;
-    char **promptp;
-    sudo_auth *auth;
+securid_init(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     static struct SD_CLIENT sd_dat;		/* SecurID data block */
 
@@ -72,10 +70,7 @@ securid_init(pw, promptp, auth)
 }
 
 int
-securid_setup(pw, promptp, auth)
-    struct passwd *pw;
-    char **promptp;
-    sudo_auth *auth;
+securid_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     struct SD_CLIENT *sd = (struct SD_CLIENT *) auth->data;
 
@@ -91,10 +86,7 @@ securid_setup(pw, promptp, auth)
 }
 
 int
-securid_verify(pw, pass, auth)
-    struct passwd *pw;
-    char *pass;
-    sudo_auth *auth;
+securid_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
     struct SD_CLIENT *sd = (struct SD_CLIENT *) auth->data;
     int rval;

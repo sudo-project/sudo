@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 1996, 1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998-2005, 2010
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -67,10 +68,7 @@
 static int check_dce_status(error_status_t, char *);
 
 int
-dce_verify(pw, plain_pw, auth)
-    struct passwd *pw;
-    char *plain_pw;
-    sudo_auth *auth;
+dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth)
 {
     struct passwd		temp_pw;
     sec_passwd_rec_t		password_rec;
@@ -187,9 +185,7 @@ dce_verify(pw, plain_pw, auth)
 
 /* Returns 0 for DCE "ok" status, 1 otherwise */
 static int
-check_dce_status(input_status, comment)
-    error_status_t input_status;
-    char *comment;
+check_dce_status(error_status_t input_status, char *comment)
 {
     int error_stat;
     unsigned char error_string[dce_c_error_string_len];

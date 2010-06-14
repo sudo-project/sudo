@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2001-2005, 2007
+ * Copyright (c) 1999, 2001-2005, 2007, 2010
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -51,10 +51,7 @@
 #include <afs/kautils.h>
 
 int
-afs_verify(pw, pass, auth)
-    struct passwd *pw;
-    char *pass;
-    sudo_auth *auth;
+afs_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
     struct ktc_encryptionKey afs_key;
     struct ktc_token afs_token;

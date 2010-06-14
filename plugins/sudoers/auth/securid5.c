@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 1999-2005, 2007 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2007, 2010
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 2002 Michael Stroucken <michael@stroucken.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -68,10 +69,7 @@
  *                   success.
  */
 int
-securid_init(pw, promptp, auth)
-    struct passwd *pw;
-    char **promptp;
-    sudo_auth *auth;
+securid_init(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     static SDI_HANDLE sd_dat;			/* SecurID handle */
 
@@ -99,10 +97,7 @@ securid_init(pw, promptp, auth)
  *                   otherwise
  */
 int
-securid_setup(pw, promptp, auth)
-    struct passwd *pw;
-    char **promptp;
-    sudo_auth *auth;
+securid_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     SDI_HANDLE *sd = (SDI_HANDLE *) auth->data;
     int retval;
@@ -152,10 +147,7 @@ securid_setup(pw, promptp, auth)
  *                   incorrect authentication, fatal on errors
  */
 int
-securid_verify(pw, pass, auth)
-    struct passwd *pw;
-    char *pass;
-    sudo_auth *auth;
+securid_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
     SDI_HANDLE *sd = (SDI_HANDLE *) auth->data;
     int rval;

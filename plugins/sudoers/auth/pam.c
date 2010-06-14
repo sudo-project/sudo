@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2009 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2007-2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -85,10 +85,7 @@ static int gotintr;
 static pam_handle_t *pamh;
 
 int
-pam_init(pw, promptp, auth)
-    struct passwd *pw;
-    char **promptp;
-    sudo_auth *auth;
+pam_init(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     static struct pam_conv pam_conv;
     static int pam_status;
@@ -124,10 +121,7 @@ pam_init(pw, promptp, auth)
 }
 
 int
-pam_verify(pw, prompt, auth)
-    struct passwd *pw;
-    char *prompt;
-    sudo_auth *auth;
+pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 {
     const char *s;
     int *pam_status = (int *) auth->data;
@@ -184,9 +178,7 @@ pam_verify(pw, prompt, auth)
 }
 
 int
-pam_cleanup(pw, auth)
-    struct passwd *pw;
-    sudo_auth *auth;
+pam_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     int *pam_status = (int *) auth->data;
 
@@ -199,9 +191,7 @@ pam_cleanup(pw, auth)
 }
 
 int
-pam_begin_session(pw, auth)
-    struct passwd *pw;
-    sudo_auth *auth;
+pam_begin_session(struct passwd *pw, sudo_auth *auth)
 {
     int status = PAM_SUCCESS;
 
@@ -251,8 +241,7 @@ done:
 }
 
 int
-pam_end_session(auth)
-    sudo_auth *auth;
+pam_end_session(sudo_auth *auth)
 {
     int status = PAM_SUCCESS;
 
@@ -270,11 +259,8 @@ pam_end_session(auth)
  * XXX - does not handle PAM_BINARY_PROMPT
  */
 static int
-converse(num_msg, msg, response, appdata_ptr)
-    int num_msg;
-    PAM_CONST struct pam_message **msg;
-    struct pam_response **response;
-    void *appdata_ptr;
+converse(int num_msg, PAM_CONST struct pam_message **msg,
+    struct pam_response **response, void *appdata_ptr)
 {
     struct pam_response *pr;
     PAM_CONST struct pam_message *pm;
