@@ -229,6 +229,21 @@ static struct ldap_config_table ldap_conf_table[] = {
     { NULL }
 };
 
+/* sudo_nss implementation */
+static int sudo_ldap_open __P((struct sudo_nss *nss));
+static int sudo_ldap_close __P((struct sudo_nss *nss));
+static int sudo_ldap_parse __P((struct sudo_nss *nss));
+static int sudo_ldap_setdefs __P((struct sudo_nss *nss));
+static int sudo_ldap_lookup __P((struct sudo_nss *nss, int ret, int pwflag));
+static int sudo_ldap_display_cmnd __P((struct sudo_nss *nss,
+    struct passwd *pw));
+static int sudo_ldap_display_defaults __P((struct sudo_nss *nss,
+    struct passwd *pw, struct lbuf *lbuf));
+static int sudo_ldap_display_bound_defaults __P((struct sudo_nss *nss,
+    struct passwd *pw, struct lbuf *lbuf));
+static int sudo_ldap_display_privs __P((struct sudo_nss *nss,
+    struct passwd *pw, struct lbuf *lbuf));
+
 struct sudo_nss sudo_nss_ldap = {
     &sudo_nss_ldap,
     NULL,
@@ -1132,7 +1147,7 @@ sudo_ldap_get_first_rdn(ld, entry)
 /*
  * Fetch and display the global Options.
  */
-int
+static int
 sudo_ldap_display_defaults(nss, pw, lbuf)
     struct sudo_nss *nss;
     struct passwd *pw;
@@ -1169,7 +1184,7 @@ sudo_ldap_display_defaults(nss, pw, lbuf)
 /*
  * STUB
  */
-int
+static int
 sudo_ldap_display_bound_defaults(nss, pw, lbuf)
     struct sudo_nss *nss;
     struct passwd *pw;
@@ -1339,7 +1354,7 @@ sudo_ldap_display_entry_long(ld, entry, lbuf)
 /*
  * Like sudo_ldap_lookup(), except we just print entries.
  */
-int
+static int
 sudo_ldap_display_privs(nss, pw, lbuf)
     struct sudo_nss *nss;
     struct passwd *pw;
@@ -1394,7 +1409,7 @@ sudo_ldap_display_privs(nss, pw, lbuf)
     return(count);
 }
 
-int
+static int
 sudo_ldap_display_cmnd(nss, pw)
     struct sudo_nss *nss;
     struct passwd *pw;
@@ -1653,7 +1668,7 @@ sudo_ldap_bind_s(ld)
  * Open a connection to the LDAP server.
  * Returns 0 on success and non-zero on failure.
  */
-int
+static int
 sudo_ldap_open(nss)
     struct sudo_nss *nss;
 {
@@ -1721,7 +1736,7 @@ sudo_ldap_open(nss)
     return(0);
 }
 
-int
+static int
 sudo_ldap_setdefs(nss)
     struct sudo_nss *nss;
 {
@@ -1749,7 +1764,7 @@ sudo_ldap_setdefs(nss)
 /*
  * like sudoers_lookup() - only LDAP style
  */
-int
+static int
 sudo_ldap_lookup(nss, ret, pwflag)
     struct sudo_nss *nss;
     int ret;
@@ -1920,7 +1935,7 @@ done:
 /*
  * shut down LDAP connection
  */
-int
+static int
 sudo_ldap_close(nss)
     struct sudo_nss *nss;
 {
@@ -1934,7 +1949,7 @@ sudo_ldap_close(nss)
 /*
  * STUB
  */
-int
+static int
 sudo_ldap_parse(nss)
     struct sudo_nss *nss;
 {

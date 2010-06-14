@@ -274,17 +274,6 @@ int log_ttyout __P((const char *buf, unsigned int len));
 void io_log_close __P((void));
 void io_nextid __P((void));
 
-/* ldap.c */
-int sudo_ldap_open	__P((struct sudo_nss *));
-int sudo_ldap_close	__P((struct sudo_nss *));
-int sudo_ldap_setdefs	__P((struct sudo_nss *));
-int sudo_ldap_lookup	__P((struct sudo_nss *, int, int));
-int sudo_ldap_parse	__P((struct sudo_nss *));
-int sudo_ldap_display_cmnd __P((struct sudo_nss *, struct passwd *));
-int sudo_ldap_display_defaults __P((struct sudo_nss *, struct passwd *, struct lbuf *));
-int sudo_ldap_display_bound_defaults __P((struct sudo_nss *, struct passwd *, struct lbuf *));
-int sudo_ldap_display_privs __P((struct sudo_nss *, struct passwd *, struct lbuf *));
-
 /* pam.c */
 int pam_begin_session	__P((struct passwd *));
 int pam_end_session	__P((void));
