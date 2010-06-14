@@ -23,22 +23,22 @@
 #define _SUDO_INTERFACES_H
 
 /*
+ * Union to hold either strucr in_addr or in6_add
+ */
+union sudo_in_addr_un {
+    struct in_addr ip4;
+#ifdef HAVE_IN6_ADDR
+    struct in6_addr ip6;
+#endif
+};
+
+/*
  * IP address and netmask pairs for checking against local interfaces.
  */
 struct interface {
     int family;	/* AF_INET or AF_INET6 */
-    union {
-	struct in_addr ip4;
-#ifdef HAVE_IN6_ADDR
-	struct in6_addr ip6;
-#endif
-    } addr;
-    union {
-	struct in_addr ip4;
-#ifdef HAVE_IN6_ADDR
-	struct in6_addr ip6;
-#endif
-    } netmask;
+    union sudo_in_addr_un addr;
+    union sudo_in_addr_un netmask;
 };
 
 /*
