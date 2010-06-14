@@ -1293,6 +1293,9 @@ cleanup(gotsignal)
 #endif
     }
     term_restore(STDIN_FILENO, 0);
+#ifdef HAVE_SELINUX
+    selinux_restore_tty();
+#endif
 }
 
 static void
