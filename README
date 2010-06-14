@@ -9,8 +9,9 @@ privileges as possible but still allow people to get their work done.
 Where to find sudo
 ==================
 Before you try and build sudo, *please* make sure you have the current
-version.  The latest sudo may always be gotten via anonymous ftp
-from ftp.sudo.ws in the directory /pub/sudo/.
+version.  The latest sudo may always be gotten via anonymous ftp from
+ftp.sudo.ws in the directory /pub/sudo/ or from the sudo web site,
+http://www.sudo.ws/
 
 The distribution is sudo-M.m.tar.gz where `M' is the major
 version number and `m' is the minor version number.
@@ -48,7 +49,8 @@ mirror.
 Building the release
 ====================
 Please read the installation guide in the `INSTALL' file before
-trying to build sudo.
+trying to build sudo.  Pay special attention to the "OS dependent notes"
+section.
 
 Copyright
 =========
@@ -91,6 +93,6 @@ If you have found what you believe to be a bug, you can file a bug
 report in the sudo bug database, on the web at http://www.sudo.ws/bugs/.
 
 Please read over the `TROUBLESHOOTING' file in the doc directory *before*
-submitting a bug report.  When reporting bugs, please be sure to
-include the version of sudo you are using as well as the platform
-you are running it on.
+submitting a bug report.  When reporting bugs, please be sure to include
+the version of sudo you are using as well as the platform you are running
+it on.
