@@ -14,6 +14,14 @@ What's new in Sudo 1.7.3?
    Mac OS X, and Linux systems with the devpts filesystem (pseudo-ttys
    only).
 
+ * Sudo's SELinux support should now function correctly when running
+   commands as a non-root user and when one of stdin, stdout or stderr
+   is not a terminal.
+
+ * Sudo now uses mbr_check_membership() on systems that support it
+   to determine group membership.  Currently, only Darwin (Mac OS X)
+   supports this.
+
  * The passwd_timeout and timestamp_timeout options may now be
    specified as floating point numbers for more granular timeout
    values.
