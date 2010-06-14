@@ -1,10 +1,27 @@
 #
 # Active Directory Schema for sudo configuration (sudoers)
 #
-# To extend your Active Directory schema, run the following command
-# on your Windows DC:
+# To extend your Active Directory schema, run one of the following command
+# on your Windows DC (default port - Active Directory):
+# 
+#  ldifde -i -f schema.ActiveDirectory -c "CN=Schema,CN=Configuration,DC=X" #schemaNamingContext
 #
-#  ldifde -i -f schema.ActiveDirectory -c dc=X dc=YOURDOMAIN,DC=COM
+# or on your Windows DC if using another port (with Active Directory LightWeight Directory Services / ADAM-Active Directory Application Mode)
+# Port 50000 by example (or any other port specified when defining the ADLDS/ADAM instance
+#
+#  ldifde -i -f schema.ActiveDirectory -t 50000 -c "CN=Schema,CN=Configuration,DC=X" #schemaNamingContext
+#
+# or 
+#
+#  ldifde -i -f schema.ActiveDirectory -s server:port -c "CN=Schema,CN=Configuration,DC=X" #schemaNamingContext
+#
+# Can add username domain and password
+#
+# -b username domain password
+#
+# Can create Log file in current or any directory
+#
+# -j .
 #
 
 dn: CN=sudoUser,CN=Schema,CN=Configuration,DC=X
@@ -140,6 +157,12 @@ lDAPDisplayName: sudoRunAsGroup
 name: sudoRunAsGroup
 schemaIDGUID:: xJhSt/Yd3RGJPTB1VtiVkw==
 objectCategory: CN=Attribute-Schema,CN=Schema,CN=Configuration,DC=X
+
+dn:
+changetype: modify
+add: schemaUpdateNow
+schemaUpdateNow: 1
+-
 
 dn: CN=sudoRole,CN=Schema,CN=Configuration,DC=X
 changetype: add
