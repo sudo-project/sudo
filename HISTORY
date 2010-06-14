@@ -41,6 +41,9 @@ had been added in the past ten years. This new parser removes some
 limitations of the previous one, removes ordering constraints and adds
 support for including multiple sudoers files.
 
+In 2010, Quest Software began sponsoring Sudo development by hiring Todd to
+work on Sudo as part of his full-time job.
+
 sudo, in its current form, is maintained by:
 
         Todd Miller <Todd.Miller@courtesan.com>
