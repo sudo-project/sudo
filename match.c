@@ -105,13 +105,6 @@ static int command_matches_normal __P((char *, char *));
  */
 #define has_meta(s)	(strpbrk(s, "\\?*[]") != NULL)
 
-union sudo_in_addr_un {
-    struct in_addr ip4;
-#ifdef HAVE_IN6_ADDR
-    struct in6_addr ip6;
-#endif
-};
-
 /*
  * Check for user described by pw in a list of members.
  * Returns ALLOW, DENY or UNSPEC.
