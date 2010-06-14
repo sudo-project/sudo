@@ -66,7 +66,6 @@ static struct selinux_state {
  *
  * Returns zero on success, non-zero otherwise
  */
-/* XXX - should also be called as part of cleanup() */
 int
 selinux_restore_tty(void)
 {
@@ -91,9 +90,14 @@ selinux_restore_tty(void)
 	warning("unable to restore context for %s", se_state.ttyn);
 
 skip_relabel:
-    if (se_state.ttyfd != -1)
+    if (se_state.ttyfd != -1) {
 	close(se_state.ttyfd);
-    freecon(chk_tty_context);
+	se_state.ttyfd = -1;
+    }
+    if (chk_tty_context != NULL) {
+	freecon(chk_tty_context);
+	chk_tty_context = NULL;
+    }
     return retval;
 }
 

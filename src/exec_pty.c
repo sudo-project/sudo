@@ -121,6 +121,9 @@ cleanup(int gotsignal)
 {
     if (!tq_empty(&io_plugins))
 	term_restore(io_fds[SFD_USERTTY], 0);
+#ifdef HAVE_SELINUX
+    selinux_restore_tty();
+#endif
 }
 
 /*
