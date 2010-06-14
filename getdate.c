@@ -918,45 +918,41 @@ time_t
 get_date(p)
     char		*p;
 {
-    struct tm		*tm, gmt;
+    struct tm		*tm, *gmt, gmtbuf;
     time_t		Start;
     time_t		tod;
     time_t		now;
     time_t		timezone;
 
     yyInput = p;
+    (void)time (&now);
+
+    gmt = gmtime (&now);
+    if (gmt != NULL)
     {
-	struct tm *gmt_ptr;
-	/* XXX - eliminate timeb */
-
-	(void)time (&now);
-
-	gmt_ptr = gmtime (&now);
-	if (gmt_ptr != NULL)
-	{
-	    /* Make a copy, in case localtime modifies *tm (I think
-	       that comment now applies to *gmt_ptr, but I am too
-	       lazy to dig into how gmtime and locatime allocate the
-	       structures they return pointers to).  */
-	    gmt = *gmt_ptr;
-	}
-
-	if (! (tm = localtime (&now)))
-	    return -1;
-
-	if (gmt_ptr != NULL)
-	    timezone = difftm (&gmt, tm) / 60;
-	else
-	    /* We are on a system like VMS, where the system clock is
-	       in local time and the system has no concept of timezones.
-	       Hopefully we can fake this out (for the case in which the
-	       user specifies no timezone) by just saying the timezone
-	       is zero.  */
-	    timezone = 0;
-
-	if(tm->tm_isdst)
-	    timezone += 60;
+	/* Make a copy, in case localtime modifies *tm (I think
+	   that comment now applies to *gmt, but I am too
+	   lazy to dig into how gmtime and locatime allocate the
+	   structures they return pointers to).  */
+	gmtbuf = *gmt;
+	gmt = &gmtbuf;
     }
+
+    if (! (tm = localtime (&now)))
+	return -1;
+
+    if (gmt != NULL)
+	timezone = difftm (gmt, tm) / 60;
+    else
+	/* We are on a system like VMS, where the system clock is
+	   in local time and the system has no concept of timezones.
+	   Hopefully we can fake this out (for the case in which the
+	   user specifies no timezone) by just saying the timezone
+	   is zero.  */
+	timezone = 0;
+
+    if(tm->tm_isdst)
+	timezone += 60;
 
     tm = localtime(&now);
     yyYear = tm->tm_year + 1900;
@@ -1020,7 +1016,7 @@ main(ac, av)
     (void)printf("Enter date, or blank line to exit.\n\t> ");
     (void)fflush(stdout);
     while (gets(buff) && buff[0]) {
-	d = get_date(buff, (struct timeb *)NULL);
+	d = get_date(buff);
 	if (d == -1)
 	    (void)printf("Bad format - couldn't convert.\n");
 	else
@@ -1032,7 +1028,7 @@ main(ac, av)
     /* NOTREACHED */
 }
 #endif	/* defined(TEST) */
-#line 984 "y.tab.c"
+#line 980 "y.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1527,7 +1523,7 @@ case 41:
 	    yyval.Meridian = yyvsp[0].Meridian;
 	}
 break;
-#line 1479 "y.tab.c"
+#line 1475 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
