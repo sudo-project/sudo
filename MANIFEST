@@ -52,7 +52,6 @@ configure.in
 doc/HISTORY
 doc/LICENSE
 doc/Makefile.in
-doc/PORTING
 doc/TROUBLESHOOTING
 doc/UPGRADE
 doc/sample.pam
