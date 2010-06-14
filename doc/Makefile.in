@@ -80,8 +80,6 @@ sudo.man: $(srcdir)/sudo.man.in
 $(srcdir)/sudo.cat: varsub $(srcdir)/sudo.man.in
 	sed -f varsub $(srcdir)/sudo.man.in | $(NROFF) -man > $@
 
-visudo.man.in: $(srcdir)/visudo.man.in
-
 $(srcdir)/visudo.man.in: $(srcdir)/visudo.pod
 	@rm -f $(srcdir)/$@
 	( cd $(srcdir); mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' visudo.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" visudo.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@ )
@@ -91,8 +89,6 @@ visudo.man: $(srcdir)/visudo.man.in
 
 $(srcdir)/visudo.cat: varsub $(srcdir)/visudo.man.in
 	sed -f varsub $(srcdir)/visudo.man.in | $(NROFF) -man > $@
-
-sudoers.man.in: $(srcdir)/sudoers.man.in
 
 $(srcdir)/sudoers.man.in: $(srcdir)/sudoers.pod
 	@rm -f $(srcdir)/$@
@@ -104,8 +100,6 @@ sudoers.man: $(srcdir)/sudoers.man.in
 $(srcdir)/sudoers.cat: varsub $(srcdir)/sudoers.man.in
 	sed -f varsub $(srcdir)/sudoers.man.in | $(NROFF) -man > $@
 
-sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.man.in
-
 $(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.pod
 	@rm -f $(srcdir)/$@
 	( cd $(srcdir); mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' sudoers.ldap.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectform --release=$(VERSION) --center="MAINTENANCE COMMANDS" sudoers.ldap.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@ )
@@ -116,8 +110,6 @@ sudoers.ldap.man: $(srcdir)/sudoers.ldap.man.in
 $(srcdir)/sudoers.ldap.cat: varsub $(srcdir)/sudoers.ldap.man.in
 	sed -f varsub $(srcdir)/sudoers.ldap.man.in | $(NROFF) -man > $@
 
-sudoreplay.man.in: $(srcdir)/sudoreplay.man.in
-
 $(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.pod
 	@rm -f $(srcdir)/$@
 	( cd $(srcdir); mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' sudoreplay.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" sudoreplay.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@ )
@@ -127,8 +119,6 @@ sudoreplay.man: $(srcdir)/sudoreplay.man.in
 
 $(srcdir)/sudoreplay.cat: varsub $(srcdir)/sudoreplay.man.in
 	sed -f varsub $(srcdir)/sudoreplay.man.in | $(NROFF) -man > $@
-
-sudo_plugin.man.in: $(srcdir)/sudo_plugin.man.in
 
 $(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.pod
 	@rm -f $(srcdir)/$@
