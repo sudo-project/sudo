@@ -196,7 +196,6 @@ int isblank __P((int));
 # define SA_ONSTACK	SV_ONSTACK
 # define SA_RESTART	SV_INTERRUPT		/* opposite effect */
 # define SA_RESETHAND	SV_RESETHAND
-# define SA_NOCLDSTOP	SV_NOCLDSTOP
 # define sa_handler	sv_handler
 # define sa_mask	sv_mask
 # define sa_flags	sv_flags
