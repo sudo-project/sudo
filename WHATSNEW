@@ -14,6 +14,10 @@ What's new in Sudo 1.7.3?
    Mac OS X, and Linux systems with the devpts filesystem (pseudo-ttys
    only).
 
+ * Support for multiple 'sudoers_base' entries in ldap.conf.  When
+   multiple bases are listed, sudo will try each one in the order
+   in which they are specified.
+
  * Sudo's SELinux support should now function correctly when running
    commands as a non-root user and when one of stdin, stdout or stderr
    is not a terminal.

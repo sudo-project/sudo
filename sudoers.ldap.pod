@@ -301,7 +301,8 @@ to wait for a response to an LDAP query.
 
 The base DN to use when performing B<sudo> LDAP queries.  Typically
 this is of the form C<ou=SUDOers,dc=example,dc=com> for the domain
-C<example.com>.
+C<example.com>.  Multiple B<SUDOERS_BASE> lines may be specified,
+in which case they are queried in the order specified.
 
 =item B<SUDOERS_DEBUG> debug_level
 
@@ -559,7 +560,7 @@ determines sudoers source order on AIX
   # The amount of time, in seconds, to wait while performing an LDAP query.
   timelimit 30
   #
-  # must be set or sudo will ignore LDAP
+  # Must be set or sudo will ignore LDAP; may be specified multiple times.
   sudoers_base   ou=SUDOers,dc=example,dc=com
   #
   # verbose sudoers matching from ldap
