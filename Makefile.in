@@ -106,13 +106,14 @@ SRCS = aix.c alias.c alloc.c audit.c boottime.c bsm_audit.c check.c \
        closefrom.c def_data.c defaults.c env.c error.c exec.c exec_pty.c \
        fileops.c find_path.c fnmatch.c get_pty.c getcwd.c getprogname.c \
        getspwuid.c gettime.c glob.c goodpath.c gram.c gram.y interfaces.c \
-       iolog.c isblank.c lbuf.c ldap.c list.c logging.c match.c mksiglist.c \
-       mkstemp.c memrchr.c nanosleep.c parse.c parse_args.c pwutil.c \
-       set_perms.c setsid.c sigaction.c snprintf.c strcasecmp.c strerror.c \
-       strlcat.c strlcpy.c strsignal.c sudo.c sudo_noexec.c sudo_edit.c \
-       sudo_nss.c term.c testsudoers.c tgetpass.c toke.c toke.l tsgetgrpw.c \
-       utimes.c vasgroups.c visudo.c zero_bytes.c redblack.c selinux.c sesh.c \
-       sudoreplay.c getdate.c getdate.y getline.c timestr.c $(AUTH_SRCS)
+       iolog.c isblank.c lbuf.c ldap.c linux_audit.c list.c logging.c match.c \
+       mksiglist.c mkstemp.c memrchr.c nanosleep.c parse.c parse_args.c \
+       pwutil.c set_perms.c setsid.c sigaction.c snprintf.c strcasecmp.c \
+       strerror.c strlcat.c strlcpy.c strsignal.c sudo.c sudo_noexec.c \
+       sudo_edit.c sudo_nss.c term.c testsudoers.c tgetpass.c toke.c toke.l \
+       tsgetgrpw.c utimes.c vasgroups.c visudo.c zero_bytes.c redblack.c \
+       selinux.c sesh.c sudoreplay.c getdate.c getdate.y getline.c \
+       timestr.c $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/kerb4.c auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
@@ -121,9 +122,9 @@ AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 
 HDRS = alloc.h bsm_audit.h compat.h def_data.h defaults.h error.h ins_2001.h \
        ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.h lbuf.h \
-       list.h logging.h missing.h mksiglist.h nonunix.h redblack.h parse.h \
-       sudo.h sudo_nss.h gram.h auth/sudo_auth.h emul/charclass.h \
-       emul/fnmatch.h emul/glob.h emul/timespec.h emul/utime.h
+       linux_audit.h list.h logging.h missing.h mksiglist.h nonunix.h \
+       redblack.h parse.h sudo.h sudo_nss.h gram.h auth/sudo_auth.h \
+       emul/charclass.h emul/fnmatch.h emul/glob.h emul/timespec.h emul/utime.h
 
 AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
@@ -253,11 +254,11 @@ alias.o: $(srcdir)/alias.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(srcdi
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alias.c
 alloc.o: $(srcdir)/alloc.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alloc.c
-audit.o: $(srcdir)/audit.c $(SUDODEP)
+audit.o: $(srcdir)/audit.c $(SUDODEP) $(srcdir)/bsm_audit.h $(srcdir)/linux_audit.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/audit.c
 boottime.o: $(srcdir)/boottime.c config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/boottime.c
-bsm_audit.o: $(srcdir)/bsm_audit.c $(SUDODEP) bsm_audit.h
+bsm_audit.o: $(srcdir)/bsm_audit.c $(SUDODEP) $(srcdir)/bsm_audit.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/bsm_audit.c
 check.o: $(srcdir)/check.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/check.c
@@ -309,6 +310,8 @@ lbuf.o: $(srcdir)/lbuf.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/lbuf.c
 ldap.o: $(srcdir)/ldap.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/ldap.c
+linux_audit.o: $(srcdir)/linux_audit.c $(SUDODEP) $(srcdir)/linux_audit.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/linux_audit.c
 list.o: $(srcdir)/list.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/list.c
 logging.o: $(srcdir)/logging.c $(SUDODEP)
