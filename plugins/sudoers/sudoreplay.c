@@ -97,6 +97,10 @@
 #define IOFD_TIMING     5
 #define IOFD_MAX        6
 
+/* Bitmap of iofds to be replayed */
+unsigned int replay_filter = (1 << IOFD_STDOUT) | (1 << IOFD_STDERR) |
+			     (1 << IOFD_TTYOUT);
+
 /* For getopt(3) */
 extern char *optarg;
 extern int optind;
@@ -216,10 +220,24 @@ main(int argc, char *argv[])
     setprogname(argc > 0 ? argv[0] : "sudoreplay");
 #endif
 
-    while ((ch = getopt(argc, argv, "d:lm:s:V")) != -1) {
+    while ((ch = getopt(argc, argv, "d:f:lm:s:V")) != -1) {
 	switch(ch) {
 	case 'd':
 	    session_dir = optarg;
+	    break;
+	case 'f':
+	    /* Set the replay filter. */
+	    replay_filter = 0;
+	    for (cp = strtok(optarg, ","); cp; cp = strtok(NULL, ",")) {
+		if (strcmp(cp, "stdout") == 0)
+		    SET(replay_filter, 1 << IOFD_STDOUT);
+		else if (strcmp(cp, "stderr") == 0)
+		    SET(replay_filter, 1 << IOFD_STDERR);
+		else if (strcmp(cp, "ttyout") == 0)
+		    SET(replay_filter, 1 << IOFD_TTYOUT);
+		else
+		    errorx(1, "invalid filter option: %s", optarg);
+	    }
 	    break;
 	case 'l':
 	    listonly = 1;
@@ -266,14 +284,13 @@ main(int argc, char *argv[])
 	    id, &id[2], &id[4], strerror(ENAMETOOLONG));
     plen -= 7;
 
-    /* Open files for replay */
+    /* Open files for replay, applying replay filter for the -f flag. */
     for (idx = 0; idx < IOFD_MAX; idx++) {
-	/* Don't support replaying input. */
-	if (idx == IOFD_STDIN || idx == IOFD_TTYIN)
-	    continue;
-	io_fds[idx].v = open_io_fd(path, plen, io_fnames[idx]);
-	if (io_fds[idx].v == NULL)
-	    error(1, "unable to open %s", path);
+	if (ISSET(replay_filter, 1 << idx) || idx == IOFD_TIMING) {
+	    io_fds[idx].v = open_io_fd(path, plen, io_fnames[idx]);
+	    if (io_fds[idx].v == NULL)
+		error(1, "unable to open %s", path);
+	}
     }
 
     /* Read log file. */
@@ -352,12 +369,11 @@ main(int argc, char *argv[])
 	    to_wait = max_wait;
 	delay(to_wait);
 
-	/* We don't replay input (but we still have to delay). */
-	if (idx == IOFD_STDIN || idx == IOFD_TTYIN)
+	/* Even if we are not relaying, we still have to delay. */
+	if (io_fds[idx].v == NULL)
 	    continue;
 
 	/* All output is sent to stdout. */
-	/* XXX - add flags to allow use to select which ones */
 	while (nbytes != 0) {
 	    if (nbytes > sizeof(buf))
 		len = sizeof(buf);
