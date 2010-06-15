@@ -88,13 +88,33 @@
 #include "error.h"
 #include "missing.h"
 
+/* Must match the defines in iolog.c */
+#define IOFD_STDIN      0
+#define IOFD_STDOUT     1
+#define IOFD_STDERR     2
+#define IOFD_TTYIN      3
+#define IOFD_TTYOUT     4
+#define IOFD_TIMING     5
+#define IOFD_MAX        6
+
+/* Bitmap of iofds to be replayed */
+unsigned int replay_filter = (1 << IOFD_STDOUT) | (1 << IOFD_STDERR) |
+			     (1 << IOFD_TTYOUT);
+
 /* For getopt(3) */
 extern char *optarg;
 extern int optind;
 
 int Argc;
 char **Argv;
-const char *session_dir = _PATH_SUDO_IO_LOGDIR;
+
+union io_fd {
+    FILE *f;
+#ifdef HAVE_ZLIB
+    gzFile g;
+#endif
+    void *v;
+};
 
 /*
  * Info present in the I/O log file
@@ -148,9 +168,21 @@ struct search_node {
 static struct search_node *node_stack[32];
 static int stack_top;
 
+static const char *session_dir = _PATH_SUDO_IO_LOGDIR;
+
+static union io_fd io_fds[IOFD_MAX];
+static const char *io_fnames[IOFD_MAX] = {
+    "/stdin",
+    "/stdout",
+    "/stderr",
+    "/ttyin",
+    "/ttyout",
+    "/timing"
+};
+
 extern time_t get_date __P((char *));
 extern char *get_timestr __P((time_t, int));
-extern int term_raw __P((int, int, int));
+extern int term_raw __P((int, int));
 extern int term_restore __P((int, int));
 extern void zero_bytes __P((volatile void *, size_t));
 void cleanup __P((int));
@@ -160,6 +192,7 @@ static int parse_expr __P((struct search_node **, char **));
 static void check_input __P((int, double *));
 static void delay __P((double));
 static void usage __P((void));
+static void *open_io_fd __P((char *pathbuf, int len, const char *suffix));
 
 #ifdef HAVE_REGCOMP
 # define REGEX_T	regex_t
@@ -175,34 +208,40 @@ static void usage __P((void));
 int
 main(argc, argv)
     int argc;
-    char **argv;
+    char *argv[];
 {
     int ch, plen, nready, interactive = 0, listonly = 0;
     const char *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
+    double seconds, to_wait, speed = 1.0, max_wait = 0;
     FILE *lfile;
-#ifdef HAVE_ZLIB
-    gzFile tfile, sfile;
-#else
-    FILE *tfile, *sfile;
-#endif
-    fd_set *fdsr;
+    fd_set *fdsw;
     sigaction_t sa;
-    unsigned long nbytes;
-    size_t len, nread;
+    unsigned long nbytes, idx;
+    size_t len, nread, off;
     ssize_t nwritten;
-    double seconds;
-    double speed = 1.0;
-    double max_wait = 0;
-    double to_wait;
 
     Argc = argc;
     Argv = argv;
 
-    while ((ch = getopt(argc, argv, "d:lm:s:V")) != -1) {
+    while ((ch = getopt(argc, argv, "d:f:lm:s:V")) != -1) {
 	switch(ch) {
 	case 'd':
 	    session_dir = optarg;
+	    break;
+	case 'f':
+	    /* Set the replay filter. */
+	    replay_filter = 0;
+	    for (cp = strtok(optarg, ","); cp; cp = strtok(NULL, ",")) {
+		if (strcmp(cp, "stdout") == 0)
+		    SET(replay_filter, 1 << IOFD_STDOUT);
+		else if (strcmp(cp, "stderr") == 0)
+		    SET(replay_filter, 1 << IOFD_STDERR);
+		else if (strcmp(cp, "ttyout") == 0)
+		    SET(replay_filter, 1 << IOFD_TTYOUT);
+		else
+		    errorx(1, "invalid filter option: %s", optarg);
+	    }
 	    break;
 	case 'l':
 	    listonly = 1;
@@ -242,37 +281,28 @@ main(argc, argv)
     if (!VALID_ID(id))
 	errorx(1, "invalid ID %s", id);
 
-    plen = snprintf(path, sizeof(path), "%s/%.2s/%.2s/%.2s.tim",
+    plen = snprintf(path, sizeof(path), "%s/%.2s/%.2s/%.2s/timing",
 	session_dir, id, &id[2], &id[4]);
     if (plen <= 0 || plen >= sizeof(path))
-	errorx(1, "%s/%.2s/%.2s/%.2s/%.2s.tim: %s", session_dir,
+	errorx(1, "%s/%.2s/%.2s/%.2s/%.2s/timing: %s", session_dir,
 	    id, &id[2], &id[4], strerror(ENAMETOOLONG));
+    plen -= 7;
 
-    /* timing file */
-#ifdef HAVE_ZLIB
-    tfile = gzopen(path, "r");
-#else
-    tfile = fopen(path, "r");
-#endif
-    if (tfile == NULL)
-	error(1, "unable to open %s", path);
+    /* Open files for replay, applying replay filter for the -f flag. */
+    for (idx = 0; idx < IOFD_MAX; idx++) {
+	if (ISSET(replay_filter, 1 << idx) || idx == IOFD_TIMING) {
+	    io_fds[idx].v = open_io_fd(path, plen, io_fnames[idx]);
+	    if (io_fds[idx].v == NULL)
+		error(1, "unable to open %s", path);
+	}
+    }
 
-    /* script file */
-    memcpy(&path[plen - 3], "scr", 3);
-#ifdef HAVE_ZLIB
-    sfile = gzopen(path, "r");
-#else
-    sfile = fopen(path, "r");
-#endif
-    if (sfile == NULL)
-	error(1, "unable to open %s", path);
-
-    /* log file */
-    path[plen - 4] = '\0';
+    /* Read log file. */
+    path[plen] = '\0';
+    strlcat(path, "/log", sizeof(path));
     lfile = fopen(path, "r");
     if (lfile == NULL)
 	error(1, "unable to open %s", path);
-
     cp = NULL;
     getline(&cp, &len, lfile); /* log */
     getline(&cp, &len, lfile); /* cwd */
@@ -295,32 +325,40 @@ main(argc, argv)
     (void) sigaction(SIGTSTP, &sa, NULL);
     (void) sigaction(SIGQUIT, &sa, NULL);
 
+    /* XXX - read user input from /dev/tty and set STDOUT to raw if not a pipe */
     /* Set stdin to raw mode if it is a tty */
     interactive = isatty(STDIN_FILENO);
     if (interactive) {
 	ch = fcntl(STDIN_FILENO, F_GETFL, 0);
 	if (ch != -1)
 	    (void) fcntl(STDIN_FILENO, F_SETFL, ch | O_NONBLOCK);
-	if (!term_raw(STDIN_FILENO, 0, 1))
+	if (!term_raw(STDIN_FILENO, 1))
 	    error(1, "cannot set tty to raw mode");
     }
-    fdsr = (fd_set *)emalloc2(howmany(STDOUT_FILENO + 1, NFDBITS),
+    fdsw = (fd_set *)emalloc2(howmany(STDOUT_FILENO + 1, NFDBITS),
 	sizeof(fd_mask));
 
     /*
      * Timing file consists of line of the format: "%f %d\n"
      */
 #ifdef HAVE_ZLIB
-    while (gzgets(tfile, buf, sizeof(buf)) != NULL) {
+    while (gzgets(io_fds[IOFD_TIMING].g, buf, sizeof(buf)) != NULL) {
 #else
-    while (fgets(buf, sizeof(buf), tfile) != NULL) {
+    while (fgets(buf, sizeof(buf), io_fds[IOFD_TIMING].f) != NULL) {
 #endif
+	idx = strtoul(buf, &ep, 10);
+	if (idx > IOFD_MAX)
+	    error(1, "invalid timing file index: %s", cp);
+	for (cp = ep + 1; isspace((unsigned char) *cp); cp++)
+	    continue;
+
 	errno = 0;
-	seconds = strtod(buf, &ep);
+	seconds = strtod(cp, &ep);
 	if (errno != 0 || !isspace((unsigned char) *ep))
 	    error(1, "invalid timing file line: %s", buf);
 	for (cp = ep + 1; isspace((unsigned char) *cp); cp++)
 	    continue;
+
 	errno = 0;
 	nbytes = strtoul(cp, &ep, 10);
 	if (errno == ERANGE && nbytes == ULONG_MAX)
@@ -335,38 +373,44 @@ main(argc, argv)
 	    to_wait = max_wait;
 	delay(to_wait);
 
+	/* Even if we are not relaying, we still have to delay. */
+	if (io_fds[idx].v == NULL)
+	    continue;
+
+	/* All output is sent to stdout. */
 	while (nbytes != 0) {
 	    if (nbytes > sizeof(buf))
 		len = sizeof(buf);
 	    else
 		len = nbytes;
 #ifdef HAVE_ZLIB
-	    nread = gzread(sfile, buf, len);
+	    nread = gzread(io_fds[idx].g, buf, len);
 #else
-	    nread = fread(buf, 1, len, sfile);
+	    nread = fread(buf, 1, len, io_fds[idx].f);
 #endif
 	    nbytes -= nread;
+	    off = 0;
 	    do {
 		/* no stdio, must be unbuffered */
-		nwritten = write(STDOUT_FILENO, buf, nread);
+		nwritten = write(STDOUT_FILENO, buf + off, nread - off);
 		if (nwritten == -1) {
 		    if (errno == EINTR)
 			continue;
 		    if (errno == EAGAIN) {
-			FD_SET(STDOUT_FILENO, fdsr);
+			FD_SET(STDOUT_FILENO, fdsw);
 			do {
-			    nready = select(STDOUT_FILENO + 1, fdsr, NULL, NULL, NULL);
+			    nready = select(STDOUT_FILENO + 1, NULL, fdsw, NULL, NULL);
 			} while (nready == -1 && errno == EINTR);
 			if (nready == 1)
 			    continue;
 		    }
 		    error(1, "writing to standard output");
 		}
-		nread -= nwritten;
-	    } while (nread);
+		off += nwritten;
+	    } while (nread > off);
 	}
     }
-    term_restore(STDOUT_FILENO, 0);
+    term_restore(STDIN_FILENO, 1);
     exit(0);
 }
 
@@ -394,13 +438,26 @@ delay(secs)
 	error(1, "nanosleep: tv_sec %ld, tv_nsec %ld", ts.tv_sec, ts.tv_nsec);
 }
 
+static void *
+open_io_fd(char *path, int len, const char *suffix)
+{
+    path[len] = '\0';
+    strlcat(path, suffix, PATH_MAX);
+
+#ifdef HAVE_ZLIB
+    return gzopen(path, "r");
+#else
+    return fopen(path, "r");
+#endif
+}
+
 /*
  * Build expression list from search args
  */
 static int
 parse_expr(headp, argv)
     struct search_node **headp;
-    char **argv;
+    char *argv[];
 {
     struct search_node *sn, *newsn;
     char or = 0, not = 0, type, **av;
@@ -831,7 +888,7 @@ void
 cleanup(signo)
     int signo;
 {
-    term_restore(STDOUT_FILENO, 0);
+    term_restore(STDIN_FILENO, 0);
     if (signo)
 	kill(getpid(), signo);
 }
