@@ -417,10 +417,6 @@ fork_pty(path, argv, envp, sv, rbac_enabled, maxfd)
     sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
     sa.sa_handler = handler;
     sigaction(SIGTSTP, &sa, NULL);
-#if 0 /* XXX - add these? */
-    sigaction(SIGTTIN, &sa, NULL);
-    sigaction(SIGTTOU, &sa, NULL);
-#endif
 
     if (foreground) {
 	/* Copy terminal attrs from user tty -> pty slave. */
