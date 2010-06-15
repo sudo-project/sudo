@@ -1198,7 +1198,10 @@ sudo_ldap_display_defaults(nss, pw, lbuf)
 	if (rc == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
 	    bv = ldap_get_values_len(ld, entry, "sudoOption");
 	    if (bv != NULL) {
-		prefix = "    ";
+		if (lbuf->len == 0 || isspace((unsigned char)lbuf->buf[lbuf->len - 1]))
+		    prefix = "    ";
+		else
+		    prefix = ", ";
 		for (p = bv; *p != NULL; p++) {
 		    lbuf_append(lbuf, prefix, (*p)->bv_val, NULL);
 		    prefix = ", ";
