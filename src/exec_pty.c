@@ -111,8 +111,6 @@ static void sync_ttysize(int src, int dst);
 static void deliver_signal(pid_t pid, int signo);
 static int safe_close(int fd);
 
-extern struct user_details user_details; /* XXX need tty name for SELinux */
-
 /*
  * Cleanup hook for error()/errorx()
  */
@@ -538,10 +536,6 @@ fork_pty(struct command_details *details, char *argv[], char *envp[],
     sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
     sa.sa_handler = handler;
     sigaction(SIGTSTP, &sa, NULL);
-#if 0 /* XXX - add these? */
-    sigaction(SIGTTIN, &sa, NULL);
-    sigaction(SIGTTOU, &sa, NULL);
-#endif
 
     if (foreground) {
 	/* Copy terminal attrs from user tty -> pty slave. */

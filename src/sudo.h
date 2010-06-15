@@ -192,6 +192,7 @@ int atobool(const char *str);
 /* parse_args.c */
 int parse_args(int argc, char **argv, int *nargc, char ***nargv,
     char ***settingsp, char ***env_addp);
+extern int tgetpass_flags;
 
 /* get_pty.c */
 int get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid);
@@ -204,8 +205,9 @@ int exec_setup(struct command_details *details, const char *ptyname, int ptyfd);
 int run_command(struct command_details *details, char *argv[],   
     char *envp[]);
 void sudo_debug(int level, const char *format, ...) __printflike(2, 3);
-
 extern int debug_level;
+extern const char *list_user, *runas_user, *runas_group;
+extern struct user_details user_details;
 
 /* sudo_edit.c */
 int sudo_edit(struct command_details *details, char *argv[], char *envp[]);

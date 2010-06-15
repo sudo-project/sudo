@@ -60,8 +60,6 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
-extern struct user_details user_details; /* XXX need tty name for SELinux */
-
 /* shared with exec_pty.c */
 sig_atomic_t recvsig[NSIG];
 void handler(int s);

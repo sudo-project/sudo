@@ -62,8 +62,6 @@ static void handler(int);
 static char *getln(int, char *, size_t, int);
 static char *sudo_askpass(const char *, const char *);
 
-extern struct user_details user_details; /* XXX */
-
 #ifdef _PATH_SUDO_ASKPASS
 const char *askpass_path = _PATH_SUDO_ASKPASS;
 #else

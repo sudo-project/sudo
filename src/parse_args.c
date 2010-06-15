@@ -56,11 +56,7 @@
 extern char *optarg;
 extern int optind;
 
-extern struct user_details user_details;
-
-/* XXX - better home for these and extern in header file */
 int tgetpass_flags;
-const char *list_user, *runas_user, *runas_group;
 
 /*
  * Local functions.

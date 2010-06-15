@@ -87,6 +87,8 @@
  */
 struct plugin_container policy_plugin;
 struct plugin_container_list io_plugins;
+struct user_details user_details;
+const char *list_user, *runas_user, *runas_group; /* extern for parse_args.c */
 int debug_level;
 
 /*
@@ -97,12 +99,6 @@ static void disable_coredumps(void);
 static char **get_user_info(struct user_details *);
 static void command_info_to_details(char * const info[],
     struct command_details *details);
-
-/* XXX - header file */
-extern const char *list_user, *runas_user, *runas_group;
-
-/* Needed by tgetpass when executing askpass helper */
-struct user_details user_details;
 
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 static struct rlimit corelimit;

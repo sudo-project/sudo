@@ -55,8 +55,6 @@
 
 #include "sudo.h"
 
-extern struct user_details user_details;
-
 static void
 switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
 {
