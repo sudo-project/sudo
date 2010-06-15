@@ -172,11 +172,14 @@ sudo_getpwuid(uid)
     key.pw_uid = uid;
     if ((node = rbfind(pwcache_byuid, &key)) != NULL) {
 	pw = (struct passwd *) node->data;
-	return(pw->pw_name != NULL ? pw : NULL);
+	goto done;
     }
     /*
      * Cache passwd db entry if it exists or a negative response if not.
      */
+#ifdef HAVE_SETAUTHDB
+    aix_setauthdb(IDtouser(uid));
+#endif
     if ((pw = getpwuid(uid)) != NULL) {
 	pw = sudo_pwdup(pw);
 	cp = sudo_getepw(pw);		/* get shadow password */
@@ -186,15 +189,18 @@ sudo_getpwuid(uid)
 	if (rbinsert(pwcache_byuid, (void *) pw) != NULL)
 	    errorx(1, "unable to cache uid %lu (%s), already exists",
 		uid, pw->pw_name);
-	return(pw);
     } else {
 	pw = emalloc(sizeof(*pw));
 	zero_bytes(pw, sizeof(*pw));
 	pw->pw_uid = uid;
 	if (rbinsert(pwcache_byuid, (void *) pw) != NULL)
 	    errorx(1, "unable to cache uid %lu, already exists", uid);
-	return(NULL);
     }
+#ifdef HAVE_SETAUTHDB
+    aix_restoreauthdb();
+#endif
+done:
+    return(pw->pw_name != NULL ? pw : NULL);
 }
 
 /*
@@ -213,11 +219,14 @@ sudo_getpwnam(name)
     key.pw_name = (char *) name;
     if ((node = rbfind(pwcache_byname, &key)) != NULL) {
 	pw = (struct passwd *) node->data;
-	return(pw->pw_uid != (uid_t) -1 ? pw : NULL);
+	goto done;
     }
     /*
      * Cache passwd db entry if it exists or a negative response if not.
      */
+#ifdef HAVE_SETAUTHDB
+    aix_setauthdb(user);
+#endif
     if ((pw = getpwnam(name)) != NULL) {
 	pw = sudo_pwdup(pw);
 	cp = sudo_getepw(pw);		/* get shadow password */
@@ -226,7 +235,6 @@ sudo_getpwnam(name)
 	pw->pw_passwd = cp;
 	if (rbinsert(pwcache_byname, (void *) pw) != NULL)
 	    errorx(1, "unable to cache user %s, already exists", name);
-	return(pw);
     } else {
 	len = strlen(name) + 1;
 	cp = emalloc(sizeof(*pw) + len);
@@ -238,8 +246,12 @@ sudo_getpwnam(name)
 	pw->pw_uid = (uid_t) -1;
 	if (rbinsert(pwcache_byname, (void *) pw) != NULL)
 	    errorx(1, "unable to cache user %s, already exists", name);
-	return(NULL);
     }
+#ifdef HAVE_SETAUTHDB
+    aix_restoreauthdb();
+#endif
+done:
+    return(pw->pw_uid != (uid_t) -1 ? pw : NULL);
 }
 
 /*
@@ -451,7 +463,7 @@ sudo_getgrgid(gid)
     key.gr_gid = gid;
     if ((node = rbfind(grcache_bygid, &key)) != NULL) {
 	gr = (struct group *) node->data;
-	return(gr->gr_name != NULL ? gr : NULL);
+	goto done;
     }
     /*
      * Cache group db entry if it exists or a negative response if not.
@@ -461,15 +473,15 @@ sudo_getgrgid(gid)
 	if (rbinsert(grcache_bygid, (void *) gr) != NULL)
 	    errorx(1, "unable to cache gid %lu (%s), already exists",
 		gid, gr->gr_name);
-	return(gr);
     } else {
 	gr = emalloc(sizeof(*gr));
 	zero_bytes(gr, sizeof(*gr));
 	gr->gr_gid = gid;
 	if (rbinsert(grcache_bygid, (void *) gr) != NULL)
 	    errorx(1, "unable to cache gid %lu, already exists, gid");
-	return(NULL);
     }
+done:
+    return(gr->gr_name != NULL ? gr : NULL);
 }
 
 /*
@@ -487,7 +499,7 @@ sudo_getgrnam(name)
     key.gr_name = (char *) name;
     if ((node = rbfind(grcache_byname, &key)) != NULL) {
 	gr = (struct group *) node->data;
-	return(gr->gr_gid != (gid_t) -1 ? gr : NULL);
+	goto done;
     }
     /*
      * Cache group db entry if it exists or a negative response if not.
@@ -496,7 +508,6 @@ sudo_getgrnam(name)
 	gr = sudo_grdup(gr);
 	if (rbinsert(grcache_byname, (void *) gr) != NULL)
 	    errorx(1, "unable to cache group %s, already exists", name);
-	return(gr);
     } else {
 	len = strlen(name) + 1;
 	cp = emalloc(sizeof(*gr) + len);
@@ -508,8 +519,9 @@ sudo_getgrnam(name)
 	gr->gr_gid = (gid_t) -1;
 	if (rbinsert(grcache_byname, (void *) gr) != NULL)
 	    errorx(1, "unable to cache group %s, already exists", name);
-	return(NULL);
     }
+done:
+    return(gr->gr_gid != (gid_t) -1 ? gr : NULL);
 }
 
 void
@@ -560,7 +572,14 @@ user_in_group(pw, group)
 #endif
     struct group *grp;
 
-    if ((grp = sudo_getgrnam(group)) == NULL)
+#ifdef HAVE_SETAUTHDB
+    aix_setauthdb(pw->pw_user);
+#endif
+    grp = sudo_getgrnam(group);
+#ifdef HAVE_SETAUTHDB
+    aix_restoreauthdb();
+#endif
+    if (grp == NULL)
 	return(FALSE);
 
     /* check against user's primary (passwd file) gid */

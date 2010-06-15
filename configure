@@ -12615,12 +12615,14 @@ fi
 		fi
 
 		# AIX-specific functions
-		for ac_func in getuserattr
+		for ac_func in getuserattr setauthdb
 do :
-  ac_fn_c_check_func "$LINENO" "getuserattr" "ac_cv_func_getuserattr"
-if test "x$ac_cv_func_getuserattr" = x""yes; then :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+eval as_val=\$$as_ac_var
+   if test "x$as_val" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_GETUSERATTR 1
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
 
 fi

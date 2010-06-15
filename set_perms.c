@@ -554,7 +554,7 @@ runas_setup(dowait)
     if (runas_pw->pw_name != NULL) {
 	gid = runas_gr ? runas_gr->gr_gid : runas_pw->pw_gid;
 #ifdef HAVE_GETUSERATTR
-	aix_setlimits(runas_pw->pw_name);
+	aix_prep_user(runas_pw->pw_name);
 #endif
 #ifdef HAVE_PAM
 	pam_begin_session(runas_pw);

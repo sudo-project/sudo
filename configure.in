@@ -1438,7 +1438,7 @@ case "$host" in
 		fi
 
 		# AIX-specific functions
-		AC_CHECK_FUNCS(getuserattr)
+		AC_CHECK_FUNCS(getuserattr setauthdb)
 		SUDO_OBJS="$SUDO_OBJS aix.o"
 		;;
     *-*-hiuxmpp*)

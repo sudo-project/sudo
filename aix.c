@@ -52,6 +52,10 @@ struct aix_limit {
     int factor;
 };
 
+#ifdef HAVE_SETAUTHDB
+static char saved_authsys[16]; /* 15 chars plus NUL as per setauthdb(3) */
+#endif
+
 static struct aix_limit aix_limits[] = {
     { RLIMIT_FSIZE, S_UFSIZE, S_UFSIZE_HARD, 512 },
     { RLIMIT_CPU, S_UCPU, S_UCPU_HARD, 1 },
@@ -78,13 +82,16 @@ aix_getlimit(user, lim, valp)
     return(0);
 }
 
-void
+static void
 aix_setlimits(user)
     char *user;
 {
     struct rlimit64 rlim;
     rlim64_t val;
     int n;
+
+    if (setuserdb(S_READ) != 0)
+	error(1, "unable to open userdb");
 
     /*
      * For each resource limit, get the soft/hard values for the user
@@ -122,6 +129,66 @@ aix_setlimits(user)
 	}
 	(void)setrlimit64(aix_limits[n].resource, &rlim);
     }
+    enduserdb();
 }
 
+#ifdef HAVE_SETAUTHDB
+/*
+ * Look up administrative domain for user (SYSTEM in /etc/security/user) and
+ * set it as the default for the process.  This ensures that password and
+ * group lookups are made against the correct source (files, NIS, LDAP, etc).
+ */
+void
+aix_setauthdb(char *user)
+{
+    char *authsys;
+
+    if (user != NULL) {
+	if (setuserdb(S_READ) != 0)
+	    error(1, "unable to open userdb");
+	if (getuserattr(user, S_AUTHSYSTEM, &authsys, SEC_CHAR) == 0) {
+	    if (setauthdb(authsys, saved_authsys) != 0)
+		error(1, "unable to switch to authsystem \"%s\" for %s",
+		    authsys, user);
+	}
+	enduserdb();
+    }
+}
+
+/*
+ * Restore the saved administrative domain, if any.
+ */
+void
+aix_restoreauthdb()
+{
+    if (saved_authsys[0]) {
+	if (setauthdb(saved_authsys, NULL) != 0)
+	    error(1, "unable to restore authsystem \"%s\", saved_authsys);
+	saved_authsys[0] = '\0';
+    }
+}
+#endif
+
+void
+aix_prep_user(user)
+    char *user;
+{
+    char *info;
+    int len;
+
+    /* set usrinfo, like login(1) does */
+    /* XXX - should NAME field be pw_gecos? */
+    len = easprintf(&info, "NAME=%s%cLOGIN=%s%cLOGNAME=%s%cTTY=%s%c",
+	user, '\0', user, '\0', user, '\0', user_ttypath ? user_ttypath : "");
+    (void)usrinfo(SETUINFO, info, len);
+    efree(info);
+
+#ifdef HAVE_SETAUTHDB
+    /* set administrative domain */
+    aix_setauthdb(user);
+#endif
+
+    /* set resource limits */
+    aix_setlimits(user);
+}
 #endif /* HAVE_GETUSERATTR */
