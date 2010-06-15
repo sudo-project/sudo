@@ -1044,16 +1044,16 @@ initial_setup()
     miss[STDOUT_FILENO] = fcntl(STDOUT_FILENO, F_GETFL, 0) == -1;
     miss[STDERR_FILENO] = fcntl(STDERR_FILENO, F_GETFL, 0) == -1;
     if (miss[STDIN_FILENO] || miss[STDOUT_FILENO] || miss[STDERR_FILENO]) {
-	if ((devnull = open(_PATH_DEVNULL, O_RDWR, 0644)) != -1) {
-	    if (miss[STDIN_FILENO])
-		(void) dup2(devnull, STDIN_FILENO);
-	    if (miss[STDOUT_FILENO])
-		(void) dup2(devnull, STDOUT_FILENO);
-	    if (miss[STDERR_FILENO])
-		(void) dup2(devnull, STDERR_FILENO);
-	    if (devnull > STDERR_FILENO)
-		close(devnull);
-	}
+	if ((devnull = open(_PATH_DEVNULL, O_RDWR, 0644)) == -1)
+	    error(1, "unable to open %s", _PATH_DEVNULL);
+	if (miss[STDIN_FILENO] && dup2(devnull, STDIN_FILENO) == -1)
+	    error(1, "dup2");
+	if (miss[STDOUT_FILENO] && dup2(devnull, STDOUT_FILENO) == -1)
+	    error(1, "dup2");
+	if (miss[STDERR_FILENO] && dup2(devnull, STDERR_FILENO) == -1)
+	    error(1, "dup2");
+	if (devnull > STDERR_FILENO)
+	    close(devnull);
     }
 }
 

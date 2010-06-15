@@ -490,7 +490,7 @@ send_mail(fmt, va_alist)
     }
 # endif
 #endif
-    chdir("/");
+    (void) chdir("/");
     if ((fd = open(_PATH_DEVNULL, O_RDWR, 0644)) != -1) {
 	(void) dup2(fd, STDIN_FILENO);
 	(void) dup2(fd, STDOUT_FILENO);
@@ -528,12 +528,15 @@ send_mail(fmt, va_alist)
 
 		/* Child, set stdin to output side of the pipe */
 		if (pfd[0] != STDIN_FILENO) {
-		    (void) dup2(pfd[0], STDIN_FILENO);
+		    if (dup2(pfd[0], STDIN_FILENO) != -1) {
+			mysyslog(LOG_ERR, "cannot dup stdin: %m");
+			_exit(127);
+		    }
 		    (void) close(pfd[0]);
 		}
 		(void) close(pfd[1]);
 
-		/* Build up an argv based the mailer path and flags */
+		/* Build up an argv based on the mailer path and flags */
 		mflags = estrdup(def_mailerflags);
 		mpath = estrdup(def_mailerpath);
 		if ((argv[0] = strrchr(mpath, ' ')))

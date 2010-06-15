@@ -199,6 +199,10 @@ sudo_askpass(prompt)
 
     if (pid == 0) {
 	/* child, point stdout to output side of the pipe and exec askpass */
+	if (dup2(pfd[1], STDOUT_FILENO) == -1) {
+	    warning("dup2");
+	    _exit(255);
+	}
 	(void) dup2(pfd[1], STDOUT_FILENO);
 	set_perms(PERM_FULL_USER);
 	closefrom(STDERR_FILENO + 1);
