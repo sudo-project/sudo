@@ -835,23 +835,10 @@ exec_monitor(struct command_details *details, char *argv[], char *envp[],
      * and the slave pty as the controlling terminal.
      * This allows us to be notified when the child has been suspended.
      */
-#ifdef HAVE_SETSID
     if (setsid() == -1) {
 	warning("setsid");
 	goto bad;
     }
-#else
-# ifdef TIOCNOTTY
-    n = open(_PATH_TTY, O_RDWR|O_NOCTTY);
-    if (n >= 0) {
-	/* Disconnect from old controlling tty. */
-	if (ioctl(n, TIOCNOTTY, NULL) == -1)
-	    warning("cannot disconnect controlling tty");
-	close(n);
-    }
-# endif
-    setpgrp(0, 0);
-#endif
     if (io_fds[SFD_SLAVE] != -1) {
 #ifdef TIOCSCTTY
 	if (ioctl(io_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0)

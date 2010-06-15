@@ -451,18 +451,8 @@ send_mail(const char *fmt, ...)
     }
 
     /* Daemonize - disassociate from session/tty. */
-#ifdef HAVE_SETSID
     if (setsid() == -1)
       warning("setsid");
-#else
-    setpgrp(0, 0);
-# ifdef TIOCNOTTY
-    if ((fd = open(_PATH_TTY, O_RDWR, 0644)) != -1) {
-	ioctl(fd, TIOCNOTTY, NULL);
-	close(fd);
-    }
-# endif
-#endif
     (void) chdir("/");
     if ((fd = open(_PATH_DEVNULL, O_RDWR, 0644)) != -1) {
 	(void) dup2(fd, STDIN_FILENO);
