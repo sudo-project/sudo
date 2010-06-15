@@ -286,7 +286,6 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     gettimeofday(&last_time, NULL);
 
     /* XXX - log more stuff?  window size? environment? */
-    /* XXX - use passed in argv instead of using sudoers policy info. */
     fprintf(io_logfile, "%ld:%s:%s:%s:%s\n", last_time.tv_sec, user_name,
         runas_pw->pw_name, runas_gr ? runas_gr->gr_name : "", user_tty);
     fprintf(io_logfile, "%s\n", user_cwd);
