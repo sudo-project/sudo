@@ -1881,7 +1881,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS(dup2 strchr strrchr memchr memcpy memset sysconf tzset \
+AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf tzset \
 	       strftime setrlimit initgroups getgroups fstat gettimeofday \
 	       regcomp setlocale getaddrinfo setsid setenv vhangup \
 	       mbr_check_membership setrlimit64)

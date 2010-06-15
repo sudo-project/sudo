@@ -104,9 +104,6 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
-/* Define to 1 if you have the `dup2' function. */
-#undef HAVE_DUP2
-
 /* Define to 1 if your glob.h defines the GLOB_BRACE and GLOB_TILDE flags. */
 #undef HAVE_EXTENDED_GLOB
 
