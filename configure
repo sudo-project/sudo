@@ -14597,6 +14597,66 @@ done
 fi
 done
 
+for ac_func in setsid
+do :
+  ac_fn_c_check_func "$LINENO" "setsid" "ac_cv_func_setsid"
+if test "x$ac_cv_func_setsid" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SETSID 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" setsid.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS setsid.$ac_objext"
+ ;;
+esac
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether setpgrp takes no argument" >&5
+$as_echo_n "checking whether setpgrp takes no argument... " >&6; }
+if test "${ac_cv_func_setpgrp_void+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "$cross_compiling" = yes; then :
+  as_fn_error "cannot check setpgrp when cross compiling" "$LINENO" 5
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+/* If this system has a BSD-style setpgrp which takes arguments,
+  setpgrp(1, 1) will fail with ESRCH and return -1, in that case
+  exit successfully. */
+  return setpgrp (1,1) != -1;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  ac_cv_func_setpgrp_void=no
+else
+  ac_cv_func_setpgrp_void=yes
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_func_setpgrp_void" >&5
+$as_echo "$ac_cv_func_setpgrp_void" >&6; }
+if test $ac_cv_func_setpgrp_void = yes; then
+
+$as_echo "#define SETPGRP_VOID 1" >>confdefs.h
+
+fi
+
+
+fi
+done
+
 
 for ac_func in sysctl getutid getutxid
 do :

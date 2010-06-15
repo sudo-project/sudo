@@ -696,6 +696,9 @@
 /* Define to 1 to send mail when the user is not in the sudoers file. */
 #undef SEND_MAIL_WHEN_NO_USER
 
+/* Define to 1 if the `setpgrp' function takes no argument. */
+#undef SETPGRP_VOID
+
 /* Define to 1 if you want sudo to start a shell if given no arguments. */
 #undef SHELL_IF_NO_ARGS
 

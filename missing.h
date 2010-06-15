@@ -86,5 +86,8 @@ int unsetenv		__P((const char *));
 #ifndef HAVE_STRSIGNAL
 char *strsignal		__P((int));
 #endif
+#ifndef HAVE_SETSID
+pid_t setsid		__P((void));
+#endif
 
 #endif /* _SUDO_MISSING_H */
