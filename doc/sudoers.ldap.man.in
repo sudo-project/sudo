@@ -140,7 +140,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "June 11, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "June 15, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -401,7 +401,8 @@ to wait for a response to an \s-1LDAP\s0 query.
 .IX Item "SUDOERS_BASE base"
 The base \s-1DN\s0 to use when performing \fBsudo\fR \s-1LDAP\s0 queries.  Typically
 this is of the form \f(CW\*(C`ou=SUDOers,dc=example,dc=com\*(C'\fR for the domain
-\&\f(CW\*(C`example.com\*(C'\fR.
+\&\f(CW\*(C`example.com\*(C'\fR.  Multiple \fB\s-1SUDOERS_BASE\s0\fR lines may be specified,
+in which case they are queried in the order specified.
 .IP "\fB\s-1SUDOERS_DEBUG\s0\fR debug_level" 4
 .IX Item "SUDOERS_DEBUG debug_level"
 This sets the debug level for \fBsudo\fR \s-1LDAP\s0 queries.  Debugging
@@ -647,7 +648,7 @@ determines sudoers source order on \s-1AIX\s0
 \&  # The amount of time, in seconds, to wait while performing an LDAP query.
 \&  timelimit 30
 \&  #
-\&  # must be set or sudo will ignore LDAP
+\&  # Must be set or sudo will ignore LDAP; may be specified multiple times.
 \&  sudoers_base   ou=SUDOers,dc=example,dc=com
 \&  #
 \&  # verbose sudoers matching from ldap

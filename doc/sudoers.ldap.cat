@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0b1                   June 11, 2010                         1
+1.8.0b1                   June 15, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.8.0b1                   June 11, 2010                         2
+1.8.0b1                   June 15, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.8.0b1                   June 11, 2010                         3
+1.8.0b1                   June 15, 2010                         3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.8.0b1                   June 11, 2010                         4
+1.8.0b1                   June 15, 2010                         4
 
 
 
@@ -301,7 +301,8 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
        SSUUDDOOEERRSS__BBAASSEE base
            The base DN to use when performing ssuuddoo LDAP queries.  Typically
            this is of the form ou=SUDOers,dc=example,dc=com for the domain
-           example.com.
+           example.com.  Multiple SSUUDDOOEERRSS__BBAASSEE lines may be specified, in
+           which case they are queried in the order specified.
 
        SSUUDDOOEERRSS__DDEEBBUUGG debug_level
            This sets the debug level for ssuuddoo LDAP queries.  Debugging
@@ -321,11 +322,10 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
        BBIINNDDPPWW secret
            The BBIINNDDPPWW parameter specifies the password to use when performing
            LDAP operations.  This is typically used in conjunction with the
-           BBIINNDDDDNN parameter.
 
 
 
-1.8.0b1                   June 11, 2010                         5
+1.8.0b1                   June 15, 2010                         5
 
 
 
@@ -333,6 +333,8 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
+
+           BBIINNDDDDNN parameter.
 
        RROOOOTTBBIINNDDDDNN DN
            The RROOOOTTBBIINNDDDDNN parameter specifies the identity, in the form of a
@@ -387,11 +389,9 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            OpenLDAP:
                tls_cert /etc/ssl/client_cert.pem
 
-           Netscape-derived:
 
 
-
-1.8.0b1                   June 11, 2010                         6
+1.8.0b1                   June 15, 2010                         6
 
 
 
@@ -400,6 +400,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
+           Netscape-derived:
                tls_cert /var/ldap/cert7.db
 
            When using Netscape-derived libraries, this file may also contain
@@ -456,8 +457,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-
-1.8.0b1                   June 11, 2010                         7
+1.8.0b1                   June 15, 2010                         7
 
 
 
@@ -523,7 +523,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.8.0b1                   June 11, 2010                         8
+1.8.0b1                   June 15, 2010                         8
 
 
 
@@ -569,7 +569,7 @@ EEXXAAMMPPLLEESS
          # The amount of time, in seconds, to wait while performing an LDAP query.
          timelimit 30
          #
-         # must be set or sudo will ignore LDAP
+         # Must be set or sudo will ignore LDAP; may be specified multiple times.
          sudoers_base   ou=SUDOers,dc=example,dc=com
          #
          # verbose sudoers matching from ldap
@@ -589,7 +589,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.8.0b1                   June 11, 2010                         9
+1.8.0b1                   June 15, 2010                         9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.8.0b1                   June 11, 2010                        10
+1.8.0b1                   June 15, 2010                        10
 
 
 
@@ -721,7 +721,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.8.0b1                   June 11, 2010                        11
+1.8.0b1                   June 15, 2010                        11
 
 
 
@@ -787,6 +787,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.0b1                   June 11, 2010                        12
+1.8.0b1                   June 15, 2010                        12
 
 
