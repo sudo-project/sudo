@@ -363,11 +363,6 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	sudo_settings[ARG_IMPLIED_SHELL].value = "true";
     }
 
-#ifndef _PATH_SUDO_ASKPASS
-    if (ISSET(tgetpass_flags, TGP_ASKPASS) && !getenv("SUDO_ASKPASS"))
-	errorx(1, "no askpass program specified, try setting SUDO_ASKPASS");
-#endif
-
     if (mode == MODE_HELP)
 	usage(0);
 

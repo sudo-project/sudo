@@ -101,8 +101,9 @@ tgetpass(const char *prompt, int timeout, int flags)
 
     /* If using a helper program to get the password, run it instead. */
     if (ISSET(flags, TGP_ASKPASS)) {
-	if (askpass && *askpass)
-	    return(sudo_askpass(askpass, prompt));
+	if (askpass == NULL || *askpass == '\0')
+	    errorx(1, "no askpass program specified, try setting SUDO_ASKPASS");
+	return(sudo_askpass(askpass, prompt));
     }
 
 restart:

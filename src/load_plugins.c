@@ -45,9 +45,6 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
-/* tgetpass.c */
-extern const char *askpass_path;
-
 /*
  * Read in /etc/sudo.conf
  * Returns a list of plugins.

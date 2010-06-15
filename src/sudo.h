@@ -157,6 +157,7 @@ void cleanup(int);
 /* tgetpass.c */
 char *tgetpass(const char *, int, int);
 int tty_present(void);
+extern const char *askpass_path;
 
 /* zero_bytes.c */
 void zero_bytes(volatile void *, size_t);
