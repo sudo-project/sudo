@@ -1096,9 +1096,10 @@ exec_pty(struct command_details *details, char *argv[], char *envp[])
     setpgid(0, self);
 
     /* Wire up standard fds, note that stdout/stderr may be pipes. */
-    dup2(io_fds[SFD_STDIN], STDIN_FILENO);
-    dup2(io_fds[SFD_STDOUT], STDOUT_FILENO);
-    dup2(io_fds[SFD_STDERR], STDERR_FILENO);
+    if (dup2(io_fds[SFD_STDIN], STDIN_FILENO) == -1 ||
+	dup2(io_fds[SFD_STDOUT], STDOUT_FILENO) == -1 ||
+	dup2(io_fds[SFD_STDERR], STDERR_FILENO) == -1)
+	error(1, "dup2");
 
     /* Wait for parent to grant us the tty if we are foreground. */
     if (foreground) {

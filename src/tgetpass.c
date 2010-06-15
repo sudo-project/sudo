@@ -222,7 +222,10 @@ sudo_askpass(const char *askpass, const char *prompt)
 
     if (pid == 0) {
 	/* child, point stdout to output side of the pipe and exec askpass */
-	(void) dup2(pfd[1], STDOUT_FILENO);
+	if (dup2(pfd[1], STDOUT_FILENO) == -1) {
+	    warning("dup2");
+	    _exit(255);
+	}
 	(void) setuid(ROOT_UID);
 	if (setgid(user_details.gid)) {
 	    warning("unable to set gid to %u", (unsigned int)user_details.gid);

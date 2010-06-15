@@ -114,6 +114,7 @@ relabel_tty(const char *ttyn, int ptyfd)
 {
     security_context_t tty_con = NULL;
     security_context_t new_tty_con = NULL;
+    int fd;
 
     se_state.ttyfd = ptyfd;
 
@@ -162,22 +163,26 @@ relabel_tty(const char *ttyn, int ptyfd)
 	    if (se_state.enforcing)
 		goto bad;
 	}
-	dup2(se_state.ttyfd, ptyfd);
+	if (dup2(se_state.ttyfd, ptyfd) == -1) {
+	    warning("dup2");
+	    goto bad;
+	}
     } else {
 	/* Re-open tty to get new label and reset std{in,out,err} */
 	close(se_state.ttyfd);
 	se_state.ttyfd = open(ttyn, O_RDWR|O_NONBLOCK);
-	if (se_state.ttyfd == -1)
+	if (se_state.ttyfd == -1) {
 	    warning("unable to open %s", ttyn);
-	else
-	    (void)fcntl(se_state.ttyfd, F_SETFL,
-		fcntl(se_state.ttyfd, F_GETFL, 0) & ~O_NONBLOCK);
-	if (isatty(STDIN_FILENO))
-	    dup2(se_state.ttyfd, STDIN_FILENO);
-	if (isatty(STDOUT_FILENO))
-	    dup2(se_state.ttyfd, STDOUT_FILENO);
-	if (isatty(STDERR_FILENO))
-	    dup2(se_state.ttyfd, STDERR_FILENO);
+	    goto bad;
+	}
+	(void)fcntl(se_state.ttyfd, F_SETFL,
+	    fcntl(se_state.ttyfd, F_GETFL, 0) & ~O_NONBLOCK);
+	for (fd = STDIN_FILENO; fd <= STDERR_FILENO; fd++) {
+	    if (isatty(fd) && dup2(se_state.ttyfd, fd) == -1) {
+		warning("dup2");
+		goto bad;
+	    }
+	}
     }
     /* Retain se_state.ttyfd so we can restore label when command finishes. */
     (void)fcntl(se_state.ttyfd, F_SETFD, FD_CLOEXEC);
