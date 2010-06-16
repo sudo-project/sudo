@@ -60,6 +60,7 @@
 #include <signal.h>
 
 #include "sudo.h"
+#include "sudo_exec.h"
 
 #define SFD_STDIN	0
 #define SFD_STDOUT	1
@@ -88,10 +89,6 @@ struct io_buffer {
     int (*action) __P((const char *buf, unsigned int len));
     char buf[16 * 1024];
 };
-
-/* shared with pty.c */
-extern sig_atomic_t recvsig[NSIG]; 
-extern void handler __P((int s));
 
 static char slavename[PATH_MAX];
 static int foreground;

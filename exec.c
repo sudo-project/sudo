@@ -64,6 +64,7 @@
 #endif
 
 #include "sudo.h"
+#include "sudo_exec.h"
 
 /* shared with exec_pty.c */
 sig_atomic_t recvsig[NSIG];

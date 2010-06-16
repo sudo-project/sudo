@@ -123,8 +123,9 @@ AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 HDRS = alloc.h bsm_audit.h compat.h def_data.h defaults.h error.h ins_2001.h \
        ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.h lbuf.h \
        linux_audit.h list.h logging.h missing.h mksiglist.h nonunix.h \
-       redblack.h parse.h sudo.h sudo_nss.h gram.h auth/sudo_auth.h \
-       emul/charclass.h emul/fnmatch.h emul/glob.h emul/timespec.h emul/utime.h
+       redblack.h parse.h sudo.h sudo_exec.h sudo_nss.h gram.h \
+       auth/sudo_auth.h emul/charclass.h emul/fnmatch.h emul/glob.h \
+       emul/timespec.h emul/utime.h
 
 AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
@@ -270,9 +271,9 @@ env.o: $(srcdir)/env.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/env.c
 error.o: $(srcdir)/error.c $(srcdir)/compat.h $(srcdir)/error.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/error.c
-exec.o: $(srcdir)/exec.c $(SUDODEP)
+exec.o: $(srcdir)/exec.c $(SUDODEP) $(srcdir)/sudo_exec.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/exec.c
-exec_pty.o: $(srcdir)/exec.c $(SUDODEP)
+exec_pty.o: $(srcdir)/exec.c $(SUDODEP) $(srcdir)/sudo_exec.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/exec_pty.c
 fileops.o: $(srcdir)/fileops.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fileops.c
