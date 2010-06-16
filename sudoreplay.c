@@ -76,7 +76,7 @@
 #ifdef HAVE_REGCOMP
 # include <regex.h>
 #endif
-#ifdef HAVE_ZLIB
+#ifdef HAVE_ZLIB_H
 # include <zlib.h>
 #endif
 #include <signal.h>
@@ -110,7 +110,7 @@ char **Argv;
 
 union io_fd {
     FILE *f;
-#ifdef HAVE_ZLIB
+#ifdef HAVE_ZLIB_H
     gzFile g;
 #endif
     void *v;
@@ -341,7 +341,7 @@ main(argc, argv)
     /*
      * Timing file consists of line of the format: "%f %d\n"
      */
-#ifdef HAVE_ZLIB
+#ifdef HAVE_ZLIB_H
     while (gzgets(io_fds[IOFD_TIMING].g, buf, sizeof(buf)) != NULL) {
 #else
     while (fgets(buf, sizeof(buf), io_fds[IOFD_TIMING].f) != NULL) {
@@ -383,7 +383,7 @@ main(argc, argv)
 		len = sizeof(buf);
 	    else
 		len = nbytes;
-#ifdef HAVE_ZLIB
+#ifdef HAVE_ZLIB_H
 	    nread = gzread(io_fds[idx].g, buf, len);
 #else
 	    nread = fread(buf, 1, len, io_fds[idx].f);
@@ -444,7 +444,7 @@ open_io_fd(char *path, int len, const char *suffix)
     path[len] = '\0';
     strlcat(path, suffix, PATH_MAX);
 
-#ifdef HAVE_ZLIB
+#ifdef HAVE_ZLIB_H
     return gzopen(path, "r");
 #else
     return fopen(path, "r");

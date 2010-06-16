@@ -18059,12 +18059,12 @@ _ACEOF
 	# Check whether --enable-zlib was given.
 if test "${enable_zlib+set}" = set; then :
   enableval=$enable_zlib;  case "$enableval" in
-	    yes)    $as_echo "#define HAVE_ZLIB 1" >>confdefs.h
+	    yes)    $as_echo "#define HAVE_ZLIB_H 1" >>confdefs.h
 
 		    ZLIB="-lz"
 		    ;;
 	    no)	    ;;
-	    *)	    $as_echo "#define HAVE_ZLIB 1" >>confdefs.h
+	    *)	    $as_echo "#define HAVE_ZLIB_H 1" >>confdefs.h
 
 		    CPPFLAGS="${CPPFLAGS} -I${enableval}/include"
 
@@ -18127,9 +18127,18 @@ fi
 $as_echo "$ac_cv_lib_z_gzdopen" >&6; }
 if test "x$ac_cv_lib_z_gzdopen" = x""yes; then :
 
-		$as_echo "#define HAVE_ZLIB 1" >>confdefs.h
+		for ac_header in zlib.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "zlib.h" "ac_cv_header_zlib_h" "$ac_includes_default"
+if test "x$ac_cv_header_zlib_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_ZLIB_H 1
+_ACEOF
+ ZLIB="-lz"
+fi
 
-		ZLIB="-lz"
+done
+
 
 fi
 
@@ -20386,8 +20395,6 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
-
-
 
 
 
