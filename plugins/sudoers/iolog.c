@@ -47,7 +47,7 @@
 #include <signal.h>
 #include <pwd.h>
 #include <grp.h>
-#ifdef HAVE_ZLIB
+#ifdef HAVE_ZLIB_H
 # include <zlib.h>
 #endif
 
@@ -55,7 +55,7 @@
 
 union io_fd {
     FILE *f;
-#ifdef HAVE_ZLIB
+#ifdef HAVE_ZLIB_H
     gzFile g;
 #endif
     void *v;
@@ -196,7 +196,7 @@ open_io_fd(char *pathbuf, int len, const char *suffix, int docompress)
     fd = open(pathbuf, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR);
     if (fd != -1) {
 	fcntl(fd, F_SETFD, FD_CLOEXEC);
-#ifdef HAVE_ZLIB
+#ifdef HAVE_ZLIB_H
 	if (docompress)
 	    vfd = gzdopen(fd, "w");
 	else
@@ -304,7 +304,7 @@ sudoers_io_close(int exit_status, int error)
     for (i = 0; i < IOFD_MAX; i++) {
 	if (io_fds[i].v == NULL)
 	    continue;
-#ifdef HAVE_ZLIB
+#ifdef HAVE_ZLIB_H
 	if (def_compress_io)
 	    gzclose(io_fds[i].g);
 	else
@@ -329,7 +329,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 
     gettimeofday(&now, NULL);
 
-#ifdef HAVE_ZLIB
+#ifdef HAVE_ZLIB_H
     if (def_compress_io)
 	gzwrite(io_fds[idx].g, buf, len);
     else
@@ -338,7 +338,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     delay.tv_sec = now.tv_sec;
     delay.tv_usec = now.tv_usec;
     timevalsub(&delay, &last_time);
-#ifdef HAVE_ZLIB
+#ifdef HAVE_ZLIB_H
     if (def_compress_io)
 	gzprintf(io_fds[IOFD_TIMING].g, "%d %f %d\n", idx,
 	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len);

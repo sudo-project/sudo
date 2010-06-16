@@ -558,8 +558,8 @@
 /* Define to 1 if you have the `waitpid' function. */
 #undef HAVE_WAITPID
 
-/* Define to 1 if you the `zlib' library. */
-#undef HAVE_ZLIB
+/* Define to 1 if you have the <zlib.h> header file. */
+#undef HAVE_ZLIB_H
 
 /* Define to 1 if you have the `_getpty' function. */
 #undef HAVE__GETPTY

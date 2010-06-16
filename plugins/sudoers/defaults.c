@@ -473,7 +473,7 @@ init_defaults(void)
     def_timestamp_timeout = TIMEOUT;
     def_passwd_timeout = PASSWORD_TIMEOUT;
     def_passwd_tries = TRIES_FOR_PASSWORD;
-#ifdef HAVE_ZLIB
+#ifdef HAVE_ZLIB_H
     def_compress_io = TRUE;
 #endif
 
