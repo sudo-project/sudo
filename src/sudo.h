@@ -151,6 +151,8 @@ struct command_status {
     int val;
 };
 
+struct timeval;
+
 /* For error() and errorx() (XXX - needed?) */
 void cleanup(int);
 
@@ -165,17 +167,6 @@ void zero_bytes(volatile void *, size_t);
 /* exec.c */
 int sudo_execve(struct command_details *details, char *argv[], char *envp[],
     struct command_status *cstat);
-int my_execve(const char *path, char *const argv[], char *const envp[]);
-
-/* exec_pty.c */
-int fork_pty(struct command_details *details, char *argv[], char *envp[],
-    int sv[], int *maxfd);
-int perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat);
-int suspend_parent(int signo);
-void fd_set_iobs(fd_set *fdsr, fd_set *fdsw);
-void pty_close(struct command_status *cstat);
-void pty_setup(uid_t uid);
-void terminate_child(pid_t pid, int use_pgrp);
 
 /* term.c */
 int term_cbreak(int);

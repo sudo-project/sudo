@@ -108,8 +108,8 @@ sesh: sesh.o
 aix.o: $(srcdir)/aix.c $(top_builddir)/config.h $(incdir)/compat.h
 conversation.o: $(srcdir)/conversation.c $(SUDODEP)
 error.o: $(srcdir)/error.c $(incdir)/compat.h $(incdir)/error.h $(top_builddir)/config.h
-exec.o: $(srcdir)/exec.c $(SUDODEP)
-exec_pty.o: $(srcdir)/exec_pty.c $(SUDODEP)
+exec.o: $(srcdir)/exec.c $(SUDODEP) $(srcdir)/sudo_exec.h
+exec_pty.o: $(srcdir)/exec_pty.c $(SUDODEP) $(srcdir)/sudo_exec.h
 get_pty.o: $(srcdir)/get_pty.c $(SUDODEP)
 load_plugins.o: $(srcdir)/load_plugins.c $(SUDODEP)
 parse_args.o: $(srcdir)/parse_args.c sudo_usage.h $(SUDODEP)

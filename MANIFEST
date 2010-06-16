@@ -191,6 +191,7 @@ src/sesh.c
 src/sudo.c
 src/sudo.h
 src/sudo_edit.c
+src/sudo_exec.h
 src/sudo_noexec.c
 src/sudo_plugin_int.h
 src/sudo_usage.h.in

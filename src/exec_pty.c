@@ -56,6 +56,7 @@
 #include <termios.h>
 
 #include "sudo.h"
+#include "sudo_exec.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
@@ -86,10 +87,6 @@ struct io_buffer {
     int (*action)(const char *buf, unsigned int len);
     char buf[16 * 1024];
 };
-
-/* shared with pty.c */  
-extern sig_atomic_t recvsig[NSIG];
-extern void handler(int s);
 
 static char slavename[PATH_MAX];
 static int foreground;
