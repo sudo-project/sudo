@@ -89,7 +89,7 @@ linux_audit_command(char *argv[], int result)
 
     efree(command);
 
-    return -1;
+    return rc;
 }
 
 #ifdef HAVE_SELINUX
