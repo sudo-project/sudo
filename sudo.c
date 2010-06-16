@@ -708,10 +708,9 @@ init_vars(sudo_mode, envp)
 
 	av[0] = user_shell;	/* may be updated later */
 	if (NewArgc > 0) {
-	    size_t cmnd_size;
+	    size_t cmnd_size = 1024;
 	    char *cmnd, *src, *dst, **ap;
 
-	    cmnd_size = 1024;
 	    cmnd = dst = emalloc(cmnd_size);
 	    for (ap = NewArgv; *ap != NULL; ap++) {
 		for (src = *ap; *src != '\0'; src++) {
@@ -723,7 +722,7 @@ init_vars(sudo_mode, envp)
 			dst = new_cmnd + (dst - cmnd);
 			cmnd = new_cmnd;
 		    }
-		    if (isalnum(*src) || *src == '_' || *src == '-') {
+		    if (isalnum((unsigned char)*src) || *src == '_' || *src == '-') {
 			*dst++ = *src;
 		    } else {
 			/* quote potential meta character */
