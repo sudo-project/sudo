@@ -65,7 +65,7 @@ VERSION = @PACKAGE_VERSION@
 
 all: $(DEVDOCS) $(DOCS)
 
-.SUFFIXES:
+.SUFFIXES: .man
 
 varsub: $(top_srcdir)/configure.in
 	printf 's#@%s@#1#\ns#@%s@#1#\ns#@%s@#1#\ns#@%s@#/etc#g\ns#@%s@#/usr/local#g\ns#@%s@#4#g\ns#@%s@#1m#g\n' SEMAN BAMAN LCMAN sysconfdir prefix mansectform mansectsu > $@; sed -n '/Begin initial values for man page substitution/,/End initial values for man page substitution/{;p;}' $(top_srcdir)/configure.in | sed -e '/^#/d' -e 's/^/s#@/' -e 's/=[\\"]*/@#/' -e 's/[\\"]*$$/#g/' >> $@
