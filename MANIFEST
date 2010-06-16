@@ -33,7 +33,6 @@ compat/mksiglist.c
 compat/mksiglist.h
 compat/mkstemp.c
 compat/nanosleep.c
-compat/sigaction.c
 compat/siglist.in
 compat/snprintf.c
 compat/strcasecmp.c
