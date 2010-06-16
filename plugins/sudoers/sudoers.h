@@ -187,6 +187,8 @@ struct sudo_user {
 
 struct lbuf;
 struct passwd;
+struct stat;
+struct timeval;
 
 /*
  * Function prototypes
