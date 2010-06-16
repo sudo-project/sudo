@@ -209,9 +209,12 @@ struct command_status {
 struct lbuf;
 struct passwd;
 struct stat;
+struct timeval;
 
 /* aix.c */
 void aix_prep_user __P((char *, char *));
+void aix_setauthdb __P((char *user));
+void aix_restoreauthdb __P((void));
 
 /* boottime.c */
 int get_boottime __P((struct timeval *));
