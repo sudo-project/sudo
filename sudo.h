@@ -211,7 +211,7 @@ struct passwd;
 struct stat;
 
 /* aix.c */
-void aix_prep_user __P((char *));
+void aix_prep_user __P((char *, char *));
 
 /* boottime.c */
 int get_boottime __P((struct timeval *));

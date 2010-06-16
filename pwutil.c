@@ -225,7 +225,7 @@ sudo_getpwnam(name)
      * Cache passwd db entry if it exists or a negative response if not.
      */
 #ifdef HAVE_SETAUTHDB
-    aix_setauthdb(user);
+    aix_setauthdb(name);
 #endif
     if ((pw = getpwnam(name)) != NULL) {
 	pw = sudo_pwdup(pw);
@@ -573,7 +573,7 @@ user_in_group(pw, group)
     struct group *grp;
 
 #ifdef HAVE_SETAUTHDB
-    aix_setauthdb(pw->pw_user);
+    aix_setauthdb(pw->pw_name);
 #endif
     grp = sudo_getgrnam(group);
 #ifdef HAVE_SETAUTHDB

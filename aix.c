@@ -29,6 +29,7 @@
 # endif
 #endif /* STDC_HEADERS */
 #include <usersec.h>
+#include <uinfo.h>
 
 #include <compat.h>
 
@@ -163,15 +164,16 @@ aix_restoreauthdb()
 {
     if (saved_authsys[0]) {
 	if (setauthdb(saved_authsys, NULL) != 0)
-	    error(1, "unable to restore authsystem \"%s\", saved_authsys);
+	    error(1, "unable to restore authsystem \"%s\"", saved_authsys);
 	saved_authsys[0] = '\0';
     }
 }
 #endif
 
 void
-aix_prep_user(user)
+aix_prep_user(user, tty)
     char *user;
+    char *tty;
 {
     char *info;
     int len;
@@ -179,7 +181,7 @@ aix_prep_user(user)
     /* set usrinfo, like login(1) does */
     /* XXX - should NAME field be pw_gecos? */
     len = easprintf(&info, "NAME=%s%cLOGIN=%s%cLOGNAME=%s%cTTY=%s%c",
-	user, '\0', user, '\0', user, '\0', user_ttypath ? user_ttypath : "");
+	user, '\0', user, '\0', user, '\0', tty ? tty : "");
     (void)usrinfo(SETUINFO, info, len);
     efree(info);
 
