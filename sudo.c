@@ -61,6 +61,7 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <pwd.h>
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -707,15 +708,33 @@ init_vars(sudo_mode, envp)
 
 	av[0] = user_shell;	/* may be updated later */
 	if (NewArgc > 0) {
-	    size_t size;
-	    char *cmnd, *src, *dst, *end;
-	    size = (size_t) (NewArgv[NewArgc - 1] - NewArgv[0]) +
-		    strlen(NewArgv[NewArgc - 1]) + 1;
-	    cmnd = emalloc(size);
-	    src = NewArgv[0];
-	    dst = cmnd;
-	    for (end = src + size - 1; src < end; src++, dst++)
-		*dst = *src == 0 ? ' ' : *src;
+	    size_t cmnd_size;
+	    char *cmnd, *src, *dst, **ap;
+
+	    cmnd_size = 1024;
+	    cmnd = dst = emalloc(cmnd_size);
+	    for (ap = NewArgv; *ap != NULL; ap++) {
+		for (src = *ap; *src != '\0'; src++) {
+		    /* reserve room for an escaped char + space */
+		    if (cmnd_size < (dst - cmnd) + 3) {
+			char *new_cmnd;
+			cmnd_size <<= 1;
+			new_cmnd = erealloc(cmnd, cmnd_size);
+			dst = new_cmnd + (dst - cmnd);
+			cmnd = new_cmnd;
+		    }
+		    if (isalnum(*src) || *src == '_' || *src == '-') {
+			*dst++ = *src;
+		    } else {
+			/* quote potential meta character */
+			*dst++ = '\\';
+			*dst++ = *src;
+		    }
+		}
+		*dst++ = ' ';
+	    }
+	    if (cmnd != dst)
+		dst--;	/* replace last space with a NUL */
 	    *dst = '\0';
 	    av[1] = "-c";
 	    av[2] = cmnd;
