@@ -859,9 +859,10 @@ exec_setup(flags, rbac_enabled, ttyname, ttyfd)
 
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	/* Change to target user's homedir. */
-	if (chdir(runas_pw->pw_dir) == -1)
+	if (chdir(runas_pw->pw_dir) == -1) {
 	    warning("unable to change directory to %s", runas_pw->pw_dir);
 	    goto done;
+	}
     }
 
     rval = TRUE;
