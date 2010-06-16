@@ -19,6 +19,7 @@ AC_SUBST([CFLAGS])
 AC_SUBST([PROGS])
 AC_SUBST([CPPFLAGS])
 AC_SUBST([LDFLAGS])
+AC_SUBST([COMMON_OBJS])
 AC_SUBST([SUDO_LDFLAGS])
 AC_SUBST([SUDO_OBJS])
 AC_SUBST([LIBS])
@@ -51,7 +52,6 @@ AC_SUBST([SELINUX_USAGE])
 AC_SUBST([LDAP])
 AC_SUBST([REPLAY])
 AC_SUBST([LOGINCAP_USAGE])
-AC_SUBST([NONUNIX_GROUPS_IMPL])
 AC_SUBST([ZLIB])
 AC_SUBST([CONFIGURE_ARGS])
 dnl
@@ -1085,7 +1085,7 @@ esac
 if test X"$with_libvas" != X"no"; then
     AC_DEFINE_UNQUOTED([LIBVAS_SO], ["$with_libvas"], [The name of libvas.so])
     AC_DEFINE(USING_NONUNIX_GROUPS)
-    NONUNIX_GROUPS_IMPL="vasgroups.o"
+    COMMON_OBJS="$COMMON_OBJS vasgroups.o"
     AC_ARG_WITH([libvas-rpath],
        [AS_HELP_STRING([--with-libvas-rpath=PATH],
 		       [Path to look for libvas in [default=/opt/quest/lib]])],
@@ -1453,7 +1453,7 @@ case "$host" in
 
 		# AIX-specific functions
 		AC_CHECK_FUNCS(getuserattr setauthdb)
-		SUDO_OBJS="$SUDO_OBJS aix.o"
+		COMMON_OBJS="$COMMON_OBJS aix.o"
 		;;
     *-*-hiuxmpp*)
 		: ${mansectsu='1m'}

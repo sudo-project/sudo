@@ -131,7 +131,7 @@ AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
 COMMON_OBJS = alias.o alloc.o defaults.o error.o getline.o gram.o \
 	      list.o match.o pwutil.o timestr.o toke.o redblack.o \
-	      term.o zero_bytes.o @NONUNIX_GROUPS_IMPL@
+	      term.o zero_bytes.o @COMMON_OBJS@
 
 SUDO_OBJS = $(AUTH_OBJS) @SUDO_OBJS@ audit.o boottime.o check.o env.o \
 	    exec.o getspwuid.o gettime.o goodpath.o fileops.o find_path.o \

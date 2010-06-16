@@ -817,7 +817,6 @@ timeout
 timedir
 CONFIGURE_ARGS
 ZLIB
-NONUNIX_GROUPS_IMPL
 LOGINCAP_USAGE
 REPLAY
 LDAP
@@ -849,6 +848,7 @@ NET_LIBS
 SUDO_LIBS
 SUDO_OBJS
 SUDO_LDFLAGS
+COMMON_OBJS
 LDFLAGS
 CPPFLAGS
 PROGS
@@ -5078,7 +5078,7 @@ _ACEOF
 
     $as_echo "#define USING_NONUNIX_GROUPS 1" >>confdefs.h
 
-    NONUNIX_GROUPS_IMPL="vasgroups.o"
+    COMMON_OBJS="$COMMON_OBJS vasgroups.o"
 
 # Check whether --with-libvas-rpath was given.
 if test "${with_libvas_rpath+set}" = set; then :
@@ -12646,7 +12646,7 @@ _ACEOF
 fi
 done
 
-		SUDO_OBJS="$SUDO_OBJS aix.o"
+		COMMON_OBJS="$COMMON_OBJS aix.o"
 		;;
     *-*-hiuxmpp*)
 		: ${mansectsu='1m'}
