@@ -141,6 +141,10 @@ Special features/options:
 	Enable support for sudo BSM audit logs on systems that support
 	it.  Currently only supported under FreeBSD and Mac OS X.
 
+  --with-linux-audit
+	Enable audit support for Linux systems.  Audits attempts
+	to run a command as well as SELinux role changes.
+
   --with-csops
 	Add CSOps standard options.  You probably aren't interested in this.
 

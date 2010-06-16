@@ -36,7 +36,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-#ifdef WITH_AUDIT
+#ifdef HAVE_LINUX_AUDIT
 #include <libaudit.h>
 #endif
 
@@ -47,7 +47,7 @@
 #include <selinux/get_context_list.h>
 
 #include "sudo.h"
-#include "pathnames.h"
+#include "linux_audit.h"
 
 static struct selinux_state {
     security_context_t old_context;
@@ -314,6 +314,11 @@ selinux_setup(const char *role, const char *type, const char *ttyn,
     }
 #endif
 
+#ifdef HAVE_LINUX_AUDIT
+    linux_audit_role_change(se_state.old_context, se_state.new_context,
+	se_state.ttyn);
+#endif
+
     rval = 0;
 
 done:
@@ -334,11 +339,6 @@ selinux_execve(const char *path, char *argv[], char *envp[])
 	if (se_state.enforcing)
 	    return;
     }
-
-#ifdef WITH_AUDIT
-    if (send_audit_message(1, se_state.old_context, se_state.new_context, se_state.ttyn)) 
-	return;
-#endif
 
     /* We use the "spare" slot in argv to store sesh. */
     --argv;

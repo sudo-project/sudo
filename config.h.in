@@ -64,7 +64,7 @@
 /* Define to 1 if you use BSD authentication. */
 #undef HAVE_BSD_AUTH_H
 
-/* Define to 1 to enable BSM auditing. */
+/* Define to 1 to enable BSM audit support. */
 #undef HAVE_BSM_AUDIT
 
 /* Define to 1 if you have the `closefrom' function. */
@@ -301,6 +301,9 @@
 /* Define to 1 if you have the `dl' library (-ldl). */
 #undef HAVE_LIBDL
 
+/* Define to 1 to enable Linux audit support. */
+#undef HAVE_LINUX_AUDIT
+
 /* Define to 1 if you have the `lockf' function. */
 #undef HAVE_LOCKF
 
@@ -399,6 +402,9 @@
 
 /* Define to 1 to enable SELinux RBAC support. */
 #undef HAVE_SELINUX
+
+/* Define to 1 if you have the `setauthdb' function. */
+#undef HAVE_SETAUTHDB
 
 /* Define to 1 if you have the `setenv' function. */
 #undef HAVE_SETENV
