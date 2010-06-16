@@ -30,6 +30,8 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include "bsm_audit.h"
+
 void log_error(int flags, const char *fmt, ...) __attribute__((__noreturn__));
 
 static int

@@ -235,10 +235,24 @@ AC_ARG_WITH(bsm-audit, [AS_HELP_STRING([--with-bsm-audit], [enable BSM audit sup
 [case $with_bsm_audit in
     yes)	AC_DEFINE(HAVE_BSM_AUDIT)
 		SUDOERS_LIBS="${SUDOERS_LIBS} -lbsm"
-		SUDOERS_OBJS="${SUDOERS_OBJS} bsm_audit.o"
+		SUDOERS_OBJS="${SUDOERS_OBJS} bsm_audit.lo"
 		;;
     no)		;;
     *)		AC_MSG_ERROR(["--with-bsm-audit does not take an argument."])
+		;;
+esac])
+
+dnl
+dnl Handle Linux auditing support.
+dnl
+AC_ARG_WITH(linux-audit, [AS_HELP_STRING([--with-linux-audit], [enable Linux audit support])],
+[case $with_linux_audit in
+    yes)	AC_DEFINE(HAVE_LINUX_AUDIT)
+		SUDO_LIBS="${SUDOERS_LIBS} -laudit"
+		SUDOERS_OBJS="${SUDOERS_OBJS} linux_audit.lo"
+		;;
+    no)		;;
+    *)		AC_MSG_ERROR(["--with-linux-audit does not take an argument."])
 		;;
 esac])
 
@@ -2786,7 +2800,7 @@ AH_TEMPLATE(HAL_INSULTS, [Define to 1 if you want 2001-like insults.])
 AH_TEMPLATE(HAVE_AFS, [Define to 1 if you use AFS.])
 AH_TEMPLATE(HAVE_AIXAUTH, [Define to 1 if you use AIX general authentication.])
 AH_TEMPLATE(HAVE_BSD_AUTH_H, [Define to 1 if you use BSD authentication.])
-AH_TEMPLATE(HAVE_BSM_AUDIT, [Define to 1 to enable BSM auditing.])
+AH_TEMPLATE(HAVE_BSM_AUDIT, [Define to 1 to enable BSM audit support.])
 AH_TEMPLATE(HAVE_DCE, [Define to 1 if you use OSF DCE.])
 AH_TEMPLATE(HAVE_DD_FD, [Define to 1 if your `DIR' contains dd_fd.])
 AH_TEMPLATE(HAVE_DIRFD, [Define to 1 if you have the `dirfd' function or macro.])
@@ -2814,6 +2828,7 @@ AH_TEMPLATE(HAVE_KRB5_INIT_SECURE_CONTEXT, [Define to 1 if you have the `krb5_in
 AH_TEMPLATE(HAVE_KRB5_VERIFY_USER, [Define to 1 if you have the `krb5_verify_user' function.])
 AH_TEMPLATE(HAVE_LBER_H, [Define to 1 if your LDAP needs <lber.h>. (OpenLDAP does not)])
 AH_TEMPLATE(HAVE_LDAP, [Define to 1 if you use LDAP for sudoers.])
+AH_TEMPLATE(HAVE_LINUX_AUDIT, [Define to 1 to enable Linux audit support.])
 AH_TEMPLATE(HAVE_OPIE, [Define to 1 if you use NRL OPIE.])
 AH_TEMPLATE(HAVE_PAM, [Define to 1 if you use PAM authentication.])
 AH_TEMPLATE(HAVE_PROJECT_H, [Define to 1 if you have the <project.h> header file.])

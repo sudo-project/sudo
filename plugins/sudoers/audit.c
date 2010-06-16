@@ -34,12 +34,18 @@
 #ifdef HAVE_BSM_AUDIT
 # include "bsm_audit.h"
 #endif
+#ifdef HAVE_LINUX_AUDIT
+# include "linux_audit.h"
+#endif
 
 void
-audit_success(char **exec_args)
+audit_success(char *exec_args[])
 {
 #ifdef HAVE_BSM_AUDIT
     bsm_audit_success(exec_args);
+#endif
+#ifdef HAVE_LINUX_AUDIT
+    linux_audit_command(exec_args, 1);
 #endif
 }
 
@@ -51,6 +57,9 @@ audit_failure(char **exec_args, char const *const fmt, ...)
     va_start(ap, fmt);
 #ifdef HAVE_BSM_AUDIT
     bsm_audit_failure(exec_args, fmt, ap);
+#endif
+#ifdef HAVE_LINUX_AUDIT
+    linux_audit_command(exec_args, 0);
 #endif
     va_end(ap);
 }

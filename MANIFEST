@@ -149,6 +149,8 @@ plugins/sudoers/interfaces.c
 plugins/sudoers/interfaces.h
 plugins/sudoers/iolog.c
 plugins/sudoers/ldap.c
+plugins/sudoers/linux_audit.c
+plugins/sudoers/linux_audit.h
 plugins/sudoers/logging.c
 plugins/sudoers/logging.h
 plugins/sudoers/match.c

@@ -36,9 +36,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-#ifdef WITH_AUDIT
-#include <libaudit.h>
-#endif
 
 #include <selinux/flask.h>             /* for SECCLASS_CHR_FILE */
 #include <selinux/selinux.h>           /* for is_selinux_enabled() */
@@ -46,8 +43,11 @@
 #include <selinux/get_default_type.h>
 #include <selinux/get_context_list.h>
 
+#ifdef HAVE_LINUX_AUDIT
+# include <libaudit.h>
+#endif
+
 #include "sudo.h"
-#include "pathnames.h"
 
 static struct selinux_state {
     security_context_t old_context;
@@ -58,6 +58,38 @@ static struct selinux_state {
     int ttyfd;
     int enforcing;
 } se_state;
+
+#ifdef HAVE_LINUX_AUDIT
+static int
+audit_role_change(const security_context_t old_context,
+    const security_context_t new_context, const char *ttyn)
+{
+    int au_fd, rc;
+    char *message;
+
+    au_fd = audit_open();
+    if (au_fd == -1) {
+        /* Kernel may not have audit support. */
+        if (errno != EINVAL && errno != EPROTONOSUPPORT && errno != EAFNOSUPPORT
+)
+            error(1, "unable to open audit system");
+	return -1;
+    }
+
+    /* audit role change using the same format as newrole(1) */
+    easprintf(&message, "newrole: old-context=%s new-context=%s",
+	old_context, new_context);
+    rc = audit_log_user_message(au_fd, AUDIT_USER_ROLE_CHANGE,
+	message, NULL, NULL, ttyn, 1);
+    if (rc <= 0)
+	warning("unable to send audit message");
+
+    efree(message);
+    close(au_fd);
+
+    return rc;
+}
+#endif
 
 /*
  * This function attempts to revert the relabeling done to the tty.
@@ -314,6 +346,11 @@ selinux_setup(const char *role, const char *type, const char *ttyn,
     }
 #endif
 
+#ifdef HAVE_LINUX_AUDIT
+    audit_role_change(se_state.old_context, se_state.new_context,
+	se_state.ttyn);
+#endif
+
     rval = 0;
 
 done:
@@ -337,11 +374,6 @@ selinux_execve(const char *path, char *argv[], char *envp[])
 	if (se_state.enforcing)
 	    return;
     }
-
-#ifdef WITH_AUDIT
-    if (send_audit_message(1, se_state.old_context, se_state.new_context, se_state.ttyn)) 
-	return;
-#endif
 
     for (argc = 0; argv[argc] != NULL; argc++)
 	continue;

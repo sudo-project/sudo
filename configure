@@ -908,6 +908,7 @@ with_CC
 with_rpath
 with_blibpath
 with_bsm_audit
+with_linux_audit
 with_incpath
 with_libpath
 with_libraries
@@ -1663,6 +1664,7 @@ Optional Packages:
   --with-rpath            pass -R flag in addition to -L for lib paths
   --with-blibpath=PATH    pass -blibpath flag to ld for additional lib paths
   --with-bsm-audit        enable BSM audit support
+  --with-linux-audit      enable Linux audit support
   --with-incpath          additional places to look for include files
   --with-libpath          additional places to look for libraries
   --with-libraries        additional libraries to link with
@@ -2925,10 +2927,26 @@ if test "${with_bsm_audit+set}" = set; then :
     yes)	$as_echo "#define HAVE_BSM_AUDIT 1" >>confdefs.h
 
 		SUDOERS_LIBS="${SUDOERS_LIBS} -lbsm"
-		SUDOERS_OBJS="${SUDOERS_OBJS} bsm_audit.o"
+		SUDOERS_OBJS="${SUDOERS_OBJS} bsm_audit.lo"
 		;;
     no)		;;
     *)		as_fn_error "\"--with-bsm-audit does not take an argument.\"" "$LINENO" 5
+		;;
+esac
+fi
+
+
+
+# Check whether --with-linux-audit was given.
+if test "${with_linux_audit+set}" = set; then :
+  withval=$with_linux_audit; case $with_linux_audit in
+    yes)	$as_echo "#define HAVE_LINUX_AUDIT 1" >>confdefs.h
+
+		SUDO_LIBS="${SUDOERS_LIBS} -laudit"
+		SUDOERS_OBJS="${SUDOERS_OBJS} linux_audit.lo"
+		;;
+    no)		;;
+    *)		as_fn_error "\"--with-linux-audit does not take an argument.\"" "$LINENO" 5
 		;;
 esac
 fi
@@ -6608,13 +6626,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6611: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6629: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6614: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6632: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6617: output\"" >&5)
+  (eval echo "\"\$as_me:6635: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -7819,7 +7837,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7822 "configure"' > conftest.$ac_ext
+  echo '#line 7840 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9211,11 +9229,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9214: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9232: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9218: \$? = $ac_status" >&5
+   echo "$as_me:9236: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9550,11 +9568,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9553: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9571: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9557: \$? = $ac_status" >&5
+   echo "$as_me:9575: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9655,11 +9673,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9658: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9676: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9662: \$? = $ac_status" >&5
+   echo "$as_me:9680: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9710,11 +9728,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9713: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9731: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9717: \$? = $ac_status" >&5
+   echo "$as_me:9735: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12077,7 +12095,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12080 "configure"
+#line 12098 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12173,7 +12191,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12176 "configure"
+#line 12194 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -20259,6 +20277,7 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+
 
 
 

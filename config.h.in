@@ -64,7 +64,7 @@
 /* Define to 1 if you use BSD authentication. */
 #undef HAVE_BSD_AUTH_H
 
-/* Define to 1 to enable BSM auditing. */
+/* Define to 1 to enable BSM audit support. */
 #undef HAVE_BSM_AUDIT
 
 /* Define to 1 if you have the `closefrom' function. */
@@ -300,6 +300,9 @@
 
 /* Define to 1 if you have the `ldap_unbind_ext_s' function. */
 #undef HAVE_LDAP_UNBIND_EXT_S
+
+/* Define to 1 to enable Linux audit support. */
+#undef HAVE_LINUX_AUDIT
 
 /* Define to 1 if you have the `lockf' function. */
 #undef HAVE_LOCKF

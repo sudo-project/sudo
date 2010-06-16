@@ -30,6 +30,9 @@ What's new in Sudo 1.7.3?
    commands as a non-root user and when one of stdin, stdout or stderr
    is not a terminal.
 
+ * Sudo will now use the Linux audit system with configure with
+   the --with-linux-audit flag.
+
  * Sudo now uses mbr_check_membership() on systems that support it
    to determine group membership.  Currently, only Darwin (Mac OS X)
    supports this.

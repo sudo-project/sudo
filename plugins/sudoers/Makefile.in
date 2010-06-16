@@ -186,8 +186,8 @@ $(devdir)/getdate.c: $(srcdir)/getdate.y
 
 # Sudoers dependencies
 alias.lo: $(srcdir)/alias.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/redblack.h
-audit.lo: audit.c $(SUDODEP)
-bsm_audit.lo: bsm_audit.c $(SUDODEP) $(srcdir)/bsm_audit.h
+audit.lo: $(srcdir)/audit.c $(SUDODEP)
+bsm_audit.lo: $(srcdir)/bsm_audit.c $(SUDODEP) $(srcdir)/bsm_audit.h
 boottime.lo: $(srcdir)/boottime.c $(top_builddir)/config.h
 check.lo: $(srcdir)/check.c $(SUDODEP)
 defaults.lo: $(srcdir)/defaults.c $(SUDODEP) $(devdir)/def_data.c $(authdir)/sudo_auth.h $(devdir)/gram.h
@@ -200,6 +200,7 @@ gram.lo: $(devdir)/gram.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir
 interfaces.lo: $(srcdir)/interfaces.c $(SUDODEP) $(srcdir)/interfaces.h
 iolog.lo: $(srcdir)/iolog.c $(SUDODEP)
 ldap.lo: $(srcdir)/ldap.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h
+linux_audit.lo: $(srcdir)/linux_audit.c $(SUDODEP) $(srcdir)/linux_audit.h
 logging.lo: $(srcdir)/logging.c $(SUDODEP)
 match.lo: $(srcdir)/match.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/interfaces.h $(devdir)/gram.h
 parse.lo: $(srcdir)/parse.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir)/gram.h
