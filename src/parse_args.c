@@ -45,8 +45,9 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#include <pwd.h>
+#include <ctype.h>
 #include <grp.h>
+#include <pwd.h>
 
 #include <sudo_usage.h>
 #include "sudo.h"
@@ -380,22 +381,38 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	    memcpy(av + 1, argv, argc * sizeof(char *));
 	} else {
 	    /* shell -c "command" */
-	    size_t size;
-	    char *src, *dst, *end;
+	    size_t cmnd_size = 1024;
+	    char *cmnd, *src, *dst, **ap;
 
-	    /* length of the command + NUL terminator */
-	    size = (size_t)(argv[argc - 1] - argv[0]) +
-		strlen(argv[argc - 1]) + 1;
+	    cmnd = dst = emalloc(cmnd_size);
+	    for (ap = argv; *ap != NULL; ap++) {
+		for (src = *ap; *src != '\0'; src++) {
+		    /* reserve room for an escaped char + space */
+		    if (cmnd_size < (dst - cmnd) + 3) {
+			char *new_cmnd;
+			cmnd_size <<= 1;
+			new_cmnd = erealloc(cmnd, cmnd_size);
+			dst = new_cmnd + (dst - cmnd);
+			cmnd = new_cmnd;
+		    }
+		    if (isalnum((unsigned char)*src) || *src == '_' || *src == '-') {
+			*dst++ = *src;
+		    } else {
+			/* quote potential meta character */
+			*dst++ = '\\';
+			*dst++ = *src;
+		    }
+		}
+		*dst++ = ' ';
+	    }
+	    if (cmnd != dst)
+		dst--;  /* replace last space with a NUL */
+	    *dst = '\0';
 
 	    ac = 3;
 	    av = emalloc2(ac + 1, sizeof(char *));
 	    av[1] = "-c";
-	    av[2] = dst = emalloc(size);
-
-	    src = argv[0];
-	    for (end = src + size - 1; src < end; src++, dst++)
-		*dst = *src == 0 ? ' ' : *src;
-	    *dst = '\0';
+	    av[2] = cmnd;
 	}
 	av[0] = (char *)user_details.shell; /* plugin may override shell */
 	av[ac] = NULL;
