@@ -13083,6 +13083,8 @@ done
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
+		# Apple sudo timedir location
+		: ${with_timedir='/var/db/sudo'}
 		;;
     *-*-nextstep*)
 		# lockf() on is broken on the NeXT -- use flock instead
