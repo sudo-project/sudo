@@ -764,11 +764,6 @@ init_vars(char * const envp[])
 #endif
 
     /* It is now safe to use log_error() and set_perms() */
-
-    if (def_fqdn) {
-	/* may call log_error() */
-	set_fqdn();
-    }
 }
 
 /*
