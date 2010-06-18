@@ -39,6 +39,10 @@ What's new in Sudo 1.7.3?
    specified as floating point numbers for more granular timeout
    values.
 
+ * Negating the fqdn option in sudoers now works correctly when sudo
+   is configured with the --with-fqdn option.  In previous versions
+   of sudo the fqdn was set before sudoers was parsed.
+
 What's new in Sudo 1.7.2?
 
  * A new #includedir directive is available in sudoers.  This can be
