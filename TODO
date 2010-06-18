@@ -175,19 +175,13 @@ TODO list (most will be addressed in sudo 2.0)
     Maybe just make it clear that setenv allows the user to run
     anything.
 
-60) Merge in Linux audit support but use AUDIT_EXECVE instead of AUDIT_USER_CMD
+60) Add setenv_all and SETENV_ALL?
 
-61) Add setenv_all and SETENV_ALL?
-
-63) Expand prompt early and set def_prompt in pam_init() so that
+61) Expand prompt early and set def_prompt in pam_init() so that
     session modules that prompt can use it.
 
-64) Should sudo remove KRB5CCNAME from the env?
+62) Should sudo remove KRB5CCNAME from the env?
     It was added to the keep list for password lookups that use GSSAPI.
     Probably best to remove it from the env before exec.
 
-65) See http://iase.disa.mil/stigs/whitepaper/sudowhitepaper-042304.doc
-
-66) Update Active Directory instructions based on Alain Roy's info
-
-67) Add support for multiple LDAP trees; from Joachim Henke
+63) See http://iase.disa.mil/stigs/whitepaper/sudowhitepaper-042304.doc
