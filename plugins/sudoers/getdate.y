@@ -677,7 +677,7 @@ LookupWord(buff)
     /* Make it lowercase. */
     for (p = buff; *p; p++)
 	if (isupper((unsigned char)*p))
-	    *p = tolower(*p);
+	    *p = tolower((unsigned char)*p);
 
     if (strcmp(buff, "am") == 0 || strcmp(buff, "a.m.") == 0) {
 	yylval.Meridian = MERam;
