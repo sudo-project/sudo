@@ -124,11 +124,11 @@ sudo_plugin.man: $(srcdir)/sudo_plugin.man.in
 @DEV@$(srcdir)/sudo_plugin.cat: varsub $(srcdir)/sudo_plugin.man.in
 @DEV@	sed -f varsub $(srcdir)/sudo_plugin.man.in | $(NROFF) -man > $@
 
-HISTORY: history.pod
-	pod2text -l -i0 $> > $@
+HISTORY: $(srcdir)/history.pod
+	pod2text -l -i0 $(srcdir)/history.pod > $@
 
-LICENSE: license.pod
-	pod2text -l -i0 $> | sed '1,2d' > $@
+LICENSE: $(srcdir)/license.pod
+	pod2text -l -i0 $(srcdir)/license.pod | sed '1,2d' > $@
 
 install: install-dirs install-man
 
