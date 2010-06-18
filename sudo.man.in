@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "June 10, 2010" "1.7.3b3" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "June 18, 2010" "1.7.3b3" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -492,7 +492,7 @@ This extends the \fBsudo\fR timeout for another \f(CW\*(C`@timeout@\*(C'\fR minu
 a command.
 .IP "\-\-" 12
 The \fB\-\-\fR option indicates that \fBsudo\fR should stop processing command
-line arguments.  It is most useful in conjunction with the \fB\-s\fR option.
+line arguments.
 .PP
 Environment variables to be set for the command may also be passed
 on the command line in the form of \fB\s-1VAR\s0\fR=\fIvalue\fR, e.g.

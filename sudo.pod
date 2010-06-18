@@ -388,7 +388,7 @@ a command.
 =item --
 
 The B<--> option indicates that B<sudo> should stop processing command
-line arguments.  It is most useful in conjunction with the B<-s> option.
+line arguments.
 
 =back
 
