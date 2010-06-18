@@ -202,6 +202,10 @@ lecture(int status)
 static void
 update_timestamp(char *timestampdir, char *timestampfile)
 {
+    /* If using tty timestamps but we have no tty there is nothing to do. */
+    if (timestampfile && !user_ttypath)
+	return;
+
     if (timestamp_uid != 0)
 	set_perms(PERM_TIMESTAMP);
     if (timestampfile) {
