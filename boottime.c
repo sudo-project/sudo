@@ -103,7 +103,7 @@ get_boottime(tv)
 {
     struct utmpx *ut, key;
 
-    zero_bytes(&key, sizeof(key));
+    memset(&key, 0, sizeof(key));
     key.ut_type = BOOT_TIME;
     if ((ut = getutxid(&key)) != NULL) {
 	tv->tv_sec = ut->ut_tv.tv_sec;
@@ -122,7 +122,7 @@ get_boottime(tv)
 {
     struct utmp *ut, key;
 
-    zero_bytes(&key, sizeof(key));
+    memset(&key, 0, sizeof(key));
     key.ut_type = BOOT_TIME;
     if ((ut = getutid(&key)) != NULL) {
 	tv->tv_sec = ut->ut_time;
