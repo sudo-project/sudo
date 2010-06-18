@@ -179,7 +179,6 @@ aix_prep_user(user, tty)
     int len;
 
     /* set usrinfo, like login(1) does */
-    /* XXX - should NAME field be pw_gecos? */
     len = easprintf(&info, "NAME=%s%cLOGIN=%s%cLOGNAME=%s%cTTY=%s%c",
 	user, '\0', user, '\0', user, '\0', tty ? tty : "");
     (void)usrinfo(SETUINFO, info, len);
