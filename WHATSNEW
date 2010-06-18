@@ -37,6 +37,12 @@ What's new in Sudo 1.7.3?
    to determine group membership.  Currently, only Darwin (Mac OS X)
    supports this.
 
+ * When the tty_tickets sudoers option is enabled but there is no
+   terminal device, sudo will no longer use or create a tty-based
+   ticket file.  Previously, sudo would use a tty name of "unknown".
+   As a consequence, if a user has no terminal device, sudo will
+   now always prompt for a password.
+
  * The passwd_timeout and timestamp_timeout options may now be
    specified as floating point numbers for more granular timeout
    values.
