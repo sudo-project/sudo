@@ -129,7 +129,7 @@ HDRS = alloc.h bsm_audit.h compat.h def_data.h defaults.h error.h ins_2001.h \
 
 AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
-COMMON_OBJS = alias.o alloc.o defaults.o error.o getline.o gram.o \
+COMMON_OBJS = alias.o alloc.o defaults.o error.o gram.o \
 	      list.o match.o pwutil.o timestr.o toke.o redblack.o \
 	      term.o zero_bytes.o @COMMON_OBJS@
 
