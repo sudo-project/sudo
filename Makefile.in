@@ -464,11 +464,11 @@ sudoreplay.man: $(srcdir)/sudoreplay.man.in
 @DEV@$(srcdir)/sudoreplay.cat: varsub $(srcdir)/sudoreplay.man.in
 @DEV@	sed -f varsub $(srcdir)/sudoreplay.man.in | $(NROFF) -man > $@
 
-@DEV@HISTORY: history.pod
-@DEV@	pod2text -l -i0 $> > $@
+@DEV@HISTORY: $(srcdir)/history.pod
+@DEV@	pod2text -l -i0 $(srcdir)/history.pod > $@
 @DEV@
-@DEV@LICENSE: license.pod
-@DEV@	pod2text -l -i0 $> | sed '1,2d' > $@
+@DEV@LICENSE: $(srcdir)/license.pod
+@DEV@	pod2text -l -i0 $(srcdir)/license.pod | sed '1,2d' > $@
 
 # The 1.7 branch started Jan 18, 2010
 ChangeLog:
