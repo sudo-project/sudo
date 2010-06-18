@@ -1,6 +1,6 @@
 Sudo is distributed under the following ISC-style license:
 
-   Copyright (c) 1994-1996, 1998-2009
+   Copyright (c) 1994-1996, 1998-2010
         Todd C. Miller <Todd.Miller@courtesan.com>
 
    Permission to use, copy, modify, and distribute this software for any
@@ -75,4 +75,4 @@ nonunix.h and vasgroups.c bear the following license:
    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-   POSSIBILITY OF SUCH DAMAGE. 
+   POSSIBILITY OF SUCH DAMAGE.
