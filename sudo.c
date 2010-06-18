@@ -576,22 +576,17 @@ init_vars(sudo_mode, envp)
      * "shost" is the unqualified form of the hostname.
      */
     nohostname = gethostname(thost, sizeof(thost));
-    if (nohostname)
+    if (nohostname) {
 	user_host = user_shost = "localhost";
-    else {
+    } else {
 	thost[sizeof(thost) - 1] = '\0';
 	user_host = estrdup(thost);
-	if (def_fqdn) {
-	    /* Defer call to set_fqdn() until log_error() is safe. */
-	    user_shost = user_host;
+	if ((p = strchr(user_host, '.'))) {
+	    *p = '\0';
+	    user_shost = estrdup(user_host);
+	    *p = '.';
 	} else {
-	    if ((p = strchr(user_host, '.'))) {
-		*p = '\0';
-		user_shost = estrdup(user_host);
-		*p = '.';
-	    } else {
-		user_shost = user_host;
-	    }
+	    user_shost = user_host;
 	}
     }
 
@@ -671,9 +666,6 @@ init_vars(sudo_mode, envp)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't get group vector");
     }
 #endif
-
-    if (def_fqdn)
-	set_fqdn();			/* may call log_error() */
 
     if (nohostname)
 	log_error(USE_ERRNO|MSG_ONLY, "can't get hostname");
