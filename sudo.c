@@ -300,6 +300,9 @@ main(argc, argv, envp)
     if (!update_defaults(SETDEF_RUNAS))
 	log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
 
+    if (def_fqdn)
+	set_fqdn();	/* deferred until after sudoers is parsed */
+
     /* Set login class if applicable. */
     set_loginclass(sudo_user.pw);
 

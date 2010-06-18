@@ -327,10 +327,6 @@ set_default(var, val, op)
 		return(FALSE);
 	    }
 	    cur->sd_un.flag = op;
-
-	    /* Special action for I_FQDN.  Move to own switch if we get more */
-	    if (num == I_FQDN && op)
-		set_fqdn();
 	    break;
 	case T_LIST:
 	    if (!val) {
