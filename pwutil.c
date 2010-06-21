@@ -46,6 +46,9 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE_SETAUTHDB
+# include <usersec.h>
+#endif /* HAVE_SETAUTHDB */
 #include <pwd.h>
 #include <grp.h>
 
