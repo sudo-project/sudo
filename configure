@@ -12562,7 +12562,7 @@ case "$host" in
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
-		OSDEFS="${OSDEFS} -D_XOPEN_EXTENDED_SOURCE -D_ALL_SOURCE"
+		OSDEFS="${OSDEFS} -D_ALL_SOURCE -D_LINUX_SOURCE_COMPAT"
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 		if test X"$with_blibpath" != X"no"; then
 		    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if linker accepts -Wl,-blibpath" >&5
