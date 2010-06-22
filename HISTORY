@@ -27,7 +27,7 @@ In 1996, Todd, who had been maintaining sudo for several years in his spare
 time, moved distribution of sudo from a CU-Boulder ftp site to his domain,
 courtesan.com.
 
-In 1999, the "CU" prefix was dropped from the name since there has been no
+In 1999, the "CU" prefix was dropped from the name since there had been no
 formal release of sudo from "The Root Group" since 1991 (the original
 authors now work elsewhere). As of version 1.6, Sudo no longer contains any
 of the original "Root Group" code and is available under an ISC-style
@@ -35,6 +35,10 @@ license.
 
 In 2001, the sudo web site, ftp site and mailing lists were moved from
 courtesan.com to the sudo.ws domain (sudo.org was already taken).
+
+In 2003, Nationwide Mutual Insurance Company contributed code written by
+Aaron Spangler to store the sudoers data in LDAP. These changes were
+incorporated into Sudo 1.6.8.
 
 In 2005, Todd rewrote the sudoers parser to better support the features that
 had been added in the past ten years. This new parser removes some
