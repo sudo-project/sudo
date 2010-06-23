@@ -31,7 +31,9 @@
 #include <usersec.h>
 #include <uinfo.h>
 
-#include <compat.h>
+#include "alloc.h"
+#include "compat.h"
+#include "error.h"
 
 #ifdef HAVE_GETUSERATTR
 
@@ -180,7 +182,7 @@ aix_prep_user(user, tty)
 
     /* set usrinfo, like login(1) does */
     len = easprintf(&info, "NAME=%s%cLOGIN=%s%cLOGNAME=%s%cTTY=%s%c",
-	user, '\0', user, '\0', user, '\0', tty ? tty : "");
+	user, '\0', user, '\0', user, '\0', tty ? tty : "", '\0');
     (void)usrinfo(SETUINFO, info, len);
     efree(info);
 
