@@ -228,7 +228,7 @@ sudo_getpwnam(name)
      * Cache passwd db entry if it exists or a negative response if not.
      */
 #ifdef HAVE_SETAUTHDB
-    aix_setauthdb(name);
+    aix_setauthdb((char *) name);
 #endif
     if ((pw = getpwnam(name)) != NULL) {
 	pw = sudo_pwdup(pw);
