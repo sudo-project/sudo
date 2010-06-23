@@ -42,6 +42,7 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <pwd.h>
+#include <usersec.h>
 
 #include "sudo.h"
 #include "sudo_auth.h"
