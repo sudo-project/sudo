@@ -31,8 +31,8 @@
 #include <usersec.h>
 #include <uinfo.h>
 
-#include "alloc.h"
 #include "compat.h"
+#include "alloc.h"
 #include "error.h"
 
 #ifdef HAVE_GETUSERATTR
