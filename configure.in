@@ -247,9 +247,13 @@ dnl Handle Linux auditing support.
 dnl
 AC_ARG_WITH(linux-audit, [AS_HELP_STRING([--with-linux-audit], [enable Linux audit support])],
 [case $with_linux_audit in
-    yes)	AC_DEFINE(HAVE_LINUX_AUDIT)
-		SUDO_LIBS="${SUDOERS_LIBS} -laudit"
-		SUDOERS_OBJS="${SUDOERS_OBJS} linux_audit.lo"
+    yes)	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <libaudit.h>]], [[int i = AUDIT_USER_CMD; (void)i;]])], [
+		    AC_DEFINE(HAVE_LINUX_AUDIT)
+		    SUDO_LIBS="${SUDO_LIBS} -laudit"
+		    SUDOERS_OBJS="${SUDOERS_OBJS} linux_audit.lo"
+		], [
+		    AC_MSG_ERROR([unable to find AUDIT_USER_CMD in libaudit.h for --with-linux-audit])
+		])
 		;;
     no)		;;
     *)		AC_MSG_ERROR(["--with-linux-audit does not take an argument."])
