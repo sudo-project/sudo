@@ -369,11 +369,13 @@ selinux_execve(const char *path, char *argv[], char *envp[])
 	    return;
     }
 
+#ifdef HAVE_SETKEYCREATECON
     if (setkeycreatecon(se_state.new_context)) {
 	warning("unable to set key creation context to %s", se_state.new_context);
 	if (se_state.enforcing)
 	    return;
     }
+#endif /* HAVE_SETKEYCREATECON */
 
     for (argc = 0; argv[argc] != NULL; argc++)
 	continue;

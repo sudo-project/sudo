@@ -409,6 +409,9 @@
 /* Define to 1 if you have the `seteuid' function. */
 #undef HAVE_SETEUID
 
+/* Define to 1 if you have the `setkeycreatecon' function. */
+#undef HAVE_SETKEYCREATECON
+
 /* Define to 1 if you have the `setlocale' function. */
 #undef HAVE_SETLOCALE
 

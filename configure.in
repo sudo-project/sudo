@@ -1314,6 +1314,8 @@ AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])
 		SUDO_OBJS="${SUDO_OBJS} selinux.o"
 		PROGS="${PROGS} sesh"
 		SEMAN=1
+		AC_CHECK_LIB([selinux], [setkeycreatecon],
+		    [AC_DEFINE(HAVE_SETKEYCREATECON)])
 		;;
     no)		;;
     *)		AC_MSG_ERROR(["--with-selinux does not take an argument."])
@@ -2839,6 +2841,7 @@ AH_TEMPLATE(HAVE_PAM, [Define to 1 if you use PAM authentication.])
 AH_TEMPLATE(HAVE_PROJECT_H, [Define to 1 if you have the <project.h> header file.])
 AH_TEMPLATE(HAVE_SECURID, [Define to 1 if you use SecurID for authentication.])
 AH_TEMPLATE(HAVE_SELINUX, [Define to 1 to enable SELinux RBAC support.])
+AH_TEMPLATE(HAVE_SETKEYCREATECON, [Define to 1 if you have the `setkeycreatecon' function.])
 AH_TEMPLATE(HAVE_SIGACTION_T, [Define to 1 if <signal.h> has the sigaction_t typedef.])
 AH_TEMPLATE(HAVE_SKEY, [Define to 1 if you use S/Key.])
 AH_TEMPLATE(HAVE_SKEYACCESS, [Define to 1 if your S/Key library has skeyaccess().])
