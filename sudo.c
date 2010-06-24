@@ -203,7 +203,7 @@ main(argc, argv, envp)
     (void) sigaction(SIGTSTP, &sa, &saved_sa_tstp);
 
     /* Initialize environment functions (including replacements). */
-    env_init(envp);
+    env_init(envp, FALSE);
 
     /*
      * Turn off core dumps and make sure fds 0-2 are open.

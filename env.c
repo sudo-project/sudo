@@ -90,6 +90,7 @@ struct environment {
     char **envp;		/* pointer to the new environment */
     size_t env_size;		/* size of new_environ in char **'s */
     size_t env_len;		/* number of slots used, not counting NULL */
+    int owned;			/* do we own envp or is it the system's? */
 };
 
 /*
@@ -209,18 +210,26 @@ static const char *initial_keepenv_table[] = {
  * Initialize env based on envp.
  */
 void
-env_init(envp)
+env_init(envp, lazy)
     char * const envp[];
+    int lazy;
 {
-    /* May have gotten initialized lazily. */
-    if (env.envp == NULL) {
-	char * const *ep;
-	size_t len;
+    char * const *ep;
+    size_t len;
 
-	for (ep = envp; *ep != NULL; ep++)
-	    continue;
-	len = (size_t)(ep - envp);
+    for (ep = envp; *ep != NULL; ep++)
+	continue;
+    len = (size_t)(ep - envp);
 
+    if (lazy) {
+	/*
+	 * If we are already initialized due to lazy init (usualy via getenv())
+	 * we need to avoid calling malloc() as it may call getenv() itself.
+	 */
+	env.envp = (char **)envp;
+	env.env_len = len;
+	env.env_size = len;
+    } else if (!env.owned) {
 	env.env_len = len;
 	env.env_size = len + 1 + 128;
 	env.envp = emalloc2(env.env_size, sizeof(char *));
@@ -229,6 +238,7 @@ env_init(envp)
 #endif
 	memcpy(env.envp, envp, len * sizeof(char *));
 	env.envp[len] = '\0';
+	env.owned = TRUE;
     }
 }
 
@@ -275,7 +285,7 @@ getenv(const char *var)
     size_t vlen = strlen(var);
 
     if (env.envp == NULL)
-	env_init(environ);
+	env_init(environ, TRUE);
 
     for (ev = env.envp; (cp = *ev) != NULL; ev++) {
 	if (strncmp(var, cp, vlen) == 0 && cp[vlen] == '=')
@@ -298,7 +308,7 @@ setenv(var, val, overwrite)
     size_t esize;
 
     if (env.envp == NULL)
-	env_init(environ);
+	env_init(environ, TRUE);
 
     if (!var || *var == '\0') {
 	errno = EINVAL;
@@ -350,7 +360,7 @@ unsetenv(var)
     size_t len;
 
     if (env.envp == NULL)
-	env_init(environ);
+	env_init(environ, TRUE);
 
     if (strchr(var, '=') != NULL) {
 	errno = EINVAL;
@@ -395,7 +405,7 @@ putenv(string)
 #endif
 {
     if (env.envp == NULL)
-	env_init(environ);
+	env_init(environ, TRUE);
 
     if (strchr(string, '=') == NULL) {
 	errno = EINVAL;
@@ -428,7 +438,15 @@ sudo_putenv(str, dupcheck, overwrite)
     /* Make sure there is room for the new entry plus a NULL. */
     if (env.env_len + 2 > env.env_size) {
 	env.env_size += 128;
-	env.envp = erealloc3(env.envp, env.env_size, sizeof(char *));
+	if (env.owned) {
+	    env.envp = erealloc3(env.envp, env.env_size, sizeof(char *));
+	} else {
+	    /* We don't own env.envp, allocate a new one. */
+	    ep = emalloc2(env.env_size, sizeof(char *));
+	    memcpy(ep, env.envp, env.env_size * sizeof(char *));
+	    env.envp = ep;
+	    env.owned = TRUE;
+	}
 #ifdef ENV_DEBUG
 	memset(env.envp + env.env_len, 0,
 	    (env.env_size - env.env_len) * sizeof(char *));
