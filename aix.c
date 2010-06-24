@@ -142,7 +142,8 @@ aix_setlimits(user)
  * group lookups are made against the correct source (files, NIS, LDAP, etc).
  */
 void
-aix_setauthdb(char *user)
+aix_setauthdb(user)
+    char *user;
 {
     char *authsys;
 
