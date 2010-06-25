@@ -358,11 +358,6 @@ main(argc, argv, envp)
 	}
     }
 
-#ifdef USING_NONUNIX_GROUPS
-    /* Finished with the groupcheck code */
-    sudo_nonunix_groupcheck_cleanup();
-#endif
-
     if (safe_cmnd == NULL)
 	safe_cmnd = estrdup(user_cmnd);
 
@@ -477,6 +472,11 @@ main(argc, argv, envp)
 	/* Cleanup sudoers sources */
 	tq_foreach_fwd(snl, nss)
 	    nss->close(nss);
+
+#ifdef USING_NONUNIX_GROUPS
+	/* Finished with the groupcheck code */
+	sudo_nonunix_groupcheck_cleanup();
+#endif
 
 	/* Deferred exit due to sudo_ldap_close() */
 	if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST)))
@@ -1300,6 +1300,9 @@ cleanup(gotsignal)
 	    tq_foreach_fwd(snl, nss)
 		nss->close(nss);
 	}
+#ifdef USING_NONUNIX_GROUPS
+	sudo_nonunix_groupcheck_cleanup();
+#endif
 	sudo_endpwent();
 	sudo_endgrent();
 #ifdef _PATH_SUDO_IO_LOGDIR
