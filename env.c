@@ -356,7 +356,7 @@ int
 unsetenv(var)
     const char *var;
 {
-    char **ep = env.envp;
+    char **ep;
     size_t len;
 
     if (env.envp == NULL)
@@ -377,7 +377,7 @@ unsetenv(var)
 #endif
 
     len = strlen(var);
-    while (*ep != NULL) {
+    for (ep = env.envp; *ep != NULL;) {
 	if (strncmp(var, *ep, len) == 0 && (*ep)[len] == '=') {
 	    /* Found it; shift remainder + NULL over by one and update len. */
 	    memmove(ep, ep + 1,
