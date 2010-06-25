@@ -115,73 +115,71 @@ TODO list (most will be addressed in sudo 2.0)
     Note that it is possible to create shared libs w/ both 32bit and 64bit
     objects.
 
-40) Revisit debian fqdn diffs.
+40) Add gettext() support.  Can borrow some translations from PAM.
 
-41) Add gettext() support.  Can borrow some translations from PAM.
-
-42) Convert the other capitalized files into .pod so we can get decent html
+41) Convert the other capitalized files into .pod so we can get decent html
     form them?  E.g. README, etc.  E.g.
 	pod2text -l -i0 history.pod > HISTORY
 	pod2html --noindex history.pod > history.html
 
-43) Use mkstemp() for visudo temp files?  Also re-examine locking.
+42) Use mkstemp() for visudo temp files?  Also re-examine locking.
 
-44) Consolidate line wrap code.
+43) Consolidate line wrap code.
 
-45) How can we distinguish between a bare '\\' and one that is escaping
+44) How can we distinguish between a bare '\\' and one that is escaping
     glob chars?  Right now we convert \\ -> \ in the lexer which
     causes the confusion.
 
-46) For LDAP entries, should be able to parse the per-command options
+45) For LDAP entries, should be able to parse the per-command options
     since they may affect the outcome (e.g. default_runas).
 
-47) Set usrinfo for AIX, see openssh.
+46) Set usrinfo for AIX, see openssh.
 
-48) Consider adding -d (debug) flag for both LDAP and files sudoers lookups.
+47) Consider adding -d (debug) flag for both LDAP and files sudoers lookups.
     Is it safe to allow normal users to use it?
 
-49) Why does testsudoers give wrong line number for parse error?
+48) Why does testsudoers give wrong line number for parse error?
 
-50) Should send mail if sudoers does not parse
+49) Should send mail if sudoers does not parse
 
-51) Add arg markup to indicate that an arg is a path and treat it specially
+50) Add arg markup to indicate that an arg is a path and treat it specially
     regarding cwd.
 
-52) Should -k/-K clear *all* timestamps in tty_ticket mode?
+51) Should -k/-K clear *all* timestamps in tty_ticket mode?
     http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=306919
     Perhaps change the meaning of -k vs. -K in 1.7.
 
-53) Dan says Pam activity should probably be happening after
+52) Dan says Pam activity should probably be happening after
     setkeycreatecon and setexeccon (which may use the keyring or
     run external commands).  However, this means sendmail
     will be executed w/ the new context if user is denied.
 
-54) Add report program (or mode) to print out all permissions on a
+53) Add report program (or mode) to print out all permissions on a
     per-user basis.  Would also be nice to have a diff facility given
     two sudoers files.
 
-55) Add rpm spec file that works on suse and redhat
+54) Add rpm spec file that works on suse and redhat
 
-56) Store configure args in sudo binary for -V
+55) Store configure args in sudo binary for -V
     Make -V operate in verbose mode with -VV instead of as root?
 
-57) Verify consumers of *list_matches do not treat UNSPEC as true
+56) Verify consumers of *list_matches do not treat UNSPEC as true
 
-58) Add FOO=BAR env settings to sudoers.  Also m/regexp/ where '/' can be
+57) Add FOO=BAR env settings to sudoers.  Also m/regexp/ where '/' can be
     any char.
 
-59) Consider a more fine-grained setenv option.  Perhaps have setenv
+58) Consider a more fine-grained setenv option.  Perhaps have setenv
     and setenv_all where the latter lets you override the blacklist?
     Maybe just make it clear that setenv allows the user to run
     anything.
 
-60) Add setenv_all and SETENV_ALL?
+59) Add setenv_all and SETENV_ALL?
 
-61) Expand prompt early and set def_prompt in pam_init() so that
+60) Expand prompt early and set def_prompt in pam_init() so that
     session modules that prompt can use it.
 
-62) Should sudo remove KRB5CCNAME from the env?
+61) Should sudo remove KRB5CCNAME from the env?
     It was added to the keep list for password lookups that use GSSAPI.
     Probably best to remove it from the env before exec.
 
-63) See http://iase.disa.mil/stigs/whitepaper/sudowhitepaper-042304.doc
+62) See http://iase.disa.mil/stigs/whitepaper/sudowhitepaper-042304.doc
