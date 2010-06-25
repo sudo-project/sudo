@@ -82,7 +82,7 @@ cmp_pwnam(const void *v1, const void *v2)
 {
     const struct passwd *pw1 = (const struct passwd *) v1;
     const struct passwd *pw2 = (const struct passwd *) v2;
-    return(strcmp(pw1->pw_name, pw2->pw_name));
+    return(strcasecmp(pw1->pw_name, pw2->pw_name));
 }
 
 #define FIELD_SIZE(src, name, size)			\
@@ -373,7 +373,7 @@ cmp_grnam(const void *v1, const void *v2)
 {
     const struct group *grp1 = (const struct group *) v1;
     const struct group *grp2 = (const struct group *) v2;
-    return(strcmp(grp1->gr_name, grp2->gr_name));
+    return(strcasecmp(grp1->gr_name, grp2->gr_name));
 }
 
 struct group *
