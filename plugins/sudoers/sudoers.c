@@ -381,11 +381,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	}
     }
 
-#ifdef USING_NONUNIX_GROUPS
-    /* Finished with the groupcheck code */
-    sudo_nonunix_groupcheck_cleanup();
-#endif
-
     if (safe_cmnd == NULL)
 	safe_cmnd = estrdup(user_cmnd);
 
@@ -533,6 +528,11 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     tq_foreach_fwd(snl, nss) {
 	nss->close(nss);
     }
+
+#ifdef USING_NONUNIX_GROUPS
+    /* Finished with the groupcheck code */
+    sudo_nonunix_groupcheck_cleanup();
+#endif
 
     if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST)))
 	goto done;
@@ -1139,6 +1139,9 @@ cleanup(int gotsignal)
 	    tq_foreach_fwd(snl, nss)
 		nss->close(nss);
 	}
+#ifdef USING_NONUNIX_GROUPS
+	sudo_nonunix_groupcheck_cleanup();
+#endif
 	sudo_endpwent();
 	sudo_endgrent();
     }
