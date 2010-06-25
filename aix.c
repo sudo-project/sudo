@@ -56,7 +56,7 @@ struct aix_limit {
 };
 
 #ifdef HAVE_SETAUTHDB
-static char saved_authsys[16]; /* 15 chars plus NUL as per setauthdb(3) */
+static char saved_registry[16]; /* 15 chars plus NUL as per setauthdb(3) */
 #endif
 
 static struct aix_limit aix_limits[] = {
@@ -145,15 +145,15 @@ void
 aix_setauthdb(user)
     char *user;
 {
-    char *authsys;
+    char *registry;
 
     if (user != NULL) {
 	if (setuserdb(S_READ) != 0)
 	    error(1, "unable to open userdb");
-	if (getuserattr(user, S_AUTHSYSTEM, &authsys, SEC_CHAR) == 0) {
-	    if (setauthdb(authsys, saved_authsys) != 0)
-		error(1, "unable to switch to authsystem \"%s\" for %s",
-		    authsys, user);
+	if (getuserattr(user, S_REGISTRY, &registry, SEC_CHAR) == 0) {
+	    if (setauthdb(registry, saved_registry) != 0)
+		error(1, "unable to switch to registry \"%s\" for %s",
+		    registry, user);
 	}
 	enduserdb();
     }
@@ -165,10 +165,10 @@ aix_setauthdb(user)
 void
 aix_restoreauthdb()
 {
-    if (saved_authsys[0]) {
-	if (setauthdb(saved_authsys, NULL) != 0)
-	    error(1, "unable to restore authsystem \"%s\"", saved_authsys);
-	saved_authsys[0] = '\0';
+    if (saved_registry[0]) {
+	if (setauthdb(saved_registry, NULL) != 0)
+	    error(1, "unable to restore registry \"%s\"", saved_registry);
+	saved_registry[0] = '\0';
     }
 }
 #endif
