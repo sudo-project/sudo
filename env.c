@@ -210,23 +210,22 @@ static const char *initial_keepenv_table[] = {
  * Initialize env based on envp.
  */
 void
-env_init(envp, lazy)
-    char * const envp[];
+env_init(lazy)
     int lazy;
 {
     char * const *ep;
     size_t len;
 
-    for (ep = envp; *ep != NULL; ep++)
+    for (ep = environ; *ep != NULL; ep++)
 	continue;
-    len = (size_t)(ep - envp);
+    len = (size_t)(ep - environ);
 
     if (lazy) {
 	/*
 	 * If we are already initialized due to lazy init (usualy via getenv())
 	 * we need to avoid calling malloc() as it may call getenv() itself.
 	 */
-	env.envp = (char **)envp;
+	env.envp = environ;
 	env.env_len = len;
 	env.env_size = len;
     } else if (!env.owned) {
@@ -236,7 +235,7 @@ env_init(envp, lazy)
 #ifdef ENV_DEBUG
 	memset(env.envp, 0, env.env_size * sizeof(char *));
 #endif
-	memcpy(env.envp, envp, len * sizeof(char *));
+	memcpy(env.envp, environ, len * sizeof(char *));
 	env.envp[len] = '\0';
 	env.owned = TRUE;
     }
@@ -285,7 +284,7 @@ getenv(const char *var)
     size_t vlen = strlen(var);
 
     if (env.envp == NULL)
-	env_init(environ, TRUE);
+	env_init(TRUE);
 
     for (ev = env.envp; (cp = *ev) != NULL; ev++) {
 	if (strncmp(var, cp, vlen) == 0 && cp[vlen] == '=')
@@ -308,7 +307,7 @@ setenv(var, val, overwrite)
     size_t esize;
 
     if (env.envp == NULL)
-	env_init(environ, TRUE);
+	env_init(TRUE);
 
     if (!var || *var == '\0') {
 	errno = EINVAL;
@@ -360,7 +359,7 @@ unsetenv(var)
     size_t len;
 
     if (env.envp == NULL)
-	env_init(environ, TRUE);
+	env_init(TRUE);
 
     if (strchr(var, '=') != NULL) {
 	errno = EINVAL;
@@ -405,7 +404,7 @@ putenv(string)
 #endif
 {
     if (env.envp == NULL)
-	env_init(environ, TRUE);
+	env_init(TRUE);
 
     if (strchr(string, '=') == NULL) {
 	errno = EINVAL;

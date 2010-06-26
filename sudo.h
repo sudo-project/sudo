@@ -226,7 +226,7 @@ void remove_timestamp	__P((int));
 
 /* env.c */
 char **env_get		__P((void));
-void env_init		__P((char * const envp[], int lazy));
+void env_init		__P((int lazy));
 void init_envtables	__P((void));
 void insert_env_vars	__P((struct list_member *));
 void read_env_file	__P((const char *, int));
