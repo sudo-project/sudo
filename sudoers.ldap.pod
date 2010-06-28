@@ -259,14 +259,16 @@ below in upper case but are parsed in a case-independent manner.
 =item B<URI> ldap[s]://[hostname[:port]] ...
 
 Specifies a whitespace-delimited list of one or more URIs describing
-the LDAP server(s) to connect to.  The I<protocol> may be either B<ldap>
-or B<ldaps>, the latter being for servers that support TLS (SSL)
-encryption.  If no I<port> is specified, the default is port 389 for
-C<ldap://> or port 636 for C<ldaps://>.  If no I<hostname> is specified,
-B<sudo> will connect to B<localhost>.  Only systems using the OpenSSL
-libraries support the mixing of C<ldap://> and C<ldaps://> URIs.
-The Netscape-derived libraries used on most commercial versions of
-Unix are only capable of supporting one or the other.
+the LDAP server(s) to connect to.  The I<protocol> may be either
+B<ldap> or B<ldaps>, the latter being for servers that support TLS
+(SSL) encryption.  If no I<port> is specified, the default is port
+389 for C<ldap://> or port 636 for C<ldaps://>.  If no I<hostname>
+is specified, B<sudo> will connect to B<localhost>.  Multiple B<URI>
+lines are treated identically to a B<URI> line containing multiple
+entries.  Only systems using the OpenSSL libraries support the
+mixing of C<ldap://> and C<ldaps://> URIs.  The Netscape-derived
+libraries used on most commercial versions of Unix are only capable
+of supporting one or the other.
 
 =item B<HOST> name[:port] ...
 

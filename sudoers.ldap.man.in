@@ -140,7 +140,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "June 25, 2010" "1.7.3rc1" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "June 28, 2010" "1.7.3rc1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -364,14 +364,16 @@ below in upper case but are parsed in a case-independent manner.
 .IP "\fB\s-1URI\s0\fR ldap[s]://[hostname[:port]] ..." 4
 .IX Item "URI ldap[s]://[hostname[:port]] ..."
 Specifies a whitespace-delimited list of one or more URIs describing
-the \s-1LDAP\s0 server(s) to connect to.  The \fIprotocol\fR may be either \fBldap\fR
-or \fBldaps\fR, the latter being for servers that support \s-1TLS\s0 (\s-1SSL\s0)
-encryption.  If no \fIport\fR is specified, the default is port 389 for
-\&\f(CW\*(C`ldap://\*(C'\fR or port 636 for \f(CW\*(C`ldaps://\*(C'\fR.  If no \fIhostname\fR is specified,
-\&\fBsudo\fR will connect to \fBlocalhost\fR.  Only systems using the OpenSSL
-libraries support the mixing of \f(CW\*(C`ldap://\*(C'\fR and \f(CW\*(C`ldaps://\*(C'\fR URIs.
-The Netscape-derived libraries used on most commercial versions of
-Unix are only capable of supporting one or the other.
+the \s-1LDAP\s0 server(s) to connect to.  The \fIprotocol\fR may be either
+\&\fBldap\fR or \fBldaps\fR, the latter being for servers that support \s-1TLS\s0
+(\s-1SSL\s0) encryption.  If no \fIport\fR is specified, the default is port
+389 for \f(CW\*(C`ldap://\*(C'\fR or port 636 for \f(CW\*(C`ldaps://\*(C'\fR.  If no \fIhostname\fR
+is specified, \fBsudo\fR will connect to \fBlocalhost\fR.  Multiple \fB\s-1URI\s0\fR
+lines are treated identically to a \fB\s-1URI\s0\fR line containing multiple
+entries.  Only systems using the OpenSSL libraries support the
+mixing of \f(CW\*(C`ldap://\*(C'\fR and \f(CW\*(C`ldaps://\*(C'\fR URIs.  The Netscape-derived
+libraries used on most commercial versions of Unix are only capable
+of supporting one or the other.
 .IP "\fB\s-1HOST\s0\fR name[:port] ..." 4
 .IX Item "HOST name[:port] ..."
 If no \fB\s-1URI\s0\fR is specified, the \fB\s-1HOST\s0\fR parameter specifies a

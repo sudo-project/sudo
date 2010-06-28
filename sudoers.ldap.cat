@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.3rc1                  June 25, 2010                         1
+1.7.3rc1                  June 28, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.3rc1                  June 25, 2010                         2
+1.7.3rc1                  June 28, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.3rc1                  June 25, 2010                         3
+1.7.3rc1                  June 28, 2010                         3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.3rc1                  June 25, 2010                         4
+1.7.3rc1                  June 28, 2010                         4
 
 
 
@@ -268,10 +268,12 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
-           ssuuddoo will connect to llooccaallhhoosstt.  Only systems using the OpenSSL
-           libraries support the mixing of ldap:// and ldaps:// URIs.  The
-           Netscape-derived libraries used on most commercial versions of Unix
-           are only capable of supporting one or the other.
+           ssuuddoo will connect to llooccaallhhoosstt.  Multiple UURRII lines are treated
+           identically to a UURRII line containing multiple entries.  Only
+           systems using the OpenSSL libraries support the mixing of ldap://
+           and ldaps:// URIs.  The Netscape-derived libraries used on most
+           commercial versions of Unix are only capable of supporting one or
+           the other.
 
        HHOOSSTT name[:port] ...
            If no UURRII is specified, the HHOOSSTT parameter specifies a whitespace-
@@ -319,13 +321,11 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            identity.  By default, most LDAP servers will allow anonymous
            access.
 
-       BBIINNDDPPWW secret
-           The BBIINNDDPPWW parameter specifies the password to use when performing
-           LDAP operations.  This is typically used in conjunction with the
 
 
 
-1.7.3rc1                  June 25, 2010                         5
+
+1.7.3rc1                  June 28, 2010                         5
 
 
 
@@ -334,6 +334,9 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
+       BBIINNDDPPWW secret
+           The BBIINNDDPPWW parameter specifies the password to use when performing
+           LDAP operations.  This is typically used in conjunction with the
            BBIINNDDDDNN parameter.
 
        RROOOOTTBBIINNDDDDNN DN
@@ -386,12 +389,9 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            used to authenticate the client to the LDAP server.  The
            certificate type depends on the LDAP libraries used.
 
-           OpenLDAP:
-               tls_cert /etc/ssl/client_cert.pem
 
 
-
-1.7.3rc1                  June 25, 2010                         6
+1.7.3rc1                  June 28, 2010                         6
 
 
 
@@ -399,6 +399,9 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
+
+           OpenLDAP:
+               tls_cert /etc/ssl/client_cert.pem
 
            Netscape-derived:
                tls_cert /var/ldap/cert7.db
@@ -452,12 +455,9 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            The path to the Kerberos 5 credential cache to use when
            authenticating with the remote server.
 
-       See the ldap.conf entry in the EXAMPLES section.
 
 
-
-
-1.7.3rc1                  June 25, 2010                         7
+1.7.3rc1                  June 28, 2010                         7
 
 
 
@@ -465,6 +465,8 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
+
+       See the ldap.conf entry in the EXAMPLES section.
 
    CCoonnffiigguurriinngg nnsssswwiittcchh..ccoonnff
        Unless it is disabled at build time, ssuuddoo consults the Name Service
@@ -519,11 +521,9 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
            sudoers = ldap = auth, files
 
-       Note that in the above example, the auth qualfier only affects user
 
 
-
-1.7.3rc1                  June 25, 2010                         8
+1.7.3rc1                  June 28, 2010                         8
 
 
 
@@ -532,6 +532,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
+       Note that in the above example, the auth qualfier only affects user
        lookups; both LDAP and _s_u_d_o_e_r_s will be queried for Defaults entries.
 
        If the _/_e_t_c_/_n_e_t_s_v_c_._c_o_n_f file is not present or there is no sudoers
@@ -585,11 +586,10 @@ EEXXAAMMPPLLEESS
          #
          # Define if you want to use an encrypted LDAP connection.
          # Typically, you must also set the port to 636 (ldaps).
-         #ssl on
 
 
 
-1.7.3rc1                  June 25, 2010                         9
+1.7.3rc1                  June 28, 2010                         9
 
 
 
@@ -598,6 +598,7 @@ EEXXAAMMPPLLEESS
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
+         #ssl on
          #
          # Define if you want to use port 389 and switch to
          # encryption before the bind credentials are sent.
@@ -651,11 +652,10 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
          #
          # The certificate database specified by tls_cert may contain CA certs
          # and/or the client's cert.  If the client's cert is included, tls_key
-         # should be specified as well.
 
 
 
-1.7.3rc1                  June 25, 2010                        10
+1.7.3rc1                  June 28, 2010                        10
 
 
 
@@ -664,6 +664,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
+         # should be specified as well.
          # For backward compatibility, "sslpath" may be used in place of tls_cert.
          #tls_cert /var/ldap
          #tls_key /var/ldap
@@ -717,11 +718,10 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            NAME 'sudoRunAsUser'
            DESC 'User(s) impersonated by sudo'
            EQUALITY caseExactIA5Match
-           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
 
 
 
-1.7.3rc1                  June 25, 2010                        11
+1.7.3rc1                  June 28, 2010                        11
 
 
 
@@ -730,6 +730,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
+           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
 
         attributetype ( 1.3.6.1.4.1.15953.9.1.7
            NAME 'sudoRunAsGroup'
@@ -786,7 +787,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-1.7.3rc1                  June 25, 2010                        12
+1.7.3rc1                  June 28, 2010                        12
 
 
