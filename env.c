@@ -306,13 +306,13 @@ setenv(var, val, overwrite)
     const char *cp;
     size_t esize;
 
-    if (env.envp == NULL)
-	env_init(TRUE);
-
     if (!var || *var == '\0') {
 	errno = EINVAL;
 	return(-1);
     }
+
+    if (env.envp == NULL)
+	env_init(TRUE);
 
     /*
      * POSIX says a var name with '=' is an error but BSD
@@ -358,10 +358,7 @@ unsetenv(var)
     char **ep;
     size_t len;
 
-    if (env.envp == NULL)
-	env_init(TRUE);
-
-    if (strchr(var, '=') != NULL) {
+    if (var == NULL || *var == '\0' || strchr(var, '=') != NULL) {
 	errno = EINVAL;
 #ifdef UNSETENV_VOID
 	return;
@@ -369,6 +366,9 @@ unsetenv(var)
 	return(-1);
 #endif
     }
+
+    if (env.envp == NULL)
+	env_init(TRUE);
 
 #ifdef ENV_DEBUG
     if (env.envp[env.env_len] != NULL)
