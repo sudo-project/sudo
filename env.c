@@ -378,15 +378,16 @@ unsetenv(var)
     len = strlen(var);
     for (ep = env.envp; *ep != NULL;) {
 	if (strncmp(var, *ep, len) == 0 && (*ep)[len] == '=') {
-	    /* Found it; shift remainder + NULL over by one and update len. */
-	    memmove(ep, ep + 1,
-		(env.env_len - (ep - env.envp)) * sizeof(char *));
-	    env.env_len--;
+	    /* Found it; shift remainder + NULL over by one. */
+	    char **cur = ep;
+	    while ((*cur = *(cur + 1)) != NULL)
+		cur++;
 	    /* Keep going, could be multiple instances of the var. */
 	} else {
 	    ep++;
 	}
     }
+    env.env_len = ep - env.envp;
 #ifndef UNSETENV_VOID
     return(0);
 #endif
@@ -470,13 +471,14 @@ sudo_putenv(str, dupcheck, overwrite)
 	if (found && overwrite) {
 	    while (*ep != NULL) {
 		if (strncmp(str, *ep, len) == 0) {
-		    memmove(ep, ep + 1,
-			(env.env_len - (ep - env.envp)) * sizeof(char *));
-		    env.env_len--;
+		    char **cur = ep;
+		    while ((*cur = *(cur + 1)) != NULL)
+			cur++;
 		} else {
 		    ep++;
 		}
 	    }
+	    env.env_len = ep - env.envp;
 	}
     }
 
