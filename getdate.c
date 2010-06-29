@@ -41,11 +41,10 @@
 #  include <memory.h>
 # endif
 # include <string.h>
-#else
-# ifdef HAVE_STRINGS_H
-#  include <strings.h>
-# endif
 #endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif /* HAVE_STRINGS_H */
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
@@ -114,7 +113,7 @@ static int	yyerror __P((char *s));
 static int	yylex __P((void));
 static int	yyparse __P((void));
 
-#line 108 "getdate.y"
+#line 107 "getdate.y"
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {
@@ -122,7 +121,7 @@ typedef union {
     enum _MERIDIAN	Meridian;
 } YYSTYPE;
 #endif /* YYSTYPE_DEFINED */
-#line 126 "y.tab.c"
+#line 125 "y.tab.c"
 #define tAGO 257
 #define tDAY 258
 #define tDAYZONE 259
@@ -390,7 +389,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 327 "getdate.y"
+#line 326 "getdate.y"
 
 /* Month and day table. */
 static TABLE const MonthDayTable[] = {
@@ -1028,7 +1027,7 @@ main(ac, av)
     /* NOTREACHED */
 }
 #endif	/* defined(TEST) */
-#line 980 "y.tab.c"
+#line 979 "y.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1234,37 +1233,37 @@ yyreduce:
     switch (yyn)
     {
 case 3:
-#line 126 "getdate.y"
+#line 125 "getdate.y"
 {
 	    yyHaveTime++;
 	}
 break;
 case 4:
-#line 129 "getdate.y"
+#line 128 "getdate.y"
 {
 	    yyHaveZone++;
 	}
 break;
 case 5:
-#line 132 "getdate.y"
+#line 131 "getdate.y"
 {
 	    yyHaveDate++;
 	}
 break;
 case 6:
-#line 135 "getdate.y"
+#line 134 "getdate.y"
 {
 	    yyHaveDay++;
 	}
 break;
 case 7:
-#line 138 "getdate.y"
+#line 137 "getdate.y"
 {
 	    yyHaveRel++;
 	}
 break;
 case 9:
-#line 144 "getdate.y"
+#line 143 "getdate.y"
 {
 	    yyHour = yyvsp[-1].Number;
 	    yyMinutes = 0;
@@ -1273,7 +1272,7 @@ case 9:
 	}
 break;
 case 10:
-#line 150 "getdate.y"
+#line 149 "getdate.y"
 {
 	    yyHour = yyvsp[-3].Number;
 	    yyMinutes = yyvsp[-1].Number;
@@ -1282,7 +1281,7 @@ case 10:
 	}
 break;
 case 11:
-#line 156 "getdate.y"
+#line 155 "getdate.y"
 {
 	    yyHour = yyvsp[-3].Number;
 	    yyMinutes = yyvsp[-1].Number;
@@ -1292,7 +1291,7 @@ case 11:
 	}
 break;
 case 12:
-#line 163 "getdate.y"
+#line 162 "getdate.y"
 {
 	    yyHour = yyvsp[-5].Number;
 	    yyMinutes = yyvsp[-3].Number;
@@ -1301,7 +1300,7 @@ case 12:
 	}
 break;
 case 13:
-#line 169 "getdate.y"
+#line 168 "getdate.y"
 {
 	    yyHour = yyvsp[-5].Number;
 	    yyMinutes = yyvsp[-3].Number;
@@ -1312,56 +1311,56 @@ case 13:
 	}
 break;
 case 14:
-#line 179 "getdate.y"
+#line 178 "getdate.y"
 {
 	    yyTimezone = yyvsp[0].Number;
 	    yyDSTmode = DSToff;
 	}
 break;
 case 15:
-#line 183 "getdate.y"
+#line 182 "getdate.y"
 {
 	    yyTimezone = yyvsp[0].Number;
 	    yyDSTmode = DSTon;
 	}
 break;
 case 16:
-#line 188 "getdate.y"
+#line 187 "getdate.y"
 {
 	    yyTimezone = yyvsp[-1].Number;
 	    yyDSTmode = DSTon;
 	}
 break;
 case 17:
-#line 194 "getdate.y"
+#line 193 "getdate.y"
 {
 	    yyDayOrdinal = 1;
 	    yyDayNumber = yyvsp[0].Number;
 	}
 break;
 case 18:
-#line 198 "getdate.y"
+#line 197 "getdate.y"
 {
 	    yyDayOrdinal = 1;
 	    yyDayNumber = yyvsp[-1].Number;
 	}
 break;
 case 19:
-#line 202 "getdate.y"
+#line 201 "getdate.y"
 {
 	    yyDayOrdinal = yyvsp[-1].Number;
 	    yyDayNumber = yyvsp[0].Number;
 	}
 break;
 case 20:
-#line 208 "getdate.y"
+#line 207 "getdate.y"
 {
 	    yyMonth = yyvsp[-2].Number;
 	    yyDay = yyvsp[0].Number;
 	}
 break;
 case 21:
-#line 212 "getdate.y"
+#line 211 "getdate.y"
 {
 	    if (yyvsp[-4].Number >= 100) {
 		yyYear = yyvsp[-4].Number;
@@ -1375,7 +1374,7 @@ case 21:
 	}
 break;
 case 22:
-#line 223 "getdate.y"
+#line 222 "getdate.y"
 {
 	    /* ISO 8601 format.  yyyy-mm-dd.  */
 	    yyYear = yyvsp[-2].Number;
@@ -1384,7 +1383,7 @@ case 22:
 	}
 break;
 case 23:
-#line 229 "getdate.y"
+#line 228 "getdate.y"
 {
 	    /* e.g. 17-JUN-1992.  */
 	    yyDay = yyvsp[-2].Number;
@@ -1393,14 +1392,14 @@ case 23:
 	}
 break;
 case 24:
-#line 235 "getdate.y"
+#line 234 "getdate.y"
 {
 	    yyMonth = yyvsp[-1].Number;
 	    yyDay = yyvsp[0].Number;
 	}
 break;
 case 25:
-#line 239 "getdate.y"
+#line 238 "getdate.y"
 {
 	    yyMonth = yyvsp[-3].Number;
 	    yyDay = yyvsp[-2].Number;
@@ -1408,14 +1407,14 @@ case 25:
 	}
 break;
 case 26:
-#line 244 "getdate.y"
+#line 243 "getdate.y"
 {
 	    yyMonth = yyvsp[0].Number;
 	    yyDay = yyvsp[-1].Number;
 	}
 break;
 case 27:
-#line 248 "getdate.y"
+#line 247 "getdate.y"
 {
 	    yyMonth = yyvsp[-1].Number;
 	    yyDay = yyvsp[-2].Number;
@@ -1423,68 +1422,68 @@ case 27:
 	}
 break;
 case 28:
-#line 255 "getdate.y"
+#line 254 "getdate.y"
 {
 	    yyRelSeconds = -yyRelSeconds;
 	    yyRelMonth = -yyRelMonth;
 	}
 break;
 case 30:
-#line 262 "getdate.y"
+#line 261 "getdate.y"
 {
 	    yyRelSeconds += yyvsp[-1].Number * yyvsp[0].Number * 60L;
 	}
 break;
 case 31:
-#line 265 "getdate.y"
+#line 264 "getdate.y"
 {
 	    yyRelSeconds += yyvsp[-1].Number * yyvsp[0].Number * 60L;
 	}
 break;
 case 32:
-#line 268 "getdate.y"
+#line 267 "getdate.y"
 {
 	    yyRelSeconds += yyvsp[0].Number * 60L;
 	}
 break;
 case 33:
-#line 271 "getdate.y"
+#line 270 "getdate.y"
 {
 	    yyRelSeconds += yyvsp[-1].Number;
 	}
 break;
 case 34:
-#line 274 "getdate.y"
+#line 273 "getdate.y"
 {
 	    yyRelSeconds += yyvsp[-1].Number;
 	}
 break;
 case 35:
-#line 277 "getdate.y"
+#line 276 "getdate.y"
 {
 	    yyRelSeconds++;
 	}
 break;
 case 36:
-#line 280 "getdate.y"
+#line 279 "getdate.y"
 {
 	    yyRelMonth += yyvsp[-1].Number * yyvsp[0].Number;
 	}
 break;
 case 37:
-#line 283 "getdate.y"
+#line 282 "getdate.y"
 {
 	    yyRelMonth += yyvsp[-1].Number * yyvsp[0].Number;
 	}
 break;
 case 38:
-#line 286 "getdate.y"
+#line 285 "getdate.y"
 {
 	    yyRelMonth += yyvsp[0].Number;
 	}
 break;
 case 39:
-#line 291 "getdate.y"
+#line 290 "getdate.y"
 {
 	    if (yyHaveTime && yyHaveDate && !yyHaveRel)
 		yyYear = yyvsp[0].Number;
@@ -1512,18 +1511,18 @@ case 39:
 	}
 break;
 case 40:
-#line 318 "getdate.y"
+#line 317 "getdate.y"
 {
 	    yyval.Meridian = MER24;
 	}
 break;
 case 41:
-#line 321 "getdate.y"
+#line 320 "getdate.y"
 {
 	    yyval.Meridian = yyvsp[0].Meridian;
 	}
 break;
-#line 1475 "y.tab.c"
+#line 1474 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

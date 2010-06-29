@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2008, 2010 Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 1989, 1993, 1994
  *	The Regents of the University of California.  All rights reserved.
  *
@@ -42,11 +42,10 @@
 #include <ctype.h>
 #ifdef HAVE_STRING_H
 # include <string.h>
-#else
-# ifdef HAVE_STRINGS_H
-#  include <strings.h>
-# endif
 #endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif /* HAVE_STRINGS_H */
 
 #include <compat.h>
 #include "emul/fnmatch.h"

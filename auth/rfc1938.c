@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996, 1998-2005
+ * Copyright (c) 1994-1996, 1998-2005, 2010
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -34,11 +34,10 @@
 #endif /* STDC_HEADERS */
 #ifdef HAVE_STRING_H
 # include <string.h>
-#else
-# ifdef HAVE_STRINGS_H
-#  include <strings.h>
-# endif
 #endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif /* HAVE_STRINGS_H */
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
