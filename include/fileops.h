@@ -24,6 +24,8 @@
 #define SUDO_TLOCK	2		/* test & lock a file (non-blocking) */
 #define SUDO_UNLOCK	4		/* unlock a file */
 
+struct timeval;
+
 int lock_file(int, int);
 int touch(int, char *, struct timeval *);
 char *sudo_parseln(FILE *);

@@ -216,6 +216,11 @@ int selinux_setup(const char *role, const char *type, const char *ttyn,
     int ttyfd);
 void selinux_execve(const char *path, char *argv[], char *envp[]);
 
+/* aix.c */
+void aix_prep_user(char *user, const char *tty);
+void aix_restoreauthdb(void);
+void aix_setauthdb(char *user);
+
 #ifndef errno
 extern int errno;
 #endif

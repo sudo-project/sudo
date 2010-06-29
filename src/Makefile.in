@@ -105,7 +105,6 @@ sesh: sesh.o
 
 # Dependencies
 # XXX - SUDODEP is overkill for some of these
-aix.o: $(srcdir)/aix.c $(top_builddir)/config.h $(incdir)/compat.h
 conversation.o: $(srcdir)/conversation.c $(SUDODEP)
 error.o: $(srcdir)/error.c $(incdir)/compat.h $(incdir)/error.h $(top_builddir)/config.h
 exec.o: $(srcdir)/exec.c $(SUDODEP) $(srcdir)/sudo_exec.h

@@ -403,6 +403,9 @@
 /* Define to 1 to enable SELinux RBAC support. */
 #undef HAVE_SELINUX
 
+/* Define to 1 if you have the `setauthdb' function. */
+#undef HAVE_SETAUTHDB
+
 /* Define to 1 if you have the `setenv' function. */
 #undef HAVE_SETENV
 

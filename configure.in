@@ -20,6 +20,7 @@ AC_SUBST([PROGS])
 AC_SUBST([CPPFLAGS])
 AC_SUBST([LDFLAGS])
 AC_SUBST([SUDOERS_LDFLAGS])
+AC_SUBST([COMMON_OBJS])
 AC_SUBST([SUDOERS_OBJS])
 AC_SUBST([SUDO_OBJS])
 AC_SUBST([LIBS])
@@ -1502,8 +1503,8 @@ case "$host" in
 		fi
 
 		# AIX-specific functions
-		AC_CHECK_FUNCS(getuserattr)
-		SUDO_OBJS="$SUDO_OBJS aix.o"
+		AC_CHECK_FUNCS(getuserattr setauthdb)
+		COMMON_OBJS="$COMMON_OBJS aix.lo"
 		;;
     *-*-hiuxmpp*)
 		: ${mansectsu='1m'}
@@ -2800,7 +2801,6 @@ AH_TEMPLATE(SUDOERS_PLUGIN, [The name of the sudoers plugin, including extension
 AH_TEMPLATE(DONT_LEAK_PATH_INFO, [Define to 1 if you want sudo to display "command not allowed" instead of "command not found" when a command cannot be found.])
 AH_TEMPLATE(ENV_DEBUG, [Define to 1 to enable environment function debugging.])
 AH_TEMPLATE(ENV_EDITOR, [Define to 1 if you want visudo to honor the EDITOR and VISUAL env variables.])
-AH_TEMPLATE(ENV_DEBUG, [Whether to enable environment debugging.])
 AH_TEMPLATE(FQDN, [Define to 1 if you want to require fully qualified hosts in sudoers.])
 AH_TEMPLATE(GOONS_INSULTS, [Define to 1 if you want insults from the "Goon Show".])
 AH_TEMPLATE(HAL_INSULTS, [Define to 1 if you want 2001-like insults.])
@@ -2848,7 +2848,6 @@ AH_TEMPLATE(HAVE_SKEYACCESS, [Define to 1 if your S/Key library has skeyaccess()
 AH_TEMPLATE(HAVE_ST__TIM, [Define to 1 if your struct stat uses an st__tim union])
 AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member])
 AH_TEMPLATE(HAVE_ST_MTIMESPEC, [Define to 1 if your struct stat has an st_mtimespec member])
-AH_TEMPLATE(HAVE_TERMIOS_H, [Define to 1 if you have the <termios.h> header file and the `tcgetattr' function.])
 AH_TEMPLATE(HAVE_TIMESPEC, [Define to 1 if you have struct timespec in sys/time.h])
 AH_TEMPLATE(HAVE___PROGNAME, [Define to 1 if your crt0.o defines the __progname symbol for you.])
 AH_TEMPLATE(HOST_IN_LOG, [Define to 1 if you want the hostname to be entered into the log file.])

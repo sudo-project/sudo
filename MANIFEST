@@ -8,6 +8,7 @@ README.LDAP
 WHATSNEW
 aclocal.m4
 common/Makefile.in
+common/aix.c
 common/alloc.c
 common/atobool.c
 common/fileops.c
@@ -177,7 +178,6 @@ plugins/sudoers/tsgetgrpw.c
 plugins/sudoers/vasgroups.c
 plugins/sudoers/visudo.c
 src/Makefile.in
-src/aix.c
 src/conversation.c
 src/error.c
 src/exec.c

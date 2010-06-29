@@ -34,11 +34,10 @@
 #endif /* STDC_HEADERS */
 #ifdef HAVE_STRING_H
 # include <string.h>
-#else
-# ifdef HAVE_STRINGS_H
-#  include <strings.h>
-# endif
 #endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif /* HAVE_STRINGS_H */
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
@@ -942,18 +941,24 @@ runas_setgroups()
      */
     if (runas_ngroups == -1) {
 	pw = runas_pw ? runas_pw : sudo_user.pw;
+# ifdef HAVE_SETAUTHDB
+	aix_setauthdb(pw->pw_name);
+# endif
 	if (initgroups(pw->pw_name, pw->pw_gid) < 0)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't set runas group vector");
-#ifdef HAVE_GETGROUPS
+# ifdef HAVE_GETGROUPS
 	if ((runas_ngroups = getgroups(0, NULL)) > 0) {
 	    runas_groups = emalloc2(runas_ngroups, sizeof(GETGROUPS_T));
 	    if (getgroups(runas_ngroups, runas_groups) < 0)
 		log_error(USE_ERRNO|MSG_ONLY, "can't get runas group vector");
 	}
+#  ifdef HAVE_SETAUTHDB
+	aix_restoreauthdb();
+#  endif
     } else {
 	if (setgroups(runas_ngroups, runas_groups) < 0)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't set runas group vector");
-#endif /* HAVE_GETGROUPS */
+# endif /* HAVE_GETGROUPS */
     }
 }
 

@@ -46,11 +46,10 @@
 #  include <memory.h>
 # endif
 # include <string.h>
-#else
-# ifdef HAVE_STRINGS_H
-#  include <strings.h>
-# endif
 #endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif /* HAVE_STRINGS_H */
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
@@ -72,6 +71,9 @@
 #ifdef HAVE_SELINUX
 # include <selinux/selinux.h>
 #endif
+#ifdef HAVE_SETAUTHDB
+# include <usersec.h>
+#endif /* HAVE_SETAUTHDB */
 
 #include "sudo.h"
 #include "sudo_plugin.h"
@@ -645,7 +647,13 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     int rval = FALSE;
     struct passwd *pw;
 
+#ifdef HAVE_SETAUTHDB
+    aix_setauthdb(IDtouser(details->euid));
+#endif
     pw = getpwuid(details->euid);
+#ifdef HAVE_SETAUTHDB
+    aix_restoreauthdb();
+#endif
 
     /* Call policy plugin's session init before other setup occurs. */
     if (policy_plugin.u.policy->init_session) {
@@ -664,7 +672,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 
     if (pw != NULL) {
 #ifdef HAVE_GETUSERATTR
-	aix_setlimits(pw->pw_name);
+	aix_prep_user(pw->pw_name, ptyname ? ptyname : user_details.tty);
 #endif
 #ifdef HAVE_LOGIN_CAP_H
 	if (details->login_class) {

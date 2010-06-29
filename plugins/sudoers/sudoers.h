@@ -295,6 +295,10 @@ void cleanup(int);
 void set_fqdn(void);
 FILE *open_sudoers(const char *, int, int *);
 
+/* aix.c */
+void aix_restoreauthdb(void);
+void aix_setauthdb(char *user);
+
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;
 extern struct passwd *auth_pw, *list_pw;

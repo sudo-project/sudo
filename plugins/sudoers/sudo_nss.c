@@ -29,11 +29,10 @@
 #endif /* STDC_HEADERS */
 #ifdef HAVE_STRING_H
 # include <string.h>
-#else
-# ifdef HAVE_STRINGS_H
-#  include <strings.h>
-# endif
 #endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif /* HAVE_STRINGS_H */
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
@@ -211,6 +210,9 @@ reset_groups(struct passwd *pw)
 {
 #if defined(HAVE_INITGROUPS) && defined(HAVE_GETGROUPS)
     if (pw != sudo_user.pw) {
+# ifdef HAVE_SETAUTHDB
+	aix_setauthdb(pw->pw_name);
+# endif
 	(void) initgroups(pw->pw_name, pw->pw_gid);
 	efree(user_groups);
 	user_groups = NULL;
@@ -219,6 +221,9 @@ reset_groups(struct passwd *pw)
 	    if (getgroups(user_ngroups, user_groups) < 0)
 		log_error(USE_ERRNO|MSG_ONLY, "can't get group vector");
 	}
+# ifdef HAVE_SETAUTHDB
+	aix_restoreauthdb();
+# endif
     }
 #endif
 }
