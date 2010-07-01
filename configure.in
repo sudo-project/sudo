@@ -63,6 +63,7 @@ AC_SUBST([CONFIGURE_ARGS])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
+AC_SUBST([io_logdir])dnl real initial value from SUDO_IO_LOGDIR
 AC_SUBST([timedir])dnl real initial value from SUDO_TIMEDIR
 AC_SUBST([timeout])
 AC_SUBST([password_timeout])
@@ -97,6 +98,7 @@ AC_SUBST([secure_path])
 #
 # Begin initial values for man page substitution
 #
+io_logdir=/var/log/sudo-io
 timedir=/var/run/sudo
 timeout=5
 password_timeout=5
