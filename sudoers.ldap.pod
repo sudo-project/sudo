@@ -23,7 +23,7 @@ sudoers.ldap - sudo LDAP configuration
 =head1 DESCRIPTION
 
 In addition to the standard I<sudoers> file, B<sudo> may be configured
-via LAP.  This can be especially useful for synchronizing I<sudoers>
+via LDAP.  This can be especially useful for synchronizing I<sudoers>
 in a large, distributed environment.
 
 Using LDAP for I<sudoers> has several benefits:
