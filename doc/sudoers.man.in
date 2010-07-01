@@ -148,15 +148,111 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "June 11, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "July  1, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
 .nh
 .SH "NAME"
-sudoers \- list of which users may execute what
+sudoers \- default sudo security policy module
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
+The \fIsudoers\fR policy module determines a user's \fBsudo\fR privileges.
+It is the default \fBsudo\fR policy plugin.  The policy is driven by
+the \fI@sysconfdir@/sudoers\fR file or, optionally in \s-1LDAP\s0.  The policy
+format is described in detail in the \*(L"\s-1SUDOERS\s0 \s-1FILE\s0 \s-1FORMAT\s0\*(R"
+section.  For information on storing \fIsudoers\fR policy information
+in \s-1LDAP\s0, please see \fIsudoers.ldap\fR\|(@mansectform@).
+.SS "Authentication and Logging"
+.IX Subsection "Authentication and Logging"
+The \fIsudoers\fR security policy requires that most users authenticate
+themselves before they can use \fBsudo\fR.  A password is not required
+if the invoking user is root, if the target user is the same as the
+invoking user, or if the policy has disabled authentication for the
+user or command.  Unlike \fIsu\fR\|(1), when \fIsudoers\fR requires
+authentication, it validates the invoking user's credentials, not
+the target user's (or root's) credentials.  This can be changed via
+the \fIrootpw\fR, \fItargetpw\fR and \fIrunaspw\fR flags, described later.
+.PP
+If a user who is not listed in the policy tries to run a command
+via \fBsudo\fR, mail is sent to the proper authorities.  The address
+used for such mail is configurable via the \fImailto\fR Defaults entry
+(described later) and defaults to \f(CW\*(C`@mailto@\*(C'\fR.
+.PP
+Note that mail will not be sent if an unauthorized user tries to
+run \fBsudo\fR with the \fB\-l\fR or \fB\-v\fR option.  This allows users to
+determine for themselves whether or not they are allowed to use
+\&\fBsudo\fR.
+.PP
+If \fBsudo\fR is run by root and the \f(CW\*(C`SUDO_USER\*(C'\fR environment variable
+is set, the \fIsudoers\fR policy will use this value to determine who
+the actual user is.  This can be used by a user to log commands 
+through sudo even when a root shell has been invoked.  It also
+allows the \fB\-e\fR option to remain useful even when invoked via a
+sudo-run script or program.  Note, however, that the \fIsudoers\fR
+lookup is still done for root, not the user specified by \f(CW\*(C`SUDO_USER\*(C'\fR.
+.PP
+\&\fIsudoers\fR uses time stamp files for credential caching.  Once a
+user has been authenticated, a time stamp is updated and the user
+may then use sudo without a password for a short period of time
+(\f(CW\*(C`@timeout@\*(C'\fR minutes unless overridden by the \fItimeout\fR option.
+By default, \fIsudoers\fR uses a per-user time stamp which means the
+time stamp is shared across all of a user's login sessions.  The
+\&\fItty_tickets\fR option can be used to enable per-tty time stamps
+instead.
+.PP
+\&\fIsudoers\fR can log both successful and unsuccessful attempts (as well
+as errors) to \fIsyslog\fR\|(3), a log file, or both.  By default, \fIsudoers\fR
+will log via \fIsyslog\fR\|(3) but this is changeable via the \fIsyslog\fR
+and \fIlogfile\fR Defaults settings.
+.PP
+\&\fIsudoers\fR also supports logging a command's input and output
+streams.  I/O logging is not on by default but can be enabled using
+the \fIlog_input\fR and \fIlog_output\fR Defaults flags as well as the
+\&\f(CW\*(C`LOG_INPUT\*(C'\fR and \f(CW\*(C`LOG_OUTPUT\*(C'\fR command tags.
+.SS "Command Environment"
+.IX Subsection "Command Environment"
+Since environment variables can influence program behavior, \fIsudoers\fR
+provides a means to restrict which variables from the user's
+environment are inherited by the command to be run.  There are two
+distinct ways \fIsudoers\fR can deal with environment variables.
+.PP
+By default, the \fIenv_reset\fR option is enabled.  This causes commands
+to be executed with a minimal environment containing \f(CW\*(C`TERM\*(C'\fR,
+\&\f(CW\*(C`PATH\*(C'\fR, \f(CW\*(C`HOME\*(C'\fR, \f(CW\*(C`SHELL\*(C'\fR, \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR and \f(CW\*(C`USERNAME\*(C'\fR in
+addition to variables from the invoking process permitted by the
+\&\fIenv_check\fR and \fIenv_keep\fR options.  This is effectively a whitelist
+for environment variables.
+.PP
+If, however, the \fIenv_reset\fR option is disabled, any variables not
+explicitly denied by the \fIenv_check\fR and \fIenv_delete\fR options are
+inherited from the invoking process.  In this case, \fIenv_check\fR
+and \fIenv_delete\fR behave like a blacklist.  Since it is not possible
+to blacklist all potentially dangerous environment variables, use
+of the default \fIenv_reset\fR behavior is encouraged.
+.PP
+In all cases, environment variables with a value beginning with
+\&\f(CW\*(C`()\*(C'\fR are removed as they could be interpreted as \fBbash\fR functions.
+The list of environment variables that \fBsudo\fR allows or denies is
+contained in the output of \f(CW\*(C`sudo \-V\*(C'\fR when run as root.
+.PP
+Note that the dynamic linker on most operating systems will remove
+variables that can control dynamic linking from the environment of
+setuid executables, including \fBsudo\fR.  Depending on the operating
+system this may include \f(CW\*(C`_RLD*\*(C'\fR, \f(CW\*(C`DYLD_*\*(C'\fR, \f(CW\*(C`LD_*\*(C'\fR, \f(CW\*(C`LDR_*\*(C'\fR,
+\&\f(CW\*(C`LIBPATH\*(C'\fR, \f(CW\*(C`SHLIB_PATH\*(C'\fR, and others.  These type of variables are
+removed from the environment before \fBsudo\fR even begins execution
+and, as such, it is not possible for \fBsudo\fR to preserve them.
+.PP
+As a special case, If \fBsudo\fR's \fB\-i\fR option (initial login) is
+specified, \fIsudoers\fR will initialize the environment regardless
+of the value of \fIenv_reset\fR.  The \fI\s-1DISPLAY\s0\fR, \fI\s-1PATH\s0\fR and \fI\s-1TERM\s0\fR
+variables remain unchanged; \fI\s-1HOME\s0\fR, \fI\s-1SHELL\s0\fR, \fI\s-1USER\s0\fR, and \fI\s-1LOGNAME\s0\fR
+are set based on the target user.  On Linux and \s-1AIX\s0 systems the
+contents of \fI/etc/environment\fR are also included.  All other
+environment variables are removed.
+.SH "SUDOERS FILE FORMAT"
+.IX Header "SUDOERS FILE FORMAT"
 The \fIsudoers\fR file is composed of two types of entries: aliases
 (basically variables) and user specifications (which specify who
 may run what).
@@ -558,13 +654,14 @@ on how \f(CW\*(C`NOEXEC\*(C'\fR works and whether or not it will work on your sy
 .IX Subsection "SETENV and NOSETENV"
 .PP
 These tags override the value of the \fIsetenv\fR option on a per-command
-basis.  Note that if \f(CW\*(C`SETENV\*(C'\fR has been set for a command, any
-environment variables set on the command line way are not subject
-to the restrictions imposed by \fIenv_check\fR, \fIenv_delete\fR, or
-\&\fIenv_keep\fR.  As such, only trusted users should be allowed to set
-variables in this manner.  If the command matched is \fB\s-1ALL\s0\fR, the
-\&\f(CW\*(C`SETENV\*(C'\fR tag is implied for that command; this default may
-be overridden by use of the \f(CW\*(C`UNSETENV\*(C'\fR tag.
+basis.  Note that if \f(CW\*(C`SETENV\*(C'\fR has been set for a command, the user
+maydisable the \fIenv_reset\fR option from the command line via the
+\&\fB\-E\fR option.  Additionally, environment variables set on the command
+line are not subject to the restrictions imposed by \fIenv_check\fR,
+\&\fIenv_delete\fR, or \fIenv_keep\fR.  As such, only trusted users should
+be allowed to set variables in this manner.  If the command matched
+is \fB\s-1ALL\s0\fR, the \f(CW\*(C`SETENV\*(C'\fR tag is implied for that command; this
+default may be overridden by use of the \f(CW\*(C`UNSETENV\*(C'\fR tag.
 .PP
 \fI\s-1LOG_INPUT\s0 and \s-1NOLOG_INPUT\s0\fR
 .IX Subsection "LOG_INPUT and NOLOG_INPUT"
@@ -942,11 +1039,11 @@ entries in the \fIenv_keep\fR list will override the value of
 .IP "setenv" 16
 .IX Item "setenv"
 Allow the user to disable the \fIenv_reset\fR option from the command
-line.  Additionally, environment variables set via the command line
-are not subject to the restrictions imposed by \fIenv_check\fR,
-\&\fIenv_delete\fR, or \fIenv_keep\fR.  As such, only trusted users should
-be allowed to set variables in this manner.  This flag is \fIoff\fR
-by default.
+line via the \fB\-E\fR option.  Additionally, environment variables set
+via the command line are not subject to the restrictions imposed
+by \fIenv_check\fR, \fIenv_delete\fR, or \fIenv_keep\fR.  As such, only
+trusted users should be allowed to set variables in this manner.
+This flag is \fIoff\fR by default.
 .IP "shell_noargs" 16
 .IX Item "shell_noargs"
 If set and \fBsudo\fR is invoked with no arguments it acts as if the
@@ -1382,9 +1479,17 @@ Local groups file
 .IP "\fI/etc/netgroup\fR" 24
 .IX Item "/etc/netgroup"
 List of network groups
-.IP "\fI/var/log/sudo\-io\fR" 24
-.IX Item "/var/log/sudo-io"
+.ie n .IP "\fI@io_logdir@\fR" 24
+.el .IP "\fI@io_logdir@\fR" 24
+.IX Item "@io_logdir@"
 I/O log files
+.ie n .IP "\fI@timedir@\fR" 24
+.el .IP "\fI@timedir@\fR" 24
+.IX Item "@timedir@"
+Directory containing time stamps for the \fIsudoers\fR security policy
+.IP "\fI/etc/environment\fR" 24
+.IX Item "/etc/environment"
+Initial environment for \fB\-i\fR mode on Linux and \s-1AIX\s0
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 Below are example \fIsudoers\fR entries.  Admittedly, some of
@@ -1710,9 +1815,55 @@ operations (such as changing or overwriting files) that could lead
 to unintended privilege escalation.  In the specific case of an
 editor, a safer approach is to give the user permission to run
 \&\fBsudoedit\fR.
+.SH "SECURITY NOTES"
+.IX Header "SECURITY NOTES"
+\&\fIsudoers\fR will check the ownership of its time stamp directory
+(\fI@timedir@\fR by default) and ignore the directory's contents if
+it is not owned by root or if it is writable by a user other than
+root.  On systems that allow non-root users to give away files via
+\&\fIchown\fR\|(2), if the time stamp directory is located in a world-writable
+directory (e.g., \fI/tmp\fR), it is possible for a user to create the
+time stamp directory before \fBsudo\fR is run.  However, because
+\&\fIsudoers\fR checks the ownership and mode of the directory and its
+contents, the only damage that can be done is to \*(L"hide\*(R" files by
+putting them in the time stamp dir.  This is unlikely to happen
+since once the time stamp dir is owned by root and inaccessible by
+any other user, the user placing files there would be unable to get
+them back out.
+.PP
+\&\fIsudoers\fR will not honor time stamps set far in the future.  Time
+stamps with a date greater than current_time + 2 * \f(CW\*(C`TIMEOUT\*(C'\fR will
+be ignored and sudo will log and complain.  This is done to keep a
+user from creating his/her own time stamp with a bogus date on
+systems that allow users to give away files if the time stamp directory
+is located in a world-writable directory.
+.PP
+On systems where the boot time is available, \fIsudoers\fR will ignore
+time stamps that date from before the machine booted.
+.PP
+Since time stamp files live in the file system, they can outlive a
+user's login session.  As a result, a user may be able to login,
+run a command with \fBsudo\fR after authenticating, logout, login
+again, and run \fBsudo\fR without authenticating so long as the time
+stamp file's modification time is within \f(CW\*(C`@timeout@\*(C'\fR minutes (or
+whatever the timeout is set to in \fIsudoers\fR).  When the \fItty_tickets\fR
+option is enabled, the time stamp has per-tty granularity but still
+may outlive the user's session.  On Linux systems where the devpts
+filesystem is used, Solaris systems with the devices filesystem,
+as well as other systems that utilize a devfs filesystem that
+monotonically increase the inode number of devices as they are
+created (such as Mac \s-1OS\s0 X), \fIsudoers\fR is able to determine when a
+tty-based time stamp file is stale and will ignore it.  Administrators
+should not rely on this feature as it is not universally available.
+.PP
+If users have sudo \f(CW\*(C`ALL\*(C'\fR there is nothing to prevent them from
+creating their own program that gives them a root shell (or making
+their own copy of a shell) regardless of any '!' elements in the
+user specification.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), \fIglob\fR\|(3), \fIsudo\fR\|(@mansectsu@), \fIvisudo\fR\|(@mansectsu@)
+\&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), \fIglob\fR\|(3), \fIsudoers.ldap\fR\|(@mansectform@),
+\&\fIsudo\fR\|(@mansectsu@), \fIvisudo\fR\|(@mansectsu@)
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 The \fIsudoers\fR file should \fBalways\fR be edited by the \fBvisudo\fR
