@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "July  1, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "July  2, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -361,7 +361,7 @@ characters.  Alternately, special characters may be specified in
 escaped hex mode, e.g. \ex20 for space.
 .PP
 The \f(CW\*(C`nonunix_group\*(C'\fR syntax depends on the underlying implementation.
-For instance, the \s-1QAS\s0 \s-1AD\s0 backend supports the following formats:
+For instance, the \s-1QAS\s0 \s-1AD\s0 plugin supports the following formats:
 .IP "\(bu" 4
 Group in the same domain: \*(L"Group Name\*(R"
 .IP "\(bu" 4
@@ -1308,6 +1308,25 @@ as \fIenv_keep\fR and \fIenv_check\fR.
 .IX Item "exempt_group"
 Users in this group are exempt from password and \s-1PATH\s0 requirements.
 This is not set by default.
+.IP "group_plugin" 12
+.IX Item "group_plugin"
+A string containing a \fIsudoers\fR group plugin with optional arguments.
+This can be used to implement support for the \f(CW\*(C`nonunix_group\*(C'\fR
+syntax described earlier.  The string should consist of the plugin
+path, either fully-qualified or relative to the \fI@prefix@/libexec\fR
+directory, followed by any configuration arguments the plugin
+requires.  These arguments (if any) will be passed to the plugin's
+initialization function.  If arguments are present, the string must
+be enclosed in double quotes (\f(CW\*(C`"\*(C'\fR).
+.Sp
+For example, given \fI/etc/sudo\-group\fR, a group file in Unix group
+format, the sample group plugin can be used:
+.Sp
+.Vb 1
+\&    Defaults sudo_plugin="sample_group.so /etc/sudo\-group"
+.Ve
+.Sp
+For more information see \fIsudo_plugin\fR\|(@mansectform@).
 .IP "lecture" 12
 .IX Item "lecture"
 This option controls when a short lecture will be printed along with
@@ -1863,7 +1882,7 @@ user specification.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), \fIglob\fR\|(3), \fIsudoers.ldap\fR\|(@mansectform@),
-\&\fIsudo\fR\|(@mansectsu@), \fIvisudo\fR\|(@mansectsu@)
+\&\fIsudo_plugin\fR\|(@mansectform@), \fIsudo\fR\|(@mansectsu@), \fIvisudo\fR\|(@mansectsu@)
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 The \fIsudoers\fR file should \fBalways\fR be edited by the \fBvisudo\fR

@@ -229,7 +229,7 @@ characters.  Alternately, special characters may be specified in
 escaped hex mode, e.g. \x20 for space.
 
 The C<nonunix_group> syntax depends on the underlying implementation.
-For instance, the QAS AD backend supports the following formats:
+For instance, the QAS AD plugin supports the following formats:
 
 =over 4
 
@@ -1242,6 +1242,24 @@ as I<env_keep> and I<env_check>.
 Users in this group are exempt from password and PATH requirements.
 This is not set by default.
 
+=item group_plugin
+
+A string containing a I<sudoers> group plugin with optional arguments.
+This can be used to implement support for the C<nonunix_group>
+syntax described earlier.  The string should consist of the plugin
+path, either fully-qualified or relative to the F<@prefix@/libexec>
+directory, followed by any configuration arguments the plugin
+requires.  These arguments (if any) will be passed to the plugin's
+initialization function.  If arguments are present, the string must
+be enclosed in double quotes (C<">).
+
+For example, given F</etc/sudo-group>, a group file in Unix group
+format, the sample group plugin can be used:
+
+    Defaults sudo_plugin="sample_group.so /etc/sudo-group"
+
+For more information see L<sudo_plugin(5)>.
+
 =item lecture
 
 This option controls when a short lecture will be printed along with
@@ -1793,7 +1811,7 @@ user specification.
 =head1 SEE ALSO
 
 L<rsh(1)>, L<su(1)>, L<fnmatch(3)>, L<glob(3)>, L<sudoers.ldap(5)>,
-L<sudo(8)>, L<visudo(8)>
+L<sudo_plugin(5)>, L<sudo(8)>, L<visudo(8)>
 
 =head1 CAVEATS
 

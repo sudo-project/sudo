@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0b1                   July  1, 2010                         1
+1.8.0b1                   July  2, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
 
 
-1.8.0b1                   July  1, 2010                         2
+1.8.0b1                   July  2, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  1, 2010                         3
+1.8.0b1                   July  2, 2010                         3
 
 
 
@@ -226,7 +226,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        space.
 
        The nonunix_group syntax depends on the underlying implementation.  For
-       instance, the QAS AD backend supports the following formats:
+       instance, the QAS AD plugin supports the following formats:
 
        +o   Group in the same domain: "Group Name"
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  1, 2010                         4
+1.8.0b1                   July  2, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  1, 2010                         5
+1.8.0b1                   July  2, 2010                         5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  1, 2010                         6
+1.8.0b1                   July  2, 2010                         6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  1, 2010                         7
+1.8.0b1                   July  2, 2010                         7
 
 
 
@@ -523,7 +523,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  1, 2010                         8
+1.8.0b1                   July  2, 2010                         8
 
 
 
@@ -589,7 +589,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  1, 2010                         9
+1.8.0b1                   July  2, 2010                         9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  1, 2010                        10
+1.8.0b1                   July  2, 2010                        10
 
 
 
@@ -721,7 +721,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
 
 
-1.8.0b1                   July  1, 2010                        11
+1.8.0b1                   July  2, 2010                        11
 
 
 
@@ -787,7 +787,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  1, 2010                        12
+1.8.0b1                   July  2, 2010                        12
 
 
 
@@ -853,7 +853,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  1, 2010                        13
+1.8.0b1                   July  2, 2010                        13
 
 
 
@@ -919,7 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  1, 2010                        14
+1.8.0b1                   July  2, 2010                        14
 
 
 
@@ -985,7 +985,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  1, 2010                        15
+1.8.0b1                   July  2, 2010                        15
 
 
 
@@ -1051,7 +1051,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  1, 2010                        16
+1.8.0b1                   July  2, 2010                        16
 
 
 
@@ -1117,7 +1117,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  1, 2010                        17
+1.8.0b1                   July  2, 2010                        17
 
 
 
@@ -1183,7 +1183,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  1, 2010                        18
+1.8.0b1                   July  2, 2010                        18
 
 
 
@@ -1249,7 +1249,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  1, 2010                        19
+1.8.0b1                   July  2, 2010                        19
 
 
 
@@ -1275,6 +1275,24 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    Users in this group are exempt from password and PATH
                    requirements.  This is not set by default.
 
+       group_plugin
+                   A string containing a _s_u_d_o_e_r_s group plugin with optional
+                   arguments.  This can be used to implement support for the
+                   nonunix_group syntax described earlier.  The string should
+                   consist of the plugin path, either fully-qualified or
+                   relative to the _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c directory, followed by
+                   any configuration arguments the plugin requires.  These
+                   arguments (if any) will be passed to the plugin's
+                   initialization function.  If arguments are present, the
+                   string must be enclosed in double quotes (").
+
+                   For example, given _/_e_t_c_/_s_u_d_o_-_g_r_o_u_p, a group file in Unix
+                   group format, the sample group plugin can be used:
+
+                       Defaults sudo_plugin="sample_group.so /etc/sudo-group"
+
+                   For more information see _s_u_d_o___p_l_u_g_i_n(4).
+
        lecture     This option controls when a short lecture will be printed
                    along with the password prompt.  It has the following
                    possible values:
@@ -1294,6 +1312,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    will be used in place of the standard lecture if the named
                    file exists.  By default, ssuuddoo uses a built-in lecture.
 
+
+
+
+1.8.0b1                   July  2, 2010                        20
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        listpw      This option controls when a password will be required when
                    a user runs ssuuddoo with the --ll option.  It has the following
                    possible values:
@@ -1311,18 +1341,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
                    never   The user need never enter a password to use the --ll
                            option.
-
-
-
-
-1.8.0b1                   July  1, 2010                        20
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
 
                    If no value is specified, a value of _a_n_y is implied.
                    Negating the option results in a value of _n_e_v_e_r being used.
@@ -1361,6 +1379,17 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    a user runs ssuuddoo with the --vv option.  It has the following
                    possible values:
 
+
+
+1.8.0b1                   July  2, 2010                        21
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
                    all     All the user's _s_u_d_o_e_r_s entries for the current host
                            must have the NOPASSWD flag set to avoid entering a
                            password.
@@ -1378,17 +1407,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    If no value is specified, a value of _a_l_l is implied.
                    Negating the option results in a value of _n_e_v_e_r being used.
                    The default value is _a_l_l.
-
-
-
-1.8.0b1                   July  1, 2010                        21
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
 
        LLiissttss tthhaatt ccaann bbee uusseedd iinn aa bboooolleeaann ccoonntteexxtt:
 
@@ -1426,6 +1444,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        be a double-quoted, space-separated list or a single
                        value without double-quotes.  The list can be replaced,
                        added to, deleted from, or disabled by using the =, +=,
+
+
+
+1.8.0b1                   July  2, 2010                        22
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
                        -=, and ! operators respectively.  The default list of
                        variables to keep is displayed when ssuuddoo is run by root
                        with the _-_V option.
@@ -1443,18 +1473,6 @@ FFIILLEESS
        _/_e_t_c_/_g_r_o_u_p              Local groups file
 
        _/_e_t_c_/_n_e_t_g_r_o_u_p           List of network groups
-
-
-
-
-1.8.0b1                   July  1, 2010                        22
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
 
        _/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o        I/O log files
 
@@ -1492,6 +1510,18 @@ EEXXAAMMPPLLEESS
         Cmnd_Alias     DUMPS = /usr/bin/mt, /usr/sbin/dump, /usr/sbin/rdump,\
                                /usr/sbin/restore, /usr/sbin/rrestore
         Cmnd_Alias     KILL = /usr/bin/kill
+
+
+
+1.8.0b1                   July  2, 2010                        23
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
         Cmnd_Alias     PRINTING = /usr/sbin/lpc, /usr/bin/lprm
         Cmnd_Alias     SHUTDOWN = /usr/sbin/shutdown
         Cmnd_Alias     HALT = /usr/sbin/halt
@@ -1510,18 +1540,6 @@ EEXXAAMMPPLLEESS
        Additionally, on the machines in the _S_E_R_V_E_R_S Host_Alias, we keep an
        additional local log file and make sure we log the year in each log
        line since the log entries will be kept around for several years.
-
-
-
-1.8.0b1                   July  1, 2010                        23
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
        Lastly, we disable shell escapes for the commands in the PAGERS
        Cmnd_Alias (_/_u_s_r_/_b_i_n_/_m_o_r_e, _/_u_s_r_/_b_i_n_/_p_g and _/_u_s_r_/_b_i_n_/_l_e_s_s).
 
@@ -1558,6 +1576,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        The user jjaacckk may run any command on the machines in the _C_S_N_E_T_S alias
        (the networks 128.138.243.0, 128.138.204.0, and 128.138.242.0).  Of
        those networks, only 128.138.204.0 has an explicit netmask (in CIDR
+
+
+
+1.8.0b1                   July  2, 2010                        24
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        notation) indicating it is a class C network.  For the other networks
        in _C_S_N_E_T_S, the local machine's netmask will be used during matching.
 
@@ -1575,18 +1605,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        directory _/_u_s_r_/_o_p_e_r_/_b_i_n_/.
 
         joe            ALL = /usr/bin/su operator
-
-
-
-
-1.8.0b1                   July  1, 2010                        24
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
 
        The user jjooee may only _s_u(1) to operator.
 
@@ -1624,6 +1642,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
         john           ALPHA = /usr/bin/su [!-]*, !/usr/bin/su *root*
 
+
+
+
+1.8.0b1                   July  2, 2010                        25
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        On the _A_L_P_H_A machines, user jjoohhnn may su to anyone except root but he is
        not allowed to specify any options to the _s_u(1) command.
 
@@ -1642,17 +1672,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        The user sstteevvee may run any command in the directory
        /usr/local/op_commands/ but only as user operator.
-
-
-
-1.8.0b1                   July  1, 2010                        25
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
 
         matt           valkyrie = KILL
 
@@ -1689,6 +1708,18 @@ SSEECCUURRIITTYY NNOOTTEESS
 
        Furthermore, if the _f_a_s_t___g_l_o_b option is in use, it is not possible to
        reliably negate commands where the path name includes globbing (aka
+
+
+
+1.8.0b1                   July  2, 2010                        26
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        wildcard) characters.  This is because the C library's _f_n_m_a_t_c_h(3)
        function cannot resolve relative paths.  While this is typically only
        an inconvenience for rules that grant privileges, it can result in a
@@ -1708,18 +1739,6 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
        since it is not uncommon for a program to allow shell escapes, which
        lets a user bypass ssuuddoo's access control and logging.  Common programs
        that permit shell escapes include shells (obviously), editors,
-
-
-
-1.8.0b1                   July  1, 2010                        26
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
        paginators, mail and terminal programs.
 
        There are two basic approaches to this problem:
@@ -1755,6 +1774,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                  error.  Unfortunately, there is no foolproof way to know
                  whether or not _n_o_e_x_e_c will work at compile-time.  _n_o_e_x_e_c
                  should work on SunOS, Solaris, *BSD, Linux, IRIX, Tru64 UNIX,
+
+
+
+1.8.0b1                   July  2, 2010                        27
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
                  MacOS X, and HP-UX 11.x.  It is known nnoott to work on AIX and
                  UnixWare.  _n_o_e_x_e_c is expected to work on most operating
                  systems that support the LD_PRELOAD environment variable.
@@ -1773,18 +1804,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                  from executing other commands (such as a shell).  If you are
                  unsure whether or not your system is capable of supporting
                  _n_o_e_x_e_c you can always just try it out and see if it works.
-
-
-
-
-1.8.0b1                   July  1, 2010                        27
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
 
        Note that restricting shell escapes is not a panacea.  Programs running
        as root are still capable of many potentially hazardous operations
@@ -1821,6 +1840,18 @@ SSEECCUURRIITTYY NNOOTTEESS
        command with ssuuddoo after authenticating, logout, login again, and run
        ssuuddoo without authenticating so long as the time stamp file's
        modification time is within 5 minutes (or whatever the timeout is set
+
+
+
+1.8.0b1                   July  2, 2010                        28
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        to in _s_u_d_o_e_r_s).  When the _t_t_y___t_i_c_k_e_t_s option is enabled, the time stamp
        has per-tty granularity but still may outlive the user's session.  On
        Linux systems where the devpts filesystem is used, Solaris systems with
@@ -1837,20 +1868,8 @@ SSEECCUURRIITTYY NNOOTTEESS
        specification.
 
 SSEEEE AALLSSOO
-       _r_s_h(1), _s_u(1), _f_n_m_a_t_c_h(3), _g_l_o_b(3), _s_u_d_o_e_r_s_._l_d_a_p(4), _s_u_d_o(1m),
-       _v_i_s_u_d_o(1m)
-
-
-
-
-1.8.0b1                   July  1, 2010                        28
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
+       _r_s_h(1), _s_u(1), _f_n_m_a_t_c_h(3), _g_l_o_b(3), _s_u_d_o_e_r_s_._l_d_a_p(4), _s_u_d_o___p_l_u_g_i_n(4),
+       _s_u_d_o(1m), _v_i_s_u_d_o(1m)
 
 CCAAVVEEAATTSS
        The _s_u_d_o_e_r_s file should aallwwaayyss be edited by the vviissuuddoo command which
@@ -1890,25 +1909,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.8.0b1                   July  1, 2010                        29
+1.8.0b1                   July  2, 2010                        29
 
 
