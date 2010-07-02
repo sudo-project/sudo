@@ -157,7 +157,7 @@ sudo_load_plugins(const char *conf_file,
 	    errorx(1, "%s must be only be writable by owner", path);
 
 	/* Open plugin and map in symbol */
-	handle = dlopen(path, RTLD_NOW);
+	handle = dlopen(path, RTLD_LAZY);
 	if (!handle)
 	    errorx(1, "unable to dlopen %s: %s", path, dlerror());
 	plugin = dlsym(handle, info->symbol_name);

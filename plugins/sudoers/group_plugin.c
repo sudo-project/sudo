@@ -99,7 +99,7 @@ group_plugin_load(char *plugin_info)
     }
 
     /* Open plugin and map in symbol. */
-    group_handle = dlopen(path, RTLD_NOW);
+    group_handle = dlopen(path, RTLD_LAZY);
     if (!group_handle) {
 	warningx("unable to dlopen %s: %s", path, dlerror());
 	return -1;
