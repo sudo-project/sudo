@@ -61,7 +61,7 @@ SSuuddoo PPlluuggiinn AAPPII
 
 
 
-1.8.0b1                   June 11, 2010                         1
+1.8.0b1                   July  2, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b1                   June 11, 2010                         2
+1.8.0b1                   July  2, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b1                   June 11, 2010                         3
+1.8.0b1                   July  2, 2010                         3
 
 
 
@@ -259,7 +259,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b1                   June 11, 2010                         4
+1.8.0b1                   July  2, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b1                   June 11, 2010                         5
+1.8.0b1                   July  2, 2010                         5
 
 
 
@@ -391,7 +391,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b1                   June 11, 2010                         6
+1.8.0b1                   July  2, 2010                         6
 
 
 
@@ -457,7 +457,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b1                   June 11, 2010                         7
+1.8.0b1                   July  2, 2010                         7
 
 
 
@@ -523,7 +523,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b1                   June 11, 2010                         8
+1.8.0b1                   July  2, 2010                         8
 
 
 
@@ -589,7 +589,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b1                   June 11, 2010                         9
+1.8.0b1                   July  2, 2010                         9
 
 
 
@@ -630,32 +630,32 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            function with SUDO_CONF_ERROR_MSG to present additional error
            information to the user.
 
-       _C_o_n_v_e_r_s_a_t_i_o_n _A_P_I
+       _V_e_r_s_i_o_n _m_a_c_r_o_s
 
-       If the plugin needs to interact with the user, it may do so via the
-       conversation function.  A plugin should not attempt to read directly
-       from the standard input or the user's tty (neither of which are
-       guaranteed to exist).  The caller must include a trailing newline in
-       msg if one is to be printed.
+        #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
+        #define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
+        #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \
+            *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
+        } while(0)
+        #define SUDO_VERSION_SET_MINOR(vp, n) do { \
+            *(vp) = (*(vp) & 0xffff0000) | (n); \
+        } while(0)
 
-       A printf-style function is also available that can be used to display
-       informational or error messages to the user, which is usually more
-       convenient for simple messages where no use input is required.
+        #define SUDO_API_VERSION_MAJOR 1
+        #define SUDO_API_VERSION_MINOR 0
+        #define SUDO_API_VERSION ((SUDO_API_VERSION_MAJOR << 16) | \
+                                  SUDO_API_VERSION_MINOR)
 
-        struct sudo_conv_message {
-        #define SUDO_CONV_PROMPT_ECHO_OFF      1 /* do not echo user input */
-        #define SUDO_CONV_PROMPT_ECHO_ON       2 /* echo user input */
-        #define SUDO_CONV_ERROR_MSG            3 /* error message */
-        #define SUDO_CONV_INFO_MSG             4 /* informational message */
-        #define SUDO_CONV_PROMPT_MASK          5 /* mask user input */
-            int msg_type;
-            int timeout;
-            const char *msg;
-        };
+   II//OO PPlluuggiinn AAPPII
 
 
 
-1.8.0b1                   June 11, 2010                        10
+
+
+
+
+
+1.8.0b1                   July  2, 2010                        10
 
 
 
@@ -664,36 +664,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
-
-        struct sudo_conv_reply {
-            char *reply;
-        };
-
-        typedef int (*sudo_conv_t)(int num_msgs,
-                     const struct sudo_conv_message msgs[],
-                     struct sudo_conv_reply replies[]);
-
-        typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
-
-       Pointers to the conversation and printf-style functions are passed in
-       to the plugin's open function when the plugin is initialized.
-
-       To use the conversation function, the plugin must pass an array of
-       sudo_conv_message and sudo_conv_reply structures.  There must be a
-       struct sudo_conv_message and struct sudo_conv_reply for each message in
-       the conversation.  The plugin is responsible for freeing the reply
-       buffer filled in to the struct sudo_conv_reply, if any.
-
-       The printf-style function uses the same underlying mechanism as the
-       conversation function but only supports SUDO_CONV_INFO_MSG and
-       SUDO_CONV_ERROR_MSG for the _m_s_g___t_y_p_e parameter.  It can be more
-       convenient than using the conversation function if no user reply is
-       needed and supports standard _p_r_i_n_t_f_(_) escape sequences.
-
-       See the sample plugin for an example of the conversation function
-       usage.
-
-   II//OO PPlluuggiinn AAPPII
         struct io_plugin {
         #define SUDO_IO_PLUGIN         2
             unsigned int type; /* always SUDO_IO_PLUGIN */
@@ -718,18 +688,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
        I/O for logging before passing it on.
 
        The log_ttyin function receives the raw user input from the terminal
-
-
-
-1.8.0b1                   June 11, 2010                        11
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
        device (note that this will include input even when echo is disabled,
        such as when a password is read). The log_ttyout function receives
        output from the pseudo-tty that is suitable for replaying the user's
@@ -760,6 +718,18 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
            The _o_p_e_n function is run before the _l_o_g___i_n_p_u_t, _l_o_g___o_u_t_p_u_t or
            _s_h_o_w___v_e_r_s_i_o_n functions are called.  It is only called if the
+
+
+
+1.8.0b1                   July  2, 2010                        11
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
            version is being requested or the _c_h_e_c_k___p_o_l_i_c_y function has
            returned successfully.  It returns 1 on success, 0 on failure, -1
            if a general error occurred, or -2 if there was a usage error.  In
@@ -784,18 +754,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            plugin_printf
                A pointer to a printf-style function that may be used by the
                _s_h_o_w___v_e_r_s_i_o_n function to display version information (see
-
-
-
-1.8.0b1                   June 11, 2010                        12
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
                show_version below).  The plugin_printf function may also be
                used to display additional error message to the user.
 
@@ -825,6 +783,19 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                See the "Policy Plugin API" section for a list of all possible
                strings.
 
+
+
+
+
+1.8.0b1                   July  2, 2010                        12
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
            argc
                The number of elements in _a_r_g_v, not counting the final NULL
                pointer.
@@ -849,18 +820,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            finishes.
 
            The function arguments are as follows:
-
-
-
-
-1.8.0b1                   June 11, 2010                        13
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
 
            exit_status
                The command's exit status, as returned by the _w_a_i_t(2) system
@@ -891,6 +850,18 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            passed to the command, 0 if the data is rejected (which will
            terminate the command) or -1 if an error occurred.
 
+
+
+
+1.8.0b1                   July  2, 2010                        13
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
            The function arguments are as follows:
 
            buf The buffer containing user input.
@@ -915,18 +886,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
        log_stdin
             int (*log_stdin)(const char *buf, unsigned int len);
-
-
-
-
-1.8.0b1                   June 11, 2010                        14
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
 
            The _l_o_g___s_t_d_i_n function is only used if the standard input does not
            correspond to a tty device.  It is called whenever data can be read
@@ -957,6 +916,18 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
            buf The buffer containing command output.
 
+
+
+
+1.8.0b1                   July  2, 2010                        14
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
            len The length of _b_u_f in bytes.
 
        log_stderr
@@ -976,16 +947,45 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
            len The length of _b_u_f in bytes.
 
-   UUnnssuuppppoorrtteedd ccoommmmaanndd lliinnee ooppttiioonnss
-       The -L command line option has been deprecated as its output is covered
-       by the _s_u_d_o_e_r_s manual page.
+       _V_e_r_s_i_o_n _m_a_c_r_o_s
 
-   SSuuddoo iimmpplleemmeennttaattiioonn ddeettaaiillss
-       Version macros:
+       Same as for the "Policy Plugin API".
+
+   CCoonnvveerrssaattiioonn AAPPII
+       If the plugin needs to interact with the user, it may do so via the
+       conversation function.  A plugin should not attempt to read directly
+       from the standard input or the user's tty (neither of which are
+       guaranteed to exist).  The caller must include a trailing newline in
+       msg if one is to be printed.
+
+       A printf-style function is also available that can be used to display
+       informational or error messages to the user, which is usually more
+       convenient for simple messages where no use input is required.
+
+        struct sudo_conv_message {
+        #define SUDO_CONV_PROMPT_ECHO_OFF  0x0001 /* do not echo user input */
+        #define SUDO_CONV_PROMPT_ECHO_ON   0x0002 /* echo user input */
+        #define SUDO_CONV_ERROR_MSG        0x0003 /* error message */
+        #define SUDO_CONV_INFO_MSG         0x0004 /* informational message */
+        #define SUDO_CONV_PROMPT_MASK      0x0005 /* mask user input */
+        #define SUDO_CONV_PROMPT_ECHO_OK   0x1000 /* flag: allow echo if no tty */
+            int msg_type;
+            int timeout;
+            const char *msg;
+        };
+
+        struct sudo_conv_reply {
+            char *reply;
+        };
+
+        typedef int (*sudo_conv_t)(int num_msgs,
+                     const struct sudo_conv_message msgs[],
+                     struct sudo_conv_reply replies[]);
 
 
 
-1.8.0b1                   June 11, 2010                        15
+
+1.8.0b1                   July  2, 2010                        15
 
 
 
@@ -994,26 +994,149 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
-        #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
-        #define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
-        #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \
+        typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
+
+       Pointers to the conversation and printf-style functions are passed in
+       to the plugin's open function when the plugin is initialized.
+
+       To use the conversation function, the plugin must pass an array of
+       sudo_conv_message and sudo_conv_reply structures.  There must be a
+       struct sudo_conv_message and struct sudo_conv_reply for each message in
+       the conversation.  The plugin is responsible for freeing the reply
+       buffer filled in to the struct sudo_conv_reply, if any.
+
+       The printf-style function uses the same underlying mechanism as the
+       conversation function but only supports SUDO_CONV_INFO_MSG and
+       SUDO_CONV_ERROR_MSG for the _m_s_g___t_y_p_e parameter.  It can be more
+       convenient than using the conversation function if no user reply is
+       needed and supports standard _p_r_i_n_t_f_(_) escape sequences.
+
+       See the sample plugin for an example of the conversation function
+       usage.
+
+   SSuuddooeerrss GGrroouupp PPlluuggiinn AAPPII
+       The _s_u_d_o_e_r_s module supports a plugin interface to allow non-Unix group
+       lookups.  This can be used to query a group source other than the
+       standard Unix group database.  A sample group plugin is bundled with
+       ssuuddoo that implements file-based lookups.  Third party group plugins
+       include a QAS AD plugin available from Quest Software.
+
+       A group plugin must declare and populate a sudoers_group_plugin struct
+       in the global scope.  This structure contains pointers to the functions
+       that implement plugin initialization, cleanup and group lookup.
+
+        struct sudoers_group_plugin {
+           unsigned int version;
+           int (*init)(int version, sudo_printf_t sudo_printf,
+                       char *const argv[]);
+           void (*cleanup)(void);
+           int (*query)(const char *user, const char *group,
+                        const struct passwd *pwd);
+       };
+
+       The sudoers_group_plugin struct has the following fields:
+
+       version
+           The version field should be set to GROUP_API_VERSION.
+
+           This allows _s_u_d_o_e_r_s to determine the API version the group plugin
+           was built against.
+
+       init
+            int (*init)(int version, sudo_printf_t plugin_printf,
+                        char *const argv[]);
+
+           The _i_n_i_t function is called after _s_u_d_o_e_r_s has been parsed but
+           before any policy checks.  It returns 1 on success, 0 on failure
+
+
+
+1.8.0b1                   July  2, 2010                        16
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
+           (or if the plugin is not configured), and -1 if a error occurred.
+           If an error occurs, the plugin may call the plugin_printf function
+           with SUDO_CONF_ERROR_MSG to present additional error information to
+           the user.
+
+           The function arguments are as follows:
+
+           version
+               The version passed in by _s_u_d_o_e_r_s allows the plugin to determine
+               the major and minor version number of the group plugin API
+               supported by _s_u_d_o_e_r_s.
+
+           plugin_printf
+               A pointer to a printf-style function that may be used to
+               display informational or error message to the user.
+
+           argv
+               A NULL-terminated array of arguments generated from the
+               _g_r_o_u_p___p_l_u_g_i_n option in _s_u_d_o_e_r_s.  If no arguments were given,
+               _a_r_g_v will be NULL.
+
+       cleanup
+            void (*cleanup)();
+
+           The _c_l_e_a_n_u_p function is called when _s_u_d_o_e_r_s has finished its group
+           checks.  The plugin should free any memory it has allocated and
+           close open file handles.
+
+       query
+            int (*query)(const char *user, const char *group,
+                         const struct passwd *pwd);
+
+           The _q_u_e_r_y function is used to ask the group plugin whether _u_s_e_r is
+           a member of _g_r_o_u_p.
+
+           The function arguments are as follows:
+
+           user
+               The name of the user being looked up in the external group
+               database.
+
+           group
+               The name of the group being queried.
+
+           pwd The password database entry for _u_s_e_r, if any.  If _u_s_e_r is not
+               present in the password database, _p_w_d will be NULL.
+
+       _V_e_r_s_i_o_n _M_a_c_r_o_s
+
+        /* Sudoers group plugin version major/minor */
+        #define GROUP_API_VERSION_MAJOR 1
+        #define GROUP_API_VERSION_MINOR 0
+        #define GROUP_API_VERSION ((GROUP_API_VERSION_MAJOR << 16) | \
+                                   GROUP_API_VERSION_MINOR)
+
+
+
+1.8.0b1                   July  2, 2010                        17
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
+
+        /* Getters and setters for group version */
+        #define GROUP_API_VERSION_GET_MAJOR(v) ((v) >> 16)
+        #define GROUP_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
+        #define GROUP_API_VERSION_SET_MAJOR(vp, n) do { \
             *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
         } while(0)
-        #define SUDO_VERSION_SET_MINOR(vp, n) do { \
+        #define GROUP_API_VERSION_SET_MINOR(vp, n) do { \
             *(vp) = (*(vp) & 0xffff0000) | (n); \
         } while(0)
 
-        #define SUDO_API_VERSION_MAJOR 1
-        #define SUDO_API_VERSION_MINOR 0
-        #define SUDO_API_VERSION ((SUDO_API_VERSION_MAJOR << 16) | SUDO_API_VERSION_MINOR)
-
-       Sudo will cast the plugin symbol to the following when determining the
-       plugin type.
-
-        union sudo_plugin {
-            struct policy_plugin policy;
-            struct io_plugin io;
-        };
 
 
 
@@ -1051,6 +1174,15 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b1                   June 11, 2010                        16
+
+
+
+
+
+
+
+
+
+1.8.0b1                   July  2, 2010                        18
 
 

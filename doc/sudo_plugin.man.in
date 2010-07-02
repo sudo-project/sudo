@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO_PLUGIN @mansectsu@"
-.TH SUDO_PLUGIN @mansectsu@ "June 11, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
+.TH SUDO_PLUGIN @mansectsu@ "July  2, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -701,59 +701,24 @@ On error, the plugin may optionally call the conversation or plugin_printf
 function with \f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present additional
 error information to the user.
 .PP
-\fIConversation \s-1API\s0\fR
-.IX Subsection "Conversation API"
+\fIVersion macros\fR
+.IX Subsection "Version macros"
 .PP
-If the plugin needs to interact with the user, it may do so via the
-conversation function.  A plugin should not attempt to read directly
-from the standard input or the user's tty (neither of which are
-guaranteed to exist).  The caller must include a trailing newline
-in \f(CW\*(C`msg\*(C'\fR if one is to be printed.
-.PP
-A printf-style function is also available that can be used to display
-informational or error messages to the user, which is usually more
-convenient for simple messages where no use input is required.
-.PP
-.Vb 10
-\& struct sudo_conv_message {
-\& #define SUDO_CONV_PROMPT_ECHO_OFF      1 /* do not echo user input */
-\& #define SUDO_CONV_PROMPT_ECHO_ON       2 /* echo user input */
-\& #define SUDO_CONV_ERROR_MSG            3 /* error message */
-\& #define SUDO_CONV_INFO_MSG             4 /* informational message */
-\& #define SUDO_CONV_PROMPT_MASK          5 /* mask user input */
-\&     int msg_type;
-\&     int timeout;
-\&     const char *msg;
-\& };
+.Vb 8
+\& #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
+\& #define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
+\& #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \e
+\&     *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \e
+\& } while(0)
+\& #define SUDO_VERSION_SET_MINOR(vp, n) do { \e
+\&     *(vp) = (*(vp) & 0xffff0000) | (n); \e
+\& } while(0)
 \&
-\& struct sudo_conv_reply {
-\&     char *reply;
-\& };
-\&
-\& typedef int (*sudo_conv_t)(int num_msgs,
-\&              const struct sudo_conv_message msgs[],
-\&              struct sudo_conv_reply replies[]);
-\&
-\& typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
+\& #define SUDO_API_VERSION_MAJOR 1
+\& #define SUDO_API_VERSION_MINOR 0
+\& #define SUDO_API_VERSION ((SUDO_API_VERSION_MAJOR << 16) | \e
+\&                           SUDO_API_VERSION_MINOR)
 .Ve
-.PP
-Pointers to the conversation and printf-style functions are passed
-in to the plugin's \f(CW\*(C`open\*(C'\fR function when the plugin is initialized.
-.PP
-To use the conversation function, the plugin must pass an array of
-\&\f(CW\*(C`sudo_conv_message\*(C'\fR and \f(CW\*(C`sudo_conv_reply\*(C'\fR structures.  There must
-be a \f(CW\*(C`struct sudo_conv_message\*(C'\fR and \f(CW\*(C`struct sudo_conv_reply\*(C'\fR for
-each message in the conversation.  The plugin is responsible for
-freeing the reply buffer filled in to the \f(CW\*(C`struct sudo_conv_reply\*(C'\fR,
-if any.
-.PP
-The printf-style function uses the same underlying mechanism as the
-conversation function but only supports \f(CW\*(C`SUDO_CONV_INFO_MSG\*(C'\fR and
-\&\f(CW\*(C`SUDO_CONV_ERROR_MSG\*(C'\fR for the \fImsg_type\fR parameter.  It can be
-more convenient than using the conversation function if no user
-reply is needed and supports standard \fIprintf()\fR escape sequences.
-.PP
-See the sample plugin for an example of the conversation function usage.
 .SS "I/O Plugin \s-1API\s0"
 .IX Subsection "I/O Plugin API"
 .Vb 10
@@ -1045,35 +1010,180 @@ The length of \fIbuf\fR in bytes.
 .RE
 .RS 4
 .RE
-.SS "Unsupported command line options"
-.IX Subsection "Unsupported command line options"
-The \f(CW\*(C`\-L\*(C'\fR command line option has been deprecated as its output is
-covered by the \fIsudoers\fR manual page.
-.SS "Sudo implementation details"
-.IX Subsection "Sudo implementation details"
-Version macros:
 .PP
-.Vb 8
-\& #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
-\& #define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
-\& #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \e
-\&     *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \e
-\& } while(0)
-\& #define SUDO_VERSION_SET_MINOR(vp, n) do { \e
-\&     *(vp) = (*(vp) & 0xffff0000) | (n); \e
-\& } while(0)
+\fIVersion macros\fR
+.IX Subsection "Version macros"
+.PP
+Same as for the \*(L"Policy Plugin \s-1API\s0\*(R".
+.SS "Conversation \s-1API\s0"
+.IX Subsection "Conversation API"
+If the plugin needs to interact with the user, it may do so via the
+conversation function.  A plugin should not attempt to read directly
+from the standard input or the user's tty (neither of which are
+guaranteed to exist).  The caller must include a trailing newline
+in \f(CW\*(C`msg\*(C'\fR if one is to be printed.
+.PP
+A printf-style function is also available that can be used to display
+informational or error messages to the user, which is usually more
+convenient for simple messages where no use input is required.
+.PP
+.Vb 11
+\& struct sudo_conv_message {
+\& #define SUDO_CONV_PROMPT_ECHO_OFF  0x0001 /* do not echo user input */
+\& #define SUDO_CONV_PROMPT_ECHO_ON   0x0002 /* echo user input */
+\& #define SUDO_CONV_ERROR_MSG        0x0003 /* error message */
+\& #define SUDO_CONV_INFO_MSG         0x0004 /* informational message */
+\& #define SUDO_CONV_PROMPT_MASK      0x0005 /* mask user input */
+\& #define SUDO_CONV_PROMPT_ECHO_OK   0x1000 /* flag: allow echo if no tty */
+\&     int msg_type;
+\&     int timeout;
+\&     const char *msg;
+\& };
 \&
-\& #define SUDO_API_VERSION_MAJOR 1
-\& #define SUDO_API_VERSION_MINOR 0
-\& #define SUDO_API_VERSION ((SUDO_API_VERSION_MAJOR << 16) | SUDO_API_VERSION_MINOR)
+\& struct sudo_conv_reply {
+\&     char *reply;
+\& };
+\&
+\& typedef int (*sudo_conv_t)(int num_msgs,
+\&              const struct sudo_conv_message msgs[],
+\&              struct sudo_conv_reply replies[]);
+\&
+\& typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
 .Ve
 .PP
-Sudo will cast the plugin symbol to the following when determining
-the plugin type.
+Pointers to the conversation and printf-style functions are passed
+in to the plugin's \f(CW\*(C`open\*(C'\fR function when the plugin is initialized.
 .PP
-.Vb 4
-\& union sudo_plugin {
-\&     struct policy_plugin policy;
-\&     struct io_plugin io;
-\& };
+To use the conversation function, the plugin must pass an array of
+\&\f(CW\*(C`sudo_conv_message\*(C'\fR and \f(CW\*(C`sudo_conv_reply\*(C'\fR structures.  There must
+be a \f(CW\*(C`struct sudo_conv_message\*(C'\fR and \f(CW\*(C`struct sudo_conv_reply\*(C'\fR for
+each message in the conversation.  The plugin is responsible for
+freeing the reply buffer filled in to the \f(CW\*(C`struct sudo_conv_reply\*(C'\fR,
+if any.
+.PP
+The printf-style function uses the same underlying mechanism as the
+conversation function but only supports \f(CW\*(C`SUDO_CONV_INFO_MSG\*(C'\fR and
+\&\f(CW\*(C`SUDO_CONV_ERROR_MSG\*(C'\fR for the \fImsg_type\fR parameter.  It can be
+more convenient than using the conversation function if no user
+reply is needed and supports standard \fIprintf()\fR escape sequences.
+.PP
+See the sample plugin for an example of the conversation function usage.
+.SS "Sudoers Group Plugin \s-1API\s0"
+.IX Subsection "Sudoers Group Plugin API"
+The \fIsudoers\fR module supports a plugin interface to allow non-Unix
+group lookups.  This can be used to query a group source other than
+the standard Unix group database.  A sample group plugin is bundled
+with \fBsudo\fR that implements file-based lookups.  Third party group
+plugins include a \s-1QAS\s0 \s-1AD\s0 plugin available from Quest Software.
+.PP
+A group plugin must declare and populate a \f(CW\*(C`sudoers_group_plugin\*(C'\fR
+struct in the global scope.  This structure contains pointers to
+the functions that implement plugin initialization, cleanup and
+group lookup.
+.PP
+.Vb 8
+\& struct sudoers_group_plugin {
+\&    unsigned int version;
+\&    int (*init)(int version, sudo_printf_t sudo_printf,
+\&                char *const argv[]);
+\&    void (*cleanup)(void);
+\&    int (*query)(const char *user, const char *group,
+\&                 const struct passwd *pwd);
+\&};
+.Ve
+.PP
+The \f(CW\*(C`sudoers_group_plugin\*(C'\fR struct has the following fields:
+.IP "version" 4
+.IX Item "version"
+The \f(CW\*(C`version\*(C'\fR field should be set to \s-1GROUP_API_VERSION\s0.
+.Sp
+This allows \fIsudoers\fR to determine the \s-1API\s0 version the group plugin
+was built against.
+.IP "init" 4
+.IX Item "init"
+.Vb 2
+\& int (*init)(int version, sudo_printf_t plugin_printf,
+\&             char *const argv[]);
+.Ve
+.Sp
+The \fIinit\fR function is called after \fIsudoers\fR has been parsed but
+before any policy checks.  It returns 1 on success, 0 on failure
+(or if the plugin is not configured), and \-1 if a error occurred.
+If an error occurs, the plugin may call the plugin_printf function
+with \f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present additional error information
+to the user.
+.Sp
+The function arguments are as follows:
+.RS 4
+.IP "version" 4
+.IX Item "version"
+The version passed in by \fIsudoers\fR allows the plugin to determine the
+major and minor version number of the group plugin \s-1API\s0 supported by
+\&\fIsudoers\fR.
+.IP "plugin_printf" 4
+.IX Item "plugin_printf"
+A pointer to a printf-style function that may be used to display
+informational or error message to the user.
+.IP "argv" 4
+.IX Item "argv"
+A NULL-terminated array of arguments generated from the \fIgroup_plugin\fR
+option in \fIsudoers\fR.  If no arguments were given, \fIargv\fR will be
+\&\s-1NULL\s0.
+.RE
+.RS 4
+.RE
+.IP "cleanup" 4
+.IX Item "cleanup"
+.Vb 1
+\& void (*cleanup)();
+.Ve
+.Sp
+The \fIcleanup\fR function is called when \fIsudoers\fR has finished its
+group checks.  The plugin should free any memory it has allocated
+and close open file handles.
+.IP "query" 4
+.IX Item "query"
+.Vb 2
+\& int (*query)(const char *user, const char *group,
+\&              const struct passwd *pwd);
+.Ve
+.Sp
+The \fIquery\fR function is used to ask the group plugin whether \fIuser\fR
+is a member of \fIgroup\fR.
+.Sp
+The function arguments are as follows:
+.RS 4
+.IP "user" 4
+.IX Item "user"
+The name of the user being looked up in the external group database.
+.IP "group" 4
+.IX Item "group"
+The name of the group being queried.
+.IP "pwd" 4
+.IX Item "pwd"
+The password database entry for \fIuser\fR, if any.  If \fIuser\fR is not
+present in the password database, \fIpwd\fR will be \f(CW\*(C`NULL\*(C'\fR.
+.RE
+.RS 4
+.RE
+.PP
+\fIVersion Macros\fR
+.IX Subsection "Version Macros"
+.PP
+.Vb 5
+\& /* Sudoers group plugin version major/minor */
+\& #define GROUP_API_VERSION_MAJOR 1
+\& #define GROUP_API_VERSION_MINOR 0
+\& #define GROUP_API_VERSION ((GROUP_API_VERSION_MAJOR << 16) | \e
+\&                            GROUP_API_VERSION_MINOR)
+\&
+\& /* Getters and setters for group version */
+\& #define GROUP_API_VERSION_GET_MAJOR(v) ((v) >> 16)
+\& #define GROUP_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
+\& #define GROUP_API_VERSION_SET_MAJOR(vp, n) do { \e
+\&     *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \e
+\& } while(0)
+\& #define GROUP_API_VERSION_SET_MINOR(vp, n) do { \e
+\&     *(vp) = (*(vp) & 0xffff0000) | (n); \e
+\& } while(0)
 .Ve
