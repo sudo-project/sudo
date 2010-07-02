@@ -143,9 +143,9 @@ sudo_load_plugins(const char *conf_file,
 	    if (strlcpy(path, info->path, sizeof(path)) >= sizeof(path))
 		errorx(1, "%s: %s", info->path, strerror(ENAMETOOLONG));
 	} else {
-	    if (snprintf(path, sizeof(path), "%s/%s", _PATH_SUDO_PLUGIN_DIR,
+	    if (snprintf(path, sizeof(path), "%s%s", _PATH_SUDO_PLUGIN_DIR,
 		info->path) >= sizeof(path)) {
-		errorx(1, "%s/%s: %s", _PATH_SUDO_PLUGIN_DIR, info->path,
+		errorx(1, "%s%s: %s", _PATH_SUDO_PLUGIN_DIR, info->path,
 		    strerror(ENAMETOOLONG));
 	    }
 	}

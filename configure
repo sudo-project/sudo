@@ -18302,7 +18302,7 @@ _ACEOF
     fi
     eval PLUGINDIR="$with_plugindir"
     cat >>confdefs.h <<EOF
-#define _PATH_SUDO_PLUGIN_DIR "$PLUGINDIR"
+#define _PATH_SUDO_PLUGIN_DIR "$PLUGINDIR/"
 EOF
 
     cat >>confdefs.h <<EOF

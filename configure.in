@@ -2770,7 +2770,7 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no"; then
 	AC_DEFINE_UNQUOTED(_PATH_SUDO_SESH, "$sesh_file", [The fully qualified pathname of sesh])
     fi
     eval PLUGINDIR="$with_plugindir"
-    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR")
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR/")
     SUDO_DEFINE_UNQUOTED(SUDOERS_PLUGIN, "sudoers$_shrext2")
     exec_prefix="$oexec_prefix"
 fi
