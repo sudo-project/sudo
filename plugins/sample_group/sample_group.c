@@ -71,7 +71,8 @@ extern void mysetgrent(void);
 extern void myendgrent(void);
 extern struct group *mygetgrnam(const char *);
 
-static int sample_init(int version, sudo_printf_t sudo_printf, char *const argv[])
+static int
+sample_init(int version, sudo_printf_t sudo_printf, char *const argv[])
 {
     struct stat sb;
 
@@ -108,7 +109,8 @@ static int sample_init(int version, sudo_printf_t sudo_printf, char *const argv[
     return TRUE;
 }
 
-static void sample_cleanup(void)
+static void
+sample_cleanup(void)
 {
     myendgrent();
 }
@@ -116,7 +118,8 @@ static void sample_cleanup(void)
 /*
  * Returns TRUE if "user" is a member of "group", else FALSE.
  */
-static int sample_query(const char *user, const char *group, const struct passwd *pwd)
+static int
+sample_query(const char *user, const char *group, const struct passwd *pwd)
 {
     struct group *grp;
     char **member;
