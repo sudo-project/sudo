@@ -20,7 +20,8 @@ devdir = @devdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
-SUBDIRS = compat common src plugins/sample plugins/sudoers include doc
+SUBDIRS = compat common src plugins/sample plugins/sample_group \
+	  plugins/sudoers include doc
 
 VERSION = @PACKAGE_VERSION@
 

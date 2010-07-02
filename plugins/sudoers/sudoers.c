@@ -105,10 +105,6 @@
 #include "interfaces.h"
 #include "auth/sudo_auth.h"
 
-#ifdef USING_NONUNIX_GROUPS
-# include "nonunix.h"
-#endif
-
 /*
  * Prototypes
  */
@@ -223,10 +219,6 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 
     init_vars(envp);		/* XXX - move this later? */
 
-#ifdef USING_NONUNIX_GROUPS
-    sudo_nonunix_groupcheck_init();	/* initialise nonunix groups impl */
-#endif /* USING_NONUNIX_GROUPS */
-
     /* Parse nsswitch.conf for sudoers order. */
     snl = sudo_read_nss();
 
@@ -245,6 +237,18 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     }
 
     /* XXX - collect post-sudoers parse settings into a function */
+
+    /*
+     * Initialize external group plugin.
+     */
+    if (def_group_plugin) {
+	switch (group_plugin_load(def_group_plugin)) {
+	case -1:
+	    return -1;
+	case FALSE:
+	    def_group_plugin = NULL;
+	}
+    }
 
     /*
      * Set runas passwd/group entries based on command line or sudoers.
@@ -342,10 +346,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     NewArgc = argc;
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
 	NewArgv[0] = runas_pw->pw_shell;
-
-#ifdef USING_NONUNIX_GROUPS
-    sudo_nonunix_groupcheck_init();     /* initialise nonunix groups impl */
-#endif /* USING_NONUNIX_GROUPS */
 
     /* Find command in path */
     cmnd_status = set_cmnd(sudo_mode);
@@ -527,11 +527,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     tq_foreach_fwd(snl, nss) {
 	nss->close(nss);
     }
-
-#ifdef USING_NONUNIX_GROUPS
-    /* Finished with the groupcheck code */
-    sudo_nonunix_groupcheck_cleanup();
-#endif
+    if (def_group_plugin)
+	group_plugin_unload();
 
     if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST)))
 	goto done;
@@ -1138,9 +1135,8 @@ cleanup(int gotsignal)
 	    tq_foreach_fwd(snl, nss)
 		nss->close(nss);
 	}
-#ifdef USING_NONUNIX_GROUPS
-	sudo_nonunix_groupcheck_cleanup();
-#endif
+	if (def_group_plugin)
+	    group_plugin_unload();
 	sudo_endpwent();
 	sudo_endgrent();
     }

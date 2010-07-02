@@ -101,6 +101,9 @@ mkinstalldirs
 pathnames.h.in
 plugins/sample/Makefile.in
 plugins/sample/sample_plugin.c
+plugins/sample_group/Makefile.in
+plugins/sample_group/getgrent.c
+plugins/sample_group/sample_group.c
 plugins/sudoers/Makefile.in
 plugins/sudoers/aixcrypt.exp
 plugins/sudoers/alias.c
@@ -140,6 +143,7 @@ plugins/sudoers/goodpath.c
 plugins/sudoers/gram.c
 plugins/sudoers/gram.h
 plugins/sudoers/gram.y
+plugins/sudoers/group_plugin.c
 plugins/sudoers/ins_2001.h
 plugins/sudoers/ins_classic.h
 plugins/sudoers/ins_csops.h
@@ -155,7 +159,6 @@ plugins/sudoers/logging.c
 plugins/sudoers/logging.h
 plugins/sudoers/match.c
 plugins/sudoers/mkdefaults
-plugins/sudoers/nonunix.h
 plugins/sudoers/parse.c
 plugins/sudoers/parse.h
 plugins/sudoers/plugin_error.c
@@ -175,7 +178,6 @@ plugins/sudoers/timestr.c
 plugins/sudoers/toke.c
 plugins/sudoers/toke.l
 plugins/sudoers/tsgetgrpw.c
-plugins/sudoers/vasgroups.c
 plugins/sudoers/visudo.c
 src/Makefile.in
 src/conversation.c

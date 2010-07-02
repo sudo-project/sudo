@@ -241,3 +241,6 @@ compress_io
 use_pty
 	T_FLAG
 	"Always run commands in a pseudo-tty"
+group_plugin
+	T_STR
+	"Plugin for non-Unix group support"

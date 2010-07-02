@@ -105,7 +105,7 @@ LIBSUDOERS_OBJS = alias.lo audit.lo defaults.lo gram.lo match.lo pwutil.lo \
 
 SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo \
 	       plugin_error.lo env.lo getspwuid.lo \
-	       goodpath.lo find_path.lo interfaces.lo \
+	       goodpath.lo group_plugin.lo find_path.lo interfaces.lo \
 	       logging.lo parse.lo set_perms.lo sudoers.lo sudo_nss.lo \
 	       iolog.lo @SUDOERS_OBJS@
 
@@ -113,7 +113,7 @@ VISUDO_OBJS = visudo.o goodpath.o find_path.o error.o
 
 REPLAY_OBJS = getdate.o sudoreplay.o error.o
 
-TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o error.o
+TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o error.o group_plugin.o
 
 VERSION = @PACKAGE_VERSION@
 
@@ -197,6 +197,7 @@ getspwuid.lo: $(srcdir)/getspwuid.c $(SUDODEP)
 goodpath.lo: $(srcdir)/goodpath.c $(SUDODEP)
 gram.lo: $(devdir)/gram.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir)/gram.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/gram.c
+group_plugin.lo: $(srcdir)/group_plugin.c $(SUDODEP)
 interfaces.lo: $(srcdir)/interfaces.c $(SUDODEP) $(srcdir)/interfaces.h
 iolog.lo: $(srcdir)/iolog.c $(SUDODEP)
 ldap.lo: $(srcdir)/ldap.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h
@@ -213,7 +214,6 @@ timestr.lo: $(srcdir)/timestr.c $(incdir)/compat.h $(top_builddir)/config.h
 toke.lo: $(devdir)/toke.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir)/gram.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/toke.c
 tsgetgrpw.lo: $(srcdir)/tsgetgrpw.c $(SUDODEP)
-vasgroups.lo: $(srcdir)/vasgroups.c $(srcdir)/nonunix.h $(SUDODEP)
 plugin_error.lo: $(srcdir)/plugin_error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
 
 # Auth dependencies

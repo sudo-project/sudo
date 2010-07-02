@@ -573,6 +573,13 @@ sudo_endspent(void)
     return;
 }
 
+/* STUB */
+int
+group_plugin_query(const char *user, const char *group, const struct passwd *pw)
+{
+    return FALSE;
+}
+
 char *
 sudo_getepw(const struct passwd *pw)
 {

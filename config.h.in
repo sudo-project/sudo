@@ -585,9 +585,6 @@
 /* The message given when a bad password is entered. */
 #undef INCORRECT_PASSWORD
 
-/* The name of libvas.so */
-#undef LIBVAS_SO
-
 /* The syslog facility sudo will use. */
 #undef LOGFAC
 
@@ -718,9 +715,6 @@
 
 /* Define to 1 if you want a different ticket file for each tty. */
 #undef USE_TTY_TICKETS
-
-/* Define to 1 if using a non-Unix group lookup implementation. */
-#undef USING_NONUNIX_GROUPS
 
 /* Define to avoid using the passwd/shadow file for authentication. */
 #undef WITHOUT_PASSWD

@@ -327,6 +327,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"Always run commands in a pseudo-tty",
 	NULL,
     }, {
+	"group_plugin", T_STR,
+	"Plugin for non-Unix group support",
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

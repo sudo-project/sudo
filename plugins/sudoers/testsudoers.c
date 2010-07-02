@@ -248,6 +248,9 @@ main(int argc, char *argv[])
 	(void) fputs(" (problem with defaults entries)", stdout);
     puts(".");
 
+    if (def_group_plugin && group_plugin_load(def_group_plugin) != TRUE)
+	def_group_plugin = NULL;
+
     /*
      * Set runas passwd/group entries based on command line or sudoers.
      * Note that if runas_group was specified without runas_user we

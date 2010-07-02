@@ -88,9 +88,6 @@
 #ifndef HAVE_EXTENDED_GLOB
 # include <compat/glob.h>
 #endif /* HAVE_EXTENDED_GLOB */
-#ifdef USING_NONUNIX_GROUPS
-# include "nonunix.h"
-#endif /* USING_NONUNIX_GROUPS */
 
 static struct member_list empty;
 
@@ -778,10 +775,8 @@ usergr_matches(char *group, char *user, struct passwd *pw)
     if (*group++ != '%')
 	return(FALSE);
 
-#ifdef USING_NONUNIX_GROUPS
-    if (*group == ':')
-	return(sudo_nonunix_groupcheck(++group, user, pw));   
-#endif /* USING_NONUNIX_GROUPS */
+    if (*group == ':' && def_group_plugin)
+	return(group_plugin_query(user, group + 1, pw));
 
     /* look up user's primary gid in the passwd file */
     if (pw == NULL && (pw = sudo_getpwnam(user)) == NULL)
@@ -790,12 +785,9 @@ usergr_matches(char *group, char *user, struct passwd *pw)
     if (user_in_group(pw, group))
 	return(TRUE);
 
-#ifdef USING_NONUNIX_GROUPS
-    /* not a Unix group, could be an AD group */
-    if (sudo_nonunix_groupcheck_available() &&
-	sudo_nonunix_groupcheck(group, user, pw))
+    /* not a Unix group, could be an external group */
+    if (def_group_plugin && group_plugin_query(user, group, pw))
     	return(TRUE);
-#endif /* USING_NONUNIX_GROUPS */
 
     return(FALSE);
 }

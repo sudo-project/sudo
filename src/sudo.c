@@ -80,10 +80,6 @@
 #include "sudo_plugin_int.h"
 #include <sudo_usage.h>
 
-#ifdef USING_NONUNIX_GROUPS
-# include "nonunix.h"
-#endif
-
 /*
  * Local variables
  */

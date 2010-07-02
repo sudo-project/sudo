@@ -1087,29 +1087,6 @@ AC_ARG_WITH(askpass, [AS_HELP_STRING([--with-askpass=PATH], [Fully qualified pat
 		;;
 esac], AC_MSG_RESULT(no))
 
-dnl
-dnl If enabled, set LIBVAS_SO, LIBVAS_RPATH and USING_NONUNIX_GROUPS
-dnl
-AC_ARG_WITH(libvas, [AS_HELP_STRING([--with-libvas=NAME], [Name of the libvas shared library (default=libvas.so)])],
-[case $with_libvas in
-    yes)	with_libvas=libvas.so
-		;;
-    no)		;;
-    *)		AC_DEFINE_UNQUOTED([LIBVAS_SO], ["$with_libvas"], [The name of libvas.so])
-		;;
-esac
-if test X"$with_libvas" != X"no"; then
-    AC_DEFINE_UNQUOTED([LIBVAS_SO], ["$with_libvas"], [The name of libvas.so])
-    AC_DEFINE(USING_NONUNIX_GROUPS)
-    NONUNIX_GROUPS_IMPL="vasgroups.o"
-    AC_ARG_WITH([libvas-rpath],
-       [AS_HELP_STRING([--with-libvas-rpath=PATH],
-		       [Path to look for libvas in [default=/opt/quest/lib]])],
-       [LIBVAS_RPATH=$withval],
-       [LIBVAS_RPATH=/opt/quest/lib])
-fi
-])
-
 with_plugindir="$libexecdir"
 AC_ARG_WITH(plugin_dir, [AS_HELP_STRING([--with-plugin_dir], [set directory to load plugins from])],
 [case $with_plugin_dir in
@@ -2672,23 +2649,6 @@ case "$host" in
 esac
 
 dnl
-dnl Add LIBVAS_RPATH to LDFLAGS
-dnl GNU ld accepts -R/path/ as an alias for -rpath /path/
-dnl
-if test X"$LIBVAS_RPATH" != X""; then
-    if test -n "$blibpath"; then
-	blibpath_add="${blibpath_add}:$LIBVAS_RPATH"
-    else
-	case "$host" in
-	    *-*-hpux*)	LDFLAGS="$LDFLAGS -Wl,+b,$LIBVAS_RPATH"
-			;;
-	    *)		LDFLAGS="$LDFLAGS -Wl,-R$LIBVAS_RPATH"
-			;;
-	esac
-    fi
-fi
-
-dnl
 dnl Add $blibpath to SUDOERS_LDFLAGS if specified by the user or if we
 dnl added -L dirpaths to SUDOERS_LDFLAGS.
 dnl
@@ -2779,7 +2739,7 @@ dnl
 dnl Substitute into the Makefile and man pages
 dnl
 dnl AC_CONFIG_FILES([doc/sudo.man doc/visudo.man doc/sudoers.man doc/sudoers.ldap.man doc/sudoreplay.man src/Makefile src/sudo_usage.h])
-AC_CONFIG_FILES([Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/sudoers/Makefile])
+AC_CONFIG_FILES([Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/sample_group/Makefile plugins/sudoers/Makefile])
 AC_OUTPUT
 
 dnl
@@ -2875,7 +2835,6 @@ AH_TEMPLATE(USE_TTY_TICKETS, [Define to 1 if you want a different ticket file fo
 AH_TEMPLATE(WITHOUT_PASSWD, [Define to avoid using the passwd/shadow file for authentication.])
 AH_TEMPLATE(sig_atomic_t, [Define to `int' if <signal.h> does not define.])
 AH_TEMPLATE(__signed, [Define to `signed' or nothing if compiler does not support a signed type qualifier.])
-AH_TEMPLATE(USING_NONUNIX_GROUPS, [Define to 1 if using a non-Unix group lookup implementation.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in

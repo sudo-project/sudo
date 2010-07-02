@@ -150,6 +150,8 @@
 #define I_COMPRESS_IO           74
 #define def_use_pty             (sudo_defs_table[75].sd_un.flag)
 #define I_USE_PTY               75
+#define def_group_plugin        (sudo_defs_table[76].sd_un.str)
+#define I_GROUP_PLUGIN          76
 
 enum def_tupple {
 	never,

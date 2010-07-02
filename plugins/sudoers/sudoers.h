@@ -177,6 +177,12 @@ struct sudo_user {
 #define user_type		(sudo_user.type)
 #define user_closefrom		(sudo_user.closefrom)
 
+#ifdef __TANDEM
+# define ROOT_UID       65535
+#else
+# define ROOT_UID       0
+#endif
+
 /*
  * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
  * but that caused problems with various alternate authentication
@@ -298,6 +304,12 @@ FILE *open_sudoers(const char *, int, int *);
 /* aix.c */
 void aix_restoreauthdb(void);
 void aix_setauthdb(char *user);
+
+/* group_plugin.c */
+int group_plugin_load(char *plugin_info);
+void group_plugin_unload(void);
+int group_plugin_query(const char *user, const char *group,
+    const struct passwd *pwd);
 
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;
