@@ -75,27 +75,19 @@ group_plugin_load(char *plugin_info)
 {
     char *args, path[PATH_MAX], savedch;
     char **argv = NULL;
-    size_t len;
     int rc;
 
     /*
      * Fill in .so path and split out args (if any).
      */
-    path[0] = '\0';
-    if (plugin_info[0] != '/')
-	strlcpy(path, "./", sizeof(path));
     if ((args = strpbrk(plugin_info, " \t")) != NULL) {
 	savedch = *args;
 	*args = '\0';
     }
-    len = strlcat(path, plugin_info, sizeof(path));
+    strncpy(path, plugin_info, sizeof(path) - 1);
+    path[sizeof(path) - 1] = '\0';
     if (args != NULL)
 	*args++ = savedch;
-    if (len >= sizeof(path)) {
-	fprintf(stderr, "%s%s: %s\n", "./", plugin_info,
-	    strerror(ENAMETOOLONG));
-	return -1;
-    }
 
     /* Open plugin and map in symbol. */
     group_handle = dlopen(path, RTLD_LAZY);
