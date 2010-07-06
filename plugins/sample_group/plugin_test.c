@@ -16,7 +16,6 @@
 
 #include <sys/types.h>
 #include <sys/param.h>
-#include <sys/time.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,10 +23,10 @@
 #include <stdarg.h>
 #include <string.h>
 #include <unistd.h>
-#include <time.h>
 #include <ctype.h>
 #include <dlfcn.h>
 #include <errno.h>
+#include <limits.h>
 #include <pwd.h>
 
 #include <sudo_plugin.h>
