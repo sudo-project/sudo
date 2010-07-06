@@ -1916,7 +1916,7 @@ dnl
 AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf tzset \
 	       strftime setrlimit initgroups fstat gettimeofday \
-	       regcomp setlocale getaddrinfo setenv vhangup \
+	       regcomp setlocale getaddrinfo vhangup \
 	       mbr_check_membership setrlimit64)
 AC_CHECK_FUNCS(getline, [], [
     AC_LIBOBJ(getline)
@@ -1939,8 +1939,7 @@ AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(util.h pty.h, [break])], [
 	])
     ])
 ])
-AC_CHECK_FUNCS(unsetenv, SUDO_FUNC_UNSETENV_VOID)
-SUDO_FUNC_PUTENV_CONST
+AC_CHECK_FUNCS(unsetenv, [SUDO_FUNC_UNSETENV_VOID], [AC_LIBOBJ(unsetenv)])
 if test -z "$SKIP_SETRESUID"; then
     AC_CHECK_FUNCS(setresuid, [
 	SKIP_SETREUID=yes
@@ -1970,7 +1969,7 @@ AC_CHECK_FUNCS(utimes, [AC_CHECK_FUNCS(futimes futimesat, [break])], [AC_CHECK_F
 AC_CHECK_FUNCS(killpg, [], [AC_LIBOBJ(killpg)])
 SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)])
 SUDO_FUNC_ISBLANK
-AC_REPLACE_FUNCS(memrchr strerror strcasecmp strlcpy strlcat)
+AC_REPLACE_FUNCS(memrchr strerror strcasecmp strlcpy strlcat setenv)
 AC_CHECK_FUNCS(nanosleep, [], [
     # On Solaris, nanosleep is in librt
     AC_CHECK_LIB(rt, nanosleep, [REPLAY_LIBS="${REPLAY_LIBS} -lrt"], [AC_LIBOBJ(nanosleep)])

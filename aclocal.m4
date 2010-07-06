@@ -273,22 +273,6 @@ AC_DEFUN([SUDO_FUNC_UNSETENV_VOID],
   ])
 
 dnl
-dnl check putenv() argument for const
-dnl
-AC_DEFUN([SUDO_FUNC_PUTENV_CONST],
-[AC_CACHE_CHECK([whether putenv has a const argument],
-sudo_cv_func_putenv_const,
-[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
-int putenv(const char *string) {return 0;}], [])],
-    [sudo_cv_func_putenv_const=yes],
-    [sudo_cv_func_putenv_const=no])
-  ])
-  if test $sudo_cv_func_putenv_const = yes; then
-    AC_DEFINE(PUTENV_CONST, 1, [Define to 1 if the `putenv' has a const argument.])
-  fi
-])
-
-dnl
 dnl check for sa_len field in struct sockaddr
 dnl
 AC_DEFUN(SUDO_SOCK_SA_LEN,

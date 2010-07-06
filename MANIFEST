@@ -34,6 +34,7 @@ compat/mksiglist.c
 compat/mksiglist.h
 compat/mkstemp.c
 compat/nanosleep.c
+compat/setenv.c
 compat/siglist.in
 compat/snprintf.c
 compat/strcasecmp.c
@@ -42,6 +43,7 @@ compat/strlcat.c
 compat/strlcpy.c
 compat/strsignal.c
 compat/timespec.h
+compat/unsetenv.c
 compat/utime.h
 compat/utimes.c
 config.guess
