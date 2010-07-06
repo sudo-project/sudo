@@ -60,6 +60,7 @@ AC_SUBST([ZLIB])
 AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST([ac_config_libobj_dir])
 AC_SUBST([CONFIGURE_ARGS])
+AC_SUBST([LIBDL])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -2633,8 +2634,9 @@ fi
 # Add library needed for dynamic linking, if any.
 # XXX - using the cache value like this is ugly
 #
-if test X"$lt_cv_dlopen_libs" != X""; then
-    SUDO_LIBS="${SUDO_LIBS} $lt_cv_dlopen_libs"
+LIBDL="$lt_cv_dlopen_libs"
+if test X"$LIBDL" != X""; then
+    SUDO_LIBS="${SUDO_LIBS} $LIBDL"
 fi
 
 # On HP-UX, you cannot dlopen() a shared object that uses pthreads
