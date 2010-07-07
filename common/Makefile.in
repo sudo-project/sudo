@@ -31,9 +31,6 @@ VPATH = $(srcdir)
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@
-AR=@AR@
-SED=@SED@
-RANLIB=@RANLIB@
 
 # C preprocessor flags
 CPPFLAGS = -I. -I$(top_builddir) -I$(incdir) @CPPFLAGS@
