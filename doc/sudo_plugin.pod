@@ -15,7 +15,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =pod
 
-=head1 Sudo Plugin API
+=head1 NAME
+
+sudo_plugin - Sudo Plugin API
+
+=head1 DESCRIPTION
 
 Starting with version 1.8, B<sudo> supports a plugin API
 for policy and session logging.  By default, the I<sudoers> policy
@@ -1133,3 +1137,26 @@ present in the password database, I<pwd> will be C<NULL>.
  #define GROUP_API_VERSION_SET_MINOR(vp, n) do { \
      *(vp) = (*(vp) & 0xffff0000) | (n); \
  } while(0)
+
+=head1 SEE ALSO
+
+L<sudoers(5)>, L<sudo(8)>
+
+=head1 BUGS
+
+If you feel you have found a bug in B<sudo>, please submit a bug report
+at http://www.sudo.ws/sudo/bugs/
+
+=head1 SUPPORT
+
+Limited free support is available via the sudo-workers mailing list,
+see http://www.sudo.ws/mailman/listinfo/sudo-workers to subscribe or
+search the archives.
+
+=head1 DISCLAIMER
+
+B<sudo> is provided ``AS IS'' and any express or implied warranties,
+including, but not limited to, the implied warranties of merchantability
+and fitness for a particular purpose are disclaimed.  See the LICENSE
+file distributed with B<sudo> or http://www.sudo.ws/sudo/license.html
+for complete details.
