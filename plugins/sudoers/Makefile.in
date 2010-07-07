@@ -269,6 +269,13 @@ install-sudoers: install-dirs
 	    $(INSTALL) -O $(sudoers_uid) -G $(sudoers_gid) -M $(sudoers_mode) \
 		$(srcdir)/sudoers $(DESTDIR)$(sudoersdir)/sudoers
 
+uninstall:
+	-$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(plugindir)/sudoers.la
+	-rm -f $(DESTDIR)$(replaydir)/sudoreplay
+	-rm -f $(DESTDIR)$(visudodir)/visudo
+	-cmp $(DESTDIR)$(sudoersdir)/sudoers $(srcdir)/sudoers >/dev/null && \
+	    rm -f $(DESTDIR)$(sudoersdir)/sudoers
+
 check:
 	@echo nothing to check
 

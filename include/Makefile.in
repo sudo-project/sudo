@@ -56,6 +56,9 @@ install-includes: install-dirs
 
 install-plugin:
 
+uninstall:
+	-rm -f $(DESTDIR)$(prefix)/include/sudo_plugin.h
+
 check:
 	@echo nothing to check
 

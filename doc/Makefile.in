@@ -153,6 +153,15 @@ install-man: install-dirs
 
 install-plugin:
 
+uninstall:
+	-rm -f	$(DESTDIR)$(mandirsu)/sudo.$(mansectsu) \
+		$(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu) \
+		$(DESTDIR)$(mandirsu)/sudo_plugin.$(mansectsu) \
+		$(DESTDIR)$(mandirsu)/sudoreplay.$(mansectsu) \
+		$(DESTDIR)$(mandirsu)/visudo.$(mansectsu) \
+		$(DESTDIR)$(mandirform)/sudoers.$(mansectform) \
+		$(DESTDIR)$(mandirform)/sudoers.ldap.$(mansectform)
+
 check:
 	@echo nothing to check
 

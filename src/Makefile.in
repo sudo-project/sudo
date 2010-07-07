@@ -141,6 +141,11 @@ install-noexec: install-dirs libsudo_noexec.la
 
 install-plugin:
 
+uninstall:
+	-rm -f	$(DESTDIR)$(bindir)/sudo $(DESTDIR)$(bindir)/sudoedit \
+		$(DESTDIR)$(libexecdir)/sesh \
+		$(DESTDIR)$(noexecdir)/$(noexecfile) \
+
 check:
 	@echo nothing to check
 

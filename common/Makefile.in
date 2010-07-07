@@ -82,6 +82,8 @@ install-man:
 
 install-plugin:
 
+uninstall:
+
 check:
 	@echo nothing to check
 
