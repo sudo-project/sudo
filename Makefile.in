@@ -20,8 +20,9 @@ devdir = @devdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
-SUBDIRS = compat common src plugins/sample plugins/sample_group \
-	  plugins/sudoers include doc
+SUBDIRS = compat common src plugins/sudoers include doc
+
+SAMPLES = plugins/sample plugins/sample_group
 
 VERSION = @PACKAGE_VERSION@
 
@@ -30,7 +31,7 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 SHELL = @SHELL@
 
 all: config.status
-	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) || break; done
+	for d in $(SUBDIRS) $(SAMPLES); do (cd $$d && $(MAKE) $@) || break; done
 
 install install-dirs install-binaries install-includes install-man install-plugin: config.status
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) || break; done
@@ -40,6 +41,12 @@ autoconf:
 
 ChangeLog:
 	hg log --style=changelog -b default > $@
+
+check:
+	@echo nothing to check
+
+uninstall:
+	@echo uninstall not yet supported
 
 config.status:
 	@if [ ! -s config.status ]; then \
