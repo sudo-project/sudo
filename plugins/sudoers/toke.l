@@ -257,7 +257,7 @@ DEFVAR			[a-z_]+
 				yyterminate();
 			}
 
-<INITIAL>^[[:blank:]]*Defaults([:@>\!]{WORD})? {
+<INITIAL>^[[:blank:]]*Defaults([:@>\!]\!?{WORD})? {
 			    int n;
 			    for (n = 0; isblank((unsigned char)yytext[n]); n++)
 				continue;
