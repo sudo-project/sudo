@@ -9,7 +9,7 @@ NNAAMMEE
 
 DDEESSCCRRIIPPTTIIOONN
        In addition to the standard _s_u_d_o_e_r_s file, ssuuddoo may be configured via
-       LAP.  This can be especially useful for synchronizing _s_u_d_o_e_r_s in a
+       LDAP.  This can be especially useful for synchronizing _s_u_d_o_e_r_s in a
        large, distributed environment.
 
        Using LDAP for _s_u_d_o_e_r_s has several benefits:
@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0b1                   June 15, 2010                         1
+1.8.0b1                   July  8, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.8.0b1                   June 15, 2010                         2
+1.8.0b1                   July  8, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.8.0b1                   June 15, 2010                         3
+1.8.0b1                   July  8, 2010                         3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.8.0b1                   June 15, 2010                         4
+1.8.0b1                   July  8, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.8.0b1                   June 15, 2010                         5
+1.8.0b1                   July  8, 2010                         5
 
 
 
@@ -366,19 +366,40 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            certificated to be verified.  If the server's TLS certificate
            cannot be verified (usually because it is signed by an unknown
            certificate authority), ssuuddoo will be unable to connect to it.  If
-           TTLLSS__CCHHEECCKKPPEEEERR is disabled, no check is made.
+           TTLLSS__CCHHEECCKKPPEEEERR is disabled, no check is made.  Note that disabling
+           the check creates an opportunity for man-in-the-middle attacks
+           since the server's identity will not be authenticated.  If
+           possible, the CA's certificate should be installed locally so it
+           can be verified.
+
+       TTLLSS__CCAACCEERRTT file name
+           An alias for TTLLSS__CCAACCEERRTTFFIILLEE.
 
        TTLLSS__CCAACCEERRTTFFIILLEE file name
            The path to a certificate authority bundle which contains the
            certificates for all the Certificate Authorities the client knows
            to be valid, e.g. _/_e_t_c_/_s_s_l_/_c_a_-_b_u_n_d_l_e_._p_e_m.  This option is only
-           supported by the OpenLDAP libraries.
+           supported by the OpenLDAP libraries.  Netscape-derived LDAP
+           libraries use the same certificate database for CA and client
+           certificates (see TTLLSS__CCEERRTT).
 
        TTLLSS__CCAACCEERRTTDDIIRR directory
            Similar to TTLLSS__CCAACCEERRTTFFIILLEE but instead of a file, it is a directory
            containing individual Certificate Authority certificates, e.g.
            _/_e_t_c_/_s_s_l_/_c_e_r_t_s.  The directory specified by TTLLSS__CCAACCEERRTTDDIIRR is
            checked after TTLLSS__CCAACCEERRTTFFIILLEE.  This option is only supported by the
+
+
+
+1.8.0b1                   July  8, 2010                         6
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
            OpenLDAP libraries.
 
        TTLLSS__CCEERRTT file name
@@ -388,17 +409,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
            OpenLDAP:
                tls_cert /etc/ssl/client_cert.pem
-
-
-
-1.8.0b1                   June 15, 2010                         6
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
 
            Netscape-derived:
                tls_cert /var/ldap/cert7.db
@@ -444,6 +454,18 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
        RROOOOTTSSAASSLL__AAUUTTHH__IIDD identity
            The SASL user name to use when RROOOOTTUUSSEE__SSAASSLL is enabled.
 
+
+
+
+1.8.0b1                   July  8, 2010                         7
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
        SSAASSLL__SSEECCPPRROOPPSS none/properties
            SASL security properties or _n_o_n_e for no properties.  See the SASL
            programmer's manual for details.
@@ -453,18 +475,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            authenticating with the remote server.
 
        See the ldap.conf entry in the EXAMPLES section.
-
-
-
-
-1.8.0b1                   June 15, 2010                         7
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
 
    CCoonnffiigguurriinngg nnsssswwiittcchh..ccoonnff
        Unless it is disabled at build time, ssuuddoo consults the Name Service
@@ -510,6 +520,18 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
            sudoers = ldap, files
 
+
+
+
+1.8.0b1                   July  8, 2010                         8
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
        The local _s_u_d_o_e_r_s file can be ignored completely by using:
 
            sudoers = ldap
@@ -520,18 +542,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            sudoers = ldap = auth, files
 
        Note that in the above example, the auth qualfier only affects user
-
-
-
-1.8.0b1                   June 15, 2010                         8
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
-
        lookups; both LDAP and _s_u_d_o_e_r_s will be queried for Defaults entries.
 
        If the _/_e_t_c_/_n_e_t_s_v_c_._c_o_n_f file is not present or there is no sudoers
@@ -576,6 +586,18 @@ EEXXAAMMPPLLEESS
          #sudoers_debug 2
          #
          # optional proxy credentials
+
+
+
+1.8.0b1                   July  8, 2010                         9
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
          #binddn        <who to search as>
          #bindpw        <password>
          #rootbinddn    <who to search as, uses /etc/ldap.secret for bindpw>
@@ -586,18 +608,6 @@ EEXXAAMMPPLLEESS
          # Define if you want to use an encrypted LDAP connection.
          # Typically, you must also set the port to 636 (ldaps).
          #ssl on
-
-
-
-1.8.0b1                   June 15, 2010                         9
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
-
          #
          # Define if you want to use port 389 and switch to
          # encryption before the bind credentials are sent.
@@ -642,6 +652,18 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
          #tls_key  /etc/certs/client_key.pem
          #
          # For SunONE or iPlanet LDAP, tls_cert and tls_key may specify either
+
+
+
+1.8.0b1                   July  8, 2010                        10
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
          # a directory, in which case the files in the directory must have the
          # default names (e.g. cert8.db and key4.db), or the path to the cert
          # and key files themselves.  However, a bug in version 5.0 of the LDAP
@@ -652,18 +674,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
          # The certificate database specified by tls_cert may contain CA certs
          # and/or the client's cert.  If the client's cert is included, tls_key
          # should be specified as well.
-
-
-
-1.8.0b1                   June 15, 2010                        10
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
-
          # For backward compatibility, "sslpath" may be used in place of tls_cert.
          #tls_cert /var/ldap
          #tls_key /var/ldap
@@ -708,6 +718,18 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
 
         attributetype ( 1.3.6.1.4.1.15953.9.1.5
+
+
+
+1.8.0b1                   July  8, 2010                        11
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
            NAME 'sudoOption'
            DESC 'Options(s) followed by sudo'
            EQUALITY caseExactIA5Match
@@ -718,18 +740,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            DESC 'User(s) impersonated by sudo'
            EQUALITY caseExactIA5Match
            SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-
-
-
-1.8.0b1                   June 15, 2010                        11
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
-
 
         attributetype ( 1.3.6.1.4.1.15953.9.1.7
            NAME 'sudoRunAsGroup'
@@ -777,16 +787,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-
-
-
-
-
-1.8.0b1                   June 15, 2010                        12
+1.8.0b1                   July  8, 2010                        12
 
 
