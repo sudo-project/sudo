@@ -363,7 +363,14 @@ If enabled, B<TLS_CHECKPEER> will cause the LDAP server's TLS
 certificated to be verified.  If the server's TLS certificate cannot
 be verified (usually because it is signed by an unknown certificate
 authority), B<sudo> will be unable to connect to it.  If B<TLS_CHECKPEER>
-is disabled, no check is made.
+is disabled, no check is made.  Note that disabling the check creates
+an opportunity for man-in-the-middle attacks since the server's
+identity will not be authenticated.  If possible, the CA's certificate
+should be installed locally so it can be verified.
+
+=item B<TLS_CACERT> file name
+
+An alias for B<TLS_CACERTFILE>.
 
 =item B<TLS_CACERTFILE> file name
 
@@ -371,6 +378,8 @@ The path to a certificate authority bundle which contains the certificates
 for all the Certificate Authorities the client knows to be valid,
 e.g. F</etc/ssl/ca-bundle.pem>.
 This option is only supported by the OpenLDAP libraries.
+Netscape-derived LDAP libraries use the same certificate
+database for CA and client certificates (see B<TLS_CERT>).
 
 =item B<TLS_CACERTDIR> directory
 

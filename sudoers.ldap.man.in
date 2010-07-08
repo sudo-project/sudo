@@ -140,7 +140,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "June 29, 2010" "1.7.3" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "July  8, 2010" "1.7.3" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -150,7 +150,7 @@ sudoers.ldap \- sudo LDAP configuration
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 In addition to the standard \fIsudoers\fR file, \fBsudo\fR may be configured
-via \s-1LAP\s0.  This can be especially useful for synchronizing \fIsudoers\fR
+via \s-1LDAP\s0.  This can be especially useful for synchronizing \fIsudoers\fR
 in a large, distributed environment.
 .PP
 Using \s-1LDAP\s0 for \fIsudoers\fR has several benefits:
@@ -455,13 +455,21 @@ If enabled, \fB\s-1TLS_CHECKPEER\s0\fR will cause the \s-1LDAP\s0 server's \s-1T
 certificated to be verified.  If the server's \s-1TLS\s0 certificate cannot
 be verified (usually because it is signed by an unknown certificate
 authority), \fBsudo\fR will be unable to connect to it.  If \fB\s-1TLS_CHECKPEER\s0\fR
-is disabled, no check is made.
+is disabled, no check is made.  Note that disabling the check creates
+an opportunity for man-in-the-middle attacks since the server's
+identity will not be authenticated.  If possible, the \s-1CA\s0's certificate
+should be installed locally so it can be verified.
+.IP "\fB\s-1TLS_CACERT\s0\fR file name" 4
+.IX Item "TLS_CACERT file name"
+An alias for \fB\s-1TLS_CACERTFILE\s0\fR.
 .IP "\fB\s-1TLS_CACERTFILE\s0\fR file name" 4
 .IX Item "TLS_CACERTFILE file name"
 The path to a certificate authority bundle which contains the certificates
 for all the Certificate Authorities the client knows to be valid,
 e.g. \fI/etc/ssl/ca\-bundle.pem\fR.
 This option is only supported by the OpenLDAP libraries.
+Netscape-derived \s-1LDAP\s0 libraries use the same certificate
+database for \s-1CA\s0 and client certificates (see \fB\s-1TLS_CERT\s0\fR).
 .IP "\fB\s-1TLS_CACERTDIR\s0\fR directory" 4
 .IX Item "TLS_CACERTDIR directory"
 Similar to \fB\s-1TLS_CACERTFILE\s0\fR but instead of a file, it is a

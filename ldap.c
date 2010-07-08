@@ -183,6 +183,8 @@ static struct ldap_config_table ldap_conf_table[] = {
 #ifdef LDAP_OPT_X_TLS_CACERTFILE
     { "tls_cacertfile", CONF_STR, FALSE, LDAP_OPT_X_TLS_CACERTFILE,
 	&ldap_conf.tls_cacertfile },
+    { "tls_cacert", CONF_STR, FALSE, LDAP_OPT_X_TLS_CACERTFILE,
+	&ldap_conf.tls_cacertfile },
 #endif
 #ifdef LDAP_OPT_X_TLS_CACERTDIR
     { "tls_cacertdir", CONF_STR, FALSE, LDAP_OPT_X_TLS_CACERTDIR,
