@@ -108,7 +108,7 @@
 /*
  * Prototypes
  */
-static void init_vars			__P((int, char **));
+static void init_vars			__P((char **));
 static int set_cmnd			__P((int));
 static void initial_setup		__P((void));
 static void set_loginclass		__P((struct passwd *));
@@ -147,7 +147,7 @@ sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp;
 char *runas_user;
 char *runas_group;
 static struct sudo_nss_list *snl;
-static int sudo_mode;
+int sudo_mode;
 
 /* For getopt(3) */
 extern char *optarg;
@@ -263,7 +263,7 @@ main(argc, argv, envp)
     if (user_cmnd == NULL && NewArgc == 0)
 	usage(1);
 
-    init_vars(sudo_mode, envp);		/* XXX - move this later? */
+    init_vars(envp);			/* XXX - move this later? */
 
 #ifdef USING_NONUNIX_GROUPS
     sudo_nonunix_groupcheck_init();	/* initialise nonunix groups impl */
@@ -414,7 +414,7 @@ main(argc, argv, envp)
         def_env_reset = FALSE;
 
     /* Build a new environment that avoids any nasty bits. */
-    rebuild_env(sudo_mode, def_noexec);
+    rebuild_env(def_noexec);
 
     /* Fill in passwd struct based on user we are authenticating as.  */
     auth_pw = get_authpw();
@@ -551,8 +551,7 @@ main(argc, argv, envp)
  * load the ``interfaces'' array.
  */
 static void
-init_vars(sudo_mode, envp)
-    int sudo_mode;
+init_vars(envp)
     char **envp;
 {
     char *p, **ep, thost[MAXHOSTNAMELEN + 1];

@@ -584,8 +584,7 @@ matches_env_keep(var)
  * Also adds sudo-specific variables (SUDO_*).
  */
 void
-rebuild_env(sudo_mode, noexec)
-    int sudo_mode;
+rebuild_env(noexec)
     int noexec;
 {
     char **old_envp, **ep, *cp, *ps1;

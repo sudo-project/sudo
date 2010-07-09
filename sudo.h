@@ -230,7 +230,7 @@ void env_init		__P((int lazy));
 void init_envtables	__P((void));
 void insert_env_vars	__P((struct list_member *));
 void read_env_file	__P((const char *, int));
-void rebuild_env	__P((int, int));
+void rebuild_env	__P((int));
 void validate_env_vars	__P((struct list_member *));
 
 /* exec.c */
@@ -355,6 +355,7 @@ extern struct passwd *auth_pw, *list_pw;
 
 extern int tgetpass_flags;
 extern int long_list;
+extern int sudo_mode;
 extern uid_t timestamp_uid;
 /* XXX - conflicts with the one in visudo */
 int run_command __P((const char *path, char *argv[], char *envp[], uid_t uid, int dowait));
