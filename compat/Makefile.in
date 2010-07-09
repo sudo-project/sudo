@@ -83,7 +83,7 @@ getprogname.lo: $(compat)/getprogname.c $(incdir)/compat.h $(top_builddir)/confi
 glob.lo: $(compat)/glob.c $(compat)/glob.h $(compat)/charclass.h $(incdir)/compat.h $(top_builddir)/config.h
 isblank.lo: $(compat)/isblank.c $(incdir)/compat.h $(top_builddir)/config.h
 memrchr.lo: $(compat)/memrchr.c $(incdir)/compat.h $(top_builddir)/config.h
-mkstemp.lo: $(compat)/mkstemp.c $(incdir)/compat.h $(top_builddir)/config.h
+mkstemps.lo: $(compat)/mkstemps.c $(incdir)/compat.h $(top_builddir)/config.h
 nanosleep.lo: $(compat)/nanosleep.c $(incdir)/compat.h $(top_builddir)/config.h
 sigaction.lo: $(compat)/sigaction.c $(incdir)/compat.h $(incdir)/compat.h
 snprintf.lo: $(compat)/snprintf.c $(incdir)/compat.h $(top_builddir)/config.h

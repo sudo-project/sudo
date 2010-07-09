@@ -63,8 +63,8 @@ size_t strlcpy(char *, const char *, size_t);
 #ifndef HAVE_MEMRCHR
 void *memrchr(const void *, int, size_t);
 #endif
-#ifndef HAVE_MKSTEMP
-int mkstemp(char *);
+#ifndef HAVE_MKSTEMPS
+int mkstemps(char *);
 #endif
 #ifndef HAVE_NANOSLEEP
 int nanosleep(const struct timespec *, struct timespec *);

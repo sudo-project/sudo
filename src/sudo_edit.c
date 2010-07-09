@@ -87,7 +87,7 @@ sudo_edit(struct command_details *command_details, char *argv[], char *envp[])
     struct command_details editor_details;
     ssize_t nread, nwritten;
     const char *tmpdir;
-    char *cp, **nargv, **ap, **files = NULL;
+    char *cp, *suff, **nargv, **ap, **files = NULL;
     char buf[BUFSIZ];
     int rc, i, j, ac, ofd, tfd, nargc, rval, tmplen;
     int editor_argc = 0, nfiles = 0;
@@ -178,14 +178,20 @@ sudo_edit(struct command_details *command_details, char *argv[], char *envp[])
 	    cp++;
 	else
 	    cp = tf[j].ofile;
-	easprintf(&tf[j].tfile, "%.*s/%s.XXXXXXXX", tmplen, tmpdir, cp);
+	suff = strrchr(cp, '.');
+	if (suff != NULL) {
+	    easprintf(&tf[j].tfile, "%.*s/%.*sXXXXXXXX%s", tmplen, tmpdir,
+		(int)(size_t)(suff - cp), cp, suff);
+	} else {
+	    easprintf(&tf[j].tfile, "%.*s/%s.XXXXXXXX", tmplen, tmpdir, cp);
+	}
 	if (seteuid(user_details.uid) != 0)
 	    error(1, "seteuid(%d)", (int)user_details.uid);
-	tfd = mkstemp(tf[j].tfile);
+	tfd = mkstemps(tf[j].tfile, suff ? strlen(suff) : 0);
 	if (seteuid(ROOT_UID) != 0)
 	    error(1, "seteuid(ROOT_UID)");
 	if (tfd == -1) {
-	    warning("mkstemp");
+	    warning("mkstemps");
 	    goto cleanup;
 	}
 	if (ofd != -1) {

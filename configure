@@ -15459,12 +15459,12 @@ fi
 fi
 done
 
-for ac_func in mkstemp
+for ac_func in mkstemps
 do :
-  ac_fn_c_check_func "$LINENO" "mkstemp" "ac_cv_func_mkstemp"
-if test "x$ac_cv_func_mkstemp" = x""yes; then :
+  ac_fn_c_check_func "$LINENO" "mkstemps" "ac_cv_func_mkstemps"
+if test "x$ac_cv_func_mkstemps" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_MKSTEMP 1
+#define HAVE_MKSTEMPS 1
 _ACEOF
 
 else
@@ -15483,8 +15483,8 @@ fi
 done
 
     case " $LIBOBJS " in
-  *" mkstemp.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS mkstemp.$ac_objext"
+  *" mkstemps.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS mkstemps.$ac_objext"
  ;;
 esac
 

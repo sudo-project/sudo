@@ -32,7 +32,7 @@ compat/isblank.c
 compat/memrchr.c
 compat/mksiglist.c
 compat/mksiglist.h
-compat/mkstemp.c
+compat/mkstemps.c
 compat/nanosleep.c
 compat/setenv.c
 compat/siglist.in

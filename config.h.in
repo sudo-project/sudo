@@ -337,8 +337,8 @@
 /* Define to 1 if you have the `memset' function. */
 #undef HAVE_MEMSET
 
-/* Define to 1 if you have the `mkstemp' function. */
-#undef HAVE_MKSTEMP
+/* Define to 1 if you have the `mkstemps' function. */
+#undef HAVE_MKSTEMPS
 
 /* Define to 1 if you have the <mps/ldap_ssl.h> header file. */
 #undef HAVE_MPS_LDAP_SSL_H
