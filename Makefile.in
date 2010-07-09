@@ -492,7 +492,7 @@ install-binaries: install-dirs $(PROGS)
 	if [ -f sesh ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s sesh $(DESTDIR)$(libexecdir)/sesh; fi
 
 install-noexec: install-dirs libsudo_noexec.la
-	if [ -f .libs/$(noexecfile) ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0755 .libs/lib$(noexecfile) $(DESTDIR)$(noexecdir)/$(noexecfile); fi
+	if [ -f .libs/lib$(noexecfile) ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0755 .libs/lib$(noexecfile) $(DESTDIR)$(noexecdir)/$(noexecfile); fi
 
 install-sudoers: install-dirs
 	test -f $(DESTDIR)$(sudoersdir)/sudoers || \
