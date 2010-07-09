@@ -107,7 +107,7 @@ SRCS = aix.c alias.c alloc.c audit.c boottime.c bsm_audit.c check.c \
        fileops.c find_path.c fnmatch.c get_pty.c getcwd.c getprogname.c \
        getspwuid.c gettime.c glob.c goodpath.c gram.c gram.y interfaces.c \
        iolog.c isblank.c lbuf.c ldap.c linux_audit.c list.c logging.c match.c \
-       mksiglist.c mkstemp.c memrchr.c nanosleep.c parse.c parse_args.c \
+       mksiglist.c mkstemps.c memrchr.c nanosleep.c parse.c parse_args.c \
        pwutil.c set_perms.c setsid.c sigaction.c snprintf.c strcasecmp.c \
        strerror.c strlcat.c strlcpy.c strsignal.c sudo.c sudo_noexec.c \
        sudo_edit.c sudo_nss.c term.c testsudoers.c tgetpass.c toke.c toke.l \
@@ -321,8 +321,8 @@ match.o: $(srcdir)/match.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(srcdi
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/match.c
 memrchr.o: $(srcdir)/memrchr.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/memrchr.c
-mkstemp.o: $(srcdir)/mkstemp.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/mkstemp.c
+mkstemps.o: $(srcdir)/mkstemps.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/mkstemps.c
 nanosleep.o: $(srcdir)/nanosleep.c $(srcdir)/compat.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/nanosleep.c
 parse.o: $(srcdir)/parse.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(devdir)/gram.h

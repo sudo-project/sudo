@@ -69,7 +69,7 @@ sudo_edit(argc, argv, envp)
 {
     ssize_t nread, nwritten;
     const char *tmpdir;
-    char *cp, **nargv, *editor, **files;
+    char *cp, *suff, **nargv, *editor, **files;
     char **editor_argv = NULL;
     char buf[BUFSIZ];
     int rc, i, j, ac, ofd, tfd, nargc, rval, nfiles, tmplen;
@@ -143,12 +143,17 @@ sudo_edit(argc, argv, envp)
 	    cp++;
 	else
 	    cp = tf[j].ofile;
-	easprintf(&tf[j].tfile, "%.*s/%s.XXXXXXXX", tmplen, tmpdir, cp);
+	suff = strrchr(cp, '.');
+	if (suff != NULL) {
+	    easprintf(&tf[j].tfile, "%.*s/%.*sXXXXXXXX%s", tmplen, tmpdir, (int)(size_t)(suff - cp), cp, suff);
+	} else {
+	    easprintf(&tf[j].tfile, "%.*s/%s.XXXXXXXX", tmplen, tmpdir, cp);
+	}
 	set_perms(PERM_USER);
-	tfd = mkstemp(tf[j].tfile);
+	tfd = mkstemps(tf[j].tfile, suff ? strlen(suff) : 0);
 	set_perms(PERM_ROOT);
 	if (tfd == -1) {
-	    warning("mkstemp");
+	    warning("mkstemps");
 	    goto cleanup;
 	}
 	if (ofd != -1) {

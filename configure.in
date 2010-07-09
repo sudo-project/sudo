@@ -1972,7 +1972,7 @@ AC_CHECK_FUNCS(closefrom, [], [AC_LIBOBJ(closefrom)
 	[ #include <limits.h>
 	  #include <fcntl.h> ])
 ])
-AC_CHECK_FUNCS(mkstemp, [], [SUDO_OBJS="${SUDO_OBJS} mkstemp.o"
+AC_CHECK_FUNCS(mkstemps, [], [SUDO_OBJS="${SUDO_OBJS} mkstemps.o"
     AC_CHECK_FUNCS(random lrand48, [break])
 ])
 AC_CHECK_FUNCS(snprintf vsnprintf asprintf vasprintf, , [NEED_SNPRINTF=1])
