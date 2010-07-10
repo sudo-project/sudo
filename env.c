@@ -277,7 +277,8 @@ sudo_setenv(var, val, dupcheck)
  * Version of getenv(3) that uses our own environ pointer.
  */
 char *
-getenv(const char *var)
+getenv(var)
+    const char *var;
 {
     char *cp, **ev;
     size_t vlen = strlen(var);

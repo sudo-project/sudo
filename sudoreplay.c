@@ -438,7 +438,10 @@ delay(secs)
 }
 
 static void *
-open_io_fd(char *path, int len, const char *suffix)
+open_io_fd(path, len, suffix)
+    char *path;
+    int len;
+    const char *suffix;
 {
     path[len] = '\0';
     strlcat(path, suffix, PATH_MAX);
