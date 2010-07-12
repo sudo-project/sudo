@@ -64,7 +64,9 @@ sbindir = @sbindir@
 sysconfdir = @sysconfdir@
 libexecdir = @libexecdir@
 datarootdir = @datarootdir@
+docdir = @docdir@
 mandir = @mandir@
+timedir = @timedir@
 noexecfile = @NOEXECFILE@
 noexecdir = @NOEXECDIR@
 
@@ -147,6 +149,7 @@ TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o
 LIB_OBJS = @LIBOBJS@
 
 VERSION = @PACKAGE_VERSION@
+PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
 DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
             LICENSE Makefile.in PORTING README README.LDAP TROUBLESHOOTING \
@@ -472,19 +475,21 @@ sudoreplay.man: $(srcdir)/sudoreplay.man.in
 
 # The 1.7 branch started Jan 18, 2010
 ChangeLog:
-	hg log --style=changelog -b 1.7 > $@
-	hg log --style=changelog -b default --date '<2010-01-18 00:00:00' >> $@
+	if test -d $(srcdir)/.hg; then \
+	    hg log --style=changelog -b 1.7 > $@; \
+	    hg log --style=changelog -b default --date '<2010-01-18 00:00:00' >> $@; \
+	fi
 
 install: install-dirs install-binaries @INSTALL_NOEXEC@ install-sudoers install-man
 
 install-dirs:
 	$(SHELL) $(srcdir)/mkinstalldirs $(DESTDIR)$(sudodir) \
-	    $(DESTDIR)$(visudodir) $(DESTDIR)$(sudoersdir) \
-	    $(DESTDIR)$(mandirsu) $(DESTDIR)$(mandirform) \
-	    $(DESTDIR)$(noexecdir)
+	    $(DESTDIR)$(visudodir) $(DESTDIR)$(noexecdir) \
+	    $(DESTDIR)$(sudoersdir) $(DESTDIR)$(docdir) \
+	    $(DESTDIR)$(mandirsu) $(DESTDIR)$(mandirform)
 
 install-binaries: install-dirs $(PROGS)
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 sudo $(DESTDIR)$(sudodir)/sudo
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 04111 sudo $(DESTDIR)$(sudodir)/sudo
 	rm -f $(DESTDIR)$(sudodir)/sudoedit
 	ln $(DESTDIR)$(sudodir)/sudo $(DESTDIR)$(sudodir)/sudoedit
 	if [ -f sudoreplay ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 sudoreplay $(DESTDIR)$(sudodir)/sudoreplay; fi
@@ -495,11 +500,14 @@ install-noexec: install-dirs libsudo_noexec.la
 	if [ -f .libs/lib$(noexecfile) ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0755 .libs/lib$(noexecfile) $(DESTDIR)$(noexecdir)/$(noexecfile); fi
 
 install-sudoers: install-dirs
+	$(INSTALL) -d -O $(sudoers_uid) -G $(sudoers_gid) -M 0750 \
+	    $(DESTDIR)$(sudoersdir)/sudoers.d
 	test -f $(DESTDIR)$(sudoersdir)/sudoers || \
 	    $(INSTALL) -O $(sudoers_uid) -G $(sudoers_gid) -M $(sudoers_mode) \
 		$(srcdir)/sudoers $(DESTDIR)$(sudoersdir)/sudoers
 
-install-man: install-dirs
+install-man: install-dirs ChangeLog
+	(cd $(srcdir) && for f in ChangeLog HISTORY LICENSE README* TROUBLESHOOTING UPGRADE WHATSNEW sample.* schema.* sudoers2ldif; do $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $$f $(DESTDIR)$(docdir); done)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/sudo.$(mantype) $(DESTDIR)$(mandirsu)/sudo.$(mansectsu)
 	@rm -f $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)
 	ln $(DESTDIR)$(mandirsu)/sudo.$(mansectsu) $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)
@@ -531,69 +539,31 @@ realclean: distclean
 cleandir: realclean
 
 dist: ChangeLog
-	pax -w -x ustar -s '/^/sudo-$(VERSION)\//' -f ../sudo-$(VERSION).tar \
-		$(DISTFILES)
-	gzip -9f ../sudo-$(VERSION).tar
-	ls -l ../sudo-$(VERSION).tar.gz
+	pax -w -x ustar -s '/^/$(PACKAGE_TARNAME)-$(VERSION)\//' \
+	    -f ../$(PACKAGE_TARNAME)-$(VERSION).tar $(DISTFILES)
+	gzip -9f ../$(PACKAGE_TARNAME)-$(VERSION).tar
+	ls -l ../$(PACKAGE_TARNAME)-$(VERSION).tar.gz
 
-bindist: ChangeLog
-	( \
-	  ARCH=`uname -m|sed 's:/:_:g'`+`uname -sr|sed 's/ /_/g'` ; \
-	  mkdir tmp.$$ARCH ; \
-	  tdir=tmp.$$ARCH/sudo-$(VERSION) ; \
-	  mkdir $$tdir ; \
-	  for i in $(BINFILES) ; do \
-	    if [ -f $$i ]; then \
-	      cp $$i $$tdir ; \
-	    elif [ -f $(srcdir)/$$i ]; then \
-	      cp $(srcdir)/$$i $$tdir ; \
-	    else \
-	      echo cannot find $$i ; \
-	      exit 1 ; \
-	    fi ; \
-	  done ; \
-	  if [ -f .libs/lib$(noexecfile) ]; then \
-	    cp .libs/lib$(noexecfile) $$tdir/$(noexecfile) ; \
-	  fi ; \
-	  cp $(srcdir)/INSTALL.binary $$tdir/INSTALL ; \
-	  $(SHELL) ./config.status --file=Makefile.binary && cp Makefile.binary $$tdir/Makefile ; \
-	  strip $$tdir/sudo ; \
-	  strip $$tdir/visudo ; \
-	  cd tmp.$$ARCH && tar Ocf ../sudo-$(VERSION)-$$ARCH.tar sudo-$(VERSION) && cd .. ; \
-	  gzip -f --best sudo-$(VERSION)-$$ARCH.tar ; \
-	  rm -rf tmp.$$ARCH ; \
-	)
-
-depot:
-	( \
-	  tdir=tmp.depot ; \
-	  mkdir $$tdir ; \
-	  for i in sudo visudo sudo.man visudo.man sudoers.man sudoers ChangeLog HISTORY LICENSE README TROUBLESHOOTING UPGRADE sample.syslog.conf sample.sudoers; do \
-	    if [ -f $$i ]; then \
-	      cp $$i $$tdir ; \
-	    elif [ -f $(srcdir)/$$i ]; then \
-	      cp $(srcdir)/$$i $$tdir ; \
-	    else \
-	      echo cannot find $$i ; \
-	      exit 1 ; \
-	    fi ; \
-	  done ; \
-	  if [ -f libsudo_noexec.la ]; then \
-	    cp libtool $$tdir ; \
-	    $(LIBTOOL) --mode=install $(INSTALL) libsudo_noexec.la `pwd`/$$tdir ; \
-	  fi ; \
-	  sed 's/@VERSION@/$(VERSION)/g' <$(srcdir)/sudo.psf >$$tdir/sudo.psf ; \
-	  printf '#!/sbin/sh\nrm -f /usr/local/bin/sudoedit\nln /usr/local/bin/sudo /usr/local/bin/sudoedit\n' > $$tdir/sudo-exec.postinstall ; \
-	  printf '#!/sbin/sh\nrm -f /usr/local/man/man1m/sudoedit.1m\nln /usr/local/man/man1m/sudo.1m /usr/local/man/man1m/sudoedit.1m\n' > $$tdir/sudo-man.postinstall ; \
-	  printf '#!/sbin/sh\nif [ ! -s /etc/sudoers ]; then\n\techo installing /usr/local/doc/sudo/sudoers as /etc/sudoers\n\techo use /usr/local/sbin/visudo to configure sudo\n\tcp /usr/local/doc/sudo/sudoers /etc/sudoers\n\tchmod 440 /etc/sudoers\n\tchown root:root /etc/sudoers\nfi\n' > $$tdir/sudo-config.postinstall ; \
-	  chmod 755 $$tdir/sudo-exec.postinstall $$tdir/sudo-man.postinstall $$tdir/sudo-config.postinstall ; \
-	  strip $$tdir/sudo ; \
-	  strip $$tdir/visudo ; \
-	  cd $$tdir ; \
-	  swpackage -x target_type=tape -d ../sudo-$(VERSION).depot -s sudo.psf ; \
-	  cd .. ; \
-	  gzip -f --best sudo-$(VERSION).depot; \
-	  rm -rf tmp.depot ; \
-	)
+package: sudo.pp
+	DESTDIR=`cd $(top_builddir) && pwd`/destdir; rm -rf $$DESTDIR; \
+	$(SHELL) $(srcdir)/mkinstalldirs $$DESTDIR/$(timedir) && \
+	$(MAKE) install DESTDIR=$$DESTDIR && \
+	mv $$DESTDIR/$(sysconfdir)/sudoers \
+	    $$DESTDIR/$(sysconfdir)/sudoers.dist && \
+	$(SHELL) $(srcdir)/pp \
+	    --destdir=$$DESTDIR \
+	    $(srcdir)/sudo.pp   \
+	    bindir=$(bindir) \
+	    sbindir=$(sbindir) \
+	    libexecdir=$(libexecdir) \
+	    timedir=$(timedir) \
+	    mandir=$(mandir) \
+	    docdir=$(docdir) \
+	    sysconfdir=$(sysconfdir) \
+	    sudoersdir=$(sudoersdir) \
+	    sudoers_uid=$(sudoers_uid) \
+	    sudoers_gid=$(sudoers_gid) \
+	    sudoers_mode=$(sudoers_mode) \
+	    version=$(VERSION)
 
 .PHONY:	ChangeLog
