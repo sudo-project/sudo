@@ -165,14 +165,6 @@ DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
             visudo.cat visudo.man.in visudo.pod auth/API sudo.man.pl \
             sudoers.man.pl
 
-BINFILES= ChangeLog HISTORY LICENSE README TROUBLESHOOTING \
-	  UPGRADE install-sh mkinstalldirs sample.syslog.conf sample.sudoers \
-	  sudo sudo.cat sudo.man sudo.pod sudoers sudoers.cat sudoers.man \
-	  sudoers.pod sudoreplay.cat sudoreplay.man sudoreplay.pod \
-	  visudo visudo.cat visudo.man visudo.pod
-
-BINSPECIAL= INSTALL.binary Makefile.binary.in libtool
-
 SUDODEP = $(srcdir)/sudo.h $(srcdir)/alloc.h $(srcdir)/compat.h \
 	  $(srcdir)/defaults.h $(srcdir)/error.h $(srcdir)/list.h \
 	  $(srcdir)/logging.h $(srcdir)/missing.h $(srcdir)/sudo_nss.h \
