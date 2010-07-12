@@ -1004,6 +1004,7 @@ enable_libtool_lock
 with_noexec
 with_netsvc
 enable_sia
+with_pam_login
 enable_pam_session
 '
       ac_precious_vars='build_alias
@@ -1747,6 +1748,7 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-noexec=PATH      fully qualified pathname of sudo_noexec.so
   --with-netsvc[=PATH]    path to netsvc.conf
+  --with-pam-login        enable specific PAM session for sudo -i
 
 Some influential environment variables:
   CC          C compiler command
@@ -6928,13 +6930,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6931: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6933: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6934: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6936: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6937: output\"" >&5)
+  (eval echo "\"\$as_me:6939: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -8139,7 +8141,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 8142 "configure"' > conftest.$ac_ext
+  echo '#line 8144 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9400,11 +9402,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9403: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9405: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9407: \$? = $ac_status" >&5
+   echo "$as_me:9409: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9739,11 +9741,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9742: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9744: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9746: \$? = $ac_status" >&5
+   echo "$as_me:9748: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9844,11 +9846,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9847: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9849: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9851: \$? = $ac_status" >&5
+   echo "$as_me:9853: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9899,11 +9901,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9902: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9904: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9906: \$? = $ac_status" >&5
+   echo "$as_me:9908: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12266,7 +12268,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12269 "configure"
+#line 12271 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12362,7 +12364,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12365 "configure"
+#line 12367 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16161,6 +16163,25 @@ done
 
 	AUTH_OBJS="$AUTH_OBJS pam.lo";
 	AUTH_EXCL=PAM
+
+
+# Check whether --with-pam-login was given.
+if test "${with_pam_login+set}" = set; then :
+  withval=$with_pam_login; case $with_pam_login in
+	    yes)	$as_echo "#define HAVE_PAM_LOGIN 1" >>confdefs.h
+
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use PAM login" >&5
+$as_echo_n "checking whether to use PAM login... " >&6; }
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+			;;
+	    no)		;;
+	    *)		as_fn_error "\"--with-pam-login does not take an argument.\"" "$LINENO" 5
+			;;
+	esac
+fi
+
+
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use PAM session support" >&5
 $as_echo_n "checking whether to use PAM session support... " >&6; }
 	# Check whether --enable-pam_session was given.
@@ -16184,6 +16205,7 @@ else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 fi
+
 
 	case $host in
 	    *-*-linux*|*-*-solaris*)
@@ -20415,6 +20437,7 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+
 
 
 

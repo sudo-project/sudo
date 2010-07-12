@@ -290,7 +290,7 @@ void env_init(char * const envp[]);
 void init_envtables(void);
 void insert_env_vars(char * const envp[]);
 void read_env_file(const char *, int);
-void rebuild_env(int, int);
+void rebuild_env(int);
 void validate_env_vars(char * const envp[]);
 
 /* fmt_string.c */
@@ -315,6 +315,7 @@ int group_plugin_query(const char *user, const char *group,
 extern struct sudo_user sudo_user;
 extern struct passwd *auth_pw, *list_pw;
 extern int long_list;
+extern int sudo_mode;
 extern uid_t timestamp_uid;
 extern sudo_conv_t sudo_conv;
 extern sudo_printf_t sudo_printf;

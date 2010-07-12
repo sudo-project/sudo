@@ -146,6 +146,7 @@ char *login_style;
 sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp;
 sudo_conv_t sudo_conv;
 sudo_printf_t sudo_printf;
+int sudo_mode;
 
 static char *runas_user;
 static char *runas_group;
@@ -157,8 +158,6 @@ char **NewArgv;
 
 /* error.c */
 extern sigjmp_buf error_jmp;
-
-static int sudo_mode;
 
 static int
 sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
@@ -437,7 +436,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	def_env_reset = FALSE;
 
     /* Build a new environment that avoids any nasty bits. */
-    rebuild_env(sudo_mode, def_noexec);
+    rebuild_env(def_noexec);
 
     /* Fill in passwd struct based on user we are authenticating as.  */
     auth_pw = get_authpw();

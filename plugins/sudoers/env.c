@@ -407,7 +407,7 @@ matches_env_keep(const char *var)
  * Also adds sudo-specific variables (SUDO_*).
  */
 void
-rebuild_env(int sudo_mode, int noexec)
+rebuild_env(int noexec)
 {
     char **old_envp, **ep, *cp, *ps1;
     char idbuf[MAX_UID_T_LEN];
