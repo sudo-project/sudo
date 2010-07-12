@@ -33,6 +33,8 @@
 
 #include <compat.h>
 
+extern int gettime(struct timeval *);
+
 static unsigned int get_random(void);
 static void seed_random(void);
 
