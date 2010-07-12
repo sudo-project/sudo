@@ -921,6 +921,10 @@ AC_ARG_WITH(insults, [AS_HELP_STRING([--with-insults], [insult the user for ente
 		with_classic_insults=yes
 		with_csops_insults=yes
 		;;
+    disabled)	insults=off
+		with_classic_insults=yes
+		with_csops_insults=yes
+		;;
     no)		insults=off
 		;;
     *)		AC_MSG_ERROR(["--with-insults does not take an argument."])

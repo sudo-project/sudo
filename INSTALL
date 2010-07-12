@@ -491,6 +491,10 @@ The following options are also configurable at runtime:
 	Define this if you want to be insulted for typing an incorrect password
 	just like the original sudo(8).  This is off by default.
 
+  --with-insults=disabled
+        Include support for insults but disable them unless explicitly
+        enabled in sudoers.
+
   --with-all-insults
 	Include all the insult sets listed below.  You must either specify
 	--with-insults or enable insults in the sudoers file for this to
