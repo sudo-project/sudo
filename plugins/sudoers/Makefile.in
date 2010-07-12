@@ -254,8 +254,8 @@ install-dirs:
 	    $(DESTDIR)$(sudoersdir)
 
 install-binaries: visudo sudoreplay install-dirs
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s sudoreplay $(DESTDIR)$(replaydir)/sudoreplay
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s visudo $(DESTDIR)$(visudodir)/visudo
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 sudoreplay $(DESTDIR)$(replaydir)/sudoreplay
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 visudo $(DESTDIR)$(visudodir)/visudo
 
 install-includes:
 
