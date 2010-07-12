@@ -431,7 +431,7 @@ send_mail(fmt, va_alist)
 #ifndef NO_ROOT_MAILER
     static char *root_envp[] = {
 	"HOME=/",
-	"PATH=/usr/bin:/bin",
+	"PATH=/usr/bin:/bin:/usr/sbin:/sbin",
 	"LOGNAME=root",
 	"USERNAME=root",
 	"USER=root",

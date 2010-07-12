@@ -43,6 +43,10 @@
 #define _PATH_DEFPATH		"/usr/bin:/bin"
 #endif /* _PATH_DEFPATH */
 
+#ifndef _PATH_STDPATH
+#define _PATH_STDPATH		"/usr/bin:/bin:/usr/sbin:/sbin"
+#endif /* _PATH_STDPATH */
+
 #ifndef _PATH_ENVIRONMENT
 #define _PATH_ENVIRONMENT	"/etc/environment"
 #endif /* _PATH_ENVIRONMENT */
