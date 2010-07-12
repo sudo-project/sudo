@@ -472,7 +472,7 @@ ChangeLog:
 	    hg log --style=changelog -b default --date '<2010-01-18 00:00:00' >> $@; \
 	fi
 
-install: install-dirs install-binaries @INSTALL_NOEXEC@ install-sudoers install-man
+install: install-dirs install-binaries @INSTALL_NOEXEC@ install-sudoers install-doc
 
 install-dirs:
 	$(SHELL) $(srcdir)/mkinstalldirs $(DESTDIR)$(sudodir) \
@@ -498,7 +498,7 @@ install-sudoers: install-dirs
 	    $(INSTALL) -O $(sudoers_uid) -G $(sudoers_gid) -M $(sudoers_mode) \
 		$(srcdir)/sudoers $(DESTDIR)$(sudoersdir)/sudoers
 
-install-man: install-dirs ChangeLog
+install-doc: install-dirs ChangeLog
 	(cd $(srcdir) && for f in ChangeLog HISTORY LICENSE README* TROUBLESHOOTING UPGRADE WHATSNEW sample.* schema.* sudoers2ldif; do $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $$f $(DESTDIR)$(docdir); done)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/sudo.$(mantype) $(DESTDIR)$(mandirsu)/sudo.$(mansectsu)
 	@rm -f $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)
