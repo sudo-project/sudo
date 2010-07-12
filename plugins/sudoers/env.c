@@ -572,7 +572,7 @@ rebuild_env(int noexec)
     if (!ISSET(didvar, DID_TERM))
 	sudo_putenv("TERM=unknown", FALSE, FALSE);
     if (!ISSET(didvar, DID_PATH))
-	sudo_setenv("PATH", _PATH_DEFPATH, FALSE);
+	sudo_setenv("PATH", _PATH_STDPATH, FALSE);
 
     /*
      * Preload a noexec file?  For a list of LD_PRELOAD-alikes, see
