@@ -95,10 +95,10 @@ pam_init(pw, promptp, auth)
     pam_conv.conv = sudo_conv;
 #ifdef HAVE_PAM_LOGIN
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
-	    pam_status = pam_start("sudo-i", pw->pw_name, &pam_conv, &pamh);
+	pam_status = pam_start("sudo-i", pw->pw_name, &pam_conv, &pamh);
     else
 #endif
-	    pam_status = pam_start("sudo", pw->pw_name, &pam_conv, &pamh);
+	pam_status = pam_start("sudo", pw->pw_name, &pam_conv, &pamh);
 
     if (pam_status != PAM_SUCCESS) {
 	log_error(USE_ERRNO|NO_EXIT|NO_MAIL, "unable to initialize PAM");
