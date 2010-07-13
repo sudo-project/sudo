@@ -152,18 +152,18 @@ VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
 DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
-            LICENSE Makefile.in PORTING README README.LDAP TROUBLESHOOTING \
-            UPGRADE WHATSNEW aclocal.m4 aixcrypt.exp config.guess \
-            config.h.in config.sub configure configure.in def_data.in \
-            indent.pro install-sh ltmain.sh m4 mkdefaults mkinstalldirs \
-            pathnames.h.in sample.pam sample.syslog.conf \
-            sample.sudoers schema.ActiveDirectory schema.OpenLDAP \
-            schema.iPlanet siglist.in sudo.cat sudo.man.in sudo.pod sudo.psf \
-            sudo_usage.h.in sudoers sudoers.cat sudoers.man.in sudoers.pod \
-            sudoers.ldap.cat sudoers.ldap.man.in sudoers.ldap.pod \
-            sudoers2ldif sudoreplay.cat sudoreplay.man.in sudoreplay.pod \
-            visudo.cat visudo.man.in visudo.pod auth/API sudo.man.pl \
-            sudoers.man.pl
+	    LICENSE Makefile.in PORTING README README.LDAP TROUBLESHOOTING \
+	    UPGRADE WHATSNEW aclocal.m4 aixcrypt.exp config.guess \
+	    config.h.in config.sub configure configure.in def_data.in \
+	    indent.pro install-sh ltmain.sh m4 mkdefaults mkinstalldirs \
+	    mkpkg pathnames.h.in pp sample.pam sample.syslog.conf \
+	    sample.sudoers schema.ActiveDirectory schema.OpenLDAP \
+	    schema.iPlanet siglist.in sudo.cat sudo.man.in sudo.pod sudo.pp \
+	    sudo_usage.h.in sudoers sudoers.cat sudoers.man.in sudoers.pod \
+	    sudoers.ldap.cat sudoers.ldap.man.in sudoers.ldap.pod \
+	    sudoers2ldif sudoreplay.cat sudoreplay.man.in sudoreplay.pod \
+	    visudo.cat visudo.man.in visudo.pod auth/API sudo.man.pl \
+	    sudoers.man.pl
 
 SUDODEP = $(srcdir)/sudo.h $(srcdir)/alloc.h $(srcdir)/compat.h \
 	  $(srcdir)/defaults.h $(srcdir)/error.h $(srcdir)/list.h \
