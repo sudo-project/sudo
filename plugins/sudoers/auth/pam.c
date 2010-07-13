@@ -106,7 +106,9 @@ pam_init(struct passwd *pw, char **promptp, sudo_auth *auth)
      * We set PAM_RHOST to avoid a bug in Solaris 7 and below.
      */
     (void) pam_set_item(pamh, PAM_RUSER, user_name);
+#ifdef __sun__
     (void) pam_set_item(pamh, PAM_RHOST, user_host);
+#endif
 
     /*
      * Some versions of pam_lastlog have a bug that
