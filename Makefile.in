@@ -20,11 +20,31 @@ devdir = @devdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
+# Installation paths for package building
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+sbindir = @sbindir@
+sysconfdir = @sysconfdir@
+libexecdir = @libexecdir@
+includedir = @includedir@
+datarootdir = @datarootdir@
+docdir = @docdir@
+mandir = @mandir@
+timedir = @timedir@
+
+# sudoers owner and mode for package building
+sudoersdir = $(sysconfdir)
+sudoers_uid = @SUDOERS_UID@
+sudoers_gid = @SUDOERS_GID@
+sudoers_mode = @SUDOERS_MODE@
+
 SUBDIRS = compat common src plugins/sudoers include doc
 
 SAMPLES = plugins/sample plugins/sample_group
 
 VERSION = @PACKAGE_VERSION@
+PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 
@@ -40,7 +60,7 @@ autoconf:
 	autoconf -I m4
 
 ChangeLog:
-	hg log --style=changelog -b default > $@
+	test -d $(srcdir)/.hg && hg log --style=changelog -b default > $@
 
 check:
 	@echo nothing to check
@@ -55,18 +75,42 @@ libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
 
 dist: ChangeLog $(srcdir)/MANIFEST
-	pax -w -x ustar -s '/^/sudo-$(VERSION)\//' -f ../sudo-$(VERSION).tar \
+	pax -w -x ustar -s '/^/$(PACKAGE_TARNAME)-$(VERSION)\//' \
+	    -f ../$(PACKAGE_TARNAME)-$(VERSION).tar \
 	    `sed 's/[ 	].*//' $(srcdir)/MANIFEST`
-	gzip -9f ../sudo-$(VERSION).tar
-	ls -l ../sudo-$(VERSION).tar.gz
+	gzip -9f ../$(PACKAGE_TARNAME)-$(VERSION).tar
+	ls -l ../$(PACKAGE_TARNAME)-$(VERSION).tar.gz
+
+package: sudo.pp
+	DESTDIR=`cd $(top_builddir) && pwd`/destdir; rm -rf $$DESTDIR; \
+	$(SHELL) $(srcdir)/mkinstalldirs $$DESTDIR/$(timedir) && \
+	$(MAKE) install DESTDIR=$$DESTDIR && \
+	mv $$DESTDIR/$(sudoersdir)/sudoers \
+	    $$DESTDIR/$(sudoersdir)/sudoers.dist && \
+	$(SHELL) $(srcdir)/pp \
+	    --destdir=$$DESTDIR \
+	    $(srcdir)/sudo.pp   \
+	    bindir=$(bindir) \
+	    sbindir=$(sbindir) \
+	    libexecdir=$(libexecdir) \
+	    includedir=$(includedir) \
+	    timedir=$(timedir) \
+	    mandir=$(mandir) \
+	    docdir=$(docdir) \
+	    sysconfdir=$(sysconfdir) \
+	    sudoersdir=$(sudoersdir) \
+	    sudoers_uid=$(sudoers_uid) \
+	    sudoers_gid=$(sudoers_gid) \
+	    sudoers_mode=$(sudoers_mode) \
+	    version=$(VERSION)
 
 clean: config.status
-	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done
+	for d in $(SUBDIRS) $(SAMPLES); do (cd $$d && $(MAKE) $@); done
 
 mostlyclean: clean
 
 distclean: config.status
-	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done
+	for d in $(SUBDIRS) $(SAMPLES); do (cd $$d && $(MAKE) $@); done
 	-rm -rf Makefile pathnames.h config.h config.status config.cache \
 		config.log libtool stamp-* autom4te.cache ChangeLog
 

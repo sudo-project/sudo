@@ -22,6 +22,7 @@
 srcdir = @srcdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+includedir = @includedir@
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
@@ -45,19 +46,19 @@ all:
 install: install-dirs install-includes
 
 install-dirs:
-	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(prefix)/include
+	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(includedir)
 
 install-binaries:
 
 install-man:
 
 install-includes: install-dirs
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $(srcdir)/sudo_plugin.h $(DESTDIR)$(prefix)/include
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $(srcdir)/sudo_plugin.h $(DESTDIR)$(includedir)
 
 install-plugin:
 
 uninstall:
-	-rm -f $(DESTDIR)$(prefix)/include/sudo_plugin.h
+	-rm -f $(DESTDIR)$(includedir)/sudo_plugin.h
 
 check:
 	@echo nothing to check

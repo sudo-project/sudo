@@ -1,0 +1,153 @@
+#!/bin/sh
+
+IFS=
+
+top_srcdir=`dirname $0`
+
+platform=`$top_srcdir/pp --probe` || exit 1
+
+# Default paths
+prefix=/usr/local
+
+# Choose configure options by platform.
+# We use the same configure options as vendor packages when possible.
+case "$platform" in
+    centos4*|rhel4*)
+	# Note, must indent with tabs, not spaces due to IFS trickery
+	prefix=/usr
+	configure_opts="
+		--prefix=$prefix
+		--with-logging=syslog
+		--with-logfac=authpriv
+		--with-pam
+		--with-pam-login
+		--with-editor=/bin/vi
+		--with-env-editor
+		--with-ignore-dot
+		--with-tty-tickets
+		--with-ldap
+		--with-selinux
+		--with-passprompt=[sudo] password for %p: "
+	;;
+    centos5*|rhel5*)
+	# Note, must indent with tabs, not spaces due to IFS trickery
+	prefix=/usr
+	configure_opts="
+		--prefix=$prefix
+		--with-logging=syslog
+		--with-logfac=authpriv
+		--with-pam
+		--with-pam-login
+		--with-editor=/bin/vi
+		--with-env-editor
+		--with-ignore-dot
+		--with-tty-tickets
+		--with-ldap
+		--with-selinux
+		--with-linux-audit
+		--with-passprompt=[sudo] password for %p: "
+	export CFLAGS="-fpie" LDFLAGS="-pie"
+	;;
+    sles9*)
+	prefix=/usr
+	# SuSE doesn't have /usr/libexec
+	case "$platform" in
+	    *64*)	libexec=lib64;;
+	    *)		libexec=lib;;
+	esac
+	# Note, must indent with tabs, not spaces due to IFS trickery
+	configure_opts="
+		--prefix=$prefix
+		--libexecdir=$prefix/$libexec/sudo
+		--with-logging=syslog
+		--with-logfac=auth
+		--with-insults=disabled
+		--with-all-insults
+		--with-ignore-dot
+		--with-tty-tickets
+		--enable-shell-sets-home
+		--with-sudoers-mode=0440
+		--with-pam
+		--with-ldap
+		--with-env-editor
+		--with-passprompt=%p\'s password: "
+
+	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
+	;;
+    sles10*)
+	prefix=/usr
+	# SuSE doesn't have /usr/libexec
+	case "$platform" in
+	    *64*)	libexec=lib64;;
+	    *)		libexec=lib;;
+	esac
+	# Note, must indent with tabs, not spaces due to IFS trickery
+	# XXX - SuSE uses secure path only for env_reset
+	configure_opts="
+		--prefix=$prefix
+		--libexecdir=$prefix/$libexec/sudo
+		--with-logging=syslog
+		--with-logfac=auth
+		--with-insults=disabled
+		--with-all-insults
+		--with-ignore-dot
+		--with-tty-tickets
+		--enable-shell-sets-home
+		--with-sudoers-mode=0440
+		--with-pam
+		--with-ldap
+		--with-env-editor
+		--with-passprompt=%p\'s password: "
+
+	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
+	export CFLAGS="-fpie" LDFLAGS="-pie"
+	;;
+    sles11*)
+	prefix=/usr
+	# SuSE doesn't have /usr/libexec
+	case "$platform" in
+	    *64*)	libexec=lib64;;
+	    *)		libexec=lib;;
+	esac
+	# Note, must indent with tabs, not spaces due to IFS trickery
+	# XXX - SuSE uses secure path only for env_reset
+	configure_opts="
+		--prefix=$prefix
+		--libexecdir=$prefix/$libexec/sudo
+		--with-selinux
+		--with-logging=syslog
+		--with-logfac=auth
+		--with-insults=disabled
+		--with-all-insults
+		--with-ignore-dot
+		--with-tty-tickets
+		--enable-shell-sets-home
+		--with-sudoers-mode=0440
+		--with-pam
+		--with-ldap
+		--with-env-editor
+		--with-passprompt=%p\'s password: "
+
+	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
+	export CFLAGS="-fpie" LDFLAGS="-pie"
+	;;
+    *)
+	# Note, must indent with tabs, not spaces due to IFS trickery
+	configure_opts="
+		--prefix=$prefix
+		--with-insults=disabled
+		--with-logging=syslog
+		--with-logfac=auth
+		--with-editor=/usr/bin/vim:/usr/bin/vi:/bin/vi
+		--with-env-editor"
+	;;
+esac
+
+# Remove spaces from IFS when setting $@ so that passprompt may include them
+OIFS="$IFS"
+IFS="	
+"
+set -- $configure_opts
+IFS="$OIFS"
+$top_srcdir/configure "$@" || exit 1
+make $make_opts && make $make_opts package

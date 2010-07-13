@@ -127,7 +127,7 @@ install-dirs:
 	    $(DESTDIR)$(noexecdir)
 
 install-binaries: install-dirs $(PROGS)
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 sudo $(DESTDIR)$(bindir)/sudo
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 04111 sudo $(DESTDIR)$(bindir)/sudo
 	rm -f $(DESTDIR)$(bindir)/sudoedit
 	ln $(DESTDIR)$(bindir)/sudo $(DESTDIR)$(bindir)/sudoedit
 	if [ -f sesh ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 sesh $(DESTDIR)$(libexecdir)/sesh; fi
