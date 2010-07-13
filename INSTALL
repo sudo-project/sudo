@@ -42,7 +42,7 @@ For most systems and configurations it is possible simply to:
        man pages, and a skeleton sudoers file.  Note that the install
        will not overwrite an existing sudoers file.  You can also
        install various pieces the package via the install-binaries,
-       install-man, and install-sudoers make targets.
+       install-doc, and install-sudoers make targets.
 
     7) Edit the sudoers file with `visudo' as necessary for your
        site.  You will probably want to refer the sample.sudoers

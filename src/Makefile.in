@@ -132,6 +132,8 @@ install-binaries: install-dirs $(PROGS)
 	ln $(DESTDIR)$(bindir)/sudo $(DESTDIR)$(bindir)/sudoedit
 	if [ -f sesh ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 sesh $(DESTDIR)$(libexecdir)/sesh; fi
 
+install-doc:
+
 install-includes:
 
 # We install sudo_noexec by hand so we can avoid a "lib" prefix

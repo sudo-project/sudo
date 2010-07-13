@@ -53,7 +53,7 @@ SHELL = @SHELL@
 all: config.status
 	for d in $(SUBDIRS) $(SAMPLES); do (cd $$d && $(MAKE) $@) || break; done
 
-install install-dirs install-binaries install-includes install-man install-plugin uninstall: config.status
+install install-dirs install-binaries install-includes install-doc install-plugin uninstall: config.status
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) || break; done
 
 autoconf:

@@ -96,7 +96,7 @@ install-binaries:
 
 install-includes:
 
-install-man:
+install-doc:
 
 install-plugin: install-dirs sample_group.la
 	$(LIBTOOL) --mode=install --quiet $(INSTALL) sample_group.la $(DESDTDIR)/$(plugindir)

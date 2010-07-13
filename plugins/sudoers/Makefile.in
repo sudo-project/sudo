@@ -260,7 +260,7 @@ install-binaries: visudo sudoreplay install-dirs
 install-includes:
 
 # XXX - install sudoers2ldif in docdir
-install-man:
+install-doc:
 
 install-plugin: sudoers.la install-dirs
 	$(LIBTOOL) --mode=install --quiet $(INSTALL) sudoers.la $(DESTDIR)$(plugindir)

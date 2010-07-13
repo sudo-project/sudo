@@ -78,7 +78,7 @@ install-binaries:
 
 install-includes:
 
-install-man:
+install-doc:
 
 install-plugin:
 

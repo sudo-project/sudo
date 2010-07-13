@@ -137,7 +137,7 @@ HISTORY: $(srcdir)/history.pod
 LICENSE: $(srcdir)/license.pod
 	pod2text -l -i0 $(srcdir)/license.pod | sed '1,2d' > $@
 
-install: install-dirs install-man
+install: install-dirs install-doc
 
 install-dirs:
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(docdir) \
@@ -147,7 +147,7 @@ install-binaries:
 
 install-includes:
 
-install-man: install-dirs
+install-doc: install-dirs
 	for f in $(OTHER_DOCS); do $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $$f $(DESTDIR)$(docdir); done
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/sudo.$(mantype) $(DESTDIR)$(mandirsu)/sudo.$(mansectsu)
 	@rm -f $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)

@@ -50,7 +50,7 @@ install-dirs:
 
 install-binaries:
 
-install-man:
+install-doc:
 
 install-includes: install-dirs
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $(srcdir)/sudo_plugin.h $(DESTDIR)$(includedir)
