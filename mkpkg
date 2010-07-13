@@ -72,7 +72,6 @@ case "$platform" in
 		--libexecdir=$prefix/$libexec/sudo
 		--with-logging=syslog
 		--with-logfac=auth
-		--with-insults=disabled
 		--with-all-insults
 		--with-ignore-dot
 		--with-tty-tickets
@@ -99,7 +98,6 @@ case "$platform" in
 		--libexecdir=$prefix/$libexec/sudo
 		--with-logging=syslog
 		--with-logfac=auth
-		--with-insults=disabled
 		--with-all-insults
 		--with-ignore-dot
 		--with-tty-tickets
@@ -128,7 +126,6 @@ case "$platform" in
 		--with-selinux
 		--with-logging=syslog
 		--with-logfac=auth
-		--with-insults=disabled
 		--with-all-insults
 		--with-ignore-dot
 		--with-tty-tickets
@@ -141,6 +138,30 @@ case "$platform" in
 
 	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
 	export CFLAGS="$F_PIE" LDFLAGS="-pie"
+	;;
+    deb4*)
+	# XXX - create sudo group like debian does
+	# XXX - newer deb moved timestamps to /var/lib/sudo
+	# Note, must indent with tabs, not spaces due to IFS trickery
+	configure_opts="
+		--prefix=/usr
+		--with-ldap
+		--with-all-insults
+		--with-exempt=sudo
+		--with-pam
+		--with-fqdn
+		--with-logging=syslog
+		--with-logfac=authpriv
+		--with-env-editor
+		--with-editor=/usr/bin/editor
+		--with-timeout=15
+		--with-password-timeout=0
+		--disable-root-mailer
+		--disable-setresuid
+		--with-sendmail=/usr/sbin/sendmail
+		--mandir=/usr/share/man
+		--libexecdir=/usr/lib/sudo
+		--with-secure-path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/X11R6/bin"
 	;;
     *)
 	# Note, must indent with tabs, not spaces due to IFS trickery
