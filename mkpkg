@@ -9,6 +9,17 @@ platform=`$top_srcdir/pp --probe` || exit 1
 # Default paths
 prefix=/usr/local
 
+# Linux distros may build binaries as pie files.
+# This is really something libtool should figure out, but it does not.
+case "$platform" in
+    *-s390*|*-sparc*|*-alpha*)
+	F_PIE=-fPIE
+	;;
+    *)
+	F_PIE=-fpie
+	;;
+esac
+
 # Choose configure options by platform.
 # We use the same configure options as vendor packages when possible.
 case "$platform" in
@@ -46,7 +57,7 @@ case "$platform" in
 		--with-selinux
 		--with-linux-audit
 		--with-passprompt=[sudo] password for %p: "
-	export CFLAGS="-fpie" LDFLAGS="-pie"
+	export CFLAGS="$F_PIE" LDFLAGS="-pie"
 	;;
     sles9*)
 	prefix=/usr
@@ -100,7 +111,7 @@ case "$platform" in
 		--with-passprompt=%p\'s password: "
 
 	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
-	export CFLAGS="-fpie" LDFLAGS="-pie"
+	export CFLAGS="$F_PIE" LDFLAGS="-pie"
 	;;
     sles11*)
 	prefix=/usr
@@ -129,7 +140,7 @@ case "$platform" in
 		--with-passprompt=%p\'s password: "
 
 	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
-	export CFLAGS="-fpie" LDFLAGS="-pie"
+	export CFLAGS="$F_PIE" LDFLAGS="-pie"
 	;;
     *)
 	# Note, must indent with tabs, not spaces due to IFS trickery
