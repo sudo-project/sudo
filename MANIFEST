@@ -100,6 +100,7 @@ m4/ltsugar.m4
 m4/ltversion.m4
 m4/lt~obsolete.m4
 mkinstalldirs
+mkpkg
 pathnames.h.in
 plugins/sample/Makefile.in
 plugins/sample/sample_plugin.c
@@ -181,6 +182,7 @@ plugins/sudoers/toke.c
 plugins/sudoers/toke.l
 plugins/sudoers/tsgetgrpw.c
 plugins/sudoers/visudo.c
+pp
 src/Makefile.in
 src/conversation.c
 src/error.c
@@ -200,4 +202,4 @@ src/sudo_plugin_int.h
 src/sudo_usage.h.in
 src/tgetpass.c
 src/ttysize.c
-sudo.psf
+sudo.pp
