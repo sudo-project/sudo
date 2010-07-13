@@ -49,7 +49,7 @@ CHMODIT=false
 STRIPIT=false
 BACKIT=false
 TOUCHIT=true
-SAVESRC=false
+DIRMODE=false
 
 case `${WHOAMI}` in
 root)
@@ -74,7 +74,10 @@ while ${MORETODO} ; do
 	BACKUP=`expr "$1" : '-b\(.*\)'`
 	;;
     X-c)
-	SAVESRC=true
+	# backwards compatibility
+	;;
+    X-d)
+	DIRMODE=true
 	;;
     X-g)
 	GROUP="$2"
@@ -155,29 +158,31 @@ while ${MORETODO} ; do
     ${MORETODO} && shift
 done
 
+##  Making a directory?
+if ${DIRMODE} ; then
+    while test $# != 0; do
+	DEST="$1"
+	if [ ! -d "${DEST}" ] ; then
+	    ${MKDIR} "${DEST}" || exit 1
+	fi
+	if ${CHOWNIT} ; then
+	    ${CHOWN} "${OWNER}" "${DEST}" || exit 1
+	fi
+	if ${CHGROUPIT} ; then
+	    ${CHGRP} "${GROUP}" "${DEST}" || exit 1
+	fi
+	if ${CHMODIT} ; then
+	    ${CHMOD} "${MODE}"  "${DEST}" || exit 1
+	fi
+	shift;
+    done
+    exit 0
+fi
+
 ##  Process arguments.
 if [ $# -ne 2 ] ; then
     echo "Usage:  ${PROGNAME} [flags] source destination"
     exit 1
-fi
-
-##  Making a directory?
-if [ X"$1" = X. ] ; then
-    DEST="$2"
-    if [ ! -d "${DEST}" ] ; then
-	${MKDIR} "${DEST}" || exit 1
-    fi
-    if ${CHOWNIT} ; then
-	${CHOWN} "${OWNER}" "${DEST}" || exit 1
-    fi
-    if ${CHGROUPIT} ; then
-	${CHGRP} "${GROUP}" "${DEST}" || exit 1
-    fi
-    if ${CHMODIT} ; then
-	umask 0
-	${CHMOD} "${MODE}"  "${DEST}" || exit 1
-    fi
-    exit 0
 fi
 
 ##  Get the destination and a temp file in the destination diretory.
@@ -190,7 +195,7 @@ else
 fi
 
 ##  If not given the same name, we must try to copy.
-if [ X"$1" != X"$2" -o $SAVESRC ] ; then
+if [ X"$1" != X"$2" ] ; then
     if cmp -s "$1" "${DEST}" ; then
 	##  Files are same; touch or not.
 	${TOUCHIT} && touch "${DEST}"
@@ -221,7 +226,6 @@ if ${CHGROUPIT} ; then
     ${CHGRP} "${GROUP}" "${DEST}" || exit 1
 fi
 if ${CHMODIT} ; then
-    umask 0
     ${CHMOD} "${MODE}"  "${DEST}" || exit 1
 fi
 exit 0
