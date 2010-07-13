@@ -93,6 +93,20 @@ still allow people to get their work done."
 	;;
   esac
 
+%set [deb]
+  # Choose the correct PAM file by distro
+  # XXX - missing deb5 and others
+  case "$pp_deb_distro" in
+    deb4.*)
+        mkdir -p ${pp_destdir}/etc/pam.d
+	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
+	#%PAM-1.0
+	@include common-auth
+	@include common-account
+	EOF
+	;;
+  esac
+
 %set [aix]
   pp_aix_version=`echo $version | sed -e 's,\([0-9][0-9]*\)\.\([0-9][0-9]*\)\.\([0-9][0-9]*\)p\([0-9][0-9]*\)q\([0-9][0-9]*\),\1.\2.\3.\4,'`
   summary="Configurable super-user privileges"

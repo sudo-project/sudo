@@ -3957,7 +3957,8 @@ pp_backend_deb_probe() {
 	    ;;
 	*)
 	    # Remove trailing revision number and any dots
-            release=`echo $release | cut -dr -f1 | tr -d .`
+	    #release=`echo $release | cut -dr -f1 | tr -d .`
+            release=`echo $release | cut -dr -f1`
 	    ;;
     esac
 
