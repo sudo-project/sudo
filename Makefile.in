@@ -53,14 +53,17 @@ SHELL = @SHELL@
 all: config.status
 	for d in $(SUBDIRS) $(SAMPLES); do (cd $$d && $(MAKE) $@) || break; done
 
-install install-dirs install-binaries install-includes install-doc install-plugin uninstall: config.status
+install-dirs install-binaries install-includes install-plugin uninstall: config.status
+	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) || break; done
+
+install install-doc: config.status ChangeLog
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) || break; done
 
 autoconf:
 	autoconf -I m4
 
 ChangeLog:
-	test -d $(srcdir)/.hg && hg log --style=changelog -b default > $@
+	(cd $(srcdir) && test -d .hg && hg log --style=changelog -b default > $@)
 
 check:
 	@echo nothing to check
