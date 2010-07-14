@@ -1,4 +1,9 @@
 #!/bin/sh
+#
+# Build a binary package using polypkg
+# Usage: mkpkg
+#
+# TODO: add flavors (e.g. LDAP)
 
 IFS=
 
@@ -23,7 +28,7 @@ esac
 # Choose configure options by platform.
 # We use the same configure options as vendor packages when possible.
 case "$platform" in
-    centos4*|rhel4*)
+    centos4.*|rhel4.*)
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	prefix=/usr
 	configure_opts="
@@ -40,7 +45,7 @@ case "$platform" in
 		--with-selinux
 		--with-passprompt=[sudo] password for %p: "
 	;;
-    centos5*|rhel5*)
+    centos5.*|rhel5.*)
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	prefix=/usr
 	configure_opts="
@@ -59,7 +64,7 @@ case "$platform" in
 		--with-passprompt=[sudo] password for %p: "
 	export CFLAGS="$F_PIE" LDFLAGS="-pie"
 	;;
-    sles9*)
+    sles9.*)
 	prefix=/usr
 	# SuSE doesn't have /usr/libexec
 	case "$platform" in
@@ -84,7 +89,7 @@ case "$platform" in
 
 	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
 	;;
-    sles10*)
+    sles10.*)
 	prefix=/usr
 	# SuSE doesn't have /usr/libexec
 	case "$platform" in
@@ -92,7 +97,7 @@ case "$platform" in
 	    *)		libexec=lib;;
 	esac
 	# Note, must indent with tabs, not spaces due to IFS trickery
-	# XXX - SuSE uses secure path only for env_reset
+	# XXX - SuSE uses secure path but only for env_reset
 	configure_opts="
 		--prefix=$prefix
 		--libexecdir=$prefix/$libexec/sudo
@@ -111,7 +116,7 @@ case "$platform" in
 	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
 	export CFLAGS="$F_PIE" LDFLAGS="-pie"
 	;;
-    sles11*)
+    sles11.*)
 	prefix=/usr
 	# SuSE doesn't have /usr/libexec
 	case "$platform" in
@@ -119,7 +124,7 @@ case "$platform" in
 	    *)		libexec=lib;;
 	esac
 	# Note, must indent with tabs, not spaces due to IFS trickery
-	# XXX - SuSE uses secure path only for env_reset
+	# XXX - SuSE uses secure path but only for env_reset
 	configure_opts="
 		--prefix=$prefix
 		--libexecdir=$prefix/$libexec/sudo
@@ -139,16 +144,17 @@ case "$platform" in
 	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
 	export CFLAGS="$F_PIE" LDFLAGS="-pie"
 	;;
-    deb4*)
+    deb[456].*)
 	# XXX - create sudo group like debian does
-	# XXX - newer deb moved timestamps to /var/lib/sudo
+	#	debian now has a %sudo entry in its sample sudoers
+	# XXX - debian has separate ldap and non-ldap packages
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	configure_opts="
 		--prefix=/usr
-		--with-ldap
 		--with-all-insults
 		--with-exempt=sudo
 		--with-pam
+		--with-ldap
 		--with-fqdn
 		--with-logging=syslog
 		--with-logfac=authpriv
@@ -156,9 +162,12 @@ case "$platform" in
 		--with-editor=/usr/bin/editor
 		--with-timeout=15
 		--with-password-timeout=0
+		--with-passprompt=[sudo] password for %p: 
+		--with-timedir=/var/lib/sudo
 		--disable-root-mailer
 		--disable-setresuid
 		--with-sendmail=/usr/sbin/sendmail
+		--with-ldap-conf-file=/etc/ldap/ldap.conf
 		--mandir=/usr/share/man
 		--libexecdir=/usr/lib/sudo
 		--with-secure-path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/X11R6/bin"
