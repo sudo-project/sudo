@@ -120,8 +120,11 @@ case "$platform" in
 		--with-secure-path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/X11R6/bin"
 	;;
     *)
+	if test "${SUDO_FLAVOR:-vanilla}" == "ldap"; then
+	    configure_opts="--with-ldap"
+	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
-	configure_opts="
+	configure_opts="$configure_opts
 		--prefix=$prefix
 		--with-insults=disabled
 		--with-logging=syslog
