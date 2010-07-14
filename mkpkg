@@ -3,7 +3,6 @@
 # Build a binary package using polypkg
 # Usage: mkpkg
 #
-# TODO: add flavors (e.g. LDAP)
 
 IFS=
 
@@ -147,14 +146,16 @@ case "$platform" in
     deb[456].*)
 	# XXX - create sudo group like debian does
 	#	debian now has a %sudo entry in its sample sudoers
-	# XXX - debian has separate ldap and non-ldap packages
 	# Note, must indent with tabs, not spaces due to IFS trickery
-	configure_opts="
+	if test "${SUDO_FLAVOR:-vanilla}" == "ldap"; then
+	    configure_opts="--with-ldap
+		--with-ldap-conf-file=/etc/sudo-ldap.conf"
+	fi
+	configure_opts="$configure_opts
 		--prefix=/usr
 		--with-all-insults
 		--with-exempt=sudo
 		--with-pam
-		--with-ldap
 		--with-fqdn
 		--with-logging=syslog
 		--with-logfac=authpriv
@@ -167,7 +168,6 @@ case "$platform" in
 		--disable-root-mailer
 		--disable-setresuid
 		--with-sendmail=/usr/sbin/sendmail
-		--with-ldap-conf-file=/etc/ldap/ldap.conf
 		--mandir=/usr/share/man
 		--libexecdir=/usr/lib/sudo
 		--with-secure-path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/X11R6/bin"

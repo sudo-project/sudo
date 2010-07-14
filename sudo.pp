@@ -1,5 +1,9 @@
 %set
-  name="sudo"
+  if test -n "$SUDO_FLAVOR"; then
+    name="sudo-$SUDO_FLAVOR"
+  else
+    name="sudo"
+  fi
   summary="Provide limited super-user priveleges to specific users"
   description="Sudo is a program designed to allow a sysadmin to give \
 limited root privileges to users and log root activity.  \
@@ -148,6 +152,14 @@ still allow people to get their work done."
   # dpkg-deb does not maintain the mode on the sudoers file, and
   # installs it 0640 when sudo requires 0440
   chmod %{sudoers_mode} %{sudoersdir}/sudoers
+
+  # create symlink to ease transition to new path for ldap config
+  # if old config file exists and new one doesn't
+  if test X"%{SUDO_FLAVOR}" = X"ldap"; then
+    if test -r /etc/ldap/ldap.conf -a ! -r /etc/sudo-ldap.conf; then
+      ln -s /etc/ldap/ldap.conf /etc/sudo-ldap.conf
+    fi
+  fi
 
   # Debian uses a sudo group in its default sudoers file
   perl -e '

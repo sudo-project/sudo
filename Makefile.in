@@ -499,7 +499,8 @@ install-sudoers: install-dirs
 		$(srcdir)/sudoers $(DESTDIR)$(sudoersdir)/sudoers
 
 install-doc: install-dirs ChangeLog
-	(cd $(srcdir) && for f in ChangeLog HISTORY LICENSE README* TROUBLESHOOTING UPGRADE WHATSNEW sample.* schema.* sudoers2ldif; do $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $$f $(DESTDIR)$(docdir); done)
+	(cd $(srcdir) && for f in ChangeLog HISTORY LICENSE README TROUBLESHOOTING UPGRADE WHATSNEW sample.*; do $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $$f $(DESTDIR)$(docdir); done)
+	@LDAP@(cd $(srcdir) && for f in README.LDAP schema.* sudoers2ldif; do $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $$f $(DESTDIR)$(docdir); done)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/sudo.$(mantype) $(DESTDIR)$(mandirsu)/sudo.$(mansectsu)
 	@rm -f $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)
 	ln $(DESTDIR)$(mandirsu)/sudo.$(mansectsu) $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)
