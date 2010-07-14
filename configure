@@ -2796,6 +2796,7 @@ badpass_message="Sorry, try again."
 fqdn=off
 runas_default=root
 env_editor=off
+editor=vi
 passwd_tries=3
 tty_tickets=off
 insults=off
@@ -6627,13 +6628,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6630: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6631: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6633: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6634: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6636: output\"" >&5)
+  (eval echo "\"\$as_me:6637: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -7838,7 +7839,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7841 "configure"' > conftest.$ac_ext
+  echo '#line 7842 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9231,11 +9232,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9234: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9235: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9238: \$? = $ac_status" >&5
+   echo "$as_me:9239: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9570,11 +9571,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9573: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9574: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9577: \$? = $ac_status" >&5
+   echo "$as_me:9578: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9675,11 +9676,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9678: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9679: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9682: \$? = $ac_status" >&5
+   echo "$as_me:9683: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9730,11 +9731,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9733: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9734: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9737: \$? = $ac_status" >&5
+   echo "$as_me:9738: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12097,7 +12098,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12100 "configure"
+#line 12101 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12193,7 +12194,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12196 "configure"
+#line 12197 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13466,98 +13467,40 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mv" >&5
 $as_echo_n "checking for mv... " >&6; }
-if test -f "/usr/bin/mv"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/bin/mv" >&5
-$as_echo "/usr/bin/mv" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_MV "/usr/bin/mv"
+found=no
+for p in "/usr/bin/mv" "/bin/mv" "/usr/ucb/mv" "/usr/sbin/mv"; do
+    if test -f "$p"; then
+	found=yes
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $p" >&5
+$as_echo "$p" >&6; }
+	cat >>confdefs.h <<EOF
+#define _PATH_MV "$p"
 EOF
 
-elif test -f "/bin/mv"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /bin/mv" >&5
-$as_echo "/bin/mv" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_MV "/bin/mv"
-EOF
-
-elif test -f "/usr/ucb/mv"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/ucb/mv" >&5
-$as_echo "/usr/ucb/mv" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_MV "/usr/ucb/mv"
-EOF
-
-elif test -f "/usr/sbin/mv"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/sbin/mv" >&5
-$as_echo "/usr/sbin/mv" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_MV "/usr/sbin/mv"
-EOF
-
-else
+	break
+    fi
+done
+if test X"$found" != X"yes"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
 $as_echo "not found" >&6; }
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for bourne shell" >&5
 $as_echo_n "checking for bourne shell... " >&6; }
-if test -f "/bin/sh"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /bin/sh" >&5
-$as_echo "/bin/sh" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_BSHELL "/bin/sh"
+found=no
+for p in "/bin/sh" "/usr/bin/sh" "/sbin/sh" "/usr/sbin/sh" "/bin/ksh" "/usr/bin/ksh" "/bin/bash" "/usr/bin/bash"; do
+    if test -f "$p"; then
+	found=yes
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $p" >&5
+$as_echo "$p" >&6; }
+	cat >>confdefs.h <<EOF
+#define _PATH_BSHELL "$p"
 EOF
 
-elif test -f "/usr/bin/sh"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/bin/sh" >&5
-$as_echo "/usr/bin/sh" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_BSHELL "/usr/bin/sh"
-EOF
-
-elif test -f "/sbin/sh"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /sbin/sh" >&5
-$as_echo "/sbin/sh" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_BSHELL "/sbin/sh"
-EOF
-
-elif test -f "/usr/sbin/sh"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/sbin/sh" >&5
-$as_echo "/usr/sbin/sh" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_BSHELL "/usr/sbin/sh"
-EOF
-
-elif test -f "/bin/ksh"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /bin/ksh" >&5
-$as_echo "/bin/ksh" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_BSHELL "/bin/ksh"
-EOF
-
-elif test -f "/usr/bin/ksh"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/bin/ksh" >&5
-$as_echo "/usr/bin/ksh" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_BSHELL "/usr/bin/ksh"
-EOF
-
-elif test -f "/bin/bash"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /bin/bash" >&5
-$as_echo "/bin/bash" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_BSHELL "/bin/bash"
-EOF
-
-elif test -f "/usr/bin/bash"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/bin/bash" >&5
-$as_echo "/usr/bin/bash" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_BSHELL "/usr/bin/bash"
-EOF
-
-else
+	break
+    fi
+done
+if test X"$found" != X"yes"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
 $as_echo "not found" >&6; }
 fi
@@ -13565,49 +13508,20 @@ fi
 if test -z "$with_sendmail"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for sendmail" >&5
 $as_echo_n "checking for sendmail... " >&6; }
-if test -f "/usr/sbin/sendmail"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/sbin/sendmail" >&5
-$as_echo "/usr/sbin/sendmail" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_SUDO_SENDMAIL "/usr/sbin/sendmail"
+found=no
+for p in "/usr/sbin/sendmail" "/usr/lib/sendmail" "/usr/etc/sendmail" "/usr/ucblib/sendmail" "/usr/local/lib/sendmail" "/usr/local/bin/sendmail"; do
+    if test -f "$p"; then
+	found=yes
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $p" >&5
+$as_echo "$p" >&6; }
+	cat >>confdefs.h <<EOF
+#define _PATH_SUDO_SENDMAIL "$p"
 EOF
 
-elif test -f "/usr/lib/sendmail"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/lib/sendmail" >&5
-$as_echo "/usr/lib/sendmail" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_SUDO_SENDMAIL "/usr/lib/sendmail"
-EOF
-
-elif test -f "/usr/etc/sendmail"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/etc/sendmail" >&5
-$as_echo "/usr/etc/sendmail" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_SUDO_SENDMAIL "/usr/etc/sendmail"
-EOF
-
-elif test -f "/usr/ucblib/sendmail"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/ucblib/sendmail" >&5
-$as_echo "/usr/ucblib/sendmail" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_SUDO_SENDMAIL "/usr/ucblib/sendmail"
-EOF
-
-elif test -f "/usr/local/lib/sendmail"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/local/lib/sendmail" >&5
-$as_echo "/usr/local/lib/sendmail" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_SUDO_SENDMAIL "/usr/local/lib/sendmail"
-EOF
-
-elif test -f "/usr/local/bin/sendmail"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/local/bin/sendmail" >&5
-$as_echo "/usr/local/bin/sendmail" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_SUDO_SENDMAIL "/usr/local/bin/sendmail"
-EOF
-
-else
+	break
+    fi
+done
+if test X"$found" != X"yes"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
 $as_echo "not found" >&6; }
 fi
@@ -13629,7 +13543,7 @@ EOF
 	break
     fi
 done
-if test X"$found" != X"no"; then
+if test X"$found" != X"yes"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
 $as_echo "not found" >&6; }
 fi

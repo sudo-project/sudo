@@ -8,29 +8,20 @@ dnl
 dnl checks for programs
 
 dnl
-dnl check for sendmail
+dnl check for sendmail in well-known locations
 dnl
-AC_DEFUN(SUDO_PROG_SENDMAIL, [AC_MSG_CHECKING(for sendmail)
-if test -f "/usr/sbin/sendmail"; then
-    AC_MSG_RESULT(/usr/sbin/sendmail)
-    SUDO_DEFINE(_PATH_SUDO_SENDMAIL, "/usr/sbin/sendmail")
-elif test -f "/usr/lib/sendmail"; then
-    AC_MSG_RESULT(/usr/lib/sendmail)
-    SUDO_DEFINE(_PATH_SUDO_SENDMAIL, "/usr/lib/sendmail")
-elif test -f "/usr/etc/sendmail"; then
-    AC_MSG_RESULT(/usr/etc/sendmail)
-    SUDO_DEFINE(_PATH_SUDO_SENDMAIL, "/usr/etc/sendmail")
-elif test -f "/usr/ucblib/sendmail"; then
-    AC_MSG_RESULT(/usr/ucblib/sendmail)
-    SUDO_DEFINE(_PATH_SUDO_SENDMAIL, "/usr/ucblib/sendmail")
-elif test -f "/usr/local/lib/sendmail"; then
-    AC_MSG_RESULT(/usr/local/lib/sendmail)
-    SUDO_DEFINE(_PATH_SUDO_SENDMAIL, "/usr/local/lib/sendmail")
-elif test -f "/usr/local/bin/sendmail"; then
-    AC_MSG_RESULT(/usr/local/bin/sendmail)
-    SUDO_DEFINE(_PATH_SUDO_SENDMAIL, "/usr/local/bin/sendmail")
-else
-    AC_MSG_RESULT(not found)
+AC_DEFUN(SUDO_PROG_SENDMAIL, [AC_MSG_CHECKING([for sendmail])
+found=no
+for p in "/usr/sbin/sendmail" "/usr/lib/sendmail" "/usr/etc/sendmail" "/usr/ucblib/sendmail" "/usr/local/lib/sendmail" "/usr/local/bin/sendmail"; do
+    if test -f "$p"; then
+	found=yes
+	AC_MSG_RESULT([$p])
+	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SENDMAIL, "$p")
+	break
+    fi
+done
+if test X"$found" != X"yes"; then
+    AC_MSG_RESULT([not found])
 fi
 ])dnl
 
@@ -47,62 +38,44 @@ for editor in "/usr/bin/vi" "/bin/vi" "/usr/ucb/vi" "/usr/bsd/vi" "/usr/local/bi
 	break
     fi
 done
-if test X"$found" != X"no"; then
-    AC_MSG_RESULT(not found)
+if test X"$found" != X"yes"; then
+    AC_MSG_RESULT([not found])
 fi
 ])dnl
 
 dnl
-dnl check for mv
+dnl check for mv in well-known locations
 dnl
-AC_DEFUN(SUDO_PROG_MV, [AC_MSG_CHECKING(for mv)
-if test -f "/usr/bin/mv"; then
-    AC_MSG_RESULT(/usr/bin/mv)
-    SUDO_DEFINE(_PATH_MV, "/usr/bin/mv")
-elif test -f "/bin/mv"; then
-    AC_MSG_RESULT(/bin/mv)
-    SUDO_DEFINE(_PATH_MV, "/bin/mv")
-elif test -f "/usr/ucb/mv"; then
-    AC_MSG_RESULT(/usr/ucb/mv)
-    SUDO_DEFINE(_PATH_MV, "/usr/ucb/mv")
-elif test -f "/usr/sbin/mv"; then
-    AC_MSG_RESULT(/usr/sbin/mv)
-    SUDO_DEFINE(_PATH_MV, "/usr/sbin/mv")
-else
-    AC_MSG_RESULT(not found)
+AC_DEFUN(SUDO_PROG_MV, [AC_MSG_CHECKING([for mv])
+found=no
+for p in "/usr/bin/mv" "/bin/mv" "/usr/ucb/mv" "/usr/sbin/mv"; do
+    if test -f "$p"; then
+	found=yes
+	AC_MSG_RESULT([$p])
+	SUDO_DEFINE_UNQUOTED(_PATH_MV, "$p")
+	break
+    fi
+done
+if test X"$found" != X"yes"; then
+    AC_MSG_RESULT([not found])
 fi
 ])dnl
 
 dnl
-dnl check for bourne shell
+dnl check for bourne shell in well-known locations
 dnl
-AC_DEFUN(SUDO_PROG_BSHELL, [AC_MSG_CHECKING(for bourne shell)
-if test -f "/bin/sh"; then
-    AC_MSG_RESULT(/bin/sh)
-    SUDO_DEFINE(_PATH_BSHELL, "/bin/sh")
-elif test -f "/usr/bin/sh"; then
-    AC_MSG_RESULT(/usr/bin/sh)
-    SUDO_DEFINE(_PATH_BSHELL, "/usr/bin/sh")
-elif test -f "/sbin/sh"; then
-    AC_MSG_RESULT(/sbin/sh)
-    SUDO_DEFINE(_PATH_BSHELL, "/sbin/sh")
-elif test -f "/usr/sbin/sh"; then
-    AC_MSG_RESULT(/usr/sbin/sh)
-    SUDO_DEFINE(_PATH_BSHELL, "/usr/sbin/sh")
-elif test -f "/bin/ksh"; then
-    AC_MSG_RESULT(/bin/ksh)
-    SUDO_DEFINE(_PATH_BSHELL, "/bin/ksh")
-elif test -f "/usr/bin/ksh"; then
-    AC_MSG_RESULT(/usr/bin/ksh)
-    SUDO_DEFINE(_PATH_BSHELL, "/usr/bin/ksh")
-elif test -f "/bin/bash"; then
-    AC_MSG_RESULT(/bin/bash)
-    SUDO_DEFINE(_PATH_BSHELL, "/bin/bash")
-elif test -f "/usr/bin/bash"; then
-    AC_MSG_RESULT(/usr/bin/bash)
-    SUDO_DEFINE(_PATH_BSHELL, "/usr/bin/bash")
-else
-    AC_MSG_RESULT(not found)
+AC_DEFUN(SUDO_PROG_BSHELL, [AC_MSG_CHECKING([for bourne shell])
+found=no
+for p in "/bin/sh" "/usr/bin/sh" "/sbin/sh" "/usr/sbin/sh" "/bin/ksh" "/usr/bin/ksh" "/bin/bash" "/usr/bin/bash"; do
+    if test -f "$p"; then
+	found=yes
+	AC_MSG_RESULT([$p])
+	SUDO_DEFINE_UNQUOTED(_PATH_BSHELL, "$p")
+	break
+    fi
+done
+if test X"$found" != X"yes"; then
+    AC_MSG_RESULT([not found])
 fi
 ])dnl
 
