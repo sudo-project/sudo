@@ -1327,6 +1327,8 @@ deserialize_info(char * const settings[], char * const user_info[])
 	    continue;
 	}
     }
+    if (user_cwd == NULL)
+	user_cwd = "unknown";
     if (user_tty == NULL)
 	user_tty = "unknown"; /* user_ttypath remains NULL */
 
