@@ -45,6 +45,7 @@ case "$platform" in
 		--with-logfac=authpriv
 		--with-pam
 		--with-pam-login
+		--enable-zlib
 		--with-editor=/bin/vi
 		--with-env-editor
 		--with-ignore-dot
@@ -86,6 +87,7 @@ case "$platform" in
 		--enable-shell-sets-home
 		--with-sudoers-mode=0440
 		--with-pam
+		--enable-zlib
 		--with-ldap
 		--with-env-editor
 		--with-passprompt=%p\'s password: "
@@ -103,6 +105,7 @@ case "$platform" in
 		--with-all-insults
 		--with-exempt=sudo
 		--with-pam
+		--enable-zlib
 		--with-fqdn
 		--with-logging=syslog
 		--with-logfac=authpriv
