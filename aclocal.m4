@@ -101,27 +101,20 @@ fi
 ])dnl
 
 dnl
-dnl Where the timestamp files go, use /var/run/sudo if /var/run exists,
-dnl else /{var,usr}/adm/sudo
+dnl Where the timestamp files go.
 dnl
 AC_DEFUN(SUDO_TIMEDIR, [AC_MSG_CHECKING(for timestamp file location)
-if test -n "$with_timedir"; then
-    AC_MSG_RESULT($with_timedir)
-    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_TIMEDIR, "$with_timedir")
-    timedir="$with_timedir"
-elif test -d "/var/run"; then
-    AC_MSG_RESULT(/var/run/sudo)
-    SUDO_DEFINE(_PATH_SUDO_TIMEDIR, "/var/run/sudo")
-    timedir="/var/run/sudo"
-elif test -d "/var/adm"; then
-    AC_MSG_RESULT(/var/adm/sudo)
-    SUDO_DEFINE(_PATH_SUDO_TIMEDIR, "/var/adm/sudo")
-    timedir="/var/adm/sudo"
-else
-    AC_MSG_RESULT(/usr/adm/sudo)
-    SUDO_DEFINE(_PATH_SUDO_TIMEDIR, "/usr/adm/sudo")
-    timedir="/usr/adm/sudo"
+timedir="$with_timedir"
+if test -z "$timedir"; then
+    for d in /var/db /var/lib /var/adm /usr/adm; do
+	if test -d "$d"; then
+	    timedir="$d/sudo"
+	    break;
+	fi
+    done
 fi
+AC_MSG_RESULT([$timedir])
+SUDO_DEFINE_UNQUOTED(_PATH_SUDO_TIMEDIR, "$timedir")
 ])dnl
 
 dnl

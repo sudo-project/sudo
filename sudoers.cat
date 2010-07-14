@@ -1108,7 +1108,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        interpreted.  Defaults to "C".
 
        timestampdir    The directory in which ssuuddoo stores its timestamp files.
-                       The default is _/_v_a_r_/_r_u_n_/_s_u_d_o.
+                       The default is _/_v_a_r_/_a_d_m_/_s_u_d_o.
 
        timestampowner  The owner of the timestamp directory and the timestamps
                        stored therein.  The default is root.

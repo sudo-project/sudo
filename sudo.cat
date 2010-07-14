@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.4                     July 12, 2010                         1
+1.7.4                     July 14, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.7.4                     July 12, 2010                         2
+1.7.4                     July 14, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.7.4                     July 12, 2010                         3
+1.7.4                     July 14, 2010                         3
 
 
 
@@ -259,7 +259,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.7.4                     July 12, 2010                         4
+1.7.4                     July 14, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.7.4                     July 12, 2010                         5
+1.7.4                     July 14, 2010                         5
 
 
 
@@ -391,7 +391,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.7.4                     July 12, 2010                         6
+1.7.4                     July 14, 2010                         6
 
 
 
@@ -426,7 +426,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        program that ssuuddoo executes.
 
        ssuuddoo will check the ownership of its time stamp directory
-       (_/_v_a_r_/_r_u_n_/_s_u_d_o by default) and ignore the directory's contents if it is
+       (_/_v_a_r_/_a_d_m_/_s_u_d_o by default) and ignore the directory's contents if it is
        not owned by root or if it is writable by a user other than root.  On
        systems that allow non-root users to give away files via _c_h_o_w_n(2), if
        the time stamp directory is located in a directory writable by anyone
@@ -438,7 +438,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        by root and inaccessible by any other user, the user placing files
        there would be unable to get them back out.  To get around this issue
        you can use a directory that is not world-writable for the time stamps
-       (_/_v_a_r_/_a_d_m_/_s_u_d_o for instance) or create _/_v_a_r_/_r_u_n_/_s_u_d_o with the
+       (_/_v_a_r_/_a_d_m_/_s_u_d_o for instance) or create _/_v_a_r_/_a_d_m_/_s_u_d_o with the
        appropriate owner (root) and permissions (0700) in the system startup
        files.
 
@@ -457,7 +457,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.7.4                     July 12, 2010                         7
+1.7.4                     July 14, 2010                         7
 
 
 
@@ -523,7 +523,7 @@ EENNVVIIRROONNMMEENNTT
 
 
 
-1.7.4                     July 12, 2010                         8
+1.7.4                     July 14, 2010                         8
 
 
 
@@ -543,7 +543,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 FFIILLEESS
        _/_e_t_c_/_s_u_d_o_e_r_s            List of who can run what
 
-       _/_v_a_r_/_r_u_n_/_s_u_d_o           Directory containing time stamps
+       _/_v_a_r_/_a_d_m_/_s_u_d_o           Directory containing time stamps
 
        _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t        Initial environment for --ii mode on Linux and
                                AIX
@@ -589,7 +589,7 @@ SSEEEE AALLSSOO
 
 
 
-1.7.4                     July 12, 2010                         9
+1.7.4                     July 14, 2010                         9
 
 
 
@@ -655,6 +655,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.4                     July 12, 2010                        10
+1.7.4                     July 14, 2010                        10
 
 
