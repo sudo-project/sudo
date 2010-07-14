@@ -47,7 +47,7 @@ still allow people to get their work done."
 
   # Choose the correct PAM file by distro
   case "$pp_rpm_distro" in
-    centos4.*|rhel4.*)
+    centos[0-4].*|rhel[0-4].*)
         mkdir -p ${pp_destdir}/etc/pam.d
 	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
 	#%PAM-1.0
@@ -57,7 +57,7 @@ still allow people to get their work done."
 	session    required	pam_limits.so
 	EOF
 	;;
-    centos5.*|rhel5.*)
+    centos*|rhel*)
         mkdir -p ${pp_destdir}/etc/pam.d
 	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
 	#%PAM-1.0
@@ -84,7 +84,7 @@ still allow people to get their work done."
 	session  required       pam_limits.so
 	EOF
 	;;
-    sles10.*|sles11.*)
+    sles*)
         mkdir -p ${pp_destdir}/etc/pam.d
 	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
 	#%PAM-1.0
@@ -100,7 +100,7 @@ still allow people to get their work done."
 %set [deb]
   # Choose the correct PAM file by distro
   case "$pp_deb_distro" in
-    deb[456].*)
+    deb*)
         mkdir -p ${pp_destdir}/etc/pam.d
 	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
 	#%PAM-1.0

@@ -27,10 +27,19 @@ esac
 # Choose configure options by platform.
 # We use the same configure options as vendor packages when possible.
 case "$platform" in
-    centos4.*|rhel4.*)
-	# Note, must indent with tabs, not spaces due to IFS trickery
+    centos*|rhel*)
 	prefix=/usr
-	configure_opts="
+	case "$platform" in
+	    centos[0-4].*|rhel[0-4].*)
+		;;
+	    *)
+		# RHEL 5 and up build pies and have audit support
+		export CFLAGS="$F_PIE" LDFLAGS="-pie"
+		configure_opts="--with-linux-audit"
+		;;
+	esac
+	# Note, must indent with tabs, not spaces due to IFS trickery
+	configure_opts="$configure_opts
 		--prefix=$prefix
 		--with-logging=syslog
 		--with-logfac=authpriv
@@ -44,52 +53,21 @@ case "$platform" in
 		--with-selinux
 		--with-passprompt=[sudo] password for %p: "
 	;;
-    centos5.*|rhel5.*)
-	# Note, must indent with tabs, not spaces due to IFS trickery
+    sles*)
 	prefix=/usr
-	configure_opts="
-		--prefix=$prefix
-		--with-logging=syslog
-		--with-logfac=authpriv
-		--with-pam
-		--with-pam-login
-		--with-editor=/bin/vi
-		--with-env-editor
-		--with-ignore-dot
-		--with-tty-tickets
-		--with-ldap
-		--with-selinux
-		--with-linux-audit
-		--with-passprompt=[sudo] password for %p: "
-	export CFLAGS="$F_PIE" LDFLAGS="-pie"
-	;;
-    sles9.*)
-	prefix=/usr
-	# SuSE doesn't have /usr/libexec
 	case "$platform" in
-	    *64*)	libexec=lib64;;
-	    *)		libexec=lib;;
+	    sles[0-9].*)
+		;;
+	    sles10.*)
+		# SLES 10 and higher build pies
+		export CFLAGS="$F_PIE" LDFLAGS="-pie"
+		;;
+	    *)
+		# SLES 11 and higher has SELinux too
+		export CFLAGS="$F_PIE" LDFLAGS="-pie"
+		configure_opts="--with-selinux"
+		;;
 	esac
-	# Note, must indent with tabs, not spaces due to IFS trickery
-	configure_opts="
-		--prefix=$prefix
-		--libexecdir=$prefix/$libexec/sudo
-		--with-logging=syslog
-		--with-logfac=auth
-		--with-all-insults
-		--with-ignore-dot
-		--with-tty-tickets
-		--enable-shell-sets-home
-		--with-sudoers-mode=0440
-		--with-pam
-		--with-ldap
-		--with-env-editor
-		--with-passprompt=%p\'s password: "
-
-	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
-	;;
-    sles10.*)
-	prefix=/usr
 	# SuSE doesn't have /usr/libexec
 	case "$platform" in
 	    *64*)	libexec=lib64;;
@@ -97,7 +75,7 @@ case "$platform" in
 	esac
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	# XXX - SuSE uses secure path but only for env_reset
-	configure_opts="
+	configure_opts="$configure_opts
 		--prefix=$prefix
 		--libexecdir=$prefix/$libexec/sudo
 		--with-logging=syslog
@@ -113,39 +91,8 @@ case "$platform" in
 		--with-passprompt=%p\'s password: "
 
 	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
-	export CFLAGS="$F_PIE" LDFLAGS="-pie"
 	;;
-    sles11.*)
-	prefix=/usr
-	# SuSE doesn't have /usr/libexec
-	case "$platform" in
-	    *64*)	libexec=lib64;;
-	    *)		libexec=lib;;
-	esac
-	# Note, must indent with tabs, not spaces due to IFS trickery
-	# XXX - SuSE uses secure path but only for env_reset
-	configure_opts="
-		--prefix=$prefix
-		--libexecdir=$prefix/$libexec/sudo
-		--with-selinux
-		--with-logging=syslog
-		--with-logfac=auth
-		--with-all-insults
-		--with-ignore-dot
-		--with-tty-tickets
-		--enable-shell-sets-home
-		--with-sudoers-mode=0440
-		--with-pam
-		--with-ldap
-		--with-env-editor
-		--with-passprompt=%p\'s password: "
-
-	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
-	export CFLAGS="$F_PIE" LDFLAGS="-pie"
-	;;
-    deb[456].*)
-	# XXX - create sudo group like debian does
-	#	debian now has a %sudo entry in its sample sudoers
+    deb.*)
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	if test "${SUDO_FLAVOR:-vanilla}" == "ldap"; then
 	    configure_opts="--with-ldap
