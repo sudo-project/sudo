@@ -936,7 +936,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        this prevents users from "chaining" ssuuddoo commands to
                        get a root shell by doing something like "sudo sudo
                        /bin/sh".  Note, however, that turning off _r_o_o_t___s_u_d_o
-                       will also prevent root and from running ssuuddooeeddiitt.
+                       will also prevent root from running ssuuddooeeddiitt.
                        Disabling _r_o_o_t___s_u_d_o provides no real additional
                        security; it exists purely for historical reasons.
                        This flag is _o_n by default.

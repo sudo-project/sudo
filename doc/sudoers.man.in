@@ -1006,7 +1006,7 @@ This flag is \fIoff\fR by default.
 If set, root is allowed to run \fBsudo\fR too.  Disabling this prevents users
 from \*(L"chaining\*(R" \fBsudo\fR commands to get a root shell by doing something
 like \f(CW"sudo sudo /bin/sh"\fR.  Note, however, that turning off \fIroot_sudo\fR
-will also prevent root and from running \fBsudoedit\fR.
+will also prevent root from running \fBsudoedit\fR.
 Disabling \fIroot_sudo\fR provides no real additional security; it
 exists purely for historical reasons.
 This flag is \fI@root_sudo@\fR by default.
