@@ -1227,7 +1227,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        interpreted.  Defaults to "C".
 
        timestampdir    The directory in which ssuuddoo stores its timestamp files.
-                       The default is _/_v_a_r_/_r_u_n_/_s_u_d_o.
+                       The default is _/_v_a_r_/_a_d_m_/_s_u_d_o.
 
        timestampowner  The owner of the timestamp directory and the timestamps
                        stored therein.  The default is root.
@@ -1476,7 +1476,7 @@ FFIILLEESS
 
        _/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o        I/O log files
 
-       _/_v_a_r_/_r_u_n_/_s_u_d_o           Directory containing time stamps for the
+       _/_v_a_r_/_a_d_m_/_s_u_d_o           Directory containing time stamps for the
                                _s_u_d_o_e_r_s security policy
 
        _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t        Initial environment for --ii mode on Linux and
@@ -1818,7 +1818,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SSEECCUURRIITTYY NNOOTTEESS
        _s_u_d_o_e_r_s will check the ownership of its time stamp directory
-       (_/_v_a_r_/_r_u_n_/_s_u_d_o by default) and ignore the directory's contents if it is
+       (_/_v_a_r_/_a_d_m_/_s_u_d_o by default) and ignore the directory's contents if it is
        not owned by root or if it is writable by a user other than root.  On
        systems that allow non-root users to give away files via _c_h_o_w_n(2), if
        the time stamp directory is located in a world-writable directory

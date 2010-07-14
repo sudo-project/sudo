@@ -1,9 +1,18 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.7.4:
+
+    Starting with sudo 1.7.4, the time stamp files have moved from
+    /var/run/sudo to either /var/db/sudo, /var/lib/sudo or /var/adm/sudo.
+    The directories are checked for existence in that order.  This
+    prevents users from receiving the sudo lecture every time the
+    system reboots.  Time stamp files older than the boot time are
+    ignored on systems where it is possible to determine this.
+
 o Upgrading from a version prior to 1.7.0:
 
-    Starting with sudo 1.7.0 comments in the sudoers file must not
+    Starting with sudo 1.7.0, comments in the sudoers file must not
     have a digit or minus sign immediately after the comment character
     ('#').  Otherwise, the comment may be interpreted as a user or
     group ID.
@@ -73,8 +82,8 @@ o Upgrading from a version prior to 1.6.9:
 o Upgrading from a version prior to 1.6.8:
 
     Prior to sudo 1.6.8, if /var/run did not exist, sudo would put
-    the timestamp files in /tmp/.odus.  As of sudo 1.6.8, the
-    timestamp files will be placed in /var/adm/sudo or /usr/adm/sudo
+    the time stamp files in /tmp/.odus.  As of sudo 1.6.8, the
+    time stamp files will be placed in /var/adm/sudo or /usr/adm/sudo
     if there is no /var/run directory.  This directory will be
     created if it does not already exist.
 
@@ -117,10 +126,10 @@ o Upgrading from a version prior to 1.6:
 	millert ALL=(daemon) NOPASSWD:/usr/bin/whoami, \
 	    (root) PASSWD:/bin/ls, /sbin/dump
 
-    Additionally, sudo now uses a per-user timestamp directory
-    instead of a timestamp file.  This allows tty timestamps to
-    simply be files within the user's timestamp dir.  For the
-    default, non-tty case, the timestamp on the directory itself
+    Additionally, sudo now uses a per-user time stamp directory
+    instead of a time stamp file.  This allows tty time stamps to
+    simply be files within the user's time stamp dir.  For the
+    default, non-tty case, the time stamp on the directory itself
     is used.
 
     Also, the temporary file used by visudo is now /etc/sudoers.tmp

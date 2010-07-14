@@ -101,7 +101,7 @@ AC_SUBST([editor])
 # Begin initial values for man page substitution
 #
 io_logdir=/var/log/sudo-io
-timedir=/var/run/sudo
+timedir=/var/adm/sudo
 timeout=5
 password_timeout=5
 sudo_umask=0022
@@ -1782,8 +1782,6 @@ case "$host" in
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
-		# Apple sudo timedir location
-		: ${with_timedir='/var/db/sudo'}
 		;;
     *-*-nextstep*)
 		# lockf() on is broken on the NeXT -- use flock instead

@@ -2788,7 +2788,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 # Begin initial values for man page substitution
 #
 io_logdir=/var/log/sudo-io
-timedir=/var/run/sudo
+timedir=/var/adm/sudo
 timeout=5
 password_timeout=5
 sudo_umask=0022
@@ -13332,8 +13332,6 @@ done
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
-		# Apple sudo timedir location
-		: ${with_timedir='/var/db/sudo'}
 		;;
     *-*-nextstep*)
 		# lockf() on is broken on the NeXT -- use flock instead
@@ -18029,39 +18027,21 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for timestamp file location" >&5
 $as_echo_n "checking for timestamp file location... " >&6; }
-if test -n "$with_timedir"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_timedir" >&5
-$as_echo "$with_timedir" >&6; }
-    cat >>confdefs.h <<EOF
-#define _PATH_SUDO_TIMEDIR "$with_timedir"
-EOF
-
-    timedir="$with_timedir"
-elif test -d "/var/run"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /var/run/sudo" >&5
-$as_echo "/var/run/sudo" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_SUDO_TIMEDIR "/var/run/sudo"
-EOF
-
-    timedir="/var/run/sudo"
-elif test -d "/var/adm"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /var/adm/sudo" >&5
-$as_echo "/var/adm/sudo" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_SUDO_TIMEDIR "/var/adm/sudo"
-EOF
-
-    timedir="/var/adm/sudo"
-else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/adm/sudo" >&5
-$as_echo "/usr/adm/sudo" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_SUDO_TIMEDIR "/usr/adm/sudo"
-EOF
-
-    timedir="/usr/adm/sudo"
+timedir="$with_timedir"
+if test -z "$timedir"; then
+    for d in /var/db /var/lib /var/adm /usr/adm; do
+	if test -d "$d"; then
+	    timedir="$d/sudo"
+	    break;
+	fi
+    done
 fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $timedir" >&5
+$as_echo "$timedir" >&6; }
+cat >>confdefs.h <<EOF
+#define _PATH_SUDO_TIMEDIR "$timedir"
+EOF
+
 
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for I/O log dir location" >&5
