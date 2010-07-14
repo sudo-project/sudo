@@ -43,7 +43,7 @@ still allow people to get their work done."
 
   # Choose the correct PAM file by distro
   case "$pp_rpm_distro" in
-    centos4*|rhel4*)
+    centos4.*|rhel4.*)
         mkdir -p ${pp_destdir}/etc/pam.d
 	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
 	#%PAM-1.0
@@ -53,7 +53,7 @@ still allow people to get their work done."
 	session    required	pam_limits.so
 	EOF
 	;;
-    centos5*|rhel5*)
+    centos5.*|rhel5.*)
         mkdir -p ${pp_destdir}/etc/pam.d
 	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
 	#%PAM-1.0
@@ -72,7 +72,7 @@ still allow people to get their work done."
 	session    required	pam_limits.so
 	EOF
 	;;
-    sles9*)
+    sles9.*)
         mkdir -p ${pp_destdir}/etc/pam.d
 	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
 	#%PAM-1.0
@@ -80,7 +80,7 @@ still allow people to get their work done."
 	session  required       pam_limits.so
 	EOF
 	;;
-    sles10*|sles11*)
+    sles10.*|sles11.*)
         mkdir -p ${pp_destdir}/etc/pam.d
 	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
 	#%PAM-1.0
@@ -95,14 +95,17 @@ still allow people to get their work done."
 
 %set [deb]
   # Choose the correct PAM file by distro
-  # XXX - missing deb5 and others
   case "$pp_deb_distro" in
-    deb4.*)
+    deb[456].*)
         mkdir -p ${pp_destdir}/etc/pam.d
 	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
 	#%PAM-1.0
+
 	@include common-auth
 	@include common-account
+
+	session required pam_permit.so
+	session required pam_limits.so
 	EOF
 	;;
   esac
