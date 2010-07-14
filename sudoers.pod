@@ -792,7 +792,7 @@ This flag is I<off> by default.
 If set, root is allowed to run B<sudo> too.  Disabling this prevents users
 from "chaining" B<sudo> commands to get a root shell by doing something
 like C<"sudo sudo /bin/sh">.  Note, however, that turning off I<root_sudo>
-will also prevent root and from running B<sudoedit>.
+will also prevent root from running B<sudoedit>.
 Disabling I<root_sudo> provides no real additional security; it
 exists purely for historical reasons.
 This flag is I<@root_sudo@> by default.
