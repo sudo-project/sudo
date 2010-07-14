@@ -36,13 +36,12 @@ simultaneous edits, provides basic sanity checks, and checks
 for parse errors.  If the I<sudoers> file is currently being
 edited you will receive a message to try again later.
 
-There is a hard-coded list of editors that B<visudo> will use set
-at compile-time that may be overridden via the I<editor> I<sudoers>
-C<Default> variable.  This list defaults to the path to L<vi(1)> on
-your system, as determined by the I<configure> script.  Normally,
+There is a hard-coded list of one or more editors that B<visudo> will
+use set at compile-time that may be overridden via the I<editor> I<sudoers>
+C<Default> variable.  This list defaults to C<"@editor@">.  Normally,
 B<visudo> does not honor the C<VISUAL> or C<EDITOR> environment
 variables unless they contain an editor in the aforementioned editors
-list.  However, if B<visudo> is configured with the I<--with-enveditor>
+list.  However, if B<visudo> is configured with the I<--with-env-editor>
 option or the I<env_editor> C<Default> variable is set in I<sudoers>,
 B<visudo> will use any the editor defines by C<VISUAL> or C<EDITOR>.
 Note that this can be a security hole since it allows the user to

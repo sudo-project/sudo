@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "July  2, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "July 14, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -1188,8 +1188,7 @@ The default is \f(CW\*(C`@badpass_message@\*(C'\fR unless insults are enabled.
 A colon (':') separated list of editors allowed to be used with
 \&\fBvisudo\fR.  \fBvisudo\fR will choose the editor that matches the user's
 \&\s-1EDITOR\s0 environment variable if possible, or the first editor in the
-list that exists and is executable.  The default is the path to vi
-on your system.
+list that exists and is executable.  The default is \f(CW"@editor@"\fR.
 .IP "mailsub" 16
 .IX Item "mailsub"
 Subject of the mail sent to the \fImailto\fR user. The escape \f(CW%h\fR
@@ -1512,9 +1511,15 @@ Initial environment for \fB\-i\fR mode on Linux and \s-1AIX\s0
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 Below are example \fIsudoers\fR entries.  Admittedly, some of
-these are a bit contrived.  First, we define our \fIaliases\fR:
+these are a bit contrived.  First, we allow a few environment
+variables to pass and then define our \fIaliases\fR:
 .PP
 .Vb 4
+\& # Run X applications through sudo; HOME is used to find .Xauthority file
+\& # Note that some programs may use HOME for other purposes too and
+\& # this may lead to privilege escalation!
+\& Defaults env_keep = "DISPLAY HOME"
+\&
 \& # User alias specification
 \& User_Alias     FULLTIMERS = millert, mikef, dowdy
 \& User_Alias     PARTTIMERS = bostley, jwfox, crawl

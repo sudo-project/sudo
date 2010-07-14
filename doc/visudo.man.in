@@ -144,7 +144,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "June 11, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "July 14, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -162,13 +162,12 @@ simultaneous edits, provides basic sanity checks, and checks
 for parse errors.  If the \fIsudoers\fR file is currently being
 edited you will receive a message to try again later.
 .PP
-There is a hard-coded list of editors that \fBvisudo\fR will use set
-at compile-time that may be overridden via the \fIeditor\fR \fIsudoers\fR
-\&\f(CW\*(C`Default\*(C'\fR variable.  This list defaults to the path to \fIvi\fR\|(1) on
-your system, as determined by the \fIconfigure\fR script.  Normally,
+There is a hard-coded list of one or more editors that \fBvisudo\fR will
+use set at compile-time that may be overridden via the \fIeditor\fR \fIsudoers\fR
+\&\f(CW\*(C`Default\*(C'\fR variable.  This list defaults to \f(CW"@editor@"\fR.  Normally,
 \&\fBvisudo\fR does not honor the \f(CW\*(C`VISUAL\*(C'\fR or \f(CW\*(C`EDITOR\*(C'\fR environment
 variables unless they contain an editor in the aforementioned editors
-list.  However, if \fBvisudo\fR is configured with the \fI\-\-with\-enveditor\fR
+list.  However, if \fBvisudo\fR is configured with the \fI\-\-with\-env\-editor\fR
 option or the \fIenv_editor\fR \f(CW\*(C`Default\*(C'\fR variable is set in \fIsudoers\fR,
 \&\fBvisudo\fR will use any the editor defines by \f(CW\*(C`VISUAL\*(C'\fR or \f(CW\*(C`EDITOR\*(C'\fR.
 Note that this can be a security hole since it allows the user to

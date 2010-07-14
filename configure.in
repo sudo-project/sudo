@@ -96,6 +96,7 @@ AC_SUBST([ldap_secret])
 AC_SUBST([nsswitch_conf])
 AC_SUBST([netsvc_conf])
 AC_SUBST([secure_path])
+AC_SUBST([editor])
 #
 # Begin initial values for man page substitution
 #
@@ -121,6 +122,7 @@ badpass_message="Sorry, try again."
 fqdn=off
 runas_default=root
 env_editor=off
+editor=vi
 passwd_tries=3
 tty_tickets=off
 insults=off
@@ -847,6 +849,7 @@ AC_ARG_WITH(editor, [AS_HELP_STRING([--with-editor=path], [Default editor for vi
 		;;
     *)		AC_DEFINE_UNQUOTED(EDITOR, "$with_editor", [A colon-separated list of pathnames to be used as the editor for visudo.])
 		AC_MSG_RESULT([$with_editor])
+		editor="$with_editor"
 		;;
 esac], [AC_DEFINE(EDITOR, _PATH_VI) AC_MSG_RESULT(vi)])
 
@@ -1088,7 +1091,7 @@ AC_ARG_WITH(askpass, [AS_HELP_STRING([--with-askpass=PATH], [Fully qualified pat
     yes)	AC_MSG_ERROR(["--with-askpass takes a path as an argument."])
 		;;
     no)		;;
-    *)		AC_DEFINE_UNQUOTED(_PATH_SUDO_ASKPASS, "$with_askpass", [The fully qualified pathname of askpass])
+    *)		SUDO_DEFINE_UNQUOTED(_PATH_SUDO_ASKPASS, "$with_askpass", [The fully qualified pathname of askpass])
 		;;
 esac], AC_MSG_RESULT(no))
 
@@ -2741,11 +2744,11 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no"; then
 	INSTALL_NOEXEC="install-noexec"
 
 	eval noexec_file="$with_noexec"
-	AC_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$noexec_file", [The fully qualified pathname of sudo_noexec.so])
+	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$noexec_file", [The fully qualified pathname of sudo_noexec.so])
     fi
     if test X"$with_selinux" != X"no"; then
 	eval sesh_file="$libexecdir/sesh"
-	AC_DEFINE_UNQUOTED(_PATH_SUDO_SESH, "$sesh_file", [The fully qualified pathname of sesh])
+	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, "$sesh_file", [The fully qualified pathname of sesh])
     fi
     eval PLUGINDIR="$with_plugindir"
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR/")

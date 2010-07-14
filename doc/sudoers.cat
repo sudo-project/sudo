@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0b1                   July  2, 2010                         1
+1.8.0b1                   July 14, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
 
 
-1.8.0b1                   July  2, 2010                         2
+1.8.0b1                   July 14, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  2, 2010                         3
+1.8.0b1                   July 14, 2010                         3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  2, 2010                         4
+1.8.0b1                   July 14, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  2, 2010                         5
+1.8.0b1                   July 14, 2010                         5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  2, 2010                         6
+1.8.0b1                   July 14, 2010                         6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  2, 2010                         7
+1.8.0b1                   July 14, 2010                         7
 
 
 
@@ -523,7 +523,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  2, 2010                         8
+1.8.0b1                   July 14, 2010                         8
 
 
 
@@ -589,7 +589,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  2, 2010                         9
+1.8.0b1                   July 14, 2010                         9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  2, 2010                        10
+1.8.0b1                   July 14, 2010                        10
 
 
 
@@ -721,7 +721,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
 
 
-1.8.0b1                   July  2, 2010                        11
+1.8.0b1                   July 14, 2010                        11
 
 
 
@@ -787,7 +787,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  2, 2010                        12
+1.8.0b1                   July 14, 2010                        12
 
 
 
@@ -853,7 +853,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  2, 2010                        13
+1.8.0b1                   July 14, 2010                        13
 
 
 
@@ -919,7 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  2, 2010                        14
+1.8.0b1                   July 14, 2010                        14
 
 
 
@@ -985,7 +985,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  2, 2010                        15
+1.8.0b1                   July 14, 2010                        15
 
 
 
@@ -1051,7 +1051,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  2, 2010                        16
+1.8.0b1                   July 14, 2010                        16
 
 
 
@@ -1117,7 +1117,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  2, 2010                        17
+1.8.0b1                   July 14, 2010                        17
 
 
 
@@ -1154,8 +1154,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        used with vviissuuddoo.  vviissuuddoo will choose the editor that
                        matches the user's EDITOR environment variable if
                        possible, or the first editor in the list that exists
-                       and is executable.  The default is the path to vi on
-                       your system.
+                       and is executable.  The default is "vi".
 
        mailsub         Subject of the mail sent to the _m_a_i_l_t_o user. The escape
                        %h will expand to the host name of the machine.
@@ -1180,10 +1179,11 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        %h  expanded to the local host name without the domain
                            name
 
+                       %p  expanded to the user whose password is being asked
 
 
 
-1.8.0b1                   July  2, 2010                        18
+1.8.0b1                   July 14, 2010                        18
 
 
 
@@ -1192,7 +1192,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
-                       %p  expanded to the user whose password is being asked
                            for (respects the _r_o_o_t_p_w, _t_a_r_g_e_t_p_w and _r_u_n_a_s_p_w
                            flags in _s_u_d_o_e_r_s)
 
@@ -1246,10 +1245,11 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    terminal is available.  This may be the case when ssuuddoo is
                    executed from a graphical (as opposed to text-based)
                    application.  The program specified by _a_s_k_p_a_s_s should
+                   display the argument passed to it as the prompt and write
 
 
 
-1.8.0b1                   July  2, 2010                        19
+1.8.0b1                   July 14, 2010                        19
 
 
 
@@ -1258,7 +1258,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
-                   display the argument passed to it as the prompt and write
                    the user's password to the standard output.  The value of
                    _a_s_k_p_a_s_s may be overridden by the SUDO_ASKPASS environment
                    variable.
@@ -1312,10 +1311,11 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    will be used in place of the standard lecture if the named
                    file exists.  By default, ssuuddoo uses a built-in lecture.
 
+       listpw      This option controls when a password will be required when
 
 
 
-1.8.0b1                   July  2, 2010                        20
+1.8.0b1                   July 14, 2010                        20
 
 
 
@@ -1324,7 +1324,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
-       listpw      This option controls when a password will be required when
                    a user runs ssuuddoo with the --ll option.  It has the following
                    possible values:
 
@@ -1381,7 +1380,8 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  2, 2010                        21
+
+1.8.0b1                   July 14, 2010                        21
 
 
 
@@ -1447,7 +1447,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July  2, 2010                        22
+1.8.0b1                   July 14, 2010                        22
 
 
 
@@ -1484,7 +1484,13 @@ FFIILLEESS
 
 EEXXAAMMPPLLEESS
        Below are example _s_u_d_o_e_r_s entries.  Admittedly, some of these are a bit
-       contrived.  First, we define our _a_l_i_a_s_e_s:
+       contrived.  First, we allow a few environment variables to pass and
+       then define our _a_l_i_a_s_e_s:
+
+        # Run X applications through sudo; HOME is used to find .Xauthority file
+        # Note that some programs may use HOME for other purposes too and
+        # this may lead to privilege escalation!
+        Defaults env_keep = "DISPLAY HOME"
 
         # User alias specification
         User_Alias     FULLTIMERS = millert, mikef, dowdy
@@ -1504,16 +1510,10 @@ EEXXAAMMPPLLEESS
         Host_Alias     CUNETS = 128.138.0.0/255.255.0.0
         Host_Alias     CSNETS = 128.138.243.0, 128.138.204.0/24, 128.138.242.0
         Host_Alias     SERVERS = master, mail, www, ns
-        Host_Alias     CDROM = orion, perseus, hercules
-
-        # Cmnd alias specification
-        Cmnd_Alias     DUMPS = /usr/bin/mt, /usr/sbin/dump, /usr/sbin/rdump,\
-                               /usr/sbin/restore, /usr/sbin/rrestore
-        Cmnd_Alias     KILL = /usr/bin/kill
 
 
 
-1.8.0b1                   July  2, 2010                        23
+1.8.0b1                   July 14, 2010                        23
 
 
 
@@ -1522,6 +1522,12 @@ EEXXAAMMPPLLEESS
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+        Host_Alias     CDROM = orion, perseus, hercules
+
+        # Cmnd alias specification
+        Cmnd_Alias     DUMPS = /usr/bin/mt, /usr/sbin/dump, /usr/sbin/rdump,\
+                               /usr/sbin/restore, /usr/sbin/rrestore
+        Cmnd_Alias     KILL = /usr/bin/kill
         Cmnd_Alias     PRINTING = /usr/sbin/lpc, /usr/bin/lprm
         Cmnd_Alias     SHUTDOWN = /usr/sbin/shutdown
         Cmnd_Alias     HALT = /usr/sbin/halt
@@ -1571,15 +1577,9 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        any host but they must authenticate themselves first (since the entry
        lacks the NOPASSWD tag).
 
-        jack           CSNETS = ALL
-
-       The user jjaacckk may run any command on the machines in the _C_S_N_E_T_S alias
-       (the networks 128.138.243.0, 128.138.204.0, and 128.138.242.0).  Of
-       those networks, only 128.138.204.0 has an explicit netmask (in CIDR
 
 
-
-1.8.0b1                   July  2, 2010                        24
+1.8.0b1                   July 14, 2010                        24
 
 
 
@@ -1588,6 +1588,11 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+        jack           CSNETS = ALL
+
+       The user jjaacckk may run any command on the machines in the _C_S_N_E_T_S alias
+       (the networks 128.138.243.0, 128.138.204.0, and 128.138.242.0).  Of
+       those networks, only 128.138.204.0 has an explicit netmask (in CIDR
        notation) indicating it is a class C network.  For the other networks
        in _C_S_N_E_T_S, the local machine's netmask will be used during matching.
 
@@ -1637,15 +1642,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
         fred           ALL = (DB) NOPASSWD: ALL
 
-       The user ffrreedd can run commands as any user in the _D_B Runas_Alias
-       (oorraaccllee or ssyybbaassee) without giving a password.
-
-        john           ALPHA = /usr/bin/su [!-]*, !/usr/bin/su *root*
 
 
 
-
-1.8.0b1                   July  2, 2010                        25
+1.8.0b1                   July 14, 2010                        25
 
 
 
@@ -1653,6 +1653,11 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+       The user ffrreedd can run commands as any user in the _D_B Runas_Alias
+       (oorraaccllee or ssyybbaassee) without giving a password.
+
+        john           ALPHA = /usr/bin/su [!-]*, !/usr/bin/su *root*
 
        On the _A_L_P_H_A machines, user jjoohhnn may su to anyone except root but he is
        not allowed to specify any options to the _s_u(1) command.
@@ -1703,15 +1708,10 @@ SSEECCUURRIITTYY NNOOTTEESS
        Doesn't really prevent bbiillll from running the commands listed in _S_U or
        _S_H_E_L_L_S since he can simply copy those commands to a different name, or
        use a shell escape from an editor or other program.  Therefore, these
-       kind of restrictions should be considered advisory at best (and
-       reinforced by policy).
-
-       Furthermore, if the _f_a_s_t___g_l_o_b option is in use, it is not possible to
-       reliably negate commands where the path name includes globbing (aka
 
 
 
-1.8.0b1                   July  2, 2010                        26
+1.8.0b1                   July 14, 2010                        26
 
 
 
@@ -1720,6 +1720,11 @@ SSEECCUURRIITTYY NNOOTTEESS
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       kind of restrictions should be considered advisory at best (and
+       reinforced by policy).
+
+       Furthermore, if the _f_a_s_t___g_l_o_b option is in use, it is not possible to
+       reliably negate commands where the path name includes globbing (aka
        wildcard) characters.  This is because the C library's _f_n_m_a_t_c_h(3)
        function cannot resolve relative paths.  While this is typically only
        an inconvenience for rules that grant privileges, it can result in a
@@ -1769,15 +1774,10 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
                      File containing dummy exec functions:
 
-                 then ssuuddoo may be able to replace the exec family of functions
-                 in the standard library with its own that simply return an
-                 error.  Unfortunately, there is no foolproof way to know
-                 whether or not _n_o_e_x_e_c will work at compile-time.  _n_o_e_x_e_c
-                 should work on SunOS, Solaris, *BSD, Linux, IRIX, Tru64 UNIX,
 
 
 
-1.8.0b1                   July  2, 2010                        27
+1.8.0b1                   July 14, 2010                        27
 
 
 
@@ -1786,6 +1786,11 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+                 then ssuuddoo may be able to replace the exec family of functions
+                 in the standard library with its own that simply return an
+                 error.  Unfortunately, there is no foolproof way to know
+                 whether or not _n_o_e_x_e_c will work at compile-time.  _n_o_e_x_e_c
+                 should work on SunOS, Solaris, *BSD, Linux, IRIX, Tru64 UNIX,
                  MacOS X, and HP-UX 11.x.  It is known nnoott to work on AIX and
                  UnixWare.  _n_o_e_x_e_c is expected to work on most operating
                  systems that support the LD_PRELOAD environment variable.
@@ -1835,15 +1840,10 @@ SSEECCUURRIITTYY NNOOTTEESS
        On systems where the boot time is available, _s_u_d_o_e_r_s will ignore time
        stamps that date from before the machine booted.
 
-       Since time stamp files live in the file system, they can outlive a
-       user's login session.  As a result, a user may be able to login, run a
-       command with ssuuddoo after authenticating, logout, login again, and run
-       ssuuddoo without authenticating so long as the time stamp file's
-       modification time is within 5 minutes (or whatever the timeout is set
 
 
 
-1.8.0b1                   July  2, 2010                        28
+1.8.0b1                   July 14, 2010                        28
 
 
 
@@ -1852,6 +1852,11 @@ SSEECCUURRIITTYY NNOOTTEESS
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       Since time stamp files live in the file system, they can outlive a
+       user's login session.  As a result, a user may be able to login, run a
+       command with ssuuddoo after authenticating, logout, login again, and run
+       ssuuddoo without authenticating so long as the time stamp file's
+       modification time is within 5 minutes (or whatever the timeout is set
        to in _s_u_d_o_e_r_s).  When the _t_t_y___t_i_c_k_e_t_s option is enabled, the time stamp
        has per-tty granularity but still may outlive the user's session.  On
        Linux systems where the devpts filesystem is used, Solaris systems with
@@ -1904,11 +1909,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-1.8.0b1                   July  2, 2010                        29
+1.8.0b1                   July 14, 2010                        29
 
 

@@ -17,17 +17,16 @@ DDEESSCCRRIIPPTTIIOONN
        _s_u_d_o_e_r_s file is currently being edited you will receive a message to
        try again later.
 
-       There is a hard-coded list of editors that vviissuuddoo will use set at
-       compile-time that may be overridden via the _e_d_i_t_o_r _s_u_d_o_e_r_s Default
-       variable.  This list defaults to the path to _v_i(1) on your system, as
-       determined by the _c_o_n_f_i_g_u_r_e script.  Normally, vviissuuddoo does not honor
-       the VISUAL or EDITOR environment variables unless they contain an
-       editor in the aforementioned editors list.  However, if vviissuuddoo is
-       configured with the _-_-_w_i_t_h_-_e_n_v_e_d_i_t_o_r option or the _e_n_v___e_d_i_t_o_r Default
-       variable is set in _s_u_d_o_e_r_s, vviissuuddoo will use any the editor defines by
-       VISUAL or EDITOR.  Note that this can be a security hole since it
-       allows the user to execute any program they wish simply by setting
-       VISUAL or EDITOR.
+       There is a hard-coded list of one or more editors that vviissuuddoo will use
+       set at compile-time that may be overridden via the _e_d_i_t_o_r _s_u_d_o_e_r_s
+       Default variable.  This list defaults to "vi".  Normally, vviissuuddoo does
+       not honor the VISUAL or EDITOR environment variables unless they
+       contain an editor in the aforementioned editors list.  However, if
+       vviissuuddoo is configured with the _-_-_w_i_t_h_-_e_n_v_-_e_d_i_t_o_r option or the
+       _e_n_v___e_d_i_t_o_r Default variable is set in _s_u_d_o_e_r_s, vviissuuddoo will use any the
+       editor defines by VISUAL or EDITOR.  Note that this can be a security
+       hole since it allows the user to execute any program they wish simply
+       by setting VISUAL or EDITOR.
 
        vviissuuddoo parses the _s_u_d_o_e_r_s file after the edit and will not save the
        changes if there is a syntax error.  Upon finding an error, vviissuuddoo will
@@ -58,10 +57,11 @@ OOPPTTIIOONNSS
                    appended to it.
 
        -q          Enable qquuiieett mode.  In this mode details about syntax
+                   errors are not printed.  This option is only useful when
 
 
 
-1.8.0b1                   June 11, 2010                         1
+1.8.0b1                   July 14, 2010                         1
 
 
 
@@ -70,7 +70,6 @@ OOPPTTIIOONNSS
 VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
 
-                   errors are not printed.  This option is only useful when
                    combined with the --cc option.
 
        -s          Enable ssttrriicctt checking of the _s_u_d_o_e_r_s file.  If an alias is
@@ -124,10 +123,11 @@ SSEEEE AALLSSOO
 
 AAUUTTHHOORR
        Many people have worked on _s_u_d_o over the years; this version of vviissuuddoo
+       was written by:
 
 
 
-1.8.0b1                   June 11, 2010                         2
+1.8.0b1                   July 14, 2010                         2
 
 
 
@@ -135,8 +135,6 @@ AAUUTTHHOORR
 
 VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
-
-       was written by:
 
         Todd Miller
 
@@ -193,6 +191,8 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.0b1                   June 11, 2010                         3
+
+
+1.8.0b1                   July 14, 2010                         3
 
 
