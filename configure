@@ -784,6 +784,7 @@ OBJEXT
 EXEEXT
 ac_ct_CC
 CC
+editor
 secure_path
 netsvc_conf
 nsswitch_conf
@@ -2770,6 +2771,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -4670,6 +4672,7 @@ _ACEOF
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_editor" >&5
 $as_echo "$with_editor" >&6; }
+		editor="$with_editor"
 		;;
 esac
 else
@@ -5070,10 +5073,9 @@ if test "${with_askpass+set}" = set; then :
     yes)	as_fn_error "\"--with-askpass takes a path as an argument.\"" "$LINENO" 5
 		;;
     no)		;;
-    *)
-cat >>confdefs.h <<_ACEOF
+    *)		cat >>confdefs.h <<EOF
 #define _PATH_SUDO_ASKPASS "$with_askpass"
-_ACEOF
+EOF
 
 		;;
 esac
@@ -6625,13 +6627,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6628: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6630: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6631: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6633: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6634: output\"" >&5)
+  (eval echo "\"\$as_me:6636: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -7836,7 +7838,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7839 "configure"' > conftest.$ac_ext
+  echo '#line 7841 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9229,11 +9231,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9232: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9234: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9236: \$? = $ac_status" >&5
+   echo "$as_me:9238: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9568,11 +9570,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9571: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9573: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9575: \$? = $ac_status" >&5
+   echo "$as_me:9577: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9673,11 +9675,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9676: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9678: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9680: \$? = $ac_status" >&5
+   echo "$as_me:9682: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9728,11 +9730,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9731: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9733: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9735: \$? = $ac_status" >&5
+   echo "$as_me:9737: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12095,7 +12097,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12098 "configure"
+#line 12100 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12191,7 +12193,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12194 "configure"
+#line 12196 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13614,42 +13616,20 @@ fi
 if test -z "$with_editor"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for vi" >&5
 $as_echo_n "checking for vi... " >&6; }
-if test -f "/usr/bin/vi"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/bin/vi" >&5
-$as_echo "/usr/bin/vi" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_VI "/usr/bin/vi"
+found=no
+for editor in "/usr/bin/vi" "/bin/vi" "/usr/ucb/vi" "/usr/bsd/vi" "/usr/local/bin/vi"; do
+    if test -f "$editor"; then
+	found=yes
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $editor" >&5
+$as_echo "$editor" >&6; }
+	cat >>confdefs.h <<EOF
+#define _PATH_VI "$editor"
 EOF
 
-elif test -f "/usr/ucb/vi"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/ucb/vi" >&5
-$as_echo "/usr/ucb/vi" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_VI "/usr/ucb/vi"
-EOF
-
-elif test -f "/usr/bsd/vi"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/bsd/vi" >&5
-$as_echo "/usr/bsd/vi" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_VI "/usr/bsd/vi"
-EOF
-
-elif test -f "/bin/vi"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /bin/vi" >&5
-$as_echo "/bin/vi" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_VI "/bin/vi"
-EOF
-
-elif test -f "/usr/local/bin/vi"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: /usr/local/bin/vi" >&5
-$as_echo "/usr/local/bin/vi" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_VI "/usr/local/bin/vi"
-EOF
-
-else
+	break
+    fi
+done
+if test X"$found" != X"no"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
 $as_echo "not found" >&6; }
 fi
@@ -18290,18 +18270,16 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no"; then
 	INSTALL_NOEXEC="install-noexec"
 
 	eval noexec_file="$with_noexec"
-
-cat >>confdefs.h <<_ACEOF
+	cat >>confdefs.h <<EOF
 #define _PATH_SUDO_NOEXEC "$noexec_file"
-_ACEOF
+EOF
 
     fi
     if test X"$with_selinux" != X"no"; then
 	eval sesh_file="$libexecdir/sesh"
-
-cat >>confdefs.h <<_ACEOF
+	cat >>confdefs.h <<EOF
 #define _PATH_SUDO_SESH "$sesh_file"
-_ACEOF
+EOF
 
     fi
     exec_prefix="$oexec_prefix"

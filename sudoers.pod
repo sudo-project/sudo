@@ -1007,8 +1007,7 @@ The default is C<@badpass_message@> unless insults are enabled.
 A colon (':') separated list of editors allowed to be used with
 B<visudo>.  B<visudo> will choose the editor that matches the user's
 EDITOR environment variable if possible, or the first editor in the
-list that exists and is executable.  The default is the path to vi
-on your system.
+list that exists and is executable.  The default is C<"@editor@">.
 
 =item mailsub
 
@@ -1357,7 +1356,13 @@ I/O log files
 =head1 EXAMPLES
 
 Below are example I<sudoers> entries.  Admittedly, some of
-these are a bit contrived.  First, we define our I<aliases>:
+these are a bit contrived.  First, we allow a few environment
+variables to pass and then define our I<aliases>:
+
+ # Run X applications through sudo; HOME is used to find .Xauthority file
+ # Note that some programs may use HOME for other purposes too and
+ # this may lead to privilege escalation!
+ Defaults env_keep = "DISPLAY HOME"
 
  # User alias specification
  User_Alias	FULLTIMERS = millert, mikef, dowdy

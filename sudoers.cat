@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.4                     July 12, 2010                         1
+1.7.4                     July 14, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                         2
+1.7.4                     July 14, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                         3
+1.7.4                     July 14, 2010                         3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                         4
+1.7.4                     July 14, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                         5
+1.7.4                     July 14, 2010                         5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                         6
+1.7.4                     July 14, 2010                         6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                         7
+1.7.4                     July 14, 2010                         7
 
 
 
@@ -523,7 +523,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                         8
+1.7.4                     July 14, 2010                         8
 
 
 
@@ -589,7 +589,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
 
 
-1.7.4                     July 12, 2010                         9
+1.7.4                     July 14, 2010                         9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                        10
+1.7.4                     July 14, 2010                        10
 
 
 
@@ -721,7 +721,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                        11
+1.7.4                     July 14, 2010                        11
 
 
 
@@ -787,7 +787,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                        12
+1.7.4                     July 14, 2010                        12
 
 
 
@@ -853,7 +853,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                        13
+1.7.4                     July 14, 2010                        13
 
 
 
@@ -919,7 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                        14
+1.7.4                     July 14, 2010                        14
 
 
 
@@ -985,7 +985,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                        15
+1.7.4                     July 14, 2010                        15
 
 
 
@@ -1035,8 +1035,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        used with vviissuuddoo.  vviissuuddoo will choose the editor that
                        matches the user's EDITOR environment variable if
                        possible, or the first editor in the list that exists
-                       and is executable.  The default is the path to vi on
-                       your system.
+                       and is executable.  The default is "vi".
 
        mailsub         Subject of the mail sent to the _m_a_i_l_t_o user. The escape
                        %h will expand to the host name of the machine.
@@ -1051,7 +1050,8 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                        16
+
+1.7.4                     July 14, 2010                        16
 
 
 
@@ -1117,7 +1117,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                        17
+1.7.4                     July 14, 2010                        17
 
 
 
@@ -1183,7 +1183,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                        18
+1.7.4                     July 14, 2010                        18
 
 
 
@@ -1249,7 +1249,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                        19
+1.7.4                     July 14, 2010                        19
 
 
 
@@ -1315,7 +1315,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 12, 2010                        20
+1.7.4                     July 14, 2010                        20
 
 
 
@@ -1341,7 +1341,13 @@ FFIILLEESS
 
 EEXXAAMMPPLLEESS
        Below are example _s_u_d_o_e_r_s entries.  Admittedly, some of these are a bit
-       contrived.  First, we define our _a_l_i_a_s_e_s:
+       contrived.  First, we allow a few environment variables to pass and
+       then define our _a_l_i_a_s_e_s:
+
+        # Run X applications through sudo; HOME is used to find .Xauthority file
+        # Note that some programs may use HOME for other purposes too and
+        # this may lead to privilege escalation!
+        Defaults env_keep = "DISPLAY HOME"
 
         # User alias specification
         User_Alias     FULLTIMERS = millert, mikef, dowdy
@@ -1372,16 +1378,10 @@ EEXXAAMMPPLLEESS
         Cmnd_Alias     HALT = /usr/sbin/halt
         Cmnd_Alias     REBOOT = /usr/sbin/reboot
         Cmnd_Alias     SHELLS = /usr/bin/sh, /usr/bin/csh, /usr/bin/ksh, \
-                                /usr/local/bin/tcsh, /usr/bin/rsh, \
-                                /usr/local/bin/zsh
-        Cmnd_Alias     SU = /usr/bin/su
-        Cmnd_Alias     PAGERS = /usr/bin/more, /usr/bin/pg, /usr/bin/less
-
-       Here we override some of the compiled in default values.  We want ssuuddoo
 
 
 
-1.7.4                     July 12, 2010                        21
+1.7.4                     July 14, 2010                        21
 
 
 
@@ -1390,6 +1390,12 @@ EEXXAAMMPPLLEESS
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+                                /usr/local/bin/tcsh, /usr/bin/rsh, \
+                                /usr/local/bin/zsh
+        Cmnd_Alias     SU = /usr/bin/su
+        Cmnd_Alias     PAGERS = /usr/bin/more, /usr/bin/pg, /usr/bin/less
+
+       Here we override some of the compiled in default values.  We want ssuuddoo
        to log via _s_y_s_l_o_g(3) using the _a_u_t_h facility in all cases.  We don't
        want to subject the full time staff to the ssuuddoo lecture, user mmiilllleerrtt
        need not give a password, and we don't want to reset the LOGNAME, USER
@@ -1438,16 +1444,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
         lisa           CUNETS = ALL
 
-       The user lliissaa may run any command on any host in the _C_U_N_E_T_S alias (the
-       class B network 128.138.0.0).
-
-        operator       ALL = DUMPS, KILL, SHUTDOWN, HALT, REBOOT, PRINTING,\
-                       sudoedit /etc/printcap, /usr/oper/bin/
 
 
 
-
-1.7.4                     July 12, 2010                        22
+1.7.4                     July 14, 2010                        22
 
 
 
@@ -1455,6 +1455,12 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+       The user lliissaa may run any command on any host in the _C_U_N_E_T_S alias (the
+       class B network 128.138.0.0).
+
+        operator       ALL = DUMPS, KILL, SHUTDOWN, HALT, REBOOT, PRINTING,\
+                       sudoedit /etc/printcap, /usr/oper/bin/
 
        The ooppeerraattoorr user may run commands limited to simple maintenance.
        Here, those are commands related to backups, killing processes, the
@@ -1504,16 +1510,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
         jen            ALL, !SERVERS = ALL
 
-       The user jjeenn may run any command on any machine except for those in the
-       _S_E_R_V_E_R_S Host_Alias (master, mail, www and ns).
-
-        jill           SERVERS = /usr/bin/, !SU, !SHELLS
-
-       For any machine in the _S_E_R_V_E_R_S Host_Alias, jjiillll may run any commands in
 
 
 
-1.7.4                     July 12, 2010                        23
+1.7.4                     July 14, 2010                        23
 
 
 
@@ -1522,6 +1522,12 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       The user jjeenn may run any command on any machine except for those in the
+       _S_E_R_V_E_R_S Host_Alias (master, mail, www and ns).
+
+        jill           SERVERS = /usr/bin/, !SU, !SHELLS
+
+       For any machine in the _S_E_R_V_E_R_S Host_Alias, jjiillll may run any commands in
        the directory _/_u_s_r_/_b_i_n_/ except for those commands belonging to the _S_U
        and _S_H_E_L_L_S Cmnd_Aliases.
 
@@ -1570,16 +1576,10 @@ SSEECCUURRIITTYY NNOOTTEESS
        an inconvenience for rules that grant privileges, it can result in a
        security issue for rules that subtract or revoke privileges.
 
-       For example, given the following _s_u_d_o_e_r_s entry:
-
-        john   ALL = /usr/bin/passwd [a-zA-Z0-9]*, /usr/bin/chsh [a-zA-Z0-9]*,
-             /usr/bin/chfn [a-zA-Z0-9]*, !/usr/bin/* root
-
-       User jjoohhnn can still run /usr/bin/passwd root if _f_a_s_t___g_l_o_b is enabled by
 
 
 
-1.7.4                     July 12, 2010                        24
+1.7.4                     July 14, 2010                        24
 
 
 
@@ -1588,6 +1588,12 @@ SSEECCUURRIITTYY NNOOTTEESS
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       For example, given the following _s_u_d_o_e_r_s entry:
+
+        john   ALL = /usr/bin/passwd [a-zA-Z0-9]*, /usr/bin/chsh [a-zA-Z0-9]*,
+             /usr/bin/chfn [a-zA-Z0-9]*, !/usr/bin/* root
+
+       User jjoohhnn can still run /usr/bin/passwd root if _f_a_s_t___g_l_o_b is enabled by
        changing to _/_u_s_r_/_b_i_n and running ./passwd root instead.
 
 PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
@@ -1636,16 +1642,10 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
                  systems that support the LD_PRELOAD environment variable.
                  Check your operating system's manual pages for the dynamic
                  linker (usually ld.so, ld.so.1, dyld, dld.sl, rld, or loader)
-                 to see if LD_PRELOAD is supported.
-
-                 To enable _n_o_e_x_e_c for a command, use the NOEXEC tag as
-                 documented in the User Specification section above.  Here is
-                 that example again:
 
 
 
-
-1.7.4                     July 12, 2010                        25
+1.7.4                     July 14, 2010                        25
 
 
 
@@ -1653,6 +1653,12 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+                 to see if LD_PRELOAD is supported.
+
+                 To enable _n_o_e_x_e_c for a command, use the NOEXEC tag as
+                 documented in the User Specification section above.  Here is
+                 that example again:
 
                   aaron  shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 
@@ -1705,12 +1711,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-
-1.7.4                     July 12, 2010                        26
+1.7.4                     July 14, 2010                        26
 
 

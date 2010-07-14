@@ -35,25 +35,19 @@ fi
 ])dnl
 
 dnl
-dnl check for vi
+dnl check for vi in well-known locations
 dnl
-AC_DEFUN(SUDO_PROG_VI, [AC_MSG_CHECKING(for vi)
-if test -f "/usr/bin/vi"; then
-    AC_MSG_RESULT(/usr/bin/vi)
-    SUDO_DEFINE(_PATH_VI, "/usr/bin/vi")
-elif test -f "/usr/ucb/vi"; then
-    AC_MSG_RESULT(/usr/ucb/vi)
-    SUDO_DEFINE(_PATH_VI, "/usr/ucb/vi")
-elif test -f "/usr/bsd/vi"; then
-    AC_MSG_RESULT(/usr/bsd/vi)
-    SUDO_DEFINE(_PATH_VI, "/usr/bsd/vi")
-elif test -f "/bin/vi"; then
-    AC_MSG_RESULT(/bin/vi)
-    SUDO_DEFINE(_PATH_VI, "/bin/vi")
-elif test -f "/usr/local/bin/vi"; then
-    AC_MSG_RESULT(/usr/local/bin/vi)
-    SUDO_DEFINE(_PATH_VI, "/usr/local/bin/vi")
-else
+AC_DEFUN(SUDO_PROG_VI, [AC_MSG_CHECKING([for vi])
+found=no
+for editor in "/usr/bin/vi" "/bin/vi" "/usr/ucb/vi" "/usr/bsd/vi" "/usr/local/bin/vi"; do
+    if test -f "$editor"; then
+	found=yes
+	AC_MSG_RESULT([$editor])
+	SUDO_DEFINE_UNQUOTED(_PATH_VI, "$editor")
+	break
+    fi
+done
+if test X"$found" != X"no"; then
     AC_MSG_RESULT(not found)
 fi
 ])dnl
