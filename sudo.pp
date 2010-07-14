@@ -149,4 +149,26 @@ still allow people to get their work done."
   # installs it 0640 when sudo requires 0440
   chmod %{sudoers_mode} %{sudoersdir}/sudoers
 
+  # Debian uses a sudo group in its default sudoers file
+  perl -e '
+    exit 0 if getgrnam("sudo");
+    $gid = 27; # default debian sudo gid
+    setgrent();
+    while (getgrgid($gid)) { $gid++; }
+    if ($gid != 27) {
+      print "On Debian we normally use gid 27 for \"sudo\".\n";
+      $gname = getgrgid(27);
+      print "However, on your system gid 27 is group \"$gname\".\n\n";
+      print "Would you like me to stop configuring sudo so that you can change this? [n] "; 
+      $ans = <STDIN>;
+      if ($ans =~ /^[yY]/) {
+	print "\"dpkg --pending --configure\" will restart the configuration.\n\n";
+	exit 1;
+      }
+    }
+    print "Creating group \"sudo\" with gid = $gid\n";
+    system("groupadd -g $gid sudo");
+    exit 0;
+  '
+
 # vim:ts=2:sw=2:et
