@@ -1,31 +1,72 @@
-# sudoers file.
-#
-# This file MUST be edited with the 'visudo' command as root.
-# Failure to use 'visudo' may result in syntax or file permission errors
-# that prevent sudo from running.
-#
-# See the sudoers man page for the details on how to write a sudoers file.
-#
+## sudoers file.
+##
+## This file MUST be edited with the 'visudo' command as root.
+## Failure to use 'visudo' may result in syntax or file permission errors
+## that prevent sudo from running.
+##
+## See the sudoers man page for the details on how to write a sudoers file.
+##
 
-# Host alias specification
+##
+## Host alias specification
+##
+## Groups of machines. These may include host names (optionally with wildcards),
+## IP addresses, network numbers or netgroups.
+# Host_Alias	WEBSERVERS = www1, www2, www3
 
-# User alias specification
+##
+## User alias specification
+##
+## Groups of users.  These may consist of user names, uids, Unix groups,
+## or netgroups.
+# User_Alias	ADMINS = millert, dowdy, mikef
 
-# Cmnd alias specification
+##
+## Cmnd alias specification
+##
+## Groups of commands.  Often used to group related commands together.
+# Cmnd_Alias	PROCESSES = /usr/bin/nice, /bin/kill, /usr/bin/renice, \
+# 			    /usr/bin/pkill, /usr/bin/top
 
-# Defaults specification
+##
+## Defaults specification
+##
+## You may wish to keep some of the following environment variables
+## when running commands via sudo.
+##
+## Locale settings
+# Defaults env_keep += "LANG LANGUAGE LINGUAS LC_* _XKB_CHARSET"
+##
+## X11 resource path settings
+# Defaults env_keep += "XAPPLRESDIR XFILESEARCHPATH XUSERFILESEARCHPATH"
+##
+## Desktop path settings
+# Defaults env_keep += "QTDIR KDEDIR"
+##
+## Allow sudo-run commands to inherit the callers' ConsoleKit session
+# Defaults env_keep += "XDG_SESSION_COOKIE"
+##
+## Uncomment to enable special input methods.  Care should be taken as
+## this may allow users to subvert the command being run via sudo.
+# Defaults env_keep += "XMODIFIERS GTK_IM_MODULE QT_IM_MODULE QT_IM_SWITCHER"
 
-# Runas alias specification
+##
+## Runas alias specification
+##
 
-# User privilege specification
+##
+## User privilege specification
+##
 root	ALL=(ALL) ALL
 
-# Uncomment to allow people in group wheel to run all commands
+## Uncomment to allow members of group wheel to execute any command
 # %wheel	ALL=(ALL) ALL
 
-# Same thing without a password
+## Same thing without a password
 # %wheel	ALL=(ALL) NOPASSWD: ALL
 
-# Samples
-# %users  ALL=/sbin/mount /cdrom,/sbin/umount /cdrom
-# %users  localhost=/sbin/shutdown -h now
+## Uncomment to allow members of group sudo to execute any command
+# %sudo	ALL=(ALL) ALL
+
+## Read drop-in files from /etc/sudoers.d (the # here does not mean a comment)
+#includedir /etc/sudoers.d
