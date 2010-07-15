@@ -4,7 +4,10 @@
 # Usage: mkpkg
 #
 
-IFS=
+# Make sure IFS is set to space, tab, newline in that order.
+nl='
+'
+IFS=" 	$nl"
 
 top_srcdir=`dirname $0`
 
@@ -140,8 +143,7 @@ esac
 
 # Remove spaces from IFS when setting $@ so that passprompt may include them
 OIFS="$IFS"
-IFS="	
-"
+IFS="	$nl"
 set -- $configure_opts
 IFS="$OIFS"
 $top_srcdir/configure "$@" || exit 1
