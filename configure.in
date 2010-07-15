@@ -1263,23 +1263,18 @@ AC_ARG_ENABLE(env_debug,
 
 AC_ARG_ENABLE(zlib,
 [AS_HELP_STRING([--enable-zlib[[=PATH]]], [Whether to enable or disable zlib])],
-[ case "$enableval" in
+[ case "$enable_zlib" in
     yes)    AC_DEFINE(HAVE_ZLIB_H)
 	    ZLIB="-lz"
 	    ;;
     no)	    ;;
     *)	    AC_DEFINE(HAVE_ZLIB_H)
-	    CPPFLAGS="${CPPFLAGS} -I${enableval}/include"
-	    SUDO_APPEND_LIBPATH(ZLIB, [$enableval/lib])
+	    CPPFLAGS="${CPPFLAGS} -I${enable_zlib}/include"
+	    SUDO_APPEND_LIBPATH(ZLIB, [$enable_zlib/lib])
 	    ZLIB="${ZLIB} -lz"
 	    ;;
   esac
 ])
-if test X"$enable_zlib" = X""; then
-    AC_CHECK_LIB(z, gzdopen, [
-	AC_CHECK_HEADERS(zlib.h, [ZLIB="-lz"])
-    ])
-fi
 
 AC_ARG_ENABLE(warnings,
 [AS_HELP_STRING([--enable-warnings], [Whether to enable compiler warnings])],
@@ -2030,6 +2025,15 @@ AC_CHECK_FUNCS(getprogname, , [
     fi
     AC_MSG_RESULT($sudo_cv___progname)
 ])
+
+dnl
+dnl If zlib not explictly enabled, check for it here
+dnl
+if test X"$enable_zlib" = X""; then
+    AC_CHECK_LIB(z, gzdopen, [
+	AC_CHECK_HEADERS(zlib.h, [ZLIB="-lz"])
+    ])
+fi
 
 dnl
 dnl Check for strsignal() or sys_siglist
