@@ -48,71 +48,72 @@ still allow people to get their work done."
   # Choose the correct PAM file by distro
   case "$pp_rpm_distro" in
     centos[0-4].*|rhel[0-4].*)
-        mkdir -p ${pp_destdir}/etc/pam.d
-	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
-	#%PAM-1.0
-	auth       required	pam_stack.so service=system-auth
-	account    required	pam_stack.so service=system-auth
-	password   required	pam_stack.so service=system-auth
-	session    required	pam_limits.so
-	EOF
-	;;
+      mkdir -p ${pp_destdir}/etc/pam.d
+      cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
+      #%PAM-1.0
+      auth       required	pam_stack.so service=system-auth
+      account    required	pam_stack.so service=system-auth
+      password   required	pam_stack.so service=system-auth
+      session    required	pam_limits.so
+      EOF
+      ;;
     centos*|rhel*)
-        mkdir -p ${pp_destdir}/etc/pam.d
-	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
-	#%PAM-1.0
-	auth       include	system-auth
-	account    include	system-auth
-	password   include	system-auth
-	session    optional	pam_keyinit.so revoke
-	session    required	pam_limits.so
-	EOF
-	cat > ${pp_destdir}/etc/pam.d/sudo-i <<-EOF
-	#%PAM-1.0
-	auth       include	sudo
-	account    include	sudo
-	password   include	sudo
-	session    optional	pam_keyinit.so force revoke
-	session    required	pam_limits.so
-	EOF
-	;;
+      mkdir -p ${pp_destdir}/etc/pam.d
+      cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
+      #%PAM-1.0
+      auth       include	system-auth
+      account    include	system-auth
+      password   include	system-auth
+      session    optional	pam_keyinit.so revoke
+      session    required	pam_limits.so
+      EOF
+      cat > ${pp_destdir}/etc/pam.d/sudo-i <<-EOF
+      #%PAM-1.0
+      auth       include	sudo
+      account    include	sudo
+      password   include	sudo
+      session    optional	pam_keyinit.so force revoke
+      session    required	pam_limits.so
+      EOF
+      ;;
     sles9.*)
-        mkdir -p ${pp_destdir}/etc/pam.d
-	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
-	#%PAM-1.0
-	auth     required       pam_unix2.so
-	session  required       pam_limits.so
-	EOF
-	;;
+      mkdir -p ${pp_destdir}/etc/pam.d
+      cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
+      #%PAM-1.0
+      auth     required       pam_unix2.so
+      session  required       pam_limits.so
+      EOF
+      ;;
     sles*)
-        mkdir -p ${pp_destdir}/etc/pam.d
-	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
-	#%PAM-1.0
-	auth     include	common-auth
-	account  include	common-account
-	password include	common-password
-	session  include	common-session
-	# session  optional	pam_xauth.so
-	EOF
-	;;
+      mkdir -p ${pp_destdir}/etc/pam.d
+      cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
+      #%PAM-1.0
+      auth     include	common-auth
+      account  include	common-account
+      password include	common-password
+      session  include	common-session
+      # session  optional	pam_xauth.so
+      EOF
+      ;;
   esac
 
 %set [deb]
-  # Choose the correct PAM file by distro
-  case "$pp_deb_distro" in
-    deb*)
-        mkdir -p ${pp_destdir}/etc/pam.d
-	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
-	#%PAM-1.0
+  # Uncomment %sudo rule in sudoers.dist
+  /bin/ed - ${pp_destdir}${sudoersdir}/sudoers.dist <<-'EOF'
+  /^# \%sudo/,s/^# //
+  w
+  q
+  EOF
+  mkdir -p ${pp_destdir}/etc/pam.d
+  cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
+  #%PAM-1.0
 
-	@include common-auth
-	@include common-account
+  @include common-auth
+  @include common-account
 
-	session required pam_permit.so
-	session required pam_limits.so
-	EOF
-	;;
-  esac
+  session required pam_permit.so
+  session required pam_limits.so
+  EOF
 
 %set [aix]
   pp_aix_version=`echo $version | sed -e 's,\([0-9][0-9]*\)\.\([0-9][0-9]*\)\.\([0-9][0-9]*\)p\([0-9][0-9]*\)q\([0-9][0-9]*\),\1.\2.\3.\4,'`
@@ -141,11 +142,14 @@ still allow people to get their work done."
 %files [rpm]
   /etc/pam.d/* volatile,optional
 
+%files [deb]
+  /etc/pam.d/* volatile,optional
+
 %post
   # Don't overwrite an existing sudoers file
-  sysconfdir=%{sysconfdir}
-  if test ! -r $sysconfdir/sudoers; then
-    cp -p $sysconfdir/sudoers.dist $sysconfdir/sudoers
+  sudoersdir=%{sudoersdir}
+  if test ! -r $sudoersdir/sudoers; then
+    cp -p $sudoersdir/sudoers.dist $sudoersdir/sudoers
   fi
 
 %post [deb]
@@ -182,5 +186,14 @@ still allow people to get their work done."
     system("groupadd -g $gid sudo");
     exit 0;
   '
+
+%preun [deb]
+  # Remove the /etc/ldap/ldap.conf -> /etc/sudo-ldap.conf symlink if
+  # it matches what we created in the postinstall script.
+  if test X"%{SUDO_FLAVOR}" = X"ldap"; then
+    if test X"`readlink /etc/sudo-ldap.conf 2>/dev/null`" = X"/etc/ldap/ldap.conf"; then
+      rm -f /etc/sudo-ldap.conf
+    fi
+  fi
 
 # vim:ts=2:sw=2:et
