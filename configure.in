@@ -1318,14 +1318,6 @@ AC_ARG_ENABLE(gss_krb5_ccache_name,
 [check_gss_krb5_ccache_name=$enableval], [check_gss_krb5_ccache_name=no])
 
 dnl
-dnl If we don't have egrep we can't do anything...
-dnl
-AC_CHECK_PROG(EGREPPROG, egrep, egrep)
-if test -z "$EGREPPROG"; then
-    AC_MSG_ERROR([Sorry, configure requires egrep to run.])
-fi
-
-dnl
 dnl Prevent configure from adding the -g flag unless in devel mode
 dnl
 if test X"$with_devel" != X"yes"; then
