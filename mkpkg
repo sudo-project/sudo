@@ -94,7 +94,7 @@ case "$platform" in
 
 	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
 	;;
-    deb.*)
+    deb*)
 	prefix=/usr
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	if test "${SUDO_FLAVOR:-vanilla}" == "ldap"; then
