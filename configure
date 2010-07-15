@@ -779,7 +779,6 @@ build
 RANLIB
 AR
 CPP
-EGREPPROG
 OBJEXT
 EXEEXT
 ac_ct_CC
@@ -5500,47 +5499,6 @@ else
 fi
 
 
-# Extract the first word of "egrep", so it can be a program name with args.
-set dummy egrep; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_prog_EGREPPROG+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$EGREPPROG"; then
-  ac_cv_prog_EGREPPROG="$EGREPPROG" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_EGREPPROG="egrep"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-EGREPPROG=$ac_cv_prog_EGREPPROG
-if test -n "$EGREPPROG"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $EGREPPROG" >&5
-$as_echo "$EGREPPROG" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-if test -z "$EGREPPROG"; then
-    as_fn_error "Sorry, configure requires egrep to run." "$LINENO" 5
-fi
-
 if test X"$with_devel" != X"yes"; then
     ac_cv_prog_cc_g=no
 fi
@@ -6628,13 +6586,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6631: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6589: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6634: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6592: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6637: output\"" >&5)
+  (eval echo "\"\$as_me:6595: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -7839,7 +7797,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7842 "configure"' > conftest.$ac_ext
+  echo '#line 7800 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9232,11 +9190,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9235: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9193: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9239: \$? = $ac_status" >&5
+   echo "$as_me:9197: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9571,11 +9529,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9574: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9532: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9578: \$? = $ac_status" >&5
+   echo "$as_me:9536: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9676,11 +9634,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9679: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9637: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9683: \$? = $ac_status" >&5
+   echo "$as_me:9641: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9731,11 +9689,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9734: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9692: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9738: \$? = $ac_status" >&5
+   echo "$as_me:9696: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12098,7 +12056,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12101 "configure"
+#line 12059 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12194,7 +12152,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12197 "configure"
+#line 12155 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -18022,7 +17980,7 @@ _ACEOF
 
 	# Check whether --enable-zlib was given.
 if test "${enable_zlib+set}" = set; then :
-  enableval=$enable_zlib;  case "$enableval" in
+  enableval=$enable_zlib;  case "$enable_zlib" in
 	    yes)    $as_echo "#define HAVE_ZLIB_H 1" >>confdefs.h
 
 		    ZLIB="-lz"
@@ -18030,20 +17988,20 @@ if test "${enable_zlib+set}" = set; then :
 	    no)	    ;;
 	    *)	    $as_echo "#define HAVE_ZLIB_H 1" >>confdefs.h
 
-		    CPPFLAGS="${CPPFLAGS} -I${enableval}/include"
+		    CPPFLAGS="${CPPFLAGS} -I${enable_zlib}/include"
 
     if test X"$with_rpath" = X"yes"; then
 	case "$host" in
-	    *-*-hpux*)	ZLIB="${ZLIB} -L$enableval/lib -Wl,+b,$enableval/lib"
+	    *-*-hpux*)	ZLIB="${ZLIB} -L$enable_zlib/lib -Wl,+b,$enable_zlib/lib"
 			;;
-	    *)		ZLIB="${ZLIB} -L$enableval/lib -Wl,-R$enableval/lib"
+	    *)		ZLIB="${ZLIB} -L$enable_zlib/lib -Wl,-R$enable_zlib/lib"
 			;;
 	esac
     else
-	ZLIB="${ZLIB} -L$enableval/lib"
+	ZLIB="${ZLIB} -L$enable_zlib/lib"
     fi
     if test X"$blibpath" != X"" -a "ZLIB" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:$enableval/lib"
+	blibpath_add="${blibpath_add}:$enable_zlib/lib"
     fi
 
 		    ZLIB="${ZLIB} -lz"
