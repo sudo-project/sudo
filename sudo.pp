@@ -18,7 +18,7 @@ still allow people to get their work done."
 	pp_rpm_packager="Todd.Miller@courtesan.com"
 	pp_deb_maintainer="Todd.Miller@courtesan.com"
 	pp_sd_vendor_tag="TCM"
-	pp_solaris_name="TCMsudo"
+	pp_solaris_name="${pp_sd_vendor_tag}${name}"
 
 %set [rpm]
 	# Add distro info to release
