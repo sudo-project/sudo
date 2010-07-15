@@ -2695,14 +2695,14 @@ if test "${with_iologdir-yes}" != "no"; then
 
 	AC_ARG_ENABLE(zlib,
 	[AS_HELP_STRING([--enable-zlib[[=PATH]]], [Whether to enable or disable zlib])],
-	[ case "$enableval" in
+	[ case "$enable_zlib" in
 	    yes)    AC_DEFINE(HAVE_ZLIB_H)
 		    ZLIB="-lz"
 		    ;;
 	    no)	    ;;
 	    *)	    AC_DEFINE(HAVE_ZLIB_H)
-		    CPPFLAGS="${CPPFLAGS} -I${enableval}/include"
-		    SUDO_APPEND_LIBPATH(ZLIB, [$enableval/lib])
+		    CPPFLAGS="${CPPFLAGS} -I${enable_zlib}/include"
+		    SUDO_APPEND_LIBPATH(ZLIB, [$enable_zlib/lib])
 		    ZLIB="${ZLIB} -lz"
 		    ;;
 	  esac
