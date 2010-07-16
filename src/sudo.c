@@ -101,6 +101,9 @@ static void command_info_to_details(char * const info[],
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 static struct rlimit corelimit;
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
+#if defined(__linux__)
+static struct rlimit nproclimit;
+#endif
 
 int
 main(int argc, char *argv[], char *envp[])
@@ -614,12 +617,12 @@ disable_coredumps(void)
      * apply resource limits when changing uid and return EAGAIN if
      * nproc would be violated by the uid switch.
      */
+    (void) getrlimit(RLIMIT_NPROC, &nproclimit);
     rl.rlim_cur = rl.rlim_max = RLIM_INFINITY;
     if (setrlimit(RLIMIT_NPROC, &rl)) {
-	if (getrlimit(RLIMIT_NPROC, &rl) == 0) {
-	    rl.rlim_cur = rl.rlim_max;
-	    (void)setrlimit(RLIMIT_NPROC, &rl);
-	}
+	memcpy(&rl, &nproclimit, sizeof(struct rlimit));
+	rl.rlim_cur = rl.rlim_max;
+	(void)setrlimit(RLIMIT_NPROC, &rl);
     }
 #endif /* __linux__ */
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
@@ -766,6 +769,21 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	    goto done;
 	}
     }
+
+    /*
+     * Restore nproc resource limit if pam_limits didn't do it for us.
+     * We must do this *after* the uid change to avoid potential EAGAIN
+     * from setuid().
+     */
+#if defined(__linux__)
+    {
+	struct rlimit rl;
+	if (getrlimit(RLIMIT_NPROC, &rl) == 0) {
+	    if (rl.rlim_cur == RLIM_INFINITY && rl.rlim_max == RLIM_INFINITY)
+		(void) setrlimit(RLIMIT_NPROC, &nproclimit);
+	}
+    }
+#endif
 
     rval = TRUE;
 
