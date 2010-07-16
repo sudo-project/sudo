@@ -12,6 +12,7 @@ IFS=" 	$nl"
 top_srcdir=`dirname $0`
 
 platform=`$top_srcdir/pp --probe` || exit 1
+osrelease=`echo "$platform" | sed -e 's/^[^0-9]*//' -e 's/-.*$//'`
 
 # Default paths
 prefix=/usr/local
@@ -32,15 +33,11 @@ esac
 case "$platform" in
     centos*|rhel*)
 	prefix=/usr
-	case "$platform" in
-	    centos[0-4].*|rhel[0-4].*)
-		;;
-	    *)
-		# RHEL 5 and up build pies and have audit support
-		export CFLAGS="$F_PIE" LDFLAGS="-pie"
-		configure_opts="--with-linux-audit"
-		;;
-	esac
+	if [ $osrelease -ge 50 ]; then
+	    # RHEL 5 and up build pies and have audit support
+	    export CFLAGS="$F_PIE" LDFLAGS="-pie"
+	    configure_opts="--with-linux-audit"
+	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	configure_opts="$configure_opts
 		--prefix=$prefix
@@ -59,19 +56,14 @@ case "$platform" in
 	;;
     sles*)
 	prefix=/usr
-	case "$platform" in
-	    sles[0-9].*)
-		;;
-	    sles10.*)
-		# SLES 10 and higher build pies
-		export CFLAGS="$F_PIE" LDFLAGS="-pie"
-		;;
-	    *)
-		# SLES 11 and higher has SELinux too
-		export CFLAGS="$F_PIE" LDFLAGS="-pie"
+	if [ $osrelease -ge 10 ]; then
+	    # SLES 10 and higher build pies
+	    export CFLAGS="$F_PIE" LDFLAGS="-pie"
+	    if [ $osrelease -ge 11 ]; then
+		# SLES 11 and higher has SELinux
 		configure_opts="--with-selinux"
-		;;
-	esac
+	    fi
+	fi
 	# SuSE doesn't have /usr/libexec
 	case "$platform" in
 	    *64*)	libexec=lib64;;

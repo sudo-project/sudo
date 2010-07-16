@@ -3762,7 +3762,6 @@ pp_deb_make_data() {
     done 
 
     # If no copyright file is present add one. This is a debian requirement.
-    # XXX - include the LICENSE file instead?
     share_doc="/usr/share/doc/`pp_deb_cmp_full_name $cmp`"
     if [ ! -f "$data/$share_doc/copyright" ]
     then
@@ -3957,8 +3956,7 @@ pp_backend_deb_probe() {
 	    ;;
 	*)
 	    # Remove trailing revision number and any dots
-	    #release=`echo $release | cut -dr -f1 | tr -d .`
-            release=`echo $release | cut -dr -f1`
+            release=`echo $release | cut -dr -f1 | tr -d .`
 	    ;;
     esac
 
@@ -5036,7 +5034,7 @@ pp_rpm_detect_distro () {
           /^SuSE SLES-[0-9]/  { print "sles" substr($2,6); exit; }
        ' /etc/SuSE-release`
     fi
-    #pp_rpm_distro=`echo $pp_rpm_distro | tr -d .`
+    pp_rpm_distro=`echo $pp_rpm_distro | tr -d .`
     test -z "$pp_rpm_distro" &&
        pp_warn "unknown distro"
 }

@@ -22,18 +22,13 @@ still allow people to get their work done."
 
 %set [rpm]
 	# Add distro info to release
+	osrelease=`echo "$pp_rpm_distro" | sed -e 's/^[^0-9]*//' -e 's/-.*$//'`
 	case "$pp_rpm_distro" in
 	centos*|rhel*)
-		d=`echo "$pp_rpm_distro" | sed -e 's/^[^0-9]*//' -e 's/[^0-9].*$//'`
-		if test -n "$d"; then
-		    pp_rpm_release="$pp_rpm_release.el$d"
-		fi
+		pp_rpm_release="$pp_rpm_release.el${osrelease%%[0-9]}"
 		;;
 	sles*)
-		d=`echo "$pp_rpm_distro" | sed -e 's/^[^0-9]*//' -e 's/[^0-9].*$//'`
-		if test -n "$d"; then
-		    pp_rpm_release="$pp_rpm_release.sles$d"
-		fi
+		pp_rpm_release="$pp_rpm_release.sles$osrelease"
 		;;
 	esac
 
@@ -72,53 +67,53 @@ still allow people to get their work done."
 
 	# Choose the correct PAM file by distro, must be tab indented for "<<-"
 	case "$pp_rpm_distro" in
-	centos[0-4].*|rhel[0-4].*)
-		mkdir -p ${pp_destdir}/etc/pam.d
-		cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
-		#%PAM-1.0
-		auth       required	pam_stack.so service=system-auth
-		account    required	pam_stack.so service=system-auth
-		password   required	pam_stack.so service=system-auth
-		session    required	pam_limits.so
-		EOF
-		;;
 	centos*|rhel*)
 		mkdir -p ${pp_destdir}/etc/pam.d
-		cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
-		#%PAM-1.0
-		auth       include	system-auth
-		account    include	system-auth
-		password   include	system-auth
-		session    optional	pam_keyinit.so revoke
-		session    required	pam_limits.so
-		EOF
-		cat > ${pp_destdir}/etc/pam.d/sudo-i <<-EOF
-		#%PAM-1.0
-		auth       include	sudo
-		account    include	sudo
-		password   include	sudo
-		session    optional	pam_keyinit.so force revoke
-		session    required	pam_limits.so
-		EOF
-		;;
-	  sles9.*)
-		mkdir -p ${pp_destdir}/etc/pam.d
-		cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
-		#%PAM-1.0
-		auth     required       pam_unix2.so
-		session  required       pam_limits.so
-		EOF
+		if test $osrelease -lt 50; then
+			cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
+			#%PAM-1.0
+			auth       required	pam_stack.so service=system-auth
+			account    required	pam_stack.so service=system-auth
+			password   required	pam_stack.so service=system-auth
+			session    required	pam_limits.so
+			EOF
+		else
+			cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
+			#%PAM-1.0
+			auth       include	system-auth
+			account    include	system-auth
+			password   include	system-auth
+			session    optional	pam_keyinit.so revoke
+			session    required	pam_limits.so
+			EOF
+			cat > ${pp_destdir}/etc/pam.d/sudo-i <<-EOF
+			#%PAM-1.0
+			auth       include	sudo
+			account    include	sudo
+			password   include	sudo
+			session    optional	pam_keyinit.so force revoke
+			session    required	pam_limits.so
+			EOF
+		fi
 		;;
 	  sles*)
 		mkdir -p ${pp_destdir}/etc/pam.d
-		cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
-		#%PAM-1.0
-		auth     include	common-auth
-		account  include	common-account
-		password include	common-password
-		session  include	common-session
-		# session  optional	pam_xauth.so
-		EOF
+		if test $osrelease -lt 10; then
+			cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
+			#%PAM-1.0
+			auth     required       pam_unix2.so
+			session  required       pam_limits.so
+			EOF
+		else
+			cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
+			#%PAM-1.0
+			auth     include	common-auth
+			account  include	common-account
+			password include	common-password
+			session  include	common-session
+			# session  optional	pam_xauth.so
+			EOF
+		fi
 		;;
 	esac
 
