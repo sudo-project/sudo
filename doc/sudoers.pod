@@ -510,7 +510,7 @@ line are not subject to the restrictions imposed by I<env_check>,
 I<env_delete>, or I<env_keep>.  As such, only trusted users should
 be allowed to set variables in this manner.  If the command matched
 is B<ALL>, the C<SETENV> tag is implied for that command; this
-default may be overridden by use of the C<UNSETENV> tag.
+default may be overridden by use of the C<NOSETENV> tag.
 
 =head3 LOG_INPUT and NOLOG_INPUT
 
