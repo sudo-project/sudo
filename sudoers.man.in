@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "July 14, 2010" "1.7.4" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "July 16, 2010" "1.7.4" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -564,7 +564,7 @@ to the restrictions imposed by \fIenv_check\fR, \fIenv_delete\fR, or
 \&\fIenv_keep\fR.  As such, only trusted users should be allowed to set
 variables in this manner.  If the command matched is \fB\s-1ALL\s0\fR, the
 \&\f(CW\*(C`SETENV\*(C'\fR tag is implied for that command; this default may
-be overridden by use of the \f(CW\*(C`UNSETENV\*(C'\fR tag.
+be overridden by use of the \f(CW\*(C`NOSETENV\*(C'\fR tag.
 .PP
 \fI\s-1LOG_INPUT\s0 and \s-1NOLOG_INPUT\s0\fR
 .IX Subsection "LOG_INPUT and NOLOG_INPUT"
