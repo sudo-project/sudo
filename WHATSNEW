@@ -25,6 +25,9 @@ What's new in Sudo 1.7.4?
  * The default PATH environment variable, used when no PATH variable
     exists, now includes /usr/sbin and /sbin.
 
+ * Sudo now uses polypkg (http://rc.quest.com/topics/polypkg/)
+   for cross-platform packing.
+
 What's new in Sudo 1.7.3?
 
  * Support for logging I/O for the command being run.
