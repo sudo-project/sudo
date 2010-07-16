@@ -225,6 +225,12 @@ Special features/options:
 	with your PAM libraries in /etc/pam.conf to obtain syslog output
 	for debugging purposes.
 
+  --with-pam-login
+        Enable a specific PAM session when sudo is given the -i option.
+	This changes the PAM service name when sudo is run with the -i
+	option from "sudo" to "sudo-i", allowing for a separate pam
+	configuration for sudo's initial login mode.
+
   --with-AFS
 	Enable AFS support with Kerberos authentication.  Should work under
 	AFS 3.3.  If your AFS doesn't have -laudit you should be able to
