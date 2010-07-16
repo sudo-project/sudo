@@ -1,3 +1,30 @@
+What's new in Sudo 1.7.4?
+
+ * Sudoedit will now preserve the file extension in the name of the
+   temporary file being edited.  The extension is used by some
+   editors (such as emacs) to choose the editing mode.
+
+ * Time stamp files have moved from /var/run/sudo to either /var/db/sudo,
+   /var/lib/sudo or /var/adm/sudo.  The directories are checked for
+   existence in that order.  This prevents users from receiving the
+   sudo lecture every time the system reboots.  Time stamp files older
+   than the boot time are ignored on systems where it is possible to
+   determine this.
+
+ * Ancillary documentation (README files, LICENSE, etc) is now installed
+   in a sudo documentation directory.
+
+ * Sudo now recognized "tls_cacert" as an alias for "tls_cacertfile"
+   in ldap.conf.
+
+ * Defaults settings that are tied to a user, host or command may
+   now include the negation operator.  For example:
+	Defaults:!millert lecture
+   will match any user but millert.
+
+ * The default PATH environment variable, used when no PATH variable
+    exists, now includes /usr/sbin and /sbin.
+
 What's new in Sudo 1.7.3?
 
  * Support for logging I/O for the command being run.
