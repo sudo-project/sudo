@@ -28,6 +28,12 @@ What's new in Sudo 1.7.4?
  * Sudo now uses polypkg (http://rc.quest.com/topics/polypkg/)
    for cross-platform packing.
 
+ * On Linux, sudo will now restore the nproc resource limit before
+   executing a command, unless the limit appears to have been modified
+   by pam_limits.  This avoids a problem with bash scripts that open
+   more than 32 descriptors on SuSE Linux, where sysconf(_SC_CHILD_MAX)
+   will return -1 when RLIMIT_NPROC is set to RLIMIT_UNLIMITED (-1).
+
 What's new in Sudo 1.7.3?
 
  * Support for logging I/O for the command being run.
