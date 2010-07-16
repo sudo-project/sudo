@@ -6,6 +6,42 @@ What's new in Sudo 1.8.0?
    functionality.  See the sudo_plugin manual for details on the
    plugin interface and the sample plugin for a simple example.
 
+What's new in Sudo 1.7.4?
+
+ * Sudoedit will now preserve the file extension in the name of the
+   temporary file being edited.  The extension is used by some
+   editors (such as emacs) to choose the editing mode.
+
+ * Time stamp files have moved from /var/run/sudo to either /var/db/sudo,
+   /var/lib/sudo or /var/adm/sudo.  The directories are checked for
+   existence in that order.  This prevents users from receiving the
+   sudo lecture every time the system reboots.  Time stamp files older
+   than the boot time are ignored on systems where it is possible to
+   determine this.
+
+ * Ancillary documentation (README files, LICENSE, etc) is now installed
+   in a sudo documentation directory.
+
+ * Sudo now recognized "tls_cacert" as an alias for "tls_cacertfile"
+   in ldap.conf.
+
+ * Defaults settings that are tied to a user, host or command may
+   now include the negation operator.  For example:
+	Defaults:!millert lecture
+   will match any user but millert.
+
+ * The default PATH environment variable, used when no PATH variable
+    exists, now includes /usr/sbin and /sbin.
+
+ * Sudo now uses polypkg (http://rc.quest.com/topics/polypkg/)
+   for cross-platform packing.
+
+ * On Linux, sudo will now restore the nproc resource limit before
+   executing a command, unless the limit appears to have been modified
+   by pam_limits.  This avoids a problem with bash scripts that open
+   more than 32 descriptors on SuSE Linux, where sysconf(_SC_CHILD_MAX)
+   will return -1 when RLIMIT_NPROC is set to RLIMIT_UNLIMITED (-1).
+
 What's new in Sudo 1.7.3?
 
  * Support for logging I/O for the command being run.
@@ -22,9 +58,15 @@ What's new in Sudo 1.7.3?
    Mac OS X, and Linux systems with the devpts filesystem (pseudo-ttys
    only).
 
- * Support for multiple 'sudoers_base' entries in ldap.conf.  When
-   multiple bases are listed, sudo will try each one in the order
-   that they are specified.
+ * On AIX systems, the registry setting in /etc/security/user is
+   now taken into account when looking up users and groups.  Sudo
+   now applies the correct the user and group ids when running a
+   command as a user whose account details come from a different
+   source (e.g. LDAP or DCE vs.  local files).
+
+ * Support for multiple 'sudoers_base' and 'uri' entries in ldap.conf.
+   When multiple entries are listed, sudo will try each one in the
+   order in which they are specified.
 
  * Sudo's SELinux support should now function correctly when running
    commands as a non-root user and when one of stdin, stdout or stderr
