@@ -22,7 +22,7 @@ What's new in Sudo 1.7.4?
  * Ancillary documentation (README files, LICENSE, etc) is now installed
    in a sudo documentation directory.
 
- * Sudo now recognized "tls_cacert" as an alias for "tls_cacertfile"
+ * Sudo now recognizes "tls_cacert" as an alias for "tls_cacertfile"
    in ldap.conf.
 
  * Defaults settings that are tied to a user, host or command may
