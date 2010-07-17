@@ -3953,6 +3953,41 @@ pp_backend_deb_probe() {
     case $release in
         *[!.0-9r]*)
 	    release=`lsb_release -cs`
+	    case $release in
+		buzz)
+		    release="1.1"
+		    ;;
+		rex)
+		    release="1.2"
+		    ;;
+		bo)
+		    release="1.3"
+		    ;;
+		hamm)
+		    release="2.0"
+		    ;;
+		slink)
+		    release="2.1"
+		    ;;
+		potato)
+		    release="2.2"
+		    ;;
+		woody)
+		    release="3.0"
+		    ;;
+		sarge)
+		    release="3.1"
+		    ;;
+		etch)
+		    release="4.0"
+		    ;;
+		lenny)
+		    release="5.0"
+		    ;;
+		squeeze)
+		    release="6.0"
+		    ;;
+	    esac
 	    ;;
 	*)
 	    # Remove trailing revision number and any dots
