@@ -502,7 +502,7 @@ EENNVVIIRROONNMMEENNTT
 
        HOME            Set to the home directory of the target user if --ii or
                        --HH are specified, _e_n_v___r_e_s_e_t or _a_l_w_a_y_s___s_e_t___h_o_m_e are set
-                       in _s_u_d_o_e_r_s, or when the --ss optino is specified and
+                       in _s_u_d_o_e_r_s, or when the --ss option is specified and
                        _s_e_t___h_o_m_e is set in _s_u_d_o_e_r_s
 
        PATH            Set to a sane value if the _s_e_c_u_r_e___p_a_t_h sudoers option
