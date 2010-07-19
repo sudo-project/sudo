@@ -847,7 +847,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        This can be done by negating the set_logname option.
                        Note that if the _e_n_v___r_e_s_e_t option has not been
                        disabled, entries in the _e_n_v___k_e_e_p list will override
-                       the value of _s_e_t___l_o_g_n_a_m_e.  This flag is _o_f_f by default.
+                       the value of _s_e_t___l_o_g_n_a_m_e.  This flag is _o_n by default.
 
        setenv          Allow the user to disable the _e_n_v___r_e_s_e_t option from the
 

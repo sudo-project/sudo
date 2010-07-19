@@ -938,7 +938,7 @@ determine the real identity of the user, it may be desirable to
 change this behavior.  This can be done by negating the set_logname
 option.  Note that if the \fIenv_reset\fR option has not been disabled,
 entries in the \fIenv_keep\fR list will override the value of
-\&\fIset_logname\fR.  This flag is \fIoff\fR by default.
+\&\fIset_logname\fR.  This flag is \fIon\fR by default.
 .IP "setenv" 16
 .IX Item "setenv"
 Allow the user to disable the \fIenv_reset\fR option from the command
