@@ -490,7 +490,7 @@ send_mail(const char *fmt, ...)
 
 		/* Child, set stdin to output side of the pipe */
 		if (pfd[0] != STDIN_FILENO) {
-		    if (dup2(pfd[0], STDIN_FILENO) != -1) {
+		    if (dup2(pfd[0], STDIN_FILENO) == -1) {
 			mysyslog(LOG_ERR, "cannot dup stdin: %m");
 			_exit(127);
 		    }
