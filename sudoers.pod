@@ -589,9 +589,12 @@ B<Boolean Flags>:
 
 =item always_set_home
 
-If set, B<sudo> will set the C<HOME> environment variable to the home
-directory of the target user (which is root unless the B<-u> option is used).
-This effectively means that the B<-H> option is always implied.
+If enabled, B<sudo> will set the C<HOME> environment variable to the
+home directory of the target user (which is root unless the B<-u>
+option is used).  This effectively means that the B<-H> option is
+always implied.  Note that C<HOME> is already set when the the
+I<env_reset> option is enabled, so I<always_set_home> is only
+effective for configurations where I<env_reset> is disabled.
 This flag is I<off> by default.
 
 =item authenticate
@@ -810,10 +813,13 @@ password of the invoking user.  This flag is I<off> by default.
 
 =item set_home
 
-If set and B<sudo> is invoked with the B<-s> option the C<HOME>
+If enabled and B<sudo> is invoked with the B<-s> option the C<HOME>
 environment variable will be set to the home directory of the target
 user (which is root unless the B<-u> option is used).  This effectively
-makes the B<-s> option imply B<-H>.  This flag is I<off> by default.
+makes the B<-s> option imply B<-H>.  Note that C<HOME> is already
+set when the the I<env_reset> option is enabled, so I<set_home> is
+only effective for configurations where I<env_reset> is disabled.
+This flag is I<off> by default.
 
 =item set_logname
 
