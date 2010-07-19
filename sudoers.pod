@@ -627,7 +627,7 @@ default.
 =item env_reset
 
 If set, B<sudo> will reset the environment to only contain the
-LOGNAME, SHELL, USER, USERNAME and the C<SUDO_*> variables.  Any
+LOGNAME, MAIL, SHELL, USER, USERNAME and the C<SUDO_*> variables.  Any
 variables in the caller's environment that match the C<env_keep>
 and C<env_check> lists are then added.  The default contents of the
 C<env_keep> and C<env_check> lists are displayed when B<sudo> is

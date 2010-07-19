@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "July 16, 2010" "1.7.4" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "July 19, 2010" "1.7.4" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -764,7 +764,7 @@ default.
 .IP "env_reset" 16
 .IX Item "env_reset"
 If set, \fBsudo\fR will reset the environment to only contain the
-\&\s-1LOGNAME\s0, \s-1SHELL\s0, \s-1USER\s0, \s-1USERNAME\s0 and the \f(CW\*(C`SUDO_*\*(C'\fR variables.  Any
+\&\s-1LOGNAME\s0, \s-1MAIL\s0, \s-1SHELL\s0, \s-1USER\s0, \s-1USERNAME\s0 and the \f(CW\*(C`SUDO_*\*(C'\fR variables.  Any
 variables in the caller's environment that match the \f(CW\*(C`env_keep\*(C'\fR
 and \f(CW\*(C`env_check\*(C'\fR lists are then added.  The default contents of the
 \&\f(CW\*(C`env_keep\*(C'\fR and \f(CW\*(C`env_check\*(C'\fR lists are displayed when \fBsudo\fR is
