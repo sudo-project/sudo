@@ -279,7 +279,8 @@ main(argc, argv, envp)
     tq_foreach_fwd(snl, nss) {
 	if (nss->open(nss) == 0 && nss->parse(nss) == 0) {
 	    sources++;
-	    nss->setdefs(nss);
+	    if (nss->setdefs(nss) != 0)
+		log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
 	}
     }
     if (sources == 0)
