@@ -225,6 +225,7 @@ root).  In either case, the primary group will be set to I<group>.
 The B<-H> (I<HOME>) option requests that the security policy set
 the C<HOME> environment variable to the home directory of the target
 user (root by default) as specified by the password database.
+Depending on the policy, this may be the default behavior.
 
 =item -h
 
@@ -505,8 +506,10 @@ to the mail spool of the target user
 
 =item C<HOME>
 
-In B<-i>, B<-s> or B<-H> mode (or if sudo was configured with the
---enable-shell-sets-home option), set to homedir of the target user
+Set to the home directory of the target user if B<-i> or B<-H> are
+specified, I<env_reset> or I<always_set_home> are set in I<sudoers>,
+or when the B<-s> option is specified and I<set_home> is set in
+I<sudoers>
 
 =item C<PATH>
 

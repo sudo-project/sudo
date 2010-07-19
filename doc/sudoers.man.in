@@ -828,9 +828,12 @@ grouped by type, are listed below.
 \&\fBBoolean Flags\fR:
 .IP "always_set_home" 16
 .IX Item "always_set_home"
-If set, \fBsudo\fR will set the \f(CW\*(C`HOME\*(C'\fR environment variable to the home
-directory of the target user (which is root unless the \fB\-u\fR option is used).
-This effectively means that the \fB\-H\fR option is always implied.
+If enabled, \fBsudo\fR will set the \f(CW\*(C`HOME\*(C'\fR environment variable to the
+home directory of the target user (which is root unless the \fB\-u\fR
+option is used).  This effectively means that the \fB\-H\fR option is
+always implied.  Note that \f(CW\*(C`HOME\*(C'\fR is already set when the the
+\&\fIenv_reset\fR option is enabled, so \fIalways_set_home\fR is only
+effective for configurations where \fIenv_reset\fR is disabled.
 This flag is \fIoff\fR by default.
 .IP "authenticate" 16
 .IX Item "authenticate"
@@ -1021,10 +1024,13 @@ If set, \fBsudo\fR will prompt for the password of the user defined by the
 password of the invoking user.  This flag is \fIoff\fR by default.
 .IP "set_home" 16
 .IX Item "set_home"
-If set and \fBsudo\fR is invoked with the \fB\-s\fR option the \f(CW\*(C`HOME\*(C'\fR
+If enabled and \fBsudo\fR is invoked with the \fB\-s\fR option the \f(CW\*(C`HOME\*(C'\fR
 environment variable will be set to the home directory of the target
 user (which is root unless the \fB\-u\fR option is used).  This effectively
-makes the \fB\-s\fR option imply \fB\-H\fR.  This flag is \fIoff\fR by default.
+makes the \fB\-s\fR option imply \fB\-H\fR.  Note that \f(CW\*(C`HOME\*(C'\fR is already
+set when the the \fIenv_reset\fR option is enabled, so \fIset_home\fR is
+only effective for configurations where \fIenv_reset\fR is disabled.
+This flag is \fIoff\fR by default.
 .IP "set_logname" 16
 .IX Item "set_logname"
 Normally, \fBsudo\fR will set the \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR and \f(CW\*(C`USERNAME\*(C'\fR

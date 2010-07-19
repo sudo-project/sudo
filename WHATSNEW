@@ -42,9 +42,14 @@ What's new in Sudo 1.7.4?
    more than 32 descriptors on SuSE Linux, where sysconf(_SC_CHILD_MAX)
    will return -1 when RLIMIT_NPROC is set to RLIMIT_UNLIMITED (-1).
 
- * If env_reset is enabled in sudoers (the default), sudo will now set
-   the MAIL environment variable based on the target user unless MAIL is
-   explicitly preserved in sudoers.  Previously MAIL was passed unchanged.
+ * The HOME and MAIL environment variables are now reset based on the
+   target user's password database entry when the env_reset sudoers option
+   is enabled (which is the case in the default configuration).  Users
+   wishing to preserve the original values should use a sudoers entry like:
+	Defaults env_keep += HOME
+   to preserve the old value of HOME and
+	Defaults env_keep += MAIL
+   to preserve the old value of MAIL.
 
 What's new in Sudo 1.7.3?
 

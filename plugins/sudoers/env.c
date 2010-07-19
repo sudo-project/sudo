@@ -193,7 +193,6 @@ static const char *initial_checkenv_table[] = {
 static const char *initial_keepenv_table[] = {
     "COLORS",
     "DISPLAY",
-    "HOME",
     "HOSTNAME",
     "KRB5CCNAME",
     "LS_COLORS",
@@ -416,6 +415,7 @@ rebuild_env(int noexec)
     char **old_envp, **ep, *cp, *ps1;
     char idbuf[MAX_UID_T_LEN];
     unsigned int didvar;
+    int reset_home = FALSE;
 
     /*
      * Either clean out the environment or reset to a safe default.
@@ -430,6 +430,9 @@ rebuild_env(int noexec)
     memset(env.envp, 0, env.env_size * sizeof(char *));
 #endif
     if (def_env_reset || ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+	/* Reset HOME based on target user unless keeping old value. */
+	reset_home = TRUE;
+
 	/* Pull in vars we want to keep from the old environment. */
 	for (ep = old_envp; *ep; ep++) {
 	    int keepit;
@@ -498,7 +501,6 @@ rebuild_env(int noexec)
 	 * on sudoers options).
 	 */
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
-	    sudo_setenv("HOME", runas_pw->pw_dir, ISSET(didvar, DID_HOME));
 	    sudo_setenv("SHELL", runas_pw->pw_shell, ISSET(didvar, DID_SHELL));
 	    sudo_setenv("LOGNAME", runas_pw->pw_name,
 		ISSET(didvar, DID_LOGNAME));
@@ -506,8 +508,6 @@ rebuild_env(int noexec)
 	    sudo_setenv("USERNAME", runas_pw->pw_name,
 		ISSET(didvar, DID_USERNAME));
 	} else {
-	    if (!ISSET(didvar, DID_HOME))
-		sudo_setenv("HOME", user_dir, FALSE);
 	    if (!ISSET(didvar, DID_SHELL))
 		sudo_setenv("SHELL", sudo_user.pw->pw_shell, FALSE);
 	    if (!ISSET(didvar, DID_LOGNAME))
@@ -530,6 +530,13 @@ rebuild_env(int noexec)
 	    sudo_putenv(cp, ISSET(didvar, DID_MAIL), TRUE);
 	}
     } else {
+	/* Reset HOME based on target user if configured to. */
+	if (ISSET(sudo_mode, MODE_RUN)) {
+	    if (def_always_set_home || ISSET(sudo_mode, MODE_RESET_HOME) || 
+		(ISSET(sudo_mode, MODE_SHELL) && def_set_home))
+		reset_home = TRUE;
+	}
+
 	/*
 	 * Copy environ entries as long as they don't match env_delete or
 	 * env_check.
@@ -569,8 +576,7 @@ rebuild_env(int noexec)
     }
 
     /* Set $USER, $LOGNAME and $USERNAME to target if "set_logname" is true. */
-    /* XXX - not needed for MODE_LOGIN_SHELL */
-    if (def_set_logname && runas_pw->pw_name) {
+    if (def_set_logname && !ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	if (!ISSET(didvar, KEPT_LOGNAME))
 	    sudo_setenv("LOGNAME", runas_pw->pw_name, TRUE);
 	if (!ISSET(didvar, KEPT_USER))
@@ -579,14 +585,9 @@ rebuild_env(int noexec)
 	    sudo_setenv("USERNAME", runas_pw->pw_name, TRUE);
     }
 
-    /* Set $HOME for `sudo -H'.  Only valid at PERM_FULL_RUNAS. */
-    /* XXX - not needed for MODE_LOGIN_SHELL */
-    if (runas_pw->pw_dir) {
-	if (ISSET(sudo_mode, MODE_RESET_HOME) ||
-	    (ISSET(sudo_mode, MODE_RUN) && (def_always_set_home ||
-	    (ISSET(sudo_mode, MODE_SHELL) && def_set_home))))
-	    sudo_setenv("HOME", runas_pw->pw_dir, TRUE);
-    }
+    /* Set $HOME to target user if not preserving user's value. */
+    if (reset_home && !ISSET(didvar, KEPT_HOME))
+	sudo_setenv("HOME", runas_pw->pw_dir, ISSET(didvar, DID_HOME));
 
     /* Provide default values for $TERM and $PATH if they are not set. */
     if (!ISSET(didvar, DID_TERM))

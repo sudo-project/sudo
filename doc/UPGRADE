@@ -10,6 +10,15 @@ o Upgrading from a version prior to 1.7.4:
     system reboots.  Time stamp files older than the boot time are
     ignored on systems where it is possible to determine this.
 
+    The HOME and MAIL environment variables are now reset based on the
+    target user's password database entry when the env_reset sudoers option
+    is enabled (which is the case in the default configuration).  Users
+    wishing to preserve the original values should use a sudoers entry like:
+        Defaults env_keep += HOME
+    to preserve the old value of HOME and
+        Defaults env_keep += MAIL
+    to preserve the old value of MAIL.
+
 o Upgrading from a version prior to 1.7.0:
 
     Starting with sudo 1.7.0, comments in the sudoers file must not

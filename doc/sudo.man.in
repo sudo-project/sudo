@@ -345,6 +345,7 @@ root).  In either case, the primary group will be set to \fIgroup\fR.
 The \fB\-H\fR (\fI\s-1HOME\s0\fR) option requests that the security policy set
 the \f(CW\*(C`HOME\*(C'\fR environment variable to the home directory of the target
 user (root by default) as specified by the password database.
+Depending on the policy, this may be the default behavior.
 .IP "\-h" 12
 .IX Item "-h"
 The \fB\-h\fR (\fIhelp\fR) option causes \fBsudo\fR to print a usage message and exit.
@@ -605,8 +606,10 @@ to the mail spool of the target user
 .ie n .IP "\*(C`HOME\*(C'" 16
 .el .IP "\f(CW\*(C`HOME\*(C'\fR" 16
 .IX Item "HOME"
-In \fB\-i\fR, \fB\-s\fR or \fB\-H\fR mode (or if sudo was configured with the
-\&\-\-enable\-shell\-sets\-home option), set to homedir of the target user
+Set to the home directory of the target user if \fB\-i\fR or \fB\-H\fR are
+specified, \fIenv_reset\fR or \fIalways_set_home\fR are set in \fIsudoers\fR,
+or when the \fB\-s\fR option is specified and \fIset_home\fR is set in
+\&\fIsudoers\fR
 .ie n .IP "\*(C`PATH\*(C'" 16
 .el .IP "\f(CW\*(C`PATH\*(C'\fR" 16
 .IX Item "PATH"

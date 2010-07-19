@@ -186,10 +186,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        -H          The --HH (_H_O_M_E) option requests that the security policy set
                    the HOME environment variable to the home directory of the
                    target user (root by default) as specified by the password
-                   database.
+                   database.  Depending on the policy, this may be the default
+                   behavior.
 
        -h          The --hh (_h_e_l_p) option causes ssuuddoo to print a usage message
-                   and exit.
 
 
 
@@ -201,6 +201,8 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+                   and exit.
 
        -i [command]
                    The --ii (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs the shell
@@ -254,8 +256,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    messages and exit.
 
        -P          The --PP (_p_r_e_s_e_r_v_e _g_r_o_u_p _v_e_c_t_o_r) option causes ssuuddoo to
-                   preserve the invoking user's group vector unaltered.  By
-                   default, the _s_u_d_o_e_r_s policy will initialize the group
 
 
 
@@ -268,6 +268,8 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+                   preserve the invoking user's group vector unaltered.  By
+                   default, the _s_u_d_o_e_r_s policy will initialize the group
                    vector to the list of groups the target user is in.  The
                    real and effective group IDs, however, are still set to
                    match the target user.
@@ -320,8 +322,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    role.
 
        -U _u_s_e_r     The --UU (_o_t_h_e_r _u_s_e_r) option is used in conjunction with the
-                   --ll option to specify the user whose privileges should be
-                   listed.  The security policy may restrict listing other
 
 
 
@@ -334,6 +334,8 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+                   --ll option to specify the user whose privileges should be
+                   listed.  The security policy may restrict listing other
                    users' privileges.  The _s_u_d_o_e_r_s policy only allows root or
                    a user with the ALL privilege on the current host to use
                    this option.
@@ -380,8 +382,6 @@ PPLLUUGGIINNSS
        _/_e_t_c_/_s_u_d_o_._c_o_n_f file.  If no _/_e_t_c_/_s_u_d_o_._c_o_n_f file is present, ssuuddoo will
        use the traditional _s_u_d_o_e_r_s security policy and I/O logging, which
        corresponds to the following _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
-
-
 
 
 
@@ -484,9 +484,10 @@ EENNVVIIRROONNMMEENNTT
        MAIL            In --ii mode or when _e_n_v___r_e_s_e_t is enabled in _s_u_d_o_e_r_s, set
                        to the mail spool of the target user
 
-       HOME            In --ii, --ss or --HH mode (or if sudo was configured with
-                       the --enable-shell-sets-home option), set to homedir of
-                       the target user
+       HOME            Set to the home directory of the target user if --ii or
+                       --HH are specified, _e_n_v___r_e_s_e_t or _a_l_w_a_y_s___s_e_t___h_o_m_e are set
+                       in _s_u_d_o_e_r_s, or when the --ss option is specified and
+                       _s_e_t___h_o_m_e is set in _s_u_d_o_e_r_s
 
        PATH            May be overridden by the security policy.
 
@@ -519,7 +520,6 @@ EENNVVIIRROONNMMEENNTT
 
 FFIILLEESS
        _/_e_t_c_/_s_u_d_o_._c_o_n_f          ssuuddoo plugin and path configuration
-
 
 
 
