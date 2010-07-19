@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0b1                   July 16, 2010                         1
+1.8.0b1                   July 19, 2010                         1
 
 
 
@@ -80,9 +80,9 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        By default, the _e_n_v___r_e_s_e_t option is enabled.  This causes commands to
        be executed with a minimal environment containing TERM, PATH, HOME,
-       SHELL, LOGNAME, USER and USERNAME in addition to variables from the
-       invoking process permitted by the _e_n_v___c_h_e_c_k and _e_n_v___k_e_e_p options.  This
-       is effectively a whitelist for environment variables.
+       MAIL, SHELL, LOGNAME, USER and USERNAME in addition to variables from
+       the invoking process permitted by the _e_n_v___c_h_e_c_k and _e_n_v___k_e_e_p options.
+       This is effectively a whitelist for environment variables.
 
        If, however, the _e_n_v___r_e_s_e_t option is disabled, any variables not
        explicitly denied by the _e_n_v___c_h_e_c_k and _e_n_v___d_e_l_e_t_e options are inherited
@@ -107,8 +107,8 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        As a special case, If ssuuddoo's --ii option (initial login) is specified,
        _s_u_d_o_e_r_s will initialize the environment regardless of the value of
        _e_n_v___r_e_s_e_t.  The _D_I_S_P_L_A_Y, _P_A_T_H and _T_E_R_M variables remain unchanged;
-       _H_O_M_E, _S_H_E_L_L, _U_S_E_R, and _L_O_G_N_A_M_E are set based on the target user.  On
-       Linux and AIX systems the contents of _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t are also
+       _H_O_M_E, _M_A_I_L, _S_H_E_L_L, _U_S_E_R, and _L_O_G_N_A_M_E are set based on the target user.
+       On Linux and AIX systems the contents of _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t are also
        included.  All other environment variables are removed.
 
 SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
@@ -127,7 +127,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
 
 
-1.8.0b1                   July 16, 2010                         2
+1.8.0b1                   July 19, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                         3
+1.8.0b1                   July 19, 2010                         3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                         4
+1.8.0b1                   July 19, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                         5
+1.8.0b1                   July 19, 2010                         5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                         6
+1.8.0b1                   July 19, 2010                         6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                         7
+1.8.0b1                   July 19, 2010                         7
 
 
 
@@ -523,7 +523,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                         8
+1.8.0b1                   July 19, 2010                         8
 
 
 
@@ -589,7 +589,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                         9
+1.8.0b1                   July 19, 2010                         9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                        10
+1.8.0b1                   July 19, 2010                        10
 
 
 
@@ -721,7 +721,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
 
 
-1.8.0b1                   July 16, 2010                        11
+1.8.0b1                   July 19, 2010                        11
 
 
 
@@ -752,7 +752,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        specified in editor.  This flag is _o_f_f by default.
 
        env_reset       If set, ssuuddoo will reset the environment to only contain
-                       the LOGNAME, SHELL, USER, USERNAME and the SUDO_*
+                       the LOGNAME, MAIL, SHELL, USER, USERNAME and the SUDO_*
                        variables.  Any variables in the caller's environment
                        that match the env_keep and env_check lists are then
                        added.  The default contents of the env_keep and
@@ -787,7 +787,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                        12
+1.8.0b1                   July 19, 2010                        12
 
 
 
@@ -853,7 +853,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                        13
+1.8.0b1                   July 19, 2010                        13
 
 
 
@@ -919,7 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                        14
+1.8.0b1                   July 19, 2010                        14
 
 
 
@@ -985,7 +985,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                        15
+1.8.0b1                   July 19, 2010                        15
 
 
 
@@ -1051,7 +1051,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                        16
+1.8.0b1                   July 19, 2010                        16
 
 
 
@@ -1117,7 +1117,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                        17
+1.8.0b1                   July 19, 2010                        17
 
 
 
@@ -1183,7 +1183,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                        18
+1.8.0b1                   July 19, 2010                        18
 
 
 
@@ -1249,7 +1249,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                        19
+1.8.0b1                   July 19, 2010                        19
 
 
 
@@ -1315,7 +1315,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                        20
+1.8.0b1                   July 19, 2010                        20
 
 
 
@@ -1381,7 +1381,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                        21
+1.8.0b1                   July 19, 2010                        21
 
 
 
@@ -1447,7 +1447,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                        22
+1.8.0b1                   July 19, 2010                        22
 
 
 
@@ -1513,7 +1513,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.8.0b1                   July 16, 2010                        23
+1.8.0b1                   July 19, 2010                        23
 
 
 
@@ -1579,7 +1579,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                        24
+1.8.0b1                   July 19, 2010                        24
 
 
 
@@ -1645,7 +1645,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 16, 2010                        25
+1.8.0b1                   July 19, 2010                        25
 
 
 
@@ -1711,7 +1711,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.8.0b1                   July 16, 2010                        26
+1.8.0b1                   July 19, 2010                        26
 
 
 
@@ -1777,7 +1777,7 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 
 
-1.8.0b1                   July 16, 2010                        27
+1.8.0b1                   July 19, 2010                        27
 
 
 
@@ -1843,7 +1843,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.8.0b1                   July 16, 2010                        28
+1.8.0b1                   July 19, 2010                        28
 
 
 
@@ -1909,6 +1909,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.0b1                   July 16, 2010                        29
+1.8.0b1                   July 19, 2010                        29
 
 

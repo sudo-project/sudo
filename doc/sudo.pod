@@ -498,6 +498,11 @@ policy has control over the content of the command's environment.
 Default editor to use in B<-e> (sudoedit) mode if neither C<SUDO_EDITOR>
 nor C<VISUAL> is set
 
+=item C<MAIL>
+
+In B<-i> mode or when I<env_reset> is enabled in I<sudoers>, set
+to the mail spool of the target user
+
 =item C<HOME>
 
 In B<-i>, B<-s> or B<-H> mode (or if sudo was configured with the

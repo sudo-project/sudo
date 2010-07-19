@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "July 16, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "July 19, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -219,7 +219,7 @@ distinct ways \fIsudoers\fR can deal with environment variables.
 .PP
 By default, the \fIenv_reset\fR option is enabled.  This causes commands
 to be executed with a minimal environment containing \f(CW\*(C`TERM\*(C'\fR,
-\&\f(CW\*(C`PATH\*(C'\fR, \f(CW\*(C`HOME\*(C'\fR, \f(CW\*(C`SHELL\*(C'\fR, \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR and \f(CW\*(C`USERNAME\*(C'\fR in
+\&\f(CW\*(C`PATH\*(C'\fR, \f(CW\*(C`HOME\*(C'\fR, \f(CW\*(C`MAIL\*(C'\fR, \f(CW\*(C`SHELL\*(C'\fR, \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR and \f(CW\*(C`USERNAME\*(C'\fR in
 addition to variables from the invoking process permitted by the
 \&\fIenv_check\fR and \fIenv_keep\fR options.  This is effectively a whitelist
 for environment variables.
@@ -247,10 +247,10 @@ and, as such, it is not possible for \fBsudo\fR to preserve them.
 As a special case, If \fBsudo\fR's \fB\-i\fR option (initial login) is
 specified, \fIsudoers\fR will initialize the environment regardless
 of the value of \fIenv_reset\fR.  The \fI\s-1DISPLAY\s0\fR, \fI\s-1PATH\s0\fR and \fI\s-1TERM\s0\fR
-variables remain unchanged; \fI\s-1HOME\s0\fR, \fI\s-1SHELL\s0\fR, \fI\s-1USER\s0\fR, and \fI\s-1LOGNAME\s0\fR
-are set based on the target user.  On Linux and \s-1AIX\s0 systems the
-contents of \fI/etc/environment\fR are also included.  All other
-environment variables are removed.
+variables remain unchanged; \fI\s-1HOME\s0\fR, \fI\s-1MAIL\s0\fR, \fI\s-1SHELL\s0\fR, \fI\s-1USER\s0\fR,
+and \fI\s-1LOGNAME\s0\fR are set based on the target user.  On Linux and \s-1AIX\s0
+systems the contents of \fI/etc/environment\fR are also included.  All
+other environment variables are removed.
 .SH "SUDOERS FILE FORMAT"
 .IX Header "SUDOERS FILE FORMAT"
 The \fIsudoers\fR file is composed of two types of entries: aliases
@@ -861,7 +861,7 @@ default.
 .IP "env_reset" 16
 .IX Item "env_reset"
 If set, \fBsudo\fR will reset the environment to only contain the
-\&\s-1LOGNAME\s0, \s-1SHELL\s0, \s-1USER\s0, \s-1USERNAME\s0 and the \f(CW\*(C`SUDO_*\*(C'\fR variables.  Any
+\&\s-1LOGNAME\s0, \s-1MAIL\s0, \s-1SHELL\s0, \s-1USER\s0, \s-1USERNAME\s0 and the \f(CW\*(C`SUDO_*\*(C'\fR variables.  Any
 variables in the caller's environment that match the \f(CW\*(C`env_keep\*(C'\fR
 and \f(CW\*(C`env_check\*(C'\fR lists are then added.  The default contents of the
 \&\f(CW\*(C`env_keep\*(C'\fR and \f(CW\*(C`env_check\*(C'\fR lists are displayed when \fBsudo\fR is

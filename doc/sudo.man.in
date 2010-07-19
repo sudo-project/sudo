@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "July  1, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "July 19, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -597,6 +597,11 @@ policy has control over the content of the command's environment.
 .IX Item "EDITOR"
 Default editor to use in \fB\-e\fR (sudoedit) mode if neither \f(CW\*(C`SUDO_EDITOR\*(C'\fR
 nor \f(CW\*(C`VISUAL\*(C'\fR is set
+.ie n .IP "\*(C`MAIL\*(C'" 16
+.el .IP "\f(CW\*(C`MAIL\*(C'\fR" 16
+.IX Item "MAIL"
+In \fB\-i\fR mode or when \fIenv_reset\fR is enabled in \fIsudoers\fR, set
+to the mail spool of the target user
 .ie n .IP "\*(C`HOME\*(C'" 16
 .el .IP "\f(CW\*(C`HOME\*(C'\fR" 16
 .IX Item "HOME"

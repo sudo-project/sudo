@@ -1866,6 +1866,7 @@ AC_SYS_POSIX_TERMIOS
 if test "$ac_cv_sys_posix_termios" != "yes"; then
     AC_MSG_ERROR([Must have POSIX termios to build sudo])
 fi
+SUDO_MAILDIR
 if test ${with_logincap-'no'} != "no"; then
     AC_CHECK_HEADERS(login_cap.h, [LOGINCAP_USAGE='[[-c class|-]] '; LCMAN=1
 	case "$OS" in

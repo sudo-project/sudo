@@ -90,7 +90,7 @@ distinct ways I<sudoers> can deal with environment variables.
 
 By default, the I<env_reset> option is enabled.  This causes commands
 to be executed with a minimal environment containing C<TERM>,
-C<PATH>, C<HOME>, C<SHELL>, C<LOGNAME>, C<USER> and C<USERNAME> in
+C<PATH>, C<HOME>, C<MAIL>, C<SHELL>, C<LOGNAME>, C<USER> and C<USERNAME> in
 addition to variables from the invoking process permitted by the
 I<env_check> and I<env_keep> options.  This is effectively a whitelist
 for environment variables.
@@ -118,10 +118,10 @@ and, as such, it is not possible for B<sudo> to preserve them.
 As a special case, If B<sudo>'s B<-i> option (initial login) is
 specified, I<sudoers> will initialize the environment regardless
 of the value of I<env_reset>.  The I<DISPLAY>, I<PATH> and I<TERM>
-variables remain unchanged; I<HOME>, I<SHELL>, I<USER>, and I<LOGNAME>
-are set based on the target user.  On Linux and AIX systems the
-contents of F</etc/environment> are also included.  All other
-environment variables are removed.
+variables remain unchanged; I<HOME>, I<MAIL>, I<SHELL>, I<USER>,
+and I<LOGNAME> are set based on the target user.  On Linux and AIX
+systems the contents of F</etc/environment> are also included.  All
+other environment variables are removed.
 
 =head1 SUDOERS FILE FORMAT
 
@@ -727,7 +727,7 @@ default.
 =item env_reset
 
 If set, B<sudo> will reset the environment to only contain the
-LOGNAME, SHELL, USER, USERNAME and the C<SUDO_*> variables.  Any
+LOGNAME, MAIL, SHELL, USER, USERNAME and the C<SUDO_*> variables.  Any
 variables in the caller's environment that match the C<env_keep>
 and C<env_check> lists are then added.  The default contents of the
 C<env_keep> and C<env_check> lists are displayed when B<sudo> is

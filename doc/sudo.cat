@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0b1                   July  1, 2010                         1
+1.8.0b1                   July 19, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.8.0b1                   July  1, 2010                         2
+1.8.0b1                   July 19, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0b1                   July  1, 2010                         3
+1.8.0b1                   July 19, 2010                         3
 
 
 
@@ -259,7 +259,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0b1                   July  1, 2010                         4
+1.8.0b1                   July 19, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0b1                   July  1, 2010                         5
+1.8.0b1                   July 19, 2010                         5
 
 
 
@@ -391,7 +391,7 @@ PPLLUUGGIINNSS
 
 
 
-1.8.0b1                   July  1, 2010                         6
+1.8.0b1                   July 19, 2010                         6
 
 
 
@@ -457,7 +457,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.8.0b1                   July  1, 2010                         7
+1.8.0b1                   July 19, 2010                         7
 
 
 
@@ -480,6 +480,9 @@ EENNVVIIRROONNMMEENNTT
 
        EDITOR          Default editor to use in --ee (sudoedit) mode if neither
                        SUDO_EDITOR nor VISUAL is set
+
+       MAIL            In --ii mode or when _e_n_v___r_e_s_e_t is enabled in _s_u_d_o_e_r_s, set
+                       to the mail spool of the target user
 
        HOME            In --ii, --ss or --HH mode (or if sudo was configured with
                        the --enable-shell-sets-home option), set to homedir of
@@ -517,13 +520,10 @@ EENNVVIIRROONNMMEENNTT
 FFIILLEESS
        _/_e_t_c_/_s_u_d_o_._c_o_n_f          ssuuddoo plugin and path configuration
 
-EEXXAAMMPPLLEESS
-       Note: the following examples assume a properly configured security
-       policy.
 
 
 
-1.8.0b1                   July  1, 2010                         8
+1.8.0b1                   July 19, 2010                         8
 
 
 
@@ -531,6 +531,10 @@ EEXXAAMMPPLLEESS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+EEXXAAMMPPLLEESS
+       Note: the following examples assume a properly configured security
+       policy.
 
        To get a file listing of an unreadable directory:
 
@@ -582,14 +586,10 @@ CCAAVVEEAATTSS
        programs (such as editors) allow the user to run commands via shell
        escapes, thus avoiding ssuuddoo's checks.  However, on most systems it is
        possible to prevent shell escapes with the _s_u_d_o_e_r_s(4) module's _n_o_e_x_e_c
-       functionality.
-
-       It is not meaningful to run the cd command directly via sudo, e.g.,
 
 
 
-
-1.8.0b1                   July  1, 2010                         9
+1.8.0b1                   July 19, 2010                         9
 
 
 
@@ -597,6 +597,10 @@ CCAAVVEEAATTSS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+       functionality.
+
+       It is not meaningful to run the cd command directly via sudo, e.g.,
 
         $ sudo cd /usr/local/protected
 
@@ -651,10 +655,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-1.8.0b1                   July  1, 2010                        10
+1.8.0b1                   July 19, 2010                        10
 
 

@@ -65,6 +65,8 @@
 #define DID_USER    	0x0020
 #undef DID_USERNAME
 #define DID_USERNAME   	0x0040
+#undef DID_MAIL
+#define DID_MAIL   	0x0080
 #undef DID_MAX
 #define DID_MAX    	0x00ff
 
@@ -82,6 +84,8 @@
 #define KEPT_USER    	0x2000
 #undef KEPT_USERNAME
 #define KEPT_USERNAME	0x4000
+#undef KEPT_MAIL
+#define KEPT_MAIL	0x8000
 #undef KEPT_MAX
 #define KEPT_MAX    	0xff00
 
@@ -192,7 +196,6 @@ static const char *initial_keepenv_table[] = {
     "HOSTNAME",
     "KRB5CCNAME",
     "LS_COLORS",
-    "MAIL",
     "PATH",
     "PS1",
     "PS2",
@@ -460,6 +463,10 @@ rebuild_env(int noexec)
 			if (strncmp(*ep, "LOGNAME=", 8) == 0)
 			    SET(didvar, DID_LOGNAME);
 			break;
+		    case 'M':
+			if (strncmp(*ep, "MAIL=", 5) == 0)
+			    SET(didvar, DID_MAIL);
+			break;
 		    case 'P':
 			if (strncmp(*ep, "PATH=", 5) == 0)
 			    SET(didvar, DID_PATH);
@@ -508,6 +515,18 @@ rebuild_env(int noexec)
 		sudo_setenv("USER", user_name, FALSE);
 	    if (!ISSET(didvar, DID_USERNAME))
 		sudo_setenv("USERNAME", user_name, FALSE);
+	}
+	/*
+	 * Set MAIL to target user in -i mode or if MAIL is not preserved
+	 * from user's environment.
+	 */
+	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) || !ISSET(didvar, KEPT_MAIL)) {
+	    cp = _PATH_MAILDIR;
+	    if (cp[sizeof(_PATH_MAILDIR) - 2] == '/')
+		easprintf(&cp, "MAIL=%s%s", _PATH_MAILDIR, runas_pw->pw_name);
+	    else
+		easprintf(&cp, "MAIL=%s/%s", _PATH_MAILDIR, runas_pw->pw_name);
+	    sudo_putenv(cp, ISSET(didvar, DID_MAIL), TRUE);
 	}
     } else {
 	/*

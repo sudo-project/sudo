@@ -13845,6 +13845,68 @@ $as_echo "$ac_cv_sys_posix_termios" >&6; }
 if test "$ac_cv_sys_posix_termios" != "yes"; then
     as_fn_error "Must have POSIX termios to build sudo" "$LINENO" 5
 fi
+
+maildir=no
+if test X"$ac_cv_header_paths_h" = X"yes"; then
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+#include <paths.h>
+int main() {char *p = _PATH_MAILDIR;}
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  maildir=yes
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+if test $maildir = no; then
+    # Solaris has maillock.h which defines MAILDIR
+    for ac_header in maillock.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "maillock.h" "ac_cv_header_maillock_h" "$ac_includes_default"
+if test "x$ac_cv_header_maillock_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_MAILLOCK_H 1
+_ACEOF
+
+	cat >>confdefs.h <<\EOF
+#define _PATH_MAILDIR MAILDIR
+EOF
+
+	maildir=yes
+
+fi
+
+done
+
+    if test $maildir = no; then
+	for d in /var/mail /var/spool/mail /usr/spool/mail; do
+	    if test -d "$d"; then
+		maildir=yes
+		cat >>confdefs.h <<EOF
+#define _PATH_MAILDIR "$d"
+EOF
+
+		break
+	    fi
+	done
+	if test $maildir = no; then
+	    # unable to find mail dir, hope for the best
+	    cat >>confdefs.h <<EOF
+#define _PATH_MAILDIR "/var/mail"
+EOF
+
+	fi
+    fi
+fi
+
 if test ${with_logincap-'no'} != "no"; then
     for ac_header in login_cap.h
 do :
@@ -17854,7 +17916,7 @@ if test -z "$timedir"; then
     for d in /var/db /var/lib /var/adm /usr/adm; do
 	if test -d "$d"; then
 	    timedir="$d/sudo"
-	    break;
+	    break
 	fi
     done
 fi

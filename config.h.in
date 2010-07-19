@@ -316,6 +316,9 @@
 /* Define to 1 if you have the `lrand48' function. */
 #undef HAVE_LRAND48
 
+/* Define to 1 if you have the <maillock.h> header file. */
+#undef HAVE_MAILLOCK_H
+
 /* Define to 1 if you have the <malloc.h> header file. */
 #undef HAVE_MALLOC_H
 
