@@ -925,7 +925,7 @@ determine the real identity of the user, it may be desirable to
 change this behavior.  This can be done by negating the set_logname
 option.  Note that if the I<env_reset> option has not been disabled,
 entries in the I<env_keep> list will override the value of
-I<set_logname>.  This flag is I<off> by default.
+I<set_logname>.  This flag is I<on> by default.
 
 =item setenv
 
