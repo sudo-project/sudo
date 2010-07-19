@@ -171,6 +171,7 @@ static const char *initial_badenv_table[] = {
     "PYTHONHOME",		/* python, module search path */
     "PYTHONPATH",		/* python, search path */
     "PYTHONINSPECT",		/* python, allow inspection */
+    "PYTHONUSERBASE",		/* python, per user site-packages directory */
     "RUBYLIB",			/* ruby, library load path */
     "RUBYOPT",			/* ruby, extra command line options */
     NULL
