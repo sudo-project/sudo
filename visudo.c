@@ -423,9 +423,12 @@ reparse_sudoers(editor, args, strict, quiet)
 	    errorfile = sp->path;
 	}
 	fclose(yyin);
-	if (!parse_error && check_aliases(strict, quiet) != 0) {
-	    parse_error = TRUE;
-	    errorfile = sp->path;
+	if (!parse_error) {
+	    if (!update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER) ||
+		check_aliases(strict, quiet) != 0) {
+		parse_error = TRUE;
+		errorfile = sp->path;
+	    }
 	}
 
 	/*
