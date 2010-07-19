@@ -700,7 +700,7 @@ rebuild_env(noexec)
 	 * Set MAIL to target user in -i mode or if MAIL is not preserved
 	 * from user's environment.
 	 */
-	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) || !ISSET(didvar, DID_MAIL)) {
+	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) || !ISSET(didvar, KEPT_MAIL)) {
 	    cp = _PATH_MAILDIR;
 	    if (cp[sizeof(_PATH_MAILDIR) - 2] == '/')
 		easprintf(&cp, "MAIL=%s%s", _PATH_MAILDIR, runas_pw->pw_name);
