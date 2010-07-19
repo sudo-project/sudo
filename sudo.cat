@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.4                     July 14, 2010                         1
+1.7.4                     July 19, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.7.4                     July 14, 2010                         2
+1.7.4                     July 19, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.7.4                     July 14, 2010                         3
+1.7.4                     July 19, 2010                         3
 
 
 
@@ -207,7 +207,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    ssuuddoo attempts to change to that user's home directory
                    before running the shell.  It also initializes the
                    environment, leaving _D_I_S_P_L_A_Y and _T_E_R_M unchanged, setting
-                   _H_O_M_E, _S_H_E_L_L, _U_S_E_R, _L_O_G_N_A_M_E, and _P_A_T_H, as well as the
+                   _H_O_M_E, _M_A_I_L, _S_H_E_L_L, _U_S_E_R, _L_O_G_N_A_M_E, and _P_A_T_H, as well as the
                    contents of _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t on Linux and AIX systems.  All
                    other environment variables are removed.
 
@@ -259,7 +259,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.7.4                     July 14, 2010                         4
+1.7.4                     July 19, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.7.4                     July 14, 2010                         5
+1.7.4                     July 19, 2010                         5
 
 
 
@@ -391,7 +391,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.7.4                     July 14, 2010                         6
+1.7.4                     July 19, 2010                         6
 
 
 
@@ -457,7 +457,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.7.4                     July 14, 2010                         7
+1.7.4                     July 19, 2010                         7
 
 
 
@@ -494,6 +494,9 @@ EENNVVIIRROONNMMEENNTT
        EDITOR          Default editor to use in --ee (sudoedit) mode if neither
                        SUDO_EDITOR nor VISUAL is set
 
+       MAIL            In --ii mode or when _e_n_v___r_e_s_e_t is enabled in _s_u_d_o_e_r_s, set
+                       to the mail spool of the target user
+
        HOME            In --ss or --HH mode (or if sudo was configured with the
                        --enable-shell-sets-home option), set to homedir of the
                        target user
@@ -518,12 +521,9 @@ EENNVVIIRROONNMMEENNTT
        SUDO_PS1        If set, PS1 will be set to its value for the program
                        being run
 
-       SUDO_UID        Set to the user ID of the user who invoked sudo
 
 
-
-
-1.7.4                     July 14, 2010                         8
+1.7.4                     July 19, 2010                         8
 
 
 
@@ -531,6 +531,8 @@ EENNVVIIRROONNMMEENNTT
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+       SUDO_UID        Set to the user ID of the user who invoked sudo
 
        SUDO_USER       Set to the login of the user who invoked sudo
 
@@ -584,12 +586,10 @@ EEXXAAMMPPLLEESS
 
 SSEEEE AALLSSOO
        _g_r_e_p(1), _s_u(1), _s_t_a_t(2), _l_o_g_i_n___c_a_p(3), _p_a_s_s_w_d(4), _s_u_d_o_e_r_s(5),
-       _v_i_s_u_d_o(1m)
 
 
 
-
-1.7.4                     July 14, 2010                         9
+1.7.4                     July 19, 2010                         9
 
 
 
@@ -597,6 +597,8 @@ SSEEEE AALLSSOO
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+       _v_i_s_u_d_o(1m)
 
 AAUUTTHHOORRSS
        Many people have worked on ssuuddoo over the years; this version consists
@@ -653,8 +655,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-1.7.4                     July 14, 2010                        10
+1.7.4                     July 19, 2010                        10
 
 

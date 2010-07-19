@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "July 14, 2010" "1.7.4" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "July 19, 2010" "1.7.4" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -347,7 +347,7 @@ it is passed to the shell for execution.  Otherwise, an interactive
 shell is executed.  \fBsudo\fR attempts to change to that user's home
 directory before running the shell.  It also initializes the
 environment, leaving \fI\s-1DISPLAY\s0\fR and \fI\s-1TERM\s0\fR unchanged, setting
-\&\fI\s-1HOME\s0\fR, \fI\s-1SHELL\s0\fR, \fI\s-1USER\s0\fR, \fI\s-1LOGNAME\s0\fR, and \fI\s-1PATH\s0\fR, as well as
+\&\fI\s-1HOME\s0\fR, \fI\s-1MAIL\s0\fR, \fI\s-1SHELL\s0\fR, \fI\s-1USER\s0\fR, \fI\s-1LOGNAME\s0\fR, and \fI\s-1PATH\s0\fR, as well as
 the contents of \fI/etc/environment\fR on Linux and \s-1AIX\s0 systems.
 All other environment variables are removed.
 .IP "\-K" 12
@@ -615,6 +615,11 @@ information, please see the \f(CW\*(C`PREVENTING SHELL ESCAPES\*(C'\fR section i
 .IX Item "EDITOR"
 Default editor to use in \fB\-e\fR (sudoedit) mode if neither \f(CW\*(C`SUDO_EDITOR\*(C'\fR
 nor \f(CW\*(C`VISUAL\*(C'\fR is set
+.ie n .IP "\*(C`MAIL\*(C'" 16
+.el .IP "\f(CW\*(C`MAIL\*(C'\fR" 16
+.IX Item "MAIL"
+In \fB\-i\fR mode or when \fIenv_reset\fR is enabled in \fIsudoers\fR, set
+to the mail spool of the target user
 .ie n .IP "\*(C`HOME\*(C'" 16
 .el .IP "\f(CW\*(C`HOME\*(C'\fR" 16
 .IX Item "HOME"

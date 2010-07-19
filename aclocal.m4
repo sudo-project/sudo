@@ -109,7 +109,7 @@ if test -z "$timedir"; then
     for d in /var/db /var/lib /var/adm /usr/adm; do
 	if test -d "$d"; then
 	    timedir="$d/sudo"
-	    break;
+	    break
 	fi
     done
 fi
@@ -343,6 +343,39 @@ AC_DEFUN(SUDO_APPEND_LIBPATH, [
     if test X"$blibpath" != X"" -a "$1" = "SUDO_LDFLAGS"; then
 	blibpath_add="${blibpath_add}:$2"
     fi
+])
+
+dnl
+dnl Determine the mail spool location
+dnl NOTE: must be run *after* check for paths.h
+dnl
+AC_DEFUN(SUDO_MAILDIR, [
+maildir=no
+if test X"$ac_cv_header_paths_h" = X"yes"; then
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
+#include <paths.h>
+int main() {char *p = _PATH_MAILDIR;}], [])], [maildir=yes], [])
+fi
+if test $maildir = no; then
+    # Solaris has maillock.h which defines MAILDIR
+    AC_CHECK_HEADERS(maillock.h, [
+	SUDO_DEFINE(_PATH_MAILDIR, MAILDIR)
+	maildir=yes
+    ])
+    if test $maildir = no; then
+	for d in /var/mail /var/spool/mail /usr/spool/mail; do
+	    if test -d "$d"; then
+		maildir=yes
+		SUDO_DEFINE_UNQUOTED(_PATH_MAILDIR, "$d")
+		break
+	    fi
+	done
+	if test $maildir = no; then
+	    # unable to find mail dir, hope for the best
+	    SUDO_DEFINE_UNQUOTED(_PATH_MAILDIR, "/var/mail")
+	fi
+    fi
+fi
 ])
 
 dnl

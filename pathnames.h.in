@@ -122,6 +122,10 @@
 #define	_PATH_USRTMP	"/usr/tmp/"
 #endif /* _PATH_USRTMP */
 
+#ifndef _PATH_MAILDIR
+#undef _PATH_MAILDIR
+#endif /* _PATH_MAILDIR */
+
 #ifndef _PATH_SUDO_SESH
 #undef _PATH_SUDO_SESH
 #endif /* _PATH_SUDO_SESH */
