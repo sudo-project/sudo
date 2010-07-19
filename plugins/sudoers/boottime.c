@@ -17,6 +17,7 @@
 #include <config.h>
 
 #include <sys/param.h>
+#include <sys/time.h>
 #include <sys/types.h>
 
 #include <stdio.h>
@@ -38,6 +39,9 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <limits.h>
+#if TIME_WITH_SYS_TIME
+# include <time.h>
+#endif
 
 #ifdef HAVE_SYSCTL
 # include <sys/sysctl.h>
