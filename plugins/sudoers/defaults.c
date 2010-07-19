@@ -505,47 +505,48 @@ init_defaults(void)
 
 /*
  * Update the defaults based on what was set by sudoers.
- * Pass in a an OR'd list of which default types to update.
+ * Pass in an OR'd list of which default types to update.
  */
 int
 update_defaults(int what)
 {
     struct defaults *def;
+    int rc = TRUE;
 
     tq_foreach_fwd(&defaults, def) {
 	switch (def->type) {
 	    case DEFAULTS:
 		if (ISSET(what, SETDEF_GENERIC) &&
 		    !set_default(def->var, def->val, def->op))
-		    return(FALSE);
+		    rc = FALSE;
 		break;
 	    case DEFAULTS_USER:
 		if (ISSET(what, SETDEF_USER) &&
 		    userlist_matches(sudo_user.pw, &def->binding) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
-		    return(FALSE);
+		    rc = FALSE;
 		break;
 	    case DEFAULTS_RUNAS:
 		if (ISSET(what, SETDEF_RUNAS) &&
 		    runaslist_matches(&def->binding, NULL) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
-		    return(FALSE);
+		    rc = FALSE;
 		break;
 	    case DEFAULTS_HOST:
 		if (ISSET(what, SETDEF_HOST) &&
 		    hostlist_matches(&def->binding) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
-		    return(FALSE);
+		    rc = FALSE;
 		break;
 	    case DEFAULTS_CMND:
 		if (ISSET(what, SETDEF_CMND) &&
 		    cmndlist_matches(&def->binding) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
-		    return(FALSE);
+		    rc = FALSE;
 		break;
 	}
     }
-    return(TRUE);
+    return(rc);
 }
 
 static int
