@@ -124,7 +124,7 @@ runas_default=root
 env_editor=off
 editor=vi
 passwd_tries=3
-tty_tickets=off
+tty_tickets=on
 insults=off
 root_sudo=on
 path_info=on
@@ -922,11 +922,11 @@ AC_ARG_WITH(tty-tickets, [AS_HELP_STRING([--with-tty-tickets], [use a different 
     *)		AC_MSG_ERROR(["--with-tty-tickets does not take an argument."])
 		;;
 esac])
-if test "$tty_tickets" = "on"; then
-    AC_DEFINE(USE_TTY_TICKETS)
-    AC_MSG_RESULT(yes)
-else
+if test "$tty_tickets" = "off"; then
+    AC_DEFINE(NO_TTY_TICKETS)
     AC_MSG_RESULT(no)
+else
+    AC_MSG_RESULT(yes)
 fi
 
 AC_MSG_CHECKING(whether to include insults)
@@ -2838,6 +2838,7 @@ AH_TEMPLATE(NO_LECTURE, [Define to 1 if you don't want users to get the lecture 
 AH_TEMPLATE(NO_PAM_SESSION, [Define to 1 if you don't want to use sudo's PAM session support])
 AH_TEMPLATE(NO_ROOT_MAILER, [Define to avoid runing the mailer as root.])
 AH_TEMPLATE(NO_ROOT_SUDO, [Define to 1 if root should not be allowed to use sudo.])
+AH_TEMPLATE(NO_TTY_TICKETS, [Define to 1 if you want a single ticket file instead of per-tty files.])
 AH_TEMPLATE(PC_INSULTS, [Define to 1 to replace politically incorrect insults with less offensive ones.])
 AH_TEMPLATE(SECURE_PATH, [Define to 1 to override the user's path with a built-in one.])
 AH_TEMPLATE(SEND_MAIL_WHEN_NOT_OK, [Define to 1 to send mail when the user is not allowed to run a command.])
@@ -2848,7 +2849,6 @@ AH_TEMPLATE(SHELL_SETS_HOME, [Define to 1 if you want sudo to set $HOME in shell
 AH_TEMPLATE(STUB_LOAD_INTERFACES, [Define to 1 if the code in interfaces.c does not compile for you.])
 AH_TEMPLATE(USE_INSULTS, [Define to 1 if you want to insult the user for entering an incorrect password.])
 AH_TEMPLATE(USE_STOW, [Define to 1 if you use GNU stow packaging.])
-AH_TEMPLATE(USE_TTY_TICKETS, [Define to 1 if you want a different ticket file for each tty.])
 AH_TEMPLATE(WITHOUT_PASSWD, [Define to avoid using the passwd/shadow file for authentication.])
 AH_TEMPLATE(sig_atomic_t, [Define to `int' if <signal.h> does not define.])
 AH_TEMPLATE(__signed, [Define to `signed' or nothing if compiler does not support a signed type qualifier.])

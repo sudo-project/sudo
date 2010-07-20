@@ -66,10 +66,10 @@ I<sudoers> uses time stamp files for credential caching.  Once a
 user has been authenticated, a time stamp is updated and the user
 may then use sudo without a password for a short period of time
 (C<@timeout@> minutes unless overridden by the I<timeout> option.
-By default, I<sudoers> uses a per-user time stamp which means the
-time stamp is shared across all of a user's login sessions.  The
-I<tty_tickets> option can be used to enable per-tty time stamps
-instead.
+By default, I<sudoers> uses a tty-based time stamp which means that
+there is a separate time stamp for each of a user's login sessions.
+The I<tty_tickets> option can be disabled to force the use of a
+single time stamp for all of a user's sessions.
 
 I<sudoers> can log both successful and unsuccessful attempts (as well
 as errors) to syslog(3), a log file, or both.  By default, I<sudoers>
@@ -1000,11 +1000,11 @@ can also be used to list or search the available logs.
 
 =item tty_tickets
 
-If set, users must authenticate on a per-tty basis.  Normally,
-B<sudo> uses a directory in the ticket dir with the same name as
-the user running it.  With this flag enabled, B<sudo> will use a
-file named for the tty the user is logged in on in that directory.
-This flag is I<@tty_tickets@> by default.
+If set, users must authenticate on a per-tty basis.  With this flag
+enabled, B<sudo> will use a file named for the tty the user is
+logged in on in the user's time stamp directory.  If disabled, the
+time stamp of the directory is used instead.  This flag is
+I<@tty_tickets@> by default.
 
 =item umask_override
 

@@ -2810,7 +2810,7 @@ runas_default=root
 env_editor=off
 editor=vi
 passwd_tries=3
-tty_tickets=off
+tty_tickets=on
 insults=off
 root_sudo=on
 path_info=on
@@ -4806,14 +4806,14 @@ if test "${with_tty_tickets+set}" = set; then :
 esac
 fi
 
-if test "$tty_tickets" = "on"; then
-    $as_echo "#define USE_TTY_TICKETS 1" >>confdefs.h
+if test "$tty_tickets" = "off"; then
+    $as_echo "#define NO_TTY_TICKETS 1" >>confdefs.h
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
+else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to include insults" >&5

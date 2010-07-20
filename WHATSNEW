@@ -19,6 +19,8 @@ What's new in Sudo 1.7.4?
    than the boot time are ignored on systems where it is possible to
    determine this.
 
+ * The tty_tickets sudoers option is now enabled by default.
+
  * Ancillary documentation (README files, LICENSE, etc) is now installed
    in a sudo documentation directory.
 

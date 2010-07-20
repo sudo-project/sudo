@@ -603,6 +603,10 @@
 /* Define to 1 if you want a two line OTP (S/Key or OPIE) prompt. */
 #undef LONG_OTP_PROMPT
 
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
+
 /* The subject of the mail sent by sudo to the MAILTO user/address. */
 #undef MAILSUBJECT
 
@@ -632,6 +636,9 @@
 /* Define to 1 if root should not be allowed to use sudo. */
 #undef NO_ROOT_SUDO
 
+/* Define to 1 if you want a single ticket file instead of per-tty files. */
+#undef NO_TTY_TICKETS
+
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 
@@ -643,6 +650,9 @@
 
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
@@ -662,9 +672,6 @@
 
 /* The syslog priority sudo will use for successful attempts. */
 #undef PRI_SUCCESS
-
-/* Define to 1 if the `putenv' has a const argument. */
-#undef PUTENV_CONST
 
 /* The user sudo should run commands as by default. */
 #undef RUNAS_DEFAULT
@@ -718,9 +725,6 @@
 
 /* Define to 1 if you use GNU stow packaging. */
 #undef USE_STOW
-
-/* Define to 1 if you want a different ticket file for each tty. */
-#undef USE_TTY_TICKETS
 
 /* Define to avoid using the passwd/shadow file for authentication. */
 #undef WITHOUT_PASSWD

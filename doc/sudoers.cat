@@ -45,10 +45,10 @@ DDEESSCCRRIIPPTTIIOONN
        _s_u_d_o_e_r_s uses time stamp files for credential caching.  Once a user has
        been authenticated, a time stamp is updated and the user may then use
        sudo without a password for a short period of time (5 minutes unless
-       overridden by the _t_i_m_e_o_u_t option.  By default, _s_u_d_o_e_r_s uses a per-user
-       time stamp which means the time stamp is shared across all of a user's
-       login sessions.  The _t_t_y___t_i_c_k_e_t_s option can be used to enable per-tty
-       time stamps instead.
+       overridden by the _t_i_m_e_o_u_t option.  By default, _s_u_d_o_e_r_s uses a tty-based
+       time stamp which means that there is a separate time stamp for each of
+       a user's login sessions.  The _t_t_y___t_i_c_k_e_t_s option can be disabled to
+       force the use of a single time stamp for all of a user's sessions.
 
        _s_u_d_o_e_r_s can log both successful and unsuccessful attempts (as well as
        errors) to _s_y_s_l_o_g(3), a log file, or both.  By default, _s_u_d_o_e_r_s will
@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0b1                   July 19, 2010                         1
+1.8.0b1                   July 20, 2010                         1
 
 
 
@@ -127,7 +127,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
 
 
-1.8.0b1                   July 19, 2010                         2
+1.8.0b1                   July 20, 2010                         2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                         3
+1.8.0b1                   July 20, 2010                         3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                         4
+1.8.0b1                   July 20, 2010                         4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                         5
+1.8.0b1                   July 20, 2010                         5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                         6
+1.8.0b1                   July 20, 2010                         6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                         7
+1.8.0b1                   July 20, 2010                         7
 
 
 
@@ -523,7 +523,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                         8
+1.8.0b1                   July 20, 2010                         8
 
 
 
@@ -589,7 +589,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                         9
+1.8.0b1                   July 20, 2010                         9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                        10
+1.8.0b1                   July 20, 2010                        10
 
 
 
@@ -721,7 +721,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
 
 
-1.8.0b1                   July 19, 2010                        11
+1.8.0b1                   July 20, 2010                        11
 
 
 
@@ -787,7 +787,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                        12
+1.8.0b1                   July 20, 2010                        12
 
 
 
@@ -853,7 +853,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                        13
+1.8.0b1                   July 20, 2010                        13
 
 
 
@@ -919,7 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                        14
+1.8.0b1                   July 20, 2010                        14
 
 
 
@@ -985,7 +985,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                        15
+1.8.0b1                   July 20, 2010                        15
 
 
 
@@ -1045,13 +1045,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        available logs.
 
        tty_tickets     If set, users must authenticate on a per-tty basis.
-                       Normally, ssuuddoo uses a directory in the ticket dir with
-                       the same name as the user running it.  With this flag
-                       enabled, ssuuddoo will use a file named for the tty the
+                       With this flag enabled, ssuuddoo will use a file named for
+                       the tty the user is logged in on in the user's time
+                       stamp directory.  If disabled, the time stamp of the
 
 
 
-1.8.0b1                   July 19, 2010                        16
+1.8.0b1                   July 20, 2010                        16
 
 
 
@@ -1060,8 +1060,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
-                       user is logged in on in that directory.  This flag is
-                       _o_f_f by default.
+                       directory is used instead.  This flag is _o_n by default.
 
        umask_override  If set, ssuuddoo will set the umask as specified by _s_u_d_o_e_r_s
                        without modification.  This makes it possible to
@@ -1114,10 +1113,11 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        passwd_timeout  Number of minutes before the ssuuddoo password prompt times
                        out, or 0 for no timeout.  The timeout may include a
+                       fractional component if minute granularity is
 
 
 
-1.8.0b1                   July 19, 2010                        17
+1.8.0b1                   July 20, 2010                        17
 
 
 
@@ -1126,7 +1126,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
-                       fractional component if minute granularity is
                        insufficient, for example 2.5.  The default is 5.
 
        timestamp_timeout
@@ -1183,7 +1182,8 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                        18
+
+1.8.0b1                   July 20, 2010                        18
 
 
 
@@ -1249,7 +1249,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                        19
+1.8.0b1                   July 20, 2010                        19
 
 
 
@@ -1315,7 +1315,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                        20
+1.8.0b1                   July 20, 2010                        20
 
 
 
@@ -1381,7 +1381,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                        21
+1.8.0b1                   July 20, 2010                        21
 
 
 
@@ -1447,7 +1447,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                        22
+1.8.0b1                   July 20, 2010                        22
 
 
 
@@ -1513,7 +1513,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.8.0b1                   July 19, 2010                        23
+1.8.0b1                   July 20, 2010                        23
 
 
 
@@ -1579,7 +1579,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                        24
+1.8.0b1                   July 20, 2010                        24
 
 
 
@@ -1645,7 +1645,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b1                   July 19, 2010                        25
+1.8.0b1                   July 20, 2010                        25
 
 
 
@@ -1711,7 +1711,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.8.0b1                   July 19, 2010                        26
+1.8.0b1                   July 20, 2010                        26
 
 
 
@@ -1777,7 +1777,7 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 
 
-1.8.0b1                   July 19, 2010                        27
+1.8.0b1                   July 20, 2010                        27
 
 
 
@@ -1843,7 +1843,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.8.0b1                   July 19, 2010                        28
+1.8.0b1                   July 20, 2010                        28
 
 
 
@@ -1909,6 +1909,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.0b1                   July 19, 2010                        29
+1.8.0b1                   July 20, 2010                        29
 
 
