@@ -87,6 +87,10 @@
 #include <error.h>
 #include <missing.h>
 
+#ifndef LINE_MAX
+# define LINE_MAX 2048
+#endif
+
 /* Must match the defines in iolog.c */
 #define IOFD_STDIN      0
 #define IOFD_STDOUT     1
