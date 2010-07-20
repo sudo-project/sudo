@@ -55,10 +55,6 @@ struct aix_limit {
     int factor;
 };
 
-#ifdef HAVE_SETAUTHDB
-static char saved_registry[16]; /* 15 chars plus NUL as per setauthdb(3) */
-#endif
-
 static struct aix_limit aix_limits[] = {
     { RLIMIT_FSIZE, S_UFSIZE, S_UFSIZE_HARD, 512 },
     { RLIMIT_CPU, S_UCPU, S_UCPU_HARD, 1 },
@@ -146,7 +142,7 @@ aix_setauthdb(char *user)
 	if (setuserdb(S_READ) != 0)
 	    error(1, "unable to open userdb");
 	if (getuserattr(user, S_REGISTRY, &registry, SEC_CHAR) == 0) {
-	    if (setauthdb(registry, saved_registry) != 0)
+	    if (setauthdb(registry, NULL) != 0)
 		error(1, "unable to switch to registry \"%s\" for %s",
 		    registry, user);
 	}
@@ -160,11 +156,8 @@ aix_setauthdb(char *user)
 void
 aix_restoreauthdb(void)
 {
-    if (saved_registry[0]) {
-	if (setauthdb(saved_registry, NULL) != 0)
-	    error(1, "unable to restore registry \"%s\"", saved_registry);
-	saved_registry[0] = '\0';
-    }
+    if (setauthdb(NULL, NULL) != 0)
+	error(1, "unable to restore registry");
 }
 #endif
 
