@@ -900,11 +900,11 @@ can also be used to list or search the available logs.
 
 =item tty_tickets
 
-If set, users must authenticate on a per-tty basis.  Normally,
-B<sudo> uses a directory in the ticket dir with the same name as
-the user running it.  With this flag enabled, B<sudo> will use a
-file named for the tty the user is logged in on in that directory.
-This flag is I<@tty_tickets@> by default.
+If set, users must authenticate on a per-tty basis.  With this flag
+enabled, B<sudo> will use a file named for the tty the user is
+logged in on in the user's time stamp directory.  If disabled, the
+time stamp of the directory is used instead.  This flag is
+I<@tty_tickets@> by default.
 
 =item umask_override
 

@@ -10,6 +10,12 @@ o Upgrading from a version prior to 1.7.4:
     system reboots.  Time stamp files older than the boot time are
     ignored on systems where it is possible to determine this.
 
+    Additionally, the tty_tickets sudoers option is now enabled by
+    default.  To restore the old behavior (single time stamp per user),
+    add a line like:
+	Defaults !tty_tickets
+    to sudoers or use the --without-tty-tickets configure option.
+
     The HOME and MAIL environment variables are now reset based on the
     target user's password database entry when the env_reset sudoers option
     is enabled (which is the case in the default configuration).  Users

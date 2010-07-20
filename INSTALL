@@ -485,13 +485,10 @@ The following options are also configurable at runtime:
 	Number of minutes before the sudo password prompt times out.
 	The default is 5, set this to 0 for no password timeout.
 
-  --with-tty-tickets
-	This makes sudo use a different ticket file for each user/tty combo.
-	Ie: instead of the ticket path being "username" it is "username/tty".
-	This is useful for "shared" accounts like "operator".  Note that this
-	means that there will be more files in the timestamp dir.  This is not
-	a problem if your system has a cron job to remove of files from /tmp
-	(or wherever you specified the timestamp dir to be).
+  --without-tty-tickets
+	By default, sudo uses a different ticket file for each user/tty combo.
+	With this option disabled, a single ticket will be used for all
+	of a user's login sessions.
 
   --with-insults
 	Define this if you want to be insulted for typing an incorrect password

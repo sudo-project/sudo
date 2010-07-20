@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "July 19, 2010" "1.7.4" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "July 20, 2010" "1.7.4" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -1006,11 +1006,11 @@ Output logs may be viewed with the \fIsudoreplay\fR\|(@mansectsu@) utility, whic
 can also be used to list or search the available logs.
 .IP "tty_tickets" 16
 .IX Item "tty_tickets"
-If set, users must authenticate on a per-tty basis.  Normally,
-\&\fBsudo\fR uses a directory in the ticket dir with the same name as
-the user running it.  With this flag enabled, \fBsudo\fR will use a
-file named for the tty the user is logged in on in that directory.
-This flag is \fI@tty_tickets@\fR by default.
+If set, users must authenticate on a per-tty basis.  With this flag
+enabled, \fBsudo\fR will use a file named for the tty the user is
+logged in on in the user's time stamp directory.  If disabled, the
+time stamp of the directory is used instead.  This flag is
+\&\fI@tty_tickets@\fR by default.
 .IP "umask_override" 16
 .IX Item "umask_override"
 If set, \fBsudo\fR will set the umask as specified by \fIsudoers\fR without

@@ -655,6 +655,9 @@
 /* Define to 1 if root should not be allowed to use sudo. */
 #undef NO_ROOT_SUDO
 
+/* Define to 1 if you want a single ticket file instead of per-tty files. */
+#undef NO_TTY_TICKETS
+
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 
@@ -747,9 +750,6 @@
 
 /* Define to 1 if you use GNU stow packaging. */
 #undef USE_STOW
-
-/* Define to 1 if you want a different ticket file for each tty. */
-#undef USE_TTY_TICKETS
 
 /* Define to 1 if using a non-Unix group lookup implementation. */
 #undef USING_NONUNIX_GROUPS

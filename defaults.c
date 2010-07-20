@@ -400,7 +400,7 @@ init_defaults()
 #ifdef SEND_MAIL_WHEN_NOT_OK
     def_mail_no_perms = TRUE;
 #endif
-#ifdef USE_TTY_TICKETS
+#ifndef NO_TTY_TICKETS
     def_tty_tickets = TRUE;
 #endif
 #ifndef NO_LECTURE
