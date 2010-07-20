@@ -43,6 +43,8 @@ What's new in Sudo 1.7.4?
 	Defaults env_keep += MAIL
    to preserve the old value of MAIL.
 
+ * Fixed a problem in the restoration of the AIX authdb registry setting.
+
 What's new in Sudo 1.7.3?
 
  * Support for logging I/O for the command being run.
