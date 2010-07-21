@@ -1,13 +1,13 @@
 #!/bin/sh
 # (c) 2010 Quest Software, Inc. All rights reserved
-pp_revision="229M"
+pp_revision="275"
 
- # (c) 2008 Quest Software, Inc.  All rights reserved.
- # 
+ # Copyright (c) 2010 Quest Software, Inc.  All rights reserved.
+ #
  # Redistribution and use in source and binary forms, with or without
  # modification, are permitted provided that the following conditions
  # are met:
- # 
+ #
  # 1. Redistributions of source code must retain the above copyright
  #    notice, this list of conditions and the following disclaimer.
  # 2. Redistributions in binary form must reproduce the above copyright
@@ -16,7 +16,7 @@ pp_revision="229M"
  # 3. Neither the name of Quest Software, Inc. nor the names of its
  #    contributors may be used to endorse or promote products derived from
  #    this software without specific prior written permission.
- # 
+ #
  # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,7 +32,7 @@ pp_revision="229M"
  # Please see <http://rc.vintela.com/topics/polypkg/> for more information
 
 pp_version="1.0.0.$pp_revision"
-pp_copyright="(c) 2008, Quest Software, Inc. All rights reserved."
+pp_copyright="Copyright (c) 2010, Quest Software, Inc. All rights reserved."
 
 pp_opt_debug=false
 pp_opt_destdir="$DESTDIR"
@@ -88,7 +88,7 @@ pp_parseopts () {
 	    --?*) : ;;
 
 	    -d)  shift; set -- "--debug" "$@";;
-	    -d*) a=`echo "$1" | sed -ne 's/^-.//'` 
+	    -d*) a=`echo "$1" | sed -ne 's/^-.//'`
 		 shift; set -- "--debug" "$@";;
 
 	    -i) shift; set -- "--install-script" "$@";;
@@ -96,7 +96,7 @@ pp_parseopts () {
 		 shift; set -- "--install-script" "$a" "$@";;
 
 	    -l)  shift; set -- "--list" "$@";;
-	    -l*) a=`echo "$1" | sed -ne 's/^-.//'` 
+	    -l*) a=`echo "$1" | sed -ne 's/^-.//'`
 		 shift; set -- "--list" "$@";;
 
 	    -p) shift; set -- "--platform" "$@";;
@@ -104,11 +104,11 @@ pp_parseopts () {
 		 shift; set -- "--platform" "$a" "$@";;
 
 	    -v)  shift; set -- "--verbose" "$@";;
-	    -v*) a=`echo "$1" | sed -ne 's/^-.//'` 
+	    -v*) a=`echo "$1" | sed -ne 's/^-.//'`
 		 shift; set -- "--verbose" "$@";;
 
 	    -\?)  shift; set -- "--help" "$@";;
-	    -\?*) a=`echo "$1" | sed -ne 's/^-.//'` 
+	    -\?*) a=`echo "$1" | sed -ne 's/^-.//'`
 		 shift; set -- "--help" "$@";;
 	  esac
 
@@ -168,7 +168,7 @@ pp_parseopts () {
 	test $# -gt 0 &&
             pp_error "unknown argument $1"
 
-	if $pp_errors; then 
+	if $pp_errors; then
 	    cat <<. >&2
 polypkg $pp_version $pp_copyright
 usage: $0 [options] [input.pp] [var=value ...]
@@ -203,9 +203,9 @@ pp_drive () {
 	# run the front-end to generate the intermediate files
         # set $pp_input_dir to be the 'include dir' if needed
 	pp_debug "calling frontend on $pp_opt_input"
-	case "$pp_opt_input" in 
+	case "$pp_opt_input" in
 	    -)   pp_input_dir=.
-		 test -t 1<&0 && 
+		 test -t 1<&0 &&
 		    pp_warn "reading directives from standard input"
                  pp_frontend
                  ;;
@@ -247,7 +247,7 @@ pp_drive () {
 	for f in `pp_backend_names` -; do
            test x"$f" = x"-" && continue
 	   pp_debug "copying: $f to `pwd`"
-	   if pp_verbose cp $pp_wrkdir/$f ${PP_PKGDESTDIR:-.}; then
+	   if pp_verbose cp -r $pp_wrkdir/$f ${PP_PKGDESTDIR:-.}; then
                echo "${PP_PKGDESTDIR:+$PP_PKGDESTDIR/}$f"
            else
                pp_error "$f: missing package"
@@ -265,7 +265,7 @@ pp_install_script () {
 }
 
 pp_main () {
-	# If PP_DEV_PATH is set, then jump to that script. 
+	# If PP_DEV_PATH is set, then jump to that script.
 	# (Useful when working on polypkg source that isn't installed)
 	if test -n "$PP_DEV_PATH" -a x"$PP_DEV_PATH" != x"$0"; then
 	    pp_warn "switching from $0 to $PP_DEV_PATH ..."
@@ -276,7 +276,7 @@ pp_main () {
 	pp_parseopts "$@"
 
         if $pp_opt_version; then
-            #-- print version and exit 
+            #-- print version and exit
             echo "polypkg $pp_version"
             exit 0
         fi
@@ -351,7 +351,7 @@ pp_die_if_errors () {
 	$pp_errors && pp_die "$@"
 }
 
-pp_debug () { 
+pp_debug () {
 	$pp_opt_debug && echo "${pp_col_bluefg}debug${pp_col_reset} $*" >&2
 }
 
@@ -360,7 +360,7 @@ pp_verbose () {
 	"$@";
 }
 
-pp_substitute () { 
+pp_substitute () {
   sed -e 's,%(\([^)]*\)),`\1`,g' \
       -e 's,%{\([^}]*\)},${\1},g' \
       -e 's,$,,' |
@@ -384,7 +384,7 @@ pp_decr () {
 }
 
 pp_check_var_is_defined () {
-    if eval test -z "\"\$$1\""; then 
+    if eval test -z "\"\$$1\""; then
 	pp_error "\$$1: not set"
 	eval "$1=undefined"
     fi
@@ -541,10 +541,10 @@ pp_create_dir_if_missing () {
 	*)  if test ! -d "$pp_destdir$1"; then
                 pp_debug "fabricating directory $1/"
 		pp_create_dir_if_missing "${1%/*}"
-		mkdir "$pp_destdir$1" && 
+		mkdir "$pp_destdir$1" &&
                     pp_note_file_used "$1/"
 		pp_remove_later "$1" &&
-		chmod ${2:-755} "$pp_destdir$1" 
+		chmod ${2:-755} "$pp_destdir$1"
 	    fi;;
     esac
 }
@@ -553,9 +553,9 @@ pp_add_file_if_missing () {
     typeset dir
     #-- check that the file isn't already declared in the component
     if test -s $pp_wrkdir/%files.${2:-run}; then
-      awk "\$6 == \"$1\" {exit 1}" < $pp_wrkdir/%files.${2:-run} || return 1  
+      awk "\$6 == \"$1\" {exit 1}" < $pp_wrkdir/%files.${2:-run} || return 1
     fi
-                
+
     pp_create_dir_if_missing "${1%/*}"
     pp_debug "fabricating file $1"
     echo "f ${3:-755} - - ${4:--} $1" >> $pp_wrkdir/%files.${2:-run}
@@ -595,7 +595,7 @@ pp_remove_later_now () {
         pp_debug "pp_remove_later_now"
         while read f; do
             pp_debug "removing $pp_destdir$f"
-	    if test -d $pp_destdir$f; then 
+	    if test -d $pp_destdir$f; then
 		rmdir $pp_destdir$f
 	    else
 		rm $pp_destdir$f
@@ -644,15 +644,15 @@ pp_install_script_common () {
               "print-platform")
                 echo "usage: \$0 print-platform" ;;
               *)
-                echo "usage: \$0 [-q] command [args]" 
-                echo "   list-services" 
-                echo "   list-components" 
-                echo "   list-files {cpt...|all}" 
-                echo "   install {cpt...|all}" 
-                echo "   uninstall {cpt...|all}" 
-                echo "   start {svc...}" 
-                echo "   stop {svc...}" 
-                echo "   print-platform" 
+                echo "usage: \$0 [-q] command [args]"
+                echo "   list-services"
+                echo "   list-components"
+                echo "   list-files {cpt...|all}"
+                echo "   install {cpt...|all}"
+                echo "   uninstall {cpt...|all}"
+                echo "   start {svc...}"
+                echo "   stop {svc...}"
+                echo "   print-platform"
                 ;;
               esac >&2
               exit 1
@@ -701,7 +701,7 @@ pp_functions () {
     done
 }
 
-pp_function () { 
+pp_function () {
     pp_functions "$1"
 }
 
@@ -726,17 +726,17 @@ pp_getopt () {
      _pp_optstring="$1"; shift; eval `_pp_getopt "$_pp_optstring"`
 }
 _pp_getopt_meta=s,[\\\\\"\'\`\$\&\;\(\)\{\}\#\%\ \	],\\\\\&,g
-_pp_protect () { 
-    sed "$_pp_getopt_meta" <<. | tr '\012' ' ' 
+_pp_protect () {
+    sed "$_pp_getopt_meta" <<. | tr '\012' ' '
 $*
 .
 }
-_pp_protect2 () { 
+_pp_protect2 () {
     sed "s,^..,,$pp_getopt_meta" <<. | tr '\012' ' '
 $*
 .
 }
-_pp_nonl () { 
+_pp_nonl () {
     tr '\012' ' ' <<.
 $*
 .
@@ -803,8 +803,7 @@ pp_frontend_init () {
     version=
     summary="no summary"
     description="No description"
-    copyright="(c) 2008 Quest Software, Inc. All rights reserved"
-    vendor="Quest Software, Inc."
+    copyright="Copyright (c) 2010 Quest Software, Inc. All rights reserved"
 
     #-- if the user supplied extra arguments on the command line
     #   then load them now.
@@ -849,7 +848,7 @@ pp_frontend_if () {
     shift
     case "$ifcmd" in
 	%if) if test 0 = $pp_if_false; then
-		case "$*" in 
+		case "$*" in
 		    true |1) pp_incr pp_if_true;;
 		    false|0) pp_incr pp_if_false;;
                     *)
@@ -944,15 +943,15 @@ pp_frontend () {
      #pp_debug "line $pp_lineno: $*"
 
      case "$line" in %*)
-        case "$1" in 
-	   %if|%else|%endif) 
+        case "$1" in
+	   %if|%else|%endif)
                 pp_debug "processing if directive $1"
 	   	pp_frontend_if "$@"
 		continue;;
 	esac
 	test 0 -ne $pp_if_false && continue	# ignore lines %if'd out
 
-        case "$1" in 
+        case "$1" in
 	  %set|%fixup|%ignore)
              pp_debug "processing new section $1"
 	     newsection="$1"; shift
@@ -963,7 +962,7 @@ pp_frontend () {
              fi
 	     test $# -eq 0 || pp_warn "ignoring extra arguments: $line"
 	     continue;;
-	  %post|%preun|%files|%depend|%check) 
+	  %pre|%post|%preun|%postup|%postun|%files|%depend|%check)
              pp_debug "processing new component section $*"
              s="$1"; shift
              if test $# -eq 0 || pp_is_qualifier "$1"; then
@@ -980,8 +979,8 @@ pp_frontend () {
              fi
              test $# -eq 0 ||
                 pp_warn "ignoring extra arguments: $line"
-             case "$cpt" in 
-                run|dbg|doc|dev) 
+             case "$cpt" in
+                run|dbg|doc|dev)
                     $newsection_enabled && pp_add_component "$cpt";;
                 x-*) :;;    # useful for discarding stuff
                 *) pp_error "unknown component: $1 $cpt";;
@@ -1018,7 +1017,7 @@ pp_frontend () {
                 pp_warn "ignoring extra arguments: $line"
 	     $newsection_enabled && pp_add_service "$svc"
 	     continue;;
-	  %\\*) 
+	  %\\*)
              pp_debug "removing leading %\\"
 	     line="${line#??}"
              pp_debug "  result is <$line>"
@@ -1026,14 +1025,14 @@ pp_frontend () {
              set -- $line
              set +f
              ;;
-	  %%*) 
+	  %%*)
              pp_debug "removing leading %"
 	     line="${line#%}"
              set -f
              set -- $line
              set +f
 	     ;;
-	  %*) 
+	  %*)
 	     pp_error "unknown section $1"
 	     newsection='%ignore'
              newsection_enabled=:
@@ -1048,7 +1047,7 @@ pp_frontend () {
      #-- finish processing a previous section
      if test x"$newsection" != x""; then
       $section_enabled && case "$section" in
-     	%ignore|%_initial) 
+     	%ignore|%_initial)
                 pp_debug "leaving ignored section $section"
 		: ignore  # guaranteed to be the last section
 		;;
@@ -1058,7 +1057,7 @@ pp_frontend () {
 		. $pp_wrkdir/tmp
 		: > $pp_wrkdir/tmp
 		;;
-	%preun.*|%post.*|%depend.*|%check.*|%service.*|%fixup)
+	%pre.*|%preun.*|%post.*|%postup.*|%postun.*|%depend.*|%check.*|%service.*|%fixup)
                 pp_debug "leaving $section: substituting $pp_wrkdir/tmp"
                 # cat $pp_wrkdir/tmp >&2    # debugging
                 $pp_opt_debug && pp_substitute < $pp_wrkdir/tmp >&2
@@ -1079,10 +1078,10 @@ pp_frontend () {
 
      #-- process some lines in-place
      case "$section" in
-	%_initial)	
+	%_initial)
 		case "$line" in "") continue;; esac # ignore non-section blanks
 		pp_die "Ignoring text before % section introducer";;
-	%set|%preun.*|%post.*|%check.*|%service.*|%fixup)
+	%set|%pre.*|%preun.*|%post.*|%postup.*|%postun.*|%check.*|%service.*|%fixup)
                 pp_debug "appending line to \$pp_wrkdir/tmp"
 		echo "$line" >> $pp_wrkdir/tmp
 		;;
@@ -1095,7 +1094,7 @@ pp_frontend () {
 		echo "$@" >> $pp_wrkdir/%depend.$cpt
 		;;
      esac
-  done 
+  done
   exec <&-
 
   if test $pp_if_true != 0 -o $pp_if_false != 0; then
@@ -1138,7 +1137,7 @@ pp_set_platform () {
 		break;
 	    fi
 	done
-	test -z "$pp_platform" && 
+	test -z "$pp_platform" &&
 		pp_die "cannot detect platform (supported: $pp_platforms)"
     fi
     pp_debug "pp_platform = $pp_platform"
@@ -1147,13 +1146,13 @@ pp_set_platform () {
 pp_expand_path=
 
 pp_expand_test_usr_bin () {
-	awk '$1 == "/usr" || $2 == "/usr" {usr++} 
-	     $1 == "/bin" || $2 == "/bin" {bin++} 
+	awk '$1 == "/usr" || $2 == "/usr" {usr++}
+	     $1 == "/bin" || $2 == "/bin" {bin++}
 	     END { if (usr == 1 && bin == 1) exit(0); else exit(1); }'
 }
 
 pp_set_expand_converter_or_reexec () {
-    test -d /usr -a -d /bin || 
+    test -d /usr -a -d /bin ||
 	pp_die "missing /usr or /bin"
     echo /usr /bin | pp_expand_test_usr_bin || pp_die "pp_expand_test_usr_bin?"
     if (eval "echo /{usr,bin}" | pp_expand_test_usr_bin) 2>/dev/null; then
@@ -1164,8 +1163,8 @@ pp_set_expand_converter_or_reexec () {
 	test x"$pp_expand_rexec" != x"true" ||
 	    pp_die "problem finding shell that can do brace expansion"
 	for shell in ksh ksh93 bash; do
-	    if ($shell -c 'echo /{usr,bin}' | 
-			pp_expand_test_usr_bin) 2>/dev/null || 
+	    if ($shell -c 'echo /{usr,bin}' |
+			pp_expand_test_usr_bin) 2>/dev/null ||
 	       ($shell -c 'echo /@(usr|bin)' |
 			pp_expand_test_usr_bin) 2>/dev/null
 	    then
@@ -1199,7 +1198,10 @@ pp_model_init () {
 
     rm -f $pp_wrkdir/%files.* \
           $pp_wrkdir/%post.* \
+          $pp_wrkdir/%pre.* \
           $pp_wrkdir/%preun.* \
+          $pp_wrkdir/%postup.* \
+          $pp_wrkdir/%postun.* \
           $pp_wrkdir/%service.* \
           $pp_wrkdir/%set \
           $pp_wrkdir/%fixup
@@ -1244,7 +1246,7 @@ pp_service_check_vars () {
 
 pp_load_service_vars () {
 	pp_service_init_vars
-	. "$pp_wrkdir/%service.$1" 
+	. "$pp_wrkdir/%service.$1"
 	pp_service_check_vars "$1"
 }
 
@@ -1324,7 +1326,7 @@ pp_files_expand () {
             while read _path; do
                 _path="${_path#.}"
                 pp_find_recurse "$pp_destdir${_path%/}"
-            done < $pp_wrkdir/tmp.files.exp | 
+            done < $pp_wrkdir/tmp.files.exp |
                  sort -u > $pp_wrkdir/tmp.files.exp2
             mv $pp_wrkdir/tmp.files.exp2 $pp_wrkdir/tmp.files.exp
             ;;
@@ -1335,12 +1337,12 @@ pp_files_expand () {
 	_file="${pp_destdir}${_path}"
 	_tgt=
 	_m="$_mode"
-	_o="${_owner:--}" 
+	_o="${_owner:--}"
 	_g="${_group:--}"
 	_f="$_flags"
 
-        case "$_path" in 
-            /*) :;; 
+        case "$_path" in
+            /*) :;;
             *)  pp_warn "$_path: inserting leading /"
                 _path="/$_path";;  # ensure leading /
         esac
@@ -1368,8 +1370,8 @@ pp_debug "symlink target is $_tgt"
 	   else
 	       _tgt=`pp_readlink "$_file"`;
                test -z "$_tgt" && pp_error "can't readlink $_file"
-               case "$_tgt" in 
-                    ${pp_destdir}/*) 
+               case "$_tgt" in
+                    ${pp_destdir}/*)
                        pp_warn "stripped \$destdir from symlink ($_path)"
                        _tgt="${_tgt#$pp_destdir}";;
                esac
@@ -1377,8 +1379,8 @@ pp_debug "symlink target is $_tgt"
 	   _m=777
 	elif test -d "$_file"; then
 	   #-- display a warning if the user forgot the trailing /
-	   case "$_path" in 
-		*/) :;; 
+	   case "$_path" in
+		*/) :;;
 		*) pp_warn "$_path (matching $_file): adding trailing /"
 		   _path="$_path/";;
 	   esac
@@ -1415,9 +1417,9 @@ pp_debug "symlink target is $_tgt"
             fi
 	    ;;
 	esac
-	
+
 	test -n "$_f" || _f=-
-	
+
 	#-- sanity checks
 	test -n "$_type" || pp_die "_type empty"
 	test -n "$_path" || pp_die "_path empty"
@@ -1572,9 +1574,9 @@ pp_aix_detect_arch () {
 	esac
 
 	case "`/usr/sbin/lsattr -El proc0 -a type -F value`" in
-	    PowerPC_POWER*) pp_aix_arch_std=ppc64;;	
-	    PowerPC*) pp_aix_arch_std=ppc;;	
-	    *) pp_aix_arch_std=unknown;;	
+	    PowerPC_POWER*) pp_aix_arch_std=ppc64;;
+	    PowerPC*) pp_aix_arch_std=ppc;;
+	    *) pp_aix_arch_std=unknown;;
 	esac
 }
 
@@ -1624,7 +1626,7 @@ pp_aix_copy_root () {
         case "$t" in
            d) pp_create_dir_if_missing "$1${p%/}";;
            f) pp_add_transient_file "$1$p"
-	      pp_verbose ln "$pp_destdir$p" "$pp_destdir$1$p" || 
+	      pp_verbose ln "$pp_destdir$p" "$pp_destdir$1$p" ||
 		pp_error "can't link $p into $1";;
            *) pp_warn "pp_aix_copy_root: filetype $t not handled";;
         esac
@@ -1639,8 +1641,8 @@ pp_aix_size () {
     while read t m o g f p st; do
       case "$t" in f) du -a "$pp_destdir$p";; esac
     done | sed -e 's!/[^/]*$!!' | sort +1 |
-    awk '{ if ($2 != d) 
-           { if (sz) print d,sz; 
+    awk '{ if ($2 != d)
+           { if (sz) print d,sz;
              d=$2; sz=0 }
            sz += $1; }
          END { if (sz) print d,sz }' |
@@ -1659,7 +1661,7 @@ pp_aix_make_liblpp () {
     fl=
     for f
     do
-	case "$f" in "$dn/"*) fl="$fl `basename $f`" ;; 
+	case "$f" in "$dn/"*) fl="$fl `basename $f`" ;;
 		     *) pp_die "liblpp name $f not in $dn/";; esac
     done
     (cd "$dn" && pp_verbose  ar -c -g -r "$out" $fl) || pp_error "ar error"
@@ -1714,12 +1716,12 @@ pp_aix_inventory () {
 	    *)
 	      if test -r "$pp_destdir$p"; then
 	        echo " size = $size"
-                pp_verbose  sum -r < "$pp_destdir$p" | 
+                pp_verbose  sum -r < "$pp_destdir$p" |
 	      	  sed -e 's/.*/ checksum = "&"/'
 	      fi
 	      ;;
 	   esac;;
-	s) 
+	s)
 	   echo " target = $st"
 	   ;;
       esac
@@ -1756,8 +1758,8 @@ pp_aix_add_service () {
 
 	set -- $cmd
 	cmd_cmd="$1"; shift
-	cmd_arg="$*";
-	
+	cmd_arg="$pp_aix_mkssys_cmd_args";
+
 	case "$stop_signal" in
 		HUP) stop_signal=1;;
 		INT) stop_signal=2;;
@@ -1766,9 +1768,9 @@ pp_aix_add_service () {
 		TERM) stop_signal=15;;
 		USR1) stop_signal=30;;
 		USR2) stop_signal=31;;
-		"") 
+		"")
 		  pp_error "%service $svc: stop_signal not set";;
-		[a-zA-Z]*) 
+		[a-zA-Z]*)
 		  pp_error "%service $svc: bad stop_signal ($stop_signal)";;
 	esac
 
@@ -1783,35 +1785,57 @@ pp_aix_add_service () {
 
 
         #-- add command text to create/remove the service
-	cat <<-. >> $pp_wrkdir/%post.run
-           # install service '$svc'
-           mkssys -s $svc -u $uid -p "$cmd_cmd" ${cmd_arg:+-a "$cmd_arg"} -O -S -n $stop_signal -f 9 ${pp_aix_mkssys_args} ${group:+-G "$group"}
+	cat <<-. >> $pp_wrkdir/%post.$svc
+svc=$svc
+uid=0
+cmd_cmd=$daemon
+cmd_arg="$cmd_arg"
+stop_signal=$stop_signal
+force_signal=9
+srcgroup="$pp_aix_mkssys_group"
+
+lssrc -s \$svc > /dev/null 2>&1
+if [ \$? -eq 0 ]; then
+  lssrc -s \$svc | grep "active" > /dev/null 2>&1
+  if [ \$? -eq 0 ]; then
+    stopsrc -s \$svc > /dev/null 2>&1
+  fi
+  rmsys -s \$svc > /dev/null 2>&1
+fi
+
+mkssys -s \$svc -u \$uid -p "\$cmd_cmd" \${cmd_arg:+-a "\$cmd_arg"} -S -n \$stop_signal -f 9 ${pp_aix_mkssys_args} \${srcgroup:+-G \$srcgroup}
 .
 
         #-- add code to start the service on reboot
         ${pp_aix_init_services_after_install} &&
-          cat <<-. >> $pp_wrkdir/%post.run
-            # start service '$svc' on reboot
-            mkitab "$svc:2:once:/usr/bin/startsrc -s $svc >/dev/console 2>&1"
+          cat <<-. >> $pp_wrkdir/%post.$svc
+mkitab "\$svc:2:once:/usr/bin/startsrc -s \$svc" > /dev/null 2>&1
 .
 
-	${pp_aix_start_services_after_install} && 
-          cat <<-. >> $pp_wrkdir/%post.run
-            # start service '$svc' automatically after install
-            startsrc -s $svc
+	${pp_aix_start_services_after_install} &&
+          cat <<-. >> $pp_wrkdir/%post.$svc
+startsrc -s \$svc
 .
+
+if [ -f "$pp_wrkdir/%post.run" ];then
+    cat $pp_wrkdir/%post.run >> $pp_wrkdir/%post.$svc
+fi
+mv $pp_wrkdir/%post.$svc $pp_wrkdir/%post.run
+
 
         ${pp_aix_init_services_after_install} &&
-           pp_prepend $pp_wrkdir/%preun.run <<-.
-            # stop starting service '$svc' at boot
-	    rmitab $svc
+           pp_prepend $pp_wrkdir/%preun.$svc <<-.
+rmitab $svc
 .
-	pp_prepend $pp_wrkdir/%preun.run <<-.
-	    # stop service '$svc'
-	    stopsrc -s $svc >/dev/null 2>&1
-	    # uninstall service '$svc' from SRC
-	    rmssys -s $svc
+	pp_prepend $pp_wrkdir/%preun.$svc <<-.
+stopsrc -s $svc >/dev/null 2>&1
+rmssys -s $svc
 .
+
+if [ -f "$pp_wrkdir/%preun.run" ];then
+    cat $pp_wrkdir/%preun.run >> $pp_wrkdir/%preun.$svc
+fi
+mv $pp_wrkdir/%preun.$svc $pp_wrkdir/%preun.run
 }
 
 pp_backend_aix () {
@@ -1824,12 +1848,13 @@ pp_backend_aix () {
 
 	instuser="/usr/lpp/$name"
 	instroot="$instuser/inst_root"
+	pp_aix_bff_name=${pp_aix_bff_name:-$name}
 
 	# Here is the component mapping:
-	#  run -> $name.rte ('Run time environment')
-	#  doc -> $name.doc (non-standard)
-	#  dev -> $name.adt ('Application developer toolkit')
-	#  dbg -> $name.diag ('Diagnostics')
+	#  run -> $pp_aix_bff_name.rte ('Run time environment')
+	#  doc -> $pp_aix_bff_name.doc (non-standard)
+	#  dev -> $pp_aix_bff_name.adt ('Application developer toolkit')
+	#  dbg -> $pp_aix_bff_name.diag ('Diagnostics')
 
 	test `echo "$summary" | wc -c ` -gt 40 && pp_error "\$summary too long"
 
@@ -1844,10 +1869,10 @@ pp_backend_aix () {
 	done
 
         {
-	  echo "4 $pp_aix_arch I $name {" 
+	  echo "4 $pp_aix_arch I $name {"
 
 	  for cmp in $pp_components; do
-	    case "$cmp" in 
+	    case "$cmp" in
 		run) ex=rte  briefex="runtime";;
 		doc) ex=doc  briefex="documentation";;
 		dev) ex=adt  briefex="developer toolkit";;
@@ -1864,6 +1889,7 @@ pp_backend_aix () {
             # or a post/pre/check script associated
 	    content=U
             if test -s $root_files \
+                    -o -s $pp_wrkdir/%pre.$cmp \
                     -o -s $pp_wrkdir/%post.$cmp \
                     -o -s $pp_wrkdir/%preun.$cmp \
                     -o -s $pp_wrkdir/%check.$cmp
@@ -1871,22 +1897,22 @@ pp_backend_aix () {
                 content=B
             fi
 
-if $pp_opt_debug; then
-    echo "$cmp USER %files:"
-    cat $user_files
-    echo "$cmp ROOT %files:"
-    cat $root_files
-fi >&2
+            if $pp_opt_debug; then
+                echo "$cmp USER %files:"
+                cat $user_files
+                echo "$cmp ROOT %files:"
+                cat $root_files
+            fi >&2
 
 	    bosboot=N; pp_contains_any "$pp_aix_bosboot" $cmp && bosboot=b
 
-            echo $name.$ex \
+            echo $pp_aix_bff_name.$ex \
                  ${pp_aix_version:-`pp_aix_version_fix "$version"`} \
 	         1 $bosboot $content \
 	         $pp_aix_lang "$summary $briefex"
 	    echo "["
 
-	    pp_aix_depend $pp_wrkdir/%depend.$cmp 
+	    pp_aix_depend $pp_wrkdir/%depend.$cmp
 
 	    echo "%"
 
@@ -1894,55 +1920,54 @@ fi >&2
 	    pp_aix_size < $user_files
 	    pp_aix_size $instroot < $root_files
 
-	    pp_aix_list            < $user_files  > $user_wrkdir/$name.$ex.al
-	    pp_aix_list $instroot  < $root_files >> $user_wrkdir/$name.$ex.al
-	    pp_aix_list            < $root_files  > $root_wrkdir/$name.$ex.al
+	    pp_aix_list            < $user_files  > $user_wrkdir/$pp_aix_bff_name.$ex.al
+	    pp_aix_list $instroot  < $root_files >> $user_wrkdir/$pp_aix_bff_name.$ex.al
+	    pp_aix_list            < $root_files  > $root_wrkdir/$pp_aix_bff_name.$ex.al
 
-if $pp_opt_debug; then
-    echo "$cmp USER $name.$ex.al:"
-    cat $user_wrkdir/$name.$ex.al 
-    echo "$cmp ROOT $name.$ex.al:"
-    cat $root_wrkdir/$name.$ex.al
-fi >&2
+            if $pp_opt_debug; then
+                echo "$cmp USER $pp_aix_bff_name.$ex.al:"
+                cat $user_wrkdir/$pp_aix_bff_name.$ex.al
+                echo "$cmp ROOT $pp_aix_bff_name.$ex.al:"
+                cat $root_wrkdir/$pp_aix_bff_name.$ex.al
+            fi >&2
 
-	    pp_aix_inventory $name.$ex < $user_files \
-                                       > $user_wrkdir/$name.$ex.inventory
-	    pp_aix_inventory $name.$ex < $root_files \
-                                       > $root_wrkdir/$name.$ex.inventory
+	    pp_aix_inventory $pp_aix_bff_name.$ex < $user_files \
+                                       > $user_wrkdir/$pp_aix_bff_name.$ex.inventory
+	    pp_aix_inventory $pp_aix_bff_name.$ex < $root_files \
+                                       > $root_wrkdir/$pp_aix_bff_name.$ex.inventory
 
-if $pp_opt_debug; then
-    pp_debug "$cmp USER $name.$ex.inventory:"
-    cat $user_wrkdir/$name.$ex.inventory 
-    pp_debug "$cmp ROOT $name.$ex.inventory:"
-    cat $root_wrkdir/$name.$ex.inventory
-fi >&2
+            if $pp_opt_debug; then
+                pp_debug "$cmp USER $pp_aix_bff_name.$ex.inventory:"
+                cat $user_wrkdir/$pp_aix_bff_name.$ex.inventory
+                pp_debug "$cmp ROOT $pp_aix_bff_name.$ex.inventory:"
+                cat $root_wrkdir/$pp_aix_bff_name.$ex.inventory
+            fi >&2
 
 	    if test x"" != x"${pp_aix_copyright:-$copyright}"; then
-	        echo "${pp_aix_copyright:-$copyright}" > $user_wrkdir/$name.$ex.copyright
-	        echo "${pp_aix_copyright:-$copyright}" > $root_wrkdir/$name.$ex.copyright
+	        echo "${pp_aix_copyright:-$copyright}" > $user_wrkdir/$pp_aix_bff_name.$ex.copyright
+	        echo "${pp_aix_copyright:-$copyright}" > $root_wrkdir/$pp_aix_bff_name.$ex.copyright
 	    fi
 
 	    #-- assume that post/pre uninstall scripts only make
 	    #   sense when installed in a root context
 
+	    if test -r $pp_wrkdir/%pre.$cmp; then
+			pp_aix_make_script $user_wrkdir/$pp_aix_bff_name.$ex.pre_i \
+                < $pp_wrkdir/%pre.$cmp
+	    fi
+
 	    if test -r $pp_wrkdir/%post.$cmp; then
-		pp_aix_make_script $root_wrkdir/$name.$ex.post_i \
+		pp_aix_make_script $root_wrkdir/$pp_aix_bff_name.$ex.post_i \
 			< $pp_wrkdir/%post.$cmp
 	    fi
 
 	    if test -r $pp_wrkdir/%preun.$cmp; then
-		pp_aix_make_script $root_wrkdir/$name.$ex.unpost_i \
+		pp_aix_make_script $root_wrkdir/$pp_aix_bff_name.$ex.unpost_i \
 			< $pp_wrkdir/%preun.$cmp
 	    fi
 
-	    if test -r $pp_wrkdir/%check.$cmp; then
-                #-- if this script exits false, then it should print a msg
-		pp_aix_make_script $root_wrkdir/$name.$ex.pre_i \
-			< $pp_wrkdir/%check.$cmp
-	    fi
-
 	    # remove empty files
-	    for f in $user_wrkdir/$name.$ex.* $root_wrkdir/$name.$ex.*; do
+	    for f in $user_wrkdir/$pp_aix_bff_name.$ex.* $root_wrkdir/$pp_aix_bff_name.$ex.*; do
 	      if test ! -s "$f"; then
                 pp_debug "removing empty $f"
                 rm -f "$f"
@@ -1958,10 +1983,10 @@ fi >&2
 	  echo "}"
 	} > $pp_wrkdir/lpp_name
 
-if $pp_opt_debug; then
-    echo "/lpp_name :"
-    cat $pp_wrkdir/lpp_name
-fi >&2
+        if $pp_opt_debug; then
+            echo "/lpp_name :"
+            cat $pp_wrkdir/lpp_name
+        fi >&2
 
         #-- copy the /lpp_name file to the destdir
         pp_add_transient_file /lpp_name
@@ -1972,14 +1997,14 @@ fi >&2
 		pp_error "ar error"
 	if test -s $user_wrkdir/liblpp.a; then
            pp_add_transient_file $instuser/liblpp.a
-	   pp_verbose cp $user_wrkdir/liblpp.a $pp_destdir$instuser/liblpp.a || 
+	   pp_verbose cp $user_wrkdir/liblpp.a $pp_destdir$instuser/liblpp.a ||
 		pp_error "cannot create user liblpp.a"
 	fi
 	(cd $root_wrkdir && pp_verbose  ar -c -g -r liblpp.a $name.*) ||
 		pp_error "ar error"
 	if test -s $root_wrkdir/liblpp.a; then
            pp_add_transient_file $instroot/liblpp.a
-	   pp_verbose cp $root_wrkdir/liblpp.a $pp_destdir$instroot/liblpp.a || 
+	   pp_verbose cp $root_wrkdir/liblpp.a $pp_destdir$instroot/liblpp.a ||
 		pp_error "cannot create root liblpp.a"
 	fi
 
@@ -2011,7 +2036,7 @@ fi >&2
 		    ;;
 	    esac
 	fi
-        
+
 	. $pp_wrkdir/%fixup
 
         outbff=`pp_backend_aix_names`
@@ -2049,7 +2074,7 @@ pp_backend_aix_install_script () {
 
         fsets=
         for cmp in $pp_components; do
-	    case "$cmp" in 
+	    case "$cmp" in
 		run) ex=rte;;
 		doc) ex=doc;;
 		dev) ex=adt;;
@@ -2068,7 +2093,7 @@ pp_backend_aix_install_script () {
                     set -- $pp_components
                 for cpt
                 do
-                    case "\$cpt" in 
+                    case "\$cpt" in
                         run) echo "$name.rte";;
                         doc) echo "$name.doc";;
                         dev) echo "$name.adt";;
@@ -2225,14 +2250,14 @@ pp_sd_write_files () {
     while read t m o g f p st; do
         line="                file"
         case "$f" in *v*) line="$line -v";; esac    # FIXME for uninstall
-        case $t in 
+        case $t in
             f) dm=644;;
             d) line="$line -t d"; p=${p%/}; dm=755;;
             s) line="$line -t s";;
         esac
 
-        test x"$o" = x"-" && o=bin
-        test x"$g" = x"-" && g=bin
+        test x"$o" = x"-" && o=root
+        test x"$g" = x"-" && g=sys
         test x"$m" = x"-" && m=$dm
 
         case $t in
@@ -2311,8 +2336,8 @@ pp_sd_service_script () {
     svc="$1"
     scriptpath="/sbin/init.d/$svc"
 
-    config_file=${pp_sd_config_file:-/etc/rc.config.d/$name}
-    sd_config_var=`echo start-$svc | tr '[a-z]-' '[A-Z]_'`
+    config_file=${pp_sd_config_file:-/etc/rc.config.d/$svc}
+    sd_config_var=`echo run-$svc | tr '[a-z]-' '[A-Z]_'`
     sd_config_value=${pp_sd_default_start:-0}
     pp_load_service_vars "$svc"
 
@@ -2323,7 +2348,7 @@ pp_sd_service_script () {
         cmd="$cmd & echo \$! > \$pidfile"
     fi
 
-pp_debug "config file is $config_file"
+    pp_debug "config file is $config_file"
 
     pp_add_file_if_missing $scriptpath run 755
     pp_add_file_if_missing $config_file run 644 v
@@ -2334,30 +2359,29 @@ pp_debug "config file is $config_file"
 	$sd_config_var=$sd_config_value
 .
 
-    cat <<. > $pp_destdir$scriptpath
+    if test ! -f $pp_destdir$scriptpath; then
+    cat <<-. > $pp_destdir$scriptpath
+	#!/sbin/sh
+	# generated by pp $pp_version
 
-        svc="$svc"
-        pidfile="$pidfile"
-        config_file="$config_file"
+	svc="$svc"
+	pidfile="$pidfile"
+	config_file="$config_file"
 
-        pp_start () {
-            $cmd
-        }
+	pp_start () {
+	    $cmd
+	}
 
-        pp_disabled () {
-            test \${$sd_config_var:-0} -eq 0
-        }
+	pp_disabled () {
+	    test \${$sd_config_var:-0} -eq 0
+	}
 
-.
-
-    cat <<'.' >>$pp_destdir$scriptpath
-
-        pp_stop () {
-            if test ! -s "$pidfile"; then
-                echo "Unable to stop $svc (no pid file)"
-                return 1
-            else
-                read pid < "$pidfile" 
+	pp_stop () {
+	    if test ! -s "$pidfile"; then
+		echo "Unable to stop $svc (no pid file)"
+		return 1
+	    else
+		read pid < "$pidfile"
 		if kill -0 "$pid" 2>/dev/null; then
 		    if kill -${stop_signal:-TERM} "$pid"; then
 			rm -f "$pidfile"
@@ -2369,48 +2393,49 @@ pp_debug "config file is $config_file"
 		else
 		    rm -f "$pidfile"
 		    return 0
-                fi
-            fi
-        }
+		fi
+	    fi
+	}
 
-        pp_running () {
-            if test ! -s "$pidfile"; then
-                return 1
-            else
-                read pid < "$pidfile" 
-                kill -0 "$pid" 2>/dev/null
-            fi
-        }
+	pp_running () {
+	    if test ! -s "$pidfile"; then
+		return 1
+	    else
+		read pid < "$pidfile"
+		kill -0 "$pid" 2>/dev/null
+	    fi
+	}
 
-        case $1 in
-            start_msg) echo "Starting the $svc service";;
-            stop_msg)  echo "Stopping the $svc service";;
-            start)  
-                    if test -f "$config_file"; then
-                        . $config_file
-                    fi
-                    if pp_disabled; then
-                        exit 2
-                    elif pp_running; then
-                        echo "$svc already running";
-                        exit 0
-                    elif pp_start; then
-                        echo "$svc started";
-                        # rc(1M) says we should exit 4, but nobody expects it!
+	case $1 in
+	    start_msg) echo "Starting the $svc service";;
+	    stop_msg)  echo "Stopping the $svc service";;
+	    start)
+		    if test -f "$config_file"; then
+			. $config_file
+		    fi
+		    if pp_disabled; then
+			exit 2
+		    elif pp_running; then
+			echo "$svc already running";
 			exit 0
-                    else
-                        exit 1
-                    fi;;
-            stop)   if pp_stop; then
-                        echo "$svc stopped";
-                        exit 0
-                    else
-                        exit 1
-                    fi;;
-            *) echo "usage: $0 {start|stop|start_msg|stop_msg}"
-               exit 1;;
-        esac
+		    elif pp_start; then
+			echo "$svc started";
+			# rc(1M) says we should exit 4, but nobody expects it!
+			exit 0
+		    else
+			exit 1
+		    fi;;
+	    stop)   if pp_stop; then
+			echo "$svc stopped";
+			exit 0
+		    else
+			exit 1
+		    fi;;
+	    *) echo "usage: $0 {start|stop|start_msg|stop_msg}"
+	       exit 1;;
+	esac
 .
+    fi
 }
 
 pp_sd_make_service () {
@@ -2443,12 +2468,12 @@ pp_sd_make_service () {
         pp_sd_service_script $svc
 
         # fix the priority up
-        case "$startpriority" in 
+        case "$startpriority" in
             ???) :;;
             ??) startpriority=0$startpriority;;
             ?) startpriority=00$startpriority;;
         esac
-        case "$stoppriority" in 
+        case "$stoppriority" in
             ???) :;;
             ??) stoppriority=0$stoppriority;;
             ?) stoppriority=00$stoppriority;;
@@ -2470,7 +2495,7 @@ pp_sd_make_service () {
         test -z "$stoplevels" || for level in $stoplevels; do
             echo "                file -t s" \
                     "/sbin/init.d/$svc" \
-                    "/sbin/rc$level.d/K$stoppriority$svc" 
+                    "/sbin/rc$level.d/K$stoppriority$svc"
         done
 }
 
@@ -2502,6 +2527,7 @@ pp_backend_sd () {
         vendor
             tag             $pp_sd_vendor_tag
             title           "${pp_sd_vendor:-$vendor}"
+        end
 
         product
             tag             $name
@@ -2517,8 +2543,10 @@ pp_backend_sd () {
             directory       /
             is_locatable    false
 .
-    test -n "$description" && cat <<. >>$psf
-            description     "$description"
+    test -n "$description" \
+        && echo $description > $pp_wrkdir/description \
+        && cat <<. >> $psf
+            description     < $pp_wrkdir/description
 .
 
     # make convenience service groups
@@ -2532,8 +2560,9 @@ pp_backend_sd () {
     for cpt in $pp_components; do
         cat <<. >>$psf
             fileset
-                tag             $cpt
-                title           $cpt
+                tag             ${pp_sd_fileset_tag:-$cpt}
+                title           "${summary:-cpt}"
+                revision        $version
 .
 
 	#-- make sure services are shut down during uninstall
@@ -2549,17 +2578,21 @@ pp_backend_sd () {
         # and not postinstall/preremove, because configure/unconfigure
         # scripts are run on the hosts where the package is installed,
         # not loaded (a subtle difference).
+        test -s $pp_wrkdir/%pre.$cpt &&
+            pp_sd_control checkinstall $cpt $pp_wrkdir/%pre.$cpt >> $psf
         test -s $pp_wrkdir/%post.$cpt &&
             pp_sd_control configure $cpt $pp_wrkdir/%post.$cpt >> $psf
         test -s $pp_wrkdir/%preun.$cpt &&
             pp_sd_control unconfigure $cpt $pp_wrkdir/%preun.$cpt >> $psf
+        test -s $pp_wrkdir/%postun.$cpt &&
+            pp_sd_control postremove $cpt $pp_wrkdir/%postun.$cpt >> $psf
         test -s $pp_wrkdir/%check.$cpt &&
             pp_sd_control checkinstall $cpt $pp_wrkdir/%check.$cpt >> $psf
 
         if test $cpt = run -a -n "$pp_services"; then
             for svc in $pp_services; do
                 #-- service names are 10 chars max on hpux
-                case "$svc" in ???????????*) 
+                case "$svc" in ???????????*)
                     pp_warn "service name '$svc' is too long for hpux";;
                 esac
                 pp_sd_make_service $svc >> $psf
@@ -2573,7 +2606,7 @@ pp_backend_sd () {
         cat <<. >>$psf
             end
 .
-        
+
     done
 
     #-- end product clause
@@ -2627,7 +2660,7 @@ pp_backend_sd_install_script () {
         test \$# -eq 0 && usage
         op="\$1"; shift
 
-        case "\$op" in 
+        case "\$op" in
             list-components)
                 test \$# -eq 0 || usage \$op
                 echo "$pp_components"
@@ -2785,7 +2818,7 @@ pp_solaris_is_request_script_necessary () {
 
 pp_solaris_request () {
     typeset _cmp _svc
-        
+
     #-- The common part of the request script contains the ask() function
     #   and resets the CLASSES list to empty
     cat <<'.'
@@ -2849,8 +2882,8 @@ pp_solaris_depend () {
     typeset _name _vers
     while read _name _vers; do
 	if test -n "$_name"; then
-	    echo "P $_name $_name" 
-	    test -n "$_vers" && echo " $_vers" 
+	    echo "P $_name $_name"
+	    test -n "$_vers" && echo " $_vers"
 	fi
     done
 }
@@ -2871,20 +2904,20 @@ pp_solaris_proto () {
 	typeset abi
 
 	while read t m o g f p st; do
-	  if test x"$o" = x"-"; then 
-            o="bin"
+	  if test x"$o" = x"-"; then
+            o="root"
           fi
-	  if test x"$g" = x"-"; then 
+	  if test x"$g" = x"-"; then
             g="bin"
           fi
 	  case "$t" in
 	    f) test x"$m" = x"-" && m=444
-	       case "$f" in 
+	       case "$f" in
 		*v*) echo "v $1 $p=$pp_destdir$p $m $o $g";;
 		*)   echo "f $1 $p=$pp_destdir$p $m $o $g";;
 	       esac
 	       if test -r "$pp_destdir$p"; then
-		  #-- Use file to record ABI types seen 
+		  #-- Use file to record ABI types seen
 		  case "`file "$pp_destdir$p"`" in
 		    *"ELF 32"*80386*) abi=i386;;
 		    *"ELF 64"*AMD*) abi=x86_64;;
@@ -2962,24 +2995,29 @@ pp_backend_solaris () {
         : > $pp_wrkdir/postinstall
         : > $pp_wrkdir/preremove
 	for _cmp in $pp_components; do
-          #-- add the postinstall scripts in definition order
-	  if test -s $pp_wrkdir/%post.$_cmp; then
-		pp_solaris_procedure $_cmp postinst < $pp_wrkdir/%post.$_cmp \
-			>> $pp_wrkdir/postinstall
-          fi
-          #-- add the preremove rules in reverse definition order
-	  if test -s $pp_wrkdir/%preun.$_cmp; then
-		pp_solaris_procedure $_cmp preremove < $pp_wrkdir/%preun.$_cmp |
+        #-- add the preinstall scripts in definition order
+        if test -s $pp_wrkdir/%pre.$_cmp; then
+            pp_solaris_procedure $_cmp preinst < $pp_wrkdir/%pre.$_cmp \
+                >> $pp_wrkdir/preinstall
+        fi
+        #-- add the postinstall scripts in definition order
+        if test -s $pp_wrkdir/%post.$_cmp; then
+            pp_solaris_procedure $_cmp postinst < $pp_wrkdir/%post.$_cmp \
+                >> $pp_wrkdir/postinstall
+        fi
+        #-- add the preremove rules in reverse definition order
+        if test -s $pp_wrkdir/%preun.$_cmp; then
+            pp_solaris_procedure $_cmp preremove < $pp_wrkdir/%preun.$_cmp |
                     pp_prepend $pp_wrkdir/preremove
-          fi
-          #-- Add the check script in definition order
-	  if test -s $pp_wrkdir/%check.$_cmp; then
-		pp_solaris_procedure $_cmp checkinstall \
+        fi
+        #-- Add the check script in definition order
+        if test -s $pp_wrkdir/%check.$_cmp; then
+            pp_solaris_procedure $_cmp checkinstall \
                         < $pp_wrkdir/%check.$_cmp \
 			>> $pp_wrkdir/checkinstall
-          fi
-          #-- All dependencies are merged together for Solaris pkgs
-          test -s $pp_wrkdir/%depend.$_cmp &&
+        fi
+        #-- All dependencies are merged together for Solaris pkgs
+        test -s $pp_wrkdir/%depend.$_cmp &&
               pp_solaris_depend < $pp_wrkdir/%depend.$_cmp > $pp_wrkdir/depend
 	done
 
@@ -2988,17 +3026,17 @@ pp_backend_solaris () {
 	    pp_solaris_request > $pp_wrkdir/request
 	fi
 
-        test -n "$pp_services" && 
+        test -n "$pp_services" &&
             for _svc in $pp_services; do
                 pp_load_service_vars $_svc
                 pp_solaris_make_service $_svc
-                pp_solaris_install_service $_svc >> $pp_wrkdir/postinstall
+                pp_solaris_install_service $_svc | pp_prepend $pp_wrkdir/postinstall
                 pp_prepend $pp_wrkdir/preremove <<-.
                     /etc/init.d/$_svc stop >/dev/null 2>/dev/null
 .
             done
 
-        test -n "$pp_service_groups" && 
+        test -n "$pp_service_groups" &&
 	    for _grp in $pp_service_groups; do
 		pp_solaris_make_service_group \
 		    $_grp "`pp_service_get_svc_group $_grp`"
@@ -3012,14 +3050,14 @@ pp_backend_solaris () {
 
         # NB: pkginfo and copyright are added earlier
         for f in compver depend space checkinstall \
-                 request preinstall postinstall \
+                 preinstall request postinstall \
                  preremove postremove; do
             if test -s $pp_wrkdir/$f; then
 		case $f in
 		    *install|*remove|request)
 			# turn scripts into a proper shell scripts
 			mv $pp_wrkdir/$f $pp_wrkdir/$f.tmp
-			{ echo "#!/bin/sh"; 
+			{ echo "#!/bin/sh";
 			  echo "# $f script for ${pp_solaris_name:-$name}-$version"
 			  cat $pp_wrkdir/$f.tmp
 			  echo "exit 0"; } > $pp_wrkdir/$f
@@ -3126,7 +3164,7 @@ pp_backend_solaris_install_script () {
             test \$# -eq 0 && usage
             op="\$1"; shift
 
-            case "\$op" in 
+            case "\$op" in
                 list-components)
                     test \$# -eq 0 || usage \$op
                     echo "$pp_components"
@@ -3175,8 +3213,8 @@ pp_backend_solaris_install_script () {
 
 pp_solaris_dynlib_depend () {
 	xargs ldd 2>/dev/null |
-	sed -e '/^[^ 	]*:$/d' -e 's,.*=>[	 ]*,,' -e 's,^[ 	]*,,' | 
-	sort -u | 
+	sed -e '/^[^ 	]*:$/d' -e 's,.*=>[	 ]*,,' -e 's,^[ 	]*,,' |
+	sort -u |
 	grep -v '^/usr/platform/' | (
 	  set -- ""; shift
 	  while read p; do
@@ -3216,12 +3254,12 @@ pp_backend_solaris_probe () {
 
 pp_backend_solaris_vas_platforms () {
     case `pp_backend_solaris_probe` in
-	sol10-sparc* | sol9-sparc* | sol8-sparc*)	
+	sol10-sparc* | sol9-sparc* | sol8-sparc*)
 			echo solaris8-sparc solaris7-sparc solaris26-sparc;;
 	sol7-sparc*)	echo                solaris7-sparc solaris26-sparc;;
 	sol26-sparc*)	echo                               solaris26-sparc;;
 	sol8-*86)	echo solaris8-x86;;
-	sol10-*86 | sol10-x86_64)	
+	sol10-*86 | sol10-x86_64)
 			echo solaris10-x64 solaris8-x86;;
 	*)		pp_die "unknown system `pp_backend_solaris_probe`";;
     esac
@@ -3257,7 +3295,7 @@ pp_solaris_init_svc () {
     smf_type=service
     solaris_user=
     solaris_stop_signal=
-    solaris_sysv_init_start=S98     # invocation order for start scripts
+    solaris_sysv_init_start=S70     # invocation order for start scripts
     solaris_sysv_init_kill=K30      # invocation order for kill scripts
     solaris_sysv_init_start_states="2" # states to install start link
     solaris_sysv_init_kill_states="S 0 1"  # states to install kill link
@@ -3277,8 +3315,8 @@ pp_solaris_smf () {
 
     cat <<-. >$pp_destdir$f
 	<?xml version="1.0"?>
-        <!-- 
-            $copyright 
+        <!--
+            $copyright
             Generated by PolyPackage $pp_version
 	-->
 
@@ -3289,7 +3327,7 @@ pp_solaris_smf () {
             <single_instance />
 
             <exec_method type='method' name='start'
-                exec='' 
+                exec=''
                 timeout_seconds='60'>
                 <method_context>
                   <method_credential user='${solaris_user:-$user}' />
@@ -3440,10 +3478,10 @@ pp_solaris_make_service () {
                 echo "service $svc is running (pid $pid)"
                 return 0
             elif test -f "$pidfile"; then
-                echo "service $svc is not running, but pid file exists" 
+                echo "service $svc is not running, but pid file exists"
                 return 2
             else
-                echo "service $svc is not running" 
+                echo "service $svc is not running"
                 return 1
             fi
         }
@@ -3497,6 +3535,12 @@ pp_solaris_install_service () {
     s="${solaris_sysv_init_start}$1"
     k="${solaris_sysv_init_kill}$1"
 
+    echo 'case " $SERVICES " in *" '$1' "*)'
+    echo '
+if [ "x${PKG_INSTALL_ROOT}" != "x" ]; then
+  if [ -x ${PKG_INSTALL_ROOT}/usr/sbin/svcadm ]; then
+    echo "/usr/sbin/svccfg import '$pp_svc_xml_file' 2>/dev/null" >> ${PKG_INSTALL_ROOT}/var/svc/profile/upgrade
+  else'
     test -n "${solaris_sysv_init_start_states}" &&
         for state in ${solaris_sysv_init_start_states}; do
             l="/etc/rc$state.d/$s"
@@ -3511,6 +3555,30 @@ pp_solaris_install_service () {
             echo "installf -c run \$PKGINST \$PKG_INSTALL_ROOT$l=../init.d/$1 s"
             pp_solaris_space /etc/rc$state.d 0 1
         done
+    echo '
+  fi
+else
+    if [ -x /usr/sbin/svcadm ]; then
+        echo "Registering '$1' with SMF"
+        /usr/sbin/svcadm disable -s '$1' 2>/dev/null
+        /usr/sbin/svccfg delete '$1' 2>/dev/null
+        /usr/sbin/svccfg import '$pp_svc_xml_file' 2>/dev/null
+    else'
+    test -n "${solaris_sysv_init_start_states}" &&
+        for state in ${solaris_sysv_init_start_states}; do
+            l="/etc/rc$state.d/$s"
+            echo "echo '$l'"
+            echo "installf -c run \$PKGINST \$PKG_INSTALL_ROOT$l=../init.d/$1 s"
+            pp_solaris_space /etc/rc$state.d 0 1
+        done
+    test -n "${solaris_sysv_init_kill_states}" &&
+        for state in ${solaris_sysv_init_kill_states}; do
+            l="/etc/rc$state.d/$k"
+            echo "echo '$l'"
+            echo "installf -c run \$PKGINST \$PKG_INSTALL_ROOT$l=../init.d/$1 s"
+            pp_solaris_space /etc/rc$state.d 0 1
+        done
+    echo " :;; esac"
 
 }
 
@@ -3521,7 +3589,7 @@ pp_backend_deb_detect () {
 }
 
 pp_deb_cmp_full_name () {
-    typeset prefix
+    local prefix
     prefix="${pp_deb_name:-$name}"
     case "$1" in
         run) echo "${prefix}" ;;
@@ -3561,7 +3629,7 @@ pp_backend_deb_init () {
 }
 
 pp_deb_check_required_programs () {
-    typeset p needed notfound ok
+    local p needed notfound ok
     needed= notfound=
     for prog in dpkg dpkg-deb install md5sum fakeroot
     do
@@ -3586,7 +3654,7 @@ pp_deb_check_required_programs () {
 }
 
 pp_deb_munge_description () {
-    # Insert a leading space on each line, replace blank lines with a 
+    # Insert a leading space on each line, replace blank lines with a
     #space followed by a full-stop.
     pp_deb_control_description=`echo ${pp_deb_description:-$description} | \
         sed "s,^\(.*\)$, \1, " \
@@ -3607,7 +3675,7 @@ pp_deb_make_control() {
 	Section: ${pp_deb_section:-contrib}
 	Priority: optional
 	Architecture: ${pp_deb_arch}
-	Maintainer: ${pp_deb_maintainer:-$maintainer} 
+	Maintainer: ${pp_deb_maintainer:-$maintainer}
 	Description: ${pp_deb_summary:-$summary}
 	${pp_deb_control_description}
 .
@@ -3618,40 +3686,40 @@ pp_deb_make_control() {
 }
 
 pp_deb_make_md5sums() {
-    typeset cmp="$1"; shift
-    typeset pkg_dir
+    local cmp="$1"; shift
+    local pkg_dir
 
     pkg_dir=$pp_wrkdir/`pp_deb_cmp_full_name $cmp`
-    (cd $pkg_dir && md5sum "$@") > $pkg_dir/DEBIAN/md5sums || 
+    (cd $pkg_dir && md5sum "$@") > $pkg_dir/DEBIAN/md5sums ||
 	pp_error "cannot make md5sums"
 }
 
 pp_deb_make_package_maintainer_script() {
-    typeset output="$1"
-    typeset source="$2"
-    typeset desc="$3"
+    local output="$1"
+    local source="$2"
+    local desc="$3"
 
     # See if we need to create this script at all
-    if [ -s "$source" ] 
+    if [ -s "$source" ]
     then
 
-        # Create header 
+        # Create header
         cat <<-. >$output || pp_error "Cannot create $output"
 	#!/bin/sh
-	# $desc 
+	# $desc
 	# Generated by PolyPackage $pp_version
 
 .
 
         cat $source >> "$output" || pp_error "Cannot append to $output"
- 
+
         # Set perms
         chmod 755 "$output" || pp_error "Cannot chmod $output"
     fi
 }
 
 pp_deb_handle_services() {
-    typeset svc
+    local svc
 
     #-- add service start/stop code
     if test -n "$pp_services"; then
@@ -3694,9 +3762,9 @@ pp_deb_fakeroot () {
 }
 
 pp_deb_make_DEBIAN() {
-    typeset cmp="${1:-run}"
-    typeset data cmp_full_name
-    typeset old_umask
+    local cmp="${1:-run}"
+    local data cmp_full_name
+    local old_umask
 
     old_umask=`umask`
     umask 0022
@@ -3728,15 +3796,15 @@ pp_deb_make_DEBIAN() {
 }
 
 pp_deb_make_data() {
-    typeset _l t m o g f p st data
-    typeset data share_doc owner group
+    local _l t m o g f p st data
+    local data share_doc owner group
     cmp=$1
     data=$pp_wrkdir/`pp_deb_cmp_full_name $cmp`
     cat $pp_wrkdir/%files.${cmp} | while read t m o g f p st; do
-	test x"$o" = x"-" && o=root 
-	test x"$g" = x"-" && g=root 
+	test x"$o" = x"-" && o=root
+	test x"$g" = x"-" && g=root
         case "$t" in
-        f) # Files 
+        f) # Files
            pp_deb_fakeroot install -D -o $o -g $g -m ${m} $pp_destdir/$p $data/$p;
            if [ x"$f" = x"v" ]
            then
@@ -3746,44 +3814,44 @@ pp_deb_make_data() {
                echo "$p" >> $pp_wrkdir/%conffiles.$cmp
            fi;;
 
-        d) # Directories 
+        d) # Directories
            pp_deb_fakeroot install -m ${m} -o $o -g $g -d $data/$p;;
 
-        s) # Symlinks 
+        s) # Symlinks
            # Remove leading / from vars
            rel_p=`echo $p | sed s,^/,,`
            rel_st=`echo $st | sed s,^/,,`
-           # TODO: we are always doing absolute links here. We should follow 
-	   # the debian policy of relative links when in the same top-level 
+           # TODO: we are always doing absolute links here. We should follow
+	   # the debian policy of relative links when in the same top-level
 	   # directory
            (cd $data; ln -sf $st $rel_p);;
 	    *) pp_error "Unsupported data file type: $t";;
 	esac
-    done 
+    done
 
     # If no copyright file is present add one. This is a debian requirement.
     share_doc="/usr/share/doc/`pp_deb_cmp_full_name $cmp`"
     if [ ! -f "$data/$share_doc/copyright" ]
     then
         echo "${pp_deb_copyright:-$copyright}" > "$pp_wrkdir/copyright"
-        install -D -m 644 "$pp_wrkdir/copyright" "$data/$share_doc/copyright" 
+        install -D -m 644 "$pp_wrkdir/copyright" "$data/$share_doc/copyright"
     fi
 
 }
 
 pp_deb_makedeb () {
-    typeset cmp
-    typeset package_build_dir
+    local cmp
+    local package_build_dir
 
     cmp="$1"
 
     package_build_dir=$pp_wrkdir/`pp_deb_cmp_full_name $cmp`
-        
+
     # Create package dir
     mkdir -p $package_build_dir
 
     # Copy in data
-    pp_deb_make_data $cmp || 
+    pp_deb_make_data $cmp ||
 	pp_die "Could not make DEBIAN data files for $cmp"
 
     # Make control files
@@ -3792,13 +3860,13 @@ pp_deb_makedeb () {
 	pp_die "Could not make DEBIAN control files for $cmp"
 
     # Create md5sums
-    pp_deb_make_md5sums $cmp `(cd $package_build_dir; 
-	find . -type f -a -not -name DEBIAN | sed "s,^\./,,")` || 
+    pp_deb_make_md5sums $cmp `(cd $package_build_dir;
+	find . -type f -a -not -name DEBIAN | sed "s,^\./,,")` ||
 	    pp_die "Could not make DEBIAN md5sums for $cmp"
 }
 
 pp_backend_deb () {
-    typeset debname
+    local debname
 
     # Handle services
     pp_deb_handle_services $cmp
@@ -3818,7 +3886,7 @@ pp_backend_deb () {
 	pp_debug "Building `pp_deb_cmp_full_name $cmp` -> $output"
 	pp_deb_fakeroot dpkg-deb \
 	    --build $pp_wrkdir/`pp_deb_cmp_full_name $cmp` \
-	    $pp_wrkdir/$debname || 
+	    $pp_wrkdir/$debname ||
 		pp_error "failed to create $cmp package"
     done
 }
@@ -3829,7 +3897,7 @@ pp_backend_deb_cleanup () {
 }
 
 pp_deb_name () {
-    typeset cmp="${1:-run}"
+    local cmp="${1:-run}"
     echo `pp_deb_cmp_full_name $cmp`"_${pp_deb_version:-$version}-${pp_deb_release:-1}_${pp_deb_arch}.deb"
 }
 pp_backend_deb_names () {
@@ -3840,7 +3908,7 @@ pp_backend_deb_names () {
 }
 
 pp_backend_deb_install_script () {
-    typeset cmp _cmp_full_name
+    local cmp _cmp_full_name
 
     echo "#!/bin/sh"
     pp_install_script_common
@@ -3848,7 +3916,7 @@ pp_backend_deb_install_script () {
     cat <<.
 
         cmp_to_pkgname () {
-            test x"\$*" = x"all" && 
+            test x"\$*" = x"all" &&
                 set -- $pp_components
             for cmp
             do
@@ -3865,7 +3933,7 @@ pp_backend_deb_install_script () {
 
 
         cmp_to_pathname () {
-            test x"\$*" = x"all" && 
+            test x"\$*" = x"all" &&
                 set -- $pp_components
             for cmp
             do
@@ -3883,7 +3951,7 @@ pp_backend_deb_install_script () {
         test \$# -eq 0 && usage
         op="\$1"; shift
         case "\$op" in
-            list-components) 
+            list-components)
                 test \$# -eq 0 || usage \$op
                 echo $pp_components
                 ;;
@@ -3924,7 +3992,7 @@ pp_backend_deb_install_script () {
 }
 
 pp_backend_deb_probe() {
-    typeset arch distro release
+    local arch distro release
 
     pp_deb_detect_arch
 
@@ -4006,7 +4074,8 @@ pp_backend_deb_vas_platforms () {
     esac
 }
 pp_backend_deb_init_svc_vars () {
-    pp_deb_default_start_runlevels=         # should be "3 4 5"??
+    # Default multi-user runlevel on Debian is 2; 3-5 are also multi-user
+    pp_deb_default_start_runlevels="2 3 4 5"
     pp_deb_default_svc_description="No description"
 }
 
@@ -4014,7 +4083,7 @@ pp_backend_deb_init_svc_vars () {
 
     reload_signal=
     start_runlevels=${pp_deb_default_start_runlevels}   # == lsb default-start
-    stop_runlevels="0 1 2 6"                            # == lsb default-stop
+    stop_runlevels="0 1 6"                              # == lsb default-stop
     svc_description="${pp_deb_default_svc_description}" # == lsb short descr
     svc_process=
 
@@ -4028,10 +4097,10 @@ pp_backend_deb_init_svc_vars () {
 }
 
 pp_deb_service_make_init_script () {
-    typeset svc=$1 
-    typeset script=/etc/init.d/$svc
-    typeset out=$pp_destdir$script
-    typeset _process _cmd
+    local svc=$1
+    local script=/etc/init.d/$svc
+    local out=$pp_destdir$script
+    local _process _cmd
 
     pp_add_file_if_missing $script run 755 || return 0
 
@@ -4161,7 +4230,7 @@ do_stop()
     else
         quiet_opt="--verbose"
     fi
-	start-stop-daemon --stop $quiet_opt $signal_opt --retry=TERM/30/KILL/5 $pidfile_opt --name $NAME 
+	start-stop-daemon --stop $quiet_opt $signal_opt --retry=TERM/30/KILL/5 $pidfile_opt --name $NAME
 	RETVAL="$?"
 	[ "$RETVAL" = 2 ] && return 2
 	# Wait for children to finish too if this is a daemon that forks
@@ -4307,7 +4376,7 @@ pp_backend_kit_init () {
 
 pp_backend_kit () {
     typeset mi_file k_file svc outfile
-    typeset desc 
+    typeset desc
 
     pp_backend_kit_names > /dev/null
 
@@ -4354,7 +4423,7 @@ pp_backend_kit_make_mi () {
     # XXX this information should go into the .inv files
     typeset t m o g f p st line dm
     while read t m o g f p st; do
-        case $t in 
+        case $t in
             f|d)
                 echo "0	.$p	$pp_kit_subset"
                 echo "        chmod $m $p" >> $pp_wrkdir/%post.run
@@ -4447,7 +4516,7 @@ pp_backend_kit_names () {
         *) pp_error "\$pp_kit_name $pp_kit_name must be three characters";;
     esac
     if test -z "$pp_kit_package"; then
-        pp_warn "pp_kit_package not specified, using YYYY" 
+        pp_warn "pp_kit_package not specified, using YYYY"
         pp_kit_package=YYYY
     fi
     if test -z "$pp_kit_version"; then
@@ -4484,7 +4553,7 @@ pp_backend_kit_install_script () {
         test \$# -eq 0 && usage
         op="\$1"; shift
 
-        case "\$op" in 
+        case "\$op" in
             list-components)
                 test \$# -eq 0 || usage \$op
                 echo "$pp_components"
@@ -4593,7 +4662,7 @@ cat <<-'.' >> $out
 	    done
 	    return 0
 	}
-	
+
 	#-- stops services in reverse
 	pp_stop () {
 	    reverse=
@@ -4606,7 +4675,7 @@ cat <<-'.' >> $out
 	        done
 	        return $rc
 	}
-	
+
 	case $1 in
 	    start_msg) echo "Starting $svcs";;
 	stop_msg)  echo "Stopping $svcs";;
@@ -4664,7 +4733,7 @@ pp_kit_service_script () {
 	            fi
 	        fi
 	    }
-	
+
 	    pp_running () {
 	        if test ! -s "$pidfile"; then
 	            return 1
@@ -4813,14 +4882,14 @@ pp_backend_kit_kits () {
     CODE=`pp_kit_kits_global "$KITFILE" CODE` || pp_die "no CODE in $KITFILE"
     VERS=`pp_kit_kits_global "$KITFILE" VERS` || pp_die "no VERS in $KITFILE"
     MI=`pp_kit_kits_global "$KITFILE" MI` || pp_die "no MI in $KITFILE"
-    ROOT=`pp_kit_kits_global "$KITFILE" ROOT` 
+    ROOT=`pp_kit_kits_global "$KITFILE" ROOT`
     COMPRESS=`pp_kit_kits_global "$KITFILE" COMPRESS`
-    
+
     test -f "$MI" || pp_die "Inventory file $MI not found"
 
-    case "$ROOT" in 
-    *ROOT)	
-        test -f "$TODIR/$ROOT" || 
+    case "$ROOT" in
+    *ROOT)
+        test -f "$TODIR/$ROOT" ||
             pp_die "Root image $ROOT not found in $TODIR" ;;
     esac
 
@@ -4839,7 +4908,7 @@ pp_backend_kit_kits () {
     #rm -f *.ctrl Volume*
 
     for SUB
-    do 
+    do
         test -z "$SUB" && pp_die "SUB is empty"
 
         typeset INV CTRL ROOTSIZE USRSIZE VARSIZE TSSUB
@@ -4861,18 +4930,18 @@ pp_backend_kit_kits () {
         #   SUB dir/path
         # and generates stl_inv(4) files, like this
         #   f 0 00000 0 0 100644 2/11/09 010 f dir/path none SUB
-	grep "	$SUB\$" "$MI" | 
+	grep "	$SUB\$" "$MI" |
             pp_verbose /usr/lbin/invcutter \
-                -v "$VERS" -f "$FROMDIR" > "$INSTCTRL/$INV" || 	
+                -v "$VERS" -f "$FROMDIR" > "$INSTCTRL/$INV" ||
             pp_die "failed to create $INSTCTRL/$INV"
         chmod 664 "$INSTCTRL/$INV"
- 
+
         pp_backend_kit_sizes "$INSTCTRL/$INV" > "$pp_wrkdir/kit.sizes"
         read ROOTSIZE USRSIZE VARSIZE < "$pp_wrkdir/kit.sizes"
 
         # Prefix each line with $FROMDIR. This will be stripped
         awk '$1 != "d" {print from $10}' from="$FROMDIR/" \
-            > "$TSSUB" < "$INSTCTRL/$INV" || 
+            > "$TSSUB" < "$INSTCTRL/$INV" ||
             pp_die "failed"
 
         NVOLS=0
@@ -4932,13 +5001,13 @@ pp_backend_kit_kits () {
 		cp "$SCPDIR/$SUB.scp" "$INSTCTRL/$SUB.scp"
                 chmod 755 "$INSTCTRL/$SUB.scp"
 	else
-		pp_debug "kits: null subset control program for $SUB"  
+		pp_debug "kits: null subset control program for $SUB"
 		: > "$INSTCTRL/$SUB.scp"
 		chmod 744 "$INSTCTRL/$SUB.scp"
 	fi
 
-        pp_debug "kits: Finished creating media image for $SUB" 
-    done 
+        pp_debug "kits: Finished creating media image for $SUB"
+    done
 
     pp_debug "kits: Creating $CODE.image"
 
@@ -5003,7 +5072,7 @@ pp_backend_rpm_init () {
     pp_rpm_rpmbuild=`pp_rpm_detect_rpmbuild`
 
     # SLES8 doesn't always come with readlink
-    test -x /usr/bin/readlink -o -x /bin/readlink || 
+    test -x /usr/bin/readlink -o -x /bin/readlink ||
         pp_readlink_fn=pp_ls_readlink
 }
 
@@ -5075,7 +5144,7 @@ pp_rpm_detect_distro () {
 }
 
 pp_rpm_detect_rpmbuild () {
-    typeset cmd
+    local cmd
     for cmd in rpmbuild rpm; do
         if `which $cmd > /dev/null 2>&1`; then
             echo $cmd
@@ -5090,7 +5159,7 @@ pp_rpm_detect_rpmbuild () {
 }
 
 pp_rpm_label () {
-    typeset label arg
+    local label arg
     label="$1"; shift
     for arg
     do
@@ -5099,7 +5168,7 @@ pp_rpm_label () {
 }
 
 pp_rpm_writefiles () {
-    typeset _l t m o g f p st fo farch
+    local _l t m o g f p st fo farch
     while read t m o g f p st; do
         _l="$p"
 	test $t = d && _l="%dir ${_l%/}/"
@@ -5161,8 +5230,25 @@ pp_rpm_depend () {
     done
 }
 
+pp_rpm_override_requires () {
+	local orig_find_requires
+
+	if test -z "$pp_rpm_depend_filter_cmd"; then
+		return 0
+	fi
+
+	orig_find_requires=`rpm --eval '%{__find_requires}'`
+	cat << EOF > "$pp_wrkdir/filtered-find-requires"
+$orig_find_requires \$@ | $pp_rpm_depend_filter_cmd
+EOF
+	chmod +x "$pp_wrkdir/filtered-find-requires"
+	echo "%define __find_requires $pp_wrkdir/filtered-find-requires"
+	# Might be necessary for old versions of RPM? Not for 4.4.2.
+	#echo "%define _use_internal_dependency_generator 0"
+}
+
 pp_backend_rpm () {
-        typeset cmp specfile _summary _group _desc _pkg _subname svc
+    local cmp specfile _summary _group _desc _pkg _subname svc
 
 	specfile=$pp_wrkdir/$name.spec
         : > $specfile
@@ -5191,12 +5277,13 @@ pp_backend_rpm () {
 	pp_rpm_label "Vendor"   "${pp_rpm_vendor:-$vendor}" >>$specfile
 	pp_rpm_label "Packager" "$pp_rpm_packager"          >>$specfile
 	pp_rpm_label "Provides" "$pp_rpm_provides"          >>$specfile
-	
+	pp_rpm_label "Requires" "$pp_rpm_requires"          >>$specfile
+
 	test -n "$pp_rpm_serial" && pp_warn "pp_rpm_serial deprecated"
 	if test -n "$pp_rpm_epoch"; then
 	    #-- Epoch was introduced in RPM 2.5.6
 	    case `$pp_rpm_rpmbuild --version 2>/dev/null` in
-		1.*|2.[0-5].*|2.5.[0-5]) 
+		1.*|2.[0-5].*|2.5.[0-5])
 		    pp_rpm_label "Serial" $pp_rpm_epoch >>$specfile;;
 		*)
 		    pp_rpm_label "Epoch" $pp_rpm_epoch >>$specfile;;
@@ -5208,6 +5295,8 @@ pp_backend_rpm () {
         elif test -s $pp_wrkdir/%depend.run; then
             pp_rpm_depend < $pp_wrkdir/%depend.run >> $specfile
         fi
+
+	pp_rpm_override_requires >> $specfile
 
 	cat <<-. >>$specfile
 
@@ -5256,7 +5345,7 @@ pp_backend_rpm () {
 .
 	done >>$specfile
 
-        #-- NB: we don't put any %prep, %build or %install RPM sections 
+        #-- NB: we don't put any %prep, %build or %install RPM sections
 	#   into the spec file.
 
         #-- add service start/stop code
@@ -5274,7 +5363,7 @@ pp_backend_rpm () {
 
                 #-- prepend %preun code to uninstall svc
                 # (use files in case vars are modified)
-                pp_rpm_service_remove $svc | pp_prepend $pp_wrkdir/%preun.run 
+                pp_rpm_service_remove $svc | pp_prepend $pp_wrkdir/%preun.run
             done
             pp_rpm_service_remove_common | pp_prepend $pp_wrkdir/%preun.run
         fi
@@ -5305,6 +5394,19 @@ pp_backend_rpm () {
                 pp_rpm_writefiles < $pp_wrkdir/%files.$cmp
             fi
 
+            if test -n "$pp_rpm_ghost"; then
+                for ghost in $pp_rpm_ghost; do
+                    echo "%ghost $ghost"
+                done
+            fi
+
+            if test -s $pp_wrkdir/%pre.$cmp; then
+                echo ""
+                echo "%pre $_subname"
+                cat $pp_wrkdir/%pre.$cmp
+                echo :   # causes script to exit true
+            fi
+
             if test -s $pp_wrkdir/%post.$cmp; then
                 echo ""
                 echo "%post $_subname"
@@ -5330,8 +5432,10 @@ pp_backend_rpm () {
 	    case "$pp_rpm_arch_seen" in
 		"i386 x86_64"|"x86_64 i386")
 		    pp_rpm_arch_seen=x86_64;;
+		*"s390 s390x"* | *"s390x s390"* )
+		    pp_rpm_arch_seen=s390x;;
 		*" "*)
-		    pp_warn "detected multiple targets: $pp_rpm_arch_seen"
+		    pp_error "detected multiple targets: $pp_rpm_arch_seen"
 		    pp_rpm_arch_seen=unknown;;	    # not detected
 		"")
 		    pp_warn "detected no binaries: using target noarch"
@@ -5344,7 +5448,7 @@ pp_backend_rpm () {
 
         . $pp_wrkdir/%fixup
 
-$pp_opt_debug && cat $specfile 
+$pp_opt_debug && cat $specfile
 
         pp_debug "creating: `pp_backend_rpm_names`"
 
@@ -5357,9 +5461,10 @@ pp_debug "pp_rpm_arch = <${pp_rpm_arch}>"
 		--buildroot="$pp_destdir/" \
                 --target="${pp_rpm_arch}" \
                 --define='_unpackaged_files_terminate_build 0' \
+                --define='_use_internal_dependency_generator 0' \
                 `$pp_opt_debug && echo --verbose || echo --quiet` \
                 $pp_rpm_rpmbuild_extra_flags \
-		$specfile || 
+		$specfile ||
             pp_error "Problem creating RPM packages"
 
 	for f in `pp_backend_rpm_names`; do
@@ -5383,7 +5488,7 @@ pp_rpm_output_name () {
 }
 
 pp_backend_rpm_names () {
-    typeset cmp _subname
+    local cmp _subname
     for cmp in $pp_components; do
 	pp_rpm_output_name $cmp
     done
@@ -5394,7 +5499,7 @@ pp_backend_rpm_cleanup () {
 }
 
 pp_rpm_print_requires () {
-    typeset _subname _name
+    local _subname _name
 
     echo "CPU:$pp_rpm_arch"
     ## XXX should be lines of the form (from file/ldd/objdump)
@@ -5404,7 +5509,7 @@ pp_rpm_print_requires () {
 }
 
 pp_backend_rpm_install_script () {
-    typeset cmp _subname
+    local cmp _subname
 
     echo "#!/bin/sh"
     pp_install_script_common
@@ -5412,7 +5517,7 @@ pp_backend_rpm_install_script () {
     cat <<.
 
         cmp_to_pkgname () {
-	    typeset oi name
+	    local oi name
 	    if test x"\$1" = x"--only-installed"; then
 		#-- only print if installation detected
 		oi=false
@@ -5420,7 +5525,7 @@ pp_backend_rpm_install_script () {
 	    else
 		oi=true
 	    fi
-            test x"\$*" = x"all" && 
+            test x"\$*" = x"all" &&
                 set -- $pp_components
             for cmp
             do
@@ -5441,7 +5546,7 @@ pp_backend_rpm_install_script () {
 
 
         cmp_to_pathname () {
-            test x"\$*" = x"all" && 
+            test x"\$*" = x"all" &&
                 set -- $pp_components
             for cmp
             do
@@ -5455,9 +5560,9 @@ pp_backend_rpm_install_script () {
                 esac
             done
         }
-	
+
 	print_requires () {
-            test x"\$*" = x"all" && 
+            test x"\$*" = x"all" &&
                 set -- $pp_components
             for cmp
             do
@@ -5477,7 +5582,7 @@ pp_backend_rpm_install_script () {
         test \$# -eq 0 && usage
         op="\$1"; shift
         case "\$op" in
-            list-components) 
+            list-components)
                 test \$# -eq 0 || usage \$op
                 echo $pp_components
                 ;;
@@ -5545,7 +5650,7 @@ pp_backend_rpm_vas_platforms () {
 }
 
 pp_backend_rpm_init_svc_vars () {
-    pp_rpm_default_start_runlevels=         # should be "3 4 5"??
+    pp_rpm_default_start_runlevels="2 3 4 5"
     pp_rpm_default_svc_description="No description"
 }
 
@@ -5553,39 +5658,57 @@ pp_rpm_service_install_common () {
     cat <<-'.'
 
         _pp_install_service () {
-            typeset svc level
+            local svc level
             svc="$1"
             if [ -x /usr/lib/lsb/install_initd -a ! -r /etc/redhat-release ]
             then
                 # LSB-style install
-                /usr/lib/lsb/install_initd /etc/init.d/$svc
+                /usr/lib/lsb/install_initd /etc/init.d/$svc &> /dev/null
             elif [ -x /sbin/chkconfig ]; then
                 # Red Hat/chkconfig-style install
-                /sbin/chkconfig --add $svc 
-                /sbin/chkconfig $svc off
+                /sbin/chkconfig --add $svc &> /dev/null
+                /sbin/chkconfig $svc off &> /dev/null
             else
 		: # manual links under /etc/init.d
             fi
         }
 
         _pp_enable_service () {
-            typeset svc level
+            local svc level
             svc="$1"
             if [ -x /usr/lib/lsb/install_initd -a ! -r /etc/redhat-release ]
             then
                 # LSB-style install
-		: not sure how to enable
+		: # not sure how to enable
             elif [ -x /sbin/chkconfig ]; then
                 # Red Hat/chkconfig-style install
-                /sbin/chkconfig $svc on
+                /sbin/chkconfig $svc on &> /dev/null
             else
                 # manual install
                 set -- `sed -n -e 's/^# Default-Start://p' /etc/init.d/$svc`
+                start_priority=`sed -n -e 's/^# X-Quest-Start-Priority:[[:space:]]*//p' /etc/init.d/$svc`
+                stop_priority=`sed -n -e 's/^# X-Quest-Stop-Priority:[[:space:]]*//p' /etc/init.d/$svc`
+
+                # Provide default start & stop priorities of 20 & 80 in
+                # accordance with Debian update-rc.d defaults
+                if [ -z "$start_priority" ]; then
+                    start_priority=20
+                fi
+                if [ -z "$stop_priority" ]; then
+                    stop_priority=80
+                fi
+                    
+                if [ -d "/etc/rc.d" ];then
+                    rcdir=/etc/rc.d
+                else
+                    rcdir=/etc
+                fi
+
                 for level
-                do ln -sf /etc/init.d/$svc /etc/rc.d/rc$level.d/S90$svc; done
+                do ln -sf /etc/init.d/$svc $rcdir/rc$level.d/S$start_priority$svc; done
                 set -- `sed -n -e 's/^# Default-Stop://p' /etc/init.d/$svc`
                 for level
-                do ln -sf /etc/init.d/$svc /etc/rc.d/rc$level.d/K10$svc; done
+                do ln -sf /etc/init.d/$svc $rcdir/rc$level.d/K$stop_priority$svc; done
             fi
         }
 .
@@ -5595,16 +5718,22 @@ pp_rpm_service_remove_common () {
     cat <<-'.'
 
         _pp_remove_service () {
-            typeset svc
+            local svc
             svc="$1"
             /etc/init.d/$svc stop >/dev/null 2>&1
             if [ -x /usr/lib/lsb/remove_initd -a ! -r /etc/redhat-release ]
             then
-                /usr/lib/lsb/remove_initd /etc/init.d/$svc
+                /usr/lib/lsb/remove_initd /etc/init.d/$svc &> /dev/null
             elif [ -x /sbin/chkconfig ]; then
-                /sbin/chkconfig --del $svc
+                /sbin/chkconfig --del $svc &> /dev/null
             else
-                rm -f /etc/rc.d/rc?.d/[SK]??$svc
+                if [ -d "/etc/rc.d" ];then
+                    rcdir=/etc/rc.d
+                else
+                    rcdir=/etc
+                fi
+
+                rm -f $rcdir/rc?.d/[SK]??$svc
             fi
         }
 .
@@ -5619,7 +5748,12 @@ pp_rpm_service_install () {
 }
 
 pp_rpm_service_remove () {
-    echo "_pp_remove_service $1"
+    cat <<-.
+        if [ "\$1" = "remove" -o "\$1" = "0" ]; then
+            # only remove the service if not upgrade
+            _pp_remove_service $1
+        fi
+.
 }
 
 
@@ -5627,7 +5761,7 @@ pp_backend_rpm_init_svc_vars () {
 
     reload_signal=
     start_runlevels=${pp_rpm_default_start_runlevels}   # == lsb default-start
-    stop_runlevels="0 1 2 6"                            # == lsb default-stop
+    stop_runlevels="0 1 6"                              # == lsb default-stop
     svc_description="${pp_rpm_default_svc_description}" # == lsb short descr
     svc_process=
 
@@ -5641,10 +5775,10 @@ pp_backend_rpm_init_svc_vars () {
 }
 
 pp_rpm_service_group_make_init_script () {
-    typeset grp=$1
-    typeset svcs="$2"
-    typeset script=/etc/init.d/$grp
-    typeset out=$pp_destdir$script
+    local grp=$1
+    local svcs="$2"
+    local script=/etc/init.d/$grp
+    local out=$pp_destdir$script
 
     pp_add_file_if_missing $script run 755 || return 0
 
@@ -5714,7 +5848,7 @@ pp_rpm_service_group_make_init_script () {
             stop)           pp_stop;;
             restart)        pp_stop; pp_start;;
             status)         pp_status;;
-            try-restart|condrestart)    
+            try-restart|condrestart)
                             if pp_status >/dev/null; then
                                     pp_restart
                             fi;;
@@ -5731,10 +5865,10 @@ pp_rpm_service_group_make_init_script () {
 }
 
 pp_rpm_service_make_init_script () {
-    typeset svc=$1 
-    typeset script=/etc/init.d/$svc
-    typeset out=$pp_destdir$script
-    typeset _process _cmd _rpmlevels
+    local svc=$1
+    local script=/etc/init.d/$svc
+    local out=$pp_destdir$script
+    local _process _cmd _rpmlevels
 
     pp_add_file_if_missing $script run 755 || return 0
 
@@ -5907,7 +6041,7 @@ pp_rpm_service_make_init_script () {
             stop)           pp_stop;;
             restart)        pp_restart;;
             status)         pp_status;;
-            try-restart|condrestart)    
+            try-restart|condrestart)
                             if pp_status >/dev/null; then
                                     pp_restart
                             fi;;
@@ -5959,7 +6093,7 @@ pp_backend_rpm_function () {
  # /Developer/usr/bin/packagemaker (man packagemaker)
 
     Make a bunch of packages, and then build a 'distribution'
-    which is only understood by macos>10.4 
+    which is only understood by macos>10.4
 
  # Message files in the resource path used are
     Welcome.{rtf,html,rtfd,txt} - limited text shown in Intro
@@ -5967,7 +6101,7 @@ pp_backend_rpm_function () {
     License.{rtf,html,rtfd,txt} - ditto, user must click 'Accept'
     background.{jpg,tif,gif,pict,eps,pdf} 620x418 background image
 
- # These scripts looked for in the resource path 
+ # These scripts looked for in the resource path
     InstallationCheck $pkgpath $defaultloc $targetvol
 	0:ok 32:warn 32+x:warn[1] 64:stop 96+x:stop[2]
     VolumeCheck $volpath
@@ -6041,13 +6175,13 @@ pp_backend_rpm_function () {
       RunAtLoad: true,
       WatchPaths: [ "/etc/crontab" ],
       QueueDirectories: [ "/var/cron/tabs" ],
-      inetdCompatibility: { Wait: false },                   # inetd-only 
+      inetdCompatibility: { Wait: false },                   # inetd-only
       OnDemand: false,                                       # recommended
       SessionCreate: true,
       UserName: "nobody",
       InitGroups: true,
       Sockets: {                                             # inetd only
-	Listeners: { 
+	Listeners: {
 	   SockServiceName: "ssh",
 	   Bonjour: ["ssh", "sftp-ssh"], } },
       Disabled: false,
@@ -6081,7 +6215,7 @@ pp_backend_macos_init () {
     pp_macos_bundle_vendor=
     pp_macos_bundle_version=
     pp_macos_bundle_info_string=
-    pp_macos_prog_packagemaker=/Developer/usr/bin/packagemaker 
+    pp_macos_prog_packagemaker=/Developer/usr/bin/packagemaker
     pp_macos_pkg_domain=anywhere
     pp_macos_pkg_extra_flags=
 }
@@ -6094,23 +6228,22 @@ pp_macos_plist () {
 
       start-plist) cat <<-.; in="  "; shift ;;
 	<?xml version="1.0" encoding="UTF-8"?>
-	<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" 
-		"http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+	<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 	<plist version="1.0">
 .
       end-plist) echo "</plist>"; in=; shift;;
 
       '[')   echo "$in<array>"; in="$in  "; shift;;
       ']')   echo "$in</array>"; in="${in#  }"; shift;;
-      '{')   echo "$in<dict>"; in="$in  "; shift;;
-      '}')   echo "$in</dict>"; in="${in#  }"; shift;;
+      '{')   echo "<dict>"; in="$in      "; shift;;
+      '}')   echo "</dict>"; in="${in#      }"; shift;;
       key)         shift; echo "$in<key>$1</key>"; shift;;
-      string)      shift; 
+      string)      shift;
 		   echo "$1" | sed -e 's/&/&amp;/g;s/</\&lt;/g;s/>/\&gt;/g;' \
 				   -e 's/^/'"$in"'<string>/;s/$/<\/string>/';
 		   shift;;
-      true)        echo "$in<true />"; shift;;
-      false)       echo "$in<false />"; shift;;
+      true)        echo "$in<true/>"; shift;;
+      false)       echo "$in<false/>"; shift;;
       real)        shift; echo "$in<real>$1</real>"; shift;;
       integer)     shift; echo "$in<integer>$1</integer>"; shift;;
       date)        shift; echo "$in<date>$1</date>"; shift;; # ISO 8601 format
@@ -6129,8 +6262,8 @@ pp_macos_rewrite_cpio () {
     # A CPIO header block has octal fields at the following offset/lengths:
     #   0  6 magic
     #   6  6 dev
-    #  12  6 ino 
-    #  18  6 mode 
+    #  12  6 ino
+    #  18  6 mode
     #  24  6 uid
     #  30  6 gid
     #  36  6 nlink
@@ -6141,7 +6274,7 @@ pp_macos_rewrite_cpio () {
     #  76    --
     cat <<-'.' >$script
 	while (<DATA>) {
-		my ($type,$mode,$uid,$gid,$flags,$name) = 
+		my ($type,$mode,$uid,$gid,$flags,$name) =
 		    m/^(.) (\d+) (\S+) (\S+) (\S+) (.*)/;
 		$uid = 0 if $uid eq "-";
 		$gid = 0 if $gid eq "-";
@@ -6208,14 +6341,14 @@ pp_macos_files_bom () {
 	case $t in
 	    f)
 		echo ".$p	10$m	$owner	`
-		    /usr/bin/cksum < "${pp_destdir}$p" | 
+		    /usr/bin/cksum < "${pp_destdir}$p" |
 		    awk '{print $2 "	" $1}'`";;
 	    d)
 		echo ".${p%/}	4$m	$owner";;
 	    s)
 		rl=`/usr/bin/readlink "${pp_destdir}$p"`
-		test x"$rl" = x"$st" || 
-		    pp_error "symlink mismatch $rl != $st"
+		#test x"$rl" = x"$st" ||
+		#    pp_error "symlink mismatch $rl != $st"
 		echo ".$p	12$m	$owner	`
 		    /usr/bin/readlink -n "${pp_destdir}$p" |
 		    /usr/bin/cksum |
@@ -6249,7 +6382,7 @@ pp_macos_files_size () {
 }
 
 pp_o2d () {
-    awk 'BEGIN { x=0; '`echo "$1" | 
+    awk 'BEGIN { x=0; '`echo "$1" |
 	sed -e 's/./x=x*8+&;/g'`'print x;}' </dev/null
 }
 pp_d2o () {
@@ -6277,50 +6410,58 @@ pp_macos_mkbom () {
     bomstage=$pp_wrkdir/bom_stage
     while IFS='	' read path mode ugid size cksumi linkpath; do
 	if test -h "$pp_destdir/$path"; then
-	    /bin/ln -s "$linkpath" "$bomstage/$path"
+	    sudo /bin/ln -s "$linkpath" "$bomstage/$path"
 	else
 	    if test -d "$pp_destdir/$path"; then
-		/bin/mkdir -p "$bomstage/$path"
+		sudo /bin/mkdir -p "$bomstage/$path"
 	    else
-		/bin/cp "$pp_destdir/$path" "$bomstage/$path" 
+		sudo /bin/cp "$pp_destdir/$path" "$bomstage/$path"
 	    fi
-	    /bin/chmod $mode "$bomstage/$path"
-	    /usr/sbin/chown `echo $ugid| tr / :` "$bomstage/$path"
+	    sudo /bin/chmod $mode "$bomstage/$path"
+	    sudo /usr/sbin/chown `echo $ugid| tr / :` "$bomstage/$path"
 	fi
     done <"$1"
-    (cd $bomstage && mkbom . $pp_wrkdir/bom_stage.bom) || 
+    (cd $bomstage && sudo mkbom . $pp_wrkdir/bom_stage.bom) ||
 	pp_error "mkbom failed"
-    mv $pp_wrkdir/bom_stage.bom "$2"
+    sudo mv $pp_wrkdir/bom_stage.bom "$2"
 }
 
 pp_backend_macos () {
-    typeset dmgdir pkgdir Contents Resources lprojdir
-    typeset Info_plist Description_plist 
+    typeset pkgdir Contents Resources lprojdir
+    typeset Info_plist Description_plist
     typeset bundle_vendor bundle_version size
 
+    mac_version=`sw_vers -productVersion`
     bundle_vendor=${pp_macos_bundle_vendor:-$vendor}
 
     if test -z "$pp_macos_bundle_version"; then
-	bundle_version=`echo "$version.0.0.0" | sed -n -e 's/[^0-9.]//g' \
-	    -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/p'`
-	if test x"$bundle_version" != x"$version"; then
-	    pp_warn "converted version from '$version' to '$bundle_version'"
-	fi
+        bundle_version=`echo "$version.0.0.0" | sed -n -e 's/[^0-9.]//g' \
+            -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/p'`
+        #if test x"$bundle_version" != x"$version"; then
+        #    pp_warn "converted version from '$version' to '$bundle_version'"
+        #fi
     else
-	bundle_version="$pp_macos_bundle_version"
+        bundle_version="$pp_macos_bundle_version"
     fi
+    source_version=`echo $version | sed 's/.*\.//'`
 
     # build the package layout
-    dmgdir=$pp_wrkdir/$name-Installer
-    pkgdir=$dmgdir/$name-$version.pkg
+    pkgdir=$pp_wrkdir/$name.pkg
     Contents=$pkgdir/Contents
     Resources=$Contents/Resources
     lprojdir=$Resources/en.lproj
-    mkdir $dmgdir $pkgdir $Contents $Resources $lprojdir || 
+    mkdir $pkgdir $Contents $Resources $lprojdir ||
 	pp_fatal "Can't make package temporary directories"
 
-    echo major: 1 > $Resources/package_version
-    echo minor: 0 >> $Resources/package_version
+    echo "major: 1" > $Resources/package_version
+    echo "minor: 0" >> $Resources/package_version
+    echo "pmkrpkg1" > $Contents/PkgInfo
+    case $mac_version in
+        "10.6"*)
+            xattr -w "com.apple.TextEncoding" "macintosh;0" "$Resources/package_version"
+            xattr -w "com.apple.TextEncoding" "macintosh;0" "$Resources/PkgInfo"
+            ;;
+    esac
 
     # compute the installed size
     size=`cat $pp_wrkdir/%files.* | pp_macos_files_size`
@@ -6333,45 +6474,58 @@ pp_backend_macos () {
 	    "${pp_macos_bundle_info_string:-$version $bundle_vendor}" \
 	key CFBundleIdentifier string \
 	    "${pp_macos_bundle_id:-$pp_macos_default_bundle_id_prefix$name}" \
+    key CFBundleName string "$name" \
 	key CFBundleShortVersionString string "$bundle_version" \
 	key IFMajorVersion integer 1 \
-	key IFMinorVersion integer 2 \
+	key IFMinorVersion integer 0 \
 	key IFPkgFlagAllowBackRev false \
-	key IFPkgFlagAuthorizationAction string "AdminAuthorization" \
+	key IFPkgFlagAuthorizationAction string "RootAuthorization" \
 	key IFPkgFlagDefaultLocation string "/" \
 	key IFPkgFlagFollowLinks true \
-	key IFPkgFlagInstallFat false \
+	key IFPkgFlagInstallFat true \
 	key IFPkgFlagInstalledSize integer $size \
 	key IFPkgFlagIsRequired false \
-	key IFPkgFlagOverwritePermissions false \
+	key IFPkgFlagOverwritePermissions true \
 	key IFPkgFlagRelocatable false \
 	key IFPkgFlagRestartAction string "NoRestart" \
-	key IFPkgFlagRootVolumeOnly false \
+	key IFPkgFlagRootVolumeOnly true \
 	key IFPkgFlagUpdateInstalledLanguages false \
-	key IFPkgFormatVersion real 0.10000000149011612 > $Info_plist
-
-    # insert requirements(VAS)
-    pp_macos_plist \
-	key IFRequirementDicts \[ \
-	  \{ \
-	    key Level        string "requires" \
-	    key SpecArgument string "/opt/quest/lib/libvas.4.dylib" \
-	    key SpecType     string "file" \
-	    key TestObject   true \
-	    key TestOperator string "eq" \
-	  \} \
-	\] >> $Info_plist
-
-    # finish Info.plist
-    pp_macos_plist \} end-plist >> $Info_plist
+	key IFPkgFlagUseUserMask false \
+	key IFPkgFormatVersion real 0.10000000149011612 \
+	key SourceVersion string $source_version \
+	\} end-plist> $Info_plist
 
     # write en.lproj/Description.plist
     Description_plist=$lprojdir/Description.plist
     pp_macos_plist \
  	start-plist \{ \
-	    key IFPkgDescriptionDescription string "$description" \
-	    key IFPkgDescriptionTitle       string "$name $version" \
+        key IFPkgDescriptionDeleteWarning string "" \
+	    key IFPkgDescriptionDescription string "$pp_macos_bundle_info_string" \
+	    key IFPkgDescriptionTitle       string "$name" \
+	    key IFPkgDescriptionVersion string "$version" \
  	\} end-plist > $Description_plist
+
+ 	# write Resources/files
+    cat $pp_wrkdir/%files.* | awk '{print $6}' > $Resources/files
+
+    # write package size file
+    printf \
+"NumFiles 0
+InstalledSize $size
+CompressedSize 0
+" > $Resources/$name.sizes
+
+    # write Resources/postinstall
+    for cmp in $pp_components; do
+	if test -s $pp_wrkdir/%pre.$cmp; then
+	    if test ! -s $Resources/preinstall; then
+		echo "#!/bin/sh" > $Resources/preinstall
+		chmod +x $Resources/preinstall
+	    fi
+	    cat $pp_wrkdir/%pre.$cmp >> $Resources/preinstall
+	    echo : >> $Resources/preinstall
+	fi
+    done
 
     # write Resources/postinstall
     for cmp in $pp_components; do
@@ -6385,20 +6539,47 @@ pp_backend_macos () {
 	fi
     done
 
-    # Warn that %preun scripts are simply ignored.
-    # However, write out a 'preuninstall' script, in case one day 
-    # it is supported.
+    # write Resources/postupgrade)
     for cmp in $pp_components; do
-	if test -s $pp_wrkdir/%preun.$cmp; then
-	    pp_warn "%preun scripts are ignored on OSX"
-	    if test ! -s $Resources/preuninstall; then
-		echo "#!/bin/sh" > $Resources/preuninstall
-		chmod +x $Resources/preuninstall
+	if test -s $pp_wrkdir/%postup.$cmp; then
+	    if test ! -s $Resources/postupgrade; then
+		echo "#!/bin/sh" > $Resources/postupgrade
+		chmod +x $Resources/postupgrade
 	    fi
-	    cat $pp_wrkdir/%preun.$cmp >> $Resources/preuninstall
-	    echo : >> $Resources/preuninstall
+	    cat $pp_wrkdir/%postup.$cmp >> $Resources/postupgrade
+	    echo : >> $Resources/postupgrade
 	fi
     done
+
+    # write Resources/preremove)
+    for cmp in $pp_components; do
+	if test -s $pp_wrkdir/%preun.$cmp; then
+	    if test ! -s $Resources/preremove; then
+		echo "#!/bin/sh" > $Resources/preremove
+		chmod +x $Resources/preremove
+	    fi
+	    cat $pp_wrkdir/%preun.$cmp >> $Resources/preremove
+	    echo : >> $Resources/preremove
+	fi
+    done
+
+    # write Resources/postremove)
+    for cmp in $pp_components; do
+	if test -s $pp_wrkdir/%postun.$cmp; then
+	    if test ! -s $Resources/postremove; then
+		echo "#!/bin/sh" > $Resources/postremove
+		chmod +x $Resources/postremove
+	    fi
+	    cat $pp_wrkdir/%postun.$cmp >> $Resources/postremove
+	    echo : >> $Resources/postremove
+	fi
+    done
+
+    # write uninstall info
+    echo "version=$version" > $Resources/uninstall
+    if [ -n "$pp_macos_requires" ];then
+        echo "requires=$pp_macos_requires" >> $Resources/uninstall
+    fi
 
     # Create the bill-of-materials (Archive.bom)
     cat $pp_wrkdir/%files.* | pp_macos_files_bom | sort |
@@ -6408,23 +6589,12 @@ pp_backend_macos () {
 
     # Create the cpio archive (Archive.pax.gz)
     # On 10.5, we used "-f -" to write explicitly to stdout
-    (cd $pp_destdir && /bin/pax -w .) | 
-	gzip -9 -c > $Contents/Archive.pax.gz
+    (
+    cd $pp_destdir &&
+    cat $pp_wrkdir/%files.* | awk '{ print "." $6 }' | sed '/\/$/d' | sort | /bin/pax -w -f - | gzip -9 -c > $Contents/Archive.pax.gz
+    )
 
-    # create a package using packagemaker
-
-    #-- convert the pkg file into a disk image (dmg file)
-    if [ -d $dmgdir/$name-$version.pkg ]; then
-	dmg=`pp_backend_macos_names`
-	{ pp_verbose hdiutil create \
-	    -srcfolder $dmgdir \
-	    -mode 555 \
-	    $pp_wrkdir/$dmg &&
-	pp_verbose hdiutil internet-enable -yes $pp_wrkdir/$dmg; } ||
-	    pp_error "unable to build disk image"
-    else
-	pp_error "$dmgdir/$name-$version.pkg: not created"
-    fi
+	sudo rm -rf $pp_wrkdir/bom_stage
 }
 
 pp_backend_macos_cleanup () {
@@ -6432,7 +6602,7 @@ pp_backend_macos_cleanup () {
 }
 
 pp_backend_macos_names () {
-    echo ${name}-${version}.dmg
+    echo ${name}.pkg
 }
 
 pp_backend_macos_install_script () {
@@ -6581,9 +6751,75 @@ pp_backend_inst_init () {
     pp_readlink_fn=pp_ls_readlink
 }
 
+pp_backend_inst_create_idb()
+{
+    typeset t m o g f p st
+
+    while read t m o g f p st; do
+        if test x"$o" = x"-"; then
+            o="root"
+        fi
+        if test x"$g" = x"-"; then
+            g="sys"
+        fi
+        case "$t" in
+            f)  test x"$m" = x"-" && m=444
+                echo "f 0$m $o $g $p $p $name.sw.base"
+                ;;
+            d)  test x"$m" = x"-" && m=555
+                echo "d 0$m $o $g $p $p $name.sw.base"
+                ;;
+            s)  test x"$m" = x"-" && m=777
+                test x"$m" = x"777" ||
+                    pp_warn "$p: invalid mode $m for symlink, should be 777 or -"
+                echo "l 0$m $o $g $p $p $name.sw.base symval($st)"
+                ;;
+        esac
+    done
+}
+
+pp_backend_inst_create_spec()
+{
+    echo "product $name"
+    echo "    id \"${summary}. Version: ${version}\""
+    echo "    image sw"
+    echo "        id \"Software\""
+    echo "        version $version"
+    echo "        order 9999"
+    echo "        subsys base"
+    echo "            id \"Base Software\""
+    echo "            replaces self"
+    echo "            exp $name.sw.base"
+    echo "        endsubsys"
+    echo "    endimage"
+    echo "endproduct"
+}
 
 pp_backend_inst () {
-    :
+    curdir=`pwd`
+
+    cd "$pp_opt_wrkdir"
+
+    # initialize
+    pp_inst_tardist=tardist
+    pp_inst_spec=${name}.spec
+    pp_inst_idb=${name}.idb
+ 
+    rm -rf $pp_inst_tardist $pp_inst_spec $pp_inst_idb
+    mkdir -p $pp_inst_tardist
+
+    # Create idb file
+    (for _cmp in $pp_components; do
+        cat  %files.$_cmp | sort +4u -6 | pp_backend_inst_create_idb
+    done) >> $pp_inst_idb
+
+    pp_backend_inst_create_spec >> $pp_inst_spec
+
+    # Generate tardist
+    gendist -verbose -all -root / -source $pp_opt_destdir -idb $pp_inst_idb -spec $pp_inst_spec -dist $pp_inst_tardist $name
+    tar -cvf `pp_backend_inst_names` $pp_inst_tardist
+
+    cd "$curdir"
 }
 
 pp_backend_inst_cleanup () {
@@ -6591,7 +6827,7 @@ pp_backend_inst_cleanup () {
 }
 
 pp_backend_inst_names () {
-    :
+    echo ${name}-${version}.tardist
 }
 
 pp_backend_inst_install_script () {
@@ -6607,12 +6843,12 @@ pp_backend_inst_init_svc_vars () {
 }
 
 pp_backend_inst_probe () {
-    cpu=`hinv|sed -n '/^CPU/{s/000 /k /;s/^CPU: //;s/ Process.*//;s/^MIPS //;p;q;}'|tr A-Z a-z` 
+    cpu=`hinv|sed -n '/^CPU/{s/000 /k /;s/^CPU: //;s/ Process.*//;s/^MIPS //;p;q;}'|tr A-Z a-z`
     echo irix`uname -r`-$cpu
 }
 
 pp_backend_inst_vas_platforms () {
-:
+    echo "irix-65"
 }
 
 pp_platforms="$pp_platforms null"
@@ -6682,10 +6918,10 @@ quest_require_vas () {
         *.*.*.0) v=$1.$2.$3;;
         *)       v=$1.$2.$3.$4;;
     esac
-        
+
     cat <<.
         if test -x /opt/quest/bin/vastool &&
-           /opt/quest/bin/vastool -v | 
+           /opt/quest/bin/vastool -v |
             awk 'NR == 1 {print \$4}' |
             awk -F. '{ if (\$1<$1 || \$1==$1 && ( \
                            \$2<$2 || \$2==$2 && ( \
