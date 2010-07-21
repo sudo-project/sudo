@@ -53,7 +53,7 @@ o Upgrading from a version prior to 1.7.0:
     in sudo's ldap.conf unless ldap.conf references a valid certificate
     authority file(s).
 
-    Please also see the WHATSNEW file for a list of new features in
+    Please also see the NEWS file for a list of new features in
     sudo 1.7.0.
 
 o Upgrading from a version prior to 1.6.9:

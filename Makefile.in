@@ -152,8 +152,8 @@ VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
 DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
-	    LICENSE Makefile.in PORTING README README.LDAP TROUBLESHOOTING \
-	    UPGRADE WHATSNEW aclocal.m4 aixcrypt.exp config.guess \
+	    LICENSE Makefile.in NEWS PORTING README README.LDAP =
+	    TROUBLESHOOTING UPGRADE aclocal.m4 aixcrypt.exp config.guess \
 	    config.h.in config.sub configure configure.in def_data.in \
 	    indent.pro install-sh ltmain.sh m4 mkdefaults mkinstalldirs \
 	    mkpkg pathnames.h.in pp sample.pam sample.syslog.conf \
@@ -499,7 +499,7 @@ install-sudoers: install-dirs
 		$(srcdir)/sudoers $(DESTDIR)$(sudoersdir)/sudoers
 
 install-doc: install-dirs ChangeLog
-	(cd $(srcdir) && for f in ChangeLog HISTORY LICENSE README TROUBLESHOOTING UPGRADE WHATSNEW sample.*; do $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $$f $(DESTDIR)$(docdir); done)
+	(cd $(srcdir) && for f in ChangeLog HISTORY LICENSE NEWS README TROUBLESHOOTING UPGRADE sample.*; do $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $$f $(DESTDIR)$(docdir); done)
 	@LDAP@(cd $(srcdir) && for f in README.LDAP schema.* sudoers2ldif; do $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $$f $(DESTDIR)$(docdir); done)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/sudo.$(mantype) $(DESTDIR)$(mandirsu)/sudo.$(mansectsu)
 	@rm -f $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)
