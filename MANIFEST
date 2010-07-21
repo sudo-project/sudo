@@ -3,9 +3,9 @@ INSTALL
 INSTALL.configure
 MANIFEST
 Makefile.in
+NEWS
 README
 README.LDAP
-WHATSNEW
 aclocal.m4
 common/Makefile.in
 common/aix.c

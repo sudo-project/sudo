@@ -63,7 +63,7 @@ DOCS =	sudo.man visudo.man sudoers.man sudoers.ldap.man sudoers.man \
 @DEV@		$(srcdir)/HISTORY $(srcdir)/LICENSE
 
 OTHER_DOCS= $(top_srcdir)/ChangeLog $(top_srcdir)/README \
-	    $(top_srcdir)/WHATSNEW $(srcdir)/HISTORY $(srcdir)/LICENSE \
+	    $(top_srcdir)/NEWS $(srcdir)/HISTORY $(srcdir)/LICENSE \
 	    $(srcdir)/TROUBLESHOOTING $(srcdir)/UPGRADE $(srcdir)/sample.*
 
 OTHER_DOCS_LDAP= $(top_srcdir)/README.LDAP $(srcdir)/schema.*

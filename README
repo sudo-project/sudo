@@ -21,9 +21,10 @@ the `sudo-workers' mailing list you will get the BETA announcements
 
 What's new
 ==========
-See the WHATSNEW file for a list of major changes in this release.
+See the NEWS file for a list of major changes in this release.
 For a complete list of changes, see the ChangeLog file.  For a
-summary, see the web page, http://www.sudo.ws/sudo/.
+summary of major changes to the current stable release, see the web
+page, http://www.sudo.ws/sudo/stable.html.
 
 If you are upgrading from an earlier version of Sudo, please see
 the UPGRADE file in the doc directory.
