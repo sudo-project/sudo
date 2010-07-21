@@ -25,6 +25,10 @@ o Upgrading from a version prior to 1.7.4:
         Defaults env_keep += MAIL
     to preserve the old value of MAIL.
 
+    NOTE: preserving HOME has security implications since many programs
+    use when searching for configuration files.  Adding HOME to env_keep
+    may enable a user to run unrestricted commands via sudo.
+
 o Upgrading from a version prior to 1.7.0:
 
     Starting with sudo 1.7.0, comments in the sudoers file must not
