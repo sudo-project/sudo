@@ -441,7 +441,7 @@ fork_pty(path, argv, envp, sv, rbac_enabled, maxfd)
 	/* child */
 	close(sv[0]);
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
-	if (exec_setup(PERM_DOWAIT, rbac_enabled, slavename, io_fds[SFD_SLAVE]) == TRUE) {
+	if (exec_setup(rbac_enabled, slavename, io_fds[SFD_SLAVE]) == TRUE) {
 	    /* Close the other end of the stdin/stdout/stderr pipes and exec. */
 	    if (io_pipe[STDIN_FILENO][1])
 		close(io_pipe[STDIN_FILENO][1]);

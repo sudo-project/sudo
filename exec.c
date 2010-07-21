@@ -109,7 +109,7 @@ static int fork_cmnd(path, argv, envp, sv, rbac_enabled)
 	/* child */
 	close(sv[0]);
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
-	if (exec_setup(PERM_DOWAIT, rbac_enabled, user_ttypath, -1) == TRUE) {
+	if (exec_setup(rbac_enabled, user_ttypath, -1) == TRUE) {
 	    /* headed for execve() */
 	    closefrom(def_closefrom);
 #ifdef HAVE_SELINUX
@@ -185,7 +185,7 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
      * If we don't need to wait for the command to finish, just exec it.
      */
     if (!dowait) {
-	exec_setup(0, FALSE, NULL, -1);
+	exec_setup(FALSE, NULL, -1);
 	closefrom(def_closefrom);
 	my_execve(path, argv, envp);
 	cstat->type = CMD_ERRNO;

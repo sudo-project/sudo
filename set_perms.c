@@ -59,7 +59,7 @@
 /*
  * Prototypes
  */
-static void runas_setup		__P((int));
+static void runas_setup		__P((void));
 static void runas_setgroups	__P((void));
 static void restore_groups	__P((void));
 
@@ -77,10 +77,9 @@ set_perms(perm)
     int perm;
 {
     const char *errstr;
-    int noexit, dowait;
+    int noexit;
 
     noexit = ISSET(perm, PERM_NOEXIT);
-    dowait = ISSET(perm, PERM_DOWAIT);
     CLR(perm, PERM_MASK);
 
     if (perm == current_perm)
@@ -127,7 +126,7 @@ set_perms(perm)
 
 	case PERM_FULL_RUNAS:
 				/* headed for exec(), assume euid == ROOT_UID */
-				runas_setup(dowait);
+				runas_setup();
 				if (setresuid(def_stay_setuid ?
 				    user_uid : runas_pw->pw_uid,
 				    runas_pw->pw_uid, runas_pw->pw_uid)) {
@@ -192,10 +191,9 @@ set_perms(perm)
     int perm;
 {
     const char *errstr;
-    int noexit, dowait;
+    int noexit;
 
     noexit = ISSET(perm, PERM_NOEXIT);
-    dowait = ISSET(perm, PERM_DOWAIT);
     CLR(perm, PERM_MASK);
 
     if (perm == current_perm)
@@ -246,7 +244,7 @@ set_perms(perm)
 
 	case PERM_FULL_RUNAS:
 				/* headed for exec(), assume euid == ROOT_UID */
-				runas_setup(dowait);
+				runas_setup();
 				if (setreuid(def_stay_setuid ? user_uid :
 				    runas_pw->pw_uid, runas_pw->pw_uid)) {
 				    errstr = "unable to change to runas uid";
@@ -308,10 +306,9 @@ set_perms(perm)
     int perm;
 {
     const char *errstr;
-    int noexit, dowait;
+    int noexit;
 
     noexit = ISSET(perm, PERM_NOEXIT);
-    dowait = ISSET(perm, PERM_DOWAIT);
     CLR(perm, PERM_MASK);
 
     if (perm == current_perm)
@@ -368,7 +365,7 @@ set_perms(perm)
 
 	case PERM_FULL_RUNAS:
 				/* headed for exec() */
-				runas_setup(dowait);
+				runas_setup();
 				if (setuid(runas_pw->pw_uid)) {
 				    errstr = "unable to change to runas uid";
 				    goto bad;
@@ -428,10 +425,9 @@ set_perms(perm)
     int perm;
 {
     const char *errstr;
-    int noexit, dowait;
+    int noexit;
 
     noexit = ISSET(perm, PERM_NOEXIT);
-    dowait = ISSET(perm, PERM_DOWAIT);
     CLR(perm, PERM_MASK);
 
     if (perm == current_perm)
@@ -456,7 +452,7 @@ set_perms(perm)
 			      	break;
 				
 	case PERM_FULL_RUNAS:
-				runas_setup(dowait);
+				runas_setup();
 				if (setuid(runas_pw->pw_uid)) {
 				    errstr = "unable to change to runas uid";
 				    goto bad;
@@ -547,8 +543,7 @@ restore_groups()
 #endif /* HAVE_INITGROUPS */
 
 static void
-runas_setup(dowait)
-    int dowait;
+runas_setup()
 {
     gid_t gid;
 #ifdef HAVE_LOGIN_CAP_H
@@ -563,8 +558,6 @@ runas_setup(dowait)
 #endif
 #ifdef HAVE_PAM
 	pam_begin_session(runas_pw);
-	if (!dowait)
-	    pam_end_session();
 #endif /* HAVE_PAM */
 
 #ifdef HAVE_LOGIN_CAP_H

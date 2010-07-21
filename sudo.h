@@ -148,7 +148,6 @@ struct command_status {
 #define PERM_FULL_RUNAS          0x05
 #define PERM_TIMESTAMP           0x06
 #define PERM_NOEXIT              0x10 /* flag */
-#define PERM_DOWAIT              0x20 /* flag */
 #define PERM_MASK                0xf0
 
 /*
@@ -314,7 +313,7 @@ int set_perms		__P((int));
 
 /* sudo.c */
 FILE *open_sudoers	__P((const char *, int, int *));
-int exec_setup		__P((int, int, const char *, int));
+int exec_setup		__P((int, const char *, int));
 void cleanup		__P((int));
 void set_fqdn		__P((void));
 

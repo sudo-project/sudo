@@ -105,6 +105,12 @@
 # include "nonunix.h"
 #endif
 
+#ifdef HAVE_PAM
+# define CMND_WAIT	TRUE
+#else
+# define CMND_WAIT	FALSE
+#endif
+
 /*
  * Prototypes
  */
@@ -517,10 +523,12 @@ main(argc, argv, envp)
 	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
 	(void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
 
-	if (ISSET(sudo_mode, MODE_EDIT))
+	if (ISSET(sudo_mode, MODE_EDIT)) {
 	    exit(sudo_edit(NewArgc, NewArgv, envp));
-	else
-	    exit(run_command(safe_cmnd, NewArgv, env_get(), runas_pw->pw_uid, FALSE));
+	} else {
+	    exit(run_command(safe_cmnd, NewArgv, env_get(), runas_pw->pw_uid,
+		CMND_WAIT));
+	}
     } else if (ISSET(validated, FLAG_NO_USER | FLAG_NO_HOST)) {
 	audit_failure(NewArgv, "No user or host");
 	log_denial(validated, 1);
@@ -820,8 +828,7 @@ set_cmnd(sudo_mode)
  * Returns TRUE on success and FALSE on failure.
  */
 int
-exec_setup(flags, rbac_enabled, ttyname, ttyfd)
-    int flags;
+exec_setup(rbac_enabled, ttyname, ttyfd)
     int rbac_enabled;
     const char *ttyname;
     int ttyfd;
@@ -870,7 +877,7 @@ exec_setup(flags, rbac_enabled, ttyname, ttyfd)
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
 
     if (ISSET(sudo_mode, MODE_RUN))
-	set_perms(PERM_FULL_RUNAS|flags);
+	set_perms(PERM_FULL_RUNAS);
 
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	/* Change to target user's homedir. */
