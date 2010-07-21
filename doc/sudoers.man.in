@@ -414,7 +414,11 @@ or \s-1CIDR\s0 notation (number of bits, e.g.\ 24 or 64).  A host name may
 include shell-style wildcards (see the Wildcards section below),
 but unless the \f(CW\*(C`host name\*(C'\fR command on your machine returns the fully
 qualified host name, you'll need to use the \fIfqdn\fR option for
-wildcards to be useful.
+wildcards to be useful.  Note \fBsudo\fR only inspects actual network
+interfaces; this means that \s-1IP\s0 address 127.0.0.1 (localhost) will
+never match.  Also, the host name \*(L"localhost\*(R" will only match if
+that is the actual host name, which is usually only the case for
+non-networked systems.
 .PP
 .Vb 2
 \& Cmnd_List ::= Cmnd |

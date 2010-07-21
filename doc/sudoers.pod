@@ -288,7 +288,11 @@ or CIDR notation (number of bits, e.g.E<nbsp>24 or 64).  A host name may
 include shell-style wildcards (see the L<Wildcards> section below),
 but unless the C<host name> command on your machine returns the fully
 qualified host name, you'll need to use the I<fqdn> option for
-wildcards to be useful.
+wildcards to be useful.  Note B<sudo> only inspects actual network
+interfaces; this means that IP address 127.0.0.1 (localhost) will
+never match.  Also, the host name "localhost" will only match if
+that is the actual host name, which is usually only the case for
+non-networked systems.
 
  Cmnd_List ::= Cmnd |
 	       Cmnd ',' Cmnd_List
