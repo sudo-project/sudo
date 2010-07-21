@@ -514,7 +514,7 @@ pty_close(cstat)
     if (cstat->type == CMD_WSTATUS && WIFSIGNALED(cstat->val)) {
 	int signo = WTERMSIG(cstat->val);
 	if (signo && signo != SIGINT && signo != SIGPIPE) {
-	    char *reason = strsignal(signo);
+	    const char *reason = strsignal(signo);
 	    n = io_fds[SFD_USERTTY] != -1 ?
 		io_fds[SFD_USERTTY] : STDOUT_FILENO;
 	    write(n, reason, strlen(reason));
