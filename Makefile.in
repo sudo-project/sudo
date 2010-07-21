@@ -152,7 +152,7 @@ VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
 DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
-	    LICENSE Makefile.in NEWS PORTING README README.LDAP =
+	    LICENSE Makefile.in NEWS PORTING README README.LDAP \
 	    TROUBLESHOOTING UPGRADE aclocal.m4 aixcrypt.exp config.guess \
 	    config.h.in config.sub configure configure.in def_data.in \
 	    indent.pro install-sh ltmain.sh m4 mkdefaults mkinstalldirs \
