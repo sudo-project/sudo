@@ -18,7 +18,9 @@
 #include "config.h"
 
 #include <sys/types.h>
+#include <sys/time.h>
 #include <sys/stat.h>
+
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -30,6 +32,9 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#if TIME_WITH_SYS_TIME
+# include <time.h>
+#endif
 
 #include "sudo.h"
 
