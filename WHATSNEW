@@ -55,6 +55,9 @@ What's new in Sudo 1.7.4?
 
  * Fixed a problem in the restoration of the AIX authdb registry setting.
 
+ * Sudo will now fork(2) and wait until the command has completed before
+   calling pam_close_session().
+
 What's new in Sudo 1.7.3?
 
  * Support for logging I/O for the command being run.
