@@ -1491,10 +1491,10 @@ Below are example I<sudoers> entries.  Admittedly, some of
 these are a bit contrived.  First, we allow a few environment
 variables to pass and then define our I<aliases>:
 
- # Run X applications through sudo; HOME is used to find .Xauthority file
- # Note that some programs may use HOME for other purposes too and
- # this may lead to privilege escalation!
- Defaults env_keep = "DISPLAY HOME"
+ # Run X applications through sudo; HOME is used to find the
+ # .Xauthority file.  Note that other programs use HOME to find
+ # configuration files and this may lead to privilege escalation!
+ Defaults env_keep += "DISPLAY HOME"
 
  # User alias specification
  User_Alias	FULLTIMERS = millert, mikef, dowdy
