@@ -1,6 +1,6 @@
 #!/bin/sh
 # (c) 2010 Quest Software, Inc. All rights reserved
-pp_revision="275"
+pp_revision="276"
 
  # Copyright (c) 2010 Quest Software, Inc.  All rights reserved.
  #
@@ -5207,7 +5207,7 @@ pp_rpm_writefiles () {
 	    test x"$farch" = x"noarch" || pp_add_to_list pp_rpm_arch_seen $farch
 	fi
 
-	case $f in *v*) _l="%config $_l";; esac
+	case $f in *v*) _l="%config(noreplace) $_l";; esac
 	echo "$_l"
     done
     echo
