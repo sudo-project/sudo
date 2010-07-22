@@ -3,7 +3,7 @@ dnl Process this file with GNU autoconf to produce a configure script.
 dnl
 dnl Copyright (c) 1994-1996,1998-2010 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
-AC_INIT([sudo], [1.7.4b4], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.7.4], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER(config.h pathnames.h)
 dnl
 dnl This won't work before AC_INIT
@@ -99,7 +99,7 @@ sudo_umask=0022
 passprompt="Password:"
 long_otp_prompt=off
 lecture=once
-logfac=local2
+logfac=auth
 goodpri=notice
 badpri=alert
 loglen=80
@@ -515,8 +515,7 @@ AC_ARG_WITH(logging, [AS_HELP_STRING([--with-logging], [log via syslog, file, or
 		;;
 esac], [AC_DEFINE(LOGGING, SLOG_SYSLOG) AC_MSG_RESULT(syslog)])
 
-AC_MSG_CHECKING(which syslog facility sudo should log with)
-AC_ARG_WITH(logfac, [AS_HELP_STRING([--with-logfac], [syslog facility to log with (default is "local2")])],
+AC_ARG_WITH(logfac, [AS_HELP_STRING([--with-logfac], [syslog facility to log with (default is "auth")])],
 [case $with_logfac in
     yes)	AC_MSG_ERROR(["must give --with-logfac an argument."])
 		;;
@@ -527,8 +526,6 @@ AC_ARG_WITH(logfac, [AS_HELP_STRING([--with-logfac], [syslog facility to log wit
     *)		AC_MSG_ERROR(["$with_logfac is not a supported syslog facility."])
 		;;
 esac])
-AC_DEFINE_UNQUOTED(LOGFAC, "$logfac", [The syslog facility sudo will use.])
-AC_MSG_RESULT($logfac)
 
 AC_MSG_CHECKING(at which syslog priority to log commands)
 AC_ARG_WITH(goodpri, [AS_HELP_STRING([--with-goodpri], [syslog priority for commands (def is "notice")])],
@@ -1841,6 +1838,15 @@ fi
 if test -z "$with_editor"; then
     SUDO_PROG_VI
 fi
+dnl
+dnl Check for authpriv support in syslog
+dnl
+AC_MSG_CHECKING(which syslog facility sudo should log with)
+if test X"$with_logfac" = X""; then
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <syslog.h>]], [[int i = LOG_AUTHPRIV; (void)i;]])], [logfac=authpriv])
+fi
+AC_DEFINE_UNQUOTED(LOGFAC, "$logfac", [The syslog facility sudo will use.])
+AC_MSG_RESULT($logfac)
 dnl
 dnl Header file checks
 dnl

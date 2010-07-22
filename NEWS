@@ -50,6 +50,9 @@ What's new in Sudo 1.7.4?
  * Sudo will now fork(2) and wait until the command has completed before
    calling pam_close_session().
 
+ * The default syslog facility is now "authpriv" if the operating system
+   supports it, else "auth".
+
 What's new in Sudo 1.7.3?
 
  * Support for logging I/O for the command being run.

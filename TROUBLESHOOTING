@@ -36,12 +36,13 @@ Q) Sudo is setup to log via syslog(3) but I'm not getting any log
    messages.
 A) Make sure you have an entry in your syslog.conf file to save
    the sudo messages (see the sample.syslog.conf file).  The default
-   log facility is local2 (changeable via configure).  Don't forget
-   to send a SIGHUP to your syslogd so that it re-reads its conf file.
-   Also, remember that syslogd does *not* create log files, you need to
-   create the file before syslogd will log to it (ie: touch /var/log/sudo).
-   Note:  the facility ("local2.debug") must be separated from the 
-	  destination ("/var/adm/sudo.log" or "@loghost") by
+   log facility is authpriv (changeable via configure or in sudoers).
+   Don't forget to send a SIGHUP to your syslogd so that it re-reads
+   its conf file.  Also, remember that syslogd does *not* create
+   log files, you need to create the file before syslogd will log
+   to it (ie: touch /var/log/sudo).
+   Note:  the facility (e.g. "auth.debug") must be separated from the 
+	  destination (e.g. "/var/log/auth" or "@loghost") by
 	  tabs, *not* spaces.  This is a common error.
 
 Q) When sudo asks me for my password it never accepts what I enter even
