@@ -117,6 +117,7 @@ REPLAY_OBJS = getdate.o sudoreplay.o error.o
 TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o error.o group_plugin.o
 
 VERSION = @PACKAGE_VERSION@
+PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
 SUDODEP = $(srcdir)/sudoers.h $(incdir)/compat.h \
 	  $(srcdir)/defaults.h $(incdir)/error.h $(incdir)/list.h \
