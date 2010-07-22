@@ -541,11 +541,9 @@ package: sudo.pp
 	DESTDIR=`cd $(top_builddir) && pwd`/destdir; rm -rf $$DESTDIR; \
 	$(SHELL) $(srcdir)/mkinstalldirs $$DESTDIR/$(timedir) && \
 	$(MAKE) install DESTDIR=$$DESTDIR && \
-	mv $$DESTDIR/$(sysconfdir)/sudoers \
-	    $$DESTDIR/$(sysconfdir)/sudoers.dist && \
 	$(SHELL) $(srcdir)/pp \
 	    --destdir=$$DESTDIR \
-	    $(srcdir)/sudo.pp   \
+	    $(srcdir)/sudo.pp \
 	    bindir=$(bindir) \
 	    sbindir=$(sbindir) \
 	    libexecdir=$(libexecdir) \
