@@ -19,6 +19,11 @@ still allow people to get their work done."
 	pp_deb_maintainer="Todd.Miller@courtesan.com"
 	pp_sd_vendor_tag="TCM"
 	pp_solaris_name="${pp_sd_vendor_tag}${name}"
+%if [!rpm,deb]
+	# For all but RPM and Debian we need to install sudoers with a different
+	# name and make a copy of it if there is no existing file.
+	mv ${pp_destdir}$sudoersdir/sudoers ${pp_destdir}$sudoersdir/sudoers.dist
+%endif
 
 %set [rpm]
 	# Add distro info to release
@@ -32,13 +37,11 @@ still allow people to get their work done."
 		;;
 	esac
 
-	# Uncomment some Defaults in sudoers.dist
+	# Uncomment some Defaults in sudoers
 	# Note that the order must match that of sudoers.
 	case "$pp_rpm_distro" in
 	centos*|rhel*)
-		# Uncomment some Defaults in sudoers.dist, must be tab indented.
-		# Note that the order must match that of sudoers.
-		/bin/ed - ${pp_destdir}${sudoersdir}/sudoers.dist <<-'EOF'
+		/bin/ed - ${pp_destdir}${sudoersdir}/sudoers <<-'EOF'
 		/Locale settings/+1,s/^# //
 		/Desktop path settings/+1,s/^# //
 		w
@@ -46,9 +49,7 @@ still allow people to get their work done."
 		EOF
 		;;
 	sles*)
-		# Uncomment some Defaults in sudoers.dist, must be tab indented.
-		# Note that the order must match that of sudoers.
-		/bin/ed - ${pp_destdir}${sudoersdir}/sudoers.dist <<-'EOF'
+		/bin/ed - ${pp_destdir}${sudoersdir}/sudoers <<-'EOF'
 		/Locale settings/+1,s/^# //
 		/ConsoleKit session/+1,s/^# //
 		w
@@ -118,9 +119,9 @@ still allow people to get their work done."
 	esac
 
 %set [deb]
-	# Uncomment some Defaults and the %sudo rule in sudoers.dist
+	# Uncomment some Defaults and the %sudo rule in sudoers
 	# Note that the order must match that of sudoers and be tab-indented.
-	/bin/ed - ${pp_destdir}${sudoersdir}/sudoers.dist <<-'EOF'
+	/bin/ed - ${pp_destdir}${sudoersdir}/sudoers <<-'EOF'
 	/Locale settings/+1,s/^# //
 	/X11 resource/+1,s/^# //
 	/^# \%sudo/,s/^# //
@@ -149,12 +150,16 @@ still allow people to get their work done."
 	$bindir/sudoreplay  0111
 	$includedir/sudo_plugin.h
 	$libexecdir/*
-	$sudoersdir/sudoers.dist $sudoers_mode $sudoers_uid:$sudoers_gid volatile
 	$sudoersdir/sudoers.d/	0750 $sudoers_uid:$sudoers_gid
 	$timedir/		0700 root:
 	$docdir/
 	$docdir/*
 	/etc/pam.d/*		volatile,optional
+%if [rpm,deb]
+	$sudoersdir/sudoers $sudoers_mode $sudoers_uid:$sudoers_gid volatile
+%else
+	$sudoersdir/sudoers.dist $sudoers_mode $sudoers_uid:$sudoers_gid volatile
+%endif
 
 %files [!aix]
 	$mandir/man*/*
@@ -164,7 +169,7 @@ still allow people to get their work done."
 	$mandir/cat*/* optional
 	$mandir/man*/* optional
 
-%post
+%post [!rpm,deb]
 	# Don't overwrite an existing sudoers file
 	sudoersdir=%{sudoersdir}
 	if test ! -r $sudoersdir/sudoers; then

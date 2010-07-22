@@ -88,11 +88,9 @@ package: sudo.pp
 	DESTDIR=`cd $(top_builddir) && pwd`/destdir; rm -rf $$DESTDIR; \
 	$(SHELL) $(srcdir)/mkinstalldirs $$DESTDIR/$(timedir) && \
 	$(MAKE) install DESTDIR=$$DESTDIR && \
-	mv $$DESTDIR/$(sudoersdir)/sudoers \
-	    $$DESTDIR/$(sudoersdir)/sudoers.dist && \
 	$(SHELL) $(srcdir)/pp \
 	    --destdir=$$DESTDIR \
-	    $(srcdir)/sudo.pp   \
+	    $(srcdir)/sudo.pp \
 	    bindir=$(bindir) \
 	    sbindir=$(sbindir) \
 	    libexecdir=$(libexecdir) \
