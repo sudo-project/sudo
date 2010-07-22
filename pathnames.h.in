@@ -27,6 +27,10 @@
 #include <paths.h>
 #endif /* HAVE_PATHS_H */
 
+#ifdef HAVE_MAILLOCK_H
+#include <maillock.h>
+#endif /* HAVE_MAILLOCK_H */
+
 #ifndef _PATH_DEV
 #define _PATH_DEV		"/dev/"
 #endif /* _PATH_DEV */
