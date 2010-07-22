@@ -1390,7 +1390,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
-                   to disable syslog logging).  Defaults to local2.
+                   to disable syslog logging).  Defaults to auth.
 
        verifypw    This option controls when a password will be required when
                    a user runs ssuuddoo with the --vv option.  It has the following
