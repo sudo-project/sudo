@@ -209,8 +209,10 @@ if [ X"$1" != X"$2" ] ; then
 	fi
 	##  Copy source to the right dir, then move to right spot.
 	##  Done in two parts so we can hope for atomicity.
+	##  We need to rm DEST due to bugs in "mv -f" on some systems.
 	${RM} -f "${TEMP}" || exit 1
 	${CP} "$1" "${TEMP}" || exit 1
+	${RM} -f "${DEST}" || exit 1
 	${MV} -f "${TEMP}" "${DEST}" || exit 1
     fi
 fi
