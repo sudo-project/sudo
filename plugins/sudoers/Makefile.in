@@ -255,8 +255,8 @@ install-dirs:
 	    $(DESTDIR)$(sudoersdir) $(DESTDIR)$(docdir)
 
 install-binaries: visudo sudoreplay install-dirs
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 sudoreplay $(DESTDIR)$(replaydir)/sudoreplay
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 visudo $(DESTDIR)$(visudodir)/visudo
+	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0111 sudoreplay $(DESTDIR)$(replaydir)/sudoreplay
+	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0111 visudo $(DESTDIR)$(visudodir)/visudo
 
 install-includes:
 
@@ -264,7 +264,7 @@ install-doc:
 	@LDAP@$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0555 $(srcdir)/sudoers2ldif $(DESTDIR)$(docdir)
 
 install-plugin: sudoers.la install-dirs
-	$(LIBTOOL) --mode=install --quiet $(INSTALL) sudoers.la $(DESTDIR)$(plugindir)
+	$(LIBTOOL) --mode=install --quiet $(INSTALL) -b~ sudoers.la $(DESTDIR)$(plugindir)
 
 install-sudoers: install-dirs
 	$(INSTALL) -d -O $(sudoers_uid) -G $(sudoers_gid) -M 0750 \

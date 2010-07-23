@@ -99,7 +99,7 @@ install-includes:
 install-doc:
 
 install-plugin: install-dirs sample_group.la
-	$(LIBTOOL) --mode=install --quiet $(INSTALL) sample_group.la $(DESDTDIR)/$(plugindir)
+	$(LIBTOOL) --mode=install --quiet $(INSTALL) -b~ sample_group.la $(DESDTDIR)/$(plugindir)
 
 uninstall:
 	-$(LIBTOOL) --mode=uninstall rm -f $(DESDTDIR)/$(plugindir)/sample_group.la
