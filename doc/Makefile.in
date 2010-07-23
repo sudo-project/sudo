@@ -164,7 +164,7 @@ install-doc: install-dirs
 install-plugin:
 
 uninstall:
-	-rm -f	$(DESTDIR)$(mandirsu)/sudo.$(mansectsu) \
+	-rm -f	$(DESTDIR)$(docdir) $(DESTDIR)$(mandirsu)/sudo.$(mansectsu) \
 		$(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu) \
 		$(DESTDIR)$(mandirsu)/sudo_plugin.$(mansectsu) \
 		$(DESTDIR)$(mandirsu)/sudoreplay.$(mansectsu) \

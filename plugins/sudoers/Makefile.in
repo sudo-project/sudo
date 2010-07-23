@@ -30,6 +30,7 @@ authdir = $(srcdir)/auth
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
+docdir = @docdir@
 
 # For out of tree builds
 VPATH = $(devdir):$(srcdir):$(srcdir)/auth
@@ -246,12 +247,12 @@ testsudoers.o: $(srcdir)/testsudoers.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/li
 tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(SUDODEP)
 visudo.o: $(srcdir)/visudo.c $(SUDODEP) $(devdir)/gram.h
 
-install: install-dirs install-plugin install-binaries install-sudoers
+install: install-dirs install-plugin install-binaries install-sudoers install-doc
 
 install-dirs:
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(plugindir) \
 	    $(DESTDIR)$(visudodir) $(DESTDIR)$(replaydir) \
-	    $(DESTDIR)$(sudoersdir)
+	    $(DESTDIR)$(sudoersdir) $(DESTDIR)$(docdir)
 
 install-binaries: visudo sudoreplay install-dirs
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 sudoreplay $(DESTDIR)$(replaydir)/sudoreplay
@@ -259,8 +260,8 @@ install-binaries: visudo sudoreplay install-dirs
 
 install-includes:
 
-# XXX - install sudoers2ldif in docdir
 install-doc:
+	@LDAP@$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0555 $(srcdir)/sudoers2ldif $(DESTDIR)$(docdir)
 
 install-plugin: sudoers.la install-dirs
 	$(LIBTOOL) --mode=install --quiet $(INSTALL) sudoers.la $(DESTDIR)$(plugindir)
