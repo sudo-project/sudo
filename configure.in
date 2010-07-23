@@ -165,18 +165,6 @@ shadow_libs_optional=
 CONFIGURE_ARGS="$@"
 
 dnl
-dnl Override default configure dirs...
-dnl
-if test X"$prefix" = X"NONE"; then
-    test "$mandir" = '${datarootdir}/man' && mandir='$(prefix)/man'
-else
-    test "$mandir" = '${datarootdir}/man' && mandir='$(datarootdir)/man'
-fi
-test "$bindir" = '${exec_prefix}/bin' && bindir='$(exec_prefix)/bin'
-test "$sbindir" = '${exec_prefix}/sbin' && sbindir='$(exec_prefix)/sbin'
-test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
-
-dnl
 dnl Deprecated --with options (these all warn or generate an error)
 dnl
 
@@ -1578,7 +1566,7 @@ case "$host" in
 		OSDEFS="${OSDEFS} -D_BSD_TYPES"
 		if test -z "$NROFFPROG"; then
 		    MAN_POSTINSTALL='	/bin/rm -f $(mandirsu)/sudo.$(mansectsu).z $(mandirsu)/visudo.$(mansectsu).z $(mandirform)/sudoers.$(mansectform).z ; /usr/bin/pack $(mandirsu)/sudo.$(mansectsu) $(mandirsu)/visudo.$(mansectsu) $(mandirform)/sudoers.$(mansectform)'
-		    if test "$prefix" = "/usr/local" -a "$mandir" = '$(prefix)/man'; then
+		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
 			if test -d /usr/share/catman/local; then
 			    mandir="/usr/share/catman/local"
 			else
@@ -1586,7 +1574,7 @@ case "$host" in
 			fi
 		    fi
 		else
-		    if test "$prefix" = "/usr/local" -a "$mandir" = '$(prefix)/man'; then
+		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
 			if test -d "/usr/share/man/local"; then
 			    mandir="/usr/share/man/local"
 			else
@@ -2781,6 +2769,22 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no"; then
     fi
     exec_prefix="$oexec_prefix"
 fi
+
+dnl
+dnl Override default configure dirs for the Makefile
+dnl
+if test X"$prefix" = X"NONE"; then
+    test "$mandir" = '${datarootdir}/man' && mandir='$(prefix)/man'
+else
+    test "$mandir" = '${datarootdir}/man' && mandir='$(datarootdir)/man'
+fi
+test "$bindir" = '${exec_prefix}/bin' && bindir='$(exec_prefix)/bin'
+test "$sbindir" = '${exec_prefix}/sbin' && sbindir='$(exec_prefix)/sbin'
+test "$libexecdir" = '${exec_prefix}/libexec' && libexecdir='$(exec_prefix)/libexec'
+test "$includedir" = '${prefix}/include' && includedir='$(prefix)/include'
+test "$datarootdir" = '${prefix}/share' && datarootdir='$(prefix)/share'
+test "$docdir" = '${datarootdir}/doc/${PACKAGE_TARNAME}' && docdir='$(datarootdir)/doc/$(PACKAGE_TARNAME)'
+test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
 
 dnl
 dnl Substitute into the Makefile and man pages

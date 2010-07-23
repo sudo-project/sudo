@@ -2839,15 +2839,6 @@ shadow_libs_optional=
 
 CONFIGURE_ARGS="$@"
 
-if test X"$prefix" = X"NONE"; then
-    test "$mandir" = '${datarootdir}/man' && mandir='$(prefix)/man'
-else
-    test "$mandir" = '${datarootdir}/man' && mandir='$(datarootdir)/man'
-fi
-test "$bindir" = '${exec_prefix}/bin' && bindir='$(exec_prefix)/bin'
-test "$sbindir" = '${exec_prefix}/sbin' && sbindir='$(exec_prefix)/sbin'
-test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
-
 
 
 # Check whether --with-otp-only was given.
@@ -6577,13 +6568,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6580: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6571: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6583: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6574: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6586: output\"" >&5)
+  (eval echo "\"\$as_me:6577: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -7788,7 +7779,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7791 "configure"' > conftest.$ac_ext
+  echo '#line 7782 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9181,11 +9172,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9184: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9175: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9188: \$? = $ac_status" >&5
+   echo "$as_me:9179: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9520,11 +9511,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9523: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9514: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9527: \$? = $ac_status" >&5
+   echo "$as_me:9518: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9625,11 +9616,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9628: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9619: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9632: \$? = $ac_status" >&5
+   echo "$as_me:9623: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9680,11 +9671,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9683: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9674: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9687: \$? = $ac_status" >&5
+   echo "$as_me:9678: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12047,7 +12038,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12050 "configure"
+#line 12041 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12143,7 +12134,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12146 "configure"
+#line 12137 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12839,7 +12830,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 		OSDEFS="${OSDEFS} -D_BSD_TYPES"
 		if test -z "$NROFFPROG"; then
 		    MAN_POSTINSTALL='	/bin/rm -f $(mandirsu)/sudo.$(mansectsu).z $(mandirsu)/visudo.$(mansectsu).z $(mandirform)/sudoers.$(mansectform).z ; /usr/bin/pack $(mandirsu)/sudo.$(mansectsu) $(mandirsu)/visudo.$(mansectsu) $(mandirform)/sudoers.$(mansectform)'
-		    if test "$prefix" = "/usr/local" -a "$mandir" = '$(prefix)/man'; then
+		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
 			if test -d /usr/share/catman/local; then
 			    mandir="/usr/share/catman/local"
 			else
@@ -12847,7 +12838,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 			fi
 		    fi
 		else
-		    if test "$prefix" = "/usr/local" -a "$mandir" = '$(prefix)/man'; then
+		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
 			if test -d "/usr/share/man/local"; then
 			    mandir="/usr/share/man/local"
 			else
@@ -18215,6 +18206,19 @@ EOF
     fi
     exec_prefix="$oexec_prefix"
 fi
+
+if test X"$prefix" = X"NONE"; then
+    test "$mandir" = '${datarootdir}/man' && mandir='$(prefix)/man'
+else
+    test "$mandir" = '${datarootdir}/man' && mandir='$(datarootdir)/man'
+fi
+test "$bindir" = '${exec_prefix}/bin' && bindir='$(exec_prefix)/bin'
+test "$sbindir" = '${exec_prefix}/sbin' && sbindir='$(exec_prefix)/sbin'
+test "$libexecdir" = '${exec_prefix}/libexec' && libexecdir='$(exec_prefix)/libexec'
+test "$includedir" = '${prefix}/include' && includedir='$(prefix)/include'
+test "$datarootdir" = '${prefix}/share' && datarootdir='$(prefix)/share'
+test "$docdir" = '${datarootdir}/doc/${PACKAGE_TARNAME}' && docdir='$(datarootdir)/doc/$(PACKAGE_TARNAME)'
+test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
 
 ac_config_files="$ac_config_files Makefile sudo.man visudo.man sudoers.man sudoers.ldap.man sudoreplay.man sudo_usage.h"
 
