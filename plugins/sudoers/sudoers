@@ -54,6 +54,13 @@
 ## Uncomment to enable special input methods.  Care should be taken as
 ## this may allow users to subvert the command being run via sudo.
 # Defaults env_keep += "XMODIFIERS GTK_IM_MODULE QT_IM_MODULE QT_IM_SWITCHER"
+##
+## Uncomment to enable logging of a command's output, except for
+## sudoreplay and reboot.  Use sudoreplay to play back logged sessions.
+# Defaults log_output
+# Defaults!/usr/bin/sudoreplay !log_output
+# Defaults!/usr/local/bin/sudoreplay !log_output
+# Defaults!/sbin/reboot !log_output
 
 ##
 ## Runas alias specification
