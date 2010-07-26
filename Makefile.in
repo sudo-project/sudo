@@ -86,7 +86,6 @@ dist: ChangeLog $(srcdir)/MANIFEST
 
 package: sudo.pp
 	DESTDIR=`cd $(top_builddir) && pwd`/destdir; rm -rf $$DESTDIR; \
-	$(SHELL) $(srcdir)/mkinstalldirs $$DESTDIR/$(timedir) && \
 	$(MAKE) install DESTDIR=$$DESTDIR && \
 	$(SHELL) $(srcdir)/pp $(PPFLAGS) \
 	    --destdir=$$DESTDIR \

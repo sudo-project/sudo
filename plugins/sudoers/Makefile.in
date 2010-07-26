@@ -254,6 +254,7 @@ install-dirs:
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(plugindir) \
 	    $(DESTDIR)$(visudodir) $(DESTDIR)$(replaydir) \
 	    $(DESTDIR)$(sudoersdir) $(DESTDIR)$(docdir)
+	$(SHELL) $(srcdir)/mkinstalldirs -m 0700 $(DESTDIR)$(timedir)
 
 install-binaries: visudo sudoreplay install-dirs
 	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0111 sudoreplay $(DESTDIR)$(replaydir)/sudoreplay
