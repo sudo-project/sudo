@@ -135,7 +135,9 @@ sudo_pwdup(pw)
 #endif
     FIELD_SIZE(pw, pw_gecos, gsize);
     FIELD_SIZE(pw, pw_dir, dsize);
-    FIELD_SIZE(pw, pw_shell, ssize);
+    /* Treat shell specially since we expand "" -> _PATH_BSHELL */
+    ssize = strlen(pw_shell) + 1;
+    total += ssize;
 
     if ((cp = malloc(total)) == NULL)
 	    return(NULL);
@@ -154,7 +156,9 @@ sudo_pwdup(pw)
 #endif
     FIELD_COPY(pw, newpw, pw_gecos, gsize);
     FIELD_COPY(pw, newpw, pw_dir, dsize);
-    FIELD_COPY(pw, newpw, pw_shell, ssize);
+    /* Treat shell specially since we expand "" -> _PATH_BSHELL */
+    memcpy(cp, pw_shell, ssize);
+    newpw->pw_shell = cp;
 
     return(newpw);
 }
