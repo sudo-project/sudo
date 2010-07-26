@@ -1,6 +1,6 @@
 #!/bin/sh
 # (c) 2010 Quest Software, Inc. All rights reserved
-pp_revision="276"
+pp_revision="277"
 
  # Copyright (c) 2010 Quest Software, Inc.  All rights reserved.
  #
@@ -5095,7 +5095,7 @@ pp_rpm_detect_arch () {
     rm $pp_wrkdir/dummy.spec
 
     #-- Ask the kernel what machine architecture is in use
-    case "`uname -m`" in
+    case "`uname -p`" in
 	i?86)	pp_rpm_arch_std=i386;;
 	x86_64)	pp_rpm_arch_std=x86_64;;
 	ppc)	pp_rpm_arch_std=ppc;;
@@ -5103,6 +5103,13 @@ pp_rpm_detect_arch () {
 	ia64)	pp_rpm_arch_std=ia64;;
 	s390)	pp_rpm_arch_std=s390;;
 	s390x)	pp_rpm_arch_std=s390x;;
+	powerpc)
+		# Probably AIX
+		case "`/usr/sbin/lsattr -El proc0 -a type -F value`" in
+		    PowerPC_POWER*)	pp_rpm_arch_std=ppc64;;
+		    *)			pp_rpm_arch_std=ppc;;
+		esac
+		;;
 	*)	pp_rpm_arch_std=unknown;;
     esac
 
@@ -5137,6 +5144,11 @@ pp_rpm_detect_distro () {
           /^S[uU]SE LINUX Enterprise Server [0-9]/ { print "sles" $5; exit; }
           /^SuSE SLES-[0-9]/  { print "sles" substr($2,6); exit; }
        ' /etc/SuSE-release`
+    elif test X"`uname -s 2>/dev/null`" = X"AIX"; then
+	local r v
+	r=`uname -r`
+	v=`uname -v`
+	pp_rpm_distro="aix$v$r"
     fi
     pp_rpm_distro=`echo $pp_rpm_distro | tr -d .`
     test -z "$pp_rpm_distro" &&
@@ -5200,6 +5212,10 @@ pp_rpm_writefiles () {
 		    farch=s390;;
 		*": ELF 64-bit MSB "*", IBM S/390"*)
 		    farch=s390x;;
+		*": executable (RISC System/6000)"*)
+		    farch=ppc;;
+		*": 64-bit XCOFF executable"*)
+		    fatch=ppc64;;
 		*)
 		    farch=noarch;;
 	    esac
@@ -5423,7 +5439,11 @@ pp_backend_rpm () {
 	done >>$specfile
 
         #-- create a suitable work area for rpmbuild
-        echo "%_topdir $pp_wrkdir" >$pp_wrkdir/.rpmmacros
+	cat <<-. >$pp_wrkdir/.rpmmacros
+		%_topdir $pp_wrkdir
+		# XXX Note escaped %% for use in headerSprintf
+		%_rpmfilename   %%{ARCH}/%%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
+	.
 	mkdir $pp_wrkdir/RPMS
 	mkdir $pp_wrkdir/BUILD
 
