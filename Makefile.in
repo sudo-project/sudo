@@ -541,7 +541,7 @@ package: sudo.pp
 	DESTDIR=`cd $(top_builddir) && pwd`/destdir; rm -rf $$DESTDIR; \
 	$(SHELL) $(srcdir)/mkinstalldirs $$DESTDIR/$(timedir) && \
 	$(MAKE) install DESTDIR=$$DESTDIR && \
-	$(SHELL) $(srcdir)/pp \
+	$(SHELL) $(srcdir)/pp $(PPFLAGS) \
 	    --destdir=$$DESTDIR \
 	    $(srcdir)/sudo.pp \
 	    bindir=$(bindir) \
@@ -555,6 +555,6 @@ package: sudo.pp
 	    sudoers_uid=$(sudoers_uid) \
 	    sudoers_gid=$(sudoers_gid) \
 	    sudoers_mode=$(sudoers_mode) \
-	    version=$(VERSION)
+	    version=$(VERSION) $(PPVARS)
 
 .PHONY:	ChangeLog

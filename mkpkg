@@ -1,13 +1,50 @@
 #!/bin/sh
 #
 # Build a binary package using polypkg
-# Usage: mkpkg
+# Usage: mkpkg [--debug] [--flavor flavor] [--platform platform]
 #
 
 # Make sure IFS is set to space, tab, newline in that order.
 nl='
 '
 IFS=" 	$nl"
+
+# Parse arguments
+usage="usage: mkpkg [--debug] [--flavor flavor] [--platform platform]"
+debug=0
+while test $# -gt 0; do
+    case "$1" in
+	--debug)
+	    set -x
+	    PPFLAGS="--debug${PPFLAGS+ }${PPFLAGS}"
+	    ;;
+	--flavor=?*)
+	    arg=`echo "$1" | sed -n 's/^--flavor=\(.*\)/\1/p'`
+	    PPVARS="${PPVARS}${PPVARS+ }flavor=$arg"
+	    ;;
+	--flavor)
+	    if [ $# -lt 2 ]; then
+		echo "$usage" 1>&2
+		exit 1
+	    fi
+	    PPVARS="${PPVARS}${PPVARS+ }flavor=$2"
+	    shift
+	    ;;
+	--platform=?*)
+	    arg=`echo "$1" | sed -n 's/^--platform=\(.*\)/\1/p'`
+	    PPVARS="${PPVARS}${PPVARS+ }platform=$arg"
+	    ;;
+	--platform)
+	    if [ $# -lt 2 ]; then
+		echo "$usage" 1>&2
+		exit 1
+	    fi
+	    PPVARS="${PPVARS}${PPVARS+ }platform=$2"
+	    shift
+	    ;;
+    esac
+    shift
+done
 
 top_srcdir=`dirname $0`
 
@@ -139,4 +176,4 @@ IFS="	$nl"
 set -- $configure_opts
 IFS="$OIFS"
 $top_srcdir/configure "$@" || exit 1
-make $make_opts && make $make_opts package
+make $make_opts && make $make_opts PPFLAGS="$PPFLAGS" PPVARS="$PPVARS" package

@@ -1,6 +1,6 @@
 %set
-	if test -n "$SUDO_FLAVOR"; then
-		name="sudo-$SUDO_FLAVOR"
+	if test -n "$flavor"; then
+		name="sudo-$flavor"
 	else
 		name="sudo"
 	fi
@@ -182,7 +182,7 @@ still allow people to get their work done."
 
 	# create symlink to ease transition to new path for ldap config
 	# if old config file exists and new one doesn't
-	if test X"%{SUDO_FLAVOR}" = X"ldap" -a \
+	if test X"%{flavor}" = X"ldap" -a \
 	    -r /etc/ldap/ldap.conf -a ! -r /etc/sudo-ldap.conf; then
 		ln -s /etc/ldap/ldap.conf /etc/sudo-ldap.conf
 	fi
@@ -212,7 +212,7 @@ still allow people to get their work done."
 %preun [deb]
 	# Remove the /etc/ldap/ldap.conf -> /etc/sudo-ldap.conf symlink if
 	# it matches what we created in the postinstall script.
-	if test X"%{SUDO_FLAVOR}" = X"ldap" -a \
+	if test X"%{flavor}" = X"ldap" -a \
 	    X"`readlink /etc/sudo-ldap.conf 2>/dev/null`" = X"/etc/ldap/ldap.conf"; then
 		rm -f /etc/sudo-ldap.conf
 	fi
