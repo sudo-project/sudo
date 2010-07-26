@@ -403,17 +403,25 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 		n = read(iob->rfd, iob->buf + iob->len,
 		    sizeof(iob->buf) - iob->len);
 	    } while (n == -1 && errno == EINTR);
-	    if (n == -1) {
-		if (errno != EAGAIN)
+	    switch (n) {
+		case -1:
+		    if (errno == EAGAIN)
+			break;
+		    if (errno != ENXIO && errno != EBADF) {
+			errors++;
+			break;
+		    }
+		    /* FALLTHROUGH */
+		case 0:
+		    /* got EOF or pty has gone away */
+		    safe_close(iob->rfd);
+		    iob->rfd = -1;
 		    break;
-	    } else if (n == 0) {
-		/* got EOF */
-		safe_close(iob->rfd);
-		iob->rfd = -1;
-	    } else {
-		if (!iob->action(iob->buf + iob->len, n))
-		    terminate_child(child, TRUE);
-		iob->len += n;
+		default:
+		    if (!iob->action(iob->buf + iob->len, n))
+			terminate_child(child, TRUE);
+		    iob->len += n;
+		    break;
 	    }
 	}
 	if (iob->wfd != -1 && FD_ISSET(iob->wfd, fdsw)) {
@@ -422,8 +430,8 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 		    iob->len - iob->off);
 	    } while (n == -1 && errno == EINTR);
 	    if (n == -1) {
-		if (errno == EPIPE) {
-		    /* other end of pipe closed */
+		if (errno == EPIPE || errno == ENXIO || errno == EBADF) {
+		    /* other end of pipe closed or pty revoked */
 		    if (iob->rfd != -1) {
 			safe_close(iob->rfd);
 			iob->rfd = -1;
