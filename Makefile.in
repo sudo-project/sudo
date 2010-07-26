@@ -479,6 +479,7 @@ install-dirs:
 	    $(DESTDIR)$(visudodir) $(DESTDIR)$(noexecdir) \
 	    $(DESTDIR)$(sudoersdir) $(DESTDIR)$(docdir) \
 	    $(DESTDIR)$(mandirsu) $(DESTDIR)$(mandirform)
+	$(SHELL) $(srcdir)/mkinstalldirs -m 0700 $(DESTDIR)$(timedir)
 
 install-binaries: install-dirs $(PROGS)
 	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 04111 sudo $(DESTDIR)$(sudodir)/sudo
@@ -539,7 +540,6 @@ dist: ChangeLog
 
 package: sudo.pp
 	DESTDIR=`cd $(top_builddir) && pwd`/destdir; rm -rf $$DESTDIR; \
-	$(SHELL) $(srcdir)/mkinstalldirs $$DESTDIR/$(timedir) && \
 	$(MAKE) install DESTDIR=$$DESTDIR && \
 	$(SHELL) $(srcdir)/pp $(PPFLAGS) \
 	    --destdir=$$DESTDIR \
