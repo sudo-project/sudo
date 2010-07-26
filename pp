@@ -1,6 +1,6 @@
 #!/bin/sh
 # (c) 2010 Quest Software, Inc. All rights reserved
-pp_revision="277"
+pp_revision="278"
 
  # Copyright (c) 2010 Quest Software, Inc.  All rights reserved.
  #
@@ -2216,7 +2216,7 @@ pp_backend_sd_detect () {
 }
 
 pp_backend_sd_init () {
-    pp_sd_sudo=sudo     # FIXME: argh why is hpux so braindead
+    pp_sd_sudo=
     pp_sd_startlevels=2
     pp_sd_stoplevels=auto
     pp_sd_config_file=
@@ -6430,20 +6430,20 @@ pp_macos_mkbom () {
     bomstage=$pp_wrkdir/bom_stage
     while IFS='	' read path mode ugid size cksumi linkpath; do
 	if test -h "$pp_destdir/$path"; then
-	    sudo /bin/ln -s "$linkpath" "$bomstage/$path"
+	    /bin/ln -s "$linkpath" "$bomstage/$path"
 	else
 	    if test -d "$pp_destdir/$path"; then
-		sudo /bin/mkdir -p "$bomstage/$path"
+		/bin/mkdir -p "$bomstage/$path"
 	    else
-		sudo /bin/cp "$pp_destdir/$path" "$bomstage/$path"
+		/bin/cp "$pp_destdir/$path" "$bomstage/$path"
 	    fi
-	    sudo /bin/chmod $mode "$bomstage/$path"
-	    sudo /usr/sbin/chown `echo $ugid| tr / :` "$bomstage/$path"
+	    /bin/chmod $mode "$bomstage/$path"
+	    /usr/sbin/chown `echo $ugid| tr / :` "$bomstage/$path"
 	fi
     done <"$1"
-    (cd $bomstage && sudo mkbom . $pp_wrkdir/bom_stage.bom) ||
+    (cd $bomstage && mkbom . $pp_wrkdir/bom_stage.bom) ||
 	pp_error "mkbom failed"
-    sudo mv $pp_wrkdir/bom_stage.bom "$2"
+    mv $pp_wrkdir/bom_stage.bom "$2"
 }
 
 pp_backend_macos () {
@@ -6614,7 +6614,7 @@ CompressedSize 0
     cat $pp_wrkdir/%files.* | awk '{ print "." $6 }' | sed '/\/$/d' | sort | /bin/pax -w -f - | gzip -9 -c > $Contents/Archive.pax.gz
     )
 
-	sudo rm -rf $pp_wrkdir/bom_stage
+	rm -rf $pp_wrkdir/bom_stage
 }
 
 pp_backend_macos_cleanup () {
