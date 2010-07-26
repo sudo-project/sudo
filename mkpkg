@@ -32,14 +32,14 @@ while test $# -gt 0; do
 	    ;;
 	--platform=?*)
 	    arg=`echo "$1" | sed -n 's/^--platform=\(.*\)/\1/p'`
-	    PPVARS="${PPVARS}${PPVARS+ }platform=$arg"
+	    PPFLAGS="${PPFLAGS}${PPFLAGS+ }--platform $arg"
 	    ;;
 	--platform)
 	    if [ $# -lt 2 ]; then
 		echo "$usage" 1>&2
 		exit 1
 	    fi
-	    PPVARS="${PPVARS}${PPVARS+ }platform=$2"
+	    PPFLAGS="${PPFLAGS}${PPFLAGS+ }--platform $2"
 	    shift
 	    ;;
     esac
