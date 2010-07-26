@@ -1,6 +1,6 @@
 #!/bin/sh
 # (c) 2010 Quest Software, Inc. All rights reserved
-pp_revision="278"
+pp_revision="279"
 
  # Copyright (c) 2010 Quest Software, Inc.  All rights reserved.
  #
@@ -4520,9 +4520,11 @@ pp_backend_kit_names () {
         pp_kit_package=YYYY
     fi
     if test -z "$pp_kit_version"; then
-        pp_kit_version=`echo $version|sed -e 's/^\([0-9]\)\.\([0-9]\).*/\1\20/'`
+        pp_kit_version=`echo $version|tr -d '.a-zA-Z'`
     fi
     case "$pp_kit_version" in
+        [0-9]) pp_kit_version="${pp_kit_version}00";;
+        [0-9][0-9]) pp_kit_version="${pp_kit_version}0";;
         [0-9][0-9][0-9]) : ok;;
         *) pp_error "\$pp_kit_version $pp_kit_version must be three digits, ";;
     esac
