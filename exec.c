@@ -52,6 +52,9 @@
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
+#ifdef HAVE_SETLOCALE
+# include <locale.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -227,6 +230,14 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
 #endif
 	child = fork_cmnd(path, argv, envp, sv, rbac_enabled);
     close(sv[1]);
+
+#ifdef HAVE_SETLOCALE
+    /*
+     * I/O logging must be in the C locale for floating point numbers
+     * to be logged consistently.
+     */
+    setlocale(LC_ALL, "C");
+#endif
 
     /*
      * In the event loop we pass input from user tty to master
