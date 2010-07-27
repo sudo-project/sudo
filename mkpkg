@@ -65,6 +65,19 @@ case "$platform" in
 	;;
 esac
 
+# Choose compiler options by platform.
+case "$platform" in
+    hpux*)
+	# Use the HP ANSI C compiler on HP-UX if possible
+	if [ -z "$CC" -a -x /opt/ansic/bin/cc ]; then
+	    CC=/opt/ansic/bin/cc; export CC
+	    if [ -z "$CFLAGS" ]; then
+		CFLAGS=-O; export CFLAGS
+	    fi
+	fi
+	;;
+esac
+
 # Choose configure options by platform.
 # We use the same configure options as vendor packages when possible.
 case "$platform" in
