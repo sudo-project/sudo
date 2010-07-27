@@ -78,6 +78,9 @@
 #ifdef HAVE_ZLIB_H
 # include <zlib.h>
 #endif
+#ifdef HAVE_SETLOCALE
+# include <locale.h>
+#endif
 #include <signal.h>
 
 #include <pathnames.h>
@@ -193,6 +196,7 @@ static void check_input(int, double *);
 static void delay(double);
 static void usage(void);
 static void *open_io_fd(char *pathbuf, int len, const char *suffix);
+static int parse_timing(const char *buf, const char *decimal, int *idx, double *seconds, size_t *nbytes);
 
 #ifdef HAVE_REGCOMP
 # define REGEX_T	regex_t
@@ -208,19 +212,23 @@ static void *open_io_fd(char *pathbuf, int len, const char *suffix);
 int
 main(int argc, char *argv[])
 {
-    int ch, plen, nready, interactive = 0, listonly = 0;
-    const char *id, *user = NULL, *pattern = NULL, *tty = NULL;
+    int ch, idx, plen, nready, interactive = 0, listonly = 0;
+    const char *id, *user = NULL, *pattern = NULL, *tty = NULL, *decimal = ".";
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
     double seconds, to_wait, speed = 1.0, max_wait = 0;
     FILE *lfile;
     fd_set *fdsw;
     sigaction_t sa;
-    unsigned long nbytes, idx;
-    size_t len, nread, off;
+    size_t len, nbytes, nread, off;
     ssize_t nwritten;
 
 #if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
     setprogname(argc > 0 ? argv[0] : "sudoreplay");
+#endif
+
+#ifdef HAVE_SETLOCALE
+    setlocale(LC_ALL, "");
+    decimal = localeconv()->decimal_point;
 #endif
 
     while ((ch = getopt(argc, argv, "d:f:lm:s:V")) != -1) {
@@ -345,23 +353,8 @@ main(int argc, char *argv[])
 #else
     while (fgets(buf, sizeof(buf), io_fds[IOFD_TIMING].f) != NULL) {
 #endif
-	idx = strtoul(buf, &ep, 10);
-	if (idx > IOFD_MAX)
-	    errorx(1, "invalid timing file index: %s", cp);
-	for (cp = ep + 1; isspace((unsigned char) *cp); cp++)
-	    continue;
-
-	errno = 0;
-	seconds = strtod(cp, &ep);
-	if (errno != 0 || !isspace((unsigned char) *ep))
+	if (!parse_timing(buf, decimal, &idx, &seconds, &nbytes))
 	    errorx(1, "invalid timing file line: %s", buf);
-	for (cp = ep + 1; isspace((unsigned char) *cp); cp++)
-	    continue;
-
-	errno = 0;
-	nbytes = strtoul(cp, &ep, 10);
-	if (errno == ERANGE && nbytes == ULONG_MAX)
-	    errorx(1, "invalid timing file byte count: %s", cp);
 
 	if (interactive)
 	    check_input(STDIN_FILENO, &speed);
@@ -851,6 +844,70 @@ check_input(int ttyfd, double *speed)
 	}
     }
     free(fdsr);
+}
+
+/*
+ * Parse a timing line, which is formatted as:
+ *	index sleep_time num_bytes
+ * Where index is IOFD_*, sleep_time is the number of seconds to sleep
+ * before writing the data and num_bytes is the number of bytes to output.
+ * Returns 1 on success and 0 on failure.
+ */
+static int
+parse_timing(buf, decimal, idx, seconds, nbytes)
+    const char *buf;
+    const char *decimal;
+    int *idx;
+    double *seconds;
+    size_t *nbytes;
+{
+    unsigned long ul;
+    long l;
+    double d, fract = 0;
+    char *cp, *ep;
+
+    /* Parse index */
+    ul = strtoul(buf, &ep, 10);
+    if (ul > IOFD_MAX)
+	goto bad;
+    *idx = (int)ul;
+    for (cp = ep + 1; isspace((unsigned char) *cp); cp++)
+	continue;
+
+    /*
+     * Parse number of seconds.  Sudo logs timing data in the C locale
+     * but this may not match the current locale so we cannot use strtod().
+     * Furthermore, sudo < 1.7.4 logged with the user's locale so we need
+     * to be able to parse those logs too.
+     */
+    errno = 0;
+    l = strtol(cp, &ep, 10);
+    if ((errno == ERANGE && (l == LONG_MAX || l == LONG_MIN)) ||
+	l < 0 || l > INT_MAX ||
+	(*ep != '.' && strncmp(ep, decimal, strlen(decimal)) != 0)) {
+	goto bad;
+    }
+    *seconds = (double)l;
+    cp = ep + (*ep == '.' ? 1 : strlen(decimal));
+    d = 10.0;
+    while (*cp && isdigit((unsigned char) *cp)) {
+	fract += (*cp - '0') / d;
+	d *= 10;
+	cp++;
+    }
+    *seconds += fract;
+    while (isspace((unsigned char) *cp))
+	cp++;
+
+    errno = 0;
+    ul = strtoul(cp, &ep, 10);
+    if (errno == ERANGE && ul == ULONG_MAX)
+	goto bad;
+    *nbytes = (size_t)ul;
+
+    return 1;
+bad:
+    return 0;
 }
 
 static void
