@@ -5,6 +5,8 @@
 #
 
 # Make sure IFS is set to space, tab, newline in that order.
+space=' '
+tab='	'
 nl='
 '
 IFS=" 	$nl"
@@ -12,39 +14,42 @@ IFS=" 	$nl"
 # Parse arguments
 usage="usage: mkpkg [--debug] [--flavor flavor] [--platform platform]"
 debug=0
+flavor=vanilla
 while test $# -gt 0; do
     case "$1" in
 	--debug)
 	    set -x
-	    PPFLAGS="--debug${PPFLAGS+ }${PPFLAGS}"
+	    debug=1
+	    PPFLAGS="--debug${PPFLAGS+$space}${PPFLAGS}"
 	    ;;
 	--flavor=?*)
-	    arg=`echo "$1" | sed -n 's/^--flavor=\(.*\)/\1/p'`
-	    PPVARS="${PPVARS}${PPVARS+ }flavor=$arg"
+	    flavor=`echo "$1" | sed -n 's/^--flavor=\(.*\)/\1/p'`
+	    PPVARS="${PPVARS}${PPVARS+$space}flavor=$flavor"
 	    ;;
 	--flavor)
 	    if [ $# -lt 2 ]; then
 		echo "$usage" 1>&2
 		exit 1
 	    fi
-	    PPVARS="${PPVARS}${PPVARS+ }flavor=$2"
+	    flavor="$2"
+	    PPVARS="${PPVARS}${PPVARS+$space}flavor=$flavor"
 	    shift
 	    ;;
 	--platform=?*)
 	    arg=`echo "$1" | sed -n 's/^--platform=\(.*\)/\1/p'`
-	    PPFLAGS="${PPFLAGS}${PPFLAGS+ }--platform $arg"
+	    PPFLAGS="${PPFLAGS}${PPFLAGS+$space}--platform $arg"
 	    ;;
 	--platform)
 	    if [ $# -lt 2 ]; then
 		echo "$usage" 1>&2
 		exit 1
 	    fi
-	    PPFLAGS="${PPFLAGS}${PPFLAGS+ }--platform $2"
+	    PPFLAGS="${PPFLAGS}${PPFLAGS+$space}--platform $2"
 	    shift
 	    ;;
 	*)
 	    # Pass unknown options to configure
-	    extra_opts="${extra_opts}${extra_opts+	}$1"
+	    configure_opts="${configure_opts}${configure_opts+$tab}$1"
 	    ;;
     esac
     shift
@@ -79,7 +84,7 @@ case "$platform" in
 		CFLAGS=-O; export CFLAGS
 	    fi
 	else
-	    extra_opts="--disable-zlib${extra_opts+	}${extra_opts}"
+	    configure_opts="${configure_opts}${configure_opts+$tab}--disable-zlib"
 	fi
 	;;
 esac
@@ -92,7 +97,7 @@ case "$platform" in
 	if [ $osrelease -ge 50 ]; then
 	    # RHEL 5 and up build pies and have audit support
 	    export CFLAGS="$F_PIE" LDFLAGS="-pie"
-	    configure_opts="--with-linux-audit"
+	    configure_opts="${configure_opts}${configure_opts+$tab}--with-linux-audit"
 	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	configure_opts="$configure_opts
@@ -117,7 +122,7 @@ case "$platform" in
 	    export CFLAGS="$F_PIE" LDFLAGS="-pie"
 	    if [ $osrelease -ge 11 ]; then
 		# SLES 11 and higher has SELinux
-		configure_opts="--with-selinux"
+		configure_opts="${configure_opts}${configure_opts+$tab}--with-selinux"
 	    fi
 	fi
 	# SuSE doesn't have /usr/libexec
@@ -148,8 +153,8 @@ case "$platform" in
     deb*)
 	prefix=/usr
 	# Note, must indent with tabs, not spaces due to IFS trickery
-	if test "${SUDO_FLAVOR:-vanilla}" = "ldap"; then
-	    configure_opts="--with-ldap
+	if test "$flavor" = "ldap"; then
+	    configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap
 		--with-ldap-conf-file=/etc/sudo-ldap.conf"
 	fi
 	configure_opts="$configure_opts
@@ -175,8 +180,8 @@ case "$platform" in
 		--with-secure-path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/X11R6/bin"
 	;;
     *)
-	if test "${SUDO_FLAVOR:-vanilla}" = "ldap"; then
-	    configure_opts="--with-ldap"
+	if test "$flavor" = "ldap"; then
+	    configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap"
 	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	configure_opts="$configure_opts
@@ -194,5 +199,9 @@ OIFS="$IFS"
 IFS="	$nl"
 set -- $configure_opts $extra_opts
 IFS="$OIFS"
+if [ -r Makefile ]; then
+    make $make_opts distclean
+fi
 $top_srcdir/configure "$@" || exit 1
 make $make_opts && make $make_opts PPFLAGS="$PPFLAGS" PPVARS="$PPVARS" package
+test $debug -eq 0 && rm -rf destdir
