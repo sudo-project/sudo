@@ -890,7 +890,7 @@ parse_timing(buf, decimal, idx, seconds, nbytes)
     *seconds = (double)l;
     cp = ep + (*ep == '.' ? 1 : strlen(decimal));
     d = 10.0;
-    while (*cp && isdigit((unsigned char) *cp)) {
+    while (isdigit((unsigned char) *cp)) {
 	fract += (*cp - '0') / d;
 	d *= 10;
 	cp++;
