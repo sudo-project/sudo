@@ -253,13 +253,13 @@ main(argc, argv)
 	    errno = 0;
 	    max_wait = strtod(optarg, &ep);
 	    if (*ep != '\0' || errno != 0)
-		error(1, "invalid max wait: %s", optarg);
+		errorx(1, "invalid max wait: %s", optarg);
 	    break;
 	case 's':
 	    errno = 0;
 	    speed = strtod(optarg, &ep);
 	    if (*ep != '\0' || errno != 0)
-		error(1, "invalid speed factor: %s", optarg);
+		errorx(1, "invalid speed factor: %s", optarg);
 	    break;
 	case 'V':
 	    (void) printf("%s version %s\n", getprogname(), PACKAGE_VERSION);
@@ -351,21 +351,21 @@ main(argc, argv)
 #endif
 	idx = strtoul(buf, &ep, 10);
 	if (idx > IOFD_MAX)
-	    error(1, "invalid timing file index: %s", cp);
+	    errorx(1, "invalid timing file index: %s", cp);
 	for (cp = ep + 1; isspace((unsigned char) *cp); cp++)
 	    continue;
 
 	errno = 0;
 	seconds = strtod(cp, &ep);
 	if (errno != 0 || !isspace((unsigned char) *ep))
-	    error(1, "invalid timing file line: %s", buf);
+	    errorx(1, "invalid timing file line: %s", buf);
 	for (cp = ep + 1; isspace((unsigned char) *cp); cp++)
 	    continue;
 
 	errno = 0;
 	nbytes = strtoul(cp, &ep, 10);
 	if (errno == ERANGE && nbytes == ULONG_MAX)
-	    error(1, "invalid timing file byte count: %s", cp);
+	    errorx(1, "invalid timing file byte count: %s", cp);
 
 	if (interactive)
 	    check_input(STDIN_FILENO, &speed);
