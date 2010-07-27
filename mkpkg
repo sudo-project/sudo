@@ -42,6 +42,10 @@ while test $# -gt 0; do
 	    PPFLAGS="${PPFLAGS}${PPFLAGS+ }--platform $2"
 	    shift
 	    ;;
+	*)
+	    # Pass unknown options to configure
+	    extra_opts="${extra_opts}${extra_opts+	}$1"
+	    ;;
     esac
     shift
 done
@@ -74,6 +78,8 @@ case "$platform" in
 	    if [ -z "$CFLAGS" ]; then
 		CFLAGS=-O; export CFLAGS
 	    fi
+	else
+	    extra_opts="--disable-zlib${extra_opts+	}${extra_opts}"
 	fi
 	;;
 esac
@@ -186,7 +192,7 @@ esac
 # Remove spaces from IFS when setting $@ so that passprompt may include them
 OIFS="$IFS"
 IFS="	$nl"
-set -- $configure_opts
+set -- $configure_opts $extra_opts
 IFS="$OIFS"
 $top_srcdir/configure "$@" || exit 1
 make $make_opts && make $make_opts PPFLAGS="$PPFLAGS" PPVARS="$PPVARS" package
