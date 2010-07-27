@@ -315,6 +315,7 @@ main(argc, argv)
     if (lfile == NULL)
 	error(1, "unable to open %s", path);
     cp = NULL;
+    len = 0;
     getline(&cp, &len, lfile); /* log */
     getline(&cp, &len, lfile); /* cwd */
     getline(&cp, &len, lfile); /* command */
