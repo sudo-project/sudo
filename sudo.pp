@@ -1,8 +1,10 @@
 %set
 	if test -n "$flavor"; then
-		name="sudo_$flavor"
+		name="sudo-$flavor"
+		pp_kit_package="sudo_$flavor"
 	else
 		name="sudo"
+		pp_kit_package="sudo"
 	fi
 	summary="Provide limited super-user priveleges to specific users"
 	description="Sudo is a program designed to allow a sysadmin to give \
@@ -19,7 +21,6 @@ still allow people to get their work done."
 	pp_deb_maintainer="Todd.Miller@courtesan.com"
 	pp_sd_vendor_tag="TCM"
 	pp_kit_name="TCM"
-	pp_kit_package="$name"
 	pp_solaris_name="TCM${name}"
 %if [!rpm,deb]
 	# For all but RPM and Debian we need to install sudoers with a different
