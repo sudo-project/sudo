@@ -150,8 +150,14 @@ case "$platform" in
 
 	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
 	;;
-    deb*)
+    deb*|ubu*)
 	prefix=/usr
+	# If Ubuntu, add --enable-admin-flag
+	case "$platform" in
+	    ubu*)
+		configure_opts="${configure_opts}${configure_opts+$tab}--enable-admin-flag${tab}--without-lecture"
+		;;
+	esac
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	if test "$flavor" = "ldap"; then
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap

@@ -123,6 +123,7 @@ static void set_runasgr			__P((char *));
 static void set_runaspw			__P((char *));
 static void show_version		__P((void));
 static struct passwd *get_authpw	__P((void));
+static void create_admin_success_flag	__P((void));
 extern int sudo_edit			__P((int, char **, char **));
 int run_command __P((const char *path, char *argv[], char *envp[], uid_t uid, int dowait)); /* XXX should be in sudo.h */
 
@@ -449,6 +450,9 @@ main(argc, argv, envp)
     }
 
     if (ISSET(validated, VALIDATE_OK)) {
+	/* Create Ubuntu-style dot file to indicate sudo was successful. */
+	create_admin_success_flag();
+
 	/* Finally tell the user if the command did not exist. */
 	if (cmnd_status == NOT_FOUND_DOT) {
 	    audit_failure(NewArgv, "command in current directory");
@@ -1360,3 +1364,40 @@ show_version()
     }
     exit(0);
 }
+
+#ifdef USE_ADMIN_FLAG
+static void
+create_admin_success_flag()
+{
+    struct stat statbuf;
+    char flagfile[PATH_MAX];
+    int fd, n;
+
+    /* Check whether the user is in the admin group. */
+    if (!user_in_group(sudo_user.pw, "admin"))
+	return;
+
+    /* Build path to flag file. */
+    n = snprintf(flagfile, sizeof(flagfile), "%s/.sudo_as_admin_successful",
+	user_dir);
+    if (n <= 0 || n >= sizeof(flagfile))
+	return;
+
+    /* Create admin flag file if it doesn't already exist. */
+    set_perms(PERM_USER);
+    if (stat(flagfile, &statbuf) == 0) {
+	set_perms(PERM_ROOT);
+	return;
+    }
+
+    fd = open(flagfile, O_CREAT|O_WRONLY|O_EXCL, 0644);
+    close(fd);
+    set_perms(PERM_ROOT);
+}
+#else /* !USE_ADMIN_FLAG */
+static void
+create_admin_success_flag()
+{
+    /* STUB */
+}
+#endif /* USE_ADMIN_FLAG */
