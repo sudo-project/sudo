@@ -55,6 +55,8 @@ still allow people to get their work done."
 		/bin/ed - ${pp_destdir}${sudoersdir}/sudoers <<-'EOF'
 		/Locale settings/+1,s/^# //
 		/ConsoleKit session/+1,s/^# //
+		/allow any user to run sudo if they know the password/+2,s/^# //
+		/allow any user to run sudo if they know the password/+3,s/^# //
 		w
 		q
 		EOF
