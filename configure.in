@@ -1473,20 +1473,26 @@ case "$host" in
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 
-		# Use the +DAportable flag if it is supported
-		_CFLAGS="$CFLAGS"
-		CFLAGS="$CFLAGS +DAportable"
-		AC_CACHE_CHECK([whether $CC understands +DAportable],
-		    [sudo_cv_var_daportable],
-		    [AC_LINK_IFELSE(
-			[AC_LANG_PROGRAM([[]], [[]])],
-			    [sudo_cv_var_daportable=yes],
-			    [sudo_cv_var_daportable=no]
+		if test -z "$GCC"; then
+		    # Use the +DAportable flag on hppa if it is supported
+		    case "$host_cpu" in
+		    hppa*)
+			_CFLAGS="$CFLAGS"
+			CFLAGS="$CFLAGS +DAportable"
+			AC_CACHE_CHECK([whether $CC understands +DAportable],
+			    [sudo_cv_var_daportable],
+			    [AC_LINK_IFELSE(
+				[AC_LANG_PROGRAM([[]], [[]])],
+				    [sudo_cv_var_daportable=yes],
+				    [sudo_cv_var_daportable=no]
+				)
+			    ]
 			)
-		    ]
-		)
-		if test X"$sudo_cv_var_daportable" != X"yes"; then
-		    CFLAGS="$_CFLAGS"
+			if test X"$sudo_cv_var_daportable" != X"yes"; then
+			    CFLAGS="$_CFLAGS"
+			fi
+			;;
+		    esac
 		fi
 
 		case "$host" in
