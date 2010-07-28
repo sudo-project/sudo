@@ -145,7 +145,6 @@ still allow people to get their work done."
 	EOF
 
 %set [aix]
-	pp_aix_version=`echo $version | sed -e 's,\([0-9][0-9]*\)\.\([0-9][0-9]*\)\.\([0-9][0-9]*\)p\([0-9][0-9]*\)q\([0-9][0-9]*\),\1.\2.\3.\4,'`
 	summary="Configurable super-user privileges"
 
 %files
