@@ -898,6 +898,7 @@ ac_user_opts='
 enable_option_checking
 with_otp_only
 with_alertmail
+with_devel
 with_CC
 with_rpath
 with_blibpath
@@ -906,7 +907,6 @@ with_linux_audit
 with_incpath
 with_libpath
 with_libraries
-with_devel
 with_efence
 with_csops
 with_passwd
@@ -1654,6 +1654,7 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-otp-only         deprecated
   --with-alertmail        deprecated
+  --with-devel            add development options
   --with-CC               C compiler to use
   --with-rpath            pass -R flag in addition to -L for lib paths
   --with-blibpath=PATH    pass -blibpath flag to ld for additional lib paths
@@ -1662,7 +1663,6 @@ Optional Packages:
   --with-incpath          additional places to look for include files
   --with-libpath          additional places to look for libraries
   --with-libraries        additional libraries to link with
-  --with-devel            add development options
   --with-efence           link with -lefence for malloc() debugging
   --with-csops            add CSOps standard options
   --without-passwd        don't use passwd/shadow file for authentication
@@ -2866,6 +2866,28 @@ fi
 
 
 
+# Check whether --with-devel was given.
+if test "${with_devel+set}" = set; then :
+  withval=$with_devel; case $with_devel in
+    yes)	{ $as_echo "$as_me:${as_lineno-$LINENO}: Setting up for development: -Wall, flex, yacc" >&5
+$as_echo "$as_me: Setting up for development: -Wall, flex, yacc" >&6;}
+		PROGS="${PROGS} testsudoers"
+		OSDEFS="${OSDEFS} -DSUDO_DEVEL"
+		DEV=""
+		devdir=.
+		;;
+    no)		;;
+    *)		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --with-devel: $with_devel" >&5
+$as_echo "$as_me: WARNING: Ignoring unknown argument to --with-devel: $with_devel" >&2;}
+		;;
+esac
+fi
+
+if test X"$with_devel" != X"yes"; then
+    ac_cv_prog_cc_g=no
+fi
+
+
 # Check whether --with-CC was given.
 if test "${with_CC+set}" = set; then :
   withval=$with_CC; case $with_CC in
@@ -3790,25 +3812,6 @@ if test "${with_libraries+set}" = set; then :
 		;;
     *)		{ $as_echo "$as_me:${as_lineno-$LINENO}: Adding ${with_libraries} to LIBS" >&5
 $as_echo "$as_me: Adding ${with_libraries} to LIBS" >&6;}
-		;;
-esac
-fi
-
-
-
-# Check whether --with-devel was given.
-if test "${with_devel+set}" = set; then :
-  withval=$with_devel; case $with_devel in
-    yes)	{ $as_echo "$as_me:${as_lineno-$LINENO}: Setting up for development: -Wall, flex, yacc" >&5
-$as_echo "$as_me: Setting up for development: -Wall, flex, yacc" >&6;}
-		PROGS="${PROGS} testsudoers"
-		OSDEFS="${OSDEFS} -DSUDO_DEVEL"
-		DEV=""
-		devdir=.
-		;;
-    no)		;;
-    *)		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --with-devel: $with_devel" >&5
-$as_echo "$as_me: WARNING: Ignoring unknown argument to --with-devel: $with_devel" >&2;}
 		;;
 esac
 fi
@@ -5481,10 +5484,6 @@ else
 fi
 
 
-if test X"$with_devel" != X"yes"; then
-    ac_cv_prog_cc_g=no
-fi
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing strerror" >&5
 $as_echo_n "checking for library containing strerror... " >&6; }
 if test "${ac_cv_search_strerror+set}" = set; then :
@@ -6568,13 +6567,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6571: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6570: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6574: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6573: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6577: output\"" >&5)
+  (eval echo "\"\$as_me:6576: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -7779,7 +7778,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7782 "configure"' > conftest.$ac_ext
+  echo '#line 7781 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9172,11 +9171,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9175: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9174: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9179: \$? = $ac_status" >&5
+   echo "$as_me:9178: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9511,11 +9510,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9514: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9513: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9518: \$? = $ac_status" >&5
+   echo "$as_me:9517: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9616,11 +9615,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9619: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9618: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9623: \$? = $ac_status" >&5
+   echo "$as_me:9622: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9671,11 +9670,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9674: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9673: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9678: \$? = $ac_status" >&5
+   echo "$as_me:9677: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12038,7 +12037,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12041 "configure"
+#line 12040 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12134,7 +12133,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12137 "configure"
+#line 12136 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
