@@ -1277,6 +1277,17 @@ AC_ARG_ENABLE(warnings,
   esac
 ])
 
+AC_ARG_ENABLE(admin-flag,
+[AS_HELP_STRING([--enable-admin-flag], [Whether to create a Ubuntu-style admin flag file])],
+[ case "$enableval" in
+    yes)    AC_DEFINE(USE_ADMIN_FLAG)
+	    ;;
+    no)	    ;;
+    *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-admin-flag: $enableval])
+	    ;;
+  esac
+])
+
 AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])],
 [case $with_selinux in
     yes)	SELINUX_USAGE="[[-r role]] [[-t type]] "
@@ -2859,6 +2870,7 @@ AH_TEMPLATE(SEND_MAIL_WHEN_NO_USER, [Define to 1 to send mail when the user is n
 AH_TEMPLATE(SHELL_IF_NO_ARGS, [Define to 1 if you want sudo to start a shell if given no arguments.])
 AH_TEMPLATE(SHELL_SETS_HOME, [Define to 1 if you want sudo to set $HOME in shell mode.])
 AH_TEMPLATE(STUB_LOAD_INTERFACES, [Define to 1 if the code in interfaces.c does not compile for you.])
+AH_TEMPLATE(USE_ADMIN_FLAG, [Define to 1 if you want to create ~/.sudo_as_admin_successful if the user is in the admin group the first time they run sudo.])
 AH_TEMPLATE(USE_INSULTS, [Define to 1 if you want to insult the user for entering an incorrect password.])
 AH_TEMPLATE(USE_STOW, [Define to 1 if you use GNU stow packaging.])
 AH_TEMPLATE(WITHOUT_PASSWD, [Define to avoid using the passwd/shadow file for authentication.])

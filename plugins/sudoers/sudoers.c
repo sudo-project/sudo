@@ -118,6 +118,7 @@ static int sudoers_policy_version(int verbose);
 static struct passwd *get_authpw(void);
 static int deserialize_info(char * const settings[], char * const user_info[]);
 static char *find_editor(int nfiles, char **files, char ***argv_out);
+static void create_admin_success_flag(void);
 
 /* XXX */
 extern int runas_ngroups;
@@ -494,6 +495,9 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	}
 	goto done;
     }
+
+    /* Create Ubuntu-style dot file to indicate sudo was successful. */
+    create_admin_success_flag();
 
     /* Finally tell the user if the command did not exist. */
     if (cmnd_status == NOT_FOUND_DOT) {
@@ -1421,6 +1425,43 @@ find_editor(int nfiles, char **files, char ***argv_out)
     }
     return editor_path;
 }
+
+#ifdef USE_ADMIN_FLAG
+static void
+create_admin_success_flag(void)
+{
+    struct stat statbuf;
+    char flagfile[PATH_MAX];
+    int fd, n;
+
+    /* Check whether the user is in the admin group. */
+    if (!user_in_group(sudo_user.pw, "admin"))
+	return;
+
+    /* Build path to flag file. */
+    n = snprintf(flagfile, sizeof(flagfile), "%s/.sudo_as_admin_successful",
+	user_dir);
+    if (n <= 0 || n >= sizeof(flagfile))
+	return;
+
+    /* Create admin flag file if it doesn't already exist. */
+    set_perms(PERM_USER);
+    if (stat(flagfile, &statbuf) == 0) {
+	set_perms(PERM_ROOT);
+	return;
+    }
+
+    fd = open(flagfile, O_CREAT|O_WRONLY|O_EXCL, 0644);
+    close(fd);
+    set_perms(PERM_ROOT);
+}
+#else /* !USE_ADMIN_FLAG */
+static void
+create_admin_success_flag(void)
+{
+    /* STUB */
+}
+#endif /* USE_ADMIN_FLAG */
 
 struct policy_plugin sudoers_policy = {
     SUDO_POLICY_PLUGIN,

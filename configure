@@ -993,6 +993,7 @@ enable_path_info
 enable_env_debug
 enable_zlib
 enable_warnings
+enable_admin_flag
 with_selinux
 enable_gss_krb5_ccache_name
 enable_shared
@@ -1647,6 +1648,7 @@ Optional Features:
   --enable-env-debug      Whether to enable environment debugging.
   --enable-zlib[=PATH]    Whether to enable or disable zlib
   --enable-warnings       Whether to enable compiler warnings
+  --enable-admin-flag     Whether to create a Ubuntu-style admin flag file
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -5398,6 +5400,21 @@ $as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-warnings: $enab
 fi
 
 
+# Check whether --enable-admin-flag was given.
+if test "${enable_admin_flag+set}" = set; then :
+  enableval=$enable_admin_flag;  case "$enableval" in
+    yes)    $as_echo "#define USE_ADMIN_FLAG 1" >>confdefs.h
+
+	    ;;
+    no)	    ;;
+    *)	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-admin-flag: $enableval" >&5
+$as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-admin-flag: $enableval" >&2;}
+	    ;;
+  esac
+
+fi
+
+
 
 # Check whether --with-selinux was given.
 if test "${with_selinux+set}" = set; then :
@@ -6553,13 +6570,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6556: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6573: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6559: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6576: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6562: output\"" >&5)
+  (eval echo "\"\$as_me:6579: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -7764,7 +7781,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7767 "configure"' > conftest.$ac_ext
+  echo '#line 7784 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9156,11 +9173,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9159: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9176: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9163: \$? = $ac_status" >&5
+   echo "$as_me:9180: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9495,11 +9512,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9498: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9515: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9502: \$? = $ac_status" >&5
+   echo "$as_me:9519: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9600,11 +9617,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9603: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9620: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9607: \$? = $ac_status" >&5
+   echo "$as_me:9624: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9655,11 +9672,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9658: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9675: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9662: \$? = $ac_status" >&5
+   echo "$as_me:9679: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12022,7 +12039,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12025 "configure"
+#line 12042 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12118,7 +12135,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12121 "configure"
+#line 12138 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -20223,6 +20240,7 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+
 
 
 

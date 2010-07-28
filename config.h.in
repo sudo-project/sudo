@@ -719,6 +719,10 @@
 /* Define to 1 if the `unsetenv' function returns void instead of `int'. */
 #undef UNSETENV_VOID
 
+/* Define to 1 if you want to create ~/.sudo_as_admin_successful if the user
+   is in the admin group the first time they run sudo. */
+#undef USE_ADMIN_FLAG
+
 /* Define to 1 if you want to insult the user for entering an incorrect
    password. */
 #undef USE_INSULTS
