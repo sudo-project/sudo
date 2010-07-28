@@ -1454,25 +1454,31 @@ case "$host" in
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 
-		# HP-UX bundled compiler can't generate shared objects
-		if test "x$ac_cv_prog_cc_c89" = "xno"; then
-		    with_noexec=no
-		fi
+		if test -z "$GCC"; then
+		    # HP-UX bundled compiler can't generate shared objects
+		    if -z "$pic_flag"; then
+			with_noexec=no
+		    fi
 
-		# Use the +DAportable flag if it is supported
-		_CFLAGS="$CFLAGS"
-		CFLAGS="$CFLAGS +DAportable"
-		AC_CACHE_CHECK([whether $CC understands +DAportable],
-		    [sudo_cv_var_daportable],
-		    [AC_LINK_IFELSE(
-			[AC_LANG_PROGRAM([[]], [[]])],
-			    [sudo_cv_var_daportable=yes],
-			    [sudo_cv_var_daportable=no]
+		    # Use the +DAportable flag on hppa if it is supported
+		    case "$host_cpu" in
+		    hppa*)
+			_CFLAGS="$CFLAGS"
+			CFLAGS="$CFLAGS +DAportable"
+			AC_CACHE_CHECK([whether $CC understands +DAportable],
+			    [sudo_cv_var_daportable],
+			    [AC_LINK_IFELSE(
+				[AC_LANG_PROGRAM([[]], [[]])],
+				    [sudo_cv_var_daportable=yes],
+				    [sudo_cv_var_daportable=no]
+				)
+			    ]
 			)
-		    ]
-		)
-		if test X"$sudo_cv_var_daportable" != X"yes"; then
-		    CFLAGS="$_CFLAGS"
+			if test X"$sudo_cv_var_daportable" != X"yes"; then
+			    CFLAGS="$_CFLAGS"
+			fi
+			;;
+		    esac
 		fi
 
 		case "$host" in
