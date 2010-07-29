@@ -677,7 +677,7 @@ handle_sigchld(backchannel, cstat)
  * parent and relays signals from the parent to the command.
  * Returns an error if fork(2) fails, else calls _exit(2).
  */
-int
+static int
 exec_monitor(path, argv, envp, backchannel, rbac)
     const char *path;
     char *argv[];
