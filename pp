@@ -1,8 +1,7 @@
 #!/bin/sh
 # (c) 2010 Quest Software, Inc. All rights reserved
-pp_revision="279"
-
- # Copyright (c) 2010 Quest Software, Inc.  All rights reserved.
+pp_revision="281"
+ # Copyright 2010 Quest Software, Inc.  All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
  # modification, are permitted provided that the following conditions
@@ -29,10 +28,10 @@ pp_revision="279"
  # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
- # Please see <http://rc.vintela.com/topics/polypkg/> for more information
+ # Please see <http://rc.quest.com/topics/polypkg/> for more information
 
 pp_version="1.0.0.$pp_revision"
-pp_copyright="Copyright (c) 2010, Quest Software, Inc. All rights reserved."
+pp_copyright="Copyright 2010, Quest Software, Inc. All rights reserved."
 
 pp_opt_debug=false
 pp_opt_destdir="$DESTDIR"
@@ -803,7 +802,7 @@ pp_frontend_init () {
     version=
     summary="no summary"
     description="No description"
-    copyright="Copyright (c) 2010 Quest Software, Inc. All rights reserved"
+    copyright="Copyright 2010 Quest Software, Inc. All rights reserved."
 
     #-- if the user supplied extra arguments on the command line
     #   then load them now.
@@ -5097,7 +5096,12 @@ pp_rpm_detect_arch () {
     rm $pp_wrkdir/dummy.spec
 
     #-- Ask the kernel what machine architecture is in use
-    case "`uname -p`" in
+    local arch=`uname -p`
+    if [ "$arch" = "unknown" ]; then
+	arch=`uname -m`
+    fi
+
+    case "$arch" in
 	i?86)	pp_rpm_arch_std=i386;;
 	x86_64)	pp_rpm_arch_std=x86_64;;
 	ppc)	pp_rpm_arch_std=ppc;;
@@ -5249,20 +5253,20 @@ pp_rpm_depend () {
 }
 
 pp_rpm_override_requires () {
-	local orig_find_requires
+    local orig_find_requires
 
-	if test -z "$pp_rpm_depend_filter_cmd"; then
-		return 0
-	fi
+    if test -z "$pp_rpm_depend_filter_cmd"; then
+	return 0
+    fi
 
-	orig_find_requires=`rpm --eval '%{__find_requires}'`
-	cat << EOF > "$pp_wrkdir/filtered-find-requires"
+    orig_find_requires=`rpm --eval '%{__find_requires}'`
+    cat << EOF > "$pp_wrkdir/filtered-find-requires"
 $orig_find_requires \$@ | $pp_rpm_depend_filter_cmd
 EOF
-	chmod +x "$pp_wrkdir/filtered-find-requires"
-	echo "%define __find_requires $pp_wrkdir/filtered-find-requires"
-	# Might be necessary for old versions of RPM? Not for 4.4.2.
-	#echo "%define _use_internal_dependency_generator 0"
+    chmod +x "$pp_wrkdir/filtered-find-requires"
+    echo "%define __find_requires $pp_wrkdir/filtered-find-requires"
+    # Might be necessary for old versions of RPM? Not for 4.4.2.
+    #echo "%define _use_internal_dependency_generator 0"
 }
 
 pp_backend_rpm () {
