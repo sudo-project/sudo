@@ -1,6 +1,6 @@
 #!/bin/sh
 # (c) 2010 Quest Software, Inc. All rights reserved
-pp_revision="281"
+pp_revision="283"
  # Copyright 2010 Quest Software, Inc.  All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -1729,8 +1729,8 @@ pp_aix_inventory () {
       case "$t" in
         f) if test -r "$pp_destdir$p"; then
 	    case "`file "$pp_destdir$p"`" in
-		*": executable (RISC System/6000)"*) abi=ppc;;
-		*": 64-bit XCOFF executable"*)       abi=ppc64;;
+		*"executable (RISC System/6000)"*) abi=ppc;;
+		*"64-bit XCOFF executable"*)       abi=ppc64;;
 		*) abi=;;
 	    esac
 	    if test -n "$abi"; then
@@ -4022,37 +4022,37 @@ pp_backend_deb_probe() {
 	    release=`lsb_release -cs`
 	    case $release in
 		buzz)
-		    release="1.1"
+		    release="11"
 		    ;;
 		rex)
-		    release="1.2"
+		    release="12"
 		    ;;
 		bo)
-		    release="1.3"
+		    release="13"
 		    ;;
 		hamm)
-		    release="2.0"
+		    release="20"
 		    ;;
 		slink)
-		    release="2.1"
+		    release="21"
 		    ;;
 		potato)
-		    release="2.2"
+		    release="22"
 		    ;;
 		woody)
-		    release="3.0"
+		    release="30"
 		    ;;
 		sarge)
-		    release="3.1"
+		    release="31"
 		    ;;
 		etch)
-		    release="4.0"
+		    release="40"
 		    ;;
 		lenny)
-		    release="5.0"
+		    release="50"
 		    ;;
 		squeeze)
-		    release="6.0"
+		    release="60"
 		    ;;
 	    esac
 	    ;;
@@ -5218,9 +5218,9 @@ pp_rpm_writefiles () {
 		    farch=s390;;
 		*": ELF 64-bit MSB "*", IBM S/390"*)
 		    farch=s390x;;
-		*": executable (RISC System/6000)"*)
+		*"executable (RISC System/6000)"*)
 		    farch=ppc;;
-		*": 64-bit XCOFF executable"*)
+		*"64-bit XCOFF executable"*)
 		    fatch=ppc64;;
 		*)
 		    farch=noarch;;
