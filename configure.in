@@ -1891,12 +1891,13 @@ AC_CHECK_TYPE([struct timespec], [AC_DEFINE(HAVE_TIMESPEC)], [], [#include <sys/
 #include <time.h>])
 AC_CHECK_TYPES([struct in6_addr], [AC_DEFINE(HAVE_IN6_ADDR)], [], [#include <sys/types.h>
 #include <netinet/in.h>])
+AC_TYPE_LONG_LONG_INT
+AC_CHECK_SIZEOF([long int])
 SUDO_TYPE_SIZE_T
 SUDO_TYPE_SSIZE_T
 SUDO_TYPE_DEV_T
 SUDO_TYPE_INO_T
 SUDO_UID_T_LEN
-SUDO_TYPE_LONG_LONG
 SUDO_SOCK_SA_LEN
 dnl
 dnl only set RETSIGTYPE if it is not set already

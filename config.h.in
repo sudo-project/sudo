@@ -310,8 +310,8 @@
 /* Define to 1 if you have the <login_cap.h> header file. */
 #undef HAVE_LOGIN_CAP_H
 
-/* Define if your compiler supports the "long long" type. */
-#undef HAVE_LONG_LONG
+/* Define to 1 if the system has the type `long long int'. */
+#undef HAVE_LONG_LONG_INT
 
 /* Define to 1 if you have the `lrand48' function. */
 #undef HAVE_LRAND48
@@ -616,9 +616,6 @@
 /* Define to SLOG_SYSLOG, SLOG_FILE, or SLOG_BOTH. */
 #undef LOGGING
 
-/* Define if sizeof(long) == sizeof(long long). */
-#undef LONG_IS_QUAD
-
 /* Define to 1 if you want a two line OTP (S/Key or OPIE) prompt. */
 #undef LONG_OTP_PROMPT
 
@@ -722,6 +719,9 @@
 
 /* Define to 1 if you want sudo to set $HOME in shell mode. */
 #undef SHELL_SETS_HOME
+
+/* The size of `long int', as computed by sizeof. */
+#undef SIZEOF_LONG_INT
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS

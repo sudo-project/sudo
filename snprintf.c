@@ -89,7 +89,7 @@ static int xxxprintf	 __P((char **, size_t, int, const char *, va_list));
 #ifndef LONG_MAX
 # define LONG_MAX	(ULONG_MAX / 2)
 #endif
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 # ifndef ULLONG_MAX
 #  ifdef UQUAD_MAX
 #   define ULLONG_MAX	UQUAD_MAX
@@ -104,7 +104,7 @@ static int xxxprintf	 __P((char **, size_t, int, const char *, va_list));
 #   define LLONG_MAX	(ULLONG_MAX / 2)
 #  endif
 # endif
-#endif /* HAVE_LONG_LONG */
+#endif /* HAVE_LONG_LONG_INT */
 
 /*
  * Macros for converting digits to letters and vice versa
@@ -212,8 +212,8 @@ __ultoa(val, endp, base, octzero, xdigs)
 }
 
 /* Identical to __ultoa, but for quads. */
-#ifdef HAVE_LONG_LONG
-# ifdef LONG_IS_QUAD
+#ifdef HAVE_LONG_LONG_INT
+# if SIZEOF_LONG_INT == 8
 #  define __uqtoa(v, e, b, o, x) __ultoa((unsigned long)(v), (e), (b), (o), (x))
 # else
 static char *
@@ -268,8 +268,8 @@ __uqtoa(val, endp, base, octzero, xdigs)
 	}
 	return (cp);
 }
-# endif /* !LONG_IS_QUAD */
-#endif /* HAVE_LONG_LONG */
+# endif /* !SIZEOF_LONG_INT */
+#endif /* HAVE_LONG_LONG_INT */
 
 /*
  * Actual printf innards.
@@ -292,7 +292,7 @@ xxxprintf(strp, strsize, alloc, fmt0, ap)
 	int prec;		/* precision from format (%.3d), or -1 */
 	char sign;		/* sign prefix (' ', '+', '-', or \0) */
 	unsigned long ulval;	/* integer arguments %[diouxX] */
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 	unsigned long long uqval; /* %q (quad) integers */
 #endif
 	int base;		/* base for [diouxX] conversion */
@@ -469,11 +469,11 @@ reswitch:	switch (ch) {
 		case 'l':
 			flags |= LONGINT;
 			goto rflag;
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 		case 'q':
 			flags |= QUADINT;
 			goto rflag;
-#endif /* HAVE_LONG_LONG */
+#endif /* HAVE_LONG_LONG_INT */
 		case 'c':
 			*(cp = buf) = va_arg(ap, int);
 			size = 1;
@@ -484,7 +484,7 @@ reswitch:	switch (ch) {
 			/*FALLTHROUGH*/
 		case 'd':
 		case 'i':
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 			if (flags & QUADINT) {
 				uqval = va_arg(ap, long long);
 				if ((long long)uqval < 0) {
@@ -493,7 +493,7 @@ reswitch:	switch (ch) {
 				}
 			}
 			else
-#endif /* HAVE_LONG_LONG */
+#endif /* HAVE_LONG_LONG_INT */
 			{
 				ulval = SARG();
 				if ((long)ulval < 0) {
@@ -504,11 +504,11 @@ reswitch:	switch (ch) {
 			base = 10;
 			goto number;
 		case 'n':
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 			if (flags & QUADINT)
 				*va_arg(ap, long long *) = ret;
 			else
-#endif /* HAVE_LONG_LONG */
+#endif /* HAVE_LONG_LONG_INT */
 			if (flags & LONGINT)
 				*va_arg(ap, long *) = ret;
 			else if (flags & SHORTINT)
@@ -520,11 +520,11 @@ reswitch:	switch (ch) {
 			flags |= LONGINT;
 			/*FALLTHROUGH*/
 		case 'o':
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 			if (flags & QUADINT)
 				uqval = va_arg(ap, unsigned long long);
 			else
-#endif /* HAVE_LONG_LONG */
+#endif /* HAVE_LONG_LONG_INT */
 				ulval = UARG();
 			base = 8;
 			goto nosign;
@@ -567,11 +567,11 @@ reswitch:	switch (ch) {
 			flags |= LONGINT;
 			/*FALLTHROUGH*/
 		case 'u':
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 			if (flags & QUADINT)
 				uqval = va_arg(ap, unsigned long long);
 			else
-#endif /* HAVE_LONG_LONG */
+#endif /* HAVE_LONG_LONG_INT */
 				ulval = UARG();
 			base = 10;
 			goto nosign;
@@ -581,20 +581,20 @@ reswitch:	switch (ch) {
 		case 'x':
 			xdigs = "0123456789abcdef";
 hex:
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 			if (flags & QUADINT)
 				uqval = va_arg(ap, unsigned long long);
 			else
-#endif /* HAVE_LONG_LONG */
+#endif /* HAVE_LONG_LONG_INT */
 				ulval = UARG();
 			base = 16;
 			/* leading 0x/X only if non-zero */
 			if (flags & ALT &&
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 			    (flags & QUADINT ? uqval != 0 : ulval != 0))
 #else
 			    ulval != 0)
-#endif /* HAVE_LONG_LONG */
+#endif /* HAVE_LONG_LONG_INT */
 				flags |= HEXPREFIX;
 
 			/* unsigned conversions */
@@ -613,14 +613,14 @@ number:			if ((dprec = prec) >= 0)
 			 *	-- ANSI X3J11
 			 */
 			cp = buf + BUF;
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 			if (flags & QUADINT) {
 				if (uqval != 0 || prec != 0)
 					cp = __uqtoa(uqval, cp, base,
 					    flags & ALT, xdigs);
 			}
 			else
-#endif /* HAVE_LONG_LONG */
+#endif /* HAVE_LONG_LONG_INT */
 			{
 				if (ulval != 0 || prec != 0)
 					cp = __ultoa(ulval, cp, base,
