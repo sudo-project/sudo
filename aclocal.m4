@@ -235,24 +235,14 @@ AC_DEFUN([SUDO_FUNC_UNSETENV_VOID],
 dnl
 dnl check for sa_len field in struct sockaddr
 dnl
-AC_DEFUN(SUDO_SOCK_SA_LEN,
-[AC_MSG_CHECKING(for sa_len field in struct sockaddr)
-AC_CACHE_VAL(sudo_cv_sock_sa_len,
-[AC_TRY_RUN([#include <sys/types.h>
-#include <sys/socket.h>
-main() {
-struct sockaddr s;
-s.sa_len = 0;
-exit(0);
-}], sudo_cv_sock_sa_len=yes, sudo_cv_sock_sa_len=no,
-  sudo_cv_sock_sa_len=no)
-rm -f core core.* *.core])dnl
-AC_MSG_RESULT($sudo_cv_sock_sa_len)
-if test $sudo_cv_sock_sa_len = yes; then
-  AC_DEFINE(HAVE_SA_LEN, 1, [Define if your struct sockadr has an sa_len field.])
-fi
-])
-
+AC_DEFUN(SUDO_SOCK_SA_LEN, [
+    AC_CHECK_MEMBER([struct sockaddr.sa_len], 
+	[AC_DEFINE(HAVE_SA_LEN, 1, [Define if your struct sockadr has an sa_len field.])],    
+	[],
+	[ #include <sys/types.h>
+	  #include <sys/socket.h>] 
+    )]
+)
 dnl
 dnl check for max length of uid_t in string representation.
 dnl we can't really trust UID_MAX or MAXUID since they may exist
@@ -287,26 +277,6 @@ rm -f conftestdata
 AC_MSG_RESULT($sudo_cv_uid_t_len)
 AC_DEFINE_UNQUOTED(MAX_UID_T_LEN, $sudo_cv_uid_t_len, [Define to the max length of a uid_t in string context (excluding the NUL).])
 ])
-
-dnl
-dnl Check for presence of long long and for sizeof(long long) == sizeof(long)
-dnl
-AC_DEFUN(SUDO_TYPE_LONG_LONG,
-[AC_CHECK_TYPES(long long, [AC_DEFINE(HAVE_LONG_LONG, 1, [Define if your compiler supports the "long long" type.])]
-[AC_MSG_CHECKING(for long and long long equivalence)
-AC_CACHE_VAL(sudo_cv_type_long_is_quad,
-[AC_TRY_RUN([
-main() {
-if (sizeof(long long) == sizeof(long)) exit(0);
-else exit(1);
-}], [sudo_cv_type_long_is_quad=yes],
-[sudo_cv_type_long_is_quad=no], [sudo_cv_type_long_is_quad=no])
-rm -f core core.* *.core])dnl
-AC_MSG_RESULT($sudo_cv_type_long_is_quad)
-if test $sudo_cv_type_long_is_quad = yes; then
-  AC_DEFINE(LONG_IS_QUAD, 1, [Define if sizeof(long) == sizeof(long long).])
-fi
-])])
 
 dnl
 dnl append a libpath to an LDFLAGS style variable
