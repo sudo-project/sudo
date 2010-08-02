@@ -227,7 +227,7 @@ AC_DEFUN([SUDO_FUNC_UNSETENV_VOID],
     ],
     [sudo_cv_func_unsetenv_void=no],
     [sudo_cv_func_unsetenv_void=yes],
-    [sudo_cv_func_unsetenv_void=yes])])
+    [sudo_cv_func_unsetenv_void=no])])
     if test $sudo_cv_func_unsetenv_void = yes; then
       AC_DEFINE(UNSETENV_VOID, 1,
         [Define to 1 if the `unsetenv' function returns void instead of `int'.])
@@ -289,7 +289,7 @@ main() {
   (void) fprintf(f, "%d\n", strlen(b));
   (void) fclose(f);
   exit(0);
-}], sudo_cv_uid_t_len=`cat conftestdata`, sudo_cv_uid_t_len=10)
+}], sudo_cv_uid_t_len=`cat conftestdata`, sudo_cv_uid_t_len=10, sudo_cv_uid_t_len=10)
 ])
 rm -f conftestdata
 AC_MSG_RESULT($sudo_cv_uid_t_len)
