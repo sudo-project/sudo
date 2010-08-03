@@ -647,7 +647,7 @@ remove_timestamp(remove)
 	    }
 	} else {
 	    timevalclear(&tv);
-	    if (touch(-1, path, &tv) == -1)
+	    if (touch(-1, path, &tv) == -1 && errno != ENOENT)
 		error(1, "can't reset %s to Epoch", path);
 	}
     }
