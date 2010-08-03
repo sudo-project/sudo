@@ -219,7 +219,8 @@ update_timestamp(timestampdir, timestampfile)
 	    log_error(NO_EXIT|USE_ERRNO, "Can't open %s", timestampfile);
 	else {
 	    lock_file(fd, SUDO_LOCK);
-	    write(fd, &tty_info, sizeof(tty_info));
+	    if (write(fd, &tty_info, sizeof(tty_info)) != sizeof(tty_info))
+		log_error(NO_EXIT|USE_ERRNO, "Can't write %s", timestampfile);
 	    close(fd);
 	}
     } else {

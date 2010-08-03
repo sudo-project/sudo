@@ -72,7 +72,8 @@ get_pty(master, slave, name, namesz, ttyuid)
 
     if (openpty(master, slave, name, NULL, NULL) != 0)
 	return(0);
-    (void) chown(name, ttyuid, ttygid);
+    if (chown(name, ttyuid, ttygid) != 0)
+	return(0);
     return(1);
 }
 

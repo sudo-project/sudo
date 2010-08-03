@@ -479,7 +479,8 @@ send_mail(fmt, va_alist)
     /* Daemonize - disassociate from session/tty. */
     if (setsid() == -1)
       warning("setsid");
-    (void) chdir("/");
+    if (chdir("/") == -1)
+      warning("chdir(/)");
     if ((fd = open(_PATH_DEVNULL, O_RDWR, 0644)) != -1) {
 	(void) dup2(fd, STDIN_FILENO);
 	(void) dup2(fd, STDOUT_FILENO);
