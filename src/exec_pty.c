@@ -639,10 +639,14 @@ pty_close(struct command_status *cstat)
 	    const char *reason = strsignal(signo);
 	    n = io_fds[SFD_USERTTY] != -1 ?
 		io_fds[SFD_USERTTY] : STDOUT_FILENO;
-	    write(n, reason, strlen(reason));
-	    if (WCOREDUMP(cstat->val))
-		write(n, " (core dumped)", 14);
-	    write(n, "\n", 1);
+	    if (write(n, reason, strlen(reason)) != -1) {
+		if (WCOREDUMP(cstat->val)) {
+		    if (write(n, " (core dumped)", 14) == -1)
+			/* shut up glibc */;
+		}
+		if (write(n, "\n", 1) == -1)
+		    /* shut up glibc */;
+	    }
 	}
     }
 }
@@ -875,7 +879,8 @@ exec_monitor(struct command_details *details, char *argv[], char *envp[],
 	exec_pty(details, argv, envp);
 	cstat.type = CMD_ERRNO;
 	cstat.val = errno;
-	write(errpipe[1], &cstat, sizeof(cstat));
+	if (write(errpipe[1], &cstat, sizeof(cstat)) == -1)
+	    /* shut up glibc */;
 	_exit(1);
     }
     close(errpipe[1]);

@@ -312,9 +312,12 @@ main(int argc, char *argv[])
 	error(1, "unable to open %s", path);
     cp = NULL;
     len = 0;
-    getline(&cp, &len, lfile); /* log */
-    getline(&cp, &len, lfile); /* cwd */
-    getline(&cp, &len, lfile); /* command */
+    /* Pull out command (third line). */
+    if (getline(&cp, &len, lfile) == -1 ||
+	getline(&cp, &len, lfile) == -1 ||
+	getline(&cp, &len, lfile) == -1) {
+	error(1, "invalid log file %s", path);
+    }
     printf("Replaying sudo session: %s", cp);
     free(cp);
     fclose(lfile);

@@ -290,7 +290,8 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 	    /* Add missing newline at EOF if needed. */
 	    if (nread > 0 && buf[nread - 1] != '\n') {
 		buf[0] = '\n';
-		write(tfd, buf, 1);
+		if (write(tfd, buf, 1) != 1)
+		    error(1, "write error");
 	    }
 	}
 	(void) close(tfd);
@@ -483,8 +484,14 @@ install_sudoers(struct sudoersfile *sp, int oldperms)
 	if (stat(sp->path, &sb) == -1)
 #endif
 	    error(1, "can't stat %s", sp->path);
-	(void) chown(sp->tpath, sb.st_uid, sb.st_gid);
-	(void) chmod(sp->tpath, sb.st_mode & 0777);
+	if (chown(sp->tpath, sb.st_uid, sb.st_gid) != 0) {
+	    warning("unable to set (uid, gid) of %s to (%d, %d)",
+		sp->tpath, sb.st_uid, sb.st_gid);
+	}
+	if (chmod(sp->tpath, sb.st_mode & 0777) != 0) {
+	    warning("unable to change mode of %s to 0%o", sp->tpath,
+		(sb.st_mode & 0777));
+	}
     } else {
 	if (chown(sp->tpath, SUDOERS_UID, SUDOERS_GID) != 0) {
 	    warning("unable to set (uid, gid) of %s to (%d, %d)",
@@ -1143,8 +1150,9 @@ quit(int signo)
 {
     cleanup(signo);
 #define	emsg	 " exiting due to signal.\n"
-    write(STDERR_FILENO, getprogname(), strlen(getprogname()));
-    write(STDERR_FILENO, emsg, sizeof(emsg) - 1);
+    if (write(STDERR_FILENO, getprogname(), strlen(getprogname())) == -1 ||
+	write(STDERR_FILENO, emsg, sizeof(emsg) - 1) == -1)
+	/* shut up glibc */;
     _exit(signo);
 }
 

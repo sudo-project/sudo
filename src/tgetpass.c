@@ -150,8 +150,10 @@ restart:
     sa.sa_handler = SIG_IGN;
     (void) sigaction(SIGPIPE, &sa, &savepipe);
 
-    if (prompt)
-	(void) write(output, prompt, strlen(prompt));
+    if (prompt) {
+	if (write(output, prompt, strlen(prompt)) == -1)
+	    goto restore;
+    }
 
     if (timeout > 0)
 	alarm(timeout);
@@ -159,9 +161,12 @@ restart:
     alarm(0);
     save_errno = errno;
 
-    if (neednl || pass == NULL)
-	(void) write(output, "\n", 1);
+    if (neednl || pass == NULL) {
+	if (write(output, "\n", 1) == -1)
+	    goto restore;
+    }
 
+restore:
     /* Restore old tty settings and signals. */
     if (!ISSET(flags, TGP_ECHO))
 	term_restore(input, 1);
@@ -277,20 +282,23 @@ getln(int fd, char *buf, size_t bufsiz, int feedback)
 	if (feedback) {
 	    if (c == term_kill) {
 		while (cp > buf) {
-		    (void) write(fd, "\b \b", 3);
+		    if (write(fd, "\b \b", 3) == -1)
+			break;
 		    --cp;
 		}
 		left = bufsiz;
 		continue;
 	    } else if (c == term_erase) {
 		if (cp > buf) {
-		    (void) write(fd, "\b \b", 3);
+		    if (write(fd, "\b \b", 3) == -1)
+			break;
 		    --cp;
 		    left++;
 		}
 		continue;
 	    }
-	    (void) write(fd, "*", 1);
+	    if (write(fd, "*", 1) == -1)
+		/* shut up glibc */;
 	}
 	*cp++ = c;
     }
@@ -298,7 +306,8 @@ getln(int fd, char *buf, size_t bufsiz, int feedback)
     if (feedback) {
 	/* erase stars */
 	while (cp > buf) {
-	    (void) write(fd, "\b \b", 3);
+	    if (write(fd, "\b \b", 3) == -1)
+		break;
 	    --cp;
 	}
     }
