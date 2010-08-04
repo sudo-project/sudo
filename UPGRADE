@@ -29,7 +29,7 @@ o Upgrading from a version prior to 1.7.4:
     use when searching for configuration files.  Adding HOME to env_keep
     may enable a user to run unrestricted commands via sudo.
 
-    The default syslog facility has changed from "local2" or "authpriv"
+    The default syslog facility has changed from "local2" to "authpriv"
     (or "auth" if the operating system doesn't have "authpriv").
     The --with-logfac configure option can be used to change this
     or it can be changed in the sudoers file.
