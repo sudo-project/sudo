@@ -690,6 +690,7 @@ user_in_group(pw, group)
     int i;
 #endif
     struct group *grp;
+    int retval = FALSE;
 
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb(pw->pw_name);
@@ -699,23 +700,29 @@ user_in_group(pw, group)
     aix_restoreauthdb();
 #endif
     if (grp == NULL)
-	return(FALSE);
+	goto done;
 
     /* check against user's primary (passwd file) gid */
-    if (grp->gr_gid == pw->pw_gid)
-	return(TRUE);
+    if (grp->gr_gid == pw->pw_gid) {
+	retval = TRUE;
+	goto done;
+    }
 
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
     /* If we are matching the invoking user use the stashed uuid. */
     if (strcmp(pw->pw_name, user_name) == 0) {
 	if (mbr_gid_to_uuid(grp->gr_gid, gu) == 0 &&
-	    mbr_check_membership(user_uuid, gu, &ismember) == 0 && ismember)
-	    return(TRUE);
+	    mbr_check_membership(user_uuid, gu, &ismember) == 0 && ismember) {
+	    retval = TRUE;
+	    goto done;
+	}
     } else {
 	if (mbr_uid_to_uuid(pw->pw_uid, uu) == 0 &&
 	    mbr_gid_to_uuid(grp->gr_gid, gu) == 0 &&
-	    mbr_check_membership(uu, gu, &ismember) == 0 && ismember)
-	    return(TRUE);
+	    mbr_check_membership(uu, gu, &ismember) == 0 && ismember) {
+	    retval = TRUE;
+	    goto done;
+	}
     }
 #else /* HAVE_MBR_CHECK_MEMBERSHIP */
 # ifdef HAVE_GETGROUPS
@@ -726,20 +733,26 @@ user_in_group(pw, group)
     if (user_ngroups >= 0 &&
 	strcmp(pw->pw_name, list_pw ? list_pw->pw_name : user_name) == 0) {
 	for (i = 0; i < user_ngroups; i++) {
-	    if (grp->gr_gid == user_groups[i])
-		return(TRUE);
+	    if (grp->gr_gid == user_groups[i]) {
+		retval = TRUE;
+		goto done;
+	    }
 	}
     } else
 # endif /* HAVE_GETGROUPS */
     {
 	if (grp != NULL && grp->gr_mem != NULL) {
 	    for (gr_mem = grp->gr_mem; *gr_mem; gr_mem++) {
-		if (strcmp(*gr_mem, pw->pw_name) == 0)
-		    return(TRUE);
+		if (strcmp(*gr_mem, pw->pw_name) == 0) {
+		    retval = TRUE;
+		    goto done;
+		}
 	    }
 	}
     }
 #endif /* HAVE_MBR_CHECK_MEMBERSHIP */
 
-    return(FALSE);
+done:
+    gr_delref(grp);
+    return(retval);
 }
