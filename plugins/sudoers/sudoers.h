@@ -270,6 +270,10 @@ struct passwd *sudo_getpwuid(uid_t);
 struct group *sudo_getgrnam(const char *);
 struct group *sudo_fakegrnam(const char *);
 struct group *sudo_getgrgid(gid_t);
+void gr_addref(struct group *);
+void gr_delref(struct group *);
+void pw_addref(struct passwd *);
+void pw_delref(struct passwd *);
 int user_in_group(struct passwd *, const char *);
 
 /* timestr.c */

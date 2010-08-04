@@ -648,6 +648,10 @@ remove_timestamp(int remove)
 
     efree(timestampdir);
     efree(timestampfile);
+    if (auth_pw) {
+	pw_delref(auth_pw);
+	auth_pw = NULL;
+    }
 }
 
 /*

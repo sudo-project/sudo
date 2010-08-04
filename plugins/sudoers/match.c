@@ -771,25 +771,41 @@ group_matches(char *sudoers_group, struct group *gr)
 int
 usergr_matches(char *group, char *user, struct passwd *pw)
 {
+    int matched = FALSE;
+    struct passwd *pw0 = NULL;
+
     /* make sure we have a valid usergroup, sudo style */
     if (*group++ != '%')
-	return(FALSE);
+	goto done;
 
-    if (*group == ':' && def_group_plugin)
-	return(group_plugin_query(user, group + 1, pw));
+    if (*group == ':' && def_group_plugin) {
+	matched = group_plugin_query(user, group + 1, pw);
+	goto done;
+    }
 
     /* look up user's primary gid in the passwd file */
-    if (pw == NULL && (pw = sudo_getpwnam(user)) == NULL)
-	return(FALSE);
+    if (pw == NULL) {
+	if ((pw0 = sudo_getpwnam(user)) == NULL)
+	    goto done;
+	pw = pw0;
+    }
 
-    if (user_in_group(pw, group))
-	return(TRUE);
+    if (user_in_group(pw, group)) {
+	matched = TRUE;
+	goto done;
+    }
 
     /* not a Unix group, could be an external group */
-    if (def_group_plugin && group_plugin_query(user, group, pw))
-    	return(TRUE);
+    if (def_group_plugin && group_plugin_query(user, group, pw)) {
+	matched = TRUE;
+	goto done;
+    }
 
-    return(FALSE);
+done:
+    if (pw0 != NULL)
+	pw_delref(pw0);
+
+    return(matched);
 }
 
 /*
