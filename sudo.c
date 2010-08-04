@@ -1276,13 +1276,15 @@ set_runaspw(user)
 }
 
 /*
- * Get group entry for the group we are going to run commands as.
- * Updates runas_pw as a side effect.
+ * Get group entry for the group we are going to run commands as
+ * and store it in runas_gr.
  */
 static void
 set_runasgr(group)
     char *group;
 {
+    if (runas_gr != NULL)
+	gr_delref(runas_gr);
     if (*group == '#') {
 	if ((runas_gr = sudo_getgrgid(atoi(group + 1))) == NULL)
 	    runas_gr = sudo_fakegrnam(group);
