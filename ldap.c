@@ -856,13 +856,17 @@ sudo_ldap_build_pass1(pw)
     sz = 29 + strlen(pw->pw_name);
 
     /* Add space for groups */
-    if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL)
+    if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
 	sz += 12 + strlen(grp->gr_name);	/* primary group */
+	gr_delref(grp);
+    }
     for (i = 0; i < user_ngroups; i++) {
 	if (user_groups[i] == pw->pw_gid)
 	    continue;
-	if ((grp = sudo_getgrgid(user_groups[i])) != NULL)
+	if ((grp = sudo_getgrgid(user_groups[i])) != NULL) {
 	    sz += 12 + strlen(grp->gr_name);	/* supplementary group */
+	    gr_delref(grp);
+	}
     }
     buf = emalloc(sz);
 
@@ -876,6 +880,7 @@ sudo_ldap_build_pass1(pw)
 	(void) strlcat(buf, "(sudoUser=%", sz);
 	(void) strlcat(buf, grp->gr_name, sz);
 	(void) strlcat(buf, ")", sz);
+	gr_delref(grp);
     }
 
     /* Append supplementary groups */
@@ -886,6 +891,7 @@ sudo_ldap_build_pass1(pw)
 	    (void) strlcat(buf, "(sudoUser=%", sz);
 	    (void) strlcat(buf, grp->gr_name, sz);
 	    (void) strlcat(buf, ")", sz);
+	    gr_delref(grp);
 	}
     }
 

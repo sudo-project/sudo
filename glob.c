@@ -175,6 +175,7 @@ static void	 qprintf __P((const char *, Char *));
 
 extern struct passwd *sudo_getpwnam __P((const char *));
 extern struct passwd *sudo_getpwuid __P((uid_t));
+extern void pw_delref __P((struct passwd *));
 
 int
 glob(pattern, flags, errfunc, pglob)
@@ -367,7 +368,7 @@ globtilde(pattern, patbuf, patbuf_len, pglob)
 	size_t patbuf_len;
 	glob_t *pglob;
 {
-	struct passwd *pwd;
+	struct passwd *pwd = NULL;
 	char *h;
 	const Char *p;
 	Char *b, *eb;
@@ -412,6 +413,9 @@ globtilde(pattern, patbuf, patbuf_len, pglob)
 	while (b < eb && (*b++ = *p++) != EOS)
 		continue;
 	*b = EOS;
+
+	if (pwd)
+	    pw_delref(pwd);
 
 	return patbuf;
 }

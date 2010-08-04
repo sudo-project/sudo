@@ -812,28 +812,44 @@ usergr_matches(group, user, pw)
     char *user;
     struct passwd *pw;
 {
+    int matched = FALSE;
+    struct passwd *pw0 = NULL;
+
     /* make sure we have a valid usergroup, sudo style */
     if (*group++ != '%')
-	return(FALSE);
+	goto done;
 
 #ifdef USING_NONUNIX_GROUPS
-    if (*group == ':')
-	return(sudo_nonunix_groupcheck(++group, user, pw));   
+    if (*group == ':') {
+	matched = sudo_nonunix_groupcheck(++group, user, pw);
+	goto done;
+    }
 #endif /* USING_NONUNIX_GROUPS */
 
     /* look up user's primary gid in the passwd file */
-    if (pw == NULL && (pw = sudo_getpwnam(user)) == NULL)
-	return(FALSE);
+    if (pw == NULL) {
+	if ((pw0 = sudo_getpwnam(user)) == NULL)
+	    goto done;
+	pw = pw0;
+    }
 
-    if (user_in_group(pw, group))
-	return(TRUE);
+    if (user_in_group(pw, group)) {
+	matched = TRUE;
+	goto done;
+    }
 
 #ifdef USING_NONUNIX_GROUPS
     /* not a Unix group, could be an AD group */
     if (sudo_nonunix_groupcheck_available() &&
-	sudo_nonunix_groupcheck(group, user, pw))
-    	return(TRUE);
+	sudo_nonunix_groupcheck(group, user, pw)) {
+	matched = TRUE;
+	goto done;
+    }
 #endif /* USING_NONUNIX_GROUPS */
+
+done:
+    if (pw0 != NULL)
+	pw_delref(pw0);
 
     return(FALSE);
 }

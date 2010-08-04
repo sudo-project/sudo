@@ -66,7 +66,10 @@ static int  cmp_grgid	__P((const void *, const void *));
 
 #define cmp_grnam	cmp_pwnam
 
+#define ptr_to_item(p) ((struct cache_item *)((char *)(p) - sizeof(struct cache_item)))
+
 struct cache_item {
+    unsigned int refcnt;
     /* key */
     union {
 	uid_t uid;
@@ -194,8 +197,41 @@ make_pwitem(pw, name)
 	item->k.uid = pw->pw_uid;
     }
     item->d.pw = newpw;
+    item->refcnt = 1;
 
     return(item);
+}
+
+void
+pw_addref(pw)
+    struct passwd *pw;
+{
+    ptr_to_item(pw)->refcnt++;
+}
+
+static void
+pw_delref_item(v)
+    void *v;
+{
+    struct cache_item *item = v;
+    struct passwd *pw = item->d.pw;
+
+    if (--item->refcnt == 0) {
+	if (pw != NULL && pw->pw_passwd != NULL) {
+	    zero_bytes(pw->pw_passwd, strlen(pw->pw_passwd));
+	    if ((char *)pw->pw_passwd < (char *)pw ||
+		(char *)pw->pw_passwd > (char *)pw->pw_gecos)
+		efree(pw->pw_passwd); /* free if separate allocation */
+	}
+	efree(item);
+    }
+}
+
+void
+pw_delref(pw)
+    struct passwd *pw;
+{
+    pw_delref_item(ptr_to_item(pw));
 }
 
 /*
@@ -232,6 +268,7 @@ sudo_getpwuid(uid)
 		uid, item->d.pw->pw_name);
     } else {
 	item = emalloc(sizeof(*item));
+	item->refcnt = 1;
 	item->k.uid = uid;
 	item->d.pw = NULL;
 	if (rbinsert(pwcache_byuid, item) != NULL)
@@ -241,6 +278,7 @@ sudo_getpwuid(uid)
     aix_restoreauthdb();
 #endif
 done:
+    item->refcnt++;
     return(item->d.pw);
 }
 
@@ -279,6 +317,7 @@ sudo_getpwnam(name)
     } else {
 	len = strlen(name) + 1;
 	item = emalloc(sizeof(*item) + len);
+	item->refcnt = 1;
 	item->k.name = (char *) item + sizeof(*item);
 	memcpy(item->k.name, name, len);
 	item->d.pw = NULL;
@@ -289,6 +328,7 @@ sudo_getpwnam(name)
     aix_restoreauthdb();
 #endif
 done:
+    item->refcnt++;
     return(item->d.pw);
 }
 
@@ -328,70 +368,26 @@ sudo_fakepwnam(user, gid)
 	pw->pw_shell = pw->pw_dir + 2;
 	memcpy(pw->pw_shell, _PATH_BSHELL, sizeof(_PATH_BSHELL));
 
+	item->refcnt = 1;
+	item->d.pw = pw;
 	if (i == 0) {
 	    /* Store by uid, overwriting cached version. */
 	    item->k.uid = pw->pw_uid;
-	    item->d.pw = pw;
 	    if ((node = rbinsert(pwcache_byuid, item)) != NULL) {
-		efree(node->data);
+		pw_delref_item(node->data);
 		node->data = item;
 	    }
 	} else {
 	    /* Store by name, overwriting cached version. */
 	    item->k.name = pw->pw_name;
-	    item->d.pw = pw;
 	    if ((node = rbinsert(pwcache_byname, item)) != NULL) {
-		efree(node->data);
+		pw_delref_item(node->data);
 		node->data = item;
 	    }
 	}
     }
+    item->refcnt++;
     return(pw);
-}
-
-/*
- * Take a gid in string form "#123" and return a faked up group struct.
- */
-struct group *
-sudo_fakegrnam(group)
-    const char *group;
-{
-    struct cache_item *item;
-    struct group *gr;
-    struct rbnode *node;
-    size_t len, namelen;
-    int i;
-
-    namelen = strlen(group);
-    len = sizeof(*item) + sizeof(*gr) + namelen + 1;
-
-    for (i = 0; i < 2; i++) {
-	item = emalloc(len);
-	zero_bytes(item, sizeof(*item) + sizeof(*gr));
-	gr = (struct group *) ((char *)item + sizeof(*item));
-	gr->gr_gid = (gid_t) atoi(group + 1);
-	gr->gr_name = (char *)gr + sizeof(struct group);
-	memcpy(gr->gr_name, group, namelen + 1);
-
-	if (i == 0) {
-	    /* Store by gid, overwriting cached version. */
-	    item->k.gid = gr->gr_gid;
-	    item->d.gr = gr;
-	    if ((node = rbinsert(grcache_bygid, item)) != NULL) {
-		efree(node->data);
-		node->data = item;
-	    }
-	} else {
-	    /* Store by name, overwriting cached version. */
-	    item->k.name = gr->gr_name;
-	    item->d.gr = gr;
-	    if ((node = rbinsert(grcache_byname, item)) != NULL) {
-		efree(node->data);
-		node->data = item;
-	    }
-	}
-    }
-    return(gr);
 }
 
 void
@@ -405,47 +401,25 @@ sudo_setpwent()
 	pwcache_byname = rbcreate(cmp_pwnam);
 }
 
-#ifdef PURIFY
-static void pw_free	__P((void *));
-
 void
 sudo_freepwcache()
 {
     if (pwcache_byuid != NULL) {
-	rbdestroy(pwcache_byuid, pw_free);
+	rbdestroy(pwcache_byuid, pw_delref_item);
 	pwcache_byuid = NULL;
     }
     if (pwcache_byname != NULL) {
-	rbdestroy(pwcache_byname, pw_free);
+	rbdestroy(pwcache_byname, pw_delref_item);
 	pwcache_byname = NULL;
     }
 }
-
-static void
-pw_free(v)
-    void *v;
-{
-    struct cache_item *item = (struct cache_item *) v;
-    struct passwd *pw = item->d.pw;
-
-    if (pw != NULL && pw->pw_passwd != NULL) {
-	zero_bytes(pw->pw_passwd, strlen(pw->pw_passwd));
-	if ((char *)pw->pw_passwd < (char *)pw ||
-	    (char *)pw->pw_passwd > (char *)pw->pw_gecos)
-	    efree(pw->pw_passwd); /* free if separate allocation */
-    }
-    efree(item);
-}
-#endif /* PURIFY */
 
 void
 sudo_endpwent()
 {
     endpwent();
     sudo_endspent();
-#ifdef PURIFY
-    sudo_freepwcache();	/* XXX - use after free */
-#endif
+    sudo_freepwcache();
 }
 
 /*
@@ -524,8 +498,33 @@ make_gritem(gr, name)
 	item->k.gid = gr->gr_gid;
     }
     item->d.gr = newgr;
+    item->refcnt = 1;
 
     return(item);
+}
+
+void
+gr_addref(gr)
+    struct group *gr;
+{
+    ptr_to_item(gr)->refcnt++;
+}
+
+static void
+gr_delref_item(v)
+    void *v;
+{
+    struct cache_item *item = v;
+
+    if (--item->refcnt == 0)
+	efree(item);
+}
+
+void
+gr_delref(gr)
+    struct group *gr;
+{
+    gr_delref_item(ptr_to_item(gr));
 }
 
 /*
@@ -553,12 +552,14 @@ sudo_getgrgid(gid)
 		gid, key.d.gr->gr_name);
     } else {
 	item = emalloc(sizeof(*item));
+	item->refcnt = 1;
 	item->k.gid = gid;
 	item->d.gr = NULL;
 	if (rbinsert(grcache_bygid, item) != NULL)
 	    errorx(1, "unable to cache gid %lu, already exists, gid");
     }
 done:
+    item->refcnt++;
     return(item->d.gr);
 }
 
@@ -588,6 +589,7 @@ sudo_getgrnam(name)
     } else {
 	len = strlen(name) + 1;
 	item = emalloc(sizeof(*item) + len);
+	item->refcnt = 1;
 	item->k.name = (char *) item + sizeof(*item);
 	memcpy(item->k.name, name, len);
 	item->d.gr = NULL;
@@ -595,7 +597,54 @@ sudo_getgrnam(name)
 	    errorx(1, "unable to cache group %s, already exists", name);
     }
 done:
+    item->refcnt++;
     return(item->d.gr);
+}
+
+/*
+ * Take a gid in string form "#123" and return a faked up group struct.
+ */
+struct group *
+sudo_fakegrnam(group)
+    const char *group;
+{
+    struct cache_item *item;
+    struct group *gr;
+    struct rbnode *node;
+    size_t len, namelen;
+    int i;
+
+    namelen = strlen(group);
+    len = sizeof(*item) + sizeof(*gr) + namelen + 1;
+
+    for (i = 0; i < 2; i++) {
+	item = emalloc(len);
+	zero_bytes(item, sizeof(*item) + sizeof(*gr));
+	gr = (struct group *) ((char *)item + sizeof(*item));
+	gr->gr_gid = (gid_t) atoi(group + 1);
+	gr->gr_name = (char *)gr + sizeof(struct group);
+	memcpy(gr->gr_name, group, namelen + 1);
+
+	item->refcnt = 1;
+	item->d.gr = gr;
+	if (i == 0) {
+	    /* Store by gid, overwriting cached version. */
+	    item->k.gid = gr->gr_gid;
+	    if ((node = rbinsert(grcache_bygid, item)) != NULL) {
+		gr_delref_item(node->data);
+		node->data = item;
+	    }
+	} else {
+	    /* Store by name, overwriting cached version. */
+	    item->k.name = gr->gr_name;
+	    if ((node = rbinsert(grcache_byname, item)) != NULL) {
+		gr_delref_item(node->data);
+		node->data = item;
+	    }
+	}
+    }
+    item->refcnt++;
+    return(gr);
 }
 
 void
@@ -608,28 +657,24 @@ sudo_setgrent()
 	grcache_byname = rbcreate(cmp_grnam);
 }
 
-#ifdef PURIFY
 void
 sudo_freegrcache()
 {
     if (grcache_bygid != NULL) {
-	rbdestroy(grcache_bygid, free);
+	rbdestroy(grcache_bygid, gr_delref_item);
 	grcache_bygid = NULL;
     }
     if (grcache_byname != NULL) {
-	rbdestroy(grcache_byname, NULL);
+	rbdestroy(grcache_byname, gr_delref_item);
 	grcache_byname = NULL;
     }
 }
-#endif /* PURIFY */
 
 void
 sudo_endgrent()
 {
     endgrent();
-#ifdef PURIFY
-    sudo_freegrcache();	/* XXX - use after free */
-#endif
+    sudo_freegrcache();
 }
 
 int

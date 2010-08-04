@@ -301,6 +301,10 @@ void sudo_endspent	__P((void));
 void sudo_setgrent	__P((void));
 void sudo_setpwent	__P((void));
 void sudo_setspent	__P((void));
+void gr_addref		__P((struct group *));
+void gr_delref		__P((struct group *));
+void pw_addref		__P((struct passwd *));
+void pw_delref		__P((struct passwd *));
 
 /* selinux.c */
 int selinux_restore_tty __P((void));

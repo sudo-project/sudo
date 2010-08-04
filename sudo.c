@@ -393,6 +393,7 @@ main(argc, argv, envp)
 	    log_error(0, "timestamp owner (%s): No such user",
 		def_timestampowner);
 	timestamp_uid = pw->pw_uid;
+	pw_delref(pw);
     }
 
     /* If given the -P option, set the "preserve_groups" flag. */
@@ -441,6 +442,8 @@ main(argc, argv, envp)
 	    struct passwd *pw;
 
 	    if ((pw = sudo_getpwnam(prev_user)) != NULL) {
+		    if (sudo_user.pw != NULL)
+			pw_delref(sudo_user.pw);
 		    sudo_user.pw = pw;
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
 		    mbr_uid_to_uuid(user_uid, user_uuid);
@@ -1252,13 +1255,15 @@ set_fqdn()
 }
 
 /*
- * Get passwd entry for the user we are going to run commands as.
- * By default, this is "root".  Updates runas_pw as a side effect.
+ * Get passwd entry for the user we are going to run commands as
+ * and store it in runas_pw.  By default, commands run as "root".
  */
 static void
 set_runaspw(user)
     char *user;
 {
+    if (runas_pw != NULL)
+	pw_delref(runas_pw);
     if (*user == '#') {
 	if ((runas_pw = sudo_getpwuid(atoi(user + 1))) == NULL)
 	    runas_pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
@@ -1307,9 +1312,12 @@ get_authpw()
 	if (runas_pw->pw_name == NULL)
 	    log_error(NO_MAIL|MSG_ONLY, "unknown uid: %lu",
 		(unsigned long) runas_pw->pw_uid);
+	pw_addref(runas_pw);
 	pw = runas_pw;
-    } else
+    } else {
+	pw_addref(sudo_user.pw);
 	pw = sudo_user.pw;
+    }
 
     return(pw);
 }

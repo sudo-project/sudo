@@ -67,8 +67,10 @@ get_pty(master, slave, name, namesz, ttyuid)
     struct group *gr;
     gid_t ttygid = -1;
 
-    if ((gr = sudo_getgrnam("tty")) != NULL)
+    if ((gr = sudo_getgrnam("tty")) != NULL) {
 	ttygid = gr->gr_gid;
+	gr_delref(gr);
+    }
 
     if (openpty(master, slave, name, NULL, NULL) != 0)
 	return(0);
