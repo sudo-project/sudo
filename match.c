@@ -851,7 +851,7 @@ done:
     if (pw0 != NULL)
 	pw_delref(pw0);
 
-    return(FALSE);
+    return(matched);
 }
 
 /*
