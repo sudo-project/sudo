@@ -163,8 +163,10 @@ check_user(validated, mode)
 	update_timestamp(timestampdir, timestampfile);
     efree(timestampdir);
     efree(timestampfile);
-    pw_delref(auth_pw);
-    auth_pw = NULL;
+    if (auth_pw != NULL) {
+	pw_delref(auth_pw);
+	auth_pw = NULL;
+    }
 }
 
 /*
