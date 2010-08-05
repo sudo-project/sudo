@@ -908,6 +908,10 @@ exec_setup(rbac_enabled, ttyname, ttyfd)
     /* Close the password and group files and free up memory. */
     sudo_endpwent();
     sudo_endgrent();
+    pw_delref(sudo_user.pw);
+    pw_delref(runas_pw);
+    if (runas_gr != NULL)
+	gr_delref(runas_gr);
 
     rval = TRUE;
 
@@ -962,6 +966,12 @@ run_command(path, argv, envp, uid, dowait)
 #ifdef _PATH_SUDO_IO_LOGDIR
     io_log_close();
 #endif
+    sudo_endpwent();
+    sudo_endgrent();
+    pw_delref(sudo_user.pw);
+    pw_delref(runas_pw);
+    if (runas_gr != NULL)
+	gr_delref(runas_gr);
     return(exitcode);
 }
 
