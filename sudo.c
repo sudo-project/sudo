@@ -849,10 +849,6 @@ exec_setup(rbac_enabled, ttyname, ttyfd)
     }
 #endif
 
-    /* Close the password and group files and free up memory. */
-    sudo_endpwent();
-    sudo_endgrent();
-
     /*
      * For sudoedit, the command runas a the user with no additional setup.
      */
@@ -908,6 +904,10 @@ exec_setup(rbac_enabled, ttyname, ttyfd)
 	}
     }
 #endif
+
+    /* Close the password and group files and free up memory. */
+    sudo_endpwent();
+    sudo_endgrent();
 
     rval = TRUE;
 
