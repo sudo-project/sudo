@@ -180,13 +180,17 @@ verify_user(struct passwd *pw, char *prompt)
 	}
 
 	/* Get the password unless the auth function will do it for us */
-	if (standalone)
+	if (standalone) {
 	    p = prompt;
-	else
-	    p = auth_getpass(prompt, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF);
+	} else {
+	    p = auth_getpass(prompt, def_passwd_timeout * 60,
+		SUDO_CONV_PROMPT_ECHO_OFF);
+	    if (p == NULL)
+		break;
+	}
 
 	/* Call authentication functions. */
-	for (auth = auth_switch; p && auth->name; auth++) {
+	for (auth = auth_switch; auth->name; auth++) {
 	    if (IS_DISABLED(auth))
 		continue;
 
@@ -201,7 +205,7 @@ verify_user(struct passwd *pw, char *prompt)
 	    if (auth->status != AUTH_FAILURE)
 		goto cleanup;
 	}
-	if (!standalone && p != NULL)
+	if (!standalone)
 	    zero_bytes(p, strlen(p));
 	pass_warn();
     }
