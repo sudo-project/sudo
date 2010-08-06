@@ -287,6 +287,12 @@ sudoers_policy_close(int exit_status, int error_code)
     /* Close the session we opened in sudoers_policy_init_session(). */
     if (ISSET(sudo_mode, MODE_RUN|MODE_EDIT))
 	(void)auth_end_session();
+
+    /* Free remaining references to password and group entries. */
+    pw_delref(sudo_user.pw);
+    pw_delref(runas_pw);
+    if (runas_gr != NULL)
+	gr_delref(runas_gr);
 }
 
 /*
@@ -653,10 +659,6 @@ done:
     /* Close the password and group files and free up memory. */
     sudo_endpwent();
     sudo_endgrent();
-    pw_delref(sudo_user.pw);
-    pw_delref(runas_pw);
-    if (runas_gr != NULL)
-	gr_delref(runas_gr);
 
     return rval;
 }
@@ -694,6 +696,8 @@ static int
 sudoers_policy_list(int argc, char * const argv[], int verbose,
     const char *list_user)
 {
+    int rval;
+
     user_cmnd = "list";
     if (argc)
 	SET(sudo_mode, MODE_CHECK);
@@ -708,8 +712,13 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 	    return -1;
 	}
     }
+    rval = sudoers_policy_main(argc, argv, I_LISTPW, NULL, NULL, NULL, NULL);
+    if (list_user) {
+	pw_delref(list_pw);
+	list_pw = NULL;
+    }
 
-    return sudoers_policy_main(argc, argv, I_LISTPW, NULL, NULL, NULL, NULL);
+    return rval;
 }
 
 /*
