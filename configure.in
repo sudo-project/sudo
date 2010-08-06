@@ -2734,7 +2734,7 @@ yes|maybe)
     ;;
 esac
 AUTH_OBJS=${AUTH_OBJS# }
-_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+_AUTH=`echo "$AUTH_OBJS" | sed -e 's/\.o//g' -e 's/getspwuid *//'`
 AC_MSG_NOTICE([using the following authentication methods: $_AUTH])
 
 dnl

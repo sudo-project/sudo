@@ -18410,7 +18410,7 @@ yes|maybe)
     ;;
 esac
 AUTH_OBJS=${AUTH_OBJS# }
-_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+_AUTH=`echo "$AUTH_OBJS" | sed -e 's/\.o//g' -e 's/getspwuid *//'`
 { $as_echo "$as_me:${as_lineno-$LINENO}: using the following authentication methods: $_AUTH" >&5
 $as_echo "$as_me: using the following authentication methods: $_AUTH" >&6;}
 
