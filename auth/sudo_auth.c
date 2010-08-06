@@ -185,8 +185,9 @@ verify_user(pw, prompt)
 		goto cleanup;
 	}
 #ifndef AUTH_STANDALONE
-	if (p)
-	    zero_bytes(p, strlen(p));
+	if (p == NULL)
+	    break;
+	zero_bytes(p, strlen(p));
 #endif
 	if (!ISSET(tgetpass_flags, TGP_ASKPASS))
 	    pass_warn(stderr);
