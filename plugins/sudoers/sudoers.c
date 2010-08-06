@@ -585,10 +585,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     (void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
     (void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
 
-    /* Close the password and group files and free up memory. */
-    sudo_endpwent();
-    sudo_endgrent();
-
     if (ISSET(sudo_mode, MODE_EDIT)) {
 	char *editor = find_editor(NewArgc - 1, NewArgv + 1, &edit_argv);
 	if (!editor)
@@ -654,6 +650,14 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     restore_perms();
 
 done:
+    /* Close the password and group files and free up memory. */
+    sudo_endpwent();
+    sudo_endgrent();
+    pw_delref(sudo_user.pw);
+    pw_delref(runas_pw);
+    if (runas_gr != NULL)
+	gr_delref(runas_gr);
+
     return rval;
 }
 
