@@ -150,6 +150,10 @@ check_user(int validated, int mode)
 	update_timestamp(timestampdir, timestampfile);
     efree(timestampdir);
     efree(timestampfile);
+    if (auth_pw) {
+	pw_delref(auth_pw);
+	auth_pw = NULL;
+    }
 
     return rval;
 }
@@ -651,10 +655,6 @@ remove_timestamp(int remove)
 
     efree(timestampdir);
     efree(timestampfile);
-    if (auth_pw) {
-	pw_delref(auth_pw);
-	auth_pw = NULL;
-    }
 }
 
 /*
