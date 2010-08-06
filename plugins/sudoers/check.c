@@ -550,9 +550,12 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 		    /*
 		     * Check for stored tty info.  If the file is zero-sized
 		     * it is an old-style timestamp with no tty info in it.
+		     * If removing, we don't care about the contents.
 		     * The actual mtime check is done later.
 		     */
-		    if (sb.st_size != 0) {
+		    if (ISSET(flags, TS_REMOVE)) {
+			status = TS_OLD;
+		    } else if (sb.st_size != 0) {
 			struct tty_info info;
 			int fd = open(timestampfile, O_RDONLY, 0644);
 			if (fd != -1) {
