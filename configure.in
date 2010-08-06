@@ -2530,7 +2530,7 @@ if test ${with_passwd-'no'} != "no"; then
     dnl
     dnl if crypt(3) not in libc, look elsewhere
     dnl
-    if test -z "$LIB_CRYPT" -a "$with_passwd" != "no"; then
+    if test -z "$LIB_CRYPT"; then
 	AC_SEARCH_LIBS([crypt], [crypt crypt_d ufc], [test -n "$ac_lib" && SUDO_LIBS="${SUDO_LIBS} $ac_res"])
     fi
 
@@ -2692,11 +2692,11 @@ SUDO_TIMEDIR
 SUDO_IO_LOGDIR
 
 dnl
-dnl Use passwd (and secureware) auth modules?
+dnl Use passwd auth module?
 dnl
 case "$with_passwd" in
 yes|maybe)
-    AUTH_OBJS="$AUTH_OBJS passwd.lo"
+    AUTH_OBJS="$AUTH_OBJS getspwuid.lo passwd.lo"
     ;;
 *)
     AC_DEFINE(WITHOUT_PASSWD)
@@ -2706,7 +2706,7 @@ yes|maybe)
     ;;
 esac
 AUTH_OBJS=${AUTH_OBJS# }
-_AUTH=`echo "$AUTH_OBJS" | sed 's/\.lo//g'`
+_AUTH=`echo "$AUTH_OBJS" | sed -e 's/\.lo//g' -e 's/getspwuid *//'`
 AC_MSG_NOTICE([using the following authentication methods: $_AUTH])
 
 dnl

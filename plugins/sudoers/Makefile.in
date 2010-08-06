@@ -104,8 +104,7 @@ AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 LIBSUDOERS_OBJS = alias.lo audit.lo defaults.lo gram.lo match.lo pwutil.lo \
 		  timestr.lo toke.lo redblack.lo @NONUNIX_GROUPS_IMPL@
 
-SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo \
-	       plugin_error.lo env.lo getspwuid.lo \
+SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo plugin_error.lo env.lo \
 	       goodpath.lo group_plugin.lo find_path.lo interfaces.lo \
 	       logging.lo parse.lo set_perms.lo sudoers.lo sudo_nss.lo \
 	       iolog.lo @SUDOERS_OBJS@

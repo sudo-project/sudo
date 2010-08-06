@@ -17457,7 +17457,7 @@ fi
 fi
 
 if test ${with_passwd-'no'} != "no"; then
-                if test -z "$LIB_CRYPT" -a "$with_passwd" != "no"; then
+                if test -z "$LIB_CRYPT"; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing crypt" >&5
 $as_echo_n "checking for library containing crypt... " >&6; }
 if test "${ac_cv_search_crypt+set}" = set; then :
@@ -18207,7 +18207,7 @@ $as_echo "$io_logdir" >&6; }
 
 case "$with_passwd" in
 yes|maybe)
-    AUTH_OBJS="$AUTH_OBJS passwd.lo"
+    AUTH_OBJS="$AUTH_OBJS getspwuid.lo passwd.lo"
     ;;
 *)
     $as_echo "#define WITHOUT_PASSWD 1" >>confdefs.h
@@ -18218,7 +18218,7 @@ yes|maybe)
     ;;
 esac
 AUTH_OBJS=${AUTH_OBJS# }
-_AUTH=`echo "$AUTH_OBJS" | sed 's/\.lo//g'`
+_AUTH=`echo "$AUTH_OBJS" | sed -e 's/\.lo//g' -e 's/getspwuid *//'`
 { $as_echo "$as_me:${as_lineno-$LINENO}: using the following authentication methods: $_AUTH" >&5
 $as_echo "$as_me: using the following authentication methods: $_AUTH" >&6;}
 

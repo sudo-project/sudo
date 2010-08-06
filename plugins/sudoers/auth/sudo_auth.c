@@ -71,10 +71,10 @@ static sudo_auth auth_switch[] = {
 
 /* Non-standalone entries */
 #ifndef WITHOUT_PASSWD
-    AUTH_ENTRY("passwd", 0, passwd_init, NULL, passwd_verify, NULL, NULL, NULL)
+    AUTH_ENTRY("passwd", 0, passwd_init, NULL, passwd_verify, passwd_cleanup, NULL, NULL)
 #endif
 #if defined(HAVE_GETPRPWNAM) && !defined(WITHOUT_PASSWD)
-    AUTH_ENTRY("secureware", 0, secureware_init, NULL, secureware_verify, NULL, NULL, NULL)
+    AUTH_ENTRY("secureware", 0, secureware_init, NULL, secureware_verify, secureware_cleanup, NULL, NULL)
 #endif
 #ifdef HAVE_AFS
     AUTH_ENTRY("afs", 0, NULL, NULL, afs_verify, NULL, NULL, NULL)

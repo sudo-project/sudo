@@ -75,8 +75,10 @@ int bsdauth_cleanup(struct passwd *pw, sudo_auth *auth);
 /* Prototypes for normal methods */
 int passwd_init(struct passwd *pw, char **prompt, sudo_auth *auth);
 int passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth);
+int passwd_cleanup(struct passwd *pw, sudo_auth *auth);
 int secureware_init(struct passwd *pw, char **prompt, sudo_auth *auth);
 int secureware_verify(struct passwd *pw, char *pass, sudo_auth *auth);
+int secureware_cleanup(struct passwd *pw, sudo_auth *auth);
 int rfc1938_setup(struct passwd *pw, char **prompt, sudo_auth *auth);
 int rfc1938_verify(struct passwd *pw, char *pass, sudo_auth *auth);
 int afs_verify(struct passwd *pw, char *pass, sudo_auth *auth);
