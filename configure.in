@@ -2526,7 +2526,7 @@ if test ${with_passwd-'no'} != "no"; then
     dnl
     dnl if crypt(3) not in libc, look elsewhere
     dnl
-    if test -z "$LIB_CRYPT" -a "$with_passwd" != "no"; then
+    if test -z "$LIB_CRYPT"; then
 	AC_SEARCH_LIBS([crypt], [crypt crypt_d ufc], [test -n "$ac_lib" && SUDO_LIBS="${SUDO_LIBS} $ac_res"])
     fi
 
@@ -2720,11 +2720,11 @@ if test "${with_iologdir-yes}" != "no"; then
 fi
 
 dnl
-dnl Use passwd (and secureware) auth modules?
+dnl Use passwd auth module?
 dnl
 case "$with_passwd" in
 yes|maybe)
-    AUTH_OBJS="$AUTH_OBJS passwd.o"
+    AUTH_OBJS="$AUTH_OBJS getspwuid.o passwd.o"
     ;;
 *)
     AC_DEFINE(WITHOUT_PASSWD)

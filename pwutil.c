@@ -214,17 +214,9 @@ pw_delref_item(v)
     void *v;
 {
     struct cache_item *item = v;
-    struct passwd *pw = item->d.pw;
 
-    if (--item->refcnt == 0) {
-	if (pw != NULL && pw->pw_passwd != NULL) {
-	    zero_bytes(pw->pw_passwd, strlen(pw->pw_passwd));
-	    if ((char *)pw->pw_passwd < (char *)pw ||
-		(char *)pw->pw_passwd > (char *)pw->pw_gecos)
-		efree(pw->pw_passwd); /* free if separate allocation */
-	}
+    if (--item->refcnt == 0)
 	efree(item);
-    }
 }
 
 void
@@ -244,7 +236,6 @@ sudo_getpwuid(uid)
 {
     struct cache_item key, *item;
     struct rbnode *node;
-    char *cp;
 
     key.k.uid = uid;
     if ((node = rbfind(pwcache_byuid, &key)) != NULL) {
@@ -259,10 +250,6 @@ sudo_getpwuid(uid)
 #endif
     if ((key.d.pw = getpwuid(uid)) != NULL) {
 	item = make_pwitem(key.d.pw, NULL);
-	cp = sudo_getepw(item->d.pw);	/* get shadow password */
-	if (item->d.pw->pw_passwd != NULL)
-	    zero_bytes(item->d.pw->pw_passwd, strlen(item->d.pw->pw_passwd));
-	item->d.pw->pw_passwd = cp;
 	if (rbinsert(pwcache_byuid, item) != NULL)
 	    errorx(1, "unable to cache uid %lu (%s), already exists",
 		uid, item->d.pw->pw_name);
@@ -293,7 +280,6 @@ sudo_getpwnam(name)
     struct cache_item key, *item;
     struct rbnode *node;
     size_t len;
-    char *cp;
 
     key.k.name = (char *) name;
     if ((node = rbfind(pwcache_byname, &key)) != NULL) {
@@ -308,10 +294,6 @@ sudo_getpwnam(name)
 #endif
     if ((key.d.pw = getpwnam(name)) != NULL) {
 	item = make_pwitem(key.d.pw, name);
-	cp = sudo_getepw(key.d.pw);	/* get shadow password */
-	if (key.d.pw->pw_passwd != NULL)
-	    zero_bytes(key.d.pw->pw_passwd, strlen(key.d.pw->pw_passwd));
-	key.d.pw->pw_passwd = cp;
 	if (rbinsert(pwcache_byname, item) != NULL)
 	    errorx(1, "unable to cache user %s, already exists", name);
     } else {
@@ -394,7 +376,6 @@ void
 sudo_setpwent()
 {
     setpwent();
-    sudo_setspent();
     if (pwcache_byuid == NULL)
 	pwcache_byuid = rbcreate(cmp_pwuid);
     if (pwcache_byname == NULL)
@@ -418,7 +399,6 @@ void
 sudo_endpwent()
 {
     endpwent();
-    sudo_endspent();
     sudo_freepwcache();
 }
 

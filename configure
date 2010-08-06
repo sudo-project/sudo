@@ -17574,7 +17574,7 @@ fi
 fi
 
 if test ${with_passwd-'no'} != "no"; then
-                if test -z "$LIB_CRYPT" -a "$with_passwd" != "no"; then
+                if test -z "$LIB_CRYPT"; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing crypt" >&5
 $as_echo_n "checking for library containing crypt... " >&6; }
 if test "${ac_cv_search_crypt+set}" = set; then :
@@ -18399,7 +18399,7 @@ fi
 
 case "$with_passwd" in
 yes|maybe)
-    AUTH_OBJS="$AUTH_OBJS passwd.o"
+    AUTH_OBJS="$AUTH_OBJS getspwuid.o passwd.o"
     ;;
 *)
     $as_echo "#define WITHOUT_PASSWD 1" >>confdefs.h
