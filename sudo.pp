@@ -13,16 +13,27 @@ The basic philosophy is to give as few privileges as possible but \
 still allow people to get their work done."
 	vendor="Todd C. Miller"
 	copyright="(c) 1993-1996,1998-2010 Todd C. Miller"
-	pp_rpm_release="1"
+
+	# Convert to 4 part version for AIX, including patch level
+	pp_aix_version=`echo $version|sed -e 's/\([0-9]*\.[0-9]*\.[0-9]*\)$/\1.0/' -e 's/[^0-9]*\([0-9]*\)$/.\1/'`
+
+	pp_sd_vendor_tag="TCM"
+	pp_kit_name="TCM"
+	pp_solaris_name="TCM${name}"
+%if [rpm,deb]
+	# Convert patch level into release and remove from version
+	pp_rpm_release="`echo $version|sed 's/^[0-9]*\.[0-9]*\.[0-9]*[^0-9]*//'`"
+	pp_rpm_release="`expr $pp_rpm_release + 1`"
+	pp_rpm_version="`echo $version|sed 's/p[0-9]*$//'`"
 	pp_rpm_license="BSD"
 	pp_rpm_url="http://www.sudo.ws/"
 	pp_rpm_group="Applications/System"
 	pp_rpm_packager="Todd.Miller@courtesan.com"
-	pp_deb_maintainer="Todd.Miller@courtesan.com"
-	pp_sd_vendor_tag="TCM"
-	pp_kit_name="TCM"
-	pp_solaris_name="TCM${name}"
-%if [!rpm,deb]
+
+	pp_deb_maintainer="$pp_rpm_packager"
+	pp_deb_release="$pp_rpm_release"
+	pp_deb_version="$pp_rpm_version"
+%else
 	# For all but RPM and Debian we need to install sudoers with a different
 	# name and make a copy of it if there is no existing file.
 	mv ${pp_destdir}$sudoersdir/sudoers ${pp_destdir}$sudoersdir/sudoers.dist
@@ -66,8 +77,8 @@ still allow people to get their work done."
 	# For RedHat the doc dir is expected to include version and release
 	case "$pp_rpm_distro" in
 	centos*|rhel*)
-		mv ${pp_destdir}/${docdir} ${pp_destdir}/${docdir}-${version}-1
-		docdir=${docdir}-${version}-1
+		mv ${pp_destdir}/${docdir} ${pp_destdir}/${docdir}-${version}-${pp_rpm_release}
+		docdir=${docdir}-${version}-${pp_rpm_release}
 		;;
 	esac
 
