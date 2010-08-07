@@ -17,8 +17,11 @@ still allow people to get their work done."
 	# Convert to 4 part version for AIX, including patch level
 	pp_aix_version=`echo $version|sed -e 's/\([0-9]*\.[0-9]*\.[0-9]*\)$/\1.0/' -e 's/[^0-9]*\([0-9]*\)$/.\1/'`
 
-	pp_sd_vendor_tag="TCM"
+	# Strip of patchlevel for kit which only supports x.y.z versions
+	pp_kit_version="`echo $version|sed -e 's/\.//g' -e 's/p[0-9]*$//'`"
 	pp_kit_name="TCM"
+
+	pp_sd_vendor_tag="TCM"
 	pp_solaris_name="TCM${name}"
 %if [rpm,deb]
 	# Convert patch level into release and remove from version
