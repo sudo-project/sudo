@@ -260,21 +260,22 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
 #else
 		pid = wait(&status);
 #endif
-		if (pid == child) {
-		    if (!log_io) {
-			if (WIFSTOPPED(status)) {
-			    /* Child may not have privs to suspend us itself. */
-			    kill(getpid(), WSTOPSIG(status));
-			} else {
-			    /* Child has exited, we are done. */
-			    cstat->type = CMD_WSTATUS;
-			    cstat->val = status;
-			    return 0;
-			}
+	    } while (pid == -1 && errno == EINTR);
+	    if (pid == child) {
+		/* If not logging I/O and child has exited we are done. */
+		if (!log_io) {
+		    if (WIFSTOPPED(status)) {
+			/* Child may not have privs to suspend us itself. */
+			kill(getpid(), WSTOPSIG(status));
+		    } else {
+			/* Child has exited, we are done. */
+			cstat->type = CMD_WSTATUS;
+			cstat->val = status;
+			return 0;
 		    }
-		    /* Else we get ECONNRESET on sv[0] if child dies. */
 		}
-	    } while (pid != -1 || errno == EINTR);
+		/* Else we get ECONNRESET on sv[0] if child dies. */
+	    }
 	}
 
 	zero_bytes(fdsw, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
