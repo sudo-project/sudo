@@ -657,7 +657,11 @@ handle_sigchld(backchannel, cstat)
 
     /* read child status */
     do {
-	pid = waitpid(child, &status, WUNTRACED|WNOHANG);
+#ifdef sudo_waitpid
+	pid = sudo_waitpid(child, &status, WUNTRACED|WNOHANG);
+#else
+	pid = wait(&status);
+#endif
     } while (pid == -1 && errno == EINTR);
     if (pid == child) {
 	if (cstat->type != CMD_ERRNO) {
