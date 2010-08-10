@@ -122,22 +122,6 @@ static int xxxprintf(char **, size_t, int, const char *, va_list);
 
 #define BUF		68
 
-#ifndef HAVE_MEMCHR
-void *
-memchr(const void *s, unsigned char c, size_t n)
-{
-	if (n != 0) {
-		const unsigned char *p = s;
-
-		do {
-			if (*p++ == c)
-				return ((void *)(p - 1));
-		} while (--n != 0);
-	}
-	return (NULL);
-}
-#endif /* !HAVE_MEMCHR */
-
 /*
  * Convert an unsigned long to ASCII for printf purposes, returning
  * a pointer to the first character of the string representation.

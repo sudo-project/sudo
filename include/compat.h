@@ -119,19 +119,6 @@
 #endif
 
 /*
- * These should be defined in <unistd.h> but not everyone has them.
- */
-#ifndef SEEK_SET
-# define	SEEK_SET	0
-#endif
-#ifndef SEEK_CUR
-# define	SEEK_CUR	1
-#endif
-#ifndef SEEK_END
-# define	SEEK_END	2
-#endif
-
-/*
  * BSD defines these in <sys/param.h> but others may not.
  */
 #ifndef MIN
@@ -147,22 +134,6 @@
 #ifndef HAVE_ISBLANK
 int isblank(int);
 # define isblank(_x)	((_x) == ' ' || (_x) == '\t')
-#endif
-
-/*
- * Old BSD systems lack strchr(), strrchr(), memset() and memcpy()
- */
-#if !defined(HAVE_STRCHR) && !defined(strchr)
-# define strchr(_s, _c)	index(_s, _c)
-#endif
-#if !defined(HAVE_STRRCHR) && !defined(strrchr)
-# define strrchr(_s, _c)	rindex(_s, _c)
-#endif
-#if !defined(HAVE_MEMCPY) && !defined(memcpy)
-# define memcpy(_d, _s, _n)	(bcopy(_s, _d, _n))
-#endif
-#if !defined(HAVE_MEMSET) && !defined(memset)
-# define memset(_s, _x, _n)	(bzero(_s, _n))
 #endif
 
 /*

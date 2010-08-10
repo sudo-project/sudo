@@ -440,11 +440,7 @@ send_mail(const char *fmt, ...)
 	default:
 	    /* Parent. */
 	    do {
-#ifdef HAVE_WAITPID
 		rv = waitpid(pid, &status, 0);
-#else
-		rv = wait(&status);
-#endif
 	    } while (rv == -1 && errno == EINTR);
 	    return;
     }
@@ -565,11 +561,7 @@ send_mail(const char *fmt, ...)
 
     fclose(mail);
     do {
-#ifdef HAVE_WAITPID
         rv = waitpid(pid, &status, 0);
-#else
-        rv = wait(&status);
-#endif
     } while (rv == -1 && errno == EINTR);
     _exit(0);
 }

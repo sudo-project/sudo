@@ -51,9 +51,6 @@ int asprintf(char **, const char *, ...) __printflike(2, 3);
 #ifndef HAVE_VASPRINTF
 int vasprintf(char **, const char *, va_list) __printflike(2, 0);
 #endif
-#ifndef HAVE_STRCASECMP
-int strcasecmp(const char *, const char *);
-#endif
 #ifndef HAVE_STRLCAT
 size_t strlcat(char *, const char *, size_t);
 #endif

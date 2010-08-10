@@ -670,11 +670,7 @@ run_command(char *path, char **argv)
     }
 
     do {
-#ifdef sudo_waitpid
-	rv = sudo_waitpid(pid, &status, 0);
-#else
-	rv = wait(&status);
-#endif
+	rv = waitpid(pid, &status, 0);
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 || !WIFEXITED(status))

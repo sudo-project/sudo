@@ -1677,7 +1677,7 @@ case "$host" in
 		: ${with_rpath='yes'}
 		;;
     *-ncr-sysv4*|*-ncr-sysvr4*)
-		AC_CHECK_LIB(c89, strcasecmp, AC_DEFINE(HAVE_STRCASECMP) [LIBS="${LIBS} -lc89"; ac_cv_func_strcasecmp=yes])
+		AC_CHECK_LIB(c89, strcasecmp, [LIBS="${LIBS} -lc89"])
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		: ${with_rpath='yes'}
@@ -1915,10 +1915,8 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf tzset \
-	       strftime setrlimit initgroups getgroups fstat gettimeofday \
-	       regcomp setlocale getaddrinfo vhangup \
-	       mbr_check_membership setrlimit64)
+AC_CHECK_FUNCS(strrchr sysconf tzset strftime initgroups getgroups fstat \
+	       regcomp setlocale getaddrinfo mbr_check_membership setrlimit64)
 AC_CHECK_FUNCS(getline, [], [
     AC_LIBOBJ(getline)
     AC_CHECK_FUNCS(fgetln)
@@ -1964,13 +1962,12 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <glob.h>]], [[int i = GLOB_BRACE |
     AC_MSG_RESULT(yes)], [AC_LIBOBJ(glob)
     AC_MSG_RESULT(no)])], [AC_LIBOBJ(glob)])
 AC_CHECK_FUNCS(lockf flock, [break])
-AC_CHECK_FUNCS(waitpid wait3, [break])
 AC_CHECK_FUNCS(innetgr _innetgr, [AC_CHECK_FUNCS(getdomainname) [break]])
 AC_CHECK_FUNCS(utimes, [AC_CHECK_FUNCS(futimes futimesat, [break])], [AC_CHECK_FUNCS(futime) AC_LIBOBJ(utimes)])
 AC_CHECK_FUNCS(killpg, [], [AC_LIBOBJ(killpg)])
 SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)])
 SUDO_FUNC_ISBLANK
-AC_REPLACE_FUNCS(memrchr strerror strcasecmp strlcpy strlcat setenv)
+AC_REPLACE_FUNCS(memrchr strlcpy strlcat setenv)
 AC_CHECK_FUNCS(nanosleep, [], [
     # On Solaris, nanosleep is in librt
     AC_CHECK_LIB(rt, nanosleep, [REPLAY_LIBS="${REPLAY_LIBS} -lrt"], [AC_LIBOBJ(nanosleep)])
@@ -2909,17 +2906,6 @@ AH_BOTTOM([/*
 #  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtime; (_y)->tv_usec = 0; } while (0)
 # endif /* HAVE_ST_MTIMESPEC */
 #endif /* HAVE_ST_MTIM */
-
-/*
- * Emulate a subset of waitpid() if we don't have it.
- */
-#ifdef HAVE_WAITPID
-# define sudo_waitpid(p, s, o)	waitpid(p, s, o)
-#else
-# ifdef HAVE_WAIT3
-#  define sudo_waitpid(p, s, o)	wait3(s, o, NULL)
-# endif
-#endif
 
 /* GNU stow needs /etc/sudoers to be a symlink. */
 #ifdef USE_STOW

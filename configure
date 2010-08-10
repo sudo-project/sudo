@@ -13176,8 +13176,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_c89_strcasecmp" >&5
 $as_echo "$ac_cv_lib_c89_strcasecmp" >&6; }
 if test "x$ac_cv_lib_c89_strcasecmp" = x""yes; then :
-  $as_echo "#define HAVE_STRCASECMP 1" >>confdefs.h
- LIBS="${LIBS} -lc89"; ac_cv_func_strcasecmp=yes
+  LIBS="${LIBS} -lc89"
 fi
 
 		: ${mansectsu='1m'}
@@ -14746,10 +14745,8 @@ $as_echo "#define HAVE_GETGROUPS 1" >>confdefs.h
 fi
 LIBS=$ac_save_LIBS
 
-for ac_func in strchr strrchr memchr memcpy memset sysconf tzset \
-	       strftime setrlimit initgroups getgroups fstat gettimeofday \
-	       regcomp setlocale getaddrinfo vhangup \
-	       mbr_check_membership setrlimit64
+for ac_func in strrchr sysconf tzset strftime initgroups getgroups fstat \
+	       regcomp setlocale getaddrinfo mbr_check_membership setrlimit64
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -15160,19 +15157,6 @@ _ACEOF
 fi
 done
 
-for ac_func in waitpid wait3
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-eval as_val=\$$as_ac_var
-   if test "x$as_val" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
- break
-fi
-done
-
 for ac_func in innetgr _innetgr
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -15333,7 +15317,7 @@ esac
 
   fi
 
-for ac_func in memrchr strerror strcasecmp strlcpy strlcat setenv
+for ac_func in memrchr strlcpy strlcat setenv
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"

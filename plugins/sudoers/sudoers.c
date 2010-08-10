@@ -33,10 +33,6 @@
 #include <sys/stat.h>
 #include <sys/param.h>
 #include <sys/socket.h>
-#ifdef HAVE_SETRLIMIT
-# include <sys/time.h>
-# include <sys/resource.h>
-#endif
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -63,9 +59,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <grp.h>
-#if TIME_WITH_SYS_TIME
-# include <time.h>
-#endif
+#include <time.h>
 #ifdef HAVE_SETLOCALE
 # include <locale.h>
 #endif

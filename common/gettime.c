@@ -33,12 +33,5 @@
 int
 gettime(struct timeval *tv)
 {
-    int rval;
-#if defined(HAVE_GETTIMEOFDAY) && (defined(HAVE_ST_MTIM) || defined(HAVE_ST_MTIMESPEC))
-    rval = gettimeofday(tv, NULL);
-#else
-    rval = (int)time(&tv->tv_sec);
-    tv->tv_usec = 0;
-#endif
-    return (rval);
+    return gettimeofday(tv, NULL);
 }

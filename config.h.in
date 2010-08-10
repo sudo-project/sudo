@@ -150,7 +150,7 @@
 /* Define to 1 if you have the `getdomainname' function. */
 #undef HAVE_GETDOMAINNAME
 
-/* Define to 1 if your system has a working `getgroups' function. */
+/* Define to 1 if you have the `getgroups' function. */
 #undef HAVE_GETGROUPS
 
 /* Define to 1 if you have the `getifaddrs' function. */
@@ -180,9 +180,6 @@
 /* Define to 1 if you have the `getspwuid' function. (HP-UX <= 9.X shadow
    passwords) */
 #undef HAVE_GETSPWUID
-
-/* Define to 1 if you have the `gettimeofday' function. */
-#undef HAVE_GETTIMEOFDAY
 
 /* Define to 1 if you have the `getuserattr' function. */
 #undef HAVE_GETUSERATTR
@@ -325,20 +322,11 @@
 /* Define to 1 if you have the `mbr_check_membership' function. */
 #undef HAVE_MBR_CHECK_MEMBERSHIP
 
-/* Define to 1 if you have the `memchr' function. */
-#undef HAVE_MEMCHR
-
-/* Define to 1 if you have the `memcpy' function. */
-#undef HAVE_MEMCPY
-
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
 /* Define to 1 if you have the `memrchr' function. */
 #undef HAVE_MEMRCHR
-
-/* Define to 1 if you have the `memset' function. */
-#undef HAVE_MEMSET
 
 /* Define to 1 if you have the `mkstemps' function. */
 #undef HAVE_MKSTEMPS
@@ -430,9 +418,6 @@
 /* Define to 1 if you have the `setreuid' function. */
 #undef HAVE_SETREUID
 
-/* Define to 1 if you have the `setrlimit' function. */
-#undef HAVE_SETRLIMIT
-
 /* Define to 1 if you have the `setrlimit64' function. */
 #undef HAVE_SETRLIMIT64
 
@@ -459,15 +444,6 @@
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
-
-/* Define to 1 if you have the `strcasecmp' function. */
-#undef HAVE_STRCASECMP
-
-/* Define to 1 if you have the `strchr' function. */
-#undef HAVE_STRCHR
-
-/* Define to 1 if you have the `strerror' function. */
-#undef HAVE_STRERROR
 
 /* Define to 1 if you have the `strftime' function. */
 #undef HAVE_STRFTIME
@@ -558,17 +534,8 @@
 /* Define to 1 if you have the `vasprintf' function. */
 #undef HAVE_VASPRINTF
 
-/* Define to 1 if you have the `vhangup' function. */
-#undef HAVE_VHANGUP
-
 /* Define to 1 if you have the `vsnprintf' function. */
 #undef HAVE_VSNPRINTF
-
-/* Define to 1 if you have the `wait3' function. */
-#undef HAVE_WAIT3
-
-/* Define to 1 if you have the `waitpid' function. */
-#undef HAVE_WAITPID
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #undef HAVE_ZLIB_H
@@ -793,17 +760,6 @@
 #  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtime; (_y)->tv_usec = 0; } while (0)
 # endif /* HAVE_ST_MTIMESPEC */
 #endif /* HAVE_ST_MTIM */
-
-/*
- * Emulate a subset of waitpid() if we don't have it.
- */
-#ifdef HAVE_WAITPID
-# define sudo_waitpid(p, s, o)	waitpid(p, s, o)
-#else
-# ifdef HAVE_WAIT3
-#  define sudo_waitpid(p, s, o)	wait3(s, o, NULL)
-# endif
-#endif
 
 /* GNU stow needs /etc/sudoers to be a symlink. */
 #ifdef USE_STOW

@@ -28,10 +28,8 @@
 #ifdef HAVE_SYS_SELECT_H
 # include <sys/select.h>
 #endif /* HAVE_SYS_SELECT_H */
-#ifdef HAVE_SETRLIMIT
-# include <sys/time.h>
-# include <sys/resource.h>
-#endif
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
