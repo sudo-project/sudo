@@ -244,7 +244,7 @@ sudo_edit(struct command_details *command_details, char *argv[], char *envp[])
      * Run the editor with the invoking user's creds,
      * keeping track of the time spent in the editor.
      */
-    gettime(&tv1);
+    gettimeofday(&tv1, NULL);
     memcpy(&editor_details, command_details, sizeof(editor_details));
     editor_details.uid = user_details.uid;
     editor_details.euid = user_details.uid;
@@ -253,7 +253,7 @@ sudo_edit(struct command_details *command_details, char *argv[], char *envp[])
     editor_details.ngroups = user_details.ngroups;
     editor_details.groups = user_details.groups;
     rval = run_command(&editor_details, nargv, envp);
-    gettime(&tv2);
+    gettimeofday(&tv2, NULL);
 
     /* Copy contents of temp files to real ones */
     for (i = 0; i < nfiles; i++) {

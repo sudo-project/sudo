@@ -250,9 +250,6 @@ char *sudo_getepw(const struct passwd *);
 /* zero_bytes.c */
 void zero_bytes(volatile void *, size_t);
 
-/* gettime.c */
-int gettime(struct timeval *);
-
 /* sudo_nss.c */
 void display_privs(struct sudo_nss_list *, struct passwd *);
 int display_cmnd(struct sudo_nss_list *, struct passwd *);

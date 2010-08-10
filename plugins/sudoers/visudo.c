@@ -338,9 +338,9 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
      *  XPG4 specifies that vi's exit value is a function of the
      *  number of errors during editing (?!?!).
      */
-    gettime(&tv1);
+    gettimeofday(&tv1, NULL);
     if (run_command(editor, av) != -1) {
-	gettime(&tv2);
+	gettimeofday(&tv2, NULL);
 	/*
 	 * Sanity checks.
 	 */

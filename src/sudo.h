@@ -207,9 +207,6 @@ int sudo_edit(struct command_details *details, char *argv[], char *envp[]);
 /* parse_args.c */
 void usage(int) __attribute__((__noreturn__));
 
-/* gettime.c */
-int gettime(struct timeval *);
-
 /* selinux.c */
 int selinux_restore_tty(void);
 int selinux_setup(const char *role, const char *type, const char *ttyn,

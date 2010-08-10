@@ -45,7 +45,7 @@ DEFS = @OSDEFS@
 
 SHELL = @SHELL@
 
-LTOBJS = alloc.lo atobool.lo fileops.lo fmt_string.lo gettime.lo \
+LTOBJS = alloc.lo atobool.lo fileops.lo fmt_string.lo \
 	 lbuf.lo list.lo term.lo zero_bytes.lo @COMMON_OBJS@
 
 all: libcommon.la
@@ -64,7 +64,6 @@ alloc.lo: $(srcdir)/alloc.c $(incdir)/compat.h $(incdir)/alloc.h $(incdir)/error
 atobool.lo: $(srcdir)/atobool.c $(incdir)/compat.h $(incdir)/missing.h $(top_builddir)/config.h
 fileops.lo: $(srcdir)/fileops.c $(incdir)/fileops.h $(top_builddir)/config.h
 fmt_string.lo: $(srcdir)/fmt_string.c $(incdir)/compat.h $(top_builddir)/config.h
-gettime.lo: $(srcdir)/gettime.c $(incdir)/compat.h $(top_builddir)/config.h
 lbuf.lo: $(srcdir)/lbuf.c $(incdir)/compat.h $(incdir)/alloc.h $(incdir)/error.h $(incdir)/missing.h $(incdir)/lbuf.h $(top_builddir)/config.h
 list.lo: $(srcdir)/list.c $(incdir)/compat.h $(incdir)/list.h $(incdir)/error.h $(top_builddir)/config.h
 term.lo: $(srcdir)/term.c $(incdir)/compat.h $(top_builddir)/config.h
