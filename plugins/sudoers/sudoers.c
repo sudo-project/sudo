@@ -93,7 +93,6 @@
 #include <ctype.h>
 #include <setjmp.h>
 
-#include "sudo_plugin.h"
 #include "sudoers.h"
 #include "lbuf.h"
 #include "interfaces.h"
