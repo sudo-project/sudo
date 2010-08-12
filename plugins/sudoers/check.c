@@ -92,9 +92,7 @@ static void  update_timestamp(char *, char *);
 static int   tty_is_devpts(const char *);
 
 /*
- * This function only returns if the user can successfully
- * verify who he/she is.
- * XXX - check return values
+ * Returns TRUE if the user successfully authenticates, else FALSE.
  */
 int
 check_user(int validated, int mode)
