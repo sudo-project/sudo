@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO_PLUGIN @mansectsu@"
-.TH SUDO_PLUGIN @mansectsu@ "July  7, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
+.TH SUDO_PLUGIN @mansectsu@ "August 12, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -264,10 +264,12 @@ major and minor version number of the plugin \s-1API\s0 supported by
 .IX Item "conversation"
 A pointer to the conversation function that can be used by the
 plugin to interact with the user (see below).
+Returns 0 on success and \-1 on failure.
 .IP "plugin_printf" 4
 .IX Item "plugin_printf"
 A pointer to a printf-style function that may be used to display
 informational or error messages (see below).
+Returns the number of characters printed on success and \-1 on failure.
 .IP "settings" 4
 .IX Item "settings"
 A vector of user-supplied \fBsudo\fR settings in the form of \*(L"name=value\*(R"
@@ -803,12 +805,15 @@ A pointer to the conversation function that may be used by the
 \&\fIshow_version\fR function to display version information (see
 show_version below).  The conversation function may also be used
 to display additional error message to the user.
+The conversation function returns 0 on success and \-1 on failure.
 .IP "plugin_printf" 4
 .IX Item "plugin_printf"
 A pointer to a printf-style function that may be used by the
 \&\fIshow_version\fR function to display version information (see
 show_version below).  The plugin_printf function may also be used
 to display additional error message to the user.
+The plugin_printf function returns number of characters printed on
+success and \-1 on failure.
 .IP "settings" 4
 .IX Item "settings"
 A vector of user-supplied \fBsudo\fR settings in the form of \*(L"name=value\*(R"
@@ -1126,6 +1131,7 @@ major and minor version number of the group plugin \s-1API\s0 supported by
 .IX Item "plugin_printf"
 A pointer to a printf-style function that may be used to display
 informational or error message to the user.
+Returns the number of characters printed on success and \-1 on failure.
 .IP "argv" 4
 .IX Item "argv"
 A NULL-terminated array of arguments generated from the \fIgroup_plugin\fR

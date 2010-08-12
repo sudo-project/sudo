@@ -141,11 +141,13 @@ B<sudo>.
 
 A pointer to the conversation function that can be used by the
 plugin to interact with the user (see below).
+Returns 0 on success and -1 on failure.
 
 =item plugin_printf
 
 A pointer to a printf-style function that may be used to display
 informational or error messages (see below).
+Returns the number of characters printed on success and -1 on failure.
 
 =item settings
 
@@ -737,6 +739,7 @@ A pointer to the conversation function that may be used by the
 I<show_version> function to display version information (see
 show_version below).  The conversation function may also be used
 to display additional error message to the user.
+The conversation function returns 0 on success and -1 on failure.
 
 =item plugin_printf
 
@@ -744,6 +747,8 @@ A pointer to a printf-style function that may be used by the
 I<show_version> function to display version information (see
 show_version below).  The plugin_printf function may also be used
 to display additional error message to the user.
+The plugin_printf function returns number of characters printed on
+success and -1 on failure.
 
 =item settings
 
@@ -1074,6 +1079,7 @@ I<sudoers>.
 
 A pointer to a printf-style function that may be used to display
 informational or error message to the user.
+Returns the number of characters printed on success and -1 on failure.
 
 =item argv
 
