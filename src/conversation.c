@@ -117,6 +117,7 @@ _sudo_printf(int msg_type, const char *fmt, ...)
 {
     va_list ap;
     FILE *fp;
+    int len;
 
     switch (msg_type) {
     case SUDO_CONV_INFO_MSG:
@@ -131,8 +132,8 @@ _sudo_printf(int msg_type, const char *fmt, ...)
     }
 
     va_start(ap, fmt);
-    vfprintf(fp, fmt, ap);
+    len = vfprintf(fp, fmt, ap);
     va_end(ap);
 
-    return 0;
+    return len;
 }
