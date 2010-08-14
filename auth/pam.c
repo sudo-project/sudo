@@ -281,6 +281,10 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 	    case PAM_PROMPT_ECHO_OFF:
 		prompt = def_prompt;
 
+		/* Error out if the last password read was interrupted. */
+		if (gotintr)
+		    goto err;
+
 		/* Is the sudo prompt standard? (If so, we'l just use PAM's) */
 		std_prompt =  strncmp(def_prompt, "Password:", 9) == 0 &&
 		    (def_prompt[9] == '\0' ||
