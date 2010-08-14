@@ -283,6 +283,10 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 	    case PAM_PROMPT_ECHO_OFF:
 		prompt = def_prompt;
 
+		/* Error out if the last password read was interrupted. */
+		if (gotintr)
+		    goto err;
+
 		/* Is the sudo prompt standard? (If so, we'l just use PAM's) */
 		std_prompt =  strncmp(def_prompt, "Password:", 9) == 0 &&
 		    (def_prompt[9] == '\0' ||
