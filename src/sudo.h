@@ -27,12 +27,11 @@
 #include <pathnames.h>
 #include <limits.h>
 
-#include <compat.h>
+#include <missing.h>
 #include <alloc.h>
 #include <error.h>
 #include <fileops.h>
 #include <list.h>
-#include <missing.h>
 
 #ifdef __TANDEM
 # define ROOT_UID       65535

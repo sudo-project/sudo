@@ -42,10 +42,9 @@
 #include <ctype.h>
 #include <termios.h>
 
-#include <compat.h>
+#include <missing.h>
 #include <alloc.h>
 #include <error.h>
-#include <missing.h>
 #include <lbuf.h>
 
 void

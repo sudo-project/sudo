@@ -22,7 +22,7 @@
 #endif
 #include <stdarg.h>
 
-#include <compat.h>
+#include <missing.h>
 
 /*
  * Dummy versions of the execve() family of syscalls.  We don't need

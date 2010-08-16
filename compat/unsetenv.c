@@ -35,7 +35,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <errno.h>
 
-#include <compat.h>
+#include <missing.h>
 
 extern char **environ;	/* global environment */
 

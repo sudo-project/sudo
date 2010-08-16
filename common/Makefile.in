@@ -59,15 +59,15 @@ libcommon.la: $(LTOBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LTOBJS) -no-install
 
 # Dependencies
-aix.lo: $(srcdir)/aix.c $(incdir)/compat.h $(incdir)/alloc.h $(incdir)/error.h $(top_builddir)/config.h
-alloc.lo: $(srcdir)/alloc.c $(incdir)/compat.h $(incdir)/alloc.h $(incdir)/error.h $(top_builddir)/config.h
-atobool.lo: $(srcdir)/atobool.c $(incdir)/compat.h $(incdir)/missing.h $(top_builddir)/config.h
+aix.lo: $(srcdir)/aix.c $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h $(top_builddir)/config.h
+alloc.lo: $(srcdir)/alloc.c $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h $(top_builddir)/config.h
+atobool.lo: $(srcdir)/atobool.c $(incdir)/missing.h $(incdir)/missing.h $(top_builddir)/config.h
 fileops.lo: $(srcdir)/fileops.c $(incdir)/fileops.h $(top_builddir)/config.h
-fmt_string.lo: $(srcdir)/fmt_string.c $(incdir)/compat.h $(top_builddir)/config.h
-lbuf.lo: $(srcdir)/lbuf.c $(incdir)/compat.h $(incdir)/alloc.h $(incdir)/error.h $(incdir)/missing.h $(incdir)/lbuf.h $(top_builddir)/config.h
-list.lo: $(srcdir)/list.c $(incdir)/compat.h $(incdir)/list.h $(incdir)/error.h $(top_builddir)/config.h
-term.lo: $(srcdir)/term.c $(incdir)/compat.h $(top_builddir)/config.h
-zero_bytes.lo: $(srcdir)/zero_bytes.c $(incdir)/compat.h $(top_builddir)/config.h
+fmt_string.lo: $(srcdir)/fmt_string.c $(incdir)/missing.h $(top_builddir)/config.h
+lbuf.lo: $(srcdir)/lbuf.c $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h $(incdir)/missing.h $(incdir)/lbuf.h $(top_builddir)/config.h
+list.lo: $(srcdir)/list.c $(incdir)/missing.h $(incdir)/list.h $(incdir)/error.h $(top_builddir)/config.h
+term.lo: $(srcdir)/term.c $(incdir)/missing.h $(top_builddir)/config.h
+zero_bytes.lo: $(srcdir)/zero_bytes.c $(incdir)/missing.h $(top_builddir)/config.h
 
 install:
 

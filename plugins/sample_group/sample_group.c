@@ -49,7 +49,6 @@
 #include <pwd.h>
 
 #include <sudo_plugin.h>
-#include <compat.h>
 #include <missing.h>
 
 /*

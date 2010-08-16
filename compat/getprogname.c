@@ -18,7 +18,7 @@
 #include <string.h>
 
 #include <config.h>
-#include <compat.h>
+#include <missing.h>
 
 static const char *progname = "sudo";
 

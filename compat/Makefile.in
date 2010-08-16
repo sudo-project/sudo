@@ -66,33 +66,32 @@ libreplace.la: $(LTLIBOBJS)
 siglist.c: mksiglist
 	./mksiglist > $@
 
-mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(incdir)/compat.h $(top_builddir)/config.h
+mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(incdir)/missing.h $(top_builddir)/config.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/mksiglist.c -o $@
 
 @DEV@$(srcdir)/mksiglist.h: $(srcdir)/siglist.in
 @DEV@	awk 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (my_sys_siglist[SIG%s] == NULL)\n\tmy_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@
 
-siglist.lo: siglist.c $(incdir)/compat.h $(top_builddir)/config.h
+siglist.lo: siglist.c $(incdir)/missing.h $(top_builddir)/config.h
 
 # Dependencies
-closefrom.lo: $(compat)/closefrom.c $(incdir)/compat.h $(top_builddir)/config.h
-fnmatch.lo: $(compat)/fnmatch.c $(compat)/fnmatch.h $(compat)/charclass.h $(incdir)/compat.h $(top_builddir)/config.h
-getcwd.lo: $(compat)/getcwd.c $(incdir)/compat.h $(top_builddir)/config.h
-getline.lo: $(compat)/getline.c $(incdir)/compat.h $(top_builddir)/config.h
-getprogname.lo: $(compat)/getprogname.c $(incdir)/compat.h $(top_builddir)/config.h
-glob.lo: $(compat)/glob.c $(compat)/glob.h $(compat)/charclass.h $(incdir)/compat.h $(top_builddir)/config.h
-isblank.lo: $(compat)/isblank.c $(incdir)/compat.h $(top_builddir)/config.h
-memrchr.lo: $(compat)/memrchr.c $(incdir)/compat.h $(top_builddir)/config.h
-mkstemps.lo: $(compat)/mkstemps.c $(incdir)/compat.h $(top_builddir)/config.h
-nanosleep.lo: $(compat)/nanosleep.c $(incdir)/compat.h $(top_builddir)/config.h
-sigaction.lo: $(compat)/sigaction.c $(incdir)/compat.h $(incdir)/compat.h
-snprintf.lo: $(compat)/snprintf.c $(incdir)/compat.h $(top_builddir)/config.h
-strcasecmp.lo: $(compat)/strcasecmp.c $(incdir)/compat.h $(top_builddir)/config.h
-strerror.lo: $(compat)/strerror.c $(incdir)/compat.h $(top_builddir)/config.h
-strlcat.lo: $(compat)/strlcat.c $(incdir)/compat.h $(top_builddir)/config.h
-strlcpy.lo: $(compat)/strlcpy.c $(incdir)/compat.h $(top_builddir)/config.h
-strsignal.lo: $(compat)/strsignal.c $(incdir)/compat.h $(top_builddir)/config.h
-utimes.lo: $(compat)/utimes.c $(incdir)/compat.h $(compat)/utime.h $(top_builddir)/config.h
+closefrom.lo: $(compat)/closefrom.c $(incdir)/missing.h $(top_builddir)/config.h
+fnmatch.lo: $(compat)/fnmatch.c $(compat)/fnmatch.h $(compat)/charclass.h $(incdir)/missing.h $(top_builddir)/config.h
+getcwd.lo: $(compat)/getcwd.c $(incdir)/missing.h $(top_builddir)/config.h
+getline.lo: $(compat)/getline.c $(incdir)/missing.h $(top_builddir)/config.h
+getprogname.lo: $(compat)/getprogname.c $(incdir)/missing.h $(top_builddir)/config.h
+glob.lo: $(compat)/glob.c $(compat)/glob.h $(compat)/charclass.h $(incdir)/missing.h $(top_builddir)/config.h
+isblank.lo: $(compat)/isblank.c $(incdir)/missing.h $(top_builddir)/config.h
+memrchr.lo: $(compat)/memrchr.c $(incdir)/missing.h $(top_builddir)/config.h
+mkstemps.lo: $(compat)/mkstemps.c $(incdir)/missing.h $(top_builddir)/config.h
+nanosleep.lo: $(compat)/nanosleep.c $(incdir)/missing.h $(top_builddir)/config.h
+snprintf.lo: $(compat)/snprintf.c $(incdir)/missing.h $(top_builddir)/config.h
+strcasecmp.lo: $(compat)/strcasecmp.c $(incdir)/missing.h $(top_builddir)/config.h
+strerror.lo: $(compat)/strerror.c $(incdir)/missing.h $(top_builddir)/config.h
+strlcat.lo: $(compat)/strlcat.c $(incdir)/missing.h $(top_builddir)/config.h
+strlcpy.lo: $(compat)/strlcpy.c $(incdir)/missing.h $(top_builddir)/config.h
+strsignal.lo: $(compat)/strsignal.c $(incdir)/missing.h $(top_builddir)/config.h
+utimes.lo: $(compat)/utimes.c $(incdir)/missing.h $(compat)/utime.h $(top_builddir)/config.h
 
 install:
 

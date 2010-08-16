@@ -47,7 +47,6 @@
 # include <sys/sysctl.h>
 #endif
 
-#include <compat.h>
 #include <missing.h>
 
 /*

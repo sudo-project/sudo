@@ -80,9 +80,8 @@ LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
 VERSION = @PACKAGE_VERSION@
 
 SUDODEP = $(srcdir)/sudo.h $(incdir)/sudo_plugin.h $(incdir)/alloc.h \
-	  $(incdir)/compat.h $(incdir)/error.h $(incdir)/list.h \
-	  $(incdir)/missing.h $(top_builddir)/pathnames.h \
-	  $(top_builddir)/config.h
+	  $(incdir)/error.h $(incdir)/list.h $(incdir)/missing.h \
+	  $(top_builddir)/pathnames.h $(top_builddir)/config.h
 
 all: $(PROGS)
 
@@ -106,19 +105,19 @@ sesh: sesh.o
 # Dependencies
 # XXX - SUDODEP is overkill for some of these
 conversation.o: $(srcdir)/conversation.c $(SUDODEP)
-error.o: $(srcdir)/error.c $(incdir)/compat.h $(incdir)/error.h $(top_builddir)/config.h
+error.o: $(srcdir)/error.c $(incdir)/missing.h $(incdir)/error.h $(top_builddir)/config.h
 exec.o: $(srcdir)/exec.c $(SUDODEP) $(srcdir)/sudo_exec.h
 exec_pty.o: $(srcdir)/exec_pty.c $(SUDODEP) $(srcdir)/sudo_exec.h
 get_pty.o: $(srcdir)/get_pty.c $(SUDODEP)
 load_plugins.o: $(srcdir)/load_plugins.c $(SUDODEP)
 parse_args.o: $(srcdir)/parse_args.c sudo_usage.h $(SUDODEP)
 selinux.o: $(srcdir)/selinux.c $(SUDODEP)
-sesh.o: $(srcdir)/sesh.c $(incdir)/compat.h $(top_builddir)/config.h
+sesh.o: $(srcdir)/sesh.c $(incdir)/missing.h $(top_builddir)/config.h
 sudo.o: $(srcdir)/sudo.c $(SUDODEP)
 sudo_edit.o: $(srcdir)/sudo_edit.c $(SUDODEP)
-sudo_noexec.lo: $(srcdir)/sudo_noexec.c $(incdir)/compat.h $(top_builddir)/config.h
+sudo_noexec.lo: $(srcdir)/sudo_noexec.c $(incdir)/missing.h $(top_builddir)/config.h
 tgetpass.o: $(srcdir)/tgetpass.c $(SUDODEP)
-ttysize.o: $(srcdir)/ttysize.c $(incdir)/compat.h $(top_builddir)/config.h
+ttysize.o: $(srcdir)/ttysize.c $(incdir)/missing.h $(top_builddir)/config.h
 
 install: install-dirs install-binaries @INSTALL_NOEXEC@
 

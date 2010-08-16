@@ -95,7 +95,7 @@
 #include <limits.h>
 #include <pwd.h>
 
-#include <compat.h>
+#include <missing.h>
 #include "glob.h"
 #include "charclass.h"
 

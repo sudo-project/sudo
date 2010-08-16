@@ -38,7 +38,6 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 
-#include <compat.h>
 #include <missing.h>
 
 int

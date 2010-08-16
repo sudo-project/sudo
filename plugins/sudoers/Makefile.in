@@ -118,10 +118,10 @@ TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o error.o group_plugin.o
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
-SUDODEP = $(srcdir)/sudoers.h $(incdir)/compat.h \
-	  $(srcdir)/defaults.h $(incdir)/error.h $(incdir)/list.h \
-	  $(srcdir)/logging.h $(incdir)/missing.h $(srcdir)/sudo_nss.h \
-	  $(devdir)/def_data.h $(top_builddir)/pathnames.h $(top_builddir)/config.h
+SUDODEP = $(srcdir)/sudoers.h $(srcdir)/defaults.h $(incdir)/error.h \
+	  $(incdir)/list.h $(srcdir)/logging.h $(incdir)/missing.h \
+	  $(srcdir)/sudo_nss.h $(devdir)/def_data.h \
+	  $(top_builddir)/pathnames.h $(top_builddir)/config.h
 
 AUTHDEP = $(SUDODEP) $(authdir)/sudo_auth.h
 
@@ -211,11 +211,11 @@ redblack.lo: $(srcdir)/redblack.c $(SUDODEP) $(srcdir)/redblack.h
 set_perms.lo: $(srcdir)/set_perms.c $(SUDODEP)
 sudo_nss.lo: $(srcdir)/sudo_nss.c $(SUDODEP)
 sudoers.lo: $(srcdir)/sudoers.c $(SUDODEP) $(srcdir)/interfaces.h
-timestr.lo: $(srcdir)/timestr.c $(incdir)/compat.h $(top_builddir)/config.h
+timestr.lo: $(srcdir)/timestr.c $(incdir)/missing.h $(top_builddir)/config.h
 toke.lo: $(devdir)/toke.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir)/gram.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/toke.c
 tsgetgrpw.lo: $(srcdir)/tsgetgrpw.c $(SUDODEP)
-plugin_error.lo: $(srcdir)/plugin_error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
+plugin_error.lo: $(srcdir)/plugin_error.c $(incdir)/error.h $(incdir)/missing.h $(top_builddir)/config.h
 
 # Auth dependencies
 sudo_auth.lo: $(authdir)/sudo_auth.c $(AUTHDEP) $(INSDEP)
@@ -235,14 +235,14 @@ securid5.lo: $(authdir)/securid5.c $(AUTHDEP)
 sia.lo: $(authdir)/sia.c $(AUTHDEP)
 
 # Command dependencies (sudoreplay, testsudoers, visudo)
-error.o: $(top_srcdir)/src/error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
+error.o: $(top_srcdir)/src/error.c $(incdir)/error.h $(incdir)/missing.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(top_srcdir)/src/error.c
 find_path.o: find_path.lo
-getdate.o: $(devdir)/getdate.c $(incdir)/compat.h $(top_builddir)/config.h
+getdate.o: $(devdir)/getdate.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/getdate.c
 goodpath.o: goodpath.lo
 interfaces.o: interfaces.lo
-sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/alloc.h $(incdir)/compat.h $(incdir)/error.h $(incdir)/missing.h $(top_builddir)/config.h
+sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/alloc.h $(incdir)/missing.h $(incdir)/error.h $(incdir)/missing.h $(top_builddir)/config.h
 testsudoers.o: $(srcdir)/testsudoers.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/interfaces.h $(devdir)/gram.h
 tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(SUDODEP)
 visudo.o: $(srcdir)/visudo.c $(SUDODEP) $(devdir)/gram.h

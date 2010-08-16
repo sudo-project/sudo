@@ -29,7 +29,7 @@
 # endif
 #endif /* STDC_HEADERS */
 
-#include <compat.h>
+#include <missing.h>
 #include <list.h>
 #ifdef DEBUG
 # include <error.h>

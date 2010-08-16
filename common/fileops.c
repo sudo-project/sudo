@@ -47,7 +47,6 @@
 # include <emul/timespec.h>
 #endif
 
-#include <compat.h>
 #include <missing.h>
 #include <fileops.h>
 

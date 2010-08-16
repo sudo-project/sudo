@@ -30,7 +30,7 @@
 # include "utime.h"
 #endif
 
-#include <compat.h>
+#include <missing.h>
 
 #ifndef HAVE_UTIMES
 /*

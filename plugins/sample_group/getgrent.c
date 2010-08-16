@@ -45,7 +45,6 @@
 #include <pwd.h>
 #include <grp.h>
 
-#include <compat.h>
 #include <missing.h>
 
 #ifndef LINE_MAX

@@ -21,7 +21,7 @@
 #include <setjmp.h>
 
 #include <config.h>
-#include <compat.h>
+#include <missing.h>
 #include <alloc.h>
 #include <error.h>
 #include <sudo_plugin.h>

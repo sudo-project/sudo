@@ -28,7 +28,7 @@
 #endif /* STDC_HEADERS */
 #include <stdarg.h>
 
-#include <compat.h>
+#include <missing.h>
 #include "logging.h"
 
 #ifdef HAVE_BSM_AUDIT

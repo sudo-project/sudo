@@ -84,7 +84,6 @@ doc/visudo.man.in
 doc/visudo.pod
 include/Makefile.in
 include/alloc.h
-include/compat.h
 include/error.h
 include/fileops.h
 include/lbuf.h

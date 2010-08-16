@@ -35,7 +35,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <limits.h>
 
-#include <compat.h>
+#include <missing.h>
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048

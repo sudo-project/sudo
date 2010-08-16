@@ -38,7 +38,7 @@
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <errno.h>
 
-#include <compat.h>
+#include <missing.h>
 
 int
 setenv(const char *var, const char *val, int overwrite)
