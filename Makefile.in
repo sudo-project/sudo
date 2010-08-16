@@ -122,7 +122,7 @@ AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/secureware.c auth/securid.c auth/securid5.c auth/sia.c \
 	    auth/sudo_auth.c
 
-HDRS = alloc.h bsm_audit.h compat.h def_data.h defaults.h error.h ins_2001.h \
+HDRS = alloc.h bsm_audit.h def_data.h defaults.h error.h ins_2001.h \
        ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.h lbuf.h \
        linux_audit.h list.h logging.h missing.h mksiglist.h nonunix.h \
        redblack.h parse.h sudo.h sudo_exec.h sudo_nss.h gram.h \
@@ -165,10 +165,10 @@ DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
 	    visudo.cat visudo.man.in visudo.pod auth/API sudo.man.pl \
 	    sudoers.man.pl
 
-SUDODEP = $(srcdir)/sudo.h $(srcdir)/alloc.h $(srcdir)/compat.h \
-	  $(srcdir)/defaults.h $(srcdir)/error.h $(srcdir)/list.h \
-	  $(srcdir)/logging.h $(srcdir)/missing.h $(srcdir)/sudo_nss.h \
-	  $(devdir)/def_data.h pathnames.h config.h
+SUDODEP = $(srcdir)/sudo.h $(srcdir)/alloc.h $(srcdir)/defaults.h \
+	  $(srcdir)/error.h $(srcdir)/list.h $(srcdir)/logging.h \
+	  $(srcdir)/missing.h $(srcdir)/sudo_nss.h $(devdir)/def_data.h \
+	  pathnames.h config.h
 
 AUTHDEP = $(SUDODEP) $(authdir)/sudo_auth.h
 
@@ -237,7 +237,7 @@ $(devdir)/getdate.c: $(srcdir)/getdate.y
 siglist.c: mksiglist
 	./mksiglist > $@
 
-mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(srcdir)/compat.h $(top_builddir)/config.h
+mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(srcdir)/missing.h $(top_builddir)/config.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/mksiglist.c -o $@
 
 @DEV@$(srcdir)/mksiglist.h: $(srcdir)/siglist.in
@@ -264,7 +264,7 @@ defaults.o: $(srcdir)/defaults.c $(SUDODEP) $(srcdir)/def_data.c $(authdir)/sudo
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/defaults.c
 env.o: $(srcdir)/env.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/env.c
-error.o: $(srcdir)/error.c $(srcdir)/compat.h $(srcdir)/error.h config.h
+error.o: $(srcdir)/error.c $(srcdir)/missing.h $(srcdir)/error.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/error.c
 exec.o: $(srcdir)/exec.c $(SUDODEP) $(srcdir)/sudo_exec.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/exec.c
@@ -274,13 +274,13 @@ fileops.o: $(srcdir)/fileops.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fileops.c
 find_path.o: $(srcdir)/find_path.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/find_path.c
-fnmatch.o: $(srcdir)/fnmatch.c $(srcdir)/emul/fnmatch.h $(srcdir)/compat.h config.h
+fnmatch.o: $(srcdir)/fnmatch.c $(srcdir)/emul/fnmatch.h $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fnmatch.c
 get_pty.o: $(srcdir)/get_pty.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/get_pty.c
-getcwd.o: $(srcdir)/getcwd.c $(srcdir)/compat.h config.h
+getcwd.o: $(srcdir)/getcwd.c $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getcwd.c
-getdate.o: $(srcdir)/getdate.c $(srcdir)/compat.h config.h
+getdate.o: $(srcdir)/getdate.c $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getdate.c
 getline.o: $(srcdir)/getline.c config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getline.c
@@ -290,7 +290,7 @@ getspwuid.o: $(srcdir)/getspwuid.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getspwuid.c
 gettime.o: $(srcdir)/gettime.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/gettime.c
-glob.o: $(srcdir)/glob.c $(srcdir)/emul/glob.h $(srcdir)/compat.h config.h
+glob.o: $(srcdir)/glob.c $(srcdir)/emul/glob.h $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/glob.c
 goodpath.o: $(srcdir)/goodpath.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/goodpath.c
@@ -300,7 +300,7 @@ interfaces.o: $(srcdir)/interfaces.c $(SUDODEP) $(srcdir)/interfaces.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/interfaces.c
 iolog.o: $(srcdir)/iolog.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/iolog.c
-isblank.o: $(srcdir)/isblank.c $(srcdir)/compat.h config.h
+isblank.o: $(srcdir)/isblank.c $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/isblank.c
 lbuf.o: $(srcdir)/lbuf.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/lbuf.c
@@ -318,7 +318,7 @@ memrchr.o: $(srcdir)/memrchr.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/memrchr.c
 mkstemps.o: $(srcdir)/mkstemps.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/mkstemps.c
-nanosleep.o: $(srcdir)/nanosleep.c $(srcdir)/compat.h config.h
+nanosleep.o: $(srcdir)/nanosleep.c $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/nanosleep.c
 parse.o: $(srcdir)/parse.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/parse.c
@@ -330,33 +330,33 @@ redblack.o: $(srcdir)/redblack.c $(SUDODEP) $(srcdir)/redblack.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/redblack.c
 set_perms.o: $(srcdir)/set_perms.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/set_perms.c
-setsid.o: $(srcdir)/setsid.c $(srcdir)/compat.h config.h
+setsid.o: $(srcdir)/setsid.c $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/setsid.c
-sigaction.o: $(srcdir)/sigaction.c $(srcdir)/compat.h
+sigaction.o: $(srcdir)/sigaction.c $(srcdir)/missing.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sigaction.c
-siglist.o: siglist.c $(srcdir)/compat.h config.h
+siglist.o: siglist.c $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/siglist.c
-snprintf.o: $(srcdir)/snprintf.c $(srcdir)/compat.h config.h
+snprintf.o: $(srcdir)/snprintf.c $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/snprintf.c
-strcasecmp.o: $(srcdir)/strcasecmp.c $(srcdir)/compat.h  config.h
+strcasecmp.o: $(srcdir)/strcasecmp.c $(srcdir)/missing.h  config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strcasecmp.c
-strerror.o: $(srcdir)/strerror.c $(srcdir)/compat.h config.h
+strerror.o: $(srcdir)/strerror.c $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strerror.c
-strlcat.o: $(srcdir)/strlcat.c $(srcdir)/compat.h config.h
+strlcat.o: $(srcdir)/strlcat.c $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strlcat.c
-strlcpy.o: $(srcdir)/strlcpy.c $(srcdir)/compat.h config.h
+strlcpy.o: $(srcdir)/strlcpy.c $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strlcpy.c
-strsignal.o: $(srcdir)/strsignal.c $(srcdir)/compat.h config.h
+strsignal.o: $(srcdir)/strsignal.c $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strsignal.c
 selinux.o: $(srcdir)/selinux.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/selinux.c
 sudo.o: $(srcdir)/sudo.c $(SUDODEP) sudo_usage.h $(srcdir)/interfaces.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo.c
-sudoreplay.o: $(srcdir)/sudoreplay.c $(srcdir)/alloc.h $(srcdir)/compat.h $(srcdir)/error.h $(srcdir)/missing.h config.h
+sudoreplay.o: $(srcdir)/sudoreplay.c $(srcdir)/alloc.h $(srcdir)/missing.h $(srcdir)/error.h $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudoreplay.c
 sudo_edit.o: $(srcdir)/sudo_edit.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_edit.c
-sudo_noexec.o: $(srcdir)/sudo_noexec.c $(srcdir)/compat.h config.h
+sudo_noexec.o: $(srcdir)/sudo_noexec.c $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_noexec.c
 sudo_nss.o: $(srcdir)/sudo_nss.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_nss.c
@@ -366,19 +366,19 @@ testsudoers.o: $(srcdir)/testsudoers.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/li
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/testsudoers.c
 tgetpass.o: $(srcdir)/tgetpass.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tgetpass.c
-timestr.o: $(srcdir)/timestr.c $(srcdir)/compat.h config.h
+timestr.o: $(srcdir)/timestr.c $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/timestr.c
 toke.o: $(devdir)/toke.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(devdir)/toke.c
 tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tsgetgrpw.c
-utimes.o: $(srcdir)/utimes.c $(srcdir)/compat.h $(srcdir)/emul/utime.h config.h
+utimes.o: $(srcdir)/utimes.c $(srcdir)/missing.h $(srcdir)/emul/utime.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/utimes.c
 vasgroups.o: $(srcdir)/vasgroups.c $(srcdir)/nonunix.h $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/vasgroups.c
 visudo.o: $(srcdir)/visudo.c $(SUDODEP) $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/visudo.c
-zero_bytes.o: $(srcdir)/zero_bytes.c $(srcdir)/compat.h config.h
+zero_bytes.o: $(srcdir)/zero_bytes.c $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/zero_bytes.c
 sudo_auth.o: $(authdir)/sudo_auth.c $(AUTHDEP) $(INSDEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/sudo_auth.c

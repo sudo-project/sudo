@@ -40,7 +40,7 @@
 
 #include <vas.h>
 
-#include "compat.h"
+#include "missing.h"
 #include "logging.h"
 #include "nonunix.h"
 #include "sudo.h"

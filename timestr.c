@@ -28,7 +28,7 @@
 #endif /* STDC_HEADERS */
 #include <time.h>
 
-#include "compat.h"
+#include "missing.h"
 
 char *get_timestr	__P((time_t, int));
 

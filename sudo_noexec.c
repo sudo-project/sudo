@@ -26,7 +26,7 @@
 # include <varargs.h>
 #endif
 
-#include <compat.h>
+#include <missing.h>
 
 /*
  * Dummy versions of the execve() family of syscalls.  We don't need

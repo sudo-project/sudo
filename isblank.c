@@ -15,7 +15,7 @@
  */
 
 #include <config.h>
-#include <compat.h>
+#include <missing.h>
 
 #undef isblank
 int

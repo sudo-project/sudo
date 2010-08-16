@@ -27,7 +27,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "compat.h"
+#include "missing.h"
 
 int
 main (int argc, char **argv)

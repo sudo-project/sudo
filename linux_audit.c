@@ -31,10 +31,9 @@
 #include <string.h>
 #include <libaudit.h>
 
-#include "compat.h"
+#include "missing.h"
 #include "error.h"
 #include "alloc.h"
-#include "missing.h"
 #include "linux_audit.h"
 
 /*

@@ -21,7 +21,7 @@
 #include <signal.h>
 #include <errno.h>
 
-#include <compat.h>
+#include <missing.h>
 
 int
 sigaction(signo, sa, osa)

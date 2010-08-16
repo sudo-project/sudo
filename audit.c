@@ -32,7 +32,7 @@
 # include <varargs.h>
 #endif
 
-#include "compat.h"
+#include "missing.h"
 #include "logging.h"
 
 #ifdef HAVE_BSM_AUDIT

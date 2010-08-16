@@ -71,7 +71,7 @@
 # endif
 #endif
 
-#include <compat.h>
+#include <missing.h>
 
 #define	ISDOT(dp) \
 	(dp->d_name[0] == '.' && (dp->d_name[1] == '\0' || \

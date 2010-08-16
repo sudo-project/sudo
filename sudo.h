@@ -24,7 +24,7 @@
 
 #include <pathnames.h>
 #include <limits.h>
-#include "compat.h"
+#include "missing.h"
 #include "alloc.h"
 #include "defaults.h"
 #include "error.h"

@@ -26,7 +26,7 @@
 #endif /* HAVE_UNISTD_H */
 
 #include <pathnames.h>
-#include <compat.h>
+#include <missing.h>
 
 pid_t
 setsid()

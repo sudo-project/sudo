@@ -20,7 +20,7 @@
 #include <string.h>
 
 #include <config.h>
-#include <compat.h>
+#include <missing.h>
 #include "error.h"
 
 static void _warning	__P((int, const char *, va_list));

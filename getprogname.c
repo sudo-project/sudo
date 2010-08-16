@@ -22,7 +22,7 @@
 #include <string.h>
 
 #include <config.h>
-#include <compat.h>
+#include <missing.h>
 
 const char *
 getprogname()

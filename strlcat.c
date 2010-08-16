@@ -20,8 +20,7 @@
 #include <string.h>
 
 #include <config.h>
-#include <compat.h>
-
+#include <missing.h>
 
 /*
  * Appends src to string dst of size siz (unlike strncat, siz is the

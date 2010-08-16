@@ -22,7 +22,7 @@
 #include <errno.h>
 
 #include <config.h>
-#include <compat.h>
+#include <missing.h>
 
 /*
  * Map errno -> error string.

@@ -31,7 +31,7 @@
 #include <usersec.h>
 #include <uinfo.h>
 
-#include "compat.h"
+#include "missing.h"
 #include "alloc.h"
 #include "error.h"
 

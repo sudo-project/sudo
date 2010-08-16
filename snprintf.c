@@ -76,7 +76,7 @@
 # include <varargs.h>
 #endif
 
-#include <compat.h>
+#include <missing.h>
 
 static int xxxprintf	 __P((char **, size_t, int, const char *, va_list));
 

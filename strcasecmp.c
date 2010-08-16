@@ -16,7 +16,7 @@
 
 #include <sys/types.h>
 #include <config.h>
-#include <compat.h>
+#include <missing.h>
 
 /*
  * Case insensitive string compare routines, same semantics as str[n]cmp()
