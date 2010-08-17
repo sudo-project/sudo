@@ -79,7 +79,7 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
     char *line;
 
     /* IRIX-style dynamic ptys (may fork) */
-    line = _getpty(master, O_RDWR, IRUSR|S_IWUSR|S_IWGRP, 0);
+    line = _getpty(master, O_RDWR, S_IRUSR|S_IWUSR|S_IWGRP, 0);
     if (line == NULL)
 	return (0);
     *slave = open(line, O_RDWR|O_NOCTTY, 0);
