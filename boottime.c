@@ -141,7 +141,7 @@ get_boottime(tv)
 
 int
 get_boottime(tv)
-    struct timeval *tv
+    struct timeval *tv;
 {
     return 0;
 }
