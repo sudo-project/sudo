@@ -18470,7 +18470,7 @@ test "$datarootdir" = '${prefix}/share' && datarootdir='$(prefix)/share'
 test "$docdir" = '${datarootdir}/doc/${PACKAGE_TARNAME}' && docdir='$(datarootdir)/doc/$(PACKAGE_TARNAME)'
 test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
 
-ac_config_files="$ac_config_files Makefile sudo.man visudo.man sudoers.man sudoers.ldap.man sudoreplay.man sudo_usage.h"
+ac_config_files="$ac_config_files Makefile sudo.man visudo.man sudoers.man sudoers.ldap.man sudoreplay.man sudo_usage.h sudoers"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -19427,6 +19427,7 @@ do
     "sudoers.ldap.man") CONFIG_FILES="$CONFIG_FILES sudoers.ldap.man" ;;
     "sudoreplay.man") CONFIG_FILES="$CONFIG_FILES sudoreplay.man" ;;
     "sudo_usage.h") CONFIG_FILES="$CONFIG_FILES sudo_usage.h" ;;
+    "sudoers") CONFIG_FILES="$CONFIG_FILES sudoers" ;;
 
   *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
