@@ -85,5 +85,6 @@ root ALL=(ALL) ALL
 # Defaults targetpw  # Ask for the password of the target user
 # ALL ALL=(ALL) ALL  # WARNING: only use this together with 'Defaults targetpw'
 
-## Read drop-in files from /etc/sudoers.d (the # here does not mean a comment)
-#includedir /etc/sudoers.d
+## Read drop-in files from @sysconfdir@/sudoers.d
+## (the '#' here does not indicate a comment)
+#includedir @sysconfdir@/sudoers.d
