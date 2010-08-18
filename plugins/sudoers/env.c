@@ -587,7 +587,7 @@ rebuild_env(int noexec)
 
     /* Set $HOME to target user if not preserving user's value. */
     if (reset_home && !ISSET(didvar, KEPT_HOME))
-	sudo_setenv("HOME", runas_pw->pw_dir, ISSET(didvar, DID_HOME));
+	sudo_setenv("HOME", runas_pw->pw_dir, TRUE);
 
     /* Provide default values for $TERM and $PATH if they are not set. */
     if (!ISSET(didvar, DID_TERM))
