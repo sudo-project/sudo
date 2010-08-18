@@ -159,7 +159,7 @@ DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
 	    mkpkg pathnames.h.in pp sample.pam sample.syslog.conf \
 	    sample.sudoers schema.ActiveDirectory schema.OpenLDAP \
 	    schema.iPlanet siglist.in sudo.cat sudo.man.in sudo.pod sudo.pp \
-	    sudo_usage.h.in sudoers sudoers.cat sudoers.man.in sudoers.pod \
+	    sudo_usage.h.in sudoers.in sudoers.cat sudoers.man.in sudoers.pod \
 	    sudoers.ldap.cat sudoers.ldap.man.in sudoers.ldap.pod \
 	    sudoers2ldif sudoreplay.cat sudoreplay.man.in sudoreplay.pod \
 	    visudo.cat visudo.man.in visudo.pod auth/API sudo.man.pl \
