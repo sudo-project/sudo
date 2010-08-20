@@ -282,14 +282,15 @@ lbuf_print(lbuf)
 
     /* For very small widths just give up... */
     if (lbuf->cols <= lbuf->indent + contlen + 20) {
-	puts(lbuf->buf);
+	lbuf->output(lbuf->buf);
+	lbuf->output("\n");
 	goto done;
     }
 
     /* Print each line in the buffer */
     for (cp = lbuf->buf; cp != NULL && *cp != '\0'; ) {
 	if (*cp == '\n') {
-	    putchar('\n');
+	    lbuf->output("\n");
 	    cp++;
 	} else {
 	    ep = memchr(cp, '\n', lbuf->len - (cp - lbuf->buf));
