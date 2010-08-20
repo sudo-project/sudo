@@ -105,4 +105,5 @@ _warning(int use_errno, const char *fmt, va_list ap)
     msg[nmsgs - 1].msg = "\n";
     memset(&repl, 0, sizeof(repl));
     sudo_conv(nmsgs, msg, repl);
+    efree(str);
 }
