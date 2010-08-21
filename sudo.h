@@ -354,7 +354,7 @@ void zero_bytes		__P((volatile void *, size_t));
 /* Only provide extern declarations outside of sudo.c. */
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;
-extern struct passwd *auth_pw, *list_pw;
+extern struct passwd *list_pw;
 
 extern int tgetpass_flags;
 extern int long_list;

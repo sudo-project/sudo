@@ -134,7 +134,7 @@ char **Argv, **NewArgv;
 char *prev_user;
 int user_closefrom = -1;
 struct sudo_user sudo_user;
-struct passwd *auth_pw, *list_pw;
+struct passwd *list_pw;
 struct interface *interfaces;
 int num_interfaces;
 int tgetpass_flags;
