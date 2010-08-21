@@ -90,6 +90,7 @@ static char *expand_prompt	__P((char *, char *, char *));
 static void  lecture		__P((int));
 static void  update_timestamp	__P((char *, char *));
 static int   tty_is_devpts	__P((const char *));
+static struct passwd *get_authpw __P((void));
 
 /*
  * This function only returns if the user can successfully
@@ -128,6 +129,8 @@ check_user(validated, mode)
 	TS_MAKE_DIRS);
 
     if (status != TS_CURRENT || ISSET(validated, FLAG_CHECK_USER)) {
+	struct passwd *auth_pw;
+
 	/* Bail out if we are non-interactive and a password is required */
 	if (ISSET(mode, MODE_NONINTERACTIVE))
 	    errorx(1, "sorry, a password is required to run %s", getprogname());
@@ -156,17 +159,15 @@ check_user(validated, mode)
 	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
 	    user_name, user_shost);
 
+	auth_pw = get_authpw();
 	verify_user(auth_pw, prompt);
+	pw_delref(auth_pw);
     }
     /* Only update timestamp if user was validated. */
     if (ISSET(validated, VALIDATE_OK) && !ISSET(mode, MODE_INVALIDATE) && status != TS_ERROR)
 	update_timestamp(timestampdir, timestampfile);
     efree(timestampdir);
     efree(timestampfile);
-    if (auth_pw != NULL) {
-	pw_delref(auth_pw);
-	auth_pw = NULL;
-    }
 }
 
 /*
@@ -696,4 +697,34 @@ tty_is_devpts(tty)
     }
 #endif /* __linux__ */
     return retval;
+}
+
+/*
+ * Get passwd entry for the user we are going to authenticate as.
+ * By default, this is the user invoking sudo.  In the most common
+ * case, this matches sudo_user.pw or runas_pw.
+ */
+static struct passwd *
+get_authpw()
+{
+    struct passwd *pw;
+
+    if (def_rootpw) {
+	if ((pw = sudo_getpwuid(0)) == NULL)
+	    log_error(0, "unknown uid: 0");
+    } else if (def_runaspw) {
+	if ((pw = sudo_getpwnam(def_runas_default)) == NULL)
+	    log_error(0, "unknown user: %s", def_runas_default);
+    } else if (def_targetpw) {
+	if (runas_pw->pw_name == NULL)
+	    log_error(NO_MAIL|MSG_ONLY, "unknown uid: %lu",
+		(unsigned long) runas_pw->pw_uid);
+	pw_addref(runas_pw);
+	pw = runas_pw;
+    } else {
+	pw_addref(sudo_user.pw);
+	pw = sudo_user.pw;
+    }
+
+    return(pw);
 }
