@@ -313,7 +313,7 @@ int group_plugin_query(const char *user, const char *group,
 
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;
-extern struct passwd *auth_pw, *list_pw;
+extern struct passwd *list_pw;
 extern int long_list;
 extern int sudo_mode;
 extern uid_t timestamp_uid;
