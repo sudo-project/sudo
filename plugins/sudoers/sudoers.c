@@ -108,7 +108,6 @@ static void set_project(struct passwd *);
 static void set_runasgr(char *);
 static void set_runaspw(char *);
 static int sudoers_policy_version(int verbose);
-static struct passwd *get_authpw(void);
 static int deserialize_info(char * const settings[], char * const user_info[]);
 static char *find_editor(int nfiles, char **files, char ***argv_out);
 static void create_admin_success_flag(void);
@@ -122,7 +121,7 @@ extern GETGROUPS_T *runas_groups;
  */
 char *prev_user;
 struct sudo_user sudo_user;
-struct passwd *auth_pw, *list_pw;
+struct passwd *list_pw;
 struct interface *interfaces;
 int num_interfaces;
 int long_list;
@@ -439,9 +438,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Build a new environment that avoids any nasty bits. */
     rebuild_env(def_noexec);
-
-    /* Fill in passwd struct based on user we are authenticating as.  */
-    auth_pw = get_authpw();
 
     /* Require a password if sudoers says so.  */
     if (def_authenticate) {
@@ -1110,36 +1106,6 @@ set_runasgr(char *group)
 	if ((runas_gr = sudo_getgrnam(group)) == NULL)
 	    log_error(NO_MAIL|MSG_ONLY, "unknown group: %s", group);
     }
-}
-
-/*
- * Get passwd entry for the user we are going to authenticate as.
- * By default, this is the user invoking sudo.  In the most common
- * case, this matches sudo_user.pw or runas_pw.
- */
-static struct passwd *
-get_authpw(void)
-{
-    struct passwd *pw;
-
-    if (def_rootpw) {
-	if ((pw = sudo_getpwuid(0)) == NULL)
-	    log_error(0, "unknown uid: 0");
-    } else if (def_runaspw) {
-	if ((pw = sudo_getpwnam(def_runas_default)) == NULL)
-	    log_error(0, "unknown user: %s", def_runas_default);
-    } else if (def_targetpw) {
-	if (runas_pw->pw_name == NULL)
-	    log_error(NO_MAIL|MSG_ONLY, "unknown uid: %lu",
-		(unsigned long) runas_pw->pw_uid);
-	pw_addref(runas_pw);
-	pw = runas_pw;
-    } else {
-	pw_addref(sudo_user.pw);
-	pw = sudo_user.pw;
-    }
-
-    return(pw);
 }
 
 /*
