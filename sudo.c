@@ -105,7 +105,7 @@
 # include "nonunix.h"
 #endif
 
-#ifdef HAVE_PAM
+#if defined(HAVE_PAM) && !defined(NO_PAM_SESSION)
 # define CMND_WAIT	TRUE
 #else
 # define CMND_WAIT	FALSE
