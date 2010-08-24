@@ -101,7 +101,14 @@ static int fork_cmnd(path, argv, envp, sv, rbac_enabled)
     int rbac_enabled;
 {
     struct command_status cstat;
+    sigaction_t sa;
     int pid;
+
+    zero_bytes(&sa, sizeof(sa));
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
+    sa.sa_handler = handler;
+    sigaction(SIGCONT, &sa, NULL);
 
     pid = fork();
     switch (pid) {
