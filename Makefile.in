@@ -465,6 +465,9 @@ sudoreplay.man: $(srcdir)/sudoreplay.man.in
 @DEV@LICENSE: $(srcdir)/license.pod
 @DEV@	pod2text -l -i0 $(srcdir)/license.pod | sed '1,2d' > $@
 
+sudoers: $(srcdir)/sudoers.in
+	(cd $(top_builddir) && $(SHELL) config.status --file=plugins/sudoers/$@)
+
 # The 1.7 branch started Jan 18, 2010
 ChangeLog:
 	if test -d $(srcdir)/.hg; then \
@@ -521,7 +524,7 @@ mostlyclean: clean
 
 distclean: clean
 	-rm -rf Makefile pathnames.h config.h config.status config.cache \
-		config.log libtool sudo_noexec.lo .libs $(GENERATED) \
+		config.log libtool sudoers sudo_noexec.lo .libs $(GENERATED) \
 		sudo.man sudoers.man sudoers.ldap.man sudoreplay.man \
 		visudo.man sudo_usage.h Makefile.binary
 
