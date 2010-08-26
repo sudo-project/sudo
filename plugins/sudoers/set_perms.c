@@ -925,7 +925,8 @@ bad:
 static void
 runas_setgroups()
 {
-    struct passwd *pw;
+    static struct passwd *pw;
+    struct passwd *opw = pw;
 
     if (def_preserve_groups)
 	return;
@@ -933,7 +934,8 @@ runas_setgroups()
     /*
      * Use stashed copy of runas groups if available, else initgroups and stash.
      */
-    if (runas_ngroups == -1) {
+    pw = runas_pw ? runas_pw : sudo_user.pw;
+    if (pw != opw) {
 	pw = runas_pw ? runas_pw : sudo_user.pw;
 # ifdef HAVE_SETAUTHDB
 	aix_setauthdb(pw->pw_name);
@@ -941,6 +943,10 @@ runas_setgroups()
 	if (initgroups(pw->pw_name, pw->pw_gid) < 0)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't set runas group vector");
 # ifdef HAVE_GETGROUPS
+	if (runas_groups) {
+	    efree(runas_groups);
+	    runas_groups = NULL;
+	}
 	if ((runas_ngroups = getgroups(0, NULL)) > 0) {
 	    runas_groups = emalloc2(runas_ngroups, sizeof(GETGROUPS_T));
 	    if (getgroups(runas_ngroups, runas_groups) < 0)
