@@ -185,6 +185,9 @@ $(devdir)/getdate.c: $(srcdir)/getdate.y
 @DEV@$(devdir)/def_data.c $(devdir)/def_data.h: $(srcdir)/def_data.in
 @DEV@	perl $(srcdir)/mkdefaults -o $(devdir)/def_data $(srcdir)/def_data.in
 
+sudoers: $(srcdir)/sudoers.in
+	(cd $(top_builddir) && $(SHELL) config.status --file=plugins/sudoers/$@)
+
 # Sudoers dependencies
 alias.lo: $(srcdir)/alias.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/redblack.h
 audit.lo: $(srcdir)/audit.c $(SUDODEP)
@@ -290,7 +293,7 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	-rm -rf Makefile sudoers.lo .libs $(LINKS)
+	-rm -rf Makefile sudoers sudoers.lo .libs $(LINKS)
 
 clobber: distclean
 
