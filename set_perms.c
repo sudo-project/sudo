@@ -488,7 +488,8 @@ runas_setgroups()
 # ifdef HAVE_GETGROUPS
     static GETGROUPS_T *groups;
 # endif
-    struct passwd *pw;
+    static struct passwd *pw;
+    struct passwd *opw = pw;
 
     if (def_preserve_groups)
 	return;
@@ -496,14 +497,18 @@ runas_setgroups()
     /*
      * Use stashed copy of runas groups if available, else initgroups and stash.
      */
-    if (ngroups == -1) {
-	pw = runas_pw ? runas_pw : sudo_user.pw;
+    pw = runas_pw ? runas_pw : sudo_user.pw;
+    if (pw != opw) {
 # ifdef HAVE_SETAUTHDB
 	aix_setauthdb(pw->pw_name);
 # endif
 	if (initgroups(pw->pw_name, pw->pw_gid) < 0)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't set runas group vector");
 # ifdef HAVE_GETGROUPS
+	if (groups) {
+	    efree(groups);
+	    groups = NULL;
+	}
 	if ((ngroups = getgroups(0, NULL)) > 0) {
 	    groups = emalloc2(ngroups, sizeof(GETGROUPS_T));
 	    if (getgroups(ngroups, groups) < 0)
