@@ -15,6 +15,9 @@
  */
 
 #include <config.h>
+
+#include <sys/types.h>
+
 #include <missing.h>
 
 #undef isblank
