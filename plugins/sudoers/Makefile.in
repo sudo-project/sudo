@@ -31,6 +31,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
 docdir = @docdir@
+timedir = @timedir@
 
 # For out of tree builds
 VPATH = $(devdir):$(srcdir):$(srcdir)/auth
