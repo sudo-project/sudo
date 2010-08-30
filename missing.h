@@ -22,6 +22,15 @@
 #ifndef _SUDO_MISSING_H
 #define _SUDO_MISSING_H
 
+#ifndef NULL
+# include <stdio.h>
+#endif
+#ifdef __STDC__
+# include <stdarg.h>
+#else
+# include <varargs.h>
+#endif
+
 /*
  * Macros that may be missing on some Operating Systems
  */
@@ -307,13 +316,6 @@ const char *getprogname __P((void));
 
 #ifndef WCOREDUMP
 # define WCOREDUMP(x)	((x) & 0x80)
-#endif
-
-#include <stdio.h>
-#ifdef __STDC__
-# include <stdarg.h>
-#else
-# include <varargs.h>
 #endif
 
 /* Functions "missing" from libc. */
