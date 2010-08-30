@@ -275,7 +275,7 @@ install-sudoers: install-dirs
 	    $(DESTDIR)$(sudoersdir)/sudoers.d
 	test -f $(DESTDIR)$(sudoersdir)/sudoers || \
 	    $(INSTALL) -O $(sudoers_uid) -G $(sudoers_gid) -M $(sudoers_mode) \
-		$(srcdir)/sudoers $(DESTDIR)$(sudoersdir)/sudoers
+		sudoers $(DESTDIR)$(sudoersdir)/sudoers
 
 uninstall:
 	-$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(plugindir)/sudoers.la
