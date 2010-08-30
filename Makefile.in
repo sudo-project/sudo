@@ -500,7 +500,7 @@ install-sudoers: install-dirs
 	    $(DESTDIR)$(sudoersdir)/sudoers.d
 	test -f $(DESTDIR)$(sudoersdir)/sudoers || \
 	    $(INSTALL) -O $(sudoers_uid) -G $(sudoers_gid) -M $(sudoers_mode) \
-		$(srcdir)/sudoers $(DESTDIR)$(sudoersdir)/sudoers
+		sudoers $(DESTDIR)$(sudoersdir)/sudoers
 
 install-doc: install-dirs ChangeLog
 	(cd $(srcdir) && for f in ChangeLog HISTORY LICENSE NEWS README TROUBLESHOOTING UPGRADE sample.*; do $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $$f $(DESTDIR)$(docdir); done)
