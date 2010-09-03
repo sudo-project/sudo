@@ -22,6 +22,9 @@
 #ifndef _SUDO_MISSING_H
 #define _SUDO_MISSING_H
 
+#include <stdio.h>
+#include <stdarg.h>
+
 /*
  * Macros and functions that may be missing on some operating systems.
  */
@@ -260,9 +263,6 @@ void setprogname(const char *);
 #    define HAVE_SETEUID 1
 #  endif
 #endif /* HAVE_SETEUID */
-
-#include <stdio.h>
-#include <stdarg.h>
 
 /* Functions "missing" from libc. */
 
