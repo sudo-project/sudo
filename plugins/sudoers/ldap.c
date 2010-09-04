@@ -1149,7 +1149,7 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     int rc, count = 0;
 
     if (ld == NULL)
-	return(-1);
+	goto done;
 
     for (base = ldap_conf.base; base != NULL; base = base->next) {
 	result = NULL;
@@ -1173,6 +1173,7 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 	if (result)
 	    ldap_msgfree(result);
     }
+done:
     return(count);
 }
 
@@ -1352,7 +1353,7 @@ sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
     int rc, do_netgr, count = 0;
 
     if (ld == NULL)
-	return(-1);
+	goto done;
 
     /*
      * Okay - time to search for anything that matches this user
@@ -1394,6 +1395,7 @@ sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
 	}
 	efree(filt);
     }
+done:
     return(count);
 }
 

@@ -414,7 +414,7 @@ sudo_file_display_privs(struct sudo_nss *nss, struct passwd *pw,
     int nfound = 0;
 
     if (nss->handle == NULL)
-	return(-1);
+	goto done;
 
     tq_foreach_fwd(&userspecs, us) {
 	if (userlist_matches(pw, &us->users) != ALLOW)
@@ -425,6 +425,7 @@ sudo_file_display_privs(struct sudo_nss *nss, struct passwd *pw,
 	else
 	    nfound += sudo_file_display_priv_short(pw, us, lbuf);
     }
+done:
     return(nfound);
 }
 
@@ -440,7 +441,7 @@ sudo_file_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     int nfound = 0;
 
     if (nss->handle == NULL)
-	return(-1);
+	goto done;
 
     if (lbuf->len == 0 || isspace((unsigned char)lbuf->buf[lbuf->len - 1]))
 	prefix = "    ";
@@ -476,7 +477,7 @@ sudo_file_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 	prefix = ", ";
 	nfound++;
     }
-
+done:
     return(nfound);
 }
 
@@ -571,7 +572,7 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
     int host_match, runas_match, cmnd_match;
 
     if (nss->handle == NULL)
-	return(rval);
+	goto done;
 
     match = NULL;
     tq_foreach_rev(&userspecs, us) {
@@ -602,6 +603,7 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 	    safe_cmnd, user_args ? " " : "", user_args ? user_args : "");
 	rval = 0;
     }
+done:
     return(rval);
 }
 
