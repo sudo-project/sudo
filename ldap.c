@@ -1269,7 +1269,7 @@ sudo_ldap_display_bound_defaults(nss, pw, lbuf)
     struct passwd *pw;
     struct lbuf *lbuf;
 {
-    return(1);
+    return(0);
 }
 
 /*
