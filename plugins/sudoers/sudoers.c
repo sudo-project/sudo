@@ -656,7 +656,8 @@ static int
 sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     char **command_infop[], char **argv_out[], char **user_env_out[])
 {
-    SET(sudo_mode, MODE_RUN);
+    if (!ISSET(sudo_mode, MODE_EDIT))
+	SET(sudo_mode, MODE_RUN);
 
     return sudoers_policy_main(argc, argv, 0, env_add, command_infop,
 	argv_out, user_env_out);
