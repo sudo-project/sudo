@@ -38,6 +38,8 @@
 
 #include <config.h>
 
+#include <sys/types.h>
+
 #include <stdio.h>
 #include <ctype.h>
 #ifdef HAVE_STRING_H
