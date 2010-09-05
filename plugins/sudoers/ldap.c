@@ -142,7 +142,7 @@ static struct ldap_config {
     int rootuse_sasl;
     int ssl_mode;
     char *host;
-    char *uri;
+    struct ldap_config_list_str *uri;
     char *binddn;
     char *bindpw;
     char *rootbinddn;
@@ -166,7 +166,7 @@ static struct ldap_config_table ldap_conf_table[] = {
     { "port", CONF_INT, FALSE, -1, &ldap_conf.port },
     { "ssl", CONF_STR, FALSE, -1, &ldap_conf.ssl },
     { "sslpath", CONF_STR, FALSE, -1, &ldap_conf.tls_certfile },
-    { "uri", CONF_STR, FALSE, -1, &ldap_conf.uri },
+    { "uri", CONF_LIST_STR, FALSE, -1, &ldap_conf.uri },
 #ifdef LDAP_OPT_DEBUG_LEVEL
     { "debug", CONF_INT, FALSE, LDAP_OPT_DEBUG_LEVEL, &ldap_conf.ldap_debug },
 #endif
@@ -313,70 +313,75 @@ toobig:
  * where the trailing slash is optional.
  */
 static int
-sudo_ldap_parse_uri(const char *uri_list)
+sudo_ldap_parse_uri(const struct ldap_config_list_str *uri_list)
 {
     char *buf, *uri, *host, *cp, *port;
     char hostbuf[LINE_MAX];
     int nldap = 0, nldaps = 0;
     int rc = -1;
 
-    buf = estrdup(uri_list);
-    hostbuf[0] = '\0';
-    for ((uri = strtok(buf, " \t")); uri != NULL; (uri = strtok(NULL, " \t"))) {
-	if (strncasecmp(uri, "ldap://", 7) == 0) {
-	    nldap++;
-	    host = uri + 7;
-	} else if (strncasecmp(uri, "ldaps://", 8) == 0) {
-	    nldaps++;
-	    host = uri + 8;
-	} else {
-	    warningx("unsupported LDAP uri type: %s", uri);
-	    goto done;
-	}
+    do {
+	buf = estrdup(uri_list->val);
+	hostbuf[0] = '\0';
+	for ((uri = strtok(buf, " \t")); uri != NULL; (uri = strtok(NULL, " \t"))) {
+	    if (strncasecmp(uri, "ldap://", 7) == 0) {
+		nldap++;
+		host = uri + 7;
+	    } else if (strncasecmp(uri, "ldaps://", 8) == 0) {
+		nldaps++;
+		host = uri + 8;
+	    } else {
+		warningx("unsupported LDAP uri type: %s", uri);
+		goto done;
+	    }
 
-	/* trim optional trailing slash */
-	if ((cp = strrchr(host, '/')) != NULL && cp[1] == '\0') {
-	    *cp = '\0';
-	}
+	    /* trim optional trailing slash */
+	    if ((cp = strrchr(host, '/')) != NULL && cp[1] == '\0') {
+		*cp = '\0';
+	    }
 
-	if (hostbuf[0] != '\0') {
-	    if (strlcat(hostbuf, " ", sizeof(hostbuf)) >= sizeof(hostbuf))
-		goto toobig;
-	}
-
-	if (*host == '\0')
-	    host = "localhost";		/* no host specified, use localhost */
-
-	if (strlcat(hostbuf, host, sizeof(hostbuf)) >= sizeof(hostbuf))
-	    goto toobig;
-
-	/* If using SSL and no port specified, add port 636 */
-	if (nldaps) {
-	    if ((port = strrchr(host, ':')) == NULL ||
-		!isdigit((unsigned char)port[1]))
-		if (strlcat(hostbuf, ":636", sizeof(hostbuf)) >= sizeof(hostbuf))
+	    if (hostbuf[0] != '\0') {
+		if (strlcat(hostbuf, " ", sizeof(hostbuf)) >= sizeof(hostbuf))
 		    goto toobig;
-	}
-    }
-    if (hostbuf[0] == '\0') {
-	warningx("invalid uri: %s", uri_list);
-	goto done;
-    }
+	    }
 
-    if (nldaps != 0) {
-	if (nldap != 0) {
-	    warningx("cannot mix ldap and ldaps URIs");
+	    if (*host == '\0')
+		host = "localhost";		/* no host specified, use localhost */
+
+	    if (strlcat(hostbuf, host, sizeof(hostbuf)) >= sizeof(hostbuf))
+		goto toobig;
+
+	    /* If using SSL and no port specified, add port 636 */
+	    if (nldaps) {
+		if ((port = strrchr(host, ':')) == NULL ||
+		    !isdigit((unsigned char)port[1]))
+		    if (strlcat(hostbuf, ":636", sizeof(hostbuf)) >= sizeof(hostbuf))
+			goto toobig;
+	    }
+	}
+	if (hostbuf[0] == '\0') {
+	    warningx("invalid uri: %s", uri_list);
 	    goto done;
 	}
-	if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS) {
-	    warningx("cannot mix ldaps and starttls");
-	    goto done;
-	}
-	ldap_conf.ssl_mode = SUDO_LDAP_SSL;
-    }
 
-    free(ldap_conf.host);
-    ldap_conf.host = estrdup(hostbuf);
+	if (nldaps != 0) {
+	    if (nldap != 0) {
+		warningx("cannot mix ldap and ldaps URIs");
+		goto done;
+	    }
+	    if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS) {
+		warningx("cannot mix ldaps and starttls");
+		goto done;
+	    }
+	    ldap_conf.ssl_mode = SUDO_LDAP_SSL;
+	}
+
+	free(ldap_conf.host);
+	ldap_conf.host = estrdup(hostbuf);
+	efree(buf);
+    } while ((uri_list = uri_list->next));
+
+    buf = NULL;
     rc = 0;
 
 done:
@@ -385,6 +390,30 @@ done:
 
 toobig:
     errorx(1, "sudo_ldap_parse_uri: out of space building hostbuf");
+}
+#else
+static char *
+sudo_ldap_join_uri(struct ldap_config_list_str *uri_list)
+{
+    struct ldap_config_list_str *uri;
+    size_t len = 0;
+    char *buf, *cp;
+
+    /* Usually just a single entry. */
+    if (uri_list->next == NULL)
+	return(estrdup(uri_list->val));
+
+    for (uri = uri_list; uri != NULL; uri = uri->next) {
+	len += strlen(uri->val) + 1;
+    }
+    buf = cp = emalloc(len);
+    buf[0] = '\0';
+    for (uri = uri_list; uri != NULL; uri = uri->next) {
+	cp += strlcpy(cp, uri->val, len - (cp - buf));
+	*cp++ = ' ';
+    }
+    cp[-1] = '\0';
+    return(buf);
 }
 #endif /* HAVE_LDAP_INITIALIZE */
 
@@ -949,8 +978,12 @@ sudo_ldap_read_config(void)
 	sudo_printf(SUDO_CONV_ERROR_MSG, "LDAP Config Summary\n");
 	sudo_printf(SUDO_CONV_ERROR_MSG, "===================\n");
 	if (ldap_conf.uri) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "uri              %s\n",
-		ldap_conf.uri);
+	    struct ldap_config_list_str *uri = ldap_conf.uri;
+
+	    do {
+		sudo_printf(SUDO_CONV_ERROR_MSG, "uri              %s\n",
+		    uri->val);
+	    } while ((uri = uri->next) != NULL);
 	} else {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, "host             %s\n",
 		ldap_conf.host ?  ldap_conf.host : "(NONE)");
@@ -1053,10 +1086,13 @@ sudo_ldap_read_config(void)
 #ifndef HAVE_LDAP_INITIALIZE
     /* Convert uri list to host list if no ldap_initialize(). */
     if (ldap_conf.uri) {
-	if (sudo_ldap_parse_uri(ldap_conf.uri) != 0)
+	struct ldap_config_list_str *uri = ldap_conf.uri;
+	if (sudo_ldap_parse_uri(uri) != 0)
 	    return(FALSE);
-	free(ldap_conf.uri);
-	ldap_conf.uri = NULL;
+	do {
+	    ldap_conf.uri = uri->next;
+	    efree(uri);
+	} while ((uri = ldap_conf.uri));
 	ldap_conf.port = LDAP_PORT;
     }
 #endif
@@ -1551,7 +1587,7 @@ sudo_ldap_set_options(LDAP *ld)
 		(long)tv.tv_sec, ldap_err2string(rc));
 	    return(-1);
 	}
-	DPRINTF(("ldap_set_option(LDAP_OPT_NETWORK_TIMEOUT, %ld)\n",
+	DPRINTF(("ldap_set_option(LDAP_OPT_NETWORK_TIMEOUT, %ld)",
 	    (long)tv.tv_sec), 1);
     }
 #endif
@@ -1565,7 +1601,7 @@ sudo_ldap_set_options(LDAP *ld)
 		ldap_err2string(rc));
 	    return(-1);
 	}
-	DPRINTF(("ldap_set_option(LDAP_OPT_X_TLS, LDAP_OPT_X_TLS_HARD)\n"), 1);
+	DPRINTF(("ldap_set_option(LDAP_OPT_X_TLS, LDAP_OPT_X_TLS_HARD)"), 1);
     }
 #endif
     return(0);
@@ -1672,8 +1708,10 @@ sudo_ldap_open(struct sudo_nss *nss)
     /* Connect to LDAP server */
 #ifdef HAVE_LDAP_INITIALIZE
     if (ldap_conf.uri != NULL) {
-	DPRINTF(("ldap_initialize(ld, %s)", ldap_conf.uri), 2);
-	rc = ldap_initialize(&ld, ldap_conf.uri);
+	char *buf = sudo_ldap_join_uri(ldap_conf.uri);
+	DPRINTF(("ldap_initialize(ld, %s)", buf), 2);
+	rc = ldap_initialize(&ld, buf);
+	efree(buf);
     } else
 #endif
 	rc = sudo_ldap_init(&ld, ldap_conf.host, ldap_conf.port);
