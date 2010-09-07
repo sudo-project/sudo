@@ -337,14 +337,21 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /*
      * Make a local copy of argc/argv, with special handling
-     * for the '-i' option.
+     * for pseudo-commands and the '-i' option.
      */
-    NewArgv = emalloc2(argc + 1, sizeof(char *));
-    memcpy(NewArgv, argv, argc * sizeof(char *));
-    NewArgv[argc] = NULL;
-    NewArgc = argc;
-    if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
-	NewArgv[0] = runas_pw->pw_shell;
+    if (argc == 0) {
+	NewArgc = 1;
+	NewArgv = emalloc2(NewArgc + 1, sizeof(char *));
+	NewArgv[0] = user_cmnd;
+	NewArgv[1] = NULL;
+    } else {
+	NewArgc = argc;
+	NewArgv = emalloc2(NewArgc + 1, sizeof(char *));
+	memcpy(NewArgv, argv, argc * sizeof(char *));
+	NewArgv[NewArgc] = NULL;
+	if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
+	    NewArgv[0] = runas_pw->pw_shell;
+    }
 
     /* Find command in path */
     cmnd_status = set_cmnd(sudo_mode);
