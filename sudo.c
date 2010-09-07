@@ -698,14 +698,10 @@ init_vars(envp)
 	set_perms(PERM_ROOT);
 
     /*
-     * If we were given the '-e', '-i' or '-s' options we need to redo
-     * NewArgv and NewArgc.
+     * If in shell or edit mode, or if running a pseudo-command
+     * such as "list", we need to redo NewArgv and NewArgc.
      */
-    if (ISSET(sudo_mode, MODE_EDIT)) {
-	NewArgv--;
-	NewArgc++;
-	NewArgv[0] = "sudoedit";
-    } else if (ISSET(sudo_mode, MODE_SHELL)) {
+    if (ISSET(sudo_mode, MODE_SHELL)) {
 	char **av;
 
 	/* Allocate an extra slot for execve() failure (ENOEXEC). */
@@ -747,6 +743,10 @@ init_vars(envp)
 	}
 	av[++NewArgc] = NULL;
 	NewArgv = av;
+    } else if (ISSET(sudo_mode, MODE_EDIT) || NewArgc == 0) {
+	NewArgv--;
+	NewArgc++;
+	NewArgv[0] = user_cmnd;
     }
 }
 
