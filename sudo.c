@@ -643,9 +643,7 @@ init_vars(envp)
     }
 
     /*
-     * Get a local copy of the user's struct passwd with the shadow password
-     * if necessary.  It is assumed that euid is 0 at this point so we
-     * can read the shadow passwd file if necessary.
+     * Stash a local copy of the user's struct passwd.
      */
     if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL) {
 	/* Need to make a fake struct passwd for logging to work. */
