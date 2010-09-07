@@ -22,13 +22,14 @@
 #ifndef _SUDO_SUDOERS_H
 #define _SUDO_SUDOERS_H
 
-#include <pathnames.h>
 #include <limits.h>
-#include <missing.h>
-#include <error.h>
-#include <alloc.h>
-#include <list.h>
-#include <fileops.h>
+
+#include <pathnames.h>
+#include "missing.h"
+#include "error.h"
+#include "alloc.h"
+#include "list.h"
+#include "fileops.h"
 #include "defaults.h"
 #include "logging.h"
 #include "sudo_nss.h"
