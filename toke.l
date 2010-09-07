@@ -339,6 +339,26 @@ NOSETENV[[:blank:]]*:	{
 			    	return(NOSETENV);
 			}
 
+LOG_OUTPUT[[:blank:]]*:	{
+			    	LEXTRACE("LOG_OUTPUT ");
+			    	return(LOG_OUTPUT);
+			}
+
+NOLOG_OUTPUT[[:blank:]]*:	{
+			    	LEXTRACE("NOLOG_OUTPUT ");
+			    	return(NOLOG_OUTPUT);
+			}
+
+LOG_INPUT[[:blank:]]*:	{
+			    	LEXTRACE("LOG_INPUT ");
+			    	return(LOG_INPUT);
+			}
+
+NOLOG_INPUT[[:blank:]]*:	{
+			    	LEXTRACE("NOLOG_INPUT ");
+			    	return(NOLOG_INPUT);
+			}
+
 \+{WORD}		{
 			    /* netgroup */
 			    if (!fill(yytext, yyleng))
