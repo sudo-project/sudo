@@ -22,9 +22,7 @@
 #ifndef _SUDO_MISSING_H
 #define _SUDO_MISSING_H
 
-#ifndef NULL
-# include <stdio.h>
-#endif
+#include <stdio.h>
 #ifdef __STDC__
 # include <stdarg.h>
 #else
