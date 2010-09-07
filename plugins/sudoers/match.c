@@ -83,10 +83,10 @@
 #include <gram.h>
 
 #ifndef HAVE_FNMATCH
-# include <compat/fnmatch.h>
+# include "compat/fnmatch.h"
 #endif /* HAVE_FNMATCH */
 #ifndef HAVE_EXTENDED_GLOB
-# include <compat/glob.h>
+# include "compat/glob.h"
 #endif /* HAVE_EXTENDED_GLOB */
 
 static struct member_list empty;

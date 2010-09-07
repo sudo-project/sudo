@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <missing.h>
+#include "missing.h"
 
 static const char *progname = "sudo";
 

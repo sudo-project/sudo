@@ -47,7 +47,7 @@
 # endif
 #endif
 
-#include <missing.h>
+#include "missing.h"
 
 #ifndef HAVE_FCNTL_CLOSEM
 # ifndef HAVE_DIRFD

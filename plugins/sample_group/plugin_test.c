@@ -29,7 +29,7 @@
 #include <limits.h>
 #include <pwd.h>
 
-#include <sudo_plugin.h>
+#include "sudo_plugin.h"
 
 /*
  * Simple driver to test sudoer group plugins.

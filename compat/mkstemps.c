@@ -36,7 +36,7 @@
 # include <time.h>
 #endif
 
-#include <missing.h>
+#include "missing.h"
 
 static unsigned int get_random(void);
 static void seed_random(void);

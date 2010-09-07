@@ -17,11 +17,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <config.h>
+
 #include <sys/types.h>
 #include <string.h>
 
-#include <config.h>
-#include <missing.h>
+#include "missing.h"
 
 /*
  * Appends src to string dst of size siz (unlike strncat, siz is the

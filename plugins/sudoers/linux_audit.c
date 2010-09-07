@@ -31,10 +31,10 @@
 #include <string.h>
 #include <libaudit.h>
 
-#include <missing.h>
-#include <error.h>
-#include <alloc.h>
-#include <linux_audit.h>
+#include "missing.h"
+#include "error.h"
+#include "alloc.h"
+#include "linux_audit.h"
 
 /*
  * Open audit connection if possible.

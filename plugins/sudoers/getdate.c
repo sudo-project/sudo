@@ -50,7 +50,7 @@
 #endif
 #include <ctype.h>
 
-#include <missing.h>
+#include "missing.h"
 
 
 #define EPOCH		1970

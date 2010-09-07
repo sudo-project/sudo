@@ -38,7 +38,7 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 
-#include <missing.h>
+#include "missing.h"
 
 /*
  * Allocate storage for a name=value string and return it.

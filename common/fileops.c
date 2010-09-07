@@ -44,11 +44,11 @@
 # include <time.h>
 #endif
 #ifndef HAVE_TIMESPEC
-# include <emul/timespec.h>
+# include "compat/timespec.h"
 #endif
 
-#include <missing.h>
-#include <fileops.h>
+#include "missing.h"
+#include "fileops.h"
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048

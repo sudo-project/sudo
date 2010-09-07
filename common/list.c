@@ -29,10 +29,10 @@
 # endif
 #endif /* STDC_HEADERS */
 
-#include <missing.h>
-#include <list.h>
+#include "missing.h"
+#include "list.h"
 #ifdef DEBUG
-# include <error.h>
+# include "error.h"
 #endif
 
 struct list_proto {

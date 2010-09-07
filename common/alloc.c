@@ -45,9 +45,9 @@
 # include <inttypes.h>
 #endif
 
-#include <missing.h>
-#include <alloc.h>
-#include <error.h>
+#include "missing.h"
+#include "alloc.h"
+#include "error.h"
 
 /*
  * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t

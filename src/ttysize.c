@@ -34,7 +34,7 @@
 #endif /* HAVE_UNISTD_H */
 #include <termios.h>
 
-#include <missing.h>
+#include "missing.h"
 
 #if !defined(TIOCGSIZE) && defined(TIOCGWINSZ)
 # define TIOCGSIZE	TIOCGWINSZ

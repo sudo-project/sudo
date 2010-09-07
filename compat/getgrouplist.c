@@ -34,7 +34,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <grp.h>
 
-#include <missing.h>
+#include "missing.h"
 
 /*
  * BSD-compatible getgrouplist(3) using getgrent(3)

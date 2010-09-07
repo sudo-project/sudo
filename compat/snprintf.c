@@ -71,7 +71,7 @@
 #include <limits.h>
 #include <stdarg.h>
 
-#include <missing.h>
+#include "missing.h"
 
 static int xxxprintf(char **, size_t, int, const char *, va_list);
 

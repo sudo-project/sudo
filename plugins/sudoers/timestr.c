@@ -28,7 +28,7 @@
 #endif /* STDC_HEADERS */
 #include <time.h>
 
-#include <missing.h>
+#include "missing.h"
 
 char *get_timestr(time_t, int);
 

@@ -42,10 +42,10 @@
 #include <ctype.h>
 #include <termios.h>
 
-#include <missing.h>
-#include <alloc.h>
-#include <error.h>
-#include <lbuf.h>
+#include "missing.h"
+#include "alloc.h"
+#include "error.h"
+#include "lbuf.h"
 
 void
 lbuf_init(struct lbuf *lbuf, int (*output)(const char *),

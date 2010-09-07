@@ -30,7 +30,7 @@
 #endif /* STDC_HEADERS */
 #include <signal.h>
 
-#include <missing.h>
+#include "missing.h"
 
 int
 main(int argc, char *argv[])

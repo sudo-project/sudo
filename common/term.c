@@ -38,7 +38,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <termios.h>
 
-#include <missing.h>
+#include "missing.h"
 
 #ifndef TCSASOFT
 # define TCSASOFT	0

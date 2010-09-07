@@ -17,10 +17,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <config.h>
+
 #include <sys/types.h>
 
-#include <config.h>
-#include <missing.h>
+#include "missing.h"
 
 /*
  * Copy src to string dst of size siz.  At most siz-1 characters

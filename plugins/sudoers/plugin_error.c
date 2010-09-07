@@ -24,10 +24,10 @@
 #include <string.h>
 #include <setjmp.h>
 
-#include <missing.h>
-#include <alloc.h>
-#include <error.h>
-#include <sudo_plugin.h>
+#include "missing.h"
+#include "alloc.h"
+#include "error.h"
+#include "sudo_plugin.h"
 
 static void _warning(int, const char *, va_list);
        void cleanup(int);

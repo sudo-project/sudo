@@ -24,14 +24,14 @@
 #ifndef _SUDO_SUDO_H
 #define _SUDO_SUDO_H
 
-#include <pathnames.h>
 #include <limits.h>
 
-#include <missing.h>
-#include <alloc.h>
-#include <error.h>
-#include <fileops.h>
-#include <list.h>
+#include <pathnames.h>
+#include "missing.h"
+#include "alloc.h"
+#include "error.h"
+#include "fileops.h"
+#include "list.h"
 
 #ifdef __TANDEM
 # define ROOT_UID       65535

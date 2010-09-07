@@ -45,7 +45,7 @@
 #include <pwd.h>
 #include <grp.h>
 
-#include <missing.h>
+#include "missing.h"
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048
