@@ -49,9 +49,9 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 
+#include "missing.h"
 #include "charclass.h"
 #include "fnmatch.h"
-#include "missing.h"
 
 #undef	EOS
 #define	EOS	'\0'
