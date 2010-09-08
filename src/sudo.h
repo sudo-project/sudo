@@ -217,6 +217,9 @@ void aix_prep_user(char *user, const char *tty);
 void aix_restoreauthdb(void);
 void aix_setauthdb(char *user);
 
+/* interfaces.c */
+int get_net_ifs(char **addrinfo);
+
 #ifndef errno
 extern int errno;
 #endif

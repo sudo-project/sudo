@@ -246,6 +246,14 @@ the C<-t> flag.
 Authentication type, if specified by the C<-a> flag, to use on
 systems where BSD authentication is supported.
 
+=item network_addrs=list
+
+A space-separated list of IP network addresses and netmasks in the
+form "addr/netmask", e.g. "192.168.1.2/255.255.255.0".  The address
+and netmask pairs may be either IPv4 or IPv6, depending on what the
+operating system supports.  If the address contains a colon (':'),
+it is an IPv6 address, else it is IPv4.
+
 =item progname=string
 
 The command name that sudo was run as, typically "sudo" or "sudoedit".

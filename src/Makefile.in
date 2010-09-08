@@ -72,8 +72,9 @@ SHELL = @SHELL@
 
 PROGS = @PROGS@
 
-OBJS = conversation.o error.o exec.o exec_pty.o get_pty.o load_plugins.o \
-       parse_args.o sudo.o sudo_edit.o tgetpass.o ttysize.o @SUDO_OBJS@
+OBJS = conversation.o error.o exec.o exec_pty.o get_pty.o net_ifs.o \
+       load_plugins.o parse_args.o sudo.o sudo_edit.o tgetpass.o \
+       ttysize.o @SUDO_OBJS@
 
 LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
 
@@ -109,6 +110,7 @@ error.o: $(srcdir)/error.c $(incdir)/missing.h $(incdir)/error.h $(top_builddir)
 exec.o: $(srcdir)/exec.c $(SUDODEP) $(srcdir)/sudo_exec.h
 exec_pty.o: $(srcdir)/exec_pty.c $(SUDODEP) $(srcdir)/sudo_exec.h
 get_pty.o: $(srcdir)/get_pty.c $(SUDODEP)
+net_ifs.o: $(srcdir)/net_ifs.c $(SUDODEP)
 load_plugins.o: $(srcdir)/load_plugins.c $(SUDODEP)
 parse_args.o: $(srcdir)/parse_args.c sudo_usage.h $(SUDODEP)
 selinux.o: $(srcdir)/selinux.c $(SUDODEP)

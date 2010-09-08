@@ -103,7 +103,9 @@ static struct sudo_settings {
     { "sudoedit" },
 #define ARG_CLOSEFROM 17
     { "closefrom" },
-#define NUM_SETTINGS 18
+#define ARG_NET_ADDRS 18
+    { "network_addrs" },
+#define NUM_SETTINGS 19
     { NULL }
 };
 
@@ -120,8 +122,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     int flags = 0;		/* mode flags */
     int valid_flags, ch;
     int i, j;
-    char **settings;
-    char **env_add;
+    char *cp, **env_add, **settings;
     int nenv = 0;
     int env_size = 32;
 
@@ -135,6 +136,10 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	mode = MODE_EDIT;
 	sudo_settings[ARG_SUDOEDIT].value = "true";
     }
+
+    /* Load local IP addresses and masks. */
+    if (get_net_ifs(&cp) > 0)
+	sudo_settings[ARG_NET_ADDRS].value = cp;
 
     /* Returns true if the last option string was "--" */
 #define got_end_of_args	(optind > 1 && argv[optind - 1][0] == '-' && \
