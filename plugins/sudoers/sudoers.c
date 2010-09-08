@@ -123,7 +123,7 @@ char *prev_user;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
 struct interface *interfaces;
-int num_interfaces;
+static const char *interfaces_string;
 int long_list;
 int debug_level;
 uid_t timestamp_uid;
@@ -202,9 +202,6 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 
     /* Setup defaults data structures. */
     init_defaults();
-
-    /* Load the list of local ip addresses and netmasks.  */
-    load_interfaces();
 
     /* Parse settings and user_info */
     sudo_mode = deserialize_info(settings, user_info);
@@ -1154,7 +1151,7 @@ sudoers_policy_version(int verbose)
 	dump_auth_methods();
 	dump_defaults();
 	sudo_printf(SUDO_CONV_INFO_MSG, "\n");
-	dump_interfaces();
+	dump_interfaces(interfaces_string);
 	sudo_printf(SUDO_CONV_INFO_MSG, "\n");
     }
     return TRUE;
@@ -1257,6 +1254,11 @@ deserialize_info(char * const settings[], char * const user_info[])
 	    continue;
 	}
 #endif
+	if (MATCHES(*cur, "network_addrs=")) {
+	    interfaces_string = *cur + sizeof("network_addrs=") - 1;
+	    set_interfaces(interfaces_string);
+	    continue;
+	}
     }
 
     for (cur = user_info; *cur != NULL; cur++) {

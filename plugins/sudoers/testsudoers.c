@@ -101,7 +101,6 @@ extern struct passwd *getpwuid(uid_t);
  */
 int  NewArgc;
 char **NewArgv;
-int num_interfaces;
 struct interface *interfaces;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
@@ -234,7 +233,8 @@ main(int argc, char *argv[])
     init_defaults();
 
     /* Load ip addr/mask for each interface. */
-    load_interfaces();
+    if (get_net_ifs(&p) > 0)
+	set_interfaces(p);
 
     /* Allocate space for data structures in the parser. */
     init_parser("sudoers", 0);

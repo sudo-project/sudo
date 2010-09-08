@@ -130,7 +130,6 @@ extern int optind;
 /*
  * Globals
  */
-int num_interfaces;
 struct interface *interfaces;
 struct sudo_user sudo_user;
 struct passwd *list_pw;

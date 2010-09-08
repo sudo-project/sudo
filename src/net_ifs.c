@@ -80,7 +80,9 @@ struct rtentry;
 # include <ifaddrs.h>
 #endif
 
-#include "sudo.h"
+#include "missing.h"
+#include "alloc.h"
+#include "error.h"
 
 /* Minix apparently lacks IFF_LOOPBACK */
 #ifndef IFF_LOOPBACK

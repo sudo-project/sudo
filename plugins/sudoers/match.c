@@ -578,7 +578,6 @@ command_matches_dir(char *sudoers_dir, size_t dlen)
 static int
 addr_matches_if(char *n)
 {
-    int i;
     union sudo_in_addr_un addr;
     struct interface *ifp;
 #ifdef HAVE_IN6_ADDR
@@ -596,8 +595,7 @@ addr_matches_if(char *n)
 	addr.ip4.s_addr = inet_addr(n);
     }
 
-    for (i = 0; i < num_interfaces; i++) {
-	ifp = &interfaces[i];
+    for (ifp = interfaces; ifp != NULL; ifp = ifp->next) {
 	if (ifp->family != family)
 	    continue;
 	switch(family) {
@@ -673,8 +671,7 @@ addr_matches_if_netmask(char *n, char *m)
     }
 #endif /* HAVE_IN6_ADDR */
 
-    for (i = 0; i < num_interfaces; i++) {
-	ifp = &interfaces[i];
+    for (ifp = interfaces; ifp != NULL; ifp = ifp->next) {
 	if (ifp->family != family)
 	    continue;
 	switch(family) {

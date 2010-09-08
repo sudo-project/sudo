@@ -39,20 +39,21 @@ struct interface {
     int family;	/* AF_INET or AF_INET6 */
     union sudo_in_addr_un addr;
     union sudo_in_addr_un netmask;
+    struct interface *next;
 };
 
 /*
  * Prototypes for external functions.
  */
-void load_interfaces(void);
-void dump_interfaces(void);
+int get_net_ifs(char **addrinfo);
+void dump_interfaces(const char *);
+void set_interfaces(const char *);
 
 /*
  * Definitions for external variables.
  */
 #ifndef _SUDO_MAIN
 extern struct interface *interfaces;
-extern int num_interfaces;
 #endif
 
 #endif /* _SUDO_INTERFACES_H */

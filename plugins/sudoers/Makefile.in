@@ -114,7 +114,8 @@ VISUDO_OBJS = visudo.o goodpath.o find_path.o error.o
 
 REPLAY_OBJS = getdate.o sudoreplay.o error.o
 
-TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o error.o group_plugin.o
+TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o error.o group_plugin.o \
+	    net_ifs.o
 
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
@@ -250,6 +251,8 @@ sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/alloc.h $(incdir)/missing.h $(inc
 testsudoers.o: $(srcdir)/testsudoers.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/interfaces.h $(devdir)/gram.h
 tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(SUDODEP)
 visudo.o: $(srcdir)/visudo.c $(SUDODEP) $(devdir)/gram.h
+net_ifs.o: $(top_srcdir)/src/net_ifs.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(top_srcdir)/src/net_ifs.c
 
 install: install-dirs install-plugin install-binaries install-sudoers install-doc
 
