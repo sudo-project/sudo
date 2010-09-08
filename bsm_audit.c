@@ -31,6 +31,16 @@
 
 #include "bsm_audit.h"
 
+/*
+ * Solaris auditon() returns EINVAL if BSM audit not configured.
+ * OpenBSM returns ENOSYS for unimplemented options.
+ */
+#ifdef __sun__
+# define AUDIT_NOT_CONFIGURED	EINVAL
+#else
+# define AUDIT_NOT_CONFIGURED	ENOSYS
+#endif
+
 void log_error(int flags, const char *fmt, ...) __attribute__((__noreturn__));
 
 static int
@@ -71,7 +81,7 @@ bsm_audit_success(char **exec_args)
 	 * If we are not auditing, don't cut an audit record; just return.
 	 */
 	if (auditon(A_GETCOND, (caddr_t)&au_cond, sizeof(long)) < 0) {
-		if (errno == ENOSYS)
+		if (errno == AUDIT_NOT_CONFIGURED)
 			return;
 		log_error(0, "Could not determine audit condition");
 	}
@@ -132,7 +142,7 @@ bsm_audit_failure(char **exec_args, char const *const fmt, va_list ap)
 	 * If we are not auditing, don't cut an audit record; just return.
 	 */
 	if (auditon(A_GETCOND, &au_cond, sizeof(long)) < 0) {
-		if (errno == ENOSYS)
+		if (errno == AUDIT_NOT_CONFIGURED)
 			return;
 		log_error(0, "Could not determine audit condition");
 	}
