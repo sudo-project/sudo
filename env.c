@@ -608,10 +608,15 @@ rebuild_env(noexec)
 #ifdef ENV_DEBUG
     memset(env.envp, 0, env.env_size * sizeof(char *));
 #endif
-    if (def_env_reset || ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
-	/* Reset HOME based on target user unless keeping old value. */
-	reset_home = TRUE;
 
+    /* Reset HOME based on target user if configured to. */
+    if (ISSET(sudo_mode, MODE_RUN)) {
+	if (def_always_set_home || ISSET(sudo_mode, MODE_RESET_HOME) || 
+	    (ISSET(sudo_mode, MODE_SHELL) && def_set_home))
+	    reset_home = TRUE;
+    }
+
+    if (def_env_reset || ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	/* Pull in vars we want to keep from the old environment. */
 	for (ep = old_envp; *ep; ep++) {
 	    int keepit;
@@ -696,6 +701,11 @@ rebuild_env(noexec)
 	    if (!ISSET(didvar, DID_USERNAME))
 		sudo_setenv("USERNAME", user_name, FALSE);
 	}
+
+	/* If we didn't keep HOME, reset it based on target user. */
+	if (!ISSET(didvar, KEPT_HOME))
+	    reset_home = TRUE;
+
 	/*
 	 * Set MAIL to target user in -i mode or if MAIL is not preserved
 	 * from user's environment.
@@ -709,13 +719,6 @@ rebuild_env(noexec)
 	    sudo_putenv(cp, ISSET(didvar, DID_MAIL), TRUE);
 	}
     } else {
-	/* Reset HOME based on target user if configured to. */
-	if (ISSET(sudo_mode, MODE_RUN)) {
-	    if (def_always_set_home || ISSET(sudo_mode, MODE_RESET_HOME) || 
-		(ISSET(sudo_mode, MODE_SHELL) && def_set_home))
-		reset_home = TRUE;
-	}
-
 	/*
 	 * Copy environ entries as long as they don't match env_delete or
 	 * env_check.
@@ -765,7 +768,7 @@ rebuild_env(noexec)
     }
 
     /* Set $HOME to target user if not preserving user's value. */
-    if (reset_home && !ISSET(didvar, KEPT_HOME))
+    if (reset_home)
 	sudo_setenv("HOME", runas_pw->pw_dir, TRUE);
 
     /* Provide default values for $TERM and $PATH if they are not set. */
