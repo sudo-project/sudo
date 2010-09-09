@@ -698,7 +698,8 @@ home directory of the target user (which is root unless the B<-u>
 option is used).  This effectively means that the B<-H> option is
 always implied.  Note that C<HOME> is already set when the the
 I<env_reset> option is enabled, so I<always_set_home> is only
-effective for configurations where I<env_reset> is disabled.
+effective for configurations where either I<env_reset> is disabled
+or C<HOME> is present in the I<env_keep> list.
 This flag is I<off> by default.
 
 =item authenticate
@@ -922,7 +923,8 @@ environment variable will be set to the home directory of the target
 user (which is root unless the B<-u> option is used).  This effectively
 makes the B<-s> option imply B<-H>.  Note that C<HOME> is already
 set when the the I<env_reset> option is enabled, so I<set_home> is
-only effective for configurations where I<env_reset> is disabled.
+only effective for configurations where either I<env_reset> is disabled
+or C<HOME> is present in the I<env_keep> list.
 This flag is I<off> by default.
 
 =item set_logname
