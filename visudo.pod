@@ -82,6 +82,8 @@ Specify and alternate I<sudoers> file location.  With this option
 B<visudo> will edit (or check) the I<sudoers> file of your choice,
 instead of the default, F<@sysconfdir@/sudoers>.  The lock file used
 is the specified I<sudoers> file with ".tmp" appended to it.
+In B<check-only> mode only, the argument to B<-f> may be "-",
+indicating that I<sudoers> will be read from the standard input.
 
 =item -q
 
