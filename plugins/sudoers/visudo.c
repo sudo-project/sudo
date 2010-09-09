@@ -683,7 +683,10 @@ check_syntax(char *sudoers_path, int quiet, int strict)
     struct stat sb;
     int error;
 
-    if ((yyin = fopen(sudoers_path, "r")) == NULL) {
+    if (strcmp(sudoers_path, "-") == 0) {
+	yyin = stdin;
+	sudoers_path = "stdin";
+    } else if ((yyin = fopen(sudoers_path, "r")) == NULL) {
 	if (!quiet)
 	    warning("unable to open %s", sudoers_path);
 	exit(1);
@@ -713,9 +716,9 @@ check_syntax(char *sudoers_path, int quiet, int strict)
     }
     /* Check mode and owner in strict mode. */
 #ifdef HAVE_FSTAT
-    if (strict && fstat(fileno(yyin), &sb) == 0)
+    if (strict && yyin != stdin && fstat(fileno(yyin), &sb) == 0)
 #else
-    if (strict && stat(sudoers_path, &sb) == 0)
+    if (strict && yyin != stdin && stat(sudoers_path, &sb) == 0)
 #endif
     {
 	if (sb.st_uid != SUDOERS_UID || sb.st_gid != SUDOERS_GID) {
