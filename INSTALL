@@ -562,6 +562,16 @@ The following options are also configurable at runtime:
         prompt as an argument and print the received password to
         the standard output.
 
+  --without-iologdir
+	Disable sudo's I/O logging support.  This can be used to allow sudo
+	to be compiled on systems without pseudo-tty support.
+
+  --with-iologdir[=DIR]
+	By default, sudo stores I/O log files in either /var/log/sudo-io,
+	/var/adm/sudo-sudo-io or /usr/log/sudo-io.  If DIR is
+	specified, I/O logs will be stored in the indicated directory
+	instead.
+
   --disable-authentication
 	By default, sudo requires the user to authenticate via a
 	password or similar means.  This options causes sudo to
@@ -602,16 +612,6 @@ The following options are also configurable at runtime:
 	the normal user does not have access to.  The disadvantage is that
 	if the executable is simply not in the user's path, sudo will tell
 	the user that they are not allowed to run it, which can be confusing.
-
-  --disable-iologdir
-	Disable sudo's I/O logging support.  This can be used to allow sudo
-	to be compiled on systems without pseudo-tty support.
-
-  --enable-iologdir[=DIR]
-	By default, sudo stores I/O log files in either /var/log/sudo-io,
-	/var/adm/sudo-sudo-io or /usr/log/sudo-io.  If DIR is
-	specified, I/O logs will be stored in the indicated directory
-	instead.
 
   --enable-zlib[=DIR]
 	Enable the use of the zlib compress library when storing
