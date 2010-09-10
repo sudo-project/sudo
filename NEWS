@@ -1,3 +1,76 @@
+What's new in Sudo 1.7.5?
+
+ * The LOG_INPUT and LOG_OUTPUT tags in sudoers are now parsed correctly.
+
+ * When using visudo in check mode, a file named "-" may be used to
+   check sudoers data on the standard input.
+
+ * Sudo now only fetches shadow password entries when using the
+   password database directly for authentication.
+
+ * Password and group entries are now cached using the same key
+   that was used to look them up.  This fixes a problem when looking
+   up entries by name if the name in the retrieved entry does not
+   match the name used to look it up.  This may happen on some systems
+   that do case insensitive lookups or that truncate long names.
+
+ * Gcc will no longer display warnings on glibc systems that use
+   the warn_unused_result attribute for write(2) and other system calls.
+
+What's new in Sudo 1.7.4p4?
+
+ * A potential security issue has been fixed with respect to the handling
+   of sudo's -g command line option when -u is also specified.  The flaw
+   may allow an attacker to run commands as a user that is not authorized
+   by the sudoers file.
+
+ * A bug has been fixed where "sudo -l" output was incomplete if multiple
+   sudoers sources were defined in nsswitch.conf and there was an error
+   querying one of the sources.
+
+ * The log_input, log_output, and use_pty sudoers options now work correctly
+   on AIX.  Previously, sudo would hang if they were enabled.
+
+ * The "make install" target now works correctly when sudo is built in a
+   directory other than the source directory.
+
+ * The "runas_default" sudoers setting now works properly in a per-command
+   Defaults line.
+
+ * Suspending and resuming the bash shell when PAM is in use now works
+   correctly.  The SIGCONT signal was not propagated to the child process.
+
+What's new in Sudo 1.7.4p3?
+
+ * A bug has been fixed where duplicate HOME environment variables could be
+   present when the env_reset setting was disabled and the always_set_home
+   setting was enabled in sudoers.
+
+ * The value of sysconfdir is now substituted into the path to the sudoers.d
+   directory in the installed sudoers file.
+
+ * Compilation problems on IRIX and other platforms have been fixed.
+
+ * If multiple PAM "auth" actions are specified and the user enters ^C at
+   the password prompt, sudo will no longer prompt for a password for any
+   subsequent "auth" actions.  Previously it was necessary to enter ^C for
+   each "auth" action.
+
+What's new in Sudo 1.7.4p2?
+
+ * A bug where sudo could spin in a busy loop waiting for the child process
+   has been fixed.
+
+What's new in Sudo 1.7.4p1?
+
+ * A bug introduced in sudo 1.7.3 that prevented the -k and -K options from
+   functioning when the tty_tickets sudoers option is enabled has been fixed.
+
+ * Sudo no longer prints a warning when the -k or -K options are specified
+   and the ticket file does not exist.
+
+ * It is now easier to cross-compile sudo.
+
 What's new in Sudo 1.7.4?
 
  * Sudoedit will now preserve the file extension in the name of the
