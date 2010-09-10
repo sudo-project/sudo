@@ -350,53 +350,55 @@ handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
     int status;
     pid_t pid;
 
-    /* read signal pipe */
-    nread = read(signal_pipe[0], &signo, sizeof(signo));
-    if (nread <= 0) {
-	/* It should not be possible to get EOF but just in case. */
-	if (nread == 0)
-	    errno = ECONNRESET;
-	if (errno != EINTR && errno != EAGAIN) {
-	    sudo_debug(9, "error reading signal pipe %s", strerror(errno));
-	    cstat->type = CMD_ERRNO;
-	    cstat->val = errno;
-	}
-	return -1;
-    }
-    sudo_debug(9, "received signal %d", signo);
-    if (signo == SIGCHLD) {
-	/*
-	 * If logging I/O, child is the intermediate process,
-	 * otherwise it is the command itself.
-	 */
-	do {
-	    pid = waitpid(child, &status, WUNTRACED|WNOHANG);
-	} while (pid == -1 && errno == EINTR);
-	if (pid == child) {
-	    /* If not logging I/O and child has exited we are done. */
-	    if (!log_io) {
-		if (WIFSTOPPED(status)) {
-		    /* Child may not have privs to suspend us itself. */
-		    kill(getpid(), WSTOPSIG(status));
-		} else {
-		    /* Child has exited, we are done. */
-		    cstat->type = CMD_WSTATUS;
-		    cstat->val = status;
-		    return 0;
-		}
+    for (;;) {
+	/* read signal pipe */
+	nread = read(signal_pipe[0], &signo, sizeof(signo));
+	if (nread <= 0) {
+	    /* It should not be possible to get EOF but just in case. */
+	    if (nread == 0)
+		errno = ECONNRESET;
+	    if (errno != EINTR && errno != EAGAIN) {
+		sudo_debug(9, "error reading signal pipe %s", strerror(errno));
+		cstat->type = CMD_ERRNO;
+		cstat->val = errno;
 	    }
-	    /* Else we get ECONNRESET on sv[0] if child dies. */
+	    return -1;
 	}
-    } else {
-	if (log_io) {
-	    /* Schedule signo to be forwared to the child. */
-	    schedule_signal(signo);
+	sudo_debug(9, "received signal %d", signo);
+	if (signo == SIGCHLD) {
+	    /*
+	     * If logging I/O, child is the intermediate process,
+	     * otherwise it is the command itself.
+	     */
+	    do {
+		pid = waitpid(child, &status, WUNTRACED|WNOHANG);
+	    } while (pid == -1 && errno == EINTR);
+	    if (pid == child) {
+		/* If not logging I/O and child has exited we are done. */
+		if (!log_io) {
+		    if (WIFSTOPPED(status)) {
+			/* Child may not have privs to suspend us itself. */
+			kill(getpid(), WSTOPSIG(status));
+		    } else {
+			/* Child has exited, we are done. */
+			cstat->type = CMD_WSTATUS;
+			cstat->val = status;
+			return 0;
+		    }
+		}
+		/* Else we get ECONNRESET on sv[0] if child dies. */
+	    }
 	} else {
-	    /* Nothing listening on sv[0], send directly. */
-	    if (signo == SIGALRM) {
-		terminate_child(child, FALSE);
+	    if (log_io) {
+		/* Schedule signo to be forwared to the child. */
+		schedule_signal(signo);
 	    } else {
-		kill(child, signo);
+		/* Nothing listening on sv[0], send directly. */
+		if (signo == SIGALRM) {
+		    terminate_child(child, FALSE);
+		} else {
+		    kill(child, signo);
+		}
 	    }
 	}
     }
