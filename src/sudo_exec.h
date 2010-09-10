@@ -23,6 +23,7 @@
 
 /* exec.c */
 int my_execve(const char *path, char *const argv[], char *const envp[]);
+int pipe_nonblock(int fds[2]);
 
 /* exec_pty.c */
 int fork_pty(struct command_details *details, char *argv[], char *envp[],
@@ -34,6 +35,6 @@ void handler(int s);
 void pty_close(struct command_status *cstat);
 void pty_setup(uid_t uid);
 void terminate_child(pid_t pid, int use_pgrp);
-extern sig_atomic_t recvsig[NSIG];
+extern int signal_pipe[2];
 
 #endif /* _SUDO_EXEC_H */

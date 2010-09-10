@@ -567,6 +567,8 @@ fork_pty(struct command_details *details, char *argv[], char *envp[],
     case 0:
 	/* child */
 	close(sv[0]);
+	close(signal_pipe[0]);
+	close(signal_pipe[1]);
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
 	if (exec_setup(details, slavename, io_fds[SFD_SLAVE]) == TRUE) {
 	    /* Close the other end of the stdin/stdout/stderr pipes and exec. */
@@ -797,7 +799,7 @@ handle_sigchld(int backchannel, struct command_status *cstat)
  * parent and relays signals from the parent to the command.
  * Returns an error if fork(2) fails, else calls _exit(2).
  */
-int
+static int
 exec_monitor(struct command_details *details, char *argv[], char *envp[],
     int backchannel)
 {
@@ -807,12 +809,20 @@ exec_monitor(struct command_details *details, char *argv[], char *envp[],
     sigaction_t sa;
     int errpipe[2], maxfd, n, status;
     int alive = TRUE;
+    unsigned char signo;
 
     /* Close unused fds. */
     if (io_fds[SFD_MASTER] != -1)
 	close(io_fds[SFD_MASTER]);
     if (io_fds[SFD_USERTTY] != -1)
 	close(io_fds[SFD_USERTTY]);
+
+    /*
+     * We use a pipe to atomically handle signal notification within
+     * the select() loop.
+     */
+    if (pipe_nonblock(signal_pipe) != 0)
+	error(1, "cannot create pipe");
 
     /* Reset SIGWINCH and SIGALRM. */
     zero_bytes(&sa, sizeof(sa));
@@ -872,6 +882,8 @@ exec_monitor(struct command_details *details, char *argv[], char *envp[],
     if (child == 0) {
 	/* We pass errno back to our parent via pipe on exec failure. */
 	close(backchannel);
+	close(signal_pipe[0]);
+	close(signal_pipe[1]);
 	close(errpipe[0]);
 	fcntl(errpipe[1], F_SETFD, FD_CLOEXEC);
 
@@ -905,27 +917,20 @@ exec_monitor(struct command_details *details, char *argv[], char *envp[],
     }
 
     /* Wait for errno on pipe, signal on backchannel or for SIGCHLD */
-    maxfd = MAX(errpipe[0], backchannel);
+    maxfd = MAX(MAX(errpipe[0], signal_pipe[0]), backchannel);
     fdsr = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
     zero_bytes(fdsr, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
     zero_bytes(&cstat, sizeof(cstat));
     tv.tv_sec = 0;
     tv.tv_usec = 0;
     for (;;) {
-	/* Read child status. */
-	if (recvsig[SIGCHLD]) {
-	    recvsig[SIGCHLD] = FALSE;
-	    alive = handle_sigchld(backchannel, &cstat);
-	}
-
 	/* Check for signal on backchannel or errno on errpipe. */
 	FD_SET(backchannel, fdsr);
+	FD_SET(signal_pipe[0], fdsr);
 	if (errpipe[0] != -1)
 	    FD_SET(errpipe[0], fdsr);
-	maxfd = MAX(errpipe[0], backchannel);
+	maxfd = MAX(MAX(errpipe[0], signal_pipe[0]), backchannel);
 
-	if (recvsig[SIGCHLD])
-	    continue;
 	/* If command exited we just poll, there may be data on errpipe. */
 	n = select(maxfd + 1, fdsr, NULL, NULL, alive ? NULL : &tv);
 	if (n <= 0) {
@@ -936,6 +941,21 @@ exec_monitor(struct command_details *details, char *argv[], char *envp[],
 	    error(1, "select failed");
 	}
 
+	if (FD_ISSET(signal_pipe[0], fdsr)) {
+	    /* Read child status. */
+	    n = read(signal_pipe[0], &signo, sizeof(signo));
+	    if (n == -1) {
+		if (errno == EINTR || errno == EAGAIN)
+		    continue;
+		warning("error reading from signal pipe");
+		goto done;
+	    }
+	    /* We should only ever get SIGCHLD. */
+	    if (signo == SIGCHLD) {
+		alive = handle_sigchld(backchannel, &cstat);
+		continue;
+	    }
+	}
 	if (errpipe[0] != -1 && FD_ISSET(errpipe[0], fdsr)) {
 	    /* read errno or EOF from command pipe */
 	    n = read(errpipe[0], &cstat, sizeof(cstat));
