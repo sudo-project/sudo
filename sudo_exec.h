@@ -23,6 +23,7 @@
 
 /* exec.c */
 int my_execve __P((const char *path, char *argv[], char *envp[]));
+int pipe_nonblock __P((int fds[2]));
 
 /* exec_pty.c */
 int fork_pty __P((const char *path, char *argv[], char *envp[], int sv[],
@@ -33,6 +34,6 @@ void fd_set_iobs __P((fd_set *fdsr, fd_set *fdsw));
 void handler __P((int s));
 void pty_close __P((struct command_status *cstat));
 void pty_setup __P((uid_t uid));
-extern sig_atomic_t recvsig[NSIG];
+extern int signal_pipe[2];
 
 #endif /* _SUDO_EXEC_H */

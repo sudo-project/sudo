@@ -77,6 +77,7 @@ struct n/**/_list {					\
  */
 void *tq_pop		__P((void *));
 void tq_append		__P((void *, void *));
+void tq_remove		__P((void *, void *));
 void list_append	__P((void *, void *));
 void list2tq		__P((void *, void *));
 

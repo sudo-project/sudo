@@ -65,9 +65,24 @@
 #include "sudo.h"
 #include "sudo_exec.h"
 
-/* shared with exec_pty.c */
-sig_atomic_t recvsig[NSIG];
-void handler __P((int s));
+/* Shared with exec_pty.c for use with handler(). */
+int signal_pipe[2];
+
+#ifdef _PATH_SUDO_IO_LOGDIR
+/* We keep a tailq of signals to forward to child. */
+struct sigforward {
+    struct sigforward *prev, *next;
+    int signo;
+};
+TQ_DECLARE(sigforward)
+static struct sigforward_list sigfwd_list;
+static void forward_signals __P((int fd));
+static void schedule_signal __P((int signo));
+static int log_io;
+#endif /* _PATH_SUDO_IO_LOGDIR */
+
+static int handle_signals __P((int fd, pid_t child,
+    struct command_status *cstat));
 
 /*
  * Like execve(2) but falls back to running through /bin/sh
@@ -118,6 +133,8 @@ static int fork_cmnd(path, argv, envp, sv, rbac_enabled)
     case 0:
 	/* child */
 	close(sv[0]);
+	close(signal_pipe[0]);
+	close(signal_pipe[1]);
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
 	if (exec_setup(rbac_enabled, user_ttypath, -1) == TRUE) {
 	    /* headed for execve() */
@@ -152,11 +169,10 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
     int dowait;
     int bgmode;
 {
-    sigaction_t sa;
-    fd_set *fdsr, *fdsw;
-    int maxfd, n, nready, status, sv[2];
+    int maxfd, n, nready, sv[2];
     int rbac_enabled = 0;
-    int log_io;
+    fd_set *fdsr, *fdsw;
+    sigaction_t sa;
     pid_t child;
 
     /* If running in background mode, fork and exit. */
@@ -210,6 +226,13 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
     if (socketpair(PF_UNIX, SOCK_DGRAM, 0, sv) != 0)
 	error(1, "cannot create sockets");
 
+    /*
+     * We use a pipe to atomically handle signal notification within
+     * the select() loop.
+     */
+    if (pipe_nonblock(signal_pipe) != 0)
+	error(1, "cannot create pipe");
+
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
 
@@ -224,7 +247,7 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
     sigaction(SIGTERM, &sa, NULL);
 
     /* Max fd we will be selecting on. */
-    maxfd = sv[0];
+    maxfd = MAX(sv[0], signal_pipe[0]);
 
     /*
      * Child will run the command in the pty, parent will pass data
@@ -253,65 +276,41 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
     fdsr = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
     fdsw = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
     for (;;) {
-	if (recvsig[SIGCHLD]) {
-	    pid_t pid;
-
-	    /*
-	     * If logging I/O, child is the intermediate process,
-	     * otherwise it is the command itself.
-	     */
-	    recvsig[SIGCHLD] = FALSE;
-	    do {
-#ifdef sudo_waitpid
-		pid = sudo_waitpid(child, &status, WUNTRACED|WNOHANG);
-#else
-		pid = wait(&status);
-#endif
-	    } while (pid == -1 && errno == EINTR);
-	    if (pid == child) {
-		/* If not logging I/O and child has exited we are done. */
-		if (!log_io) {
-		    if (WIFSTOPPED(status)) {
-			/* Child may not have privs to suspend us itself. */
-			kill(getpid(), WSTOPSIG(status));
-		    } else {
-			/* Child has exited, we are done. */
-			cstat->type = CMD_WSTATUS;
-			cstat->val = status;
-			return 0;
-		    }
-		}
-		/* Else we get ECONNRESET on sv[0] if child dies. */
-	    }
-	}
-
 	zero_bytes(fdsw, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
 	zero_bytes(fdsr, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
 
 	FD_SET(sv[0], fdsr);
 #ifdef _PATH_SUDO_IO_LOGDIR
+	if (!tq_empty(&sigfwd_list))
+	    FD_SET(sv[0], fdsw);
 	if (log_io)
 	    fd_set_iobs(fdsr, fdsw); /* XXX - better name */
 #endif
-	for (n = 0; n < NSIG; n++) {
-	    if (recvsig[n] && n != SIGCHLD) {
-		if (log_io) {
-		    FD_SET(sv[0], fdsw);
-		    break;
-		} else {
-		    /* nothing listening on sv[0], send directly */
-		    kill(child, n);
-		}
-	    }
-	}
-
-	if (recvsig[SIGCHLD])
-	    continue;
 	nready = select(maxfd + 1, fdsr, fdsw, NULL, NULL);
 	if (nready == -1) {
 	    if (errno == EINTR)
 		continue;
 	    error(1, "select failed");
+	}
+#ifdef _PATH_SUDO_IO_LOGDIR
+	if (FD_ISSET(sv[0], fdsw)) {
+	    forward_signals(sv[0]);
+	}
+#endif /* _PATH_SUDO_IO_LOGDIR */
+	if (FD_ISSET(signal_pipe[0], fdsr)) {
+	    n = handle_signals(signal_pipe[0], child, cstat);
+	    if (n == 0) {
+		/* Child has exited, cstat is set, we are done. */
+		goto done;
+	    }
+	    if (n == -1) {
+		if (errno == EAGAIN || errno == EINTR)
+		    continue;
+		/* Error reading signal_pipe[0], should not happen. */
+		break;
+	    }
+	    /* Restart event loop so signals get sent to child immediately. */
+	    continue;
 	}
 	if (FD_ISSET(sv[0], fdsr)) {
 	    /* read child status */
@@ -319,6 +318,7 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
 	    if (n == -1) {
 		if (errno == EINTR)
 		    continue;
+#ifdef _PATH_SUDO_IO_LOGDIR
 		/*
 		 * If not logging I/O we will receive ECONNRESET when
 		 * the command is executed.  It is safe to ignore this.
@@ -328,13 +328,14 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
 		    cstat->val = errno;
 		    break;
 		}
+#endif
 	    }
 #ifdef _PATH_SUDO_IO_LOGDIR /* XXX */
 	    if (cstat->type == CMD_WSTATUS) {
 		if (WIFSTOPPED(cstat->val)) {
 		    /* Suspend parent and tell child how to resume on return. */
 		    n = suspend_parent(WSTOPSIG(cstat->val));
-		    recvsig[n] = TRUE;
+		    schedule_signal(n);
 		    continue;
 		} else {
 		    /* Child exited or was killed, either way we are done. */
@@ -349,23 +350,6 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
 	}
 
 #ifdef _PATH_SUDO_IO_LOGDIR
-	/* XXX - move this too */
-	if (FD_ISSET(sv[0], fdsw)) {
-	    for (n = 0; n < NSIG; n++) {
-		if (!recvsig[n])
-		    continue;
-		recvsig[n] = FALSE;
-		cstat->type = CMD_SIGNO;
-		cstat->val = n;
-		do {
-		    n = send(sv[0], cstat, sizeof(*cstat), 0);
-		} while (n == -1 && errno == EINTR);
-		if (n != sizeof(*cstat)) {
-		    recvsig[n] = TRUE;
-		    break;
-		}
-	    }
-	}
 	if (perform_io(fdsr, fdsw, cstat) != 0)
 	    break;
 #endif /* _PATH_SUDO_IO_LOGDIR */
@@ -386,19 +370,188 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
     }
 #endif
 
+done:
     efree(fdsr);
     efree(fdsw);
+#ifdef _PATH_SUDO_IO_LOGDIR
+    while (!tq_empty(&sigfwd_list)) {
+	struct sigforward *sigfwd = tq_first(&sigfwd_list);
+	tq_remove(&sigfwd_list, sigfwd);
+	efree(sigfwd);
+    }
+#endif /* _PATH_SUDO_IO_LOGDIR */
 
     return cstat->type == CMD_ERRNO ? -1 : 0;
 }
 
 /*
+ * Read signals on fd written to by handler().
+ * Returns -1 on error (possibly non-fatal), 0 on child exit, else 1.
+ */
+static int
+handle_signals(fd, child, cstat)
+    int fd;
+    pid_t child;
+    struct command_status *cstat;
+{
+    unsigned char signo;
+    ssize_t nread;
+    int status;
+    pid_t pid;
+
+    for (;;) {
+	/* read signal pipe */
+	nread = read(signal_pipe[0], &signo, sizeof(signo));
+	if (nread <= 0) {
+	    /* It should not be possible to get EOF but just in case. */
+	    if (nread == 0)
+		errno = ECONNRESET;
+	    if (errno != EINTR && errno != EAGAIN) {
+		cstat->type = CMD_ERRNO;
+		cstat->val = errno;
+	    }
+	    return -1;
+	}
+	if (signo == SIGCHLD) {
+	    /*
+	     * If logging I/O, child is the intermediate process,
+	     * otherwise it is the command itself.
+	     */
+	    do {
+#ifdef sudo_waitpid
+		pid = sudo_waitpid(child, &status, WUNTRACED|WNOHANG);
+#else
+		pid = wait(&status);
+#endif
+	    } while (pid == -1 && errno == EINTR);
+	    if (pid == child) {
+		/* If not logging I/O and child has exited we are done. */
+#ifdef _PATH_SUDO_IO_LOGDIR
+		if (!log_io)
+#endif
+		{
+		    if (WIFSTOPPED(status)) {
+			/* Child may not have privs to suspend us itself. */
+			kill(getpid(), WSTOPSIG(status));
+		    } else {
+			/* Child has exited, we are done. */
+			cstat->type = CMD_WSTATUS;
+			cstat->val = status;
+			return 0;
+		    }
+		}
+		/* Else we get ECONNRESET on sv[0] if child dies. */
+	    }
+	} else {
+#ifdef _PATH_SUDO_IO_LOGDIR
+	    if (log_io) {
+		/* Schedule signo to be forwared to the child. */
+		schedule_signal(signo);
+	    } else
+#endif
+	    {
+		/* Nothing listening on sv[0], send directly. */
+		kill(child, signo);
+	    }
+	}
+    }
+    return 1;
+}
+
+#ifdef _PATH_SUDO_IO_LOGDIR
+/*
+ * Forward signals in sigfwd_list to child listening on fd.
+ */
+static void
+forward_signals(sock)
+    int sock;
+{
+    struct sigforward *sigfwd;
+    struct command_status cstat;
+    ssize_t nsent;
+
+    while (!tq_empty(&sigfwd_list)) {
+	sigfwd = tq_first(&sigfwd_list);
+	cstat.type = CMD_SIGNO;
+	cstat.val = sigfwd->signo;
+	do {
+	    nsent = send(sock, &cstat, sizeof(cstat), 0);
+	} while (nsent == -1 && errno == EINTR);
+	tq_remove(&sigfwd_list, sigfwd);
+	efree(sigfwd);
+	if (nsent != sizeof(cstat)) {
+	    if (errno == EPIPE) {
+		/* Other end of socket gone, empty out sigfwd_list. */
+		while (!tq_empty(&sigfwd_list)) {
+		    sigfwd = tq_first(&sigfwd_list);
+		    tq_remove(&sigfwd_list, sigfwd);
+		    efree(sigfwd);
+		}
+	    }
+	    break;
+	}
+    }
+}
+
+/*
+ * Schedule a signal to be forwared.
+ */
+static void
+schedule_signal(signo)
+    int signo;
+{
+    struct sigforward *sigfwd;
+
+    sigfwd = emalloc(sizeof(*sigfwd));
+    sigfwd->prev = sigfwd;
+    sigfwd->next = NULL;
+    sigfwd->signo = signo;
+    tq_append(&sigfwd_list, sigfwd);
+}
+#endif /* _PATH_SUDO_IO_LOGDIR */
+
+/*
  * Generic handler for signals passed from parent -> child.
- * The recvsig[] array is checked in the main event loop.
+ * The other end of signal_pipe is checked in the main event loop.
  */
 void
 handler(s)
     int s;
 {
-    recvsig[s] = TRUE;
+    unsigned char signo = (unsigned char)s;
+
+    /*
+     * The pipe is non-blocking, if we overflow the kernel's pipe
+     * buffer we drop the signal.  This is not a problem in practice.
+     */
+    (void)write(signal_pipe[1], &signo, sizeof(signo));
+}
+
+/*
+ * Open a pipe and make both ends non-blocking.
+ * Returns 0 on success and -1 on error.
+ */
+int
+pipe_nonblock(fds)
+    int fds[2];
+{
+    int flags, rval;
+
+    rval = pipe(fds);
+    if (rval != -1) {
+	flags = fcntl(fds[0], F_GETFL, 0);
+	if (flags != -1 && !ISSET(flags, O_NONBLOCK))
+	    rval = fcntl(fds[0], F_SETFL, flags | O_NONBLOCK);
+	if (rval != -1) {
+	    flags = fcntl(fds[1], F_GETFL, 0);
+	    if (flags != -1 && !ISSET(flags, O_NONBLOCK))
+		rval = fcntl(fds[1], F_SETFL, flags | O_NONBLOCK);
+	}
+	if (rval == -1) {
+	    close(fds[0]);
+	    close(fds[1]);
+	}
+    }
+
+    return rval;
 }
