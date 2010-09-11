@@ -154,10 +154,10 @@ sudoers.la: $(SUDOERS_OBJS) libsudoers.la
 visudo: libsudoers.la $(VISUDO_OBJS) $(LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)
 
-sudoreplay: libsudoers.la $(REPLAY_OBJS) $(LIBS)
+sudoreplay: $(REPLAY_OBJS) $(LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) timestr.lo $(REPLAY_LIBS) $(LIBS)
 
-testsudoers: $(TEST_OBJS) $(LIBS)
+testsudoers: libsudoers.la $(TEST_OBJS) $(LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS) @LIBDL@
 
 # Uncomment the following if you want "make distclean" to clean the parser
