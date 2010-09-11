@@ -524,7 +524,8 @@ handler(s)
      * The pipe is non-blocking, if we overflow the kernel's pipe
      * buffer we drop the signal.  This is not a problem in practice.
      */
-    (void)write(signal_pipe[1], &signo, sizeof(signo));
+    if (write(signal_pipe[1], &signo, sizeof(signo)) == -1)
+	/* shut up glibc */;
 }
 
 /*
