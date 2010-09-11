@@ -1876,7 +1876,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        specification.
 
 SSEEEE AALLSSOO
-       _r_s_h(1), _s_u(1), _f_n_m_a_t_c_h(3), _g_l_o_b(3), _s_u_d_o_e_r_s_._l_d_a_p(4), _s_u_d_o___p_l_u_g_i_n(4),
+       _r_s_h(1), _s_u(1), _f_n_m_a_t_c_h(3), _g_l_o_b(3), _s_u_d_o_e_r_s_._l_d_a_p(4), _s_u_d_o___p_l_u_g_i_n(1m),
        _s_u_d_o(1m), _v_i_s_u_d_o(1m)
 
 CCAAVVEEAATTSS

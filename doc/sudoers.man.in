@@ -1897,7 +1897,7 @@ user specification.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), \fIglob\fR\|(3), \fIsudoers.ldap\fR\|(@mansectform@),
-\&\fIsudo_plugin\fR\|(@mansectform@), \fIsudo\fR\|(@mansectsu@), \fIvisudo\fR\|(@mansectsu@)
+\&\fIsudo_plugin\fR\|(@mansectsu@), \fIsudo\fR\|(@mansectsu@), \fIvisudo\fR\|(@mansectsu@)
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 The \fIsudoers\fR file should \fBalways\fR be edited by the \fBvisudo\fR

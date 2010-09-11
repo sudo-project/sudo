@@ -1828,7 +1828,7 @@ user specification.
 =head1 SEE ALSO
 
 L<rsh(1)>, L<su(1)>, L<fnmatch(3)>, L<glob(3)>, L<sudoers.ldap(5)>,
-L<sudo_plugin(5)>, L<sudo(8)>, L<visudo(8)>
+L<sudo_plugin(8)>, L<sudo(8)>, L<visudo(8)>
 
 =head1 CAVEATS
 
