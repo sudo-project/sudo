@@ -20,7 +20,6 @@
 
 #include <sys/types.h>
 #include <sys/param.h>
-#include <sys/time.h>
 #include <sys/ioctl.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
