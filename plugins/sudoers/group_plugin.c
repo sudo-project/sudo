@@ -60,26 +60,26 @@ int
 group_plugin_load(char *plugin_info)
 {
     struct stat sb;
-    char *args, path[PATH_MAX], savedch;
+    char *args, path[PATH_MAX];
     char **argv = NULL;
-    size_t len;
-    int rc;
+    int len, rc;
 
     /*
      * Fill in .so path and split out args (if any).
      */
-    path[0] = '\0';
-    if (plugin_info[0] != '/')
-	strlcpy(path, _PATH_SUDO_PLUGIN_DIR, sizeof(path));
+    args = strpbrk(plugin_info, " \t");
     if ((args = strpbrk(plugin_info, " \t")) != NULL) {
-	savedch = *args;
-	*args = '\0';
+	len = snprintf(path, sizeof(path), "%s%.*s",
+	    (*plugin_info != '/') ? _PATH_SUDO_PLUGIN_DIR : "",
+	    (int)(args - plugin_info), plugin_info);
+	args++;
+    } else {
+	len = snprintf(path, sizeof(path), "%s%s",
+	    (*plugin_info != '/') ? _PATH_SUDO_PLUGIN_DIR : "", plugin_info);
     }
-    len = strlcat(path, plugin_info, sizeof(path));
-    if (args != NULL)
-	*args++ = savedch;
-    if (len >= sizeof(path)) {
-	warningx("%s%s: %s", _PATH_SUDO_PLUGIN_DIR, plugin_info,
+    if (len <= 0 || len >= sizeof(path)) {
+	warningx("%s%s: %s",
+	    (*plugin_info != '/') ? _PATH_SUDO_PLUGIN_DIR : "", plugin_info,
 	    strerror(ENAMETOOLONG));
 	return -1;
     }
