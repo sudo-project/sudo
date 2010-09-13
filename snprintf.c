@@ -291,16 +291,16 @@ xxxprintf(strp, strsize, alloc, fmt0, ap)
 	int width;		/* width from format (%8d), or 0 */
 	int prec;		/* precision from format (%.3d), or -1 */
 	char sign;		/* sign prefix (' ', '+', '-', or \0) */
-	unsigned long ulval;	/* integer arguments %[diouxX] */
+	unsigned long ulval = 0; /* integer arguments %[diouxX] */
 #ifdef HAVE_LONG_LONG_INT
-	unsigned long long uqval; /* %q (quad) integers */
+	unsigned long long uqval = 0; /* %q (quad) integers */
 #endif
 	int base;		/* base for [diouxX] conversion */
 	int dprec;		/* a copy of prec if [diouxX], 0 otherwise */
 	int fieldsz;		/* field size expanded by sign, etc */
 	int realsz;		/* field size expanded by dprec */
 	int size;		/* size of converted field or string */
-	char *xdigs;		/* digits for [xX] conversion */
+	char *xdigs = "";	/* digits for [xX] conversion */
 	char buf[BUF];		/* space for %c, %[diouxX], %[eEfgG] */
 	char ox[2];		/* space for 0x hex-prefix */
 	char *str;		/* pointer to string to fill */
