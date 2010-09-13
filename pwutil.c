@@ -733,6 +733,7 @@ user_in_group(pw, group)
 #endif /* HAVE_MBR_CHECK_MEMBERSHIP */
 
 done:
-    gr_delref(grp);
+    if (grp != NULL)
+	gr_delref(grp);
     return(retval);
 }
