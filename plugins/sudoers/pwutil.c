@@ -708,6 +708,7 @@ user_in_group(struct passwd *pw, const char *group)
 #endif /* HAVE_MBR_CHECK_MEMBERSHIP */
 
 done:
-    gr_delref(grp);
+    if (grp != NULL)
+	gr_delref(grp);
     return(retval);
 }
