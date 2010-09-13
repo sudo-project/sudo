@@ -316,6 +316,17 @@ const char *getprogname __P((void));
 # define WCOREDUMP(x)	((x) & 0x80)
 #endif
 
+/*
+ * HP-UX does not declare innetgr() or getdomainname().
+ * Solaris does not declare getdomainname().
+ */
+#if defined(__hpux)
+int innetgr(const char *, const char *, const char *, const char *);
+#endif
+#if defined(__hpux) || defined(__sun)
+int getdomainname(char *, size_t);
+#endif
+
 /* Functions "missing" from libc. */
 
 struct timeval;
