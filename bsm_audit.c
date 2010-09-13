@@ -35,7 +35,7 @@
  * Solaris auditon() returns EINVAL if BSM audit not configured.
  * OpenBSM returns ENOSYS for unimplemented options.
  */
-#ifdef __sun__
+#ifdef __sun
 # define AUDIT_NOT_CONFIGURED	EINVAL
 #else
 # define AUDIT_NOT_CONFIGURED	ENOSYS
