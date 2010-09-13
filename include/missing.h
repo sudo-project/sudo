@@ -264,6 +264,17 @@ void setprogname(const char *);
 #  endif
 #endif /* HAVE_SETEUID */
 
+/*
+ * HP-UX does not declare innetgr() or getdomainname().
+ * Solaris does not declare getdomainname().
+ */
+#if defined(__hpux)
+int innetgr(const char *, const char *, const char *, const char *);
+#endif
+#if defined(__hpux) || defined(__sun)
+int getdomainname(char *, size_t);
+#endif
+
 /* Functions "missing" from libc. */
 
 struct timeval;
