@@ -71,7 +71,7 @@ while ${MORETODO} ; do
 	;;
     X-b*)
 	BACKIT=true
-	BACKUP=`expr "$1" : '-b\(.*\)'`
+	BACKUP="`echo \"$1\" | sed 's/^..//'`"
 	;;
     X-c)
 	# backwards compatibility
@@ -85,7 +85,7 @@ while ${MORETODO} ; do
 	shift
 	;;
     X-g*)
-	GROUP=`expr "$1" : '-g\(.*\)'`
+	GROUP="`echo \"$1\" | sed 's/^..//'`"
 	CHGROUPIT=true
 	;;
     X-G)
@@ -95,7 +95,7 @@ while ${MORETODO} ; do
 	;;
     X-G*)
 	if ${ROOT} ; then
-	    GROUP=`expr "$1" : '-g\(.*\)'`
+	    GROUP="`echo \"$1\" | sed 's/^..//'`"
 	    CHGROUPIT=true
 	fi
 	;;
@@ -105,7 +105,7 @@ while ${MORETODO} ; do
 	shift
 	;;
     X-m*)
-	MODE=`expr "$1" : '-m\(.*\)'`
+	MODE="`echo \"$1\" | sed 's/^..//'`"
 	CHMODIT=true
 	;;
     X-M)
@@ -114,7 +114,7 @@ while ${MORETODO} ; do
 	shift
 	;;
     X-M*)
-	MODE=`expr "$1" : '-m\(.*\)'`
+	MODE="`echo \"$1\" | sed 's/^..//'`"
 	${ROOT} && CHMODIT=true
 	;;
     X-n)
@@ -126,7 +126,7 @@ while ${MORETODO} ; do
 	shift
 	;;
     X-o*)
-	OWNER=`expr "$1" : '-o\(.*\)'`
+	OWNER="`echo \"$1\" | sed 's/^..//'`"
 	CHOWNIT=true
 	;;
     X-O)
@@ -136,7 +136,7 @@ while ${MORETODO} ; do
 	;;
     X-O*)
 	if ${ROOT} ; then
-	    OWNER=`expr "$1" : '-o\(.*\)'`
+	    OWNER="`echo \"$1\" | sed 's/^..//'`"
 	    CHOWNIT=true
 	fi
 	;;
