@@ -20,7 +20,7 @@
 
 #include <sys/types.h>
 #include <sys/param.h>
-#include <sys/ioctl.h>
+#include <sys/time.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -43,7 +43,6 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <ctype.h>
-#include <termios.h>
 
 #include "missing.h"
 #include "alloc.h"
