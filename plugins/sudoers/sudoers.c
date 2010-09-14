@@ -347,7 +347,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	memcpy(NewArgv, argv, argc * sizeof(char *));
 	NewArgv[NewArgc] = NULL;
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
-	    NewArgv[0] = runas_pw->pw_shell;
+	    NewArgv[0] = estrdup(runas_pw->pw_shell);
     }
 
     /* Find command in path */
