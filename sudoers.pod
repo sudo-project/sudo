@@ -919,7 +919,7 @@ modification.  This makes it possible to specify a more permissive
 umask in I<sudoers> than the user's own umask and matches historical
 behavior.  If I<umask_override> is not set, B<sudo> will set the
 umask to be the union of the user's umask and what is specified in
-I<sudoers>.  This flag is I<off> by default.
+I<sudoers>.  This flag is I<@umask_override@> by default.
 
 =item use_loginclass
 

@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.4                     July 21, 2010                         1
+1.7.5                   September 14, 2010                      1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 21, 2010                         2
+1.7.5                   September 14, 2010                      2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 21, 2010                         3
+1.7.5                   September 14, 2010                      3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 21, 2010                         4
+1.7.5                   September 14, 2010                      4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 21, 2010                         5
+1.7.5                   September 14, 2010                      5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 21, 2010                         6
+1.7.5                   September 14, 2010                      6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 21, 2010                         7
+1.7.5                   September 14, 2010                      7
 
 
 
@@ -523,7 +523,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 21, 2010                         8
+1.7.5                   September 14, 2010                      8
 
 
 
@@ -589,7 +589,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 21, 2010                         9
+1.7.5                   September 14, 2010                      9
 
 
 
@@ -611,8 +611,9 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        that the --HH option is always implied.  Note that HOME
                        is already set when the the _e_n_v___r_e_s_e_t option is
                        enabled, so _a_l_w_a_y_s___s_e_t___h_o_m_e is only effective for
-                       configurations where _e_n_v___r_e_s_e_t is disabled.  This flag
-                       is _o_f_f by default.
+                       configurations where either _e_n_v___r_e_s_e_t is disabled or
+                       HOME is present in the _e_n_v___k_e_e_p list.  This flag is _o_f_f
+                       by default.
 
        authenticate    If set, users must authenticate themselves via a
                        password (or other means of authentication) before they
@@ -651,11 +652,10 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        its value will be used for the PATH environment
                        variable.  This flag is _o_n by default.
 
-       fast_glob       Normally, ssuuddoo uses the _g_l_o_b(3) function to do shell-
 
 
 
-1.7.4                     July 21, 2010                        10
+1.7.5                   September 14, 2010                     10
 
 
 
@@ -664,6 +664,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       fast_glob       Normally, ssuuddoo uses the _g_l_o_b(3) function to do shell-
                        style globbing when matching path names.  However,
                        since it accesses the file system, _g_l_o_b(3) can take a
                        long time to complete for some patterns, especially
@@ -717,11 +718,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        insults         If set, ssuuddoo will insult users when they enter an
                        incorrect password.  This flag is _o_f_f by default.
 
-       log_host        If set, the host name will be logged in the (non-
 
 
 
-1.7.4                     July 21, 2010                        11
+1.7.5                   September 14, 2010                     11
 
 
 
@@ -730,6 +730,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       log_host        If set, the host name will be logged in the (non-
                        syslog) ssuuddoo log file.  This flag is _o_f_f by default.
 
        log_year        If set, the four-digit year will be logged in the (non-
@@ -783,11 +784,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        passprompt_override
                        The password prompt specified by _p_a_s_s_p_r_o_m_p_t will
                        normally only be used if the password prompt provided
-                       by systems such as PAM matches the string "Password:".
 
 
 
-1.7.4                     July 21, 2010                        12
+1.7.5                   September 14, 2010                     12
 
 
 
@@ -796,6 +796,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+                       by systems such as PAM matches the string "Password:".
                        If _p_a_s_s_p_r_o_m_p_t___o_v_e_r_r_i_d_e is set, _p_a_s_s_p_r_o_m_p_t will always
                        be used.  This flag is _o_f_f by default.
 
@@ -846,14 +847,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        --uu option is used).  This effectively makes the --ss
                        option imply --HH.  Note that HOME is already set when
                        the the _e_n_v___r_e_s_e_t option is enabled, so _s_e_t___h_o_m_e is
-                       only effective for configurations where _e_n_v___r_e_s_e_t is
-                       disabled.  This flag is _o_f_f by default.
-
-       set_logname     Normally, ssuuddoo will set the LOGNAME, USER and USERNAME
-
+                       only effective for configurations where either
+                       _e_n_v___r_e_s_e_t is disabled or HOME is present in the
+                       _e_n_v___k_e_e_p list.  This flag is _o_f_f by default.
 
 
-1.7.4                     July 21, 2010                        13
+
+1.7.5                   September 14, 2010                     13
 
 
 
@@ -862,6 +862,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       set_logname     Normally, ssuuddoo will set the LOGNAME, USER and USERNAME
                        environment variables to the name of the target user
                        (usually root unless the --uu option is given).  However,
                        since some programs (including the RCS revision control
@@ -918,8 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-
-1.7.4                     July 21, 2010                        14
+1.7.5                   September 14, 2010                     14
 
 
 
@@ -985,7 +985,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 21, 2010                        15
+1.7.5                   September 14, 2010                     15
 
 
 
@@ -1051,7 +1051,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 21, 2010                        16
+1.7.5                   September 14, 2010                     16
 
 
 
@@ -1117,7 +1117,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 21, 2010                        17
+1.7.5                   September 14, 2010                     17
 
 
 
@@ -1183,7 +1183,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 21, 2010                        18
+1.7.5                   September 14, 2010                     18
 
 
 
@@ -1249,7 +1249,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 21, 2010                        19
+1.7.5                   September 14, 2010                     19
 
 
 
@@ -1315,7 +1315,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 21, 2010                        20
+1.7.5                   September 14, 2010                     20
 
 
 
@@ -1381,7 +1381,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.7.4                     July 21, 2010                        21
+1.7.5                   September 14, 2010                     21
 
 
 
@@ -1447,7 +1447,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 21, 2010                        22
+1.7.5                   September 14, 2010                     22
 
 
 
@@ -1513,7 +1513,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.4                     July 21, 2010                        23
+1.7.5                   September 14, 2010                     23
 
 
 
@@ -1579,7 +1579,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.7.4                     July 21, 2010                        24
+1.7.5                   September 14, 2010                     24
 
 
 
@@ -1645,7 +1645,7 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 
 
-1.7.4                     July 21, 2010                        25
+1.7.5                   September 14, 2010                     25
 
 
 
@@ -1711,7 +1711,7 @@ SSUUPPPPOORRTT
 
 
 
-1.7.4                     July 21, 2010                        26
+1.7.5                   September 14, 2010                     26
 
 
 
@@ -1777,6 +1777,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.4                     July 21, 2010                        27
+1.7.5                   September 14, 2010                     27
 
 

@@ -463,6 +463,11 @@ The following options are also configurable at runtime:
   --without-umask
 	Preserves the umask of the user invoking sudo.
 
+  --with-umask-override
+        Use the umask specified in sudoers even if it is less restrictive
+	than the user's.  The default is to use the intersection of the
+	user's umask and the umask specified in sudoers.
+
   --with-runas-default=USER
 	The default user to run commands as if the -u flag is not specified
 	on the command line.  This defaults to "root".

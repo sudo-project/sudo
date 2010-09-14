@@ -811,6 +811,7 @@ logfac
 lecture
 long_otp_prompt
 passprompt
+umask_override
 sudo_umask
 password_timeout
 timeout
@@ -947,6 +948,7 @@ with_sudoers_mode
 with_sudoers_uid
 with_sudoers_gid
 with_umask
+with_umask_override
 with_runas_default
 with_exempt
 with_editor
@@ -1709,6 +1711,8 @@ Optional Packages:
   --with-umask            umask with which the prog should run (default is
                           022)
   --without-umask         Preserves the umask of the user invoking sudo.
+  --with-umask-override   Use the umask specified in sudoers even if it is
+                          less restrictive than the user's.
   --with-runas-default    User to run commands as (default is "root")
   --with-exempt=group     no passwd needed for users in this group
   --with-editor=path      Default editor for visudo (defaults to vi)
@@ -2951,6 +2955,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -2958,6 +2963,7 @@ timedir=/var/adm/sudo
 timeout=5
 password_timeout=5
 sudo_umask=0022
+umask_override=off
 passprompt="Password:"
 long_otp_prompt=off
 lecture=once
@@ -4774,6 +4780,22 @@ else
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_umask" >&5
 $as_echo "$sudo_umask" >&6; }
 fi
+
+
+# Check whether --with-umask-override was given.
+if test "${with_umask_override+set}" = set; then :
+  withval=$with_umask_override; case $with_umask_override in
+    yes)	$as_echo "#define UMASK_OVERRIDE 1" >>confdefs.h
+
+		umask_override=on
+		;;
+    no)		umask_override=off
+		;;
+    *)		as_fn_error "\"--with-umask-override does not take an argument.\"" "$LINENO" 5
+		;;
+esac
+fi
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default user to run commands as" >&5
 $as_echo_n "checking for default user to run commands as... " >&6; }
@@ -6762,13 +6784,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6765: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6787: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6768: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6790: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6771: output\"" >&5)
+  (eval echo "\"\$as_me:6793: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -7973,7 +7995,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7976 "configure"' > conftest.$ac_ext
+  echo '#line 7998 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9366,11 +9388,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9369: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9391: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9373: \$? = $ac_status" >&5
+   echo "$as_me:9395: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9705,11 +9727,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9708: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9730: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9712: \$? = $ac_status" >&5
+   echo "$as_me:9734: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9810,11 +9832,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9813: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9835: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9817: \$? = $ac_status" >&5
+   echo "$as_me:9839: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9865,11 +9887,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9868: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9890: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9872: \$? = $ac_status" >&5
+   echo "$as_me:9894: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12232,7 +12254,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12235 "configure"
+#line 12257 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12328,7 +12350,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12331 "configure"
+#line 12353 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -20649,6 +20671,7 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+
 
 
 

@@ -61,6 +61,7 @@ AC_SUBST([timedir])dnl real initial value from SUDO_TIMEDIR
 AC_SUBST([timeout])
 AC_SUBST([password_timeout])
 AC_SUBST([sudo_umask])
+AC_SUBST([umask_override])
 AC_SUBST([passprompt])
 AC_SUBST([long_otp_prompt])
 AC_SUBST([lecture])
@@ -96,6 +97,7 @@ timedir=/var/adm/sudo
 timeout=5
 password_timeout=5
 sudo_umask=0022
+umask_override=off
 passprompt="Password:"
 long_otp_prompt=off
 lecture=once
@@ -784,12 +786,23 @@ AS_HELP_STRING([--without-umask], [Preserves the umask of the user invoking sudo
     *)		AC_MSG_ERROR(["you must enter a numeric mask."])
 		;;
 esac])
-AC_DEFINE_UNQUOTED(SUDO_UMASK, $sudo_umask, [The umask that the root-run prog should use.])
+AC_DEFINE_UNQUOTED(SUDO_UMASK, $sudo_umask, [The umask that the sudo-run prog should use.])
 if test "$sudo_umask" = "0777"; then
     AC_MSG_RESULT(user)
 else
     AC_MSG_RESULT($sudo_umask)
 fi
+
+AC_ARG_WITH(umask-override, [AS_HELP_STRING([--with-umask-override], [Use the umask specified in sudoers even if it is less restrictive than the user's.])],
+[case $with_umask_override in
+    yes)	AC_DEFINE(UMASK_OVERRIDE)
+		umask_override=on
+		;;
+    no)		umask_override=off
+		;;
+    *)		AC_MSG_ERROR(["--with-umask-override does not take an argument."])
+		;;
+esac])
 
 AC_MSG_CHECKING(for default user to run commands as)
 AC_ARG_WITH(runas-default, [AS_HELP_STRING([--with-runas-default], [User to run commands as (default is "root")])],
@@ -2895,6 +2908,7 @@ AH_TEMPLATE(SEND_MAIL_WHEN_NO_USER, [Define to 1 to send mail when the user is n
 AH_TEMPLATE(SHELL_IF_NO_ARGS, [Define to 1 if you want sudo to start a shell if given no arguments.])
 AH_TEMPLATE(SHELL_SETS_HOME, [Define to 1 if you want sudo to set $HOME in shell mode.])
 AH_TEMPLATE(STUB_LOAD_INTERFACES, [Define to 1 if the code in interfaces.c does not compile for you.])
+AH_TEMPLATE(UMASK_OVERRIDE, [Define to 1 to use the umask specified in sudoers even when it is less restrictive than the invoking user's.])
 AH_TEMPLATE(USE_ADMIN_FLAG, [Define to 1 if you want to create ~/.sudo_as_admin_successful if the user is in the admin group the first time they run sudo.])
 AH_TEMPLATE(USE_INSULTS, [Define to 1 if you want to insult the user for entering an incorrect password.])
 AH_TEMPLATE(USE_STOW, [Define to 1 if you use GNU stow packaging.])

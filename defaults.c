@@ -433,6 +433,9 @@ init_defaults()
 #ifdef ENV_EDITOR
     def_env_editor = TRUE;
 #endif
+#ifdef UMASK_OVERRIDE
+    def_umask_override = TRUE;
+#endif
 #ifdef _PATH_SUDO_ASKPASS
     def_askpass = estrdup(_PATH_SUDO_ASKPASS);
 #endif
