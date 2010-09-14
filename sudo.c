@@ -317,7 +317,7 @@ main(argc, argv, envp)
 
     /* Update initial shell now that runas is set. */
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
-	NewArgv[0] = runas_pw->pw_shell;
+	NewArgv[0] = estrdup(runas_pw->pw_shell);
 
     /* This goes after sudoers is parsed since it may have timestamp options. */
     if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE) {
