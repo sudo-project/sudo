@@ -1057,9 +1057,14 @@ static void
 initial_setup()
 {
     int miss[3], devnull = -1;
+    sigset_t mask;
 #if defined(__linux__) || (defined(RLIMIT_CORE) && !defined(SUDO_DEVEL))
     struct rlimit rl;
 #endif
+
+    /* Reset signal mask. */
+    (void) sigfillset(&mask);
+    (void) sigprocmask(SIG_UNBLOCK, &mask, NULL);
 
 #if defined(__linux__)
     /*
