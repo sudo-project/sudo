@@ -523,8 +523,8 @@ rebuild_env(int noexec)
 		sudo_setenv("USERNAME", user_name, FALSE);
 	}
 
-	/* If we didn't keep HOME, reset it based on target user. */
-	if (!ISSET(didvar, KEPT_HOME))
+	/* If not a login shell and it wasn't kept above, reset HOME. */
+	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) || !ISSET(didvar, KEPT_HOME))
 	    reset_home = TRUE;
 
 	/*
