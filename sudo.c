@@ -1063,8 +1063,8 @@ initial_setup()
 #endif
 
     /* Reset signal mask. */
-    (void) sigfillset(&mask);
-    (void) sigprocmask(SIG_UNBLOCK, &mask, NULL);
+    (void) sigemptyset(&mask);
+    (void) sigprocmask(SIG_SETMASK, &mask, NULL);
 
 #if defined(__linux__)
     /*
