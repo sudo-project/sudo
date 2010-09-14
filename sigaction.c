@@ -121,7 +121,7 @@ sigprocmask(how, set, oset)
 		mask = sigblock(*set);
 		break;
 	    case SIG_UNBLOCK:
-		mask = sigsetmask(~*set);
+		mask = sigsetmask(sigblock(0) & ~(*set));
 		break;
 	    case SIG_SETMASK:
 		mask = sigsetmask(*set);
