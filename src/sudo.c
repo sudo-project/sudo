@@ -131,8 +131,8 @@ main(int argc, char *argv[], char *envp[])
 	errorx(1, "must be setuid root");
 
     /* Reset signal mask, disable core dumps and make sure fds 0-2 are open. */
-    (void) sigfillset(&mask);
-    (void) sigprocmask(SIG_UNBLOCK, &mask, NULL);
+    (void) sigemptyset(&mask);
+    (void) sigprocmask(SIG_SETMASK, &mask, NULL);
     disable_coredumps();
     fix_fds();
 
