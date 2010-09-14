@@ -111,6 +111,7 @@ main(int argc, char *argv[], char *envp[])
     char **user_info, **command_info, **argv_out, **user_env_out;
     struct plugin_container *plugin, *next;
     struct command_details command_details;
+    sigset_t mask;
     int ok;
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     extern char *malloc_options;
@@ -129,7 +130,9 @@ main(int argc, char *argv[], char *envp[])
     if (geteuid() != 0)
 	errorx(1, "must be setuid root");
 
-    /* Turn off core dumps and make sure fds 0-2 are open. */
+    /* Reset signal mask, disable core dumps and make sure fds 0-2 are open. */
+    (void) sigfillset(&mask);
+    (void) sigprocmask(SIG_UNBLOCK, &mask, NULL);
     disable_coredumps();
     fix_fds();
 
