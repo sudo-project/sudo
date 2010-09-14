@@ -671,7 +671,7 @@
 /* The name of the sudoers plugin, including extension. */
 #undef SUDOERS_PLUGIN
 
-/* The umask that the root-run prog should use. */
+/* The umask that the sudo-run prog should use. */
 #undef SUDO_UMASK
 
 /* The number of minutes before sudo asks for a password again. */
@@ -682,6 +682,10 @@
 
 /* The number of tries a user gets to enter their password. */
 #undef TRIES_FOR_PASSWORD
+
+/* Define to 1 to use the umask specified in sudoers even when it is less
+   restrictive than the invoking user's. */
+#undef UMASK_OVERRIDE
 
 /* Define to 1 if the `unsetenv' function returns void instead of `int'. */
 #undef UNSETENV_VOID
