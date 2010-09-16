@@ -161,7 +161,7 @@ sudo_parseln(FILE *fp)
 	len = strlen(buf);
 	while (len > 0 && isspace((unsigned char)buf[len - 1]))
 	    buf[--len] = '\0';
-	for (cp = buf; isblank(*cp); cp++)
+	for (cp = buf; isblank((unsigned char)*cp); cp++)
 	    continue;
     }
     return(cp);
