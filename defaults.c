@@ -684,13 +684,13 @@ store_list(str, def, op)
 	end = str;
 	do {
 	    /* Remove leading blanks, if nothing but blanks we are done. */
-	    for (start = end; isblank(*start); start++)
+	    for (start = end; isblank((unsigned char)*start); start++)
 		;
 	    if (*start == '\0')
 		break;
 
 	    /* Find end position and perform operation. */
-	    for (end = start; *end && !isblank(*end); end++)
+	    for (end = start; *end && !isblank((unsigned char)*end); end++)
 		;
 	    list_op(start, end - start, def, op == '-' ? delete : add);
 	} while (*end++ != '\0');
