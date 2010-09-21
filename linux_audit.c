@@ -81,9 +81,9 @@ linux_audit_command(char *argv[], int result)
     }
     *--cp = '\0';
 
-    /* Log command, ignoring EPERM on error. */
+    /* Log command, ignoring ECONNREFUSED on error. */
     rc = audit_log_user_command(au_fd, AUDIT_USER_CMD, command, NULL, result);
-    if (rc <= 0)
+    if (rc <= 0 && errno != ECONNREFUSED)
 	warning("unable to send audit message");
 
     efree(command);
