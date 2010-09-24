@@ -96,8 +96,8 @@
 #include <pwd.h>
 
 #include "missing.h"
-#include "glob.h"
-#include "charclass.h"
+#include "compat/glob.h"
+#include "compat/charclass.h"
 
 #define	DOLLAR		'$'
 #define	DOT		'.'

@@ -38,7 +38,7 @@ main(int argc, char *argv[])
     static char *my_sys_siglist[NSIG];
     int i;
 
-#include "mksiglist.h"
+#include "compat/mksiglist.h"
 
     printf("#include <config.h>\n");
     printf("#include <signal.h>\n");

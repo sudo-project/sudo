@@ -50,8 +50,8 @@
 #endif /* HAVE_STRINGS_H */
 
 #include "missing.h"
-#include "charclass.h"
-#include "fnmatch.h"
+#include "compat/charclass.h"
+#include "compat/fnmatch.h"
 
 #undef	EOS
 #define	EOS	'\0'
