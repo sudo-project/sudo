@@ -39,7 +39,7 @@ sudoers_uid = @SUDOERS_UID@
 sudoers_gid = @SUDOERS_GID@
 sudoers_mode = @SUDOERS_MODE@
 
-SUBDIRS = compat common src plugins/sudoers include doc
+SUBDIRS = compat common plugins/sudoers src include doc
 
 SAMPLES = plugins/sample plugins/sample_group
 

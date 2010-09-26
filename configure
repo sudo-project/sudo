@@ -823,7 +823,6 @@ CONFIGURE_ARGS
 ac_config_libobj_dir
 LIBTOOL_DEPS
 ZLIB
-NONUNIX_GROUPS_IMPL
 LOGINCAP_USAGE
 LDAP
 SELINUX_USAGE
@@ -2887,7 +2886,6 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
-
 
 
 
@@ -6770,13 +6768,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6773: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6771: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6776: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6774: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6779: output\"" >&5)
+  (eval echo "\"\$as_me:6777: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -7981,7 +7979,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7984 "configure"' > conftest.$ac_ext
+  echo '#line 7982 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9373,11 +9371,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9376: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9374: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9380: \$? = $ac_status" >&5
+   echo "$as_me:9378: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9712,11 +9710,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9715: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9713: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9719: \$? = $ac_status" >&5
+   echo "$as_me:9717: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9817,11 +9815,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9820: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9818: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9824: \$? = $ac_status" >&5
+   echo "$as_me:9822: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9872,11 +9870,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9875: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9873: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9879: \$? = $ac_status" >&5
+   echo "$as_me:9877: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12239,7 +12237,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12242 "configure"
+#line 12240 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12335,7 +12333,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12338 "configure"
+#line 12336 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -18078,8 +18076,46 @@ $as_echo "$as_me: WARNING: Unable to locate gssapi.h, you will have to edit the 
 fi
 
 #
-# Add library needed for dynamic linking, if any.
-# XXX - using the cache value like this is ugly
+# How to do dynamic object loading.
+# We support dlopen() and sh_load(), else fall back to static loading.
+#
+case "$lt_cv_dlopen" in
+    dlopen)
+	SUDOERS_OBJS="$SUDOERS_OBJS plugin_error.lo"
+	;;
+    shl_load)
+	$as_echo "#define HAVE_SHL_LOAD 1" >>confdefs.h
+
+	SUDOERS_OBJS="$SUDOERS_OBJS plugin_error.lo"
+	;;
+    no)
+	# Preload sudoers module symbols
+	SUDO_OBJS="${SUDO_OBJS} preload.o"
+	SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
+	;;
+esac
+for ac_func in dlopen
+do :
+  ac_fn_c_check_func "$LINENO" "dlopen" "ac_cv_func_dlopen"
+if test "x$ac_cv_func_dlopen" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DLOPEN 1
+_ACEOF
+
+else
+  case " $LIBOBJS " in
+  *" $ac_func.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS $ac_func.$ac_objext"
+ ;;
+esac
+
+fi
+done
+
+
+
+#
+# Add library needed for dynamic loading, if any.
 #
 LIBDL="$lt_cv_dlopen_libs"
 if test X"$LIBDL" != X""; then
@@ -20475,6 +20511,7 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+
 
 
 

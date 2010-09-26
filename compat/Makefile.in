@@ -76,6 +76,7 @@ siglist.lo: siglist.c $(incdir)/missing.h $(top_builddir)/config.h
 
 # Dependencies
 closefrom.lo: $(compat)/closefrom.c $(incdir)/missing.h $(top_builddir)/config.h
+dlopen.lo: $(compat)/dlopen.c $(compat)/dlfcn.h $(incdir)/missing.h $(top_builddir)/config.h
 fnmatch.lo: $(compat)/fnmatch.c $(compat)/fnmatch.h $(compat)/charclass.h $(incdir)/missing.h $(top_builddir)/config.h
 getcwd.lo: $(compat)/getcwd.c $(incdir)/missing.h $(top_builddir)/config.h
 getline.lo: $(compat)/getline.c $(incdir)/missing.h $(top_builddir)/config.h

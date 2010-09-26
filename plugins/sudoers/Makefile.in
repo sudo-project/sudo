@@ -103,12 +103,11 @@ PROGS = sudoers.la visudo sudoreplay testsudoers
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
 LIBSUDOERS_OBJS = alias.lo audit.lo defaults.lo gram.lo match.lo pwutil.lo \
-		  timestr.lo toke.lo redblack.lo @NONUNIX_GROUPS_IMPL@
+		  timestr.lo toke.lo redblack.lo
 
-SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo plugin_error.lo env.lo \
-	       goodpath.lo group_plugin.lo find_path.lo interfaces.lo \
-	       logging.lo parse.lo set_perms.lo sudoers.lo sudo_nss.lo \
-	       iolog.lo @SUDOERS_OBJS@
+SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo env.lo goodpath.lo \
+	       group_plugin.lo find_path.lo interfaces.lo logging.lo parse.lo \
+	       set_perms.lo sudoers.lo sudo_nss.lo iolog.lo @SUDOERS_OBJS@
 
 VISUDO_OBJS = visudo.o goodpath.o find_path.o error.o
 
@@ -149,7 +148,7 @@ libsudoers.la: $(LIBSUDOERS_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LIBSUDOERS_OBJS) -no-install
 
 sudoers.la: $(SUDOERS_OBJS) libsudoers.la
-	$(LIBTOOL) --tag=disable-static --mode=link $(CC) $(SUDOERS_LDFLAGS) -o $@ $(SUDOERS_OBJS) libsudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir)
+	$(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(SUDOERS_LDFLAGS) -o $@ $(SUDOERS_OBJS) libsudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir)
 
 visudo: libsudoers.la $(VISUDO_OBJS) $(LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)

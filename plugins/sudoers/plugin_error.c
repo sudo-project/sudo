@@ -30,9 +30,9 @@
 #include "sudo_plugin.h"
 
 static void _warning(int, const char *, va_list);
-       void cleanup(int);
+       void plugin_cleanup(int);
 
-sigjmp_buf error_jmp;
+extern sigjmp_buf error_jmp;
 
 extern sudo_conv_t sudo_conv;
 
@@ -44,7 +44,7 @@ error(int eval, const char *fmt, ...)
     va_start(ap, fmt);
     _warning(1, fmt, ap);
     va_end(ap);
-    cleanup(0);
+    plugin_cleanup(0);
     siglongjmp(error_jmp, eval);
 }
 
@@ -56,7 +56,7 @@ errorx(int eval, const char *fmt, ...)
     va_start(ap, fmt);
     _warning(0, fmt, ap);
     va_end(ap);
-    cleanup(0);
+    plugin_cleanup(0);
     siglongjmp(error_jmp, eval);
 }
 

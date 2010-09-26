@@ -30,7 +30,7 @@ VPATH = $(srcdir)
 
 # Compiler & tools to use
 CC = @CC@
-LIBTOOL = @LIBTOOL@ --tag=disable-static
+LIBTOOL = @LIBTOOL@ @LT_STATIC@
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
@@ -113,6 +113,7 @@ get_pty.o: $(srcdir)/get_pty.c $(SUDODEP)
 net_ifs.o: $(srcdir)/net_ifs.c $(SUDODEP)
 load_plugins.o: $(srcdir)/load_plugins.c $(SUDODEP)
 parse_args.o: $(srcdir)/parse_args.c sudo_usage.h $(SUDODEP)
+preload.o: $(srcdir)/preload.c $(incdir)/sudo_plugin.h $(top_builddir)/config.h
 selinux.o: $(srcdir)/selinux.c $(SUDODEP)
 sesh.o: $(srcdir)/sesh.c $(incdir)/missing.h $(top_builddir)/config.h
 sudo.o: $(srcdir)/sudo.c $(SUDODEP)

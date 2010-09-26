@@ -150,7 +150,7 @@ int NewArgc;
 char **NewArgv;
 
 /* error.c */
-extern sigjmp_buf error_jmp;
+sigjmp_buf error_jmp;
 
 static int
 sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
@@ -1117,7 +1117,7 @@ set_runasgr(char *group)
  * Cleanup hook for error()/errorx()
  */
 void
-cleanup(int gotsignal)
+plugin_cleanup(int gotsignal)
 {
     struct sudo_nss *nss;
 

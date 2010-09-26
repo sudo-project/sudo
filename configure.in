@@ -55,12 +55,12 @@ AC_SUBST([BSDAUTH_USAGE])
 AC_SUBST([SELINUX_USAGE])
 AC_SUBST([LDAP])
 AC_SUBST([LOGINCAP_USAGE])
-AC_SUBST([NONUNIX_GROUPS_IMPL])
 AC_SUBST([ZLIB])
 AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST([ac_config_libobj_dir])
 AC_SUBST([CONFIGURE_ARGS])
 AC_SUBST([LIBDL])
+AC_SUBST([LT_STATIC])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -2663,8 +2663,30 @@ if test ${with_ldap-'no'} != "no"; then
 fi
 
 #
-# Add library needed for dynamic linking, if any.
-# XXX - using the cache value like this is ugly
+# How to do dynamic object loading.
+# We support dlopen() and sh_load(), else fall back to static loading.
+#
+case "$lt_cv_dlopen" in
+    dlopen)
+	SUDOERS_OBJS="$SUDOERS_OBJS plugin_error.lo"
+	LT_STATIC='--tag=disable-static"
+	;;
+    shl_load)
+	AC_DEFINE(HAVE_SHL_LOAD)
+	SUDOERS_OBJS="$SUDOERS_OBJS plugin_error.lo"
+	LT_STATIC='--tag=disable-static"
+	;;
+    no)
+	# Preload sudoers module symbols
+	SUDO_OBJS="${SUDO_OBJS} preload.o"
+	SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
+	LT_STATIC=""
+	;;
+esac
+AC_REPLACE_FUNCS(dlopen)
+
+#
+# Add library needed for dynamic loading, if any.
 #
 LIBDL="$lt_cv_dlopen_libs"
 if test X"$LIBDL" != X""; then
@@ -2855,6 +2877,7 @@ AH_TEMPLATE(HAVE_PROJECT_H, [Define to 1 if you have the <project.h> header file
 AH_TEMPLATE(HAVE_SECURID, [Define to 1 if you use SecurID for authentication.])
 AH_TEMPLATE(HAVE_SELINUX, [Define to 1 to enable SELinux RBAC support.])
 AH_TEMPLATE(HAVE_SETKEYCREATECON, [Define to 1 if you have the `setkeycreatecon' function.])
+AH_TEMPLATE(HAVE_SHL_LOAD, [Define to 1 if you have the `shl_load' function.])
 AH_TEMPLATE(HAVE_SIGACTION_T, [Define to 1 if <signal.h> has the sigaction_t typedef.])
 AH_TEMPLATE(HAVE_SKEY, [Define to 1 if you use S/Key.])
 AH_TEMPLATE(HAVE_SKEYACCESS, [Define to 1 if your S/Key library has skeyaccess().])

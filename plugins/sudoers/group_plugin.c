@@ -16,6 +16,8 @@
 
 #include <config.h>
 
+#if defined(HAVE_DLOPEN) || defined(HAVE_SHL_LOAD)
+
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
@@ -41,12 +43,20 @@
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
+#ifdef HAVE_DLFCN_H
+# include <dlfcn.h>
+#else
+# include "compat/dlfcn.h"
+#endif
 #include <ctype.h>
-#include <dlfcn.h>
 #include <errno.h>
 #include <pwd.h>
 
 #include "sudoers.h"
+
+#ifndef RTLD_LOCAL
+# define RTLD_LOCAL	0
+#endif
 
 static void *group_handle;
 static struct sudoers_group_plugin *group_plugin;
@@ -99,7 +109,7 @@ group_plugin_load(char *plugin_info)
     }
 
     /* Open plugin and map in symbol. */
-    group_handle = dlopen(path, RTLD_LAZY);
+    group_handle = dlopen(path, RTLD_LAZY|RTLD_LOCAL);
     if (!group_handle) {
 	warningx("unable to dlopen %s: %s", path, dlerror());
 	return -1;
@@ -161,3 +171,30 @@ group_plugin_query(const char *user, const char *group,
 {
     return (group_plugin->query)(user, group, pwd);
 }
+
+#else /* !HAVE_DLOPEN && !HAVE_SHL_LOAD */
+
+/*
+ * No loadable shared object support.
+ */
+
+int
+group_plugin_load(char *plugin_info)
+{
+    return FALSE;
+}
+
+void
+group_plugin_unload(void)
+{
+    return;
+}
+
+int
+group_plugin_query(const char *user, const char *group,
+    const struct passwd *pwd)
+{
+    return FALSE;
+}
+
+#endif /* HAVE_DLOPEN || HAVE_SHL_LOAD */

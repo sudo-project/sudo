@@ -37,12 +37,20 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE_DLFCN_H
+# include <dlfcn.h>
+#else
+# include "compat/dlfcn.h"
+#endif
 #include <errno.h>
-#include <dlfcn.h>
 
 #include "sudo.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
+
+#ifndef RTLD_LOCAL
+# define RTLD_LOCAL	0
+#endif
 
 /*
  * Read in /etc/sudo.conf
@@ -157,7 +165,7 @@ sudo_load_plugins(const char *conf_file,
 	    errorx(1, "%s must be only be writable by owner", path);
 
 	/* Open plugin and map in symbol */
-	handle = dlopen(path, RTLD_LAZY);
+	handle = dlopen(path, RTLD_LAZY|RTLD_LOCAL);
 	if (!handle)
 	    errorx(1, "unable to dlopen %s: %s", path, dlerror());
 	plugin = dlsym(handle, info->symbol_name);

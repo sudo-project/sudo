@@ -30,7 +30,7 @@ VPATH = $(srcdir)
 
 # Compiler & tools to use
 CC = @CC@
-LIBTOOL = @LIBTOOL@ --tag=disable-static
+LIBTOOL = @LIBTOOL@ @LT_STATIC@
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
