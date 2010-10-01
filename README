@@ -35,7 +35,7 @@ System requirements
 ===================
 To build sudo from the source distribution you need a machine running
 Unix (most flavors of BSD, SYSV, or POSIX will do), a working C
-compiler, and the make utility.
+compiler, and the ar, make and ranlib utilities.
 
 If you wish to modify the parser then you will need flex version
 2.5.2 or later and either bison or byacc (sudo comes with a pre-flex'd
