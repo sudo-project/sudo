@@ -279,6 +279,7 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
 	zero_bytes(fdsw, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
 	zero_bytes(fdsr, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
 
+	FD_SET(signal_pipe[0], fdsr);
 	FD_SET(sv[0], fdsr);
 #ifdef _PATH_SUDO_IO_LOGDIR
 	if (!tq_empty(&sigfwd_list))
