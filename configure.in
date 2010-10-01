@@ -2669,12 +2669,12 @@ fi
 case "$lt_cv_dlopen" in
     dlopen)
 	SUDOERS_OBJS="$SUDOERS_OBJS plugin_error.lo"
-	LT_STATIC='--tag=disable-static"
+	LT_STATIC="--tag=disable-static"
 	;;
     shl_load)
 	AC_DEFINE(HAVE_SHL_LOAD)
 	SUDOERS_OBJS="$SUDOERS_OBJS plugin_error.lo"
-	LT_STATIC='--tag=disable-static"
+	LT_STATIC="--tag=disable-static"
 	;;
     no)
 	# Preload sudoers module symbols
