@@ -88,10 +88,6 @@
 #  define LOGIN_DEFROOTCLASS	"daemon"
 # endif
 #endif
-#ifdef HAVE_PROJECT_H
-# include <project.h>
-# include <sys/task.h>
-#endif
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
 # include <membership.h>
 #endif
@@ -118,7 +114,6 @@ static void init_vars			__P((char **));
 static int set_cmnd			__P((int));
 static void initial_setup		__P((void));
 static void set_loginclass		__P((struct passwd *));
-static void set_project			__P((struct passwd *));
 static void set_runasgr			__P((char *));
 static void set_runaspw			__P((char *));
 static void show_version		__P((void));
@@ -761,9 +756,6 @@ set_cmnd(sudo_mode)
     int rval;
     char *path = user_path;
 
-    /* Set project if applicable. */
-    set_project(runas_pw);
-
     /* Resolve the path and return. */
     rval = FOUND;
     user_stat = emalloc(sizeof(struct stat));
@@ -1153,72 +1145,6 @@ set_loginclass(pw)
 {
 }
 #endif /* HAVE_LOGIN_CAP_H */
-
-#ifdef HAVE_PROJECT_H
-static void
-set_project(pw)
-    struct passwd *pw;
-{
-    int errflags = NO_MAIL|MSG_ONLY|NO_EXIT;
-    int errval;
-    struct project proj;
-    struct project *resultp = '\0';
-    char buf[1024];
-
-    /*
-     * Collect the default project for the user and settaskid
-     */
-    setprojent();
-    if (resultp = getdefaultproj(pw->pw_name, &proj, buf, sizeof(buf))) {
-	errval = setproject(resultp->pj_name, pw->pw_name, TASK_NORMAL);
-	if (errval != 0) {
-	    switch(errval) {
-	    case SETPROJ_ERR_TASK:
-		if (errno == EAGAIN)
-		    log_error(errflags, "resource control limit has been reached");
-		else if (errno == ESRCH)
-		    log_error(errflags, "user \"%s\" is not a member of "
-			"project \"%s\"", pw->pw_name, resultp->pj_name);
-		else if (errno == EACCES)
-		    log_error(errflags, "the invoking task is final");
-		else
-		    log_error(errflags, "could not join project \"%s\"",
-			resultp->pj_name);
-		break;
-	    case SETPROJ_ERR_POOL:
-		if (errno == EACCES)
-		    log_error(errflags, "no resource pool accepting "
-			    "default bindings exists for project \"%s\"",
-			    resultp->pj_name);
-		else if (errno == ESRCH)
-		    log_error(errflags, "specified resource pool does "
-			    "not exist for project \"%s\"", resultp->pj_name);
-		else
-		    log_error(errflags, "could not bind to default "
-			    "resource pool for project \"%s\"", resultp->pj_name);
-		break;
-	    default:
-		if (errval <= 0) {
-		    log_error(errflags, "setproject failed for project \"%s\"",
-			resultp->pj_name);
-		} else {
-		    log_error(errflags, "warning, resource control assignment "
-			"failed for project \"%s\"", resultp->pj_name);
-		}
-	    }
-	}
-    } else {
-	log_error(errflags, "getdefaultproj() error: %s", strerror(errno));
-    }
-    endprojent();
-}
-#else
-static void
-set_project(pw)
-    struct passwd *pw;
-{
-}
-#endif /* HAVE_PROJECT_H */
 
 /*
  * Look up the fully qualified domain name and set user_host and user_shost.

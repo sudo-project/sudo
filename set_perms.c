@@ -47,6 +47,10 @@
 #ifdef HAVE_LOGIN_CAP_H
 # include <login_cap.h>
 #endif
+#ifdef HAVE_PROJECT_H
+# include <project.h>
+# include <sys/task.h>
+#endif
 
 #include "sudo.h"
 
@@ -547,6 +551,66 @@ restore_groups()
 
 #endif /* HAVE_INITGROUPS */
 
+#ifdef HAVE_PROJECT_H
+static void
+set_project(pw)
+    struct passwd *pw;
+{
+    int errflags = NO_MAIL|MSG_ONLY|NO_EXIT;
+    int errval;
+    struct project proj;
+    struct project *resultp = '\0';
+    char buf[1024];
+
+    /*
+     * Collect the default project for the user and settaskid
+     */
+    setprojent();
+    if (resultp = getdefaultproj(pw->pw_name, &proj, buf, sizeof(buf))) {
+	errval = setproject(resultp->pj_name, pw->pw_name, TASK_NORMAL);
+	if (errval != 0) {
+	    switch(errval) {
+	    case SETPROJ_ERR_TASK:
+		if (errno == EAGAIN)
+		    log_error(errflags, "resource control limit has been reached");
+		else if (errno == ESRCH)
+		    log_error(errflags, "user \"%s\" is not a member of "
+			"project \"%s\"", pw->pw_name, resultp->pj_name);
+		else if (errno == EACCES)
+		    log_error(errflags, "the invoking task is final");
+		else
+		    log_error(errflags, "could not join project \"%s\"",
+			resultp->pj_name);
+		break;
+	    case SETPROJ_ERR_POOL:
+		if (errno == EACCES)
+		    log_error(errflags, "no resource pool accepting "
+			    "default bindings exists for project \"%s\"",
+			    resultp->pj_name);
+		else if (errno == ESRCH)
+		    log_error(errflags, "specified resource pool does "
+			    "not exist for project \"%s\"", resultp->pj_name);
+		else
+		    log_error(errflags, "could not bind to default "
+			    "resource pool for project \"%s\"", resultp->pj_name);
+		break;
+	    default:
+		if (errval <= 0) {
+		    log_error(errflags, "setproject failed for project \"%s\"",
+			resultp->pj_name);
+		} else {
+		    log_error(errflags, "warning, resource control assignment "
+			"failed for project \"%s\"", resultp->pj_name);
+		}
+	    }
+	}
+    } else {
+	log_error(errflags, "getdefaultproj() error: %s", strerror(errno));
+    }
+    endprojent();
+}
+#endif /* HAVE_PROJECT_H */
+
 static void
 runas_setup()
 {
@@ -558,6 +622,9 @@ runas_setup()
 
     if (runas_pw->pw_name != NULL) {
 	gid = runas_gr ? runas_gr->gr_gid : runas_pw->pw_gid;
+#ifdef HAVE_PROJECT_H
+	set_project(runas_pw);
+#endif
 #ifdef HAVE_GETUSERATTR
 	aix_prep_user(runas_pw->pw_name, user_ttypath);
 #endif
