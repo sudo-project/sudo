@@ -66,6 +66,10 @@
 #ifdef HAVE_LOGIN_CAP_H
 # include <login_cap.h>
 #endif
+#ifdef HAVE_PROJECT_H
+# include <project.h>
+# include <sys/task.h>
+#endif
 #ifdef HAVE_SELINUX
 # include <selinux/selinux.h>
 #endif
@@ -637,6 +641,68 @@ disable_coredumps(void)
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
 }
 
+#ifdef HAVE_PROJECT_H
+static void
+set_project(struct passwd *pw)
+{
+    struct project proj;
+    char buf[PROJECT_BUFSZ];
+    int errval;
+
+    /*
+     * Collect the default project for the user and settaskid
+     */
+    setprojent();
+    if (getdefaultproj(pw->pw_name, &proj, buf, sizeof(buf)) != NULL) {
+	errval = setproject(proj.pj_name, pw->pw_name, TASK_NORMAL);
+	switch(errval) {
+	case 0:
+	    break;
+	case SETPROJ_ERR_TASK:
+	    switch (errno) {
+	    case EAGAIN:
+		warningx("resource control limit has been reached");
+		break;
+	    case ESRCH:
+		warningx("user \"%s\" is not a member of project \"%s\"",
+		    pw->pw_name, proj.pj_name);
+		break;
+	    case EACCES:
+		warningx("the invoking task is final");
+		break;
+	    default:
+		warningx("could not join project \"%s\"", proj.pj_name);
+	    }
+	case SETPROJ_ERR_POOL:
+	    switch (errno) {
+	    case EACCES:
+		warningx("no resource pool accepting default bindings "
+		    "exists for project \"%s\"", proj.pj_name);
+		break;
+	    case ESRCH:
+		warningx("specified resource pool does not exist for "
+		    "project \"%s\"", proj.pj_name);
+		break;
+	    default:
+		warningx("could not bind to default resource pool for "
+		    "project \"%s\"", proj.pj_name);
+	    }
+	    break;
+	default:
+	    if (errval <= 0) {
+		warningx("setproject failed for project \"%s\"", proj.pj_name);
+	    } else {
+		warningx("warning, resource control assignment failed for "
+		    "project \"%s\"", proj.pj_name);
+	    }
+	}
+    } else {
+	warning("getdefaultproj");
+    }
+    endprojent();
+}
+#endif /* HAVE_PROJECT_H */
+
 /*
  * Setup the execution environment immediately prior to the call to execve()
  * Returns TRUE on success and FALSE on failure.
@@ -671,6 +737,9 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 #endif
 
     if (pw != NULL) {
+#ifdef HAVE_PROJECT_H
+	set_project(pw);
+#endif
 #ifdef HAVE_GETUSERATTR
 	aix_prep_user(pw->pw_name, ptyname ? ptyname : user_details.tty);
 #endif
