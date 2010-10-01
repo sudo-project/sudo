@@ -556,56 +556,59 @@ static void
 set_project(pw)
     struct passwd *pw;
 {
-    int errflags = NO_MAIL|MSG_ONLY|NO_EXIT;
-    int errval;
     struct project proj;
-    struct project *resultp = '\0';
-    char buf[1024];
+    char buf[PROJECT_BUFSZ];
+    int errval;
 
     /*
      * Collect the default project for the user and settaskid
      */
     setprojent();
-    if (resultp = getdefaultproj(pw->pw_name, &proj, buf, sizeof(buf))) {
-	errval = setproject(resultp->pj_name, pw->pw_name, TASK_NORMAL);
-	if (errval != 0) {
-	    switch(errval) {
-	    case SETPROJ_ERR_TASK:
-		if (errno == EAGAIN)
-		    log_error(errflags, "resource control limit has been reached");
-		else if (errno == ESRCH)
-		    log_error(errflags, "user \"%s\" is not a member of "
-			"project \"%s\"", pw->pw_name, resultp->pj_name);
-		else if (errno == EACCES)
-		    log_error(errflags, "the invoking task is final");
-		else
-		    log_error(errflags, "could not join project \"%s\"",
-			resultp->pj_name);
+    if (getdefaultproj(pw->pw_name, &proj, buf, sizeof(buf)) != NULL) {
+	errval = setproject(proj.pj_name, pw->pw_name, TASK_NORMAL);
+	switch(errval) {
+	case 0:
+	    break;
+	case SETPROJ_ERR_TASK:
+	    switch (errno) {
+	    case EAGAIN:
+		warningx("resource control limit has been reached");
 		break;
-	    case SETPROJ_ERR_POOL:
-		if (errno == EACCES)
-		    log_error(errflags, "no resource pool accepting "
-			    "default bindings exists for project \"%s\"",
-			    resultp->pj_name);
-		else if (errno == ESRCH)
-		    log_error(errflags, "specified resource pool does "
-			    "not exist for project \"%s\"", resultp->pj_name);
-		else
-		    log_error(errflags, "could not bind to default "
-			    "resource pool for project \"%s\"", resultp->pj_name);
+	    case ESRCH:
+		warningx("user \"%s\" is not a member of project \"%s\"",
+		    pw->pw_name, proj.pj_name);
+		break;
+	    case EACCES:
+		warningx("the invoking task is final");
 		break;
 	    default:
-		if (errval <= 0) {
-		    log_error(errflags, "setproject failed for project \"%s\"",
-			resultp->pj_name);
-		} else {
-		    log_error(errflags, "warning, resource control assignment "
-			"failed for project \"%s\"", resultp->pj_name);
-		}
+		warningx("could not join project \"%s\"", proj.pj_name);
+	    }
+	case SETPROJ_ERR_POOL:
+	    switch (errno) {
+	    case EACCES:
+		warningx("no resource pool accepting default bindings "
+		    "exists for project \"%s\"", proj.pj_name);
+		break;
+	    case ESRCH:
+		warningx("specified resource pool does not exist for "
+		    "project \"%s\"", proj.pj_name);
+		break;
+	    default:
+		warningx("could not bind to default resource pool for "
+		    "project \"%s\"", proj.pj_name);
+	    }
+	    break;
+	default:
+	    if (errval <= 0) {
+		warningx("setproject failed for project \"%s\"", proj.pj_name);
+	    } else {
+		warningx("warning, resource control assignment failed for "
+		    "project \"%s\"", proj.pj_name);
 	    }
 	}
     } else {
-	log_error(errflags, "getdefaultproj() error: %s", strerror(errno));
+	warning("getdefaultproj");
     }
     endprojent();
 }
