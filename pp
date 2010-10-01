@@ -1,6 +1,6 @@
 #!/bin/sh
 # (c) 2010 Quest Software, Inc. All rights reserved
-pp_revision="20100917"
+pp_revision="291"
  # Copyright 2010 Quest Software, Inc.  All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -2753,6 +2753,7 @@ pp_backend_solaris_init () {
 	pp_solaris_category=
 	pp_solaris_istates="s S 1 2 3"	# run-states when install is ok
 	pp_solaris_rstates="s S 1 2 3"	# run-states when remove is ok
+	pp_solaris_maxinst=
 	pp_solaris_vendor=
 	pp_solaris_copyright=
 	pp_solaris_name=
@@ -2982,6 +2983,8 @@ pp_backend_solaris () {
 	  echo "RSTATES=$pp_solaris_rstates" >> $pkginfo
 	test -n "$pp_solaris_istates" &&
 	  echo "ISTATES=$pp_solaris_istates" >> $pkginfo
+	test -n "$pp_solaris_maxinst" &&
+	  echo "MAXINST=$pp_solaris_maxinst" >> $pkginfo
 	test -n "${pp_solaris_vendor:-$vendor}" &&
 	  echo "VENDOR=${pp_solaris_vendor:-$vendor}" >> $pkginfo
 
