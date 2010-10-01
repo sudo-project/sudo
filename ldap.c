@@ -116,6 +116,11 @@
 #define SUDO_LDAP_SSL		1
 #define SUDO_LDAP_STARTTLS	2
 
+struct ldap_result_list {
+    struct ldap_result_list *next;
+    LDAPMessage *result;
+};
+
 struct ldap_config_table {
     const char *conf_str;	/* config file string */
     short type;			/* CONF_BOOL, CONF_INT, CONF_STR */
@@ -1865,12 +1870,13 @@ sudo_ldap_lookup(nss, ret, pwflag)
 {
     struct ldap_config_list_str *base;
     LDAP *ld = (LDAP *) nss->handle;
-    LDAPMessage *entry, *result;
+    LDAPMessage *entry, *result, *matching_entry = NULL;
     char *filt;
-    int do_netgr, rc, matched;
+    int do_netgr, rc, allowed = UNSPEC;
     int setenv_implied;
     int ldap_user_matches = FALSE, ldap_host_matches = FALSE;
     struct passwd *pw = list_pw ? list_pw : sudo_user.pw;
+    struct ldap_result_list *rl, *results = NULL;
 
     if (ld == NULL)
 	return(ret);
@@ -1880,7 +1886,7 @@ sudo_ldap_lookup(nss, ret, pwflag)
 	enum def_tupple pwcheck = 
 	    (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
 
-	for (matched = 0, do_netgr = 0; !matched && do_netgr < 2; do_netgr++) {
+	for (allowed = 0, do_netgr = 0; !allowed && do_netgr < 2; do_netgr++) {
 	    filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1(pw);
 	    for (base = ldap_conf.base; base != NULL; base = base->next) {
 		result = NULL;
@@ -1904,7 +1910,7 @@ sudo_ldap_lookup(nss, ret, pwflag)
 			if (user_uid == 0 || list_pw == NULL ||
 			    user_uid == list_pw->pw_uid ||
 			    sudo_ldap_check_command(ld, entry, NULL)) {
-			    matched = 1;
+			    allowed = 1;
 			    break;	/* end foreach */
 			}
 		    }
@@ -1913,7 +1919,7 @@ sudo_ldap_lookup(nss, ret, pwflag)
 	    }
 	    efree(filt);
 	}
-	if (matched || user_uid == 0) {
+	if (allowed || user_uid == 0) {
 	    SET(ret, VALIDATE_OK);
 	    CLR(ret, VALIDATE_NOT_OK);
 	    if (def_authenticate) {
@@ -1952,10 +1958,10 @@ sudo_ldap_lookup(nss, ret, pwflag)
      * try to match them against the username.
      */
     setenv_implied = FALSE;
-    for (matched = 0, do_netgr = 0; !matched && do_netgr < 2; do_netgr++) {
+    for (do_netgr = 0; allowed != FALSE && do_netgr < 2; do_netgr++) {
 	filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1(pw);
 	DPRINTF(("ldap search '%s'", filt), 1);
-	for (base = ldap_conf.base; base != NULL; base = base->next) {
+	for (base = ldap_conf.base; allowed != FALSE && base != NULL; base = base->next) {
 	    result = NULL;
 	    rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE, filt,
 		NULL, 0, NULL, NULL, NULL, 0, &result);
@@ -1963,6 +1969,12 @@ sudo_ldap_lookup(nss, ret, pwflag)
 		DPRINTF(("nothing found for '%s'", filt), 1);
 		continue;
 	    }
+
+	    /* Add result to list for later free()ing. */
+	    rl = emalloc(sizeof(*rl));
+	    rl->result = result;
+	    rl->next = results;
+	    results = rl;
 
 	    /* parse each entry returned from this most recent search */
 	    LDAP_FOREACH(entry, ld, result) {
@@ -1983,33 +1995,45 @@ sudo_ldap_lookup(nss, ret, pwflag)
 		    ) {
 		    /* We have a match! */
 		    DPRINTF(("Command %sallowed", rc == TRUE ? "" : "NOT "), 1);
-		    matched = TRUE;
-		    if (rc == TRUE) {
-			/* pick up any options */
-			if (setenv_implied)
-			    def_setenv = TRUE;
-			sudo_ldap_parse_options(ld, entry);
-#ifdef HAVE_SELINUX
-			/* Set role and type if not specified on command line. */
-			if (user_role == NULL)
-			    user_role = def_role;
-			if (user_type == NULL)
-			    user_type = def_type;
-#endif /* HAVE_SELINUX */
-			/* make sure we don't reenter loop */
-			SET(ret, VALIDATE_OK);
-			CLR(ret, VALIDATE_NOT_OK);
-		    } else {
-			SET(ret, VALIDATE_NOT_OK);
-			CLR(ret, VALIDATE_OK);
+		    if (rc == FALSE) {
+			/* Command explicitly denied, we are done. */
+			allowed = FALSE;
+			break;
+		    } else if (rc == TRUE && allowed == UNSPEC) {
+			/* Command allowed, no other matches yet. */
+			allowed = TRUE;
+			matching_entry = entry;
 		    }
-		    /* break from inside for loop */
-		    break;
 		}
 	    }
-	    ldap_msgfree(result);
 	}
 	efree(filt);
+    }
+    if (allowed == TRUE) {
+	SET(ret, VALIDATE_OK);
+	CLR(ret, VALIDATE_NOT_OK);
+
+	/* Set options based on matching entry. */
+	if (setenv_implied)
+	    def_setenv = TRUE;
+	sudo_ldap_parse_options(ld, matching_entry);
+#ifdef HAVE_SELINUX
+	/* Set role and type if not specified on command line. */
+	if (user_role == NULL)
+	    user_role = def_role;
+	if (user_type == NULL)
+	    user_type = def_type;
+#endif /* HAVE_SELINUX */
+    } else if (allowed == FALSE) {
+	SET(ret, VALIDATE_NOT_OK);
+	CLR(ret, VALIDATE_OK);
+    }
+
+    /* Free all results. */
+    while ((rl = results) != NULL) {
+	results = results->next;
+	ldap_msgfree(rl->result);
+	efree(rl);
     }
 
 done:
