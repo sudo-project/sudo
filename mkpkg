@@ -186,6 +186,9 @@ case "$platform" in
 		--with-secure-path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/X11R6/bin"
 	;;
     *)
+	case "$platform" in
+	    sol*) configure_opts="${configure_opts}${configure_opts+$tab}--with-project";;
+	esac
 	if test "$flavor" = "ldap"; then
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap"
 	fi
