@@ -246,6 +246,7 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
 	zero_bytes(fdsw, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
 	zero_bytes(fdsr, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
 
+	FD_SET(signal_pipe[0], fdsr);
 	FD_SET(sv[0], fdsr);
 	if (!tq_empty(&sigfwd_list))
 	    FD_SET(sv[0], fdsw);
