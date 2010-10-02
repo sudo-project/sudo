@@ -36,24 +36,24 @@
 
 #include "missing.h"
 
-#if !defined(TIOCGSIZE) && defined(TIOCGWINSZ)
-# define TIOCGSIZE	TIOCGWINSZ
-# define ttysize	winsize
-# define ts_cols	ws_col
-# define ts_lines	ws_row
+/* Compatibility with older tty systems. */
+#if !defined(TIOCGWINSZ) && defined(TIOCGSIZE)
+# define TIOCGWINSZ	TIOCGSIZE
+# define winsize	ttysize
+# define ws_cols	ts_col
 #endif
 
 void
 get_ttysize(int *linep, int *colp)
 {
     char *p;
-#ifdef TIOCGSIZE
-    struct ttysize win;
+#ifdef TIOCGWINSZ
+    struct winsize wsize;
 
-    if (ioctl(STDERR_FILENO, TIOCGSIZE, &win) == 0 &&
-	win.ts_lines != 0 && win.ts_cols  != 0) {
-	*linep = win.ts_lines;
-	*colp = win.ts_cols;
+    if (ioctl(STDERR_FILENO, TIOCGWINSZ, &wsize) == 0 &&
+	wsize.ws_lines != 0 && wsize.ws_cols  != 0) {
+	*linep = wsize.ws_lines;
+	*colp = wsize.ws_cols;
 	return;
     }
 #endif

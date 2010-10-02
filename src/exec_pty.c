@@ -70,11 +70,11 @@
 #define TERM_RAW	1
 
 /* Compatibility with older tty systems. */
-#if !defined(TIOCGSIZE) && defined(TIOCGWINSZ)
-# define TIOCGSIZE	TIOCGWINSZ
-# define TIOCSSIZE	TIOCSWINSZ
-# define ttysize	winsize
-# define ts_cols	ws_col
+#if !defined(TIOCGWINSZ) && defined(TIOCGSIZE)
+# define TIOCGWINSZ	TIOCGSIZE
+# define TIOCSWINSZ	TIOCSSIZE
+# define winsize	ttysize
+# define ws_cols	ts_col
 #endif
 
 struct io_buffer {
@@ -1143,12 +1143,12 @@ exec_pty(struct command_details *details, char *argv[], char *envp[])
 static void
 sync_ttysize(int src, int dst)
 {
-#ifdef TIOCGSIZE
-    struct ttysize tsize;
+#ifdef TIOCGWINSZ
+    struct winsize wsize;
     pid_t pgrp;
 
-    if (ioctl(src, TIOCGSIZE, &tsize) == 0) {
-	    ioctl(dst, TIOCSSIZE, &tsize);
+    if (ioctl(src, TIOCGWINSZ, &wsize) == 0) {
+	    ioctl(dst, TIOCSWINSZ, &wsize);
 	    if ((pgrp = tcgetpgrp(dst)) != -1)
 		killpg(pgrp, SIGWINCH);
     }
