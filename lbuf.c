@@ -54,10 +54,11 @@
 #include "sudo.h"
 #include "lbuf.h"
 
-#if !defined(TIOCGSIZE) && defined(TIOCGWINSZ)
-# define TIOCGSIZE	TIOCGWINSZ
-# define ttysize	winsize
-# define ts_cols	ws_col
+/* Compatibility with older tty systems. */
+#if !defined(TIOCGWINSZ) && defined(TIOCGSIZE)
+# define TIOCGWINSZ	TIOCGSIZE
+# define winsize	ttysize
+# define ws_cols	ts_col
 #endif
 
 int
@@ -65,11 +66,11 @@ get_ttycols()
 {
     char *p;
     int cols;
-#ifdef TIOCGSIZE
-    struct ttysize win;
+#ifdef TIOCGWINSZ
+    struct winsize wsize;
 
-    if (ioctl(STDERR_FILENO, TIOCGSIZE, &win) == 0 && win.ts_cols != 0)
-	return((int)win.ts_cols);
+    if (ioctl(STDERR_FILENO, TIOCGWINSZ, &wsize) == 0 && wsize.ws_cols != 0)
+	return((int)wsize.ws_cols);
 #endif
 
     /* Fall back on $COLUMNS. */
