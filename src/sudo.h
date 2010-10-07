@@ -189,7 +189,7 @@ extern int tgetpass_flags;
 int get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid);
 
 /* ttysize.c */
-void get_ttysize(int *linep, int *colp);
+void get_ttysize(int *rowp, int *colp);
 
 /* sudo.c */
 int exec_setup(struct command_details *details, const char *ptyname, int ptyfd);

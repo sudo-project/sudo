@@ -40,27 +40,28 @@
 #if !defined(TIOCGWINSZ) && defined(TIOCGSIZE)
 # define TIOCGWINSZ	TIOCGSIZE
 # define winsize	ttysize
-# define ws_cols	ts_col
+# define ws_col		ts_cols
+# define ws_row		ts_lines
 #endif
 
 void
-get_ttysize(int *linep, int *colp)
+get_ttysize(int *rowp, int *colp)
 {
     char *p;
 #ifdef TIOCGWINSZ
     struct winsize wsize;
 
     if (ioctl(STDERR_FILENO, TIOCGWINSZ, &wsize) == 0 &&
-	wsize.ws_lines != 0 && wsize.ws_cols  != 0) {
-	*linep = wsize.ws_lines;
-	*colp = wsize.ws_cols;
+	wsize.ws_row != 0 && wsize.ws_col  != 0) {
+	*rowp = wsize.ws_row;
+	*colp = wsize.ws_col;
 	return;
     }
 #endif
 
     /* Fall back on $LINES and $COLUMNS. */
-    if ((p = getenv("LINES")) == NULL || (*linep = atoi(p)) <= 0)
-	*linep = 24;
+    if ((p = getenv("LINES")) == NULL || (*rowp = atoi(p)) <= 0)
+	*rowp = 24;
     if ((p = getenv("COLUMNS")) == NULL || (*colp = atoi(p)) <= 0)
 	*colp = 80;
 }
