@@ -76,7 +76,7 @@
 # define TIOCGWINSZ	TIOCGSIZE
 # define TIOCSWINSZ	TIOCSSIZE
 # define winsize	ttysize
-# define ws_cols	ts_col
+# define ws_col		ts_cols
 #endif
 
 struct io_buffer {

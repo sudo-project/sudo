@@ -58,7 +58,7 @@
 #if !defined(TIOCGWINSZ) && defined(TIOCGSIZE)
 # define TIOCGWINSZ	TIOCGSIZE
 # define winsize	ttysize
-# define ws_cols	ts_col
+# define ws_col		ts_cols
 #endif
 
 int
@@ -69,8 +69,8 @@ get_ttycols()
 #ifdef TIOCGWINSZ
     struct winsize wsize;
 
-    if (ioctl(STDERR_FILENO, TIOCGWINSZ, &wsize) == 0 && wsize.ws_cols != 0)
-	return((int)wsize.ws_cols);
+    if (ioctl(STDERR_FILENO, TIOCGWINSZ, &wsize) == 0 && wsize.ws_col != 0)
+	return((int)wsize.ws_col);
 #endif
 
     /* Fall back on $COLUMNS. */
