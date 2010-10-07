@@ -205,7 +205,7 @@ static void
 update_timestamp(char *timestampdir, char *timestampfile)
 {
     /* If using tty timestamps but we have no tty there is nothing to do. */
-    if (timestampfile && !user_ttypath)
+    if (def_tty_tickets && !user_ttypath)
 	return;
 
     if (timestamp_uid != 0)
@@ -525,7 +525,7 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
     if (timestampfile && status != TS_ERROR) {
 	if (status != TS_MISSING)
 	    status = TS_NOFILE;			/* dir there, file missing */
-	if (!user_ttypath)
+	if (def_tty_tickets && !user_ttypath)
 	    goto done;				/* no tty, always prompt */
 	if (lstat(timestampfile, &sb) == 0) {
 	    if (!S_ISREG(sb.st_mode)) {
