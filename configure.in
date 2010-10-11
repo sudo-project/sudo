@@ -2668,6 +2668,7 @@ fi
 #
 case "$lt_cv_dlopen" in
     dlopen)
+	AC_DEFINE(HAVE_DLOPEN)
 	SUDOERS_OBJS="$SUDOERS_OBJS plugin_error.lo"
 	LT_STATIC="--tag=disable-static"
 	;;
@@ -2675,15 +2676,16 @@ case "$lt_cv_dlopen" in
 	AC_DEFINE(HAVE_SHL_LOAD)
 	SUDOERS_OBJS="$SUDOERS_OBJS plugin_error.lo"
 	LT_STATIC="--tag=disable-static"
+	AC_LIBOBJ(dlopen)
 	;;
-    no)
+    *)
 	# Preload sudoers module symbols
 	SUDO_OBJS="${SUDO_OBJS} preload.o"
 	SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
 	LT_STATIC=""
+	AC_LIBOBJ(dlopen)
 	;;
 esac
-AC_REPLACE_FUNCS(dlopen)
 
 #
 # Add library needed for dynamic loading, if any.
@@ -2847,6 +2849,7 @@ AH_TEMPLATE(HAVE_DD_FD, [Define to 1 if your `DIR' contains dd_fd.])
 AH_TEMPLATE(HAVE_DIRFD, [Define to 1 if you have the `dirfd' function or macro.])
 AH_TEMPLATE(HAVE_DGETTEXT, [Define to 1 if you have the `dgettext' function.])
 AH_TEMPLATE(HAVE_DISPCRYPT, [Define to 1 if you have the `dispcrypt' function.])
+AH_TEMPLATE(HAVE_DLOPEN, [Define to 1 if you have the `dlopen' function.])
 AH_TEMPLATE(HAVE_EXTENDED_GLOB, [Define to 1 if your glob.h defines the GLOB_BRACE and GLOB_TILDE flags.])
 AH_TEMPLATE(HAVE_FCNTL_CLOSEM, [Define to 1 if your system has the F_CLOSEM fcntl.])
 AH_TEMPLATE(HAVE_FNMATCH, [Define to 1 if you have the `fnmatch' function.])
