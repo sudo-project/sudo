@@ -1480,7 +1480,9 @@ case "$host" in
 
 		if test -z "$GCC"; then
 		    # HP-UX bundled compiler can't generate shared objects
-		    test -z "$pic_flag" && with_noexec=no
+		    if test "x$ac_cv_prog_cc_c89" = "xno"; then
+			with_noexec=no
+		    fi
 
 		    # Use the +DAportable flag on hppa if it is supported
 		    case "$host_cpu" in
