@@ -147,9 +147,9 @@ pam_verify(pw, prompt, auth)
 		case PAM_SUCCESS:
 		    return(AUTH_SUCCESS);
 		case PAM_AUTH_ERR:
-		    log_error(NO_EXIT|NO_MAIL, "pam_acct_mgmt: %d",
-			*pam_status);
-		    return(AUTH_FAILURE);
+		    log_error(NO_EXIT|NO_MAIL,
+			"account validation failure, is your account locked?");
+		    return(AUTH_FATAL);
 		case PAM_NEW_AUTHTOK_REQD:
 		    log_error(NO_EXIT|NO_MAIL, "%s, %s",
 			"Account or password is expired",
