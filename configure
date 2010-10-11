@@ -12889,9 +12889,7 @@ done
 
 		if test -z "$GCC"; then
 		    # HP-UX bundled compiler can't generate shared objects
-		    if -z "$pic_flag"; then
-			with_noexec=no
-		    fi
+		    test -z "$pic_flag" && with_noexec=no
 
 		    # Use the +DAportable flag on hppa if it is supported
 		    case "$host_cpu" in
