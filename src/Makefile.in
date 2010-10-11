@@ -36,8 +36,8 @@ LIBTOOL = @LIBTOOL@ @LT_STATIC@
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 
 # Libraries
-LIBS = @LIBS@ @SUDO_LIBS@ @GETGROUPS_LIB@ @NET_LIBS@ \
-       $(top_builddir)/common/libcommon.la $(LIBOBJDIR)libreplace.la
+LT_LIBS = $(top_builddir)/common/libcommon.la $(LIBOBJDIR)libreplace.la
+LIBS = @LIBS@ @SUDO_LIBS@ @GETGROUPS_LIB@ @NET_LIBS@ $(LT_LIBS)
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) -I. @CPPFLAGS@
@@ -94,7 +94,7 @@ all: $(PROGS)
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 
-sudo: $(OBJS)
+sudo: $(OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS) $(LDFLAGS) $(LIBS) -static-libtool-libs
 
 libsudo_noexec.la: sudo_noexec.lo
