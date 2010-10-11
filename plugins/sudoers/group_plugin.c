@@ -178,6 +178,12 @@ group_plugin_query(const char *user, const char *group,
  * No loadable shared object support.
  */
 
+#ifndef FALSE
+#define FALSE	0
+#endif
+
+struct passwd;
+
 int
 group_plugin_load(char *plugin_info)
 {
