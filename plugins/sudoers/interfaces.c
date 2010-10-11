@@ -80,7 +80,7 @@ set_interfaces(const char *ai)
 	    }
 	} else {
 	    /* IPv4 */
-	    ifp->family = AF_INET6;
+	    ifp->family = AF_INET;
 	    ifp->addr.ip4.s_addr = inet_addr(addr);
 	    ifp->netmask.ip4.s_addr = inet_addr(mask);
 	    if (ifp->addr.ip4.s_addr == (in_addr_t)-1 ||
