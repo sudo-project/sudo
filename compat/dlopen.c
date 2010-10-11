@@ -100,12 +100,12 @@ struct sudo_preload_table {
     const char *name;
     void *address;
 };
-extern sudo_preload_table;
+extern struct sudo_preload_table sudo_preload_table[];
 
 void *
 dlopen(const char *path, int mode)
 {
-    return path;
+    return (void *)path;
 }
 
 int
