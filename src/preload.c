@@ -24,7 +24,7 @@ extern struct io_plugin sudoers_io;
 struct sudo_preload_table {
     const char *name;
     void *address;
-} sudo_preload_table = {
+} sudo_preload_table[] = {
     { "sudoers_policy", (void *) &sudoers_policy},
     { "sudoers_io", (void *) &sudoers_io},
     { NULL, NULL }
