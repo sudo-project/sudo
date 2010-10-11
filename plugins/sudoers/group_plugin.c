@@ -43,7 +43,7 @@
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#ifdef HAVE_DLFCN_H
+#ifdef HAVE_DLOPEN
 # include <dlfcn.h>
 #else
 # include "compat/dlfcn.h"

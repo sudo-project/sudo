@@ -37,7 +37,7 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_DLFCN_H
+#ifdef HAVE_DLOPEN
 # include <dlfcn.h>
 #else
 # include "compat/dlfcn.h"
