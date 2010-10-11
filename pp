@@ -1,6 +1,6 @@
 #!/bin/sh
 # (c) 2010 Quest Software, Inc. All rights reserved
-pp_revision="291"
+pp_revision="293"
  # Copyright 2010 Quest Software, Inc.  All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -2249,11 +2249,21 @@ pp_sd_write_files () {
     while read t m o g f p st; do
         line="                file"
         case "$f" in *v*) line="$line -v";; esac    # FIXME for uninstall
-        case $t in
-            f) dm=644;;
-            d) line="$line -t d"; p=${p%/}; dm=755;;
-            s) line="$line -t s";;
-        esac
+	case ${pp_sd_os} in
+	    10.*)
+		case $t in
+		    f) dm=644;;
+		    d) p=${p%/}; dm=755;;
+		esac
+		;;
+	    *)
+		case $t in
+		    f) dm=644;;
+		    d) line="$line -t d"; p=${p%/}; dm=755;;
+		    s) line="$line -t s";;
+		esac
+		;;
+	esac
 
         test x"$o" = x"-" && o=root
         test x"$g" = x"-" && g=sys
@@ -2439,10 +2449,15 @@ pp_sd_service_script () {
 
 pp_sd_make_service () {
         typeset level startpriority stoppriority startlevels stoplevels
-        typeset svc svcvar
+        typeset svc svcvar symtype
 
         svc="$1"
 	svcvar=`pp_makevar $svc`
+
+	case ${pp_sd_os} in
+	    10.*) symtype="file";;
+	    *) symtype="file -t s";;
+	esac
 
         # TODO: Figure out why this check is here
         #-- don't do anything if the script exists
@@ -2487,12 +2502,12 @@ pp_sd_make_service () {
 
         # create the symlinks
         test -z "$startlevels" || for level in $startlevels; do
-            echo "                file -t s" \
+            echo "                ${symtype}" \
                     "/sbin/init.d/$svc" \
                     "/sbin/rc$level.d/S$startpriority$svc"
         done
         test -z "$stoplevels" || for level in $stoplevels; do
-            echo "                file -t s" \
+            echo "                ${symtype}" \
                     "/sbin/init.d/$svc" \
                     "/sbin/rc$level.d/K$stoppriority$svc"
         done
@@ -2514,9 +2529,10 @@ pp_sd_control () {
 }
 
 pp_backend_sd () {
-    typeset psf cpt svc outfile
+    typeset psf cpt svc outfile release swp_flags
 
     psf=$pp_wrkdir/psf
+    release="?.${pp_sd_os%.[0-9][0-9]}.*"
 
     echo "depot" > $psf
     echo "layout_version 1.0" >>$psf
@@ -2537,7 +2553,7 @@ pp_backend_sd () {
             copyright       "$copyright"
             machine_type    *
             os_name         HP-UX
-            os_release      ?.11.*
+            os_release      $release
             os_version      ?
             directory       /
             is_locatable    false
@@ -2618,10 +2634,15 @@ pp_backend_sd () {
     test -s $pp_wrkdir/%fixup && . $pp_wrkdir/%fixup
 
     outfile=`pp_backend_sd_names`
-    if pp_verbose ${pp_sd_sudo} /usr/sbin/swpackage \
-        -s $psf \
-        -x run_as_superuser=false \
-        -x media_type=tape \
+    case ${pp_sd_os} in
+	10.*)
+	    swp_flags="-x target_type=tape"
+	    ;;
+	*)
+	    swp_flags="-x media_type=tape -x run_as_superuser=false"
+	    ;;
+    esac
+    if pp_verbose ${pp_sd_sudo} /usr/sbin/swpackage -s $psf $swp_flags \
         @ $pp_wrkdir/$outfile
     then
         pp_verbose ${pp_sd_sudo} /usr/sbin/swlist -l file -s $pp_wrkdir/$outfile
@@ -3714,11 +3735,24 @@ pp_deb_detect_arch () {
    pp_deb_arch_std=`uname -m`
 }
 
+pp_deb_sanitize_version() {
+    echo "$@" | tr -d -c '[:alnum:].+-:~'
+}
+
+pp_deb_version_final() {
+    if test -n "$pp_deb_version"; then
+        # Don't sanitize; assume the user is sane (hah!)
+        echo "$pp_deb_version"
+    else
+        pp_deb_sanitize_version "$version"
+    fi
+}
+
 pp_deb_make_control() {
     package_name=`pp_deb_cmp_full_name "$1"`
     cat <<-.
 	Package: ${package_name}
-	Version: ${pp_deb_version:-$version}-${pp_deb_release:-1}
+	Version: `pp_deb_version_final`-${pp_deb_release:-1}
 	Section: ${pp_deb_section:-contrib}
 	Priority: optional
 	Architecture: ${pp_deb_arch}
@@ -3945,7 +3979,7 @@ pp_backend_deb_cleanup () {
 
 pp_deb_name () {
     local cmp="${1:-run}"
-    echo `pp_deb_cmp_full_name $cmp`"_${pp_deb_version:-$version}-${pp_deb_release:-1}_${pp_deb_arch}.deb"
+    echo `pp_deb_cmp_full_name $cmp`"_"`pp_deb_version_final`"-${pp_deb_release:-1}_${pp_deb_arch}.deb"
 }
 pp_backend_deb_names () {
     for cmp in $pp_components
