@@ -52,19 +52,17 @@ void *
 dlopen(const char *path, int mode)
 {
     int flags = DYNAMIC_PATH;
-    shl_t handle;
 
     if (mode == 0)
 	mode = RTLD_LAZY;	/* default behavior */
 
+    /* We don't support RTLD_GLOBAL or RTLD_LOCAL yet. */
     if (ISSET(mode, RTLD_LAZY))
 	flags |= BIND_DEFERRED
     if (ISSET(mode, RTLD_NOW))
 	flags |= BIND_IMMEDIATE
 
-    /* We don't support RTLD_GLOBAL or RTLD_LOCAL yet. */
-
-    return (void *)handle;
+    return (void *)shl_load(path, flags, 0);
 }
 
 int
