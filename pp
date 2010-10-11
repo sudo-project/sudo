@@ -1,6 +1,6 @@
 #!/bin/sh
 # (c) 2010 Quest Software, Inc. All rights reserved
-pp_revision="293"
+pp_revision="294"
  # Copyright 2010 Quest Software, Inc.  All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -2639,7 +2639,7 @@ pp_backend_sd () {
 	    swp_flags="-x target_type=tape"
 	    ;;
 	*)
-	    swp_flags="-x media_type=tape -x run_as_superuser=false"
+	    swp_flags="-x media_type=tape"
 	    ;;
     esac
     if pp_verbose ${pp_sd_sudo} /usr/sbin/swpackage -s $psf $swp_flags \
