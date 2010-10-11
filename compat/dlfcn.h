@@ -14,11 +14,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifndef _DLFCN_H_
+#define _DLFCN_H_
+
 /* Emulated functions. */
 void *dlopen(const char *path, int mode);
 int dlclose(void *handle);
 void *dlsym(void *handle, const char *symbol);
-const char *dlerror(void);
+char *dlerror(void);
 
 /* Values for dlopen() mode. */
 #define RTLD_LAZY	0x1
