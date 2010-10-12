@@ -1863,9 +1863,7 @@ SUDO_PROG_BSHELL
 if test -z "$with_sendmail"; then
     SUDO_PROG_SENDMAIL
 fi
-if test -z "$with_editor"; then
-    SUDO_PROG_VI
-fi
+SUDO_PROG_VI
 dnl
 dnl Check for authpriv support in syslog
 dnl

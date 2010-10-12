@@ -13672,8 +13672,7 @@ $as_echo "not found" >&6; }
 fi
 
 fi
-if test -z "$with_editor"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for vi" >&5
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for vi" >&5
 $as_echo_n "checking for vi... " >&6; }
 found=no
 for editor in "/usr/bin/vi" "/bin/vi" "/usr/ucb/vi" "/usr/bsd/vi" "/usr/local/bin/vi"; do
@@ -13693,7 +13692,6 @@ if test X"$found" != X"yes"; then
 $as_echo "not found" >&6; }
 fi
 
-fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking which syslog facility sudo should log with" >&5
 $as_echo_n "checking which syslog facility sudo should log with... " >&6; }
 if test X"$with_logfac" = X""; then
