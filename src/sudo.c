@@ -76,6 +76,15 @@
 #ifdef HAVE_SETAUTHDB
 # include <usersec.h>
 #endif /* HAVE_SETAUTHDB */
+#if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
+# ifdef __hpux
+#  undef MAXINT
+#  include <hpsecurity.h>
+# else
+#  include <sys/security.h>
+# endif /* __hpux */
+# include <prot.h>
+#endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
 #include "sudo.h"
 #include "sudo_plugin.h"
@@ -130,6 +139,14 @@ main(int argc, char *argv[], char *envp[])
     if (argc > 0)
 	setprogname(argv[0]);
 #endif
+
+    /* Must be done before we do any password lookups */
+#if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
+    (void) set_auth_parameters(argc, argv);
+# ifdef HAVE_INITPRIVS
+    initprivs();
+# endif
+#endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
     if (geteuid() != 0)
 	errorx(1, "must be setuid root");

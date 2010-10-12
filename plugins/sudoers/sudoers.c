@@ -65,15 +65,6 @@
 #endif
 #include <netinet/in.h>
 #include <netdb.h>
-#if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
-# ifdef __hpux
-#  undef MAXINT
-#  include <hpsecurity.h>
-# else
-#  include <sys/security.h>
-# endif /* __hpux */
-# include <prot.h>
-#endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 #ifdef HAVE_LOGIN_CAP_H
 # include <login_cap.h>
 # ifndef LOGIN_DEFROOTCLASS
@@ -152,17 +143,9 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t plugin_printf, char * const settings[],
     char * const user_info[], char * const envp[])
 {
-    int sources = 0;
+    volatile int sources = 0;
     sigaction_t sa;
     struct sudo_nss *nss;
-
-    /* Must be done before we do any password lookups */
-#if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
-    (void) set_auth_parameters(Argc, Argv);
-# ifdef HAVE_INITPRIVS
-    initprivs();
-# endif
-#endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
     if (!sudo_conv)
 	sudo_conv = conversation;
@@ -297,8 +280,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     char **edit_argv = NULL;
     struct sudo_nss *nss;
     int cmnd_status = -1, validated;
-    int info_len = 0;
-    int rval = FALSE;
+    volatile int info_len = 0;
+    volatile int rval = FALSE;
 
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
