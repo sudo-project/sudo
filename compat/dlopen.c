@@ -58,11 +58,11 @@ dlopen(const char *path, int mode)
 
     /* We don't support RTLD_GLOBAL or RTLD_LOCAL yet. */
     if (ISSET(mode, RTLD_LAZY))
-	flags |= BIND_DEFERRED
+	flags |= BIND_DEFERRED;
     if (ISSET(mode, RTLD_NOW))
-	flags |= BIND_IMMEDIATE
+	flags |= BIND_IMMEDIATE;
 
-    return (void *)shl_load(path, flags, 0);
+    return (void *)shl_load(path, flags, 0L);
 }
 
 int
@@ -72,9 +72,9 @@ dlclose(void *handle)
 }
 
 void *
-dlsym(void *handle, const char *symbol)
+dlsym(void *vhandle, const char *symbol)
 {
-    shl_t handle;
+    shl_t handle = vhandle;
     void *value = NULL;
 
     (void)shl_findsym(&handle, symbol, TYPE_UNDEFINED, (void *)&value);
