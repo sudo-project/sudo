@@ -63,7 +63,13 @@ autoconf:
 	autoconf -I m4
 
 ChangeLog:
-	(cd $(srcdir) && test -d .hg && hg log --style=changelog -b default > $@)
+	if test -d $(srcdir)/.hg && cd $(srcdir); then \
+	    if hg log --style=changelog -b default > $@.tmp; then \
+		mv $@.tmp $@; \
+	    else \
+		rm -f $@.tmp; \
+	    fi; \
+	fi
 
 check:
 	@echo nothing to check
@@ -119,3 +125,5 @@ cleandir: distclean
 clobber: distclean
 
 realclean: distclean
+
+.PHONY: ChangeLog
