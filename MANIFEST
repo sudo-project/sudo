@@ -13,7 +13,6 @@ common/alloc.c
 common/atobool.c
 common/fileops.c
 common/fmt_string.c
-common/gettime.c
 common/lbuf.c
 common/list.c
 common/term.c
@@ -21,6 +20,8 @@ common/zero_bytes.c
 compat/Makefile.in
 compat/charclass.h
 compat/closefrom.c
+compat/dlfcn.h
+compat/dlopen.c
 compat/fnmatch.c
 compat/fnmatch.h
 compat/getcwd.c
@@ -37,8 +38,6 @@ compat/nanosleep.c
 compat/setenv.c
 compat/siglist.in
 compat/snprintf.c
-compat/strcasecmp.c
-compat/strerror.c
 compat/strlcat.c
 compat/strlcpy.c
 compat/strsignal.c
@@ -56,7 +55,10 @@ doc/LICENSE
 doc/Makefile.in
 doc/TROUBLESHOOTING
 doc/UPGRADE
+doc/history.pod
+doc/license.pod
 doc/sample.pam
+doc/sample.sudo.conf
 doc/sample.sudoers
 doc/sample.syslog.conf
 doc/schema.ActiveDirectory
@@ -105,6 +107,7 @@ plugins/sample/Makefile.in
 plugins/sample/sample_plugin.c
 plugins/sample_group/Makefile.in
 plugins/sample_group/getgrent.c
+plugins/sample_group/plugin_test.c
 plugins/sample_group/sample_group.c
 plugins/sudoers/Makefile.in
 plugins/sudoers/aixcrypt.exp
@@ -170,9 +173,9 @@ plugins/sudoers/redblack.h
 plugins/sudoers/set_perms.c
 plugins/sudoers/sudo_nss.c
 plugins/sudoers/sudo_nss.h
-plugins/sudoers/sudoers
 plugins/sudoers/sudoers.c
 plugins/sudoers/sudoers.h
+plugins/sudoers/sudoers.in
 plugins/sudoers/sudoers2ldif
 plugins/sudoers/sudoreplay.c
 plugins/sudoers/testsudoers.c
@@ -189,7 +192,9 @@ src/exec.c
 src/exec_pty.c
 src/get_pty.c
 src/load_plugins.c
+src/net_ifs.c
 src/parse_args.c
+src/preload.c
 src/selinux.c
 src/sesh.c
 src/sudo.c
