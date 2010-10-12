@@ -18,10 +18,16 @@
 #define _DLFCN_H_
 
 /* Emulated functions. */
-void *dlopen(const char *path, int mode);
-int dlclose(void *handle);
-void *dlsym(void *handle, const char *symbol);
-char *dlerror(void);
+void *sudo_dlopen(const char *path, int mode);
+int sudo_dlclose(void *handle);
+void *sudo_dlsym(void *handle, const char *symbol);
+char *sudo_dlerror(void);
+
+/* Map emulated functions to standard names. */
+#define dlopen(p, m)	sudo_dlopen(p, m)
+#define dlclose(h)	sudo_dlclose(h)
+#define dlsym(h, s)	sudo_dlsym(h, s)
+#define dlerror()	sudo_dlerror()
 
 /* Values for dlopen() mode. */
 #define RTLD_LAZY	0x1

@@ -49,7 +49,7 @@
 #endif
 
 void *
-dlopen(const char *path, int mode)
+sudo_dlopen(const char *path, int mode)
 {
     int flags = DYNAMIC_PATH;
 
@@ -66,13 +66,13 @@ dlopen(const char *path, int mode)
 }
 
 int
-dlclose(void *handle)
+sudo_dlclose(void *handle)
 {
     return shl_unload((shl_t)handle);
 }
 
 void *
-dlsym(void *vhandle, const char *symbol)
+sudo_dlsym(void *vhandle, const char *symbol)
 {
     shl_t handle = vhandle;
     void *value = NULL;
@@ -83,7 +83,7 @@ dlsym(void *vhandle, const char *symbol)
 }
 
 char *
-dlerror(void)
+sudo_dlerror(void)
 {
     return strerror(errno);
 }
@@ -101,19 +101,19 @@ struct sudo_preload_table {
 extern struct sudo_preload_table sudo_preload_table[];
 
 void *
-dlopen(const char *path, int mode)
+sudo_dlopen(const char *path, int mode)
 {
     return (void *)path;
 }
 
 int
-dlclose(void *handle)
+sudo_dlclose(void *handle)
 {
     return 0;
 }
 
 void *
-dlsym(void *handle, const char *symbol)
+sudo_dlsym(void *handle, const char *symbol)
 {
     struct sudo_preload_table *sym;
 
@@ -125,7 +125,7 @@ dlsym(void *handle, const char *symbol)
 }
 
 char *
-dlerror(void)
+sudo_dlerror(void)
 {
     return strerror(errno);
 }
