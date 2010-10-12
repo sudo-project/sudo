@@ -90,7 +90,7 @@ struct sudoersfile {
     int modified;
     int doedit;
 };
-TQ_DECLARE(sudoersfile);
+TQ_DECLARE(sudoersfile)
 
 /*
  * Function prototypes
