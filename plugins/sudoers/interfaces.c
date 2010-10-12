@@ -48,6 +48,10 @@
 #include "sudoers.h"
 #include "interfaces.h"
 
+#ifndef INADDR_NONE
+# define INADDR_NONE ((unsigned int)-1)
+#endif
+
 /*
  * Parse a space-delimited list of IP address/netmask pairs and
  * store in a list of interface structures.
@@ -83,8 +87,8 @@ set_interfaces(const char *ai)
 	    ifp->family = AF_INET;
 	    ifp->addr.ip4.s_addr = inet_addr(addr);
 	    ifp->netmask.ip4.s_addr = inet_addr(mask);
-	    if (ifp->addr.ip4.s_addr == (in_addr_t)-1 ||
-		ifp->netmask.ip4.s_addr == (in_addr_t)-1) {
+	    if (ifp->addr.ip4.s_addr == INADDR_NONE ||
+		ifp->netmask.ip4.s_addr == INADDR_NONE) {
 		efree(ifp);
 		continue;
 	    }
