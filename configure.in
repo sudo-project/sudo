@@ -1546,6 +1546,8 @@ case "$host" in
 			*-*-hpux10.*)
 			    shadow_funcs="getprpwnam iscomsec"
 			    shadow_libs="-lsec"
+			    # HP-UX 10.20 libc has an incompatible getline
+			    ac_cv_func_getline="no"
 			;;
 			*)
 			    shadow_funcs="getspnam iscomsec"
