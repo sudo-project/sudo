@@ -310,8 +310,12 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
 	    }
 	}
 
-	if (perform_io(fdsr, fdsw, cstat) != 0)
+	if (perform_io(fdsr, fdsw, cstat) != 0) {
+	    /* I/O error, kill child if still alive and finish. */
+	    schedule_signal(SIGKILL);
+	    forward_signals(sv[0]);
 	    break;
+	}
     }
 
     if (log_io) {
