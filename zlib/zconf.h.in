@@ -12,6 +12,8 @@
 #undef HAVE_UNISTD_H
 #undef HAVE_VSNPRINTF
 #undef HAVE_MEMCPY
+#undef _FILE_OFFSET_BITS
+#undef _LARGE_FILES
 #undef const
 
 /*
