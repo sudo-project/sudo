@@ -148,6 +148,10 @@ TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o
 
 LIB_OBJS = @LIBOBJS@
 
+ZLIB_OBJS = adler32.o compress.o crc32.o deflate.o gzclose.o gzlib.o \
+	    gzread.o gzwrite.o infback.o inffast.o inflate.o inftrees.o \
+	    trees.o uncompr.o zutil.o
+
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
@@ -189,13 +193,17 @@ libsudo.a: $(LIB_OBJS) $(COMMON_OBJS)
 	$(AR) rv $@ $(LIB_OBJS) $(COMMON_OBJS)
 	$(RANLIB) $@
 
-sudo: libsudo.a $(SUDO_OBJS)
+libz.a: $(ZLIB_OBJS)
+	$(AR) rv $@ $(ZLIB_OBJS)
+	$(RANLIB) $@
+
+sudo: libsudo.a @ZLIB_DEP@ $(SUDO_OBJS)
 	$(CC) -o $@ $(SUDO_OBJS) $(SUDO_LDFLAGS) -lsudo $(SUDO_LIBS) @ZLIB@
 
 visudo: libsudo.a $(VISUDO_OBJS)
 	$(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) -lsudo $(LIBS) $(NET_LIBS)
 
-sudoreplay: libsudo.a $(REPLAY_OBJS)
+sudoreplay: libsudo.a @ZLIB_DEP@ $(REPLAY_OBJS)
 	$(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) -lsudo $(LIBS) @ZLIB@
 
 testsudoers: $(TEST_OBJS)
@@ -237,7 +245,7 @@ $(devdir)/getdate.c: $(srcdir)/getdate.y
 siglist.c: mksiglist
 	./mksiglist > $@
 
-mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(srcdir)/missing.h $(top_builddir)/config.h
+mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(srcdir)/missing.h config.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/mksiglist.c -o $@
 
 @DEV@$(srcdir)/mksiglist.h: $(srcdir)/siglist.in
@@ -410,6 +418,38 @@ securid5.o: $(authdir)/securid5.c $(AUTHDEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/securid5.c
 sia.o: $(authdir)/sia.c $(AUTHDEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/sia.c
+
+# Zlib dependencies
+adler32.o: $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(srcdir)/zlib/adler32.c
+compress.o: $(srcdir)/zlib/zlib.h zlib/zconf.h
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(srcdir)/zlib/compress.c
+crc32.o: $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/crc32.h
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(srcdir)/zlib/crc32.c
+deflate.o: $(srcdir)/zlib/deflate.h $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(srcdir)/zlib/deflate.c
+gzclose.o: $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/gzguts.h
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(srcdir)/zlib/gzclose.c
+gzlib.o: $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/gzguts.h
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(srcdir)/zlib/gzlib.c
+gzread.o: $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/gzguts.h
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(srcdir)/zlib/gzread.c
+gzwrite.o: $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/gzguts.h
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(srcdir)/zlib/gzwrite.c
+infback.o: $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/inftrees.h $(srcdir)/zlib/inflate.h $(srcdir)/zlib/inffast.h $(srcdir)/zlib/inffixed.h
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(srcdir)/zlib/infback.c
+inffast.o: $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/inftrees.h $(srcdir)/zlib/inflate.h $(srcdir)/zlib/inffast.h
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(srcdir)/zlib/inffast.c
+inflate.o: $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/inftrees.h $(srcdir)/zlib/inflate.h $(srcdir)/zlib/inffast.h $(srcdir)/zlib/inffixed.h
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(srcdir)/zlib/inflate.c
+inftrees.o: $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/inftrees.h
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(srcdir)/zlib/inftrees.c
+trees.o: $(srcdir)/zlib/deflate.h $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/trees.h
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(srcdir)/zlib/trees.c
+uncompr.o: $(srcdir)/zlib/zlib.h zlib/zconf.h
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(srcdir)/zlib/uncompr.c
+zutil.o: $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(srcdir)/zlib/zutil.c
 
 @DEV@varsub: $(srcdir)/configure.in
 @DEV@	printf 's#@%s@#1#\ns#@%s@#1#\ns#@%s@#1#\ns#@%s@#/etc#g\ns#@%s@#/usr/local#g\ns#@%s@#4#g\ns#@%s@#1m#g\n' SEMAN BAMAN LCMAN sysconfdir prefix mansectform mansectsu > $@; sed -n '/Begin initial values for man page substitution/,/End initial values for man page substitution/{;p;}' $(srcdir)/configure.in | sed -e '/^#/d' -e 's/^/s#@/' -e 's/=[\\"]*/@#/' -e 's/[\\"]*$$/#g/' >> $@

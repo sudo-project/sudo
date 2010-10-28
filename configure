@@ -817,6 +817,7 @@ password_timeout
 timeout
 timedir
 CONFIGURE_ARGS
+ZLIB_DEP
 ZLIB
 LOGINCAP_USAGE
 REPLAY
@@ -998,6 +999,7 @@ enable_libtool_lock
 with_noexec
 with_netsvc
 enable_sia
+enable_largefile
 with_pam_login
 enable_pam_session
 enable_zlib
@@ -1650,6 +1652,7 @@ Optional Features:
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --disable-sia           Disable SIA on Digital UNIX
+  --disable-largefile     omit support for large files
   --disable-pam-session   Disable PAM session support
   --enable-zlib[=PATH]    Whether to enable or disable zlib
 
@@ -2878,10 +2881,11 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-ac_config_headers="$ac_config_headers config.h pathnames.h"
+ac_config_headers="$ac_config_headers config.h pathnames.h zlib/zconf.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -3011,6 +3015,7 @@ BAMAN=0
 LCMAN=0
 SEMAN=0
 ZLIB=
+ZLIB_DEP=
 AUTH_OBJS=
 AUTH_REG=
 AUTH_EXCL=
@@ -6784,13 +6789,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6787: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6792: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6790: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6795: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6793: output\"" >&5)
+  (eval echo "\"\$as_me:6798: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -7995,7 +8000,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7998 "configure"' > conftest.$ac_ext
+  echo '#line 8003 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9388,11 +9393,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9391: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9396: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9395: \$? = $ac_status" >&5
+   echo "$as_me:9400: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9727,11 +9732,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9730: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9735: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9734: \$? = $ac_status" >&5
+   echo "$as_me:9739: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9832,11 +9837,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9835: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9840: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9839: \$? = $ac_status" >&5
+   echo "$as_me:9844: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9887,11 +9892,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9890: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9895: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9894: \$? = $ac_status" >&5
+   echo "$as_me:9899: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12254,7 +12259,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12257 "configure"
+#line 12262 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12350,7 +12355,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12353 "configure"
+#line 12358 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14056,6 +14061,204 @@ _ACEOF
 fi
 
 done
+
+# Check whether --enable-largefile was given.
+if test "${enable_largefile+set}" = set; then :
+  enableval=$enable_largefile;
+fi
+
+if test "$enable_largefile" != no; then
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for special C compiler options needed for large files" >&5
+$as_echo_n "checking for special C compiler options needed for large files... " >&6; }
+if test "${ac_cv_sys_largefile_CC+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_cv_sys_largefile_CC=no
+     if test "$GCC" != yes; then
+       ac_save_CC=$CC
+       while :; do
+	 # IRIX 6.2 and later do not support large files by default,
+	 # so use the C compiler's -n32 option if that helps.
+	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+ /* Check that off_t can represent 2**63 - 1 correctly.
+    We can't simply define LARGE_OFF_T to be 9223372036854775807,
+    since some C++ compilers masquerading as C compilers
+    incorrectly reject 9223372036854775807.  */
+#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+  int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
+		       && LARGE_OFF_T % 2147483647 == 1)
+		      ? 1 : -1];
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+	 if ac_fn_c_try_compile "$LINENO"; then :
+  break
+fi
+rm -f core conftest.err conftest.$ac_objext
+	 CC="$CC -n32"
+	 if ac_fn_c_try_compile "$LINENO"; then :
+  ac_cv_sys_largefile_CC=' -n32'; break
+fi
+rm -f core conftest.err conftest.$ac_objext
+	 break
+       done
+       CC=$ac_save_CC
+       rm -f conftest.$ac_ext
+    fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sys_largefile_CC" >&5
+$as_echo "$ac_cv_sys_largefile_CC" >&6; }
+  if test "$ac_cv_sys_largefile_CC" != no; then
+    CC=$CC$ac_cv_sys_largefile_CC
+  fi
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for _FILE_OFFSET_BITS value needed for large files" >&5
+$as_echo_n "checking for _FILE_OFFSET_BITS value needed for large files... " >&6; }
+if test "${ac_cv_sys_file_offset_bits+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  while :; do
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+ /* Check that off_t can represent 2**63 - 1 correctly.
+    We can't simply define LARGE_OFF_T to be 9223372036854775807,
+    since some C++ compilers masquerading as C compilers
+    incorrectly reject 9223372036854775807.  */
+#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+  int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
+		       && LARGE_OFF_T % 2147483647 == 1)
+		      ? 1 : -1];
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ac_cv_sys_file_offset_bits=no; break
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#define _FILE_OFFSET_BITS 64
+#include <sys/types.h>
+ /* Check that off_t can represent 2**63 - 1 correctly.
+    We can't simply define LARGE_OFF_T to be 9223372036854775807,
+    since some C++ compilers masquerading as C compilers
+    incorrectly reject 9223372036854775807.  */
+#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+  int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
+		       && LARGE_OFF_T % 2147483647 == 1)
+		      ? 1 : -1];
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ac_cv_sys_file_offset_bits=64; break
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  ac_cv_sys_file_offset_bits=unknown
+  break
+done
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sys_file_offset_bits" >&5
+$as_echo "$ac_cv_sys_file_offset_bits" >&6; }
+case $ac_cv_sys_file_offset_bits in #(
+  no | unknown) ;;
+  *)
+cat >>confdefs.h <<_ACEOF
+#define _FILE_OFFSET_BITS $ac_cv_sys_file_offset_bits
+_ACEOF
+;;
+esac
+rm -rf conftest*
+  if test $ac_cv_sys_file_offset_bits = unknown; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for _LARGE_FILES value needed for large files" >&5
+$as_echo_n "checking for _LARGE_FILES value needed for large files... " >&6; }
+if test "${ac_cv_sys_large_files+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  while :; do
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+ /* Check that off_t can represent 2**63 - 1 correctly.
+    We can't simply define LARGE_OFF_T to be 9223372036854775807,
+    since some C++ compilers masquerading as C compilers
+    incorrectly reject 9223372036854775807.  */
+#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+  int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
+		       && LARGE_OFF_T % 2147483647 == 1)
+		      ? 1 : -1];
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ac_cv_sys_large_files=no; break
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#define _LARGE_FILES 1
+#include <sys/types.h>
+ /* Check that off_t can represent 2**63 - 1 correctly.
+    We can't simply define LARGE_OFF_T to be 9223372036854775807,
+    since some C++ compilers masquerading as C compilers
+    incorrectly reject 9223372036854775807.  */
+#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+  int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
+		       && LARGE_OFF_T % 2147483647 == 1)
+		      ? 1 : -1];
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ac_cv_sys_large_files=1; break
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  ac_cv_sys_large_files=unknown
+  break
+done
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sys_large_files" >&5
+$as_echo "$ac_cv_sys_large_files" >&6; }
+case $ac_cv_sys_large_files in #(
+  no | unknown) ;;
+  *)
+cat >>confdefs.h <<_ACEOF
+#define _LARGE_FILES $ac_cv_sys_large_files
+_ACEOF
+;;
+esac
+rm -rf conftest*
+  fi
+fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking POSIX termios" >&5
 $as_echo_n "checking POSIX termios... " >&6; }
@@ -18324,38 +18527,12 @@ _ACEOF
 
 	# Check whether --enable-zlib was given.
 if test "${enable_zlib+set}" = set; then :
-  enableval=$enable_zlib;  case "$enable_zlib" in
-	    yes)    $as_echo "#define HAVE_ZLIB_H 1" >>confdefs.h
-
-		    ZLIB="-lz"
-		    ;;
-	    no)	    ;;
-	    *)	    $as_echo "#define HAVE_ZLIB_H 1" >>confdefs.h
-
-		    CPPFLAGS="${CPPFLAGS} -I${enable_zlib}/include"
-
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	ZLIB="${ZLIB} -L$enable_zlib/lib -Wl,+b,$enable_zlib/lib"
-			;;
-	    *)		ZLIB="${ZLIB} -L$enable_zlib/lib -Wl,-R$enable_zlib/lib"
-			;;
-	esac
-    else
-	ZLIB="${ZLIB} -L$enable_zlib/lib"
-    fi
-    if test X"$blibpath" != X"" -a "ZLIB" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:$enable_zlib/lib"
-    fi
-
-		    ZLIB="${ZLIB} -lz"
-		    ;;
-	  esac
-
+  enableval=$enable_zlib;
 fi
 
-	if test X"$enable_zlib" = X""; then
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gzdopen in -lz" >&5
+	case ${enable_zlib-"yes"} in
+	    yes)
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for gzdopen in -lz" >&5
 $as_echo_n "checking for gzdopen in -lz... " >&6; }
 if test "${ac_cv_lib_z_gzdopen+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -18393,7 +18570,7 @@ fi
 $as_echo "$ac_cv_lib_z_gzdopen" >&6; }
 if test "x$ac_cv_lib_z_gzdopen" = x""yes; then :
 
-		for ac_header in zlib.h
+		    for ac_header in zlib.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "zlib.h" "ac_cv_header_zlib_h" "$ac_includes_default"
 if test "x$ac_cv_header_zlib_h" = x""yes; then :
@@ -18401,6 +18578,8 @@ if test "x$ac_cv_header_zlib_h" = x""yes; then :
 #define HAVE_ZLIB_H 1
 _ACEOF
  ZLIB="-lz"
+else
+  enable_zlib=builtin
 fi
 
 done
@@ -18408,6 +18587,46 @@ done
 
 fi
 
+		ZLIB="-lz"
+		;;
+	    no)
+		;;
+	    system)
+		$as_echo "#define HAVE_ZLIB_H 1" >>confdefs.h
+
+		ZLIB="-lz"
+		;;
+	    builtin)
+		# handled below
+		;;
+	    *)
+		$as_echo "#define HAVE_ZLIB_H 1" >>confdefs.h
+
+		CPPFLAGS="${CPPFLAGS} -I${enable_zlib}/include"
+
+    if test X"$with_rpath" = X"yes"; then
+	case "$host" in
+	    *-*-hpux*)	ZLIB="${ZLIB} -L$enable_zlib/lib -Wl,+b,$enable_zlib/lib"
+			;;
+	    *)		ZLIB="${ZLIB} -L$enable_zlib/lib -Wl,-R$enable_zlib/lib"
+			;;
+	esac
+    else
+	ZLIB="${ZLIB} -L$enable_zlib/lib"
+    fi
+    if test X"$blibpath" != X"" -a "ZLIB" = "SUDO_LDFLAGS"; then
+	blibpath_add="${blibpath_add}:$enable_zlib/lib"
+    fi
+
+		ZLIB="${ZLIB} -lz"
+		;;
+	esac
+	if test X"$enable_zlib" = X"builtin"; then
+	    $as_echo "#define HAVE_ZLIB_H 1" >>confdefs.h
+
+	    CPPFLAGS="${CPPFLAGS}"' -I$(srcdir)/zlib'
+	    ZLIB="${ZLIB} libz.a"
+	    ZLIB_DEP=libz.a
 	fi
 
 else
@@ -19443,6 +19662,7 @@ do
   case $ac_config_target in
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "pathnames.h") CONFIG_HEADERS="$CONFIG_HEADERS pathnames.h" ;;
+    "zlib/zconf.h") CONFIG_HEADERS="$CONFIG_HEADERS zlib/zconf.h" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "sudo.man") CONFIG_FILES="$CONFIG_FILES sudo.man" ;;
