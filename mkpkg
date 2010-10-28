@@ -83,8 +83,6 @@ case "$platform" in
 	    if [ -z "$CFLAGS" ]; then
 		CFLAGS=-O; export CFLAGS
 	    fi
-	else
-	    configure_opts="${configure_opts}${configure_opts+$tab}--disable-zlib"
 	fi
 	;;
 esac
@@ -106,7 +104,7 @@ case "$platform" in
 		--with-logfac=authpriv
 		--with-pam
 		--with-pam-login
-		--enable-zlib
+		--enable-zlib=system
 		--with-editor=/bin/vi
 		--with-env-editor
 		--with-ignore-dot
@@ -143,7 +141,7 @@ case "$platform" in
 		--enable-shell-sets-home
 		--with-sudoers-mode=0440
 		--with-pam
-		--enable-zlib
+		--enable-zlib=system
 		--with-ldap
 		--with-env-editor
 		--with-passprompt=%p\'s password: "
@@ -168,7 +166,7 @@ case "$platform" in
 		--with-all-insults
 		--with-exempt=sudo
 		--with-pam
-		--enable-zlib
+		--enable-zlib=system
 		--with-fqdn
 		--with-logging=syslog
 		--with-logfac=authpriv
@@ -186,8 +184,11 @@ case "$platform" in
 		--with-secure-path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/X11R6/bin"
 	;;
     *)
+	# For Solaris, add project support and use let configure choose zlib.
+	# For all others, use the builtin zlib.
 	case "$platform" in
 	    sol*) configure_opts="${configure_opts}${configure_opts+$tab}--with-project";;
+	    *) configure_opts="${configure_opts}${configure_opts+$tab}--enable-zlib=builtin";;
 	esac
 	if test "$flavor" = "ldap"; then
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap"
