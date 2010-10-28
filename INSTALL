@@ -604,11 +604,15 @@ The following options are also configurable at runtime:
 	if the executable is simply not in the user's path, sudo will tell
 	the user that they are not allowed to run it, which can be confusing.
 
-  --enable-zlib[=DIR]
-        Enable the use of the zlib compress library when storing
-        I/O log files.  If specified, DIR is the base directory
-        containing the zlib include and lib directories.  By default
-        zlib is used if it is found on the system.
+  --enable-zlib[=location]
+	Enable the use of the zlib compress library when storing
+	I/O log files.  If specified, location is the base directory
+	containing the zlib include and lib directories.  The special
+	values "system" and "builtin" can be used to indicate that
+	the system version of zlib should be used or that the version
+	of zlib shipped with sudo should be used instead.
+	If this option is not specified, configure will use the
+	system zlib if it is present.
 
   --disable-zlib
         Disable the use of the zlib compress library when storing
