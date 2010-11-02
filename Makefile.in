@@ -167,7 +167,15 @@ DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
 	    sudoers.ldap.cat sudoers.ldap.man.in sudoers.ldap.pod \
 	    sudoers2ldif sudoreplay.cat sudoreplay.man.in sudoreplay.pod \
 	    visudo.cat visudo.man.in visudo.pod auth/API sudo.man.pl \
-	    sudoers.man.pl
+	    sudoers.man.pl $(ZLIB_FILES)
+
+ZLIB_FILES = zlib/adler32.c zlib/compress.c zlib/crc32.c zlib/crc32.h \
+	     zlib/deflate.c zlib/deflate.h zlib/gzclose.c zlib/gzguts.h \
+	     zlib/gzlib.c zlib/gzread.c zlib/gzwrite.c zlib/infback.c \
+	     zlib/inffast.c zlib/inffast.h zlib/inffixed.h zlib/inflate.c \
+	     zlib/inflate.h zlib/inftrees.c zlib/inftrees.h zlib/trees.c \
+	     zlib/trees.h zlib/uncompr.c zlib/zconf.h.in zlib/zlib.h \
+	     zlib/zutil.c zlib/zutil.h
 
 SUDODEP = $(srcdir)/sudo.h $(srcdir)/alloc.h $(srcdir)/defaults.h \
 	  $(srcdir)/error.h $(srcdir)/list.h $(srcdir)/logging.h \
