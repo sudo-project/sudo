@@ -14,8 +14,40 @@ What's new in Sudo 1.7.5?
    match the name used to look it up.  This may happen on some systems
    that do case insensitive lookups or that truncate long names.
 
- * Gcc will no longer display warnings on glibc systems that use
+ * GCC will no longer display warnings on glibc systems that use
    the warn_unused_result attribute for write(2) and other system calls.
+
+ * If a PAM account management module denies access, sudo now prints
+   a more useful error message and stops trying to validate the user.
+
+ * Fixed a bug introduced in sudo 1.7.3 where the ticket file was not
+   being honored when the "targetpw" sudoers Defaults option was enabled.
+
+ * Fixed a potential hang on idle systems when the sudo-run process
+   exits immediately.
+
+ * Fixed a crash when Solaris project support was enabled and the
+   -g flag was used.
+
+ * Sudo no longer exits with an error when support for
+   auditing is compiled in but auditing is not enabled.
+
+ * Fixed a crash with "sudo -l" when auditing is enabled and the
+   user is not allowed to run any commands on the host.
+
+ * Sudo will now examine all matching LDAP entries when doing a
+   lookup, even if there has already been a positive match. This
+   catches negative matches that may exist in other entries and
+   more closely match the sudoers file behavior.
+
+ * Sudo now includes a copy of zlib that will be used on systems
+   that do not have zlib installed.
+
+ * The --with-umask-override configure flag has been added to enable
+   the "umask_override" sudoers Defaults option at build time.
+
+ * Sudo now unblocks all signals on startup to avoid problems caused
+   by the parent process changing the default signal mask.
 
 What's new in Sudo 1.7.4p4?
 
