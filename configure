@@ -18587,7 +18587,6 @@ done
 
 fi
 
-		ZLIB="-lz"
 		;;
 	    no)
 		;;
