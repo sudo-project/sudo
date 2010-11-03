@@ -577,7 +577,7 @@ distclean: clean
 	-rm -rf Makefile pathnames.h config.h config.status config.cache \
 		config.log libtool sudoers sudo_noexec.lo .libs $(GENERATED) \
 		sudo.man sudoers.man sudoers.ldap.man sudoreplay.man \
-		visudo.man sudo_usage.h Makefile.binary
+		visudo.man sudo_usage.h Makefile.binary zlib/zconf.h
 
 clobber: distclean
 
