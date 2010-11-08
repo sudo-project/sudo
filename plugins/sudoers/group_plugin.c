@@ -72,7 +72,7 @@ group_plugin_load(char *plugin_info)
     struct stat sb;
     char *args, path[PATH_MAX];
     char **argv = NULL;
-    int len, rc;
+    int len, rc = -1;
 
     /*
      * Fill in .so path and split out args (if any).
@@ -91,40 +91,40 @@ group_plugin_load(char *plugin_info)
 	warningx("%s%s: %s",
 	    (*plugin_info != '/') ? _PATH_SUDO_PLUGIN_DIR : "", plugin_info,
 	    strerror(ENAMETOOLONG));
-	return -1;
+	goto done;
     }
 
     /* Sanity check plugin path. */
     if (stat(path, &sb) != 0) {
 	warning("%s", path);
-	return -1;
+	goto done;
     }
     if (sb.st_uid != ROOT_UID) {
 	warningx("%s must be owned by uid %d", path, ROOT_UID);
-	return -1;
+	goto done;
     }
     if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
 	warningx("%s must be only be writable by owner", path);
-	return -1;
+	goto done;
     }
 
     /* Open plugin and map in symbol. */
     group_handle = dlopen(path, RTLD_LAZY|RTLD_LOCAL);
     if (!group_handle) {
 	warningx("unable to dlopen %s: %s", path, dlerror());
-	return -1;
+	goto done;
     }
     group_plugin = dlsym(group_handle, "group_plugin");
     if (group_plugin == NULL) {
 	warningx("unable to find symbol \"group_plugin\" in %s", path);
-	return -1;
+	goto done;
     }
 
     if (GROUP_API_VERSION_GET_MAJOR(group_plugin->version) != GROUP_API_VERSION_MAJOR) {
 	warningx("%s: incompatible group plugin major version %d, expected %d",
 	    path, GROUP_API_VERSION_GET_MAJOR(group_plugin->version),
 	    GROUP_API_VERSION_MAJOR);
-	return -1;
+	goto done;
     }
 
     /*
@@ -152,7 +152,15 @@ group_plugin_load(char *plugin_info)
 
     rc = (group_plugin->init)(GROUP_API_VERSION, sudo_printf, argv);
 
+done:
     efree(argv);
+
+    if (rc != 0) {
+	if (group_handle != NULL) {
+	    dlclose(group_handle);
+	    group_handle = NULL;
+	}
+    }
 
     return rc;
 }
