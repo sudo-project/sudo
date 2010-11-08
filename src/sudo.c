@@ -848,12 +848,17 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     }
 #endif /* !HAVE_SETRESUID && !HAVE_SETREUID */
 
-    /* Set cwd after uid to avoid permissions problems. */
+    /*
+     * Only change cwd if we have chroot()ed or the policy modules
+     * specifies a different cwd.  Must be done after uid change.
+     */
     if (details->cwd) {
-	/* Note: cwd is relative to the new root, if any. */
-	if (chdir(details->cwd) != 0) {
-	    warning("unable to change directory to %s", details->cwd);
-	    goto done;
+	if (details->chroot || strcmp(details->cwd, user_details.cwd) != 0) {
+	    /* Note: cwd is relative to the new root, if any. */
+	    if (chdir(details->cwd) != 0) {
+		warning("unable to change directory to %s", details->cwd);
+		goto done;
+	    }
 	}
     }
 
