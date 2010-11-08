@@ -54,14 +54,14 @@ OOPPTTIIOONNSS
                    option vviissuuddoo will edit (or check) the _s_u_d_o_e_r_s file of your
                    choice, instead of the default, _/_e_t_c_/_s_u_d_o_e_r_s.  The lock
                    file used is the specified _s_u_d_o_e_r_s file with ".tmp"
-                   appended to it.
-
-       -q          Enable qquuiieett mode.  In this mode details about syntax
-                   errors are not printed.  This option is only useful when
-
+                   appended to it.  In cchheecckk--oonnllyy mode only, the argument to
+                   --ff may be "-", indicating that _s_u_d_o_e_r_s will be read from
+                   the standard input.
 
 
-1.8.0b1                   July 14, 2010                         1
+
+
+1.8.0b2                 November  5, 2010                       1
 
 
 
@@ -70,6 +70,8 @@ OOPPTTIIOONNSS
 VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
 
+       -q          Enable qquuiieett mode.  In this mode details about syntax
+                   errors are not printed.  This option is only useful when
                    combined with the --cc option.
 
        -s          Enable ssttrriicctt checking of the _s_u_d_o_e_r_s file.  If an alias is
@@ -121,13 +123,11 @@ DDIIAAGGNNOOSSTTIICCSS
 SSEEEE AALLSSOO
        _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(1m)
 
-AAUUTTHHOORR
-       Many people have worked on _s_u_d_o over the years; this version of vviissuuddoo
-       was written by:
 
 
 
-1.8.0b1                   July 14, 2010                         2
+
+1.8.0b2                 November  5, 2010                       2
 
 
 
@@ -135,6 +135,10 @@ AAUUTTHHOORR
 
 VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
+
+AAUUTTHHOORR
+       Many people have worked on _s_u_d_o over the years; this version of vviissuuddoo
+       was written by:
 
         Todd Miller
 
@@ -189,10 +193,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-1.8.0b1                   July 14, 2010                         3
+1.8.0b2                 November  5, 2010                       3
 
 
