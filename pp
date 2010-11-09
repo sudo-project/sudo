@@ -1,6 +1,6 @@
 #!/bin/sh
 # (c) 2010 Quest Software, Inc. All rights reserved
-pp_revision="294"
+pp_revision="297"
  # Copyright 2010 Quest Software, Inc.  All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -2224,6 +2224,7 @@ pp_backend_sd_init () {
     pp_sd_default_start=1           # config_file default start value
 
     pp_readlink_fn=pp_ls_readlink   # HPUX has no readlink
+    pp_shlib_suffix='.sl'           # .so on most other platforms
 
     pp_sd_detect_os
 }
@@ -2776,6 +2777,7 @@ pp_backend_solaris_init () {
 	pp_solaris_rstates="s S 1 2 3"	# run-states when remove is ok
 	pp_solaris_maxinst=
 	pp_solaris_vendor=
+	pp_solaris_pstamp=
 	pp_solaris_copyright=
 	pp_solaris_name=
 	pp_solaris_desc=
@@ -3008,6 +3010,8 @@ pp_backend_solaris () {
 	  echo "MAXINST=$pp_solaris_maxinst" >> $pkginfo
 	test -n "${pp_solaris_vendor:-$vendor}" &&
 	  echo "VENDOR=${pp_solaris_vendor:-$vendor}" >> $pkginfo
+	test -n "$pp_solaris_pstamp" &&
+	  echo "PSTAMP=$pp_solaris_pstamp" >> $pkginfo
 
 	if test -n "${pp_solaris_copyright:-$copyright}"; then
 	    echo "${pp_solaris_copyright:-$copyright}" > $pp_wrkdir/copyright
@@ -5212,6 +5216,15 @@ pp_rpm_detect_distro () {
        pp_rpm_distro=`awk '
           /^White Box Enterprise Linux release/ { print "wbel" $6; exit; }
        ' /etc/whitebox-release`
+    elif test -f /etc/mandrakelinux-release; then
+       pp_rpm_distro=`awk '
+          /^Mandrakelinux release/ { print "mand" $3; exit; }
+       ' /etc/mandrake-release`
+    elif test -f /etc/mandrake-release; then
+       pp_rpm_distro=`awk '
+          /^Linux Mandrake release/ { print "mand" $4; exit; }
+          /^Mandrake Linux release/ { print "mand" $4; exit; }
+       ' /etc/mandrake-release`
     elif test -f /etc/fedora-release; then
        pp_rpm_distro=`awk '
           /^Fedora Core release/ { print "fc" $4; exit; }
@@ -6326,6 +6339,8 @@ pp_backend_macos_init () {
     pp_macos_prog_packagemaker=/Developer/usr/bin/packagemaker
     pp_macos_pkg_domain=anywhere
     pp_macos_pkg_extra_flags=
+    # OS X puts the library version *before* the .dylib extension
+    pp_shlib_suffix='*.dylib'
 }
 
 pp_macos_plist () {
