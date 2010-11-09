@@ -165,21 +165,27 @@ testsudoers: libsudoers.la $(TEST_OBJS) $(LIBS)
 # Uncomment the lines before -@true if you intend to modify gram.y
 $(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y
 @DEV@	$(YACC) -d $(srcdir)/gram.y
-@DEV@	mv -f y.tab.c $(devdir)/gram.c
+@DEV@	echo "#include <config.h>" > $(devdir)/gram.c
+@DEV@	cat y.tab.c >> $(devdir)/gram.c
+@DEV@	rm -f y.tab.c
 @DEV@	mv -f y.tab.h $(devdir)/gram.h
 	-@true
 
 # Uncomment the lines before -@true if you intend to modify toke.l
 $(devdir)/toke.c: $(srcdir)/toke.l
 @DEV@	$(FLEX) $(srcdir)/toke.l
-@DEV@	mv -f lex.yy.c $(devdir)/toke.c
+@DEV@	echo "#include <config.h>" > $(devdir)/toke.c
+@DEV@	cat lex.yy.c >> $(devdir)/toke.c
+@DEV@	rm -f lex.yy.c
 	-@true
 
 # Uncomment the lines before -@true if you intend to modify getdate.y
 $(devdir)/getdate.c: $(srcdir)/getdate.y
 @DEV@	echo "expect 10 shift/reduce conflicts"
 @DEV@	$(YACC) $(srcdir)/getdate.y
-@DEV@	mv -f y.tab.c $(devdir)/getdate.c
+@DEV@	echo "#include <config.h>" > $(devdir)/getdate.c
+@DEV@	cat y.tab.c >> $(devdir)/getdate.c
+@DEV@	rm -f y.tab.c
 	-@true
 
 # Uncomment the following if you intend to modify def_data.in
