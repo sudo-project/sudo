@@ -67,3 +67,35 @@ infback.lo inflate.lo: $(srcdir)/zutil.h $(srcdir)/zlib.h ./zconf.h $(srcdir)/in
 inffast.lo: $(srcdir)/zutil.h $(srcdir)/zlib.h ./zconf.h $(srcdir)/inftrees.h $(srcdir)/inflate.h $(srcdir)/inffast.h
 inftrees.lo: $(srcdir)/zutil.h $(srcdir)/zlib.h ./zconf.h $(srcdir)/inftrees.h
 trees.lo: $(srcdir)/deflate.h $(srcdir)/zutil.h $(srcdir)/zlib.h ./zconf.h $(srcdir)/trees.h
+
+install:
+
+install-dirs:
+
+install-binaries:
+
+install-includes:
+
+install-doc:
+
+install-plugin:
+
+uninstall:
+
+check:
+	@echo nothing to check
+
+clean:
+	-$(LIBTOOL) --mode=clean rm -f *.lo *.o *.la *.a stamp-* core *.core core.*
+
+mostlyclean: clean
+
+distclean: clean
+	-rm -rf Makefile .libs zconf.h
+
+clobber: distclean
+
+realclean: distclean
+	rm -f TAGS tags
+
+cleandir: realclean
