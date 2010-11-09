@@ -159,7 +159,7 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	-rm -rf Makefile .libs sudo_usage.h $(GENERATED)
+	-rm -rf Makefile .libs sudo_usage.h
 
 clobber: distclean
 
