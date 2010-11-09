@@ -4,9 +4,9 @@ dnl
 dnl Copyright (c) 1994-1996,1998-2010 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_INIT([sudo], [1.8.0b2], [http://www.sudo.ws/bugs/], [sudo])
-AC_CONFIG_HEADER(config.h pathnames.h zlib/zconf.h)
+AC_CONFIG_HEADER([config.h pathnames.h])
 dnl
-dnl This won't work before AC_INIT
+dnl Note: this must come after AC_INIT
 dnl
 AC_MSG_NOTICE([Configuring Sudo version $PACKAGE_VERSION])
 dnl
@@ -2068,6 +2068,8 @@ if test X"$enable_zlib" = X"builtin"; then
     CPPFLAGS="${CPPFLAGS}"' -I$(top_srcdir)/zlib'
     ZLIB="${ZLIB}"' $(top_builddir)/zlib/libz.la'
     ZLIB_SRC=zlib
+    AC_CONFIG_HEADER([zlib/zconf.h])
+    AC_CONFIG_FILES([zlib/Makefile])
 fi
 
 dnl
@@ -2829,7 +2831,7 @@ dnl
 dnl Substitute into the Makefile and man pages
 dnl
 dnl AC_CONFIG_FILES([doc/sudo.man doc/visudo.man doc/sudoers.man doc/sudoers.ldap.man doc/sudoreplay.man src/Makefile src/sudo_usage.h])
-AC_CONFIG_FILES([Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/sample_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers zlib/Makefile])
+AC_CONFIG_FILES([Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/sample_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 AC_OUTPUT
 
 dnl

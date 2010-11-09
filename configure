@@ -2886,7 +2886,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-ac_config_headers="$ac_config_headers config.h pathnames.h zlib/zconf.h"
+ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
@@ -16283,6 +16283,10 @@ if test X"$enable_zlib" = X"builtin"; then
     CPPFLAGS="${CPPFLAGS}"' -I$(top_srcdir)/zlib'
     ZLIB="${ZLIB}"' $(top_builddir)/zlib/libz.la'
     ZLIB_SRC=zlib
+    ac_config_headers="$ac_config_headers zlib/zconf.h"
+
+    ac_config_files="$ac_config_files zlib/Makefile"
+
 fi
 
 for ac_func in strsignal
@@ -18547,7 +18551,7 @@ test "$datarootdir" = '${prefix}/share' && datarootdir='$(prefix)/share'
 test "$docdir" = '${datarootdir}/doc/${PACKAGE_TARNAME}' && docdir='$(datarootdir)/doc/$(PACKAGE_TARNAME)'
 test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
 
-ac_config_files="$ac_config_files Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/sample_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers zlib/Makefile"
+ac_config_files="$ac_config_files Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/sample_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -19496,8 +19500,9 @@ do
   case $ac_config_target in
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "pathnames.h") CONFIG_HEADERS="$CONFIG_HEADERS pathnames.h" ;;
-    "zlib/zconf.h") CONFIG_HEADERS="$CONFIG_HEADERS zlib/zconf.h" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
+    "zlib/zconf.h") CONFIG_HEADERS="$CONFIG_HEADERS zlib/zconf.h" ;;
+    "zlib/Makefile") CONFIG_FILES="$CONFIG_FILES zlib/Makefile" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "common/Makefile") CONFIG_FILES="$CONFIG_FILES common/Makefile" ;;
     "compat/Makefile") CONFIG_FILES="$CONFIG_FILES compat/Makefile" ;;
@@ -19509,7 +19514,6 @@ do
     "plugins/sample_group/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/sample_group/Makefile" ;;
     "plugins/sudoers/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/sudoers/Makefile" ;;
     "plugins/sudoers/sudoers") CONFIG_FILES="$CONFIG_FILES plugins/sudoers/sudoers" ;;
-    "zlib/Makefile") CONFIG_FILES="$CONFIG_FILES zlib/Makefile" ;;
 
   *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
