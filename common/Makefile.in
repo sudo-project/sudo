@@ -25,9 +25,6 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
 
-# For out of tree builds
-VPATH = $(srcdir)
-
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@
@@ -60,14 +57,23 @@ libcommon.la: $(LTOBJS)
 
 # Dependencies
 aix.lo: $(srcdir)/aix.c $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/aix.c
 alloc.lo: $(srcdir)/alloc.c $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/alloc.c
 atobool.lo: $(srcdir)/atobool.c $(incdir)/missing.h $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/atobool.c
 fileops.lo: $(srcdir)/fileops.c $(incdir)/fileops.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/fileops.c
 fmt_string.lo: $(srcdir)/fmt_string.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/fmt_string.c
 lbuf.lo: $(srcdir)/lbuf.c $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h $(incdir)/missing.h $(incdir)/lbuf.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/lbuf.c
 list.lo: $(srcdir)/list.c $(incdir)/missing.h $(incdir)/list.h $(incdir)/error.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/list.c
 term.lo: $(srcdir)/term.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/term.c
 zero_bytes.lo: $(srcdir)/zero_bytes.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/zero_bytes.c
 
 install:
 

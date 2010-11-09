@@ -24,10 +24,6 @@ devdir = @devdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
-compat = $(top_srcdir)/compat
-
-# For out of tree builds
-VPATH = $(srcdir)
 
 # Compiler & tools to use
 CC = @CC@
@@ -54,45 +50,60 @@ all: libreplace.la
 
 .SUFFIXES: .o .c .h .lo
 
-.c.o:
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
-
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 
 libreplace.la: $(LTLIBOBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LTLIBOBJS) -no-install
 
-siglist.c: mksiglist
+./siglist.c: ./mksiglist
 	./mksiglist > $@
 
-mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(incdir)/missing.h $(top_builddir)/config.h
+./mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(incdir)/missing.h $(top_builddir)/config.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/mksiglist.c -o $@
 
 @DEV@$(srcdir)/mksiglist.h: $(srcdir)/siglist.in
 @DEV@	awk 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (my_sys_siglist[SIG%s] == NULL)\n\tmy_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@
 
-siglist.lo: siglist.c $(incdir)/missing.h $(top_builddir)/config.h
-
 # Dependencies
-closefrom.lo: $(compat)/closefrom.c $(incdir)/missing.h $(top_builddir)/config.h
-dlopen.lo: $(compat)/dlopen.c $(compat)/dlfcn.h $(incdir)/missing.h $(top_builddir)/config.h
-fnmatch.lo: $(compat)/fnmatch.c $(compat)/fnmatch.h $(compat)/charclass.h $(incdir)/missing.h $(top_builddir)/config.h
-getcwd.lo: $(compat)/getcwd.c $(incdir)/missing.h $(top_builddir)/config.h
-getline.lo: $(compat)/getline.c $(incdir)/missing.h $(top_builddir)/config.h
-getprogname.lo: $(compat)/getprogname.c $(incdir)/missing.h $(top_builddir)/config.h
-glob.lo: $(compat)/glob.c $(compat)/glob.h $(compat)/charclass.h $(incdir)/missing.h $(top_builddir)/config.h
-isblank.lo: $(compat)/isblank.c $(incdir)/missing.h $(top_builddir)/config.h
-memrchr.lo: $(compat)/memrchr.c $(incdir)/missing.h $(top_builddir)/config.h
-mkstemps.lo: $(compat)/mkstemps.c $(incdir)/missing.h $(top_builddir)/config.h
-nanosleep.lo: $(compat)/nanosleep.c $(incdir)/missing.h $(top_builddir)/config.h
-snprintf.lo: $(compat)/snprintf.c $(incdir)/missing.h $(top_builddir)/config.h
-strcasecmp.lo: $(compat)/strcasecmp.c $(incdir)/missing.h $(top_builddir)/config.h
-strerror.lo: $(compat)/strerror.c $(incdir)/missing.h $(top_builddir)/config.h
-strlcat.lo: $(compat)/strlcat.c $(incdir)/missing.h $(top_builddir)/config.h
-strlcpy.lo: $(compat)/strlcpy.c $(incdir)/missing.h $(top_builddir)/config.h
-strsignal.lo: $(compat)/strsignal.c $(incdir)/missing.h $(top_builddir)/config.h
-utimes.lo: $(compat)/utimes.c $(incdir)/missing.h $(compat)/utime.h $(top_builddir)/config.h
+closefrom.lo: $(srcdir)/closefrom.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/closefrom.c
+dlopen.lo: $(srcdir)/dlopen.c $(srcdir)/dlfcn.h $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/dlopen.c
+fnmatch.lo: $(srcdir)/fnmatch.c $(srcdir)/fnmatch.h $(srcdir)/charclass.h $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/fnmatch.c
+getcwd.lo: $(srcdir)/getcwd.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/getcwd.c
+getline.lo: $(srcdir)/getline.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/getline.c
+getprogname.lo: $(srcdir)/getprogname.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/getprogname.c
+glob.lo: $(srcdir)/glob.c $(srcdir)/glob.h $(srcdir)/charclass.h $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/glob.c
+isblank.lo: $(srcdir)/isblank.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/isblank.c
+memrchr.lo: $(srcdir)/memrchr.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/memrchr.c
+mkstemps.lo: $(srcdir)/mkstemps.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/mkstemps.c
+nanosleep.lo: $(srcdir)/nanosleep.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/nanosleep.c
+siglist.lo: ./siglist.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) ./siglist.c
+snprintf.lo: $(srcdir)/snprintf.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/snprintf.c
+strcasecmp.lo: $(srcdir)/strcasecmp.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/strcasecmp.c
+strerror.lo: $(srcdir)/strerror.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/strerror.c
+strlcat.lo: $(srcdir)/strlcat.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/strlcat.c
+strlcpy.lo: $(srcdir)/strlcpy.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/strlcpy.c
+strsignal.lo: $(srcdir)/strsignal.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/strsignal.c
+utimes.lo: $(srcdir)/utimes.c $(incdir)/missing.h $(srcdir)/utime.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/utimes.c
 
 install:
 

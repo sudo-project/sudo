@@ -23,9 +23,6 @@ srcdir = @srcdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
-# For out of tree builds
-VPATH = $(srcdir)
-
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@
@@ -58,15 +55,36 @@ libz.la: $(LTOBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LTOBJS) -no-install
 
 # Dependencies
-adler32.lo zutil.lo: $(srcdir)/zutil.h $(srcdir)/zlib.h ./zconf.h
-gzclose.lo gzlib.lo gzread.lo gzwrite.lo: $(srcdir)/zlib.h ./zconf.h $(srcdir)/gzguts.h
-compress.lo uncompr.lo: $(srcdir)/zlib.h ./zconf.h
+adler32.lo: $(srcdir)/zutil.h $(srcdir)/zlib.h ./zconf.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/adler32.c
+compress.lo: $(srcdir)/zlib.h ./zconf.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/compress.c
 crc32.lo: $(srcdir)/zutil.h $(srcdir)/zlib.h ./zconf.h $(srcdir)/crc32.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/crc32.c
 deflate.lo: $(srcdir)/deflate.h $(srcdir)/zutil.h $(srcdir)/zlib.h ./zconf.h
-infback.lo inflate.lo: $(srcdir)/zutil.h $(srcdir)/zlib.h ./zconf.h $(srcdir)/inftrees.h $(srcdir)/inflate.h $(srcdir)/inffast.h $(srcdir)/inffixed.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/deflate.c
+gzclose.lo: $(srcdir)/zlib.h ./zconf.h $(srcdir)/gzguts.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/gzclose.c
+gzlib.lo: $(srcdir)/zlib.h ./zconf.h $(srcdir)/gzguts.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/gzlib.c
+gzread.lo: $(srcdir)/zlib.h ./zconf.h $(srcdir)/gzguts.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/gzread.c
+gzwrite.lo: $(srcdir)/zlib.h ./zconf.h $(srcdir)/gzguts.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/gzwrite.c
+infback.lo: $(srcdir)/zutil.h $(srcdir)/zlib.h ./zconf.h $(srcdir)/inftrees.h $(srcdir)/inflate.h $(srcdir)/inffast.h $(srcdir)/inffixed.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/infback.c
 inffast.lo: $(srcdir)/zutil.h $(srcdir)/zlib.h ./zconf.h $(srcdir)/inftrees.h $(srcdir)/inflate.h $(srcdir)/inffast.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/inffast.c
+inflate.lo: $(srcdir)/zutil.h $(srcdir)/zlib.h ./zconf.h $(srcdir)/inftrees.h $(srcdir)/inflate.h $(srcdir)/inffast.h $(srcdir)/inffixed.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/inflate.c
 inftrees.lo: $(srcdir)/zutil.h $(srcdir)/zlib.h ./zconf.h $(srcdir)/inftrees.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/inftrees.c
 trees.lo: $(srcdir)/deflate.h $(srcdir)/zutil.h $(srcdir)/zlib.h ./zconf.h $(srcdir)/trees.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/trees.c
+uncompr.lo: $(srcdir)/zlib.h ./zconf.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/uncompr.c
+zutil.lo: $(srcdir)/zutil.h $(srcdir)/zlib.h ./zconf.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/zutil.c
 
 install:
 

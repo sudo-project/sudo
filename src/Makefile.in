@@ -25,9 +25,6 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
 
-# For out of tree builds
-VPATH = $(srcdir)
-
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@ @LT_STATIC@
@@ -106,21 +103,37 @@ sesh: sesh.o
 # Dependencies
 # XXX - SUDODEP is overkill for some of these
 conversation.o: $(srcdir)/conversation.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/conversation.c
 error.o: $(srcdir)/error.c $(incdir)/missing.h $(incdir)/error.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/error.c
 exec.o: $(srcdir)/exec.c $(SUDODEP) $(srcdir)/sudo_exec.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/exec.c
 exec_pty.o: $(srcdir)/exec_pty.c $(SUDODEP) $(srcdir)/sudo_exec.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/exec_pty.c
 get_pty.o: $(srcdir)/get_pty.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/get_pty.c
 net_ifs.o: $(srcdir)/net_ifs.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/net_ifs.c
 load_plugins.o: $(srcdir)/load_plugins.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/load_plugins.c
 parse_args.o: $(srcdir)/parse_args.c sudo_usage.h $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/parse_args.c
 preload.o: $(srcdir)/preload.c $(incdir)/sudo_plugin.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/preload.c
 selinux.o: $(srcdir)/selinux.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/selinux.c
 sesh.o: $(srcdir)/sesh.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sesh.c
 sudo.o: $(srcdir)/sudo.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudo.c
 sudo_edit.o: $(srcdir)/sudo_edit.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudo_edit.c
 sudo_noexec.lo: $(srcdir)/sudo_noexec.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudo_noexec.c
 tgetpass.o: $(srcdir)/tgetpass.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/tgetpass.c
 ttysize.o: $(srcdir)/ttysize.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/ttysize.c
 
 install: install-dirs install-binaries @INSTALL_NOEXEC@
 

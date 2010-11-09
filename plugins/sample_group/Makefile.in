@@ -25,9 +25,6 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
 
-# For out of tree builds
-VPATH = $(srcdir)
-
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@ @LT_STATIC@
@@ -74,15 +71,14 @@ all: sample_group.la
 
 .SUFFIXES: .o .c .h .lo
 
-.c.o:
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
-
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 
 getgrent.lo: $(srcdir)/getgrent.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/getgrent.c
 
 sample_group.lo: $(srcdir)/sample_group.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sample_group.c
 
 sample_group.la: $(OBJS)
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS) -module -avoid-version -rpath $(plugindir)

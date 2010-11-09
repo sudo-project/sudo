@@ -33,9 +33,6 @@ incdir = $(top_srcdir)/include
 docdir = @docdir@
 timedir = @timedir@
 
-# For out of tree builds
-VPATH = $(devdir):$(srcdir):$(srcdir)/auth
-
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@
@@ -197,52 +194,93 @@ sudoers: $(srcdir)/sudoers.in
 
 # Sudoers dependencies
 alias.lo: $(srcdir)/alias.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/redblack.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/alias.c
 audit.lo: $(srcdir)/audit.c $(SUDODEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/audit.c
 bsm_audit.lo: $(srcdir)/bsm_audit.c $(SUDODEP) $(srcdir)/bsm_audit.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/bsm_audit.c
 boottime.lo: $(srcdir)/boottime.c $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/boottime.c
 check.lo: $(srcdir)/check.c $(SUDODEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/check.c
 defaults.lo: $(srcdir)/defaults.c $(SUDODEP) $(devdir)/def_data.c $(authdir)/sudo_auth.h $(devdir)/gram.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/defaults.c
 env.lo: $(srcdir)/env.c $(SUDODEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/env.c
 find_path.lo: $(srcdir)/find_path.c $(SUDODEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/find_path.c
 getspwuid.lo: $(srcdir)/getspwuid.c $(SUDODEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/getspwuid.c
 goodpath.lo: $(srcdir)/goodpath.c $(SUDODEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/goodpath.c
 gram.lo: $(devdir)/gram.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir)/gram.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/gram.c
 group_plugin.lo: $(srcdir)/group_plugin.c $(SUDODEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/group_plugin.c
 interfaces.lo: $(srcdir)/interfaces.c $(SUDODEP) $(srcdir)/interfaces.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/interfaces.c
 iolog.lo: $(srcdir)/iolog.c $(SUDODEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/iolog.c
 ldap.lo: $(srcdir)/ldap.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/ldap.c
 linux_audit.lo: $(srcdir)/linux_audit.c $(SUDODEP) $(srcdir)/linux_audit.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/linux_audit.c
 logging.lo: $(srcdir)/logging.c $(SUDODEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/logging.c
 match.lo: $(srcdir)/match.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/interfaces.h $(devdir)/gram.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/match.c
 parse.lo: $(srcdir)/parse.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir)/gram.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/parse.c
 pwutil.lo: $(srcdir)/pwutil.c $(SUDODEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/pwutil.c
 redblack.lo: $(srcdir)/redblack.c $(SUDODEP) $(srcdir)/redblack.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/redblack.c
 set_perms.lo: $(srcdir)/set_perms.c $(SUDODEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/set_perms.c
 sudo_nss.lo: $(srcdir)/sudo_nss.c $(SUDODEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudo_nss.c
 sudoers.lo: $(srcdir)/sudoers.c $(SUDODEP) $(srcdir)/interfaces.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudoers.c
 timestr.lo: $(srcdir)/timestr.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/timestr.c
 toke.lo: $(devdir)/toke.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir)/gram.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/toke.c
 tsgetgrpw.lo: $(srcdir)/tsgetgrpw.c $(SUDODEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/tsgetgrpw.c
 plugin_error.lo: $(srcdir)/plugin_error.c $(incdir)/error.h $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/plugin_error.c
 
 # Auth dependencies
 sudo_auth.lo: $(authdir)/sudo_auth.c $(AUTHDEP) $(INSDEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/sudo_auth.c
 afs.lo: $(authdir)/afs.c $(AUTHDEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/afs.c
 aix_auth.lo: $(authdir)/aix_auth.c $(AUTHDEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/aix_auth.c
 bsdauth.lo: $(authdir)/bsdauth.c $(AUTHDEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/bsdauth.c
 dce.lo: $(authdir)/dce.c $(AUTHDEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/dce.c
 fwtk.lo: $(authdir)/fwtk.c $(AUTHDEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/fwtk.c
 kerb4.lo: $(authdir)/kerb4.c $(AUTHDEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/kerb4.c
 kerb5.lo: $(authdir)/kerb5.c $(AUTHDEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/kerb5.c
 pam.lo: $(authdir)/pam.c $(AUTHDEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/pam.c
 passwd.lo: $(authdir)/passwd.c $(AUTHDEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/passwd.c
 rfc1938.lo: $(authdir)/rfc1938.c $(AUTHDEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/rfc1938.c
 secureware.lo: $(authdir)/secureware.c $(AUTHDEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/secureware.c
 securid.lo: $(authdir)/securid.c $(AUTHDEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/securid.c
 securid5.lo: $(authdir)/securid5.c $(AUTHDEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/securid5.c
 sia.lo: $(authdir)/sia.c $(AUTHDEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/sia.c
 
 # Command dependencies (sudoreplay, testsudoers, visudo)
 error.o: $(top_srcdir)/src/error.c $(incdir)/error.h $(incdir)/missing.h $(top_builddir)/config.h
@@ -252,12 +290,16 @@ getdate.o: $(devdir)/getdate.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/getdate.c
 goodpath.o: goodpath.lo
 interfaces.o: interfaces.lo
-sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/alloc.h $(incdir)/missing.h $(incdir)/error.h $(incdir)/missing.h $(top_builddir)/config.h
-testsudoers.o: $(srcdir)/testsudoers.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/interfaces.h $(devdir)/gram.h
-tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(SUDODEP)
-visudo.o: $(srcdir)/visudo.c $(SUDODEP) $(devdir)/gram.h
 net_ifs.o: $(top_srcdir)/src/net_ifs.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(top_srcdir)/src/net_ifs.c
+sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/alloc.h $(incdir)/missing.h $(incdir)/error.h $(incdir)/missing.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudoreplay.c
+testsudoers.o: $(srcdir)/testsudoers.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/interfaces.h $(devdir)/gram.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/testsudoers.c
+tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/tsgetgrpw.c
+visudo.o: $(srcdir)/visudo.c $(SUDODEP) $(devdir)/gram.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/visudo.c
 
 install: install-dirs install-plugin install-binaries install-sudoers install-doc
 
