@@ -14,15 +14,29 @@ still allow people to get their work done."
 	vendor="Todd C. Miller"
 	copyright="(c) 1993-1996,1998-2010 Todd C. Miller"
 
+%if [aix]
+	# AIX package summary is limited to 40 characters
+	summary="Configurable super-user privileges"
+
 	# Convert to 4 part version for AIX, including patch level
 	pp_aix_version=`echo $version|sed -e 's/\([0-9]*\.[0-9]*\.[0-9]*\)$/\1.0/' -e 's/[^0-9]*\([0-9]*\)$/.\1/'`
+%endif
 
-	# Strip of patchlevel for kit which only supports x.y.z versions
+%if [kit]
+	# Strip of patchlevel for kit which only supports xyz versions
 	pp_kit_version="`echo $version|sed -e 's/\.//g' -e 's/p[0-9]*$//'`"
 	pp_kit_name="TCM"
+%endif
 
+%if [sd]
 	pp_sd_vendor_tag="TCM"
+%endif
+
+%if [solaris]
 	pp_solaris_name="TCM${name}"
+	pp_solaris_pstamp=`/usr/bin/date "+%B %d, %Y"`
+%endif
+
 %if [rpm,deb]
 	# Convert patch level into release and remove from version
 	pp_rpm_release="`echo $version|sed 's/^[0-9]*\.[0-9]*\.[0-9]*[^0-9]*//'`"
@@ -42,7 +56,7 @@ still allow people to get their work done."
 	mv ${pp_destdir}$sudoersdir/sudoers ${pp_destdir}$sudoersdir/sudoers.dist
 %endif
 
-%set [rpm]
+%if [rpm]
 	# Add distro info to release
 	osrelease=`echo "$pp_rpm_distro" | sed -e 's/^[^0-9]*//' -e 's/-.*$//'`
 	case "$pp_rpm_distro" in
@@ -136,8 +150,9 @@ still allow people to get their work done."
 		fi
 		;;
 	esac
+%endif
 
-%set [deb]
+%if [deb]
 	# Uncomment some Defaults and the %sudo rule in sudoers
 	# Note that the order must match that of sudoers and be tab-indented.
 	/bin/ed - ${pp_destdir}${sudoersdir}/sudoers <<-'EOF'
@@ -157,9 +172,7 @@ still allow people to get their work done."
 	session required pam_permit.so
 	session required pam_limits.so
 	EOF
-
-%set [aix]
-	summary="Configurable super-user privileges"
+%endif
 
 %files
 	$bindir/sudo        4111 root:
