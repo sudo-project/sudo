@@ -37,9 +37,6 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-# include <malloc.h>
-#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
@@ -303,7 +300,7 @@ sudo_ldap_conf_add_ports()
 	}
     }
 
-    free(ldap_conf.host);
+    efree(ldap_conf.host);
     ldap_conf.host = estrdup(hostbuf);
     return;
 
@@ -383,7 +380,7 @@ sudo_ldap_parse_uri(uri_list)
 	    ldap_conf.ssl_mode = SUDO_LDAP_SSL;
 	}
 
-	free(ldap_conf.host);
+	efree(ldap_conf.host);
 	ldap_conf.host = estrdup(hostbuf);
 	efree(buf);
     } while ((uri_list = uri_list->next));
