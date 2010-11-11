@@ -40,6 +40,9 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#if TIME_WITH_SYS_TIME
+# include <time.h>
+#endif
 #include <ctype.h>
 #include <pwd.h>
 #include <grp.h>
@@ -118,6 +121,15 @@ struct ldap_result_list {
     LDAPMessage *result;
 };
 
+/* The TIMEFILTER_LENGTH includes the filter itself plus the global AND
+   wrapped around the user filter and the time filter when timed entries
+   are used. The length is computed as follows:
+       85       for the filter
+       + 2 * 13 for the now timestamp
+       +      3 for the global AND
+*/
+#define TIMEFILTER_LENGTH	114    
+
 struct ldap_config_table {
     const char *conf_str;	/* config file string */
     short type;			/* CONF_BOOL, CONF_INT, CONF_STR */
@@ -143,6 +155,7 @@ static struct ldap_config {
     int use_sasl;
     int rootuse_sasl;
     int ssl_mode;
+    int timed;
     char *host;
     struct ldap_config_list_str *uri;
     char *binddn;
@@ -224,6 +237,7 @@ static struct ldap_config_table ldap_conf_table[] = {
     { "bindpw", CONF_STR, FALSE, -1, &ldap_conf.bindpw },
     { "rootbinddn", CONF_STR, FALSE, -1, &ldap_conf.rootbinddn },
     { "sudoers_base", CONF_LIST_STR, FALSE, -1, &ldap_conf.base },
+    { "sudoers_timed", CONF_BOOL, FALSE, -1, &ldap_conf.timed },
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     { "use_sasl", CONF_BOOL, FALSE, -1, &ldap_conf.use_sasl },
     { "sasl_auth_id", CONF_STR, FALSE, -1, &ldap_conf.sasl_auth_id },
@@ -843,6 +857,63 @@ sudo_ldap_parse_options(ld, entry)
 }
 
 /*
+ * Build an LDAP timefilter.
+ *
+ * Stores a filter in the buffer that makes sure only entries
+ * are selected that have a sudoNotBefore in the past and a
+ * sudoNotAfter in the future, i.e. a filter of the following
+ * structure (spaced out a little more for better readability:
+ *
+ * (&
+ *   (|
+ *	(!(sudoNotAfter=*))
+ *	(sudoNotAfter>__now__)
+ *   )
+ *   (|
+ *	(!(sudoNotBefore=*))
+ *	(sudoNotBefore<__now__)
+ *   )
+ * )
+ *
+ * If either the sudoNotAfter or sudoNotBefore attributes are missing,
+ * no time restriction shall be imposed.
+ */
+static int
+sudo_ldap_timefilter(buffer, buffersize)
+    char *buffer;
+    size_t buffersize;
+{
+    struct tm *tp;
+    time_t now;
+    char timebuffer[16];
+    int bytes = 0;
+
+    /* Make sure we have a formatted timestamp for __now__. */
+    time(&now);
+    if ((tp = gmtime(&now)) == NULL) {
+	warning("unable to get GMT");
+	goto done;
+    }
+
+    /* Format the timestamp according to the RFC. */
+    if (strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%MZ", tp) == 0) {
+	warning("unable to format timestamp");
+	goto done;
+    }
+
+    /* Build filter. */
+    bytes = snprintf(buffer, buffersize, "(&(|(!(sudoNotAfter=*))(sudoNotAfter>=%s))(|(!(sudoNotBefore=*))(sudoNotBefore<=%s)))",
+	timebuffer, timebuffer);
+    if (bytes < 0 || bytes >= buffersize) {
+	warning("unable to build time filter");
+	bytes = 0;
+    }
+
+done:
+    return(bytes);
+}
+
+/*
  * builds together a filter to check against ldap
  */
 static char *
@@ -852,6 +923,7 @@ sudo_ldap_build_pass1(pw)
     struct group *grp;
     size_t sz;
     char *buf;
+    char timebuffer[TIMEFILTER_LENGTH];
     int i;
 
     /* Start with (|(sudoUser=USERNAME)(sudoUser=ALL)) + NUL */
@@ -870,10 +942,22 @@ sudo_ldap_build_pass1(pw)
 	    gr_delref(grp);
 	}
     }
+
+    /* If timed, add space for time limits. */
+    if (ldap_conf.timed)
+	sz += TIMEFILTER_LENGTH;
     buf = emalloc(sz);
+    *buf = '\0';
+
+    /*
+     * If timed, start a global AND clause that will have the time limits
+     * as the second leg.
+     */
+    if (ldap_conf.timed)
+	(void) strlcpy(buf, "(&", sz);
 
     /* Global OR + sudoUser=user_name filter */
-    (void) strlcpy(buf, "(|(sudoUser=", sz);
+    (void) strlcat(buf, "(|(sudoUser=", sz);
     (void) strlcat(buf, pw->pw_name, sz);
     (void) strlcat(buf, ")", sz);
 
@@ -898,8 +982,16 @@ sudo_ldap_build_pass1(pw)
     }
 
     /* Add ALL to list and end the global OR */
-    if (strlcat(buf, "(sudoUser=ALL))", sz) >= sz)
+    if (strlcat(buf, "(sudoUser=ALL)", sz) >= sz)
 	errorx(1, "sudo_ldap_build_pass1 allocation mismatch");
+
+    /* Add the time restriction, or simply end the global OR. */
+    if (ldap_conf.timed) {
+	strlcat(buf, ")", sz); /* closes the global OR */
+	sudo_ldap_timefilter(timebuffer, sizeof(timebuffer));
+	strlcat(buf, timebuffer, sz);
+    }
+    strlcat(buf, ")", sz); /* closes the global OR or the global AND */
 
     return(buf);
 }

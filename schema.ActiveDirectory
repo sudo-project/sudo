@@ -158,6 +158,44 @@ name: sudoRunAsGroup
 schemaIDGUID:: xJhSt/Yd3RGJPTB1VtiVkw==
 objectCategory: CN=Attribute-Schema,CN=Schema,CN=Configuration,DC=X
 
+dn: CN=sudoNotBefore,CN=Schema,CN=Configuration,DC=X
+changetype: add
+objectClass: top
+objectClass: attributeSchema
+cn: sudoNotBefore
+distinguishedName: CN=sudoNotBefore,CN=Schema,CN=Configuration,DC=X
+instanceType: 4
+attributeID: 1.3.6.1.4.1.15953.9.1.8
+attributeSyntax: 1.3.6.1.4.1.1466.115.121.1.24
+isSingleValued: TRUE
+showInAdvancedViewOnly: TRUE
+adminDisplayName: sudoNotBefore
+adminDescription: Start of time interval for which the entry is valid
+oMSyntax: 22
+lDAPDisplayName:  sudoNotBefore
+name: sudoNotBefore
+schemaIDGUID:: xJhSt/Yd3RGJPTB1VtiVkw==
+objectCategory: CN=Attribute-Schema,CN=Schema,CN=Configuration,DC=X
+
+dn: CN=sudoNotAfter,CN=Schema,CN=Configuration,DC=X
+changetype: add
+objectClass: top
+objectClass: attributeSchema
+cn: sudoNotAfter
+distinguishedName: CN=sudoNotAfter,CN=Schema,CN=Configuration,DC=X
+instanceType: 4
+attributeID: 1.3.6.1.4.1.15953.9.1.9
+attributeSyntax: 1.3.6.1.4.1.1466.115.121.1.24
+isSingleValued: TRUE
+showInAdvancedViewOnly: TRUE
+adminDisplayName: sudoNotAfter
+adminDescription: End of time interval for which the entry is valid
+oMSyntax: 22
+lDAPDisplayName:  sudoNotAfter
+name: sudoNotAfter
+schemaIDGUID:: xJhSt/Yd3RGJPTB1VtiVkw==
+objectCategory: CN=Attribute-Schema,CN=Schema,CN=Configuration,DC=X
+
 dn:
 changetype: modify
 add: schemaUpdateNow
@@ -182,6 +220,8 @@ mayContain: sudoRunAs
 mayContain: sudoRunAsUser
 mayContain: sudoRunAsGroup
 mayContain: sudoUser
+mayContain: sudoNotBefore
+mayContain: sudoNotAfter
 rDNAttID: cn
 showInAdvancedViewOnly: FALSE
 adminDisplayName: sudoRole
