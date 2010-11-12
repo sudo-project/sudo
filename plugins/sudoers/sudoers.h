@@ -298,7 +298,7 @@ void validate_env_vars(char * const envp[]);
 char *fmt_string(const char *, const char *);
 
 /* sudoers.c */
-void cleanup(int);
+void plugin_cleanup(int);
 void set_fqdn(void);
 FILE *open_sudoers(const char *, int, int *);
 
