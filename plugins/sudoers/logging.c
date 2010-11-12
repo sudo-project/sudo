@@ -382,7 +382,7 @@ log_error(int flags, const char *fmt, ...)
     restore_perms();
 
     if (!ISSET(flags, NO_EXIT)) {
-	cleanup(0);
+	plugin_cleanup(0);
 	siglongjmp(error_jmp, 1);
     }
 }

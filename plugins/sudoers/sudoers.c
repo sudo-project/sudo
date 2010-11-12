@@ -660,7 +660,7 @@ sudoers_policy_invalidate(int remove)
     user_cmnd = "kill";
     if (sigsetjmp(error_jmp, 1) == 0) {
 	remove_timestamp(remove);
-	cleanup(0);
+	plugin_cleanup(0);
     }
 }
 
