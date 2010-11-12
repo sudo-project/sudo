@@ -138,6 +138,18 @@ The special value C<ALL> will match any user.
 A Unix group or gid (prefixed with C<'#'>) that commands may be run as.
 The special value C<ALL> will match any group.
 
+=item B<sudoNotBefore>
+
+A timestamp in the form C<yyyymmddHHMMZ> that indicates start of validity
+of this C<sudoRole>.
+If multiple B<sudoNotBefore> entries are present, the earliest is used.
+
+=item B<sudoNotAfter>
+
+A timestamp in the form C<yyyymmddHHMMZ> that indicates end of validity
+of this C<sudoRole>.
+If multiple B<sudoNotAfter> entries are present, the last one is used.
+
 =back
 
 Each component listed above should contain a single value, but there
@@ -164,6 +176,10 @@ groups that the user belongs to.  (The special ALL tag is matched
 in this query too.)  If no match is returned for the user's name
 and groups, a third query returns all entries containing user
 netgroups and checks to see if the user belongs to any of them.
+
+If timed entries are enabled with the B<SUDOERS_TIMED> configuration
+directive, the LDAP queries include a subfilter that limits retrieval
+to entries that satisfy the time constraints, if any are present.
 
 =head2 Differences between LDAP and non-LDAP sudoers
 
@@ -305,6 +321,11 @@ The base DN to use when performing B<sudo> LDAP queries.  Typically
 this is of the form C<ou=SUDOers,dc=example,dc=com> for the domain
 C<example.com>.  Multiple B<SUDOERS_BASE> lines may be specified,
 in which case they are queried in the order specified.
+
+=item B<SUDOERS_TIMED> on/true/yes/off/false/no
+
+Whether or not to evaluate the sudoNotBefore and sudoNotAfter
+attributes that implement time-dependent sudoers entries.
 
 =item B<SUDOERS_DEBUG> debug_level
 
@@ -577,6 +598,9 @@ determines sudoers source order on AIX
   # verbose sudoers matching from ldap
   #sudoers_debug 2
   #
+  # Enable support for time-based entries in sudoers.
+  #sudoers_timed yes
+  #
   # optional proxy credentials
   #binddn        <who to search as>
   #bindpw        <password>
@@ -704,11 +728,26 @@ C<include> line in C<slapd.conf> and restart B<slapd>.
     EQUALITY caseExactIA5Match
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
 
+ attributetype ( 1.3.6.1.4.1.15953.9.1.8
+    NAME 'sudoNotBefore'
+    DESC 'Start of time interval for which the entry is valid'
+    EQUALITY generalizedTimeMatch
+    ORDERING generalizedTimeOrderingMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.24 )
+
+ attributetype ( 1.3.6.1.4.1.15953.9.1.9
+    NAME 'sudoNotAfter'
+    DESC 'End of time interval for which the entry is valid'
+    EQUALITY generalizedTimeMatch
+    ORDERING generalizedTimeOrderingMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.24 )
+
  objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL
     DESC 'Sudoer Entries'
     MUST ( cn )
     MAY ( sudoUser $ sudoHost $ sudoCommand $ sudoRunAs $ sudoRunAsUser $
-	  sudoRunAsGroup $ sudoOption $ description )
+	  sudoRunAsGroup $ sudoOption $ sudoNotBefore $ sudoNotAfter $
+	  description )
     )
 
 =head1 SEE ALSO

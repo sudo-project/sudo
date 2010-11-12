@@ -47,6 +47,20 @@ attributetype ( 1.3.6.1.4.1.15953.9.1.7
     EQUALITY caseExactIA5Match
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
 
+attributetype ( 1.3.6.1.4.1.15953.9.1.8
+    NAME 'sudoNotBefore'
+    DESC 'Start of time interval for which the entry is valid'
+    EQUALITY generalizedTimeMatch
+    ORDERING generalizedTimeOrderingMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.24 )
+
+attributetype ( 1.3.6.1.4.1.15953.9.1.9
+    NAME 'sudoNotAfter'
+    DESC 'End of time interval for which the entry is valid'
+    EQUALITY generalizedTimeMatch
+    ORDERING generalizedTimeOrderingMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.24 )
+
 objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL
     DESC 'Sudoer Entries'
     MUST ( cn )
