@@ -169,10 +169,14 @@ done:
 void
 group_plugin_unload(void)
 {
-    (group_plugin->cleanup)();
-    dlclose(group_handle);
-    group_handle = NULL;
-    group_plugin = NULL;
+    if (group_plugin != NULL) {
+	(group_plugin->cleanup)();
+	group_plugin = NULL;
+    }
+    if (group_handle != NULL) {
+	dlclose(group_handle);
+	group_handle = NULL;
+    }
 }
 
 int
