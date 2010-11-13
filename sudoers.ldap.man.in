@@ -140,7 +140,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "November  3, 2010" "1.7.5" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "November 13, 2010" "1.7.5b2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -245,6 +245,24 @@ The special value \f(CW\*(C`ALL\*(C'\fR will match any user.
 .IX Item "sudoRunAsGroup"
 A Unix group or gid (prefixed with \f(CW\*(Aq#\*(Aq\fR) that commands may be run as.
 The special value \f(CW\*(C`ALL\*(C'\fR will match any group.
+.IP "\fBsudoNotBefore\fR" 4
+.IX Item "sudoNotBefore"
+A timestamp in the form \f(CW\*(C`yyyymmddHHMMZ\*(C'\fR that indicates start of validity
+of this \f(CW\*(C`sudoRole\*(C'\fR.
+If multiple \fBsudoNotBefore\fR entries are present, the earliest is used.
+.IP "\fBsudoNotAfter\fR" 4
+.IX Item "sudoNotAfter"
+A timestamp in the form \f(CW\*(C`yyyymmddHHMMZ\*(C'\fR that indicates end of validity
+of this \f(CW\*(C`sudoRole\*(C'\fR.
+If multiple \fBsudoNotAfter\fR entries are present, the last one is used.
+.IP "\fBsudoOrder\fR" 4
+.IX Item "sudoOrder"
+The sudoRole entries retrieved from the \s-1LDAP\s0 directory have no
+inherent order. The \fBsudoOrder\fR attribute is an integer that will
+be used to sort the matching entries.  This allows to more closely
+mimic the behaviour of the sudoers file, where the of the entries
+does have an influence on the result.  If the \fBsudoOrder\fR attribute
+is not present, a value of 0 is assumed.
 .PP
 Each component listed above should contain a single value, but there
 may be multiple instances of each component type.  A sudoRole must
@@ -271,6 +289,10 @@ groups that the user belongs to.  (The special \s-1ALL\s0 tag is matched
 in this query too.)  If no match is returned for the user's name
 and groups, a third query returns all entries containing user
 netgroups and checks to see if the user belongs to any of them.
+.PP
+If timed entries are enabled with the \fB\s-1SUDOERS_TIMED\s0\fR configuration
+directive, the \s-1LDAP\s0 queries include a subfilter that limits retrieval
+to entries that satisfy the time constraints, if any are present.
 .SS "Differences between \s-1LDAP\s0 and non-LDAP sudoers"
 .IX Subsection "Differences between LDAP and non-LDAP sudoers"
 There are some subtle differences in the way sudoers is handled
@@ -405,6 +427,10 @@ The base \s-1DN\s0 to use when performing \fBsudo\fR \s-1LDAP\s0 queries.  Typic
 this is of the form \f(CW\*(C`ou=SUDOers,dc=example,dc=com\*(C'\fR for the domain
 \&\f(CW\*(C`example.com\*(C'\fR.  Multiple \fB\s-1SUDOERS_BASE\s0\fR lines may be specified,
 in which case they are queried in the order specified.
+.IP "\fB\s-1SUDOERS_TIMED\s0\fR on/true/yes/off/false/no" 4
+.IX Item "SUDOERS_TIMED on/true/yes/off/false/no"
+Whether or not to evaluate the \fBsudoNotBefore\fR and \fBsudoNotAfter\fR
+attributes that implement time-dependent sudoers entries.
 .IP "\fB\s-1SUDOERS_DEBUG\s0\fR debug_level" 4
 .IX Item "SUDOERS_DEBUG debug_level"
 This sets the debug level for \fBsudo\fR \s-1LDAP\s0 queries.  Debugging
@@ -664,6 +690,9 @@ determines sudoers source order on \s-1AIX\s0
 \&  # verbose sudoers matching from ldap
 \&  #sudoers_debug 2
 \&  #
+\&  # Enable support for time\-based entries in sudoers.
+\&  #sudoers_timed yes
+\&  #
 \&  # optional proxy credentials
 \&  #binddn        <who to search as>
 \&  #bindpw        <password>
@@ -792,11 +821,33 @@ schema directory (e.g. \fI/etc/openldap/schema\fR), add the proper
 \&    EQUALITY caseExactIA5Match
 \&    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
 \&
+\& attributetype ( 1.3.6.1.4.1.15953.9.1.8
+\&    NAME \*(AqsudoNotBefore\*(Aq
+\&    DESC \*(AqStart of time interval for which the entry is valid\*(Aq
+\&    EQUALITY generalizedTimeMatch
+\&    ORDERING generalizedTimeOrderingMatch
+\&    SYNTAX 1.3.6.1.4.1.1466.115.121.1.24 )
+\&
+\& attributetype ( 1.3.6.1.4.1.15953.9.1.9
+\&    NAME \*(AqsudoNotAfter\*(Aq
+\&    DESC \*(AqEnd of time interval for which the entry is valid\*(Aq
+\&    EQUALITY generalizedTimeMatch
+\&    ORDERING generalizedTimeOrderingMatch
+\&    SYNTAX 1.3.6.1.4.1.1466.115.121.1.24 )
+\&
+\& attributeTypes ( 1.3.6.1.4.1.15953.9.1.10
+\&     NAME \*(AqsudoOrder\*(Aq
+\&     DESC \*(Aqan integer to order the sudoRole entries\*(Aq
+\&     EQUALITY integerMatch
+\&     ORDERING integerOrderingMatch
+\&     SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 )
+\&
 \& objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME \*(AqsudoRole\*(Aq SUP top STRUCTURAL
 \&    DESC \*(AqSudoer Entries\*(Aq
 \&    MUST ( cn )
 \&    MAY ( sudoUser $ sudoHost $ sudoCommand $ sudoRunAs $ sudoRunAsUser $
-\&          sudoRunAsGroup $ sudoOption $ description )
+\&          sudoRunAsGroup $ sudoOption $ sudoNotBefore $ sudoNotAfter $
+\&          sudoOrder $ description )
 \&    )
 .Ve
 .SH "SEE ALSO"
