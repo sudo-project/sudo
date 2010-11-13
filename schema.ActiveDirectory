@@ -196,6 +196,25 @@ name: sudoNotAfter
 schemaIDGUID:: xJhSt/Yd3RGJPTB1VtiVkw==
 objectCategory: CN=Attribute-Schema,CN=Schema,CN=Configuration,DC=X
 
+dn: CN=sudoOrder,CN=Schema,CN=Configuration,DC=X
+changetype: add
+objectClass: top
+objectClass: attributeSchema
+cn: sudoOrder
+distinguishedName: CN=sudoOrder,CN=Schema,CN=Configuration,DC=X
+instanceType: 4
+attributeID: 1.3.6.1.4.1.15953.9.1.10
+attributeSyntax: 1.3.6.1.4.1.1466.115.121.1.27
+isSingleValued: TRUE
+showInAdvancedViewOnly: TRUE
+adminDisplayName: sudoOrder
+adminDescription: an integer to order the sudoRole entries
+oMSyntax: 22
+lDAPDisplayName:  sudoOrder
+name: sudoOrder
+schemaIDGUID:: xJhSt/Yd3RGJPTB1VtiVkw==
+objectCategory: CN=Attribute-Schema,CN=Schema,CN=Configuration,DC=X
+
 dn:
 changetype: modify
 add: schemaUpdateNow
@@ -222,6 +241,7 @@ mayContain: sudoRunAsGroup
 mayContain: sudoUser
 mayContain: sudoNotBefore
 mayContain: sudoNotAfter
+mayContain: sudoOrder
 rDNAttID: cn
 showInAdvancedViewOnly: FALSE
 adminDisplayName: sudoRole
