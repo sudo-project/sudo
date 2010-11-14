@@ -147,7 +147,6 @@ struct ldap_search_list {
 struct ldap_entry_wrapper {
     LDAPMessage	*entry;
     double order;
-    int allowed;
 };
 
 /*
@@ -157,7 +156,9 @@ struct ldap_entry_wrapper {
 struct ldap_result {
     struct ldap_search_list *searches;
     struct ldap_entry_wrapper *entries;
-    int	nentries;
+    int nentries;
+    short user_matches;
+    short host_matches;
 };
 
 struct ldap_config_table {
@@ -1667,18 +1668,18 @@ sudo_ldap_display_cmnd(nss, pw)
     if (ld == NULL)
 	goto done;
 
-    /* the sudo_ldap_result_get method returns all nodes that are match
-       the user and the host */
+    /*
+     * The sudo_ldap_result_get() function returns all nodes that match
+     * the user and the host.
+     */
     DPRINTF(("ldap search for command list"), 1);
     lres = sudo_ldap_result_get(nss, pw);
-
-    /* display all the entries that match */
-    for (found = FALSE, i = 0; (!found) && (i < lres->nentries); i++) {
+    for (i = 0; i < lres->nentries; i++) {
 	entry = sudo_ldap_result_get_entry(lres, i);
 	if (sudo_ldap_check_command(ld, entry, NULL) &&
 	    sudo_ldap_check_runas(ld, entry)) {
-		found = TRUE;
-		goto done;
+	    found = TRUE;
+	    goto done;
 	}
     }
 
@@ -2010,8 +2011,7 @@ sudo_ldap_lookup(nss, ret, pwflag)
     struct sudo_ldap_handle *handle = nss->handle;
     LDAP *ld = handle->ld;
     LDAPMessage *entry;
-    int i, rc, setenv_implied;
-    int ldap_user_matches = FALSE, ldap_host_matches = FALSE;
+    int i, rc, setenv_implied, matched = UNSPEC;
     struct passwd *pw = list_pw ? list_pw : sudo_user.pw;
     struct ldap_result *lres = NULL;
 
@@ -2027,14 +2027,11 @@ sudo_ldap_lookup(nss, ret, pwflag)
      */
     if (pwflag) {
 	DPRINTF(("perform search for pwflag %d", pwflag), 1);
-	int matched = FALSE;
 	int doauth = UNSPEC;
 	enum def_tupple pwcheck = 
 	    (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
 
         for (i = 0; i < lres->nentries; i++) {
-	    ldap_user_matches = TRUE;
-	    ldap_host_matches = TRUE;
 	    entry = sudo_ldap_result_get_entry(lres, i);
 	    if ((pwcheck == any && doauth != FALSE) ||
 		(pwcheck == all && doauth == FALSE)) {
@@ -2076,60 +2073,50 @@ sudo_ldap_lookup(nss, ret, pwflag)
 
     setenv_implied = FALSE;
     for (i = 0; i < lres->nentries; i++) {
-	ldap_user_matches = TRUE;
-	ldap_host_matches = TRUE;
 	entry = sudo_ldap_result_get_entry(lres, i);
-	if (sudo_ldap_check_runas(ld, entry) &&
-	    /* verify command match */
-	    (rc = sudo_ldap_check_command(ld, entry, &setenv_implied)) != UNSPEC
-		) {
-		    /* We have a match, set allowed flag based on rc. */
-		    DPRINTF(("Command %sallowed", rc == TRUE ? "" : "NOT "), 1);
-		    lres->entries[i].allowed = rc;
+	if (!sudo_ldap_check_runas(ld, entry))
+	    continue;
+	rc = sudo_ldap_check_command(ld, entry, &setenv_implied);
+	if (rc != UNSPEC) {
+	    /* We have a match. */
+	    DPRINTF(("Command %sallowed", rc == TRUE ? "" : "NOT "), 1);
+	    matched = TRUE;
+	    if (rc == TRUE) {
+		DPRINTF(("LDAP entry: %p", entry), 1);
+		/* Apply entry-specific options. */
+		if (setenv_implied)
+		    def_setenv = TRUE;
+		sudo_ldap_parse_options(ld, entry);
+#ifdef HAVE_SELINUX
+		/* Set role and type if not specified on command line. */
+		if (user_role == NULL)
+		    user_role = def_role;
+		if (user_type == NULL)
+		    user_type = def_type;
+#endif /* HAVE_SELINUX */
+		SET(ret, VALIDATE_OK);
+		CLR(ret, VALIDATE_NOT_OK);
+	    } else {
+		SET(ret, VALIDATE_NOT_OK);
+		CLR(ret, VALIDATE_OK);
+	    }
+	    break;
 	}
     }
 
-    /* The matching entry with the highest order should now be applied. */
-    /* XXX - will this choose an entry with a non-maching runas user? */
-    entry = sudo_ldap_result_get_entry(lres, 0);
-    DPRINTF(("LDAP entry: %p", entry), 1);
-    if (lres->entries[0].allowed == TRUE) {
-	/* Apply any options. */
-	sudo_ldap_check_command(ld, entry, &setenv_implied);
-	if (setenv_implied)
-	    def_setenv = TRUE;
-	sudo_ldap_parse_options(ld, entry);
-#ifdef HAVE_SELINUX
-	/* Set role and type if not specified on command line. */
-	if (user_role == NULL)
-	    user_role = def_role;
-	if (user_type == NULL)
-	    user_type = def_type;
-#endif /* HAVE_SELINUX */
-	SET(ret, VALIDATE_OK);
-	CLR(ret, VALIDATE_NOT_OK);
-    } else {
-	SET(ret, VALIDATE_NOT_OK);
-	CLR(ret, VALIDATE_OK);
-    }
-
-    /* XXX - if we did not jump to the label "done", then some of
-       the code below is tautological. i.e. ldap_user_matches and
-       ldap_host_matches will be set (otherwise we would not
-       have selected the entry) */
 done:
     DPRINTF(("done with LDAP searches"), 1);
-    DPRINTF(("user_matches=%d", ldap_user_matches), 1);
-    DPRINTF(("host_matches=%d", ldap_host_matches), 1);
+    DPRINTF(("user_matches=%d", lres->user_matches), 1);
+    DPRINTF(("host_matches=%d", lres->host_matches), 1);
 
     if (!ISSET(ret, VALIDATE_OK)) {
 	/* No matching entries. */
 	if (pwflag && list_pw == NULL)
 	    SET(ret, FLAG_NO_CHECK);
     }
-    if (ldap_user_matches)
+    if (lres->user_matches)
 	CLR(ret, FLAG_NO_USER);
-    if (ldap_host_matches)
+    if (lres->host_matches)
 	CLR(ret, FLAG_NO_HOST);
     DPRINTF(("sudo_ldap_lookup(%d)=0x%02x", pwflag, ret), 1);
 
@@ -2200,6 +2187,7 @@ sudo_ldap_result_get(nss, pw)
 		DPRINTF(("nothing found for '%s'", filt), 1);
 		continue;
 	    }
+	    lres->user_matches = TRUE;
 
 	    /* Add the seach result to list of search results. */
 	    DPRINTF(("adding search result"), 1);
@@ -2208,6 +2196,7 @@ sudo_ldap_result_get(nss, pw)
 		if ((!do_netgr ||
 		    sudo_ldap_check_user_netgroup(ld, entry, pw->pw_name)) &&
 		    sudo_ldap_check_host(ld, entry)) {
+		    lres->host_matches = TRUE;
 		    sudo_ldap_result_add_entry(lres, entry);
 		}
 	    }
@@ -2296,6 +2285,8 @@ sudo_ldap_result_alloc()
     result->searches = NULL;
     result->nentries = 0;
     result->entries = NULL;
+    result->user_matches = FALSE;
+    result->host_matches = FALSE;
     return(result);
 }
 
@@ -2388,7 +2379,6 @@ sudo_ldap_result_add_entry(lres, entry)
 	sizeof(lres->entries[0]));
     lres->entries[lres->nentries - 1].entry = entry;
     lres->entries[lres->nentries - 1].order = order;
-    lres->entries[lres->nentries - 1].allowed = UNSPEC;
 
     return(&lres->entries[lres->nentries - 1]);
 }
@@ -2469,6 +2459,7 @@ ldap_entry_compare(a, b)
 
 /*
  * Get an entry by number (index) with bounds checking.
+ * XXX - just inline this.
  */
 static LDAPMessage *
 sudo_ldap_result_get_entry(lres, idx)
