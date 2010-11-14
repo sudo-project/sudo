@@ -292,8 +292,6 @@ static struct ldap_search_list *sudo_ldap_result_add_search
 static struct ldap_entry_wrapper	*sudo_ldap_result_add_entry
     __P((struct ldap_result *lres, LDAPMessage *entry));
 static int ldap_entry_compare __P((const void *a, const void *b));
-static LDAPMessage *sudo_ldap_result_get_entry __P((struct ldap_result *lres,
-    int idx));
 
 /* sudo_nss implementation */
 static int sudo_ldap_open __P((struct sudo_nss *nss));
@@ -1643,7 +1641,7 @@ sudo_ldap_display_privs(nss, pw, lbuf)
 
     /* Display all matching entries. */
     for (i = 0; i < lres->nentries; i++) {
-	entry = sudo_ldap_result_get_entry(lres, i);
+	entry = lres->entries[i].entry;
 	if (long_list)
 	    count += sudo_ldap_display_entry_long(ld, entry, lbuf);
 	else
@@ -1675,7 +1673,7 @@ sudo_ldap_display_cmnd(nss, pw)
     DPRINTF(("ldap search for command list"), 1);
     lres = sudo_ldap_result_get(nss, pw);
     for (i = 0; i < lres->nentries; i++) {
-	entry = sudo_ldap_result_get_entry(lres, i);
+	entry = lres->entries[i].entry;
 	if (sudo_ldap_check_command(ld, entry, NULL) &&
 	    sudo_ldap_check_runas(ld, entry)) {
 	    found = TRUE;
@@ -2032,7 +2030,7 @@ sudo_ldap_lookup(nss, ret, pwflag)
 	    (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
 
         for (i = 0; i < lres->nentries; i++) {
-	    entry = sudo_ldap_result_get_entry(lres, i);
+	    entry = lres->entries[i].entry;
 	    if ((pwcheck == any && doauth != FALSE) ||
 		(pwcheck == all && doauth == FALSE)) {
 		doauth = sudo_ldap_check_bool(ld, entry, "authenticate");
@@ -2073,7 +2071,7 @@ sudo_ldap_lookup(nss, ret, pwflag)
 
     setenv_implied = FALSE;
     for (i = 0; i < lres->nentries; i++) {
-	entry = sudo_ldap_result_get_entry(lres, i);
+	entry = lres->entries[i].entry;
 	if (!sudo_ldap_check_runas(ld, entry))
 	    continue;
 	rc = sudo_ldap_check_command(ld, entry, &setenv_implied);
@@ -2455,18 +2453,4 @@ ldap_entry_compare(a, b)
 
     return(aw->order < bw->order ? -1 :
 	(aw->order > bw->order ? 1 : 0));
-}
-
-/*
- * Get an entry by number (index) with bounds checking.
- * XXX - just inline this.
- */
-static LDAPMessage *
-sudo_ldap_result_get_entry(lres, idx)
-    struct ldap_result *lres;
-    int idx;
-{
-    if (idx < 0 || idx >= lres->nentries)
-	return(NULL);
-    return(lres->entries[idx].entry);
 }
