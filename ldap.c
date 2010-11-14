@@ -283,16 +283,6 @@ static struct ldap_config_table ldap_conf_table[] = {
     { NULL }
 };
 
-/* XXX - reorder code to avoid protos */
-static struct ldap_result *sudo_ldap_result_alloc __P((void));
-static struct ldap_search_list *sudo_ldap_result_last_search __P((struct ldap_result *lres));
-static void sudo_ldap_result_free __P((struct ldap_result *lres));
-static struct ldap_search_list *sudo_ldap_result_add_search
-    __P((struct ldap_result *lres, LDAP *ldap, LDAPMessage *searchresult));
-static struct ldap_entry_wrapper	*sudo_ldap_result_add_entry
-    __P((struct ldap_result *lres, LDAPMessage *entry));
-static int ldap_entry_compare __P((const void *a, const void *b));
-
 /* sudo_nss implementation */
 static int sudo_ldap_open __P((struct sudo_nss *nss));
 static int sudo_ldap_close __P((struct sudo_nss *nss));
@@ -307,11 +297,8 @@ static int sudo_ldap_display_bound_defaults __P((struct sudo_nss *nss,
     struct passwd *pw, struct lbuf *lbuf));
 static int sudo_ldap_display_privs __P((struct sudo_nss *nss,
     struct passwd *pw, struct lbuf *lbuf));
-
-/* ldap retrieval functions using sudo_nss */
 static struct ldap_result *sudo_ldap_result_get __P((struct sudo_nss *nss,
     struct passwd *pw));
-static void sudo_ldap_result_free_nss __P((struct sudo_nss *nss));
 
 /*
  * LDAP sudo_nss handle.
@@ -1807,6 +1794,75 @@ sudo_ldap_set_options(ld)
 }
 
 /*
+ * Create a new sudo_ldap_result structure.
+ */
+static struct ldap_result *
+sudo_ldap_result_alloc()
+{
+    struct ldap_result *result;
+
+    result = emalloc(sizeof(*result));
+    result->searches = NULL;
+    result->nentries = 0;
+    result->entries = NULL;
+    result->user_matches = FALSE;
+    result->host_matches = FALSE;
+    return(result);
+}
+
+/*
+ * Free the ldap result structure
+ */
+static void
+sudo_ldap_result_free(lres)
+    struct ldap_result *lres;
+{
+    struct ldap_search_list *s;
+
+    if (lres != NULL) {
+	if (lres->nentries) {
+	    efree(lres->entries);
+	    lres->entries = NULL;
+	}
+	if (lres->searches) {
+	    while ((s = lres->searches) != NULL) {
+		ldap_msgfree(s->searchresult);
+		lres->searches = s->next;
+		efree(s);
+	    }
+	}
+	efree(lres);
+    }
+}
+
+/*
+ * Add a search result to the ldap_result structure.
+ */
+static struct ldap_search_list *
+sudo_ldap_result_add_search(lres, ldap, searchresult)
+    struct ldap_result *lres;
+    LDAP *ldap;
+    LDAPMessage *searchresult;
+{
+    struct ldap_search_list *s, *news;
+
+    news = emalloc(sizeof(struct ldap_search_list));
+    news->next = NULL;
+    news->ldap = ldap;
+    news->searchresult = searchresult;
+
+    /* Add entry to the end of the chain (XXX - tailq instead?). */
+    if (lres->searches) {
+	for (s = lres->searches; s->next != NULL; s = s->next)
+	    continue;
+	s->next = news;
+    } else {
+	lres->searches = news;
+    }
+    return(news);
+}
+
+/*
  * Connect to the LDAP server specified by ld
  */
 static int
@@ -2122,6 +2178,100 @@ done:
 }
 
 /*
+ * Sort comparison function for ldap_entry_wrapper structures.
+ */
+static int
+ldap_entry_compare(a, b)
+    const void *a;
+    const void *b;
+{
+    const struct ldap_entry_wrapper *aw = a;
+    const struct ldap_entry_wrapper *bw = b;
+
+    return(aw->order < bw->order ? -1 :
+	(aw->order > bw->order ? 1 : 0));
+}
+
+/*
+ * Find the last entry in the list of searches, usually the
+ * one currently being used to add entries.
+ * XXX - use a tailq instead?
+ */
+static struct ldap_search_list *
+sudo_ldap_result_last_search(lres)
+    struct ldap_result *lres;
+{
+    struct ldap_search_list *result = lres->searches;
+
+    if (result) {
+        while (result->next)
+	    result = result->next;
+    }
+    return(result);
+}
+
+/*
+ * Add an entry to the result structure.
+ */
+static struct ldap_entry_wrapper *
+sudo_ldap_result_add_entry(lres, entry)
+    struct ldap_result *lres;
+    LDAPMessage *entry;
+{
+    struct ldap_search_list *last;
+    struct berval **bv;
+    double order = 0.0;
+    char *ep;
+
+    /* Determine whether the entry has the sudoOrder attribute. */
+    last = sudo_ldap_result_last_search(lres);
+    bv = ldap_get_values_len(last->ldap, entry, "sudoOrder");
+    if (bv != NULL) {
+	if (ldap_count_values_len(bv) > 0) {
+	    /* Get the value of this attribute, 0 if not present. */
+	    DPRINTF(("order attribute raw: %s", (*bv)->bv_val), 1);
+	    order = strtod((*bv)->bv_val, &ep);
+	    if (ep == (*bv)->bv_val || *ep != '\0') {
+		warningx("invalid sudoOrder attribute: %s", (*bv)->bv_val);
+		order = 0.0;
+	    }
+	    DPRINTF(("order attribute: %f", order), 1);
+	}
+	ldap_value_free_len(bv);
+    }
+
+    /* Allocate a new entry_wrapper, fill it in and append to the array. */
+    /* XXX - realloc each time can be expensive, preallocate? */
+    lres->nentries++;
+    lres->entries = erealloc3(lres->entries, lres->nentries,
+	sizeof(lres->entries[0]));
+    lres->entries[lres->nentries - 1].entry = entry;
+    lres->entries[lres->nentries - 1].order = order;
+
+    return(&lres->entries[lres->nentries - 1]);
+}
+
+/*
+ * Free the ldap result structure in the sudo_nss handle.
+ */
+static void
+sudo_ldap_result_free_nss(nss)
+    struct sudo_nss *nss;
+{
+    struct sudo_ldap_handle *handle = nss->handle;
+
+    if (handle->result != NULL) {
+	DPRINTF(("removing reusable search result"), 1);
+	sudo_ldap_result_free(handle->result);
+	if (handle->username) {
+	    efree(handle->username);
+	    handle->username = NULL;
+	}
+	handle->result = NULL;
+    }
+}
+
+/*
  * Perform the LDAP query for the user or return a cached query if
  * there is one for this user.
  */
@@ -2216,26 +2366,6 @@ sudo_ldap_result_get(nss, pw)
 }
 
 /*
- * Free the ldap result structure in the sudo_nss handle.
- */
-static void
-sudo_ldap_result_free_nss(nss)
-    struct sudo_nss *nss;
-{
-    struct sudo_ldap_handle *handle = nss->handle;
-
-    if (handle->result != NULL) {
-	DPRINTF(("removing reusable search result"), 1);
-	sudo_ldap_result_free(handle->result);
-	if (handle->username) {
-	    efree(handle->username);
-	    handle->username = NULL;
-	}
-	handle->result = NULL;
-    }
-}
-
-/*
  * Shut down the LDAP connection.
  */
 static int
@@ -2269,134 +2399,6 @@ sudo_ldap_parse(nss)
     struct sudo_nss *nss;
 {
     return(0);
-}
-
-/*
- * Create a new sudo_ldap_result structure.
- */
-static struct ldap_result *
-sudo_ldap_result_alloc()
-{
-    struct ldap_result *result;
-
-    result = emalloc(sizeof(*result));
-    result->searches = NULL;
-    result->nentries = 0;
-    result->entries = NULL;
-    result->user_matches = FALSE;
-    result->host_matches = FALSE;
-    return(result);
-}
-
-/*
- * Free the ldap result structure
- */
-static void
-sudo_ldap_result_free(lres)
-    struct ldap_result *lres;
-{
-    struct ldap_search_list *s;
-
-    if (lres != NULL) {
-	if (lres->nentries) {
-	    efree(lres->entries);
-	    lres->entries = NULL;
-	}
-	if (lres->searches) {
-	    while ((s = lres->searches) != NULL) {
-		ldap_msgfree(s->searchresult);
-		lres->searches = s->next;
-		efree(s);
-	    }
-	}
-	efree(lres);
-    }
-}
-
-/*
- * Add a search result to the ldap_result structure.
- */
-static struct ldap_search_list *
-sudo_ldap_result_add_search(lres, ldap, searchresult)
-    struct ldap_result *lres;
-    LDAP *ldap;
-    LDAPMessage *searchresult;
-{
-    struct ldap_search_list *s, *news;
-
-    news = emalloc(sizeof(struct ldap_search_list));
-    news->next = NULL;
-    news->ldap = ldap;
-    news->searchresult = searchresult;
-
-    /* Add entry to the end of the chain (XXX - tailq instead?). */
-    if (lres->searches) {
-	for (s = lres->searches; s->next != NULL; s = s->next)
-	    continue;
-	s->next = news;
-    } else {
-	lres->searches = news;
-    }
-    return(news);
-}
-
-/*
- * Add an entry to the result structure.
- */
-static struct ldap_entry_wrapper *
-sudo_ldap_result_add_entry(lres, entry)
-    struct ldap_result *lres;
-    LDAPMessage *entry;
-{
-    struct ldap_search_list *last;
-    struct berval **bv;
-    double order = 0.0;
-    char *ep;
-
-    /* Determine whether the entry has the sudoOrder attribute. */
-    last = sudo_ldap_result_last_search(lres);
-    bv = ldap_get_values_len(last->ldap, entry, "sudoOrder");
-    if (bv != NULL) {
-	if (ldap_count_values_len(bv) > 0) {
-	    /* Get the value of this attribute, 0 if not present. */
-	    DPRINTF(("order attribute raw: %s", (*bv)->bv_val), 1);
-	    order = strtod((*bv)->bv_val, &ep);
-	    if (ep == (*bv)->bv_val || *ep != '\0') {
-		warningx("invalid sudoOrder attribute: %s", (*bv)->bv_val);
-		order = 0.0;
-	    }
-	    DPRINTF(("order attribute: %f", order), 1);
-	}
-	ldap_value_free_len(bv);
-    }
-
-    /* Allocate a new entry_wrapper, fill it in and append to the array. */
-    /* XXX - realloc each time can be expensive, preallocate? */
-    lres->nentries++;
-    lres->entries = erealloc3(lres->entries, lres->nentries,
-	sizeof(lres->entries[0]));
-    lres->entries[lres->nentries - 1].entry = entry;
-    lres->entries[lres->nentries - 1].order = order;
-
-    return(&lres->entries[lres->nentries - 1]);
-}
-
-/*
- * Find the last entry in the list of searches, usually the
- * one currently being used to add entries.
- * XXX - use a tailq instead?
- */
-static struct ldap_search_list *
-sudo_ldap_result_last_search(lres)
-    struct ldap_result *lres;
-{
-    struct ldap_search_list *result = lres->searches;
-
-    if (result) {
-        while (result->next)
-	    result = result->next;
-    }
-    return(result);
 }
 
 #if 0
@@ -2439,18 +2441,3 @@ sudo_ldap_result_from_search(ldap, searchresult)
     return(result);
 }
 #endif
-
-/*
- * Sort comparison function for ldap_entry_wrapper structures.
- */
-static int
-ldap_entry_compare(a, b)
-    const void *a;
-    const void *b;
-{
-    const struct ldap_entry_wrapper *aw = a;
-    const struct ldap_entry_wrapper *bw = b;
-
-    return(aw->order < bw->order ? -1 :
-	(aw->order > bw->order ? 1 : 0));
-}
