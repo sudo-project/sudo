@@ -116,11 +116,6 @@
 #define SUDO_LDAP_SSL		1
 #define SUDO_LDAP_STARTTLS	2
 
-struct ldap_result_list {
-    struct ldap_result_list *next;
-    LDAPMessage *result;
-};
-
 /* The TIMEFILTER_LENGTH includes the filter itself plus the global AND
    wrapped around the user filter and the time filter when timed entries
    are used. The length is computed as follows:
@@ -129,6 +124,42 @@ struct ldap_result_list {
        +      3 for the global AND
 */
 #define TIMEFILTER_LENGTH	114    
+
+/*
+ * The ldap_search structure implements a linked list of ldap and
+ * search result pointers, which allows us to remove them after
+ * all search results have been combined in memory.
+ * XXX - should probably be a tailq since we do appends
+ */
+struct ldap_search_list {
+    LDAP *ldap;
+    LDAPMessage *searchresult;
+    struct ldap_search_list *next;
+};
+
+/*
+ * The ldap_entry_wrapper structure is used to implement sorted result entries.
+ * A double is used for the order to allow for insertion of new entries
+ * without having to renumber everything.
+ * Note: there is no standard floating point type in LDAP.
+ *       As a result, some LDAP servers will only allow an integer.
+ */
+struct ldap_entry_wrapper {
+    LDAPMessage	*entry;
+    double order;
+};
+
+/*
+ * The ldap_result structure contains the list of matching searches as
+ * well as an array of all result entries sorted by the sudoOrder attribute.
+ */
+struct ldap_result {
+    struct ldap_search_list *searches;
+    struct ldap_entry_wrapper *entries;
+    int nentries;
+    short user_matches;
+    short host_matches;
+};
 
 struct ldap_config_table {
     const char *conf_str;	/* config file string */
@@ -143,7 +174,7 @@ struct ldap_config_list_str {
     char val[1];
 };
 
-/* ldap configuration structure */
+/* LDAP configuration structure */
 static struct ldap_config {
     int port;
     int version;
@@ -265,6 +296,21 @@ static int sudo_ldap_display_bound_defaults(struct sudo_nss *nss,
     struct passwd *pw, struct lbuf *lbuf);
 static int sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
     struct lbuf *lbuf);
+static struct ldap_result *sudo_ldap_result_get(struct sudo_nss *nss,
+    struct passwd *pw);
+
+/*
+ * LDAP sudo_nss handle.
+ * We store the connection to the LDAP server, the cached ldap_result object
+ * (if any), and the name of the user the query was performed for.
+ * If a new query is launched with sudo_ldap_result_get() that specifies a
+ * different user, the old cached result is freed before the new query is run.
+ */
+struct sudo_ldap_handle {
+    LDAP *ld;
+    struct ldap_result *result;
+    char *username;
+};
 
 struct sudo_nss sudo_nss_ldap = {
     &sudo_nss_ldap,
@@ -524,7 +570,7 @@ sudo_ldap_check_user_netgroup(LDAP *ld, LDAPMessage *entry, char *user)
 	if (netgr_matches(val, NULL, NULL, user))
 	    ret = TRUE;
 	DPRINTF(("ldap sudoUser netgroup '%s' ... %s", val,
-	    ret ? "MATCH!" : "not"), 2);
+	    ret ? "MATCH!" : "not"), 2 + ((ret) ? 0 : 1));
     }
 
     ldap_value_free_len(bv);	/* cleanup */
@@ -854,9 +900,7 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
  * no time restriction shall be imposed.
  */
 static int
-sudo_ldap_timefilter(buffer, buffersize)
-    char *buffer;
-    size_t buffersize;
+sudo_ldap_timefilter(char *buffer, size_t buffersize)
 {
     struct tm *tp;
     time_t now;
@@ -889,15 +933,14 @@ done:
 }
 
 /*
- * builds together a filter to check against ldap
+ * Builds up a filter to check against LDAP.
  */
 static char *
 sudo_ldap_build_pass1(struct passwd *pw)
 {
     struct group *grp;
+    char *buf, timebuffer[TIMEFILTER_LENGTH];
     size_t sz;
-    char *buf;
-    char timebuffer[TIMEFILTER_LENGTH];
     int i;
 
     /* Start with (|(sudoUser=USERNAME)(sudoUser=ALL)) + NUL */
@@ -966,6 +1009,28 @@ sudo_ldap_build_pass1(struct passwd *pw)
 	strlcat(buf, timebuffer, sz);
     }
     strlcat(buf, ")", sz); /* closes the global OR or the global AND */
+
+    return(buf);
+}
+
+/*
+ * Builds up a filter to check against netgroup entries in LDAP.
+ */
+static char *
+sudo_ldap_build_pass2(void)
+{
+    char *buf, timebuffer[TIMEFILTER_LENGTH];
+
+    if (ldap_conf.timed) {
+	/*
+	 * If timed, use a global AND clause that has the time limit as
+	 * as the second leg. 
+	 */
+	easprintf(&buf, "(&(sudoUser=+*)%s)", timebuffer);
+    } else {
+	/* No time limit, just the netgroup selection. */
+	buf = estrdup("sudoUser=+*");
+    }
 
     return(buf);
 }
@@ -1273,7 +1338,8 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 {
     struct berval **bv, **p;
     struct ldap_config_list_str *base;
-    LDAP *ld = (LDAP *) nss->handle;
+    struct sudo_ldap_handle *handle = nss->handle;
+    LDAP *ld = handle->ld;
     LDAPMessage *entry, *result;
     char *prefix;
     int rc, count = 0;
@@ -1455,7 +1521,19 @@ sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
 	lbuf_append(lbuf, "\n", NULL);
     }
 
-    /* get the Command Values from the entry */
+    /*
+     * Display order attribute if present.  This attribute is single valued,
+     * so there is no need for a loop.
+     */
+    bv = ldap_get_values_len(ld, entry, "sudoOrder");
+    if (bv != NULL) {
+	if (*bv != NULL) {
+	    lbuf_append(lbuf, "    Order: ", (*bv)->bv_val, "\n", NULL);
+	}
+	ldap_value_free_len(bv);
+    }
+
+    /* Get the command values from the entry. */
     bv = ldap_get_values_len(ld, entry, "sudoCommand");
     if (bv != NULL) {
 	lbuf_append(lbuf, "    Commands:\n", NULL);
@@ -1476,55 +1554,27 @@ static int
 sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
     struct lbuf *lbuf)
 {
-    struct ldap_config_list_str *base;
-    LDAP *ld = (LDAP *) nss->handle;
-    LDAPMessage *entry, *result;
-    char *filt;
-    int rc, do_netgr, count = 0;
+    struct sudo_ldap_handle *handle = nss->handle;
+    LDAP *ld = handle->ld;
+    struct ldap_result*lres;
+    LDAPMessage *entry;
+    int i, count = 0;
 
     if (ld == NULL)
 	goto done;
 
-    /*
-     * Okay - time to search for anything that matches this user
-     * Lets limit it to only two queries of the LDAP server
-     *
-     * The first pass will look by the username, groups, and
-     * the keyword ALL.  We will then inspect the results that
-     * came back from the query.  We don't need to inspect the
-     * sudoUser in this pass since the LDAP server already scanned
-     * it for us.
-     *
-     * The second pass will return all the entries that contain
-     * user netgroups.  Then we take the netgroups returned and
-     * try to match them against the username.
-     */
-    for (do_netgr = 0; do_netgr < 2; do_netgr++) {
-	filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1(pw);
-	DPRINTF(("ldap search '%s'", filt), 1);
-	for (base = ldap_conf.base; base != NULL; base = base->next) {
-	    result = NULL;
-	    rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE, filt,
-		NULL, 0, NULL, NULL, NULL, 0, &result);
-	    if (rc != LDAP_SUCCESS)
-		continue;	/* no entries for this pass */
+    DPRINTF(("ldap search for command list"), 1);
+    lres = sudo_ldap_result_get(nss, pw);
 
-	    /* print each matching entry */
-	    LDAP_FOREACH(entry, ld, result) {
-		if ((!do_netgr ||
-		    sudo_ldap_check_user_netgroup(ld, entry, pw->pw_name)) &&
-		    sudo_ldap_check_host(ld, entry)) {
-
-		    if (long_list)
-			count += sudo_ldap_display_entry_long(ld, entry, lbuf);
-		    else
-			count += sudo_ldap_display_entry_short(ld, entry, lbuf);
-		}
-	    }
-	    ldap_msgfree(result);
-	}
-	efree(filt);
+    /* Display all matching entries. */
+    for (i = 0; i < lres->nentries; i++) {
+	entry = lres->entries[i].entry;
+	if (long_list)
+	    count += sudo_ldap_display_entry_long(ld, entry, lbuf);
+	else
+	    count += sudo_ldap_display_entry_short(ld, entry, lbuf);
     }
+
 done:
     return(count);
 }
@@ -1532,55 +1582,31 @@ done:
 static int
 sudo_ldap_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 {
-    struct ldap_config_list_str *base;
-    LDAP *ld = (LDAP *) nss->handle;
-    LDAPMessage *entry, *result;		/* used for searches */
-    char *filt;					/* used to parse attributes */
-    int rc, found, do_netgr;			/* temp/final return values */
+    struct sudo_ldap_handle *handle = nss->handle;
+    LDAP *ld = handle->ld;
+    struct ldap_result *lres;
+    LDAPMessage *entry;
+    int i, found = FALSE;
 
     if (ld == NULL)
-	return(1);
+	goto done;
 
     /*
-     * Okay - time to search for anything that matches this user
-     * Lets limit it to only two queries of the LDAP server
-     *
-     * The first pass will look by the username, groups, and
-     * the keyword ALL.  We will then inspect the results that
-     * came back from the query.  We don't need to inspect the
-     * sudoUser in this pass since the LDAP server already scanned
-     * it for us.
-     *
-     * The second pass will return all the entries that contain
-     * user netgroups.  Then we take the netgroups returned and
-     * try to match them against the username.
+     * The sudo_ldap_result_get() function returns all nodes that match
+     * the user and the host.
      */
-    for (found = FALSE, do_netgr = 0; !found && do_netgr < 2; do_netgr++) {
-	filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1(pw);
-	DPRINTF(("ldap search '%s'", filt), 1);
-	for (base = ldap_conf.base; base != NULL; base = base->next) {
-	    result = NULL;
-	    rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE, filt,
-		NULL, 0, NULL, NULL, NULL, 0, &result);
-	    if (rc != LDAP_SUCCESS)
-		continue;	/* no entries for this pass */
-
-	    LDAP_FOREACH(entry, ld, result) {
-		if ((!do_netgr ||
-		    sudo_ldap_check_user_netgroup(ld, entry, pw->pw_name)) &&
-		    sudo_ldap_check_host(ld, entry) &&
-		    sudo_ldap_check_command(ld, entry, NULL) &&
-		    sudo_ldap_check_runas(ld, entry)) {
-
-		    found = TRUE;
-		    break;
-		}
-	    }
-	    ldap_msgfree(result);
+    DPRINTF(("ldap search for command list"), 1);
+    lres = sudo_ldap_result_get(nss, pw);
+    for (i = 0; i < lres->nentries; i++) {
+	entry = lres->entries[i].entry;
+	if (sudo_ldap_check_command(ld, entry, NULL) &&
+	    sudo_ldap_check_runas(ld, entry)) {
+	    found = TRUE;
+	    goto done;
 	}
-	efree(filt);
     }
 
+done:
     if (found)
 	printf("%s%s%s\n", safe_cmnd ? safe_cmnd : user_cmnd,
 	    user_args ? " " : "", user_args ? user_args : "");
@@ -1702,6 +1728,72 @@ sudo_ldap_set_options(LDAP *ld)
 }
 
 /*
+ * Create a new sudo_ldap_result structure.
+ */
+static struct ldap_result *
+sudo_ldap_result_alloc(void)
+{
+    struct ldap_result *result;
+
+    result = emalloc(sizeof(*result));
+    result->searches = NULL;
+    result->nentries = 0;
+    result->entries = NULL;
+    result->user_matches = FALSE;
+    result->host_matches = FALSE;
+    return(result);
+}
+
+/*
+ * Free the ldap result structure
+ */
+static void
+sudo_ldap_result_free(struct ldap_result *lres)
+{
+    struct ldap_search_list *s;
+
+    if (lres != NULL) {
+	if (lres->nentries) {
+	    efree(lres->entries);
+	    lres->entries = NULL;
+	}
+	if (lres->searches) {
+	    while ((s = lres->searches) != NULL) {
+		ldap_msgfree(s->searchresult);
+		lres->searches = s->next;
+		efree(s);
+	    }
+	}
+	efree(lres);
+    }
+}
+
+/*
+ * Add a search result to the ldap_result structure.
+ */
+static struct ldap_search_list *
+sudo_ldap_result_add_search(struct ldap_result *lres, LDAP *ldap,
+    LDAPMessage *searchresult)
+{
+    struct ldap_search_list *s, *news;
+
+    news = emalloc(sizeof(struct ldap_search_list));
+    news->next = NULL;
+    news->ldap = ldap;
+    news->searchresult = searchresult;
+
+    /* Add entry to the end of the chain (XXX - tailq instead?). */
+    if (lres->searches) {
+	for (s = lres->searches; s->next != NULL; s = s->next)
+	    continue;
+	s->next = news;
+    } else {
+	lres->searches = news;
+    }
+    return(news);
+}
+
+/*
  * Connect to the LDAP server specified by ld
  */
 static int
@@ -1789,6 +1881,7 @@ sudo_ldap_open(struct sudo_nss *nss)
 {
     LDAP *ld;
     int rc, ldapnoinit = FALSE;
+    struct sudo_ldap_handle	*handle;
 
     if (!sudo_ldap_read_config())
 	return(-1);
@@ -1849,7 +1942,13 @@ sudo_ldap_open(struct sudo_nss *nss)
     if (sudo_ldap_bind_s(ld) != 0)
 	return(-1);
 
-    nss->handle = ld;
+    /* Create a handle container. */
+    handle = emalloc(sizeof(struct sudo_ldap_handle));
+    handle->ld = ld;
+    handle->result = NULL;
+    handle->username = NULL;
+    nss->handle = handle;
+
     return(0);
 }
 
@@ -1857,9 +1956,10 @@ static int
 sudo_ldap_setdefs(struct sudo_nss *nss)
 {
     struct ldap_config_list_str *base;
-    LDAP *ld = (LDAP *) nss->handle;
-    LDAPMessage *entry, *result;		 /* used for searches */
-    int rc;					 /* temp return value */
+    struct sudo_ldap_handle *handle = nss->handle;
+    LDAP *ld = handle->ld;
+    LDAPMessage *entry, *result;
+    int rc;
 
     if (ld == NULL)
 	return(-1);
@@ -1887,58 +1987,44 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
 static int
 sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 {
-    struct ldap_config_list_str *base;
-    LDAP *ld = (LDAP *) nss->handle;
-    LDAPMessage *entry, *result, *matching_entry = NULL;
-    char *filt;
-    int do_netgr, rc, allowed = UNSPEC;
-    int setenv_implied;
-    int ldap_user_matches = FALSE, ldap_host_matches = FALSE;
+    struct sudo_ldap_handle *handle = nss->handle;
+    LDAP *ld = handle->ld;
+    LDAPMessage *entry;
+    int i, rc, setenv_implied, matched = UNSPEC;
     struct passwd *pw = list_pw ? list_pw : sudo_user.pw;
-    struct ldap_result_list *rl, *results = NULL;
+    struct ldap_result *lres = NULL;
 
     if (ld == NULL)
 	return(ret);
 
+    /* Fetch list of sudoRole entries that match user and host. */
+    lres = sudo_ldap_result_get(nss, pw);
+
+    /*
+     * The following queries are only determine whether or not a
+     * password is required, so the order of the entries doesn't matter.
+     */
     if (pwflag) {
+	DPRINTF(("perform search for pwflag %d", pwflag), 1);
 	int doauth = UNSPEC;
 	enum def_tupple pwcheck = 
 	    (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
 
-	for (allowed = 0, do_netgr = 0; !allowed && do_netgr < 2; do_netgr++) {
-	    filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1(pw);
-	    for (base = ldap_conf.base; base != NULL; base = base->next) {
-		result = NULL;
-		rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE, filt,
-		    NULL, 0, NULL, NULL, NULL, 0, &result);
-		if (rc != LDAP_SUCCESS)
-		    continue;
-
-		LDAP_FOREACH(entry, ld, result) {
-		    /* only verify netgroup matches in pass 2 */
-		    if (do_netgr && !sudo_ldap_check_user_netgroup(ld, entry, pw->pw_name))
-			continue;
-
-		    ldap_user_matches = TRUE;
-		    if (sudo_ldap_check_host(ld, entry)) {
-			ldap_host_matches = TRUE;
-			if ((pwcheck == any && doauth != FALSE) ||
-			    (pwcheck == all && doauth == FALSE))
-			    doauth = sudo_ldap_check_bool(ld, entry, "authenticate");
-			/* Only check the command when listing another user. */
-			if (user_uid == 0 || list_pw == NULL ||
-			    user_uid == list_pw->pw_uid ||
-			    sudo_ldap_check_command(ld, entry, NULL)) {
-			    allowed = 1;
-			    break;	/* end foreach */
-			}
-		    }
-		}
-		ldap_msgfree(result);
+        for (i = 0; i < lres->nentries; i++) {
+	    entry = lres->entries[i].entry;
+	    if ((pwcheck == any && doauth != FALSE) ||
+		(pwcheck == all && doauth == FALSE)) {
+		doauth = sudo_ldap_check_bool(ld, entry, "authenticate");
 	    }
-	    efree(filt);
+	    /* Only check the command when listing another user. */
+	    if (user_uid == 0 || list_pw == NULL ||
+		user_uid == list_pw->pw_uid ||
+		sudo_ldap_check_command(ld, entry, NULL)) {
+		matched = TRUE;
+		break;
+	    }
 	}
-	if (allowed || user_uid == 0) {
+	if (matched || user_uid == 0) {
 	    SET(ret, VALIDATE_OK);
 	    CLR(ret, VALIDATE_NOT_OK);
 	    if (def_authenticate) {
@@ -1962,6 +2048,179 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	goto done;
     }
 
+    DPRINTF(("searching LDAP for sudoers entries"), 1);
+
+    setenv_implied = FALSE;
+    for (i = 0; i < lres->nentries; i++) {
+	entry = lres->entries[i].entry;
+	if (!sudo_ldap_check_runas(ld, entry))
+	    continue;
+	rc = sudo_ldap_check_command(ld, entry, &setenv_implied);
+	if (rc != UNSPEC) {
+	    /* We have a match. */
+	    DPRINTF(("Command %sallowed", rc == TRUE ? "" : "NOT "), 1);
+	    matched = TRUE;
+	    if (rc == TRUE) {
+		DPRINTF(("LDAP entry: %p", entry), 1);
+		/* Apply entry-specific options. */
+		if (setenv_implied)
+		    def_setenv = TRUE;
+		sudo_ldap_parse_options(ld, entry);
+#ifdef HAVE_SELINUX
+		/* Set role and type if not specified on command line. */
+		if (user_role == NULL)
+		    user_role = def_role;
+		if (user_type == NULL)
+		    user_type = def_type;
+#endif /* HAVE_SELINUX */
+		SET(ret, VALIDATE_OK);
+		CLR(ret, VALIDATE_NOT_OK);
+	    } else {
+		SET(ret, VALIDATE_NOT_OK);
+		CLR(ret, VALIDATE_OK);
+	    }
+	    break;
+	}
+    }
+
+done:
+    DPRINTF(("done with LDAP searches"), 1);
+    DPRINTF(("user_matches=%d", lres->user_matches), 1);
+    DPRINTF(("host_matches=%d", lres->host_matches), 1);
+
+    if (!ISSET(ret, VALIDATE_OK)) {
+	/* No matching entries. */
+	if (pwflag && list_pw == NULL)
+	    SET(ret, FLAG_NO_CHECK);
+    }
+    if (lres->user_matches)
+	CLR(ret, FLAG_NO_USER);
+    if (lres->host_matches)
+	CLR(ret, FLAG_NO_HOST);
+    DPRINTF(("sudo_ldap_lookup(%d)=0x%02x", pwflag, ret), 1);
+
+    return(ret);
+}
+
+/*
+ * Sort comparison function for ldap_entry_wrapper structures.
+ */
+static int
+ldap_entry_compare(const void *a, const void *b)
+{
+    const struct ldap_entry_wrapper *aw = a;
+    const struct ldap_entry_wrapper *bw = b;
+
+    return(aw->order < bw->order ? -1 :
+	(aw->order > bw->order ? 1 : 0));
+}
+
+/*
+ * Find the last entry in the list of searches, usually the
+ * one currently being used to add entries.
+ * XXX - use a tailq instead?
+ */
+static struct ldap_search_list *
+sudo_ldap_result_last_search(struct ldap_result *lres)
+{
+    struct ldap_search_list *result = lres->searches;
+
+    if (result) {
+        while (result->next)
+	    result = result->next;
+    }
+    return(result);
+}
+
+/*
+ * Add an entry to the result structure.
+ */
+static struct ldap_entry_wrapper *
+sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
+{
+    struct ldap_search_list *last;
+    struct berval **bv;
+    double order = 0.0;
+    char *ep;
+
+    /* Determine whether the entry has the sudoOrder attribute. */
+    last = sudo_ldap_result_last_search(lres);
+    bv = ldap_get_values_len(last->ldap, entry, "sudoOrder");
+    if (bv != NULL) {
+	if (ldap_count_values_len(bv) > 0) {
+	    /* Get the value of this attribute, 0 if not present. */
+	    DPRINTF(("order attribute raw: %s", (*bv)->bv_val), 1);
+	    order = strtod((*bv)->bv_val, &ep);
+	    if (ep == (*bv)->bv_val || *ep != '\0') {
+		warningx("invalid sudoOrder attribute: %s", (*bv)->bv_val);
+		order = 0.0;
+	    }
+	    DPRINTF(("order attribute: %f", order), 1);
+	}
+	ldap_value_free_len(bv);
+    }
+
+    /* Allocate a new entry_wrapper, fill it in and append to the array. */
+    /* XXX - realloc each time can be expensive, preallocate? */
+    lres->nentries++;
+    lres->entries = erealloc3(lres->entries, lres->nentries,
+	sizeof(lres->entries[0]));
+    lres->entries[lres->nentries - 1].entry = entry;
+    lres->entries[lres->nentries - 1].order = order;
+
+    return(&lres->entries[lres->nentries - 1]);
+}
+
+/*
+ * Free the ldap result structure in the sudo_nss handle.
+ */
+static void
+sudo_ldap_result_free_nss(struct sudo_nss *nss)
+{
+    struct sudo_ldap_handle *handle = nss->handle;
+
+    if (handle->result != NULL) {
+	DPRINTF(("removing reusable search result"), 1);
+	sudo_ldap_result_free(handle->result);
+	if (handle->username) {
+	    efree(handle->username);
+	    handle->username = NULL;
+	}
+	handle->result = NULL;
+    }
+}
+
+/*
+ * Perform the LDAP query for the user or return a cached query if
+ * there is one for this user.
+ */
+static struct ldap_result *
+sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
+{
+    struct sudo_ldap_handle *handle = nss->handle;
+    struct ldap_config_list_str *base;
+    struct ldap_result *lres;
+    LDAPMessage *entry, *result;
+    LDAP *ld = handle->ld;
+    int do_netgr, rc;
+    char *filt;
+
+    /*
+     * If we already have a cached result, return it so we don't have to
+     * have to contact the LDAP server again.
+     */
+    if (handle->result) {
+	if (strcmp(pw->pw_name, handle->username) == 0) {
+	    DPRINTF(("reusing previous result (user %s) with %d entries",
+		handle->username, handle->result->nentries), 1);
+	    return(handle->result);
+	}
+	/* User mismatch, cached result cannot be used. */
+	DPRINTF(("removing result (user %s), new search (user %s)",
+	    handle->username, pw->pw_name), 1);
+	sudo_ldap_result_free_nss(nss);
+    }
+
     /*
      * Okay - time to search for anything that matches this user
      * Lets limit it to only two queries of the LDAP server
@@ -1975,12 +2234,17 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
      * The second pass will return all the entries that contain
      * user netgroups.  Then we take the netgroups returned and
      * try to match them against the username.
+     *
+     * Since we have to sort the possible entries before we make a
+     * decision, we perform the queries and store all of the results in
+     * an ldap_result object.  The results are then sorted by sudoOrder.
      */
-    setenv_implied = FALSE;
-    for (do_netgr = 0; allowed != FALSE && do_netgr < 2; do_netgr++) {
-	filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1(pw);
+    lres = sudo_ldap_result_alloc();
+    for (do_netgr = 0; do_netgr < 2; do_netgr++) {
+	filt = do_netgr ? sudo_ldap_build_pass2() : sudo_ldap_build_pass1(pw);
 	DPRINTF(("ldap search '%s'", filt), 1);
-	for (base = ldap_conf.base; allowed != FALSE && base != NULL; base = base->next) {
+	for (base = ldap_conf.base; base != NULL; base = base->next) {
+	    DPRINTF(("searching from base '%s'", base->val), 1);
 	    result = NULL;
 	    rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE, filt,
 		NULL, 0, NULL, NULL, NULL, 0, &result);
@@ -1988,99 +2252,56 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 		DPRINTF(("nothing found for '%s'", filt), 1);
 		continue;
 	    }
+	    lres->user_matches = TRUE;
 
-	    /* Add result to list for later free()ing. */
-	    rl = emalloc(sizeof(*rl));
-	    rl->result = result;
-	    rl->next = results;
-	    results = rl;
-
-	    /* parse each entry returned from this most recent search */
+	    /* Add the seach result to list of search results. */
+	    DPRINTF(("adding search result"), 1);
+	    sudo_ldap_result_add_search(lres, ld, result);
 	    LDAP_FOREACH(entry, ld, result) {
-		DPRINTF(("found:%s", ldap_get_dn(ld, entry)), 1);
-		if (
-		/* first verify user netgroup matches - only if in pass 2 */
-		    (!do_netgr || sudo_ldap_check_user_netgroup(ld, entry, pw->pw_name)) &&
-		/* remember that user matched */
-		    (ldap_user_matches = TRUE) &&
-		/* verify host match */
-		    sudo_ldap_check_host(ld, entry) &&
-		/* remember that host matched */
-		    (ldap_host_matches = TRUE) &&
-		/* verify runas match */
-		    sudo_ldap_check_runas(ld, entry) &&
-		/* verify command match */
-		    (rc = sudo_ldap_check_command(ld, entry, &setenv_implied)) != UNSPEC
-		    ) {
-		    /* We have a match! */
-		    DPRINTF(("Command %sallowed", rc == TRUE ? "" : "NOT "), 1);
-		    if (rc == FALSE) {
-			/* Command explicitly denied, we are done. */
-			allowed = FALSE;
-			break;
-		    } else if (rc == TRUE && allowed == UNSPEC) {
-			/* Command allowed, no other matches yet. */
-			allowed = TRUE;
-			matching_entry = entry;
-		    }
+		if ((!do_netgr ||
+		    sudo_ldap_check_user_netgroup(ld, entry, pw->pw_name)) &&
+		    sudo_ldap_check_host(ld, entry)) {
+		    lres->host_matches = TRUE;
+		    sudo_ldap_result_add_entry(lres, entry);
 		}
 	    }
+	    DPRINTF(("result now has %d entries", lres->nentries), 1);
 	}
 	efree(filt);
     }
-    if (allowed == TRUE) {
-	SET(ret, VALIDATE_OK);
-	CLR(ret, VALIDATE_NOT_OK);
 
-	/* Set options based on matching entry. */
-	if (setenv_implied)
-	    def_setenv = TRUE;
-	sudo_ldap_parse_options(ld, matching_entry);
-#ifdef HAVE_SELINUX
-	/* Set role and type if not specified on command line. */
-	if (user_role == NULL)
-	    user_role = def_role;
-	if (user_type == NULL)
-	    user_type = def_type;
-#endif /* HAVE_SELINUX */
-    } else if (allowed == FALSE) {
-	SET(ret, VALIDATE_NOT_OK);
-	CLR(ret, VALIDATE_OK);
-    }
+    /* Sort the entries by the sudoOrder attribute. */
+    DPRINTF(("sorting remaining %d entries", lres->nentries), 1);
+    qsort(lres->entries, lres->nentries, sizeof(lres->entries[0]),
+	ldap_entry_compare);
 
-    /* Free all results. */
-    while ((rl = results) != NULL) {
-	results = results->next;
-	ldap_msgfree(rl->result);
-	efree(rl);
-    }
+    /* Store everything in the sudo_nss handle. */
+    handle->result = lres;
+    handle->username = estrdup(pw->pw_name);
 
-done:
-    DPRINTF(("user_matches=%d", ldap_user_matches), 1);
-    DPRINTF(("host_matches=%d", ldap_host_matches), 1);
-
-    if (!ISSET(ret, VALIDATE_OK)) {
-	/* we do not have a match */
-	if (pwflag && list_pw == NULL)
-	    SET(ret, FLAG_NO_CHECK);
-    }
-    if (ldap_user_matches)
-	CLR(ret, FLAG_NO_USER);
-    if (ldap_host_matches)
-	CLR(ret, FLAG_NO_HOST);
-    DPRINTF(("sudo_ldap_lookup(%d)=0x%02x", pwflag, ret), 1);
-
-    return(ret);
+    return(lres);
 }
 
 /*
- * shut down LDAP connection
+ * Shut down the LDAP connection.
  */
 static int
 sudo_ldap_close(struct sudo_nss *nss)
 {
-    if (nss->handle != NULL) {
-	ldap_unbind_ext_s((LDAP *) nss->handle, NULL, NULL);
+    struct sudo_ldap_handle *handle = nss->handle;
+
+    if (handle != NULL) {
+	/* Free the result before unbinding; it may use the LDAP connection. */
+	sudo_ldap_result_free_nss(nss);
+
+	/* Unbind and close the LDAP connection. */
+	if (handle->ld != NULL) {
+	    ldap_unbind_ext_s(handle->ld, NULL, NULL);
+	    handle->ld = NULL;
+	}
+
+	/* Free the handle container. */
+	efree(nss->handle);
 	nss->handle = NULL;
     }
     return(0);
@@ -2094,3 +2315,42 @@ sudo_ldap_parse(struct sudo_nss *nss)
 {
     return(0);
 }
+
+#if 0
+/*
+ * Create an ldap_result from an LDAP search result.
+ *
+ * This function is currently not used anywhere, it is left here as
+ * an example of how to use the cached searches.
+ */
+static struct ldap_result *
+sudo_ldap_result_from_search(LDAP *ldap, LDAPMessage *searchresult)
+{
+    /*
+     * An ldap_result is built from several search results, which are
+     * organized in a list. The head of the list is maintained in the
+     * ldap_result structure, together with the wrappers that point
+     * to individual entries, this has to be initialized first.
+     */
+    struct ldap_result *result = sudo_ldap_result_alloc();
+
+    /*
+     * Build a new list node for the search result, this creates the
+     * list node.
+     */
+    struct ldap_search_list *last = sudo_ldap_result_add_search(result,
+	ldap, searchresult);
+
+    /*
+     * Now add each entry in the search result to the array of of entries
+     * in the ldap_result object.
+     */
+    LDAPMessage	*entry;
+    LDAP_FOREACH(entry, last->ldap, last->searchresult) {
+	sudo_ldap_result_add_entry(result, entry);
+    }
+    DPRINTF(("sudo_ldap_result_from_search: %d entries found",
+	result->nentries), 2);
+    return(result);
+}
+#endif
