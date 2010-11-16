@@ -8,6 +8,14 @@ A) This usually means you either don't have a working compiler.  This
    to why this is happening.  On many systems, compiler components live
    in /usr/ccs/bin which may not be in your PATH environment variable.
 
+Q) When I run configure, it says "sudo requires the 'ar' utility to build".
+A) As part of the build process, sudo creates a temporary library containing
+   objects that are shared amongst the different sudo executables.
+   On Unix systems, the "ar" utility is used to do this.  This error
+   indicates that "ar" is missing on your system.  On Solaris systems,
+   you may need to install the SUNWbtool package.  On other systems
+   "ar" may be included in the GNU binutils package.
+
 Q) Sudo compiles but when I run it I get "Sorry, sudo must be setuid root."
    and sudo quits.
 A) Sudo must be setuid root to do its work.  You need to do something like
