@@ -1322,6 +1322,9 @@ AC_SEARCH_LIBS([strerror], [cposix])
 AC_PROG_CPP
 AC_CHECK_TOOL(AR, ar, false)
 AC_CHECK_TOOL(RANLIB, ranlib, :)
+if test X"$AR" = X"false"; then
+    AC_MSG_ERROR([the "ar" utility is required to build sudo])
+fi
 
 if test "x$ac_cv_prog_cc_c89" = "xno"; then
     AC_MSG_ERROR([Sudo version $PACKAGE_VERSION requires an ANSI C compiler to build.])
