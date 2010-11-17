@@ -156,10 +156,12 @@ struct ldap_entry_wrapper {
 struct ldap_result {
     struct ldap_search_list *searches;
     struct ldap_entry_wrapper *entries;
+    int allocated_entries;
     int nentries;
-    short user_matches;
-    short host_matches;
+    int user_matches;
+    int host_matches;
 };
+#define	ALLOCATION_INCREMENT	100
 
 struct ldap_config_table {
     const char *conf_str;	/* config file string */
@@ -1740,6 +1742,7 @@ sudo_ldap_result_alloc(void)
     result->searches = NULL;
     result->nentries = 0;
     result->entries = NULL;
+    result->allocated_entries = 0;
     result->user_matches = FALSE;
     result->host_matches = FALSE;
     return(result);
@@ -2161,11 +2164,17 @@ sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
 	ldap_value_free_len(bv);
     }
 
-    /* Allocate a new entry_wrapper, fill it in and append to the array. */
-    /* XXX - realloc each time can be expensive, preallocate? */
-    lres->nentries++;
-    lres->entries = erealloc3(lres->entries, lres->nentries,
-	sizeof(lres->entries[0]));
+    /*
+     * Enlarge the array of entry wrappers as needed, preallocating blocks
+     * of 100 entries to save on allocation time.
+     */
+    if (++lres->nentries > lres->allocated_entries) {
+	lres->allocated_entries += ALLOCATION_INCREMENT;
+	lres->entries = erealloc3(lres->entries, lres->allocated_entries,
+	    sizeof(lres->entries[0]));
+    }
+
+    /* Fill in the new entry and return it. */
     lres->entries[lres->nentries - 1].entry = entry;
     lres->entries[lres->nentries - 1].order = order;
 
