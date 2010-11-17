@@ -1054,6 +1054,7 @@ sudo_ldap_build_pass2()
 	 * If timed, use a global AND clause that has the time limit as
 	 * as the second leg. 
 	 */
+	sudo_ldap_timefilter(timebuffer, sizeof(timebuffer));
 	easprintf(&buf, "(&(sudoUser=+*)%s)", timebuffer);
     } else {
 	/* No time limit, just the netgroup selection. */
