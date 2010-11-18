@@ -155,7 +155,7 @@ group_plugin_load(char *plugin_info)
 done:
     efree(argv);
 
-    if (rc != 0) {
+    if (rc != TRUE) {
 	if (group_handle != NULL) {
 	    dlclose(group_handle);
 	    group_handle = NULL;
