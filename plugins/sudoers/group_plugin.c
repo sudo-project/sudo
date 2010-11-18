@@ -183,6 +183,8 @@ int
 group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd)
 {
+    if (group_plugin == NULL)
+	return FALSE;
     return (group_plugin->query)(user, group, pwd);
 }
 
