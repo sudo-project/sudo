@@ -81,6 +81,7 @@ void print_userspecs(void);
 void usage(void) __attribute__((__noreturn__));
 void set_runasgr(char *);
 void set_runaspw(char *);
+void cleanup(int);
 static int testsudoers_printf(int msg_type, const char *fmt, ...);
 
 extern void setgrfile(const char *);

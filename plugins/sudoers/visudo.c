@@ -113,6 +113,8 @@ static void print_undefined(char *name, int, int, int);
 static void setup_signals(void);
 static void usage(void) __attribute__((__noreturn__));
 
+void cleanup(int);
+
 extern void yyerror(const char *);
 extern void yyrestart(FILE *);
 
