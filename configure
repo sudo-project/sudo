@@ -14219,6 +14219,63 @@ rm -rf conftest*
   fi
 fi
 
+case "$host" in
+    *-*-hpux11.*)
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether sys/types.h needs _XOPEN_SOURCE_EXTENDED" >&5
+$as_echo_n "checking whether sys/types.h needs _XOPEN_SOURCE_EXTENDED... " >&6; }
+if test "${sudo_cv_xopen_source_extended+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+	#include <sys/socket.h>
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  sudo_cv_xopen_source_extended=no
+else
+
+	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#define _XOPEN_SOURCE_EXTENDED
+	    $ac_includes_default
+	    #include <sys/socket.h>
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  sudo_cv_xopen_source_extended=yes
+else
+  sudo_cv_xopen_source_extended=error
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_xopen_source_extended" >&5
+$as_echo "$sudo_cv_xopen_source_extended" >&6; }
+	if test "$sudo_cv_xopen_source_extended" = "yes"; then
+	    OSDEFS="${OSDEFS} -D_XOPEN_SOURCE_EXTENDED"
+	    cat >>confdefs.h <<\EOF
+#define _XOPEN_SOURCE_EXTENDED 1
+EOF
+
+	fi
+	;;
+esac
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking POSIX termios" >&5
 $as_echo_n "checking POSIX termios... " >&6; }
 if test "${ac_cv_sys_posix_termios+set}" = set; then :
@@ -14260,11 +14317,10 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 $ac_includes_default
 #include <paths.h>
-int main() {char *p = _PATH_MAILDIR;}
 int
 main ()
 {
-
+char *p = _PATH_MAILDIR;
   ;
   return 0;
 }

@@ -1876,7 +1876,27 @@ AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_TIME
 AC_CHECK_HEADERS(malloc.h paths.h utime.h netgroup.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h)
+dnl
+dnl Check for large file support.  HP-UX 11.23 has a broken sys/type.h
+dnl when large files support is enabled so work around it.
+dnl
 AC_SYS_LARGEFILE
+case "$host" in
+    *-*-hpux11.*)
+	AC_CACHE_CHECK([whether sys/types.h needs _XOPEN_SOURCE_EXTENDED], [sudo_cv_xopen_source_extended],
+	[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
+	#include <sys/socket.h>], [])], [sudo_cv_xopen_source_extended=no], [
+	    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#define _XOPEN_SOURCE_EXTENDED
+	    AC_INCLUDES_DEFAULT
+	    #include <sys/socket.h>], [])], [sudo_cv_xopen_source_extended=yes],
+	    [sudo_cv_xopen_source_extended=error])
+	])])
+	if test "$sudo_cv_xopen_source_extended" = "yes"; then
+	    OSDEFS="${OSDEFS} -D_XOPEN_SOURCE_EXTENDED"
+	    SUDO_DEFINE(_XOPEN_SOURCE_EXTENDED)
+	fi
+	;;
+esac
 AC_SYS_POSIX_TERMIOS
 if test "$ac_cv_sys_posix_termios" != "yes"; then
     AC_MSG_ERROR([Must have POSIX termios to build sudo])
