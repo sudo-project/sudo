@@ -323,8 +323,8 @@ AC_DEFUN(SUDO_MAILDIR, [
 maildir=no
 if test X"$ac_cv_header_paths_h" = X"yes"; then
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
-#include <paths.h>
-int main() {char *p = _PATH_MAILDIR;}], [])], [maildir=yes], [])
+#include <paths.h>],
+[char *p = _PATH_MAILDIR;])], [maildir=yes], [])
 fi
 if test $maildir = no; then
     # Solaris has maillock.h which defines MAILDIR
