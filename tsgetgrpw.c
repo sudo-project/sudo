@@ -44,9 +44,8 @@
 #endif /* HAVE_STRINGS_H */
 #include <fcntl.h>
 #include <limits.h>
-#include <pwd.h>
-#include <grp.h>
 
+#include "tsgetgrpw.h"
 #include "sudo.h"
 
 #ifndef LINE_MAX
@@ -63,20 +62,6 @@ static int pw_stayopen;
 static FILE *grf;
 static const char *grfile = "/etc/group";
 static int gr_stayopen;
-
-void setgrfile __P((const char *));
-void setgrent __P((void));
-void endgrent __P((void));
-struct group *getgrent __P((void));
-struct group *getgrnam __P((const char *));
-struct group *getgrgid __P((gid_t));
-
-void setpwfile __P((const char *));
-void setpwent __P((void));
-void endpwent __P((void));
-struct passwd *getpwent __P((void));
-struct passwd *getpwnam __P((const char *));
-struct passwd *getpwuid __P((uid_t));
 
 void
 setpwfile(file)

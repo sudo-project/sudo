@@ -60,6 +60,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
+#include "tsgetgrpw.h"
 #include "sudo.h"
 #include "interfaces.h"
 #include "parse.h"
@@ -99,19 +100,6 @@ void print_userspecs __P((void));
 void usage __P((void)) __attribute__((__noreturn__));
 void set_runasgr __P((char *));
 void set_runaspw __P((char *));
-
-extern void setgrfile __P((const char *));
-extern void setgrent __P((void));
-extern void endgrent __P((void));
-extern struct group *getgrent __P((void));
-extern struct group *getgrnam __P((const char *));
-extern struct group *getgrgid __P((gid_t));
-extern void setpwfile __P((const char *));
-extern void setpwent __P((void));
-extern void endpwent __P((void));
-extern struct passwd *getpwent __P((void));
-extern struct passwd *getpwnam __P((const char *));
-extern struct passwd *getpwuid __P((uid_t));
 
 int
 main(argc, argv)
