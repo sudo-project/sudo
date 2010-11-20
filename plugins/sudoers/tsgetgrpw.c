@@ -44,9 +44,8 @@
 #endif /* HAVE_STRINGS_H */
 #include <fcntl.h>
 #include <limits.h>
-#include <pwd.h>
-#include <grp.h>
 
+#include "tsgetgrpw.h"
 #include "sudoers.h"
 
 #ifndef LINE_MAX

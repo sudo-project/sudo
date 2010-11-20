@@ -183,6 +183,7 @@ plugins/sudoers/timestr.c
 plugins/sudoers/toke.c
 plugins/sudoers/toke.l
 plugins/sudoers/tsgetgrpw.c
+plugins/sudoers/tsgetgrpw.h
 plugins/sudoers/visudo.c
 pp
 src/Makefile.in

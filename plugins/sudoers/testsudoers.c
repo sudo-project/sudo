@@ -55,12 +55,11 @@
 #endif /* HAVE_NETGROUP_H */
 #include <ctype.h>
 #include <errno.h>
-#include <pwd.h>
-#include <grp.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 
+#include "tsgetgrpw.h"
 #include "sudoers.h"
 #include "interfaces.h"
 #include "parse.h"
