@@ -23,8 +23,8 @@ still allow people to get their work done."
 %endif
 
 %if [kit]
-	# Strip of patchlevel for kit which only supports xyz versions
-	pp_kit_version="`echo $version|sed -e 's/\.//g' -e 's/p[0-9]*$//'`"
+	# Strip off patchlevel for kit which only supports xyz versions
+	pp_kit_version="`echo $version|sed -e 's/\.//g' -e 's/[bp][0-9]*$//'`"
 	pp_kit_name="TCM"
 %endif
 
