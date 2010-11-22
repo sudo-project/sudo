@@ -1600,7 +1600,7 @@ arbitrary commands.  Many editors have a restricted mode where shell
 escapes are disabled, though B<sudoedit> is a better solution to
 running editors via B<sudo>.  Due to the large number of programs that
 offer shell escapes, restricting users to the set of programs that
-do not if often unworkable.
+do not is often unworkable.
 
 =item noexec
 
