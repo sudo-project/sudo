@@ -350,6 +350,34 @@ cmnd_matches(struct member *m)
     return(matched);
 }
 
+static int
+command_args_match(sudoers_cmnd, sudoers_args)
+    char *sudoers_cmnd;
+    char *sudoers_args;
+{
+    int flags = 0;
+
+    /*
+     * If no args specified in sudoers, any user args are allowed.
+     * If the empty string is specified in sudoers, no user args are allowed.
+     */
+    if (!sudoers_args ||
+	(!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)))
+	return TRUE;
+    /*
+     * If args are specified in sudoers, they must match the user args.
+     * If running as sudoedit, all args are assumed to be paths.
+     */
+    if (sudoers_args) {
+	/* For sudoedit, all args are assumed to be pathnames. */
+	if (strcmp(sudoers_cmnd, "sudoedit") == 0)
+	    flags = FNM_PATHNAME;
+	if (fnmatch(sudoers_args, user_args ? user_args : "", flags) == 0)
+	    return TRUE;
+    }
+    return FALSE;
+}
+
 /*
  * If path doesn't end in /, return TRUE iff cmnd & path name the same inode;
  * otherwise, return TRUE if user_cmnd names one of the inodes in path.
@@ -368,10 +396,7 @@ command_matches(char *sudoers_cmnd, char *sudoers_args)
 	if (strcmp(sudoers_cmnd, "sudoedit") != 0 ||
 	    strcmp(user_cmnd, "sudoedit") != 0)
 	    return(FALSE);
-	if (!sudoers_args ||
-	    (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
-	    (sudoers_args &&
-	     fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0)) {
+	if (command_args_match(sudoers_cmnd, sudoers_args)) {
 	    efree(safe_cmnd);
 	    safe_cmnd = estrdup(sudoers_cmnd);
 	    return(TRUE);
@@ -403,10 +428,7 @@ command_matches_fnmatch(char *sudoers_cmnd, char *sudoers_args)
      */
     if (fnmatch(sudoers_cmnd, user_cmnd, FNM_PATHNAME) != 0)
 	return(FALSE);
-    if (!sudoers_args ||
-	(!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
-	(sudoers_args &&
-	 fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0)) {
+    if (command_args_match(sudoers_cmnd, sudoers_args)) {
 	if (safe_cmnd)
 	    free(safe_cmnd);
 	safe_cmnd = estrdup(user_cmnd);
@@ -478,10 +500,7 @@ command_matches_glob(char *sudoers_cmnd, char *sudoers_args)
     if (cp == NULL)
 	return(FALSE);
 
-    if (!sudoers_args ||
-	(!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
-	(sudoers_args &&
-	 fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0)) {
+    if (command_args_match(sudoers_cmnd, sudoers_args)) {
 	efree(safe_cmnd);
 	safe_cmnd = estrdup(user_cmnd);
 	return(TRUE);
@@ -520,10 +539,7 @@ command_matches_normal(char *sudoers_cmnd, char *sudoers_args)
 	(user_stat->st_dev != sudoers_stat.st_dev ||
 	user_stat->st_ino != sudoers_stat.st_ino))
 	return(FALSE);
-    if (!sudoers_args ||
-	(!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
-	(sudoers_args &&
-	 fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0)) {
+    if (command_args_match(sudoers_cmnd, sudoers_args)) {
 	efree(safe_cmnd);
 	safe_cmnd = estrdup(sudoers_cmnd);
 	return(TRUE);
