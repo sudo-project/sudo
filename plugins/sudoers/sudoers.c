@@ -1349,14 +1349,11 @@ create_admin_success_flag(void)
 
     /* Create admin flag file if it doesn't already exist. */
     set_perms(PERM_USER);
-    if (stat(flagfile, &statbuf) == 0) {
-	set_perms(PERM_ROOT);
-	return;
+    if (stat(flagfile, &statbuf) != 0) {
+	fd = open(flagfile, O_CREAT|O_WRONLY|O_EXCL, 0644);
+	close(fd);
     }
-
-    fd = open(flagfile, O_CREAT|O_WRONLY|O_EXCL, 0644);
-    close(fd);
-    set_perms(PERM_ROOT);
+    restore_perms();
 }
 #else /* !USE_ADMIN_FLAG */
 static void
