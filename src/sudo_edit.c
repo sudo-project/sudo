@@ -104,7 +104,10 @@ sudo_edit(struct command_details *command_details, char *argv[], char *envp[])
      * Set real, effective and saved uids to root.
      * We will change the euid as needed below.
      */
-    setuid(ROOT_UID);
+    if (setuid(ROOT_UID) != 0) {
+	warning("unable to change to uid to root (%u)", ROOT_UID);
+	return 1;
+    }
 
     /*
      * Find our temporary directory, one of /var/tmp, /usr/tmp, or /tmp
