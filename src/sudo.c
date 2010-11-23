@@ -730,6 +730,14 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     int rval = FALSE;
     struct passwd *pw;
 
+    /*
+     * This function must run with root privileges.
+     */
+    if (setuid(ROOT_UID) != 0) {
+	warning("unable to change to uid to root (%u)", ROOT_UID);
+	goto done;
+    }
+
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb(IDtouser(details->euid));
 #endif
@@ -791,12 +799,12 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
      */
 #ifdef HAVE_SETEUID
     if (ISSET(details->flags, CD_SET_EGID) && setegid(details->egid)) {
-	warning("unable to set egid to runas gid");
+	warning("unable to set egid to runas gid %u", details->egid);
 	goto done;
     }
 #endif
     if (ISSET(details->flags, CD_SET_GID) && setgid(details->gid)) {
-	warning("unable to set gid to runas gid");
+	warning("unable to set gid to runas gid %u", details->gid);
 	goto done;
     }
 
@@ -833,17 +841,20 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 
 #ifdef HAVE_SETRESUID
     if (setresuid(details->uid, details->euid, details->euid) != 0) {
-	warning("unable to change to runas uid");
+	warning("unable to change to runas uid (%u, %u)", details->uid,
+	    details->euid);
 	goto done;
     }
 #elif HAVE_SETREUID
     if (setreuid(details->uid, details->euid) != 0) {
-	warning("unable to change to runas uid");
+	warning("unable to change to runas uid (%u, %u)", details->uid,
+	    details->euid);
 	goto done;
     }
 #else
     if (seteuid(details->euid) != 0 || setuid(details->euid) != 0) {
-	warning("unable to change to runas uid");
+	warning("unable to change to runas uid (%u, %u)", details->uid,
+	    details->euid);
 	goto done;
     }
 #endif /* !HAVE_SETRESUID && !HAVE_SETREUID */
