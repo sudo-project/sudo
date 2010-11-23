@@ -730,14 +730,6 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     int rval = FALSE;
     struct passwd *pw;
 
-    /*
-     * This function must run with root privileges.
-     */
-    if (setuid(ROOT_UID) != 0) {
-	warning("unable to change to uid to root (%u)", ROOT_UID);
-	goto done;
-    }
-
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb(IDtouser(details->euid));
 #endif
