@@ -1,6 +1,6 @@
 #!/bin/sh
 # (c) 2010 Quest Software, Inc. All rights reserved
-pp_revision="297"
+pp_revision="298"
  # Copyright 2010 Quest Software, Inc.  All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -438,7 +438,7 @@ pp_unique () {
 
 pp_mode_strip_altaccess () {
     case "$1" in
-	??????????+)
+	??????????[+.])
 	    echo `echo "$1" | cut -b -10`;;
 	*)
 	    echo "$1";;
