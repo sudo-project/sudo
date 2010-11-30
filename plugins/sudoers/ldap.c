@@ -1342,13 +1342,14 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     struct berval **bv, **p;
     struct ldap_config_list_str *base;
     struct sudo_ldap_handle *handle = nss->handle;
-    LDAP *ld = handle->ld;
+    LDAP *ld;
     LDAPMessage *entry, *result;
     char *prefix;
     int rc, count = 0;
 
-    if (ld == NULL)
+    if (handle == NULL || handle->ld == NULL)
 	goto done;
+    ld = handle->ld;
 
     for (base = ldap_conf.base; base != NULL; base = base->next) {
 	result = NULL;
@@ -1558,13 +1559,14 @@ sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
     struct lbuf *lbuf)
 {
     struct sudo_ldap_handle *handle = nss->handle;
-    LDAP *ld = handle->ld;
-    struct ldap_result*lres;
+    LDAP *ld;
+    struct ldap_result *lres;
     LDAPMessage *entry;
     int i, count = 0;
 
-    if (ld == NULL)
+    if (handle == NULL || handle->ld == NULL)
 	goto done;
+    ld = handle->ld;
 
     DPRINTF(("ldap search for command list"), 1);
     lres = sudo_ldap_result_get(nss, pw);
@@ -1586,13 +1588,14 @@ static int
 sudo_ldap_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_ldap_handle *handle = nss->handle;
-    LDAP *ld = handle->ld;
+    LDAP *ld;
     struct ldap_result *lres;
     LDAPMessage *entry;
     int i, found = FALSE;
 
-    if (ld == NULL)
+    if (handle == NULL || handle->ld == NULL)
 	goto done;
+    ld = handle->ld;
 
     /*
      * The sudo_ldap_result_get() function returns all nodes that match
@@ -1961,12 +1964,13 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
 {
     struct ldap_config_list_str *base;
     struct sudo_ldap_handle *handle = nss->handle;
-    LDAP *ld = handle->ld;
+    LDAP *ld;
     LDAPMessage *entry, *result;
     int rc;
 
-    if (ld == NULL)
+    if (handle == NULL || handle->ld == NULL)
 	return(-1);
+    ld = handle->ld;
 
     for (base = ldap_conf.base; base != NULL; base = base->next) {
 	result = NULL;
@@ -1992,14 +1996,15 @@ static int
 sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 {
     struct sudo_ldap_handle *handle = nss->handle;
-    LDAP *ld = handle->ld;
+    LDAP *ld;
     LDAPMessage *entry;
     int i, rc, setenv_implied, matched = UNSPEC;
     struct passwd *pw = list_pw ? list_pw : sudo_user.pw;
     struct ldap_result *lres = NULL;
 
-    if (ld == NULL)
+    if (handle == NULL || handle->ld == NULL)
 	return(ret);
+    ld = handle->ld;
 
     /* Fetch list of sudoRole entries that match user and host. */
     lres = sudo_ldap_result_get(nss, pw);
