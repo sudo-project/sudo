@@ -646,8 +646,8 @@ init_vars(envp)
 	char pw_name[MAX_UID_T_LEN + 1];
 
 	pw.pw_uid = getuid();
-	(void) snprintf(pw_name, sizeof(pw_name), "%lu",
-	    (unsigned long) pw.pw_uid);
+	(void) snprintf(pw_name, sizeof(pw_name), "%u",
+	    (unsigned int) pw.pw_uid);
 	pw.pw_name = pw_name;
 	sudo_user.pw = &pw;
 
@@ -1013,11 +1013,11 @@ open_sudoers(sudoers, doedit, keepopen)
 	    (unsigned int) (statbuf.st_mode & 07777),
 	    (unsigned int) SUDOERS_MODE);
     else if (statbuf.st_uid != SUDOERS_UID)
-	log_error(NO_EXIT, "%s is owned by uid %lu, should be %lu", sudoers,
-	    (unsigned long) statbuf.st_uid, (unsigned long) SUDOERS_UID);
+	log_error(NO_EXIT, "%s is owned by uid %u, should be %u", sudoers,
+	    (unsigned int) statbuf.st_uid, (unsigned int) SUDOERS_UID);
     else if (statbuf.st_gid != SUDOERS_GID)
-	log_error(NO_EXIT, "%s is owned by gid %lu, should be %lu", sudoers,
-	    (unsigned long) statbuf.st_gid, (unsigned long) SUDOERS_GID);
+	log_error(NO_EXIT, "%s is owned by gid %u, should be %u", sudoers,
+	    (unsigned int) statbuf.st_gid, (unsigned int) SUDOERS_GID);
     else if ((fp = fopen(sudoers, "r")) == NULL)
 	log_error(USE_ERRNO|NO_EXIT, "can't open %s", sudoers);
     else {
