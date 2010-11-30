@@ -324,8 +324,8 @@ get_user_groups(struct user_details *ud)
     cp = gid_list + sizeof("groups=") - 1;
     for (i = 0; i < ud->ngroups; i++) {
 	/* XXX - check rval */
-	len = snprintf(cp, glsize - (cp - gid_list), "%s%lu",
-	    i ? "," : "", (unsigned long)ud->groups[i]);
+	len = snprintf(cp, glsize - (cp - gid_list), "%s%u",
+	    i ? "," : "", (unsigned int)ud->groups[i]);
 	cp += len;
     }
 #endif
@@ -355,7 +355,7 @@ get_user_info(struct user_details *ud)
 
     pw = getpwuid(ud->uid);
     if (pw == NULL)
-	errorx(1, "unknown uid %lu: who are you?", (unsigned long)ud->uid);
+	errorx(1, "unknown uid %u: who are you?", (unsigned int)ud->uid);
 
     user_info[i] = fmt_string("user", pw->pw_name);
     if (user_info[i] == NULL)
@@ -368,10 +368,10 @@ get_user_info(struct user_details *ud)
     }
     ud->shell = estrdup(ud->shell);
 
-    easprintf(&user_info[++i], "uid=%lu", (unsigned long)ud->uid);
-    easprintf(&user_info[++i], "euid=%lu", (unsigned long)ud->euid);
-    easprintf(&user_info[++i], "gid=%lu", (unsigned long)ud->gid);
-    easprintf(&user_info[++i], "egid=%lu", (unsigned long)ud->egid);
+    easprintf(&user_info[++i], "uid=%u", (unsigned int)ud->uid);
+    easprintf(&user_info[++i], "euid=%u", (unsigned int)ud->euid);
+    easprintf(&user_info[++i], "gid=%u", (unsigned int)ud->gid);
+    easprintf(&user_info[++i], "egid=%u", (unsigned int)ud->egid);
 
     if ((cp = get_user_groups(ud)) != NULL)
 	user_info[++i] = cp;

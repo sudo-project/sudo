@@ -641,9 +641,9 @@ rebuild_env(int noexec)
 
     /* Add the SUDO_USER, SUDO_UID, SUDO_GID environment variables. */
     sudo_setenv("SUDO_USER", user_name, TRUE);
-    snprintf(idbuf, sizeof(idbuf), "%lu", (unsigned long) user_uid);
+    snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) user_uid);
     sudo_setenv("SUDO_UID", idbuf, TRUE);
-    snprintf(idbuf, sizeof(idbuf), "%lu", (unsigned long) user_gid);
+    snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) user_gid);
     sudo_setenv("SUDO_GID", idbuf, TRUE);
 
     /* Free old environment. */

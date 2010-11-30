@@ -447,9 +447,9 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 	    log_error(NO_EXIT, "%s exists but is not a directory (0%o)",
 		dirparent, (unsigned int) sb.st_mode);
 	else if (sb.st_uid != timestamp_uid)
-	    log_error(NO_EXIT, "%s owned by uid %lu, should be uid %lu",
-		dirparent, (unsigned long) sb.st_uid,
-		(unsigned long) timestamp_uid);
+	    log_error(NO_EXIT, "%s owned by uid %u, should be uid %u",
+		dirparent, (unsigned int) sb.st_uid,
+		(unsigned int) timestamp_uid);
 	else if ((sb.st_mode & 0000022))
 	    log_error(NO_EXIT,
 		"%s writable by non-owner (0%o), should be mode 0700",
@@ -491,9 +491,9 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 		log_error(NO_EXIT, "%s exists but is not a directory (0%o)",
 		    timestampdir, (unsigned int) sb.st_mode);
 	} else if (sb.st_uid != timestamp_uid)
-	    log_error(NO_EXIT, "%s owned by uid %lu, should be uid %lu",
-		timestampdir, (unsigned long) sb.st_uid,
-		(unsigned long) timestamp_uid);
+	    log_error(NO_EXIT, "%s owned by uid %u, should be uid %u",
+		timestampdir, (unsigned int) sb.st_uid,
+		(unsigned int) timestamp_uid);
 	else if ((sb.st_mode & 0000022))
 	    log_error(NO_EXIT,
 		"%s writable by non-owner (0%o), should be mode 0700",
@@ -536,9 +536,9 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 		/* If bad uid or file mode, complain and kill the bogus file. */
 		if (sb.st_uid != timestamp_uid) {
 		    log_error(NO_EXIT,
-			"%s owned by uid %lu, should be uid %lu",
-			timestampfile, (unsigned long) sb.st_uid,
-			(unsigned long) timestamp_uid);
+			"%s owned by uid %u, should be uid %u",
+			timestampfile, (unsigned int) sb.st_uid,
+			(unsigned int) timestamp_uid);
 		    (void) unlink(timestampfile);
 		} else if ((sb.st_mode & 0000022)) {
 		    log_error(NO_EXIT,
@@ -708,8 +708,8 @@ get_authpw(void)
 	    log_error(0, "unknown user: %s", def_runas_default);
     } else if (def_targetpw) {
 	if (runas_pw->pw_name == NULL)
-	    log_error(NO_MAIL|MSG_ONLY, "unknown uid: %lu",
-		(unsigned long) runas_pw->pw_uid);
+	    log_error(NO_MAIL|MSG_ONLY, "unknown uid: %u",
+		(unsigned int) runas_pw->pw_uid);
 	pw_addref(runas_pw);
 	pw = runas_pw;
     } else {

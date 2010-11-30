@@ -599,8 +599,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	cp = gid_list + sizeof("runas_groups=") - 1;
 	for (i = 0; i < runas_ngroups; i++) {
 	    /* XXX - check rval */
-	    len = snprintf(cp, glsize - (cp - gid_list), "%s%lu",
-		 i ? "," : "", (unsigned long)runas_groups[i]);
+	    len = snprintf(cp, glsize - (cp - gid_list), "%s%u",
+		 i ? "," : "", (unsigned int) runas_groups[i]);
 	    cp += len;
 	}
 	command_info[info_len++] = gid_list;
@@ -877,11 +877,11 @@ open_sudoers(const char *sudoers, int doedit, int *keepopen)
 	    (unsigned int) (statbuf.st_mode & 07777),
 	    (unsigned int) SUDOERS_MODE);
     else if (statbuf.st_uid != SUDOERS_UID)
-	log_error(NO_EXIT, "%s is owned by uid %lu, should be %lu", sudoers,
-	    (unsigned long) statbuf.st_uid, (unsigned long) SUDOERS_UID);
+	log_error(NO_EXIT, "%s is owned by uid %u, should be %u", sudoers,
+	    (unsigned int) statbuf.st_uid, (unsigned int) SUDOERS_UID);
     else if (statbuf.st_gid != SUDOERS_GID)
-	log_error(NO_EXIT, "%s is owned by gid %lu, should be %lu", sudoers,
-	    (unsigned long) statbuf.st_gid, (unsigned long) SUDOERS_GID);
+	log_error(NO_EXIT, "%s is owned by gid %u, should be %u", sudoers,
+	    (unsigned int) statbuf.st_gid, (unsigned int) SUDOERS_GID);
     else if ((fp = fopen(sudoers, "r")) == NULL)
 	log_error(USE_ERRNO|NO_EXIT, "can't open %s", sudoers);
     else {

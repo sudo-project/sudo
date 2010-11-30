@@ -241,15 +241,16 @@ sudo_getpwuid(uid_t uid)
     if ((key.d.pw = getpwuid(uid)) != NULL) {
 	item = make_pwitem(key.d.pw, NULL);
 	if (rbinsert(pwcache_byuid, item) != NULL)
-	    errorx(1, "unable to cache uid %lu (%s), already exists",
-		uid, item->d.pw->pw_name);
+	    errorx(1, "unable to cache uid %u (%s), already exists",
+		(unsigned int) uid, item->d.pw->pw_name);
     } else {
 	item = emalloc(sizeof(*item));
 	item->refcnt = 1;
 	item->k.uid = uid;
 	item->d.pw = NULL;
 	if (rbinsert(pwcache_byuid, item) != NULL)
-	    errorx(1, "unable to cache uid %lu, already exists", uid);
+	    errorx(1, "unable to cache uid %u, already exists",
+		(unsigned int) uid);
     }
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
@@ -507,15 +508,16 @@ sudo_getgrgid(gid_t gid)
     if ((key.d.gr = getgrgid(gid)) != NULL) {
 	item = make_gritem(key.d.gr, NULL);
 	if (rbinsert(grcache_bygid, item) != NULL)
-	    errorx(1, "unable to cache gid %lu (%s), already exists",
-		gid, key.d.gr->gr_name);
+	    errorx(1, "unable to cache gid %u (%s), already exists",
+		(unsigned int) gid, key.d.gr->gr_name);
     } else {
 	item = emalloc(sizeof(*item));
 	item->refcnt = 1;
 	item->k.gid = gid;
 	item->d.gr = NULL;
 	if (rbinsert(grcache_bygid, item) != NULL)
-	    errorx(1, "unable to cache gid %lu, already exists, gid");
+	    errorx(1, "unable to cache gid %u, already exists",
+		(unsigned int) gid);
     }
 done:
     item->refcnt++;
