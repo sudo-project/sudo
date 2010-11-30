@@ -232,7 +232,7 @@ Here is an example:
     sudoCommand: ALL
 
 Another difference is that negations on the Host, User or Runas are
-currently ignorred.  For example, the following attributes do not
+currently ignored.  For example, the following attributes do not
 behave the way one might expect.
 
     # does not match all but joe
@@ -772,10 +772,9 @@ L<ldap.conf(5)>, L<sudoers(5)>
 
 =head1 CAVEATS
 
-The way that I<sudoers> is parsed differs between Note that there
-are differences in the way that LDAP-based I<sudoers> is parsed
-compared to file-based I<sudoers>.  See the L<Differences between
-LDAP and non-LDAP sudoers> section for more information.
+Note that there are differences in the way that LDAP-based I<sudoers>
+is parsed compared to file-based I<sudoers>.  See the L<Differences
+between LDAP and non-LDAP sudoers> section for more information.
 
 =head1 BUGS
 
