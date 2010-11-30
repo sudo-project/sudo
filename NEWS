@@ -49,6 +49,24 @@ What's new in Sudo 1.7.5?
  * Sudo now unblocks all signals on startup to avoid problems caused
    by the parent process changing the default signal mask.
 
+ * LDAP Sudoers entries may now specify a time period for which
+   the entry is valid.  This requires an updated sudoers schema
+   that includes the sudoNotBefore and sudoNotAfter attributes.
+   Support for timed entries must be explicitly enabled in the
+   ldap.conf file.  Based on changes from Andreas Mueller.
+
+ * LDAP Sudoers entries may now specify a sudoOrder attribute that
+   determines the order in which matching entries are applied; the first
+   matching entry is used.  This requires an updated sudoers schema that
+   includes the sudOrder attribute.  Based on changes from Andreas Mueller.
+
+ * When run as sudoedit, or when given the -e flag, sudo now treats
+   command line arguments as pathnames.  This means that slashes
+   in the sudoers file entry must explicitly match slashes in
+   the command line arguments.  As a result, and entry such as:
+	user ALL = sudoedit /etc/*
+   will allow editing of /etc/motd but not /etc/security/default.
+
 What's new in Sudo 1.7.4p4?
 
  * A potential security issue has been fixed with respect to the handling
