@@ -153,11 +153,13 @@ If multiple B<sudoNotAfter> entries are present, the last one is used.
 =item B<sudoOrder>
 
 The sudoRole entries retrieved from the LDAP directory have no
-inherent order. The B<sudoOrder> attribute is an integer that will
-be used to sort the matching entries.  This allows to more closely
-mimic the behaviour of the sudoers file, where the of the entries
-does have an influence on the result.  If the B<sudoOrder> attribute
-is not present, a value of 0 is assumed.
+inherent order.  The B<sudoOrder> attribute is an integer (or
+floating point value for LDAP servers that support it) that is used
+to sort the matching entries.  This allows LDAP-based sudoers entries
+to more closely mimic the behaviour of the sudoers file, where the
+of the entries influences the result.  If multiple entries match,
+the entry with the lowest B<sudoOrder> attribute is chosen.  If the
+B<sudoOrder> attribute is not present, a value of 0 is assumed.
 
 =back
 
@@ -195,8 +197,12 @@ to entries that satisfy the time constraints, if any are present.
 There are some subtle differences in the way sudoers is handled
 once in LDAP.  Probably the biggest is that according to the RFC,
 LDAP ordering is arbitrary and you cannot expect that Attributes
-and Entries are returned in any specific order.  If there are
-conflicting command rules on an entry, the negative takes precedence.
+and Entries are returned in any specific order.
+
+The order in which different entries are applied can be controlled
+using the B<sudoOrder> attribute, but there is no way to guarantee
+the order of attributes within a specific entry.  If there are
+conflicting command rules in an entry, the negative takes precedence.
 This is called paranoid behavior (not necessarily the most specific
 match).
 
