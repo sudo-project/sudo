@@ -150,6 +150,15 @@ A timestamp in the form C<yyyymmddHHMMZ> that indicates end of validity
 of this C<sudoRole>.
 If multiple B<sudoNotAfter> entries are present, the last one is used.
 
+=item B<sudoOrder>
+
+The sudoRole entries retrieved from the LDAP directory have no
+inherent order. The B<sudoOrder> attribute is an integer that will
+be used to sort the matching entries.  This allows to more closely
+mimic the behaviour of the sudoers file, where the of the entries
+does have an influence on the result.  If the B<sudoOrder> attribute
+is not present, a value of 0 is assumed.
+
 =back
 
 Each component listed above should contain a single value, but there
@@ -324,7 +333,7 @@ in which case they are queried in the order specified.
 
 =item B<SUDOERS_TIMED> on/true/yes/off/false/no
 
-Whether or not to evaluate the sudoNotBefore and sudoNotAfter
+Whether or not to evaluate the B<sudoNotBefore> and B<sudoNotAfter>
 attributes that implement time-dependent sudoers entries.
 
 =item B<SUDOERS_DEBUG> debug_level
@@ -742,12 +751,19 @@ C<include> line in C<slapd.conf> and restart B<slapd>.
     ORDERING generalizedTimeOrderingMatch
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.24 )
 
+ attributeTypes ( 1.3.6.1.4.1.15953.9.1.10
+     NAME 'sudoOrder'
+     DESC 'an integer to order the sudoRole entries'
+     EQUALITY integerMatch
+     ORDERING integerOrderingMatch
+     SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 )
+
  objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL
     DESC 'Sudoer Entries'
     MUST ( cn )
     MAY ( sudoUser $ sudoHost $ sudoCommand $ sudoRunAs $ sudoRunAsUser $
 	  sudoRunAsGroup $ sudoOption $ sudoNotBefore $ sudoNotAfter $
-	  description )
+	  sudoOrder $ description )
     )
 
 =head1 SEE ALSO
