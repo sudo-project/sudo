@@ -1,6 +1,6 @@
 #!/bin/sh
 # (c) 2010 Quest Software, Inc. All rights reserved
-pp_revision="298"
+pp_revision="299"
  # Copyright 2010 Quest Software, Inc.  All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -5316,10 +5316,34 @@ pp_rpm_writefiles () {
 		*"executable (RISC System/6000)"*)
 		    farch=ppc;;
 		*"64-bit XCOFF executable"*)
-		    fatch=ppc64;;
+		    farch=ppc64;;
+		*" ELF ")
+		    farch=ELF;;
 		*)
 		    farch=noarch;;
 	    esac
+	    # If file(1) doesn't provide enough info, try readelf(1)
+	    if test "$farch" = "ELF"; then
+		fo=`readelf -h "${pp_destdir}$p" | awk '{if ($1 == "Class:") {class=$2} else if ($1 == "Machine:") {machine=$0; sub(/^ *Machine: */, "", machine)}} END {print class " " machine}' 2>/dev/null`
+		case "$fo" in
+		    "ELF32 Intel 80386")
+			farch=i386;;
+		    "ELF64 "*[xX]"86-64")
+			farch=x86_64;;
+		    "ELF32 PowerPC")
+			farch=ppc;;
+		    "ELF64 PowerPC")
+			farch=ppc64;;
+		    "ELF64 IA-64")
+			farch=ia64;;
+		    "ELF32 IBM S/390")
+			farch=s390;;
+		    "ELF64 IBM S/390")
+			farch=s390x;;
+		    *)
+			farch=noarch;;
+		esac
+	    fi
 	    pp_debug "file: $fo -> $farch"
 	    test x"$farch" = x"noarch" || pp_add_to_list pp_rpm_arch_seen $farch
 	fi
