@@ -1,6 +1,6 @@
 #!/bin/sh
 # (c) 2010 Quest Software, Inc. All rights reserved
-pp_revision="299"
+pp_revision="300"
  # Copyright 2010 Quest Software, Inc.  All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -5317,7 +5317,7 @@ pp_rpm_writefiles () {
 		    farch=ppc;;
 		*"64-bit XCOFF executable"*)
 		    farch=ppc64;;
-		*" ELF ")
+		*" ELF "*)
 		    farch=ELF;;
 		*)
 		    farch=noarch;;
