@@ -816,6 +816,7 @@ sudo_umask
 password_timeout
 timeout
 timedir
+iolog_dir
 CONFIGURE_ARGS
 ZLIB_DEP
 ZLIB
@@ -2963,6 +2964,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 #
 # Begin initial values for man page substitution
 #
+iolog_dir=/var/log/sudo-io
 timedir=/var/adm/sudo
 timeout=5
 password_timeout=5
@@ -3927,8 +3929,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 # Check whether --with-linux-audit was given.
 if test "${with_linux_audit+set}" = set; then :
   withval=$with_linux_audit; case $with_linux_audit in
-    yes)
-		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+    yes)	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <libaudit.h>
 int
@@ -6792,13 +6793,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6795: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6796: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6798: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6799: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6801: output\"" >&5)
+  (eval echo "\"\$as_me:6802: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -8003,7 +8004,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 8006 "configure"' > conftest.$ac_ext
+  echo '#line 8007 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9396,11 +9397,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9399: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9400: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9403: \$? = $ac_status" >&5
+   echo "$as_me:9404: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9735,11 +9736,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9738: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9739: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9742: \$? = $ac_status" >&5
+   echo "$as_me:9743: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9840,11 +9841,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9843: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9844: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9847: \$? = $ac_status" >&5
+   echo "$as_me:9848: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9895,11 +9896,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9898: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9899: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9902: \$? = $ac_status" >&5
+   echo "$as_me:9903: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12262,7 +12263,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12265 "configure"
+#line 12266 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12358,7 +12359,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12361 "configure"
+#line 12362 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -18552,22 +18553,20 @@ EOF
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for I/O log dir location" >&5
 $as_echo_n "checking for I/O log dir location... " >&6; }
     if test "${with_iologdir-yes}" != "yes"; then
-	:
+	iolog_dir="$with_iologdir":
     elif test -d "/var/log"; then
-	with_iologdir="/var/log/sudo-io"
+	iolog_dir="/var/log/sudo-io"
     elif test -d "/var/adm"; then
-	with_iologdir="/var/adm/sudo-io"
+	iolog_dir="/var/adm/sudo-io"
     else
-	with_iologdir="/usr/adm/sudo-io"
+	iolog_dir="/usr/adm/sudo-io"
     fi
-    if test "${with_iologdir-yes}" != "no"; then
-	cat >>confdefs.h <<EOF
-#define _PATH_SUDO_IO_LOGDIR "$with_iologdir"
+    cat >>confdefs.h <<EOF
+#define _PATH_SUDO_IO_LOGDIR "$iolog_dir"
 EOF
 
-    fi
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_iologdir" >&5
-$as_echo "$with_iologdir" >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $iolog_dir" >&5
+$as_echo "$iolog_dir" >&6; }
 
 
 if test "${with_iologdir-yes}" != "no"; then

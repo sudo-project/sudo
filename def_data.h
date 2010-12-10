@@ -152,6 +152,8 @@
 #define I_COMPRESS_IO           75
 #define def_use_pty             (sudo_defs_table[76].sd_un.flag)
 #define I_USE_PTY               76
+#define def_iolog_dir           (sudo_defs_table[77].sd_un.str)
+#define I_IOLOG_DIR             77
 
 enum def_tupple {
 	never,

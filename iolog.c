@@ -96,20 +96,20 @@ io_nextid()
     char pathbuf[PATH_MAX];
 
     /*
-     * Create _PATH_SUDO_IO_LOGDIR if it doesn't already exist.
+     * Create I/O log directory if it doesn't already exist.
      */
-    if (stat(_PATH_SUDO_IO_LOGDIR, &sb) != 0) {
-	if (mkdir(_PATH_SUDO_IO_LOGDIR, S_IRWXU) != 0)
-	    log_error(USE_ERRNO, "Can't mkdir %s", _PATH_SUDO_IO_LOGDIR);
+    if (stat(def_iolog_dir, &sb) != 0) {
+	if (mkdir(def_iolog_dir, S_IRWXU) != 0)
+	    log_error(USE_ERRNO, "Can't mkdir %s", def_iolog_dir);
     } else if (!S_ISDIR(sb.st_mode)) {
 	log_error(0, "%s exists but is not a directory (0%o)",
-	    _PATH_SUDO_IO_LOGDIR, (unsigned int) sb.st_mode);
+	    def_iolog_dir, (unsigned int) sb.st_mode);
     }
 
     /*
      * Open sequence file
      */
-    len = snprintf(pathbuf, sizeof(pathbuf), "%s/seq", _PATH_SUDO_IO_LOGDIR);
+    len = snprintf(pathbuf, sizeof(pathbuf), "%s/seq", def_iolog_dir);
     if (len <= 0 || len >= sizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
 	log_error(USE_ERRNO, "%s/seq", pathbuf);
@@ -163,14 +163,14 @@ build_idpath(pathbuf, pathsize)
 	log_error(0, "tried to build a session id path without a session id");
 
     /*
-     * Path is of the form /var/log/sudo-session/00/00/01.
+     * Path is of the form /var/log/sudo-io/00/00/01.
      */
-    len = snprintf(pathbuf, pathsize, "%s/%c%c/%c%c/%c%c", _PATH_SUDO_IO_LOGDIR,
+    len = snprintf(pathbuf, pathsize, "%s/%c%c/%c%c/%c%c", def_iolog_dir,
 	sudo_user.sessid[0], sudo_user.sessid[1], sudo_user.sessid[2],
 	sudo_user.sessid[3], sudo_user.sessid[4], sudo_user.sessid[5]);
     if (len <= 0 && len >= pathsize) {
 	errno = ENAMETOOLONG;
-	log_error(USE_ERRNO, "%s/%s", _PATH_SUDO_IO_LOGDIR, sudo_user.sessid);
+	log_error(USE_ERRNO, "%s/%s", def_iolog_dir, sudo_user.sessid);
     }
 
     /*
@@ -227,7 +227,7 @@ io_log_open()
 
     /*
      * Build a path containing the session id split into two-digit subdirs,
-     * so ID 000001 becomes /var/log/sudo-session/00/00/01.
+     * so ID 000001 becomes /var/log/sudo-io/00/00/01.
      */
     len = build_idpath(pathbuf, sizeof(pathbuf));
     if (len == -1)

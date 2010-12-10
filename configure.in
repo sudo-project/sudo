@@ -6,7 +6,7 @@ dnl
 AC_INIT([sudo], [1.7.5b2], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER(config.h pathnames.h zlib/zconf.h)
 dnl
-dnl This won't work before AC_INIT
+dnl Note: this must come after AC_INIT
 dnl
 AC_MSG_NOTICE([Configuring Sudo version $PACKAGE_VERSION])
 dnl
@@ -58,6 +58,7 @@ AC_SUBST([CONFIGURE_ARGS])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
+AC_SUBST([iolog_dir])dnl real initial value from SUDO_IO_LOGDIR
 AC_SUBST([timedir])dnl real initial value from SUDO_TIMEDIR
 AC_SUBST([timeout])
 AC_SUBST([password_timeout])
@@ -94,6 +95,7 @@ AC_SUBST([editor])
 #
 # Begin initial values for man page substitution
 #
+iolog_dir=/var/log/sudo-io
 timedir=/var/adm/sudo
 timeout=5
 password_timeout=5
@@ -249,8 +251,7 @@ dnl Handle Linux auditing support.
 dnl
 AC_ARG_WITH(linux-audit, [AS_HELP_STRING([--with-linux-audit], [enable Linux audit support])],
 [case $with_linux_audit in
-    yes)	
-		AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <libaudit.h>]], [[int i = AUDIT_USER_CMD; (void)i;]])], [
+    yes)	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <libaudit.h>]], [[int i = AUDIT_USER_CMD; (void)i;]])], [
 		    AC_DEFINE(HAVE_LINUX_AUDIT)
 		    SUDO_LIBS="${SUDO_LIBS} -laudit"
 		    SUDO_OBJS="${SUDO_OBJS} linux_audit.o"

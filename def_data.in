@@ -244,3 +244,6 @@ compress_io
 use_pty
 	T_FLAG
 	"Always run commands in a pseudo-tty"
+iolog_dir
+	T_STR|T_PATH
+	"Directory in which to store input/output logs"
