@@ -65,7 +65,7 @@ AC_SUBST([LT_STATIC])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
-AC_SUBST([io_logdir])dnl real initial value from SUDO_IO_LOGDIR
+AC_SUBST([iolog_dir])dnl real initial value from SUDO_IO_LOGDIR
 AC_SUBST([timedir])dnl real initial value from SUDO_TIMEDIR
 AC_SUBST([timeout])
 AC_SUBST([password_timeout])
@@ -102,7 +102,7 @@ AC_SUBST([editor])
 #
 # Begin initial values for man page substitution
 #
-io_logdir=/var/log/sudo-io
+iolog_dir=/var/log/sudo-io
 timedir=/var/adm/sudo
 timeout=5
 password_timeout=5

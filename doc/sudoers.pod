@@ -1477,7 +1477,7 @@ Local groups file
 
 List of network groups
 
-=item F<@io_logdir@>
+=item F<@iolog_dir@>
 
 I/O log files
 

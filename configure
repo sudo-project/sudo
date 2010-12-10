@@ -817,7 +817,7 @@ sudo_umask
 password_timeout
 timeout
 timedir
-io_logdir
+iolog_dir
 LT_STATIC
 LIBDL
 CONFIGURE_ARGS
@@ -2975,7 +2975,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 #
 # Begin initial values for man page substitution
 #
-io_logdir=/var/log/sudo-io
+iolog_dir=/var/log/sudo-io
 timedir=/var/adm/sudo
 timeout=5
 password_timeout=5
@@ -18512,20 +18512,20 @@ EOF
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for I/O log dir location" >&5
 $as_echo_n "checking for I/O log dir location... " >&6; }
     if test "${with_iologdir-yes}" != "yes"; then
-	io_logdir="$with_iologdir":
+	iolog_dir="$with_iologdir":
     elif test -d "/var/log"; then
-	io_logdir="/var/log/sudo-io"
+	iolog_dir="/var/log/sudo-io"
     elif test -d "/var/adm"; then
-	io_logdir="/var/adm/sudo-io"
+	iolog_dir="/var/adm/sudo-io"
     else
-	io_logdir="/usr/adm/sudo-io"
+	iolog_dir="/usr/adm/sudo-io"
     fi
     cat >>confdefs.h <<EOF
-#define _PATH_SUDO_IO_LOGDIR "$io_logdir"
+#define _PATH_SUDO_IO_LOGDIR "$iolog_dir"
 EOF
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $io_logdir" >&5
-$as_echo "$io_logdir" >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $iolog_dir" >&5
+$as_echo "$iolog_dir" >&6; }
 
 
 case "$with_passwd" in
