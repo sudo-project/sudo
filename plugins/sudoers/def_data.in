@@ -244,3 +244,6 @@ use_pty
 group_plugin
 	T_STR
 	"Plugin for non-Unix group support"
+iolog_dir
+	T_STR|T_PATH
+	"Directory in which to store input/output logs"

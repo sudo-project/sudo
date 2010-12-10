@@ -152,6 +152,8 @@
 #define I_USE_PTY               75
 #define def_group_plugin        (sudo_defs_table[76].sd_un.str)
 #define I_GROUP_PLUGIN          76
+#define def_iolog_dir           (sudo_defs_table[77].sd_un.str)
+#define I_IOLOG_DIR             77
 
 enum def_tupple {
 	never,

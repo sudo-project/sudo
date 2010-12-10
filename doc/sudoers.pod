@@ -1121,6 +1121,13 @@ B<visudo>.  B<visudo> will choose the editor that matches the user's
 EDITOR environment variable if possible, or the first editor in the
 list that exists and is executable.  The default is C<"@editor@">.
 
+=item iolog_dir
+
+The directory in which to store input/output logs when the I<log_input>
+or I<log_output> options are enabled or when the <LOG_INPUT> or
+C<LOG_OUTPUT> tags are present for a command.
+The default is C<"@iolog_dir@">.
+
 =item mailsub
 
 Subject of the mail sent to the I<mailto> user. The escape C<%h>
