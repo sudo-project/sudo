@@ -731,8 +731,7 @@ AC_ARG_WITH(timedir, [AS_HELP_STRING([--with-timedir], [path to the sudo timesta
 		;;
 esac])
 
-AC_ARG_WITH(iologdir, [AS_HELP_STRING([--with-iologdir=DIR], [directory
-to store sudo I/O log files in])],
+AC_ARG_WITH(iologdir, [AS_HELP_STRING([--with-iologdir=DIR], [directory to store sudo I/O log files in])],
 [case $with_iologdir in
     yes)    ;;
     no)     AC_MSG_ERROR(["--without-iologdir not supported."])
