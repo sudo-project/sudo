@@ -2187,7 +2187,7 @@ done:
 }
 
 /*
- * Sort comparison function for ldap_entry_wrapper structures.
+ * Comparison function for ldap_entry_wrapper structures, descending order.
  */
 static int
 ldap_entry_compare(a, b)
@@ -2197,8 +2197,8 @@ ldap_entry_compare(a, b)
     const struct ldap_entry_wrapper *aw = a;
     const struct ldap_entry_wrapper *bw = b;
 
-    return(aw->order < bw->order ? -1 :
-	(aw->order > bw->order ? 1 : 0));
+    return(bw->order < aw->order ? -1 :
+	(bw->order > aw->order ? 1 : 0));
 }
 
 /*
