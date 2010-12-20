@@ -119,6 +119,7 @@ struct user_details {
 #define CD_SUDOEDIT		0x0200
 #define CD_BACKGROUND		0x0400
 #define CD_RBAC_ENABLED		0x0800
+#define CD_USE_PTY		0x1000
 
 struct command_details {
     uid_t uid;

@@ -156,7 +156,7 @@ int
 sudo_execve(struct command_details *details, char *argv[], char *envp[],
     struct command_status *cstat)
 {
-    int log_io, maxfd, n, nready, sv[2];
+    int maxfd, n, nready, sv[2], log_io = FALSE;
     fd_set *fdsr, *fdsw;
     sigaction_t sa;
     pid_t child;
@@ -177,10 +177,17 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
 	}
     }
 
-    log_io = !tq_empty(&io_plugins);
-    if (log_io && !ISSET(details->flags, CD_BACKGROUND)) {
-	sudo_debug(8, "allocate pty for I/O logging");
-	pty_setup(details->euid);
+    /*
+     * If we have an I/O plugin or the policy plugin has requested one, we
+     * need to allocate a pty.  It is OK to set log_io in the pty-only case
+     * as the tailqueue plugin will be empty and no I/O logging will occur.
+     */
+    if (!tq_empty(&io_plugins) || ISSET(details->flags, CD_USE_PTY)) {
+	log_io = TRUE;
+	if (!ISSET(details->flags, CD_BACKGROUND)) {
+	    sudo_debug(8, "allocate pty for I/O logging");
+	    pty_setup(details->euid);
+	}
     }
 
     /*
