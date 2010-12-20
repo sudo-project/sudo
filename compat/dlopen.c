@@ -77,7 +77,7 @@ sudo_dlsym(void *vhandle, const char *symbol)
     shl_t handle = vhandle;
     void *value = NULL;
 
-    (void)shl_findsym(&handle, symbol, TYPE_UNDEFINED, (void *)&value);
+    (void)shl_findsym(&handle, symbol, TYPE_UNDEFINED, &value);
 
     return value;
 }
