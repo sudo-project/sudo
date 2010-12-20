@@ -118,6 +118,30 @@ static int iolog_open(struct plugin_container *plugin, char * const settings[],
 static void iolog_close(struct plugin_container *plugin, int exit_status,
     int error);
 
+/* Policy plugin convenience functions. */
+static int policy_open(struct plugin_container *plugin, char * const settings[],
+    char * const user_info[], char * const user_env[]);
+static void policy_close(struct plugin_container *plugin, int exit_status,
+    int error);
+static int policy_show_version(struct plugin_container *plugin, int verbose);
+static int policy_check(struct plugin_container *plugin, int argc,
+    char * const argv[], char *env_add[], char **command_info[],
+    char **argv_out[], char **user_env_out[]);
+static int policy_list(struct plugin_container *plugin, int argc,
+    char * const argv[], int verbose, const char *list_user);
+static int policy_validate(struct plugin_container *plugin);
+static void policy_invalidate(struct plugin_container *plugin, int remove);
+static int policy_init_session(struct plugin_container *plugin,
+    struct passwd *pwd);
+
+/* I/O log plugin convenience functions. */
+static int iolog_open(struct plugin_container *plugin, char * const settings[],
+    char * const user_info[], char * const command_details[],
+    int argc, char * const argv[], char * const user_env[]);
+static void iolog_close(struct plugin_container *plugin, int exit_status,
+    int error);
+static int iolog_show_version(struct plugin_container *plugin, int verbose);
+
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 static struct rlimit corelimit;
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
@@ -191,50 +215,33 @@ main(int argc, char *argv[], char *envp[])
 	    printf("Sudo version %s\n", PACKAGE_VERSION);
 	    if (user_details.uid == ROOT_UID)
 		(void) printf("Configure args: %s\n", CONFIGURE_ARGS);
-	    policy_plugin.u.policy->show_version(!user_details.uid);
+	    policy_show_version(&policy_plugin, !user_details.uid);
 	    tq_foreach_fwd(&io_plugins, plugin) {
 		ok = iolog_open(plugin, settings, user_info, NULL,
 		    nargc, nargv, envp);
 		if (ok == TRUE)
-		    plugin->u.io->show_version(user_details.uid == ROOT_UID);
+		    iolog_show_version(plugin, !user_details.uid);
 	    }
 	    break;
 	case MODE_VALIDATE:
 	case MODE_VALIDATE|MODE_INVALIDATE:
-	    if (policy_plugin.u.policy->validate == NULL) {
-		warningx("policy plugin %s does not support the -v flag",
-		    policy_plugin.name);
-		ok = FALSE;
-	    } else {
-		ok = policy_plugin.u.policy->validate();
-	    }
+	    ok = policy_validate(&policy_plugin);
 	    exit(ok != TRUE);
 	case MODE_KILL:
 	case MODE_INVALIDATE:
-	    if (policy_plugin.u.policy->invalidate == NULL) {
-		warningx("policy plugin %s does not support the -k/-K flags",
-		    policy_plugin.name);
-		exit(1);
-	    }
-	    policy_plugin.u.policy->invalidate(sudo_mode == MODE_KILL);
+	    policy_invalidate(&policy_plugin, sudo_mode == MODE_KILL);
 	    exit(0);
 	    break;
 	case MODE_CHECK:
 	case MODE_CHECK|MODE_INVALIDATE:
 	case MODE_LIST:
 	case MODE_LIST|MODE_INVALIDATE:
-	    if (policy_plugin.u.policy->list == NULL) {
-		warningx("policy plugin %s does not support listing privileges",
-		    policy_plugin.name);
-		ok = FALSE;
-	    } else {
-		ok = policy_plugin.u.policy->list(nargc, nargv,
-		    ISSET(sudo_mode, MODE_LONG_LIST), list_user);
-	    }
+	    ok = policy_list(&policy_plugin, nargc, nargv,
+		ISSET(sudo_mode, MODE_LONG_LIST), list_user);
 	    exit(ok != TRUE);
 	case MODE_EDIT:
 	case MODE_RUN:
-	    ok = policy_plugin.u.policy->check_policy(nargc, nargv, env_add,
+	    ok = policy_check(&policy_plugin, nargc, nargv, env_add,
 		&command_info, &argv_out, &user_env_out);
 	    sudo_debug(8, "policy plugin returns %d", ok);
 	    if (ok != TRUE) {
@@ -619,6 +626,12 @@ command_info_to_details(char * const info[], struct command_details *details)
 			details->umask = (uid_t)ulval;
 			SET(details->flags, CD_SET_UMASK);
 		    }
+		    break;
+		}
+		if (strncmp("use_pty=", info[i], sizeof("use_pty=") - 1) == 0) {
+		    if (atobool(info[i] + sizeof("use_pty=") - 1) == TRUE)
+			SET(details->flags, CD_USE_PTY);
+		    break;
 		}
 		break;
 	}
@@ -750,12 +763,12 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     aix_restoreauthdb();
 #endif
 
-    /* Call policy plugin's session init before other setup occurs. */
-    if (policy_plugin.u.policy->init_session) {
-	/* The session init code is expected to print an error as needed. */
-	if (policy_plugin.u.policy->init_session(pw) != TRUE)
-	    goto done;
-    }
+    /*
+     * Call policy plugin's session init before other setup occurs.
+     * The session init code is expected to print an error as needed.
+     */
+    if (policy_init_session(&policy_plugin, pw) != TRUE)
+	goto done;
 
 #ifdef HAVE_SELINUX
     if (ISSET(details->flags, CD_RBAC_ENABLED)) {
@@ -959,6 +972,62 @@ policy_close(struct plugin_container *plugin, int exit_status, int error)
 }
 
 static int
+policy_show_version(struct plugin_container *plugin, int verbose)
+{
+    return plugin->u.policy->show_version(verbose);
+}
+
+static int
+policy_check(struct plugin_container *plugin, int argc, char * const argv[],
+    char *env_add[], char **command_info[], char **argv_out[],
+    char **user_env_out[])
+{
+    return plugin->u.policy->check_policy(argc, argv, env_add, command_info,
+	argv_out, user_env_out);
+}
+
+static int
+policy_list(struct plugin_container *plugin, int argc, char * const argv[],
+    int verbose, const char *list_user)
+{
+    if (plugin->u.policy->list == NULL) {
+	warningx("policy plugin %s does not support listing privileges",
+	    plugin->name);
+	return FALSE;
+    }
+    return plugin->u.policy->list(argc, argv, verbose, list_user);
+}
+
+static int
+policy_validate(struct plugin_container *plugin)
+{
+    if (plugin->u.policy->validate == NULL) {
+	warningx("policy plugin %s does not support the -v flag",
+	    plugin->name);
+	return FALSE;
+    }
+    return plugin->u.policy->validate();
+}
+
+static void
+policy_invalidate(struct plugin_container *plugin, int remove)
+{
+    if (plugin->u.policy->invalidate == NULL) {
+	errorx(1, "policy plugin %s does not support the -k/-K flags",
+	    plugin->name);
+    }
+    plugin->u.policy->invalidate(remove);
+}
+
+static int
+policy_init_session(struct plugin_container *plugin, struct passwd *pwd)
+{
+    if (plugin->u.policy->init_session)
+	return plugin->u.policy->init_session(pwd);
+    return TRUE;
+}
+
+static int
 iolog_open(struct plugin_container *plugin, char * const settings[],
     char * const user_info[], char * const command_info[],
     int argc, char * const argv[], char * const user_env[])
@@ -986,6 +1055,12 @@ static void
 iolog_close(struct plugin_container *plugin, int exit_status, int error)
 {
     plugin->u.io->close(exit_status, error);
+}
+
+static int
+iolog_show_version(struct plugin_container *plugin, int verbose)
+{
+    return plugin->u.io->show_version(verbose);
 }
 
 /*
