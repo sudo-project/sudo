@@ -158,8 +158,9 @@ floating point value for LDAP servers that support it) that is used
 to sort the matching entries.  This allows LDAP-based sudoers entries
 to more closely mimic the behaviour of the sudoers file, where the
 of the entries influences the result.  If multiple entries match,
-the entry with the lowest B<sudoOrder> attribute is chosen.  If the
-B<sudoOrder> attribute is not present, a value of 0 is assumed.
+the entry with the highest B<sudoOrder> attribute is chosen.  This
+corresponds to the "last match" behavior of the sudoers file.  If
+the B<sudoOrder> attribute is not present, a value of 0 is assumed.
 
 =back
 
