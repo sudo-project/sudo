@@ -499,8 +499,12 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    validate_env_vars(sudo_user.env_vars);
     }
 
-    if (ISSET(sudo_mode, (MODE_RUN| MODE_EDIT)) && (def_log_input || def_log_output))
+    if (ISSET(sudo_mode, (MODE_RUN| MODE_EDIT)) && (def_log_input || def_log_output)) {
 	io_nextid();
+	command_info[info_len++] = fmt_string("iolog_dir", def_iolog_dir);
+	command_info[info_len++] = fmt_string("iolog_file", sudo_user.sessid);
+    }
+
     log_allowed(validated);
     if (ISSET(sudo_mode, MODE_CHECK))
 	rval = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw);
