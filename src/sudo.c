@@ -108,6 +108,15 @@ static void disable_coredumps(void);
 static char **get_user_info(struct user_details *);
 static void command_info_to_details(char * const info[],
     struct command_details *details);
+static int policy_open(struct plugin_container *plugin, char * const settings[],
+    char * const user_info[], char * const user_env[]);
+static void policy_close(struct plugin_container *plugin, int exit_status,
+    int error);
+static int iolog_open(struct plugin_container *plugin, char * const settings[],
+    char * const user_info[], char * const command_details[],
+    int argc, char * const argv[], char * const user_env[]);
+static void iolog_close(struct plugin_container *plugin, int exit_status,
+    int error);
 
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 static struct rlimit corelimit;
@@ -168,8 +177,7 @@ main(int argc, char *argv[], char *envp[])
     sudo_mode = parse_args(argc, argv, &nargc, &nargv, &settings, &env_add);
 
     /* Open policy plugin. */
-    ok = policy_plugin.u.policy->open(SUDO_API_VERSION, sudo_conversation,
-	_sudo_printf, settings, user_info, envp);
+    ok = policy_open(&policy_plugin, settings, user_info, envp);
     if (ok != TRUE) {
 	if (ok == -2)
 	    usage(1);
@@ -185,8 +193,8 @@ main(int argc, char *argv[], char *envp[])
 		(void) printf("Configure args: %s\n", CONFIGURE_ARGS);
 	    policy_plugin.u.policy->show_version(!user_details.uid);
 	    tq_foreach_fwd(&io_plugins, plugin) {
-		ok = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation,
-		    _sudo_printf, settings, user_info, nargc, nargv, envp);
+		ok = iolog_open(plugin, settings, user_info, NULL,
+		    nargc, nargv, envp);
 		if (ok == TRUE)
 		    plugin->u.io->show_version(user_details.uid == ROOT_UID);
 	    }
@@ -237,8 +245,8 @@ main(int argc, char *argv[], char *envp[])
 	    /* Open I/O plugins once policy plugin succeeds. */
 	    for (plugin = io_plugins.first; plugin != NULL; plugin = next) {
 		next = plugin->next;
-		ok = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation,
-		    _sudo_printf, settings, user_info, nargc, nargv, envp);
+		ok = iolog_open(plugin, settings, user_info,
+		    command_info, nargc, nargv, envp);
 		switch (ok) {
 		case TRUE:
 		    break;
@@ -450,6 +458,10 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    }
 		    break;
 		}
+		break;
+	    case 'i':
+		SET_STRING("iolog_dir=", iolog_dir)
+		SET_STRING("iolog_file=", iolog_file)
 		break;
 	    case 'l':
 		SET_STRING("login_class=", login_class)
@@ -905,20 +917,20 @@ run_command(struct command_details *details, char *argv[], char *envp[])
     case CMD_ERRNO:
 	/* exec_setup() or execve() returned an error. */
 	sudo_debug(9, "calling policy close with errno");
-	policy_plugin.u.policy->close(0, cstat.val);
+	policy_close(&policy_plugin, 0, cstat.val);
 	tq_foreach_fwd(&io_plugins, plugin) {
 	    sudo_debug(9, "calling I/O close with errno");
-	    plugin->u.io->close(0, cstat.val);
+	    iolog_close(plugin, 0, cstat.val);
 	}
 	exitcode = 1;
 	break;
     case CMD_WSTATUS:
 	/* Command ran, exited or was killed. */
 	sudo_debug(9, "calling policy close with wait status");
-	policy_plugin.u.policy->close(cstat.val, 0);
+	policy_close(&policy_plugin, cstat.val, 0);
 	tq_foreach_fwd(&io_plugins, plugin) {
 	    sudo_debug(9, "calling I/O close with wait status");
-	    plugin->u.io->close(cstat.val, 0);
+	    iolog_close(plugin, cstat.val, 0);
 	}
 	if (WIFEXITED(cstat.val))
 	    exitcode = WEXITSTATUS(cstat.val);
@@ -930,6 +942,50 @@ run_command(struct command_details *details, char *argv[], char *envp[])
 	break;
     }
     return exitcode;
+}
+
+static int
+policy_open(struct plugin_container *plugin, char * const settings[],
+    char * const user_info[], char * const user_env[])
+{
+    return plugin->u.policy->open(SUDO_API_VERSION, sudo_conversation,
+	_sudo_printf, settings, user_info, user_env);
+}
+
+static void
+policy_close(struct plugin_container *plugin, int exit_status, int error)
+{
+    plugin->u.policy->close(exit_status, error);
+}
+
+static int
+iolog_open(struct plugin_container *plugin, char * const settings[],
+    char * const user_info[], char * const command_info[],
+    int argc, char * const argv[], char * const user_env[])
+{
+    int rval;
+
+    /*
+     * Backwards compatibility for API major 1, minor 0
+     */
+    switch (plugin->u.generic->version) {
+    case SUDO_API_MKVERSION(1, 0):
+	rval = plugin->u.io_1_0->open(plugin->u.io_1_0->version,
+	    sudo_conversation, _sudo_printf, settings, user_info, argc, argv,
+	    user_env);
+	break;
+    default:
+	rval = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation,
+	    _sudo_printf, settings, user_info, command_info, argc, argv,
+	    user_env);
+    }
+    return rval;
+}
+
+static void
+iolog_close(struct plugin_container *plugin, int exit_status, int error)
+{
+    plugin->u.io->close(exit_status, error);
 }
 
 /*

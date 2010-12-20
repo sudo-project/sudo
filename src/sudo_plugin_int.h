@@ -18,6 +18,25 @@
 #define _SUDO_PLUGIN_INT_H
 
 /*
+ * Backwards-compatible structures for API bumps.
+ */
+struct io_plugin_1_0 {
+    unsigned int type;
+    unsigned int version;
+    int (*open)(unsigned int version, sudo_conv_t conversation,
+        sudo_printf_t sudo_printf, char * const settings[],
+        char * const user_info[], int argc, char * const argv[],
+        char * const user_env[]);
+    void (*close)(int exit_status, int error);
+    int (*show_version)(int verbose);
+    int (*log_ttyin)(const char *buf, unsigned int len);
+    int (*log_ttyout)(const char *buf, unsigned int len);
+    int (*log_stdin)(const char *buf, unsigned int len);
+    int (*log_stdout)(const char *buf, unsigned int len);
+    int (*log_stderr)(const char *buf, unsigned int len);
+};
+
+/*
  * Sudo plugin internals.
  */
 
@@ -38,6 +57,7 @@ struct plugin_container {
 	struct generic_plugin *generic;
 	struct policy_plugin *policy;
 	struct io_plugin *io;
+	struct io_plugin_1_0 *io_1_0;
     } u;
 };
 TQ_DECLARE(plugin_container)

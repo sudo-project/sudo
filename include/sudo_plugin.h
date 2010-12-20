@@ -19,8 +19,9 @@
 
 /* API version major/minor */
 #define SUDO_API_VERSION_MAJOR 1
-#define SUDO_API_VERSION_MINOR 0
-#define SUDO_API_VERSION ((SUDO_API_VERSION_MAJOR << 16) | SUDO_API_VERSION_MINOR)
+#define SUDO_API_VERSION_MINOR 1
+#define SUDO_API_MKVERSION(x, y) ((x << 16) | y)
+#define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR, SUDO_API_VERSION_MINOR)
 
 /* Getters and setters for API version */
 #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
@@ -81,8 +82,8 @@ struct io_plugin {
     unsigned int version; /* always SUDO_API_VERSION */
     int (*open)(unsigned int version, sudo_conv_t conversation,
 	sudo_printf_t sudo_printf, char * const settings[],
-	char * const user_info[], int argc, char * const argv[],
-	char * const user_env[]);
+	char * const user_info[], char * const command_info[],
+	int argc, char * const argv[], char * const user_env[]);
     void (*close)(int exit_status, int error); /* wait status or error */
     int (*show_version)(int verbose);
     int (*log_ttyin)(const char *buf, unsigned int len);
