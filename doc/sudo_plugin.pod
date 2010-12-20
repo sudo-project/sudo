@@ -535,6 +535,22 @@ enable I<sudoedit> when the user attempts to run an editor.
 If specified, B<sudo> will close all files descriptors with a value
 of I<number> or higher.
 
+=item iolog_dir=string
+
+Fully qualified path to the directory in which I/O logs are
+to be stored.  This value may be used by the I/O logging plugin.
+
+=item iolog_file=string
+
+File name to use when I/O logging is enabled, relative to I<iolog_dir>.
+This value may be used by the I/O logging plugin.
+
+=item use_pty=bool
+
+Allocate a pseudo-tty to run the command in, regardless of whether
+or not I/O logging is in use.  By default, B<sudo> will only run
+the command in a pty when an I/O log plugin is loaded.
+
 =back
 
 Unsupported values will be ignored.
