@@ -1097,11 +1097,11 @@ own timestamps via C<sudo -v> and C<sudo -k> respectively.
 
 Umask to use when running the command.  Negate this option or set
 it to 0777 to preserve the user's umask.  The actual umask that is
-used will be the union of the user's umask and C<@sudo_umask@>.
-This guarantees that B<sudo> never lowers the umask when running a
-command.  Note on systems that use PAM, the default PAM configuration
-may specify its own umask which will override the value set in
-I<sudoers>.
+used will be the union of the user's umask and the value of the
+I<umask> option, which defaults to C<@sudo_umask@>.  This guarantees
+that B<sudo> never lowers the umask when running a command.  Note
+on systems that use PAM, the default PAM configuration may specify
+its own umask which will override the value set in I<sudoers>.
 
 =back
 
