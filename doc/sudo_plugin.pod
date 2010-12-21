@@ -535,15 +535,50 @@ enable I<sudoedit> when the user attempts to run an editor.
 If specified, B<sudo> will close all files descriptors with a value
 of I<number> or higher.
 
+=item iolog_stdin=bool
+
+Set to true if the I/O logging plugins, if any, should log the
+standard input if it is not connected to a terminal device.  This
+is a hint to the I/O logging plugin which may choose to ignore it.
+
+=item iolog_stdout=bool
+
+Set to true if the I/O logging plugins, if any, should log the
+standard output if it is not connected to a terminal device.  This
+is a hint to the I/O logging plugin which may choose to ignore it.
+
+=item iolog_stderr=bool
+
+Set to true if the I/O logging plugins, if any, should log the
+standard error if it is not connected to a terminal device.  This
+is a hint to the I/O logging plugin which may choose to ignore it.
+
+=item iolog_ttyin=bool
+
+Set to true if the I/O logging plugins, if any, should log all
+terminal input.  This only includes input typed by the user and not
+from a pipe or redirected from a file.  This is a hint to the I/O
+logging plugin which may choose to ignore it.
+
+=item iolog_ttyout=bool
+
+Set to true if the I/O logging plugins, if any, should log all
+terminal output.  This only includes output to the screen, not
+output to a pipe or file.  This is a hint to the I/O logging plugin
+which may choose to ignore it.
+
 =item iolog_dir=string
 
-Fully qualified path to the directory in which I/O logs are
-to be stored.  This value may be used by the I/O logging plugin.
+Fully qualified path to the directory in which I/O logs are to be
+stored.  This is a hint to the I/O logging plugin which may choose
+to ignore it.  If no I/O logging plugin is loaded, this setting has
+no effect.
 
 =item iolog_file=string
 
 File name to use when I/O logging is enabled, relative to I<iolog_dir>.
-This value may be used by the I/O logging plugin.
+This is a hint to the I/O logging plugin which may choose to ignore
+it.  If no I/O logging plugin is loaded, this setting has no effect.
 
 =item use_pty=bool
 

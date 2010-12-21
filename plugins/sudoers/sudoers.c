@@ -499,10 +499,19 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    validate_env_vars(sudo_user.env_vars);
     }
 
-    if (ISSET(sudo_mode, (MODE_RUN| MODE_EDIT)) && (def_log_input || def_log_output)) {
+    if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)) && (def_log_input || def_log_output)) {
 	io_nextid();
 	command_info[info_len++] = fmt_string("iolog_dir", def_iolog_dir);
 	command_info[info_len++] = fmt_string("iolog_file", sudo_user.sessid);
+	if (def_log_input) {
+	    command_info[info_len++] = estrdup("iolog_stdin=true");
+	    command_info[info_len++] = estrdup("iolog_ttyin=true");
+	}
+	if (def_log_output) {
+	    command_info[info_len++] = estrdup("iolog_stdout=true");
+	    command_info[info_len++] = estrdup("iolog_stderr=true");
+	    command_info[info_len++] = estrdup("iolog_ttyout=true");
+	}
     }
 
     log_allowed(validated);

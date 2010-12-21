@@ -246,10 +246,10 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     int argc, char * const argv[], char * const user_env[])
 {
     char pathbuf[PATH_MAX];
-    const char *iolog_dir, *iolog_file = NULL;
+    const char *iolog_dir, *iolog_file;
     char * const *cur;
     FILE *io_logfile;
-    int len;
+    int len, iolog_stdin, iolog_stdout, iolog_stderr, iolog_ttyin, iolog_ttyout;
 
     if (!sudo_conv)
 	sudo_conv = conversation;
@@ -261,26 +261,60 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	return TRUE;
 
     /*
-     * Pull iolog_dir and iolog_file out of command_info, if present,
-     * falling back to policy module info if not.
+     * Pull iolog settings out of command_info, if any.
      */
     iolog_dir = def_iolog_dir;
+    iolog_file = sudo_user.sessid;
+    iolog_stdin = iolog_ttyin = def_log_input;
+    iolog_stdout = iolog_stderr = iolog_ttyout = def_log_output;
     for (cur = command_info; *cur != NULL; cur++) {
 	if (**cur != 'i')
 	    continue;
 	if (strncmp(*cur, "iolog_file=", sizeof("iolog_file=") - 1) == 0) {
 	    iolog_file = *cur + sizeof("iolog_file=") - 1;
-	} else if (strncmp(*cur, "iolog_dir=", sizeof("iolog_dir=") - 1) == 0) {
+	    continue;
+	}
+	if (strncmp(*cur, "iolog_dir=", sizeof("iolog_dir=") - 1) == 0) {
 	    iolog_dir = *cur + sizeof("iolog_dir=") - 1;
+	    continue;
+	}
+	if (strncmp(*cur, "iolog_stdin=", sizeof("iolog_stdin=") - 1) == 0) {
+	    if (atobool(*cur + sizeof("iolog_stdin=") - 1) == TRUE)
+		iolog_stdin = TRUE;
+	    continue;
+	}
+	if (strncmp(*cur, "iolog_stdout=", sizeof("iolog_stdout=") - 1) == 0) {
+	    if (atobool(*cur + sizeof("iolog_stdout=") - 1) == TRUE)
+		iolog_stdout = TRUE;
+	    continue;
+	}
+	if (strncmp(*cur, "iolog_stderr=", sizeof("iolog_stderr=") - 1) == 0) {
+	    if (atobool(*cur + sizeof("iolog_stderr=") - 1) == TRUE)
+		iolog_stderr = TRUE;
+	    continue;
+	}
+	if (strncmp(*cur, "iolog_ttyin=", sizeof("iolog_ttyin=") - 1) == 0) {
+	    if (atobool(*cur + sizeof("iolog_ttyin=") - 1) == TRUE)
+		iolog_ttyin = TRUE;
+	    continue;
+	}
+	if (strncmp(*cur, "iolog_ttyout=", sizeof("iolog_ttyout=") - 1) == 0) {
+	    if (atobool(*cur + sizeof("iolog_ttyout=") - 1) == TRUE)
+		iolog_ttyout = TRUE;
+	    continue;
 	}
     }
+    /* Did policy module disable I/O logging? */
+    if (!iolog_stdin && !iolog_ttyin && !iolog_stdout && !iolog_stderr &&
+	!iolog_ttyout)
+	return FALSE;
 
     /* If no I/O log file defined there is nothing to do. */
     if (iolog_file == NULL)
 	return FALSE;
 
     /*
-     * Build a path containing the session id split into two-digit subdirs,
+     * Build a path containing the session ID split into two-digit subdirs,
      * so ID 000001 becomes /var/log/sudo-io/00/00/01.
      */
     len = build_idpath(iolog_dir, iolog_file, pathbuf, sizeof(pathbuf));
@@ -301,42 +335,46 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (io_fds[IOFD_TIMING].v == NULL)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
 
-    if (def_log_input) {
+    if (iolog_ttyin) {
 	io_fds[IOFD_TTYIN].v = open_io_fd(pathbuf, len, "/ttyin", def_compress_io);
 	if (io_fds[IOFD_TTYIN].v == NULL)
 	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
-
+    } else {
+	sudoers_io.log_ttyin = NULL;
+    }
+    if (iolog_stdin) {
 	io_fds[IOFD_STDIN].v = open_io_fd(pathbuf, len, "/stdin", def_compress_io);
 	if (io_fds[IOFD_STDIN].v == NULL)
 	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
     } else {
-	/* No input logging. */
-	sudoers_io.log_ttyin = NULL;
 	sudoers_io.log_stdin = NULL;
     }
-
-    if (def_log_output) {
+    if (iolog_ttyout) {
 	io_fds[IOFD_TTYOUT].v = open_io_fd(pathbuf, len, "/ttyout", def_compress_io);
 	if (io_fds[IOFD_TTYOUT].v == NULL)
 	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
-
+    } else {
+	sudoers_io.log_ttyout = NULL;
+    }
+    if (iolog_stdout) {
 	io_fds[IOFD_STDOUT].v = open_io_fd(pathbuf, len, "/stdout", def_compress_io);
 	if (io_fds[IOFD_STDOUT].v == NULL)
 	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
-
+    } else {
+	sudoers_io.log_stdout = NULL;
+    }
+    if (iolog_stderr) {
 	io_fds[IOFD_STDERR].v = open_io_fd(pathbuf, len, "/stderr", def_compress_io);
 	if (io_fds[IOFD_STDERR].v == NULL)
 	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
     } else {
-	/* No output logging. */
-	sudoers_io.log_ttyout = NULL;
-	sudoers_io.log_stdout = NULL;
 	sudoers_io.log_stderr = NULL;
     }
 
     gettimeofday(&last_time, NULL);
 
     /* XXX - log more stuff?  window size? environment? */
+    /* XXX - don't rely on policy module globals */
     fprintf(io_logfile, "%ld:%s:%s:%s:%s\n", (long)last_time.tv_sec, user_name,
         runas_pw->pw_name, runas_gr ? runas_gr->gr_name : "", user_tty);
     fprintf(io_logfile, "%s\n", user_cwd);
