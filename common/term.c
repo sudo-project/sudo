@@ -107,10 +107,11 @@ term_raw(int fd, int isig)
     /* Set terminal to raw mode */
     term.c_cc[VMIN] = 1;
     term.c_cc[VTIME] = 0;
-    CLR(term.c_lflag, ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+    CLR(term.c_iflag, ICRNL | IGNCR | INLCR | IUCLC | IXON);
+    SET(term.c_oflag, OPOST);
+    CLR(term.c_lflag, ECHO | ICANON | ISIG | IEXTEN);
     if (isig)
 	SET(term.c_lflag, ISIG);
-    CLR(term.c_iflag, ICRNL | IGNCR | INLCR | IUCLC | IXON);
     if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
     	return(1);
