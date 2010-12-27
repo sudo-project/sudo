@@ -216,7 +216,7 @@ expand_iolog_path(const char *prefix, const char *opath)
 #endif
 	/* Double the size of the buffer until it is big enough to expand. */
 	do {
-	    psize * 2;
+	    psize *= 2;
 	    buf = erealloc(buf, psize);
 	    buf[psize - 1] = '\0';
 	} while (!strftime(buf, psize, path, timeptr) || buf[psize - 1] != '\0');
