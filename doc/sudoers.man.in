@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "September 14, 2010" "1.8.0b1" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "December 27, 2010" "1.8.0b3" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -1184,11 +1184,11 @@ own timestamps via \f(CW\*(C`sudo \-v\*(C'\fR and \f(CW\*(C`sudo \-k\*(C'\fR res
 .IX Item "umask"
 Umask to use when running the command.  Negate this option or set
 it to 0777 to preserve the user's umask.  The actual umask that is
-used will be the union of the user's umask and \f(CW\*(C`@sudo_umask@\*(C'\fR.
-This guarantees that \fBsudo\fR never lowers the umask when running a
-command.  Note on systems that use \s-1PAM\s0, the default \s-1PAM\s0 configuration
-may specify its own umask which will override the value set in
-\&\fIsudoers\fR.
+used will be the union of the user's umask and the value of the
+\&\fIumask\fR option, which defaults to \f(CW\*(C`@sudo_umask@\*(C'\fR.  This guarantees
+that \fBsudo\fR never lowers the umask when running a command.  Note
+on systems that use \s-1PAM\s0, the default \s-1PAM\s0 configuration may specify
+its own umask which will override the value set in \fIsudoers\fR.
 .PP
 \&\fBStrings\fR:
 .IP "badpass_message" 16
@@ -1201,6 +1201,64 @@ A colon (':') separated list of editors allowed to be used with
 \&\fBvisudo\fR.  \fBvisudo\fR will choose the editor that matches the user's
 \&\s-1EDITOR\s0 environment variable if possible, or the first editor in the
 list that exists and is executable.  The default is \f(CW"@editor@"\fR.
+.IP "iolog_dir" 16
+.IX Item "iolog_dir"
+The top-level directory to use when constructing the path name for
+the input/output log directory.  Only used if the \fIlog_input\fR or
+\&\fIlog_output\fR options are enabled or when the <\s-1LOG_INPUT\s0> or
+\&\f(CW\*(C`LOG_OUTPUT\*(C'\fR tags are present for a command.  The session sequence
+number, if any, is stored in the directory.
+The default is \f(CW"@iolog_dir@"\fR.
+.Sp
+The following percent (`\f(CW\*(C`%\*(C'\fR') escape sequences are supported:
+.RS 16
+.ie n .IP "\*(C`%{seq}\*(C'" 4
+.el .IP "\f(CW\*(C`%{seq}\*(C'\fR" 4
+.IX Item "%{seq}"
+expanded to a monotonically increasing base\-36 sequence number, such as 0100A5,
+where every two digits are used to form a new directory, e.g. \fI01/00/A5\fR
+.ie n .IP "\*(C`%{user}\*(C'" 4
+.el .IP "\f(CW\*(C`%{user}\*(C'\fR" 4
+.IX Item "%{user}"
+expanded to the invoking user's login name
+.ie n .IP "\*(C`%{group}\*(C'" 4
+.el .IP "\f(CW\*(C`%{group}\*(C'\fR" 4
+.IX Item "%{group}"
+expanded to the name of the invoking user's real group \s-1ID\s0
+.ie n .IP "\*(C`%{runas_user}\*(C'" 4
+.el .IP "\f(CW\*(C`%{runas_user}\*(C'\fR" 4
+.IX Item "%{runas_user}"
+expanded to the login name of the user the command will
+be run as (e.g. root)
+.ie n .IP "\*(C`%{runas_group}\*(C'" 4
+.el .IP "\f(CW\*(C`%{runas_group}\*(C'\fR" 4
+.IX Item "%{runas_group}"
+expanded to the group name of the user the command will
+be run as (e.g. wheel)
+.ie n .IP "\*(C`%{hostname}\*(C'" 4
+.el .IP "\f(CW\*(C`%{hostname}\*(C'\fR" 4
+.IX Item "%{hostname}"
+expanded to the local host name without the domain name
+.ie n .IP "\*(C`%{command}\*(C'" 4
+.el .IP "\f(CW\*(C`%{command}\*(C'\fR" 4
+.IX Item "%{command}"
+expanded to the base name of the command being run
+.RE
+.RS 16
+.Sp
+In addition, any escape sequences supported by the system's \fIstrftime()\fR
+function will be expanded.
+.RE
+.IP "iolog_file" 16
+.IX Item "iolog_file"
+The path name, relative to \fIiolog_dir\fR, in which to store input/output
+logs when the \fIlog_input\fR or \fIlog_output\fR options are enabled or
+when the <\s-1LOG_INPUT\s0> or \f(CW\*(C`LOG_OUTPUT\*(C'\fR tags are present for a command.
+Note that \fIiolog_file\fR may contain directory components.
+The default is \f(CW"%{seq}"\fR.
+.Sp
+See the \fIiolog_dir\fR option above for a list of supported percent
+(`\f(CW\*(C`%\*(C'\fR') escape sequences.
 .IP "mailsub" 16
 .IX Item "mailsub"
 Subject of the mail sent to the \fImailto\fR user. The escape \f(CW%h\fR
@@ -1216,7 +1274,7 @@ support \f(CW\*(C`LD_PRELOAD\*(C'\fR or its equivalent.  Defaults to \fI@noexec_
 .IX Item "passprompt"
 The default prompt to use when asking for a password; can be overridden
 via the \fB\-p\fR option or the \f(CW\*(C`SUDO_PROMPT\*(C'\fR environment variable.
-The following percent (`\f(CW\*(C`%\*(C'\fR') escapes are supported:
+The following percent (`\f(CW\*(C`%\*(C'\fR') escape sequences are supported:
 .RS 16
 .ie n .IP "%H" 4
 .el .IP "\f(CW%H\fR" 4
@@ -1509,9 +1567,9 @@ Local groups file
 .IP "\fI/etc/netgroup\fR" 24
 .IX Item "/etc/netgroup"
 List of network groups
-.ie n .IP "\fI@io_logdir@\fR" 24
-.el .IP "\fI@io_logdir@\fR" 24
-.IX Item "@io_logdir@"
+.ie n .IP "\fI@iolog_dir@\fR" 24
+.el .IP "\fI@iolog_dir@\fR" 24
+.IX Item "@iolog_dir@"
 I/O log files
 .ie n .IP "\fI@timedir@\fR" 24
 .el .IP "\fI@timedir@\fR" 24
@@ -1796,7 +1854,7 @@ arbitrary commands.  Many editors have a restricted mode where shell
 escapes are disabled, though \fBsudoedit\fR is a better solution to
 running editors via \fBsudo\fR.  Due to the large number of programs that
 offer shell escapes, restricting users to the set of programs that
-do not if often unworkable.
+do not is often unworkable.
 .IP "noexec" 10
 .IX Item "noexec"
 Many systems that support shared libraries have the ability to
@@ -1898,8 +1956,8 @@ their own copy of a shell) regardless of any '!' elements in the
 user specification.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), \fIglob\fR\|(3), \fIsudoers.ldap\fR\|(@mansectform@),
-\&\fIsudo_plugin\fR\|(@mansectsu@), \fIsudo\fR\|(@mansectsu@), \fIvisudo\fR\|(@mansectsu@)
+\&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), \fIglob\fR\|(3), \fIstrftime\fR\|(3),
+\&\fIsudoers.ldap\fR\|(@mansectform@), \fIsudo_plugin\fR\|(@mansectsu@), \fIsudo\fR\|(@mansectsu@), \fIvisudo\fR\|(@mansectsu@)
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 The \fIsudoers\fR file should \fBalways\fR be edited by the \fBvisudo\fR

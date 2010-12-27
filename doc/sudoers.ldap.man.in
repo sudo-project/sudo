@@ -140,7 +140,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "November 18, 2010" "1.8.0b2" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "December 27, 2010" "1.8.0b3" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -255,6 +255,17 @@ If multiple \fBsudoNotBefore\fR entries are present, the earliest is used.
 A timestamp in the form \f(CW\*(C`yyyymmddHHMMZ\*(C'\fR that indicates end of validity
 of this \f(CW\*(C`sudoRole\*(C'\fR.
 If multiple \fBsudoNotAfter\fR entries are present, the last one is used.
+.IP "\fBsudoOrder\fR" 4
+.IX Item "sudoOrder"
+The sudoRole entries retrieved from the \s-1LDAP\s0 directory have no
+inherent order.  The \fBsudoOrder\fR attribute is an integer (or
+floating point value for \s-1LDAP\s0 servers that support it) that is used
+to sort the matching entries.  This allows LDAP-based sudoers entries
+to more closely mimic the behaviour of the sudoers file, where the
+of the entries influences the result.  If multiple entries match,
+the entry with the highest \fBsudoOrder\fR attribute is chosen.  This
+corresponds to the \*(L"last match\*(R" behavior of the sudoers file.  If
+the \fBsudoOrder\fR attribute is not present, a value of 0 is assumed.
 .PP
 Each component listed above should contain a single value, but there
 may be multiple instances of each component type.  A sudoRole must
@@ -290,8 +301,12 @@ to entries that satisfy the time constraints, if any are present.
 There are some subtle differences in the way sudoers is handled
 once in \s-1LDAP\s0.  Probably the biggest is that according to the \s-1RFC\s0,
 \&\s-1LDAP\s0 ordering is arbitrary and you cannot expect that Attributes
-and Entries are returned in any specific order.  If there are
-conflicting command rules on an entry, the negative takes precedence.
+and Entries are returned in any specific order.
+.PP
+The order in which different entries are applied can be controlled
+using the \fBsudoOrder\fR attribute, but there is no way to guarantee
+the order of attributes within a specific entry.  If there are
+conflicting command rules in an entry, the negative takes precedence.
 This is called paranoid behavior (not necessarily the most specific
 match).
 .PP
@@ -329,7 +344,7 @@ Here is an example:
 .Ve
 .PP
 Another difference is that negations on the Host, User or Runas are
-currently ignorred.  For example, the following attributes do not
+currently ignored.  For example, the following attributes do not
 behave the way one might expect.
 .PP
 .Vb 3
@@ -421,7 +436,7 @@ this is of the form \f(CW\*(C`ou=SUDOers,dc=example,dc=com\*(C'\fR for the domai
 in which case they are queried in the order specified.
 .IP "\fB\s-1SUDOERS_TIMED\s0\fR on/true/yes/off/false/no" 4
 .IX Item "SUDOERS_TIMED on/true/yes/off/false/no"
-Whether or not to evaluate the sudoNotBefore and sudoNotAfter
+Whether or not to evaluate the \fBsudoNotBefore\fR and \fBsudoNotAfter\fR
 attributes that implement time-dependent sudoers entries.
 .IP "\fB\s-1SUDOERS_DEBUG\s0\fR debug_level" 4
 .IX Item "SUDOERS_DEBUG debug_level"
@@ -827,12 +842,19 @@ schema directory (e.g. \fI/etc/openldap/schema\fR), add the proper
 \&    ORDERING generalizedTimeOrderingMatch
 \&    SYNTAX 1.3.6.1.4.1.1466.115.121.1.24 )
 \&
+\& attributeTypes ( 1.3.6.1.4.1.15953.9.1.10
+\&     NAME \*(AqsudoOrder\*(Aq
+\&     DESC \*(Aqan integer to order the sudoRole entries\*(Aq
+\&     EQUALITY integerMatch
+\&     ORDERING integerOrderingMatch
+\&     SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 )
+\&
 \& objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME \*(AqsudoRole\*(Aq SUP top STRUCTURAL
 \&    DESC \*(AqSudoer Entries\*(Aq
 \&    MUST ( cn )
 \&    MAY ( sudoUser $ sudoHost $ sudoCommand $ sudoRunAs $ sudoRunAsUser $
 \&          sudoRunAsGroup $ sudoOption $ sudoNotBefore $ sudoNotAfter $
-\&          description )
+\&          sudoOrder $ description )
 \&    )
 .Ve
 .SH "SEE ALSO"
@@ -840,10 +862,9 @@ schema directory (e.g. \fI/etc/openldap/schema\fR), add the proper
 \&\fIldap.conf\fR\|(@mansectform@), \fIsudoers\fR\|(@mansectform@)
 .SH "CAVEATS"
 .IX Header "CAVEATS"
-The way that \fIsudoers\fR is parsed differs between Note that there
-are differences in the way that LDAP-based \fIsudoers\fR is parsed
-compared to file-based \fIsudoers\fR.  See the \*(L"Differences between
-\&\s-1LDAP\s0 and non-LDAP sudoers\*(R" section for more information.
+Note that there are differences in the way that LDAP-based \fIsudoers\fR
+is parsed compared to file-based \fIsudoers\fR.  See the \*(L"Differences
+between \s-1LDAP\s0 and non-LDAP sudoers\*(R" section for more information.
 .SH "BUGS"
 .IX Header "BUGS"
 If you feel you have found a bug in \fBsudo\fR, please submit a bug report
