@@ -15710,8 +15710,8 @@ fi
 done
 
     case " $LIBOBJS " in
-  *" mkstemp.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS mkstemp.$ac_objext"
+  *" mktemp.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS mktemp.$ac_objext"
  ;;
 esac
 

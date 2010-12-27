@@ -84,8 +84,8 @@ isblank.lo: $(srcdir)/isblank.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/isblank.c
 memrchr.lo: $(srcdir)/memrchr.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/memrchr.c
-mkstemps.lo: $(srcdir)/mkstemps.c $(incdir)/missing.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/mkstemps.c
+mktemp.lo: $(srcdir)/mktemp.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/mktemp.c
 nanosleep.lo: $(srcdir)/nanosleep.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/nanosleep.c
 siglist.lo: ./siglist.c $(incdir)/missing.h $(top_builddir)/config.h
