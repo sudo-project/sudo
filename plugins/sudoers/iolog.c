@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <setjmp.h>
 #include <pwd.h>
 #include <grp.h>
 #ifdef HAVE_ZLIB_H
@@ -51,6 +52,9 @@
 #endif
 
 #include "sudoers.h"
+
+/* plugin_error.c */
+extern sigjmp_buf error_jmp;
 
 union io_fd {
     FILE *f;
@@ -259,6 +263,11 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     /* If we have no command (because -V was specified) just return. */
     if (argc == 0)
 	return TRUE;
+
+    if (sigsetjmp(error_jmp, 1)) {
+	/* called via error(), errorx() or log_error() */
+	return -1;
+    }
 
     /*
      * Pull iolog settings out of command_info, if any.
