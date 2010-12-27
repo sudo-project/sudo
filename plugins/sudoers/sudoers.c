@@ -135,8 +135,8 @@ static struct sudo_nss_list *snl;
 int NewArgc;
 char **NewArgv;
 
-/* error.c */
-sigjmp_buf error_jmp;
+/* plugin_error.c */
+extern sigjmp_buf error_jmp;
 
 static int
 sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
@@ -500,9 +500,13 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)) && (def_log_input || def_log_output)) {
-	io_nextid();
-	command_info[info_len++] = fmt_string("iolog_dir", def_iolog_dir);
-	command_info[info_len++] = fmt_string("iolog_file", sudo_user.sessid);
+	if (def_iolog_file) {
+	    if (strstr(def_iolog_file, "%{seq}") != NULL) /* XXX - inline? */
+		io_nextid();
+	    command_info[info_len++] = expand_iolog_path("iolog_file=", def_iolog_file);
+	}
+	if (def_iolog_dir)
+	    command_info[info_len++] = expand_iolog_path("iolog_dir=", def_iolog_dir);
 	if (def_log_input) {
 	    command_info[info_len++] = estrdup("iolog_stdin=true");
 	    command_info[info_len++] = estrdup("iolog_ttyin=true");

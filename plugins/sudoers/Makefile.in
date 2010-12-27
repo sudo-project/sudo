@@ -103,8 +103,9 @@ LIBSUDOERS_OBJS = alias.lo audit.lo defaults.lo gram.lo match.lo pwutil.lo \
 		  timestr.lo toke.lo redblack.lo
 
 SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo env.lo goodpath.lo \
-	       group_plugin.lo find_path.lo interfaces.lo logging.lo parse.lo \
-	       set_perms.lo sudoers.lo sudo_nss.lo iolog.lo @SUDOERS_OBJS@
+	       group_plugin.lo find_path.lo interfaces.lo logging.lo \
+	       parse.lo set_perms.lo sudoers.lo sudo_nss.lo iolog.lo \
+	       iolog_path.lo @SUDOERS_OBJS@
 
 VISUDO_OBJS = visudo.o goodpath.o find_path.o error.o
 
@@ -221,6 +222,8 @@ interfaces.lo: $(srcdir)/interfaces.c $(SUDODEP) $(srcdir)/interfaces.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/interfaces.c
 iolog.lo: $(srcdir)/iolog.c $(SUDODEP)
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/iolog.c
+iolog_path.lo: $(srcdir)/iolog_path.c $(SUDODEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/iolog_path.c
 ldap.lo: $(srcdir)/ldap.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/ldap.c
 linux_audit.lo: $(srcdir)/linux_audit.c $(SUDODEP) $(srcdir)/linux_audit.h

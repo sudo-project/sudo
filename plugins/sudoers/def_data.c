@@ -335,6 +335,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"Directory in which to store input/output logs",
 	NULL,
     }, {
+	"iolog_file", T_STR,
+	"File in which to store the input/output log",
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

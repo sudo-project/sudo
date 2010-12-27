@@ -247,3 +247,6 @@ group_plugin
 iolog_dir
 	T_STR|T_PATH
 	"Directory in which to store input/output logs"
+iolog_file
+	T_STR
+	"File in which to store the input/output log"

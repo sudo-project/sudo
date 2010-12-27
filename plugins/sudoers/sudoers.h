@@ -285,6 +285,9 @@ int get_boottime(struct timeval *);
 /* iolog.c */
 void io_nextid(void);
 
+/* iolog_path.c */
+char *expand_iolog_path(const char *prefix, const char *opath);
+
 /* env.c */
 char **env_get(void);
 void env_init(char * const envp[]);

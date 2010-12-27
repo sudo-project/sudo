@@ -84,6 +84,26 @@ static struct timeval last_time;
 static union io_fd io_fds[IOFD_MAX];
 extern struct io_plugin sudoers_io;
 
+static void
+mkdir_parents(char *path)
+{
+    struct stat sb;
+    char *slash = path;
+
+    for (;;) {
+	if ((slash = strchr(slash + 1, '/')) == NULL)
+	    break;
+	*slash = '\0';
+	if (stat(path, &sb) != 0) {
+	    if (mkdir(path, S_IRWXU) != 0)
+		log_error(USE_ERRNO, "Can't mkdir %s", path);
+	} else if (!S_ISDIR(sb.st_mode)) {
+	    log_error(0, "%s: %s", path, strerror(ENOTDIR));
+	}
+	*slash = '/';
+    }
+}
+
 void
 io_nextid(void)
 {
@@ -98,6 +118,7 @@ io_nextid(void)
     /*
      * Create I/O log directory if it doesn't already exist.
      */
+    mkdir_parents(def_iolog_dir);
     if (stat(def_iolog_dir, &sb) != 0) {
 	if (mkdir(def_iolog_dir, S_IRWXU) != 0)
 	    log_error(USE_ERRNO, "Can't mkdir %s", def_iolog_dir);
@@ -152,72 +173,36 @@ io_nextid(void)
 }
 
 static int
-build_idpath(const char *iolog_dir, const char *sessid, char *pathbuf, size_t pathsize)
+build_iopath(const char *iolog_dir, const char *iolog_file, char *pathbuf,
+    size_t pathsize)
 {
-    struct stat sb;
-    char *cp;
-    int i, len;
+    int dirlen, filelen, len;
 
-    if (sessid[0] == '\0')
-	log_error(0, "tried to build a session id path without a session id");
+    /* Trim extraneous slashes. */
+    dirlen = strlen(iolog_dir);
+    while (dirlen > 1 && iolog_dir[dirlen - 1] == '/')
+	dirlen--;
+    while (*iolog_file == '/')
+	iolog_file++;
+    filelen = strlen(iolog_file);
+    while (filelen > 1 && iolog_file[filelen - 1] == '/')
+	filelen--;
 
-    /* Check whether or not we have a real session ID. */
-    for (i = 0; i < 6; i++) {
-	switch (sessid[i]) {
-	    case '0': case '1': case '2': case '3': case '4': case '5':
-	    case '6': case '7': case '8': case '9': case 'A': case 'B':
-	    case 'C': case 'D': case 'E': case 'F': case 'G': case 'H':
-	    case 'I': case 'J': case 'K': case 'L': case 'M': case 'N':
-	    case 'O': case 'P': case 'Q': case 'R': case 'S': case 'T':
-	    case 'U': case 'V': case 'W': case 'X': case 'Y': case 'Z':
-		break;
-	    default:
-		goto checked;
-	}
+    if (*iolog_dir != '/' || *iolog_file == '\0')
+	log_error(0, "invalid I/O log path: %s/%s", iolog_dir, iolog_file);
+
+    len = snprintf(pathbuf, pathsize, "%.*s/%.*s", dirlen, iolog_dir,
+	filelen, iolog_file);
+    if (len <= 0 && len >= pathsize) {
+	errno = ENAMETOOLONG;
+	log_error(USE_ERRNO, "%.*s/%.*s", dirlen, iolog_dir,
+	    filelen, iolog_file);
     }
-checked:
-    if (i == 6 && sessid[6] == '\0') {
-	/* Path is of the form /var/log/sudo-io/00/00/01. */
-	len = snprintf(pathbuf, pathsize, "%s/%c%c/%c%c/%c%c", iolog_dir,
-	    sessid[0], sessid[1], sessid[2], sessid[3], sessid[4], sessid[5]);
-	if (len <= 0 && len >= pathsize) {
-	    errno = ENAMETOOLONG;
-	    log_error(USE_ERRNO, "%s/%s", iolog_dir, sessid);
-	}
 
-	/* Create the intermediate subdirs as needed. */
-	for (i = 6; i > 0; i -= 3) {
-	    pathbuf[len - i] = '\0';
-	    if (stat(pathbuf, &sb) != 0) {
-		if (mkdir(pathbuf, S_IRWXU) != 0)
-		    log_error(USE_ERRNO, "Can't mkdir %s", pathbuf);
-	    } else if (!S_ISDIR(sb.st_mode)) {
-		log_error(0, "%s: %s", pathbuf, strerror(ENOTDIR));
-	    }
-	    pathbuf[len - i] = '/';
-	}
-    } else {
-	/* Not a session ID, just append dir + file. */
-	len = snprintf(pathbuf, pathsize, "%s/%s", iolog_dir, sessid);
-	if (len <= 0 && len >= pathsize) {
-	    errno = ENAMETOOLONG;
-	    log_error(USE_ERRNO, "%s/%s", iolog_dir, sessid);
-	}
-
-	/* Create the intermediate subdirs as needed. */
-	cp = &pathbuf[strlen(iolog_dir)];
-	do {
-	    *cp = '\0';
-	    if (stat(pathbuf, &sb) != 0) {
-		if (mkdir(pathbuf, S_IRWXU) != 0)
-		    log_error(USE_ERRNO, "Can't mkdir %s", pathbuf);
-	    } else if (!S_ISDIR(sb.st_mode)) {
-		log_error(0, "%s: %s", pathbuf, strerror(ENOTDIR));
-	    }
-	    *cp++ = '/';
-	    cp = strchr(cp, '/');
-	} while (cp != NULL);
-    }
+    /* Create path and intermediate subdirs as needed. */
+    mkdir_parents(pathbuf);
+    if (mkdtemp(pathbuf) == NULL)
+	log_error(USE_ERRNO, "Can't create %s", pathbuf);
 
     return(len);
 }
@@ -272,8 +257,8 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     /*
      * Pull iolog settings out of command_info, if any.
      */
-    iolog_dir = def_iolog_dir;
-    iolog_file = sudo_user.sessid;
+    iolog_dir = _PATH_SUDO_IO_LOGDIR; /* XXX */
+    iolog_file = sudo_user.sessid; /* XXX */
     iolog_stdin = iolog_ttyin = def_log_input;
     iolog_stdout = iolog_stderr = iolog_ttyout = def_log_output;
     for (cur = command_info; *cur != NULL; cur++) {
@@ -319,19 +304,16 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	return FALSE;
 
     /* If no I/O log file defined there is nothing to do. */
-    if (iolog_file == NULL)
+    if (iolog_file == NULL || iolog_dir == NULL)
 	return FALSE;
 
     /*
-     * Build a path containing the session ID split into two-digit subdirs,
-     * so ID 000001 becomes /var/log/sudo-io/00/00/01.
+     * Build a path from I/O file and dir, creating intermediate subdirs
+     * and calling mkdtemp() on the result.
      */
-    len = build_idpath(iolog_dir, iolog_file, pathbuf, sizeof(pathbuf));
-    if (len == -1)
+    len = build_iopath(iolog_dir, iolog_file, pathbuf, sizeof(pathbuf));
+    if (len < 0 || len >= sizeof(pathbuf))
 	return -1;
-
-    if (mkdir(pathbuf, S_IRUSR|S_IWUSR|S_IXUSR) != 0)
-	log_error(USE_ERRNO, "Can't mkdir %s", pathbuf);
 
     /*
      * We create 7 files: a log file, a timing file and 5 for input/output.
