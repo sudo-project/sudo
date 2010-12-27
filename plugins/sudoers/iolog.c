@@ -199,10 +199,18 @@ build_iopath(const char *iolog_dir, const char *iolog_file, char *pathbuf,
 	    filelen, iolog_file);
     }
 
-    /* Create path and intermediate subdirs as needed. */
+    /*
+     * Create path and intermediate subdirs as needed.
+     * If path ends in at least 6 Xs (ala POSIX mktemp), use mkdtemp().
+     */
     mkdir_parents(pathbuf);
-    if (mkdtemp(pathbuf) == NULL)
-	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+    if (len >= 6 && strcmp(&pathbuf[len - 6], "XXXXXX") == 0) {
+	if (mkdtemp(pathbuf) == NULL)
+	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+    } else {
+	if (mkdir(pathbuf, S_IRWXU) != 0)
+	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+    }
 
     return(len);
 }
@@ -307,10 +315,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (iolog_file == NULL || iolog_dir == NULL)
 	return FALSE;
 
-    /*
-     * Build a path from I/O file and dir, creating intermediate subdirs
-     * and calling mkdtemp() on the result.
-     */
+    /* Build a path from I/O file and dir, creating intermediate subdirs. */
     len = build_iopath(iolog_dir, iolog_file, pathbuf, sizeof(pathbuf));
     if (len < 0 || len >= sizeof(pathbuf))
 	return -1;
