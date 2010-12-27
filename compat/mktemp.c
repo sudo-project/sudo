@@ -41,6 +41,9 @@
 static unsigned int get_random(void);
 static void seed_random(void);
 
+#define MKTEMP_FILE	1
+#define MKTEMP_DIR	2
+
 #define TEMPCHARS	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 #define NUM_CHARS	(sizeof(TEMPCHARS) - 1)
 
@@ -48,8 +51,26 @@ static void seed_random(void);
 #define INT_MAX	0x7fffffff
 #endif
 
+#ifndef HAVE_MKSTEMPS
 int
 mkstemps(char *path, int slen)
+{
+	return(mktemp_internal(path, slen, MKTEMP_FILE));
+}
+#endif /* HAVE_MKSTEMPS */
+
+#ifndef HAVE_MKDTEMP
+char *
+mkdtemp(char *path)
+{
+	if (mktemp_internal(path, 0, MKTEMP_DIR) == -1)
+		return(NULL);
+	return(path);
+}
+#endif /* HAVE_MKDTEMP */
+
+int
+mktemp_internal(char *path, int slen, int mode)
 {
 	char *start, *cp, *ep;
 	const char *tempchars = TEMPCHARS;
@@ -77,9 +98,19 @@ mkstemps(char *path, int slen)
 			*cp = tempchars[r];
 		}
 
-		fd = open(path, O_CREAT|O_EXCL|O_RDWR, S_IRUSR|S_IWUSR);
-		if (fd != -1 || errno != EEXIST)
-			return(fd);
+		switch (mode) {
+		case MKTEMP_FILE:
+			fd = open(path, O_CREAT|O_EXCL|O_RDWR, S_IRUSR|S_IWUSR);
+			if (fd != -1 || errno != EEXIST)
+				return(fd);
+			break;
+		case MKTEMP_DIR:
+			if (mkdir(path, S_IRWXU) == 0)
+				return(0);
+			if (errno != EEXIST)
+				return(-1);
+			break;
+		}
 	} while (--tries);
 
 	errno = EEXIST;

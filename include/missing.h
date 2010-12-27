@@ -316,6 +316,9 @@ size_t strlcpy(char *, const char *, size_t);
 #ifndef HAVE_MEMRCHR
 void *memrchr(const void *, int, size_t);
 #endif
+#ifndef HAVE_MKDTEMP
+char *mkdtemp(char *);
+#endif
 #ifndef HAVE_MKSTEMPS
 int mkstemps(char *, int);
 #endif

@@ -2004,9 +2004,9 @@ AC_CHECK_FUNCS(closefrom, [], [AC_LIBOBJ(closefrom)
 	[ #include <limits.h>
 	  #include <fcntl.h> ])
 ])
-AC_CHECK_FUNCS(mkstemps, [], [
+AC_CHECK_FUNCS(mkstemps mkdtemp, [], [
     AC_CHECK_FUNCS(random lrand48, [break])
-    AC_LIBOBJ(mkstemps)
+    AC_LIBOBJ(mkstemp)
 ])
 AC_CHECK_FUNCS(snprintf vsnprintf asprintf vasprintf, , [NEED_SNPRINTF=1])
 if test X"$ac_cv_type_struct_timespec" != X"no"; then
