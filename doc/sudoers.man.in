@@ -1248,6 +1248,10 @@ expanded to the base name of the command being run
 .Sp
 In addition, any escape sequences supported by the system's \fIstrftime()\fR
 function will be expanded.
+.Sp
+Path names that end in six or more \f(CW\*(C`X\*(C'\fRs will have the \f(CW\*(C`X\*(C'\fRs replaced
+with a unique combination of digits and letters, similar to the
+\&\fImktemp()\fR function.
 .RE
 .IP "iolog_file" 16
 .IX Item "iolog_file"
@@ -1956,7 +1960,7 @@ their own copy of a shell) regardless of any '!' elements in the
 user specification.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), \fIglob\fR\|(3), \fIstrftime\fR\|(3),
+\&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), \fIglob\fR\|(3), \fImktemp\fR\|(3), \fIstrftime\fR\|(3),
 \&\fIsudoers.ldap\fR\|(@mansectform@), \fIsudo_plugin\fR\|(@mansectsu@), \fIsudo\fR\|(@mansectsu@), \fIvisudo\fR\|(@mansectsu@)
 .SH "CAVEATS"
 .IX Header "CAVEATS"

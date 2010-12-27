@@ -1170,6 +1170,10 @@ expanded to the base name of the command being run
 In addition, any escape sequences supported by the system's strftime()
 function will be expanded.
 
+Path names that end in six or more C<X>s will have the C<X>s replaced
+with a unique combination of digits and letters, similar to the
+mktemp() function.
+
 =item iolog_file
 
 The path name, relative to I<iolog_dir>, in which to store input/output
@@ -1887,7 +1891,7 @@ user specification.
 
 =head1 SEE ALSO
 
-L<rsh(1)>, L<su(1)>, L<fnmatch(3)>, L<glob(3)>, L<strftime(3)>,
+L<rsh(1)>, L<su(1)>, L<fnmatch(3)>, L<glob(3)>, L<mktemp(3)>, L<strftime(3)>,
 L<sudoers.ldap(5)>, L<sudo_plugin(8)>, L<sudo(8)>, L<visudo(8)>
 
 =head1 CAVEATS
