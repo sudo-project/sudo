@@ -526,6 +526,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    command_info[info_len++] = estrdup("iolog_stderr=true");
 	    command_info[info_len++] = estrdup("iolog_ttyout=true");
 	}
+	if (def_compress_io)
+	    command_info[info_len++] = estrdup("iolog_compress=true");
     }
 
     log_allowed(validated);

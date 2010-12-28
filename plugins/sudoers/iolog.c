@@ -80,10 +80,14 @@ struct script_buf {
 
 #define SESSID_MAX	2176782336U
 
+static int iolog_compress;
 static struct timeval last_time;
 static union io_fd io_fds[IOFD_MAX];
 extern struct io_plugin sudoers_io;
 
+/*
+ * Create parent directories for path as needed, but not path itself.
+ */
 static void
 mkdir_parents(char *path)
 {
@@ -104,6 +108,11 @@ mkdir_parents(char *path)
     }
 }
 
+/*
+ * Read the on-disk sequence number, set sudo_user.sessid to the next
+ * number, and update the on-disk copy.
+ * Uses file locking to avoid sequence number collisions.
+ */
 void
 io_nextid(void)
 {
@@ -172,6 +181,11 @@ io_nextid(void)
     close(fd);
 }
 
+/*
+ * Join iolog_dir and iolog_file, storing the result as pathbuf and
+ * expanding any escapes sequences that are found.
+ * Creates the resulting directory and any intermediate directories.
+ */
 static int
 build_iopath(const char *iolog_dir, const char *iolog_file, char *pathbuf,
     size_t pathsize)
@@ -215,6 +229,12 @@ build_iopath(const char *iolog_dir, const char *iolog_file, char *pathbuf,
     return(len);
 }
 
+/*
+ * Append suffix to pathbuf after len chars and open the resulting file.
+ * Note that the size of pathbuf is assumed to be PATH_MAX.
+ * Uses zlib if docompress is TRUE.
+ * Returns the open file handle which has the close-on-exec flag set.
+ */
 static void *
 open_io_fd(char *pathbuf, int len, const char *suffix, int docompress)
 {
@@ -243,10 +263,11 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     int argc, char * const argv[], char * const user_env[])
 {
     char pathbuf[PATH_MAX];
-    const char *iolog_dir, *iolog_file;
+    const char *iolog_dir = NULL, *iolog_file = NULL;
     char * const *cur;
     FILE *io_logfile;
-    int len, iolog_stdin, iolog_stdout, iolog_stderr, iolog_ttyin, iolog_ttyout;
+    int len, iolog_stdin = FALSE, iolog_stdout = FALSE, iolog_stderr = FALSE;
+    int iolog_ttyin = FALSE, iolog_ttyout = FALSE, iolog_compress = FALSE;
 
     if (!sudo_conv)
 	sudo_conv = conversation;
@@ -265,10 +286,6 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     /*
      * Pull iolog settings out of command_info, if any.
      */
-    iolog_dir = _PATH_SUDO_IO_LOGDIR; /* XXX */
-    iolog_file = sudo_user.sessid; /* XXX */
-    iolog_stdin = iolog_ttyin = def_log_input;
-    iolog_stdout = iolog_stderr = iolog_ttyout = def_log_output;
     for (cur = command_info; *cur != NULL; cur++) {
 	if (**cur != 'i')
 	    continue;
@@ -305,6 +322,11 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 		iolog_ttyout = TRUE;
 	    continue;
 	}
+	if (strncmp(*cur, "iolog_compress=", sizeof("iolog_compress=") - 1) == 0) {
+	    if (atobool(*cur + sizeof("iolog_compress=") - 1) == TRUE)
+		iolog_compress = TRUE;
+	    continue;
+	}
     }
     /* Did policy module disable I/O logging? */
     if (!iolog_stdin && !iolog_ttyin && !iolog_stdout && !iolog_stderr &&
@@ -327,40 +349,40 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (io_logfile == NULL)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
 
-    io_fds[IOFD_TIMING].v = open_io_fd(pathbuf, len, "/timing", def_compress_io);
+    io_fds[IOFD_TIMING].v = open_io_fd(pathbuf, len, "/timing", iolog_compress);
     if (io_fds[IOFD_TIMING].v == NULL)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
 
     if (iolog_ttyin) {
-	io_fds[IOFD_TTYIN].v = open_io_fd(pathbuf, len, "/ttyin", def_compress_io);
+	io_fds[IOFD_TTYIN].v = open_io_fd(pathbuf, len, "/ttyin", iolog_compress);
 	if (io_fds[IOFD_TTYIN].v == NULL)
 	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
     } else {
 	sudoers_io.log_ttyin = NULL;
     }
     if (iolog_stdin) {
-	io_fds[IOFD_STDIN].v = open_io_fd(pathbuf, len, "/stdin", def_compress_io);
+	io_fds[IOFD_STDIN].v = open_io_fd(pathbuf, len, "/stdin", iolog_compress);
 	if (io_fds[IOFD_STDIN].v == NULL)
 	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
     } else {
 	sudoers_io.log_stdin = NULL;
     }
     if (iolog_ttyout) {
-	io_fds[IOFD_TTYOUT].v = open_io_fd(pathbuf, len, "/ttyout", def_compress_io);
+	io_fds[IOFD_TTYOUT].v = open_io_fd(pathbuf, len, "/ttyout", iolog_compress);
 	if (io_fds[IOFD_TTYOUT].v == NULL)
 	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
     } else {
 	sudoers_io.log_ttyout = NULL;
     }
     if (iolog_stdout) {
-	io_fds[IOFD_STDOUT].v = open_io_fd(pathbuf, len, "/stdout", def_compress_io);
+	io_fds[IOFD_STDOUT].v = open_io_fd(pathbuf, len, "/stdout", iolog_compress);
 	if (io_fds[IOFD_STDOUT].v == NULL)
 	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
     } else {
 	sudoers_io.log_stdout = NULL;
     }
     if (iolog_stderr) {
-	io_fds[IOFD_STDERR].v = open_io_fd(pathbuf, len, "/stderr", def_compress_io);
+	io_fds[IOFD_STDERR].v = open_io_fd(pathbuf, len, "/stderr", iolog_compress);
 	if (io_fds[IOFD_STDERR].v == NULL)
 	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
     } else {
@@ -395,7 +417,7 @@ sudoers_io_close(int exit_status, int error)
 	if (io_fds[i].v == NULL)
 	    continue;
 #ifdef HAVE_ZLIB_H
-	if (def_compress_io)
+	if (iolog_compress)
 	    gzclose(io_fds[i].g);
 	else
 #endif
@@ -417,6 +439,9 @@ sudoers_io_version(int verbose)
     return TRUE;
 }
 
+/*
+ * Generic I/O logging function.  Called by the I/O logging entry points.
+ */
 static int
 sudoers_io_log(const char *buf, unsigned int len, int idx)
 {
@@ -430,7 +455,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     }
 
 #ifdef HAVE_ZLIB_H
-    if (def_compress_io)
+    if (iolog_compress)
 	gzwrite(io_fds[idx].g, buf, len);
     else
 #endif
@@ -439,7 +464,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     delay.tv_usec = now.tv_usec;
     timevalsub(&delay, &last_time);
 #ifdef HAVE_ZLIB_H
-    if (def_compress_io)
+    if (iolog_compress)
 	gzprintf(io_fds[IOFD_TIMING].g, "%d %f %d\n", idx,
 	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len);
     else
