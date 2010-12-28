@@ -466,10 +466,6 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    break;
 		}
 		break;
-	    case 'i':
-		SET_STRING("iolog_dir=", iolog_dir)
-		SET_STRING("iolog_file=", iolog_file)
-		break;
 	    case 'l':
 		SET_STRING("login_class=", login_class)
 		break;

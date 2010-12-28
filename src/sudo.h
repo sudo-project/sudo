@@ -139,8 +139,6 @@ struct command_details {
     const char *chroot;
     const char *selinux_role;
     const char *selinux_type;
-    const char *iolog_dir;
-    const char *iolog_file;
 };
 
 /* Status passed between parent and child via socketpair */
