@@ -386,6 +386,11 @@ sudoers_io_close(int exit_status, int error)
 {
     int i;
 
+    if (sigsetjmp(error_jmp, 1)) {
+	/* called via error(), errorx() or log_error() */
+	return;
+    }
+
     for (i = 0; i < IOFD_MAX; i++) {
 	if (io_fds[i].v == NULL)
 	    continue;
@@ -401,6 +406,11 @@ sudoers_io_close(int exit_status, int error)
 static int
 sudoers_io_version(int verbose)
 {
+    if (sigsetjmp(error_jmp, 1)) {
+	/* called via error(), errorx() or log_error() */
+	return -1;
+    }
+
     sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers I/O plugin version %s\n",
 	PACKAGE_VERSION);
 
@@ -413,6 +423,11 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     struct timeval now, delay;
 
     gettimeofday(&now, NULL);
+
+    if (sigsetjmp(error_jmp, 1)) {
+	/* called via error(), errorx() or log_error() */
+	return -1;
+    }
 
 #ifdef HAVE_ZLIB_H
     if (def_compress_io)

@@ -247,6 +247,11 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 static void
 sudoers_policy_close(int exit_status, int error_code)
 {
+    if (sigsetjmp(error_jmp, 1)) {
+	/* called via error(), errorx() or log_error() */
+	return;
+    }
+
     /* We do not currently log the exit status. */
     if (error_code)
 	warningx("unable to execute %s: %s", safe_cmnd, strerror(error_code));
@@ -269,6 +274,11 @@ sudoers_policy_close(int exit_status, int error_code)
 static int
 sudoers_policy_init_session(struct passwd *pwd)
 {
+    if (sigsetjmp(error_jmp, 1)) {
+	/* called via error(), errorx() or log_error() */
+	return -1;
+    }
+
     return auth_begin_session(pwd);
 }
 
@@ -283,6 +293,12 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     volatile int info_len = 0;
     volatile int rval = FALSE;
 
+    if (sigsetjmp(error_jmp, 1)) {
+	/* error recovery via error(), errorx() or log_error() */
+	rewind_perms();
+	return -1;
+    }
+
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
         warningx("sudoers specifies that root is not allowed to sudo");
@@ -296,12 +312,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    goto done;
 	}
 	def_closefrom = user_closefrom;
-    }
-
-    if (sigsetjmp(error_jmp, 1)) {
-	/* error recovery via error(), errorx() or log_error() */
-	rewind_perms();
-	return -1;
     }
 
     set_perms(PERM_INITIAL);
@@ -1064,6 +1074,11 @@ plugin_cleanup(int gotsignal)
 static int
 sudoers_policy_version(int verbose)
 {
+    if (sigsetjmp(error_jmp, 1)) {
+	/* error recovery via error(), errorx() or log_error() */
+	return -1;
+    }
+
     sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers policy plugin version %s\n",
 	PACKAGE_VERSION);
 
