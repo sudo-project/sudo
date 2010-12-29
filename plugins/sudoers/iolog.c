@@ -114,7 +114,7 @@ mkdir_parents(char *path)
  * Uses file locking to avoid sequence number collisions.
  */
 void
-io_nextid(void)
+io_nextid(char *iolog_dir, char sessid[7])
 {
     struct stat sb;
     char buf[32], *ep;
@@ -127,19 +127,19 @@ io_nextid(void)
     /*
      * Create I/O log directory if it doesn't already exist.
      */
-    mkdir_parents(def_iolog_dir);
-    if (stat(def_iolog_dir, &sb) != 0) {
-	if (mkdir(def_iolog_dir, S_IRWXU) != 0)
-	    log_error(USE_ERRNO, "Can't mkdir %s", def_iolog_dir);
+    mkdir_parents(iolog_dir);
+    if (stat(iolog_dir, &sb) != 0) {
+	if (mkdir(iolog_dir, S_IRWXU) != 0)
+	    log_error(USE_ERRNO, "Can't mkdir %s", iolog_dir);
     } else if (!S_ISDIR(sb.st_mode)) {
 	log_error(0, "%s exists but is not a directory (0%o)",
-	    def_iolog_dir, (unsigned int) sb.st_mode);
+	    iolog_dir, (unsigned int) sb.st_mode);
     }
 
     /*
      * Open sequence file
      */
-    len = snprintf(pathbuf, sizeof(pathbuf), "%s/seq", def_iolog_dir);
+    len = snprintf(pathbuf, sizeof(pathbuf), "%s/seq", iolog_dir);
     if (len <= 0 || len >= sizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
 	log_error(USE_ERRNO, "%s/seq", pathbuf);
@@ -161,7 +161,7 @@ io_nextid(void)
     id++;
 
     /*
-     * Convert id to a string and stash in sudo_user.sessid.
+     * Convert id to a string and stash in sessid.
      * Note that that least significant digits go at the end of the string.
      */
     for (i = 5; i >= 0; i--) {
@@ -172,8 +172,8 @@ io_nextid(void)
     buf[6] = '\n';
 
     /* Stash id logging purposes */
-    memcpy(sudo_user.sessid, buf, 6);
-    sudo_user.sessid[6] = '\0';
+    memcpy(sessid, buf, 6);
+    sessid[6] = '\0';
 
     /* Rewind and overwrite old seq file. */
     if (lseek(fd, 0, SEEK_SET) == (off_t)-1 || write(fd, buf, 7) != 7)
@@ -262,12 +262,13 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     char * const user_info[], char * const command_info[],
     int argc, char * const argv[], char * const user_env[])
 {
-    char pathbuf[PATH_MAX];
-    const char *iolog_dir = NULL, *iolog_file = NULL;
+    char pathbuf[PATH_MAX], sessid[9];
+    char *tofree = NULL, *iolog_dir = NULL, *iolog_file = NULL;
     char * const *cur;
     FILE *io_logfile;
     int len, iolog_stdin = FALSE, iolog_stdout = FALSE, iolog_stderr = FALSE;
     int iolog_ttyin = FALSE, iolog_ttyout = FALSE, iolog_compress = FALSE;
+    int rval = -1;
 
     if (!sudo_conv)
 	sudo_conv = conversation;
@@ -280,7 +281,8 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 
     if (sigsetjmp(error_jmp, 1)) {
 	/* called via error(), errorx() or log_error() */
-	return -1;
+	rval = -1;
+	goto done;
     }
 
     /*
@@ -330,17 +332,31 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     }
     /* Did policy module disable I/O logging? */
     if (!iolog_stdin && !iolog_ttyin && !iolog_stdout && !iolog_stderr &&
-	!iolog_ttyout)
-	return FALSE;
+	!iolog_ttyout) {
+	rval = FALSE;
+	goto done;
+    }
 
-    /* If no I/O log file defined there is nothing to do. */
-    if (iolog_file == NULL || iolog_dir == NULL)
-	return FALSE;
+    /* If no I/O log file defined we need to figure it out ourselves. */
+    if (iolog_dir == NULL)
+	iolog_dir = tofree = estrdup(_PATH_SUDO_IO_LOGDIR);
+    if (iolog_file == NULL) {
+	/* Get next session ID and convert it into a path. */
+	io_nextid(iolog_dir, sessid);
+	sessid[8] = '\0';
+	sessid[7] = sessid[5];
+	sessid[6] = sessid[4];
+	sessid[5] = '/';
+	sessid[4] = sessid[3];
+	sessid[3] = sessid[2];
+	sessid[2] = '/';
+	iolog_file = sessid;
+    }
 
     /* Build a path from I/O file and dir, creating intermediate subdirs. */
     len = build_iopath(iolog_dir, iolog_file, pathbuf, sizeof(pathbuf));
     if (len < 0 || len >= sizeof(pathbuf))
-	return -1;
+	goto done;
 
     /*
      * We create 7 files: a log file, a timing file and 5 for input/output.
@@ -400,7 +416,12 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
         user_args ? user_args : "");
     fclose(io_logfile);
 
-    return TRUE;
+    rval = TRUE;
+
+done:
+    efree(tofree);
+
+    return rval;
 }
 
 static void
