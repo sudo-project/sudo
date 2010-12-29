@@ -70,6 +70,26 @@ struct script_buf {
     char buf[16 * 1024];
 };
 
+/* XXX - separate sudoers.h and iolog.h? */
+#undef runas_pw
+#undef runas_gr
+
+struct iolog_details {
+    const char *cwd;
+    const char *tty;
+    const char *user;
+    const char *command;
+    const char *iolog_file;
+    char *iolog_dir;
+    struct passwd *runas_pw;
+    struct group *runas_gr;
+    int iolog_stdin;
+    int iolog_stdout;
+    int iolog_stderr;
+    int iolog_ttyin;
+    int iolog_ttyout;
+};
+
 #define IOFD_STDIN	0
 #define IOFD_STDOUT	1
 #define IOFD_STDERR	2
@@ -256,18 +276,168 @@ open_io_fd(char *pathbuf, int len, const char *suffix, int docompress)
     return vfd;
 }
 
+/*
+ * Pull out I/O log related data from user_info and command_info arrays.
+ */
+static void
+iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
+    char * const command_info[])
+{
+    const char *runas_uid_str = "0", *runas_euid_str = NULL;
+    const char *runas_gid_str = "0", *runas_egid_str = NULL;
+    char id[MAX_UID_T_LEN + 2], *ep;
+    char * const *cur;
+    unsigned long ulval;
+    uid_t runas_uid = 0;
+    gid_t runas_gid = 0;
+
+    memset(details, 0, sizeof(*details));
+
+    for (cur = user_info; *cur != NULL; cur++) {
+	switch (**cur) {
+	case 'c':
+	    if (strncmp(*cur, "cwd=", sizeof("cwd=") - 1) == 0) {
+		details->cwd = *cur + sizeof("cwd=") - 1;
+		continue;
+	    }
+	    break;
+	case 't':
+	    if (strncmp(*cur, "tty=", sizeof("tty=") - 1) == 0) {
+		details->tty = *cur + sizeof("tty=") - 1;
+		continue;
+	    }
+	    break;
+	case 'u':
+	    if (strncmp(*cur, "user=", sizeof("user=") - 1) == 0) {
+		details->user = *cur + sizeof("user=") - 1;
+		continue;
+	    }
+	    break;
+	}
+    }
+
+    for (cur = command_info; *cur != NULL; cur++) {
+	switch (**cur) {
+	case 'c':
+	    if (strncmp(*cur, "command=", sizeof("command=") - 1) == 0) {
+		details->command = *cur + sizeof("command=") - 1;
+		continue;
+	    }
+	    break;
+	case 'i':
+	    if (strncmp(*cur, "iolog_file=", sizeof("iolog_file=") - 1) == 0) {
+		details->iolog_file = *cur + sizeof("iolog_file=") - 1;
+		continue;
+	    }
+	    if (strncmp(*cur, "iolog_dir=", sizeof("iolog_dir=") - 1) == 0) {
+		details->iolog_dir = *cur + sizeof("iolog_dir=") - 1;
+		continue;
+	    }
+	    if (strncmp(*cur, "iolog_stdin=", sizeof("iolog_stdin=") - 1) == 0) {
+		if (atobool(*cur + sizeof("iolog_stdin=") - 1) == TRUE)
+		    details->iolog_stdin = TRUE;
+		continue;
+	    }
+	    if (strncmp(*cur, "iolog_stdout=", sizeof("iolog_stdout=") - 1) == 0) {
+		if (atobool(*cur + sizeof("iolog_stdout=") - 1) == TRUE)
+		    details->iolog_stdout = TRUE;
+		continue;
+	    }
+	    if (strncmp(*cur, "iolog_stderr=", sizeof("iolog_stderr=") - 1) == 0) {
+		if (atobool(*cur + sizeof("iolog_stderr=") - 1) == TRUE)
+		    details->iolog_stderr = TRUE;
+		continue;
+	    }
+	    if (strncmp(*cur, "iolog_ttyin=", sizeof("iolog_ttyin=") - 1) == 0) {
+		if (atobool(*cur + sizeof("iolog_ttyin=") - 1) == TRUE)
+		    details->iolog_ttyin = TRUE;
+		continue;
+	    }
+	    if (strncmp(*cur, "iolog_ttyout=", sizeof("iolog_ttyout=") - 1) == 0) {
+		if (atobool(*cur + sizeof("iolog_ttyout=") - 1) == TRUE)
+		    details->iolog_ttyout = TRUE;
+		continue;
+	    }
+	    if (strncmp(*cur, "iolog_compress=", sizeof("iolog_compress=") - 1) == 0) {
+		if (atobool(*cur + sizeof("iolog_compress=") - 1) == TRUE)
+		    iolog_compress = TRUE; /* must be global */
+		continue;
+	    }
+	    break;
+	case 'r':
+	    if (strncmp(*cur, "runas_gid=", sizeof("runas_gid=") - 1) == 0) {
+		runas_gid_str = *cur + sizeof("runas_gid=") - 1;
+		continue;
+	    }
+	    if (strncmp(*cur, "runas_egid=", sizeof("runas_egid=") - 1) == 0) {
+		runas_egid_str = *cur + sizeof("runas_egid=") - 1;
+		continue;
+	    }
+	    if (strncmp(*cur, "runas_uid=", sizeof("runas_uid=") - 1) == 0) {
+		runas_uid_str = *cur + sizeof("runas_uid=") - 1;
+		continue;
+	    }
+	    if (strncmp(*cur, "runas_euid=", sizeof("runas_euid=") - 1) == 0) {
+		runas_euid_str = *cur + sizeof("runas_euid=") - 1;
+		continue;
+	    }
+	    break;
+	}
+    }
+
+    /*
+     * Lookup runas user and group, preferring effective over real uid/gid.
+     */
+    if (runas_euid_str != NULL)
+	runas_uid_str = runas_euid_str;
+    if (runas_uid_str != NULL) {
+	errno = 0;
+	ulval = strtoul(runas_uid_str, &ep, 0);
+	if (*runas_uid_str != '\0' && *ep == '\0' &&
+	    (errno != ERANGE || ulval != ULONG_MAX)) {
+	    runas_uid = (uid_t)ulval;
+	}
+    }
+    if (runas_egid_str != NULL)
+	runas_gid_str = runas_egid_str;
+    if (runas_gid_str != NULL) {
+	errno = 0;
+	ulval = strtoul(runas_gid_str, &ep, 0);
+	if (*runas_gid_str != '\0' && *ep == '\0' &&
+	    (errno != ERANGE || ulval != ULONG_MAX)) {
+	    runas_gid = (gid_t)ulval;
+	}
+    }
+
+    details->runas_pw = sudo_getpwuid(runas_uid);
+    if (details->runas_pw == NULL) {
+	id[0] = '#';
+	strlcpy(&id[1], runas_uid_str, sizeof(id) - 1);
+	details->runas_pw = sudo_fakepwnam(id, runas_gid);
+    }
+
+    if (runas_gid != details->runas_pw->pw_gid) {
+	details->runas_gr = sudo_getgrgid(runas_gid);
+	if (details->runas_gr == NULL) {
+	    id[0] = '#';
+	    strlcpy(&id[1], runas_gid_str, sizeof(id) - 1);
+	    details->runas_gr = sudo_fakegrnam(id);
+	}
+    }
+}
+
 static int
 sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t plugin_printf, char * const settings[],
     char * const user_info[], char * const command_info[],
     int argc, char * const argv[], char * const user_env[])
 {
+    struct iolog_details details;
     char pathbuf[PATH_MAX], sessid[9];
-    char *tofree = NULL, *iolog_dir = NULL, *iolog_file = NULL;
+    char *tofree = NULL;
     char * const *cur;
     FILE *io_logfile;
-    int len, iolog_stdin = FALSE, iolog_stdout = FALSE, iolog_stderr = FALSE;
-    int iolog_ttyin = FALSE, iolog_ttyout = FALSE, iolog_compress = FALSE;
+    int len;
     int rval = -1;
 
     if (!sudo_conv)
@@ -285,64 +455,27 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	goto done;
     }
 
+    sudo_setpwent();
+    sudo_setgrent();
+
     /*
      * Pull iolog settings out of command_info, if any.
      */
-    for (cur = command_info; *cur != NULL; cur++) {
-	if (**cur != 'i')
-	    continue;
-	if (strncmp(*cur, "iolog_file=", sizeof("iolog_file=") - 1) == 0) {
-	    iolog_file = *cur + sizeof("iolog_file=") - 1;
-	    continue;
-	}
-	if (strncmp(*cur, "iolog_dir=", sizeof("iolog_dir=") - 1) == 0) {
-	    iolog_dir = *cur + sizeof("iolog_dir=") - 1;
-	    continue;
-	}
-	if (strncmp(*cur, "iolog_stdin=", sizeof("iolog_stdin=") - 1) == 0) {
-	    if (atobool(*cur + sizeof("iolog_stdin=") - 1) == TRUE)
-		iolog_stdin = TRUE;
-	    continue;
-	}
-	if (strncmp(*cur, "iolog_stdout=", sizeof("iolog_stdout=") - 1) == 0) {
-	    if (atobool(*cur + sizeof("iolog_stdout=") - 1) == TRUE)
-		iolog_stdout = TRUE;
-	    continue;
-	}
-	if (strncmp(*cur, "iolog_stderr=", sizeof("iolog_stderr=") - 1) == 0) {
-	    if (atobool(*cur + sizeof("iolog_stderr=") - 1) == TRUE)
-		iolog_stderr = TRUE;
-	    continue;
-	}
-	if (strncmp(*cur, "iolog_ttyin=", sizeof("iolog_ttyin=") - 1) == 0) {
-	    if (atobool(*cur + sizeof("iolog_ttyin=") - 1) == TRUE)
-		iolog_ttyin = TRUE;
-	    continue;
-	}
-	if (strncmp(*cur, "iolog_ttyout=", sizeof("iolog_ttyout=") - 1) == 0) {
-	    if (atobool(*cur + sizeof("iolog_ttyout=") - 1) == TRUE)
-		iolog_ttyout = TRUE;
-	    continue;
-	}
-	if (strncmp(*cur, "iolog_compress=", sizeof("iolog_compress=") - 1) == 0) {
-	    if (atobool(*cur + sizeof("iolog_compress=") - 1) == TRUE)
-		iolog_compress = TRUE;
-	    continue;
-	}
-    }
+    iolog_deserialize_info(&details, user_info, command_info);
     /* Did policy module disable I/O logging? */
-    if (!iolog_stdin && !iolog_ttyin && !iolog_stdout && !iolog_stderr &&
-	!iolog_ttyout) {
+    if (!details.iolog_stdin && !details.iolog_ttyin &&
+	!details.iolog_stdout && !details.iolog_stderr &&
+	!details.iolog_ttyout) {
 	rval = FALSE;
 	goto done;
     }
 
     /* If no I/O log file defined we need to figure it out ourselves. */
-    if (iolog_dir == NULL)
-	iolog_dir = tofree = estrdup(_PATH_SUDO_IO_LOGDIR);
-    if (iolog_file == NULL) {
+    if (details.iolog_dir == NULL)
+	details.iolog_dir = tofree = estrdup(_PATH_SUDO_IO_LOGDIR);
+    if (details.iolog_file == NULL) {
 	/* Get next session ID and convert it into a path. */
-	io_nextid(iolog_dir, sessid);
+	io_nextid(details.iolog_dir, sessid);
 	sessid[8] = '\0';
 	sessid[7] = sessid[5];
 	sessid[6] = sessid[4];
@@ -350,11 +483,12 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	sessid[4] = sessid[3];
 	sessid[3] = sessid[2];
 	sessid[2] = '/';
-	iolog_file = sessid;
+	details.iolog_file = sessid;
     }
 
     /* Build a path from I/O file and dir, creating intermediate subdirs. */
-    len = build_iopath(iolog_dir, iolog_file, pathbuf, sizeof(pathbuf));
+    len = build_iopath(details.iolog_dir, details.iolog_file,
+	pathbuf, sizeof(pathbuf));
     if (len < 0 || len >= sizeof(pathbuf))
 	goto done;
 
@@ -365,40 +499,46 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (io_logfile == NULL)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
 
-    io_fds[IOFD_TIMING].v = open_io_fd(pathbuf, len, "/timing", iolog_compress);
+    io_fds[IOFD_TIMING].v = open_io_fd(pathbuf, len, "/timing",
+	iolog_compress);
     if (io_fds[IOFD_TIMING].v == NULL)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
 
-    if (iolog_ttyin) {
-	io_fds[IOFD_TTYIN].v = open_io_fd(pathbuf, len, "/ttyin", iolog_compress);
+    if (details.iolog_ttyin) {
+	io_fds[IOFD_TTYIN].v = open_io_fd(pathbuf, len, "/ttyin",
+	    iolog_compress);
 	if (io_fds[IOFD_TTYIN].v == NULL)
 	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
     } else {
 	sudoers_io.log_ttyin = NULL;
     }
-    if (iolog_stdin) {
-	io_fds[IOFD_STDIN].v = open_io_fd(pathbuf, len, "/stdin", iolog_compress);
+    if (details.iolog_stdin) {
+	io_fds[IOFD_STDIN].v = open_io_fd(pathbuf, len, "/stdin",
+	    iolog_compress);
 	if (io_fds[IOFD_STDIN].v == NULL)
 	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
     } else {
 	sudoers_io.log_stdin = NULL;
     }
-    if (iolog_ttyout) {
-	io_fds[IOFD_TTYOUT].v = open_io_fd(pathbuf, len, "/ttyout", iolog_compress);
+    if (details.iolog_ttyout) {
+	io_fds[IOFD_TTYOUT].v = open_io_fd(pathbuf, len, "/ttyout",
+	    iolog_compress);
 	if (io_fds[IOFD_TTYOUT].v == NULL)
 	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
     } else {
 	sudoers_io.log_ttyout = NULL;
     }
-    if (iolog_stdout) {
-	io_fds[IOFD_STDOUT].v = open_io_fd(pathbuf, len, "/stdout", iolog_compress);
+    if (details.iolog_stdout) {
+	io_fds[IOFD_STDOUT].v = open_io_fd(pathbuf, len, "/stdout",
+	    iolog_compress);
 	if (io_fds[IOFD_STDOUT].v == NULL)
 	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
     } else {
 	sudoers_io.log_stdout = NULL;
     }
-    if (iolog_stderr) {
-	io_fds[IOFD_STDERR].v = open_io_fd(pathbuf, len, "/stderr", iolog_compress);
+    if (details.iolog_stderr) {
+	io_fds[IOFD_STDERR].v = open_io_fd(pathbuf, len, "/stderr",
+	    iolog_compress);
 	if (io_fds[IOFD_STDERR].v == NULL)
 	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
     } else {
@@ -407,19 +547,29 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 
     gettimeofday(&last_time, NULL);
 
-    /* XXX - log more stuff?  window size? environment? */
-    /* XXX - don't rely on policy module globals */
-    fprintf(io_logfile, "%ld:%s:%s:%s:%s\n", (long)last_time.tv_sec, user_name,
-        runas_pw->pw_name, runas_gr ? runas_gr->gr_name : "", user_tty);
-    fprintf(io_logfile, "%s\n", user_cwd);
-    fprintf(io_logfile, "%s%s%s\n", user_cmnd, user_args ? " " : "",
-        user_args ? user_args : "");
+    fprintf(io_logfile, "%ld:%s:%s:%s:%s\n", (long)last_time.tv_sec,
+	details.user ? details.user : "unknown", details.runas_pw->pw_name,
+	details.runas_gr ? details.runas_gr->gr_name : "",
+	details.tty ? details.tty : "unknown");
+    fputs(details.command ? details.command : "unknown", io_logfile);
+    for (cur = &argv[1]; *cur != NULL; cur++) {
+	if (cur != &argv[1])
+	    fputc(' ', io_logfile);
+	fputs(*cur, io_logfile);
+    }
+    fputc('\n', io_logfile);
     fclose(io_logfile);
 
     rval = TRUE;
 
 done:
     efree(tofree);
+    if (details.runas_pw)
+	pw_delref(details.runas_pw);
+    sudo_endpwent();
+    if (details.runas_gr)
+	gr_delref(details.runas_gr);
+    sudo_endgrent();
 
     return rval;
 }
