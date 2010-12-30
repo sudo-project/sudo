@@ -156,6 +156,10 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file)
     dst = path = emalloc(psize);
     *path = '\0';
 
+    /* Trim leading slashes from file component. */
+    while (*file == '/')
+	file++;
+
     if (prefix != NULL) {
 	plen = strlcpy(path, prefix, psize);
 	dst += plen;
@@ -166,6 +170,9 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file)
 	    src = dir;
 	    break;
 	case 1:
+	    /* Only add path separator if dir doesn't end in a slash. */
+	    if (dst > path && dst[-1] == '/')
+		continue;
 	    src = "/";
 	    break;
 	case 2:

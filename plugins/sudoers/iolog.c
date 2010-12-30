@@ -209,29 +209,6 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
 {
     int len;
 
-#if 0 /* XXX - move this into sudoers when it concats dir + file */
-    /* Trim extraneous slashes. */
-    dirlen = strlen(iolog_dir);
-    while (dirlen > 1 && iolog_dir[dirlen - 1] == '/')
-	dirlen--;
-    while (*iolog_file == '/')
-	iolog_file++;
-    filelen = strlen(iolog_file);
-    while (filelen > 1 && iolog_file[filelen - 1] == '/')
-	filelen--;
-
-    if (*iolog_dir != '/' || *iolog_file == '\0')
-	log_error(0, "invalid I/O log path: %s/%s", iolog_dir, iolog_file);
-
-    len = snprintf(pathbuf, pathsize, "%.*s/%.*s", dirlen, iolog_dir,
-	filelen, iolog_file);
-    if (len <= 0 && len >= pathsize) {
-	errno = ENAMETOOLONG;
-	log_error(USE_ERRNO, "%.*s/%.*s", dirlen, iolog_dir,
-	    filelen, iolog_file);
-    }
-#endif
-
     len = strlcpy(pathbuf, iolog_path, pathsize);
     if (len >= pathsize) {
 	errno = ENAMETOOLONG;
