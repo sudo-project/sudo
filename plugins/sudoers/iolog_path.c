@@ -145,14 +145,14 @@ fill_command(char *str, size_t strsize)
 }
 
 char *
-expand_iolog_path(const char *prefix, const char *opath)
+expand_iolog_path(const char *prefix, const char *dir, const char *file)
 {
     size_t plen = 0, psize = 1024;
     char *path, *dst;
     const char *src, *ep;
-    int strfit = FALSE;
+    int pass, strfit = FALSE;
 
-    /* Copy opath -> path, expanding any escape sequences. */
+    /* Concatenate dir + file -> path, expanding any escape sequences. */
     dst = path = emalloc(psize);
     *path = '\0';
 
@@ -160,42 +160,57 @@ expand_iolog_path(const char *prefix, const char *opath)
 	plen = strlcpy(path, prefix, psize);
 	dst += plen;
     }
-    for (src = opath; *src != '\0'; src++) {
-	if (src[0] == '%') {
-	    if (src[1] == '{') {
-		ep = strchr(src + 2, '}');
-		if (ep != NULL) {
-		    struct path_escape *esc;
-		    size_t len = (size_t)(ep - src - 2);
-		    for (esc = escapes; esc->name != NULL; esc++) {
-			if (strncmp(src + 2, esc->name, len) == 0 &&
-			    esc->name[len] == '\0')
-			    break;
+    for (pass = 0; pass < 3; pass++) {
+	switch (pass) {
+	case 0:
+	    src = dir;
+	    break;
+	case 1:
+	    src = "/";
+	    break;
+	case 2:
+	    src = file;
+	    break;
+	}
+	for (; *src != '\0'; src++) {
+	    if (src[0] == '%') {
+		if (src[1] == '{') {
+		    ep = strchr(src + 2, '}');
+		    if (ep != NULL) {
+			struct path_escape *esc;
+			size_t len = (size_t)(ep - src - 2);
+			for (esc = escapes; esc->name != NULL; esc++) {
+			    if (strncmp(src + 2, esc->name, len) == 0 &&
+				esc->name[len] == '\0')
+				break;
+			}
+			for (;;) {
+			    len = esc->copy_fn(dst, psize - (dst - path));
+			    if (len < psize - (dst - path))
+				break;
+			    path = erealloc3(path, 2, psize);
+			    psize *= 2;
+			    dst = path + plen;
+			}
+			dst += len;
+			plen += len;
+			src = ep;
+			continue;
 		    }
-		    for (;;) {
-			len = esc->copy_fn(dst, psize - (dst - path));
-			if (len < psize - (dst - path))
-			    break;
-			path = erealloc3(path, 2, psize);
-			psize *= 2;
-			dst = path + plen;
-		    }
-		    dst += len;
-		    src = ep;
-		    continue;
+		} else {
+		    /* May need strftime() */
+		    strfit = 1;
 		}
-	    } else {
-		/* May need strftime() */
-		strfit = 1;
 	    }
+	    /* Need at least 2 chars, including the NUL terminator. */
+	    if (plen + 2 >= psize) {
+		path = erealloc3(path, 2, psize);
+		psize *= 2;
+		dst = path + plen;
+	    }
+	    *dst++ = *src;
+	    plen++;
 	}
-	/* Need at least 2 chars, including the NUL terminator. */
-	if (plen + 2 >= psize) {
-	    path = erealloc3(path, 2, psize);
-	    psize *= 2;
-	    dst = path + plen;
-	}
-	*dst++ = *src;
     }
     *dst = '\0';
 

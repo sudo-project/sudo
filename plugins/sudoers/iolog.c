@@ -79,8 +79,7 @@ struct iolog_details {
     const char *tty;
     const char *user;
     const char *command;
-    const char *iolog_file;
-    char *iolog_dir;
+    const char *iolog_path;
     struct passwd *runas_pw;
     struct group *runas_gr;
     int iolog_stdin;
@@ -202,16 +201,15 @@ io_nextid(char *iolog_dir, char sessid[7])
 }
 
 /*
- * Join iolog_dir and iolog_file, storing the result as pathbuf and
- * expanding any escapes sequences that are found.
- * Creates the resulting directory and any intermediate directories.
+ * Copy iolog_path to pathbuf and create the directory and any intermediate
+ * directories.  If iolog_path ends in 'XXXXXX', use mkdtemp().
  */
 static int
-build_iopath(const char *iolog_dir, const char *iolog_file, char *pathbuf,
-    size_t pathsize)
+mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
 {
-    int dirlen, filelen, len;
+    int len;
 
+#if 0 /* XXX - move this into sudoers when it concats dir + file */
     /* Trim extraneous slashes. */
     dirlen = strlen(iolog_dir);
     while (dirlen > 1 && iolog_dir[dirlen - 1] == '/')
@@ -231,6 +229,13 @@ build_iopath(const char *iolog_dir, const char *iolog_file, char *pathbuf,
 	errno = ENAMETOOLONG;
 	log_error(USE_ERRNO, "%.*s/%.*s", dirlen, iolog_dir,
 	    filelen, iolog_file);
+    }
+#endif
+
+    len = strlcpy(pathbuf, iolog_path, pathsize);
+    if (len >= pathsize) {
+	errno = ENAMETOOLONG;
+	log_error(USE_ERRNO, "%s", iolog_path);
     }
 
     /*
@@ -325,12 +330,8 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	    }
 	    break;
 	case 'i':
-	    if (strncmp(*cur, "iolog_file=", sizeof("iolog_file=") - 1) == 0) {
-		details->iolog_file = *cur + sizeof("iolog_file=") - 1;
-		continue;
-	    }
-	    if (strncmp(*cur, "iolog_dir=", sizeof("iolog_dir=") - 1) == 0) {
-		details->iolog_dir = *cur + sizeof("iolog_dir=") - 1;
+	    if (strncmp(*cur, "iolog_path=", sizeof("iolog_path=") - 1) == 0) {
+		details->iolog_path = *cur + sizeof("iolog_path=") - 1;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_stdin=", sizeof("iolog_stdin=") - 1) == 0) {
@@ -433,7 +434,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     int argc, char * const argv[], char * const user_env[])
 {
     struct iolog_details details;
-    char pathbuf[PATH_MAX], sessid[9];
+    char pathbuf[PATH_MAX], sessid[7];
     char *tofree = NULL;
     char * const *cur;
     FILE *io_logfile;
@@ -470,25 +471,23 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	goto done;
     }
 
-    /* If no I/O log file defined we need to figure it out ourselves. */
-    if (details.iolog_dir == NULL)
-	details.iolog_dir = tofree = estrdup(_PATH_SUDO_IO_LOGDIR);
-    if (details.iolog_file == NULL) {
+    /* If no I/O log path defined we need to figure it out ourselves. */
+    if (details.iolog_path == NULL) {
 	/* Get next session ID and convert it into a path. */
-	io_nextid(details.iolog_dir, sessid);
-	sessid[8] = '\0';
-	sessid[7] = sessid[5];
-	sessid[6] = sessid[4];
-	sessid[5] = '/';
-	sessid[4] = sessid[3];
-	sessid[3] = sessid[2];
-	sessid[2] = '/';
-	details.iolog_file = sessid;
+	tofree = emalloc(sizeof(_PATH_SUDO_IO_LOGDIR) + sizeof(sessid) + 2);
+	memcpy(tofree, _PATH_SUDO_IO_LOGDIR, sizeof(_PATH_SUDO_IO_LOGDIR));
+	io_nextid(tofree, sessid);
+	snprintf(tofree + sizeof(_PATH_SUDO_IO_LOGDIR), sizeof(sessid) + 2,
+	    "%c%c/%c%c/%c%c", sessid[0], sessid[1], sessid[2], sessid[3],
+	    sessid[4], sessid[5]);
+	details.iolog_path = tofree;
     }
 
-    /* Build a path from I/O file and dir, creating intermediate subdirs. */
-    len = build_iopath(details.iolog_dir, details.iolog_file,
-	pathbuf, sizeof(pathbuf));
+    /*
+     * Make local copy of I/O log path and create it, along with any
+     * intermediate subdirs.  Calls mkdtemp() if iolog_path ends in XXXXXX.
+     */
+    len = mkdir_iopath(details.iolog_path, pathbuf, sizeof(pathbuf));
     if (len < 0 || len >= sizeof(pathbuf))
 	goto done;
 

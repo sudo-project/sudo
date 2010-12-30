@@ -286,7 +286,7 @@ int get_boottime(struct timeval *);
 void io_nextid(char *iolog_dir, char sessid[7]);
 
 /* iolog_path.c */
-char *expand_iolog_path(const char *prefix, const char *opath);
+char *expand_iolog_path(const char *prefix, const char *dir, const char *file);
 
 /* env.c */
 char **env_get(void);

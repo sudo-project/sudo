@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0b3                 December 28, 2010                       1
+1.8.0b3                 December 30, 2010                       1
 
 
 
@@ -127,7 +127,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b3                 December 28, 2010                       2
+1.8.0b3                 December 30, 2010                       2
 
 
 
@@ -193,7 +193,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b3                 December 28, 2010                       3
+1.8.0b3                 December 30, 2010                       3
 
 
 
@@ -259,7 +259,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b3                 December 28, 2010                       4
+1.8.0b3                 December 30, 2010                       4
 
 
 
@@ -325,7 +325,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b3                 December 28, 2010                       5
+1.8.0b3                 December 30, 2010                       5
 
 
 
@@ -391,7 +391,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b3                 December 28, 2010                       6
+1.8.0b3                 December 30, 2010                       6
 
 
 
@@ -457,7 +457,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b3                 December 28, 2010                       7
+1.8.0b3                 December 30, 2010                       7
 
 
 
@@ -523,7 +523,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b3                 December 28, 2010                       8
+1.8.0b3                 December 30, 2010                       8
 
 
 
@@ -548,18 +548,11 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                    compress the log data.  This is a hint to the I/O logging
                    plugin which may choose to ignore it.
 
-               iolog_dir=string
-                   Fully qualified path to the directory in which I/O logs are
-                   to be stored.  This is a hint to the I/O logging plugin
-                   which may choose to ignore it.  If no I/O logging plugin is
-                   loaded, this setting has no effect.
-
-               iolog_file=string
-                   File name to use when I/O logging is enabled, relative to
-                   _i_o_l_o_g___d_i_r (may also contain directory components).  This is
-                   a hint to the I/O logging plugin which may choose to ignore
-                   it.  If no I/O logging plugin is loaded, this setting has
-                   no effect.
+               iolog_path=string
+                   Fully qualified path to the file or directory in which I/O
+                   log is to be stored.  This is a hint to the I/O logging
+                   plugin which may choose to ignore it.  If no I/O logging
+                   plugin is loaded, this setting has no effect.
 
                iolog_stdin=bool
                    Set to true if the I/O logging plugins, if any, should log
@@ -586,10 +579,17 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                    is a hint to the I/O logging plugin which may choose to
                    ignore it.
 
+               iolog_ttyout=bool
+                   Set to true if the I/O logging plugins, if any, should log
+                   all terminal output.  This only includes output to the
+                   screen, not output to a pipe or file.  This is a hint to
+                   the I/O logging plugin which may choose to ignore it.
 
 
 
-1.8.0b3                 December 28, 2010                       9
+
+
+1.8.0b3                 December 30, 2010                       9
 
 
 
@@ -597,12 +597,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
-
-               iolog_ttyout=bool
-                   Set to true if the I/O logging plugins, if any, should log
-                   all terminal output.  This only includes output to the
-                   screen, not output to a pipe or file.  This is a hint to
-                   the I/O logging plugin which may choose to ignore it.
 
                use_pty=bool
                    Allocate a pseudo-tty to run the command in, regardless of
@@ -652,10 +646,16 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                wishes to check against the policy in the same form as what
                would be passed to the _e_x_e_c_v_e_(_) system call.  If the command is
                permitted by the policy, the fully-qualified path to the
+               command should be displayed along with any command line
+               arguments.
+
+       validate
+            int (*validate)(void);
 
 
 
-1.8.0b3                 December 28, 2010                      10
+
+1.8.0b3                 December 30, 2010                      10
 
 
 
@@ -663,12 +663,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
-
-               command should be displayed along with any command line
-               arguments.
-
-       validate
-            int (*validate)(void);
 
            The validate function is called when ssuuddoo is run with the -v flag.
            For policy plugins such as _s_u_d_o_e_r_s that cache authentication
@@ -714,22 +708,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
        _V_e_r_s_i_o_n _m_a_c_r_o_s
 
-
-
-
-
-
-
-
-1.8.0b3                 December 28, 2010                      11
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
         #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
         #define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
         #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \
@@ -740,6 +718,18 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
         } while(0)
 
         #define SUDO_API_VERSION_MAJOR 1
+
+
+
+1.8.0b3                 December 30, 2010                      11
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
         #define SUDO_API_VERSION_MINOR 0
         #define SUDO_API_VERSION ((SUDO_API_VERSION_MAJOR << 16) | \
                                   SUDO_API_VERSION_MINOR)
@@ -785,9 +775,19 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
        type
            The type field should always be set to SUDO_IO_PLUGIN
 
+       version
+           The version field should be set to SUDO_API_VERSION.
+
+           This allows ssuuddoo to determine the API version the plugin was built
+           against.
+
+       open
 
 
-1.8.0b3                 December 28, 2010                      12
+
+
+
+1.8.0b3                 December 30, 2010                      12
 
 
 
@@ -796,13 +796,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
-       version
-           The version field should be set to SUDO_API_VERSION.
-
-           This allows ssuuddoo to determine the API version the plugin was built
-           against.
-
-       open
             int (*open)(unsigned int version, sudo_conv_t conversation
                         sudo_printf_t plugin_printf, char * const settings[],
                         char * const user_info[], int argc, char * const argv[],
@@ -851,9 +844,16 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                equal sign ('=') since the _n_a_m_e field will never include one
                itself but the _v_a_l_u_e might.
 
+               See the "Policy Plugin API" section for a list of all possible
+               settings.
+
+           user_info
+               A vector of information about the user running the command in
+               the form of "name=value" strings.  The vector is terminated by
 
 
-1.8.0b3                 December 28, 2010                      13
+
+1.8.0b3                 December 30, 2010                      13
 
 
 
@@ -862,12 +862,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
-               See the "Policy Plugin API" section for a list of all possible
-               settings.
-
-           user_info
-               A vector of information about the user running the command in
-               the form of "name=value" strings.  The vector is terminated by
                a NULL pointer.
 
                When parsing _u_s_e_r___i_n_f_o, the plugin should split on the ffiirrsstt
@@ -916,10 +910,16 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
             int (*show_version)(int verbose);
 
            The show_version function is called by ssuuddoo when the user specifies
+           the -V option.  The plugin may display its version information to
+           the user via the conversation or plugin_printf function using
+           SUDO_CONV_INFO_MSG.  If the user requests detailed version
+           information, the verbose flag will be set.
 
 
 
-1.8.0b3                 December 28, 2010                      14
+
+
+1.8.0b3                 December 30, 2010                      14
 
 
 
@@ -927,11 +927,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
-
-           the -V option.  The plugin may display its version information to
-           the user via the conversation or plugin_printf function using
-           SUDO_CONV_INFO_MSG.  If the user requests detailed version
-           information, the verbose flag will be set.
 
        log_ttyin
             int (*log_ttyin)(const char *buf, unsigned int len);
@@ -982,10 +977,15 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
            len The length of _b_u_f in bytes.
 
+       log_stdout
+            int (*log_stdout)(const char *buf, unsigned int len);
+
+           The _l_o_g___s_t_d_o_u_t function is only used if the standard output does
+           not correspond to a tty device.  It is called whenever data can be
 
 
 
-1.8.0b3                 December 28, 2010                      15
+1.8.0b3                 December 30, 2010                      15
 
 
 
@@ -994,11 +994,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
-       log_stdout
-            int (*log_stdout)(const char *buf, unsigned int len);
-
-           The _l_o_g___s_t_d_o_u_t function is only used if the standard output does
-           not correspond to a tty device.  It is called whenever data can be
            read from the command but before it is written to the standard
            output.  This allows the plugin to reject data if it chooses to
            (for instance if the output contains banned content).  Returns 1 if
@@ -1051,7 +1046,12 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b3                 December 28, 2010                      16
+
+
+
+
+
+1.8.0b3                 December 30, 2010                      16
 
 
 
@@ -1117,7 +1117,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b3                 December 28, 2010                      17
+1.8.0b3                 December 30, 2010                      17
 
 
 
@@ -1183,7 +1183,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b3                 December 28, 2010                      18
+1.8.0b3                 December 30, 2010                      18
 
 
 
@@ -1249,6 +1249,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.0b3                 December 28, 2010                      19
+1.8.0b3                 December 30, 2010                      19
 
 
