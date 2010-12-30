@@ -315,7 +315,7 @@ main(int argc, char *argv[])
     if (getline(&cp, &len, lfile) == -1 ||
 	getline(&cp, &len, lfile) == -1 ||
 	getline(&cp, &len, lfile) == -1) {
-	error(1, "invalid log file %s", path);
+	errorx(1, "invalid log file %s", path);
     }
     printf("Replaying sudo session: %s", cp);
     free(cp);
