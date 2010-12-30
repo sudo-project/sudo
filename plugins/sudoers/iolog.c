@@ -204,10 +204,10 @@ io_nextid(char *iolog_dir, char sessid[7])
  * Copy iolog_path to pathbuf and create the directory and any intermediate
  * directories.  If iolog_path ends in 'XXXXXX', use mkdtemp().
  */
-static int
+static size_t
 mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
 {
-    int len;
+    size_t len;
 
     len = strlcpy(pathbuf, iolog_path, pathsize);
     if (len >= pathsize) {
@@ -238,7 +238,7 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
  * Returns the open file handle which has the close-on-exec flag set.
  */
 static void *
-open_io_fd(char *pathbuf, int len, const char *suffix, int docompress)
+open_io_fd(char *pathbuf, size_t len, const char *suffix, int docompress)
 {
     void *vfd = NULL;
     int fd;
@@ -415,7 +415,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     char *tofree = NULL;
     char * const *cur;
     FILE *io_logfile;
-    int len;
+    size_t len;
     int rval = -1;
 
     if (!sudo_conv)
@@ -465,7 +465,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
      * intermediate subdirs.  Calls mkdtemp() if iolog_path ends in XXXXXX.
      */
     len = mkdir_iopath(details.iolog_path, pathbuf, sizeof(pathbuf));
-    if (len < 0 || len >= sizeof(pathbuf))
+    if (len >= sizeof(pathbuf))
 	goto done;
 
     /*
