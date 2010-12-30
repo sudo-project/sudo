@@ -551,6 +551,8 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	details.user ? details.user : "unknown", details.runas_pw->pw_name,
 	details.runas_gr ? details.runas_gr->gr_name : "",
 	details.tty ? details.tty : "unknown");
+    fputs(details.cwd ? details.cwd : "unknown", io_logfile);
+    fputc('\n', io_logfile);
     fputs(details.command ? details.command : "unknown", io_logfile);
     for (cur = &argv[1]; *cur != NULL; cur++) {
 	if (cur != &argv[1])
