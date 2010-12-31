@@ -246,6 +246,8 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 	    buf[psize - 1] = '\0';
 	} while (!strftime(buf, psize, path, timeptr) || buf[psize - 1] != '\0');
 	setlocale(LC_ALL, "");
+	if (slashp)
+	    *slashp = buf + (*slashp - path);
 	efree(path);
 	path = buf;
     }
