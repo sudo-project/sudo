@@ -145,7 +145,8 @@ fill_command(char *str, size_t strsize)
 }
 
 char *
-expand_iolog_path(const char *prefix, const char *dir, const char *file)
+expand_iolog_path(const char *prefix, const char *dir, const char *file,
+    char **slashp)
 {
     size_t plen = 0, psize = 1024;
     char *path, *dst;
@@ -170,9 +171,11 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file)
 	    src = dir;
 	    break;
 	case 1:
-	    /* Only add path separator if dir doesn't end in a slash. */
-	    if (dst > path && dst[-1] == '/')
-		continue;
+	    /* Trim trailing slashes from dir component. */
+	    while (dst > path && dst[-1] == '/')
+		dst--;
+	    if (slashp)
+		*slashp = dst;
 	    src = "/";
 	    break;
 	case 2:
