@@ -69,8 +69,8 @@ This limitation does not apply to I/O plugins.
  # The plugin_name corresponds to a global symbol in the plugin
  #   that contains the plugin interface structure.
  #
- Plugin policy_plugin sudoers.so
- Plugin io_plugin sudoers.so
+ Plugin sudoers_policy sudoers.so
+ Plugin sudoers_io sudoers.so
 
 =head2 Policy Plugin API
 

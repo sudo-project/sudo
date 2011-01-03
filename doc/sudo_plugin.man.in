@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO_PLUGIN @mansectsu@"
-.TH SUDO_PLUGIN @mansectsu@ "December 30, 2010" "1.8.0b3" "MAINTENANCE COMMANDS"
+.TH SUDO_PLUGIN @mansectsu@ "January  3, 2011" "1.8.0b3" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -196,8 +196,8 @@ This limitation does not apply to I/O plugins.
 \& # The plugin_name corresponds to a global symbol in the plugin
 \& #   that contains the plugin interface structure.
 \& #
-\& Plugin policy_plugin sudoers.so
-\& Plugin io_plugin sudoers.so
+\& Plugin sudoers_policy sudoers.so
+\& Plugin sudoers_io sudoers.so
 .Ve
 .SS "Policy Plugin \s-1API\s0"
 .IX Subsection "Policy Plugin API"
