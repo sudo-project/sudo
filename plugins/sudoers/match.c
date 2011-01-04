@@ -165,10 +165,11 @@ _runaslist_matches(struct member_list *user_list, struct member_list *group_list
     int user_matched = UNSPEC;
     int group_matched = UNSPEC;
 
-    if (tq_empty(user_list) && tq_empty(group_list))
-	return(userpw_matches(def_runas_default, runas_pw->pw_name, runas_pw));
-
     if (runas_pw != NULL) {
+	/* If no runas user or runas group listed in sudoers, use default. */
+	if (tq_empty(user_list) && tq_empty(group_list))
+	    return(userpw_matches(def_runas_default, runas_pw->pw_name, runas_pw));
+
 	tq_foreach_rev(user_list, m) {
 	    switch (m->type) {
 		case ALL:
