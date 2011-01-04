@@ -65,7 +65,7 @@ autoconf:
 ChangeLog:
 	if test -d $(srcdir)/.hg && cd $(srcdir); then \
 	    if hg log --style=changelog -b default > $@.tmp; then \
-		mv $@.tmp $@; \
+		mv -f $@.tmp $@; \
 	    else \
 		rm -f $@.tmp; \
 	    fi; \
