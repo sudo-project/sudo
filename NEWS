@@ -35,11 +35,6 @@ What's new in Sudo 1.7.5?
  * Fixed a crash with "sudo -l" when auditing is enabled and the
    user is not allowed to run any commands on the host.
 
- * Sudo will now examine all matching LDAP entries when doing a
-   lookup, even if there has already been a positive match. This
-   catches negative matches that may exist in other entries and
-   more closely match the sudoers file behavior.
-
  * Sudo now includes a copy of zlib that will be used on systems
    that do not have zlib installed.
 
@@ -66,6 +61,9 @@ What's new in Sudo 1.7.5?
    the command line arguments.  As a result, and entry such as:
 	user ALL = sudoedit /etc/*
    will allow editing of /etc/motd but not /etc/security/default.
+
+ * Fixed a crash when the -g flag was used without the -u flag and
+   a sudoers entry did not contain a Runas_Spec.
 
 What's new in Sudo 1.7.4p4?
 
