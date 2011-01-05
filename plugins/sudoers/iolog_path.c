@@ -245,7 +245,9 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 	    buf = erealloc(buf, psize);
 	    buf[psize - 1] = '\0';
 	} while (!strftime(buf, psize, path, timeptr) || buf[psize - 1] != '\0');
+#ifdef HAVE_SETLOCALE
 	setlocale(LC_ALL, "");
+#endif
 	if (slashp)
 	    *slashp = buf + (*slashp - path);
 	efree(path);
