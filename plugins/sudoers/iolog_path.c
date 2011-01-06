@@ -150,7 +150,7 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 {
     size_t plen = 0, psize = 1024;
     char *path, *dst;
-    const char *src, *ep;
+    const char *src = dir, *ep;
     int pass, strfit = FALSE;
 
     /* Concatenate dir + file -> path, expanding any escape sequences. */
