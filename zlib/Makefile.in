@@ -46,6 +46,9 @@ LTOBJS = adler32.lo compress.lo crc32.lo deflate.lo gzclose.lo gzlib.lo \
 
 all: libz.la
 
+Makefile: $(srcdir)/Makefile.in
+	(cd $(top_builddir) && ./config.status --file zlib/Makefile)
+
 .SUFFIXES: .c .h .lo
 
 .c.lo:

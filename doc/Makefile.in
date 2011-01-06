@@ -73,6 +73,9 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
 all: $(DEVDOCS) $(DOCS)
 
+Makefile: $(srcdir)/Makefile.in
+	(cd $(top_builddir) && ./config.status --file doc/Makefile)
+
 .SUFFIXES: .man
 
 @DEV@varsub: $(top_srcdir)/configure.in

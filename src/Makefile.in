@@ -83,6 +83,9 @@ SUDODEP = $(srcdir)/sudo.h $(incdir)/sudo_plugin.h $(incdir)/alloc.h \
 
 all: $(PROGS)
 
+Makefile: $(srcdir)/Makefile.in
+	(cd $(top_builddir) && ./config.status --file src/Makefile)
+
 .SUFFIXES: .c .h .lo .o
 
 .c.o:

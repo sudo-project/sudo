@@ -129,6 +129,9 @@ INSDEP = $(srcdir)/ins_2001.h $(srcdir)/ins_classic.h $(srcdir)/ins_csops.h \
 
 all: $(PROGS)
 
+Makefile: $(srcdir)/Makefile.in
+	(cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile)
+
 .SUFFIXES: .o .c .h .l .y .lo
 
 .c.o:
@@ -141,6 +144,9 @@ all: $(PROGS)
 .l.c:
 
 .y.c:
+
+Makefile: $(srcdir)/Makefile.in
+	(cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile)
 
 libsudoers.la: $(LIBSUDOERS_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LIBSUDOERS_OBJS) -no-install

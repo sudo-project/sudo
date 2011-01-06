@@ -47,6 +47,9 @@ LTOBJS = alloc.lo atobool.lo fileops.lo fmt_string.lo \
 
 all: libcommon.la
 
+Makefile: $(srcdir)/Makefile.in
+	(cd $(top_builddir) && ./config.status --file common/Makefile)
+
 .SUFFIXES: .c .h .lo
 
 .c.lo:

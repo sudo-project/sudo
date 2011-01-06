@@ -48,6 +48,9 @@ LTLIBOBJS = @LTLIBOBJS@
 
 all: libreplace.la
 
+Makefile: $(srcdir)/Makefile.in
+	(cd $(top_builddir) && ./config.status --file compat/Makefile)
+
 .SUFFIXES: .o .c .h .lo
 
 .c.lo:

@@ -83,6 +83,9 @@ config.status:
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
 
+Makefile: $(srcdir)/Makefile.in
+	./config.status --file Makefile
+
 dist: ChangeLog $(srcdir)/MANIFEST
 	pax -w -x ustar -s '/^/$(PACKAGE_TARNAME)-$(VERSION)\//' \
 	    -f ../$(PACKAGE_TARNAME)-$(VERSION).tar \
