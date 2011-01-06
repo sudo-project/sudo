@@ -157,6 +157,7 @@ plugins/sudoers/insults.h
 plugins/sudoers/interfaces.c
 plugins/sudoers/interfaces.h
 plugins/sudoers/iolog.c
+plugins/sudoers/iolog_path.c
 plugins/sudoers/ldap.c
 plugins/sudoers/linux_audit.c
 plugins/sudoers/linux_audit.h
@@ -170,6 +171,8 @@ plugins/sudoers/plugin_error.c
 plugins/sudoers/pwutil.c
 plugins/sudoers/redblack.c
 plugins/sudoers/redblack.h
+plugins/sudoers/regress/iolog_path/check_iolog_path.c
+plugins/sudoers/regress/iolog_path/data
 plugins/sudoers/set_perms.c
 plugins/sudoers/sudo_nss.c
 plugins/sudoers/sudo_nss.h

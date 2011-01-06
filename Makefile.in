@@ -50,7 +50,7 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 
 SHELL = @SHELL@
 
-all: config.status
+all check: config.status
 	for d in $(SUBDIRS) $(SAMPLES); do (cd $$d && $(MAKE) $@) || break; done
 
 install-dirs install-binaries install-includes install-plugin uninstall: config.status
@@ -70,9 +70,6 @@ ChangeLog:
 		rm -f $@.tmp; \
 	    fi; \
 	fi
-
-check:
-	@echo nothing to check
 
 config.status:
 	@if [ ! -s config.status ]; then \

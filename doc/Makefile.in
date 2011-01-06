@@ -177,7 +177,6 @@ uninstall:
 		$(DESTDIR)$(mandirform)/sudoers.ldap.$(mansectform)
 
 check:
-	@echo nothing to check
 
 clean:
 	-rm -f varsub

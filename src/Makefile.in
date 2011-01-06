@@ -167,7 +167,6 @@ uninstall:
 		$(DESTDIR)$(noexecdir)/$(noexecfile) \
 
 check:
-	@echo nothing to check
 
 clean:
 	-$(LIBTOOL) --mode=clean rm -f $(PROGS) *.lo *.o *.la *.a stamp-* core *.core core.*

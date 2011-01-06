@@ -104,7 +104,6 @@ install-plugin:
 uninstall:
 
 check:
-	@echo nothing to check
 
 clean:
 	-$(LIBTOOL) --mode=clean rm -f *.lo *.o *.la *.a stamp-* core *.core core.*

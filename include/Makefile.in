@@ -64,7 +64,6 @@ uninstall:
 	-rm -f $(DESTDIR)$(includedir)/sudo_plugin.h
 
 check:
-	@echo nothing to check
 
 clean:
 

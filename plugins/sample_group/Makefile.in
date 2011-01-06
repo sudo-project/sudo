@@ -104,7 +104,6 @@ uninstall:
 	-$(LIBTOOL) --mode=uninstall rm -f $(DESDTDIR)/$(plugindir)/sample_group.la
 
 check:
-	@echo nothing to check
 
 clean:
 	-$(LIBTOOL) --mode=clean rm -f *.lo *.o *.la *.a stamp-* core *.core core.*
