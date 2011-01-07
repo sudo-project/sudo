@@ -35,6 +35,11 @@ compat/mksiglist.c
 compat/mksiglist.h
 compat/mktemp.c
 compat/nanosleep.c
+compat/regress/fnmatch/fnm_test.c
+compat/regress/fnmatch/fnm_test.in
+compat/regress/glob/files
+compat/regress/glob/globtest.c
+compat/regress/glob/globtest.in
 compat/setenv.c
 compat/siglist.in
 compat/snprintf.c
@@ -173,6 +178,10 @@ plugins/sudoers/redblack.c
 plugins/sudoers/redblack.h
 plugins/sudoers/regress/iolog_path/check_iolog_path.c
 plugins/sudoers/regress/iolog_path/data
+plugins/sudoers/regress/testsudoers/test1.ok
+plugins/sudoers/regress/testsudoers/test1.sh
+plugins/sudoers/regress/visudo/test1.ok
+plugins/sudoers/regress/visudo/test1.sh
 plugins/sudoers/set_perms.c
 plugins/sudoers/sudo_nss.c
 plugins/sudoers/sudo_nss.h
