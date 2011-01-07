@@ -182,12 +182,10 @@ main(int argc, char *argv[])
     if (argc < 2) {
 	if (!dflag)
 	    usage();
-	if ((sudo_user.pw = sudo_getpwnam("nobody")) == NULL)
-            errorx(1, "no passwd entry for nobody!");
+	user_name = "nobody";
 	user_cmnd = user_base = "true";
     } else {
-	if ((sudo_user.pw = sudo_getpwnam(*argv)) == NULL)
-            errorx(1, "no passwd entry for %s!", *argv);
+	user_name = *argv;
 	user_cmnd = *++argv;
 	if ((p = strrchr(user_cmnd, '/')) != NULL)
 	    user_base = p + 1;
@@ -195,6 +193,8 @@ main(int argc, char *argv[])
 	    user_base = user_cmnd;
 	NewArgc -= 2;
     }
+    if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL)
+	errorx(1, "no passwd entry for %s!", user_name);
 
     if (user_host == NULL) {
 	if (gethostname(hbuf, sizeof(hbuf)) != 0)
