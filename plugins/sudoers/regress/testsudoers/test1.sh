@@ -6,7 +6,7 @@
 #
 
 WANT=${SRCDIR-.}/regress/testsudoers/test1.ok
-GOT=test1.out
+GOT=ts_test1.out
 ./testsudoers -g wheel root id > $GOT <<EOF
 root ALL = ALL
 EOF
