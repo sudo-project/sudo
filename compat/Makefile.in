@@ -65,6 +65,12 @@ libreplace.la: $(LTLIBOBJS)
 ./mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(incdir)/missing.h $(top_builddir)/config.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/mksiglist.c -o $@
 
+fnm_test: $(srcdir)/regress/fnmatch/fnm_test.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/fnmatch/fnm_test.c -o $@
+
+globtest: $(srcdir)/regress/glob/globtest.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/glob/globtest.c -o $@
+
 @DEV@$(srcdir)/mksiglist.h: $(srcdir)/siglist.in
 @DEV@	awk 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (my_sys_siglist[SIG%s] == NULL)\n\tmy_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@
 
@@ -122,7 +128,15 @@ install-plugin:
 
 uninstall:
 
-check:
+check: fnm_test globtest
+	@./fnm_test $(srcdir)/regress/fnmatch/fnm_test.in
+	@mkdir -p `sed 's@/[^/]*$$@@' $(srcdir)/regress/glob/files | sort -u`
+	@touch `cat $(srcdir)/regress/glob/files`
+	@chmod 0755 `grep '/r[^/]*$$' $(srcdir)/regress/glob/files`
+	@chmod 0444 `grep '/s[^/]*$$' $(srcdir)/regress/glob/files`
+	@chmod 0711 `grep '/t[^/]*$$' $(srcdir)/regress/glob/files`
+	@./globtest $(srcdir)/regress/glob/globtest.in
+	@rm -rf fake
 
 clean:
 	-$(LIBTOOL) --mode=clean rm -f mksiglist siglist.c *.lo *.o *.la *.a stamp-* core *.core core.*
