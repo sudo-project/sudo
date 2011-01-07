@@ -354,10 +354,10 @@ uninstall:
 
 check: check_iolog_path
 	@./check_iolog_path $(srcdir)/regress/iolog_path/data
-	@for t in $(srcdir)/regress/testsudoers/test*.sh; do SRCDIR=$(srcdir) $(SHELL) $$t; done
+	@for t in $(srcdir)/regress/testsudoers/test*.sh $(srcdir)/regress/visudo/test*.sh; do SRCDIR=$(srcdir) $(SHELL) $$t; done
 
 clean:
-	-$(LIBTOOL) --mode=clean rm -f $(PROGS) *.lo *.o *.la *.a stamp-* core *.core core.* test*.out
+	-$(LIBTOOL) --mode=clean rm -f $(PROGS) *.lo *.o *.la *.a stamp-* core *.core core.* *.out
 
 mostlyclean: clean
 
