@@ -89,8 +89,7 @@ static struct member *new_member(char *, int);
        void  yyerror(const char *);
 
 void
-yyerror(s)
-    const char *s;
+yyerror(const char *s)
 {
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {
@@ -604,10 +603,7 @@ group		:	ALIAS {
 
 %%
 static struct defaults *
-new_default(var, val, op)
-    char *var;
-    char *val;
-    int op;
+new_default(char *var, char *val, int op)
 {
     struct defaults *d;
 
@@ -624,9 +620,7 @@ new_default(var, val, op)
 }
 
 static struct member *
-new_member(name, type)
-    char *name;
-    int type;
+new_member(char *name, int type)
 {
     struct member *m;
 
@@ -645,10 +639,7 @@ new_member(name, type)
  * runas users the entries apply to (specified by the type).
  */
 static void
-add_defaults(type, bmem, defs)
-    int type;
-    struct member *bmem;
-    struct defaults *defs;
+add_defaults(int type, struct member *bmem, struct defaults *defs)
 {
     struct defaults *d;
     struct member_list binding;
@@ -674,9 +665,7 @@ add_defaults(type, bmem, defs)
  * and of the userspecs list.
  */
 static void
-add_userspec(members, privs)
-    struct member *members;
-    struct privilege *privs;
+add_userspec(struct member *members, struct privilege *privs)
 {
     struct userspec *u;
 
@@ -693,9 +682,7 @@ add_userspec(members, privs)
  * the current sudoers file to path.
  */
 void
-init_parser(path, quiet)
-    char *path;
-    int quiet;
+init_parser(char *path, int quiet)
 {
     struct defaults *d;
     struct member *m, *binding;

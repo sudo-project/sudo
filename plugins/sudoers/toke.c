@@ -3238,8 +3238,7 @@ int main()
 #line 560 "toke.l"
 
 static unsigned char
-hexchar(s)
-    const char *s;
+hexchar(const char *s)
 {
     int i;
     int result = 0;
@@ -3284,9 +3283,7 @@ hexchar(s)
 }
 
 static int
-_fill(src, len, olen)
-    char *src;
-    int len, olen;
+_fill(char *src, int len, int olen)
 {
     char *dst;
 
@@ -3321,9 +3318,7 @@ _fill(src, len, olen)
 }
 
 static int
-append(src, len)
-    char *src;
-    int len;
+append(char *src, int len)
 {
     int olen = 0;
 
@@ -3337,9 +3332,7 @@ append(src, len)
     ((c) == ',' || (c) == ':' || (c) == '=' || (c) == ' ' || (c) == '\t' || (c) == '#')
 
 static int
-fill_cmnd(src, len)
-    char *src;
-    int len;
+fill_cmnd(char *src, int len)
 {
     char *dst;
     int i;
@@ -3366,10 +3359,7 @@ fill_cmnd(src, len)
 }
 
 static int
-fill_args(s, len, addspace)
-    char *s;
-    int len;
-    int addspace;
+fill_args(char *s, int len, int addspace)
 {
     int new_len;
     char *p;
@@ -3422,9 +3412,7 @@ struct include_stack {
 };
 
 static int
-pl_compare(v1, v2)
-    const void *v1;
-    const void *v2;
+pl_compare(const void *v1, const void *v2)
 {
     const struct path_list * const *p1 = v1;
     const struct path_list * const *p2 = v2;
@@ -3433,9 +3421,7 @@ pl_compare(v1, v2)
 }
 
 static char *
-switch_dir(stack, dirpath)
-    struct include_stack *stack;
-    char *dirpath;
+switch_dir(struct include_stack *stack, char *dirpath)
 {
     DIR *dir;
     int i, count = 0;
@@ -3527,7 +3513,7 @@ static struct include_stack *istack;
 static int keepopen;
 
 void
-init_lexer()
+init_lexer(void)
 {
     struct path_list *pl;
 
@@ -3550,9 +3536,7 @@ init_lexer()
 }
 
 static int
-_push_include(path, isdir)
-    char *path;
-    int isdir;
+_push_include(char *path, int isdir)
 {
     struct path_list *pl;
     FILE *fp;
@@ -3606,7 +3590,7 @@ _push_include(path, isdir)
 }
 
 static int
-pop_include()
+pop_include(void)
 {
     struct path_list *pl;
     FILE *fp;
@@ -3647,8 +3631,7 @@ pop_include()
 }
 
 static char *
-parse_include(base)
-    char *base;
+parse_include(char *base)
 {
     char *cp, *ep, *path;
     int len = 0, subst = 0;
@@ -3705,8 +3688,7 @@ parse_include(base)
  * Returns TRUE if address is valid else FALSE.
  */
 static int
-ipv6_valid(s)
-    const char *s;
+ipv6_valid(const char *s)
 {
     int nmatch = 0;
 
