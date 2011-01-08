@@ -193,7 +193,9 @@ plugins/sudoers/sudoreplay.c
 plugins/sudoers/testsudoers.c
 plugins/sudoers/timestr.c
 plugins/sudoers/toke.c
+plugins/sudoers/toke.h
 plugins/sudoers/toke.l
+plugins/sudoers/toke_util.c
 plugins/sudoers/tsgetgrpw.c
 plugins/sudoers/tsgetgrpw.h
 plugins/sudoers/visudo.c

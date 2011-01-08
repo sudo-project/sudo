@@ -100,7 +100,7 @@ PROGS = sudoers.la visudo sudoreplay testsudoers
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
 LIBSUDOERS_OBJS = alias.lo audit.lo defaults.lo gram.lo match.lo pwutil.lo \
-		  timestr.lo toke.lo redblack.lo
+		  timestr.lo toke.lo toke_util.lo redblack.lo
 
 SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo env.lo goodpath.lo \
 	       group_plugin.lo find_path.lo interfaces.lo logging.lo \
@@ -255,8 +255,10 @@ sudoers.lo: $(srcdir)/sudoers.c $(SUDODEP) $(srcdir)/interfaces.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudoers.c
 timestr.lo: $(srcdir)/timestr.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/timestr.c
-toke.lo: $(devdir)/toke.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir)/gram.h
+toke.lo: $(devdir)/toke.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/toke.h $(devdir)/gram.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/toke.c
+toke_util.lo: $(devdir)/toke_util.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/toke.h $(devdir)/gram.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/toke_util.c
 tsgetgrpw.lo: $(srcdir)/tsgetgrpw.c $(SUDODEP)
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/tsgetgrpw.c
 plugin_error.lo: $(srcdir)/plugin_error.c $(incdir)/error.h $(incdir)/missing.h $(top_builddir)/config.h
