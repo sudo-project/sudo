@@ -81,8 +81,6 @@ static int _push_include(char *, int);
 static int pop_include(void);
 static char *parse_include(char *);
 
-#define fill(a, b)		fill_txt(a, b, 0)
-
 #define	push_include(_p)	(_push_include((_p), FALSE))
 #define	push_includedir(_p)	(_push_include((_p), TRUE))
 

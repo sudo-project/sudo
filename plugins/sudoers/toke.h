@@ -24,6 +24,8 @@ int fill_txt(char *, int, int);
 int ipv6_valid(const char *s);
 void yyerror(const char *);
 
+#define fill(a, b)	fill_txt(a, b, 0)
+
 /* realloc() to size + COMMANDARGINC to make room for command args */
 #define COMMANDARGINC   64
 
