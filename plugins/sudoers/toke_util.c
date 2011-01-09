@@ -102,7 +102,7 @@ hexchar(const char *s)
 }
 
 int
-fill_txt(char *src, int len, int olen)
+fill_txt(const char *src, int len, int olen)
 {
     char *dst;
 
@@ -137,7 +137,7 @@ fill_txt(char *src, int len, int olen)
 }
 
 int
-append(char *src, int len)
+append(const char *src, int len)
 {
     int olen = 0;
 
@@ -151,7 +151,7 @@ append(char *src, int len)
     ((c) == ',' || (c) == ':' || (c) == '=' || (c) == ' ' || (c) == '\t' || (c) == '#')
 
 int
-fill_cmnd(char *src, int len)
+fill_cmnd(const char *src, int len)
 {
     char *dst;
     int i;
@@ -178,7 +178,7 @@ fill_cmnd(char *src, int len)
 }
 
 int
-fill_args(char *s, int len, int addspace)
+fill_args(const char *s, int len, int addspace)
 {
     int new_len;
     char *p;

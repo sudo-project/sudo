@@ -17,10 +17,10 @@
 #ifndef _SUDO_TOKE_H
 #define _SUDO_TOKE_H
 
-int append(char *, int);
-int fill_args(char *, int, int);
-int fill_cmnd(char *, int);
-int fill_txt(char *, int, int);
+int append(const char *, int);
+int fill_args(const char *, int, int);
+int fill_cmnd(const char *, int);
+int fill_txt(const char *, int, int);
 int ipv6_valid(const char *s);
 void yyerror(const char *);
 
