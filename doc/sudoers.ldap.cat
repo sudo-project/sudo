@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0b3                 December 27, 2010                       1
+1.8.0b3                  January 10, 2011                       1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.8.0b3                 December 27, 2010                       2
+1.8.0b3                  January 10, 2011                       2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.8.0b3                 December 27, 2010                       3
+1.8.0b3                  January 10, 2011                       3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.8.0b3                 December 27, 2010                       4
+1.8.0b3                  January 10, 2011                       4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.8.0b3                 December 27, 2010                       5
+1.8.0b3                  January 10, 2011                       5
 
 
 
@@ -333,6 +333,9 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
+
+       NNEETTWWOORRKK__TTIIMMEEOOUUTT seconds
+           An alias for BBIINNDD__TTIIMMEELLIIMMIITT.
 
        TTIIMMEELLIIMMIITT seconds
            The TTIIMMEELLIIMMIITT parameter specifies the amount of time, in seconds,
@@ -385,13 +388,10 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            Typically, this involves connecting to the server on port 636
            (ldaps).
 
-       SSSSLL start_tls
-           If the SSSSLL parameter is set to start_tls, the LDAP server
-           connection is initiated normally and TLS encryption is begun before
 
 
 
-1.8.0b3                 December 27, 2010                       6
+1.8.0b3                  January 10, 2011                       6
 
 
 
@@ -400,6 +400,9 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
+       SSSSLL start_tls
+           If the SSSSLL parameter is set to start_tls, the LDAP server
+           connection is initiated normally and TLS encryption is begun before
            the bind credentials are sent.  This has the advantage of not
            requiring a dedicated port for encrypted communications.  This
            parameter is only supported by LDAP servers that honor the
@@ -451,13 +454,10 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
        TTLLSS__KKEEYY file name
            The path to a file containing the private key which matches the
            certificate specified by TTLLSS__CCEERRTT.  The private key must not be
-           password-protected.  The key type depends on the LDAP libraries
-           used.
 
 
 
-
-1.8.0b3                 December 27, 2010                       7
+1.8.0b3                  January 10, 2011                       7
 
 
 
@@ -465,6 +465,9 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
+
+           password-protected.  The key type depends on the LDAP libraries
+           used.
 
            OpenLDAP:
                tls_key /etc/ssl/client_key.pem
@@ -518,12 +521,9 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
        The following sources are recognized:
 
-           files       read sudoers from F</etc/sudoers>
-           ldap        read sudoers from LDAP
 
 
-
-1.8.0b3                 December 27, 2010                       8
+1.8.0b3                  January 10, 2011                       8
 
 
 
@@ -531,6 +531,9 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
+
+           files       read sudoers from F</etc/sudoers>
+           ldap        read sudoers from LDAP
 
        In addition, the entry [NOTFOUND=return] will short-circuit the search
        if the user was not found in the preceding source.
@@ -583,13 +586,10 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 FFIILLEESS
        _/_e_t_c_/_l_d_a_p_._c_o_n_f          LDAP configuration file
 
-       _/_e_t_c_/_n_s_s_w_i_t_c_h_._c_o_n_f      determines sudoers source order
-
-       _/_e_t_c_/_n_e_t_s_v_c_._c_o_n_f        determines sudoers source order on AIX
 
 
 
-1.8.0b3                 December 27, 2010                       9
+1.8.0b3                  January 10, 2011                       9
 
 
 
@@ -597,6 +597,10 @@ FFIILLEESS
 
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
+
+       _/_e_t_c_/_n_s_s_w_i_t_c_h_._c_o_n_f      determines sudoers source order
+
+       _/_e_t_c_/_n_e_t_s_v_c_._c_o_n_f        determines sudoers source order on AIX
 
 EEXXAAMMPPLLEESS
    EExxaammppllee llddaapp..ccoonnff
@@ -648,14 +652,10 @@ EEXXAAMMPPLLEESS
          # extension such as OpenLDAP.
          #ssl start_tls
          #
-         # Additional TLS options follow that allow tweaking of the
-         # SSL/TLS connection.
-         #
-         #tls_checkpeer yes # verify server SSL certificate
 
 
 
-1.8.0b3                 December 27, 2010                      10
+1.8.0b3                  January 10, 2011                      10
 
 
 
@@ -664,6 +664,10 @@ EEXXAAMMPPLLEESS
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
+         # Additional TLS options follow that allow tweaking of the
+         # SSL/TLS connection.
+         #
+         #tls_checkpeer yes # verify server SSL certificate
          #tls_checkpeer no  # ignore server SSL certificate
          #
          # If you enable tls_checkpeer, specify either tls_cacertfile
@@ -714,14 +718,10 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
          # If using SASL authentication for LDAP (OpenSSL)
          # use_sasl yes
          # sasl_auth_id <SASL user name>
-         # rootuse_sasl yes
-         # rootsasl_auth_id <SASL user name for root access>
-         # sasl_secprops none
-         # krb5_ccname /etc/.ldapcache
 
 
 
-1.8.0b3                 December 27, 2010                      11
+1.8.0b3                  January 10, 2011                      11
 
 
 
@@ -729,6 +729,11 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
+
+         # rootuse_sasl yes
+         # rootsasl_auth_id <SASL user name for root access>
+         # sasl_secprops none
+         # krb5_ccname /etc/.ldapcache
 
    SSuuddoo sscchheemmaa ffoorr OOppeennLLDDAAPP
        The following schema is in OpenLDAP format.  Simply copy it to the
@@ -779,15 +784,10 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            EQUALITY caseExactIA5Match
            SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
 
-        attributetype ( 1.3.6.1.4.1.15953.9.1.8
-           NAME 'sudoNotBefore'
-           DESC 'Start of time interval for which the entry is valid'
-           EQUALITY generalizedTimeMatch
-           ORDERING generalizedTimeOrderingMatch
 
 
 
-1.8.0b3                 December 27, 2010                      12
+1.8.0b3                  January 10, 2011                      12
 
 
 
@@ -796,6 +796,11 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
+        attributetype ( 1.3.6.1.4.1.15953.9.1.8
+           NAME 'sudoNotBefore'
+           DESC 'Start of time interval for which the entry is valid'
+           EQUALITY generalizedTimeMatch
+           ORDERING generalizedTimeOrderingMatch
            SYNTAX 1.3.6.1.4.1.1466.115.121.1.24 )
 
         attributetype ( 1.3.6.1.4.1.15953.9.1.9
@@ -848,11 +853,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-1.8.0b3                 December 27, 2010                      13
+1.8.0b3                  January 10, 2011                      13
 
 
