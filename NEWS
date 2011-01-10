@@ -68,6 +68,8 @@ What's new in Sudo 1.7.5?
  * NETWORK_TIMEOUT is now an alias for BIND_TIMELIMIT in ldap.conf for
    compatibility with OpenLDAP configuration files.
 
+ * The LDAP API TIMEOUT parameter is now honored in ldap.conf.
+
 What's new in Sudo 1.7.4p4?
 
  * A potential security issue has been fixed with respect to the handling

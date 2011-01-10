@@ -280,6 +280,9 @@
 /* Define to 1 if you have the `ldap_search_ext_s' function. */
 #undef HAVE_LDAP_SEARCH_EXT_S
 
+/* Define to 1 if you have the `ldap_search_st' function. */
+#undef HAVE_LDAP_SEARCH_ST
+
 /* Define to 1 if you have the `ldap_ssl_client_init' function. */
 #undef HAVE_LDAP_SSL_CLIENT_INIT
 
