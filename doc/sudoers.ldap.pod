@@ -335,6 +335,11 @@ An alias for B<BIND_TIMELIMIT>.
 The B<TIMELIMIT> parameter specifies the amount of time, in seconds,
 to wait for a response to an LDAP query.
 
+=item B<TIMEOUT> seconds
+
+The B<TIMEOUT> parameter specifies the amount of time, in seconds,
+to wait for a response from the various LDAP APIs.
+
 =item B<SUDOERS_BASE> base
 
 The base DN to use when performing B<sudo> LDAP queries.  Typically

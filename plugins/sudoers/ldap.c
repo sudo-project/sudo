@@ -97,8 +97,13 @@
 #endif
 
 #ifndef HAVE_LDAP_SEARCH_EXT_S
-#define ldap_search_ext_s(a, b, c, d, e, f, g, h, i, j, k)		\
+# ifdef HAVE_LDAP_SEARCH_ST
+#  define ldap_search_ext_s(a, b, c, d, e, f, g, h, i, j, k)		\
+	ldap_search_st(a, b, c, d, e, f, i, k)
+# else
+#  define ldap_search_ext_s(a, b, c, d, e, f, g, h, i, j, k)		\
 	ldap_search_s(a, b, c, d, e, f, k)
+# endif
 #endif
 
 #define LDAP_FOREACH(var, ld, res)					\
@@ -184,6 +189,7 @@ static struct ldap_config {
     int ldap_debug;
     int tls_checkpeer;
     int timelimit;
+    int timeout;
     int bind_timelimit;
     int use_sasl;
     int rootuse_sasl;
@@ -270,6 +276,10 @@ static struct ldap_config_table ldap_conf_table[] = {
 	&ldap_conf.bind_timelimit },
 #endif
     { "timelimit", CONF_INT, TRUE, LDAP_OPT_TIMELIMIT, &ldap_conf.timelimit },
+#ifdef LDAP_OPT_TIMEOUT
+    { "timeout", CONF_INT, TRUE, -1 /* needs timeval, set manually */,
+	&ldap_conf.timeout },
+#endif
     { "binddn", CONF_STR, FALSE, -1, &ldap_conf.binddn },
     { "bindpw", CONF_STR, FALSE, -1, &ldap_conf.bindpw },
     { "rootbinddn", CONF_STR, FALSE, -1, &ldap_conf.rootbinddn },
@@ -1075,6 +1085,7 @@ sudo_ldap_read_config(void)
     ldap_conf.port = -1;
     ldap_conf.tls_checkpeer = -1;
     ldap_conf.timelimit = -1;
+    ldap_conf.timeout = -1;
     ldap_conf.bind_timelimit = -1;
     ldap_conf.use_sasl = -1;
     ldap_conf.rootuse_sasl = -1;
@@ -1136,9 +1147,6 @@ sudo_ldap_read_config(void)
 
     if (!ldap_conf.host)
 	ldap_conf.host = estrdup("localhost");
-
-    if (ldap_conf.bind_timelimit > 0)
-	ldap_conf.bind_timelimit *= 1000;	/* convert to ms */
 
     if (ldap_conf.debug > 1) {
 	sudo_printf(SUDO_CONV_ERROR_MSG, "LDAP Config Summary\n");
@@ -1231,6 +1239,9 @@ sudo_ldap_read_config(void)
     }
     if (!ldap_conf.base)
 	return(FALSE);		/* if no base is defined, ignore LDAP */
+
+    if (ldap_conf.bind_timelimit > 0)
+	ldap_conf.bind_timelimit *= 1000;	/* convert to ms */
 
     /*
      * Interpret SSL option
@@ -1344,6 +1355,7 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     struct lbuf *lbuf)
 {
     struct berval **bv, **p;
+    struct timeval tv, *tvp = NULL;
     struct ldap_config_list_str *base;
     struct sudo_ldap_handle *handle = nss->handle;
     LDAP *ld;
@@ -1356,9 +1368,14 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     ld = handle->ld;
 
     for (base = ldap_conf.base; base != NULL; base = base->next) {
+	if (ldap_conf.timeout > 0) {
+	    tv.tv_sec = ldap_conf.timeout;
+	    tv.tv_usec = 0;
+	    tvp = &tv;
+	}
 	result = NULL;
 	rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE,
-	    "cn=defaults", NULL, 0, NULL, NULL, NULL, 0, &result);
+	    "cn=defaults", NULL, 0, NULL, NULL, tvp, 0, &result);
 	if (rc == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
 	    bv = ldap_get_values_len(ld, entry, "sudoOption");
 	    if (bv != NULL) {
@@ -1705,6 +1722,22 @@ sudo_ldap_set_options(LDAP *ld)
 	}
     }
 
+#ifdef LDAP_OPT_TIMEOUT
+    /* Convert timeout to a timeval */
+    if (ldap_conf.timeout > 0) {
+	struct timeval tv;
+	tv.tv_sec = ldap_conf.timeout;
+	tv.tv_usec = 0;
+	rc = ldap_set_option(ld, LDAP_OPT_TIMEOUT, &tv);
+	if (rc != LDAP_OPT_SUCCESS) {
+	    warningx("ldap_set_option(TIMEOUT, %ld): %s",
+		(long)tv.tv_sec, ldap_err2string(rc));
+	    return(-1);
+	}
+	DPRINTF(("ldap_set_option(LDAP_OPT_TIMEOUT, %ld)",
+	    (long)tv.tv_sec), 1);
+    }
+#endif
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
     /* Convert bind_timelimit to a timeval */
     if (ldap_conf.bind_timelimit > 0) {
@@ -1968,6 +2001,7 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
 {
     struct ldap_config_list_str *base;
     struct sudo_ldap_handle *handle = nss->handle;
+    struct timeval tv, *tvp = NULL;
     LDAP *ld;
     LDAPMessage *entry, *result;
     int rc;
@@ -1977,6 +2011,11 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
     ld = handle->ld;
 
     for (base = ldap_conf.base; base != NULL; base = base->next) {
+	if (ldap_conf.timeout > 0) {
+	    tv.tv_sec = ldap_conf.timeout;
+	    tv.tv_usec = 0;
+	    tvp = &tv;
+	}
 	result = NULL;
 	rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE,
 	    "cn=defaults", NULL, 0, NULL, NULL, NULL, 0, &result);
@@ -2219,6 +2258,7 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
     struct sudo_ldap_handle *handle = nss->handle;
     struct ldap_config_list_str *base;
     struct ldap_result *lres;
+    struct timeval tv, *tvp = NULL;
     LDAPMessage *entry, *result;
     LDAP *ld = handle->ld;
     int do_netgr, rc;
@@ -2264,6 +2304,11 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 	DPRINTF(("ldap search '%s'", filt), 1);
 	for (base = ldap_conf.base; base != NULL; base = base->next) {
 	    DPRINTF(("searching from base '%s'", base->val), 1);
+	    if (ldap_conf.timeout > 0) {
+		tv.tv_sec = ldap_conf.timeout;
+		tv.tv_usec = 0;
+		tvp = &tv;
+	    }
 	    result = NULL;
 	    rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE, filt,
 		NULL, 0, NULL, NULL, NULL, 0, &result);

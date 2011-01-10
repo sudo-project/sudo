@@ -431,6 +431,10 @@ An alias for \fB\s-1BIND_TIMELIMIT\s0\fR.
 .IX Item "TIMELIMIT seconds"
 The \fB\s-1TIMELIMIT\s0\fR parameter specifies the amount of time, in seconds,
 to wait for a response to an \s-1LDAP\s0 query.
+.IP "\fB\s-1TIMEOUT\s0\fR seconds" 4
+.IX Item "TIMEOUT seconds"
+The \fB\s-1TIMEOUT\s0\fR parameter specifies the amount of time, in seconds,
+to wait for a response from the various \s-1LDAP\s0 APIs.
 .IP "\fB\s-1SUDOERS_BASE\s0\fR base" 4
 .IX Item "SUDOERS_BASE base"
 The base \s-1DN\s0 to use when performing \fBsudo\fR \s-1LDAP\s0 queries.  Typically
