@@ -712,7 +712,7 @@ user_in_group(pw, group)
      * If we are matching the invoking or list user and that user has a
      * supplementary group vector, check it.
      */
-    if (user_ngroups >= 0 &&
+    if (user_ngroups > 0 &&
 	strcmp(pw->pw_name, list_pw ? list_pw->pw_name : user_name) == 0) {
 	for (i = 0; i < user_ngroups; i++) {
 	    if (grp->gr_gid == user_groups[i]) {
