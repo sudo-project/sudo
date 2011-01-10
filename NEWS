@@ -65,6 +65,9 @@ What's new in Sudo 1.7.5?
  * Fixed a crash when the -g flag was used without the -u flag and
    a sudoers entry did not contain a Runas_Spec.
 
+ * NETWORK_TIMEOUT is now an alias for BIND_TIMELIMIT in ldap.conf for
+   compatibility with OpenLDAP configuration files.
+
 What's new in Sudo 1.7.4p4?
 
  * A potential security issue has been fixed with respect to the handling
