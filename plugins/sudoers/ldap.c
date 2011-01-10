@@ -261,8 +261,12 @@ static struct ldap_config_table ldap_conf_table[] = {
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
     { "bind_timelimit", CONF_INT, TRUE, -1 /* needs timeval, set manually */,
 	&ldap_conf.bind_timelimit },
+    { "network_timeout", CONF_INT, TRUE, -1 /* needs timeval, set manually */,
+	&ldap_conf.bind_timelimit },
 #elif defined(LDAP_X_OPT_CONNECT_TIMEOUT)
     { "bind_timelimit", CONF_INT, TRUE, LDAP_X_OPT_CONNECT_TIMEOUT,
+	&ldap_conf.bind_timelimit },
+    { "network_timeout", CONF_INT, TRUE, LDAP_X_OPT_CONNECT_TIMEOUT,
 	&ldap_conf.bind_timelimit },
 #endif
     { "timelimit", CONF_INT, TRUE, LDAP_OPT_TIMELIMIT, &ldap_conf.timelimit },

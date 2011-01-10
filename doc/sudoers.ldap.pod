@@ -326,6 +326,10 @@ to wait while trying to connect to an LDAP server.  If multiple B<URI>s or
 B<HOST>s are specified, this is the amount of time to wait before trying
 the next one in the list.
 
+=item B<NETWORK_TIMEOUT> seconds
+
+An alias for B<BIND_TIMELIMIT>.
+
 =item B<TIMELIMIT> seconds
 
 The B<TIMELIMIT> parameter specifies the amount of time, in seconds,
