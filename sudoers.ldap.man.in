@@ -140,7 +140,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "November 13, 2010" "1.7.5b2" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "January 10, 2011" "1.7.5b2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -258,11 +258,14 @@ If multiple \fBsudoNotAfter\fR entries are present, the last one is used.
 .IP "\fBsudoOrder\fR" 4
 .IX Item "sudoOrder"
 The sudoRole entries retrieved from the \s-1LDAP\s0 directory have no
-inherent order. The \fBsudoOrder\fR attribute is an integer that will
-be used to sort the matching entries.  This allows to more closely
-mimic the behaviour of the sudoers file, where the of the entries
-does have an influence on the result.  If the \fBsudoOrder\fR attribute
-is not present, a value of 0 is assumed.
+inherent order.  The \fBsudoOrder\fR attribute is an integer (or
+floating point value for \s-1LDAP\s0 servers that support it) that is used
+to sort the matching entries.  This allows LDAP-based sudoers entries
+to more closely mimic the behaviour of the sudoers file, where the
+of the entries influences the result.  If multiple entries match,
+the entry with the highest \fBsudoOrder\fR attribute is chosen.  This
+corresponds to the \*(L"last match\*(R" behavior of the sudoers file.  If
+the \fBsudoOrder\fR attribute is not present, a value of 0 is assumed.
 .PP
 Each component listed above should contain a single value, but there
 may be multiple instances of each component type.  A sudoRole must
@@ -298,8 +301,12 @@ to entries that satisfy the time constraints, if any are present.
 There are some subtle differences in the way sudoers is handled
 once in \s-1LDAP\s0.  Probably the biggest is that according to the \s-1RFC\s0,
 \&\s-1LDAP\s0 ordering is arbitrary and you cannot expect that Attributes
-and Entries are returned in any specific order.  If there are
-conflicting command rules on an entry, the negative takes precedence.
+and Entries are returned in any specific order.
+.PP
+The order in which different entries are applied can be controlled
+using the \fBsudoOrder\fR attribute, but there is no way to guarantee
+the order of attributes within a specific entry.  If there are
+conflicting command rules in an entry, the negative takes precedence.
 This is called paranoid behavior (not necessarily the most specific
 match).
 .PP
@@ -337,7 +344,7 @@ Here is an example:
 .Ve
 .PP
 Another difference is that negations on the Host, User or Runas are
-currently ignorred.  For example, the following attributes do not
+currently ignored.  For example, the following attributes do not
 behave the way one might expect.
 .PP
 .Vb 3
@@ -417,6 +424,9 @@ The \fB\s-1BIND_TIMELIMIT\s0\fR parameter specifies the amount of time, in secon
 to wait while trying to connect to an \s-1LDAP\s0 server.  If multiple \fB\s-1URI\s0\fRs or
 \&\fB\s-1HOST\s0\fRs are specified, this is the amount of time to wait before trying
 the next one in the list.
+.IP "\fB\s-1NETWORK_TIMEOUT\s0\fR seconds" 4
+.IX Item "NETWORK_TIMEOUT seconds"
+An alias for \fB\s-1BIND_TIMELIMIT\s0\fR.
 .IP "\fB\s-1TIMELIMIT\s0\fR seconds" 4
 .IX Item "TIMELIMIT seconds"
 The \fB\s-1TIMELIMIT\s0\fR parameter specifies the amount of time, in seconds,
@@ -855,10 +865,9 @@ schema directory (e.g. \fI/etc/openldap/schema\fR), add the proper
 \&\fIldap.conf\fR\|(@mansectform@), \fIsudoers\fR\|(5)
 .SH "CAVEATS"
 .IX Header "CAVEATS"
-The way that \fIsudoers\fR is parsed differs between Note that there
-are differences in the way that LDAP-based \fIsudoers\fR is parsed
-compared to file-based \fIsudoers\fR.  See the \*(L"Differences between
-\&\s-1LDAP\s0 and non-LDAP sudoers\*(R" section for more information.
+Note that there are differences in the way that LDAP-based \fIsudoers\fR
+is parsed compared to file-based \fIsudoers\fR.  See the \*(L"Differences
+between \s-1LDAP\s0 and non-LDAP sudoers\*(R" section for more information.
 .SH "BUGS"
 .IX Header "BUGS"
 If you feel you have found a bug in \fBsudo\fR, please submit a bug report

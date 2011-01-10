@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "November 13, 2010" "1.7.5b2" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "December 17, 2010" "1.7.5b2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -1104,6 +1104,12 @@ A colon (':') separated list of editors allowed to be used with
 \&\fBvisudo\fR.  \fBvisudo\fR will choose the editor that matches the user's
 \&\s-1EDITOR\s0 environment variable if possible, or the first editor in the
 list that exists and is executable.  The default is \f(CW"@editor@"\fR.
+.IP "iolog_dir" 16
+.IX Item "iolog_dir"
+The directory in which to store input/output logs when the \fIlog_input\fR
+or \fIlog_output\fR options are enabled or when the <\s-1LOG_INPUT\s0> or
+\&\f(CW\*(C`LOG_OUTPUT\*(C'\fR tags are present for a command.
+The default is \f(CW"@iolog_dir@"\fR.
 .IP "mailsub" 16
 .IX Item "mailsub"
 Subject of the mail sent to the \fImailto\fR user. The escape \f(CW%h\fR
@@ -1393,8 +1399,9 @@ Local groups file
 .IP "\fI/etc/netgroup\fR" 24
 .IX Item "/etc/netgroup"
 List of network groups
-.IP "\fI/var/log/sudo\-io\fR" 24
-.IX Item "/var/log/sudo-io"
+.ie n .IP "\fI@iolog_dir@\fR" 24
+.el .IP "\fI@iolog_dir@\fR" 24
+.IX Item "@iolog_dir@"
 I/O log files
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
@@ -1672,7 +1679,7 @@ arbitrary commands.  Many editors have a restricted mode where shell
 escapes are disabled, though \fBsudoedit\fR is a better solution to
 running editors via \fBsudo\fR.  Due to the large number of programs that
 offer shell escapes, restricting users to the set of programs that
-do not if often unworkable.
+do not is often unworkable.
 .IP "noexec" 10
 .IX Item "noexec"
 Many systems that support shared libraries have the ability to
