@@ -120,7 +120,13 @@ check_user(validated, mode)
     if (ISSET(mode, MODE_INVALIDATE)) {
 	SET(validated, FLAG_CHECK_USER);
     } else {
-	if (user_uid == 0 || user_uid == runas_pw->pw_uid || user_is_exempt())
+	/*
+	 * Don't prompt for the root passwd or if the user is exempt.
+	 * If the user is not changing uid/gid, no need for a password.
+	 */
+	if (user_uid == 0 || (user_uid == runas_pw->pw_uid &&
+	    (!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name))) ||
+	    user_is_exempt())
 	    return;
     }
 
