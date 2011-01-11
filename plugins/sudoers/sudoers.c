@@ -607,11 +607,13 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	easprintf(&command_info[info_len++], "runas_euid=%u",
 	    (unsigned int)runas_pw->pw_uid);
 	easprintf(&command_info[info_len++], "runas_egid=%u",
+	    runas_gr ? (unsigned int)runas_gr->gr_gid :
 	    (unsigned int)runas_pw->pw_gid);
     } else {
 	easprintf(&command_info[info_len++], "runas_uid=%u",
 	    (unsigned int)runas_pw->pw_uid);
 	easprintf(&command_info[info_len++], "runas_gid=%u",
+	    runas_gr ? (unsigned int)runas_gr->gr_gid :
 	    (unsigned int)runas_pw->pw_gid);
     }
     if (def_preserve_groups) {
