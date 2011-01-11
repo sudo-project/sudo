@@ -78,6 +78,9 @@ What's new in Sudo 1.7.5?
 
  * The LDAP API TIMEOUT parameter is now honored in ldap.conf.
 
+ * A user running "sudo -g group command" will now be prompted
+   for a password when appropriate.
+
 What's new in Sudo 1.7.4p4?
 
  * A potential security issue has been fixed with respect to the handling
