@@ -8,8 +8,6 @@ What's new in Sudo 1.8.0?
 
 What's new in Sudo 1.7.5?
 
- * The LOG_INPUT and LOG_OUTPUT tags in sudoers are now parsed correctly.
-
  * When using visudo in check mode, a file named "-" may be used to
    check sudoers data on the standard input.
 
@@ -28,20 +26,8 @@ What's new in Sudo 1.7.5?
  * If a PAM account management module denies access, sudo now prints
    a more useful error message and stops trying to validate the user.
 
- * Fixed a bug introduced in sudo 1.7.3 where the ticket file was not
-   being honored when the "targetpw" sudoers Defaults option was enabled.
-
  * Fixed a potential hang on idle systems when the sudo-run process
    exits immediately.
-
- * Fixed a crash when Solaris project support was enabled and the
-   -g flag was used.
-
- * Sudo no longer exits with an error when support for
-   auditing is compiled in but auditing is not enabled.
-
- * Fixed a crash with "sudo -l" when auditing is enabled and the
-   user is not allowed to run any commands on the host.
 
  * Sudo now includes a copy of zlib that will be used on systems
    that do not have zlib installed.
@@ -70,16 +56,38 @@ What's new in Sudo 1.7.5?
 	user ALL = sudoedit /etc/*
    will allow editing of /etc/motd but not /etc/security/default.
 
- * Fixed a crash when the -g flag was used without the -u flag and
-   a sudoers entry did not contain a Runas_Spec.
-
  * NETWORK_TIMEOUT is now an alias for BIND_TIMELIMIT in ldap.conf for
    compatibility with OpenLDAP configuration files.
 
  * The LDAP API TIMEOUT parameter is now honored in ldap.conf.
 
- * A user running "sudo -g group command" will now be prompted
-   for a password when appropriate.
+What's new in Sudo 1.7.4p5?
+
+ * A bug has been fixed that would allow a command to be run without the
+   user entering a password when sudo's -g flag is used without the -u flag.
+
+ * If user has no supplementary groups, sudo will now fall back on checking
+   the group file explicitly, which restores historic sudo behavior.
+
+ * A crash has been fixed when sudo's -g flag is used without the -u flag
+   and the sudoers file contains an entry with no runas user or group listed.
+
+ * A bug has been fixed in the I/O logging support that could cause
+   visual artifacts in full-screen programs such as text editors,.
+
+ * A crash has been fixed when the Solaris project support is enabled
+   and sudo's -g flag is used without the -u flag.
+
+ * Sudo no longer exits with an error when support for auditing is
+   compiled in but auditing is not enabled.
+
+ * Fixed a bug introduced in sudo 1.7.3 where the ticket file was not
+   being honored when the "targetpw" sudoers Defaults option was enabled.
+
+ * The LOG_INPUT and LOG_OUTPUT tags in sudoers are now parsed correctly.
+
+ * A crash has been fixed in "sudo -l" when sudo is built with auditing
+   support and the user is not allowed to run any commands on the host.
 
 What's new in Sudo 1.7.4p4?
 
