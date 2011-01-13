@@ -1125,7 +1125,7 @@ list that exists and is executable.  The default is C<"@editor@">.
 
 The top-level directory to use when constructing the path name for
 the input/output log directory.  Only used if the I<log_input> or
-I<log_output> options are enabled or when the <LOG_INPUT> or
+I<log_output> options are enabled or when the C<LOG_INPUT> or
 C<LOG_OUTPUT> tags are present for a command.  The session sequence
 number, if any, is stored in the directory.
 The default is C<"@iolog_dir@">.
@@ -1178,7 +1178,7 @@ mktemp() function.
 
 The path name, relative to I<iolog_dir>, in which to store input/output
 logs when the I<log_input> or I<log_output> options are enabled or
-when the <LOG_INPUT> or C<LOG_OUTPUT> tags are present for a command.
+when the C<LOG_INPUT> or C<LOG_OUTPUT> tags are present for a command.
 Note that I<iolog_file> may contain directory components.
 The default is C<"%{seq}">.
 
