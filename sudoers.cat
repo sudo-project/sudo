@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.5b2                 December 17, 2010                       1
+1.7.5b2                  January 13, 2011                       1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                       2
+1.7.5b2                  January 13, 2011                       2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                       3
+1.7.5b2                  January 13, 2011                       3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                       4
+1.7.5b2                  January 13, 2011                       4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                       5
+1.7.5b2                  January 13, 2011                       5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                       6
+1.7.5b2                  January 13, 2011                       6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                       7
+1.7.5b2                  January 13, 2011                       7
 
 
 
@@ -523,7 +523,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                       8
+1.7.5b2                  January 13, 2011                       8
 
 
 
@@ -589,7 +589,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                       9
+1.7.5b2                  January 13, 2011                       9
 
 
 
@@ -655,7 +655,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
 
 
-1.7.5b2                 December 17, 2010                      10
+1.7.5b2                  January 13, 2011                      10
 
 
 
@@ -721,7 +721,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                      11
+1.7.5b2                  January 13, 2011                      11
 
 
 
@@ -787,7 +787,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                      12
+1.7.5b2                  January 13, 2011                      12
 
 
 
@@ -853,7 +853,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                      13
+1.7.5b2                  January 13, 2011                      13
 
 
 
@@ -919,7 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                      14
+1.7.5b2                  January 13, 2011                      14
 
 
 
@@ -985,7 +985,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                      15
+1.7.5b2                  January 13, 2011                      15
 
 
 
@@ -1030,7 +1030,8 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        umask           Umask to use when running the command.  Negate this
                        option or set it to 0777 to preserve the user's umask.
                        The actual umask that is used will be the union of the
-                       user's umask and 0022.  This guarantees that ssuuddoo never
+                       user's umask and the value of the _u_m_a_s_k option, which
+                       defaults to 0022.  This guarantees that ssuuddoo never
                        lowers the umask when running a command.  Note on
                        systems that use PAM, the default PAM configuration may
                        specify its own umask which will override the value set
@@ -1050,8 +1051,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-
-1.7.5b2                 December 17, 2010                      16
+1.7.5b2                  January 13, 2011                      16
 
 
 
@@ -1062,7 +1062,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        iolog_dir       The directory in which to store input/output logs when
                        the _l_o_g___i_n_p_u_t or _l_o_g___o_u_t_p_u_t options are enabled or when
-                       the <LOG_INPUT> or LOG_OUTPUT tags are present for a
+                       the LOG_INPUT or LOG_OUTPUT tags are present for a
                        command.  The default is "/var/log/sudo-io".
 
        mailsub         Subject of the mail sent to the _m_a_i_l_t_o user. The escape
@@ -1117,7 +1117,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                      17
+1.7.5b2                  January 13, 2011                      17
 
 
 
@@ -1183,7 +1183,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                      18
+1.7.5b2                  January 13, 2011                      18
 
 
 
@@ -1249,7 +1249,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                      19
+1.7.5b2                  January 13, 2011                      19
 
 
 
@@ -1315,7 +1315,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                      20
+1.7.5b2                  January 13, 2011                      20
 
 
 
@@ -1381,7 +1381,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.7.5b2                 December 17, 2010                      21
+1.7.5b2                  January 13, 2011                      21
 
 
 
@@ -1447,7 +1447,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                      22
+1.7.5b2                  January 13, 2011                      22
 
 
 
@@ -1513,7 +1513,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.5b2                 December 17, 2010                      23
+1.7.5b2                  January 13, 2011                      23
 
 
 
@@ -1579,7 +1579,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.7.5b2                 December 17, 2010                      24
+1.7.5b2                  January 13, 2011                      24
 
 
 
@@ -1645,7 +1645,7 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 
 
-1.7.5b2                 December 17, 2010                      25
+1.7.5b2                  January 13, 2011                      25
 
 
 
@@ -1711,7 +1711,7 @@ SSUUPPPPOORRTT
 
 
 
-1.7.5b2                 December 17, 2010                      26
+1.7.5b2                  January 13, 2011                      26
 
 
 
@@ -1777,6 +1777,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.5b2                 December 17, 2010                      27
+1.7.5b2                  January 13, 2011                      27
 
 
