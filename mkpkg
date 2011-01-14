@@ -96,6 +96,7 @@ case "$platform" in
 	    # RHEL 5 and up build pies and have audit support
 	    export CFLAGS="$F_PIE" LDFLAGS="-pie"
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-linux-audit"
+	    PPVARS="${PPVARS}${PPVARS+$space}linux_audit=1.4.0"
 	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	configure_opts="$configure_opts
