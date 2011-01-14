@@ -46,6 +46,9 @@ still allow people to get their work done."
 	pp_rpm_url="http://www.sudo.ws/"
 	pp_rpm_group="Applications/System"
 	pp_rpm_packager="Todd.Miller@courtesan.com"
+	if test -n "$linux_audit"; then
+		pp_rpm_requires="audit-libs >= $linux_audit"
+	fi
 
 	pp_deb_maintainer="$pp_rpm_packager"
 	pp_deb_release="$pp_rpm_release"
