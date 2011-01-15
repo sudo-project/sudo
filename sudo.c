@@ -486,8 +486,11 @@ main(argc, argv, envp)
 #endif
 
 	/* Deferred exit due to sudo_ldap_close() */
-	if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST)))
+	if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST))) {
+	    if (list_pw != NULL)
+		pw_delref(list_pw);
 	    exit(rc);
+	}
 
 	/* Must audit before uid change. */
 	audit_success(NewArgv);
