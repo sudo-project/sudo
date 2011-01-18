@@ -152,7 +152,7 @@ term_raw(fd, isig)
     term.c_cc[VMIN] = 1;
     term.c_cc[VTIME] = 0;
     CLR(term.c_iflag, ICRNL | IGNCR | INLCR | IUCLC | IXON);
-    SET(term.c_oflag, OPOST);
+    CLR(term.c_oflag, OPOST);
     CLR(term.c_lflag, ECHO | ICANON | ISIG | IEXTEN);
     if (isig)
 	SET(term.c_lflag, ISIG);
