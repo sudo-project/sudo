@@ -53,6 +53,11 @@ What's new in Sudo 1.7.5?
 
  * The LDAP API TIMEOUT parameter is now honored in ldap.conf.
 
+What's new in Sudo 1.7.4p6?
+
+ * A bug has been fixed in the I/O logging support that could cause
+   visual artifacts in full-screen programs such as text editors.
+
 What's new in Sudo 1.7.4p5?
 
  * A bug has been fixed that would allow a command to be run without the
@@ -63,9 +68,6 @@ What's new in Sudo 1.7.4p5?
 
  * A crash has been fixed when sudo's -g flag is used without the -u flag
    and the sudoers file contains an entry with no runas user or group listed.
-
- * A bug has been fixed in the I/O logging support that could cause
-   visual artifacts in full-screen programs such as text editors,.
 
  * A crash has been fixed when the Solaris project support is enabled
    and sudo's -g flag is used without the -u flag.
