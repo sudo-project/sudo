@@ -326,6 +326,7 @@ struct sudo_ldap_handle {
     LDAP *ld;
     struct ldap_result *result;
     char *username;
+    GETGROUPS_T *groups;
 };
 
 struct sudo_nss sudo_nss_ldap = {
@@ -1467,7 +1468,6 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
 		    "NOSETENV: " : "SETENV: ";
 	    if (tag != NULL)
 		lbuf_append(lbuf, tag, NULL);
-	    /* XXX - ignores other options */
 	}
 	ldap_value_free_len(bv);
     }
@@ -1991,6 +1991,7 @@ sudo_ldap_open(struct sudo_nss *nss)
     handle->ld = ld;
     handle->result = NULL;
     handle->username = NULL;
+    handle->groups = NULL;
     nss->handle = handle;
 
     return(0);
@@ -2244,6 +2245,7 @@ sudo_ldap_result_free_nss(struct sudo_nss *nss)
 	    efree(handle->username);
 	    handle->username = NULL;
 	}
+	handle->groups = NULL;
 	handle->result = NULL;
     }
 }
@@ -2269,7 +2271,8 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
      * have to contact the LDAP server again.
      */
     if (handle->result) {
-	if (strcmp(pw->pw_name, handle->username) == 0) {
+	if (handle->groups == user_groups &&
+	    strcmp(pw->pw_name, handle->username) == 0) {
 	    DPRINTF(("reusing previous result (user %s) with %d entries",
 		handle->username, handle->result->nentries), 1);
 	    return(handle->result);
@@ -2342,6 +2345,7 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
     /* Store everything in the sudo_nss handle. */
     handle->result = lres;
     handle->username = estrdup(pw->pw_name);
+    handle->groups = user_groups;
 
     return(lres);
 }
