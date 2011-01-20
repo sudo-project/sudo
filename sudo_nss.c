@@ -214,7 +214,8 @@ reset_groups(pw)
 # ifdef HAVE_SETAUTHDB
         aix_setauthdb(pw->pw_name);
 # endif
-	(void) initgroups(pw->pw_name, pw->pw_gid);
+	if (initgroups(pw->pw_name, pw->pw_gid) == -1)
+	    log_error(USE_ERRNO|MSG_ONLY, "can't reset group vector");
 	efree(user_groups);
 	user_groups = NULL;
 	if ((user_ngroups = getgroups(0, NULL)) > 0) {
