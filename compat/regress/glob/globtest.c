@@ -1,4 +1,4 @@
-/*	$OpenBSD: globtest.c,v 1.2 2010/09/24 13:32:55 djm Exp $	*/
+/*	$OpenBSD: globtest.c,v 1.1 2008/10/01 23:04:36 millert Exp $	*/
 
 /*
  * Public domain, 2008, Todd C. Miller <Todd.Miller@courtesan.com>
@@ -27,7 +27,6 @@ struct gl_entry {
 	int nresults;
 	char pattern[1024];
 	char *results[MAX_RESULTS];
-	mode_t modes[MAX_RESULTS];
 };
 
 int test_glob(struct gl_entry *);
@@ -37,7 +36,7 @@ main(int argc, char **argv)
 {
 	FILE *fp = stdin;
 	char *buf, *cp;
-	int errors = 0, tests = 0, lineno, mode;
+	int errors = 0, tests = 0, lineno;
 	struct gl_entry entry;
 	size_t len;
 
@@ -52,9 +51,9 @@ main(int argc, char **argv)
 	 * Read in test file, which is formatted thusly:
 	 *
 	 * [pattern] <flags>
-	 * result1 [mode]
-	 * result2 [mode]
-	 * result3 [mode]
+	 * result1
+	 * result2
+	 * result3
 	 * ...
 	 *
 	 */
@@ -108,7 +107,7 @@ main(int argc, char **argv)
 				exit(1);
 			}
 			entry.flags = (int)strtol(buf, &cp, 0);
-			if (*cp != '>' || entry.flags < 0 || entry.flags > 0x4000) {
+			if (*cp != '>' || entry.flags < 0 || entry.flags > 0x2000) {
 				fprintf(stderr,
 				    "globtest: invalid flags: %s\n", buf);
 				exit(1);
@@ -128,12 +127,6 @@ main(int argc, char **argv)
 			    entry.pattern, MAX_RESULTS);
 			exit(1);
 		}
-		if ((cp = strchr(buf, ' ')) != NULL) {
-			*cp++ = '\0';
-			mode = strtol(cp, NULL, 8);
-		} else
-			mode = -1;
-		entry.modes[entry.nresults] = (mode_t)mode;
 		entry.results[entry.nresults++] = strdup(buf);
 	}
 	if (entry.pattern[0]) {
@@ -164,27 +157,13 @@ int test_glob(struct gl_entry *entry)
 	for (i = 0; i < gl.gl_matchc; i++) {
 		if (strcmp(gl.gl_pathv[i], entry->results[i]) != 0)
 			goto mismatch;
-		if ((entry->flags & GLOB_KEEPSTAT) != 0) {
-			if (entry->modes[i] == -1 ||
-			    gl.gl_statv[i] == NULL ||
-			    entry->modes[i] != gl.gl_statv[i]->st_mode)
-			goto badmode;
-		}
 		free(entry->results[i]);
 	}
 	return (0);
- badmode:
-	fprintf(stderr, "globtest: mismatch mode for pattern %s, flags 0x%x, "
-	    "file \"%s\" (found %07o, expected %07o)\n",
-	    entry->pattern, entry->flags,
-	    gl.gl_pathv[i], gl.gl_statv[i] ? gl.gl_statv[i]->st_mode : 0,
-	    entry->modes[i]);
-	goto cleanup;
  mismatch:
 	fprintf(stderr, "globtest: mismatch for pattern %s, flags 0x%x "
 	    "(found \"%s\", expected \"%s\")\n", entry->pattern, entry->flags,
 	    gl.gl_pathv[i], entry->results[i]);
- cleanup:
 	while (i < gl.gl_matchc) {
 		free(entry->results[i++]);
 	}
