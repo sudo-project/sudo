@@ -178,6 +178,7 @@ plugins/sudoers/redblack.c
 plugins/sudoers/redblack.h
 plugins/sudoers/regress/iolog_path/check_iolog_path.c
 plugins/sudoers/regress/iolog_path/data
+plugins/sudoers/regress/parser/check_fill.c
 plugins/sudoers/regress/testsudoers/test1.ok
 plugins/sudoers/regress/testsudoers/test1.sh
 plugins/sudoers/regress/visudo/test1.ok
