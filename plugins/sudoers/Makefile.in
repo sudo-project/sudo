@@ -97,6 +97,8 @@ SHELL = @SHELL@
 
 PROGS = sudoers.la visudo sudoreplay testsudoers
 
+TEST_PROGS = check_iolog_path check_fill
+
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
 LIBSUDOERS_OBJS = alias.lo audit.lo defaults.lo gram.lo match.lo pwutil.lo \
@@ -114,8 +116,8 @@ REPLAY_OBJS = getdate.o sudoreplay.o error.o
 TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o error.o group_plugin.o \
 	    net_ifs.o
 
-CHECK_IOLOG_PATH_OBJS = check_iolog_path.o error.o iolog_path.o pwutil.o \
-			redblack.o
+CHECK_IOLOG_PATH_OBJS = check_iolog_path.o error.o iolog_path.lo pwutil.lo \
+			redblack.lo
 
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
@@ -165,6 +167,9 @@ testsudoers: libsudoers.la $(TEST_OBJS) $(LIBS)
 
 check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) $(LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_IOLOG_PATH_OBJS) $(LDFLAGS) $(LIBS)
+
+check_fill: check_fill.o toke_util.lo error.o $(LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ check_fill.o toke_util.lo error.o $(LDFLAGS) $(LIBS)
 
 # Uncomment the following if you want "make distclean" to clean the parser
 @DEV@GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate.c
@@ -306,13 +311,12 @@ getdate.o: $(devdir)/getdate.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/getdate.c
 goodpath.o: goodpath.lo
 interfaces.o: interfaces.lo
-iolog_path.o: iolog_path.lo
 net_ifs.o: $(top_srcdir)/src/net_ifs.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(top_srcdir)/src/net_ifs.c
-pwutil.o: pwutil.lo
-redblack.o: redblack.lo
 sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/alloc.h $(incdir)/missing.h $(incdir)/error.h $(incdir)/missing.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudoreplay.c
+check_fill.o: $(srcdir)/regress/parser/check_fill.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_fill.c
 testsudoers.o: $(srcdir)/testsudoers.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/interfaces.h $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/testsudoers.c
 tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(SUDODEP)
@@ -354,9 +358,10 @@ uninstall:
 	-cmp $(DESTDIR)$(sudoersdir)/sudoers $(srcdir)/sudoers >/dev/null && \
 	    rm -f $(DESTDIR)$(sudoersdir)/sudoers
 
-check: check_iolog_path
+check: $(TEST_PROGS)
 	@./check_iolog_path $(srcdir)/regress/iolog_path/data
-	@for t in $(srcdir)/regress/testsudoers/test*.sh $(srcdir)/regress/visudo/test*.sh; do SRCDIR=$(srcdir) $(SHELL) $$t; done
+	@./check_fill
+	@for t in $(srcdir)/regress/*/test*.sh; do SRCDIR=$(srcdir) $(SHELL) $$t; done
 
 clean:
 	-$(LIBTOOL) --mode=clean rm -f $(PROGS) *.lo *.o *.la *.a stamp-* core *.core core.* *.out
