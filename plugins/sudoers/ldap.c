@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2003-2011 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
