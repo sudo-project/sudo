@@ -253,52 +253,51 @@ void
 display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 {
     struct sudo_nss *nss;
-    struct lbuf lbuf;
+    struct lbuf defs, privs;
     int count;
 
     /* Reset group vector so group matching works correctly. */
     reset_groups(pw);
 
-    lbuf_init(&lbuf, output, 4, NULL, sudo_user.cols);
+    lbuf_init(&defs, output, 4, NULL, sudo_user.cols);
+    lbuf_init(&privs, output, 4, NULL, sudo_user.cols);
 
     /* Display defaults from all sources. */
-    lbuf_append(&lbuf, "Matching Defaults entries for ", pw->pw_name,
+    lbuf_append(&defs, "Matching Defaults entries for ", pw->pw_name,
 	" on this host:\n", NULL);
     count = 0;
     tq_foreach_fwd(snl, nss) {
-	count += nss->display_defaults(nss, pw, &lbuf);
+	count += nss->display_defaults(nss, pw, &defs);
     }
-    if (count) {
-	lbuf_append(&lbuf, "\n\n", NULL);
-	lbuf_print(&lbuf);
-    }
+    if (count)
+	lbuf_append(&defs, "\n\n", NULL);
+    else
+	defs.len = 0;
 
     /* Display Runas and Cmnd-specific defaults from all sources. */
-    lbuf.len = 0;
-    lbuf_append(&lbuf, "Runas and Command-specific defaults for ", pw->pw_name,
+    lbuf_append(&defs, "Runas and Command-specific defaults for ", pw->pw_name,
 	":\n", NULL);
     count = 0;
     tq_foreach_fwd(snl, nss) {
-	count += nss->display_bound_defaults(nss, pw, &lbuf);
+	count += nss->display_bound_defaults(nss, pw, &defs);
     }
-    if (count) {
-	lbuf_append(&lbuf, "\n\n", NULL);
-	lbuf_print(&lbuf);
-    }
+    if (count)
+	lbuf_append(&defs, "\n\n", NULL);
 
     /* Display privileges from all sources. */
-    lbuf.len = 0;
-    lbuf_append(&lbuf, "User ", pw->pw_name,
+    lbuf_append(&privs, "User ", pw->pw_name,
 	" may run the following commands on this host:\n", NULL);
     count = 0;
     tq_foreach_fwd(snl, nss) {
-	count += nss->display_privs(nss, pw, &lbuf);
+	count += nss->display_privs(nss, pw, &privs);
     }
     if (count) {
-	lbuf_print(&lbuf);
+	lbuf_print(&defs);
+	lbuf_print(&privs);
     }
 
-    lbuf_destroy(&lbuf);
+    lbuf_destroy(&defs);
+    lbuf_destroy(&privs);
 }
 
 /*
