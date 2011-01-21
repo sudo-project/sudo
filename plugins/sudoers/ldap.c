@@ -2043,7 +2043,6 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
     LDAP *ld;
     LDAPMessage *entry;
     int i, rc, setenv_implied, matched = UNSPEC;
-    struct passwd *pw = list_pw ? list_pw : sudo_user.pw;
     struct ldap_result *lres = NULL;
 
     if (handle == NULL || handle->ld == NULL)
@@ -2051,7 +2050,7 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
     ld = handle->ld;
 
     /* Fetch list of sudoRole entries that match user and host. */
-    lres = sudo_ldap_result_get(nss, pw);
+    lres = sudo_ldap_result_get(nss, sudo_user.pw);
 
     /*
      * The following queries are only determine whether or not a
