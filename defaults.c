@@ -439,7 +439,7 @@ init_defaults()
 #ifdef _PATH_SUDO_ASKPASS
     def_askpass = estrdup(_PATH_SUDO_ASKPASS);
 #endif
-    def_iolog_dir = _PATH_SUDO_IO_LOGDIR;
+    def_iolog_dir = estrdup(_PATH_SUDO_IO_LOGDIR);
     def_sudoers_locale = estrdup("C");
     def_env_reset = TRUE;
     def_set_logname = TRUE;
