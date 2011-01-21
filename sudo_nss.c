@@ -288,6 +288,9 @@ display_privs(snl, pw)
     if (count) {
 	lbuf_print(&defs);
 	lbuf_print(&privs);
+    } else {
+	printf("User %s is not allowed to run sudo on %s.\n", pw->pw_name,
+	    user_shost);
     }
 
     lbuf_destroy(&defs);
