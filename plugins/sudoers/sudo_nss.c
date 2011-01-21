@@ -294,6 +294,9 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
     if (count) {
 	lbuf_print(&defs);
 	lbuf_print(&privs);
+    } else {
+	printf("User %s is not allowed to run sudo on %s.\n", pw->pw_name,
+	    user_shost);
     }
 
     lbuf_destroy(&defs);
