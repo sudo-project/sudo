@@ -45,9 +45,10 @@ What's new in Sudo 1.7.5?
    ldap.conf file.  Based on changes from Andreas Mueller.
 
  * LDAP Sudoers entries may now specify a sudoOrder attribute that
-   determines the order in which matching entries are applied; the first
-   matching entry is used.  This requires an updated sudoers schema that
-   includes the sudOrder attribute.  Based on changes from Andreas Mueller.
+   determines the order in which matching entries are applied.  The
+   last matching entry is used, just like file-based sudoers.  This
+   requires an updated sudoers schema that includes the sudOrder
+   attribute.  Based on changes from Andreas Mueller.
 
  * When run as sudoedit, or when given the -e flag, sudo now treats
    command line arguments as pathnames.  This means that slashes
@@ -60,6 +61,8 @@ What's new in Sudo 1.7.5?
    compatibility with OpenLDAP configuration files.
 
  * The LDAP API TIMEOUT parameter is now honored in ldap.conf.
+
+ * The I/O log directory may now be specified in the sudoers file.
 
 What's new in Sudo 1.7.4p6?
 
