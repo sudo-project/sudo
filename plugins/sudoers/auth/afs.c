@@ -64,7 +64,7 @@ afs_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 			 0,			/* lifetime */
 			 &afs_token,		/* token */
 			 0) == 0)		/* new */
-	return(AUTH_SUCCESS);
+	return AUTH_SUCCESS;
 
     /* Fall back on old method XXX - needed? */
     setpag();
@@ -77,7 +77,7 @@ afs_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 				   NULL,	/* expiration ptr (unused) */
 				   0,		/* spare */
 				   NULL) == 0)	/* reason */
-	return(AUTH_SUCCESS);
+	return AUTH_SUCCESS;
 
-    return(AUTH_FAILURE);
+    return AUTH_FAILURE;
 }

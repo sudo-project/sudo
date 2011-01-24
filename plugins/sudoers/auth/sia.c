@@ -94,11 +94,11 @@ sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 
 	log_error(USE_ERRNO|NO_EXIT|NO_MAIL,
 	    "unable to initialize SIA session");
-	return(AUTH_FATAL);
+	return AUTH_FATAL;
     }
 
     auth->data = (void *) siah;
-    return(AUTH_SUCCESS);
+    return AUTH_SUCCESS;
 }
 
 int
@@ -110,9 +110,9 @@ sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 
     /* XXX - need a way to detect user hitting return or EOF at prompt */
     if (sia_ses_reauthent(sudo_collect, siah) == SIASUCCESS)
-	return(AUTH_SUCCESS);
+	return AUTH_SUCCESS;
     else
-	return(AUTH_FAILURE);
+	return AUTH_FAILURE;
 }
 
 int
@@ -121,5 +121,5 @@ sia_cleanup(struct passwd *pw, sudo_auth *auth)
     SIAENTITY *siah = (SIAENTITY *) auth->data;
 
     (void) sia_ses_release(&siah);
-    return(AUTH_SUCCESS);
+    return AUTH_SUCCESS;
 }

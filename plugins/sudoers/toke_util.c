@@ -98,7 +98,7 @@ hexchar(const char *s)
 	    s++;
 	}
     }
-    return((unsigned char)result);
+    return (unsigned char)result;
 }
 
 int
@@ -109,7 +109,7 @@ fill_txt(const char *src, int len, int olen)
     dst = olen ? realloc(yylval.string, olen + len + 1) : malloc(len + 1);
     if (dst == NULL) {
 	yyerror("unable to allocate memory");
-	return(FALSE);
+	return FALSE;
     }
     yylval.string = dst;
 
@@ -133,7 +133,7 @@ fill_txt(const char *src, int len, int olen)
 	}
     }
     *dst = '\0';
-    return(TRUE);
+    return TRUE;
 }
 
 int
@@ -144,7 +144,7 @@ append(const char *src, int len)
     if (yylval.string != NULL)
 	olen = strlen(yylval.string);
 
-    return(fill_txt(src, len, olen));
+    return fill_txt(src, len, olen);
 }
 
 #define SPECIAL(c) \
@@ -161,7 +161,7 @@ fill_cmnd(const char *src, int len)
     dst = yylval.command.cmnd = (char *) malloc(len + 1);
     if (yylval.command.cmnd == NULL) {
 	yyerror("unable to allocate memory");
-	return(FALSE);
+	return FALSE;
     }
 
     /* Copy the string and collapse any escaped sudo-specific characters. */
@@ -174,7 +174,7 @@ fill_cmnd(const char *src, int len)
     *dst = '\0';
 
     yylval.command.args = NULL;
-    return(TRUE);
+    return TRUE;
 }
 
 int
@@ -200,7 +200,7 @@ fill_args(const char *s, int len, int addspace)
 	if (p == NULL) {
 	    efree(yylval.command.args);
 	    yyerror("unable to allocate memory");
-	    return(FALSE);
+	    return FALSE;
 	} else
 	    yylval.command.args = p;
     }
@@ -211,10 +211,10 @@ fill_args(const char *s, int len, int addspace)
 	*p++ = ' ';
     if (strlcpy(p, s, arg_size - (p - yylval.command.args)) != len) {
 	yyerror("fill_args: buffer overflow");	/* paranoia */
-	return(FALSE);
+	return FALSE;
     }
     arg_len = new_len;
-    return(TRUE);
+    return TRUE;
 }
 
 /*
@@ -236,5 +236,5 @@ ipv6_valid(const char *s)
 	    nmatch = 0;			/* reset if we hit netmask */
     }
 
-    return (nmatch <= 1);
+    return nmatch <= 1;
 }

@@ -109,7 +109,7 @@ rbcreate(int (*compar)(const void *, const void*))
     tree->root.color = black;
     tree->root.data = NULL;
 
-    return(tree);
+    return tree;
 }
 
 /*
@@ -174,7 +174,7 @@ rbinsert(struct rbtree *tree, void *data)
     while (node != rbnil(tree)) {
 	parent = node;
 	if ((res = tree->compar(data, node->data)) == 0)
-	    return(node);
+	    return node;
 	node = res < 0 ? node->left : node->right;
     }
 
@@ -248,7 +248,7 @@ rbinsert(struct rbtree *tree, void *data)
 	}
     }
     rbfirst(tree)->color = black;	/* first node is always black */
-    return(NULL);
+    return NULL;
 }
 
 /*
@@ -263,10 +263,10 @@ rbfind(struct rbtree *tree, void *key)
 
     while (node != rbnil(tree)) {
 	if ((res = tree->compar(key, node->data)) == 0)
-	    return(node);
+	    return node;
 	node = res < 0 ? node->left : node->right;
     }
-    return(NULL);
+    return NULL;
 }
 
 /*
@@ -283,19 +283,19 @@ rbapply_node(struct rbtree *tree, struct rbnode *node,
     if (node != rbnil(tree)) {
 	if (order == preorder)
 	    if ((error = func(node->data, cookie)) != 0)
-		return(error);
+		return error;
 	if ((error = rbapply_node(tree, node->left, func, cookie, order)) != 0)
-	    return(error);
+	    return error;
 	if (order == inorder)
 	    if ((error = func(node->data, cookie)) != 0)
-		return(error);
+		return error;
 	if ((error = rbapply_node(tree, node->right, func, cookie, order)) != 0)
-	    return(error);
+	    return error;
 	if (order == postorder)
 	    if ((error = func(node->data, cookie)) != 0)
-		return(error);
+		return error;
     }
-    return (0);
+    return 0;
 }
 
 /*
@@ -316,7 +316,7 @@ rbsuccessor(struct rbtree *tree, struct rbnode *node)
 	if (succ == rbroot(tree))
 	    succ = rbnil(tree);
     }
-    return(succ);
+    return succ;
 }
 
 /*
@@ -382,7 +382,7 @@ void *rbdelete(struct rbtree *tree, struct rbnode *z)
     }
     free(z); 
     
-    return (data);
+    return data;
 }
 
 /*

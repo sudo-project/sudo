@@ -102,12 +102,12 @@ getcwd(char *pt, size_t size)
 		ptsize = 0;
 		if (!size) {
 			errno = EINVAL;
-			return (NULL);
+			return NULL;
 		}
 		ept = pt + size;
 	} else {
 		if ((pt = malloc(ptsize = 1024 - 4)) == NULL)
-			return (NULL);
+			return NULL;
 		ept = pt + ptsize;
 	}
 	bpt = ept - 1;
@@ -152,7 +152,7 @@ getcwd(char *pt, size_t size)
 			 */
 			bcopy(bpt, pt, ept - bpt);
 			free(up);
-			return (pt);
+			return pt;
 		}
 
 		/*
@@ -260,5 +260,5 @@ err:
 		free(up);
 	if (dir)
 		(void)closedir(dir);
-	return (NULL);
+	return NULL;
 }

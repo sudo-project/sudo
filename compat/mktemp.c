@@ -55,7 +55,7 @@ static void seed_random(void);
 int
 mkstemps(char *path, int slen)
 {
-	return(mktemp_internal(path, slen, MKTEMP_FILE));
+	return mktemp_internal(path, slen, MKTEMP_FILE);
 }
 #endif /* HAVE_MKSTEMPS */
 
@@ -64,8 +64,8 @@ char *
 mkdtemp(char *path)
 {
 	if (mktemp_internal(path, 0, MKTEMP_DIR) == -1)
-		return(NULL);
-	return(path);
+		return NULL;
+	return path;
 }
 #endif /* HAVE_MKDTEMP */
 
@@ -81,7 +81,7 @@ mktemp_internal(char *path, int slen, int mode)
 		;
 	if (path + slen >= ep) {
 		errno = EINVAL;
-		return(-1);
+		return -1;
 	}
 	ep -= slen;
 
@@ -102,19 +102,19 @@ mktemp_internal(char *path, int slen, int mode)
 		case MKTEMP_FILE:
 			fd = open(path, O_CREAT|O_EXCL|O_RDWR, S_IRUSR|S_IWUSR);
 			if (fd != -1 || errno != EEXIST)
-				return(fd);
+				return fd;
 			break;
 		case MKTEMP_DIR:
 			if (mkdir(path, S_IRWXU) == 0)
-				return(0);
+				return 0;
 			if (errno != EEXIST)
-				return(-1);
+				return -1;
 			break;
 		}
 	} while (--tries);
 
 	errno = EEXIST;
-	return(-1);
+	return -1;
 }
 
 #ifdef HAVE_RANDOM
@@ -158,5 +158,5 @@ get_random(void)
 		initialized = 1;
 	}
 
-	return(RAND() & 0xffffffff);
+	return RAND() & 0xffffffff;
 }

@@ -82,9 +82,9 @@ int
 sudo_file_open(struct sudo_nss *nss)
 {
     if (def_ignore_local_sudoers)
-	return(-1);
+	return -1;
     nss->handle = open_sudoers(_PATH_SUDOERS, FALSE, NULL);
-    return(nss->handle ? 0 : -1);
+    return nss->handle ? 0 : -1;
 }
 
 int
@@ -97,7 +97,7 @@ sudo_file_close(struct sudo_nss *nss)
 	nss->handle = NULL;
 	yyin = NULL;
     }
-    return(0);
+    return 0;
 }
 
 /*
@@ -107,16 +107,16 @@ int
 sudo_file_parse(struct sudo_nss *nss)
 {
     if (nss->handle == NULL)
-	return(-1);
+	return -1;
 
     init_parser(_PATH_SUDOERS, 0);
     yyin = nss->handle;
     if (yyparse() != 0 || parse_error) {
 	log_error(NO_EXIT, "parse error in %s near line %d",
 	    errorfile, errorlineno);
-	return(-1);
+	return -1;
     }
-    return(0);
+    return 0;
 }
 
 /*
@@ -126,11 +126,11 @@ int
 sudo_file_setdefs(struct sudo_nss *nss)
 {
     if (nss->handle == NULL)
-	return(-1);
+	return -1;
 
     if (!update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER))
-	return(-1);
-    return(0);
+	return -1;
+    return 0;
 }
 
 /*
@@ -147,7 +147,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
     struct userspec *us;
 
     if (nss->handle == NULL)
-	return(validated);
+	return validated;
 
     /*
      * Only check the actual command if pwflag is not set.
@@ -193,7 +193,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 	    SET(validated, FLAG_CHECK_USER);
 	else if (pwcheck == never || nopass == TRUE)
 	    def_authenticate = FALSE;
-	return(validated);
+	return validated;
     }
 
     /* Need to be runas user while stat'ing things. */
@@ -252,7 +252,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 	CLR(validated, VALIDATE_OK);
     }
     restore_perms();
-    return(validated);
+    return validated;
 }
 
 #define	TAG_CHANGED(t) \
@@ -350,7 +350,7 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
 	}
 	lbuf_append(lbuf, "\n", NULL);
     }
-    return(nfound);
+    return nfound;
 }
 
 static int
@@ -403,7 +403,7 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 	    nfound++;
 	}
     }
-    return(nfound);
+    return nfound;
 }
 
 int
@@ -426,7 +426,7 @@ sudo_file_display_privs(struct sudo_nss *nss, struct passwd *pw,
 	    nfound += sudo_file_display_priv_short(pw, us, lbuf);
     }
 done:
-    return(nfound);
+    return nfound;
 }
 
 /*
@@ -478,7 +478,7 @@ sudo_file_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 	nfound++;
     }
 done:
-    return(nfound);
+    return nfound;
 }
 
 /*
@@ -494,7 +494,7 @@ sudo_file_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
     nfound += display_bound_defaults(DEFAULTS_RUNAS, lbuf);
     nfound += display_bound_defaults(DEFAULTS_CMND, lbuf);
 
-    return(nfound);
+    return nfound;
 }
 
 /*
@@ -530,7 +530,7 @@ display_bound_defaults(int dtype, struct lbuf *lbuf)
 	    dsep = "!";
 	    break;
 	default:
-	    return(-1);
+	    return -1;
     }
     /* sudo_printf(SUDO_CONV_INFO_MSG, "Per-%s Defaults entries:\n", dname); */
     tq_foreach_fwd(&defaults, d) {
@@ -558,7 +558,7 @@ display_bound_defaults(int dtype, struct lbuf *lbuf)
 	    lbuf_append(lbuf, d->op == FALSE ? "!" : "", d->var, NULL);
     }
 
-    return(nfound);
+    return nfound;
 }
 
 int
@@ -604,7 +604,7 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 	rval = 0;
     }
 done:
-    return(rval);
+    return rval;
 }
 
 /*

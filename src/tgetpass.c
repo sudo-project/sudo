@@ -93,7 +93,7 @@ tgetpass(const char *prompt, int timeout, int flags)
 	!tty_present()) {
 	if (askpass == NULL || getenv("DISPLAY") == NULL) {
 	    warningx("no tty present and no askpass program specified");
-	    return(NULL);
+	    return NULL;
 	}
 	SET(flags, TGP_ASKPASS);
     }
@@ -102,7 +102,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     if (ISSET(flags, TGP_ASKPASS)) {
 	if (askpass == NULL || *askpass == '\0')
 	    errorx(1, "no askpass program specified, try setting SUDO_ASKPASS");
-	return(sudo_askpass(askpass, prompt));
+	return sudo_askpass(askpass, prompt);
     }
 
 restart:
@@ -203,7 +203,7 @@ restore:
 
     if (save_errno)
 	errno = save_errno;
-    return(pass);
+    return pass;
 }
 
 /*
@@ -257,7 +257,7 @@ sudo_askpass(const char *askpass, const char *prompt)
     (void) close(pfd[0]);
     (void) sigaction(SIGPIPE, &saved_sa_pipe, NULL);
 
-    return(pass);
+    return pass;
 }
 
 extern int term_erase, term_kill;
@@ -272,7 +272,7 @@ getln(int fd, char *buf, size_t bufsiz, int feedback)
 
     if (left == 0) {
 	errno = EINVAL;
-	return(NULL);			/* sanity */
+	return NULL;			/* sanity */
     }
 
     while (--left) {
@@ -312,7 +312,7 @@ getln(int fd, char *buf, size_t bufsiz, int feedback)
 	}
     }
 
-    return(nr == 1 ? buf : NULL);
+    return nr == 1 ? buf : NULL;
 }
 
 static void
@@ -329,5 +329,5 @@ tty_present(void)
 
     if ((fd = open(_PATH_TTY, O_RDWR|O_NOCTTY)) != -1)
 	close(fd);
-    return(fd != -1);
+    return fd != -1;
 }

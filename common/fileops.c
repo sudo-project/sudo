@@ -69,13 +69,13 @@ touch(int fd, char *path, struct timeval *tvp)
 
 #if defined(HAVE_FUTIME) || defined(HAVE_FUTIMES)
     if (fd != -1)
-	return(futimes(fd, tvp ? times : NULL));
+	return futimes(fd, tvp ? times : NULL);
     else
 #endif
     if (path != NULL)
-	return(utimes(path, tvp ? times : NULL));
+	return utimes(path, tvp ? times : NULL);
     else
-	return(-1);
+	return -1;
 }
 
 /*
@@ -98,7 +98,7 @@ lock_file(int fd, int lockit)
 	    op = F_ULOCK;
 	    break;
     }
-    return(lockf(fd, op, 0) == 0);
+    return lockf(fd, op, 0) == 0;
 }
 #elif HAVE_FLOCK
 int
@@ -117,7 +117,7 @@ lock_file(int fd, int lockit)
 	    op = LOCK_UN;
 	    break;
     }
-    return(flock(fd, op) == 0);
+    return flock(fd, op) == 0;
 }
 #else
 int
@@ -134,9 +134,9 @@ lock_file(int fd, int lockit)
     lock.l_whence = SEEK_SET;
     func = (lockit == SUDO_LOCK) ? F_SETLKW : F_SETLK;
 
-    return(fcntl(fd, func, &lock) == 0);
+    return fcntl(fd, func, &lock) == 0;
 #else
-    return(TRUE);
+    return TRUE;
 #endif
 }
 #endif
@@ -164,5 +164,5 @@ sudo_parseln(FILE *fp)
 	for (cp = buf; isblank((unsigned char)*cp); cp++)
 	    continue;
     }
-    return(cp);
+    return cp;
 }

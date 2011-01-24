@@ -65,7 +65,7 @@ tq_pop(void *vh)
 	    h->last->next = NULL;
 	}
     }
-    return (last);
+    return last;
 }
 
 /*

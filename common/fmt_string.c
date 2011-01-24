@@ -60,5 +60,5 @@ fmt_string(const char *var, const char *val)
 	*cp = '\0';
     }
 
-    return(str);
+    return str;
 }

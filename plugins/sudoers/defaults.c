@@ -236,7 +236,7 @@ set_default(char *var, char *val, int op)
     }
     if (!cur->name) {
 	warningx("unknown defaults entry `%s'", var);
-	return(FALSE);
+	return FALSE;
     }
 
     switch (cur->type & T_MASK) {
@@ -246,7 +246,7 @@ set_default(char *var, char *val, int op)
 		    warningx("value `%s' is invalid for option `%s'", val, var);
 		else
 		    warningx("no value specified for `%s'", var);
-		return(FALSE);
+		return FALSE;
 	    }
 	    break;
 	case T_LOGPRI:
@@ -255,7 +255,7 @@ set_default(char *var, char *val, int op)
 		    warningx("value `%s' is invalid for option `%s'", val, var);
 		else
 		    warningx("no value specified for `%s'", var);
-		return(FALSE);
+		return FALSE;
 	    }
 	    break;
 	case T_STR:
@@ -263,16 +263,16 @@ set_default(char *var, char *val, int op)
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warningx("no value specified for `%s'", var);
-		    return(FALSE);
+		    return FALSE;
 		}
 	    }
 	    if (ISSET(cur->type, T_PATH) && val && *val != '/') {
 		warningx("values for `%s' must start with a '/'", var);
-		return(FALSE);
+		return FALSE;
 	    }
 	    if (!store_str(val, cur, op)) {
 		warningx("value `%s' is invalid for option `%s'", val, var);
-		return(FALSE);
+		return FALSE;
 	    }
 	    break;
 	case T_INT:
@@ -280,12 +280,12 @@ set_default(char *var, char *val, int op)
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warningx("no value specified for `%s'", var);
-		    return(FALSE);
+		    return FALSE;
 		}
 	    }
 	    if (!store_int(val, cur, op)) {
 		warningx("value `%s' is invalid for option `%s'", val, var);
-		return(FALSE);
+		return FALSE;
 	    }
 	    break;
 	case T_UINT:
@@ -293,12 +293,12 @@ set_default(char *var, char *val, int op)
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warningx("no value specified for `%s'", var);
-		    return(FALSE);
+		    return FALSE;
 		}
 	    }
 	    if (!store_uint(val, cur, op)) {
 		warningx("value `%s' is invalid for option `%s'", val, var);
-		return(FALSE);
+		return FALSE;
 	    }
 	    break;
 	case T_FLOAT:
@@ -306,12 +306,12 @@ set_default(char *var, char *val, int op)
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warningx("no value specified for `%s'", var);
-		    return(FALSE);
+		    return FALSE;
 		}
 	    }
 	    if (!store_float(val, cur, op)) {
 		warningx("value `%s' is invalid for option `%s'", val, var);
-		return(FALSE);
+		return FALSE;
 	    }
 	    break;
 	case T_MODE:
@@ -319,18 +319,18 @@ set_default(char *var, char *val, int op)
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warningx("no value specified for `%s'", var);
-		    return(FALSE);
+		    return FALSE;
 		}
 	    }
 	    if (!store_mode(val, cur, op)) {
 		warningx("value `%s' is invalid for option `%s'", val, var);
-		return(FALSE);
+		return FALSE;
 	    }
 	    break;
 	case T_FLAG:
 	    if (val) {
 		warningx("option `%s' does not take a value", var);
-		return(FALSE);
+		return FALSE;
 	    }
 	    cur->sd_un.flag = op;
 	    break;
@@ -339,27 +339,27 @@ set_default(char *var, char *val, int op)
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warningx("no value specified for `%s'", var);
-		    return(FALSE);
+		    return FALSE;
 		}
 	    }
 	    if (!store_list(val, cur, op)) {
 		warningx("value `%s' is invalid for option `%s'", val, var);
-		return(FALSE);
+		return FALSE;
 	    }
 	    break;
 	case T_TUPLE:
 	    if (!val && !ISSET(cur->type, T_BOOL)) {
 		warningx("no value specified for `%s'", var);
-		return(FALSE);
+		return FALSE;
 	    }
 	    if (!store_tuple(val, cur, op)) {
 		warningx("value `%s' is invalid for option `%s'", val, var);
-		return(FALSE);
+		return FALSE;
 	    }
 	    break;
     }
 
-    return(TRUE);
+    return TRUE;
 }
 
 /*
@@ -551,7 +551,7 @@ update_defaults(int what)
 		break;
 	}
     }
-    return(rc);
+    return rc;
 }
 
 static int
@@ -565,13 +565,13 @@ store_int(char *val, struct sudo_defs_types *def, int op)
     } else {
 	l = strtol(val, &endp, 10);
 	if (*endp != '\0')
-	    return(FALSE);
+	    return FALSE;
 	/* XXX - should check against INT_MAX */
 	def->sd_un.ival = (int)l;
     }
     if (def->callback)
-	return(def->callback(val));
-    return(TRUE);
+	return def->callback(val);
+    return TRUE;
 }
 
 static int
@@ -585,13 +585,13 @@ store_uint(char *val, struct sudo_defs_types *def, int op)
     } else {
 	l = strtol(val, &endp, 10);
 	if (*endp != '\0' || l < 0)
-	    return(FALSE);
+	    return FALSE;
 	/* XXX - should check against INT_MAX */
 	def->sd_un.ival = (unsigned int)l;
     }
     if (def->callback)
-	return(def->callback(val));
-    return(TRUE);
+	return def->callback(val);
+    return TRUE;
 }
 
 static int
@@ -605,13 +605,13 @@ store_float(char *val, struct sudo_defs_types *def, int op)
     } else {
 	d = strtod(val, &endp);
 	if (*endp != '\0')
-	    return(FALSE);
+	    return FALSE;
 	/* XXX - should check against HUGE_VAL */
 	def->sd_un.fval = d;
     }
     if (def->callback)
-	return(def->callback(val));
-    return(TRUE);
+	return def->callback(val);
+    return TRUE;
 }
 
 static int
@@ -636,11 +636,11 @@ store_tuple(char *val, struct sudo_defs_types *def, int op)
 	    }
 	}
 	if (v->sval == NULL)
-	    return(FALSE);
+	    return FALSE;
     }
     if (def->callback)
-	return(def->callback(val));
-    return(TRUE);
+	return def->callback(val);
+    return TRUE;
 }
 
 static int
@@ -653,8 +653,8 @@ store_str(char *val, struct sudo_defs_types *def, int op)
     else
 	def->sd_un.str = estrdup(val);
     if (def->callback)
-	return(def->callback(val));
-    return(TRUE);
+	return def->callback(val);
+    return TRUE;
 }
 
 static int
@@ -682,7 +682,7 @@ store_list(char *str, struct sudo_defs_types *def, int op)
 	    list_op(start, end - start, def, op == '-' ? delete : add);
 	} while (*end++ != '\0');
     }
-    return(TRUE);
+    return TRUE;
 }
 
 static int
@@ -692,21 +692,21 @@ store_syslogfac(char *val, struct sudo_defs_types *def, int op)
 
     if (op == FALSE) {
 	def->sd_un.ival = FALSE;
-	return(TRUE);
+	return TRUE;
     }
 #ifdef LOG_NFACILITIES
     if (!val)
-	return(FALSE);
+	return FALSE;
     for (fac = facilities; fac->name && strcmp(val, fac->name); fac++)
 	;
     if (fac->name == NULL)
-	return(FALSE);				/* not found */
+	return FALSE;				/* not found */
 
     def->sd_un.ival = fac->num;
 #else
     def->sd_un.ival = -1;
 #endif /* LOG_NFACILITIES */
-    return(TRUE);
+    return TRUE;
 }
 
 static const char *
@@ -717,9 +717,9 @@ logfac2str(int n)
 
     for (fac = facilities; fac->name && fac->num != n; fac++)
 	;
-    return(fac->name);
+    return fac->name;
 #else
-    return("default");
+    return "default";
 #endif /* LOG_NFACILITIES */
 }
 
@@ -729,15 +729,15 @@ store_syslogpri(char *val, struct sudo_defs_types *def, int op)
     struct strmap *pri;
 
     if (op == FALSE || !val)
-	return(FALSE);
+	return FALSE;
 
     for (pri = priorities; pri->name && strcmp(val, pri->name); pri++)
 	;
     if (pri->name == NULL)
-	return(FALSE);				/* not found */
+	return FALSE;				/* not found */
 
     def->sd_un.ival = pri->num;
-    return(TRUE);
+    return TRUE;
 }
 
 static const char *
@@ -747,7 +747,7 @@ logpri2str(int n)
 
     for (pri = priorities; pri->name && pri->num != n; pri++)
 	;
-    return(pri->name);
+    return pri->name;
 }
 
 static int
@@ -761,12 +761,12 @@ store_mode(char *val, struct sudo_defs_types *def, int op)
     } else {
 	l = strtol(val, &endp, 8);
 	if (*endp != '\0' || l < 0 || l > 0777)
-	    return(FALSE);
+	    return FALSE;
 	def->sd_un.mode = (mode_t)l;
     }
     if (def->callback)
-	return(def->callback(val));
-    return(TRUE);
+	return def->callback(val);
+    return TRUE;
 }
 
 static void

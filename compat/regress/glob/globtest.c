@@ -159,7 +159,7 @@ int test_glob(struct gl_entry *entry)
 			goto mismatch;
 		free(entry->results[i]);
 	}
-	return (0);
+	return 0;
  mismatch:
 	fprintf(stderr, "globtest: mismatch for pattern %s, flags 0x%x "
 	    "(found \"%s\", expected \"%s\")\n", entry->pattern, entry->flags,
@@ -167,5 +167,5 @@ int test_glob(struct gl_entry *entry)
 	while (i < gl.gl_matchc) {
 		free(entry->results[i++]);
 	}
-	return (1);
+	return 1;
 }

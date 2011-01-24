@@ -647,7 +647,7 @@ new_default(char *var, char *val, int op)
     d->prev = d;
     d->next = NULL;
 
-    return(d);
+    return d;
 }
 
 static struct member *
@@ -661,7 +661,7 @@ new_member(char *name, int type)
     m->prev = m;
     m->next = NULL;
 
-    return(m);
+    return m;
 }
 
 /*

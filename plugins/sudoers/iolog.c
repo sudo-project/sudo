@@ -228,7 +228,7 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
 	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
     }
 
-    return(len);
+    return len;
 }
 
 /*

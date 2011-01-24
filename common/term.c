@@ -73,17 +73,17 @@ term_restore(int fd, int flush)
 	int flags = TCSASOFT;
 	flags |= flush ? TCSAFLUSH : TCSADRAIN;
 	if (tcsetattr(fd, flags, &oterm) != 0)
-	    return(0);
+	    return 0;
 	changed = 0;
     }
-    return(1);
+    return 1;
 }
 
 int
 term_noecho(int fd)
 {
     if (!changed && tcgetattr(fd, &oterm) != 0)
-	return(0);
+	return 0;
     (void) memcpy(&term, &oterm, sizeof(term));
     CLR(term.c_lflag, ECHO|ECHONL);
 #ifdef VSTATUS
@@ -91,9 +91,9 @@ term_noecho(int fd)
 #endif
     if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
-	return(1);
+	return 1;
     }
-    return(0);
+    return 0;
 }
 
 int
@@ -102,7 +102,7 @@ term_raw(int fd, int isig)
     struct termios term;
 
     if (!changed && tcgetattr(fd, &oterm) != 0)
-	return(0);
+	return 0;
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to raw mode */
     term.c_cc[VMIN] = 1;
@@ -114,16 +114,16 @@ term_raw(int fd, int isig)
 	SET(term.c_lflag, ISIG);
     if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
-    	return(1);
+    	return 1;
     }
-    return(0);
+    return 0;
 }
 
 int
 term_cbreak(int fd)
 {
     if (!changed && tcgetattr(fd, &oterm) != 0)
-	return(0);
+	return 0;
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to half-cooked mode */
     term.c_cc[VMIN] = 1;
@@ -137,9 +137,9 @@ term_cbreak(int fd)
 	term_erase = term.c_cc[VERASE];
 	term_kill = term.c_cc[VKILL];
 	changed = 1;
-	return(1);
+	return 1;
     }
-    return(0);
+    return 0;
 }
 
 int
@@ -148,8 +148,8 @@ term_copy(int src, int dst)
     struct termios tt;
 
     if (tcgetattr(src, &tt) != 0)
-	return(0);
+	return 0;
     if (tcsetattr(dst, TCSANOW|TCSASOFT, &tt) != 0)
-	return(0);
-    return(1);
+	return 0;
+    return 1;
 }

@@ -106,19 +106,19 @@ mygetgrent(void)
     int n;
 
     if ((colon = fgets(grbuf, sizeof(grbuf), grf)) == NULL)
-	return(NULL);
+	return NULL;
 
     memset(&gr, 0, sizeof(gr));
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return(NULL);
+	return NULL;
     *colon++ = '\0';
     gr.gr_name = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return(NULL);
+	return NULL;
     *colon++ = '\0';
     gr.gr_passwd = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return(NULL);
+	return NULL;
     *colon++ = '\0';
     gr.gr_gid = atoi(cp);
     len = strlen(colon);
@@ -134,7 +134,7 @@ mygetgrent(void)
 	gr.gr_mem[n++] = NULL;
     } else
 	gr.gr_mem = NULL;
-    return(&gr);
+    return &gr;
 }
 
 struct group *
@@ -144,7 +144,7 @@ mygetgrnam(const char *name)
 
     if (grf == NULL) {
 	if ((grf = fopen(grfile, "r")) == NULL)
-	    return(NULL);
+	    return NULL;
 	fcntl(fileno(grf), F_SETFD, FD_CLOEXEC);
     } else {
 	rewind(grf);
@@ -157,7 +157,7 @@ mygetgrnam(const char *name)
 	fclose(grf);
 	grf = NULL;
     }
-    return(gr);
+    return gr;
 }
 
 struct group *
@@ -167,7 +167,7 @@ mygetgrgid(gid_t gid)
 
     if (grf == NULL) {
 	if ((grf = fopen(grfile, "r")) == NULL)
-	    return(NULL);
+	    return NULL;
 	fcntl(fileno(grf), F_SETFD, FD_CLOEXEC);
     } else {
 	rewind(grf);
@@ -180,5 +180,5 @@ mygetgrgid(gid_t gid)
 	fclose(grf);
 	grf = NULL;
     }
-    return(gr);
+    return gr;
 }

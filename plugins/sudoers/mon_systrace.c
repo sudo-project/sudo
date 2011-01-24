@@ -54,7 +54,7 @@ systrace_open()
 
     fd = open(_PATH_DEV_SYSTRACE, O_RDONLY, 0644);
     if (fd == -1)
-	return(-1);
+	return -1;
     serrno = errno;
 
 #ifdef SYSTR_CLONE
@@ -69,11 +69,11 @@ systrace_open()
     if (fcntl(fd, F_SETFD, 1) == -1)	/* really needed? */
     	goto bad;
 
-    return(fd);
+    return fd;
 bad:
     close(fd);
     errno = serrno;
-    return(-1);
+    return -1;
 }
 
 static void
@@ -334,13 +334,13 @@ switch_emulation(fd, msgp)
     struct emulation *emul;
 
     if ((entry = find_child(msgp->msg_pid)) == NULL)
-	return(-1);
+	return -1;
     for (emul = emulations; emul != NULL; emul++)
 	if (strcmp(emul->name, msgp->msg_data.msg_emul.emul) == 0) {
 	    entry->action = emul->action;
-	    return(set_policy(fd, entry));
+	    return set_policy(fd, entry);
 	}
-    return(-1);
+    return -1;
 }
 
 /*
@@ -376,9 +376,9 @@ find_child(pid)
 
     for (cur = children.first; cur != NULL; cur = cur->next) {
 	if (cur->pid == pid)
-	    return(cur);
+	    return cur;
     }
-    return(NULL);
+    return NULL;
 }
 
 /*
@@ -417,12 +417,12 @@ set_policy(fd, child)
     pol.strp_num = -1;
     pol.strp_maxents = SYSTRACE_MAXENTS;
     if (ioctl(fd, STRIOCPOLICY, &pol) == -1)
-	return(-1);
+	return -1;
 
     pol.strp_op = SYSTR_POLICY_ASSIGN;
     pol.strp_pid = child->pid;
     if (ioctl(fd, STRIOCPOLICY, &pol) == -1)
-	return(-1);
+	return -1;
 
     for (i = 0; i < SYSTRACE_MAXENTS; i++) {
 	pol.strp_op = SYSTR_POLICY_MODIFY;
@@ -435,9 +435,9 @@ set_policy(fd, child)
 	    }
 	}
 	if (ioctl(fd, STRIOCPOLICY, &pol) == -1)
-	    return(-1);
+	    return -1;
     }
-    return(0);
+    return 0;
 }
 
 /*
@@ -463,7 +463,7 @@ systrace_read(fd, pid, addr, buf, bufsiz)
     io.strio_op = SYSTR_READ;
     if ((rval = ioctl(fd, STRIOCIO, &io)) != 0)
 	warning("systrace_read: STRIOCIO");
-    return(rval ? -1 : (ssize_t)io.strio_len);
+    return rval ? -1 : (ssize_t)io.strio_len;
 }
 
 /*
@@ -495,7 +495,7 @@ read_string(fd, pid, addr, buf, bufsiz)
 	    bufsiz -= nread;
 	} else {
 	    if (errno != EINVAL || chunksiz == 1)
-		    return(-1);
+		    return -1;
 	    chunksiz >>= 1;	/* chunksiz too big, halve it */
 	}
     }
@@ -503,7 +503,7 @@ read_string(fd, pid, addr, buf, bufsiz)
     if (cp == buf)
 	warningx("read empty string, chunksize == %d", chunksiz); /* XXX, should not happen but does */
 #endif
-    return(bufsiz >= chunksiz ? cp - buf : -1);
+    return bufsiz >= chunksiz ? cp - buf : -1;
 }
 
 static struct syscallhandler *
@@ -516,13 +516,13 @@ find_handler(pid, code)
 
     if ((child = find_child(pid)) == NULL) {
 	warningx("unable to find child with pid %d", pid);
-	return(NULL);
+	return NULL;
     }
     for (sca = child->action; sca->code != -1; sca++) {
 	if (sca->code == code)
-	    return(&sca->handler);
+	    return &sca->handler;
     }
-    return(NULL);
+    return NULL;
 }
 
 #define SUDO_USER	0
@@ -554,7 +554,7 @@ systrace_write(fd, pid, addr, buf, len)
     io.strio_op = SYSTR_WRITE;
     if ((rval = ioctl(fd, STRIOCIO, &io)) != 0)
 	warning("systrace_write: STRIOCIO");
-    return(rval ? -1 : (ssize_t)io.strio_len);
+    return rval ? -1 : (ssize_t)io.strio_len;
 }
 
 /*
@@ -583,12 +583,12 @@ update_env(fd, pid, seqnr, askp)
     envep = envbuf + (sizeof(envbuf) / sizeof(char *));
     for (envp = envbuf; envp < envep; envp++, off += sizeof(char *)) {
 	if (systrace_read(fd, pid, off, &ap, sizeof(ap)) == -1)
-	    return(-1);
+	    return -1;
 	if ((*envp = ap) == NULL)
 	    break;
 	memset(buf, 0, sizeof(buf));
 	if ((len = read_string(fd, pid, ap, buf, sizeof(buf))) == -1)
-	    return(-1);
+	    return -1;
 	if (buf[0] == 'S') {
 	    if (strncmp(buf, "SUDO_USER=", 10) == 0) {
 		offsets[SUDO_USER] = off;
@@ -662,7 +662,7 @@ update_env(fd, pid, seqnr, askp)
     if (replace[SUDO_USER]) {
 	n = snprintf(cp, sizeof(buf) - (cp - buf), "SUDO_USER=%s", user_name);
 	if (n < 0 || n >= sizeof(buf) - (cp - buf))
-	    return(-1);
+	    return -1;
 	replace[SUDO_USER] = cp;
 	cp += n + 1;
     }
@@ -670,7 +670,7 @@ update_env(fd, pid, seqnr, askp)
 	n = snprintf(cp, sizeof(buf) - (cp - buf), "SUDO_COMMAND=%s%s%s",
 	    user_cmnd, user_args ? " " : "", user_args ? user_args : "");
 	if (n < 0 || n >= sizeof(buf) - (cp - buf))
-	    return(-1);
+	    return -1;
 	replace[SUDO_COMMAND] = cp;
 	cp += n + 1;
     }
@@ -678,7 +678,7 @@ update_env(fd, pid, seqnr, askp)
 	n = snprintf(cp, sizeof(buf) - (cp - buf), "SUDO_UID=%lu",
 	    (unsigned long) user_uid);
 	if (n < 0 || n >= sizeof(buf) - (cp - buf))
-	    return(-1);
+	    return -1;
 	replace[SUDO_UID] = cp;
 	cp += n + 1;
     }
@@ -686,7 +686,7 @@ update_env(fd, pid, seqnr, askp)
 	n = snprintf(cp, sizeof(buf) - (cp - buf), "SUDO_GID=%lu",
 	    (unsigned long) user_gid);
 	if (n < 0 || n >= sizeof(buf) - (cp - buf))
-	    return(-1);
+	    return -1;
 	replace[SUDO_GID] = cp;
 	cp += n + 1;
     }
@@ -697,7 +697,7 @@ update_env(fd, pid, seqnr, askp)
 	inject.stri_addr = buf;
 	inject.stri_len = cp - buf;
 	if (ioctl(fd, STRIOCINJECT, &inject) != 0)
-	    return(-1);
+	    return -1;
 	n = (offsets[SUDO_USER] == NULL) + (offsets[SUDO_COMMAND] == NULL) +
 	    (offsets[SUDO_UID] == NULL) + (offsets[SUDO_GID] == NULL);
 	/*
@@ -713,7 +713,7 @@ update_env(fd, pid, seqnr, askp)
 		    continue;
 		ap = inject.stri_addr + (replace[n] - buf);
 		if (systrace_write(fd, pid, offsets[n], &ap, sizeof(ap)) == -1)
-		    return(-1);
+		    return -1;
 	    }
 	} else {
 	    /*
@@ -731,7 +731,7 @@ update_env(fd, pid, seqnr, askp)
 		    *envp = inject.stri_addr + (replace[SUDO_GID] - buf);
 	    }
 	    if (envp + n >= envep)
-		return(-1);
+		return -1;
 	    if (offsets[SUDO_USER] == NULL)
 		*envp++ = inject.stri_addr + (replace[SUDO_USER] - buf);
 	    if (offsets[SUDO_COMMAND] == NULL)
@@ -753,10 +753,10 @@ update_env(fd, pid, seqnr, askp)
 	    repl.strr_off[0] = 0;
 	    repl.strr_offlen[0] = (char *)envp - (char *)envbuf;
 	    if (ioctl(fd, STRIOCREPLACE, &repl) != 0)
-		return(-1);
+		return -1;
 	}
     }
-    return(0);
+    return 0;
 }
 #endif /* STRIOCINJECT */
 
@@ -782,7 +782,7 @@ decode_args(fd, pid, askp)
      */
     memset(pbuf, 0, sizeof(pbuf));
     if (read_string(fd, pid, (void *)askp->args[0], pbuf, sizeof(pbuf)) == -1)
-	return(-1);
+	return -1;
     if ((user_base = strrchr(user_cmnd = pbuf, '/')) != NULL)
 	user_base++;
     else
@@ -802,7 +802,7 @@ decode_args(fd, pid, askp)
     off = (char *)askp->args[1];
     for (cp = abuf, ep = abuf + sizeof(abuf); cp < ep; off += sizeof(char *)) {
 	if (systrace_read(fd, pid, off, &ap, sizeof(ap)) == -1)
-	    return(-1);
+	    return -1;
 	if (ap == NULL)
 	    break;		/* end of args */
 	if (argc + 1 >= argc_max) {
@@ -810,7 +810,7 @@ decode_args(fd, pid, askp)
 	    argv = erealloc3(argv, argc_max, sizeof(char *));
 	}
 	if ((len = read_string(fd, pid, ap, cp, ep - cp)) == -1)
-	    return(-1);
+	    return -1;
 	argv[argc++] = cp;
 	cp += len;
     }
@@ -832,7 +832,7 @@ decode_args(fd, pid, askp)
     }
 
     efree(argv);
-    return(0);
+    return 0;
 }
 
 static void
@@ -865,30 +865,30 @@ check_execv(fd, pid, seqnr, askp, policyp, errorp)
     if (initialized == 0) {
 	initialized = 1;
 	*policyp = SYSTR_POLICY_PERMIT;
-	return(0);
+	return 0;
     }
 
     /* Failure should not be possible. */
     if ((info = find_child(pid)) == NULL) {
 	*policyp = SYSTR_POLICY_NEVER;
 	*errorp = ECHILD;
-	return(0);
+	return 0;
     }
 
     /* Fill in user_cmnd, user_base, user_args and user_stat.  */
     if (decode_args(fd, pid, askp) != 0) {
 	if (errno == EBUSY)
-	    return(-1);
+	    return -1;
 	*policyp = SYSTR_POLICY_NEVER;
 	*errorp = errno;
-	return(0);
+	return 0;
     }
 
     /* Get process cwd. */
     rval = ioctl(fd, STRIOCGETCWD, &pid);
     if (rval == -1 || getcwd(user_cwd, sizeof(user_cwd)) == NULL) {
 	if (rval == -1 && errno == EBUSY)
-	    return(-1);
+	    return -1;
 	warningx("cannot get working directory");
 	(void) strlcpy(user_cwd, "unknown", sizeof(user_cwd));
     }
@@ -901,7 +901,7 @@ check_execv(fd, pid, seqnr, askp, policyp, errorp)
 	    warning("can't restore cwd");
 	*policyp = SYSTR_POLICY_NEVER;
 	*errorp = EACCES;
-	return(0);
+	return 0;
     }
     if (rval != -1 && ioctl(fd, STRIOCRESCWD, 0) != 0)
 	warning("can't restore cwd");
@@ -929,7 +929,7 @@ check_execv(fd, pid, seqnr, askp, policyp, errorp)
 	*policyp = SYSTR_POLICY_NEVER;
 	*errorp = EACCES;
     }
-    return(validated);
+    return validated;
 }
 
 /*
@@ -955,7 +955,7 @@ check_execve(fd, pid, seqnr, askp, policyp, errorp)
 	    rval = -1;
     }
 #endif
-    return(rval);
+    return rval;
 }
 
 /*

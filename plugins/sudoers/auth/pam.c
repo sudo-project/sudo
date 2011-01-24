@@ -98,7 +98,7 @@ pam_init(struct passwd *pw, char **promptp, sudo_auth *auth)
 	pam_status = pam_start("sudo", pw->pw_name, &pam_conv, &pamh);
     if (pam_status != PAM_SUCCESS) {
 	log_error(USE_ERRNO|NO_EXIT|NO_MAIL, "unable to initialize PAM");
-	return(AUTH_FATAL);
+	return AUTH_FATAL;
     }
 
     /*
@@ -120,7 +120,7 @@ pam_init(struct passwd *pw, char **promptp, sudo_auth *auth)
     else
 	(void) pam_set_item(pamh, PAM_TTY, user_ttypath);
 
-    return(AUTH_SUCCESS);
+    return AUTH_SUCCESS;
 }
 
 int
@@ -138,11 +138,11 @@ pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	    *pam_status = pam_acct_mgmt(pamh, PAM_SILENT);
 	    switch (*pam_status) {
 		case PAM_SUCCESS:
-		    return(AUTH_SUCCESS);
+		    return AUTH_SUCCESS;
 		case PAM_AUTH_ERR:
 		    log_error(NO_EXIT|NO_MAIL,
 			"account validation failure, is your account locked?");
-		    return(AUTH_FATAL);
+		    return AUTH_FATAL;
 		case PAM_NEW_AUTHTOK_REQD:
 		    log_error(NO_EXIT|NO_MAIL, "%s, %s",
 			"Account or password is expired",
@@ -150,33 +150,33 @@ pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 		    *pam_status = pam_chauthtok(pamh,
 			PAM_CHANGE_EXPIRED_AUTHTOK);
 		    if (*pam_status == PAM_SUCCESS)
-			return(AUTH_SUCCESS);
+			return AUTH_SUCCESS;
 		    if ((s = pam_strerror(pamh, *pam_status)))
 			log_error(NO_EXIT|NO_MAIL, "pam_chauthtok: %s", s);
-		    return(AUTH_FAILURE);
+		    return AUTH_FAILURE;
 		case PAM_AUTHTOK_EXPIRED:
 		    log_error(NO_EXIT|NO_MAIL,
 			"Password expired, contact your system administrator");
-		    return(AUTH_FATAL);
+		    return AUTH_FATAL;
 		case PAM_ACCT_EXPIRED:
 		    log_error(NO_EXIT|NO_MAIL, "%s %s",
 			"Account expired or PAM config lacks an \"account\"",
 			"section for sudo, contact your system administrator");
-		    return(AUTH_FATAL);
+		    return AUTH_FATAL;
 	    }
 	    /* FALLTHROUGH */
 	case PAM_AUTH_ERR:
 	    if (gotintr) {
 		/* error or ^C from tgetpass() */
-		return(AUTH_INTR);
+		return AUTH_INTR;
 	    }
 	case PAM_MAXTRIES:
 	case PAM_PERM_DENIED:
-	    return(AUTH_FAILURE);
+	    return AUTH_FAILURE;
 	default:
 	    if ((s = pam_strerror(pamh, *pam_status)))
 		log_error(NO_EXIT|NO_MAIL, "pam_authenticate: %s", s);
-	    return(AUTH_FATAL);
+	    return AUTH_FATAL;
     }
 }
 
@@ -187,10 +187,10 @@ pam_cleanup(struct passwd *pw, sudo_auth *auth)
 
     /* If successful, we can't close the session until pam_end_session() */
     if (auth->status == AUTH_SUCCESS)
-	return(AUTH_SUCCESS);
+	return AUTH_SUCCESS;
 
     *pam_status = pam_end(pamh, *pam_status | PAM_DATA_SILENT);
-    return(*pam_status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
+    return *pam_status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE;
 }
 
 int
@@ -240,7 +240,7 @@ pam_begin_session(struct passwd *pw, sudo_auth *auth)
 #endif
 
 done:
-    return(status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
+    return status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE;
 }
 
 int
@@ -254,7 +254,7 @@ pam_end_session(sudo_auth *auth)
 #endif
 	status = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
     }
-    return(status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
+    return status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE;
 }
 
 /*
@@ -272,7 +272,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
     int n, type, std_prompt;
 
     if ((*response = malloc(num_msg * sizeof(struct pam_response))) == NULL)
-	return(PAM_SYSTEM_ERR);
+	return PAM_SYSTEM_ERR;
     zero_bytes(*response, num_msg * sizeof(struct pam_response));
 
     for (pr = *response, pm = *msg, n = num_msg; n--; pr++, pm++) {
@@ -334,7 +334,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 	}
     }
 
-    return(PAM_SUCCESS);
+    return PAM_SUCCESS;
 
 err:
     /* Zero and free allocated memory and return an error. */
@@ -348,5 +348,5 @@ err:
     zero_bytes(*response, num_msg * sizeof(struct pam_response));
     free(*response);
     *response = NULL;
-    return(gotintr ? PAM_AUTH_ERR : PAM_CONV_ERR);
+    return gotintr ? PAM_AUTH_ERR : PAM_CONV_ERR;
 }

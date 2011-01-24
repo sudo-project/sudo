@@ -63,7 +63,7 @@ audit_sudo_selected(int sf)
 		mask = &ainfo_addr.ai_mask;
 	sorf = (sf == 0) ? AU_PRS_SUCCESS : AU_PRS_FAILURE;
 	rc = au_preselect(AUE_sudo, mask, sorf, AU_PRS_REREAD);
-        return (rc);
+        return rc;
 }
 
 void

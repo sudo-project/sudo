@@ -62,7 +62,7 @@ bsdauth_init(struct passwd *pw, char **promptp, sudo_auth *auth)
     if ((as = auth_open()) == NULL) {
 	log_error(USE_ERRNO|NO_EXIT|NO_MAIL,
 	    "unable to begin bsd authentication");
-	return(AUTH_FATAL);
+	return AUTH_FATAL;
     }
 
     /* XXX - maybe sanity check the auth style earlier? */
@@ -70,7 +70,7 @@ bsdauth_init(struct passwd *pw, char **promptp, sudo_auth *auth)
     if (login_style == NULL) {
 	log_error(NO_EXIT|NO_MAIL, "invalid authentication type");
 	auth_close(as);
-	return(AUTH_FATAL);
+	return AUTH_FATAL;
     }
 
      if (auth_setitem(as, AUTHV_STYLE, login_style) < 0 ||
@@ -78,11 +78,11 @@ bsdauth_init(struct passwd *pw, char **promptp, sudo_auth *auth)
 	auth_setitem(as, AUTHV_CLASS, login_class) < 0) {
 	log_error(NO_EXIT|NO_MAIL, "unable to setup authentication");
 	auth_close(as);
-	return(AUTH_FATAL);
+	return AUTH_FATAL;
     }
 
     auth->data = (void *) as;
-    return(AUTH_SUCCESS);
+    return AUTH_SUCCESS;
 }
 
 int
@@ -140,14 +140,14 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
     (void) sigaction(SIGCHLD, &osa, NULL);
 
     if (authok)
-	return(AUTH_SUCCESS);
+	return AUTH_SUCCESS;
 
     if (!pass)
-	return(AUTH_INTR);
+	return AUTH_INTR;
 
     if ((s = auth_getvalue(as, "errormsg")) != NULL)
 	log_error(NO_EXIT|NO_MAIL, "%s", s);
-    return(AUTH_FAILURE);
+    return AUTH_FAILURE;
 }
 
 int
@@ -157,5 +157,5 @@ bsdauth_cleanup(struct passwd *pw, sudo_auth *auth)
 
     auth_close(as);
 
-    return(AUTH_SUCCESS);
+    return AUTH_SUCCESS;
 }

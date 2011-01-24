@@ -91,7 +91,7 @@ cmp_pwuid(const void *v1, const void *v2)
 {
     const struct cache_item *ci1 = (const struct cache_item *) v1;
     const struct cache_item *ci2 = (const struct cache_item *) v2;
-    return(ci1->k.uid - ci2->k.uid);
+    return ci1->k.uid - ci2->k.uid;
 }
 
 /*
@@ -102,7 +102,7 @@ cmp_pwnam(const void *v1, const void *v2)
 {
     const struct cache_item *ci1 = (const struct cache_item *) v1;
     const struct cache_item *ci2 = (const struct cache_item *) v2;
-    return(strcmp(ci1->k.name, ci2->k.name));
+    return strcmp(ci1->k.name, ci2->k.name);
 }
 
 #define FIELD_SIZE(src, name, size)			\
@@ -161,7 +161,7 @@ make_pwitem(const struct passwd *pw, const char *name)
 
     /* Allocate space for struct item, struct passwd and the strings. */
     if ((item = malloc(total)) == NULL)
-	    return(NULL);
+	    return NULL;
     cp = (char *) item + sizeof(struct cache_item);
 
     /*
@@ -193,7 +193,7 @@ make_pwitem(const struct passwd *pw, const char *name)
     item->d.pw = newpw;
     item->refcnt = 1;
 
-    return(item);
+    return item;
 }
 
 void
@@ -257,7 +257,7 @@ sudo_getpwuid(uid_t uid)
 #endif
 done:
     item->refcnt++;
-    return(item->d.pw);
+    return item->d.pw;
 }
 
 /*
@@ -301,7 +301,7 @@ sudo_getpwnam(const char *name)
 #endif
 done:
     item->refcnt++;
-    return(item->d.pw);
+    return item->d.pw;
 }
 
 /*
@@ -357,7 +357,7 @@ sudo_fakepwnam(const char *user, gid_t gid)
 	}
     }
     item->refcnt++;
-    return(pw);
+    return pw;
 }
 
 void
@@ -398,7 +398,7 @@ cmp_grgid(const void *v1, const void *v2)
 {
     const struct cache_item *ci1 = (const struct cache_item *) v1;
     const struct cache_item *ci2 = (const struct cache_item *) v2;
-    return(ci1->k.gid - ci2->k.gid);
+    return ci1->k.gid - ci2->k.gid;
 }
 
 /*
@@ -429,7 +429,7 @@ make_gritem(const struct group *gr, const char *name)
 	total += strlen(name) + 1;
 
     if ((item = malloc(total)) == NULL)
-	    return(NULL);
+	    return NULL;
     cp = (char *) item + sizeof(struct cache_item);
 
     /*
@@ -464,7 +464,7 @@ make_gritem(const struct group *gr, const char *name)
     item->d.gr = newgr;
     item->refcnt = 1;
 
-    return(item);
+    return item;
 }
 
 void
@@ -521,7 +521,7 @@ sudo_getgrgid(gid_t gid)
     }
 done:
     item->refcnt++;
-    return(item->d.gr);
+    return item->d.gr;
 }
 
 /*
@@ -558,7 +558,7 @@ sudo_getgrnam(const char *name)
     }
 done:
     item->refcnt++;
-    return(item->d.gr);
+    return item->d.gr;
 }
 
 /*
@@ -603,7 +603,7 @@ sudo_fakegrnam(const char *group)
 	}
     }
     item->refcnt++;
-    return(gr);
+    return gr;
 }
 
 void
@@ -712,5 +712,5 @@ user_in_group(struct passwd *pw, const char *group)
 done:
     if (grp != NULL)
 	gr_delref(grp);
-    return(retval);
+    return retval;
 }

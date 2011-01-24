@@ -78,17 +78,17 @@ fnmatch(const char *pattern, const char *string, int flags)
 		switch (c = *pattern++) {
 		case EOS:
 			if (ISSET(flags, FNM_LEADING_DIR) && *string == '/')
-				return (0);
-			return (*string == EOS ? 0 : FNM_NOMATCH);
+				return 0;
+			return *string == EOS ? 0 : FNM_NOMATCH;
 		case '?':
 			if (*string == EOS)
-				return (FNM_NOMATCH);
+				return FNM_NOMATCH;
 			if (*string == '/' && ISSET(flags, FNM_PATHNAME))
-				return (FNM_NOMATCH);
+				return FNM_NOMATCH;
 			if (*string == '.' && ISSET(flags, FNM_PERIOD) &&
 			    (string == stringstart ||
 			    (ISSET(flags, FNM_PATHNAME) && *(string - 1) == '/')))
-				return (FNM_NOMATCH);
+				return FNM_NOMATCH;
 			++string;
 			break;
 		case '*':
@@ -100,7 +100,7 @@ fnmatch(const char *pattern, const char *string, int flags)
 			if (*string == '.' && ISSET(flags, FNM_PERIOD) &&
 			    (string == stringstart ||
 			    (ISSET(flags, FNM_PATHNAME) && *(string - 1) == '/')))
-				return (FNM_NOMATCH);
+				return FNM_NOMATCH;
 
 			/* Optimize for pattern with * at end or before /. */
 			if (c == EOS) {
@@ -109,31 +109,31 @@ fnmatch(const char *pattern, const char *string, int flags)
 					    strchr(string, '/') == NULL ?
 					    0 : FNM_NOMATCH);
 				else
-					return (0);
+					return 0;
 			} else if (c == '/' && ISSET(flags, FNM_PATHNAME)) {
 				if ((string = strchr(string, '/')) == NULL)
-					return (FNM_NOMATCH);
+					return FNM_NOMATCH;
 				break;
 			}
 
 			/* General case, use recursion. */
 			while ((test = *string) != EOS) {
 				if (!fnmatch(pattern, string, flags & ~FNM_PERIOD))
-					return (0);
+					return 0;
 				if (test == '/' && ISSET(flags, FNM_PATHNAME))
 					break;
 				++string;
 			}
-			return (FNM_NOMATCH);
+			return FNM_NOMATCH;
 		case '[':
 			if (*string == EOS)
-				return (FNM_NOMATCH);
+				return FNM_NOMATCH;
 			if (*string == '/' && ISSET(flags, FNM_PATHNAME))
-				return (FNM_NOMATCH);
+				return FNM_NOMATCH;
 			if (*string == '.' && ISSET(flags, FNM_PERIOD) &&
 			    (string == stringstart ||
 			    (ISSET(flags, FNM_PATHNAME) && *(string - 1) == '/')))
-				return (FNM_NOMATCH);
+				return FNM_NOMATCH;
 
 			switch (rangematch(pattern, *string, flags, &newp)) {
 			case RANGE_ERROR:
@@ -143,7 +143,7 @@ fnmatch(const char *pattern, const char *string, int flags)
 				pattern = newp;
 				break;
 			case RANGE_NOMATCH:
-				return (FNM_NOMATCH);
+				return FNM_NOMATCH;
 			}
 			++string;
 			break;
@@ -160,7 +160,7 @@ fnmatch(const char *pattern, const char *string, int flags)
 			if (c != *string && !(ISSET(flags, FNM_CASEFOLD) &&
 				 (tolower((unsigned char)c) ==
 				 tolower((unsigned char)*string))))
-				return (FNM_NOMATCH);
+				return FNM_NOMATCH;
 			++string;
 			break;
 		}
@@ -208,9 +208,9 @@ rangematch(const char *pattern, int test, int flags, char **newp)
 		if (c == '\\' && !ISSET(flags, FNM_NOESCAPE))
 			c = *pattern++;
 		if (c == EOS)
-			return (RANGE_ERROR);
+			return RANGE_ERROR;
 		if (c == '/' && ISSET(flags, FNM_PATHNAME))
-			return (RANGE_NOMATCH);
+			return RANGE_NOMATCH;
 		if (ISSET(flags, FNM_CASEFOLD))
 			c = tolower((unsigned char)c);
 		if (*pattern == '-'
@@ -219,7 +219,7 @@ rangematch(const char *pattern, int test, int flags, char **newp)
 			if (c2 == '\\' && !ISSET(flags, FNM_NOESCAPE))
 				c2 = *pattern++;
 			if (c2 == EOS)
-				return (RANGE_ERROR);
+				return RANGE_ERROR;
 			if (ISSET(flags, FNM_CASEFOLD))
 				c2 = tolower((unsigned char)c2);
 			if (c <= test && test <= c2)
@@ -229,7 +229,7 @@ rangematch(const char *pattern, int test, int flags, char **newp)
 	} while ((c = *pattern++) != ']');
 
 	*newp = (char *)pattern;
-	return (ok == negate ? RANGE_NOMATCH : RANGE_MATCH);
+	return ok == negate ? RANGE_NOMATCH : RANGE_MATCH;
 }
 
 static int
@@ -242,7 +242,7 @@ classmatch(const char *pattern, int test, int foldcase, const char **ep)
 
 	if ((colon = strchr(pattern, ':')) == NULL || colon[1] != ']') {
 		*ep = pattern - 2;
-		return(RANGE_ERROR);
+		return RANGE_ERROR;
 	}
 	*ep = colon + 2;
 	len = (size_t)(colon - pattern);
@@ -261,5 +261,5 @@ classmatch(const char *pattern, int test, int foldcase, const char **ep)
 		*ep = colon + strlen(colon);
 		rval = RANGE_ERROR;
 	}
-	return(rval);
+	return rval;
 }

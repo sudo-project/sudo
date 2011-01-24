@@ -24,5 +24,5 @@
 int
 isblank(int ch)
 {
-    return(ch == ' ' || ch == '\t');
+    return ch == ' ' || ch == '\t';
 }

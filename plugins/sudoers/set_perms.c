@@ -292,7 +292,7 @@ bad:
     warningx("%s: %s", errstr,
 	errno == EAGAIN ? "too many processes" : strerror(errno));
     if (noexit)
-	return(0);
+	return 0;
     exit(1);
 }
 
@@ -517,7 +517,7 @@ bad:
     warningx("%s: %s", errstr,
 	errno == EAGAIN ? "too many processes" : strerror(errno));
     if (noexit)
-	return(0);
+	return 0;
     exit(1);
 }
 
@@ -748,7 +748,7 @@ bad:
     warningx("%s: %s", errstr,
 	errno == EAGAIN ? "too many processes" : strerror(errno));
     if (noexit)
-	return(0);
+	return 0;
     exit(1);
 }
 
@@ -882,7 +882,7 @@ bad:
     warningx("%s: %s", errstr,
 	errno == EAGAIN ? "too many processes" : strerror(errno));
     if (noexit)
-	return(0);
+	return 0;
     exit(1);
 }
 

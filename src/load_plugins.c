@@ -122,7 +122,7 @@ sudo_read_conf(const char *conf_file)
 
 done:
 
-    return(&pil);
+    return &pil;
 }
 
 /*

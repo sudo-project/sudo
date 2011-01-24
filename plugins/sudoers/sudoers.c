@@ -855,7 +855,7 @@ set_cmnd(int sudo_mode)
     if (!runas_user && !runas_group)
 	set_runaspw(def_runas_default);	/* may have been updated above */
 
-    return(rval);
+    return rval;
 }
 
 /*
@@ -932,7 +932,7 @@ open_sudoers(const char *sudoers, int doedit, int *keepopen)
     }
 
     restore_perms();		/* change back to root */
-    return(fp);
+    return fp;
 }
 
 #ifdef HAVE_LOGIN_CAP_H

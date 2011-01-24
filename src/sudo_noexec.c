@@ -41,7 +41,7 @@ extern int errno;
 #define DUMMY_BODY				\
 {						\
     errno = EACCES;				\
-    return(-1);					\
+    return -1;					\
 }
 
 #define DUMMY2(fn, t1, t2)			\

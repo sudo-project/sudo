@@ -359,7 +359,7 @@ expand_prompt(char *old_prompt, char *user, char *host)
     } else
 	new_prompt = old_prompt;
 
-    return(new_prompt);
+    return new_prompt;
 
 oflow:
     /* We pre-allocate enough space, so this should never happen. */
@@ -373,8 +373,8 @@ int
 user_is_exempt(void)
 {
     if (!def_exempt_group)
-	return(FALSE);
-    return(user_in_group(sudo_user.pw, def_exempt_group));
+	return FALSE;
+    return user_in_group(sudo_user.pw, def_exempt_group);
 }
 
 /*
@@ -621,7 +621,7 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 done:
     if (timestamp_uid != 0)
 	restore_perms();
-    return(status);
+    return status;
 }
 
 /*
@@ -723,5 +723,5 @@ get_authpw(void)
 	pw = sudo_user.pw;
     }
 
-    return(pw);
+    return pw;
 }

@@ -40,6 +40,6 @@ char *
 strsignal(int signo)
 {
     if (signo > 0 && signo < NSIG)
-	return((char *)my_sys_siglist[signo]);
-    return("Unknown signal");
+	return (char *)my_sys_siglist[signo];
+    return "Unknown signal";
 }

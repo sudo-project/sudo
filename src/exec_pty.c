@@ -346,7 +346,7 @@ suspend_parent(int signo)
 	break;
     }
 
-    return(rval);
+    return rval;
 }
 
 /*

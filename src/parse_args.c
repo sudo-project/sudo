@@ -454,7 +454,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     *env_addp = env_add;
     *nargc = argc;
     *nargv = argv;
-    return(mode | flags);
+    return mode | flags;
 }
 
 static int

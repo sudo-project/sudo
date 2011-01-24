@@ -342,7 +342,7 @@ sudo_endspent(void)
 char *
 sudo_getepw(const struct passwd *pw)
 {
-    return (pw->pw_passwd);
+    return pw->pw_passwd;
 }
 
 void
@@ -354,7 +354,7 @@ set_fqdn(void)
 FILE *
 open_sudoers(const char *path, int isdir, int *keepopen)
 {
-    return(fopen(path, "r"));
+    return fopen(path, "r");
 }
 
 void
@@ -468,7 +468,7 @@ print_alias(void *v1, void *v2)
 	    fputs(m->name, stdout);
     }
     putchar('\n');
-    return(0);
+    return 0;
 }
 
 void

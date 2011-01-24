@@ -54,16 +54,16 @@ kerb4_init(struct passwd *pw, char **promptp, sudo_auth *auth)
 
     /* Don't try to verify root */
     if (pw->pw_uid == 0)
-	return(AUTH_FAILURE);
+	return AUTH_FAILURE;
 
     /* Get the local realm, or retrun failure (no krb.conf) */
     if (krb_get_lrealm(realm, 1) != KSUCCESS)
-	return(AUTH_FAILURE);
+	return AUTH_FAILURE;
 
     /* Stash a pointer to the realm (used in kerb4_verify) */
     auth->data = (void *) realm;
 
-    return(AUTH_SUCCESS);
+    return AUTH_SUCCESS;
 }
 
 int
@@ -88,7 +88,7 @@ kerb4_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     switch (error) {
 	case INTK_OK:
 	    dest_tkt();			/* we are done with the temp ticket */
-	    return(AUTH_SUCCESS);
+	    return AUTH_SUCCESS;
 	    break;
 	case INTK_BADPW:
 	case KDC_PR_UNKNOWN:
@@ -98,5 +98,5 @@ kerb4_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 		krb_err_txt[error]);
     }
 
-    return(AUTH_FAILURE);
+    return AUTH_FAILURE;
 }
