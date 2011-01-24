@@ -670,7 +670,10 @@ new_logline(message, serrno)
 	}
 	len += sizeof(LL_ENV_STR) + 2 + evlen;
     }
+    /* Note: we log "sudo -l command arg ..." as "list command arg ..." */
     len += sizeof(LL_CMND_STR) - 1 + strlen(user_cmnd);
+    if (ISSET(sudo_mode, MODE_CHECK))
+	len += sizeof("list ") - 1;
     if (user_args != NULL)
 	len += strlen(user_args) + 1;
 
@@ -723,8 +726,11 @@ new_logline(message, serrno)
 	    goto toobig;
 	efree(evstr);
     }
-    if (strlcat(line, LL_CMND_STR, len) >= len ||
-	strlcat(line, user_cmnd, len) >= len)
+    if (strlcat(line, LL_CMND_STR, len) >= len)
+	goto toobig;
+    if (ISSET(sudo_mode, MODE_CHECK) && strlcat(line, "list ", len) >= len)
+	goto toobig;
+    if (strlcat(line, user_cmnd, len) >= len)
 	goto toobig;
     if (user_args != NULL) {
 	if (strlcat(line, " ", len) >= len ||
