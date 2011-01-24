@@ -612,8 +612,7 @@ sudo_file_display_cmnd(nss, pw)
 		if (runas_match == ALLOW) {
 		    cmnd_match = cmnd_matches(cs->cmnd);
 		    if (cmnd_match != UNSPEC) {
-			match = host_match && runas_match ?
-			    cs->cmnd : NULL;
+			match = host_match && runas_match ? cs->cmnd : NULL;
 			goto matched;
 		    }
 		}
