@@ -56,6 +56,9 @@ What's new in Sudo 1.7.5?
 
  * The I/O log directory may now be specified in the sudoers file.
 
+ * Sudo will no longer refuse to run if the sudoers file is writable
+   by root.
+
 What's new in Sudo 1.7.4p6?
 
  * A bug has been fixed in the I/O logging support that could cause
