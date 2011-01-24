@@ -139,10 +139,10 @@ memchr(s, c, n)
 
 		do {
 			if (*p++ == c)
-				return ((void *)(p - 1));
+				return (void *)(p - 1);
 		} while (--n != 0);
 	}
-	return (NULL);
+	return NULL;
 }
 #endif /* !HAVE_MEMCHR */
 
@@ -170,7 +170,7 @@ __ultoa(val, endp, base, octzero, xdigs)
 	case 10:
 		if (val < 10) {	/* many numbers are 1 digit */
 			*--cp = to_char(val);
-			return (cp);
+			return cp;
 		}
 		/*
 		 * On many machines, unsigned arithmetic is harder than
@@ -208,7 +208,7 @@ __ultoa(val, endp, base, octzero, xdigs)
 	default:			/* oops */
 		abort();
 	}
-	return (cp);
+	return cp;
 }
 
 /* Identical to __ultoa, but for quads. */
@@ -229,12 +229,12 @@ __uqtoa(val, endp, base, octzero, xdigs)
 	/* quick test for small values; __ultoa is typically much faster */
 	/* (perhaps instead we should run until small, then call __ultoa?) */
 	if (val <= (unsigned long long)ULONG_MAX)
-		return (__ultoa((unsigned long)val, endp, base, octzero, xdigs));
+		return __ultoa((unsigned long)val, endp, base, octzero, xdigs);
 	switch (base) {
 	case 10:
 		if (val < 10) {
 			*--cp = to_char(val % 10);
-			return (cp);
+			return cp;
 		}
 		if (val > LLONG_MAX) {
 			*--cp = to_char(val % 10);
@@ -266,7 +266,7 @@ __uqtoa(val, endp, base, octzero, xdigs)
 	default:			/* oops */
 		abort();
 	}
-	return (cp);
+	return cp;
 }
 # endif /* !SIZEOF_LONG_INT */
 #endif /* HAVE_LONG_LONG_INT */
@@ -693,7 +693,7 @@ number:			if ((dprec = prec) >= 0)
 done:
 	if (strsize)
 		*str = '\0';
-	return (ret);
+	return ret;
 	/* NOTREACHED */
 }
 
@@ -706,7 +706,7 @@ vsnprintf(str, n, fmt, ap)
 	va_list ap;
 {
 
-	return (xxxprintf(&str, n, 0, fmt, ap));
+	return xxxprintf(&str, n, 0, fmt, ap);
 }
 #endif /* HAVE_VSNPRINTF */
 
@@ -732,7 +732,7 @@ snprintf(str, n, fmt, va_alist)
 #endif
 	ret = xxxprintf(&str, n, 0, fmt, ap);
 	va_end(ap);
-	return (ret);
+	return ret;
 }
 #endif /* HAVE_SNPRINTF */
 
@@ -744,7 +744,7 @@ vasprintf(str, fmt, ap)
 	va_list ap;
 {
 
-	return (xxxprintf(str, 0, 1, fmt, ap));
+	return xxxprintf(str, 0, 1, fmt, ap);
 }
 #endif /* HAVE_VASPRINTF */
 
@@ -769,6 +769,6 @@ asprintf(str, fmt, va_alist)
 #endif
 	ret = xxxprintf(str, 0, 1, fmt, ap);
 	va_end(ap);
-	return (ret);
+	return ret;
 }
 #endif /* HAVE_ASPRINTF */

@@ -104,38 +104,38 @@ getpwent()
     char *cp, *colon;
 
     if ((colon = fgets(pwbuf, sizeof(pwbuf), pwf)) == NULL)
-	return(NULL);
+	return NULL;
 
     zero_bytes(&pw, sizeof(pw));
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return(NULL);
+	return NULL;
     *colon++ = '\0';
     pw.pw_name = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return(NULL);
+	return NULL;
     *colon++ = '\0';
     pw.pw_passwd = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return(NULL);
+	return NULL;
     *colon++ = '\0';
     pw.pw_uid = atoi(cp);
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return(NULL);
+	return NULL;
     *colon++ = '\0';
     pw.pw_gid = atoi(cp);
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return(NULL);
+	return NULL;
     *colon++ = '\0';
     pw.pw_gecos = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return(NULL);
+	return NULL;
     *colon++ = '\0';
     pw.pw_dir = cp;
     pw.pw_shell = colon;
     len = strlen(colon);
     if (len > 0 && colon[len - 1] == '\n')
 	colon[len - 1] = '\0';
-    return(&pw);
+    return &pw;
 }
 
 struct passwd *
@@ -146,7 +146,7 @@ getpwnam(name)
 
     if (pwf == NULL) {
 	if ((pwf = fopen(pwfile, "r")) == NULL)
-	    return(NULL);
+	    return NULL;
 	fcntl(fileno(pwf), F_SETFD, FD_CLOEXEC);
     } else {
 	rewind(pwf);
@@ -159,7 +159,7 @@ getpwnam(name)
 	fclose(pwf);
 	pwf = NULL;
     }
-    return(pw);
+    return pw;
 }
 
 struct passwd *
@@ -170,7 +170,7 @@ getpwuid(uid)
 
     if (pwf == NULL) {
 	if ((pwf = fopen(pwfile, "r")) == NULL)
-	    return(NULL);
+	    return NULL;
 	fcntl(fileno(pwf), F_SETFD, FD_CLOEXEC);
     } else {
 	rewind(pwf);
@@ -183,7 +183,7 @@ getpwuid(uid)
 	fclose(pwf);
 	pwf = NULL;
     }
-    return(pw);
+    return pw;
 }
 
 void
@@ -228,19 +228,19 @@ getgrent()
     int n;
 
     if ((colon = fgets(grbuf, sizeof(grbuf), grf)) == NULL)
-	return(NULL);
+	return NULL;
 
     zero_bytes(&gr, sizeof(gr));
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return(NULL);
+	return NULL;
     *colon++ = '\0';
     gr.gr_name = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return(NULL);
+	return NULL;
     *colon++ = '\0';
     gr.gr_passwd = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return(NULL);
+	return NULL;
     *colon++ = '\0';
     gr.gr_gid = atoi(cp);
     len = strlen(colon);
@@ -256,7 +256,7 @@ getgrent()
 	gr.gr_mem[n++] = NULL;
     } else
 	gr.gr_mem = NULL;
-    return(&gr);
+    return &gr;
 }
 
 struct group *
@@ -267,7 +267,7 @@ getgrnam(name)
 
     if (grf == NULL) {
 	if ((grf = fopen(grfile, "r")) == NULL)
-	    return(NULL);
+	    return NULL;
 	fcntl(fileno(grf), F_SETFD, FD_CLOEXEC);
     } else {
 	rewind(grf);
@@ -280,7 +280,7 @@ getgrnam(name)
 	fclose(grf);
 	grf = NULL;
     }
-    return(gr);
+    return gr;
 }
 
 struct group *
@@ -291,7 +291,7 @@ getgrgid(gid)
 
     if (grf == NULL) {
 	if ((grf = fopen(grfile, "r")) == NULL)
-	    return(NULL);
+	    return NULL;
 	fcntl(fileno(grf), F_SETFD, FD_CLOEXEC);
     } else {
 	rewind(grf);
@@ -304,5 +304,5 @@ getgrgid(gid)
 	fclose(grf);
 	grf = NULL;
     }
-    return(gr);
+    return gr;
 }

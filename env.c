@@ -314,7 +314,7 @@ setenv(var, val, overwrite)
 
     if (!var || *var == '\0') {
 	errno = EINVAL;
-	return(-1);
+	return -1;
     }
 
     if (env.envp == NULL)
@@ -347,7 +347,7 @@ setenv(var, val, overwrite)
 	errorx(1, "setenv: corrupted envp, len mismatch");
 #endif
     sudo_putenv(estring, TRUE, overwrite);
-    return(0);
+    return 0;
 }
 
 /*
@@ -369,7 +369,7 @@ unsetenv(var)
 #ifdef UNSETENV_VOID
 	return;
 #else
-	return(-1);
+	return -1;
 #endif
     }
 
@@ -395,7 +395,7 @@ unsetenv(var)
     }
     env.env_len = ep - env.envp;
 #ifndef UNSETENV_VOID
-    return(0);
+    return 0;
 #endif
 }
 
@@ -415,14 +415,14 @@ putenv(string)
 
     if (strchr(string, '=') == NULL) {
 	errno = EINVAL;
-	return(-1);
+	return -1;
     }
 #ifdef ENV_DEBUG
     if (env.envp[env.env_len] != NULL)
 	errorx(1, "putenv: corrupted envp, len mismatch");
 #endif
     sudo_putenv((char *)string, TRUE, TRUE);
-    return(0);
+    return 0;
 }
 
 /*
@@ -523,7 +523,7 @@ matches_env_delete(var)
 	    break;
 	}
     }
-    return(match);
+    return match;
 }
 
 /*
@@ -553,7 +553,7 @@ matches_env_check(var)
 	    break;
 	}
     }
-    return(keepit);
+    return keepit;
 }
 
 /*
@@ -582,7 +582,7 @@ matches_env_keep(var)
 	    break;
 	}
     }
-    return(keepit);
+    return keepit;
 }
 
 /*

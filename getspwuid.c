@@ -87,11 +87,11 @@ sudo_getepw(pw)
     /* If there is a function to check for shadow enabled, use it... */
 #ifdef HAVE_ISCOMSEC
     if (!iscomsec())
-	return(estrdup(pw->pw_passwd));
+	return estrdup(pw->pw_passwd);
 #endif /* HAVE_ISCOMSEC */
 #ifdef HAVE_ISSECURE
     if (!issecure())
-	return(estrdup(pw->pw_passwd));
+	return estrdup(pw->pw_passwd);
 #endif /* HAVE_ISSECURE */
 
     epw = NULL;
@@ -106,7 +106,7 @@ sudo_getepw(pw)
 	    epw = estrdup(spw->ufld.fd_encrypt);
 	}
 	if (epw)
-	    return(epw);
+	    return epw;
     }
 #endif /* HAVE_GETPRPWNAM */
 #ifdef HAVE_GETSPNAM
@@ -116,7 +116,7 @@ sudo_getepw(pw)
 	if ((spw = getspnam(pw->pw_name)) && spw->sp_pwdp)
 	    epw = estrdup(spw->sp_pwdp);
 	if (epw)
-	    return(epw);
+	    return epw;
     }
 #endif /* HAVE_GETSPNAM */
 #ifdef HAVE_GETSPWUID
@@ -126,7 +126,7 @@ sudo_getepw(pw)
 	if ((spw = getspwuid(pw->pw_uid)) && spw->pw_passwd)
 	    epw = estrdup(spw->pw_passwd);
 	if (epw)
-	    return(epw);
+	    return epw;
     }
 #endif /* HAVE_GETSPWUID */
 #ifdef HAVE_GETPWANAM
@@ -136,7 +136,7 @@ sudo_getepw(pw)
 	if ((spw = getpwanam(pw->pw_name)) && spw->pwa_passwd)
 	    epw = estrdup(spw->pwa_passwd);
 	if (epw)
-	    return(epw);
+	    return epw;
     }
 #endif /* HAVE_GETPWANAM */
 #ifdef HAVE_GETAUTHUID
@@ -146,12 +146,12 @@ sudo_getepw(pw)
 	if ((spw = getauthuid(pw->pw_uid)) && spw->a_password)
 	    epw = estrdup(spw->a_password);
 	if (epw)
-	    return(epw);
+	    return epw;
     }
 #endif /* HAVE_GETAUTHUID */
 
     /* Fall back on normal password. */
-    return(estrdup(pw->pw_passwd));
+    return estrdup(pw->pw_passwd);
 }
 
 void

@@ -216,7 +216,7 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
 	my_execve(path, argv, envp);
 	cstat->type = CMD_ERRNO;
 	cstat->val = errno;
-	return(127);
+	return 127;
     }
 
     /*

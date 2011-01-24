@@ -62,7 +62,7 @@ tq_pop(vh)
 	    h->last->next = NULL;
 	}
     }
-    return (last);
+    return last;
 }
 
 /*

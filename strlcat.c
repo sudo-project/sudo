@@ -47,7 +47,7 @@ strlcat(dst, src, siz)
 	n = siz - dlen;
 
 	if (n == 0)
-		return(dlen + strlen(s));
+		return dlen + strlen(s);
 	while (*s != '\0') {
 		if (n != 1) {
 			*d++ = *s;
@@ -57,5 +57,5 @@ strlcat(dst, src, siz)
 	}
 	*d = '\0';
 
-	return(dlen + (s - src));	/* count does not include NUL */
+	return dlen + (s - src);	/* count does not include NUL */
 }

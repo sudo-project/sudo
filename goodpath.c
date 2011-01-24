@@ -50,18 +50,18 @@ sudo_goodpath(path, sbp)
 
     /* Check for brain damage */
     if (path == NULL || path[0] == '\0')
-	return(NULL);
+	return NULL;
 
     if (stat(path, &sb))
-	return(NULL);
+	return NULL;
 
     /* Make sure path describes an executable regular file. */
     if (!S_ISREG(sb.st_mode) || !(sb.st_mode & 0000111)) {
 	errno = EACCES;
-	return(NULL);
+	return NULL;
     }
 
     if (sbp != NULL)
 	(void) memcpy(sbp, &sb, sizeof(struct stat));
-    return((char *)path);
+    return (char *)path;
 }

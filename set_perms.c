@@ -87,7 +87,7 @@ set_perms(perm)
     CLR(perm, PERM_MASK);
 
     if (perm == current_perm)
-	return(1);
+	return 1;
 
     switch (perm) {
 	case PERM_ROOT:
@@ -172,12 +172,12 @@ set_perms(perm)
     }
 
     current_perm = perm;
-    return(1);
+    return 1;
 bad:
     warningx("%s: %s", errstr,
 	errno == EAGAIN ? "too many processes" : strerror(errno));
     if (noexit)
-	return(0);
+	return 0;
     exit(1);
 }
 
@@ -201,7 +201,7 @@ set_perms(perm)
     CLR(perm, PERM_MASK);
 
     if (perm == current_perm)
-	return(1);
+	return 1;
 
     switch (perm) {
 	case PERM_ROOT:
@@ -289,12 +289,12 @@ set_perms(perm)
     }
 
     current_perm = perm;
-    return(1);
+    return 1;
 bad:
     warningx("%s: %s", errstr,
 	errno == EAGAIN ? "too many processes" : strerror(errno));
     if (noexit)
-	return(0);
+	return 0;
     exit(1);
 }
 
@@ -316,7 +316,7 @@ set_perms(perm)
     CLR(perm, PERM_MASK);
 
     if (perm == current_perm)
-	return(1);
+	return 1;
 
     /*
      * Since we only have setuid() and seteuid() and semantics
@@ -408,12 +408,12 @@ set_perms(perm)
     }
 
     current_perm = perm;
-    return(1);
+    return 1;
 bad:
     warningx("%s: %s", errstr,
 	errno == EAGAIN ? "too many processes" : strerror(errno));
     if (noexit)
-	return(0);
+	return 0;
     exit(1);
 }
 
@@ -435,7 +435,7 @@ set_perms(perm)
     CLR(perm, PERM_MASK);
 
     if (perm == current_perm)
-	return(1);
+	return 1;
 
     switch (perm) {
 	case PERM_ROOT:
@@ -472,12 +472,12 @@ set_perms(perm)
     }
 
     current_perm = perm;
-    return(1);
+    return 1;
 bad:
     warningx("%s: %s", errstr,
 	errno == EAGAIN ? "too many processes" : strerror(errno));
     if (noexit)
-	return(0);
+	return 0;
     exit(1);
 }
 #  endif /* HAVE_SETEUID */

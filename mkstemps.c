@@ -62,7 +62,7 @@ mkstemps(path, slen)
 		;
 	if (path + slen >= ep) {
 		errno = EINVAL;
-		return(-1);
+		return -1;
 	}
 	ep -= slen;
 
@@ -81,11 +81,11 @@ mkstemps(path, slen)
 
 		fd = open(path, O_CREAT|O_EXCL|O_RDWR, S_IRUSR|S_IWUSR);
 		if (fd != -1 || errno != EEXIST)
-			return(fd);
+			return fd;
 	} while (--tries);
 
 	errno = EEXIST;
-	return(-1);
+	return -1;
 }
 
 #ifdef HAVE_RANDOM
@@ -129,5 +129,5 @@ get_random()
 		initialized = 1;
 	}
 
-	return(RAND() & 0xffffffff);
+	return RAND() & 0xffffffff;
 }

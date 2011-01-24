@@ -165,7 +165,7 @@ FINISHED: /* cleanups */
     if( vas_group )              v_group_free( sudo_vas_ctx, vas_group );
     if( vas_user )              v_user_free( sudo_vas_ctx, vas_user );
 
-    return(rval);
+    return rval;
 }
 
 

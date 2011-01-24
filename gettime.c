@@ -41,5 +41,5 @@ gettime(tv)
     rval = (int)time(&tv->tv_sec);
     tv->tv_usec = 0;
 #endif
-    return (rval);
+    return rval;
 }

@@ -36,7 +36,7 @@ strerror(n)
     extern char *sys_errlist[];
 
     if (n > 0 && n < sys_nerr)
-	return(sys_errlist[n]);
+	return sys_errlist[n];
     errno = EINVAL;
-    return("Unknown error");
+    return "Unknown error";
 }

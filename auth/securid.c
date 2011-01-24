@@ -66,9 +66,9 @@ securid_init(pw, promptp, auth)
     auth->data = (void *) &sd_dat;		/* For method-specific data */
 
     if (creadcfg() == 0)
-	return(AUTH_SUCCESS);
+	return AUTH_SUCCESS;
     else
-	return(AUTH_FATAL);
+	return AUTH_FATAL;
 }
 
 int
@@ -83,10 +83,10 @@ securid_setup(pw, promptp, auth)
     if (sd_init(sd) == 0) {
 	/* The programmer's guide says username is 32 bytes */
 	strlcpy(sd->username, pw->pw_name, 32);
-	return(AUTH_SUCCESS);
+	return AUTH_SUCCESS;
     } else {
 	warningx("unable to contact the SecurID server");
-	return(AUTH_FATAL);
+	return AUTH_FATAL;
     }
 }
 
@@ -102,7 +102,7 @@ securid_verify(pw, pass, auth)
     rval = sd_auth(sd);
     sd_close();
     if (rval == ACM_OK)
-	return(AUTH_SUCCESS);
+	return AUTH_SUCCESS;
     else
-	return(AUTH_FAILURE);
+	return AUTH_FAILURE;
 }

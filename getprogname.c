@@ -41,5 +41,5 @@ getprogname()
 	else
 	    progname = Argv[0];
     }
-    return(progname);
+    return progname;
 }

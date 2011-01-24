@@ -79,7 +79,7 @@ emalloc(size)
 
     if ((ptr = malloc(size)) == NULL)
 	errorx(1, "unable to allocate memory");
-    return(ptr);
+    return ptr;
 }
 
 /*
@@ -101,7 +101,7 @@ emalloc2(nmemb, size)
     size *= nmemb;
     if ((ptr = malloc(size)) == NULL)
 	errorx(1, "unable to allocate memory");
-    return(ptr);
+    return ptr;
 }
 
 /*
@@ -121,7 +121,7 @@ erealloc(ptr, size)
     ptr = ptr ? realloc(ptr, size) : malloc(size);
     if (ptr == NULL)
 	errorx(1, "unable to allocate memory");
-    return(ptr);
+    return ptr;
 }
 
 /*
@@ -146,7 +146,7 @@ erealloc3(ptr, nmemb, size)
     ptr = ptr ? realloc(ptr, size) : malloc(size);
     if (ptr == NULL)
 	errorx(1, "unable to allocate memory");
-    return(ptr);
+    return ptr;
 }
 
 /*
@@ -165,7 +165,7 @@ estrdup(src)
 	dst = (char *) emalloc(size);
 	(void) memcpy(dst, src, size);
     }
-    return(dst);
+    return dst;
 }
 
 /*
@@ -194,7 +194,7 @@ easprintf(ret, fmt, va_alist)
 
     if (len == -1)
 	errorx(1, "unable to allocate memory");
-    return(len);
+    return len;
 }
 
 /*
@@ -211,7 +211,7 @@ evasprintf(ret, format, args)
 
     if ((len = vasprintf(ret, format, args)) == -1)
 	errorx(1, "unable to allocate memory");
-    return(len);
+    return len;
 }
 
 /*

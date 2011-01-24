@@ -80,7 +80,7 @@ tgetpass(prompt, timeout, flags)
 
     /* If using a helper program to get the password, run it instead. */
     if (ISSET(flags, TGP_ASKPASS) && user_askpass)
-	return(sudo_askpass(prompt));
+	return sudo_askpass(prompt);
 
 restart:
     for (i = 0; i < NSIG; i++)
@@ -180,7 +180,7 @@ restore:
 
     if (save_errno)
 	errno = save_errno;
-    return(pass);
+    return pass;
 }
 
 /*
@@ -228,7 +228,7 @@ sudo_askpass(prompt)
     (void) close(pfd[0]);
     (void) sigaction(SIGPIPE, &saved_sa_pipe, NULL);
 
-    return(pass);
+    return pass;
 }
 
 extern int term_erase, term_kill;
@@ -247,7 +247,7 @@ getln(fd, buf, bufsiz, feedback)
 
     if (left == 0) {
 	errno = EINVAL;
-	return(NULL);			/* sanity */
+	return NULL;			/* sanity */
     }
 
     while (--left) {
@@ -287,7 +287,7 @@ getln(fd, buf, bufsiz, feedback)
 	}
     }
 
-    return(nr == 1 ? buf : NULL);
+    return nr == 1 ? buf : NULL;
 }
 
 static void
@@ -305,5 +305,5 @@ tty_present()
 
     if ((fd = open(_PATH_TTY, O_RDWR|O_NOCTTY)) != -1)
 	close(fd);
-    return(fd != -1);
+    return fd != -1;
 }

@@ -187,7 +187,7 @@ build_idpath(pathbuf, pathsize)
 	pathbuf[len - i] = '/';
     }
 
-    return(len);
+    return len;
 }
 
 static void *

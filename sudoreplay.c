@@ -539,7 +539,7 @@ parse_expr(headp, argv)
 		errorx(1, "unmatched ')' in expression");
 	    if (node_stack[stack_top])
 		sn->next = node_stack[stack_top]->next;
-	    return(av - argv + 1);
+	    return av - argv + 1;
 	bad:
 	default:
 	    errorx(1, "unknown search term \"%s\"", *av);
@@ -585,7 +585,7 @@ parse_expr(headp, argv)
     if (not)
 	errorx(1, "illegal trailing \"!\"");
 
-    return(av - argv);
+    return av - argv;
 }
 
 static int
@@ -643,7 +643,7 @@ match_expr(head, log)
 	if (sn->negated)
 	    matched = !matched;
     }
-    return(matched);
+    return matched;
 }
 
 static int
@@ -664,7 +664,7 @@ list_session_dir(pathbuf, re, user, tty)
     d = opendir(pathbuf);
     if (d == NULL && errno != ENOTDIR) {
 	warning("cannot opendir %s", pathbuf);
-	return(-1);
+	return -1;
     }
     while ((dp = readdir(d)) != NULL) {
 	if (NAMLEN(dp) != 2 || !isalnum((unsigned char)dp->d_name[0]) ||
@@ -749,7 +749,7 @@ list_session_dir(pathbuf, re, user, tty)
 	    printf("GROUP=%s ; ", li.runas_group);
 	printf("TSID=%s ; COMMAND=%s\n", idstr, li.cmd);
     }
-    return(0);
+    return 0;
 }
 
 static int
@@ -821,7 +821,7 @@ list_sessions(argc, argv, pattern, user, tty)
 	closedir(d2);
     }
     closedir(d1);
-    return(0);
+    return 0;
 }
 
 /*

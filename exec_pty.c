@@ -217,7 +217,7 @@ suspend_parent(signo)
 	break;
     }
 
-    return(rval);
+    return rval;
 }
 
 /*

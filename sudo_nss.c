@@ -100,7 +100,7 @@ nomatch:
     if (tq_empty(&snl))
 	tq_append(&snl, &sudo_nss_file);
 
-    return(&snl);
+    return &snl;
 }
 
 #else /* HAVE_LDAP && _PATH_NSSWITCH_CONF */
@@ -179,7 +179,7 @@ nomatch:
     if (tq_empty(&snl))
 	tq_append(&snl, &sudo_nss_file);
 
-    return(&snl);
+    return &snl;
 }
 
 # else /* !_PATH_NETSVC_CONF && !_PATH_NSSWITCH_CONF */
@@ -197,7 +197,7 @@ sudo_read_nss()
 #  endif
     tq_append(&snl, &sudo_nss_file);
 
-    return(&snl);
+    return &snl;
 }
 
 # endif /* !HAVE_LDAP || !_PATH_NETSVC_CONF */
@@ -313,7 +313,7 @@ display_cmnd(snl, pw)
 
     tq_foreach_fwd(snl, nss) {
 	if (nss->display_cmnd(nss, pw) == 0)
-	    return(0);
+	    return 0;
     }
-    return(1);
+    return 1;
 }

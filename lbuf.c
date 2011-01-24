@@ -70,13 +70,13 @@ get_ttycols()
     struct winsize wsize;
 
     if (ioctl(STDERR_FILENO, TIOCGWINSZ, &wsize) == 0 && wsize.ws_col != 0)
-	return((int)wsize.ws_col);
+	return (int)wsize.ws_col;
 #endif
 
     /* Fall back on $COLUMNS. */
     if ((p = getenv("COLUMNS")) == NULL || (cols = atoi(p)) <= 0)
 	cols = 80;
-    return(cols);
+    return cols;
 }
 
 void

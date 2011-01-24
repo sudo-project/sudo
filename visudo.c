@@ -350,17 +350,17 @@ edit_sudoers(sp, editor, args, lineno)
 	if (stat(sp->tpath, &sb) < 0) {
 	    warningx("cannot stat temporary file (%s), %s unchanged",
 		sp->tpath, sp->path);
-	    return(FALSE);
+	    return FALSE;
 	}
 	if (sb.st_size == 0 && orig_size != 0) {
 	    warningx("zero length temporary file (%s), %s unchanged",
 		sp->tpath, sp->path);
 	    sp->modified = TRUE;
-	    return(FALSE);
+	    return FALSE;
 	}
     } else {
 	warningx("editor (%s) failed, %s unchanged", editor, sp->path);
-	return(FALSE);
+	return FALSE;
     }
 
     /* Set modified bit if use changed the file. */
@@ -384,7 +384,7 @@ edit_sudoers(sp, editor, args, lineno)
     else
 	warningx("%s unchanged", sp->tpath);
 
-    return(TRUE);
+    return TRUE;
 }
 
 /*
@@ -465,7 +465,7 @@ reparse_sudoers(editor, args, strict, quiet)
 	}
     } while (parse_error);
 
-    return(TRUE);
+    return TRUE;
 }
 
 /*
@@ -503,12 +503,12 @@ install_sudoers(sp, oldperms)
 	if (chown(sp->tpath, SUDOERS_UID, SUDOERS_GID) != 0) {
 	    warning("unable to set (uid, gid) of %s to (%d, %d)",
 		sp->tpath, SUDOERS_UID, SUDOERS_GID);
-	    return(FALSE);
+	    return FALSE;
 	}
 	if (chmod(sp->tpath, SUDOERS_MODE) != 0) {
 	    warning("unable to change mode of %s to 0%o", sp->tpath,
 		SUDOERS_MODE);
-	    return(FALSE);
+	    return FALSE;
 	}
     }
 
@@ -542,17 +542,17 @@ install_sudoers(sp, oldperms)
 		(void) unlink(sp->tpath);
 		efree(sp->tpath);
 		sp->tpath = NULL;
-		return(FALSE);
+		return FALSE;
 	    }
 	    efree(sp->tpath);
 	    sp->tpath = NULL;
 	} else {
 	    warning("error renaming %s, %s unchanged", sp->tpath, sp->path);
 	    (void) unlink(sp->tpath);
-	    return(FALSE);
+	    return FALSE;
 	}
     }
-    return(TRUE);
+    return TRUE;
 }
 
 /* STUB */
@@ -573,7 +573,7 @@ init_envtables()
 int
 user_is_exempt()
 {
-    return(FALSE);
+    return FALSE;
 }
 
 /* STUB */
@@ -594,7 +594,7 @@ char *
 sudo_getepw(pw)
     const struct passwd *pw;
 {
-    return (pw->pw_passwd);
+    return pw->pw_passwd;
 }
 
 /*
@@ -619,7 +619,7 @@ whatnow()
 	    case 'e':
 	    case 'x':
 	    case 'Q':
-		return(choice);
+		return choice;
 	    default:
 		(void) puts("Options are:");
 		(void) puts("  (e)dit sudoers file again");
@@ -681,8 +681,8 @@ run_command(path, argv)
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 || !WIFEXITED(status))
-	return(-1);
-    return(WEXITSTATUS(status));
+	return -1;
+    return WEXITSTATUS(status);
 }
 
 static int
@@ -748,7 +748,7 @@ check_syntax(sudoers_path, quiet, strict)
 	}
     }
 
-    return(error);
+    return error;
 }
 
 /*
@@ -781,7 +781,7 @@ open_sudoers(path, doedit, keepopen)
 	if (entry->fd == -1) {
 	    warning("%s", entry->path);
 	    efree(entry);
-	    return(NULL);
+	    return NULL;
 	}
 	if (!lock_file(entry->fd, SUDO_TLOCK))
 	    errorx(1, "%s busy, try again later", entry->path);
@@ -801,7 +801,7 @@ open_sudoers(path, doedit, keepopen)
     }
     if (keepopen != NULL)
 	*keepopen = TRUE;
-    return(fp);
+    return fp;
 }
 
 static char *
@@ -902,7 +902,7 @@ get_editor(args)
 	    errorx(1, "no editor found (editor path = %s)", def_editor);
     }
     *args = EditorArgs;
-    return(Editor);
+    return Editor;
 }
 
 /*
@@ -922,7 +922,7 @@ get_args(cmnd)
 	while (*args && isblank((unsigned char) *args))
 	    args++;
     }
-    return(*args ? args : NULL);
+    return *args ? args : NULL;
 }
 
 /*
@@ -977,7 +977,7 @@ alias_remove_recursive(name, type, strict, quiet)
     a = alias_remove(name, type);
     if (a)
 	rbinsert(alias_freelist, a);
-    return(error);
+    return error;
 }
 
 /*
@@ -1100,7 +1100,7 @@ check_aliases(strict, quiet)
     if (!no_aliases() && !quiet)
 	alias_apply(print_unused, strict ? "Error" : "Warning");
 
-    return (strict ? error : 0);
+    return strict ? error : 0;
 }
 
 static void
@@ -1147,7 +1147,7 @@ print_unused(v1, v2)
 	a->type == HOSTALIAS ? "Host" : a->type == CMNDALIAS ? "Cmnd" :
 	a->type == USERALIAS ? "User" : a->type == RUNASALIAS ? "Runas" :
 	"Unknown", a->name);
-    return(0);
+    return 0;
 }
 
 /*

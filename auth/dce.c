@@ -89,7 +89,7 @@ dce_verify(pw, plain_pw, auth)
 	sec_login_no_flags, &login_context, &status)) {
 
 	if (check_dce_status(status, "sec_login_setup_identity(1):"))
-	    return(AUTH_FAILURE);
+	    return AUTH_FAILURE;
 
 	password_rec.key.key_type = sec_passwd_plain;
 	password_rec.key.tagged_union.plain = (idl_char *) plain_pw;
@@ -101,7 +101,7 @@ dce_verify(pw, plain_pw, auth)
 	    &reset_passwd, &auth_src, &status)) {
 
 	    if (check_dce_status(status, "sec_login_validate_identity(1):"))
-		return(AUTH_FAILURE);
+		return AUTH_FAILURE;
 
 	    /*
 	     * Certify that the DCE Security Server used to set
@@ -111,10 +111,10 @@ dce_verify(pw, plain_pw, auth)
 	    if (!sec_login_certify_identity(login_context, &status)) {
 		(void) fprintf(stderr, "Whoa! Bogus authentication server!\n");
 		(void) check_dce_status(status,"sec_login_certify_identity(1):");
-		return(AUTH_FAILURE);
+		return AUTH_FAILURE;
 	    }
 	    if (check_dce_status(status, "sec_login_certify_identity(2):"))
-		return(AUTH_FAILURE);
+		return AUTH_FAILURE;
 
 	    /*
 	     * Sets the network credentials to those specified
@@ -122,7 +122,7 @@ dce_verify(pw, plain_pw, auth)
 	     */
 	    sec_login_set_context(login_context, &status);
 	    if (check_dce_status(status, "sec_login_set_context:"))
-		return(AUTH_FAILURE);
+		return AUTH_FAILURE;
 
 	    /*
 	     * Oops, your credentials were no good. Possibly
@@ -132,13 +132,13 @@ dce_verify(pw, plain_pw, auth)
 	    if (auth_src != sec_login_auth_src_network) {
 		    (void) fprintf(stderr,
 			"You have no network credentials.\n");
-		    return(AUTH_FAILURE);
+		    return AUTH_FAILURE;
 	    }
 	    /* Check if the password has aged and is thus no good */
 	    if (reset_passwd) {
 		    (void) fprintf(stderr,
 			"Your DCE password needs resetting.\n");
-		    return(AUTH_FAILURE);
+		    return AUTH_FAILURE;
 	    }
 
 	    /*
@@ -150,7 +150,7 @@ dce_verify(pw, plain_pw, auth)
 	    sec_login_get_pwent(login_context, (sec_login_passwd_t) &temp_pw,
 		&status);
 	    if (check_dce_status(status, "sec_login_get_pwent:"))
-		return(AUTH_FAILURE);
+		return AUTH_FAILURE;
 
 	    /*
 	     * If we get to here, then the pwent above properly fetched
@@ -172,17 +172,17 @@ dce_verify(pw, plain_pw, auth)
 	     * somewhere later in the program.
 	     */
 	    sec_login_purge_context(&login_context, &status);
-	    return(AUTH_SUCCESS);
+	    return AUTH_SUCCESS;
 	} else {
 	    if(check_dce_status(status, "sec_login_validate_identity(2):"))
-		return(AUTH_FAILURE);
+		return AUTH_FAILURE;
 	    sec_login_purge_context(&login_context, &status);
 	    if(check_dce_status(status, "sec_login_purge_context:"))
-		return(AUTH_FAILURE);
+		return AUTH_FAILURE;
 	}
     }
     (void) check_dce_status(status, "sec_login_setup_identity(2):");
-    return(AUTH_FAILURE);
+    return AUTH_FAILURE;
 }
 
 /* Returns 0 for DCE "ok" status, 1 otherwise */
@@ -195,8 +195,8 @@ check_dce_status(input_status, comment)
     unsigned char error_string[dce_c_error_string_len];
 
     if (input_status == rpc_s_ok)
-	return(0);
+	return 0;
     dce_error_inq_text(input_status, error_string, &error_stat);
     (void) fprintf(stderr, "%s %s\n", comment, error_string);
-    return(1);
+    return 1;
 }

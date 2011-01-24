@@ -69,7 +69,7 @@ aixauth_verify(pw, prompt, auth)
 	free(message);
 	zero_bytes(pass, strlen(pass));
     }
-    return(rval);
+    return rval;
 }
 
 int
@@ -80,5 +80,5 @@ aixauth_cleanup(pw, auth)
     /* Unset AUTHSTATE as it may not be correct for the runas user. */
     unsetenv("AUTHSTATE");
 
-    return(AUTH_SUCCESS);
+    return AUTH_SUCCESS;
 }

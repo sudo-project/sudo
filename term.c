@@ -112,10 +112,10 @@ term_restore(fd, flush)
 	int flags = TCSASOFT;
 	flags |= flush ? TCSAFLUSH : TCSADRAIN;
 	if (tcsetattr(fd, flags, &oterm) != 0)
-	    return(0);
+	    return 0;
 	changed = 0;
     }
-    return(1);
+    return 1;
 }
 
 int
@@ -123,7 +123,7 @@ term_noecho(fd)
     int fd;
 {
     if (!changed && tcgetattr(fd, &oterm) != 0)
-	return(0);
+	return 0;
     (void) memcpy(&term, &oterm, sizeof(term));
     CLR(term.c_lflag, ECHO|ECHONL);
 #ifdef VSTATUS
@@ -131,9 +131,9 @@ term_noecho(fd)
 #endif
     if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
-	return(1);
+	return 1;
     }
-    return(0);
+    return 0;
 }
 
 #if defined(HAVE_TERMIOS_H) || defined(HAVE_TERMIO_H)
@@ -146,7 +146,7 @@ term_raw(fd, isig)
     struct termios term;
 
     if (!changed && tcgetattr(fd, &oterm) != 0)
-	return(0);
+	return 0;
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to raw mode */
     term.c_cc[VMIN] = 1;
@@ -158,9 +158,9 @@ term_raw(fd, isig)
 	SET(term.c_lflag, ISIG);
     if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
-    	return(1);
+    	return 1;
     }
-    return(0);
+    return 0;
 }
 
 int
@@ -168,7 +168,7 @@ term_cbreak(fd)
     int fd;
 {
     if (!changed && tcgetattr(fd, &oterm) != 0)
-	return(0);
+	return 0;
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to half-cooked mode */
     term.c_cc[VMIN] = 1;
@@ -182,9 +182,9 @@ term_cbreak(fd)
 	term_erase = term.c_cc[VERASE];
 	term_kill = term.c_cc[VKILL];
 	changed = 1;
-	return(1);
+	return 1;
     }
-    return(0);
+    return 0;
 }
 
 int
@@ -195,11 +195,11 @@ term_copy(src, dst)
     struct termios tt;
 
     if (tcgetattr(src, &tt) != 0)
-	return(0);
+	return 0;
     /* XXX - add TCSANOW compat define */
     if (tcsetattr(dst, TCSANOW|TCSASOFT, &tt) != 0)
-	return(0);
-    return(1);
+	return 0;
+    return 1;
 }
 
 #else /* SGTTY */
@@ -210,7 +210,7 @@ term_raw(fd, isig)
     int isig;
 {
     if (!changed && ioctl(fd, TIOCGETP, &oterm) != 0)
-	return(0);
+	return 0;
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to raw mode */
     /* XXX - how to support isig? */
@@ -218,9 +218,9 @@ term_raw(fd, isig)
     SET(term.sg_flags, RAW);
     if (ioctl(fd, TIOCSETP, &term) == 0) {
 	changed = 1;
-	return(1);
+	return 1;
     }
-    return(0);
+    return 0;
 }
 
 int
@@ -228,7 +228,7 @@ term_cbreak(fd)
     int fd;
 {
     if (!changed && ioctl(fd, TIOCGETP, &oterm) != 0)
-	return(0);
+	return 0;
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to half-cooked mode */
     CLR(term.c_lflag, ECHO);
@@ -237,9 +237,9 @@ term_cbreak(fd)
 	term_erase = term.sg_erase;
 	term_kill = term.sg_kill;
 	changed = 1;
-	return(1);
+	return 1;
     }
-    return(0);
+    return 0;
 }
 
 int
@@ -255,14 +255,14 @@ term_copy(src, dst)
     if (ioctl(src, TIOCGETP, &b) != 0 || ioctl(src, TIOCGETC, &tc) != 0 ||
 	ioctl(src, TIOCGETD, &l) != 0 || ioctl(src, TIOCGLTC, &lc) != 0 ||
 	ioctl(src, TIOCLGET, &lb)) {
-	return(0);
+	return 0;
     }
     if (ioctl(dst, TIOCSETP, &b) != 0 || ioctl(dst, TIOCSETC, &tc) != 0 ||
 	ioctl(dst, TIOCSLTC, &lc) != 0 || ioctl(dst, TIOCLSET, &lb) != 0 ||
 	ioctl(dst, TIOCSETD, &l) != 0) {
-	return(0);
+	return 0;
     }
-    return(1);
+    return 1;
 }
 
 #endif

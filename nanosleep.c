@@ -52,5 +52,5 @@ nanosleep(ts, rts)
 	rts->tv_sec = endtime.tv_sec;
 	rts->tv_nsec = endtime.tv_usec * 1000;
     }
-    return(rval);
+    return rval;
 }

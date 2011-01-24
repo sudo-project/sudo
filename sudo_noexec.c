@@ -45,7 +45,7 @@ extern int errno;
 #define DUMMY_BODY				\
 {						\
     errno = EACCES;				\
-    return(-1);					\
+    return -1;					\
 }
 
 #ifdef __STDC__

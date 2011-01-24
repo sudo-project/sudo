@@ -69,7 +69,7 @@ alias_compare(v1, v2)
 	res = 1;
     else if ((res = strcmp(a1->name, a2->name)) == 0)
 	res = a1->type - a2->type;
-    return(res);
+    return res;
 }
 
 /*
@@ -95,10 +95,10 @@ alias_find(name, type)
 	     */
 	    a = node->data;
 	    if (a->seqno == alias_seqno)
-		return(NULL);
+		return NULL;
 	    a->seqno = alias_seqno;
     }
-    return(a);
+    return a;
 }
 
 /*
@@ -122,9 +122,9 @@ alias_add(name, type, members)
     if (rbinsert(aliases, a)) {
 	snprintf(errbuf, sizeof(errbuf), "Alias `%s' already defined", name);
 	alias_free(a);
-	return(errbuf);
+	return errbuf;
     }
-    return(NULL);
+    return NULL;
 }
 
 /*
@@ -144,7 +144,7 @@ alias_apply(func, cookie)
 int
 no_aliases()
 {
-    return(rbisempty(aliases));
+    return rbisempty(aliases);
 }
 
 /*
@@ -187,9 +187,9 @@ alias_remove(name, type)
     key.name = name;
     key.type = type;
     if ((node = rbfind(aliases, &key)) == NULL)
-	return(NULL);
+	return NULL;
     a = rbdelete(aliases, node);
-    return(a);
+    return a;
 }
 
 void

@@ -104,9 +104,9 @@ rfc1938_setup(pw, promptp, auth)
     if (rfc1938challenge(&rfc1938, pw->pw_name, challenge, sizeof(challenge))) {
 	if (IS_ONEANDONLY(auth)) {
 	    warningx("you do not exist in the %s database", auth->name);
-	    return(AUTH_FATAL);
+	    return AUTH_FATAL;
 	} else {
-	    return(AUTH_FAILURE);
+	    return AUTH_FAILURE;
 	}
     }
 
@@ -123,7 +123,7 @@ rfc1938_setup(pw, promptp, auth)
 	    orig_prompt, challenge);
 
     *promptp = new_prompt;
-    return(AUTH_SUCCESS);
+    return AUTH_SUCCESS;
 }
 
 int
@@ -134,7 +134,7 @@ rfc1938_verify(pw, pass, auth)
 {
 
     if (rfc1938verify((struct RFC1938 *) auth->data, pass) == 0)
-	return(AUTH_SUCCESS);
+	return AUTH_SUCCESS;
     else
-	return(AUTH_FAILURE);
+	return AUTH_FAILURE;
 }

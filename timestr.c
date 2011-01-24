@@ -55,7 +55,7 @@ get_timestr(tstamp, log_year)
     /* strftime() does not guarantee to NUL-terminate so we must check. */
     buf[sizeof(buf) - 1] = '\0';
     if (strftime(buf, sizeof(buf), s, timeptr) && buf[sizeof(buf) - 1] == '\0')
-	return(buf);
+	return buf;
 
 #endif /* HAVE_STRFTIME */
 
@@ -65,5 +65,5 @@ get_timestr(tstamp, log_year)
     else
 	s[15] = '\0';			/* don't care about year */
 
-    return(s);
+    return s;
 }

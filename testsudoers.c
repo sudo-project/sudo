@@ -325,7 +325,7 @@ char *
 sudo_getepw(pw)
     const struct passwd *pw;
 {
-    return (pw->pw_passwd);
+    return pw->pw_passwd;
 }
 
 void
@@ -340,7 +340,7 @@ open_sudoers(path, isdir, keepopen)
     int isdir;
     int *keepopen;
 {
-    return(fopen(path, "r"));
+    return fopen(path, "r");
 }
 
 void
@@ -353,7 +353,7 @@ int
 set_perms(perm)
     int perm;
 {
-    return(1);
+    return 1;
 }
 
 void
@@ -453,7 +453,7 @@ print_alias(v1, v2)
 	    fputs(m->name, stdout);
     }
     putchar('\n');
-    return(0);
+    return 0;
 }
 
 void

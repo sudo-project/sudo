@@ -60,25 +60,25 @@ fwtk_init(pw, promptp, auth)
 
     if ((confp = cfg_read("sudo")) == (Cfg *)-1) {
 	warningx("cannot read fwtk config");
-	return(AUTH_FATAL);
+	return AUTH_FATAL;
     }
 
     if (auth_open(confp)) {
 	warningx("cannot connect to authentication server");
-	return(AUTH_FATAL);
+	return AUTH_FATAL;
     }
 
     /* Get welcome message from auth server */
     if (auth_recv(resp, sizeof(resp))) {
 	warningx("lost connection to authentication server");
-	return(AUTH_FATAL);
+	return AUTH_FATAL;
     }
     if (strncmp(resp, "Authsrv ready", 13) != 0) {
 	warningx("authentication server error:\n%s", resp);
-	return(AUTH_FATAL);
+	return AUTH_FATAL;
     }
 
-    return(AUTH_SUCCESS);
+    return AUTH_SUCCESS;
 }
 
 int
@@ -97,7 +97,7 @@ fwtk_verify(pw, prompt, auth)
 restart:
     if (auth_send(buf) || auth_recv(resp, sizeof(resp))) {
 	warningx("lost connection to authentication server");
-	return(AUTH_FATAL);
+	return AUTH_FATAL;
     }
 
     /* Get the password/response from the user. */
@@ -119,10 +119,10 @@ restart:
 	goto restart;
     } else {
 	warningx("%s", resp);
-	return(AUTH_FATAL);
+	return AUTH_FATAL;
     }
     if (!pass) {			/* ^C or error */
-	return(AUTH_INTR);
+	return AUTH_INTR;
     }
 
     /* Send the user's response to the server */
@@ -145,7 +145,7 @@ restart:
 done:
     zero_bytes(pass, strlen(pass));
     zero_bytes(buf, strlen(buf));
-    return(error);
+    return error;
 }
 
 int
@@ -155,5 +155,5 @@ fwtk_cleanup(pw, auth)
 {
 
     auth_close();
-    return(AUTH_SUCCESS);
+    return AUTH_SUCCESS;
 }

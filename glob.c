@@ -554,7 +554,7 @@ glob0(pattern, pglob)
 #endif
 
 	if ((err = glob1(patbuf, patbuf + PATH_MAX - 1, pglob)) != 0)
-		return(err);
+		return err;
 
 	/*
 	 * If there was no match we are going to append the pattern
@@ -562,21 +562,21 @@ glob0(pattern, pglob)
 	 */
 	if (pglob->gl_pathc == oldpathc) {
 		if (pglob->gl_flags & GLOB_NOCHECK)
-			return(globextend(pattern, pglob));
+			return globextend(pattern, pglob);
 		else
-			return(GLOB_NOMATCH);
+			return GLOB_NOMATCH;
 	}
 	if (!(pglob->gl_flags & GLOB_NOSORT))
 		qsort(pglob->gl_pathv + pglob->gl_offs + oldpathc,
 		    pglob->gl_pathc - oldpathc, sizeof(char *), compare);
-	return(0);
+	return 0;
 }
 
 static int
 compare(p, q)
 	const void *p, *q;
 {
-	return(strcmp(*(char **)p, *(char **)q));
+	return strcmp(*(char **)p, *(char **)q);
 }
 
 static int
@@ -588,10 +588,10 @@ glob1(pattern, pattern_last,  pglob)
 
 	/* A null pathname is invalid -- POSIX 1003.1 sect. 2.4. */
 	if (*pattern == EOS)
-		return(0);
-	return(glob2(pathbuf, pathbuf + PATH_MAX - 1,
+		return 0;
+	return glob2(pathbuf, pathbuf + PATH_MAX - 1,
 	    pathbuf, pathbuf + PATH_MAX - 1,
-	    pattern, pattern_last, pglob));
+	    pattern, pattern_last, pglob);
 }
 
 /*
@@ -618,7 +618,7 @@ glob2(pathbuf, pathbuf_last, pathend, pathend_last, pattern, pattern_last, pglob
 		if (*pattern == EOS) {		/* End of pattern? */
 			*pathend = EOS;
 			if (g_lstat(pathbuf, &sb, pglob))
-				return(0);
+				return 0;
 
 			if (((pglob->gl_flags & GLOB_MARK) &&
 			    pathend[-1] != SEP) && (S_ISDIR(sb.st_mode) ||
@@ -626,12 +626,12 @@ glob2(pathbuf, pathbuf_last, pathend, pathend_last, pattern, pattern_last, pglob
 			    (g_stat(pathbuf, &sb, pglob) == 0) &&
 			    S_ISDIR(sb.st_mode)))) {
 				if (pathend+1 > pathend_last)
-					return (1);
+					return 1;
 				*pathend++ = SEP;
 				*pathend = EOS;
 			}
 			++pglob->gl_matchc;
-			return(globextend(pathbuf, pglob));
+			return globextend(pathbuf, pglob);
 		}
 
 		/* Find end of next segment, copy tentatively to pathend. */
@@ -641,7 +641,7 @@ glob2(pathbuf, pathbuf_last, pathend, pathend_last, pattern, pattern_last, pglob
 			if (ismeta(*p))
 				anymeta = 1;
 			if (q+1 > pathend_last)
-				return (1);
+				return 1;
 			*q++ = *p++;
 		}
 
@@ -650,14 +650,14 @@ glob2(pathbuf, pathbuf_last, pathend, pathend_last, pattern, pattern_last, pglob
 			pattern = p;
 			while (*pattern == SEP) {
 				if (pathend+1 > pathend_last)
-					return (1);
+					return 1;
 				*pathend++ = *pattern++;
 			}
 		} else
 			/* Need expansion, recurse. */
-			return(glob3(pathbuf, pathbuf_last, pathend,
+			return glob3(pathbuf, pathbuf_last, pathend,
 			    pathend_last, pattern, pattern_last,
-			    p, pattern_last, pglob));
+			    p, pattern_last, pglob);
 	}
 	/* NOTREACHED */
 }
@@ -675,7 +675,7 @@ glob3(pathbuf, pathbuf_last, pathend, pathend_last, pattern, pattern_last,
 	char buf[PATH_MAX];
 
 	if (pathend > pathend_last)
-		return (1);
+		return 1;
 	*pathend = EOS;
 	errno = 0;
 
@@ -683,12 +683,12 @@ glob3(pathbuf, pathbuf_last, pathend, pathend_last, pattern, pattern_last,
 		/* TODO: don't call for ENOENT or ENOTDIR? */
 		if (pglob->gl_errfunc) {
 			if (g_Ctoc(pathbuf, buf, sizeof(buf)))
-				return(GLOB_ABORTED);
+				return GLOB_ABORTED;
 			if (pglob->gl_errfunc(buf, errno) ||
 			    pglob->gl_flags & GLOB_ERR)
-				return(GLOB_ABORTED);
+				return GLOB_ABORTED;
 		}
-		return(0);
+		return 0;
 	}
 
 	err = 0;
@@ -722,7 +722,7 @@ glob3(pathbuf, pathbuf_last, pathend, pathend_last, pattern, pattern_last,
 	}
 
 	closedir(dirp);
-	return(err);
+	return err;
 }
 
 /*
@@ -759,7 +759,7 @@ globextend(path, pglob)
 			free(pglob->gl_pathv);
 			pglob->gl_pathv = NULL;
 		}
-		return(GLOB_NOSPACE);
+		return GLOB_NOSPACE;
 	}
 
 	if (pglob->gl_pathv == NULL && pglob->gl_offs > 0) {
@@ -776,13 +776,13 @@ globextend(path, pglob)
 	if ((copy = malloc(len)) != NULL) {
 		if (g_Ctoc(path, copy, len)) {
 			free(copy);
-			return(GLOB_NOSPACE);
+			return GLOB_NOSPACE;
 		}
 		pathv[pglob->gl_offs + pglob->gl_pathc++] = copy;
 	}
 	pathv[pglob->gl_offs + pglob->gl_pathc] = NULL;
 
-	return(copy == NULL ? GLOB_NOSPACE : 0);
+	return copy == NULL ? GLOB_NOSPACE : 0;
 }
 
 /*
@@ -801,20 +801,20 @@ match(name, pat, patend)
 		switch (c & M_MASK) {
 		case M_ALL:
 			if (pat == patend)
-				return(1);
+				return 1;
 			do {
 			    if (match(name, pat, patend))
-				    return(1);
+				    return 1;
 			} while (*name++ != EOS);
-			return(0);
+			return 0;
 		case M_ONE:
 			if (*name++ == EOS)
-				return(0);
+				return 0;
 			break;
 		case M_SET:
 			ok = 0;
 			if ((k = *name++) == EOS)
-				return(0);
+				return 0;
 			if ((negate_range = ((*pat & M_MASK) == M_NOT)) != EOS)
 				++pat;
 			while (((c = *pat++) & M_MASK) != M_END) {
@@ -833,15 +833,15 @@ match(name, pat, patend)
 					ok = 1;
 			}
 			if (ok == negate_range)
-				return(0);
+				return 0;
 			break;
 		default:
 			if (*name++ != c)
-				return(0);
+				return 0;
 			break;
 		}
 	}
-	return(*name == EOS);
+	return *name == EOS;
 }
 
 /* Free allocated data belonging to a glob_t structure. */
@@ -874,9 +874,9 @@ g_opendir(str, pglob)
 		buf[1] = '\0';
 	} else {
 		if (g_Ctoc(str, buf, sizeof(buf)))
-			return(NULL);
+			return NULL;
 	}
-	return(opendir(buf));
+	return opendir(buf);
 }
 
 static int
@@ -888,8 +888,8 @@ g_lstat(fn, sb, pglob)
 	char buf[PATH_MAX];
 
 	if (g_Ctoc(fn, buf, sizeof(buf)))
-		return(-1);
-	return(lstat(buf, sb));
+		return -1;
+	return lstat(buf, sb);
 }
 
 static int
@@ -901,8 +901,8 @@ g_stat(fn, sb, pglob)
 	char buf[PATH_MAX];
 
 	if (g_Ctoc(fn, buf, sizeof(buf)))
-		return(-1);
-	return(stat(buf, sb));
+		return -1;
+	return stat(buf, sb);
 }
 
 static Char *
@@ -912,9 +912,9 @@ g_strchr(str, ch)
 {
 	do {
 		if (*str == ch)
-			return ((Char *)str);
+			return (Char *)str;
 	} while (*str++);
-	return (NULL);
+	return NULL;
 }
 
 static int
@@ -926,9 +926,9 @@ g_Ctoc(str, buf, len)
 
 	while (len--) {
 		if ((*buf++ = *str++) == EOS)
-			return (0);
+			return 0;
 	}
-	return (1);
+	return 1;
 }
 
 #ifdef DEBUG

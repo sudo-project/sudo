@@ -78,13 +78,13 @@ find_path(infile, outfile, sbp, path, ignore_dot)
 	strlcpy(command, infile, sizeof(command));	/* paranoia */
 	if (sudo_goodpath(command, sbp)) {
 	    *outfile = command;
-	    return(FOUND);
+	    return FOUND;
 	} else
-	    return(NOT_FOUND);
+	    return NOT_FOUND;
     }
 
     if (path == NULL)
-	return(NOT_FOUND);
+	return NOT_FOUND;
     path = estrdup(path);
     origpath = path;
 
@@ -125,12 +125,12 @@ find_path(infile, outfile, sbp, path, ignore_dot)
 	    errorx(1, "%s: File name too long", infile);
 	result = sudo_goodpath(command, sbp);
 	if (result && ignore_dot)
-	    return(NOT_FOUND_DOT);
+	    return NOT_FOUND_DOT;
     }
 
     if (result) {
 	*outfile = result;
-	return(FOUND);
+	return FOUND;
     } else
-	return(NOT_FOUND);
+	return NOT_FOUND;
 }

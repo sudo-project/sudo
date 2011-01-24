@@ -816,7 +816,7 @@ set_cmnd(sudo_mode)
     if (!runas_user && !runas_group)
 	set_runaspw(def_runas_default);	/* may have been updated above */
 
-    return(rval);
+    return rval;
 }
 
 /*
@@ -905,7 +905,7 @@ exec_setup(rbac_enabled, ttyname, ttyfd)
     rval = TRUE;
 
 done:
-    return(rval);
+    return rval;
 }
 
 /*
@@ -961,7 +961,7 @@ run_command(path, argv, envp, uid, dowait)
     pw_delref(runas_pw);
     if (runas_gr != NULL)
 	gr_delref(runas_gr);
-    return(exitcode);
+    return exitcode;
 }
 
 /*
@@ -1041,7 +1041,7 @@ open_sudoers(sudoers, doedit, keepopen)
     }
 
     set_perms(PERM_ROOT);		/* change back to root */
-    return(fp);
+    return fp;
 }
 
 /*

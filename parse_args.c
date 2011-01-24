@@ -303,7 +303,7 @@ parse_args(argc, argv)
     if (NewArgc == 0 && mode == MODE_RUN && !ISSET(flags, MODE_SHELL))
 	SET(flags, (MODE_IMPLIED_SHELL | MODE_SHELL));
 
-    return(mode | flags);
+    return mode | flags;
 }
 
 static int

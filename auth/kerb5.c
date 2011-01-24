@@ -110,7 +110,7 @@ kerb5_init(pw, promptp, auth)
     error = krb5_init_context(&(sudo_krb5_data.sudo_context));
 #endif
     if (error)
-	return(AUTH_FAILURE);
+	return AUTH_FAILURE;
     sudo_context = sudo_krb5_data.sudo_context;
 
     if ((error = krb5_parse_name(sudo_context, pw->pw_name,
@@ -118,7 +118,7 @@ kerb5_init(pw, promptp, auth)
 	log_error(NO_EXIT|NO_MAIL,
 		  "%s: unable to parse '%s': %s", auth->name, pw->pw_name,
 		  error_message(error));
-	return(AUTH_FAILURE);
+	return AUTH_FAILURE;
     }
     princ = sudo_krb5_data.princ;
 
@@ -131,7 +131,7 @@ kerb5_init(pw, promptp, auth)
 	log_error(NO_EXIT|NO_MAIL,
 		  "%s: unable to unparse princ ('%s'): %s", auth->name,
 		  pw->pw_name, error_message(error));
-	return(AUTH_FAILURE);
+	return AUTH_FAILURE;
     }
 
     /* Only rewrite prompt if user didn't specify their own. */
@@ -148,11 +148,11 @@ kerb5_init(pw, promptp, auth)
 	log_error(NO_EXIT|NO_MAIL,
 		  "%s: unable to resolve ccache: %s", auth->name,
 		  error_message(error));
-	return(AUTH_FAILURE);
+	return AUTH_FAILURE;
     }
     ccache = sudo_krb5_data.ccache;
 
-    return(AUTH_SUCCESS);
+    return AUTH_SUCCESS;
 }
 
 #ifdef HAVE_KRB5_VERIFY_USER
@@ -172,7 +172,7 @@ kerb5_verify(pw, pass, auth)
     ccache = ((sudo_krb5_datap) auth->data)->ccache;
 
     error = krb5_verify_user(sudo_context, princ, ccache, pass, 1, NULL);
-    return (error ? AUTH_FAILURE : AUTH_SUCCESS);
+    return error ? AUTH_FAILURE : AUTH_SUCCESS;
 }
 #else
 int
@@ -243,7 +243,7 @@ done:
     }
     if (creds)
 	krb5_free_cred_contents(sudo_context, creds);
-    return (error ? AUTH_FAILURE : AUTH_SUCCESS);
+    return error ? AUTH_FAILURE : AUTH_SUCCESS;
 }
 #endif
 
@@ -268,7 +268,7 @@ kerb5_cleanup(pw, auth)
 	krb5_free_context(sudo_context);
     }
 
-    return(AUTH_SUCCESS);
+    return AUTH_SUCCESS;
 }
 
 #ifndef HAVE_KRB5_VERIFY_USER
@@ -299,7 +299,7 @@ verify_krb_v5_tgt(sudo_context, cred, auth_name)
 	log_error(NO_EXIT|NO_MAIL,
 		  "%s: unable to get host principal: %s", auth_name,
 		  error_message(error));
-	return(-1);
+	return -1;
     }
 
     /* Initialize verify opts and set secure mode */
@@ -314,6 +314,6 @@ verify_krb_v5_tgt(sudo_context, cred, auth_name)
 	log_error(NO_EXIT|NO_MAIL,
 		  "%s: Cannot verify TGT! Possible attack!: %s", auth_name,
 		  error_message(error));
-    return(error);
+    return error;
 }
 #endif

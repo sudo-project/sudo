@@ -57,12 +57,12 @@ passwd_init(pw, promptp, auth)
 {
 #ifdef HAVE_SKEYACCESS
     if (skeyaccess(pw, user_tty, NULL, NULL) == 0)
-	return(AUTH_FAILURE);
+	return AUTH_FAILURE;
 #endif
     sudo_setspent();
     auth->data = sudo_getepw(pw);
     sudo_endspent();
-    return(AUTH_SUCCESS);
+    return AUTH_SUCCESS;
 }
 
 int
@@ -82,7 +82,7 @@ passwd_verify(pw, pass, auth)
     /* Ultrix shadow passwords may use crypt16() */
     error = strcmp(pw_epasswd, (char *) crypt16(pass, pw_epasswd));
     if (!error)
-	return(AUTH_SUCCESS);
+	return AUTH_SUCCESS;
 #endif /* HAVE_GETAUTHUID */
 
     /*
@@ -105,7 +105,7 @@ passwd_verify(pw, pass, auth)
     else
 	error = strcmp(pw_epasswd, epass);
 
-    return(error ? AUTH_FAILURE : AUTH_SUCCESS);
+    return error ? AUTH_FAILURE : AUTH_SUCCESS;
 }
 
 int
@@ -119,5 +119,5 @@ passwd_cleanup(pw, auth)
 	zero_bytes(pw_epasswd, strlen(pw_epasswd));
 	efree(pw_epasswd);
     }
-    return(AUTH_SUCCESS);
+    return AUTH_SUCCESS;
 }

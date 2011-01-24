@@ -367,7 +367,7 @@ expand_prompt(old_prompt, user, host)
     } else
 	new_prompt = old_prompt;
 
-    return(new_prompt);
+    return new_prompt;
 
 oflow:
     /* We pre-allocate enough space, so this should never happen. */
@@ -381,8 +381,8 @@ int
 user_is_exempt()
 {
     if (!def_exempt_group)
-	return(FALSE);
-    return(user_in_group(sudo_user.pw, def_exempt_group));
+	return FALSE;
+    return user_in_group(sudo_user.pw, def_exempt_group);
 }
 
 /*
@@ -486,7 +486,7 @@ timestamp_status(timestampdir, timestampfile, user, flags)
     if (status == TS_ERROR) {
 	if (timestamp_uid != 0)
 	    set_perms(PERM_ROOT);
-	return(status);
+	return status;
     }
 
     /*
@@ -630,7 +630,7 @@ timestamp_status(timestampdir, timestampfile, user, flags)
 done:
     if (timestamp_uid != 0)
 	set_perms(PERM_ROOT);
-    return(status);
+    return status;
 }
 
 /*
@@ -732,5 +732,5 @@ get_authpw()
 	pw = sudo_user.pw;
     }
 
-    return(pw);
+    return pw;
 }

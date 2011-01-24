@@ -133,29 +133,29 @@ DEFVAR			[a-z_]+
 			    LEXTRACE("DEFVAR ");
 			    if (!fill(yytext, yyleng))
 				yyterminate();
-			    return(DEFVAR);
+			    return DEFVAR;
 			}
 
 <INDEFS>{
     ,			{
 			    BEGIN STARTDEFS;
 			    LEXTRACE(", ");
-			    return(',');
+			    return ',';
 			}			/* return ',' */
 
     =			{
 			    LEXTRACE("= ");
-			    return('=');
+			    return '=';
 			}			/* return '=' */
 
     \+=			{
 			    LEXTRACE("+= ");
-			    return('+');
+			    return '+';
 			}			/* return '+' */
 
     -=			{
 			    LEXTRACE("-= ");
-			    return('-');
+			    return '-';
 			}			/* return '-' */
 
     \"			{
@@ -168,7 +168,7 @@ DEFVAR			[a-z_]+
 			    LEXTRACE("WORD(2) ");
 			    if (!fill(yytext, yyleng))
 				yyterminate();
-			    return(WORD);
+			    return WORD;
 			}
 }
 
@@ -182,7 +182,7 @@ DEFVAR			[a-z_]+
     \"			{
 			    LEXTRACE("ENDSTR ");
 			    BEGIN INDEFS;
-			    return(WORD);
+			    return WORD;
 			}
 
     \\			{
@@ -218,7 +218,7 @@ DEFVAR			[a-z_]+
     [#:\,=\n]		{
 			    BEGIN INITIAL;
 			    yyless(0);
-			    return(COMMAND);
+			    return COMMAND;
 			}			/* end of command line args */
 
     [^#\\:, \t\n]+ 	{
@@ -268,22 +268,22 @@ DEFVAR			[a-z_]+
 				case ':':
 				    yyless(n);
 				    LEXTRACE("DEFAULTS_USER ");
-				    return(DEFAULTS_USER);
+				    return DEFAULTS_USER;
 				case '>':
 				    yyless(n);
 				    LEXTRACE("DEFAULTS_RUNAS ");
-				    return(DEFAULTS_RUNAS);
+				    return DEFAULTS_RUNAS;
 				case '@':
 				    yyless(n);
 				    LEXTRACE("DEFAULTS_HOST ");
-				    return(DEFAULTS_HOST);
+				    return DEFAULTS_HOST;
 				case '!':
 				    yyless(n);
 				    LEXTRACE("DEFAULTS_CMND ");
-				    return(DEFAULTS_CMND);
+				    return DEFAULTS_CMND;
 				default:
 				    LEXTRACE("DEFAULTS ");
-				    return(DEFAULTS);
+				    return DEFAULTS;
 			    }
 			}
 
@@ -294,69 +294,69 @@ DEFVAR			[a-z_]+
 			    switch (yytext[n]) {
 				case 'H':
 				    LEXTRACE("HOSTALIAS ");
-				    return(HOSTALIAS);
+				    return HOSTALIAS;
 				case 'C':
 				    LEXTRACE("CMNDALIAS ");
-				    return(CMNDALIAS);
+				    return CMNDALIAS;
 				case 'U':
 				    LEXTRACE("USERALIAS ");
-				    return(USERALIAS);
+				    return USERALIAS;
 				case 'R':
 				    LEXTRACE("RUNASALIAS ");
-				    return(RUNASALIAS);
+				    return RUNASALIAS;
 			    }
 			}
 
 NOPASSWD[[:blank:]]*:	{
 				/* cmnd does not require passwd for this user */
 			    	LEXTRACE("NOPASSWD ");
-			    	return(NOPASSWD);
+			    	return NOPASSWD;
 			}
 
 PASSWD[[:blank:]]*:	{
 				/* cmnd requires passwd for this user */
 			    	LEXTRACE("PASSWD ");
-			    	return(PASSWD);
+			    	return PASSWD;
 			}
 
 NOEXEC[[:blank:]]*:	{
 			    	LEXTRACE("NOEXEC ");
-			    	return(NOEXEC);
+			    	return NOEXEC;
 			}
 
 EXEC[[:blank:]]*:	{
 			    	LEXTRACE("EXEC ");
-			    	return(EXEC);
+			    	return EXEC;
 			}
 
 SETENV[[:blank:]]*:	{
 			    	LEXTRACE("SETENV ");
-			    	return(SETENV);
+			    	return SETENV;
 			}
 
 NOSETENV[[:blank:]]*:	{
 			    	LEXTRACE("NOSETENV ");
-			    	return(NOSETENV);
+			    	return NOSETENV;
 			}
 
 LOG_OUTPUT[[:blank:]]*:	{
 			    	LEXTRACE("LOG_OUTPUT ");
-			    	return(LOG_OUTPUT);
+			    	return LOG_OUTPUT;
 			}
 
 NOLOG_OUTPUT[[:blank:]]*:	{
 			    	LEXTRACE("NOLOG_OUTPUT ");
-			    	return(NOLOG_OUTPUT);
+			    	return NOLOG_OUTPUT;
 			}
 
 LOG_INPUT[[:blank:]]*:	{
 			    	LEXTRACE("LOG_INPUT ");
-			    	return(LOG_INPUT);
+			    	return LOG_INPUT;
 			}
 
 NOLOG_INPUT[[:blank:]]*:	{
 			    	LEXTRACE("NOLOG_INPUT ");
-			    	return(NOLOG_INPUT);
+			    	return NOLOG_INPUT;
 			}
 
 \+{WORD}		{
@@ -364,7 +364,7 @@ NOLOG_INPUT[[:blank:]]*:	{
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("NETGROUP ");
-			    return(NETGROUP);
+			    return NETGROUP;
 			}
 
 \%:?{WORD}		{
@@ -372,65 +372,65 @@ NOLOG_INPUT[[:blank:]]*:	{
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("USERGROUP ");
-			    return(USERGROUP);
+			    return USERGROUP;
 			}
 
 {IPV4ADDR}(\/{IPV4ADDR})? {
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
-			    return(NTWKADDR);
+			    return NTWKADDR;
 			}
 
 {IPV4ADDR}\/([12][0-9]*|3[0-2]*) {
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
-			    return(NTWKADDR);
+			    return NTWKADDR;
 			}
 
 {IPV6ADDR}(\/{IPV6ADDR})? {
 			    if (!ipv6_valid(yytext)) {
 				LEXTRACE("ERROR ");
-				return(ERROR);
+				return ERROR;
 			    }
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
-			    return(NTWKADDR);
+			    return NTWKADDR;
 			}
 
 {IPV6ADDR}\/([0-9]|[1-9][0-9]|1[01][0-9]|12[0-8]) {
 			    if (!ipv6_valid(yytext)) {
 				LEXTRACE("ERROR ");
-				return(ERROR);
+				return ERROR;
 			    }
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
-			    return(NTWKADDR);
+			    return NTWKADDR;
 			}
 
 [[:upper:]][[:upper:][:digit:]_]* {
 			    if (strcmp(yytext, "ALL") == 0) {
 				LEXTRACE("ALL ");
-				return(ALL);
+				return ALL;
 			    }
 #ifdef HAVE_SELINUX
 			    /* XXX - restrict type/role to initial state */
 			    if (strcmp(yytext, "TYPE") == 0) {
 				LEXTRACE("TYPE ");
-				return(TYPE);
+				return TYPE;
 			    }
 			    if (strcmp(yytext, "ROLE") == 0) {
 				LEXTRACE("ROLE ");
-				return(ROLE);
+				return ROLE;
 			    }
 #endif /* HAVE_SELINUX */
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("ALIAS ");
-			    return(ALIAS);
+			    return ALIAS;
 			}
 
 <GOTDEFS>({PATH}|sudoedit) {
@@ -438,7 +438,7 @@ NOLOG_INPUT[[:blank:]]*:	{
 			    if (!fill_cmnd(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("COMMAND ");
-			    return(COMMAND);
+			    return COMMAND;
 			}
 
 sudoedit		{
@@ -454,7 +454,7 @@ sudoedit		{
 				LEXTRACE("COMMAND ");
 				if (!fill_cmnd(yytext, yyleng))
 				    yyterminate();
-				return(COMMAND);
+				return COMMAND;
 			    } else {
 				BEGIN GOTCMND;
 				LEXTRACE("COMMAND ");
@@ -470,13 +470,13 @@ sudoedit		{
 			    switch (yytext[1]) {
 			    case '%':
 				LEXTRACE("USERGROUP ");
-				return(USERGROUP);
+				return USERGROUP;
 			    case '+':
 				LEXTRACE("NETGROUP ");
-				return(NETGROUP);
+				return NETGROUP;
 			    default:
 				LEXTRACE("WORD(4) ");
-				return(WORD);
+				return WORD;
 			    }
 			}
 
@@ -485,44 +485,44 @@ sudoedit		{
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("WORD(5) ");
-			    return(WORD);
+			    return WORD;
 			}
 
 \(			{
 			    LEXTRACE("( ");
-			    return ('(');
+			    return '(';
 			}
 
 \)			{
 			    LEXTRACE(") ");
-			    return(')');
+			    return ')';
 			}
 
 ,			{
 			    LEXTRACE(", ");
-			    return(',');
+			    return ',';
 			}			/* return ',' */
 
 =			{
 			    LEXTRACE("= ");
-			    return('=');
+			    return '=';
 			}			/* return '=' */
 
 :			{
 			    LEXTRACE(": ");
-			    return(':');
+			    return ':';
 			}			/* return ':' */
 
 <*>!+			{
 			    if (yyleng % 2 == 1)
-				return('!');	/* return '!' */
+				return '!';	/* return '!' */
 			}
 
 <*>\n			{
 			    BEGIN INITIAL;
 			    ++sudolineno;
 			    LEXTRACE("\n");
-			    return(COMMENT);
+			    return COMMENT;
 			}			/* return newline */
 
 <*>[[:blank:]]+		{			/* throw away space/tabs */
@@ -539,19 +539,19 @@ sudoedit		{
 			    BEGIN INITIAL;
 			    ++sudolineno;
 			    LEXTRACE("\n");
-			    return(COMMENT);
+			    return COMMENT;
 			}			/* comment, not uid/gid */
 
 <*>.			{
 			    LEXTRACE("ERROR ");
-			    return(ERROR);
+			    return ERROR;
 			}	/* parse error */
 
 <*><<EOF>>		{
 			    if (YY_START != INITIAL) {
 			    	BEGIN INITIAL;
 				LEXTRACE("ERROR ");
-				return(ERROR);
+				return ERROR;
 			    }
 			    if (!pop_include())
 				yyterminate();
@@ -601,7 +601,7 @@ hexchar(s)
 	    s++;
 	}
     }
-    return((unsigned char)result);
+    return (unsigned char)result;
 }
 
 static int
@@ -614,7 +614,7 @@ _fill(src, len, olen)
     dst = olen ? realloc(yylval.string, olen + len + 1) : malloc(len + 1);
     if (dst == NULL) {
 	yyerror("unable to allocate memory");
-	return(FALSE);
+	return FALSE;
     }
     yylval.string = dst;
 
@@ -638,7 +638,7 @@ _fill(src, len, olen)
 	}
     }
     *dst = '\0';
-    return(TRUE);
+    return TRUE;
 }
 
 static int
@@ -651,7 +651,7 @@ append(src, len)
     if (yylval.string != NULL)
 	olen = strlen(yylval.string);
 
-    return(_fill(src, len, olen));
+    return _fill(src, len, olen);
 }
 
 #define SPECIAL(c) \
@@ -670,7 +670,7 @@ fill_cmnd(src, len)
     dst = yylval.command.cmnd = (char *) malloc(len + 1);
     if (yylval.command.cmnd == NULL) {
 	yyerror("unable to allocate memory");
-	return(FALSE);
+	return FALSE;
     }
 
     /* Copy the string and collapse any escaped sudo-specific characters. */
@@ -683,7 +683,7 @@ fill_cmnd(src, len)
     *dst = '\0';
 
     yylval.command.args = NULL;
-    return(TRUE);
+    return TRUE;
 }
 
 static int
@@ -712,7 +712,7 @@ fill_args(s, len, addspace)
 	if (p == NULL) {
 	    efree(yylval.command.args);
 	    yyerror("unable to allocate memory");
-	    return(FALSE);
+	    return FALSE;
 	} else
 	    yylval.command.args = p;
     }
@@ -723,10 +723,10 @@ fill_args(s, len, addspace)
 	*p++ = ' ';
     if (strlcpy(p, s, arg_size - (p - yylval.command.args)) != len) {
 	yyerror("fill_args: buffer overflow");	/* paranoia */
-	return(FALSE);
+	return FALSE;
     }
     arg_len = new_len;
-    return(TRUE);
+    return TRUE;
 }
 
 struct path_list {
@@ -750,7 +750,7 @@ pl_compare(v1, v2)
     const struct path_list * const *p1 = v1;
     const struct path_list * const *p2 = v2;
 
-    return(strcmp((*p1)->path, (*p2)->path));
+    return strcmp((*p1)->path, (*p2)->path);
 }
 
 static char *
@@ -768,7 +768,7 @@ switch_dir(stack, dirpath)
 
     if (!(dir = opendir(dirpath))) {
 	yyerror(dirpath);
-	return(NULL);
+	return NULL;
     }
     while ((dent = readdir(dir))) {
 	/* Ignore files that end in '~' or have a '.' in them. */
@@ -826,7 +826,7 @@ switch_dir(stack, dirpath)
     }
 done:
     efree(dirpath);
-    return(path);
+    return path;
 bad:
     while (first != NULL) {
 	pl = first;
@@ -837,7 +837,7 @@ bad:
     efree(sorted);
     efree(dirpath);
     efree(path);
-    return(NULL);
+    return NULL;
 }
 
 #define MAX_SUDOERS_DEPTH	128
@@ -882,26 +882,26 @@ _push_include(path, isdir)
     if (idepth >= istacksize) {
 	if (idepth > MAX_SUDOERS_DEPTH) {
 	    yyerror("too many levels of includes");
-	    return(FALSE);
+	    return FALSE;
 	}
 	istacksize += SUDOERS_STACK_INCREMENT;
 	istack = (struct include_stack *) realloc(istack,
 	    sizeof(*istack) * istacksize);
 	if (istack == NULL) {
 	    yyerror("unable to allocate memory");
-	    return(FALSE);
+	    return FALSE;
 	}
     }
     if (isdir) {
 	if (!(path = switch_dir(&istack[idepth], path))) {
 	    /* switch_dir() called yyerror() for us */
-	    return(FALSE);
+	    return FALSE;
 	}
 	while ((fp = open_sudoers(path, FALSE, &keepopen)) == NULL) {
 	    /* Unable to open path in includedir, go to next one, if any. */
 	    efree(path);
 	    if ((pl = istack[idepth].more) == NULL)
-		return(FALSE);
+		return FALSE;
 	    path = pl->path;
 	    istack[idepth].more = pl->next;
 	    efree(pl);
@@ -909,7 +909,7 @@ _push_include(path, isdir)
     } else {
 	if ((fp = open_sudoers(path, TRUE, &keepopen)) == NULL) {
 	    yyerror(path);
-	    return(FALSE);
+	    return FALSE;
 	}
 	istack[idepth].more = NULL;
     }
@@ -923,7 +923,7 @@ _push_include(path, isdir)
     sudoers = path;
     yy_switch_to_buffer(yy_create_buffer(fp, YY_BUF_SIZE));
 
-    return(TRUE);
+    return TRUE;
 }
 
 static int
@@ -933,7 +933,7 @@ pop_include()
     FILE *fp;
 
     if (idepth == 0)
-	return(FALSE);
+	return FALSE;
 
     if (!keepopen)
 	fclose(YY_CURRENT_BUFFER->yy_input_file);
@@ -964,7 +964,7 @@ pop_include()
 	sudolineno = istack[idepth].lineno;
 	keepopen = istack[idepth].keepopen;
     }
-    return(TRUE);
+    return TRUE;
 }
 
 static char *
@@ -1017,7 +1017,7 @@ parse_include(base)
     if (*ep != '\0')
 	yyless((int)(ep - base));
 
-    return(path);
+    return path;
 }
 
 /*
@@ -1040,5 +1040,5 @@ ipv6_valid(s)
 	    nmatch = 0;			/* reset if we hit netmask */
     }
 
-    return (nmatch <= 1);
+    return nmatch <= 1;
 }
