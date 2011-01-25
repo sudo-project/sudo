@@ -560,6 +560,30 @@ main(argc, argv, envp)
 }
 
 /*
+ * Escape any non-alpha numeric or blank characters to make sure
+ * they are not interpreted specially by the shell.
+ */
+static char *
+escape_cmnd(const char *src)
+{
+    char *cmnd, *dst;
+
+    /* Worst case scenario, we have to escape everything. */
+    cmnd = dst = emalloc((2 * strlen(src)) + 1);
+    while (*src != '\0') {
+	if (!isalnum((unsigned char)*src) && !isspace((unsigned char)*src) &&
+	    *src != '_' && *src != '-') {
+	    /* quote potential meta character */
+	    *dst++ = '\\';
+	}
+	*dst++ = *src++;
+    }
+    *dst++ = '\0';
+
+    return cmnd;
+}
+
+/*
  * Initialize timezone, set umask, fill in ``sudo_user'' struct and
  * load the ``interfaces'' array.
  */
@@ -708,32 +732,14 @@ init_vars(envp)
 
 	av[0] = user_shell;	/* may be updated later */
 	if (NewArgc > 0) {
-	    size_t cmnd_size = 1024;
-	    char *cmnd, *src, *dst, **ap;
-
+	    size_t cmnd_size;
+	    char *cmnd, *src, *dst, *end;
+	    cmnd_size = (size_t) (NewArgv[NewArgc - 1] - NewArgv[0]) +
+		    strlen(NewArgv[NewArgc - 1]) + 1;
 	    cmnd = dst = emalloc(cmnd_size);
-	    for (ap = NewArgv; *ap != NULL; ap++) {
-		for (src = *ap; *src != '\0'; src++) {
-		    /* reserve room for an escaped char + space */
-		    if (cmnd_size < (dst - cmnd) + 3) {
-			char *new_cmnd;
-			cmnd_size <<= 1;
-			new_cmnd = erealloc(cmnd, cmnd_size);
-			dst = new_cmnd + (dst - cmnd);
-			cmnd = new_cmnd;
-		    }
-		    if (isalnum((unsigned char)*src) || *src == '_' || *src == '-') {
-			*dst++ = *src;
-		    } else {
-			/* quote potential meta character */
-			*dst++ = '\\';
-			*dst++ = *src;
-		    }
-		}
-		*dst++ = ' ';
-	    }
-	    if (cmnd != dst)
-		dst--;	/* replace last space with a NUL */
+	    src = NewArgv[0];
+	    for (end = src + cmnd_size - 1; src < end; src++, dst++)
+		*dst = *src == '\0' ? ' ' : *src;
 	    *dst = '\0';
 	    av[1] = "-c";
 	    av[2] = cmnd;
@@ -928,6 +934,13 @@ run_command(path, argv, envp, uid, dowait)
 
     cstat.type = CMD_INVALID;
     cstat.val = 0;
+
+    /* Escape meta chars if running a shell with args. */
+    if (ISSET(sudo_mode, MODE_SHELL) && argv[1] != NULL) {
+	char *cmnd = argv[2];
+	argv[2] = escape_cmnd(cmnd);
+	efree(cmnd);
+    }
 
     sudo_execve(path, argv, envp, uid, &cstat, dowait,
 	ISSET(sudo_mode, MODE_BACKGROUND));

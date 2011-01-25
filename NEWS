@@ -59,6 +59,10 @@ What's new in Sudo 1.7.5?
  * Sudo will no longer refuse to run if the sudoers file is writable
    by root.
 
+ * Sudo now performs command line escaping for "sudo -s" and "sudo -i"
+   after validating the command so the sudoers entries do not need
+   to include the backslashes.
+
 What's new in Sudo 1.7.4p6?
 
  * A bug has been fixed in the I/O logging support that could cause
