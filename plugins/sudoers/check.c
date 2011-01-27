@@ -117,14 +117,14 @@ check_user(int validated, int mode)
     if (ISSET(mode, MODE_IGNORE_TICKET)) {
 	SET(validated, FLAG_CHECK_USER);
     } else {
-    /*
-     * Don't prompt for the root passwd or if the user is exempt.
-     * If the user is not changing uid/gid, no need for a password.
-     */
-    if (user_uid == 0 || (user_uid == runas_pw->pw_uid &&
-	(!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name))) ||
-	user_is_exempt())
-	return TRUE;
+	/*
+	 * Don't prompt for the root passwd or if the user is exempt.
+	 * If the user is not changing uid/gid, no need for a password.
+	 */
+	if (user_uid == 0 || (user_uid == runas_pw->pw_uid &&
+	    (!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name))) ||
+	    user_is_exempt())
+	    return TRUE;
     }
 
     if (build_timestamp(&timestampdir, &timestampfile) == -1)
