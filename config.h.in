@@ -27,6 +27,9 @@
    variables. */
 #undef ENV_EDITOR
 
+/* Define to 1 to enable environment resetting by default. */
+#undef ENV_RESET
+
 /* If defined, users in this group need not enter a passwd (ie "sudo"). */
 #undef EXEMPTGROUP
 

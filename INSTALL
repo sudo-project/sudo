@@ -625,6 +625,10 @@ The following options are also configurable at runtime:
 	Enable the creation of an Ubuntu-style admin flag file
 	the first time sudo is run.
 
+  --disable-env-reset
+        Disable environment resetting.  This sets the default value
+        of the "env_reset" Defaults option in sudoers to false.
+
 Shadow password and C2 support
 ==============================
 
