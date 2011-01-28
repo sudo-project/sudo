@@ -71,6 +71,10 @@ What's new in Sudo 1.7.5?
    after validating the command so the sudoers entries do not need
    to include the backslashes.
 
+ * Logging and email sending are now done in the locale specified
+   by the "sudoers_locale" setting ("C" by default).  Email send by
+   sudo now includes MIME headers when "sudoers_locale" is not "C".
+
 What's new in Sudo 1.7.4p6?
 
  * A bug has been fixed in the I/O logging support that could cause

@@ -352,6 +352,9 @@
 /* Define to 1 if you have the <netgroup.h> header file. */
 #undef HAVE_NETGROUP_H
 
+/* Define to 1 if you have the `nl_langinfo' function. */
+#undef HAVE_NL_LANGINFO
+
 /* Define to 1 if you have the `openpty' function. */
 #undef HAVE_OPENPTY
 

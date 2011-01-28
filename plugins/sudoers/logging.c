@@ -47,6 +47,12 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE_SETLOCALE
+# include <locale.h>
+#endif /* HAVE_SETLOCALE */
+#ifdef HAVE_NL_LANGINFO
+# include <langinfo.h>
+#endif /* HAVE_NL_LANGINFO */
 #include <pwd.h>
 #include <grp.h>
 #include <signal.h>
@@ -122,6 +128,12 @@ do_syslog(int pri, char *msg)
     char *p, *tmp, save;
     const char *fmt;
 
+#ifdef HAVE_SETLOCALE
+    const char *old_locale = estrdup(setlocale(LC_ALL, NULL));
+    if (!setlocale(LC_ALL, def_sudoers_locale))
+	setlocale(LC_ALL, "C");
+#endif /* HAVE_SETLOCALE */
+
     /*
      * Log the full line, breaking into multiple syslog(3) calls if necessary
      */
@@ -156,6 +168,11 @@ do_syslog(int pri, char *msg)
 	fmt = FMT_CONTD;
 	maxlen = MAXSYSLOGLEN - (sizeof(FMT_CONTD) - 6 + strlen(user_name));
     }
+
+#ifdef HAVE_SETLOCALE
+    setlocale(LC_ALL, old_locale);
+    efree((void *)old_locale);
+#endif /* HAVE_SETLOCALE */
 }
 
 static void
@@ -177,6 +194,12 @@ do_logfile(char *msg)
 	send_mail("Can't lock log file: %s: %s", def_logfile, strerror(errno));
     } else {
 	time_t now;
+
+#ifdef HAVE_SETLOCALE
+	const char *old_locale = estrdup(setlocale(LC_ALL, NULL));
+	if (!setlocale(LC_ALL, def_sudoers_locale))
+	    setlocale(LC_ALL, "C");
+#endif /* HAVE_SETLOCALE */
 
 	now = time(NULL);
 	if (def_loglinelen == 0) {
@@ -247,6 +270,11 @@ do_logfile(char *msg)
 	(void) fflush(fp);
 	(void) lock_file(fileno(fp), SUDO_UNLOCK);
 	(void) fclose(fp);
+
+#ifdef HAVE_SETLOCALE
+	setlocale(LC_ALL, old_locale);
+	efree((void *)old_locale);
+#endif /* HAVE_SETLOCALE */
     }
 }
 
@@ -410,7 +438,7 @@ send_mail(const char *fmt, ...)
 	"USER=root",
 	NULL
     };
-#endif
+#endif /* NO_ROOT_MAILER */
 
     /* Just return if mailer is disabled. */
     if (!def_mailerpath || !def_mailto)
@@ -455,6 +483,14 @@ send_mail(const char *fmt, ...)
 	(void) dup2(fd, STDOUT_FILENO);
 	(void) dup2(fd, STDERR_FILENO);
     }
+
+#ifdef HAVE_SETLOCALE
+    if (!setlocale(LC_ALL, def_sudoers_locale)) {
+	setlocale(LC_ALL, "C");
+	efree(def_sudoers_locale);
+	def_sudoers_locale = estrdup("C");
+    }
+#endif /* HAVE_SETLOCALE */
 
     /* Close password, group and other fds so we don't leak. */
     sudo_endpwent();
@@ -551,6 +587,11 @@ send_mail(const char *fmt, ...)
 	} else
 	    (void) fputc(*p, mail);
     }
+
+#ifdef HAVE_NL_LANGINFO
+    if (strcmp(def_sudoers_locale, "C") != 0)
+	(void) fprintf(mail, "\nContent-Type: text/plain; charset=\"%s\"\nContent-Transfer-Encoding: 8bit", nl_langinfo(CODESET));
+#endif /* HAVE_NL_LANGINFO */
 
     (void) fprintf(mail, "\n\n%s : %s : %s : ", user_host,
 	get_timestr(time(NULL), def_log_year), user_name);
