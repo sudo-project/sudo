@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0b3                  January 13, 2011                       1
+1.8.0b3                  January 28, 2011                       1
 
 
 
@@ -127,7 +127,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
 
 
-1.8.0b3                  January 13, 2011                       2
+1.8.0b3                  January 28, 2011                       2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b3                  January 13, 2011                       3
+1.8.0b3                  January 28, 2011                       3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b3                  January 13, 2011                       4
+1.8.0b3                  January 28, 2011                       4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b3                  January 13, 2011                       5
+1.8.0b3                  January 28, 2011                       5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b3                  January 13, 2011                       6
+1.8.0b3                  January 28, 2011                       6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b3                  January 13, 2011                       7
+1.8.0b3                  January 28, 2011                       7
 
 
 
@@ -523,7 +523,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b3                  January 13, 2011                       8
+1.8.0b3                  January 28, 2011                       8
 
 
 
@@ -589,7 +589,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b3                  January 13, 2011                       9
+1.8.0b3                  January 28, 2011                       9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b3                  January 13, 2011                      10
+1.8.0b3                  January 28, 2011                      10
 
 
 
@@ -721,7 +721,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
 
 
-1.8.0b3                  January 13, 2011                      11
+1.8.0b3                  January 28, 2011                      11
 
 
 
@@ -787,7 +787,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b3                  January 13, 2011                      12
+1.8.0b3                  January 28, 2011                      12
 
 
 
@@ -853,7 +853,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b3                  January 13, 2011                      13
+1.8.0b3                  January 28, 2011                      13
 
 
 
@@ -919,7 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b3                  January 13, 2011                      14
+1.8.0b3                  January 28, 2011                      14
 
 
 
@@ -985,7 +985,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b3                  January 13, 2011                      15
+1.8.0b3                  January 28, 2011                      15
 
 
 
@@ -1051,7 +1051,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b3                  January 13, 2011                      16
+1.8.0b3                  January 28, 2011                      16
 
 
 
@@ -1117,7 +1117,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b3                  January 13, 2011                      17
+1.8.0b3                  January 28, 2011                      17
 
 
 
@@ -1183,7 +1183,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b3                  January 13, 2011                      18
+1.8.0b3                  January 28, 2011                      18
 
 
 
@@ -1249,7 +1249,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b3                  January 13, 2011                      19
+1.8.0b3                  January 28, 2011                      19
 
 
 
@@ -1301,9 +1301,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        syslog_goodpri  Syslog priority to use when user authenticates
                        successfully.  Defaults to notice.
 
-       sudoers_locale  Locale to use when parsing the sudoers file.  Note that
-                       changing the locale may affect how sudoers is
-                       interpreted.  Defaults to "C".
+       sudoers_locale  Locale to use when parsing the sudoers file, logging
+                       commands, and sending email.  Note that changing the
+                       locale may affect how sudoers is interpreted.  Defaults
+                       to "C".
 
        timestampdir    The directory in which ssuuddoo stores its timestamp files.
                        The default is _/_v_a_r_/_a_d_m_/_s_u_d_o.
@@ -1311,11 +1312,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        timestampowner  The owner of the timestamp directory and the timestamps
                        stored therein.  The default is root.
 
-       type            The default SELinux type to use when constructing a new
 
 
 
-1.8.0b3                  January 13, 2011                      20
+1.8.0b3                  January 28, 2011                      20
 
 
 
@@ -1324,6 +1324,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       type            The default SELinux type to use when constructing a new
                        security context to run the command.  The default type
                        may be overridden on a per-command basis in _s_u_d_o_e_r_s or
                        via command line options.  This option is only
@@ -1377,11 +1378,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
                    always  Always lecture the user.
 
-                   never   Never lecture the user.
 
 
 
-1.8.0b3                  January 13, 2011                      21
+1.8.0b3                  January 28, 2011                      21
 
 
 
@@ -1389,6 +1389,8 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+                   never   Never lecture the user.
 
                    once    Only lecture the user the first time they run ssuuddoo.
 
@@ -1442,12 +1444,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    ssuuddoo interpreting the @ sign.  Defaults to root.
 
        secure_path Path used for every command run from ssuuddoo.  If you don't
-                   trust the people running ssuuddoo to have a sane PATH
-                   environment variable you may want to use this.  Another use
 
 
 
-1.8.0b3                  January 13, 2011                      22
+1.8.0b3                  January 28, 2011                      22
 
 
 
@@ -1456,6 +1456,8 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+                   trust the people running ssuuddoo to have a sane PATH
+                   environment variable you may want to use this.  Another use
                    is if you want to have the "root path" be separate from the
                    "user path."  Users in the group specified by the
                    _e_x_e_m_p_t___g_r_o_u_p option are not affected by _s_e_c_u_r_e___p_a_t_h.  This
@@ -1508,12 +1510,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        The argument may be a double-quoted, space-separated
                        list or a single value without double-quotes.  The list
                        can be replaced, added to, deleted from, or disabled by
-                       using the =, +=, -=, and ! operators respectively.  The
-                       default list of environment variables to remove is
 
 
 
-1.8.0b3                  January 13, 2011                      23
+1.8.0b3                  January 28, 2011                      23
 
 
 
@@ -1522,6 +1522,8 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+                       using the =, +=, -=, and ! operators respectively.  The
+                       default list of environment variables to remove is
                        displayed when ssuuddoo is run by root with the _-_V option.
                        Note that many operating systems will remove
                        potentially dangerous variables from the environment of
@@ -1575,11 +1577,9 @@ EEXXAAMMPPLLEESS
         User_Alias     PARTTIMERS = bostley, jwfox, crawl
         User_Alias     WEBMASTERS = will, wendy, wim
 
-        # Runas alias specification
 
 
-
-1.8.0b3                  January 13, 2011                      24
+1.8.0b3                  January 28, 2011                      24
 
 
 
@@ -1588,6 +1588,8 @@ EEXXAAMMPPLLEESS
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+
+        # Runas alias specification
         Runas_Alias    OP = root, operator
         Runas_Alias    DB = oracle, sybase
         Runas_Alias    ADMINGRP = adm, oper
@@ -1641,11 +1643,9 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
         root           ALL = (ALL) ALL
         %wheel         ALL = (ALL) ALL
 
-       We let rroooott and any user in group wwhheeeell run any command on any host as
 
 
-
-1.8.0b3                  January 13, 2011                      25
+1.8.0b3                  January 28, 2011                      25
 
 
 
@@ -1654,6 +1654,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       We let rroooott and any user in group wwhheeeell run any command on any host as
        any user.
 
         FULLTIMERS     ALL = NOPASSWD: ALL
@@ -1710,8 +1711,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-
-1.8.0b3                  January 13, 2011                      26
+1.8.0b3                  January 28, 2011                      26
 
 
 
@@ -1777,7 +1777,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.8.0b3                  January 13, 2011                      27
+1.8.0b3                  January 28, 2011                      27
 
 
 
@@ -1843,7 +1843,7 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 
 
-1.8.0b3                  January 13, 2011                      28
+1.8.0b3                  January 28, 2011                      28
 
 
 
@@ -1909,7 +1909,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.8.0b3                  January 13, 2011                      29
+1.8.0b3                  January 28, 2011                      29
 
 
 
@@ -1975,7 +1975,7 @@ SSUUPPPPOORRTT
 
 
 
-1.8.0b3                  January 13, 2011                      30
+1.8.0b3                  January 28, 2011                      30
 
 
 
@@ -2041,6 +2041,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.0b3                  January 13, 2011                      31
+1.8.0b3                  January 28, 2011                      31
 
 
