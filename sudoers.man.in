@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "January 13, 2011" "1.7.5b2" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "January 28, 2011" "1.7.5b2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -1184,9 +1184,9 @@ Syslog priority to use when user authenticates successfully.
 Defaults to \f(CW\*(C`@goodpri@\*(C'\fR.
 .IP "sudoers_locale" 16
 .IX Item "sudoers_locale"
-Locale to use when parsing the sudoers file.  Note that changing
-the locale may affect how sudoers is interpreted.
-Defaults to \f(CW"C"\fR.
+Locale to use when parsing the sudoers file, logging commands, and
+sending email.  Note that changing the locale may affect how sudoers
+is interpreted.  Defaults to \f(CW"C"\fR.
 .IP "timestampdir" 16
 .IX Item "timestampdir"
 The directory in which \fBsudo\fR stores its timestamp files.

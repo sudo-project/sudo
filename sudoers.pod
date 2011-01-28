@@ -1107,9 +1107,9 @@ Defaults to C<@goodpri@>.
 
 =item sudoers_locale
 
-Locale to use when parsing the sudoers file.  Note that changing
-the locale may affect how sudoers is interpreted.
-Defaults to C<"C">.
+Locale to use when parsing the sudoers file, logging commands, and
+sending email.  Note that changing the locale may affect how sudoers
+is interpreted.  Defaults to C<"C">.
 
 =item timestampdir
 
