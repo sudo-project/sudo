@@ -133,6 +133,11 @@ I recommend using any of the following LDAP browsers to administer your SUDOers.
     and since it is Schema aware, I don't need to create a sudoRole template.
 	http://biot.com/gq/
 
+  * phpQLAdmin - Open Source - phpQLAdmin is an administration tool,
+    originally for QmailLDAP, that supports editing sudoRole objects
+    in version 2.3.2 and higher.
+	http://phpqladmin.com/
+
   * LDAP Browser/Editor - by Jarek Gawor - I use this a lot on Windows
     and Solaris.  It runs anywhere in a Java Virtual Machine including
     web pages.  You have to make a template from an existing sudoRole entry.
