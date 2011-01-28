@@ -641,7 +641,7 @@ and C<env_check> lists are then added.  The default contents of the
 C<env_keep> and C<env_check> lists are displayed when B<sudo> is
 run by root with the I<-V> option.  If the I<secure_path> option
 is set, its value will be used for the C<PATH> environment variable.
-This flag is I<on> by default.
+This flag is I<@env_reset@> by default.
 
 =item fast_glob
 

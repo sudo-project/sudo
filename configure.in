@@ -81,6 +81,7 @@ AC_SUBST([badpass_message])
 AC_SUBST([fqdn])
 AC_SUBST([runas_default])
 AC_SUBST([env_editor])
+AC_SUBST([env_reset])
 AC_SUBST([passwd_tries])
 AC_SUBST([tty_tickets])
 AC_SUBST([insults])
@@ -118,6 +119,7 @@ badpass_message="Sorry, try again."
 fqdn=off
 runas_default=root
 env_editor=off
+env_reset=on
 editor=vi
 passwd_tries=3
 tty_tickets=on
@@ -1271,6 +1273,27 @@ AC_ARG_ENABLE(env_debug,
 		;;
   esac
 ], AC_MSG_RESULT(no))
+
+AC_MSG_CHECKING(whether to enable environment resetting by default)
+AC_ARG_ENABLE(env_reset,
+[AS_HELP_STRING([--enable-env-reset], [Whether to enable environment resetting by default.])],
+[ case "$enableval" in
+    yes)	env_reset=on
+		;;
+    no)		env_reset=off
+		;;
+    *)		env_reset=on
+    		AC_MSG_WARN([Ignoring unknown argument to --enable-env-reset: $enableval])
+		;;
+  esac
+])
+if test "$env_reset" = "on"; then
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(ENV_RESET, TRUE)
+else
+    AC_MSG_RESULT(no)
+    AC_DEFINE(ENV_RESET, FALSE)
+fi
 
 AC_ARG_ENABLE(warnings,
 [AS_HELP_STRING([--enable-warnings], [Whether to enable compiler warnings])],
@@ -2880,6 +2903,7 @@ AH_TEMPLATE(CSOPS_INSULTS, [Define to 1 if you want insults culled from the twis
 AH_TEMPLATE(DONT_LEAK_PATH_INFO, [Define to 1 if you want sudo to display "command not allowed" instead of "command not found" when a command cannot be found.])
 AH_TEMPLATE(ENV_EDITOR, [Define to 1 if you want visudo to honor the EDITOR and VISUAL env variables.])
 AH_TEMPLATE(ENV_DEBUG, [Define to 1 to enable environment function debugging.])
+AH_TEMPLATE(ENV_RESET, [Define to 1 to enable environment resetting by default.])
 AH_TEMPLATE(FQDN, [Define to 1 if you want to require fully qualified hosts in sudoers.])
 AH_TEMPLATE(GOONS_INSULTS, [Define to 1 if you want insults from the "Goon Show".])
 AH_TEMPLATE(HAL_INSULTS, [Define to 1 if you want 2001-like insults.])

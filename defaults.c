@@ -441,7 +441,7 @@ init_defaults()
 #endif
     def_iolog_dir = estrdup(_PATH_SUDO_IO_LOGDIR);
     def_sudoers_locale = estrdup("C");
-    def_env_reset = TRUE;
+    def_env_reset = ENV_RESET;
     def_set_logname = TRUE;
     def_closefrom = STDERR_FILENO + 1;
 

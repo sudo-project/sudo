@@ -778,7 +778,7 @@ and \f(CW\*(C`env_check\*(C'\fR lists are then added.  The default contents of t
 \&\f(CW\*(C`env_keep\*(C'\fR and \f(CW\*(C`env_check\*(C'\fR lists are displayed when \fBsudo\fR is
 run by root with the \fI\-V\fR option.  If the \fIsecure_path\fR option
 is set, its value will be used for the \f(CW\*(C`PATH\*(C'\fR environment variable.
-This flag is \fIon\fR by default.
+This flag is \fI@env_reset@\fR by default.
 .IP "fast_glob" 16
 .IX Item "fast_glob"
 Normally, \fBsudo\fR uses the \fIglob\fR\|(3) function to do shell-style
