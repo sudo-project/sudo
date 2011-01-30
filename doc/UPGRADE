@@ -1,6 +1,28 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.7.5:
+
+    Sudo 1.7.5 includes an updated LDAP schema with support for
+    the sudoNotBefore, sudoNotAfter and sudoOrder attributes.
+
+    The sudoNotBefore and sudoNotAfter attribute support is only
+    used when the SUDOERS_TIMED setting is enabled in ldap.conf.
+    If enabled, those attributes are used directly when constructing
+    an LDAP filter.  As a result, your LDAP server must have the
+    updated schema if you want to use sudoNotBefore and sudoNotAfter.
+
+    The sudoOrder support does not affect the LDAP filter sudo
+    constructs and so there is no need to explicitly enable it in
+    ldap.conf.  If the sudoOrder attribute is not present in an
+    entry, a value of 0 is used.  If no entries contain sudoOrder
+    attributes, the results are in whatever order the LDAP server
+    returns them, as in past versions of sudo.
+
+    Older versions of sudo will simply ignore the new attributes
+    if they are present in an entry.  There are no compatibility
+    problems using the updated schema with older versions of sudo.
+
 o Upgrading from a version prior to 1.7.4:
 
     Starting with sudo 1.7.4, the time stamp files have moved from
