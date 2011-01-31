@@ -25,6 +25,7 @@ my $base=$ENV{SUDOERS_BASE} or die "$0: Container SUDOERS_BASE undefined\n";
 my @options=();
 
 my $did_defaults=0;
+my $order = 0;
 
 # parse sudoers one line at a time
 while (<>){
@@ -67,8 +68,9 @@ while (<>){
         print "objectClass: top\n";
         print "objectClass: sudoRole\n";
         print "cn: defaults\n";
-     print "description: Default sudoOption's go here\n";
+        print "description: Default sudoOption's go here\n";
         print "sudoOption: $_\n" foreach @options;
+        printf "sudoOrder: %d\n", ++$order;
         print "\n";
       }
       # Definition
@@ -96,6 +98,7 @@ while (<>){
       }
       print "sudoCommand: $_\n" foreach expand(\%CA,@cmds);
       print "sudoOption: $_\n" foreach @options;
+      printf "sudoOrder: %d\n", ++$order;
       print "\n";
     }
 
@@ -120,6 +123,10 @@ sub expand{
     s/EXEC:\s*// && push @options,"!noexec";
     s/SETENV:\s*// && push @options,"setenv";
     s/NOSETENV:\s*// && push @options,"!setenv";
+    s/LOG_INPUT:\s*// && push @options,"log_input";
+    s/NOLOG_INPUT:\s*// && push @options,"!log_input";
+    s/LOG_OUTPUT:\s*// && push @options,"log_output";
+    s/NOLOG_OUTPUT:\s*// && push @options,"!log_output";
     s/\w+://; # silently remove other directives
     s/\s+$//; # right trim
   }
