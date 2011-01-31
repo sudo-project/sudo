@@ -358,7 +358,7 @@ uninstall:
 	-cmp $(DESTDIR)$(sudoersdir)/sudoers $(srcdir)/sudoers >/dev/null && \
 	    rm -f $(DESTDIR)$(sudoersdir)/sudoers
 
-check: $(TEST_PROGS)
+check: $(TEST_PROGS) visudo testsudoers
 	@./check_iolog_path $(srcdir)/regress/iolog_path/data
 	@./check_fill
 	@for t in $(srcdir)/regress/*/test*.sh; do SRCDIR=$(srcdir) $(SHELL) $$t; done
