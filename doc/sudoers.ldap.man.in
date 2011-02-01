@@ -140,7 +140,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "January 10, 2011" "1.8.0b3" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "February  1, 2011" "1.8.0b3" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -183,14 +183,14 @@ is that in \s-1LDAP\s0, \fBsudo\fR\-specific Aliases are not supported.
 .PP
 For the most part, there is really no need for \fBsudo\fR\-specific
 Aliases.  Unix groups or user netgroups can be used in place of
-User_Aliases and RunasAliases.  Host netgroups can be used in place
-of HostAliases.  Since Unix groups and netgroups can also be stored
+User_Aliases and Runas_Aliases.  Host netgroups can be used in place
+of Host_Aliases.  Since Unix groups and netgroups can also be stored
 in \s-1LDAP\s0 there is no real need for \fBsudo\fR\-specific aliases.
 .PP
 Cmnd_Aliases are not really required either since it is possible
-to have multiple users listed in a sudoRole.  Instead of defining
+to have multiple users listed in a \f(CW\*(C`sudoRole\*(C'\fR.  Instead of defining
 a Cmnd_Alias that is referenced by multiple users, one can create
-a sudoRole that contains the commands and assign multiple users
+a \f(CW\*(C`sudoRole\*(C'\fR that contains the commands and assign multiple users
 to it.
 .SS "SUDOers \s-1LDAP\s0 container"
 .IX Subsection "SUDOers LDAP container"
@@ -213,7 +213,7 @@ in the environment for all users.
 .Ve
 .PP
 The equivalent of a sudoer in \s-1LDAP\s0 is a \f(CW\*(C`sudoRole\*(C'\fR.  It consists of
-the following components:
+the following attributes:
 .IP "\fBsudoUser\fR" 4
 .IX Item "sudoUser"
 A user name, uid (prefixed with \f(CW\*(Aq#\*(Aq\fR), Unix group (prefixed with
@@ -241,34 +241,56 @@ as or a Unix group (prefixed with a \f(CW\*(Aq%\*(Aq\fR) or user netgroup (prefi
 with a \f(CW\*(Aq+\*(Aq\fR) that contains a list of users that commands may be
 run as.
 The special value \f(CW\*(C`ALL\*(C'\fR will match any user.
+.Sp
+The \f(CW\*(C`sudoRunAsUser\*(C'\fR attribute is only available in \fBsudo\fR versions
+1.7.0 and higher.  Older versions of \fBsudo\fR use the \f(CW\*(C`sudoRunAs\*(C'\fR
+attribute instead.
 .IP "\fBsudoRunAsGroup\fR" 4
 .IX Item "sudoRunAsGroup"
 A Unix group or gid (prefixed with \f(CW\*(Aq#\*(Aq\fR) that commands may be run as.
 The special value \f(CW\*(C`ALL\*(C'\fR will match any group.
+.Sp
+The \f(CW\*(C`sudoRunAsGroup\*(C'\fR attribute is only available in \fBsudo\fR versions
+1.7.0 and higher.
 .IP "\fBsudoNotBefore\fR" 4
 .IX Item "sudoNotBefore"
-A timestamp in the form \f(CW\*(C`yyyymmddHHMMZ\*(C'\fR that indicates start of validity
-of this \f(CW\*(C`sudoRole\*(C'\fR.
-If multiple \fBsudoNotBefore\fR entries are present, the earliest is used.
+A timestamp in the form \f(CW\*(C`yyyymmddHHMMZ\*(C'\fR that can be used to provide
+a start date/time for when the \f(CW\*(C`sudoRole\*(C'\fR will be valid.  If
+multiple \f(CW\*(C`sudoNotBefore\*(C'\fR entries are present, the earliest is used.
+Note that timestamps must be in Coordinated Universal Time (\s-1UTC\s0),
+not the local timezone.
+.Sp
+The \f(CW\*(C`sudoNotBefore\*(C'\fR attribute is only available in \fBsudo\fR versions
+1.7.5 and higher and must be explicitly enabled via the \fB\s-1SUDOERS_TIMED\s0\fR
+option in \fI@ldap_conf@\fR.
 .IP "\fBsudoNotAfter\fR" 4
 .IX Item "sudoNotAfter"
-A timestamp in the form \f(CW\*(C`yyyymmddHHMMZ\*(C'\fR that indicates end of validity
-of this \f(CW\*(C`sudoRole\*(C'\fR.
-If multiple \fBsudoNotAfter\fR entries are present, the last one is used.
+A timestamp in the form \f(CW\*(C`yyyymmddHHMMZ\*(C'\fR that indicates an expiration
+date/time, after which the \f(CW\*(C`sudoRole\*(C'\fR will no longer be valid.  If
+multiple \f(CW\*(C`sudoNotBefore\*(C'\fR entries are present, the last one is used.
+Note that timestamps must be in Coordinated Universal Time (\s-1UTC\s0),
+not the local timezone.
+.Sp
+The \f(CW\*(C`sudoNotAfter\*(C'\fR attribute is only available in \fBsudo\fR versions
+1.7.5 and higher and must be explicitly enabled via the \fB\s-1SUDOERS_TIMED\s0\fR
+option in \fI@ldap_conf@\fR.
 .IP "\fBsudoOrder\fR" 4
 .IX Item "sudoOrder"
-The sudoRole entries retrieved from the \s-1LDAP\s0 directory have no
-inherent order.  The \fBsudoOrder\fR attribute is an integer (or
+The \f(CW\*(C`sudoRole\*(C'\fR entries retrieved from the \s-1LDAP\s0 directory have no
+inherent order.  The \f(CW\*(C`sudoOrder\*(C'\fR attribute is an integer (or
 floating point value for \s-1LDAP\s0 servers that support it) that is used
 to sort the matching entries.  This allows LDAP-based sudoers entries
 to more closely mimic the behaviour of the sudoers file, where the
 of the entries influences the result.  If multiple entries match,
-the entry with the highest \fBsudoOrder\fR attribute is chosen.  This
+the entry with the highest \f(CW\*(C`sudoOrder\*(C'\fR attribute is chosen.  This
 corresponds to the \*(L"last match\*(R" behavior of the sudoers file.  If
-the \fBsudoOrder\fR attribute is not present, a value of 0 is assumed.
+the \f(CW\*(C`sudoOrder\*(C'\fR attribute is not present, a value of 0 is assumed.
+.Sp
+The \f(CW\*(C`sudoOrder\*(C'\fR attribute is only available in \fBsudo\fR versions
+1.7.5 and higher.
 .PP
-Each component listed above should contain a single value, but there
-may be multiple instances of each component type.  A sudoRole must
+Each attribute listed above should contain a single value, but there
+may be multiple instances of each attribute type.  A \f(CW\*(C`sudoRole\*(C'\fR must
 contain at least one \f(CW\*(C`sudoUser\*(C'\fR, \f(CW\*(C`sudoHost\*(C'\fR and \f(CW\*(C`sudoCommand\*(C'\fR.
 .PP
 The following example allows users in group wheel to run any command
@@ -295,7 +317,7 @@ netgroups and checks to see if the user belongs to any of them.
 .PP
 If timed entries are enabled with the \fB\s-1SUDOERS_TIMED\s0\fR configuration
 directive, the \s-1LDAP\s0 queries include a subfilter that limits retrieval
-to entries that satisfy the time constraints, if any are present.
+to entries that satisfy the time constraints, if any.
 .SS "Differences between \s-1LDAP\s0 and non-LDAP sudoers"
 .IX Subsection "Differences between LDAP and non-LDAP sudoers"
 There are some subtle differences in the way sudoers is handled
@@ -304,7 +326,7 @@ once in \s-1LDAP\s0.  Probably the biggest is that according to the \s-1RFC\s0,
 and Entries are returned in any specific order.
 .PP
 The order in which different entries are applied can be controlled
-using the \fBsudoOrder\fR attribute, but there is no way to guarantee
+using the \f(CW\*(C`sudoOrder\*(C'\fR attribute, but there is no way to guarantee
 the order of attributes within a specific entry.  If there are
 conflicting command rules in an entry, the negative takes precedence.
 This is called paranoid behavior (not necessarily the most specific
@@ -387,7 +409,7 @@ Also note that on systems using the OpenLDAP libraries, default
 values specified in \fI/etc/openldap/ldap.conf\fR or the user's
 \&\fI.ldaprc\fR files are not used.
 .PP
-Only those options explicitly listed in \fI@ldap_conf@\fR that are
+Only those options explicitly listed in \fI@ldap_conf@\fR as being
 supported by \fBsudo\fR are honored.  Configuration options are listed
 below in upper case but are parsed in a case-independent manner.
 .IP "\fB\s-1URI\s0\fR ldap[s]://[hostname[:port]] ..." 4
@@ -426,7 +448,7 @@ to wait while trying to connect to an \s-1LDAP\s0 server.  If multiple \fB\s-1UR
 the next one in the list.
 .IP "\fB\s-1NETWORK_TIMEOUT\s0\fR seconds" 4
 .IX Item "NETWORK_TIMEOUT seconds"
-An alias for \fB\s-1BIND_TIMELIMIT\s0\fR.
+An alias for \fB\s-1BIND_TIMELIMIT\s0\fR for OpenLDAP compatibility.
 .IP "\fB\s-1TIMELIMIT\s0\fR seconds" 4
 .IX Item "TIMELIMIT seconds"
 The \fB\s-1TIMELIMIT\s0\fR parameter specifies the amount of time, in seconds,
@@ -443,7 +465,7 @@ this is of the form \f(CW\*(C`ou=SUDOers,dc=example,dc=com\*(C'\fR for the domai
 in which case they are queried in the order specified.
 .IP "\fB\s-1SUDOERS_TIMED\s0\fR on/true/yes/off/false/no" 4
 .IX Item "SUDOERS_TIMED on/true/yes/off/false/no"
-Whether or not to evaluate the \fBsudoNotBefore\fR and \fBsudoNotAfter\fR
+Whether or not to evaluate the \f(CW\*(C`sudoNotBefore\*(C'\fR and \f(CW\*(C`sudoNotAfter\*(C'\fR
 attributes that implement time-dependent sudoers entries.
 .IP "\fB\s-1SUDOERS_DEBUG\s0\fR debug_level" 4
 .IX Item "SUDOERS_DEBUG debug_level"
@@ -501,7 +523,7 @@ identity will not be authenticated.  If possible, the \s-1CA\s0's certificate
 should be installed locally so it can be verified.
 .IP "\fB\s-1TLS_CACERT\s0\fR file name" 4
 .IX Item "TLS_CACERT file name"
-An alias for \fB\s-1TLS_CACERTFILE\s0\fR.
+An alias for \fB\s-1TLS_CACERTFILE\s0\fR for OpenLDAP compatibility.
 .IP "\fB\s-1TLS_CACERTFILE\s0\fR file name" 4
 .IX Item "TLS_CACERTFILE file name"
 The path to a certificate authority bundle which contains the certificates
@@ -786,9 +808,10 @@ determines sudoers source order on \s-1AIX\s0
 .Ve
 .SS "Sudo schema for OpenLDAP"
 .IX Subsection "Sudo schema for OpenLDAP"
-The following schema is in OpenLDAP format.  Simply copy it to the
-schema directory (e.g. \fI/etc/openldap/schema\fR), add the proper
-\&\f(CW\*(C`include\*(C'\fR line in \f(CW\*(C`slapd.conf\*(C'\fR and restart \fBslapd\fR.
+The following schema, in OpenLDAP format, is included with \fBsudo\fR
+source and binary distributions as \fIschema.OpenLDAP\fR.  Simply copy
+it to the schema directory (e.g. \fI/etc/openldap/schema\fR), add the
+proper \f(CW\*(C`include\*(C'\fR line in \f(CW\*(C`slapd.conf\*(C'\fR and restart \fBslapd\fR.
 .PP
 .Vb 6
 \& attributetype ( 1.3.6.1.4.1.15953.9.1.1
