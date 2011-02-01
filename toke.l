@@ -75,6 +75,7 @@ extern int parse_error;
 int sudolineno = 1;
 char *sudoers;
 static int sawspace = 0;
+static int prev_state = INITIAL;
 static int arg_len = 0;
 static int arg_size = 0;
 
@@ -109,7 +110,7 @@ IPV4ADDR		{OCTET}(\.{OCTET}){3}
 IPV6ADDR		({HEX16}?:){2,7}{HEX16}?|({HEX16}?:){2,6}:{IPV4ADDR}
 
 HOSTNAME		[[:alnum:]_-]+
-WORD			([^#>!=:,\(\) \t\n\\]|\\[^\n])+
+WORD			([^#>!=:,\(\) \t\n\\\"]|\\[^\n])+
 ID			#-?[0-9]+
 PATH			\/(\\[\,:= \t#]|[^\,:=\\ \t\n#])+
 ENVAR			([^#!=, \t\n\\\"]|\\[^\n])([^#=, \t\n\\\"]|\\[^\n])*
@@ -161,6 +162,7 @@ DEFVAR			[a-z_]+
     \"			{
 			    LEXTRACE("BEGINSTR ");
 			    yylval.string = NULL;
+			    prev_state = YY_START;
 			    BEGIN INSTR;
 			}
 
@@ -181,7 +183,18 @@ DEFVAR			[a-z_]+
 
     \"			{
 			    LEXTRACE("ENDSTR ");
-			    BEGIN INDEFS;
+			    BEGIN prev_state;
+			    if (prev_state == INITIAL) {
+				switch (yylval.string[0]) {
+				case '%':
+				    LEXTRACE("USERGROUP ");
+				    return USERGROUP;
+				case '+':
+				    LEXTRACE("NETGROUP ");
+				    return NETGROUP;
+				}
+			    }
+			    LEXTRACE("WORD(4) ");
 			    return WORD;
 			}
 
@@ -463,21 +476,11 @@ sudoedit		{
 			    }
 			}			/* a pathname */
 
-<INITIAL,GOTDEFS>\"[^"\n]+\" {
-			    /* a quoted user/group name */
-			    if (!fill(yytext + 1, yyleng - 2))
-				yyterminate();
-			    switch (yytext[1]) {
-			    case '%':
-				LEXTRACE("USERGROUP ");
-				return USERGROUP;
-			    case '+':
-				LEXTRACE("NETGROUP ");
-				return NETGROUP;
-			    default:
-				LEXTRACE("WORD(4) ");
-				return WORD;
-			    }
+<INITIAL,GOTDEFS>^\" {
+			    LEXTRACE("BEGINSTR ");
+			    yylval.string = NULL;
+			    prev_state = YY_START;
+			    BEGIN INSTR;
 			}
 
 <INITIAL,GOTDEFS>({ID}|{WORD}) {
