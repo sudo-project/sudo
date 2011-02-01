@@ -68,14 +68,14 @@ is that in LDAP, B<sudo>-specific Aliases are not supported.
 
 For the most part, there is really no need for B<sudo>-specific
 Aliases.  Unix groups or user netgroups can be used in place of
-User_Aliases and RunasAliases.  Host netgroups can be used in place
-of HostAliases.  Since Unix groups and netgroups can also be stored
+User_Aliases and Runas_Aliases.  Host netgroups can be used in place
+of Host_Aliases.  Since Unix groups and netgroups can also be stored
 in LDAP there is no real need for B<sudo>-specific aliases.
 
 Cmnd_Aliases are not really required either since it is possible
-to have multiple users listed in a sudoRole.  Instead of defining
+to have multiple users listed in a C<sudoRole>.  Instead of defining
 a Cmnd_Alias that is referenced by multiple users, one can create
-a sudoRole that contains the commands and assign multiple users
+a C<sudoRole> that contains the commands and assign multiple users
 to it.
 
 =head2 SUDOers LDAP container
@@ -97,7 +97,7 @@ in the environment for all users.
     sudoOption: env_keep+=SSH_AUTH_SOCK
  
 The equivalent of a sudoer in LDAP is a C<sudoRole>.  It consists of
-the following components:
+the following attributes:
 
 =over 4
 
@@ -133,39 +133,61 @@ with a C<'+'>) that contains a list of users that commands may be
 run as.
 The special value C<ALL> will match any user.
 
+The C<sudoRunAsUser> attribute is only available in B<sudo> versions
+1.7.0 and higher.  Older versions of B<sudo> use the C<sudoRunAs>
+attribute instead.
+
 =item B<sudoRunAsGroup>
 
 A Unix group or gid (prefixed with C<'#'>) that commands may be run as.
 The special value C<ALL> will match any group.
 
+The C<sudoRunAsGroup> attribute is only available in B<sudo> versions
+1.7.0 and higher.
+
 =item B<sudoNotBefore>
 
-A timestamp in the form C<yyyymmddHHMMZ> that indicates start of validity
-of this C<sudoRole>.
-If multiple B<sudoNotBefore> entries are present, the earliest is used.
+A timestamp in the form C<yyyymmddHHMMZ> that can be used to provide
+a start date/time for when the C<sudoRole> will be valid.  If
+multiple C<sudoNotBefore> entries are present, the earliest is used.
+Note that timestamps must be in Coordinated Universal Time (UTC),
+not the local timezone.
+
+The C<sudoNotBefore> attribute is only available in B<sudo> versions
+1.7.5 and higher and must be explicitly enabled via the B<SUDOERS_TIMED>
+option in F<@ldap_conf@>.
 
 =item B<sudoNotAfter>
 
-A timestamp in the form C<yyyymmddHHMMZ> that indicates end of validity
-of this C<sudoRole>.
-If multiple B<sudoNotAfter> entries are present, the last one is used.
+A timestamp in the form C<yyyymmddHHMMZ> that indicates an expiration
+date/time, after which the C<sudoRole> will no longer be valid.  If
+multiple C<sudoNotBefore> entries are present, the last one is used.
+Note that timestamps must be in Coordinated Universal Time (UTC),
+not the local timezone.
+
+The C<sudoNotAfter> attribute is only available in B<sudo> versions
+1.7.5 and higher and must be explicitly enabled via the B<SUDOERS_TIMED>
+option in F<@ldap_conf@>.
 
 =item B<sudoOrder>
 
-The sudoRole entries retrieved from the LDAP directory have no
-inherent order.  The B<sudoOrder> attribute is an integer (or
+The C<sudoRole> entries retrieved from the LDAP directory have no
+inherent order.  The C<sudoOrder> attribute is an integer (or
 floating point value for LDAP servers that support it) that is used
 to sort the matching entries.  This allows LDAP-based sudoers entries
 to more closely mimic the behaviour of the sudoers file, where the
 of the entries influences the result.  If multiple entries match,
-the entry with the highest B<sudoOrder> attribute is chosen.  This
+the entry with the highest C<sudoOrder> attribute is chosen.  This
 corresponds to the "last match" behavior of the sudoers file.  If
-the B<sudoOrder> attribute is not present, a value of 0 is assumed.
+the C<sudoOrder> attribute is not present, a value of 0 is assumed.
+
+The C<sudoOrder> attribute is only available in B<sudo> versions
+1.7.5 and higher.
 
 =back
 
-Each component listed above should contain a single value, but there
-may be multiple instances of each component type.  A sudoRole must
+Each attribute listed above should contain a single value, but there
+may be multiple instances of each attribute type.  A C<sudoRole> must
 contain at least one C<sudoUser>, C<sudoHost> and C<sudoCommand>.
 
 The following example allows users in group wheel to run any command
@@ -191,7 +213,7 @@ netgroups and checks to see if the user belongs to any of them.
 
 If timed entries are enabled with the B<SUDOERS_TIMED> configuration
 directive, the LDAP queries include a subfilter that limits retrieval
-to entries that satisfy the time constraints, if any are present.
+to entries that satisfy the time constraints, if any.
 
 =head2 Differences between LDAP and non-LDAP sudoers
 
@@ -201,7 +223,7 @@ LDAP ordering is arbitrary and you cannot expect that Attributes
 and Entries are returned in any specific order.
 
 The order in which different entries are applied can be controlled
-using the B<sudoOrder> attribute, but there is no way to guarantee
+using the C<sudoOrder> attribute, but there is no way to guarantee
 the order of attributes within a specific entry.  If there are
 conflicting command rules in an entry, the negative takes precedence.
 This is called paranoid behavior (not necessarily the most specific
@@ -282,7 +304,7 @@ Also note that on systems using the OpenLDAP libraries, default
 values specified in F</etc/openldap/ldap.conf> or the user's
 F<.ldaprc> files are not used.
 
-Only those options explicitly listed in F<@ldap_conf@> that are
+Only those options explicitly listed in F<@ldap_conf@> as being
 supported by B<sudo> are honored.  Configuration options are listed
 below in upper case but are parsed in a case-independent manner.
 
@@ -328,7 +350,7 @@ the next one in the list.
 
 =item B<NETWORK_TIMEOUT> seconds
 
-An alias for B<BIND_TIMELIMIT>.
+An alias for B<BIND_TIMELIMIT> for OpenLDAP compatibility.
 
 =item B<TIMELIMIT> seconds
 
@@ -349,7 +371,7 @@ in which case they are queried in the order specified.
 
 =item B<SUDOERS_TIMED> on/true/yes/off/false/no
 
-Whether or not to evaluate the B<sudoNotBefore> and B<sudoNotAfter>
+Whether or not to evaluate the C<sudoNotBefore> and C<sudoNotAfter>
 attributes that implement time-dependent sudoers entries.
 
 =item B<SUDOERS_DEBUG> debug_level
@@ -416,7 +438,7 @@ should be installed locally so it can be verified.
 
 =item B<TLS_CACERT> file name
 
-An alias for B<TLS_CACERTFILE>.
+An alias for B<TLS_CACERTFILE> for OpenLDAP compatibility.
 
 =item B<TLS_CACERTFILE> file name
 
@@ -705,9 +727,10 @@ determines sudoers source order on AIX
 
 =head2 Sudo schema for OpenLDAP 
 
-The following schema is in OpenLDAP format.  Simply copy it to the
-schema directory (e.g. F</etc/openldap/schema>), add the proper
-C<include> line in C<slapd.conf> and restart B<slapd>.
+The following schema, in OpenLDAP format, is included with B<sudo>
+source and binary distributions as F<schema.OpenLDAP>.  Simply copy
+it to the schema directory (e.g. F</etc/openldap/schema>), add the
+proper C<include> line in C<slapd.conf> and restart B<slapd>.
 
  attributetype ( 1.3.6.1.4.1.15953.9.1.1
     NAME 'sudoUser'
