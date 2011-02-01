@@ -89,11 +89,12 @@ io_nextid()
 {
     struct stat sb;
     char buf[32], *ep;
-    int fd, i, ch;
+    int fd, i;
     unsigned long id = 0;
     int len;
     ssize_t nread;
     char pathbuf[PATH_MAX];
+    static const char b36char[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     /*
      * Create I/O log directory if it doesn't already exist.
@@ -135,9 +136,8 @@ io_nextid()
      * Note that that least significant digits go at the end of the string.
      */
     for (i = 5; i >= 0; i--) {
-	ch = id % 36;
+	buf[i] = b36char[id % 36];
 	id /= 36;
-	buf[i] = ch < 10 ? ch + '0' : ch - 10 + 'A';
     }
     buf[6] = '\n';
 
