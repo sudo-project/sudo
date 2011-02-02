@@ -498,6 +498,18 @@ handle_signals(fd, child, cstat)
 	    } else
 #endif
 	    {
+		if (signo == SIGCONT) {
+		    /*
+		     * Before continuing the child, make it the foreground
+		     * pgrp if possible.  Fixes resuming a shell.
+		     */
+		    int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
+		    if (fd != -1) {
+			if (tcgetpgrp(fd) == getpgrp())
+			    (void)tcsetpgrp(fd, child);
+			close(fd);
+		    }
+		}
 		/* Nothing listening on sv[0], send directly. */
 		kill(child, signo);
 	    }
