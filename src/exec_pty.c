@@ -824,6 +824,7 @@ exec_monitor(struct command_details *details, char *argv[], char *envp[],
 	error(1, "cannot create pipe");
 
     /* Reset SIGWINCH and SIGALRM. */
+    /* XXX - restore all signals except SIGPIPE? */
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
@@ -885,6 +886,7 @@ exec_monitor(struct command_details *details, char *argv[], char *envp[],
 	close(signal_pipe[1]);
 	close(errpipe[0]);
 	fcntl(errpipe[1], F_SETFD, FD_CLOEXEC);
+	restore_signals();
 
 	/* setup tty and exec command */
 	exec_pty(details, argv, envp);
@@ -1082,24 +1084,7 @@ flush_output(void)
 static void
 exec_pty(struct command_details *details, char *argv[], char *envp[])
 {
-    sigaction_t sa;
     pid_t self = getpid();
-
-    /* Reset signal handlers. */
-    zero_bytes(&sa, sizeof(sa));
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-    sa.sa_handler = SIG_DFL;
-    sigaction(SIGHUP, &sa, NULL);
-    sigaction(SIGTERM, &sa, NULL);
-    sigaction(SIGINT, &sa, NULL);
-    sigaction(SIGQUIT, &sa, NULL);
-    sigaction(SIGTSTP, &sa, NULL);
-    sigaction(SIGTTIN, &sa, NULL);
-    sigaction(SIGTTOU, &sa, NULL);
-    sigaction(SIGUSR1, &sa, NULL);
-    sigaction(SIGUSR2, &sa, NULL);
-    sigaction(SIGCHLD, &sa, NULL);
 
     /* Set child process group here too to avoid a race. */
     setpgid(0, self);

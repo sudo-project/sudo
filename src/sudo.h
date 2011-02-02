@@ -167,6 +167,8 @@ void zero_bytes(volatile void *, size_t);
 /* exec.c */
 int sudo_execve(struct command_details *details, char *argv[], char *envp[],
     struct command_status *cstat);
+void save_signals(void);
+void restore_signals(void);
 
 /* term.c */
 int term_cbreak(int);

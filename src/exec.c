@@ -128,6 +128,7 @@ static int fork_cmnd(struct command_details *details, char *argv[],
 	close(signal_pipe[0]);
 	close(signal_pipe[1]);
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
+	restore_signals();
 	if (exec_setup(details, NULL, -1) == TRUE) {
 	    /* headed for execve() */
 	    if (details->closefrom >= 0)
@@ -145,6 +146,52 @@ static int fork_cmnd(struct command_details *details, char *argv[],
 	_exit(1);
     }
     return pid;
+}
+
+static struct signal_state {
+    int signo;
+    sigaction_t sa;
+} saved_signals[] = {
+    { SIGALRM },
+    { SIGCHLD },
+    { SIGCONT },
+    { SIGHUP },
+    { SIGINT },
+    { SIGPIPE },
+    { SIGQUIT },
+    { SIGTERM },
+    { SIGQUIT },
+    { SIGTERM },
+    { SIGTSTP },
+    { SIGTTIN },
+    { SIGTTOU },
+    { SIGUSR1 },
+    { SIGUSR2 },
+    { -1 }
+};
+
+/*
+ * Save signal handler state so it can be restored before exec.
+ */
+void
+save_signals(void)
+{
+    struct signal_state *ss;
+
+    for (ss = saved_signals; ss->signo != -1; ss++)
+	sigaction(ss->signo, NULL, &ss->sa);
+}
+
+/*
+ * Restore signal handlers to initial state.
+ */
+void
+restore_signals(void)
+{
+    struct signal_state *ss;
+
+    for (ss = saved_signals; ss->signo != -1; ss++)
+	sigaction(ss->signo, &ss->sa, NULL);
 }
 
 /*
