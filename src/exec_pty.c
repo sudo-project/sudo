@@ -824,7 +824,6 @@ exec_monitor(struct command_details *details, char *argv[], char *envp[],
 	error(1, "cannot create pipe");
 
     /* Reset SIGWINCH and SIGALRM. */
-    /* XXX - restore all signals except SIGPIPE? */
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
