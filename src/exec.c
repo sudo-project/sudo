@@ -456,6 +456,18 @@ handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
 		if (signo == SIGALRM) {
 		    terminate_child(child, FALSE);
 		} else {
+		    if (signo == SIGCONT) {
+			/*
+			 * Before continuing the child, make it the foreground
+			 * pgrp if possible.  Fixes resuming a shell.
+			 */
+			int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
+			if (fd != -1) {
+			    if (tcgetpgrp(fd) == getpgrp())
+				(void)tcsetpgrp(fd, child);
+			    close(fd);
+			}
+		    }
 		    kill(child, signo);
 		}
 	    }
