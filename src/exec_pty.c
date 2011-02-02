@@ -943,7 +943,6 @@ exec_monitor(struct command_details *details, char *argv[], char *envp[],
 	}
 
 	if (FD_ISSET(signal_pipe[0], fdsr)) {
-	    /* Read child status. */
 	    n = read(signal_pipe[0], &signo, sizeof(signo));
 	    if (n == -1) {
 		if (errno == EINTR || errno == EAGAIN)
@@ -951,11 +950,15 @@ exec_monitor(struct command_details *details, char *argv[], char *envp[],
 		warning("error reading from signal pipe");
 		goto done;
 	    }
-	    /* We should only ever get SIGCHLD. */
-	    if (signo == SIGCHLD) {
+	    /*
+	     * Handle SIGCHLD specially and deliver other signals
+	     * directly to the child.
+	     */
+	    if (signo == SIGCHLD)
 		alive = handle_sigchld(backchannel, &cstat);
-		continue;
-	    }
+	    else
+		deliver_signal(child, signo);
+	    continue;
 	}
 	if (errpipe[0] != -1 && FD_ISSET(errpipe[0], fdsr)) {
 	    /* read errno or EOF from command pipe */
