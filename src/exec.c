@@ -160,8 +160,6 @@ static struct signal_state {
     { SIGPIPE },
     { SIGQUIT },
     { SIGTERM },
-    { SIGQUIT },
-    { SIGTERM },
     { SIGTSTP },
     { SIGTTIN },
     { SIGTTOU },
@@ -254,7 +252,10 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
 
-    /* Note: HP-UX select() will not be interrupted if SA_RESTART set */
+    /*
+     * Signals for forward to the child process (excluding SIGALRM and SIGCHLD).
+     * Note: HP-UX select() will not be interrupted if SA_RESTART set.
+     */
     sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
     sa.sa_handler = handler;
     sigaction(SIGALRM, &sa, NULL);
@@ -264,6 +265,8 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
     sigaction(SIGPIPE, &sa, NULL);
     sigaction(SIGQUIT, &sa, NULL);
     sigaction(SIGTERM, &sa, NULL);
+    sigaction(SIGUSR1, &sa, NULL);
+    sigaction(SIGUSR2, &sa, NULL);
 
     /* Max fd we will be selecting on. */
     maxfd = MAX(sv[0], signal_pipe[0]);
