@@ -79,6 +79,20 @@ What's new in Sudo 1.7.5?
    allow one to change the default for the sudoers Default setting
    "env_reset" at compile time.
 
+ * When logging "sudo -l command", sudo will now prepend "list "
+   to the command in the log line to distinguish between an
+   actual command invocation in the logs.
+
+ * Double-quoted group and user names may now include escaped double
+   quotes as part of the name.  Previously this was a parse error.
+
+ * Sudo once again restores the state of the signal handlers it
+   modifies before executing the command.  This allows sudo to be
+   used with the nohup command.
+
+ * Resuming a suspended shell now works properly when I/O logging
+   is not enabled (the I/O logging case was already correct).
+
 What's new in Sudo 1.7.4p6?
 
  * A bug has been fixed in the I/O logging support that could cause
