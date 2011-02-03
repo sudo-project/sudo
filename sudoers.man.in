@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "January 28, 2011" "1.7.5b2" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "February  3, 2011" "1.7.5b2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -460,7 +460,7 @@ The user \fBdgb\fR may run \fI/bin/ls\fR, \fI/bin/kill\fR, and
 \&\fI/usr/bin/lprm\fR \*(-- but only as \fBoperator\fR.  E.g.,
 .PP
 .Vb 1
-\& $ sudo \-u operator /bin/ls.
+\& $ sudo \-u operator /bin/ls
 .Ve
 .PP
 It is also possible to override a \f(CW\*(C`Runas_Spec\*(C'\fR later on in an
@@ -481,14 +481,43 @@ the user or group set to \fBoperator\fR:
 \&        /usr/bin/lprm
 .Ve
 .PP
+Note that while the group portion of the \f(CW\*(C`Runas_Spec\*(C'\fR permits the
+user to run as command with that group, it does not force the user
+to do so.  If no group is specified on the command line, the command
+will run with the group listed in the target user's password database
+entry.  The following would all be permitted by the sudoers entry above:
+.PP
+.Vb 3
+\& $ sudo \-u operator /bin/ls
+\& $ sudo \-u operator \-g operator /bin/ls
+\& $ sudo \-g operator /bin/ls
+.Ve
+.PP
 In the following example, user \fBtcm\fR may run commands that access
-a modem device file with the dialer group.  Note that in this example
-only the group will be set, the command still runs as user \fBtcm\fR.
+a modem device file with the dialer group.
 .PP
 .Vb 2
 \& tcm    boulder = (:dialer) /usr/bin/tip, /usr/bin/cu, \e
 \&        /usr/local/bin/minicom
 .Ve
+.PP
+Note that in this example only the group will be set, the command
+still runs as user \fBtcm\fR.  E.g.
+.PP
+.Vb 1
+\& $ sudo \-g dialer /usr/bin/cu
+.Ve
+.PP
+Multiple users and groups may be present in a \f(CW\*(C`Runas_Spec\*(C'\fR, in
+which case the user may select any combination of users and groups
+via the \fB\-u\fR and \fB\-g\fR options.  In this example:
+.PP
+.Vb 1
+\& alan   ALL = (root, bin : operator, system) ALL
+.Ve
+.PP
+user \fBalan\fR may run any command as either user root or bin,
+optionally setting the group to operator or system.
 .if \n(SL \{\
 .SS "SELinux_Spec"
 .IX Subsection "SELinux_Spec"

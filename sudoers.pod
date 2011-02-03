@@ -322,7 +322,7 @@ What this means is that for the entry:
 The user B<dgb> may run F</bin/ls>, F</bin/kill>, and
 F</usr/bin/lprm> -- but only as B<operator>.  E.g.,
 
- $ sudo -u operator /bin/ls.
+ $ sudo -u operator /bin/ls
 
 It is also possible to override a C<Runas_Spec> later on in an
 entry.  If we modify the entry like so:
@@ -338,12 +338,35 @@ the user or group set to B<operator>:
  dgb	boulder = (operator : operator) /bin/ls, (root) /bin/kill, \
 	/usr/bin/lprm
 
+Note that while the group portion of the C<Runas_Spec> permits the
+user to run as command with that group, it does not force the user
+to do so.  If no group is specified on the command line, the command
+will run with the group listed in the target user's password database
+entry.  The following would all be permitted by the sudoers entry above:
+
+ $ sudo -u operator /bin/ls
+ $ sudo -u operator -g operator /bin/ls
+ $ sudo -g operator /bin/ls
+
 In the following example, user B<tcm> may run commands that access
-a modem device file with the dialer group.  Note that in this example
-only the group will be set, the command still runs as user B<tcm>.
+a modem device file with the dialer group.
 
  tcm	boulder = (:dialer) /usr/bin/tip, /usr/bin/cu, \
 	/usr/local/bin/minicom
+
+Note that in this example only the group will be set, the command
+still runs as user B<tcm>.  E.g.
+
+ $ sudo -g dialer /usr/bin/cu
+
+Multiple users and groups may be present in a C<Runas_Spec>, in
+which case the user may select any combination of users and groups
+via the B<-u> and B<-g> options.  In this example:
+
+ alan	ALL = (root, bin : operator, system) ALL
+
+user B<alan> may run any command as either user root or bin,
+optionally setting the group to operator or system.
 
 =head2 SELinux_Spec
 
