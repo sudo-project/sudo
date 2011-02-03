@@ -271,7 +271,8 @@ check_foreground(void)
 
 /*
  * Suspend sudo if the underlying command is suspended.
- * Returns SIGUSR1 if the child should be resume in foreground else SIGUSR2.
+ * Returns SIGCONT_FG if the child should be resume in the
+ * foreground or SIGCONT_BG if it is a background process.
  */
 int
 suspend_parent(int signo)
@@ -295,7 +296,7 @@ suspend_parent(int signo)
 		} while (!n && errno == EINTR);
 		ttymode = TERM_RAW;
 	    }
-	    rval = SIGUSR1; /* resume child in foreground */
+	    rval = SIGCONT_FG; /* resume child in foreground */
 	    break;
 	}
 	ttymode = TERM_RAW;
@@ -342,7 +343,7 @@ suspend_parent(int signo)
 	}
 
 	sigaction(signo, &osa, NULL);
-	rval = ttymode == TERM_RAW ? SIGUSR1 : SIGUSR2;
+	rval = ttymode == TERM_RAW ? SIGCONT_FG : SIGCONT_BG;
 	break;
     }
 
@@ -709,14 +710,14 @@ deliver_signal(pid_t pid, int signo)
     case SIGALRM:
 	terminate_child(pid, TRUE);
 	break;
-    case SIGUSR1:
+    case SIGCONT_FG:
 	/* foreground process, grant it controlling tty. */
 	do {
 	    status = tcsetpgrp(io_fds[SFD_SLAVE], pid);
 	} while (status == -1 && errno == EINTR);
 	killpg(pid, SIGCONT);
 	break;
-    case SIGUSR2:
+    case SIGCONT_BG:
 	/* background process, I take controlling tty. */
 	do {
 	    status = tcsetpgrp(io_fds[SFD_SLAVE], getpid());
