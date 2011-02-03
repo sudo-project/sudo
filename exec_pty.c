@@ -587,37 +587,29 @@ deliver_signal(pid, signo)
 
     /* Handle signal from parent. */
     switch (signo) {
-    case SIGKILL:
-	_exit(1); /* XXX */
-	/* NOTREACHED */
-    case SIGPIPE:
-    case SIGHUP:
-    case SIGTERM:
-    case SIGINT:
-    case SIGQUIT:
-    case SIGTSTP:
-	/* relay signal to child */
-	killpg(pid, signo);
-	break;
     case SIGALRM:
 	terminate_child(pid, TRUE);
 	break;
     case SIGUSR1:
-	/* foreground process, grant it controlling tty. */
+	/* Continue in foreground, grant it controlling tty. */
 	do {
 	    status = tcsetpgrp(io_fds[SFD_SLAVE], pid);
 	} while (status == -1 && errno == EINTR);
 	killpg(pid, SIGCONT);
 	break;
     case SIGUSR2:
-	/* background process, I take controlling tty. */
+	/* Continue in background, I take controlling tty. */
 	do {
 	    status = tcsetpgrp(io_fds[SFD_SLAVE], getpid());
 	} while (status == -1 && errno == EINTR);
 	killpg(pid, SIGCONT);
 	break;
+    case SIGKILL:
+	_exit(1); /* XXX */
+	/* NOTREACHED */
     default:
-	warningx("unexpected signal from child: %d", signo);
+	/* Relay signal to child. */
+	killpg(pid, signo);
 	break;
     }
 }
