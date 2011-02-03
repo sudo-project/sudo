@@ -282,11 +282,12 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
     sigemptyset(&sa.sa_mask);
 
     /*
-     * Signals for forward to the child process (excluding SIGALRM and SIGCHLD).
+     * Signals for forward to the child process (excluding SIGCHLD).
      * Note: HP-UX select() will not be interrupted if SA_RESTART set.
      */
     sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
     sa.sa_handler = handler;
+    sigaction(SIGALRM, &sa, NULL);
     sigaction(SIGCHLD, &sa, NULL);
     sigaction(SIGHUP, &sa, NULL);
     sigaction(SIGINT, &sa, NULL);

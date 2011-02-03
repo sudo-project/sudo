@@ -587,9 +587,6 @@ deliver_signal(pid, signo)
 
     /* Handle signal from parent. */
     switch (signo) {
-    case SIGALRM:
-	terminate_child(pid, TRUE);
-	break;
     case SIGUSR1:
 	/* Continue in foreground, grant it controlling tty. */
 	do {
@@ -707,13 +704,12 @@ exec_monitor(path, argv, envp, backchannel, rbac)
     if (pipe_nonblock(signal_pipe) != 0)
 	error(1, "cannot create pipe");
 
-    /* Reset SIGWINCH and SIGALRM. */
+    /* Reset SIGWINCH. */
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = SIG_DFL;
     sigaction(SIGWINCH, &sa, NULL);
-    sigaction(SIGALRM, &sa, NULL);
 
     /* Ignore any SIGTTIN or SIGTTOU we get. */
     sa.sa_handler = SIG_IGN;
