@@ -499,6 +499,7 @@ handle_signals(fd, child, cstat)
 	    } else
 #endif
 	    {
+#ifdef HAVE_TCSETPGRP
 		if (signo == SIGCONT) {
 		    /*
 		     * Before continuing the child, make it the foreground
@@ -511,6 +512,7 @@ handle_signals(fd, child, cstat)
 			close(fd);
 		    }
 		}
+#endif
 		/* Nothing listening on sv[0], send directly. */
 		if (kill(child, signo) != 0)
 		    warning("kill(%d, %d)", child, signo);
