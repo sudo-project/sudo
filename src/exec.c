@@ -109,7 +109,7 @@ static int fork_cmnd(struct command_details *details, char *argv[],
 {
     struct command_status cstat;
     sigaction_t sa;
-    int pid;
+    pid_t child;
 
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
@@ -117,8 +117,8 @@ static int fork_cmnd(struct command_details *details, char *argv[],
     sa.sa_handler = handler;
     sigaction(SIGCONT, &sa, NULL);
 
-    pid = fork();
-    switch (pid) {
+    child = fork();
+    switch (child) {
     case -1:
 	error(1, "fork");
 	break;
@@ -145,7 +145,7 @@ static int fork_cmnd(struct command_details *details, char *argv[],
 	send(sv[1], &cstat, sizeof(cstat), 0);
 	_exit(1);
     }
-    return pid;
+    return child;
 }
 
 static struct signal_state {
@@ -437,7 +437,8 @@ handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
 		if (!log_io) {
 		    if (WIFSTOPPED(status)) {
 			/* Child may not have privs to suspend us itself. */
-			kill(getpid(), WSTOPSIG(status));
+			if (kill(getpid(), WSTOPSIG(status)) != 0)
+			    warning("kill(%d, %d)", getpid(), WSTOPSIG(status));
 		    } else {
 			/* Child has exited, we are done. */
 			cstat->type = CMD_WSTATUS;
@@ -468,7 +469,8 @@ handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
 			    close(fd);
 			}
 		    }
-		    kill(child, signo);
+		    if (kill(child, signo) != 0)
+			warning("kill(%d, %d)", child, signo);
 		}
 	    }
 	}
