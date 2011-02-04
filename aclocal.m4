@@ -124,7 +124,7 @@ dnl
 AC_DEFUN(SUDO_IO_LOGDIR, [
     AC_MSG_CHECKING(for I/O log dir location)
     if test "${with_iologdir-yes}" != "yes"; then
-	iolog_dir="$with_iologdir":
+	iolog_dir="$with_iologdir"
     elif test -d "/var/log"; then
 	iolog_dir="/var/log/sudo-io"
     elif test -d "/var/adm"; then
