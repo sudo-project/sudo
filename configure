@@ -18600,7 +18600,7 @@ EOF
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for I/O log dir location" >&5
 $as_echo_n "checking for I/O log dir location... " >&6; }
     if test "${with_iologdir-yes}" != "yes"; then
-	iolog_dir="$with_iologdir":
+	iolog_dir="$with_iologdir"
     elif test -d "/var/log"; then
 	iolog_dir="/var/log/sudo-io"
     elif test -d "/var/adm"; then
