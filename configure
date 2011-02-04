@@ -18608,10 +18608,12 @@ $as_echo_n "checking for I/O log dir location... " >&6; }
     else
 	iolog_dir="/usr/adm/sudo-io"
     fi
-    cat >>confdefs.h <<EOF
+    if test "${with_iologdir}" != "no"; then
+	cat >>confdefs.h <<EOF
 #define _PATH_SUDO_IO_LOGDIR "$iolog_dir"
 EOF
 
+    fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $iolog_dir" >&5
 $as_echo "$iolog_dir" >&6; }
 
