@@ -14,12 +14,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <config.h>
+
 #include <sys/types.h>
 
 #include <stdio.h>
 #include <signal.h>
 
-#include <config.h>
 #include <missing.h>
 
 #if defined(HAVE_DECL_SYS_SIGLIST) && HAVE_DECL_SYS_SIGLIST == 1
