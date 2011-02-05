@@ -42,7 +42,7 @@ main(int argc, char *argv[])
 
     printf("#include <config.h>\n");
     printf("#include <signal.h>\n");
-    printf("#include <missing.h>\n\n");
+    printf("#include "missing.h"\n\n");
     printf("const char *const my_sys_siglist[NSIG] = {\n");
     for (i = 0; i < NSIG; i++) {
 	if (my_sys_siglist[i] != NULL) {
