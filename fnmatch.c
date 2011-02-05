@@ -49,7 +49,7 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 
-#include <missing.h>
+#include "missing.h"
 #include "emul/fnmatch.h"
 #include "emul/charclass.h"
 

@@ -18,7 +18,7 @@
 
 #include <sys/types.h>
 
-#include <missing.h>
+#include "missing.h"
 
 /*
  * Reverse memchr()

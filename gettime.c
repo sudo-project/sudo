@@ -24,7 +24,7 @@
 # include <time.h>
 #endif
 
-#include <missing.h>
+#include "missing.h"
 
 /*
  * Get the current time via gettimeofday() for systems with

@@ -25,7 +25,7 @@
 # include <time.h>
 #endif
 #ifndef HAVE_TIMESPEC
-# include <emul/timespec.h>
+# include "emul/timespec.h"
 #endif
 #include <errno.h>
 

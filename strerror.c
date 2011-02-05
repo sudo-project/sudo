@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include <missing.h>
+#include "missing.h"
 
 /*
  * Map errno -> error string.

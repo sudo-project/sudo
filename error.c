@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <missing.h>
+#include "missing.h"
 #include "error.h"
 
 static void _warning	__P((int, const char *, va_list));

@@ -26,10 +26,10 @@
 #ifdef HAVE_UTIME_H
 # include <utime.h>
 #else
-# include <emul/utime.h>
+# include "emul/utime.h"
 #endif
 
-#include <missing.h>
+#include "missing.h"
 
 #ifndef HAVE_UTIMES
 /*

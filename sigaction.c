@@ -21,10 +21,11 @@
 #include <config.h>
 
 #include <sys/types.h>
+
 #include <signal.h>
 #include <errno.h>
 
-#include <missing.h>
+#include "missing.h"
 
 int
 sigaction(signo, sa, osa)

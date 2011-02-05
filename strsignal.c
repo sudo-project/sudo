@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <signal.h>
 
-#include <missing.h>
+#include "missing.h"
 
 #if defined(HAVE_DECL_SYS_SIGLIST) && HAVE_DECL_SYS_SIGLIST == 1
 # define my_sys_siglist	sys_siglist
