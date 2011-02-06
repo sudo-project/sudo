@@ -307,7 +307,6 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
 	FD_SET(sv[0], fdsr);
 	if (!tq_empty(&sigfwd_list))
 	    FD_SET(sv[0], fdsw);
-	FD_SET(signal_pipe[0], fdsr);
 	if (log_io)
 	    fd_set_iobs(fdsr, fdsw); /* XXX - better name */
 	nready = select(maxfd + 1, fdsr, fdsw, NULL, NULL);
