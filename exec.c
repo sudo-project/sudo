@@ -402,8 +402,12 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
 	}
 
 #ifdef _PATH_SUDO_IO_LOGDIR
-	if (perform_io(fdsr, fdsw, cstat) != 0)
+	if (perform_io(fdsr, fdsw, cstat) != 0) {
+	    /* I/O error, kill child if still alive and finish. */
+	    schedule_signal(SIGKILL);
+	    forward_signals(sv[0]);
 	    break;
+	}
 #endif /* _PATH_SUDO_IO_LOGDIR */
     }
 
