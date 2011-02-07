@@ -265,7 +265,6 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    SET(flags, MODE_SHELL);
 		    break;
 		case 'U':
-		    /* XXX - sudo_getpwnam */
 		    if ((getpwnam(optarg)) == NULL)
 			errorx(1, "unknown user: %s", optarg);
 		    list_user = optarg;
