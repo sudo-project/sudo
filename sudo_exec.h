@@ -37,7 +37,7 @@ int fork_pty __P((const char *path, char *argv[], char *envp[], int sv[],
 int perform_io __P((fd_set *fdsr, fd_set *fdsw, struct command_status *cstat));
 int suspend_parent __P((int signo));
 void fd_set_iobs __P((fd_set *fdsr, fd_set *fdsw));
-void handler __P((int s));
+RETSIGTYPE handler __P((int s));
 void pty_close __P((struct command_status *cstat));
 void pty_setup __P((uid_t uid));
 extern int signal_pipe[2];

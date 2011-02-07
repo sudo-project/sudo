@@ -57,7 +57,7 @@
 
 static volatile sig_atomic_t signo[NSIG];
 
-static void handler __P((int));
+static RETSIGTYPE handler __P((int));
 static char *getln __P((int, char *, size_t, int));
 static char *sudo_askpass __P((const char *));
 
@@ -290,7 +290,7 @@ getln(fd, buf, bufsiz, feedback)
     return nr == 1 ? buf : NULL;
 }
 
-static void
+static RETSIGTYPE
 handler(s)
     int s;
 {

@@ -102,7 +102,7 @@ static int exec_monitor __P((const char *path, char *argv[],
     char *envp[], int, int));
 static void exec_pty __P((const char *path, char *argv[],
     char *envp[], int));
-static void sigwinch __P((int s));
+static RETSIGTYPE sigwinch __P((int s));
 static void sync_ttysize __P((int src, int dst));
 static void deliver_signal __P((pid_t pid, int signo));
 static int safe_close __P((int fd));

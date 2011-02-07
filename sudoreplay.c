@@ -190,7 +190,7 @@ extern char *get_timestr __P((time_t, int));
 extern int term_raw __P((int, int));
 extern int term_restore __P((int, int));
 extern void zero_bytes __P((volatile void *, size_t));
-void cleanup __P((int));
+RETSIGTYPE cleanup __P((int));
 
 static int list_sessions __P((int, char **, const char *, const char *, const char *));
 static int parse_expr __P((struct search_node **, char **));
@@ -950,7 +950,7 @@ usage()
 /*
  * Cleanup hook for error()/errorx()
   */
-void
+RETSIGTYPE
 cleanup(signo)
     int signo;
 {

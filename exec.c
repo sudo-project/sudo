@@ -586,7 +586,7 @@ schedule_signal(signo)
  * Generic handler for signals passed from parent -> child.
  * The other end of signal_pipe is checked in the main event loop.
  */
-void
+RETSIGTYPE
 handler(s)
     int s;
 {

@@ -320,7 +320,7 @@ int set_perms		__P((int));
 /* sudo.c */
 FILE *open_sudoers	__P((const char *, int, int *));
 int exec_setup		__P((int, const char *, int));
-void cleanup		__P((int));
+RETSIGTYPE cleanup	__P((int));
 void set_fqdn		__P((void));
 
 /* sudo_auth.c */

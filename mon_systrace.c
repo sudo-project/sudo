@@ -76,7 +76,7 @@ bad:
     return -1;
 }
 
-static void
+static RETSIGTYPE
 catchsig(signo)
     int signo;
 {
