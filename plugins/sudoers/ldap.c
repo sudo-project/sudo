@@ -2163,8 +2163,8 @@ ldap_entry_compare(const void *a, const void *b)
     const struct ldap_entry_wrapper *aw = a;
     const struct ldap_entry_wrapper *bw = b;
 
-    return(bw->order < aw->order ? -1 :
-	(bw->order > aw->order ? 1 : 0));
+    return bw->order < aw->order ? -1 :
+	(bw->order > aw->order ? 1 : 0);
 }
 
 /*

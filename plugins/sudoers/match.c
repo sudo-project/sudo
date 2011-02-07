@@ -240,8 +240,8 @@ int
 runaslist_matches(struct member_list *user_list, struct member_list *group_list)
 {
     alias_seqno++;
-    return(_runaslist_matches(user_list ? user_list : &empty,
-	group_list ? group_list : &empty));
+    return _runaslist_matches(user_list ? user_list : &empty,
+	group_list ? group_list : &empty);
 }
 
 /*

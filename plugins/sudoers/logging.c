@@ -614,10 +614,10 @@ static int
 should_mail(int status)
 {
 
-    return(def_mail_always || ISSET(status, VALIDATE_ERROR) ||
+    return def_mail_always || ISSET(status, VALIDATE_ERROR) ||
 	(def_mail_no_user && ISSET(status, FLAG_NO_USER)) ||
 	(def_mail_no_host && ISSET(status, FLAG_NO_HOST)) ||
-	(def_mail_no_perms && !ISSET(status, VALIDATE_OK)));
+	(def_mail_no_perms && !ISSET(status, VALIDATE_OK));
 }
 
 #define	LL_TTY_STR	"TTY="

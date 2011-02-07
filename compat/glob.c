@@ -561,9 +561,9 @@ glob1(Char *pattern, Char *pattern_last, glob_t *pglob)
 	/* A null pathname is invalid -- POSIX 1003.1 sect. 2.4. */
 	if (*pattern == EOS)
 		return 0;
-	return(glob2(pathbuf, pathbuf + PATH_MAX - 1,
+	return glob2(pathbuf, pathbuf + PATH_MAX - 1,
 	    pathbuf, pathbuf + PATH_MAX - 1,
-	    pattern, pattern_last, pglob));
+	    pattern, pattern_last, pglob);
 }
 
 /*
@@ -624,9 +624,9 @@ glob2(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last,
 			}
 		} else
 			/* Need expansion, recurse. */
-			return(glob3(pathbuf, pathbuf_last, pathend,
+			return glob3(pathbuf, pathbuf_last, pathend,
 			    pathend_last, pattern, pattern_last,
-			    p, pattern_last, pglob));
+			    p, pattern_last, pglob);
 	}
 	/* NOTREACHED */
 }
