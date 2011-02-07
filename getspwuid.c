@@ -82,19 +82,18 @@ char *
 sudo_getepw(pw)
     const struct passwd *pw;
 {
-    char *epw;
+    char *epw = NULL;
 
     /* If there is a function to check for shadow enabled, use it... */
 #ifdef HAVE_ISCOMSEC
     if (!iscomsec())
-	return estrdup(pw->pw_passwd);
+	goto done;
 #endif /* HAVE_ISCOMSEC */
 #ifdef HAVE_ISSECURE
     if (!issecure())
-	return estrdup(pw->pw_passwd);
+	goto done;
 #endif /* HAVE_ISSECURE */
 
-    epw = NULL;
 #ifdef HAVE_GETPRPWNAM
     {
 	struct pr_passwd *spw;
@@ -103,10 +102,8 @@ sudo_getepw(pw)
 # ifdef __alpha
 	    crypt_type = spw->ufld.fd_oldcrypt;
 # endif /* __alpha */
-	    epw = estrdup(spw->ufld.fd_encrypt);
+	    epw = spw->ufld.fd_encrypt;
 	}
-	if (epw)
-	    return epw;
     }
 #endif /* HAVE_GETPRPWNAM */
 #ifdef HAVE_GETSPNAM
@@ -114,9 +111,7 @@ sudo_getepw(pw)
 	struct spwd *spw;
 
 	if ((spw = getspnam(pw->pw_name)) && spw->sp_pwdp)
-	    epw = estrdup(spw->sp_pwdp);
-	if (epw)
-	    return epw;
+	    epw = spw->sp_pwdp;
     }
 #endif /* HAVE_GETSPNAM */
 #ifdef HAVE_GETSPWUID
@@ -124,9 +119,7 @@ sudo_getepw(pw)
 	struct s_passwd *spw;
 
 	if ((spw = getspwuid(pw->pw_uid)) && spw->pw_passwd)
-	    epw = estrdup(spw->pw_passwd);
-	if (epw)
-	    return epw;
+	    epw = spw->pw_passwd;
     }
 #endif /* HAVE_GETSPWUID */
 #ifdef HAVE_GETPWANAM
@@ -134,9 +127,7 @@ sudo_getepw(pw)
 	struct passwd_adjunct *spw;
 
 	if ((spw = getpwanam(pw->pw_name)) && spw->pwa_passwd)
-	    epw = estrdup(spw->pwa_passwd);
-	if (epw)
-	    return epw;
+	    epw = spw->pwa_passwd;
     }
 #endif /* HAVE_GETPWANAM */
 #ifdef HAVE_GETAUTHUID
@@ -144,14 +135,15 @@ sudo_getepw(pw)
 	AUTHORIZATION *spw;
 
 	if ((spw = getauthuid(pw->pw_uid)) && spw->a_password)
-	    epw = estrdup(spw->a_password);
-	if (epw)
-	    return epw;
+	    epw = spw->a_password;
     }
 #endif /* HAVE_GETAUTHUID */
 
-    /* Fall back on normal password. */
-    return estrdup(pw->pw_passwd);
+#if defined(HAVE_ISCOMSEC) || defined(HAVE_ISSECURE)
+done:
+#endif
+    /* If no shadow password, fall back on regular password. */
+    return estrdup(epw ? epw : pw->pw_passwd);
 }
 
 void
