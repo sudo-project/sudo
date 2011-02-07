@@ -113,8 +113,8 @@ SRCS = aix.c alias.c alloc.c audit.c boottime.c bsm_audit.c check.c \
        pwutil.c set_perms.c setsid.c sigaction.c snprintf.c strcasecmp.c \
        strerror.c strlcat.c strlcpy.c strsignal.c sudo.c sudo_noexec.c \
        sudo_edit.c sudo_nss.c term.c testsudoers.c tgetpass.c toke.c toke.l \
-       tsgetgrpw.c utimes.c vasgroups.c visudo.c zero_bytes.c redblack.c \
-       selinux.c sesh.c sudoreplay.c getdate.c getdate.y getline.c \
+       toke_util.c tsgetgrpw.c utimes.c vasgroups.c visudo.c zero_bytes.c \
+       redblack.c selinux.c sesh.c sudoreplay.c getdate.c getdate.y getline.c \
        timestr.c $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
@@ -125,14 +125,14 @@ AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 HDRS = alloc.h bsm_audit.h def_data.h defaults.h error.h ins_2001.h \
        ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.h lbuf.h \
        linux_audit.h list.h logging.h missing.h mksiglist.h nonunix.h \
-       redblack.h parse.h sudo.h sudo_exec.h sudo_nss.h gram.h \
+       redblack.h parse.h sudo.h sudo_exec.h sudo_nss.h gram.h toke.h \
        auth/sudo_auth.h emul/charclass.h emul/fnmatch.h emul/glob.h \
        emul/timespec.h emul/utime.h
 
 AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
 COMMON_OBJS = alias.o alloc.o defaults.o error.o gram.o \
-	      list.o match.o pwutil.o timestr.o toke.o redblack.o \
+	      list.o match.o pwutil.o timestr.o toke.o toke_util.o redblack.o \
 	      term.o zero_bytes.o @COMMON_OBJS@
 
 SUDO_OBJS = $(AUTH_OBJS) @SUDO_OBJS@ audit.o boottime.o check.o env.o \
@@ -390,8 +390,10 @@ tgetpass.o: $(srcdir)/tgetpass.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tgetpass.c
 timestr.o: $(srcdir)/timestr.c $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/timestr.c
-toke.o: $(devdir)/toke.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(devdir)/gram.h
+toke.o: $(devdir)/toke.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(srcdir)/toke.h $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(devdir)/toke.c
+toke_util.o: $(devdir)/toke_util.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(srcdir)/toke.h $(devdir)/gram.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(devdir)/toke_util.c
 tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tsgetgrpw.c
 utimes.o: $(srcdir)/utimes.c $(srcdir)/missing.h $(srcdir)/emul/utime.h config.h

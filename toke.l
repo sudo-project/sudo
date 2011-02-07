@@ -68,6 +68,7 @@
 #include <ctype.h>
 #include "sudo.h"
 #include "parse.h"
+#include "toke.h"
 #include <gram.h>
 
 extern YYSTYPE yylval;
@@ -76,26 +77,15 @@ int sudolineno = 1;
 char *sudoers;
 static int sawspace = 0;
 static int prev_state = INITIAL;
-static int arg_len = 0;
-static int arg_size = 0;
 
-static int append		__P((char *, int));
-static int _fill		__P((char *, int, int));
-static int fill_cmnd		__P((char *, int));
-static int fill_args		__P((char *, int, int));
 static int _push_include	__P((char *, int));
 static int pop_include		__P((void));
-static int ipv6_valid		__P((const char *s));
 static char *parse_include	__P((char *));
-extern void yyerror		__P((const char *));
 
-#define fill(a, b)		_fill(a, b, 0)
+#define fill(a, b)		fill_txt(a, b, 0)
 
 #define	push_include(_p)	(_push_include((_p), FALSE))
 #define	push_includedir(_p)	(_push_include((_p), TRUE))
-
-/* realloc() to size + COMMANDARGINC to make room for command args */
-#define COMMANDARGINC	64
 
 #ifdef TRACELEXER
 #define LEXTRACE(msg)	fputs(msg, stderr)
@@ -561,177 +551,6 @@ sudoedit		{
 			}
 
 %%
-static unsigned char
-hexchar(s)
-    const char *s;
-{
-    int i;
-    int result = 0;
-
-    s += 2; /* skip \\x */
-    for (i = 0; i < 2; i++) {
-	switch (*s) {
-	case 'A':
-	case 'a':
-	    result += 10;
-	    break;
-	case 'B':
-	case 'b':
-	    result += 11;
-	    break;
-	case 'C':
-	case 'c':
-	    result += 12;
-	    break;
-	case 'D':
-	case 'd':
-	    result += 13;
-	    break;
-	case 'E':
-	case 'e':
-	    result += 14;
-	    break;
-	case 'F':
-	case 'f':
-	    result += 15;
-	    break;
-	default:
-	    result += *s - '0';
-	    break;
-	}
-	if (i == 0) {
-	    result *= 16;
-	    s++;
-	}
-    }
-    return (unsigned char)result;
-}
-
-static int
-_fill(src, len, olen)
-    char *src;
-    int len, olen;
-{
-    char *dst;
-
-    dst = olen ? realloc(yylval.string, olen + len + 1) : malloc(len + 1);
-    if (dst == NULL) {
-	yyerror("unable to allocate memory");
-	return FALSE;
-    }
-    yylval.string = dst;
-
-    /* Copy the string and collapse any escaped characters. */
-    dst += olen;
-    while (len--) {
-	if (*src == '\\' && len) {
-	    if (src[1] == 'x' && len >= 3 && 
-		isxdigit((unsigned char) src[2]) &&
-		isxdigit((unsigned char) src[3])) {
-		*dst++ = hexchar(src);
-		src += 4;
-		len -= 3;
-	    } else {
-		src++;
-		len--;
-		*dst++ = *src++;
-	    }
-	} else {
-	    *dst++ = *src++;
-	}
-    }
-    *dst = '\0';
-    return TRUE;
-}
-
-static int
-append(src, len)
-    char *src;
-    int len;
-{
-    int olen = 0;
-
-    if (yylval.string != NULL)
-	olen = strlen(yylval.string);
-
-    return _fill(src, len, olen);
-}
-
-#define SPECIAL(c) \
-    ((c) == ',' || (c) == ':' || (c) == '=' || (c) == ' ' || (c) == '\t' || (c) == '#')
-
-static int
-fill_cmnd(src, len)
-    char *src;
-    int len;
-{
-    char *dst;
-    int i;
-
-    arg_len = arg_size = 0;
-
-    dst = yylval.command.cmnd = (char *) malloc(len + 1);
-    if (yylval.command.cmnd == NULL) {
-	yyerror("unable to allocate memory");
-	return FALSE;
-    }
-
-    /* Copy the string and collapse any escaped sudo-specific characters. */
-    for (i = 0; i < len; i++) {
-	if (src[i] == '\\' && i != len - 1 && SPECIAL(src[i + 1]))
-	    *dst++ = src[++i];
-	else
-	    *dst++ = src[i];
-    }
-    *dst = '\0';
-
-    yylval.command.args = NULL;
-    return TRUE;
-}
-
-static int
-fill_args(s, len, addspace)
-    char *s;
-    int len;
-    int addspace;
-{
-    int new_len;
-    char *p;
-
-    if (yylval.command.args == NULL) {
-	addspace = 0;
-	new_len = len;
-    } else
-	new_len = arg_len + len + addspace;
-
-    if (new_len >= arg_size) {
-	/* Allocate more space than we need for subsequent args */
-	while (new_len >= (arg_size += COMMANDARGINC))
-	    ;
-
-	p = yylval.command.args ?
-	    (char *) realloc(yylval.command.args, arg_size) :
-	    (char *) malloc(arg_size);
-	if (p == NULL) {
-	    efree(yylval.command.args);
-	    yyerror("unable to allocate memory");
-	    return FALSE;
-	} else
-	    yylval.command.args = p;
-    }
-
-    /* Efficiently append the arg (with a leading space if needed). */
-    p = yylval.command.args + arg_len;
-    if (addspace)
-	*p++ = ' ';
-    if (strlcpy(p, s, arg_size - (p - yylval.command.args)) != len) {
-	yyerror("fill_args: buffer overflow");	/* paranoia */
-	return FALSE;
-    }
-    arg_len = new_len;
-    return TRUE;
-}
-
 struct path_list {
     char *path;
     struct path_list *next;
@@ -1021,27 +840,4 @@ parse_include(base)
 	yyless((int)(ep - base));
 
     return path;
-}
-
-/*
- * Check to make sure an IPv6 address does not contain multiple instances
- * of the string "::".  Assumes strlen(s) >= 1.
- * Returns TRUE if address is valid else FALSE.
- */
-static int
-ipv6_valid(s)
-    const char *s;
-{
-    int nmatch = 0;
-
-    for (; *s != '\0'; s++) {
-	if (s[0] == ':' && s[1] == ':') {
-	    if (++nmatch > 1)
-		break;
-	}
-	if (s[0] == '/')
-	    nmatch = 0;			/* reset if we hit netmask */
-    }
-
-    return nmatch <= 1;
 }
