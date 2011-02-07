@@ -305,7 +305,7 @@ expand_prompt(old_prompt, user, host)
     }
 
     if (subst) {
-	new_prompt = (char *) emalloc(++len);
+	new_prompt = emalloc(++len);
 	endp = new_prompt + len;
 	for (p = old_prompt, np = new_prompt; *p; p++) {
 	    if (p[0] =='%') {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007
+ * Copyright (c) 2004-2005, 2007, 2010
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -47,7 +47,7 @@
 # endif
 #endif
 
-#include "sudo.h"
+#include "missing.h"
 
 #ifndef HAVE_FCNTL_CLOSEM
 # ifndef HAVE_DIRFD

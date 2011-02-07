@@ -1051,7 +1051,7 @@ check_aliases(strict, quiet)
 	tq_foreach_fwd(&us->privileges, priv) {
 	    tq_foreach_fwd(&priv->hostlist, m) {
 		if (m->type == ALIAS)
-		    if (!alias_remove_recursive(m->name, HOSTALIAS, strict, 
+		    if (!alias_remove_recursive(m->name, HOSTALIAS, strict,
 			quiet))
 			error++;
 	    }

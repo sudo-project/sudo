@@ -212,7 +212,7 @@ reset_groups(pw)
 #if defined(HAVE_INITGROUPS) && defined(HAVE_GETGROUPS)
     if (pw != sudo_user.pw) {
 # ifdef HAVE_SETAUTHDB
-        aix_setauthdb(pw->pw_name);
+	aix_setauthdb(pw->pw_name);
 # endif
 	if (initgroups(pw->pw_name, pw->pw_gid) == -1)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't reset group vector");
@@ -224,7 +224,7 @@ reset_groups(pw)
 		log_error(USE_ERRNO|MSG_ONLY, "can't get group vector");
 	}
 # ifdef HAVE_SETAUTHDB
-        aix_restoreauthdb();
+	aix_restoreauthdb();
 # endif
     }
 #endif /* HAVE_INITGROUPS && HAVE_GETGROUPS */
