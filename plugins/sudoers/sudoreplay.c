@@ -50,7 +50,7 @@
 # include <time.h>
 #endif
 #ifndef HAVE_TIMESPEC
-# include <compat/timespec.h>
+# include "compat/timespec.h"
 #endif
 #include <ctype.h>
 #include <errno.h>

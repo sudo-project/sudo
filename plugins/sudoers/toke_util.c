@@ -50,7 +50,7 @@
 #include <ctype.h>
 #include "sudoers.h"
 #include "parse.h"
-#include <toke.h>
+#include "toke.h"
 #include <gram.h>
 
 static int arg_len = 0;
