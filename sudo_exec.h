@@ -18,6 +18,12 @@
 #define _SUDO_EXEC_H
 
 /*
+ * Special values to indicate whether continuing in foreground or background.
+ */
+#define SIGCONT_FG	-2
+#define SIGCONT_BG	-3
+
+/*
  * Symbols shared between exec.c and exec_pty.c
  */
 
