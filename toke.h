@@ -17,12 +17,12 @@
 #ifndef _SUDO_TOKE_H
 #define _SUDO_TOKE_H
 
-int append(char *, int);
-int fill_args(char *, int, int);
-int fill_cmnd(char *, int);
-int fill_txt(char *, int, int);
-int ipv6_valid(const char *s);
-void yyerror(const char *);
+int append	__P((char *, int));
+int fill_args	__P((char *, int, int));
+int fill_cmnd	__P((char *, int));
+int fill_txt	__P((char *, int, int));
+int ipv6_valid	__P((const char *s));
+void yyerror	__P((const char *));
 
 /* realloc() to size + COMMANDARGINC to make room for command args */
 #define COMMANDARGINC   64

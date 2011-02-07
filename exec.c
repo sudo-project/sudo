@@ -179,7 +179,7 @@ static struct signal_state {
  * Save signal handler state so it can be restored before exec.
  */
 void
-save_signals(void)
+save_signals()
 {
     struct signal_state *ss;
 
@@ -191,7 +191,7 @@ save_signals(void)
  * Restore signal handlers to initial state.
  */
 void
-restore_signals(void)
+restore_signals()
 {
     struct signal_state *ss;
 

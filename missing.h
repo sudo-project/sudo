@@ -321,10 +321,10 @@ const char *getprogname __P((void));
  * Solaris does not declare getdomainname().
  */
 #if defined(__hpux)
-int innetgr(const char *, const char *, const char *, const char *);
+int innetgr __P((const char *, const char *, const char *, const char *));
 #endif
 #if defined(__hpux) || defined(__sun)
-int getdomainname(char *, size_t);
+int getdomainname __P((char *, size_t));
 #endif
 
 /* Functions "missing" from libc. */

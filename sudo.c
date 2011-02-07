@@ -564,7 +564,8 @@ main(argc, argv, envp)
  * they are not interpreted specially by the shell.
  */
 static char *
-escape_cmnd(const char *src)
+escape_cmnd(src)
+    const char *src;
 {
     char *cmnd, *dst;
 
