@@ -1972,7 +1972,7 @@ AC_CHECK_FUNCS(getline, [], [
     AC_LIBOBJ(getline)
     AC_CHECK_FUNCS(fgetln)
 ])
-AC_CHECK_FUNCS(sysctl getutid getutxid, [break])
+AC_CHECK_FUNCS(sysctl getutxid getutid, [break])
 
 AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(util.h pty.h, [break])], [
     AC_CHECK_LIB(util, openpty, [
