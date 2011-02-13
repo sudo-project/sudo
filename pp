@@ -1435,8 +1435,8 @@ pp_debug "symlink target is $_tgt"
 	esac
 
 	# convert numeric uids into usernames; only works for /etc/passwd
-	case "$_o" in [0-9]*) _o=`pp_getpwuid $_o`;; esac
-	case "$_g" in [0-9]*) _g=`pp_getgrgid $_g`;; esac
+	#case "$_o" in [0-9]*) _o=`pp_getpwuid $_o`;; esac
+	#case "$_g" in [0-9]*) _g=`pp_getgrgid $_g`;; esac
 
 	pp_debug "$_type $_m $_o $_g $_f $_path" $_tgt
 	$_ignore || echo "$_type $_m $_o $_g $_f $_path" $_tgt
