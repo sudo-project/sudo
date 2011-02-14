@@ -219,7 +219,6 @@ lbuf_print(struct lbuf *lbuf)
     /* For very small widths just give up... */
     if (lbuf->cols <= lbuf->indent + contlen + 20) {
 	lbuf->output(lbuf->buf);
-	lbuf->output("\n");
 	goto done;
     }
 
