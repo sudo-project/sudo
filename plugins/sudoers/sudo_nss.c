@@ -254,7 +254,7 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 {
     struct sudo_nss *nss;
     struct lbuf defs, privs;
-    int count;
+    int count, olen;
 
     /* Reset group vector so group matching works correctly. */
     reset_groups(pw);
@@ -275,6 +275,7 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 	defs.len = 0;
 
     /* Display Runas and Cmnd-specific defaults from all sources. */
+    olen = defs.len;
     lbuf_append(&defs, "Runas and Command-specific defaults for ", pw->pw_name,
 	":\n", NULL);
     count = 0;
@@ -283,6 +284,8 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
     }
     if (count)
 	lbuf_append(&defs, "\n\n", NULL);
+    else
+	defs.len = olen;
 
     /* Display privileges from all sources. */
     lbuf_append(&privs, "User ", pw->pw_name,
