@@ -418,9 +418,9 @@ that would overwise be forbidden.  See L<sudoers(5)> for more information.
 
 Plugins are dynamically loaded based on the contents of the
 F<@sysconfdir@/sudo.conf> file.  If no F<@sysconfdir@/sudo.conf>
-file is present, B<sudo> will use the traditional I<sudoers> security
-policy and I/O logging, which corresponds to the following
-F<@sysconfdir@/sudo.conf> file.
+file is present, or it contains no C<Plugin> lines, B<sudo>
+will use the traditional I<sudoers> security policy and I/O logging,
+which corresponds to the following F<@sysconfdir@/sudo.conf> file.
 
  #
  # Default @sysconfdir@/sudo.conf file
