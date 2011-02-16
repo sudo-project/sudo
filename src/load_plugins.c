@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -64,25 +64,8 @@ sudo_read_conf(const char *conf_file)
     struct plugin_info *info;
     static struct plugin_info_list pil; /* XXX */
 
-    if ((fp = fopen(conf_file, "r")) == NULL) {
-	/* Default policy plugin */
-	info = emalloc(sizeof(*info));
-	info->symbol_name = "sudoers_policy";
-	info->path = SUDOERS_PLUGIN;
-	info->prev = info;
-	info->next = NULL;
-	tq_append(&pil, info);
-
-	/* Default I/O plugin */
-	info = emalloc(sizeof(*info));
-	info->symbol_name = "sudoers_io";
-	info->path = SUDOERS_PLUGIN;
-	info->prev = info;
-	info->next = NULL;
-	tq_append(&pil, info);
-
+    if ((fp = fopen(conf_file, "r")) == NULL)
 	goto done;
-    }
 
     while ((cp = sudo_parseln(fp)) != NULL) {
 	/* Skip blank or comment lines */
@@ -121,6 +104,23 @@ sudo_read_conf(const char *conf_file)
     fclose(fp);
 
 done:
+    if (tq_empty(&pil)) {
+	/* Default policy plugin */
+	info = emalloc(sizeof(*info));
+	info->symbol_name = "sudoers_policy";
+	info->path = SUDOERS_PLUGIN;
+	info->prev = info;
+	info->next = NULL;
+	tq_append(&pil, info);
+
+	/* Default I/O plugin */
+	info = emalloc(sizeof(*info));
+	info->symbol_name = "sudoers_io";
+	info->path = SUDOERS_PLUGIN;
+	info->prev = info;
+	info->next = NULL;
+	tq_append(&pil, info);
+    }
 
     return &pil;
 }
@@ -143,8 +143,6 @@ sudo_load_plugins(const char *conf_file,
 
     /* Parse sudo.conf */
     plugin_list = sudo_read_conf(conf_file);
-    if (tq_empty(plugin_list))
-	errorx(1, "no plugins defined in %s", conf_file);
 
     tq_foreach_fwd(plugin_list, info) {
 	if (info->path[0] == '/') {
