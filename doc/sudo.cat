@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0b4                 February  3, 2011                       1
+1.8.0b5                 February 16, 2011                       1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.8.0b4                 February  3, 2011                       2
+1.8.0b5                 February 16, 2011                       2
 
 
 
@@ -193,7 +193,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0b4                 February  3, 2011                       3
+1.8.0b5                 February 16, 2011                       3
 
 
 
@@ -259,7 +259,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0b4                 February  3, 2011                       4
+1.8.0b5                 February 16, 2011                       4
 
 
 
@@ -325,7 +325,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0b4                 February  3, 2011                       5
+1.8.0b5                 February 16, 2011                       5
 
 
 
@@ -379,9 +379,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 PPLLUUGGIINNSS
        Plugins are dynamically loaded based on the contents of the
-       _/_e_t_c_/_s_u_d_o_._c_o_n_f file.  If no _/_e_t_c_/_s_u_d_o_._c_o_n_f file is present, ssuuddoo will
-       use the traditional _s_u_d_o_e_r_s security policy and I/O logging, which
-       corresponds to the following _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
+       _/_e_t_c_/_s_u_d_o_._c_o_n_f file.  If no _/_e_t_c_/_s_u_d_o_._c_o_n_f file is present, or it
+       contains no Plugin lines, ssuuddoo will use the traditional _s_u_d_o_e_r_s
+       security policy and I/O logging, which corresponds to the following
+       _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
 
 
 
@@ -390,8 +391,7 @@ PPLLUUGGIINNSS
 
 
 
-
-1.8.0b4                 February  3, 2011                       6
+1.8.0b5                 February 16, 2011                       6
 
 
 
@@ -457,7 +457,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.8.0b4                 February  3, 2011                       7
+1.8.0b5                 February 16, 2011                       7
 
 
 
@@ -523,7 +523,7 @@ FFIILLEESS
 
 
 
-1.8.0b4                 February  3, 2011                       8
+1.8.0b5                 February 16, 2011                       8
 
 
 
@@ -589,7 +589,7 @@ CCAAVVEEAATTSS
 
 
 
-1.8.0b4                 February  3, 2011                       9
+1.8.0b5                 February 16, 2011                       9
 
 
 
@@ -655,6 +655,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.0b4                 February  3, 2011                      10
+1.8.0b5                 February 16, 2011                      10
 
 

@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "February  3, 2011" "1.8.0b4" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "February 16, 2011" "1.8.0b5" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -521,9 +521,9 @@ that would overwise be forbidden.  See \fIsudoers\fR\|(@mansectform@) for more i
 .IX Header "PLUGINS"
 Plugins are dynamically loaded based on the contents of the
 \&\fI@sysconfdir@/sudo.conf\fR file.  If no \fI@sysconfdir@/sudo.conf\fR
-file is present, \fBsudo\fR will use the traditional \fIsudoers\fR security
-policy and I/O logging, which corresponds to the following
-\&\fI@sysconfdir@/sudo.conf\fR file.
+file is present, or it contains no \f(CW\*(C`Plugin\*(C'\fR lines, \fBsudo\fR
+will use the traditional \fIsudoers\fR security policy and I/O logging,
+which corresponds to the following \fI@sysconfdir@/sudo.conf\fR file.
 .PP
 .Vb 10
 \& #
