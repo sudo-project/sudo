@@ -43,11 +43,11 @@
 #endif /* HAVE_UNISTD_H */
 #include <pwd.h>
 
-#include "sudo.h"
-#include "sudo_auth.h"
-
 #include <afs/stds.h>
 #include <afs/kautils.h>
+
+#include "sudo.h"
+#include "sudo_auth.h"
 
 int
 afs_verify(pw, pass, auth)
