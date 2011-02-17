@@ -1977,7 +1977,7 @@ dnl
 AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf tzset \
 	       strftime setrlimit initgroups getgroups fstat gettimeofday \
-	       regcomp setlocale nl_langinfo getaddrinfo setenv vhangup \
+	       regcomp setlocale nl_langinfo getaddrinfo setenv \
 	       mbr_check_membership setrlimit64)
 AC_CHECK_FUNCS(getline, [], [
     AC_LIBOBJ(getline)

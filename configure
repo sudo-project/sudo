@@ -15133,7 +15133,7 @@ LIBS=$ac_save_LIBS
 
 for ac_func in strchr strrchr memchr memcpy memset sysconf tzset \
 	       strftime setrlimit initgroups getgroups fstat gettimeofday \
-	       regcomp setlocale nl_langinfo getaddrinfo setenv vhangup \
+	       regcomp setlocale nl_langinfo getaddrinfo setenv \
 	       mbr_check_membership setrlimit64
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
