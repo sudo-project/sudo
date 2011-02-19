@@ -18,6 +18,9 @@
 
 #include <sys/types.h>
 #include <sys/param.h>
+#ifdef HAVE_SYS_SYSMACROS_H
+# include <sys/sysmacros.h>
+#endif
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/wait.h>
