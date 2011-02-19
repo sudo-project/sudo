@@ -105,7 +105,7 @@ The policy_plugin struct has the following fields:
 
 =item type
 
-The C<type> field should always be set to SUDO_POLICY_PLUGIN
+The C<type> field should always be set to SUDO_POLICY_PLUGIN.
 
 =item version
 
