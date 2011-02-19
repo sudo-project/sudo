@@ -239,7 +239,7 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
      * We communicate with the child over a bi-directional pair of sockets.
      * Parent sends signal info to child and child sends back wait status.
      */
-    if (socketpair(PF_UNIX, SOCK_DGRAM, 0, sv) != 0)
+    if (socketpair(PF_UNIX, SOCK_DGRAM, 0, sv) == -1)
 	error(1, "cannot create sockets");
 
     /*
