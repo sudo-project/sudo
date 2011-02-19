@@ -14086,7 +14086,7 @@ $as_echo "#define TIME_WITH_SYS_TIME 1" >>confdefs.h
 
 fi
 
-for ac_header in malloc.h paths.h utime.h netgroup.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h
+for ac_header in malloc.h paths.h utime.h netgroup.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"

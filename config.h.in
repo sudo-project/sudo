@@ -546,6 +546,9 @@
 /* Define to 1 if you have the <sys/stropts.h> header file. */
 #undef HAVE_SYS_STROPTS_H
 
+/* Define to 1 if you have the <sys/sysmacros.h> header file. */
+#undef HAVE_SYS_SYSMACROS_H
+
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 

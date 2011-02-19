@@ -1898,7 +1898,7 @@ dnl
 AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_TIME
-AC_CHECK_HEADERS(malloc.h paths.h utime.h netgroup.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h)
+AC_CHECK_HEADERS(malloc.h paths.h utime.h netgroup.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h)
 dnl
 dnl Check for large file support.  HP-UX 11.23 has a broken sys/type.h
 dnl when large files support is enabled so work around it.
