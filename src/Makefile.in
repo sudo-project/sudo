@@ -53,6 +53,7 @@ sbindir = @sbindir@
 sysconfdir = @sysconfdir@
 libexecdir = @libexecdir@
 datarootdir = @datarootdir@
+localstatedir = @localstatedir@
 noexecfile = @NOEXECFILE@
 noexecdir = @NOEXECDIR@
 

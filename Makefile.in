@@ -29,6 +29,7 @@ sysconfdir = @sysconfdir@
 libexecdir = @libexecdir@
 includedir = @includedir@
 datarootdir = @datarootdir@
+localstatedir = @localstatedir@
 docdir = @docdir@
 mandir = @mandir@
 timedir = @timedir@

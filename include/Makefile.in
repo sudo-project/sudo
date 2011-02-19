@@ -30,6 +30,7 @@ INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 # Where to install things...
 prefix = @prefix@
 datarootdir = @datarootdir@
+localstatedir = @localstatedir@
 
 # User and group ids the installed files should be "owned" by
 install_uid = 0

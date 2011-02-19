@@ -66,6 +66,7 @@ sbindir = @sbindir@
 sysconfdir = @sysconfdir@
 libexecdir = @libexecdir@
 datarootdir = @datarootdir@
+localstatedir = @localstatedir@
 
 # Directory in which to install the sudoers plugin
 plugindir = @PLUGINDIR@

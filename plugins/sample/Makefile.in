@@ -52,6 +52,7 @@ sbindir = @sbindir@
 sysconfdir = @sysconfdir@
 libexecdir = @libexecdir@
 datarootdir = @datarootdir@
+localstatedir = @localstatedir@
 plugindir = @PLUGINDIR@
 
 # OS dependent defines
