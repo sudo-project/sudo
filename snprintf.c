@@ -340,13 +340,13 @@ xxxprintf(strp, strsize, alloc, fmt0, ap)
 } while (0)
 
 	/* BEWARE, PAD uses `n'. */
-#define	PAD(howmany, with) do { \
-	if ((n = (howmany)) > 0) { \
+#define	PAD(plen, pstr) do { \
+	if ((n = (plen)) > 0) { \
 		while (n > PADSIZE) { \
-			PRINT(with, PADSIZE); \
+			PRINT(pstr, PADSIZE); \
 			n -= PADSIZE; \
 		} \
-		PRINT(with, n); \
+		PRINT(pstr, n); \
 	} \
 } while (0)
 
