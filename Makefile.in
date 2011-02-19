@@ -64,6 +64,7 @@ sbindir = @sbindir@
 sysconfdir = @sysconfdir@
 libexecdir = @libexecdir@
 datarootdir = @datarootdir@
+localstatedir = @localstatedir@
 docdir = @docdir@
 mandir = @mandir@
 timedir = @timedir@
