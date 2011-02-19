@@ -228,7 +228,8 @@ be enclosed in double quotes to avoid the need for escaping special
 characters.  Alternately, special characters may be specified in
 escaped hex mode, e.g. \x20 for space.
 
-The C<nonunix_group> syntax depends on the underlying implementation.
+The actual C<nonunix_group> syntax depends on the underlying group
+provider plugin (see the I<group_plugin> description below).
 For instance, the QAS AD plugin supports the following formats:
 
 =over 4
