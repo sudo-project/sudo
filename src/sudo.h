@@ -207,7 +207,7 @@ extern struct user_details user_details;
 int sudo_edit(struct command_details *details, char *argv[], char *envp[]);
 
 /* parse_args.c */
-void usage(int) __attribute__((__noreturn__));
+void usage(int);
 
 /* selinux.c */
 int selinux_restore_tty(void);

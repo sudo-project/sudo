@@ -21,9 +21,9 @@ sudoreplay - replay sudo session logs
 
 =head1 SYNOPSIS
 
-B<sudoreplay> [B<-d> I<directory>] [B<-f> I<filter>] [B<-m> I<max_wait>] [B<-s> I<speed_factor>] ID
+B<sudoreplay> [B<-h>] [B<-d> I<directory>] [B<-f> I<filter>] [B<-m> I<max_wait>] [B<-s> I<speed_factor>] ID
 
-B<sudoreplay> [B<-d> I<directory>] -l [search expression]
+B<sudoreplay> [B<-h>] [B<-d> I<directory>] -l [search expression]
 
 =head1 DESCRIPTION
 
@@ -76,7 +76,12 @@ used to select which of these to output.  The I<filter> argument
 is a comma-separated list, consisting of one or more of following:
 I<stdout>, I<stderr>, and I<ttyout>.
 
-=item -l
+=item -h
+
+The B<-h> (I<help>) option causes B<sudoreplay> to print a short
+help message to the standard output and exit.
+
+=item -l [I<search expression>]
 
 Enable "list mode".  In this mode, B<sudoreplay> will list available
 session IDs.  If a I<search expression> is specified, it will be

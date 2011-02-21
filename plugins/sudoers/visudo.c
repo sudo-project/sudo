@@ -111,7 +111,8 @@ static int visudo_printf(int msg_type, const char *fmt, ...);
 static void print_selfref(char *name, int, int, int);
 static void print_undefined(char *name, int, int, int);
 static void setup_signals(void);
-static void usage(void) __attribute__((__noreturn__));
+static void help(void) __attribute__((__noreturn__));
+static void usage(int);
 
 void cleanup(int);
 
@@ -154,7 +155,7 @@ main(int argc, char *argv[])
     setprogname(argc > 0 ? argv[0] : "visudo");
 #endif
     if (argc < 1)
-	usage();
+	usage(1);
 
     /*
      * Arg handling.
@@ -173,6 +174,9 @@ main(int argc, char *argv[])
 		sudoers_path = optarg;	/* sudoers file path */
 		oldperms = TRUE;
 		break;
+	    case 'h':
+		help();
+		break;
 	    case 's':
 		strict++;		/* strict mode */
 		break;
@@ -180,13 +184,13 @@ main(int argc, char *argv[])
 		quiet++;		/* quiet mode */
 		break;
 	    default:
-		usage();
+		usage(1);
 	}
     }
     argc -= optind;
     argv += optind;
     if (argc)
-	usage();
+	usage(1);
 
     sudo_setpwent();
     sudo_setgrent();
@@ -1157,11 +1161,27 @@ quit(int signo)
 }
 
 static void
-usage(void)
+usage(int fatal)
 {
-    (void) fprintf(stderr, "usage: %s [-c] [-q] [-s] [-V] [-f sudoers]\n",
-	getprogname());
-    exit(1);
+    (void) fprintf(fatal ? stderr : stdout,
+	"usage: %s [-chqsV] [-f sudoers]\n", getprogname());
+    if (fatal)
+	exit(1);
+}
+
+static void
+help(void)
+{
+    (void) printf("%s - safely edit the sudoers file\n\n", getprogname());
+    usage(0);
+    (void) puts("\nOptions:");
+    (void) puts("  -c          check-only mode");
+    (void) puts("  -f sudoers  specify sudoers file location");
+    (void) puts("  -h          display help message and exit");
+    (void) puts("  -q          less verbose (quiet) syntax error messages");
+    (void) puts("  -s          strict syntax checking");
+    (void) puts("  -V          display version information and exit");
+    exit(0);
 }
 
 static int

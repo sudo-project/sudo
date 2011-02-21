@@ -196,7 +196,8 @@ static int list_sessions(int, char **, const char *, const char *, const char *)
 static int parse_expr(struct search_node **, char **);
 static void check_input(int, double *);
 static void delay(double);
-static void usage(void);
+static void help(void) __attribute__((__noreturn__));
+static void usage(int);
 static void *open_io_fd(char *pathbuf, int len, const char *suffix);
 static int parse_timing(const char *buf, const char *decimal, int *idx, double *seconds, size_t *nbytes);
 
@@ -233,7 +234,7 @@ main(int argc, char *argv[])
     decimal = localeconv()->decimal_point;
 #endif
 
-    while ((ch = getopt(argc, argv, "d:f:lm:s:V")) != -1) {
+    while ((ch = getopt(argc, argv, "d:f:hlm:s:V")) != -1) {
 	switch(ch) {
 	case 'd':
 	    session_dir = optarg;
@@ -252,6 +253,9 @@ main(int argc, char *argv[])
 		    errorx(1, "invalid filter option: %s", optarg);
 	    }
 	    break;
+	case 'h':
+	    help();
+	    /* NOTREACHED */
 	case 'l':
 	    listonly = 1;
 	    break;
@@ -271,7 +275,7 @@ main(int argc, char *argv[])
 	    (void) printf("%s version %s\n", getprogname(), PACKAGE_VERSION);
 	    exit(0);
 	default:
-	    usage();
+	    usage(1);
 	    /* NOTREACHED */
 	}
 
@@ -283,7 +287,7 @@ main(int argc, char *argv[])
 	exit(list_sessions(argc, argv, pattern, user, tty));
 
     if (argc != 1)
-	usage();
+	usage(1);
 
     /* 6 digit ID in base 36, e.g. 01G712AB */
     id = argv[0];
@@ -917,15 +921,32 @@ bad:
 }
 
 static void
-usage(void)
+usage(int fatal)
 {
-    fprintf(stderr,
-	"usage: %s [-d directory] [-m max_wait] [-s speed_factor] ID\n",
+    fprintf(fatal ? stderr : stdout,
+	"usage: %s [-h] [-d directory] [-m max_wait] [-s speed_factor] ID\n",
 	getprogname());
-    fprintf(stderr,
-	"usage: %s [-d directory] -l [search expression]\n",
+    fprintf(fatal ? stderr : stdout,
+	"usage: %s [-h] [-d directory] -l [search expression]\n",
 	getprogname());
-    exit(1);
+    if (fatal)
+	exit(1);
+}
+
+static void
+help(void)
+{
+    (void) printf("%s - replay sudo session logs\n\n", getprogname());
+    usage(0);
+    (void) puts("\nOptions:");
+    (void) puts("  -d directory     specify directory for session logs");
+    (void) puts("  -f filter        specify which I/O type to display");
+    (void) puts("  -h               display help message and exit");
+    (void) puts("  -l [expression]  list available session IDs that match expression");
+    (void) puts("  -m max_wait      max number of seconds to wait between events");
+    (void) puts("  -s speed_factor  speed up or slow down output");
+    (void) puts("  -V               display version information and exit");
+    exit(0);
 }
 
 /*
