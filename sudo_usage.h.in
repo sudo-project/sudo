@@ -19,7 +19,8 @@
 #ifndef _SUDO_USAGE_H
 #define _SUDO_USAGE_H
 
-void usage __P((int)) __attribute__((__noreturn__));
+void help __P((void)) __attribute__((__noreturn__));
+void usage __P((int));
 
 /*
  * Usage strings for sudo.  These are here because we

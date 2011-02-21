@@ -235,7 +235,7 @@ main(argc, argv, envp)
 		show_version();
 		break;
 	    case MODE_HELP:
-		usage(0);
+		help();
 		break;
 	    case MODE_VALIDATE:
 	    case MODE_VALIDATE|MODE_INVALIDATE:

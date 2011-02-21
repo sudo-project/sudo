@@ -110,7 +110,8 @@ static int run_command		__P((char *, char **));
 static void print_selfref	__P((char *, int, int, int));
 static void print_undefined	__P((char *, int, int, int));
 static void setup_signals	__P((void));
-static void usage		__P((void)) __attribute__((__noreturn__));
+static void help		__P((void)) __attribute__((__noreturn__));
+static void usage		__P((int));
 
 extern void yyerror		__P((const char *));
 extern void yyrestart		__P((FILE *));
@@ -153,14 +154,14 @@ main(argc, argv)
 
     Argv = argv;
     if ((Argc = argc) < 1)
-	usage();
+	usage(1);
 
     /*
      * Arg handling.
      */
     checkonly = oldperms = quiet = strict = FALSE;
     sudoers_path = _PATH_SUDOERS;
-    while ((ch = getopt(argc, argv, "Vcf:sq")) != -1) {
+    while ((ch = getopt(argc, argv, "Vcf:hsq")) != -1) {
 	switch (ch) {
 	    case 'V':
 		(void) printf("%s version %s\n", getprogname(), PACKAGE_VERSION);
@@ -172,6 +173,9 @@ main(argc, argv)
 		sudoers_path = optarg;	/* sudoers file path */
 		oldperms = TRUE;
 		break;
+	    case 'h':
+		help();
+		break;
 	    case 's':
 		strict++;		/* strict mode */
 		break;
@@ -179,13 +183,13 @@ main(argc, argv)
 		quiet++;		/* quiet mode */
 		break;
 	    default:
-		usage();
+		usage(1);
 	}
     }
     argc -= optind;
     argv += optind;
     if (argc)
-	usage();
+	usage(1);
 
     sudo_setpwent();
     sudo_setgrent();
@@ -1185,9 +1189,26 @@ quit(signo)
 }
 
 static void
-usage()
+usage(fatal)
+    int fatal;
 {
-    (void) fprintf(stderr, "usage: %s [-c] [-q] [-s] [-V] [-f sudoers]\n",
-	getprogname());
-    exit(1);
+    (void) fprintf(fatal ? stderr : stdout,
+	"usage: %s [-chqsV] [-f sudoers]\n", getprogname());
+    if (fatal)
+	exit(1);
+}
+
+static void
+help()
+{
+    (void) printf("%s - safely edit the sudoers file\n\n", getprogname());
+    usage(0);
+    (void) puts("\nOptions:");
+    (void) puts("  -c          check-only mode");
+    (void) puts("  -f sudoers  specify sudoers file location");
+    (void) puts("  -h          display help message and exit");
+    (void) puts("  -q          less verbose (quiet) syntax error messages");
+    (void) puts("  -s          strict syntax checking");
+    (void) puts("  -V          display version information and exit");
+    exit(0);
 }

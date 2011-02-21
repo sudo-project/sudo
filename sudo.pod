@@ -221,7 +221,8 @@ command line.
 
 =item -h
 
-The B<-h> (I<help>) option causes B<sudo> to print a usage message and exit.
+The B<-h> (I<help>) option causes B<sudo> to print a short help message
+to the standard output and exit.
 
 =item -i [command]
 

@@ -26,7 +26,7 @@ visudo - edit the sudoers file
 
 =head1 SYNOPSIS
 
-B<visudo> [B<-c>] [B<-q>] [B<-s>] [B<-V>] [B<-f> I<sudoers>]
+B<visudo> [B<-chqsV>] [B<-f> I<sudoers>]
 
 =head1 DESCRIPTION
 
@@ -84,6 +84,11 @@ instead of the default, F<@sysconfdir@/sudoers>.  The lock file used
 is the specified I<sudoers> file with ".tmp" appended to it.
 In B<check-only> mode only, the argument to B<-f> may be "-",
 indicating that I<sudoers> will be read from the standard input.
+
+=item -h
+
+The B<-h> (I<help>) option causes B<visudo> to print a short help message
+to the standard output and exit.
 
 =item -q
 
