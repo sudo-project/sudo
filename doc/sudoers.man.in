@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "February 16, 2011" "1.8.0b5" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "February 21, 2011" "1.8.0rc1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -360,7 +360,8 @@ be enclosed in double quotes to avoid the need for escaping special
 characters.  Alternately, special characters may be specified in
 escaped hex mode, e.g. \ex20 for space.
 .PP
-The \f(CW\*(C`nonunix_group\*(C'\fR syntax depends on the underlying implementation.
+The actual \f(CW\*(C`nonunix_group\*(C'\fR syntax depends on the underlying group
+provider plugin (see the \fIgroup_plugin\fR description below).
 For instance, the \s-1QAS\s0 \s-1AD\s0 plugin supports the following formats:
 .IP "\(bu" 4
 Group in the same domain: \*(L"Group Name\*(R"

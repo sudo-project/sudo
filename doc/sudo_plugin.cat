@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0b5                 February 16, 2011                       1
+1.8.0rc1                February 21, 2011                       1
 
 
 
@@ -99,7 +99,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
        The policy_plugin struct has the following fields:
 
        type
-           The type field should always be set to SUDO_POLICY_PLUGIN
+           The type field should always be set to SUDO_POLICY_PLUGIN.
 
        version
            The version field should be set to SUDO_API_VERSION.
@@ -127,7 +127,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b5                 February 16, 2011                       2
+1.8.0rc1                February 21, 2011                       2
 
 
 
@@ -193,7 +193,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b5                 February 16, 2011                       3
+1.8.0rc1                February 21, 2011                       3
 
 
 
@@ -259,7 +259,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b5                 February 16, 2011                       4
+1.8.0rc1                February 21, 2011                       4
 
 
 
@@ -325,7 +325,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b5                 February 16, 2011                       5
+1.8.0rc1                February 21, 2011                       5
 
 
 
@@ -391,7 +391,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b5                 February 16, 2011                       6
+1.8.0rc1                February 21, 2011                       6
 
 
 
@@ -457,7 +457,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b5                 February 16, 2011                       7
+1.8.0rc1                February 21, 2011                       7
 
 
 
@@ -523,7 +523,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b5                 February 16, 2011                       8
+1.8.0rc1                February 21, 2011                       8
 
 
 
@@ -589,7 +589,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b5                 February 16, 2011                       9
+1.8.0rc1                February 21, 2011                       9
 
 
 
@@ -655,7 +655,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b5                 February 16, 2011                      10
+1.8.0rc1                February 21, 2011                      10
 
 
 
@@ -721,7 +721,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b5                 February 16, 2011                      11
+1.8.0rc1                February 21, 2011                      11
 
 
 
@@ -787,7 +787,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b5                 February 16, 2011                      12
+1.8.0rc1                February 21, 2011                      12
 
 
 
@@ -853,7 +853,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b5                 February 16, 2011                      13
+1.8.0rc1                February 21, 2011                      13
 
 
 
@@ -919,7 +919,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b5                 February 16, 2011                      14
+1.8.0rc1                February 21, 2011                      14
 
 
 
@@ -985,7 +985,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b5                 February 16, 2011                      15
+1.8.0rc1                February 21, 2011                      15
 
 
 
@@ -1051,7 +1051,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b5                 February 16, 2011                      16
+1.8.0rc1                February 21, 2011                      16
 
 
 
@@ -1117,7 +1117,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b5                 February 16, 2011                      17
+1.8.0rc1                February 21, 2011                      17
 
 
 
@@ -1183,7 +1183,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0b5                 February 16, 2011                      18
+1.8.0rc1                February 21, 2011                      18
 
 
 
@@ -1249,6 +1249,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.0b5                 February 16, 2011                      19
+1.8.0rc1                February 21, 2011                      19
 
 

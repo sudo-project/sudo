@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "February 16, 2011" "1.8.0b5" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "February 21, 2011" "1.8.0rc1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -348,7 +348,8 @@ user (root by default) as specified by the password database.
 Depending on the policy, this may be the default behavior.
 .IP "\-h" 12
 .IX Item "-h"
-The \fB\-h\fR (\fIhelp\fR) option causes \fBsudo\fR to print a usage message and exit.
+The \fB\-h\fR (\fIhelp\fR) option causes \fBsudo\fR to print a short help message
+to the standard output and exit.
 .IP "\-i [command]" 12
 .IX Item "-i [command]"
 The \fB\-i\fR (\fIsimulate initial login\fR) option runs the shell specified

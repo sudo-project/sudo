@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0b5                 February 16, 2011                       1
+1.8.0rc1                February 21, 2011                       1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.8.0b5                 February 16, 2011                       2
+1.8.0rc1                February 21, 2011                       2
 
 
 
@@ -189,11 +189,11 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    database.  Depending on the policy, this may be the default
                    behavior.
 
-       -h          The --hh (_h_e_l_p) option causes ssuuddoo to print a usage message
+       -h          The --hh (_h_e_l_p) option causes ssuuddoo to print a short help
 
 
 
-1.8.0b5                 February 16, 2011                       3
+1.8.0rc1                February 21, 2011                       3
 
 
 
@@ -202,7 +202,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
-                   and exit.
+                   message to the standard output and exit.
 
        -i [command]
                    The --ii (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs the shell
@@ -259,7 +259,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0b5                 February 16, 2011                       4
+1.8.0rc1                February 21, 2011                       4
 
 
 
@@ -325,7 +325,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0b5                 February 16, 2011                       5
+1.8.0rc1                February 21, 2011                       5
 
 
 
@@ -391,7 +391,7 @@ PPLLUUGGIINNSS
 
 
 
-1.8.0b5                 February 16, 2011                       6
+1.8.0rc1                February 21, 2011                       6
 
 
 
@@ -457,7 +457,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.8.0b5                 February 16, 2011                       7
+1.8.0rc1                February 21, 2011                       7
 
 
 
@@ -523,7 +523,7 @@ FFIILLEESS
 
 
 
-1.8.0b5                 February 16, 2011                       8
+1.8.0rc1                February 21, 2011                       8
 
 
 
@@ -589,7 +589,7 @@ CCAAVVEEAATTSS
 
 
 
-1.8.0b5                 February 16, 2011                       9
+1.8.0rc1                February 21, 2011                       9
 
 
 
@@ -655,6 +655,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.0b5                 February 16, 2011                      10
+1.8.0rc1                February 21, 2011                      10
 
 
