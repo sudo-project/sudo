@@ -144,7 +144,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "February 13, 2011" "1.7.5b5" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "February 21, 2011" "1.7.5rc1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -153,7 +153,7 @@
 visudo \- edit the sudoers file
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBvisudo\fR [\fB\-c\fR] [\fB\-q\fR] [\fB\-s\fR] [\fB\-V\fR] [\fB\-f\fR \fIsudoers\fR]
+\&\fBvisudo\fR [\fB\-chqsV\fR] [\fB\-f\fR \fIsudoers\fR]
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 \&\fBvisudo\fR edits the \fIsudoers\fR file in a safe fashion, analogous to
@@ -205,6 +205,10 @@ instead of the default, \fI@sysconfdir@/sudoers\fR.  The lock file used
 is the specified \fIsudoers\fR file with \*(L".tmp\*(R" appended to it.
 In \fBcheck-only\fR mode only, the argument to \fB\-f\fR may be \*(L"\-\*(R",
 indicating that \fIsudoers\fR will be read from the standard input.
+.IP "\-h" 12
+.IX Item "-h"
+The \fB\-h\fR (\fIhelp\fR) option causes \fBvisudo\fR to print a short help message
+to the standard output and exit.
 .IP "\-q" 12
 .IX Item "-q"
 Enable \fBquiet\fR mode.  In this mode details about syntax errors

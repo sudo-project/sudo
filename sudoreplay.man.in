@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOREPLAY @mansectsu@"
-.TH SUDOREPLAY @mansectsu@ "February 13, 2011" "1.7.5b5" "MAINTENANCE COMMANDS"
+.TH SUDOREPLAY @mansectsu@ "February 21, 2011" "1.7.5rc1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -148,9 +148,9 @@
 sudoreplay \- replay sudo session logs
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBsudoreplay\fR [\fB\-d\fR \fIdirectory\fR] [\fB\-f\fR \fIfilter\fR] [\fB\-m\fR \fImax_wait\fR] [\fB\-s\fR \fIspeed_factor\fR] \s-1ID\s0
+\&\fBsudoreplay\fR [\fB\-h\fR] [\fB\-d\fR \fIdirectory\fR] [\fB\-f\fR \fIfilter\fR] [\fB\-m\fR \fImax_wait\fR] [\fB\-s\fR \fIspeed_factor\fR] \s-1ID\s0
 .PP
-\&\fBsudoreplay\fR [\fB\-d\fR \fIdirectory\fR] \-l [search expression]
+\&\fBsudoreplay\fR [\fB\-h\fR] [\fB\-d\fR \fIdirectory\fR] \-l [search expression]
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 \&\fBsudoreplay\fR plays back or lists the session logs created by
@@ -187,8 +187,12 @@ output, standard error and tty output.  The \fI\-f\fR option can be
 used to select which of these to output.  The \fIfilter\fR argument
 is a comma-separated list, consisting of one or more of following:
 \&\fIstdout\fR, \fIstderr\fR, and \fIttyout\fR.
-.IP "\-l" 12
-.IX Item "-l"
+.IP "\-h" 12
+.IX Item "-h"
+The \fB\-h\fR (\fIhelp\fR) option causes \fBsudoreplay\fR to print a short
+help message to the standard output and exit.
+.IP "\-l [\fIsearch expression\fR]" 12
+.IX Item "-l [search expression]"
 Enable \*(L"list mode\*(R".  In this mode, \fBsudoreplay\fR will list available
 session IDs.  If a \fIsearch expression\fR is specified, it will be
 used to restrict the IDs that are displayed.  An expression is

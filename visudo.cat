@@ -8,7 +8,7 @@ NNAAMMEE
        visudo - edit the sudoers file
 
 SSYYNNOOPPSSIISS
-       vviissuuddoo [--cc] [--qq] [--ss] [--VV] [--ff _s_u_d_o_e_r_s]
+       vviissuuddoo [--cchhqqssVV] [--ff _s_u_d_o_e_r_s]
 
 DDEESSCCRRIIPPTTIIOONN
        vviissuuddoo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous to _v_i_p_w(1m).
@@ -61,7 +61,7 @@ OOPPTTIIOONNSS
 
 
 
-1.7.5b5                 February 13, 2011                       1
+1.7.5rc1                February 21, 2011                       1
 
 
 
@@ -69,6 +69,9 @@ OOPPTTIIOONNSS
 
 VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
+
+       -h          The --hh (_h_e_l_p) option causes vviissuuddoo to print a short help
+                   message to the standard output and exit.
 
        -q          Enable qquuiieett mode.  In this mode details about syntax
                    errors are not printed.  This option is only useful when
@@ -120,14 +123,11 @@ DDIIAAGGNNOOSSTTIICCSS
            used.  You may wish to comment out or remove the unused alias.  In
            --ss (strict) mode this is an error, not a warning.
 
-SSEEEE AALLSSOO
-       _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(8)
 
 
 
 
-
-1.7.5b5                 February 13, 2011                       2
+1.7.5rc1                February 21, 2011                       2
 
 
 
@@ -135,6 +135,9 @@ SSEEEE AALLSSOO
 
 VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
+
+SSEEEE AALLSSOO
+       _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(8)
 
 AAUUTTHHOORR
        Many people have worked on _s_u_d_o over the years; this version of vviissuuddoo
@@ -190,9 +193,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-1.7.5b5                 February 13, 2011                       3
+1.7.5rc1                February 21, 2011                       3
 
 

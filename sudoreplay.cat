@@ -8,10 +8,10 @@ NNAAMMEE
        sudoreplay - replay sudo session logs
 
 SSYYNNOOPPSSIISS
-       ssuuddoorreeppllaayy [--dd _d_i_r_e_c_t_o_r_y] [--ff _f_i_l_t_e_r] [--mm _m_a_x___w_a_i_t] [--ss _s_p_e_e_d___f_a_c_t_o_r]
-       ID
+       ssuuddoorreeppllaayy [--hh] [--dd _d_i_r_e_c_t_o_r_y] [--ff _f_i_l_t_e_r] [--mm _m_a_x___w_a_i_t] [--ss
+       _s_p_e_e_d___f_a_c_t_o_r] ID
 
-       ssuuddoorreeppllaayy [--dd _d_i_r_e_c_t_o_r_y] -l [search expression]
+       ssuuddoorreeppllaayy [--hh] [--dd _d_i_r_e_c_t_o_r_y] -l [search expression]
 
 DDEESSCCRRIIPPTTIIOONN
        ssuuddoorreeppllaayy plays back or lists the session logs created by ssuuddoo.  When
@@ -47,21 +47,21 @@ OOPPTTIIOONNSS
                    _f_i_l_t_e_r argument is a comma-separated list, consisting of
                    one or more of following: _s_t_d_o_u_t, _s_t_d_e_r_r, and _t_t_y_o_u_t.
 
-       -l          Enable "list mode".  In this mode, ssuuddoorreeppllaayy will list
+       -h          The --hh (_h_e_l_p) option causes ssuuddoorreeppllaayy to print a short
+                   help message to the standard output and exit.
+
+       -l [_s_e_a_r_c_h _e_x_p_r_e_s_s_i_o_n]
+                   Enable "list mode".  In this mode, ssuuddoorreeppllaayy will list
                    available session IDs.  If a _s_e_a_r_c_h _e_x_p_r_e_s_s_i_o_n is
                    specified, it will be used to restrict the IDs that are
                    displayed.  An expression is composed of the following
                    predicates:
 
-                   command _c_o_m_m_a_n_d _p_a_t_t_e_r_n
-                           Evaluates to true if the command run matches
-                           _c_o_m_m_a_n_d _p_a_t_t_e_r_n.  On systems with POSIX regular
-                           expression support, the pattern may be an extended
-                           regular expression.  On systems without POSIX
 
 
 
-1.7.5b5                 February 13, 2011                       1
+
+1.7.5rc1                February 21, 2011                       1
 
 
 
@@ -70,6 +70,11 @@ OOPPTTIIOONNSS
 SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
 
+                   command _c_o_m_m_a_n_d _p_a_t_t_e_r_n
+                           Evaluates to true if the command run matches
+                           _c_o_m_m_a_n_d _p_a_t_t_e_r_n.  On systems with POSIX regular
+                           expression support, the pattern may be an extended
+                           regular expression.  On systems without POSIX
                            regular expression support, a simple substring
                            match is performed instead.
 
@@ -119,15 +124,10 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
        -m _m_a_x___w_a_i_t Specify an upper bound on how long to wait between key
                    presses or output data.  By default, ssuuddoo__rreeppllaayy will
-                   accurately reproduce the delays between key presses or
-                   program output.  However, this can be tedious when the
-                   session includes long pauses.  When the _-_m option is
-                   specified, ssuuddoorreeppllaayy will limit these pauses to at most
-                   _m_a_x___w_a_i_t seconds.  The value may be specified as a floating
 
 
 
-1.7.5b5                 February 13, 2011                       2
+1.7.5rc1                February 21, 2011                       2
 
 
 
@@ -136,6 +136,11 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
 
+                   accurately reproduce the delays between key presses or
+                   program output.  However, this can be tedious when the
+                   session includes long pauses.  When the _-_m option is
+                   specified, ssuuddoorreeppllaayy will limit these pauses to at most
+                   _m_a_x___w_a_i_t seconds.  The value may be specified as a floating
                    point number, .e.g. _2_._5.
 
        -s _s_p_e_e_d___f_a_c_t_o_r
@@ -186,14 +191,9 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
        2 hours ago
                2 hours ago.
 
-       next Friday
-               The first second of the next Friday.
 
 
-
-
-
-1.7.5b5                 February 13, 2011                       3
+1.7.5rc1                February 21, 2011                       3
 
 
 
@@ -201,6 +201,9 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
 SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
+
+       next Friday
+               The first second of the next Friday.
 
        this week
                The current time but the first day of the coming week.
@@ -254,12 +257,9 @@ EEXXAAMMPPLLEESS
 
         sudoreplay -l user millert
 
-       List sessions run by user _b_o_b with a command containing the string vi:
 
 
-
-
-1.7.5b5                 February 13, 2011                       4
+1.7.5rc1                February 21, 2011                       4
 
 
 
@@ -267,6 +267,8 @@ EEXXAAMMPPLLEESS
 
 SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
+
+       List sessions run by user _b_o_b with a command containing the string vi:
 
         sudoreplay -l user bob command vi
 
@@ -323,8 +325,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-1.7.5b5                 February 13, 2011                       5
+1.7.5rc1                February 21, 2011                       5
 
 
