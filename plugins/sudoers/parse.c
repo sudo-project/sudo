@@ -83,7 +83,7 @@ sudo_file_open(struct sudo_nss *nss)
 {
     if (def_ignore_local_sudoers)
 	return -1;
-    nss->handle = open_sudoers(_PATH_SUDOERS, FALSE, NULL);
+    nss->handle = open_sudoers(sudoers_file, FALSE, NULL);
     return nss->handle ? 0 : -1;
 }
 
@@ -109,7 +109,7 @@ sudo_file_parse(struct sudo_nss *nss)
     if (nss->handle == NULL)
 	return -1;
 
-    init_parser(_PATH_SUDOERS, 0);
+    init_parser(sudoers_file, 0);
     yyin = nss->handle;
     if (yyparse() != 0 || parse_error) {
 	log_error(NO_EXIT, "parse error in %s near line %d",

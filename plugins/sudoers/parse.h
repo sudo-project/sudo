@@ -185,7 +185,7 @@ void alias_free(void *);
 void alias_apply(int (*)(void *, void *), void *);
 void init_aliases(void);
 void init_lexer(void);
-void init_parser(char *, int);
+void init_parser(const char *, int);
 int alias_compare(const void *, const void *);
 
 #endif /* _SUDO_PARSE_H */

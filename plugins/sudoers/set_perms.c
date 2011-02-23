@@ -246,21 +246,21 @@ set_perms(int perm)
 
 	/* assumes euid == ROOT_UID, ruid == user */
 	state->rgid = -1;
-	state->egid = SUDOERS_GID;
+	state->egid = sudoers_gid;
 	state->sgid = -1;
 	if (setresgid(-1, ID(egid), -1))
 	    error(1, "unable to change to sudoers gid");
 
 	state->ruid = ROOT_UID;
 	/*
-	 * If SUDOERS_UID == ROOT_UID and SUDOERS_MODE is group readable
+	 * If sudoers_uid == ROOT_UID and sudoers_mode is group readable
 	 * we use a non-zero uid in order to avoid NFS lossage.
 	 * Using uid 1 is a bit bogus but should work on all OS's.
 	 */
-	if (SUDOERS_UID == ROOT_UID && (SUDOERS_MODE & 040))
+	if (sudoers_uid == ROOT_UID && (sudoers_mode & 040))
 	    state->euid = 1;
 	else
-	    state->euid = SUDOERS_UID;
+	    state->euid = sudoers_uid;
 	state->suid = ROOT_UID;
 	if (setresuid(ID(ruid), ID(euid), ID(suid))) {
 	    errstr = "setresuid(ROOT_UID, SUDOERS_UID, ROOT_UID)";
@@ -475,20 +475,20 @@ set_perms(int perm)
 
 	/* assume euid == ROOT_UID, ruid == user */
 	state->rgid = -1;
-	state->egid = SUDOERS_GID;
+	state->egid = sudoers_gid;
 	if (setregid(-1, ID(egid)))
 	    error(1, "unable to change to sudoers gid");
 
 	state->ruid = ROOT_UID;
 	/*
-	 * If SUDOERS_UID == ROOT_UID and SUDOERS_MODE is group readable
+	 * If sudoers_uid == ROOT_UID and sudoers_mode is group readable
 	 * we use a non-zero uid in order to avoid NFS lossage.
 	 * Using uid 1 is a bit bogus but should work on all OS's.
 	 */
-	if (SUDOERS_UID == ROOT_UID && (SUDOERS_MODE & 040))
+	if (sudoers_uid == ROOT_UID && (sudoers_mode & 040))
 	    state->euid = 1;
 	else
-	    state->euid = SUDOERS_UID;
+	    state->euid = sudoers_uid;
 	if (setreuid(ID(ruid), ID(euid))) {
 	    errstr = "setreuid(ROOT_UID, SUDOERS_UID)";
 	    goto bad;
@@ -706,20 +706,20 @@ set_perms(int perm)
 
 	/* assume euid == ROOT_UID, ruid == user */
 	state->rgid = -1;
-	state->egid = SUDOERS_GID;
+	state->egid = sudoers_gid;
 	if (setegid(ID(egid)))
 	    error(1, "unable to change to sudoers gid");
 
 	state->ruid = ROOT_UID;
 	/*
-	 * If SUDOERS_UID == ROOT_UID and SUDOERS_MODE is group readable
+	 * If sudoers_uid == ROOT_UID and sudoers_mode is group readable
 	 * we use a non-zero uid in order to avoid NFS lossage.
 	 * Using uid 1 is a bit bogus but should work on all OS's.
 	 */
-	if (SUDOERS_UID == ROOT_UID && (SUDOERS_MODE & 040))
+	if (sudoers_uid == ROOT_UID && (sudoers_mode & 040))
 	    state->euid = 1;
 	else
-	    state->euid = SUDOERS_UID;
+	    state->euid = sudoers_uid;
 	if (seteuid(ID(euid))) {
 	    errstr = "seteuid(SUDOERS_UID)";
 	    goto bad;
@@ -803,7 +803,7 @@ bad:
 /*
  * Set uids and gids based on perm via setuid() and setgid().
  * NOTE: does not support the "stay_setuid" or timestampowner options.
- *       Also, SUDOERS_UID and SUDOERS_GID are not used.
+ *       Also, sudoers_uid and sudoers_gid are not used.
  */
 int
 set_perms(int perm)

@@ -713,7 +713,7 @@ add_userspec(struct member *members, struct privilege *privs)
  * the current sudoers file to path.
  */
 void
-init_parser(char *path, int quiet)
+init_parser(const char *path, int quiet)
 {
     struct defaults *d;
     struct member *m, *binding;

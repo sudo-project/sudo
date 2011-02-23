@@ -105,11 +105,13 @@ extern GETGROUPS_T *runas_groups;
 /*
  * Globals
  */
-char *prev_user;
+const char *sudoers_file = _PATH_SUDOERS;
+mode_t sudoers_mode = SUDOERS_MODE;
+uid_t sudoers_uid = SUDOERS_UID;
+gid_t sudoers_gid = SUDOERS_GID;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
 struct interface *interfaces;
-static const char *interfaces_string;
 int long_list;
 int debug_level;
 uid_t timestamp_uid;
@@ -122,14 +124,16 @@ login_cap_t *lc;
 #ifdef HAVE_BSD_AUTH_H
 char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
-sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp;
 sudo_conv_t sudo_conv;
 sudo_printf_t sudo_printf;
 int sudo_mode;
 
+static char *prev_user;
 static char *runas_user;
 static char *runas_group;
 static struct sudo_nss_list *snl;
+static const char *interfaces_string;
+static sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp;
 
 /* XXX - must be extern for audit bits of sudo_auth.c */
 int NewArgc;
@@ -874,16 +878,16 @@ open_sudoers(const char *sudoers, int doedit, int *keepopen)
      * Only works if file system is readable/writable by root.
      */
     if ((rootstat = stat_sudoers(sudoers, &statbuf)) == 0 &&
-	SUDOERS_UID == statbuf.st_uid && SUDOERS_MODE != 0400 &&
+	sudoers_uid == statbuf.st_uid && sudoers_mode != 0400 &&
 	(statbuf.st_mode & 0007777) == 0400) {
 
-	if (chmod(sudoers, SUDOERS_MODE) == 0) {
+	if (chmod(sudoers, sudoers_mode) == 0) {
 	    warningx("fixed mode on %s", sudoers);
-	    SET(statbuf.st_mode, SUDOERS_MODE);
-	    if (statbuf.st_gid != SUDOERS_GID) {
-		if (chown(sudoers, (uid_t) -1, SUDOERS_GID) == 0) {
+	    SET(statbuf.st_mode, sudoers_mode);
+	    if (statbuf.st_gid != sudoers_gid) {
+		if (chown(sudoers, (uid_t) -1, sudoers_gid) == 0) {
 		    warningx("set group on %s", sudoers);
-		    statbuf.st_gid = SUDOERS_GID;
+		    statbuf.st_gid = sudoers_gid;
 		} else
 		    warning("unable to set group on %s", sudoers);
 	    }
@@ -902,16 +906,16 @@ open_sudoers(const char *sudoers, int doedit, int *keepopen)
 	log_error(USE_ERRNO|NO_EXIT, "can't stat %s", sudoers);
     else if (!S_ISREG(statbuf.st_mode))
 	log_error(NO_EXIT, "%s is not a regular file", sudoers);
-    else if ((statbuf.st_mode & 07577) != SUDOERS_MODE)
+    else if ((statbuf.st_mode & 07577) != sudoers_mode)
 	log_error(NO_EXIT, "%s is mode 0%o, should be 0%o", sudoers,
 	    (unsigned int) (statbuf.st_mode & 07777),
-	    (unsigned int) SUDOERS_MODE);
-    else if (statbuf.st_uid != SUDOERS_UID)
+	    (unsigned int) sudoers_mode);
+    else if (statbuf.st_uid != sudoers_uid)
 	log_error(NO_EXIT, "%s is owned by uid %u, should be %u", sudoers,
-	    (unsigned int) statbuf.st_uid, (unsigned int) SUDOERS_UID);
-    else if (statbuf.st_gid != SUDOERS_GID)
+	    (unsigned int) statbuf.st_uid, (unsigned int) sudoers_uid);
+    else if (statbuf.st_gid != sudoers_gid)
 	log_error(NO_EXIT, "%s is owned by gid %u, should be %u", sudoers,
-	    (unsigned int) statbuf.st_gid, (unsigned int) SUDOERS_GID);
+	    (unsigned int) statbuf.st_gid, (unsigned int) sudoers_gid);
     else if ((fp = fopen(sudoers, "r")) == NULL)
 	log_error(USE_ERRNO|NO_EXIT, "can't open %s", sudoers);
     else {
@@ -1086,7 +1090,7 @@ sudoers_policy_version(int verbose)
 	PACKAGE_VERSION);
 
     if (verbose) {
-	sudo_printf(SUDO_CONV_INFO_MSG, "\nSudoers path: %s\n", _PATH_SUDOERS);
+	sudo_printf(SUDO_CONV_INFO_MSG, "\nSudoers path: %s\n", sudoers_file);
 #ifdef HAVE_LDAP
 # ifdef _PATH_NSSWITCH_CONF
 	sudo_printf(SUDO_CONV_INFO_MSG, "nsswitch path: %s\n", _PATH_NSSWITCH_CONF);
@@ -1205,6 +1209,23 @@ deserialize_info(char * const settings[], char * const user_info[])
 	    set_interfaces(interfaces_string);
 	    continue;
 	}
+	if (MATCHES(*cur, "sudoers_file=")) {
+	    sudoers_file = *cur + sizeof("sudoers_file=") - 1;
+	    continue;
+	}
+	if (MATCHES(*cur, "sudoers_uid=")) {
+	    sudoers_uid = (uid_t) atoi(*cur + sizeof("sudoers_uid=") - 1);
+	    continue;
+	}
+	if (MATCHES(*cur, "sudoers_gid=")) {
+	    sudoers_gid = (gid_t) atoi(*cur + sizeof("sudoers_gid=") - 1);
+	    continue;
+	}
+	if (MATCHES(*cur, "sudoers_mode=")) {
+	    sudoers_mode = (mode_t) strtol(*cur + sizeof("sudoers_mode=") - 1,
+		NULL, 8);
+	    continue;
+	}
     }
 
     for (cur = user_info; *cur != NULL; cur++) {
@@ -1213,11 +1234,11 @@ deserialize_info(char * const settings[], char * const user_info[])
 	    continue;
 	}
 	if (MATCHES(*cur, "uid=")) {
-	    user_uid = atoi(*cur + sizeof("uid=") - 1);
+	    user_uid = (uid_t) atoi(*cur + sizeof("uid=") - 1);
 	    continue;
 	}
 	if (MATCHES(*cur, "gid=")) {
-	    user_gid = atoi(*cur + sizeof("gid=") - 1);
+	    user_gid = (gid_t) atoi(*cur + sizeof("gid=") - 1);
 	    continue;
 	}
 	if (MATCHES(*cur, "groups=")) {
