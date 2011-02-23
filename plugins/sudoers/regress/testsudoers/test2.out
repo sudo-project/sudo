@@ -1,0 +1,9 @@
+Parses OK.
+
+
+
+%:C/non UNIX 0 c	ALL = (ALL) ALL
+%:C/non\'UNIX\'1 c	ALL = (ALL) ALL
+%:C/non"UNIX"0 c	ALL = (ALL) ALL
+%:C/non_UNIX_0 c	ALL = (ALL) ALL
+%:C/non\'UNIX_3 c	ALL = (ALL) ALL
