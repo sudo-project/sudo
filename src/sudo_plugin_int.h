@@ -18,6 +18,15 @@
 #define _SUDO_PLUGIN_INT_H
 
 /*
+ * All plugin structures start with a type and a version.
+ */
+struct generic_plugin {
+    unsigned int type;
+    unsigned int version;
+    /* the rest depends on the type... */
+};
+
+/*
  * Backwards-compatible structures for API bumps.
  */
 struct io_plugin_1_0 {

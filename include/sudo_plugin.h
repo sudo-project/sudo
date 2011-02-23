@@ -93,18 +93,6 @@ struct io_plugin {
     int (*log_stderr)(const char *buf, unsigned int len);
 };
 
-/* Internal use only */
-struct generic_plugin {
-    unsigned int type;
-    unsigned int version;
-    int (*open)(unsigned int version, sudo_conv_t conversation,
-	char * const settings[], char * const user_info[],
-	char * const user_env[]);
-    void (*close)(int exit_status, int error); /* wait status or error */
-    int (*show_version)(int verbose);
-    /* the rest depends on the type... */
-};
-
 /* Sudoers group plugin version major/minor */
 #define GROUP_API_VERSION_MAJOR 1
 #define GROUP_API_VERSION_MINOR 0
