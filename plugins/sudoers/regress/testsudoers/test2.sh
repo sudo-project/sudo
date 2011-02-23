@@ -1,7 +1,8 @@
 #!/bin/sh
 #
-# Verify that all command tags are parsed OK.
-# See http://www.sudo.ws/bugs/show_bug.cgi?id=437
+# Test quoted group names in sudoers.
+# Note that a backslash is treated literally unless
+# it is escaping a double quote.
 #
 
 WANT=${SRCDIR-.}/regress/testsudoers/test2.out
