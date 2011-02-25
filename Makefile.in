@@ -63,9 +63,10 @@ install install-doc: config.status ChangeLog
 autoconf:
 	autoconf -I m4
 
+# The 1.8 branch started February 25, 2011
 ChangeLog:
 	if test -d $(srcdir)/.hg && cd $(srcdir); then \
-	    if hg log --style=changelog -b default > $@.tmp; then \
+	    if hg log --style=changelog -b 1.8 > $@.tmp && hg log --style=changelog -b default --date '<2011-02-25 21:30:00' >> $@.tmp; then \
 		mv -f $@.tmp $@; \
 	    else \
 		rm -f $@.tmp; \
