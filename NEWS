@@ -1,10 +1,10 @@
 What's new in Sudo 1.8.0?
 
- * Sudo has been refactored to use modular framework that can
+ * Sudo has been refactored to use a modular framework that can
    support third-party policy and I/O logging plugins.  The default
-   plugin is "sudoers" which provides the traditional sudo
-   functionality.  See the sudo_plugin manual for details on the
-   plugin interface and the sample plugin for a simple example.
+   plugin is "sudoers" which provides the traditional sudo functionality.
+   See the sudo_plugin manual for details on the plugin API and the
+   sample in the plugins directory for a simple example.
 
 What's new in Sudo 1.7.5?
 
