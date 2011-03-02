@@ -35,7 +35,7 @@ int
 main(int argc, char **argv)
 {
 	FILE *fp = stdin;
-	char *buf, *cp;
+	char buf[2048], *cp, *ep;
 	int errors = 0, tests = 0, lineno;
 	struct gl_entry entry;
 	size_t len;
@@ -59,13 +59,17 @@ main(int argc, char **argv)
 	 */
 	lineno = 0;
 	memset(&entry, 0, sizeof(entry));
-	while ((buf = fgetln(fp, &len)) != NULL) {
+	while (fgets(buf, sizeof(buf), fp) != NULL) {
 		lineno++;
-		if (buf[len - 1] != '\n') {
-			fprintf(stderr, "globtest: missing newline at EOF\n");
-			exit(1);
+		len = strlen(buf);
+		if (len > 0) {
+			if (buf[len - 1] != '\n') {
+				fprintf(stderr,
+				    "globtest: missing newline at EOF\n");
+				exit(1);
+			}
+			buf[--len] = '\0';
 		}
-		buf[--len] = '\0';
 		if (len == 0)
 			continue; /* blank line */
 
@@ -93,23 +97,23 @@ main(int argc, char **argv)
 			memcpy(entry.pattern, buf + 1, len);
 			entry.pattern[len] = '\0';
 
-			buf = cp + 2;
-			if (*buf++ != '<') {
+			cp += 2;
+			if (*cp++ != '<') {
 				fprintf(stderr,
 				    "globtest: invalid entry on line %d\n",
 				    lineno);
 				exit(1);
 			}
-			if ((cp = strchr(buf, '>')) == NULL) {
+			entry.flags = (int)strtol(cp, &ep, 0);
+			if (*ep != '>') {
 				fprintf(stderr,
 				    "globtest: invalid entry on line %d\n",
 				    lineno);
 				exit(1);
 			}
-			entry.flags = (int)strtol(buf, &cp, 0);
-			if (*cp != '>' || entry.flags < 0 || entry.flags > 0x2000) {
+			if (entry.flags < 0 || entry.flags > 0x2000) {
 				fprintf(stderr,
-				    "globtest: invalid flags: %s\n", buf);
+				    "globtest: invalid flags: %s\n", cp);
 				exit(1);
 			}
 			entry.nresults = 0;
