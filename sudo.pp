@@ -24,7 +24,7 @@ still allow people to get their work done."
 
 %if [kit]
 	# Strip off patchlevel for kit which only supports xyz versions
-	pp_kit_version="`echo $version|sed -e 's/\.//g' -e 's/[bp][0-9]*$//'`"
+	pp_kit_version="`echo $version|sed -e 's/\.//g' -e 's/[^0-9][^0-9]*[0-9][0-9]*$//'`"
 	pp_kit_name="TCM"
 %endif
 
@@ -39,9 +39,8 @@ still allow people to get their work done."
 
 %if [rpm,deb]
 	# Convert patch level into release and remove from version
-	pp_rpm_release="`echo $version|sed 's/^[0-9]*\.[0-9]*\.[0-9]*[^0-9]*//'`"
-	pp_rpm_release="`expr $pp_rpm_release + 1`"
-	pp_rpm_version="`echo $version|sed 's/p[0-9]*$//'`"
+	pp_rpm_release="`expr $version : '.*p\([0-9][0-9]*\)' + 1`"
+	pp_rpm_version="`expr $version : '\(.*\)p[0-9][0-9]*'`"
 	pp_rpm_license="BSD"
 	pp_rpm_url="http://www.sudo.ws/"
 	pp_rpm_group="Applications/System"
