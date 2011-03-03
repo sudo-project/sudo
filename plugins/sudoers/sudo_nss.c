@@ -309,6 +309,7 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 /*
  * Check user_cmnd against sudoers and print the matching entry if the
  * command is allowed.
+ * Returns TRUE if the command is allowed, else FALSE.
  */
 int
 display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
@@ -320,7 +321,7 @@ display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
 
     tq_foreach_fwd(snl, nss) {
 	if (nss->display_cmnd(nss, pw) == 0)
-	    return 0;
+	    return TRUE;
     }
-    return 1;
+    return FALSE;
 }
