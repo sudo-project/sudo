@@ -12956,7 +12956,7 @@ $as_echo "$sudo_cv_var_daportable" >&6; }
 			    # DCE support (requires ANSI C compiler)
 			    if test "$with_DCE" = "yes"; then
 				# order of libs in 9.X is important. -lc_r must be last
-				SUDO_LIBS="${SUDO_LIBS} -ldce -lM -lc_r"
+				SUDOERS_LIBS="${SUDOERS_LIBS} -ldce -lM -lc_r"
 				LIBS="${LIBS} -ldce -lM -lc_r"
 				CPPFLAGS="${CPPFLAGS} -D_REENTRANT -I/usr/include/reentrant"
 			    fi
@@ -13149,8 +13149,7 @@ fi
     *-*-isc*)
 		OSDEFS="${OSDEFS} -D_ISC"
 		LIB_CRYPT=1
-		SUDO_LIBS="${SUDO_LIBS} -lcrypt"
-		LIBS="${LIBS} -lcrypt"
+		SUDOERS_LIBS="${SUDOERS_LIBS} -lcrypt"
 
 		shadow_funcs="getspnam"
 		shadow_libs="-lsec"
@@ -13265,7 +13264,7 @@ done
 		    ;;
 		esac
 		if test "$with_skey" = "yes"; then
-		     SUDO_LIBS="${SUDO_LIBS} -lmd"
+		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
 		fi
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
@@ -13301,7 +13300,7 @@ done
 		;;
     *-*-dragonfly*)
 		if test "$with_skey" = "yes"; then
-		     SUDO_LIBS="${SUDO_LIBS} -lmd"
+		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
 		fi
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
@@ -16646,7 +16645,7 @@ $as_echo "$as_me: using AIX general authentication" >&6;}
 	$as_echo "#define HAVE_AIXAUTH 1" >>confdefs.h
 
 	AUTH_OBJS="$AUTH_OBJS aix_auth.lo";
-	SUDO_LIBS="${SUDO_LIBS} -ls"
+	SUDOERS_LIBS="${SUDOERS_LIBS} -ls"
 	AUTH_EXCL=AIX_AUTH
     fi
 fi
@@ -16706,7 +16705,7 @@ if test ${with_fwtk-'no'} != "no"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_fwtk}"
 	with_fwtk=yes
     fi
-    SUDO_LIBS="${SUDO_LIBS} -lauth -lfwall"
+    SUDOERS_LIBS="${SUDOERS_LIBS} -lauth -lfwall"
     AUTH_OBJS="$AUTH_OBJS fwtk.lo"
 fi
 
@@ -16780,7 +16779,7 @@ $as_echo "$ac_cv_lib_aceclnt_SD_Init_______lpthread_______" >&6; }
 if test "x$ac_cv_lib_aceclnt_SD_Init_______lpthread_______" = x""yes; then :
 
 	    AUTH_OBJS="$AUTH_OBJS securid5.lo";
-	    SUDO_LIBS="${SUDO_LIBS} -laceclnt -lpthread"
+	    SUDOERS_LIBS="${SUDOERS_LIBS} -laceclnt -lpthread"
 
 
 
@@ -16802,7 +16801,7 @@ if test "x$ac_cv_lib_aceclnt_SD_Init_______lpthread_______" = x""yes; then :
 else
 
 	    AUTH_OBJS="$AUTH_OBJS securid.lo";
-	    SUDO_LIBS="${SUDO_LIBS} ${with_SecurID}/sdiclient.a"
+	    SUDOERS_LIBS="${SUDOERS_LIBS} ${with_SecurID}/sdiclient.a"
 
 fi
 
@@ -17103,8 +17102,8 @@ eval as_val=\$$as_ac_Lib
   K4LIBS="-lkrb4 $K4LIBS"
 else
   K4LIBS="-lkrb $K4LIBS"
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Unable to locate Kerberos IV libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDOERS_LDFLAGS and possibly add Kerberos libs to SUDO_LIBS" >&5
-$as_echo "$as_me: WARNING: Unable to locate Kerberos IV libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDOERS_LDFLAGS and possibly add Kerberos libs to SUDO_LIBS" >&2;}
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Unable to locate Kerberos IV libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDOERS_LDFLAGS and possibly add Kerberos libs to SUDOERS_LIBS" >&5
+$as_echo "$as_me: WARNING: Unable to locate Kerberos IV libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDOERS_LDFLAGS and possibly add Kerberos libs to SUDOERS_LIBS" >&2;}
 
 fi
 
@@ -17112,7 +17111,7 @@ fi
 fi
 
     LDFLAGS="$O_LDFLAGS"
-    SUDO_LIBS="${SUDO_LIBS} $K4LIBS"
+    SUDOERS_LIBS="${SUDOERS_LIBS} $K4LIBS"
     AUTH_OBJS="$AUTH_OBJS kerb4.lo"
 fi
 
@@ -17160,7 +17159,7 @@ fi
 
 	AUTH_OBJS="$AUTH_OBJS kerb5.lo"
 	CPPFLAGS="$CPPFLAGS `krb5-config --cflags`"
-	SUDO_LIBS="$SUDO_LIBS `krb5-config --libs`"
+	SUDOERS_LIBS="$SUDOERS_LIBS `krb5-config --libs`"
 				{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we are using Heimdal" >&5
 $as_echo_n "checking whether we are using Heimdal... " >&6; }
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -17252,7 +17251,7 @@ $as_echo "yes" >&6; }
 	    $as_echo "#define HAVE_HEIMDAL 1" >>confdefs.h
 
 	    # XXX - need to check whether -lcrypo is needed!
-	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lcrypto -ldes -lcom_err -lasn1"
+	    SUDOERS_LIBS="${SUDOERS_LIBS} -lkrb5 -lcrypto -ldes -lcom_err -lasn1"
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lroken" >&5
 $as_echo_n "checking for main in -lroken... " >&6; }
 if test "${ac_cv_lib_roken_main+set}" = set; then :
@@ -17284,7 +17283,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_roken_main" >&5
 $as_echo "$ac_cv_lib_roken_main" >&6; }
 if test "x$ac_cv_lib_roken_main" = x""yes; then :
-  SUDO_LIBS="${SUDO_LIBS} -lroken"
+  SUDOERS_LIBS="${SUDOERS_LIBS} -lroken"
 fi
 
 
@@ -17292,7 +17291,7 @@ else
 
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
+	    SUDOERS_LIBS="${SUDOERS_LIBS} -lkrb5 -lk5crypto -lcom_err"
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lkrb5support" >&5
 $as_echo_n "checking for main in -lkrb5support... " >&6; }
 if test "${ac_cv_lib_krb5support_main+set}" = set; then :
@@ -17324,7 +17323,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_krb5support_main" >&5
 $as_echo "$ac_cv_lib_krb5support_main" >&6; }
 if test "x$ac_cv_lib_krb5support_main" = x""yes; then :
-  SUDO_LIBS="${SUDO_LIBS} -lkrb5support"
+  SUDOERS_LIBS="${SUDOERS_LIBS} -lkrb5support"
 fi
 
 
@@ -17332,7 +17331,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     AUTH_OBJS="$AUTH_OBJS kerb5.lo"
     _LIBS="$LIBS"
-    LIBS="${LIBS} ${SUDO_LIBS}"
+    LIBS="${LIBS} ${SUDOERS_LIBS}"
     for ac_func in krb5_verify_user krb5_init_secure_context
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -17457,7 +17456,7 @@ fi
 
 if test ${with_DCE-'no'} = "yes"; then
     DCE_OBJS="${DCE_OBJS} dce_pwent.o"
-    SUDO_LIBS="${SUDO_LIBS} -ldce"
+    SUDOERS_LIBS="${SUDOERS_LIBS} -ldce"
     AUTH_OBJS="$AUTH_OBJS dce.lo"
 fi
 
@@ -17553,10 +17552,10 @@ rm -f conftest.err conftest.$ac_ext
     fi
 
 	fi
-    fi
-    if test "$found" = "no"; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS" >&5
+	if test "$found" = "no"; then
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS" >&5
 $as_echo "$as_me: WARNING: Unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS" >&2;}
+	fi
     fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lskey" >&5
 $as_echo_n "checking for main in -lskey... " >&6; }
@@ -17637,7 +17636,7 @@ if test "x$ac_cv_lib_skey_skeyaccess" = x""yes; then :
 fi
 
     LDFLAGS="$O_LDFLAGS"
-    SUDO_LIBS="${SUDO_LIBS} -lskey"
+    SUDOERS_LIBS="${SUDOERS_LIBS} -lskey"
     AUTH_OBJS="$AUTH_OBJS rfc1938.lo"
 fi
 
@@ -17733,10 +17732,10 @@ rm -f conftest.err conftest.$ac_ext
     fi
 
 	fi
-    fi
-    if test "$found" = "no"; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS" >&5
+	if test "$found" = "no"; then
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS" >&5
 $as_echo "$as_me: WARNING: Unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS" >&2;}
+	fi
     fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lopie" >&5
 $as_echo_n "checking for main in -lopie... " >&6; }
@@ -17776,12 +17775,13 @@ $as_echo "$as_me: WARNING: Unable to locate libopie.a, you will have to edit the
 fi
 
     LDFLAGS="$O_LDFLAGS"
-    SUDO_LIBS="${SUDO_LIBS} -lopie"
+    SUDOERS_LIBS="${SUDOERS_LIBS} -lopie"
     AUTH_OBJS="$AUTH_OBJS rfc1938.lo"
 fi
 
 if test ${with_passwd-'no'} != "no"; then
                 if test -z "$LIB_CRYPT"; then
+	_LIBS="$LIBS"
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing crypt" >&5
 $as_echo_n "checking for library containing crypt... " >&6; }
 if test "${ac_cv_search_crypt+set}" = set; then :
@@ -17835,9 +17835,10 @@ $as_echo "$ac_cv_search_crypt" >&6; }
 ac_res=$ac_cv_search_crypt
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-  test -n "$ac_lib" && SUDO_LIBS="${SUDO_LIBS} $ac_res"
+  test -n "$ac_lib" && SUDOERS_LIBS="${SUDOERS_LIBS} $ac_res"
 fi
 
+	LIBS="$_LIBS"
     fi
 
     if test "$CHECKSHADOW" = "true" -a -n "$shadow_funcs"; then
@@ -17858,7 +17859,7 @@ fi
 done
 
 	if test "$found" = "yes"; then
-	    SUDO_LIBS="$SUDO_LIBS $shadow_libs"
+	    SUDOERS_LIBS="$SUDOERS_LIBS $shadow_libs"
 	elif test -n "$shadow_libs_optional"; then
 	    LIBS="$LIBS $shadow_libs_optional"
 	    for ac_func in $shadow_funcs
@@ -17875,7 +17876,7 @@ fi
 done
 
 	    if test "$found" = "yes"; then
-		SUDO_LIBS="$SUDO_LIBS $shadow_libs $shadow_libs_optional"
+		SUDOERS_LIBS="$SUDOERS_LIBS $shadow_libs $shadow_libs_optional"
 	    fi
 	fi
 	if test "$found" = "yes"; then
@@ -17943,7 +17944,7 @@ ac_res=$ac_cv_search_getspnam
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
   $as_echo "#define HAVE_GETSPNAM 1" >>confdefs.h
- CHECKSHADOW=false; test -n "$ac_lib" && SUDO_LIBS="${SUDO_LIBS} $ac_res"
+ CHECKSHADOW=false; test -n "$ac_lib" && SUDOERS_LIBS="${SUDOERS_LIBS} $ac_res"
 fi
 
     fi
@@ -18002,7 +18003,7 @@ ac_res=$ac_cv_search_getprpwnam
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
   $as_echo "#define HAVE_GETPRPWNAM 1" >>confdefs.h
- CHECKSHADOW=false; SECUREWARE=1; test -n "$ac_lib" && SUDO_LIBS="${SUDO_LIBS} $ac_res"
+ CHECKSHADOW=false; SECUREWARE=1; test -n "$ac_lib" && SUDOERS_LIBS="${SUDOERS_LIBS} $ac_res"
 fi
 
     fi
