@@ -339,12 +339,6 @@ sudo_endspent(void)
     return;
 }
 
-char *
-sudo_getepw(const struct passwd *pw)
-{
-    return pw->pw_passwd;
-}
-
 void
 set_fqdn(void)
 {

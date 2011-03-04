@@ -595,12 +595,6 @@ group_plugin_query(const char *user, const char *group, const struct passwd *pw)
     return FALSE;
 }
 
-char *
-sudo_getepw(const struct passwd *pw)
-{
-    return pw->pw_passwd;
-}
-
 /*
  * Assuming a parse error occurred, prompt the user for what they want
  * to do now.  Returns the first letter of their choice.
