@@ -1146,10 +1146,16 @@ cleanup(int gotsignal)
 static void
 quit(int signo)
 {
+    const char *signame, *myname;
+
     cleanup(signo);
-#define	emsg	 " exiting due to signal.\n"
-    if (write(STDERR_FILENO, getprogname(), strlen(getprogname())) == -1 ||
-	write(STDERR_FILENO, emsg, sizeof(emsg) - 1) == -1)
+#define	emsg	 " exiting due to signal: "
+    myname = getprogname();
+    signame = strsignal(signo);
+    if (write(STDERR_FILENO, myname, strlen(myname)) == -1 ||
+	write(STDERR_FILENO, emsg, sizeof(emsg) - 1) == -1 ||
+	write(STDERR_FILENO, signame, strlen(signame)) == -1 ||
+	write(STDERR_FILENO, "\n", 1) == -1)
 	/* shut up glibc */;
     _exit(signo);
 }
