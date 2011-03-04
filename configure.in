@@ -1554,7 +1554,7 @@ case "$host" in
 			    # DCE support (requires ANSI C compiler)
 			    if test "$with_DCE" = "yes"; then
 				# order of libs in 9.X is important. -lc_r must be last
-				SUDO_LIBS="${SUDO_LIBS} -ldce -lM -lc_r"
+				SUDOERS_LIBS="${SUDOERS_LIBS} -ldce -lM -lc_r"
 				LIBS="${LIBS} -ldce -lM -lc_r"
 				CPPFLAGS="${CPPFLAGS} -D_REENTRANT -I/usr/include/reentrant"
 			    fi
@@ -1679,8 +1679,7 @@ case "$host" in
     *-*-isc*)
 		OSDEFS="${OSDEFS} -D_ISC"
 		LIB_CRYPT=1
-		SUDO_LIBS="${SUDO_LIBS} -lcrypt"
-		LIBS="${LIBS} -lcrypt"
+		SUDOERS_LIBS="${SUDOERS_LIBS} -lcrypt"
 
 		shadow_funcs="getspnam"
 		shadow_libs="-lsec"
@@ -1745,7 +1744,7 @@ case "$host" in
 		    ;;
 		esac
 		if test "$with_skey" = "yes"; then
-		     SUDO_LIBS="${SUDO_LIBS} -lmd"
+		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
 		fi
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
@@ -1781,7 +1780,7 @@ case "$host" in
 		;;
     *-*-dragonfly*)
 		if test "$with_skey" = "yes"; then
-		     SUDO_LIBS="${SUDO_LIBS} -lmd"
+		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
 		fi
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
@@ -2234,7 +2233,7 @@ if test ${with_aixauth-'no'} != "no"; then
 	AC_MSG_NOTICE([using AIX general authentication])
 	AC_DEFINE(HAVE_AIXAUTH)
 	AUTH_OBJS="$AUTH_OBJS aix_auth.lo";
-	SUDO_LIBS="${SUDO_LIBS} -ls"
+	SUDOERS_LIBS="${SUDOERS_LIBS} -ls"
 	AUTH_EXCL=AIX_AUTH
     fi
 fi
@@ -2271,7 +2270,7 @@ if test ${with_fwtk-'no'} != "no"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_fwtk}"
 	with_fwtk=yes
     fi
-    SUDO_LIBS="${SUDO_LIBS} -lauth -lfwall"
+    SUDOERS_LIBS="${SUDOERS_LIBS} -lauth -lfwall"
     AUTH_OBJS="$AUTH_OBJS fwtk.lo"
 fi
 
@@ -2295,13 +2294,13 @@ if test ${with_SecurID-'no'} != "no"; then
     AC_CHECK_LIB(aceclnt, SD_Init,
 	[
 	    AUTH_OBJS="$AUTH_OBJS securid5.lo";
-	    SUDO_LIBS="${SUDO_LIBS} -laceclnt -lpthread"
+	    SUDOERS_LIBS="${SUDOERS_LIBS} -laceclnt -lpthread"
 	]
 	[
 	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_SecurID}])
 	], [
 	    AUTH_OBJS="$AUTH_OBJS securid.lo";
-	    SUDO_LIBS="${SUDO_LIBS} ${with_SecurID}/sdiclient.a"
+	    SUDOERS_LIBS="${SUDOERS_LIBS} ${with_SecurID}/sdiclient.a"
 	],
 	[
 	    -lpthread
@@ -2378,11 +2377,11 @@ if test ${with_kerb4-'no'} != "no"; then
     AC_CHECK_LIB(krb, main, [K4LIBS="-lkrb $K4LIBS"], [
 	AC_CHECK_LIB(krb4, main, [K4LIBS="-lkrb4 $K4LIBS"],
 	    [K4LIBS="-lkrb $K4LIBS"]
-	    [AC_MSG_WARN([Unable to locate Kerberos IV libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDOERS_LDFLAGS and possibly add Kerberos libs to SUDO_LIBS])]
+	    [AC_MSG_WARN([Unable to locate Kerberos IV libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDOERS_LDFLAGS and possibly add Kerberos libs to SUDOERS_LIBS])]
 	, [$K4LIBS])
     ], [$K4LIBS])
     LDFLAGS="$O_LDFLAGS"
-    SUDO_LIBS="${SUDO_LIBS} $K4LIBS"
+    SUDOERS_LIBS="${SUDOERS_LIBS} $K4LIBS"
     AUTH_OBJS="$AUTH_OBJS kerb4.lo"
 fi
 
@@ -2396,7 +2395,7 @@ if test ${with_kerb5-'no'} != "no"; then
 	AC_DEFINE(HAVE_KERB5)
 	AUTH_OBJS="$AUTH_OBJS kerb5.lo"
 	CPPFLAGS="$CPPFLAGS `krb5-config --cflags`"
-	SUDO_LIBS="$SUDO_LIBS `krb5-config --libs`"
+	SUDOERS_LIBS="$SUDOERS_LIBS `krb5-config --libs`"
 	dnl
 	dnl Try to determine whether we have Heimdal or MIT Kerberos
 	dnl
@@ -2440,16 +2439,16 @@ if test ${with_kerb5-'no'} != "no" -a -z "$KRB5CONFIG"; then
 	    AC_MSG_RESULT(yes)
 	    AC_DEFINE(HAVE_HEIMDAL)
 	    # XXX - need to check whether -lcrypo is needed!
-	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lcrypto -ldes -lcom_err -lasn1"
-	    AC_CHECK_LIB(roken, main, [SUDO_LIBS="${SUDO_LIBS} -lroken"])
+	    SUDOERS_LIBS="${SUDOERS_LIBS} -lkrb5 -lcrypto -ldes -lcom_err -lasn1"
+	    AC_CHECK_LIB(roken, main, [SUDOERS_LIBS="${SUDOERS_LIBS} -lroken"])
 	], [
 	    AC_MSG_RESULT(no)
-	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
-	    AC_CHECK_LIB(krb5support, main, [SUDO_LIBS="${SUDO_LIBS} -lkrb5support"])
+	    SUDOERS_LIBS="${SUDOERS_LIBS} -lkrb5 -lk5crypto -lcom_err"
+	    AC_CHECK_LIB(krb5support, main, [SUDOERS_LIBS="${SUDOERS_LIBS} -lkrb5support"])
     ])
     AUTH_OBJS="$AUTH_OBJS kerb5.lo"
     _LIBS="$LIBS"
-    LIBS="${LIBS} ${SUDO_LIBS}"
+    LIBS="${LIBS} ${SUDOERS_LIBS}"
     AC_CHECK_FUNCS(krb5_verify_user krb5_init_secure_context)
     AC_CHECK_FUNCS(krb5_get_init_creds_opt_alloc, [
 	AC_CACHE_CHECK([whether krb5_get_init_creds_opt_free takes a context],
@@ -2524,7 +2523,7 @@ dnl Order of libs in HP-UX 10.x is important, -ldce must be last.
 dnl
 if test ${with_DCE-'no'} = "yes"; then
     DCE_OBJS="${DCE_OBJS} dce_pwent.o"
-    SUDO_LIBS="${SUDO_LIBS} -ldce"
+    SUDOERS_LIBS="${SUDOERS_LIBS} -ldce"
     AUTH_OBJS="$AUTH_OBJS dce.lo"
 fi
 
@@ -2558,7 +2557,7 @@ if test ${with_skey-'no'} = "yes"; then
     AC_CHECK_LIB(skey, main, [found=yes], [AC_MSG_WARN([Unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDOERS_LDFLAGS])])
     AC_CHECK_LIB(skey, skeyaccess, AC_DEFINE(HAVE_SKEYACCESS))
     LDFLAGS="$O_LDFLAGS"
-    SUDO_LIBS="${SUDO_LIBS} -lskey"
+    SUDOERS_LIBS="${SUDOERS_LIBS} -lskey"
     AUTH_OBJS="$AUTH_OBJS rfc1938.lo"
 fi
 
@@ -2591,7 +2590,7 @@ if test ${with_opie-'no'} = "yes"; then
     fi
     AC_CHECK_LIB(opie, main, [found=yes], [AC_MSG_WARN([Unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDOERS_LDFLAGS])])
     LDFLAGS="$O_LDFLAGS"
-    SUDO_LIBS="${SUDO_LIBS} -lopie"
+    SUDOERS_LIBS="${SUDOERS_LIBS} -lopie"
     AUTH_OBJS="$AUTH_OBJS rfc1938.lo"
 fi
 
@@ -2605,7 +2604,9 @@ if test ${with_passwd-'no'} != "no"; then
     dnl if crypt(3) not in libc, look elsewhere
     dnl
     if test -z "$LIB_CRYPT"; then
-	AC_SEARCH_LIBS([crypt], [crypt crypt_d ufc], [test -n "$ac_lib" && SUDO_LIBS="${SUDO_LIBS} $ac_res"])
+	_LIBS="$LIBS"
+	AC_SEARCH_LIBS([crypt], [crypt crypt_d ufc], [test -n "$ac_lib" && SUDOERS_LIBS="${SUDOERS_LIBS} $ac_res"])
+	LIBS="$_LIBS"
     fi
 
     if test "$CHECKSHADOW" = "true" -a -n "$shadow_funcs"; then
@@ -2614,12 +2615,12 @@ if test ${with_passwd-'no'} != "no"; then
 	found=no
 	AC_CHECK_FUNCS($shadow_funcs, [found=yes])
 	if test "$found" = "yes"; then
-	    SUDO_LIBS="$SUDO_LIBS $shadow_libs"
+	    SUDOERS_LIBS="$SUDOERS_LIBS $shadow_libs"
 	elif test -n "$shadow_libs_optional"; then
 	    LIBS="$LIBS $shadow_libs_optional"
 	    AC_CHECK_FUNCS($shadow_funcs, [found=yes])
 	    if test "$found" = "yes"; then
-		SUDO_LIBS="$SUDO_LIBS $shadow_libs $shadow_libs_optional"
+		SUDOERS_LIBS="$SUDOERS_LIBS $shadow_libs $shadow_libs_optional"
 	    fi
 	fi
 	if test "$found" = "yes"; then
@@ -2633,10 +2634,10 @@ if test ${with_passwd-'no'} != "no"; then
 	CHECKSHADOW=false
     fi
     if test "$CHECKSHADOW" = "true"; then
-	AC_SEARCH_LIBS([getspnam], [gen], [AC_DEFINE(HAVE_GETSPNAM)] [CHECKSHADOW=false; test -n "$ac_lib" && SUDO_LIBS="${SUDO_LIBS} $ac_res"])
+	AC_SEARCH_LIBS([getspnam], [gen], [AC_DEFINE(HAVE_GETSPNAM)] [CHECKSHADOW=false; test -n "$ac_lib" && SUDOERS_LIBS="${SUDOERS_LIBS} $ac_res"])
     fi
     if test "$CHECKSHADOW" = "true"; then
-	AC_SEARCH_LIBS([getprpwnam], [sec security prot], [AC_DEFINE(HAVE_GETPRPWNAM)] [CHECKSHADOW=false; SECUREWARE=1; test -n "$ac_lib" && SUDO_LIBS="${SUDO_LIBS} $ac_res"])
+	AC_SEARCH_LIBS([getprpwnam], [sec security prot], [AC_DEFINE(HAVE_GETPRPWNAM)] [CHECKSHADOW=false; SECUREWARE=1; test -n "$ac_lib" && SUDOERS_LIBS="${SUDOERS_LIBS} $ac_res"])
     fi
     if test -n "$SECUREWARE"; then
 	AC_CHECK_FUNCS(bigcrypt set_auth_parameters initprivs)
