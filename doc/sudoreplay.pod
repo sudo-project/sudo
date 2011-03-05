@@ -1,4 +1,4 @@
-Copyright (c) 2009-2010 Todd C. Miller <Todd.Miller@courtesan.com>
+Copyright (c) 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
 
 Permission to use, copy, modify, and distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
@@ -27,13 +27,17 @@ B<sudoreplay> [B<-h>] [B<-d> I<directory>] -l [search expression]
 
 =head1 DESCRIPTION
 
-B<sudoreplay> plays back or lists the session logs created by
-B<sudo>.  When replaying, B<sudoreplay> can play the session back
-in real-time, or the playback speed may be adjusted (faster or
-slower) based on the command line options.  The I<ID> should be
-a six character sequence of digits and upper case letters, e.g.
-0100A5, which is logged by B<sudo> when a command is run with
-session logging enabled.
+B<sudoreplay> plays back or lists the output logs created by B<sudo>.
+When replaying, B<sudoreplay> can play the session back in real-time,
+or the playback speed may be adjusted (faster or slower) based on
+the command line options.
+
+The I<ID> should either be a six character sequence of digits and
+upper case letters, e.g. C<0100A5>, or a pattern matching the
+I<iolog_file> option in the I<sudoers> file.  When a command is run
+via B<sudo> with I<log_output> enabled in the I<sudoers> file, a
+C<TSID=ID> string is logged via syslog or to the B<sudo> log file.
+The I<ID> may also be determined using B<sudoreplay>'s list mode.
 
 In list mode, B<sudoreplay> can be used to find the ID of a session
 based on a number of criteria such as the user, tty or command run.
