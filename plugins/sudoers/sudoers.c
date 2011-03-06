@@ -546,8 +546,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (def_group_plugin)
 	group_plugin_unload();
 
-    if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST)))
+    if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST))) {
+	rval = TRUE;
 	goto done;
+    }
 
     /*
      * Set umask based on sudoers.
