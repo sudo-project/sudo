@@ -1172,6 +1172,11 @@ deserialize_info(char * const settings[], char * const user_info[])
 		SET(flags, MODE_IGNORE_TICKET);
 	    continue;
 	}
+	if (MATCHES(*cur, "noninteractive=")) {
+	    if (atobool(*cur + sizeof("noninteractive=") - 1) == TRUE)
+		SET(flags, MODE_NONINTERACTIVE);
+	    continue;
+	}
 	if (MATCHES(*cur, "sudoedit=")) {
 	    if (atobool(*cur + sizeof("sudoedit=") - 1) == TRUE)
 		SET(flags, MODE_EDIT);
