@@ -39,7 +39,7 @@ still allow people to get their work done."
 
 %if [rpm,deb]
 	# Convert patch level into release and remove from version
-	pp_rpm_release="`expr $version : '.*p\([0-9][0-9]*\)' + 1`"
+	pp_rpm_release="`expr \( $version : '.*p\([0-9][0-9]*\)' \| 0 \) + 1`"
 	pp_rpm_version="`expr $version : '\(.*\)p[0-9][0-9]*'`"
 	pp_rpm_license="BSD"
 	pp_rpm_url="http://www.sudo.ws/"
