@@ -643,6 +643,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
     if (def_closefrom >= 0)
 	easprintf(&command_info[info_len++], "closefrom=%d", def_closefrom);
+#ifdef HAVE_LOGIN_CAP_H
+    if (lc != NULL)
+	command_info[info_len++] = fmt_string("login_class", lc->lc_class);
+#endif /* HAVE_LOGIN_CAP_H */
 #ifdef HAVE_SELINUX
     if (user_role != NULL)
 	command_info[info_len++] = fmt_string("selinux_role", user_role);
