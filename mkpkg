@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # Build a binary package using polypkg
-# Usage: mkpkg [--debug] [--flavor flavor] [--platform platform]
+# Usage: mkpkg [--debug] [--flavor flavor] [--platform platform] [--osversion ver]
 #
 
 # Make sure IFS is set to space, tab, newline in that order.
@@ -12,7 +12,7 @@ nl='
 IFS=" 	$nl"
 
 # Parse arguments
-usage="usage: mkpkg [--debug] [--flavor flavor] [--platform platform]"
+usage="usage: mkpkg [--debug] [--flavor flavor] [--platform platform] [--osversion ver]"
 debug=0
 flavor=vanilla
 while test $# -gt 0; do
@@ -47,6 +47,18 @@ while test $# -gt 0; do
 	    PPFLAGS="${PPFLAGS}${PPFLAGS+$space}--platform $2"
 	    shift
 	    ;;
+	--osversion=?*)
+	    arg=`echo "$1" | sed -n 's/^--osversion=\(.*\)/\1/p'`
+	    osversion="$arg"
+	    ;;
+	--osversion)
+	    if [ $# -lt 2 ]; then
+		echo "$usage" 1>&2
+		exit 1
+	    fi
+	    osversion="$2"
+	    shift
+	    ;;
 	*)
 	    # Pass unknown options to configure
 	    configure_opts="${configure_opts}${configure_opts+$tab}$1"
@@ -57,15 +69,15 @@ done
 
 top_srcdir=`dirname $0`
 
-platform=`$top_srcdir/pp --probe` || exit 1
-osrelease=`echo "$platform" | sed -e 's/^[^0-9]*//' -e 's/-.*$//'`
+: osversion=`$top_srcdir/pp --probe` || exit 1
+osrelease=`echo "$osversion" | sed -e 's/^[^0-9]*//' -e 's/-.*$//'`
 
 # Default paths
 prefix=/usr/local
 
 # Linux distros may build binaries as pie files.
 # This is really something libtool should figure out, but it does not.
-case "$platform" in
+case "$osversion" in
     *-s390*|*-sparc*|*-alpha*)
 	F_PIE=-fPIE
 	;;
@@ -74,8 +86,8 @@ case "$platform" in
 	;;
 esac
 
-# Choose compiler options by platform.
-case "$platform" in
+# Choose compiler options by osversion.
+case "$osversion" in
     hpux*)
 	# Use the HP ANSI C compiler on HP-UX if possible
 	if [ -z "$CC" -a -x /opt/ansic/bin/cc ]; then
@@ -87,9 +99,9 @@ case "$platform" in
 	;;
 esac
 
-# Choose configure options by platform.
+# Choose configure options by osversion.
 # We use the same configure options as vendor packages when possible.
-case "$platform" in
+case "$osversion" in
     centos*|rhel*)
 	prefix=/usr
 	if [ $osrelease -ge 50 ]; then
@@ -125,7 +137,7 @@ case "$platform" in
 	    fi
 	fi
 	# SuSE doesn't have /usr/libexec
-	case "$platform" in
+	case "$osversion" in
 	    *64*)	libexec=lib64;;
 	    *)		libexec=lib;;
 	esac
@@ -152,7 +164,7 @@ case "$platform" in
     deb*|ubu*)
 	prefix=/usr
 	# If Ubuntu, add --enable-admin-flag
-	case "$platform" in
+	case "$osversion" in
 	    ubu*)
 		configure_opts="${configure_opts}${configure_opts+$tab}--enable-admin-flag${tab}--without-lecture"
 		;;
@@ -187,7 +199,7 @@ case "$platform" in
     *)
 	# For Solaris, add project support and use let configure choose zlib.
 	# For all others, use the builtin zlib.
-	case "$platform" in
+	case "$osversion" in
 	    sol*) configure_opts="${configure_opts}${configure_opts+$tab}--with-project";;
 	    *) configure_opts="${configure_opts}${configure_opts+$tab}--enable-zlib=builtin";;
 	esac
