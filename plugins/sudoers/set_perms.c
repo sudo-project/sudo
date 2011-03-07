@@ -44,9 +44,6 @@
 #include <pwd.h>
 #include <errno.h>
 #include <grp.h>
-#ifdef HAVE_LOGIN_CAP_H
-# include <login_cap.h>
-#endif
 
 #include "sudoers.h"
 
