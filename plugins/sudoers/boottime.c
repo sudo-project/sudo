@@ -42,15 +42,15 @@
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#ifdef HAVE_GETUTXID
-# include <utmpx.h>
-#endif
-#ifdef HAVE_GETUTID
-# include <utmp.h>
-#endif
-#ifdef HAVE_SYSCTL
-# include <sys/sysctl.h>
-#endif
+#ifndef __linux__
+# if defined(HAVE_SYSCTL) && defined(KERN_BOOTTIME)
+#  include <sys/sysctl.h>
+# elif defined(HAVE_GETUTXID)
+#  include <utmpx.h>
+# elif defined(HAVE_GETUTID)
+#  include <utmp.h>
+# endif
+#endif /* !__linux__ */
 
 #include "missing.h"
 
@@ -111,11 +111,12 @@ get_boottime(struct timeval *tv)
 
     memset(&key, 0, sizeof(key));
     key.ut_type = BOOT_TIME;
+    setutxent();
     if ((ut = getutxid(&key)) != NULL) {
 	tv->tv_sec = ut->ut_tv.tv_sec;
 	tv->tv_usec = ut->ut_tv.tv_usec;
-	endutxent();
     }
+    endutxent();
     return ut != NULL;
 }
 
@@ -128,11 +129,12 @@ get_boottime(struct timeval *tv)
 
     memset(&key, 0, sizeof(key));
     key.ut_type = BOOT_TIME;
+    setutent();
     if ((ut = getutid(&key)) != NULL) {
 	tv->tv_sec = ut->ut_time;
 	tv->tv_usec = 0;
-	endutent();
     }
+    endutent();
     return ut != NULL;
 }
 
