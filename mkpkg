@@ -69,7 +69,8 @@ done
 
 top_srcdir=`dirname $0`
 
-: osversion=`$top_srcdir/pp --probe` || exit 1
+: ${osversion="`$top_srcdir/pp --probe`"}
+test -n "$osversion" || exit 1
 osrelease=`echo "$osversion" | sed -e 's/^[^0-9]*//' -e 's/-.*$//'`
 
 # Default paths
