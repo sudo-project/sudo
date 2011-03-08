@@ -313,6 +313,9 @@
 /* Define to 1 if you have the `lockf' function. */
 #undef HAVE_LOCKF
 
+/* Define to 1 if you have the `login' function. */
+#undef HAVE_LOGIN
+
 /* Define to 1 if you have the <login_cap.h> header file. */
 #undef HAVE_LOGIN_CAP_H
 
@@ -551,6 +554,9 @@
 
 /* Define to 1 if you have the <utime.h> header file. */
 #undef HAVE_UTIME_H
+
+/* Define to 1 if you have the <utmp.h> header file. */
+#undef HAVE_UTMP_H
 
 /* Define to 1 if you have the `vasprintf' function. */
 #undef HAVE_VASPRINTF

@@ -15039,7 +15039,7 @@ LIBS=$ac_save_LIBS
 
 for ac_func in strrchr sysconf tzset strftime initgroups getgroups fstat \
 	       regcomp setlocale nl_langinfo getaddrinfo mbr_check_membership \
-	       setrlimit64
+	       setrlimit64 sysctl
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -15083,7 +15083,7 @@ done
 fi
 done
 
-for ac_func in sysctl getutxid getutid
+for ac_func in getutxid getutid
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -15092,10 +15092,104 @@ eval as_val=\$$as_ac_var
   cat >>confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
- break
+ utmp=POSIX; break
 fi
 done
 
+if test "${utmp-NONE}" = "NONE"; then
+    for ac_func in login
+do :
+  ac_fn_c_check_func "$LINENO" "login" "ac_cv_func_login"
+if test "x$ac_cv_func_login" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LOGIN 1
+_ACEOF
+
+	UTMP=BSD
+	for ac_header in util.h utmp.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+eval as_val=\$$as_ac_Header
+   if test "x$as_val" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+ break
+fi
+
+done
+
+
+else
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for login in -lutil" >&5
+$as_echo_n "checking for login in -lutil... " >&6; }
+if test "${ac_cv_lib_util_login+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lutil  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char login ();
+int
+main ()
+{
+return login ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_util_login=yes
+else
+  ac_cv_lib_util_login=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_util_login" >&5
+$as_echo "$ac_cv_lib_util_login" >&6; }
+if test "x$ac_cv_lib_util_login" = x""yes; then :
+
+	    UTMP=BSD
+	    for ac_header in util.h utmp.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+eval as_val=\$$as_ac_Header
+   if test "x$as_val" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+ break
+fi
+
+done
+
+	    case "$SUDO_LIBS" in
+		*-lutil*) ;;
+		*) SUDO_LIBS="${SUDO_LIBS} -lutil";;
+	    esac
+	    $as_echo "#define HAVE_LOGIN 1" >>confdefs.h
+
+
+fi
+
+
+fi
+done
+
+fi
 
 for ac_func in openpty
 do :

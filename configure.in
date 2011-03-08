@@ -1968,12 +1968,28 @@ dnl
 AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS(strrchr sysconf tzset strftime initgroups getgroups fstat \
 	       regcomp setlocale nl_langinfo getaddrinfo mbr_check_membership \
-	       setrlimit64)
+	       setrlimit64 sysctl)
 AC_CHECK_FUNCS(getline, [], [
     AC_LIBOBJ(getline)
     AC_CHECK_FUNCS(fgetln)
 ])
-AC_CHECK_FUNCS(sysctl getutxid getutid, [break])
+AC_CHECK_FUNCS(getutxid getutid, [utmp=POSIX; break])
+if test "${utmp-NONE}" = "NONE"; then
+    AC_CHECK_FUNCS(login, [
+	UTMP=BSD
+	AC_CHECK_HEADERS(util.h utmp.h, [break])
+    ], [
+	AC_CHECK_LIB(util, login, [
+	    UTMP=BSD
+	    AC_CHECK_HEADERS(util.h utmp.h, [break])
+	    case "$SUDO_LIBS" in
+		*-lutil*) ;;
+		*) SUDO_LIBS="${SUDO_LIBS} -lutil";;
+	    esac
+	    AC_DEFINE(HAVE_LOGIN)
+	])
+    ])
+fi
 
 AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(util.h pty.h, [break])], [
     AC_CHECK_LIB(util, openpty, [
