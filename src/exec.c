@@ -234,7 +234,7 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
 	log_io = TRUE;
 	if (!ISSET(details->flags, CD_BACKGROUND)) {
 	    sudo_debug(8, "allocate pty for I/O logging");
-	    pty_setup(details->euid);
+	    pty_setup(details->euid, user_details.tty);
 	}
     }
 

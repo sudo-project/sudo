@@ -39,7 +39,7 @@ int suspend_parent(int signo);
 void fd_set_iobs(fd_set *fdsr, fd_set *fdsw);
 void handler(int s);
 void pty_close(struct command_status *cstat);
-void pty_setup(uid_t uid);
+void pty_setup(uid_t uid, const char *tty);
 void terminate_child(pid_t pid, int use_pgrp);
 extern int signal_pipe[2];
 
