@@ -295,25 +295,25 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     struct sudo_nss *nss;
     int cmnd_status = -1, validated;
     volatile int info_len = 0;
-    volatile int rval = FALSE;
+    volatile int rval = TRUE;
 
     if (sigsetjmp(error_jmp, 1)) {
 	/* error recovery via error(), errorx() or log_error() */
-	rewind_perms();
-	return -1;
+	rval = -1;
+	goto done;
     }
 
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
         warningx("sudoers specifies that root is not allowed to sudo");
-        goto done;
+        goto bad;
     }    
 
     /* Check for -C overriding def_closefrom. */
     if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
 	if (!def_closefrom_override) {
 	    warningx("you are not permitted to use the -C option");
-	    goto done;
+	    goto bad;
 	}
 	def_closefrom = user_closefrom;
     }
@@ -419,7 +419,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	if (fd == -1) {
 	    audit_failure(NewArgv, "no tty");
 	    warningx("sorry, you must have a tty to run sudo");
-	    goto done;
+	    goto bad;
 	} else
 	    (void) close(fd);
     }
@@ -487,7 +487,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    }
 	    audit_failure(NewArgv, "validation failure");
 	}
-	goto done;
+	goto bad;
     }
 
     /* Create Ubuntu-style dot file to indicate sudo was successful. */
@@ -497,18 +497,18 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (cmnd_status == NOT_FOUND_DOT) {
 	audit_failure(NewArgv, "command in current directory");
 	warningx("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.", user_cmnd, user_cmnd, user_cmnd);
-	goto done;
+	goto bad;
     } else if (cmnd_status == NOT_FOUND) {
 	audit_failure(NewArgv, "%s: command not found", user_cmnd);
 	warningx("%s: command not found", user_cmnd);
-	goto done;
+	goto bad;
     }
 
     /* If user specified env vars make sure sudoers allows it. */
     if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
 	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
 	    warningx("sorry, you are not allowed to preserve the environment");
-	    goto done;
+	    goto bad;
 	} else
 	    validate_env_vars(sudo_user.env_vars);
     }
@@ -547,7 +547,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	group_plugin_unload();
 
     if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST))) {
-	rval = TRUE;
+	/* rval already set appropriately */
 	goto done;
     }
 
@@ -598,8 +598,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     if (ISSET(sudo_mode, MODE_EDIT)) {
 	char *editor = find_editor(NewArgc - 1, NewArgv + 1, &edit_argv);
-	if (!editor)
-	    goto done;
+	if (editor == NULL)
+	    goto bad;
 	command_info[info_len++] = fmt_string("command", editor);
 	command_info[info_len++] = estrdup("sudoedit=true");
     } else {
@@ -662,11 +662,14 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     *argv_out = edit_argv ? edit_argv : NewArgv;
     *user_env_out = env_get(); /* our private copy */
 
-    rval = TRUE;
+    goto done;
 
-    restore_perms();
+bad:
+    rval = FALSE;
 
 done:
+    rewind_perms();
+
     /* Close the password and group files and free up memory. */
     sudo_endpwent();
     sudo_endgrent();
