@@ -3960,6 +3960,7 @@ if ac_fn_c_try_compile "$LINENO"; then :
 		    $as_echo "#define HAVE_LINUX_AUDIT 1" >>confdefs.h
 
 		    SUDO_LIBS="${SUDO_LIBS} -laudit"
+		    SUDOERS_LIBS="${SUDO_LIBS} -laudit"
 		    SUDOERS_OBJS="${SUDOERS_OBJS} linux_audit.lo"
 
 else
@@ -6785,13 +6786,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6788: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6789: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6791: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6792: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6794: output\"" >&5)
+  (eval echo "\"\$as_me:6795: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -7996,7 +7997,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7999 "configure"' > conftest.$ac_ext
+  echo '#line 8000 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9388,11 +9389,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9391: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9392: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9395: \$? = $ac_status" >&5
+   echo "$as_me:9396: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9727,11 +9728,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9730: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9731: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9734: \$? = $ac_status" >&5
+   echo "$as_me:9735: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9832,11 +9833,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9835: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9836: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9839: \$? = $ac_status" >&5
+   echo "$as_me:9840: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9887,11 +9888,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9890: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9891: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9894: \$? = $ac_status" >&5
+   echo "$as_me:9895: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12254,7 +12255,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12257 "configure"
+#line 12258 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12350,7 +12351,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12353 "configure"
+#line 12354 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13223,7 +13224,6 @@ fi
 		;;
     *-ccur-sysv4*|*-ccur-sysvr4*)
 		LIBS="${LIBS} -lgen"
-		SUDO_LIBS="${SUDO_LIBS} -lgen"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		: ${with_rpath='yes'}
@@ -14414,8 +14414,10 @@ if test "x$ac_cv_header_login_cap_h" = x""yes; then :
 _ACEOF
  LOGINCAP_USAGE='[-c class|-] '; LCMAN=1
 	case "$OS" in
-	    freebsd|netbsd)	SUDO_LIBS="${SUDO_LIBS} -lutil"
-	    ;;
+	    freebsd|netbsd)
+		SUDO_LIBS="${SUDO_LIBS} -lutil"
+		SUDOERS_LIBS="${SUDOERS_LIBS} -lutil"
+		;;
 	esac
 
 fi
@@ -15170,7 +15172,10 @@ fi
 
 done
 
-	SUDO_LIBS="${SUDO_LIBS} -lutil"
+	case "$SUDO_LIBS" in
+	    *-lutil*) ;;
+	    *) SUDO_LIBS="${SUDO_LIBS} -lutil";;
+	esac
 	$as_echo "#define HAVE_OPENPTY 1" >>confdefs.h
 
 
@@ -18452,6 +18457,7 @@ esac
 LIBDL="$lt_cv_dlopen_libs"
 if test X"$LIBDL" != X""; then
     SUDO_LIBS="${SUDO_LIBS} $LIBDL"
+    SUDOERS_LIBS="${SUDOERS_LIBS} $LIBDL"
 fi
 
 # On HP-UX, you cannot dlopen() a shared object that uses pthreads
@@ -18603,7 +18609,7 @@ if test -n "$LIBS"; then
     LIBS=
     for l in ${L}; do
 	dupe=0
-	for sl in ${SUDO_LIBS} ${NET_LIBS}; do
+	for sl in ${SUDO_LIBS} ${SUDOERS_LIBS} ${NET_LIBS}; do
 	    test $l = $sl && dupe=1
 	done
 	test $dupe = 0 && LIBS="${LIBS} $l"

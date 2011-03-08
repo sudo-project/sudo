@@ -265,6 +265,7 @@ AC_ARG_WITH(linux-audit, [AS_HELP_STRING([--with-linux-audit], [enable Linux aud
     yes)	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <libaudit.h>]], [[int i = AUDIT_USER_CMD; (void)i;]])], [
 		    AC_DEFINE(HAVE_LINUX_AUDIT)
 		    SUDO_LIBS="${SUDO_LIBS} -laudit"
+		    SUDOERS_LIBS="${SUDO_LIBS} -laudit"
 		    SUDOERS_OBJS="${SUDOERS_OBJS} linux_audit.lo"
 		], [
 		    AC_MSG_ERROR([unable to find AUDIT_USER_CMD in libaudit.h for --with-linux-audit])
@@ -1714,7 +1715,6 @@ case "$host" in
 		;;
     *-ccur-sysv4*|*-ccur-sysvr4*)
 		LIBS="${LIBS} -lgen"
-		SUDO_LIBS="${SUDO_LIBS} -lgen"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		: ${with_rpath='yes'}
@@ -1926,8 +1926,10 @@ SUDO_MAILDIR
 if test ${with_logincap-'no'} != "no"; then
     AC_CHECK_HEADERS(login_cap.h, [LOGINCAP_USAGE='[[-c class|-]] '; LCMAN=1
 	case "$OS" in
-	    freebsd|netbsd)	SUDO_LIBS="${SUDO_LIBS} -lutil"
-	    ;;
+	    freebsd|netbsd)
+		SUDO_LIBS="${SUDO_LIBS} -lutil"
+		SUDOERS_LIBS="${SUDOERS_LIBS} -lutil"
+		;;
 	esac
     ])
 fi
@@ -1976,7 +1978,10 @@ AC_CHECK_FUNCS(sysctl getutxid getutid, [break])
 AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(util.h pty.h, [break])], [
     AC_CHECK_LIB(util, openpty, [
 	AC_CHECK_HEADERS(util.h pty.h, [break])
-	SUDO_LIBS="${SUDO_LIBS} -lutil"
+	case "$SUDO_LIBS" in
+	    *-lutil*) ;;
+	    *) SUDO_LIBS="${SUDO_LIBS} -lutil";;
+	esac
 	AC_DEFINE(HAVE_OPENPTY)
     ], [
 	AC_CHECK_FUNCS(_getpty, [], [
@@ -2759,6 +2764,7 @@ esac
 LIBDL="$lt_cv_dlopen_libs"
 if test X"$LIBDL" != X""; then
     SUDO_LIBS="${SUDO_LIBS} $LIBDL"
+    SUDOERS_LIBS="${SUDOERS_LIBS} $LIBDL"
 fi
 
 # On HP-UX, you cannot dlopen() a shared object that uses pthreads
@@ -2810,14 +2816,14 @@ _AUTH=`echo "$AUTH_OBJS" | sed -e 's/\.lo//g' -e 's/getspwuid *//'`
 AC_MSG_NOTICE([using the following authentication methods: $_AUTH])
 
 dnl
-dnl LIBS may contain duplicates from SUDO_LIBS or NET_LIBS so prune it.
+dnl LIBS may contain duplicates from SUDO_LIBS, SUDOERS_LIBS, or NET_LIBS
 dnl
 if test -n "$LIBS"; then
     L="$LIBS"
     LIBS=
     for l in ${L}; do
 	dupe=0
-	for sl in ${SUDO_LIBS} ${NET_LIBS}; do
+	for sl in ${SUDO_LIBS} ${SUDOERS_LIBS} ${NET_LIBS}; do
 	    test $l = $sl && dupe=1
 	done
 	test $dupe = 0 && LIBS="${LIBS} $l"
