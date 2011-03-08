@@ -477,7 +477,7 @@ The supplementary group vector to use for the command in the form
 of a comma-separated list of group IDs.  If I<preserve_groups>
 is set, this option is ignored.
 
-=item login_class=login_class
+=item login_class=string
 
 BSD login class to use when setting resource limits and nice value
 (optional).  This option is only set on systems that support login
