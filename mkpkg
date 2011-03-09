@@ -98,6 +98,15 @@ case "$osversion" in
 	    fi
 	fi
 	;;
+    sol[0-9]*)
+	# Use the Sun Studio C compiler on Solaris if possible
+	if [ -z "$CC" -a -x /usr/bin/cc ]; then
+	    CC=/usr/bin/cc; export CC
+	    if [ -z "$CFLAGS" ]; then
+		CFLAGS=-O; export CFLAGS
+	    fi
+	fi
+	;;
 esac
 
 # Choose configure options by osversion.
