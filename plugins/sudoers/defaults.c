@@ -498,9 +498,6 @@ init_defaults(void)
     def_secure_path = estrdup(SECURE_PATH);
 #endif
     def_editor = estrdup(EDITOR);
-#ifdef _PATH_SUDO_NOEXEC
-    def_noexec_file = estrdup(_PATH_SUDO_NOEXEC);
-#endif
 
     /* Finally do the lists (currently just environment tables). */
     init_envtables();

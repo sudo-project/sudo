@@ -52,6 +52,8 @@
 # define RTLD_LOCAL	0
 #endif
 
+const char *noexec_path = _PATH_SUDO_NOEXEC;
+
 /*
  * Read in /etc/sudo.conf
  * Returns a list of plugins.
@@ -79,9 +81,10 @@ sudo_read_conf(const char *conf_file)
 		(path = strtok(NULL, " \t")) == NULL) {
 		continue;
 	    }
-	    if (strcasecmp(name, "askpass") != 0)
-		continue;
-	    askpass_path = estrdup(path);
+	    if (strcasecmp(name, "askpass") == 0)
+		askpass_path = estrdup(path);
+	    else if (strcasecmp(name, "noexec") == 0)
+		noexec_path = estrdup(path);
 	    continue;
 	}
 
