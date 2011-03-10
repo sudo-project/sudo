@@ -328,8 +328,6 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
 		goto done;
 	    }
 	    if (n == -1) {
-		if (errno == EAGAIN || errno == EINTR)
-		    continue;
 		/* Error reading signal_pipe[0], should not happen. */
 		break;
 	    }
@@ -404,7 +402,7 @@ done:
 
 /*
  * Read signals on fd written to by handler().
- * Returns -1 on error (possibly non-fatal), 0 on child exit, else 1.
+ * Returns -1 on error, 0 on child exit, else 1.
  */
 static int
 handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
@@ -421,11 +419,15 @@ handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
 	    /* It should not be possible to get EOF but just in case. */
 	    if (nread == 0)
 		errno = ECONNRESET;
-	    if (errno != EINTR && errno != EAGAIN) {
-		sudo_debug(9, "error reading signal pipe %s", strerror(errno));
-		cstat->type = CMD_ERRNO;
-		cstat->val = errno;
-	    }
+	    /* Restart if interrupted by signal so the pipe doesn't fill. */
+	    if (errno == EINTR)
+		continue;
+	    /* If pipe is empty, we are done. */
+	    if (errno == EAGAIN)
+		break;
+	    sudo_debug(9, "error reading signal pipe %s", strerror(errno));
+	    cstat->type = CMD_ERRNO;
+	    cstat->val = errno;
 	    return -1;
 	}
 	sudo_debug(9, "received signal %d", signo);
