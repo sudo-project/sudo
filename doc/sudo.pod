@@ -429,6 +429,7 @@ which corresponds to the following F<@sysconfdir@/sudo.conf> file.
  # Format:
  #   Plugin plugin_name plugin_path
  #   Path askpass path/to/askpass
+ #   Path noexec path/to/noexec
  #
  # The plugin_path is relative to @prefix@/libexec unless
  #   fully qualified.
@@ -448,6 +449,39 @@ parameters after the I<path> are ignored.  Lines that don't begin
 with C<Plugin> or C<Path> are silently ignored
 
 For more information, see the L<sudo_plugin(8)> manual.
+
+=head1 PATHS
+
+A C<Path> line consists of the C<Path> keyword, followed by the
+name of the path to set and its value.  E.g.
+
+ Path noexec @noexec_file@
+ Path askpass /usr/X11R6/bin/ssh-askpass
+
+The following plugin-agnostic paths may be set in the
+F<@sysconfdir@/sudo.conf> file.
+
+=over 16
+
+=item askpass
+
+The fully qualified path to a helper program used to read the user's
+password when no terminal is available.  This may be the case when
+B<sudo> is executed from a graphical (as opposed to text-based)
+application.  The program specified by I<askpass> should display
+the argument passed to it as the prompt and write the user's password
+to the standard output.  The value of I<askpass> may be overridden
+by the C<SUDO_ASKPASS> environment variable.
+
+=item noexec
+
+The fully-qualified path to a shared library containing dummy
+versions of the execv(), execve() and fexecve() library functions
+that just return an error.  This is used to implement the I<noexec>
+functionality on systems that support C<LD_PRELOAD> or its equivalent.
+Defaults to F<@noexec_file@>.
+
+=back
 
 =head1 RETURN VALUES
 
