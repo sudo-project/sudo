@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2003, 2004, 2008-2010
+ * Copyright (c) 2001, 2003, 2004, 2008-2011
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -38,9 +38,6 @@
 
 #include "missing.h"
 
-static unsigned int get_random(void);
-static void seed_random(void);
-
 #define MKTEMP_FILE	1
 #define MKTEMP_DIR	2
 
@@ -51,25 +48,51 @@ static void seed_random(void);
 #define INT_MAX	0x7fffffff
 #endif
 
-#ifndef HAVE_MKSTEMPS
-int
-mkstemps(char *path, int slen)
-{
-	return mktemp_internal(path, slen, MKTEMP_FILE);
-}
-#endif /* HAVE_MKSTEMPS */
+#ifdef HAVE_RANDOM
+# define RAND		random
+# define SRAND		srandom
+# define SEED_T		unsigned int
+#else
+# ifdef HAVE_LRAND48
+#  define RAND		lrand48
+#  define SRAND		srand48
+#  define SEED_T	long
+# else
+#  define RAND		rand
+#  define SRAND		srand
+#  define SEED_T	unsigned int
+# endif
+#endif
 
-#ifndef HAVE_MKDTEMP
-char *
-mkdtemp(char *path)
+static void
+seed_random(void)
 {
-	if (mktemp_internal(path, 0, MKTEMP_DIR) == -1)
-		return NULL;
-	return path;
-}
-#endif /* HAVE_MKDTEMP */
+	SEED_T seed;
+	struct timeval tv;
 
-int
+	/*
+	 * Seed from time of day and process id multiplied by small primes.
+	 */
+	(void) gettimeofday(&tv, NULL);
+	seed = (tv.tv_sec % 10000) * 523 + tv.tv_usec * 13 +
+	    (getpid() % 1000) * 983;
+	SRAND(seed);
+}
+
+static unsigned int
+get_random(void)
+{
+	static int initialized;
+
+	if (!initialized) {
+		seed_random();
+		initialized = 1;
+	}
+
+	return RAND() & 0xffffffff;
+}
+
+static int
 mktemp_internal(char *path, int slen, int mode)
 {
 	char *start, *cp, *ep;
@@ -117,46 +140,20 @@ mktemp_internal(char *path, int slen, int mode)
 	return -1;
 }
 
-#ifdef HAVE_RANDOM
-# define RAND		random
-# define SRAND		srandom
-# define SEED_T		unsigned int
-#else
-# ifdef HAVE_LRAND48
-#  define RAND		lrand48
-#  define SRAND		srand48
-#  define SEED_T	long
-# else
-#  define RAND		rand
-#  define SRAND		srand
-#  define SEED_T	unsigned int
-# endif
-#endif
-
-static void
-seed_random(void)
+#ifndef HAVE_MKSTEMPS
+int
+mkstemps(char *path, int slen)
 {
-	SEED_T seed;
-	struct timeval tv;
-
-	/*
-	 * Seed from time of day and process id multiplied by small primes.
-	 */
-	(void) gettimeofday(&tv, NULL);
-	seed = (tv.tv_sec % 10000) * 523 + tv.tv_usec * 13 +
-	    (getpid() % 1000) * 983;
-	SRAND(seed);
+	return mktemp_internal(path, slen, MKTEMP_FILE);
 }
+#endif /* HAVE_MKSTEMPS */
 
-static unsigned int
-get_random(void)
+#ifndef HAVE_MKDTEMP
+char *
+mkdtemp(char *path)
 {
-	static int initialized;
-
-	if (!initialized) {
-		seed_random();
-		initialized = 1;
-	}
-
-	return RAND() & 0xffffffff;
+	if (mktemp_internal(path, 0, MKTEMP_DIR) == -1)
+		return NULL;
+	return path;
 }
+#endif /* HAVE_MKDTEMP */
