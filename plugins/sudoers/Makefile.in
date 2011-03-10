@@ -68,6 +68,9 @@ libexecdir = @libexecdir@
 datarootdir = @datarootdir@
 localstatedir = @localstatedir@
 
+# File extension for shared objects
+soext = @SOEXT@
+
 # Directory in which to install the sudoers plugin
 plugindir = @PLUGINDIR@
 
@@ -343,7 +346,7 @@ install-doc:
 	@LDAP@$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0555 $(srcdir)/sudoers2ldif $(DESTDIR)$(docdir)
 
 install-plugin: sudoers.la install-dirs
-	$(LIBTOOL) --mode=install --quiet $(INSTALL) -b~ sudoers.la $(DESTDIR)$(plugindir)
+	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0755 .libs/sudoers$(soext) $(DESTDIR)$(plugindir)
 
 install-sudoers: install-dirs
 	$(INSTALL) -d -O $(sudoers_uid) -G $(sudoers_gid) -M 0750 \
@@ -353,7 +356,7 @@ install-sudoers: install-dirs
 		sudoers $(DESTDIR)$(sudoersdir)/sudoers
 
 uninstall:
-	-$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(plugindir)/sudoers.la
+	-rm -f $(DESTDIR)$(plugindir)/sudoers$(soext)
 	-rm -f $(DESTDIR)$(replaydir)/sudoreplay
 	-rm -f $(DESTDIR)$(visudodir)/visudo
 	-cmp $(DESTDIR)$(sudoersdir)/sudoers $(srcdir)/sudoers >/dev/null && \
