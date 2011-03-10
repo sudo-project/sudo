@@ -82,7 +82,7 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
  * Wrapper to allow users to edit privileged files with their own uid.
  */
 int
-sudo_edit(struct command_details *command_details, char *argv[], char *envp[])
+sudo_edit(struct command_details *command_details)
 {
     struct command_details editor_details;
     ssize_t nread, nwritten;
@@ -128,7 +128,7 @@ sudo_edit(struct command_details *command_details, char *argv[], char *envp[])
      * The user's editor must be separated from the files to be
      * edited by a "--" option.
      */
-    for (ap = argv; *ap != NULL; ap++) {
+    for (ap = command_details->argv; *ap != NULL; ap++) {
 	if (files)
 	    nfiles++;
 	else if (strcmp(*ap, "--") == 0)
@@ -238,7 +238,7 @@ sudo_edit(struct command_details *command_details, char *argv[], char *envp[])
     nargc = editor_argc + nfiles;
     nargv = (char **) emalloc2(nargc + 1, sizeof(char *));
     for (ac = 0; ac < editor_argc; ac++)
-	nargv[ac] = argv[ac];
+	nargv[ac] = command_details->argv[ac];
     for (i = 0; i < nfiles && ac < nargc; )
 	nargv[ac++] = tf[i++].tfile;
     nargv[ac] = NULL;
@@ -255,7 +255,8 @@ sudo_edit(struct command_details *command_details, char *argv[], char *envp[])
     editor_details.egid = user_details.gid;
     editor_details.ngroups = user_details.ngroups;
     editor_details.groups = user_details.groups;
-    rval = run_command(&editor_details, nargv, envp);
+    editor_details.argv = nargv;
+    rval = run_command(&editor_details);
     gettimeofday(&tv2, NULL);
 
     /* Copy contents of temp files to real ones */
@@ -345,7 +346,7 @@ cleanup:
  * Must have the ability to change the effective uid to use sudoedit.
  */
 int
-sudo_edit(struct command_details *command_details, char *argv[], char *envp[])
+sudo_edit(struct command_details *command_details)
 {
     return 1;
 }

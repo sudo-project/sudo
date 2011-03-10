@@ -108,10 +108,8 @@ static sigset_t ttyblock;
 static struct io_buffer *iobufs;
 
 static void flush_output(void);
-static int exec_monitor(struct command_details *details, char *argv[],
-    char *envp[], int backchannel);
-static void exec_pty(struct command_details *detail, char *argv[],
-    char *envp[]);
+static int exec_monitor(struct command_details *details, int backchannel);
+static void exec_pty(struct command_details *detail);
 static void sigwinch(int s);
 static void sync_ttysize(int src, int dst);
 static void deliver_signal(pid_t pid, int signo);
@@ -640,8 +638,7 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
  * Returns the child pid.
  */
 int
-fork_pty(struct command_details *details, char *argv[], char *envp[],
-    int sv[], int *maxfd)
+fork_pty(struct command_details *details, int sv[], int *maxfd)
 {
     struct command_status cstat;
     struct io_buffer *iob;
@@ -758,7 +755,7 @@ fork_pty(struct command_details *details, char *argv[], char *envp[],
 		close(io_pipe[STDOUT_FILENO][0]);
 	    if (io_pipe[STDERR_FILENO][0])
 		close(io_pipe[STDERR_FILENO][0]);
-	    exec_monitor(details, argv, envp, sv[1]);
+	    exec_monitor(details, sv[1]);
 	}
 	cstat.type = CMD_ERRNO;
 	cstat.val = errno;
@@ -973,8 +970,7 @@ handle_sigchld(int backchannel, struct command_status *cstat)
  * Returns an error if fork(2) fails, else calls _exit(2).
  */
 static int
-exec_monitor(struct command_details *details, char *argv[], char *envp[],
-    int backchannel)
+exec_monitor(struct command_details *details, int backchannel)
 {
     struct command_status cstat;
     struct timeval tv;
@@ -1062,7 +1058,7 @@ exec_monitor(struct command_details *details, char *argv[], char *envp[],
 	restore_signals();
 
 	/* setup tty and exec command */
-	exec_pty(details, argv, envp);
+	exec_pty(details);
 	cstat.type = CMD_ERRNO;
 	cstat.val = errno;
 	if (write(errpipe[1], &cstat, sizeof(cstat)) == -1)
@@ -1258,7 +1254,7 @@ flush_output(void)
  * Returns only if execve() fails.
  */
 static void
-exec_pty(struct command_details *details, char *argv[], char *envp[])
+exec_pty(struct command_details *details)
 {
     pid_t self = getpid();
 
@@ -1291,10 +1287,10 @@ exec_pty(struct command_details *details, char *argv[], char *envp[])
 	closefrom(details->closefrom);
 #ifdef HAVE_SELINUX
     if (ISSET(details->flags, CD_RBAC_ENABLED))
-	selinux_execve(details->command, argv, envp);
+	selinux_execve(details->command, details->argv, details->envp);
     else
 #endif
-	my_execve(details->command, argv, envp);
+	my_execve(details->command, details->argv, details->envp);
 }
 
 /*

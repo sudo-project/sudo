@@ -382,6 +382,9 @@
 /* Define to 1 if you have the `posix_openpt' function. */
 #undef HAVE_POSIX_OPENPT
 
+/* Define to 1 if you have the `priv_set' function. */
+#undef HAVE_PRIV_SET
+
 /* Define to 1 if you have the <project.h> header file. */
 #undef HAVE_PROJECT_H
 

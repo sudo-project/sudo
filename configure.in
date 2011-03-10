@@ -1462,6 +1462,7 @@ case "$host" in
 		: ${mansectform='4'}
 		: ${with_rpath='yes'}
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
+		AC_CHECK_FUNCS(priv_set)
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
