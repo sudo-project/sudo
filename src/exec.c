@@ -107,8 +107,7 @@ my_execve(const char *path, char *const argv[], char *const envp[])
  * Fork and execute a command, returns the child's pid.
  * Sends errno back on sv[1] if execve() fails.
  */
-static int fork_cmnd(struct command_details *details, char *argv[],
-    char *envp[], int sv[2])
+static int fork_cmnd(struct command_details *details, int sv[2])
 {
     struct command_status cstat;
     sigaction_t sa;
@@ -138,10 +137,10 @@ static int fork_cmnd(struct command_details *details, char *argv[],
 		closefrom(details->closefrom);
 #ifdef HAVE_SELINUX
 	    if (ISSET(details->flags, CD_RBAC_ENABLED))
-		selinux_execve(details->command, argv, envp);
+		selinux_execve(details->command, details->argv, details->envp);
 	    else
 #endif
-		my_execve(details->command, argv, envp);
+		my_execve(details->command, details->argv, details->envp);
 	}
 	cstat.type = CMD_ERRNO;
 	cstat.val = errno;
@@ -201,8 +200,7 @@ restore_signals(void)
  * we fact that we have two different controlling terminals to deal with.
  */
 int
-sudo_execve(struct command_details *details, char *argv[], char *envp[],
-    struct command_status *cstat)
+sudo_execve(struct command_details *details, struct command_status *cstat)
 {
     int maxfd, n, nready, sv[2], log_io = FALSE;
     fd_set *fdsr, *fdsw;
@@ -279,9 +277,9 @@ sudo_execve(struct command_details *details, char *argv[], char *envp[],
      * to and from pty.  Adjusts maxfd as needed.
      */
     if (log_io)
-	child = fork_pty(details, argv, envp, sv, &maxfd);
+	child = fork_pty(details, sv, &maxfd);
     else
-	child = fork_cmnd(details, argv, envp, sv);
+	child = fork_cmnd(details, sv);
     close(sv[1]);
 
     /* Set command timeout if specified. */

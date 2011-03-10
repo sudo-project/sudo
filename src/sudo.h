@@ -139,6 +139,8 @@ struct command_details {
     const char *chroot;
     const char *selinux_role;
     const char *selinux_type;
+    char **argv;
+    char **envp;
 };
 
 /* Status passed between parent and child via socketpair */
@@ -165,8 +167,7 @@ extern const char *askpass_path;
 void zero_bytes(volatile void *, size_t);
 
 /* exec.c */
-int sudo_execve(struct command_details *details, char *argv[], char *envp[],
-    struct command_status *cstat);
+int sudo_execve(struct command_details *details, struct command_status *cstat);
 void save_signals(void);
 void restore_signals(void);
 
@@ -196,15 +197,14 @@ void get_ttysize(int *rowp, int *colp);
 
 /* sudo.c */
 int exec_setup(struct command_details *details, const char *ptyname, int ptyfd);
-int run_command(struct command_details *details, char *argv[],   
-    char *envp[]);
+int run_command(struct command_details *details);
 void sudo_debug(int level, const char *format, ...) __printflike(2, 3);
 extern int debug_level;
 extern const char *list_user, *runas_user, *runas_group;
 extern struct user_details user_details;
 
 /* sudo_edit.c */
-int sudo_edit(struct command_details *details, char *argv[], char *envp[]);
+int sudo_edit(struct command_details *details);
 
 /* parse_args.c */
 void usage(int);

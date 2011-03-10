@@ -32,8 +32,7 @@ int my_execve(const char *path, char *const argv[], char *const envp[]);
 int pipe_nonblock(int fds[2]);
 
 /* exec_pty.c */
-int fork_pty(struct command_details *details, char *argv[], char *envp[],
-    int sv[], int *maxfd);
+int fork_pty(struct command_details *details, int sv[], int *maxfd);
 int perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat);
 int suspend_parent(int signo);
 void fd_set_iobs(fd_set *fdsr, fd_set *fdsw);

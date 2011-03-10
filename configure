@@ -12974,6 +12974,17 @@ case "$host" in
 		: ${mansectform='4'}
 		: ${with_rpath='yes'}
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
+		for ac_func in priv_set
+do :
+  ac_fn_c_check_func "$LINENO" "priv_set" "ac_cv_func_priv_set"
+if test "x$ac_cv_func_priv_set" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PRIV_SET 1
+_ACEOF
+
+fi
+done
+
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)

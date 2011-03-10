@@ -433,7 +433,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	def_env_reset = FALSE;
 
     /* Build a new environment that avoids any nasty bits. */
-    rebuild_env(def_noexec);
+    rebuild_env(def_noexec); /* XXX - move noexec bits */
 
     /* Require a password if sudoers says so.  */
     if (def_authenticate) {
@@ -532,6 +532,9 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	if (def_compress_io)
 	    command_info[info_len++] = estrdup("iolog_compress=true");
     }
+
+    if (def_noexec)
+	    command_info[info_len++] = estrdup("noexec=true");
 
     log_allowed(validated);
     if (ISSET(sudo_mode, MODE_CHECK))

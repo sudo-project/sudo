@@ -86,6 +86,9 @@
 # endif /* __hpux */
 # include <prot.h>
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
+#ifdef HAVE_PRIV_SET
+# include <priv.h>
+#endif
 
 #include "sudo.h"
 #include "sudo_plugin.h"
@@ -271,6 +274,8 @@ main(int argc, char *argv[], char *envp[])
 		}
 	    }
 	    command_info_to_details(command_info, &command_details);
+	    command_details.argv = argv_out;
+	    command_details.envp = user_env_out;
 	    if (ISSET(sudo_mode, MODE_BACKGROUND))
 		SET(command_details.flags, CD_BACKGROUND);
 	    /* Restore coredumpsize resource limit before running. */
@@ -278,7 +283,7 @@ main(int argc, char *argv[], char *envp[])
 	    (void) setrlimit(RLIMIT_CORE, &corelimit);
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
 	    if (ISSET(command_details.flags, CD_SUDOEDIT)) {
-		exitcode = sudo_edit(&command_details, argv_out, user_env_out);
+		exitcode = sudo_edit(&command_details);
 	    } else {
 		if (ISSET(sudo_mode, MODE_SHELL)) {
 		    /* Escape meta chars if running a shell with args. */
@@ -286,7 +291,7 @@ main(int argc, char *argv[], char *envp[])
 			argv_out[2] != NULL && argv_out[3] == NULL)
 			argv_out[2] = escape_cmnd(argv_out[2]);
 		}
-		exitcode = run_command(&command_details, argv_out, user_env_out);
+		exitcode = run_command(&command_details);
 	    }
 	    /* The close method was called by sudo_edit/run_command. */
 	    break;
@@ -860,6 +865,14 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	}
     }
 
+    /* XXX - should do env-based noexec here too */
+#ifdef HAVE_PRIV_SET
+    if (ISSET(details->flags, CD_NOEXEC)) {
+	if (priv_set(PRIV_OFF, PRIV_LIMIT, "PRIV_PROC_EXEC", NULL) == -1)
+	    warning("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT");
+    }
+#endif /* HAVE_PRIV_SET */
+
 #ifdef HAVE_SETRESUID
     if (setresuid(details->uid, details->euid, details->euid) != 0) {
 	warning("unable to change to runas uid (%u, %u)", details->uid,
@@ -943,7 +956,7 @@ escape_cmnd(const char *src)
  * Run the command and wait for it to complete.
  */
 int
-run_command(struct command_details *details, char *argv[], char *envp[])
+run_command(struct command_details *details)
 {
     struct plugin_container *plugin;
     struct command_status cstat;
@@ -952,7 +965,7 @@ run_command(struct command_details *details, char *argv[], char *envp[])
     cstat.type = CMD_INVALID;
     cstat.val = 0;
 
-    sudo_execve(details, argv, envp, &cstat);
+    sudo_execve(details, &cstat);
 
     switch (cstat.type) {
     case CMD_ERRNO:
