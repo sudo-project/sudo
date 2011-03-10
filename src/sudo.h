@@ -139,6 +139,7 @@ struct command_details {
     const char *chroot;
     const char *selinux_role;
     const char *selinux_type;
+    const char *noexec_file;
     char **argv;
     char **envp;
 };
