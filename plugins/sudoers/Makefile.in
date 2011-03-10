@@ -158,7 +158,7 @@ libsudoers.la: $(LIBSUDOERS_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LIBSUDOERS_OBJS) -no-install
 
 sudoers.la: $(SUDOERS_OBJS) libsudoers.la
-	$(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(SUDOERS_LDFLAGS) -o $@ $(SUDOERS_OBJS) libsudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir)
+	$(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(SUDOERS_LDFLAGS) -o $@ $(SUDOERS_OBJS) libsudoers.la $(SUDOERS_LIBS) -module -export-symbols $(srcdir)/sudoers.sym -avoid-version -rpath $(plugindir)
 
 visudo: libsudoers.la $(VISUDO_OBJS) $(LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)
