@@ -54,6 +54,7 @@ libexecdir = @libexecdir@
 datarootdir = @datarootdir@
 localstatedir = @localstatedir@
 plugindir = @PLUGINDIR@
+soext = @SOEXT@
 
 # OS dependent defines
 DEFS = @OSDEFS@
@@ -96,10 +97,10 @@ install-includes:
 install-doc:
 
 install-plugin: install-dirs sample_plugin.la
-	$(LIBTOOL) --mode=install --quiet $(INSTALL) -b~ sample_plugin.la $(DESDTDIR)/$(plugindir)
+	$(INSTALL) -b~ -M 0755 .libs/sample_plugin$(soext) $(DESTDIR)$(plugindir)
 
 uninstall:
-	-$(LIBTOOL) --mode=uninstall rm -f $(DESDTDIR)/$(plugindir)/sample_plugin.la
+	-rm -f $(DESTDIR)$(plugindir)/sample_plugin$(soext)
 
 check:
 

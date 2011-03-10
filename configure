@@ -694,6 +694,7 @@ BSDAUTH_USAGE
 DONT_LEAK_PATH_INFO
 INSTALL_NOEXEC
 noexec_file
+SOEXT
 PLUGINDIR
 NOEXECDIR
 NOEXECFILE
@@ -2754,6 +2755,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -12757,13 +12759,16 @@ CC="$lt_save_CC"
 
 if test "$enable_shared" = "no"; then
     with_noexec=no
+    enable_dlopen=no
+    lt_cv_dlopen=none
+    lt_cv_dlopen_libs=
 else
     eval _shrext="$shrext_cmds"
     # Darwin uses .dylib for libraries but .so for modules
     if test X"$_shrext" = X".dylib"; then
-	_shrext2=".so"
+	SOEXT=".so"
     else
-	_shrext2="$_shrext"
+	SOEXT="$_shrext"
     fi
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking path to sudo_noexec.so" >&5
@@ -18920,7 +18925,7 @@ EOF
 EOF
 
     cat >>confdefs.h <<EOF
-#define SUDOERS_PLUGIN "sudoers$_shrext2"
+#define SUDOERS_PLUGIN "sudoers${SOEXT}"
 EOF
 
     exec_prefix="$oexec_prefix"
