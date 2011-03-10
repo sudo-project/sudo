@@ -1215,13 +1215,6 @@ Subject of the mail sent to the I<mailto> user. The escape C<%h>
 will expand to the host name of the machine.
 Default is C<@mailsub@>.
 
-=item noexec_file
-
-Path to a shared library containing dummy versions of the execv(),
-execve() and fexecve() library functions that just return an error.
-This is used to implement the I<noexec> functionality on systems that
-support C<LD_PRELOAD> or its equivalent.  Defaults to F<@noexec_file@>.
-
 =item passprompt
 
 The default prompt to use when asking for a password; can be overridden
@@ -1827,25 +1820,15 @@ Note, however, that this applies only to native dynamically-linked
 executables.  Statically-linked executables and foreign executables
 running under binary emulation are not affected.
 
-To tell whether or not B<sudo> supports I<noexec>, you can run
-the following as root:
-
-    sudo -V | grep "dummy exec"
-
-If the resulting output contains a line that begins with:
-
-    File containing dummy exec functions:
-
-then B<sudo> may be able to replace the exec family of functions
-in the standard library with its own that simply return an error.
-Unfortunately, there is no foolproof way to know whether or not
-I<noexec> will work at compile-time.  I<noexec> should work on
-SunOS, Solaris, *BSD, Linux, IRIX, Tru64 UNIX, MacOS X, and HP-UX
-11.x.  It is known B<not> to work on AIX and UnixWare.  I<noexec>
-is expected to work on most operating systems that support the
+The I<noexec> feature is known to work on SunOS, Solaris, *BSD,
+Linux, IRIX, Tru64 UNIX, MacOS X, HP-UX 11.x and AIX 5.3 and above.
+It should be supported on most operating systems that support the
 C<LD_PRELOAD> environment variable.  Check your operating system's
 manual pages for the dynamic linker (usually ld.so, ld.so.1, dyld,
 dld.sl, rld, or loader) to see if C<LD_PRELOAD> is supported.
+
+On Solaris 10 and higher, I<noexec> uses Solaris privileges instead
+of the C<LD_PRELOAD> environment variable.
 
 To enable I<noexec> for a command, use the C<NOEXEC> tag as documented
 in the User Specification section above.  Here is that example again:
@@ -1856,7 +1839,8 @@ This allows user B<aaron> to run F</usr/bin/more> and F</usr/bin/vi>
 with I<noexec> enabled.  This will prevent those two commands from
 executing other commands (such as a shell).  If you are unsure
 whether or not your system is capable of supporting I<noexec> you
-can always just try it out and see if it works.
+can always just try it out and check whether shell escapes work
+when I<noexec> is enabled.
 
 =back
 
