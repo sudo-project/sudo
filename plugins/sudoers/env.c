@@ -413,7 +413,7 @@ matches_env_keep(const char *var)
  * Also adds sudo-specific variables (SUDO_*).
  */
 void
-rebuild_env(int noexec)
+rebuild_env(void)
 {
     char **old_envp, **ep, *cp, *ps1;
     char idbuf[MAX_UID_T_LEN];
@@ -601,30 +601,6 @@ rebuild_env(int noexec)
 	sudo_putenv("TERM=unknown", FALSE, FALSE);
     if (!ISSET(didvar, DID_PATH))
 	sudo_setenv("PATH", _PATH_STDPATH, FALSE);
-
-    /*
-     * Preload a noexec file?  For a list of LD_PRELOAD-alikes, see
-     * http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html
-     * XXX - should prepend to original value, if any
-     */
-    if (noexec && def_noexec_file != NULL) {
-#if defined(__darwin__) || defined(__APPLE__)
-	sudo_setenv("DYLD_INSERT_LIBRARIES", def_noexec_file, TRUE);
-	sudo_setenv("DYLD_FORCE_FLAT_NAMESPACE", "", TRUE);
-#else
-# if defined(__osf__) || defined(__sgi)
-	easprintf(&cp, "%s:DEFAULT", def_noexec_file);
-	sudo_setenv("_RLD_LIST", cp, TRUE);
-	efree(cp);
-# else
-#  ifdef _AIX
-	sudo_setenv("LDR_PRELOAD", def_noexec_file, TRUE);
-#  else
-	sudo_setenv("LD_PRELOAD", def_noexec_file, TRUE);
-#  endif /* _AIX */
-# endif /* __osf__ || __sgi */
-#endif /* __darwin__ || __APPLE__ */
-    }
 
     /* Set PS1 if SUDO_PS1 is set. */
     if (ps1 != NULL)

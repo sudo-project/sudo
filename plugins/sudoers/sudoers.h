@@ -123,8 +123,8 @@ struct sudo_user {
 #define MODE_MASK		0x0000ffff
 
 /* Mode flags */
-#define MODE_BACKGROUND		0x00010000
-#define MODE_SHELL		0x00020000
+#define MODE_BACKGROUND		0x00010000 /* XXX - unused */
+#define MODE_SHELL		0x00020000 /* XXX - not set but is used */
 #define MODE_LOGIN_SHELL	0x00040000
 #define MODE_IMPLIED_SHELL	0x00080000
 #define MODE_RESET_HOME		0x00100000
@@ -295,7 +295,7 @@ void env_init(char * const envp[]);
 void init_envtables(void);
 void insert_env_vars(char * const envp[]);
 void read_env_file(const char *, int);
-void rebuild_env(int);
+void rebuild_env(void);
 void validate_env_vars(char * const envp[]);
 
 /* fmt_string.c */

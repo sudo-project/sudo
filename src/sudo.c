@@ -450,6 +450,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 
     memset(details, 0, sizeof(*details));
     details->closefrom = -1;
+    details->noexec_file = _PATH_SUDO_NOEXEC;
 
 #define SET_STRING(s, n) \
     if (strncmp(s, info[i], sizeof(s) - 1) == 0 && info[i][sizeof(s) - 1]) { \
@@ -504,6 +505,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 			SET(details->flags, CD_NOEXEC);
 		    break;
 		}
+		SET_STRING("noexec_file=", noexec_file)
 		break;
 	    case 'p':
 		if (strncmp("preserve_groups=", info[i], sizeof("preserve_groups=") - 1) == 0) {
@@ -755,6 +757,75 @@ set_project(struct passwd *pw)
 #endif /* HAVE_PROJECT_H */
 
 /*
+ * Disable execution of child processes in the command we are about
+ * to run.  On systems with privilege sets, we can remove the exec
+ * privilege.  On other systems we use LD_PRELOAD and the like.
+ */
+static void
+disable_execute(struct command_details *details)
+{
+    char *cp, **ev, **nenvp;
+    int env_len = 0, env_size = 128;
+
+#ifdef HAVE_PRIV_SET
+    /* Solaris privileges, remove PRIV_PROC_EXEC post-execve. */
+    if (priv_set(PRIV_OFF, PRIV_LIMIT, "PRIV_PROC_EXEC", NULL) == 0)
+	return;
+    warning("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT");
+#endif /* HAVE_PRIV_SET */
+
+    nenvp = emalloc2(env_size, sizeof(char *));
+    for (ev = details->envp; *ev != NULL; ev++) {
+	if (env_len + 2 > env_size) {
+	    env_size += 128;
+	    nenvp = erealloc3(nenvp, env_size, sizeof(char *));
+	}
+	/*
+	 * Prune out existing preloaded libraries.
+	 * XXX - should save and append instead of replacing.
+	 */
+#if defined(__darwin__) || defined(__APPLE__)
+	if (strncmp(*ev, "DYLD_INSERT_LIBRARIES=", sizeof("DYLD_INSERT_LIBRARIES=") - 1) == 0)
+	    continue;
+	if (strncmp(*ev, "DYLD_FORCE_FLAT_NAMESPACE=", sizeof("DYLD_INSERT_LIBRARIES=") - 1) == 0)
+	    continue;
+#elif defined(__osf__) || defined(__sgi)
+	if (strncmp(*ev, "_RLD_LIST=", sizeof("_RLD_LIST=") - 1) == 0)
+	    continue;
+#elif defined(_AIX)
+	if (strncmp(*ev, "LDR_PRELOAD=", sizeof("LDR_PRELOAD=") - 1) == 0)
+	    continue;
+#else
+	if (strncmp(*ev, "LD_PRELOAD=", sizeof("LD_PRELOAD=") - 1) == 0)
+	    continue;
+#endif
+	nenvp[env_len++] = *ev;
+    }
+
+    /*
+     * Preload a noexec file?  For a list of LD_PRELOAD-alikes, see
+     * http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html
+     * XXX - need to support 32-bit and 64-bit variants
+     */
+#if defined(__darwin__) || defined(__APPLE__)
+    nenvp[env_len++] = "DYLD_FORCE_FLAT_NAMESPACE=";
+    cp = fmt_string("DYLD_INSERT_LIBRARIES", details->noexec_file);
+#elif defined(__osf__) || defined(__sgi)
+    easprintf(&cp, "_RLD_LIST=%s:DEFAULT", details->noexec_file);
+#elif defined(_AIX)
+    cp = fmt_string("LDR_PRELOAD", details->noexec_file);
+#else
+    cp = fmt_string("LD_PRELOAD", details->noexec_file);
+#endif
+    if (cp == NULL)
+	error(1, NULL);
+    nenvp[env_len++] = cp;
+    nenvp[env_len] = NULL;
+
+    details->envp = nenvp;
+}
+
+/*
  * Setup the execution environment immediately prior to the call to execve()
  * Returns TRUE on success and FALSE on failure.
  */
@@ -865,13 +936,8 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	}
     }
 
-    /* XXX - should do env-based noexec here too */
-#ifdef HAVE_PRIV_SET
-    if (ISSET(details->flags, CD_NOEXEC)) {
-	if (priv_set(PRIV_OFF, PRIV_LIMIT, "PRIV_PROC_EXEC", NULL) == -1)
-	    warning("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT");
-    }
-#endif /* HAVE_PRIV_SET */
+    if (ISSET(details->flags, CD_NOEXEC))
+	disable_execute(details);
 
 #ifdef HAVE_SETRESUID
     if (setresuid(details->uid, details->euid, details->euid) != 0) {
