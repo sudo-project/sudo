@@ -450,7 +450,6 @@ command_info_to_details(char * const info[], struct command_details *details)
 
     memset(details, 0, sizeof(*details));
     details->closefrom = -1;
-    details->noexec_file = _PATH_SUDO_NOEXEC;
 
 #define SET_STRING(s, n) \
     if (strncmp(s, info[i], sizeof(s) - 1) == 0 && info[i][sizeof(s) - 1]) { \
@@ -505,7 +504,11 @@ command_info_to_details(char * const info[], struct command_details *details)
 			SET(details->flags, CD_NOEXEC);
 		    break;
 		}
-		SET_STRING("noexec_file=", noexec_file)
+		/* XXX - deprecated */
+		if (strncmp("noexec_file=", info[i], sizeof("noexec_file=") - 1) == 0) {
+		    noexec_path = info[i] + sizeof("noexec_file=") - 1;
+		    break;
+		}
 		break;
 	    case 'p':
 		if (strncmp("preserve_groups=", info[i], sizeof("preserve_groups=") - 1) == 0) {
@@ -809,13 +812,13 @@ disable_execute(struct command_details *details)
      */
 #if defined(__darwin__) || defined(__APPLE__)
     nenvp[env_len++] = "DYLD_FORCE_FLAT_NAMESPACE=";
-    cp = fmt_string("DYLD_INSERT_LIBRARIES", details->noexec_file);
+    cp = fmt_string("DYLD_INSERT_LIBRARIES", noexec_path);
 #elif defined(__osf__) || defined(__sgi)
-    easprintf(&cp, "_RLD_LIST=%s:DEFAULT", details->noexec_file);
+    easprintf(&cp, "_RLD_LIST=%s:DEFAULT", noexec_path);
 #elif defined(_AIX)
-    cp = fmt_string("LDR_PRELOAD", details->noexec_file);
+    cp = fmt_string("LDR_PRELOAD", noexec_path);
 #else
-    cp = fmt_string("LD_PRELOAD", details->noexec_file);
+    cp = fmt_string("LD_PRELOAD", noexec_path);
 #endif
     if (cp == NULL)
 	error(1, NULL);
