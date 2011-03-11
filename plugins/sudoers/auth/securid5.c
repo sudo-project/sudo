@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007, 2010
+ * Copyright (c) 1999-2005, 2007, 2010-2011
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 2002 Michael Stroucken <michael@stroucken.org>
  *
