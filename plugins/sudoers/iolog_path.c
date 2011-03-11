@@ -73,6 +73,10 @@ fill_seq(char *str, size_t strsize)
 {
     int len;
 
+    /* XXX - sessid should be static to fill_seq */
+    if (sudo_user.sessid[0] == '\0')
+	io_nextid(def_iolog_dir, sudo_user.sessid);
+
     /* Path is of the form /var/log/sudo-io/00/00/01. */
     len = snprintf(str, strsize, "%c%c/%c%c/%c%c", sudo_user.sessid[0],
 	sudo_user.sessid[1], sudo_user.sessid[2], sudo_user.sessid[3],

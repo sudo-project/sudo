@@ -515,10 +515,9 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)) && (def_log_input || def_log_output)) {
 	if (def_iolog_file && def_iolog_dir) {
-	    if (strstr(def_iolog_file, "%{seq}") != NULL) /* XXX - inline? */
-		io_nextid(def_iolog_dir, sudo_user.sessid);
 	    command_info[info_len++] = expand_iolog_path("iolog_path=",
-		def_iolog_dir, def_iolog_file, NULL);
+		def_iolog_dir, def_iolog_file, &sudo_user.iolog_file);
+	    sudo_user.iolog_file++;
 	}
 	if (def_log_input) {
 	    command_info[info_len++] = estrdup("iolog_stdin=true");
