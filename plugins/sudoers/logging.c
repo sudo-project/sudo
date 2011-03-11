@@ -57,6 +57,7 @@
 #include <grp.h>
 #include <signal.h>
 #include <time.h>
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <setjmp.h>
@@ -628,6 +629,14 @@ should_mail(int status)
 #define	LL_CMND_STR	"COMMAND="
 #define	LL_TSID_STR	"TSID="
 
+#define IS_SESSID(s) ( \
+    isalnum((unsigned char)(s)[0]) && isalnum((unsigned char)(s)[1]) && \
+    (s)[2] == '/' && \
+    isalnum((unsigned char)(s)[3]) && isalnum((unsigned char)(s)[4]) && \
+    (s)[5] == '/' && \
+    isalnum((unsigned char)(s)[6]) && isalnum((unsigned char)(s)[7]) && \
+    (s)[8] == '\0')
+
 /*
  * Allocate and fill in a new logline.
  */
@@ -637,11 +646,23 @@ new_logline(const char *message, int serrno)
     size_t len = 0;
     char *errstr = NULL;
     char *evstr = NULL;
-    char *line, *tsid;
+    char *line, sessid[7], *tsid = NULL;
 
     /* A TSID may be a sudoers-style session ID or a free-form string. */
-    tsid =
-	sudo_user.sessid[0] != '\0' ? sudo_user.sessid : sudo_user.iolog_file;
+    if (sudo_user.iolog_file != NULL) {
+	if (IS_SESSID(sudo_user.iolog_file)) {
+	    sessid[0] = sudo_user.iolog_file[0];
+	    sessid[1] = sudo_user.iolog_file[1];
+	    sessid[2] = sudo_user.iolog_file[3];
+	    sessid[3] = sudo_user.iolog_file[4];
+	    sessid[4] = sudo_user.iolog_file[6];
+	    sessid[5] = sudo_user.iolog_file[7];
+	    sessid[6] = '\0';
+	    tsid = sessid;
+	} else {
+	    tsid = sudo_user.iolog_file;
+	}
+    }
 
     /*
      * Compute line length
