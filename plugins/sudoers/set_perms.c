@@ -454,13 +454,13 @@ set_perms(int perm)
 
 	state->rgid = -1;
 	state->egid = runas_gr ? runas_gr->gr_gid : runas_pw->pw_gid;
-	if (setregid(-1, ID(egid))) {
+	if (setregid(ID(rgid), ID(egid))) {
 	    errstr = "unable to change to runas gid";
 	    goto bad;
 	}
-	state->ruid = -1;
+	state->ruid = ROOT_UID;
 	state->euid = runas_pw ? runas_pw->pw_uid : user_uid;
-	if (setreuid(-1, ID(euid))) {
+	if (setreuid(ID(ruid), ID(euid))) {
 	    errstr = "unable to change to runas uid";
 	    goto bad;
 	}
@@ -536,7 +536,7 @@ restore_perms(void)
      */
     if (OID(euid) == ROOT_UID) {
 	if (setuid(ROOT_UID)) {
-	    warning("setuid()");
+	    warning("setuid(%d)", ROOT_UID);
 	    goto bad;
 	}
     }
