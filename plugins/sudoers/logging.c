@@ -635,9 +635,13 @@ static char *
 new_logline(const char *message, int serrno)
 {
     size_t len = 0;
-    char *evstr = NULL;
     char *errstr = NULL;
-    char *line;
+    char *evstr = NULL;
+    char *line, *tsid;
+
+    /* A TSID may be a sudoers-style session ID or a free-form string. */
+    tsid =
+	sudo_user.sessid[0] != '\0' ? sudo_user.sessid : sudo_user.iolog_file;
 
     /*
      * Compute line length
@@ -654,8 +658,8 @@ new_logline(const char *message, int serrno)
 	len += sizeof(LL_USER_STR) + 2 + strlen(runas_pw->pw_name);
     if (runas_gr != NULL)
 	len += sizeof(LL_GROUP_STR) + 2 + strlen(runas_gr->gr_name);
-    if (sudo_user.sessid[0] != '\0')
-	len += sizeof(LL_TSID_STR) + 2 + strlen(sudo_user.sessid);
+    if (tsid != NULL)
+	len += sizeof(LL_TSID_STR) + 2 + strlen(tsid);
     if (sudo_user.env_vars != NULL) {
 	size_t evlen = 0;
 	char * const *ep;
@@ -715,9 +719,9 @@ new_logline(const char *message, int serrno)
 	    strlcat(line, " ; ", len) >= len)
 	    goto toobig;
     }
-    if (sudo_user.sessid[0] != '\0') {
+    if (tsid != NULL) {
 	if (strlcat(line, LL_TSID_STR, len) >= len ||
-	    strlcat(line, sudo_user.sessid, len) >= len ||
+	    strlcat(line, tsid, len) >= len ||
 	    strlcat(line, " ; ", len) >= len)
 	    goto toobig;
     }

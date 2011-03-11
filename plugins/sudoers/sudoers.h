@@ -73,6 +73,7 @@ struct sudo_user {
     char *type;
 #endif
     char *cwd;
+    char *iolog_file;
     char  sessid[7];
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
     uuid_t uuid;

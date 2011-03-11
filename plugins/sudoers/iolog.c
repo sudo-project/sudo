@@ -128,7 +128,7 @@ mkdir_parents(char *path)
 }
 
 /*
- * Read the on-disk sequence number, set sudo_user.sessid to the next
+ * Read the on-disk sequence number, set sessid to the next
  * number, and update the on-disk copy.
  * Uses file locking to avoid sequence number collisions.
  */
