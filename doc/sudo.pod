@@ -428,8 +428,8 @@ which corresponds to the following F<@sysconfdir@/sudo.conf> file.
  #
  # Format:
  #   Plugin plugin_name plugin_path
- #   Path askpass path/to/askpass
- #   Path noexec path/to/noexec
+ #   Path askpass /path/to/askpass
+ #   Path noexec /path/to/noexec.so
  #
  # The plugin_path is relative to @prefix@/libexec unless
  #   fully qualified.
