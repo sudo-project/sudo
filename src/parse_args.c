@@ -80,33 +80,35 @@ static struct sudo_settings {
     { "runas_group" },
 #define ARG_SET_HOME 5
     { "set_home" },
-#define ARG_LOGIN_SHELL 6
+#define ARG_USER_SHELL 6
+    { "user_shell" },
+#define ARG_LOGIN_SHELL 7
     { "login_shell" },
-#define ARG_IGNORE_TICKET 7
+#define ARG_IGNORE_TICKET 8
     { "ignore_ticket" },
-#define ARG_PROMPT 8
+#define ARG_PROMPT 9
     { "prompt" },
-#define ARG_SELINUX_ROLE 9
+#define ARG_SELINUX_ROLE 10
     { "selinux_role" },
-#define ARG_SELINUX_TYPE 10
+#define ARG_SELINUX_TYPE 11
     { "selinux_type" },
-#define ARG_RUNAS_USER 11
+#define ARG_RUNAS_USER 12
     { "runas_user" },
-#define ARG_PROGNAME 12
+#define ARG_PROGNAME 13
     { "progname" },
-#define ARG_IMPLIED_SHELL 13
+#define ARG_IMPLIED_SHELL 14
     { "implied_shell" },
-#define ARG_PRESERVE_GROUPS 14
+#define ARG_PRESERVE_GROUPS 15
     { "preserve_groups" },
-#define ARG_NONINTERACTIVE 15
+#define ARG_NONINTERACTIVE 16
     { "noninteractive" },
-#define ARG_SUDOEDIT 16
+#define ARG_SUDOEDIT 17
     { "sudoedit" },
-#define ARG_CLOSEFROM 17
+#define ARG_CLOSEFROM 18
     { "closefrom" },
-#define ARG_NET_ADDRS 18
+#define ARG_NET_ADDRS 19
     { "network_addrs" },
-#define NUM_SETTINGS 19
+#define NUM_SETTINGS 20
     { NULL }
 };
 
@@ -263,6 +265,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    SET(tgetpass_flags, TGP_STDIN);
 		    break;
 		case 's':
+		    sudo_settings[ARG_USER_SHELL].value = "true";
 		    SET(flags, MODE_SHELL);
 		    break;
 		case 'U':
