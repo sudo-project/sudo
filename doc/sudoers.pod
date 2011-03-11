@@ -1215,6 +1215,12 @@ Subject of the mail sent to the I<mailto> user. The escape C<%h>
 will expand to the host name of the machine.
 Default is C<@mailsub@>.
 
+=item noexec_file
+
+This option is deprecated and will be removed in a future release
+of B<sudo>.  The path to the noexec file should now be set in the
+F<@sysconfdir@/sudo.conf> file.
+
 =item passprompt
 
 The default prompt to use when asking for a password; can be overridden
