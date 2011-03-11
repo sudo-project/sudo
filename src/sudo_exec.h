@@ -42,4 +42,8 @@ void pty_setup(uid_t uid, const char *tty);
 void terminate_child(pid_t pid, int use_pgrp);
 extern int signal_pipe[2];
 
+/* utmp.c */
+int utmp_clone(const char *from_line, const char *to_line);
+int utmp_remove(const char *line);
+
 #endif /* _SUDO_EXEC_H */
