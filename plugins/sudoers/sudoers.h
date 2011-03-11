@@ -124,7 +124,7 @@ struct sudo_user {
 
 /* Mode flags */
 #define MODE_BACKGROUND		0x00010000 /* XXX - unused */
-#define MODE_SHELL		0x00020000 /* XXX - not set but is used */
+#define MODE_SHELL		0x00020000
 #define MODE_LOGIN_SHELL	0x00040000
 #define MODE_IMPLIED_SHELL	0x00080000
 #define MODE_RESET_HOME		0x00100000
