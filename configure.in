@@ -1900,7 +1900,7 @@ dnl
 AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_TIME
-AC_CHECK_HEADERS(malloc.h paths.h utime.h netgroup.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h)
+AC_CHECK_HEADERS(malloc.h paths.h utime.h netgroup.h utmpx.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h)
 dnl
 dnl Check for large file support.  HP-UX 11.23 has a broken sys/type.h
 dnl when large files support is enabled so work around it.
@@ -1967,6 +1967,21 @@ SUDO_TYPE_INO_T
 SUDO_UID_T_LEN
 SUDO_SOCK_SA_LEN
 dnl
+dnl Check for utmp/utmpx struct members.
+dnl
+if test $ac_cv_header_utmpx_h = "yes"; then
+    AC_CHECK_MEMBERS([struct utmpx.ut_id, struct utmpx.ut_pid, struct utmpx.ut_tv, struct utmpx.ut_type], [], [], [
+	#include <sys/types.h>
+	#include <utmpx.h>
+    ])
+else
+    AC_CHECK_MEMBERS([struct utmp.ut_id, struct utmp.ut_pid, struct utmp.ut_tv, struct utmp.ut_type, struct utmp.ut_user], [], [], [
+	#include <sys/types.h>
+	#include <utmp.h>
+    ])
+fi
+
+dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
@@ -1979,20 +1994,7 @@ AC_CHECK_FUNCS(getline, [], [
 ])
 AC_CHECK_FUNCS(getutxid getutid, [utmp=POSIX; break])
 if test "${utmp-NONE}" = "NONE"; then
-    AC_CHECK_FUNCS(login, [
-	UTMP=BSD
-	AC_CHECK_HEADERS(util.h utmp.h, [break])
-    ], [
-	AC_CHECK_LIB(util, login, [
-	    UTMP=BSD
-	    AC_CHECK_HEADERS(util.h utmp.h, [break])
-	    case "$SUDO_LIBS" in
-		*-lutil*) ;;
-		*) SUDO_LIBS="${SUDO_LIBS} -lutil";;
-	    esac
-	    AC_DEFINE(HAVE_LOGIN)
-	])
-    ])
+    AC_CHECK_FUNCS(getttyent ttyslot, [break])
 fi
 
 AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(util.h pty.h, [break])], [

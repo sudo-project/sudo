@@ -43,7 +43,7 @@ void terminate_child(pid_t pid, int use_pgrp);
 extern int signal_pipe[2];
 
 /* utmp.c */
-int utmp_clone(const char *from_line, const char *to_line);
-int utmp_remove(const char *line);
+int utmp_login(const char *from_line, const char *to_line, int ttyfd);
+int utmp_logout(const char *line);
 
 #endif /* _SUDO_EXEC_H */

@@ -118,7 +118,7 @@ cleanup(int gotsignal)
 #ifdef HAVE_SELINUX
     selinux_restore_tty();
 #endif
-    utmp_remove(slavename);
+    utmp_logout(slavename);
 }
 
 /*
@@ -131,24 +131,13 @@ pty_setup(uid_t uid, const char *tty)
 {
     io_fds[SFD_USERTTY] = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
     if (io_fds[SFD_USERTTY] != -1) {
-	int sfd;
-
 	if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
 	    slavename, sizeof(slavename), uid))
 	    error(1, "Can't get pty");
 	/*
 	 * Add entry to utmp/utmpx.
-	 * Temporarily point stdin to the pty slave for the benefit of
-	 * legacy utmp handling that uses ttyslot().
 	 */
-	if ((sfd = dup(STDIN_FILENO)) == -1)
-	    error(1, "Can't save stdin");
-	if (dup2(io_fds[SFD_SLAVE], STDIN_FILENO) == -1)
-	    error(1, "Can't dup2 stdin");
-	utmp_clone(tty, slavename);
-	if (dup2(sfd, STDIN_FILENO) == -1)
-	    error(1, "Can't restore stdin");
-	close(sfd);
+	utmp_login(tty, slavename, io_fds[SFD_SLAVE]);
     }
 }
 
@@ -667,7 +656,7 @@ pty_close(struct command_status *cstat)
 	    }
 	}
     }
-    utmp_remove(slavename);
+    utmp_logout(slavename);
 }
 
 /*

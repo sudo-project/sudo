@@ -72,7 +72,7 @@ PROGS = @PROGS@
 
 OBJS = conversation.o error.o exec.o exec_pty.o get_pty.o net_ifs.o \
        load_plugins.o parse_args.o sudo.o sudo_edit.o tgetpass.o \
-       ttysize.o @SUDO_OBJS@
+       ttysize.o utmp.o @SUDO_OBJS@
 
 LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
 

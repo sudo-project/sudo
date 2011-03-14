@@ -43,167 +43,292 @@
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#if defined(HAVE_GETUTXID)
+#ifdef HAVE_UTMPX_H
 # include <utmpx.h>
-#elif defined(HAVE_GETUTID)
+#else
 # include <utmp.h>
-#elif defined(HAVE_UTIL_H)
-# include <util.h>
-# include <utmp.h>
+#endif /* HAVE_UTMPX_H */
+#ifdef HAVE_GETTTYENT
+# include <ttyent.h>
 #endif
+#include <fcntl.h>
 
 #include "sudo.h"
 #include "sudo_exec.h"
 
+/*
+ * Simplify handling of utmp vs. utmpx
+ */
+#if !defined(HAVE_GETUTXID) && defined(HAVE_GETUTID)
+# define getutxline(u)	getutline(u)
+# define pututxline(u)	pututline(u)
+# define setutxent	setutent(u)
+# define endutxent	endutent(u)
+#endif /* !HAVE_GETUTXID && HAVE_GETUTID */
+
+#ifdef HAVE_GETUTXID
+typedef struct utmpx sudo_utmp_t;
+#else
+typedef struct utmp sudo_utmp_t;
+/* Older systems have ut_name, not us_user */
+# if !defined(HAVE_STRUCT_UTMP_UT_USER) && !defined(ut_user)
+#  define ut_user ut_name
+# endif
+#endif
+
 #if defined(HAVE_GETUTXID) || defined(HAVE_GETUTID)
 /*
- * Create ut_id from tty line and the id from the entry we are cloning.
+ * Create ut_id from the new ut_line and the old ut_id.
  */
 static void
-utmp_setid(const char *line, const char *old_id, char *new_id, size_t idsize)
+utmp_setid(sudo_utmp_t *old, sudo_utmp_t *new)
 {
+    const char *line = new->ut_line;
     size_t idlen;
 
     /* Skip over "tty" in the id if old entry did too. */
-    if (strncmp(line, "tty", 3) == 0 &&
-	strncmp(old_id, "tty", idsize < 3 ? idsize : 3) != 0)
-	line += 3;
+    if (strncmp(line, "tty", 3) == 0) {
+	idlen = MIN(sizeof(old->ut_id), 3);
+	if (strncmp(old->ut_id, "tty", idlen) != 0)
+	    line += 3;
+    }
     
     /* Store as much as will fit, skipping parts of the beginning as needed. */
     idlen = strlen(line);
-    if (idlen > idsize) {
-	line += (idlen - idsize);
-	idlen = idsize;
+    if (idlen > sizeof(new->ut_id)) {
+	line += idlen - sizeof(new->ut_id);
+	idlen = sizeof(new->ut_id);
     }
-    strncpy(new_id, line, idlen);
+    strncpy(new->ut_id, line, idlen);
 }
 #endif /* HAVE_GETUTXID || HAVE_GETUTID */
 
 /*
- * Clone a utmp entry, updating the line, id, pid and time.
- * XXX - if no existing entry, make a new one
+ * Store time in utmp structure.
  */
-static int
-utmp_doclone(const char *from_line, const char *to_line)
+static void
+utmp_settime(sudo_utmp_t *ut)
 {
-    int rval = FALSE;
-#ifdef HAVE_GETUTXID
-    struct utmpx *ut_old, ut_new;
+    struct timeval tv;
 
-    memset(&ut_new, 0, sizeof(ut_new));
-    strncpy(ut_new.ut_line, from_line, sizeof(ut_new.ut_line));
-    setutxent();
-    if ((ut_old = getutxid(&ut_new)) != NULL) {
-	if (ut_old != &ut_new)
-	    memcpy(&ut_new, ut_old, sizeof(ut_new));
-	strncpy(ut_new.ut_line, to_line, sizeof(ut_new.ut_line));
-	utmp_setid(to_line, ut_old->ut_id, ut_new.ut_id, sizeof(ut_new.ut_id));
-	ut_new.ut_pid = getpid();
-	gettimeofday(&ut_new.ut_tv, NULL);
-	ut_new.ut_type = USER_PROCESS;
+    gettimeofday(&tv, NULL);
 
-	if (pututxline(&ut_new) != NULL)
-	    rval = TRUE;
-    }
-    endutxent();
-#elif HAVE_GETUTID
-    struct utmp *ut_old, ut_new;
-
-    memset(&ut_new, 0, sizeof(ut_new));
-    strncpy(ut_new.ut_line, from_line, sizeof(ut_new.ut_line));
-    setutent();
-    if ((ut_old = getutid(&ut_new)) != NULL) {
-	if (ut_old != &ut_new)
-	    memcpy(&ut_new, ut_old, sizeof(ut_new));
-	strncpy(ut_new.ut_line, to_line, sizeof(ut_new.ut_line));
-	utmp_setid(to_line, ut_old->ut_id, ut_new.ut_id, sizeof(ut_new.ut_id));
-	ut_new.ut_pid = getpid();
-	ut_new.ut_time = time(NULL);
-	ut_new.ut_type = USER_PROCESS;
-
-	if (pututline(&ut_new) != NULL)
-	    rval = TRUE;
-    }
-    endutent();
-#elif HAVE_LOGIN
-    FILE *fp;
-    struct utmp ut;
-
-    /* Find existing entry, update line and add as new. */
-    if ((fp = fopen(_PATH_UTMP, "r")) != NULL) {
-	while (fread(&ut, sizeof(ut), 1, fp) == 1) {
-	    if (ut.ut_name[0] &&
-		strncmp(ut.ut_line, from_line, sizeof(ut.ut_line)) == 0) {
-		strncpy(ut.ut_line, to_line, sizeof(ut.ut_line));
-		login(&ut);
-		rval = TRUE;
-		break;
-	    }
-	}
-	fclose(fp);
-    }
+#if defined(HAVE_STRUCT_UTMP_UT_TV) || defined(HAVE_STRUCT_UTMPX_UT_TV)
+    ut->ut_tv.tv_sec = tv.tv_sec;
+    ut->ut_tv.tv_usec = tv.tv_usec;
+#else
+    ut->ut_time = tv.tv_sec;
 #endif
-    return rval;
-}
-
-int
-utmp_clone(const char *from_line, const char *to_line)
-{
-    /* Strip off /dev/ prefix from to/from line as needed. */
-    if (strncmp(from_line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
-	from_line += sizeof(_PATH_DEV) - 1;
-    if (strncmp(to_line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
-	to_line += sizeof(_PATH_DEV) - 1;
-   
-    return utmp_doclone(from_line, to_line);
 }
 
 /*
- * Remove (zero out) the utmp entry for a line.
+ * Fill in a utmp entry, using an old entry as a template if there is one.
  */
-static int
-utmp_doremove(const char *line)
+static void
+utmp_fill(const char *line, sudo_utmp_t *ut_old, sudo_utmp_t *ut_new)
 {
+    if (ut_old == NULL) {
+	memset(ut_new, 0, sizeof(*ut_new));
+	strncpy(ut_new->ut_user, user_details.username, sizeof(ut_new->ut_user));
+    } else if (ut_old != ut_new) {
+	memcpy(ut_new, ut_old, sizeof(*ut_new));
+    }
+    strncpy(ut_new->ut_line, line, sizeof(ut_new->ut_line));
+#if defined(HAVE_STRUCT_UTMPX_UT_ID) || defined(HAVE_STRUCT_UTMP_UT_ID)
+    utmp_setid(ut_old, ut_new);
+#endif
+#if defined(HAVE_STRUCT_UTMPX_UT_PID) || defined(HAVE_STRUCT_UTMP_UT_PID)
+    ut_new->ut_pid = getpid();
+#endif
+    utmp_settime(ut_new);
+#if defined(HAVE_STRUCT_UTMPX_UT_TYPE) || defined(HAVE_STRUCT_UTMP_UT_TYPE)
+    ut_new->ut_type = USER_PROCESS;
+#endif
+}
+
+/*
+ * There are two basic utmp file types:
+ *
+ *  POSIX:  sequential access with new entries appended to the end.
+ *	    Manipulated via {get,put}utent()/{get,put}getutxent().
+ *
+ *  Legacy: sparse file indexed by ttyslot() * sizeof(struct utmp)
+ */
+#if defined(HAVE_GETUTXID) || defined(HAVE_GETUTID)
+int
+utmp_login(const char *from_line, const char *to_line, int ttyfd)
+{
+    sudo_utmp_t utbuf, *ut_old = NULL;
     int rval = FALSE;
-#ifdef HAVE_GETUTXID
-    struct utmpx *ut, key;
-   
-    memset(&key, 0, sizeof(key));
-    strncpy(key.ut_line, line, sizeof(key.ut_line));
+
+    /* Strip off /dev/ prefix from line as needed. */
+    if (strncmp(to_line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
+	to_line += sizeof(_PATH_DEV) - 1;
     setutxent();
-    if ((ut = getutxid(&key)) != NULL) {
-	ut->ut_type = DEAD_PROCESS;
-	(void)gettimeofday(&ut->ut_tv, NULL);
-	if (pututxline(ut) != NULL)
-	    rval = TRUE;
+    if (from_line != NULL) {
+	if (strncmp(from_line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
+	    from_line += sizeof(_PATH_DEV) - 1;
+
+	/* Lookup old line. */
+	memset(&utbuf, 0, sizeof(utbuf));
+	strncpy(utbuf.ut_line, from_line, sizeof(utbuf.ut_line));
+	ut_old = getutxline(&utbuf);
     }
-    endutxent();
-#elif HAVE_GETUTID
-    struct utmp *ut, key;
-   
-    memset(&key, 0, sizeof(key));
-    strncpy(key.ut_line, line, sizeof(key.ut_line));
-    setutent();
-    if ((ut = getutid(&key)) != NULL) {
-	ut->ut_type = DEAD_PROCESS;
-	ut->ut_time = time(NULL);
-	if (pututline(ut) != NULL)
-	    rval = TRUE;
-    }
-    endutent();
-#elif HAVE_LOGIN
-    if (logout(line) != 0)
+    utmp_fill(to_line, ut_old, &utbuf);
+    if (pututxline(&utbuf) != NULL)
 	rval = TRUE;
-#endif /* HAVE_GETUTXID */
+    endutxent();
+
     return rval;
 }
 
 int
-utmp_remove(const char *line)
+utmp_logout(const char *line)
 {
-    /* Strip off /dev/ prefix from to/from line as needed. */
+    int rval = FALSE;
+    sudo_utmp_t *ut, utbuf;
+
+    /* Strip off /dev/ prefix from line as needed. */
     if (strncmp(line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
 	line += sizeof(_PATH_DEV) - 1;
-
-    return utmp_doremove(line);
+   
+    memset(&utbuf, 0, sizeof(utbuf));
+    strncpy(utbuf.ut_line, line, sizeof(utbuf.ut_line));
+    if ((ut = getutxline(&utbuf)) != NULL) {
+	memset(ut->ut_user, 0, sizeof(ut->ut_user));
+# if defined(HAVE_STRUCT_UTMPX_UT_TYPE) || defined(HAVE_STRUCT_UTMP_UT_TYPE)
+	ut->ut_type = DEAD_PROCESS;
+# endif
+	utmp_settime(ut);
+	if (pututxline(ut) != NULL)
+	    rval = TRUE;
+    }
+    return rval;
 }
+
+#else /* !HAVE_GETUTXID && !HAVE_GETUTID */
+
+/*
+ * Find the slot for the specified line (tty name and file descriptor).
+ * Returns a slot suitable for seeking into utmp on success or <= 0 on error.
+ * If getttyent() is available we can use that to compute the slot.
+ */
+# ifdef HAVE_GETTTYENT
+static int
+utmp_slot(const char *line, int ttyfd)
+{
+    int slot = 1;
+    struct ttyent *tty;
+
+    setttyent();
+    while ((tty = getttyent()) != NULL) {
+	if (strcmp(line, tty->ty_name) == 0)
+	    break;
+	slot++;
+    }
+    endttyent();
+    return tty ? slot : 0;
+}
+# else
+static int
+utmp_slot(const char *line, int ttyfd)
+{
+    int sfd, slot;
+
+    /*
+     * Temporarily point stdin to the tty since ttyslot()
+     * doesn't take an argument.
+     */
+    if ((sfd = dup(STDIN_FILENO)) == -1)
+	error(1, "Can't save stdin");
+    if (dup2(ttyfd, STDIN_FILENO) == -1)
+	error(1, "Can't dup2 stdin");
+    slot = ttyslot();
+    if (dup2(sfd, STDIN_FILENO) == -1)
+	error(1, "Can't restore stdin");
+    close(sfd);
+
+    return slot;
+}
+# endif /* HAVE_GETTTYENT */
+
+int
+utmp_login(const char *from_line, const char *to_line, int ttyfd)
+{
+    sudo_utmp_t utbuf, *ut_old = NULL;
+    int slot, rval = FALSE;
+    FILE *fp;
+
+    /* Find slot for new entry. */
+    slot = utmp_slot(to_line, ttyfd);
+    if (slot <= 0)
+	goto done;
+
+    if ((fp = fopen(_PATH_UTMP, "r+")) == NULL)
+	goto done;
+
+    /* Strip off /dev/ prefix from line as needed. */
+    if (strncmp(to_line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
+	to_line += sizeof(_PATH_DEV) - 1;
+    if (from_line != NULL) {
+	if (strncmp(from_line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
+	    from_line += sizeof(_PATH_DEV) - 1;
+
+	/* Lookup old line. */
+	while (fread(&utbuf, sizeof(utbuf), 1, fp) == 1) {
+# ifdef HAVE_STRUCT_UTMP_UT_ID
+	    if (utbuf.ut_type != LOGIN_PROCESS && utbuf.ut_type != USER_PROCESS)
+		continue;
+# endif
+	    if (utbuf.ut_user[0] &&
+		!strncmp(utbuf.ut_line, from_line, sizeof(utbuf.ut_line))) {
+		ut_old = &utbuf;
+		break;
+	    }
+	}
+    }
+    utmp_fill(to_line, ut_old, &utbuf);
+    if (fseek(fp, slot * (long)sizeof(utbuf), SEEK_SET) == 0) {
+	if (fwrite(&utbuf, sizeof(utbuf), 1, fp) == 1)
+	    rval = TRUE;
+    }
+    fclose(fp);
+
+done:
+    return rval;
+}
+
+int
+utmp_logout(const char *line)
+{
+    sudo_utmp_t utbuf;
+    int rval = FALSE;
+    FILE *fp;
+
+    if ((fp = fopen(_PATH_UTMP, "r+")) == NULL)
+	return rval;
+
+    /* Strip off /dev/ prefix from line as needed. */
+    if (strncmp(line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
+	line += sizeof(_PATH_DEV) - 1;
+   
+    while (fread(&utbuf, sizeof(utbuf), 1, fp) == 1) {
+	if (!strncmp(utbuf.ut_line, line, sizeof(utbuf.ut_line))) {
+	    memset(utbuf.ut_user, 0, sizeof(utbuf.ut_user));
+# if defined(HAVE_STRUCT_UTMP_UT_TYPE)
+	    utbuf.ut_type = DEAD_PROCESS;
+# endif
+	    utmp_settime(&utbuf);
+	    /* Back up and overwrite record. */
+	    if (fseek(fp, 0L - (long)sizeof(utbuf), SEEK_CUR) == 0) {
+		if (fwrite(&utbuf, sizeof(utbuf), 1, fp) == 1)
+		    rval = TRUE;
+	    }
+	    break;
+	}
+    }
+    fclose(fp);
+
+    return rval;
+}
+#endif /* HAVE_GETUTXID || HAVE_GETUTID */
