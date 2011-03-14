@@ -49,6 +49,8 @@
 struct sudo_user sudo_user;
 struct passwd *list_pw;
 
+static char sessid[7];
+
 static void
 usage(void)
 {
@@ -136,7 +138,7 @@ main(int argc, char *argv[])
 
 	switch (state) {
 	case 0:
-	    strlcpy(sudo_user.sessid, line, sizeof(sudo_user.sessid));
+	    strlcpy(sessid, line, sizeof(sessid));
 	    break;
 	case 1:
 	    if (user_name != NULL)
@@ -189,6 +191,11 @@ main(int argc, char *argv[])
     }
 
     exit(errors);
+}
+
+void io_nextid(char *iolog_dir, char *id)
+{
+    memcpy(id, sessid, sizeof(id));
 }
 
 void
