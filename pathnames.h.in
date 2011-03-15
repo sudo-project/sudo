@@ -141,6 +141,10 @@
 #undef _PATH_MAILDIR
 #endif /* _PATH_MAILDIR */
 
+#ifndef _PATH_UTMP
+#undef _PATH_UTMP
+#endif /* _PATH_UTMP */
+
 #ifndef _PATH_SUDO_SESH
 #undef _PATH_SUDO_SESH
 #endif /* _PATH_SUDO_SESH */

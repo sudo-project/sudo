@@ -15398,6 +15398,7 @@ done
 fi
 done
 
+utmp_style=LEGACY
 for ac_func in getutxid getutid
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -15407,11 +15408,11 @@ eval as_val=\$$as_ac_var
   cat >>confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
- utmp=POSIX; break
+ utmp_style=POSIX; break
 fi
 done
 
-if test "${utmp-NONE}" = "NONE"; then
+if test "$utmp_style" = "LEGACY"; then
     for ac_func in getttyent ttyslot
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -18842,6 +18843,28 @@ if test -n "$blibpath"; then
     fi
 fi
 
+if test "$utmp_style" = "LEGACY"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for utmp file path" >&5
+$as_echo_n "checking for utmp file path... " >&6; }
+found=no
+for p in "/var/run/utmp" "/var/adm/utmp" "/etc/utmp"; do
+    if test -r "$p"; then
+	found=yes
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $p" >&5
+$as_echo "$p" >&6; }
+	cat >>confdefs.h <<EOF
+#define _PATH_UTMP "$p"
+EOF
+
+	break
+    fi
+done
+if test X"$found" != X"yes"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
+$as_echo "not found" >&6; }
+fi
+
+fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for log file location" >&5
 $as_echo_n "checking for log file location... " >&6; }
 if test -n "$with_logpath"; then

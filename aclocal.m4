@@ -80,6 +80,24 @@ fi
 ])dnl
 
 dnl
+dnl check for utmp file
+dnl
+AC_DEFUN(SUDO_PATH_UTMP, [AC_MSG_CHECKING([for utmp file path])
+found=no
+for p in "/var/run/utmp" "/var/adm/utmp" "/etc/utmp"; do
+    if test -r "$p"; then
+	found=yes
+	AC_MSG_RESULT([$p])
+	SUDO_DEFINE_UNQUOTED(_PATH_UTMP, "$p")
+	break
+    fi
+done
+if test X"$found" != X"yes"; then
+    AC_MSG_RESULT([not found])
+fi
+])dnl
+
+dnl
 dnl Where the log file goes, use /var/log if it exists, else /{var,usr}/adm
 dnl
 AC_DEFUN(SUDO_LOGFILE, [AC_MSG_CHECKING(for log file location)
