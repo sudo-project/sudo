@@ -2059,7 +2059,7 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
     if (pwflag) {
 	DPRINTF(("perform search for pwflag %d", pwflag), 1);
 	int doauth = UNSPEC;
-	enum def_tupple pwcheck = 
+	enum def_tuple pwcheck = 
 	    (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
 
         for (i = 0; i < lres->nentries; i++) {

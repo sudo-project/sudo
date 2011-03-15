@@ -156,7 +156,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
      */
     if (pwflag) {
 	int nopass;
-	enum def_tupple pwcheck;
+	enum def_tuple pwcheck;
 
 	pwcheck = (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
 	nopass = (pwcheck == all) ? TRUE : FALSE;
