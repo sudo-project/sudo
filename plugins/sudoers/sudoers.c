@@ -646,6 +646,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	command_info[info_len++] = estrdup("noexec=true");
     if (def_noexec_file)
 	command_info[info_len++] = fmt_string("noexec_file", def_noexec_file);
+    if (def_set_utmp)
+	command_info[info_len++] = estrdup("set_utmp=true");
+    if (def_utmp_runas)
+	command_info[info_len++] = fmt_string("utmp_user", runas_pw->pw_name);
 #ifdef HAVE_LOGIN_CAP_H
     if (lc != NULL)
 	command_info[info_len++] = fmt_string("login_class", lc->lc_class);

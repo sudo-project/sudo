@@ -120,6 +120,7 @@ struct user_details {
 #define CD_BACKGROUND		0x0400
 #define CD_RBAC_ENABLED		0x0800
 #define CD_USE_PTY		0x1000
+#define CD_SET_UTMP		0x2000
 
 struct command_details {
     uid_t uid;
@@ -139,6 +140,7 @@ struct command_details {
     const char *chroot;
     const char *selinux_role;
     const char *selinux_type;
+    const char *utmp_user;
     char **argv;
     char **envp;
 };

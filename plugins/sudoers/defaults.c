@@ -498,6 +498,7 @@ init_defaults(void)
     def_secure_path = estrdup(SECURE_PATH);
 #endif
     def_editor = estrdup(EDITOR);
+    def_set_utmp = TRUE;
 
     /* Finally do the lists (currently just environment tables). */
     init_envtables();

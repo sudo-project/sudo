@@ -339,6 +339,14 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"File in which to store the input/output log",
 	NULL,
     }, {
+	"set_utmp", T_FLAG,
+	"Add an entry to the utmp/utmpx file when allocating a pty",
+	NULL,
+    }, {
+	"utmp_runas", T_FLAG,
+	"Set the user in utmp to the runas user, not the invoking user",
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

@@ -125,14 +125,20 @@ utmp_settime(sudo_utmp_t *ut)
  * Fill in a utmp entry, using an old entry as a template if there is one.
  */
 static void
-utmp_fill(const char *line, sudo_utmp_t *ut_old, sudo_utmp_t *ut_new)
+utmp_fill(const char *line, const char *user, sudo_utmp_t *ut_old,
+    sudo_utmp_t *ut_new)
 {
     if (ut_old == NULL) {
 	memset(ut_new, 0, sizeof(*ut_new));
-	strncpy(ut_new->ut_user, user_details.username, sizeof(ut_new->ut_user));
+	if (user == NULL) {
+	    strncpy(ut_new->ut_user, user_details.username,
+		sizeof(ut_new->ut_user));
+	}
     } else if (ut_old != ut_new) {
 	memcpy(ut_new, ut_old, sizeof(*ut_new));
     }
+    if (user != NULL)
+	strncpy(ut_new->ut_user, user, sizeof(ut_new->ut_user));
     strncpy(ut_new->ut_line, line, sizeof(ut_new->ut_line));
 #if defined(HAVE_STRUCT_UTMPX_UT_ID) || defined(HAVE_STRUCT_UTMP_UT_ID)
     utmp_setid(ut_old, ut_new);
@@ -156,7 +162,8 @@ utmp_fill(const char *line, sudo_utmp_t *ut_old, sudo_utmp_t *ut_new)
  */
 #if defined(HAVE_GETUTXID) || defined(HAVE_GETUTID)
 int
-utmp_login(const char *from_line, const char *to_line, int ttyfd)
+utmp_login(const char *from_line, const char *to_line, int ttyfd,
+    const char *user)
 {
     sudo_utmp_t utbuf, *ut_old = NULL;
     int rval = FALSE;
@@ -174,7 +181,7 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd)
 	strncpy(utbuf.ut_line, from_line, sizeof(utbuf.ut_line));
 	ut_old = getutxline(&utbuf);
     }
-    utmp_fill(to_line, ut_old, &utbuf);
+    utmp_fill(to_line, user, ut_old, &utbuf);
     if (pututxline(&utbuf) != NULL)
 	rval = TRUE;
     endutxent();
@@ -253,7 +260,8 @@ utmp_slot(const char *line, int ttyfd)
 # endif /* HAVE_GETTTYENT */
 
 int
-utmp_login(const char *from_line, const char *to_line, int ttyfd)
+utmp_login(const char *from_line, const char *to_line, int ttyfd,
+    const char *user)
 {
     sudo_utmp_t utbuf, *ut_old = NULL;
     int slot, rval = FALSE;
@@ -288,7 +296,7 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd)
 	    }
 	}
     }
-    utmp_fill(to_line, ut_old, &utbuf);
+    utmp_fill(to_line, user, ut_old, &utbuf);
     if (fseek(fp, slot * (long)sizeof(utbuf), SEEK_SET) == 0) {
 	if (fwrite(&utbuf, sizeof(utbuf), 1, fp) == 1)
 	    rval = TRUE;

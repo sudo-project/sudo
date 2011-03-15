@@ -250,3 +250,9 @@ iolog_dir
 iolog_file
 	T_STR
 	"File in which to store the input/output log"
+set_utmp
+	T_FLAG
+	"Add an entry to the utmp/utmpx file when allocating a pty"
+utmp_runas
+	T_FLAG
+	"Set the user in utmp to the runas user, not the invoking user"

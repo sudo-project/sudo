@@ -118,7 +118,7 @@ cleanup(int gotsignal)
 #ifdef HAVE_SELINUX
     selinux_restore_tty();
 #endif
-    utmp_logout(slavename);
+    utmp_logout(slavename); /* XXX - only if CD_SET_UTMP */
 }
 
 /*
@@ -127,17 +127,16 @@ cleanup(int gotsignal)
  * and slavename globals.
  */
 void
-pty_setup(uid_t uid, const char *tty)
+pty_setup(uid_t uid, const char *tty, const char *utmp_user)
 {
     io_fds[SFD_USERTTY] = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
     if (io_fds[SFD_USERTTY] != -1) {
 	if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
 	    slavename, sizeof(slavename), uid))
 	    error(1, "Can't get pty");
-	/*
-	 * Add entry to utmp/utmpx.
-	 */
-	utmp_login(tty, slavename, io_fds[SFD_SLAVE]);
+	/* Add entry to utmp/utmpx? */
+	if (utmp_user != NULL)
+	    utmp_login(tty, slavename, io_fds[SFD_SLAVE], utmp_user);
     }
 }
 
@@ -656,7 +655,7 @@ pty_close(struct command_status *cstat)
 	    }
 	}
     }
-    utmp_logout(slavename);
+    utmp_logout(slavename); /* XXX - only if CD_SET_UTMP */
 }
 
 /*
