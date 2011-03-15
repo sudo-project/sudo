@@ -15067,6 +15067,19 @@ _ACEOF
 
 
 fi
+ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_exit" "ac_cv_member_struct_utmpx_ut_exit" "
+	#include <sys/types.h>
+	#include <utmpx.h>
+
+"
+if test "x$ac_cv_member_struct_utmpx_ut_exit" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_UTMPX_UT_EXIT 1
+_ACEOF
+
+
+fi
 ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_pid" "ac_cv_member_struct_utmpx_ut_pid" "
 	#include <sys/types.h>
 	#include <utmpx.h>
@@ -15117,6 +15130,19 @@ if test "x$ac_cv_member_struct_utmp_ut_id" = x""yes; then :
 
 cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_UTMP_UT_ID 1
+_ACEOF
+
+
+fi
+ac_fn_c_check_member "$LINENO" "struct utmp" "ut_exit" "ac_cv_member_struct_utmp_ut_exit" "
+	#include <sys/types.h>
+	#include <utmp.h>
+
+"
+if test "x$ac_cv_member_struct_utmp_ut_exit" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_UTMP_UT_EXIT 1
 _ACEOF
 
 

@@ -1970,12 +1970,12 @@ dnl
 dnl Check for utmp/utmpx struct members.
 dnl
 if test $ac_cv_header_utmpx_h = "yes"; then
-    AC_CHECK_MEMBERS([struct utmpx.ut_id, struct utmpx.ut_pid, struct utmpx.ut_tv, struct utmpx.ut_type], [], [], [
+    AC_CHECK_MEMBERS([struct utmpx.ut_id, struct utmpx.ut_exit, struct utmpx.ut_pid, struct utmpx.ut_tv, struct utmpx.ut_type], [], [], [
 	#include <sys/types.h>
 	#include <utmpx.h>
     ])
 else
-    AC_CHECK_MEMBERS([struct utmp.ut_id, struct utmp.ut_pid, struct utmp.ut_tv, struct utmp.ut_type, struct utmp.ut_user], [], [], [
+    AC_CHECK_MEMBERS([struct utmp.ut_id, struct utmp.ut_exit, struct utmp.ut_pid, struct utmp.ut_tv, struct utmp.ut_type, struct utmp.ut_user], [], [], [
 	#include <sys/types.h>
 	#include <utmp.h>
     ])
