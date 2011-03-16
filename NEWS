@@ -1,3 +1,53 @@
+What's new in Sudo 1.8.1?
+
+ * The fix for resuming a suspended shell in 1.7.5 caused problems
+   with resuming non-shells on Linux.  Sudo will now save the process
+   group ID of the program it is running on suspend and restore it
+   when resuming, which fixes both problems.
+
+ * A bug that could result in corrupted output in "sudo -l" has been
+   fixed.
+
+ * Sudo will now create an entry in the utmp (or utmpx) file when
+   allocating a pseudo-tty (e.g. when logging I/O).  The "set_utmp"
+   and "utmp_runas" sudoers file options can be used to control this.
+   Other policy plugins may use the "set_utmp" and "utmp_user"
+   entries in the command_info list.
+
+ * The sudoers policy now stores the TSID field in the logs
+   even when the "iolog_file" sudoers option is defined to a value
+   other than %{sessid}.  Previously, the TSID field was only
+   included in the log file when the "iolog_file" option was set
+   to its default value.
+
+ * The sudoreplay utility now supports arbitrary session IDs.
+   Previously, it would only work with the base-36 session IDs
+   that the sudoers plugin uses by default.
+
+ * Sudo now passes "user_shell=true" to the policy plugin in the
+   settings list when sudo's -s command line option is specified.
+   The sudoers policy plugin uses this to implement the "set_home"
+   sudoers option which was missing from sudo 1.8.0.
+
+ * The "noexec" functionality has been moved out of the sudoers
+   policy plugin and into the sudo front-end, which matches the
+   behavior documented in the plugin writer's guide.  As a result,
+   the path to the noexec file is now specified in the sudo.conf
+   file instead of the sudoers file.
+
+ * On Solaris 10, the PRIV_PROC_EXEC privilege is now used to
+   implement the "noexec" feature.  Previously, this was implemented
+   via the LD_PRELOAD environment variable.
+
+ * The exit values for "sudo -l", "sudo -v" and "sudo -l command"
+   have been fixed in the sudoers policy plugin.
+
+ * The sudoers policy plugin now passes the login class, if any,
+   back to the sudo front-end.
+
+ * The sudoers policy plugin was not being linked with requisite
+   libraries in certain configurations.
+
 What's new in Sudo 1.8.0?
 
  * Sudo has been refactored to use a modular framework that can

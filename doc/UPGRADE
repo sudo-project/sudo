@@ -1,6 +1,36 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.8.1:
+
+    In Sudo 1.8.1 the "noexec" functionality has moved out of the
+    sudoers policy plugin and into the sudo front-end.  As a result,
+    the path to the noexec file is now specified in the sudo.conf
+    file instead of the sudoers file.  If you have a sudoers file
+    that uses the "noexec_file" option, you will need to move the
+    definition to the sudo.conf file instead.
+
+    Old style in /etc/sudoers:
+	Defaults noexec_file=/usr/local/libexec/sudo_noexec.so
+
+    New style in /etc/sudo.conf:
+	Path noexec /usr/local/libexec/sudo_noexec.so
+
+o Upgrading from a version prior to 1.8.0:
+
+    Starting with version 1.8.0, sudo uses a modular framework to
+    support policy and I/O logging plugins.  The default policy
+    plugin is "sudoers" which provides the traditional sudoers
+    evaluation and I/O logging.  Plugins are typically located in
+    /usr/libexec or /usr/local/libexec, though this is system-dependent.
+    The sudoers plugin is named "sudoers.so" on most systems.
+
+    The sudo.conf file, usually stored in /etc, is used to configure
+    plugins.  This file is optional--if no plugins are specified
+    in sudo.conf, the "sudoers" plugin is used.  See the sample.sudo.conf
+    file in the doc directory or refer to the updated sudo manual
+    to see how to configure sudo.conf.
+
 o Upgrading from a version prior to 1.7.5:
 
     Sudo 1.7.5 includes an updated LDAP schema with support for
