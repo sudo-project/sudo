@@ -107,7 +107,7 @@ case "$osversion" in
 	prefix=/usr
 	if [ $osrelease -ge 50 ]; then
 	    # RHEL 5 and up build pies and have audit support
-	    export CFLAGS="$F_PIE" LDFLAGS="-pie"
+	    export CFLAGS="-O2 $F_PIE" LDFLAGS="-pie"
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-linux-audit"
 	    PPVARS="${PPVARS}${PPVARS+$space}linux_audit=1.4.0"
 	fi
@@ -131,7 +131,7 @@ case "$osversion" in
 	prefix=/usr
 	if [ $osrelease -ge 10 ]; then
 	    # SLES 10 and higher build pies
-	    export CFLAGS="$F_PIE" LDFLAGS="-pie"
+	    export CFLAGS="-O2 $F_PIE" LDFLAGS="-pie"
 	    if [ $osrelease -ge 11 ]; then
 		# SLES 11 and higher has SELinux
 		configure_opts="${configure_opts}${configure_opts+$tab}--with-selinux"
