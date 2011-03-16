@@ -821,10 +821,38 @@ C<cn=defaults> section.  This flag is I<off> by default.
 If set, B<sudo> will insult users when they enter an incorrect
 password.  This flag is I<@insults@> by default.
 
+=item log_input
+
+If set, B<sudo> will run the command in a I<pseudo tty> and log all
+user input.
+If the standard input is not connected to the user's tty, due to
+I/O redirection or because the command is part of a pipeline, that
+input is also captured and stored in a separate log file.
+
+Input is logged to the F</var/log/sudo-io> directory using a unique
+session ID that is included in the normal B<sudo> log line, prefixed
+with I<TSID=>.
+
 =item log_host
 
 If set, the host name will be logged in the (non-syslog) B<sudo> log file.
 This flag is I<off> by default.
+
+=item log_output
+
+If set, B<sudo> will run the command in a I<pseudo tty> and log all
+output that is sent to the screen, similar to the script(1) command.
+If the standard output or standard error is not connected to the
+user's tty, due to I/O redirection or because the command is part
+of a pipeline, that output is also captured and stored in separate
+log files.
+
+Output is logged to the
+F</var/log/sudo-io> directory using a unique session ID that is
+included in the normal B<sudo> log line, prefixed with I<TSID=>.
+
+Output logs may be viewed with the L<sudoreplay(8)> utility, which
+can also be used to list or search the available logs.
 
 =item log_year
 
@@ -963,6 +991,15 @@ option.  Note that if the I<env_reset> option has not been disabled,
 entries in the I<env_keep> list will override the value of
 I<set_logname>.  This flag is I<on> by default.
 
+=item set_utmp
+
+When enabled, B<sudo> will create an entry in the utmp (or utmpx)
+file when a pseudo-tty is allocated.  A pseudo-tty is allocated by
+B<sudo> when the I<log_input>, I<log_output> or I<use_pty> flags
+are enabled.  By default, the new entry will be a copy of the user's
+existing utmp entry (if any), with the tty, time, type and pid
+fields updated.  This flag is I<on> by default.
+
 =item setenv
 
 Allow the user to disable the I<env_reset> option from the command
@@ -1000,34 +1037,6 @@ include the target user's name.  Note that this flag precludes the
 use of a uid not listed in the passwd database as an argument to
 the B<-u> option.  This flag is I<off> by default.
 
-=item log_input
-
-If set, B<sudo> will run the command in a I<pseudo tty> and log all
-user input.
-If the standard input is not connected to the user's tty, due to
-I/O redirection or because the command is part of a pipeline, that
-input is also captured and stored in a separate log file.
-
-Input is logged to the F</var/log/sudo-io> directory using a unique
-session ID that is included in the normal B<sudo> log line, prefixed
-with I<TSID=>.
-
-=item log_output
-
-If set, B<sudo> will run the command in a I<pseudo tty> and log all
-output that is sent to the screen, similar to the script(1) command.
-If the standard output or standard error is not connected to the
-user's tty, due to I/O redirection or because the command is part
-of a pipeline, that output is also captured and stored in separate
-log files.
-
-Output is logged to the
-F</var/log/sudo-io> directory using a unique session ID that is
-included in the normal B<sudo> log line, prefixed with I<TSID=>.
-
-Output logs may be viewed with the L<sudoreplay(8)> utility, which
-can also be used to list or search the available logs.
-
 =item tty_tickets
 
 If set, users must authenticate on a per-tty basis.  With this flag
@@ -1057,7 +1066,13 @@ If set, B<sudo> will run the command in a pseudo-pty even if no I/O
 logging is being gone.  A malicious program run under B<sudo> could
 conceivably fork a background process that retains to the user's
 terminal device after the main program has finished executing.  Use
-of this option will make that impossible.
+of this option will make that impossible.  This flag is I<off> by default.
+
+=item utmp_runas
+
+If set, B<sudo> will store the name of the runas user when updating
+the utmp (or utmpx) file.  By default, B<sudo> stores the name of
+the invoking user.  This flag is I<off> by default.
 
 =item visiblepw
 
