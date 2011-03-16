@@ -1,6 +1,6 @@
 #!/bin/sh
 # (c) 2011 Quest Software, Inc. All rights reserved
-pp_revision="301"
+pp_revision="303"
  # Copyright 2010 Quest Software, Inc.  All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -1435,8 +1435,8 @@ pp_debug "symlink target is $_tgt"
 	esac
 
 	# convert numeric uids into usernames; only works for /etc/passwd
-	#case "$_o" in [0-9]*) _o=`pp_getpwuid $_o`;; esac
-	#case "$_g" in [0-9]*) _g=`pp_getgrgid $_g`;; esac
+	case "$_o" in [0-9]*) _o=`pp_getpwuid $_o`;; esac
+	case "$_g" in [0-9]*) _g=`pp_getgrgid $_g`;; esac
 
 	pp_debug "$_type $_m $_o $_g $_f $_path" $_tgt
 	$_ignore || echo "$_type $_m $_o $_g $_f $_path" $_tgt
@@ -1553,6 +1553,8 @@ pp_backend_aix_init () {
 	pp_aix_copyright=
         pp_aix_start_services_after_install=false
         pp_aix_init_services_after_install=true
+
+        pp_aix_sudo=sudo	# AIX package tools must run as root
 
         case "$pp_aix_os" in
             *) pp_readlink_fn=pp_ls_readlink;;  # XXX
@@ -1688,8 +1690,6 @@ pp_aix_inventory () {
       esac
       echo " type = $type"
       echo " class = inventory,apply,$fileset"
-      set -- `/bin/ls -ld "$pp_destdir$p" 2>/dev/null`
-      owner=$3 group=$4 size=$5
       if test x"$m" = x"-"; then m="$defm"; fi
       if test x"$o" = x"-"; then o="root"; fi
       if test x"$g" = x"-"; then g="system"; fi
@@ -2043,7 +2043,7 @@ pp_backend_aix () {
 	(cd $pp_destdir && pp_verbose  /usr/sbin/backup -i -q -p -f -) \
           < $pp_wrkdir/bff.list \
 	  > $pp_wrkdir/$outbff || pp_error "backup failed"
-        ${SUDO:-sudo} /usr/sbin/installp -l -d $pp_wrkdir/$outbff
+        $pp_aix_sudo /usr/sbin/installp -l -d $pp_wrkdir/$outbff
 }
 
 pp_backend_aix_cleanup () {
@@ -6450,6 +6450,7 @@ pp_backend_macos_init () {
     pp_macos_prog_packagemaker=/Developer/usr/bin/packagemaker
     pp_macos_pkg_domain=anywhere
     pp_macos_pkg_extra_flags=
+    pp_macos_sudo=
     # OS X puts the library version *before* the .dylib extension
     pp_shlib_suffix='*.dylib'
 }
@@ -6644,20 +6645,20 @@ pp_macos_mkbom () {
     bomstage=$pp_wrkdir/bom_stage
     while IFS='	' read path mode ugid size cksumi linkpath; do
 	if test -h "$pp_destdir/$path"; then
-	    /bin/ln -s "$linkpath" "$bomstage/$path"
+	    $pp_macos_sudo /bin/ln -s "$linkpath" "$bomstage/$path"
 	else
 	    if test -d "$pp_destdir/$path"; then
-		/bin/mkdir -p "$bomstage/$path"
+		$pp_macos_sudo /bin/mkdir -p "$bomstage/$path"
 	    else
-		/bin/cp "$pp_destdir/$path" "$bomstage/$path"
+		$pp_macos_sudo /bin/cp "$pp_destdir/$path" "$bomstage/$path"
 	    fi
-	    /bin/chmod $mode "$bomstage/$path"
-	    /usr/sbin/chown `echo $ugid| tr / :` "$bomstage/$path"
+	    $pp_macos_sudo /bin/chmod $mode "$bomstage/$path"
+	    $pp_macos_sudo /usr/sbin/chown `echo $ugid| tr / :` "$bomstage/$path"
 	fi
     done <"$1"
-    (cd $bomstage && mkbom . $pp_wrkdir/bom_stage.bom) ||
+    (cd $bomstage && $pp_macos_sudo mkbom . $pp_wrkdir/bom_stage.bom) ||
 	pp_error "mkbom failed"
-    mv $pp_wrkdir/bom_stage.bom "$2"
+    $pp_macos_sudo mv $pp_wrkdir/bom_stage.bom "$2"
 }
 
 pp_backend_macos () {
@@ -6828,7 +6829,7 @@ CompressedSize 0
     cat $pp_wrkdir/%files.* | awk '{ print "." $6 }' | sed '/\/$/d' | sort | /bin/pax -w -f - | gzip -9 -c > $Contents/Archive.pax.gz
     )
 
-	rm -rf $pp_wrkdir/bom_stage
+	$pp_macos_sudo rm -rf $pp_wrkdir/bom_stage
 
     hdiutil create -fs HFS+ -srcfolder $pkgdir -volname $name ${name}-${version}.dmg
 }
