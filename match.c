@@ -606,8 +606,9 @@ command_matches_dir(sudoers_dir, dlen)
 	if (strcmp(user_base, dent->d_name) != 0 ||
 	    stat(buf, &sudoers_stat) == -1)
 	    continue;
-	if (user_stat->st_dev == sudoers_stat.st_dev &&
-	    user_stat->st_ino == sudoers_stat.st_ino) {
+	if (user_stat == NULL ||
+	    (user_stat->st_dev == sudoers_stat.st_dev &&
+	    user_stat->st_ino == sudoers_stat.st_ino)) {
 	    efree(safe_cmnd);
 	    safe_cmnd = estrdup(buf);
 	    break;
