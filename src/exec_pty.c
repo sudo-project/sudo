@@ -118,7 +118,7 @@ cleanup(int gotsignal)
 #ifdef HAVE_SELINUX
     selinux_restore_tty();
 #endif
-    utmp_logout(slavename); /* XXX - only if CD_SET_UTMP */
+    utmp_logout(slavename, 0); /* XXX - only if CD_SET_UTMP */
 }
 
 /*
@@ -655,7 +655,7 @@ pty_close(struct command_status *cstat)
 	    }
 	}
     }
-    utmp_logout(slavename); /* XXX - only if CD_SET_UTMP */
+    utmp_logout(slavename, cstat->type == CMD_WSTATUS ? cstat->val : 0); /* XXX - only if CD_SET_UTMP */
 }
 
 /*

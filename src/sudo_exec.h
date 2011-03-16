@@ -45,6 +45,6 @@ extern int signal_pipe[2];
 /* utmp.c */
 int utmp_login(const char *from_line, const char *to_line, int ttyfd,
     const char *user);
-int utmp_logout(const char *line);
+int utmp_logout(const char *line, int status);
 
 #endif /* _SUDO_EXEC_H */

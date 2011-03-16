@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/time.h>
+#include <sys/wait.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -190,7 +191,7 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd,
 }
 
 int
-utmp_logout(const char *line)
+utmp_logout(const char *line, int status)
 {
     int rval = FALSE;
     sudo_utmp_t *ut, utbuf;
@@ -205,6 +206,10 @@ utmp_logout(const char *line)
 	memset(ut->ut_user, 0, sizeof(ut->ut_user));
 # if defined(HAVE_STRUCT_UTMPX_UT_TYPE) || defined(HAVE_STRUCT_UTMP_UT_TYPE)
 	ut->ut_type = DEAD_PROCESS;
+# endif
+# if defined(HAVE_STRUCT_UTMPX_UT_EXIT) || defined(HAVE_STRUCT_UTMP_UT_EXIT)
+	ut->ut_exit.e_exit = WEXITSTATUS(status);
+	ut->ut_exit.e_termination = WIFEXITED(status) ? WEXITSTATUS(status) : 0;
 # endif
 	utmp_settime(ut);
 	if (pututxline(ut) != NULL)
@@ -308,7 +313,7 @@ done:
 }
 
 int
-utmp_logout(const char *line)
+utmp_logout(const char *line, int status)
 {
     sudo_utmp_t utbuf;
     int rval = FALSE;

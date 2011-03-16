@@ -493,6 +493,9 @@
 /* Define to 1 if the system has the type `struct in6_addr'. */
 #undef HAVE_STRUCT_IN6_ADDR
 
+/* Define to 1 if `ut_exit' is a member of `struct utmpx'. */
+#undef HAVE_STRUCT_UTMPX_UT_EXIT
+
 /* Define to 1 if `ut_id' is a member of `struct utmpx'. */
 #undef HAVE_STRUCT_UTMPX_UT_ID
 
@@ -504,6 +507,9 @@
 
 /* Define to 1 if `ut_type' is a member of `struct utmpx'. */
 #undef HAVE_STRUCT_UTMPX_UT_TYPE
+
+/* Define to 1 if `ut_exit' is a member of `struct utmp'. */
+#undef HAVE_STRUCT_UTMP_UT_EXIT
 
 /* Define to 1 if `ut_id' is a member of `struct utmp'. */
 #undef HAVE_STRUCT_UTMP_UT_ID
