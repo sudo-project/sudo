@@ -725,6 +725,39 @@ password.  This flag is I<@insults@> by default.
 If set, the host name will be logged in the (non-syslog) B<sudo> log file.
 This flag is I<off> by default.
 
+=item log_input
+
+If set, B<sudo> will run the command in a I<pseudo tty> and log all
+user input.
+If the standard input is not connected to the user's tty, due to
+I/O redirection or because the command is part of a pipeline, that
+input is also captured and stored in a separate log file.
+
+Input is logged to the directory specified by the I<iolog_dir>
+option (F<@iolog_dir@> by default) using a unique session ID that
+is included in the normal B<sudo> log line, prefixed with I<TSID=>.
+
+Note that user input may contain sensitive information such as
+passwords (even if they are not echoed to the screen), which will
+be stored in the log file unencrypted.  In most cases, logging the
+command output via I<log_output> is all that is required.
+
+=item log_output
+
+If set, B<sudo> will run the command in a I<pseudo tty> and log all
+output that is sent to the screen, similar to the script(1) command.
+If the standard output or standard error is not connected to the
+user's tty, due to I/O redirection or because the command is part
+of a pipeline, that output is also captured and stored in separate
+log files.
+
+Output is logged to the directory specified by the I<iolog_dir>
+option (F<@iolog_dir@> by default) using a unique session ID that
+is included in the normal B<sudo> log line, prefixed with I<TSID=>.
+
+Output logs may be viewed with the L<sudoreplay(8)> utility, which
+can also be used to list or search the available logs.
+
 =item log_year
 
 If set, the four-digit year will be logged in the (non-syslog) B<sudo> log file.
@@ -898,34 +931,6 @@ of the invoking user.  In addition, the timestamp file name will
 include the target user's name.  Note that this flag precludes the
 use of a uid not listed in the passwd database as an argument to
 the B<-u> option.  This flag is I<off> by default.
-
-=item log_input
-
-If set, B<sudo> will run the command in a I<pseudo tty> and log all
-user input.
-If the standard input is not connected to the user's tty, due to
-I/O redirection or because the command is part of a pipeline, that
-input is also captured and stored in a separate log file.
-
-Input is logged to the F</var/log/sudo-io> directory using a unique
-session ID that is included in the normal B<sudo> log line, prefixed
-with I<TSID=>.
-
-=item log_output
-
-If set, B<sudo> will run the command in a I<pseudo tty> and log all
-output that is sent to the screen, similar to the script(1) command.
-If the standard output or standard error is not connected to the
-user's tty, due to I/O redirection or because the command is part
-of a pipeline, that output is also captured and stored in separate
-log files.
-
-Output is logged to the
-F</var/log/sudo-io> directory using a unique session ID that is
-included in the normal B<sudo> log line, prefixed with I<TSID=>.
-
-Output logs may be viewed with the L<sudoreplay(8)> utility, which
-can also be used to list or search the available logs.
 
 =item tty_tickets
 
