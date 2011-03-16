@@ -1,3 +1,13 @@
+What's new in Sudo 1.7.6?
+
+ * The fix for resuming a suspended shell in 1.7.5 caused problems
+   with resuming non-shells on Linux.  Sudo will now save the process
+   group ID of the program it is running on suspend and restore it
+   when resuming, which fixes both problems.
+
+ * A bug that could result in corrupted output in "sudo -l" has been
+   fixed.
+
 What's new in Sudo 1.7.5?
 
  * When using visudo in check mode, a file named "-" may be used to
