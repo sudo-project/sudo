@@ -834,9 +834,16 @@ If the standard input is not connected to the user's tty, due to
 I/O redirection or because the command is part of a pipeline, that
 input is also captured and stored in a separate log file.
 
-Input is logged to the F</var/log/sudo-io> directory using a unique
-session ID that is included in the normal B<sudo> log line, prefixed
-with I<TSID=>.
+Input is logged to the directory specified by the I<iolog_dir>
+option (F<@iolog_dir@> by default) using a unique session ID that
+is included in the normal B<sudo> log line, prefixed with I<TSID=>.
+The I<iolog_file> option may be used to control the format of the
+session ID.
+
+Note that user input may contain sensitive information such as
+passwords (even if they are not echoed to the screen), which will
+be stored in the log file unencrypted.  In most cases, logging the
+command output via I<log_output> is all that is required.
 
 =item log_output
 
@@ -847,9 +854,11 @@ user's tty, due to I/O redirection or because the command is part
 of a pipeline, that output is also captured and stored in separate
 log files.
 
-Output is logged to the
-F</var/log/sudo-io> directory using a unique session ID that is
-included in the normal B<sudo> log line, prefixed with I<TSID=>.
+Output is logged to the directory specified by the I<iolog_dir>
+option (F<@iolog_dir@> by default) using a unique session ID that
+is included in the normal B<sudo> log line, prefixed with I<TSID=>.
+The I<iolog_file> option may be used to control the format of the
+session ID.
 
 Output logs may be viewed with the L<sudoreplay(8)> utility, which
 can also be used to list or search the available logs.
