@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2007-2011 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -280,12 +280,14 @@ lbuf_print(lbuf)
     struct lbuf *lbuf;
 {
     char *cp, *ep;
-    int len, contlen;
+    int len;
 
-    contlen = lbuf->continuation ? strlen(lbuf->continuation) : 0;
+    if (lbuf->buf == NULL || lbuf->len == 0)
+	goto done;
 
     /* For very small widths just give up... */
-    if (lbuf->cols <= lbuf->indent + contlen + 20) {
+    len = lbuf->continuation ? strlen(lbuf->continuation) : 0;
+    if (lbuf->cols <= lbuf->indent + len + 20) {
 	lbuf->buf[lbuf->len] = '\0';
 	lbuf->output(lbuf->buf);
 	goto done;
@@ -297,9 +299,11 @@ lbuf_print(lbuf)
 	    lbuf->output("\n");
 	    cp++;
 	} else {
-	    ep = memchr(cp, '\n', lbuf->len - (cp - lbuf->buf));
-	    len = ep ? (int)(ep - cp) : lbuf->len;
-	    lbuf_println(lbuf, cp, len);
+	    len = lbuf->len - (cp - lbuf->buf);
+	    if ((ep = memchr(cp, '\n', len)) != NULL)
+		len = (int)(ep - cp);
+	    if (len)
+		lbuf_println(lbuf, cp, len);
 	    cp = ep ? ep + 1 : NULL;
 	}
     }
