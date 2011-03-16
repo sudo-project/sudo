@@ -605,6 +605,11 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 's':
 		SET_STRING("selinux_role=", selinux_role)
 		SET_STRING("selinux_type=", selinux_type)
+		if (strncmp("set_utmp=", info[i], sizeof("set_utmp=") - 1) == 0) {
+		    if (atobool(info[i] + sizeof("set_utmp=") - 1) == TRUE)
+			SET(details->flags, CD_SET_UTMP);
+		    break;
+		}
 		if (strncmp("sudoedit=", info[i], sizeof("sudoedit=") - 1) == 0) {
 		    if (atobool(info[i] + sizeof("sudoedit=") - 1) == TRUE)
 			SET(details->flags, CD_SUDOEDIT);
@@ -647,6 +652,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 			SET(details->flags, CD_USE_PTY);
 		    break;
 		}
+		SET_STRING("utmp_user=", utmp_user)
 		break;
 	}
     }

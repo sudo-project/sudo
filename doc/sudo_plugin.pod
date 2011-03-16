@@ -591,6 +591,20 @@ Allocate a pseudo-tty to run the command in, regardless of whether
 or not I/O logging is in use.  By default, B<sudo> will only run
 the command in a pty when an I/O log plugin is loaded.
 
+=item set_utmp=bool
+
+Create a utmp (or utmpx) entry when a pseudo-tty is allocated.  By
+default, the new entry will be a copy of the user's existing utmp
+entry (if any), with the tty, time, type and pid fields updated.
+
+=item utmp_user=string
+
+User name to use when constructing a new utmp (or utmpx) entry when
+I<set_utmp> is enabled.  This option can be used to set the user
+field in the utmp entry to the user the command runs as rather than
+the invoking user.  If not set, B<sudo> will base the new entry on
+the invoking user's existing entry.
+
 =back
 
 Unsupported values will be ignored.

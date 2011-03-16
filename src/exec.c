@@ -203,6 +203,7 @@ int
 sudo_execve(struct command_details *details, struct command_status *cstat)
 {
     int maxfd, n, nready, sv[2], log_io = FALSE;
+    const char *utmp_user = NULL;
     fd_set *fdsr, *fdsw;
     sigaction_t sa;
     pid_t child;
@@ -231,8 +232,10 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
     if (!tq_empty(&io_plugins) || ISSET(details->flags, CD_USE_PTY)) {
 	log_io = TRUE;
 	if (!ISSET(details->flags, CD_BACKGROUND)) {
+	    if (ISSET(details->flags, CD_SET_UTMP))
+		utmp_user = details->utmp_user ? details->utmp_user : user_details.username;
 	    sudo_debug(8, "allocate pty for I/O logging");
-	    pty_setup(details->euid, user_details.tty);
+	    pty_setup(details->euid, user_details.tty, utmp_user);
 	}
     }
 

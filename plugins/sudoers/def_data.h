@@ -156,6 +156,10 @@
 #define I_IOLOG_DIR             77
 #define def_iolog_file          (sudo_defs_table[78].sd_un.str)
 #define I_IOLOG_FILE            78
+#define def_set_utmp            (sudo_defs_table[79].sd_un.flag)
+#define I_SET_UTMP              79
+#define def_utmp_runas          (sudo_defs_table[80].sd_un.flag)
+#define I_UTMP_RUNAS            80
 
 enum def_tuple {
 	never,
