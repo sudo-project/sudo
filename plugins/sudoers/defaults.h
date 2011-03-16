@@ -53,7 +53,7 @@ struct sudo_defs_types {
 	int flag;
 	int ival;
 	double fval;
-	enum def_tupple tuple;
+	enum def_tuple tuple;
 	char *str;
 	mode_t mode;
 	struct list_member *list;

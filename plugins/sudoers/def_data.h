@@ -157,7 +157,7 @@
 #define def_iolog_file          (sudo_defs_table[78].sd_un.str)
 #define I_IOLOG_FILE            78
 
-enum def_tupple {
+enum def_tuple {
 	never,
 	once,
 	always,

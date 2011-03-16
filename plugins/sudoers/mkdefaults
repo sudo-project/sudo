@@ -88,7 +88,7 @@ $records[$count++] = [$var, $type, $desc, $values, $callback] if defined($var);
 # Print out value arrays
 for ($i = 0; $i < $count; $i++) {
     if (defined($records[$i]->[3])) {
-	die "Values list specified for non-tupple\n" unless
+	die "Values list specified for non-tuple\n" unless
 	    $records[$i]->[1] =~ /^T_TUPLE/;
 	printf CFILE "static struct def_values def_data_%s[] = {\n", $records[$i]->[0];
 	foreach (@{$records[$i]->[3]}) {
@@ -108,7 +108,7 @@ print CFILE "\tNULL, 0, NULL\n    }\n};\n";
 
 # Print out def_tuple
 if (@tuple_values) {
-    print HEADER "\nenum def_tupple {\n";
+    print HEADER "\nenum def_tuple {\n";
     for ($i = 0; $i <= $#tuple_values; $i++) {
 	printf HEADER "\t%s%s\n", $tuple_values[$i],
 	    $i != $#tuple_values ? "," : "";
