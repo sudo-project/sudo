@@ -1992,8 +1992,9 @@ AC_CHECK_FUNCS(getline, [], [
     AC_LIBOBJ(getline)
     AC_CHECK_FUNCS(fgetln)
 ])
-AC_CHECK_FUNCS(getutxid getutid, [utmp=POSIX; break])
-if test "${utmp-NONE}" = "NONE"; then
+utmp_style=LEGACY
+AC_CHECK_FUNCS(getutxid getutid, [utmp_style=POSIX; break])
+if test "$utmp_style" = "LEGACY"; then
     AC_CHECK_FUNCS(getttyent ttyslot, [break])
 fi
 
@@ -2815,6 +2816,9 @@ fi
 dnl
 dnl Check for log file, timestamp and iolog locations
 dnl
+if test "$utmp_style" = "LEGACY"; then
+    SUDO_PATH_UTMP
+fi
 SUDO_LOGFILE
 SUDO_TIMEDIR
 SUDO_IO_LOGDIR
