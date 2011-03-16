@@ -222,6 +222,7 @@ src/sudo_plugin_int.h
 src/sudo_usage.h.in
 src/tgetpass.c
 src/ttysize.c
+src/utmp.c
 sudo.pp
 zlib/Makefile.in
 zlib/adler32.c

@@ -138,6 +138,8 @@ tgetpass.o: $(srcdir)/tgetpass.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/tgetpass.c
 ttysize.o: $(srcdir)/ttysize.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/ttysize.c
+utmp.o: $(srcdir)/utmp.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/utmp.c
 
 install: install-dirs install-binaries @INSTALL_NOEXEC@
 
