@@ -187,6 +187,9 @@
    passwords) */
 #undef HAVE_GETSPWUID
 
+/* Define to 1 if you have the `getttyent' function. */
+#undef HAVE_GETTTYENT
+
 /* Define to 1 if you have the `getuserattr' function. */
 #undef HAVE_GETUSERATTR
 
@@ -312,9 +315,6 @@
 
 /* Define to 1 if you have the `lockf' function. */
 #undef HAVE_LOCKF
-
-/* Define to 1 if you have the `login' function. */
-#undef HAVE_LOGIN
 
 /* Define to 1 if you have the <login_cap.h> header file. */
 #undef HAVE_LOGIN_CAP_H
@@ -493,6 +493,33 @@
 /* Define to 1 if the system has the type `struct in6_addr'. */
 #undef HAVE_STRUCT_IN6_ADDR
 
+/* Define to 1 if `ut_id' is a member of `struct utmpx'. */
+#undef HAVE_STRUCT_UTMPX_UT_ID
+
+/* Define to 1 if `ut_pid' is a member of `struct utmpx'. */
+#undef HAVE_STRUCT_UTMPX_UT_PID
+
+/* Define to 1 if `ut_tv' is a member of `struct utmpx'. */
+#undef HAVE_STRUCT_UTMPX_UT_TV
+
+/* Define to 1 if `ut_type' is a member of `struct utmpx'. */
+#undef HAVE_STRUCT_UTMPX_UT_TYPE
+
+/* Define to 1 if `ut_id' is a member of `struct utmp'. */
+#undef HAVE_STRUCT_UTMP_UT_ID
+
+/* Define to 1 if `ut_pid' is a member of `struct utmp'. */
+#undef HAVE_STRUCT_UTMP_UT_PID
+
+/* Define to 1 if `ut_tv' is a member of `struct utmp'. */
+#undef HAVE_STRUCT_UTMP_UT_TV
+
+/* Define to 1 if `ut_type' is a member of `struct utmp'. */
+#undef HAVE_STRUCT_UTMP_UT_TYPE
+
+/* Define to 1 if `ut_user' is a member of `struct utmp'. */
+#undef HAVE_STRUCT_UTMP_UT_USER
+
 /* Define to 1 if your struct stat has an st_mtim member */
 #undef HAVE_ST_MTIM
 
@@ -540,6 +567,9 @@
 /* Define to 1 if you have struct timespec in sys/time.h */
 #undef HAVE_TIMESPEC
 
+/* Define to 1 if you have the `ttyslot' function. */
+#undef HAVE_TTYSLOT
+
 /* Define to 1 if you have the `tzset' function. */
 #undef HAVE_TZSET
 
@@ -558,8 +588,8 @@
 /* Define to 1 if you have the <utime.h> header file. */
 #undef HAVE_UTIME_H
 
-/* Define to 1 if you have the <utmp.h> header file. */
-#undef HAVE_UTMP_H
+/* Define to 1 if you have the <utmpx.h> header file. */
+#undef HAVE_UTMPX_H
 
 /* Define to 1 if you have the `vasprintf' function. */
 #undef HAVE_VASPRINTF
