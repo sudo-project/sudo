@@ -821,6 +821,11 @@ C<cn=defaults> section.  This flag is I<off> by default.
 If set, B<sudo> will insult users when they enter an incorrect
 password.  This flag is I<@insults@> by default.
 
+=item log_host
+
+If set, the host name will be logged in the (non-syslog) B<sudo> log file.
+This flag is I<off> by default.
+
 =item log_input
 
 If set, B<sudo> will run the command in a I<pseudo tty> and log all
@@ -832,11 +837,6 @@ input is also captured and stored in a separate log file.
 Input is logged to the F</var/log/sudo-io> directory using a unique
 session ID that is included in the normal B<sudo> log line, prefixed
 with I<TSID=>.
-
-=item log_host
-
-If set, the host name will be logged in the (non-syslog) B<sudo> log file.
-This flag is I<off> by default.
 
 =item log_output
 
