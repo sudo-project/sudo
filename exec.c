@@ -492,9 +492,25 @@ handle_signals(fd, child, cstat)
 #endif
 		{
 		    if (WIFSTOPPED(status)) {
-			/* Child may not have privs to suspend us itself. */
+			/*
+			 * Save the controlling terminal's process group
+			 * so we can restore it after we resume.
+			 */
+#ifdef HAVE_TCSETPGRP
+			pid_t saved_pgrp = (pid_t)-1;
+			int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
+			if (fd != -1)
+			    saved_pgrp = tcgetpgrp(fd);
+#endif /* HAVE_TCSETPGRP */
 			if (kill(getpid(), WSTOPSIG(status)) != 0)
 			    warning("kill(%d, %d)", getpid(), WSTOPSIG(status));
+#ifdef HAVE_TCSETPGRP
+			if (fd != -1) {
+			    if (saved_pgrp != (pid_t)-1)
+				(void)tcsetpgrp(fd, saved_pgrp);
+			    close(fd);
+			}
+#endif /* HAVE_TCSETPGRP */
 		    } else {
 			/* Child has exited, we are done. */
 			cstat->type = CMD_WSTATUS;
@@ -512,20 +528,6 @@ handle_signals(fd, child, cstat)
 	    } else
 #endif
 	    {
-#ifdef HAVE_TCSETPGRP
-		if (signo == SIGCONT) {
-		    /*
-		     * Before continuing the child, make it the foreground
-		     * pgrp if possible.  Fixes resuming a shell.
-		     */
-		    int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
-		    if (fd != -1) {
-			if (tcgetpgrp(fd) == getpgrp())
-			    (void)tcsetpgrp(fd, child);
-			close(fd);
-		    }
-		}
-#endif
 		/* Nothing listening on sv[0], send directly. */
 		if (kill(child, signo) != 0)
 		    warning("kill(%d, %d)", child, signo);
