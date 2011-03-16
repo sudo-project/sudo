@@ -259,6 +259,10 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd)
     int slot, rval = FALSE;
     FILE *fp;
 
+    /* Strip off /dev/ prefix from line as needed. */
+    if (strncmp(to_line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
+	to_line += sizeof(_PATH_DEV) - 1;
+
     /* Find slot for new entry. */
     slot = utmp_slot(to_line, ttyfd);
     if (slot <= 0)
@@ -267,9 +271,6 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd)
     if ((fp = fopen(_PATH_UTMP, "r+")) == NULL)
 	goto done;
 
-    /* Strip off /dev/ prefix from line as needed. */
-    if (strncmp(to_line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
-	to_line += sizeof(_PATH_DEV) - 1;
     if (from_line != NULL) {
 	if (strncmp(from_line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
 	    from_line += sizeof(_PATH_DEV) - 1;
