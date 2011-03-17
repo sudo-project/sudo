@@ -115,6 +115,11 @@ DEFVAR			[a-z_]+
 %x	INSTR
 
 %%
+<GOTDEFS>[[:blank:]]*,[[:blank:]]* {
+			    LEXTRACE(", ");
+			    return ',';
+			}			/* return ',' */
+
 <GOTDEFS>[[:blank:]]+	BEGIN STARTDEFS;
 
 <STARTDEFS>{DEFVAR}	{
