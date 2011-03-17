@@ -259,7 +259,7 @@ DEFVAR			[a-z_]+
 				yyterminate();
 			}
 
-<INITIAL>^[[:blank:]]*Defaults([:@>\!]\!?{WORD})? {
+<INITIAL>^[[:blank:]]*Defaults([:@>\!]\!?\"?{WORD})? {
 			    int n;
 			    for (n = 0; isblank((unsigned char)yytext[n]); n++)
 				continue;
@@ -464,7 +464,7 @@ sudoedit		{
 			    }
 			}			/* a pathname */
 
-<INITIAL,GOTDEFS>^\" {
+<INITIAL,GOTDEFS>\" {
 			    LEXTRACE("BEGINSTR ");
 			    yylval.string = NULL;
 			    prev_state = YY_START;
