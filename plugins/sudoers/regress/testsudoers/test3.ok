@@ -1,0 +1,9 @@
+Parses OK.
+
+Defaults:FOO	env_reset
+Defaults:foo,bar	env_reset
+Defaults:foo, bar	env_reset
+Defaults:foo,bar	env_reset
+
+User_Alias	FOO = foo, bar
+
