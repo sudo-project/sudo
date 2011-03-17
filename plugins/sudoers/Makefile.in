@@ -266,8 +266,8 @@ timestr.lo: $(srcdir)/timestr.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/timestr.c
 toke.lo: $(devdir)/toke.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/toke.h $(devdir)/gram.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/toke.c
-toke_util.lo: $(devdir)/toke_util.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/toke.h $(devdir)/gram.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/toke_util.c
+toke_util.lo: $(srcdir)/toke_util.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/toke.h $(devdir)/gram.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/toke_util.c
 tsgetgrpw.lo: $(srcdir)/tsgetgrpw.c $(SUDODEP)
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/tsgetgrpw.c
 plugin_error.lo: $(srcdir)/plugin_error.c $(incdir)/error.h $(incdir)/missing.h $(top_builddir)/config.h
