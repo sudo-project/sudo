@@ -248,8 +248,10 @@ Group SID: "S-1-2-34-5678901234-5678901234-5678901234-567"
 
 =back
 
-Note that quotes around group names are optional.  Unquoted strings must
-use a backslash (\) to escape spaces and the '@' symbol.
+Note that quotes around group names are optional.  Unquoted strings
+must use a backslash (\) to escape spaces and special characters.
+See L<"Other special characters and reserved words"> for a list of
+characters that need to be escaped.
 
  Runas_List ::= Runas_Member |
 		Runas_Member ',' Runas_List
@@ -703,7 +705,7 @@ characters in a I<User Specification> ('=', ':', '(', ')') is optional.
 
 The following characters must be escaped with a backslash ('\') when
 used as part of a word (e.g.E<nbsp>a user name or host name):
-'@', '!', '=', ':', ',', '(', ')', '\'.
+'!', '=', ':', ',', '(', ')', '\'.
 
 =head1 SUDOERS OPTIONS
 
