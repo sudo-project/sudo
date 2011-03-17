@@ -216,9 +216,6 @@ AC_ARG_WITH(devel, [AS_HELP_STRING([--with-devel], [add development options])],
     *)		AC_MSG_WARN([Ignoring unknown argument to --with-devel: $with_devel])
 		;;
 esac])
-if test X"$with_devel" != X"yes"; then
-    ac_cv_prog_cc_g=no
-fi
 
 AC_ARG_WITH(CC, [AS_HELP_STRING([--with-CC], [C compiler to use])],
 [case $with_CC in
