@@ -2954,9 +2954,6 @@ $as_echo "$as_me: WARNING: Ignoring unknown argument to --with-devel: $with_deve
 esac
 fi
 
-if test X"$with_devel" != X"yes"; then
-    ac_cv_prog_cc_g=no
-fi
 
 
 # Check whether --with-CC was given.
