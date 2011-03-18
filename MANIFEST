@@ -110,10 +110,12 @@ mkpkg
 pathnames.h.in
 plugins/sample/Makefile.in
 plugins/sample/sample_plugin.c
+plugins/sample/sample_plugin.sym
 plugins/sample_group/Makefile.in
 plugins/sample_group/getgrent.c
 plugins/sample_group/plugin_test.c
 plugins/sample_group/sample_group.c
+plugins/sample_group/sample_group.sym
 plugins/sudoers/Makefile.in
 plugins/sudoers/aixcrypt.exp
 plugins/sudoers/alias.c
@@ -189,6 +191,7 @@ plugins/sudoers/sudo_nss.h
 plugins/sudoers/sudoers.c
 plugins/sudoers/sudoers.h
 plugins/sudoers/sudoers.in
+plugins/sudoers/sudoers.sym
 plugins/sudoers/sudoers2ldif
 plugins/sudoers/sudoreplay.c
 plugins/sudoers/testsudoers.c
