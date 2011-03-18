@@ -95,7 +95,7 @@ static int io_fds[6] = { -1, -1, -1, -1, -1, -1};
 static int pipeline = FALSE;
 static int tty_initialized;
 static int ttymode = TERM_COOKED;
-static pid_t ppgrp, child;
+static pid_t ppgrp, child, child_pgrp;
 static sigset_t ttyblock;
 static struct io_buffer *iobufs;
 
@@ -706,7 +706,7 @@ deliver_signal(pid_t pid, int signo)
     case SIGCONT_FG:
 	/* Continue in foreground, grant it controlling tty. */
 	do {
-	    status = tcsetpgrp(io_fds[SFD_SLAVE], pid);
+	    status = tcsetpgrp(io_fds[SFD_SLAVE], child_pgrp);
 	} while (status == -1 && errno == EINTR);
 	killpg(pid, SIGCONT);
 	break;
@@ -773,6 +773,9 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 	    if (WIFSTOPPED(status)) {
 		sudo_debug(8, "command stopped, signal %d",
 		    WSTOPSIG(status));
+		do {
+		    child_pgrp = tcgetpgrp(io_fds[SFD_SLAVE]);
+		} while (child_pgrp == -1 && errno == EINTR);
 		if (send_status(backchannel, cstat) == -1)
 		    return alive; /* XXX */
 	    } else if (WIFSIGNALED(status)) {
@@ -906,10 +909,11 @@ exec_monitor(struct command_details *details, int backchannel)
      * Put child in its own process group.  If we are starting the command
      * in the foreground, assign its pgrp to the tty.
      */
-    setpgid(child, child);
+    child_pgrp = child;
+    setpgid(child, child_pgrp);
     if (foreground) {
 	do {
-	    status = tcsetpgrp(io_fds[SFD_SLAVE], child);
+	    status = tcsetpgrp(io_fds[SFD_SLAVE], child_pgrp);
 	} while (status == -1 && errno == EINTR);
     }
 
