@@ -1166,8 +1166,8 @@ deserialize_info(char * const settings[], char * const user_info[])
 		SET(flags, MODE_PRESERVE_ENV);
 	    continue;
 	}
-	if (MATCHES(*cur, "user_shell=")) {
-	    if (atobool(*cur + sizeof("user_shell=") - 1) == TRUE)
+	if (MATCHES(*cur, "run_shell=")) {
+	    if (atobool(*cur + sizeof("run_shell=") - 1) == TRUE)
 		SET(flags, MODE_SHELL);
 	    continue;
 	}
