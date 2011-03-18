@@ -1,8 +1,9 @@
 What's new in Sudo 1.7.6?
 
- * A new LDAP setting, sudoers_search_filter, has been added to 
-   ldap.conf.  This setting can be used to restrict the set of 
-   returned by the LDAP query.
+ * A new LDAP setting, sudoers_search_filter, has been added to
+   ldap.conf.  This setting can be used to restrict the set of
+   records returned by the LDAP query.  Based on changes from Matthew
+   Thomas.
 
  * White space is now permitted within a User_List when used in
    conjunction with a per-user Defaults definition.
