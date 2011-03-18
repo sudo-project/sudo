@@ -201,6 +201,7 @@ static struct ldap_config {
     char *bindpw;
     char *rootbinddn;
     struct ldap_config_list_str *base;
+    char *search_filter;
     char *ssl;
     char *tls_cacertfile;
     char *tls_cacertdir;
@@ -285,6 +286,7 @@ static struct ldap_config_table ldap_conf_table[] = {
     { "rootbinddn", CONF_STR, FALSE, -1, &ldap_conf.rootbinddn },
     { "sudoers_base", CONF_LIST_STR, FALSE, -1, &ldap_conf.base },
     { "sudoers_timed", CONF_BOOL, FALSE, -1, &ldap_conf.timed },
+    { "sudoers_search_filter", CONF_STR, FALSE, -1, &ldap_conf.search_filter },
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     { "use_sasl", CONF_BOOL, FALSE, -1, &ldap_conf.use_sasl },
     { "sasl_auth_id", CONF_STR, FALSE, -1, &ldap_conf.sasl_auth_id },
@@ -977,6 +979,21 @@ done:
 }
 
 /*
+ * Builds up a filter to search for default settings
+ */
+static char *
+sudo_ldap_build_default_filter()
+{
+    char *filt;
+
+    if (ldap_conf.search_filter)
+	easprintf(&filt, "(&(%s)(cn=defaults))", ldap_conf.search_filter);
+    else
+	filt = estrdup("cn=defaults");
+    return filt;
+}
+
+/*
  * Builds up a filter to check against LDAP.
  */
 static char *
@@ -985,11 +1002,15 @@ sudo_ldap_build_pass1(pw)
 {
     struct group *grp;
     char *buf, timebuffer[TIMEFILTER_LENGTH];
-    size_t sz;
+    size_t sz = 0;
     int i;
 
-    /* Start with (|(sudoUser=USERNAME)(sudoUser=ALL)) + NUL */
-    sz = 29 + strlen(pw->pw_name);
+    /* Start with LDAP search filter length + 3 */
+    if (ldap_conf.search_filter)
+	sz += strlen(ldap_conf.search_filter) + 3;
+
+    /* Then add (|(sudoUser=USERNAME)(sudoUser=ALL)) + NUL */
+    sz += 29 + strlen(pw->pw_name);
 
     /* Add space for groups */
     if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
@@ -1012,11 +1033,14 @@ sudo_ldap_build_pass1(pw)
     *buf = '\0';
 
     /*
-     * If timed, start a global AND clause that will have the time limits
-     * as the second leg.
+     * If timed or using a search filter, start a global AND clause to
+     * contain the search filter, search criteria, and time restriction.
      */
-    if (ldap_conf.timed)
+    if (ldap_conf.timed || ldap_conf.search_filter)
 	(void) strlcpy(buf, "(&", sz);
+
+    if (ldap_conf.search_filter)
+	(void) strlcat(buf, ldap_conf.search_filter, sz);
 
     /* Global OR + sudoUser=user_name filter */
     (void) strlcat(buf, "(|(sudoUser=", sz);
@@ -1052,6 +1076,8 @@ sudo_ldap_build_pass1(pw)
 	strlcat(buf, ")", sz); /* closes the global OR */
 	sudo_ldap_timefilter(timebuffer, sizeof(timebuffer));
 	strlcat(buf, timebuffer, sz);
+    } else if (ldap_conf.search_filter) {
+	strlcat(buf, ")", sz); /* closes the global OR */
     }
     strlcat(buf, ")", sz); /* closes the global OR or the global AND */
 
@@ -1064,21 +1090,23 @@ sudo_ldap_build_pass1(pw)
 static char *
 sudo_ldap_build_pass2()
 {
-    char *buf, timebuffer[TIMEFILTER_LENGTH];
+    char *filt, timebuffer[TIMEFILTER_LENGTH];
 
-    if (ldap_conf.timed) {
-	/*
-	 * If timed, use a global AND clause that has the time limit as
-	 * as the second leg. 
-	 */
+    if (ldap_conf.timed)
 	sudo_ldap_timefilter(timebuffer, sizeof(timebuffer));
-	easprintf(&buf, "(&(sudoUser=+*)%s)", timebuffer);
-    } else {
-	/* No time limit, just the netgroup selection. */
-	buf = estrdup("sudoUser=+*");
-    }
 
-    return buf;
+    /*
+     * Match all sudoUsers beginning with a '+'.
+     * If a search filter or time restriction is specified, 
+     * those get ANDed in to the expression.
+     */
+    easprintf(&filt, "%s%s(sudoUser=+*)%s%s",
+	(ldap_conf.timed || ldap_conf.search_filter) ? "(&" : "",
+	ldap_conf.search_filter ? ldap_conf.search_filter : "",
+	ldap_conf.timed ? timebuffer : "",
+	(ldap_conf.timed || ldap_conf.search_filter) ? ")" : "");
+
+    return filt;
 }
 
 /*
@@ -1242,6 +1270,8 @@ sudo_ldap_read_config()
 	    fprintf(stderr, "sudoers_base     %s\n",
 		"(NONE) <---Sudo will ignore ldap)");
 	}
+	if (ldap_conf.search_filter)
+	    fprintf(stderr, "search_filter    %s\n", ldap_conf.search_filter);
 	fprintf(stderr, "binddn           %s\n", ldap_conf.binddn ?
 	    ldap_conf.binddn : "(anonymous)");
 	fprintf(stderr, "bindpw           %s\n", ldap_conf.bindpw ?
@@ -1339,6 +1369,18 @@ sudo_ldap_read_config()
 #endif
     }
 
+    /* If search filter is not parenthesized, make it so. */
+    if (ldap_conf.search_filter && ldap_conf.search_filter[0] != '(') {
+	size_t len = strlen(ldap_conf.search_filter);
+	cp = ldap_conf.search_filter;
+	ldap_conf.search_filter = emalloc(len + 3);
+	ldap_conf.search_filter[0] = '(';
+	memcpy(ldap_conf.search_filter + 1, cp, len);
+	ldap_conf.search_filter[len + 1] = ')';
+	ldap_conf.search_filter[len + 2] = '\0';
+	efree(cp);
+    }
+
     /* If rootbinddn set, read in /etc/ldap.secret if it exists. */
     if (ldap_conf.rootbinddn)
 	sudo_ldap_read_secret(_PATH_LDAP_SECRET);
@@ -1413,13 +1455,14 @@ sudo_ldap_display_defaults(nss, pw, lbuf)
     struct sudo_ldap_handle *handle = nss->handle;
     LDAP *ld;
     LDAPMessage *entry, *result;
-    char *prefix;
+    char *prefix, *filt;
     int rc, count = 0;
 
     if (handle == NULL || handle->ld == NULL)
 	goto done;
     ld = handle->ld;
 
+    filt = sudo_ldap_build_default_filter();
     for (base = ldap_conf.base; base != NULL; base = base->next) {
 	if (ldap_conf.timeout > 0) {
 	    tv.tv_sec = ldap_conf.timeout;
@@ -1428,7 +1471,7 @@ sudo_ldap_display_defaults(nss, pw, lbuf)
 	}
 	result = NULL;
 	rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE,
-	    "cn=defaults", NULL, 0, NULL, NULL, tvp, 0, &result);
+	    filt, NULL, 0, NULL, NULL, tvp, 0, &result);
 	if (rc == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
 	    bv = ldap_get_values_len(ld, entry, "sudoOption");
 	    if (bv != NULL) {
@@ -1447,6 +1490,7 @@ sudo_ldap_display_defaults(nss, pw, lbuf)
 	if (result)
 	    ldap_msgfree(result);
     }
+    efree(filt);
 done:
     return count;
 }
@@ -2079,11 +2123,15 @@ sudo_ldap_setdefs(nss)
     struct timeval tv, *tvp = NULL;
     LDAP *ld;
     LDAPMessage *entry, *result;
+    char *filt;
     int rc;
 
     if (handle == NULL || handle->ld == NULL)
 	return -1;
     ld = handle->ld;
+
+    filt = sudo_ldap_build_default_filter();
+    DPRINTF(("Looking for cn=defaults: %s", filt), 1);
 
     for (base = ldap_conf.base; base != NULL; base = base->next) {
 	if (ldap_conf.timeout > 0) {
@@ -2093,7 +2141,7 @@ sudo_ldap_setdefs(nss)
 	}
 	result = NULL;
 	rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE,
-	    "cn=defaults", NULL, 0, NULL, NULL, NULL, 0, &result);
+	    filt, NULL, 0, NULL, NULL, NULL, 0, &result);
 	if (rc == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
 	    DPRINTF(("found:%s", ldap_get_dn(ld, entry)), 1);
 	    sudo_ldap_parse_options(ld, entry);
@@ -2103,6 +2151,7 @@ sudo_ldap_setdefs(nss)
 	if (result)
 	    ldap_msgfree(result);
     }
+    efree(filt);
 
     return 0;
 }
@@ -2139,7 +2188,7 @@ sudo_ldap_lookup(nss, ret, pwflag)
 	enum def_tupple pwcheck = 
 	    (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
 
-        for (i = 0; i < lres->nentries; i++) {
+	for (i = 0; i < lres->nentries; i++) {
 	    entry = lres->entries[i].entry;
 	    if ((pwcheck == any && doauth != FALSE) ||
 		(pwcheck == all && doauth == FALSE)) {
@@ -2258,7 +2307,7 @@ sudo_ldap_result_last_search(lres)
     struct ldap_search_list *result = lres->searches;
 
     if (result) {
-        while (result->next)
+	while (result->next)
 	    result = result->next;
     }
     return result;

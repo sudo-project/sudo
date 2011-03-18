@@ -369,6 +369,12 @@ this is of the form C<ou=SUDOers,dc=example,dc=com> for the domain
 C<example.com>.  Multiple B<SUDOERS_BASE> lines may be specified,
 in which case they are queried in the order specified.
 
+=item B<SUDOERS_SEARCH_FILTER> ldap_filter
+
+An LDAP filter which is used to restrict the set of records returned
+when performing a B<sudo> LDAP query.  Typically, this is of the
+form C<attribute=value> or C<(&(attribute=value)(attribute2=value2))>.
+
 =item B<SUDOERS_TIMED> on/true/yes/off/false/no
 
 Whether or not to evaluate the C<sudoNotBefore> and C<sudoNotAfter>
