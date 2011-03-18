@@ -1,5 +1,17 @@
 What's new in Sudo 1.7.6?
 
+ * A new LDAP setting, sudoers_search_filter, has been added to 
+   ldap.conf.  This setting can be used to restrict the set of 
+   returned by the LDAP query.
+
+ * White space is now permitted within a User_List when used in
+   conjunction with a per-user Defaults definition.
+
+ * Support for double-quoted words in the sudoers file has been fixed.
+   The change in 1.7.5 for escaping the double quote character
+   caused the double quoting to only be available at the beginning
+   of an entry.
+
  * The fix for resuming a suspended shell in 1.7.5 caused problems
    with resuming non-shells on Linux.  Sudo will now save the process
    group ID of the program it is running on suspend and restore it
