@@ -15,6 +15,7 @@ IFS=" 	$nl"
 usage="usage: mkpkg [--debug] [--flavor flavor] [--platform platform] [--osversion ver]"
 debug=0
 flavor=vanilla
+crossbuild=false
 while test $# -gt 0; do
     case "$1" in
 	--debug)
@@ -59,6 +60,10 @@ while test $# -gt 0; do
 	    osversion="$2"
 	    shift
 	    ;;
+	--build|--host)
+	    crossbuild=true
+	    configure_opts="${configure_opts}${configure_opts+$tab}$1"
+	    ;;
 	*)
 	    # Pass unknown options to configure
 	    configure_opts="${configure_opts}${configure_opts+$tab}$1"
@@ -87,18 +92,29 @@ case "$osversion" in
 	;;
 esac
 
-# Choose compiler options by osversion.
-case "$osversion" in
-    hpux*)
-	# Use the HP ANSI C compiler on HP-UX if possible
-	if [ -z "$CC" -a -x /opt/ansic/bin/cc ]; then
-	    CC=/opt/ansic/bin/cc; export CC
-	    if [ -z "$CFLAGS" ]; then
-		CFLAGS=-O; export CFLAGS
+# Choose compiler options by osversion if not cross-compiling.
+if [ "$crossbuild" = "false" ]; then
+    case "$osversion" in
+	hpux*)
+	    # Use the HP ANSI C compiler on HP-UX if possible
+	    if [ -z "$CC" -a -x /opt/ansic/bin/cc ]; then
+		CC=/opt/ansic/bin/cc; export CC
+		if [ -z "$CFLAGS" ]; then
+		    CFLAGS=-O; export CFLAGS
+		fi
 	    fi
-	fi
-	;;
-esac
+	    ;;
+	sol[0-9]*)
+	    # Use the Sun Studio C compiler on Solaris if possible
+	    if [ -z "$CC" -a -x /usr/bin/cc ]; then
+		CC=/usr/bin/cc; export CC
+		if [ -z "$CFLAGS" ]; then
+		    CFLAGS=-O; export CFLAGS
+		fi
+	    fi
+	    ;;
+    esac
+fi
 
 # Choose configure options by osversion.
 # We use the same configure options as vendor packages when possible.
