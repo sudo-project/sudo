@@ -81,7 +81,7 @@ static struct sudo_settings {
 #define ARG_SET_HOME 5
     { "set_home" },
 #define ARG_USER_SHELL 6
-    { "user_shell" },
+    { "run_shell" },
 #define ARG_LOGIN_SHELL 7
     { "login_shell" },
 #define ARG_IGNORE_TICKET 8

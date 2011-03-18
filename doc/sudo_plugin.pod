@@ -192,7 +192,7 @@ C<HOME> environment variable to the target user's home directory.
 Set to true if the user specified the C<-E> flag, indicating that
 the user wishes to preserve the environment.
 
-=item user_shell=bool
+=item run_shell=bool
 
 Set to true if the user specified the C<-s> flag, indicating that
 the user wishes to run a shell.
