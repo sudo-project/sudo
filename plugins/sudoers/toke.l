@@ -75,7 +75,6 @@ extern YYSTYPE yylval;
 extern int parse_error;
 int sudolineno = 1;
 char *sudoers;
-int (*trace_print)(const char *msg);
 
 static int sawspace = FALSE;
 static int continued = FALSE;
@@ -84,6 +83,13 @@ static int prev_state = INITIAL;
 static int _push_include(char *, int);
 static int pop_include(void);
 static char *parse_include(char *);
+
+#ifdef TRACELEXER
+static int sudoers_trace_print(const char *msg);
+#else
+# define sudoers_trace_print NULL
+#endif
+int (*trace_print)(const char *msg) = sudoers_trace_print;
 
 #define	push_include(_p)	(_push_include((_p), FALSE))
 #define	push_includedir(_p)	(_push_include((_p), TRUE))
@@ -863,3 +869,11 @@ parse_include(char *base)
 
     return path;
 }
+
+#ifdef TRACELEXER
+static int
+sudoers_trace_print(const char *msg)
+{
+    return fputs(msg, stderr);
+}
+#endif /* TRACELEXER */
