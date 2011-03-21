@@ -77,7 +77,8 @@ int sudolineno = 1;
 char *sudoers;
 int (*trace_print)(const char *msg);
 
-static int sawspace = 0;
+static int sawspace = FALSE;
+static int continued = FALSE;
 static int prev_state = INITIAL;
 
 static int _push_include(char *, int);
@@ -167,7 +168,7 @@ DEFVAR			[a-z_]+
     \\[[:blank:]]*\n[[:blank:]]*	{
 			    /* Line continuation char followed by newline. */
 			    ++sudolineno;
-			    LEXTRACE("\n");
+			    continued = TRUE;
 			}
 
     \"			{
@@ -234,6 +235,11 @@ DEFVAR			[a-z_]+
 <INITIAL>^#include[[:blank:]]+\/.*\n {
 			    char *path;
 
+			    if (continued) {
+				LEXTRACE("ERROR ");
+				return ERROR;
+			    }
+
 			    if ((path = parse_include(yytext)) == NULL)
 				yyterminate();
 
@@ -246,6 +252,11 @@ DEFVAR			[a-z_]+
 
 <INITIAL>^#includedir[[:blank:]]+\/.*\n {
 			    char *path;
+
+			    if (continued) {
+				LEXTRACE("ERROR ");
+				return ERROR;
+			    }
 
 			    if ((path = parse_include(yytext)) == NULL)
 				yyterminate();
@@ -263,6 +274,12 @@ DEFVAR			[a-z_]+
 <INITIAL>^[[:blank:]]*Defaults([:@>\!][[:blank:]]*\!*\"?{WORD})? {
 			    char deftype;
 			    int n;
+
+			    if (continued) {
+				LEXTRACE("ERROR ");
+				return ERROR;
+			    }
+
 			    for (n = 0; isblank((unsigned char)yytext[n]); n++)
 				continue;
 			    n += sizeof("Defaults") - 1;
@@ -296,6 +313,12 @@ DEFVAR			[a-z_]+
 
 <INITIAL>^[[:blank:]]*(Host|Cmnd|User|Runas)_Alias	{
 			    int n;
+
+			    if (continued) {
+				LEXTRACE("ERROR ");
+				return ERROR;
+			    }
+
 			    for (n = 0; isblank((unsigned char)yytext[n]); n++)
 				continue;
 			    switch (yytext[n]) {
@@ -518,6 +541,7 @@ sudoedit		{
 <*>\n			{
 			    BEGIN INITIAL;
 			    ++sudolineno;
+			    continued = FALSE;
 			    LEXTRACE("\n");
 			    return COMMENT;
 			}			/* return newline */
@@ -527,14 +551,14 @@ sudoedit		{
 			}
 
 <*>\\[[:blank:]]*\n	{
-			    sawspace = TRUE;	/* remember for fill_args */
 			    ++sudolineno;
-			    LEXTRACE("\n\t");
+			    continued = TRUE;
 			}			/* throw away EOL after \ */
 
 <INITIAL,STARTDEFS,INDEFS>#(-[^\n0-9].*|[^\n0-9-].*)?\n	{
 			    BEGIN INITIAL;
 			    ++sudolineno;
+			    continued = FALSE;
 			    LEXTRACE("#\n");
 			    return COMMENT;
 			}			/* comment, not uid/gid */
