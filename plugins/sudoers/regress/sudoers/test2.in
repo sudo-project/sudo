@@ -1,13 +1,3 @@
-#!/bin/sh
-#
-# Test quoted words in sudoers.
-# Note that a backslash in double quotes is treated literally unless
-# it is escaping a double quote.
-#
-
-WANT=${SRCDIR-.}/regress/testsudoers/test2.out
-GOT=ts_test2.out
-./testsudoers -d > $GOT <<EOF
 # Check quoted user name in User_Alias
 User_Alias UA1 = "foo"
 User_Alias UA2 = "foo.bar"
@@ -68,12 +58,3 @@ Defaults>"some one" set_home
 "%:C/non_UNIX_0 c"	"hostf" = ("root") ALL
 "%:C/non\'UNIX_3 c"	"hostg" = ("root") ALL
 "+netgr"		"hosth" = ("root") ALL
-EOF
-
-# Check results
-if cmp $WANT $GOT >/dev/null; then
-    echo "testsudoers 2: OK"
-else
-    echo "testsudoers 2: FAILED"
-    diff $WANT $GOT
-fi

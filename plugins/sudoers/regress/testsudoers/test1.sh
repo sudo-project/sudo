@@ -5,16 +5,6 @@
 # This is RedHat bug Bug 667103.
 #
 
-WANT=${SRCDIR-.}/regress/testsudoers/test1.ok
-GOT=ts_test1.out
-./testsudoers -g wheel root id > $GOT <<EOF
+./testsudoers -g wheel root id <<EOF
 root ALL = ALL
 EOF
-
-# Check results
-if cmp $WANT $GOT >/dev/null; then
-    echo "testsudoers 1: OK"
-else
-    echo "testsudoers 1: FAILED"
-    diff $WANT $GOT
-fi
