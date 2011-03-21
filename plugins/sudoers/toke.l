@@ -75,6 +75,8 @@ extern YYSTYPE yylval;
 extern int parse_error;
 int sudolineno = 1;
 char *sudoers;
+int (*trace_print)(const char *msg);
+
 static int sawspace = 0;
 static int prev_state = INITIAL;
 
@@ -85,11 +87,11 @@ static char *parse_include(char *);
 #define	push_include(_p)	(_push_include((_p), FALSE))
 #define	push_includedir(_p)	(_push_include((_p), TRUE))
 
-#ifdef TRACELEXER
-#define LEXTRACE(msg)	fputs(msg, stderr)
-#else
-#define LEXTRACE(msg)
-#endif
+#define LEXTRACE(msg)	do { \
+    if (trace_print != NULL) \
+	(*trace_print)(msg); \
+} while (0);
+
 %}
 
 HEX16			[0-9A-Fa-f]{1,4}
@@ -539,7 +541,7 @@ sudoedit		{
 <INITIAL,STARTDEFS,INDEFS>#(-[^\n0-9].*|[^\n0-9-].*)?\n	{
 			    BEGIN INITIAL;
 			    ++sudolineno;
-			    LEXTRACE("\n");
+			    LEXTRACE("#\n");
 			    return COMMENT;
 			}			/* comment, not uid/gid */
 
