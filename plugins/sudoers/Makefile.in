@@ -384,10 +384,10 @@ check: $(TEST_PROGS) visudo testsudoers
 		total=`expr $$total + 1`; \
 		if cmp $$toke $$dir/$$toke.ok >/dev/null; then \
 		    passed=`expr $$passed + 1`; \
-		    echo "$$dirbase/$$base (toke): OK"; \
+		    echo "$$dirbase/$$base (toke):  OK"; \
 		else \
 		    failed=`expr $$failed + 1`; \
-		    echo "$$dirbase/$$base (toke): FAIL"; \
+		    echo "$$dirbase/$$base (toke):  FAIL"; \
 		    diff $$out $$dir/$$out.ok; \
 		fi; \
 		total=`expr $$total + 1`; \
