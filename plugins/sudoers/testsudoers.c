@@ -82,6 +82,7 @@ void set_runasgr(char *);
 void set_runaspw(char *);
 void cleanup(int);
 static int testsudoers_printf(int msg_type, const char *fmt, ...);
+static int testsudoers_print(const char *msg);
 
 extern void setgrfile(const char *);
 extern void setgrent(void);
@@ -95,6 +96,8 @@ extern void endpwent(void);
 extern struct passwd *getpwent(void);
 extern struct passwd *getpwnam(const char *);
 extern struct passwd *getpwuid(uid_t);
+
+extern int (*trace_print)(const char *msg);
 
 /*
  * Globals
@@ -141,7 +144,7 @@ main(int argc, char *argv[])
 
     dflag = 0;
     grfile = pwfile = runas_group = runas_user = NULL;
-    while ((ch = getopt(argc, argv, "dg:G:h:p:u:")) != -1) {
+    while ((ch = getopt(argc, argv, "dg:G:h:p:tu:")) != -1) {
 	switch (ch) {
 	    case 'd':
 		dflag = 1;
@@ -157,6 +160,9 @@ main(int argc, char *argv[])
 		break;
 	    case 'p':
 		pwfile = optarg;
+		break;
+	    case 't':
+		trace_print = testsudoers_print;
 		break;
 	    case 'u':
 		runas_user = optarg;
@@ -567,9 +573,14 @@ dump_sudoers(void)
     print_userspecs();
 }
 
+static int testsudoers_print(const char *msg)
+{
+    return fputs(msg, stderr);
+}
+
 void
 usage(void)
 {
-    (void) fprintf(stderr, "usage: %s [-d] [-G grfile] [-g group] [-h host] [-p pwfile] [-u user] <user> <command> [args]\n", getprogname());
+    (void) fprintf(stderr, "usage: %s [-dt] [-G grfile] [-g group] [-h host] [-p pwfile] [-u user] <user> <command> [args]\n", getprogname());
     exit(1);
 }
