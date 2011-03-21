@@ -266,13 +266,18 @@ DEFVAR			[a-z_]+
 				yyterminate();
 			}
 
-<INITIAL>^[[:blank:]]*Defaults([:@>\!]\!?\"?{WORD})? {
+<INITIAL>^[[:blank:]]*Defaults([:@>\!][[:blank:]]*\!*\"?{WORD})? {
+			    char deftype;
 			    int n;
 			    for (n = 0; isblank((unsigned char)yytext[n]); n++)
 				continue;
-			    n += 8;
+			    n += sizeof("Defaults") - 1;
+			    if ((deftype = yytext[n]) != '\0') {
+				while (isblank((unsigned char)yytext[++n]))
+				    continue;
+			    }
 			    BEGIN GOTDEFS;
-			    switch (yytext[n++]) {
+			    switch (deftype) {
 				case ':':
 				    yyless(n);
 				    LEXTRACE("DEFAULTS_USER ");
