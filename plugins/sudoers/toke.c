@@ -2333,13 +2333,14 @@ case 52:
 YY_RULE_SETUP
 #line 553 "toke.l"
 {
+			    sawspace = TRUE;	/* remember for fill_args */
 			    ++sudolineno;
 			    continued = TRUE;
 			}			/* throw away EOL after \ */
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 558 "toke.l"
+#line 559 "toke.l"
 {
 			    BEGIN INITIAL;
 			    ++sudolineno;
@@ -2350,7 +2351,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 566 "toke.l"
+#line 567 "toke.l"
 {
 			    LEXTRACE("ERROR ");
 			    return ERROR;
@@ -2362,7 +2363,7 @@ case YY_STATE_EOF(GOTCMND):
 case YY_STATE_EOF(STARTDEFS):
 case YY_STATE_EOF(INDEFS):
 case YY_STATE_EOF(INSTR):
-#line 571 "toke.l"
+#line 572 "toke.l"
 {
 			    if (YY_START != INITIAL) {
 			    	BEGIN INITIAL;
@@ -2375,10 +2376,10 @@ case YY_STATE_EOF(INSTR):
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 581 "toke.l"
+#line 582 "toke.l"
 ECHO;
 	YY_BREAK
-#line 2381 "lex.yy.c"
+#line 2382 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -3269,7 +3270,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 581 "toke.l"
+#line 582 "toke.l"
 
 struct path_list {
     char *path;

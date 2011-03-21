@@ -551,6 +551,7 @@ sudoedit		{
 			}
 
 <*>\\[[:blank:]]*\n	{
+			    sawspace = TRUE;	/* remember for fill_args */
 			    ++sudolineno;
 			    continued = TRUE;
 			}			/* throw away EOL after \ */
