@@ -24,9 +24,18 @@ int fill_txt(const char *, int, int);
 int ipv6_valid(const char *s);
 void yyerror(const char *);
 
+#ifndef FLEX_SCANNER
+extern int (*trace_print)(const char *msg);
+#endif
+
 #define fill(a, b)	fill_txt(a, b, 0)
 
 /* realloc() to size + COMMANDARGINC to make room for command args */
 #define COMMANDARGINC   64
+
+#define LEXTRACE(msg)   do { \
+    if (trace_print != NULL) \
+        (*trace_print)(msg); \
+} while (0);
 
 #endif /* _SUDO_TOKE_H */

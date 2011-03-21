@@ -51,6 +51,7 @@
 
 #include "sudoers.h" /* XXX */
 #include "parse.h"
+#include "toke.h"
 
 /*
  * We must define SIZE_MAX for yacc's skeleton.c.
@@ -96,13 +97,11 @@ yyerror(const char *s)
 	errorlineno = sudolineno ? sudolineno - 1 : 0;
 	errorfile = estrdup(sudoers);
     }
-    if (verbose && s != NULL) {
-#ifndef TRACELEXER
+    if (trace_print != NULL) {
+	LEXTRACE("<*> ");
+    } else if (verbose && s != NULL) {
 	warningx(">>> %s: %s near line %d <<<", sudoers, s,
 	    sudolineno ? sudolineno - 1 : 0);
-#else
-	fputs("<*> ", stderr);
-#endif
     }
     parse_error = TRUE;
 }

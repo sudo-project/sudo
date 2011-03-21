@@ -86,12 +86,6 @@ static char *parse_include(char *);
 
 #define	push_include(_p)	(_push_include((_p), FALSE))
 #define	push_includedir(_p)	(_push_include((_p), TRUE))
-
-#define LEXTRACE(msg)	do { \
-    if (trace_print != NULL) \
-	(*trace_print)(msg); \
-} while (0);
-
 %}
 
 HEX16			[0-9A-Fa-f]{1,4}
