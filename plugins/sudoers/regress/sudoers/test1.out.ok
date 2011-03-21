@@ -1,0 +1,6 @@
+Parses OK.
+
+
+
+user1	ALL = /usr/bin/su - : ALL = /usr/bin/id
+user2	ALL = NOPASSWD: NOEXEC: /usr/bin/vi : ALL = PASSWD: EXEC: /usr/bin/echo
