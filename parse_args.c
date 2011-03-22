@@ -121,7 +121,7 @@ parse_args(argc, argv)
 		    break;
 		case 'C':
 		    if ((user_closefrom = atoi(optarg)) < 3) {
-			warningx("the argument to -C must be at least 3");
+			warningx("the argument to -C must be a number greater than or equal to 3");
 			usage(1);
 		    }
 		    break;
