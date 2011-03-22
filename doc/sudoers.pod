@@ -395,7 +395,7 @@ A B<user specification> determines which commands a user may run
 (and as what user) on specified hosts.  By default, commands are
 run as B<root>, but this can be changed on a per-command basis.
 
-The basic structure of a user specification is `who = where (as_whom)
+The basic structure of a user specification is `who where = (as_whom)
 what'.  Let's break that down into its constituent parts:
 
 =head2 Runas_Spec
