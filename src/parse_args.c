@@ -177,7 +177,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    break;
 		case 'C':
 		    if (atoi(optarg) < 3) {
-			warningx("the argument to -C must be at least 3");
+			warningx("the argument to -C must be a number greater than or equal to 3");
 			usage(1);
 		    }
 		    sudo_settings[ARG_CLOSEFROM].value = optarg;
