@@ -449,8 +449,11 @@ print_alias(v1, v2)
 	    c = (struct sudo_command *) m->name;
 	    printf("%s%s%s", c->cmnd, c->args ? " " : "",
 		c->args ? c->args : "");
-	} else
+	} else if (m->type == ALL) {
+	    fputs("ALL", stdout);
+	} else {
 	    fputs(m->name, stdout);
+	}
     }
     putchar('\n');
     return 0;
