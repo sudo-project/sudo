@@ -408,7 +408,7 @@ NOLOG_INPUT[[:blank:]]*:	{
 			    return NETGROUP;
 			}
 
-\%:?{WORD}		{
+\%:?({WORD}|{ID})	{
 			    /* group */
 			    if (!fill(yytext, yyleng))
 				yyterminate();
