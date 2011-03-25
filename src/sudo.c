@@ -204,6 +204,14 @@ main(int argc, char *argv[], char *envp[])
 
     /* Parse command line arguments. */
     sudo_mode = parse_args(argc, argv, &nargc, &nargv, &settings, &env_add);
+    sudo_debug(9, "sudo_mode %d", sudo_mode);
+
+    /* Print sudo version early, in case policy plugin init fails. */
+    if (ISSET(sudo_mode, MODE_VERSION)) {
+	printf("Sudo version %s\n", PACKAGE_VERSION);
+	if (user_details.uid == ROOT_UID)
+	    (void) printf("Configure args: %s\n", CONFIGURE_ARGS);
+    }
 
     /* Open policy plugin. */
     ok = policy_open(&policy_plugin, settings, user_info, envp);
@@ -214,12 +222,8 @@ main(int argc, char *argv[], char *envp[])
 	    errorx(1, "unable to initialize policy plugin");
     }
 
-    sudo_debug(9, "sudo_mode %d", sudo_mode);
     switch (sudo_mode & MODE_MASK) {
 	case MODE_VERSION:
-	    printf("Sudo version %s\n", PACKAGE_VERSION);
-	    if (user_details.uid == ROOT_UID)
-		(void) printf("Configure args: %s\n", CONFIGURE_ARGS);
 	    policy_show_version(&policy_plugin, !user_details.uid);
 	    tq_foreach_fwd(&io_plugins, plugin) {
 		ok = iolog_open(plugin, settings, user_info, NULL,
