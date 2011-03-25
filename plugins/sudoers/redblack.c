@@ -55,7 +55,8 @@
 # endif
 #endif /* STDC_HEADERS */
 
-#include "sudoers.h"
+#include "missing.h"
+#include "alloc.h"
 #include "redblack.h"
 
 static void rbrepair(struct rbtree *, struct rbnode *);
