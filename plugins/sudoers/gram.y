@@ -776,6 +776,5 @@ init_parser(const char *path, int quiet)
     parse_error = FALSE;
     errorlineno = -1;
     errorfile = NULL;
-    sudolineno = 1;
     verbose = !quiet;
 }
