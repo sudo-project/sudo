@@ -188,9 +188,19 @@ DEFVAR			[a-z_]+
 			    if (prev_state == INITIAL) {
 				switch (yylval.string[0]) {
 				case '%':
+				    if (yylval.string[1] == '\0' ||
+					(yylval.string[1] == ':' &&
+					yylval.string[2] == '\0')) {
+					LEXTRACE("ERROR "); /* empty group */
+					return ERROR;
+				    }
 				    LEXTRACE("USERGROUP ");
 				    return USERGROUP;
 				case '+':
+				    if (yylval.string[1] == '\0') {
+					LEXTRACE("ERROR "); /* empty netgroup */
+					return ERROR;
+				    }
 				    LEXTRACE("NETGROUP ");
 				    return NETGROUP;
 				}
@@ -398,6 +408,12 @@ LOG_INPUT[[:blank:]]*:	{
 NOLOG_INPUT[[:blank:]]*:	{
 			    	LEXTRACE("NOLOG_INPUT ");
 			    	return NOLOG_INPUT;
+			}
+
+<INITIAL,GOTDEFS>(\+|\%|\%:) {
+			    /* empty group or netgroup */
+			    LEXTRACE("ERROR ");
+			    return ERROR;
 			}
 
 \+{WORD}		{

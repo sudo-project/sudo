@@ -288,75 +288,75 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 	*yy_cp = '\0'; \
 	yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 55
-#define YY_END_OF_BUFFER 56
+#define YY_NUM_RULES 56
+#define YY_END_OF_BUFFER 57
 static yyconst short int yy_accept[599] =
     {   0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,   56,   43,   51,   50,   49,   42,   54,   43,
-       44,   45,   43,   46,   43,   43,   43,   43,   48,   47,
-       54,   38,   38,   38,   38,   38,   38,   38,   54,   43,
-       43,   51,   54,   38,   38,   38,   38,   38,    2,   54,
-        1,   43,   43,   17,   16,   17,   16,   16,   54,   54,
-       54,    3,    9,    8,    9,    4,    9,    5,   54,   13,
-       13,   13,   11,   12,   43,    0,   51,   49,    0,   53,
-        0,   43,   33,    0,    0,    0,   32,    0,   41,   41,
-        0,   43,   43,    0,   43,   43,   43,   43,    0,   36,
+        0,    0,   57,   44,   52,   51,   50,   43,   55,   32,
+       45,   46,   32,   47,   44,   44,   44,   44,   49,   48,
+       55,   39,   39,   39,   39,   39,   39,   39,   55,   44,
+       44,   52,   55,   39,   39,   39,   39,   39,    2,   55,
+        1,   44,   44,   17,   16,   17,   16,   16,   55,   55,
+       55,    3,    9,    8,    9,    4,    9,    5,   55,   13,
+       13,   13,   11,   12,   44,    0,   52,   50,    0,   54,
+        0,   44,   34,    0,   32,    0,   33,    0,   42,   42,
+        0,   44,   44,    0,   44,   44,   44,   44,    0,   37,
 
-       38,   38,   38,   38,   38,   38,   38,   43,   52,   43,
-       51,    0,    0,    0,    0,    0,    0,   43,   43,   43,
-       43,   43,    2,    1,    0,    1,   39,   39,    0,   43,
+       39,   39,   39,   39,   39,   39,   39,   44,   53,   44,
+       52,    0,    0,    0,    0,    0,    0,   44,   44,   44,
+       44,   44,    2,    1,    0,    1,   40,   40,    0,   44,
        17,   17,   15,   14,   15,    0,    0,    3,    9,    0,
         6,    7,    9,    9,   13,    0,   13,   13,    0,   10,
-        0,    0,    0,   33,   33,    0,    0,   43,   43,   43,
-       43,   43,    0,    0,   36,   36,   38,   38,   38,   38,
-       38,   38,   38,   38,   38,   43,    0,    0,    0,    0,
-        0,    0,   43,   43,   43,   43,   43,    0,   43,   10,
-        0,   43,   43,   43,   43,   43,   43,    0,   37,   37,
+        0,    0,    0,   34,   34,    0,    0,   44,   44,   44,
+       44,   44,    0,    0,   37,   37,   39,   39,   39,   39,
+       39,   39,   39,   39,   39,   44,    0,    0,    0,    0,
+        0,    0,   44,   44,   44,   44,   44,    0,   44,   10,
+        0,   44,   44,   44,   44,   44,   44,    0,   38,   38,
 
-       37,    0,    0,   36,   36,   36,   36,   36,   36,   36,
-       38,   38,   38,   38,   38,   38,   38,   38,   38,   43,
-        0,    0,    0,    0,    0,    0,   43,   43,   43,   43,
-       43,   43,   43,    0,    0,   37,   37,   37,    0,   36,
-       36,    0,   36,   36,   36,   36,   36,   36,   36,   36,
-       36,   36,   36,    0,   25,   38,   38,   38,   38,   38,
-       38,   38,   38,   43,    0,    0,    0,    0,   43,   43,
-       43,   43,   43,   43,   43,   43,    0,   37,    0,   36,
-       36,   36,    0,    0,    0,   36,   36,   36,   36,   36,
-       36,   36,   36,   36,   36,   36,   36,   36,   38,   38,
+       38,    0,    0,   37,   37,   37,   37,   37,   37,   37,
+       39,   39,   39,   39,   39,   39,   39,   39,   39,   44,
+        0,    0,    0,    0,    0,    0,   44,   44,   44,   44,
+       44,   44,   44,    0,    0,   38,   38,   38,    0,   37,
+       37,    0,   37,   37,   37,   37,   37,   37,   37,   37,
+       37,   37,   37,    0,   25,   39,   39,   39,   39,   39,
+       39,   39,   39,   44,    0,    0,    0,    0,   44,   44,
+       44,   44,   44,   44,   44,   44,    0,   38,    0,   37,
+       37,   37,    0,    0,    0,   37,   37,   37,   37,   37,
+       37,   37,   37,   37,   37,   37,   37,   37,   39,   39,
 
-       38,   38,   38,   38,   38,   38,   43,    0,    0,    0,
-       43,   43,   43,   34,   34,   34,    0,    0,   36,   36,
-       36,   36,   36,   36,   36,    0,    0,    0,    0,    0,
-       36,   36,   36,   36,   36,   36,   36,   36,   36,   36,
-       36,   36,   36,   36,   38,   38,    0,   24,   38,   38,
-       38,   38,    0,   23,    0,   26,   43,    0,    0,    0,
-       43,   43,   43,   43,   34,   34,   34,   34,    0,   36,
-        0,   36,   36,   36,   36,   36,   36,   36,   36,   36,
-       36,   36,    0,    0,    0,   36,   36,   36,   36,   36,
-       36,   36,   36,   36,   36,   36,   36,   36,   38,   38,
+       39,   39,   39,   39,   39,   39,   44,    0,    0,    0,
+       44,   44,   44,   35,   35,   35,    0,    0,   37,   37,
+       37,   37,   37,   37,   37,    0,    0,    0,    0,    0,
+       37,   37,   37,   37,   37,   37,   37,   37,   37,   37,
+       37,   37,   37,   37,   39,   39,    0,   24,   39,   39,
+       39,   39,    0,   23,    0,   26,   44,    0,    0,    0,
+       44,   44,   44,   44,   35,   35,   35,   35,    0,   37,
+        0,   37,   37,   37,   37,   37,   37,   37,   37,   37,
+       37,   37,    0,    0,    0,   37,   37,   37,   37,   37,
+       37,   37,   37,   37,   37,   37,   37,   37,   39,   39,
 
-       38,   38,   38,   38,   40,    0,    0,    0,   43,   20,
-       39,   43,   35,   35,   35,   36,    0,    0,    0,   36,
-       36,   36,   36,   36,   36,   36,   36,   36,   36,   36,
-       36,   36,    0,    0,    0,    0,    0,   36,   36,   36,
-       36,   36,   36,   36,   36,   38,   38,   38,   38,    0,
-       22,    0,   27,    0,   20,    0,    0,   43,    0,   43,
-       43,   43,   35,   35,   35,   35,   35,    0,    0,    0,
-        0,    0,   36,   36,   36,   36,   36,   36,   36,   36,
-       36,   36,   36,   36,   36,   36,   36,   36,   36,   36,
-       36,   36,    0,   30,   38,   38,   38,    0,    0,    0,
+       39,   39,   39,   39,   41,    0,    0,    0,   44,   20,
+       40,   44,   36,   36,   36,   37,    0,    0,    0,   37,
+       37,   37,   37,   37,   37,   37,   37,   37,   37,   37,
+       37,   37,    0,    0,    0,    0,    0,   37,   37,   37,
+       37,   37,   37,   37,   37,   39,   39,   39,   39,    0,
+       22,    0,   27,    0,   20,    0,    0,   44,    0,   44,
+       44,   44,   36,   36,   36,   36,   36,    0,    0,    0,
+        0,    0,   37,   37,   37,   37,   37,   37,   37,   37,
+       37,   37,   37,   37,   37,   37,   37,   37,   37,   37,
+       37,   37,    0,   30,   39,   39,   39,    0,    0,    0,
 
-       21,   20,    0,    0,    0,    0,    0,   20,    0,   43,
-       43,   43,   35,   35,    0,    0,    0,   36,   36,   36,
-       36,   36,   36,   36,   36,   36,   36,   36,   36,   36,
-       36,   36,   36,   36,   36,    0,   28,   38,   38,   21,
-        0,   18,    0,    0,   20,   43,   43,   43,   43,   43,
-        0,    0,    0,    0,    0,   36,   36,   36,   36,   36,
-       36,   36,   36,    0,   31,   38,    0,   43,   43,   43,
-       36,   36,   36,   36,   36,   36,    0,   29,    0,   43,
-       43,   43,   43,   43,   36,   36,   36,   36,   36,    0,
-       19,   34,   34,   34,   34,   34,   34,    0
+       21,   20,    0,    0,    0,    0,    0,   20,    0,   44,
+       44,   44,   36,   36,    0,    0,    0,   37,   37,   37,
+       37,   37,   37,   37,   37,   37,   37,   37,   37,   37,
+       37,   37,   37,   37,   37,    0,   28,   39,   39,   21,
+        0,   18,    0,    0,   20,   44,   44,   44,   44,   44,
+        0,    0,    0,    0,    0,   37,   37,   37,   37,   37,
+       37,   37,   37,    0,   31,   39,    0,   44,   44,   44,
+       37,   37,   37,   37,   37,   37,    0,   29,    0,   44,
+       44,   44,   44,   44,   37,   37,   37,   37,   37,    0,
+       19,   35,   35,   35,   35,   35,   35,    0
 
     } ;
 
@@ -1850,9 +1850,19 @@ YY_RULE_SETUP
 			    if (prev_state == INITIAL) {
 				switch (yylval.string[0]) {
 				case '%':
+				    if (yylval.string[1] == '\0' ||
+					(yylval.string[1] == ':' &&
+					yylval.string[2] == '\0')) {
+					LEXTRACE("ERROR "); /* empty group */
+					return ERROR;
+				    }
 				    LEXTRACE("USERGROUP ");
 				    return USERGROUP;
 				case '+':
+				    if (yylval.string[1] == '\0') {
+					LEXTRACE("ERROR "); /* empty netgroup */
+					return ERROR;
+				    }
 				    LEXTRACE("NETGROUP ");
 				    return NETGROUP;
 				}
@@ -1863,7 +1873,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 202 "toke.l"
+#line 212 "toke.l"
 {
 			    LEXTRACE("BACKSLASH ");
 			    if (!append(yytext, yyleng))
@@ -1872,7 +1882,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 208 "toke.l"
+#line 218 "toke.l"
 {
 			    LEXTRACE("STRBODY ");
 			    if (!append(yytext, yyleng))
@@ -1883,7 +1893,7 @@ YY_RULE_SETUP
 
 case 14:
 YY_RULE_SETUP
-#line 216 "toke.l"
+#line 226 "toke.l"
 {
 			    /* quoted fnmatch glob char, pass verbatim */
 			    LEXTRACE("QUOTEDCHAR ");
@@ -1894,7 +1904,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 224 "toke.l"
+#line 234 "toke.l"
 {
 			    /* quoted sudoers special char, strip backslash */
 			    LEXTRACE("QUOTEDCHAR ");
@@ -1905,7 +1915,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 232 "toke.l"
+#line 242 "toke.l"
 {
 			    BEGIN INITIAL;
 			    yyless(0);
@@ -1914,7 +1924,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 238 "toke.l"
+#line 248 "toke.l"
 {
 			    LEXTRACE("ARG ");
 			    if (!fill_args(yytext, yyleng, sawspace))
@@ -1925,7 +1935,7 @@ YY_RULE_SETUP
 
 case 18:
 YY_RULE_SETUP
-#line 246 "toke.l"
+#line 256 "toke.l"
 {
 			    char *path;
 
@@ -1946,7 +1956,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 264 "toke.l"
+#line 274 "toke.l"
 {
 			    char *path;
 
@@ -1970,7 +1980,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 285 "toke.l"
+#line 295 "toke.l"
 {
 			    char deftype;
 			    int n;
@@ -2013,7 +2023,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 325 "toke.l"
+#line 335 "toke.l"
 {
 			    int n;
 
@@ -2042,7 +2052,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 351 "toke.l"
+#line 361 "toke.l"
 {
 				/* cmnd does not require passwd for this user */
 			    	LEXTRACE("NOPASSWD ");
@@ -2051,7 +2061,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 357 "toke.l"
+#line 367 "toke.l"
 {
 				/* cmnd requires passwd for this user */
 			    	LEXTRACE("PASSWD ");
@@ -2060,7 +2070,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 363 "toke.l"
+#line 373 "toke.l"
 {
 			    	LEXTRACE("NOEXEC ");
 			    	return NOEXEC;
@@ -2068,7 +2078,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 368 "toke.l"
+#line 378 "toke.l"
 {
 			    	LEXTRACE("EXEC ");
 			    	return EXEC;
@@ -2076,7 +2086,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 373 "toke.l"
+#line 383 "toke.l"
 {
 			    	LEXTRACE("SETENV ");
 			    	return SETENV;
@@ -2084,7 +2094,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 378 "toke.l"
+#line 388 "toke.l"
 {
 			    	LEXTRACE("NOSETENV ");
 			    	return NOSETENV;
@@ -2092,7 +2102,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 383 "toke.l"
+#line 393 "toke.l"
 {
 			    	LEXTRACE("LOG_OUTPUT ");
 			    	return LOG_OUTPUT;
@@ -2100,7 +2110,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 388 "toke.l"
+#line 398 "toke.l"
 {
 			    	LEXTRACE("NOLOG_OUTPUT ");
 			    	return NOLOG_OUTPUT;
@@ -2108,7 +2118,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 393 "toke.l"
+#line 403 "toke.l"
 {
 			    	LEXTRACE("LOG_INPUT ");
 			    	return LOG_INPUT;
@@ -2116,7 +2126,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 398 "toke.l"
+#line 408 "toke.l"
 {
 			    	LEXTRACE("NOLOG_INPUT ");
 			    	return NOLOG_INPUT;
@@ -2124,7 +2134,16 @@ YY_RULE_SETUP
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 403 "toke.l"
+#line 413 "toke.l"
+{
+			    /* empty group or netgroup */
+			    LEXTRACE("ERROR ");
+			    return ERROR;
+			}
+	YY_BREAK
+case 33:
+YY_RULE_SETUP
+#line 419 "toke.l"
 {
 			    /* netgroup */
 			    if (!fill(yytext, yyleng))
@@ -2133,9 +2152,9 @@ YY_RULE_SETUP
 			    return NETGROUP;
 			}
 	YY_BREAK
-case 33:
+case 34:
 YY_RULE_SETUP
-#line 411 "toke.l"
+#line 427 "toke.l"
 {
 			    /* group */
 			    if (!fill(yytext, yyleng))
@@ -2144,19 +2163,9 @@ YY_RULE_SETUP
 			    return USERGROUP;
 			}
 	YY_BREAK
-case 34:
-YY_RULE_SETUP
-#line 419 "toke.l"
-{
-			    if (!fill(yytext, yyleng))
-				yyterminate();
-			    LEXTRACE("NTWKADDR ");
-			    return NTWKADDR;
-			}
-	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 426 "toke.l"
+#line 435 "toke.l"
 {
 			    if (!fill(yytext, yyleng))
 				yyterminate();
@@ -2166,12 +2175,8 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 433 "toke.l"
+#line 442 "toke.l"
 {
-			    if (!ipv6_valid(yytext)) {
-				LEXTRACE("ERROR ");
-				return ERROR;
-			    }
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
@@ -2180,7 +2185,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 444 "toke.l"
+#line 449 "toke.l"
 {
 			    if (!ipv6_valid(yytext)) {
 				LEXTRACE("ERROR ");
@@ -2194,7 +2199,21 @@ YY_RULE_SETUP
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 455 "toke.l"
+#line 460 "toke.l"
+{
+			    if (!ipv6_valid(yytext)) {
+				LEXTRACE("ERROR ");
+				return ERROR;
+			    }
+			    if (!fill(yytext, yyleng))
+				yyterminate();
+			    LEXTRACE("NTWKADDR ");
+			    return NTWKADDR;
+			}
+	YY_BREAK
+case 39:
+YY_RULE_SETUP
+#line 471 "toke.l"
 {
 			    if (strcmp(yytext, "ALL") == 0) {
 				LEXTRACE("ALL ");
@@ -2217,9 +2236,9 @@ YY_RULE_SETUP
 			    return ALIAS;
 			}
 	YY_BREAK
-case 39:
+case 40:
 YY_RULE_SETUP
-#line 477 "toke.l"
+#line 493 "toke.l"
 {
 			    /* no command args allowed for Defaults!/path */
 			    if (!fill_cmnd(yytext, yyleng))
@@ -2228,9 +2247,9 @@ YY_RULE_SETUP
 			    return COMMAND;
 			}
 	YY_BREAK
-case 40:
+case 41:
 YY_RULE_SETUP
-#line 485 "toke.l"
+#line 501 "toke.l"
 {
 			    BEGIN GOTCMND;
 			    LEXTRACE("COMMAND ");
@@ -2238,9 +2257,9 @@ YY_RULE_SETUP
 				yyterminate();
 			}			/* sudo -e */
 	YY_BREAK
-case 41:
+case 42:
 YY_RULE_SETUP
-#line 492 "toke.l"
+#line 508 "toke.l"
 {
 			    /* directories can't have args... */
 			    if (yytext[yyleng - 1] == '/') {
@@ -2256,9 +2275,9 @@ YY_RULE_SETUP
 			    }
 			}			/* a pathname */
 	YY_BREAK
-case 42:
+case 43:
 YY_RULE_SETUP
-#line 507 "toke.l"
+#line 523 "toke.l"
 {
 			    LEXTRACE("BEGINSTR ");
 			    yylval.string = NULL;
@@ -2266,9 +2285,9 @@ YY_RULE_SETUP
 			    BEGIN INSTR;
 			}
 	YY_BREAK
-case 43:
+case 44:
 YY_RULE_SETUP
-#line 514 "toke.l"
+#line 530 "toke.l"
 {
 			    /* a word */
 			    if (!fill(yytext, yyleng))
@@ -2277,57 +2296,57 @@ YY_RULE_SETUP
 			    return WORD;
 			}
 	YY_BREAK
-case 44:
+case 45:
 YY_RULE_SETUP
-#line 522 "toke.l"
+#line 538 "toke.l"
 {
 			    LEXTRACE("( ");
 			    return '(';
 			}
 	YY_BREAK
-case 45:
+case 46:
 YY_RULE_SETUP
-#line 527 "toke.l"
+#line 543 "toke.l"
 {
 			    LEXTRACE(") ");
 			    return ')';
 			}
 	YY_BREAK
-case 46:
+case 47:
 YY_RULE_SETUP
-#line 532 "toke.l"
+#line 548 "toke.l"
 {
 			    LEXTRACE(", ");
 			    return ',';
 			}			/* return ',' */
 	YY_BREAK
-case 47:
+case 48:
 YY_RULE_SETUP
-#line 537 "toke.l"
+#line 553 "toke.l"
 {
 			    LEXTRACE("= ");
 			    return '=';
 			}			/* return '=' */
 	YY_BREAK
-case 48:
+case 49:
 YY_RULE_SETUP
-#line 542 "toke.l"
+#line 558 "toke.l"
 {
 			    LEXTRACE(": ");
 			    return ':';
 			}			/* return ':' */
 	YY_BREAK
-case 49:
+case 50:
 YY_RULE_SETUP
-#line 547 "toke.l"
+#line 563 "toke.l"
 {
 			    if (yyleng % 2 == 1)
 				return '!';	/* return '!' */
 			}
 	YY_BREAK
-case 50:
+case 51:
 YY_RULE_SETUP
-#line 552 "toke.l"
+#line 568 "toke.l"
 {
 			    BEGIN INITIAL;
 			    ++sudolineno;
@@ -2336,25 +2355,25 @@ YY_RULE_SETUP
 			    return COMMENT;
 			}			/* return newline */
 	YY_BREAK
-case 51:
+case 52:
 YY_RULE_SETUP
-#line 560 "toke.l"
+#line 576 "toke.l"
 {			/* throw away space/tabs */
 			    sawspace = TRUE;	/* but remember for fill_args */
 			}
 	YY_BREAK
-case 52:
+case 53:
 YY_RULE_SETUP
-#line 564 "toke.l"
+#line 580 "toke.l"
 {
 			    sawspace = TRUE;	/* remember for fill_args */
 			    ++sudolineno;
 			    continued = TRUE;
 			}			/* throw away EOL after \ */
 	YY_BREAK
-case 53:
+case 54:
 YY_RULE_SETUP
-#line 570 "toke.l"
+#line 586 "toke.l"
 {
 			    BEGIN INITIAL;
 			    ++sudolineno;
@@ -2363,9 +2382,9 @@ YY_RULE_SETUP
 			    return COMMENT;
 			}			/* comment, not uid/gid */
 	YY_BREAK
-case 54:
+case 55:
 YY_RULE_SETUP
-#line 578 "toke.l"
+#line 594 "toke.l"
 {
 			    LEXTRACE("ERROR ");
 			    return ERROR;
@@ -2377,7 +2396,7 @@ case YY_STATE_EOF(GOTCMND):
 case YY_STATE_EOF(STARTDEFS):
 case YY_STATE_EOF(INDEFS):
 case YY_STATE_EOF(INSTR):
-#line 583 "toke.l"
+#line 599 "toke.l"
 {
 			    if (YY_START != INITIAL) {
 			    	BEGIN INITIAL;
@@ -2388,12 +2407,12 @@ case YY_STATE_EOF(INSTR):
 				yyterminate();
 			}
 	YY_BREAK
-case 55:
+case 56:
 YY_RULE_SETUP
-#line 593 "toke.l"
+#line 609 "toke.l"
 ECHO;
 	YY_BREAK
-#line 2397 "lex.yy.c"
+#line 2416 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -3284,7 +3303,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 593 "toke.l"
+#line 609 "toke.l"
 
 struct path_list {
     char *path;
