@@ -3358,6 +3358,7 @@ switch_dir(stack, dirpath)
 	}
 	if (stat(path, &sb) != 0 || !S_ISREG(sb.st_mode)) {
 	    efree(path);
+	    path = NULL;
 	    continue;
 	}
 	pl = malloc(sizeof(*pl));
