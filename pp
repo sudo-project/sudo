@@ -1,6 +1,6 @@
 #!/bin/sh
 # (c) 2011 Quest Software, Inc. All rights reserved
-pp_revision="303"
+pp_revision="305"
  # Copyright 2010 Quest Software, Inc.  All rights reserved.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -5269,28 +5269,29 @@ pp_rpm_detect_arch () {
     rm $pp_wrkdir/dummy.spec
 
     #-- Ask the kernel what machine architecture is in use
-    local arch=`uname -p`
-    if [ "$arch" = "unknown" ]; then
-	arch=`uname -m`
-    fi
-
-    case "$arch" in
-	i?86)	pp_rpm_arch_std=i386;;
-	x86_64)	pp_rpm_arch_std=x86_64;;
-	ppc)	pp_rpm_arch_std=ppc;;
-	ppc64)	pp_rpm_arch_std=ppc64;;
-	ia64)	pp_rpm_arch_std=ia64;;
-	s390)	pp_rpm_arch_std=s390;;
-	s390x)	pp_rpm_arch_std=s390x;;
-	powerpc)
+    local arch
+    for arch in "`uname -m`" "`uname -p`"; do
+	case "$arch" in
+	    i?86)
+		pp_rpm_arch_std=i386
+		break
+		;;
+	    x86_64|ppc|ppc64|ia64|s390|s390x)
+		pp_rpm_arch_std="$arch"
+		break
+		;;
+	    powerpc)
 		# Probably AIX
 		case "`/usr/sbin/lsattr -El proc0 -a type -F value`" in
 		    PowerPC_POWER*)	pp_rpm_arch_std=ppc64;;
 		    *)			pp_rpm_arch_std=ppc;;
 		esac
+		break
 		;;
-	*)	pp_rpm_arch_std=unknown;;
-    esac
+	    *)	pp_rpm_arch_std=unknown
+		;;
+	esac
+    done
 
     #-- Later on, when files are processed, we use 'file' to determine
     #   what platform ABIs are used. This is used when pp_rpm_arch == auto
@@ -5332,6 +5333,10 @@ pp_rpm_detect_distro () {
           /^S[uU]SE LINUX Enterprise Server [0-9]/ { print "sles" $5; exit; }
           /^SuSE SLES-[0-9]/  { print "sles" substr($2,6); exit; }
        ' /etc/SuSE-release`
+    elif test -f /etc/pld-release; then
+       pp_rpm_distro=`awk '
+          /^[^ ]* PLD Linux/ { print "pld" $1; exit; }
+       ' /etc/pld-release`
     elif test X"`uname -s 2>/dev/null`" = X"AIX"; then
 	local r v
 	r=`uname -r`
