@@ -180,6 +180,11 @@ DEFVAR			[a-z_]+
     \"			{
 			    LEXTRACE("ENDSTR ");
 			    BEGIN prev_state;
+
+			    if (yylval.string == NULL) {
+				LEXTRACE("ERROR "); /* empty string */
+				return ERROR;
+			    }
 			    if (prev_state == INITIAL) {
 				switch (yylval.string[0]) {
 				case '%':
@@ -277,7 +282,7 @@ DEFVAR			[a-z_]+
 				yyterminate();
 			}
 
-<INITIAL>^[[:blank:]]*Defaults([:@>\!][[:blank:]]*\!*\"?{WORD})? {
+<INITIAL>^[[:blank:]]*Defaults([:@>\!][[:blank:]]*\!*\"?({ID}|{WORD}))? {
 			    char deftype;
 			    int n;
 
@@ -404,7 +409,7 @@ NOLOG_INPUT[[:blank:]]*:	{
 			}
 
 \%:?{WORD}		{
-			    /* UN*X group */
+			    /* group */
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("USERGROUP ");
