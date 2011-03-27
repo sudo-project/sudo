@@ -1,4 +1,3 @@
-#include <config.h>
 #include <stdlib.h>
 #include <string.h>
 #define YYBYACC 1
@@ -821,10 +820,9 @@ init_parser(path, quiet)
     parse_error = FALSE;
     errorlineno = -1;
     errorfile = NULL;
-    sudolineno = 1;
     verbose = !quiet;
 }
-#line 775 "y.tab.c"
+#line 774 "y.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1593,7 +1591,7 @@ case 96:
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
-#line 1544 "y.tab.c"
+#line 1543 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
