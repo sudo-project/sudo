@@ -560,11 +560,15 @@ sudoedit		{
 			}			/* return ':' */
 
 <*>!+			{
-			    if (yyleng % 2 == 1)
+			    if (yyleng & 1)
 				return '!';	/* return '!' */
 			}
 
 <*>\n			{
+			    if (YY_START == INSTR) {
+				LEXTRACE("ERROR ");
+				return ERROR;	/* line break in string */
+			    }
 			    BEGIN INITIAL;
 			    ++sudolineno;
 			    continued = FALSE;
