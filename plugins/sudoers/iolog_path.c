@@ -197,19 +197,24 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 				esc->name[len] == '\0')
 				break;
 			}
-			for (;;) {
-			    len = esc->copy_fn(dst, psize - (dst - path));
-			    if (len < psize - (dst - path))
-				break;
-			    path = erealloc3(path, 2, psize);
-			    psize *= 2;
-			    dst = path + plen;
+			if (esc->name != NULL) {
+			    for (;;) {
+				len = esc->copy_fn(dst, psize - (dst - path));
+				if (len < psize - (dst - path))
+				    break;
+				path = erealloc3(path, 2, psize);
+				psize *= 2;
+				dst = path + plen;
+			    }
+			    dst += len;
+			    plen += len;
+			    src = ep;
+			    continue;
 			}
-			dst += len;
-			plen += len;
-			src = ep;
-			continue;
 		    }
+		} else if (src[1] == '%') {
+		    /* Collapse %% -> % */
+		    src++;
 		} else {
 		    /* May need strftime() */
 		    strfit = 1;
