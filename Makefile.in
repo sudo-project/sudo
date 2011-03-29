@@ -535,7 +535,13 @@ ChangeLog:
 	    fi; \
 	fi
 
-install: install-dirs install-binaries @INSTALL_NOEXEC@ install-sudoers install-doc
+pre-install:
+	@if test -r $(DESTDIR)$(sudoersdir)/sudoers; then \
+	    echo "Checking existing sudoers file for syntax errors."; \
+	    ./visudo -c -f $(DESTDIR)$(sudoersdir)/sudoers; \
+	fi
+
+install: pre-install install-dirs install-binaries @INSTALL_NOEXEC@ install-sudoers install-doc
 
 install-dirs:
 	$(SHELL) $(srcdir)/mkinstalldirs $(DESTDIR)$(sudodir) \
