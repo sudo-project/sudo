@@ -142,6 +142,8 @@ HISTORY: $(srcdir)/history.pod
 LICENSE: $(srcdir)/license.pod
 	pod2text -l -i0 $(srcdir)/license.pod | sed '1,2d' > $@
 
+pre-install:
+
 install: install-dirs install-doc
 
 install-dirs:

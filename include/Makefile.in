@@ -47,6 +47,8 @@ Makefile: $(srcdir)/Makefile.in
 
 .SUFFIXES: .h
 
+pre-install:
+
 install: install-dirs install-includes
 
 install-dirs:

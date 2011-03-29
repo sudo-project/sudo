@@ -78,6 +78,8 @@ term.lo: $(srcdir)/term.c $(incdir)/missing.h $(top_builddir)/config.h
 zero_bytes.lo: $(srcdir)/zero_bytes.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/zero_bytes.c
 
+pre-install:
+
 install:
 
 install-dirs:

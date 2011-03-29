@@ -141,6 +141,8 @@ ttysize.o: $(srcdir)/ttysize.c $(incdir)/missing.h $(top_builddir)/config.h
 utmp.o: $(srcdir)/utmp.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/utmp.c
 
+pre-install:
+
 install: install-dirs install-binaries @INSTALL_NOEXEC@
 
 install-dirs:
