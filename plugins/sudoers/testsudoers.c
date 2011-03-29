@@ -129,7 +129,8 @@ main(int argc, char *argv[])
     struct userspec *us;
     char *p, *grfile, *pwfile, *runas_group, *runas_user;
     char hbuf[MAXHOSTNAMELEN + 1];
-    int ch, dflag, rval, matched;
+    int match, host_match, runas_match, cmnd_match;
+    int ch, dflag;
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     malloc_options = "AFGJPR";
@@ -278,9 +279,9 @@ main(int argc, char *argv[])
 	    exit(parse_error ? 1 : 0);
     }
 
-    /* This loop must match the one in sudoers_lookup() */
+    /* This loop must match the one in sudo_file_lookup() */
     printf("\nEntries for user %s:\n", user_name);
-    matched = UNSPEC;
+    match = UNSPEC;
     tq_foreach_rev(&userspecs, us) {
 	if (userlist_matches(sudo_user.pw, &us->users) != ALLOW)
 	    continue;
@@ -288,25 +289,27 @@ main(int argc, char *argv[])
 	    putchar('\n');
 	    print_privilege(priv); /* XXX */
 	    putchar('\n');
-	    if (hostlist_matches(&priv->hostlist) == ALLOW) {
+	    host_match = hostlist_matches(&priv->hostlist);
+	    if (host_match == ALLOW) {
 		puts("\thost  matched");
 		tq_foreach_rev(&priv->cmndlist, cs) {
-		    if (runaslist_matches(&cs->runasuserlist,
-			&cs->runasgrouplist) == ALLOW) {
+		    runas_match = runaslist_matches(&cs->runasuserlist,
+			&cs->runasgrouplist);
+		    if (runas_match == ALLOW) {
 			puts("\trunas matched");
-			rval = cmnd_matches(cs->cmnd);
-			if (rval != UNSPEC)
-			    matched = rval;
-			printf("\tcmnd  %s\n", rval == ALLOW ? "allowed" :
-			    rval == DENY ? "denied" : "unmatched");
+			cmnd_match = cmnd_matches(cs->cmnd);
+			if (cmnd_match != UNSPEC)
+			    match = cmnd_match;
+			printf("\tcmnd  %s\n", match == ALLOW ? "allowed" :
+			    match == DENY ? "denied" : "unmatched");
 		    }
 		}
 	    } else
 		puts("\thost  unmatched");
 	}
     }
-    printf("\nCommand %s\n", matched == ALLOW ? "allowed" :
-	matched == DENY ? "denied" : "unmatched");
+    printf("\nCommand %s\n", match == ALLOW ? "allowed" :
+	match == DENY ? "denied" : "unmatched");
 
     /*
      * Exit codes:
@@ -317,7 +320,7 @@ main(int argc, char *argv[])
      */
     if (parse_error)
 	exit(1);
-    exit(matched == ALLOW ? 0 : matched + 3);
+    exit(match == ALLOW ? 0 : match + 3);
 }
 
 void
@@ -506,13 +509,26 @@ print_privilege(struct privilege *priv)
 	tq_foreach_fwd(&p->cmndlist, cs) {
 	    if (cs != tq_first(&p->cmndlist))
 		fputs(", ", stdout);
-	    /* XXX - runasgrouplist too */
-	    if (!tq_empty(&cs->runasuserlist)) {
+	    if (!tq_empty(&cs->runasuserlist) || !tq_empty(&cs->runasgrouplist)) {
 		fputs("(", stdout);
-		tq_foreach_fwd(&cs->runasuserlist, m) {
-		    if (m != tq_first(&cs->runasuserlist))
-			fputs(", ", stdout);
-		    print_member(m);
+		if (!tq_empty(&cs->runasuserlist)) {
+		    tq_foreach_fwd(&cs->runasuserlist, m) {
+			if (m != tq_first(&cs->runasuserlist))
+			    fputs(", ", stdout);
+			print_member(m);
+		    }  
+		} else if (tq_empty(&cs->runasgrouplist)) {
+		    fputs(def_runas_default, stdout);
+		} else {
+		    fputs(sudo_user.pw->pw_name, stdout);
+		}
+		if (!tq_empty(&cs->runasgrouplist)) {
+		    fputs(" : ", stdout);
+		    tq_foreach_fwd(&cs->runasgrouplist, m) {
+			if (m != tq_first(&cs->runasgrouplist))
+			    fputs(", ", stdout);
+			print_member(m);
+		    }
 		}
 		fputs(") ", stdout);
 	    }
