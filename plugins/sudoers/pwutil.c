@@ -652,7 +652,9 @@ user_in_group(struct passwd *pw, const char *group)
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb(pw->pw_name);
 #endif
-    grp = sudo_getgrnam(group);
+    /* A group name that begins with a '#' may be a gid. */
+    if ((grp = sudo_getgrnam(group)) == NULL && *group == '#')
+	grp = sudo_getgrgid(atoi(group + 1));
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
