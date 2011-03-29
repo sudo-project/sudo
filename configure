@@ -15064,19 +15064,6 @@ _ACEOF
 
 
 fi
-ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_exit" "ac_cv_member_struct_utmpx_ut_exit" "
-	#include <sys/types.h>
-	#include <utmpx.h>
-
-"
-if test "x$ac_cv_member_struct_utmpx_ut_exit" = x""yes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_UTMPX_UT_EXIT 1
-_ACEOF
-
-
-fi
 ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_pid" "ac_cv_member_struct_utmpx_ut_pid" "
 	#include <sys/types.h>
 	#include <utmpx.h>
@@ -15117,6 +15104,39 @@ _ACEOF
 
 fi
 
+                ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_exit.__e_termination" "ac_cv_member_struct_utmpx_ut_exit___e_termination" "
+	#include <sys/types.h>
+	#include <utmpx.h>
+
+"
+if test "x$ac_cv_member_struct_utmpx_ut_exit___e_termination" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_UTMPX_UT_EXIT___E_TERMINATION 1
+_ACEOF
+
+$as_echo "#define HAVE_STRUCT_UTMPX_UT_EXIT 1" >>confdefs.h
+
+else
+
+	ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_exit.e_termination" "ac_cv_member_struct_utmpx_ut_exit_e_termination" "
+	    #include <sys/types.h>
+	    #include <utmpx.h>
+
+"
+if test "x$ac_cv_member_struct_utmpx_ut_exit_e_termination" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_UTMPX_UT_EXIT_E_TERMINATION 1
+_ACEOF
+
+$as_echo "#define HAVE_STRUCT_UTMPX_UT_EXIT 1" >>confdefs.h
+
+fi
+
+
+fi
+
 else
     ac_fn_c_check_member "$LINENO" "struct utmp" "ut_id" "ac_cv_member_struct_utmp_ut_id" "
 	#include <sys/types.h>
@@ -15127,19 +15147,6 @@ if test "x$ac_cv_member_struct_utmp_ut_id" = x""yes; then :
 
 cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_UTMP_UT_ID 1
-_ACEOF
-
-
-fi
-ac_fn_c_check_member "$LINENO" "struct utmp" "ut_exit" "ac_cv_member_struct_utmp_ut_exit" "
-	#include <sys/types.h>
-	#include <utmp.h>
-
-"
-if test "x$ac_cv_member_struct_utmp_ut_exit" = x""yes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_UTMP_UT_EXIT 1
 _ACEOF
 
 
@@ -15193,6 +15200,39 @@ if test "x$ac_cv_member_struct_utmp_ut_user" = x""yes; then :
 cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_UTMP_UT_USER 1
 _ACEOF
+
+
+fi
+
+                ac_fn_c_check_member "$LINENO" "struct utmp" "ut_exit.__e_termination" "ac_cv_member_struct_utmp_ut_exit___e_termination" "
+	#include <sys/types.h>
+	#include <utmp.h>
+
+"
+if test "x$ac_cv_member_struct_utmp_ut_exit___e_termination" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_UTMP_UT_EXIT___E_TERMINATION 1
+_ACEOF
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_EXIT 1" >>confdefs.h
+
+else
+
+	ac_fn_c_check_member "$LINENO" "struct utmp" "ut_exit.e_termination" "ac_cv_member_struct_utmp_ut_exit_e_termination" "
+	    #include <sys/types.h>
+	    #include <utmp.h>
+
+"
+if test "x$ac_cv_member_struct_utmp_ut_exit_e_termination" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_UTMP_UT_EXIT_E_TERMINATION 1
+_ACEOF
+
+$as_echo "#define HAVE_STRUCT_UTMP_UT_EXIT 1" >>confdefs.h
+
+fi
 
 
 fi
@@ -21240,6 +21280,8 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+
+
 
 
 

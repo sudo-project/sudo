@@ -77,6 +77,14 @@ typedef struct utmp sudo_utmp_t;
 # endif
 #endif
 
+/* HP-UX has __e_termination and __e_exit, others lack the __ */
+#if defined(HAVE_STRUCT_UTMPX_UT_EXIT_E_TERMINATION) || defined(HAVE_STRUCT_UTMP_UT_EXIT_E_TERMINATION)
+# undef  __e_termination
+# define __e_termination	e_termination
+# undef  __e_exit
+# define __e_exit		e_exit
+#endif
+
 #if defined(HAVE_GETUTXID) || defined(HAVE_GETUTID)
 /*
  * Create ut_id from the new ut_line and the old ut_id.
@@ -208,8 +216,8 @@ utmp_logout(const char *line, int status)
 	ut->ut_type = DEAD_PROCESS;
 # endif
 # if defined(HAVE_STRUCT_UTMPX_UT_EXIT) || defined(HAVE_STRUCT_UTMP_UT_EXIT)
-	ut->ut_exit.e_exit = WEXITSTATUS(status);
-	ut->ut_exit.e_termination = WIFEXITED(status) ? WEXITSTATUS(status) : 0;
+	ut->ut_exit.__e_exit = WEXITSTATUS(status);
+	ut->ut_exit.__e_termination = WIFEXITED(status) ? WEXITSTATUS(status) : 0;
 # endif
 	utmp_settime(ut);
 	if (pututxline(ut) != NULL)

@@ -1967,12 +1967,36 @@ dnl
 dnl Check for utmp/utmpx struct members.
 dnl
 if test $ac_cv_header_utmpx_h = "yes"; then
-    AC_CHECK_MEMBERS([struct utmpx.ut_id, struct utmpx.ut_exit, struct utmpx.ut_pid, struct utmpx.ut_tv, struct utmpx.ut_type], [], [], [
+    AC_CHECK_MEMBERS([struct utmpx.ut_id, struct utmpx.ut_pid, struct utmpx.ut_tv, struct utmpx.ut_type], [], [], [
+	#include <sys/types.h>
+	#include <utmpx.h>
+    ])
+    dnl
+    dnl Check for ut_exit.__e_termination first, then ut_exit.e_termination
+    dnl
+    AC_CHECK_MEMBERS([struct utmpx.ut_exit.__e_termination], [AC_DEFINE(HAVE_STRUCT_UTMPX_UT_EXIT)], [
+	AC_CHECK_MEMBERS([struct utmpx.ut_exit.e_termination], [AC_DEFINE(HAVE_STRUCT_UTMPX_UT_EXIT)], [], [
+	    #include <sys/types.h>
+	    #include <utmpx.h>
+	])
+    ], [
 	#include <sys/types.h>
 	#include <utmpx.h>
     ])
 else
-    AC_CHECK_MEMBERS([struct utmp.ut_id, struct utmp.ut_exit, struct utmp.ut_pid, struct utmp.ut_tv, struct utmp.ut_type, struct utmp.ut_user], [], [], [
+    AC_CHECK_MEMBERS([struct utmp.ut_id, struct utmp.ut_pid, struct utmp.ut_tv, struct utmp.ut_type, struct utmp.ut_user], [], [], [
+	#include <sys/types.h>
+	#include <utmp.h>
+    ])
+    dnl
+    dnl Check for ut_exit.__e_termination first, then ut_exit.e_termination
+    dnl
+    AC_CHECK_MEMBERS([struct utmp.ut_exit.__e_termination], [AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT)], [
+	AC_CHECK_MEMBERS([struct utmp.ut_exit.e_termination], [AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT)], [], [
+	    #include <sys/types.h>
+	    #include <utmp.h>
+	])
+    ], [
 	#include <sys/types.h>
 	#include <utmp.h>
     ])
@@ -3010,6 +3034,8 @@ AH_TEMPLATE(USE_STOW, [Define to 1 if you use GNU stow packaging.])
 AH_TEMPLATE(WITHOUT_PASSWD, [Define to avoid using the passwd/shadow file for authentication.])
 AH_TEMPLATE(sig_atomic_t, [Define to `int' if <signal.h> does not define.])
 AH_TEMPLATE(__signed, [Define to `signed' or nothing if compiler does not support a signed type qualifier.])
+AH_TEMPLATE(HAVE_STRUCT_UTMP_UT_EXIT, [Define to 1 if `ut_exit' is a member of `struct utmp'.])
+AH_TEMPLATE(HAVE_STRUCT_UTMPX_UT_EXIT, [Define to 1 if `ut_exit' is a member of `struct utmpx'.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in
