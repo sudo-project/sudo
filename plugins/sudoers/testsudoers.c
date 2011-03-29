@@ -245,10 +245,12 @@ main(int argc, char *argv[])
     /* Allocate space for data structures in the parser. */
     init_parser("sudoers", 0);
 
-    if (yyparse() != 0 || parse_error)
+    if (yyparse() != 0 || parse_error) {
+	parse_error = TRUE;
 	(void) fputs("Does not parse", stdout);
-    else
+    } else {
 	(void) fputs("Parses OK", stdout);
+    }
 
     if (!update_defaults(SETDEF_ALL))
 	(void) fputs(" (problem with defaults entries)", stdout);
@@ -273,7 +275,7 @@ main(int argc, char *argv[])
 	(void) putchar('\n');
 	dump_sudoers();
 	if (argc < 2)
-	    exit(0);
+	    exit(parse_error ? 1 : 0);
     }
 
     /* This loop must match the one in sudoers_lookup() */
@@ -306,7 +308,16 @@ main(int argc, char *argv[])
     printf("\nCommand %s\n", matched == ALLOW ? "allowed" :
 	matched == DENY ? "denied" : "unmatched");
 
-    exit(0);
+    /*
+     * Exit codes:
+     *	0 - parsed OK and command matched.
+     *	1 - parse error
+     *	2 - command not matched
+     *	3 - command denied
+     */
+    if (parse_error)
+	exit(1);
+    exit(matched == ALLOW ? 0 : matched + 3);
 }
 
 void
