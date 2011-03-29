@@ -211,26 +211,33 @@ The definitions of what constitutes a valid I<alias> member follow.
 	       User ',' User_List
 
  User ::= '!'* user name |
-	  '!'* '#'uid |
-	  '!'* '%'group |
-	  '!'* '+'netgroup |
-	  '!'* '%:'nonunix_group |
+	  '!'* #uid |
+	  '!'* %group |
+	  '!'* %#gid |
+	  '!'* +netgroup |
+	  '!'* %:nonunix_group |
+	  '!'* %:#nonunix_gid |
 	  '!'* User_Alias
 
-A C<User_List> is made up of one or more user names, uids (prefixed
-with '#'), system groups (prefixed with '%'), netgroups (prefixed
-with '+') and C<User_Alias>es.  Each list item may be prefixed with
-zero or more '!' operators.  An odd number of '!' operators negate
-the value of the item; an even number just cancel each other out.
+A C<User_List> is made up of one or more user names, user ids
+(prefixed with '#'), system group names and ids (prefixed with '%'
+and '%#' respectively), netgroups (prefixed with '+'), non-Unix
+group names and IDs (prefixed with '%:' and '%:#' respectively) and
+C<User_Alias>es.  Each list item may be prefixed with zero or more
+'!' operators.  An odd number of '!' operators negate the value of
+the item; an even number just cancel each other out.
 
-A C<user name>, C<group>, C<netgroup> or C<nonunix_group> may
-be enclosed in double quotes to avoid the need for escaping special
-characters.  Alternately, special characters may be specified in
-escaped hex mode, e.g. \x20 for space.
+A C<user name>, C<uid>, C<group>, C<gid>, C<netgroup>, C<nonunix_group>
+or C<nonunix_gid> may be enclosed in double quotes to avoid the
+need for escaping special characters.  Alternately, special characters
+may be specified in escaped hex mode, e.g. \x20 for space.  When
+using double quotes, any prefix characters must be included inside
+the quotes.
 
-The actual C<nonunix_group> syntax depends on the underlying group
-provider plugin (see the I<group_plugin> description below).
-For instance, the QAS AD plugin supports the following formats:
+The actual C<nonunix_group> and C<nonunix_gid> syntax depends on
+the underlying group provider plugin (see the I<group_plugin>
+description below).  For instance, the QAS AD plugin supports the
+following formats:
 
 =over 4
 
@@ -257,8 +264,11 @@ characters that need to be escaped.
 		Runas_Member ',' Runas_List
 
  Runas_Member ::= '!'* user name |
-	          '!'* '#'uid |
-	          '!'* '%'group |
+	          '!'* #uid |
+	          '!'* %group |
+	          '!'* %#gid |
+	          '!'* %:nonunix_group |
+	          '!'* %:#nonunix_gid |
 	          '!'* +netgroup |
 	          '!'* Runas_Alias
 
@@ -275,7 +285,7 @@ and toor), you can use a uid instead (#0 in the example given).
  Host ::= '!'* host name |
 	  '!'* ip_addr |
 	  '!'* network(/netmask)? |
-	  '!'* '+'netgroup |
+	  '!'* +netgroup |
 	  '!'* Host_Alias
 
 A C<Host_List> is made up of one or more host names, IP addresses,
@@ -1219,6 +1229,9 @@ expanded to the base name of the command being run
 
 In addition, any escape sequences supported by the system's strftime()
 function will be expanded.
+
+To include a literal `C<%>' character, the string `C<%%>' should
+be used.
 
 Path names that end in six or more C<X>s will have the C<X>s replaced
 with a unique combination of digits and letters, similar to the
