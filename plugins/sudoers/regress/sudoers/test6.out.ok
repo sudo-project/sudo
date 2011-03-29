@@ -7,8 +7,8 @@ Defaults>#123	set_home
 
 
 #0	ALL = ALL
-#0	ALL = (#0) ALL
+#0	ALL = (#0 : #0) ALL
 #0	ALL = ALL
-#0	ALL = (#0) ALL
+#0	ALL = (#0 : #0) ALL
 %#0	ALL = ALL
 %#0	ALL = ALL
