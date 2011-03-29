@@ -496,6 +496,12 @@
 /* Define to 1 if `ut_exit' is a member of `struct utmpx'. */
 #undef HAVE_STRUCT_UTMPX_UT_EXIT
 
+/* Define to 1 if `ut_exit.e_termination' is a member of `struct utmpx'. */
+#undef HAVE_STRUCT_UTMPX_UT_EXIT_E_TERMINATION
+
+/* Define to 1 if `ut_exit.__e_termination' is a member of `struct utmpx'. */
+#undef HAVE_STRUCT_UTMPX_UT_EXIT___E_TERMINATION
+
 /* Define to 1 if `ut_id' is a member of `struct utmpx'. */
 #undef HAVE_STRUCT_UTMPX_UT_ID
 
@@ -510,6 +516,12 @@
 
 /* Define to 1 if `ut_exit' is a member of `struct utmp'. */
 #undef HAVE_STRUCT_UTMP_UT_EXIT
+
+/* Define to 1 if `ut_exit.e_termination' is a member of `struct utmp'. */
+#undef HAVE_STRUCT_UTMP_UT_EXIT_E_TERMINATION
+
+/* Define to 1 if `ut_exit.__e_termination' is a member of `struct utmp'. */
+#undef HAVE_STRUCT_UTMP_UT_EXIT___E_TERMINATION
 
 /* Define to 1 if `ut_id' is a member of `struct utmp'. */
 #undef HAVE_STRUCT_UTMP_UT_ID
