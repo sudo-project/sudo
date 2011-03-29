@@ -88,6 +88,8 @@ sample_group.lo: $(srcdir)/sample_group.c
 sample_group.la: $(OBJS)
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS) -module -export-symbols $(srcdir)/sample_group.sym -avoid-version -rpath $(plugindir)
 
+pre-install:
+
 install: install-dirs install-plugin
 
 install-dirs:

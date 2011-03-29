@@ -85,6 +85,8 @@ sample_plugin.lo: $(srcdir)/sample_plugin.c
 sample_plugin.la: $(OBJS)
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS) -module -export-symbols $(srcdir)/sample_plugin.sym -avoid-version -rpath $(plugindir)
 
+pre-install:
+
 install: install-dirs install-plugin
 
 install-dirs:

@@ -328,6 +328,12 @@ tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(SUDODEP)
 visudo.o: $(srcdir)/visudo.c $(SUDODEP) $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/visudo.c
 
+pre-install:
+	@if test -r $(DESTDIR)$(sudoersdir)/sudoers; then \
+	    echo "Checking existing sudoers file for syntax errors."; \
+	    ./visudo -c -f $(DESTDIR)$(sudoersdir)/sudoers; \
+	fi
+
 install: install-dirs install-plugin install-binaries install-sudoers install-doc
 
 install-dirs:
@@ -351,7 +357,7 @@ install-plugin: sudoers.la install-dirs
 install-sudoers: install-dirs
 	$(INSTALL) -d -O $(sudoers_uid) -G $(sudoers_gid) -M 0750 \
 	    $(DESTDIR)$(sudoersdir)/sudoers.d
-	test -f $(DESTDIR)$(sudoersdir)/sudoers || \
+	test -r $(DESTDIR)$(sudoersdir)/sudoers || \
 	    $(INSTALL) -O $(sudoers_uid) -G $(sudoers_gid) -M $(sudoers_mode) \
 		sudoers $(DESTDIR)$(sudoersdir)/sudoers
 

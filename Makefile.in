@@ -57,10 +57,13 @@ all: config.status
 check: config.status
 	for d in $(SUBDIRS) $(SAMPLES); do (cd $$d && $(MAKE) $@) || break; done
 
-install-dirs install-binaries install-includes install-plugin uninstall: config.status
+pre-install:
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) || break; done
 
-install install-doc: config.status ChangeLog
+install-dirs install-binaries install-includes install-plugin uninstall: config.status pre-install
+	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) || break; done
+
+install install-doc: config.status ChangeLog pre-install
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) || break; done
 
 autoconf:

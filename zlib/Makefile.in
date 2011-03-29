@@ -89,6 +89,8 @@ uncompr.lo: $(srcdir)/zlib.h ./zconf.h
 zutil.lo: $(srcdir)/zutil.h $(srcdir)/zlib.h ./zconf.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/zutil.c
 
+pre-install:
+
 install:
 
 install-dirs:
