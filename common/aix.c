@@ -70,10 +70,8 @@ aix_getlimit(char *user, char *lim, rlim64_t *valp)
 {
     int val;
 
-    if (getuserattr(user, lim, &val, SEC_INT) != 0 &&
-	getuserattr("default", lim, &val, SEC_INT) != 0) {
+    if (getuserattr(user, lim, &val, SEC_INT) != 0)
 	return -1;
-    }
     *valp = val;
     return 0;
 }
