@@ -1965,7 +1965,11 @@ SUDO_UID_T_LEN
 SUDO_SOCK_SA_LEN
 dnl
 dnl Check for utmp/utmpx struct members.
+dnl We need to include OSDEFS for glibc which only has __e_termination
+dnl visible when _GNU_SOURCE is *not* defined.
 dnl
+_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS $OSDEFS"
 if test $ac_cv_header_utmpx_h = "yes"; then
     AC_CHECK_MEMBERS([struct utmpx.ut_id, struct utmpx.ut_pid, struct utmpx.ut_tv, struct utmpx.ut_type], [], [], [
 	#include <sys/types.h>
@@ -2001,6 +2005,7 @@ else
 	#include <utmp.h>
     ])
 fi
+CFLAGS="$_CFLAGS"
 
 dnl
 dnl Function checks

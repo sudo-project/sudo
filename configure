@@ -15050,6 +15050,8 @@ $as_echo "#define HAVE_SA_LEN 1" >>confdefs.h
 fi
 
 
+_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS $OSDEFS"
 if test $ac_cv_header_utmpx_h = "yes"; then
     ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_id" "ac_cv_member_struct_utmpx_ut_id" "
 	#include <sys/types.h>
@@ -15238,6 +15240,7 @@ fi
 fi
 
 fi
+CFLAGS="$_CFLAGS"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking type of array argument to getgroups" >&5
 $as_echo_n "checking type of array argument to getgroups... " >&6; }
