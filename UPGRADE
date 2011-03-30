@@ -1,6 +1,35 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.7.6:
+
+    Changes in the sudoers parser could result in parse errors for
+    existing sudoers file.  These changes cause certain erroneous
+    entries to be flagged as errors where before they allowed.
+    Changes include:
+
+    Combining multiple Defaults entries with a backslash.  E.g.
+
+	Defaults set_path \
+	Defaults syslog
+
+    which should be:
+
+	Defaults set_path
+	Defaults syslog
+
+    Also, double-quoted strings with a missing end-quote are now
+    detected and result in an error.  Previously, text starting a
+    double quote and ending with a newline was ignored.  E.g.
+
+	Defaults set_path"foo
+
+    In previous versions of sudo, the `"foo' portion would have
+    been ignored.
+
+    To avoid problems, sudo 1.8.1's "make install" will not install
+    a new sudo binary if the existing sudoers file has errors.
+
 o Upgrading from a version prior to 1.7.5:
 
     Sudo 1.7.5 includes an updated LDAP schema with support for
