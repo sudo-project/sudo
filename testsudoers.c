@@ -196,7 +196,7 @@ main(argc, argv)
     }
 
     /* Fill in user_args from NewArgv. */
-    if (NewArgc > 1) {
+    if (NewArgc > 0) {
 	char *to, **from;
 	size_t size, n;
 
