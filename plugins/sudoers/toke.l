@@ -559,8 +559,10 @@ sudoedit		{
 			}			/* return ':' */
 
 <*>!+			{
-			    if (yyleng & 1)
+			    if (yyleng & 1) {
+				LEXTRACE("!");
 				return '!';	/* return '!' */
+			    }
 			}
 
 <*>\n			{
