@@ -5,6 +5,6 @@
 # This is RedHat bug Bug 667103.
 #
 
-./testsudoers -g wheel root id <<EOF
+./testsudoers -g bin root id <<EOF
 root ALL = ALL
 EOF
