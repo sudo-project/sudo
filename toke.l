@@ -303,9 +303,9 @@ DEFVAR			[a-z_]+
 			    for (n = 0; isblank((unsigned char)yytext[n]); n++)
 				continue;
 			    n += sizeof("Defaults") - 1;
-			    if ((deftype = yytext[n]) != '\0') {
-				while (isblank((unsigned char)yytext[++n]))
-				    continue;
+			    if ((deftype = yytext[n++]) != '\0') {
+				while (isblank((unsigned char)yytext[n]))
+				    n++;
 			    }
 			    BEGIN GOTDEFS;
 			    switch (deftype) {
