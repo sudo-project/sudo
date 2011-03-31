@@ -102,8 +102,6 @@ extern int (*trace_print)(const char *msg);
 /*
  * Globals
  */
-int  NewArgc;
-char **NewArgv;
 struct interface *interfaces;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
@@ -175,8 +173,6 @@ main(int argc, char *argv[])
     }
     argc -= optind;
     argv += optind;
-    NewArgc = argc;
-    NewArgv = argv;
 
     /* Set group/passwd file and init the cache. */
     if (grfile)
@@ -198,7 +194,7 @@ main(int argc, char *argv[])
 	    user_base = p + 1;
 	else
 	    user_base = user_cmnd;
-	NewArgc -= 2;
+	argc -= 2;
     }
     if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL)
 	errorx(1, "no passwd entry for %s!", user_name);
@@ -217,16 +213,16 @@ main(int argc, char *argv[])
 	user_shost = user_host;
     }
 
-    /* Fill in user_args from NewArgv. */
-    if (NewArgc > 0) {
+    /* Fill in user_args from argv. */
+    if (argc > 0) {
 	char *to, **from;
 	size_t size, n;
 
-	for (size = 0, from = NewArgv + 1; *from; from++)
+	for (size = 0, from = argv + 1; *from; from++)
 	    size += strlen(*from) + 1;
 
 	user_args = (char *) emalloc(size);
-	for (to = user_args, from = NewArgv + 1; *from; from++) {
+	for (to = user_args, from = argv + 1; *from; from++) {
 	    n = strlcpy(to, *from, size - (to - user_args));
 	    if (n >= size - (to - user_args))
 		    errorx(1, "internal error, init_vars() overflow");
