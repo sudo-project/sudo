@@ -167,8 +167,8 @@ main(argc, argv)
     if (argc < 2) {
 	if (!dflag)
 	    usage();
-	if ((sudo_user.pw = sudo_getpwnam("nobody")) == NULL)
-            errorx(1, "no passwd entry for nobody!");
+	if ((sudo_user.pw = sudo_getpwnam("root")) == NULL)
+            errorx(1, "no passwd entry for root!");
 	user_cmnd = user_base = "true";
     } else {
 	if ((sudo_user.pw = sudo_getpwnam(*argv)) == NULL)
