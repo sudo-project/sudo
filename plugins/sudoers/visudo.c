@@ -80,6 +80,7 @@
 #include "interfaces.h"
 #include "parse.h"
 #include "redblack.h"
+#include "sudoers_version.h"
 #include <gram.h>
 
 struct sudoersfile {
@@ -166,6 +167,7 @@ main(int argc, char *argv[])
 	switch (ch) {
 	    case 'V':
 		(void) printf("%s version %s\n", getprogname(), PACKAGE_VERSION);
+		(void) printf("%s grammar version %d\n", getprogname(), SUDOERS_GRAMMAR_VERSION);
 		exit(0);
 	    case 'c':
 		checkonly++;		/* check mode */

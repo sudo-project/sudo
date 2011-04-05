@@ -83,6 +83,7 @@
 #include "sudoers.h"
 #include "lbuf.h"
 #include "interfaces.h"
+#include "sudoers_version.h"
 #include "auth/sudo_auth.h"
 
 /*
@@ -1104,6 +1105,8 @@ sudoers_policy_version(int verbose)
 
     sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers policy plugin version %s\n",
 	PACKAGE_VERSION);
+    sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers file grammar version %d\n",
+	SUDOERS_GRAMMAR_VERSION);
 
     if (verbose) {
 	sudo_printf(SUDO_CONV_INFO_MSG, "\nSudoers path: %s\n", sudoers_file);
