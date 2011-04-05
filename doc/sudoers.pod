@@ -544,7 +544,7 @@ on how C<NOEXEC> works and whether or not it will work on your system.
 
 These tags override the value of the I<setenv> option on a per-command
 basis.  Note that if C<SETENV> has been set for a command, the user
-maydisable the I<env_reset> option from the command line via the
+may disable the I<env_reset> option from the command line via the
 B<-E> option.  Additionally, environment variables set on the command
 line are not subject to the restrictions imposed by I<env_check>,
 I<env_delete>, or I<env_keep>.  As such, only trusted users should
