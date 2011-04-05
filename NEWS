@@ -8,6 +8,9 @@ What's new in Sudo 1.8.1?
  * White space is now permitted within a User_List when used in
    conjunction with a per-user Defaults definition.
 
+ * A group ID (%#gid) may now be specified in a User_List or Runas_List.
+   Likewise, for non-Unix groups the syntax is %:#gid.
+
  * Support for double-quoted words in the sudoers file has been fixed.
    The change in 1.7.5 for escaping the double quote character
    caused the double quoting to only be available at the beginning
