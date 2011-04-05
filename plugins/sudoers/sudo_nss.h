@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010
+ * Copyright (c) 2007-2011
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -13,6 +13,9 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+
+#ifndef _SUDO_NSS_H
+#define _SUDO_NSS_H
 
 struct lbuf;
 struct passwd;
@@ -37,3 +40,5 @@ struct sudo_nss {
 TQ_DECLARE(sudo_nss)
 
 struct sudo_nss_list *sudo_read_nss(void);
+
+#endif /* _SUDO_NSS_H */
