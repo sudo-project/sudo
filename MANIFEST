@@ -215,6 +215,7 @@ plugins/sudoers/sudoers.h
 plugins/sudoers/sudoers.in
 plugins/sudoers/sudoers.sym
 plugins/sudoers/sudoers2ldif
+plugins/sudoers/sudoers_version.h
 plugins/sudoers/sudoreplay.c
 plugins/sudoers/testsudoers.c
 plugins/sudoers/timestr.c
