@@ -19,8 +19,13 @@
 #else
 # include "compat/glob.h"
 #endif
+#include <errno.h>
 
 #define MAX_RESULTS	256
+
+#ifndef errno
+extern int errno;
+#endif
 
 struct gl_entry {
 	int flags;
@@ -104,17 +109,40 @@ main(int argc, char **argv)
 				    lineno);
 				exit(1);
 			}
-			entry.flags = (int)strtol(cp, &ep, 0);
-			if (*ep != '>') {
+			ep = strchr(cp, '>');
+			if (ep == NULL) {
 				fprintf(stderr,
 				    "globtest: invalid entry on line %d\n",
 				    lineno);
 				exit(1);
 			}
-			if (entry.flags < 0 || entry.flags > 0x2000) {
-				fprintf(stderr,
-				    "globtest: invalid flags: %s\n", cp);
-				exit(1);
+			*ep = '\0';
+			entry.flags = 0;
+			for ((cp = strtok(cp, "|")); cp != NULL; (cp = strtok(NULL, "|"))) {
+				if (strcmp(cp, "GLOB_APPEND") == 0)
+					entry.flags |= GLOB_APPEND;
+				else if (strcmp(cp, "GLOB_DOOFFS") == 0)
+					entry.flags |= GLOB_DOOFFS;
+				else if (strcmp(cp, "GLOB_ERR") == 0)
+					entry.flags |= GLOB_ERR;
+				else if (strcmp(cp, "GLOB_MARK") == 0)
+					entry.flags |= GLOB_MARK;
+				else if (strcmp(cp, "GLOB_NOCHECK") == 0)
+					entry.flags |= GLOB_NOCHECK;
+				else if (strcmp(cp, "GLOB_NOSORT") == 0)
+					entry.flags |= GLOB_NOSORT;
+				else if (strcmp(cp, "GLOB_NOESCAPE") == 0)
+					entry.flags |= GLOB_NOESCAPE;
+				else if (strcmp(cp, "GLOB_BRACE") == 0)
+					entry.flags |= GLOB_BRACE;
+				else if (strcmp(cp, "GLOB_TILDE") == 0)
+					entry.flags |= GLOB_TILDE;
+				else if (strcmp(cp, "NONE") != 0) {
+					fprintf(stderr,
+					    "globtest: invalid flags on line %d\n",
+					    lineno);
+					exit(1);
+				}
 			}
 			entry.nresults = 0;
 			continue;
@@ -151,7 +179,8 @@ int test_glob(struct gl_entry *entry)
 	int i = 0;
 
 	if (glob(entry->pattern, entry->flags, NULL, &gl) != 0) {
-		fprintf(stderr, "glob failed: %s", entry->pattern);
+		fprintf(stderr, "glob failed: %s: %s\n", entry->pattern,
+		    strerror(errno));
 		exit(1);
 	}
 

@@ -8,6 +8,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif /* HAVE_STRINGS_H */
 #ifdef HAVE_FNMATCH
 # include <fnmatch.h>
 #else
@@ -18,7 +24,7 @@ int
 main(int argc, char *argv[])
 {
 	FILE *fp = stdin;
-	char pattern[1024], string[1024];
+	char pattern[1024], string[1024], flagstr[1024];
 	int errors = 0, tests = 0, flags, got, want;
 
 	if (argc > 1) {
@@ -35,11 +41,22 @@ main(int argc, char *argv[])
 	 *
 	 */
 	for (;;) {
-		got = fscanf(fp, "%s %s 0x%x %d\n", pattern, string, &flags,
+		got = fscanf(fp, "%s %s %s %d\n", pattern, string, flagstr,
 		    &want);
 		if (got == EOF)
 			break;
 		if (got == 4) {
+			flags = 0;
+			if (strcmp(flagstr, "FNM_NOESCAPE") == 0)
+				flags |= FNM_NOESCAPE;
+			else if (strcmp(flagstr, "FNM_PATHNAME") == 0)
+				flags |= FNM_PATHNAME;
+			else if (strcmp(flagstr, "FNM_PERIOD") == 0)
+				flags |= FNM_PERIOD;
+			else if (strcmp(flagstr, "FNM_LEADING_DIR") == 0)
+				flags |= FNM_LEADING_DIR;
+			else if (strcmp(flagstr, "FNM_CASEFOLD") == 0)
+				flags |= FNM_CASEFOLD;
 			got = fnmatch(pattern, string, flags);
 			if (got != want) {
 				fprintf(stderr,
