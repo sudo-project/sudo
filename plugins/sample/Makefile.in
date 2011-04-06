@@ -42,7 +42,7 @@ CPPFLAGS = -I$(incdir) -I$(top_builddir) @CPPFLAGS@
 CFLAGS = @CFLAGS@
 
 # Flags to pass to the link stage
-LDFLAGS =
+LDFLAGS = @LDFLAGS@
 LTLDFLAGS = @LTLDFLAGS@
 
 # Where to install things...

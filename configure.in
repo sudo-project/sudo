@@ -1845,7 +1845,6 @@ dnl
 if test -n "$with_libpath"; then
     for i in ${with_libpath}; do
 	SUDO_APPEND_LIBPATH(LDFLAGS, [$i])
-	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [$i])
     done
 fi
 if test -n "$with_libraries"; then
