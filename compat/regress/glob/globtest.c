@@ -14,7 +14,7 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_GLOB
+#ifdef HAVE_EXTENDED_GLOB
 # include <glob.h>
 #else
 # include "compat/glob.h"
@@ -176,7 +176,8 @@ main(int argc, char **argv)
 int test_glob(struct gl_entry *entry)
 {
 	glob_t gl;
-	int i = 0;
+	char **ap;
+	int nmatches = 0, i = 0;
 
 	if (glob(entry->pattern, entry->flags, NULL, &gl) != 0) {
 		fprintf(stderr, "glob failed: %s: %s\n", entry->pattern,
@@ -184,21 +185,29 @@ int test_glob(struct gl_entry *entry)
 		exit(1);
 	}
 
-	if (gl.gl_matchc != entry->nresults)
+	for (ap = gl.gl_pathv; *ap != NULL; ap++)
+		nmatches++;
+
+	if (nmatches != entry->nresults)
 		goto mismatch;
 
-	for (i = 0; i < gl.gl_matchc; i++) {
+	for (i = 0; i < entry->nresults; i++) {
 		if (strcmp(gl.gl_pathv[i], entry->results[i]) != 0)
 			goto mismatch;
 		free(entry->results[i]);
 	}
 	return 0;
  mismatch:
-	fprintf(stderr, "globtest: mismatch for pattern %s, flags 0x%x "
-	    "(found \"%s\", expected \"%s\")\n", entry->pattern, entry->flags,
-	    gl.gl_pathv[i], entry->results[i]);
-	while (i < gl.gl_matchc) {
-		free(entry->results[i++]);
+	if (nmatches != entry->nresults) {
+		fprintf(stderr,
+		    "globtest: mismatch in number of results (found %d, expected %d) for pattern %s\n",
+		    nmatches, entry->nresults, entry->pattern);
+	} else {
+		fprintf(stderr, "globtest: mismatch for pattern %s, flags 0x%x "
+		    "(found \"%s\", expected \"%s\")\n", entry->pattern, entry->flags,
+		    gl.gl_pathv[i], entry->results[i]);
+		while (i < entry->nresults)
+			free(entry->results[i++]);
 	}
 	return 1;
 }
