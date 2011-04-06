@@ -17892,29 +17892,27 @@ if test "${with_skey-'no'}" = "yes"; then
 	blibpath_add="${blibpath_add}:${with_skey}/lib"
     fi
 
-	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <skey.h>
-_ACEOF
-if ac_fn_c_try_cpp "$LINENO"; then :
+	ac_fn_c_check_header_compile "$LINENO" "skey.h" "ac_cv_header_skey_h" "#include <stdio.h>
+"
+if test "x$ac_cv_header_skey_h" = x""yes; then :
   found=yes
 else
   found=no
 fi
-rm -f conftest.err conftest.$ac_ext
+
+
     else
 	found=no
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "/usr/local" "/usr/contrib"; do
 	    test -n "$dir" && CPPFLAGS="$O_CPPFLAGS -I${dir}/include"
-	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <skey.h>
-_ACEOF
-if ac_fn_c_try_cpp "$LINENO"; then :
+	    ac_fn_c_check_header_compile "$LINENO" "skey.h" "ac_cv_header_skey_h" "#include <stdio.h>
+"
+if test "x$ac_cv_header_skey_h" = x""yes; then :
   found=yes; break
 fi
-rm -f conftest.err conftest.$ac_ext
+
+
 	done
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
@@ -18032,6 +18030,38 @@ if test "x$ac_cv_lib_skey_skeyaccess" = x""yes; then :
   $as_echo "#define HAVE_SKEYACCESS 1" >>confdefs.h
 
 fi
+
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for RFC1938-compliant skeychallenge" >&5
+$as_echo_n "checking for RFC1938-compliant skeychallenge... " >&6; }
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdio.h>
+	    #include <skey.h>
+int
+main ()
+{
+skeychallenge(NULL, NULL, NULL, 0);
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
+	    $as_echo "#define HAVE_RFC1938_SKEYCHALLENGE 1" >>confdefs.h
+
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+else
+
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
     LDFLAGS="$O_LDFLAGS"
     SUDOERS_LIBS="${SUDOERS_LIBS} -lskey"
@@ -21279,6 +21309,7 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+
 
 
 
