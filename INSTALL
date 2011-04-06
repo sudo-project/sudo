@@ -134,6 +134,10 @@ Special features/options:
 	`-l' will be prepended to it.  Multiple libraries may be
 	specified as long as they are space separated.
 
+  --with-plugindir=PATH
+	Set the directory that sudo looks in to find the policy and I/O
+	logging plugins.  Defaults to the libexec dir used by configure.
+
   --with-efence
 	Link with the "electric fence" debugging malloc.
 
@@ -143,6 +147,11 @@ Special features/options:
 
   --with-csops
 	Add CSOps standard options.  You probably aren't interested in this.
+
+  --with-devel
+        Configure development options.  This will enable compiler warnings
+	and set the Makefile to be able to regenerate the sudoers parser
+	as well as the manual pages.
 
   --with-linux-audit
 	Enable audit support for Linux systems.  Audits attempts
