@@ -30,7 +30,7 @@ CC = @CC@
 LIBTOOL = @LIBTOOL@
 
 # C preprocessor flags
-CPPFLAGS = -I. -I$(top_builddir) -I$(incdir) @CPPFLAGS@
+CPPFLAGS = -I$(top_builddir) -I$(incdir) @CPPFLAGS@
 
 # Usually -O and/or -g
 CFLAGS = @CFLAGS@
