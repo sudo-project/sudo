@@ -52,19 +52,16 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 SHELL = @SHELL@
 
 all: config.status
-	for d in $(SUBDIRS) $(SAMPLES); do (cd $$d && $(MAKE) $@) || break; done
+	for d in $(SUBDIRS) $(SAMPLES); do (cd $$d && $(MAKE) $@) && continue; exit $$?; done
 
-check: config.status
-	for d in $(SUBDIRS) $(SAMPLES); do (cd $$d && $(MAKE) $@) || break; done
-
-pre-install:
-	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) || break; done
+check pre-install: config.status
+	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) && continue; exit $$?; done
 
 install-dirs install-binaries install-includes install-plugin uninstall: config.status pre-install
-	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) || break; done
+	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) && continue; exit $$?; done
 
 install install-doc: config.status ChangeLog pre-install
-	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) || break; done
+	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) && continue; exit $$?; done
 
 autoconf:
 	autoconf -I m4
