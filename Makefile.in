@@ -52,16 +52,28 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 SHELL = @SHELL@
 
 all: config.status
-	for d in $(SUBDIRS) $(SAMPLES); do (cd $$d && $(MAKE) $@) && continue; exit $$?; done
+	for d in $(SUBDIRS) $(SAMPLES); \
+	    do (cd $$d && exec $(MAKE) $@) && continue; \
+	    exit $$?; \
+	done
 
 check pre-install: config.status
-	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) && continue; exit $$?; done
+	for d in $(SUBDIRS); \
+	    do (cd $$d && exec $(MAKE) $@) && continue; \
+	    exit $$?; \
+	done
 
 install-dirs install-binaries install-includes install-plugin uninstall: config.status pre-install
-	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) && continue; exit $$?; done
+	for d in $(SUBDIRS); \
+	    do (cd $$d && exec $(MAKE) $@) && continue; \
+	    exit $$?; \
+	done
 
 install install-doc: config.status ChangeLog pre-install
-	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) && continue; exit $$?; done
+	for d in $(SUBDIRS); \
+	    do (cd $$d && exec $(MAKE) $@) && continue; \
+	    exit $$?; \
+	done
 
 autoconf:
 	autoconf -I m4
@@ -116,12 +128,16 @@ package: sudo.pp
 	    version=$(VERSION) $(PPVARS)
 
 clean: config.status
-	for d in $(SUBDIRS) $(SAMPLES); do (cd $$d && $(MAKE) $@); done
+	for d in $(SUBDIRS) $(SAMPLES); do \
+	    (cd $$d && exec $(MAKE) $@); \
+	done
 
 mostlyclean: clean
 
 distclean: config.status
-	for d in $(SUBDIRS) $(SAMPLES); do (cd $$d && $(MAKE) $@); done
+	for d in $(SUBDIRS) $(SAMPLES); do \
+	    (cd $$d && exec $(MAKE) $@); \
+	done
 	-rm -rf Makefile pathnames.h config.h config.status config.cache \
 		config.log libtool stamp-* autom4te.cache
 
