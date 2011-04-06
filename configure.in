@@ -3,7 +3,7 @@ dnl Process this file with GNU autoconf to produce a configure script.
 dnl
 dnl Copyright (c) 1994-1996,1998-2011 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
-AC_INIT([sudo], [1.7.6], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.7.6rc2], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER(config.h pathnames.h zlib/zconf.h)
 dnl
 dnl Note: this must come after AC_INIT
@@ -339,8 +339,7 @@ esac])
 
 AC_ARG_WITH(skey, [AS_HELP_STRING([--with-skey[=DIR]], [enable S/Key support ])],
 [case $with_skey in
-    no)		with_skey=""
-		;;
+    no)		;;
     *)		AC_DEFINE(HAVE_SKEY)
 		AC_MSG_CHECKING(whether to try S/Key authentication)
 		AC_MSG_RESULT(yes)
@@ -350,8 +349,7 @@ esac])
 
 AC_ARG_WITH(opie, [AS_HELP_STRING([--with-opie[=DIR]], [enable OPIE support ])],
 [case $with_opie in
-    no)		with_opie=""
-		;;
+    no)		;;
     *)		AC_DEFINE(HAVE_OPIE)
 		AC_MSG_CHECKING(whether to try NRL OPIE authentication)
 		AC_MSG_RESULT(yes)
@@ -374,7 +372,7 @@ esac])
 
 AC_ARG_WITH(SecurID, [AS_HELP_STRING([--with-SecurID[[=DIR]]], [enable SecurID support])],
 [case $with_SecurID in
-    no)		with_SecurID="";;
+    no)		;;
     *)		AC_DEFINE(HAVE_SECURID)
 		AC_MSG_CHECKING(whether to use SecurID for authentication)
 		AC_MSG_RESULT(yes)
@@ -384,7 +382,7 @@ esac])
 
 AC_ARG_WITH(fwtk, [AS_HELP_STRING([--with-fwtk[[=DIR]]], [enable FWTK AuthSRV support])],
 [case $with_fwtk in
-    no)		with_fwtk="";;
+    no)		;;
     *)		AC_DEFINE(HAVE_FWTK)
 		AC_MSG_CHECKING(whether to use FWTK AuthSRV for authentication)
 		AC_MSG_RESULT(yes)
@@ -394,7 +392,7 @@ esac])
 
 AC_ARG_WITH(kerb4, [AS_HELP_STRING([--with-kerb4[[=DIR]]], [enable Kerberos IV support])],
 [case $with_kerb4 in
-    no)		with_kerb4="";;
+    no)		;;
     *)		AC_MSG_CHECKING(whether to try kerberos IV authentication)
 		AC_MSG_RESULT(yes)
 		AUTH_REG="$AUTH_REG kerb4"
@@ -403,7 +401,7 @@ esac])
 
 AC_ARG_WITH(kerb5, [AS_HELP_STRING([--with-kerb5[[=DIR]]], [enable Kerberos V support])],
 [case $with_kerb5 in
-    no)		with_kerb5="";;
+    no)		;;
     *)		AC_MSG_CHECKING(whether to try Kerberos V authentication)
 		AC_MSG_RESULT(yes)
 		AUTH_REG="$AUTH_REG kerb5"
@@ -1740,7 +1738,7 @@ case "$host" in
 		    SKIP_SETREUID=yes
 		    ;;
 		esac
-		if test "$with_skey" = "yes"; then
+		if test "${with_skey-'no'}" = "yes"; then
 		     SUDO_LIBS="${SUDO_LIBS} -lmd"
 		fi
 		CHECKSHADOW="false"
@@ -1776,7 +1774,7 @@ case "$host" in
 		: ${with_logincap='maybe'}
 		;;
     *-*-dragonfly*)
-		if test "$with_skey" = "yes"; then
+		if test "${with_skey-'no'}" = "yes"; then
 		     SUDO_LIBS="${SUDO_LIBS} -lmd"
 		fi
 		CHECKSHADOW="false"
@@ -2515,7 +2513,7 @@ fi
 dnl
 dnl extra S/Key lib and includes
 dnl
-if test ${with_skey-'no'} = "yes"; then
+if test "${with_skey-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_skey" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_skey}/include"
@@ -2549,7 +2547,7 @@ fi
 dnl
 dnl extra OPIE lib and includes
 dnl
-if test ${with_opie-'no'} = "yes"; then
+if test "${with_opie-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_opie" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_opie}/include"
