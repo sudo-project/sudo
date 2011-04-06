@@ -1,4 +1,4 @@
-[fake/bin/[[:alpha:]]*] <0x0>
+[fake/bin/[[:alpha:]]*] <NONE>
 fake/bin/cat
 fake/bin/chgrp
 fake/bin/chio
@@ -46,19 +46,19 @@ fake/bin/systrace
 fake/bin/tar
 fake/bin/test
 
-[fake/bin/rm{,dir,ail}] <0x80>
+[fake/bin/rm{,dir,ail}] <GLOB_BRACE>
 fake/bin/rm
 fake/bin/rmdir
 fake/bin/rmail
 
-[fake/bin/sha[[:digit:]]] <0x0>
+[fake/bin/sha[[:digit:]]] <NONE>
 fake/bin/sha1
 
-[fake/bin/sha[[:digit:]]*] <0x0>
+[fake/bin/sha[[:digit:]]*] <NONE>
 fake/bin/sha1
 fake/bin/sha256
 fake/bin/sha384
 fake/bin/sha512
 
-[fake/bin/ca[a-z]] <0x0>
+[fake/bin/ca[a-z]] <NONE>
 fake/bin/cat
