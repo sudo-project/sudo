@@ -55,8 +55,8 @@ CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) -I$(top_srcdir) @CPPFLAGS@
 CFLAGS = @CFLAGS@
 
 # Flags to pass to the link stage
-LDFLAGS =
-SUDOERS_LDFLAGS = @SUDOERS_LDFLAGS@
+LDFLAGS = @LDFLAGS@
+SUDOERS_LDFLAGS = @LDFLAGS@ @SUDOERS_LDFLAGS@
 LTLDFLAGS = @LTLDFLAGS@
 
 # Where to install things...

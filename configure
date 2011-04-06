@@ -13556,21 +13556,6 @@ if test -n "$with_libpath"; then
 	blibpath_add="${blibpath_add}:$i"
     fi
 
-
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i -Wl,+b,$i"
-			;;
-	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i -Wl,-R$i"
-			;;
-	esac
-    else
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i"
-    fi
-    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:$i"
-    fi
-
     done
 fi
 if test -n "$with_libraries"; then
