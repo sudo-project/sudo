@@ -846,7 +846,7 @@ with_secure_path
 with_interfaces
 with_stow
 with_askpass
-with_plugin_dir
+with_plugindir
 enable_authentication
 enable_root_mailer
 enable_setreuid
@@ -1616,7 +1616,7 @@ Optional Packages:
   --without-interfaces    don't try to read the ip addr of ether interfaces
   --with-stow             properly handle GNU stow packaging
   --with-askpass=PATH     Fully qualified pathname of askpass helper
-  --with-plugin_dir       set directory to load plugins from
+  --with-plugindir        set directory to load plugins from
   --with-selinux          enable SELinux support
   --with-pic              try to use only PIC/non-PIC objects [default=use
                           both]
@@ -5155,15 +5155,16 @@ $as_echo "no" >&6; }
 fi
 
 
-with_plugindir="$libexecdir"
 
-# Check whether --with-plugin_dir was given.
-if test "${with_plugin_dir+set}" = set; then :
-  withval=$with_plugin_dir; case $with_plugin_dir in
-    no)		as_fn_error "\"illegal argument: --without-plugin_dir.\"" "$LINENO" 5
+# Check whether --with-plugindir was given.
+if test "${with_plugindir+set}" = set; then :
+  withval=$with_plugindir; case $with_plugindir in
+    no)		as_fn_error "\"illegal argument: --without-plugindir.\"" "$LINENO" 5
 		;;
     *)		;;
 esac
+else
+  with_plugindir="$libexecdir"
 fi
 
 

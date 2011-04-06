@@ -1097,13 +1097,12 @@ AC_ARG_WITH(askpass, [AS_HELP_STRING([--with-askpass=PATH], [Fully qualified pat
 		;;
 esac], AC_MSG_RESULT(no))
 
-with_plugindir="$libexecdir"
-AC_ARG_WITH(plugin_dir, [AS_HELP_STRING([--with-plugin_dir], [set directory to load plugins from])],
-[case $with_plugin_dir in
-    no)		AC_MSG_ERROR(["illegal argument: --without-plugin_dir."])
+AC_ARG_WITH(plugindir, [AS_HELP_STRING([--with-plugindir], [set directory to load plugins from])],
+[case $with_plugindir in
+    no)		AC_MSG_ERROR(["illegal argument: --without-plugindir."])
 		;;
     *)		;;
-esac])
+esac], [with_plugindir="$libexecdir"])
 
 dnl
 dnl Options for --enable
