@@ -64,6 +64,14 @@ What's new in Sudo 1.8.1?
  * The sudoers policy plugin was not being linked with requisite
    libraries in certain configurations.
 
+ * Sudo now parses command line arguments before loading any plugins.
+   This allows "sudo -V" or "sudo -h" to work even if there is a problem
+   with sudo.conf
+
+ * Plugins are now linked with the static version of libgcc to allow
+   the plugin to run on a system where no shared libgcc is installed,
+   or where it is installed in a different location.
+
 What's new in Sudo 1.8.0?
 
  * Sudo has been refactored to use a modular framework that can
