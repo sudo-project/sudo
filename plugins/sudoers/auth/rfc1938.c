@@ -46,7 +46,7 @@
 #if defined(HAVE_SKEY)
 # include <skey.h>
 # define RFC1938				skey
-#  ifdef __NetBSD__
+#  ifdef HAVE_RFC1938_SKEYCHALLENGE
 #   define rfc1938challenge(a,b,c,d)	skeychallenge((a),(b),(c),(d))
 #  else
 #   define rfc1938challenge(a,b,c,d)	skeychallenge((a),(b),(c))
