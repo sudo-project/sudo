@@ -56,7 +56,7 @@ CFLAGS = @CFLAGS@
 
 # Flags to pass to the link stage
 LDFLAGS = @LDFLAGS@
-SUDOERS_LDFLAGS = @LDFLAGS@ @SUDOERS_LDFLAGS@
+SUDOERS_LDFLAGS = $(LDFLAGS) @SUDOERS_LDFLAGS@
 LTLDFLAGS = @LTLDFLAGS@
 
 # Where to install things...
