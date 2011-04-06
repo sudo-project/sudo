@@ -131,7 +131,7 @@ done:
 /*
  * Load the plugins listed in conf_file.
  */
-void
+int
 sudo_load_plugins(const char *conf_file,
     struct plugin_container *policy_plugin,
     struct plugin_container_list *io_plugins)
@@ -143,47 +143,65 @@ sudo_load_plugins(const char *conf_file,
     struct stat sb;
     void *handle;
     char path[PATH_MAX];
+    int rval = FALSE;
 
     /* Parse sudo.conf */
     plugin_list = sudo_read_conf(conf_file);
 
     tq_foreach_fwd(plugin_list, info) {
 	if (info->path[0] == '/') {
-	    if (strlcpy(path, info->path, sizeof(path)) >= sizeof(path))
-		errorx(1, "%s: %s", info->path, strerror(ENAMETOOLONG));
+	    if (strlcpy(path, info->path, sizeof(path)) >= sizeof(path)) {
+		warningx("%s: %s", info->path, strerror(ENAMETOOLONG));
+		goto done;
+	    }
 	} else {
 	    if (snprintf(path, sizeof(path), "%s%s", _PATH_SUDO_PLUGIN_DIR,
 		info->path) >= sizeof(path)) {
-		errorx(1, "%s%s: %s", _PATH_SUDO_PLUGIN_DIR, info->path,
+		warningx("%s%s: %s", _PATH_SUDO_PLUGIN_DIR, info->path,
 		    strerror(ENAMETOOLONG));
+		goto done;
 	    }
 	}
-	if (stat(path, &sb) != 0)
-	    error(1, "%s", path);
-	if (sb.st_uid != ROOT_UID)
-	    errorx(1, "%s must be owned by uid %d", path, ROOT_UID);
-	if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0)
-	    errorx(1, "%s must be only be writable by owner", path);
+	if (stat(path, &sb) != 0) {
+	    warning("%s", path);
+	    goto done;
+	}
+	if (sb.st_uid != ROOT_UID) {
+	    warningx("%s must be owned by uid %d", path, ROOT_UID);
+	    goto done;
+	}
+	if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
+	    warningx("%s must be only be writable by owner", path);
+	    goto done;
+	}
 
 	/* Open plugin and map in symbol */
 	handle = dlopen(path, RTLD_LAZY|RTLD_LOCAL);
-	if (!handle)
-	    errorx(1, "unable to dlopen %s: %s", path, dlerror());
+	if (!handle) {
+	    warningx("unable to dlopen %s: %s", path, dlerror());
+	    goto done;
+	}
 	plugin = dlsym(handle, info->symbol_name);
-	if (!plugin)
-	    errorx(1, "unable to find symbol %s in %s", info->symbol_name, path);
+	if (!plugin) {
+	    warningx("unable to find symbol %s in %s", info->symbol_name, path);
+	    goto done;
+	}
 
 	if (plugin->type != SUDO_POLICY_PLUGIN && plugin->type != SUDO_IO_PLUGIN) {
-	    errorx(1, "%s: unknown policy type %d", path, plugin->type);
+	    warningx("%s: unknown policy type %d", path, plugin->type);
+	    goto done;
 	}
 	if (SUDO_API_VERSION_GET_MAJOR(plugin->version) != SUDO_API_VERSION_MAJOR) {
-	    errorx(1, "%s: incompatible policy major version %d, expected %d",
+	    warningx("%s: incompatible policy major version %d, expected %d",
 		path, SUDO_API_VERSION_GET_MAJOR(plugin->version),
 		SUDO_API_VERSION_MAJOR);
+	    goto done;
 	}
 	if (plugin->type == SUDO_POLICY_PLUGIN) {
-	    if (policy_plugin->handle)
-		errorx(1, "only a single policy plugin may be loaded");
+	    if (policy_plugin->handle) {
+		warningx("only a single policy plugin may be loaded");
+		goto done;
+	    }
 	    policy_plugin->handle = handle;
 	    policy_plugin->name = info->symbol_name;
 	    policy_plugin->u.generic = plugin;
@@ -197,8 +215,18 @@ sudo_load_plugins(const char *conf_file,
 	    tq_append(io_plugins, container);
 	}
     }
-    if (policy_plugin->handle == NULL)
-	errorx(1, "%s: at least one policy plugin must be specified", conf_file);
-    if (policy_plugin->u.policy->check_policy == NULL)
-	errorx(1, "policy plugin %s does not include a check_policy method");
+    if (policy_plugin->handle == NULL) {
+	warningx("%s: at least one policy plugin must be specified", conf_file);
+	goto done;
+    }
+    if (policy_plugin->u.policy->check_policy == NULL) {
+	warningx("policy plugin %s does not include a check_policy method",
+	    policy_plugin->name);
+	goto done;
+    }
+
+    rval = TRUE;
+
+done:
+    return rval;
 }
