@@ -199,19 +199,20 @@ main(int argc, char *argv[], char *envp[])
     memset(&user_details, 0, sizeof(user_details));
     user_info = get_user_info(&user_details);
 
-    /* Read sudo.conf and load plugins. */
-    sudo_load_plugins(_PATH_SUDO_CONF, &policy_plugin, &io_plugins);
-
     /* Parse command line arguments. */
     sudo_mode = parse_args(argc, argv, &nargc, &nargv, &settings, &env_add);
     sudo_debug(9, "sudo_mode %d", sudo_mode);
 
-    /* Print sudo version early, in case policy plugin init fails. */
+    /* Print sudo version early, in case of plugin init failure. */
     if (ISSET(sudo_mode, MODE_VERSION)) {
 	printf("Sudo version %s\n", PACKAGE_VERSION);
 	if (user_details.uid == ROOT_UID)
 	    (void) printf("Configure args: %s\n", CONFIGURE_ARGS);
     }
+
+    /* Read sudo.conf and load plugins. */
+    if (!sudo_load_plugins(_PATH_SUDO_CONF, &policy_plugin, &io_plugins))
+	errorx(1, "fatal error, unable to load plugins");
 
     /* Open policy plugin. */
     ok = policy_open(&policy_plugin, settings, user_info, envp);
