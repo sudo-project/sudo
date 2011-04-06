@@ -3950,8 +3950,7 @@ fi
 # Check whether --with-skey was given.
 if test "${with_skey+set}" = set; then :
   withval=$with_skey; case $with_skey in
-    no)		with_skey=""
-		;;
+    no)		;;
     *)		$as_echo "#define HAVE_SKEY 1" >>confdefs.h
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to try S/Key authentication" >&5
@@ -3968,8 +3967,7 @@ fi
 # Check whether --with-opie was given.
 if test "${with_opie+set}" = set; then :
   withval=$with_opie; case $with_opie in
-    no)		with_opie=""
-		;;
+    no)		;;
     *)		$as_echo "#define HAVE_OPIE 1" >>confdefs.h
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to try NRL OPIE authentication" >&5
@@ -4006,7 +4004,7 @@ fi
 # Check whether --with-SecurID was given.
 if test "${with_SecurID+set}" = set; then :
   withval=$with_SecurID; case $with_SecurID in
-    no)		with_SecurID="";;
+    no)		;;
     *)		$as_echo "#define HAVE_SECURID 1" >>confdefs.h
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use SecurID for authentication" >&5
@@ -4023,7 +4021,7 @@ fi
 # Check whether --with-fwtk was given.
 if test "${with_fwtk+set}" = set; then :
   withval=$with_fwtk; case $with_fwtk in
-    no)		with_fwtk="";;
+    no)		;;
     *)		$as_echo "#define HAVE_FWTK 1" >>confdefs.h
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use FWTK AuthSRV for authentication" >&5
@@ -4040,7 +4038,7 @@ fi
 # Check whether --with-kerb4 was given.
 if test "${with_kerb4+set}" = set; then :
   withval=$with_kerb4; case $with_kerb4 in
-    no)		with_kerb4="";;
+    no)		;;
     *)		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to try kerberos IV authentication" >&5
 $as_echo_n "checking whether to try kerberos IV authentication... " >&6; }
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -4055,7 +4053,7 @@ fi
 # Check whether --with-kerb5 was given.
 if test "${with_kerb5+set}" = set; then :
   withval=$with_kerb5; case $with_kerb5 in
-    no)		with_kerb5="";;
+    no)		;;
     *)		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to try Kerberos V authentication" >&5
 $as_echo_n "checking whether to try Kerberos V authentication... " >&6; }
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -13447,7 +13445,7 @@ done
 		    SKIP_SETREUID=yes
 		    ;;
 		esac
-		if test "$with_skey" = "yes"; then
+		if test "${with_skey-'no'}" = "yes"; then
 		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
 		fi
 		CHECKSHADOW="false"
@@ -13483,7 +13481,7 @@ done
 		: ${with_logincap='maybe'}
 		;;
     *-*-dragonfly*)
-		if test "$with_skey" = "yes"; then
+		if test "${with_skey-'no'}" = "yes"; then
 		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
 		fi
 		CHECKSHADOW="false"
@@ -17860,7 +17858,7 @@ if test ${with_DCE-'no'} = "yes"; then
     AUTH_OBJS="$AUTH_OBJS dce.lo"
 fi
 
-if test ${with_skey-'no'} = "yes"; then
+if test "${with_skey-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_skey" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_skey}/include"
@@ -18040,7 +18038,7 @@ fi
     AUTH_OBJS="$AUTH_OBJS rfc1938.lo"
 fi
 
-if test ${with_opie-'no'} = "yes"; then
+if test "${with_opie-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_opie" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_opie}/include"
