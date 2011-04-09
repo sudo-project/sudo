@@ -1,4 +1,4 @@
-.\" Copyright (c) 2009-2010 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
 .\" 
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOREPLAY @mansectsu@"
-.TH SUDOREPLAY @mansectsu@ "February 21, 2011" "1.8.0rc1" "MAINTENANCE COMMANDS"
+.TH SUDOREPLAY @mansectsu@ "April  9, 2011" "1.8.1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -153,13 +153,17 @@ sudoreplay \- replay sudo session logs
 \&\fBsudoreplay\fR [\fB\-h\fR] [\fB\-d\fR \fIdirectory\fR] \-l [search expression]
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
-\&\fBsudoreplay\fR plays back or lists the session logs created by
-\&\fBsudo\fR.  When replaying, \fBsudoreplay\fR can play the session back
-in real-time, or the playback speed may be adjusted (faster or
-slower) based on the command line options.  The \fI\s-1ID\s0\fR should be
-a six character sequence of digits and upper case letters, e.g.
-0100A5, which is logged by \fBsudo\fR when a command is run with
-session logging enabled.
+\&\fBsudoreplay\fR plays back or lists the output logs created by \fBsudo\fR.
+When replaying, \fBsudoreplay\fR can play the session back in real-time,
+or the playback speed may be adjusted (faster or slower) based on
+the command line options.
+.PP
+The \fI\s-1ID\s0\fR should either be a six character sequence of digits and
+upper case letters, e.g. \f(CW\*(C`0100A5\*(C'\fR, or a pattern matching the
+\&\fIiolog_file\fR option in the \fIsudoers\fR file.  When a command is run
+via \fBsudo\fR with \fIlog_output\fR enabled in the \fIsudoers\fR file, a
+\&\f(CW\*(C`TSID=ID\*(C'\fR string is logged via syslog or to the \fBsudo\fR log file.
+The \fI\s-1ID\s0\fR may also be determined using \fBsudoreplay\fR's list mode.
 .PP
 In list mode, \fBsudoreplay\fR can be used to find the \s-1ID\s0 of a session
 based on a number of criteria such as the user, tty or command run.

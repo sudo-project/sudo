@@ -1,4 +1,4 @@
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2010
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2011
 .\" 	Todd C. Miller <Todd.Miller@courtesan.com>
 .\" 
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "February 21, 2011" "1.8.0rc1" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "April  9, 2011" "1.8.1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -532,7 +532,8 @@ which corresponds to the following \fI@sysconfdir@/sudo.conf\fR file.
 \& #
 \& # Format:
 \& #   Plugin plugin_name plugin_path
-\& #   Path askpass path/to/askpass
+\& #   Path askpass /path/to/askpass
+\& #   Path noexec /path/to/noexec.so
 \& #
 \& # The plugin_path is relative to @prefix@/libexec unless
 \& #   fully qualified.
@@ -553,6 +554,34 @@ parameters after the \fIpath\fR are ignored.  Lines that don't begin
 with \f(CW\*(C`Plugin\*(C'\fR or \f(CW\*(C`Path\*(C'\fR are silently ignored
 .PP
 For more information, see the \fIsudo_plugin\fR\|(@mansectsu@) manual.
+.SH "PATHS"
+.IX Header "PATHS"
+A \f(CW\*(C`Path\*(C'\fR line consists of the \f(CW\*(C`Path\*(C'\fR keyword, followed by the
+name of the path to set and its value.  E.g.
+.PP
+.Vb 2
+\& Path noexec @noexec_file@
+\& Path askpass /usr/X11R6/bin/ssh\-askpass
+.Ve
+.PP
+The following plugin-agnostic paths may be set in the
+\&\fI@sysconfdir@/sudo.conf\fR file.
+.IP "askpass" 16
+.IX Item "askpass"
+The fully qualified path to a helper program used to read the user's
+password when no terminal is available.  This may be the case when
+\&\fBsudo\fR is executed from a graphical (as opposed to text-based)
+application.  The program specified by \fIaskpass\fR should display
+the argument passed to it as the prompt and write the user's password
+to the standard output.  The value of \fIaskpass\fR may be overridden
+by the \f(CW\*(C`SUDO_ASKPASS\*(C'\fR environment variable.
+.IP "noexec" 16
+.IX Item "noexec"
+The fully-qualified path to a shared library containing dummy
+versions of the \fIexecv()\fR, \fIexecve()\fR and \fIfexecve()\fR library functions
+that just return an error.  This is used to implement the \fInoexec\fR
+functionality on systems that support \f(CW\*(C`LD_PRELOAD\*(C'\fR or its equivalent.
+Defaults to \fI@noexec_file@\fR.
 .SH "RETURN VALUES"
 .IX Header "RETURN VALUES"
 Upon successful execution of a program, the exit status from \fBsudo\fR

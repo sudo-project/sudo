@@ -140,7 +140,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "February 21, 2011" "1.8.0rc1" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "April  9, 2011" "1.8.1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -463,6 +463,11 @@ The base \s-1DN\s0 to use when performing \fBsudo\fR \s-1LDAP\s0 queries.  Typic
 this is of the form \f(CW\*(C`ou=SUDOers,dc=example,dc=com\*(C'\fR for the domain
 \&\f(CW\*(C`example.com\*(C'\fR.  Multiple \fB\s-1SUDOERS_BASE\s0\fR lines may be specified,
 in which case they are queried in the order specified.
+.IP "\fB\s-1SUDOERS_SEARCH_FILTER\s0\fR ldap_filter" 4
+.IX Item "SUDOERS_SEARCH_FILTER ldap_filter"
+An \s-1LDAP\s0 filter which is used to restrict the set of records returned
+when performing a \fBsudo\fR \s-1LDAP\s0 query.  Typically, this is of the
+form \f(CW\*(C`attribute=value\*(C'\fR or \f(CW\*(C`(&(attribute=value)(attribute2=value2))\*(C'\fR.
 .IP "\fB\s-1SUDOERS_TIMED\s0\fR on/true/yes/off/false/no" 4
 .IX Item "SUDOERS_TIMED on/true/yes/off/false/no"
 Whether or not to evaluate the \f(CW\*(C`sudoNotBefore\*(C'\fR and \f(CW\*(C`sudoNotAfter\*(C'\fR

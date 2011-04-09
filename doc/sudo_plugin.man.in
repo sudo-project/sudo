@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO_PLUGIN @mansectsu@"
-.TH SUDO_PLUGIN @mansectsu@ "February 21, 2011" "1.8.0rc1" "MAINTENANCE COMMANDS"
+.TH SUDO_PLUGIN @mansectsu@ "April  9, 2011" "1.8.1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -305,6 +305,10 @@ Set to true if the user specified the \f(CW\*(C`\-H\*(C'\fR flag.  If true, set 
 .IX Item "preserve_environment=bool"
 Set to true if the user specified the \f(CW\*(C`\-E\*(C'\fR flag, indicating that
 the user wishes to preserve the environment.
+.IP "run_shell=bool" 4
+.IX Item "run_shell=bool"
+Set to true if the user specified the \f(CW\*(C`\-s\*(C'\fR flag, indicating that
+the user wishes to run a shell.
 .IP "login_shell=bool" 4
 .IX Item "login_shell=bool"
 Set to true if the user specified the \f(CW\*(C`\-i\*(C'\fR flag, indicating that
@@ -557,8 +561,8 @@ If not specified, the value of \fIrunas_gid\fR is used.
 The supplementary group vector to use for the command in the form
 of a comma-separated list of group IDs.  If \fIpreserve_groups\fR
 is set, this option is ignored.
-.IP "login_class=login_class" 4
-.IX Item "login_class=login_class"
+.IP "login_class=string" 4
+.IX Item "login_class=string"
 \&\s-1BSD\s0 login class to use when setting resource limits and nice value
 (optional).  This option is only set on systems that support login
 classes.
@@ -646,6 +650,18 @@ which may choose to ignore it.
 Allocate a pseudo-tty to run the command in, regardless of whether
 or not I/O logging is in use.  By default, \fBsudo\fR will only run
 the command in a pty when an I/O log plugin is loaded.
+.IP "set_utmp=bool" 4
+.IX Item "set_utmp=bool"
+Create a utmp (or utmpx) entry when a pseudo-tty is allocated.  By
+default, the new entry will be a copy of the user's existing utmp
+entry (if any), with the tty, time, type and pid fields updated.
+.IP "utmp_user=string" 4
+.IX Item "utmp_user=string"
+User name to use when constructing a new utmp (or utmpx) entry when
+\&\fIset_utmp\fR is enabled.  This option can be used to set the user
+field in the utmp entry to the user the command runs as rather than
+the invoking user.  If not set, \fBsudo\fR will base the new entry on
+the invoking user's existing entry.
 .RE
 .RS 4
 .Sp

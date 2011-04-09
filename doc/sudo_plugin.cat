@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0rc1                February 21, 2011                       1
+1.8.1                     April  9, 2011                        1
 
 
 
@@ -127,7 +127,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0rc1                February 21, 2011                       2
+1.8.1                     April  9, 2011                        2
 
 
 
@@ -184,16 +184,16 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                    Set to true if the user specified the -E flag, indicating
                    that the user wishes to preserve the environment.
 
+               run_shell=bool
+                   Set to true if the user specified the -s flag, indicating
+                   that the user wishes to run a shell.
+
                login_shell=bool
                    Set to true if the user specified the -i flag, indicating
-                   that the user wishes to run a login shell.
-
-               implied_shell=bool
-                   If the user does not specify a program on the command line,
 
 
 
-1.8.0rc1                February 21, 2011                       3
+1.8.1                     April  9, 2011                        3
 
 
 
@@ -202,6 +202,10 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
+                   that the user wishes to run a login shell.
+
+               implied_shell=bool
+                   If the user does not specify a program on the command line,
                    ssuuddoo will pass the plugin the path to the user's shell and
                    set _i_m_p_l_i_e_d___s_h_e_l_l to true.  This allows ssuuddoo with no
                    arguments to be used similarly to _s_u(1).  If the plugin
@@ -253,13 +257,9 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                    The command name that sudo was run as, typically "sudo" or
                    "sudoedit".
 
-               sudoedit=bool
-                   Set to true when the -e flag is is specified or if invoked
-                   as ssuuddooeeddiitt.  The plugin shall substitute an editor into
 
 
-
-1.8.0rc1                February 21, 2011                       4
+1.8.1                     April  9, 2011                        4
 
 
 
@@ -268,6 +268,9 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
+               sudoedit=bool
+                   Set to true when the -e flag is is specified or if invoked
+                   as ssuuddooeeddiitt.  The plugin shall substitute an editor into
                    _a_r_g_v in the _c_h_e_c_k___p_o_l_i_c_y function or return -2 with a usage
                    error if the plugin does not support _s_u_d_o_e_d_i_t.  For more
                    information, see the _c_h_e_c_k___p_o_l_i_c_y section.
@@ -320,12 +323,9 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                    is no terminal device available, a default value of 24 is
                    used.
 
-               cols=int
-                   The number of columns the user's terminal supports.  If
 
 
-
-1.8.0rc1                February 21, 2011                       5
+1.8.1                     April  9, 2011                        5
 
 
 
@@ -334,6 +334,8 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
+               cols=int
+                   The number of columns the user's terminal supports.  If
                    there is no terminal device available, a default value of
                    80 is used.
 
@@ -386,12 +388,10 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            the _o_p_e_n function, the user has requested _s_u_d_o_e_d_i_t mode.  _s_u_d_o_e_d_i_t
            is a mechanism for editing one or more files where an editor is run
            with the user's credentials instead of with elevated privileges.
-           ssuuddoo achieves this by creating user-writable temporary copies of
-           the files to be edited and then overwriting the originals with the
 
 
 
-1.8.0rc1                February 21, 2011                       6
+1.8.1                     April  9, 2011                        6
 
 
 
@@ -400,6 +400,8 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
+           ssuuddoo achieves this by creating user-writable temporary copies of
+           the files to be edited and then overwriting the originals with the
            temporary copies after editing is complete.  If the plugin supports
            ssuuddooeeddiitt, it should choose the editor to be used, potentially from
            a variable in the user's environment, such as EDITOR, and include
@@ -451,13 +453,11 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                command=string
                    Fully qualified path to the command to be executed.
 
-               runas_uid=uid
-                   User ID to run the command as.
 
 
 
 
-1.8.0rc1                February 21, 2011                       7
+1.8.1                     April  9, 2011                        7
 
 
 
@@ -465,6 +465,9 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
+
+               runas_uid=uid
+                   User ID to run the command as.
 
                runas_euid=uid
                    Effective user ID to run the command as.  If not specified,
@@ -482,7 +485,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                    the form of a comma-separated list of group IDs.  If
                    _p_r_e_s_e_r_v_e___g_r_o_u_p_s is set, this option is ignored.
 
-               login_class=login_class
+               login_class=string
                    BSD login class to use when setting resource limits and
                    nice value (optional).  This option is only set on systems
                    that support login classes.
@@ -517,13 +520,10 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
                timeout=int
                    Command timeout.  If non-zero then when the timeout expires
-                   the command will be killed.
 
 
 
-
-
-1.8.0rc1                February 21, 2011                       8
+1.8.1                     April  9, 2011                        8
 
 
 
@@ -531,6 +531,8 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
+
+                   the command will be killed.
 
                sudoedit=bool
                    Set to true when in _s_u_d_o_e_d_i_t mode.  The plugin may enable
@@ -587,9 +589,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-
-
-1.8.0rc1                February 21, 2011                       9
+1.8.1                     April  9, 2011                        9
 
 
 
@@ -603,6 +603,20 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                    whether or not I/O logging is in use.  By default, ssuuddoo
                    will only run the command in a pty when an I/O log plugin
                    is loaded.
+
+               set_utmp=bool
+                   Create a utmp (or utmpx) entry when a pseudo-tty is
+                   allocated.  By default, the new entry will be a copy of the
+                   user's existing utmp entry (if any), with the tty, time,
+                   type and pid fields updated.
+
+               utmp_user=string
+                   User name to use when constructing a new utmp (or utmpx)
+                   entry when _s_e_t___u_t_m_p is enabled.  This option can be used to
+                   set the user field in the utmp entry to the user the
+                   command runs as rather than the invoking user.  If not set,
+                   ssuuddoo will base the new entry on the invoking user's
+                   existing entry.
 
                Unsupported values will be ignored.
 
@@ -637,6 +651,19 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                policy allows it.  If NULL, the plugin should list the
                privileges of the invoking user.
 
+
+
+
+
+1.8.1                     April  9, 2011                       10
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
            argc
                The number of elements in _a_r_g_v, not counting the final NULL
                pointer.
@@ -651,18 +678,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
        validate
             int (*validate)(void);
-
-
-
-
-1.8.0rc1                February 21, 2011                      10
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
 
            The validate function is called when ssuuddoo is run with the -v flag.
            For policy plugins such as _s_u_d_o_e_r_s that cache authentication
@@ -703,6 +718,18 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
            Returns 1 on success, 0 on failure and -1 on error.  On error, the
            plugin may optionally call the conversation or plugin_printf
+
+
+
+1.8.1                     April  9, 2011                       11
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
            function with SUDO_CONF_ERROR_MSG to present additional error
            information to the user.
 
@@ -718,18 +745,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
         } while(0)
 
         #define SUDO_API_VERSION_MAJOR 1
-
-
-
-1.8.0rc1                February 21, 2011                      11
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
         #define SUDO_API_VERSION_MINOR 0
         #define SUDO_API_VERSION ((SUDO_API_VERSION_MAJOR << 16) | \
                                   SUDO_API_VERSION_MINOR)
@@ -770,6 +785,17 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
        logging is to be performed.  If the open function returns 0, no I/O
        will be sent to the plugin.
 
+
+
+1.8.1                     April  9, 2011                       12
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
        The io_plugin struct has the following fields:
 
        type
@@ -782,20 +808,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            against.
 
        open
-
-
-
-
-
-1.8.0rc1                February 21, 2011                      12
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
             int (*open)(unsigned int version, sudo_conv_t conversation
                         sudo_printf_t plugin_printf, char * const settings[],
                         char * const user_info[], int argc, char * const argv[],
@@ -838,6 +850,18 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                "name=value" strings.  The vector is terminated by a NULL
                pointer.  These settings correspond to flags the user specified
                when running ssuuddoo.  As such, they will only be present when the
+
+
+
+1.8.1                     April  9, 2011                       13
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
                corresponding flag has been specified on the command line.
 
                When parsing _s_e_t_t_i_n_g_s, the plugin should split on the ffiirrsstt
@@ -850,18 +874,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            user_info
                A vector of information about the user running the command in
                the form of "name=value" strings.  The vector is terminated by
-
-
-
-1.8.0rc1                February 21, 2011                      13
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
                a NULL pointer.
 
                When parsing _u_s_e_r___i_n_f_o, the plugin should split on the ffiirrsstt
@@ -904,6 +916,18 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            error
                If the command could not be executed, this is set to the value
                of errno set by the _e_x_e_c_v_e(2) system call.  If the command was
+
+
+
+1.8.1                     April  9, 2011                       14
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
                successfully executed, the value of error is 0.
 
        show_version
@@ -914,19 +938,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            the user via the conversation or plugin_printf function using
            SUDO_CONV_INFO_MSG.  If the user requests detailed version
            information, the verbose flag will be set.
-
-
-
-
-
-1.8.0rc1                February 21, 2011                      14
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
 
        log_ttyin
             int (*log_ttyin)(const char *buf, unsigned int len);
@@ -971,6 +982,18 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            the data should be passed to the command, 0 if the data is rejected
            (which will terminate the command) or -1 if an error occurred.
 
+
+
+
+1.8.1                     April  9, 2011                       15
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
            The function arguments are as follows:
 
            buf The buffer containing user input.
@@ -982,18 +1005,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
            The _l_o_g___s_t_d_o_u_t function is only used if the standard output does
            not correspond to a tty device.  It is called whenever data can be
-
-
-
-1.8.0rc1                February 21, 2011                      15
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
            read from the command but before it is written to the standard
            output.  This allows the plugin to reject data if it chooses to
            (for instance if the output contains banned content).  Returns 1 if
@@ -1040,18 +1051,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-1.8.0rc1                February 21, 2011                      16
+1.8.1                     April  9, 2011                       16
 
 
 
@@ -1117,7 +1117,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0rc1                February 21, 2011                      17
+1.8.1                     April  9, 2011                       17
 
 
 
@@ -1183,7 +1183,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0rc1                February 21, 2011                      18
+1.8.1                     April  9, 2011                       18
 
 
 
@@ -1249,6 +1249,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.0rc1                February 21, 2011                      19
+1.8.1                     April  9, 2011                       19
 
 

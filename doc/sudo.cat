@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.8.0rc1                February 21, 2011                       1
+1.8.1                     April  9, 2011                        1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.8.0rc1                February 21, 2011                       2
+1.8.1                     April  9, 2011                        2
 
 
 
@@ -193,7 +193,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0rc1                February 21, 2011                       3
+1.8.1                     April  9, 2011                        3
 
 
 
@@ -259,7 +259,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0rc1                February 21, 2011                       4
+1.8.1                     April  9, 2011                        4
 
 
 
@@ -325,7 +325,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.8.0rc1                February 21, 2011                       5
+1.8.1                     April  9, 2011                        5
 
 
 
@@ -391,7 +391,7 @@ PPLLUUGGIINNSS
 
 
 
-1.8.0rc1                February 21, 2011                       6
+1.8.1                     April  9, 2011                        6
 
 
 
@@ -405,7 +405,8 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
         #
         # Format:
         #   Plugin plugin_name plugin_path
-        #   Path askpass path/to/askpass
+        #   Path askpass /path/to/askpass
+        #   Path noexec /path/to/noexec.so
         #
         # The plugin_path is relative to /usr/local/libexec unless
         #   fully qualified.
@@ -425,6 +426,45 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        ignored
 
        For more information, see the _s_u_d_o___p_l_u_g_i_n(1m) manual.
+
+PPAATTHHSS
+       A Path line consists of the Path keyword, followed by the name of the
+       path to set and its value.  E.g.
+
+        Path noexec /usr/local/libexec/sudo_noexec.so
+        Path askpass /usr/X11R6/bin/ssh-askpass
+
+       The following plugin-agnostic paths may be set in the _/_e_t_c_/_s_u_d_o_._c_o_n_f
+       file.
+
+       askpass         The fully qualified path to a helper program used to
+                       read the user's password when no terminal is available.
+                       This may be the case when ssuuddoo is executed from a
+                       graphical (as opposed to text-based) application.  The
+                       program specified by _a_s_k_p_a_s_s should display the
+                       argument passed to it as the prompt and write the
+                       user's password to the standard output.  The value of
+                       _a_s_k_p_a_s_s may be overridden by the SUDO_ASKPASS
+                       environment variable.
+
+       noexec          The fully-qualified path to a shared library containing
+                       dummy versions of the _e_x_e_c_v_(_), _e_x_e_c_v_e_(_) and _f_e_x_e_c_v_e_(_)
+                       library functions that just return an error.  This is
+                       used to implement the _n_o_e_x_e_c functionality on systems
+                       that support LD_PRELOAD or its equivalent.  Defaults to
+                       _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c_/_s_u_d_o___n_o_e_x_e_c_._s_o.
+
+
+
+
+1.8.1                     April  9, 2011                        7
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
 
 RREETTUURRNN VVAALLUUEESS
        Upon successful execution of a program, the exit status from ssuuddoo will
@@ -454,18 +494,6 @@ SSEECCUURRIITTYY NNOOTTEESS
        runs.  If a user runs a command such as sudo su or sudo sh, subsequent
        commands run from that shell are not subject to ssuuddoo's security policy.
        The same is true for commands that offer shell escapes (including most
-
-
-
-1.8.0rc1                February 21, 2011                       7
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        editors).  If I/O logging is enabled, subsequent commands will have
        their input and/or output logged, but there will not be traditional
        logs for those commands.  Because of this, care must be taken when
@@ -492,6 +520,17 @@ EENNVVIIRROONNMMEENNTT
        PATH            May be overridden by the security policy.
 
        SHELL           Used to determine shell to run with -s option
+
+
+
+1.8.1                     April  9, 2011                        8
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
 
        SUDO_ASKPASS    Specifies the path to a helper program used to read the
                        password if no terminal is available or if the -A
@@ -521,17 +560,6 @@ EENNVVIIRROONNMMEENNTT
 FFIILLEESS
        _/_e_t_c_/_s_u_d_o_._c_o_n_f          ssuuddoo plugin and path configuration
 
-
-
-1.8.0rc1                February 21, 2011                       8
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
 EEXXAAMMPPLLEESS
        Note: the following examples assume a properly configured security
        policy.
@@ -558,6 +586,17 @@ EEXXAAMMPPLLEESS
         $ sudo -u jim -g audio vi ~jim/sound.txt
 
        To shutdown a machine:
+
+
+
+1.8.1                     April  9, 2011                        9
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
 
         $ sudo shutdown -r +15 "quick reboot"
 
@@ -586,18 +625,6 @@ CCAAVVEEAATTSS
        programs (such as editors) allow the user to run commands via shell
        escapes, thus avoiding ssuuddoo's checks.  However, on most systems it is
        possible to prevent shell escapes with the _s_u_d_o_e_r_s(4) module's _n_o_e_x_e_c
-
-
-
-1.8.0rc1                February 21, 2011                       9
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        functionality.
 
        It is not meaningful to run the cd command directly via sudo, e.g.,
@@ -625,6 +652,18 @@ DDIISSCCLLAAIIMMEERR
        including, but not limited to, the implied warranties of
        merchantability and fitness for a particular purpose are disclaimed.
        See the LICENSE file distributed with ssuuddoo or
+
+
+
+1.8.1                     April  9, 2011                       10
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
        http://www.sudo.ws/sudo/license.html for complete details.
 
 
@@ -655,6 +694,33 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.0rc1                February 21, 2011                      10
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1.8.1                     April  9, 2011                       11
 
 

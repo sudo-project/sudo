@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "February 21, 2011" "1.8.0rc1" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "April  9, 2011" "1.8.1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -342,27 +342,34 @@ The definitions of what constitutes a valid \fIalias\fR member follow.
 \&               User \*(Aq,\*(Aq User_List
 \&
 \& User ::= \*(Aq!\*(Aq* user name |
-\&          \*(Aq!\*(Aq* \*(Aq#\*(Aquid |
-\&          \*(Aq!\*(Aq* \*(Aq%\*(Aqgroup |
-\&          \*(Aq!\*(Aq* \*(Aq+\*(Aqnetgroup |
-\&          \*(Aq!\*(Aq* \*(Aq%:\*(Aqnonunix_group |
+\&          \*(Aq!\*(Aq* #uid |
+\&          \*(Aq!\*(Aq* %group |
+\&          \*(Aq!\*(Aq* %#gid |
+\&          \*(Aq!\*(Aq* +netgroup |
+\&          \*(Aq!\*(Aq* %:nonunix_group |
+\&          \*(Aq!\*(Aq* %:#nonunix_gid |
 \&          \*(Aq!\*(Aq* User_Alias
 .Ve
 .PP
-A \f(CW\*(C`User_List\*(C'\fR is made up of one or more user names, uids (prefixed
-with '#'), system groups (prefixed with '%'), netgroups (prefixed
-with '+') and \f(CW\*(C`User_Alias\*(C'\fRes.  Each list item may be prefixed with
-zero or more '!' operators.  An odd number of '!' operators negate
-the value of the item; an even number just cancel each other out.
+A \f(CW\*(C`User_List\*(C'\fR is made up of one or more user names, user ids
+(prefixed with '#'), system group names and ids (prefixed with '%'
+and '%#' respectively), netgroups (prefixed with '+'), non-Unix
+group names and IDs (prefixed with '%:' and '%:#' respectively) and
+\&\f(CW\*(C`User_Alias\*(C'\fRes.  Each list item may be prefixed with zero or more
+\&'!' operators.  An odd number of '!' operators negate the value of
+the item; an even number just cancel each other out.
 .PP
-A \f(CW\*(C`user name\*(C'\fR, \f(CW\*(C`group\*(C'\fR, \f(CW\*(C`netgroup\*(C'\fR or \f(CW\*(C`nonunix_group\*(C'\fR may
-be enclosed in double quotes to avoid the need for escaping special
-characters.  Alternately, special characters may be specified in
-escaped hex mode, e.g. \ex20 for space.
+A \f(CW\*(C`user name\*(C'\fR, \f(CW\*(C`uid\*(C'\fR, \f(CW\*(C`group\*(C'\fR, \f(CW\*(C`gid\*(C'\fR, \f(CW\*(C`netgroup\*(C'\fR, \f(CW\*(C`nonunix_group\*(C'\fR
+or \f(CW\*(C`nonunix_gid\*(C'\fR may be enclosed in double quotes to avoid the
+need for escaping special characters.  Alternately, special characters
+may be specified in escaped hex mode, e.g. \ex20 for space.  When
+using double quotes, any prefix characters must be included inside
+the quotes.
 .PP
-The actual \f(CW\*(C`nonunix_group\*(C'\fR syntax depends on the underlying group
-provider plugin (see the \fIgroup_plugin\fR description below).
-For instance, the \s-1QAS\s0 \s-1AD\s0 plugin supports the following formats:
+The actual \f(CW\*(C`nonunix_group\*(C'\fR and \f(CW\*(C`nonunix_gid\*(C'\fR syntax depends on
+the underlying group provider plugin (see the \fIgroup_plugin\fR
+description below).  For instance, the \s-1QAS\s0 \s-1AD\s0 plugin supports the
+following formats:
 .IP "\(bu" 4
 Group in the same domain: \*(L"Group Name\*(R"
 .IP "\(bu" 4
@@ -370,16 +377,21 @@ Group in any domain: \*(L"Group Name@FULLY.QUALIFIED.DOMAIN\*(R"
 .IP "\(bu" 4
 Group \s-1SID:\s0 \*(L"S\-1\-2\-34\-5678901234\-5678901234\-5678901234\-567\*(R"
 .PP
-Note that quotes around group names are optional.  Unquoted strings must
-use a backslash (\e) to escape spaces and the '@' symbol.
+Note that quotes around group names are optional.  Unquoted strings
+must use a backslash (\e) to escape spaces and special characters.
+See \*(L"Other special characters and reserved words\*(R" for a list of
+characters that need to be escaped.
 .PP
 .Vb 2
 \& Runas_List ::= Runas_Member |
 \&                Runas_Member \*(Aq,\*(Aq Runas_List
 \&
 \& Runas_Member ::= \*(Aq!\*(Aq* user name |
-\&                  \*(Aq!\*(Aq* \*(Aq#\*(Aquid |
-\&                  \*(Aq!\*(Aq* \*(Aq%\*(Aqgroup |
+\&                  \*(Aq!\*(Aq* #uid |
+\&                  \*(Aq!\*(Aq* %group |
+\&                  \*(Aq!\*(Aq* %#gid |
+\&                  \*(Aq!\*(Aq* %:nonunix_group |
+\&                  \*(Aq!\*(Aq* %:#nonunix_gid |
 \&                  \*(Aq!\*(Aq* +netgroup |
 \&                  \*(Aq!\*(Aq* Runas_Alias
 .Ve
@@ -398,7 +410,7 @@ and toor), you can use a uid instead (#0 in the example given).
 \& Host ::= \*(Aq!\*(Aq* host name |
 \&          \*(Aq!\*(Aq* ip_addr |
 \&          \*(Aq!\*(Aq* network(/netmask)? |
-\&          \*(Aq!\*(Aq* \*(Aq+\*(Aqnetgroup |
+\&          \*(Aq!\*(Aq* +netgroup |
 \&          \*(Aq!\*(Aq* Host_Alias
 .Ve
 .PP
@@ -526,7 +538,7 @@ A \fBuser specification\fR determines which commands a user may run
 (and as what user) on specified hosts.  By default, commands are
 run as \fBroot\fR, but this can be changed on a per-command basis.
 .PP
-The basic structure of a user specification is `who = where (as_whom)
+The basic structure of a user specification is `who where = (as_whom)
 what'.  Let's break that down into its constituent parts:
 .SS "Runas_Spec"
 .IX Subsection "Runas_Spec"
@@ -689,7 +701,7 @@ on how \f(CW\*(C`NOEXEC\*(C'\fR works and whether or not it will work on your sy
 .PP
 These tags override the value of the \fIsetenv\fR option on a per-command
 basis.  Note that if \f(CW\*(C`SETENV\*(C'\fR has been set for a command, the user
-maydisable the \fIenv_reset\fR option from the command line via the
+may disable the \fIenv_reset\fR option from the command line via the
 \&\fB\-E\fR option.  Additionally, environment variables set on the command
 line are not subject to the restrictions imposed by \fIenv_check\fR,
 \&\fIenv_delete\fR, or \fIenv_keep\fR.  As such, only trusted users should
@@ -852,7 +864,7 @@ characters in a \fIUser Specification\fR ('=', ':', '(', ')') is optional.
 .PP
 The following characters must be escaped with a backslash ('\e') when
 used as part of a word (e.g.\ a user name or host name):
-\&'@', '!', '=', ':', ',', '(', ')', '\e'.
+\&'!', '=', ':', ',', '(', ')', '\e'.
 .SH "SUDOERS OPTIONS"
 .IX Header "SUDOERS OPTIONS"
 \&\fBsudo\fR's behavior can be modified by \f(CW\*(C`Default_Entry\*(C'\fR lines, as
@@ -959,6 +971,41 @@ password.  This flag is \fI@insults@\fR by default.
 .IX Item "log_host"
 If set, the host name will be logged in the (non-syslog) \fBsudo\fR log file.
 This flag is \fIoff\fR by default.
+.IP "log_input" 16
+.IX Item "log_input"
+If set, \fBsudo\fR will run the command in a \fIpseudo tty\fR and log all
+user input.
+If the standard input is not connected to the user's tty, due to
+I/O redirection or because the command is part of a pipeline, that
+input is also captured and stored in a separate log file.
+.Sp
+Input is logged to the directory specified by the \fIiolog_dir\fR
+option (\fI@iolog_dir@\fR by default) using a unique session \s-1ID\s0 that
+is included in the normal \fBsudo\fR log line, prefixed with \fITSID=\fR.
+The \fIiolog_file\fR option may be used to control the format of the
+session \s-1ID\s0.
+.Sp
+Note that user input may contain sensitive information such as
+passwords (even if they are not echoed to the screen), which will
+be stored in the log file unencrypted.  In most cases, logging the
+command output via \fIlog_output\fR is all that is required.
+.IP "log_output" 16
+.IX Item "log_output"
+If set, \fBsudo\fR will run the command in a \fIpseudo tty\fR and log all
+output that is sent to the screen, similar to the \fIscript\fR\|(1) command.
+If the standard output or standard error is not connected to the
+user's tty, due to I/O redirection or because the command is part
+of a pipeline, that output is also captured and stored in separate
+log files.
+.Sp
+Output is logged to the directory specified by the \fIiolog_dir\fR
+option (\fI@iolog_dir@\fR by default) using a unique session \s-1ID\s0 that
+is included in the normal \fBsudo\fR log line, prefixed with \fITSID=\fR.
+The \fIiolog_file\fR option may be used to control the format of the
+session \s-1ID\s0.
+.Sp
+Output logs may be viewed with the \fIsudoreplay\fR\|(@mansectsu@) utility, which
+can also be used to list or search the available logs.
 .IP "log_year" 16
 .IX Item "log_year"
 If set, the four-digit year will be logged in the (non-syslog) \fBsudo\fR log file.
@@ -1078,6 +1125,14 @@ change this behavior.  This can be done by negating the set_logname
 option.  Note that if the \fIenv_reset\fR option has not been disabled,
 entries in the \fIenv_keep\fR list will override the value of
 \&\fIset_logname\fR.  This flag is \fIon\fR by default.
+.IP "set_utmp" 16
+.IX Item "set_utmp"
+When enabled, \fBsudo\fR will create an entry in the utmp (or utmpx)
+file when a pseudo-tty is allocated.  A pseudo-tty is allocated by
+\&\fBsudo\fR when the \fIlog_input\fR, \fIlog_output\fR or \fIuse_pty\fR flags
+are enabled.  By default, the new entry will be a copy of the user's
+existing utmp entry (if any), with the tty, time, type and pid
+fields updated.  This flag is \fIon\fR by default.
 .IP "setenv" 16
 .IX Item "setenv"
 Allow the user to disable the \fIenv_reset\fR option from the command
@@ -1111,32 +1166,6 @@ of the invoking user.  In addition, the timestamp file name will
 include the target user's name.  Note that this flag precludes the
 use of a uid not listed in the passwd database as an argument to
 the \fB\-u\fR option.  This flag is \fIoff\fR by default.
-.IP "log_input" 16
-.IX Item "log_input"
-If set, \fBsudo\fR will run the command in a \fIpseudo tty\fR and log all
-user input.
-If the standard input is not connected to the user's tty, due to
-I/O redirection or because the command is part of a pipeline, that
-input is also captured and stored in a separate log file.
-.Sp
-Input is logged to the \fI/var/log/sudo\-io\fR directory using a unique
-session \s-1ID\s0 that is included in the normal \fBsudo\fR log line, prefixed
-with \fITSID=\fR.
-.IP "log_output" 16
-.IX Item "log_output"
-If set, \fBsudo\fR will run the command in a \fIpseudo tty\fR and log all
-output that is sent to the screen, similar to the \fIscript\fR\|(1) command.
-If the standard output or standard error is not connected to the
-user's tty, due to I/O redirection or because the command is part
-of a pipeline, that output is also captured and stored in separate
-log files.
-.Sp
-Output is logged to the
-\&\fI/var/log/sudo\-io\fR directory using a unique session \s-1ID\s0 that is
-included in the normal \fBsudo\fR log line, prefixed with \fITSID=\fR.
-.Sp
-Output logs may be viewed with the \fIsudoreplay\fR\|(@mansectsu@) utility, which
-can also be used to list or search the available logs.
 .IP "tty_tickets" 16
 .IX Item "tty_tickets"
 If set, users must authenticate on a per-tty basis.  With this flag
@@ -1165,7 +1194,12 @@ If set, \fBsudo\fR will run the command in a pseudo-pty even if no I/O
 logging is being gone.  A malicious program run under \fBsudo\fR could
 conceivably fork a background process that retains to the user's
 terminal device after the main program has finished executing.  Use
-of this option will make that impossible.
+of this option will make that impossible.  This flag is \fIoff\fR by default.
+.IP "utmp_runas" 16
+.IX Item "utmp_runas"
+If set, \fBsudo\fR will store the name of the runas user when updating
+the utmp (or utmpx) file.  By default, \fBsudo\fR stores the name of
+the invoking user.  This flag is \fIoff\fR by default.
 .IP "visiblepw" 16
 .IX Item "visiblepw"
 By default, \fBsudo\fR will refuse to run if the user must enter a
@@ -1279,6 +1313,9 @@ expanded to the base name of the command being run
 In addition, any escape sequences supported by the system's \fIstrftime()\fR
 function will be expanded.
 .Sp
+To include a literal `\f(CW\*(C`%\*(C'\fR' character, the string `\f(CW\*(C`%%\*(C'\fR' should
+be used.
+.Sp
 Path names that end in six or more \f(CW\*(C`X\*(C'\fRs will have the \f(CW\*(C`X\*(C'\fRs replaced
 with a unique combination of digits and letters, similar to the
 \&\fImktemp()\fR function.
@@ -1300,10 +1337,9 @@ will expand to the host name of the machine.
 Default is \f(CW\*(C`@mailsub@\*(C'\fR.
 .IP "noexec_file" 16
 .IX Item "noexec_file"
-Path to a shared library containing dummy versions of the \fIexecv()\fR,
-\&\fIexecve()\fR and \fIfexecve()\fR library functions that just return an error.
-This is used to implement the \fInoexec\fR functionality on systems that
-support \f(CW\*(C`LD_PRELOAD\*(C'\fR or its equivalent.  Defaults to \fI@noexec_file@\fR.
+This option is deprecated and will be removed in a future release
+of \fBsudo\fR.  The path to the noexec file should now be set in the
+\&\fI@sysconfdir@/sudo.conf\fR file.
 .IP "passprompt" 16
 .IX Item "passprompt"
 The default prompt to use when asking for a password; can be overridden
@@ -1900,29 +1936,15 @@ Note, however, that this applies only to native dynamically-linked
 executables.  Statically-linked executables and foreign executables
 running under binary emulation are not affected.
 .Sp
-To tell whether or not \fBsudo\fR supports \fInoexec\fR, you can run
-the following as root:
-.Sp
-.Vb 1
-\&    sudo \-V | grep "dummy exec"
-.Ve
-.Sp
-If the resulting output contains a line that begins with:
-.Sp
-.Vb 1
-\&    File containing dummy exec functions:
-.Ve
-.Sp
-then \fBsudo\fR may be able to replace the exec family of functions
-in the standard library with its own that simply return an error.
-Unfortunately, there is no foolproof way to know whether or not
-\&\fInoexec\fR will work at compile-time.  \fInoexec\fR should work on
-SunOS, Solaris, *BSD, Linux, \s-1IRIX\s0, Tru64 \s-1UNIX\s0, MacOS X, and HP-UX
-11.x.  It is known \fBnot\fR to work on \s-1AIX\s0 and UnixWare.  \fInoexec\fR
-is expected to work on most operating systems that support the
+The \fInoexec\fR feature is known to work on SunOS, Solaris, *BSD,
+Linux, \s-1IRIX\s0, Tru64 \s-1UNIX\s0, MacOS X, HP-UX 11.x and \s-1AIX\s0 5.3 and above.
+It should be supported on most operating systems that support the
 \&\f(CW\*(C`LD_PRELOAD\*(C'\fR environment variable.  Check your operating system's
 manual pages for the dynamic linker (usually ld.so, ld.so.1, dyld,
 dld.sl, rld, or loader) to see if \f(CW\*(C`LD_PRELOAD\*(C'\fR is supported.
+.Sp
+On Solaris 10 and higher, \fInoexec\fR uses Solaris privileges instead
+of the \f(CW\*(C`LD_PRELOAD\*(C'\fR environment variable.
 .Sp
 To enable \fInoexec\fR for a command, use the \f(CW\*(C`NOEXEC\*(C'\fR tag as documented
 in the User Specification section above.  Here is that example again:
@@ -1935,7 +1957,8 @@ This allows user \fBaaron\fR to run \fI/usr/bin/more\fR and \fI/usr/bin/vi\fR
 with \fInoexec\fR enabled.  This will prevent those two commands from
 executing other commands (such as a shell).  If you are unsure
 whether or not your system is capable of supporting \fInoexec\fR you
-can always just try it out and see if it works.
+can always just try it out and check whether shell escapes work
+when \fInoexec\fR is enabled.
 .PP
 Note that restricting shell escapes is not a panacea.  Programs
 running as root are still capable of many potentially hazardous
