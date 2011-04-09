@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.5rc1                February 21, 2011                       1
+1.7.6                     April  9, 2011                        1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.5rc1                February 21, 2011                       2
+1.7.6                     April  9, 2011                        2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.5rc1                February 21, 2011                       3
+1.7.6                     April  9, 2011                        3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.5rc1                February 21, 2011                       4
+1.7.6                     April  9, 2011                        4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.5rc1                February 21, 2011                       5
+1.7.6                     April  9, 2011                        5
 
 
 
@@ -372,6 +372,12 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            example.com.  Multiple SSUUDDOOEERRSS__BBAASSEE lines may be specified, in
            which case they are queried in the order specified.
 
+       SSUUDDOOEERRSS__SSEEAARRCCHH__FFIILLTTEERR ldap_filter
+           An LDAP filter which is used to restrict the set of records
+           returned when performing a ssuuddoo LDAP query.  Typically, this is of
+           the form attribute=value or
+           (&(attribute=value)(attribute2=value2)).
+
        SSUUDDOOEERRSS__TTIIMMEEDD on/true/yes/off/false/no
            Whether or not to evaluate the sudoNotBefore and sudoNotAfter
            attributes that implement time-dependent sudoers entries.
@@ -382,16 +388,10 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            in a moderate amount of debugging information.  A value of 2 shows
            the results of the matches themselves.  This parameter should not
            be set in a production environment as the extra information is
-           likely to confuse users.
-
-       BBIINNDDDDNN DN
-           The BBIINNDDDDNN parameter specifies the identity, in the form of a
-           Distinguished Name (DN), to use when performing LDAP operations.
-           If not specified, LDAP operations are performed with an anonymous
 
 
 
-1.7.5rc1                February 21, 2011                       6
+1.7.6                     April  9, 2011                        6
 
 
 
@@ -400,6 +400,12 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
+           likely to confuse users.
+
+       BBIINNDDDDNN DN
+           The BBIINNDDDDNN parameter specifies the identity, in the form of a
+           Distinguished Name (DN), to use when performing LDAP operations.
+           If not specified, LDAP operations are performed with an anonymous
            identity.  By default, most LDAP servers will allow anonymous
            access.
 
@@ -447,17 +453,11 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
        TTLLSS__CCAACCEERRTT file name
            An alias for TTLLSS__CCAACCEERRTTFFIILLEE for OpenLDAP compatibility.
 
-       TTLLSS__CCAACCEERRTTFFIILLEE file name
-           The path to a certificate authority bundle which contains the
-           certificates for all the Certificate Authorities the client knows
-           to be valid, e.g. _/_e_t_c_/_s_s_l_/_c_a_-_b_u_n_d_l_e_._p_e_m.  This option is only
-           supported by the OpenLDAP libraries.  Netscape-derived LDAP
-           libraries use the same certificate database for CA and client
-           certificates (see TTLLSS__CCEERRTT).
 
 
 
-1.7.5rc1                February 21, 2011                       7
+
+1.7.6                     April  9, 2011                        7
 
 
 
@@ -465,6 +465,14 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
+
+       TTLLSS__CCAACCEERRTTFFIILLEE file name
+           The path to a certificate authority bundle which contains the
+           certificates for all the Certificate Authorities the client knows
+           to be valid, e.g. _/_e_t_c_/_s_s_l_/_c_a_-_b_u_n_d_l_e_._p_e_m.  This option is only
+           supported by the OpenLDAP libraries.  Netscape-derived LDAP
+           libraries use the same certificate database for CA and client
+           certificates (see TTLLSS__CCEERRTT).
 
        TTLLSS__CCAACCEERRTTDDIIRR directory
            Similar to TTLLSS__CCAACCEERRTTFFIILLEE but instead of a file, it is a directory
@@ -511,6 +519,19 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            the OpenSSL manual for a list of valid ciphers.  This option is
            only supported by the OpenLDAP libraries.
 
+
+
+
+
+1.7.6                     April  9, 2011                        8
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
        UUSSEE__SSAASSLL on/true/yes/off/false/no
            Enable UUSSEE__SSAASSLL for LDAP servers that support SASL authentication.
 
@@ -520,18 +541,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
        RROOOOTTUUSSEE__SSAASSLL on/true/yes/off/false/no
            Enable RROOOOTTUUSSEE__SSAASSLL to enable SASL authentication when connecting
-
-
-
-1.7.5rc1                February 21, 2011                       8
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
-
            to an LDAP server from a privileged process, such as ssuuddoo.
 
        RROOOOTTSSAASSLL__AAUUTTHH__IIDD identity
@@ -577,6 +586,18 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
            sudoers: files
 
+
+
+
+1.7.6                     April  9, 2011                        9
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
        Note that _/_e_t_c_/_n_s_s_w_i_t_c_h_._c_o_n_f is supported even when the underlying
        operating system does not use an nsswitch.conf file.
 
@@ -585,18 +606,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
        _/_e_t_c_/_n_s_s_w_i_t_c_h_._c_o_n_f.  ssuuddoo simply treats _n_e_t_s_v_c_._c_o_n_f as a variant of
        _n_s_s_w_i_t_c_h_._c_o_n_f; information in the previous section unrelated to the
        file format itself still applies.
-
-
-
-
-1.7.5rc1                February 21, 2011                       9
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
 
        To consult LDAP first followed by the local sudoers file (if it
        exists), use:
@@ -643,6 +652,18 @@ EEXXAAMMPPLLEESS
          #uri            ldaps://secureldapserver
          #uri            ldaps://secureldapserver ldap://ldapserver
          #
+
+
+
+1.7.6                     April  9, 2011                       10
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
          # The amount of time, in seconds, to wait while trying to connect to
          # an LDAP server.
          bind_timelimit 30
@@ -652,18 +673,6 @@ EEXXAAMMPPLLEESS
          #
          # Must be set or sudo will ignore LDAP; may be specified multiple times.
          sudoers_base   ou=SUDOers,dc=example,dc=com
-
-
-
-1.7.5rc1                February 21, 2011                      10
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
-
          #
          # verbose sudoers matching from ldap
          #sudoers_debug 2
@@ -709,6 +718,18 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
          #tls_randfile /etc/egd-pool
          #
          # You may restrict which ciphers are used.  Consult your SSL
+
+
+
+1.7.6                     April  9, 2011                       11
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
          # documentation for which options go here.
          # Only supported when using OpenLDAP.
          #
@@ -718,18 +739,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
          # the LDAP server.
          # Tips:
          #   * Enable both lines at the same time.
-
-
-
-1.7.5rc1                February 21, 2011                      11
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
-
          #   * Do not password protect the key file.
          #   * Ensure the keyfile is only readable by root.
          #
@@ -775,6 +784,18 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
         attributetype ( 1.3.6.1.4.1.15953.9.1.2
            NAME 'sudoHost'
+
+
+
+1.7.6                     April  9, 2011                       12
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
            DESC 'Host(s) who may run sudo'
            EQUALITY caseExactIA5Match
            SUBSTR caseExactIA5SubstringsMatch
@@ -784,18 +805,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            NAME 'sudoCommand'
            DESC 'Command(s) to be executed by sudo'
            EQUALITY caseExactIA5Match
-
-
-
-1.7.5rc1                February 21, 2011                      12
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
-
            SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
 
         attributetype ( 1.3.6.1.4.1.15953.9.1.4
@@ -841,6 +850,18 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
             DESC 'an integer to order the sudoRole entries'
             EQUALITY integerMatch
             ORDERING integerOrderingMatch
+
+
+
+1.7.6                     April  9, 2011                       13
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
             SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 )
 
         objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL
@@ -850,17 +871,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
                  sudoRunAsGroup $ sudoOption $ sudoNotBefore $ sudoNotAfter $
                  sudoOrder $ description )
            )
-
-
-
-1.7.5rc1                February 21, 2011                      13
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
 
 SSEEEE AALLSSOO
        _l_d_a_p_._c_o_n_f(4), _s_u_d_o_e_r_s(5)
@@ -909,16 +919,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-
-
-
-
-
-1.7.5rc1                February 21, 2011                      14
+1.7.6                     April  9, 2011                       14
 
 
