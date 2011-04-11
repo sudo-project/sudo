@@ -349,7 +349,7 @@ install-binaries: visudo sudoreplay install-dirs
 
 install-includes:
 
-install-doc:
+install-doc: install-dirs
 	@LDAP@$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0555 $(srcdir)/sudoers2ldif $(DESTDIR)$(docdir)
 
 install-plugin: sudoers.la install-dirs
