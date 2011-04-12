@@ -3138,9 +3138,9 @@ if $pp_opt_debug; then
   echo "$prototype::"; cat $prototype
 fi >&2
 
-	pkgmk -a $pp_solaris_arch -d $pp_wrkdir/pkg \
-	      -f $prototype || { error "pkgmk failed"; return; }
-        pkgtrans -s $pp_wrkdir/pkg \
+	pkgmk -d $pp_wrkdir/pkg -f $prototype \
+		|| { error "pkgmk failed"; return; }
+	pkgtrans -s $pp_wrkdir/pkg \
 		$pp_wrkdir/`pp_backend_solaris_names` \
                 ${pp_solaris_name:-$name} \
 		|| { error "pkgtrans failed"; return; }
