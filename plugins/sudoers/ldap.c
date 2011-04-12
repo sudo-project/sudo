@@ -960,7 +960,7 @@ sudo_ldap_build_default_filter()
     char *filt;
 
     if (ldap_conf.search_filter)
-	easprintf(&filt, "(&(%s)(cn=defaults))", ldap_conf.search_filter);
+	easprintf(&filt, "(&%s(cn=defaults))", ldap_conf.search_filter);
     else
 	filt = estrdup("cn=defaults");
     return filt;
