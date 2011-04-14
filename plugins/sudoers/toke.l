@@ -65,6 +65,7 @@
 #  include <ndir.h>
 # endif
 #endif
+#include <errno.h>
 #include <ctype.h>
 #include "sudoers.h"
 #include "parse.h"
@@ -645,8 +646,16 @@ switch_dir(struct include_stack *stack, char *dirpath)
     struct path_list **sorted = NULL;
 
     if (!(dir = opendir(dirpath))) {
-	yyerror(dirpath);
-	return NULL;
+	if (errno != ENOENT) {
+	    char *errbuf;
+	    if (asprintf(&errbuf, "%s: %s", dirpath, strerror(errno)) != -1) {
+		yyerror(errbuf);
+		free(errbuf);
+	    } else {
+		yyerror("unable to allocate memory");
+	    }
+	}
+	goto done;
     }
     while ((dent = readdir(dir))) {
 	/* Ignore files that end in '~' or have a '.' in them. */
@@ -789,7 +798,13 @@ _push_include(char *path, int isdir)
 	}
     } else {
 	if ((fp = open_sudoers(path, TRUE, &keepopen)) == NULL) {
-	    yyerror(path);
+	    char *errbuf;
+	    if (asprintf(&errbuf, "%s: %s", path, strerror(errno)) != -1) {
+		yyerror(errbuf);
+		free(errbuf);
+	    } else {
+		yyerror("unable to allocate memory");
+	    }
 	    return FALSE;
 	}
 	istack[idepth].more = NULL;
