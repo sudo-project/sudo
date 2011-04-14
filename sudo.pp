@@ -12,7 +12,7 @@ limited root privileges to users and log root activity.  \
 The basic philosophy is to give as few privileges as possible but \
 still allow people to get their work done."
 	vendor="Todd C. Miller"
-	copyright="(c) 1993-1996,1998-2010 Todd C. Miller"
+	copyright="(c) 1993-1996,1998-2011 Todd C. Miller"
 
 %if [aix]
 	# AIX package summary is limited to 40 characters
