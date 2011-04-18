@@ -17587,17 +17587,15 @@ $as_echo "no" >&6; }
 
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-    fi
-fi
-if test ${with_kerb5-'no'} != "no" -a -z "$KRB5CONFIG"; then
-    $as_echo "#define HAVE_KERB5 1" >>confdefs.h
+    else
+	$as_echo "#define HAVE_KERB5 1" >>confdefs.h
 
-                if test "$with_kerb5" = "yes"; then
-	found=no
-	O_CPPFLAGS="$CPPFLAGS"
-	for dir in "" "kerberosV/" "krb5/" "kerberos5/" "kerberosv5/"; do
-	    CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
-	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+				if test "$with_kerb5" = "yes"; then
+	    found=no
+	    O_CPPFLAGS="$CPPFLAGS"
+	    for dir in "" "kerberosV/" "krb5/" "kerberos5/" "kerberosv5/"; do
+		CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
+		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <krb5.h>
 _ACEOF
@@ -17605,13 +17603,13 @@ if ac_fn_c_try_cpp "$LINENO"; then :
   found=yes; break
 fi
 rm -f conftest.err conftest.$ac_ext
-	done
-	if test X"$found" = X"no"; then
-	    CPPFLAGS="$O_CPPFLAGS"
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Unable to locate Kerberos V include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS" >&5
+	    done
+	    if test X"$found" = X"no"; then
+		CPPFLAGS="$O_CPPFLAGS"
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Unable to locate Kerberos V include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS" >&5
 $as_echo "$as_me: WARNING: Unable to locate Kerberos V include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS" >&2;}
-	fi
-    else
+	    fi
+	else
 
     if test X"$with_rpath" = X"yes"; then
 	case "$host" in
@@ -17627,12 +17625,12 @@ $as_echo "$as_me: WARNING: Unable to locate Kerberos V include files, you will h
 	blibpath_add="${blibpath_add}:${with_kerb5}/lib"
     fi
 
-	CPPFLAGS="$CPPFLAGS -I${with_kerb5}/include"
-    fi
+	    CPPFLAGS="$CPPFLAGS -I${with_kerb5}/include"
+	fi
 
-                { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we are using Heimdal" >&5
+				{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we are using Heimdal" >&5
 $as_echo_n "checking whether we are using Heimdal... " >&6; }
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <krb5.h>
 int
@@ -17645,13 +17643,13 @@ const char *tmp = heimdal_version;
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
 
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-	    $as_echo "#define HAVE_HEIMDAL 1" >>confdefs.h
+		$as_echo "#define HAVE_HEIMDAL 1" >>confdefs.h
 
-	    # XXX - need to check whether -lcrypo is needed!
-	    SUDOERS_LIBS="${SUDOERS_LIBS} -lkrb5 -lcrypto -ldes -lcom_err -lasn1"
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lroken" >&5
+		# XXX - need to check whether -lcrypo is needed!
+		SUDOERS_LIBS="${SUDOERS_LIBS} -lkrb5 -lcrypto -ldes -lcom_err -lasn1"
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lroken" >&5
 $as_echo_n "checking for main in -lroken... " >&6; }
 if test "${ac_cv_lib_roken_main+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -17688,10 +17686,10 @@ fi
 
 else
 
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-	    SUDOERS_LIBS="${SUDOERS_LIBS} -lkrb5 -lk5crypto -lcom_err"
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lkrb5support" >&5
+		SUDOERS_LIBS="${SUDOERS_LIBS} -lkrb5 -lk5crypto -lcom_err"
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lkrb5support" >&5
 $as_echo_n "checking for main in -lkrb5support... " >&6; }
 if test "${ac_cv_lib_krb5support_main+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -17728,7 +17726,8 @@ fi
 
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-    AUTH_OBJS="$AUTH_OBJS kerb5.lo"
+	AUTH_OBJS="$AUTH_OBJS kerb5.lo"
+    fi
     _LIBS="$LIBS"
     LIBS="${LIBS} ${SUDOERS_LIBS}"
     for ac_func in krb5_verify_user krb5_init_secure_context
