@@ -1,3 +1,11 @@
+What's new in Sudo 1.7.6p1
+
+ * A non-existent includedir is now treated the same as an empty
+   directory and not reported as an error.
+
+ * Removed extraneous parens in LDAP filter when sudoers_search_filter
+   is enabled that can cause an LDAP search error.
+
 What's new in Sudo 1.7.6?
 
  * A new LDAP setting, sudoers_search_filter, has been added to
