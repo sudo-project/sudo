@@ -1,3 +1,16 @@
+What's new in Sudo 1.8.1p1?
+
+ * Fixed a problem on AIX where sudo was unable to set the final
+   uid if the PAM module modified the effective uid.
+
+ * A non-existent includedir is now treated the same as an empty
+   directory and not reported as an error.
+
+ * Removed extraneous parens in LDAP filter when sudoers_search_filter
+   is enabled that can cause an LDAP search error.
+
+ * Fixed a "make -j" problem for "make install".
+
 What's new in Sudo 1.8.1?
 
  * A new LDAP setting, sudoers_search_filter, has been added to
