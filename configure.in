@@ -2390,46 +2390,45 @@ if test ${with_kerb5-'no'} != "no"; then
 		AC_MSG_RESULT(no)
 	    ]
 	)
-    fi
-fi
-if test ${with_kerb5-'no'} != "no" -a -z "$KRB5CONFIG"; then
-    AC_DEFINE(HAVE_KERB5)
-    dnl
-    dnl Use the specified directory, if any, else search for correct inc dir
-    dnl
-    if test "$with_kerb5" = "yes"; then
-	found=no
-	O_CPPFLAGS="$CPPFLAGS"
-	for dir in "" "kerberosV/" "krb5/" "kerberos5/" "kerberosv5/"; do
-	    CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
-	    AC_PREPROC_IFELSE([#include <krb5.h>], [found=yes; break])
-	done
-	if test X"$found" = X"no"; then
-	    CPPFLAGS="$O_CPPFLAGS"
-	    AC_MSG_WARN([Unable to locate Kerberos V include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS])
-	fi
     else
-	dnl XXX - try to include krb5.h here too
-	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_kerb5}/lib])
-	CPPFLAGS="$CPPFLAGS -I${with_kerb5}/include"
-    fi
+	AC_DEFINE(HAVE_KERB5)
+	dnl
+	dnl Use the specified directory, if any, else search for correct inc dir
+	dnl
+	if test "$with_kerb5" = "yes"; then
+	    found=no
+	    O_CPPFLAGS="$CPPFLAGS"
+	    for dir in "" "kerberosV/" "krb5/" "kerberos5/" "kerberosv5/"; do
+		CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
+		AC_PREPROC_IFELSE([#include <krb5.h>], [found=yes; break])
+	    done
+	    if test X"$found" = X"no"; then
+		CPPFLAGS="$O_CPPFLAGS"
+		AC_MSG_WARN([Unable to locate Kerberos V include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS])
+	    fi
+	else
+	    dnl XXX - try to include krb5.h here too
+	    SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_kerb5}/lib])
+	    CPPFLAGS="$CPPFLAGS -I${with_kerb5}/include"
+	fi
 
-    dnl
-    dnl Try to determine whether we have Heimdal or MIT Kerberos
-    dnl
-    AC_MSG_CHECKING(whether we are using Heimdal)
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <krb5.h>]], [[const char *tmp = heimdal_version;]])], [
-	    AC_MSG_RESULT(yes)
-	    AC_DEFINE(HAVE_HEIMDAL)
-	    # XXX - need to check whether -lcrypo is needed!
-	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lcrypto -ldes -lcom_err -lasn1"
-	    AC_CHECK_LIB(roken, main, [SUDO_LIBS="${SUDO_LIBS} -lroken"])
-	], [
-	    AC_MSG_RESULT(no)
-	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
-	    AC_CHECK_LIB(krb5support, main, [SUDO_LIBS="${SUDO_LIBS} -lkrb5support"])
-    ])
-    AUTH_OBJS="$AUTH_OBJS kerb5.o"
+	dnl
+	dnl Try to determine whether we have Heimdal or MIT Kerberos
+	dnl
+	AC_MSG_CHECKING(whether we are using Heimdal)
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <krb5.h>]], [[const char *tmp = heimdal_version;]])], [
+		AC_MSG_RESULT(yes)
+		AC_DEFINE(HAVE_HEIMDAL)
+		# XXX - need to check whether -lcrypo is needed!
+		SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lcrypto -ldes -lcom_err -lasn1"
+		AC_CHECK_LIB(roken, main, [SUDO_LIBS="${SUDO_LIBS} -lroken"])
+	    ], [
+		AC_MSG_RESULT(no)
+		SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
+		AC_CHECK_LIB(krb5support, main, [SUDO_LIBS="${SUDO_LIBS} -lkrb5support"])
+	])
+	AUTH_OBJS="$AUTH_OBJS kerb5.o"
+    fi
     _LIBS="$LIBS"
     LIBS="${LIBS} ${SUDO_LIBS}"
     AC_CHECK_FUNCS(krb5_verify_user krb5_init_secure_context)
@@ -2440,7 +2439,7 @@ if test ${with_kerb5-'no'} != "no" -a -z "$KRB5CONFIG"; then
 		   [AC_LANG_PROGRAM(
 		       [[#include <krb5.h>]],
 		       [[krb5_get_init_creds_opt_free(NULL, NULL);]]
-                   )],
+		   )],
 		    [sudo_cv_krb5_get_init_creds_opt_free_two_args=yes],
 		    [sudo_cv_krb5_get_init_creds_opt_free_two_args=no]
 		)
@@ -2448,7 +2447,7 @@ if test ${with_kerb5-'no'} != "no" -a -z "$KRB5CONFIG"; then
 	)
     ])
     if test X"$sudo_cv_krb5_get_init_creds_opt_free_two_args" = X"yes"; then
-  	AC_DEFINE(HAVE_KRB5_GET_INIT_CREDS_OPT_FREE_TWO_ARGS)
+	AC_DEFINE(HAVE_KRB5_GET_INIT_CREDS_OPT_FREE_TWO_ARGS)
     fi
     LIBS="$_LIBS"
 fi
