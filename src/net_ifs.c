@@ -121,7 +121,7 @@ get_net_ifs(char **addrinfo)
 	    !ISSET(ifa->ifa_flags, IFF_UP) || ISSET(ifa->ifa_flags, IFF_LOOPBACK))
 	    continue;
 
-	switch(ifa->ifa_addr->sa_family) {
+	switch (ifa->ifa_addr->sa_family) {
 	    case AF_INET:
 #ifdef HAVE_IN6_ADDR
 	    case AF_INET6:
@@ -142,7 +142,7 @@ get_net_ifs(char **addrinfo)
 	    !ISSET(ifa->ifa_flags, IFF_UP) || ISSET(ifa->ifa_flags, IFF_LOOPBACK))
 		continue;
 
-	switch(ifa->ifa_addr->sa_family) {
+	switch (ifa->ifa_addr->sa_family) {
 	    case AF_INET:
 		sin = (struct sockaddr_in *)ifa->ifa_addr;
 		len = snprintf(cp, ailen - (*addrinfo - cp),
@@ -224,27 +224,25 @@ get_net_ifs(char **addrinfo)
      * Get interface configuration or return.
      */
     for (;;) {
-	ifconf_buf = erealloc(ifconf_buf, buflen);
+	ifconf_buf = emalloc(buflen);
 	ifconf = (struct ifconf *) ifconf_buf;
 	ifconf->ifc_len = buflen - sizeof(struct ifconf);
 	ifconf->ifc_buf = (caddr_t) (ifconf_buf + sizeof(struct ifconf));
 
 #ifdef _ISC
 	STRSET(SIOCGIFCONF, (caddr_t) ifconf, buflen);
-	if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0) {
+	if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0)
 #else
 	/* Note that some kernels return EINVAL if the buffer is too small */
-	if (ioctl(sock, SIOCGIFCONF, (caddr_t) ifconf) < 0 && errno != EINVAL) {
+	if (ioctl(sock, SIOCGIFCONF, (caddr_t) ifconf) < 0 && errno != EINVAL)
 #endif /* _ISC */
-	    efree(ifconf_buf);
-	    (void) close(sock);
-	    return 0;
-	}
+	    goto done;
 
 	/* Break out of loop if we have a big enough buffer. */
 	if (ifconf->ifc_len + sizeof(struct ifreq) < buflen)
 	    break;
 	buflen += BUFSIZ;
+	efree(ifconf_buf);
     }
 
     /* Allocate space for the maximum number of interfaces that could exist. */
