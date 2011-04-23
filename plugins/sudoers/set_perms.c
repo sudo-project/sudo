@@ -383,9 +383,7 @@ set_perms(int perm)
 	 * setreuid(0, 0) may fail on some systems
 	 * when the euid is not already 0.
 	 */
-	state->ruid = -1;
-	state->euid = ROOT_UID;
-	if (setreuid(ID(ruid), ID(euid))) {
+	if (setreuid(-1, ROOT_UID)) {
 	    errstr = "setreuid(-1, ROOT_UID)";
 	    goto bad;
 	}
@@ -394,6 +392,7 @@ set_perms(int perm)
 	    goto bad;
 	}
 	state->ruid = ROOT_UID;
+	state->euid = ROOT_UID;
 	state->rgid = -1;
 	state->egid = -1;
 	state->groups = NULL;
