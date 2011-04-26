@@ -52,6 +52,8 @@
 static int sudo_collect(int, int, uchar_t *, int, prompt_t *);
 
 static char *def_prompt;
+static char **sudo_argv;
+static int sudo_argc;
 
 /*
  * Collection routine (callback) for limiting the timeouts in SIA
@@ -86,11 +88,19 @@ int
 sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     SIAENTITY *siah = NULL;
-    extern int Argc;
-    extern char **Argv;
+    int i;
+    extern int NewArgc;
+    extern char **NewArgv;
 
-    if (sia_ses_init(&siah, Argc, Argv, NULL, pw->pw_name, ttyname(0), 1, NULL)
-	!= SIASUCCESS) {
+    /* Rebuild argv for sia_ses_init() */
+    sudo_argc = NewArgc + 1;
+    sudo_argv = emalloc2(sudo_argc + 1, sizeof(char *));
+    sudo_argv[0] = "sudo";
+    for (i = 0; i < NewArgc; i++)
+	sudo_argv[i + 1] = NewArgv[i];
+    sudo_argv[sudo_argc] = NULL;
+
+    if (sia_ses_init(&siah, sudo_argc, sudo_argv, NULL, pw->pw_name, user_ttypath, 1, NULL) != SIASUCCESS) {
 
 	log_error(USE_ERRNO|NO_EXIT|NO_MAIL,
 	    "unable to initialize SIA session");
@@ -121,5 +131,6 @@ sia_cleanup(struct passwd *pw, sudo_auth *auth)
     SIAENTITY *siah = (SIAENTITY *) auth->data;
 
     (void) sia_ses_release(&siah);
+    efree(sudo_argv);
     return AUTH_SUCCESS;
 }
