@@ -1133,18 +1133,21 @@ This option is only available whe B<sudo> is built with SELinux support.
 
 The default user to run commands as if the B<-u> option is not specified
 on the command line.  This defaults to C<@runas_default@>.
-Note that if I<runas_default> is set it B<must> occur before
-any C<Runas_Alias> specifications.
 
 =item syslog_badpri
 
 Syslog priority to use when user authenticates unsuccessfully.
 Defaults to C<@badpri@>.
 
+The following syslog priorities are supported: B<alert>, B<crit>,
+B<debug>, B<emerg>, B<err>, B<info>, B<notice>, and B<warning>.
+
 =item syslog_goodpri
 
 Syslog priority to use when user authenticates successfully.
 Defaults to C<@goodpri@>.
+
+See L<syslog_badpri> for the list of supported syslog priorities.
 
 =item sudoers_locale
 
@@ -1305,6 +1308,10 @@ This option is @secure_path@ by default.
 Syslog facility if syslog is being used for logging (negate to
 disable syslog logging).  Defaults to C<@logfac@>.
 
+The following syslog facilities are supported: B<authpriv> (if your
+OS supports it), B<auth>, B<daemon>, B<user>, B<local0>, B<local1>,
+B<local2>, B<local3>, B<local4>, B<local5>, B<local6>, and B<local7>.
+
 =item verifypw
 
 This option controls when a password will be required when a user runs
@@ -1382,14 +1389,6 @@ C<!> operators respectively.  The default list of variables to keep
 is displayed when B<sudo> is run by root with the I<-V> option.
 
 =back
-
-When logging via L<syslog(3)>, B<sudo> accepts the following values
-for the syslog facility (the value of the B<syslog> Parameter):
-B<authpriv> (if your OS supports it), B<auth>, B<daemon>, B<user>,
-B<local0>, B<local1>, B<local2>, B<local3>, B<local4>, B<local5>,
-B<local6>, and B<local7>.  The following syslog priorities are
-supported: B<alert>, B<crit>, B<debug>, B<emerg>, B<err>, B<info>,
-B<notice>, and B<warning>.
 
 =head1 FILES
 
