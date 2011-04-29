@@ -58,6 +58,17 @@ o Upgrading from a version prior to 1.8.0:
     file in the doc directory or refer to the updated sudo manual
     to see how to configure sudo.conf.
 
+    The "askpass" setting has moved from the sudoers file to the
+    sudo.conf file.  If you have a sudoers file that uses the
+    "askpass" option, you will need to move the definition to the
+    sudo.conf file.
+
+    Old style in /etc/sudoers:
+	Defaults askpass=/usr/X11R6/bin/ssh-askpass
+
+    New style in /etc/sudo.conf:
+	Path askpass /usr/X11R6/bin/ssh-askpass
+
 o Upgrading from a version prior to 1.7.5:
 
     Sudo 1.7.5 includes an updated LDAP schema with support for
