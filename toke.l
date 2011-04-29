@@ -439,7 +439,7 @@ NOLOG_INPUT[[:blank:]]*:	{
 			    return NTWKADDR;
 			}
 
-{IPV4ADDR}\/([12][0-9]*|3[0-2]*) {
+{IPV4ADDR}\/([12]?[0-9]|3[0-2]) {
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
