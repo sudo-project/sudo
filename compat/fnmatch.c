@@ -68,7 +68,7 @@ static int rangematch(const char *, int, int, char **);
 static int classmatch(const char *, int, int, const char **);
 
 int
-fnmatch(const char *pattern, const char *string, int flags)
+rpl_fnmatch(const char *pattern, const char *string, int flags)
 {
 	const char *stringstart;
 	char *newp;
