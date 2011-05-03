@@ -174,7 +174,7 @@ static void	 qprintf(const char *, Char *);
 #endif
 
 int
-glob(const char *pattern, int flags, int (*errfunc)(const char *, int),
+rpl_glob(const char *pattern, int flags, int (*errfunc)(const char *, int),
 	glob_t *pglob)
 {
 	const unsigned char *patnext;
@@ -810,7 +810,7 @@ match(Char *name, Char *pat, Char *patend)
 
 /* Free allocated data belonging to a glob_t structure. */
 void
-globfree(glob_t *pglob)
+rpl_globfree(glob_t *pglob)
 {
 	int i;
 	char **pp;
