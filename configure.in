@@ -2130,6 +2130,19 @@ AC_CHECK_FUNCS(getprogname, , [
     AC_MSG_RESULT($sudo_cv___progname)
 ])
 
+# gettext() and friends may be located in libc (Linux and Solaris)
+# or in libintl.  However, it is possible to have libintl installed
+# even when gettext() is present in libc.  In the case of GNU libintl,
+# gettext() will be defined to gettext_libintl in libintl.h.
+# Since gcc prefers /usr/local/include to /usr/include, we need to
+# make sure we use the gettext() that matches the include file.
+# First check that it links w/o additional libs, then try with -lintl.
+AC_LINK_IFELSE([AC_LANG_PROGRAM(
+[[#include <libintl.h>]], [(void)gettext((char *)0, (char *)0);])],
+[AC_DEFINE(HAVE_LIBINTL_H)],
+[AC_CHECK_LIB(intl, gettext, [LIBS="${LIBS} -lintl"]
+    [AC_DEFINE(HAVE_LIBINTL_H)])])
+
 dnl
 dnl Deferred zlib option processing.
 dnl By default we use the system zlib if it is present.
@@ -2256,19 +2269,6 @@ if test ${with_pam-"no"} != "no"; then
 			    AC_MSG_WARN([Ignoring unknown argument to --enable-pam-session: $enableval])
 			    ;;
 	    esac], AC_MSG_RESULT(yes))
-
-	case $host in
-	    *-*-linux*|*-*-solaris*)
-		    # dgettext() may be defined to dgettext_libintl in the
-		    # header file, so first check that it links w/ additional
-		    # libs, then try with -lintl
-		    AC_LINK_IFELSE([AC_LANG_PROGRAM(
-		    [[#include <libintl.h>]], [(void)dgettext((char *)0, (char *)0);])],
-		    [AC_DEFINE(HAVE_DGETTEXT)],
-		    [AC_CHECK_LIB(intl, dgettext, [LIBS="${LIBS} -lintl"]
-			[AC_DEFINE(HAVE_DGETTEXT)])])
-		    ;;
-	esac
     fi
 fi
 
@@ -2981,7 +2981,6 @@ AH_TEMPLATE(HAVE_BSM_AUDIT, [Define to 1 to enable BSM audit support.])
 AH_TEMPLATE(HAVE_DCE, [Define to 1 if you use OSF DCE.])
 AH_TEMPLATE(HAVE_DD_FD, [Define to 1 if your `DIR' contains dd_fd.])
 AH_TEMPLATE(HAVE_DIRFD, [Define to 1 if you have the `dirfd' function or macro.])
-AH_TEMPLATE(HAVE_DGETTEXT, [Define to 1 if you have the `dgettext' function.])
 AH_TEMPLATE(HAVE_DISPCRYPT, [Define to 1 if you have the `dispcrypt' function.])
 AH_TEMPLATE(HAVE_DLOPEN, [Define to 1 if you have the `dlopen' function.])
 AH_TEMPLATE(HAVE_EXTENDED_GLOB, [Define to 1 if your glob.h defines the GLOB_BRACE and GLOB_TILDE flags.])
@@ -3006,6 +3005,7 @@ AH_TEMPLATE(HAVE_KRB5_INIT_SECURE_CONTEXT, [Define to 1 if you have the `krb5_in
 AH_TEMPLATE(HAVE_KRB5_VERIFY_USER, [Define to 1 if you have the `krb5_verify_user' function.])
 AH_TEMPLATE(HAVE_LBER_H, [Define to 1 if your LDAP needs <lber.h>. (OpenLDAP does not)])
 AH_TEMPLATE(HAVE_LDAP, [Define to 1 if you use LDAP for sudoers.])
+AH_TEMPLATE(HAVE_LIBINTL_H, [Define to 1 if you have the <libintl.h> header file.])
 AH_TEMPLATE(HAVE_LINUX_AUDIT, [Define to 1 to enable Linux audit support.])
 AH_TEMPLATE(HAVE_OPIE, [Define to 1 if you use NRL OPIE.])
 AH_TEMPLATE(HAVE_PAM, [Define to 1 if you use PAM authentication.])
@@ -3098,6 +3098,20 @@ AH_BOTTOM([/*
 #define CLR(t, f)	((t) &= ~(f))
 #undef ISSET
 #define ISSET(t, f)     ((t) & (f))
+
+/*
+ * Internationalization support.
+ */
+#ifdef HAVE_LIBINTL_H
+# define _(String) gettext(String)
+# define gettext_noop(String) String
+# define N_(String) gettext_noop(String)
+#else
+# define _(String) String 
+# define N_(String) String
+# define textdomain(Domain)
+# define bindtextdomain(Package, Directory)
+#endif /* HAVE_LIBINTL_H */
 
 /* New ANSI-style OS defs for HP-UX and ConvexOS. */
 #if defined(hpux) && !defined(__hpux)

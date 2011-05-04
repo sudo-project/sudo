@@ -49,7 +49,7 @@
 # include <security/pam_appl.h>
 #endif
 
-#ifdef HAVE_DGETTEXT
+#ifdef HAVE_LIBINTL_H
 # include <libintl.h>
 # if defined(__LINUX_PAM__)
 #  define PAM_TEXT_DOMAIN	"Linux-PAM"
@@ -293,7 +293,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		    (def_prompt[9] == ' ' && def_prompt[10] == '\0'));
 
 		/* Only override PAM prompt if it matches /^Password: ?/ */
-#if defined(PAM_TEXT_DOMAIN) && defined(HAVE_DGETTEXT)
+#if defined(PAM_TEXT_DOMAIN) && defined(HAVE_LIBINTL_H)
 		if (!def_passprompt_override && (std_prompt ||
 		    (strcmp(pm->msg, dgettext(PAM_TEXT_DOMAIN, "Password: ")) &&
 		    strcmp(pm->msg, dgettext(PAM_TEXT_DOMAIN, "Password:")))))
