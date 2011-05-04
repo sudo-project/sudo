@@ -69,10 +69,10 @@ typedef struct {
 #define	GLOB_NOSYS	(-4)	/* Function not supported. */
 #define GLOB_ABEND	GLOB_ABORTED
 
+int	rpl_glob(const char *, int, int (*)(const char *, int), glob_t *);
+void	rpl_globfree(glob_t *);
+
 #define glob(_a, _b, _c, _d) rpl_glob((_a), (_b), (_c), (_d))
 #define globfree(_a) rpl_globfree((_a))
-
-int	glob(const char *, int, int (*)(const char *, int), glob_t *);
-void	globfree(glob_t *);
 
 #endif /* !_GLOB_H_ */
