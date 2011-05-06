@@ -35,7 +35,7 @@ main (int argc, char *argv[])
     char *cp, *cmnd;
 
     if (argc < 2)
-	errx(EXIT_FAILURE, "requires at least one argument");
+	errx(EXIT_FAILURE, _("requires at least one argument"));
 
     /* Shift argv and make a copy of the command to execute. */
     argv++;
@@ -51,6 +51,6 @@ main (int argc, char *argv[])
 	*cp = '-';
     }
     execv(cmnd, argv);
-    warn("unable to execute %s", argv[0]);
+    warn(_("unable to execute %s"), argv[0]);
     _exit(EXIT_FAILURE);
 }

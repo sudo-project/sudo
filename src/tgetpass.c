@@ -92,7 +92,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     if (!ISSET(flags, TGP_STDIN|TGP_ECHO|TGP_ASKPASS|TGP_NOECHO_TRY) &&
 	!tty_present()) {
 	if (askpass == NULL || getenv("DISPLAY") == NULL) {
-	    warningx("no tty present and no askpass program specified");
+	    warningx(_("no tty present and no askpass program specified"));
 	    return NULL;
 	}
 	SET(flags, TGP_ASKPASS);
@@ -101,7 +101,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     /* If using a helper program to get the password, run it instead. */
     if (ISSET(flags, TGP_ASKPASS)) {
 	if (askpass == NULL || *askpass == '\0')
-	    errorx(1, "no askpass program specified, try setting SUDO_ASKPASS");
+	    errorx(1, _("no askpass program specified, try setting SUDO_ASKPASS"));
 	return sudo_askpass(askpass, prompt);
     }
 
@@ -218,10 +218,10 @@ sudo_askpass(const char *askpass, const char *prompt)
     pid_t pid;
 
     if (pipe(pfd) == -1)
-	error(1, "unable to create pipe");
+	error(1, _("unable to create pipe"));
 
     if ((pid = fork()) == -1)
-	error(1, "unable to fork");
+	error(1, _("unable to fork"));
 
     if (pid == 0) {
 	/* child, point stdout to output side of the pipe and exec askpass */
@@ -231,16 +231,16 @@ sudo_askpass(const char *askpass, const char *prompt)
 	}
 	(void) setuid(ROOT_UID);
 	if (setgid(user_details.gid)) {
-	    warning("unable to set gid to %u", (unsigned int)user_details.gid);
+	    warning(_("unable to set gid to %u"), (unsigned int)user_details.gid);
 	    _exit(255);
 	}
 	if (setuid(user_details.uid)) {
-	    warning("unable to set uid to %u", (unsigned int)user_details.uid);
+	    warning(_("unable to set uid to %u"), (unsigned int)user_details.uid);
 	    _exit(255);
 	}
 	closefrom(STDERR_FILENO + 1);
 	execl(askpass, askpass, prompt, (char *)NULL);
-	warning("unable to run %s", askpass);
+	warning(_("unable to run %s"), askpass);
 	_exit(255);
     }
 

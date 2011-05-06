@@ -133,7 +133,7 @@ pty_setup(uid_t uid, const char *tty, const char *utmp_user)
     if (io_fds[SFD_USERTTY] != -1) {
 	if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
 	    slavename, sizeof(slavename), uid))
-	    error(1, "Can't get pty");
+	    error(1, _("can't allocate pty"));
 	/* Add entry to utmp/utmpx? */
 	if (utmp_user != NULL)
 	    utmp_login(tty, slavename, io_fds[SFD_SLAVE], utmp_user);
@@ -321,7 +321,7 @@ suspend_parent(int signo)
 	/* Suspend self and continue child when we resume. */
 	sa.sa_handler = SIG_DFL;
 	sigaction(signo, &sa, &osa);
-	sudo_debug(8, "kill parent %d", signo);
+	sudo_debug(8, _("kill parent %d"), signo);
 	if (killpg(ppgrp, signo) != 0)
 	    warning("killpg(%d, %d)", ppgrp, signo);
 
@@ -332,8 +332,9 @@ suspend_parent(int signo)
 	 * Only modify term if we are foreground process and either
 	 * the old tty mode was not cooked or child got SIGTT{IN,OU}
 	 */
-	sudo_debug(8, "parent is in %sground, ttymode %d -> %d",
-	    foreground ? "fore" : "back", oldmode, ttymode);
+	sudo_debug(8,
+	    foreground ? _("parent is in foreground, ttymode %d -> %d") :
+	    _("parent is in background, ttymode %d -> %d"), oldmode, ttymode);
 
 	if (ttymode != TERM_COOKED) {
 	    if (foreground) {
@@ -519,7 +520,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
     if (io_fds[SFD_STDIN] == -1 || !isatty(STDIN_FILENO)) {
 	pipeline = TRUE;
 	if (pipe(io_pipe[STDIN_FILENO]) != 0)
-	    error(1, "unable to create pipe");
+	    error(1, _("unable to create pipe"));
 	iobufs = io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
 	    log_stdin, iobufs);
 	io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
@@ -527,14 +528,14 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
     if (io_fds[SFD_STDOUT] == -1 || !isatty(STDOUT_FILENO)) {
 	pipeline = TRUE;
 	if (pipe(io_pipe[STDOUT_FILENO]) != 0)
-	    error(1, "unable to create pipe");
+	    error(1, _("unable to create pipe"));
 	iobufs = io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
 	    log_stdout, iobufs);
 	io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
     }
     if (io_fds[SFD_STDERR] == -1 || !isatty(STDERR_FILENO)) {
 	if (pipe(io_pipe[STDERR_FILENO]) != 0)
-	    error(1, "unable to create pipe");
+	    error(1, _("unable to create pipe"));
 	iobufs = io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
 	    log_stderr, iobufs);
 	io_fds[SFD_STDERR] = io_pipe[STDERR_FILENO][1];
@@ -559,7 +560,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
 		n = term_raw(io_fds[SFD_USERTTY], 0);
 	    } while (!n && errno == EINTR);
 	    if (!n)
-		error(1, "Can't set terminal to raw mode");
+		error(1, _("Can't set terminal to raw mode"));
 	}
     }
 
@@ -698,7 +699,7 @@ deliver_signal(pid_t pid, int signo)
     int status;
 
     /* Handle signal from parent. */
-    sudo_debug(8, "signal %d from parent", signo);
+    sudo_debug(8, _("signal %d from parent"), signo);
     switch (signo) {
     case SIGALRM:
 	terminate_child(pid, TRUE);
@@ -741,9 +742,10 @@ send_status(int fd, struct command_status *cstat)
 	    n = send(fd, cstat, sizeof(*cstat), 0);
 	} while (n == -1 && errno == EINTR);
 	if (n != sizeof(*cstat)) {
-	    sudo_debug(8, "unable to send status to parent: %s", strerror(errno));
+	    sudo_debug(8, _("unable to send status to parent: %s"),
+		strerror(errno));
 	} else {
-	    sudo_debug(8, "sent status to parent");
+	    sudo_debug(8, _("sent status to parent"));
 	}
 	cstat->type = CMD_INVALID; /* prevent re-sending */
     }
@@ -771,7 +773,7 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 	    cstat->type = CMD_WSTATUS;
 	    cstat->val = status;
 	    if (WIFSTOPPED(status)) {
-		sudo_debug(8, "command stopped, signal %d",
+		sudo_debug(8, _("command stopped, signal %d"),
 		    WSTOPSIG(status));
 		do {
 		    child_pgrp = tcgetpgrp(io_fds[SFD_SLAVE]);
@@ -779,10 +781,10 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 		if (send_status(backchannel, cstat) == -1)
 		    return alive; /* XXX */
 	    } else if (WIFSIGNALED(status)) {
-		sudo_debug(8, "command killed, signal %d",
+		sudo_debug(8, _("command killed, signal %d"),
 		    WTERMSIG(status));
 	    } else {
-		sudo_debug(8, "command exited: %d",
+		sudo_debug(8, _("command exited: %d"),
 		    WEXITSTATUS(status));
 	    }
 	}
@@ -821,7 +823,7 @@ exec_monitor(struct command_details *details, int backchannel)
      * the select() loop.
      */
     if (pipe_nonblock(signal_pipe) != 0)
-	error(1, "cannot create pipe");
+	error(1, _("cannot create pipe"));
 
     /* Reset SIGWINCH and SIGALRM. */
     zero_bytes(&sa, sizeof(sa));
@@ -853,7 +855,7 @@ exec_monitor(struct command_details *details, int backchannel)
     if (io_fds[SFD_SLAVE] != -1) {
 #ifdef TIOCSCTTY
 	if (ioctl(io_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0)
-	    error(1, "unable to set controlling tty");
+	    error(1, _("unable to set controlling tty"));
 #else
 	/* Set controlling tty by reopening slave. */
 	if ((n = open(slavename, O_RDWR)) >= 0)
@@ -872,10 +874,10 @@ exec_monitor(struct command_details *details, int backchannel)
 
     /* Start command and wait for it to stop or exit */
     if (pipe(errpipe) == -1)
-	error(1, "unable to create pipe");
+	error(1, _("unable to create pipe"));
     child = fork();
     if (child == -1) {
-	warning("Can't fork");
+	warning("fork");
 	goto bad;
     }
     if (child == 0) {
@@ -939,7 +941,7 @@ exec_monitor(struct command_details *details, int backchannel)
 		goto done;
 	    if (errno == EINTR)
 		continue;
-	    error(1, "select failed");
+	    error(1, _("select failed"));
 	}
 
 	if (FD_ISSET(signal_pipe[0], fdsr)) {
@@ -947,7 +949,7 @@ exec_monitor(struct command_details *details, int backchannel)
 	    if (n == -1) {
 		if (errno == EINTR || errno == EAGAIN)
 		    continue;
-		warning("error reading from signal pipe");
+		warning(_("error reading from signal pipe"));
 		goto done;
 	    }
 	    /*
@@ -966,7 +968,7 @@ exec_monitor(struct command_details *details, int backchannel)
 	    if (n == -1) {
 		if (errno == EINTR)
 		    continue;
-		warning("error reading from pipe");
+		warning(_("error reading from pipe"));
 		goto done;
 	    }
 	    /* Got errno or EOF, either way we are done with errpipe. */
@@ -982,11 +984,12 @@ exec_monitor(struct command_details *details, int backchannel)
 	    if (n == -1) {
 		if (errno == EINTR)
 		    continue;
-		warning("error reading from socketpair");
+		warning(_("error reading from socketpair"));
 		goto done;
 	    }
 	    if (cstmp.type != CMD_SIGNO) {
-		warningx("unexpected reply type on backchannel: %d", cstmp.type);
+		warningx(_("unexpected reply type on backchannel: %d"),
+		    cstmp.type);
 		continue;
 	    }
 	    deliver_signal(child, cstmp.val);
@@ -1071,7 +1074,7 @@ flush_output(void)
 		break; /* all I/O flushed */
 	    if (errno == EINTR)
 		continue;
-	    error(1, "select failed");
+	    error(1, _("select failed"));
 	}
 	if (perform_io(fdsr, fdsw, NULL) != 0)
 	    break;

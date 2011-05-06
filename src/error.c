@@ -76,11 +76,11 @@ _warning(int use_errno, const char *fmt, va_list ap)
 
 	fputs(getprogname(), stderr);
 	if (fmt != NULL) {
-		fputs(": ", stderr);
+		fputs(_(": "), stderr);
 		vfprintf(stderr, fmt, ap);
 	}
 	if (use_errno) {
-	    fputs(": ", stderr);
+	    fputs(_(": "), stderr);
 	    fputs(strerror(serrno), stderr);
 	}
 	putc('\n', stderr);

@@ -72,7 +72,7 @@ audit_role_change(const security_context_t old_context,
         /* Kernel may not have audit support. */
         if (errno != EINVAL && errno != EPROTONOSUPPORT && errno != EAFNOSUPPORT
 )
-            error(1, "unable to open audit system");
+            error(1, _("unable to open audit system"));
 	return -1;
     }
 
@@ -82,7 +82,7 @@ audit_role_change(const security_context_t old_context,
     rc = audit_log_user_message(au_fd, AUDIT_USER_ROLE_CHANGE,
 	message, NULL, NULL, ttyn, 1);
     if (rc <= 0)
-	warning("unable to send audit message");
+	warning(_("unable to send audit message"));
 
     efree(message);
     close(au_fd);
@@ -109,17 +109,17 @@ selinux_restore_tty(void)
 
     /* Verify that the tty still has the context set by sudo. */
     if ((retval = fgetfilecon(se_state.ttyfd, &chk_tty_context)) < 0) {
-	warning("unable to fgetfilecon %s", se_state.ttyn);
+	warning(_("unable to fgetfilecon %s"), se_state.ttyn);
 	goto skip_relabel;
     }
 
     if ((retval = strcmp(chk_tty_context, se_state.new_tty_context))) {
-	warningx("%s changed labels.", se_state.ttyn);
+	warningx(_("%s changed labels"), se_state.ttyn);
 	goto skip_relabel;
     }
 
     if ((retval = fsetfilecon(se_state.ttyfd, se_state.tty_context)) < 0)
-	warning("unable to restore context for %s", se_state.ttyn);
+	warning(_("unable to restore context for %s"), se_state.ttyn);
 
 skip_relabel:
     if (se_state.ttyfd != -1) {
@@ -158,7 +158,7 @@ relabel_tty(const char *ttyn, int ptyfd)
     if (ptyfd == -1) {
 	se_state.ttyfd = open(ttyn, O_RDWR|O_NONBLOCK);
 	if (se_state.ttyfd == -1) {
-	    warning("unable to open %s, not relabeling tty", ttyn);
+	    warning(_("unable to open %s, not relabeling tty"), ttyn);
 	    if (se_state.enforcing)
 		goto bad;
 	}
@@ -167,21 +167,21 @@ relabel_tty(const char *ttyn, int ptyfd)
     }
 
     if (fgetfilecon(se_state.ttyfd, &tty_con) < 0) {
-	warning("unable to get current tty context, not relabeling tty");
+	warning(_("unable to get current tty context, not relabeling tty"));
 	if (se_state.enforcing)
 	    goto bad;
     }
 
     if (tty_con && (security_compute_relabel(se_state.new_context, tty_con,
 	SECCLASS_CHR_FILE, &new_tty_con) < 0)) {
-	warning("unable to get new tty context, not relabeling tty");
+	warning(_("unable to get new tty context, not relabeling tty"));
 	if (se_state.enforcing)
 	    goto bad;
     }
 
     if (new_tty_con != NULL) {
 	if (fsetfilecon(se_state.ttyfd, new_tty_con) < 0) {
-	    warning("unable to set new tty context");
+	    warning(_("unable to set new tty context"));
 	    if (se_state.enforcing)
 		goto bad;
 	}
@@ -191,7 +191,7 @@ relabel_tty(const char *ttyn, int ptyfd)
 	/* Reopen pty that was relabeled, std{in,out,err} are reset later. */
 	se_state.ttyfd = open(ttyn, O_RDWR|O_NOCTTY, 0);
 	if (se_state.ttyfd == -1) {
-	    warning("cannot open %s", ttyn);
+	    warning(_("cannot open %s"), ttyn);
 	    if (se_state.enforcing)
 		goto bad;
 	}
@@ -204,7 +204,7 @@ relabel_tty(const char *ttyn, int ptyfd)
 	close(se_state.ttyfd);
 	se_state.ttyfd = open(ttyn, O_RDWR|O_NONBLOCK);
 	if (se_state.ttyfd == -1) {
-	    warning("unable to open %s", ttyn);
+	    warning(_("unable to open %s"), ttyn);
 	    goto bad;
 	}
 	(void)fcntl(se_state.ttyfd, F_SETFL,
@@ -246,13 +246,13 @@ get_exec_context(security_context_t old_context, const char *role, const char *t
     
     /* We must have a role, the type is optional (we can use the default). */
     if (!role) {
-	warningx("you must specify a role for type %s", type);
+	warningx(_("you must specify a role for type %s"), type);
 	errno = EINVAL;
 	return NULL;
     }
     if (!type) {
 	if (get_default_type(role, &typebuf)) {
-	    warningx("unable to get default type for role %s", role);
+	    warningx(_("unable to get default type for role %s"), role);
 	    errno = EINVAL;
 	    return NULL;
 	}
@@ -270,11 +270,11 @@ get_exec_context(security_context_t old_context, const char *role, const char *t
      * type we will be running the command as.
      */
     if (context_role_set(context, role)) {
-	warning("failed to set new role %s", role);
+	warning(_("failed to set new role %s"), role);
 	goto bad;
     }
     if (context_type_set(context, type)) {
-	warning("failed to set new type %s", type);
+	warning(_("failed to set new type %s"), type);
 	goto bad;
     }
       
@@ -283,7 +283,7 @@ get_exec_context(security_context_t old_context, const char *role, const char *t
      */
     new_context = estrdup(context_str(context));
     if (security_check_context(new_context) < 0) {
-	warningx("%s is not a valid context", new_context);
+	warningx(_("%s is not a valid context"), new_context);
 	errno = EINVAL;
 	goto bad;
     }
@@ -317,13 +317,13 @@ selinux_setup(const char *role, const char *type, const char *ttyn,
 
     /* Store the caller's SID in old_context. */
     if (getprevcon(&se_state.old_context)) {
-	warning("failed to get old_context");
+	warning(_("failed to get old_context"));
 	goto done;
     }
 
     se_state.enforcing = security_getenforce();
     if (se_state.enforcing < 0) {
-	warning("unable to determine enforcing mode.");
+	warning(_("unable to determine enforcing mode."));
 	goto done;
     }
 
@@ -335,7 +335,7 @@ selinux_setup(const char *role, const char *type, const char *ttyn,
 	goto done;
     
     if (relabel_tty(ttyn, ptyfd) < 0) {
-	warning("unable to setup tty context for %s", se_state.new_context);
+	warning(_("unable to setup tty context for %s"), se_state.new_context);
 	goto done;
     }
 
@@ -364,14 +364,14 @@ selinux_execve(const char *path, char *argv[], char *envp[])
     int argc, serrno;
 
     if (setexeccon(se_state.new_context)) {
-	warning("unable to set exec context to %s", se_state.new_context);
+	warning(_("unable to set exec context to %s"), se_state.new_context);
 	if (se_state.enforcing)
 	    return;
     }
 
 #ifdef HAVE_SETKEYCREATECON
     if (setkeycreatecon(se_state.new_context)) {
-	warning("unable to set key creation context to %s", se_state.new_context);
+	warning(_("unable to set key creation context to %s"), se_state.new_context);
 	if (se_state.enforcing)
 	    return;
     }
