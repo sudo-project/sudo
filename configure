@@ -13084,14 +13084,18 @@ done
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 
-		if test -z "$GCC"; then
-		    # Use the +DAportable flag on hppa if it is supported
-		    case "$host_cpu" in
-		    hppa*)
+		# Build PA-RISC1.1 objects for better portability
+		case "$host_cpu" in
+		    hppa2-9*)
 			_CFLAGS="$CFLAGS"
-			CFLAGS="$CFLAGS +DAportable"
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC understands +DAportable" >&5
-$as_echo_n "checking whether $CC understands +DAportable... " >&6; }
+			if test -n "$GCC"; then
+			    portable_flag="-march=1.1"
+			else
+			    portable_flag="+DAportable"
+			fi
+			CFLAGS="$CFLAGS $portable_flag"
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC understands $portable_flag" >&5
+$as_echo_n "checking whether $CC understands $portable_flag... " >&6; }
 if test "${sudo_cv_var_daportable+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
@@ -13123,8 +13127,7 @@ $as_echo "$sudo_cv_var_daportable" >&6; }
 			    CFLAGS="$_CFLAGS"
 			fi
 			;;
-		    esac
-		fi
+		esac
 
 		case "$host" in
 			*-*-hpux1-8.*)

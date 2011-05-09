@@ -1513,13 +1513,17 @@ case "$host" in
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 
-		if test -z "$GCC"; then
-		    # Use the +DAportable flag on hppa if it is supported
-		    case "$host_cpu" in
-		    hppa*)
+		# Build PA-RISC1.1 objects for better portability
+		case "$host_cpu" in
+		    hppa[2-9]*)
 			_CFLAGS="$CFLAGS"
-			CFLAGS="$CFLAGS +DAportable"
-			AC_CACHE_CHECK([whether $CC understands +DAportable],
+			if test -n "$GCC"; then
+			    portable_flag="-march=1.1"
+			else
+			    portable_flag="+DAportable"
+			fi
+			CFLAGS="$CFLAGS $portable_flag"
+			AC_CACHE_CHECK([whether $CC understands $portable_flag],
 			    [sudo_cv_var_daportable],
 			    [AC_LINK_IFELSE(
 				[AC_LANG_PROGRAM([[]], [[]])],
@@ -1532,8 +1536,7 @@ case "$host" in
 			    CFLAGS="$_CFLAGS"
 			fi
 			;;
-		    esac
-		fi
+		esac
 
 		case "$host" in
 			*-*-hpux[1-8].*)
