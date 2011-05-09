@@ -638,6 +638,12 @@ The following options are also configurable at runtime:
         Disable environment resetting.  This sets the default value
         of the "env_reset" Defaults option in sudoers to false.
 
+  --disable-nls
+        Disable natural language support.  By default, sudo will
+        use the gettext() family of functions, if available, to
+        implement messages in the invoking user's native language.
+	Note that translations do not exist for all languages.
+
 Shadow password and C2 support
 ==============================
 

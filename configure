@@ -862,6 +862,7 @@ enable_zlib
 enable_env_reset
 enable_warnings
 enable_admin_flag
+enable_nls
 with_selinux
 enable_gss_krb5_ccache_name
 enable_shared
@@ -1519,6 +1520,7 @@ Optional Features:
   --enable-env-reset      Whether to enable environment resetting by default.
   --enable-warnings       Whether to enable compiler warnings
   --enable-admin-flag     Whether to create a Ubuntu-style admin flag file
+  --disable-nls           Disable natural language support using gettext
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -5486,6 +5488,21 @@ $as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-admin-flag: $en
 	    ;;
   esac
 
+fi
+
+
+# Check whether --enable-nls was given.
+if test "${enable_nls+set}" = set; then :
+  enableval=$enable_nls;  case "$enableval" in
+    yes|no) enable_nls=$enableval
+	    ;;
+    *)	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-nls: $enableval" >&5
+$as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-nls: $enableval" >&2;}
+	    ;;
+  esac
+
+else
+  enable_nls=yes
 fi
 
 
@@ -16691,22 +16708,28 @@ done
 # Since gcc prefers /usr/local/include to /usr/include, we need to
 # make sure we use the gettext() that matches the include file.
 # First check that it links w/o additional libs, then try with -lintl.
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+if test "$enable_nls" = "yes"; then
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include <libintl.h>
+
+	    #include <libintl.h>
 int
 main ()
 {
-(void)gettext((char *)0, (char *)0);
+(void)gettext((char *)0);
   ;
   return 0;
 }
+
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  $as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
+
+	    $as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
+
 
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettext in -lintl" >&5
+
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettext in -lintl" >&5
 $as_echo_n "checking for gettext in -lintl... " >&6; }
 if test "${ac_cv_lib_intl_gettext+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -16744,13 +16767,60 @@ fi
 $as_echo "$ac_cv_lib_intl_gettext" >&6; }
 if test "x$ac_cv_lib_intl_gettext" = x""yes; then :
   LIBS="${LIBS} -lintl"
-    $as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
+		$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
+
+else
+
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettext in -lintl" >&5
+$as_echo_n "checking for gettext in -lintl... " >&6; }
+if test "${ac_cv_lib_intl_gettext_liconv+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lintl -liconv $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char gettext ();
+int
+main ()
+{
+return gettext ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_intl_gettext_liconv=yes
+else
+  ac_cv_lib_intl_gettext_liconv=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_intl_gettext_liconv" >&5
+$as_echo "$ac_cv_lib_intl_gettext_liconv" >&6; }
+if test "x$ac_cv_lib_intl_gettext_liconv" = x""yes; then :
+  LIBS="${LIBS} -lintl -liconv"
+		    $as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
 
 fi
+
+
+fi
+
 
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+fi
 
 case ${enable_zlib-"yes"} in
     yes)
