@@ -930,7 +930,7 @@ open_sudoers(const char *sudoers, int doedit, int *keepopen)
     else if (statbuf.st_uid != sudoers_uid)
 	log_error(NO_EXIT, "%s is owned by uid %u, should be %u", sudoers,
 	    (unsigned int) statbuf.st_uid, (unsigned int) sudoers_uid);
-    else if (statbuf.st_gid != sudoers_gid)
+    else if (ISSET(statbuf.st_mode, S_IRGRP) && statbuf.st_gid != sudoers_gid)
 	log_error(NO_EXIT, "%s is owned by gid %u, should be %u", sudoers,
 	    (unsigned int) statbuf.st_gid, (unsigned int) sudoers_gid);
     else if ((fp = fopen(sudoers, "r")) == NULL)
