@@ -24,9 +24,12 @@
 #ifndef _SUDO_SUDO_H
 #define _SUDO_SUDO_H
 
+#ifdef HAVE_LIBINTL_H
+# include <libintl.h>
+#endif
 #include <limits.h>
-
 #include <pathnames.h>
+
 #include "missing.h"
 #include "alloc.h"
 #include "error.h"

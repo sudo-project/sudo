@@ -50,7 +50,6 @@
 #endif
 
 #ifdef HAVE_LIBINTL_H
-# include <libintl.h>
 # if defined(__LINUX_PAM__)
 #  define PAM_TEXT_DOMAIN	"Linux-PAM"
 # elif defined(__sun__)

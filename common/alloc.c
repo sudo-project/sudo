@@ -47,6 +47,9 @@
 #ifdef HAVE_INTTYPES_H
 # include <inttypes.h>
 #endif
+#ifdef HAVE_LIBINTL_H
+# include <libintl.h>
+#endif
 
 #include "missing.h"
 #include "alloc.h"
