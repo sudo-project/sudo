@@ -54,16 +54,23 @@ aixauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 {
     char *pass;
     char *message = NULL;
-    int reenter = 1;
+    int result, reenter = 0;
     int rval = AUTH_FAILURE;
 
-    pass = auth_getpass(prompt, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF);
     if (pass) {
+	/* XXX - should verify that S_AUTH1 is "NONE" or "SYSTEM" */
+	do {
+	    pass = auth_getpass(prompt, def_passwd_timeout * 60,
+		SUDO_CONV_PROMPT_ECHO_OFF);
+	    efree(message);
+	    result = authenticate(pw->pw_name, pass, &reenter, &message);
+	    zero_bytes(pass, strlen(pass));
+	    prompt = message;
+	} while (reenter);
 	/* XXX - should probably print message on failure. */
-	if (authenticate(pw->pw_name, pass, &reenter, &message) == 0)
+	efree(message);
+	if (result == 0)
 	    rval = AUTH_SUCCESS;
-	free(message);
-	zero_bytes(pass, strlen(pass));
     }
     return rval;
 }
