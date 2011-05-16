@@ -61,14 +61,14 @@ bsdauth_init(struct passwd *pw, char **promptp, sudo_auth *auth)
 
     if ((as = auth_open()) == NULL) {
 	log_error(USE_ERRNO|NO_EXIT|NO_MAIL,
-	    "unable to begin bsd authentication");
+	    _("unable to begin bsd authentication"));
 	return AUTH_FATAL;
     }
 
     /* XXX - maybe sanity check the auth style earlier? */
     login_style = login_getstyle(lc, login_style, "auth-sudo");
     if (login_style == NULL) {
-	log_error(NO_EXIT|NO_MAIL, "invalid authentication type");
+	log_error(NO_EXIT|NO_MAIL, _("invalid authentication type"));
 	auth_close(as);
 	return AUTH_FATAL;
     }
@@ -76,7 +76,7 @@ bsdauth_init(struct passwd *pw, char **promptp, sudo_auth *auth)
      if (auth_setitem(as, AUTHV_STYLE, login_style) < 0 ||
 	auth_setitem(as, AUTHV_NAME, pw->pw_name) < 0 ||
 	auth_setitem(as, AUTHV_CLASS, login_class) < 0) {
-	log_error(NO_EXIT|NO_MAIL, "unable to setup authentication");
+	log_error(NO_EXIT|NO_MAIL, _("unable to setup authentication"));
 	auth_close(as);
 	return AUTH_FATAL;
     }

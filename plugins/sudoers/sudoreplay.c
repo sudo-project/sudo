@@ -259,7 +259,7 @@ main(int argc, char *argv[])
 		else if (strcmp(cp, "ttyout") == 0)
 		    SET(replay_filter, 1 << IOFD_TTYOUT);
 		else
-		    errorx(1, "invalid filter option: %s", optarg);
+		    errorx(1, _("invalid filter option: %s"), optarg);
 	    }
 	    break;
 	case 'h':
@@ -272,13 +272,13 @@ main(int argc, char *argv[])
 	    errno = 0;
 	    max_wait = strtod(optarg, &ep);
 	    if (*ep != '\0' || errno != 0)
-		errorx(1, "invalid max wait: %s", optarg);
+		errorx(1, _("invalid max wait: %s"), optarg);
 	    break;
 	case 's':
 	    errno = 0;
 	    speed = strtod(optarg, &ep);
 	    if (*ep != '\0' || errno != 0)
-		errorx(1, "invalid speed factor: %s", optarg);
+		errorx(1, _("invalid speed factor: %s"), optarg);
 	    break;
 	case 'V':
 	    (void) printf("%s version %s\n", getprogname(), PACKAGE_VERSION);
@@ -304,13 +304,13 @@ main(int argc, char *argv[])
 	plen = snprintf(path, sizeof(path), "%s/%.2s/%.2s/%.2s/timing",
 	    session_dir, id, &id[2], &id[4]);
 	if (plen <= 0 || plen >= sizeof(path))
-	    errorx(1, "%s/%.2s/%.2s/%.2s/%.2s/timing: %s", session_dir,
+	    errorx(1, _("%s/%.2s/%.2s/%.2s/%.2s/timing: %s"), session_dir,
 		id, &id[2], &id[4], strerror(ENAMETOOLONG));
     } else {
 	plen = snprintf(path, sizeof(path), "%s/%s/timing",
 	    session_dir, id);
 	if (plen <= 0 || plen >= sizeof(path))
-	    errorx(1, "%s/%s/timing: %s", session_dir,
+	    errorx(1, _("%s/%s/timing: %s"), session_dir,
 		id, strerror(ENAMETOOLONG));
     }
     plen -= 7;
@@ -320,7 +320,7 @@ main(int argc, char *argv[])
 	if (ISSET(replay_filter, 1 << idx) || idx == IOFD_TIMING) {
 	    io_fds[idx].v = open_io_fd(path, plen, io_fnames[idx]);
 	    if (io_fds[idx].v == NULL)
-		error(1, "unable to open %s", path);
+		error(1, _("unable to open %s"), path);
 	}
     }
 
@@ -329,14 +329,14 @@ main(int argc, char *argv[])
     strlcat(path, "/log", sizeof(path));
     lfile = fopen(path, "r");
     if (lfile == NULL)
-	error(1, "unable to open %s", path);
+	error(1, _("unable to open %s"), path);
     cp = NULL;
     len = 0;
     /* Pull out command (third line). */
     if (getline(&cp, &len, lfile) == -1 ||
 	getline(&cp, &len, lfile) == -1 ||
 	getline(&cp, &len, lfile) == -1) {
-	errorx(1, "invalid log file %s", path);
+	errorx(1, _("invalid log file %s"), path);
     }
     printf("Replaying sudo session: %s", cp);
     free(cp);
@@ -364,7 +364,7 @@ main(int argc, char *argv[])
 	if (ch != -1)
 	    (void) fcntl(STDIN_FILENO, F_SETFL, ch | O_NONBLOCK);
 	if (!term_raw(STDIN_FILENO, 1))
-	    error(1, "cannot set tty to raw mode");
+	    error(1, _("cannot set tty to raw mode"));
     }
     fdsw = (fd_set *)emalloc2(howmany(STDOUT_FILENO + 1, NFDBITS),
 	sizeof(fd_mask));
@@ -378,7 +378,7 @@ main(int argc, char *argv[])
     while (fgets(buf, sizeof(buf), io_fds[IOFD_TIMING].f) != NULL) {
 #endif
 	if (!parse_timing(buf, decimal, &idx, &seconds, &nbytes))
-	    errorx(1, "invalid timing file line: %s", buf);
+	    errorx(1, _("invalid timing file line: %s"), buf);
 
 	if (interactive)
 	    check_input(STDIN_FILENO, &speed);
@@ -420,7 +420,7 @@ main(int argc, char *argv[])
 			if (nready == 1)
 			    continue;
 		    }
-		    error(1, "writing to standard output");
+		    error(1, _("writing to standard output"));
 		}
 		off += nwritten;
 	    } while (nread > off);
@@ -450,7 +450,7 @@ delay(double secs)
       rval = nanosleep(&ts, &rts);
     } while (rval == -1 && errno == EINTR);
     if (rval == -1)
-	error(1, "nanosleep: tv_sec %ld, tv_nsec %ld", ts.tv_sec, ts.tv_nsec);
+	error(1, _("nanosleep: tv_sec %ld, tv_nsec %ld"), ts.tv_sec, ts.tv_nsec);
 }
 
 static void *
@@ -494,7 +494,7 @@ parse_expr(struct search_node **headp, char *argv[])
 	    continue;
 	case 'c': /* command */
 	    if (av[0][1] == '\0')
-		errorx(1, "ambiguous expression \"%s\"", *av);
+		errorx(1, _("ambiguous expression \"%s\""), *av);
 	    if (strncmp(*av, "cwd", strlen(*av)) == 0)
 		type = ST_CWD;
 	    else if (strncmp(*av, "command", strlen(*av)) == 0)
@@ -519,7 +519,7 @@ parse_expr(struct search_node **headp, char *argv[])
 	    break;
 	case 't': /* tty or to date */
 	    if (av[0][1] == '\0')
-		errorx(1, "ambiguous expression \"%s\"", *av);
+		errorx(1, _("ambiguous expression \"%s\""), *av);
 	    if (strncmp(*av, "todate", strlen(*av)) == 0)
 		type = ST_TODATE;
 	    else if (strncmp(*av, "tty", strlen(*av)) == 0)
@@ -536,7 +536,7 @@ parse_expr(struct search_node **headp, char *argv[])
 	    if (av[0][1] != '\0')
 		goto bad;
 	    if (stack_top + 1 == STACK_NODE_SIZE) {
-		errorx(1, "too many parenthesized expressions, max %d",
+		errorx(1, _("too many parenthesized expressions, max %d"),
 		    STACK_NODE_SIZE);
 	    }
 	    node_stack[stack_top++] = sn;
@@ -547,13 +547,13 @@ parse_expr(struct search_node **headp, char *argv[])
 		goto bad;
 	    /* pop */
 	    if (--stack_top < 0)
-		errorx(1, "unmatched ')' in expression");
+		errorx(1, _("unmatched ')' in expression"));
 	    if (node_stack[stack_top])
 		sn->next = node_stack[stack_top]->next;
 	    return av - argv + 1;
 	bad:
 	default:
-	    errorx(1, "unknown search term \"%s\"", *av);
+	    errorx(1, _("unknown search term \"%s\""), *av);
 	    /* NOTREACHED */
 	}
 
@@ -567,17 +567,17 @@ parse_expr(struct search_node **headp, char *argv[])
 	    av += parse_expr(&newsn->u.expr, av + 1);
 	} else {
 	    if (*(++av) == NULL)
-		errorx(1, "%s requires an argument", av[-1]);
+		errorx(1, _("%s requires an argument"), av[-1]);
 #ifdef HAVE_REGCOMP
 	    if (type == ST_PATTERN) {
 		if (regcomp(&newsn->u.cmdre, *av, REG_EXTENDED|REG_NOSUB) != 0)
-		    errorx(1, "invalid regex: %s", *av);
+		    errorx(1, _("invalid regex: %s"), *av);
 	    } else
 #endif
 	    if (type == ST_TODATE || type == ST_FROMDATE) {
 		newsn->u.tstamp = get_date(*av);
 		if (newsn->u.tstamp == -1)
-		    errorx(1, "could not parse date \"%s\"", *av);
+		    errorx(1, _("could not parse date \"%s\""), *av);
 	    } else {
 		newsn->u.ptr = *av;
 	    }
@@ -590,11 +590,11 @@ parse_expr(struct search_node **headp, char *argv[])
 	sn = newsn;
     }
     if (stack_top)
-	errorx(1, "unmatched '(' in expression");
+	errorx(1, _("unmatched '(' in expression"));
     if (or)
-	errorx(1, "illegal trailing \"or\"");
+	errorx(1, _("illegal trailing \"or\""));
     if (not)
-	errorx(1, "illegal trailing \"!\"");
+	errorx(1, _("illegal trailing \"!\""));
 
     return av - argv;
 }
@@ -666,7 +666,7 @@ list_session(char *logfile, REGEX_T *re, const char *user, const char *tty)
 
     fp = fopen(logfile, "r");
     if (fp == NULL) {
-	warning("unable to open %s", logfile);
+	warning(_("unable to open %s"), logfile);
 	goto done;
     }
 
@@ -758,7 +758,7 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
 
     d = opendir(dir);
     if (d == NULL)
-	error(1, "unable to open %s", dir);
+	error(1, _("unable to open %s"), dir);
 
     /* XXX - would be faster to chdir and use relative names */
     sdlen = strlcpy(pathbuf, dir, sizeof(pathbuf));
@@ -810,7 +810,7 @@ list_sessions(int argc, char **argv, const char *pattern, const char *user,
     if (pattern) {
 	re = &rebuf;
 	if (regcomp(re, pattern, REG_EXTENDED|REG_NOSUB) != 0)
-	    errorx(1, "invalid regex: %s", pattern);
+	    errorx(1, _("invalid regex: %s"), pattern);
     }
 #else
     re = (char *) pattern;

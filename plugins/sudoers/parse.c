@@ -112,7 +112,7 @@ sudo_file_parse(struct sudo_nss *nss)
     init_parser(sudoers_file, 0);
     yyin = nss->handle;
     if (yyparse() != 0 || parse_error) {
-	log_error(NO_EXIT, "parse error in %s near line %d",
+	log_error(NO_EXIT, _("parse error in %s near line %d"),
 	    errorfile, errorlineno);
 	return -1;
     }
@@ -532,7 +532,7 @@ display_bound_defaults(int dtype, struct lbuf *lbuf)
 	default:
 	    return -1;
     }
-    /* sudo_printf(SUDO_CONV_INFO_MSG, "Per-%s Defaults entries:\n", dname); */
+    /* sudo_printf(SUDO_CONV_INFO_MSG, _("Per-%s Defaults entries:\n"), dname); */
     tq_foreach_fwd(&defaults, d) {
 	if (d->type != dtype)
 	    continue;

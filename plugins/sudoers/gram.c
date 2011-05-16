@@ -112,7 +112,7 @@ yyerror(const char *s)
     if (trace_print != NULL) {
 	LEXTRACE("<*> ");
     } else if (verbose && s != NULL) {
-	warningx(">>> %s: %s near line %d <<<", sudoers, s,
+	warningx(_(">>> %s: %s near line %d <<<"), sudoers, s,
 	    sudolineno ? sudolineno - 1 : 0);
     }
     parse_error = TRUE;

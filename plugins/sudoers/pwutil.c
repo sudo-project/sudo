@@ -241,7 +241,7 @@ sudo_getpwuid(uid_t uid)
     if ((key.d.pw = getpwuid(uid)) != NULL) {
 	item = make_pwitem(key.d.pw, NULL);
 	if (rbinsert(pwcache_byuid, item) != NULL)
-	    errorx(1, "unable to cache uid %u (%s), already exists",
+	    errorx(1, _("unable to cache uid %u (%s), already exists"),
 		(unsigned int) uid, item->d.pw->pw_name);
     } else {
 	item = emalloc(sizeof(*item));
@@ -249,7 +249,7 @@ sudo_getpwuid(uid_t uid)
 	item->k.uid = uid;
 	item->d.pw = NULL;
 	if (rbinsert(pwcache_byuid, item) != NULL)
-	    errorx(1, "unable to cache uid %u, already exists",
+	    errorx(1, _("unable to cache uid %u, already exists"),
 		(unsigned int) uid);
     }
 #ifdef HAVE_SETAUTHDB
@@ -285,7 +285,7 @@ sudo_getpwnam(const char *name)
     if ((key.d.pw = getpwnam(name)) != NULL) {
 	item = make_pwitem(key.d.pw, name);
 	if (rbinsert(pwcache_byname, item) != NULL)
-	    errorx(1, "unable to cache user %s, already exists", name);
+	    errorx(1, _("unable to cache user %s, already exists"), name);
     } else {
 	len = strlen(name) + 1;
 	item = emalloc(sizeof(*item) + len);
@@ -294,7 +294,7 @@ sudo_getpwnam(const char *name)
 	memcpy(item->k.name, name, len);
 	item->d.pw = NULL;
 	if (rbinsert(pwcache_byname, item) != NULL)
-	    errorx(1, "unable to cache user %s, already exists", name);
+	    errorx(1, _("unable to cache user %s, already exists"), name);
     }
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
@@ -508,7 +508,7 @@ sudo_getgrgid(gid_t gid)
     if ((key.d.gr = getgrgid(gid)) != NULL) {
 	item = make_gritem(key.d.gr, NULL);
 	if (rbinsert(grcache_bygid, item) != NULL)
-	    errorx(1, "unable to cache gid %u (%s), already exists",
+	    errorx(1, _("unable to cache gid %u (%s), already exists"),
 		(unsigned int) gid, key.d.gr->gr_name);
     } else {
 	item = emalloc(sizeof(*item));
@@ -516,7 +516,7 @@ sudo_getgrgid(gid_t gid)
 	item->k.gid = gid;
 	item->d.gr = NULL;
 	if (rbinsert(grcache_bygid, item) != NULL)
-	    errorx(1, "unable to cache gid %u, already exists",
+	    errorx(1, _("unable to cache gid %u, already exists"),
 		(unsigned int) gid);
     }
 done:
@@ -545,7 +545,7 @@ sudo_getgrnam(const char *name)
     if ((key.d.gr = getgrnam(name)) != NULL) {
 	item = make_gritem(key.d.gr, name);
 	if (rbinsert(grcache_byname, item) != NULL)
-	    errorx(1, "unable to cache group %s, already exists", name);
+	    errorx(1, _("unable to cache group %s, already exists"), name);
     } else {
 	len = strlen(name) + 1;
 	item = emalloc(sizeof(*item) + len);
@@ -554,7 +554,7 @@ sudo_getgrnam(const char *name)
 	memcpy(item->k.name, name, len);
 	item->d.gr = NULL;
 	if (rbinsert(grcache_byname, item) != NULL)
-	    errorx(1, "unable to cache group %s, already exists", name);
+	    errorx(1, _("unable to cache group %s, already exists"), name);
     }
 done:
     item->refcnt++;

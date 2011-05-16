@@ -194,22 +194,22 @@ list_options(void)
     char *p;
 
     sudo_printf(SUDO_CONV_INFO_MSG,
-	"Available options in a sudoers ``Defaults'' line:\n\n");
+	_("Available options in a sudoers ``Defaults'' line:\n\n"));
     for (cur = sudo_defs_table; cur->name; cur++) {
 	if (cur->name && cur->desc) {
 	    switch (cur->type & T_MASK) {
 		case T_FLAG:
 		    sudo_printf(SUDO_CONV_INFO_MSG,
-			"%s: %s\n", cur->name, cur->desc);
+			_("%s: %s\n"), cur->name, cur->desc);
 		    break;
 		default:
 		    p = strrchr(cur->desc, ':');
 		    if (p) {
-			sudo_printf(SUDO_CONV_INFO_MSG, "%s: %.*s\n",
+			sudo_printf(SUDO_CONV_INFO_MSG, _("%s: %.*s\n"),
 			    cur->name, (int) (p - cur->desc), cur->desc);
 		    } else {
 			sudo_printf(SUDO_CONV_INFO_MSG,
-			    "%s: %s\n", cur->name, cur->desc);
+			    _("%s: %s\n"), cur->name, cur->desc);
 		    }
 		    break;
 	    }
@@ -235,7 +235,7 @@ set_default(char *var, char *val, int op)
 	    break;
     }
     if (!cur->name) {
-	warningx("unknown defaults entry `%s'", var);
+	warningx(_("unknown defaults entry `%s'"), var);
 	return FALSE;
     }
 
@@ -243,18 +243,20 @@ set_default(char *var, char *val, int op)
 	case T_LOGFAC:
 	    if (!store_syslogfac(val, cur, op)) {
 		if (val)
-		    warningx("value `%s' is invalid for option `%s'", val, var);
+		    warningx(_("value `%s' is invalid for option `%s'"),
+			val, var);
 		else
-		    warningx("no value specified for `%s'", var);
+		    warningx(_("no value specified for `%s'"), var);
 		return FALSE;
 	    }
 	    break;
 	case T_LOGPRI:
 	    if (!store_syslogpri(val, cur, op)) {
 		if (val)
-		    warningx("value `%s' is invalid for option `%s'", val, var);
+		    warningx(_("value `%s' is invalid for option `%s'"),
+			val, var);
 		else
-		    warningx("no value specified for `%s'", var);
+		    warningx(_("no value specified for `%s'"), var);
 		return FALSE;
 	    }
 	    break;
@@ -262,16 +264,16 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
-		    warningx("no value specified for `%s'", var);
+		    warningx(_("no value specified for `%s'"), var);
 		    return FALSE;
 		}
 	    }
 	    if (ISSET(cur->type, T_PATH) && val && *val != '/') {
-		warningx("values for `%s' must start with a '/'", var);
+		warningx(_("values for `%s' must start with a '/'"), var);
 		return FALSE;
 	    }
 	    if (!store_str(val, cur, op)) {
-		warningx("value `%s' is invalid for option `%s'", val, var);
+		warningx(_("value `%s' is invalid for option `%s'"), val, var);
 		return FALSE;
 	    }
 	    break;
@@ -279,12 +281,12 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
-		    warningx("no value specified for `%s'", var);
+		    warningx(_("no value specified for `%s'"), var);
 		    return FALSE;
 		}
 	    }
 	    if (!store_int(val, cur, op)) {
-		warningx("value `%s' is invalid for option `%s'", val, var);
+		warningx(_("value `%s' is invalid for option `%s'"), val, var);
 		return FALSE;
 	    }
 	    break;
@@ -292,12 +294,12 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
-		    warningx("no value specified for `%s'", var);
+		    warningx(_("no value specified for `%s'"), var);
 		    return FALSE;
 		}
 	    }
 	    if (!store_uint(val, cur, op)) {
-		warningx("value `%s' is invalid for option `%s'", val, var);
+		warningx(_("value `%s' is invalid for option `%s'"), val, var);
 		return FALSE;
 	    }
 	    break;
@@ -305,12 +307,12 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
-		    warningx("no value specified for `%s'", var);
+		    warningx(_("no value specified for `%s'"), var);
 		    return FALSE;
 		}
 	    }
 	    if (!store_float(val, cur, op)) {
-		warningx("value `%s' is invalid for option `%s'", val, var);
+		warningx(_("value `%s' is invalid for option `%s'"), val, var);
 		return FALSE;
 	    }
 	    break;
@@ -318,18 +320,18 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
-		    warningx("no value specified for `%s'", var);
+		    warningx(_("no value specified for `%s'"), var);
 		    return FALSE;
 		}
 	    }
 	    if (!store_mode(val, cur, op)) {
-		warningx("value `%s' is invalid for option `%s'", val, var);
+		warningx(_("value `%s' is invalid for option `%s'"), val, var);
 		return FALSE;
 	    }
 	    break;
 	case T_FLAG:
 	    if (val) {
-		warningx("option `%s' does not take a value", var);
+		warningx(_("option `%s' does not take a value"), var);
 		return FALSE;
 	    }
 	    cur->sd_un.flag = op;
@@ -338,22 +340,22 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
-		    warningx("no value specified for `%s'", var);
+		    warningx(_("no value specified for `%s'"), var);
 		    return FALSE;
 		}
 	    }
 	    if (!store_list(val, cur, op)) {
-		warningx("value `%s' is invalid for option `%s'", val, var);
+		warningx(_("value `%s' is invalid for option `%s'"), val, var);
 		return FALSE;
 	    }
 	    break;
 	case T_TUPLE:
 	    if (!val && !ISSET(cur->type, T_BOOL)) {
-		warningx("no value specified for `%s'", var);
+		warningx(_("no value specified for `%s'"), var);
 		return FALSE;
 	    }
 	    if (!store_tuple(val, cur, op)) {
-		warningx("value `%s' is invalid for option `%s'", val, var);
+		warningx(_("value `%s' is invalid for option `%s'"), val, var);
 		return FALSE;
 	    }
 	    break;
@@ -479,10 +481,10 @@ init_defaults(void)
 
     /* Now do the strings */
     def_mailto = estrdup(MAILTO);
-    def_mailsub = estrdup(MAILSUBJECT);
-    def_badpass_message = estrdup(INCORRECT_PASSWORD);
+    def_mailsub = estrdup(_(MAILSUBJECT));
+    def_badpass_message = estrdup(_(INCORRECT_PASSWORD));
     def_timestampdir = estrdup(_PATH_SUDO_TIMEDIR);
-    def_passprompt = estrdup(PASSPROMPT);
+    def_passprompt = estrdup(_(PASSPROMPT));
     def_runas_default = estrdup(RUNAS_DEFAULT);
 #ifdef _PATH_SUDO_SENDMAIL
     def_mailerpath = estrdup(_PATH_SUDO_SENDMAIL);

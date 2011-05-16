@@ -64,7 +64,7 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
     int len;			/* length parameter */
 
     if (strlen(infile) >= PATH_MAX)
-	errorx(1, "%s: File name too long", infile);
+	errorx(1, _("%s: File name too long"), infile);
 
     /*
      * If we were given a fully qualified or relative path
@@ -103,7 +103,7 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
 	 */
 	len = snprintf(command, sizeof(command), "%s/%s", path, infile);
 	if (len <= 0 || len >= sizeof(command))
-	    errorx(1, "%s: File name too long", infile);
+	    errorx(1, _("%s: File name too long"), infile);
 	if ((result = sudo_goodpath(command, sbp)))
 	    break;
 
@@ -118,7 +118,7 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
     if (!result && checkdot) {
 	len = snprintf(command, sizeof(command), "./%s", infile);
 	if (len <= 0 || len >= sizeof(command))
-	    errorx(1, "%s: File name too long", infile);
+	    errorx(1, _("%s: File name too long"), infile);
 	result = sudo_goodpath(command, sbp);
 	if (result && ignore_dot)
 	    return NOT_FOUND_DOT;

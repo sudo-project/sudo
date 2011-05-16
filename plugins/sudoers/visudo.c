@@ -200,7 +200,7 @@ main(int argc, char *argv[])
     /* Mock up a fake sudo_user struct. */
     user_cmnd = "";
     if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL)
-	errorx(1, "you don't exist in the passwd database");
+	errorx(1, _("you don't exist in the passwd database"));
     get_hostname();
 
     /* Setup defaults data structures. */
@@ -276,7 +276,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 #else
     if (stat(sp->path, &sb) == -1)
 #endif
-	error(1, "can't stat %s", sp->path);
+	error(1, _("can't stat %s"), sp->path);
     orig_size = sb.st_size;
     mtim_get(&sb, &orig_mtim);
 
@@ -292,13 +292,13 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 	    (void) lseek(sp->fd, (off_t)0, SEEK_SET);
 	    while ((nread = read(sp->fd, buf, sizeof(buf))) > 0)
 		if (write(tfd, buf, nread) != nread)
-		    error(1, "write error");
+		    error(1, _("write error"));
 
 	    /* Add missing newline at EOF if needed. */
 	    if (nread > 0 && buf[nread - 1] != '\n') {
 		buf[0] = '\n';
 		if (write(tfd, buf, 1) != 1)
-		    error(1, "write error");
+		    error(1, _("write error"));
 	    }
 	}
 	(void) close(tfd);
@@ -352,18 +352,18 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 	 * Sanity checks.
 	 */
 	if (stat(sp->tpath, &sb) < 0) {
-	    warningx("cannot stat temporary file (%s), %s unchanged",
+	    warningx(_("cannot stat temporary file (%s), %s unchanged"),
 		sp->tpath, sp->path);
 	    return FALSE;
 	}
 	if (sb.st_size == 0 && orig_size != 0) {
-	    warningx("zero length temporary file (%s), %s unchanged",
+	    warningx(_("zero length temporary file (%s), %s unchanged"),
 		sp->tpath, sp->path);
 	    sp->modified = TRUE;
 	    return FALSE;
 	}
     } else {
-	warningx("editor (%s) failed, %s unchanged", editor, sp->path);
+	warningx(_("editor (%s) failed, %s unchanged"), editor, sp->path);
 	return FALSE;
     }
 
@@ -386,7 +386,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
     if (modified)
 	sp->modified = modified;
     else
-	warningx("%s unchanged", sp->tpath);
+	warningx(_("%s unchanged"), sp->tpath);
 
     return TRUE;
 }
@@ -410,7 +410,7 @@ reparse_sudoers(char *editor, char *args, int strict, int quiet)
 	last = tq_last(&sudoerslist);
 	fp = fopen(sp->tpath, "r+");
 	if (fp == NULL)
-	    errorx(1, "can't re-open temporary file (%s), %s unchanged.",
+	    errorx(1, _("can't re-open temporary file (%s), %s unchanged."),
 		sp->tpath, sp->path);
 
 	/* Clean slate for each parse */
@@ -420,7 +420,7 @@ reparse_sudoers(char *editor, char *args, int strict, int quiet)
 	/* Parse the sudoers temp file */
 	yyrestart(fp);
 	if (yyparse() && !parse_error) {
-	    warningx("unabled to parse temporary file (%s), unknown error",
+	    warningx(_("unabled to parse temporary file (%s), unknown error"),
 		sp->tpath);
 	    parse_error = TRUE;
 	    errorfile = sp->path;
@@ -455,7 +455,7 @@ reparse_sudoers(char *editor, char *args, int strict, int quiet)
 		}
 	    }
 	    if (sp == NULL)
-		errorx(1, "internal error, can't find %s in list!", sudoers);
+		errorx(1, _("internal error, can't find %s in list!"), sudoers);
 	}
 
 	/* If any new #include directives were added, edit them too. */
@@ -490,23 +490,23 @@ install_sudoers(struct sudoersfile *sp, int oldperms)
 #else
 	if (stat(sp->path, &sb) == -1)
 #endif
-	    error(1, "can't stat %s", sp->path);
+	    error(1, _("can't stat %s"), sp->path);
 	if (chown(sp->tpath, sb.st_uid, sb.st_gid) != 0) {
-	    warning("unable to set (uid, gid) of %s to (%d, %d)",
+	    warning(_("unable to set (uid, gid) of %s to (%d, %d)"),
 		sp->tpath, sb.st_uid, sb.st_gid);
 	}
 	if (chmod(sp->tpath, sb.st_mode & 0777) != 0) {
-	    warning("unable to change mode of %s to 0%o", sp->tpath,
+	    warning(_("unable to change mode of %s to 0%o"), sp->tpath,
 		(sb.st_mode & 0777));
 	}
     } else {
 	if (chown(sp->tpath, SUDOERS_UID, SUDOERS_GID) != 0) {
-	    warning("unable to set (uid, gid) of %s to (%d, %d)",
+	    warning(_("unable to set (uid, gid) of %s to (%d, %d)"),
 		sp->tpath, SUDOERS_UID, SUDOERS_GID);
 	    return FALSE;
 	}
 	if (chmod(sp->tpath, SUDOERS_MODE) != 0) {
-	    warning("unable to change mode of %s to 0%o", sp->tpath,
+	    warning(_("unable to change mode of %s to 0%o"), sp->tpath,
 		SUDOERS_MODE);
 	    return FALSE;
 	}
@@ -523,7 +523,7 @@ install_sudoers(struct sudoersfile *sp, int oldperms)
     } else {
 	if (errno == EXDEV) {
 	    char *av[4];
-	    warningx("%s and %s not on the same file system, using mv to rename",
+	    warningx(_("%s and %s not on the same file system, using mv to rename"),
 	      sp->tpath, sp->path);
 
 	    /* Build up argument vector for the command */
@@ -537,7 +537,7 @@ install_sudoers(struct sudoersfile *sp, int oldperms)
 
 	    /* And run it... */
 	    if (run_command(_PATH_MV, av)) {
-		warningx("command failed: '%s %s %s', %s unchanged",
+		warningx(_("command failed: '%s %s %s', %s unchanged"),
 		    _PATH_MV, sp->tpath, sp->path, sp->path);
 		(void) unlink(sp->tpath);
 		efree(sp->tpath);
@@ -547,7 +547,7 @@ install_sudoers(struct sudoersfile *sp, int oldperms)
 	    efree(sp->tpath);
 	    sp->tpath = NULL;
 	} else {
-	    warning("error renaming %s, %s unchanged", sp->tpath, sp->path);
+	    warning(_("error renaming %s, %s unchanged"), sp->tpath, sp->path);
 	    (void) unlink(sp->tpath);
 	    return FALSE;
 	}
@@ -658,14 +658,14 @@ run_command(char *path, char **argv)
 
     switch (pid = fork()) {
 	case -1:
-	    error(1, "unable to run %s", path);
+	    error(1, _("unable to run %s"), path);
 	    break;	/* NOTREACHED */
 	case 0:
 	    sudo_endpwent();
 	    sudo_endgrent();
 	    closefrom(STDERR_FILENO + 1);
 	    execv(path, argv);
-	    warning("unable to run %s", path);
+	    warning(_("unable to run %s"), path);
 	    _exit(127);
 	    break;	/* NOTREACHED */
     }
@@ -690,13 +690,13 @@ check_syntax(char *sudoers_path, int quiet, int strict)
 	sudoers_path = "stdin";
     } else if ((yyin = fopen(sudoers_path, "r")) == NULL) {
 	if (!quiet)
-	    warning("unable to open %s", sudoers_path);
+	    warning(_("unable to open %s"), sudoers_path);
 	exit(1);
     }
     init_parser(sudoers_path, quiet);
     if (yyparse() && !parse_error) {
 	if (!quiet)
-	    warningx("failed to parse %s file, unknown error", sudoers_path);
+	    warningx(_("failed to parse %s file, unknown error"), sudoers_path);
 	parse_error = TRUE;
 	errorfile = sudoers_path;
     }
@@ -772,7 +772,7 @@ open_sudoers(const char *path, int doedit, int *keepopen)
 	    return NULL;
 	}
 	if (!lock_file(entry->fd, SUDO_TLOCK))
-	    errorx(1, "%s busy, try again later", entry->path);
+	    errorx(1, _("%s busy, try again later"), entry->path);
 	if ((fp = fdopen(entry->fd, "r")) == NULL)
 	    error(1, "%s", entry->path);
 	tq_append(&sudoerslist, entry);
@@ -815,7 +815,7 @@ get_editor(char **args)
 	} else {
 	    if (def_env_editor) {
 		/* If we are honoring $EDITOR this is a fatal error. */
-		errorx(1, "specified editor (%s) doesn't exist!", UserEditor);
+		errorx(1, _("specified editor (%s) doesn't exist"), UserEditor);
 	    } else {
 		/* Otherwise, just ignore $EDITOR. */
 		UserEditor = NULL;
@@ -838,7 +838,7 @@ get_editor(char **args)
 
 	if (stat(UserEditor, &user_editor_sb) != 0) {
 	    /* Should never happen since we already checked above. */
-	    error(1, "unable to stat editor (%s)", UserEditor);
+	    error(1, _("unable to stat editor (%s)"), UserEditor);
 	}
 	EditorPath = estrdup(def_editor);
 	Editor = strtok(EditorPath, ":");
@@ -886,7 +886,7 @@ get_editor(char **args)
 
 	/* Bleah, none of the editors existed! */
 	if (Editor == NULL || *Editor == '\0')
-	    errorx(1, "no editor found (editor path = %s)", def_editor);
+	    errorx(1, _("no editor found (editor path = %s)"), def_editor);
     }
     *args = EditorArgs;
     return Editor;
@@ -1087,7 +1087,7 @@ static void
 print_undefined(char *name, int type, int strict, int quiet)
 {
     if (!quiet) {
-	warningx("%s: %s_Alias `%s' referenced but not defined",
+	warningx(_("%s: %s_Alias `%s' referenced but not defined"),
 	    strict ? "Error" : "Warning",
 	    type == HOSTALIAS ? "Host" : type == CMNDALIAS ? "Cmnd" :
 	    type == USERALIAS ? "User" : type == RUNASALIAS ? "Runas" :
@@ -1103,7 +1103,7 @@ print_selfref(name, type, strict, quiet)
     int quiet;
 {
     if (!quiet) {
-	warningx("%s: %s_Alias `%s' references self",
+	warningx(_("%s: %s_Alias `%s' references self"),
 	    strict ? "Error" : "Warning",
 	    type == HOSTALIAS ? "Host" : type == CMNDALIAS ? "Cmnd" :
 	    type == USERALIAS ? "User" : type == RUNASALIAS ? "Runas" :
@@ -1117,7 +1117,7 @@ print_unused(void *v1, void *v2)
     struct alias *a = (struct alias *)v1;
     char *prefix = (char *)v2;
 
-    warningx("%s: unused %s_Alias %s", prefix,
+    warningx(_("%s: unused %s_Alias %s"), prefix,
 	a->type == HOSTALIAS ? "Host" : a->type == CMNDALIAS ? "Cmnd" :
 	a->type == USERALIAS ? "User" : a->type == RUNASALIAS ? "Runas" :
 	"Unknown", a->name);

@@ -88,7 +88,7 @@ group_plugin_load(char *plugin_info)
 	    (*plugin_info != '/') ? _PATH_SUDO_PLUGIN_DIR : "", plugin_info);
     }
     if (len <= 0 || len >= sizeof(path)) {
-	warningx("%s%s: %s",
+	warningx(_("%s%s: %s"),
 	    (*plugin_info != '/') ? _PATH_SUDO_PLUGIN_DIR : "", plugin_info,
 	    strerror(ENAMETOOLONG));
 	goto done;
@@ -100,28 +100,28 @@ group_plugin_load(char *plugin_info)
 	goto done;
     }
     if (sb.st_uid != ROOT_UID) {
-	warningx("%s must be owned by uid %d", path, ROOT_UID);
+	warningx(_("%s must be owned by uid %d"), path, ROOT_UID);
 	goto done;
     }
     if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
-	warningx("%s must be only be writable by owner", path);
+	warningx(_("%s must be only be writable by owner"), path);
 	goto done;
     }
 
     /* Open plugin and map in symbol. */
     group_handle = dlopen(path, RTLD_LAZY|RTLD_LOCAL);
     if (!group_handle) {
-	warningx("unable to dlopen %s: %s", path, dlerror());
+	warningx(_("unable to dlopen %s: %s"), path, dlerror());
 	goto done;
     }
     group_plugin = dlsym(group_handle, "group_plugin");
     if (group_plugin == NULL) {
-	warningx("unable to find symbol \"group_plugin\" in %s", path);
+	warningx(_("unable to find symbol \"group_plugin\" in %s"), path);
 	goto done;
     }
 
     if (GROUP_API_VERSION_GET_MAJOR(group_plugin->version) != GROUP_API_VERSION_MAJOR) {
-	warningx("%s: incompatible group plugin major version %d, expected %d",
+	warningx(_("%s: incompatible group plugin major version %d, expected %d"),
 	    path, GROUP_API_VERSION_GET_MAJOR(group_plugin->version),
 	    GROUP_API_VERSION_MAJOR);
 	goto done;

@@ -201,11 +201,11 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 	if (nss->open(nss) == 0 && nss->parse(nss) == 0) {
 	    sources++;
 	    if (nss->setdefs(nss) != 0)
-		log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
+		log_error(NO_STDERR|NO_EXIT, _("problem with defaults entries"));
 	}
     }
     if (sources == 0) {
-	warningx("no valid sudoers sources found, quitting");
+	warningx(_("no valid sudoers sources found, quitting"));
 	return -1;
     }
 
@@ -236,7 +236,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 	set_runaspw(runas_user ? runas_user : def_runas_default);
 
     if (!update_defaults(SETDEF_RUNAS))
-	log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
+	log_error(NO_STDERR|NO_EXIT, _("problem with defaults entries"));
 
     if (def_fqdn)
 	set_fqdn();	/* deferred until after sudoers is parsed */
@@ -259,7 +259,7 @@ sudoers_policy_close(int exit_status, int error_code)
 
     /* We do not currently log the exit status. */
     if (error_code)
-	warningx("unable to execute %s: %s", safe_cmnd, strerror(error_code));
+	warningx(_("unable to execute %s: %s"), safe_cmnd, strerror(error_code));
 
     /* Close the session we opened in sudoers_policy_init_session(). */
     if (ISSET(sudo_mode, MODE_RUN|MODE_EDIT))
@@ -306,14 +306,14 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
-        warningx("sudoers specifies that root is not allowed to sudo");
+        warningx(_("sudoers specifies that root is not allowed to sudo"));
         goto bad;
     }    
 
     /* Check for -C overriding def_closefrom. */
     if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
 	if (!def_closefrom_override) {
-	    warningx("you are not permitted to use the -C option");
+	    warningx(_("you are not permitted to use the -C option"));
 	    goto bad;
 	}
 	def_closefrom = user_closefrom;
@@ -352,7 +352,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
 #ifdef HAVE_SETLOCALE
     if (!setlocale(LC_ALL, def_sudoers_locale)) {
-	warningx("unable to set locale to \"%s\", using \"C\"",
+	warningx(_("unable to set locale to \"%s\", using \"C\""),
 	    def_sudoers_locale);
 	setlocale(LC_ALL, "C");
     }
@@ -398,7 +398,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	else
 	    pw = sudo_getpwnam(def_timestampowner);
 	if (!pw)
-	    log_error(0, "timestamp owner (%s): No such user",
+	    log_error(0, _("timestamp owner (%s): No such user"),
 		def_timestampowner);
 	timestamp_uid = pw->pw_uid;
 	pw_delref(pw);
@@ -418,8 +418,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (def_requiretty) {
 	int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY);
 	if (fd == -1) {
-	    audit_failure(NewArgv, "no tty");
-	    warningx("sorry, you must have a tty to run sudo");
+	    audit_failure(NewArgv, _("no tty"));
+	    warningx(_("sorry, you must have a tty to run sudo"));
 	    goto bad;
 	} else
 	    (void) close(fd);
@@ -465,7 +465,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* If the user was not allowed to run the command we are done. */
     if (!ISSET(validated, VALIDATE_OK)) {
 	if (ISSET(validated, FLAG_NO_USER | FLAG_NO_HOST)) {
-	    audit_failure(NewArgv, "No user or host");
+	    audit_failure(NewArgv, _("No user or host"));
 	    log_denial(validated, 1);
 	} else {
 	    if (def_path_info) {
@@ -479,14 +479,14 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 		log_denial(validated,
 		    !(cmnd_status == NOT_FOUND_DOT || cmnd_status == NOT_FOUND));
 		if (cmnd_status == NOT_FOUND)
-		    warningx("%s: command not found", user_cmnd);
+		    warningx(_("%s: command not found"), user_cmnd);
 		else if (cmnd_status == NOT_FOUND_DOT)
-		    warningx("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.", user_cmnd, user_cmnd, user_cmnd);
+		    warningx(_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
 	    } else {
 		/* Just tell the user they are not allowed to run foo. */
 		log_denial(validated, 1);
 	    }
-	    audit_failure(NewArgv, "validation failure");
+	    audit_failure(NewArgv, _("validation failure"));
 	}
 	goto bad;
     }
@@ -496,19 +496,19 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Finally tell the user if the command did not exist. */
     if (cmnd_status == NOT_FOUND_DOT) {
-	audit_failure(NewArgv, "command in current directory");
-	warningx("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.", user_cmnd, user_cmnd, user_cmnd);
+	audit_failure(NewArgv, _("command in current directory"));
+	warningx(_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
 	goto bad;
     } else if (cmnd_status == NOT_FOUND) {
-	audit_failure(NewArgv, "%s: command not found", user_cmnd);
-	warningx("%s: command not found", user_cmnd);
+	audit_failure(NewArgv, _("%s: command not found"), user_cmnd);
+	warningx(_("%s: command not found"), user_cmnd);
 	goto bad;
     }
 
     /* If user specified env vars make sure sudoers allows it. */
     if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
 	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
-	    warningx("sorry, you are not allowed to preserve the environment");
+	    warningx(_("sorry, you are not allowed to preserve the environment"));
 	    goto bad;
 	} else
 	    validate_env_vars(sudo_user.env_vars);
@@ -731,7 +731,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
     if (list_user) {
 	list_pw = sudo_getpwnam(list_user);
 	if (list_pw == NULL) {
-	    warningx("unknown user: %s", list_user);
+	    warningx(_("unknown user: %s"), list_user);
 	    return -1;
 	}
     }
@@ -797,8 +797,8 @@ init_vars(char * const envp[])
 	 * YP/NIS/NIS+/LDAP/etc daemon has died.
 	 */
 	if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE)
-	    errorx(1, "unknown user: %s", user_name);
-	log_error(0, "unknown user: %s", user_name);
+	    errorx(1, _("unknown user: %s"), user_name);
+	log_error(0, _("unknown user: %s"), user_name);
 	/* NOTREACHED */
     }
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
@@ -855,7 +855,7 @@ set_cmnd(int sudo_mode)
 	    for (to = user_args, from = NewArgv + 1; *from; from++) {
 		n = strlcpy(to, *from, size - (to - user_args));
 		if (n >= size - (to - user_args))
-		    errorx(1, "internal error, set_cmnd() overflow");
+		    errorx(1, _("internal error, set_cmnd() overflow"));
 		to += n;
 		*to++ = ' ';
 	    }
@@ -863,7 +863,7 @@ set_cmnd(int sudo_mode)
 	}
     }
     if (strlen(user_cmnd) >= PATH_MAX)
-	errorx(1, "%s: file name too long", user_cmnd);
+	errorx(1, _("%s: file name too long"), user_cmnd);
 
     if ((user_base = strrchr(user_cmnd, '/')) != NULL)
 	user_base++;
@@ -871,7 +871,7 @@ set_cmnd(int sudo_mode)
 	user_base = user_cmnd;
 
     if (!update_defaults(SETDEF_CMND))
-	log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
+	log_error(NO_STDERR|NO_EXIT, _("problem with defaults entries"));
 
     if (!runas_user && !runas_group)
 	set_runaspw(def_runas_default);	/* may have been updated above */
@@ -899,17 +899,17 @@ open_sudoers(const char *sudoers, int doedit, int *keepopen)
 	(statbuf.st_mode & 0007777) == 0400) {
 
 	if (chmod(sudoers, sudoers_mode) == 0) {
-	    warningx("fixed mode on %s", sudoers);
+	    warningx(_("fixed mode on %s"), sudoers);
 	    SET(statbuf.st_mode, sudoers_mode);
 	    if (statbuf.st_gid != sudoers_gid) {
 		if (chown(sudoers, (uid_t) -1, sudoers_gid) == 0) {
-		    warningx("set group on %s", sudoers);
+		    warningx(_("set group on %s"), sudoers);
 		    statbuf.st_gid = sudoers_gid;
 		} else
-		    warning("unable to set group on %s", sudoers);
+		    warning(_("unable to set group on %s"), sudoers);
 	    }
 	} else
-	    warning("unable to fix mode on %s", sudoers);
+	    warning(_("unable to fix mode on %s"), sudoers);
     }
 
     /*
@@ -920,28 +920,28 @@ open_sudoers(const char *sudoers, int doedit, int *keepopen)
     set_perms(PERM_SUDOERS);
 
     if (rootstat != 0 && stat_sudoers(sudoers, &statbuf) != 0)
-	log_error(USE_ERRNO|NO_EXIT, "can't stat %s", sudoers);
+	log_error(USE_ERRNO|NO_EXIT, _("can't stat %s"), sudoers);
     else if (!S_ISREG(statbuf.st_mode))
-	log_error(NO_EXIT, "%s is not a regular file", sudoers);
+	log_error(NO_EXIT, _("%s is not a regular file"), sudoers);
     else if ((statbuf.st_mode & 07577) != sudoers_mode)
-	log_error(NO_EXIT, "%s is mode 0%o, should be 0%o", sudoers,
+	log_error(NO_EXIT, _("%s is mode 0%o, should be 0%o"), sudoers,
 	    (unsigned int) (statbuf.st_mode & 07777),
 	    (unsigned int) sudoers_mode);
     else if (statbuf.st_uid != sudoers_uid)
-	log_error(NO_EXIT, "%s is owned by uid %u, should be %u", sudoers,
+	log_error(NO_EXIT, _("%s is owned by uid %u, should be %u"), sudoers,
 	    (unsigned int) statbuf.st_uid, (unsigned int) sudoers_uid);
     else if (ISSET(statbuf.st_mode, S_IRGRP) && statbuf.st_gid != sudoers_gid)
-	log_error(NO_EXIT, "%s is owned by gid %u, should be %u", sudoers,
+	log_error(NO_EXIT, _("%s is owned by gid %u, should be %u"), sudoers,
 	    (unsigned int) statbuf.st_gid, (unsigned int) sudoers_gid);
     else if ((fp = fopen(sudoers, "r")) == NULL)
-	log_error(USE_ERRNO|NO_EXIT, "can't open %s", sudoers);
+	log_error(USE_ERRNO|NO_EXIT, _("can't open %s"), sudoers);
     else {
 	/*
 	 * Make sure we can actually read sudoers so we can present the
 	 * user with a reasonable error message (unlike the lexer).
 	 */
 	if (statbuf.st_size != 0 && fgetc(fp) == EOF) {
-	    log_error(USE_ERRNO|NO_EXIT, "can't read %s", sudoers);
+	    log_error(USE_ERRNO|NO_EXIT, _("can't read %s"), sudoers);
 	    fclose(fp);
 	    fp = NULL;
 	}
@@ -975,7 +975,7 @@ set_loginclass(struct passwd *pw)
     if (login_class && strcmp(login_class, "-") != 0) {
 	if (user_uid != 0 &&
 	    strcmp(runas_user ? runas_user : def_runas_default, "root") != 0)
-	    errorx(1, "only root can use -c %s", login_class);
+	    errorx(1, _("only root can use -c %s"), login_class);
     } else {
 	login_class = pw->pw_class;
 	if (!login_class || !*login_class)
@@ -985,7 +985,7 @@ set_loginclass(struct passwd *pw)
 
     lc = login_getclass(login_class);
     if (!lc || !lc->lc_class || strcmp(lc->lc_class, login_class) != 0) {
-	log_error(errflags, "unknown login class: %s", login_class);
+	log_error(errflags, _("unknown login class: %s"), login_class);
 	if (!lc)
 	    lc = login_getclass(NULL);	/* needed for login_getstyle() later */
     }
@@ -1019,7 +1019,7 @@ set_fqdn(void)
     if (!(hp = gethostbyname(user_host))) {
 #endif
 	log_error(MSG_ONLY|NO_EXIT,
-	    "unable to resolve host %s", user_host);
+	    _("unable to resolve host %s"), user_host);
     } else {
 	if (user_shost != user_host)
 	    efree(user_shost);
@@ -1051,8 +1051,8 @@ set_runaspw(char *user)
 	    runas_pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
     } else {
 	if ((runas_pw = sudo_getpwnam(user)) == NULL) {
-	    audit_failure(NewArgv, "unknown user: %s", user);
-	    log_error(NO_MAIL|MSG_ONLY, "unknown user: %s", user);
+	    audit_failure(NewArgv, _("unknown user: %s"), user);
+	    log_error(NO_MAIL|MSG_ONLY, _("unknown user: %s"), user);
 	}
     }
 }
@@ -1071,7 +1071,7 @@ set_runasgr(char *group)
 	    runas_gr = sudo_fakegrnam(group);
     } else {
 	if ((runas_gr = sudo_getgrnam(group)) == NULL)
-	    log_error(NO_MAIL|MSG_ONLY, "unknown group: %s", group);
+	    log_error(NO_MAIL|MSG_ONLY, _("unknown group: %s"), group);
     }
 }
 
@@ -1103,19 +1103,19 @@ sudoers_policy_version(int verbose)
 	return -1;
     }
 
-    sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers policy plugin version %s\n",
+    sudo_printf(SUDO_CONV_INFO_MSG, _("Sudoers policy plugin version %s\n"),
 	PACKAGE_VERSION);
-    sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers file grammar version %d\n",
+    sudo_printf(SUDO_CONV_INFO_MSG, _("Sudoers file grammar version %d\n"),
 	SUDOERS_GRAMMAR_VERSION);
 
     if (verbose) {
-	sudo_printf(SUDO_CONV_INFO_MSG, "\nSudoers path: %s\n", sudoers_file);
+	sudo_printf(SUDO_CONV_INFO_MSG, _("\nSudoers path: %s\n"), sudoers_file);
 #ifdef HAVE_LDAP
 # ifdef _PATH_NSSWITCH_CONF
-	sudo_printf(SUDO_CONV_INFO_MSG, "nsswitch path: %s\n", _PATH_NSSWITCH_CONF);
+	sudo_printf(SUDO_CONV_INFO_MSG, _("nsswitch path: %s\n"), _PATH_NSSWITCH_CONF);
 # endif
-	sudo_printf(SUDO_CONV_INFO_MSG, "ldap.conf path: %s\n", _PATH_LDAP_CONF);
-	sudo_printf(SUDO_CONV_INFO_MSG, "ldap.secret path: %s\n", _PATH_LDAP_SECRET);
+	sudo_printf(SUDO_CONV_INFO_MSG, _("ldap.conf path: %s\n"), _PATH_LDAP_CONF);
+	sudo_printf(SUDO_CONV_INFO_MSG, _("ldap.secret path: %s\n"), _PATH_LDAP_SECRET);
 #endif
 	dump_auth_methods();
 	dump_defaults();
@@ -1408,8 +1408,8 @@ find_editor(int nfiles, char **files, char ***argv_out)
 	    efree(editor);
     }
     if (!editor_path) {
-	audit_failure(NewArgv, "%s: command not found", editor);
-	warningx("%s: command not found", editor);
+	audit_failure(NewArgv, _("%s: command not found"), editor);
+	warningx(_("%s: command not found"), editor);
     }
     return editor_path;
 }
