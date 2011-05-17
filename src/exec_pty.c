@@ -321,7 +321,7 @@ suspend_parent(int signo)
 	/* Suspend self and continue child when we resume. */
 	sa.sa_handler = SIG_DFL;
 	sigaction(signo, &sa, &osa);
-	sudo_debug(8, _("kill parent %d"), signo);
+	sudo_debug(8, "kill parent %d", signo);
 	if (killpg(ppgrp, signo) != 0)
 	    warning("killpg(%d, %d)", ppgrp, signo);
 
@@ -332,9 +332,8 @@ suspend_parent(int signo)
 	 * Only modify term if we are foreground process and either
 	 * the old tty mode was not cooked or child got SIGTT{IN,OU}
 	 */
-	sudo_debug(8,
-	    foreground ? _("parent is in foreground, ttymode %d -> %d") :
-	    _("parent is in background, ttymode %d -> %d"), oldmode, ttymode);
+	sudo_debug(8, "parent is in %s, ttymode %d -> %d",
+	    foreground ? "foreground" : "background", oldmode, ttymode);
 
 	if (ttymode != TERM_COOKED) {
 	    if (foreground) {
@@ -699,7 +698,7 @@ deliver_signal(pid_t pid, int signo)
     int status;
 
     /* Handle signal from parent. */
-    sudo_debug(8, _("signal %d from parent"), signo);
+    sudo_debug(8, "signal %d from parent", signo);
     switch (signo) {
     case SIGALRM:
 	terminate_child(pid, TRUE);
@@ -742,10 +741,10 @@ send_status(int fd, struct command_status *cstat)
 	    n = send(fd, cstat, sizeof(*cstat), 0);
 	} while (n == -1 && errno == EINTR);
 	if (n != sizeof(*cstat)) {
-	    sudo_debug(8, _("unable to send status to parent: %s"),
+	    sudo_debug(8, "unable to send status to parent: %s",
 		strerror(errno));
 	} else {
-	    sudo_debug(8, _("sent status to parent"));
+	    sudo_debug(8, "sent status to parent");
 	}
 	cstat->type = CMD_INVALID; /* prevent re-sending */
     }
@@ -773,19 +772,16 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 	    cstat->type = CMD_WSTATUS;
 	    cstat->val = status;
 	    if (WIFSTOPPED(status)) {
-		sudo_debug(8, _("command stopped, signal %d"),
-		    WSTOPSIG(status));
+		sudo_debug(8, "command stopped, signal %d", WSTOPSIG(status));
 		do {
 		    child_pgrp = tcgetpgrp(io_fds[SFD_SLAVE]);
 		} while (child_pgrp == -1 && errno == EINTR);
 		if (send_status(backchannel, cstat) == -1)
 		    return alive; /* XXX */
 	    } else if (WIFSIGNALED(status)) {
-		sudo_debug(8, _("command killed, signal %d"),
-		    WTERMSIG(status));
+		sudo_debug(8, "command killed, signal %d", WTERMSIG(status));
 	    } else {
-		sudo_debug(8, _("command exited: %d"),
-		    WEXITSTATUS(status));
+		sudo_debug(8, "command exited: %d", WEXITSTATUS(status));
 	    }
 	}
 	if (!WIFSTOPPED(status))
