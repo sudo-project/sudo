@@ -16729,19 +16729,22 @@ main ()
 
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-
-	    sudo_cv_gettext=yes
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_gettext" >&5
-$as_echo "$sudo_cv_gettext" >&6; }
-	    $as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
-
-
+  sudo_cv_gettext=yes
 else
+  sudo_cv_gettext=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
 
-	    sudo_cv_gettext=no
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_gettext" >&5
+fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_gettext" >&5
 $as_echo "$sudo_cv_gettext" >&6; }
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettext in -lintl" >&5
+    if test "$sudo_cv_gettext" = "yes"; then
+	$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
+
+    else
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettext in -lintl" >&5
 $as_echo_n "checking for gettext in -lintl... " >&6; }
 if test "${ac_cv_lib_intl_gettext+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -16779,11 +16782,11 @@ fi
 $as_echo "$ac_cv_lib_intl_gettext" >&6; }
 if test "x$ac_cv_lib_intl_gettext" = x""yes; then :
   LIBS="${LIBS} -lintl"
-		$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
+	    $as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
 
 else
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettext in -lintl" >&5
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettext in -lintl" >&5
 $as_echo_n "checking for gettext in -lintl... " >&6; }
 if test "${ac_cv_lib_intl_gettext_liconv+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -16821,19 +16824,14 @@ fi
 $as_echo "$ac_cv_lib_intl_gettext_liconv" >&6; }
 if test "x$ac_cv_lib_intl_gettext_liconv" = x""yes; then :
   LIBS="${LIBS} -lintl -liconv"
-		    $as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
+		$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
 
 fi
 
 
 fi
 
-
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-fi
-
+    fi
 fi
 
 case ${enable_zlib-"yes"} in
