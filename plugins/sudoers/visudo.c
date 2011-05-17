@@ -58,6 +58,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#include <stdarg.h>
 #include <ctype.h>
 #include <pwd.h>
 #include <grp.h>
@@ -70,10 +71,11 @@
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#ifdef __STDC__
-# include <stdarg.h>
-#else
-# include <varargs.h>
+#ifdef HAVE_SETLOCALE
+# include <locale.h>
+#endif
+#ifdef HAVE_LIBINTL_H
+# include <libintl.h>
 #endif
 
 #include "sudoers.h"
@@ -150,6 +152,14 @@ main(int argc, char *argv[])
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     extern char *malloc_options;
     malloc_options = "AFGJPR";
+#endif
+
+#ifdef HAVE_SETLOCALE 
+    setlocale(LC_ALL, "");
+#endif
+#ifdef HAVE_LIBINTL_H
+    bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have visudo domain */
+    textdomain("sudoers");
 #endif
 
 #if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)

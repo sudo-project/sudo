@@ -41,6 +41,8 @@
 
 #ifdef HAVE_LIBINTL_H
 # include <libintl.h>
+# undef _
+# define _(String) dgettext("sudoers", String)
 #endif
 
 /*

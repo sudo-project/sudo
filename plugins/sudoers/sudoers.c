@@ -163,6 +163,10 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 	return -1;
     }
 
+#ifdef HAVE_LIBINTL_H
+    bindtextdomain("sudoers", LOCALEDIR);
+#endif
+
     /*
      * Signal setup:
      *	Ignore keyboard-generated signals so the user cannot interrupt

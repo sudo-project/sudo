@@ -245,6 +245,10 @@ main(int argc, char *argv[])
     setlocale(LC_ALL, "");
     decimal = localeconv()->decimal_point;
 #endif
+#ifdef HAVE_LIBINTL_H
+    bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have sudoreplay domain */
+    textdomain("sudoers");
+#endif
 
     while ((ch = getopt(argc, argv, "d:f:hlm:s:V")) != -1) {
 	switch(ch) {

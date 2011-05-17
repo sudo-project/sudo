@@ -34,7 +34,7 @@ INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 
 # Libraries
 LT_LIBS = $(top_builddir)/common/libcommon.la $(LIBOBJDIR)libreplace.la
-LIBS = @LIBS@ @SUDO_LIBS@ @GETGROUPS_LIB@ @NET_LIBS@ $(LT_LIBS)
+LIBS = @LIBS@ @SUDO_LIBS@ @GETGROUPS_LIB@ @NET_LIBS@ @LIBINTL@ $(LT_LIBS)
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) -I. @CPPFLAGS@
@@ -53,6 +53,7 @@ sbindir = @sbindir@
 sysconfdir = @sysconfdir@
 libexecdir = @libexecdir@
 datarootdir = @datarootdir@
+localedir = @localedir@
 localstatedir = @localstatedir@
 noexecfile = @NOEXECFILE@
 noexecdir = @NOEXECDIR@
@@ -62,7 +63,8 @@ install_uid = 0
 install_gid = 0
 
 # OS dependent defines
-DEFS = @OSDEFS@ -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\"
+DEFS = @OSDEFS@ -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\" \
+       -DLOCALEDIR=\"$(localedir)\" 
 
 #### End of system configuration section. ####
 
