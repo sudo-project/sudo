@@ -24,327 +24,327 @@ static struct def_values def_data_verifypw[] = {
 struct sudo_defs_types sudo_defs_table[] = {
     {
 	"syslog", T_LOGFAC|T_BOOL,
-	"Syslog facility if syslog is being used for logging: %s",
+	N_("Syslog facility if syslog is being used for logging: %s"),
 	NULL,
     }, {
 	"syslog_goodpri", T_LOGPRI,
-	"Syslog priority to use when user authenticates successfully: %s",
+	N_("Syslog priority to use when user authenticates successfully: %s"),
 	NULL,
     }, {
 	"syslog_badpri", T_LOGPRI,
-	"Syslog priority to use when user authenticates unsuccessfully: %s",
+	N_("Syslog priority to use when user authenticates unsuccessfully: %s"),
 	NULL,
     }, {
 	"long_otp_prompt", T_FLAG,
-	"Put OTP prompt on its own line",
+	N_("Put OTP prompt on its own line"),
 	NULL,
     }, {
 	"ignore_dot", T_FLAG,
-	"Ignore '.' in $PATH",
+	N_("Ignore '.' in $PATH"),
 	NULL,
     }, {
 	"mail_always", T_FLAG,
-	"Always send mail when sudo is run",
+	N_("Always send mail when sudo is run"),
 	NULL,
     }, {
 	"mail_badpass", T_FLAG,
-	"Send mail if user authentication fails",
+	N_("Send mail if user authentication fails"),
 	NULL,
     }, {
 	"mail_no_user", T_FLAG,
-	"Send mail if the user is not in sudoers",
+	N_("Send mail if the user is not in sudoers"),
 	NULL,
     }, {
 	"mail_no_host", T_FLAG,
-	"Send mail if the user is not in sudoers for this host",
+	N_("Send mail if the user is not in sudoers for this host"),
 	NULL,
     }, {
 	"mail_no_perms", T_FLAG,
-	"Send mail if the user is not allowed to run a command",
+	N_("Send mail if the user is not allowed to run a command"),
 	NULL,
     }, {
 	"tty_tickets", T_FLAG,
-	"Use a separate timestamp for each user/tty combo",
+	N_("Use a separate timestamp for each user/tty combo"),
 	NULL,
     }, {
 	"lecture", T_TUPLE|T_BOOL,
-	"Lecture user the first time they run sudo",
+	N_("Lecture user the first time they run sudo"),
 	def_data_lecture,
     }, {
 	"lecture_file", T_STR|T_PATH|T_BOOL,
-	"File containing the sudo lecture: %s",
+	N_("File containing the sudo lecture: %s"),
 	NULL,
     }, {
 	"authenticate", T_FLAG,
-	"Require users to authenticate by default",
+	N_("Require users to authenticate by default"),
 	NULL,
     }, {
 	"root_sudo", T_FLAG,
-	"Root may run sudo",
+	N_("Root may run sudo"),
 	NULL,
     }, {
 	"log_host", T_FLAG,
-	"Log the hostname in the (non-syslog) log file",
+	N_("Log the hostname in the (non-syslog) log file"),
 	NULL,
     }, {
 	"log_year", T_FLAG,
-	"Log the year in the (non-syslog) log file",
+	N_("Log the year in the (non-syslog) log file"),
 	NULL,
     }, {
 	"shell_noargs", T_FLAG,
-	"If sudo is invoked with no arguments, start a shell",
+	N_("If sudo is invoked with no arguments, start a shell"),
 	NULL,
     }, {
 	"set_home", T_FLAG,
-	"Set $HOME to the target user when starting a shell with -s",
+	N_("Set $HOME to the target user when starting a shell with -s"),
 	NULL,
     }, {
 	"always_set_home", T_FLAG,
-	"Always set $HOME to the target user's home directory",
+	N_("Always set $HOME to the target user's home directory"),
 	NULL,
     }, {
 	"path_info", T_FLAG,
-	"Allow some information gathering to give useful error messages",
+	N_("Allow some information gathering to give useful error messages"),
 	NULL,
     }, {
 	"fqdn", T_FLAG,
-	"Require fully-qualified hostnames in the sudoers file",
+	N_("Require fully-qualified hostnames in the sudoers file"),
 	NULL,
     }, {
 	"insults", T_FLAG,
-	"Insult the user when they enter an incorrect password",
+	N_("Insult the user when they enter an incorrect password"),
 	NULL,
     }, {
 	"requiretty", T_FLAG,
-	"Only allow the user to run sudo if they have a tty",
+	N_("Only allow the user to run sudo if they have a tty"),
 	NULL,
     }, {
 	"env_editor", T_FLAG,
-	"Visudo will honor the EDITOR environment variable",
+	N_("Visudo will honor the EDITOR environment variable"),
 	NULL,
     }, {
 	"rootpw", T_FLAG,
-	"Prompt for root's password, not the users's",
+	N_("Prompt for root's password, not the users's"),
 	NULL,
     }, {
 	"runaspw", T_FLAG,
-	"Prompt for the runas_default user's password, not the users's",
+	N_("Prompt for the runas_default user's password, not the users's"),
 	NULL,
     }, {
 	"targetpw", T_FLAG,
-	"Prompt for the target user's password, not the users's",
+	N_("Prompt for the target user's password, not the users's"),
 	NULL,
     }, {
 	"use_loginclass", T_FLAG,
-	"Apply defaults in the target user's login class if there is one",
+	N_("Apply defaults in the target user's login class if there is one"),
 	NULL,
     }, {
 	"set_logname", T_FLAG,
-	"Set the LOGNAME and USER environment variables",
+	N_("Set the LOGNAME and USER environment variables"),
 	NULL,
     }, {
 	"stay_setuid", T_FLAG,
-	"Only set the effective uid to the target user, not the real uid",
+	N_("Only set the effective uid to the target user, not the real uid"),
 	NULL,
     }, {
 	"preserve_groups", T_FLAG,
-	"Don't initialize the group vector to that of the target user",
+	N_("Don't initialize the group vector to that of the target user"),
 	NULL,
     }, {
 	"loglinelen", T_UINT|T_BOOL,
-	"Length at which to wrap log file lines (0 for no wrap): %d",
+	N_("Length at which to wrap log file lines (0 for no wrap): %d"),
 	NULL,
     }, {
 	"timestamp_timeout", T_FLOAT|T_BOOL,
-	"Authentication timestamp timeout: %.1f minutes",
+	N_("Authentication timestamp timeout: %.1f minutes"),
 	NULL,
     }, {
 	"passwd_timeout", T_FLOAT|T_BOOL,
-	"Password prompt timeout: %.1f minutes",
+	N_("Password prompt timeout: %.1f minutes"),
 	NULL,
     }, {
 	"passwd_tries", T_UINT,
-	"Number of tries to enter a password: %d",
+	N_("Number of tries to enter a password: %d"),
 	NULL,
     }, {
 	"umask", T_MODE|T_BOOL,
-	"Umask to use or 0777 to use user's: 0%o",
+	N_("Umask to use or 0777 to use user's: 0%o"),
 	NULL,
     }, {
 	"logfile", T_STR|T_BOOL|T_PATH,
-	"Path to log file: %s",
+	N_("Path to log file: %s"),
 	NULL,
     }, {
 	"mailerpath", T_STR|T_BOOL|T_PATH,
-	"Path to mail program: %s",
+	N_("Path to mail program: %s"),
 	NULL,
     }, {
 	"mailerflags", T_STR|T_BOOL,
-	"Flags for mail program: %s",
+	N_("Flags for mail program: %s"),
 	NULL,
     }, {
 	"mailto", T_STR|T_BOOL,
-	"Address to send mail to: %s",
+	N_("Address to send mail to: %s"),
 	NULL,
     }, {
 	"mailfrom", T_STR|T_BOOL,
-	"Address to send mail from: %s",
+	N_("Address to send mail from: %s"),
 	NULL,
     }, {
 	"mailsub", T_STR,
-	"Subject line for mail messages: %s",
+	N_("Subject line for mail messages: %s"),
 	NULL,
     }, {
 	"badpass_message", T_STR,
-	"Incorrect password message: %s",
+	N_("Incorrect password message: %s"),
 	NULL,
     }, {
 	"timestampdir", T_STR|T_PATH,
-	"Path to authentication timestamp dir: %s",
+	N_("Path to authentication timestamp dir: %s"),
 	NULL,
     }, {
 	"timestampowner", T_STR,
-	"Owner of the authentication timestamp dir: %s",
+	N_("Owner of the authentication timestamp dir: %s"),
 	NULL,
     }, {
 	"exempt_group", T_STR|T_BOOL,
-	"Users in this group are exempt from password and PATH requirements: %s",
+	N_("Users in this group are exempt from password and PATH requirements: %s"),
 	NULL,
     }, {
 	"passprompt", T_STR,
-	"Default password prompt: %s",
+	N_("Default password prompt: %s"),
 	NULL,
     }, {
 	"passprompt_override", T_FLAG,
-	"If set, passprompt will override system prompt in all cases.",
+	N_("If set, passprompt will override system prompt in all cases."),
 	NULL,
     }, {
 	"runas_default", T_STR,
-	"Default user to run commands as: %s",
+	N_("Default user to run commands as: %s"),
 	NULL,
     }, {
 	"secure_path", T_STR|T_BOOL,
-	"Value to override user's $PATH with: %s",
+	N_("Value to override user's $PATH with: %s"),
 	NULL,
     }, {
 	"editor", T_STR|T_PATH,
-	"Path to the editor for use by visudo: %s",
+	N_("Path to the editor for use by visudo: %s"),
 	NULL,
     }, {
 	"listpw", T_TUPLE|T_BOOL,
-	"When to require a password for 'list' pseudocommand: %s",
+	N_("When to require a password for 'list' pseudocommand: %s"),
 	def_data_listpw,
     }, {
 	"verifypw", T_TUPLE|T_BOOL,
-	"When to require a password for 'verify' pseudocommand: %s",
+	N_("When to require a password for 'verify' pseudocommand: %s"),
 	def_data_verifypw,
     }, {
 	"noexec", T_FLAG,
-	"Preload the dummy exec functions contained in 'noexec_file'",
+	N_("Preload the dummy exec functions contained in 'noexec_file'"),
 	NULL,
     }, {
 	"noexec_file", T_STR|T_PATH,
-	"File containing dummy exec functions: %s",
+	N_("File containing dummy exec functions: %s"),
 	NULL,
     }, {
 	"ignore_local_sudoers", T_FLAG,
-	"If LDAP directory is up, do we ignore local sudoers file",
+	N_("If LDAP directory is up, do we ignore local sudoers file"),
 	NULL,
     }, {
 	"closefrom", T_INT,
-	"File descriptors >= %d will be closed before executing a command",
+	N_("File descriptors >= %d will be closed before executing a command"),
 	NULL,
     }, {
 	"closefrom_override", T_FLAG,
-	"If set, users may override the value of `closefrom' with the -C option",
+	N_("If set, users may override the value of `closefrom' with the -C option"),
 	NULL,
     }, {
 	"setenv", T_FLAG,
-	"Allow users to set arbitrary environment variables",
+	N_("Allow users to set arbitrary environment variables"),
 	NULL,
     }, {
 	"env_reset", T_FLAG,
-	"Reset the environment to a default set of variables",
+	N_("Reset the environment to a default set of variables"),
 	NULL,
     }, {
 	"env_check", T_LIST|T_BOOL,
-	"Environment variables to check for sanity:",
+	N_("Environment variables to check for sanity:"),
 	NULL,
     }, {
 	"env_delete", T_LIST|T_BOOL,
-	"Environment variables to remove:",
+	N_("Environment variables to remove:"),
 	NULL,
     }, {
 	"env_keep", T_LIST|T_BOOL,
-	"Environment variables to preserve:",
+	N_("Environment variables to preserve:"),
 	NULL,
     }, {
 	"role", T_STR,
-	"SELinux role to use in the new security context: %s",
+	N_("SELinux role to use in the new security context: %s"),
 	NULL,
     }, {
 	"type", T_STR,
-	"SELinux type to use in the new security context: %s",
+	N_("SELinux type to use in the new security context: %s"),
 	NULL,
     }, {
 	"env_file", T_STR|T_PATH|T_BOOL,
-	"Path to the sudo-specific environment file: %s",
+	N_("Path to the sudo-specific environment file: %s"),
 	NULL,
     }, {
 	"sudoers_locale", T_STR,
-	"Locale to use while parsing sudoers: %s",
+	N_("Locale to use while parsing sudoers: %s"),
 	NULL,
     }, {
 	"visiblepw", T_FLAG,
-	"Allow sudo to prompt for a password even if it would be visisble",
+	N_("Allow sudo to prompt for a password even if it would be visisble"),
 	NULL,
     }, {
 	"pwfeedback", T_FLAG,
-	"Provide visual feedback at the password prompt when there is user input",
+	N_("Provide visual feedback at the password prompt when there is user input"),
 	NULL,
     }, {
 	"fast_glob", T_FLAG,
-	"Use faster globbing that is less accurate but does not access the filesystem",
+	N_("Use faster globbing that is less accurate but does not access the filesystem"),
 	NULL,
     }, {
 	"umask_override", T_FLAG,
-	"The umask specified in sudoers will override the user's, even if it is more permissive",
+	N_("The umask specified in sudoers will override the user's, even if it is more permissive"),
 	NULL,
     }, {
 	"log_input", T_FLAG,
-	"Log user's input for the command being run",
+	N_("Log user's input for the command being run"),
 	NULL,
     }, {
 	"log_output", T_FLAG,
-	"Log the output of the command being run",
+	N_("Log the output of the command being run"),
 	NULL,
     }, {
 	"compress_io", T_FLAG,
-	"Compress I/O logs using zlib",
+	N_("Compress I/O logs using zlib"),
 	NULL,
     }, {
 	"use_pty", T_FLAG,
-	"Always run commands in a pseudo-tty",
+	N_("Always run commands in a pseudo-tty"),
 	NULL,
     }, {
 	"group_plugin", T_STR,
-	"Plugin for non-Unix group support",
+	N_("Plugin for non-Unix group support"),
 	NULL,
     }, {
 	"iolog_dir", T_STR|T_PATH,
-	"Directory in which to store input/output logs",
+	N_("Directory in which to store input/output logs"),
 	NULL,
     }, {
 	"iolog_file", T_STR,
-	"File in which to store the input/output log",
+	N_("File in which to store the input/output log"),
 	NULL,
     }, {
 	"set_utmp", T_FLAG,
-	"Add an entry to the utmp/utmpx file when allocating a pty",
+	N_("Add an entry to the utmp/utmpx file when allocating a pty"),
 	NULL,
     }, {
 	"utmp_runas", T_FLAG,
-	"Set the user in utmp to the runas user, not the invoking user",
+	N_("Set the user in utmp to the runas user, not the invoking user"),
 	NULL,
     }, {
 	NULL, 0, NULL
