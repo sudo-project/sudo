@@ -240,9 +240,9 @@ cleanup:
 		    flags = 0;
 		else
 		    flags = NO_MAIL;
-		log_error(flags, _("%d incorrect password attempt%s"),
-		    def_passwd_tries - counter,
-		    (def_passwd_tries - counter == 1) ? "" : "s");
+		log_error(flags, ngettext("%d incorrect password attempt",
+		    "%d incorrect password attempts",
+		    def_passwd_tries - counter), def_passwd_tries - counter);
 	    }
 	    audit_failure(NewArgv, "authentication failure");
 	    rval = FALSE;
