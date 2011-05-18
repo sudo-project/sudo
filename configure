@@ -17057,8 +17057,16 @@ if test -z "${AUTH_EXCL}${AUTH_REG}" -a -n "$AUTH_EXCL_DEF"; then
 fi
 
 if test ${with_pam-"no"} != "no"; then
-    # Note: we already link the main sudo program with -ldl as needed
+    # We already link with -ldl (see LIBDL below) so no need for that here.
     SUDOERS_LIBS="${SUDOERS_LIBS} -lpam"
+
+    # There should be no need to link the sudo front-end with PAM
+    # as all PAM calls happen via the sudoers plugin.
+    # Unfortunately, not doing so causes problems on FreeBSD at least.
+    case "$OS" in
+	freebsd)
+	    LIBS="${LIBS} -lpam";;
+    esac
 
                     for ac_header in security/pam_appl.h pam/pam_appl.h
 do :

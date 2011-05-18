@@ -2263,8 +2263,16 @@ dnl PAM support.  Systems that use PAM by default set with_pam=default
 dnl and we do the actual tests here.
 dnl
 if test ${with_pam-"no"} != "no"; then
-    # Note: we already link the main sudo program with -ldl as needed
+    # We already link with -ldl (see LIBDL below) so no need for that here.
     SUDOERS_LIBS="${SUDOERS_LIBS} -lpam"
+
+    # There should be no need to link the sudo front-end with PAM
+    # as all PAM calls happen via the sudoers plugin.
+    # Unfortunately, not doing so causes problems on FreeBSD at least.
+    case "$OS" in
+	freebsd)
+	    LIBS="${LIBS} -lpam";;
+    esac
 
     dnl
     dnl Some PAM implementations (MacOS X for example) put the PAM headers
