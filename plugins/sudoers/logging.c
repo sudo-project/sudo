@@ -451,14 +451,14 @@ send_mail(const char *fmt, ...)
     switch (pid = fork()) {
 	case -1:
 	    /* Error. */
-	    error(1, _("cannot fork"));
+	    error(1, _("unable to fork"));
 	    break;
 	case 0:
 	    /* Child. */
 	    switch (pid = fork()) {
 		case -1:
 		    /* Error. */
-		    mysyslog(LOG_ERR, _("cannot fork: %m"));
+		    mysyslog(LOG_ERR, _("unable to fork: %m"));
 		    _exit(1);
 		case 0:
 		    /* Grandchild continues below. */
@@ -508,14 +508,14 @@ send_mail(const char *fmt, ...)
     (void) sigaction(SIGPIPE, &sa, NULL);
 
     if (pipe(pfd) == -1) {
-	mysyslog(LOG_ERR, _("cannot open pipe: %m"));
+	mysyslog(LOG_ERR, _("unable to open pipe: %m"));
 	_exit(1);
     }
 
     switch (pid = fork()) {
 	case -1:
 	    /* Error. */
-	    mysyslog(LOG_ERR, _("cannot fork: %m"));
+	    mysyslog(LOG_ERR, _("unable to fork: %m"));
 	    _exit(1);
 	    break;
 	case 0:
@@ -527,7 +527,7 @@ send_mail(const char *fmt, ...)
 		/* Child, set stdin to output side of the pipe */
 		if (pfd[0] != STDIN_FILENO) {
 		    if (dup2(pfd[0], STDIN_FILENO) == -1) {
-			mysyslog(LOG_ERR, _("cannot dup stdin: %m"));
+			mysyslog(LOG_ERR, _("unable to dup stdin: %m"));
 			_exit(127);
 		    }
 		    (void) close(pfd[0]);
@@ -561,7 +561,7 @@ send_mail(const char *fmt, ...)
 		set_perms(PERM_FULL_USER|PERM_NOEXIT);
 		execv(mpath, argv);
 #endif /* NO_ROOT_MAILER */
-		mysyslog(LOG_ERR, _("cannot execute %s: %m"), mpath);
+		mysyslog(LOG_ERR, _("unable to execute %s: %m"), mpath);
 		_exit(127);
 	    }
 	    break;

@@ -244,14 +244,14 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
      * Parent sends signal info to child and child sends back wait status.
      */
     if (socketpair(PF_UNIX, SOCK_DGRAM, 0, sv) == -1)
-	error(1, _("cannot create sockets"));
+	error(1, _("unable to create sockets"));
 
     /*
      * We use a pipe to atomically handle signal notification within
      * the select() loop.
      */
     if (pipe_nonblock(signal_pipe) != 0)
-	error(1, _("cannot create pipe"));
+	error(1, _("unable to create pipe"));
 
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);

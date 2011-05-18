@@ -819,7 +819,7 @@ exec_monitor(struct command_details *details, int backchannel)
      * the select() loop.
      */
     if (pipe_nonblock(signal_pipe) != 0)
-	error(1, _("cannot create pipe"));
+	error(1, _("unable to create pipe"));
 
     /* Reset SIGWINCH and SIGALRM. */
     zero_bytes(&sa, sizeof(sa));

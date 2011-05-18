@@ -889,7 +889,7 @@ check_execv(fd, pid, seqnr, askp, policyp, errorp)
     if (rval == -1 || getcwd(user_cwd, sizeof(user_cwd)) == NULL) {
 	if (rval == -1 && errno == EBUSY)
 	    return -1;
-	warningx("cannot get working directory");
+	warningx("unable to get working directory");
 	(void) strlcpy(user_cwd, "unknown", sizeof(user_cwd));
     }
 

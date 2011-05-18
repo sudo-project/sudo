@@ -362,7 +362,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 	 * Sanity checks.
 	 */
 	if (stat(sp->tpath, &sb) < 0) {
-	    warningx(_("cannot stat temporary file (%s), %s unchanged"),
+	    warningx(_("unable to stat temporary file (%s), %s unchanged"),
 		sp->tpath, sp->path);
 	    return FALSE;
 	}

@@ -56,12 +56,12 @@ fwtk_init(struct passwd *pw, char **promptp, sudo_auth *auth)
     char resp[128];			/* Response from the server */
 
     if ((confp = cfg_read("sudo")) == (Cfg *)-1) {
-	warningx(_("cannot read fwtk config"));
+	warningx(_("unable to read fwtk config"));
 	return AUTH_FATAL;
     }
 
     if (auth_open(confp)) {
-	warningx(_("cannot connect to authentication server"));
+	warningx(_("unable to connect to authentication server"));
 	return AUTH_FATAL;
     }
 

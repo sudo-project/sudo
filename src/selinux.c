@@ -191,7 +191,7 @@ relabel_tty(const char *ttyn, int ptyfd)
 	/* Reopen pty that was relabeled, std{in,out,err} are reset later. */
 	se_state.ttyfd = open(ttyn, O_RDWR|O_NOCTTY, 0);
 	if (se_state.ttyfd == -1) {
-	    warning(_("cannot open %s"), ttyn);
+	    warning(_("unable to open %s"), ttyn);
 	    if (se_state.enforcing)
 		goto bad;
 	}
