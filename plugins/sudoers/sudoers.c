@@ -924,7 +924,7 @@ open_sudoers(const char *sudoers, int doedit, int *keepopen)
     set_perms(PERM_SUDOERS);
 
     if (rootstat != 0 && stat_sudoers(sudoers, &statbuf) != 0)
-	log_error(USE_ERRNO|NO_EXIT, _("can't stat %s"), sudoers);
+	log_error(USE_ERRNO|NO_EXIT, _("unable to stat %s"), sudoers);
     else if (!S_ISREG(statbuf.st_mode))
 	log_error(NO_EXIT, _("%s is not a regular file"), sudoers);
     else if ((statbuf.st_mode & 07577) != sudoers_mode)
@@ -938,14 +938,14 @@ open_sudoers(const char *sudoers, int doedit, int *keepopen)
 	log_error(NO_EXIT, _("%s is owned by gid %u, should be %u"), sudoers,
 	    (unsigned int) statbuf.st_gid, (unsigned int) sudoers_gid);
     else if ((fp = fopen(sudoers, "r")) == NULL)
-	log_error(USE_ERRNO|NO_EXIT, _("can't open %s"), sudoers);
+	log_error(USE_ERRNO|NO_EXIT, _("unable to open %s"), sudoers);
     else {
 	/*
 	 * Make sure we can actually read sudoers so we can present the
 	 * user with a reasonable error message (unlike the lexer).
 	 */
 	if (statbuf.st_size != 0 && fgetc(fp) == EOF) {
-	    log_error(USE_ERRNO|NO_EXIT, _("can't read %s"), sudoers);
+	    log_error(USE_ERRNO|NO_EXIT, _("unable to read %s"), sudoers);
 	    fclose(fp);
 	    fp = NULL;
 	}

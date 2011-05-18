@@ -133,7 +133,7 @@ pty_setup(uid_t uid, const char *tty, const char *utmp_user)
     if (io_fds[SFD_USERTTY] != -1) {
 	if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
 	    slavename, sizeof(slavename), uid))
-	    error(1, _("can't allocate pty"));
+	    error(1, _("unable to allocate pty"));
 	/* Add entry to utmp/utmpx? */
 	if (utmp_user != NULL)
 	    utmp_login(tty, slavename, io_fds[SFD_SLAVE], utmp_user);

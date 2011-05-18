@@ -463,12 +463,12 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 	    status = TS_MISSING;
 	}
     } else if (errno != ENOENT) {
-	log_error(NO_EXIT|USE_ERRNO, _("can't stat %s"), dirparent);
+	log_error(NO_EXIT|USE_ERRNO, _("unable to stat %s"), dirparent);
     } else {
 	/* No dirparent, try to make one. */
 	if (ISSET(flags, TS_MAKE_DIRS)) {
 	    if (mkdir(dirparent, S_IRWXU))
-		log_error(NO_EXIT|USE_ERRNO, _("can't mkdir %s"),
+		log_error(NO_EXIT|USE_ERRNO, _("unable to mkdir %s"),
 		    dirparent);
 	    else
 		status = TS_MISSING;
@@ -507,7 +507,7 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 	    status = TS_OLD;		/* do date check later */
 	}
     } else if (errno != ENOENT) {
-	log_error(NO_EXIT|USE_ERRNO, _("can't stat %s"), timestampdir);
+	log_error(NO_EXIT|USE_ERRNO, _("unable to stat %s"), timestampdir);
     } else
 	status = TS_MISSING;
 
@@ -518,7 +518,7 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
     if (status == TS_MISSING && timestampfile && ISSET(flags, TS_MAKE_DIRS)) {
 	if (mkdir(timestampdir, S_IRWXU) == -1) {
 	    status = TS_ERROR;
-	    log_error(NO_EXIT|USE_ERRNO, _("can't mkdir %s"), timestampdir);
+	    log_error(NO_EXIT|USE_ERRNO, _("unable to mkdir %s"), timestampdir);
 	}
     }
 
@@ -575,7 +575,7 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 		}
 	    }
 	} else if (errno != ENOENT) {
-	    log_error(NO_EXIT|USE_ERRNO, _("can't stat %s"), timestampfile);
+	    log_error(NO_EXIT|USE_ERRNO, _("unable to stat %s"), timestampfile);
 	    status = TS_ERROR;
 	}
     }
@@ -644,14 +644,15 @@ remove_timestamp(int remove)
 	    else
 		status = rmdir(timestampdir);
 	    if (status == -1 && errno != ENOENT) {
-		log_error(NO_EXIT, _("can't remove %s (%s), will reset to Epoch"),
+		log_error(NO_EXIT,
+		    _("unable to remove %s (%s), will reset to the epoch"),
 		    path, strerror(errno));
 		remove = FALSE;
 	    }
 	} else {
 	    timevalclear(&tv);
 	    if (touch(-1, path, &tv) == -1 && errno != ENOENT)
-		error(1, _("can't reset %s to Epoch"), path);
+		error(1, _("unable to reset %s to the epoch"), path);
 	}
     }
 
