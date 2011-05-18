@@ -559,14 +559,14 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
 		n = term_raw(io_fds[SFD_USERTTY], 0);
 	    } while (!n && errno == EINTR);
 	    if (!n)
-		error(1, _("Can't set terminal to raw mode"));
+		error(1, _("unable to set terminal to raw mode"));
 	}
     }
 
     child = fork();
     switch (child) {
     case -1:
-	error(1, "fork");
+	error(1, _("unable to fork"));
 	break;
     case 0:
 	/* child */
@@ -873,7 +873,7 @@ exec_monitor(struct command_details *details, int backchannel)
 	error(1, _("unable to create pipe"));
     child = fork();
     if (child == -1) {
-	warning("fork");
+	warning(_("unable to fork"));
 	goto bad;
     }
     if (child == 0) {

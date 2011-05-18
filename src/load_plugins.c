@@ -183,8 +183,8 @@ sudo_load_plugins(const char *conf_file,
 	}
 	plugin = dlsym(handle, info->symbol_name);
 	if (!plugin) {
-	    warningx(_("unable to find symbol %s in %s"), info->symbol_name,
-		path);
+	    warningx(_("%s: unable to find symbol %s"), path,
+		info->symbol_name);
 	    goto done;
 	}
 
@@ -200,7 +200,8 @@ sudo_load_plugins(const char *conf_file,
 	}
 	if (plugin->type == SUDO_POLICY_PLUGIN) {
 	    if (policy_plugin->handle) {
-		warningx(_("only a single policy plugin may be loaded"));
+		warningx(_("%s: only a single policy plugin may be loaded"),
+		    conf_file);
 		goto done;
 	    }
 	    policy_plugin->handle = handle;

@@ -212,7 +212,7 @@ main(int argc, char *argv[], char *envp[])
     if (ISSET(sudo_mode, MODE_VERSION)) {
 	printf(_("Sudo version %s\n"), PACKAGE_VERSION);
 	if (user_details.uid == ROOT_UID)
-	    (void) printf(_("Configure args: %s\n"), CONFIGURE_ARGS);
+	    (void) printf(_("Configure options: %s\n"), CONFIGURE_ARGS);
     }
 
     /* Read sudo.conf and load plugins. */
@@ -916,7 +916,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
      */
 #ifdef HAVE_SETEUID
     if (ISSET(details->flags, CD_SET_EGID) && setegid(details->egid)) {
-	warning(_("unable to set egid to runas gid %u"), details->egid);
+	warning(_("unable to set effective gid to runas gid %u"), details->egid);
 	goto done;
     }
 #endif
@@ -1129,7 +1129,7 @@ static int
 policy_validate(struct plugin_container *plugin)
 {
     if (plugin->u.policy->validate == NULL) {
-	warningx(_("policy plugin %s does not support the -v flag"),
+	warningx(_("policy plugin %s does not support the -v option"),
 	    plugin->name);
 	return FALSE;
     }
@@ -1140,7 +1140,7 @@ static void
 policy_invalidate(struct plugin_container *plugin, int remove)
 {
     if (plugin->u.policy->invalidate == NULL) {
-	errorx(1, _("policy plugin %s does not support the -k/-K flags"),
+	errorx(1, _("policy plugin %s does not support the -k/-K options"),
 	    plugin->name);
     }
     plugin->u.policy->invalidate(remove);
