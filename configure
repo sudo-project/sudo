@@ -2847,7 +2847,6 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
-
 #
 # Begin initial values for man page substitution
 #
@@ -2912,7 +2911,6 @@ AUTH_EXCL=
 AUTH_EXCL_DEF=
 AUTH_DEF=passwd
 LINGUAS=
-ECHO_N="${as_echo_n}"
 
 CHECKSHADOW=true
 shadow_defs=
@@ -13108,6 +13106,27 @@ done
 		fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+
+		# The HP bundled compiler cannot generate shared libs
+		if test -z "$GCC"; then
+		    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for HP bundled C compiler" >&5
+$as_echo_n "checking for HP bundled C compiler... " >&6; }
+if test "${sudo_cv_var_hpccbundled+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  if $CC -V 2>&1 | grep '^(Bundled)' >/dev/null 2>&1; then
+			    sudo_cv_var_hpccbundled=yes
+			else
+			    sudo_cv_var_hpccbundled=no
+			fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_hpccbundled" >&5
+$as_echo "$sudo_cv_var_hpccbundled" >&6; }
+		    if test "$sudo_cv_var_hpccbundled" = "yes"; then
+			as_fn_error "The HP bundled C compiler is unable to build Sudo, you must use gcc or the HP ANSI C compiler instead." "$LINENO" 5
+		    fi
+		fi
 
 		# Build PA-RISC1.1 objects for better portability
 		case "$host_cpu" in
