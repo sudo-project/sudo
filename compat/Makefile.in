@@ -120,6 +120,10 @@ strsignal.lo: $(srcdir)/strsignal.c $(incdir)/missing.h $(top_builddir)/config.h
 utimes.lo: $(srcdir)/utimes.c $(incdir)/missing.h $(srcdir)/utime.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/utimes.c
 
+update-po:
+
+compile-po:
+
 pre-install:
 
 install:
@@ -133,6 +137,8 @@ install-includes:
 install-doc:
 
 install-plugin:
+
+install-nls:
 
 uninstall:
 

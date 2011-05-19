@@ -57,13 +57,13 @@ all: config.status
 	    exit $$?; \
 	done
 
-check pre-install: config.status
+check update-po compile-po pre-install: config.status
 	for d in $(SUBDIRS); \
 	    do (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
 	done
 
-install-dirs install-binaries install-includes install-plugin uninstall: config.status pre-install
+install-dirs install-binaries install-includes install-plugin install-nls uninstall: config.status pre-install
 	for d in $(SUBDIRS); \
 	    do (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \

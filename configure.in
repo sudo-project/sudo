@@ -65,6 +65,7 @@ AC_SUBST([CONFIGURE_ARGS])
 AC_SUBST([LIBDL])
 AC_SUBST([LT_STATIC])
 AC_SUBST([LIBINTL])
+AC_SUBST([LINGUAS])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -170,6 +171,7 @@ AUTH_REG=
 AUTH_EXCL=
 AUTH_EXCL_DEF=
 AUTH_DEF=passwd
+LINGUAS=
 
 dnl
 dnl Other vaiables
@@ -2153,6 +2155,8 @@ AC_CHECK_FUNCS(getprogname, , [
 # make sure we use the gettext() that matches the include file.
 # First check that it links w/o additional libs, then try with -lintl.
 if test "$enable_nls" = "yes"; then
+    # List of translations
+    LINGUAS=
     AC_CACHE_VAL(sudo_cv_gettext, [
     AC_MSG_CHECKING([for gettext])
     AC_LINK_IFELSE(
