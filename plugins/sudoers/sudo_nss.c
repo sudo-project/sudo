@@ -263,8 +263,8 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
     lbuf_init(&privs, output, 4, NULL, sudo_user.cols);
 
     /* Display defaults from all sources. */
-    lbuf_append(&defs, "Matching Defaults entries for ", pw->pw_name,
-	" on this host:\n", NULL);
+    lbuf_append(&defs, _("Matching Defaults entries for "), pw->pw_name,
+	_(" on this host:\n"), NULL);
     count = 0;
     tq_foreach_fwd(snl, nss) {
 	count += nss->display_defaults(nss, pw, &defs);
@@ -276,8 +276,8 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 
     /* Display Runas and Cmnd-specific defaults from all sources. */
     olen = defs.len;
-    lbuf_append(&defs, "Runas and Command-specific defaults for ", pw->pw_name,
-	":\n", NULL);
+    lbuf_append(&defs, _("Runas and Command-specific defaults for "),
+	pw->pw_name, ":\n", NULL);
     count = 0;
     tq_foreach_fwd(snl, nss) {
 	count += nss->display_bound_defaults(nss, pw, &defs);
@@ -288,8 +288,8 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 	defs.len = olen;
 
     /* Display privileges from all sources. */
-    lbuf_append(&privs, "User ", pw->pw_name,
-	" may run the following commands on this host:\n", NULL);
+    lbuf_append(&privs, _("User "), pw->pw_name,
+	_(" may run the following commands on this host:\n"), NULL);
     count = 0;
     tq_foreach_fwd(snl, nss) {
 	count += nss->display_privs(nss, pw, &privs);
@@ -298,7 +298,7 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 	lbuf_print(&defs);
 	lbuf_print(&privs);
     } else {
-	printf("User %s is not allowed to run sudo on %s.\n", pw->pw_name,
+	printf(_("User %s is not allowed to run sudo on %s.\n"), pw->pw_name,
 	    user_shost);
     }
 

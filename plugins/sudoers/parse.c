@@ -371,9 +371,9 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 	tags.nopasswd = UNSPEC;
 	tags.log_input = UNSPEC;
 	tags.log_output = UNSPEC;
-	lbuf_append(lbuf, "\nSudoers entry:\n", NULL);
+	lbuf_append(lbuf, _("\nSudoers entry:\n"), NULL);
 	tq_foreach_fwd(&priv->cmndlist, cs) {
-	    lbuf_append(lbuf, "    RunAsUsers: ", NULL);
+	    lbuf_append(lbuf, "    ", _("RunAsUsers: "), NULL);
 	    if (!tq_empty(&cs->runasuserlist)) {
 		tq_foreach_fwd(&cs->runasuserlist, m) {
 		    if (m != tq_first(&cs->runasuserlist))
@@ -388,7 +388,7 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 	    }
 	    lbuf_append(lbuf, "\n", NULL);
 	    if (!tq_empty(&cs->runasgrouplist)) {
-		lbuf_append(lbuf, "    RunAsGroups: ", NULL);
+		lbuf_append(lbuf, "    ", _("RunAsGroups: "), NULL);
 		tq_foreach_fwd(&cs->runasgrouplist, m) {
 		    if (m != tq_first(&cs->runasgrouplist))
 			lbuf_append(lbuf, ", ", NULL);
@@ -397,7 +397,7 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
 		}
 		lbuf_append(lbuf, "\n", NULL);
 	    }
-	    lbuf_append(lbuf, "    Commands:\n\t", NULL);
+	    lbuf_append(lbuf, "    ", _("Commands:\n\t"), NULL);
 	    sudo_file_append_cmnd(cs, &tags, lbuf);
 	    lbuf_append(lbuf, "\n", NULL);
 	    nfound++;
