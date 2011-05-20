@@ -69,81 +69,89 @@ lbuf_destroy(struct lbuf *lbuf)
 }
 
 /*
- * Append strings to the buffer, expanding it as needed.
+ * Parse the format and append strings, only %s and %% escapes are supported.
+ * Any characters in set are quoted with a backslash.
  */
 void
-lbuf_append_quoted(struct lbuf *lbuf, const char *set, ...)
+lbuf_append_quoted(struct lbuf *lbuf, const char *set, const char *fmt, ...)
 {
     va_list ap;
-    int len = 0;
-    char *cp, *s;
+    int len;
+    char *cp, *s = NULL;
 
-    va_start(ap, set);
-    while ((s = va_arg(ap, char *)) != NULL) {
-	len += strlen(s);
-	for (cp = s; (cp = strpbrk(cp, set)) != NULL; cp++)
-	    len++;
-    }
-    va_end(ap);
-
-    /* Expand buffer as needed. */
-    if (lbuf->len + len >= lbuf->size) {
-	do {
-	    lbuf->size += 256;
-	} while (lbuf->len + len >= lbuf->size);
-	lbuf->buf = erealloc(lbuf->buf, lbuf->size);
-    }
-
-    va_start(ap, set);
-    /* Append each string. */
-    while ((s = va_arg(ap, char *)) != NULL) {
-	while ((cp = strpbrk(s, set)) != NULL) {
-	    len = (int)(cp - s);
-	    memcpy(lbuf->buf + lbuf->len, s, len);
-	    lbuf->len += len;
-	    lbuf->buf[lbuf->len++] = '\\';
-	    lbuf->buf[lbuf->len++] = *cp;
-	    s = cp + 1;
-	}
-	if (*s != '\0') {
+    va_start(ap, fmt);
+    while (*fmt != '\0') {
+	len = 1;
+	if (fmt[0] == '%' && fmt[1] == 's') {
+	    s = va_arg(ap, char *);
 	    len = strlen(s);
-	    memcpy(lbuf->buf + lbuf->len, s, len);
-	    lbuf->len += len;
 	}
+	/* Assume worst case that all chars must be escaped. */
+	if (lbuf->len + (len * 2) + 1 >= lbuf->size) {
+	    do {
+		lbuf->size += 256;
+	    } while (lbuf->len + len + 1 >= lbuf->size);
+	    lbuf->buf = erealloc(lbuf->buf, lbuf->size);
+	}
+	if (*fmt == '%') {
+	    if (*(++fmt) == 's') {
+		while ((cp = strpbrk(s, set)) != NULL) {
+		    len = (int)(cp - s);
+		    memcpy(lbuf->buf + lbuf->len, s, len);
+		    lbuf->len += len;
+		    lbuf->buf[lbuf->len++] = '\\';
+		    lbuf->buf[lbuf->len++] = *cp;
+		    s = cp + 1;
+		}
+		if (*s != '\0') {
+		    len = strlen(s);
+		    memcpy(lbuf->buf + lbuf->len, s, len);
+		    lbuf->len += len;
+		}
+		fmt++;
+		continue;
+	    }
+	}
+	if (strchr(set, *fmt) != NULL)
+	    lbuf->buf[lbuf->len++] = '\\';
+	lbuf->buf[lbuf->len++] = *fmt++;
     }
     lbuf->buf[lbuf->len] = '\0';
     va_end(ap);
 }
 
 /*
- * Append strings to the buffer, expanding it as needed.
+ * Parse the format and append strings, only %s and %% escapes are supported.
  */
 void
-lbuf_append(struct lbuf *lbuf, ...)
+lbuf_append(struct lbuf *lbuf, const char *fmt, ...)
 {
     va_list ap;
-    int len = 0;
-    char *s;
+    int len;
+    char *s = NULL;
 
-    va_start(ap, lbuf);
-    while ((s = va_arg(ap, char *)) != NULL)
-	len += strlen(s);
-    va_end(ap);
-
-    /* Expand buffer as needed. */
-    if (lbuf->len + len >= lbuf->size) {
-	do {
-	    lbuf->size += 256;
-	} while (lbuf->len + len >= lbuf->size);
-	lbuf->buf = erealloc(lbuf->buf, lbuf->size);
-    }
-
-    va_start(ap, lbuf);
-    /* Append each string. */
-    while ((s = va_arg(ap, char *)) != NULL) {
-	len = strlen(s);
-	memcpy(lbuf->buf + lbuf->len, s, len);
-	lbuf->len += len;
+    va_start(ap, fmt);
+    while (*fmt != '\0') {
+	len = 1;
+	if (fmt[0] == '%' && fmt[1] == 's') {
+	    s = va_arg(ap, char *);
+	    len = strlen(s);
+	}
+	if (lbuf->len + len + 1 >= lbuf->size) {
+	    do {
+		lbuf->size += 256;
+	    } while (lbuf->len + len + 1 >= lbuf->size);
+	    lbuf->buf = erealloc(lbuf->buf, lbuf->size);
+	}
+	if (*fmt == '%') {
+	    if (*(++fmt) == 's') {
+		memcpy(lbuf->buf + lbuf->len, s, len);
+		lbuf->len += len;
+		fmt++;
+		continue;
+	    }
+	}
+	lbuf->buf[lbuf->len++] = *fmt++;
     }
     lbuf->buf[lbuf->len] = '\0';
     va_end(ap);

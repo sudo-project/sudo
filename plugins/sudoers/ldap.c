@@ -1430,7 +1430,7 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 		else
 		    prefix = ", ";
 		for (p = bv; *p != NULL; p++) {
-		    lbuf_append(lbuf, prefix, (*p)->bv_val, NULL);
+		    lbuf_append(lbuf, "%s%s", prefix, (*p)->bv_val);
 		    prefix = ", ";
 		    count++;
 		}
@@ -1464,7 +1464,7 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
     struct berval **bv, **p;
     int count = 0;
 
-    lbuf_append(lbuf, "    (", NULL);
+    lbuf_append(lbuf, "    (");
 
     /* get the RunAsUser Values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoRunAsUser");
@@ -1472,26 +1472,22 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
 	bv = ldap_get_values_len(ld, entry, "sudoRunAs");
     if (bv != NULL) {
 	for (p = bv; *p != NULL; p++) {
-	    if (p != bv)
-		lbuf_append(lbuf, ", ", NULL);
-	    lbuf_append(lbuf, (*p)->bv_val, NULL);
+	    lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
 	}
 	ldap_value_free_len(bv);
     } else
-	lbuf_append(lbuf, def_runas_default, NULL);
+	lbuf_append(lbuf, "%s", def_runas_default);
 
     /* get the RunAsGroup Values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
     if (bv != NULL) {
-	lbuf_append(lbuf, " : ", NULL);
+	lbuf_append(lbuf, " : ");
 	for (p = bv; *p != NULL; p++) {
-	    if (p != bv)
-		lbuf_append(lbuf, ", ", NULL);
-	    lbuf_append(lbuf, (*p)->bv_val, NULL);
+	    lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
 	}
 	ldap_value_free_len(bv);
     }
-    lbuf_append(lbuf, ") ", NULL);
+    lbuf_append(lbuf, ") ");
 
     /* get the Option Values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoOption");
@@ -1513,7 +1509,7 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
 		tag = (*p)->bv_val[0] == '!' ?
 		    "NOSETENV: " : "SETENV: ";
 	    if (tag != NULL)
-		lbuf_append(lbuf, tag, NULL);
+		lbuf_append(lbuf, tag);
 	}
 	ldap_value_free_len(bv);
     }
@@ -1522,14 +1518,12 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
     bv = ldap_get_values_len(ld, entry, "sudoCommand");
     if (bv != NULL) {
 	for (p = bv; *p != NULL; p++) {
-	    if (p != bv)
-		lbuf_append(lbuf, ", ", NULL);
-	    lbuf_append(lbuf, (*p)->bv_val, NULL);
+	    lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
 	    count++;
 	}
 	ldap_value_free_len(bv);
     }
-    lbuf_append(lbuf, "\n", NULL);
+    lbuf_append(lbuf, "\n");
 
     return count;
 }
@@ -1547,52 +1541,46 @@ sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
     /* extract the dn, only show the first rdn */
     rdn = sudo_ldap_get_first_rdn(ld, entry);
     if (rdn != NULL)
-	lbuf_append(lbuf, _("\nLDAP Role: "), rdn, "\n", NULL);
+	lbuf_append(lbuf, _("\nLDAP Role: %s\n"), rdn);
     else
-	lbuf_append(lbuf, _("\nLDAP Role: UNKNOWN\n"), NULL);
+	lbuf_append(lbuf, _("\nLDAP Role: UNKNOWN\n"));
     if (rdn)
 	ldap_memfree(rdn);
 
     /* get the RunAsUser Values from the entry */
-    lbuf_append(lbuf, "    RunAsUsers: ", NULL);
+    lbuf_append(lbuf, "    RunAsUsers: ");
     bv = ldap_get_values_len(ld, entry, "sudoRunAsUser");
     if (bv == NULL)
 	bv = ldap_get_values_len(ld, entry, "sudoRunAs");
     if (bv != NULL) {
 	for (p = bv; *p != NULL; p++) {
-	    if (p != bv)
-		lbuf_append(lbuf, ", ", NULL);
-	    lbuf_append(lbuf, (*p)->bv_val, NULL);
+	    lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
 	}
 	ldap_value_free_len(bv);
     } else
-	lbuf_append(lbuf, def_runas_default, NULL);
-    lbuf_append(lbuf, "\n", NULL);
+	lbuf_append(lbuf, "%s", def_runas_default);
+    lbuf_append(lbuf, "\n");
 
     /* get the RunAsGroup Values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
     if (bv != NULL) {
-	lbuf_append(lbuf, "    RunAsGroups: ", NULL);
+	lbuf_append(lbuf, "    RunAsGroups: ");
 	for (p = bv; *p != NULL; p++) {
-	    if (p != bv)
-		lbuf_append(lbuf, ", ", NULL);
-	    lbuf_append(lbuf, (*p)->bv_val, NULL);
+	    lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
 	}
 	ldap_value_free_len(bv);
-	lbuf_append(lbuf, "\n", NULL);
+	lbuf_append(lbuf, "\n");
     }
 
     /* get the Option Values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoOption");
     if (bv != NULL) {
-	lbuf_append(lbuf, "    Options: ", NULL);
+	lbuf_append(lbuf, "    Options: ");
 	for (p = bv; *p != NULL; p++) {
-	    if (p != bv)
-		lbuf_append(lbuf, ", ", NULL);
-	    lbuf_append(lbuf, (*p)->bv_val, NULL);
+	    lbuf_append(lbuf, "%s%s", p != bv ? ", " : "", (*p)->bv_val);
 	}
 	ldap_value_free_len(bv);
-	lbuf_append(lbuf, "\n", NULL);
+	lbuf_append(lbuf, "\n");
     }
 
     /*
@@ -1602,7 +1590,7 @@ sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
     bv = ldap_get_values_len(ld, entry, "sudoOrder");
     if (bv != NULL) {
 	if (*bv != NULL) {
-	    lbuf_append(lbuf, "    Order: ", (*bv)->bv_val, "\n", NULL);
+	    lbuf_append(lbuf, _("    Order: %s\n"), (*bv)->bv_val);
 	}
 	ldap_value_free_len(bv);
     }
@@ -1610,9 +1598,9 @@ sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
     /* Get the command values from the entry. */
     bv = ldap_get_values_len(ld, entry, "sudoCommand");
     if (bv != NULL) {
-	lbuf_append(lbuf, "    Commands:\n", NULL);
+	lbuf_append(lbuf, _("    Commands:\n"));
 	for (p = bv; *p != NULL; p++) {
-	    lbuf_append(lbuf, "\t", (*p)->bv_val, "\n", NULL);
+	    lbuf_append(lbuf, "\t%s\n", (*p)->bv_val);
 	    count++;
 	}
 	ldap_value_free_len(bv);
