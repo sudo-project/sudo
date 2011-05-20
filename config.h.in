@@ -91,9 +91,6 @@
    don't. */
 #undef HAVE_DECL___SYS_SIGLIST
 
-/* Define to 1 if you have the `dgettext' function. */
-#undef HAVE_DGETTEXT
-
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
@@ -309,6 +306,9 @@
 
 /* Define to 1 if you have the `ldap_unbind_ext_s' function. */
 #undef HAVE_LDAP_UNBIND_EXT_S
+
+/* Define to 1 if you have the <libintl.h> header file. */
+#undef HAVE_LIBINTL_H
 
 /* Define to 1 to enable Linux audit support. */
 #undef HAVE_LINUX_AUDIT
@@ -867,6 +867,20 @@
 #define CLR(t, f)	((t) &= ~(f))
 #undef ISSET
 #define ISSET(t, f)     ((t) & (f))
+
+/*
+ * Internationalization support.
+ */
+#ifdef HAVE_LIBINTL_H
+# define _(String) gettext(String)
+# define gettext_noop(String) String
+# define N_(String) gettext_noop(String)
+#else
+# define _(String) String 
+# define N_(String) String
+# define textdomain(Domain)
+# define bindtextdomain(Package, Directory)
+#endif /* HAVE_LIBINTL_H */
 
 /* New ANSI-style OS defs for HP-UX and ConvexOS. */
 #if defined(hpux) && !defined(__hpux)

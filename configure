@@ -16681,6 +16681,74 @@ fi
 done
 
 
+# gettext() and friends may be located in libc (Linux and Solaris)
+# or in libintl.  However, it is possible to have libintl installed
+# even when gettext() is present in libc.  In the case of GNU libintl,
+# gettext() will be defined to gettext_libintl in libintl.h.
+# Since gcc prefers /usr/local/include to /usr/include, we need to
+# make sure we use the gettext() that matches the include file.
+# First check that it links w/o additional libs, then try with -lintl.
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <libintl.h>
+int
+main ()
+{
+(void)gettext((char *)0, (char *)0);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  $as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettext in -lintl" >&5
+$as_echo_n "checking for gettext in -lintl... " >&6; }
+if test "${ac_cv_lib_intl_gettext+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lintl  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char gettext ();
+int
+main ()
+{
+return gettext ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_intl_gettext=yes
+else
+  ac_cv_lib_intl_gettext=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_intl_gettext" >&5
+$as_echo "$ac_cv_lib_intl_gettext" >&6; }
+if test "x$ac_cv_lib_intl_gettext" = x""yes; then :
+  LIBS="${LIBS} -lintl"
+    $as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
+
+fi
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
 case ${enable_zlib-"yes"} in
     yes)
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for gzdopen in -lz" >&5
@@ -16966,74 +17034,6 @@ else
 $as_echo "yes" >&6; }
 fi
 
-
-	case $host in
-	    *-*-linux*|*-*-solaris*)
-		    # dgettext() may be defined to dgettext_libintl in the
-		    # header file, so first check that it links w/ additional
-		    # libs, then try with -lintl
-		    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <libintl.h>
-int
-main ()
-{
-(void)dgettext((char *)0, (char *)0);
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  $as_echo "#define HAVE_DGETTEXT 1" >>confdefs.h
-
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for dgettext in -lintl" >&5
-$as_echo_n "checking for dgettext in -lintl... " >&6; }
-if test "${ac_cv_lib_intl_dgettext+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lintl  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char dgettext ();
-int
-main ()
-{
-return dgettext ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_intl_dgettext=yes
-else
-  ac_cv_lib_intl_dgettext=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_intl_dgettext" >&5
-$as_echo "$ac_cv_lib_intl_dgettext" >&6; }
-if test "x$ac_cv_lib_intl_dgettext" = x""yes; then :
-  LIBS="${LIBS} -lintl"
-			$as_echo "#define HAVE_DGETTEXT 1" >>confdefs.h
-
-fi
-
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-		    ;;
-	esac
     fi
 fi
 
