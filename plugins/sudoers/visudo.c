@@ -74,14 +74,12 @@
 #ifdef HAVE_SETLOCALE
 # include <locale.h>
 #endif
-#ifdef HAVE_LIBINTL_H
-# include <libintl.h>
-#endif
 
 #include "sudoers.h"
 #include "interfaces.h"
 #include "parse.h"
 #include "redblack.h"
+#include "gettext.h"
 #include "sudoers_version.h"
 #include <gram.h>
 
@@ -154,17 +152,16 @@ main(int argc, char *argv[])
     malloc_options = "AFGJPR";
 #endif
 
-#ifdef HAVE_SETLOCALE 
-    setlocale(LC_ALL, "");
-#endif
-#ifdef HAVE_LIBINTL_H
-    bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have visudo domain */
-    textdomain("sudoers");
-#endif
-
 #if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
     setprogname(argc > 0 ? argv[0] : "visudo");
 #endif
+
+#ifdef HAVE_SETLOCALE 
+    setlocale(LC_ALL, "");
+#endif
+    bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have visudo domain */
+    textdomain("sudoers");
+
     if (argc < 1)
 	usage(1);
 

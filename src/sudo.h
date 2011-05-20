@@ -24,9 +24,6 @@
 #ifndef _SUDO_SUDO_H
 #define _SUDO_SUDO_H
 
-#ifdef HAVE_LIBINTL_H
-# include <libintl.h>
-#endif
 #include <limits.h>
 #include <pathnames.h>
 
@@ -35,6 +32,7 @@
 #include "error.h"
 #include "fileops.h"
 #include "list.h"
+#include "gettext.h"
 
 #ifdef __TANDEM
 # define ROOT_UID       65535

@@ -55,9 +55,6 @@
 #ifndef HAVE_TIMESPEC
 # include "compat/timespec.h"
 #endif
-#ifdef HAVE_LIBINTL_H
-# include <libintl.h>
-#endif
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
@@ -94,6 +91,7 @@
 #include "missing.h"
 #include "alloc.h"
 #include "error.h"
+#include "gettext.h"
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048
@@ -245,10 +243,8 @@ main(int argc, char *argv[])
     setlocale(LC_ALL, "");
     decimal = localeconv()->decimal_point;
 #endif
-#ifdef HAVE_LIBINTL_H
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have sudoreplay domain */
     textdomain("sudoers");
-#endif
 
     while ((ch = getopt(argc, argv, "d:f:hlm:s:V")) != -1) {
 	switch(ch) {

@@ -169,19 +169,16 @@ main(int argc, char *argv[], char *envp[])
     malloc_options = "AFGJPR";
 #endif
 
-#ifdef HAVE_SETLOCALE
-    setlocale(LC_ALL, "");
-#endif
-
 #if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
     if (argc > 0)
 	setprogname(argv[0]);
 #endif
 
-#ifdef HAVE_LIBINTL_H
-    bindtextdomain("sudo", LOCALEDIR);
-    textdomain("sudo");
+#ifdef HAVE_SETLOCALE
+    setlocale(LC_ALL, "");
 #endif
+    bindtextdomain(PACKAGE_NAME, LOCALEDIR);
+    textdomain(PACKAGE_NAME);
 
     /* Must be done before we do any password lookups */
 #if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)

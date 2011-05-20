@@ -47,13 +47,13 @@
 #ifdef HAVE_INTTYPES_H
 # include <inttypes.h>
 #endif
-#ifdef HAVE_LIBINTL_H
-# include <libintl.h>
-#endif
 
 #include "missing.h"
 #include "alloc.h"
 #include "error.h"
+
+#define DEFAULT_TEXT_DOMAIN	"sudo"
+#include "gettext.h"
 
 /*
  * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t

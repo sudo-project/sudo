@@ -59,9 +59,6 @@ struct rtentry;
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_LIBINTL_H
-# include <libintl.h>
-#endif
 #include <netdb.h>
 #include <errno.h>
 #ifdef _ISC
@@ -86,6 +83,9 @@ struct rtentry;
 #include "missing.h"
 #include "alloc.h"
 #include "error.h"
+
+#define DEFAULT_TEXT_DOMAIN	"sudo"
+#include "gettext.h"
 
 /* Minix apparently lacks IFF_LOOPBACK */
 #ifndef IFF_LOOPBACK

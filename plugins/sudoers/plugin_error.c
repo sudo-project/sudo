@@ -23,16 +23,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <setjmp.h>
-#ifdef HAVE_LIBINTL_H
-# include <libintl.h>
-# undef _
-# define _(String) dgettext("sudoers", String)
-#endif
 
 #include "missing.h"
 #include "alloc.h"
 #include "error.h"
 #include "sudo_plugin.h"
+
+#define DEFAULT_TEXT_DOMAIN	"sudoers"
+#include "gettext.h"
 
 static void _warning(int, const char *, va_list);
        void plugin_cleanup(int);
