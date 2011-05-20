@@ -22,6 +22,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef HAVE_LIBINTL_H
+# include <libintl.h>
+#endif
 
 #include "missing.h"
 #include "error.h"

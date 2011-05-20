@@ -59,6 +59,9 @@ struct rtentry;
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE_LIBINTL_H
+# include <libintl.h>
+#endif
 #include <netdb.h>
 #include <errno.h>
 #ifdef _ISC

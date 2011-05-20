@@ -55,6 +55,9 @@
 #ifndef HAVE_TIMESPEC
 # include "compat/timespec.h"
 #endif
+#ifdef HAVE_LIBINTL_H
+# include <libintl.h>
+#endif
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
