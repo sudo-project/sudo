@@ -138,8 +138,8 @@ POTFILE = $(srcdir)/po/sudoers.pot
 MSGFMT = msgfmt
 MSGMERGE = msgmerge
 XGETTEXT = xgettext
-XGETTEXT_OPTS = -k_ -kN_ -dsudoers --msgid-bugs-address=sudo@sudo.ws \
-		--copyright-holder="Todd C. Miller" \
+XGETTEXT_OPTS = -k_ -kN_ -dsudoers --copyright-holder="Todd C. Miller" \
+		"--msgid-bugs-address=http://www.sudo.ws/bugs" \
 		--package-name=@PACKAGE_NAME@ --package-version=$(VERSION) \
 		--flag warning:1:c-format --flag warningx:1:c-format \
 		--flag error:2:c-format --flag errorx:2:c-format \
