@@ -142,6 +142,10 @@ HISTORY: $(srcdir)/history.pod
 LICENSE: $(srcdir)/license.pod
 	pod2text -l -i0 $(srcdir)/license.pod | sed '1,2d' > $@
 
+update-po:
+
+compile-po:
+
 pre-install:
 
 install: install-dirs install-doc
@@ -168,6 +172,8 @@ install-doc: install-dirs
 @MAN_POSTINSTALL@
 
 install-plugin:
+
+install-nls:
 
 uninstall:
 	-rm -rf	$(DESTDIR)$(docdir)

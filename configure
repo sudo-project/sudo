@@ -680,6 +680,7 @@ password_timeout
 timeout
 timedir
 iolog_dir
+LINGUAS
 LIBINTL
 LT_STATIC
 LIBDL
@@ -2845,6 +2846,8 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
+
 #
 # Begin initial values for man page substitution
 #
@@ -2908,6 +2911,8 @@ AUTH_REG=
 AUTH_EXCL=
 AUTH_EXCL_DEF=
 AUTH_DEF=passwd
+LINGUAS=
+ECHO_N="${as_echo_n}"
 
 CHECKSHADOW=true
 shadow_defs=
@@ -16712,6 +16717,8 @@ done
 # make sure we use the gettext() that matches the include file.
 # First check that it links w/o additional libs, then try with -lintl.
 if test "$enable_nls" = "yes"; then
+    # List of translations
+    LINGUAS=
     if test "${sudo_cv_gettext+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else

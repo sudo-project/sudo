@@ -28,6 +28,8 @@ incdir = $(top_srcdir)/include
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@ @LT_STATIC@
+ECHO_N = @ECHO_N@
+ECHO_C = @ECHO_C@
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
@@ -79,6 +81,19 @@ OBJS = conversation.o error.o exec.o exec_pty.o get_pty.o net_ifs.o \
 LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
 
 VERSION = @PACKAGE_VERSION@
+
+# Message catalog support
+LINGUAS = @LINGUAS@
+POTFILE = $(srcdir)/po/sudo.pot
+MSGFMT = msgfmt
+MSGMERGE = msgmerge
+XGETTEXT = xgettext
+XGETTEXT_OPTS = -k_ -kN_ -dsudo --msgid-bugs-address=sudo@sudo.ws \
+		--copyright-holder="Todd C. Miller" \
+		--package-name=@PACKAGE_NAME@ --package-version=$(VERSION) \
+		--flag warning:1:c-format --flag warningx:1:c-format \
+		--flag error:2:c-format --flag errorx:2:c-format \
+		--flag easprintf:3:c-format
 
 SUDODEP = $(srcdir)/sudo.h $(incdir)/sudo_plugin.h $(incdir)/alloc.h \
 	  $(incdir)/error.h $(incdir)/list.h $(incdir)/missing.h \
@@ -143,9 +158,25 @@ ttysize.o: $(srcdir)/ttysize.c $(incdir)/missing.h $(top_builddir)/config.h
 utmp.o: $(srcdir)/utmp.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/utmp.c
 
+update-po:
+	@echo "Updating $(POTFILE)"; \
+	    $(XGETTEXT) $(XGETTEXT_OPTS) $(top_srcdir)/src/*c $(top_srcdir)/common/*c $(top_srcdir)/compat/*c -o $(POTFILE)
+	@for f in $(LINGUAS); do \
+	    echo $(ECHO_N) "Updating \"$$f\" message catalog$(ECHO_C)"; \
+	    $(MSGMERGE) --update $(srcdir)/po/$$f.po $(POTFILE); \
+	    $(MSGFMT) --output /dev/null --check-format $(srcdir)/po/$$f.po || exit 1; \
+	done
+
+compile-po:
+	@test -n "$(LINGUAS)" && mkdir -p po
+	@for f in $(LINGUAS); do \
+	    echo "Compiling \"$$f\" message catalog."; \
+	    $(MSGFMT) --statistics -c -o po/$$f.mo $(srcdir)/po/$$f.po; \
+	done
+
 pre-install:
 
-install: install-dirs install-binaries @INSTALL_NOEXEC@
+install: install-dirs install-binaries @INSTALL_NOEXEC@ install-nls
 
 install-dirs:
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(bindir) \
@@ -167,6 +198,12 @@ install-noexec: install-dirs libsudo_noexec.la
 	if [ -f .libs/lib$(noexecfile) ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0755 .libs/lib$(noexecfile) $(DESTDIR)$(noexecdir)/$(noexecfile); fi
 
 install-plugin:
+
+install-nls:
+	@for f in $(LINGUAS); do \
+	    $(INSTALL) -d $(DESTDIR)$(localedir)/$$f/LC_MESSAGES; \
+	    $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0644 $(srcdir)/po/$$f.mo $(DESTDIR)$(localedir)/$$f/LC_MESSAGES/sudo.mo; \
+	done
 
 uninstall:
 	-rm -f	$(DESTDIR)$(bindir)/sudo $(DESTDIR)$(bindir)/sudoedit \

@@ -86,6 +86,10 @@ sample_plugin.lo: $(srcdir)/sample_plugin.c
 sample_plugin.la: $(OBJS)
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LTLDFLAGS) -o $@ $(OBJS) $(LIBS) -module -export-symbols $(srcdir)/sample_plugin.sym -avoid-version -rpath $(plugindir)
 
+update-po:
+
+compile-po:
+
 pre-install:
 
 install: install-dirs install-plugin
@@ -101,6 +105,8 @@ install-doc:
 
 install-plugin: install-dirs sample_plugin.la
 	$(INSTALL) -b~ -M 0755 .libs/sample_plugin$(soext) $(DESTDIR)$(plugindir)
+
+install-nls:
 
 uninstall:
 	-rm -f $(DESTDIR)$(plugindir)/sample_plugin$(soext)
