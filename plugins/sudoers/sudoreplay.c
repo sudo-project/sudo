@@ -288,7 +288,7 @@ main(int argc, char *argv[])
 		errorx(1, _("invalid speed factor: %s"), optarg);
 	    break;
 	case 'V':
-	    (void) printf("%s version %s\n", getprogname(), PACKAGE_VERSION);
+	    (void) printf(_("%s version %s\n"), getprogname(), PACKAGE_VERSION);
 	    exit(0);
 	default:
 	    usage(1);
@@ -345,7 +345,7 @@ main(int argc, char *argv[])
 	getline(&cp, &len, lfile) == -1) {
 	errorx(1, _("invalid log file %s"), path);
     }
-    printf("Replaying sudo session: %s", cp);
+    printf(_("Replaying sudo session: %s"), cp);
     free(cp);
     fclose(lfile);
 
@@ -939,10 +939,10 @@ static void
 usage(int fatal)
 {
     fprintf(fatal ? stderr : stdout,
-	"usage: %s [-h] [-d directory] [-m max_wait] [-s speed_factor] ID\n",
+	_("usage: %s [-h] [-d directory] [-m max_wait] [-s speed_factor] ID\n"),
 	getprogname());
     fprintf(fatal ? stderr : stdout,
-	"usage: %s [-h] [-d directory] -l [search expression]\n",
+	_("usage: %s [-h] [-d directory] -l [search expression]\n"),
 	getprogname());
     if (fatal)
 	exit(1);
@@ -951,16 +951,16 @@ usage(int fatal)
 static void
 help(void)
 {
-    (void) printf("%s - replay sudo session logs\n\n", getprogname());
+    (void) printf(_("%s - replay sudo session logs\n\n"), getprogname());
     usage(0);
-    (void) puts("\nOptions:");
-    (void) puts("  -d directory     specify directory for session logs");
-    (void) puts("  -f filter        specify which I/O type to display");
-    (void) puts("  -h               display help message and exit");
-    (void) puts("  -l [expression]  list available session IDs that match expression");
-    (void) puts("  -m max_wait      max number of seconds to wait between events");
-    (void) puts("  -s speed_factor  speed up or slow down output");
-    (void) puts("  -V               display version information and exit");
+    (void) puts(_("\nOptions:\n"
+	"  -d directory     specify directory for session logs\n"
+	"  -f filter        specify which I/O type to display\n"
+	"  -h               display help message and exit\n"
+	"  -l [expression]  list available session IDs that match expression\n"
+	"  -m max_wait      max number of seconds to wait between events\n"
+	"  -s speed_factor  speed up or slow down output\n"
+	"  -V               display version information and exit"));
     exit(0);
 }
 

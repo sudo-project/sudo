@@ -1546,7 +1546,10 @@ sudo_ldap_display_entry_long(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
 
     /* extract the dn, only show the first rdn */
     rdn = sudo_ldap_get_first_rdn(ld, entry);
-    lbuf_append(lbuf, "\nLDAP Role: ", rdn ? rdn : "UNKNOWN", "\n", NULL);
+    if (rdn != NULL)
+	lbuf_append(lbuf, _("\nLDAP Role: "), rdn, "\n", NULL);
+    else
+	lbuf_append(lbuf, _("\nLDAP Role: UNKNOWN\n"), NULL);
     if (rdn)
 	ldap_memfree(rdn);
 

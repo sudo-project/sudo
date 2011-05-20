@@ -512,81 +512,100 @@ help(void)
 
     lbuf_init(&lbuf, usage_out, indent, NULL, user_details.ts_cols);
     if (strcmp(pname, "sudoedit") == 0)
-	lbuf_append(&lbuf, pname,  " - edit files as another user\n\n", NULL);
+	lbuf_append(&lbuf, pname,  _(" - edit files as another user\n\n"), NULL);
     else
-	lbuf_append(&lbuf, pname,  " - execute a command as another user\n\n", NULL);
+	lbuf_append(&lbuf, pname,  _(" - execute a command as another user\n\n"), NULL);
     lbuf_print(&lbuf);
 
     usage(0);
 
-    lbuf_append(&lbuf, "\nOptions:\n", NULL);
+    lbuf_append(&lbuf, _("\nOptions:\n"), NULL);
 #ifdef HAVE_BSD_AUTH_H
     lbuf_append(&lbuf,
-	"  -A            use helper program for password prompting\n", NULL);
+	"  -A            ",
+	_("use helper program for password prompting\n"), NULL);
 #endif
     lbuf_append(&lbuf,
-	"  -a type       use specified BSD authentication type\n", NULL);
+	"  -a type       ",
+	_("use specified BSD authentication type\n"), NULL);
     lbuf_append(&lbuf,
-	"  -b            run command in the background\n", NULL);
+	"  -b            ",
+	_("run command in the background\n"), NULL);
     lbuf_append(&lbuf,
-	"  -C fd         close all file descriptors >= fd\n", NULL);
+	"  -C fd         ",
+	_("close all file descriptors >= fd\n"), NULL);
 #ifdef HAVE_LOGIN_CAP_H
     lbuf_append(&lbuf,
-	"  -c class      run command with specified login class\n", NULL);
+	"  -c class      ",
+	_("run command with specified login class\n"), NULL);
 #endif
     lbuf_append(&lbuf,
-	"  -E            preserve user environment when executing command\n",
-	NULL);
+	"  -E            ",
+	_("preserve user environment when executing command\n"), NULL);
     lbuf_append(&lbuf,
-	"  -e            edit files instead of running a command\n", NULL);
+	"  -e            ",
+	_("edit files instead of running a command\n"), NULL);
     lbuf_append(&lbuf,
-	"  -g group      execute command as the specified group\n", NULL);
+	"  -g group      ",
+	_("execute command as the specified group\n"), NULL);
     lbuf_append(&lbuf,
-	"  -H            set HOME variable to target user's home dir.\n",
-	NULL);
+	"  -H            ",
+	_("set HOME variable to target user's home dir.\n"), NULL);
     lbuf_append(&lbuf,
-	"  -h            display help message and exit\n", NULL);
+	"  -h            ",
+	_("display help message and exit\n"), NULL);
     lbuf_append(&lbuf,
-	"  -i [command]  run a login shell as target user\n", NULL);
+	"  -i [command]  ",
+	_("run a login shell as target user\n"), NULL);
     lbuf_append(&lbuf,
-	"  -K            remove timestamp file completely\n", NULL);
+	"  -K            ",
+	_("remove timestamp file completely\n"), NULL);
     lbuf_append(&lbuf,
-	"  -k            invalidate timestamp file\n", NULL);
+	"  -k            ",
+	_("invalidate timestamp file\n"), NULL);
     lbuf_append(&lbuf,
-	"  -l[l] command list user's available commands\n", NULL);
+	"  -l[l] command ",
+	_("list user's available commands\n"), NULL);
     lbuf_append(&lbuf,
-	"  -n            non-interactive mode, will not prompt user\n", NULL);
+	"  -n            ",
+	_("non-interactive mode, will not prompt user\n"), NULL);
     lbuf_append(&lbuf,
-	"  -P            preserve group vector instead of setting to target's\n",
-	NULL);
+	"  -P            ",
+	_("preserve group vector instead of setting to target's\n"), NULL);
     lbuf_append(&lbuf,
-	"  -p prompt     use specified password prompt\n", NULL);
+	"  -p prompt     ",
+	_("use specified password prompt\n"), NULL);
 #ifdef HAVE_SELINUX
     lbuf_append(&lbuf,
-	"  -r role       create SELinux security context with specified role\n",
-	NULL);
+	"  -r role       ",
+	_("create SELinux security context with specified role\n"), NULL);
 #endif
     lbuf_append(&lbuf,
-	"  -S            read password from standard input\n", NULL);
+	"  -S            ",
+	_("read password from standard input\n"), NULL);
     lbuf_append(&lbuf,
-	"  -s [command]  run a shell as target user\n", NULL);
+	"  -s [command]  ",
+	_("run a shell as target user\n"), NULL);
 #ifdef HAVE_SELINUX
     lbuf_append(&lbuf,
-	"  -t type       create SELinux security context with specified role\n",
-	NULL);
+	"  -t type       ",
+	_("create SELinux security context with specified role\n"), NULL);
 #endif
     lbuf_append(&lbuf,
-	"  -U user       when listing, list specified user's privileges\n",
-	NULL);
+	"  -U user       ",
+	_("when listing, list specified user's privileges\n"), NULL);
     lbuf_append(&lbuf,
-	"  -u user       run command (or edit file) as specified user\n", NULL);
+	"  -u user       ",
+	_("run command (or edit file) as specified user\n"), NULL);
     lbuf_append(&lbuf,
-	"  -V            display version information and exit\n", NULL);
+	"  -V            ",
+	_("display version information and exit\n"), NULL);
     lbuf_append(&lbuf,
-	"  -v            update user's timestamp without running a command\n",
-	NULL);
+	"  -v            ",
+	_("update user's timestamp without running a command\n"), NULL);
     lbuf_append(&lbuf,
-	"  --            stop processing command line arguments\n", NULL);
+	"  --            ",
+	_("stop processing command line arguments\n"), NULL);
     lbuf_print(&lbuf);
     lbuf_destroy(&lbuf);
     exit(0);

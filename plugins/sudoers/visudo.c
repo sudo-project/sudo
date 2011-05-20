@@ -176,8 +176,8 @@ main(int argc, char *argv[])
     while ((ch = getopt(argc, argv, "Vcf:sq")) != -1) {
 	switch (ch) {
 	    case 'V':
-		(void) printf("%s version %s\n", getprogname(), PACKAGE_VERSION);
-		(void) printf("%s grammar version %d\n", getprogname(), SUDOERS_GRAMMAR_VERSION);
+		(void) printf(_("%s version %s\n"), getprogname(), PACKAGE_VERSION);
+		(void) printf(_("%s grammar version %d\n"), getprogname(), SUDOERS_GRAMMAR_VERSION);
 		exit(0);
 	    case 'c':
 		checkonly++;		/* check mode */
@@ -240,7 +240,7 @@ main(int argc, char *argv[])
 	if (!sp->doedit)
 	    continue;
 	if (sp != tq_first(&sudoerslist)) {
-	    printf("press return to edit %s: ", sp->path);
+	    printf(_("press return to edit %s: "), sp->path);
 	    while ((ch = getchar()) != EOF && ch != '\n')
 		    continue;
 	}
@@ -472,7 +472,7 @@ reparse_sudoers(char *editor, char *args, int strict, int quiet)
 
 	/* If any new #include directives were added, edit them too. */
 	for (sp = last->next; sp != NULL; sp = sp->next) {
-	    printf("press return to edit %s: ", sp->path);
+	    printf(_("press return to edit %s: "), sp->path);
 	    while ((ch = getchar()) != EOF && ch != '\n')
 		    continue;
 	    edit_sudoers(sp, editor, args, errorlineno);
@@ -619,7 +619,7 @@ whatnow(void)
     int choice, c;
 
     for (;;) {
-	(void) fputs("What now? ", stdout);
+	(void) fputs(_("What now? "), stdout);
 	choice = getchar();
 	for (c = choice; c != '\n' && c != EOF;)
 	    c = getchar();
@@ -633,10 +633,10 @@ whatnow(void)
 	    case 'Q':
 		return choice;
 	    default:
-		(void) puts("Options are:");
-		(void) puts("  (e)dit sudoers file again");
-		(void) puts("  e(x)it without saving changes to sudoers file");
-		(void) puts("  (Q)uit and save changes to sudoers file (DANGER!)\n");
+		(void) puts(_("Options are:\n"
+		    "  (e)dit sudoers file again\n"
+		    "  e(x)it without saving changes to sudoers file\n"
+		    "  (Q)uit and save changes to sudoers file (DANGER!)\n"));
 	}
     }
 }
@@ -720,12 +720,12 @@ check_syntax(char *sudoers_path, int quiet, int strict)
     if (!quiet) {
 	if (parse_error) {
 	    if (errorlineno != -1)
-		(void) printf("parse error in %s near line %d\n", errorfile,
-		    errorlineno);
+		(void) printf(_("parse error in %s near line %d\n"),
+		    errorfile, errorlineno);
 	    else
-		(void) printf("parse error in %s\n", errorfile);
+		(void) printf(_("parse error in %s\n"), errorfile);
 	} else {
-	    (void) printf("%s: parsed OK\n", sudoers_path);
+	    (void) printf(_("%s: parsed OK\n"), sudoers_path);
 	}
     }
     /* Check mode and owner in strict mode. */
@@ -738,14 +738,15 @@ check_syntax(char *sudoers_path, int quiet, int strict)
 	if (sb.st_uid != SUDOERS_UID || sb.st_gid != SUDOERS_GID) {
 	    error = TRUE;
 	    if (!quiet) {
-		fprintf(stderr, "%s: wrong owner (uid, gid) should be (%d, %d)\n",
+		fprintf(stderr,
+		    _("%s: wrong owner (uid, gid) should be (%d, %d)\n"),
 		    sudoers_path, SUDOERS_UID, SUDOERS_GID);
 		}
 	}
 	if ((sb.st_mode & 07777) != SUDOERS_MODE) {
 	    error = TRUE;
 	    if (!quiet) {
-		fprintf(stderr, "%s: bad permissions, should be mode 0%o\n",
+		fprintf(stderr, _("%s: bad permissions, should be mode 0%o\n"),
 		    sudoers_path, SUDOERS_MODE);
 	    }
 	}
@@ -1186,15 +1187,15 @@ usage(int fatal)
 static void
 help(void)
 {
-    (void) printf("%s - safely edit the sudoers file\n\n", getprogname());
+    (void) printf(_("%s - safely edit the sudoers file\n\n"), getprogname());
     usage(0);
-    (void) puts("\nOptions:");
-    (void) puts("  -c          check-only mode");
-    (void) puts("  -f sudoers  specify sudoers file location");
-    (void) puts("  -h          display help message and exit");
-    (void) puts("  -q          less verbose (quiet) syntax error messages");
-    (void) puts("  -s          strict syntax checking");
-    (void) puts("  -V          display version information and exit");
+    (void) puts(_("\nOptions:\n"
+	"  -c          check-only mode\n"
+	"  -f sudoers  specify sudoers file location\n"
+	"  -h          display help message and exit\n"
+	"  -q          less verbose (quiet) syntax error messages\n"
+	"  -s          strict syntax checking\n"
+	"  -V          display version information and exit"));
     exit(0);
 }
 
