@@ -176,6 +176,7 @@ plugins/sudoers/mkdefaults
 plugins/sudoers/parse.c
 plugins/sudoers/parse.h
 plugins/sudoers/plugin_error.c
+plugins/sudoers/po/sudoers.pot
 plugins/sudoers/pwutil.c
 plugins/sudoers/redblack.c
 plugins/sudoers/redblack.h
@@ -237,6 +238,7 @@ src/get_pty.c
 src/load_plugins.c
 src/net_ifs.c
 src/parse_args.c
+src/po/sudo.pot
 src/preload.c
 src/selinux.c
 src/sesh.c
