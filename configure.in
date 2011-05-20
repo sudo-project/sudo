@@ -2195,8 +2195,8 @@ AC_CHECK_FUNCS(getprogname, , [
 if test "$enable_nls" = "yes"; then
     # List of translations
     LINGUAS=
-    AC_CACHE_VAL(sudo_cv_gettext, [
     AC_MSG_CHECKING([for gettext])
+    AC_CACHE_VAL(sudo_cv_gettext, [
     AC_LINK_IFELSE(
 	[
 	    AC_LANG_PROGRAM([[#include <libintl.h>]], [(void)gettext((char *)0);])
