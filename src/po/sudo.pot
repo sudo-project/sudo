@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.2\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2011-05-20 13:19-0400\n"
+"POT-Creation-Date: 2011-05-20 15:33-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -219,120 +219,123 @@ msgid ""
 msgstr ""
 
 #: ../../trunk/src/parse_args.c:515
+#, c-format
 msgid ""
-" - edit files as another user\n"
+"%s - edit files as another user\n"
 "\n"
 msgstr ""
 
 #: ../../trunk/src/parse_args.c:517
+#, c-format
 msgid ""
-" - execute a command as another user\n"
+"%s - execute a command as another user\n"
 "\n"
 msgstr ""
 
 #: ../../trunk/src/parse_args.c:522
+#, c-format
 msgid ""
 "\n"
 "Options:\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:526
+#: ../../trunk/src/parse_args.c:525
 msgid "use helper program for password prompting\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:530
+#: ../../trunk/src/parse_args.c:528
 msgid "use specified BSD authentication type\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:533
+#: ../../trunk/src/parse_args.c:530
 msgid "run command in the background\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:536
+#: ../../trunk/src/parse_args.c:532
 msgid "close all file descriptors >= fd\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:540
+#: ../../trunk/src/parse_args.c:535
 msgid "run command with specified login class\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:544
+#: ../../trunk/src/parse_args.c:538
 msgid "preserve user environment when executing command\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:547
+#: ../../trunk/src/parse_args.c:540
 msgid "edit files instead of running a command\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:550
+#: ../../trunk/src/parse_args.c:542
 msgid "execute command as the specified group\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:553
+#: ../../trunk/src/parse_args.c:544
 msgid "set HOME variable to target user's home dir.\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:556
+#: ../../trunk/src/parse_args.c:546
 msgid "display help message and exit\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:559
+#: ../../trunk/src/parse_args.c:548
 msgid "run a login shell as target user\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:562
+#: ../../trunk/src/parse_args.c:550
 msgid "remove timestamp file completely\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:565
+#: ../../trunk/src/parse_args.c:552
 msgid "invalidate timestamp file\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:568
+#: ../../trunk/src/parse_args.c:554
 msgid "list user's available commands\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:571
+#: ../../trunk/src/parse_args.c:556
 msgid "non-interactive mode, will not prompt user\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:574
+#: ../../trunk/src/parse_args.c:558
 msgid "preserve group vector instead of setting to target's\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:577
+#: ../../trunk/src/parse_args.c:560
 msgid "use specified password prompt\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:581 ../../trunk/src/parse_args.c:592
+#: ../../trunk/src/parse_args.c:563 ../../trunk/src/parse_args.c:571
 msgid "create SELinux security context with specified role\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:585
+#: ../../trunk/src/parse_args.c:566
 msgid "read password from standard input\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:588
+#: ../../trunk/src/parse_args.c:568
 msgid "run a shell as target user\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:596
+#: ../../trunk/src/parse_args.c:574
 msgid "when listing, list specified user's privileges\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:599
+#: ../../trunk/src/parse_args.c:576
 msgid "run command (or edit file) as specified user\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:602
+#: ../../trunk/src/parse_args.c:578
 msgid "display version information and exit\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:605
+#: ../../trunk/src/parse_args.c:580
 msgid "update user's timestamp without running a command\n"
 msgstr ""
 
-#: ../../trunk/src/parse_args.c:608
+#: ../../trunk/src/parse_args.c:582
 msgid "stop processing command line arguments\n"
 msgstr ""
 

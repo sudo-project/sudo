@@ -93,7 +93,8 @@ XGETTEXT_OPTS = -k_ -kN_ -dsudo --copyright-holder="Todd C. Miller" \
 		--package-name=@PACKAGE_NAME@ --package-version=$(VERSION) \
 		--flag warning:1:c-format --flag warningx:1:c-format \
 		--flag error:2:c-format --flag errorx:2:c-format \
-		--flag easprintf:3:c-format --foreign-user
+		--flag easprintf:3:c-format --flag lbuf_append:2:c-format \
+		--flag lbuf_append_quoted:3:c-format --foreign-user
 
 SUDODEP = $(srcdir)/sudo.h $(incdir)/sudo_plugin.h $(incdir)/alloc.h \
 	  $(incdir)/error.h $(incdir)/list.h $(incdir)/missing.h \
