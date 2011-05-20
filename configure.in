@@ -2156,21 +2156,20 @@ if test "$enable_nls" = "yes"; then
     AC_LINK_IFELSE(
 	[
 	    AC_LANG_PROGRAM([[#include <libintl.h>]], [(void)gettext((char *)0);])
-	], [
-	    sudo_cv_gettext=yes
-	    AC_MSG_RESULT($sudo_cv_gettext)
-	    AC_DEFINE(HAVE_LIBINTL_H)
-	], [
-	    sudo_cv_gettext=no
-	    AC_MSG_RESULT($sudo_cv_gettext)
-	    AC_CHECK_LIB(intl, gettext,
-		[LIBS="${LIBS} -lintl"]
-		[AC_DEFINE(HAVE_LIBINTL_H)],
-	    [
-		AC_CHECK_LIB(intl, gettext, [LIBS="${LIBS} -lintl -liconv"]
-		    AC_DEFINE(HAVE_LIBINTL_H), [], [-liconv])
-	    ])
-	])])
+	], [sudo_cv_gettext=yes], [sudo_cv_gettext=no])
+    ])
+    AC_MSG_RESULT($sudo_cv_gettext)
+    if test "$sudo_cv_gettext" = "yes"; then
+	AC_DEFINE(HAVE_LIBINTL_H)
+    else
+	AC_CHECK_LIB(intl, gettext,
+	    [LIBS="${LIBS} -lintl"]
+	    [AC_DEFINE(HAVE_LIBINTL_H)],
+	[
+	    AC_CHECK_LIB(intl, gettext, [LIBS="${LIBS} -lintl -liconv"]
+		AC_DEFINE(HAVE_LIBINTL_H), [], [-liconv])
+	])
+    fi
 fi
 
 dnl
