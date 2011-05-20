@@ -492,7 +492,9 @@ ALL {
 			}
 
 [[:upper:]][[:upper:][:digit:]_]* {
+#ifndef HAVE_SELINUX
 			got_alias:
+#endif
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("ALIAS ");
