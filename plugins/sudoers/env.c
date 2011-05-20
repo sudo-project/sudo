@@ -286,7 +286,7 @@ sudo_putenv(char *str, int dupcheck, int overwrite)
 
 #ifdef ENV_DEBUG
     if (env.envp[env.env_len] != NULL)
-	errorx(1, _("sudo_putenv: corrupted envp, len mismatch"));
+	errorx(1, _("sudo_putenv: corrupted envp, length mismatch"));
 #endif
 
     if (dupcheck) {

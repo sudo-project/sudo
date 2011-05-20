@@ -867,7 +867,7 @@ set_cmnd(int sudo_mode)
 	}
     }
     if (strlen(user_cmnd) >= PATH_MAX)
-	errorx(1, _("%s: file name too long"), user_cmnd);
+	errorx(1, _("%s: %s"), user_cmnd, strerror(ENAMETOOLONG));
 
     if ((user_base = strrchr(user_cmnd, '/')) != NULL)
 	user_base++;
@@ -979,7 +979,7 @@ set_loginclass(struct passwd *pw)
     if (login_class && strcmp(login_class, "-") != 0) {
 	if (user_uid != 0 &&
 	    strcmp(runas_user ? runas_user : def_runas_default, "root") != 0)
-	    errorx(1, _("only root can use -c %s"), login_class);
+	    errorx(1, _("only root can use `-c %s'"), login_class);
     } else {
 	login_class = pw->pw_class;
 	if (!login_class || !*login_class)

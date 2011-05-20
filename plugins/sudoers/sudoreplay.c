@@ -578,7 +578,7 @@ parse_expr(struct search_node **headp, char *argv[])
 #ifdef HAVE_REGCOMP
 	    if (type == ST_PATTERN) {
 		if (regcomp(&newsn->u.cmdre, *av, REG_EXTENDED|REG_NOSUB) != 0)
-		    errorx(1, _("invalid regex: %s"), *av);
+		    errorx(1, _("invalid regular expression: %s"), *av);
 	    } else
 #endif
 	    if (type == ST_TODATE || type == ST_FROMDATE) {

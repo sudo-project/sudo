@@ -104,7 +104,7 @@ group_plugin_load(char *plugin_info)
 	goto done;
     }
     if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
-	warningx(_("%s must be only be writable by owner"), path);
+	warningx(_("%s must only be writable by owner"), path);
 	goto done;
     }
 

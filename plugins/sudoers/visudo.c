@@ -210,7 +210,7 @@ main(int argc, char *argv[])
     /* Mock up a fake sudo_user struct. */
     user_cmnd = "";
     if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL)
-	errorx(1, _("you don't exist in the passwd database"));
+	errorx(1, _("you do not exist in the %s database"), "passwd");
     get_hostname();
 
     /* Setup defaults data structures. */
@@ -670,7 +670,7 @@ run_command(char *path, char **argv)
 
     switch (pid = fork()) {
 	case -1:
-	    error(1, _("unable to run %s"), path);
+	    error(1, _("unable to execute %s"), path);
 	    break;	/* NOTREACHED */
 	case 0:
 	    sudo_endpwent();
