@@ -940,7 +940,7 @@ runas_setgroups()
 	aix_setauthdb(pw->pw_name);
 # endif
 	if (initgroups(pw->pw_name, pw->pw_gid) < 0)
-	    log_error(USE_ERRNO|MSG_ONLY, _("can't set runas group vector"));
+	    log_error(USE_ERRNO|MSG_ONLY, _("unable to set runas group vector"));
 # ifdef HAVE_GETGROUPS
 	if (runas_groups) {
 	    efree(runas_groups);
@@ -949,14 +949,14 @@ runas_setgroups()
 	if ((runas_ngroups = getgroups(0, NULL)) > 0) {
 	    runas_groups = emalloc2(runas_ngroups, sizeof(GETGROUPS_T));
 	    if (getgroups(runas_ngroups, runas_groups) < 0)
-		log_error(USE_ERRNO|MSG_ONLY, _("can't get runas group vector"));
+		log_error(USE_ERRNO|MSG_ONLY, _("unable to get runas group vector"));
 	}
 #  ifdef HAVE_SETAUTHDB
 	aix_restoreauthdb();
 #  endif
     } else {
 	if (setgroups(runas_ngroups, runas_groups) < 0)
-	    log_error(USE_ERRNO|MSG_ONLY, _("can't set runas group vector"));
+	    log_error(USE_ERRNO|MSG_ONLY, _("unable to set runas group vector"));
 # endif /* HAVE_GETGROUPS */
     }
 }

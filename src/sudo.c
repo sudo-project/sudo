@@ -356,7 +356,7 @@ get_user_groups(struct user_details *ud)
 
     ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
     if (getgroups(ud->ngroups, ud->groups) < 0)
-	error(1, _("can't get group vector"));
+	error(1, _("unable to get group vector"));
     glsize = sizeof("groups=") - 1 + (ud->ngroups * (MAX_UID_T_LEN + 1));
     gid_list = emalloc(glsize);
     memcpy(gid_list, "groups=", sizeof("groups=") - 1);

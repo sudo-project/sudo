@@ -447,11 +447,11 @@ sudo_ldap_parse_uri(const struct ldap_config_list_str *uri_list)
 
 	if (nldaps != 0) {
 	    if (nldap != 0) {
-		warningx(_("cannot mix ldap and ldaps URIs"));
+		warningx(_("unable to mix ldap and ldaps URIs"));
 		goto done;
 	    }
 	    if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS) {
-		warningx(_("cannot mix ldaps and starttls"));
+		warningx(_("unable to mix ldaps and starttls"));
 		goto done;
 	    }
 	    ldap_conf.ssl_mode = SUDO_LDAP_SSL;

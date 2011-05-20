@@ -166,14 +166,14 @@ io_nextid(char *iolog_dir, char sessid[7])
     }
     fd = open(pathbuf, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
     if (fd == -1)
-	log_error(USE_ERRNO, _("cannot open %s"), pathbuf);
+	log_error(USE_ERRNO, _("unable to open %s"), pathbuf);
     lock_file(fd, SUDO_LOCK);
 
     /* Read seq number (base 36). */
     nread = read(fd, buf, sizeof(buf));
     if (nread != 0) {
 	if (nread == -1)
-	    log_error(USE_ERRNO, _("cannot read %s"), pathbuf);
+	    log_error(USE_ERRNO, _("unable to read %s"), pathbuf);
 	id = strtoul(buf, &ep, 36);
 	if (buf == ep || id >= SESSID_MAX)
 	    log_error(0, _("invalid sequence number %s"), pathbuf);

@@ -132,7 +132,7 @@ verify_user(struct passwd *pw, char *prompt)
     if (standalone && auth_switch[1].name != NULL) {
 	audit_failure(NewArgv, "invalid authentication methods");
     	log_error(0, _("Invalid authentication methods compiled into sudo!  "
-	    "You cannot mix standalone and non-standalone authentication."));
+	    "You may mix standalone and non-standalone authentication."));
 	return -1;
     }
 

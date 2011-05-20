@@ -286,7 +286,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 #else
     if (stat(sp->path, &sb) == -1)
 #endif
-	error(1, _("can't stat %s"), sp->path);
+	error(1, _("unable to stat %s"), sp->path);
     orig_size = sb.st_size;
     mtim_get(&sb, &orig_mtim);
 
@@ -362,7 +362,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 	 * Sanity checks.
 	 */
 	if (stat(sp->tpath, &sb) < 0) {
-	    warningx(_("cannot stat temporary file (%s), %s unchanged"),
+	    warningx(_("unable to stat temporary file (%s), %s unchanged"),
 		sp->tpath, sp->path);
 	    return FALSE;
 	}
@@ -420,7 +420,7 @@ reparse_sudoers(char *editor, char *args, int strict, int quiet)
 	last = tq_last(&sudoerslist);
 	fp = fopen(sp->tpath, "r+");
 	if (fp == NULL)
-	    errorx(1, _("can't re-open temporary file (%s), %s unchanged."),
+	    errorx(1, _("unable to re-open temporary file (%s), %s unchanged."),
 		sp->tpath, sp->path);
 
 	/* Clean slate for each parse */
@@ -464,8 +464,10 @@ reparse_sudoers(char *editor, char *args, int strict, int quiet)
 		    break;
 		}
 	    }
-	    if (sp == NULL)
-		errorx(1, _("internal error, can't find %s in list!"), sudoers);
+	    if (sp == NULL) {
+		errorx(1, _("internal error, unable to find %s in list!"),
+		    sudoers);
+	    }
 	}
 
 	/* If any new #include directives were added, edit them too. */
@@ -500,7 +502,7 @@ install_sudoers(struct sudoersfile *sp, int oldperms)
 #else
 	if (stat(sp->path, &sb) == -1)
 #endif
-	    error(1, _("can't stat %s"), sp->path);
+	    error(1, _("unable to stat %s"), sp->path);
 	if (chown(sp->tpath, sb.st_uid, sb.st_gid) != 0) {
 	    warning(_("unable to set (uid, gid) of %s to (%d, %d)"),
 		sp->tpath, sb.st_uid, sb.st_gid);

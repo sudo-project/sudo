@@ -371,7 +371,7 @@ main(int argc, char *argv[])
 	if (ch != -1)
 	    (void) fcntl(STDIN_FILENO, F_SETFL, ch | O_NONBLOCK);
 	if (!term_raw(STDIN_FILENO, 1))
-	    error(1, _("cannot set tty to raw mode"));
+	    error(1, _("unable to set tty to raw mode"));
     }
     fdsw = (fd_set *)emalloc2(howmany(STDOUT_FILENO + 1, NFDBITS),
 	sizeof(fd_mask));

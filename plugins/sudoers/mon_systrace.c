@@ -120,12 +120,12 @@ systrace_attach(pid)
 
     switch (fork()) {
     case -1:
-	error(1, "can't fork");
+	error(1, "unable to fork");
     case 0:
 	/* tracer, fork again to completely disassociate */
 	switch (fork()) {
 	    case -1:
-		warning("can't fork");
+		warning("unable to fork");
 		kill(pid, SIGKILL);
 		_exit(1);
 	    case 0:
@@ -889,7 +889,7 @@ check_execv(fd, pid, seqnr, askp, policyp, errorp)
     if (rval == -1 || getcwd(user_cwd, sizeof(user_cwd)) == NULL) {
 	if (rval == -1 && errno == EBUSY)
 	    return -1;
-	warningx("cannot get working directory");
+	warningx("unable to get working directory");
 	(void) strlcpy(user_cwd, "unknown", sizeof(user_cwd));
     }
 
@@ -898,13 +898,13 @@ check_execv(fd, pid, seqnr, askp, policyp, errorp)
      */
     if (sudo_goodpath(user_cmnd, user_stat) == NULL) {
 	if (rval != -1 && ioctl(fd, STRIOCRESCWD, 0) != 0)
-	    warning("can't restore cwd");
+	    warning("unable to restore cwd");
 	*policyp = SYSTR_POLICY_NEVER;
 	*errorp = EACCES;
 	return 0;
     }
     if (rval != -1 && ioctl(fd, STRIOCRESCWD, 0) != 0)
-	warning("can't restore cwd");
+	warning("unable to restore cwd");
 
     /* Check sudoers and log the result. */
     init_defaults();
