@@ -28,6 +28,9 @@
 #  include <stdlib.h>
 # endif
 #endif /* STDC_HEADERS */
+#ifdef HAVE_LIBINTL_H
+# include <libintl.h>
+#endif
 #include <usersec.h>
 #include <uinfo.h>
 
