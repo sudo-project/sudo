@@ -35,14 +35,11 @@
 #include "sudo_nss.h"
 #include "sudo_plugin.h"
 
+#define DEFAULT_TEXT_DOMAIN	"sudoers"
+#include "gettext.h"
+
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
 # include <membership.h>
-#endif
-
-#ifdef HAVE_LIBINTL_H
-# include <libintl.h>
-# undef _
-# define _(String) dgettext("sudoers", String)
 #endif
 
 /*

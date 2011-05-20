@@ -868,23 +868,7 @@
 #undef ISSET
 #define ISSET(t, f)     ((t) & (f))
 
-/*
- * Internationalization support.
- */
-#ifdef HAVE_LIBINTL_H
-# define _(String) gettext(String)
-# define gettext_noop(String) String
-# define N_(String) gettext_noop(String)
-#else
-# define _(String) String 
-# define N_(String) String
-# define textdomain(Domain)
-# define bindtextdomain(Package, Directory)
-# define ngettext(String, String_Plural, N) \
-    ((N) == 1 ? (String) : (String_Plural))
-#endif /* HAVE_LIBINTL_H */
-
-/* New ANSI-style OS defs for HP-UX and ConvexOS. */
+/* ANSI-style OS defs for HP-UX and ConvexOS. */
 #if defined(hpux) && !defined(__hpux)
 # define __hpux		1
 #endif /* hpux */

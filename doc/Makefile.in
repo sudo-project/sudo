@@ -25,7 +25,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 # Tools to use
-NROFF = @NROFFPROG@ -Tascii
+NROFF = @NROFFPROG@
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c

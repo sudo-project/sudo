@@ -20,11 +20,11 @@
 
 #include <stdio.h>
 #include <signal.h>
-#ifdef HAVE_LIBINTL_H
-# include <libintl.h>
-#endif
 
 #include "missing.h"
+
+#define DEFAULT_TEXT_DOMAIN	"sudo"
+#include "gettext.h"
 
 #if defined(HAVE_DECL_SYS_SIGLIST) && HAVE_DECL_SYS_SIGLIST == 1
 # define my_sys_siglist	sys_siglist

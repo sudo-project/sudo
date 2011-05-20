@@ -22,12 +22,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef HAVE_LIBINTL_H
-# include <libintl.h>
-#endif
 
 #include "missing.h"
 #include "error.h"
+
+#define DEFAULT_TEXT_DOMAIN	"sudo"
+#include "gettext.h"
 
 static void _warning(int, const char *, va_list);
        void cleanup(int);

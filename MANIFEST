@@ -93,6 +93,7 @@ include/Makefile.in
 include/alloc.h
 include/error.h
 include/fileops.h
+include/gettext.h
 include/lbuf.h
 include/list.h
 include/missing.h

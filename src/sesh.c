@@ -29,11 +29,9 @@
 #ifdef HAVE_SETLOCALE
 # include <locale.h>
 #endif
-#ifdef HAVE_LIBINTL_H
-# include <libintl.h>
-#endif
 
 #include "missing.h"
+#include "gettext.h"
 
 int
 main (int argc, char *argv[])
@@ -43,10 +41,8 @@ main (int argc, char *argv[])
 #ifdef HAVE_SETLOCALE 
     setlocale(LC_ALL, "");
 #endif
-#ifdef HAVE_LIBINTL_H
-    bindtextdomain("sudo", LOCALEDIR);
-    textdomain("sudo");
-#endif
+    bindtextdomain(PACKAGE_NAME, LOCALEDIR);
+    textdomain(PACKAGE_NAME);
 
     if (argc < 2)
 	errx(EXIT_FAILURE, _("requires at least one argument"));

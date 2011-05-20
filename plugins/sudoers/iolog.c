@@ -433,9 +433,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	goto done;
     }
 
-#ifdef HAVE_LIBINTL_H
     bindtextdomain("sudoers", LOCALEDIR);
-#endif
 
     sudo_setpwent();
     sudo_setgrent();
