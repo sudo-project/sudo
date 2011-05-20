@@ -178,6 +178,11 @@ main(int argc, char *argv[], char *envp[])
 	setprogname(argv[0]);
 #endif
 
+#ifdef HAVE_LIBINTL_H
+    bindtextdomain("sudo", LOCALEDIR);
+    textdomain("sudo");
+#endif
+
     /* Must be done before we do any password lookups */
 #if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
     (void) set_auth_parameters(argc, argv);

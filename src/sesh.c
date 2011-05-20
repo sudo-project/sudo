@@ -26,6 +26,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#ifdef HAVE_SETLOCALE
+# include <locale.h>
+#endif
 #ifdef HAVE_LIBINTL_H
 # include <libintl.h>
 #endif
@@ -36,6 +39,14 @@ int
 main (int argc, char *argv[])
 {
     char *cp, *cmnd;
+
+#ifdef HAVE_SETLOCALE 
+    setlocale(LC_ALL, "");
+#endif
+#ifdef HAVE_LIBINTL_H
+    bindtextdomain("sudo", LOCALEDIR);
+    textdomain("sudo");
+#endif
 
     if (argc < 2)
 	errx(EXIT_FAILURE, _("requires at least one argument"));

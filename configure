@@ -680,6 +680,7 @@ password_timeout
 timeout
 timedir
 iolog_dir
+LIBINTL
 LT_STATIC
 LIBDL
 CONFIGURE_ARGS
@@ -2843,6 +2844,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -2898,6 +2900,7 @@ LDAP="#"
 BAMAN=0
 LCMAN=0
 SEMAN=0
+LIBINTL=
 ZLIB=
 ZLIB_SRC=
 AUTH_OBJS=
@@ -16781,7 +16784,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_intl_gettext" >&5
 $as_echo "$ac_cv_lib_intl_gettext" >&6; }
 if test "x$ac_cv_lib_intl_gettext" = x""yes; then :
-  LIBS="${LIBS} -lintl"
+  LIBINTL="-lintl"
 	    $as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
 
 else
@@ -16823,7 +16826,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_intl_gettext_liconv" >&5
 $as_echo "$ac_cv_lib_intl_gettext_liconv" >&6; }
 if test "x$ac_cv_lib_intl_gettext_liconv" = x""yes; then :
-  LIBS="${LIBS} -lintl -liconv"
+  LIBINTL="-lintl -liconv"
 		$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
 
 fi

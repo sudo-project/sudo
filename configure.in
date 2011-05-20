@@ -64,6 +64,7 @@ AC_SUBST([ac_config_libobj_dir])
 AC_SUBST([CONFIGURE_ARGS])
 AC_SUBST([LIBDL])
 AC_SUBST([LT_STATIC])
+AC_SUBST([LIBINTL])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -161,6 +162,7 @@ LDAP="#"
 BAMAN=0
 LCMAN=0
 SEMAN=0
+LIBINTL=
 ZLIB=
 ZLIB_SRC=
 AUTH_OBJS=
@@ -2163,10 +2165,10 @@ if test "$enable_nls" = "yes"; then
 	AC_DEFINE(HAVE_LIBINTL_H)
     else
 	AC_CHECK_LIB(intl, gettext,
-	    [LIBS="${LIBS} -lintl"]
+	    [LIBINTL="-lintl"]
 	    [AC_DEFINE(HAVE_LIBINTL_H)],
 	[
-	    AC_CHECK_LIB(intl, gettext, [LIBS="${LIBS} -lintl -liconv"]
+	    AC_CHECK_LIB(intl, gettext, [LIBINTL="-lintl -liconv"]
 		AC_DEFINE(HAVE_LIBINTL_H), [], [-liconv])
 	])
     fi

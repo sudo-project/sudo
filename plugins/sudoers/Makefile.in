@@ -43,7 +43,7 @@ YACC = @YACC@
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 
 # Libraries
-LIBS = $(top_builddir)/common/libcommon.la $(top_builddir)/@ac_config_libobj_dir@/libreplace.la
+LIBS = $(top_builddir)/common/libcommon.la $(top_builddir)/@ac_config_libobj_dir@/libreplace.la @LIBINTL@
 NET_LIBS = @NET_LIBS@
 SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(LIBS) $(NET_LIBS) @ZLIB@
 REPLAY_LIBS = @REPLAY_LIBS@ @ZLIB@
@@ -67,6 +67,7 @@ sbindir = @sbindir@
 sysconfdir = @sysconfdir@
 libexecdir = @libexecdir@
 datarootdir = @datarootdir@
+localedir = @localedir@
 localstatedir = @localstatedir@
 
 # File extension for shared objects
@@ -94,7 +95,9 @@ sudoers_gid = @SUDOERS_GID@
 sudoers_mode = @SUDOERS_MODE@
 
 # Pass in paths and uid/gid + OS dependent defines
-DEFS = @OSDEFS@ -D_PATH_SUDOERS=\"$(sudoersdir)/sudoers\" -DSUDOERS_UID=$(sudoers_uid) -DSUDOERS_GID=$(sudoers_gid) -DSUDOERS_MODE=$(sudoers_mode)
+DEFS = @OSDEFS@ -D_PATH_SUDOERS=\"$(sudoersdir)/sudoers\" \
+       -DSUDOERS_UID=$(sudoers_uid) -DSUDOERS_GID=$(sudoers_gid) \
+       -DSUDOERS_MODE=$(sudoers_mode) -DLOCALEDIR=\"$(localedir)\"
 
 #### End of system configuration section. ####
 
