@@ -1527,6 +1527,21 @@ case "$host" in
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 
+		# The HP bundled compiler cannot generate shared libs
+		if test -z "$GCC"; then
+		    AC_CACHE_CHECK([for HP bundled C compiler],
+			[sudo_cv_var_hpccbundled],
+			[if $CC -V 2>&1 | grep '^(Bundled)' >/dev/null 2>&1; then
+			    sudo_cv_var_hpccbundled=yes
+			else
+			    sudo_cv_var_hpccbundled=no
+			fi]
+		    )
+		    if test "$sudo_cv_var_hpccbundled" = "yes"; then
+			AC_MSG_ERROR([The HP bundled C compiler is unable to build Sudo, you must use gcc or the HP ANSI C compiler instead.])
+		    fi
+		fi
+
 		# Build PA-RISC1.1 objects for better portability
 		case "$host_cpu" in
 		    hppa[2-9]*)
