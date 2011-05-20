@@ -311,7 +311,7 @@ main(int argc, char *argv[])
 	plen = snprintf(path, sizeof(path), "%s/%.2s/%.2s/%.2s/timing",
 	    session_dir, id, &id[2], &id[4]);
 	if (plen <= 0 || plen >= sizeof(path))
-	    errorx(1, _("%s/%.2s/%.2s/%.2s/%.2s/timing: %s"), session_dir,
+	    errorx(1, _("%s/%.2s/%.2s/%.2s/timing: %s"), session_dir,
 		id, &id[2], &id[4], strerror(ENAMETOOLONG));
     } else {
 	plen = snprintf(path, sizeof(path), "%s/%s/timing",
@@ -456,8 +456,10 @@ delay(double secs)
       memcpy(&ts, &rts, sizeof(ts));
       rval = nanosleep(&ts, &rts);
     } while (rval == -1 && errno == EINTR);
-    if (rval == -1)
-	error(1, _("nanosleep: tv_sec %ld, tv_nsec %ld"), ts.tv_sec, ts.tv_nsec);
+    if (rval == -1) {
+	error(1, _("nanosleep: tv_sec %ld, tv_nsec %ld"),
+	    (long)ts.tv_sec, (long)ts.tv_nsec);
+    }
 }
 
 static void *
