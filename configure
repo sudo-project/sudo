@@ -16773,12 +16773,12 @@ done
 if test "$enable_nls" = "yes"; then
     # List of translations
     LINGUAS=
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettext" >&5
+$as_echo_n "checking for gettext... " >&6; }
     if test "${sudo_cv_gettext+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettext" >&5
-$as_echo_n "checking for gettext... " >&6; }
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
