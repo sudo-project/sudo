@@ -19,9 +19,9 @@
 
 #include <stdarg.h>
 
-void	error(int, const char *, ...) __attribute__((__noreturn__));
-void	errorx(int, const char *, ...) __attribute__((__noreturn__));
-void	warning(const char *, ...);
-void	warningx(const char *, ...);
+void	error(int, const char *, ...)  __printflike(2, 3) __attribute__((__noreturn__));
+void	errorx(int, const char *, ...)  __printflike(2, 3) __attribute__((__noreturn__));
+void	warning(const char *, ...) __printflike(1, 2);
+void	warningx(const char *, ...) __printflike(1, 2);
 
 #endif /* _SUDO_ERROR_H_ */
