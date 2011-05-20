@@ -122,7 +122,7 @@ static int fork_cmnd(struct command_details *details, int sv[2])
     child = fork();
     switch (child) {
     case -1:
-	error(1, "fork");
+	error(1, _("unable to fork"));
 	break;
     case 0:
 	/* child */

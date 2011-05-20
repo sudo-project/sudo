@@ -190,10 +190,10 @@ do_logfile(char *msg)
     fp = fopen(def_logfile, "a");
     (void) umask(oldmask);
     if (fp == NULL) {
-	send_mail(_("Can't open log file: %s: %s"),
+	send_mail(_("unable to open log file: %s: %s"),
 	    def_logfile, strerror(errno));
     } else if (!lock_file(fileno(fp), SUDO_LOCK)) {
-	send_mail(_("Can't lock log file: %s: %s"),
+	send_mail(_("unable to lock log file: %s: %s"),
 	    def_logfile, strerror(errno));
     } else {
 	time_t now;

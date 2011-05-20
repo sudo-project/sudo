@@ -222,17 +222,21 @@ update_timestamp(char *timestampdir, char *timestampfile)
 	 */
 	int fd = open(timestampfile, O_WRONLY|O_CREAT, 0600);
 	if (fd == -1)
-	    log_error(NO_EXIT|USE_ERRNO, _("Can't open %s"), timestampfile);
+	    log_error(NO_EXIT|USE_ERRNO, _("unable to open %s"), timestampfile);
 	else {
 	    lock_file(fd, SUDO_LOCK);
-	    if (write(fd, &tty_info, sizeof(tty_info)) != sizeof(tty_info))
-		log_error(NO_EXIT|USE_ERRNO, _("Can't write %s"), timestampfile);
+	    if (write(fd, &tty_info, sizeof(tty_info)) != sizeof(tty_info)) {
+		log_error(NO_EXIT|USE_ERRNO, _("unable to write to %s"),
+		    timestampfile);
+	    }
 	    close(fd);
 	}
     } else {
 	if (touch(-1, timestampdir, NULL) == -1) {
-	    if (mkdir(timestampdir, 0700) == -1)
-		log_error(NO_EXIT|USE_ERRNO, _("Can't mkdir %s"), timestampdir);
+	    if (mkdir(timestampdir, 0700) == -1) {
+		log_error(NO_EXIT|USE_ERRNO, _("unable to mkdir %s"),
+		    timestampdir);
+	    }
 	}
     }
     if (timestamp_uid != 0)

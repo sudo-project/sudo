@@ -105,7 +105,7 @@ sudo_edit(struct command_details *command_details)
      * We will change the euid as needed below.
      */
     if (setuid(ROOT_UID) != 0) {
-	warning(_("unable to change to uid to root (%u)"), ROOT_UID);
+	warning(_("unable to change uid to root (%u)"), ROOT_UID);
 	return 1;
     }
 
