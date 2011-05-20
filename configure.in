@@ -1311,6 +1311,16 @@ AC_ARG_ENABLE(admin-flag,
   esac
 ])
 
+AC_ARG_ENABLE(nls,
+[AS_HELP_STRING([--disable-nls], [Disable natural language support using gettext])],
+[ case "$enableval" in
+    yes|no) enable_nls=$enableval
+	    ;;
+    *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-nls: $enableval])
+	    ;;
+  esac
+], [enable_nls=yes])
+
 AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])],
 [case $with_selinux in
     yes)	SELINUX_USAGE="[[-r role]] [[-t type]] "
@@ -2140,11 +2150,22 @@ AC_CHECK_FUNCS(getprogname, , [
 # Since gcc prefers /usr/local/include to /usr/include, we need to
 # make sure we use the gettext() that matches the include file.
 # First check that it links w/o additional libs, then try with -lintl.
-AC_LINK_IFELSE([AC_LANG_PROGRAM(
-[[#include <libintl.h>]], [(void)gettext((char *)0, (char *)0);])],
-[AC_DEFINE(HAVE_LIBINTL_H)],
-[AC_CHECK_LIB(intl, gettext, [LIBS="${LIBS} -lintl"]
-    [AC_DEFINE(HAVE_LIBINTL_H)])])
+if test "$enable_nls" = "yes"; then
+    AC_LINK_IFELSE(
+	[
+	    AC_LANG_PROGRAM([[#include <libintl.h>]], [(void)gettext((char *)0);])
+	], [
+	    AC_DEFINE(HAVE_LIBINTL_H)
+	], [
+	    AC_CHECK_LIB(intl, gettext,
+		[LIBS="${LIBS} -lintl"]
+		[AC_DEFINE(HAVE_LIBINTL_H)],
+	    [
+		AC_CHECK_LIB(intl, gettext, [LIBS="${LIBS} -lintl -liconv"]
+		    AC_DEFINE(HAVE_LIBINTL_H), [], [-liconv])
+	    ])
+	])
+fi
 
 dnl
 dnl Deferred zlib option processing.
