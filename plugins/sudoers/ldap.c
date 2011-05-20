@@ -1746,7 +1746,7 @@ sudo_ldap_set_options(LDAP *ld)
 	    if (ival >= 0) {
 		rc = ldap_set_option(conn, cur->opt_val, &ival);
 		if (rc != LDAP_OPT_SUCCESS) {
-		    warningx(_("ldap_set_option: %s -> %d: %s"),
+		    warningx("ldap_set_option: %s -> %d: %s",
 			cur->conf_str, ival, ldap_err2string(rc));
 		    return -1;
 		}
@@ -1758,7 +1758,7 @@ sudo_ldap_set_options(LDAP *ld)
 	    if (sval != NULL) {
 		rc = ldap_set_option(conn, cur->opt_val, sval);
 		if (rc != LDAP_OPT_SUCCESS) {
-		    warningx(_("ldap_set_option: %s -> %s: %s"),
+		    warningx("ldap_set_option: %s -> %s: %s",
 			cur->conf_str, sval, ldap_err2string(rc));
 		    return -1;
 		}
@@ -1776,7 +1776,7 @@ sudo_ldap_set_options(LDAP *ld)
 	tv.tv_usec = 0;
 	rc = ldap_set_option(ld, LDAP_OPT_TIMEOUT, &tv);
 	if (rc != LDAP_OPT_SUCCESS) {
-	    warningx(_("ldap_set_option(TIMEOUT, %ld): %s"),
+	    warningx("ldap_set_option(TIMEOUT, %ld): %s",
 		(long)tv.tv_sec, ldap_err2string(rc));
 	    return -1;
 	}
@@ -1792,7 +1792,7 @@ sudo_ldap_set_options(LDAP *ld)
 	tv.tv_usec = 0;
 	rc = ldap_set_option(ld, LDAP_OPT_NETWORK_TIMEOUT, &tv);
 	if (rc != LDAP_OPT_SUCCESS) {
-	    warningx(_("ldap_set_option(NETWORK_TIMEOUT, %ld): %s"),
+	    warningx("ldap_set_option(NETWORK_TIMEOUT, %ld): %s",
 		(long)tv.tv_sec, ldap_err2string(rc));
 	    return -1;
 	}
@@ -1806,7 +1806,7 @@ sudo_ldap_set_options(LDAP *ld)
 	int val = LDAP_OPT_X_TLS_HARD;
 	rc = ldap_set_option(ld, LDAP_OPT_X_TLS, &val);
 	if (rc != LDAP_SUCCESS) {
-	    warningx(_("ldap_set_option(LDAP_OPT_X_TLS, LDAP_OPT_X_TLS_HARD): %s"),
+	    warningx("ldap_set_option(LDAP_OPT_X_TLS, LDAP_OPT_X_TLS_HARD): %s",
 		ldap_err2string(rc));
 	    return -1;
 	}
@@ -1928,7 +1928,7 @@ sudo_ldap_bind_s(LDAP *ld)
 # endif
 	}
 	if (rc != LDAP_SUCCESS) {
-	    warningx(_("ldap_sasl_interactive_bind_s(): %s"),
+	    warningx("ldap_sasl_interactive_bind_s(): %s",
 		ldap_err2string(rc));
 	    return -1;
 	}
@@ -1945,7 +1945,7 @@ sudo_ldap_bind_s(LDAP *ld)
 	rc = ldap_sasl_bind_s(ld, ldap_conf.binddn, LDAP_SASL_SIMPLE, &bv,
 	    NULL, NULL, NULL);
 	if (rc != LDAP_SUCCESS) {
-	    warningx(_("ldap_sasl_bind_s(): %s"), ldap_err2string(rc));
+	    warningx("ldap_sasl_bind_s(): %s", ldap_err2string(rc));
 	    return -1;
 	}
 	DPRINTF(("ldap_sasl_bind_s() ok"), 1);
@@ -1954,7 +1954,7 @@ sudo_ldap_bind_s(LDAP *ld)
     {
 	rc = ldap_simple_bind_s(ld, ldap_conf.binddn, ldap_conf.bindpw);
 	if (rc != LDAP_SUCCESS) {
-	    warningx(_("ldap_simple_bind_s(): %s"), ldap_err2string(rc));
+	    warningx("ldap_simple_bind_s(): %s", ldap_err2string(rc));
 	    return -1;
 	}
 	DPRINTF(("ldap_simple_bind_s() ok"), 1);
@@ -2009,18 +2009,18 @@ sudo_ldap_open(struct sudo_nss *nss)
 #if defined(HAVE_LDAP_START_TLS_S)
 	rc = ldap_start_tls_s(ld, NULL, NULL);
 	if (rc != LDAP_SUCCESS) {
-	    warningx(_("ldap_start_tls_s(): %s"), ldap_err2string(rc));
+	    warningx("ldap_start_tls_s(): %s", ldap_err2string(rc));
 	    return -1;
 	}
 	DPRINTF(("ldap_start_tls_s() ok"), 1);
 #elif defined(HAVE_LDAP_SSL_CLIENT_INIT) && defined(HAVE_LDAP_START_TLS_S_NP)
 	if (ldap_ssl_client_init(NULL, NULL, 0, &rc) != LDAP_SUCCESS) {
-	    warningx(_("ldap_ssl_client_init(): %s"), ldap_err2string(rc));
+	    warningx("ldap_ssl_client_init(): %s", ldap_err2string(rc));
 	    return -1;
 	}
 	rc = ldap_start_tls_s_np(ld, NULL);
 	if (rc != LDAP_SUCCESS) {
-	    warningx(_("ldap_start_tls_s_np(): %s",) ldap_err2string(rc));
+	    warningx("ldap_start_tls_s_np(): %s", ldap_err2string(rc));
 	    return -1;
 	}
 	DPRINTF(("ldap_start_tls_s_np() ok"), 1);
