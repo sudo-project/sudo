@@ -157,8 +157,8 @@ pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 			_("Password expired, contact your system administrator"));
 		    return AUTH_FATAL;
 		case PAM_ACCT_EXPIRED:
-		    log_error(NO_EXIT|NO_MAIL, "%s %s",
-			_("Account expired or PAM config lacks an \"account\"",
+		    log_error(NO_EXIT|NO_MAIL,
+			_("Account expired or PAM config lacks an \"account\" "
 			"section for sudo, contact your system administrator"));
 		    return AUTH_FATAL;
 	    }
