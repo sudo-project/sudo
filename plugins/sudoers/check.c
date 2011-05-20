@@ -709,8 +709,8 @@ get_authpw(void)
     struct passwd *pw;
 
     if (def_rootpw) {
-	if ((pw = sudo_getpwuid(0)) == NULL)
-	    log_error(0, _("unknown uid: 0"));
+	if ((pw = sudo_getpwuid(ROOT_UID)) == NULL)
+	    log_error(0, _("unknown uid: %u"), ROOT_UID);
     } else if (def_runaspw) {
 	if ((pw = sudo_getpwnam(def_runas_default)) == NULL)
 	    log_error(0, _("unknown user: %s"), def_runas_default);
