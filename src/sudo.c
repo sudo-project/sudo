@@ -1203,7 +1203,7 @@ sudo_debug(int level, const char *fmt, ...)
 	return;
 
     /* Backet fmt with program name and a newline to make it a single write */
-    easprintf(&fmt2, _("%s: %s\n"), getprogname(), fmt);
+    easprintf(&fmt2, "%s: %s\n", getprogname(), fmt);
     va_start(ap, fmt);
     vfprintf(stderr, fmt2, ap);
     va_end(ap);

@@ -234,7 +234,7 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
 	if (!ISSET(details->flags, CD_BACKGROUND)) {
 	    if (ISSET(details->flags, CD_SET_UTMP))
 		utmp_user = details->utmp_user ? details->utmp_user : user_details.username;
-	    sudo_debug(8, _("allocate pty for I/O logging"));
+	    sudo_debug(8, "allocate pty for I/O logging");
 	    pty_setup(details->euid, user_details.tty, utmp_user);
 	}
     }
@@ -354,7 +354,7 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
 	    if (cstat->type == CMD_WSTATUS) {
 		if (WIFSTOPPED(cstat->val)) {
 		    /* Suspend parent and tell child how to resume on return. */
-		    sudo_debug(8, _("child stopped, suspending parent"));
+		    sudo_debug(8, "child stopped, suspending parent");
 		    n = suspend_parent(WSTOPSIG(cstat->val));
 		    schedule_signal(n);
 		    continue;
@@ -426,12 +426,12 @@ handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
 	    /* If pipe is empty, we are done. */
 	    if (errno == EAGAIN)
 		break;
-	    sudo_debug(9, _("error reading signal pipe %s"), strerror(errno));
+	    sudo_debug(9, "error reading signal pipe %s", strerror(errno));
 	    cstat->type = CMD_ERRNO;
 	    cstat->val = errno;
 	    return -1;
 	}
-	sudo_debug(9, _("received signal %d"), signo);
+	sudo_debug(9, "received signal %d", signo);
 	if (signo == SIGCHLD) {
 	    /*
 	     * If logging I/O, child is the intermediate process,
@@ -496,7 +496,7 @@ forward_signals(int sock)
 
     while (!tq_empty(&sigfwd_list)) {
 	sigfwd = tq_first(&sigfwd_list);
-	sudo_debug(9, _("sending signal %d to child over backchannel"),
+	sudo_debug(9, "sending signal %d to child over backchannel",
 	    sigfwd->signo);
 	cstat.type = CMD_SIGNO;
 	cstat.val = sigfwd->signo;
