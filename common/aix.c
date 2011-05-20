@@ -138,10 +138,10 @@ aix_setauthdb(char *user)
 
     if (user != NULL) {
 	if (setuserdb(S_READ) != 0)
-	    error(1, "unable to open userdb");
+	    error(1, _("unable to open userdb"));
 	if (getuserattr(user, S_REGISTRY, &registry, SEC_CHAR) == 0) {
 	    if (setauthdb(registry, NULL) != 0)
-		error(1, "unable to switch to registry \"%s\" for %s",
+		error(1, _("unable to switch to registry \"%s\" for %s"),
 		    registry, user);
 	}
 	enduserdb();
@@ -155,7 +155,7 @@ void
 aix_restoreauthdb(void)
 {
     if (setauthdb(NULL, NULL) != 0)
-	error(1, "unable to restore registry");
+	error(1, _("unable to restore registry"));
 }
 #endif
 

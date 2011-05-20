@@ -187,7 +187,7 @@ main(int argc, char *argv[], char *envp[])
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
     if (geteuid() != 0)
-	errorx(1, "must be setuid root");
+	errorx(1, _("must be setuid root"));
 
     /* Reset signal mask, disable core dumps and make sure fds 0-2 are open. */
     (void) sigemptyset(&mask);
@@ -205,14 +205,14 @@ main(int argc, char *argv[], char *envp[])
 
     /* Print sudo version early, in case of plugin init failure. */
     if (ISSET(sudo_mode, MODE_VERSION)) {
-	printf("Sudo version %s\n", PACKAGE_VERSION);
+	printf(_("Sudo version %s\n"), PACKAGE_VERSION);
 	if (user_details.uid == ROOT_UID)
-	    (void) printf("Configure args: %s\n", CONFIGURE_ARGS);
+	    (void) printf(_("Configure args: %s\n"), CONFIGURE_ARGS);
     }
 
     /* Read sudo.conf and load plugins. */
     if (!sudo_load_plugins(_PATH_SUDO_CONF, &policy_plugin, &io_plugins))
-	errorx(1, "fatal error, unable to load plugins");
+	errorx(1, _("fatal error, unable to load plugins"));
 
     /* Open policy plugin. */
     ok = policy_open(&policy_plugin, settings, user_info, envp);
@@ -220,7 +220,7 @@ main(int argc, char *argv[], char *envp[])
 	if (ok == -2)
 	    usage(1);
 	else
-	    errorx(1, "unable to initialize policy plugin");
+	    errorx(1, _("unable to initialize policy plugin"));
     }
 
     switch (sudo_mode & MODE_MASK) {
@@ -275,7 +275,8 @@ main(int argc, char *argv[], char *envp[])
 		    usage(1);
 		    break;
 		default:
-		    errorx(1, "error initializing I/O plugin %s", plugin->name);
+		    errorx(1, _("error initializing I/O plugin %s"),
+			plugin->name);
 		}
 	    }
 	    command_info_to_details(command_info, &command_details);
@@ -301,7 +302,7 @@ main(int argc, char *argv[], char *envp[])
 	    /* The close method was called by sudo_edit/run_command. */
 	    break;
 	default:
-	    errorx(1, "unexpected sudo mode 0x%x", sudo_mode);
+	    errorx(1, _("unexpected sudo mode 0x%x"), sudo_mode);
     }
     exit(exitcode);
 }
@@ -324,7 +325,7 @@ fix_fds(void)
     miss[STDERR_FILENO] = fcntl(STDERR_FILENO, F_GETFL, 0) == -1;
     if (miss[STDIN_FILENO] || miss[STDOUT_FILENO] || miss[STDERR_FILENO]) {
 	if ((devnull = open(_PATH_DEVNULL, O_RDWR, 0644)) == -1)
-	    error(1, "unable to open %s", _PATH_DEVNULL);
+	    error(1, _("unable to open %s"), _PATH_DEVNULL);
 	if (miss[STDIN_FILENO] && dup2(devnull, STDIN_FILENO) == -1)
 	    error(1, "dup2");
 	if (miss[STDOUT_FILENO] && dup2(devnull, STDOUT_FILENO) == -1)
@@ -350,7 +351,7 @@ get_user_groups(struct user_details *ud)
 
     ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
     if (getgroups(ud->ngroups, ud->groups) < 0)
-	error(1, "can't get group vector");
+	error(1, _("can't get group vector"));
     glsize = sizeof("groups=") - 1 + (ud->ngroups * (MAX_UID_T_LEN + 1));
     gid_list = emalloc(glsize);
     memcpy(gid_list, "groups=", sizeof("groups=") - 1);
@@ -388,11 +389,11 @@ get_user_info(struct user_details *ud)
 
     pw = getpwuid(ud->uid);
     if (pw == NULL)
-	errorx(1, "unknown uid %u: who are you?", (unsigned int)ud->uid);
+	errorx(1, _("unknown uid %u: who are you?"), (unsigned int)ud->uid);
 
     user_info[i] = fmt_string("user", pw->pw_name);
     if (user_info[i] == NULL)
-	errorx(1, "unable to allocate memory");
+	errorx(1, _("unable to allocate memory"));
     ud->username = user_info[i] + sizeof("user=") - 1;
 
     /* Stash user's shell for use with the -s flag; don't pass to plugin. */
@@ -412,7 +413,7 @@ get_user_info(struct user_details *ud)
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
 	user_info[++i] = fmt_string("cwd", cwd);
 	if (user_info[i] == NULL)
-	    errorx(1, "unable to allocate memory");
+	    errorx(1, _("unable to allocate memory"));
 	ud->cwd = user_info[i] + sizeof("cwd=") - 1;
     }
 
@@ -420,7 +421,7 @@ get_user_info(struct user_details *ud)
 	(cp = ttyname(STDERR_FILENO))) {
 	user_info[++i] = fmt_string("tty", cp);
 	if (user_info[i] == NULL)
-	    errorx(1, "unable to allocate memory");
+	    errorx(1, _("unable to allocate memory"));
 	ud->tty = user_info[i] + sizeof("tty=") - 1;
     }
 
@@ -430,7 +431,7 @@ get_user_info(struct user_details *ud)
 	strlcpy(host, "localhost", sizeof(host));
     user_info[++i] = fmt_string("host", host);
     if (user_info[i] == NULL)
-	errorx(1, "unable to allocate memory");
+	errorx(1, _("unable to allocate memory"));
     ud->host = user_info[i] + sizeof("host=") - 1;
 
     get_ttysize(&ud->ts_lines, &ud->ts_cols);
@@ -728,39 +729,39 @@ set_project(struct passwd *pw)
 	case SETPROJ_ERR_TASK:
 	    switch (errno) {
 	    case EAGAIN:
-		warningx("resource control limit has been reached");
+		warningx(_("resource control limit has been reached"));
 		break;
 	    case ESRCH:
-		warningx("user \"%s\" is not a member of project \"%s\"",
+		warningx(_("user \"%s\" is not a member of project \"%s\""),
 		    pw->pw_name, proj.pj_name);
 		break;
 	    case EACCES:
-		warningx("the invoking task is final");
+		warningx(_("the invoking task is final"));
 		break;
 	    default:
-		warningx("could not join project \"%s\"", proj.pj_name);
+		warningx(_("could not join project \"%s\""), proj.pj_name);
 	    }
 	case SETPROJ_ERR_POOL:
 	    switch (errno) {
 	    case EACCES:
-		warningx("no resource pool accepting default bindings "
-		    "exists for project \"%s\"", proj.pj_name);
+		warningx(_("no resource pool accepting default bindings "
+		    "exists for project \"%s\""), proj.pj_name);
 		break;
 	    case ESRCH:
-		warningx("specified resource pool does not exist for "
-		    "project \"%s\"", proj.pj_name);
+		warningx(_("specified resource pool does not exist for "
+		    "project \"%s\""), proj.pj_name);
 		break;
 	    default:
-		warningx("could not bind to default resource pool for "
-		    "project \"%s\"", proj.pj_name);
+		warningx(_("could not bind to default resource pool for "
+		    "project \"%s\""), proj.pj_name);
 	    }
 	    break;
 	default:
 	    if (errval <= 0) {
-		warningx("setproject failed for project \"%s\"", proj.pj_name);
+		warningx(_("setproject failed for project \"%s\""), proj.pj_name);
 	    } else {
-		warningx("warning, resource control assignment failed for "
-		    "project \"%s\"", proj.pj_name);
+		warningx(_("warning, resource control assignment failed for "
+		    "project \"%s\""), proj.pj_name);
 	    }
 	}
     } else {
@@ -785,7 +786,7 @@ disable_execute(struct command_details *details)
     /* Solaris privileges, remove PRIV_PROC_EXEC post-execve. */
     if (priv_set(PRIV_OFF, PRIV_LIMIT, "PRIV_PROC_EXEC", NULL) == 0)
 	return;
-    warning("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT");
+    warning(_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
 #endif /* HAVE_PRIV_SET */
 
     nenvp = emalloc2(env_size, sizeof(char *));
@@ -889,17 +890,17 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	     */
 	    lc = login_getclass((char *)details->login_class);
 	    if (!lc) {
-		warningx("unknown login class %s", details->login_class);
+		warningx(_("unknown login class %s"), details->login_class);
 		errno = ENOENT;
 		goto done;
 	    }
 	    flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
 	    if (setusercontext(lc, pw, pw->pw_uid, flags)) {
 		if (pw->pw_uid != ROOT_UID) {
-		    warning("unable to set user context");
+		    warning(_("unable to set user context"));
 		    goto done;
 		} else
-		    warning("unable to set user context");
+		    warning(_("unable to set user context"));
 	    }
 	}
 #endif /* HAVE_LOGIN_CAP_H */
@@ -910,12 +911,12 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
      */
 #ifdef HAVE_SETEUID
     if (ISSET(details->flags, CD_SET_EGID) && setegid(details->egid)) {
-	warning("unable to set egid to runas gid %u", details->egid);
+	warning(_("unable to set egid to runas gid %u"), details->egid);
 	goto done;
     }
 #endif
     if (ISSET(details->flags, CD_SET_GID) && setgid(details->gid)) {
-	warning("unable to set gid to runas gid %u", details->gid);
+	warning(_("unable to set gid to runas gid %u"), details->gid);
 	goto done;
     }
 
@@ -923,13 +924,13 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 #ifdef HAVE_GETGROUPS
 	if (details->ngroups >= 0) {
 	    if (setgroups(details->ngroups, details->groups) < 0) {
-		warning("unable to set supplementary group IDs");
+		warning(_("unable to set supplementary group IDs"));
 		goto done;
 	    }
 	}
 #else
 	if (pw && initgroups(pw->pw_name, pw->pw_gid) < 0) {
-	    warning("unable to set supplementary group IDs");
+	    warning(_("unable to set supplementary group IDs"));
 	    goto done;
 	}
 #endif
@@ -937,7 +938,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 
     if (ISSET(details->flags, CD_SET_PRIORITY)) {
 	if (setpriority(PRIO_PROCESS, 0, details->priority) != 0) {
-	    warning("unable to set process priority");
+	    warning(_("unable to set process priority"));
 	    goto done;
 	}
     }
@@ -945,7 +946,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	(void) umask(details->umask);
     if (details->chroot) {
 	if (chroot(details->chroot) != 0 || chdir("/") != 0) {
-	    warning("unable to change root to %s", details->chroot);
+	    warning(_("unable to change root to %s"), details->chroot);
 	    goto done;
 	}
     }
@@ -955,19 +956,19 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 
 #ifdef HAVE_SETRESUID
     if (setresuid(details->uid, details->euid, details->euid) != 0) {
-	warning("unable to change to runas uid (%u, %u)", details->uid,
+	warning(_("unable to change to runas uid (%u, %u)"), details->uid,
 	    details->euid);
 	goto done;
     }
 #elif HAVE_SETREUID
     if (setreuid(details->uid, details->euid) != 0) {
-	warning("unable to change to runas uid (%u, %u)", details->uid,
+	warning(_("unable to change to runas uid (%u, %u)"), details->uid,
 	    details->euid);
 	goto done;
     }
 #else
     if (seteuid(details->euid) != 0 || setuid(details->euid) != 0) {
-	warning("unable to change to runas uid (%u, %u)", details->uid,
+	warning(_("unable to change to runas uid (%u, %u)"), details->uid,
 	    details->euid);
 	goto done;
     }
@@ -981,7 +982,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	if (details->chroot || strcmp(details->cwd, user_details.cwd) != 0) {
 	    /* Note: cwd is relative to the new root, if any. */
 	    if (chdir(details->cwd) != 0) {
-		warning("unable to change directory to %s", details->cwd);
+		warning(_("unable to change directory to %s"), details->cwd);
 		goto done;
 	    }
 	}
@@ -1072,7 +1073,7 @@ run_command(struct command_details *details)
 	    exitcode = WTERMSIG(cstat.val) | 128;
 	break;
     default:
-	warningx("unexpected child termination condition: %d", cstat.type);
+	warningx(_("unexpected child termination condition: %d"), cstat.type);
 	break;
     }
     return exitcode;
@@ -1112,7 +1113,7 @@ policy_list(struct plugin_container *plugin, int argc, char * const argv[],
     int verbose, const char *list_user)
 {
     if (plugin->u.policy->list == NULL) {
-	warningx("policy plugin %s does not support listing privileges",
+	warningx(_("policy plugin %s does not support listing privileges"),
 	    plugin->name);
 	return FALSE;
     }
@@ -1123,7 +1124,7 @@ static int
 policy_validate(struct plugin_container *plugin)
 {
     if (plugin->u.policy->validate == NULL) {
-	warningx("policy plugin %s does not support the -v flag",
+	warningx(_("policy plugin %s does not support the -v flag"),
 	    plugin->name);
 	return FALSE;
     }
@@ -1134,7 +1135,7 @@ static void
 policy_invalidate(struct plugin_container *plugin, int remove)
 {
     if (plugin->u.policy->invalidate == NULL) {
-	errorx(1, "policy plugin %s does not support the -k/-K flags",
+	errorx(1, _("policy plugin %s does not support the -k/-K flags"),
 	    plugin->name);
     }
     plugin->u.policy->invalidate(remove);
@@ -1197,7 +1198,7 @@ sudo_debug(int level, const char *fmt, ...)
 	return;
 
     /* Backet fmt with program name and a newline to make it a single write */
-    easprintf(&fmt2, "%s: %s\n", getprogname(), fmt);
+    easprintf(&fmt2, _("%s: %s\n"), getprogname(), fmt);
     va_start(ap, fmt);
     vfprintf(stderr, fmt2, ap);
     va_end(ap);
