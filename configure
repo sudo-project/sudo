@@ -16709,6 +16709,12 @@ done
 # make sure we use the gettext() that matches the include file.
 # First check that it links w/o additional libs, then try with -lintl.
 if test "$enable_nls" = "yes"; then
+    if test "${sudo_cv_gettext+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettext" >&5
+$as_echo_n "checking for gettext... " >&6; }
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -16724,11 +16730,17 @@ main ()
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
 
+	    sudo_cv_gettext=yes
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_gettext" >&5
+$as_echo "$sudo_cv_gettext" >&6; }
 	    $as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
 
 
 else
 
+	    sudo_cv_gettext=no
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_gettext" >&5
+$as_echo "$sudo_cv_gettext" >&6; }
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettext in -lintl" >&5
 $as_echo_n "checking for gettext in -lintl... " >&6; }
 if test "${ac_cv_lib_intl_gettext+set}" = set; then :
@@ -16820,6 +16832,8 @@ fi
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+fi
+
 fi
 
 case ${enable_zlib-"yes"} in
