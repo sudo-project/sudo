@@ -880,6 +880,8 @@
 # define N_(String) String
 # define textdomain(Domain)
 # define bindtextdomain(Package, Directory)
+# define ngettext(String, String_Plural, N) \
+    ((N) == 1 ? (String) : (String_Plural))
 #endif /* HAVE_LIBINTL_H */
 
 /* New ANSI-style OS defs for HP-UX and ConvexOS. */
