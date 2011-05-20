@@ -1,3 +1,15 @@
+What's new in Sudo 1.8.1p2?
+
+ * Two-character CIDR-style IPv4 netmasks are now matched correctly
+   in the sudoers file.
+
+ * A build error with MIT Kerberos V has been resolved.
+
+ * A crash on HP-UX in the sudoers plugin when wildcards are
+   present in the sudoers file has been resolved.
+
+ * Sudo now works correctly on Tru64 Unix again.
+
 What's new in Sudo 1.8.1p1?
 
  * Fixed a problem on AIX where sudo was unable to set the final
