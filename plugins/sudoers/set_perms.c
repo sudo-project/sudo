@@ -246,7 +246,7 @@ set_perms(int perm)
 	state->egid = sudoers_gid;
 	state->sgid = -1;
 	if (setresgid(-1, ID(egid), -1))
-	    error(1, "unable to change to sudoers gid");
+	    error(1, _("unable to change to sudoers gid"));
 
 	state->ruid = ROOT_UID;
 	/*
@@ -287,7 +287,7 @@ done:
 bad:
     /* XXX - better warnings inline */
     warningx("%s: %s", errstr,
-	errno == EAGAIN ? "too many processes" : strerror(errno));
+	errno == EAGAIN ? _("too many processes") : strerror(errno));
     if (noexit)
 	return 0;
     exit(1);
@@ -473,7 +473,7 @@ set_perms(int perm)
 	state->rgid = -1;
 	state->egid = sudoers_gid;
 	if (setregid(-1, ID(egid)))
-	    error(1, "unable to change to sudoers gid");
+	    error(1, _("unable to change to sudoers gid"));
 
 	state->ruid = ROOT_UID;
 	/*
@@ -511,7 +511,7 @@ done:
 bad:
     /* XXX - better warnings inline */
     warningx("%s: %s", errstr,
-	errno == EAGAIN ? "too many processes" : strerror(errno));
+	errno == EAGAIN ? _("too many processes") : strerror(errno));
     if (noexit)
 	return 0;
     exit(1);
@@ -707,7 +707,7 @@ set_perms(int perm)
 	state->rgid = -1;
 	state->egid = sudoers_gid;
 	if (setegid(ID(egid)))
-	    error(1, "unable to change to sudoers gid");
+	    error(1, _("unable to change to sudoers gid"));
 
 	state->ruid = ROOT_UID;
 	/*
@@ -745,7 +745,7 @@ done:
 bad:
     /* XXX - better warnings inline */
     warningx("%s: %s", errstr,
-	errno == EAGAIN ? "too many processes" : strerror(errno));
+	errno == EAGAIN ? _("too many processes") : strerror(errno));
     if (noexit)
 	return 0;
     exit(1);
@@ -879,7 +879,7 @@ done:
 bad:
     /* XXX - better warnings inline */
     warningx("%s: %s", errstr,
-	errno == EAGAIN ? "too many processes" : strerror(errno));
+	errno == EAGAIN ? _("too many processes") : strerror(errno));
     if (noexit)
 	return 0;
     exit(1);
@@ -940,7 +940,7 @@ runas_setgroups()
 	aix_setauthdb(pw->pw_name);
 # endif
 	if (initgroups(pw->pw_name, pw->pw_gid) < 0)
-	    log_error(USE_ERRNO|MSG_ONLY, "can't set runas group vector");
+	    log_error(USE_ERRNO|MSG_ONLY, _("can't set runas group vector"));
 # ifdef HAVE_GETGROUPS
 	if (runas_groups) {
 	    efree(runas_groups);
@@ -949,14 +949,14 @@ runas_setgroups()
 	if ((runas_ngroups = getgroups(0, NULL)) > 0) {
 	    runas_groups = emalloc2(runas_ngroups, sizeof(GETGROUPS_T));
 	    if (getgroups(runas_ngroups, runas_groups) < 0)
-		log_error(USE_ERRNO|MSG_ONLY, "can't get runas group vector");
+		log_error(USE_ERRNO|MSG_ONLY, _("can't get runas group vector"));
 	}
 #  ifdef HAVE_SETAUTHDB
 	aix_restoreauthdb();
 #  endif
     } else {
 	if (setgroups(runas_ngroups, runas_groups) < 0)
-	    log_error(USE_ERRNO|MSG_ONLY, "can't set runas group vector");
+	    log_error(USE_ERRNO|MSG_ONLY, _("can't set runas group vector"));
 # endif /* HAVE_GETGROUPS */
     }
 }

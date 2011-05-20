@@ -56,22 +56,22 @@ fwtk_init(struct passwd *pw, char **promptp, sudo_auth *auth)
     char resp[128];			/* Response from the server */
 
     if ((confp = cfg_read("sudo")) == (Cfg *)-1) {
-	warningx("cannot read fwtk config");
+	warningx(_("cannot read fwtk config"));
 	return AUTH_FATAL;
     }
 
     if (auth_open(confp)) {
-	warningx("cannot connect to authentication server");
+	warningx(_("cannot connect to authentication server"));
 	return AUTH_FATAL;
     }
 
     /* Get welcome message from auth server */
     if (auth_recv(resp, sizeof(resp))) {
-	warningx("lost connection to authentication server");
+	warningx(_("lost connection to authentication server"));
 	return AUTH_FATAL;
     }
     if (strncmp(resp, "Authsrv ready", 13) != 0) {
-	warningx("authentication server error:\n%s", resp);
+	warningx(_("authentication server error:\n%s"), resp);
 	return AUTH_FATAL;
     }
 
@@ -90,7 +90,7 @@ fwtk_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
     (void) snprintf(buf, sizeof(buf), "authorize %s 'sudo'", pw->pw_name);
 restart:
     if (auth_send(buf) || auth_recv(resp, sizeof(resp))) {
-	warningx("lost connection to authentication server");
+	warningx(_("lost connection to authentication server"));
 	return AUTH_FATAL;
     }
 
@@ -123,7 +123,7 @@ restart:
     /* Send the user's response to the server */
     (void) snprintf(buf, sizeof(buf), "response '%s'", pass);
     if (auth_send(buf) || auth_recv(resp, sizeof(resp))) {
-	warningx("lost connection to authentication server");
+	warningx(_("lost connection to authentication server"));
 	error = AUTH_FATAL;
 	goto done;
     }

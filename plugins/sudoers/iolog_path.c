@@ -242,7 +242,7 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 
 #ifdef HAVE_SETLOCALE
 	if (!setlocale(LC_ALL, def_sudoers_locale)) {
-	    warningx("unable to set locale to \"%s\", using \"C\"",
+	    warningx(_("unable to set locale to \"%s\", using \"C\""),
 		def_sudoers_locale);
 	    setlocale(LC_ALL, "C");
 	}

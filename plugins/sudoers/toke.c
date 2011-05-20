@@ -3367,11 +3367,11 @@ switch_dir(struct include_stack *stack, char *dirpath)
     if (!(dir = opendir(dirpath))) {
 	if (errno != ENOENT) {
 	    char *errbuf;
-	    if (asprintf(&errbuf, "%s: %s", dirpath, strerror(errno)) != -1) {
+	    if (asprintf(&errbuf, _("%s: %s"), dirpath, strerror(errno)) != -1) {
 		yyerror(errbuf);
 		free(errbuf);
 	    } else {
-		yyerror("unable to allocate memory");
+		yyerror(_("unable to allocate memory"));
 	    }
 	}
 	goto done;
@@ -3490,14 +3490,14 @@ _push_include(char *path, int isdir)
     /* push current state onto stack */
     if (idepth >= istacksize) {
 	if (idepth > MAX_SUDOERS_DEPTH) {
-	    yyerror("too many levels of includes");
+	    yyerror(_("too many levels of includes"));
 	    return FALSE;
 	}
 	istacksize += SUDOERS_STACK_INCREMENT;
 	istack = (struct include_stack *) realloc(istack,
 	    sizeof(*istack) * istacksize);
 	if (istack == NULL) {
-	    yyerror("unable to allocate memory");
+	    yyerror(_("unable to allocate memory"));
 	    return FALSE;
 	}
     }
@@ -3518,11 +3518,11 @@ _push_include(char *path, int isdir)
     } else {
 	if ((fp = open_sudoers(path, TRUE, &keepopen)) == NULL) {
 	    char *errbuf;
-	    if (asprintf(&errbuf, "%s: %s", path, strerror(errno)) != -1) {
+	    if (asprintf(&errbuf, _("%s: %s"), path, strerror(errno)) != -1) {
 		yyerror(errbuf);
 		free(errbuf);
 	    } else {
-		yyerror("unable to allocate memory");
+		yyerror(_("unable to allocate memory"));
 	    }
 	    return FALSE;
 	}
@@ -3608,7 +3608,7 @@ parse_include(char *base)
     /* Make a copy of path and return it. */
     len += (int)(ep - cp);
     if ((path = malloc(len + 1)) == NULL)
-	yyerror("unable to allocate memory");
+	yyerror(_("unable to allocate memory"));
     if (subst) {
 	/* substitute for %h */
 	char *pp = path;

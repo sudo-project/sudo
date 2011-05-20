@@ -106,7 +106,7 @@ dump_interfaces(const char *ai)
 
     addrinfo = estrdup(ai);
 
-    sudo_printf(SUDO_CONV_INFO_MSG, "Local IP address and netmask pairs:\n");
+    sudo_printf(SUDO_CONV_INFO_MSG, _("Local IP address and netmask pairs:\n"));
     for (cp = strtok(addrinfo, " \t"); cp != NULL; cp = strtok(NULL, " \t"))
 	sudo_printf(SUDO_CONV_INFO_MSG, "\t%s\n", cp);
 

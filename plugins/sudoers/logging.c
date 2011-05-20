@@ -138,8 +138,8 @@ do_syslog(int pri, char *msg)
     /*
      * Log the full line, breaking into multiple syslog(3) calls if necessary
      */
-    fmt = FMT_FIRST;
-    maxlen = MAXSYSLOGLEN - (sizeof(FMT_FIRST) - 6 + strlen(user_name));
+    fmt = _(FMT_FIRST);
+    maxlen = MAXSYSLOGLEN - (strlen(fmt) - 5 + strlen(user_name));
     for (p = msg; *p != '\0'; ) {
 	len = strlen(p);
 	if (len > maxlen) {
@@ -166,8 +166,8 @@ do_syslog(int pri, char *msg)
 	    mysyslog(pri, fmt, user_name, p);
 	    p += len;
 	}
-	fmt = FMT_CONTD;
-	maxlen = MAXSYSLOGLEN - (sizeof(FMT_CONTD) - 6 + strlen(user_name));
+	fmt = _(FMT_CONTD);
+	maxlen = MAXSYSLOGLEN - (strlen(fmt) - 5 + strlen(user_name));
     }
 
 #ifdef HAVE_SETLOCALE
@@ -190,9 +190,11 @@ do_logfile(char *msg)
     fp = fopen(def_logfile, "a");
     (void) umask(oldmask);
     if (fp == NULL) {
-	send_mail("Can't open log file: %s: %s", def_logfile, strerror(errno));
+	send_mail(_("Can't open log file: %s: %s"),
+	    def_logfile, strerror(errno));
     } else if (!lock_file(fileno(fp), SUDO_LOCK)) {
-	send_mail("Can't lock log file: %s: %s", def_logfile, strerror(errno));
+	send_mail(_("Can't lock log file: %s: %s"),
+	    def_logfile, strerror(errno));
     } else {
 	time_t now;
 
@@ -290,11 +292,11 @@ log_denial(int status, int inform_user)
 
     /* Set error message. */
     if (ISSET(status, FLAG_NO_USER))
-	message = "user NOT in sudoers";
+	message = _("user NOT in sudoers");
     else if (ISSET(status, FLAG_NO_HOST))
-	message = "user NOT authorized on host";
+	message = _("user NOT authorized on host");
     else
-	message = "command not allowed";
+	message = _("command not allowed");
 
     logline = new_logline(message, 0);
 
@@ -304,18 +306,18 @@ log_denial(int status, int inform_user)
     /* Inform the user if they failed to authenticate.  */
     if (inform_user) {
 	if (ISSET(status, FLAG_NO_USER)) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "%s is not in the sudoers file.  "
-		"This incident will be reported.\n", user_name);
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s is not in the sudoers "
+		"file.  This incident will be reported.\n"), user_name);
 	} else if (ISSET(status, FLAG_NO_HOST)) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "%s is not allowed to run sudo "
-		"on %s.  This incident will be reported.\n",
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s is not allowed to run sudo "
+		"on %s.  This incident will be reported.\n"),
 		user_name, user_shost);
 	} else if (ISSET(status, FLAG_NO_CHECK)) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "Sorry, user %s may not run "
-		"sudo on %s.\n", user_name, user_shost);
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _("Sorry, user %s may not run "
+		"sudo on %s.\n"), user_name, user_shost);
 	} else {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "Sorry, user %s is not allowed "
-		"to execute '%s%s%s' as %s%s%s on %s.\n",
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _("Sorry, user %s is not allowed "
+		"to execute '%s%s%s' as %s%s%s on %s.\n"),
 		user_name, user_cmnd, user_args ? " " : "",
 		user_args ? user_args : "",
 		list_pw ? list_pw->pw_name : runas_pw ?
@@ -449,14 +451,14 @@ send_mail(const char *fmt, ...)
     switch (pid = fork()) {
 	case -1:
 	    /* Error. */
-	    error(1, "cannot fork");
+	    error(1, _("cannot fork"));
 	    break;
 	case 0:
 	    /* Child. */
 	    switch (pid = fork()) {
 		case -1:
 		    /* Error. */
-		    mysyslog(LOG_ERR, "cannot fork: %m");
+		    mysyslog(LOG_ERR, _("cannot fork: %m"));
 		    _exit(1);
 		case 0:
 		    /* Grandchild continues below. */
@@ -506,14 +508,14 @@ send_mail(const char *fmt, ...)
     (void) sigaction(SIGPIPE, &sa, NULL);
 
     if (pipe(pfd) == -1) {
-	mysyslog(LOG_ERR, "cannot open pipe: %m");
+	mysyslog(LOG_ERR, _("cannot open pipe: %m"));
 	_exit(1);
     }
 
     switch (pid = fork()) {
 	case -1:
 	    /* Error. */
-	    mysyslog(LOG_ERR, "cannot fork: %m");
+	    mysyslog(LOG_ERR, _("cannot fork: %m"));
 	    _exit(1);
 	    break;
 	case 0:
@@ -525,7 +527,7 @@ send_mail(const char *fmt, ...)
 		/* Child, set stdin to output side of the pipe */
 		if (pfd[0] != STDIN_FILENO) {
 		    if (dup2(pfd[0], STDIN_FILENO) == -1) {
-			mysyslog(LOG_ERR, "cannot dup stdin: %m");
+			mysyslog(LOG_ERR, _("cannot dup stdin: %m"));
 			_exit(127);
 		    }
 		    (void) close(pfd[0]);
@@ -559,7 +561,7 @@ send_mail(const char *fmt, ...)
 		set_perms(PERM_FULL_USER|PERM_NOEXIT);
 		execv(mpath, argv);
 #endif /* NO_ROOT_MAILER */
-		mysyslog(LOG_ERR, "cannot execute %s: %m", mpath);
+		mysyslog(LOG_ERR, _("cannot execute %s: %m"), mpath);
 		_exit(127);
 	    }
 	    break;
@@ -769,5 +771,5 @@ new_logline(const char *message, int serrno)
 
     return line;
 toobig:
-    errorx(1, "internal error: insufficient space for log line");
+    errorx(1, _("internal error: insufficient space for log line"));
 }

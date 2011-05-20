@@ -94,12 +94,12 @@ _warning(int use_errno, const char *fmt, va_list ap)
     msg[0].msg_type = SUDO_CONV_ERROR_MSG;
     msg[0].msg = getprogname();
     msg[1].msg_type = SUDO_CONV_ERROR_MSG;
-    msg[1].msg = ": ";
+    msg[1].msg = _(": ");
     msg[2].msg_type = SUDO_CONV_ERROR_MSG;
     msg[2].msg = str;
     if (use_errno) {
 	msg[3].msg_type = SUDO_CONV_ERROR_MSG;
-	msg[3].msg = ": ";
+	msg[3].msg = _(": ");
 	msg[4].msg_type = SUDO_CONV_ERROR_MSG;
 	msg[4].msg = strerror(errno);
 	nmsgs = 6;

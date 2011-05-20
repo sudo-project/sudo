@@ -114,7 +114,7 @@ alias_add(char *name, int type, struct member *members)
     a->seqno = 0;
     list2tq(&a->members, members);
     if (rbinsert(aliases, a)) {
-	snprintf(errbuf, sizeof(errbuf), "Alias `%s' already defined", name);
+	snprintf(errbuf, sizeof(errbuf), _("Alias `%s' already defined"), name);
 	alias_free(a);
 	return errbuf;
     }

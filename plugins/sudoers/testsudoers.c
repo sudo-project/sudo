@@ -197,7 +197,7 @@ main(int argc, char *argv[])
 	argc -= 2;
     }
     if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL)
-	errorx(1, "no passwd entry for %s!", user_name);
+	errorx(1, _("unknown user: %s"), user_name);
 
     if (user_host == NULL) {
 	if (gethostname(hbuf, sizeof(hbuf)) != 0)
@@ -225,7 +225,7 @@ main(int argc, char *argv[])
 	for (to = user_args, from = argv + 1; *from; from++) {
 	    n = strlcpy(to, *from, size - (to - user_args));
 	    if (n >= size - (to - user_args))
-		    errorx(1, "internal error, init_vars() overflow");
+		    errorx(1, _("internal error, init_vars() overflow"));
 	    to += n;
 	    *to++ = ' ';
 	}
@@ -301,11 +301,11 @@ main(int argc, char *argv[])
 		    }
 		}
 	    } else
-		puts("\thost  unmatched");
+		puts(_("\thost  unmatched"));
 	}
     }
-    printf("\nCommand %s\n", match == ALLOW ? "allowed" :
-	match == DENY ? "denied" : "unmatched");
+    puts(match == ALLOW ? _("\nCommand allowed") :
+	match == DENY ?  _("\nCommand denied") :  _("\nCommand unmatched"));
 
     /*
      * Exit codes:
@@ -327,7 +327,7 @@ set_runaspw(char *user)
 	    runas_pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
     } else {
 	if ((runas_pw = sudo_getpwnam(user)) == NULL)
-	    errorx(1, "unknown user: %s", user);
+	    errorx(1, _("unknown user: %s"), user);
     }
 }
 
@@ -339,7 +339,7 @@ set_runasgr(char *group)
 	    runas_gr = sudo_fakegrnam(group);
     } else {
 	if ((runas_gr = sudo_getgrnam(group)) == NULL)
-	    errorx(1, "unknown group: %s", group);
+	    errorx(1, _("unknown group: %s"), group);
     }
 }
 

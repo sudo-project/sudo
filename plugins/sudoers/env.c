@@ -256,7 +256,7 @@ sudo_setenv(const char *var, const char *val, int dupcheck)
 	strlcat(estring, "=", esize) >= esize ||
 	strlcat(estring, val, esize) >= esize) {
 
-	errorx(1, "internal error, sudo_setenv() overflow");
+	errorx(1, _("internal error, sudo_setenv() overflow"));
     }
     sudo_putenv(estring, dupcheck, TRUE);
 }
@@ -286,7 +286,7 @@ sudo_putenv(char *str, int dupcheck, int overwrite)
 
 #ifdef ENV_DEBUG
     if (env.envp[env.env_len] != NULL)
-	errorx(1, "sudo_putenv: corrupted envp, len mismatch");
+	errorx(1, _("sudo_putenv: corrupted envp, len mismatch"));
 #endif
 
     if (dupcheck) {
@@ -691,7 +691,7 @@ validate_env_vars(char * const env_vars[])
     if (bad != NULL) {
 	bad[blen - 2] = '\0';		/* remove trailing ", " */
 	log_error(NO_MAIL,
-	    "sorry, you are not allowed to set the following environment variables: %s", bad);
+	    _("sorry, you are not allowed to set the following environment variables: %s"), bad);
 	/* NOTREACHED */
 	efree(bad);
     }

@@ -119,9 +119,9 @@ mkdir_parents(char *path)
 	*slash = '\0';
 	if (stat(path, &sb) != 0) {
 	    if (mkdir(path, S_IRWXU) != 0)
-		log_error(USE_ERRNO, "Can't mkdir %s", path);
+		log_error(USE_ERRNO, _("Can't mkdir %s"), path);
 	} else if (!S_ISDIR(sb.st_mode)) {
-	    log_error(0, "%s: %s", path, strerror(ENOTDIR));
+	    log_error(0, _("%s: %s"), path, strerror(ENOTDIR));
 	}
 	*slash = '/';
     }
@@ -150,9 +150,9 @@ io_nextid(char *iolog_dir, char sessid[7])
     mkdir_parents(iolog_dir);
     if (stat(iolog_dir, &sb) != 0) {
 	if (mkdir(iolog_dir, S_IRWXU) != 0)
-	    log_error(USE_ERRNO, "Can't mkdir %s", iolog_dir);
+	    log_error(USE_ERRNO, _("Can't mkdir %s"), iolog_dir);
     } else if (!S_ISDIR(sb.st_mode)) {
-	log_error(0, "%s exists but is not a directory (0%o)",
+	log_error(0, _("%s exists but is not a directory (0%o)"),
 	    iolog_dir, (unsigned int) sb.st_mode);
     }
 
@@ -166,17 +166,17 @@ io_nextid(char *iolog_dir, char sessid[7])
     }
     fd = open(pathbuf, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
     if (fd == -1)
-	log_error(USE_ERRNO, "cannot open %s", pathbuf);
+	log_error(USE_ERRNO, _("cannot open %s"), pathbuf);
     lock_file(fd, SUDO_LOCK);
 
     /* Read seq number (base 36). */
     nread = read(fd, buf, sizeof(buf));
     if (nread != 0) {
 	if (nread == -1)
-	    log_error(USE_ERRNO, "cannot read %s", pathbuf);
+	    log_error(USE_ERRNO, _("cannot read %s"), pathbuf);
 	id = strtoul(buf, &ep, 36);
 	if (buf == ep || id >= SESSID_MAX)
-	    log_error(0, "invalid sequence number %s", pathbuf);
+	    log_error(0, _("invalid sequence number %s"), pathbuf);
     }
     id++;
 
@@ -196,7 +196,7 @@ io_nextid(char *iolog_dir, char sessid[7])
 
     /* Rewind and overwrite old seq file. */
     if (lseek(fd, 0, SEEK_SET) == (off_t)-1 || write(fd, buf, 7) != 7)
-	log_error(USE_ERRNO, "Can't write to %s", pathbuf);
+	log_error(USE_ERRNO, _("Can't write to %s"), pathbuf);
     close(fd);
 }
 
@@ -222,10 +222,10 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
     mkdir_parents(pathbuf);
     if (len >= 6 && strcmp(&pathbuf[len - 6], "XXXXXX") == 0) {
 	if (mkdtemp(pathbuf) == NULL)
-	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+	    log_error(USE_ERRNO, _("Can't create %s"), pathbuf);
     } else {
 	if (mkdir(pathbuf, S_IRWXU) != 0)
-	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+	    log_error(USE_ERRNO, _("Can't create %s"), pathbuf);
     }
 
     return len;
@@ -473,18 +473,18 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
      */
     io_logfile = open_io_fd(pathbuf, len, "/log", FALSE);
     if (io_logfile == NULL)
-	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+	log_error(USE_ERRNO, _("Can't create %s"), pathbuf);
 
     io_fds[IOFD_TIMING].v = open_io_fd(pathbuf, len, "/timing",
 	iolog_compress);
     if (io_fds[IOFD_TIMING].v == NULL)
-	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+	log_error(USE_ERRNO, _("Can't create %s"), pathbuf);
 
     if (details.iolog_ttyin) {
 	io_fds[IOFD_TTYIN].v = open_io_fd(pathbuf, len, "/ttyin",
 	    iolog_compress);
 	if (io_fds[IOFD_TTYIN].v == NULL)
-	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+	    log_error(USE_ERRNO, _("Can't create %s"), pathbuf);
     } else {
 	sudoers_io.log_ttyin = NULL;
     }
@@ -492,7 +492,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	io_fds[IOFD_STDIN].v = open_io_fd(pathbuf, len, "/stdin",
 	    iolog_compress);
 	if (io_fds[IOFD_STDIN].v == NULL)
-	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+	    log_error(USE_ERRNO, _("Can't create %s"), pathbuf);
     } else {
 	sudoers_io.log_stdin = NULL;
     }
@@ -500,7 +500,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	io_fds[IOFD_TTYOUT].v = open_io_fd(pathbuf, len, "/ttyout",
 	    iolog_compress);
 	if (io_fds[IOFD_TTYOUT].v == NULL)
-	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+	    log_error(USE_ERRNO, _("Can't create %s"), pathbuf);
     } else {
 	sudoers_io.log_ttyout = NULL;
     }
@@ -508,7 +508,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	io_fds[IOFD_STDOUT].v = open_io_fd(pathbuf, len, "/stdout",
 	    iolog_compress);
 	if (io_fds[IOFD_STDOUT].v == NULL)
-	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+	    log_error(USE_ERRNO, _("Can't create %s"), pathbuf);
     } else {
 	sudoers_io.log_stdout = NULL;
     }
@@ -516,7 +516,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	io_fds[IOFD_STDERR].v = open_io_fd(pathbuf, len, "/stderr",
 	    iolog_compress);
 	if (io_fds[IOFD_STDERR].v == NULL)
-	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+	    log_error(USE_ERRNO, _("Can't create %s"), pathbuf);
     } else {
 	sudoers_io.log_stderr = NULL;
     }

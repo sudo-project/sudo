@@ -108,7 +108,7 @@ fill_txt(const char *src, int len, int olen)
 
     dst = olen ? realloc(yylval.string, olen + len + 1) : malloc(len + 1);
     if (dst == NULL) {
-	yyerror("unable to allocate memory");
+	yyerror(_("unable to allocate memory"));
 	return FALSE;
     }
     yylval.string = dst;
@@ -160,7 +160,7 @@ fill_cmnd(const char *src, int len)
 
     dst = yylval.command.cmnd = (char *) malloc(len + 1);
     if (yylval.command.cmnd == NULL) {
-	yyerror("unable to allocate memory");
+	yyerror(_("unable to allocate memory"));
 	return FALSE;
     }
 
@@ -199,7 +199,7 @@ fill_args(const char *s, int len, int addspace)
 	    (char *) malloc(arg_size);
 	if (p == NULL) {
 	    efree(yylval.command.args);
-	    yyerror("unable to allocate memory");
+	    yyerror(_("unable to allocate memory"));
 	    return FALSE;
 	} else
 	    yylval.command.args = p;
@@ -210,7 +210,7 @@ fill_args(const char *s, int len, int addspace)
     if (addspace)
 	*p++ = ' ';
     if (strlcpy(p, s, arg_size - (p - yylval.command.args)) != len) {
-	yyerror("fill_args: buffer overflow");	/* paranoia */
+	yyerror(_("fill_args: buffer overflow"));	/* paranoia */
 	return FALSE;
     }
     arg_len = new_len;

@@ -138,11 +138,11 @@ check_user(int validated, int mode)
 
 	/* Bail out if we are non-interactive and a password is required */
 	if (ISSET(mode, MODE_NONINTERACTIVE)) {
-	    warningx("sorry, a password is required to run %s", getprogname());
+	    warningx(_("sorry, a password is required to run %s"), getprogname());
 	    return -1;
 	}
 
-	/* XXX - should not lecture if askpass help is being used. */
+	/* XXX - should not lecture if askpass helper is being used. */
 	lecture(status);
 
 	/* Expand any escapes in the prompt. */
@@ -163,12 +163,12 @@ check_user(int validated, int mode)
     return rval;
 }
 
-static const char lecture_text[] = "\n"
-"We trust you have received the usual lecture from the local System\n"
-"Administrator. It usually boils down to these three things:\n\n"
-"    #1) Respect the privacy of others.\n"
-"    #2) Think before you type.\n"
-"    #3) With great power comes great responsibility.\n\n";
+#define DEFAULT_LECTURE "\n" \
+    "We trust you have received the usual lecture from the local System\n" \
+    "Administrator. It usually boils down to these three things:\n\n" \
+    "    #1) Respect the privacy of others.\n" \
+    "    #2) Think before you type.\n" \
+    "    #3) With great power comes great responsibility.\n\n"
 
 /*
  * Standard sudo lecture.
@@ -199,7 +199,7 @@ lecture(int status)
 	fclose(fp);
     } else {
 	msg.msg_type = SUDO_CONV_ERROR_MSG;
-	msg.msg = lecture_text;
+	msg.msg = _(DEFAULT_LECTURE);
 	sudo_conv(1, &msg, &repl);
     }
 }
@@ -222,17 +222,17 @@ update_timestamp(char *timestampdir, char *timestampfile)
 	 */
 	int fd = open(timestampfile, O_WRONLY|O_CREAT, 0600);
 	if (fd == -1)
-	    log_error(NO_EXIT|USE_ERRNO, "Can't open %s", timestampfile);
+	    log_error(NO_EXIT|USE_ERRNO, _("Can't open %s"), timestampfile);
 	else {
 	    lock_file(fd, SUDO_LOCK);
 	    if (write(fd, &tty_info, sizeof(tty_info)) != sizeof(tty_info))
-		log_error(NO_EXIT|USE_ERRNO, "Can't write %s", timestampfile);
+		log_error(NO_EXIT|USE_ERRNO, _("Can't write %s"), timestampfile);
 	    close(fd);
 	}
     } else {
 	if (touch(-1, timestampdir, NULL) == -1) {
 	    if (mkdir(timestampdir, 0700) == -1)
-		log_error(NO_EXIT|USE_ERRNO, "Can't mkdir %s", timestampdir);
+		log_error(NO_EXIT|USE_ERRNO, _("Can't mkdir %s"), timestampdir);
 	}
     }
     if (timestamp_uid != 0)
@@ -363,7 +363,7 @@ expand_prompt(char *old_prompt, char *user, char *host)
 
 oflow:
     /* We pre-allocate enough space, so this should never happen. */
-    errorx(1, "internal error, expand_prompt() overflow");
+    errorx(1, _("internal error, expand_prompt() overflow"));
 }
 
 /*
@@ -388,10 +388,8 @@ build_timestamp(char **timestampdir, char **timestampfile)
 
     dirparent = def_timestampdir;
     len = easprintf(timestampdir, "%s/%s", dirparent, user_name);
-    if (len >= PATH_MAX) {
-	log_error(0, "timestamp path too long: %s", *timestampdir);
-	return -1;
-    }
+    if (len >= PATH_MAX)
+	goto bad;
 
     /*
      * Timestamp file may be a file in the directory or NUL to use
@@ -409,21 +407,20 @@ build_timestamp(char **timestampdir, char **timestampfile)
 		p, runas_pw->pw_name);
 	else
 	    len = easprintf(timestampfile, "%s/%s/%s", dirparent, user_name, p);
-	if (len >= PATH_MAX) {
-	    log_error(0, "timestamp path too long: %s", *timestampfile);
-	    return -1;
-	}
+	if (len >= PATH_MAX)
+	    goto bad;
     } else if (def_targetpw) {
 	len = easprintf(timestampfile, "%s/%s/%s", dirparent, user_name,
 	    runas_pw->pw_name);
-	if (len >= PATH_MAX) {
-	    log_error(0, "timestamp path too long: %s", *timestampfile);
-	    return -1;
-	}
+	if (len >= PATH_MAX)
+	    goto bad;
     } else
 	*timestampfile = NULL;
 
     return len;
+bad:
+    log_error(0, _("timestamp path too long: %s"), *timestampfile);
+    return -1;
 }
 
 /*
@@ -450,15 +447,15 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
      */
     if (lstat(dirparent, &sb) == 0) {
 	if (!S_ISDIR(sb.st_mode))
-	    log_error(NO_EXIT, "%s exists but is not a directory (0%o)",
+	    log_error(NO_EXIT, _("%s exists but is not a directory (0%o)"),
 		dirparent, (unsigned int) sb.st_mode);
 	else if (sb.st_uid != timestamp_uid)
-	    log_error(NO_EXIT, "%s owned by uid %u, should be uid %u",
+	    log_error(NO_EXIT, _("%s owned by uid %u, should be uid %u"),
 		dirparent, (unsigned int) sb.st_uid,
 		(unsigned int) timestamp_uid);
 	else if ((sb.st_mode & 0000022))
 	    log_error(NO_EXIT,
-		"%s writable by non-owner (0%o), should be mode 0700",
+		_("%s writable by non-owner (0%o), should be mode 0700"),
 		dirparent, (unsigned int) sb.st_mode);
 	else {
 	    if ((sb.st_mode & 0000777) != 0700)
@@ -466,12 +463,12 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 	    status = TS_MISSING;
 	}
     } else if (errno != ENOENT) {
-	log_error(NO_EXIT|USE_ERRNO, "can't stat %s", dirparent);
+	log_error(NO_EXIT|USE_ERRNO, _("can't stat %s"), dirparent);
     } else {
 	/* No dirparent, try to make one. */
 	if (ISSET(flags, TS_MAKE_DIRS)) {
 	    if (mkdir(dirparent, S_IRWXU))
-		log_error(NO_EXIT|USE_ERRNO, "can't mkdir %s",
+		log_error(NO_EXIT|USE_ERRNO, _("can't mkdir %s"),
 		    dirparent);
 	    else
 		status = TS_MISSING;
@@ -494,15 +491,15 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 		if (unlink(timestampdir) == 0)
 		    status = TS_MISSING;
 	    } else
-		log_error(NO_EXIT, "%s exists but is not a directory (0%o)",
+		log_error(NO_EXIT, _("%s exists but is not a directory (0%o)"),
 		    timestampdir, (unsigned int) sb.st_mode);
 	} else if (sb.st_uid != timestamp_uid)
-	    log_error(NO_EXIT, "%s owned by uid %u, should be uid %u",
+	    log_error(NO_EXIT, _("%s owned by uid %u, should be uid %u"),
 		timestampdir, (unsigned int) sb.st_uid,
 		(unsigned int) timestamp_uid);
 	else if ((sb.st_mode & 0000022))
 	    log_error(NO_EXIT,
-		"%s writable by non-owner (0%o), should be mode 0700",
+		_("%s writable by non-owner (0%o), should be mode 0700"),
 		timestampdir, (unsigned int) sb.st_mode);
 	else {
 	    if ((sb.st_mode & 0000777) != 0700)
@@ -510,7 +507,7 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 	    status = TS_OLD;		/* do date check later */
 	}
     } else if (errno != ENOENT) {
-	log_error(NO_EXIT|USE_ERRNO, "can't stat %s", timestampdir);
+	log_error(NO_EXIT|USE_ERRNO, _("can't stat %s"), timestampdir);
     } else
 	status = TS_MISSING;
 
@@ -521,7 +518,7 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
     if (status == TS_MISSING && timestampfile && ISSET(flags, TS_MAKE_DIRS)) {
 	if (mkdir(timestampdir, S_IRWXU) == -1) {
 	    status = TS_ERROR;
-	    log_error(NO_EXIT|USE_ERRNO, "can't mkdir %s", timestampdir);
+	    log_error(NO_EXIT|USE_ERRNO, _("can't mkdir %s"), timestampdir);
 	}
     }
 
@@ -536,19 +533,19 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 	if (lstat(timestampfile, &sb) == 0) {
 	    if (!S_ISREG(sb.st_mode)) {
 		status = TS_ERROR;
-		log_error(NO_EXIT, "%s exists but is not a regular file (0%o)",
+		log_error(NO_EXIT, _("%s exists but is not a regular file (0%o)"),
 		    timestampfile, (unsigned int) sb.st_mode);
 	    } else {
 		/* If bad uid or file mode, complain and kill the bogus file. */
 		if (sb.st_uid != timestamp_uid) {
 		    log_error(NO_EXIT,
-			"%s owned by uid %u, should be uid %u",
+			_("%s owned by uid %u, should be uid %u"),
 			timestampfile, (unsigned int) sb.st_uid,
 			(unsigned int) timestamp_uid);
 		    (void) unlink(timestampfile);
 		} else if ((sb.st_mode & 0000022)) {
 		    log_error(NO_EXIT,
-			"%s writable by non-owner (0%o), should be mode 0600",
+			_("%s writable by non-owner (0%o), should be mode 0600"),
 			timestampfile, (unsigned int) sb.st_mode);
 		    (void) unlink(timestampfile);
 		} else {
@@ -578,7 +575,7 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 		}
 	    }
 	} else if (errno != ENOENT) {
-	    log_error(NO_EXIT|USE_ERRNO, "can't stat %s", timestampfile);
+	    log_error(NO_EXIT|USE_ERRNO, _("can't stat %s"), timestampfile);
 	    status = TS_ERROR;
 	}
     }
@@ -602,7 +599,7 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 		if (mtime.tv_sec > now + 60 * def_timestamp_timeout * 2) {
 		    time_t tv_sec = (time_t)mtime.tv_sec;
 		    log_error(NO_EXIT,
-			"timestamp too far in the future: %20.20s",
+			_("timestamp too far in the future: %20.20s"),
 			4 + ctime(&tv_sec));
 		    if (timestampfile)
 			(void) unlink(timestampfile);
@@ -647,14 +644,14 @@ remove_timestamp(int remove)
 	    else
 		status = rmdir(timestampdir);
 	    if (status == -1 && errno != ENOENT) {
-		log_error(NO_EXIT, "can't remove %s (%s), will reset to Epoch",
+		log_error(NO_EXIT, _("can't remove %s (%s), will reset to Epoch"),
 		    path, strerror(errno));
 		remove = FALSE;
 	    }
 	} else {
 	    timevalclear(&tv);
 	    if (touch(-1, path, &tv) == -1 && errno != ENOENT)
-		error(1, "can't reset %s to Epoch", path);
+		error(1, _("can't reset %s to Epoch"), path);
 	}
     }
 
@@ -708,13 +705,13 @@ get_authpw(void)
 
     if (def_rootpw) {
 	if ((pw = sudo_getpwuid(0)) == NULL)
-	    log_error(0, "unknown uid: 0");
+	    log_error(0, _("unknown uid: 0"));
     } else if (def_runaspw) {
 	if ((pw = sudo_getpwnam(def_runas_default)) == NULL)
-	    log_error(0, "unknown user: %s", def_runas_default);
+	    log_error(0, _("unknown user: %s"), def_runas_default);
     } else if (def_targetpw) {
 	if (runas_pw->pw_name == NULL)
-	    log_error(NO_MAIL|MSG_ONLY, "unknown uid: %u",
+	    log_error(NO_MAIL|MSG_ONLY, _("unknown uid: %u"),
 		(unsigned int) runas_pw->pw_uid);
 	pw_addref(runas_pw);
 	pw = runas_pw;

@@ -79,7 +79,7 @@ securid_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 	strlcpy(sd->username, pw->pw_name, 32);
 	return AUTH_SUCCESS;
     } else {
-	warningx("unable to contact the SecurID server");
+	warningx(_("unable to contact the SecurID server"));
 	return AUTH_FATAL;
     }
 }

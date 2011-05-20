@@ -120,10 +120,10 @@ verify_user(struct passwd *pw, char *prompt)
     /* Make sure we have at least one auth method. */
     if (auth_switch[0].name == NULL) {
 	audit_failure(NewArgv, "no authentication methods");
-    	log_error(0, "%s  %s %s",
-	    "There are no authentication methods compiled into sudo!",
-	    "If you want to turn off authentication, use the",
-	    "--disable-authentication configure option.");
+    	log_error(0,
+	    _("There are no authentication methods compiled into sudo!  "
+	    "If you want to turn off authentication, use the "
+	    "--disable-authentication configure option."));
 	return -1;
     }
 
@@ -131,8 +131,8 @@ verify_user(struct passwd *pw, char *prompt)
     standalone = IS_STANDALONE(&auth_switch[0]);
     if (standalone && auth_switch[1].name != NULL) {
 	audit_failure(NewArgv, "invalid authentication methods");
-    	log_error(0, "Invalid authentication methods compiled into sudo!  "
-	    "You cannot mix standalone and non-standalone authentication.");
+    	log_error(0, _("Invalid authentication methods compiled into sudo!  "
+	    "You cannot mix standalone and non-standalone authentication."));
 	return -1;
     }
 
@@ -240,7 +240,7 @@ cleanup:
 		    flags = 0;
 		else
 		    flags = NO_MAIL;
-		log_error(flags, "%d incorrect password attempt%s",
+		log_error(flags, _("%d incorrect password attempt%s"),
 		    def_passwd_tries - counter,
 		    (def_passwd_tries - counter == 1) ? "" : "s");
 	    }
@@ -332,7 +332,7 @@ dump_auth_methods(void)
 {
     sudo_auth *auth;
 
-    sudo_printf(SUDO_CONV_INFO_MSG, "Authentication methods:");
+    sudo_printf(SUDO_CONV_INFO_MSG, _("Authentication methods:"));
     for (auth = auth_switch; auth->name; auth++)
 	sudo_printf(SUDO_CONV_INFO_MSG, " '%s'", auth->name);
     sudo_printf(SUDO_CONV_INFO_MSG, "\n");
