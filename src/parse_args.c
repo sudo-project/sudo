@@ -485,7 +485,7 @@ usage(int fatal)
     lbuf_init(&lbuf, fatal ? usage_err : usage_out, ulen, NULL,
 	user_details.ts_cols);
     for (i = 0; uvec[i] != NULL; i++) {
-	lbuf_append(&lbuf, "usage: ", getprogname(), uvec[i], NULL);
+	lbuf_append(&lbuf, "usage: %s%s", getprogname(), uvec[i]);
 	lbuf_print(&lbuf);
     }
     lbuf_destroy(&lbuf);
@@ -512,100 +512,74 @@ help(void)
 
     lbuf_init(&lbuf, usage_out, indent, NULL, user_details.ts_cols);
     if (strcmp(pname, "sudoedit") == 0)
-	lbuf_append(&lbuf, pname,  _(" - edit files as another user\n\n"), NULL);
+	lbuf_append(&lbuf, _("%s - edit files as another user\n\n"), pname);
     else
-	lbuf_append(&lbuf, pname,  _(" - execute a command as another user\n\n"), NULL);
+	lbuf_append(&lbuf, _("%s - execute a command as another user\n\n"), pname);
     lbuf_print(&lbuf);
 
     usage(0);
 
-    lbuf_append(&lbuf, _("\nOptions:\n"), NULL);
+    lbuf_append(&lbuf, _("\nOptions:\n"));
 #ifdef HAVE_BSD_AUTH_H
-    lbuf_append(&lbuf,
-	"  -A            ",
-	_("use helper program for password prompting\n"), NULL);
+    lbuf_append(&lbuf, "  -A            %s",
+	_("use helper program for password prompting\n"));
 #endif
-    lbuf_append(&lbuf,
-	"  -a type       ",
-	_("use specified BSD authentication type\n"), NULL);
-    lbuf_append(&lbuf,
-	"  -b            ",
-	_("run command in the background\n"), NULL);
-    lbuf_append(&lbuf,
-	"  -C fd         ",
-	_("close all file descriptors >= fd\n"), NULL);
+    lbuf_append(&lbuf, "  -a type       %s",
+	_("use specified BSD authentication type\n"));
+    lbuf_append(&lbuf, "  -b            %s",
+	_("run command in the background\n"));
+    lbuf_append(&lbuf, "  -C fd         %s",
+	_("close all file descriptors >= fd\n"));
 #ifdef HAVE_LOGIN_CAP_H
-    lbuf_append(&lbuf,
-	"  -c class      ",
-	_("run command with specified login class\n"), NULL);
+    lbuf_append(&lbuf, "  -c class      %s",
+	_("run command with specified login class\n"));
 #endif
-    lbuf_append(&lbuf,
-	"  -E            ",
-	_("preserve user environment when executing command\n"), NULL);
-    lbuf_append(&lbuf,
-	"  -e            ",
-	_("edit files instead of running a command\n"), NULL);
-    lbuf_append(&lbuf,
-	"  -g group      ",
-	_("execute command as the specified group\n"), NULL);
-    lbuf_append(&lbuf,
-	"  -H            ",
-	_("set HOME variable to target user's home dir.\n"), NULL);
-    lbuf_append(&lbuf,
-	"  -h            ",
-	_("display help message and exit\n"), NULL);
-    lbuf_append(&lbuf,
-	"  -i [command]  ",
-	_("run a login shell as target user\n"), NULL);
-    lbuf_append(&lbuf,
-	"  -K            ",
-	_("remove timestamp file completely\n"), NULL);
-    lbuf_append(&lbuf,
-	"  -k            ",
-	_("invalidate timestamp file\n"), NULL);
-    lbuf_append(&lbuf,
-	"  -l[l] command ",
-	_("list user's available commands\n"), NULL);
-    lbuf_append(&lbuf,
-	"  -n            ",
-	_("non-interactive mode, will not prompt user\n"), NULL);
-    lbuf_append(&lbuf,
-	"  -P            ",
-	_("preserve group vector instead of setting to target's\n"), NULL);
-    lbuf_append(&lbuf,
-	"  -p prompt     ",
-	_("use specified password prompt\n"), NULL);
+    lbuf_append(&lbuf, "  -E            %s",
+	_("preserve user environment when executing command\n"));
+    lbuf_append(&lbuf, "  -e            %s",
+	_("edit files instead of running a command\n"));
+    lbuf_append(&lbuf, "  -g group      %s",
+	_("execute command as the specified group\n"));
+    lbuf_append(&lbuf, "  -H            %s",
+	_("set HOME variable to target user's home dir.\n"));
+    lbuf_append(&lbuf, "  -h            %s",
+	_("display help message and exit\n"));
+    lbuf_append(&lbuf, "  -i [command]  %s",
+	_("run a login shell as target user\n"));
+    lbuf_append(&lbuf, "  -K            %s",
+	_("remove timestamp file completely\n"));
+    lbuf_append(&lbuf, "  -k            %s",
+	_("invalidate timestamp file\n"));
+    lbuf_append(&lbuf, "  -l[l] command %s",
+	_("list user's available commands\n"));
+    lbuf_append(&lbuf, "  -n            %s",
+	_("non-interactive mode, will not prompt user\n"));
+    lbuf_append(&lbuf, "  -P            %s",
+	_("preserve group vector instead of setting to target's\n"));
+    lbuf_append(&lbuf, "  -p prompt     %s",
+	_("use specified password prompt\n"));
 #ifdef HAVE_SELINUX
-    lbuf_append(&lbuf,
-	"  -r role       ",
-	_("create SELinux security context with specified role\n"), NULL);
+    lbuf_append(&lbuf, "  -r role       %s",
+	_("create SELinux security context with specified role\n"));
 #endif
+    lbuf_append(&lbuf, "  -S            %s",
+	_("read password from standard input\n"));
     lbuf_append(&lbuf,
-	"  -S            ",
-	_("read password from standard input\n"), NULL);
-    lbuf_append(&lbuf,
-	"  -s [command]  ",
-	_("run a shell as target user\n"), NULL);
+	"  -s [command]  %s", _("run a shell as target user\n"));
 #ifdef HAVE_SELINUX
-    lbuf_append(&lbuf,
-	"  -t type       ",
-	_("create SELinux security context with specified role\n"), NULL);
+    lbuf_append(&lbuf, "  -t type       %s",
+	_("create SELinux security context with specified role\n"));
 #endif
-    lbuf_append(&lbuf,
-	"  -U user       ",
-	_("when listing, list specified user's privileges\n"), NULL);
-    lbuf_append(&lbuf,
-	"  -u user       ",
-	_("run command (or edit file) as specified user\n"), NULL);
-    lbuf_append(&lbuf,
-	"  -V            ",
-	_("display version information and exit\n"), NULL);
-    lbuf_append(&lbuf,
-	"  -v            ",
-	_("update user's timestamp without running a command\n"), NULL);
-    lbuf_append(&lbuf,
-	"  --            ",
-	_("stop processing command line arguments\n"), NULL);
+    lbuf_append(&lbuf, "  -U user       %s",
+	_("when listing, list specified user's privileges\n"));
+    lbuf_append(&lbuf, "  -u user       %s",
+	_("run command (or edit file) as specified user\n"));
+    lbuf_append(&lbuf, "  -V            %s",
+	_("display version information and exit\n"));
+    lbuf_append(&lbuf, "  -v            %s",
+	_("update user's timestamp without running a command\n"));
+    lbuf_append(&lbuf, "  --            %s",
+	_("stop processing command line arguments\n"));
     lbuf_print(&lbuf);
     lbuf_destroy(&lbuf);
     exit(0);

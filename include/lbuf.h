@@ -34,8 +34,8 @@ struct lbuf {
 
 void lbuf_init(struct lbuf *, int (*)(const char *), int, const char *, int);
 void lbuf_destroy(struct lbuf *);
-void lbuf_append(struct lbuf *, ...);
-void lbuf_append_quoted(struct lbuf *, const char *, ...);
+void lbuf_append(struct lbuf *, const char *, ...) __printflike(2, 3);
+void lbuf_append_quoted(struct lbuf *, const char *, const char *, ...) __printflike(3, 4);
 void lbuf_print(struct lbuf *);
 
 #endif /* _SUDO_LBUF_H */
