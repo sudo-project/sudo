@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "April  9, 2011" "1.8.1" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "May 22, 2011" "1.8.2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -1391,16 +1391,19 @@ This option is only available whe \fBsudo\fR is built with SELinux support.
 .IX Item "runas_default"
 The default user to run commands as if the \fB\-u\fR option is not specified
 on the command line.  This defaults to \f(CW\*(C`@runas_default@\*(C'\fR.
-Note that if \fIrunas_default\fR is set it \fBmust\fR occur before
-any \f(CW\*(C`Runas_Alias\*(C'\fR specifications.
 .IP "syslog_badpri" 16
 .IX Item "syslog_badpri"
 Syslog priority to use when user authenticates unsuccessfully.
 Defaults to \f(CW\*(C`@badpri@\*(C'\fR.
+.Sp
+The following syslog priorities are supported: \fBalert\fR, \fBcrit\fR,
+\&\fBdebug\fR, \fBemerg\fR, \fBerr\fR, \fBinfo\fR, \fBnotice\fR, and \fBwarning\fR.
 .IP "syslog_goodpri" 16
 .IX Item "syslog_goodpri"
 Syslog priority to use when user authenticates successfully.
 Defaults to \f(CW\*(C`@goodpri@\*(C'\fR.
+.Sp
+See syslog_badpri for the list of supported syslog priorities.
 .IP "sudoers_locale" 16
 .IX Item "sudoers_locale"
 Locale to use when parsing the sudoers file, logging commands, and
@@ -1424,16 +1427,6 @@ This option is only available whe \fBsudo\fR is built with SELinux support.
 \}
 .PP
 \&\fBStrings that can be used in a boolean context\fR:
-.IP "askpass" 12
-.IX Item "askpass"
-The \fIaskpass\fR option specifies the fully qualified path to a helper
-program used to read the user's password when no terminal is
-available.  This may be the case when \fBsudo\fR is executed from a
-graphical (as opposed to text-based) application.  The program
-specified by \fIaskpass\fR should display the argument passed to it
-as the prompt and write the user's password to the standard output.
-The value of \fIaskpass\fR may be overridden by the \f(CW\*(C`SUDO_ASKPASS\*(C'\fR
-environment variable.
 .IP "env_file" 12
 .IX Item "env_file"
 The \fIenv_file\fR options specifies the fully qualified path to a
@@ -1553,6 +1546,10 @@ This option is @secure_path@ by default.
 .IX Item "syslog"
 Syslog facility if syslog is being used for logging (negate to
 disable syslog logging).  Defaults to \f(CW\*(C`@logfac@\*(C'\fR.
+.Sp
+The following syslog facilities are supported: \fBauthpriv\fR (if your
+\&\s-1OS\s0 supports it), \fBauth\fR, \fBdaemon\fR, \fBuser\fR, \fBlocal0\fR, \fBlocal1\fR,
+\&\fBlocal2\fR, \fBlocal3\fR, \fBlocal4\fR, \fBlocal5\fR, \fBlocal6\fR, and \fBlocal7\fR.
 .IP "verifypw" 12
 .IX Item "verifypw"
 This option controls when a password will be required when a user runs
@@ -1617,14 +1614,6 @@ single value without double-quotes.  The list can be replaced, added
 to, deleted from, or disabled by using the \f(CW\*(C`=\*(C'\fR, \f(CW\*(C`+=\*(C'\fR, \f(CW\*(C`\-=\*(C'\fR, and
 \&\f(CW\*(C`!\*(C'\fR operators respectively.  The default list of variables to keep
 is displayed when \fBsudo\fR is run by root with the \fI\-V\fR option.
-.PP
-When logging via \fIsyslog\fR\|(3), \fBsudo\fR accepts the following values
-for the syslog facility (the value of the \fBsyslog\fR Parameter):
-\&\fBauthpriv\fR (if your \s-1OS\s0 supports it), \fBauth\fR, \fBdaemon\fR, \fBuser\fR,
-\&\fBlocal0\fR, \fBlocal1\fR, \fBlocal2\fR, \fBlocal3\fR, \fBlocal4\fR, \fBlocal5\fR,
-\&\fBlocal6\fR, and \fBlocal7\fR.  The following syslog priorities are
-supported: \fBalert\fR, \fBcrit\fR, \fBdebug\fR, \fBemerg\fR, \fBerr\fR, \fBinfo\fR,
-\&\fBnotice\fR, and \fBwarning\fR.
 .SH "FILES"
 .IX Header "FILES"
 .ie n .IP "\fI@sysconfdir@/sudoers\fR" 24

@@ -1,7 +1,5 @@
+VISUDO(1m)                   MAINTENANCE COMMANDS                   VISUDO(1m)
 
-
-
-VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
 
 NNAAMMEE
@@ -58,18 +56,6 @@ OOPPTTIIOONNSS
                    --ff may be "-", indicating that _s_u_d_o_e_r_s will be read from
                    the standard input.
 
-
-
-
-1.8.1                     April  9, 2011                        1
-
-
-
-
-
-VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
-
-
        -h          The --hh (_h_e_l_p) option causes vviissuuddoo to print a short help
                    message to the standard output and exit.
 
@@ -123,19 +109,6 @@ DDIIAAGGNNOOSSTTIICCSS
            used.  You may wish to comment out or remove the unused alias.  In
            --ss (strict) mode this is an error, not a warning.
 
-
-
-
-
-1.8.1                     April  9, 2011                        2
-
-
-
-
-
-VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
-
-
 SSEEEE AALLSSOO
        _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(1m)
 
@@ -170,29 +143,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.8.1                     April  9, 2011                        3
-
-
+1.8.2                            May 22, 2011                       VISUDO(1m)

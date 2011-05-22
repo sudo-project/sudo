@@ -1,7 +1,5 @@
+SUDOREPLAY(1m)               MAINTENANCE COMMANDS               SUDOREPLAY(1m)
 
-
-
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
 
 NNAAMMEE
@@ -58,18 +56,6 @@ OOPPTTIIOONNSS
        -l [_s_e_a_r_c_h _e_x_p_r_e_s_s_i_o_n]
                    Enable "list mode".  In this mode, ssuuddoorreeppllaayy will list
                    available session IDs.  If a _s_e_a_r_c_h _e_x_p_r_e_s_s_i_o_n is
-
-
-
-1.8.1                     April  9, 2011                        1
-
-
-
-
-
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
-
-
                    specified, it will be used to restrict the IDs that are
                    displayed.  An expression is composed of the following
                    predicates:
@@ -124,18 +110,6 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
                    well as '(' and ')' for grouping (note that parentheses
                    must generally be escaped from the shell).  The _a_n_d
                    operator is optional, adjacent predicates have an implied
-
-
-
-1.8.1                     April  9, 2011                        2
-
-
-
-
-
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
-
-
                    _a_n_d unless separated by an _o_r.
 
        -m _m_a_x___w_a_i_t Specify an upper bound on how long to wait between key
@@ -188,19 +162,6 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
        tomorrow
                Exactly one day from now.
-
-
-
-
-
-1.8.1                     April  9, 2011                        3
-
-
-
-
-
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
-
 
        yesterday
                24 hours ago.
@@ -256,18 +217,6 @@ FFIILLEESS
                                Example session timing file.
 
        Note that the _s_t_d_i_n, _s_t_d_o_u_t and _s_t_d_e_r_r files will be empty unless ssuuddoo
-
-
-
-1.8.1                     April  9, 2011                        4
-
-
-
-
-
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
-
-
        was used as part of a pipeline for a particular command.
 
 EEXXAAMMPPLLEESS
@@ -311,20 +260,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.8.1                     April  9, 2011                        5
-
-
+1.8.2                            May 22, 2011                   SUDOREPLAY(1m)

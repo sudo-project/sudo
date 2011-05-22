@@ -1,7 +1,5 @@
+SUDO(1m)                     MAINTENANCE COMMANDS                     SUDO(1m)
 
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 NNAAMMEE
@@ -56,19 +54,6 @@ DDEESSCCRRIIPPTTIIOONN
        Security policies may log successful and failed attempts to use ssuuddoo.
        If an I/O plugin is configured, the running command's input and output
        may be logged as well.
-
-
-
-
-
-1.8.1                     April  9, 2011                        1
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
 OOPPTTIIOONNSS
        ssuuddoo accepts the following command line options:
@@ -125,17 +110,6 @@ OOPPTTIIOONNSS
                    is already root.  This option is only available on systems
                    with BSD login classes.
 
-
-
-1.8.1                     April  9, 2011                        2
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        -D _l_e_v_e_l    Enable debugging of ssuuddoo plugins and ssuuddoo itself.  The
                    _l_e_v_e_l may be a value from 1 through 9.
 
@@ -190,18 +164,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    behavior.
 
        -h          The --hh (_h_e_l_p) option causes ssuuddoo to print a short help
-
-
-
-1.8.1                     April  9, 2011                        3
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
                    message to the standard output and exit.
 
        -i [command]
@@ -256,18 +218,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    messages and exit.
 
        -P          The --PP (_p_r_e_s_e_r_v_e _g_r_o_u_p _v_e_c_t_o_r) option causes ssuuddoo to
-
-
-
-1.8.1                     April  9, 2011                        4
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
                    preserve the invoking user's group vector unaltered.  By
                    default, the _s_u_d_o_e_r_s policy will initialize the group
                    vector to the list of groups the target user is in.  The
@@ -322,18 +272,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    role.
 
        -U _u_s_e_r     The --UU (_o_t_h_e_r _u_s_e_r) option is used in conjunction with the
-
-
-
-1.8.1                     April  9, 2011                        5
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
                    --ll option to specify the user whose privileges should be
                    listed.  The security policy may restrict listing other
                    users' privileges.  The _s_u_d_o_e_r_s policy only allows root or
@@ -383,22 +321,6 @@ PPLLUUGGIINNSS
        contains no Plugin lines, ssuuddoo will use the traditional _s_u_d_o_e_r_s
        security policy and I/O logging, which corresponds to the following
        _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
-
-
-
-
-
-
-
-
-1.8.1                     April  9, 2011                        6
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
         #
         # Default /etc/sudo.conf file
@@ -453,18 +375,6 @@ PPAATTHHSS
                        used to implement the _n_o_e_x_e_c functionality on systems
                        that support LD_PRELOAD or its equivalent.  Defaults to
                        _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c_/_s_u_d_o___n_o_e_x_e_c_._s_o.
-
-
-
-
-1.8.1                     April  9, 2011                        7
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
 RREETTUURRNN VVAALLUUEESS
        Upon successful execution of a program, the exit status from ssuuddoo will
@@ -521,17 +431,6 @@ EENNVVIIRROONNMMEENNTT
 
        SHELL           Used to determine shell to run with -s option
 
-
-
-1.8.1                     April  9, 2011                        8
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        SUDO_ASKPASS    Specifies the path to a helper program used to read the
                        password if no terminal is available or if the -A
                        option is specified.
@@ -587,17 +486,6 @@ EEXXAAMMPPLLEESS
 
        To shutdown a machine:
 
-
-
-1.8.1                     April  9, 2011                        9
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
         $ sudo shutdown -r +15 "quick reboot"
 
        To make a usage listing of the directories in the /home partition.
@@ -652,75 +540,8 @@ DDIISSCCLLAAIIMMEERR
        including, but not limited to, the implied warranties of
        merchantability and fitness for a particular purpose are disclaimed.
        See the LICENSE file distributed with ssuuddoo or
-
-
-
-1.8.1                     April  9, 2011                       10
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        http://www.sudo.ws/sudo/license.html for complete details.
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.8.1                     April  9, 2011                       11
-
-
+1.8.2                            May 22, 2011                         SUDO(1m)
