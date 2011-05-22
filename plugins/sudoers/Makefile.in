@@ -351,18 +351,24 @@ visudo.o: $(srcdir)/visudo.c $(SUDODEP) $(devdir)/gram.h
 update-po:
 	@echo "Updating $(POTFILE)"; \
 	    $(XGETTEXT) $(XGETTEXT_OPTS) $(srcdir)/*c $(srcdir)/auth/*c -o $(POTFILE)
-	@for f in $(LINGUAS); do \
-	    echo $(ECHO_N) "Updating \"$$f\" message catalog$(ECHO_C)"; \
-	    $(MSGMERGE) --update $(srcdir)/po/$$f.po $(POTFILE); \
-	    $(MSGFMT) --output /dev/null --check-format $(srcdir)/po/$$f.po || exit 1; \
+	@set -- $(LINGUAS); \
+	while test $$# != 0; do \
+	    echo $(ECHO_N) "Updating \"$$1\" message catalog$(ECHO_C)"; \
+	    $(MSGMERGE) --update $(srcdir)/po/$$1.po $(POTFILE); \
+	    $(MSGFMT) --output /dev/null --check-format $(srcdir)/po/$$1.po || exit 1; \
+	    shift; \
 	done
 
 compile-po:
-	@test -n "$(LINGUAS)" && mkdir -p po
-	@for f in $(LINGUAS); do \
-	    echo "Compiling \"$$f\" message catalog."; \
-	    $(MSGFMT) --statistics -c -o po/$$f.mo $(srcdir)/po/$$f.po; \
-	done
+	@if test -n "$(LINGUAS)"; then \
+	    mkdir -p po; \
+	    set -- $(LINGUAS); \
+	    while test $$# != 0; do \
+		echo "Compiling \"$$1\" message catalog."; \
+		$(MSGFMT) --statistics -c -o po/$$1.mo $(srcdir)/po/$$1.po; \
+		shift; \
+	    done; \
+	fi
 
 pre-install:
 	@if test -r $(DESTDIR)$(sudoersdir)/sudoers; then \
@@ -398,9 +404,11 @@ install-sudoers: install-dirs
 		sudoers $(DESTDIR)$(sudoersdir)/sudoers
 
 install-nls:
-	@for f in $(LINGUAS); do \
-	    $(INSTALL) -d $(DESTDIR)$(localedir)/$$f/LC_MESSAGES; \
-	    $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0644 $(srcdir)/po/$$f.mo $(DESTDIR)$(localedir)/$$f/LC_MESSAGES/sudoers.mo; \
+	@set -- $(LINGUAS); \
+	while test $$# != 0; do \
+	    $(INSTALL) -d $(DESTDIR)$(localedir)/$$1/LC_MESSAGES; \
+	    $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0644 $(srcdir)/po/$$1.mo $(DESTDIR)$(localedir)/$$1/LC_MESSAGES/sudoers.mo; \
+	    shift; \
 	done
 
 uninstall:
