@@ -98,7 +98,8 @@ XGETTEXT_OPTS = -k_ -kN_ -dsudo --copyright-holder="Todd C. Miller" \
 
 SUDODEP = $(srcdir)/sudo.h $(incdir)/sudo_plugin.h $(incdir)/alloc.h \
 	  $(incdir)/error.h $(incdir)/list.h $(incdir)/missing.h \
-	  $(top_builddir)/pathnames.h $(top_builddir)/config.h
+	  $(incdir)/gettext.h $(top_builddir)/pathnames.h \
+	  $(top_builddir)/config.h
 
 all: $(PROGS)
 
@@ -126,7 +127,7 @@ sesh: sesh.o
 # XXX - SUDODEP is overkill for some of these
 conversation.o: $(srcdir)/conversation.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/conversation.c
-error.o: $(srcdir)/error.c $(incdir)/missing.h $(incdir)/error.h $(top_builddir)/config.h
+error.o: $(srcdir)/error.c $(incdir)/error.h $(incdir)/missing.h $(incdir)/gettext.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/error.c
 exec.o: $(srcdir)/exec.c $(SUDODEP) $(srcdir)/sudo_exec.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/exec.c
@@ -144,7 +145,7 @@ preload.o: $(srcdir)/preload.c $(incdir)/sudo_plugin.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/preload.c
 selinux.o: $(srcdir)/selinux.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/selinux.c
-sesh.o: $(srcdir)/sesh.c $(incdir)/missing.h $(top_builddir)/config.h
+sesh.o: $(srcdir)/sesh.c $(incdir)/missing.h $(incdir)/gettext.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sesh.c
 sudo.o: $(srcdir)/sudo.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudo.c
