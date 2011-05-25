@@ -172,6 +172,13 @@ The specified {User,Runas,Host,Cmnd}_Alias was defined but never
 used.  You may wish to comment out or remove the unused alias.  In
 B<-s> (strict) mode this is an error, not a warning.
 
+=item Warning: cycle in {User,Runas,Host,Cmnd}_Alias
+
+The specified {User,Runas,Host,Cmnd}_Alias includes a reference to
+itself, either directly or through an alias it includes.  This is
+only a warning by default as B<sudo> will ignore cycles when parsing
+the I<sudoers> file.
+
 =back
 
 =head1 SEE ALSO
