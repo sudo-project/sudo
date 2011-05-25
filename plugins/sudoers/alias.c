@@ -44,6 +44,7 @@
 #include "parse.h"
 #include "redblack.h"
 #include <gram.h>
+#include <errno.h>
 
 /*
  * Globals
@@ -85,15 +86,19 @@ alias_find(char *name, int type)
     key.name = name;
     key.type = type;
     if ((node = rbfind(aliases, &key)) != NULL) {
-	    /*
-	     * Compare the global sequence number with the one stored
-	     * in the alias.  If they match then we've seen this alias
-	     * before and found a loop.
-	     */
-	    a = node->data;
-	    if (a->seqno == alias_seqno)
-		return NULL;
-	    a->seqno = alias_seqno;
+	/*
+	 * Compare the global sequence number with the one stored
+	 * in the alias.  If they match then we've seen this alias
+	 * before and found a loop.
+	 */
+	a = node->data;
+	if (a->seqno == alias_seqno) {
+	    errno = ELOOP;
+	    return NULL;
+	}
+	a->seqno = alias_seqno;
+    } else {
+	errno = ENOENT;
     }
     return a;
 }
@@ -175,8 +180,10 @@ alias_remove(char *name, int type)
 
     key.name = name;
     key.type = type;
-    if ((node = rbfind(aliases, &key)) == NULL)
+    if ((node = rbfind(aliases, &key)) == NULL) {
+	errno = ENOENT;
 	return NULL;
+    }
     return rbdelete(aliases, node);
 }
 
