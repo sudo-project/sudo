@@ -79,14 +79,21 @@ autoconf:
 	autoconf -I m4
 
 depend:
-	$(srcdir)/mkdep.pl compat/Makefile.in common/Makefile.in \
-	    plugins/sudoers/Makefile.in plugins/sample/Makefile.in \
-	    plugins/sample_group/Makefile.in src/Makefile.in \
-	    zlib/Makefile.in
-	./config.status --file compat/Makefile --file common/Makefile \
-	    --file plugins/sudoers/Makefile --file plugins/sample/Makefile \
-	    --file plugins/sample_group/Makefile --file src/Makefile \
-	    --file zlib/Makefile
+	@if test "$(srcdir)" != "."; then \
+	    echo "make depend only supported in the source directory"; \
+	    exit 1; \
+	fi; \
+	$(srcdir)/mkdep.pl $(srcdir)/common/Makefile.in \
+	    $(srcdir)/compat/Makefile.in $(srcdir)/plugins/sample/Makefile.in \
+	    $(srcdir)/plugins/sample_group/Makefile.in \
+	    $(srcdir)/plugins/sudoers/Makefile.in \
+	    $(srcdir)/src/Makefile.in $(srcdir)/zlib/Makefile.in; \
+	./config.status --file $(srcdir)/common/Makefile \
+	    --file $(srcdir)/compat/Makefile \
+	    --file $(srcdir)/plugins/sample/Makefile \
+	    --file $(srcdir)/plugins/sample_group/Makefile \
+	    --file $(srcdir)/plugins/sudoers/Makefile \
+	    --file $(srcdir)/src/Makefile --file $(srcdir)/zlib/Makefile
 
 # The 1.8 branch started February 25, 2011
 ChangeLog:
