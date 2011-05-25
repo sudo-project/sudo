@@ -78,6 +78,16 @@ install install-doc: config.status ChangeLog pre-install
 autoconf:
 	autoconf -I m4
 
+depend:
+	$(srcdir)/mkdep.pl compat/Makefile.in common/Makefile.in \
+	    plugins/sudoers/Makefile.in plugins/sample/Makefile.in \
+	    plugins/sample_group/Makefile.in src/Makefile.in \
+	    zlib/Makefile.in
+	./config.status --file compat/Makefile --file common/Makefile \
+	    --file plugins/sudoers/Makefile --file plugins/sample/Makefile \
+	    --file plugins/sample_group/Makefile --file src/Makefile \
+	    --file zlib/Makefile
+
 # The 1.8 branch started February 25, 2011
 ChangeLog:
 	if test -d $(srcdir)/.hg && cd $(srcdir); then \
