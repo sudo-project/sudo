@@ -1034,28 +1034,35 @@ check_aliases(int strict, int quiet)
     tq_foreach_fwd(&userspecs, us) {
 	tq_foreach_fwd(&us->users, m) {
 	    if (m->type == ALIAS) {
+		alias_seqno++;
 		if (!alias_remove_recursive(m->name, USERALIAS, strict, quiet))
 		    error++;
 	    }
 	}
 	tq_foreach_fwd(&us->privileges, priv) {
 	    tq_foreach_fwd(&priv->hostlist, m) {
-		if (m->type == ALIAS)
+		if (m->type == ALIAS) {
+		    alias_seqno++;
 		    if (!alias_remove_recursive(m->name, HOSTALIAS, strict,
 			quiet))
 			error++;
+		}
 	    }
 	    tq_foreach_fwd(&priv->cmndlist, cs) {
 		tq_foreach_fwd(&cs->runasuserlist, m) {
-		    if (m->type == ALIAS)
+		    if (m->type == ALIAS) {
+			alias_seqno++;
 			if (!alias_remove_recursive(m->name, RUNASALIAS,
 			    strict, quiet))
 			    error++;
+		    }
 		}
-		if ((m = cs->cmnd)->type == ALIAS)
+		if ((m = cs->cmnd)->type == ALIAS) {
+		    alias_seqno++;
 		    if (!alias_remove_recursive(m->name, CMNDALIAS, strict,
 			quiet))
 			error++;
+		}
 	    }
 	}
     }
@@ -1078,9 +1085,11 @@ check_aliases(int strict, int quiet)
 	}
 	tq_foreach_fwd(&d->binding, binding) {
 	    for (m = binding; m != NULL; m = m->next) {
-		if (m->type == ALIAS)
+		if (m->type == ALIAS) {
+		    alias_seqno++;
 		    if (!alias_remove_recursive(m->name, atype, strict, quiet))
 			error++;
+		}
 	    }
 	}
     }
