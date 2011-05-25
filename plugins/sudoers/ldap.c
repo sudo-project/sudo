@@ -934,7 +934,7 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
     }
 
     /* Format the timestamp according to the RFC. */
-    if (strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%MZ", tp) == 0) {
+    if (strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%M%SZ", tp) == 0) {
 	warning(_("unable to format timestamp"));
 	goto done;
     }
