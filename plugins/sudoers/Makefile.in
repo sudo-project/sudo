@@ -45,7 +45,8 @@ ECHO_C = @ECHO_C@
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 
 # Libraries
-LIBS = $(top_builddir)/common/libcommon.la $(top_builddir)/@ac_config_libobj_dir@/libreplace.la @LIBINTL@
+LT_LIBS = $(top_builddir)/common/libcommon.la $(LIBOBJDIR)libreplace.la
+LIBS = $(LT_LIBS) @LIBINTL@
 NET_LIBS = @NET_LIBS@
 SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(LIBS) $(NET_LIBS) @ZLIB@
 REPLAY_LIBS = @REPLAY_LIBS@ @ZLIB@
@@ -129,6 +130,8 @@ TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o error.o group_plugin.o \
 CHECK_IOLOG_PATH_OBJS = check_iolog_path.o error.o iolog_path.lo pwutil.lo \
 			redblack.lo
 
+LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
+
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
@@ -167,22 +170,22 @@ Makefile: $(srcdir)/Makefile.in
 libsudoers.la: $(LIBSUDOERS_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LIBSUDOERS_OBJS) -no-install
 
-sudoers.la: $(SUDOERS_OBJS) libsudoers.la
+sudoers.la: $(SUDOERS_OBJS) $(LT_LIBS) libsudoers.la
 	$(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(SUDOERS_LDFLAGS) $(LTLDFLAGS) -o $@ $(SUDOERS_OBJS) libsudoers.la $(SUDOERS_LIBS) -module -export-symbols $(srcdir)/sudoers.sym -avoid-version -rpath $(plugindir)
 
-visudo: libsudoers.la $(VISUDO_OBJS) $(LIBS)
+visudo: libsudoers.la $(VISUDO_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)
 
-sudoreplay: $(REPLAY_OBJS) $(LIBS)
+sudoreplay: $(REPLAY_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) timestr.lo $(REPLAY_LIBS) $(LIBS)
 
-testsudoers: libsudoers.la $(TEST_OBJS) $(LIBS)
+testsudoers: libsudoers.la $(TEST_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS) @LIBDL@
 
-check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) $(LIBS)
+check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_IOLOG_PATH_OBJS) $(LDFLAGS) $(LIBS)
 
-check_fill: check_fill.o toke_util.lo error.o $(LIBS)
+check_fill: check_fill.o toke_util.lo error.o $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ check_fill.o toke_util.lo error.o $(LDFLAGS) $(LIBS)
 
 # Uncomment the following if you want "make distclean" to clean the parser
