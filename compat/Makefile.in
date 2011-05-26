@@ -138,7 +138,7 @@ fnmatch.lo: $(srcdir)/fnmatch.c $(top_builddir)/config.h $(incdir)/missing.h \
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/fnmatch.c
 getcwd.lo: $(srcdir)/getcwd.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/getcwd.c
-getgrouplist.lo: compat/getgrouplist.c $(top_builddir)/config.h \
+getgrouplist.lo: $(srcdir)/getgrouplist.c $(top_builddir)/config.h \
                  $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) compat/getgrouplist.c
 getline.lo: $(srcdir)/getline.c $(top_builddir)/config.h $(incdir)/missing.h
@@ -153,15 +153,15 @@ isblank.lo: $(srcdir)/isblank.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/isblank.c
 memrchr.lo: $(srcdir)/memrchr.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/memrchr.c
-mksiglist.lo: compat/mksiglist.c $(top_builddir)/config.h $(incdir)/missing.h \
-              $(top_srcdir)/compat/mksiglist.h
+mksiglist.lo: $(srcdir)/mksiglist.c $(top_builddir)/config.h \
+              $(incdir)/missing.h $(top_srcdir)/compat/mksiglist.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) compat/mksiglist.c
 mktemp.lo: $(srcdir)/mktemp.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/mktemp.c
 nanosleep.lo: $(srcdir)/nanosleep.c $(top_builddir)/config.h \
               $(top_srcdir)/compat/timespec.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/nanosleep.c
-setenv.lo: compat/setenv.c $(top_builddir)/config.h $(incdir)/missing.h
+setenv.lo: $(srcdir)/setenv.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) compat/setenv.c
 snprintf.lo: $(srcdir)/snprintf.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/snprintf.c
@@ -172,7 +172,7 @@ strlcpy.lo: $(srcdir)/strlcpy.c $(top_builddir)/config.h $(incdir)/missing.h
 strsignal.lo: $(srcdir)/strsignal.c $(top_builddir)/config.h \
               $(incdir)/missing.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/strsignal.c
-unsetenv.lo: compat/unsetenv.c $(top_builddir)/config.h $(incdir)/missing.h
+unsetenv.lo: $(srcdir)/unsetenv.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) compat/unsetenv.c
 utimes.lo: $(srcdir)/utimes.c $(top_builddir)/config.h \
            $(top_srcdir)/compat/utime.h $(incdir)/missing.h
