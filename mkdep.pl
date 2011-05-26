@@ -42,14 +42,14 @@ sub mkdep {
     $makefile =~ s:\@SUDOERS_OBJS\@:bsm_audit.lo linux_audit.lo ldap.lo plugin_error.lo:;
     # XXX - fill in AUTH_OBJS from contents of the auth dir instead
     $makefile =~ s:\@AUTH_OBJS\@:afs.lo aix_auth.lo bsdauth.lo dce.lo fwtk.lo kerb4.lo kerb5.lo pam.lo passwd.lo rfc1938.lo secureware.lo securid.lo securid5.lo sia.lo:;
-    $makefile =~ s:\@LTLIBOBJS\@:closefrom.lo dlopen.lo fnmatch.lo getcwd.lo getgrouplist.lo getline.lo getprogname.lo glob.lo isblank.lo memrchr.lo mksiglist.lo mktemp.lo nanosleep.lo setenv.lo snprintf.lo strlcat.lo strlcpy.lo strsignal.lo unsetenv.lo utimes.lo:;
+    $makefile =~ s:\@LTLIBOBJS\@:closefrom.lo dlopen.lo fnmatch.lo getcwd.lo getgrouplist.lo getline.lo getprogname.lo glob.lo isblank.lo memrchr.lo mksiglist.lo mktemp.lo nanosleep.lo setenv.lo siglist.lo snprintf.lo strlcat.lo strlcpy.lo strsignal.lo unsetenv.lo utimes.lo:;
 
     # Parse OBJS lines
-    my @objs;
+    my %objs;
     while ($makefile =~ /^[A-Z0-9_]*OBJS\s*=\s*(.*)/mg) {
 	foreach (split/\s+/, $1) {
 	    next if /^\$[\(\{].*[\)\}]$/; # skip included vars for now
-	    push(@objs, $_);
+	    $objs{$_} = 1;
 	}
     }
 
@@ -82,7 +82,7 @@ sub mkdep {
     }
 
     # Do .lo files first
-    foreach my $obj (sort @objs) {
+    foreach my $obj (sort keys %objs) {
 	next unless $obj =~ /(\S+)\.(l?o)$/;
 	if ($2 eq "o" && exists($srcs{"$1.lo"})) {
 	    # If we have both .lo and .o files, make the .o depend on the .lo
@@ -134,6 +134,11 @@ exit(0);
 sub find_depends {
     my $src = $_[0];
     my ($deps, $code, @headers);
+
+    if ($src !~ /\//) {
+	# XXX - want build dir not src dir
+	$src = "$dir_vars{'srcdir'}/$src";
+    }
 
     # resolve $(srcdir) etc.
     foreach (keys %dir_vars) {

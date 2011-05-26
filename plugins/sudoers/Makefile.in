@@ -454,15 +454,6 @@ env.lo: $(srcdir)/env.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
 error.o: $(top_srcdir)/src/error.c $(top_builddir)/config.h \
          $(incdir)/missing.h $(incdir)/error.h $(incdir)/gettext.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(top_srcdir)/src/error.c
-error.o: $(top_srcdir)/src/error.c $(top_builddir)/config.h \
-         $(incdir)/missing.h $(incdir)/error.h $(incdir)/gettext.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(top_srcdir)/src/error.c
-error.o: $(top_srcdir)/src/error.c $(top_builddir)/config.h \
-         $(incdir)/missing.h $(incdir)/error.h $(incdir)/gettext.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(top_srcdir)/src/error.c
-error.o: $(top_srcdir)/src/error.c $(top_builddir)/config.h \
-         $(incdir)/missing.h $(incdir)/error.h $(incdir)/gettext.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(top_srcdir)/src/error.c
 find_path.lo: $(srcdir)/find_path.c $(top_builddir)/config.h \
               $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \
               $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
@@ -518,13 +509,6 @@ iolog.lo: $(srcdir)/iolog.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
           $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/iolog.c
-iolog_path.lo: $(srcdir)/iolog_path.c $(top_builddir)/config.h \
-               $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \
-               $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
-               $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
-               $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-               $(incdir)/sudo_plugin.h $(incdir)/gettext.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/iolog_path.c
 iolog_path.lo: $(srcdir)/iolog_path.c $(top_builddir)/config.h \
                $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \
                $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
@@ -603,16 +587,6 @@ pwutil.lo: $(srcdir)/pwutil.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
            $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
            $(srcdir)/redblack.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/pwutil.c
-pwutil.lo: $(srcdir)/pwutil.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
-           $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
-           $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
-           $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-           $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
-           $(srcdir)/redblack.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/pwutil.c
-redblack.lo: $(srcdir)/redblack.c $(top_builddir)/config.h $(incdir)/missing.h \
-             $(incdir)/alloc.h $(srcdir)/redblack.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/redblack.c
 redblack.lo: $(srcdir)/redblack.c $(top_builddir)/config.h $(incdir)/missing.h \
              $(incdir)/alloc.h $(srcdir)/redblack.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/redblack.c
