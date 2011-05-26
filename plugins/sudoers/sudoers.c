@@ -345,6 +345,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    NewArgv[0] = estrdup(runas_pw->pw_shell);
     }
 
+    /* If given the -P option, set the "preserve_groups" flag. */
+    if (ISSET(sudo_mode, MODE_PRESERVE_GROUPS))
+	def_preserve_groups = TRUE;
+
     /* Find command in path */
     cmnd_status = set_cmnd(sudo_mode);
     if (cmnd_status == -1) {
@@ -405,10 +409,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	timestamp_uid = pw->pw_uid;
 	pw_delref(pw);
     }
-
-    /* If given the -P option, set the "preserve_groups" flag. */
-    if (ISSET(sudo_mode, MODE_PRESERVE_GROUPS))
-	def_preserve_groups = TRUE;
 
     /* If no command line args and "shell_noargs" is not set, error out. */
     if (ISSET(sudo_mode, MODE_IMPLIED_SHELL) && !def_shell_noargs) {
