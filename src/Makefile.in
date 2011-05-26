@@ -131,11 +131,10 @@ update-po:
 
 compile-po:
 	@if test -n "$(LINGUAS)"; then \
-	    mkdir -p po; \
 	    set -- $(LINGUAS); \
 	    while test $$# != 0; do \
 		echo "Compiling \"$$1\" message catalog."; \
-		$(MSGFMT) --statistics -c -o po/$$1.mo $(srcdir)/po/$$1.po; \
+		$(MSGFMT) --statistics -c -o $(srcdir)/po/$$1.mo $(srcdir)/po/$$1.po; \
 		shift; \
 	    done; \
 	fi
@@ -166,12 +165,18 @@ install-noexec: install-dirs libsudo_noexec.la
 install-plugin:
 
 install-nls:
-	@set -- $(LINGUAS); \
+	@if test -n "$(LINGUAS)"; then \
+	    echo $(ECHO_N) "Installing sudo message catalogs:$(ECHO_C)"; \
+	fi; \
+	set -- $(LINGUAS); \
 	while test $$# != 0; do \
 	    $(INSTALL) -d $(DESTDIR)$(localedir)/$$1/LC_MESSAGES; \
 	    $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0644 $(srcdir)/po/$$1.mo $(DESTDIR)$(localedir)/$$1/LC_MESSAGES/sudo.mo; \
 	    shift; \
-	done
+	done; \
+	if test -n "$(LINGUAS)"; then \
+	    echo ""; \
+	fi
 
 uninstall:
 	-rm -f	$(DESTDIR)$(bindir)/sudo $(DESTDIR)$(bindir)/sudoedit \
