@@ -59,10 +59,10 @@ Makefile: $(srcdir)/Makefile.in
 libreplace.la: $(LTLIBOBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LTLIBOBJS) -no-install
 
-./siglist.c: ./mksiglist
+siglist.c: mksiglist
 	./mksiglist > $@
 
-./mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(incdir)/missing.h $(top_builddir)/config.h
+mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(incdir)/missing.h $(top_builddir)/config.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/mksiglist.c -o $@
 
 fnm_test.o: $(srcdir)/regress/fnmatch/fnm_test.c
