@@ -1,0 +1,752 @@
+# Ukrainian translation for sudo.
+# This file is put in the public domain.
+#
+# Yuri Chornoivan <yurchor@ukr.net>, 2011.
+msgid ""
+msgstr ""
+"Project-Id-Version: sudo 1.8.2-rc1\n"
+"Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
+"POT-Creation-Date: 2011-05-20 15:33-0400\n"
+"PO-Revision-Date: 2011-05-25 20:07+0300\n"
+"Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
+"Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Lokalize 1.2\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: ../../trunk/src/error.c:82 ../../trunk/src/error.c:86
+msgid ": "
+msgstr ": "
+
+#: ../../trunk/src/exec.c:125 ../../trunk/src/exec_pty.c:569
+#: ../../trunk/src/exec_pty.c:876 ../../trunk/src/tgetpass.c:224
+#, c-format
+msgid "unable to fork"
+msgstr "не вдалося створити відгалуження"
+
+#: ../../trunk/src/exec.c:247
+#, c-format
+msgid "unable to create sockets"
+msgstr "не вдалося створити сокети"
+
+#: ../../trunk/src/exec.c:254 ../../trunk/src/exec_pty.c:522
+#: ../../trunk/src/exec_pty.c:530 ../../trunk/src/exec_pty.c:537
+#: ../../trunk/src/exec_pty.c:822 ../../trunk/src/exec_pty.c:873
+#: ../../trunk/src/tgetpass.c:221
+#, c-format
+msgid "unable to create pipe"
+msgstr "не вдалося створити канал"
+
+#: ../../trunk/src/exec.c:320 ../../trunk/src/exec_pty.c:940
+#: ../../trunk/src/exec_pty.c:1073
+#, c-format
+msgid "select failed"
+msgstr "спроба виконати select зазнала невдачі"
+
+#: ../../trunk/src/exec.c:388
+#, c-format
+msgid "unable to restore tty label"
+msgstr "не вдалося відновити позначку tty"
+
+#: ../../trunk/src/exec_pty.c:136
+#, c-format
+msgid "unable to allocate pty"
+msgstr "не вдалося розмістити pty"
+
+#: ../../trunk/src/exec_pty.c:562
+#, c-format
+msgid "unable to set terminal to raw mode"
+msgstr "не вдалося перевести термінал у режим без обробки"
+
+#: ../../trunk/src/exec_pty.c:854
+#, c-format
+msgid "unable to set controlling tty"
+msgstr "не вдалося встановити tty для керування"
+
+#: ../../trunk/src/exec_pty.c:948
+#, c-format
+msgid "error reading from signal pipe"
+msgstr "помилка під час спроби читання з каналу сигналів"
+
+#: ../../trunk/src/exec_pty.c:967
+#, c-format
+msgid "error reading from pipe"
+msgstr "помилка під час спроби читання з каналу"
+
+#: ../../trunk/src/exec_pty.c:983
+#, c-format
+msgid "error reading from socketpair"
+msgstr "помилка під час спроби читання з пари сокетів"
+
+#: ../../trunk/src/exec_pty.c:987
+#, c-format
+msgid "unexpected reply type on backchannel: %d"
+msgstr "неочікуваний тип відповіді на зворотному каналі: %d"
+
+#: ../../trunk/src/load_plugins.c:154
+#, c-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: ../../trunk/src/load_plugins.c:160
+#, c-format
+msgid "%s%s: %s"
+msgstr "%s%s: %s"
+
+#: ../../trunk/src/load_plugins.c:170
+#, c-format
+msgid "%s must be owned by uid %d"
+msgstr "%s має належати користувачеві з uid %d"
+
+#: ../../trunk/src/load_plugins.c:174
+#, c-format
+msgid "%s must be only be writable by owner"
+msgstr "%s має бути доступним до запису лише для власника"
+
+#: ../../trunk/src/load_plugins.c:181
+#, c-format
+msgid "unable to dlopen %s: %s"
+msgstr "не вдалося виконати dlopen для %s: %s"
+
+#: ../../trunk/src/load_plugins.c:186
+#, c-format
+msgid "%s: unable to find symbol %s"
+msgstr "%s: не вдалося знайти символ %s"
+
+#: ../../trunk/src/load_plugins.c:192
+#, c-format
+msgid "%s: unknown policy type %d"
+msgstr "%s: невідомий тип правил %d"
+
+#: ../../trunk/src/load_plugins.c:196
+#, c-format
+msgid "%s: incompatible policy major version %d, expected %d"
+msgstr "%s: несумісна основна версія правил %d, мало бути — %d"
+
+#: ../../trunk/src/load_plugins.c:203
+#, c-format
+msgid "%s: only a single policy plugin may be loaded"
+msgstr "%s: можна завантажувати лише єдиний додаток правил"
+
+#: ../../trunk/src/load_plugins.c:221
+#, c-format
+msgid "%s: at least one policy plugin must be specified"
+msgstr "%s: мало бути вказано принаймні один додаток правил"
+
+#: ../../trunk/src/load_plugins.c:226
+#, c-format
+msgid "policy plugin %s does not include a check_policy method"
+msgstr "до додатка правил %s не включено метод check_policy"
+
+#: ../../trunk/src/net_ifs.c:155 ../../trunk/src/net_ifs.c:164
+#: ../../trunk/src/net_ifs.c:176 ../../trunk/src/net_ifs.c:185
+#: ../../trunk/src/net_ifs.c:295 ../../trunk/src/net_ifs.c:319
+#, c-format
+msgid "load_interfaces: overflow detected"
+msgstr "load_interfaces: виявлено переповнення"
+
+#: ../../trunk/src/net_ifs.c:224
+#, c-format
+msgid "unable to open socket"
+msgstr "не вдалося відкрити сокет"
+
+#: ../../trunk/src/parse_args.c:180
+#, c-format
+msgid "the argument to -C must be a number greater than or equal to 3"
+msgstr "аргументом параметра -C mмає бути число не менше за 3"
+
+#: ../../trunk/src/parse_args.c:192
+#, c-format
+msgid "the argument to -D must be between 1 and 9 inclusive"
+msgstr "аргументом параметра -D має бути число з діапазону від 1 до 9, включно"
+
+#: ../../trunk/src/parse_args.c:273
+#, c-format
+msgid "unknown user: %s"
+msgstr "невідомий користувач: %s"
+
+#: ../../trunk/src/parse_args.c:332
+#, c-format
+msgid "you may not specify both the `-i' and `-s' options"
+msgstr "не можна одночасно вказувати параметри «-i» і «-s»"
+
+#: ../../trunk/src/parse_args.c:336
+#, c-format
+msgid "you may not specify both the `-i' and `-E' options"
+msgstr "не можна одночасно вказувати параметри «-i» і «-E»"
+
+#: ../../trunk/src/parse_args.c:346
+#, c-format
+msgid "the `-E' option is not valid in edit mode"
+msgstr "не можна використовувати «-E» у режимі редагування"
+
+#: ../../trunk/src/parse_args.c:348
+#, c-format
+msgid "you may not specify environment variables in edit mode"
+msgstr "не можна вказувати змінні середовища у режимі редагування"
+
+#: ../../trunk/src/parse_args.c:356
+#, c-format
+msgid "the `-U' option may only be used with the `-l' option"
+msgstr "параметр «-U» можна використовувати лише разом з параметром «-l»"
+
+#: ../../trunk/src/parse_args.c:360
+#, c-format
+msgid "the `-A' and `-S' options may not be used together"
+msgstr "параметри «-A» і «-S» не можна використовувати одночасно"
+
+#: ../../trunk/src/parse_args.c:418 ../../trunk/src/sudo.c:398
+#: ../../trunk/src/sudo.c:418 ../../trunk/src/sudo.c:426
+#: ../../trunk/src/sudo.c:436 ../../trunk/common/alloc.c:85
+#: ../../trunk/common/alloc.c:105 ../../trunk/common/alloc.c:123
+#: ../../trunk/common/alloc.c:145 ../../trunk/common/alloc.c:203
+#: ../../trunk/common/alloc.c:217
+#, c-format
+msgid "unable to allocate memory"
+msgstr "не вдалося отримати потрібний об’єм пам’яті"
+
+#: ../../trunk/src/parse_args.c:431
+#, c-format
+msgid "sudoedit is not supported on this platform"
+msgstr "підтримки sudoedit для цієї платформи не передбачено"
+
+#: ../../trunk/src/parse_args.c:502
+#, c-format
+msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
+msgstr "Можна використовувати лише такі параметри: -e, -h, -i, -K, -l, -s, -v та -V"
+
+#: ../../trunk/src/parse_args.c:515
+#, c-format
+msgid ""
+"%s - edit files as another user\n"
+"\n"
+msgstr ""
+"%s — редагувати файли від імені іншого користувача\n"
+"\n"
+
+#: ../../trunk/src/parse_args.c:517
+#, c-format
+msgid ""
+"%s - execute a command as another user\n"
+"\n"
+msgstr ""
+"%s — виконати команду від імені іншого користувача\n"
+"\n"
+
+#: ../../trunk/src/parse_args.c:522
+#, c-format
+msgid ""
+"\n"
+"Options:\n"
+msgstr ""
+"\n"
+"Параметри:\n"
+
+#: ../../trunk/src/parse_args.c:525
+msgid "use helper program for password prompting\n"
+msgstr "використовувати допоміжну програму для запитів щодо пароля\n"
+
+#: ../../trunk/src/parse_args.c:528
+msgid "use specified BSD authentication type\n"
+msgstr "використовувати вказаний тип розпізнавання BSD\n"
+
+#: ../../trunk/src/parse_args.c:530
+msgid "run command in the background\n"
+msgstr "виконати команду у фоновому режимі\n"
+
+#: ../../trunk/src/parse_args.c:532
+msgid "close all file descriptors >= fd\n"
+msgstr "закрити всі дескриптори файлів >= fd\n"
+
+#: ../../trunk/src/parse_args.c:535
+msgid "run command with specified login class\n"
+msgstr "виконати команду з вказаним класом доступу\n"
+
+#: ../../trunk/src/parse_args.c:538
+msgid "preserve user environment when executing command\n"
+msgstr "зберегти середовище користувача на час виконання команди\n"
+
+#: ../../trunk/src/parse_args.c:540
+msgid "edit files instead of running a command\n"
+msgstr "редагувати файли замість виконання команди\n"
+
+#: ../../trunk/src/parse_args.c:542
+msgid "execute command as the specified group\n"
+msgstr "виконати команду від імені вказаної групи користувачів\n"
+
+#: ../../trunk/src/parse_args.c:544
+msgid "set HOME variable to target user's home dir.\n"
+msgstr "встановити для змінної HOME значення домашнього каталогу вказаного користувача.\n"
+
+#: ../../trunk/src/parse_args.c:546
+msgid "display help message and exit\n"
+msgstr "показати довідкове повідомлення і завершити роботу\n"
+
+#: ../../trunk/src/parse_args.c:548
+msgid "run a login shell as target user\n"
+msgstr "запустити оболонку для входу до системи від імені вказаного користувача\n"
+
+#: ../../trunk/src/parse_args.c:550
+msgid "remove timestamp file completely\n"
+msgstr "повністю вилучити файл часового штампу\n"
+
+#: ../../trunk/src/parse_args.c:552
+msgid "invalidate timestamp file\n"
+msgstr "позбавити чинності файл часового штампу\n"
+
+#: ../../trunk/src/parse_args.c:554
+msgid "list user's available commands\n"
+msgstr "показати список доступних користувачеві команд\n"
+
+#: ../../trunk/src/parse_args.c:556
+msgid "non-interactive mode, will not prompt user\n"
+msgstr "неінтерактивний режим, не просити користувача відповідати на питання\n"
+
+#: ../../trunk/src/parse_args.c:558
+msgid "preserve group vector instead of setting to target's\n"
+msgstr "зберегти вектор групи, не встановлювати вектор вказаного користувача\n"
+
+#: ../../trunk/src/parse_args.c:560
+msgid "use specified password prompt\n"
+msgstr "використовувати вказаний інструмент отримання паролів\n"
+
+#: ../../trunk/src/parse_args.c:563 ../../trunk/src/parse_args.c:571
+msgid "create SELinux security context with specified role\n"
+msgstr "створити контекст захисту SELinux з вказаною роллю\n"
+
+#: ../../trunk/src/parse_args.c:566
+msgid "read password from standard input\n"
+msgstr "прочитати пароль зі стандартного джерела вхідних даних\n"
+
+#: ../../trunk/src/parse_args.c:568
+msgid "run a shell as target user\n"
+msgstr "запустити командну оболонку від імені вказаного користувача\n"
+
+#: ../../trunk/src/parse_args.c:574
+msgid "when listing, list specified user's privileges\n"
+msgstr "у списку показати права доступу вказаного користувача\n"
+
+#: ../../trunk/src/parse_args.c:576
+msgid "run command (or edit file) as specified user\n"
+msgstr "виконати команду (або редагувати файл) від імені вказаного користувача\n"
+
+#: ../../trunk/src/parse_args.c:578
+msgid "display version information and exit\n"
+msgstr "показати дані щодо версії і завершити роботу\n"
+
+#: ../../trunk/src/parse_args.c:580
+msgid "update user's timestamp without running a command\n"
+msgstr "оновити штамп часу користувача без виконання команди\n"
+
+#: ../../trunk/src/parse_args.c:582
+msgid "stop processing command line arguments\n"
+msgstr "зупинити обробку аргументів командного рядка\n"
+
+#: ../../trunk/src/selinux.c:75
+#, c-format
+msgid "unable to open audit system"
+msgstr "не вдалося відкрити систему аудита"
+
+#: ../../trunk/src/selinux.c:85
+#, c-format
+msgid "unable to send audit message"
+msgstr "не вдалося надіслати повідомлення аудита"
+
+#: ../../trunk/src/selinux.c:112
+#, c-format
+msgid "unable to fgetfilecon %s"
+msgstr "не вдалося виконати fgetfilecon %s"
+
+#: ../../trunk/src/selinux.c:117
+#, c-format
+msgid "%s changed labels"
+msgstr "%s змінено позначки"
+
+#: ../../trunk/src/selinux.c:122
+#, c-format
+msgid "unable to restore context for %s"
+msgstr "не вдалося відновити контекст %s"
+
+#: ../../trunk/src/selinux.c:161
+#, c-format
+msgid "unable to open %s, not relabeling tty"
+msgstr "не вдалося відкрити %s, не змінюємо позначки tty"
+
+#: ../../trunk/src/selinux.c:170
+#, c-format
+msgid "unable to get current tty context, not relabeling tty"
+msgstr "не вдалося отримати поточний контекст tty, не змінюємо позначки tty"
+
+#: ../../trunk/src/selinux.c:177
+#, c-format
+msgid "unable to get new tty context, not relabeling tty"
+msgstr "не вдалося отримати новий контекст tty, не змінюємо позначки tty"
+
+#: ../../trunk/src/selinux.c:184
+#, c-format
+msgid "unable to set new tty context"
+msgstr "не вдалося встановити новий контекст tty"
+
+#: ../../trunk/src/selinux.c:194 ../../trunk/src/selinux.c:207
+#: ../../trunk/src/sudo.c:330
+#, c-format
+msgid "unable to open %s"
+msgstr "не вдалося відкрити %s"
+
+#: ../../trunk/src/selinux.c:249
+#, c-format
+msgid "you must specify a role for type %s"
+msgstr "вам слід вказати роль для типу %s"
+
+#: ../../trunk/src/selinux.c:255
+#, c-format
+msgid "unable to get default type for role %s"
+msgstr "не вдалося отримати типовий тип для ролі %s"
+
+#: ../../trunk/src/selinux.c:273
+#, c-format
+msgid "failed to set new role %s"
+msgstr "не вдалося встановити нову роль %s"
+
+#: ../../trunk/src/selinux.c:277
+#, c-format
+msgid "failed to set new type %s"
+msgstr "не вдалося встановити новий тип %s"
+
+#: ../../trunk/src/selinux.c:286
+#, c-format
+msgid "%s is not a valid context"
+msgstr "%s не є коректним контекстом"
+
+#: ../../trunk/src/selinux.c:320
+#, c-format
+msgid "failed to get old_context"
+msgstr "не вдалося отримати old_context"
+
+#: ../../trunk/src/selinux.c:326
+#, c-format
+msgid "unable to determine enforcing mode."
+msgstr "не вдалося визначити режим примушення."
+
+#: ../../trunk/src/selinux.c:338
+#, c-format
+msgid "unable to setup tty context for %s"
+msgstr "не вдалося налаштувати контекст tty для %s"
+
+#: ../../trunk/src/selinux.c:367
+#, c-format
+msgid "unable to set exec context to %s"
+msgstr "не вдалося встановити контекст виконання у значення %s"
+
+#: ../../trunk/src/selinux.c:374
+#, c-format
+msgid "unable to set key creation context to %s"
+msgstr "не вдалося встановити контекст ключа створення у значення %s"
+
+#: ../../trunk/src/sesh.c:48
+msgid "requires at least one argument"
+msgstr "потребує принаймні одного аргументу"
+
+#: ../../trunk/src/sesh.c:64
+#, c-format
+msgid "unable to execute %s"
+msgstr "не вдалося виконати %s"
+
+#: ../../trunk/src/sudo.c:192
+#, c-format
+msgid "must be setuid root"
+msgstr "має виконуватися з setuid root"
+
+#: ../../trunk/src/sudo.c:210
+#, c-format
+msgid "Sudo version %s\n"
+msgstr "Версія sudo %s\n"
+
+#: ../../trunk/src/sudo.c:212
+#, c-format
+msgid "Configure options: %s\n"
+msgstr "Параметри налаштування: %s\n"
+
+#: ../../trunk/src/sudo.c:217
+#, c-format
+msgid "fatal error, unable to load plugins"
+msgstr "критична помилка, не вдалося завантажити додатки"
+
+#: ../../trunk/src/sudo.c:225
+#, c-format
+msgid "unable to initialize policy plugin"
+msgstr "не вдалося ініціалізувати додаток правил"
+
+#: ../../trunk/src/sudo.c:280
+#, c-format
+msgid "error initializing I/O plugin %s"
+msgstr "помилка під час спроби ініціалізації додатка введення/виведення даних %s"
+
+#: ../../trunk/src/sudo.c:307
+#, c-format
+msgid "unexpected sudo mode 0x%x"
+msgstr "неочікуваний режим sudo 0x%x"
+
+#: ../../trunk/src/sudo.c:356
+#, c-format
+msgid "unable to get group vector"
+msgstr "не вдалося отримати вектор групи"
+
+#: ../../trunk/src/sudo.c:394
+#, c-format
+msgid "unknown uid %u: who are you?"
+msgstr "невідомий uid %u: хто ви такий?"
+
+#: ../../trunk/src/sudo.c:734
+#, c-format
+msgid "resource control limit has been reached"
+msgstr "перевищено обмеження керування ресурсами"
+
+#: ../../trunk/src/sudo.c:737
+#, c-format
+msgid "user \"%s\" is not a member of project \"%s\""
+msgstr "користувач «%s» не є учасником проекту «%s»"
+
+#: ../../trunk/src/sudo.c:741
+#, c-format
+msgid "the invoking task is final"
+msgstr "викликане завдання є завершальним"
+
+#: ../../trunk/src/sudo.c:744
+#, c-format
+msgid "could not join project \"%s\""
+msgstr "не вдалося приєднатися до проекту «%s»"
+
+#: ../../trunk/src/sudo.c:749
+#, c-format
+msgid "no resource pool accepting default bindings exists for project \"%s\""
+msgstr "для проекту «%s» не існує сховища ресурсів, яке приймає типові прив’язки"
+
+#: ../../trunk/src/sudo.c:753
+#, c-format
+msgid "specified resource pool does not exist for project \"%s\""
+msgstr "у проекті «%s» не існує вказаного сховища ресурсів"
+
+#: ../../trunk/src/sudo.c:757
+#, c-format
+msgid "could not bind to default resource pool for project \"%s\""
+msgstr "не вдалося виконати прив’язку до типового сховища ресурсів проекту «%s»"
+
+#: ../../trunk/src/sudo.c:763
+#, c-format
+msgid "setproject failed for project \"%s\""
+msgstr "помилка під час виконання setproject для проекту «%s»"
+
+#: ../../trunk/src/sudo.c:765
+#, c-format
+msgid "warning, resource control assignment failed for project \"%s\""
+msgstr "попередження, помилка призначення керування ресурсами проекту «%s»"
+
+#: ../../trunk/src/sudo.c:791
+#, c-format
+msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
+msgstr "не вдалося вилучити PRIV_PROC_EXEC з PRIV_LIMIT"
+
+#: ../../trunk/src/sudo.c:895
+#, c-format
+msgid "unknown login class %s"
+msgstr "невідомий клас входу %s"
+
+#: ../../trunk/src/sudo.c:902 ../../trunk/src/sudo.c:905
+#, c-format
+msgid "unable to set user context"
+msgstr "не вдалося встановити контекст користувача"
+
+#: ../../trunk/src/sudo.c:916
+#, c-format
+msgid "unable to set effective gid to runas gid %u"
+msgstr "не вдалося встановити ефективний ідентифікатор групи для ідентифікатора групи запуску %u"
+
+#: ../../trunk/src/sudo.c:921
+#, c-format
+msgid "unable to set gid to runas gid %u"
+msgstr "не вдалося встановити ідентифікатор групи для ідентифікатора групи запуску %u"
+
+#: ../../trunk/src/sudo.c:929 ../../trunk/src/sudo.c:935
+#, c-format
+msgid "unable to set supplementary group IDs"
+msgstr "не вдалося встановити ідентифікатори додаткових груп"
+
+#: ../../trunk/src/sudo.c:943
+#, c-format
+msgid "unable to set process priority"
+msgstr "не вдалося встановити пріоритет процесу"
+
+#: ../../trunk/src/sudo.c:951
+#, c-format
+msgid "unable to change root to %s"
+msgstr "не вдалося змінити root на %s"
+
+#: ../../trunk/src/sudo.c:961 ../../trunk/src/sudo.c:967
+#: ../../trunk/src/sudo.c:973
+#, c-format
+msgid "unable to change to runas uid (%u, %u)"
+msgstr "не вдалося змінити uid користувача, від імені якого відбувається виконання (%u, %u)"
+
+#: ../../trunk/src/sudo.c:987
+#, c-format
+msgid "unable to change directory to %s"
+msgstr "не вдалося змінити каталог на %s"
+
+#: ../../trunk/src/sudo.c:1078
+#, c-format
+msgid "unexpected child termination condition: %d"
+msgstr "неочікувана умова переривання дочірнього процесу: %d"
+
+#: ../../trunk/src/sudo.c:1118
+#, c-format
+msgid "policy plugin %s does not support listing privileges"
+msgstr "у додатку правил %s не передбачено підтримки побудови списку прав доступу"
+
+#: ../../trunk/src/sudo.c:1129
+#, c-format
+msgid "policy plugin %s does not support the -v option"
+msgstr "у додатку правил %s не передбачено підтримки параметра -v"
+
+#: ../../trunk/src/sudo.c:1140
+#, c-format
+msgid "policy plugin %s does not support the -k/-K options"
+msgstr "у додатку правил %s не передбачено підтримки параметрів -k/-K"
+
+#: ../../trunk/src/sudo_edit.c:108
+#, c-format
+msgid "unable to change uid to root (%u)"
+msgstr "не вдалося змінити значення uid на значення root (%u)"
+
+#: ../../trunk/src/sudo_edit.c:140
+#, c-format
+msgid "plugin error: missing file list for sudoedit"
+msgstr "помилка додатка: не вистачає списку файлів для sudoedit"
+
+#: ../../trunk/src/sudo_edit.c:172 ../../trunk/src/sudo_edit.c:280
+#, c-format
+msgid "%s: not a regular file"
+msgstr "%s: не є звичайним файлом"
+
+#: ../../trunk/src/sudo_edit.c:206 ../../trunk/src/sudo_edit.c:316
+#, c-format
+msgid "%s: short write"
+msgstr "%s: короткий запис"
+
+#: ../../trunk/src/sudo_edit.c:281
+#, c-format
+msgid "%s left unmodified"
+msgstr "%s залишено без змін"
+
+#: ../../trunk/src/sudo_edit.c:294
+#, c-format
+msgid "%s unchanged"
+msgstr "%s не змінено"
+
+#: ../../trunk/src/sudo_edit.c:306 ../../trunk/src/sudo_edit.c:327
+#, c-format
+msgid "unable to write to %s"
+msgstr "не вдалося виконати запис до %s"
+
+#: ../../trunk/src/sudo_edit.c:307 ../../trunk/src/sudo_edit.c:325
+#: ../../trunk/src/sudo_edit.c:328
+#, c-format
+msgid "contents of edit session left in %s"
+msgstr "дані сеансу редагування залишилися у %s"
+
+#: ../../trunk/src/sudo_edit.c:324
+#, c-format
+msgid "unable to read temporary file"
+msgstr "не вдалося виконати читання з файла тимчасових даних"
+
+#: ../../trunk/src/tgetpass.c:95
+#, c-format
+msgid "no tty present and no askpass program specified"
+msgstr "не виявлено tty і не вказано програми askpass"
+
+#: ../../trunk/src/tgetpass.c:104
+#, c-format
+msgid "no askpass program specified, try setting SUDO_ASKPASS"
+msgstr "не вказано програми askpass, спробуйте встановити значення змінної SUDO_ASKPASS"
+
+#: ../../trunk/src/tgetpass.c:234
+#, c-format
+msgid "unable to set gid to %u"
+msgstr "не вдалося встановити gid у значення %u"
+
+#: ../../trunk/src/tgetpass.c:238
+#, c-format
+msgid "unable to set uid to %u"
+msgstr "не вдалося встановити uid у значення %u"
+
+#: ../../trunk/src/tgetpass.c:243
+#, c-format
+msgid "unable to run %s"
+msgstr "не вдалося виконати %s"
+
+#: ../../trunk/src/utmp.c:263
+#, c-format
+msgid "unable to save stdin"
+msgstr "не вдалося зберегти stdin"
+
+#: ../../trunk/src/utmp.c:265
+#, c-format
+msgid "unable to dup2 stdin"
+msgstr "не вдалося виконати dup2 для stdin"
+
+#: ../../trunk/src/utmp.c:268
+#, c-format
+msgid "unable to restore stdin"
+msgstr "не вдалося відновити stdin"
+
+#: ../../trunk/common/aix.c:144
+#, c-format
+msgid "unable to open userdb"
+msgstr "не вдалося відкрити userdb"
+
+#: ../../trunk/common/aix.c:147
+#, c-format
+msgid "unable to switch to registry \"%s\" for %s"
+msgstr "не вдалося перемкнутися на регістр «%s» для %s"
+
+#: ../../trunk/common/aix.c:161
+#, c-format
+msgid "unable to restore registry"
+msgstr "не вдалося відновити регістр"
+
+#: ../../trunk/common/alloc.c:82
+#, c-format
+msgid "internal error, tried to emalloc(0)"
+msgstr "внутрішня помилка, спроба виконання emalloc(0)"
+
+#: ../../trunk/common/alloc.c:99
+#, c-format
+msgid "internal error, tried to emalloc2(0)"
+msgstr "внутрішня помилка, спроба виконання emalloc2(0)"
+
+#: ../../trunk/common/alloc.c:101
+#, c-format
+msgid "internal error, emalloc2() overflow"
+msgstr "внутрішня помилка, переповнення emalloc2()"
+
+#: ../../trunk/common/alloc.c:119
+#, c-format
+msgid "internal error, tried to erealloc(0)"
+msgstr "внутрішня помилка, спроба виконання erealloc(0)"
+
+#: ../../trunk/common/alloc.c:138
+#, c-format
+msgid "internal error, tried to erealloc3(0)"
+msgstr "внутрішня помилка, спроба виконання erealloc3(0)"
+
+#: ../../trunk/common/alloc.c:140
+#, c-format
+msgid "internal error, erealloc3() overflow"
+msgstr "внутрішня помилка, переповнення erealloc3()"
+
+#: ../../trunk/compat/strsignal.c:47
+msgid "Unknown signal"
+msgstr "Невідомий сигнал"
