@@ -163,6 +163,8 @@ nanosleep.lo: $(srcdir)/nanosleep.c $(top_builddir)/config.h \
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/nanosleep.c
 setenv.lo: $(srcdir)/setenv.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/setenv.c
+siglist.lo: siglist.c $(top_builddir)/config.h $(incdir)/missing.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) siglist.c
 snprintf.lo: $(srcdir)/snprintf.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/snprintf.c
 strlcat.lo: $(srcdir)/strlcat.c $(top_builddir)/config.h $(incdir)/missing.h

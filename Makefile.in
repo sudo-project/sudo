@@ -78,7 +78,10 @@ install install-doc: config.status ChangeLog pre-install
 autoconf:
 	autoconf -I m4
 
-depend:
+siglist.c:
+	(cd compat && exec $(MAKE) $@)
+
+depend: siglist.c
 	@if test "$(srcdir)" != "."; then \
 	    echo "make depend only supported in the source directory"; \
 	    exit 1; \
