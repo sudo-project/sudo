@@ -187,6 +187,8 @@ still allow people to get their work done."
 	$timedir/		0700 root:
 	$docdir/
 	$docdir/*
+	$localedir/		optional
+	$localedir/**		optional
 	/etc/pam.d/*		volatile,optional
 %if [rpm,deb]
 	$sudoersdir/sudoers $sudoers_mode $sudoers_uid:$sudoers_gid volatile
