@@ -199,7 +199,7 @@ static void check_input(int, double *);
 static void delay(double);
 static void help(void) __attribute__((__noreturn__));
 static void usage(int);
-static void *open_io_fd(char *pathbuf, int len, const char *suffix);
+static int open_io_fd(char *pathbuf, int len, const char *suffix, union io_fd *fdp);
 static int parse_timing(const char *buf, const char *decimal, int *idx, double *seconds, size_t *nbytes);
 
 #ifdef HAVE_REGCOMP
@@ -321,8 +321,7 @@ main(int argc, char *argv[])
     /* Open files for replay, applying replay filter for the -f flag. */
     for (idx = 0; idx < IOFD_MAX; idx++) {
 	if (ISSET(replay_filter, 1 << idx) || idx == IOFD_TIMING) {
-	    io_fds[idx].v = open_io_fd(path, plen, io_fnames[idx]);
-	    if (io_fds[idx].v == NULL)
+	    if (open_io_fd(path, plen, io_fnames[idx], &io_fds[idx]) == -1)
 		error(1, _("unable to open %s"), path);
 	}
     }
@@ -458,16 +457,18 @@ delay(double secs)
     }
 }
 
-static void *
-open_io_fd(char *path, int len, const char *suffix)
+static int
+open_io_fd(char *path, int len, const char *suffix, union io_fd *fdp)
 {
     path[len] = '\0';
     strlcat(path, suffix, PATH_MAX);
 
 #ifdef HAVE_ZLIB_H
-    return gzopen(path, "r");
+    fdp->g = gzopen(path, "r");
+    return fdp->g ? 0 : -1;
 #else
-    return fopen(path, "r");
+    fdp->f = fopen(path, "r");
+    return fdp->f ? 0 : -1;
 #endif
 }
 
