@@ -1,0 +1,760 @@
+# Finnish messages for sudo.
+# This file is put in the public domain.
+# Copyright © 2011 Free Software Foundation, Inc.
+# This file is distributed under the same license as the sudo package.
+# Jorma Karvonen <karvonen.jorma@gmail.com>, 2011.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sudo 1.8.2-rc1\n"
+"Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
+"POT-Creation-Date: 2011-05-20 15:33-0400\n"
+"PO-Revision-Date: 2011-05-27 10:30+0200\n"
+"Last-Translator: Jorma Karvonen <karvonen.jorma@gmail.com>\n"
+"Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
+"Language: fi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#: ../../trunk/src/error.c:82 ../../trunk/src/error.c:86
+msgid ": "
+msgstr ": "
+
+#: ../../trunk/src/exec.c:125 ../../trunk/src/exec_pty.c:569
+#: ../../trunk/src/exec_pty.c:876 ../../trunk/src/tgetpass.c:224
+#, c-format
+msgid "unable to fork"
+msgstr "ei kyetä kutsumaan fork-kutsua"
+
+#: ../../trunk/src/exec.c:247
+#, c-format
+msgid "unable to create sockets"
+msgstr "ei kyetä luomaan pistokkeita"
+
+#: ../../trunk/src/exec.c:254 ../../trunk/src/exec_pty.c:522
+#: ../../trunk/src/exec_pty.c:530 ../../trunk/src/exec_pty.c:537
+#: ../../trunk/src/exec_pty.c:822 ../../trunk/src/exec_pty.c:873
+#: ../../trunk/src/tgetpass.c:221
+#, c-format
+msgid "unable to create pipe"
+msgstr "ei kyetä luomaan putkea"
+
+#: ../../trunk/src/exec.c:320 ../../trunk/src/exec_pty.c:940
+#: ../../trunk/src/exec_pty.c:1073
+#, c-format
+msgid "select failed"
+msgstr "select-funktio epäonnistui"
+
+#: ../../trunk/src/exec.c:388
+#, c-format
+msgid "unable to restore tty label"
+msgstr "ei kyetä palauttamaan tty-nimiötä"
+
+#: ../../trunk/src/exec_pty.c:136
+#, c-format
+msgid "unable to allocate pty"
+msgstr "ei kyetä varaamaan pty:tä"
+
+#: ../../trunk/src/exec_pty.c:562
+#, c-format
+msgid "unable to set terminal to raw mode"
+msgstr "ei kyetä asettamaan päätettä raakatilaan"
+
+#  Istunnolla voi olla ohjaava tty. Istunnon yksi prosessiryhmä voi olla edustaprosessiryhmä ja toimia siten ohjaavana tty:nä, joka vastaanottaa tty-syötteen ja -signaalit.
+#: ../../trunk/src/exec_pty.c:854
+#, c-format
+msgid "unable to set controlling tty"
+msgstr "ei kyetä asettamaan ohjaavaa tty:tä"
+
+#: ../../trunk/src/exec_pty.c:948
+#, c-format
+msgid "error reading from signal pipe"
+msgstr "virhe luettaessa signaaliputkesta"
+
+#: ../../trunk/src/exec_pty.c:967
+#, c-format
+msgid "error reading from pipe"
+msgstr "virhe luettaessa putkesta"
+
+#: ../../trunk/src/exec_pty.c:983
+#, c-format
+msgid "error reading from socketpair"
+msgstr "virhe luettaessa pistokeparista"
+
+#: ../../trunk/src/exec_pty.c:987
+#, c-format
+msgid "unexpected reply type on backchannel: %d"
+msgstr "odottamaton vastaustyyppi paluukanavalla: %d"
+
+#: ../../trunk/src/load_plugins.c:154
+#, c-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: ../../trunk/src/load_plugins.c:160
+#, c-format
+msgid "%s%s: %s"
+msgstr "%s%s: %s"
+
+#  ensimmäinen parametri on path
+#: ../../trunk/src/load_plugins.c:170
+#, c-format
+msgid "%s must be owned by uid %d"
+msgstr "polun %s omistajan on oltava uid %d"
+
+#  parametri on path
+#: ../../trunk/src/load_plugins.c:174
+#, c-format
+msgid "%s must be only be writable by owner"
+msgstr "polun %s on oltava vain omistajan kirjoitettava"
+
+#: ../../trunk/src/load_plugins.c:181
+#, c-format
+msgid "unable to dlopen %s: %s"
+msgstr "lisäosan avaaminen epäonnistui funktiolla dlopen %s: %s"
+
+#: ../../trunk/src/load_plugins.c:186
+#, c-format
+msgid "%s: unable to find symbol %s"
+msgstr "%s: ei kyetä löytämään symbolia %s"
+
+#: ../../trunk/src/load_plugins.c:192
+#, c-format
+msgid "%s: unknown policy type %d"
+msgstr "%s: tuntematon menettelytapatyyppi %d"
+
+#: ../../trunk/src/load_plugins.c:196
+#, c-format
+msgid "%s: incompatible policy major version %d, expected %d"
+msgstr "%s: yhteensopimaton menettelytavan major-versio %d, odotettiin %d"
+
+#: ../../trunk/src/load_plugins.c:203
+#, c-format
+msgid "%s: only a single policy plugin may be loaded"
+msgstr "%s: vain yksi menettelytapalisäosa voidaan ladata"
+
+#: ../../trunk/src/load_plugins.c:221
+#, c-format
+msgid "%s: at least one policy plugin must be specified"
+msgstr "%s: vähintään yksi menettelytapalisäosa on määriteltävä"
+
+#: ../../trunk/src/load_plugins.c:226
+#, c-format
+msgid "policy plugin %s does not include a check_policy method"
+msgstr "menettelytapalisäosa %s ei sisällä check_policy-metodia"
+
+#: ../../trunk/src/net_ifs.c:155 ../../trunk/src/net_ifs.c:164
+#: ../../trunk/src/net_ifs.c:176 ../../trunk/src/net_ifs.c:185
+#: ../../trunk/src/net_ifs.c:295 ../../trunk/src/net_ifs.c:319
+#, c-format
+msgid "load_interfaces: overflow detected"
+msgstr "load_interfaces: ylivuoto havaittu"
+
+#: ../../trunk/src/net_ifs.c:224
+#, c-format
+msgid "unable to open socket"
+msgstr "ei kyetä avaamaan pistoketta"
+
+#: ../../trunk/src/parse_args.c:180
+#, c-format
+msgid "the argument to -C must be a number greater than or equal to 3"
+msgstr "valitsimen -C argumentin on oltava vähintään 3"
+
+#: ../../trunk/src/parse_args.c:192
+#, c-format
+msgid "the argument to -D must be between 1 and 9 inclusive"
+msgstr "valitsimen -D argumentin on oltava alueella 1 - 9"
+
+#: ../../trunk/src/parse_args.c:273
+#, c-format
+msgid "unknown user: %s"
+msgstr "tuntematon käyttäjä: %s"
+
+#: ../../trunk/src/parse_args.c:332
+#, c-format
+msgid "you may not specify both the `-i' and `-s' options"
+msgstr "et voi määritellä sekä valitsinta ”-i” että valitsinta ”-s”"
+
+#: ../../trunk/src/parse_args.c:336
+#, c-format
+msgid "you may not specify both the `-i' and `-E' options"
+msgstr "et voi määritellä sekä valitsinta ”-i” että valitsinta ”-E”"
+
+#: ../../trunk/src/parse_args.c:346
+#, c-format
+msgid "the `-E' option is not valid in edit mode"
+msgstr "valitsin ”-E” ei ole kelvollinen muokkaustilassa"
+
+#: ../../trunk/src/parse_args.c:348
+#, c-format
+msgid "you may not specify environment variables in edit mode"
+msgstr "ei voi määritellä ympäristömuuttujia muokkaustilassa"
+
+#: ../../trunk/src/parse_args.c:356
+#, c-format
+msgid "the `-U' option may only be used with the `-l' option"
+msgstr "valitsinta ”-U” voidaan käyttää vain valitsimen ”-l” kanssa"
+
+#: ../../trunk/src/parse_args.c:360
+#, c-format
+msgid "the `-A' and `-S' options may not be used together"
+msgstr "valitsimia ”-A” ja ”-S” ei voi käyttää yhdessä"
+
+#: ../../trunk/src/parse_args.c:418 ../../trunk/src/sudo.c:398
+#: ../../trunk/src/sudo.c:418 ../../trunk/src/sudo.c:426
+#: ../../trunk/src/sudo.c:436 ../../trunk/common/alloc.c:85
+#: ../../trunk/common/alloc.c:105 ../../trunk/common/alloc.c:123
+#: ../../trunk/common/alloc.c:145 ../../trunk/common/alloc.c:203
+#: ../../trunk/common/alloc.c:217
+#, c-format
+msgid "unable to allocate memory"
+msgstr "ei kyetä varaamaan muistia"
+
+#: ../../trunk/src/parse_args.c:431
+#, c-format
+msgid "sudoedit is not supported on this platform"
+msgstr "sudoedit ei ole tuettu tällä alustalla"
+
+#: ../../trunk/src/parse_args.c:502
+#, c-format
+msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
+msgstr "Vain yksi valitsimista -e, -h, -i, -K, -l, -s, -v tai -V voidaan määritellä"
+
+#: ../../trunk/src/parse_args.c:515
+#, c-format
+msgid ""
+"%s - edit files as another user\n"
+"\n"
+msgstr ""
+"%s - muokkaa tiedostoja toisena käyttäjänä\n"
+"\n"
+
+#: ../../trunk/src/parse_args.c:517
+#, c-format
+msgid ""
+"%s - execute a command as another user\n"
+"\n"
+msgstr ""
+"%s - suorita komentoja toisena käyttäjänä\n"
+"\n"
+
+#: ../../trunk/src/parse_args.c:522
+#, c-format
+msgid ""
+"\n"
+"Options:\n"
+msgstr ""
+"\n"
+"Valitsimet:\n"
+
+#: ../../trunk/src/parse_args.c:525
+msgid "use helper program for password prompting\n"
+msgstr "käytä apuohjelmaa salasanakyselyyn\n"
+
+#: ../../trunk/src/parse_args.c:528
+msgid "use specified BSD authentication type\n"
+msgstr "käytä määriteltyä BSD-todennustyyppiä\n"
+
+#: ../../trunk/src/parse_args.c:530
+msgid "run command in the background\n"
+msgstr "suorita komento taustalla\n"
+
+#: ../../trunk/src/parse_args.c:532
+msgid "close all file descriptors >= fd\n"
+msgstr "sulje kaikki tiedostokuvaajat >= fd\n"
+
+#: ../../trunk/src/parse_args.c:535
+msgid "run command with specified login class\n"
+msgstr "suorita komento määritellyllä kirjautumisluokalla\n"
+
+#: ../../trunk/src/parse_args.c:538
+msgid "preserve user environment when executing command\n"
+msgstr "säilytä käyttäjäympäristö komentoa suoritettaessa\n"
+
+#: ../../trunk/src/parse_args.c:540
+msgid "edit files instead of running a command\n"
+msgstr "muokkaa tiedostoja komennon suorittamisen sijasta\n"
+
+#  tämä viittaa runas_group-määritelyyn
+#: ../../trunk/src/parse_args.c:542
+msgid "execute command as the specified group\n"
+msgstr "suorita komento määriteltynä ryhmänä\n"
+
+#: ../../trunk/src/parse_args.c:544
+msgid "set HOME variable to target user's home dir.\n"
+msgstr "aseta HOME-muuttuja osoittamaan kohdekäyttäjän kotihakemistoon.\n"
+
+#: ../../trunk/src/parse_args.c:546
+msgid "display help message and exit\n"
+msgstr "näytä opasteviesti ja poistu\n"
+
+#: ../../trunk/src/parse_args.c:548
+msgid "run a login shell as target user\n"
+msgstr "suorita kirjautumiskomentoikkuna kohdekäyttäjänä\n"
+
+#: ../../trunk/src/parse_args.c:550
+msgid "remove timestamp file completely\n"
+msgstr "poista aikaleimatiedosto kokonaan\n"
+
+#: ../../trunk/src/parse_args.c:552
+msgid "invalidate timestamp file\n"
+msgstr "mitätöi aikaleimatiedosto\n"
+
+#: ../../trunk/src/parse_args.c:554
+msgid "list user's available commands\n"
+msgstr "luettele käyttäjän käytettävissä olevat komennot\n"
+
+#: ../../trunk/src/parse_args.c:556
+msgid "non-interactive mode, will not prompt user\n"
+msgstr "ei-interaktiivinen tila, ei kysy käyttäjältä\n"
+
+#: ../../trunk/src/parse_args.c:558
+msgid "preserve group vector instead of setting to target's\n"
+msgstr "säilytä ryhmävektori kohteen vektorin asettamisen sijasta\n"
+
+#: ../../trunk/src/parse_args.c:560
+msgid "use specified password prompt\n"
+msgstr "käytä määriteltyä salasanakehotetta\n"
+
+#: ../../trunk/src/parse_args.c:563 ../../trunk/src/parse_args.c:571
+msgid "create SELinux security context with specified role\n"
+msgstr "luo SELinux-turva-asiayhteys määritellyllä roolilla\n"
+
+#: ../../trunk/src/parse_args.c:566
+msgid "read password from standard input\n"
+msgstr "lue salasana vakiosyötteestä\n"
+
+#: ../../trunk/src/parse_args.c:568
+msgid "run a shell as target user\n"
+msgstr "suorita komentotulkki kohdekäyttäjänä\n"
+
+#: ../../trunk/src/parse_args.c:574
+msgid "when listing, list specified user's privileges\n"
+msgstr "luetteloitaessa luettele määritellyn käyttäjän käyttöoikeudet\n"
+
+#: ../../trunk/src/parse_args.c:576
+msgid "run command (or edit file) as specified user\n"
+msgstr "suorita komento (tai muokkaa tiedostoa) määriteltynä käyttäjänä\n"
+
+#: ../../trunk/src/parse_args.c:578
+msgid "display version information and exit\n"
+msgstr "näytä versiotiedot ja poistu\n"
+
+#: ../../trunk/src/parse_args.c:580
+msgid "update user's timestamp without running a command\n"
+msgstr "päivitä käyttäjän aikaleima suorittamatta komentoa\n"
+
+#: ../../trunk/src/parse_args.c:582
+msgid "stop processing command line arguments\n"
+msgstr "lopeta komentoriviargumenttien käsittely\n"
+
+#: ../../trunk/src/selinux.c:75
+#, c-format
+msgid "unable to open audit system"
+msgstr "ei kyetä avaamaan audit-järjestelmää"
+
+#: ../../trunk/src/selinux.c:85
+#, c-format
+msgid "unable to send audit message"
+msgstr "ei kyetä lähettämään audit-viestiä"
+
+#: ../../trunk/src/selinux.c:112
+#, c-format
+msgid "unable to fgetfilecon %s"
+msgstr "ei kyetä kutsumaan funktiota fgetfilecon %s"
+
+#: ../../trunk/src/selinux.c:117
+#, c-format
+msgid "%s changed labels"
+msgstr "%s muutti nimiöitä"
+
+#: ../../trunk/src/selinux.c:122
+#, c-format
+msgid "unable to restore context for %s"
+msgstr "ei kyetä palauttamaan asiayhteyttä kohteelle %s"
+
+#: ../../trunk/src/selinux.c:161
+#, c-format
+msgid "unable to open %s, not relabeling tty"
+msgstr "ei kyetä avaamaan kohdetta %s, ei nimiöidä uudelleen tty:tä"
+
+#: ../../trunk/src/selinux.c:170
+#, c-format
+msgid "unable to get current tty context, not relabeling tty"
+msgstr "ei kyetä hakemaan nykyistä tty-asiayhteyttä, ei nimiöidä uudelleen tty:tä"
+
+#: ../../trunk/src/selinux.c:177
+#, c-format
+msgid "unable to get new tty context, not relabeling tty"
+msgstr "ei kyetä hakemaan uutta tty-asiayhteyttä, ei nimiöidä uudelleen tty:tä"
+
+#: ../../trunk/src/selinux.c:184
+#, c-format
+msgid "unable to set new tty context"
+msgstr "ei kyetä asettamaan uutta tty-asiayhteyttä"
+
+#: ../../trunk/src/selinux.c:194 ../../trunk/src/selinux.c:207
+#: ../../trunk/src/sudo.c:330
+#, c-format
+msgid "unable to open %s"
+msgstr "ei kyetä avaamaan kohdetta %s"
+
+#: ../../trunk/src/selinux.c:249
+#, c-format
+msgid "you must specify a role for type %s"
+msgstr "tyypille %s on määriteltävä rooli"
+
+#: ../../trunk/src/selinux.c:255
+#, c-format
+msgid "unable to get default type for role %s"
+msgstr "roolille %s ei kyetä hakemaan oletustyyppiä"
+
+#: ../../trunk/src/selinux.c:273
+#, c-format
+msgid "failed to set new role %s"
+msgstr "uuden roolin %s asettaminen epäonnistui"
+
+#: ../../trunk/src/selinux.c:277
+#, c-format
+msgid "failed to set new type %s"
+msgstr "uuden tyypin %s asettaminen epäonnistui"
+
+#: ../../trunk/src/selinux.c:286
+#, c-format
+msgid "%s is not a valid context"
+msgstr "%s ei ole kelvollinen asiayhteys"
+
+#: ../../trunk/src/selinux.c:320
+#, c-format
+msgid "failed to get old_context"
+msgstr "kohteen old_context hakeminen epäonnistui"
+
+#: ../../trunk/src/selinux.c:326
+#, c-format
+msgid "unable to determine enforcing mode."
+msgstr "ei kyetä määrittelemään vahvistustilaa."
+
+#: ../../trunk/src/selinux.c:338
+#, c-format
+msgid "unable to setup tty context for %s"
+msgstr "ei kyetä asettamaan tty-asiayhteydeksi %s"
+
+#: ../../trunk/src/selinux.c:367
+#, c-format
+msgid "unable to set exec context to %s"
+msgstr "ei kyetä asettamaan suoritusasiayhteydeksi %s"
+
+#: ../../trunk/src/selinux.c:374
+#, c-format
+msgid "unable to set key creation context to %s"
+msgstr "ei kyetä asettamaan avaimenluontiasiayhteydeksi %s"
+
+#: ../../trunk/src/sesh.c:48
+msgid "requires at least one argument"
+msgstr "vaatii vähintään yhden argumentin"
+
+#: ../../trunk/src/sesh.c:64
+#, c-format
+msgid "unable to execute %s"
+msgstr "ei kyetä suorittamaan kohdetta %s"
+
+#: ../../trunk/src/sudo.c:192
+#, c-format
+msgid "must be setuid root"
+msgstr "on oltava setuid root"
+
+#: ../../trunk/src/sudo.c:210
+#, c-format
+msgid "Sudo version %s\n"
+msgstr "Sudo-versio %s\n"
+
+#: ../../trunk/src/sudo.c:212
+#, c-format
+msgid "Configure options: %s\n"
+msgstr "Asetusvalitsimet: %s\n"
+
+#: ../../trunk/src/sudo.c:217
+#, c-format
+msgid "fatal error, unable to load plugins"
+msgstr "kohtalokas virhe, ei kyetä lataamaan lisäosia"
+
+#: ../../trunk/src/sudo.c:225
+#, c-format
+msgid "unable to initialize policy plugin"
+msgstr "ei kyetä alustamaan menettelytapalisäosaa"
+
+#: ../../trunk/src/sudo.c:280
+#, c-format
+msgid "error initializing I/O plugin %s"
+msgstr "virhe alustettaessa siirräntälisäosaa %s"
+
+#: ../../trunk/src/sudo.c:307
+#, c-format
+msgid "unexpected sudo mode 0x%x"
+msgstr "odottamaton sudo-tila 0x%x"
+
+#: ../../trunk/src/sudo.c:356
+#, c-format
+msgid "unable to get group vector"
+msgstr "ei kyetä hakemaan ryhmävektoria"
+
+#: ../../trunk/src/sudo.c:394
+#, c-format
+msgid "unknown uid %u: who are you?"
+msgstr "tuntematon uid-käyttäjätunniste %u: kuka olet?"
+
+#: ../../trunk/src/sudo.c:734
+#, c-format
+msgid "resource control limit has been reached"
+msgstr "resurssivalvontaraja saavutettu"
+
+#: ../../trunk/src/sudo.c:737
+#, c-format
+msgid "user \"%s\" is not a member of project \"%s\""
+msgstr "käyttäjä ”%s” ei ole hankkeen ”%s” jäsen"
+
+#: ../../trunk/src/sudo.c:741
+#, c-format
+msgid "the invoking task is final"
+msgstr "kutsuttu tehtävä on final-tyyppinen"
+
+#: ../../trunk/src/sudo.c:744
+#, c-format
+msgid "could not join project \"%s\""
+msgstr "ei voitu liittyä hankkeeseen ”%s”"
+
+#: ../../trunk/src/sudo.c:749
+#, c-format
+msgid "no resource pool accepting default bindings exists for project \"%s\""
+msgstr "hankkeelle ”%s” ei ole oletusyhteydet hyväksyvää resurssivarantoa"
+
+#: ../../trunk/src/sudo.c:753
+#, c-format
+msgid "specified resource pool does not exist for project \"%s\""
+msgstr "hankkeelle ”%s” ei ole määriteltyä resurssivarantoa"
+
+#: ../../trunk/src/sudo.c:757
+#, c-format
+msgid "could not bind to default resource pool for project \"%s\""
+msgstr "hankkeelle ”%s” ei voitu sitoa oletusresurssivarantoa"
+
+#: ../../trunk/src/sudo.c:763
+#, c-format
+msgid "setproject failed for project \"%s\""
+msgstr "setproject hankkeelle ”%s” epäonnistui"
+
+#: ../../trunk/src/sudo.c:765
+#, c-format
+msgid "warning, resource control assignment failed for project \"%s\""
+msgstr "varoitus, hankkeen ”%s” resurssiohjausosoitus epäonnistui"
+
+#  Solaris privileges, remove PRIV_PROC_EXEC post-execve.
+#: ../../trunk/src/sudo.c:791
+#, c-format
+msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
+msgstr "ei kyetä poistamaan PRIV_PROC_EXEC kohteesta PRIV_LIMIT"
+
+#: ../../trunk/src/sudo.c:895
+#, c-format
+msgid "unknown login class %s"
+msgstr "tuntematon kirjautumisluokka %s"
+
+#: ../../trunk/src/sudo.c:902 ../../trunk/src/sudo.c:905
+#, c-format
+msgid "unable to set user context"
+msgstr "ei kyetä asettamaan käyttäjäasiayhteyttä"
+
+#  tämän ymmärrän niin, että käyttäjärjestelmäydin luo tiedoston ja antaa tälle tavallaan tilapäisen effective gid-tunnisteen, joka vaihdetaan suorittamisen yhteydessä prosessin omistajan suoritettavaksi ryhmätunnisteeksi.
+#: ../../trunk/src/sudo.c:916
+#, c-format
+msgid "unable to set effective gid to runas gid %u"
+msgstr "ei kyetä asettamaan voimassaolevaa gid-ryhmätunnistetta suoritettavaksi gid-ryhmätunnisteeksi %u"
+
+#: ../../trunk/src/sudo.c:921
+#, c-format
+msgid "unable to set gid to runas gid %u"
+msgstr "ei kyetä asettamaan gid-ryhmätunnistetta suoritettavaksi gid-ryhmätunnisteeksi %u"
+
+#: ../../trunk/src/sudo.c:929 ../../trunk/src/sudo.c:935
+#, c-format
+msgid "unable to set supplementary group IDs"
+msgstr "ei kyetä asettamaan lisäryhmätunnisteita"
+
+#: ../../trunk/src/sudo.c:943
+#, c-format
+msgid "unable to set process priority"
+msgstr "ei kyetä asettamaan prosessiprioriteettia"
+
+#: ../../trunk/src/sudo.c:951
+#, c-format
+msgid "unable to change root to %s"
+msgstr "ei kyetä vaihtamaan root-käyttäjää käyttäjäksi %s"
+
+#: ../../trunk/src/sudo.c:961 ../../trunk/src/sudo.c:967
+#: ../../trunk/src/sudo.c:973
+#, c-format
+msgid "unable to change to runas uid (%u, %u)"
+msgstr "ei kyetä vaihtamaan suoritettavaksi uid-käyttäjätunnisteeksi (%u, %u)"
+
+#  parametrina on CWD- eli Change Working Directory- komennolla palautettava hakemisto
+#: ../../trunk/src/sudo.c:987
+#, c-format
+msgid "unable to change directory to %s"
+msgstr "ei kyetä vaihtamaan hakemistoksi %s"
+
+#: ../../trunk/src/sudo.c:1078
+#, c-format
+msgid "unexpected child termination condition: %d"
+msgstr "lapsiprosessin odottamaton päättymisehto: %d"
+
+#: ../../trunk/src/sudo.c:1118
+#, c-format
+msgid "policy plugin %s does not support listing privileges"
+msgstr "menettelytapalisäosa %s ei tue luettelointikäyttöoikeuksia"
+
+#: ../../trunk/src/sudo.c:1129
+#, c-format
+msgid "policy plugin %s does not support the -v option"
+msgstr "menettelytapalisäosa %s ei tue valitsinta -v"
+
+#: ../../trunk/src/sudo.c:1140
+#, c-format
+msgid "policy plugin %s does not support the -k/-K options"
+msgstr "menettelytapalisäosa %s ei tue valitsimia -k/-K"
+
+#: ../../trunk/src/sudo_edit.c:108
+#, c-format
+msgid "unable to change uid to root (%u)"
+msgstr "ei kyetä vaihtamaan uid-käyttäjätunnistetta root-tunnisteeksi (%u)"
+
+#: ../../trunk/src/sudo_edit.c:140
+#, c-format
+msgid "plugin error: missing file list for sudoedit"
+msgstr "lisäosavirhe: puuttuu sudoedit-tiedostoluettelo"
+
+#: ../../trunk/src/sudo_edit.c:172 ../../trunk/src/sudo_edit.c:280
+#, c-format
+msgid "%s: not a regular file"
+msgstr "%s: ei ole tavallinen tiedosto"
+
+#: ../../trunk/src/sudo_edit.c:206 ../../trunk/src/sudo_edit.c:316
+#, c-format
+msgid "%s: short write"
+msgstr "%s: lyhyt kirjoitus"
+
+#: ../../trunk/src/sudo_edit.c:281
+#, c-format
+msgid "%s left unmodified"
+msgstr "%s jätetty muokkaamattomaksi"
+
+#: ../../trunk/src/sudo_edit.c:294
+#, c-format
+msgid "%s unchanged"
+msgstr "%s muuttamaton"
+
+#: ../../trunk/src/sudo_edit.c:306 ../../trunk/src/sudo_edit.c:327
+#, c-format
+msgid "unable to write to %s"
+msgstr "ei kyetä kirjoittamaan kohteeseen %s"
+
+#: ../../trunk/src/sudo_edit.c:307 ../../trunk/src/sudo_edit.c:325
+#: ../../trunk/src/sudo_edit.c:328
+#, c-format
+msgid "contents of edit session left in %s"
+msgstr "muokkausistunnon sisältö jätetty kohteessa %s"
+
+#: ../../trunk/src/sudo_edit.c:324
+#, c-format
+msgid "unable to read temporary file"
+msgstr "ei kyetä lukemaan tilapäistä tiedostoa"
+
+#: ../../trunk/src/tgetpass.c:95
+#, c-format
+msgid "no tty present and no askpass program specified"
+msgstr "ei tty:tä käytettävissä eikä salasanan kyselyohjelmaa määriteltynä"
+
+#: ../../trunk/src/tgetpass.c:104
+#, c-format
+msgid "no askpass program specified, try setting SUDO_ASKPASS"
+msgstr "salasanan kyselyohjelma ei ole määritelty, yritä asettaa SUDO_ASKPASS"
+
+#: ../../trunk/src/tgetpass.c:234
+#, c-format
+msgid "unable to set gid to %u"
+msgstr "ei kyetä asettamaan gid-ryhmätunnisteeksi %u"
+
+#: ../../trunk/src/tgetpass.c:238
+#, c-format
+msgid "unable to set uid to %u"
+msgstr "ei kyetä asettamaan uid-käyttäjätunnisteeksi %u"
+
+#: ../../trunk/src/tgetpass.c:243
+#, c-format
+msgid "unable to run %s"
+msgstr "ei kyetä suorittamaan salasanakyselyä %s"
+
+#: ../../trunk/src/utmp.c:263
+#, c-format
+msgid "unable to save stdin"
+msgstr "ei kyetä tallentamaan vakiosyötettä"
+
+#: ../../trunk/src/utmp.c:265
+#, c-format
+msgid "unable to dup2 stdin"
+msgstr "ei kyetä kutsumaan funktiota dup2 vakiosyötteellä"
+
+#: ../../trunk/src/utmp.c:268
+#, c-format
+msgid "unable to restore stdin"
+msgstr "ei kyetä palauttamaan vakiosyötettä"
+
+#: ../../trunk/common/aix.c:144
+#, c-format
+msgid "unable to open userdb"
+msgstr "ei kyetä avaamaan userdb-käyttäjätietokantaa"
+
+#: ../../trunk/common/aix.c:147
+#, c-format
+msgid "unable to switch to registry \"%s\" for %s"
+msgstr "ei kyetä vaihtamaan registeriä ”%s” käyttäjälle %s"
+
+#: ../../trunk/common/aix.c:161
+#, c-format
+msgid "unable to restore registry"
+msgstr "ei kyetä palauttamaan rekisteriä"
+
+#: ../../trunk/common/alloc.c:82
+#, c-format
+msgid "internal error, tried to emalloc(0)"
+msgstr "sisäinen virhe, yritettiin suorittaa emalloc(0)"
+
+#: ../../trunk/common/alloc.c:99
+#, c-format
+msgid "internal error, tried to emalloc2(0)"
+msgstr "sisäinen virhe, yritettiin suorittaa emalloc2(0)"
+
+#: ../../trunk/common/alloc.c:101
+#, c-format
+msgid "internal error, emalloc2() overflow"
+msgstr "sisäinen virhe, emalloc2() -ylivuoto"
+
+#: ../../trunk/common/alloc.c:119
+#, c-format
+msgid "internal error, tried to erealloc(0)"
+msgstr "sisäinen virhe, yritettiin suorittaa erealloc(0)"
+
+#: ../../trunk/common/alloc.c:138
+#, c-format
+msgid "internal error, tried to erealloc3(0)"
+msgstr "sisäinen virhe, yritettiin suorittaa erealloc3(0)"
+
+#: ../../trunk/common/alloc.c:140
+#, c-format
+msgid "internal error, erealloc3() overflow"
+msgstr "sisäinen virhe, erealloc3() -ylivuoto"
+
+#: ../../trunk/compat/strsignal.c:47
+msgid "Unknown signal"
+msgstr "Tuntematon signaali"
