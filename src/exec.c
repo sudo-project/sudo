@@ -216,7 +216,9 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
 		cstat->val = errno;
 		return -1;
 	    case 0:
-		/* child continues */   
+		/* child continues in a new session in a different pty */
+		SET(details->flags, CD_USE_PTY);
+		(void)setsid();
 		break;
 	    default:
 		/* parent exits */
@@ -231,12 +233,10 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
      */
     if (!tq_empty(&io_plugins) || ISSET(details->flags, CD_USE_PTY)) {
 	log_io = TRUE;
-	if (!ISSET(details->flags, CD_BACKGROUND)) {
-	    if (ISSET(details->flags, CD_SET_UTMP))
-		utmp_user = details->utmp_user ? details->utmp_user : user_details.username;
-	    sudo_debug(8, "allocate pty for I/O logging");
-	    pty_setup(details->euid, user_details.tty, utmp_user);
-	}
+	if (ISSET(details->flags, CD_SET_UTMP))
+	    utmp_user = details->utmp_user ? details->utmp_user : user_details.username;
+	sudo_debug(8, "allocate pty for I/O logging");
+	pty_setup(details->euid, user_details.tty, utmp_user);
     }
 
     /*
