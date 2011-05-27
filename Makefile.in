@@ -120,6 +120,10 @@ libtool: $(LIBTOOL_DEPS)
 Makefile: $(srcdir)/Makefile.in
 	./config.status --file Makefile
 
+sync-po:
+	rsync -Lrtvz  translationproject.org::tp/latest/sudo/ src/po/
+	rsync -Lrtvz  translationproject.org::tp/latest/sudoers/ plugins/sudoers/po/
+
 dist: ChangeLog $(srcdir)/MANIFEST
 	pax -w -x ustar -s '/^/$(PACKAGE_TARNAME)-$(VERSION)\//' \
 	    -f ../$(PACKAGE_TARNAME)-$(VERSION).tar \
