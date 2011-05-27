@@ -16772,7 +16772,7 @@ done
 # First check that it links w/o additional libs, then try with -lintl.
 if test "$enable_nls" = "yes"; then
     # List of translations
-    LINGUAS="uk"
+    LINGUAS="uk zh_CN"
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettext" >&5
 $as_echo_n "checking for gettext... " >&6; }
     if test "${sudo_cv_gettext+set}" = set; then :
