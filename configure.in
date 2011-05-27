@@ -2194,7 +2194,7 @@ AC_CHECK_FUNCS(getprogname, , [
 # First check that it links w/o additional libs, then try with -lintl.
 if test "$enable_nls" = "yes"; then
     # List of translations
-    LINGUAS="uk"
+    LINGUAS="uk zh_CN"
     AC_MSG_CHECKING([for gettext])
     AC_CACHE_VAL(sudo_cv_gettext, [
     AC_LINK_IFELSE(

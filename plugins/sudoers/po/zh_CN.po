@@ -1,0 +1,1786 @@
+# Chinese simplified translation for sudoers.
+# This file is put in the public domain.
+# Yinghua Wang <wantinghard@gmail.com>, 2011.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sudoers 1.8.2-rc1\n"
+"Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
+"POT-Creation-Date: 2011-05-20 15:33-0400\n"
+"PO-Revision-Date: 2011-05-27 16:10+0800\n"
+"Last-Translator: Wylmer Wang <wantinghard@gmail.com>\n"
+"Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: ../../../trunk/plugins/sudoers/alias.c:117
+#, c-format
+msgid "Alias `%s' already defined"
+msgstr "别名“%s”已定义"
+
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:58
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:61
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:109
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:113
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:163
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:167
+msgid "getaudit: failed"
+msgstr "getaudit：失败"
+
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:87
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:148
+msgid "Could not determine audit condition"
+msgstr "无法确定审核条件"
+
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:98
+msgid "getauid failed"
+msgstr "getauid 失败"
+
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:100
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:157
+msgid "au_open: failed"
+msgstr "au_open：失败"
+
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:115
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:169
+msgid "au_to_subject: failed"
+msgstr "au_to_subject：失败"
+
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:119
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:173
+msgid "au_to_exec_args: failed"
+msgstr "au_to_exec_args：失败"
+
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:123
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:182
+msgid "au_to_return32: failed"
+msgstr "au_to_return32：失败"
+
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:126
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:185
+msgid "unable to commit audit record"
+msgstr "无法提交审核记录"
+
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:155
+msgid "getauid: failed"
+msgstr "getauid：失败"
+
+#: ../../../trunk/plugins/sudoers/bsm_audit.c:178
+msgid "au_to_text: failed"
+msgstr "au_to_text：失败"
+
+#: ../../../trunk/plugins/sudoers/check.c:141
+#, c-format
+msgid "sorry, a password is required to run %s"
+msgstr "抱歉，执行 %s 需要密码"
+
+#: ../../../trunk/plugins/sudoers/check.c:225
+#: ../../../trunk/plugins/sudoers/iolog.c:169
+#: ../../../trunk/plugins/sudoers/sudoers.c:939
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:326
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:335
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:674
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:766
+#: ../../../trunk/plugins/sudoers/visudo.c:702
+#, c-format
+msgid "unable to open %s"
+msgstr "无法打开 %s"
+
+#: ../../../trunk/plugins/sudoers/check.c:229
+#: ../../../trunk/plugins/sudoers/iolog.c:199
+#, c-format
+msgid "unable to write to %s"
+msgstr "无法写入 %s"
+
+#: ../../../trunk/plugins/sudoers/check.c:237
+#: ../../../trunk/plugins/sudoers/check.c:475
+#: ../../../trunk/plugins/sudoers/check.c:525
+#: ../../../trunk/plugins/sudoers/iolog.c:122
+#: ../../../trunk/plugins/sudoers/iolog.c:153
+#, c-format
+msgid "unable to mkdir %s"
+msgstr "无法创建目录 %s"
+
+#: ../../../trunk/plugins/sudoers/check.c:370
+#, c-format
+msgid "internal error, expand_prompt() overflow"
+msgstr "内部错误，expand_prompt() 溢出"
+
+#: ../../../trunk/plugins/sudoers/check.c:426
+#, c-format
+msgid "timestamp path too long: %s"
+msgstr "时间戳路径过长：%s"
+
+#: ../../../trunk/plugins/sudoers/check.c:454
+#: ../../../trunk/plugins/sudoers/check.c:498
+#: ../../../trunk/plugins/sudoers/iolog.c:155
+#, c-format
+msgid "%s exists but is not a directory (0%o)"
+msgstr "%s 存在，但不是目录(0%o)"
+
+#: ../../../trunk/plugins/sudoers/check.c:457
+#: ../../../trunk/plugins/sudoers/check.c:501
+#: ../../../trunk/plugins/sudoers/check.c:546
+#, c-format
+msgid "%s owned by uid %u, should be uid %u"
+msgstr "%s 属于用户 ID %u，应为用户 ID %u"
+
+#: ../../../trunk/plugins/sudoers/check.c:462
+#: ../../../trunk/plugins/sudoers/check.c:506
+#, c-format
+msgid "%s writable by non-owner (0%o), should be mode 0700"
+msgstr "%s 对非所有者可写(0%o)，模式应该为 0700"
+
+#: ../../../trunk/plugins/sudoers/check.c:470
+#: ../../../trunk/plugins/sudoers/check.c:514
+#: ../../../trunk/plugins/sudoers/check.c:582
+#: ../../../trunk/plugins/sudoers/sudoers.c:925
+#: ../../../trunk/plugins/sudoers/visudo.c:286
+#: ../../../trunk/plugins/sudoers/visudo.c:502
+#, c-format
+msgid "unable to stat %s"
+msgstr "无法 stat %s"
+
+#: ../../../trunk/plugins/sudoers/check.c:540
+#, c-format
+msgid "%s exists but is not a regular file (0%o)"
+msgstr "%s 存在，但不是常规文件(0%o)"
+
+#: ../../../trunk/plugins/sudoers/check.c:552
+#, c-format
+msgid "%s writable by non-owner (0%o), should be mode 0600"
+msgstr "%s 对非所有者可写(0%o)，模式应该为 0600"
+
+#: ../../../trunk/plugins/sudoers/check.c:606
+#, c-format
+msgid "timestamp too far in the future: %20.20s"
+msgstr "时间戳太超前：%20.20s"
+
+#: ../../../trunk/plugins/sudoers/check.c:652
+#, c-format
+msgid "unable to remove %s (%s), will reset to the epoch"
+msgstr "无法移除 %s (%s)，将重设为戳记"
+
+#: ../../../trunk/plugins/sudoers/check.c:659
+#, c-format
+msgid "unable to reset %s to the epoch"
+msgstr "无法将 %s 重设为戳记"
+
+#: ../../../trunk/plugins/sudoers/check.c:713
+#: ../../../trunk/plugins/sudoers/check.c:719
+#, c-format
+msgid "unknown uid: %u"
+msgstr "未知的用户 ID：%u"
+
+#: ../../../trunk/plugins/sudoers/check.c:716
+#: ../../../trunk/plugins/sudoers/sudoers.c:736
+#: ../../../trunk/plugins/sudoers/sudoers.c:802
+#: ../../../trunk/plugins/sudoers/sudoers.c:803
+#: ../../../trunk/plugins/sudoers/sudoers.c:1056
+#: ../../../trunk/plugins/sudoers/sudoers.c:1057
+#: ../../../trunk/plugins/sudoers/testsudoers.c:200
+#: ../../../trunk/plugins/sudoers/testsudoers.c:330
+#, c-format
+msgid "unknown user: %s"
+msgstr "未知用户：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:27
+#, c-format
+msgid "Syslog facility if syslog is being used for logging: %s"
+msgstr "若使用了 syslog，用于记录日志的 syslog 设施：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:31
+#, c-format
+msgid "Syslog priority to use when user authenticates successfully: %s"
+msgstr "用户认证成功时使用的 syslog 优先级：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:35
+#, c-format
+msgid "Syslog priority to use when user authenticates unsuccessfully: %s"
+msgstr "用户认证不成功时使用的 syslog 优先级：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:39
+msgid "Put OTP prompt on its own line"
+msgstr "将 OPT 提示放在独自的行中"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:43
+msgid "Ignore '.' in $PATH"
+msgstr "忽略 $PATH 中的“.”"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:47
+msgid "Always send mail when sudo is run"
+msgstr "在运行 sudo 时总是发送邮件"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:51
+msgid "Send mail if user authentication fails"
+msgstr "在用户认证失败时发送邮件"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:55
+msgid "Send mail if the user is not in sudoers"
+msgstr "在用户不在 sudoers 列表中时发送邮件"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:59
+msgid "Send mail if the user is not in sudoers for this host"
+msgstr "在用户不在此主机的 sudoers 列表中时发送邮件"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:63
+msgid "Send mail if the user is not allowed to run a command"
+msgstr "在用户不允许执行某个命令时发送邮件"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:67
+msgid "Use a separate timestamp for each user/tty combo"
+msgstr "对每个用户/终端组合使用独立的时间戳"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:71
+msgid "Lecture user the first time they run sudo"
+msgstr "在用户第一次运行 sudo 时向他致辞"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:75
+#, c-format
+msgid "File containing the sudo lecture: %s"
+msgstr "包含 sudo 致辞的文件：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:79
+msgid "Require users to authenticate by default"
+msgstr "默认要求用户认证"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:83
+msgid "Root may run sudo"
+msgstr "root 可以运行 sudo"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:87
+msgid "Log the hostname in the (non-syslog) log file"
+msgstr "将主机名记录在(非 syslog)的日志文件中"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:91
+msgid "Log the year in the (non-syslog) log file"
+msgstr "将年份记录在(非 syslog)的日志文件中"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:95
+msgid "If sudo is invoked with no arguments, start a shell"
+msgstr "如果不带参数调用 sudo，启动一个 shell"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:99
+msgid "Set $HOME to the target user when starting a shell with -s"
+msgstr "若使用 -s 选项启动 shell，将 $HOME 设为目标用户的主目录"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:103
+msgid "Always set $HOME to the target user's home directory"
+msgstr "总是将 $HOME 设为目标用户的主目录"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:107
+msgid "Allow some information gathering to give useful error messages"
+msgstr "允许收集一些信息，以提供有用的错误消息"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:111
+msgid "Require fully-qualified hostnames in the sudoers file"
+msgstr "要求 sudoers 文件中包含完全限定的主机名"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:115
+#, fuzzy
+msgid "Insult the user when they enter an incorrect password"
+msgstr "在用户输入错误密码时对其警告"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:119
+msgid "Only allow the user to run sudo if they have a tty"
+msgstr "只允许拥有终端的用户执行 sudo"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:123
+msgid "Visudo will honor the EDITOR environment variable"
+msgstr "Visudo 将优先考虑 EDITOR 环境变量"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:127
+msgid "Prompt for root's password, not the users's"
+msgstr "询问 root 用户的密码而非用户的密码"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:131
+msgid "Prompt for the runas_default user's password, not the users's"
+msgstr "询问 runas_default 用户的密码，而非用户密码"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:135
+msgid "Prompt for the target user's password, not the users's"
+msgstr "询问目标用户的密码，而非用户密码"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:139
+msgid "Apply defaults in the target user's login class if there is one"
+msgstr "应用目标用户登录类别中的默认设置，如果没有设置的话"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:143
+msgid "Set the LOGNAME and USER environment variables"
+msgstr "设置 LOGNAME 和 USER 环境变量"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:147
+msgid "Only set the effective uid to the target user, not the real uid"
+msgstr "只将有效用户 ID 设为目标用户的，而不是实际用户 ID"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:151
+msgid "Don't initialize the group vector to that of the target user"
+msgstr "不将组向量初始化为目标用户的"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:155
+#, c-format
+msgid "Length at which to wrap log file lines (0 for no wrap): %d"
+msgstr "日志文件折行的长度(0 则不折行)：%d"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:159
+#, c-format
+msgid "Authentication timestamp timeout: %.1f minutes"
+msgstr "认证时间戳延时：%.1f 分钟"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:163
+#, c-format
+msgid "Password prompt timeout: %.1f minutes"
+msgstr "密码提示延时：%.1f 分钟"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:167
+#, c-format
+msgid "Number of tries to enter a password: %d"
+msgstr "输入密码的尝试次数：%d"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:171
+#, c-format
+msgid "Umask to use or 0777 to use user's: 0%o"
+msgstr "要使用的 umask，或 0777 使用用户的：0%o"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:175
+#, c-format
+msgid "Path to log file: %s"
+msgstr "日志文件路径：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:179
+#, c-format
+msgid "Path to mail program: %s"
+msgstr "邮件程序路径：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:183
+#, c-format
+msgid "Flags for mail program: %s"
+msgstr "邮件程序标志：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:187
+#, c-format
+msgid "Address to send mail to: %s"
+msgstr "发送邮件的地址：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:191
+#, c-format
+msgid "Address to send mail from: %s"
+msgstr "接收邮件的地址：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:195
+#, c-format
+msgid "Subject line for mail messages: %s"
+msgstr "邮件消息的主题行：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:199
+#, c-format
+msgid "Incorrect password message: %s"
+msgstr "密码错误消息：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:203
+#, c-format
+msgid "Path to authentication timestamp dir: %s"
+msgstr "认证时间戳文件夹的路径：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:207
+#, c-format
+msgid "Owner of the authentication timestamp dir: %s"
+msgstr "认证时间戳的所有者：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:211
+#, c-format
+msgid "Users in this group are exempt from password and PATH requirements: %s"
+msgstr "此组的用户不要求密码和 PATH：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:215
+#, c-format
+msgid "Default password prompt: %s"
+msgstr "默认密码提示：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:219
+msgid "If set, passprompt will override system prompt in all cases."
+msgstr "如果设置，密码提示将覆盖各种情况下的系统提示。"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:223
+#, c-format
+msgid "Default user to run commands as: %s"
+msgstr "运行命令的默认用户：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:227
+#, c-format
+msgid "Value to override user's $PATH with: %s"
+msgstr "覆盖用户的 $PATH 变量的值：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:231
+#, c-format
+msgid "Path to the editor for use by visudo: %s"
+msgstr "visudo 所使用的编辑器的路径：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:235
+#, c-format
+msgid "When to require a password for 'list' pseudocommand: %s"
+msgstr "何时为“list”伪命令请求密码：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:239
+#, c-format
+msgid "When to require a password for 'verify' pseudocommand: %s"
+msgstr "何时为“verify”伪命令请求密码：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:243
+#, fuzzy
+msgid "Preload the dummy exec functions contained in 'noexec_file'"
+msgstr "预加载“noexec_file”中包含的哑 exec 函数"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:247
+#, fuzzy, c-format
+msgid "File containing dummy exec functions: %s"
+msgstr "含有哑 exec 函数的文件：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:251
+msgid "If LDAP directory is up, do we ignore local sudoers file"
+msgstr "如果 LDAP 目录有效，是不是忽略本地的 sudoers 文件"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:255
+#, c-format
+msgid "File descriptors >= %d will be closed before executing a command"
+msgstr ">= %d 的文件描述符将会在执行命令前关闭"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:259
+msgid "If set, users may override the value of `closefrom' with the -C option"
+msgstr "如果设置，用户可以通过 -C 选项覆盖“closefrom”的值"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:263
+msgid "Allow users to set arbitrary environment variables"
+msgstr "允许用户设置任意的环境变量"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:267
+msgid "Reset the environment to a default set of variables"
+msgstr "将环境重设为默认的变量集"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:271
+msgid "Environment variables to check for sanity:"
+msgstr "要检查完整性的环境变量："
+
+#: ../../../trunk/plugins/sudoers/def_data.c:275
+msgid "Environment variables to remove:"
+msgstr "要移除的环境变量："
+
+#: ../../../trunk/plugins/sudoers/def_data.c:279
+msgid "Environment variables to preserve:"
+msgstr "要保留的环境变量："
+
+#: ../../../trunk/plugins/sudoers/def_data.c:283
+#, c-format
+msgid "SELinux role to use in the new security context: %s"
+msgstr "在新的安全环境中使用的 SELinux 角色：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:287
+#, c-format
+msgid "SELinux type to use in the new security context: %s"
+msgstr "在新的安全环境中使用的 SELinux 类型：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:291
+#, c-format
+msgid "Path to the sudo-specific environment file: %s"
+msgstr "sudo 特定环境文件的路径：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:295
+#, c-format
+msgid "Locale to use while parsing sudoers: %s"
+msgstr "解析 sudoers 时使用的区域设置：%s"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:299
+msgid "Allow sudo to prompt for a password even if it would be visisble"
+msgstr "允许 sudo 询问密码，即使它不可见"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:303
+msgid "Provide visual feedback at the password prompt when there is user input"
+msgstr "用户在询问密码窗口输入时提供视觉反馈"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:307
+msgid "Use faster globbing that is less accurate but does not access the filesystem"
+msgstr "使用不太精确但不访问文件系统的较快通配方法"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:311
+msgid "The umask specified in sudoers will override the user's, even if it is more permissive"
+msgstr "sudoers 中指定的 umask 会覆盖用户的，即使它允许的权限更多"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:315
+msgid "Log user's input for the command being run"
+msgstr "记录用户在所执行命令中的输入"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:319
+msgid "Log the output of the command being run"
+msgstr "记录所执行命令的输出"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:323
+msgid "Compress I/O logs using zlib"
+msgstr "使用 zlib 压缩 I/O 日志"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:327
+msgid "Always run commands in a pseudo-tty"
+msgstr "总是在伪终端中运行命令"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:331
+msgid "Plugin for non-Unix group support"
+msgstr "用于非 Unix 组支持的插件"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:335
+msgid "Directory in which to store input/output logs"
+msgstr "用于保存输入/输出日志的目录"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:339
+msgid "File in which to store the input/output log"
+msgstr "用于保存输入/输出日志的文件"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:343
+msgid "Add an entry to the utmp/utmpx file when allocating a pty"
+msgstr "在分配伪终端时向 utmp/utmpx 文件中添加一条记录"
+
+#: ../../../trunk/plugins/sudoers/def_data.c:347
+msgid "Set the user in utmp to the runas user, not the invoking user"
+msgstr "将 utmp 中的用户设为 runas 用户，而不是调用用户"
+
+#: ../../../trunk/plugins/sudoers/defaults.c:197
+msgid ""
+"Available options in a sudoers ``Defaults'' line:\n"
+"\n"
+msgstr ""
+"sudoers 中“Defaults”行中的可用选项：\n"
+"\n"
+
+#: ../../../trunk/plugins/sudoers/defaults.c:204
+#: ../../../trunk/plugins/sudoers/defaults.c:215
+#, c-format
+msgid "%s: %s\n"
+msgstr "%s：%s\n"
+
+#: ../../../trunk/plugins/sudoers/defaults.c:211
+#, c-format
+msgid "%s: %.*s\n"
+msgstr "%s：%.*s\n"
+
+#: ../../../trunk/plugins/sudoers/defaults.c:241
+#, c-format
+msgid "unknown defaults entry `%s'"
+msgstr "未知的默认条目“%s”"
+
+#: ../../../trunk/plugins/sudoers/defaults.c:249
+#: ../../../trunk/plugins/sudoers/defaults.c:259
+#: ../../../trunk/plugins/sudoers/defaults.c:279
+#: ../../../trunk/plugins/sudoers/defaults.c:292
+#: ../../../trunk/plugins/sudoers/defaults.c:305
+#: ../../../trunk/plugins/sudoers/defaults.c:318
+#: ../../../trunk/plugins/sudoers/defaults.c:331
+#: ../../../trunk/plugins/sudoers/defaults.c:351
+#: ../../../trunk/plugins/sudoers/defaults.c:361
+#, c-format
+msgid "value `%s' is invalid for option `%s'"
+msgstr "值“%s”对选项“%s”无效"
+
+#: ../../../trunk/plugins/sudoers/defaults.c:252
+#: ../../../trunk/plugins/sudoers/defaults.c:262
+#: ../../../trunk/plugins/sudoers/defaults.c:270
+#: ../../../trunk/plugins/sudoers/defaults.c:287
+#: ../../../trunk/plugins/sudoers/defaults.c:300
+#: ../../../trunk/plugins/sudoers/defaults.c:313
+#: ../../../trunk/plugins/sudoers/defaults.c:326
+#: ../../../trunk/plugins/sudoers/defaults.c:346
+#: ../../../trunk/plugins/sudoers/defaults.c:357
+#, c-format
+msgid "no value specified for `%s'"
+msgstr "没有给“%s”指定值"
+
+#: ../../../trunk/plugins/sudoers/defaults.c:275
+#, c-format
+msgid "values for `%s' must start with a '/'"
+msgstr "“%s”的值必须以“/”开头"
+
+#: ../../../trunk/plugins/sudoers/defaults.c:337
+#, c-format
+msgid "option `%s' does not take a value"
+msgstr "“%s”选项不带值"
+
+#: ../../../trunk/plugins/sudoers/env.c:259
+#, c-format
+msgid "internal error, sudo_setenv() overflow"
+msgstr "内部错误，sudo_setenv()溢出"
+
+#: ../../../trunk/plugins/sudoers/env.c:289
+#, c-format
+msgid "sudo_putenv: corrupted envp, length mismatch"
+msgstr "sudo_putenv：envp 损坏，长度不符"
+
+#: ../../../trunk/plugins/sudoers/env.c:694
+#, c-format
+msgid "sorry, you are not allowed to set the following environment variables: %s"
+msgstr "对不起，您无权设置以下环境变量：%s"
+
+#: ../../../trunk/plugins/sudoers/find_path.c:68
+#: ../../../trunk/plugins/sudoers/find_path.c:107
+#: ../../../trunk/plugins/sudoers/find_path.c:122
+#: ../../../trunk/plugins/sudoers/iolog.c:124
+#: ../../../trunk/plugins/sudoers/sudoers.c:868 toke.l:663 toke.l:814
+#, c-format
+msgid "%s: %s"
+msgstr "%s：%s"
+
+#: gram.y:103
+#, c-format
+msgid ">>> %s: %s near line %d <<<"
+msgstr ">>> %s：%s 在行 %d 附近<<<"
+
+#: ../../../trunk/plugins/sudoers/group_plugin.c:91
+#, c-format
+msgid "%s%s: %s"
+msgstr "%s%s：%s"
+
+#: ../../../trunk/plugins/sudoers/group_plugin.c:103
+#, c-format
+msgid "%s must be owned by uid %d"
+msgstr "%s 必须属于用户 ID %d"
+
+#: ../../../trunk/plugins/sudoers/group_plugin.c:107
+#, c-format
+msgid "%s must only be writable by owner"
+msgstr "%s 必须只对所有者可写"
+
+#: ../../../trunk/plugins/sudoers/group_plugin.c:114
+#, c-format
+msgid "unable to dlopen %s: %s"
+msgstr "无法执行 dlopen %s：%s"
+
+#: ../../../trunk/plugins/sudoers/group_plugin.c:119
+#, c-format
+msgid "unable to find symbol \"group_plugin\" in %s"
+msgstr "无法在 %s 中找到符号“group_plugin”"
+
+#: ../../../trunk/plugins/sudoers/group_plugin.c:124
+#, c-format
+msgid "%s: incompatible group plugin major version %d, expected %d"
+msgstr "%s：不兼容的组插件主版本号 %d，应为 %d"
+
+#: ../../../trunk/plugins/sudoers/interfaces.c:109
+msgid "Local IP address and netmask pairs:\n"
+msgstr "本地 IP 地址和网络掩码对：\n"
+
+#: ../../../trunk/plugins/sudoers/iolog.c:176
+#: ../../../trunk/plugins/sudoers/sudoers.c:946
+#, c-format
+msgid "unable to read %s"
+msgstr "无法读取 %s"
+
+#: ../../../trunk/plugins/sudoers/iolog.c:179
+#, c-format
+msgid "invalid sequence number %s"
+msgstr "无效的序列号：%s"
+
+#: ../../../trunk/plugins/sudoers/iolog.c:225
+#: ../../../trunk/plugins/sudoers/iolog.c:228
+#: ../../../trunk/plugins/sudoers/iolog.c:478
+#: ../../../trunk/plugins/sudoers/iolog.c:483
+#: ../../../trunk/plugins/sudoers/iolog.c:489
+#: ../../../trunk/plugins/sudoers/iolog.c:497
+#: ../../../trunk/plugins/sudoers/iolog.c:505
+#: ../../../trunk/plugins/sudoers/iolog.c:513
+#: ../../../trunk/plugins/sudoers/iolog.c:521
+#, c-format
+msgid "unable to create %s"
+msgstr "无法创建 %s"
+
+#: ../../../trunk/plugins/sudoers/iolog_path.c:245
+#: ../../../trunk/plugins/sudoers/sudoers.c:357
+#, c-format
+msgid "unable to set locale to \"%s\", using \"C\""
+msgstr "无法将区域设置为“%s”，将使用“C”"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:363
+#, c-format
+msgid "sudo_ldap_conf_add_ports: port too large"
+msgstr "sudo_ldap_conf_add_ports：端口太大"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:386
+#, c-format
+msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
+msgstr "sudo_ldap_conf_add_ports：扩展主机缓存时空间不足"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:415
+#, c-format
+msgid "unsupported LDAP uri type: %s"
+msgstr "不支持的 LDAP URI 类型：%s"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:444
+#, c-format
+msgid "invalid uri: %s"
+msgstr "无效的 URI：%s"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:450
+#, c-format
+msgid "unable to mix ldap and ldaps URIs"
+msgstr "无法混合 ldap 和 ldaps URI"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:454
+#, c-format
+msgid "unable to mix ldaps and starttls"
+msgstr "无法混合 ldaps 和 starttls"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:473
+#, c-format
+msgid "sudo_ldap_parse_uri: out of space building hostbuf"
+msgstr "sudo_ldap_parse_uri：构建主机缓存时空间不足"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:536
+#, c-format
+msgid "unable to initialize SSL cert and key db: %s"
+msgstr "无法初始化 SSL 证书和密钥数据库：%s"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:932
+#, c-format
+msgid "unable to get GMT time"
+msgstr "无法获取 GMT 时间"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:938
+#, c-format
+msgid "unable to format timestamp"
+msgstr "无法格式化时间戳"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:946
+#, c-format
+msgid "unable to build time filter"
+msgstr "无法构建时间过滤器"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:1044
+#, c-format
+msgid "sudo_ldap_build_pass1 allocation mismatch"
+msgstr "sudo_ldap_build_pass1 分配不匹配"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:1544
+#, c-format
+msgid ""
+"\n"
+"LDAP Role: %s\n"
+msgstr ""
+"\n"
+"LDAP 角色：%s\n"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:1546
+#, c-format
+msgid ""
+"\n"
+"LDAP Role: UNKNOWN\n"
+msgstr ""
+"\n"
+"LDAP 角色：未知\n"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:1593
+#, c-format
+msgid "    Order: %s\n"
+msgstr "    顺序：%s\n"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:1601
+#, c-format
+msgid "    Commands:\n"
+msgstr "    命令：\n"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:1988
+#, c-format
+msgid "unable to initialize LDAP: %s"
+msgstr "无法初始化 LDAP：%s"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:2019
+#, c-format
+msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
+msgstr "指定了 start_tls，但 LDAP 库不支持 ldap_start_tls_s() 或 ldap_start_tls_s_np()"
+
+#: ../../../trunk/plugins/sudoers/ldap.c:2250
+#, c-format
+msgid "invalid sudoOrder attribute: %s"
+msgstr "无效的 sudoOrder 属性：%s"
+
+#: ../../../trunk/plugins/sudoers/linux_audit.c:54
+#, c-format
+msgid "unable to open audit system"
+msgstr "无法打开审核系统"
+
+#: ../../../trunk/plugins/sudoers/linux_audit.c:78
+#, c-format
+msgid "internal error, linux_audit_command() overflow"
+msgstr "内部错误，linux_audit_command() 溢出"
+
+#: ../../../trunk/plugins/sudoers/linux_audit.c:87
+#, c-format
+msgid "unable to send audit message"
+msgstr "无法发送审核消息"
+
+#: ../../../trunk/plugins/sudoers/logging.c:193
+#, c-format
+msgid "unable to open log file: %s: %s"
+msgstr "无法打开日志文件：%s：%s"
+
+#: ../../../trunk/plugins/sudoers/logging.c:196
+#, c-format
+msgid "unable to lock log file: %s: %s"
+msgstr "无法锁定日志文件：%s：%s"
+
+#: ../../../trunk/plugins/sudoers/logging.c:295
+msgid "user NOT in sudoers"
+msgstr "用户不在 sudoers 中"
+
+#: ../../../trunk/plugins/sudoers/logging.c:297
+msgid "user NOT authorized on host"
+msgstr "用户未获得此主机上的授权"
+
+#: ../../../trunk/plugins/sudoers/logging.c:299
+msgid "command not allowed"
+msgstr "命令禁止使用"
+
+#: ../../../trunk/plugins/sudoers/logging.c:309
+#, c-format
+msgid "%s is not in the sudoers file.  This incident will be reported.\n"
+msgstr "%s 不在 sudoers 文件中。此事将被报告。\n"
+
+#: ../../../trunk/plugins/sudoers/logging.c:312
+#, c-format
+msgid "%s is not allowed to run sudo on %s.  This incident will be reported.\n"
+msgstr "%s 无权在 %s 上运行 sudo。此事将被报告。\n"
+
+#: ../../../trunk/plugins/sudoers/logging.c:316
+#, c-format
+msgid "Sorry, user %s may not run sudo on %s.\n"
+msgstr "对不起，用户 %s 不能在 %s 上运行 sudo。\n"
+
+#: ../../../trunk/plugins/sudoers/logging.c:319
+#, c-format
+msgid "Sorry, user %s is not allowed to execute '%s%s%s' as %s%s%s on %s.\n"
+msgstr "对不起，用户 %1$s 无权以 %5$s%6$s%7$s 的身份在 %8$s 上执行 %2$s%3$s%4$s。\n"
+
+#: ../../../trunk/plugins/sudoers/logging.c:454
+#, c-format
+msgid "unable to fork"
+msgstr "无法执行 fork"
+
+#: ../../../trunk/plugins/sudoers/logging.c:461
+#: ../../../trunk/plugins/sudoers/logging.c:518
+#, c-format
+msgid "unable to fork: %m"
+msgstr "无法执行 fork：%m"
+
+#: ../../../trunk/plugins/sudoers/logging.c:511
+#, c-format
+msgid "unable to open pipe: %m"
+msgstr "无法打开管道：%m"
+
+#: ../../../trunk/plugins/sudoers/logging.c:530
+#, c-format
+msgid "unable to dup stdin: %m"
+msgstr "无法 dup stdin：%m"
+
+#: ../../../trunk/plugins/sudoers/logging.c:564
+#, c-format
+msgid "unable to execute %s: %m"
+msgstr "无法执行 %s：%m"
+
+#: ../../../trunk/plugins/sudoers/logging.c:774
+#, c-format
+msgid "internal error: insufficient space for log line"
+msgstr "内部错误：没有足够的空间存放日志行"
+
+#: ../../../trunk/plugins/sudoers/parse.c:115
+#, c-format
+msgid "parse error in %s near line %d"
+msgstr "%s 中第 %d 行附近有解析错误"
+
+#: ../../../trunk/plugins/sudoers/parse.c:369
+#, c-format
+msgid ""
+"\n"
+"Sudoers entry:\n"
+msgstr ""
+"\n"
+"Sudoers 条目：\n"
+
+#: ../../../trunk/plugins/sudoers/parse.c:371
+#, c-format
+msgid "    RunAsUsers: "
+msgstr "    RunAs 用户："
+
+#: ../../../trunk/plugins/sudoers/parse.c:386
+#, c-format
+msgid "    RunAsGroups: "
+msgstr "    RunAs 组："
+
+#: ../../../trunk/plugins/sudoers/parse.c:395
+#, c-format
+msgid ""
+"    Commands:\n"
+"\t"
+msgstr ""
+"    命令：\n"
+"\t"
+
+#: ../../../trunk/plugins/sudoers/plugin_error.c:100
+#: ../../../trunk/plugins/sudoers/plugin_error.c:105
+msgid ": "
+msgstr "："
+
+#: ../../../trunk/plugins/sudoers/pwutil.c:244
+#, c-format
+msgid "unable to cache uid %u (%s), already exists"
+msgstr "无法缓存用户 ID %u(%s)，已存在"
+
+#: ../../../trunk/plugins/sudoers/pwutil.c:252
+#, c-format
+msgid "unable to cache uid %u, already exists"
+msgstr "无法缓存用户 ID %u，已存在"
+
+#: ../../../trunk/plugins/sudoers/pwutil.c:288
+#: ../../../trunk/plugins/sudoers/pwutil.c:297
+#, c-format
+msgid "unable to cache user %s, already exists"
+msgstr "无法缓存用户 %s，已存在"
+
+#: ../../../trunk/plugins/sudoers/pwutil.c:511
+#, c-format
+msgid "unable to cache gid %u (%s), already exists"
+msgstr "无法缓存组 ID %u(%s)，已存在"
+
+#: ../../../trunk/plugins/sudoers/pwutil.c:519
+#, c-format
+msgid "unable to cache gid %u, already exists"
+msgstr "无法缓存组 ID %u，已存在"
+
+#: ../../../trunk/plugins/sudoers/pwutil.c:548
+#: ../../../trunk/plugins/sudoers/pwutil.c:557
+#, c-format
+msgid "unable to cache group %s, already exists"
+msgstr "无法缓存组 %s，已存在"
+
+#: ../../../trunk/plugins/sudoers/set_perms.c:249
+#: ../../../trunk/plugins/sudoers/set_perms.c:476
+#: ../../../trunk/plugins/sudoers/set_perms.c:710
+#, c-format
+msgid "unable to change to sudoers gid"
+msgstr "无法切换为 sudoers 组 ID"
+
+#: ../../../trunk/plugins/sudoers/set_perms.c:290
+#: ../../../trunk/plugins/sudoers/set_perms.c:514
+#: ../../../trunk/plugins/sudoers/set_perms.c:748
+#: ../../../trunk/plugins/sudoers/set_perms.c:882
+msgid "too many processes"
+msgstr "进程过多"
+
+#: ../../../trunk/plugins/sudoers/set_perms.c:943
+#: ../../../trunk/plugins/sudoers/set_perms.c:959
+msgid "unable to set runas group vector"
+msgstr "无法设置 runas 组向量"
+
+#: ../../../trunk/plugins/sudoers/set_perms.c:952
+msgid "unable to get runas group vector"
+msgstr "无法获取 runas 组向量"
+
+#: ../../../trunk/plugins/sudoers/sudo_nss.c:217
+msgid "unable to reset group vector"
+msgstr "无法重设组向量"
+
+#: ../../../trunk/plugins/sudoers/sudo_nss.c:223
+msgid "unable to get group vector"
+msgstr "无法获取组向量"
+
+#: ../../../trunk/plugins/sudoers/sudo_nss.c:266
+#, c-format
+msgid "Matching Defaults entries for %s on this host:\n"
+msgstr "匹配此主机上 %s 的默认条目：\n"
+
+#: ../../../trunk/plugins/sudoers/sudo_nss.c:279
+#, c-format
+msgid "Runas and Command-specific defaults for %s:\n"
+msgstr "%s Runas 和命令特定的默认值：\n"
+
+#: ../../../trunk/plugins/sudoers/sudo_nss.c:292
+#, c-format
+msgid "User %s may run the following commands on this host:\n"
+msgstr "用户 %s 可以在该主机上运行以下命令：\n"
+
+#: ../../../trunk/plugins/sudoers/sudo_nss.c:302
+#, c-format
+msgid "User %s is not allowed to run sudo on %s.\n"
+msgstr "用户 %s 无权在 %s 上运行 sudo。\n"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:206
+#: ../../../trunk/plugins/sudoers/sudoers.c:241
+#: ../../../trunk/plugins/sudoers/sudoers.c:876
+msgid "problem with defaults entries"
+msgstr "默认条目有问题"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:210
+#, c-format
+msgid "no valid sudoers sources found, quitting"
+msgstr "没有找到有效的 sudoers 资源，退出"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:264
+#, c-format
+msgid "unable to execute %s: %s"
+msgstr "无法执行 %s：%s"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:311
+#, c-format
+msgid "sudoers specifies that root is not allowed to sudo"
+msgstr "sudoers 指定 root 不允许执行 sudo"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:318
+#, c-format
+msgid "you are not permitted to use the -C option"
+msgstr "您无权使用 -C 选项"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:403
+#, c-format
+msgid "timestamp owner (%s): No such user"
+msgstr "时间戳所有者(%s)：无此用户"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:423
+msgid "no tty"
+msgstr "无终端"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:424
+#, c-format
+msgid "sorry, you must have a tty to run sudo"
+msgstr "抱歉，您必须拥有一个终端来执行 sudo"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:470
+msgid "No user or host"
+msgstr "无用户或主机"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:484
+#: ../../../trunk/plugins/sudoers/sudoers.c:505
+#: ../../../trunk/plugins/sudoers/sudoers.c:506
+#: ../../../trunk/plugins/sudoers/sudoers.c:1413
+#: ../../../trunk/plugins/sudoers/sudoers.c:1414
+#, c-format
+msgid "%s: command not found"
+msgstr "%s：找不到命令"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:486
+#: ../../../trunk/plugins/sudoers/sudoers.c:502
+#, c-format
+msgid ""
+"ignoring `%s' found in '.'\n"
+"Use `sudo ./%s' if this is the `%s' you wish to run."
+msgstr ""
+"忽略在“.”中找到的“%s”\n"
+"请使用“sudo ./%s”，如果这是您想运行的“%s”。"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:491
+msgid "validation failure"
+msgstr "校验失败"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:501
+msgid "command in current directory"
+msgstr "当前目录中的命令"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:513
+#, c-format
+msgid "sorry, you are not allowed to preserve the environment"
+msgstr "抱歉，您无权保留环境"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:860
+#, c-format
+msgid "internal error, set_cmnd() overflow"
+msgstr "内部错误：set_cmnd() 溢出"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:904
+#, fuzzy, c-format
+msgid "fixed mode on %s"
+msgstr "对 %s 修正了模式"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:908
+#, c-format
+msgid "set group on %s"
+msgstr "对 %s 设置组"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:911
+#, c-format
+msgid "unable to set group on %s"
+msgstr "无法对 %s 设置组"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:914
+#, c-format
+msgid "unable to fix mode on %s"
+msgstr "无法对 %s 修正模式"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:927
+#, c-format
+msgid "%s is not a regular file"
+msgstr "%s 不是常规文件"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:929
+#, c-format
+msgid "%s is mode 0%o, should be 0%o"
+msgstr "%s 的模式为 0%o，应为 0%o"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:933
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s 属于用户 ID %u，应为 %u"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:936
+#, c-format
+msgid "%s is owned by gid %u, should be %u"
+msgstr "%s 属于组 ID %u，应为 %u"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:980
+#, c-format
+msgid "only root can use `-c %s'"
+msgstr "只有 root 才能使用“-c %s”"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:990
+#, c-format
+msgid "unknown login class: %s"
+msgstr "未知的登录类别：%s"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:1024
+#, c-format
+msgid "unable to resolve host %s"
+msgstr "无法解析主机：%s"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:1076
+#: ../../../trunk/plugins/sudoers/testsudoers.c:342
+#, c-format
+msgid "unknown group: %s"
+msgstr "未知组：%s"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:1108
+#, c-format
+msgid "Sudoers policy plugin version %s\n"
+msgstr "Sudoers 策略插件版本 %s\n"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:1110
+#, c-format
+msgid "Sudoers file grammar version %d\n"
+msgstr "Sudoers 文件语法版本 %d\n"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:1114
+#, c-format
+msgid ""
+"\n"
+"Sudoers path: %s\n"
+msgstr ""
+"\n"
+"Sudoers 路径：%s\n"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:1117
+#, c-format
+msgid "nsswitch path: %s\n"
+msgstr "nsswitch 路径：%s\n"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:1119
+#, c-format
+msgid "ldap.conf path: %s\n"
+msgstr "ldap.conf 路径：%s\n"
+
+#: ../../../trunk/plugins/sudoers/sudoers.c:1120
+#, c-format
+msgid "ldap.secret path: %s\n"
+msgstr "ldap.secret 路径：%s\n"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:265
+#, c-format
+msgid "invalid filter option: %s"
+msgstr "无效的过滤器选项：%s"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:278
+#, c-format
+msgid "invalid max wait: %s"
+msgstr "无效的最大等待：%s"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:284
+#, c-format
+msgid "invalid speed factor: %s"
+msgstr "无法的速度系数：%s"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:287
+#: ../../../trunk/plugins/sudoers/visudo.c:176
+#, c-format
+msgid "%s version %s\n"
+msgstr "%s 版本 %s\n"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:310
+#, fuzzy, c-format
+msgid "%s/%.2s/%.2s/%.2s/timing: %s"
+msgstr "%s/%.2s/%.2s/%.2s/时序：%s"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:316
+#, fuzzy, c-format
+msgid "%s/%s/timing: %s"
+msgstr "%s/%s/时序：%s"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:342
+#, c-format
+msgid "invalid log file %s"
+msgstr "无效的日志文件 %s"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:344
+#, c-format
+msgid "Replaying sudo session: %s"
+msgstr "回放 sudo 会话：%s"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:370
+#, c-format
+msgid "unable to set tty to raw mode"
+msgstr "无法将终端设为原始模式"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:384
+#, fuzzy, c-format
+msgid "invalid timing file line: %s"
+msgstr "无效的时序文件行：%s"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:426
+#, c-format
+msgid "writing to standard output"
+msgstr "写入标准输出"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:456
+#, c-format
+msgid "nanosleep: tv_sec %ld, tv_nsec %ld"
+msgstr "nanosleep：tv_sec %ld，tv_nsec %ld"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:502
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:527
+#, c-format
+msgid "ambiguous expression \"%s\""
+msgstr "有歧义的表达式“%s”"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:544
+#, c-format
+msgid "too many parenthesized expressions, max %d"
+msgstr "括号表达式过多，最多 %d"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:555
+#, c-format
+msgid "unmatched ')' in expression"
+msgstr "表达式中的“)”不匹配"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:561
+#, c-format
+msgid "unknown search term \"%s\""
+msgstr "未知的搜索词“%s”"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:575
+#, c-format
+msgid "%s requires an argument"
+msgstr "%s 需要参数"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:579
+#, c-format
+msgid "invalid regular expression: %s"
+msgstr "无效的正则表达式：%s"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:585
+#, c-format
+msgid "could not parse date \"%s\""
+msgstr "无法解析日期“%s”"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:598
+#, c-format
+msgid "unmatched '(' in expression"
+msgstr "表达式中的“(”不匹配"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:600
+#, c-format
+msgid "illegal trailing \"or\""
+msgstr "非法的结尾字符“or”"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:602
+#, c-format
+msgid "illegal trailing \"!\""
+msgstr "非法的结尾字符“!”"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:818
+#, c-format
+msgid "invalid regex: %s"
+msgstr "无效的正则表达式：%s"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:940
+#, c-format
+msgid "usage: %s [-h] [-d directory] [-m max_wait] [-s speed_factor] ID\n"
+msgstr "用法：%s [-h] [-d 目录] [-m 最长等待] [-s 速度系数] ID\n"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:943
+#, c-format
+msgid "usage: %s [-h] [-d directory] -l [search expression]\n"
+msgstr "用法：%s [-h] [-d 目录] -l [搜索表达式]\n"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:952
+#, c-format
+msgid ""
+"%s - replay sudo session logs\n"
+"\n"
+msgstr ""
+"%s - 回放 sudo 会话记录\n"
+"\n"
+
+#: ../../../trunk/plugins/sudoers/sudoreplay.c:954
+msgid ""
+"\n"
+"Options:\n"
+"  -d directory     specify directory for session logs\n"
+"  -f filter        specify which I/O type to display\n"
+"  -h               display help message and exit\n"
+"  -l [expression]  list available session IDs that match expression\n"
+"  -m max_wait      max number of seconds to wait between events\n"
+"  -s speed_factor  speed up or slow down output\n"
+"  -V               display version information and exit"
+msgstr ""
+"\n"
+"选项：\n"
+"  -d 目录          指定会话日志目录\n"
+"  -f 过滤器        指定要显示的 I/O 类型\n"
+"  -h               显示帮助信息并退出\n"
+"  -l [表达式]      列出与表达式匹配的可用会话 ID\n"
+"  -m 最长等待      事件间等待的最大秒数\n"
+"  -s 速度系数      加速或减慢输出\n"
+"  -V               显示版本信息并退出"
+
+#: ../../../trunk/plugins/sudoers/testsudoers.c:228
+#, c-format
+msgid "internal error, init_vars() overflow"
+msgstr "内部错误，init_vars() 溢出"
+
+#: ../../../trunk/plugins/sudoers/testsudoers.c:304
+msgid "\thost  unmatched"
+msgstr "\t主机不匹配"
+
+#: ../../../trunk/plugins/sudoers/testsudoers.c:307
+msgid ""
+"\n"
+"Command allowed"
+msgstr ""
+"\n"
+"命令允许"
+
+#: ../../../trunk/plugins/sudoers/testsudoers.c:308
+msgid ""
+"\n"
+"Command denied"
+msgstr ""
+"\n"
+"命令被拒"
+
+#: ../../../trunk/plugins/sudoers/testsudoers.c:308
+msgid ""
+"\n"
+"Command unmatched"
+msgstr ""
+"\n"
+"命令不匹配"
+
+#: toke.l:667 toke.l:793 toke.l:818 toke.l:904
+#: ../../../trunk/plugins/sudoers/toke_util.c:111
+#: ../../../trunk/plugins/sudoers/toke_util.c:163
+#: ../../../trunk/plugins/sudoers/toke_util.c:202
+msgid "unable to allocate memory"
+msgstr "无法分配内存"
+
+#: toke.l:786
+#, fuzzy
+msgid "too many levels of includes"
+msgstr "include 嵌套层数过多"
+
+#: ../../../trunk/plugins/sudoers/toke_util.c:213
+msgid "fill_args: buffer overflow"
+msgstr "fill_args：缓存溢出"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:177
+#, c-format
+msgid "%s grammar version %d\n"
+msgstr "%s 语法版本 %d\n"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:210
+#: ../../../trunk/plugins/sudoers/auth/rfc1938.c:103
+#, c-format
+msgid "you do not exist in the %s database"
+msgstr "%s 数据库中没有您"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:240
+#: ../../../trunk/plugins/sudoers/visudo.c:472
+#, c-format
+msgid "press return to edit %s: "
+msgstr "按回车键编辑 %s："
+
+#: ../../../trunk/plugins/sudoers/visudo.c:302
+#: ../../../trunk/plugins/sudoers/visudo.c:308
+#, c-format
+msgid "write error"
+msgstr "写错误"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:362
+#, c-format
+msgid "unable to stat temporary file (%s), %s unchanged"
+msgstr "无法 stat 临时文件(%s)，%s 未更改"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:367
+#, c-format
+msgid "zero length temporary file (%s), %s unchanged"
+msgstr "零长度的临时文件(%s)，%s 未更改"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:373
+#, c-format
+msgid "editor (%s) failed, %s unchanged"
+msgstr "编辑器(%s)失败，%s 未更改"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:396
+#, c-format
+msgid "%s unchanged"
+msgstr "%s 未更改"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:420
+#, c-format
+msgid "unable to re-open temporary file (%s), %s unchanged."
+msgstr "无法重新打开临时文件(%s)，%s 未更改"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:430
+#, c-format
+msgid "unabled to parse temporary file (%s), unknown error"
+msgstr "无法解析临时文件(%s)，未知错误"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:465
+#, c-format
+msgid "internal error, unable to find %s in list!"
+msgstr "内部错误，在列表中找不到 %s！"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:504
+#: ../../../trunk/plugins/sudoers/visudo.c:513
+#, c-format
+msgid "unable to set (uid, gid) of %s to (%d, %d)"
+msgstr "无法将 %s 的 (uid, gid) 设为 (%d, %d)"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:508
+#: ../../../trunk/plugins/sudoers/visudo.c:518
+#, c-format
+msgid "unable to change mode of %s to 0%o"
+msgstr "无法将 %s 的模式更改为 0%o"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:535
+#, c-format
+msgid "%s and %s not on the same file system, using mv to rename"
+msgstr "%s 和 %s 不在同一个文件系统，使用 mv 进行重命名"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:549
+#, c-format
+msgid "command failed: '%s %s %s', %s unchanged"
+msgstr "命令失败：“%s %s %s”，%s 未更改"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:559
+#, c-format
+msgid "error renaming %s, %s unchanged"
+msgstr "重命名 %s 出错，%s 未更改"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:619
+msgid "What now? "
+msgstr "现在做什么？"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:633
+msgid ""
+"Options are:\n"
+"  (e)dit sudoers file again\n"
+"  e(x)it without saving changes to sudoers file\n"
+"  (Q)uit and save changes to sudoers file (DANGER!)\n"
+msgstr ""
+"选项有：\n"
+"  重新编辑 sudoers 文件(e)\n"
+"  退出，不保存对 sudoers 文件的更改(x)\n"
+"  退出并将更改保存到 sudoers 文件(危险！)(Q)\n"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:670
+#, c-format
+msgid "unable to execute %s"
+msgstr "无法执行 %s"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:677
+#, c-format
+msgid "unable to run %s"
+msgstr "无法运行 %s"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:708
+#, c-format
+msgid "failed to parse %s file, unknown error"
+msgstr "解析 %s 文件失败，未知错误"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:720
+#, c-format
+msgid "parse error in %s near line %d\n"
+msgstr "%s 中第 %d 行附近出现解析错误\n"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:723
+#, c-format
+msgid "parse error in %s\n"
+msgstr "%s 中出现解析错误\n"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:725
+#, c-format
+msgid "%s: parsed OK\n"
+msgstr "%s：解析正确\n"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:739
+#, c-format
+msgid "%s: wrong owner (uid, gid) should be (%d, %d)\n"
+msgstr "%s：错误的所有者(uid, gid)，应为(%d, %d)\n"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:746
+#, c-format
+msgid "%s: bad permissions, should be mode 0%o\n"
+msgstr "%s：权限不正确，模式应该是 0%o\n"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:785
+#, c-format
+msgid "%s busy, try again later"
+msgstr "%s 忙，请稍后重试"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:828
+#, c-format
+msgid "specified editor (%s) doesn't exist"
+msgstr "指定的编辑器(%s)不存在"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:851
+#, c-format
+msgid "unable to stat editor (%s)"
+msgstr "无法 stat 编辑器(%s)"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:899
+#, c-format
+msgid "no editor found (editor path = %s)"
+msgstr "未找到编辑器(编辑器路径 = %s)"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:1100
+#, c-format
+msgid "%s: %s_Alias `%s' referenced but not defined"
+msgstr "%s：引用了 %s_Alias “%s”但未定义"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:1116
+#, c-format
+msgid "%s: %s_Alias `%s' references self"
+msgstr "%s：%s_Alias “%s”引用了自己"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:1130
+#, c-format
+msgid "%s: unused %s_Alias %s"
+msgstr "%s：未使用的 %s_Alias %s"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:1187
+#, c-format
+msgid ""
+"%s - safely edit the sudoers file\n"
+"\n"
+msgstr ""
+"%s - 安全地编辑 sudoers 文件\n"
+"\n"
+
+#: ../../../trunk/plugins/sudoers/visudo.c:1189
+msgid ""
+"\n"
+"Options:\n"
+"  -c          check-only mode\n"
+"  -f sudoers  specify sudoers file location\n"
+"  -h          display help message and exit\n"
+"  -q          less verbose (quiet) syntax error messages\n"
+"  -s          strict syntax checking\n"
+"  -V          display version information and exit"
+msgstr ""
+"\n"
+"选项：\n"
+"  -c          纯检查模式\n"
+"  -f sudoers  指定 sudoers 文件的位置\n"
+"  -h          显示帮助信息并退出\n"
+"  -q          较简略(安静)的语法错误信息\n"
+"  -s          严格语法检查\n"
+"  -V          显示版本信息并退出"
+
+#: ../../../trunk/plugins/sudoers/auth/bsdauth.c:64
+msgid "unable to begin bsd authentication"
+msgstr "无法开始 bsd 认证"
+
+#: ../../../trunk/plugins/sudoers/auth/bsdauth.c:71
+msgid "invalid authentication type"
+msgstr "无效的认证类型"
+
+#: ../../../trunk/plugins/sudoers/auth/bsdauth.c:79
+msgid "unable to setup authentication"
+msgstr "无法设置认证"
+
+#: ../../../trunk/plugins/sudoers/auth/fwtk.c:59
+#, c-format
+msgid "unable to read fwtk config"
+msgstr "无法读取 fwtk 配置"
+
+#: ../../../trunk/plugins/sudoers/auth/fwtk.c:64
+#, c-format
+msgid "unable to connect to authentication server"
+msgstr "无法连接到认证服务器"
+
+#: ../../../trunk/plugins/sudoers/auth/fwtk.c:70
+#: ../../../trunk/plugins/sudoers/auth/fwtk.c:93
+#: ../../../trunk/plugins/sudoers/auth/fwtk.c:126
+#, c-format
+msgid "lost connection to authentication server"
+msgstr "丢失了到认证服务器的连接"
+
+#: ../../../trunk/plugins/sudoers/auth/fwtk.c:74
+#, c-format
+msgid ""
+"authentication server error:\n"
+"%s"
+msgstr ""
+"认证服务器错误：\n"
+"%s"
+
+#: ../../../trunk/plugins/sudoers/auth/kerb5.c:114
+#, c-format
+msgid "%s: unable to parse '%s': %s"
+msgstr "%s：无法解析“%s”：%s"
+
+#: ../../../trunk/plugins/sudoers/auth/kerb5.c:127
+#, c-format
+msgid "%s: unable to unparse princ ('%s'): %s"
+msgstr "%s：无法解析 princ(“%s”)：%s"
+
+#: ../../../trunk/plugins/sudoers/auth/kerb5.c:144
+#, c-format
+msgid "%s: unable to resolve ccache: %s"
+msgstr "%s：无法解析 ccache：%s"
+
+#: ../../../trunk/plugins/sudoers/auth/kerb5.c:188
+#, c-format
+msgid "%s: unable to allocate options: %s"
+msgstr "%s：无法分配选项：%s"
+
+#: ../../../trunk/plugins/sudoers/auth/kerb5.c:204
+#, c-format
+msgid "%s: unable to get credentials: %s"
+msgstr "%s：无法获取凭据：%s"
+
+#: ../../../trunk/plugins/sudoers/auth/kerb5.c:217
+#, c-format
+msgid "%s: unable to initialize ccache: %s"
+msgstr "%s：无法初始化 ccache：%s"
+
+#: ../../../trunk/plugins/sudoers/auth/kerb5.c:221
+#, fuzzy, c-format
+msgid "%s: unable to store cred in ccache: %s"
+msgstr "%s：无法储存 ccache 中的凭据"
+
+#: ../../../trunk/plugins/sudoers/auth/kerb5.c:284
+#, c-format
+msgid "%s: unable to get host principal: %s"
+msgstr ""
+
+#: ../../../trunk/plugins/sudoers/auth/kerb5.c:299
+#, fuzzy, c-format
+msgid "%s: Cannot verify TGT! Possible attack!: %s"
+msgstr "%s：无法验证目标！可能遭到了攻击！：%s"
+
+#: ../../../trunk/plugins/sudoers/auth/pam.c:99
+msgid "unable to initialize PAM"
+msgstr "无法初始化 PAM"
+
+#: ../../../trunk/plugins/sudoers/auth/pam.c:142
+msgid "account validation failure, is your account locked?"
+msgstr "账户验证失败，您的账户是不是上锁了？"
+
+#: ../../../trunk/plugins/sudoers/auth/pam.c:146
+msgid "Account or password is expired, reset your password and try again"
+msgstr "账户或密码过期，重置您的密码并重试"
+
+#: ../../../trunk/plugins/sudoers/auth/pam.c:153
+#, c-format
+msgid "pam_chauthtok: %s"
+msgstr "pam_chauthtok：%s"
+
+#: ../../../trunk/plugins/sudoers/auth/pam.c:157
+msgid "Password expired, contact your system administrator"
+msgstr "密码过期，联系您的系统管理员"
+
+#: ../../../trunk/plugins/sudoers/auth/pam.c:161
+msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
+msgstr "账户过期，或 PAM 配置缺少 sudo 使用的“account”节，联系您的系统管理员"
+
+#: ../../../trunk/plugins/sudoers/auth/pam.c:176
+#, c-format
+msgid "pam_authenticate: %s"
+msgstr "pam_authenticate：%s"
+
+#: ../../../trunk/plugins/sudoers/auth/pam.c:296
+msgid "Password: "
+msgstr "密码："
+
+#: ../../../trunk/plugins/sudoers/auth/pam.c:297
+msgid "Password:"
+msgstr "密码："
+
+#: ../../../trunk/plugins/sudoers/auth/securid.c:82
+#: ../../../trunk/plugins/sudoers/auth/securid5.c:106
+#, c-format
+msgid "unable to contact the SecurID server"
+msgstr "无法联络 SecurID 服务器"
+
+#: ../../../trunk/plugins/sudoers/auth/securid5.c:81
+#, c-format
+msgid "failed to initialise the ACE API library"
+msgstr "初始化 ACE API 库失败"
+
+#: ../../../trunk/plugins/sudoers/auth/securid5.c:115
+#, c-format
+msgid "User ID locked for SecurID Authentication"
+msgstr "为进行 SecurID 认证，已锁定用户 ID"
+
+#: ../../../trunk/plugins/sudoers/auth/securid5.c:119
+#: ../../../trunk/plugins/sudoers/auth/securid5.c:169
+#, c-format
+msgid "invalid username length for SecurID"
+msgstr "SecurID 的用户名长度无效"
+
+#: ../../../trunk/plugins/sudoers/auth/securid5.c:123
+#: ../../../trunk/plugins/sudoers/auth/securid5.c:174
+#, fuzzy, c-format
+msgid "invalid Authentication Handle for SecurID"
+msgstr "SecurID 的认证句柄无效"
+
+#: ../../../trunk/plugins/sudoers/auth/securid5.c:127
+#, c-format
+msgid "SecurID communication failed"
+msgstr "SecurID 通讯失败"
+
+#: ../../../trunk/plugins/sudoers/auth/securid5.c:131
+#: ../../../trunk/plugins/sudoers/auth/securid5.c:213
+#, c-format
+msgid "unknown SecurID error"
+msgstr "未知的 SecurID 错误"
+
+#: ../../../trunk/plugins/sudoers/auth/securid5.c:164
+#, c-format
+msgid "invalid passcode length for SecurID"
+msgstr "无效的 SecurID 密码长度"
+
+#: ../../../trunk/plugins/sudoers/auth/sia.c:106
+msgid "unable to initialize SIA session"
+msgstr "无法初始化 SIA 会话"
+
+#: ../../../trunk/plugins/sudoers/auth/sudo_auth.c:124
+msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
+msgstr "sudo 编译时没有加入任何认证方法！如果您想关闭认证，使用 --disable-authentication 配置选项。"
+
+#: ../../../trunk/plugins/sudoers/auth/sudo_auth.c:134
+#, fuzzy
+msgid "Invalid authentication methods compiled into sudo!  You may mix standalone and non-standalone authentication."
+msgstr "编译进 sudo 的认证方法无效！您可以混用独立和非独立认证。"
+
+#: ../../../trunk/plugins/sudoers/auth/sudo_auth.c:243
+#, c-format
+msgid "%d incorrect password attempt"
+msgid_plural "%d incorrect password attempts"
+msgstr[0] "%d 次错误密码尝试"
+
+#: ../../../trunk/plugins/sudoers/auth/sudo_auth.c:335
+msgid "Authentication methods:"
+msgstr "认证方法："
