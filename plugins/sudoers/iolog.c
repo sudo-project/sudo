@@ -533,8 +533,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     fputc('\n', io_logfile);
     fputs(details.command ? details.command : "unknown", io_logfile);
     for (cur = &argv[1]; *cur != NULL; cur++) {
-	if (cur != &argv[1])
-	    fputc(' ', io_logfile);
+	fputc(' ', io_logfile);
 	fputs(*cur, io_logfile);
     }
     fputc('\n', io_logfile);
