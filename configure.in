@@ -2193,8 +2193,6 @@ AC_CHECK_FUNCS(getprogname, , [
 # make sure we use the gettext() that matches the include file.
 # First check that it links w/o additional libs, then try with -lintl.
 if test "$enable_nls" = "yes"; then
-    # List of translations
-    LINGUAS="uk zh_CN"
     AC_MSG_CHECKING([for gettext])
     AC_CACHE_VAL(sudo_cv_gettext, [
     AC_LINK_IFELSE(
@@ -2211,8 +2209,12 @@ if test "$enable_nls" = "yes"; then
 	    [AC_DEFINE(HAVE_LIBINTL_H)],
 	[
 	    AC_CHECK_LIB(intl, gettext, [LIBINTL="-lintl -liconv"]
-		AC_DEFINE(HAVE_LIBINTL_H), [], [-liconv])
+		AC_DEFINE(HAVE_LIBINTL_H), [enable_nls=no], [-liconv])
 	])
+    fi
+    if test "$enable_nls" = "yes"; then
+	# List of available translations
+	LINGUAS="uk zh_CN"
     fi
 fi
 

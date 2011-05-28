@@ -16771,8 +16771,6 @@ done
 # make sure we use the gettext() that matches the include file.
 # First check that it links w/o additional libs, then try with -lintl.
 if test "$enable_nls" = "yes"; then
-    # List of translations
-    LINGUAS="uk zh_CN"
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettext" >&5
 $as_echo_n "checking for gettext... " >&6; }
     if test "${sudo_cv_gettext+set}" = set; then :
@@ -16890,11 +16888,17 @@ if test "x$ac_cv_lib_intl_gettext_liconv" = x""yes; then :
   LIBINTL="-lintl -liconv"
 		$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
 
+else
+  enable_nls=no
 fi
 
 
 fi
 
+    fi
+    if test "$enable_nls" = "yes"; then
+	# List of available translations
+	LINGUAS="uk zh_CN"
     fi
 fi
 
