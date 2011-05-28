@@ -34,6 +34,7 @@
 #include "missing.h"
 #include "error.h"
 #include "alloc.h"
+#include "gettext.h"
 #include "linux_audit.h"
 
 /*
