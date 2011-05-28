@@ -1492,24 +1492,19 @@ sudo_ldap_display_entry_short(LDAP *ld, LDAPMessage *entry, struct lbuf *lbuf)
     /* get the Option Values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoOption");
     if (bv != NULL) {
-	char *cp, *tag;
-
 	for (p = bv; *p != NULL; p++) {
-	    cp = (*p)->bv_val;
+	    char *cp = (*p)->bv_val;
 	    if (*cp == '!')
 		cp++;
-	    tag = NULL;
 	    if (strcmp(cp, "authenticate") == 0)
-		tag = (*p)->bv_val[0] == '!' ?
-		    "NOPASSWD: " : "PASSWD: ";
+		lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
+		    "NOPASSWD: " : "PASSWD: ");
 	    else if (strcmp(cp, "noexec") == 0)
-		tag = (*p)->bv_val[0] == '!' ?
-		    "EXEC: " : "NOEXEC: ";
+		lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
+		    "EXEC: " : "NOEXEC: ");
 	    else if (strcmp(cp, "setenv") == 0)
-		tag = (*p)->bv_val[0] == '!' ?
-		    "NOSETENV: " : "SETENV: ";
-	    if (tag != NULL)
-		lbuf_append(lbuf, tag);
+		lbuf_append(lbuf, (*p)->bv_val[0] == '!' ?
+		    "NOSETENV: " : "SETENV: ");
 	}
 	ldap_value_free_len(bv);
     }

@@ -457,10 +457,9 @@ sudo_file_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 	    case DEFAULTS_CMND:
 		continue;
 	}
-	lbuf_append(lbuf, prefix);
 	if (d->val != NULL) {
-	    lbuf_append(lbuf, "%s%s", d->var, d->op == '+' ? "+=" :
-		d->op == '-' ? "-=" : "=");
+	    lbuf_append(lbuf, "%s%s%s", prefix, d->var,
+		d->op == '+' ? "+=" : d->op == '-' ? "-=" : "=");
 	    if (strpbrk(d->val, " \t") != NULL) {
 		lbuf_append(lbuf, "\"");
 		lbuf_append_quoted(lbuf, "\"", "%s", d->val);
@@ -468,7 +467,8 @@ sudo_file_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 	    } else
 		lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", d->val);
 	} else
-	    lbuf_append(lbuf, "%s%s", d->op == FALSE ? "!" : "", d->var);
+	    lbuf_append(lbuf, "%s%s%s", prefix,
+		d->op == FALSE ? "!" : "", d->var);
 	prefix = ", ";
 	nfound++;
     }
