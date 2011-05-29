@@ -5434,6 +5434,8 @@ fi
 # Check whether --enable-zlib was given.
 if test "${enable_zlib+set}" = set; then :
   enableval=$enable_zlib;
+else
+  enable_zlib=yes
 fi
 
 
@@ -5499,14 +5501,7 @@ fi
 
 # Check whether --enable-nls was given.
 if test "${enable_nls+set}" = set; then :
-  enableval=$enable_nls;  case "$enableval" in
-    yes|no) enable_nls=$enableval
-	    ;;
-    *)	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-nls: $enableval" >&5
-$as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-nls: $enableval" >&2;}
-	    ;;
-  esac
-
+  enableval=$enable_nls;
 else
   enable_nls=yes
 fi
@@ -16770,7 +16765,25 @@ done
 # Since gcc prefers /usr/local/include to /usr/include, we need to
 # make sure we use the gettext() that matches the include file.
 # First check that it links w/o additional libs, then try with -lintl.
-if test "$enable_nls" = "yes"; then
+if test "$enable_nls" != "no"; then
+    if test "$enable_nls" != "yes"; then
+	CPPFLAGS="${CPPFLAGS} -I${enable_nls}/include"
+
+    if test X"$with_rpath" = X"yes"; then
+	case "$host" in
+	    *-*-hpux*)	LDFLAGS="${LDFLAGS} -L$enable_nls/lib -Wl,+b,$enable_nls/lib"
+			;;
+	    *)		LDFLAGS="${LDFLAGS} -L$enable_nls/lib -Wl,-R$enable_nls/lib"
+			;;
+	esac
+    else
+	LDFLAGS="${LDFLAGS} -L$enable_nls/lib"
+    fi
+    if test X"$blibpath" != X"" -a "LDFLAGS" = "SUDO_LDFLAGS"; then
+	blibpath_add="${blibpath_add}:$enable_nls/lib"
+    fi
+
+    fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettext" >&5
 $as_echo_n "checking for gettext... " >&6; }
     if test "${sudo_cv_gettext+set}" = set; then :
@@ -16802,10 +16815,7 @@ fi
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_gettext" >&5
 $as_echo "$sudo_cv_gettext" >&6; }
-    if test "$sudo_cv_gettext" = "yes"; then
-	$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
-
-    else
+    if test "$sudo_cv_gettext" != "yes"; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettext in -lintl" >&5
 $as_echo_n "checking for gettext in -lintl... " >&6; }
 if test "${ac_cv_lib_intl_gettext+set}" = set; then :
@@ -16844,8 +16854,6 @@ fi
 $as_echo "$ac_cv_lib_intl_gettext" >&6; }
 if test "x$ac_cv_lib_intl_gettext" = x""yes; then :
   LIBINTL="-lintl"
-	    $as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
-
 else
 
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettext in -lintl" >&5
@@ -16886,8 +16894,6 @@ fi
 $as_echo "$ac_cv_lib_intl_gettext_liconv" >&6; }
 if test "x$ac_cv_lib_intl_gettext_liconv" = x""yes; then :
   LIBINTL="-lintl -liconv"
-		$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
-
 else
   enable_nls=no
 fi
@@ -16896,13 +16902,15 @@ fi
 fi
 
     fi
-    if test "$enable_nls" = "yes"; then
+    if test "$enable_nls" != "no"; then
+	$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
+
 	# List of available translations
 	LINGUAS="uk zh_CN"
     fi
 fi
 
-case ${enable_zlib-"yes"} in
+case "$enable_zlib" in
     yes)
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for gzdopen in -lz" >&5
 $as_echo_n "checking for gzdopen in -lz... " >&6; }
