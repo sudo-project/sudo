@@ -638,6 +638,15 @@ The following options are also configurable at runtime:
         Disable environment resetting.  This sets the default value
         of the "env_reset" Defaults option in sudoers to false.
 
+  --enable-nls[=location]
+        Enable natural language support using the gettext() family
+        of functions.  If specified, location is the base directory
+        containing the libintl include and lib directories.  If
+        this option is not specified, configure will look for the
+        gettext() family of functions in the standard C library
+        first, then check for a standalone libintl (linking with
+        libiconv as needed).
+
   --disable-nls
         Disable natural language support.  By default, sudo will
         use the gettext() family of functions, if available, to
