@@ -42,6 +42,8 @@ DEFS = @OSDEFS@
 
 SHELL = @SHELL@
 
+TEST_PROGS = fnm_test globtest
+
 LIBOBJDIR = 
 
 LTLIBOBJS = @LTLIBOBJS@
@@ -52,6 +54,9 @@ Makefile: $(srcdir)/Makefile.in
 	(cd $(top_builddir) && ./config.status --file compat/Makefile)
 
 .SUFFIXES: .o .c .h .lo
+
+.c.o:
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
@@ -65,14 +70,8 @@ siglist.c: mksiglist
 mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(incdir)/missing.h $(top_builddir)/config.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/mksiglist.c -o $@
 
-fnm_test.o: $(srcdir)/regress/fnmatch/fnm_test.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/fnmatch/fnm_test.c
-
 fnm_test: fnm_test.o libreplace.la
 	$(LIBTOOL) --mode=link $(CC) -o $@ fnm_test.o libreplace.la
-
-globtest.o: $(srcdir)/regress/glob/globtest.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/glob/globtest.c
 
 globtest: globtest.o libreplace.la
 	$(LIBTOOL) --mode=link $(CC) -o $@ globtest.o libreplace.la
@@ -102,7 +101,7 @@ install-nls:
 
 uninstall:
 
-check: fnm_test globtest
+check: $(TEST_PROGS)
 	@./fnm_test $(srcdir)/regress/fnmatch/fnm_test.in
 	@mkdir -p `sed 's@/[^/]*$$@@' $(srcdir)/regress/glob/files | sort -u`
 	@touch `cat $(srcdir)/regress/glob/files`
@@ -113,7 +112,7 @@ check: fnm_test globtest
 	@rm -rf fake
 
 clean:
-	-$(LIBTOOL) --mode=clean rm -f mksiglist siglist.c *.lo *.o *.la *.a stamp-* core *.core core.*
+	-$(LIBTOOL) --mode=clean rm -f $(TEST_PROGS) mksiglist siglist.c *.lo *.o *.la *.a stamp-* core *.core core.*
 
 mostlyclean: clean
 
@@ -133,6 +132,9 @@ closefrom.lo: $(srcdir)/closefrom.c $(top_builddir)/config.h $(incdir)/missing.h
 dlopen.lo: $(srcdir)/dlopen.c $(top_builddir)/config.h \
            $(top_srcdir)/compat/dlfcn.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/dlopen.c
+fnm_test.o: $(srcdir)/regress/fnmatch/fnm_test.c $(top_builddir)/config.h \
+            $(top_srcdir)/compat/fnmatch.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/fnmatch/fnm_test.c
 fnmatch.lo: $(srcdir)/fnmatch.c $(top_builddir)/config.h $(incdir)/missing.h \
             $(top_srcdir)/compat/charclass.h $(top_srcdir)/compat/fnmatch.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/fnmatch.c
@@ -149,6 +151,9 @@ getprogname.lo: $(srcdir)/getprogname.c $(top_builddir)/config.h \
 glob.lo: $(srcdir)/glob.c $(top_builddir)/config.h $(incdir)/missing.h \
          $(top_srcdir)/compat/glob.h $(top_srcdir)/compat/charclass.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/glob.c
+globtest.o: $(srcdir)/regress/glob/globtest.c $(top_builddir)/config.h \
+            $(top_srcdir)/compat/glob.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/glob/globtest.c
 isblank.lo: $(srcdir)/isblank.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/isblank.c
 memrchr.lo: $(srcdir)/memrchr.c $(top_builddir)/config.h $(incdir)/missing.h
