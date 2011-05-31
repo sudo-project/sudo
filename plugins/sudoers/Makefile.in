@@ -370,7 +370,7 @@ check: $(TEST_PROGS) visudo testsudoers
 	    rval=`expr $$rval + $$failed`; exit $$rval
 
 clean:
-	-$(LIBTOOL) --mode=clean rm -f $(PROGS) *.lo *.o *.la *.a stamp-* core *.core core.* *.out
+	-$(LIBTOOL) --mode=clean rm -f $(PROGS) $(TEST_PROGS) *.lo *.o *.la *.a stamp-* core *.core core.* *.out *.toke *.err
 
 mostlyclean: clean
 
