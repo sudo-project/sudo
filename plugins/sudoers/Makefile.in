@@ -130,6 +130,8 @@ TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o error.o group_plugin.o \
 CHECK_IOLOG_PATH_OBJS = check_iolog_path.o error.o iolog_path.lo pwutil.lo \
 			redblack.lo
 
+CHECK_FILL_OBJS = check_fill.o toke_util.lo error.o
+
 LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
 
 VERSION = @PACKAGE_VERSION@
@@ -185,8 +187,8 @@ testsudoers: libsudoers.la $(TEST_OBJS) $(LT_LIBS)
 check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_IOLOG_PATH_OBJS) $(LDFLAGS) $(LIBS)
 
-check_fill: check_fill.o toke_util.lo error.o $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ check_fill.o toke_util.lo error.o $(LDFLAGS) $(LIBS)
+check_fill: $(CHECK_FILL_OBJS) $(LT_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_FILL_OBJS) $(LDFLAGS) $(LIBS)
 
 # Uncomment the following if you want "make distclean" to clean the parser
 @DEV@GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate.c
@@ -423,6 +425,10 @@ check.lo: $(srcdir)/check.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
           $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/check.c
+check_fill.o: $(srcdir)/regress/parser/check_fill.c $(top_builddir)/config.h \
+              $(incdir)/list.h $(srcdir)/parse.h $(srcdir)/toke.h \
+              $(srcdir)/gram.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_fill.c
 check_iolog_path.o: $(srcdir)/regress/iolog_path/check_iolog_path.c \
                     $(top_builddir)/config.h $(srcdir)/sudoers.h \
                     $(top_builddir)/pathnames.h $(incdir)/missing.h \
@@ -537,7 +543,7 @@ ldap.lo: $(srcdir)/ldap.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/ldap.c
 linux_audit.lo: $(srcdir)/linux_audit.c $(top_builddir)/config.h \
                 $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
-                $(srcdir)/linux_audit.h
+                $(incdir)/gettext.h $(srcdir)/linux_audit.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/linux_audit.c
 logging.lo: $(srcdir)/logging.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
