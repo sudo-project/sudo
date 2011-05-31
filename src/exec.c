@@ -216,20 +216,19 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
 		cstat->val = errno;
 		return -1;
 	    case 0:
-		/* child continues in a new session in a different pty */
-		SET(details->flags, CD_USE_PTY);
-		(void)setsid();
+		/* child continues without controlling terminal */
+		(void)setpgid(0, 0);
 		break;
 	    default:
-		/* parent exits */
-		exit(0);
+		/* parent exits (but does not flush buffers) */
+		_exit(0);
 	}
     }
 
     /*
      * If we have an I/O plugin or the policy plugin has requested one, we
      * need to allocate a pty.  It is OK to set log_io in the pty-only case
-     * as the tailqueue plugin will be empty and no I/O logging will occur.
+     * as the io plugin tailqueue will be empty and no I/O logging will occur.
      */
     if (!tq_empty(&io_plugins) || ISSET(details->flags, CD_USE_PTY)) {
 	log_io = TRUE;
