@@ -1385,7 +1385,7 @@ be enclosed in double quotes (C<">).
 For example, given F</etc/sudo-group>, a group file in Unix group
 format, the sample group plugin can be used:
 
-    Defaults sudo_plugin="sample_group.so /etc/sudo-group"
+    Defaults group_plugin="sample_group.so /etc/sudo-group"
 
 For more information see L<sudo_plugin(5)>.
 
