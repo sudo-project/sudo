@@ -1,15 +1,29 @@
 What's new in Sudo 1.8.2?
 
+ * Sudo, visudo, sudoreplay and the sudoers plug-in now have natural
+   language support (NLS). This can be disabled by passing configure
+   the --disable-nls option.  Sudo will use gettext(), if available,
+   to display translated messages.  All translations are coordinated
+   via The Translation Project, http://translationproject.org/.
+
  * Added a workaround for a FreeBSD bug with dlopen() and non-standard
    PAM modules.
 
- * Sudo, visudo, sudoreplay and the sudoers plug-in now have natural
-   language support (NLS).  Sudo will use gettext(), if available,
-   to display translated messages.  This can be disabled by passing
-   configure the --disable-nls option.
+ * I/O logging is now supported for commands run in background mode
+   (using sudo's -b flag).
 
  * Group ownership of the sudoers file is only enforced when the file
    mode on sudoers allows group readability or writability.
+
+ * Visudo now checks the contents of an alias and warns about cycles
+   when the alias is expanded.
+
+ * If the user specifes a group via sudo's -g option that matches
+   the target user's group in the password database, it is now
+   allowed even if no groups are present in the Runas_Spec.
+
+ * The sudo Makefiles now have more complete dependencies which are
+   automatically generated instead of being maintained manually.
 
 What's new in Sudo 1.8.1p2?
 
