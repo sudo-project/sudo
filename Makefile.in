@@ -35,6 +35,10 @@ docdir = @docdir@
 mandir = @mandir@
 timedir = @timedir@
 
+# User and group ids the installed files should be "owned" by
+install_uid = 0
+install_gid = 0
+
 # sudoers owner and mode for package building
 sudoersdir = $(sysconfdir)
 sudoers_uid = @SUDOERS_UID@
@@ -52,19 +56,38 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 
 SHELL = @SHELL@
 
+INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
+
+ECHO_N = @ECHO_N@
+ECHO_C = @ECHO_C@
+
+# Message catalog support
+LINGUAS = @LINGUAS@
+POTFILES = src/po/sudo.pot plugins/sudoers/po/sudoers.pot
+MSGFMT = msgfmt
+MSGMERGE = msgmerge
+XGETTEXT = xgettext
+XGETTEXT_OPTS = -k_ -kN_ --copyright-holder="Todd C. Miller" \
+		"--msgid-bugs-address=http://www.sudo.ws/bugs" \
+		--package-name=@PACKAGE_NAME@ --package-version=$(VERSION) \
+		--flag warning:1:c-format --flag warningx:1:c-format \
+		--flag error:2:c-format --flag errorx:2:c-format \
+		--flag easprintf:3:c-format --flag lbuf_append:2:c-format \
+		--flag lbuf_append_quoted:3:c-format --foreign-user
+
 all: config.status
 	for d in $(SUBDIRS) $(SAMPLES); \
 	    do (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
 	done
 
-check update-po compile-po pre-install: config.status
+check pre-install: config.status
 	for d in $(SUBDIRS); \
 	    do (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
 	done
 
-install-dirs install-binaries install-includes install-plugin install-nls uninstall: config.status pre-install
+install-dirs install-binaries install-includes install-plugin uninstall: config.status pre-install
 	for d in $(SUBDIRS); \
 	    do (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
@@ -124,6 +147,57 @@ Makefile: $(srcdir)/Makefile.in
 sync-po:
 	rsync -Lrtvz  translationproject.org::tp/latest/sudo/ src/po/
 	rsync -Lrtvz  translationproject.org::tp/latest/sudoers/ plugins/sudoers/po/
+
+update-po:
+	@cd $(top_srcdir); \
+	for pot in $(POTFILES); do \
+	    echo "Updating $$pot"; \
+	    podir=`dirname $$pot`; \
+	    domain=`basename $$pot .pot`; \
+	    case "$$domain" in \
+		sudo) cfiles="src/*c common/*c compat/*c";; \
+		sudoers) cfiles="plugins/sudoers/*.c plugins/sudoers/auth/*.c";; \
+		*) echo unknown domain $$domain continue;; \
+	    esac; \
+	    $(XGETTEXT) $(XGETTEXT_OPTS) -d$$domain $$cfiles -o $$pot; \
+	    set -- $(LINGUAS); \
+	    while test $$# != 0; do \
+		echo $(ECHO_N) "Updating $$podir/$$1.po$(ECHO_C)"; \
+		$(MSGMERGE) --update $$podir/$$1.po $$pot; \
+		$(MSGFMT) --output /dev/null --check-format $$podir/$$1.po || exit 1; \
+		shift; \
+	    done; \
+	done
+
+compile-po:
+	@cd $(top_srcdir); \
+	for pot in $(POTFILES); do \
+	    podir=`dirname $$pot`; \
+	    set -- $(LINGUAS); \
+	    while test $$# != 0; do \
+		echo $(ECHO_N) "Compiling $$podir/$$1.mo: $(ECHO_C)"; \
+		$(MSGFMT) --statistics -c -o $$podir/$$1.mo $$podir/$$1.po; \
+		shift; \
+	    done; \
+	done
+
+install-nls:
+	@if test -n "$(LINGUAS)"; then \
+	    cd $(top_srcdir); \
+	    for pot in $(POTFILES); do \
+		podir=`dirname $$pot`; \
+		domain=`basename $$pot .pot`; \
+		echo $(ECHO_N) "Installing $$domain message catalogs:$(ECHO_C)"; \
+		set -- $(LINGUAS); \
+		while test $$# != 0; do \
+		    echo $(ECHO_N) " $$1$(ECHO_C)"; \
+		    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(localedir)/$$1/LC_MESSAGES; \
+		    $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0644 $$podir/$$1.mo $(DESTDIR)$(localedir)/$$1/LC_MESSAGES/$$domain.mo; \
+		    shift; \
+		done; \
+		echo ""; \
+	    done; \
+	fi
 
 dist: ChangeLog $(srcdir)/MANIFEST
 	pax -w -x ustar -s '/^/$(PACKAGE_TARNAME)-$(VERSION)\//' \

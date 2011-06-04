@@ -47,10 +47,6 @@ Makefile: $(srcdir)/Makefile.in
 
 .SUFFIXES: .h
 
-update-po:
-
-compile-po:
-
 pre-install:
 
 install: install-dirs install-includes
@@ -66,8 +62,6 @@ install-includes: install-dirs
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $(srcdir)/sudo_plugin.h $(DESTDIR)$(includedir)
 
 install-plugin:
-
-install-nls:
 
 uninstall:
 	-rm -f $(DESTDIR)$(includedir)/sudo_plugin.h
