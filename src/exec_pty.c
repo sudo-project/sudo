@@ -493,17 +493,21 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
 
     /*
      * Setup stdin/stdout/stderr for child, to be duped after forking.
+     * In background mode there is no stdin.
      */
-    io_fds[SFD_STDIN] = io_fds[SFD_SLAVE];
+    if (!ISSET(details->flags, CD_BACKGROUND))
+	io_fds[SFD_STDIN] = io_fds[SFD_SLAVE];
     io_fds[SFD_STDOUT] = io_fds[SFD_SLAVE];
     io_fds[SFD_STDERR] = io_fds[SFD_SLAVE];
 
-    /* Copy /dev/tty -> pty master */
     if (io_fds[SFD_USERTTY] != -1) {
-	iobufs = io_buf_new(io_fds[SFD_USERTTY], io_fds[SFD_MASTER],
-	    log_ttyin, iobufs);
+	/* Read from /dev/tty, write to pty master */
+	if (!ISSET(details->flags, CD_BACKGROUND)) {
+	    iobufs = io_buf_new(io_fds[SFD_USERTTY], io_fds[SFD_MASTER],
+		log_ttyin, iobufs);
+	}
 
-	/* Copy pty master -> /dev/tty */
+	/* Read from pty master, write to /dev/tty */
 	iobufs = io_buf_new(io_fds[SFD_MASTER], io_fds[SFD_USERTTY],
 	    log_ttyout, iobufs);
 
