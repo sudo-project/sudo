@@ -58,10 +58,6 @@ Makefile: $(srcdir)/Makefile.in
 libcommon.la: $(LTOBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LTOBJS) -no-install
 
-update-po:
-
-compile-po:
-
 pre-install:
 
 install:
@@ -75,8 +71,6 @@ install-includes:
 install-doc:
 
 install-plugin:
-
-install-nls:
 
 uninstall:
 

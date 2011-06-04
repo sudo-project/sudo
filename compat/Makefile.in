@@ -79,10 +79,6 @@ globtest: globtest.o libreplace.la
 @DEV@$(srcdir)/mksiglist.h: $(srcdir)/siglist.in
 @DEV@	awk 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (my_sys_siglist[SIG%s] == NULL)\n\tmy_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@
 
-update-po:
-
-compile-po:
-
 pre-install:
 
 install:
@@ -96,8 +92,6 @@ install-includes:
 install-doc:
 
 install-plugin:
-
-install-nls:
 
 uninstall:
 

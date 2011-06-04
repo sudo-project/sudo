@@ -83,10 +83,6 @@ Makefile: $(srcdir)/Makefile.in
 sample_group.la: $(OBJS)
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LTLDFLAGS) -o $@ $(OBJS) $(LIBS) -module -export-symbols $(srcdir)/sample_group.sym -avoid-version -rpath $(plugindir)
 
-update-po:
-
-compile-po:
-
 pre-install:
 
 install: install-dirs install-plugin
@@ -102,8 +98,6 @@ install-doc:
 
 install-plugin: install-dirs sample_group.la
 	$(INSTALL) -b~ -M 0755 .libs/sample_group$(soext) $(DESTDIR)$(plugindir)
-
-install-nls:
 
 uninstall:
 	-rm -f $(DESTDIR)$(plugindir)/sample_group$(soext)
