@@ -16906,7 +16906,7 @@ fi
 	$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
 
 	# List of available translations
-	LINGUAS="uk zh_CN"
+	LINGUAS="fi uk zh_CN"
     fi
 fi
 
