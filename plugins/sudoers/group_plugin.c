@@ -54,8 +54,8 @@
 
 #include "sudoers.h"
 
-#ifndef RTLD_LOCAL
-# define RTLD_LOCAL	0
+#ifndef RTLD_GLOBAL
+# define RTLD_GLOBAL	0
 #endif
 
 static void *group_handle;
@@ -109,7 +109,7 @@ group_plugin_load(char *plugin_info)
     }
 
     /* Open plugin and map in symbol. */
-    group_handle = dlopen(path, RTLD_LAZY|RTLD_LOCAL);
+    group_handle = dlopen(path, RTLD_LAZY|RTLD_GLOBAL);
     if (!group_handle) {
 	warningx(_("unable to dlopen %s: %s"), path, dlerror());
 	goto done;
