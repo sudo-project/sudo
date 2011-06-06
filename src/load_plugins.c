@@ -48,8 +48,8 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
-#ifndef RTLD_LOCAL
-# define RTLD_LOCAL	0
+#ifndef RTLD_GLOBAL
+# define RTLD_GLOBAL	0
 #endif
 
 const char *noexec_path = _PATH_SUDO_NOEXEC;
@@ -176,7 +176,7 @@ sudo_load_plugins(const char *conf_file,
 	}
 
 	/* Open plugin and map in symbol */
-	handle = dlopen(path, RTLD_LAZY|RTLD_LOCAL);
+	handle = dlopen(path, RTLD_LAZY|RTLD_GLOBAL);
 	if (!handle) {
 	    warningx(_("unable to dlopen %s: %s"), path, dlerror());
 	    goto done;
