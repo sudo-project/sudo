@@ -2210,7 +2210,7 @@ if test "$enable_nls" != "no"; then
     if test "$enable_nls" != "no"; then
 	AC_DEFINE(HAVE_LIBINTL_H)
 	# List of available translations
-	LINGUAS="fi uk zh_CN"
+	LINGUAS="eu fi uk zh_CN"
     fi
 fi
 
