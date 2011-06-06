@@ -6,8 +6,9 @@ What's new in Sudo 1.8.2?
    to display translated messages.  All translations are coordinated
    via The Translation Project, http://translationproject.org/.
 
- * Added a workaround for a FreeBSD bug with dlopen() and non-standard
-   PAM modules.
+ * Plug-ins are now loaded with the RTLD_GLOBAL flag instead of
+   RTLD_LOCAL.  This fixes missing symbol problems in PAM modules
+   on certain platforms, such as FreeBSD and SuSE Linux Enterprise.
 
  * I/O logging is now supported for commands run in background mode
    (using sudo's -b flag).
