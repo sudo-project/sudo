@@ -148,11 +148,10 @@ sync-po:
 	rsync -Lrtvz  translationproject.org::tp/latest/sudo/ src/po/
 	rsync -Lrtvz  translationproject.org::tp/latest/sudoers/ plugins/sudoers/po/
 
-update-po:
+update-pot:
 	@cd $(top_srcdir); \
 	for pot in $(POTFILES); do \
 	    echo "Updating $$pot"; \
-	    podir=`dirname $$pot`; \
 	    domain=`basename $$pot .pot`; \
 	    case "$$domain" in \
 		sudo) cfiles="src/*c common/*c compat/*c";; \
@@ -160,6 +159,12 @@ update-po:
 		*) echo unknown domain $$domain continue;; \
 	    esac; \
 	    $(XGETTEXT) $(XGETTEXT_OPTS) -d$$domain $$cfiles -o $$pot; \
+	done
+
+update-po: update-pot
+	@cd $(top_srcdir); \
+	for pot in $(POTFILES); do \
+	    podir=`dirname $$pot`; \
 	    set -- $(LINGUAS); \
 	    while test $$# != 0; do \
 		echo $(ECHO_N) "Updating $$podir/$$1.po$(ECHO_C)"; \
