@@ -87,7 +87,7 @@ check pre-install: config.status
 	    exit $$?; \
 	done
 
-install-dirs install-binaries install-includes install-plugin uninstall: config.status pre-install
+install-dirs install-binaries install-includes install-plugin: config.status pre-install
 	for d in $(SUBDIRS); \
 	    do (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
@@ -98,6 +98,22 @@ install install-doc: config.status ChangeLog pre-install
 	    do (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
 	done
+
+uninstall:
+	for d in $(SUBDIRS); \
+	    do (cd $$d && exec $(MAKE) $@) && continue; \
+	    exit $$?; \
+	done
+	if test -n "$(LINGUAS)"; then \
+	    for pot in $(POTFILES); do \
+		domain=`basename $$pot .pot`; \
+		set -- $(LINGUAS); \
+		while test $$# != 0; do \
+		    rm -f $(DESTDIR)$(localedir)/$$1/LC_MESSAGES/$$domain.mo; \
+		    shift; \
+		done; \
+	    done; \
+	fi
 
 autoconf:
 	autoconf -I m4
