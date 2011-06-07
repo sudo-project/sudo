@@ -112,7 +112,7 @@ static time_t	yyRelSeconds;
 
 static int	yyerror(char *s);
 static int	yylex(void);
-static int	yyparse(void);
+       int	yyparse(void);
 
 #line 107 "getdate.y"
 #ifndef YYSTYPE_DEFINED
