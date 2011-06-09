@@ -115,7 +115,7 @@ C<LIBPATH>, C<SHLIB_PATH>, and others.  These type of variables are
 removed from the environment before B<sudo> even begins execution
 and, as such, it is not possible for B<sudo> to preserve them.
 
-As a special case, If B<sudo>'s B<-i> option (initial login) is
+As a special case, if B<sudo>'s B<-i> option (initial login) is
 specified, I<sudoers> will initialize the environment regardless
 of the value of I<env_reset>.  The I<DISPLAY>, I<PATH> and I<TERM>
 variables remain unchanged; I<HOME>, I<MAIL>, I<SHELL>, I<USER>,
