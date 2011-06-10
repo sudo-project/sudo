@@ -208,7 +208,10 @@ still allow people to get their work done."
 	# Don't overwrite an existing sudoers file
 	sudoersdir=%{sudoersdir}
 	if test ! -r $sudoersdir/sudoers; then
-		cp -p $sudoersdir/sudoers.dist $sudoersdir/sudoers
+		cp $sudoersdir/sudoers.dist $sudoersdir/sudoers
+		chmod %{sudoers_mode} $sudoersdir/sudoers
+		chown %{sudoers_uid} $sudoersdir/sudoers
+		chgrp %{sudoers_gid} $sudoersdir/sudoers
 	fi
 
 %post [deb]
