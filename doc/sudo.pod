@@ -243,7 +243,10 @@ If no command is specified, an interactive shell is executed.
 B<sudo> attempts to change to that user's home directory before
 running the shell.  The security policy shall initialize the
 environment to a minimal set of variables, similar to what is present
-when a user logs in.
+when a user logs in.  The I<Command Environment> section in the
+L<sudoers(5)> manual documents how the B<-i> option affects the
+environment in which a command is run when the I<sudoers> policy
+is in use.
 
 =item -K
 
