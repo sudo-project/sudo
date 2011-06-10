@@ -1978,8 +1978,12 @@ if test ${with_logincap-'no'} != "no"; then
     ])
 fi
 if test ${with_project-'no'} != "no"; then
-    AC_CHECK_HEADER(project.h, AC_DEFINE(HAVE_PROJECT_H)
-	[SUDO_LIBS="${SUDO_LIBS} -lproject"], -)
+    AC_CHECK_HEADER(project.h, [
+	AC_CHECK_LIB(project, setproject, [
+	    AC_DEFINE(HAVE_PROJECT_H)
+	    SUDO_LIBS="${SUDO_LIBS} -lproject"
+	])
+    ], [])
 fi
 dnl
 dnl typedef checks
