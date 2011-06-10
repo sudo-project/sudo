@@ -10,12 +10,23 @@ my @incpaths;
 my %dir_vars;
 my %implicit;
 
+# Read in MANIFEST fail if present
+my %manifest;
+if (open(MANIFEST, "<MANIFEST")) {
+    while (<MANIFEST>) {
+	chomp;
+	next unless /([^\/]+\.[cly])$/;
+	$manifest{$1} = $_;
+    }
+}
+
 foreach (@ARGV) {
     mkdep($_);
 }
 
 sub mkdep {
     my $file = $_[0];
+    $file =~ s:^\./+::;		# strip off leading ./
 
     my $makefile;
     if (open(MF, "<$file")) {
@@ -42,7 +53,7 @@ sub mkdep {
     $makefile =~ s:\@SUDOERS_OBJS\@:bsm_audit.lo linux_audit.lo ldap.lo plugin_error.lo:;
     # XXX - fill in AUTH_OBJS from contents of the auth dir instead
     $makefile =~ s:\@AUTH_OBJS\@:afs.lo aix_auth.lo bsdauth.lo dce.lo fwtk.lo kerb4.lo kerb5.lo pam.lo passwd.lo rfc1938.lo secureware.lo securid.lo securid5.lo sia.lo:;
-    $makefile =~ s:\@LTLIBOBJS\@:closefrom.lo dlopen.lo fnmatch.lo getcwd.lo getgrouplist.lo getline.lo getprogname.lo glob.lo isblank.lo memrchr.lo mksiglist.lo mktemp.lo nanosleep.lo setenv.lo siglist.lo snprintf.lo strlcat.lo strlcpy.lo strsignal.lo unsetenv.lo utimes.lo globtest.o fnm_test.o:;
+    $makefile =~ s:\@LTLIBOBJS\@:closefrom.lo dlopen.lo fnmatch.lo getcwd.lo getline.lo getprogname.lo glob.lo isblank.lo memrchr.lo mksiglist.lo mktemp.lo nanosleep.lo setenv.lo siglist.lo snprintf.lo strlcat.lo strlcpy.lo strsignal.lo unsetenv.lo utimes.lo globtest.o fnm_test.o:;
 
     # Parse OBJS lines
     my %objs;
@@ -76,24 +87,35 @@ sub mkdep {
     }
 
     # Find existing .o and .lo dependencies
-    my %srcs;
+    my %old_deps;
     while ($makefile =~ /^(\w+\.l?o):\s*(\S+\.c)/mg) {
-	$srcs{$1} = $2;
+	$old_deps{$1} = $2;
     }
 
-    # Do .lo files first
+    # Sort files so we do .lo files first
     foreach my $obj (sort keys %objs) {
 	next unless $obj =~ /(\S+)\.(l?o)$/;
-	if ($2 eq "o" && exists($srcs{"$1.lo"})) {
+	if ($2 eq "o" && exists($objs{"$1.lo"})) {
 	    # If we have both .lo and .o files, make the .o depend on the .lo
 	    $new_makefile .= sprintf("%s: %s.lo\n", $obj, $1);
 	} else {
-	    # XXX - search for the .c file if we don't know it
-	    # XXX - use MANIFEST file for this
-	    my $src = $srcs{$obj} || $1 . '.c';
+	    # Use old depenencies when mapping objects to their source.
+	    # If no old depenency, use the MANIFEST file to find the source.
+	    my $src = $1 . '.c';
 	    my $ext = $2;
+	    if (exists $old_deps{$obj}) {
+		$src = $old_deps{$obj};
+	    } elsif (exists $manifest{$src}) {
+		$src = $manifest{$src};
+		foreach (sort { length($b) <=> length($a) } keys %dir_vars) {
+		    last if $src =~ s:^\Q$dir_vars{$_}/\E:\$\($_\)/:;
+		}
+	    } else {
+		warn "$file: unable to find source for $obj\n";
+	    }
 	    my $imp = $implicit{$ext};
 	    $imp =~ s/\$</$src/g;
+
 	    my $deps = sprintf("%s: %s %s", $obj, $src,
 		join(' ', find_depends($src)));
 	    if (length($deps) > 80) {
