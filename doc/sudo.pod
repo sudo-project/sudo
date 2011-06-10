@@ -166,7 +166,7 @@ may be a value from 1 through 9.
 =item -E
 
 The B<-E> (I<preserve> I<environment>) option indicates to the
-security policy that the uses wishes to preserve their existing
+security policy that the user wishes to preserve their existing
 environment variables.  The security policy may return an error if
 the B<-E> option is specified and the user does not have permission
 to preserve the environment.
