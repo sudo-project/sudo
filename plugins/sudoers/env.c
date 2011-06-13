@@ -390,6 +390,10 @@ matches_env_keep(const char *var)
     size_t len;
     int iswild, keepit = FALSE;
 
+    /* Preserve SHELL variable for "sudo -s". */
+    if (ISSET(sudo_mode, MODE_SHELL) && strncmp(var, "SHELL=", 6) == 0)
+	return TRUE;
+
     for (cur = def_env_keep; cur; cur = cur->next) {
 	len = strlen(cur->value);
 	/* Deal with '*' wildcard */
