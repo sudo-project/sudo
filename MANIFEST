@@ -55,6 +55,7 @@ config.h.in
 config.sub
 configure
 configure.in
+doc/CONTRIBUTORS
 doc/HISTORY
 doc/LICENSE
 doc/Makefile.in
