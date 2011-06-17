@@ -61,11 +61,12 @@ DOCS =	sudo.man visudo.man sudoers.man sudoers.ldap.man sudoers.man \
 @DEV@		$(srcdir)/sudoers.man.in $(srcdir)/sudoers.cat \
 @DEV@		$(srcdir)/sudoreplay.man.in $(srcdir)/sudoreplay.cat \
 @DEV@		$(srcdir)/sudo_plugin.man.in $(srcdir)/sudo_plugin.cat \
-@DEV@		$(srcdir)/HISTORY $(srcdir)/LICENSE
+@DEV@		$(srcdir)/HISTORY $(srcdir)/LICENSE $(srcdir)/CONTRIBUTORS
 
 OTHER_DOCS= $(top_srcdir)/ChangeLog $(top_srcdir)/README \
-	    $(top_srcdir)/NEWS $(srcdir)/HISTORY $(srcdir)/LICENSE \
-	    $(srcdir)/TROUBLESHOOTING $(srcdir)/UPGRADE $(srcdir)/sample.*
+	    $(top_srcdir)/NEWS $(srcdir)/HISTORY $(srcdir)/CONTRIBUTORS \
+	    $(srcdir)/LICENSE $(srcdir)/TROUBLESHOOTING $(srcdir)/UPGRADE \
+	    $(srcdir)/sample.*
 
 OTHER_DOCS_LDAP= $(top_srcdir)/README.LDAP $(srcdir)/schema.*
 
@@ -136,11 +137,14 @@ sudo_plugin.man: $(srcdir)/sudo_plugin.man.in
 @DEV@$(srcdir)/sudo_plugin.cat: varsub $(srcdir)/sudo_plugin.man.in
 @DEV@	sed -f varsub $(srcdir)/sudo_plugin.man.in | $(NROFF) -man > $@
 
+CONTRIBUTORS: $(srcdir)/contributors.pod
+	pod2text -l -i0 $(srcdir)/contributors.pod | sed '1,3d' > $@
+
 HISTORY: $(srcdir)/history.pod
 	pod2text -l -i0 $(srcdir)/history.pod > $@
 
 LICENSE: $(srcdir)/license.pod
-	pod2text -l -i0 $(srcdir)/license.pod | sed '1,2d' > $@
+	pod2text -l -i0 $(srcdir)/license.pod | sed '1,3d' > $@
 
 pre-install:
 
