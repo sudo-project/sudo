@@ -61,6 +61,7 @@ doc/LICENSE
 doc/Makefile.in
 doc/TROUBLESHOOTING
 doc/UPGRADE
+doc/contributors.pod
 doc/history.pod
 doc/license.pod
 doc/sample.pam
