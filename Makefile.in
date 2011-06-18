@@ -62,7 +62,7 @@ ECHO_N = @ECHO_N@
 ECHO_C = @ECHO_C@
 
 # Message catalog support
-LINGUAS = @LINGUAS@
+NLS = @SUDO_NLS@
 POTFILES = src/po/sudo.pot plugins/sudoers/po/sudoers.pot
 MSGFMT = msgfmt
 MSGMERGE = msgmerge
@@ -93,27 +93,33 @@ install-dirs install-binaries install-includes install-plugin: config.status pre
 	    exit $$?; \
 	done
 
-install install-doc: config.status ChangeLog pre-install
+install-doc: config.status ChangeLog
 	for d in $(SUBDIRS); \
 	    do (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
 	done
 
-uninstall:
+install: config.status pre-install install-nls
 	for d in $(SUBDIRS); \
 	    do (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
 	done
-	if test -n "$(LINGUAS)"; then \
-	    for pot in $(POTFILES); do \
-		domain=`basename $$pot .pot`; \
-		set -- $(LINGUAS); \
-		while test $$# != 0; do \
-		    rm -f $(DESTDIR)$(localedir)/$$1/LC_MESSAGES/$$domain.mo; \
-		    shift; \
-		done; \
+
+uninstall: uninstall-nls
+	for d in $(SUBDIRS); \
+	    do (cd $$d && exec $(MAKE) $@) && continue; \
+	    exit $$?; \
+	done
+
+uninstall-nls:
+	for pot in $(POTFILES); do \
+	    domain=`basename $$pot .pot`; \
+	    podir=`dirname $$pot`; \
+	    for po in $$podir/*.po; do \
+		lang=`basename $$po .po`; \
+		rm -f $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$$domain.mo; \
 	    done; \
-	fi
+	done
 
 autoconf:
 	autoconf -I m4
@@ -171,7 +177,7 @@ update-pot:
 	    case "$$domain" in \
 		sudo) cfiles="src/*c common/*c compat/*c";; \
 		sudoers) cfiles="plugins/sudoers/*.c plugins/sudoers/auth/*.c";; \
-		*) echo unknown domain $$domain continue;; \
+		*) echo unknown domain $$domain; continue;; \
 	    esac; \
 	    $(XGETTEXT) $(XGETTEXT_OPTS) -d$$domain $$cfiles -o $$pot; \
 	done
@@ -180,12 +186,10 @@ update-po: update-pot
 	@cd $(top_srcdir); \
 	for pot in $(POTFILES); do \
 	    podir=`dirname $$pot`; \
-	    set -- $(LINGUAS); \
-	    while test $$# != 0; do \
-		echo $(ECHO_N) "Updating $$podir/$$1.po$(ECHO_C)"; \
-		$(MSGMERGE) --update $$podir/$$1.po $$pot; \
-		$(MSGFMT) --output /dev/null --check-format $$podir/$$1.po || exit 1; \
-		shift; \
+	    for po in $$podir/*.po; do \
+		echo $(ECHO_N) "Updating $$po$(ECHO_C)"; \
+		$(MSGMERGE) --update $$po $$pot; \
+		$(MSGFMT) --output /dev/null --check-format $$po || exit 1; \
 	    done; \
 	done
 
@@ -193,27 +197,25 @@ compile-po:
 	@cd $(top_srcdir); \
 	for pot in $(POTFILES); do \
 	    podir=`dirname $$pot`; \
-	    set -- $(LINGUAS); \
-	    while test $$# != 0; do \
-		echo $(ECHO_N) "Compiling $$podir/$$1.mo: $(ECHO_C)"; \
-		$(MSGFMT) --statistics -c -o $$podir/$$1.mo $$podir/$$1.po; \
-		shift; \
+	    for po in $$podir/*.po; do \
+		mo=`echo $$po | sed 's/po$$/mo/'`; \
+		echo $(ECHO_N) "Compiling $$mo: $(ECHO_C)"; \
+		$(MSGFMT) --statistics -c -o $$mo $$po; \
 	    done; \
 	done
 
 install-nls:
-	@if test -n "$(LINGUAS)"; then \
+	@if test "$(NLS)" = "enabled"; then \
 	    cd $(top_srcdir); \
 	    for pot in $(POTFILES); do \
 		podir=`dirname $$pot`; \
 		domain=`basename $$pot .pot`; \
 		echo $(ECHO_N) "Installing $$domain message catalogs:$(ECHO_C)"; \
-		set -- $(LINGUAS); \
-		while test $$# != 0; do \
-		    echo $(ECHO_N) " $$1$(ECHO_C)"; \
-		    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(localedir)/$$1/LC_MESSAGES; \
-		    $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0644 $$podir/$$1.mo $(DESTDIR)$(localedir)/$$1/LC_MESSAGES/$$domain.mo; \
-		    shift; \
+		for mo in $$podir/*.mo; do \
+		    lang=`basename $$mo .mo`; \
+		    echo $(ECHO_N) " $$lang$(ECHO_C)"; \
+		    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES; \
+		    $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0644 $$mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$$domain.mo; \
 		done; \
 		echo ""; \
 	    done; \
