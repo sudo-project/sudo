@@ -180,6 +180,8 @@ plugins/sudoers/parse.c
 plugins/sudoers/parse.h
 plugins/sudoers/plugin_error.c
 plugins/sudoers/po/README
+plugins/sudoers/po/eu.mo
+plugins/sudoers/po/eu.po
 plugins/sudoers/po/fi.mo
 plugins/sudoers/po/fi.po
 plugins/sudoers/po/sudoers.pot
@@ -249,6 +251,10 @@ src/load_plugins.c
 src/net_ifs.c
 src/parse_args.c
 src/po/README
+src/po/da.mo
+src/po/da.po
+src/po/eu.mo
+src/po/eu.po
 src/po/fi.mo
 src/po/fi.po
 src/po/sudo.pot
