@@ -65,7 +65,7 @@ AC_SUBST([CONFIGURE_ARGS])
 AC_SUBST([LIBDL])
 AC_SUBST([LT_STATIC])
 AC_SUBST([LIBINTL])
-AC_SUBST([LINGUAS])
+AC_SUBST([SUDO_NLS])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -171,7 +171,7 @@ AUTH_REG=
 AUTH_EXCL=
 AUTH_EXCL_DEF=
 AUTH_DEF=passwd
-LINGUAS=
+SUDO_NLS=disabled
 
 dnl
 dnl Other vaiables
@@ -2213,8 +2213,7 @@ if test "$enable_nls" != "no"; then
     fi
     if test "$enable_nls" != "no"; then
 	AC_DEFINE(HAVE_LIBINTL_H)
-	# List of available translations
-	LINGUAS="eu fi uk zh_CN"
+	SUDO_NLS=enabled
     fi
 fi
 

@@ -680,7 +680,7 @@ password_timeout
 timeout
 timedir
 iolog_dir
-LINGUAS
+SUDO_NLS
 LIBINTL
 LT_STATIC
 LIBDL
@@ -2910,7 +2910,7 @@ AUTH_REG=
 AUTH_EXCL=
 AUTH_EXCL_DEF=
 AUTH_DEF=passwd
-LINGUAS=
+SUDO_NLS=disabled
 
 CHECKSHADOW=true
 shadow_defs=
@@ -16946,8 +16946,7 @@ fi
     if test "$enable_nls" != "no"; then
 	$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
 
-	# List of available translations
-	LINGUAS="eu fi uk zh_CN"
+	SUDO_NLS=enabled
     fi
 fi
 
