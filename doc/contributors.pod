@@ -85,6 +85,7 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Dworkin Muller
     Jeff Nieusma
     Peter A. Nikitser
+    Ludwig Nussel
     Eric Paquet
     Chantal Paradis
     Ted Percival
