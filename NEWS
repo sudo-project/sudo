@@ -26,6 +26,10 @@ What's new in Sudo 1.8.2?
  * The sudo Makefiles now have more complete dependencies which are
    automatically generated instead of being maintained manually.
 
+ * The "use_pty" sudoers option is now correctly passed back to the
+   sudo front end.  This was missing in previous versions of sudo
+   1.8 which prevented "use_pty" from having being honored.
+
 What's new in Sudo 1.8.1p2?
 
  * Two-character CIDR-style IPv4 netmasks are now matched correctly
