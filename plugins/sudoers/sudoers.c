@@ -580,6 +580,15 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	/* Set cwd to run user's homedir. */
 	command_info[info_len++] = fmt_string("cwd", runas_pw->pw_dir);
 
+	/*
+	 * Newer versions of bash require the -l option to be used
+	 * in conjunction with the -c option even if the shell name
+	 * starts with a '-'.
+	 */
+	if (NewArgc > 1 && strcmp(NewArgv[0], "-bash") == 0 &&
+	    strcmp(NewArgv[1], "-c") == 0)
+	    NewArgv[1] = "-lc";
+
 #if defined(__linux__) || defined(_AIX)
 	/* Insert system-wide environment variables. */
 	read_env_file(_PATH_ENVIRONMENT, TRUE);
