@@ -30,6 +30,10 @@ What's new in Sudo 1.8.2?
    sudo front end.  This was missing in previous versions of sudo
    1.8 which prevented "use_pty" from being honored.
 
+ * "sudo -i command" now works correctly with the bash shell.
+   Previously, the .bash_profile would not be sourced prior to
+   running the command.
+
 What's new in Sudo 1.8.1p2?
 
  * Two-character CIDR-style IPv4 netmasks are now matched correctly
