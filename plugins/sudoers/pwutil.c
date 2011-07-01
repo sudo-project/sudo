@@ -636,15 +636,55 @@ sudo_endgrent(void)
     sudo_freegrcache();
 }
 
+#if defined(HAVE_GETGROUPS) && !defined(HAVE_MBR_CHECK_MEMBERSHIP)
+static int
+user_in_group_cached(const char *group)
+{
+    gid_t gid = -1;
+    int i, retval = FALSE;
+
+    if (group[0] == '#')
+	gid = atoi(group + 1);
+
+    /* Check against user's primary (passwd file) group. */
+    if ((user_group != NULL && strcasecmp(group, user_group) == 0) ||
+	(group[0] == '#' && gid == user_gid)) {
+	retval = TRUE;
+	goto done;
+    }
+
+    /*
+     * If we are matching the invoking or list user and that user has a
+     * supplementary group vector, check it.
+     */
+    for (i = 0; i < user_ngroups; i++) {
+	if (strcasecmp(group, user_groups[i]) == 0) {
+	    retval = TRUE;
+	    goto done;
+	}
+    }
+    if (group[0] == '#') {
+	for (i = 0; i < user_ngroups; i++) {
+	    if (gid == user_gids[i]) {
+		retval = TRUE;
+		goto done;
+	    }
+	}
+    }
+
+done:
+    return retval;
+}
+#endif /* HAVE_GETGROUPS && !HAVE_MBR_CHECK_MEMBERSHIP */
+
 int
-user_in_group(struct passwd *pw, const char *group)
+user_in_group_lookup(struct passwd *pw, const char *group)
 {
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
     uuid_t gu, uu;
     int ismember;
 #else
     char **gr_mem;
-    int i;
 #endif
     struct group *grp;
     int retval = FALSE;
@@ -684,28 +724,11 @@ user_in_group(struct passwd *pw, const char *group)
 	}
     }
 #else /* HAVE_MBR_CHECK_MEMBERSHIP */
-# ifdef HAVE_GETGROUPS
-    /*
-     * If we are matching the invoking or list user and that user has a
-     * supplementary group vector, check it.
-     */
-    if (user_ngroups > 0 &&
-	strcmp(pw->pw_name, list_pw ? list_pw->pw_name : user_name) == 0) {
-	for (i = 0; i < user_ngroups; i++) {
-	    if (grp->gr_gid == user_groups[i]) {
+    if (grp->gr_mem != NULL) {
+	for (gr_mem = grp->gr_mem; *gr_mem; gr_mem++) {
+	    if (strcmp(*gr_mem, pw->pw_name) == 0) {
 		retval = TRUE;
 		goto done;
-	    }
-	}
-    } else
-# endif /* HAVE_GETGROUPS */
-    {
-	if (grp != NULL && grp->gr_mem != NULL) {
-	    for (gr_mem = grp->gr_mem; *gr_mem; gr_mem++) {
-		if (strcmp(*gr_mem, pw->pw_name) == 0) {
-		    retval = TRUE;
-		    goto done;
-		}
 	    }
 	}
     }
@@ -715,4 +738,16 @@ done:
     if (grp != NULL)
 	gr_delref(grp);
     return retval;
+}
+
+int
+user_in_group(struct passwd *pw, const char *group)
+{
+#if defined(HAVE_GETGROUPS) && !defined(HAVE_MBR_CHECK_MEMBERSHIP)
+    if (user_ngroups > 0 &&
+	strcmp(pw->pw_name, list_pw ? list_pw->pw_name : user_name) == 0) {
+	return user_in_group_cached(group);
+    }
+#endif /* HAVE_GETGROUPS && !HAVE_MBR_CHECK_MEMBERSHIP */
+    return user_in_group_lookup(pw, group);
 }

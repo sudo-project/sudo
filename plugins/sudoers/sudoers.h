@@ -63,13 +63,9 @@ struct sudo_user {
     char *cmnd_safe;
     char *class_name;
     char *krb5_ccname;
-    int   closefrom;
-    int   ngroups;
-    uid_t uid;
-    uid_t gid;
-    int   lines;
-    int   cols;
-    GETGROUPS_T *groups;
+    char *group;
+    char **groups;
+    GETGROUPS_T *gids;
     char * const * env_vars;
 #ifdef HAVE_SELINUX
     char *role;
@@ -77,6 +73,12 @@ struct sudo_user {
 #endif
     char *cwd;
     char *iolog_file;
+    int   closefrom;
+    int   ngroups;
+    uid_t uid;
+    uid_t gid;
+    int   lines;
+    int   cols;
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
     uuid_t uuid;
 #endif
@@ -159,6 +161,8 @@ struct sudo_user {
 #define user_uuid		(sudo_user.uuid)
 #define user_dir		(sudo_user.pw->pw_dir)
 #define user_ngroups		(sudo_user.ngroups)
+#define user_gids		(sudo_user.gids)
+#define user_group		(sudo_user.group)
 #define user_groups		(sudo_user.groups)
 #define user_tty		(sudo_user.tty)
 #define user_ttypath		(sudo_user.ttypath)
