@@ -101,7 +101,7 @@ static void create_admin_success_flag(void);
 
 /* XXX */
 extern int runas_ngroups;
-extern GETGROUPS_T *runas_groups;
+extern GETGROUPS_T *runas_gids;
 
 /*
  * Globals
@@ -647,7 +647,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	for (i = 0; i < runas_ngroups; i++) {
 	    /* XXX - check rval */
 	    len = snprintf(cp, glsize - (cp - gid_list), "%s%u",
-		 i ? "," : "", (unsigned int) runas_groups[i]);
+		 i ? "," : "", (unsigned int) runas_gids[i]);
 	    cp += len;
 	}
 	command_info[info_len++] = gid_list;
@@ -1142,6 +1142,7 @@ sudoers_policy_version(int verbose)
 static int
 deserialize_info(char * const settings[], char * const user_info[])
 {
+    struct group *grp;
     char * const *cur;
     const char *p;
     int flags = 0;
@@ -1280,7 +1281,12 @@ deserialize_info(char * const settings[], char * const user_info[])
 	    continue;
 	}
 	if (MATCHES(*cur, "gid=")) {
-	    user_gid = (gid_t) atoi(*cur + sizeof("gid=") - 1);
+	    p = *cur + sizeof("gid=") - 1;
+	    user_gid = (gid_t) atoi(p);
+	    if ((grp = sudo_getgrgid(user_gid)) != NULL) {
+		user_group = estrdup(grp->gr_name);
+		gr_delref(grp);
+	    }
 	    continue;
 	}
 	if (MATCHES(*cur, "groups=")) {
@@ -1294,12 +1300,21 @@ deserialize_info(char * const settings[], char * const user_info[])
 			user_ngroups++;
 		}
 
-		user_groups = emalloc2(user_ngroups, sizeof(GETGROUPS_T));
+		user_gids = emalloc2(user_ngroups, sizeof(GETGROUPS_T));
+		user_groups = emalloc2(user_ngroups, sizeof(char *));
 		user_ngroups = 0;
 		cp = val;
 		for (;;) {
 		    /* XXX - strtol would be better here */
-		    user_groups[user_ngroups++] = atoi(cp);
+		    grp = sudo_getgrgid(atoi(cp));
+		    if (grp != NULL) {
+			user_gids[user_ngroups] = grp->gr_gid;
+			user_groups[user_ngroups] = estrdup(grp->gr_name);
+			gr_delref(grp);
+		    } else {
+			easprintf(&user_groups[user_ngroups], "#%s", cp);
+		    }
+		    user_ngroups++;
 		    cp = strchr(cp, ',');
 		    if (cp == NULL)
 			break;

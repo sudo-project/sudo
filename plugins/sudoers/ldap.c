@@ -328,7 +328,7 @@ struct sudo_ldap_handle {
     LDAP *ld;
     struct ldap_result *result;
     char *username;
-    GETGROUPS_T *groups;
+    char **groups;
 };
 
 struct sudo_nss sudo_nss_ldap = {
@@ -989,12 +989,11 @@ sudo_ldap_build_pass1(struct passwd *pw)
 	sz += 12 + strlen(grp->gr_name);	/* primary group */
 	gr_delref(grp);
     }
-    for (i = 0; i < user_ngroups; i++) {
-	if (user_groups[i] == pw->pw_gid)
-	    continue;
-	if ((grp = sudo_getgrgid(user_groups[i])) != NULL) {
-	    sz += 12 + strlen(grp->gr_name);	/* supplementary group */
-	    gr_delref(grp);
+    if (strcmp(pw->pw_name, list_pw ? list_pw->pw_name : user_name) == 0) {
+	for (i = 0; i < user_ngroups; i++) {
+	    if (user_gids[i] == pw->pw_gid)
+		continue;
+	    sz += 12 + strlen(user_groups[i]);	/* supplementary group */
 	}
     }
 
@@ -1028,14 +1027,13 @@ sudo_ldap_build_pass1(struct passwd *pw)
     }
 
     /* Append supplementary groups */
-    for (i = 0; i < user_ngroups; i++) {
-	if (user_groups[i] == pw->pw_gid)
-	    continue;
-	if ((grp = sudo_getgrgid(user_groups[i])) != NULL) {
+    if (strcmp(pw->pw_name, list_pw ? list_pw->pw_name : user_name) == 0) {
+	for (i = 0; i < user_ngroups; i++) {
+	    if (user_gids[i] == pw->pw_gid)
+		continue;
 	    (void) strlcat(buf, "(sudoUser=%", sz);
-	    (void) strlcat(buf, grp->gr_name, sz);
+	    (void) strlcat(buf, user_groups[i], sz);
 	    (void) strlcat(buf, ")", sz);
-	    gr_delref(grp);
 	}
     }
 

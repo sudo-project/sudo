@@ -204,23 +204,39 @@ sudo_read_nss(void)
 
 #endif /* HAVE_LDAP && _PATH_NSSWITCH_CONF */
 
-/* Reset user_groups based on passwd entry. */
+/* Reset user_gids and user_groups based on passwd entry. */
 static void
 reset_groups(struct passwd *pw)
 {
 #if defined(HAVE_INITGROUPS) && defined(HAVE_GETGROUPS)
     if (pw != sudo_user.pw) {
+	struct group *grp;
+	int i;
+
 # ifdef HAVE_SETAUTHDB
 	aix_setauthdb(pw->pw_name);
 # endif
 	if (initgroups(pw->pw_name, pw->pw_gid) == -1)
 	    log_error(USE_ERRNO|MSG_ONLY, _("unable to reset group vector"));
+	efree(user_gids);
+	user_gids = NULL;
 	efree(user_groups);
 	user_groups = NULL;
 	if ((user_ngroups = getgroups(0, NULL)) > 0) {
-	    user_groups = emalloc2(user_ngroups, sizeof(GETGROUPS_T));
-	    if (getgroups(user_ngroups, user_groups) < 0)
+	    user_gids = emalloc2(user_ngroups, sizeof(GETGROUPS_T));
+	    if (getgroups(user_ngroups, user_gids) < 0)
 		log_error(USE_ERRNO|MSG_ONLY, _("unable to get group vector"));
+            user_groups = emalloc2(user_ngroups, sizeof(char *));
+            for (i = 0; i < user_ngroups; i++) {
+                grp = sudo_getgrgid(user_gids[i]);
+		if (grp != NULL) {
+		    user_groups[i] = estrdup(grp->gr_name);
+		    gr_delref(grp);
+		} else {
+		    easprintf(&user_groups[i], "#%u",
+			(unsigned int) user_gids[i]);
+		}
+            }
 	}
 # ifdef HAVE_SETAUTHDB
 	aix_restoreauthdb();
