@@ -1,6 +1,30 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.8.2:
+
+    When matching Unix groups in the sudoers file, sudo will now
+    match based on the name of the group as it appears in sudoers
+    instead of the group ID.  This can substantially reduce the
+    number of group lookups for sudoers files that contain a large
+    nummber of groups.  There are a few side effects of this change.
+
+    1) Unix groups with different names but the same group ID are
+       can no longer be used interchangably.  Sudo will look up all
+       of a user's groups by group ID and use the resulting group
+       names when matching sudoers entries.  If there are multiple
+       groups with the same ID, the group name returned by the
+       system getgrgid() library function is the name that will be
+       used when matching sudoers entries.
+
+    2) Unix group names specified in the sudoers file that are
+       longer than the system maximum will no longer match.  For
+       instance, if there is a Unix group "fireflie" on a system
+       where group names are limited to eight characters, "%fireflies"
+       in sudoers will no longer match "fireflie".  Previously, a
+       lookup by name of the group "fireflies" would have matched
+       the "fireflie" group on most systems.
+
 o Upgrading from a version prior to 1.8.1:
 
     Changes in the sudoers parser could result in parse errors for

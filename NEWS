@@ -34,6 +34,11 @@ What's new in Sudo 1.8.2?
    Previously, the .bash_profile would not be sourced prior to
    running the command.
 
+ * When matching groups in the sudoers file, sudo will now match
+   based on the name of the group instead of the group ID. This can
+   substantially reduce the number of group lookups for sudoers
+   files that contain a large nummber of groups.
+
 What's new in Sudo 1.8.1p2?
 
  * Two-character CIDR-style IPv4 netmasks are now matched correctly
