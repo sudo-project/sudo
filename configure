@@ -13109,6 +13109,11 @@ fi
 		    with_netsvc="/etc/netsvc.conf"
 		fi
 
+		# LDR_PRELOAD is supported in AIX 5.3 and later
+		case "$OSREV" in
+		    1-4.*) with_noexec=no ;;
+		esac
+
 		# AIX-specific functions
 		for ac_func in getuserattr setauthdb
 do :
