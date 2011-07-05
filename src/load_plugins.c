@@ -52,7 +52,9 @@
 # define RTLD_GLOBAL	0
 #endif
 
+#ifdef _PATH_SUDO_NOEXEC
 const char *noexec_path = _PATH_SUDO_NOEXEC;
+#endif
 
 /*
  * Read in /etc/sudo.conf
@@ -83,8 +85,10 @@ sudo_read_conf(const char *conf_file)
 	    }
 	    if (strcasecmp(name, "askpass") == 0)
 		askpass_path = estrdup(path);
+#ifdef _PATH_SUDO_NOEXEC
 	    else if (strcasecmp(name, "noexec") == 0)
 		noexec_path = estrdup(path);
+#endif
 	    continue;
 	}
 

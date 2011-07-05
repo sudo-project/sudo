@@ -512,11 +512,13 @@ command_info_to_details(char * const info[], struct command_details *details)
 			SET(details->flags, CD_NOEXEC);
 		    break;
 		}
+#ifdef _PATH_SUDO_NOEXEC
 		/* XXX - deprecated */
 		if (strncmp("noexec_file=", info[i], sizeof("noexec_file=") - 1) == 0) {
 		    noexec_path = info[i] + sizeof("noexec_file=") - 1;
 		    break;
 		}
+#endif /* _PATH_SUDO_NOEXEC */
 		break;
 	    case 'p':
 		if (strncmp("preserve_groups=", info[i], sizeof("preserve_groups=") - 1) == 0) {
@@ -781,8 +783,10 @@ set_project(struct passwd *pw)
 static void
 disable_execute(struct command_details *details)
 {
+#ifdef _PATH_SUDO_NOEXEC
     char *cp, **ev, **nenvp;
     int env_len = 0, env_size = 128;
+#endif /* _PATH_SUDO_NOEXEC */
 
 #ifdef HAVE_PRIV_SET
     /* Solaris privileges, remove PRIV_PROC_EXEC post-execve. */
@@ -791,6 +795,7 @@ disable_execute(struct command_details *details)
     warning(_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
 #endif /* HAVE_PRIV_SET */
 
+#ifdef _PATH_SUDO_NOEXEC
     nenvp = emalloc2(env_size, sizeof(char *));
     for (ev = details->envp; *ev != NULL; ev++) {
 	if (env_len + 2 > env_size) {
@@ -801,21 +806,21 @@ disable_execute(struct command_details *details)
 	 * Prune out existing preloaded libraries.
 	 * XXX - should save and append instead of replacing.
 	 */
-#if defined(__darwin__) || defined(__APPLE__)
+# if defined(__darwin__) || defined(__APPLE__)
 	if (strncmp(*ev, "DYLD_INSERT_LIBRARIES=", sizeof("DYLD_INSERT_LIBRARIES=") - 1) == 0)
 	    continue;
 	if (strncmp(*ev, "DYLD_FORCE_FLAT_NAMESPACE=", sizeof("DYLD_INSERT_LIBRARIES=") - 1) == 0)
 	    continue;
-#elif defined(__osf__) || defined(__sgi)
+# elif defined(__osf__) || defined(__sgi)
 	if (strncmp(*ev, "_RLD_LIST=", sizeof("_RLD_LIST=") - 1) == 0)
 	    continue;
-#elif defined(_AIX)
+# elif defined(_AIX)
 	if (strncmp(*ev, "LDR_PRELOAD=", sizeof("LDR_PRELOAD=") - 1) == 0)
 	    continue;
-#else
+# else
 	if (strncmp(*ev, "LD_PRELOAD=", sizeof("LD_PRELOAD=") - 1) == 0)
 	    continue;
-#endif
+# endif
 	nenvp[env_len++] = *ev;
     }
 
@@ -824,22 +829,23 @@ disable_execute(struct command_details *details)
      * http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html
      * XXX - need to support 32-bit and 64-bit variants
      */
-#if defined(__darwin__) || defined(__APPLE__)
+# if defined(__darwin__) || defined(__APPLE__)
     nenvp[env_len++] = "DYLD_FORCE_FLAT_NAMESPACE=";
     cp = fmt_string("DYLD_INSERT_LIBRARIES", noexec_path);
-#elif defined(__osf__) || defined(__sgi)
+# elif defined(__osf__) || defined(__sgi)
     easprintf(&cp, "_RLD_LIST=%s:DEFAULT", noexec_path);
-#elif defined(_AIX)
+# elif defined(_AIX)
     cp = fmt_string("LDR_PRELOAD", noexec_path);
-#else
+# else
     cp = fmt_string("LD_PRELOAD", noexec_path);
-#endif
+# endif
     if (cp == NULL)
 	error(1, NULL);
     nenvp[env_len++] = cp;
     nenvp[env_len] = NULL;
 
     details->envp = nenvp;
+#endif /* _PATH_SUDO_NOEXEC */
 }
 
 /*
