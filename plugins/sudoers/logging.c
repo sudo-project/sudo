@@ -176,19 +176,16 @@ do_syslog(int pri, char *msg)
 #endif /* HAVE_SETLOCALE */
 }
 
-#define LOG_INDENT	"    "
-
 static void
 do_logfile(char *msg)
 {
-    char *full_line, *beg, *end, *indent = "";
-    size_t len, maxlen;
+    char *full_line;
+    size_t len;
     mode_t oldmask;
     time_t now;
     FILE *fp;
 
     oldmask = umask(077);
-    maxlen = def_loglinelen > 0 ? def_loglinelen : 0;
     fp = fopen(def_logfile, "a");
     (void) umask(oldmask);
     if (fp == NULL) {
@@ -222,32 +219,9 @@ do_logfile(char *msg)
 		    get_timestr(now, def_log_year), user_name, msg);
 
 	    /*
-	     * Print out full_line with word wrap around maxlen characters.
+	     * Print out full_line with word wrap around def_loglinelen chars.
 	     */
-	    beg = full_line;
-	    while (len > maxlen) {
-		end = beg + maxlen + 1;
-		while (end != beg && *end != ' ')
-		    end--;
-		if (beg == end) {
-		    /* Unable to find word break within maxlen, look beyond. */
-		    end = strchr(beg + maxlen + 1, ' ');
-		    if (end == NULL)
-			break;	/* no word break */
-		}
-		fprintf(fp, "%s%.*s\n", indent, (int)(end - beg), beg);
-		while (*end == ' ')
-		    end++;
-		len -= (end - beg);
-		beg = end;
-		if (indent[0] == '\0') {
-		    indent = LOG_INDENT;
-		    maxlen -= sizeof(LOG_INDENT) - 1;
-		}
-	    }
-	    /* Print remainder, if any. */
-	    if (len)
-		fprintf(fp, "%s%s\n", indent, beg);
+	    writeln_wrap(fp, full_line, len, def_loglinelen);
 	    efree(full_line);
 	}
 	(void) fflush(fp);

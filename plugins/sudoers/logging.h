@@ -47,11 +47,17 @@
 # define MAXSYSLOGLEN		960
 #endif
 
+/*
+ * Indentation level for file-based logs when word wrap is enabled.
+ */
+#define LOG_INDENT	"    "
+
 void audit_success(char *[]);
 void audit_failure(char *[], char const * const, ...);
 void log_allowed(int);
 void log_denial(int, int);
 void log_error(int flags, const char *fmt, ...) __printflike(2, 3);
 void reapchild(int);
+void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
 
 #endif /* _LOGGING_H */
