@@ -106,7 +106,7 @@ SHELL = @SHELL@
 
 PROGS = sudoers.la visudo sudoreplay testsudoers
 
-TEST_PROGS = check_iolog_path check_fill
+TEST_PROGS = check_iolog_path check_fill check_wrap
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
@@ -115,8 +115,8 @@ LIBSUDOERS_OBJS = alias.lo audit.lo defaults.lo gram.lo match.lo pwutil.lo \
 
 SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo env.lo goodpath.lo \
 	       group_plugin.lo find_path.lo interfaces.lo logging.lo \
-	       parse.lo set_perms.lo sudoers.lo sudo_nss.lo iolog.lo \
-	       iolog_path.lo @SUDOERS_OBJS@
+	       logwrap.lo parse.lo set_perms.lo sudoers.lo sudo_nss.lo \
+	       iolog.lo iolog_path.lo @SUDOERS_OBJS@
 
 VISUDO_OBJS = visudo.o goodpath.o find_path.o error.o
 
@@ -125,10 +125,12 @@ REPLAY_OBJS = getdate.o sudoreplay.o error.o
 TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o error.o group_plugin.o \
 	    net_ifs.o
 
-CHECK_IOLOG_PATH_OBJS = check_iolog_path.o error.o iolog_path.lo pwutil.lo \
-			redblack.lo
+CHECK_IOLOG_PATH_OBJS = check_iolog_path.o error.o iolog_path.o pwutil.o \
+			redblack.o
 
-CHECK_FILL_OBJS = check_fill.o toke_util.lo error.o
+CHECK_FILL_OBJS = check_fill.o toke_util.o error.o
+
+CHECK_WRAP_OBJS = check_wrap.o logwrap.o error.o
 
 LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
 
@@ -173,6 +175,9 @@ check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) $(LT_LIBS)
 
 check_fill: $(CHECK_FILL_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_FILL_OBJS) $(LDFLAGS) $(LIBS)
+
+check_wrap: $(CHECK_WRAP_OBJS) $(LT_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_WRAP_OBJS) $(LDFLAGS) $(LIBS)
 
 # Uncomment the following if you want "make distclean" to clean the parser
 @DEV@GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate.c
@@ -255,6 +260,9 @@ check: $(TEST_PROGS) visudo testsudoers
 	./check_iolog_path $(srcdir)/regress/iolog_path/data; \
 	rval=`expr $$rval + $$?`; \
 	./check_fill; \
+	rval=`expr $$rval + $$?`; \
+	./check_wrap $(srcdir)/regress/logging/check_wrap.in > check_wrap.out; \
+	diff check_wrap.out $(srcdir)/regress/logging/check_wrap.out.ok; \
 	rval=`expr $$rval + $$?`; \
 	passed=0; failed=0; total=0; \
 	    for t in $(srcdir)/regress/sudoers/*.in; do \
@@ -387,6 +395,9 @@ check_iolog_path.o: $(srcdir)/regress/iolog_path/check_iolog_path.c \
                     $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
                     $(incdir)/gettext.h $(srcdir)/def_data.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/iolog_path/check_iolog_path.c
+check_wrap.o: $(srcdir)/regress/logging/check_wrap.c $(top_builddir)/config.h \
+              $(incdir)/missing.h $(incdir)/error.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/logging/check_wrap.c
 dce.lo: $(authdir)/dce.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
         $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
         $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
@@ -471,6 +482,7 @@ iolog_path.lo: $(srcdir)/iolog_path.c $(top_builddir)/config.h \
                $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
                $(incdir)/sudo_plugin.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/iolog_path.c
+iolog_path.o: iolog_path.lo
 kerb4.lo: $(authdir)/kerb4.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
           $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
@@ -500,6 +512,13 @@ logging.lo: $(srcdir)/logging.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
             $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/logging.c
+logwrap.lo: $(srcdir)/logwrap.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
+            $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
+            $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
+            $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
+            $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/logwrap.c
+logwrap.o: logwrap.lo
 match.lo: $(srcdir)/match.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
           $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
@@ -542,9 +561,11 @@ pwutil.lo: $(srcdir)/pwutil.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
            $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
            $(srcdir)/redblack.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/pwutil.c
+pwutil.o: pwutil.lo
 redblack.lo: $(srcdir)/redblack.c $(top_builddir)/config.h $(incdir)/missing.h \
              $(incdir)/alloc.h $(srcdir)/redblack.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/redblack.c
+redblack.o: redblack.lo
 rfc1938.lo: $(authdir)/rfc1938.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
             $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
@@ -640,6 +661,7 @@ toke_util.lo: $(srcdir)/toke_util.c $(top_builddir)/config.h \
               $(incdir)/sudo_plugin.h $(incdir)/gettext.h $(srcdir)/parse.h \
               $(srcdir)/toke.h $(srcdir)/gram.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/toke_util.c
+toke_util.o: toke_util.lo
 tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(top_builddir)/config.h \
              $(srcdir)/tsgetgrpw.h $(top_builddir)/config.h \
              $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \
