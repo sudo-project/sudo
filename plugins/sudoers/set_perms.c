@@ -112,7 +112,7 @@ set_perms(int perm)
     CLR(perm, PERM_MASK);
 
     if (perm_stack_depth == PERM_STACK_MAX) {
-	errstr = "perm stack overflow";
+	errstr = _("perm stack overflow");
 	errno = EINVAL;
 	goto bad;
     }
@@ -225,14 +225,14 @@ set_perms(int perm)
 	state->egid = runas_gr ? runas_gr->gr_gid : runas_pw->pw_gid;
 	state->sgid = -1;
 	if (setresgid(-1, ID(egid), -1)) {
-	    errstr = "unable to change to runas gid";
+	    errstr = _("unable to change to runas gid");
 	    goto bad;
 	}
 	state->ruid = -1;
 	state->euid = runas_pw ? runas_pw->pw_uid : user_uid;
 	state->suid = -1;
 	if (setresuid(-1, ID(euid), -1)) {
-	    errstr = "unable to change to runas uid";
+	    errstr = _("unable to change to runas uid");
 	    goto bad;
 	}
 	break;
@@ -355,7 +355,7 @@ set_perms(int perm)
     CLR(perm, PERM_MASK);
 
     if (perm_stack_depth == PERM_STACK_MAX) {
-	errstr = "perm stack overflow";
+	errstr = _("perm stack overflow");
 	errno = EINVAL;
 	goto bad;
     }
@@ -454,13 +454,13 @@ set_perms(int perm)
 	state->rgid = -1;
 	state->egid = runas_gr ? runas_gr->gr_gid : runas_pw->pw_gid;
 	if (setregid(ID(rgid), ID(egid))) {
-	    errstr = "unable to change to runas gid";
+	    errstr = _("unable to change to runas gid");
 	    goto bad;
 	}
 	state->ruid = ROOT_UID;
 	state->euid = runas_pw ? runas_pw->pw_uid : user_uid;
 	if (setreuid(ID(ruid), ID(euid))) {
-	    errstr = "unable to change to runas uid";
+	    errstr = _("unable to change to runas uid");
 	    goto bad;
 	}
 	break;
@@ -584,7 +584,7 @@ set_perms(int perm)
     CLR(perm, PERM_MASK);
 
     if (perm_stack_depth == PERM_STACK_MAX) {
-	errstr = "perm stack overflow";
+	errstr = _("perm stack overflow");
 	errno = EINVAL;
 	goto bad;
     }
@@ -688,13 +688,13 @@ set_perms(int perm)
 	state->rgid = -1;
 	state->egid = runas_gr ? runas_gr->gr_gid : runas_pw->pw_gid;
 	if (setegid(ID(egid))) {
-	    errstr = "unable to change to runas gid";
+	    errstr = _("unable to change to runas gid");
 	    goto bad;
 	}
 	state->ruid = -1;
 	state->euid = runas_pw ? runas_pw->pw_uid : user_uid;
 	if (seteuid(ID(euid))) {
-	    errstr = "unable to change to runas uid";
+	    errstr = _("unable to change to runas uid");
 	    goto bad;
 	}
 	break;
@@ -815,7 +815,7 @@ set_perms(int perm)
     CLR(perm, PERM_MASK);
 
     if (perm_stack_depth == PERM_STACK_MAX) {
-	errstr = "perm stack overflow";
+	errstr = _("perm stack overflow");
 	errno = EINVAL;
 	goto bad;
     }
