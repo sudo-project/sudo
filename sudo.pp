@@ -6,7 +6,7 @@
 		name="sudo"
 		pp_kit_package="sudo"
 	fi
-	summary="Provide limited super-user priveleges to specific users"
+	summary="Provide limited super-user privileges to specific users"
 	description="Sudo is a program designed to allow a sysadmin to give \
 limited root privileges to users and log root activity.  \
 The basic philosophy is to give as few privileges as possible but \
