@@ -337,9 +337,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	NewArgv[0] = user_cmnd;
 	NewArgv[1] = NULL;
     } else {
+	/* Must leave an extra slot before NewArgv for bash's --login */
 	NewArgc = argc;
-	NewArgv = emalloc2(NewArgc + 1, sizeof(char *));
-	memcpy(NewArgv, argv, argc * sizeof(char *));
+	NewArgv = emalloc2(NewArgc + 2, sizeof(char *));
+	memcpy(++NewArgv, argv, argc * sizeof(char *));
 	NewArgv[NewArgc] = NULL;
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
 	    NewArgv[0] = estrdup(runas_pw->pw_shell);
@@ -581,13 +582,19 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	command_info[info_len++] = fmt_string("cwd", runas_pw->pw_dir);
 
 	/*
-	 * Newer versions of bash require the -l option to be used
-	 * in conjunction with the -c option even if the shell name
-	 * starts with a '-'.
+	 * Newer versions of bash require the --login option to be used
+	 * in conjunction with the -c option even if the shell name starts
+	 * with a '-'.  Unfortunately, bash 1.x uses -login, not --login
+	 * so this will cause an error for that.
 	 */
 	if (NewArgc > 1 && strcmp(NewArgv[0], "-bash") == 0 &&
-	    strcmp(NewArgv[1], "-c") == 0)
-	    NewArgv[1] = "-lc";
+	    strcmp(NewArgv[1], "-c") == 0) {
+	    /* Use the extra slot before NewArgv so we can store --login. */
+	    NewArgv--;
+	    NewArgc++;
+	    NewArgv[0] = NewArgv[1];
+	    NewArgv[1] = "--login";
+	}
 
 #if defined(__linux__) || defined(_AIX)
 	/* Insert system-wide environment variables. */
