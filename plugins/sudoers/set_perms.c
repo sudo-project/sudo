@@ -141,7 +141,7 @@ set_perms(int perm)
 	state->sgid = state->egid; /* in case we are setgid */
 #endif
 	state->grlist = user_group_list;
-	grlist_addref(user_group_list);
+	grlist_addref(state->grlist);
 	break;
 
     case PERM_ROOT:
@@ -160,20 +160,20 @@ set_perms(int perm)
 	break;
 
     case PERM_USER:
-	state->grlist = user_group_list;
-	grlist_addref(user_group_list);
-	if (state->grlist != ostate->grlist) {
-	    if (setgroups(state->grlist->ngids, state->grlist->gids)) {
-		errstr = "setgroups()";
-		goto bad;
-	    }
-	}
 	state->rgid = -1;
 	state->egid = user_gid;
 	state->sgid = -1;
 	if (setresgid(-1, ID(egid), -1)) {
 	    errstr = "setresgid(-1, user_gid, -1)";
 	    goto bad;
+	}
+	state->grlist = user_group_list;
+	grlist_addref(state->grlist);
+	if (state->grlist != ostate->grlist) {
+	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
+		errstr = "setgroups()";
+		goto bad;
+	    }
 	}
 	state->ruid = user_uid;
 	state->euid = user_uid;
@@ -186,20 +186,20 @@ set_perms(int perm)
 
     case PERM_FULL_USER:
 	/* headed for exec() */
-	state->grlist = user_group_list;
-	grlist_addref(user_group_list);
-	if (state->grlist != ostate->grlist) {
-	    if (setgroups(state->grlist->ngids, state->grlist->gids)) {
-		errstr = "setgroups()";
-		goto bad;
-	    }
-	}
 	state->rgid = user_gid;
 	state->egid = user_gid;
 	state->sgid = user_gid;
 	if (setresgid(ID(rgid), ID(egid), ID(sgid))) {
 	    errstr = "setresgid(user_gid, user_gid, user_gid)";
 	    goto bad;
+	}
+	state->grlist = user_group_list;
+	grlist_addref(state->grlist);
+	if (state->grlist != ostate->grlist) {
+	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
+		errstr = "setgroups()";
+		goto bad;
+	    }
 	}
 	state->ruid = user_uid;
 	state->euid = user_uid;
@@ -211,7 +211,6 @@ set_perms(int perm)
 	break;
 
     case PERM_RUNAS:
-	state->grlist = runas_setgroups();
 	state->rgid = -1;
 	state->egid = runas_gr ? runas_gr->gr_gid : runas_pw->pw_gid;
 	state->sgid = -1;
@@ -219,6 +218,7 @@ set_perms(int perm)
 	    errstr = _("unable to change to runas gid");
 	    goto bad;
 	}
+	state->grlist = runas_setgroups();
 	state->ruid = -1;
 	state->euid = runas_pw ? runas_pw->pw_uid : user_uid;
 	state->suid = -1;
@@ -315,7 +315,7 @@ restore_perms(void)
 	goto bad;
     }
     if (state->grlist != ostate->grlist) {
-	if (setgroups(ostate->grlist->ngids, ostate->grlist->gids)) {
+	if (sudo_setgroups(ostate->grlist->ngids, ostate->grlist->gids)) {
 	    warning("setgroups()");
 	    goto bad;
 	}
@@ -392,18 +392,19 @@ set_perms(int perm)
 	break;
 
     case PERM_USER:
-	state->grlist = user_group_list;
-	if (state->grlist != ostate->grlist) {
-	    if (setgroups(state->grlist->ngids, state->grlist->gids)) {
-		errstr = "setgroups()";
-		goto bad;
-	    }
-	}
 	state->rgid = -1;
 	state->egid = user_gid;
 	if (setregid(-1, ID(egid))) {
 	    errstr = "setregid(-1, user_gid)";
 	    goto bad;
+	}
+	state->grlist = user_group_list;
+	grlist_addref(state->grlist);
+	if (state->grlist != ostate->grlist) {
+	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
+		errstr = "setgroups()";
+		goto bad;
+	    }
 	}
 	state->ruid = ROOT_UID;
 	state->euid = user_uid;
@@ -415,18 +416,19 @@ set_perms(int perm)
 
     case PERM_FULL_USER:
 	/* headed for exec() */
-	state->grlist = user_group_list;
-	if (state->grlist != ostate->grlist) {
-	    if (setgroups(state->grlist->ngids, state->grlist->gids)) {
-		errstr = "setgroups()";
-		goto bad;
-	    }
-	}
 	state->rgid = user_gid;
 	state->egid = user_gid;
 	if (setregid(ID(rgid), ID(egid))) {
 	    errstr = "setregid(user_gid, user_gid)";
 	    goto bad;
+	}
+	state->grlist = user_group_list;
+	grlist_addref(state->grlist);
+	if (state->grlist != ostate->grlist) {
+	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
+		errstr = "setgroups()";
+		goto bad;
+	    }
 	}
 	state->ruid = user_uid;
 	state->euid = user_uid;
@@ -437,13 +439,13 @@ set_perms(int perm)
 	break;
 
     case PERM_RUNAS:
-	state->grlist = runas_setgroups();
 	state->rgid = -1;
 	state->egid = runas_gr ? runas_gr->gr_gid : runas_pw->pw_gid;
 	if (setregid(ID(rgid), ID(egid))) {
 	    errstr = _("unable to change to runas gid");
 	    goto bad;
 	}
+	state->grlist = runas_setgroups();
 	state->ruid = ROOT_UID;
 	state->euid = runas_pw ? runas_pw->pw_uid : user_uid;
 	if (setreuid(ID(ruid), ID(euid))) {
@@ -540,7 +542,7 @@ restore_perms(void)
 	goto bad;
     }
     if (state->grlist != ostate->grlist) {
-	if (setgroups(ostate->grlist->ngids, ostate->grlist->gids)) {
+	if (sudo_setgroups(ostate->grlist->ngids, ostate->grlist->gids)) {
 	    warning("setgroups()");
 	    goto bad;
 	}
@@ -622,19 +624,20 @@ set_perms(int perm)
 	break;
 
     case PERM_USER:
-	state->grlist = user_group_list;
-	if (state->grlist != ostate->grlist) {
-	    if (setgroups(state->grlist->ngids, state->grlist->gids)) {
-		errstr = "setgroups()";
-		goto bad;
-	    }
-	}
-	state->rgid = -1;
 	state->egid = user_gid;
 	if (setegid(ID(egid))) {
 	    errstr = "setegid(user_gid)";
 	    goto bad;
 	}
+	state->grlist = user_group_list;
+	grlist_addref(state->grlist);
+	if (state->grlist != ostate->grlist) {
+	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
+		errstr = "setgroups()";
+		goto bad;
+	    }
+	}
+	state->rgid = -1;
 	state->ruid = ROOT_UID;
 	state->euid = user_uid;
 	if (seteuid(ID(euid))) {
@@ -645,18 +648,19 @@ set_perms(int perm)
 
     case PERM_FULL_USER:
 	/* headed for exec() */
-	state->grlist = user_group_list;
-	if (state->grlist != ostate->grlist) {
-	    if (setgroups(state->grlist->ngids, state->grlist->gids)) {
-		errstr = "setgroups()";
-		goto bad;
-	    }
-	}
 	state->rgid = user_gid;
 	state->egid = user_gid;
 	if (setgid(user_gid)) {
 	    errstr = "setgid(user_gid)";
 	    goto bad;
+	}
+	state->grlist = user_group_list;
+	grlist_addref(state->grlist);
+	if (state->grlist != ostate->grlist) {
+	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
+		errstr = "setgroups()";
+		goto bad;
+	    }
 	}
 	state->ruid = user_uid;
 	state->euid = user_uid;
@@ -667,13 +671,13 @@ set_perms(int perm)
 	break;
 
     case PERM_RUNAS:
-	state->grlist = runas_setgroups();
 	state->rgid = -1;
 	state->egid = runas_gr ? runas_gr->gr_gid : runas_pw->pw_gid;
 	if (setegid(ID(egid))) {
 	    errstr = _("unable to change to runas gid");
 	    goto bad;
 	}
+	state->grlist = runas_setgroups();
 	state->ruid = -1;
 	state->euid = runas_pw ? runas_pw->pw_uid : user_uid;
 	if (seteuid(ID(euid))) {
@@ -765,7 +769,7 @@ restore_perms(void)
 	goto bad;
     }
     if (state->grlist != ostate->grlist) {
-	if (setgroups(ostate->grlist->ngids, ostate->grlist->gids)) {
+	if (sudo_setgroups(ostate->grlist->ngids, ostate->grlist->gids)) {
 	    warning("setgroups()");
 	    goto bad;
 	}
@@ -832,15 +836,16 @@ set_perms(int perm)
 	break;
 
     case PERM_FULL_USER:
+	state->rgid = user_gid;
+	(void) setgid(user_gid);
 	state->grlist = user_group_list;
+	grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
-	    if (setgroups(state->grlist->ngids, state->grlist->gids)) {
+	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
 		errstr = "setgroups()";
 		goto bad;
 	    }
 	}
-	state->rgid = user_gid;
-	(void) setgid(user_gid);
 	state->ruid = user_uid;
 	if (setuid(user_uid)) {
 	    errstr = "setuid(user_uid)";
@@ -880,17 +885,17 @@ restore_perms(void)
     ostate = &perm_stack[perm_stack_depth - 2];
     perm_stack_depth--;
 
+    if (OID(rgid) != -1 && setgid(ostate->rgid)) {
+	warning("setgid(%d)", ostate->rgid);
+	goto bad;
+    }
     if (state->grlist != ostate->grlist) {
-	if (setgroups(ostate->grlist->ngids, ostate->grlist->gids)) {
+	if (sudo_setgroups(ostate->grlist->ngids, ostate->grlist->gids)) {
 	    warning("setgroups()");
 	    goto bad;
 	}
     }
     grlist_delref(state->grlist);
-    if (OID(rgid) != -1 && setgid(ostate->rgid)) {
-	warning("setgid(%d)", ostate->rgid);
-	goto bad;
-    }
     if (OID(ruid) != -1 && setuid(ostate->ruid)) {
 	warning("setuid(%d)", ostate->ruid);
 	goto bad;
@@ -923,7 +928,7 @@ runas_setgroups(void)
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
-    if (setgroups(grlist->ngids, grlist->gids) < 0)
+    if (sudo_setgroups(grlist->ngids, grlist->gids) < 0)
 	log_error(USE_ERRNO|MSG_ONLY, _("unable to set runas group vector"));
     return grlist;
 }

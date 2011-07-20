@@ -15,6 +15,7 @@ common/fileops.c
 common/fmt_string.c
 common/lbuf.c
 common/list.c
+common/setgroups.c
 common/term.c
 common/zero_bytes.c
 compat/Makefile.in

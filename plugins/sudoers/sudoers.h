@@ -333,6 +333,9 @@ void group_plugin_unload(void);
 int group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd);
 
+/* setgroups.c */
+int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
+
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;
 extern struct passwd *list_pw;
