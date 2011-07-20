@@ -36,6 +36,51 @@
 
 #include "missing.h"
 
+#ifdef HAVE_GETGRSET
+/*
+ * BSD-compatible getgrouplist(3) using getgrset(3)
+ */
+int
+getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
+{
+    char *cp, *grset = NULL;
+    int i, ngroups = 1;
+    int grpsize = *ngroupsp;
+    int rval = -1;
+    gid_t gid;
+
+    /* We support BSD semantics where the first element is the base gid */
+    if (grpsize <= 0)
+	return -1;
+    groups[0] = basegid;
+
+#ifdef HAVE_SETAUTHDB
+    aix_setauthdb((char *) name);
+#endif
+    if ((grset = getgrset(name)) != NULL) {
+	for (cp = strtok(grset, ","); cp != NULL; cp = strtok(NULL, ",")) {
+	    gid = atoi(cp);
+	    if (gid != basegid) {
+		if (ngroups == grpsize)
+		    goto done;
+		groups[ngroups++] = gid;
+	    }
+	}
+    }
+    rval = 0;
+
+done:
+    efree(grset);
+#ifdef HAVE_SETAUTHDB
+    aix_restoreauthdb();
+#endif
+    *ngroupsp = ngroups;
+
+    return rval;
+}
+
+#else /* HAVE_GETGRSET */
+
 /*
  * BSD-compatible getgrouplist(3) using getgrent(3)
  */
@@ -83,3 +128,4 @@ done:
 
     return rval;
 }
+#endif /* HAVE_GETGRSET */

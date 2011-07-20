@@ -286,6 +286,9 @@ void closefrom(int);
 #ifndef HAVE_GETCWD
 char *getcwd(char *, size_t size);
 #endif
+#ifndef HAVE_GETGROUPLIST
+int getgrouplist(const char *, gid_t, gid_t *, int *);
+#endif
 #ifndef HAVE_GETLINE
 ssize_t getline(char **, size_t *, FILE *);
 #endif

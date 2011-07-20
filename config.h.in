@@ -153,8 +153,14 @@
 /* Define to 1 if you have the `getdomainname' function. */
 #undef HAVE_GETDOMAINNAME
 
-/* Define to 1 if you have the `getgroups' function. */
+/* Define to 1 if you have the `getgrouplist' function. */
+#undef HAVE_GETGROUPLIST
+
+/* Define to 1 if your system has a working `getgroups' function. */
 #undef HAVE_GETGROUPS
+
+/* Define to 1 if you have the `getgrset' function. */
+#undef HAVE_GETGRSET
 
 /* Define to 1 if you have the `getifaddrs' function. */
 #undef HAVE_GETIFADDRS
@@ -213,9 +219,6 @@
 
 /* Define to 1 if <netinet/in.h> contains struct in6_addr. */
 #undef HAVE_IN6_ADDR
-
-/* Define to 1 if you have the `initgroups' function. */
-#undef HAVE_INITGROUPS
 
 /* Define to 1 if you have the `initprivs' function. */
 #undef HAVE_INITPRIVS

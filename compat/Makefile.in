@@ -134,6 +134,9 @@ fnmatch.lo: $(srcdir)/fnmatch.c $(top_builddir)/config.h $(incdir)/missing.h \
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/fnmatch.c
 getcwd.lo: $(srcdir)/getcwd.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/getcwd.c
+getgrouplist.lo: $(srcdir)/getgrouplist.c $(top_builddir)/config.h \
+                 $(incdir)/missing.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/getgrouplist.c
 getline.lo: $(srcdir)/getline.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/getline.c
 getprogname.lo: $(srcdir)/getprogname.c $(top_builddir)/config.h \

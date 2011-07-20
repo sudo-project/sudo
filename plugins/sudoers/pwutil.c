@@ -48,6 +48,12 @@
 #ifdef HAVE_SETAUTHDB
 # include <usersec.h>
 #endif /* HAVE_SETAUTHDB */
+#ifdef HAVE_UTMPX_H
+# include <utmpx.h>
+#else
+# include <utmp.h>
+#endif /* HAVE_UTMPX_H */
+#include <limits.h>
 #include <pwd.h>
 #include <grp.h>
 
@@ -59,6 +65,7 @@
  */
 static struct rbtree *pwcache_byuid, *pwcache_byname;
 static struct rbtree *grcache_bygid, *grcache_byname;
+static struct rbtree *grlist_cache;
 
 static int  cmp_pwuid(const void *, const void *);
 static int  cmp_pwnam(const void *, const void *);
@@ -80,6 +87,7 @@ struct cache_item {
     union {
 	struct passwd *pw;
 	struct group *gr;
+	struct group_list *grlist;
     } d;
 };
 
@@ -160,8 +168,7 @@ make_pwitem(const struct passwd *pw, const char *name)
 	total += strlen(name) + 1;
 
     /* Allocate space for struct item, struct passwd and the strings. */
-    if ((item = malloc(total)) == NULL)
-	    return NULL;
+    item = emalloc(total);
     cp = (char *) item + sizeof(struct cache_item);
 
     /*
@@ -406,7 +413,7 @@ cmp_grgid(const void *v1, const void *v2)
  * elements.  If name is non-NULL it is used as the key, else the
  * gid is the key.  Fills in datum from struct group.
  */
-struct cache_item *
+static struct cache_item *
 make_gritem(const struct group *gr, const char *name)
 {
     char *cp;
@@ -428,8 +435,7 @@ make_gritem(const struct group *gr, const char *name)
     if (name != NULL)
 	total += strlen(name) + 1;
 
-    if ((item = malloc(total)) == NULL)
-	    return NULL;
+    item = emalloc(total);
     cp = (char *) item + sizeof(struct cache_item);
 
     /*
@@ -463,6 +469,96 @@ make_gritem(const struct group *gr, const char *name)
     }
     item->d.gr = newgr;
     item->refcnt = 1;
+
+    return item;
+}
+
+#ifdef HAVE_UTMPX_H
+# define GROUPNAME_LEN	(sizeof((struct utmpx *)0)->ut_user)
+#else
+# ifdef HAVE_STRUCT_UTMP_UT_USER
+#  define GROUPNAME_LEN	(sizeof((struct utmp *)0)->ut_user)
+# else
+#  define GROUPNAME_LEN	(sizeof((struct utmp *)0)->ut_name)
+# endif
+#endif /* HAVE_UTMPX_H */
+
+/*
+ * Dynamically allocate space for a struct item plus the key and data
+ * elements.  Fills in datum from the groups and gids arrays.
+ */
+static struct cache_item *
+make_grlist_item(const char *user, GETGROUPS_T *gids, int ngids)
+{
+    char *cp;
+    size_t i, nsize, ngroups = 0, total, len;
+    struct cache_item *item;
+    struct group_list *grlist;
+    struct group *grp;
+
+    /* Allocate in one big chunk for easy freeing. */
+    nsize = strlen(user) + 1;
+    total = sizeof(struct cache_item) + sizeof(struct group_list) + nsize;
+    total += sizeof(char *) * ngids;
+    total += sizeof(gid_t *) * ngids;
+    total += GROUPNAME_LEN * ngids;
+
+    item = emalloc(total);
+    cp = (char *) item + sizeof(struct cache_item);
+
+    /*
+     * Copy in group list and make pointers relative to space
+     * at the end of the buffer.  Note that the gids array must come
+     * immediately after struct group to guarantee proper alignment.
+     */
+    grlist = (struct group_list *)cp;
+    zero_bytes(grlist, sizeof(struct group_list));
+    cp += sizeof(struct group_list);
+    grlist->gids = (gid_t *)cp;
+    cp += sizeof(gid_t) * ngids;
+    grlist->groups = (char **)cp;
+    cp += sizeof(char *) * ngids;
+
+    /* Set key and datum. */
+    memcpy(cp, user, nsize);
+    item->k.name = cp;
+    item->d.grlist = grlist;
+    item->refcnt = 1;
+    cp += nsize;
+
+    /*
+     * Store group IDs.
+     */
+    for (i = 0; i < ngids; i++)
+	grlist->gids[i] = gids[i];
+    grlist->ngids = ngids;
+
+#ifdef HAVE_SETAUTHDB
+    aix_setauthdb((char *) user);
+#endif
+    /*
+     * Resolve group names by ID and store at the end.
+     */
+    for (i = 0; i < ngids; i++) {
+	if ((grp = sudo_getgrgid(gids[i])) != NULL) {
+	    len = strlen(grp->gr_name) + 1;
+	    if (cp - (char *)grlist + len > total) {
+		void *ptr = erealloc(grlist, total + len + GROUPNAME_LEN);
+		total += len + GROUPNAME_LEN;
+		cp = (char *)ptr + (cp - (char *)grlist);
+		grlist = ptr;
+	    }
+	    memcpy(cp, grp->gr_name, len);
+	    grlist->groups[ngroups++] = cp;
+	    cp += len;
+	    gr_delref(grp);
+	}
+    }
+    grlist->ngroups = ngroups;
+
+#ifdef HAVE_SETAUTHDB
+    aix_restoreauthdb();
+#endif
 
     return item;
 }
@@ -607,6 +703,27 @@ sudo_fakegrnam(const char *group)
 }
 
 void
+grlist_addref(struct group_list *grlist)
+{
+    ptr_to_item(grlist)->refcnt++;
+}
+
+static void
+grlist_delref_item(void *v)
+{
+    struct cache_item *item = v;
+
+    if (--item->refcnt == 0)
+	efree(item);
+}
+
+void
+grlist_delref(struct group_list *grlist)
+{
+    grlist_delref_item(ptr_to_item(grlist));
+}
+
+void
 sudo_setgrent(void)
 {
     setgrent();
@@ -614,6 +731,8 @@ sudo_setgrent(void)
 	grcache_bygid = rbcreate(cmp_grgid);
     if (grcache_byname == NULL)
 	grcache_byname = rbcreate(cmp_grnam);
+    if (grlist_cache == NULL)
+	grlist_cache = rbcreate(cmp_grnam);
 }
 
 void
@@ -627,6 +746,10 @@ sudo_freegrcache(void)
 	rbdestroy(grcache_byname, gr_delref_item);
 	grcache_byname = NULL;
     }
+    if (grlist_cache != NULL) {
+	rbdestroy(grlist_cache, grlist_delref_item);
+	grlist_cache = NULL;
+    }
 }
 
 void
@@ -636,46 +759,130 @@ sudo_endgrent(void)
     sudo_freegrcache();
 }
 
-#if defined(HAVE_GETGROUPS) && !defined(HAVE_MBR_CHECK_MEMBERSHIP)
-static int
-user_in_group_cached(const char *group)
+struct group_list *
+get_group_list(struct passwd *pw)
 {
-    gid_t gid = -1;
-    int i, retval = FALSE;
+    struct cache_item key, *item;
+    struct rbnode *node;
+    size_t len;
+    GETGROUPS_T *gids;
+    int ngids;
 
-    if (group[0] == '#')
-	gid = atoi(group + 1);
-
-    /* Check against user's primary (passwd file) group. */
-    if ((user_group != NULL && strcasecmp(group, user_group) == 0) ||
-	(group[0] == '#' && gid == user_gid)) {
-	retval = TRUE;
+    key.k.name = pw->pw_name;
+    if ((node = rbfind(grlist_cache, &key)) != NULL) {
+	item = (struct cache_item *) node->data;
 	goto done;
     }
+    /*
+     * Cache group db entry if it exists or a negative response if not.
+     */
+#if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
+    ngids = sysconf(_SC_NGROUPS_MAX) * 2;
+    if (ngids < 0)
+#endif
+	ngids = NGROUPS_MAX * 2;
+    gids = emalloc2(ngids, sizeof(GETGROUPS_T));
+    if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1) {
+	efree(gids);
+	gids = emalloc2(ngids, sizeof(GETGROUPS_T));
+	if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1) {
+	    efree(gids);
+	    return NULL;
+	}
+    }
+    if (ngids > 0) {
+	if ((item = make_grlist_item(pw->pw_name, gids, ngids)) == NULL)
+	    errorx(1, "unable to parse group list for %s", pw->pw_name);
+	efree(gids);
+	if (rbinsert(grlist_cache, item) != NULL)
+	    errorx(1, "unable to cache group list for %s, already exists",
+		pw->pw_name);
+    } else {
+	/* Should not happen. */
+	len = strlen(pw->pw_name) + 1;
+	item = emalloc(sizeof(*item) + len);
+	item->refcnt = 1;
+	item->k.name = (char *) item + sizeof(*item);
+	memcpy(item->k.name, pw->pw_name, len);
+	item->d.grlist = NULL;
+	if (rbinsert(grlist_cache, item) != NULL)
+	    errorx(1, "unable to cache group list for %s, already exists",
+		pw->pw_name);
+    }
+done:
+    item->refcnt++;
+    return item->d.grlist;
+}
+
+void
+set_group_list(const char *user, GETGROUPS_T *gids, int ngids)
+{
+    struct cache_item key, *item;
+    struct rbnode *node;
 
     /*
-     * If we are matching the invoking or list user and that user has a
-     * supplementary group vector, check it.
+     * Cache group db entry if it doesn't already exist
      */
-    for (i = 0; i < user_ngroups; i++) {
-	if (strcasecmp(group, user_groups[i]) == 0) {
+    key.k.name = (char *) user;
+    if ((node = rbfind(grlist_cache, &key)) == NULL) {
+	if ((item = make_grlist_item(user, gids, ngids)) == NULL)
+	    errorx(1, "unable to parse group list for %s", user);
+	if (rbinsert(grlist_cache, item) != NULL)
+	    errorx(1, "unable to cache group list for %s, already exists",
+		user);
+    }
+}
+
+#ifndef HAVE_MBR_CHECK_MEMBERSHIP
+static int
+user_in_group_list(struct passwd *pw, struct group_list *grlist, const char *group)
+{
+    struct group *grp = NULL;
+    int i, retval = FALSE;
+
+    /*
+     * If it could be a sudo-style group ID check gids first.
+     */
+    if (group[0] == '#') {
+	gid_t gid = atoi(group + 1);
+	if (gid == pw->pw_gid) {
 	    retval = TRUE;
 	    goto done;
 	}
-    }
-    if (group[0] == '#') {
-	for (i = 0; i < user_ngroups; i++) {
-	    if (gid == user_gids[i]) {
+	for (i = 0; i < grlist->ngids; i++) {
+	    if (gid == grlist->gids[i]) {
 		retval = TRUE;
 		goto done;
 	    }
 	}
     }
 
+
+    /*
+     * Next check the supplementary group vector.
+     * It usually includes the password db group too.
+     */
+    for (i = 0; i < grlist->ngroups; i++) {
+	if (strcasecmp(group, grlist->groups[i]) == 0) {
+	    retval = TRUE;
+	    goto done;
+	}
+    }
+
+    /* Finally check against user's primary (passwd file) group. */
+    if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
+	if (strcasecmp(group, grp->gr_name) == 0) {
+	    retval = TRUE;
+	    goto done;
+	}
+    }
+
 done:
+    if (grp != NULL)
+	gr_delref(grp);
     return retval;
 }
-#endif /* HAVE_GETGROUPS && !HAVE_MBR_CHECK_MEMBERSHIP */
+#endif /* !HAVE_MBR_CHECK_MEMBERSHIP */
 
 int
 user_in_group_lookup(struct passwd *pw, const char *group)
@@ -743,11 +950,18 @@ done:
 int
 user_in_group(struct passwd *pw, const char *group)
 {
-#if defined(HAVE_GETGROUPS) && !defined(HAVE_MBR_CHECK_MEMBERSHIP)
-    if (user_ngroups > 0 &&
-	strcmp(pw->pw_name, list_pw ? list_pw->pw_name : user_name) == 0) {
-	return user_in_group_cached(group);
+#ifndef HAVE_MBR_CHECK_MEMBERSHIP
+    struct group_list *grlist;
+
+    if ((grlist = get_group_list(pw)) != NULL) {
+	/* The base gid (from passwd) is always present. */
+	if (grlist->ngids > 1) {
+	    int matched = user_in_group_list(pw, grlist, group);
+	    grlist_delref(grlist);
+	    return matched;
+	}
+	grlist_delref(grlist);
     }
-#endif /* HAVE_GETGROUPS && !HAVE_MBR_CHECK_MEMBERSHIP */
+#endif /* !HAVE_MBR_CHECK_MEMBERSHIP */
     return user_in_group_lookup(pw, group);
 }
