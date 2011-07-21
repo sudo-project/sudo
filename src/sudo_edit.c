@@ -64,12 +64,12 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
 	if (seteuid(ROOT_UID) != 0)
 	    error(1, "seteuid(ROOT_UID)");
     }
-    if (ngroups != -1) {
-	if (setgroups(ngroups, groups) != 0)
-	    error(1, "setgroups");
-    }
     if (setegid(egid) != 0)
 	error(1, "setegid(%d)", (int)egid);
+    if (ngroups != -1) {
+	if (sudo_setgroups(ngroups, groups) != 0)
+	    error(1, "setgroups");
+    }
     if (euid != ROOT_UID) {
 	if (seteuid(euid) != 0)
 	    error(1, "seteuid(%d)", (int)euid);

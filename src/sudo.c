@@ -928,7 +928,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 
     if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
 	if (details->ngroups >= 0) {
-	    if (setgroups(details->ngroups, details->groups) < 0) {
+	    if (sudo_setgroups(details->ngroups, details->groups) < 0) {
 		warning(_("unable to set supplementary group IDs"));
 		goto done;
 	    }
