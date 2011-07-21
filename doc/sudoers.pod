@@ -1271,7 +1271,7 @@ The following percent (`C<%>') escape sequences are supported:
 =item C<%H>
 
 expanded to the local host name including the domain name
-(on if the machine's host name is fully qualified or the I<fqdn>
+(only if the machine's host name is fully qualified or the I<fqdn>
 option is set)
 
 =item C<%h>
