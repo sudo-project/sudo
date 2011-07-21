@@ -90,7 +90,7 @@
  * Prototypes
  */
 static void init_vars(char * const *);
-static int set_cmnd(int);
+static int set_cmnd(void);
 static void set_loginclass(struct passwd *);
 static void set_runasgr(char *);
 static void set_runaspw(char *);
@@ -351,7 +351,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	def_preserve_groups = TRUE;
 
     /* Find command in path */
-    cmnd_status = set_cmnd(sudo_mode);
+    cmnd_status = set_cmnd();
     if (cmnd_status == -1) {
 	rval = -1;
 	goto done;
@@ -833,7 +833,7 @@ init_vars(char * const envp[])
  * and apply any command-specific defaults entries.
  */
 static int
-set_cmnd(int sudo_mode)
+set_cmnd(void)
 {
     int rval;
     char *path = user_path;
