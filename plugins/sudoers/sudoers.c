@@ -99,10 +99,6 @@ static int deserialize_info(char * const settings[], char * const user_info[]);
 static char *find_editor(int nfiles, char **files, char ***argv_out);
 static void create_admin_success_flag(void);
 
-/* XXX */
-extern int runas_ngroups;
-extern GETGROUPS_T *runas_gids;
-
 /*
  * Globals
  */
@@ -272,6 +268,8 @@ sudoers_policy_close(int exit_status, int error_code)
     pw_delref(runas_pw);
     if (runas_gr != NULL)
 	gr_delref(runas_gr);
+    if (user_group_list != NULL)
+	grlist_delref(user_group_list);
 }
 
 /*
@@ -642,22 +640,24 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
     if (def_preserve_groups) {
 	command_info[info_len++] = "preserve_groups=true";
-    } else if (runas_ngroups != -1) {
+    } else {
 	int i, len;
 	size_t glsize;
 	char *cp, *gid_list;
+	struct group_list *grlist = get_group_list(runas_pw);
 
-	glsize = sizeof("runas_groups=") - 1 + (runas_ngroups * (MAX_UID_T_LEN + 1));
+	glsize = sizeof("runas_groups=") - 1 + (grlist->ngids * (MAX_UID_T_LEN + 1));
 	gid_list = emalloc(glsize);
 	memcpy(gid_list, "runas_groups=", sizeof("runas_groups=") - 1);
 	cp = gid_list + sizeof("runas_groups=") - 1;
-	for (i = 0; i < runas_ngroups; i++) {
+	for (i = 0; i < grlist->ngids; i++) {
 	    /* XXX - check rval */
 	    len = snprintf(cp, glsize - (cp - gid_list), "%s%u",
-		 i ? "," : "", (unsigned int) runas_gids[i]);
+		 i ? "," : "", (unsigned int) grlist->gids[i]);
 	    cp += len;
 	}
 	command_info[info_len++] = gid_list;
+	grlist_delref(grlist);
     }
     if (def_closefrom >= 0)
 	easprintf(&command_info[info_len++], "closefrom=%d", def_closefrom);
@@ -821,6 +821,13 @@ init_vars(char * const envp[])
 	log_error(0, _("unknown user: %s"), user_name);
 	/* NOTREACHED */
     }
+
+    /*
+     * Get group list.
+     */
+    if (user_group_list == NULL)
+	user_group_list = get_group_list(sudo_user.pw);
+
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
     mbr_uid_to_uuid(user_uid, user_uuid);
 #endif
@@ -1151,7 +1158,7 @@ deserialize_info(char * const settings[], char * const user_info[])
 {
     struct group *grp;
     char * const *cur;
-    const char *p;
+    const char *p, *groups = NULL;
     int flags = 0;
 
 #define MATCHES(s, v) (strncmp(s, v, sizeof(v) - 1) == 0)
@@ -1297,37 +1304,7 @@ deserialize_info(char * const settings[], char * const user_info[])
 	    continue;
 	}
 	if (MATCHES(*cur, "groups=")) {
-	    /* Count number of groups */
-	    const char *val = *cur + sizeof("groups=") - 1;
-	    const char *cp;
-	    if (val[0] != '\0') {
-		user_ngroups = 1;
-		for (cp = val; *cp != '\0'; cp++) {
-		    if (*cp == ',')
-			user_ngroups++;
-		}
-
-		user_gids = emalloc2(user_ngroups, sizeof(GETGROUPS_T));
-		user_groups = emalloc2(user_ngroups, sizeof(char *));
-		user_ngroups = 0;
-		cp = val;
-		for (;;) {
-		    /* XXX - strtol would be better here */
-		    grp = sudo_getgrgid(atoi(cp));
-		    if (grp != NULL) {
-			user_gids[user_ngroups] = grp->gr_gid;
-			user_groups[user_ngroups] = estrdup(grp->gr_name);
-			gr_delref(grp);
-		    } else {
-			easprintf(&user_groups[user_ngroups], "#%s", cp);
-		    }
-		    user_ngroups++;
-		    cp = strchr(cp, ',');
-		    if (cp == NULL)
-			break;
-		    cp++; /* skip over comma */
-		}
-	    }
+	    groups = *cur + sizeof("groups=") - 1;
 	    continue;
 	}
 	if (MATCHES(*cur, "cwd=")) {
@@ -1359,6 +1336,36 @@ deserialize_info(char * const settings[], char * const user_info[])
 	user_cwd = "unknown";
     if (user_tty == NULL)
 	user_tty = "unknown"; /* user_ttypath remains NULL */
+
+    if (groups != NULL && groups[0] != '\0') {
+	const char *cp;
+	GETGROUPS_T *gids;
+	int ngids;
+
+	/* Count number of groups, including passwd gid. */
+	ngids = 2;
+	for (cp = groups; *cp != '\0'; cp++) {
+	    if (*cp == ',')
+		ngids++;
+	}
+
+	/* The first gid in the list is the passwd group gid. */
+	gids = emalloc2(ngids, sizeof(GETGROUPS_T));
+	gids[0] = user_gid;
+	ngids = 1;
+	cp = groups;
+	for (;;) {
+	    gids[ngids] = atoi(cp);
+	    if (gids[0] != gids[ngids])
+		ngids++;
+	    cp = strchr(cp, ',');
+	    if (cp == NULL)
+		break;
+	    cp++; /* skip over comma */
+	}
+	set_group_list(user_name, gids, ngids);
+	efree(gids);
+    }
 
 #undef MATCHES
     return flags;

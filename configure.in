@@ -1528,6 +1528,9 @@ case "$host" in
 		    with_netsvc="/etc/netsvc.conf"
 		fi
 
+		# For implementing getgrouplist()
+		AC_CHECK_FUNCS(getgrset)
+
 		# LDR_PRELOAD is supported in AIX 5.3 and later
 		case "$OSREV" in
 		    [1-4].*) with_noexec=no ;;
@@ -2063,9 +2066,10 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS(strrchr sysconf tzset strftime initgroups getgroups fstat \
+AC_CHECK_FUNCS(strrchr sysconf tzset strftime fstat \
 	       regcomp setlocale nl_langinfo getaddrinfo mbr_check_membership \
 	       setrlimit64 sysctl)
+AC_REPLACE_FUNCS(getgrouplist)
 AC_CHECK_FUNCS(getline, [], [
     AC_LIBOBJ(getline)
     AC_CHECK_FUNCS(fgetln)

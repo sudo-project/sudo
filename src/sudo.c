@@ -343,7 +343,6 @@ static char *
 get_user_groups(struct user_details *ud)
 {
     char *gid_list = NULL;
-#ifdef HAVE_GETGROUPS
     size_t glsize;
     char *cp;
     int i, len;
@@ -364,7 +363,6 @@ get_user_groups(struct user_details *ud)
 	    i ? "," : "", (unsigned int)ud->groups[i]);
 	cp += len;
     }
-#endif
     return gid_list;
 }
 
@@ -929,19 +927,12 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     }
 
     if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
-#ifdef HAVE_GETGROUPS
 	if (details->ngroups >= 0) {
 	    if (setgroups(details->ngroups, details->groups) < 0) {
 		warning(_("unable to set supplementary group IDs"));
 		goto done;
 	    }
 	}
-#else
-	if (pw && initgroups(pw->pw_name, pw->pw_gid) < 0) {
-	    warning(_("unable to set supplementary group IDs"));
-	    goto done;
-	}
-#endif
     }
 
     if (ISSET(details->flags, CD_SET_PRIORITY)) {

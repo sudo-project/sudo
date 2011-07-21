@@ -328,7 +328,7 @@ struct sudo_ldap_handle {
     LDAP *ld;
     struct ldap_result *result;
     char *username;
-    char **groups;
+    struct group_list *grlist;
 };
 
 struct sudo_nss sudo_nss_ldap = {
@@ -974,6 +974,7 @@ sudo_ldap_build_pass1(struct passwd *pw)
 {
     struct group *grp;
     char *buf, timebuffer[TIMEFILTER_LENGTH];
+    struct group_list *grlist;
     size_t sz = 0;
     int i;
 
@@ -984,16 +985,15 @@ sudo_ldap_build_pass1(struct passwd *pw)
     /* Then add (|(sudoUser=USERNAME)(sudoUser=ALL)) + NUL */
     sz += 29 + strlen(pw->pw_name);
 
-    /* Add space for groups */
+    /* Add space for primary and supplementary groups */
     if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
-	sz += 12 + strlen(grp->gr_name);	/* primary group */
-	gr_delref(grp);
+	sz += 12 + strlen(grp->gr_name);
     }
-    if (strcmp(pw->pw_name, list_pw ? list_pw->pw_name : user_name) == 0) {
-	for (i = 0; i < user_ngroups; i++) {
-	    if (user_gids[i] == pw->pw_gid)
+    if ((grlist = get_group_list(pw)) != NULL) {
+	for (i = 0; i < grlist->ngroups; i++) {
+	    if (grp != NULL && strcasecmp(grlist->groups[i], grp->gr_name) == 0)
 		continue;
-	    sz += 12 + strlen(user_groups[i]);	/* supplementary group */
+	    sz += 12 + strlen(grlist->groups[i]);
 	}
     }
 
@@ -1019,23 +1019,28 @@ sudo_ldap_build_pass1(struct passwd *pw)
     (void) strlcat(buf, ")", sz);
 
     /* Append primary group */
-    if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
+    if (grp != NULL) {
 	(void) strlcat(buf, "(sudoUser=%", sz);
 	(void) strlcat(buf, grp->gr_name, sz);
 	(void) strlcat(buf, ")", sz);
-	gr_delref(grp);
     }
 
     /* Append supplementary groups */
-    if (strcmp(pw->pw_name, list_pw ? list_pw->pw_name : user_name) == 0) {
-	for (i = 0; i < user_ngroups; i++) {
-	    if (user_gids[i] == pw->pw_gid)
+    if (grlist != NULL) {
+	for (i = 0; i < grlist->ngroups; i++) {
+	    if (grp != NULL && strcasecmp(grlist->groups[i], grp->gr_name) == 0)
 		continue;
 	    (void) strlcat(buf, "(sudoUser=%", sz);
-	    (void) strlcat(buf, user_groups[i], sz);
+	    (void) strlcat(buf, grlist->groups[i], sz);
 	    (void) strlcat(buf, ")", sz);
 	}
     }
+
+    /* Done with groups. */
+    if (grlist != NULL)
+	grlist_delref(grlist);
+    if (grp != NULL)
+	gr_delref(grp);
 
     /* Add ALL to list and end the global OR */
     if (strlcat(buf, "(sudoUser=ALL)", sz) >= sz)
@@ -2022,7 +2027,7 @@ sudo_ldap_open(struct sudo_nss *nss)
     handle->ld = ld;
     handle->result = NULL;
     handle->username = NULL;
-    handle->groups = NULL;
+    handle->grlist = NULL;
     nss->handle = handle;
 
     return 0;
@@ -2280,7 +2285,7 @@ sudo_ldap_result_free_nss(struct sudo_nss *nss)
 	    efree(handle->username);
 	    handle->username = NULL;
 	}
-	handle->groups = NULL;
+	handle->grlist = NULL;
 	handle->result = NULL;
     }
 }
@@ -2306,7 +2311,7 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
      * have to contact the LDAP server again.
      */
     if (handle->result) {
-	if (handle->groups == user_groups &&
+	if (handle->grlist == user_group_list &&
 	    strcmp(pw->pw_name, handle->username) == 0) {
 	    DPRINTF(("reusing previous result (user %s) with %d entries",
 		handle->username, handle->result->nentries), 1);
@@ -2380,7 +2385,7 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
     /* Store everything in the sudo_nss handle. */
     handle->result = lres;
     handle->username = estrdup(pw->pw_name);
-    handle->groups = user_groups;
+    handle->grlist = user_group_list;
 
     return lres;
 }

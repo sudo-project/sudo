@@ -43,6 +43,16 @@
 #endif
 
 /*
+ * Password db and supplementary group IDs with associated group names.
+ */
+struct group_list {
+    char **groups;
+    GETGROUPS_T *gids;
+    int ngroups;
+    int ngids;
+};
+
+/*
  * Info pertaining to the invoking user.
  */
 struct sudo_user {
@@ -64,8 +74,7 @@ struct sudo_user {
     char *class_name;
     char *krb5_ccname;
     char *group;
-    char **groups;
-    GETGROUPS_T *gids;
+    struct group_list *group_list;
     char * const * env_vars;
 #ifdef HAVE_SELINUX
     char *role;
@@ -74,11 +83,10 @@ struct sudo_user {
     char *cwd;
     char *iolog_file;
     int   closefrom;
-    int   ngroups;
-    uid_t uid;
-    uid_t gid;
     int   lines;
     int   cols;
+    uid_t uid;
+    uid_t gid;
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
     uuid_t uuid;
 #endif
@@ -160,10 +168,8 @@ struct sudo_user {
 #define user_passwd		(sudo_user.pw->pw_passwd)
 #define user_uuid		(sudo_user.uuid)
 #define user_dir		(sudo_user.pw->pw_dir)
-#define user_ngroups		(sudo_user.ngroups)
-#define user_gids		(sudo_user.gids)
 #define user_group		(sudo_user.group)
-#define user_groups		(sudo_user.groups)
+#define user_group_list		(sudo_user.group_list)
 #define user_tty		(sudo_user.tty)
 #define user_ttypath		(sudo_user.ttypath)
 #define user_cwd		(sudo_user.cwd)
@@ -268,12 +274,16 @@ void sudo_setpwent(void);
 void sudo_endpwent(void);
 void sudo_setspent(void);
 void sudo_endspent(void);
+struct group_list *get_group_list(struct passwd *pw);
+void set_group_list(const char *, GETGROUPS_T *gids, int ngids);
 struct passwd *sudo_getpwnam(const char *);
 struct passwd *sudo_fakepwnam(const char *, gid_t);
 struct passwd *sudo_getpwuid(uid_t);
 struct group *sudo_getgrnam(const char *);
 struct group *sudo_fakegrnam(const char *);
 struct group *sudo_getgrgid(gid_t);
+void grlist_addref(struct group_list *);
+void grlist_delref(struct group_list *);
 void gr_addref(struct group *);
 void gr_delref(struct group *);
 void pw_addref(struct passwd *);

@@ -25,6 +25,7 @@ compat/dlopen.c
 compat/fnmatch.c
 compat/fnmatch.h
 compat/getcwd.c
+compat/getgrouplist.c
 compat/getline.c
 compat/getprogname.c
 compat/glob.c
