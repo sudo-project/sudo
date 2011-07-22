@@ -45,15 +45,12 @@ sudo_setgroups(int ngids, const GETGROUPS_T *gids)
     if (rval == -1 && errno == EINVAL) {
 	/* Too many groups, try again with fewer. */
 #if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
-	maxgids = sysconf(_SC_NGROUPS_MAX);
+	maxgids = (int)sysconf(_SC_NGROUPS_MAX);
 	if (maxgids == -1)
 #endif
 	    maxgids = NGROUPS_MAX;
-	if (maxgids > ngids) {
-	    /* Skip base gid. */
-	    if (getegid() == gids[0])
-		rval = setgroups(maxgids, gids + 1);
-	}
+	if (ngids > maxgids)
+	    rval = setgroups(maxgids, gids);
     }
     return rval;
 }
