@@ -366,8 +366,8 @@ set_perms(int perm)
 	state->euid = geteuid();
 	state->rgid = getgid();
 	state->egid = getegid();
-	state->gids = user_gids;
-	state->ngids = user_ngids;
+	state->grlist = user_group_list;
+	grlist_addref(state->grlist);
 	break;
 
     case PERM_ROOT:
@@ -609,8 +609,8 @@ set_perms(int perm)
 	state->euid = geteuid();
 	state->rgid = getgid();
 	state->egid = getegid();
-	state->gids = user_gids;
-	state->ngids = user_ngids;
+	state->grlist = user_group_list;
+	grlist_addref(state->grlist);
 	break;
 
     case PERM_ROOT:
@@ -820,8 +820,8 @@ set_perms(int perm)
 	/* Stash initial state */
 	state->ruid = getuid();
 	state->rgid = getgid();
-	state->gids = user_gids;
-	state->ngids = user_ngids;
+	state->grlist = user_group_list;
+	grlist_addref(state->grlist);
 	break;
 
     case PERM_ROOT:
