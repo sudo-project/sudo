@@ -81,7 +81,6 @@
 #include <setjmp.h>
 
 #include "sudoers.h"
-#include "lbuf.h"
 #include "interfaces.h"
 #include "sudoers_version.h"
 #include "auth/sudo_auth.h"
@@ -1156,7 +1155,6 @@ sudoers_policy_version(int verbose)
 static int
 deserialize_info(char * const settings[], char * const user_info[])
 {
-    struct group *grp;
     char * const *cur;
     const char *p, *groups = NULL;
     int flags = 0;
@@ -1297,10 +1295,6 @@ deserialize_info(char * const settings[], char * const user_info[])
 	if (MATCHES(*cur, "gid=")) {
 	    p = *cur + sizeof("gid=") - 1;
 	    user_gid = (gid_t) atoi(p);
-	    if ((grp = sudo_getgrgid(user_gid)) != NULL) {
-		user_group = estrdup(grp->gr_name);
-		gr_delref(grp);
-	    }
 	    continue;
 	}
 	if (MATCHES(*cur, "groups=")) {

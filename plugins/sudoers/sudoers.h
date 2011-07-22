@@ -73,7 +73,6 @@ struct sudo_user {
     char *cmnd_safe;
     char *class_name;
     char *krb5_ccname;
-    char *group;
     struct group_list *group_list;
     char * const * env_vars;
 #ifdef HAVE_SELINUX
@@ -168,7 +167,6 @@ struct sudo_user {
 #define user_passwd		(sudo_user.pw->pw_passwd)
 #define user_uuid		(sudo_user.uuid)
 #define user_dir		(sudo_user.pw->pw_dir)
-#define user_group		(sudo_user.group)
 #define user_group_list		(sudo_user.group_list)
 #define user_tty		(sudo_user.tty)
 #define user_ttypath		(sudo_user.ttypath)
