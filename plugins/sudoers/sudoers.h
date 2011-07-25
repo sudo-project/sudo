@@ -38,10 +38,6 @@
 #define DEFAULT_TEXT_DOMAIN	"sudoers"
 #include "gettext.h"
 
-#ifdef HAVE_MBR_CHECK_MEMBERSHIP
-# include <membership.h>
-#endif
-
 /*
  * Password db and supplementary group IDs with associated group names.
  */
@@ -86,9 +82,6 @@ struct sudo_user {
     int   cols;
     uid_t uid;
     uid_t gid;
-#ifdef HAVE_MBR_CHECK_MEMBERSHIP
-    uuid_t uuid;
-#endif
 };
 
 /*

@@ -339,20 +339,66 @@ fix_fds(void)
     }
 }
 
+/*
+ * Allocate space for groups and fill in using getgrouplist()
+ * for when we cannot use getgroups().
+ */
+static int
+fill_group_list(struct user_details *ud)
+{
+    int maxgroups, tries, rval = -1;
+
+#if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
+    maxgroups = (int)sysconf(_SC_NGROUPS_MAX);
+    if (maxgroups < 0)
+#endif
+	maxgroups = NGROUPS_MAX;
+
+    /*
+     * It is possible to belong to more groups in the group database
+     * than NGROUPS_MAX.  We start off with NGROUPS_MAX * 2 entries
+     * and double this as needed.
+     */
+    ud->groups = NULL;
+    ud->ngroups = maxgroups;
+    for (tries = 0; tries < 10 && rval == -1; tries++) {
+	ud->ngroups *= 2;
+	efree(ud->groups);
+	ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
+	rval = getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
+    }
+    return rval;
+}
+
 static char *
 get_user_groups(struct user_details *ud)
 {
-    char *gid_list = NULL;
+    char *cp, *gid_list = NULL;
     size_t glsize;
-    char *cp;
     int i, len;
 
-    if ((ud->ngroups = getgroups(0, NULL)) <= 0)
-	return NULL;
+    /*
+     * Systems with mbr_check_membership() support more than NGROUPS_MAX
+     * groups so we cannot use getgroups().
+     */
+    ud->groups = NULL;
+#ifndef HAVE_MBR_CHECK_MEMBERSHIP
+    if ((ud->ngroups = getgroups(0, NULL)) > 0) {
+	ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
+	if (getgroups(ud->ngroups, ud->groups) < 0) {
+	    efree(ud->groups);
+	    ud->groups = NULL;
+	}
+    }
+#endif /* HAVE_MBR_CHECK_MEMBERSHIP */
+    if (ud->groups == NULL) {
+	if (fill_group_list(ud) == -1)
+	    error(1, _("unable to get group vector"));
+    }
 
-    ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
-    if (getgroups(ud->ngroups, ud->groups) < 0)
-	error(1, _("unable to get group vector"));
+    /*
+     * Format group list as a comma-separated string of gids.
+     */
     glsize = sizeof("groups=") - 1 + (ud->ngroups * (MAX_UID_T_LEN + 1));
     gid_list = emalloc(glsize);
     memcpy(gid_list, "groups=", sizeof("groups=") - 1);
