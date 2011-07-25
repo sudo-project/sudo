@@ -777,7 +777,7 @@ get_group_list(struct passwd *pw)
      * Cache group db entry if it exists or a negative response if not.
      */
 #if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
-    ngids = sysconf(_SC_NGROUPS_MAX) * 2;
+    ngids = (int)sysconf(_SC_NGROUPS_MAX) * 2;
     if (ngids < 0)
 #endif
 	ngids = NGROUPS_MAX * 2;
@@ -833,135 +833,53 @@ set_group_list(const char *user, GETGROUPS_T *gids, int ngids)
     }
 }
 
-#ifndef HAVE_MBR_CHECK_MEMBERSHIP
-static int
-user_in_group_list(struct passwd *pw, struct group_list *grlist, const char *group)
-{
-    struct group *grp = NULL;
-    int i, retval = FALSE;
-
-    /*
-     * If it could be a sudo-style group ID check gids first.
-     */
-    if (group[0] == '#') {
-	gid_t gid = atoi(group + 1);
-	if (gid == pw->pw_gid) {
-	    retval = TRUE;
-	    goto done;
-	}
-	for (i = 0; i < grlist->ngids; i++) {
-	    if (gid == grlist->gids[i]) {
-		retval = TRUE;
-		goto done;
-	    }
-	}
-    }
-
-
-    /*
-     * Next check the supplementary group vector.
-     * It usually includes the password db group too.
-     */
-    for (i = 0; i < grlist->ngroups; i++) {
-	if (strcasecmp(group, grlist->groups[i]) == 0) {
-	    retval = TRUE;
-	    goto done;
-	}
-    }
-
-    /* Finally check against user's primary (passwd file) group. */
-    if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
-	if (strcasecmp(group, grp->gr_name) == 0) {
-	    retval = TRUE;
-	    goto done;
-	}
-    }
-
-done:
-    if (grp != NULL)
-	gr_delref(grp);
-    return retval;
-}
-#endif /* !HAVE_MBR_CHECK_MEMBERSHIP */
-
-int
-user_in_group_lookup(struct passwd *pw, const char *group)
-{
-#ifdef HAVE_MBR_CHECK_MEMBERSHIP
-    uuid_t gu, uu;
-    int ismember;
-#else
-    char **gr_mem;
-#endif
-    struct group *grp;
-    int retval = FALSE;
-
-#ifdef HAVE_SETAUTHDB
-    aix_setauthdb(pw->pw_name);
-#endif
-    /* A group name that begins with a '#' may be a gid. */
-    if ((grp = sudo_getgrnam(group)) == NULL && *group == '#')
-	grp = sudo_getgrgid(atoi(group + 1));
-#ifdef HAVE_SETAUTHDB
-    aix_restoreauthdb();
-#endif
-    if (grp == NULL)
-	goto done;
-
-    /* check against user's primary (passwd file) gid */
-    if (grp->gr_gid == pw->pw_gid) {
-	retval = TRUE;
-	goto done;
-    }
-
-#ifdef HAVE_MBR_CHECK_MEMBERSHIP
-    /* If we are matching the invoking user use the stashed uuid. */
-    if (strcmp(pw->pw_name, user_name) == 0) {
-	if (mbr_gid_to_uuid(grp->gr_gid, gu) == 0 &&
-	    mbr_check_membership(user_uuid, gu, &ismember) == 0 && ismember) {
-	    retval = TRUE;
-	    goto done;
-	}
-    } else {
-	if (mbr_uid_to_uuid(pw->pw_uid, uu) == 0 &&
-	    mbr_gid_to_uuid(grp->gr_gid, gu) == 0 &&
-	    mbr_check_membership(uu, gu, &ismember) == 0 && ismember) {
-	    retval = TRUE;
-	    goto done;
-	}
-    }
-#else /* HAVE_MBR_CHECK_MEMBERSHIP */
-    if (grp->gr_mem != NULL) {
-	for (gr_mem = grp->gr_mem; *gr_mem; gr_mem++) {
-	    if (strcmp(*gr_mem, pw->pw_name) == 0) {
-		retval = TRUE;
-		goto done;
-	    }
-	}
-    }
-#endif /* HAVE_MBR_CHECK_MEMBERSHIP */
-
-done:
-    if (grp != NULL)
-	gr_delref(grp);
-    return retval;
-}
-
 int
 user_in_group(struct passwd *pw, const char *group)
 {
-#ifndef HAVE_MBR_CHECK_MEMBERSHIP
     struct group_list *grlist;
+    struct group *grp = NULL;
+    int i, matched = FALSE;
 
     if ((grlist = get_group_list(pw)) != NULL) {
-	/* The base gid (from passwd) is always present. */
-	if (grlist->ngids > 1) {
-	    int matched = user_in_group_list(pw, grlist, group);
-	    grlist_delref(grlist);
-	    return matched;
+	/*
+	 * If it could be a sudo-style group ID check gids first.
+	 */
+	if (group[0] == '#') {
+	    gid_t gid = atoi(group + 1);
+	    if (gid == pw->pw_gid) {
+		matched = TRUE;
+		goto done;
+	    }
+	    for (i = 0; i < grlist->ngids; i++) {
+		if (gid == grlist->gids[i]) {
+		    matched = TRUE;
+		    goto done;
+		}
+	    }
 	}
+
+	/*
+	 * Next check the supplementary group vector.
+	 * It usually includes the password db group too.
+	 */
+	for (i = 0; i < grlist->ngroups; i++) {
+	    if (strcasecmp(group, grlist->groups[i]) == 0) {
+		matched = TRUE;
+		goto done;
+	    }
+	}
+
+	/* Finally check against user's primary (passwd file) group. */
+	if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
+	    if (strcasecmp(group, grp->gr_name) == 0) {
+		matched = TRUE;
+		goto done;
+	    }
+	}
+done:
+	if (grp != NULL)
+	    gr_delref(grp);
 	grlist_delref(grlist);
     }
-#endif /* !HAVE_MBR_CHECK_MEMBERSHIP */
-    return user_in_group_lookup(pw, group);
+    return matched;
 }

@@ -74,9 +74,6 @@
 #ifdef HAVE_SELINUX
 # include <selinux/selinux.h>
 #endif
-#ifdef HAVE_MBR_CHECK_MEMBERSHIP
-# include <membership.h>
-#endif
 #include <ctype.h>
 #include <setjmp.h>
 
@@ -455,9 +452,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 		    if (sudo_user.pw != NULL)
 			pw_delref(sudo_user.pw);
 		    sudo_user.pw = pw;
-#ifdef HAVE_MBR_CHECK_MEMBERSHIP
-		    mbr_uid_to_uuid(user_uid, user_uuid);
-#endif
 	    }
 	}
     }
@@ -826,10 +820,6 @@ init_vars(char * const envp[])
      */
     if (user_group_list == NULL)
 	user_group_list = get_group_list(sudo_user.pw);
-
-#ifdef HAVE_MBR_CHECK_MEMBERSHIP
-    mbr_uid_to_uuid(user_uid, user_uuid);
-#endif
 
     /* It is now safe to use log_error() and set_perms() */
 }
