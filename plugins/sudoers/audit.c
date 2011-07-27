@@ -41,6 +41,9 @@
 void
 audit_success(char *exec_args[])
 {
+    if (exec_args == NULL)
+	return;
+
 #ifdef HAVE_BSM_AUDIT
     bsm_audit_success(exec_args);
 #endif
@@ -50,9 +53,12 @@ audit_success(char *exec_args[])
 }
 
 void
-audit_failure(char **exec_args, char const *const fmt, ...)
+audit_failure(char *exec_args[], char const *const fmt, ...)
 {
     va_list ap;
+
+    if (exec_args == NULL)
+	return;
 
     va_start(ap, fmt);
 #ifdef HAVE_BSM_AUDIT
