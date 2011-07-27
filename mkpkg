@@ -124,7 +124,7 @@ case "$osversion" in
 	if [ $osrelease -ge 50 ]; then
 	    # RHEL 5 and up build pies, have audit support and use a
 	    # separate PAM config file for "sudo -i".
-	    export CFLAGS="-O2 $F_PIE" LDFLAGS="-pie"
+	    export CFLAGS="-O2 -g $F_PIE" LDFLAGS="-pie"
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-linux-audit"
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-pam-login"
 	    PPVARS="${PPVARS}${PPVARS+$space}linux_audit=1.4.0"
@@ -148,7 +148,7 @@ case "$osversion" in
 	prefix=/usr
 	if [ $osrelease -ge 10 ]; then
 	    # SLES 10 and higher build pies
-	    export CFLAGS="-O2 $F_PIE" LDFLAGS="-pie"
+	    export CFLAGS="-O2 -g $F_PIE" LDFLAGS="-pie"
 	    if [ $osrelease -ge 11 ]; then
 		# SLES 11 and higher has SELinux
 		configure_opts="${configure_opts}${configure_opts+$tab}--with-selinux"
