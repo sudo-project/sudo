@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: sudoers 1.8.2-rc2\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2011-06-04 18:27-0400\n"
-"PO-Revision-Date: 2011-07-17 05:04+0200\n"
+"PO-Revision-Date: 2011-07-27 20:32+0200\n"
 "Last-Translator: Jakub Bogusz <qboosh@pld-linux.org>\n"
 "Language-Team: Polish <translation-team-pl@lists.sourceforge.net>\n"
 "Language: pl\n"
@@ -520,21 +520,23 @@ msgid ""
 "Available options in a sudoers ``Defaults'' line:\n"
 "\n"
 msgstr ""
+"Opcje dostępne w linii \"Defaults\" pliku sudoers:\n"
+"\n"
 
 #: plugins/sudoers/defaults.c:204 plugins/sudoers/defaults.c:215
 #, c-format
 msgid "%s: %s\n"
-msgstr ""
+msgstr "%s: %s\n"
 
 #: plugins/sudoers/defaults.c:211
 #, c-format
 msgid "%s: %.*s\n"
-msgstr ""
+msgstr "%s: %.*s\n"
 
 #: plugins/sudoers/defaults.c:241
 #, c-format
 msgid "unknown defaults entry `%s'"
-msgstr ""
+msgstr "nieznany wpis domyślny `%s'"
 
 #: plugins/sudoers/defaults.c:249 plugins/sudoers/defaults.c:259
 #: plugins/sudoers/defaults.c:279 plugins/sudoers/defaults.c:292
@@ -543,7 +545,7 @@ msgstr ""
 #: plugins/sudoers/defaults.c:361
 #, c-format
 msgid "value `%s' is invalid for option `%s'"
-msgstr ""
+msgstr "błędna wartość `%s' dla opcji `%s'"
 
 #: plugins/sudoers/defaults.c:252 plugins/sudoers/defaults.c:262
 #: plugins/sudoers/defaults.c:270 plugins/sudoers/defaults.c:287
@@ -552,88 +554,88 @@ msgstr ""
 #: plugins/sudoers/defaults.c:357
 #, c-format
 msgid "no value specified for `%s'"
-msgstr ""
+msgstr "nie podano wartości dla `%s'"
 
 #: plugins/sudoers/defaults.c:275
 #, c-format
 msgid "values for `%s' must start with a '/'"
-msgstr ""
+msgstr "wartości `%s' muszą zaczynać się od '/'"
 
 #: plugins/sudoers/defaults.c:337
 #, c-format
 msgid "option `%s' does not take a value"
-msgstr ""
+msgstr "opcja `%s' nie przyjmuje wartości"
 
 #: plugins/sudoers/env.c:259
 #, c-format
 msgid "internal error, sudo_setenv() overflow"
-msgstr ""
+msgstr "błąd wewnętrzny, przepełnienie sudo_setenv()"
 
 #: plugins/sudoers/env.c:289
 #, c-format
 msgid "sudo_putenv: corrupted envp, length mismatch"
-msgstr ""
+msgstr "sudo_putenv: uszkodzone envp, niezgodność długości"
 
 #: plugins/sudoers/env.c:694
 #, c-format
 msgid "sorry, you are not allowed to set the following environment variables: %s"
-msgstr ""
+msgstr "niestety nie jest dozwolone ustawianie następujących zmiennych środowiskowych: %s"
 
 #: plugins/sudoers/find_path.c:68 plugins/sudoers/find_path.c:107
 #: plugins/sudoers/find_path.c:122 plugins/sudoers/iolog.c:124
 #: plugins/sudoers/sudoers.c:868 toke.l:663 toke.l:814
 #, c-format
 msgid "%s: %s"
-msgstr ""
+msgstr "%s: %s"
 
 #: gram.y:103
 #, c-format
 msgid ">>> %s: %s near line %d <<<"
-msgstr ""
+msgstr ">>> %s: %s w okolicy linii %d <<<"
 
 #: plugins/sudoers/group_plugin.c:91
 #, c-format
 msgid "%s%s: %s"
-msgstr ""
+msgstr "%s%s: %s"
 
 #: plugins/sudoers/group_plugin.c:103
 #, c-format
 msgid "%s must be owned by uid %d"
-msgstr ""
+msgstr "właścicielem %s musi być uid %d"
 
 #: plugins/sudoers/group_plugin.c:107
 #, c-format
 msgid "%s must only be writable by owner"
-msgstr ""
+msgstr "prawo zapisu do %s może mieć tylko właściciel"
 
 #: plugins/sudoers/group_plugin.c:114
 #, c-format
 msgid "unable to dlopen %s: %s"
-msgstr ""
+msgstr "nie udało się wykonać dlopen %s: %s"
 
 #: plugins/sudoers/group_plugin.c:119
 #, c-format
 msgid "unable to find symbol \"group_plugin\" in %s"
-msgstr ""
+msgstr "nie udało się odnaleźć symbolu \"group_plugin\" w %s"
 
 #: plugins/sudoers/group_plugin.c:124
 #, c-format
 msgid "%s: incompatible group plugin major version %d, expected %d"
-msgstr ""
+msgstr "%s: niezgodna główna wersja wtyczki grup %d, oczekiwano %d"
 
 #: plugins/sudoers/interfaces.c:109
 msgid "Local IP address and netmask pairs:\n"
-msgstr ""
+msgstr "Pary lokalnych adresów IP i masek:\n"
 
 #: plugins/sudoers/iolog.c:176 plugins/sudoers/sudoers.c:946
 #, c-format
 msgid "unable to read %s"
-msgstr ""
+msgstr "nie udało się odczytać %s"
 
 #: plugins/sudoers/iolog.c:179
 #, c-format
 msgid "invalid sequence number %s"
-msgstr ""
+msgstr "błędny numer sekwencyjny %s"
 
 #: plugins/sudoers/iolog.c:225 plugins/sudoers/iolog.c:228
 #: plugins/sudoers/iolog.c:478 plugins/sudoers/iolog.c:483
@@ -642,72 +644,72 @@ msgstr ""
 #: plugins/sudoers/iolog.c:521
 #, c-format
 msgid "unable to create %s"
-msgstr ""
+msgstr "nie udało się utworzyć %s"
 
 #: plugins/sudoers/iolog_path.c:245 plugins/sudoers/sudoers.c:361
 #, c-format
 msgid "unable to set locale to \"%s\", using \"C\""
-msgstr ""
+msgstr "nie udało się ustawić lokalizacji na \"%s\", użyto \"C\""
 
 #: plugins/sudoers/ldap.c:363
 #, c-format
 msgid "sudo_ldap_conf_add_ports: port too large"
-msgstr ""
+msgstr "sudo_ldap_conf_add_ports: port zbyt duży"
 
 #: plugins/sudoers/ldap.c:386
 #, c-format
 msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
-msgstr ""
+msgstr "sudo_ldap_conf_add_ports: brak miejsca podczas rozszerzania hostbuf"
 
 #: plugins/sudoers/ldap.c:415
 #, c-format
 msgid "unsupported LDAP uri type: %s"
-msgstr ""
+msgstr "nieobsługiwany rodzaj URI LDAP: %s"
 
 #: plugins/sudoers/ldap.c:444
 #, c-format
 msgid "invalid uri: %s"
-msgstr ""
+msgstr "błędny URI: %s"
 
 #: plugins/sudoers/ldap.c:450
 #, c-format
 msgid "unable to mix ldap and ldaps URIs"
-msgstr ""
+msgstr "nie można mieszać URI ldap i ldaps"
 
 #: plugins/sudoers/ldap.c:454
 #, c-format
 msgid "unable to mix ldaps and starttls"
-msgstr ""
+msgstr "nie można mieszać ldaps i starttls"
 
 #: plugins/sudoers/ldap.c:473
 #, c-format
 msgid "sudo_ldap_parse_uri: out of space building hostbuf"
-msgstr ""
+msgstr "sudo_ldap_parse_uri: brak miejsca podczas konstruowania hostbuf"
 
 #: plugins/sudoers/ldap.c:536
 #, c-format
 msgid "unable to initialize SSL cert and key db: %s"
-msgstr ""
+msgstr "nie udało się zainicjować bazy certyfikatów i kluczy SSL: %s"
 
 #: plugins/sudoers/ldap.c:932
 #, c-format
 msgid "unable to get GMT time"
-msgstr ""
+msgstr "nie udało się pobrać czasu GMT"
 
 #: plugins/sudoers/ldap.c:938
 #, c-format
 msgid "unable to format timestamp"
-msgstr ""
+msgstr "nie udało się sformatować znacznika czasu"
 
 #: plugins/sudoers/ldap.c:946
 #, c-format
 msgid "unable to build time filter"
-msgstr ""
+msgstr "nie udało się stworzyć filtra czasu"
 
 #: plugins/sudoers/ldap.c:1044
 #, c-format
 msgid "sudo_ldap_build_pass1 allocation mismatch"
-msgstr ""
+msgstr "niezgodność przydzielenia sudo_ldap_build_pass1"
 
 #: plugins/sudoers/ldap.c:1539
 #, c-format
@@ -715,6 +717,8 @@ msgid ""
 "\n"
 "LDAP Role: %s\n"
 msgstr ""
+"\n"
+"Rola LDAP: %s\n"
 
 #: plugins/sudoers/ldap.c:1541
 #, c-format
@@ -722,123 +726,125 @@ msgid ""
 "\n"
 "LDAP Role: UNKNOWN\n"
 msgstr ""
+"\n"
+"Rola LDAP: NIEZNANA\n"
 
 #: plugins/sudoers/ldap.c:1588
 #, c-format
 msgid "    Order: %s\n"
-msgstr ""
+msgstr "    Porządek: %s\n"
 
 #: plugins/sudoers/ldap.c:1596
 #, c-format
 msgid "    Commands:\n"
-msgstr ""
+msgstr "    Polecenia:\n"
 
 #: plugins/sudoers/ldap.c:1983
 #, c-format
 msgid "unable to initialize LDAP: %s"
-msgstr ""
+msgstr "nie udało się zainicjować LDAP: %s"
 
 #: plugins/sudoers/ldap.c:2014
 #, c-format
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
-msgstr ""
+msgstr "wybrano start_tls, ale biblioteki LDAP nie obsługują ldap_start_tls_s() ani ldap_start_tls_s_np()"
 
 #: plugins/sudoers/ldap.c:2245
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
-msgstr ""
+msgstr "błędny atrybut sudoOrder: %s"
 
 #: plugins/sudoers/linux_audit.c:55
 #, c-format
 msgid "unable to open audit system"
-msgstr ""
+msgstr "nie udało się otworzyć systemu audytowego"
 
 #: plugins/sudoers/linux_audit.c:79
 #, c-format
 msgid "internal error, linux_audit_command() overflow"
-msgstr ""
+msgstr "błąd wewnętrzny, przepełnienie linux_audit_command()"
 
 #: plugins/sudoers/linux_audit.c:88
 #, c-format
 msgid "unable to send audit message"
-msgstr ""
+msgstr "nie udało się wysłać komunikatu audytowego"
 
 #: plugins/sudoers/logging.c:193
 #, c-format
 msgid "unable to open log file: %s: %s"
-msgstr ""
+msgstr "nie udało się otworzyć pliku logu: %s: %s"
 
 #: plugins/sudoers/logging.c:196
 #, c-format
 msgid "unable to lock log file: %s: %s"
-msgstr ""
+msgstr "nie udało się zablokować pliku logu: %s: %s"
 
 #: plugins/sudoers/logging.c:295
 msgid "user NOT in sudoers"
-msgstr ""
+msgstr "użytkownik NIE występuje w sudoers"
 
 #: plugins/sudoers/logging.c:297
 msgid "user NOT authorized on host"
-msgstr ""
+msgstr "użytkownik NIE jest autoryzowany na hoście"
 
 #: plugins/sudoers/logging.c:299
 msgid "command not allowed"
-msgstr ""
+msgstr "polecenie niedozwolone"
 
 #: plugins/sudoers/logging.c:309
 #, c-format
 msgid "%s is not in the sudoers file.  This incident will be reported.\n"
-msgstr ""
+msgstr "%s nie występuje w pliku sudoers. Ten incydent zostanie zgłoszony.\n"
 
 #: plugins/sudoers/logging.c:312
 #, c-format
 msgid "%s is not allowed to run sudo on %s.  This incident will be reported.\n"
-msgstr ""
+msgstr "%s nie ma uprawnień do uruchamiania sudo na %s. Ten incydent zostanie zgłoszony.\n"
 
 #: plugins/sudoers/logging.c:316
 #, c-format
 msgid "Sorry, user %s may not run sudo on %s.\n"
-msgstr ""
+msgstr "Niestety użytkownik %s nie moze uruchamiać sudo na %s.\n"
 
 #: plugins/sudoers/logging.c:319
 #, c-format
 msgid "Sorry, user %s is not allowed to execute '%s%s%s' as %s%s%s on %s.\n"
-msgstr ""
+msgstr "Niestety użytkownik %s nie ma uprawnień do uruchamiania '%s%s%s' jako %s%s%s na %s.\n"
 
 #: plugins/sudoers/logging.c:454
 #, c-format
 msgid "unable to fork"
-msgstr ""
+msgstr "nie udało się wykonać fork"
 
 #: plugins/sudoers/logging.c:461 plugins/sudoers/logging.c:518
 #, c-format
 msgid "unable to fork: %m"
-msgstr ""
+msgstr "nie udało się wykonać fork: %m"
 
 #: plugins/sudoers/logging.c:511
 #, c-format
 msgid "unable to open pipe: %m"
-msgstr ""
+msgstr "nie udało się otworzyć potoku: %m"
 
 #: plugins/sudoers/logging.c:530
 #, c-format
 msgid "unable to dup stdin: %m"
-msgstr ""
+msgstr "nie udało się wykonać dup na stdin: %m"
 
 #: plugins/sudoers/logging.c:564
 #, c-format
 msgid "unable to execute %s: %m"
-msgstr ""
+msgstr "nie udało się wywołać %s: %m"
 
 #: plugins/sudoers/logging.c:774
 #, c-format
 msgid "internal error: insufficient space for log line"
-msgstr ""
+msgstr "błąd wewnętrzny: za mało miejsca na linię logu"
 
 #: plugins/sudoers/parse.c:115
 #, c-format
 msgid "parse error in %s near line %d"
-msgstr ""
+msgstr "błąd składni w %s w okolicy linii %d"
 
 #: plugins/sudoers/parse.c:369
 #, c-format
@@ -846,16 +852,18 @@ msgid ""
 "\n"
 "Sudoers entry:\n"
 msgstr ""
+"\n"
+"Wpis sudoers:\n"
 
 #: plugins/sudoers/parse.c:371
 #, c-format
 msgid "    RunAsUsers: "
-msgstr ""
+msgstr "    Jako użytkownicy: "
 
 #: plugins/sudoers/parse.c:386
 #, c-format
 msgid "    RunAsGroups: "
-msgstr ""
+msgstr "    Jako grupy: "
 
 #: plugins/sudoers/parse.c:395
 #, c-format
@@ -863,137 +871,139 @@ msgid ""
 "    Commands:\n"
 "\t"
 msgstr ""
+"    Polecenia:\n"
+"\t"
 
 #: plugins/sudoers/plugin_error.c:100 plugins/sudoers/plugin_error.c:105
 msgid ": "
-msgstr ""
+msgstr ": "
 
 #: plugins/sudoers/pwutil.c:244
 #, c-format
 msgid "unable to cache uid %u (%s), already exists"
-msgstr ""
+msgstr "nie udało się zapamiętać uid-a %u (%s), już istnieje"
 
 #: plugins/sudoers/pwutil.c:252
 #, c-format
 msgid "unable to cache uid %u, already exists"
-msgstr ""
+msgstr "nie udało się zapamiętać uid-a %u, już istnieje"
 
 #: plugins/sudoers/pwutil.c:288 plugins/sudoers/pwutil.c:297
 #, c-format
 msgid "unable to cache user %s, already exists"
-msgstr ""
+msgstr "nie udało się zapamiętać użytkownika %s, już istnieje"
 
 #: plugins/sudoers/pwutil.c:511
 #, c-format
 msgid "unable to cache gid %u (%s), already exists"
-msgstr ""
+msgstr "nie udało się zapamiętać gid-a %u (%s), już istnieje"
 
 #: plugins/sudoers/pwutil.c:519
 #, c-format
 msgid "unable to cache gid %u, already exists"
-msgstr ""
+msgstr "nie udało się zapamiętać gid-a %u, już istnieje"
 
 #: plugins/sudoers/pwutil.c:548 plugins/sudoers/pwutil.c:557
 #, c-format
 msgid "unable to cache group %s, already exists"
-msgstr ""
+msgstr "nie udało się zapamiętać grupy %s, już istnieje"
 
 #: plugins/sudoers/set_perms.c:249 plugins/sudoers/set_perms.c:476
 #: plugins/sudoers/set_perms.c:710
 #, c-format
 msgid "unable to change to sudoers gid"
-msgstr ""
+msgstr "nie udało się zmienić na gid sudoers"
 
 #: plugins/sudoers/set_perms.c:290 plugins/sudoers/set_perms.c:514
 #: plugins/sudoers/set_perms.c:748 plugins/sudoers/set_perms.c:882
 msgid "too many processes"
-msgstr ""
+msgstr "zbyt dużo procesów"
 
 #: plugins/sudoers/set_perms.c:943 plugins/sudoers/set_perms.c:959
 msgid "unable to set runas group vector"
-msgstr ""
+msgstr "nie udało się ustawić wektora grup docelowych"
 
 #: plugins/sudoers/set_perms.c:952
 msgid "unable to get runas group vector"
-msgstr ""
+msgstr "nie udało się pobrać wektora grup docelowych"
 
 #: plugins/sudoers/sudo_nss.c:217
 msgid "unable to reset group vector"
-msgstr ""
+msgstr "nie udało się przywrócić wektora grup"
 
 #: plugins/sudoers/sudo_nss.c:223
 msgid "unable to get group vector"
-msgstr ""
+msgstr "nie udało się pobrać wektora grup"
 
 #: plugins/sudoers/sudo_nss.c:266
 #, c-format
 msgid "Matching Defaults entries for %s on this host:\n"
-msgstr ""
+msgstr "Pasujące wpisy Defaults dla %s na tym hoście:\n"
 
 #: plugins/sudoers/sudo_nss.c:279
 #, c-format
 msgid "Runas and Command-specific defaults for %s:\n"
-msgstr ""
+msgstr "Wartości specyficzne dla Runas i Command dla %s:\n"
 
 #: plugins/sudoers/sudo_nss.c:292
 #, c-format
 msgid "User %s may run the following commands on this host:\n"
-msgstr ""
+msgstr "Użytkownik %s może uruchamiać na tym hoście następujące polecenia:\n"
 
 #: plugins/sudoers/sudo_nss.c:302
 #, c-format
 msgid "User %s is not allowed to run sudo on %s.\n"
-msgstr ""
+msgstr "Użytkownik %s nie ma uprawnień do uruchamiania sudo na %s.\n"
 
 #: plugins/sudoers/sudoers.c:206 plugins/sudoers/sudoers.c:241
 #: plugins/sudoers/sudoers.c:876
 msgid "problem with defaults entries"
-msgstr ""
+msgstr "problem z wpisami domyślnymi"
 
 #: plugins/sudoers/sudoers.c:210
 #, c-format
 msgid "no valid sudoers sources found, quitting"
-msgstr ""
+msgstr "nie znaleziono poprawnych źródeł sudoers, zakończenie"
 
 #: plugins/sudoers/sudoers.c:264
 #, c-format
 msgid "unable to execute %s: %s"
-msgstr ""
+msgstr "nie udało się wywołać %s: %s"
 
 #: plugins/sudoers/sudoers.c:311
 #, c-format
 msgid "sudoers specifies that root is not allowed to sudo"
-msgstr ""
+msgstr "wg sudoers root nie ma prawa używać sudo"
 
 #: plugins/sudoers/sudoers.c:318
 #, c-format
 msgid "you are not permitted to use the -C option"
-msgstr ""
+msgstr "brak uprawnień do używania opcji -C"
 
 #: plugins/sudoers/sudoers.c:407
 #, c-format
 msgid "timestamp owner (%s): No such user"
-msgstr ""
+msgstr "właściciel znacznika czasu (%s): nie ma takiego użytkownika"
 
 #: plugins/sudoers/sudoers.c:423
 msgid "no tty"
-msgstr ""
+msgstr "brak tty"
 
 #: plugins/sudoers/sudoers.c:424
 #, c-format
 msgid "sorry, you must have a tty to run sudo"
-msgstr ""
+msgstr "niestety do uruchomienia sudo konieczny jest tty"
 
 #: plugins/sudoers/sudoers.c:470
 msgid "No user or host"
-msgstr ""
+msgstr "Brak użytkownika lub hosta"
 
 #: plugins/sudoers/sudoers.c:484 plugins/sudoers/sudoers.c:505
 #: plugins/sudoers/sudoers.c:506 plugins/sudoers/sudoers.c:1413
 #: plugins/sudoers/sudoers.c:1414
 #, c-format
 msgid "%s: command not found"
-msgstr ""
+msgstr "%s: nie znaleziono polecenia"
 
 #: plugins/sudoers/sudoers.c:486 plugins/sudoers/sudoers.c:502
 #, c-format
