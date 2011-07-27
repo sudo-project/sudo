@@ -1066,10 +1066,8 @@ set_runaspw(char *user)
 	if ((runas_pw = sudo_getpwuid(atoi(user + 1))) == NULL)
 	    runas_pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
     } else {
-	if ((runas_pw = sudo_getpwnam(user)) == NULL) {
-	    audit_failure(NewArgv, _("unknown user: %s"), user);
+	if ((runas_pw = sudo_getpwnam(user)) == NULL)
 	    log_error(NO_MAIL|MSG_ONLY, _("unknown user: %s"), user);
-	}
     }
 }
 
