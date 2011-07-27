@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.2\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2011-06-04 18:27-0400\n"
+"POT-Creation-Date: 2011-07-27 14:21-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -81,57 +81,57 @@ msgstr ""
 msgid "unexpected reply type on backchannel: %d"
 msgstr ""
 
-#: src/load_plugins.c:154
+#: src/load_plugins.c:158
 #, c-format
 msgid "%s: %s"
 msgstr ""
 
-#: src/load_plugins.c:160
+#: src/load_plugins.c:164
 #, c-format
 msgid "%s%s: %s"
 msgstr ""
 
-#: src/load_plugins.c:170
+#: src/load_plugins.c:174
 #, c-format
 msgid "%s must be owned by uid %d"
 msgstr ""
 
-#: src/load_plugins.c:174
+#: src/load_plugins.c:178
 #, c-format
 msgid "%s must be only be writable by owner"
 msgstr ""
 
-#: src/load_plugins.c:181
+#: src/load_plugins.c:185
 #, c-format
 msgid "unable to dlopen %s: %s"
 msgstr ""
 
-#: src/load_plugins.c:186
+#: src/load_plugins.c:190
 #, c-format
 msgid "%s: unable to find symbol %s"
 msgstr ""
 
-#: src/load_plugins.c:192
+#: src/load_plugins.c:196
 #, c-format
 msgid "%s: unknown policy type %d"
 msgstr ""
 
-#: src/load_plugins.c:196
+#: src/load_plugins.c:200
 #, c-format
 msgid "%s: incompatible policy major version %d, expected %d"
 msgstr ""
 
-#: src/load_plugins.c:203
+#: src/load_plugins.c:207
 #, c-format
 msgid "%s: only a single policy plugin may be loaded"
 msgstr ""
 
-#: src/load_plugins.c:221
+#: src/load_plugins.c:225
 #, c-format
 msgid "%s: at least one policy plugin must be specified"
 msgstr ""
 
-#: src/load_plugins.c:226
+#: src/load_plugins.c:230
 #, c-format
 msgid "policy plugin %s does not include a check_policy method"
 msgstr ""
@@ -192,8 +192,8 @@ msgstr ""
 msgid "the `-A' and `-S' options may not be used together"
 msgstr ""
 
-#: src/parse_args.c:418 src/sudo.c:398 src/sudo.c:418 src/sudo.c:426
-#: src/sudo.c:436 common/alloc.c:85 common/alloc.c:105 common/alloc.c:123
+#: src/parse_args.c:418 src/sudo.c:442 src/sudo.c:462 src/sudo.c:470
+#: src/sudo.c:480 common/alloc.c:85 common/alloc.c:105 common/alloc.c:123
 #: common/alloc.c:145 common/alloc.c:203 common/alloc.c:217
 #, c-format
 msgid "unable to allocate memory"
@@ -475,127 +475,127 @@ msgstr ""
 msgid "unexpected sudo mode 0x%x"
 msgstr ""
 
-#: src/sudo.c:356
+#: src/sudo.c:396
 #, c-format
 msgid "unable to get group vector"
 msgstr ""
 
-#: src/sudo.c:394
+#: src/sudo.c:438
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr ""
 
-#: src/sudo.c:734
+#: src/sudo.c:780
 #, c-format
 msgid "resource control limit has been reached"
 msgstr ""
 
-#: src/sudo.c:737
+#: src/sudo.c:783
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
 msgstr ""
 
-#: src/sudo.c:741
+#: src/sudo.c:787
 #, c-format
 msgid "the invoking task is final"
 msgstr ""
 
-#: src/sudo.c:744
+#: src/sudo.c:790
 #, c-format
 msgid "could not join project \"%s\""
 msgstr ""
 
-#: src/sudo.c:749
+#: src/sudo.c:795
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:753
+#: src/sudo.c:799
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:757
+#: src/sudo.c:803
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:763
+#: src/sudo.c:809
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:765
+#: src/sudo.c:811
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:791
+#: src/sudo.c:839
 #, c-format
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr ""
 
-#: src/sudo.c:895
+#: src/sudo.c:945
 #, c-format
 msgid "unknown login class %s"
 msgstr ""
 
-#: src/sudo.c:902 src/sudo.c:905
+#: src/sudo.c:952 src/sudo.c:955
 #, c-format
 msgid "unable to set user context"
 msgstr ""
 
-#: src/sudo.c:916
+#: src/sudo.c:966
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:921
+#: src/sudo.c:971
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:929 src/sudo.c:935
+#: src/sudo.c:978
 #, c-format
 msgid "unable to set supplementary group IDs"
 msgstr ""
 
-#: src/sudo.c:943
+#: src/sudo.c:986
 #, c-format
 msgid "unable to set process priority"
 msgstr ""
 
-#: src/sudo.c:951
+#: src/sudo.c:994
 #, c-format
 msgid "unable to change root to %s"
 msgstr ""
 
-#: src/sudo.c:961 src/sudo.c:967 src/sudo.c:973
+#: src/sudo.c:1004 src/sudo.c:1010 src/sudo.c:1016
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr ""
 
-#: src/sudo.c:987
+#: src/sudo.c:1030
 #, c-format
 msgid "unable to change directory to %s"
 msgstr ""
 
-#: src/sudo.c:1078
+#: src/sudo.c:1121
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr ""
 
-#: src/sudo.c:1118
+#: src/sudo.c:1161
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr ""
 
-#: src/sudo.c:1129
+#: src/sudo.c:1172
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr ""
 
-#: src/sudo.c:1140
+#: src/sudo.c:1183
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr ""
