@@ -500,34 +500,29 @@ display_bound_defaults(int dtype, struct lbuf *lbuf)
 {
     struct defaults *d;
     struct member *m, *binding = NULL;
-    char *dname, *dsep;
+    char *dsep;
     int atype, nfound = 0;
 
     switch (dtype) {
 	case DEFAULTS_HOST:
 	    atype = HOSTALIAS;
-	    dname = "host";
 	    dsep = "@";
 	    break;
 	case DEFAULTS_USER:
 	    atype = USERALIAS;
-	    dname = "user";
 	    dsep = ":";
 	    break;
 	case DEFAULTS_RUNAS:
 	    atype = RUNASALIAS;
-	    dname = "runas";
 	    dsep = ">";
 	    break;
 	case DEFAULTS_CMND:
 	    atype = CMNDALIAS;
-	    dname = "cmnd";
 	    dsep = "!";
 	    break;
 	default:
 	    return -1;
     }
-    /* sudo_printf(SUDO_CONV_INFO_MSG, _("Per-%s Defaults entries:\n"), dname); */
     tq_foreach_fwd(&defaults, d) {
 	if (d->type != dtype)
 	    continue;

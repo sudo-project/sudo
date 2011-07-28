@@ -77,7 +77,6 @@ group_plugin_load(char *plugin_info)
     /*
      * Fill in .so path and split out args (if any).
      */
-    args = strpbrk(plugin_info, " \t");
     if ((args = strpbrk(plugin_info, " \t")) != NULL) {
 	len = snprintf(path, sizeof(path), "%s%.*s",
 	    (*plugin_info != '/') ? _PATH_SUDO_PLUGIN_DIR : "",
