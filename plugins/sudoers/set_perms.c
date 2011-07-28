@@ -98,7 +98,7 @@ rewind_perms(void)
 int
 set_perms(int perm)
 {
-    struct perm_state *state, *ostate = NULL;
+    struct perm_state *state, *ostate;
     const char *errstr;
     int noexit;
 
@@ -112,11 +112,16 @@ set_perms(int perm)
     }
 
     state = &perm_stack[perm_stack_depth];
-    if (perm_stack_depth)
+    if (perm != PERM_INITIAL) {
+	if (perm_stack_depth == 0) {
+	    errstr = _("perm stack underflow");
+	    errno = EINVAL;
+	    goto bad;
+	}
 	ostate = &perm_stack[perm_stack_depth - 1];
-
-    if (perm != PERM_INITIAL && memcmp(state, ostate, sizeof(*state)) == 0)
-	goto done;
+	if (memcmp(state, ostate, sizeof(*state)) == 0)
+	    goto done;
+    }
 
     switch (perm) {
     case PERM_INITIAL:
@@ -339,7 +344,7 @@ bad:
 int
 set_perms(int perm)
 {
-    struct perm_state *state, *ostate = NULL;
+    struct perm_state *state, *ostate;
     const char *errstr;
     int noexit;
 
@@ -353,11 +358,16 @@ set_perms(int perm)
     }
 
     state = &perm_stack[perm_stack_depth];
-    if (perm_stack_depth)
+    if (perm != PERM_INITIAL) {
+	if (perm_stack_depth == 0) {
+	    errstr = _("perm stack underflow");
+	    errno = EINVAL;
+	    goto bad;
+	}
 	ostate = &perm_stack[perm_stack_depth - 1];
-
-    if (perm != PERM_INITIAL && memcmp(state, ostate, sizeof(*state)) == 0)
-	goto done;
+	if (memcmp(state, ostate, sizeof(*state)) == 0)
+	    goto done;
+    }
 
     switch (perm) {
     case PERM_INITIAL:
@@ -566,7 +576,7 @@ bad:
 int
 set_perms(int perm)
 {
-    struct perm_state *state, *ostate = NULL;
+    struct perm_state *state, *ostate;
     const char *errstr;
     int noexit;
 
@@ -580,11 +590,16 @@ set_perms(int perm)
     }
 
     state = &perm_stack[perm_stack_depth];
-    if (perm_stack_depth)
+    if (perm != PERM_INITIAL) {
+	if (perm_stack_depth == 0) {
+	    errstr = _("perm stack underflow");
+	    errno = EINVAL;
+	    goto bad;
+	}
 	ostate = &perm_stack[perm_stack_depth - 1];
-
-    if (perm != PERM_INITIAL && memcmp(state, ostate, sizeof(*state)) == 0)
-	goto done;
+	if (memcmp(state, ostate, sizeof(*state)) == 0)
+	    goto done;
+    }
 
     /*
      * Since we only have setuid() and seteuid() and semantics
@@ -795,7 +810,7 @@ bad:
 int
 set_perms(int perm)
 {
-    struct perm_state *state, *ostate = NULL;
+    struct perm_state *state, *ostate;
     const char *errstr;
     int noexit;
 
@@ -809,11 +824,16 @@ set_perms(int perm)
     }
 
     state = &perm_stack[perm_stack_depth];
-    if (perm_stack_depth)
+    if (perm != PERM_INITIAL) {
+	if (perm_stack_depth == 0) {
+	    errstr = _("perm stack underflow");
+	    errno = EINVAL;
+	    goto bad;
+	}
 	ostate = &perm_stack[perm_stack_depth - 1];
-
-    if (perm != PERM_INITIAL && memcmp(state, ostate, sizeof(*state)) == 0)
-	goto done;
+	if (memcmp(state, ostate, sizeof(*state)) == 0)
+	    goto done;
+    }
 
     switch (perm) {
     case PERM_INITIAL:
