@@ -385,17 +385,28 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	    memcpy(av + 1, argv, argc * sizeof(char *));
 	} else {
 	    /* shell -c "command" */
-	    char *src, *dst, *end;
+	    char *cmnd, *src, *dst;
 	    size_t cmnd_size = (size_t) (argv[argc - 1] - argv[0]) +
-		    strlen(argv[argc - 1]) + 1;
+		strlen(argv[argc - 1]) + 1;
+
+	    cmnd = dst = emalloc2(cmnd_size, 2);
+	    for (av = argv; *av != NULL; av++) {
+		for (src = *av; *src != '\0'; src++) {
+		    /* quote potential meta characters */
+		    if (!isalnum((unsigned char)*src) && *src != '_' && *src != '-')
+			*dst++ = '\\';
+		    *dst++ = *src;
+		}
+		*dst++ = ' ';
+	    }
+	    if (cmnd != dst)
+		dst--;  /* replace last space with a NUL */
+	    *dst = '\0';
+
 	    ac = 3;
 	    av = emalloc2(ac + 1, sizeof(char *));
 	    av[1] = "-c";
-	    av[2] = dst = emalloc(cmnd_size);
-	    src = argv[0];
-	    for (end = src + cmnd_size - 1; src < end; src++, dst++)
-		*dst = *src == '\0' ? ' ' : *src;
-	    *dst = '\0';
+	    av[2] = cmnd;
 	}
 	av[0] = (char *)user_details.shell; /* plugin may override shell */
 	av[ac] = NULL;

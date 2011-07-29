@@ -861,21 +861,38 @@ set_cmnd(void)
 
 	/* set user_args */
 	if (NewArgc > 1) {
-	    char *to, **from;
+	    char *to, *from, **av;
 	    size_t size, n;
 
 	    /* Alloc and build up user_args. */
-	    for (size = 0, from = NewArgv + 1; *from; from++)
-		size += strlen(*from) + 1;
+	    for (size = 0, av = NewArgv + 1; *av; av++)
+		size += strlen(*av) + 1;
 	    user_args = emalloc(size);
-	    for (to = user_args, from = NewArgv + 1; *from; from++) {
-		n = strlcpy(to, *from, size - (to - user_args));
-		if (n >= size - (to - user_args))
-		    errorx(1, _("internal error, set_cmnd() overflow"));
-		to += n;
-		*to++ = ' ';
+	    if (ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL)) {
+		/*
+		 * When running a command via a shell, the sudo front-end
+		 * escapes potential meta chars.  We unescape non-spaces
+		 * for sudoers matching and logging purposes.
+		 */
+		for (to = user_args, av = NewArgv + 1; (from = *av); av++) {
+		    while (*from) {
+			if (from[0] == '\\' && !isspace((unsigned char)from[1]))
+			    from++;
+			*to++ = *from++;
+		    }
+		    *to++ = ' ';
+		}
+		*--to = '\0';
+	    } else {
+		for (to = user_args, av = NewArgv + 1; *av; av++) {
+		    n = strlcpy(to, *av, size - (to - user_args));
+		    if (n >= size - (to - user_args))
+			errorx(1, _("internal error, set_cmnd() overflow"));
+		    to += n;
+		    *to++ = ' ';
+		}
+		*--to = '\0';
 	    }
-	    *--to = '\0';
 	}
     }
     if (strlen(user_cmnd) >= PATH_MAX)
