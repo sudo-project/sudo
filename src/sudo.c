@@ -121,7 +121,6 @@ static int iolog_open(struct plugin_container *plugin, char * const settings[],
     int argc, char * const argv[], char * const user_env[]);
 static void iolog_close(struct plugin_container *plugin, int exit_status,
     int error);
-static char *escape_cmnd(const char *src);
 
 /* Policy plugin convenience functions. */
 static int policy_open(struct plugin_container *plugin, char * const settings[],
@@ -293,12 +292,6 @@ main(int argc, char *argv[], char *envp[])
 	    if (ISSET(command_details.flags, CD_SUDOEDIT)) {
 		exitcode = sudo_edit(&command_details);
 	    } else {
-		if (ISSET(sudo_mode, MODE_SHELL)) {
-		    /* Escape meta chars if running a shell with args. */
-		    if (argv_out[1] != NULL && strcmp(argv_out[1], "-c") == 0 &&
-			argv_out[2] != NULL && argv_out[3] == NULL)
-			argv_out[2] = escape_cmnd(argv_out[2]);
-		}
 		exitcode = run_command(&command_details);
 	    }
 	    /* The close method was called by sudo_edit/run_command. */
@@ -1052,30 +1045,6 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 
 done:
     return rval;
-}
-
-/*
- * Escape any non-alpha numeric or blank characters to make sure
- * they are not interpreted specially by the shell.
- */
-static char *
-escape_cmnd(const char *src)
-{
-    char *cmnd, *dst;
-
-    /* Worst case scenario, we have to escape everything. */
-    cmnd = dst = emalloc((2 * strlen(src)) + 1);
-    while (*src != '\0') {
-	if (!isalnum((unsigned char)*src) && !isspace((unsigned char)*src) &&
-	    *src != '_' && *src != '-') {
-	    /* quote potential meta character */
-	    *dst++ = '\\';
-	}
-	*dst++ = *src++;
-    }
-    *dst++ = '\0';
-
-    return cmnd;
 }
 
 /*
