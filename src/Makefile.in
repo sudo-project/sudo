@@ -44,6 +44,7 @@ CFLAGS = @CFLAGS@
 
 # Flags to pass to the link stage
 LDFLAGS = @LDFLAGS@
+LTLDFLAGS = @LTLDFLAGS@
 
 # Where to install things...
 prefix = @prefix@
@@ -97,7 +98,7 @@ sudo: $(OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS) $(LDFLAGS) $(LIBS) -static-libtool-libs
 
 libsudo_noexec.la: sudo_noexec.lo
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LTLDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
 
 sesh: sesh.o
 	$(CC) -o $@ sesh.o
