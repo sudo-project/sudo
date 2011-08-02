@@ -1920,7 +1920,21 @@ AC_PROG_GCC_TRADITIONAL
 AC_C_CONST
 AC_C_VOLATILE
 if test X"$with_gnu_ld" != "yes" -a -n "$GCC"; then
-    LTLDFLAGS="$LTLDFLAGS -Wc,-static-libgcc"
+    _CFLAGS="$CFLAGS"
+    CFLAGS="$CFLAGS -static-libgcc"
+    AC_CACHE_CHECK([whether $CC understands -static-libgcc],
+	[sudo_cv_var_gcc_static_libgcc],
+	[AC_LINK_IFELSE(
+	    [AC_LANG_PROGRAM([[]], [[]])],
+		[sudo_cv_var_gcc_static_libgcc=yes],
+		[sudo_cv_var_gcc_static_libgcc=no]
+	    )
+	]
+    )
+    CFLAGS="$_CFLAGS"
+    if test "$sudo_cv_var_gcc_static_libgcc" = "yes"; then
+	LTLDFLAGS="$LTLDFLAGS -Wc,-static-libgcc"
+    fi
 fi
 dnl
 dnl Program checks
