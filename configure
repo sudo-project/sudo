@@ -13821,7 +13821,41 @@ $as_echo "#define volatile /**/" >>confdefs.h
 fi
 
 if test X"$with_gnu_ld" != "yes" -a -n "$GCC"; then
-    LTLDFLAGS="$LTLDFLAGS -Wc,-static-libgcc"
+    _CFLAGS="$CFLAGS"
+    CFLAGS="$CFLAGS -static-libgcc"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC understands -static-libgcc" >&5
+$as_echo_n "checking whether $CC understands -static-libgcc... " >&6; }
+if test "${sudo_cv_var_gcc_static_libgcc+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  sudo_cv_var_gcc_static_libgcc=yes
+else
+  sudo_cv_var_gcc_static_libgcc=no
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_gcc_static_libgcc" >&5
+$as_echo "$sudo_cv_var_gcc_static_libgcc" >&6; }
+    CFLAGS="$_CFLAGS"
+    if test "$sudo_cv_var_gcc_static_libgcc" = "yes"; then
+	LTLDFLAGS="$LTLDFLAGS -Wc,-static-libgcc"
+    fi
 fi
 for ac_prog in 'bison -y' byacc
 do
