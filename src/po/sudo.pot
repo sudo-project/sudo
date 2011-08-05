@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.2\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2011-07-27 14:21-0400\n"
+"POT-Creation-Date: 2011-08-05 13:34-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -192,142 +192,142 @@ msgstr ""
 msgid "the `-A' and `-S' options may not be used together"
 msgstr ""
 
-#: src/parse_args.c:418 src/sudo.c:442 src/sudo.c:462 src/sudo.c:470
-#: src/sudo.c:480 common/alloc.c:85 common/alloc.c:105 common/alloc.c:123
+#: src/parse_args.c:429 src/sudo.c:435 src/sudo.c:455 src/sudo.c:463
+#: src/sudo.c:473 common/alloc.c:85 common/alloc.c:105 common/alloc.c:123
 #: common/alloc.c:145 common/alloc.c:203 common/alloc.c:217
 #, c-format
 msgid "unable to allocate memory"
 msgstr ""
 
-#: src/parse_args.c:431
+#: src/parse_args.c:442
 #, c-format
 msgid "sudoedit is not supported on this platform"
 msgstr ""
 
-#: src/parse_args.c:502
+#: src/parse_args.c:513
 #, c-format
 msgid ""
 "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr ""
 
-#: src/parse_args.c:515
+#: src/parse_args.c:526
 #, c-format
 msgid ""
 "%s - edit files as another user\n"
 "\n"
 msgstr ""
 
-#: src/parse_args.c:517
+#: src/parse_args.c:528
 #, c-format
 msgid ""
 "%s - execute a command as another user\n"
 "\n"
 msgstr ""
 
-#: src/parse_args.c:522
+#: src/parse_args.c:533
 #, c-format
 msgid ""
 "\n"
 "Options:\n"
 msgstr ""
 
-#: src/parse_args.c:525
+#: src/parse_args.c:536
 msgid "use helper program for password prompting\n"
 msgstr ""
 
-#: src/parse_args.c:528
+#: src/parse_args.c:539
 msgid "use specified BSD authentication type\n"
 msgstr ""
 
-#: src/parse_args.c:530
+#: src/parse_args.c:541
 msgid "run command in the background\n"
 msgstr ""
 
-#: src/parse_args.c:532
+#: src/parse_args.c:543
 msgid "close all file descriptors >= fd\n"
 msgstr ""
 
-#: src/parse_args.c:535
+#: src/parse_args.c:546
 msgid "run command with specified login class\n"
 msgstr ""
 
-#: src/parse_args.c:538
+#: src/parse_args.c:549
 msgid "preserve user environment when executing command\n"
 msgstr ""
 
-#: src/parse_args.c:540
+#: src/parse_args.c:551
 msgid "edit files instead of running a command\n"
 msgstr ""
 
-#: src/parse_args.c:542
+#: src/parse_args.c:553
 msgid "execute command as the specified group\n"
 msgstr ""
 
-#: src/parse_args.c:544
+#: src/parse_args.c:555
 msgid "set HOME variable to target user's home dir.\n"
 msgstr ""
 
-#: src/parse_args.c:546
+#: src/parse_args.c:557
 msgid "display help message and exit\n"
 msgstr ""
 
-#: src/parse_args.c:548
+#: src/parse_args.c:559
 msgid "run a login shell as target user\n"
 msgstr ""
 
-#: src/parse_args.c:550
+#: src/parse_args.c:561
 msgid "remove timestamp file completely\n"
 msgstr ""
 
-#: src/parse_args.c:552
+#: src/parse_args.c:563
 msgid "invalidate timestamp file\n"
 msgstr ""
 
-#: src/parse_args.c:554
+#: src/parse_args.c:565
 msgid "list user's available commands\n"
 msgstr ""
 
-#: src/parse_args.c:556
+#: src/parse_args.c:567
 msgid "non-interactive mode, will not prompt user\n"
 msgstr ""
 
-#: src/parse_args.c:558
+#: src/parse_args.c:569
 msgid "preserve group vector instead of setting to target's\n"
 msgstr ""
 
-#: src/parse_args.c:560
+#: src/parse_args.c:571
 msgid "use specified password prompt\n"
 msgstr ""
 
-#: src/parse_args.c:563 src/parse_args.c:571
+#: src/parse_args.c:574 src/parse_args.c:582
 msgid "create SELinux security context with specified role\n"
 msgstr ""
 
-#: src/parse_args.c:566
+#: src/parse_args.c:577
 msgid "read password from standard input\n"
 msgstr ""
 
-#: src/parse_args.c:568
+#: src/parse_args.c:579
 msgid "run a shell as target user\n"
 msgstr ""
 
-#: src/parse_args.c:574
+#: src/parse_args.c:585
 msgid "when listing, list specified user's privileges\n"
 msgstr ""
 
-#: src/parse_args.c:576
+#: src/parse_args.c:587
 msgid "run command (or edit file) as specified user\n"
 msgstr ""
 
-#: src/parse_args.c:578
+#: src/parse_args.c:589
 msgid "display version information and exit\n"
 msgstr ""
 
-#: src/parse_args.c:580
+#: src/parse_args.c:591
 msgid "update user's timestamp without running a command\n"
 msgstr ""
 
-#: src/parse_args.c:582
+#: src/parse_args.c:593
 msgid "stop processing command line arguments\n"
 msgstr ""
 
@@ -376,7 +376,7 @@ msgstr ""
 msgid "unable to set new tty context"
 msgstr ""
 
-#: src/selinux.c:194 src/selinux.c:207 src/sudo.c:330
+#: src/selinux.c:194 src/selinux.c:207 src/sudo.c:323
 #, c-format
 msgid "unable to open %s"
 msgstr ""
@@ -440,162 +440,162 @@ msgstr ""
 msgid "unable to execute %s"
 msgstr ""
 
-#: src/sudo.c:192
+#: src/sudo.c:191
 #, c-format
 msgid "must be setuid root"
 msgstr ""
 
-#: src/sudo.c:210
+#: src/sudo.c:209
 #, c-format
 msgid "Sudo version %s\n"
 msgstr ""
 
-#: src/sudo.c:212
+#: src/sudo.c:211
 #, c-format
 msgid "Configure options: %s\n"
 msgstr ""
 
-#: src/sudo.c:217
+#: src/sudo.c:216
 #, c-format
 msgid "fatal error, unable to load plugins"
 msgstr ""
 
-#: src/sudo.c:225
+#: src/sudo.c:224
 #, c-format
 msgid "unable to initialize policy plugin"
 msgstr ""
 
-#: src/sudo.c:280
+#: src/sudo.c:279
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr ""
 
-#: src/sudo.c:307
+#: src/sudo.c:300
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr ""
 
-#: src/sudo.c:396
+#: src/sudo.c:389
 #, c-format
 msgid "unable to get group vector"
 msgstr ""
 
-#: src/sudo.c:438
+#: src/sudo.c:431
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr ""
 
-#: src/sudo.c:780
+#: src/sudo.c:773
 #, c-format
 msgid "resource control limit has been reached"
 msgstr ""
 
-#: src/sudo.c:783
+#: src/sudo.c:776
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
 msgstr ""
 
-#: src/sudo.c:787
+#: src/sudo.c:780
 #, c-format
 msgid "the invoking task is final"
 msgstr ""
 
-#: src/sudo.c:790
+#: src/sudo.c:783
 #, c-format
 msgid "could not join project \"%s\""
 msgstr ""
 
-#: src/sudo.c:795
+#: src/sudo.c:788
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:799
+#: src/sudo.c:792
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:803
+#: src/sudo.c:796
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:809
+#: src/sudo.c:802
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:811
+#: src/sudo.c:804
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:839
+#: src/sudo.c:832
 #, c-format
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr ""
 
-#: src/sudo.c:945
+#: src/sudo.c:938
 #, c-format
 msgid "unknown login class %s"
 msgstr ""
 
-#: src/sudo.c:952 src/sudo.c:955
+#: src/sudo.c:945 src/sudo.c:948
 #, c-format
 msgid "unable to set user context"
 msgstr ""
 
-#: src/sudo.c:966
+#: src/sudo.c:959
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:971
+#: src/sudo.c:964
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:978
+#: src/sudo.c:971
 #, c-format
 msgid "unable to set supplementary group IDs"
 msgstr ""
 
-#: src/sudo.c:986
+#: src/sudo.c:979
 #, c-format
 msgid "unable to set process priority"
 msgstr ""
 
-#: src/sudo.c:994
+#: src/sudo.c:987
 #, c-format
 msgid "unable to change root to %s"
 msgstr ""
 
-#: src/sudo.c:1004 src/sudo.c:1010 src/sudo.c:1016
+#: src/sudo.c:997 src/sudo.c:1003 src/sudo.c:1009
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr ""
 
-#: src/sudo.c:1030
+#: src/sudo.c:1023
 #, c-format
 msgid "unable to change directory to %s"
 msgstr ""
 
-#: src/sudo.c:1121
+#: src/sudo.c:1090
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr ""
 
-#: src/sudo.c:1161
+#: src/sudo.c:1130
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr ""
 
-#: src/sudo.c:1172
+#: src/sudo.c:1141
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr ""
 
-#: src/sudo.c:1183
+#: src/sudo.c:1152
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr ""
