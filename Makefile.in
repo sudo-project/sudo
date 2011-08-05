@@ -171,39 +171,59 @@ sync-po:
 	rsync -Lrtvz  translationproject.org::tp/latest/sudoers/ plugins/sudoers/po/
 
 update-pot:
-	@cd $(top_srcdir); \
-	for pot in $(POTFILES); do \
-	    echo "Updating $$pot"; \
-	    domain=`basename $$pot .pot`; \
-	    case "$$domain" in \
-		sudo) cfiles="src/*c common/*c compat/*c";; \
-		sudoers) cfiles="plugins/sudoers/*.c plugins/sudoers/auth/*.c";; \
-		*) echo unknown domain $$domain; continue;; \
-	    esac; \
-	    $(XGETTEXT) $(XGETTEXT_OPTS) -d$$domain $$cfiles -o $$pot; \
-	done
+	@if $(XGETTEXT) --help >/dev/null 2>&1; then \
+	    cd $(top_srcdir); \
+	    for pot in $(POTFILES); do \
+		echo "Updating $$pot"; \
+		domain=`basename $$pot .pot`; \
+		case "$$domain" in \
+		    sudo) cfiles="src/*c common/*c compat/*c";; \
+		    sudoers) cfiles="plugins/sudoers/*.c plugins/sudoers/auth/*.c";; \
+		    *) echo unknown domain $$domain; continue;; \
+		esac; \
+		$(XGETTEXT) $(XGETTEXT_OPTS) -d$$domain $$cfiles -o $$pot.tmp; \
+		if diff -I'^.POT-Creation-Date' $$pot.tmp $$pot >/dev/null; then \
+		    mv -f $$pot.tmp $$pot; \
+		else \
+		    rm -f $$pot.tmp; \
+		fi; \
+	    done; \
+	fi
 
 update-po: update-pot
-	@cd $(top_srcdir); \
-	for pot in $(POTFILES); do \
-	    podir=`dirname $$pot`; \
-	    for po in $$podir/*.po; do \
-		echo $(ECHO_N) "Updating $$po$(ECHO_C)"; \
-		$(MSGMERGE) --update $$po $$pot; \
-		$(MSGFMT) --output /dev/null --check-format $$po || exit 1; \
+	@if $(MSGFMT) --help >/dev/null 2>&1; then \
+	    cd $(top_srcdir); \
+	    for pot in $(POTFILES); do \
+		podir=`dirname $$pot`; \
+		for po in $$podir/*.po; do \
+		    echo $(ECHO_N) "Updating $$po$(ECHO_C)"; \
+		    $(MSGMERGE) --update $$po $$pot; \
+		    $(MSGFMT) --output /dev/null --check-format $$po || exit 1; \
+		done; \
 	    done; \
-	done
+	fi
 
 compile-po:
-	@cd $(top_srcdir); \
-	for pot in $(POTFILES); do \
-	    podir=`dirname $$pot`; \
-	    for po in $$podir/*.po; do \
-		mo=`echo $$po | sed 's/po$$/mo/'`; \
-		echo $(ECHO_N) "Compiling $$mo: $(ECHO_C)"; \
-		$(MSGFMT) --statistics -c -o $$mo $$po; \
+	@if $(MSGFMT) --help >/dev/null 2>&1; then \
+	    cd $(top_srcdir); \
+	    rm -f Makefile.$$$$; \
+	    POFILES=""; \
+	    for pot in $(POTFILES); do \
+		podir=`dirname $$pot`; \
+		for po in $$podir/*.po; do \
+		    POFILES="$$POFILES $$po"; \
+		done; \
 	    done; \
-	done
+	    echo "all: `echo $$POFILES | sed 's/\.po/.mo/g'`" >> Makefile.$$$$; \
+	    echo "" >> Makefile.$$$$; \
+	    for po in $$POFILES; do \
+		mo=`echo $$po | sed 's/po$$/mo/'`; \
+		echo "$$mo: $$po" >> Makefile.$$$$; \
+		echo "	$(MSGFMT) --statistics -c -o $$mo $$po" >> Makefile.$$$$; \
+	    done; \
+	    make -f Makefile.$$$$; \
+	    rm -f Makefile.$$$$; \
+	fi
 
 install-nls:
 	@if test "$(NLS)" = "enabled"; then \
@@ -222,7 +242,15 @@ install-nls:
 	    done; \
 	fi
 
-dist: ChangeLog $(srcdir)/MANIFEST
+check-dist: update-pot compile-po
+	@if [ -d .hg ]; then \
+	    if hg stat -am | grep '\.[mp]ot*$$'; then \
+		echo "Uncommitted message catalog changes" 1>&2; \
+		false; \
+	    fi; \
+	fi
+
+dist: check-dist ChangeLog $(srcdir)/MANIFEST
 	pax -w -x ustar -s '/^/$(PACKAGE_TARNAME)-$(VERSION)\//' \
 	    -f ../$(PACKAGE_TARNAME)-$(VERSION).tar \
 	    `sed 's/[ 	].*//' $(srcdir)/MANIFEST`
