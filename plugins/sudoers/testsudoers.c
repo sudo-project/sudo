@@ -78,9 +78,9 @@ void print_defaults(void);
 void print_privilege(struct privilege *);
 void print_userspecs(void);
 void usage(void) __attribute__((__noreturn__));
-void set_runasgr(char *);
-void set_runaspw(char *);
 void cleanup(int);
+static int set_runaspw(const char *);
+static int set_runasgr(const char *);
 static int testsudoers_printf(int msg_type, const char *fmt, ...);
 static int testsudoers_print(const char *msg);
 
@@ -235,6 +235,9 @@ main(int argc, char *argv[])
     /* Initialize default values. */
     init_defaults();
 
+    /* Set runas callback. */
+    sudo_defs_table[I_RUNAS_DEFAULT].callback = set_runaspw;
+
     /* Load ip addr/mask for each interface. */
     if (get_net_ifs(&p) > 0)
 	set_interfaces(p);
@@ -319,9 +322,11 @@ main(int argc, char *argv[])
     exit(match == ALLOW ? 0 : match + 3);
 }
 
-void
-set_runaspw(char *user)
+static int
+set_runaspw(const char *user)
 {
+    if (runas_pw != NULL)
+	pw_delref(runas_pw);
     if (*user == '#') {
 	if ((runas_pw = sudo_getpwuid(atoi(user + 1))) == NULL)
 	    runas_pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
@@ -329,11 +334,14 @@ set_runaspw(char *user)
 	if ((runas_pw = sudo_getpwnam(user)) == NULL)
 	    errorx(1, _("unknown user: %s"), user);
     }
+    return TRUE;
 }
 
-void
-set_runasgr(char *group)
+static int
+set_runasgr(const char *group)
 {
+    if (runas_gr != NULL)
+	gr_delref(runas_gr);
     if (*group == '#') {
 	if ((runas_gr = sudo_getgrgid(atoi(group + 1))) == NULL)
 	    runas_gr = sudo_fakegrnam(group);
@@ -341,6 +349,7 @@ set_runasgr(char *group)
 	if ((runas_gr = sudo_getgrnam(group)) == NULL)
 	    errorx(1, _("unknown group: %s"), group);
     }
+    return TRUE;
 }
 
 void
