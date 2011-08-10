@@ -79,8 +79,9 @@ void print_privilege(struct privilege *);
 void print_userspecs(void);
 void usage(void) __attribute__((__noreturn__));
 void cleanup(int);
-static int set_runaspw(const char *);
-static int set_runasgr(const char *);
+static void set_runaspw(const char *);
+static void set_runasgr(const char *);
+static int cb_runas_default(const char *);
 static int testsudoers_printf(int msg_type, const char *fmt, ...);
 static int testsudoers_print(const char *msg);
 
@@ -105,6 +106,7 @@ extern int (*trace_print)(const char *msg);
 struct interface *interfaces;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
+static char *runas_group, *runas_user;
 extern int parse_error;
 sudo_printf_t sudo_printf = testsudoers_printf;
 
@@ -125,7 +127,7 @@ main(int argc, char *argv[])
     struct cmndspec *cs;
     struct privilege *priv;
     struct userspec *us;
-    char *p, *grfile, *pwfile, *runas_group, *runas_user;
+    char *p, *grfile, *pwfile;
     char hbuf[MAXHOSTNAMELEN + 1];
     int match, host_match, runas_match, cmnd_match;
     int ch, dflag;
@@ -142,7 +144,7 @@ main(int argc, char *argv[])
 #endif
 
     dflag = 0;
-    grfile = pwfile = runas_group = runas_user = NULL;
+    grfile = pwfile = NULL;
     while ((ch = getopt(argc, argv, "dg:G:h:p:tu:")) != -1) {
 	switch (ch) {
 	    case 'd':
@@ -236,7 +238,7 @@ main(int argc, char *argv[])
     init_defaults();
 
     /* Set runas callback. */
-    sudo_defs_table[I_RUNAS_DEFAULT].callback = set_runaspw;
+    sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
 
     /* Load ip addr/mask for each interface. */
     if (get_net_ifs(&p) > 0)
@@ -322,7 +324,7 @@ main(int argc, char *argv[])
     exit(match == ALLOW ? 0 : match + 3);
 }
 
-static int
+static void
 set_runaspw(const char *user)
 {
     if (runas_pw != NULL)
@@ -334,10 +336,9 @@ set_runaspw(const char *user)
 	if ((runas_pw = sudo_getpwnam(user)) == NULL)
 	    errorx(1, _("unknown user: %s"), user);
     }
-    return TRUE;
 }
 
-static int
+static void
 set_runasgr(const char *group)
 {
     if (runas_gr != NULL)
@@ -349,6 +350,17 @@ set_runasgr(const char *group)
 	if ((runas_gr = sudo_getgrnam(group)) == NULL)
 	    errorx(1, _("unknown group: %s"), group);
     }
+}
+
+/* 
+ * Callback for runas_default sudoers setting.
+ */
+static int
+cb_runas_default(const char *user)
+{
+    /* Only reset runaspw if user didn't specify one. */
+    if (!runas_user && !runas_group)
+        set_runaspw(user);
     return TRUE;
 }
 
