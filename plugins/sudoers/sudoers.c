@@ -88,8 +88,9 @@
 static void init_vars(char * const *);
 static int set_cmnd(void);
 static void set_loginclass(struct passwd *);
-static int set_runaspw(const char *);
-static int set_runasgr(const char *);
+static void set_runaspw(const char *);
+static void set_runasgr(const char *);
+static int cb_runas_default(const char *);
 static int sudoers_policy_version(int verbose);
 static int deserialize_info(char * const settings[], char * const user_info[]);
 static char *find_editor(int nfiles, char **files, char ***argv_out);
@@ -822,7 +823,7 @@ init_vars(char * const envp[])
 	user_group_list = get_group_list(sudo_user.pw);
 
     /* Set runas callback. */
-    sudo_defs_table[I_RUNAS_DEFAULT].callback = set_runaspw;
+    sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
 
     /* It is now safe to use log_error() and set_perms() */
 }
@@ -1074,7 +1075,7 @@ set_fqdn(void)
  * Get passwd entry for the user we are going to run commands as
  * and store it in runas_pw.  By default, commands run as "root".
  */
-int
+void
 set_runaspw(const char *user)
 {
     if (runas_pw != NULL)
@@ -1086,14 +1087,13 @@ set_runaspw(const char *user)
 	if ((runas_pw = sudo_getpwnam(user)) == NULL)
 	    log_error(NO_MAIL|MSG_ONLY, _("unknown user: %s"), user);
     }
-    return TRUE;
 }
 
 /*
  * Get group entry for the group we are going to run commands as
  * and store it in runas_gr.
  */
-static int
+static void
 set_runasgr(const char *group)
 {
     if (runas_gr != NULL)
@@ -1105,6 +1105,17 @@ set_runasgr(const char *group)
 	if ((runas_gr = sudo_getgrnam(group)) == NULL)
 	    log_error(NO_MAIL|MSG_ONLY, _("unknown group: %s"), group);
     }
+}
+
+/*
+ * Callback for runas_default sudoers setting.
+ */
+static int
+cb_runas_default(const char *user)
+{
+    /* Only reset runaspw if user didn't specify one. */
+    if (!runas_user && !runas_group)
+	set_runaspw(user);
     return TRUE;
 }
 
