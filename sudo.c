@@ -114,8 +114,9 @@ static void init_vars			__P((char **));
 static int set_cmnd			__P((int));
 static void initial_setup		__P((void));
 static void set_loginclass		__P((struct passwd *));
-static int set_runaspw			__P((const char *));
-static int set_runasgr			__P((const char *));
+static void set_runaspw			__P((const char *));
+static void set_runasgr			__P((const char *));
+static int cb_runas_default		__P((const char *));
 static void show_version		__P((void));
 static void create_admin_success_flag	__P((void));
 extern int sudo_edit			__P((int, char **, char **));
@@ -755,7 +756,7 @@ init_vars(envp)
     }
 
     /* Set runas callback. */
-    sudo_defs_table[I_RUNAS_DEFAULT].callback = set_runaspw;
+    sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
 }
 
 /*
@@ -1210,7 +1211,7 @@ set_fqdn()
  * Get passwd entry for the user we are going to run commands as
  * and store it in runas_pw.  By default, commands run as "root".
  */
-int
+void
 set_runaspw(user)
     const char *user;
 {
@@ -1225,14 +1226,13 @@ set_runaspw(user)
 	    log_error(NO_MAIL|MSG_ONLY, "unknown user: %s", user);
 	}
     }
-    return TRUE;
 }
 
 /*
  * Get group entry for the group we are going to run commands as
  * and store it in runas_gr.
  */
-static int
+static void
 set_runasgr(group)
     const char *group;
 {
@@ -1245,6 +1245,17 @@ set_runasgr(group)
 	if ((runas_gr = sudo_getgrnam(group)) == NULL)
 	    log_error(NO_MAIL|MSG_ONLY, "unknown group: %s", group);
     }
+}
+
+/*
+ * Callback for runas_default sudoers setting.
+ */
+static int
+cb_runas_default(const char *user)
+{
+    /* Only reset runaspw if user didn't specify one. */
+    if (!runas_user && !runas_group)
+	set_runaspw(user);
     return TRUE;
 }
 
