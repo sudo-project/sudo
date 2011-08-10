@@ -183,6 +183,8 @@ plugins/sudoers/parse.c
 plugins/sudoers/parse.h
 plugins/sudoers/plugin_error.c
 plugins/sudoers/po/README
+plugins/sudoers/po/da.mo
+plugins/sudoers/po/da.po
 plugins/sudoers/po/eu.mo
 plugins/sudoers/po/eu.po
 plugins/sudoers/po/fi.mo
