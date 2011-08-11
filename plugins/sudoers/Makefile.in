@@ -110,8 +110,8 @@ TEST_PROGS = check_iolog_path check_fill check_wrap
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
-LIBSUDOERS_OBJS = alias.lo audit.lo defaults.lo gram.lo match.lo pwutil.lo \
-		  timestr.lo toke.lo toke_util.lo redblack.lo
+LIBPARSESUDOERS_OBJS = alias.lo audit.lo defaults.lo gram.lo match.lo \
+		       pwutil.lo timestr.lo toke.lo toke_util.lo redblack.lo
 
 SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo env.lo goodpath.lo \
 	       group_plugin.lo find_path.lo interfaces.lo logging.lo \
@@ -155,20 +155,20 @@ all: $(PROGS)
 Makefile: $(srcdir)/Makefile.in
 	(cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile)
 
-libsudoers.la: $(LIBSUDOERS_OBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(LIBSUDOERS_OBJS) -no-install
+libparsesudoers.la: $(LIBPARSESUDOERS_OBJS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(LIBPARSESUDOERS_OBJS) -no-install
 
-sudoers.la: $(SUDOERS_OBJS) $(LT_LIBS) libsudoers.la
-	$(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(SUDOERS_LDFLAGS) $(LTLDFLAGS) -o $@ $(SUDOERS_OBJS) libsudoers.la $(SUDOERS_LIBS) -module -export-symbols $(srcdir)/sudoers.sym -avoid-version -rpath $(plugindir)
+sudoers.la: $(SUDOERS_OBJS) $(LT_LIBS) libparsesudoers.la
+	$(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(SUDOERS_LDFLAGS) $(LTLDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module -export-symbols $(srcdir)/sudoers.sym -avoid-version -rpath $(plugindir)
 
-visudo: libsudoers.la $(VISUDO_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)
+visudo: libparsesudoers.la $(VISUDO_OBJS) $(LT_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) libparsesudoers.la $(LIBS) $(NET_LIBS)
 
 sudoreplay: $(REPLAY_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) timestr.lo $(REPLAY_LIBS) $(LIBS)
 
-testsudoers: libsudoers.la $(TEST_OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS) @LIBDL@
+testsudoers: libparsesudoers.la $(TEST_OBJS) $(LT_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) libparsesudoers.la $(LIBS) $(NET_LIBS) @LIBDL@
 
 check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_IOLOG_PATH_OBJS) $(LDFLAGS) $(LIBS)
