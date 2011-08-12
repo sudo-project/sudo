@@ -41,6 +41,7 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <pwd.h>
+#include <usersec.h>
 
 #include "sudoers.h"
 #include "sudo_auth.h"
@@ -52,26 +53,37 @@
 int
 aixauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 {
-    char *pass;
-    char *message = NULL;
-    int result, reenter = 0;
-    int rval = AUTH_FAILURE;
+    char *pass, *message = NULL;
+    int result = 1, reenter = 0;
+    int rval = AUTH_SUCCESS;
 
-    if (pass) {
-	/* XXX - should verify that S_AUTH1 is "NONE" or "SYSTEM" */
-	do {
-	    pass = auth_getpass(prompt, def_passwd_timeout * 60,
-		SUDO_CONV_PROMPT_ECHO_OFF);
-	    efree(message);
-	    result = authenticate(pw->pw_name, pass, &reenter, &message);
-	    zero_bytes(pass, strlen(pass));
-	    prompt = message;
-	} while (reenter);
-	/* XXX - should probably print message on failure. */
+    do {
+	pass = auth_getpass(prompt, def_passwd_timeout * 60,
+	    SUDO_CONV_PROMPT_ECHO_OFF);
+	if (pass == NULL)
+	    break;
 	efree(message);
-	if (result == 0)
-	    rval = AUTH_SUCCESS;
+	message = NULL;
+	result = authenticate(pw->pw_name, pass, &reenter, &message);
+	zero_bytes(pass, strlen(pass));
+	prompt = message;
+    } while (reenter);
+
+    if (result != 0) {
+	/* Display error message, if any. */
+	if (message != NULL) {
+	    struct sudo_conv_message msg;
+	    struct sudo_conv_reply repl;
+
+	    memset(&msg, 0, sizeof(msg));
+	    msg.msg_type = SUDO_CONV_ERROR_MSG;
+	    msg.msg = message;
+	    memset(&repl, 0, sizeof(repl));
+	    sudo_conv(1, &msg, &repl);
+	}
+	rval = pass ? AUTH_FAILURE : AUTH_INTR;
     }
+    efree(message);
     return rval;
 }
 
