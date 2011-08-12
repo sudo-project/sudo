@@ -19841,6 +19841,9 @@ esac
 
 	;;
     *)
+	if test X"${ac_cv_func_dlopen}" = X"yes"; then
+	    as_fn_error $? "\"dlopen present but libtool doesn't appear to support your platform.\"" "$LINENO" 5
+	fi
 	# Preload sudoers module symbols
 	SUDO_OBJS="${SUDO_OBJS} preload.o"
 	SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
