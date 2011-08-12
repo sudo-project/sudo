@@ -2905,6 +2905,9 @@ case "$lt_cv_dlopen" in
 	AC_LIBOBJ(dlopen)
 	;;
     *)
+	if test X"${ac_cv_func_dlopen}" = X"yes"; then
+	    AC_MSG_ERROR(["dlopen present but libtool doesn't appear to support your platform."])
+	fi
 	# Preload sudoers module symbols
 	SUDO_OBJS="${SUDO_OBJS} preload.o"
 	SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
