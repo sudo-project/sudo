@@ -130,8 +130,7 @@ case "$osversion" in
 	    PPVARS="${PPVARS}${PPVARS+$space}linux_audit=1.4.0"
 	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
-	configure_opts="$configure_opts
-		--prefix=$prefix
+	configure_opts="--prefix=$prefix
 		--with-logging=syslog
 		--with-logfac=authpriv
 		--with-pam
@@ -142,7 +141,8 @@ case "$osversion" in
 		--with-tty-tickets
 		--with-ldap
 		--with-selinux
-		--with-passprompt=[sudo] password for %p: "
+		--with-passprompt=[sudo] password for %p: 
+		$configure_opts"
 	;;
     sles*)
 	prefix=/usr
@@ -162,8 +162,7 @@ case "$osversion" in
 	esac
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	# XXX - SuSE uses secure path but only for env_reset
-	configure_opts="$configure_opts
-		--prefix=$prefix
+	configure_opts="--prefix=$prefix
 		--libexecdir=$prefix/$libexec/sudo
 		--with-logging=syslog
 		--with-logfac=auth
@@ -176,7 +175,8 @@ case "$osversion" in
 		--enable-zlib=system
 		--with-ldap
 		--with-env-editor
-		--with-passprompt=%p\'s password: "
+		--with-passprompt=%p\'s password: 
+		$configure_opts"
 
 	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
 	;;
@@ -193,8 +193,7 @@ case "$osversion" in
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap
 		--with-ldap-conf-file=/etc/sudo-ldap.conf"
 	fi
-	configure_opts="$configure_opts
-		--prefix=/usr
+	configure_opts="--prefix=/usr
 		--with-all-insults
 		--with-exempt=sudo
 		--with-pam
@@ -213,26 +212,27 @@ case "$osversion" in
 		--with-sendmail=/usr/sbin/sendmail
 		--mandir=/usr/share/man
 		--libexecdir=/usr/lib/sudo
-		--with-secure-path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/X11R6/bin"
+		--with-secure-path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/X11R6/bin
+		$configure_opts"
 	;;
     *)
 	# For Solaris, add project support and use let configure choose zlib.
-	# For all others, use the builtin zlib.
+	# For all others, use the builtin zlib and disable NLS support.
 	case "$osversion" in
 	    sol*) configure_opts="${configure_opts}${configure_opts+$tab}--with-project";;
-	    *) configure_opts="${configure_opts}${configure_opts+$tab}--enable-zlib=builtin";;
+	    *) configure_opts="${configure_opts}${configure_opts+$tab}--enable-zlib=builtin${tab}--disable-nls";;
 	esac
 	if test "$flavor" = "ldap"; then
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap"
 	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
-	configure_opts="$configure_opts
-		--prefix=$prefix
+	configure_opts="--prefix=$prefix
 		--with-insults=disabled
 		--with-logging=syslog
 		--with-logfac=auth
 		--with-editor=/usr/bin/vim:/usr/bin/vi:/bin/vi
-		--with-env-editor"
+		--with-env-editor
+		$configure_opts"
 	;;
 esac
 
