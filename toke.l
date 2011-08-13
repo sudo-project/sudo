@@ -906,8 +906,10 @@ parse_include(base)
 
     /* Make a copy of path and return it. */
     len += (int)(ep - cp);
-    if ((path = malloc(len + 1)) == NULL)
+    if ((path = malloc(len + 1)) == NULL) {
 	yyerror("unable to allocate memory");
+	return NULL;
+    }
     if (subst) {
 	/* substitute for %h */
 	char *pp = path;

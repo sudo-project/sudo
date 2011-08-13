@@ -2141,7 +2141,7 @@ sudo_ldap_setdefs(nss)
 	}
 	result = NULL;
 	rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE,
-	    filt, NULL, 0, NULL, NULL, NULL, 0, &result);
+	    filt, NULL, 0, NULL, NULL, tvp, 0, &result);
 	if (rc == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
 	    DPRINTF(("found:%s", ldap_get_dn(ld, entry)), 1);
 	    sudo_ldap_parse_options(ld, entry);
@@ -2168,7 +2168,7 @@ sudo_ldap_lookup(nss, ret, pwflag)
     struct sudo_ldap_handle *handle = nss->handle;
     LDAP *ld;
     LDAPMessage *entry;
-    int i, rc, setenv_implied, matched = UNSPEC;
+    int i, rc, setenv_implied;
     struct ldap_result *lres = NULL;
 
     if (handle == NULL || handle->ld == NULL)
@@ -2183,11 +2183,12 @@ sudo_ldap_lookup(nss, ret, pwflag)
      * password is required, so the order of the entries doesn't matter.
      */
     if (pwflag) {
-	DPRINTF(("perform search for pwflag %d", pwflag), 1);
 	int doauth = UNSPEC;
+	int matched = UNSPEC;
 	enum def_tupple pwcheck = 
 	    (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
 
+	DPRINTF(("perform search for pwflag %d", pwflag), 1);
 	for (i = 0; i < lres->nentries; i++) {
 	    entry = lres->entries[i].entry;
 	    if ((pwcheck == any && doauth != FALSE) ||
@@ -2237,7 +2238,6 @@ sudo_ldap_lookup(nss, ret, pwflag)
 	if (rc != UNSPEC) {
 	    /* We have a match. */
 	    DPRINTF(("Command %sallowed", rc == TRUE ? "" : "NOT "), 1);
-	    matched = TRUE;
 	    if (rc == TRUE) {
 		DPRINTF(("LDAP entry: %p", entry), 1);
 		/* Apply entry-specific options. */
@@ -2447,7 +2447,7 @@ sudo_ldap_result_get(nss, pw)
 	    }
 	    result = NULL;
 	    rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE, filt,
-		NULL, 0, NULL, NULL, NULL, 0, &result);
+		NULL, 0, NULL, NULL, tvp, 0, &result);
 	    if (rc != LDAP_SUCCESS) {
 		DPRINTF(("nothing found for '%s'", filt), 1);
 		continue;
