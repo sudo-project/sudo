@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2007-2011 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -56,19 +56,28 @@ aixauth_verify(pw, prompt, auth)
     char *prompt;
     sudo_auth *auth;
 {
-    char *pass;
-    char *message = NULL;
-    int reenter = 1;
-    int rval = AUTH_FAILURE;
+    char *pass, *message = NULL;
+    int result = 1, reenter = 0;
+    int rval = AUTH_SUCCESS;
 
-    pass = tgetpass(prompt, def_passwd_timeout * 60, tgetpass_flags);
-    if (pass) {
-	/* XXX - should probably print message on failure. */
-	if (authenticate(pw->pw_name, pass, &reenter, &message) == 0)
-	    rval = AUTH_SUCCESS;
-	free(message);
+    do {
+	pass = tgetpass(prompt, def_passwd_timeout * 60, tgetpass_flags);
+	if (pass == NULL)
+	    break;
+	efree(message);
+	message = NULL;
+	result = authenticate(pw->pw_name, pass, &reenter, &message);
 	zero_bytes(pass, strlen(pass));
+	prompt = message;
+    } while (reenter);
+
+    if (result != 0) {
+	/* Display error message, if any. */
+	if (message != NULL)
+	    fputs(message, stderr);
+	rval = pass ? AUTH_FAILURE : AUTH_INTR;
     }
+    efree(message);
     return rval;
 }
 
