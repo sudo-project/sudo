@@ -1251,7 +1251,8 @@ set_runasgr(group)
  * Callback for runas_default sudoers setting.
  */
 static int
-cb_runas_default(const char *user)
+cb_runas_default(user)
+    const char *user;
 {
     /* Only reset runaspw if user didn't specify one. */
     if (!runas_user && !runas_group)
