@@ -1389,7 +1389,30 @@ dnl
 AC_CHECK_PROG(UNAMEPROG, [uname], [uname])
 AC_CHECK_PROG(TRPROG, [tr], [tr])
 AC_CHECK_PROGS(NROFFPROG, [nroff mandoc])
-if test -z "$NROFFPROG"; then
+if test -n "$NROFFPROG"; then
+    AC_CACHE_CHECK([whether $NROFFPROG supports the -c option],
+	[sudo_cv_var_nroff_opt_c],
+	[if $NROFFPROG -c </dev/null >/dev/null 2>&1; then
+	    sudo_cv_var_nroff_opt_c=yes
+	else
+	    sudo_cv_var_nroff_opt_c=no
+	fi]
+    )
+    if test "$sudo_cv_var_nroff_opt_c" = "yes"; then
+	NROFFPROG="$NROFFPROG -c"
+    fi
+    AC_CACHE_CHECK([whether $NROFFPROG supports the -Tascii option],
+	[sudo_cv_var_nroff_opt_Tascii],
+	[if $NROFFPROG -Tascii </dev/null >/dev/null 2>&1; then
+	    sudo_cv_var_nroff_opt_Tascii=yes
+	else
+	    sudo_cv_var_nroff_opt_Tascii=no
+	fi]
+    if test "$sudo_cv_var_nroff_opt_Tascii" = "yes"; then
+	NROFFPROG="$NROFFPROG -Tascii"
+    fi
+    )
+else
     MANTYPE="cat"
     mansrcdir='$(srcdir)'
 fi
