@@ -1202,6 +1202,7 @@ as I<env_keep> and I<env_check>.
 =item exempt_group
 
 Users in this group are exempt from password and PATH requirements.
+The group name specified should not include a C<%> prefix.
 This is not set by default.
 
 =item lecture
