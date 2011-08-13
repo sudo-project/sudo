@@ -190,13 +190,12 @@ do_logfile(msg)
     char *msg;
 {
     char *full_line;
-    char *beg, *oldend, *end;
-    FILE *fp;
+    size_t len;
     mode_t oldmask;
-    size_t maxlen;
+    time_t now;
+    FILE *fp;
 
     oldmask = umask(077);
-    maxlen = def_loglinelen > 0 ? def_loglinelen : 0;
     fp = fopen(def_logfile, "a");
     (void) umask(oldmask);
     if (fp == NULL) {
@@ -204,8 +203,6 @@ do_logfile(msg)
     } else if (!lock_file(fileno(fp), SUDO_LOCK)) {
 	send_mail("Can't lock log file: %s: %s", def_logfile, strerror(errno));
     } else {
-	time_t now;
-
 #ifdef HAVE_SETLOCALE
 	const char *old_locale = estrdup(setlocale(LC_ALL, NULL));
 	if (!setlocale(LC_ALL, def_sudoers_locale))
@@ -213,7 +210,7 @@ do_logfile(msg)
 #endif /* HAVE_SETLOCALE */
 
 	now = time(NULL);
-	if (def_loglinelen == 0) {
+	if (def_loglinelen < sizeof(LOG_INDENT)) {
 	    /* Don't pretty-print long log file lines (hard to grep) */
 	    if (def_log_host)
 		(void) fprintf(fp, "%s : %s : HOST=%s : %s\n",
@@ -223,59 +220,16 @@ do_logfile(msg)
 		    get_timestr(now, def_log_year), user_name, msg);
 	} else {
 	    if (def_log_host)
-		easprintf(&full_line, "%s : %s : HOST=%s : %s",
+		len = easprintf(&full_line, "%s : %s : HOST=%s : %s",
 		    get_timestr(now, def_log_year), user_name, user_shost, msg);
 	    else
-		easprintf(&full_line, "%s : %s : %s",
+		len = easprintf(&full_line, "%s : %s : %s",
 		    get_timestr(now, def_log_year), user_name, msg);
 
 	    /*
-	     * Print out full_line with word wrap
+	     * Print out full_line with word wrap around def_loglinelen chars.
 	     */
-	    beg = end = full_line;
-	    while (beg) {
-		oldend = end;
-		end = strchr(oldend, ' ');
-
-		if (maxlen > 0 && end) {
-		    *end = '\0';
-		    if (strlen(beg) > maxlen) {
-			/* too far, need to back up & print the line */
-
-			if (beg == (char *)full_line)
-			    maxlen -= 4;	/* don't indent first line */
-
-			*end = ' ';
-			if (oldend != beg) {
-			    /* rewind & print */
-			    end = oldend-1;
-			    while (*end == ' ')
-				--end;
-			    *(++end) = '\0';
-			    (void) fprintf(fp, "%s\n    ", beg);
-			    *end = ' ';
-			} else {
-			    (void) fprintf(fp, "%s\n    ", beg);
-			}
-
-			/* reset beg to point to the start of the new substr */
-			beg = end;
-			while (*beg == ' ')
-			    ++beg;
-		    } else {
-			/* we still have room */
-			*end = ' ';
-		    }
-
-		    /* remove leading whitespace */
-		    while (*end == ' ')
-			++end;
-		} else {
-		    /* final line */
-		    (void) fprintf(fp, "%s\n", beg);
-		    beg = NULL;			/* exit condition */
-		}
-	    }
+	    writeln_wrap(fp, full_line, len, def_loglinelen);
 	    efree(full_line);
 	}
 	(void) fflush(fp);

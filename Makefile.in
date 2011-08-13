@@ -109,14 +109,14 @@ SRCS = aix.c alias.c alloc.c audit.c boottime.c bsm_audit.c check.c \
        closefrom.c def_data.c defaults.c env.c error.c exec.c exec_pty.c \
        fileops.c find_path.c fnmatch.c get_pty.c getcwd.c getprogname.c \
        getspwuid.c gettime.c glob.c goodpath.c gram.c gram.y interfaces.c \
-       iolog.c isblank.c lbuf.c ldap.c linux_audit.c list.c logging.c match.c \
-       mksiglist.c mkstemps.c memrchr.c nanosleep.c parse.c parse_args.c \
-       pwutil.c set_perms.c setsid.c sigaction.c snprintf.c strcasecmp.c \
-       strerror.c strlcat.c strlcpy.c strsignal.c sudo.c sudo_noexec.c \
-       sudo_edit.c sudo_nss.c term.c testsudoers.c tgetpass.c toke.c toke.l \
-       toke_util.c tsgetgrpw.c utimes.c vasgroups.c visudo.c zero_bytes.c \
-       redblack.c selinux.c sesh.c sudoreplay.c getdate.c getdate.y getline.c \
-       timestr.c $(AUTH_SRCS)
+       iolog.c isblank.c lbuf.c ldap.c linux_audit.c list.c logging.c \
+       logwrap.c match.c mksiglist.c mkstemps.c memrchr.c nanosleep.c parse.c \
+       parse_args.c pwutil.c set_perms.c setsid.c sigaction.c snprintf.c \
+       strcasecmp.c strerror.c strlcat.c strlcpy.c strsignal.c sudo.c \
+       sudo_noexec.c sudo_edit.c sudo_nss.c term.c testsudoers.c tgetpass.c \
+       toke.c toke.l toke_util.c tsgetgrpw.c utimes.c vasgroups.c visudo.c \
+       zero_bytes.c redblack.c selinux.c sesh.c sudoreplay.c getdate.c \
+       getdate.y getline.c timestr.c $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/kerb4.c auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
@@ -138,8 +138,8 @@ COMMON_OBJS = alias.o alloc.o defaults.o error.o gram.o \
 
 SUDO_OBJS = $(AUTH_OBJS) @SUDO_OBJS@ audit.o boottime.o check.o env.o \
 	    exec.o gettime.o goodpath.o fileops.o find_path.o \
-	    interfaces.o lbuf.o logging.o parse.o parse_args.o set_perms.o \
-	    sudo.o sudo_edit.o sudo_nss.o tgetpass.o
+	    interfaces.o lbuf.o logging.o logwrap.o parse.o parse_args.o \
+	    set_perms.o sudo.o sudo_edit.o sudo_nss.o tgetpass.o
 
 VISUDO_OBJS = visudo.o fileops.o gettime.o goodpath.o find_path.o
 
@@ -335,6 +335,8 @@ list.o: $(srcdir)/list.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/list.c
 logging.o: $(srcdir)/logging.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/logging.c
+logwrap.o: $(srcdir)/logwrap.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/logwrap.c
 match.o: $(srcdir)/match.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(srcdir)/interfaces.h $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/match.c
 memrchr.o: $(srcdir)/memrchr.c $(SUDODEP)
