@@ -2327,7 +2327,7 @@ if test ${with_kerb4-'no'} != "no"; then
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "kerberosIV/" "krb4/" "kerberos4/" "kerberosv4/"; do
 	    CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
-	    AC_PREPROC_IFELSE([#include <krb.h>], [found=yes; break])
+	    AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <krb.h>]])], [found=yes; break])
 	done
 	test X"$found" = X"no" && CPPFLAGS="$O_CPPFLAGS"
     else
@@ -2404,7 +2404,7 @@ if test ${with_kerb5-'no'} != "no"; then
 	    O_CPPFLAGS="$CPPFLAGS"
 	    for dir in "" "kerberosV/" "krb5/" "kerberos5/" "kerberosv5/"; do
 		CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
-		AC_PREPROC_IFELSE([#include <krb5.h>], [found=yes; break])
+		AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <krb5.h>]])], [found=yes; break])
 	    done
 	    if test X"$found" = X"no"; then
 		CPPFLAGS="$O_CPPFLAGS"
@@ -2572,13 +2572,13 @@ if test "${with_opie-'no'}" = "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_opie}/include"
 	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_opie}/lib])
 	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_opie}/lib])
-	AC_PREPROC_IFELSE([#include <opie.h>], [found=yes], [found=no])
+	AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <opie.h>]])], [found=yes], [found=no])
     else
 	found=no
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "/usr/local" "/usr/contrib"; do
 	    test -n "$dir" && CPPFLAGS="$O_CPPFLAGS -I${dir}/include"
-	    AC_PREPROC_IFELSE([#include <opie.h>], [found=yes; break])
+	    AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <opie.h>]])], [found=yes; break])
 	done
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
@@ -2710,7 +2710,7 @@ if test ${with_ldap-'no'} != "no"; then
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "kerberosV" "krb5" "kerberos5" "kerberosv5"; do
 	    test X"$dir" != X"" && CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
-	    AC_PREPROC_IFELSE([#include <gssapi/gssapi.h>], [found="gssapi/gssapi.h"; break], [AC_PREPROC_IFELSE([#include <gssapi.h>], [found="gssapi.h"; break])])
+	    AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <gssapi/gssapi.h>]])], [found="gssapi/gssapi.h"; break], [AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <gssapi.h>]])], [found="gssapi.h"; break])])
 	done
 	if test X"$found" != X"no"; then
 	    AC_CHECK_HEADERS([$found])
