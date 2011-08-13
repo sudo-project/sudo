@@ -51,9 +51,9 @@ int stream_size;
     if (state == Z_NULL) return Z_MEM_ERROR;
     Tracev((stderr, "inflate: allocated\n"));
     strm->state = (struct internal_state FAR *)state;
-    state->dmax = 32768U;
+    state->dmax = 32768;
     state->wbits = windowBits;
-    state->wsize = 1U << windowBits;
+    state->wsize = (unsigned)1 << windowBits;
     state->window = window;
     state->wnext = 0;
     state->whave = 0;
@@ -179,7 +179,7 @@ struct inflate_state FAR *state;
 
 /* Return the low n bits of the bit accumulator (n < 16) */
 #define BITS(n) \
-    ((unsigned)hold & ((1U << (n)) - 1))
+    ((unsigned)hold & (((unsigned)1 << (n)) - 1))
 
 /* Remove n bits from the bit accumulator */
 #define DROPBITS(n) \

@@ -113,7 +113,7 @@ z_streamp strm;
     state->mode = HEAD;
     state->last = 0;
     state->havedict = 0;
-    state->dmax = 32768U;
+    state->dmax = 32768;
     state->head = Z_NULL;
     state->wsize = 0;
     state->whave = 0;
@@ -316,7 +316,7 @@ void makefixed()
     puts("       subject to change. Applications should only use zlib.h.");
     puts("     */");
     puts("");
-    size = 1U << 9;
+    size = (unsigned)1 << 9;
     printf("    static const code lenfix[%u] = {", size);
     low = 0;
     for (;;) {
@@ -327,7 +327,7 @@ void makefixed()
         putchar(',');
     }
     puts("\n    };");
-    size = 1U << 5;
+    size = (unsigned)1 << 5;
     printf("\n    static const code distfix[%u] = {", size);
     low = 0;
     for (;;) {
@@ -367,14 +367,14 @@ unsigned out;
     /* if it hasn't been done already, allocate space for the window */
     if (state->window == Z_NULL) {
         state->window = (unsigned char FAR *)
-                        ZALLOC(strm, 1U << state->wbits,
+                        ZALLOC(strm, (unsigned)1 << state->wbits,
                                sizeof(unsigned char));
         if (state->window == Z_NULL) return 1;
     }
 
     /* if window not in use yet, initialize */
     if (state->wsize == 0) {
-        state->wsize = 1U << state->wbits;
+        state->wsize = (unsigned)1 << state->wbits;
         state->wnext = 0;
         state->whave = 0;
     }
@@ -483,7 +483,7 @@ unsigned out;
 
 /* Return the low n bits of the bit accumulator (n < 16) */
 #define BITS(n) \
-    ((unsigned)hold & ((1U << (n)) - 1))
+    ((unsigned)hold & (((unsigned)1 << (n)) - 1))
 
 /* Remove n bits from the bit accumulator */
 #define DROPBITS(n) \
@@ -661,7 +661,7 @@ int flush;
                 state->mode = BAD;
                 break;
             }
-            state->dmax = 1U << len;
+            state->dmax = (unsigned)1 << len;
             Tracev((stderr, "inflate:   zlib header ok\n"));
             strm->adler = state->check = adler32(0L, Z_NULL, 0);
             state->mode = hold & 0x200 ? DICTID : TYPE;
@@ -1183,7 +1183,7 @@ int flush;
         case LENGTH:
             if (state->wrap && state->flags) {
                 NEEDBITS(32);
-                if (hold != (state->total & 0xffffffffUL)) {
+                if (hold != (state->total & (unsigned long)0xffffffff)) {
                     strm->msg = (char *)"incorrect length check";
                     state->mode = BAD;
                     break;
@@ -1425,7 +1425,7 @@ z_streamp source;
     window = Z_NULL;
     if (state->window != Z_NULL) {
         window = (unsigned char FAR *)
-                 ZALLOC(source, 1U << state->wbits, sizeof(unsigned char));
+                 ZALLOC(source, (unsigned)1 << state->wbits, sizeof(unsigned char));
         if (window == Z_NULL) {
             ZFREE(source, copy);
             return Z_MEM_ERROR;
@@ -1442,7 +1442,7 @@ z_streamp source;
     }
     copy->next = copy->codes + (state->next - state->codes);
     if (window != Z_NULL) {
-        wsize = 1U << state->wbits;
+        wsize = (unsigned)1 << state->wbits;
         zmemcpy(window, state->window, wsize);
     }
     copy->window = window;

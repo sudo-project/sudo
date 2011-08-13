@@ -204,7 +204,7 @@ unsigned short FAR *work;
     curr = root;                /* current table index bits */
     drop = 0;                   /* current bits to drop from code for index */
     low = (unsigned)(-1);       /* trigger new sub-table when len > root */
-    used = 1U << root;          /* use root table entries */
+    used = (unsigned)1 << root; /* use root table entries */
     mask = used - 1;            /* mask for comparing low */
 
     /* check available table space */
@@ -230,8 +230,8 @@ unsigned short FAR *work;
         }
 
         /* replicate for those indices with low len bits equal to huff */
-        incr = 1U << (len - drop);
-        fill = 1U << curr;
+        incr = (unsigned)1 << (len - drop);
+        fill = (unsigned)1 << curr;
         min = fill;                 /* save offset to next table */
         do {
             fill -= incr;
@@ -239,7 +239,7 @@ unsigned short FAR *work;
         } while (fill != 0);
 
         /* backwards increment the len-bit code huff */
-        incr = 1U << (len - 1);
+        incr = (unsigned)1 << (len - 1);
         while (huff & incr)
             incr >>= 1;
         if (incr != 0) {
@@ -276,7 +276,7 @@ unsigned short FAR *work;
             }
 
             /* check for enough space */
-            used += 1U << curr;
+            used += (unsigned)1 << curr;
             if ((type == LENS && used >= ENOUGH_LENS) ||
                 (type == DISTS && used >= ENOUGH_DISTS))
                 return 1;
@@ -312,7 +312,7 @@ unsigned short FAR *work;
         next[huff >> drop] = here;
 
         /* backwards increment the len-bit code huff */
-        incr = 1U << (len - 1);
+        incr = (unsigned)1 << (len - 1);
         while (huff & incr)
             incr >>= 1;
         if (incr != 0) {

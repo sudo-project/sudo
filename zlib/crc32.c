@@ -68,7 +68,7 @@
 local unsigned long gf2_matrix_times OF((unsigned long *mat,
                                          unsigned long vec));
 local void gf2_matrix_square OF((unsigned long *square, unsigned long *mat));
-local uLong crc32_combine_(uLong crc1, uLong crc2, z_off64_t len2);
+local uLong crc32_combine_ OF((uLong crc1, uLong crc2, z_off64_t len2));
 
 
 #ifdef DYNAMIC_CRC_TABLE
@@ -121,9 +121,9 @@ local void make_crc_table()
         first = 0;
 
         /* make exclusive-or pattern from polynomial (0xedb88320UL) */
-        poly = 0UL;
+        poly = 0;
         for (n = 0; n < sizeof(p)/sizeof(unsigned char); n++)
-            poly |= 1UL << (31 - p[n]);
+            poly |= (unsigned long)1 << (31 - p[n]);
 
         /* generate a crc for every 8-bit value */
         for (n = 0; n < 256; n++) {
@@ -223,7 +223,7 @@ unsigned long ZEXPORT crc32(crc, buf, len)
     const unsigned char FAR *buf;
     uInt len;
 {
-    if (buf == Z_NULL) return 0UL;
+    if (buf == Z_NULL) return 0;
 
 #ifdef DYNAMIC_CRC_TABLE
     if (crc_table_empty)
@@ -241,7 +241,7 @@ unsigned long ZEXPORT crc32(crc, buf, len)
             return crc32_big(crc, buf, len);
     }
 #endif /* BYFOUR */
-    crc = crc ^ 0xffffffffUL;
+    crc = crc ^ (unsigned long)0xffffffff;
     while (len >= 8) {
         DO8;
         len -= 8;
@@ -249,7 +249,7 @@ unsigned long ZEXPORT crc32(crc, buf, len)
     if (len) do {
         DO1;
     } while (--len);
-    return crc ^ 0xffffffffUL;
+    return crc ^ (unsigned long)0xffffffff;
 }
 
 #ifdef BYFOUR
@@ -384,7 +384,7 @@ local uLong crc32_combine_(crc1, crc2, len2)
         return crc1;
 
     /* put operator for one zero bit in odd */
-    odd[0] = 0xedb88320UL;          /* CRC-32 polynomial */
+    odd[0] = (unsigned long)0xedb88320; /* CRC-32 polynomial */
     row = 1;
     for (n = 1; n < GF2_DIM; n++) {
         odd[n] = row;
