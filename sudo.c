@@ -1033,7 +1033,7 @@ open_sudoers(sudoers, doedit, keepopen)
     else if (statbuf.st_uid != SUDOERS_UID)
 	log_error(NO_EXIT, "%s is owned by uid %u, should be %u", sudoers,
 	    (unsigned int) statbuf.st_uid, (unsigned int) SUDOERS_UID);
-    else if (statbuf.st_gid != SUDOERS_GID)
+    else if (statbuf.st_gid != SUDOERS_GID && ISSET(statbuf.st_mode, S_IRGRP|S_IWGRP))
 	log_error(NO_EXIT, "%s is owned by gid %u, should be %u", sudoers,
 	    (unsigned int) statbuf.st_gid, (unsigned int) SUDOERS_GID);
     else if ((fp = fopen(sudoers, "r")) == NULL)
