@@ -147,11 +147,12 @@ The C<sudoRunAsGroup> attribute is only available in B<sudo> versions
 
 =item B<sudoNotBefore>
 
-A timestamp in the form C<yyyymmddHHMMZ> that can be used to provide
+A timestamp in the form C<yyyymmddHHMMSSZ> that can be used to provide
 a start date/time for when the C<sudoRole> will be valid.  If
 multiple C<sudoNotBefore> entries are present, the earliest is used.
 Note that timestamps must be in Coordinated Universal Time (UTC),
-not the local timezone.
+not the local timezone.  The minute and seconds portions are optional,
+but some LDAP servers require that they be present (contrary to the RFC).
 
 The C<sudoNotBefore> attribute is only available in B<sudo> versions
 1.7.5 and higher and must be explicitly enabled via the B<SUDOERS_TIMED>
@@ -159,11 +160,12 @@ option in F<@ldap_conf@>.
 
 =item B<sudoNotAfter>
 
-A timestamp in the form C<yyyymmddHHMMZ> that indicates an expiration
+A timestamp in the form C<yyyymmddHHMMSSZ> that indicates an expiration
 date/time, after which the C<sudoRole> will no longer be valid.  If
 multiple C<sudoNotBefore> entries are present, the last one is used.
 Note that timestamps must be in Coordinated Universal Time (UTC),
-not the local timezone.
+not the local timezone.  The minute and seconds portions are optional,
+but some LDAP servers require that they be present (contrary to the RFC).
 
 The C<sudoNotAfter> attribute is only available in B<sudo> versions
 1.7.5 and higher and must be explicitly enabled via the B<SUDOERS_TIMED>
