@@ -13,8 +13,8 @@ What's new in Sudo 1.8.2?
  * I/O logging is now supported for commands run in background mode
    (using sudo's -b flag).
 
- * Group ownership of the sudoers file is only enforced when the file
-   mode on sudoers allows group readability or writability.
+ * Group ownership of the sudoers file is now only enforced when
+   the file mode on sudoers allows group readability or writability.
 
  * Visudo now checks the contents of an alias and warns about cycles
    when the alias is expanded.
@@ -30,14 +30,26 @@ What's new in Sudo 1.8.2?
    sudo front end.  This was missing in previous versions of sudo
    1.8 which prevented "use_pty" from being honored.
 
- * "sudo -i command" now works correctly with the bash shell.
-   Previously, the .bash_profile would not be sourced prior to
-   running the command.
+ * "sudo -i command" now works correctly with the bash version
+   2.0 and higher.  Previously, the .bash_profile would not be
+   sourced prior to running the command unless bash was built with
+   NON_INTERACTIVE_LOGIN_SHELLS defined.
 
  * When matching groups in the sudoers file, sudo will now match
    based on the name of the group instead of the group ID. This can
    substantially reduce the number of group lookups for sudoers
-   files that contain a large nummber of groups.
+   files that contain a large number of groups.
+
+ * Multi-factor authentication is now supported on AIX.
+
+ * Added support for non-RFC 4517 compliant LDAP servers that require
+   that seconds be present in a timestamp, such as Tivoli Directory Server.
+
+ * If the group vector is to be preserved, the PATH search for the
+   command is now done with the user's original group vector.
+
+ * For LDAP-based sudoers, the "runas_default" sudoOption now works
+   properly in a sudoRole that contains a sudoCommand.
 
 What's new in Sudo 1.8.1p2?
 
