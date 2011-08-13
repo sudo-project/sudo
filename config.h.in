@@ -400,6 +400,10 @@
 /* Define to 1 if you have the `revoke' function. */
 #undef HAVE_REVOKE
 
+/* Define to 1 if the skeychallenge() function is RFC1938-compliant and takes
+   4 arguments */
+#undef HAVE_RFC1938_SKEYCHALLENGE
+
 /* Define to 1 if you have the <sasl.h> header file. */
 #undef HAVE_SASL_H
 

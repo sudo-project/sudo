@@ -2522,13 +2522,14 @@ if test "${with_skey-'no'}" = "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_skey}/include"
 	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_skey}/lib])
 	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_skey}/lib])
-	AC_PREPROC_IFELSE([#include <skey.h>], [found=yes], [found=no])
+	AC_CHECK_HEADER([skey.h], [found=yes], [found=no], [#include <stdio.h>])
     else
 	found=no
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "/usr/local" "/usr/contrib"; do
 	    test -n "$dir" && CPPFLAGS="$O_CPPFLAGS -I${dir}/include"
-	    AC_PREPROC_IFELSE([#include <skey.h>], [found=yes; break])
+	    AC_CHECK_HEADER([skey.h], [found=yes; break], [],
+		[#include <stdio.h>])
 	done
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
@@ -2542,6 +2543,21 @@ if test "${with_skey-'no'}" = "yes"; then
     fi
     AC_CHECK_LIB(skey, main, [found=yes], [AC_MSG_WARN([Unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDO_LDFLAGS])])
     AC_CHECK_LIB(skey, skeyaccess, AC_DEFINE(HAVE_SKEYACCESS))
+
+    AC_MSG_CHECKING([for RFC1938-compliant skeychallenge])
+    AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM(
+	    [[#include <stdio.h>
+	    #include <skey.h>]],
+	    [[skeychallenge(NULL, NULL, NULL, 0);]]
+	)], [
+	    AC_DEFINE(HAVE_RFC1938_SKEYCHALLENGE)
+	    AC_MSG_RESULT([yes])
+	], [
+	    AC_MSG_RESULT([no])
+	]
+    )
+
     LDFLAGS="$O_LDFLAGS"
     SUDO_LIBS="${SUDO_LIBS} -lskey"
     AUTH_OBJS="$AUTH_OBJS rfc1938.o"
@@ -2947,6 +2963,7 @@ AH_TEMPLATE(HAVE_SETKEYCREATECON, [Define to 1 if you have the `setkeycreatecon'
 AH_TEMPLATE(HAVE_SIGACTION_T, [Define to 1 if <signal.h> has the sigaction_t typedef.])
 AH_TEMPLATE(HAVE_SKEY, [Define to 1 if you use S/Key.])
 AH_TEMPLATE(HAVE_SKEYACCESS, [Define to 1 if your S/Key library has skeyaccess().])
+AH_TEMPLATE(HAVE_RFC1938_SKEYCHALLENGE, [Define to 1 if the skeychallenge() function is RFC1938-compliant and takes 4 arguments])
 AH_TEMPLATE(HAVE_ST__TIM, [Define to 1 if your struct stat uses an st__tim union])
 AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member])
 AH_TEMPLATE(HAVE_ST_MTIMESPEC, [Define to 1 if your struct stat has an st_mtimespec member])
