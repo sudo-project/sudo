@@ -236,6 +236,10 @@ _runaslist_matches(user_list, group_list)
 	    if (group_matched != UNSPEC)
 		break;
 	}
+	if (group_matched == UNSPEC) {
+	    if (runas_pw != NULL && runas_pw->pw_gid == runas_gr->gr_gid)
+		group_matched = ALLOW;	/* runas group matches passwd db */
+	}
     }
 
     if (user_matched == DENY || group_matched == DENY)
