@@ -338,6 +338,10 @@ main(argc, argv, envp)
 	    def_closefrom = user_closefrom;
     }
 
+    /* If given the -P option, set the "preserve_groups" flag. */
+    if (ISSET(sudo_mode, MODE_PRESERVE_GROUPS))
+	def_preserve_groups = TRUE;
+
     cmnd_status = set_cmnd(sudo_mode);
 
 #ifdef HAVE_SETLOCALE
@@ -390,10 +394,6 @@ main(argc, argv, envp)
 	timestamp_uid = pw->pw_uid;
 	pw_delref(pw);
     }
-
-    /* If given the -P option, set the "preserve_groups" flag. */
-    if (ISSET(sudo_mode, MODE_PRESERVE_GROUPS))
-	def_preserve_groups = TRUE;
 
     /* If no command line args and "set_home" is not set, error out. */
     if (ISSET(sudo_mode, MODE_IMPLIED_SHELL) && !def_shell_noargs)
