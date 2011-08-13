@@ -155,9 +155,10 @@ case "$osversion" in
 	    fi
 	fi
 	# SuSE doesn't have /usr/libexec
+	libexec=lib
 	case "$osversion" in
-	    *64*)	libexec=lib64;;
-	    *)		libexec=lib;;
+	    *64*)	gcc -v 2>&1 | grep "with-cpu=[^ ]*32" >/dev/null || libexec=lib64
+			;;
 	esac
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	# XXX - SuSE uses secure path but only for env_reset
