@@ -1,31 +1,29 @@
+SUDOREPLAY(1m)               MAINTENANCE COMMANDS               SUDOREPLAY(1m)
 
 
 
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
-
-
-NNAAMMEE
+[1mNAME[0m
        sudoreplay - replay sudo session logs
 
-SSYYNNOOPPSSIISS
-       ssuuddoorreeppllaayy [--hh] [--dd _d_i_r_e_c_t_o_r_y] [--ff _f_i_l_t_e_r] [--mm _m_a_x___w_a_i_t] [--ss
-       _s_p_e_e_d___f_a_c_t_o_r] ID
+[1mSYNOPSIS[0m
+       [1msudoreplay [22m[[1m-h[22m] [[1m-d [4m[22mdirectory[24m] [[1m-f [4m[22mfilter[24m] [[1m-m [4m[22mmax_wait[24m] [[1m-s[0m
+       [4mspeed_factor[24m] ID
 
-       ssuuddoorreeppllaayy [--hh] [--dd _d_i_r_e_c_t_o_r_y] -l [search expression]
+       [1msudoreplay [22m[[1m-h[22m] [[1m-d [4m[22mdirectory[24m] -l [search expression]
 
-DDEESSCCRRIIPPTTIIOONN
-       ssuuddoorreeppllaayy plays back or lists the session logs created by ssuuddoo.  When
-       replaying, ssuuddoorreeppllaayy can play the session back in real-time, or the
+[1mDESCRIPTION[0m
+       [1msudoreplay [22mplays back or lists the session logs created by [1msudo[22m.  When
+       replaying, [1msudoreplay [22mcan play the session back in real-time, or the
        playback speed may be adjusted (faster or slower) based on the command
-       line options.  The _I_D should be a six character sequence of digits and
-       upper case letters, e.g.  0100A5, which is logged by ssuuddoo when a
+       line options.  The [4mID[24m should be a six character sequence of digits and
+       upper case letters, e.g.  0100A5, which is logged by [1msudo [22mwhen a
        command is run with session logging enabled.
 
-       In list mode, ssuuddoorreeppllaayy can be used to find the ID of a session based
+       In list mode, [1msudoreplay [22mcan be used to find the ID of a session based
        on a number of criteria such as the user, tty or command run.
 
        In replay mode, if the standard output has not been redirected,
-       ssuuddoorreeppllaayy will act on the following keys:
+       [1msudoreplay [22mwill act on the following keys:
 
        ' ' (space)
                Pause output; press any key to resume.
@@ -34,127 +32,102 @@ DDEESSCCRRIIPPTTIIOONN
 
        '>'     Double the playback speed.
 
-OOPPTTIIOONNSS
-       ssuuddoorreeppllaayy accepts the following command line options:
+[1mOPTIONS[0m
+       [1msudoreplay [22maccepts the following command line options:
 
-       -d _d_i_r_e_c_t_o_r_y
-                   Use _d_i_r_e_c_t_o_r_y to for the session logs instead of the
-                   default, _/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o.
+       -d [4mdirectory[0m
+                   Use [4mdirectory[24m to for the session logs instead of the
+                   default, [4m/var/log/sudo-io[24m.
 
-       -f _f_i_l_t_e_r   By default, ssuuddoorreeppllaayy will play back the command's
-                   standard output, standard error and tty output.  The _-_f
+       -f [4mfilter[24m   By default, [1msudoreplay [22mwill play back the command's
+                   standard output, standard error and tty output.  The [4m-f[0m
                    option can be used to select which of these to output.  The
-                   _f_i_l_t_e_r argument is a comma-separated list, consisting of
-                   one or more of following: _s_t_d_o_u_t, _s_t_d_e_r_r, and _t_t_y_o_u_t.
+                   [4mfilter[24m argument is a comma-separated list, consisting of
+                   one or more of following: [4mstdout[24m, [4mstderr[24m, and [4mttyout[24m.
 
-       -h          The --hh (_h_e_l_p) option causes ssuuddoorreeppllaayy to print a short
+       -h          The [1m-h [22m([4mhelp[24m) option causes [1msudoreplay [22mto print a short
                    help message to the standard output and exit.
 
-       -l [_s_e_a_r_c_h _e_x_p_r_e_s_s_i_o_n]
-                   Enable "list mode".  In this mode, ssuuddoorreeppllaayy will list
-                   available session IDs.  If a _s_e_a_r_c_h _e_x_p_r_e_s_s_i_o_n is
+       -l [[4msearch[24m [4mexpression[24m]
+                   Enable "list mode".  In this mode, [1msudoreplay [22mwill list
+                   available session IDs.  If a [4msearch[24m [4mexpression[24m is
                    specified, it will be used to restrict the IDs that are
                    displayed.  An expression is composed of the following
                    predicates:
 
-
-
-
-
-1.7.6                     April  9, 2011                        1
-
-
-
-
-
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
-
-
-                   command _c_o_m_m_a_n_d _p_a_t_t_e_r_n
+                   command [4mcommand[24m [4mpattern[0m
                            Evaluates to true if the command run matches
-                           _c_o_m_m_a_n_d _p_a_t_t_e_r_n.  On systems with POSIX regular
+                           [4mcommand[24m [4mpattern[24m.  On systems with POSIX regular
                            expression support, the pattern may be an extended
                            regular expression.  On systems without POSIX
                            regular expression support, a simple substring
                            match is performed instead.
 
-                   cwd _d_i_r_e_c_t_o_r_y
+                   cwd [4mdirectory[0m
                            Evaluates to true if the command was run with the
                            specified current working directory.
 
-                   fromdate _d_a_t_e
+                   fromdate [4mdate[0m
                            Evaluates to true if the command was run on or
-                           after _d_a_t_e.  See "Date and time format" for a
+                           after [4mdate[24m.  See "Date and time format" for a
                            description of supported date and time formats.
 
-                   group _r_u_n_a_s___g_r_o_u_p
+                   group [4mrunas_group[0m
                            Evaluates to true if the command was run with the
-                           specified _r_u_n_a_s___g_r_o_u_p.  Note that unless a
-                           _r_u_n_a_s___g_r_o_u_p was explicitly specified when ssuuddoo was
+                           specified [4mrunas_group[24m.  Note that unless a
+                           [4mrunas_group[24m was explicitly specified when [1msudo [22mwas
                            run this field will be empty in the log.
 
-                   runas _r_u_n_a_s___u_s_e_r
+                   runas [4mrunas_user[0m
                            Evaluates to true if the command was run as the
-                           specified _r_u_n_a_s___u_s_e_r.  Note that ssuuddoo runs commands
-                           as user _r_o_o_t by default.
+                           specified [4mrunas_user[24m.  Note that [1msudo [22mruns commands
+                           as user [4mroot[24m by default.
 
-                   todate _d_a_t_e
+                   todate [4mdate[0m
                            Evaluates to true if the command was run on or
-                           prior to _d_a_t_e.  See "Date and time format" for a
+                           prior to [4mdate[24m.  See "Date and time format" for a
                            description of supported date and time formats.
 
-                   tty _t_t_y Evaluates to true if the command was run on the
-                           specified terminal device.  The _t_t_y should be
-                           specified without the _/_d_e_v_/ prefix, e.g.  _t_t_y_0_1
-                           instead of _/_d_e_v_/_t_t_y_0_1.
+                   tty [4mtty[24m Evaluates to true if the command was run on the
+                           specified terminal device.  The [4mtty[24m should be
+                           specified without the [4m/dev/[24m prefix, e.g.  [4mtty01[0m
+                           instead of [4m/dev/tty01[24m.
 
-                   user _u_s_e_r _n_a_m_e
+                   user [4muser[24m [4mname[0m
                            Evaluates to true if the ID matches a command run
-                           by _u_s_e_r _n_a_m_e.
+                           by [4muser[24m [4mname[24m.
 
                    Predicates may be abbreviated to the shortest unique string
                    (currently all predicates may be shortened to a single
                    character).
 
-                   Predicates may be combined using _a_n_d, _o_r and _! operators as
+                   Predicates may be combined using [4mand[24m, [4mor[24m and [4m![24m operators as
                    well as '(' and ')' for grouping (note that parentheses
-                   must generally be escaped from the shell).  The _a_n_d
+                   must generally be escaped from the shell).  The [4mand[0m
                    operator is optional, adjacent predicates have an implied
-                   _a_n_d unless separated by an _o_r.
+                   [4mand[24m unless separated by an [4mor[24m.
 
-       -m _m_a_x___w_a_i_t Specify an upper bound on how long to wait between key
-                   presses or output data.  By default, ssuuddoo__rreeppllaayy will
-
-
-
-1.7.6                     April  9, 2011                        2
-
-
-
-
-
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
-
-
+       -m [4mmax_wait[24m Specify an upper bound on how long to wait between key
+                   presses or output data.  By default, [1msudo_replay [22mwill
                    accurately reproduce the delays between key presses or
                    program output.  However, this can be tedious when the
-                   session includes long pauses.  When the _-_m option is
-                   specified, ssuuddoorreeppllaayy will limit these pauses to at most
-                   _m_a_x___w_a_i_t seconds.  The value may be specified as a floating
-                   point number, .e.g. _2_._5.
+                   session includes long pauses.  When the [4m-m[24m option is
+                   specified, [1msudoreplay [22mwill limit these pauses to at most
+                   [4mmax_wait[24m seconds.  The value may be specified as a floating
+                   point number, .e.g. [4m2.5[24m.
 
-       -s _s_p_e_e_d___f_a_c_t_o_r
-                   This option causes ssuuddoorreeppllaayy to adjust the number of
+       -s [4mspeed_factor[0m
+                   This option causes [1msudoreplay [22mto adjust the number of
                    seconds it will wait between key presses or program output.
                    This can be used to slow down or speed up the display.  For
-                   example, a _s_p_e_e_d___f_a_c_t_o_r of _2 would make the output twice as
-                   fast whereas a _s_p_e_e_d___f_a_c_t_o_r of <.5> would make the output
+                   example, a [4mspeed_factor[24m of [4m2[24m would make the output twice as
+                   fast whereas a [4mspeed_factor[24m of <.5> would make the output
                    twice as slow.
 
-       -V          The --VV (version) option causes ssuuddoorreeppllaayy to print its
+       -V          The [1m-V [22m(version) option causes [1msudoreplay [22mto print its
                    version number and exit.
 
-   DDaattee aanndd ttiimmee ffoorrmmaatt
+   [1mDate and time format[0m
        The time and date may be specified multiple ways, common formats
        include:
 
@@ -191,17 +164,6 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
        2 hours ago
                2 hours ago.
 
-
-
-1.7.6                     April  9, 2011                        3
-
-
-
-
-
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
-
-
        next Friday
                The first second of the next Friday.
 
@@ -225,54 +187,43 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
        10:01 am Sep 17, 2009
                10:01 am, September 17, 2009.
 
-FFIILLEESS
-       _/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o        The default I/O log directory.
+[1mFILES[0m
+       [4m/var/log/sudo-io[24m        The default I/O log directory.
 
-       _/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o_/_0_0_/_0_0_/_0_1_/_l_o_g
+       [4m/var/log/sudo-io/00/00/01/log[0m
                                Example session log info.
 
-       _/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o_/_0_0_/_0_0_/_0_1_/_s_t_d_i_n
+       [4m/var/log/sudo-io/00/00/01/stdin[0m
                                Example session standard input log.
 
-       _/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o_/_0_0_/_0_0_/_0_1_/_s_t_d_o_u_t
+       [4m/var/log/sudo-io/00/00/01/stdout[0m
                                Example session standard output log.
 
-       _/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o_/_0_0_/_0_0_/_0_1_/_s_t_d_e_r_r
+       [4m/var/log/sudo-io/00/00/01/stderr[0m
                                Example session standard error log.
 
-       _/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o_/_0_0_/_0_0_/_0_1_/_t_t_y_i_n
+       [4m/var/log/sudo-io/00/00/01/ttyin[0m
                                Example session tty input file.
 
-       _/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o_/_0_0_/_0_0_/_0_1_/_t_t_y_o_u_t
+       [4m/var/log/sudo-io/00/00/01/ttyout[0m
                                Example session tty output file.
 
-       _/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o_/_0_0_/_0_0_/_0_1_/_t_i_m_i_n_g
+       [4m/var/log/sudo-io/00/00/01/timing[0m
                                Example session timing file.
 
-       Note that the _s_t_d_i_n, _s_t_d_o_u_t and _s_t_d_e_r_r files will be empty unless ssuuddoo
+       Note that the [4mstdin[24m, [4mstdout[24m and [4mstderr[24m files will be empty unless [1msudo[0m
        was used as part of a pipeline for a particular command.
 
-EEXXAAMMPPLLEESS
-       List sessions run by user _m_i_l_l_e_r_t:
+[1mEXAMPLES[0m
+       List sessions run by user [4mmillert[24m:
 
         sudoreplay -l user millert
 
-
-
-1.7.6                     April  9, 2011                        4
-
-
-
-
-
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
-
-
-       List sessions run by user _b_o_b with a command containing the string vi:
+       List sessions run by user [4mbob[24m with a command containing the string vi:
 
         sudoreplay -l user bob command vi
 
-       List sessions run by user _j_e_f_f that match a regular expression:
+       List sessions run by user [4mjeff[24m that match a regular expression:
 
         sudoreplay -l user jeff command '/bin/[a-z]*sh'
 
@@ -280,51 +231,28 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
         sudoreplay -l ( user jeff or user bob ) tty console
 
-SSEEEE AALLSSOO
-       _s_u_d_o(1m), _s_c_r_i_p_t(1)
+[1mSEE ALSO[0m
+       [4msudo[24m(1m), [4mscript[24m(1)
 
-AAUUTTHHOORR
+[1mAUTHOR[0m
        Todd C. Miller
 
-BBUUGGSS
-       If you feel you have found a bug in ssuuddoorreeppllaayy, please submit a bug
+[1mBUGS[0m
+       If you feel you have found a bug in [1msudoreplay[22m, please submit a bug
        report at http://www.sudo.ws/sudo/bugs/
 
-SSUUPPPPOORRTT
+[1mSUPPORT[0m
        Limited free support is available via the sudo-users mailing list, see
        http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or search
        the archives.
 
-DDIISSCCLLAAIIMMEERR
-       ssuuddoorreeppllaayy is provided ``AS IS'' and any express or implied warranties,
+[1mDISCLAIMER[0m
+       [1msudoreplay [22mis provided ``AS IS'' and any express or implied warranties,
        including, but not limited to, the implied warranties of
        merchantability and fitness for a particular purpose are disclaimed.
-       See the LICENSE file distributed with ssuuddoo or
+       See the LICENSE file distributed with [1msudo [22mor
        http://www.sudo.ws/sudo/license.html for complete details.
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.7.6                     April  9, 2011                        5
-
-
+1.7.7                           August 13, 2011                 SUDOREPLAY(1m)

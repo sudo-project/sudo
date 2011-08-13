@@ -1,3 +1,33 @@
+What's new in Sudo 1.7.7
+
+ * Group ownership of the sudoers file is now only enforced when
+   the file mode on sudoers allows group readability or writability.
+
+ * Visudo now checks the contents of an alias and warns about cycles
+   when the alias is expanded.
+
+ * If the user specifes a group via sudo's -g option that matches
+   the target user's group in the password database, it is now
+   allowed even if no groups are present in the Runas_Spec.
+
+ * Multi-factor authentication is now supported on AIX.
+
+ * Added support for non-RFC 4517 compliant LDAP servers that require
+   that seconds be present in a timestamp, such as Tivoli Directory Server.
+
+ * If the group vector is to be preserved, the PATH search for the
+   command is now done with the user's original group vector.
+
+ * For LDAP-based sudoers, the "runas_default" sudoOption now works
+   properly in a sudoRole that contains a sudoCommand.
+
+What's new in Sudo 1.7.6p2
+
+ * Two-character CIDR-style IPv4 netmasks are now matched correctly 
+   in the sudoers file.
+
+ * A build error with MIT Kerberos V has been resolved.
+
 What's new in Sudo 1.7.6p1
 
  * A non-existent includedir is now treated the same as an empty

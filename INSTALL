@@ -1,5 +1,5 @@
-Installation instructions for Sudo 1.7
-======================================
+Sudo installation instructions
+==============================
 
 Sudo uses a `configure' script to probe the capabilities and type
 of the system in question.  In this release, `configure' takes many

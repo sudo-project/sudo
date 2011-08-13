@@ -1,150 +1,124 @@
+SUDO(1m)                     MAINTENANCE COMMANDS                     SUDO(1m)
 
 
 
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
-NNAAMMEE
+[1mNAME[0m
        sudo, sudoedit - execute a command as another user
 
-SSYYNNOOPPSSIISS
-       ssuuddoo --hh | --KK | --kk | --LL | --VV
+[1mSYNOPSIS[0m
+       [1msudo -h [22m| [1m-K [22m| [1m-k [22m| [1m-L [22m| [1m-V[0m
 
-       ssuuddoo --vv [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t]
-       [--uu _u_s_e_r_n_a_m_e|_#_u_i_d]
+       [1msudo -v [22m[[1m-AknS[22m] [[1m-a [4m[22mauth_type[24m] [[1m-g [4m[22mgroup[24m [4mname[24m|[4m#gid[24m] [[1m-p [4m[22mprompt[24m]
+       [[1m-u [4m[22musername[24m|[4m#uid[24m]
 
-       ssuuddoo --ll[[ll]] [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t]
-       [--UU _u_s_e_r _n_a_m_e] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [_c_o_m_m_a_n_d]
+       [1msudo -l[l] [22m[[1m-AknS[22m] [[1m-a [4m[22mauth_type[24m] [[1m-g [4m[22mgroup[24m [4mname[24m|[4m#gid[24m] [[1m-p [4m[22mprompt[24m]
+       [[1m-U [4m[22muser[24m [4mname[24m] [[1m-u [4m[22muser[24m [4mname[24m|[4m#uid[24m] [[4mcommand[24m]
 
-       ssuuddoo [--AAbbEEHHnnPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-]
-       [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--rr _r_o_l_e] [--tt _t_y_p_e]
-       [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [VVAARR=_v_a_l_u_e] [--ii | --ss] [_c_o_m_m_a_n_d]
+       [1msudo [22m[[1m-AbEHnPS[22m] [[1m-a [4m[22mauth_type[24m] [[1m-C [4m[22mfd[24m] [[1m-c [4m[22mclass[24m|[4m-[24m]
+       [[1m-g [4m[22mgroup[24m [4mname[24m|[4m#gid[24m] [[1m-p [4m[22mprompt[24m] [[1m-r [4m[22mrole[24m] [[1m-t [4m[22mtype[24m]
+       [[1m-u [4m[22muser[24m [4mname[24m|[4m#uid[24m] [[1mVAR[22m=[4mvalue[24m] [[1m-i [22m| [1m-s[22m] [[4mcommand[24m]
 
-       ssuuddooeeddiitt [--AAnnSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-]
-       [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] file ...
+       [1msudoedit [22m[[1m-AnS[22m] [[1m-a [4m[22mauth_type[24m] [[1m-C [4m[22mfd[24m] [[1m-c [4m[22mclass[24m|[4m-[24m]
+       [[1m-g [4m[22mgroup[24m [4mname[24m|[4m#gid[24m] [[1m-p [4m[22mprompt[24m] [[1m-u [4m[22muser[24m [4mname[24m|[4m#uid[24m] file ...
 
-DDEESSCCRRIIPPTTIIOONN
-       ssuuddoo allows a permitted user to execute a _c_o_m_m_a_n_d as the superuser or
-       another user, as specified in the _s_u_d_o_e_r_s file.  The real and effective
+[1mDESCRIPTION[0m
+       [1msudo [22mallows a permitted user to execute a [4mcommand[24m as the superuser or
+       another user, as specified in the [4msudoers[24m file.  The real and effective
        uid and gid are set to match those of the target user as specified in
        the passwd file and the group vector is initialized based on the group
-       file (unless the --PP option was specified).  If the invoking user is
+       file (unless the [1m-P [22moption was specified).  If the invoking user is
        root or if the target user is the same as the invoking user, no
-       password is required.  Otherwise, ssuuddoo requires that users authenticate
+       password is required.  Otherwise, [1msudo [22mrequires that users authenticate
        themselves with a password by default (NOTE: in the default
        configuration this is the user's password, not the root password).
        Once a user has been authenticated, a time stamp is updated and the
        user may then use sudo without a password for a short period of time (5
-       minutes unless overridden in _s_u_d_o_e_r_s).
+       minutes unless overridden in [4msudoers[24m).
 
-       When invoked as ssuuddooeeddiitt, the --ee option (described below), is implied.
+       When invoked as [1msudoedit[22m, the [1m-e [22moption (described below), is implied.
 
-       ssuuddoo determines who is an authorized user by consulting the file
-       _/_e_t_c_/_s_u_d_o_e_r_s.  By running ssuuddoo with the --vv option, a user can update
-       the time stamp without running a _c_o_m_m_a_n_d.  If a password is required,
-       ssuuddoo will exit if the user's password is not entered within a
+       [1msudo [22mdetermines who is an authorized user by consulting the file
+       [4m/etc/sudoers[24m.  By running [1msudo [22mwith the [1m-v [22moption, a user can update
+       the time stamp without running a [4mcommand[24m.  If a password is required,
+       [1msudo [22mwill exit if the user's password is not entered within a
        configurable time limit.  The default password prompt timeout is 5
        minutes.
 
-       If a user who is not listed in the _s_u_d_o_e_r_s file tries to run a command
-       via ssuuddoo, mail is sent to the proper authorities, as defined at
-       configure time or in the _s_u_d_o_e_r_s file (defaults to root).  Note that
+       If a user who is not listed in the [4msudoers[24m file tries to run a command
+       via [1msudo[22m, mail is sent to the proper authorities, as defined at
+       configure time or in the [4msudoers[24m file (defaults to root).  Note that
        the mail will not be sent if an unauthorized user tries to run sudo
-       with the --ll or --vv option.  This allows users to determine for
-       themselves whether or not they are allowed to use ssuuddoo.
+       with the [1m-l [22mor [1m-v [22moption.  This allows users to determine for
+       themselves whether or not they are allowed to use [1msudo[22m.
 
-       If ssuuddoo is run by root and the SUDO_USER environment variable is set,
-       ssuuddoo will use this value to determine who the actual user is.  This can
+       If [1msudo [22mis run by root and the SUDO_USER environment variable is set,
+       [1msudo [22mwill use this value to determine who the actual user is.  This can
        be used by a user to log commands through sudo even when a root shell
-       has been invoked.  It also allows the --ee option to remain useful even
+       has been invoked.  It also allows the [1m-e [22moption to remain useful even
        when being run via a sudo-run script or program.  Note however, that
-
-
-
-1.7.6                     April  9, 2011                        1
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        the sudoers lookup is still done for root, not the user specified by
        SUDO_USER.
 
-       ssuuddoo can log both successful and unsuccessful attempts (as well as
-       errors) to _s_y_s_l_o_g(3), a log file, or both.  By default ssuuddoo will log
-       via _s_y_s_l_o_g(3) but this is changeable at configure time or via the
-       _s_u_d_o_e_r_s file.
+       [1msudo [22mcan log both successful and unsuccessful attempts (as well as
+       errors) to [4msyslog[24m(3), a log file, or both.  By default [1msudo [22mwill log
+       via [4msyslog[24m(3) but this is changeable at configure time or via the
+       [4msudoers[24m file.
 
-OOPPTTIIOONNSS
-       ssuuddoo accepts the following command line options:
+[1mOPTIONS[0m
+       [1msudo [22maccepts the following command line options:
 
-       -A          Normally, if ssuuddoo requires a password, it will read it from
-                   the current terminal.  If the --AA (_a_s_k_p_a_s_s) option is
+       -A          Normally, if [1msudo [22mrequires a password, it will read it from
+                   the current terminal.  If the [1m-A [22m([4maskpass[24m) option is
                    specified, a (possibly graphical) helper program is
                    executed to read the user's password and output the
                    password to the standard output.  If the SUDO_ASKPASS
                    environment variable is set, it specifies the path to the
                    helper program.  Otherwise, the value specified by the
-                   _a_s_k_p_a_s_s option in _s_u_d_o_e_r_s(4) is used.
+                   [4maskpass[24m option in [4msudoers[24m(4) is used.
 
-       -a _t_y_p_e     The --aa (_a_u_t_h_e_n_t_i_c_a_t_i_o_n _t_y_p_e) option causes ssuuddoo to use the
+       -a [4mtype[24m     The [1m-a [22m([4mauthentication[24m [4mtype[24m) option causes [1msudo [22mto use the
                    specified authentication type when validating the user, as
-                   allowed by _/_e_t_c_/_l_o_g_i_n_._c_o_n_f.  The system administrator may
+                   allowed by [4m/etc/login.conf[24m.  The system administrator may
                    specify a list of sudo-specific authentication methods by
-                   adding an "auth-sudo" entry in _/_e_t_c_/_l_o_g_i_n_._c_o_n_f.  This
+                   adding an "auth-sudo" entry in [4m/etc/login.conf[24m.  This
                    option is only available on systems that support BSD
                    authentication.
 
-       -b          The --bb (_b_a_c_k_g_r_o_u_n_d) option tells ssuuddoo to run the given
-                   command in the background.  Note that if you use the --bb
+       -b          The [1m-b [22m([4mbackground[24m) option tells [1msudo [22mto run the given
+                   command in the background.  Note that if you use the [1m-b[0m
                    option you cannot use shell job control to manipulate the
                    process.
 
-       -C _f_d       Normally, ssuuddoo will close all open file descriptors other
+       -C [4mfd[24m       Normally, [1msudo [22mwill close all open file descriptors other
                    than standard input, standard output and standard error.
-                   The --CC (_c_l_o_s_e _f_r_o_m) option allows the user to specify a
+                   The [1m-C [22m([4mclose[24m [4mfrom[24m) option allows the user to specify a
                    starting point above the standard error (file descriptor
                    three).  Values less than three are not permitted.  This
                    option is only available if the administrator has enabled
-                   the _c_l_o_s_e_f_r_o_m___o_v_e_r_r_i_d_e option in _s_u_d_o_e_r_s(4).
+                   the [4mclosefrom_override[24m option in [4msudoers[24m(4).
 
-       -c _c_l_a_s_s    The --cc (_c_l_a_s_s) option causes ssuuddoo to run the specified
+       -c [4mclass[24m    The [1m-c [22m([4mclass[24m) option causes [1msudo [22mto run the specified
                    command with resources limited by the specified login
-                   class.  The _c_l_a_s_s argument can be either a class name as
-                   defined in _/_e_t_c_/_l_o_g_i_n_._c_o_n_f, or a single '-' character.
-                   Specifying a _c_l_a_s_s of - indicates that the command should
+                   class.  The [4mclass[24m argument can be either a class name as
+                   defined in [4m/etc/login.conf[24m, or a single '-' character.
+                   Specifying a [4mclass[24m of - indicates that the command should
                    be run restricted by the default login capabilities for the
-                   user the command is run as.  If the _c_l_a_s_s argument
+                   user the command is run as.  If the [4mclass[24m argument
                    specifies an existing user class, the command must be run
-                   as root, or the ssuuddoo command must be run from a shell that
+                   as root, or the [1msudo [22mcommand must be run from a shell that
                    is already root.  This option is only available on systems
                    with BSD login classes.
 
-       -E          The --EE (_p_r_e_s_e_r_v_e _e_n_v_i_r_o_n_m_e_n_t) option will override the
-
-
-
-1.7.6                     April  9, 2011                        2
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
-                   _e_n_v___r_e_s_e_t option in _s_u_d_o_e_r_s(4)).  It is only available when
+       -E          The [1m-E [22m([4mpreserve[24m [4menvironment[24m) option will override the
+                   [4menv_reset[24m option in [4msudoers[24m(4)).  It is only available when
                    either the matching command has the SETENV tag or the
-                   _s_e_t_e_n_v option is set in _s_u_d_o_e_r_s(4).
+                   [4msetenv[24m option is set in [4msudoers[24m(4).
 
-       -e          The --ee (_e_d_i_t) option indicates that, instead of running a
+       -e          The [1m-e [22m([4medit[24m) option indicates that, instead of running a
                    command, the user wishes to edit one or more files.  In
                    lieu of a command, the string "sudoedit" is used when
-                   consulting the _s_u_d_o_e_r_s file.  If the user is authorized by
-                   _s_u_d_o_e_r_s the following steps are taken:
+                   consulting the [4msudoers[24m file.  If the user is authorized by
+                   [4msudoers[24m the following steps are taken:
 
                    1.  Temporary copies are made of the files to be edited
                        with the owner set to the invoking user.
@@ -152,139 +126,115 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    2.  The editor specified by the SUDO_EDITOR, VISUAL or
                        EDITOR environment variables is run to edit the
                        temporary files.  If none of SUDO_EDITOR, VISUAL or
-                       EDITOR are set, the first program listed in the _e_d_i_t_o_r
-                       _s_u_d_o_e_r_s variable is used.
+                       EDITOR are set, the first program listed in the [4meditor[0m
+                       [4msudoers[24m variable is used.
 
                    3.  If they have been modified, the temporary files are
                        copied back to their original location and the
                        temporary versions are removed.
 
                    If the specified file does not exist, it will be created.
-                   Note that unlike most commands run by ssuuddoo, the editor is
+                   Note that unlike most commands run by [1msudo[22m, the editor is
                    run with the invoking user's environment unmodified.  If,
-                   for some reason, ssuuddoo is unable to update a file with its
+                   for some reason, [1msudo [22mis unable to update a file with its
                    edited version, the user will receive a warning and the
                    edited copy will remain in a temporary file.
 
-       -g _g_r_o_u_p    Normally, ssuuddoo sets the primary group to the one specified
+       -g [4mgroup[24m    Normally, [1msudo [22msets the primary group to the one specified
                    by the passwd database for the user the command is being
-                   run as (by default, root).  The --gg (_g_r_o_u_p) option causes
-                   ssuuddoo to run the specified command with the primary group
-                   set to _g_r_o_u_p.  To specify a _g_i_d instead of a _g_r_o_u_p _n_a_m_e,
-                   use _#_g_i_d.  When running commands as a _g_i_d, many shells
+                   run as (by default, root).  The [1m-g [22m([4mgroup[24m) option causes
+                   [1msudo [22mto run the specified command with the primary group
+                   set to [4mgroup[24m.  To specify a [4mgid[24m instead of a [4mgroup[24m [4mname[24m,
+                   use [4m#gid[24m.  When running commands as a [4mgid[24m, many shells
                    require that the '#' be escaped with a backslash ('\').  If
-                   no --uu option is specified, the command will be run as the
+                   no [1m-u [22moption is specified, the command will be run as the
                    invoking user (not root).  In either case, the primary
-                   group will be set to _g_r_o_u_p.
+                   group will be set to [4mgroup[24m.
 
-       -H          The --HH (_H_O_M_E) option sets the HOME environment variable to
+       -H          The [1m-H [22m([4mHOME[24m) option sets the HOME environment variable to
                    the homedir of the target user (root by default) as
-                   specified in _p_a_s_s_w_d(4).  The default handling of the HOME
-                   environment variable depends on _s_u_d_o_e_r_s(4) settings.  By
-                   default, ssuuddoo will set HOME if _e_n_v___r_e_s_e_t or _a_l_w_a_y_s___s_e_t___h_o_m_e
-                   are set, or if _s_e_t___h_o_m_e is set and the --ss option is
+                   specified in [4mpasswd[24m(4).  The default handling of the HOME
+                   environment variable depends on [4msudoers[24m(4) settings.  By
+                   default, [1msudo [22mwill set HOME if [4menv_reset[24m or [4malways_set_home[0m
+                   are set, or if [4mset_home[24m is set and the [1m-s [22moption is
                    specified on the command line.
 
-       -h          The --hh (_h_e_l_p) option causes ssuuddoo to print a short help
+       -h          The [1m-h [22m([4mhelp[24m) option causes [1msudo [22mto print a short help
                    message to the standard output and exit.
 
        -i [command]
-                   The --ii (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs the shell
-
-
-
-1.7.6                     April  9, 2011                        3
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
-                   specified in the _p_a_s_s_w_d(4) entry of the target user as a
+                   The [1m-i [22m([4msimulate[24m [4minitial[24m [4mlogin[24m) option runs the shell
+                   specified in the [4mpasswd[24m(4) entry of the target user as a
                    login shell.  This means that login-specific resource files
                    such as .profile or .login will be read by the shell.  If a
                    command is specified, it is passed to the shell for
                    execution.  Otherwise, an interactive shell is executed.
-                   ssuuddoo attempts to change to that user's home directory
+                   [1msudo [22mattempts to change to that user's home directory
                    before running the shell.  It also initializes the
-                   environment, leaving _D_I_S_P_L_A_Y and _T_E_R_M unchanged, setting
-                   _H_O_M_E, _M_A_I_L, _S_H_E_L_L, _U_S_E_R, _L_O_G_N_A_M_E, and _P_A_T_H, as well as the
-                   contents of _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t on Linux and AIX systems.  All
+                   environment, leaving [4mDISPLAY[24m and [4mTERM[24m unchanged, setting
+                   [4mHOME[24m, [4mMAIL[24m, [4mSHELL[24m, [4mUSER[24m, [4mLOGNAME[24m, and [4mPATH[24m, as well as the
+                   contents of [4m/etc/environment[24m on Linux and AIX systems.  All
                    other environment variables are removed.
 
-       -K          The --KK (sure _k_i_l_l) option is like --kk except that it removes
+       -K          The [1m-K [22m(sure [4mkill[24m) option is like [1m-k [22mexcept that it removes
                    the user's time stamp entirely and may not be used in
                    conjunction with a command or other option.  This option
                    does not require a password.
 
-       -k          When used by itself, the --kk (_k_i_l_l) option to ssuuddoo
+       -k          When used by itself, the [1m-k [22m([4mkill[24m) option to [1msudo[0m
                    invalidates the user's time stamp by setting the time on it
-                   to the Epoch.  The next time ssuuddoo is run a password will be
+                   to the Epoch.  The next time [1msudo [22mis run a password will be
                    required.  This option does not require a password and was
-                   added to allow a user to revoke ssuuddoo permissions from a
+                   added to allow a user to revoke [1msudo [22mpermissions from a
                    .logout file.
 
                    When used in conjunction with a command or an option that
-                   may require a password, the --kk option will cause ssuuddoo to
-                   ignore the user's time stamp file.  As a result, ssuuddoo will
-                   prompt for a password (if one is required by _s_u_d_o_e_r_s) and
+                   may require a password, the [1m-k [22moption will cause [1msudo [22mto
+                   ignore the user's time stamp file.  As a result, [1msudo [22mwill
+                   prompt for a password (if one is required by [4msudoers[24m) and
                    will not update the user's time stamp file.
 
-       -L          The --LL (_l_i_s_t defaults) option will list the parameters that
-                   may be set in a _D_e_f_a_u_l_t_s line along with a short
+       -L          The [1m-L [22m([4mlist[24m defaults) option will list the parameters that
+                   may be set in a [4mDefaults[24m line along with a short
                    description for each.  This option will be removed from a
-                   future version of ssuuddoo.
+                   future version of [1msudo[22m.
 
-       -l[l] [_c_o_m_m_a_n_d]
-                   If no _c_o_m_m_a_n_d is specified, the --ll (_l_i_s_t) option will list
+       -l[l] [[4mcommand[24m]
+                   If no [4mcommand[24m is specified, the [1m-l [22m([4mlist[24m) option will list
                    the allowed (and forbidden) commands for the invoking user
-                   (or the user specified by the --UU option) on the current
-                   host.  If a _c_o_m_m_a_n_d is specified and is permitted by
-                   _s_u_d_o_e_r_s, the fully-qualified path to the command is
+                   (or the user specified by the [1m-U [22moption) on the current
+                   host.  If a [4mcommand[24m is specified and is permitted by
+                   [4msudoers[24m, the fully-qualified path to the command is
                    displayed along with any command line arguments.  If
-                   _c_o_m_m_a_n_d is specified but not allowed, ssuuddoo will exit with a
-                   status value of 1.  If the --ll option is specified with an ll
-                   argument (i.e. --llll), or if --ll is specified multiple times,
+                   [4mcommand[24m is specified but not allowed, [1msudo [22mwill exit with a
+                   status value of 1.  If the [1m-l [22moption is specified with an [1ml[0m
+                   argument (i.e. [1m-ll[22m), or if [1m-l [22mis specified multiple times,
                    a longer list format is used.
 
-       -n          The --nn (_n_o_n_-_i_n_t_e_r_a_c_t_i_v_e) option prevents ssuuddoo from
+       -n          The [1m-n [22m([4mnon-interactive[24m) option prevents [1msudo [22mfrom
                    prompting the user for a password.  If a password is
-                   required for the command to run, ssuuddoo will display an error
+                   required for the command to run, [1msudo [22mwill display an error
                    messages and exit.
 
-       -P          The --PP (_p_r_e_s_e_r_v_e _g_r_o_u_p _v_e_c_t_o_r) option causes ssuuddoo to
+       -P          The [1m-P [22m([4mpreserve[24m [4mgroup[24m [4mvector[24m) option causes [1msudo [22mto
                    preserve the invoking user's group vector unaltered.  By
-
-
-
-1.7.6                     April  9, 2011                        4
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
-                   default, ssuuddoo will initialize the group vector to the list
+                   default, [1msudo [22mwill initialize the group vector to the list
                    of groups the target user is in.  The real and effective
                    group IDs, however, are still set to match the target user.
 
-       -p _p_r_o_m_p_t   The --pp (_p_r_o_m_p_t) option allows you to override the default
+       -p [4mprompt[24m   The [1m-p [22m([4mprompt[24m) option allows you to override the default
                    password prompt and use a custom one.  The following
                    percent (`%') escapes are supported:
 
                    %H  expanded to the local host name including the domain
                        name (on if the machine's host name is fully qualified
-                       or the _f_q_d_n _s_u_d_o_e_r_s option is set)
+                       or the [4mfqdn[24m [4msudoers[24m option is set)
 
                    %h  expanded to the local host name without the domain name
 
                    %p  expanded to the user whose password is being asked for
-                       (respects the _r_o_o_t_p_w, _t_a_r_g_e_t_p_w and _r_u_n_a_s_p_w flags in
-                       _s_u_d_o_e_r_s)
+                       (respects the [4mrootpw[24m, [4mtargetpw[24m and [4mrunaspw[24m flags in
+                       [4msudoers[24m)
 
                    %U  expanded to the login name of the user the command will
                        be run as (defaults to root)
@@ -294,218 +244,183 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    %%  two consecutive % characters are collapsed into a
                        single % character
 
-                   The prompt specified by the --pp option will override the
+                   The prompt specified by the [1m-p [22moption will override the
                    system password prompt on systems that support PAM unless
-                   the _p_a_s_s_p_r_o_m_p_t___o_v_e_r_r_i_d_e flag is disabled in _s_u_d_o_e_r_s.
+                   the [4mpassprompt_override[24m flag is disabled in [4msudoers[24m.
 
-       -r _r_o_l_e     The --rr (_r_o_l_e) option causes the new (SELinux) security
-                   context to have the role specified by _r_o_l_e.
+       -r [4mrole[24m     The [1m-r [22m([4mrole[24m) option causes the new (SELinux) security
+                   context to have the role specified by [4mrole[24m.
 
-       -S          The --SS (_s_t_d_i_n) option causes ssuuddoo to read the password from
+       -S          The [1m-S [22m([4mstdin[24m) option causes [1msudo [22mto read the password from
                    the standard input instead of the terminal device.  The
                    password must be followed by a newline character.
 
        -s [command]
-                   The --ss (_s_h_e_l_l) option runs the shell specified by the _S_H_E_L_L
+                   The [1m-s [22m([4mshell[24m) option runs the shell specified by the [4mSHELL[0m
                    environment variable if it is set or the shell as specified
-                   in _p_a_s_s_w_d(4).  If a command is specified, it is passed to
+                   in [4mpasswd[24m(4).  If a command is specified, it is passed to
                    the shell for execution.  Otherwise, an interactive shell
                    is executed.
 
-       -t _t_y_p_e     The --tt (_t_y_p_e) option causes the new (SELinux) security
-                   context to have the type specified by _t_y_p_e.  If no type is
+       -t [4mtype[24m     The [1m-t [22m([4mtype[24m) option causes the new (SELinux) security
+                   context to have the type specified by [4mtype[24m.  If no type is
                    specified, the default type is derived from the specified
                    role.
 
-       -U _u_s_e_r     The --UU (_o_t_h_e_r _u_s_e_r) option is used in conjunction with the
-                   --ll option to specify the user whose privileges should be
-                   listed.  Only root or a user with ssuuddoo ALL on the current
+       -U [4muser[24m     The [1m-U [22m([4mother[24m [4muser[24m) option is used in conjunction with the
+                   [1m-l [22moption to specify the user whose privileges should be
+                   listed.  Only root or a user with [1msudo [22mALL on the current
                    host may use this option.
 
-
-
-
-1.7.6                     April  9, 2011                        5
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
-       -u _u_s_e_r     The --uu (_u_s_e_r) option causes ssuuddoo to run the specified
-                   command as a user other than _r_o_o_t.  To specify a _u_i_d
-                   instead of a _u_s_e_r _n_a_m_e, use _#_u_i_d.  When running commands as
-                   a _u_i_d, many shells require that the '#' be escaped with a
-                   backslash ('\').  Note that if the _t_a_r_g_e_t_p_w Defaults option
-                   is set (see _s_u_d_o_e_r_s(4)) it is not possible to run commands
+       -u [4muser[24m     The [1m-u [22m([4muser[24m) option causes [1msudo [22mto run the specified
+                   command as a user other than [4mroot[24m.  To specify a [4muid[0m
+                   instead of a [4muser[24m [4mname[24m, use [4m#uid[24m.  When running commands as
+                   a [4muid[24m, many shells require that the '#' be escaped with a
+                   backslash ('\').  Note that if the [4mtargetpw[24m Defaults option
+                   is set (see [4msudoers[24m(4)) it is not possible to run commands
                    with a uid not listed in the password database.
 
-       -V          The --VV (_v_e_r_s_i_o_n) option causes ssuuddoo to print the version
+       -V          The [1m-V [22m([4mversion[24m) option causes [1msudo [22mto print the version
                    number and exit.  If the invoking user is already root the
-                   --VV option will print out a list of the defaults ssuuddoo was
+                   [1m-V [22moption will print out a list of the defaults [1msudo [22mwas
                    compiled with as well as the machine's local network
                    addresses.
 
-       -v          If given the --vv (_v_a_l_i_d_a_t_e) option, ssuuddoo will update the
+       -v          If given the [1m-v [22m([4mvalidate[24m) option, [1msudo [22mwill update the
                    user's time stamp, prompting for the user's password if
-                   necessary.  This extends the ssuuddoo timeout for another 5
-                   minutes (or whatever the timeout is set to in _s_u_d_o_e_r_s) but
+                   necessary.  This extends the [1msudo [22mtimeout for another 5
+                   minutes (or whatever the timeout is set to in [4msudoers[24m) but
                    does not run a command.
 
-       --          The ---- option indicates that ssuuddoo should stop processing
+       --          The [1m-- [22moption indicates that [1msudo [22mshould stop processing
                    command line arguments.
 
        Environment variables to be set for the command may also be passed on
-       the command line in the form of VVAARR=_v_a_l_u_e, e.g.
-       LLDD__LLIIBBRRAARRYY__PPAATTHH=_/_u_s_r_/_l_o_c_a_l_/_p_k_g_/_l_i_b.  Variables passed on the command
+       the command line in the form of [1mVAR[22m=[4mvalue[24m, e.g.
+       [1mLD_LIBRARY_PATH[22m=[4m/usr/local/pkg/lib[24m.  Variables passed on the command
        line are subject to the same restrictions as normal environment
-       variables with one important exception.  If the _s_e_t_e_n_v option is set in
-       _s_u_d_o_e_r_s, the command to be run has the SETENV tag set or the command
+       variables with one important exception.  If the [4msetenv[24m option is set in
+       [4msudoers[24m, the command to be run has the SETENV tag set or the command
        matched is ALL, the user may set variables that would overwise be
-       forbidden.  See _s_u_d_o_e_r_s(4) for more information.
+       forbidden.  See [4msudoers[24m(4) for more information.
 
-RREETTUURRNN VVAALLUUEESS
-       Upon successful execution of a program, the exit status from ssuuddoo will
+[1mRETURN VALUES[0m
+       Upon successful execution of a program, the exit status from [1msudo [22mwill
        simply be the exit status of the program that was executed.
 
-       Otherwise, ssuuddoo quits with an exit value of 1 if there is a
-       configuration/permission problem or if ssuuddoo cannot execute the given
+       Otherwise, [1msudo [22mquits with an exit value of 1 if there is a
+       configuration/permission problem or if [1msudo [22mcannot execute the given
        command.  In the latter case the error string is printed to stderr.  If
-       ssuuddoo cannot _s_t_a_t(2) one or more entries in the user's PATH an error is
+       [1msudo [22mcannot [4mstat[24m(2) one or more entries in the user's PATH an error is
        printed on stderr.  (If the directory does not exist or if it is not
        really a directory, the entry is ignored and no error is printed.)
        This should not happen under normal circumstances.  The most common
-       reason for _s_t_a_t(2) to return "permission denied" is if you are running
+       reason for [4mstat[24m(2) to return "permission denied" is if you are running
        an automounter and one of the directories in your PATH is on a machine
        that is currently unreachable.
 
-SSEECCUURRIITTYY NNOOTTEESS
-       ssuuddoo tries to be safe when executing external commands.
+[1mSECURITY NOTES[0m
+       [1msudo [22mtries to be safe when executing external commands.
 
        There are two distinct ways to deal with environment variables.  By
-       default, the _e_n_v___r_e_s_e_t _s_u_d_o_e_r_s option is enabled.  This causes commands
+       default, the [4menv_reset[24m [4msudoers[24m option is enabled.  This causes commands
        to be executed with a minimal environment containing TERM, PATH, HOME,
        SHELL, LOGNAME, USER and USERNAME in addition to variables from the
-
-
-
-1.7.6                     April  9, 2011                        6
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
-       invoking process permitted by the _e_n_v___c_h_e_c_k and _e_n_v___k_e_e_p _s_u_d_o_e_r_s
+       invoking process permitted by the [4menv_check[24m and [4menv_keep[24m [4msudoers[0m
        options.  There is effectively a whitelist for environment variables.
 
-       If, however, the _e_n_v___r_e_s_e_t option is disabled in _s_u_d_o_e_r_s, any variables
-       not explicitly denied by the _e_n_v___c_h_e_c_k and _e_n_v___d_e_l_e_t_e options are
-       inherited from the invoking process.  In this case, _e_n_v___c_h_e_c_k and
-       _e_n_v___d_e_l_e_t_e behave like a blacklist.  Since it is not possible to
+       If, however, the [4menv_reset[24m option is disabled in [4msudoers[24m, any variables
+       not explicitly denied by the [4menv_check[24m and [4menv_delete[24m options are
+       inherited from the invoking process.  In this case, [4menv_check[24m and
+       [4menv_delete[24m behave like a blacklist.  Since it is not possible to
        blacklist all potentially dangerous environment variables, use of the
-       default _e_n_v___r_e_s_e_t behavior is encouraged.
+       default [4menv_reset[24m behavior is encouraged.
 
        In all cases, environment variables with a value beginning with () are
-       removed as they could be interpreted as bbaasshh functions.  The list of
-       environment variables that ssuuddoo allows or denies is contained in the
+       removed as they could be interpreted as [1mbash [22mfunctions.  The list of
+       environment variables that [1msudo [22mallows or denies is contained in the
        output of sudo -V when run as root.
 
        Note that the dynamic linker on most operating systems will remove
        variables that can control dynamic linking from the environment of
-       setuid executables, including ssuuddoo.  Depending on the operating system
+       setuid executables, including [1msudo[22m.  Depending on the operating system
        this may include _RLD*, DYLD_*, LD_*, LDR_*, LIBPATH, SHLIB_PATH, and
        others.  These type of variables are removed from the environment
-       before ssuuddoo even begins execution and, as such, it is not possible for
-       ssuuddoo to preserve them.
+       before [1msudo [22meven begins execution and, as such, it is not possible for
+       [1msudo [22mto preserve them.
 
-       To prevent command spoofing, ssuuddoo checks "." and "" (both denoting
+       To prevent command spoofing, [1msudo [22mchecks "." and "" (both denoting
        current directory) last when searching for a command in the user's PATH
        (if one or both are in the PATH).  Note, however, that the actual PATH
-       environment variable is _n_o_t modified and is passed unchanged to the
-       program that ssuuddoo executes.
+       environment variable is [4mnot[24m modified and is passed unchanged to the
+       program that [1msudo [22mexecutes.
 
-       ssuuddoo will check the ownership of its time stamp directory
-       (_/_v_a_r_/_a_d_m_/_s_u_d_o by default) and ignore the directory's contents if it is
+       [1msudo [22mwill check the ownership of its time stamp directory
+       ([4m/var/adm/sudo[24m by default) and ignore the directory's contents if it is
        not owned by root or if it is writable by a user other than root.  On
-       systems that allow non-root users to give away files via _c_h_o_w_n(2), if
+       systems that allow non-root users to give away files via [4mchown[24m(2), if
        the time stamp directory is located in a directory writable by anyone
-       (e.g., _/_t_m_p), it is possible for a user to create the time stamp
-       directory before ssuuddoo is run.  However, because ssuuddoo checks the
+       (e.g., [4m/tmp[24m), it is possible for a user to create the time stamp
+       directory before [1msudo [22mis run.  However, because [1msudo [22mchecks the
        ownership and mode of the directory and its contents, the only damage
        that can be done is to "hide" files by putting them in the time stamp
        dir.  This is unlikely to happen since once the time stamp dir is owned
        by root and inaccessible by any other user, the user placing files
        there would be unable to get them back out.  To get around this issue
        you can use a directory that is not world-writable for the time stamps
-       (_/_v_a_r_/_a_d_m_/_s_u_d_o for instance) or create _/_v_a_r_/_a_d_m_/_s_u_d_o with the
+       ([4m/var/adm/sudo[24m for instance) or create [4m/var/adm/sudo[24m with the
        appropriate owner (root) and permissions (0700) in the system startup
        files.
 
-       ssuuddoo will not honor time stamps set far in the future.  Timestamps with
+       [1msudo [22mwill not honor time stamps set far in the future.  Timestamps with
        a date greater than current_time + 2 * TIMEOUT will be ignored and sudo
        will log and complain.  This is done to keep a user from creating
        his/her own time stamp with a bogus date on systems that allow users to
        give away files.
 
-       On systems where the boot time is available, ssuuddoo will also not honor
+       On systems where the boot time is available, [1msudo [22mwill also not honor
        time stamps from before the machine booted.
-
-
-
-1.7.6                     April  9, 2011                        7
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
        Since time stamp files live in the file system, they can outlive a
        user's login session.  As a result, a user may be able to login, run a
-       command with ssuuddoo after authenticating, logout, login again, and run
-       ssuuddoo without authenticating so long as the time stamp file's
+       command with [1msudo [22mafter authenticating, logout, login again, and run
+       [1msudo [22mwithout authenticating so long as the time stamp file's
        modification time is within 5 minutes (or whatever the timeout is set
-       to in _s_u_d_o_e_r_s).  When the _t_t_y___t_i_c_k_e_t_s option is enabled in _s_u_d_o_e_r_s, the
+       to in [4msudoers[24m).  When the [4mtty_tickets[24m option is enabled in [4msudoers[24m, the
        time stamp has per-tty granularity but still may outlive the user's
        session.  On Linux systems where the devpts filesystem is used, Solaris
        systems with the devices filesystem, as well as other systems that
        utilize a devfs filesystem that monotonically increase the inode number
-       of devices as they are created (such as Mac OS X), ssuuddoo is able to
+       of devices as they are created (such as Mac OS X), [1msudo [22mis able to
        determine when a tty-based time stamp file is stale and will ignore it.
        Administrators should not rely on this feature as it is not universally
        available.
 
-       Please note that ssuuddoo will normally only log the command it explicitly
+       Please note that [1msudo [22mwill normally only log the command it explicitly
        runs.  If a user runs a command such as sudo su or sudo sh, subsequent
-       commands run from that shell will _n_o_t be logged, nor will ssuuddoo's access
+       commands run from that shell will [4mnot[24m be logged, nor will [1msudo[22m's access
        control affect them.  The same is true for commands that offer shell
        escapes (including most editors).  Because of this, care must be taken
-       when giving users access to commands via ssuuddoo to verify that the
+       when giving users access to commands via [1msudo [22mto verify that the
        command does not inadvertently give the user an effective root shell.
        For more information, please see the PREVENTING SHELL ESCAPES section
-       in _s_u_d_o_e_r_s(4).
+       in [4msudoers[24m(4).
 
-EENNVVIIRROONNMMEENNTT
-       ssuuddoo utilizes the following environment variables:
+[1mENVIRONMENT[0m
+       [1msudo [22mutilizes the following environment variables:
 
-       EDITOR          Default editor to use in --ee (sudoedit) mode if neither
+       EDITOR          Default editor to use in [1m-e [22m(sudoedit) mode if neither
                        SUDO_EDITOR nor VISUAL is set
 
-       MAIL            In --ii mode or when _e_n_v___r_e_s_e_t is enabled in _s_u_d_o_e_r_s, set
+       MAIL            In [1m-i [22mmode or when [4menv_reset[24m is enabled in [4msudoers[24m, set
                        to the mail spool of the target user
 
-       HOME            Set to the home directory of the target user if --ii or
-                       --HH are specified, _e_n_v___r_e_s_e_t or _a_l_w_a_y_s___s_e_t___h_o_m_e are set
-                       in _s_u_d_o_e_r_s, or when the --ss option is specified and
-                       _s_e_t___h_o_m_e is set in _s_u_d_o_e_r_s
+       HOME            Set to the home directory of the target user if [1m-i [22mor
+                       [1m-H [22mare specified, [4menv_reset[24m or [4malways_set_home[24m are set
+                       in [4msudoers[24m, or when the [1m-s [22moption is specified and
+                       [4mset_home[24m is set in [4msudoers[0m
 
-       PATH            Set to a sane value if the _s_e_c_u_r_e___p_a_t_h sudoers option
+       PATH            Set to a sane value if the [4msecure_path[24m sudoers option
                        is set.
 
        SHELL           Used to determine shell to run with -s option
@@ -516,21 +431,9 @@ EENNVVIIRROONNMMEENNTT
 
        SUDO_COMMAND    Set to the command run by sudo
 
-       SUDO_EDITOR     Default editor to use in --ee (sudoedit) mode
+       SUDO_EDITOR     Default editor to use in [1m-e [22m(sudoedit) mode
 
        SUDO_GID        Set to the group ID of the user who invoked sudo
-
-
-
-
-1.7.6                     April  9, 2011                        8
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
        SUDO_PROMPT     Used as the default password prompt
 
@@ -541,22 +444,22 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
        SUDO_USER       Set to the login of the user who invoked sudo
 
-       USER            Set to the target user (root unless the --uu option is
+       USER            Set to the target user (root unless the [1m-u [22moption is
                        specified)
 
-       VISUAL          Default editor to use in --ee (sudoedit) mode if
+       VISUAL          Default editor to use in [1m-e [22m(sudoedit) mode if
                        SUDO_EDITOR is not set
 
-FFIILLEESS
-       _/_e_t_c_/_s_u_d_o_e_r_s            List of who can run what
+[1mFILES[0m
+       [4m/etc/sudoers[24m            List of who can run what
 
-       _/_v_a_r_/_a_d_m_/_s_u_d_o           Directory containing time stamps
+       [4m/var/adm/sudo[24m           Directory containing time stamps
 
-       _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t        Initial environment for --ii mode on Linux and
+       [4m/etc/environment[24m        Initial environment for [1m-i [22mmode on Linux and
                                AIX
 
-EEXXAAMMPPLLEESS
-       Note: the following examples assume suitable _s_u_d_o_e_r_s(4) entries.
+[1mEXAMPLES[0m
+       Note: the following examples assume suitable [4msudoers[24m(4) entries.
 
        To get a file listing of an unreadable directory:
 
@@ -567,7 +470,7 @@ EEXXAAMMPPLLEESS
 
         $ sudo -u yaz ls ~yaz
 
-       To edit the _i_n_d_e_x_._h_t_m_l file as user www:
+       To edit the [4mindex.html[24m file as user www:
 
         $ sudo -u www vi ~www/htdocs/index.html
 
@@ -587,39 +490,28 @@ EEXXAAMMPPLLEESS
        Note that this runs the commands in a sub-shell to make the cd and file
        redirection work.
 
-
-
-1.7.6                     April  9, 2011                        9
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
         $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 
-SSEEEE AALLSSOO
-       _g_r_e_p(1), _s_u(1), _s_t_a_t(2), _l_o_g_i_n___c_a_p(3), _p_a_s_s_w_d(4), _s_u_d_o_e_r_s(5),
-       _v_i_s_u_d_o(1m)
+[1mSEE ALSO[0m
+       [4mgrep[24m(1), [4msu[24m(1), [4mstat[24m(2), [4mlogin_cap[24m(3), [4mpasswd[24m(4), [4msudoers[24m(5),
+       [4mvisudo[24m(1m)
 
-AAUUTTHHOORRSS
-       Many people have worked on ssuuddoo over the years; this version consists
+[1mAUTHORS[0m
+       Many people have worked on [1msudo [22mover the years; this version consists
        of code written primarily by:
 
                Todd C. Miller
 
-       See the HISTORY file in the ssuuddoo distribution or visit
-       http://www.sudo.ws/sudo/history.html for a short history of ssuuddoo.
+       See the HISTORY file in the [1msudo [22mdistribution or visit
+       http://www.sudo.ws/sudo/history.html for a short history of [1msudo[22m.
 
-CCAAVVEEAATTSS
+[1mCAVEATS[0m
        There is no easy way to prevent a user from gaining a root shell if
-       that user is allowed to run arbitrary commands via ssuuddoo.  Also, many
+       that user is allowed to run arbitrary commands via [1msudo[22m.  Also, many
        programs (such as editors) allow the user to run commands via shell
-       escapes, thus avoiding ssuuddoo's checks.  However, on most systems it is
-       possible to prevent shell escapes with ssuuddoo's _n_o_e_x_e_c functionality.
-       See the _s_u_d_o_e_r_s(4) manual for details.
+       escapes, thus avoiding [1msudo[22m's checks.  However, on most systems it is
+       possible to prevent shell escapes with [1msudo[22m's [4mnoexec[24m functionality.
+       See the [4msudoers[24m(4) manual for details.
 
        It is not meaningful to run the cd command directly via sudo, e.g.,
 
@@ -632,29 +524,26 @@ CCAAVVEEAATTSS
        their own program that gives them a root shell regardless of any '!'
        elements in the user specification.
 
-       Running shell scripts via ssuuddoo can expose the same kernel bugs that
+       Running shell scripts via [1msudo [22mcan expose the same kernel bugs that
        make setuid shell scripts unsafe on some operating systems (if your OS
        has a /dev/fd/ directory, setuid shell scripts are generally safe).
 
-BBUUGGSS
-       If you feel you have found a bug in ssuuddoo, please submit a bug report at
+[1mBUGS[0m
+       If you feel you have found a bug in [1msudo[22m, please submit a bug report at
        http://www.sudo.ws/sudo/bugs/
 
-SSUUPPPPOORRTT
+[1mSUPPORT[0m
        Limited free support is available via the sudo-users mailing list, see
        http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or search
        the archives.
 
-DDIISSCCLLAAIIMMEERR
-       ssuuddoo is provided ``AS IS'' and any express or implied warranties,
+[1mDISCLAIMER[0m
+       [1msudo [22mis provided ``AS IS'' and any express or implied warranties,
        including, but not limited to, the implied warranties of
        merchantability and fitness for a particular purpose are disclaimed.
-       See the LICENSE file distributed with ssuuddoo or
+       See the LICENSE file distributed with [1msudo [22mor
        http://www.sudo.ws/sudo/license.html for complete details.
 
 
 
-
-1.7.6                     April  9, 2011                       10
-
-
+1.7.7                           August 13, 2011                       SUDO(1m)

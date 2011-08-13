@@ -140,7 +140,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "April  9, 2011" "1.7.6" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "August 13, 2011" "1.7.7" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -254,22 +254,24 @@ The \f(CW\*(C`sudoRunAsGroup\*(C'\fR attribute is only available in \fBsudo\fR v
 1.7.0 and higher.
 .IP "\fBsudoNotBefore\fR" 4
 .IX Item "sudoNotBefore"
-A timestamp in the form \f(CW\*(C`yyyymmddHHMMZ\*(C'\fR that can be used to provide
+A timestamp in the form \f(CW\*(C`yyyymmddHHMMSSZ\*(C'\fR that can be used to provide
 a start date/time for when the \f(CW\*(C`sudoRole\*(C'\fR will be valid.  If
 multiple \f(CW\*(C`sudoNotBefore\*(C'\fR entries are present, the earliest is used.
 Note that timestamps must be in Coordinated Universal Time (\s-1UTC\s0),
-not the local timezone.
+not the local timezone.  The minute and seconds portions are optional,
+but some \s-1LDAP\s0 servers require that they be present (contrary to the \s-1RFC\s0).
 .Sp
 The \f(CW\*(C`sudoNotBefore\*(C'\fR attribute is only available in \fBsudo\fR versions
 1.7.5 and higher and must be explicitly enabled via the \fB\s-1SUDOERS_TIMED\s0\fR
 option in \fI@ldap_conf@\fR.
 .IP "\fBsudoNotAfter\fR" 4
 .IX Item "sudoNotAfter"
-A timestamp in the form \f(CW\*(C`yyyymmddHHMMZ\*(C'\fR that indicates an expiration
+A timestamp in the form \f(CW\*(C`yyyymmddHHMMSSZ\*(C'\fR that indicates an expiration
 date/time, after which the \f(CW\*(C`sudoRole\*(C'\fR will no longer be valid.  If
 multiple \f(CW\*(C`sudoNotBefore\*(C'\fR entries are present, the last one is used.
 Note that timestamps must be in Coordinated Universal Time (\s-1UTC\s0),
-not the local timezone.
+not the local timezone.  The minute and seconds portions are optional,
+but some \s-1LDAP\s0 servers require that they be present (contrary to the \s-1RFC\s0).
 .Sp
 The \f(CW\*(C`sudoNotAfter\*(C'\fR attribute is only available in \fBsudo\fR versions
 1.7.5 and higher and must be explicitly enabled via the \fB\s-1SUDOERS_TIMED\s0\fR

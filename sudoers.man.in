@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "April  9, 2011" "1.7.6" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "August 13, 2011" "1.7.7" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -911,7 +911,7 @@ If set, the four-digit year will be logged in the (non-syslog) \fBsudo\fR log fi
 This flag is \fIoff\fR by default.
 .IP "long_otp_prompt" 16
 .IX Item "long_otp_prompt"
-When validating with a One Time Password (\s-1OPT\s0) scheme such as
+When validating with a One Time Password (\s-1OTP\s0) scheme such as
 \&\fBS/Key\fR or \fB\s-1OPIE\s0\fR, a two-line prompt is used to make it easier
 to cut and paste the challenge to a local window.  It's not as
 pretty as the default but some people find it more convenient.  This
@@ -1219,16 +1219,19 @@ This option is only available whe \fBsudo\fR is built with SELinux support.
 .IX Item "runas_default"
 The default user to run commands as if the \fB\-u\fR option is not specified
 on the command line.  This defaults to \f(CW\*(C`@runas_default@\*(C'\fR.
-Note that if \fIrunas_default\fR is set it \fBmust\fR occur before
-any \f(CW\*(C`Runas_Alias\*(C'\fR specifications.
 .IP "syslog_badpri" 16
 .IX Item "syslog_badpri"
 Syslog priority to use when user authenticates unsuccessfully.
 Defaults to \f(CW\*(C`@badpri@\*(C'\fR.
+.Sp
+The following syslog priorities are supported: \fBalert\fR, \fBcrit\fR,
+\&\fBdebug\fR, \fBemerg\fR, \fBerr\fR, \fBinfo\fR, \fBnotice\fR, and \fBwarning\fR.
 .IP "syslog_goodpri" 16
 .IX Item "syslog_goodpri"
 Syslog priority to use when user authenticates successfully.
 Defaults to \f(CW\*(C`@goodpri@\*(C'\fR.
+.Sp
+See syslog_badpri for the list of supported syslog priorities.
 .IP "sudoers_locale" 16
 .IX Item "sudoers_locale"
 Locale to use when parsing the sudoers file, logging commands, and
@@ -1274,6 +1277,7 @@ as \fIenv_keep\fR and \fIenv_check\fR.
 .IP "exempt_group" 12
 .IX Item "exempt_group"
 Users in this group are exempt from password and \s-1PATH\s0 requirements.
+The group name specified should not include a \f(CW\*(C`%\*(C'\fR prefix.
 This is not set by default.
 .IP "lecture" 12
 .IX Item "lecture"
@@ -1362,6 +1366,10 @@ This option is @secure_path@ by default.
 .IX Item "syslog"
 Syslog facility if syslog is being used for logging (negate to
 disable syslog logging).  Defaults to \f(CW\*(C`@logfac@\*(C'\fR.
+.Sp
+The following syslog facilities are supported: \fBauthpriv\fR (if your
+\&\s-1OS\s0 supports it), \fBauth\fR, \fBdaemon\fR, \fBuser\fR, \fBlocal0\fR, \fBlocal1\fR,
+\&\fBlocal2\fR, \fBlocal3\fR, \fBlocal4\fR, \fBlocal5\fR, \fBlocal6\fR, and \fBlocal7\fR.
 .IP "verifypw" 12
 .IX Item "verifypw"
 This option controls when a password will be required when a user runs
@@ -1426,14 +1434,6 @@ single value without double-quotes.  The list can be replaced, added
 to, deleted from, or disabled by using the \f(CW\*(C`=\*(C'\fR, \f(CW\*(C`+=\*(C'\fR, \f(CW\*(C`\-=\*(C'\fR, and
 \&\f(CW\*(C`!\*(C'\fR operators respectively.  The default list of variables to keep
 is displayed when \fBsudo\fR is run by root with the \fI\-V\fR option.
-.PP
-When logging via \fIsyslog\fR\|(3), \fBsudo\fR accepts the following values
-for the syslog facility (the value of the \fBsyslog\fR Parameter):
-\&\fBauthpriv\fR (if your \s-1OS\s0 supports it), \fBauth\fR, \fBdaemon\fR, \fBuser\fR,
-\&\fBlocal0\fR, \fBlocal1\fR, \fBlocal2\fR, \fBlocal3\fR, \fBlocal4\fR, \fBlocal5\fR,
-\&\fBlocal6\fR, and \fBlocal7\fR.  The following syslog priorities are
-supported: \fBalert\fR, \fBcrit\fR, \fBdebug\fR, \fBemerg\fR, \fBerr\fR, \fBinfo\fR,
-\&\fBnotice\fR, and \fBwarning\fR.
 .SH "FILES"
 .IX Header "FILES"
 .ie n .IP "\fI@sysconfdir@/sudoers\fR" 24
