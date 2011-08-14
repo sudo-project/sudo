@@ -13,6 +13,11 @@ What's new in Sudo 1.7.7
    the target user's group in the password database, it is now
    allowed even if no groups are present in the Runas_Spec.
 
+ * "sudo -i command" now works correctly with the bash version
+   2.0 and higher.  Previously, the .bash_profile would not be
+   sourced prior to running the command unless bash was built with
+   NON_INTERACTIVE_LOGIN_SHELLS defined.
+
  * Multi-factor authentication is now supported on AIX.
 
  * Added support for non-RFC 4517 compliant LDAP servers that require

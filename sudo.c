@@ -505,6 +505,20 @@ main(argc, argv, envp)
 	    *p = '-';
 	    NewArgv[0] = p;
 
+	    /*
+	     * Newer versions of bash require the --login option to be used
+	     * in conjunction with the -c option even if the shell name starts
+	     * with a '-'.  Unfortunately, bash 1.x uses -login, not --login
+	     * so this will cause an error for that.
+	     */
+	    if (NewArgc > 1 && strcmp(NewArgv[0], "-bash") == 0) {
+		/* Use an extra slot before NewArgv so we can store --login. */
+		NewArgv--;
+		NewArgc++;
+		NewArgv[0] = NewArgv[1];
+		NewArgv[1] = "--login";
+	    }
+
 #if defined(__linux__) || defined(_AIX)
 	    /* Insert system-wide environment variables. */
 	    read_env_file(_PATH_ENVIRONMENT, TRUE);
@@ -703,9 +717,9 @@ init_vars(envp)
     if (ISSET(sudo_mode, MODE_SHELL)) {
 	char **av;
 
-	/* Allocate an extra slot for execve() failure (ENOEXEC). */
-	av = (char **) emalloc2(5, sizeof(char *));
-	av++;
+	/* Allocate 2 extra slots for --login and execve() failure (ENOEXEC). */
+	av = (char **) emalloc2(6, sizeof(char *));
+	av += 2;
 
 	av[0] = user_shell;	/* may be updated later */
 	if (NewArgc > 0) {
