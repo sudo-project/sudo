@@ -1530,10 +1530,22 @@ case "$host" in
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 
-		# HP-UX bundled compiler can't generate shared objects
-		if test -z "$GCC" -a "x$ac_cv_prog_cc_c89" = "xno"; then
-		    with_noexec=no
-		fi
+                if test -z "$GCC"; then
+                    AC_CACHE_CHECK([for HP bundled C compiler],
+                        [sudo_cv_var_hpccbundled],
+                        [if test "x$ac_cv_prog_cc_c89" = "xno"; then
+                            sudo_cv_var_hpccbundled=yes
+			elif $CC -V 2>&1 | grep '^(Bundled)' >/dev/null 2>&1; then
+                            sudo_cv_var_hpccbundled=yes
+                        else
+                            sudo_cv_var_hpccbundled=no
+                        fi]
+                    )
+		    # The HP bundled compiler can't generate shared objects
+                    if test "$sudo_cv_var_hpccbundled" = "yes"; then
+			with_noexec=no
+                    fi
+                fi
 
 		# Build PA-RISC1.1 objects for better portability
 		case "$host_cpu" in
