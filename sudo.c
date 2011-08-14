@@ -561,31 +561,6 @@ main(argc, argv, envp)
 }
 
 /*
- * Escape any non-alpha numeric or blank characters to make sure
- * they are not interpreted specially by the shell.
- */
-static char *
-escape_cmnd(src)
-    const char *src;
-{
-    char *cmnd, *dst;
-
-    /* Worst case scenario, we have to escape everything. */
-    cmnd = dst = emalloc((2 * strlen(src)) + 1);
-    while (*src != '\0') {
-	if (!isalnum((unsigned char)*src) && !isspace((unsigned char)*src) &&
-	    *src != '_' && *src != '-') {
-	    /* quote potential meta character */
-	    *dst++ = '\\';
-	}
-	*dst++ = *src++;
-    }
-    *dst++ = '\0';
-
-    return cmnd;
-}
-
-/*
  * Initialize timezone, set umask, fill in ``sudo_user'' struct and
  * load the ``interfaces'' array.
  */
@@ -734,15 +709,25 @@ init_vars(envp)
 
 	av[0] = user_shell;	/* may be updated later */
 	if (NewArgc > 0) {
-	    size_t cmnd_size;
-	    char *cmnd, *src, *dst, *end;
-	    cmnd_size = (size_t) (NewArgv[NewArgc - 1] - NewArgv[0]) +
+	    /* shell -c "command" */
+	    char *cmnd, *src, *dst;
+	    size_t cmnd_size = (size_t) (NewArgv[NewArgc - 1] - NewArgv[0]) +
 		    strlen(NewArgv[NewArgc - 1]) + 1;
-	    cmnd = dst = emalloc(cmnd_size);
-	    src = NewArgv[0];
-	    for (end = src + cmnd_size - 1; src < end; src++, dst++)
-		*dst = *src == '\0' ? ' ' : *src;
+
+	    cmnd = dst = emalloc2(cmnd_size, 2);
+	    for (av = NewArgv; *av != NULL; av++) {
+		for (src = *av; *src != '\0'; src++) {
+		    /* quote potential meta characters */
+		    if (!isalnum((unsigned char)*src) && *src != '_' && *src != '-')
+			*dst++ = '\\';
+		    *dst++ = *src;
+		}
+		*dst++ = ' ';
+	    }
+	    if (cmnd != dst)
+		dst--;	/* replace last space with a NUL */
 	    *dst = '\0';
+
 	    av[1] = "-c";
 	    av[2] = cmnd;
 	    NewArgc = 2;
@@ -792,28 +777,43 @@ set_cmnd(sudo_mode)
 
 	/* set user_args */
 	if (NewArgc > 1) {
-	    char *to, **from;
+	    char *to, *from, **av;
 	    size_t size, n;
 
-	    /* If we didn't realloc NewArgv it is contiguous so just count. */
-	    if (!ISSET(sudo_mode, MODE_SHELL)) {
-		size = (size_t) (NewArgv[NewArgc-1] - NewArgv[1]) +
-			strlen(NewArgv[NewArgc-1]) + 1;
-	    } else {
-		for (size = 0, from = NewArgv + 1; *from; from++)
-		    size += strlen(*from) + 1;
-	    }
+	    if (ISSET(sudo_mode, MODE_SHELL)) {
+		for (size = 0, av = NewArgv + 1; *av; av++)
+		    size += strlen(*av) + 1;
+		user_args = emalloc(size);
 
-	    /* Alloc and build up user_args. */
-	    user_args = (char *) emalloc(size);
-	    for (to = user_args, from = NewArgv + 1; *from; from++) {
-		n = strlcpy(to, *from, size - (to - user_args));
-		if (n >= size - (to - user_args))
-		    errorx(1, "internal error, init_vars() overflow");
-		to += n;
-		*to++ = ' ';
+		/*
+		 * When running a command via a shell, sudo escapes potential
+		 * meta chars in NewArgv.  We unescape non-spaces for sudoers
+		 * matching and logging purposes.
+		 */
+		for (to = user_args, av = NewArgv + 1; (from = *av); av++) {
+		    while (*from) {
+			if (from[0] == '\\' && !isspace((unsigned char)from[1]))
+			    from++;
+			*to++ = *from++;
+		    }
+		    *to++ = ' ';
+		}
+		*--to = '\0';
+	    } else {
+		/* NewArgv is contiguous so just count. */
+		size = (size_t) (NewArgv[NewArgc - 1] - NewArgv[1]) +
+			strlen(NewArgv[NewArgc - 1]) + 1;
+		user_args = emalloc(size);
+
+		for (to = user_args, av = NewArgv + 1; *av; av++) {
+		    n = strlcpy(to, *av, size - (to - user_args));
+		    if (n >= size - (to - user_args))
+			errorx(1, "internal error, init_vars() overflow");
+		    to += n;
+		    *to++ = ' ';
+		}
+		*--to = '\0';
 	    }
-	    *--to = '\0';
 	}
     }
     if ((user_base = strrchr(user_cmnd, '/')) != NULL)
@@ -936,13 +936,6 @@ run_command(path, argv, envp, uid, dowait)
 
     cstat.type = CMD_INVALID;
     cstat.val = 0;
-
-    /* Escape meta chars if running a shell with args. */
-    if (ISSET(sudo_mode, MODE_SHELL) && argv[1] != NULL) {
-	char *cmnd = argv[2];
-	argv[2] = escape_cmnd(cmnd);
-	efree(cmnd);
-    }
 
     sudo_execve(path, argv, envp, uid, &cstat, dowait,
 	ISSET(sudo_mode, MODE_BACKGROUND));
