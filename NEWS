@@ -1,5 +1,8 @@
 What's new in Sudo 1.7.7
 
+ * I/O logging is now supported for commands run in background mode
+   (using sudo's -b flag).
+
  * Group ownership of the sudoers file is now only enforced when
    the file mode on sudoers allows group readability or writability.
 
@@ -20,6 +23,9 @@ What's new in Sudo 1.7.7
 
  * For LDAP-based sudoers, the "runas_default" sudoOption now works
    properly in a sudoRole that contains a sudoCommand.
+
+ * Spaces in command line arguments for "sudo -s" and "sudo -i" are
+    now escaped with a backslash when checking the sudoers file.
 
 What's new in Sudo 1.7.6p2
 
