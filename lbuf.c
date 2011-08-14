@@ -174,7 +174,7 @@ void
 #ifdef __STDC__
 lbuf_append(struct lbuf *lbuf, const char *fmt, ...)
 #else
-lbuf_append_quoted(lbuf, fmt, va_alist)
+lbuf_append(lbuf, fmt, va_alist)
        struct lbuf *lbuf;
        const char *fmt;
        va_dcl
