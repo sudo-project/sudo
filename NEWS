@@ -51,6 +51,9 @@ What's new in Sudo 1.8.2?
  * For LDAP-based sudoers, the "runas_default" sudoOption now works
    properly in a sudoRole that contains a sudoCommand.
 
+ * Spaces in command line arguments for "sudo -s" and "sudo -i" are
+   now escaped with a backslash when checking the security policy.
+
 What's new in Sudo 1.8.1p2?
 
  * Two-character CIDR-style IPv4 netmasks are now matched correctly
