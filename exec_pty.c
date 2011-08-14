@@ -347,12 +347,13 @@ perform_io(fdsr, fdsw, cstat)
  * Returns the child pid.
  */
 int
-fork_pty(path, argv, envp, sv, rbac_enabled, maxfd)
+fork_pty(path, argv, envp, sv, rbac_enabled, bgmode, maxfd)
     const char *path;
     char *argv[];
     char *envp[];
     int sv[2];
     int rbac_enabled;
+    int bgmode;
     int *maxfd;
 {
     struct command_status cstat;
@@ -373,17 +374,21 @@ fork_pty(path, argv, envp, sv, rbac_enabled, maxfd)
 
     /*
      * Setup stdin/stdout/stderr for child, to be duped after forking.
+     * In background mode there is no stdin.
      */
-    io_fds[SFD_STDIN] = io_fds[SFD_SLAVE];
+    if (!bgmode)
+	io_fds[SFD_STDIN] = io_fds[SFD_SLAVE];
     io_fds[SFD_STDOUT] = io_fds[SFD_SLAVE];
     io_fds[SFD_STDERR] = io_fds[SFD_SLAVE];
 
-    /* Copy /dev/tty -> pty master */
     if (io_fds[SFD_USERTTY] != -1) {
-	iobufs = io_buf_new(io_fds[SFD_USERTTY], io_fds[SFD_MASTER],
-	    log_ttyin, iobufs);
+	/* Read from /dev/tty, write to pty master */
+	if (!bgmode) {
+	    iobufs = io_buf_new(io_fds[SFD_USERTTY], io_fds[SFD_MASTER],
+		log_ttyin, iobufs);
+	}
 
-	/* Copy pty master -> /dev/tty */
+	/* Read from pty master, write to /dev/tty */
 	iobufs = io_buf_new(io_fds[SFD_MASTER], io_fds[SFD_USERTTY],
 	    log_ttyout, iobufs);
 

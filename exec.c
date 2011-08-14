@@ -231,19 +231,19 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
 		cstat->val = errno;
 		return -1;
 	    case 0:
-		/* child continues */   
+		/* child continues without controlling terminal */
+		(void)setpgid(0, 0);
 		break;
 	    default:
-		/* parent exits */
-		exit(0);
+		/* parent exits (but does not flush buffers) */
+		_exit(0);
 	}
     }
 
 #ifdef _PATH_SUDO_IO_LOGDIR
     log_io = def_log_output || def_log_input || def_use_pty;
     if (log_io) {
-	if (!bgmode)
-	    pty_setup(uid);
+	pty_setup(uid);
 	io_log_open();
 	dowait = TRUE;
     }
@@ -309,7 +309,7 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
      */
 #ifdef _PATH_SUDO_IO_LOGDIR
     if (log_io)
-	child = fork_pty(path, argv, envp, sv, rbac_enabled, &maxfd);
+	child = fork_pty(path, argv, envp, sv, rbac_enabled, bgmode, &maxfd);
     else
 #endif
 	child = fork_cmnd(path, argv, envp, sv, rbac_enabled);

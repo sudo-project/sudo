@@ -33,7 +33,7 @@ int pipe_nonblock __P((int fds[2]));
 
 /* exec_pty.c */
 int fork_pty __P((const char *path, char *argv[], char *envp[], int sv[],
-    int rbac_enabled, int *maxfd));
+    int rbac_enabled, int bgmode, int *maxfd));
 int perform_io __P((fd_set *fdsr, fd_set *fdsw, struct command_status *cstat));
 int suspend_parent __P((int signo));
 void fd_set_iobs __P((fd_set *fdsr, fd_set *fdsw));
