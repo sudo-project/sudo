@@ -107,22 +107,26 @@ DDEESSCCRRIIPPTTIIOONN
            1.7.0 and higher.
 
        ssuuddooNNoottBBeeffoorree
-           A timestamp in the form yyyymmddHHMMZ that can be used to provide a
-           start date/time for when the sudoRole will be valid.  If multiple
+           A timestamp in the form yyyymmddHHMMSSZ that can be used to provide
+           a start date/time for when the sudoRole will be valid.  If multiple
            sudoNotBefore entries are present, the earliest is used.  Note that
            timestamps must be in Coordinated Universal Time (UTC), not the
-           local timezone.
+           local timezone.  The minute and seconds portions are optional, but
+           some LDAP servers require that they be present (contrary to the
+           RFC).
 
            The sudoNotBefore attribute is only available in ssuuddoo versions
            1.7.5 and higher and must be explicitly enabled via the
            SSUUDDOOEERRSS__TTIIMMEEDD option in _/_e_t_c_/_l_d_a_p_._c_o_n_f.
 
        ssuuddooNNoottAAfftteerr
-           A timestamp in the form yyyymmddHHMMZ that indicates an expiration
-           date/time, after which the sudoRole will no longer be valid.  If
-           multiple sudoNotBefore entries are present, the last one is used.
-           Note that timestamps must be in Coordinated Universal Time (UTC),
-           not the local timezone.
+           A timestamp in the form yyyymmddHHMMSSZ that indicates an
+           expiration date/time, after which the sudoRole will no longer be
+           valid.  If multiple sudoNotBefore entries are present, the last one
+           is used.  Note that timestamps must be in Coordinated Universal
+           Time (UTC), not the local timezone.  The minute and seconds
+           portions are optional, but some LDAP servers require that they be
+           present (contrary to the RFC).
 
            The sudoNotAfter attribute is only available in ssuuddoo versions 1.7.5
            and higher and must be explicitly enabled via the SSUUDDOOEERRSS__TTIIMMEEDD
@@ -738,4 +742,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.2                            May 22, 2011                  SUDOERS.LDAP(4)
+1.8.2                           August 17, 2011                SUDOERS.LDAP(4)

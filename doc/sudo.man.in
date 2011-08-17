@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "May 22, 2011" "1.8.2" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "August 17, 2011" "1.8.2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -295,7 +295,7 @@ may be a value from 1 through 9.
 .IP "\-E" 12
 .IX Item "-E"
 The \fB\-E\fR (\fIpreserve\fR \fIenvironment\fR) option indicates to the
-security policy that the uses wishes to preserve their existing
+security policy that the user wishes to preserve their existing
 environment variables.  The security policy may return an error if
 the \fB\-E\fR option is specified and the user does not have permission
 to preserve the environment.
@@ -361,7 +361,10 @@ If no command is specified, an interactive shell is executed.
 \&\fBsudo\fR attempts to change to that user's home directory before
 running the shell.  The security policy shall initialize the
 environment to a minimal set of variables, similar to what is present
-when a user logs in.
+when a user logs in.  The \fICommand Environment\fR section in the
+\&\fIsudoers\fR\|(@mansectform@) manual documents how the \fB\-i\fR option affects the
+environment in which a command is run when the \fIsudoers\fR policy
+is in use.
 .IP "\-K" 12
 .IX Item "-K"
 The \fB\-K\fR (sure \fIkill\fR) option is like \fB\-k\fR except that it removes

@@ -90,7 +90,7 @@ DDEESSCCRRIIPPTTIIOONN
        before ssuuddoo even begins execution and, as such, it is not possible for
        ssuuddoo to preserve them.
 
-       As a special case, If ssuuddoo's --ii option (initial login) is specified,
+       As a special case, if ssuuddoo's --ii option (initial login) is specified,
        _s_u_d_o_e_r_s will initialize the environment regardless of the value of
        _e_n_v___r_e_s_e_t.  The _D_I_S_P_L_A_Y, _P_A_T_H and _T_E_R_M variables remain unchanged;
        _H_O_M_E, _M_A_I_L, _S_H_E_L_L, _U_S_E_R, and _L_O_G_N_A_M_E are set based on the target user.
@@ -768,7 +768,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
        log_year        If set, the four-digit year will be logged in the (non-
                        syslog) ssuuddoo log file.  This flag is _o_f_f by default.
 
-       long_otp_prompt When validating with a One Time Password (OPT) scheme
+       long_otp_prompt When validating with a One Time Password (OTP) scheme
                        such as SS//KKeeyy or OOPPIIEE, a two-line prompt is used to
                        make it easier to cut and paste the challenge to a
                        local window.  It's not as pretty as the default but
@@ -1096,8 +1096,8 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        escape sequences are supported:
 
                        %H  expanded to the local host name including the
-                           domain name (on if the machine's host name is fully
-                           qualified or the _f_q_d_n option is set)
+                           domain name (only if the machine's host name is
+                           fully qualified or the _f_q_d_n option is set)
 
                        %h  expanded to the local host name without the domain
                            name
@@ -1167,7 +1167,8 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
        exempt_group
                    Users in this group are exempt from password and PATH
-                   requirements.  This is not set by default.
+                   requirements.  The group name specified should not include
+                   a % prefix.  This is not set by default.
 
        group_plugin
                    A string containing a _s_u_d_o_e_r_s group plugin with optional
@@ -1183,7 +1184,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                    For example, given _/_e_t_c_/_s_u_d_o_-_g_r_o_u_p, a group file in Unix
                    group format, the sample group plugin can be used:
 
-                       Defaults sudo_plugin="sample_group.so /etc/sudo-group"
+                       Defaults group_plugin="sample_group.so /etc/sudo-group"
 
                    For more information see _s_u_d_o___p_l_u_g_i_n(4).
 
@@ -1681,4 +1682,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.2                            May 22, 2011                       SUDOERS(4)
+1.8.2                           August 17, 2011                     SUDOERS(4)

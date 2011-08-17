@@ -109,6 +109,12 @@ DDIIAAGGNNOOSSTTIICCSS
            used.  You may wish to comment out or remove the unused alias.  In
            --ss (strict) mode this is an error, not a warning.
 
+       Warning: cycle in {User,Runas,Host,Cmnd}_Alias
+           The specified {User,Runas,Host,Cmnd}_Alias includes a reference to
+           itself, either directly or through an alias it includes.  This is
+           only a warning by default as ssuuddoo will ignore cycles when parsing
+           the _s_u_d_o_e_r_s file.
+
 SSEEEE AALLSSOO
        _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(1m)
 
@@ -143,4 +149,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.2                            May 22, 2011                       VISUDO(1m)
+1.8.2                           August 17, 2011                     VISUDO(1m)

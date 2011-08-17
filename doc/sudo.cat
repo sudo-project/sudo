@@ -114,7 +114,7 @@ OOPPTTIIOONNSS
                    _l_e_v_e_l may be a value from 1 through 9.
 
        -E          The --EE (_p_r_e_s_e_r_v_e _e_n_v_i_r_o_n_m_e_n_t) option indicates to the
-                   security policy that the uses wishes to preserve their
+                   security policy that the user wishes to preserve their
                    existing environment variables.  The security policy may
                    return an error if the --EE option is specified and the user
                    does not have permission to preserve the environment.
@@ -177,7 +177,10 @@ OOPPTTIIOONNSS
                    to change to that user's home directory before running the
                    shell.  The security policy shall initialize the
                    environment to a minimal set of variables, similar to what
-                   is present when a user logs in.
+                   is present when a user logs in.  The _C_o_m_m_a_n_d _E_n_v_i_r_o_n_m_e_n_t
+                   section in the _s_u_d_o_e_r_s(4) manual documents how the --ii
+                   option affects the environment in which a command is run
+                   when the _s_u_d_o_e_r_s policy is in use.
 
        -K          The --KK (sure _k_i_l_l) option is like --kk except that it removes
                    the user's cached credentials entirely and may not be used
@@ -544,4 +547,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.2                            May 22, 2011                         SUDO(1m)
+1.8.2                           August 17, 2011                       SUDO(1m)
