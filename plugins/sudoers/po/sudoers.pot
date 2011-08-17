@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.2\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2011-08-05 13:34-0400\n"
+"POT-Creation-Date: 2011-08-17 11:40-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -70,7 +70,7 @@ msgid "sorry, a password is required to run %s"
 msgstr ""
 
 #: plugins/sudoers/check.c:225 plugins/sudoers/iolog.c:169
-#: plugins/sudoers/sudoers.c:970 plugins/sudoers/sudoreplay.c:325
+#: plugins/sudoers/sudoers.c:971 plugins/sudoers/sudoreplay.c:325
 #: plugins/sudoers/sudoreplay.c:334 plugins/sudoers/sudoreplay.c:675
 #: plugins/sudoers/sudoreplay.c:767 plugins/sudoers/visudo.c:700
 #, c-format
@@ -117,7 +117,7 @@ msgid "%s writable by non-owner (0%o), should be mode 0700"
 msgstr ""
 
 #: plugins/sudoers/check.c:470 plugins/sudoers/check.c:514
-#: plugins/sudoers/check.c:582 plugins/sudoers/sudoers.c:956
+#: plugins/sudoers/check.c:582 plugins/sudoers/sudoers.c:957
 #: plugins/sudoers/visudo.c:284 plugins/sudoers/visudo.c:500
 #, c-format
 msgid "unable to stat %s"
@@ -153,10 +153,10 @@ msgstr ""
 msgid "unknown uid: %u"
 msgstr ""
 
-#: plugins/sudoers/check.c:717 plugins/sudoers/sudoers.c:747
-#: plugins/sudoers/sudoers.c:813 plugins/sudoers/sudoers.c:814
-#: plugins/sudoers/sudoers.c:1087 plugins/sudoers/testsudoers.c:200
-#: plugins/sudoers/testsudoers.c:330
+#: plugins/sudoers/check.c:717 plugins/sudoers/sudoers.c:748
+#: plugins/sudoers/sudoers.c:814 plugins/sudoers/sudoers.c:815
+#: plugins/sudoers/sudoers.c:1088 plugins/sudoers/testsudoers.c:202
+#: plugins/sudoers/testsudoers.c:337
 #, c-format
 msgid "unknown user: %s"
 msgstr ""
@@ -586,7 +586,7 @@ msgstr ""
 
 #: plugins/sudoers/find_path.c:68 plugins/sudoers/find_path.c:107
 #: plugins/sudoers/find_path.c:122 plugins/sudoers/iolog.c:124
-#: plugins/sudoers/sudoers.c:899 toke.l:663 toke.l:814
+#: plugins/sudoers/sudoers.c:903 toke.l:663 toke.l:814
 #, c-format
 msgid "%s: %s"
 msgstr ""
@@ -630,7 +630,7 @@ msgstr ""
 msgid "Local IP address and netmask pairs:\n"
 msgstr ""
 
-#: plugins/sudoers/iolog.c:176 plugins/sudoers/sudoers.c:977
+#: plugins/sudoers/iolog.c:176 plugins/sudoers/sudoers.c:978
 #, c-format
 msgid "unable to read %s"
 msgstr ""
@@ -649,7 +649,7 @@ msgstr ""
 msgid "unable to create %s"
 msgstr ""
 
-#: plugins/sudoers/iolog_path.c:245 plugins/sudoers/sudoers.c:356
+#: plugins/sudoers/iolog_path.c:245 plugins/sudoers/sudoers.c:357
 #, c-format
 msgid "unable to set locale to \"%s\", using \"C\""
 msgstr ""
@@ -960,169 +960,169 @@ msgstr ""
 msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:198 plugins/sudoers/sudoers.c:233
-#: plugins/sudoers/sudoers.c:907
+#: plugins/sudoers/sudoers.c:199 plugins/sudoers/sudoers.c:234
+#: plugins/sudoers/sudoers.c:911
 msgid "problem with defaults entries"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:202
+#: plugins/sudoers/sudoers.c:203
 #, c-format
 msgid "no valid sudoers sources found, quitting"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:256
+#: plugins/sudoers/sudoers.c:257
 #, c-format
 msgid "unable to execute %s: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:305
+#: plugins/sudoers/sudoers.c:306
 #, c-format
 msgid "sudoers specifies that root is not allowed to sudo"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:312
+#: plugins/sudoers/sudoers.c:313
 #, c-format
 msgid "you are not permitted to use the -C option"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:402
+#: plugins/sudoers/sudoers.c:403
 #, c-format
 msgid "timestamp owner (%s): No such user"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:418
+#: plugins/sudoers/sudoers.c:419
 msgid "no tty"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:419
+#: plugins/sudoers/sudoers.c:420
 #, c-format
 msgid "sorry, you must have a tty to run sudo"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:462
+#: plugins/sudoers/sudoers.c:463
 msgid "No user or host"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:476 plugins/sudoers/sudoers.c:497
-#: plugins/sudoers/sudoers.c:498 plugins/sudoers/sudoers.c:1452
-#: plugins/sudoers/sudoers.c:1453
+#: plugins/sudoers/sudoers.c:477 plugins/sudoers/sudoers.c:498
+#: plugins/sudoers/sudoers.c:499 plugins/sudoers/sudoers.c:1465
+#: plugins/sudoers/sudoers.c:1466
 #, c-format
 msgid "%s: command not found"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:478 plugins/sudoers/sudoers.c:494
+#: plugins/sudoers/sudoers.c:479 plugins/sudoers/sudoers.c:495
 #, c-format
 msgid ""
 "ignoring `%s' found in '.'\n"
 "Use `sudo ./%s' if this is the `%s' you wish to run."
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:483
+#: plugins/sudoers/sudoers.c:484
 msgid "validation failure"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:493
+#: plugins/sudoers/sudoers.c:494
 msgid "command in current directory"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:505
+#: plugins/sudoers/sudoers.c:506
 #, c-format
 msgid "sorry, you are not allowed to preserve the environment"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:890
+#: plugins/sudoers/sudoers.c:894
 #, c-format
 msgid "internal error, set_cmnd() overflow"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:935
+#: plugins/sudoers/sudoers.c:936
 #, c-format
 msgid "fixed mode on %s"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:939
+#: plugins/sudoers/sudoers.c:940
 #, c-format
 msgid "set group on %s"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:942
+#: plugins/sudoers/sudoers.c:943
 #, c-format
 msgid "unable to set group on %s"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:945
+#: plugins/sudoers/sudoers.c:946
 #, c-format
 msgid "unable to fix mode on %s"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:958
+#: plugins/sudoers/sudoers.c:959
 #, c-format
 msgid "%s is not a regular file"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:960
+#: plugins/sudoers/sudoers.c:961
 #, c-format
 msgid "%s is mode 0%o, should be 0%o"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:964
+#: plugins/sudoers/sudoers.c:965
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:967
+#: plugins/sudoers/sudoers.c:968
 #, c-format
 msgid "%s is owned by gid %u, should be %u"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:1011
+#: plugins/sudoers/sudoers.c:1012
 #, c-format
 msgid "only root can use `-c %s'"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:1021
+#: plugins/sudoers/sudoers.c:1022
 #, c-format
 msgid "unknown login class: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:1055
+#: plugins/sudoers/sudoers.c:1056
 #, c-format
 msgid "unable to resolve host %s"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:1105 plugins/sudoers/testsudoers.c:342
+#: plugins/sudoers/sudoers.c:1106 plugins/sudoers/testsudoers.c:351
 #, c-format
 msgid "unknown group: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:1137
+#: plugins/sudoers/sudoers.c:1150
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:1139
+#: plugins/sudoers/sudoers.c:1152
 #, c-format
 msgid "Sudoers file grammar version %d\n"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:1143
+#: plugins/sudoers/sudoers.c:1156
 #, c-format
 msgid ""
 "\n"
 "Sudoers path: %s\n"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:1146
+#: plugins/sudoers/sudoers.c:1159
 #, c-format
 msgid "nsswitch path: %s\n"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:1148
+#: plugins/sudoers/sudoers.c:1161
 #, c-format
 msgid "ldap.conf path: %s\n"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:1149
+#: plugins/sudoers/sudoers.c:1162
 #, c-format
 msgid "ldap.secret path: %s\n"
 msgstr ""
@@ -1272,28 +1272,28 @@ msgid ""
 "  -V               display version information and exit"
 msgstr ""
 
-#: plugins/sudoers/testsudoers.c:228
+#: plugins/sudoers/testsudoers.c:230
 #, c-format
 msgid "internal error, init_vars() overflow"
 msgstr ""
 
-#: plugins/sudoers/testsudoers.c:304
+#: plugins/sudoers/testsudoers.c:309
 msgid "\thost  unmatched"
 msgstr ""
 
-#: plugins/sudoers/testsudoers.c:307
+#: plugins/sudoers/testsudoers.c:312
 msgid ""
 "\n"
 "Command allowed"
 msgstr ""
 
-#: plugins/sudoers/testsudoers.c:308
+#: plugins/sudoers/testsudoers.c:313
 msgid ""
 "\n"
 "Command denied"
 msgstr ""
 
-#: plugins/sudoers/testsudoers.c:308
+#: plugins/sudoers/testsudoers.c:313
 msgid ""
 "\n"
 "Command unmatched"
