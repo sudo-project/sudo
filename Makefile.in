@@ -182,9 +182,9 @@ update-pot:
 		esac; \
 		$(XGETTEXT) $(XGETTEXT_OPTS) -d$$domain $$cfiles -o $$pot.tmp; \
 		if diff -I'^.POT-Creation-Date' $$pot.tmp $$pot >/dev/null; then \
-		    mv -f $$pot.tmp $$pot; \
-		else \
 		    rm -f $$pot.tmp; \
+		else \
+		    mv -f $$pot.tmp $$pot; \
 		fi; \
 	    done; \
 	fi
