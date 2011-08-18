@@ -292,7 +292,8 @@ check: $(TEST_PROGS) visudo testsudoers
 		total=`expr $$total + 1`; \
 	    done; \
 	    echo "$$dirbase: $$passed/$$total tests passed; $$failed/$$total tests failed"; \
-	rval=$$failed; passed=0; failed=0; total=0; \
+	rval=`expr $$rval + $$failed`; \
+	passed=0; failed=0; total=0; \
 	    for t in $(srcdir)/regress/*/*.sh; do \
 		dir=`dirname $$t`; \
 		dirbase=`basename $$dir`; \
