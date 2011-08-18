@@ -70,3 +70,27 @@ su
 /var/log/sudo-io
 nobody/root/su_%Y%m%s_%H%M
 
+000001
+nobody
+1
+root
+0
+somehost
+su
+/var/log/sudo-io/%d%m%Y
+%{user}/%{runas_user}/%{command}
+/var/log/sudo-io/%d%m%Y
+nobody/root/su
+
+000001
+nobody
+1
+root
+0
+somehost
+su
+////////
+%{user}/%{runas_user}/%{command}
+/
+nobody/root/su
+
