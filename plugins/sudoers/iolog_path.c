@@ -147,35 +147,47 @@ fill_command(char *str, size_t strsize)
     return strlcpy(str, user_base, strsize);
 }
 
+/*
+ * Concatenate dir + file, expanding any escape sequences.
+ * Returns the concatenated path and sets slashp point to
+ * the path separator between the expanded dir and file.
+ */
 char *
 expand_iolog_path(const char *prefix, const char *dir, const char *file,
     char **slashp)
 {
-    size_t plen = 0, psize = 1024;
-    char *path, *dst;
-    const char *src = dir, *ep;
-    int pass, strfit = FALSE;
+    size_t len, prelen = 0;
+    char *dst, *dst0, *path, *pathend, tmpbuf[PATH_MAX];
+    const char *endbrace, *src = dir;
+    int pass, strfit;
 
-    /* Concatenate dir + file -> path, expanding any escape sequences. */
-    dst = path = emalloc(psize);
+    /* Expanded path must be <= PATH_MAX */
+    if (prefix != NULL)
+	prelen = strlen(prefix);
+    dst = path = emalloc(prelen + PATH_MAX);
     *path = '\0';
+    pathend = path + prelen + PATH_MAX;
+
+    /* Copy prefix, if present. */
+    if (prefix != NULL) {
+	memcpy(path, prefix, prelen);
+	dst += prelen;
+	*dst = '\0';
+    }
 
     /* Trim leading slashes from file component. */
     while (*file == '/')
 	file++;
 
-    if (prefix != NULL) {
-	plen = strlcpy(path, prefix, psize);
-	dst += plen;
-    }
     for (pass = 0; pass < 3; pass++) {
+	strfit = FALSE;
 	switch (pass) {
 	case 0:
 	    src = dir;
 	    break;
 	case 1:
 	    /* Trim trailing slashes from dir component. */
-	    while (dst > path && dst[-1] == '/')
+	    while (dst - path - 1 > prelen && dst[-1] == '/')
 		dst--;
 	    if (slashp)
 		*slashp = dst;
@@ -185,30 +197,25 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 	    src = file;
 	    break;
 	}
+	dst0 = dst;
 	for (; *src != '\0'; src++) {
 	    if (src[0] == '%') {
 		if (src[1] == '{') {
-		    ep = strchr(src + 2, '}');
-		    if (ep != NULL) {
+		    endbrace = strchr(src + 2, '}');
+		    if (endbrace != NULL) {
 			struct path_escape *esc;
-			size_t len = (size_t)(ep - src - 2);
+			len = (size_t)(endbrace - src - 2);
 			for (esc = escapes; esc->name != NULL; esc++) {
 			    if (strncmp(src + 2, esc->name, len) == 0 &&
 				esc->name[len] == '\0')
 				break;
 			}
 			if (esc->name != NULL) {
-			    for (;;) {
-				len = esc->copy_fn(dst, psize - (dst - path));
-				if (len < psize - (dst - path))
-				    break;
-				path = erealloc3(path, 2, psize);
-				psize *= 2;
-				dst = path + plen;
-			    }
+			    len = esc->copy_fn(dst, (size_t)(pathend - dst));
+			    if (len >= (size_t)(pathend - dst))
+				goto bad;
 			    dst += len;
-			    plen += len;
-			    src = ep;
+			    src = endbrace;
 			    continue;
 			}
 		    }
@@ -221,46 +228,46 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 		}
 	    }
 	    /* Need at least 2 chars, including the NUL terminator. */
-	    if (plen + 2 >= psize) {
-		path = erealloc3(path, 2, psize);
-		psize *= 2;
-		dst = path + plen;
-	    }
+	    if (dst + 1 >= pathend)
+		goto bad;
 	    *dst++ = *src;
-	    plen++;
 	}
-    }
-    *dst = '\0';
+	*dst = '\0';
 
-    if (strfit) {
-	time_t now;
-	struct tm *timeptr;
-	char *buf = NULL;
+	/* Expand strftime escapes as needed. */
+	if (strfit) {
+	    time_t now;
+	    struct tm *timeptr;
 
-	time(&now);
-	timeptr = localtime(&now);
+	    time(&now);
+	    timeptr = localtime(&now);
 
 #ifdef HAVE_SETLOCALE
-	if (!setlocale(LC_ALL, def_sudoers_locale)) {
-	    warningx(_("unable to set locale to \"%s\", using \"C\""),
-		def_sudoers_locale);
-	    setlocale(LC_ALL, "C");
-	}
+	    if (!setlocale(LC_ALL, def_sudoers_locale)) {
+		warningx(_("unable to set locale to \"%s\", using \"C\""),
+		    def_sudoers_locale);
+		setlocale(LC_ALL, "C");
+	    }
 #endif
-	/* Double the size of the buffer until it is big enough to expand. */
-	do {
-	    psize *= 2;
-	    buf = erealloc(buf, psize);
-	    buf[psize - 1] = '\0';
-	} while (!strftime(buf, psize, path, timeptr) || buf[psize - 1] != '\0');
+	    /* We only calls strftime() on the current part of the buffer. */
+	    len = strftime(tmpbuf, sizeof(tmpbuf), dst0, timeptr);
+
 #ifdef HAVE_SETLOCALE
-	setlocale(LC_ALL, "");
+	    setlocale(LC_ALL, "");
 #endif
-	if (slashp)
-	    *slashp = buf + (*slashp - path);
-	efree(path);
-	path = buf;
+	    if (len == 0 || tmpbuf[sizeof(tmpbuf) - 1] != '\0')
+		goto bad;		/* strftime() failed, buf too small? */
+
+	    if (len >= (size_t)(pathend - dst0))
+		goto bad;		/* expanded buffer too big to fit. */
+	    memcpy(dst0, tmpbuf, len);
+	    dst = dst0 + len;
+	    *dst = '\0';
+	}
     }
 
     return path;
+bad:
+    efree(path);
+    return NULL;
 }
