@@ -250,6 +250,7 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 	    }
 #endif
 	    /* We only calls strftime() on the current part of the buffer. */
+	    tmpbuf[sizeof(tmpbuf) - 1] = '\0';
 	    len = strftime(tmpbuf, sizeof(tmpbuf), dst0, timeptr);
 
 #ifdef HAVE_SETLOCALE
