@@ -121,6 +121,10 @@ fi
 case "$osversion" in
     centos*|rhel*)
 	prefix=/usr
+	if [ $osrelease -ge 40 ]; then
+	    # RHEL 4 and up support SELinux
+	    configure_opts="${configure_opts}${configure_opts+$tab}--with-selinux"
+	fi
 	if [ $osrelease -ge 50 ]; then
 	    # RHEL 5 and up build pies, have audit support and use a
 	    # separate PAM config file for "sudo -i".
@@ -140,7 +144,6 @@ case "$osversion" in
 		--with-ignore-dot
 		--with-tty-tickets
 		--with-ldap
-		--with-selinux
 		--with-passprompt=[sudo] password for %p: 
 		$configure_opts"
 	;;
