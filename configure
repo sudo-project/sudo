@@ -13749,9 +13749,10 @@ rm -f core conftest.err conftest.$ac_objext \
 		fi
 		LDFLAGS="$O_LDFLAGS"
 
-		# Use authenticate(3) as the default authentication method
-		if test X"$with_aixauth" = X""; then
-		    for ac_func in authenticate
+		# On AIX 6 and higher default to PAM, else default to LAM
+		case "$OSREV" in
+		    1-5.*)	if test X"$with_aixauth" = X""; then
+				    for ac_func in authenticate
 do :
   ac_fn_c_check_func "$LINENO" "authenticate" "ac_cv_func_authenticate"
 if test "x$ac_cv_func_authenticate" = xyes; then :
@@ -13762,7 +13763,13 @@ _ACEOF
 fi
 done
 
-		fi
+				fi
+				;;
+		    *)		if test X"$with_pam" = X""; then
+				    AUTH_EXCL_DEF="PAM"
+				fi
+				;;
+		esac
 
 		# AIX analog of nsswitch.conf, enabled by default
 

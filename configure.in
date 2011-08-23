@@ -1511,10 +1511,17 @@ case "$host" in
 		fi
 		LDFLAGS="$O_LDFLAGS"
 
-		# Use authenticate(3) as the default authentication method
-		if test X"$with_aixauth" = X""; then
-		    AC_CHECK_FUNCS(authenticate, [AUTH_EXCL_DEF="AIX_AUTH"])
-		fi
+		# On AIX 6 and higher default to PAM, else default to LAM
+		case "$OSREV" in
+		    [1-5].*)	if test X"$with_aixauth" = X""; then
+				    AC_CHECK_FUNCS(authenticate, [AUTH_EXCL_DEF="AIX_AUTH"])
+				fi
+				;;
+		    *)		if test X"$with_pam" = X""; then
+				    AUTH_EXCL_DEF="PAM"
+				fi
+				;;
+		esac
 
 		# AIX analog of nsswitch.conf, enabled by default
 		AC_ARG_WITH(netsvc, [AS_HELP_STRING([--with-netsvc[[=PATH]]], [path to netsvc.conf])],
