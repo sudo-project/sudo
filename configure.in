@@ -1304,6 +1304,19 @@ AC_ARG_ENABLE(warnings,
   esac
 ])
 
+AC_ARG_ENABLE(werror,
+[AS_HELP_STRING([--enable-werror], [Whether to enable the -Werror compiler option])],
+[ case "$enableval" in
+    yes)    if test X"$with_devel" != X"yes" -a -n "$GCC"; then
+		CFLAGS="${CFLAGS} -Werror"
+	    fi
+	    ;;
+    no)	    ;;
+    *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-werror: $enableval])
+	    ;;
+  esac
+])
+
 AC_ARG_ENABLE(admin-flag,
 [AS_HELP_STRING([--enable-admin-flag], [Whether to create a Ubuntu-style admin flag file])],
 [ case "$enableval" in
