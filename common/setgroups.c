@@ -32,6 +32,7 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <errno.h>
+#include <grp.h>
 #include <limits.h>
 
 #include "missing.h"
