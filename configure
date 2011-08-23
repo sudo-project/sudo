@@ -874,6 +874,7 @@ enable_env_debug
 enable_zlib
 enable_env_reset
 enable_warnings
+enable_werror
 enable_admin_flag
 enable_nls
 with_selinux
@@ -1534,6 +1535,7 @@ Optional Features:
   --enable-zlib[=PATH]    Whether to enable or disable zlib
   --enable-env-reset      Whether to enable environment resetting by default.
   --enable-warnings       Whether to enable compiler warnings
+  --enable-werror         Whether to enable the -Werror compiler option
   --enable-admin-flag     Whether to create a Ubuntu-style admin flag file
   --disable-nls           Disable natural language support using gettext
   --enable-gss-krb5-ccache-name
@@ -5499,6 +5501,22 @@ if test "${enable_warnings+set}" = set; then :
     no)	    ;;
     *)	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-warnings: $enableval" >&5
 $as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-warnings: $enableval" >&2;}
+	    ;;
+  esac
+
+fi
+
+
+# Check whether --enable-werror was given.
+if test "${enable_werror+set}" = set; then :
+  enableval=$enable_werror;  case "$enableval" in
+    yes)    if test X"$with_devel" != X"yes" -a -n "$GCC"; then
+		CFLAGS="${CFLAGS} -Werror"
+	    fi
+	    ;;
+    no)	    ;;
+    *)	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-werror: $enableval" >&5
+$as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-werror: $enableval" >&2;}
 	    ;;
   esac
 
