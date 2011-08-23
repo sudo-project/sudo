@@ -956,12 +956,14 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
      */
 #ifdef HAVE_SETEUID
     if (ISSET(details->flags, CD_SET_EGID) && setegid(details->egid)) {
-	warning(_("unable to set effective gid to runas gid %u"), details->egid);
+	warning(_("unable to set effective gid to runas gid %u"),
+	    (unsigned int)details->egid);
 	goto done;
     }
 #endif
     if (ISSET(details->flags, CD_SET_GID) && setgid(details->gid)) {
-	warning(_("unable to set gid to runas gid %u"), details->gid);
+	warning(_("unable to set gid to runas gid %u"),
+	    (unsigned int)details->gid);
 	goto done;
     }
 
@@ -1000,8 +1002,8 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     }
 #elif HAVE_SETREUID
     if (setreuid(details->uid, details->euid) != 0) {
-	warning(_("unable to change to runas uid (%u, %u)"), details->uid,
-	    details->euid);
+	warning(_("unable to change to runas uid (%u, %u)"),
+	    (unsigned int)details->uid, (unsigned int)details->euid);
 	goto done;
     }
 #else

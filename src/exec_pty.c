@@ -323,7 +323,7 @@ suspend_parent(int signo)
 	sigaction(signo, &sa, &osa);
 	sudo_debug(8, "kill parent %d", signo);
 	if (killpg(ppgrp, signo) != 0)
-	    warning("killpg(%d, %d)", ppgrp, signo);
+	    warning("killpg(%d, %d)", (int)ppgrp, signo);
 
 	/* Check foreground/background status on resume. */
 	check_foreground();
