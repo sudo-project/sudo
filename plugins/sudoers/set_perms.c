@@ -98,7 +98,7 @@ rewind_perms(void)
 int
 set_perms(int perm)
 {
-    struct perm_state *state, *ostate;
+    struct perm_state *state, *ostate = NULL;
     const char *errstr;
     int noexit;
 
@@ -304,19 +304,22 @@ restore_perms(void)
     /* XXX - more cases here where euid != ruid */
     if (OID(euid) == ROOT_UID && state->euid != ROOT_UID) {
 	if (setresuid(-1, ROOT_UID, -1)) {
-	    warning("setresuid() [%d, %d, %d] -> [%d, %d, %d]", state->ruid,
-		state->euid, state->suid, -1, ROOT_UID, -1);
+	    warning("setresuid() [%d, %d, %d] -> [%d, %d, %d]",
+		(int)state->ruid, (int)state->euid, (int)state->suid,
+		-1, ROOT_UID, -1);
 	    goto bad;
 	}
     }
     if (setresuid(OID(ruid), OID(euid), OID(suid))) {
-	warning("setresuid() [%d, %d, %d] -> [%d, %d, %d]", state->ruid,
-	    state->euid, state->suid, OID(ruid), OID(euid), OID(suid));
+	warning("setresuid() [%d, %d, %d] -> [%d, %d, %d]",
+	    (int)state->ruid, (int)state->euid, (int)state->suid,
+	    (int)OID(ruid), (int)OID(euid), (int)OID(suid));
 	goto bad;
     }
     if (setresgid(OID(rgid), OID(egid), OID(sgid))) {
-	warning("setresgid() [%d, %d, %d] -> [%d, %d, %d]", state->rgid,
-	    state->egid, state->sgid, OID(rgid), OID(egid), OID(sgid));
+	warning("setresgid() [%d, %d, %d] -> [%d, %d, %d]",
+	    (int)state->rgid, (int)state->egid, (int)state->sgid,
+	    (int)OID(rgid), (int)OID(egid), (int)OID(sgid));
 	goto bad;
     }
     if (state->grlist != ostate->grlist) {
@@ -344,7 +347,7 @@ bad:
 int
 set_perms(int perm)
 {
-    struct perm_state *state, *ostate;
+    struct perm_state *state, *ostate = NULL;
     const char *errstr;
     int noexit;
 
@@ -542,13 +545,13 @@ restore_perms(void)
 	}
     }
     if (setreuid(OID(ruid), OID(euid))) {
-	warning("setreuid() [%d, %d] -> [%d, %d]", state->ruid,
-	    state->euid, OID(ruid), OID(euid));
+	warning("setreuid() [%d, %d] -> [%d, %d]", (int)state->ruid,
+	    (int)state->euid, (int)OID(ruid), (int)OID(euid));
 	goto bad;
     }
     if (setregid(OID(rgid), OID(egid))) {
-	warning("setregid() [%d, %d] -> [%d, %d]", state->rgid,
-	    state->egid, OID(rgid), OID(egid));
+	warning("setregid() [%d, %d] -> [%d, %d]", (int)state->rgid,
+	    (int)state->egid, (int)OID(rgid), (int)OID(egid));
 	goto bad;
     }
     if (state->grlist != ostate->grlist) {
@@ -576,7 +579,7 @@ bad:
 int
 set_perms(int perm)
 {
-    struct perm_state *state, *ostate;
+    struct perm_state *state, *ostate = NULL;
     const char *errstr;
     int noexit;
 
@@ -780,7 +783,7 @@ restore_perms(void)
     }
 
     if (setegid(OID(egid))) {
-	warning("setegid(%d)", OID(egid));
+	warning("setegid(%d)", (int)OID(egid));
 	goto bad;
     }
     if (state->grlist != ostate->grlist) {
@@ -790,7 +793,7 @@ restore_perms(void)
 	}
     }
     if (seteuid(OID(euid))) {
-	warning("seteuid(%d)", OID(euid));
+	warning("seteuid(%d)", (int)OID(euid));
 	goto bad;
     }
     grlist_delref(state->grlist);
@@ -810,7 +813,7 @@ bad:
 int
 set_perms(int perm)
 {
-    struct perm_state *state, *ostate;
+    struct perm_state *state, *ostate = NULL;
     const char *errstr;
     int noexit;
 
@@ -906,7 +909,7 @@ restore_perms(void)
     perm_stack_depth--;
 
     if (OID(rgid) != -1 && setgid(ostate->rgid)) {
-	warning("setgid(%d)", ostate->rgid);
+	warning("setgid(%d)", (int)ostate->rgid);
 	goto bad;
     }
     if (state->grlist != ostate->grlist) {
@@ -917,7 +920,7 @@ restore_perms(void)
     }
     grlist_delref(state->grlist);
     if (OID(ruid) != -1 && setuid(ostate->ruid)) {
-	warning("setuid(%d)", ostate->ruid);
+	warning("setuid(%d)", (int)ostate->ruid);
 	goto bad;
     }
     return;

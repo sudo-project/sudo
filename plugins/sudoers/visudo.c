@@ -499,16 +499,16 @@ install_sudoers(struct sudoersfile *sp, int oldperms)
 #endif
 	    error(1, _("unable to stat %s"), sp->path);
 	if (chown(sp->tpath, sb.st_uid, sb.st_gid) != 0) {
-	    warning(_("unable to set (uid, gid) of %s to (%d, %d)"),
-		sp->tpath, sb.st_uid, sb.st_gid);
+	    warning(_("unable to set (uid, gid) of %s to (%u, %u)"),
+		sp->tpath, (unsigned int)sb.st_uid, (unsigned int)sb.st_gid);
 	}
 	if (chmod(sp->tpath, sb.st_mode & 0777) != 0) {
 	    warning(_("unable to change mode of %s to 0%o"), sp->tpath,
-		(sb.st_mode & 0777));
+		(unsigned int)(sb.st_mode & 0777));
 	}
     } else {
 	if (chown(sp->tpath, SUDOERS_UID, SUDOERS_GID) != 0) {
-	    warning(_("unable to set (uid, gid) of %s to (%d, %d)"),
+	    warning(_("unable to set (uid, gid) of %s to (%u, %u)"),
 		sp->tpath, SUDOERS_UID, SUDOERS_GID);
 	    return FALSE;
 	}
@@ -734,7 +734,7 @@ check_syntax(char *sudoers_path, int quiet, int strict)
 	    error = TRUE;
 	    if (!quiet) {
 		fprintf(stderr,
-		    _("%s: wrong owner (uid, gid) should be (%d, %d)\n"),
+		    _("%s: wrong owner (uid, gid) should be (%u, %u)\n"),
 		    sudoers_path, SUDOERS_UID, SUDOERS_GID);
 		}
 	}

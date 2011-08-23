@@ -451,8 +451,10 @@ handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
 			int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
 			if (fd != -1)
 			    saved_pgrp = tcgetpgrp(fd);
-			if (kill(getpid(), WSTOPSIG(status)) != 0)
-			    warning("kill(%d, %d)", getpid(), WSTOPSIG(status));
+			if (kill(getpid(), WSTOPSIG(status)) != 0) {
+			    warning("kill(%d, %d)", (int)getpid(),
+				WSTOPSIG(status));
+			}
 			if (fd != -1) {
 			    if (saved_pgrp != (pid_t)-1)
 				(void)tcsetpgrp(fd, saved_pgrp);
@@ -476,7 +478,7 @@ handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
 		if (signo == SIGALRM)
 		    terminate_child(child, FALSE);
 		else if (kill(child, signo) != 0)
-		    warning("kill(%d, %d)", child, signo);
+		    warning("kill(%d, %d)", (int)child, signo);
 	    }
 	}
     }
