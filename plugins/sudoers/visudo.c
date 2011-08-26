@@ -257,6 +257,30 @@ main(int argc, char *argv[])
 }
 
 /*
+ * List of editors that support the "+lineno" command line syntax.
+ * If an entry starts with '*' the tail end of the string is matched.
+ * No other wild cards are supported.
+ */
+static char *lineno_editors[] = {
+    "ex",
+    "nex",
+    "vi",
+    "nvi",
+    "vim",
+    "elvis",
+    "*macs",
+    "mg",
+    "vile",
+    "jove",
+    "pico",
+    "nano",
+    "ee",
+    "joe",
+    "zile",
+    NULL
+};
+
+/*
  * Edit each sudoers file.
  * Returns TRUE on success, else FALSE.
  */
@@ -309,6 +333,34 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 	(void) close(tfd);
     }
     (void) touch(-1, sp->tpath, &orig_mtim);
+
+    /* Does the editor support +lineno? */
+    if (lineno > 0)
+    {
+	char *editor_base = strrchr(editor, '/');
+	if (editor_base != NULL)
+	    editor_base++;
+	else
+	    editor_base = editor;
+	if (*editor_base == 'r')
+	    editor_base++;
+
+	for (av = lineno_editors; (cp = *av) != NULL; av++) {
+	    /* We only handle a leading '*' wildcard. */
+	    if (*cp == '*') {
+		size_t blen = strlen(editor_base);
+		size_t clen = strlen(++cp);
+		if (blen >= clen) {
+		    if (strcmp(cp, editor_base + blen - clen) == 0)
+			break;
+		}
+	    } else if (strcmp(cp, editor_base) == 0)
+		break;
+	}
+	/* Disable +lineno if editor doesn't support it. */
+	if (cp == NULL)
+	    lineno = -1;
+    }
 
     /* Find the length of the argument vector */
     ac = 3 + (lineno > 0);
