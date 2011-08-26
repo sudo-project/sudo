@@ -667,13 +667,16 @@ addr_matches_if_netmask(char *n, char *m)
     }
 
     if (family == AF_INET) {
-	if (strchr(m, '.'))
+	if (strchr(m, '.')) {
 	    mask.ip4.s_addr = inet_addr(m);
-	else {
-	    i = 32 - atoi(m);
-	    mask.ip4.s_addr = 0xffffffff;
-	    mask.ip4.s_addr >>= i;
-	    mask.ip4.s_addr <<= i;
+	} else {
+	    i = atoi(m);
+	    if (i == 0)
+		mask.ip4.s_addr = 0;
+	    else if (i == 32)
+		mask.ip4.s_addr = 0xffffffff;
+	    else
+		mask.ip4.s_addr = 0xffffffff - (1 << (32 - i)) + 1;
 	    mask.ip4.s_addr = htonl(mask.ip4.s_addr);
 	}
     }
@@ -698,12 +701,12 @@ addr_matches_if_netmask(char *n, char *m)
 	    continue;
 	switch(family) {
 	    case AF_INET:
-		if ((ifp->addr.ip4.s_addr & mask.ip4.s_addr) == addr.ip4.s_addr)
+		if ((ifp->addr.ip4.s_addr & mask.ip4.s_addr) == (addr.ip4.s_addr & mask.ip4.s_addr))
 		    return TRUE;
 #ifdef HAVE_IN6_ADDR
 	    case AF_INET6:
 		for (j = 0; j < sizeof(addr.ip6.s6_addr); j++) {
-		    if ((ifp->addr.ip6.s6_addr[j] & mask.ip6.s6_addr[j]) != addr.ip6.s6_addr[j])
+		    if ((ifp->addr.ip6.s6_addr[j] & mask.ip6.s6_addr[j]) != (addr.ip6.s6_addr[j] & mask.ip6.s6_addr[j]))
 			break;
 		}
 		if (j == sizeof(addr.ip6.s6_addr))
