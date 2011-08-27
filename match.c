@@ -698,27 +698,32 @@ addr_matches_if_netmask(n, m)
     }
 
     if (family == AF_INET) {
-	if (strchr(m, '.'))
+	if (strchr(m, '.')) {
 	    mask.ip4.s_addr = inet_addr(m);
-	else {
-	    i = 32 - atoi(m);
-	    mask.ip4.s_addr = 0xffffffff;
-	    mask.ip4.s_addr >>= i;
-	    mask.ip4.s_addr <<= i;
+	} else {
+	    i = atoi(m);
+	    if (i == 0)
+		mask.ip4.s_addr = 0;
+	    else if (i == 32)
+		mask.ip4.s_addr = 0xffffffff;
+	    else
+		mask.ip4.s_addr = 0xffffffff - (1 << (32 - i)) + 1;
 	    mask.ip4.s_addr = htonl(mask.ip4.s_addr);
 	}
+	addr.ip4.s_addr &= mask.ip4.s_addr;
     }
 #ifdef HAVE_IN6_ADDR
     else {
 	if (inet_pton(AF_INET6, m, &mask.ip6) <= 0) {
 	    j = atoi(m);
-	    for (i = 0; i < 16; i++) {
+	    for (i = 0; i < sizeof(addr.ip6.s6_addr); i++) {
 		if (j < i * 8)
 		    mask.ip6.s6_addr[i] = 0;
 		else if (i * 8 + 8 <= j)
 		    mask.ip6.s6_addr[i] = 0xff;
 		else
 		    mask.ip6.s6_addr[i] = 0xff00 >> (j - i * 8);
+		addr.ip6.s6_addr[i] &= mask.ip6.s6_addr[i];
 	    }
 	}
     }
