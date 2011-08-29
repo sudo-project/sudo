@@ -72,9 +72,11 @@ check_addr(char *input)
     input[len] = '\0';
 
     matched = addr_matches(input);
-    warningx("%s %smatched (%s)", input, matched ? "" : "not ",
-	matched == expected ? "OK" : "FAIL");
-    return (matched != expected);
+    if (matched != expected) {
+	warningx("%s %smatched: FAIL", input, matched ? "" : "not ");
+	return 1;
+    }
+    return 0;
 }
 
 static void
