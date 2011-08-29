@@ -5494,10 +5494,7 @@ fi
 # Check whether --enable-warnings was given.
 if test "${enable_warnings+set}" = set; then :
   enableval=$enable_warnings;  case "$enableval" in
-    yes)    if test X"$with_devel" != X"yes" -a -n "$GCC"; then
-		CFLAGS="${CFLAGS} -Wall"
-	    fi
-	    ;;
+    yes)    ;;
     no)	    ;;
     *)	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-warnings: $enableval" >&5
 $as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-warnings: $enableval" >&2;}
@@ -5510,10 +5507,7 @@ fi
 # Check whether --enable-werror was given.
 if test "${enable_werror+set}" = set; then :
   enableval=$enable_werror;  case "$enableval" in
-    yes)    if test X"$with_devel" != X"yes" -a -n "$GCC"; then
-		CFLAGS="${CFLAGS} -Werror"
-	    fi
-	    ;;
+    yes)    ;;
     no)	    ;;
     *)	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-werror: $enableval" >&5
 $as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-werror: $enableval" >&2;}
@@ -13496,10 +13490,6 @@ $as_echo "$with_noexec" >&6; }
 NOEXECFILE="sudo_noexec$_shrext"
 NOEXECDIR="`echo $with_noexec|sed 's:^\(.*\)/[^/]*:\1:'`"
 
-if test X"$with_devel" = X"yes" -a -n "$GCC"; then
-    CFLAGS="${CFLAGS} -Wall"
-fi
-
 # Extract the first word of "uname", so it can be a program name with args.
 set dummy uname; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -20009,6 +19999,15 @@ if test -n "$LIBS"; then
 	done
 	test $dupe = 0 && LIBS="${LIBS} $l"
     done
+fi
+
+if test -n "$GCC"; then
+    if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"; then
+	CFLAGS="${CFLAGS} -Wall"
+    fi
+    if test X"$enable_werror" = X"yes"; then
+	CFLAGS="${CFLAGS} -Werror"
+    fi
 fi
 
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
