@@ -263,9 +263,11 @@ uninstall:
 
 check: $(TEST_PROGS) visudo testsudoers
 	@-rval=0; \
-	./check_iolog_path $(srcdir)/regress/iolog_path/data; \
+	./check_addr $(srcdir)/regress/parser/check_addr.in; \
 	rval=`expr $$rval + $$?`; \
 	./check_fill; \
+	rval=`expr $$rval + $$?`; \
+	./check_iolog_path $(srcdir)/regress/iolog_path/data; \
 	rval=`expr $$rval + $$?`; \
 	./check_wrap $(srcdir)/regress/logging/check_wrap.in > check_wrap.out; \
 	diff check_wrap.out $(srcdir)/regress/logging/check_wrap.out.ok; \
