@@ -92,6 +92,10 @@ main(int argc, char *argv[])
     size_t len;
     FILE *fp;
 
+#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
+    setprogname(argc > 0 ? argv[0] : "check_addr");
+#endif
+
     if (argc != 2)
 	usage();
 

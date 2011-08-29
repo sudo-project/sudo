@@ -56,6 +56,10 @@ main(int argc, char *argv[])
     char *cp, *dash, *line, lines[2][2048];
     int which = 0;
 
+#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
+    setprogname(argc > 0 ? argv[0] : "check_wrap");
+#endif
+
     if (argc != 2)
 	usage();
 
