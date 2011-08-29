@@ -106,12 +106,13 @@ SHELL = @SHELL@
 
 PROGS = sudoers.la visudo sudoreplay testsudoers
 
-TEST_PROGS = check_iolog_path check_fill check_wrap
+TEST_PROGS = check_iolog_path check_fill check_wrap check_addr
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
 LIBPARSESUDOERS_OBJS = alias.lo audit.lo defaults.lo gram.lo match.lo \
-		       pwutil.lo timestr.lo toke.lo toke_util.lo redblack.lo
+		       match_addr.lo pwutil.lo timestr.lo toke.lo \
+		       toke_util.lo redblack.lo
 
 SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo env.lo goodpath.lo \
 	       group_plugin.lo find_path.lo interfaces.lo logging.lo \
@@ -125,10 +126,12 @@ REPLAY_OBJS = getdate.o sudoreplay.o error.o
 TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o error.o group_plugin.o \
 	    net_ifs.o
 
-CHECK_IOLOG_PATH_OBJS = check_iolog_path.o error.o iolog_path.o pwutil.o \
-			redblack.o
+CHECK_ADDR_OBJS = check_addr.o match_addr.o interfaces.o error.o
 
 CHECK_FILL_OBJS = check_fill.o toke_util.o error.o
+
+CHECK_IOLOG_PATH_OBJS = check_iolog_path.o error.o iolog_path.o pwutil.o \
+			redblack.o
 
 CHECK_WRAP_OBJS = check_wrap.o logwrap.o error.o
 
@@ -169,6 +172,9 @@ sudoreplay: $(REPLAY_OBJS) $(LT_LIBS)
 
 testsudoers: libparsesudoers.la $(TEST_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) libparsesudoers.la $(LIBS) $(NET_LIBS) @LIBDL@
+
+check_addr: $(CHECK_ADDR_OBJS) $(LT_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_ADDR_OBJS) $(LDFLAGS) $(LIBS)
 
 check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_IOLOG_PATH_OBJS) $(LDFLAGS) $(LIBS)
@@ -383,6 +389,9 @@ check.lo: $(srcdir)/check.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
           $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/check.c
+check_addr.o: $(srcdir)/regress/parser/check_addr.c $(top_builddir)/config.h \
+              $(incdir)/list.h $(srcdir)/parse.h $(srcdir)/interfaces.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_addr.c
 check_fill.o: $(srcdir)/regress/parser/check_fill.c $(top_builddir)/config.h \
               $(incdir)/list.h $(srcdir)/parse.h $(srcdir)/toke.h \
               $(srcdir)/gram.h
@@ -528,6 +537,15 @@ match.lo: $(srcdir)/match.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(srcdir)/interfaces.h $(srcdir)/parse.h $(srcdir)/gram.h \
           $(top_srcdir)/compat/fnmatch.h $(top_srcdir)/compat/glob.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/match.c
+match_addr.lo: $(srcdir)/match_addr.c $(top_builddir)/config.h \
+               $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \
+               $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
+               $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+               $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
+               $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
+               $(srcdir)/interfaces.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/match_addr.c
+match_addr.o: match_addr.lo
 net_ifs.o: $(top_srcdir)/src/net_ifs.c $(top_builddir)/config.h \
            $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
            $(incdir)/gettext.h
@@ -627,8 +645,8 @@ sudoers.lo: $(srcdir)/sudoers.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
             $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
             $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
-            $(incdir)/lbuf.h $(srcdir)/interfaces.h \
-            $(srcdir)/sudoers_version.h $(srcdir)/auth/sudo_auth.h
+            $(srcdir)/interfaces.h $(srcdir)/sudoers_version.h \
+            $(srcdir)/auth/sudo_auth.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudoers.c
 sudoreplay.o: $(srcdir)/sudoreplay.c $(top_builddir)/config.h \
               $(top_srcdir)/compat/timespec.h $(top_builddir)/pathnames.h \
