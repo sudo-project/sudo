@@ -202,6 +202,13 @@ void setprogname(const char *);
 #endif /* HAVE___PROGNAME */
 #endif /* !HAVE_GETPROGNAME */
 
+/*
+ * Declare errno if errno.h doesn't do it for us.
+ */
+#if defined(HAVE_DECL_ERRNO) && !HAVE_DECL_ERRNO
+extern int errno;
+#endif /* !HAVE_DECL_ERRNO */
+
 #ifndef timevalclear
 # define timevalclear(tv)	((tv)->tv_sec = (tv)->tv_usec = 0)
 #endif

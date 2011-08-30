@@ -21,11 +21,9 @@
 #endif
 #include <errno.h>
 
-#define MAX_RESULTS	256
+#include "missing.h"
 
-#ifndef errno
-extern int errno;
-#endif
+#define MAX_RESULTS	256
 
 struct gl_entry {
 	int flags;

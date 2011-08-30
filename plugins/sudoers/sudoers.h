@@ -341,9 +341,4 @@ extern sudo_conv_t sudo_conv;
 extern sudo_printf_t sudo_printf;
 #endif
 
-/* Some systems don't declare errno in errno.h */
-#ifndef errno
-extern int errno;
-#endif
-
 #endif /* _SUDO_SUDOERS_H */
