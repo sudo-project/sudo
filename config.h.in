@@ -79,6 +79,10 @@
 /* Define to 1 if your `DIR' contains dd_fd. */
 #undef HAVE_DD_FD
 
+/* Define to 1 if you have the declaration of `errno', and to 0 if you don't.
+   */
+#undef HAVE_DECL_ERRNO
+
 /* Define to 1 if you have the declaration of `sys_siglist', and to 0 if you
    don't. */
 #undef HAVE_DECL_SYS_SIGLIST

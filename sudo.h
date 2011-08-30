@@ -365,8 +365,5 @@ extern uid_t timestamp_uid;
 /* XXX - conflicts with the one in visudo */
 int run_command __P((const char *path, char *argv[], char *envp[], uid_t uid, int dowait));
 #endif
-#ifndef errno
-extern int errno;
-#endif
 
 #endif /* _SUDO_SUDO_H */

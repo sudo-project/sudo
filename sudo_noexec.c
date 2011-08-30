@@ -38,10 +38,6 @@
  * few programs actually do that.
  */
 
-#ifndef errno
-extern int errno;
-#endif
-
 #define DUMMY_BODY				\
 {						\
     errno = EACCES;				\

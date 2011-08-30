@@ -2140,6 +2140,14 @@ AC_CHECK_FUNCS(getprogname, , [
 ])
 
 dnl
+dnl Check for errno declaration in errno.h
+dnl
+AC_CHECK_DECLS([errno], [], [], [
+AC_INCLUDES_DEFAULT
+#include <errno.h>
+])
+
+dnl
 dnl Check for strsignal() or sys_siglist
 dnl
 AC_CHECK_FUNCS(strsignal, [], [
