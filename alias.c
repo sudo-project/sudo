@@ -39,12 +39,12 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#include <errno.h>
 
 #include "sudo.h"
 #include "parse.h"
 #include "redblack.h"
 #include <gram.h>
-#include <errno.h>
 
 /*
  * Globals
