@@ -230,8 +230,4 @@ int get_net_ifs(char **addrinfo);
 /* setgroups.c */
 int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
 
-#ifndef errno
-extern int errno;
-#endif
-
 #endif /* _SUDO_SUDO_H */
