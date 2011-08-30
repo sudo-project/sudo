@@ -1293,12 +1293,19 @@ fi
 AC_ARG_ENABLE(warnings,
 [AS_HELP_STRING([--enable-warnings], [Whether to enable compiler warnings])],
 [ case "$enableval" in
-    yes)    if test X"$with_devel" != X"yes" -a -n "$GCC"; then
-		CFLAGS="${CFLAGS} -Wall"
-	    fi
-	    ;;
+    yes)    ;;
     no)	    ;;
     *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-warnings: $enableval])
+	    ;;
+  esac
+])
+
+AC_ARG_ENABLE(werror,
+[AS_HELP_STRING([--enable-werror], [Whether to enable the -Werror compiler option])],
+[ case "$enableval" in
+    yes)    ;;
+    no)	    ;;
+    *)	    AC_MSG_WARN([Ignoring unknown argument to --enable-werror: $enableval])
 	    ;;
   esac
 ])
@@ -1375,13 +1382,6 @@ esac], [with_noexec="$libexecdir/sudo_noexec$_shrext"])
 AC_MSG_RESULT($with_noexec)
 NOEXECFILE="sudo_noexec$_shrext"
 NOEXECDIR="`echo $with_noexec|sed 's:^\(.*\)/[[^/]]*:\1:'`"
-
-dnl
-dnl It is now safe to modify CFLAGS and CPPFLAGS
-dnl
-if test X"$with_devel" = X"yes" -a -n "$GCC"; then
-    CFLAGS="${CFLAGS} -Wall"
-fi
 
 dnl
 dnl Find programs we use
@@ -2892,6 +2892,18 @@ if test -n "$LIBS"; then
 	done
 	test $dupe = 0 && LIBS="${LIBS} $l"
     done
+fi
+
+dnl
+dnl We add -Wall and -Werror after all tests so they don't cause failures
+dnl
+if test -n "$GCC"; then
+    if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"; then
+	CFLAGS="${CFLAGS} -Wall"
+    fi
+    if test X"$enable_werror" = X"yes"; then
+	CFLAGS="${CFLAGS} -Werror"
+    fi
 fi
 
 dnl

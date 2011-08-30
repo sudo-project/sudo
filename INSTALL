@@ -636,6 +636,9 @@ The following options are also configurable at runtime:
   --enable-warnings
 	Enable compiler warnings when building sudo with gcc.
 
+  --enable-werror
+	Enable the -Werror compiler option when building sudo with gcc.
+
   --enable-admin-flag
 	Enable the creation of an Ubuntu-style admin flag file
 	the first time sudo is run.

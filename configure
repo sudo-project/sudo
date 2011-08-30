@@ -862,6 +862,7 @@ enable_path_info
 enable_env_debug
 enable_env_reset
 enable_warnings
+enable_werror
 enable_admin_flag
 with_selinux
 enable_gss_krb5_ccache_name
@@ -1521,6 +1522,7 @@ Optional Features:
   --enable-env-debug      Whether to enable environment debugging.
   --enable-env-reset      Whether to enable environment resetting by default.
   --enable-warnings       Whether to enable compiler warnings
+  --enable-werror         Whether to enable the -Werror compiler option
   --enable-admin-flag     Whether to create a Ubuntu-style admin flag file
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
@@ -5522,13 +5524,23 @@ fi
 # Check whether --enable-warnings was given.
 if test "${enable_warnings+set}" = set; then :
   enableval=$enable_warnings;  case "$enableval" in
-    yes)    if test X"$with_devel" != X"yes" -a -n "$GCC"; then
-		CFLAGS="${CFLAGS} -Wall"
-	    fi
-	    ;;
+    yes)    ;;
     no)	    ;;
     *)	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-warnings: $enableval" >&5
 $as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-warnings: $enableval" >&2;}
+	    ;;
+  esac
+
+fi
+
+
+# Check whether --enable-werror was given.
+if test "${enable_werror+set}" = set; then :
+  enableval=$enable_werror;  case "$enableval" in
+    yes)    ;;
+    no)	    ;;
+    *)	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-werror: $enableval" >&5
+$as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-werror: $enableval" >&2;}
 	    ;;
   esac
 
@@ -13488,10 +13500,6 @@ $as_echo "$with_noexec" >&6; }
 NOEXECFILE="sudo_noexec$_shrext"
 NOEXECDIR="`echo $with_noexec|sed 's:^\(.*\)/[^/]*:\1:'`"
 
-if test X"$with_devel" = X"yes" -a -n "$GCC"; then
-    CFLAGS="${CFLAGS} -Wall"
-fi
-
 # Extract the first word of "uname", so it can be a program name with args.
 set dummy uname; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -19831,6 +19839,15 @@ if test -n "$LIBS"; then
 	done
 	test $dupe = 0 && LIBS="${LIBS} $l"
     done
+fi
+
+if test -n "$GCC"; then
+    if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"; then
+	CFLAGS="${CFLAGS} -Wall"
+    fi
+    if test X"$enable_werror" = X"yes"; then
+	CFLAGS="${CFLAGS} -Werror"
+    fi
 fi
 
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
