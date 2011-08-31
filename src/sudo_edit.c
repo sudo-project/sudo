@@ -156,11 +156,7 @@ sudo_edit(struct command_details *command_details)
 		zero_bytes(&sb, sizeof(sb));		/* new file */
 		rc = 0;
 	    } else {
-#ifdef HAVE_FSTAT
 		rc = fstat(ofd, &sb);
-#else
-		rc = stat(tf[j].ofile, &sb);
-#endif
 	    }
 	}
 	switch_user(ROOT_UID, user_details.egid,
@@ -217,11 +213,7 @@ sudo_edit(struct command_details *command_details)
 	 * to determine whether or not a file has been modified.
 	 */
 	(void) touch(tfd, NULL, &tf[j].omtim);
-#ifdef HAVE_FSTAT
 	rc = fstat(tfd, &sb);
-#else
-	rc = stat(tf[j].tfile, &sb);
-#endif
 	if (!rc)
 	    mtim_get(&sb, &tf[j].omtim);
 	close(tfd);
@@ -265,11 +257,7 @@ sudo_edit(struct command_details *command_details)
 	if (seteuid(user_details.uid) != 0)
 	    error(1, "seteuid(%d)", (int)user_details.uid);
 	if ((tfd = open(tf[i].tfile, O_RDONLY, 0644)) != -1) {
-#ifdef HAVE_FSTAT
 	    rc = fstat(tfd, &sb);
-#else
-	    rc = stat(tf[i].tfile, &sb);
-#endif
 	}
 	if (seteuid(ROOT_UID) != 0)
 	    error(1, "seteuid(ROOT_UID)");

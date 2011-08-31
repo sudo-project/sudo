@@ -129,9 +129,6 @@
 /* Define to 1 if you have the `freeifaddrs' function. */
 #undef HAVE_FREEIFADDRS
 
-/* Define to 1 if you have the `fstat' function. */
-#undef HAVE_FSTAT
-
 /* Define to 1 if you have the `futime' function. */
 #undef HAVE_FUTIME
 
