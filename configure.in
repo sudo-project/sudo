@@ -2087,7 +2087,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS(strrchr sysconf tzset strftime fstat \
+AC_CHECK_FUNCS(strrchr sysconf tzset strftime \
 	       regcomp setlocale nl_langinfo getaddrinfo mbr_check_membership \
 	       setrlimit64 sysctl)
 AC_REPLACE_FUNCS(getgrouplist)

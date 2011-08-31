@@ -300,11 +300,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
     ssize_t nread;			/* number of bytes read */
     struct stat sb;			/* stat buffer */
 
-#ifdef HAVE_FSTAT
     if (fstat(sp->fd, &sb) == -1)
-#else
-    if (stat(sp->path, &sb) == -1)
-#endif
 	error(1, _("unable to stat %s"), sp->path);
     orig_size = sb.st_size;
     mtim_get(&sb, &orig_mtim);
@@ -544,11 +540,7 @@ install_sudoers(struct sudoersfile *sp, int oldperms)
      */
     if (oldperms) {
 	/* Use perms of the existing file.  */
-#ifdef HAVE_FSTAT
 	if (fstat(sp->fd, &sb) == -1)
-#else
-	if (stat(sp->path, &sb) == -1)
-#endif
 	    error(1, _("unable to stat %s"), sp->path);
 	if (chown(sp->tpath, sb.st_uid, sb.st_gid) != 0) {
 	    warning(_("unable to set (uid, gid) of %s to (%u, %u)"),
@@ -776,12 +768,7 @@ check_syntax(char *sudoers_path, int quiet, int strict)
 	}
     }
     /* Check mode and owner in strict mode. */
-#ifdef HAVE_FSTAT
-    if (strict && yyin != stdin && fstat(fileno(yyin), &sb) == 0)
-#else
-    if (strict && yyin != stdin && stat(sudoers_path, &sb) == 0)
-#endif
-    {
+    if (strict && yyin != stdin && fstat(fileno(yyin), &sb) == 0) {
 	if (sb.st_uid != SUDOERS_UID || sb.st_gid != SUDOERS_GID) {
 	    error = TRUE;
 	    if (!quiet) {
