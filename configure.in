@@ -222,16 +222,6 @@ AC_ARG_WITH(devel, [AS_HELP_STRING([--with-devel], [add development options])],
 		;;
 esac])
 
-AC_ARG_WITH(CC, [AS_HELP_STRING([--with-CC], [C compiler to use])],
-[case $with_CC in
-    yes)	AC_MSG_ERROR(["must give --with-CC an argument."])
-		;;
-    no)		AC_MSG_ERROR(["illegal argument: --without-CC."])
-		;;
-    *)		CC=$with_CC
-		;;
-esac])
-
 AC_ARG_WITH(rpath, [AS_HELP_STRING([--with-rpath], [pass -R flag in addition to -L for lib paths])],
 [case $with_rpath in
     yes|no)	;;
@@ -1777,16 +1767,7 @@ case "$host" in
 		;;
     *-*-bsdi*)
 		SKIP_SETREUID=yes
-		# Use shlicc for BSD/OS [23].x unless asked to do otherwise
-		if test "${with_CC+set}" != set -a "$ac_cv_prog_CC" = gcc; then
-		    case "$OSMAJOR" in
-			2|3)	AC_MSG_NOTICE([using shlicc as CC])
-				ac_cv_prog_CC=shlicc
-				CC="$ac_cv_prog_CC"
-				;;
-		    esac
-		fi
-		# Check for newer BSD auth API (just check for >= 3.0?)
+		# Check for newer BSD auth API
 		if test -z "$with_bsdauth"; then
 		    AC_CHECK_FUNCS(auth_challenge, [AUTH_EXCL_DEF="BSD_AUTH"])
 		fi
