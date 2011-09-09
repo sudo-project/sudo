@@ -250,6 +250,8 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
     } else if (match == DENY) {
 	SET(validated, VALIDATE_NOT_OK);
 	CLR(validated, VALIDATE_OK);
+	if (tags != NULL && tags->nopasswd != UNSPEC)
+	    def_authenticate = !tags->nopasswd;
     }
     restore_perms();
     return validated;
