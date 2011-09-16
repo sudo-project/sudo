@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2011-09-16 13:37-0400\n"
+"POT-Creation-Date: 2011-09-16 16:52-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -638,103 +638,103 @@ msgstr ""
 msgid "unable to set locale to \"%s\", using \"C\""
 msgstr ""
 
-#: plugins/sudoers/ldap.c:363
+#: plugins/sudoers/ldap.c:368
 #, c-format
 msgid "sudo_ldap_conf_add_ports: port too large"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:386
+#: plugins/sudoers/ldap.c:391
 #, c-format
 msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:415
+#: plugins/sudoers/ldap.c:420
 #, c-format
 msgid "unsupported LDAP uri type: %s"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:444
+#: plugins/sudoers/ldap.c:449
 #, c-format
 msgid "invalid uri: %s"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:450
+#: plugins/sudoers/ldap.c:455
 #, c-format
 msgid "unable to mix ldap and ldaps URIs"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:454
+#: plugins/sudoers/ldap.c:459
 #, c-format
 msgid "unable to mix ldaps and starttls"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:473
+#: plugins/sudoers/ldap.c:478
 #, c-format
 msgid "sudo_ldap_parse_uri: out of space building hostbuf"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:536
+#: plugins/sudoers/ldap.c:541
 #, c-format
 msgid "unable to initialize SSL cert and key db: %s"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:932
+#: plugins/sudoers/ldap.c:937
 #, c-format
 msgid "unable to get GMT time"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:938
+#: plugins/sudoers/ldap.c:943
 #, c-format
 msgid "unable to format timestamp"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:946
+#: plugins/sudoers/ldap.c:951
 #, c-format
 msgid "unable to build time filter"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1047
+#: plugins/sudoers/ldap.c:1052
 #, c-format
 msgid "sudo_ldap_build_pass1 allocation mismatch"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1542
+#: plugins/sudoers/ldap.c:1562
 #, c-format
 msgid ""
 "\n"
 "LDAP Role: %s\n"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1544
+#: plugins/sudoers/ldap.c:1564
 #, c-format
 msgid ""
 "\n"
 "LDAP Role: UNKNOWN\n"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1591
+#: plugins/sudoers/ldap.c:1611
 #, c-format
 msgid "    Order: %s\n"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1599
+#: plugins/sudoers/ldap.c:1619
 #, c-format
 msgid "    Commands:\n"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1986
+#: plugins/sudoers/ldap.c:2006
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:2017
+#: plugins/sudoers/ldap.c:2037
 #, c-format
 msgid ""
 "start_tls specified but LDAP libs do not support ldap_start_tls_s() or "
 "ldap_start_tls_s_np()"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:2248
+#: plugins/sudoers/ldap.c:2268
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr ""
