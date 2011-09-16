@@ -787,6 +787,7 @@ enable_option_checking
 with_otp_only
 with_alertmail
 with_devel
+with_CC
 with_rpath
 with_blibpath
 with_bsm_audit
@@ -1554,6 +1555,7 @@ Optional Packages:
   --with-otp-only         deprecated
   --with-alertmail        deprecated
   --with-devel            add development options
+  --with-CC               C compiler to use
   --with-rpath            pass -R flag in addition to -L for lib paths
   --with-blibpath=PATH    pass -blibpath flag to ld for additional lib paths
   --with-bsm-audit        enable BSM audit support
@@ -2982,6 +2984,16 @@ $as_echo "$as_me: Setting up for development: -Wall, flex, yacc" >&6;}
     no)		;;
     *)		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --with-devel: $with_devel" >&5
 $as_echo "$as_me: WARNING: Ignoring unknown argument to --with-devel: $with_devel" >&2;}
+		;;
+esac
+fi
+
+
+
+# Check whether --with-CC was given.
+if test "${with_CC+set}" = set; then :
+  withval=$with_CC; case $with_CC in
+    *)		as_fn_error $? "the --with-CC option is no longer supported, please set the CC environment variable instead." "$LINENO" 5
 		;;
 esac
 fi
