@@ -23,6 +23,9 @@ What's new in Sudo 1.8.3?
  * The NOPASSWD tag is now honored for denied commands too, which
    matches historic sudo behavior (prior to sudo 1.7.0).
 
+ * Sudo now honors the "DEREF" setting in ldap.conf which controls
+   how alias dereferencing is done during an LDAP search.
+
 What's new in Sudo 1.8.2?
 
  * Sudo, visudo, sudoreplay and the sudoers plug-in now have natural
