@@ -13754,9 +13754,13 @@ rm -f core conftest.err conftest.$ac_objext \
 		LDFLAGS="$O_LDFLAGS"
 
 		# On AIX 6 and higher default to PAM, else default to LAM
-		case "$OSREV" in
-		    1-5.*)	if test X"$with_aixauth" = X""; then
-				    for ac_func in authenticate
+		if test $OSMAJOR -ge 6; then
+		    if test X"$with_pam" = X""; then
+			AUTH_EXCL_DEF="PAM"
+		    fi
+		else
+		    if test X"$with_aixauth" = X""; then
+			for ac_func in authenticate
 do :
   ac_fn_c_check_func "$LINENO" "authenticate" "ac_cv_func_authenticate"
 if test "x$ac_cv_func_authenticate" = xyes; then :
@@ -13767,13 +13771,8 @@ _ACEOF
 fi
 done
 
-				fi
-				;;
-		    *)		if test X"$with_pam" = X""; then
-				    AUTH_EXCL_DEF="PAM"
-				fi
-				;;
-		esac
+		    fi
+		fi
 
 		# AIX analog of nsswitch.conf, enabled by default
 
@@ -13804,10 +13803,10 @@ fi
 done
 
 
-		# LDR_PRELOAD is supported in AIX 5.3 and later
-		case "$OSREV" in
-		    1-4.*) with_noexec=no ;;
-		esac
+		# LDR_PRELOAD is only supported in AIX 5.3 and later
+		if test $OSMAJOR -lt 5; then
+		    with_noexec=no
+		fi
 
 		# AIX-specific functions
 		for ac_func in getuserattr setauthdb
@@ -13859,7 +13858,7 @@ $as_echo "$sudo_cv_var_hpccbundled" >&6; }
 
 		# Build PA-RISC1.1 objects for better portability
 		case "$host_cpu" in
-		    hppa2-9*)
+		    hppa[2-9]*)
 			_CFLAGS="$CFLAGS"
 			if test -n "$GCC"; then
 			    portable_flag="-march=1.1"
@@ -13903,7 +13902,7 @@ $as_echo "$sudo_cv_var_daportable" >&6; }
 		esac
 
 		case "$host" in
-			*-*-hpux1-8.*)
+			*-*-hpux[1-8].*)
 			    $as_echo "#define BROKEN_SYSLOG 1" >>confdefs.h
 
 			;;
@@ -14226,20 +14225,16 @@ done
 		CHECKSHADOW="false"
 		# OpenBSD >= 3.0 supports BSD auth
 		if test -z "$with_bsdauth"; then
-		    case "$OSREV" in
-		    0-2.*)
-			;;
-		    *)
+		    if test "$OSMAJOR" -ge 3; then
 			AUTH_EXCL_DEF="BSD_AUTH"
-			;;
-		    esac
+		    fi
 		fi
 		: ${with_logincap='maybe'}
 		;;
     *-*-*netbsd*)
 		# NetBSD has a real setreuid(2) starting with 1.3.2
 		case "$OSREV" in
-		0.9*|1.012*|1.3|1.3.1)
+		0.9*|1.[012]*|1.3|1.3.1)
 		    SKIP_SETREUID=yes
 		    ;;
 		esac
