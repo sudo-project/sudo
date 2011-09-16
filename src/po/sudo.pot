@@ -5,9 +5,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.2\n"
+"Project-Id-Version: sudo 1.8.3rc1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2011-08-17 11:39-0400\n"
+"POT-Creation-Date: 2011-09-16 09:36-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -550,52 +550,52 @@ msgstr ""
 msgid "unable to set effective gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:964
+#: src/sudo.c:965
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:971
+#: src/sudo.c:973
 #, c-format
 msgid "unable to set supplementary group IDs"
 msgstr ""
 
-#: src/sudo.c:979
+#: src/sudo.c:981
 #, c-format
 msgid "unable to set process priority"
 msgstr ""
 
-#: src/sudo.c:987
+#: src/sudo.c:989
 #, c-format
 msgid "unable to change root to %s"
 msgstr ""
 
-#: src/sudo.c:997 src/sudo.c:1003 src/sudo.c:1009
+#: src/sudo.c:999 src/sudo.c:1005 src/sudo.c:1011
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr ""
 
-#: src/sudo.c:1023
+#: src/sudo.c:1025
 #, c-format
 msgid "unable to change directory to %s"
 msgstr ""
 
-#: src/sudo.c:1090
+#: src/sudo.c:1092
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr ""
 
-#: src/sudo.c:1130
+#: src/sudo.c:1132
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr ""
 
-#: src/sudo.c:1141
+#: src/sudo.c:1143
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr ""
 
-#: src/sudo.c:1152
+#: src/sudo.c:1154
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr ""
@@ -610,37 +610,37 @@ msgstr ""
 msgid "plugin error: missing file list for sudoedit"
 msgstr ""
 
-#: src/sudo_edit.c:172 src/sudo_edit.c:280
+#: src/sudo_edit.c:168 src/sudo_edit.c:268
 #, c-format
 msgid "%s: not a regular file"
 msgstr ""
 
-#: src/sudo_edit.c:206 src/sudo_edit.c:316
+#: src/sudo_edit.c:202 src/sudo_edit.c:304
 #, c-format
 msgid "%s: short write"
 msgstr ""
 
-#: src/sudo_edit.c:281
+#: src/sudo_edit.c:269
 #, c-format
 msgid "%s left unmodified"
 msgstr ""
 
-#: src/sudo_edit.c:294
+#: src/sudo_edit.c:282
 #, c-format
 msgid "%s unchanged"
 msgstr ""
 
-#: src/sudo_edit.c:306 src/sudo_edit.c:327
+#: src/sudo_edit.c:294 src/sudo_edit.c:315
 #, c-format
 msgid "unable to write to %s"
 msgstr ""
 
-#: src/sudo_edit.c:307 src/sudo_edit.c:325 src/sudo_edit.c:328
+#: src/sudo_edit.c:295 src/sudo_edit.c:313 src/sudo_edit.c:316
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr ""
 
-#: src/sudo_edit.c:324
+#: src/sudo_edit.c:312
 #, c-format
 msgid "unable to read temporary file"
 msgstr ""

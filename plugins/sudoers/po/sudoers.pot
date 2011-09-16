@@ -5,9 +5,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.2\n"
+"Project-Id-Version: sudo 1.8.3rc1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2011-08-17 11:39-0400\n"
+"POT-Creation-Date: 2011-09-16 09:36-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -72,7 +72,7 @@ msgstr ""
 #: plugins/sudoers/check.c:225 plugins/sudoers/iolog.c:169
 #: plugins/sudoers/sudoers.c:971 plugins/sudoers/sudoreplay.c:325
 #: plugins/sudoers/sudoreplay.c:334 plugins/sudoers/sudoreplay.c:675
-#: plugins/sudoers/sudoreplay.c:767 plugins/sudoers/visudo.c:700
+#: plugins/sudoers/sudoreplay.c:767 plugins/sudoers/visudo.c:744
 #, c-format
 msgid "unable to open %s"
 msgstr ""
@@ -118,7 +118,7 @@ msgstr ""
 
 #: plugins/sudoers/check.c:470 plugins/sudoers/check.c:514
 #: plugins/sudoers/check.c:582 plugins/sudoers/sudoers.c:957
-#: plugins/sudoers/visudo.c:284 plugins/sudoers/visudo.c:500
+#: plugins/sudoers/visudo.c:304 plugins/sudoers/visudo.c:544
 #, c-format
 msgid "unable to stat %s"
 msgstr ""
@@ -649,7 +649,7 @@ msgstr ""
 msgid "unable to create %s"
 msgstr ""
 
-#: plugins/sudoers/iolog_path.c:245 plugins/sudoers/sudoers.c:357
+#: plugins/sudoers/iolog_path.c:247 plugins/sudoers/sudoers.c:357
 #, c-format
 msgid "unable to set locale to \"%s\", using \"C\""
 msgstr ""
@@ -847,24 +847,24 @@ msgstr ""
 msgid "parse error in %s near line %d"
 msgstr ""
 
-#: plugins/sudoers/parse.c:369
+#: plugins/sudoers/parse.c:371
 #, c-format
 msgid ""
 "\n"
 "Sudoers entry:\n"
 msgstr ""
 
-#: plugins/sudoers/parse.c:371
+#: plugins/sudoers/parse.c:373
 #, c-format
 msgid "    RunAsUsers: "
 msgstr ""
 
-#: plugins/sudoers/parse.c:386
+#: plugins/sudoers/parse.c:388
 #, c-format
 msgid "    RunAsGroups: "
 msgstr ""
 
-#: plugins/sudoers/parse.c:395
+#: plugins/sudoers/parse.c:397
 #, c-format
 msgid ""
 "    Commands:\n"
@@ -905,38 +905,38 @@ msgstr ""
 msgid "unable to cache group %s, already exists"
 msgstr ""
 
-#: plugins/sudoers/set_perms.c:109 plugins/sudoers/set_perms.c:355
-#: plugins/sudoers/set_perms.c:587 plugins/sudoers/set_perms.c:821
+#: plugins/sudoers/set_perms.c:109 plugins/sudoers/set_perms.c:358
+#: plugins/sudoers/set_perms.c:590 plugins/sudoers/set_perms.c:824
 msgid "perm stack overflow"
 msgstr ""
 
-#: plugins/sudoers/set_perms.c:117 plugins/sudoers/set_perms.c:363
-#: plugins/sudoers/set_perms.c:595 plugins/sudoers/set_perms.c:829
+#: plugins/sudoers/set_perms.c:117 plugins/sudoers/set_perms.c:366
+#: plugins/sudoers/set_perms.c:598 plugins/sudoers/set_perms.c:832
 msgid "perm stack underflow"
 msgstr ""
 
-#: plugins/sudoers/set_perms.c:223 plugins/sudoers/set_perms.c:455
-#: plugins/sudoers/set_perms.c:692
+#: plugins/sudoers/set_perms.c:223 plugins/sudoers/set_perms.c:458
+#: plugins/sudoers/set_perms.c:695
 msgid "unable to change to runas gid"
 msgstr ""
 
-#: plugins/sudoers/set_perms.c:231 plugins/sudoers/set_perms.c:462
-#: plugins/sudoers/set_perms.c:699
+#: plugins/sudoers/set_perms.c:231 plugins/sudoers/set_perms.c:465
+#: plugins/sudoers/set_perms.c:702
 msgid "unable to change to runas uid"
 msgstr ""
 
-#: plugins/sudoers/set_perms.c:245 plugins/sudoers/set_perms.c:475
-#: plugins/sudoers/set_perms.c:712
+#: plugins/sudoers/set_perms.c:245 plugins/sudoers/set_perms.c:478
+#: plugins/sudoers/set_perms.c:715
 #, c-format
 msgid "unable to change to sudoers gid"
 msgstr ""
 
-#: plugins/sudoers/set_perms.c:286 plugins/sudoers/set_perms.c:513
-#: plugins/sudoers/set_perms.c:750 plugins/sudoers/set_perms.c:890
+#: plugins/sudoers/set_perms.c:286 plugins/sudoers/set_perms.c:516
+#: plugins/sudoers/set_perms.c:753 plugins/sudoers/set_perms.c:893
 msgid "too many processes"
 msgstr ""
 
-#: plugins/sudoers/set_perms.c:952
+#: plugins/sudoers/set_perms.c:955
 msgid "unable to set runas group vector"
 msgstr ""
 
@@ -1322,81 +1322,81 @@ msgstr ""
 msgid "you do not exist in the %s database"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:238 plugins/sudoers/visudo.c:470
+#: plugins/sudoers/visudo.c:238 plugins/sudoers/visudo.c:518
 #, c-format
 msgid "press return to edit %s: "
 msgstr ""
 
-#: plugins/sudoers/visudo.c:300 plugins/sudoers/visudo.c:306
+#: plugins/sudoers/visudo.c:320 plugins/sudoers/visudo.c:326
 #, c-format
 msgid "write error"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:360
+#: plugins/sudoers/visudo.c:408
 #, c-format
 msgid "unable to stat temporary file (%s), %s unchanged"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:365
+#: plugins/sudoers/visudo.c:413
 #, c-format
 msgid "zero length temporary file (%s), %s unchanged"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:371
+#: plugins/sudoers/visudo.c:419
 #, c-format
 msgid "editor (%s) failed, %s unchanged"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:394
+#: plugins/sudoers/visudo.c:442
 #, c-format
 msgid "%s unchanged"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:418
+#: plugins/sudoers/visudo.c:466
 #, c-format
 msgid "unable to re-open temporary file (%s), %s unchanged."
 msgstr ""
 
-#: plugins/sudoers/visudo.c:428
+#: plugins/sudoers/visudo.c:476
 #, c-format
 msgid "unabled to parse temporary file (%s), unknown error"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:463
+#: plugins/sudoers/visudo.c:511
 #, c-format
 msgid "internal error, unable to find %s in list!"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:502 plugins/sudoers/visudo.c:511
+#: plugins/sudoers/visudo.c:546 plugins/sudoers/visudo.c:555
 #, c-format
-msgid "unable to set (uid, gid) of %s to (%d, %d)"
+msgid "unable to set (uid, gid) of %s to (%u, %u)"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:506 plugins/sudoers/visudo.c:516
+#: plugins/sudoers/visudo.c:550 plugins/sudoers/visudo.c:560
 #, c-format
 msgid "unable to change mode of %s to 0%o"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:533
+#: plugins/sudoers/visudo.c:577
 #, c-format
 msgid "%s and %s not on the same file system, using mv to rename"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:547
+#: plugins/sudoers/visudo.c:591
 #, c-format
 msgid "command failed: '%s %s %s', %s unchanged"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:557
+#: plugins/sudoers/visudo.c:601
 #, c-format
 msgid "error renaming %s, %s unchanged"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:617
+#: plugins/sudoers/visudo.c:661
 msgid "What now? "
 msgstr ""
 
-#: plugins/sudoers/visudo.c:631
+#: plugins/sudoers/visudo.c:675
 msgid ""
 "Options are:\n"
 "  (e)dit sudoers file again\n"
@@ -1404,99 +1404,99 @@ msgid ""
 "  (Q)uit and save changes to sudoers file (DANGER!)\n"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:668
+#: plugins/sudoers/visudo.c:712
 #, c-format
 msgid "unable to execute %s"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:675
+#: plugins/sudoers/visudo.c:719
 #, c-format
 msgid "unable to run %s"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:706
+#: plugins/sudoers/visudo.c:750
 #, c-format
 msgid "failed to parse %s file, unknown error"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:718
+#: plugins/sudoers/visudo.c:762
 #, c-format
 msgid "parse error in %s near line %d\n"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:721
+#: plugins/sudoers/visudo.c:765
 #, c-format
 msgid "parse error in %s\n"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:723
+#: plugins/sudoers/visudo.c:767
 #, c-format
 msgid "%s: parsed OK\n"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:737
+#: plugins/sudoers/visudo.c:776
 #, c-format
-msgid "%s: wrong owner (uid, gid) should be (%d, %d)\n"
-msgstr ""
-
-#: plugins/sudoers/visudo.c:744
-#, c-format
-msgid "%s: bad permissions, should be mode 0%o\n"
+msgid "%s: wrong owner (uid, gid) should be (%u, %u)\n"
 msgstr ""
 
 #: plugins/sudoers/visudo.c:783
 #, c-format
+msgid "%s: bad permissions, should be mode 0%o\n"
+msgstr ""
+
+#: plugins/sudoers/visudo.c:822
+#, c-format
 msgid "%s busy, try again later"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:826
+#: plugins/sudoers/visudo.c:865
 #, c-format
 msgid "specified editor (%s) doesn't exist"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:849
+#: plugins/sudoers/visudo.c:888
 #, c-format
 msgid "unable to stat editor (%s)"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:897
+#: plugins/sudoers/visudo.c:936
 #, c-format
 msgid "no editor found (editor path = %s)"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:986
+#: plugins/sudoers/visudo.c:1025
 #, c-format
 msgid "Error: cycle in %s_Alias `%s'"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:987
+#: plugins/sudoers/visudo.c:1026
 #, c-format
 msgid "Warning: cycle in %s_Alias `%s'"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:990
+#: plugins/sudoers/visudo.c:1029
 #, c-format
 msgid "Error: %s_Alias `%s' referenced but not defined"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:991
+#: plugins/sudoers/visudo.c:1030
 #, c-format
 msgid "Warning: %s_Alias `%s' referenced but not defined"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:1128
+#: plugins/sudoers/visudo.c:1167
 #, c-format
 msgid "%s: unused %s_Alias %s"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:1185
+#: plugins/sudoers/visudo.c:1224
 #, c-format
 msgid ""
 "%s - safely edit the sudoers file\n"
 "\n"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:1187
+#: plugins/sudoers/visudo.c:1226
 msgid ""
 "\n"
 "Options:\n"
