@@ -185,42 +185,6 @@ dump_defaults(void)
 }
 
 /*
- * List each option along with its description.
- */
-void
-list_options(void)
-{
-    struct sudo_defs_types *cur;
-    char *p, *desc;
-
-    sudo_printf(SUDO_CONV_INFO_MSG,
-	_("Available options in a sudoers ``Defaults'' line:\n\n"));
-    for (cur = sudo_defs_table; cur->name; cur++) {
-	if (cur->desc) {
-	    desc = _(cur->desc);
-	    switch (cur->type & T_MASK) {
-		case T_FLAG:
-		    sudo_printf(SUDO_CONV_INFO_MSG,
-			_("%s: %s\n"), cur->name, desc);
-		    break;
-		default:
-		    p = strrchr(desc, ':');
-		    if (p) {
-			while (p > desc && isspace((unsigned char)p[-1]))
-			    p--;
-			sudo_printf(SUDO_CONV_INFO_MSG, _("%s: %.*s\n"),
-			    cur->name, (int) (p - desc), desc);
-		    } else {
-			sudo_printf(SUDO_CONV_INFO_MSG,
-			    _("%s: %s\n"), cur->name, desc);
-		    }
-		    break;
-	    }
-	}
-    }
-}
-
-/*
  * Sets/clears an entry in the defaults structure
  * If a variable that takes a value is used in a boolean
  * context with op == 0, disable that variable.
