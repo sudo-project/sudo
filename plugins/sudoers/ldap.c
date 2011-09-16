@@ -117,6 +117,7 @@
 #define CONF_INT	1
 #define CONF_STR	2
 #define CONF_LIST_STR	4
+#define CONF_DEREF_VAL	5
 
 #define SUDO_LDAP_SSL		1
 #define SUDO_LDAP_STARTTLS	2
@@ -195,6 +196,7 @@ static struct ldap_config {
     int rootuse_sasl;
     int ssl_mode;
     int timed;
+    int deref;
     char *host;
     struct ldap_config_list_str *uri;
     char *binddn;
@@ -280,6 +282,9 @@ static struct ldap_config_table ldap_conf_table[] = {
 #ifdef LDAP_OPT_TIMEOUT
     { "timeout", CONF_INT, TRUE, -1 /* needs timeval, set manually */,
 	&ldap_conf.timeout },
+#endif
+#ifdef LDAP_OPT_DEREF
+    { "deref", CONF_DEREF_VAL, TRUE, LDAP_OPT_DEREF, &ldap_conf.deref },
 #endif
     { "binddn", CONF_STR, FALSE, -1, &ldap_conf.binddn },
     { "bindpw", CONF_STR, FALSE, -1, &ldap_conf.bindpw },
@@ -1121,6 +1126,7 @@ sudo_ldap_read_config(void)
     ldap_conf.bind_timelimit = -1;
     ldap_conf.use_sasl = -1;
     ldap_conf.rootuse_sasl = -1;
+    ldap_conf.deref = -1;
 
     if ((fp = fopen(_PATH_LDAP_CONF, "r")) == NULL)
 	return FALSE;
@@ -1145,6 +1151,16 @@ sudo_ldap_read_config(void)
 	for (cur = ldap_conf_table; cur->conf_str != NULL; cur++) {
 	    if (strcasecmp(keyword, cur->conf_str) == 0) {
 		switch (cur->type) {
+		case CONF_DEREF_VAL:
+		    if (strcasecmp(value, "searching") == 0)
+			*(int *)(cur->valp) = LDAP_DEREF_SEARCHING;
+		    else if (strcasecmp(value, "finding") == 0)
+			*(int *)(cur->valp) = LDAP_DEREF_FINDING;
+		    else if (strcasecmp(value, "always") == 0)
+			*(int *)(cur->valp) = LDAP_DEREF_ALWAYS;
+		    else
+			*(int *)(cur->valp) = LDAP_DEREF_NEVER;
+		    break;
 		case CONF_BOOL:
 		    *(int *)(cur->valp) = atobool(value) == TRUE;
 		    break;
@@ -1224,6 +1240,10 @@ sudo_ldap_read_config(void)
 	if (ldap_conf.timelimit > 0) {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, "timelimit        %d\n",
 		ldap_conf.timelimit);
+	}
+	if (ldap_conf.deref != -1) {
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "deref            %d\n",
+		ldap_conf.deref);
 	}
 	sudo_printf(SUDO_CONV_ERROR_MSG, "ssl              %s\n",
 	    ldap_conf.ssl ?  ldap_conf.ssl : "(no)");

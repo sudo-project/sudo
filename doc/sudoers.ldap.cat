@@ -458,6 +458,10 @@ DDEESSCCRRIIPPTTIIOONN
            The path to the Kerberos 5 credential cache to use when
            authenticating with the remote server.
 
+       DDEERREEFF never/searching/finding/always
+           How alias dereferencing is to be performed when searching.  See the
+           _l_d_a_p_._c_o_n_f(4) manual for a full description of this option.
+
        See the ldap.conf entry in the EXAMPLES section.
 
    CCoonnffiigguurriinngg nnsssswwiittcchh..ccoonnff
