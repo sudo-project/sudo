@@ -508,16 +508,16 @@ make_grlist_item(const char *user, GETGROUPS_T *gids, int ngids)
 
     /*
      * Copy in group list and make pointers relative to space
-     * at the end of the buffer.  Note that the gids array must come
+     * at the end of the buffer.  Note that the groups array must come
      * immediately after struct group to guarantee proper alignment.
      */
     grlist = (struct group_list *)cp;
     zero_bytes(grlist, sizeof(struct group_list));
     cp += sizeof(struct group_list);
-    grlist->gids = (gid_t *)cp;
-    cp += sizeof(gid_t) * ngids;
     grlist->groups = (char **)cp;
     cp += sizeof(char *) * ngids;
+    grlist->gids = (gid_t *)cp;
+    cp += sizeof(gid_t) * ngids;
 
     /* Set key and datum. */
     memcpy(cp, user, nsize);
