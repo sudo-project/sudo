@@ -99,7 +99,7 @@ install-doc: config.status ChangeLog
 	    exit $$?; \
 	done
 
-install: config.status pre-install install-nls
+install: config.status ChangeLog pre-install install-nls
 	for d in $(SUBDIRS); \
 	    do (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
