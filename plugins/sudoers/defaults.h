@@ -107,7 +107,6 @@ struct sudo_defs_types {
  */
 void dump_default(void);
 void init_defaults(void);
-void list_options(void);
 int  set_default(char *, char *, int);
 int  update_defaults(int);
 
