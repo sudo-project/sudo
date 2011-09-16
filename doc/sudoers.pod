@@ -1233,10 +1233,6 @@ function will be expanded.
 To include a literal `C<%>' character, the string `C<%%>' should
 be used.
 
-Path names that end in six or more C<X>s will have the C<X>s replaced
-with a unique combination of digits and letters, similar to the
-mktemp() function.
-
 =item iolog_file
 
 The path name, relative to I<iolog_dir>, in which to store input/output
@@ -1247,6 +1243,10 @@ The default is C<"%{seq}">.
 
 See the I<iolog_dir> option above for a list of supported percent
 (`C<%>') escape sequences.
+
+In addition to the escape sequences, path names that end in six or
+more C<X>s will have the C<X>s replaced with a unique combination
+of digits and letters, similar to the mktemp() function.
 
 =item mailsub
 
