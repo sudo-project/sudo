@@ -1068,10 +1068,6 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        To include a literal `%' character, the string `%%'
                        should be used.
 
-                       Path names that end in six or more Xs will have the Xs
-                       replaced with a unique combination of digits and
-                       letters, similar to the _m_k_t_e_m_p_(_) function.
-
        iolog_file      The path name, relative to _i_o_l_o_g___d_i_r, in which to store
                        input/output logs when the _l_o_g___i_n_p_u_t or _l_o_g___o_u_t_p_u_t
                        options are enabled or when the LOG_INPUT or LOG_OUTPUT
@@ -1081,6 +1077,11 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
                        See the _i_o_l_o_g___d_i_r option above for a list of supported
                        percent (`%') escape sequences.
+
+                       In addition to the escape sequences, path names that
+                       end in six or more Xs will have the Xs replaced with a
+                       unique combination of digits and letters, similar to
+                       the _m_k_t_e_m_p_(_) function.
 
        mailsub         Subject of the mail sent to the _m_a_i_l_t_o user. The escape
                        %h will expand to the host name of the machine.

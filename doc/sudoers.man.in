@@ -1315,10 +1315,6 @@ function will be expanded.
 .Sp
 To include a literal `\f(CW\*(C`%\*(C'\fR' character, the string `\f(CW\*(C`%%\*(C'\fR' should
 be used.
-.Sp
-Path names that end in six or more \f(CW\*(C`X\*(C'\fRs will have the \f(CW\*(C`X\*(C'\fRs replaced
-with a unique combination of digits and letters, similar to the
-\&\fImktemp()\fR function.
 .RE
 .IP "iolog_file" 16
 .IX Item "iolog_file"
@@ -1330,6 +1326,10 @@ The default is \f(CW"%{seq}"\fR.
 .Sp
 See the \fIiolog_dir\fR option above for a list of supported percent
 (`\f(CW\*(C`%\*(C'\fR') escape sequences.
+.Sp
+In addition to the escape sequences, path names that end in six or
+more \f(CW\*(C`X\*(C'\fRs will have the \f(CW\*(C`X\*(C'\fRs replaced with a unique combination
+of digits and letters, similar to the \fImktemp()\fR function.
 .IP "mailsub" 16
 .IX Item "mailsub"
 Subject of the mail sent to the \fImailto\fR user. The escape \f(CW%h\fR
