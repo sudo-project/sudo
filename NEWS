@@ -1,3 +1,28 @@
+What's new in Sudo 1.8.3?
+
+ * Fixed expansion of strftime() escape sequences in the "log_dir"
+   sudoers setting.
+
+ * Added new Esperanto translation from translationproject.org.
+
+ * Sudo will now use PAM by default on AIX 6 and higher.
+
+ * Added --enable-werror configure option for gcc's -Werror flag.
+
+ * Visudo no longer assumes all editors support the +linenumber
+   command line argument.  It now uses a whitelist of editors known
+   to support the option.
+
+ * Fixed matching of network addresses when a netmask is specified
+   but the address is not the first one in the CIDR block.
+
+ * The configure script now check whether or not errno.h declares
+   the errno variable.  Previously, sudo would always declare errno
+   itself for older systems that don't declare it in errno.h.
+
+ * The NOPASSWD tag is now honored for denied commands too, which
+   matches historic sudo behavior (prior to sudo 1.7.0).
+
 What's new in Sudo 1.8.2?
 
  * Sudo, visudo, sudoreplay and the sudoers plug-in now have natural
