@@ -1,3 +1,84 @@
+What's new in Sudo 1.8.3?
+
+ * Fixed expansion of strftime() escape sequences in the "log_dir"
+   sudoers setting.
+
+ * Added new Esperanto translation from translationproject.org.
+
+ * Sudo will now use PAM by default on AIX 6 and higher.
+
+ * Added --enable-werror configure option for gcc's -Werror flag.
+
+ * Visudo no longer assumes all editors support the +linenumber
+   command line argument.  It now uses a whitelist of editors known
+   to support the option.
+
+ * Fixed matching of network addresses when a netmask is specified
+   but the address is not the first one in the CIDR block.
+
+ * The configure script now check whether or not errno.h declares
+   the errno variable.  Previously, sudo would always declare errno
+   itself for older systems that don't declare it in errno.h.
+
+ * The NOPASSWD tag is now honored for denied commands too, which
+   matches historic sudo behavior (prior to sudo 1.7.0).
+
+What's new in Sudo 1.8.2?
+
+ * Sudo, visudo, sudoreplay and the sudoers plug-in now have natural
+   language support (NLS). This can be disabled by passing configure
+   the --disable-nls option.  Sudo will use gettext(), if available,
+   to display translated messages.  All translations are coordinated
+   via The Translation Project, http://translationproject.org/.
+
+ * Plug-ins are now loaded with the RTLD_GLOBAL flag instead of
+   RTLD_LOCAL.  This fixes missing symbol problems in PAM modules
+   on certain platforms, such as FreeBSD and SuSE Linux Enterprise.
+
+ * I/O logging is now supported for commands run in background mode
+   (using sudo's -b flag).
+
+ * Group ownership of the sudoers file is now only enforced when
+   the file mode on sudoers allows group readability or writability.
+
+ * Visudo now checks the contents of an alias and warns about cycles
+   when the alias is expanded.
+
+ * If the user specifes a group via sudo's -g option that matches
+   the target user's group in the password database, it is now
+   allowed even if no groups are present in the Runas_Spec.
+
+ * The sudo Makefiles now have more complete dependencies which are
+   automatically generated instead of being maintained manually.
+
+ * The "use_pty" sudoers option is now correctly passed back to the
+   sudo front end.  This was missing in previous versions of sudo
+   1.8 which prevented "use_pty" from being honored.
+
+ * "sudo -i command" now works correctly with the bash version
+   2.0 and higher.  Previously, the .bash_profile would not be
+   sourced prior to running the command unless bash was built with
+   NON_INTERACTIVE_LOGIN_SHELLS defined.
+
+ * When matching groups in the sudoers file, sudo will now match
+   based on the name of the group instead of the group ID. This can
+   substantially reduce the number of group lookups for sudoers
+   files that contain a large number of groups.
+
+ * Multi-factor authentication is now supported on AIX.
+
+ * Added support for non-RFC 4517 compliant LDAP servers that require
+   that seconds be present in a timestamp, such as Tivoli Directory Server.
+
+ * If the group vector is to be preserved, the PATH search for the
+   command is now done with the user's original group vector.
+
+ * For LDAP-based sudoers, the "runas_default" sudoOption now works
+   properly in a sudoRole that contains a sudoCommand.
+
+ * Spaces in command line arguments for "sudo -s" and "sudo -i" are
+   now escaped with a backslash when checking the security policy.
+
 What's new in Sudo 1.8.1p2?
 
  * Two-character CIDR-style IPv4 netmasks are now matched correctly
