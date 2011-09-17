@@ -2710,6 +2710,17 @@ if test ${with_ldap-'no'} != "no"; then
 	#include <lber.h>
 	#include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [found=yes; break])
     done
+    if test "$found" = "no"; then
+	LDAP_LIBS=""
+	LIBS="$_LIBS"
+	for l in -libmldap -lidsldif; do
+	    LIBS="${LIBS} $l"
+	    LDAP_LIBS="${LDAP_LIBS} $l"
+	    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
+	    #include <lber.h>
+	    #include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [found=yes; break])
+	done
+    fi
     dnl if nothing linked just try with -lldap
     if test "$found" = "no"; then
 	LIBS="${_LIBS} -lldap"

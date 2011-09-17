@@ -19249,6 +19249,32 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
     done
+    if test "$found" = "no"; then
+	LDAP_LIBS=""
+	LIBS="$_LIBS"
+	for l in -libmldap -lidsldif; do
+	    LIBS="${LIBS} $l"
+	    LDAP_LIBS="${LDAP_LIBS} $l"
+	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+	    #include <lber.h>
+	    #include <ldap.h>
+int
+main ()
+{
+(void)ldap_init(0, 0)
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  found=yes; break
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+	done
+    fi
         if test "$found" = "no"; then
 	LIBS="${_LIBS} -lldap"
 	LDAP_LIBS="-lldap"
