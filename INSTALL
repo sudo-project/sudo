@@ -99,9 +99,6 @@ Directory and file names:
 	Find the sources in DIR [configure dir or ..]
 
 Special features/options:
-  --with-CC=PATH
-	Specifies path to C compiler you wish to use.
-
   --with-incpath=DIR
 	Adds the specified directory (or directories) to CPPFLAGS
 	so configure and the compiler will look there for include
@@ -706,14 +703,15 @@ Solaris 2.x:
     CD.  You can also get them from various places on the net,
     including http://www.sunfreeware.com/
     NOTE: sudo will *not* build with the sun C compiler in BSD
-	  compatibility mode (/usr/ucb/cc).  Sudo is designed to
-	  compile with the standard C compiler (or gcc) and will
-	  not build correctly with /usr/ucb/cc.  You can use the
-	  `--with-CC' option to point `configure' to the non-ucb
-	  compiler if it is not the first cc in your path.  Some
-	  sites link /usr/ucb/cc to gcc; configure will not notice
-	  this and still refuse to use /usr/ucb/cc, so make sure gcc
-	  is also in your path if your site is setup this way.
+          compatibility mode (/usr/ucb/cc).  Sudo is designed to
+          compile with the standard C compiler (or gcc) and will
+          not build correctly with /usr/ucb/cc.  You can set the
+          CC environment variable to the non-ucb compiler when
+          running `configure' if it is not the first cc in your
+          path.  Some sites link /usr/ucb/cc to gcc; configure will
+          not notice this and still refuse to use /usr/ucb/cc, so
+          make sure gcc is also in your path if your site is setup
+          this way.
     Also: Older versions of Solaris come with a broken syslogd.
 	  If you have having problems with sudo logging you should
 	  make sure you have the latest syslogd patch installed.

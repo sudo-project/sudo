@@ -2971,11 +2971,7 @@ fi
 # Check whether --with-CC was given.
 if test "${with_CC+set}" = set; then :
   withval=$with_CC; case $with_CC in
-    yes)	as_fn_error $? "\"must give --with-CC an argument.\"" "$LINENO" 5
-		;;
-    no)		as_fn_error $? "\"illegal argument: --without-CC.\"" "$LINENO" 5
-		;;
-    *)		CC=$with_CC
+    *)		as_fn_error $? "the --with-CC option is no longer supported, please set the CC environment variable instead." "$LINENO" 5
 		;;
 esac
 fi
@@ -14190,17 +14186,7 @@ fi
 		;;
     *-*-bsdi*)
 		SKIP_SETREUID=yes
-		# Use shlicc for BSD/OS [23].x unless asked to do otherwise
-		if test "${with_CC+set}" != set -a "$ac_cv_prog_CC" = gcc; then
-		    case "$OSMAJOR" in
-			2|3)	{ $as_echo "$as_me:${as_lineno-$LINENO}: using shlicc as CC" >&5
-$as_echo "$as_me: using shlicc as CC" >&6;}
-				ac_cv_prog_CC=shlicc
-				CC="$ac_cv_prog_CC"
-				;;
-		    esac
-		fi
-		# Check for newer BSD auth API (just check for >= 3.0?)
+		# Check for newer BSD auth API
 		if test -z "$with_bsdauth"; then
 		    for ac_func in auth_challenge
 do :
