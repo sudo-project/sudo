@@ -257,6 +257,8 @@ sudo_file_lookup(nss, validated, pwflag)
     } else if (match == DENY) {
 	SET(validated, VALIDATE_NOT_OK);
 	CLR(validated, VALIDATE_OK);
+	if (tags != NULL && tags->nopasswd != UNSPEC)
+	    def_authenticate = !tags->nopasswd;
     }
     set_perms(PERM_ROOT);
     return validated;
