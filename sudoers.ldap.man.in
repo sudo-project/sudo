@@ -140,7 +140,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "August 13, 2011" "1.7.7" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "September 16, 2011" "1.7.8" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -607,6 +607,10 @@ The \s-1SASL\s0 user name to use when \fB\s-1ROOTUSE_SASL\s0\fR is enabled.
 .IX Item "KRB5_CCNAME file name"
 The path to the Kerberos 5 credential cache to use when authenticating
 with the remote server.
+.IP "\fB\s-1DEREF\s0\fR never/searching/finding/always" 4
+.IX Item "DEREF never/searching/finding/always"
+How alias dereferencing is to be performed when searching.  See the
+\&\fIldap.conf\fR\|(@mansectform@) manual for a full description of this option.
 .PP
 See the \f(CW\*(C`ldap.conf\*(C'\fR entry in the \s-1EXAMPLES\s0 section.
 .SS "Configuring nsswitch.conf"

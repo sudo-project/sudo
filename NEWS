@@ -1,3 +1,26 @@
+What's new in Sudo 1.7.8?
+
+ * Sudo will now use PAM by default on AIX 6 and higher.
+
+ * Added --enable-werror configure option for gcc's -Werror flag.
+
+ * Visudo no longer assumes all editors support the +linenumber
+   command line argument.  It now uses a whitelist of editors known
+   to support the option.
+
+ * Fixed matching of network addresses when a netmask is specified
+   but the address is not the first one in the CIDR block.
+
+ * The configure script now check whether or not errno.h declares
+   the errno variable.  Previously, sudo would always declare errno
+   itself for older systems that don't declare it in errno.h.
+
+ * The NOPASSWD tag is now honored for denied commands too, which
+   matches historic sudo behavior (prior to sudo 1.7.0).
+
+ * Sudo now honors the "DEREF" setting in ldap.conf which controls
+   how alias dereferencing is done during an LDAP search.
+
 What's new in Sudo 1.7.7
 
  * I/O logging is now supported for commands run in background mode

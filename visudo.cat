@@ -2,96 +2,96 @@ VISUDO(1m)                   MAINTENANCE COMMANDS                   VISUDO(1m)
 
 
 
-[1mNAME[0m
+NNAAMMEE
        visudo - edit the sudoers file
 
-[1mSYNOPSIS[0m
-       [1mvisudo [22m[[1m-chqsV[22m] [[1m-f [4m[22msudoers[24m]
+SSYYNNOOPPSSIISS
+       vviissuuddoo [--cchhqqssVV] [--ff _s_u_d_o_e_r_s]
 
-[1mDESCRIPTION[0m
-       [1mvisudo [22medits the [4msudoers[24m file in a safe fashion, analogous to [4mvipw[24m(1m).
-       [1mvisudo [22mlocks the [4msudoers[24m file against multiple simultaneous edits,
+DDEESSCCRRIIPPTTIIOONN
+       vviissuuddoo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous to _v_i_p_w(1m).
+       vviissuuddoo locks the _s_u_d_o_e_r_s file against multiple simultaneous edits,
        provides basic sanity checks, and checks for parse errors.  If the
-       [4msudoers[24m file is currently being edited you will receive a message to
+       _s_u_d_o_e_r_s file is currently being edited you will receive a message to
        try again later.
 
-       There is a hard-coded list of one or more editors that [1mvisudo [22mwill use
-       set at compile-time that may be overridden via the [4meditor[24m [4msudoers[0m
-       Default variable.  This list defaults to "vi".  Normally, [1mvisudo [22mdoes
+       There is a hard-coded list of one or more editors that vviissuuddoo will use
+       set at compile-time that may be overridden via the _e_d_i_t_o_r _s_u_d_o_e_r_s
+       Default variable.  This list defaults to "vi".  Normally, vviissuuddoo does
        not honor the VISUAL or EDITOR environment variables unless they
        contain an editor in the aforementioned editors list.  However, if
-       [1mvisudo [22mis configured with the [4m--with-env-editor[24m option or the
-       [4menv_editor[24m Default variable is set in [4msudoers[24m, [1mvisudo [22mwill use any the
+       vviissuuddoo is configured with the _-_-_w_i_t_h_-_e_n_v_-_e_d_i_t_o_r option or the
+       _e_n_v___e_d_i_t_o_r Default variable is set in _s_u_d_o_e_r_s, vviissuuddoo will use any the
        editor defines by VISUAL or EDITOR.  Note that this can be a security
        hole since it allows the user to execute any program they wish simply
        by setting VISUAL or EDITOR.
 
-       [1mvisudo [22mparses the [4msudoers[24m file after the edit and will not save the
-       changes if there is a syntax error.  Upon finding an error, [1mvisudo [22mwill
+       vviissuuddoo parses the _s_u_d_o_e_r_s file after the edit and will not save the
+       changes if there is a syntax error.  Upon finding an error, vviissuuddoo will
        print a message stating the line number(s) where the error occurred and
        the user will receive the "What now?" prompt.  At this point the user
-       may enter "e" to re-edit the [4msudoers[24m file, "x" to exit without saving
+       may enter "e" to re-edit the _s_u_d_o_e_r_s file, "x" to exit without saving
        the changes, or "Q" to quit and save changes.  The "Q" option should be
-       used with extreme care because if [1mvisudo [22mbelieves there to be a parse
-       error, so will [1msudo [22mand no one will be able to [1msudo [22magain until the
-       error is fixed.  If "e" is typed to edit the  [4msudoers[24m file after a
+       used with extreme care because if vviissuuddoo believes there to be a parse
+       error, so will ssuuddoo and no one will be able to ssuuddoo again until the
+       error is fixed.  If "e" is typed to edit the  _s_u_d_o_e_r_s file after a
        parse error has been detected, the cursor will be placed on the line
        where the error occurred (if the editor supports this feature).
 
-[1mOPTIONS[0m
-       [1mvisudo [22maccepts the following command line options:
+OOPPTTIIOONNSS
+       vviissuuddoo accepts the following command line options:
 
-       -c          Enable [1mcheck-only [22mmode.  The existing [4msudoers[24m file will be
+       -c          Enable cchheecckk--oonnllyy mode.  The existing _s_u_d_o_e_r_s file will be
                    checked for syntax and a message will be printed to the
-                   standard output detailing the status of [4msudoers[24m.  If the
-                   syntax check completes successfully, [1mvisudo [22mwill exit with
-                   a value of 0.  If a syntax error is encountered, [1mvisudo[0m
+                   standard output detailing the status of _s_u_d_o_e_r_s.  If the
+                   syntax check completes successfully, vviissuuddoo will exit with
+                   a value of 0.  If a syntax error is encountered, vviissuuddoo
                    will exit with a value of 1.
 
-       -f [4msudoers[24m  Specify and alternate [4msudoers[24m file location.  With this
-                   option [1mvisudo [22mwill edit (or check) the [4msudoers[24m file of your
-                   choice, instead of the default, [4m/etc/sudoers[24m.  The lock
-                   file used is the specified [4msudoers[24m file with ".tmp"
-                   appended to it.  In [1mcheck-only [22mmode only, the argument to
-                   [1m-f [22mmay be "-", indicating that [4msudoers[24m will be read from
+       -f _s_u_d_o_e_r_s  Specify and alternate _s_u_d_o_e_r_s file location.  With this
+                   option vviissuuddoo will edit (or check) the _s_u_d_o_e_r_s file of your
+                   choice, instead of the default, _/_e_t_c_/_s_u_d_o_e_r_s.  The lock
+                   file used is the specified _s_u_d_o_e_r_s file with ".tmp"
+                   appended to it.  In cchheecckk--oonnllyy mode only, the argument to
+                   --ff may be "-", indicating that _s_u_d_o_e_r_s will be read from
                    the standard input.
 
-       -h          The [1m-h [22m([4mhelp[24m) option causes [1mvisudo [22mto print a short help
+       -h          The --hh (_h_e_l_p) option causes vviissuuddoo to print a short help
                    message to the standard output and exit.
 
-       -q          Enable [1mquiet [22mmode.  In this mode details about syntax
+       -q          Enable qquuiieett mode.  In this mode details about syntax
                    errors are not printed.  This option is only useful when
-                   combined with the [1m-c [22moption.
+                   combined with the --cc option.
 
-       -s          Enable [1mstrict [22mchecking of the [4msudoers[24m file.  If an alias is
-                   used before it is defined, [1mvisudo [22mwill consider this a
+       -s          Enable ssttrriicctt checking of the _s_u_d_o_e_r_s file.  If an alias is
+                   used before it is defined, vviissuuddoo will consider this a
                    parse error.  Note that it is not possible to differentiate
                    between an alias and a host name or user name that consists
                    solely of uppercase letters, digits, and the underscore
                    ('_') character.
 
-       -V          The [1m-V [22m(version) option causes [1mvisudo [22mto print its version
+       -V          The --VV (version) option causes vviissuuddoo to print its version
                    number and exit.
 
-[1mENVIRONMENT[0m
+EENNVVIIRROONNMMEENNTT
        The following environment variables may be consulted depending on the
-       value of the [4meditor[24m and [4menv_editor[24m [4msudoers[24m variables:
+       value of the _e_d_i_t_o_r and _e_n_v___e_d_i_t_o_r _s_u_d_o_e_r_s variables:
 
        VISUAL          Invoked by visudo as the editor to use
 
        EDITOR          Used by visudo if VISUAL is not set
 
-[1mFILES[0m
-       [4m/etc/sudoers[24m            List of who can run what
+FFIILLEESS
+       _/_e_t_c_/_s_u_d_o_e_r_s            List of who can run what
 
-       [4m/etc/sudoers.tmp[24m        Lock file for visudo
+       _/_e_t_c_/_s_u_d_o_e_r_s_._t_m_p        Lock file for visudo
 
-[1mDIAGNOSTICS[0m
+DDIIAAGGNNOOSSTTIICCSS
        sudoers file busy, try again later.
-           Someone else is currently editing the [4msudoers[24m file.
+           Someone else is currently editing the _s_u_d_o_e_r_s file.
 
        /etc/sudoers.tmp: Permission denied
-           You didn't run [1mvisudo [22mas root.
+           You didn't run vviissuuddoo as root.
 
        Can't find you in the passwd database
            Your userid does not appear in the system passwd file.
@@ -101,19 +101,19 @@ VISUDO(1m)                   MAINTENANCE COMMANDS                   VISUDO(1m)
            {User,Runas,Host,Cmnd}_Alias or you have a user or host name listed
            that consists solely of uppercase letters, digits, and the
            underscore ('_') character.  In the latter case, you can ignore the
-           warnings ([1msudo [22mwill not complain).  In [1m-s [22m(strict) mode these are
+           warnings (ssuuddoo will not complain).  In --ss (strict) mode these are
            errors, not warnings.
 
        Warning: unused {User,Runas,Host,Cmnd}_Alias
            The specified {User,Runas,Host,Cmnd}_Alias was defined but never
            used.  You may wish to comment out or remove the unused alias.  In
-           [1m-s [22m(strict) mode this is an error, not a warning.
+           --ss (strict) mode this is an error, not a warning.
 
-[1mSEE ALSO[0m
-       [4mvi[24m(1), [4msudoers[24m(4), [4msudo[24m(1m), [4mvipw[24m(8)
+SSEEEE AALLSSOO
+       _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(8)
 
-[1mAUTHOR[0m
-       Many people have worked on [4msudo[24m over the years; this version of [1mvisudo[0m
+AAUUTTHHOORR
+       Many people have worked on _s_u_d_o over the years; this version of vviissuuddoo
        was written by:
 
         Todd Miller
@@ -121,26 +121,26 @@ VISUDO(1m)                   MAINTENANCE COMMANDS                   VISUDO(1m)
        See the HISTORY file in the sudo distribution or visit
        http://www.sudo.ws/sudo/history.html for more details.
 
-[1mCAVEATS[0m
+CCAAVVEEAATTSS
        There is no easy way to prevent a user from gaining a root shell if the
-       editor used by [1mvisudo [22mallows shell escapes.
+       editor used by vviissuuddoo allows shell escapes.
 
-[1mBUGS[0m
-       If you feel you have found a bug in [1mvisudo[22m, please submit a bug report
+BBUUGGSS
+       If you feel you have found a bug in vviissuuddoo, please submit a bug report
        at http://www.sudo.ws/sudo/bugs/
 
-[1mSUPPORT[0m
+SSUUPPPPOORRTT
        Limited free support is available via the sudo-users mailing list, see
        http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or search
        the archives.
 
-[1mDISCLAIMER[0m
-       [1mvisudo [22mis provided ``AS IS'' and any express or implied warranties,
+DDIISSCCLLAAIIMMEERR
+       vviissuuddoo is provided ``AS IS'' and any express or implied warranties,
        including, but not limited to, the implied warranties of
        merchantability and fitness for a particular purpose are disclaimed.
-       See the LICENSE file distributed with [1msudo [22mor
+       See the LICENSE file distributed with ssuuddoo or
        http://www.sudo.ws/sudo/license.html for complete details.
 
 
 
-1.7.7                           August 13, 2011                     VISUDO(1m)
+1.7.8                         September 16, 2011                    VISUDO(1m)

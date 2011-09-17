@@ -2,11 +2,11 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
 
 
 
-[1mNAME[0m
+NNAAMMEE
        sudoers - list of which users may execute what
 
-[1mDESCRIPTION[0m
-       The [4msudoers[24m file is composed of two types of entries: aliases
+DDEESSCCRRIIPPTTIIOONN
+       The _s_u_d_o_e_r_s file is composed of two types of entries: aliases
        (basically variables) and user specifications (which specify who may
        run what).
 
@@ -14,17 +14,17 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
        Where there are multiple matches, the last match is used (which is not
        necessarily the most specific match).
 
-       The [4msudoers[24m grammar will be described below in Extended Backus-Naur
+       The _s_u_d_o_e_r_s grammar will be described below in Extended Backus-Naur
        Form (EBNF).  Don't despair if you don't know what EBNF is; it is
        fairly simple, and the definitions below are annotated.
 
-   [1mQuick guide to EBNF[0m
+   QQuuiicckk gguuiiddee ttoo EEBBNNFF
        EBNF is a concise and exact way of describing the grammar of a
-       language.  Each EBNF definition is made up of [4mproduction[24m [4mrules[24m.  E.g.,
+       language.  Each EBNF definition is made up of _p_r_o_d_u_c_t_i_o_n _r_u_l_e_s.  E.g.,
 
         symbol ::= definition | alternate1 | alternate2 ...
 
-       Each [4mproduction[24m [4mrule[24m references others and thus makes up a grammar for
+       Each _p_r_o_d_u_c_t_i_o_n _r_u_l_e references others and thus makes up a grammar for
        the language.  EBNF also contains the following operators, which many
        readers will recognize from regular expressions.  Do not, however,
        confuse them with "wildcard" characters, which have different meanings.
@@ -42,7 +42,7 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
        will use single quotes ('') to designate what is a verbatim character
        string (as opposed to a symbol name).
 
-   [1mAliases[0m
+   AAlliiaasseess
        There are four kinds of aliases: User_Alias, Runas_Alias, Host_Alias
        and Cmnd_Alias.
 
@@ -61,19 +61,19 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
 
         NAME ::= [A-Z]([A-Z][0-9]_)*
 
-       Each [4malias[24m definition is of the form
+       Each _a_l_i_a_s definition is of the form
 
         Alias_Type NAME = item1, item2, ...
 
-       where [4mAlias_Type[24m is one of User_Alias, Runas_Alias, Host_Alias, or
+       where _A_l_i_a_s___T_y_p_e is one of User_Alias, Runas_Alias, Host_Alias, or
        Cmnd_Alias.  A NAME is a string of uppercase letters, numbers, and
-       underscore characters ('_').  A NAME [1mmust [22mstart with an uppercase
+       underscore characters ('_').  A NAME mmuusstt start with an uppercase
        letter.  It is possible to put several alias definitions of the same
        type on a single line, joined by a colon (':').  E.g.,
 
         Alias_Type NAME = item1, item2, item3 : NAME = item4, item5
 
-       The definitions of what constitutes a valid [4malias[24m member follow.
+       The definitions of what constitutes a valid _a_l_i_a_s member follow.
 
         User_List ::= User |
                       User ',' User_List
@@ -147,7 +147,7 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
        A Host_List is made up of one or more host names, IP addresses, network
        numbers, netgroups (prefixed with '+') and other aliases.  Again, the
        value of an item may be negated with the '!' operator.  If you do not
-       specify a netmask along with the network number, [1msudo [22mwill query each
+       specify a netmask along with the network number, ssuuddoo will query each
        of the local host's network interfaces and, if the network number
        corresponds to one of the hosts's network interfaces, the corresponding
        netmask will be used.  The netmask may be specified either in standard
@@ -155,8 +155,8 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
        CIDR notation (number of bits, e.g. 24 or 64).  A host name may include
        shell-style wildcards (see the Wildcards section below), but unless the
        host name command on your machine returns the fully qualified host
-       name, you'll need to use the [4mfqdn[24m option for wildcards to be useful.
-       Note [1msudo [22monly inspects actual network interfaces; this means that IP
+       name, you'll need to use the _f_q_d_n option for wildcards to be useful.
+       Note ssuuddoo only inspects actual network interfaces; this means that IP
        address 127.0.0.1 (localhost) will never match.  Also, the host name
        "localhost" will only match if that is the actual host name, which is
        usually only the case for non-networked systems.
@@ -179,7 +179,7 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
        simple file name allows the user to run the command with any arguments
        he/she wishes.  However, you may also specify command line arguments
        (including wildcards).  Alternately, you can specify "" to indicate
-       that the command may only be run [1mwithout [22mcommand line arguments.  A
+       that the command may only be run wwiitthhoouutt command line arguments.  A
        directory is a fully qualified path name ending in a '/'.  When you
        specify a directory in a Cmnd_List, the user will be able to run any
        file within that directory (but not in any subdirectories therein).
@@ -189,10 +189,10 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
        (or match the wildcards if there are any).  Note that the following
        characters must be escaped with a '\' if they are used in command
        arguments: ',', ':', '=', '\'.  The special command "sudoedit" is used
-       to permit a user to run [1msudo [22mwith the [1m-e [22moption (or as [1msudoedit[22m).  It
+       to permit a user to run ssuuddoo with the --ee option (or as ssuuddooeeddiitt).  It
        may take command line arguments just as a normal command does.
 
-   [1mDefaults[0m
+   DDeeffaauullttss
        Certain configuration options may be changed from their default values
        at runtime via one or more Default_Entry lines.  These may affect all
        users on any host, all users on a specific host, a specific user, a
@@ -217,7 +217,7 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
                       Parameter '-=' Value |
                       '!'* Parameter
 
-       Parameters may be [1mflags[22m, [1minteger [22mvalues, [1mstrings[22m, or [1mlists[22m.  Flags are
+       Parameters may be ffllaaggss, iinntteeggeerr values, ssttrriinnggss, or lliissttss.  Flags are
        implicitly boolean and can be turned off via the '!'  operator.  Some
        integer, string and list parameters may also be used in a boolean
        context to disable them.  Values may be enclosed in double quotes (")
@@ -234,7 +234,7 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
 
        See "SUDOERS OPTIONS" for a list of supported Defaults parameters.
 
-   [1mUser Specification[0m
+   UUsseerr SSppeecciiffiiccaattiioonn
         User_Spec ::= User_List Host_List '=' Cmnd_Spec_List \
                       (':' Host_List '=' Cmnd_Spec_List)*
 
@@ -251,35 +251,35 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
                       'SETENV:' | 'NOSETENV:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
                       'LOG_OUTPUT:' | 'NOLOG_OUTPUT:')
 
-       A [1muser specification [22mdetermines which commands a user may run (and as
-       what user) on specified hosts.  By default, commands are run as [1mroot[22m,
+       A uusseerr ssppeecciiffiiccaattiioonn determines which commands a user may run (and as
+       what user) on specified hosts.  By default, commands are run as rroooott,
        but this can be changed on a per-command basis.
 
        The basic structure of a user specification is `who where = (as_whom)
        what'.  Let's break that down into its constituent parts:
 
-   [1mRunas_Spec[0m
+   RRuunnaass__SSppeecc
        A Runas_Spec determines the user and/or the group that a command may be
        run as.  A fully-specified Runas_Spec consists of two Runas_Lists (as
        defined above) separated by a colon (':') and enclosed in a set of
        parentheses.  The first Runas_List indicates which users the command
-       may be run as via [1msudo[22m's [1m-u [22moption.  The second defines a list of
-       groups that can be specified via [1msudo[22m's [1m-g [22moption.  If both Runas_Lists
+       may be run as via ssuuddoo's --uu option.  The second defines a list of
+       groups that can be specified via ssuuddoo's --gg option.  If both Runas_Lists
        are specified, the command may be run with any combination of users and
        groups listed in their respective Runas_Lists.  If only the first is
-       specified, the command may be run as any user in the list but no [1m-g[0m
+       specified, the command may be run as any user in the list but no --gg
        option may be specified.  If the first Runas_List is empty but the
        second is specified, the command may be run as the invoking user with
        the group set to any listed in the Runas_List.  If no Runas_Spec is
-       specified the command may be run as [1mroot [22mand no group may be specified.
+       specified the command may be run as rroooott and no group may be specified.
 
        A Runas_Spec sets the default for the commands that follow it.  What
        this means is that for the entry:
 
         dgb    boulder = (operator) /bin/ls, /bin/kill, /usr/bin/lprm
 
-       The user [1mdgb [22mmay run [4m/bin/ls[24m, [4m/bin/kill[24m, and [4m/usr/bin/lprm[24m -- but only
-       as [1moperator[22m.  E.g.,
+       The user ddggbb may run _/_b_i_n_/_l_s, _/_b_i_n_/_k_i_l_l, and _/_u_s_r_/_b_i_n_/_l_p_r_m -- but only
+       as ooppeerraattoorr.  E.g.,
 
         $ sudo -u operator /bin/ls
 
@@ -288,11 +288,11 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
 
         dgb    boulder = (operator) /bin/ls, (root) /bin/kill, /usr/bin/lprm
 
-       Then user [1mdgb [22mis now allowed to run [4m/bin/ls[24m as [1moperator[22m, but  [4m/bin/kill[0m
-       and [4m/usr/bin/lprm[24m as [1mroot[22m.
+       Then user ddggbb is now allowed to run _/_b_i_n_/_l_s as ooppeerraattoorr, but  _/_b_i_n_/_k_i_l_l
+       and _/_u_s_r_/_b_i_n_/_l_p_r_m as rroooott.
 
-       We can extend this to allow [1mdgb [22mto run /bin/ls with either the user or
-       group set to [1moperator[22m:
+       We can extend this to allow ddggbb to run /bin/ls with either the user or
+       group set to ooppeerraattoorr:
 
         dgb    boulder = (operator : operator) /bin/ls, (root) /bin/kill, \
                /usr/bin/lprm
@@ -307,34 +307,34 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
         $ sudo -u operator -g operator /bin/ls
         $ sudo -g operator /bin/ls
 
-       In the following example, user [1mtcm [22mmay run commands that access a modem
+       In the following example, user ttccmm may run commands that access a modem
        device file with the dialer group.
 
         tcm    boulder = (:dialer) /usr/bin/tip, /usr/bin/cu, \
                /usr/local/bin/minicom
 
        Note that in this example only the group will be set, the command still
-       runs as user [1mtcm[22m.  E.g.
+       runs as user ttccmm.  E.g.
 
         $ sudo -g dialer /usr/bin/cu
 
        Multiple users and groups may be present in a Runas_Spec, in which case
-       the user may select any combination of users and groups via the [1m-u [22mand
-       [1m-g [22moptions.  In this example:
+       the user may select any combination of users and groups via the --uu and
+       --gg options.  In this example:
 
         alan   ALL = (root, bin : operator, system) ALL
 
-       user [1malan [22mmay run any command as either user root or bin, optionally
+       user aallaann may run any command as either user root or bin, optionally
        setting the group to operator or system.
 
-   [1mSELinux_Spec[0m
-       On systems with SELinux support, [4msudoers[24m entries may optionally have an
+   SSEELLiinnuuxx__SSppeecc
+       On systems with SELinux support, _s_u_d_o_e_r_s entries may optionally have an
        SELinux role and/or type associated with a command.  If a role or type
        is specified with the command it will override any default values
-       specified in [4msudoers[24m.  A role or type specified on the command line,
-       however, will supercede the values in [4msudoers[24m.
+       specified in _s_u_d_o_e_r_s.  A role or type specified on the command line,
+       however, will supercede the values in _s_u_d_o_e_r_s.
 
-   [1mTag_Spec[0m
+   TTaagg__SSppeecc
        A command may have zero or more tags associated with it.  There are
        eight possible tag values, NOPASSWD, PASSWD, NOEXEC, EXEC, SETENV,
        NOSETENV, LOG_INPUT, NOLOG_INPUT, LOG_OUTPUT and NOLOG_OUTPUT.  Once a
@@ -342,9 +342,9 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
        the tag unless it is overridden by the opposite tag (i.e.: PASSWD
        overrides NOPASSWD and NOEXEC overrides EXEC).
 
-       [4mNOPASSWD[24m [4mand[24m [4mPASSWD[0m
+       _N_O_P_A_S_S_W_D _a_n_d _P_A_S_S_W_D
 
-       By default, [1msudo [22mrequires that a user authenticate him or herself
+       By default, ssuuddoo requires that a user authenticate him or herself
        before running a command.  This behavior can be modified via the
        NOPASSWD tag.  Like a Runas_Spec, the NOPASSWD tag sets a default for
        the commands that follow it in the Cmnd_Spec_List.  Conversely, the
@@ -352,15 +352,15 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
 
         ray    rushmore = NOPASSWD: /bin/kill, /bin/ls, /usr/bin/lprm
 
-       would allow the user [1mray [22mto run [4m/bin/kill[24m, [4m/bin/ls[24m, and [4m/usr/bin/lprm[0m
-       as [1mroot [22mon the machine rushmore without authenticating himself.  If we
-       only want [1mray [22mto be able to run [4m/bin/kill[24m without a password the entry
+       would allow the user rraayy to run _/_b_i_n_/_k_i_l_l, _/_b_i_n_/_l_s, and _/_u_s_r_/_b_i_n_/_l_p_r_m
+       as rroooott on the machine rushmore without authenticating himself.  If we
+       only want rraayy to be able to run _/_b_i_n_/_k_i_l_l without a password the entry
        would be:
 
         ray    rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
 
        Note, however, that the PASSWD tag has no effect on users who are in
-       the group specified by the [4mexempt_group[24m option.
+       the group specified by the _e_x_e_m_p_t___g_r_o_u_p option.
 
        By default, if the NOPASSWD tag is applied to any of the entries for a
        user on the current host, he or she will be able to run sudo -l without
@@ -369,49 +369,49 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
        pertain to the current host.  This behavior may be overridden via the
        verifypw and listpw options.
 
-       [4mNOEXEC[24m [4mand[24m [4mEXEC[0m
+       _N_O_E_X_E_C _a_n_d _E_X_E_C
 
-       If [1msudo [22mhas been compiled with [4mnoexec[24m support and the underlying
+       If ssuuddoo has been compiled with _n_o_e_x_e_c support and the underlying
        operating system supports it, the NOEXEC tag can be used to prevent a
        dynamically-linked executable from running further commands itself.
 
-       In the following example, user [1maaron [22mmay run [4m/usr/bin/more[24m and
-       [4m/usr/bin/vi[24m but shell escapes will be disabled.
+       In the following example, user aaaarroonn may run _/_u_s_r_/_b_i_n_/_m_o_r_e and
+       _/_u_s_r_/_b_i_n_/_v_i but shell escapes will be disabled.
 
         aaron  shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 
        See the "PREVENTING SHELL ESCAPES" section below for more details on
        how NOEXEC works and whether or not it will work on your system.
 
-       [4mSETENV[24m [4mand[24m [4mNOSETENV[0m
+       _S_E_T_E_N_V _a_n_d _N_O_S_E_T_E_N_V
 
-       These tags override the value of the [4msetenv[24m option on a per-command
+       These tags override the value of the _s_e_t_e_n_v option on a per-command
        basis.  Note that if SETENV has been set for a command, the user may
-       disable the [4menv_reset[24m option from the command line via the [1m-E [22moption.
+       disable the _e_n_v___r_e_s_e_t option from the command line via the --EE option.
        Additionally, environment variables set on the command line are not
-       subject to the restrictions imposed by [4menv_check[24m, [4menv_delete[24m, or
-       [4menv_keep[24m.  As such, only trusted users should be allowed to set
-       variables in this manner.  If the command matched is [1mALL[22m, the SETENV
+       subject to the restrictions imposed by _e_n_v___c_h_e_c_k, _e_n_v___d_e_l_e_t_e, or
+       _e_n_v___k_e_e_p.  As such, only trusted users should be allowed to set
+       variables in this manner.  If the command matched is AALLLL, the SETENV
        tag is implied for that command; this default may be overridden by use
        of the NOSETENV tag.
 
-       [4mLOG_INPUT[24m [4mand[24m [4mNOLOG_INPUT[0m
+       _L_O_G___I_N_P_U_T _a_n_d _N_O_L_O_G___I_N_P_U_T
 
-       These tags override the value of the [4mlog_input[24m option on a per-command
-       basis.  For more information, see the description of [4mlog_input[24m in the
+       These tags override the value of the _l_o_g___i_n_p_u_t option on a per-command
+       basis.  For more information, see the description of _l_o_g___i_n_p_u_t in the
        "SUDOERS OPTIONS" section below.
 
-       [4mLOG_OUTPUT[24m [4mand[24m [4mNOLOG_OUTPUT[0m
+       _L_O_G___O_U_T_P_U_T _a_n_d _N_O_L_O_G___O_U_T_P_U_T
 
-       These tags override the value of the [4mlog_output[24m option on a per-command
-       basis.  For more information, see the description of [4mlog_output[24m in the
+       These tags override the value of the _l_o_g___o_u_t_p_u_t option on a per-command
+       basis.  For more information, see the description of _l_o_g___o_u_t_p_u_t in the
        "SUDOERS OPTIONS" section below.
 
-   [1mWildcards[0m
-       [1msudo [22mallows shell-style [4mwildcards[24m (aka meta or glob characters) to be
+   WWiillddccaarrddss
+       ssuuddoo allows shell-style _w_i_l_d_c_a_r_d_s (aka meta or glob characters) to be
        used in host names, path names and command line arguments in the
-       [4msudoers[24m file.  Wildcard matching is done via the [1mPOSIX [4m[22mglob[24m(3) and
-       [4mfnmatch[24m(3) routines.  Note that these are [4mnot[24m regular expressions.
+       _s_u_d_o_e_r_s file.  Wildcard matching is done via the PPOOSSIIXX _g_l_o_b(3) and
+       _f_n_m_a_t_c_h(3) routines.  Note that these are _n_o_t regular expressions.
 
        *       Matches any set of zero or more characters.
 
@@ -419,50 +419,50 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
 
        [...]   Matches any character in the specified range.
 
-       [!...]  Matches any character [1mnot [22min the specified range.
+       [!...]  Matches any character nnoott in the specified range.
 
        \x      For any character "x", evaluates to "x".  This is used to
                escape special characters such as: "*", "?", "[", and "}".
 
-       POSIX character classes may also be used if your system's [4mglob[24m(3) and
-       [4mfnmatch[24m(3) functions support them.  However, because the ':' character
-       has special meaning in [4msudoers[24m, it must be escaped.  For example:
+       POSIX character classes may also be used if your system's _g_l_o_b(3) and
+       _f_n_m_a_t_c_h(3) functions support them.  However, because the ':' character
+       has special meaning in _s_u_d_o_e_r_s, it must be escaped.  For example:
 
            /bin/ls [[\:alpha\:]]*
 
        Would match any file name beginning with a letter.
 
-       Note that a forward slash ('/') will [1mnot [22mbe matched by wildcards used
+       Note that a forward slash ('/') will nnoott be matched by wildcards used
        in the path name.  When matching the command line arguments, however, a
-       slash [1mdoes [22mget matched by wildcards.  This is to make a path like:
+       slash ddooeess get matched by wildcards.  This is to make a path like:
 
            /usr/bin/*
 
-       match [4m/usr/bin/who[24m but not [4m/usr/bin/X11/xterm[24m.
+       match _/_u_s_r_/_b_i_n_/_w_h_o but not _/_u_s_r_/_b_i_n_/_X_1_1_/_x_t_e_r_m.
 
-   [1mExceptions to wildcard rules[0m
+   EExxcceeppttiioonnss ttoo wwiillddccaarrdd rruulleess
        The following exceptions apply to the above rules:
 
        ""      If the empty string "" is the only command line argument in the
-               [4msudoers[24m entry it means that command is not allowed to be run
-               with [1many [22marguments.
+               _s_u_d_o_e_r_s entry it means that command is not allowed to be run
+               with aannyy arguments.
 
-   [1mIncluding other files from within sudoers[0m
-       It is possible to include other [4msudoers[24m files from within the [4msudoers[0m
+   IInncclluuddiinngg ootthheerr ffiilleess ffrroomm wwiitthhiinn ssuuddooeerrss
+       It is possible to include other _s_u_d_o_e_r_s files from within the _s_u_d_o_e_r_s
        file currently being parsed using the #include and #includedir
        directives.
 
-       This can be used, for example, to keep a site-wide [4msudoers[24m file in
+       This can be used, for example, to keep a site-wide _s_u_d_o_e_r_s file in
        addition to a local, per-machine file.  For the sake of this example
-       the site-wide [4msudoers[24m will be [4m/etc/sudoers[24m and the per-machine one will
-       be [4m/etc/sudoers.local[24m.  To include [4m/etc/sudoers.local[24m from within
-       [4m/etc/sudoers[24m we would use the following line in [4m/etc/sudoers[24m:
+       the site-wide _s_u_d_o_e_r_s will be _/_e_t_c_/_s_u_d_o_e_r_s and the per-machine one will
+       be _/_e_t_c_/_s_u_d_o_e_r_s_._l_o_c_a_l.  To include _/_e_t_c_/_s_u_d_o_e_r_s_._l_o_c_a_l from within
+       _/_e_t_c_/_s_u_d_o_e_r_s we would use the following line in _/_e_t_c_/_s_u_d_o_e_r_s:
 
            #include /etc/sudoers.local
 
-       When [1msudo [22mreaches this line it will suspend processing of the current
-       file ([4m/etc/sudoers[24m) and switch to [4m/etc/sudoers.local[24m.  Upon reaching
-       the end of [4m/etc/sudoers.local[24m, the rest of [4m/etc/sudoers[24m will be
+       When ssuuddoo reaches this line it will suspend processing of the current
+       file (_/_e_t_c_/_s_u_d_o_e_r_s) and switch to _/_e_t_c_/_s_u_d_o_e_r_s_._l_o_c_a_l.  Upon reaching
+       the end of _/_e_t_c_/_s_u_d_o_e_r_s_._l_o_c_a_l, the rest of _/_e_t_c_/_s_u_d_o_e_r_s will be
        processed.  Files that are included may themselves include other files.
        A hard limit of 128 nested include files is enforced to prevent include
        file loops.
@@ -472,45 +472,45 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
 
        #include /etc/sudoers.%h
 
-       will cause [1msudo [22mto include the file [4m/etc/sudoers.xerxes[24m.
+       will cause ssuuddoo to include the file _/_e_t_c_/_s_u_d_o_e_r_s_._x_e_r_x_e_s.
 
-       The #includedir directive can be used to create a [4msudo.d[24m directory that
-       the system package manager can drop [4msudoers[24m rules into as part of
+       The #includedir directive can be used to create a _s_u_d_o_._d directory that
+       the system package manager can drop _s_u_d_o_e_r_s rules into as part of
        package installation.  For example, given:
 
        #includedir /etc/sudoers.d
 
-       [1msudo [22mwill read each file in [4m/etc/sudoers.d[24m, skipping file names that
+       ssuuddoo will read each file in _/_e_t_c_/_s_u_d_o_e_r_s_._d, skipping file names that
        end in ~ or contain a . character to avoid causing problems with
        package manager or editor temporary/backup files.  Files are parsed in
-       sorted lexical order.  That is, [4m/etc/sudoers.d/01_first[24m will be parsed
-       before [4m/etc/sudoers.d/10_second[24m.  Be aware that because the sorting is
-       lexical, not numeric, [4m/etc/sudoers.d/1_whoops[24m would be loaded [1mafter[0m
-       [4m/etc/sudoers.d/10_second[24m.  Using a consistent number of leading zeroes
+       sorted lexical order.  That is, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_0_1___f_i_r_s_t will be parsed
+       before _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Be aware that because the sorting is
+       lexical, not numeric, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1___w_h_o_o_p_s would be loaded aafftteerr
+       _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Using a consistent number of leading zeroes
        in the file names can be used to avoid such problems.
 
-       Note that unlike files included via #include, [1mvisudo [22mwill not edit the
+       Note that unlike files included via #include, vviissuuddoo will not edit the
        files in a #includedir directory unless one of them contains a syntax
-       error.  It is still possible to run [1mvisudo [22mwith the -f flag to edit the
+       error.  It is still possible to run vviissuuddoo with the -f flag to edit the
        files directly.
 
-   [1mOther special characters and reserved words[0m
+   OOtthheerr ssppeecciiaall cchhaarraacctteerrss aanndd rreesseerrvveedd wwoorrddss
        The pound sign ('#') is used to indicate a comment (unless it is part
        of a #include directive or unless it occurs in the context of a user
        name and is followed by one or more digits, in which case it is treated
        as a uid).  Both the comment character and any text after it, up to the
        end of the line, are ignored.
 
-       The reserved word [1mALL [22mis a built-in [4malias[24m that always causes a match to
+       The reserved word AALLLL is a built-in _a_l_i_a_s that always causes a match to
        succeed.  It can be used wherever one might otherwise use a Cmnd_Alias,
        User_Alias, Runas_Alias, or Host_Alias.  You should not try to define
-       your own [4malias[24m called [1mALL [22mas the built-in alias will be used in
-       preference to your own.  Please note that using [1mALL [22mcan be dangerous
-       since in a command context, it allows the user to run [1many [22mcommand on
+       your own _a_l_i_a_s called AALLLL as the built-in alias will be used in
+       preference to your own.  Please note that using AALLLL can be dangerous
+       since in a command context, it allows the user to run aannyy command on
        the system.
 
-       An exclamation point ('!') can be used as a logical [4mnot[24m operator both
-       in an [4malias[24m and in front of a Cmnd.  This allows one to exclude certain
+       An exclamation point ('!') can be used as a logical _n_o_t operator both
+       in an _a_l_i_a_s and in front of a Cmnd.  This allows one to exclude certain
        values.  Note, however, that using a ! in conjunction with the built-in
        ALL alias to allow a user to run "all but a few" commands rarely works
        as intended (see SECURITY NOTES below).
@@ -519,90 +519,90 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
        character on the line.
 
        Whitespace between elements in a list as well as special syntactic
-       characters in a [4mUser[24m [4mSpecification[24m ('=', ':', '(', ')') is optional.
+       characters in a _U_s_e_r _S_p_e_c_i_f_i_c_a_t_i_o_n ('=', ':', '(', ')') is optional.
 
        The following characters must be escaped with a backslash ('\') when
        used as part of a word (e.g. a user name or host name): '!', '=', ':',
        ',', '(', ')', '\'.
 
-[1mSUDOERS OPTIONS[0m
-       [1msudo[22m's behavior can be modified by Default_Entry lines, as explained
+SSUUDDOOEERRSS OOPPTTIIOONNSS
+       ssuuddoo's behavior can be modified by Default_Entry lines, as explained
        earlier.  A list of all supported Defaults parameters, grouped by type,
        are listed below.
 
-       [1mBoolean Flags[22m:
+       BBoooolleeaann FFllaaggss:
 
-       always_set_home If enabled, [1msudo [22mwill set the HOME environment variable
+       always_set_home If enabled, ssuuddoo will set the HOME environment variable
                        to the home directory of the target user (which is root
-                       unless the [1m-u [22moption is used).  This effectively means
-                       that the [1m-H [22moption is always implied.  Note that HOME
-                       is already set when the the [4menv_reset[24m option is
-                       enabled, so [4malways_set_home[24m is only effective for
-                       configurations where either [4menv_reset[24m is disabled or
-                       HOME is present in the [4menv_keep[24m list.  This flag is [4moff[0m
+                       unless the --uu option is used).  This effectively means
+                       that the --HH option is always implied.  Note that HOME
+                       is already set when the the _e_n_v___r_e_s_e_t option is
+                       enabled, so _a_l_w_a_y_s___s_e_t___h_o_m_e is only effective for
+                       configurations where either _e_n_v___r_e_s_e_t is disabled or
+                       HOME is present in the _e_n_v___k_e_e_p list.  This flag is _o_f_f
                        by default.
 
        authenticate    If set, users must authenticate themselves via a
                        password (or other means of authentication) before they
                        may run commands.  This default may be overridden via
-                       the PASSWD and NOPASSWD tags.  This flag is [4mon[24m by
+                       the PASSWD and NOPASSWD tags.  This flag is _o_n by
                        default.
 
        closefrom_override
-                       If set, the user may use [1msudo[22m's [1m-C [22moption which
-                       overrides the default starting point at which [1msudo[0m
-                       begins closing open file descriptors.  This flag is [4moff[0m
+                       If set, the user may use ssuuddoo's --CC option which
+                       overrides the default starting point at which ssuuddoo
+                       begins closing open file descriptors.  This flag is _o_f_f
                        by default.
 
-       compress_io     If set, and [1msudo [22mis configured to log a command's input
-                       or output, the I/O logs will be compressed using [1mzlib[22m.
-                       This flag is [4mon[24m by default when [1msudo [22mis compiled with
-                       [1mzlib [22msupport.
+       compress_io     If set, and ssuuddoo is configured to log a command's input
+                       or output, the I/O logs will be compressed using zzlliibb.
+                       This flag is _o_n by default when ssuuddoo is compiled with
+                       zzlliibb support.
 
-       env_editor      If set, [1mvisudo [22mwill use the value of the EDITOR or
+       env_editor      If set, vviissuuddoo will use the value of the EDITOR or
                        VISUAL environment variables before falling back on the
                        default editor list.  Note that this may create a
                        security hole as it allows the user to run any
                        arbitrary command as root without logging.  A safer
                        alternative is to place a colon-separated list of
-                       editors in the editor variable.  [1mvisudo [22mwill then only
+                       editors in the editor variable.  vviissuuddoo will then only
                        use the EDITOR or VISUAL if they match a value
-                       specified in editor.  This flag is [4moff[24m by default.
+                       specified in editor.  This flag is _o_f_f by default.
 
-       env_reset       If set, [1msudo [22mwill reset the environment to only contain
+       env_reset       If set, ssuuddoo will reset the environment to only contain
                        the LOGNAME, MAIL, SHELL, USER, USERNAME and the SUDO_*
                        variables.  Any variables in the caller's environment
                        that match the env_keep and env_check lists are then
                        added.  The default contents of the env_keep and
-                       env_check lists are displayed when [1msudo [22mis run by root
-                       with the [4m-V[24m option.  If the [4msecure_path[24m option is set,
+                       env_check lists are displayed when ssuuddoo is run by root
+                       with the _-_V option.  If the _s_e_c_u_r_e___p_a_t_h option is set,
                        its value will be used for the PATH environment
-                       variable.  This flag is [4mon[24m by default.
+                       variable.  This flag is _o_n by default.
 
-       fast_glob       Normally, [1msudo [22muses the [4mglob[24m(3) function to do shell-
+       fast_glob       Normally, ssuuddoo uses the _g_l_o_b(3) function to do shell-
                        style globbing when matching path names.  However,
-                       since it accesses the file system, [4mglob[24m(3) can take a
+                       since it accesses the file system, _g_l_o_b(3) can take a
                        long time to complete for some patterns, especially
                        when the pattern references a network file system that
-                       is mounted on demand (automounted).  The [4mfast_glob[0m
-                       option causes [1msudo [22mto use the [4mfnmatch[24m(3) function,
+                       is mounted on demand (automounted).  The _f_a_s_t___g_l_o_b
+                       option causes ssuuddoo to use the _f_n_m_a_t_c_h(3) function,
                        which does not access the file system to do its
-                       matching.  The disadvantage of [4mfast_glob[24m is that it is
-                       unable to match relative path names such as [4m./ls[24m or
-                       [4m../bin/ls[24m.  This has security implications when path
+                       matching.  The disadvantage of _f_a_s_t___g_l_o_b is that it is
+                       unable to match relative path names such as _._/_l_s or
+                       _._._/_b_i_n_/_l_s.  This has security implications when path
                        names that include globbing characters are used with
                        the negation operator, '!', as such rules can be
                        trivially bypassed.  As such, this option should not be
-                       used when [4msudoers[24m contains rules that contain negated
+                       used when _s_u_d_o_e_r_s contains rules that contain negated
                        path names which include globbing characters.  This
-                       flag is [4moff[24m by default.
+                       flag is _o_f_f by default.
 
        fqdn            Set this flag if you want to put fully qualified host
-                       names in the [4msudoers[24m file.  I.e., instead of myhost you
+                       names in the _s_u_d_o_e_r_s file.  I.e., instead of myhost you
                        would use myhost.mydomain.edu.  You may still use the
                        short form if you wish (and even mix the two).  Beware
-                       that turning on [4mfqdn[24m requires [1msudo [22mto make DNS lookups
-                       which may make [1msudo [22munusable if DNS stops working (for
+                       that turning on _f_q_d_n requires ssuuddoo to make DNS lookups
+                       which may make ssuuddoo unusable if DNS stops working (for
                        example if the machine is not plugged into the
                        network).  Also note that you must use the host's
                        official name as DNS knows it.  That is, you may not
@@ -610,265 +610,265 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
                        issues and the fact that there is no way to get all
                        aliases from DNS.  If your machine's host name (as
                        returned by the hostname command) is already fully
-                       qualified you shouldn't need to set [4mfqdn[24m.  This flag is
-                       [4moff[24m by default.
+                       qualified you shouldn't need to set _f_q_d_n.  This flag is
+                       _o_f_f by default.
 
-       ignore_dot      If set, [1msudo [22mwill ignore '.' or '' (current dir) in the
+       ignore_dot      If set, ssuuddoo will ignore '.' or '' (current dir) in the
                        PATH environment variable; the PATH itself is not
-                       modified.  This flag is [4moff[24m by default.
+                       modified.  This flag is _o_f_f by default.
 
        ignore_local_sudoers
-                       If set via LDAP, parsing of [4m/etc/sudoers[24m will be
+                       If set via LDAP, parsing of _/_e_t_c_/_s_u_d_o_e_r_s will be
                        skipped.  This is intended for Enterprises that wish to
                        prevent the usage of local sudoers files so that only
                        LDAP is used.  This thwarts the efforts of rogue
                        operators who would attempt to add roles to
-                       [4m/etc/sudoers[24m.  When this option is present,
-                       [4m/etc/sudoers[24m does not even need to exist. Since this
-                       option tells [1msudo [22mhow to behave when no specific LDAP
+                       _/_e_t_c_/_s_u_d_o_e_r_s.  When this option is present,
+                       _/_e_t_c_/_s_u_d_o_e_r_s does not even need to exist. Since this
+                       option tells ssuuddoo how to behave when no specific LDAP
                        entries have been matched, this sudoOption is only
                        meaningful for the cn=defaults section.  This flag is
-                       [4moff[24m by default.
+                       _o_f_f by default.
 
-       insults         If set, [1msudo [22mwill insult users when they enter an
-                       incorrect password.  This flag is [4moff[24m by default.
+       insults         If set, ssuuddoo will insult users when they enter an
+                       incorrect password.  This flag is _o_f_f by default.
 
        log_host        If set, the host name will be logged in the (non-
-                       syslog) [1msudo [22mlog file.  This flag is [4moff[24m by default.
+                       syslog) ssuuddoo log file.  This flag is _o_f_f by default.
 
-       log_input       If set, [1msudo [22mwill run the command in a [4mpseudo[24m [4mtty[24m and
+       log_input       If set, ssuuddoo will run the command in a _p_s_e_u_d_o _t_t_y and
                        log all user input.  If the standard input is not
                        connected to the user's tty, due to I/O redirection or
                        because the command is part of a pipeline, that input
                        is also captured and stored in a separate log file.
 
                        Input is logged to the directory specified by the
-                       [4miolog_dir[24m option ([4m/var/log/sudo-io[24m by default) using a
-                       unique session ID that is included in the normal [1msudo[0m
-                       log line, prefixed with [4mTSID=[24m.
+                       _i_o_l_o_g___d_i_r option (_/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o by default) using a
+                       unique session ID that is included in the normal ssuuddoo
+                       log line, prefixed with _T_S_I_D_=.
 
                        Note that user input may contain sensitive information
                        such as passwords (even if they are not echoed to the
                        screen), which will be stored in the log file
                        unencrypted.  In most cases, logging the command output
-                       via [4mlog_output[24m is all that is required.
+                       via _l_o_g___o_u_t_p_u_t is all that is required.
 
-       log_output      If set, [1msudo [22mwill run the command in a [4mpseudo[24m [4mtty[24m and
+       log_output      If set, ssuuddoo will run the command in a _p_s_e_u_d_o _t_t_y and
                        log all output that is sent to the screen, similar to
-                       the [4mscript[24m(1) command.  If the standard output or
+                       the _s_c_r_i_p_t(1) command.  If the standard output or
                        standard error is not connected to the user's tty, due
                        to I/O redirection or because the command is part of a
                        pipeline, that output is also captured and stored in
                        separate log files.
 
                        Output is logged to the directory specified by the
-                       [4miolog_dir[24m option ([4m/var/log/sudo-io[24m by default) using a
-                       unique session ID that is included in the normal [1msudo[0m
-                       log line, prefixed with [4mTSID=[24m.
+                       _i_o_l_o_g___d_i_r option (_/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o by default) using a
+                       unique session ID that is included in the normal ssuuddoo
+                       log line, prefixed with _T_S_I_D_=.
 
-                       Output logs may be viewed with the [4msudoreplay[24m(1m)
+                       Output logs may be viewed with the _s_u_d_o_r_e_p_l_a_y(1m)
                        utility, which can also be used to list or search the
                        available logs.
 
        log_year        If set, the four-digit year will be logged in the (non-
-                       syslog) [1msudo [22mlog file.  This flag is [4moff[24m by default.
+                       syslog) ssuuddoo log file.  This flag is _o_f_f by default.
 
        long_otp_prompt When validating with a One Time Password (OTP) scheme
-                       such as [1mS/Key [22mor [1mOPIE[22m, a two-line prompt is used to
+                       such as SS//KKeeyy or OOPPIIEE, a two-line prompt is used to
                        make it easier to cut and paste the challenge to a
                        local window.  It's not as pretty as the default but
-                       some people find it more convenient.  This flag is [4moff[0m
+                       some people find it more convenient.  This flag is _o_f_f
                        by default.
 
-       mail_always     Send mail to the [4mmailto[24m user every time a users runs
-                       [1msudo[22m.  This flag is [4moff[24m by default.
+       mail_always     Send mail to the _m_a_i_l_t_o user every time a users runs
+                       ssuuddoo.  This flag is _o_f_f by default.
 
-       mail_badpass    Send mail to the [4mmailto[24m user if the user running [1msudo[0m
-                       does not enter the correct password.  This flag is [4moff[0m
+       mail_badpass    Send mail to the _m_a_i_l_t_o user if the user running ssuuddoo
+                       does not enter the correct password.  This flag is _o_f_f
                        by default.
 
-       mail_no_host    If set, mail will be sent to the [4mmailto[24m user if the
-                       invoking user exists in the [4msudoers[24m file, but is not
+       mail_no_host    If set, mail will be sent to the _m_a_i_l_t_o user if the
+                       invoking user exists in the _s_u_d_o_e_r_s file, but is not
                        allowed to run commands on the current host.  This flag
-                       is [4moff[24m by default.
+                       is _o_f_f by default.
 
-       mail_no_perms   If set, mail will be sent to the [4mmailto[24m user if the
-                       invoking user is allowed to use [1msudo [22mbut the command
-                       they are trying is not listed in their [4msudoers[24m file
-                       entry or is explicitly denied.  This flag is [4moff[24m by
+       mail_no_perms   If set, mail will be sent to the _m_a_i_l_t_o user if the
+                       invoking user is allowed to use ssuuddoo but the command
+                       they are trying is not listed in their _s_u_d_o_e_r_s file
+                       entry or is explicitly denied.  This flag is _o_f_f by
                        default.
 
-       mail_no_user    If set, mail will be sent to the [4mmailto[24m user if the
-                       invoking user is not in the [4msudoers[24m file.  This flag is
-                       [4mon[24m by default.
+       mail_no_user    If set, mail will be sent to the _m_a_i_l_t_o user if the
+                       invoking user is not in the _s_u_d_o_e_r_s file.  This flag is
+                       _o_n by default.
 
-       noexec          If set, all commands run via [1msudo [22mwill behave as if the
+       noexec          If set, all commands run via ssuuddoo will behave as if the
                        NOEXEC tag has been set, unless overridden by a EXEC
-                       tag.  See the description of [4mNOEXEC[24m [4mand[24m [4mEXEC[24m below as
+                       tag.  See the description of _N_O_E_X_E_C _a_n_d _E_X_E_C below as
                        well as the "PREVENTING SHELL ESCAPES" section at the
-                       end of this manual.  This flag is [4moff[24m by default.
+                       end of this manual.  This flag is _o_f_f by default.
 
-       path_info       Normally, [1msudo [22mwill tell the user when a command could
+       path_info       Normally, ssuuddoo will tell the user when a command could
                        not be found in their PATH environment variable.  Some
                        sites may wish to disable this as it could be used to
                        gather information on the location of executables that
                        the normal user does not have access to.  The
                        disadvantage is that if the executable is simply not in
-                       the user's PATH, [1msudo [22mwill tell the user that they are
+                       the user's PATH, ssuuddoo will tell the user that they are
                        not allowed to run it, which can be confusing.  This
-                       flag is [4mon[24m by default.
+                       flag is _o_n by default.
 
        passprompt_override
-                       The password prompt specified by [4mpassprompt[24m will
+                       The password prompt specified by _p_a_s_s_p_r_o_m_p_t will
                        normally only be used if the password prompt provided
                        by systems such as PAM matches the string "Password:".
-                       If [4mpassprompt_override[24m is set, [4mpassprompt[24m will always
-                       be used.  This flag is [4moff[24m by default.
+                       If _p_a_s_s_p_r_o_m_p_t___o_v_e_r_r_i_d_e is set, _p_a_s_s_p_r_o_m_p_t will always
+                       be used.  This flag is _o_f_f by default.
 
-       preserve_groups By default, [1msudo [22mwill initialize the group vector to
+       preserve_groups By default, ssuuddoo will initialize the group vector to
                        the list of groups the target user is in.  When
-                       [4mpreserve_groups[24m is set, the user's existing group
+                       _p_r_e_s_e_r_v_e___g_r_o_u_p_s is set, the user's existing group
                        vector is left unaltered.  The real and effective group
                        IDs, however, are still set to match the target user.
-                       This flag is [4moff[24m by default.
+                       This flag is _o_f_f by default.
 
-       pwfeedback      By default, [1msudo [22mreads the password like most other
+       pwfeedback      By default, ssuuddoo reads the password like most other
                        Unix programs, by turning off echo until the user hits
                        the return (or enter) key.  Some users become confused
-                       by this as it appears to them that [1msudo [22mhas hung at
-                       this point.  When [4mpwfeedback[24m is set, [1msudo [22mwill provide
+                       by this as it appears to them that ssuuddoo has hung at
+                       this point.  When _p_w_f_e_e_d_b_a_c_k is set, ssuuddoo will provide
                        visual feedback when the user presses a key.  Note that
                        this does have a security impact as an onlooker may be
                        able to determine the length of the password being
-                       entered.  This flag is [4moff[24m by default.
+                       entered.  This flag is _o_f_f by default.
 
-       requiretty      If set, [1msudo [22mwill only run when the user is logged in
-                       to a real tty.  When this flag is set, [1msudo [22mcan only be
+       requiretty      If set, ssuuddoo will only run when the user is logged in
+                       to a real tty.  When this flag is set, ssuuddoo can only be
                        run from a login session and not via other means such
-                       as [4mcron[24m(1m) or cgi-bin scripts.  This flag is [4moff[24m by
+                       as _c_r_o_n(1m) or cgi-bin scripts.  This flag is _o_f_f by
                        default.
 
-       root_sudo       If set, root is allowed to run [1msudo [22mtoo.  Disabling
-                       this prevents users from "chaining" [1msudo [22mcommands to
+       root_sudo       If set, root is allowed to run ssuuddoo too.  Disabling
+                       this prevents users from "chaining" ssuuddoo commands to
                        get a root shell by doing something like "sudo sudo
-                       /bin/sh".  Note, however, that turning off [4mroot_sudo[0m
-                       will also prevent root from running [1msudoedit[22m.
-                       Disabling [4mroot_sudo[24m provides no real additional
+                       /bin/sh".  Note, however, that turning off _r_o_o_t___s_u_d_o
+                       will also prevent root from running ssuuddooeeddiitt.
+                       Disabling _r_o_o_t___s_u_d_o provides no real additional
                        security; it exists purely for historical reasons.
-                       This flag is [4mon[24m by default.
+                       This flag is _o_n by default.
 
-       rootpw          If set, [1msudo [22mwill prompt for the root password instead
-                       of the password of the invoking user.  This flag is [4moff[0m
+       rootpw          If set, ssuuddoo will prompt for the root password instead
+                       of the password of the invoking user.  This flag is _o_f_f
                        by default.
 
-       runaspw         If set, [1msudo [22mwill prompt for the password of the user
-                       defined by the [4mrunas_default[24m option (defaults to root)
+       runaspw         If set, ssuuddoo will prompt for the password of the user
+                       defined by the _r_u_n_a_s___d_e_f_a_u_l_t option (defaults to root)
                        instead of the password of the invoking user.  This
-                       flag is [4moff[24m by default.
+                       flag is _o_f_f by default.
 
-       set_home        If enabled and [1msudo [22mis invoked with the [1m-s [22moption the
+       set_home        If enabled and ssuuddoo is invoked with the --ss option the
                        HOME environment variable will be set to the home
                        directory of the target user (which is root unless the
-                       [1m-u [22moption is used).  This effectively makes the [1m-s[0m
-                       option imply [1m-H[22m.  Note that HOME is already set when
-                       the the [4menv_reset[24m option is enabled, so [4mset_home[24m is
+                       --uu option is used).  This effectively makes the --ss
+                       option imply --HH.  Note that HOME is already set when
+                       the the _e_n_v___r_e_s_e_t option is enabled, so _s_e_t___h_o_m_e is
                        only effective for configurations where either
-                       [4menv_reset[24m is disabled or HOME is present in the
-                       [4menv_keep[24m list.  This flag is [4moff[24m by default.
+                       _e_n_v___r_e_s_e_t is disabled or HOME is present in the
+                       _e_n_v___k_e_e_p list.  This flag is _o_f_f by default.
 
-       set_logname     Normally, [1msudo [22mwill set the LOGNAME, USER and USERNAME
+       set_logname     Normally, ssuuddoo will set the LOGNAME, USER and USERNAME
                        environment variables to the name of the target user
-                       (usually root unless the [1m-u [22moption is given).  However,
+                       (usually root unless the --uu option is given).  However,
                        since some programs (including the RCS revision control
                        system) use LOGNAME to determine the real identity of
                        the user, it may be desirable to change this behavior.
                        This can be done by negating the set_logname option.
-                       Note that if the [4menv_reset[24m option has not been
-                       disabled, entries in the [4menv_keep[24m list will override
-                       the value of [4mset_logname[24m.  This flag is [4mon[24m by default.
+                       Note that if the _e_n_v___r_e_s_e_t option has not been
+                       disabled, entries in the _e_n_v___k_e_e_p list will override
+                       the value of _s_e_t___l_o_g_n_a_m_e.  This flag is _o_n by default.
 
-       setenv          Allow the user to disable the [4menv_reset[24m option from the
+       setenv          Allow the user to disable the _e_n_v___r_e_s_e_t option from the
                        command line.  Additionally, environment variables set
                        via the command line are not subject to the
-                       restrictions imposed by [4menv_check[24m, [4menv_delete[24m, or
-                       [4menv_keep[24m.  As such, only trusted users should be
+                       restrictions imposed by _e_n_v___c_h_e_c_k, _e_n_v___d_e_l_e_t_e, or
+                       _e_n_v___k_e_e_p.  As such, only trusted users should be
                        allowed to set variables in this manner.  This flag is
-                       [4moff[24m by default.
+                       _o_f_f by default.
 
-       shell_noargs    If set and [1msudo [22mis invoked with no arguments it acts as
-                       if the [1m-s [22moption had been given.  That is, it runs a
+       shell_noargs    If set and ssuuddoo is invoked with no arguments it acts as
+                       if the --ss option had been given.  That is, it runs a
                        shell as root (the shell is determined by the SHELL
                        environment variable if it is set, falling back on the
                        shell listed in the invoking user's /etc/passwd entry
-                       if not).  This flag is [4moff[24m by default.
+                       if not).  This flag is _o_f_f by default.
 
-       stay_setuid     Normally, when [1msudo [22mexecutes a command the real and
+       stay_setuid     Normally, when ssuuddoo executes a command the real and
                        effective UIDs are set to the target user (root by
                        default).  This option changes that behavior such that
                        the real UID is left as the invoking user's UID.  In
-                       other words, this makes [1msudo [22mact as a setuid wrapper.
+                       other words, this makes ssuuddoo act as a setuid wrapper.
                        This can be useful on systems that disable some
                        potentially dangerous functionality when a program is
                        run setuid.  This option is only effective on systems
-                       with either the [4msetreuid()[24m or [4msetresuid()[24m function.
-                       This flag is [4moff[24m by default.
+                       with either the _s_e_t_r_e_u_i_d_(_) or _s_e_t_r_e_s_u_i_d_(_) function.
+                       This flag is _o_f_f by default.
 
-       targetpw        If set, [1msudo [22mwill prompt for the password of the user
-                       specified by the [1m-u [22moption (defaults to root) instead
+       targetpw        If set, ssuuddoo will prompt for the password of the user
+                       specified by the --uu option (defaults to root) instead
                        of the password of the invoking user.  In addition, the
                        timestamp file name will include the target user's
                        name.  Note that this flag precludes the use of a uid
                        not listed in the passwd database as an argument to the
-                       [1m-u [22moption.  This flag is [4moff[24m by default.
+                       --uu option.  This flag is _o_f_f by default.
 
        tty_tickets     If set, users must authenticate on a per-tty basis.
-                       With this flag enabled, [1msudo [22mwill use a file named for
+                       With this flag enabled, ssuuddoo will use a file named for
                        the tty the user is logged in on in the user's time
                        stamp directory.  If disabled, the time stamp of the
-                       directory is used instead.  This flag is [4mon[24m by default.
+                       directory is used instead.  This flag is _o_n by default.
 
-       umask_override  If set, [1msudo [22mwill set the umask as specified by [4msudoers[0m
+       umask_override  If set, ssuuddoo will set the umask as specified by _s_u_d_o_e_r_s
                        without modification.  This makes it possible to
-                       specify a more permissive umask in [4msudoers[24m than the
+                       specify a more permissive umask in _s_u_d_o_e_r_s than the
                        user's own umask and matches historical behavior.  If
-                       [4mumask_override[24m is not set, [1msudo [22mwill set the umask to
+                       _u_m_a_s_k___o_v_e_r_r_i_d_e is not set, ssuuddoo will set the umask to
                        be the union of the user's umask and what is specified
-                       in [4msudoers[24m.  This flag is [4moff[24m by default.
+                       in _s_u_d_o_e_r_s.  This flag is _o_f_f by default.
 
-       use_loginclass  If set, [1msudo [22mwill apply the defaults specified for the
+       use_loginclass  If set, ssuuddoo will apply the defaults specified for the
                        target user's login class if one exists.  Only
-                       available if [1msudo [22mis configured with the
-                       --with-logincap option.  This flag is [4moff[24m by default.
+                       available if ssuuddoo is configured with the
+                       --with-logincap option.  This flag is _o_f_f by default.
 
-       use_pty         If set, [1msudo [22mwill run the command in a pseudo-pty even
+       use_pty         If set, ssuuddoo will run the command in a pseudo-pty even
                        if no I/O logging is being gone.  A malicious program
-                       run under [1msudo [22mcould conceivably fork a background
+                       run under ssuuddoo could conceivably fork a background
                        process that retains to the user's terminal device
                        after the main program has finished executing.  Use of
                        this option will make that impossible.
 
-       visiblepw       By default, [1msudo [22mwill refuse to run if the user must
+       visiblepw       By default, ssuuddoo will refuse to run if the user must
                        enter a password but it is not possible to disable echo
-                       on the terminal.  If the [4mvisiblepw[24m flag is set, [1msudo[0m
+                       on the terminal.  If the _v_i_s_i_b_l_e_p_w flag is set, ssuuddoo
                        will prompt for a password even when it would be
                        visible on the screen.  This makes it possible to run
-                       things like "rsh somehost sudo ls" since [4mrsh[24m(1) does
-                       not allocate a tty.  This flag is [4moff[24m by default.
+                       things like "rsh somehost sudo ls" since _r_s_h(1) does
+                       not allocate a tty.  This flag is _o_f_f by default.
 
-       [1mIntegers[22m:
+       IInntteeggeerrss:
 
-       closefrom       Before it executes a command, [1msudo [22mwill close all open
+       closefrom       Before it executes a command, ssuuddoo will close all open
                        file descriptors other than standard input, standard
                        output and standard error (ie: file descriptors 0-2).
-                       The [4mclosefrom[24m option can be used to specify a different
+                       The _c_l_o_s_e_f_r_o_m option can be used to specify a different
                        file descriptor at which to start closing.  The default
                        is 3.
 
        passwd_tries    The number of tries a user gets to enter his/her
-                       password before [1msudo [22mlogs the failure and exits.  The
+                       password before ssuuddoo logs the failure and exits.  The
                        default is 3.
 
-       [1mIntegers that can be used in a boolean context[22m:
+       IInntteeggeerrss tthhaatt ccaann bbee uusseedd iinn aa bboooolleeaann ccoonntteexxtt:
 
        loglinelen      Number of characters per line for the file log.  This
                        value is used to decide when to wrap lines for nicer
@@ -876,13 +876,13 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
                        only the file log.  The default is 80 (use 0 or negate
                        the option to disable word wrap).
 
-       passwd_timeout  Number of minutes before the [1msudo [22mpassword prompt times
+       passwd_timeout  Number of minutes before the ssuuddoo password prompt times
                        out, or 0 for no timeout.  The timeout may include a
                        fractional component if minute granularity is
                        insufficient, for example 2.5.  The default is 5.
 
        timestamp_timeout
-                       Number of minutes that can elapse before [1msudo [22mwill ask
+                       Number of minutes that can elapse before ssuuddoo will ask
                        for a passwd again.  The timeout may include a
                        fractional component if minute granularity is
                        insufficient, for example 2.5.  The default is 5.  Set
@@ -895,56 +895,56 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
        umask           Umask to use when running the command.  Negate this
                        option or set it to 0777 to preserve the user's umask.
                        The actual umask that is used will be the union of the
-                       user's umask and the value of the [4mumask[24m option, which
-                       defaults to 0022.  This guarantees that [1msudo [22mnever
+                       user's umask and the value of the _u_m_a_s_k option, which
+                       defaults to 0022.  This guarantees that ssuuddoo never
                        lowers the umask when running a command.  Note on
                        systems that use PAM, the default PAM configuration may
                        specify its own umask which will override the value set
-                       in [4msudoers[24m.
+                       in _s_u_d_o_e_r_s.
 
-       [1mStrings[22m:
+       SSttrriinnggss:
 
        badpass_message Message that is displayed if a user enters an incorrect
                        password.  The default is Sorry, try again. unless
                        insults are enabled.
 
        editor          A colon (':') separated list of editors allowed to be
-                       used with [1mvisudo[22m.  [1mvisudo [22mwill choose the editor that
+                       used with vviissuuddoo.  vviissuuddoo will choose the editor that
                        matches the user's EDITOR environment variable if
                        possible, or the first editor in the list that exists
                        and is executable.  The default is "vi".
 
        iolog_dir       The directory in which to store input/output logs when
-                       the [4mlog_input[24m or [4mlog_output[24m options are enabled or when
+                       the _l_o_g___i_n_p_u_t or _l_o_g___o_u_t_p_u_t options are enabled or when
                        the LOG_INPUT or LOG_OUTPUT tags are present for a
                        command.  The default is "/var/log/sudo-io".
 
-       mailsub         Subject of the mail sent to the [4mmailto[24m user. The escape
+       mailsub         Subject of the mail sent to the _m_a_i_l_t_o user. The escape
                        %h will expand to the host name of the machine.
                        Default is *** SECURITY information for %h ***.
 
        noexec_file     Path to a shared library containing dummy versions of
-                       the [4mexecv()[24m, [4mexecve()[24m and [4mfexecve()[24m library functions
+                       the _e_x_e_c_v_(_), _e_x_e_c_v_e_(_) and _f_e_x_e_c_v_e_(_) library functions
                        that just return an error.  This is used to implement
-                       the [4mnoexec[24m functionality on systems that support
+                       the _n_o_e_x_e_c functionality on systems that support
                        LD_PRELOAD or its equivalent.  Defaults to
-                       [4m/usr/local/libexec/sudo_noexec.so[24m.
+                       _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c_/_s_u_d_o___n_o_e_x_e_c_._s_o.
 
        passprompt      The default prompt to use when asking for a password;
-                       can be overridden via the [1m-p [22moption or the SUDO_PROMPT
+                       can be overridden via the --pp option or the SUDO_PROMPT
                        environment variable.  The following percent (`%')
                        escapes are supported:
 
                        %H  expanded to the local host name including the
                            domain name (on if the machine's host name is fully
-                           qualified or the [4mfqdn[24m option is set)
+                           qualified or the _f_q_d_n option is set)
 
                        %h  expanded to the local host name without the domain
                            name
 
                        %p  expanded to the user whose password is being asked
-                           for (respects the [4mrootpw[24m, [4mtargetpw[24m and [4mrunaspw[0m
-                           flags in [4msudoers[24m)
+                           for (respects the _r_o_o_t_p_w, _t_a_r_g_e_t_p_w and _r_u_n_a_s_p_w
+                           flags in _s_u_d_o_e_r_s)
 
                        %U  expanded to the login name of the user the command
                            will be run as (defaults to root)
@@ -958,19 +958,19 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
 
        role            The default SELinux role to use when constructing a new
                        security context to run the command.  The default role
-                       may be overridden on a per-command basis in [4msudoers[24m or
+                       may be overridden on a per-command basis in _s_u_d_o_e_r_s or
                        via command line options.  This option is only
-                       available whe [1msudo [22mis built with SELinux support.
+                       available whe ssuuddoo is built with SELinux support.
 
-       runas_default   The default user to run commands as if the [1m-u [22moption is
+       runas_default   The default user to run commands as if the --uu option is
                        not specified on the command line.  This defaults to
                        root.
 
        syslog_badpri   Syslog priority to use when user authenticates
                        unsuccessfully.  Defaults to alert.
 
-                       The following syslog priorities are supported: [1malert[22m,
-                       [1mcrit[22m, [1mdebug[22m, [1memerg[22m, [1merr[22m, [1minfo[22m, [1mnotice[22m, and [1mwarning[22m.
+                       The following syslog priorities are supported: aalleerrtt,
+                       ccrriitt, ddeebbuugg, eemmeerrgg, eerrrr, iinnffoo, nnoottiiccee, and wwaarrnniinngg.
 
        syslog_goodpri  Syslog priority to use when user authenticates
                        successfully.  Defaults to notice.
@@ -983,37 +983,37 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
                        locale may affect how sudoers is interpreted.  Defaults
                        to "C".
 
-       timestampdir    The directory in which [1msudo [22mstores its timestamp files.
-                       The default is [4m/var/adm/sudo[24m.
+       timestampdir    The directory in which ssuuddoo stores its timestamp files.
+                       The default is _/_v_a_r_/_a_d_m_/_s_u_d_o.
 
        timestampowner  The owner of the timestamp directory and the timestamps
                        stored therein.  The default is root.
 
        type            The default SELinux type to use when constructing a new
                        security context to run the command.  The default type
-                       may be overridden on a per-command basis in [4msudoers[24m or
+                       may be overridden on a per-command basis in _s_u_d_o_e_r_s or
                        via command line options.  This option is only
-                       available whe [1msudo [22mis built with SELinux support.
+                       available whe ssuuddoo is built with SELinux support.
 
-       [1mStrings that can be used in a boolean context[22m:
+       SSttrriinnggss tthhaatt ccaann bbee uusseedd iinn aa bboooolleeaann ccoonntteexxtt:
 
-       askpass     The [4maskpass[24m option specifies the fully qualified path to a
+       askpass     The _a_s_k_p_a_s_s option specifies the fully qualified path to a
                    helper program used to read the user's password when no
-                   terminal is available.  This may be the case when [1msudo [22mis
+                   terminal is available.  This may be the case when ssuuddoo is
                    executed from a graphical (as opposed to text-based)
-                   application.  The program specified by [4maskpass[24m should
+                   application.  The program specified by _a_s_k_p_a_s_s should
                    display the argument passed to it as the prompt and write
                    the user's password to the standard output.  The value of
-                   [4maskpass[24m may be overridden by the SUDO_ASKPASS environment
+                   _a_s_k_p_a_s_s may be overridden by the SUDO_ASKPASS environment
                    variable.
 
-       env_file    The [4menv_file[24m options specifies the fully qualified path to
+       env_file    The _e_n_v___f_i_l_e options specifies the fully qualified path to
                    a file containing variables to be set in the environment of
                    the program being run.  Entries in this file should either
                    be of the form VARIABLE=value or export VARIABLE=value.
                    The value may optionally be surrounded by single or double
-                   quotes.  Variables in this file are subject to other [1msudo[0m
-                   environment settings such as [4menv_keep[24m and [4menv_check[24m.
+                   quotes.  Variables in this file are subject to other ssuuddoo
+                   environment settings such as _e_n_v___k_e_e_p and _e_n_v___c_h_e_c_k.
 
        exempt_group
                    Users in this group are exempt from password and PATH
@@ -1028,95 +1028,95 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
 
                    never   Never lecture the user.
 
-                   once    Only lecture the user the first time they run [1msudo[22m.
+                   once    Only lecture the user the first time they run ssuuddoo.
 
-                   If no value is specified, a value of [4monce[24m is implied.
-                   Negating the option results in a value of [4mnever[24m being used.
-                   The default value is [4monce[24m.
+                   If no value is specified, a value of _o_n_c_e is implied.
+                   Negating the option results in a value of _n_e_v_e_r being used.
+                   The default value is _o_n_c_e.
 
        lecture_file
-                   Path to a file containing an alternate [1msudo [22mlecture that
+                   Path to a file containing an alternate ssuuddoo lecture that
                    will be used in place of the standard lecture if the named
-                   file exists.  By default, [1msudo [22muses a built-in lecture.
+                   file exists.  By default, ssuuddoo uses a built-in lecture.
 
        listpw      This option controls when a password will be required when
-                   a user runs [1msudo [22mwith the [1m-l [22moption.  It has the following
+                   a user runs ssuuddoo with the --ll option.  It has the following
                    possible values:
 
-                   all     All the user's [4msudoers[24m entries for the current host
+                   all     All the user's _s_u_d_o_e_r_s entries for the current host
                            must have the NOPASSWD flag set to avoid entering a
                            password.
 
-                   always  The user must always enter a password to use the [1m-l[0m
+                   always  The user must always enter a password to use the --ll
                            option.
 
-                   any     At least one of the user's [4msudoers[24m entries for the
+                   any     At least one of the user's _s_u_d_o_e_r_s entries for the
                            current host must have the NOPASSWD flag set to
                            avoid entering a password.
 
-                   never   The user need never enter a password to use the [1m-l[0m
+                   never   The user need never enter a password to use the --ll
                            option.
 
-                   If no value is specified, a value of [4many[24m is implied.
-                   Negating the option results in a value of [4mnever[24m being used.
-                   The default value is [4many[24m.
+                   If no value is specified, a value of _a_n_y is implied.
+                   Negating the option results in a value of _n_e_v_e_r being used.
+                   The default value is _a_n_y.
 
-       logfile     Path to the [1msudo [22mlog file (not the syslog log file).
+       logfile     Path to the ssuuddoo log file (not the syslog log file).
                    Setting a path turns on logging to a file; negating this
-                   option turns it off.  By default, [1msudo [22mlogs via syslog.
+                   option turns it off.  By default, ssuuddoo logs via syslog.
 
-       mailerflags Flags to use when invoking mailer. Defaults to [1m-t[22m.
+       mailerflags Flags to use when invoking mailer. Defaults to --tt.
 
        mailerpath  Path to mail program used to send warning mail.  Defaults
                    to the path to sendmail found at configure time.
 
        mailfrom    Address to use for the "from" address when sending warning
                    and error mail.  The address should be enclosed in double
-                   quotes (") to protect against [1msudo [22minterpreting the @ sign.
-                   Defaults to the name of the user running [1msudo[22m.
+                   quotes (") to protect against ssuuddoo interpreting the @ sign.
+                   Defaults to the name of the user running ssuuddoo.
 
        mailto      Address to send warning and error mail to.  The address
                    should be enclosed in double quotes (") to protect against
-                   [1msudo [22minterpreting the @ sign.  Defaults to root.
+                   ssuuddoo interpreting the @ sign.  Defaults to root.
 
-       secure_path Path used for every command run from [1msudo[22m.  If you don't
-                   trust the people running [1msudo [22mto have a sane PATH
+       secure_path Path used for every command run from ssuuddoo.  If you don't
+                   trust the people running ssuuddoo to have a sane PATH
                    environment variable you may want to use this.  Another use
                    is if you want to have the "root path" be separate from the
                    "user path."  Users in the group specified by the
-                   [4mexempt_group[24m option are not affected by [4msecure_path[24m.  This
+                   _e_x_e_m_p_t___g_r_o_u_p option are not affected by _s_e_c_u_r_e___p_a_t_h.  This
                    option is not set by default.
 
        syslog      Syslog facility if syslog is being used for logging (negate
                    to disable syslog logging).  Defaults to auth.
 
-                   The following syslog facilities are supported: [1mauthpriv [22m(if
-                   your OS supports it), [1mauth[22m, [1mdaemon[22m, [1muser[22m, [1mlocal0[22m, [1mlocal1[22m,
-                   [1mlocal2[22m, [1mlocal3[22m, [1mlocal4[22m, [1mlocal5[22m, [1mlocal6[22m, and [1mlocal7[22m.
+                   The following syslog facilities are supported: aauutthhpprriivv (if
+                   your OS supports it), aauutthh, ddaaeemmoonn, uusseerr, llooccaall00, llooccaall11,
+                   llooccaall22, llooccaall33, llooccaall44, llooccaall55, llooccaall66, and llooccaall77.
 
        verifypw    This option controls when a password will be required when
-                   a user runs [1msudo [22mwith the [1m-v [22moption.  It has the following
+                   a user runs ssuuddoo with the --vv option.  It has the following
                    possible values:
 
-                   all     All the user's [4msudoers[24m entries for the current host
+                   all     All the user's _s_u_d_o_e_r_s entries for the current host
                            must have the NOPASSWD flag set to avoid entering a
                            password.
 
-                   always  The user must always enter a password to use the [1m-v[0m
+                   always  The user must always enter a password to use the --vv
                            option.
 
-                   any     At least one of the user's [4msudoers[24m entries for the
+                   any     At least one of the user's _s_u_d_o_e_r_s entries for the
                            current host must have the NOPASSWD flag set to
                            avoid entering a password.
 
-                   never   The user need never enter a password to use the [1m-v[0m
+                   never   The user need never enter a password to use the --vv
                            option.
 
-                   If no value is specified, a value of [4mall[24m is implied.
-                   Negating the option results in a value of [4mnever[24m being used.
-                   The default value is [4mall[24m.
+                   If no value is specified, a value of _a_l_l is implied.
+                   Negating the option results in a value of _n_e_v_e_r being used.
+                   The default value is _a_l_l.
 
-       [1mLists that can be used in a boolean context[22m:
+       LLiissttss tthhaatt ccaann bbee uusseedd iinn aa bboooolleeaann ccoonntteexxtt:
 
        env_check       Environment variables to be removed from the user's
                        environment if the variable's value contains % or /
@@ -1130,45 +1130,45 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
                        option is enabled or disabled, variables specified by
                        env_check will be preserved in the environment if they
                        pass the aforementioned check.  The default list of
-                       environment variables to check is displayed when [1msudo[0m
-                       is run by root with the [4m-V[24m option.
+                       environment variables to check is displayed when ssuuddoo
+                       is run by root with the _-_V option.
 
        env_delete      Environment variables to be removed from the user's
-                       environment when the [4menv_reset[24m option is not in effect.
+                       environment when the _e_n_v___r_e_s_e_t option is not in effect.
                        The argument may be a double-quoted, space-separated
                        list or a single value without double-quotes.  The list
                        can be replaced, added to, deleted from, or disabled by
                        using the =, +=, -=, and ! operators respectively.  The
                        default list of environment variables to remove is
-                       displayed when [1msudo [22mis run by root with the [4m-V[24m option.
+                       displayed when ssuuddoo is run by root with the _-_V option.
                        Note that many operating systems will remove
                        potentially dangerous variables from the environment of
-                       any setuid process (such as [1msudo[22m).
+                       any setuid process (such as ssuuddoo).
 
        env_keep        Environment variables to be preserved in the user's
-                       environment when the [4menv_reset[24m option is in effect.
+                       environment when the _e_n_v___r_e_s_e_t option is in effect.
                        This allows fine-grained control over the environment
-                       [1msudo[22m-spawned processes will receive.  The argument may
+                       ssuuddoo-spawned processes will receive.  The argument may
                        be a double-quoted, space-separated list or a single
                        value without double-quotes.  The list can be replaced,
                        added to, deleted from, or disabled by using the =, +=,
                        -=, and ! operators respectively.  The default list of
-                       variables to keep is displayed when [1msudo [22mis run by root
-                       with the [4m-V[24m option.
+                       variables to keep is displayed when ssuuddoo is run by root
+                       with the _-_V option.
 
-[1mFILES[0m
-       [4m/etc/sudoers[24m            List of who can run what
+FFIILLEESS
+       _/_e_t_c_/_s_u_d_o_e_r_s            List of who can run what
 
-       [4m/etc/group[24m              Local groups file
+       _/_e_t_c_/_g_r_o_u_p              Local groups file
 
-       [4m/etc/netgroup[24m           List of network groups
+       _/_e_t_c_/_n_e_t_g_r_o_u_p           List of network groups
 
-       [4m/var/log/sudo-io[24m        I/O log files
+       _/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o        I/O log files
 
-[1mEXAMPLES[0m
-       Below are example [4msudoers[24m entries.  Admittedly, some of these are a bit
+EEXXAAMMPPLLEESS
+       Below are example _s_u_d_o_e_r_s entries.  Admittedly, some of these are a bit
        contrived.  First, we allow a few environment variables to pass and
-       then define our [4maliases[24m:
+       then define our _a_l_i_a_s_e_s:
 
         # Run X applications through sudo; HOME is used to find the
         # .Xauthority file.  Note that other programs use HOME to find
@@ -1209,16 +1209,16 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
         Cmnd_Alias     SU = /usr/bin/su
         Cmnd_Alias     PAGERS = /usr/bin/more, /usr/bin/pg, /usr/bin/less
 
-       Here we override some of the compiled in default values.  We want [1msudo[0m
-       to log via [4msyslog[24m(3) using the [4mauth[24m facility in all cases.  We don't
-       want to subject the full time staff to the [1msudo [22mlecture, user [1mmillert[0m
+       Here we override some of the compiled in default values.  We want ssuuddoo
+       to log via _s_y_s_l_o_g(3) using the _a_u_t_h facility in all cases.  We don't
+       want to subject the full time staff to the ssuuddoo lecture, user mmiilllleerrtt
        need not give a password, and we don't want to reset the LOGNAME, USER
        or USERNAME environment variables when running commands as root.
-       Additionally, on the machines in the [4mSERVERS[24m Host_Alias, we keep an
+       Additionally, on the machines in the _S_E_R_V_E_R_S Host_Alias, we keep an
        additional local log file and make sure we log the year in each log
        line since the log entries will be kept around for several years.
        Lastly, we disable shell escapes for the commands in the PAGERS
-       Cmnd_Alias ([4m/usr/bin/more[24m, [4m/usr/bin/pg[24m and [4m/usr/bin/less[24m).
+       Cmnd_Alias (_/_u_s_r_/_b_i_n_/_m_o_r_e, _/_u_s_r_/_b_i_n_/_p_g and _/_u_s_r_/_b_i_n_/_l_e_s_s).
 
         # Override built-in defaults
         Defaults               syslog=auth
@@ -1228,114 +1228,114 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
         Defaults@SERVERS       log_year, logfile=/var/log/sudo.log
         Defaults!PAGERS        noexec
 
-       The [4mUser[24m [4mspecification[24m is the part that actually determines who may run
+       The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually determines who may run
        what.
 
         root           ALL = (ALL) ALL
         %wheel         ALL = (ALL) ALL
 
-       We let [1mroot [22mand any user in group [1mwheel [22mrun any command on any host as
+       We let rroooott and any user in group wwhheeeell run any command on any host as
        any user.
 
         FULLTIMERS     ALL = NOPASSWD: ALL
 
-       Full time sysadmins ([1mmillert[22m, [1mmikef[22m, and [1mdowdy[22m) may run any command on
+       Full time sysadmins (mmiilllleerrtt, mmiikkeeff, and ddoowwddyy) may run any command on
        any host without authenticating themselves.
 
         PARTTIMERS     ALL = ALL
 
-       Part time sysadmins ([1mbostley[22m, [1mjwfox[22m, and [1mcrawl[22m) may run any command on
+       Part time sysadmins (bboossttlleeyy, jjwwffooxx, and ccrraawwll) may run any command on
        any host but they must authenticate themselves first (since the entry
        lacks the NOPASSWD tag).
 
         jack           CSNETS = ALL
 
-       The user [1mjack [22mmay run any command on the machines in the [4mCSNETS[24m alias
+       The user jjaacckk may run any command on the machines in the _C_S_N_E_T_S alias
        (the networks 128.138.243.0, 128.138.204.0, and 128.138.242.0).  Of
        those networks, only 128.138.204.0 has an explicit netmask (in CIDR
        notation) indicating it is a class C network.  For the other networks
-       in [4mCSNETS[24m, the local machine's netmask will be used during matching.
+       in _C_S_N_E_T_S, the local machine's netmask will be used during matching.
 
         lisa           CUNETS = ALL
 
-       The user [1mlisa [22mmay run any command on any host in the [4mCUNETS[24m alias (the
+       The user lliissaa may run any command on any host in the _C_U_N_E_T_S alias (the
        class B network 128.138.0.0).
 
         operator       ALL = DUMPS, KILL, SHUTDOWN, HALT, REBOOT, PRINTING,\
                        sudoedit /etc/printcap, /usr/oper/bin/
 
-       The [1moperator [22muser may run commands limited to simple maintenance.
+       The ooppeerraattoorr user may run commands limited to simple maintenance.
        Here, those are commands related to backups, killing processes, the
        printing system, shutting down the system, and any commands in the
-       directory [4m/usr/oper/bin/[24m.
+       directory _/_u_s_r_/_o_p_e_r_/_b_i_n_/.
 
         joe            ALL = /usr/bin/su operator
 
-       The user [1mjoe [22mmay only [4msu[24m(1) to operator.
+       The user jjooee may only _s_u(1) to operator.
 
         pete           HPPA = /usr/bin/passwd [A-Za-z]*, !/usr/bin/passwd root
 
         %opers         ALL = (: ADMINGRP) /usr/sbin/
 
-       Users in the [1mopers [22mgroup may run commands in [4m/usr/sbin/[24m as themselves
-       with any group in the [4mADMINGRP[24m Runas_Alias (the [1madm [22mand [1moper [22mgroups).
+       Users in the ooppeerrss group may run commands in _/_u_s_r_/_s_b_i_n_/ as themselves
+       with any group in the _A_D_M_I_N_G_R_P Runas_Alias (the aaddmm and ooppeerr groups).
 
-       The user [1mpete [22mis allowed to change anyone's password except for root on
-       the [4mHPPA[24m machines.  Note that this assumes [4mpasswd[24m(1) does not take
+       The user ppeettee is allowed to change anyone's password except for root on
+       the _H_P_P_A machines.  Note that this assumes _p_a_s_s_w_d(1) does not take
        multiple user names on the command line.
 
         bob            SPARC = (OP) ALL : SGI = (OP) ALL
 
-       The user [1mbob [22mmay run anything on the [4mSPARC[24m and [4mSGI[24m machines as any user
-       listed in the [4mOP[24m Runas_Alias ([1mroot [22mand [1moperator[22m).
+       The user bboobb may run anything on the _S_P_A_R_C and _S_G_I machines as any user
+       listed in the _O_P Runas_Alias (rroooott and ooppeerraattoorr).
 
         jim            +biglab = ALL
 
-       The user [1mjim [22mmay run any command on machines in the [4mbiglab[24m netgroup.
-       [1msudo [22mknows that "biglab" is a netgroup due to the '+' prefix.
+       The user jjiimm may run any command on machines in the _b_i_g_l_a_b netgroup.
+       ssuuddoo knows that "biglab" is a netgroup due to the '+' prefix.
 
         +secretaries   ALL = PRINTING, /usr/bin/adduser, /usr/bin/rmuser
 
-       Users in the [1msecretaries [22mnetgroup need to help manage the printers as
+       Users in the sseeccrreettaarriieess netgroup need to help manage the printers as
        well as add and remove users, so they are allowed to run those commands
        on all machines.
 
         fred           ALL = (DB) NOPASSWD: ALL
 
-       The user [1mfred [22mcan run commands as any user in the [4mDB[24m Runas_Alias
-       ([1moracle [22mor [1msybase[22m) without giving a password.
+       The user ffrreedd can run commands as any user in the _D_B Runas_Alias
+       (oorraaccllee or ssyybbaassee) without giving a password.
 
         john           ALPHA = /usr/bin/su [!-]*, !/usr/bin/su *root*
 
-       On the [4mALPHA[24m machines, user [1mjohn [22mmay su to anyone except root but he is
-       not allowed to specify any options to the [4msu[24m(1) command.
+       On the _A_L_P_H_A machines, user jjoohhnn may su to anyone except root but he is
+       not allowed to specify any options to the _s_u(1) command.
 
         jen            ALL, !SERVERS = ALL
 
-       The user [1mjen [22mmay run any command on any machine except for those in the
-       [4mSERVERS[24m Host_Alias (master, mail, www and ns).
+       The user jjeenn may run any command on any machine except for those in the
+       _S_E_R_V_E_R_S Host_Alias (master, mail, www and ns).
 
         jill           SERVERS = /usr/bin/, !SU, !SHELLS
 
-       For any machine in the [4mSERVERS[24m Host_Alias, [1mjill [22mmay run any commands in
-       the directory [4m/usr/bin/[24m except for those commands belonging to the [4mSU[0m
-       and [4mSHELLS[24m Cmnd_Aliases.
+       For any machine in the _S_E_R_V_E_R_S Host_Alias, jjiillll may run any commands in
+       the directory _/_u_s_r_/_b_i_n_/ except for those commands belonging to the _S_U
+       and _S_H_E_L_L_S Cmnd_Aliases.
 
         steve          CSNETS = (operator) /usr/local/op_commands/
 
-       The user [1msteve [22mmay run any command in the directory
+       The user sstteevvee may run any command in the directory
        /usr/local/op_commands/ but only as user operator.
 
         matt           valkyrie = KILL
 
-       On his personal workstation, valkyrie, [1mmatt [22mneeds to be able to kill
+       On his personal workstation, valkyrie, mmaatttt needs to be able to kill
        hung processes.
 
         WEBMASTERS     www = (www) ALL, (root) /usr/bin/su www
 
-       On the host www, any user in the [4mWEBMASTERS[24m User_Alias (will, wendy,
+       On the host www, any user in the _W_E_B_M_A_S_T_E_R_S User_Alias (will, wendy,
        and wim), may run any command as user www (which owns the web pages) or
-       simply [4msu[24m(1) to www.
+       simply _s_u(1) to www.
 
         ALL            CDROM = NOPASSWD: /sbin/umount /CDROM,\
                        /sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
@@ -1345,7 +1345,7 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
        This is a bit tedious for users to type, so it is a prime candidate for
        encapsulating in a shell script.
 
-[1mSECURITY NOTES[0m
+SSEECCUURRIITTYY NNOOTTEESS
        It is generally not effective to "subtract" commands from ALL using the
        '!' operator.  A user can trivially circumvent this by copying the
        desired command to a different name and then executing that.  For
@@ -1353,32 +1353,32 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
 
            bill        ALL = ALL, !SU, !SHELLS
 
-       Doesn't really prevent [1mbill [22mfrom running the commands listed in [4mSU[24m or
-       [4mSHELLS[24m since he can simply copy those commands to a different name, or
+       Doesn't really prevent bbiillll from running the commands listed in _S_U or
+       _S_H_E_L_L_S since he can simply copy those commands to a different name, or
        use a shell escape from an editor or other program.  Therefore, these
        kind of restrictions should be considered advisory at best (and
        reinforced by policy).
 
-       Furthermore, if the [4mfast_glob[24m option is in use, it is not possible to
+       Furthermore, if the _f_a_s_t___g_l_o_b option is in use, it is not possible to
        reliably negate commands where the path name includes globbing (aka
-       wildcard) characters.  This is because the C library's [4mfnmatch[24m(3)
+       wildcard) characters.  This is because the C library's _f_n_m_a_t_c_h(3)
        function cannot resolve relative paths.  While this is typically only
        an inconvenience for rules that grant privileges, it can result in a
        security issue for rules that subtract or revoke privileges.
 
-       For example, given the following [4msudoers[24m entry:
+       For example, given the following _s_u_d_o_e_r_s entry:
 
         john   ALL = /usr/bin/passwd [a-zA-Z0-9]*, /usr/bin/chsh [a-zA-Z0-9]*,
              /usr/bin/chfn [a-zA-Z0-9]*, !/usr/bin/* root
 
-       User [1mjohn [22mcan still run /usr/bin/passwd root if [4mfast_glob[24m is enabled by
-       changing to [4m/usr/bin[24m and running ./passwd root instead.
+       User jjoohhnn can still run /usr/bin/passwd root if _f_a_s_t___g_l_o_b is enabled by
+       changing to _/_u_s_r_/_b_i_n and running ./passwd root instead.
 
-[1mPREVENTING SHELL ESCAPES[0m
-       Once [1msudo [22mexecutes a program, that program is free to do whatever it
+PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
+       Once ssuuddoo executes a program, that program is free to do whatever it
        pleases, including run other programs.  This can be a security issue
        since it is not uncommon for a program to allow shell escapes, which
-       lets a user bypass [1msudo[22m's access control and logging.  Common programs
+       lets a user bypass ssuuddoo's access control and logging.  Common programs
        that permit shell escapes include shells (obviously), editors,
        paginators, mail and terminal programs.
 
@@ -1386,22 +1386,22 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
 
        restrict  Avoid giving users access to commands that allow the user to
                  run arbitrary commands.  Many editors have a restricted mode
-                 where shell escapes are disabled, though [1msudoedit [22mis a better
-                 solution to running editors via [1msudo[22m.  Due to the large
+                 where shell escapes are disabled, though ssuuddooeeddiitt is a better
+                 solution to running editors via ssuuddoo.  Due to the large
                  number of programs that offer shell escapes, restricting
                  users to the set of programs that do not is often unworkable.
 
        noexec    Many systems that support shared libraries have the ability
                  to override default library functions by pointing an
                  environment variable (usually LD_PRELOAD) to an alternate
-                 shared library.  On such systems, [1msudo[22m's [4mnoexec[24m functionality
-                 can be used to prevent a program run by [1msudo [22mfrom executing
+                 shared library.  On such systems, ssuuddoo's _n_o_e_x_e_c functionality
+                 can be used to prevent a program run by ssuuddoo from executing
                  any other programs.  Note, however, that this applies only to
                  native dynamically-linked executables.  Statically-linked
                  executables and foreign executables running under binary
                  emulation are not affected.
 
-                 To tell whether or not [1msudo [22msupports [4mnoexec[24m, you can run the
+                 To tell whether or not ssuuddoo supports _n_o_e_x_e_c, you can run the
                  following as root:
 
                      sudo -V | grep "dummy exec"
@@ -1410,66 +1410,66 @@ SUDOERS(4)                   MAINTENANCE COMMANDS                   SUDOERS(4)
 
                      File containing dummy exec functions:
 
-                 then [1msudo [22mmay be able to replace the exec family of functions
+                 then ssuuddoo may be able to replace the exec family of functions
                  in the standard library with its own that simply return an
                  error.  Unfortunately, there is no foolproof way to know
-                 whether or not [4mnoexec[24m will work at compile-time.  [4mnoexec[0m
+                 whether or not _n_o_e_x_e_c will work at compile-time.  _n_o_e_x_e_c
                  should work on SunOS, Solaris, *BSD, Linux, IRIX, Tru64 UNIX,
-                 MacOS X, and HP-UX 11.x.  It is known [1mnot [22mto work on AIX and
-                 UnixWare.  [4mnoexec[24m is expected to work on most operating
+                 MacOS X, and HP-UX 11.x.  It is known nnoott to work on AIX and
+                 UnixWare.  _n_o_e_x_e_c is expected to work on most operating
                  systems that support the LD_PRELOAD environment variable.
                  Check your operating system's manual pages for the dynamic
                  linker (usually ld.so, ld.so.1, dyld, dld.sl, rld, or loader)
                  to see if LD_PRELOAD is supported.
 
-                 To enable [4mnoexec[24m for a command, use the NOEXEC tag as
+                 To enable _n_o_e_x_e_c for a command, use the NOEXEC tag as
                  documented in the User Specification section above.  Here is
                  that example again:
 
                   aaron  shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 
-                 This allows user [1maaron [22mto run [4m/usr/bin/more[24m and [4m/usr/bin/vi[0m
-                 with [4mnoexec[24m enabled.  This will prevent those two commands
+                 This allows user aaaarroonn to run _/_u_s_r_/_b_i_n_/_m_o_r_e and _/_u_s_r_/_b_i_n_/_v_i
+                 with _n_o_e_x_e_c enabled.  This will prevent those two commands
                  from executing other commands (such as a shell).  If you are
                  unsure whether or not your system is capable of supporting
-                 [4mnoexec[24m you can always just try it out and see if it works.
+                 _n_o_e_x_e_c you can always just try it out and see if it works.
 
        Note that restricting shell escapes is not a panacea.  Programs running
        as root are still capable of many potentially hazardous operations
        (such as changing or overwriting files) that could lead to unintended
        privilege escalation.  In the specific case of an editor, a safer
-       approach is to give the user permission to run [1msudoedit[22m.
+       approach is to give the user permission to run ssuuddooeeddiitt.
 
-[1mSEE ALSO[0m
-       [4mrsh[24m(1), [4msu[24m(1), [4mfnmatch[24m(3), [4mglob[24m(3), [4msudo[24m(1m), [4mvisudo[24m(8)
+SSEEEE AALLSSOO
+       _r_s_h(1), _s_u(1), _f_n_m_a_t_c_h(3), _g_l_o_b(3), _s_u_d_o(1m), _v_i_s_u_d_o(8)
 
-[1mCAVEATS[0m
-       The [4msudoers[24m file should [1malways [22mbe edited by the [1mvisudo [22mcommand which
+CCAAVVEEAATTSS
+       The _s_u_d_o_e_r_s file should aallwwaayyss be edited by the vviissuuddoo command which
        locks the file and does grammatical checking. It is imperative that
-       [4msudoers[24m be free of syntax errors since [1msudo [22mwill not run with a
-       syntactically incorrect [4msudoers[24m file.
+       _s_u_d_o_e_r_s be free of syntax errors since ssuuddoo will not run with a
+       syntactically incorrect _s_u_d_o_e_r_s file.
 
        When using netgroups of machines (as opposed to users), if you store
        fully qualified host name in the netgroup (as is usually the case), you
        either need to have the machine's host name be fully qualified as
-       returned by the hostname command or use the [4mfqdn[24m option in [4msudoers[24m.
+       returned by the hostname command or use the _f_q_d_n option in _s_u_d_o_e_r_s.
 
-[1mBUGS[0m
-       If you feel you have found a bug in [1msudo[22m, please submit a bug report at
+BBUUGGSS
+       If you feel you have found a bug in ssuuddoo, please submit a bug report at
        http://www.sudo.ws/sudo/bugs/
 
-[1mSUPPORT[0m
+SSUUPPPPOORRTT
        Limited free support is available via the sudo-users mailing list, see
        http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or search
        the archives.
 
-[1mDISCLAIMER[0m
-       [1msudo [22mis provided ``AS IS'' and any express or implied warranties,
+DDIISSCCLLAAIIMMEERR
+       ssuuddoo is provided ``AS IS'' and any express or implied warranties,
        including, but not limited to, the implied warranties of
        merchantability and fitness for a particular purpose are disclaimed.
-       See the LICENSE file distributed with [1msudo [22mor
+       See the LICENSE file distributed with ssuuddoo or
        http://www.sudo.ws/sudo/license.html for complete details.
 
 
 
-1.7.7                           August 13, 2011                     SUDOERS(4)
+1.7.8                         September 16, 2011                    SUDOERS(4)
