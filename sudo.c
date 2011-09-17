@@ -231,7 +231,7 @@ main(argc, argv, envp)
     else if (ISSET(sudo_mode, MODE_EDIT))
 	user_cmnd = "sudoedit";
     else {
-	switch (sudo_mode) {
+	switch (sudo_mode & MODE_MASK) {
 	    case MODE_VERSION:
 		show_version();
 		break;

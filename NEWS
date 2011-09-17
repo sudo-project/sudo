@@ -21,6 +21,9 @@ What's new in Sudo 1.7.8?
  * Sudo now honors the "DEREF" setting in ldap.conf which controls
    how alias dereferencing is done during an LDAP search.
 
+ * Using the -n option may in conjunction with the -v or -l option
+   no longer results in a usage error.
+
 What's new in Sudo 1.7.7
 
  * I/O logging is now supported for commands run in background mode
