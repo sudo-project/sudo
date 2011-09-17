@@ -536,6 +536,11 @@ SASL programmer's manual for details.
 The path to the Kerberos 5 credential cache to use when authenticating
 with the remote server.
 
+=item B<DEREF> never/searching/finding/always
+
+How alias dereferencing is to be performed when searching.  See the
+L<ldap.conf(5)> manual for a full description of this option.
+
 =back
 
 See the C<ldap.conf> entry in the L<EXAMPLES> section.
