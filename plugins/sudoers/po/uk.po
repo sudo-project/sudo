@@ -4,10 +4,10 @@
 # Yuri Chornoivan <yurchor@ukr.net>, 2011.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.8.2-rc9\n"
+"Project-Id-Version: sudoers 1.8.3rc1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2011-08-05 13:34-0400\n"
-"PO-Revision-Date: 2011-08-09 08:41+0300\n"
+"POT-Creation-Date: 2011-09-16 16:52-0400\n"
+"PO-Revision-Date: 2011-09-17 12:50+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
 "Language: \n"
@@ -70,9 +70,9 @@ msgid "sorry, a password is required to run %s"
 msgstr "вибачте, для виконання %s слід вказати пароль"
 
 #: plugins/sudoers/check.c:225 plugins/sudoers/iolog.c:169
-#: plugins/sudoers/sudoers.c:970 plugins/sudoers/sudoreplay.c:325
+#: plugins/sudoers/sudoers.c:971 plugins/sudoers/sudoreplay.c:325
 #: plugins/sudoers/sudoreplay.c:334 plugins/sudoers/sudoreplay.c:675
-#: plugins/sudoers/sudoreplay.c:767 plugins/sudoers/visudo.c:700
+#: plugins/sudoers/sudoreplay.c:767 plugins/sudoers/visudo.c:744
 #, c-format
 msgid "unable to open %s"
 msgstr "не вдалося відкрити %s"
@@ -117,8 +117,8 @@ msgid "%s writable by non-owner (0%o), should be mode 0700"
 msgstr "%s доступний до запису невласником (0%o), має бути встановлено режим 0700"
 
 #: plugins/sudoers/check.c:470 plugins/sudoers/check.c:514
-#: plugins/sudoers/check.c:582 plugins/sudoers/sudoers.c:956
-#: plugins/sudoers/visudo.c:284 plugins/sudoers/visudo.c:500
+#: plugins/sudoers/check.c:582 plugins/sudoers/sudoers.c:957
+#: plugins/sudoers/visudo.c:304 plugins/sudoers/visudo.c:544
 #, c-format
 msgid "unable to stat %s"
 msgstr "не вдалося виконати stat для %s"
@@ -153,10 +153,10 @@ msgstr "не вдалося встановити для %s час епохи"
 msgid "unknown uid: %u"
 msgstr "невідоме значення uid: %u"
 
-#: plugins/sudoers/check.c:717 plugins/sudoers/sudoers.c:747
-#: plugins/sudoers/sudoers.c:813 plugins/sudoers/sudoers.c:814
-#: plugins/sudoers/sudoers.c:1087 plugins/sudoers/testsudoers.c:200
-#: plugins/sudoers/testsudoers.c:330
+#: plugins/sudoers/check.c:717 plugins/sudoers/sudoers.c:748
+#: plugins/sudoers/sudoers.c:814 plugins/sudoers/sudoers.c:815
+#: plugins/sudoers/sudoers.c:1088 plugins/sudoers/testsudoers.c:202
+#: plugins/sudoers/testsudoers.c:337
 #, c-format
 msgid "unknown user: %s"
 msgstr "невідомий користувач: %s"
@@ -516,53 +516,35 @@ msgstr "Додати запис до файла utmp/utmpx під час роз�
 msgid "Set the user in utmp to the runas user, not the invoking user"
 msgstr "Встановити користувача у utmp у значення користувача, від імені якого виконується команда"
 
-#: plugins/sudoers/defaults.c:197
-msgid ""
-"Available options in a sudoers ``Defaults'' line:\n"
-"\n"
-msgstr ""
-"Можливі параметри у рядку «Defaults» sudoers:\n"
-"\n"
-
-#: plugins/sudoers/defaults.c:204 plugins/sudoers/defaults.c:215
-#, c-format
-msgid "%s: %s\n"
-msgstr "%s: %s\n"
-
-#: plugins/sudoers/defaults.c:211
-#, c-format
-msgid "%s: %.*s\n"
-msgstr "%s: %.*s\n"
-
-#: plugins/sudoers/defaults.c:241
+#: plugins/sudoers/defaults.c:205
 #, c-format
 msgid "unknown defaults entry `%s'"
 msgstr "невідомий запис типових параметрів «%s»"
 
-#: plugins/sudoers/defaults.c:249 plugins/sudoers/defaults.c:259
-#: plugins/sudoers/defaults.c:279 plugins/sudoers/defaults.c:292
-#: plugins/sudoers/defaults.c:305 plugins/sudoers/defaults.c:318
-#: plugins/sudoers/defaults.c:331 plugins/sudoers/defaults.c:351
-#: plugins/sudoers/defaults.c:361
+#: plugins/sudoers/defaults.c:213 plugins/sudoers/defaults.c:223
+#: plugins/sudoers/defaults.c:243 plugins/sudoers/defaults.c:256
+#: plugins/sudoers/defaults.c:269 plugins/sudoers/defaults.c:282
+#: plugins/sudoers/defaults.c:295 plugins/sudoers/defaults.c:315
+#: plugins/sudoers/defaults.c:325
 #, c-format
 msgid "value `%s' is invalid for option `%s'"
 msgstr "значення «%s» є некоректним для параметра «%s»"
 
-#: plugins/sudoers/defaults.c:252 plugins/sudoers/defaults.c:262
-#: plugins/sudoers/defaults.c:270 plugins/sudoers/defaults.c:287
-#: plugins/sudoers/defaults.c:300 plugins/sudoers/defaults.c:313
-#: plugins/sudoers/defaults.c:326 plugins/sudoers/defaults.c:346
-#: plugins/sudoers/defaults.c:357
+#: plugins/sudoers/defaults.c:216 plugins/sudoers/defaults.c:226
+#: plugins/sudoers/defaults.c:234 plugins/sudoers/defaults.c:251
+#: plugins/sudoers/defaults.c:264 plugins/sudoers/defaults.c:277
+#: plugins/sudoers/defaults.c:290 plugins/sudoers/defaults.c:310
+#: plugins/sudoers/defaults.c:321
 #, c-format
 msgid "no value specified for `%s'"
 msgstr "не вказано значення для «%s»"
 
-#: plugins/sudoers/defaults.c:275
+#: plugins/sudoers/defaults.c:239
 #, c-format
 msgid "values for `%s' must start with a '/'"
 msgstr "значення для «%s» має починатися з «/»"
 
-#: plugins/sudoers/defaults.c:337
+#: plugins/sudoers/defaults.c:301
 #, c-format
 msgid "option `%s' does not take a value"
 msgstr "параметру «%s» не потрібно передавати значення"
@@ -584,7 +566,7 @@ msgstr "вибачте, вам не дозволено встановлюват�
 
 #: plugins/sudoers/find_path.c:68 plugins/sudoers/find_path.c:107
 #: plugins/sudoers/find_path.c:122 plugins/sudoers/iolog.c:124
-#: plugins/sudoers/sudoers.c:899 toke.l:663 toke.l:814
+#: plugins/sudoers/sudoers.c:903 toke.l:663 toke.l:814
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -628,7 +610,7 @@ msgstr "%s: несумісна основна версія додатка обр
 msgid "Local IP address and netmask pairs:\n"
 msgstr "Пари локальних IP-адрес і масок мережі:\n"
 
-#: plugins/sudoers/iolog.c:176 plugins/sudoers/sudoers.c:977
+#: plugins/sudoers/iolog.c:176 plugins/sudoers/sudoers.c:978
 #, c-format
 msgid "unable to read %s"
 msgstr "не вдалося прочитати %s"
@@ -647,72 +629,72 @@ msgstr "некоректний номер у послідовності %s"
 msgid "unable to create %s"
 msgstr "не вдалося створити %s"
 
-#: plugins/sudoers/iolog_path.c:245 plugins/sudoers/sudoers.c:356
+#: plugins/sudoers/iolog_path.c:247 plugins/sudoers/sudoers.c:357
 #, c-format
 msgid "unable to set locale to \"%s\", using \"C\""
 msgstr "не вдалося встановити локаль у значення «%s», використовуємо локаль «C»"
 
-#: plugins/sudoers/ldap.c:363
+#: plugins/sudoers/ldap.c:368
 #, c-format
 msgid "sudo_ldap_conf_add_ports: port too large"
 msgstr "sudo_ldap_conf_add_ports: занадто великий номер порту"
 
-#: plugins/sudoers/ldap.c:386
+#: plugins/sudoers/ldap.c:391
 #, c-format
 msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
 msgstr "sudo_ldap_conf_add_ports: вихід за межі розширеного буфера вузла"
 
-#: plugins/sudoers/ldap.c:415
+#: plugins/sudoers/ldap.c:420
 #, c-format
 msgid "unsupported LDAP uri type: %s"
 msgstr "непідтримуваний тип адреси LDAP: %s"
 
-#: plugins/sudoers/ldap.c:444
+#: plugins/sudoers/ldap.c:449
 #, c-format
 msgid "invalid uri: %s"
 msgstr "некоректна адреса: %s"
 
-#: plugins/sudoers/ldap.c:450
+#: plugins/sudoers/ldap.c:455
 #, c-format
 msgid "unable to mix ldap and ldaps URIs"
 msgstr "не можна використовувати суміш з адрес ldap і ldaps"
 
-#: plugins/sudoers/ldap.c:454
+#: plugins/sudoers/ldap.c:459
 #, c-format
 msgid "unable to mix ldaps and starttls"
 msgstr "не можна використовувати суміш з ldaps і starttls"
 
-#: plugins/sudoers/ldap.c:473
+#: plugins/sudoers/ldap.c:478
 #, c-format
 msgid "sudo_ldap_parse_uri: out of space building hostbuf"
 msgstr "sudo_ldap_parse_uri: вихід за межі пам’яті під час побудови буфера вузла"
 
-#: plugins/sudoers/ldap.c:536
+#: plugins/sudoers/ldap.c:541
 #, c-format
 msgid "unable to initialize SSL cert and key db: %s"
 msgstr "не вдалося ініціалізувати базу даних сертифікатів і ключів SSL: %s"
 
-#: plugins/sudoers/ldap.c:932
+#: plugins/sudoers/ldap.c:937
 #, c-format
 msgid "unable to get GMT time"
 msgstr "не вдалося отримати гринвіцький час"
 
-#: plugins/sudoers/ldap.c:938
+#: plugins/sudoers/ldap.c:943
 #, c-format
 msgid "unable to format timestamp"
 msgstr "не вдалося виконати форматування часового штампа"
 
-#: plugins/sudoers/ldap.c:946
+#: plugins/sudoers/ldap.c:951
 #, c-format
 msgid "unable to build time filter"
 msgstr "не вдалося побудувати фільтр часу"
 
-#: plugins/sudoers/ldap.c:1047
+#: plugins/sudoers/ldap.c:1052
 #, c-format
 msgid "sudo_ldap_build_pass1 allocation mismatch"
 msgstr "sudo_ldap_build_pass1: невідповідність розміщення"
 
-#: plugins/sudoers/ldap.c:1542
+#: plugins/sudoers/ldap.c:1562
 #, c-format
 msgid ""
 "\n"
@@ -721,7 +703,7 @@ msgstr ""
 "\n"
 "Роль LDAP: %s\n"
 
-#: plugins/sudoers/ldap.c:1544
+#: plugins/sudoers/ldap.c:1564
 #, c-format
 msgid ""
 "\n"
@@ -730,27 +712,27 @@ msgstr ""
 "\n"
 "Роль у LDAP: НЕВІДОМА\n"
 
-#: plugins/sudoers/ldap.c:1591
+#: plugins/sudoers/ldap.c:1611
 #, c-format
 msgid "    Order: %s\n"
 msgstr "    Порядок: %s\n"
 
-#: plugins/sudoers/ldap.c:1599
+#: plugins/sudoers/ldap.c:1619
 #, c-format
 msgid "    Commands:\n"
 msgstr "    Команди:\n"
 
-#: plugins/sudoers/ldap.c:1986
+#: plugins/sudoers/ldap.c:2006
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr "не вдалося ініціалізувати LDAP: %s"
 
-#: plugins/sudoers/ldap.c:2017
+#: plugins/sudoers/ldap.c:2037
 #, c-format
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
 msgstr "start_tls вказано, але у бібліотеках LDAP не передбачено підтримки ldap_start_tls_s() або ldap_start_tls_s_np()"
 
-#: plugins/sudoers/ldap.c:2248
+#: plugins/sudoers/ldap.c:2268
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr "некоректний атрибут sudoOrder: %s"
@@ -847,7 +829,7 @@ msgstr "внутрішня помилка: недостатньо місця д�
 msgid "parse error in %s near line %d"
 msgstr "помилка обробки у %s поблизу рядка %d"
 
-#: plugins/sudoers/parse.c:369
+#: plugins/sudoers/parse.c:371
 #, c-format
 msgid ""
 "\n"
@@ -856,17 +838,17 @@ msgstr ""
 "\n"
 "Запис sudoers:\n"
 
-#: plugins/sudoers/parse.c:371
+#: plugins/sudoers/parse.c:373
 #, c-format
 msgid "    RunAsUsers: "
 msgstr "    Користувачі для запуску: "
 
-#: plugins/sudoers/parse.c:386
+#: plugins/sudoers/parse.c:388
 #, c-format
 msgid "    RunAsGroups: "
 msgstr "    Групи для запуску: "
 
-#: plugins/sudoers/parse.c:395
+#: plugins/sudoers/parse.c:397
 #, c-format
 msgid ""
 "    Commands:\n"
@@ -909,38 +891,38 @@ msgstr "не вдалося кешувати gid %u, запис вже існу�
 msgid "unable to cache group %s, already exists"
 msgstr "не вдалося кешувати групу %s, запис вже існує"
 
-#: plugins/sudoers/set_perms.c:109 plugins/sudoers/set_perms.c:355
-#: plugins/sudoers/set_perms.c:587 plugins/sudoers/set_perms.c:821
+#: plugins/sudoers/set_perms.c:109 plugins/sudoers/set_perms.c:358
+#: plugins/sudoers/set_perms.c:590 plugins/sudoers/set_perms.c:824
 msgid "perm stack overflow"
 msgstr "переповнення стека доступу"
 
-#: plugins/sudoers/set_perms.c:117 plugins/sudoers/set_perms.c:363
-#: plugins/sudoers/set_perms.c:595 plugins/sudoers/set_perms.c:829
+#: plugins/sudoers/set_perms.c:117 plugins/sudoers/set_perms.c:366
+#: plugins/sudoers/set_perms.c:598 plugins/sudoers/set_perms.c:832
 msgid "perm stack underflow"
 msgstr "вичерпання стека доступу"
 
-#: plugins/sudoers/set_perms.c:223 plugins/sudoers/set_perms.c:455
-#: plugins/sudoers/set_perms.c:692
+#: plugins/sudoers/set_perms.c:223 plugins/sudoers/set_perms.c:458
+#: plugins/sudoers/set_perms.c:695
 msgid "unable to change to runas gid"
 msgstr "не вдалося змінити gid на runas"
 
-#: plugins/sudoers/set_perms.c:231 plugins/sudoers/set_perms.c:462
-#: plugins/sudoers/set_perms.c:699
+#: plugins/sudoers/set_perms.c:231 plugins/sudoers/set_perms.c:465
+#: plugins/sudoers/set_perms.c:702
 msgid "unable to change to runas uid"
 msgstr "не вдалося змінити uid на runas"
 
-#: plugins/sudoers/set_perms.c:245 plugins/sudoers/set_perms.c:475
-#: plugins/sudoers/set_perms.c:712
+#: plugins/sudoers/set_perms.c:245 plugins/sudoers/set_perms.c:478
+#: plugins/sudoers/set_perms.c:715
 #, c-format
 msgid "unable to change to sudoers gid"
 msgstr "не вдалося змінити gid на sudoers"
 
-#: plugins/sudoers/set_perms.c:286 plugins/sudoers/set_perms.c:513
-#: plugins/sudoers/set_perms.c:750 plugins/sudoers/set_perms.c:890
+#: plugins/sudoers/set_perms.c:286 plugins/sudoers/set_perms.c:516
+#: plugins/sudoers/set_perms.c:753 plugins/sudoers/set_perms.c:893
 msgid "too many processes"
 msgstr "забагато процесів"
 
-#: plugins/sudoers/set_perms.c:952
+#: plugins/sudoers/set_perms.c:955
 msgid "unable to set runas group vector"
 msgstr "не вдалося встановити вектор групи виконання"
 
@@ -964,57 +946,57 @@ msgstr "Користувач %s має право виконувати на ць
 msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr "Користувач %s не має права виконувати sudo на %s.\n"
 
-#: plugins/sudoers/sudoers.c:198 plugins/sudoers/sudoers.c:233
-#: plugins/sudoers/sudoers.c:907
+#: plugins/sudoers/sudoers.c:199 plugins/sudoers/sudoers.c:234
+#: plugins/sudoers/sudoers.c:911
 msgid "problem with defaults entries"
 msgstr "проблема з типовими записами"
 
-#: plugins/sudoers/sudoers.c:202
+#: plugins/sudoers/sudoers.c:203
 #, c-format
 msgid "no valid sudoers sources found, quitting"
 msgstr "не знайдено коректних джерел даних sudoers, завершення роботи"
 
-#: plugins/sudoers/sudoers.c:256
+#: plugins/sudoers/sudoers.c:257
 #, c-format
 msgid "unable to execute %s: %s"
 msgstr "не вдалося виконати %s: %s"
 
-#: plugins/sudoers/sudoers.c:305
+#: plugins/sudoers/sudoers.c:306
 #, c-format
 msgid "sudoers specifies that root is not allowed to sudo"
 msgstr "sudoers вказує, що sudo не можна користуватися для виконання команд від  root"
 
-#: plugins/sudoers/sudoers.c:312
+#: plugins/sudoers/sudoers.c:313
 #, c-format
 msgid "you are not permitted to use the -C option"
 msgstr "вам не дозволено використовувати параметр -C"
 
-#: plugins/sudoers/sudoers.c:402
+#: plugins/sudoers/sudoers.c:403
 #, c-format
 msgid "timestamp owner (%s): No such user"
 msgstr "власник часового штампа (%s): не знайдено користувача з таким іменем"
 
-#: plugins/sudoers/sudoers.c:418
+#: plugins/sudoers/sudoers.c:419
 msgid "no tty"
 msgstr "немає tty"
 
-#: plugins/sudoers/sudoers.c:419
+#: plugins/sudoers/sudoers.c:420
 #, c-format
 msgid "sorry, you must have a tty to run sudo"
 msgstr "вибачте, для виконання sudo вашому користувачеві потрібен tty"
 
-#: plugins/sudoers/sudoers.c:462
+#: plugins/sudoers/sudoers.c:463
 msgid "No user or host"
 msgstr "Немає користувача або вузла"
 
-#: plugins/sudoers/sudoers.c:476 plugins/sudoers/sudoers.c:497
-#: plugins/sudoers/sudoers.c:498 plugins/sudoers/sudoers.c:1452
-#: plugins/sudoers/sudoers.c:1453
+#: plugins/sudoers/sudoers.c:477 plugins/sudoers/sudoers.c:498
+#: plugins/sudoers/sudoers.c:499 plugins/sudoers/sudoers.c:1465
+#: plugins/sudoers/sudoers.c:1466
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: команду не знайдено"
 
-#: plugins/sudoers/sudoers.c:478 plugins/sudoers/sudoers.c:494
+#: plugins/sudoers/sudoers.c:479 plugins/sudoers/sudoers.c:495
 #, c-format
 msgid ""
 "ignoring `%s' found in '.'\n"
@@ -1023,95 +1005,95 @@ msgstr ""
 "пропущено «%s» знайдений у «.»\n"
 "Скористайтеся командою «sudo ./%s», якщо вам потрібно виконати саме «%s»."
 
-#: plugins/sudoers/sudoers.c:483
+#: plugins/sudoers/sudoers.c:484
 msgid "validation failure"
 msgstr "помилка під час спроби перевірки"
 
-#: plugins/sudoers/sudoers.c:493
+#: plugins/sudoers/sudoers.c:494
 msgid "command in current directory"
 msgstr "команда у поточному каталозі"
 
-#: plugins/sudoers/sudoers.c:505
+#: plugins/sudoers/sudoers.c:506
 #, c-format
 msgid "sorry, you are not allowed to preserve the environment"
 msgstr "вибачте, вам не дозволено зберігати середовище"
 
-#: plugins/sudoers/sudoers.c:890
+#: plugins/sudoers/sudoers.c:894
 #, c-format
 msgid "internal error, set_cmnd() overflow"
 msgstr "внутрішня помилка, переповнення set_cmnd()"
 
-#: plugins/sudoers/sudoers.c:935
+#: plugins/sudoers/sudoers.c:936
 #, c-format
 msgid "fixed mode on %s"
 msgstr "виправлено режим на %s"
 
-#: plugins/sudoers/sudoers.c:939
+#: plugins/sudoers/sudoers.c:940
 #, c-format
 msgid "set group on %s"
 msgstr "встановлено групу у %s"
 
-#: plugins/sudoers/sudoers.c:942
+#: plugins/sudoers/sudoers.c:943
 #, c-format
 msgid "unable to set group on %s"
 msgstr "не вдалося встановити групу на %s"
 
-#: plugins/sudoers/sudoers.c:945
+#: plugins/sudoers/sudoers.c:946
 #, c-format
 msgid "unable to fix mode on %s"
 msgstr "не вдалося виправити режим на %s"
 
-#: plugins/sudoers/sudoers.c:958
+#: plugins/sudoers/sudoers.c:959
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s не є звичайним файлом"
 
-#: plugins/sudoers/sudoers.c:960
+#: plugins/sudoers/sudoers.c:961
 #, c-format
 msgid "%s is mode 0%o, should be 0%o"
 msgstr "%s має режим доступу 0%o, має бути 0%o"
 
-#: plugins/sudoers/sudoers.c:964
+#: plugins/sudoers/sudoers.c:965
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s належить uid %u, має належати %u"
 
-#: plugins/sudoers/sudoers.c:967
+#: plugins/sudoers/sudoers.c:968
 #, c-format
 msgid "%s is owned by gid %u, should be %u"
 msgstr "%s належить gid %u, має належати %u"
 
-#: plugins/sudoers/sudoers.c:1011
+#: plugins/sudoers/sudoers.c:1012
 #, c-format
 msgid "only root can use `-c %s'"
 msgstr "використовувати «-c %s» може лише root"
 
-#: plugins/sudoers/sudoers.c:1021
+#: plugins/sudoers/sudoers.c:1022
 #, c-format
 msgid "unknown login class: %s"
 msgstr "невідомий клас входу: %s"
 
-#: plugins/sudoers/sudoers.c:1055
+#: plugins/sudoers/sudoers.c:1056
 #, c-format
 msgid "unable to resolve host %s"
 msgstr "не вдалося визначити адресу вузла %s"
 
-#: plugins/sudoers/sudoers.c:1105 plugins/sudoers/testsudoers.c:342
+#: plugins/sudoers/sudoers.c:1106 plugins/sudoers/testsudoers.c:351
 #, c-format
 msgid "unknown group: %s"
 msgstr "невідома група: %s"
 
-#: plugins/sudoers/sudoers.c:1137
+#: plugins/sudoers/sudoers.c:1150
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
 msgstr "Додаток правил sudoers версії %s\n"
 
-#: plugins/sudoers/sudoers.c:1139
+#: plugins/sudoers/sudoers.c:1152
 #, c-format
 msgid "Sudoers file grammar version %d\n"
 msgstr "Граматична перевірка файла sudoers версії %d\n"
 
-#: plugins/sudoers/sudoers.c:1143
+#: plugins/sudoers/sudoers.c:1156
 #, c-format
 msgid ""
 "\n"
@@ -1120,17 +1102,17 @@ msgstr ""
 "\n"
 "Шлях до sudoers: %s\n"
 
-#: plugins/sudoers/sudoers.c:1146
+#: plugins/sudoers/sudoers.c:1159
 #, c-format
 msgid "nsswitch path: %s\n"
 msgstr "Шлях до nsswitch: %s\n"
 
-#: plugins/sudoers/sudoers.c:1148
+#: plugins/sudoers/sudoers.c:1161
 #, c-format
 msgid "ldap.conf path: %s\n"
 msgstr "Шлях до ldap.conf: %s\n"
 
-#: plugins/sudoers/sudoers.c:1149
+#: plugins/sudoers/sudoers.c:1162
 #, c-format
 msgid "ldap.secret path: %s\n"
 msgstr "Шлях до ldap.secret: %s\n"
@@ -1291,16 +1273,16 @@ msgstr ""
 "  -s коеф_швидк    коефіцієнт прискорення або сповільнення виводу даних\n"
 "  -V               показати дані щодо версії і завершити роботу"
 
-#: plugins/sudoers/testsudoers.c:228
+#: plugins/sudoers/testsudoers.c:230
 #, c-format
 msgid "internal error, init_vars() overflow"
 msgstr "внутрішня помилка, переповнення init_vars()"
 
-#: plugins/sudoers/testsudoers.c:304
+#: plugins/sudoers/testsudoers.c:309
 msgid "\thost  unmatched"
 msgstr "\tвідповідника вузла не знайдено"
 
-#: plugins/sudoers/testsudoers.c:307
+#: plugins/sudoers/testsudoers.c:312
 msgid ""
 "\n"
 "Command allowed"
@@ -1308,7 +1290,7 @@ msgstr ""
 "\n"
 "Команду дозволено"
 
-#: plugins/sudoers/testsudoers.c:308
+#: plugins/sudoers/testsudoers.c:313
 msgid ""
 "\n"
 "Command denied"
@@ -1316,7 +1298,7 @@ msgstr ""
 "\n"
 "Команду заборонено"
 
-#: plugins/sudoers/testsudoers.c:308
+#: plugins/sudoers/testsudoers.c:313
 msgid ""
 "\n"
 "Command unmatched"
@@ -1347,81 +1329,81 @@ msgstr "Граматична перевірка %s, версія %d\n"
 msgid "you do not exist in the %s database"
 msgstr "вас немає у базі даних %s"
 
-#: plugins/sudoers/visudo.c:238 plugins/sudoers/visudo.c:470
+#: plugins/sudoers/visudo.c:238 plugins/sudoers/visudo.c:518
 #, c-format
 msgid "press return to edit %s: "
 msgstr "натисніть Enter для редагування %s: "
 
-#: plugins/sudoers/visudo.c:300 plugins/sudoers/visudo.c:306
+#: plugins/sudoers/visudo.c:320 plugins/sudoers/visudo.c:326
 #, c-format
 msgid "write error"
 msgstr "помилка запису"
 
-#: plugins/sudoers/visudo.c:360
+#: plugins/sudoers/visudo.c:408
 #, c-format
 msgid "unable to stat temporary file (%s), %s unchanged"
 msgstr "не вдалося обробити stat файл тимчасових даних (%s), %s не змінено"
 
-#: plugins/sudoers/visudo.c:365
+#: plugins/sudoers/visudo.c:413
 #, c-format
 msgid "zero length temporary file (%s), %s unchanged"
 msgstr "файл тимчасових даних має нульовий об’єм (%s), %s не змінено"
 
-#: plugins/sudoers/visudo.c:371
+#: plugins/sudoers/visudo.c:419
 #, c-format
 msgid "editor (%s) failed, %s unchanged"
 msgstr "помилка редактора (%s), %s не змінено"
 
-#: plugins/sudoers/visudo.c:394
+#: plugins/sudoers/visudo.c:442
 #, c-format
 msgid "%s unchanged"
 msgstr "%s не змінено"
 
-#: plugins/sudoers/visudo.c:418
+#: plugins/sudoers/visudo.c:466
 #, c-format
 msgid "unable to re-open temporary file (%s), %s unchanged."
 msgstr "не вдалося повторно відкрити файл тимчасових даних (%s), %s не змінено."
 
-#: plugins/sudoers/visudo.c:428
+#: plugins/sudoers/visudo.c:476
 #, c-format
 msgid "unabled to parse temporary file (%s), unknown error"
 msgstr "не вдалося обробити файл тимчасових даних (%s), невідома помилка"
 
-#: plugins/sudoers/visudo.c:463
+#: plugins/sudoers/visudo.c:511
 #, c-format
 msgid "internal error, unable to find %s in list!"
 msgstr "внутрішня помилка, не вдалося знайти %s у списку!"
 
-#: plugins/sudoers/visudo.c:502 plugins/sudoers/visudo.c:511
+#: plugins/sudoers/visudo.c:546 plugins/sudoers/visudo.c:555
 #, c-format
-msgid "unable to set (uid, gid) of %s to (%d, %d)"
-msgstr "не вдалося встановити (uid, gid) %s у значення (%d, %d)"
+msgid "unable to set (uid, gid) of %s to (%u, %u)"
+msgstr "не вдалося встановити (uid, gid) %s у значення (%u, %u)"
 
-#: plugins/sudoers/visudo.c:506 plugins/sudoers/visudo.c:516
+#: plugins/sudoers/visudo.c:550 plugins/sudoers/visudo.c:560
 #, c-format
 msgid "unable to change mode of %s to 0%o"
 msgstr "не вдалося змінити режим доступу до %s на значення 0%o"
 
-#: plugins/sudoers/visudo.c:533
+#: plugins/sudoers/visudo.c:577
 #, c-format
 msgid "%s and %s not on the same file system, using mv to rename"
 msgstr "%s і %s не перебувають у одній файловій системі, використовуємо mv для перейменування"
 
-#: plugins/sudoers/visudo.c:547
+#: plugins/sudoers/visudo.c:591
 #, c-format
 msgid "command failed: '%s %s %s', %s unchanged"
 msgstr "помилка команди: «%s %s %s», %s не змінено"
 
-#: plugins/sudoers/visudo.c:557
+#: plugins/sudoers/visudo.c:601
 #, c-format
 msgid "error renaming %s, %s unchanged"
 msgstr "помилка перейменування %s, %s не змінено"
 
-#: plugins/sudoers/visudo.c:617
+#: plugins/sudoers/visudo.c:661
 msgid "What now? "
 msgstr "А зараз що? "
 
-#: plugins/sudoers/visudo.c:631
+#: plugins/sudoers/visudo.c:675
 msgid ""
 "Options are:\n"
 "  (e)dit sudoers file again\n"
@@ -1433,92 +1415,92 @@ msgstr ""
 "  (x) — вийти без внесення змін до файла sudoers\n"
 "  (Q) — вийти зі збереженням файла sudoers (НЕБЕЗПЕЧНО!)\n"
 
-#: plugins/sudoers/visudo.c:668
+#: plugins/sudoers/visudo.c:712
 #, c-format
 msgid "unable to execute %s"
 msgstr "не вдалося виконати %s"
 
-#: plugins/sudoers/visudo.c:675
+#: plugins/sudoers/visudo.c:719
 #, c-format
 msgid "unable to run %s"
 msgstr "не вдалося виконати %s"
 
-#: plugins/sudoers/visudo.c:706
+#: plugins/sudoers/visudo.c:750
 #, c-format
 msgid "failed to parse %s file, unknown error"
 msgstr "не вдалося обробити файл %s, невідома помилка"
 
-#: plugins/sudoers/visudo.c:718
+#: plugins/sudoers/visudo.c:762
 #, c-format
 msgid "parse error in %s near line %d\n"
 msgstr "помилка обробки у %s поблизу рядка %d\n"
 
-#: plugins/sudoers/visudo.c:721
+#: plugins/sudoers/visudo.c:765
 #, c-format
 msgid "parse error in %s\n"
 msgstr "помилка обробки у %s\n"
 
-#: plugins/sudoers/visudo.c:723
+#: plugins/sudoers/visudo.c:767
 #, c-format
 msgid "%s: parsed OK\n"
 msgstr "%s: вдала обробка\n"
 
-#: plugins/sudoers/visudo.c:737
+#: plugins/sudoers/visudo.c:776
 #, c-format
-msgid "%s: wrong owner (uid, gid) should be (%d, %d)\n"
-msgstr "%s: помилковий власник (uid, gid), має бути (%d, %d)\n"
+msgid "%s: wrong owner (uid, gid) should be (%u, %u)\n"
+msgstr "%s: помилковий власник (uid, gid), має бути (%u, %u)\n"
 
-#: plugins/sudoers/visudo.c:744
+#: plugins/sudoers/visudo.c:783
 #, c-format
 msgid "%s: bad permissions, should be mode 0%o\n"
 msgstr "%s: помилкові права доступу, режим доступу має бути 0%o\n"
 
-#: plugins/sudoers/visudo.c:783
+#: plugins/sudoers/visudo.c:822
 #, c-format
 msgid "%s busy, try again later"
 msgstr "%s зайнято, повторіть спробу пізніше"
 
-#: plugins/sudoers/visudo.c:826
+#: plugins/sudoers/visudo.c:865
 #, c-format
 msgid "specified editor (%s) doesn't exist"
 msgstr "вказаного редактора (%s) не існує"
 
-#: plugins/sudoers/visudo.c:849
+#: plugins/sudoers/visudo.c:888
 #, c-format
 msgid "unable to stat editor (%s)"
 msgstr "не вдалося виконати stat для редактора (%s)"
 
-#: plugins/sudoers/visudo.c:897
+#: plugins/sudoers/visudo.c:936
 #, c-format
 msgid "no editor found (editor path = %s)"
 msgstr "не знайдено жодного редактора (шлях до редактора = %s)"
 
-#: plugins/sudoers/visudo.c:986
+#: plugins/sudoers/visudo.c:1025
 #, c-format
 msgid "Error: cycle in %s_Alias `%s'"
 msgstr "Помилка: цикл у %s_Alias «%s»"
 
-#: plugins/sudoers/visudo.c:987
+#: plugins/sudoers/visudo.c:1026
 #, c-format
 msgid "Warning: cycle in %s_Alias `%s'"
 msgstr "Попередження: цикл у %s_Alias «%s»"
 
-#: plugins/sudoers/visudo.c:990
+#: plugins/sudoers/visudo.c:1029
 #, c-format
 msgid "Error: %s_Alias `%s' referenced but not defined"
 msgstr "Помилка: виявлено посилання %s_Alias «%s», яке не визначено"
 
-#: plugins/sudoers/visudo.c:991
+#: plugins/sudoers/visudo.c:1030
 #, c-format
 msgid "Warning: %s_Alias `%s' referenced but not defined"
 msgstr "Попередження: виявлено посилання %s_Alias «%s», яке не визначено"
 
-#: plugins/sudoers/visudo.c:1128
+#: plugins/sudoers/visudo.c:1167
 #, c-format
 msgid "%s: unused %s_Alias %s"
 msgstr "%s: невикористаний %s_Alias %s"
 
-#: plugins/sudoers/visudo.c:1185
+#: plugins/sudoers/visudo.c:1224
 #, c-format
 msgid ""
 "%s - safely edit the sudoers file\n"
@@ -1527,7 +1509,7 @@ msgstr ""
 "%s — безпечне редагування файла sudoers\n"
 "\n"
 
-#: plugins/sudoers/visudo.c:1187
+#: plugins/sudoers/visudo.c:1226
 msgid ""
 "\n"
 "Options:\n"
@@ -1731,6 +1713,19 @@ msgstr[3] "одна невдала спроба введення пароля"
 #: plugins/sudoers/auth/sudo_auth.c:335
 msgid "Authentication methods:"
 msgstr "Способи розпізнавання:"
+
+#~ msgid ""
+#~ "Available options in a sudoers ``Defaults'' line:\n"
+#~ "\n"
+#~ msgstr ""
+#~ "Можливі параметри у рядку «Defaults» sudoers:\n"
+#~ "\n"
+
+#~ msgid "%s: %s\n"
+#~ msgstr "%s: %s\n"
+
+#~ msgid "%s: %.*s\n"
+#~ msgstr "%s: %.*s\n"
 
 #~ msgid "unable to get runas group vector"
 #~ msgstr "не вдалося отримати вектор групи виконання"
