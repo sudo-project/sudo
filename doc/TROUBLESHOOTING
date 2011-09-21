@@ -27,7 +27,7 @@ A) Sudo must be setuid root to do its work.  You need to do something like
 
 Q) Sudo never gives me a chance to enter a password using PAM, it just
    says 'Sorry, try again.' three times and exits.
-A) You didn't setup PAM to work with sudo.  On Redhat Linux or Fedora
+A) You didn't setup PAM to work with sudo.  On RedHat Linux or Fedora
    Core this generally means installing sample.pam as /etc/pam.d/sudo.
    See the sample.pam file for hints on what to use for other Linux
    systems.
@@ -55,14 +55,20 @@ A) Make sure you have an entry in your syslog.conf file to save
 
 Q) When sudo asks me for my password it never accepts what I enter even
    though I know I entered my password correctly.
-A) If your system uses shadow passwords, it is possible that sudo
-   didn't detect this.  Take a look at the generated config.h file
-   and verify that the C function used for shadow password lookups
-   was detected.  For instance, for SVR4-style shadow passwords,
-   HAVE_GETSPNAM should be defined (you can search for the string
-   "shadow passwords" in config.h with your editor).  Note that
-   there is no define for 4.4BSD-based shadow passwords since that
-   just uses the standard getpw* routines.
+A) If you are not using pam and your system uses shadow passwords,
+   it is possible that sudo didn't properly detect that shadow
+   passwords are in use.  Take a look at the generated config.h
+   file and verify that the C function used for shadow password
+   look ups was detected.  For instance, for SVR4-style shadow
+   passwords, HAVE_GETSPNAM should be defined (you can search for
+   the string "shadow passwords" in config.h with your editor).
+   Note that there is no define for 4.4BSD-based shadow passwords
+   since that just uses the standard getpw* routines.
+
+Q) Can sudo use the ssh agent for authentication instead of asking
+   for the user's Unix password?
+A) Not directly, but you can use a PAM module like pam_ssh_agent_auth
+   or pam_ssh for this purpose.
 
 Q) I don't want the sudoers file in /etc, how can I specify where it
    should go?
@@ -72,21 +78,25 @@ A) Use the --sysconfdir option to configure.  Ie:
 Q) Can I put the sudoers file in NIS/NIS+ or do I have to have a
    copy on each machine?
 A) There is no support for making an NIS/NIS+ map/table out of
-   the sudoers file at this time.  A good way to distribute the
-   sudoers file is via rdist(1).  It is also possible to NFS-mount
-   the sudoers file.
+   the sudoers file at this time.  You can distribute the sudoers
+   file via rsync or rdist.  It is also possible to NFS-mount the
+   sudoers file.  If you use LDAP at your site you may be interested
+   in sudo's LDAP sudoers support, see the README.LDAP file and the
+   sudoers.ldap manual.
 
 Q) I don't run sendmail on my machine.  Does this mean that I cannot
    use sudo?
-A) No, you just need to run use the --without-sendmail argument to configure
-   or add "!mailerpath" to the Defaults line in /etc/sudoers.
+A) No, you just need to disable mailing with a line like:
+	Defaults !mailerpath
+   in your sudoers file or run configure with the --without-sendmail
+   option.
 
 Q) When I run visudo it uses vi as the editor and I hate vi.  How
    can I make it use another editor?
-A) Your best bet is to run configure with the --with-env-editor switch.
-   This will make visudo use the editor specified by the user's
-   EDITOR environment variable.  Alternately, you can run configure
-   with the --with-editor=/path/to/another/editor.
+A) You can specify the editor to use in visudo in the sudoers file.
+   See the "editor" and "env_editor" entries in the sudoers manual.
+   The defaults can also be set at configure time using the
+   --with-editor and --with-env-editor configure options.
 
 Q) Sudo appears to be removing some variables from my environment, why?
 A) Sudo removes the following "dangerous" environment variables
@@ -120,13 +130,14 @@ A) Sudo removes the following "dangerous" environment variables
      DLC_ACE (SecurID only)
 
 Q) How can I keep sudo from asking for a password?
-A) To specify this on a per-user (and per-command) basis, use the 'NOPASSWD'
-   tag right before the command list in sudoers.  See the sudoers man page
-   and sample.sudoers for details.  To disable passwords completely,
-   run configure with the --without-passwd option or add "!authenticate"
-   to the Defaults line in /etc/sudoers.  You can also turn off authentication
-   on a per-user or per-host basis using a user or host-specific Defaults
-   entry in sudoers.
+A) To specify this on a per-user (and per-command) basis, use the
+   'NOPASSWD' tag right before the command list in sudoers.  See
+   the sudoers man page and sample.sudoers for details.  To disable
+   passwords completely, add !authenticate" to the Defaults line
+   in /etc/sudoers.  You can also turn off authentication on a
+   per-user or per-host basis using a user or host-specific Defaults
+   entry in sudoers.  To hard-code the global default, you can
+   configure with the --without-passwd option.
 
 Q) When I run configure, it dies with the following error:
    "no acceptable cc found in $PATH".
@@ -184,7 +195,7 @@ A) The default user sudo tries to run things as is always root, even if
    work around this using the 'runas_default' option in sudoers.
    For example:
     Defaults:bob	runas_default=oracle
-   would achieve the desired result ofr the preceding sudoers fragment.
+   would achieve the desired result for the preceding sudoers fragment.
 
 Q) When I try to run sudo via ssh, I get the error:
     sudo: no tty present and no askpass program specified
