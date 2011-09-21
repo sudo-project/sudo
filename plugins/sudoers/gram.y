@@ -71,9 +71,9 @@
  */
 extern int sudolineno;
 extern char *sudoers;
-int parse_error;
+static int verbose = FALSE;
+int parse_error = FALSE;
 int pedantic = FALSE;
-int verbose = FALSE;
 int errorlineno = -1;
 char *errorfile = NULL;
 
