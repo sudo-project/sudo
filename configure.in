@@ -2086,9 +2086,9 @@ if test "$utmp_style" = "LEGACY"; then
     AC_CHECK_FUNCS(getttyent ttyslot, [break])
 fi
 
-AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(util.h pty.h, [break])], [
+AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(libutil.h util.h pty.h, [break])], [
     AC_CHECK_LIB(util, openpty, [
-	AC_CHECK_HEADERS(util.h pty.h, [break])
+	AC_CHECK_HEADERS(libutil.h util.h pty.h, [break])
 	case "$SUDO_LIBS" in
 	    *-lutil*) ;;
 	    *) SUDO_LIBS="${SUDO_LIBS} -lutil";;

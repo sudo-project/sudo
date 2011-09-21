@@ -314,6 +314,9 @@
 /* Define to 1 if you have the <libintl.h> header file. */
 #undef HAVE_LIBINTL_H
 
+/* Define to 1 if you have the <libutil.h> header file. */
+#undef HAVE_LIBUTIL_H
+
 /* Define to 1 to enable Linux audit support. */
 #undef HAVE_LINUX_AUDIT
 

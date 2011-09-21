@@ -46,7 +46,9 @@
 #include <grp.h>
 #include <pwd.h>
 
-#ifdef HAVE_UTIL_H
+#if defined(HAVE_LIBUTIL_H)
+# include <libutil.h>
+#elif defined(HAVE_UTIL_H)
 # include <util.h>
 #endif
 #ifdef HAVE_PTY_H
