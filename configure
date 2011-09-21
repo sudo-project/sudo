@@ -16197,7 +16197,7 @@ if test "x$ac_cv_func_openpty" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_OPENPTY 1
 _ACEOF
- for ac_header in util.h pty.h
+ for ac_header in libutil.h util.h pty.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -16250,7 +16250,7 @@ fi
 $as_echo "$ac_cv_lib_util_openpty" >&6; }
 if test "x$ac_cv_lib_util_openpty" = xyes; then :
 
-	for ac_header in util.h pty.h
+	for ac_header in libutil.h util.h pty.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
