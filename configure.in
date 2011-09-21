@@ -1785,6 +1785,7 @@ case "$host" in
 		    SKIP_SETREUID=yes
 		    ;;
 		esac
+		OSDEFS="${OSDEFS} -D_BSD_SOURCE"
 		if test "${with_skey-'no'}" = "yes"; then
 		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
 		fi
@@ -1794,8 +1795,9 @@ case "$host" in
 		;;
     *-*-*openbsd*)
 		# OpenBSD has a real setreuid(2) starting with 3.3 but
-		# we will use setreuid(2) instead.
+		# we will use setresuid(2) instead.
 		SKIP_SETREUID=yes
+		OSDEFS="${OSDEFS} -D_BSD_SOURCE"
 		CHECKSHADOW="false"
 		# OpenBSD >= 3.0 supports BSD auth
 		if test -z "$with_bsdauth"; then
@@ -1817,6 +1819,7 @@ case "$host" in
 		: ${with_logincap='maybe'}
 		;;
     *-*-dragonfly*)
+		OSDEFS="${OSDEFS} -D_BSD_SOURCE"
 		if test "${with_skey-'no'}" = "yes"; then
 		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
 		fi
