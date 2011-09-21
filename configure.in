@@ -3,7 +3,7 @@ dnl Process this file with GNU autoconf to produce a configure script.
 dnl
 dnl Copyright (c) 1994-1996,1998-2011 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
-AC_INIT([sudo], [1.7.8], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.7.8rc1], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER(config.h pathnames.h zlib/zconf.h)
 dnl
 dnl Note: this must come after AC_INIT
@@ -1774,6 +1774,7 @@ case "$host" in
 		    SKIP_SETREUID=yes
 		    ;;
 		esac
+		OSDEFS="${OSDEFS} -D_BSD_SOURCE"
 		if test "${with_skey-'no'}" = "yes"; then
 		     SUDO_LIBS="${SUDO_LIBS} -lmd"
 		fi
@@ -1783,8 +1784,9 @@ case "$host" in
 		;;
     *-*-*openbsd*)
 		# OpenBSD has a real setreuid(2) starting with 3.3 but
-		# we will use setreuid(2) instead.
+		# we will use setresuid(2) instead.
 		SKIP_SETREUID=yes
+		OSDEFS="${OSDEFS} -D_BSD_SOURCE"
 		CHECKSHADOW="false"
 		# OpenBSD >= 3.0 supports BSD auth
 		if test -z "$with_bsdauth"; then
@@ -1806,6 +1808,7 @@ case "$host" in
 		: ${with_logincap='maybe'}
 		;;
     *-*-dragonfly*)
+		OSDEFS="${OSDEFS} -D_BSD_SOURCE"
 		if test "${with_skey-'no'}" = "yes"; then
 		     SUDO_LIBS="${SUDO_LIBS} -lmd"
 		fi
