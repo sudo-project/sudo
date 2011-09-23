@@ -797,7 +797,7 @@ init_vars(char * const envp[])
      * can read the shadow passwd file if necessary.
      */
     if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL) {
-	struct passwd pw;
+	static struct passwd pw;
 
 	/* Create a fake struct passwd for log_error(). */
 	memset(&pw, 0, sizeof(pw));
