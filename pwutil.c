@@ -315,12 +315,10 @@ done:
     return item->d.pw;
 }
 
-/*
- * Take a uid in string form "#123" and return a faked up passwd struct.
- */
-struct passwd *
-sudo_fakepwnam(user, gid)
+static struct passwd *
+sudo_fakepwnamid(user, uid, gid)
     const char *user;
+    uid_t uid;
     gid_t gid;
 {
     struct cache_item *item;
@@ -338,7 +336,7 @@ sudo_fakepwnam(user, gid)
 	item = emalloc(len);
 	zero_bytes(item, sizeof(*item) + sizeof(*pw));
 	pw = (struct passwd *) ((char *)item + sizeof(*item));
-	pw->pw_uid = (uid_t) atoi(user + 1);
+	pw->pw_uid = uid;
 	pw->pw_gid = gid;
 	pw->pw_name = (char *)pw + sizeof(struct passwd);
 	memcpy(pw->pw_name, user, namelen + 1);
@@ -371,6 +369,34 @@ sudo_fakepwnam(user, gid)
     }
     item->refcnt++;
     return pw;
+}
+
+/*
+ * Take a uid in string form "#123" and return a faked up passwd struct.
+ */
+struct passwd *
+sudo_fakepwnam(user, gid)
+    const char *user;
+    gid_t gid;
+{
+    uid_t uid;
+
+    uid = (uid_t) atoi(user + 1);
+    return sudo_fakepwnamid(user, uid, gid);
+}
+
+/*
+ * Take a uid and gid and return a faked up passwd struct.
+ */
+struct passwd *
+sudo_fakepwuid(uid, gid)
+    uid_t uid;
+    gid_t gid;
+{
+    char user[MAX_UID_T_LEN + 1];
+
+    (void) snprintf(user, sizeof(user), "#%u", (unsigned int) uid);
+    return sudo_fakepwnamid(user, uid, gid);
 }
 
 void

@@ -659,15 +659,8 @@ init_vars(envp)
      * Stash a local copy of the user's struct passwd.
      */
     if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL) {
-	/* Need to make a fake struct passwd for logging to work. */
-	struct passwd pw;
-	char pw_name[MAX_UID_T_LEN + 1];
-
-	pw.pw_uid = getuid();
-	(void) snprintf(pw_name, sizeof(pw_name), "%u",
-	    (unsigned int) pw.pw_uid);
-	pw.pw_name = pw_name;
-	sudo_user.pw = &pw;
+	uid_t uid = getuid();
+	gid_t gid = getgid();
 
 	/*
 	 * If we are in -k/-K mode, just spew to stderr.  It is not unusual for
@@ -675,8 +668,11 @@ init_vars(envp)
 	 * be run during reboot after the YP/NIS/NIS+/LDAP/etc daemon has died.
 	 */
 	if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE)
-	    errorx(1, "unknown uid: %s", pw_name);
-	log_error(0, "unknown uid: %s", pw_name);
+	    errorx(1, "unknown uid: %u", (unsigned int) uid);
+
+	/* Need to make a fake struct passwd for the call to log_error(). */
+	sudo_user.pw = sudo_fakepwuid(uid, gid);
+	log_error(0, "unknown uid: %u", (unsigned int) uid);
     }
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
     mbr_uid_to_uuid(user_uid, user_uuid);

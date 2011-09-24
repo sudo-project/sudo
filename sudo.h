@@ -295,6 +295,7 @@ struct group *sudo_fakegrnam __P((const char *));
 struct group *sudo_getgrgid __P((gid_t));
 struct group *sudo_getgrnam __P((const char *));
 struct passwd *sudo_fakepwnam __P((const char *, gid_t));
+struct passwd *sudo_fakepwuid __P((uid_t uid, gid_t gid));
 struct passwd *sudo_getpwnam __P((const char *));
 struct passwd *sudo_getpwuid __P((uid_t));
 void sudo_endgrent	__P((void));
