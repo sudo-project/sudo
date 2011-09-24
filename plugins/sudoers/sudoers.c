@@ -207,15 +207,11 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     /* XXX - collect post-sudoers parse settings into a function */
 
     /*
-     * Initialize external group plugin.
+     * Initialize external group plugin, if any.
      */
     if (def_group_plugin) {
-	switch (group_plugin_load(def_group_plugin)) {
-	case -1:
-	    return -1;
-	case FALSE:
+	if (group_plugin_load(def_group_plugin) != TRUE)
 	    def_group_plugin = NULL;
-	}
     }
 
     /*
