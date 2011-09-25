@@ -268,6 +268,7 @@ void sudo_endspent(void);
 struct group_list *get_group_list(struct passwd *pw);
 void set_group_list(const char *, GETGROUPS_T *gids, int ngids);
 struct passwd *sudo_getpwnam(const char *);
+struct passwd *sudo_fakepwnamid(const char *user, uid_t uid, gid_t gid);
 struct passwd *sudo_fakepwnam(const char *, gid_t);
 struct passwd *sudo_getpwuid(uid_t);
 struct group *sudo_getgrnam(const char *);
