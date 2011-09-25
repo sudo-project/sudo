@@ -792,23 +792,18 @@ init_vars(char * const envp[])
      * if necessary.  It is assumed that euid is 0 at this point so we
      * can read the shadow passwd file if necessary.
      */
-    if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL) {
-	static struct passwd pw;
-
-	/* Create a fake struct passwd for log_error(). */
-	memset(&pw, 0, sizeof(pw));
-	pw.pw_uid = getuid();
-	pw.pw_name = user_name;
-	sudo_user.pw = &pw;
-
+    if ((sudo_user.pw = sudo_getpwuid(user_uid)) == NULL) {
 	/*
 	 * It is not unusual for users to place "sudo -k" in a .logout
 	 * file which can cause sudo to be run during reboot after the
 	 * YP/NIS/NIS+/LDAP/etc daemon has died.
 	 */
 	if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE)
-	    errorx(1, _("unknown user: %s"), user_name);
-	log_error(0, _("unknown user: %s"), user_name);
+	    errorx(1, _("unknown uid: %u"), (unsigned int) user_uid);
+
+	/* Need to make a fake struct passwd for the call to log_error(). */
+	sudo_user.pw = sudo_fakepwnamid(user_name, user_uid, user_gid);
+	log_error(0, _("unknown uid: %u"), (unsigned int) user_uid);
 	/* NOTREACHED */
     }
 
