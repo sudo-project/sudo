@@ -117,11 +117,9 @@ check_user(int validated, int mode)
     /* Init authentication system regardless of whether we need a password. */
     auth_pw = get_authpw();
     if (sudo_auth_init(auth_pw) == -1) {
-	pw_delref(auth_pw);
 	rval = -1;
 	goto done;
     }
-    pw_delref(auth_pw);
 
     /* Always prompt for a password when -k was specified with the command. */
     if (ISSET(mode, MODE_IGNORE_TICKET)) {
@@ -146,8 +144,6 @@ check_user(int validated, int mode)
 	TS_MAKE_DIRS);
 
     if (status != TS_CURRENT || ISSET(validated, FLAG_CHECK_USER)) {
-	struct passwd *auth_pw;
-
 	/* Bail out if we are non-interactive and a password is required */
 	if (ISSET(mode, MODE_NONINTERACTIVE)) {
 	    warningx(_("sorry, a password is required to run %s"), getprogname());
@@ -162,9 +158,7 @@ check_user(int validated, int mode)
 	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
 	    user_name, user_shost);
 
-	auth_pw = get_authpw();
 	rval = verify_user(auth_pw, prompt);
-	pw_delref(auth_pw);
     }
     /* Only update timestamp if user was validated. */
     if (rval == TRUE && ISSET(validated, VALIDATE_OK) &&
@@ -175,6 +169,7 @@ check_user(int validated, int mode)
 
 done:
     sudo_auth_cleanup(auth_pw);
+    pw_delref(auth_pw);
 
     return rval;
 }
