@@ -107,10 +107,10 @@ int
 sudo_auth_init(struct passwd *pw)
 {
     sudo_auth *auth;
-    int status;
+    int status = AUTH_SUCCESS;
 
     if (auth_switch[0].name == NULL)
-	return AUTH_SUCCESS;
+	return TRUE;
 
     /* Make sure we haven't mixed standalone and shared auth methods. */
     standalone = IS_STANDALONE(&auth_switch[0]);
@@ -141,18 +141,18 @@ sudo_auth_init(struct passwd *pw)
 	    else if (status == AUTH_FATAL) {
 		/* XXX log */
 		audit_failure(NewArgv, "authentication failure");
-		return -1;		/* assume error msg already printed */
+		break;		/* assume error msg already printed */
 	    }
 	}
     }
-    return AUTH_SUCCESS;
+    return status == AUTH_FATAL ? -1 : TRUE;
 }
 
 int
 sudo_auth_cleanup(struct passwd *pw)
 {
     sudo_auth *auth;
-    int status;
+    int status = AUTH_SUCCESS;
 
     /* Call cleanup routines. */
     for (auth = auth_switch; auth->name; auth++) {
@@ -168,11 +168,11 @@ sudo_auth_cleanup(struct passwd *pw)
 	    if (status == AUTH_FATAL) {
 		/* XXX log */
 		audit_failure(NewArgv, "authentication failure");
-		return -1;		/* assume error msg already printed */
+		break;		/* assume error msg already printed */
 	    }
 	}
     }
-    return AUTH_SUCCESS;
+    return status == AUTH_FATAL ? -1 : TRUE;
 }
 
 int

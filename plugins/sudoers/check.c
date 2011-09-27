@@ -116,7 +116,11 @@ check_user(int validated, int mode)
 
     /* Init authentication system regardless of whether we need a password. */
     auth_pw = get_authpw();
-    sudo_auth_init(auth_pw);
+    if (sudo_auth_init(auth_pw) == -1) {
+	pw_delref(auth_pw);
+	rval = -1;
+	goto done;
+    }
     pw_delref(auth_pw);
 
     /* Always prompt for a password when -k was specified with the command. */
