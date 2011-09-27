@@ -242,16 +242,26 @@ done:
 }
 
 int
-pam_end_session(sudo_auth *auth)
+pam_end_session(struct passwd *pw, sudo_auth *auth)
 {
     int status = PAM_SUCCESS;
 
-    if (pamh) {
 #ifndef NO_PAM_SESSION
-	(void) pam_close_session(pamh, PAM_SILENT);
+    /* If the user did not have to authenticate there is no pam handle yet. */
+    if (pamh == NULL)
+	pam_init(pw, NULL, NULL);
+
+    /*
+     * Update PAM_USER to reference the user we are running the command
+     * as to match the call to pam_open_session().
+     */
+    (void) pam_set_item(pamh, PAM_USER, pw->pw_name);
+
+    (void) pam_close_session(pamh, PAM_SILENT);
 #endif
+
+    if (pamh != NULL)
 	status = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
-    }
     return status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE;
 }
 
