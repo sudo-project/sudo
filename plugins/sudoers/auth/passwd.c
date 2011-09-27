@@ -49,7 +49,7 @@
 #define HAS_AGEINFO(p, l)	(l == 18 && p[DESLEN] == ',')
 
 int
-passwd_init(struct passwd *pw, char **promptp, sudo_auth *auth)
+passwd_init(struct passwd *pw, sudo_auth *auth)
 {
 #ifdef HAVE_SKEYACCESS
     if (skeyaccess(pw, user_tty, NULL, NULL) == 0)
