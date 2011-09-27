@@ -274,14 +274,14 @@ int auth_begin_session(struct passwd *pw)
     return TRUE;
 }
 
-int auth_end_session(void)
+int auth_end_session(struct passwd *pw)
 {
     sudo_auth *auth;
     int status;
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->end_session && !IS_DISABLED(auth)) {
-	    status = (auth->end_session)(auth);
+	    status = (auth->end_session)(pw, auth);
 	    if (status == AUTH_FATAL) {	/* XXX log */
 		return -1;		/* assume error msg already printed */
 	    }
