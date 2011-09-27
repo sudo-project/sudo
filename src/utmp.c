@@ -96,10 +96,12 @@ utmp_setid(sudo_utmp_t *old, sudo_utmp_t *new)
     size_t idlen;
 
     /* Skip over "tty" in the id if old entry did too. */
-    if (strncmp(line, "tty", 3) == 0) {
-	idlen = MIN(sizeof(old->ut_id), 3);
-	if (strncmp(old->ut_id, "tty", idlen) != 0)
-	    line += 3;
+    if (old != NULL) {
+	if (strncmp(line, "tty", 3) == 0) {
+	    idlen = MIN(sizeof(old->ut_id), 3);
+	    if (strncmp(old->ut_id, "tty", idlen) != 0)
+		line += 3;
+	}
     }
     
     /* Store as much as will fit, skipping parts of the beginning as needed. */
