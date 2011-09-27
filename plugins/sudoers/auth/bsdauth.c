@@ -54,7 +54,7 @@
 extern char *login_style;		/* from sudo.c */
 
 int
-bsdauth_init(struct passwd *pw, char **promptp, sudo_auth *auth)
+bsdauth_init(struct passwd *pw, sudo_auth *auth)
 {
     static auth_session_t *as;
     extern login_cap_t *lc;			/* from sudo.c */

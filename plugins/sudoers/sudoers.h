@@ -218,8 +218,10 @@ int user_is_exempt(void);
 
 /* sudo_auth.c */
 int verify_user(struct passwd *, char *);
-int auth_begin_session(struct passwd *);
-int auth_end_session();
+int sudo_auth_begin_session(struct passwd *);
+int sudo_auth_end_session(struct passwd *);
+int sudo_auth_init(struct passwd *pw);
+int sudo_auth_cleanup(struct passwd *pw);
 
 /* parse.c */
 int sudo_file_open(struct sudo_nss *);

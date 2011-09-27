@@ -80,7 +80,7 @@ static int gotintr;
 static pam_handle_t *pamh;
 
 int
-pam_init(struct passwd *pw, char **promptp, sudo_auth *auth)
+pam_init(struct passwd *pw, sudo_auth *auth)
 {
     static struct pam_conv pam_conv;
     static int pam_status;
@@ -184,10 +184,11 @@ pam_cleanup(struct passwd *pw, sudo_auth *auth)
     int *pam_status = (int *) auth->data;
 
     /* If successful, we can't close the session until pam_end_session() */
-    if (auth->status == AUTH_SUCCESS)
+    if (*pam_status == AUTH_SUCCESS)
 	return AUTH_SUCCESS;
 
     *pam_status = pam_end(pamh, *pam_status | PAM_DATA_SILENT);
+    pamh = NULL;
     return *pam_status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE;
 }
 
@@ -208,10 +209,6 @@ pam_begin_session(struct passwd *pw, sudo_auth *auth)
 	}
 	goto done;
     }
-
-    /* If the user did not have to authenticate there is no pam handle yet. */
-    if (pamh == NULL)
-	pam_init(pw, NULL, NULL);
 
     /*
      * Update PAM_USER to reference the user we are running the command
@@ -246,22 +243,19 @@ pam_end_session(struct passwd *pw, sudo_auth *auth)
 {
     int status = PAM_SUCCESS;
 
+    if (pamh != NULL) {
 #ifndef NO_PAM_SESSION
-    /* If the user did not have to authenticate there is no pam handle yet. */
-    if (pamh == NULL)
-	pam_init(pw, NULL, NULL);
-
-    /*
-     * Update PAM_USER to reference the user we are running the command
-     * as to match the call to pam_open_session().
-     */
-    (void) pam_set_item(pamh, PAM_USER, pw->pw_name);
-
-    (void) pam_close_session(pamh, PAM_SILENT);
+	/*
+	 * Update PAM_USER to reference the user we are running the command
+	 * as to match the call to pam_open_session().
+	 */
+	(void) pam_set_item(pamh, PAM_USER, pw->pw_name);
+	(void) pam_close_session(pamh, PAM_SILENT);
 #endif
-
-    if (pamh != NULL)
 	status = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
+	pamh = NULL;
+    }
+
     return status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE;
 }
 

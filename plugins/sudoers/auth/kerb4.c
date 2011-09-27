@@ -48,7 +48,7 @@
 #include "sudo_auth.h"
 
 int
-kerb4_init(struct passwd *pw, char **promptp, sudo_auth *auth)
+kerb4_init(struct passwd *pw, sudo_auth *auth)
 {
     static char realm[REALM_SZ];
 

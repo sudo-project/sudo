@@ -254,7 +254,7 @@ sudoers_policy_close(int exit_status, int error_code)
 
     /* Close the session we opened in sudoers_policy_init_session(). */
     if (ISSET(sudo_mode, MODE_RUN|MODE_EDIT))
-	(void)auth_end_session(runas_pw);
+	(void)sudo_auth_end_session(runas_pw);
 
     /* Free remaining references to password and group entries. */
     pw_delref(sudo_user.pw);
@@ -277,7 +277,7 @@ sudoers_policy_init_session(struct passwd *pwd)
 	return -1;
     }
 
-    return auth_begin_session(pwd);
+    return sudo_auth_begin_session(pwd);
 }
 
 static int

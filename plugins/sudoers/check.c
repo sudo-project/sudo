@@ -98,6 +98,7 @@ static struct passwd *get_authpw(void);
 int
 check_user(int validated, int mode)
 {
+    struct passwd *auth_pw;
     char *timestampdir = NULL;
     char *timestampfile = NULL;
     char *prompt;
@@ -113,6 +114,11 @@ check_user(int validated, int mode)
 	    ctim_get(&sb, &tty_info.ctime);
     }
 
+    /* Init authentication system regardless of whether we need a password. */
+    auth_pw = get_authpw();
+    sudo_auth_init(auth_pw);
+    pw_delref(auth_pw);
+
     /* Always prompt for a password when -k was specified with the command. */
     if (ISSET(mode, MODE_IGNORE_TICKET)) {
 	SET(validated, FLAG_CHECK_USER);
@@ -124,11 +130,13 @@ check_user(int validated, int mode)
 	if (user_uid == 0 || (user_uid == runas_pw->pw_uid &&
 	    (!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name))) ||
 	    user_is_exempt())
-	    return TRUE;
+	    goto done;
     }
 
-    if (build_timestamp(&timestampdir, &timestampfile) == -1)
-	return -1;
+    if (build_timestamp(&timestampdir, &timestampfile) == -1) {
+	rval = -1;
+	goto done;
+    }
 
     status = timestamp_status(timestampdir, timestampfile, user_name,
 	TS_MAKE_DIRS);
@@ -139,7 +147,8 @@ check_user(int validated, int mode)
 	/* Bail out if we are non-interactive and a password is required */
 	if (ISSET(mode, MODE_NONINTERACTIVE)) {
 	    warningx(_("sorry, a password is required to run %s"), getprogname());
-	    return -1;
+	    rval = -1;
+	    goto done;
 	}
 
 	/* XXX - should not lecture if askpass helper is being used. */
@@ -159,6 +168,9 @@ check_user(int validated, int mode)
 	update_timestamp(timestampdir, timestampfile);
     efree(timestampdir);
     efree(timestampfile);
+
+done:
+    sudo_auth_cleanup(auth_pw);
 
     return rval;
 }

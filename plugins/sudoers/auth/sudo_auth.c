@@ -86,7 +86,7 @@ static sudo_auth auth_switch[] = {
     AUTH_ENTRY("kerb4", 0, kerb4_init, NULL, kerb4_verify, NULL, NULL, NULL)
 #endif
 #ifdef HAVE_KERB5
-    AUTH_ENTRY("kerb5", 0, kerb5_init, NULL, kerb5_verify, kerb5_cleanup, NULL, NULL)
+    AUTH_ENTRY("kerb5", 0, kerb5_init, kerb5_setup, kerb5_verify, kerb5_cleanup, NULL, NULL)
 #endif
 #ifdef HAVE_SKEY
     AUTH_ENTRY("S/Key", 0, NULL, rfc1938_setup, rfc1938_verify, NULL, NULL, NULL)
@@ -97,35 +97,19 @@ static sudo_auth auth_switch[] = {
     AUTH_ENTRY(NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL)
 };
 
+static int standalone;
+
 extern char **NewArgv; /* XXX - for auditing */
 
 static void pass_warn(void);
 
 int
-verify_user(struct passwd *pw, char *prompt)
+sudo_auth_init(struct passwd *pw)
 {
-    int counter = def_passwd_tries + 1;
-    int success = AUTH_FAILURE;
-    int flags, status, standalone, rval;
-    char *p;
     sudo_auth *auth;
-    sigaction_t sa, osa;
 
-    /* Enable suspend during password entry. */
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-    sa.sa_handler = SIG_DFL;
-    (void) sigaction(SIGTSTP, &sa, &osa);
-
-    /* Make sure we have at least one auth method. */
-    if (auth_switch[0].name == NULL) {
-	audit_failure(NewArgv, "no authentication methods");
-    	log_error(0,
-	    _("There are no authentication methods compiled into sudo!  "
-	    "If you want to turn off authentication, use the "
-	    "--disable-authentication configure option."));
-	return -1;
-    }
+    if (auth_switch[0].name == NULL)
+	return AUTH_SUCCESS;
 
     /* Make sure we haven't mixed standalone and shared auth methods. */
     standalone = IS_STANDALONE(&auth_switch[0]);
@@ -146,10 +130,36 @@ verify_user(struct passwd *pw, char *prompt)
 	    if (NEEDS_USER(auth))
 		set_perms(PERM_USER);
 
-	    status = (auth->init)(pw, &prompt, auth);
-	    if (status == AUTH_FAILURE)
-		SET(auth->flags, FLAG_DISABLED);
-	    else if (status == AUTH_FATAL) {	/* XXX log */
+	    switch ((auth->init)(pw, auth)) {
+		case AUTH_FAILURE:
+		    SET(auth->flags, FLAG_DISABLED);
+		    break;
+		case AUTH_FATAL:
+		    /* XXX log */
+		    audit_failure(NewArgv, "authentication failure");
+		    return -1;		/* assume error msg already printed */
+	    }
+
+	    if (NEEDS_USER(auth))
+		restore_perms();
+	}
+    }
+    return AUTH_SUCCESS;
+}
+
+int
+sudo_auth_cleanup(struct passwd *pw)
+{
+    sudo_auth *auth;
+
+    /* Call cleanup routines. */
+    for (auth = auth_switch; auth->name; auth++) {
+	if (auth->cleanup && !IS_DISABLED(auth)) {
+	    if (NEEDS_USER(auth))
+		set_perms(PERM_USER);
+
+	    if ((auth->cleanup)(pw, auth) == AUTH_FATAL) {
+		/* XXX log */
 		audit_failure(NewArgv, "authentication failure");
 		return -1;		/* assume error msg already printed */
 	    }
@@ -157,6 +167,35 @@ verify_user(struct passwd *pw, char *prompt)
 	    if (NEEDS_USER(auth))
 		restore_perms();
 	}
+    }
+    return AUTH_SUCCESS;
+}
+
+int
+verify_user(struct passwd *pw, char *prompt)
+{
+    int counter = def_passwd_tries + 1;
+    int success = AUTH_FAILURE;
+    int flags, status, rval;
+    char *p;
+    sudo_auth *auth;
+    sigaction_t sa, osa;
+
+    /* Enable suspend during password entry. */
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    sa.sa_handler = SIG_DFL;
+    (void) sigaction(SIGTSTP, &sa, &osa);
+
+    /* Make sure we have at least one auth method. */
+    /* XXX - check FLAG_DISABLED too */
+    if (auth_switch[0].name == NULL) {
+	audit_failure(NewArgv, "no authentication methods");
+    	log_error(0,
+	    _("There are no authentication methods compiled into sudo!  "
+	    "If you want to turn off authentication, use the "
+	    "--disable-authentication configure option."));
+	return -1;
     }
 
     while (--counter) {
@@ -203,31 +242,14 @@ verify_user(struct passwd *pw, char *prompt)
 		restore_perms();
 
 	    if (auth->status != AUTH_FAILURE)
-		goto cleanup;
+		goto done;
 	}
 	if (!standalone)
 	    zero_bytes(p, strlen(p));
 	pass_warn();
     }
 
-cleanup:
-    /* Call cleanup routines. */
-    for (auth = auth_switch; auth->name; auth++) {
-	if (auth->cleanup && !IS_DISABLED(auth)) {
-	    if (NEEDS_USER(auth))
-		set_perms(PERM_USER);
-
-	    status = (auth->cleanup)(pw, auth);
-	    if (status == AUTH_FATAL) {	/* XXX log */
-		audit_failure(NewArgv, "authentication failure");
-		return -1;		/* assume error msg already printed */
-	    }
-
-	    if (NEEDS_USER(auth))
-		restore_perms();
-	}
-    }
-
+done:
     switch (success) {
 	case AUTH_SUCCESS:
 	    (void) sigaction(SIGTSTP, &osa, NULL);
@@ -257,7 +279,8 @@ cleanup:
     return rval;
 }
 
-int auth_begin_session(struct passwd *pw)
+int
+sudo_auth_begin_session(struct passwd *pw)
 {
     sudo_auth *auth;
     int status;
@@ -274,7 +297,8 @@ int auth_begin_session(struct passwd *pw)
     return TRUE;
 }
 
-int auth_end_session(struct passwd *pw)
+int
+sudo_auth_end_session(struct passwd *pw)
 {
     sudo_auth *auth;
     int status;

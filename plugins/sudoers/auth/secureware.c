@@ -53,7 +53,7 @@
 #include "sudo_auth.h"
 
 int
-secureware_init(struct passwd *pw, char **promptp, sudo_auth *auth)
+secureware_init(struct passwd *pw, sudo_auth *auth)
 {
 #ifdef __alpha
     extern int crypt_type;
