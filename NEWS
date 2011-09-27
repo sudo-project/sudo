@@ -26,6 +26,21 @@ What's new in Sudo 1.8.3?
  * Sudo now honors the "DEREF" setting in ldap.conf which controls
    how alias dereferencing is done during an LDAP search.
 
+ * A symbol conflict with the pam_ssh_agent_auth PAM module that
+   would cause a crash been resolved.
+
+ * Sudo now includes an Italian translation from translationproject.org.
+
+ * The inability to load a group provider plugin is no longer
+   a fatal error.
+
+ * A potential crash in the utmp handling code has been fixed.
+
+ * Two PAM session issues have been resolved.  In previous versions
+   of sudo, the PAM session was opened as one user and closed as
+   another.  Additionally, if no authentication was performed, the
+   PAM session would never be closed.
+
 What's new in Sudo 1.8.2?
 
  * Sudo, visudo, sudoreplay and the sudoers plug-in now have natural
