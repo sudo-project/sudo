@@ -107,6 +107,7 @@ int
 sudo_auth_init(struct passwd *pw)
 {
     sudo_auth *auth;
+    int status;
 
     if (auth_switch[0].name == NULL)
 	return AUTH_SUCCESS;
@@ -130,18 +131,18 @@ sudo_auth_init(struct passwd *pw)
 	    if (NEEDS_USER(auth))
 		set_perms(PERM_USER);
 
-	    switch ((auth->init)(pw, auth)) {
-		case AUTH_FAILURE:
-		    SET(auth->flags, FLAG_DISABLED);
-		    break;
-		case AUTH_FATAL:
-		    /* XXX log */
-		    audit_failure(NewArgv, "authentication failure");
-		    return -1;		/* assume error msg already printed */
-	    }
+	    status = (auth->init)(pw, auth);
 
 	    if (NEEDS_USER(auth))
 		restore_perms();
+
+	    if (status == AUTH_FAILURE)
+		SET(auth->flags, FLAG_DISABLED);
+	    else if (status == AUTH_FATAL) {
+		/* XXX log */
+		audit_failure(NewArgv, "authentication failure");
+		return -1;		/* assume error msg already printed */
+	    }
 	}
     }
     return AUTH_SUCCESS;
@@ -151,6 +152,7 @@ int
 sudo_auth_cleanup(struct passwd *pw)
 {
     sudo_auth *auth;
+    int status;
 
     /* Call cleanup routines. */
     for (auth = auth_switch; auth->name; auth++) {
@@ -158,14 +160,16 @@ sudo_auth_cleanup(struct passwd *pw)
 	    if (NEEDS_USER(auth))
 		set_perms(PERM_USER);
 
-	    if ((auth->cleanup)(pw, auth) == AUTH_FATAL) {
+	    status = (auth->cleanup)(pw, auth);
+
+	    if (NEEDS_USER(auth))
+		restore_perms();
+
+	    if (status == AUTH_FATAL) {
 		/* XXX log */
 		audit_failure(NewArgv, "authentication failure");
 		return -1;		/* assume error msg already printed */
 	    }
-
-	    if (NEEDS_USER(auth))
-		restore_perms();
 	}
     }
     return AUTH_SUCCESS;
@@ -206,15 +210,17 @@ verify_user(struct passwd *pw, char *prompt)
 		    set_perms(PERM_USER);
 
 		status = (auth->setup)(pw, &prompt, auth);
-		if (status == AUTH_FAILURE)
-		    SET(auth->flags, FLAG_DISABLED);
-		else if (status == AUTH_FATAL) {/* XXX log */
-		    audit_failure(NewArgv, "authentication failure");
-		    return -1;		/* assume error msg already printed */
-		}
 
 		if (NEEDS_USER(auth))
 		    restore_perms();
+
+		if (status == AUTH_FAILURE)
+		    SET(auth->flags, FLAG_DISABLED);
+		else if (status == AUTH_FATAL) {
+		    /* XXX log */
+		    audit_failure(NewArgv, "authentication failure");
+		    return -1;		/* assume error msg already printed */
+		}
 	    }
 	}
 
@@ -288,7 +294,8 @@ sudo_auth_begin_session(struct passwd *pw)
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->begin_session && !IS_DISABLED(auth)) {
 	    status = (auth->begin_session)(pw, auth);
-	    if (status == AUTH_FATAL) {	/* XXX log */
+	    if (status == AUTH_FATAL) {
+		/* XXX log */
 		audit_failure(NewArgv, "authentication failure");
 		return -1;		/* assume error msg already printed */
 	    }
@@ -306,7 +313,8 @@ sudo_auth_end_session(struct passwd *pw)
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->end_session && !IS_DISABLED(auth)) {
 	    status = (auth->end_session)(pw, auth);
-	    if (status == AUTH_FATAL) {	/* XXX log */
+	    if (status == AUTH_FATAL) {
+		/* XXX log */
 		return -1;		/* assume error msg already printed */
 	    }
 	}
