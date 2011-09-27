@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2007-2011 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -78,12 +78,11 @@ static int gotintr;
 #define PAM_DATA_SILENT	0
 #endif
 
-static pam_handle_t *pamh;	/* global due to pam_prep_user() */
+static pam_handle_t *pamh;
 
 int
-pam_init(pw, promptp, auth)
+pam_init(pw, auth)
     struct passwd *pw;
-    char **promptp;
     sudo_auth *auth;
 {
     static struct pam_conv pam_conv;
@@ -194,11 +193,12 @@ pam_cleanup(pw, auth)
 {
     int *pam_status = (int *) auth->data;
 
-    /* If successful, we can't close the session until pam_prep_user() */
-    if (auth->status == AUTH_SUCCESS)
+    /* If successful, we can't close the session until pam_end_session() */
+    if (*pam_status == AUTH_SUCCESS)
 	return AUTH_SUCCESS;
 
     *pam_status = pam_end(pamh, *pam_status | PAM_DATA_SILENT);
+    pamh = NULL;
     return *pam_status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE;
 }
 
@@ -206,11 +206,20 @@ int
 pam_begin_session(pw)
     struct passwd *pw;
 {
-    int status =  PAM_SUCCESS;
+    int status = PAM_SUCCESS;
 
-    /* If the user did not have to authenticate there is no pam handle yet. */
-    if (pamh == NULL)
-	pam_init(pw, NULL, NULL);
+    /*
+     * If there is no valid user we cannot open a PAM session.
+     * This is not an error as sudo can run commands with arbitrary
+     * uids, it just means we are done from a session management standpoint.
+     */
+    if (pw == NULL) {
+	if (pamh != NULL) {
+	    (void) pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
+	    pamh = NULL;
+	}
+	goto done;
+    }
 
     /*
      * Update PAM_USER to reference the user we are running the command
@@ -230,25 +239,35 @@ pam_begin_session(pw)
 
 #ifndef NO_PAM_SESSION
     status = pam_open_session(pamh, 0);
-     if (status != PAM_SUCCESS) {
+    if (status != PAM_SUCCESS) {
 	(void) pam_end(pamh, status | PAM_DATA_SILENT);
 	pamh = NULL;
     }
 #endif
+
+done:
     return status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE;
 }
 
 int
-pam_end_session()
+pam_end_session(pw)
+    struct passwd *pw;
 {
     int status = PAM_SUCCESS;
 
     if (pamh != NULL) {
 #ifndef NO_PAM_SESSION
-	(void) pam_close_session(pamh, 0);
+	/*
+	 * Update PAM_USER to reference the user we are running the command
+	 * as to match the call to pam_open_session().
+	 */
+	(void) pam_set_item(pamh, PAM_USER, pw->pw_name);
+	(void) pam_close_session(pamh, PAM_SILENT);
 #endif
 	status = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
+	pamh = NULL;
     }
+
     return status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE;
 }
 

@@ -968,7 +968,7 @@ run_command(path, argv, envp, uid, dowait)
 	break;
     }
 #ifdef HAVE_PAM
-    pam_end_session();
+    pam_end_session(runas_pw);
 #endif /* HAVE_PAM */
 #ifdef _PATH_SUDO_IO_LOGDIR
     io_log_close();

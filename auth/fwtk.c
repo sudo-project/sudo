@@ -50,9 +50,8 @@
 #include "sudo_auth.h"
 
 int
-fwtk_init(pw, promptp, auth)
+fwtk_init(pw, auth)
     struct passwd *pw;
-    char **promptp;
     sudo_auth *auth;
 {
     static Cfg *confp;			/* Configuration entry struct */

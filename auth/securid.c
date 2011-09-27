@@ -56,9 +56,8 @@
 union config_record configure;
 
 int
-securid_init(pw, promptp, auth)
+securid_init(pw, auth)
     struct passwd *pw;
-    char **promptp;
     sudo_auth *auth;
 {
     static struct SD_CLIENT sd_dat;		/* SecurID data block */

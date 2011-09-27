@@ -68,7 +68,7 @@ sudo_auth auth_switch[] = {
     AUTH_ENTRY(0, "kerb4", kerb4_init, NULL, kerb4_verify, NULL)
 #  endif
 #  ifdef HAVE_KERB5
-    AUTH_ENTRY(0, "kerb5", kerb5_init, NULL, kerb5_verify, kerb5_cleanup)
+    AUTH_ENTRY(0, "kerb5", kerb5_init, kerb5_setup, kerb5_verify, kerb5_cleanup)
 #  endif
 #  ifdef HAVE_SKEY
     AUTH_ENTRY(0, "S/Key", NULL, rfc1938_setup, rfc1938_verify, NULL)
@@ -79,6 +79,71 @@ sudo_auth auth_switch[] = {
 #endif /* AUTH_STANDALONE */
     AUTH_ENTRY(0, NULL, NULL, NULL, NULL, NULL)
 };
+
+void
+sudo_auth_init(pw)
+    struct passwd *pw;
+{
+    sudo_auth *auth;
+    int status;
+
+    if (auth_switch[0].name == NULL)
+	return;
+
+    /* Set FLAG_ONEANDONLY if there is only one auth method. */
+    if (auth_switch[1].name == NULL)
+	SET(auth_switch[0].flags, FLAG_ONEANDONLY);
+
+    /* Initialize auth methods and unconfigure the method if necessary. */
+    for (auth = auth_switch; auth->name; auth++) {
+	if (auth->init && IS_CONFIGURED(auth)) {
+	    if (NEEDS_USER(auth))
+		set_perms(PERM_USER);
+
+	    status = (auth->init)(pw, auth);
+
+	    if (NEEDS_USER(auth))
+		set_perms(PERM_ROOT);
+
+	    if (status == AUTH_FAILURE)
+		CLR(auth->flags, FLAG_CONFIGURED);
+	    else if (status == AUTH_FATAL) {	/* XXX log */
+#ifdef HAVE_BSM_AUDIT
+		audit_failure(NewArgv, "authentication failure");
+#endif
+		exit(1);		/* assume error msg already printed */
+	    }
+	}
+    }
+}
+
+void
+sudo_auth_cleanup(pw)
+    struct passwd *pw;
+{
+    sudo_auth *auth;
+    int status;
+
+    /* Call cleanup routines. */
+    for (auth = auth_switch; auth->name; auth++) {
+	if (auth->cleanup && IS_CONFIGURED(auth)) {
+	    if (NEEDS_USER(auth))
+		set_perms(PERM_USER);
+
+	    status = (auth->cleanup)(pw, auth);
+
+	    if (NEEDS_USER(auth))
+		set_perms(PERM_ROOT);
+
+	    if (status == AUTH_FATAL) {	/* XXX log */
+#ifdef HAVE_BSM_AUDIT
+		audit_failure(NewArgv, "authentication failure");
+#endif
+		exit(1);		/* assume error msg already printed */
+	    }
+	}
+    }
+}
 
 void
 verify_user(pw, prompt)
@@ -113,31 +178,6 @@ verify_user(pw, prompt)
 	    "--disable-authentication configure option.");
     }
 
-    /* Set FLAG_ONEANDONLY if there is only one auth method. */
-    if (auth_switch[1].name == NULL)
-	SET(auth_switch[0].flags, FLAG_ONEANDONLY);
-
-    /* Initialize auth methods and unconfigure the method if necessary. */
-    for (auth = auth_switch; auth->name; auth++) {
-	if (auth->init && IS_CONFIGURED(auth)) {
-	    if (NEEDS_USER(auth))
-		set_perms(PERM_USER);
-
-	    status = (auth->init)(pw, &prompt, auth);
-	    if (status == AUTH_FAILURE)
-		CLR(auth->flags, FLAG_CONFIGURED);
-	    else if (status == AUTH_FATAL) {	/* XXX log */
-#ifdef HAVE_BSM_AUDIT
-		audit_failure(NewArgv, "authentication failure");
-#endif
-		exit(1);		/* assume error msg already printed */
-	    }
-
-	    if (NEEDS_USER(auth))
-		set_perms(PERM_ROOT);
-	}
-    }
-
     while (--counter) {
 	/* Do any per-method setup and unconfigure the method if needed */
 	for (auth = auth_switch; auth->name; auth++) {
@@ -146,6 +186,10 @@ verify_user(pw, prompt)
 		    set_perms(PERM_USER);
 
 		status = (auth->setup)(pw, &prompt, auth);
+
+		if (NEEDS_USER(auth))
+		    set_perms(PERM_ROOT);
+
 		if (status == AUTH_FAILURE)
 		    CLR(auth->flags, FLAG_CONFIGURED);
 		else if (status == AUTH_FATAL) {/* XXX log */
@@ -154,9 +198,6 @@ verify_user(pw, prompt)
 #endif
 		    exit(1);		/* assume error msg already printed */
 		}
-
-		if (NEEDS_USER(auth))
-		    set_perms(PERM_ROOT);
 	    }
 	}
 
@@ -182,7 +223,7 @@ verify_user(pw, prompt)
 		set_perms(PERM_ROOT);
 
 	    if (auth->status != AUTH_FAILURE)
-		goto cleanup;
+		goto done;
 	}
 #ifndef AUTH_STANDALONE
 	if (p == NULL)
@@ -193,26 +234,7 @@ verify_user(pw, prompt)
 	    pass_warn(stderr);
     }
 
-cleanup:
-    /* Call cleanup routines. */
-    for (auth = auth_switch; auth->name; auth++) {
-	if (auth->cleanup && IS_CONFIGURED(auth)) {
-	    if (NEEDS_USER(auth))
-		set_perms(PERM_USER);
-
-	    status = (auth->cleanup)(pw, auth);
-	    if (status == AUTH_FATAL) {	/* XXX log */
-#ifdef HAVE_BSM_AUDIT
-		audit_failure(NewArgv, "authentication failure");
-#endif
-		exit(1);		/* assume error msg already printed */
-	    }
-
-	    if (NEEDS_USER(auth))
-		set_perms(PERM_ROOT);
-	}
-    }
-
+done:
     switch (success) {
 	case AUTH_SUCCESS:
 	    (void) sigaction(SIGTSTP, &osa, NULL);

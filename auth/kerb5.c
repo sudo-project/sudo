@@ -90,9 +90,47 @@ krb5_get_init_creds_opt_free(opts)
 #endif
 
 int
-kerb5_init(pw, promptp, auth)
+kerb5_setup(pw, promptp, auth)
     struct passwd *pw;
     char **promptp;
+    sudo_auth *auth;
+{
+    static char	*krb5_prompt;
+
+    if (krb5_prompt == NULL) {
+	krb5_context	sudo_context;
+	krb5_principal	princ;
+	char		*pname;
+	krb5_error_code	error;
+
+	sudo_context = ((sudo_krb5_datap) auth->data)->sudo_context;
+	princ = ((sudo_krb5_datap) auth->data)->princ;
+
+	/*
+	 * Really, we need to tell the caller not to prompt for password. The
+	 * API does not currently provide this unless the auth is standalone.
+	 */
+	if ((error = krb5_unparse_name(sudo_context, princ, &pname))) {
+	    log_error(NO_EXIT|NO_MAIL,
+		      "%s: unable to unparse princ ('%s'): %s", auth->name,
+		      pw->pw_name, error_message(error));
+	    return AUTH_FAILURE;
+	}
+
+	/* Only rewrite prompt if user didn't specify their own. */
+	/*if (!strcmp(prompt, PASSPROMPT)) { */
+	    easprintf(&krb5_prompt, "Password for %s: ", pname);
+	/*}*/
+	free(pname);
+    }
+    *promptp = krb5_prompt;
+
+    return AUTH_SUCCESS;
+}
+
+int
+kerb5_init(pw, auth)
+    struct passwd *pw;
     sudo_auth *auth;
 {
     krb5_context	sudo_context;
@@ -100,7 +138,6 @@ kerb5_init(pw, promptp, auth)
     krb5_principal	princ;
     krb5_error_code 	error;
     char		cache_name[64];
-    char		*pname;
 
     auth->data = (void *) &sudo_krb5_data; /* Stash all our data here */
 
@@ -121,25 +158,6 @@ kerb5_init(pw, promptp, auth)
 	return AUTH_FAILURE;
     }
     princ = sudo_krb5_data.princ;
-
-    /*
-     * Really, we need to tell the caller not to prompt for password.
-     * The API does not currently provide this unless the auth is standalone.
-     */
-#if 1
-    if ((error = krb5_unparse_name(sudo_context, princ, &pname))) {
-	log_error(NO_EXIT|NO_MAIL,
-		  "%s: unable to unparse princ ('%s'): %s", auth->name,
-		  pw->pw_name, error_message(error));
-	return AUTH_FAILURE;
-    }
-
-    /* Only rewrite prompt if user didn't specify their own. */
-    /*if (!strcmp(prompt, PASSPROMPT)) { */
-	easprintf(promptp, "Password for %s: ", pname);
-    /*}*/
-    free(pname);
-#endif
 
     (void) snprintf(cache_name, sizeof(cache_name), "MEMORY:sudocc_%ld",
 		    (long) getpid());

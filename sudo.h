@@ -270,7 +270,7 @@ void io_nextid __P((void));
 
 /* pam.c */
 int pam_begin_session	__P((struct passwd *));
-int pam_end_session	__P((void));
+int pam_end_session	__P((struct passwd *));
 
 /* parse.c */
 int sudo_file_open	__P((struct sudo_nss *));
@@ -328,6 +328,8 @@ void set_fqdn		__P((void));
 void verify_user	__P((struct passwd *, char *));
 void pass_warn		__P((FILE *));
 void dump_auth_methods	__P((void));
+void sudo_auth_init	__P((struct passwd *));
+void sudo_auth_cleanup	__P((struct passwd *));
 
 /* sudo_nss.c */
 void display_privs	__P((struct sudo_nss_list *, struct passwd *));

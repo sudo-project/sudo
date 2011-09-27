@@ -59,7 +59,6 @@
  * securid_init - Initialises communications with ACE server
  * Arguments in:
  *     pw - UNUSED
- *     promptp - UNUSED
  *     auth - sudo authentication structure
  *
  * Results out:
@@ -68,9 +67,8 @@
  *                   success.
  */
 int
-securid_init(pw, promptp, auth)
+securid_init(pw, auth)
     struct passwd *pw;
-    char **promptp;
     sudo_auth *auth;
 {
     static SDI_HANDLE sd_dat;			/* SecurID handle */

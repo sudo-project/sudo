@@ -53,9 +53,8 @@
 #include "sudo_auth.h"
 
 int
-secureware_init(pw, promptp, auth)
+secureware_init(pw, auth)
     struct passwd *pw;
-    char **promptp;
     sudo_auth *auth;
 {
 #ifdef __alpha

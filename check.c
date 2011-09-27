@@ -101,6 +101,7 @@ check_user(validated, mode)
     int validated;
     int mode;
 {
+    struct passwd *auth_pw;
     char *timestampdir = NULL;
     char *timestampfile = NULL;
     char *prompt;
@@ -116,6 +117,10 @@ check_user(validated, mode)
 	    ctim_get(&sb, &tty_info.ctime);
     }
 
+    /* Init authentication system regardless of whether we need a password. */
+    auth_pw = get_authpw();
+    sudo_auth_init(auth_pw);
+
     /* Always prompt for a password when -k was specified with the command. */
     if (ISSET(mode, MODE_INVALIDATE)) {
 	SET(validated, FLAG_CHECK_USER);
@@ -127,7 +132,7 @@ check_user(validated, mode)
 	if (user_uid == 0 || (user_uid == runas_pw->pw_uid &&
 	    (!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name))) ||
 	    user_is_exempt())
-	    return;
+	    goto done;
     }
 
     build_timestamp(&timestampdir, &timestampfile);
@@ -135,8 +140,6 @@ check_user(validated, mode)
 	TS_MAKE_DIRS);
 
     if (status != TS_CURRENT || ISSET(validated, FLAG_CHECK_USER)) {
-	struct passwd *auth_pw;
-
 	/* Bail out if we are non-interactive and a password is required */
 	if (ISSET(mode, MODE_NONINTERACTIVE))
 	    errorx(1, "sorry, a password is required to run %s", getprogname());
@@ -165,15 +168,17 @@ check_user(validated, mode)
 	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
 	    user_name, user_shost);
 
-	auth_pw = get_authpw();
 	verify_user(auth_pw, prompt);
-	pw_delref(auth_pw);
     }
     /* Only update timestamp if user was validated. */
     if (ISSET(validated, VALIDATE_OK) && !ISSET(mode, MODE_INVALIDATE) && status != TS_ERROR)
 	update_timestamp(timestampdir, timestampfile);
     efree(timestampdir);
     efree(timestampfile);
+
+done:
+    sudo_auth_cleanup(auth_pw);
+    pw_delref(auth_pw);
 }
 
 /*

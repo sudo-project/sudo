@@ -12,7 +12,7 @@ typedef struct sudo_auth {
     char *name;			/* name of the method in string form */
     void *data;                 /* method-specific data pointer */
 
-    int (*init) __P((struct passwd *pw, char **prompt, sudo_auth *auth));
+    int (*init) __P((struct passwd *pw, sudo_auth *auth));
     int (*setup) __P((struct passwd *pw, char **prompt, sudo_auth *auth));
     int (*verify) __P((struct passwd *pw, char *p, sudo_auth *auth));
     int (*cleanup) __P((struct passwd *pw, sudo_auth *auth));
@@ -61,11 +61,10 @@ The member functions can return the following values:
 
 The functions in the struct are as follows:
 
-    int init(struct passwd *pw, char **prompt, sudo_auth *auth)
+    int init(struct passwd *pw, sudo_auth *auth)
         Function to do any one-time initialization for the auth
         method.  All of the "init" functions are run before anything
-        else.  A pointer to the prompt string may be used to add
-        method-specific info to the prompt.
+        else.
 
     int setup(struct passwd *pw, char **prompt, sudo_auth *auth)
         Function to do method-specific setup.  All the "setup"
