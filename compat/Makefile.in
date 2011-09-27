@@ -146,7 +146,7 @@ glob.lo: $(srcdir)/glob.c $(top_builddir)/config.h $(incdir)/missing.h \
          $(top_srcdir)/compat/glob.h $(top_srcdir)/compat/charclass.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/glob.c
 globtest.o: $(srcdir)/regress/glob/globtest.c $(top_builddir)/config.h \
-            $(top_srcdir)/compat/glob.h
+            $(top_srcdir)/compat/glob.h $(incdir)/missing.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/glob/globtest.c
 isblank.lo: $(srcdir)/isblank.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/isblank.c

@@ -392,7 +392,12 @@ check.lo: $(srcdir)/check.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/check.c
 check_addr.o: $(srcdir)/regress/parser/check_addr.c $(top_builddir)/config.h \
-              $(incdir)/list.h $(srcdir)/parse.h $(srcdir)/interfaces.h
+              $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \
+              $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
+              $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+              $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
+              $(incdir)/sudo_plugin.h $(incdir)/gettext.h $(srcdir)/parse.h \
+              $(srcdir)/interfaces.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_addr.c
 check_fill.o: $(srcdir)/regress/parser/check_fill.c $(top_builddir)/config.h \
               $(incdir)/list.h $(srcdir)/parse.h $(srcdir)/toke.h \
@@ -449,6 +454,13 @@ fwtk.lo: $(authdir)/fwtk.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
 getdate.o: $(devdir)/getdate.c $(top_builddir)/config.h \
            $(top_builddir)/config.h $(incdir)/missing.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/getdate.c
+getspwuid.lo: $(srcdir)/getspwuid.c $(top_builddir)/config.h \
+              $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \
+              $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
+              $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+              $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
+              $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/getspwuid.c
 goodpath.lo: $(srcdir)/goodpath.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
              $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
              $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
@@ -536,8 +548,8 @@ match.lo: $(srcdir)/match.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
           $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
           $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
-          $(srcdir)/interfaces.h $(srcdir)/parse.h $(srcdir)/gram.h \
-          $(top_srcdir)/compat/fnmatch.h $(top_srcdir)/compat/glob.h
+          $(srcdir)/parse.h $(srcdir)/gram.h $(top_srcdir)/compat/fnmatch.h \
+          $(top_srcdir)/compat/glob.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/match.c
 match_addr.lo: $(srcdir)/match_addr.c $(top_builddir)/config.h \
                $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \

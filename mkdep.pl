@@ -52,7 +52,7 @@ sub mkdep {
     $makefile =~ s:\@SUDO_OBJS\@:preload.o selinux.o sesh.o sudo_noexec.lo:;
     $makefile =~ s:\@SUDOERS_OBJS\@:bsm_audit.lo linux_audit.lo ldap.lo plugin_error.lo:;
     # XXX - fill in AUTH_OBJS from contents of the auth dir instead
-    $makefile =~ s:\@AUTH_OBJS\@:afs.lo aix_auth.lo bsdauth.lo dce.lo fwtk.lo kerb4.lo kerb5.lo pam.lo passwd.lo rfc1938.lo secureware.lo securid.lo securid5.lo sia.lo:;
+    $makefile =~ s:\@AUTH_OBJS\@:afs.lo aix_auth.lo bsdauth.lo dce.lo fwtk.lo getspwuid.lo kerb4.lo kerb5.lo pam.lo passwd.lo rfc1938.lo secureware.lo securid.lo securid5.lo sia.lo:;
     $makefile =~ s:\@LTLIBOBJS\@:closefrom.lo dlopen.lo fnmatch.lo getcwd.lo getgrouplist.lo getline.lo getprogname.lo glob.lo isblank.lo memrchr.lo mksiglist.lo mktemp.lo nanosleep.lo setenv.lo siglist.lo snprintf.lo strlcat.lo strlcpy.lo strsignal.lo unsetenv.lo utimes.lo globtest.o fnm_test.o:;
 
     # Parse OBJS lines
