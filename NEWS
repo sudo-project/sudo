@@ -3,7 +3,7 @@ What's new in Sudo 1.8.3?
  * Fixed expansion of strftime() escape sequences in the "log_dir"
    sudoers setting.
 
- * Added new Esperanto translation from translationproject.org.
+ * Esperanto and Italian translations from translationproject.org.
 
  * Sudo will now use PAM by default on AIX 6 and higher.
 
@@ -22,6 +22,25 @@ What's new in Sudo 1.8.3?
 
  * The NOPASSWD tag is now honored for denied commands too, which
    matches historic sudo behavior (prior to sudo 1.7.0).
+
+ * Sudo now honors the "DEREF" setting in ldap.conf which controls
+   how alias dereferencing is done during an LDAP search.
+
+ * A symbol conflict with the pam_ssh_agent_auth PAM module that
+   would cause a crash been resolved.
+
+ * The inability to load a group provider plugin is no longer
+   a fatal error.
+
+ * A potential crash in the utmp handling code has been fixed.
+
+ * Two PAM session issues have been resolved.  In previous versions
+   of sudo, the PAM session was opened as one user and closed as
+   another.  Additionally, if no authentication was performed, the
+   PAM session would never be closed.
+
+ * Sudo will now work correctly with LDAP-based sudoers using TLS
+   or SSL on Debian systems.
 
 What's new in Sudo 1.8.2?
 
