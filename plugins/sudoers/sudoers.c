@@ -189,7 +189,9 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     /* Parse nsswitch.conf for sudoers order. */
     snl = sudo_read_nss();
 
+    /* LDAP or NSS may modify the euid so we need to be root for the open. */
     set_perms(PERM_INITIAL);
+    set_perms(PERM_ROOT);
 
     /* Open and parse sudoers, set global defaults */
     tq_foreach_fwd(snl, nss) {
