@@ -39,6 +39,9 @@ What's new in Sudo 1.8.3?
    another.  Additionally, if no authentication was performed, the
    PAM session would never be closed.
 
+ * Sudo will now work correctly with LDAP-based sudoers using TLS
+   or SSL on Debian systems.
+
 What's new in Sudo 1.8.2?
 
  * Sudo, visudo, sudoreplay and the sudoers plug-in now have natural
