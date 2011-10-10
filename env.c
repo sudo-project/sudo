@@ -765,8 +765,13 @@ rebuild_env(noexec)
 	SET(didvar, DID_PATH);
     }
 
-    /* Set $USER, $LOGNAME and $USERNAME to target if "set_logname" is true. */
-    if (def_set_logname && !ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+    /*
+     * Set $USER, $LOGNAME and $USERNAME to target if "set_logname" is not
+     * disabled.  We skip this if we are running a login shell (because
+     * they have already been set them) or sudoedit (because we want the
+     * editor to find the user's startup files).
+     */
+    if (def_set_logname && !ISSET(sudo_mode, MODE_LOGIN_SHELL|MODE_EDIT)) {
 	if (!ISSET(didvar, KEPT_LOGNAME))
 	    sudo_setenv("LOGNAME", runas_pw->pw_name, TRUE);
 	if (!ISSET(didvar, KEPT_USER))
