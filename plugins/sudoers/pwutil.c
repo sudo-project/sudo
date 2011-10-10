@@ -486,12 +486,12 @@ make_gritem(const struct group *gr, const char *name)
 }
 
 #ifdef HAVE_UTMPX_H
-# define GROUPNAME_LEN	(sizeof((struct utmpx *)0)->ut_user)
+# define GROUPNAME_LEN	(sizeof((struct utmpx *)0)->ut_user + 1)
 #else
 # ifdef HAVE_STRUCT_UTMP_UT_USER
-#  define GROUPNAME_LEN	(sizeof((struct utmp *)0)->ut_user)
+#  define GROUPNAME_LEN	(sizeof((struct utmp *)0)->ut_user + 1)
 # else
-#  define GROUPNAME_LEN	(sizeof((struct utmp *)0)->ut_name)
+#  define GROUPNAME_LEN	(sizeof((struct utmp *)0)->ut_name + 1)
 # endif
 #endif /* HAVE_UTMPX_H */
 
@@ -503,10 +503,14 @@ static struct cache_item *
 make_grlist_item(const char *user, GETGROUPS_T *gids, int ngids)
 {
     char *cp;
-    size_t i, nsize, ngroups = 0, total, len;
+    size_t i, nsize, ngroups, total, len;
     struct cache_item *item;
     struct group_list *grlist;
     struct group *grp;
+
+#ifdef HAVE_SETAUTHDB
+    aix_setauthdb((char *) user);
+#endif
 
     /* Allocate in one big chunk for easy freeing. */
     nsize = strlen(user) + 1;
@@ -515,6 +519,7 @@ make_grlist_item(const char *user, GETGROUPS_T *gids, int ngids)
     total += sizeof(gid_t *) * ngids;
     total += GROUPNAME_LEN * ngids;
 
+again:
     item = emalloc(total);
     cp = (char *) item + sizeof(struct cache_item);
 
@@ -545,20 +550,18 @@ make_grlist_item(const char *user, GETGROUPS_T *gids, int ngids)
 	grlist->gids[i] = gids[i];
     grlist->ngids = ngids;
 
-#ifdef HAVE_SETAUTHDB
-    aix_setauthdb((char *) user);
-#endif
     /*
-     * Resolve group names by ID and store at the end.
+     * Resolve and store group names by ID.
      */
+    ngroups = 0;
     for (i = 0; i < ngids; i++) {
 	if ((grp = sudo_getgrgid(gids[i])) != NULL) {
 	    len = strlen(grp->gr_name) + 1;
-	    if (cp - (char *)grlist + len > total) {
-		void *ptr = erealloc(grlist, total + len + GROUPNAME_LEN);
+	    if (cp - (char *)item + len > total) {
 		total += len + GROUPNAME_LEN;
-		cp = (char *)ptr + (cp - (char *)grlist);
-		grlist = ptr;
+		efree(item);
+		gr_delref(grp);
+		goto again;
 	    }
 	    memcpy(cp, grp->gr_name, len);
 	    grlist->groups[ngroups++] = cp;
