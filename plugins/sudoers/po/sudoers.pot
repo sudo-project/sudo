@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.x\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2011-10-04 12:31-0400\n"
+"POT-Creation-Date: 2011-10-10 15:50-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -562,7 +562,7 @@ msgstr ""
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr ""
 
-#: plugins/sudoers/env.c:698
+#: plugins/sudoers/env.c:703
 #, c-format
 msgid ""
 "sorry, you are not allowed to set the following environment variables: %s"
@@ -874,17 +874,17 @@ msgstr ""
 msgid "unable to cache user %s, already exists"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:619
+#: plugins/sudoers/pwutil.c:622
 #, c-format
 msgid "unable to cache gid %u (%s), already exists"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:627
+#: plugins/sudoers/pwutil.c:630
 #, c-format
 msgid "unable to cache gid %u, already exists"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:656 plugins/sudoers/pwutil.c:665
+#: plugins/sudoers/pwutil.c:659 plugins/sudoers/pwutil.c:668
 #, c-format
 msgid "unable to cache group %s, already exists"
 msgstr ""
