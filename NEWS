@@ -24,6 +24,9 @@ What's new in Sudo 1.7.8?
  * Using the -n option may in conjunction with the -v or -l option
    no longer results in a usage error.
 
+ * The LOGNAME, USER and USERNAME environment variables are preserved
+   correctly again in sudoedit mode.
+
 What's new in Sudo 1.7.7
 
  * I/O logging is now supported for commands run in background mode
