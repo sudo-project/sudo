@@ -192,6 +192,8 @@ plugins/sudoers/po/eu.mo
 plugins/sudoers/po/eu.po
 plugins/sudoers/po/fi.mo
 plugins/sudoers/po/fi.po
+plugins/sudoers/po/ja.mo
+plugins/sudoers/po/ja.po
 plugins/sudoers/po/pl.mo
 plugins/sudoers/po/pl.po
 plugins/sudoers/po/sudoers.pot
@@ -276,6 +278,8 @@ src/po/fi.mo
 src/po/fi.po
 src/po/it.mo
 src/po/it.po
+src/po/ja.mo
+src/po/ja.po
 src/po/pl.mo
 src/po/pl.po
 src/po/ru.mo
