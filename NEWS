@@ -42,6 +42,9 @@ What's new in Sudo 1.8.3?
  * Sudo will now work correctly with LDAP-based sudoers using TLS
    or SSL on Debian systems.
 
+ * The LOGNAME, USER and USERNAME environment variables are preserved
+   correctly again in sudoedit mode.
+
 What's new in Sudo 1.8.2?
 
  * Sudo, visudo, sudoreplay and the sudoers plug-in now have natural
