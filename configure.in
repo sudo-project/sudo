@@ -1361,6 +1361,15 @@ if test "x$ac_cv_prog_cc_c89" = "xno"; then
 fi
 
 dnl
+dnl If the user specified --disable-static, override them or we'll
+dnl be unable to build the executables in the sudoers plugin dir.
+dnl
+if test "$enable_static" = "no"; then
+    AC_MSG_WARN([Ignoring --disable-static, sudo does not install static libs])
+    enable_static=yes
+fi
+
+dnl
 dnl Libtool setup, we require libtool 2.2.6b or higher
 dnl
 AC_CANONICAL_HOST
