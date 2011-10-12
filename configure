@@ -5989,6 +5989,12 @@ if test "x$ac_cv_prog_cc_c89" = "xno"; then
     as_fn_error $? "Sudo version $PACKAGE_VERSION requires an ANSI C compiler to build." "$LINENO" 5
 fi
 
+if test "$enable_static" = "no"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring --disable-static, sudo does not install static libs" >&5
+$as_echo "$as_me: WARNING: Ignoring --disable-static, sudo does not install static libs" >&2;}
+    enable_static=yes
+fi
+
 ac_aux_dir=
 for ac_dir in "$srcdir" "$srcdir/.." "$srcdir/../.."; do
   if test -f "$ac_dir/install-sh"; then
