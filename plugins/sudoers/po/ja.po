@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: sudoers 1.8.3rc1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2011-09-16 16:52-0400\n"
-"PO-Revision-Date: 2011-10-10 15:24+0900\n"
+"PO-Revision-Date: 2011-10-20 05:47+0900\n"
 "Last-Translator: Yasuaki Taniguchi <yasuakit@gmail.com>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
 "Language: ja\n"
@@ -1580,7 +1580,7 @@ msgstr "%s: princ ('%s') を符号化できません: %s"
 #: plugins/sudoers/auth/kerb5.c:144
 #, c-format
 msgid "%s: unable to resolve ccache: %s"
-msgstr "%s: ccache を解決できません: %s"
+msgstr "%s: 資格情報キャッシュ (ccache) を解決できません: %s"
 
 #: plugins/sudoers/auth/kerb5.c:188
 #, c-format
@@ -1595,12 +1595,12 @@ msgstr "%s: 資格情報を取得できません: %s"
 #: plugins/sudoers/auth/kerb5.c:217
 #, c-format
 msgid "%s: unable to initialize ccache: %s"
-msgstr "%s: ccache を初期化できません: %s"
+msgstr "%s: 資格情報キャッシュ (ccache) を初期化できません: %s"
 
 #: plugins/sudoers/auth/kerb5.c:221
 #, c-format
 msgid "%s: unable to store cred in ccache: %s"
-msgstr "%s: 資格情報を ccache 内に保存できません: %s"
+msgstr "%s: 資格情報を資格情報キャッシュ (ccache) 内に保存できません: %s"
 
 #: plugins/sudoers/auth/kerb5.c:284
 #, c-format
