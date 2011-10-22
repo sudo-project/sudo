@@ -45,21 +45,23 @@ char *
 sudo_goodpath(const char *path, struct stat *sbp)
 {
     struct stat sb;
+    debug_decl(sudo_goodpath, SUDO_DEBUG_UTIL)
 
     /* Check for brain damage */
     if (path == NULL || path[0] == '\0')
-	return NULL;
+	debug_return_str(NULL);
 
     if (stat(path, &sb))
-	return NULL;
+	debug_return_str(NULL);
 
     /* Make sure path describes an executable regular file. */
     if (!S_ISREG(sb.st_mode) || !(sb.st_mode & 0000111)) {
 	errno = EACCES;
-	return NULL;
+	debug_return_str(NULL);
     }
 
     if (sbp != NULL)
 	(void) memcpy(sbp, &sb, sizeof(struct stat));
-    return (char *)path;
+
+    debug_return_str((char *)path);
 }

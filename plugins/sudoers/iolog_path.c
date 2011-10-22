@@ -73,6 +73,7 @@ fill_seq(char *str, size_t strsize)
 {
     static char sessid[7];
     int len;
+    debug_decl(sudoers_io_version, SUDO_DEBUG_UTIL)
 
     if (sessid[0] == '\0')
 	io_nextid(def_iolog_dir, sessid);
@@ -81,14 +82,15 @@ fill_seq(char *str, size_t strsize)
     len = snprintf(str, strsize, "%c%c/%c%c/%c%c", sessid[0],
 	sessid[1], sessid[2], sessid[3], sessid[4], sessid[5]);
     if (len < 0)
-	return strsize;	/* handle non-standard snprintf() */
-    return (size_t)len;
+	debug_return_size_t(strsize); /* handle non-standard snprintf() */
+    debug_return_size_t(len);
 }
 
 static size_t
 fill_user(char *str, size_t strsize)
 {
-    return strlcpy(str, user_name, strsize);
+    debug_decl(fill_user, SUDO_DEBUG_UTIL)
+    debug_return_size_t(strlcpy(str, user_name, strsize));
 }
 
 static size_t
@@ -96,6 +98,7 @@ fill_group(char *str, size_t strsize)
 {
     struct group *grp;
     size_t len;
+    debug_decl(fill_group, SUDO_DEBUG_UTIL)
 
     if ((grp = sudo_getgrgid(user_gid)) != NULL) {
 	len = strlcpy(str, grp->gr_name, strsize);
@@ -105,13 +108,14 @@ fill_group(char *str, size_t strsize)
 	len = snprintf(str + len, strsize - len, "#%u",
 	    (unsigned int) user_gid);
     }
-    return len;
+    debug_return_size_t(len);
 }
 
 static size_t
 fill_runas_user(char *str, size_t strsize)
 {
-    return strlcpy(str, runas_pw->pw_name, strsize);
+    debug_decl(fill_runas_user, SUDO_DEBUG_UTIL)
+    debug_return_size_t(strlcpy(str, runas_pw->pw_name, strsize));
 }
 
 static size_t
@@ -119,6 +123,7 @@ fill_runas_group(char *str, size_t strsize)
 {
     struct group *grp;
     size_t len;
+    debug_decl(fill_runas_group, SUDO_DEBUG_UTIL)
 
     if (runas_gr != NULL) {
 	len = strlcpy(str, runas_gr->gr_name, strsize);
@@ -132,19 +137,21 @@ fill_runas_group(char *str, size_t strsize)
 		(unsigned int) runas_pw->pw_gid);
 	}
     }
-    return len;
+    debug_return_size_t(len);
 }
 
 static size_t
 fill_hostname(char *str, size_t strsize)
 {
-    return strlcpy(str, user_shost, strsize);
+    debug_decl(fill_hostname, SUDO_DEBUG_UTIL)
+    debug_return_size_t(strlcpy(str, user_shost, strsize));
 }
 
 static size_t
 fill_command(char *str, size_t strsize)
 {
-    return strlcpy(str, user_base, strsize);
+    debug_decl(fill_command, SUDO_DEBUG_UTIL)
+    debug_return_size_t(strlcpy(str, user_base, strsize));
 }
 
 /*
@@ -160,6 +167,7 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
     char *dst, *dst0, *path, *pathend, tmpbuf[PATH_MAX];
     const char *endbrace, *src = dir;
     int pass, strfit;
+    debug_decl(expand_iolog_path, SUDO_DEBUG_UTIL)
 
     /* Expanded path must be <= PATH_MAX */
     if (prefix != NULL)
@@ -267,8 +275,8 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 	}
     }
 
-    return path;
+    debug_return_str(path);
 bad:
     efree(path);
-    return NULL;
+    debug_return_str(NULL);
 }

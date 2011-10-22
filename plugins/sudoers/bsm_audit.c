@@ -51,6 +51,7 @@ audit_sudo_selected(int sf)
 	struct au_mask *mask;
 	auditinfo_t ainfo;
 	int rc, sorf;
+	debug_decl(audit_sudo_selected, SUDO_DEBUG_AUDIT)
 
 	if (getaudit_addr(&ainfo_addr, sizeof(ainfo_addr)) < 0) {
 		if (errno == ENOSYS) {
@@ -63,7 +64,7 @@ audit_sudo_selected(int sf)
 		mask = &ainfo_addr.ai_mask;
 	sorf = (sf == 0) ? AU_PRS_SUCCESS : AU_PRS_FAILURE;
 	rc = au_preselect(AUE_sudo, mask, sorf, AU_PRS_REREAD);
-        return rc;
+        debug_return_int(rc);
 }
 
 void
@@ -76,6 +77,7 @@ bsm_audit_success(char **exec_args)
 	long au_cond;
 	int aufd;
 	pid_t pid;
+	debug_decl(bsm_audit_success, SUDO_DEBUG_AUDIT)
 
 	pid = getpid();
 	/*
@@ -87,13 +89,13 @@ bsm_audit_success(char **exec_args)
 		log_error(0, _("Could not determine audit condition"));
 	}
 	if (au_cond == AUC_NOAUDIT)
-		return;
+		debug_return;
 	/*
 	 * Check to see if the preselection masks are interested in seeing
 	 * this event.
 	 */
 	if (!audit_sudo_selected(0))
-		return;
+		debug_return;
 	if (getauid(&auid) < 0)
 		log_error(0, _("getauid failed"));
 	if ((aufd = au_open()) == -1)
@@ -124,6 +126,7 @@ bsm_audit_success(char **exec_args)
 	au_write(aufd, tok);
 	if (au_close(aufd, 1, AUE_sudo) == -1)
 		log_error(0, _("unable to commit audit record"));
+	debug_return;
 }
 
 void
@@ -137,6 +140,7 @@ bsm_audit_failure(char **exec_args, char const *const fmt, va_list ap)
 	au_id_t auid;
 	pid_t pid;
 	int aufd;
+	debug_decl(bsm_audit_success, SUDO_DEBUG_AUDIT)
 
 	pid = getpid();
 	/*
@@ -144,13 +148,13 @@ bsm_audit_failure(char **exec_args, char const *const fmt, va_list ap)
 	 */
 	if (auditon(A_GETCOND, &au_cond, sizeof(long)) < 0) {
 		if (errno == AUDIT_NOT_CONFIGURED)
-			return;
+			debug_return;
 		log_error(0, _("Could not determine audit condition"));
 	}
 	if (au_cond == AUC_NOAUDIT)
-		return;
+		debug_return;
 	if (!audit_sudo_selected(1))
-		return;
+		debug_return;
 	if (getauid(&auid) < 0)
 		log_error(0, _("getauid: failed"));
 	if ((aufd = au_open()) == -1)
@@ -183,4 +187,5 @@ bsm_audit_failure(char **exec_args, char const *const fmt, va_list ap)
 	au_write(aufd, tok);
 	if (au_close(aufd, 1, AUE_sudo) == -1)
 		log_error(0, _("unable to commit audit record"));
+	debug_return;
 }

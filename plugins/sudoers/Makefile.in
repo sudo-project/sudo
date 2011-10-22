@@ -355,32 +355,37 @@ afs.lo: $(authdir)/afs.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
         $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
         $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
         $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-        $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+        $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+        $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/afs.c
 aix_auth.lo: $(authdir)/aix_auth.c $(top_builddir)/config.h \
              $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \
              $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
              $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
              $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-             $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+             $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/aix_auth.c
 alias.lo: $(srcdir)/alias.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
           $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
           $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
-          $(srcdir)/parse.h $(srcdir)/redblack.h $(srcdir)/gram.h
+          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+          $(incdir)/gettext.h $(srcdir)/parse.h $(srcdir)/redblack.h \
+          $(srcdir)/gram.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/alias.c
 audit.lo: $(srcdir)/audit.c $(top_builddir)/config.h $(incdir)/missing.h \
-          $(srcdir)/logging.h $(srcdir)/bsm_audit.h $(srcdir)/linux_audit.h
+          $(srcdir)/logging.h $(incdir)/sudo_debug.h $(srcdir)/bsm_audit.h \
+          $(srcdir)/linux_audit.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/audit.c
-boottime.lo: $(srcdir)/boottime.c $(top_builddir)/config.h $(incdir)/missing.h
+boottime.lo: $(srcdir)/boottime.c $(top_builddir)/config.h $(incdir)/missing.h \
+             $(incdir)/sudo_debug.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/boottime.c
 bsdauth.lo: $(authdir)/bsdauth.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
             $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
             $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-            $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+            $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
+            $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/bsdauth.c
 bsm_audit.lo: $(srcdir)/bsm_audit.c $(top_builddir)/config.h \
               $(srcdir)/bsm_audit.h
@@ -389,15 +394,16 @@ check.lo: $(srcdir)/check.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
           $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
           $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+          $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/check.c
 check_addr.o: $(srcdir)/regress/parser/check_addr.c $(top_builddir)/config.h \
               $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \
               $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
               $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
               $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-              $(incdir)/sudo_plugin.h $(incdir)/gettext.h $(srcdir)/parse.h \
-              $(srcdir)/interfaces.h
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+              $(incdir)/gettext.h $(srcdir)/parse.h $(srcdir)/interfaces.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_addr.c
 check_fill.o: $(srcdir)/regress/parser/check_fill.c $(top_builddir)/config.h \
               $(incdir)/list.h $(srcdir)/parse.h $(srcdir)/toke.h \
@@ -410,7 +416,8 @@ check_iolog_path.o: $(srcdir)/regress/iolog_path/check_iolog_path.c \
                     $(incdir)/fileops.h $(srcdir)/defaults.h \
                     $(srcdir)/def_data.h $(srcdir)/logging.h \
                     $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
-                    $(incdir)/gettext.h $(srcdir)/def_data.c
+                    $(incdir)/sudo_debug.h $(incdir)/gettext.h \
+                    $(srcdir)/def_data.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/iolog_path/check_iolog_path.c
 check_wrap.o: $(srcdir)/regress/logging/check_wrap.c $(top_builddir)/config.h \
               $(incdir)/missing.h $(incdir)/error.h
@@ -419,20 +426,23 @@ dce.lo: $(authdir)/dce.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
         $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
         $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
         $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-        $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+        $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+        $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/dce.c
 defaults.lo: $(srcdir)/defaults.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
              $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
              $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
              $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-             $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
-             $(srcdir)/parse.h $(srcdir)/gram.h $(srcdir)/def_data.c
+             $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
+             $(incdir)/sudo_debug.h $(incdir)/gettext.h $(srcdir)/parse.h \
+             $(srcdir)/gram.h $(srcdir)/def_data.c
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/defaults.c
 env.lo: $(srcdir)/env.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
         $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
         $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
         $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-        $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+        $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+        $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/env.c
 error.o: $(top_srcdir)/src/error.c $(top_builddir)/config.h \
          $(incdir)/missing.h $(incdir)/error.h $(incdir)/gettext.h
@@ -442,14 +452,15 @@ find_path.lo: $(srcdir)/find_path.c $(top_builddir)/config.h \
               $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
               $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
               $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-              $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/find_path.c
 find_path.o: find_path.lo
 fwtk.lo: $(authdir)/fwtk.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
          $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
          $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
          $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-         $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+         $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+         $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/fwtk.c
 getdate.o: $(devdir)/getdate.c $(top_builddir)/config.h \
            $(top_builddir)/config.h $(incdir)/missing.h
@@ -459,13 +470,14 @@ getspwuid.lo: $(srcdir)/getspwuid.c $(top_builddir)/config.h \
               $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
               $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
               $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-              $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/getspwuid.c
 goodpath.lo: $(srcdir)/goodpath.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
              $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
              $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
              $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-             $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+             $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
+             $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/goodpath.c
 goodpath.o: goodpath.lo
 gram.lo: $(devdir)/gram.c $(top_builddir)/config.h $(top_builddir)/config.h \
@@ -473,7 +485,8 @@ gram.lo: $(devdir)/gram.c $(top_builddir)/config.h $(top_builddir)/config.h \
          $(incdir)/error.h $(incdir)/alloc.h $(incdir)/list.h \
          $(incdir)/fileops.h $(srcdir)/defaults.h $(srcdir)/def_data.h \
          $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
-         $(incdir)/gettext.h $(srcdir)/parse.h $(srcdir)/toke.h
+         $(incdir)/sudo_debug.h $(incdir)/gettext.h $(srcdir)/parse.h \
+         $(srcdir)/toke.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/gram.c
 group_plugin.lo: $(srcdir)/group_plugin.c $(top_builddir)/config.h \
                  $(top_srcdir)/compat/dlfcn.h $(srcdir)/sudoers.h \
@@ -481,7 +494,8 @@ group_plugin.lo: $(srcdir)/group_plugin.c $(top_builddir)/config.h \
                  $(incdir)/error.h $(incdir)/alloc.h $(incdir)/list.h \
                  $(incdir)/fileops.h $(srcdir)/defaults.h $(srcdir)/def_data.h \
                  $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-                 $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+                 $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+                 $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/group_plugin.c
 group_plugin.o: group_plugin.lo
 interfaces.lo: $(srcdir)/interfaces.c $(top_builddir)/config.h \
@@ -489,99 +503,109 @@ interfaces.lo: $(srcdir)/interfaces.c $(top_builddir)/config.h \
                $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
                $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
                $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-               $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
-               $(srcdir)/interfaces.h
+               $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+               $(incdir)/gettext.h $(srcdir)/interfaces.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/interfaces.c
 interfaces.o: interfaces.lo
 iolog.lo: $(srcdir)/iolog.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
           $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
           $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+          $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/iolog.c
 iolog_path.lo: $(srcdir)/iolog_path.c $(top_builddir)/config.h \
                $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \
                $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
                $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
                $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-               $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+               $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+               $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/iolog_path.c
 iolog_path.o: iolog_path.lo
 kerb4.lo: $(authdir)/kerb4.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
           $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
           $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+          $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/kerb4.c
 kerb5.lo: $(authdir)/kerb5.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
           $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
           $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+          $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/kerb5.c
 ldap.lo: $(srcdir)/ldap.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
          $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
          $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
          $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-         $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
-         $(srcdir)/parse.h $(incdir)/lbuf.h
+         $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+         $(incdir)/gettext.h $(srcdir)/parse.h $(incdir)/lbuf.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/ldap.c
 linux_audit.lo: $(srcdir)/linux_audit.c $(top_builddir)/config.h \
                 $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
-                $(incdir)/gettext.h $(srcdir)/linux_audit.h
+                $(incdir)/gettext.h $(incdir)/sudo_debug.h \
+                $(srcdir)/linux_audit.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/linux_audit.c
 logging.lo: $(srcdir)/logging.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
             $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
             $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-            $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+            $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
+            $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/logging.c
 logwrap.lo: $(srcdir)/logwrap.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
             $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
             $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-            $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+            $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
+            $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/logwrap.c
 logwrap.o: logwrap.lo
 match.lo: $(srcdir)/match.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
           $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
           $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
-          $(srcdir)/parse.h $(srcdir)/gram.h $(top_srcdir)/compat/fnmatch.h \
-          $(top_srcdir)/compat/glob.h
+          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+          $(incdir)/gettext.h $(srcdir)/parse.h $(srcdir)/gram.h \
+          $(top_srcdir)/compat/fnmatch.h $(top_srcdir)/compat/glob.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/match.c
 match_addr.lo: $(srcdir)/match_addr.c $(top_builddir)/config.h \
                $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \
                $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
                $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
                $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-               $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
-               $(srcdir)/interfaces.h
+               $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+               $(incdir)/gettext.h $(srcdir)/interfaces.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/match_addr.c
 match_addr.o: match_addr.lo
 net_ifs.o: $(top_srcdir)/src/net_ifs.c $(top_builddir)/config.h \
            $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
-           $(incdir)/gettext.h
+           $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(top_srcdir)/src/net_ifs.c
 pam.lo: $(authdir)/pam.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
         $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
         $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
         $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-        $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+        $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+        $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/pam.c
 parse.lo: $(srcdir)/parse.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
           $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
           $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
-          $(srcdir)/parse.h $(incdir)/lbuf.h $(srcdir)/gram.h
+          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+          $(incdir)/gettext.h $(srcdir)/parse.h $(incdir)/lbuf.h \
+          $(srcdir)/gram.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/parse.c
 passwd.lo: $(authdir)/passwd.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
            $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
            $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
            $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-           $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+           $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+           $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/passwd.c
 plugin_error.lo: $(srcdir)/plugin_error.c $(top_builddir)/config.h \
                  $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
@@ -591,76 +615,81 @@ pwutil.lo: $(srcdir)/pwutil.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
            $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
            $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
            $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-           $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
-           $(srcdir)/redblack.h
+           $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+           $(incdir)/gettext.h $(srcdir)/redblack.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/pwutil.c
 pwutil.o: pwutil.lo
 redblack.lo: $(srcdir)/redblack.c $(top_builddir)/config.h $(incdir)/missing.h \
-             $(incdir)/alloc.h $(srcdir)/redblack.h
+             $(incdir)/alloc.h $(incdir)/sudo_debug.h $(srcdir)/redblack.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/redblack.c
 redblack.o: redblack.lo
 rfc1938.lo: $(authdir)/rfc1938.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
             $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
             $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-            $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+            $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
+            $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/rfc1938.c
 secureware.lo: $(authdir)/secureware.c $(top_builddir)/config.h \
                $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \
                $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
                $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
                $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-               $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+               $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+               $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/secureware.c
 securid.lo: $(authdir)/securid.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
             $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
             $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-            $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+            $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
+            $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/securid.c
 securid5.lo: $(authdir)/securid5.c $(top_builddir)/config.h \
              $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \
              $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
              $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
              $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-             $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+             $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/securid5.c
 set_perms.lo: $(srcdir)/set_perms.c $(top_builddir)/config.h \
               $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \
               $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
               $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
               $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-              $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/set_perms.c
 sia.lo: $(authdir)/sia.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
         $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
         $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
         $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-        $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+        $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+        $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/sia.c
 sudo_auth.lo: $(authdir)/sudo_auth.c $(top_builddir)/config.h \
               $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \
               $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
               $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
               $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-              $(incdir)/sudo_plugin.h $(incdir)/gettext.h $(srcdir)/insults.h \
-              $(srcdir)/ins_2001.h $(srcdir)/ins_goons.h \
-              $(srcdir)/ins_classic.h $(srcdir)/ins_csops.h
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+              $(incdir)/gettext.h $(srcdir)/insults.h $(srcdir)/ins_2001.h \
+              $(srcdir)/ins_goons.h $(srcdir)/ins_classic.h \
+              $(srcdir)/ins_csops.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/sudo_auth.c
 sudo_nss.lo: $(srcdir)/sudo_nss.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
              $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
              $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
              $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-             $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
-             $(incdir)/lbuf.h
+             $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
+             $(incdir)/sudo_debug.h $(incdir)/gettext.h $(incdir)/lbuf.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudo_nss.c
 sudoers.lo: $(srcdir)/sudoers.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
             $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
             $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-            $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
-            $(srcdir)/interfaces.h $(srcdir)/sudoers_version.h \
-            $(srcdir)/auth/sudo_auth.h
+            $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
+            $(incdir)/sudo_debug.h $(incdir)/gettext.h $(srcdir)/interfaces.h \
+            $(srcdir)/sudoers_version.h $(srcdir)/auth/sudo_auth.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudoers.c
 sudoreplay.o: $(srcdir)/sudoreplay.c $(top_builddir)/config.h \
               $(top_srcdir)/compat/timespec.h $(top_builddir)/pathnames.h \
@@ -673,9 +702,9 @@ testsudoers.o: $(srcdir)/testsudoers.c $(top_builddir)/config.h \
                $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
                $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
                $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-               $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
-               $(srcdir)/interfaces.h $(srcdir)/parse.h $(srcdir)/gram.h \
-               $(top_srcdir)/compat/fnmatch.h
+               $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+               $(incdir)/gettext.h $(srcdir)/interfaces.h $(srcdir)/parse.h \
+               $(srcdir)/gram.h $(top_srcdir)/compat/fnmatch.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/testsudoers.c
 timestr.lo: $(srcdir)/timestr.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/timestr.c
@@ -684,15 +713,17 @@ toke.lo: $(devdir)/toke.c $(top_builddir)/config.h $(top_builddir)/config.h \
          $(incdir)/error.h $(incdir)/alloc.h $(incdir)/list.h \
          $(incdir)/fileops.h $(srcdir)/defaults.h $(srcdir)/def_data.h \
          $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
-         $(incdir)/gettext.h $(srcdir)/parse.h $(srcdir)/toke.h $(srcdir)/gram.h
+         $(incdir)/sudo_debug.h $(incdir)/gettext.h $(srcdir)/parse.h \
+         $(srcdir)/toke.h $(srcdir)/gram.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/toke.c
 toke_util.lo: $(srcdir)/toke_util.c $(top_builddir)/config.h \
               $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \
               $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
               $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
               $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-              $(incdir)/sudo_plugin.h $(incdir)/gettext.h $(srcdir)/parse.h \
-              $(srcdir)/toke.h $(srcdir)/gram.h
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+              $(incdir)/gettext.h $(srcdir)/parse.h $(srcdir)/toke.h \
+              $(srcdir)/gram.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/toke_util.c
 toke_util.o: toke_util.lo
 tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(top_builddir)/config.h \
@@ -701,13 +732,14 @@ tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(top_builddir)/config.h \
              $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
              $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
              $(srcdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-             $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+             $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/tsgetgrpw.c
 visudo.o: $(srcdir)/visudo.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
           $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
           $(srcdir)/defaults.h $(srcdir)/def_data.h $(srcdir)/logging.h \
-          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h \
-          $(srcdir)/interfaces.h $(srcdir)/parse.h $(srcdir)/redblack.h \
-          $(incdir)/gettext.h $(srcdir)/sudoers_version.h $(srcdir)/gram.h
+          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+          $(incdir)/gettext.h $(srcdir)/interfaces.h $(srcdir)/parse.h \
+          $(srcdir)/redblack.h $(incdir)/gettext.h $(srcdir)/sudoers_version.h \
+          $(srcdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/visudo.c

@@ -91,6 +91,7 @@ mysyslog(int pri, const char *fmt, ...)
 #endif
     char buf[MAXSYSLOGLEN+1];
     va_list ap;
+    debug_decl(mysyslog, SUDO_DEBUG_LOGGING)
 
     va_start(ap, fmt);
 #ifdef LOG_NFACILITIES
@@ -113,6 +114,7 @@ mysyslog(int pri, const char *fmt, ...)
 #endif /* BROKEN_SYSLOG */
     va_end(ap);
     closelog();
+    debug_return;
 }
 
 #define FMT_FIRST "%8s : %s"
@@ -128,6 +130,7 @@ do_syslog(int pri, char *msg)
     size_t len, maxlen;
     char *p, *tmp, save;
     const char *fmt;
+    debug_decl(do_syslog, SUDO_DEBUG_LOGGING)
 
 #ifdef HAVE_SETLOCALE
     const char *old_locale = estrdup(setlocale(LC_ALL, NULL));
@@ -174,6 +177,8 @@ do_syslog(int pri, char *msg)
     setlocale(LC_ALL, old_locale);
     efree((void *)old_locale);
 #endif /* HAVE_SETLOCALE */
+
+    debug_return;
 }
 
 static void
@@ -184,6 +189,7 @@ do_logfile(char *msg)
     mode_t oldmask;
     time_t now;
     FILE *fp;
+    debug_decl(do_logfile, SUDO_DEBUG_LOGGING)
 
     oldmask = umask(077);
     fp = fopen(def_logfile, "a");
@@ -233,6 +239,7 @@ do_logfile(char *msg)
 	efree((void *)old_locale);
 #endif /* HAVE_SETLOCALE */
     }
+    debug_return;
 }
 
 /*
@@ -241,8 +248,8 @@ do_logfile(char *msg)
 void
 log_denial(int status, int inform_user)
 {
-    char *message;
-    char *logline;
+    char *logline, *message;
+    debug_decl(log_denial, SUDO_DEBUG_LOGGING)
 
     /* Set error message. */
     if (ISSET(status, FLAG_NO_USER))
@@ -289,6 +296,7 @@ log_denial(int status, int inform_user)
 	do_logfile(logline);
 
     efree(logline);
+    debug_return;
 }
 
 /*
@@ -298,6 +306,7 @@ void
 log_allowed(int status)
 {
     char *logline;
+    debug_decl(log_allowed, SUDO_DEBUG_LOGGING)
 
     logline = new_logline(NULL, 0);
 
@@ -313,15 +322,16 @@ log_allowed(int status)
 	do_logfile(logline);
 
     efree(logline);
+    debug_return;
 }
 
 void
 log_error(int flags, const char *fmt, ...)
 {
     int serrno = errno;
-    char *message;
-    char *logline;
+    char *logline, *message;
     va_list ap;
+    debug_decl(log_error, SUDO_DEBUG_LOGGING)
 
     /* Expand printf-style format + args. */
     va_start(ap, fmt);
@@ -370,6 +380,7 @@ log_error(int flags, const char *fmt, ...)
 	plugin_cleanup(0);
 	siglongjmp(error_jmp, 1);
     }
+    debug_return;
 }
 
 #define MAX_MAILFLAGS	63
@@ -396,10 +407,11 @@ send_mail(const char *fmt, ...)
 	NULL
     };
 #endif /* NO_ROOT_MAILER */
+    debug_decl(send_mail, SUDO_DEBUG_LOGGING)
 
     /* Just return if mailer is disabled. */
     if (!def_mailerpath || !def_mailto)
-	return;
+	debug_return;
 
     /* Fork and return, child will daemonize. */
     switch (pid = fork()) {
@@ -413,6 +425,8 @@ send_mail(const char *fmt, ...)
 		case -1:
 		    /* Error. */
 		    mysyslog(LOG_ERR, _("unable to fork: %m"));
+		    sudo_debug_printf(SUDO_DEBUG_SYSERR, "unable to fork: %s",
+			strerror(errno));
 		    _exit(1);
 		case 0:
 		    /* Grandchild continues below. */
@@ -427,7 +441,7 @@ send_mail(const char *fmt, ...)
 	    do {
 		rv = waitpid(pid, &status, 0);
 	    } while (rv == -1 && errno == EINTR);
-	    return;
+	    return; /* not debug */
     }
 
     /* Daemonize - disassociate from session/tty. */
@@ -463,6 +477,9 @@ send_mail(const char *fmt, ...)
 
     if (pipe(pfd) == -1) {
 	mysyslog(LOG_ERR, _("unable to open pipe: %m"));
+	sudo_debug_printf(SUDO_DEBUG_SYSERR, "unable to open pipe: %s",
+	    strerror(errno));
+	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 	_exit(1);
     }
 
@@ -470,6 +487,9 @@ send_mail(const char *fmt, ...)
 	case -1:
 	    /* Error. */
 	    mysyslog(LOG_ERR, _("unable to fork: %m"));
+	    sudo_debug_printf(SUDO_DEBUG_SYSERR, "unable to fork: %s",
+		strerror(errno));
+	    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 	    _exit(1);
 	    break;
 	case 0:
@@ -482,6 +502,8 @@ send_mail(const char *fmt, ...)
 		if (pfd[0] != STDIN_FILENO) {
 		    if (dup2(pfd[0], STDIN_FILENO) == -1) {
 			mysyslog(LOG_ERR, _("unable to dup stdin: %m"));
+			sudo_debug_printf(SUDO_DEBUG_SYSERR,
+			    "unable to dup stdin: %s", strerror(errno));
 			_exit(127);
 		    }
 		    (void) close(pfd[0]);
@@ -516,6 +538,8 @@ send_mail(const char *fmt, ...)
 		execv(mpath, argv);
 #endif /* NO_ROOT_MAILER */
 		mysyslog(LOG_ERR, _("unable to execute %s: %m"), mpath);
+		sudo_debug_printf(SUDO_DEBUG_SYSERR, "unable to execute %s: %s",
+		    mpath, strerror(errno));
 		_exit(127);
 	    }
 	    break;
@@ -561,6 +585,7 @@ send_mail(const char *fmt, ...)
     do {
         rv = waitpid(pid, &status, 0);
     } while (rv == -1 && errno == EINTR);
+    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
     _exit(0);
 }
 
@@ -570,11 +595,12 @@ send_mail(const char *fmt, ...)
 static int
 should_mail(int status)
 {
+    debug_decl(should_mail, SUDO_DEBUG_LOGGING)
 
-    return def_mail_always || ISSET(status, VALIDATE_ERROR) ||
+    debug_return_bool(def_mail_always || ISSET(status, VALIDATE_ERROR) ||
 	(def_mail_no_user && ISSET(status, FLAG_NO_USER)) ||
 	(def_mail_no_host && ISSET(status, FLAG_NO_HOST)) ||
-	(def_mail_no_perms && !ISSET(status, VALIDATE_OK));
+	(def_mail_no_perms && !ISSET(status, VALIDATE_OK)));
 }
 
 #define	LL_TTY_STR	"TTY="
@@ -603,6 +629,7 @@ new_logline(const char *message, int serrno)
     char *errstr = NULL;
     char *evstr = NULL;
     char *line, sessid[7], *tsid = NULL;
+    debug_decl(new_logline, SUDO_DEBUG_LOGGING)
 
     /* A TSID may be a sudoers-style session ID or a free-form string. */
     if (sudo_user.iolog_file != NULL) {
@@ -723,7 +750,7 @@ new_logline(const char *message, int serrno)
 	}
     }
 
-    return line;
+    debug_return_str(line);
 toobig:
     errorx(1, _("internal error: insufficient space for log line"));
 }

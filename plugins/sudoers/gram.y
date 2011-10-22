@@ -92,6 +92,8 @@ static struct member *new_member(char *, int);
 void
 yyerror(const char *s)
 {
+    debug_decl(yyerror, SUDO_DEBUG_PARSER)
+
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {
 	errorlineno = sudolineno ? sudolineno - 1 : 0;
@@ -104,6 +106,7 @@ yyerror(const char *s)
 	    sudolineno ? sudolineno - 1 : 0);
     }
     parse_error = TRUE;
+    debug_return;
 }
 %}
 
@@ -605,6 +608,7 @@ static struct defaults *
 new_default(char *var, char *val, int op)
 {
     struct defaults *d;
+    debug_decl(new_default, SUDO_DEBUG_PARSER)
 
     d = emalloc(sizeof(struct defaults));
     d->var = var;
@@ -615,13 +619,14 @@ new_default(char *var, char *val, int op)
     d->prev = d;
     d->next = NULL;
 
-    return d;
+    debug_return_ptr(d);
 }
 
 static struct member *
 new_member(char *name, int type)
 {
     struct member *m;
+    debug_decl(new_member, SUDO_DEBUG_PARSER)
 
     m = emalloc(sizeof(struct member));
     m->name = name;
@@ -629,7 +634,7 @@ new_member(char *name, int type)
     m->prev = m;
     m->next = NULL;
 
-    return m;
+    debug_return_ptr(m);
 }
 
 /*
@@ -642,6 +647,7 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 {
     struct defaults *d;
     struct member_list binding;
+    debug_decl(add_defaults, SUDO_DEBUG_PARSER)
 
     /*
      * We can only call list2tq once on bmem as it will zero
@@ -657,6 +663,8 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
 	d->binding = binding;
     }
     tq_append(&defaults, defs);
+
+    debug_return;
 }
 
 /*
@@ -667,6 +675,7 @@ static void
 add_userspec(struct member *members, struct privilege *privs)
 {
     struct userspec *u;
+    debug_decl(add_userspec, SUDO_DEBUG_PARSER)
 
     u = emalloc(sizeof(*u));
     list2tq(&u->users, members);
@@ -674,6 +683,8 @@ add_userspec(struct member *members, struct privilege *privs)
     u->prev = u;
     u->next = NULL;
     tq_append(&userspecs, u);
+
+    debug_return;
 }
 
 /*
@@ -689,6 +700,7 @@ init_parser(const char *path, int quiet)
     struct privilege *priv;
     struct cmndspec *cs;
     struct sudo_command *c;
+    debug_decl(init_parser, SUDO_DEBUG_PARSER)
 
     while ((us = tq_pop(&userspecs)) != NULL) {
 	while ((m = tq_pop(&us->users)) != NULL) {
@@ -777,4 +789,6 @@ init_parser(const char *path, int quiet)
     errorlineno = -1;
     errorfile = NULL;
     verbose = !quiet;
+
+    debug_return;
 }

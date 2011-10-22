@@ -63,6 +63,8 @@ static int
 sudo_collect(int timeout, int rendition, uchar_t *title, int nprompts,
     prompt_t *prompts)
 {
+    debug_decl(sudo_collect, SUDO_DEBUG_AUTH)
+
     switch (rendition) {
 	case SIAFORM:
 	case SIAONELINER:
@@ -81,7 +83,7 @@ sudo_collect(int timeout, int rendition, uchar_t *title, int nprompts,
 	    break;
     }
 
-    return sia_collect_trm(timeout, rendition, title, nprompts, prompts);
+    debug_return_int(sia_collect_trm(timeout, rendition, title, nprompts, prompts));
 }
 
 int
@@ -91,6 +93,7 @@ sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
     int i;
     extern int NewArgc;
     extern char **NewArgv;
+    debug_decl(sia_setup, SUDO_DEBUG_AUTH)
 
     /* Rebuild argv for sia_ses_init() */
     sudo_argc = NewArgc + 1;
@@ -104,33 +107,35 @@ sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 
 	log_error(USE_ERRNO|NO_EXIT|NO_MAIL,
 	    _("unable to initialize SIA session"));
-	return AUTH_FATAL;
+	debug_return_int(AUTH_FATAL);
     }
 
     auth->data = (void *) siah;
-    return AUTH_SUCCESS;
+    debug_return_int(AUTH_SUCCESS);
 }
 
 int
 sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 {
     SIAENTITY *siah = (SIAENTITY *) auth->data;
+    debug_decl(sia_verify, SUDO_DEBUG_AUTH)
 
     def_prompt = prompt;		/* for sudo_collect */
 
     /* XXX - need a way to detect user hitting return or EOF at prompt */
     if (sia_ses_reauthent(sudo_collect, siah) == SIASUCCESS)
-	return AUTH_SUCCESS;
+	debug_return_int(AUTH_SUCCESS);
     else
-	return AUTH_FAILURE;
+	debug_return_int(AUTH_FAILURE);
 }
 
 int
 sia_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     SIAENTITY *siah = (SIAENTITY *) auth->data;
+    debug_decl(sia_cleanup, SUDO_DEBUG_AUTH)
 
     (void) sia_ses_release(&siah);
     efree(sudo_argv);
-    return AUTH_SUCCESS;
+    debug_return_int(AUTH_SUCCESS);
 }

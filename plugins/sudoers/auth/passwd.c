@@ -51,14 +51,16 @@
 int
 passwd_init(struct passwd *pw, sudo_auth *auth)
 {
+    debug_decl(passwd_init, SUDO_DEBUG_AUTH)
+
 #ifdef HAVE_SKEYACCESS
     if (skeyaccess(pw, user_tty, NULL, NULL) == 0)
-	return AUTH_FAILURE;
+	debug_return_int(AUTH_FAILURE);
 #endif
     sudo_setspent();
     auth->data = sudo_getepw(pw);
     sudo_endspent();
-    return AUTH_SUCCESS;
+    debug_return_int(AUTH_SUCCESS);
 }
 
 int
@@ -68,6 +70,7 @@ passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     char *pw_epasswd = auth->data;
     size_t pw_len;
     int error;
+    debug_decl(passwd_verify, SUDO_DEBUG_AUTH)
 
     pw_len = strlen(pw_epasswd);
 
@@ -75,7 +78,7 @@ passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     /* Ultrix shadow passwords may use crypt16() */
     error = strcmp(pw_epasswd, (char *) crypt16(pass, pw_epasswd));
     if (!error)
-	return AUTH_SUCCESS;
+	debug_return_int(AUTH_SUCCESS);
 #endif /* HAVE_GETAUTHUID */
 
     /*
@@ -98,7 +101,7 @@ passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     else
 	error = strcmp(pw_epasswd, epass);
 
-    return error ? AUTH_FAILURE : AUTH_SUCCESS;
+    debug_return_int(error ? AUTH_FAILURE : AUTH_SUCCESS);
 }
 
 int
@@ -107,10 +110,11 @@ passwd_cleanup(pw, auth)
     sudo_auth *auth;
 {
     char *pw_epasswd = auth->data;
+    debug_decl(passwd_cleanup, SUDO_DEBUG_AUTH)
 
     if (pw_epasswd != NULL) {
 	zero_bytes(pw_epasswd, strlen(pw_epasswd));
 	efree(pw_epasswd);
     }
-    return AUTH_SUCCESS;
+    debug_return_int(AUTH_SUCCESS);
 }

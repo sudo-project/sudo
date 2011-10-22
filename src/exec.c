@@ -112,6 +112,7 @@ static int fork_cmnd(struct command_details *details, int sv[2])
     struct command_status cstat;
     sigaction_t sa;
     pid_t child;
+    debug_decl(fork_cmnd, SUDO_DEBUG_EXEC)
 
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
@@ -133,6 +134,8 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 	restore_signals();
 	if (exec_setup(details, NULL, -1) == TRUE) {
 	    /* headed for execve() */
+	    sudo_debug_execve(SUDO_DEBUG_INFO, details->command,
+		details->argv, details->envp);
 	    if (details->closefrom >= 0)
 		closefrom(details->closefrom);
 #ifdef HAVE_SELINUX
@@ -141,13 +144,16 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 	    else
 #endif
 		my_execve(details->command, details->argv, details->envp);
+	    sudo_debug_printf(SUDO_DEBUG_SYSERR, "unable to exec %s: %s",
+		details->command, strerror(errno));
 	}
 	cstat.type = CMD_ERRNO;
 	cstat.val = errno;
 	send(sv[1], &cstat, sizeof(cstat), 0);
+	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);
 	_exit(1);
     }
-    return child;
+    debug_return_int(child);
 }
 
 static struct signal_state {
@@ -177,9 +183,12 @@ void
 save_signals(void)
 {
     struct signal_state *ss;
+    debug_decl(save_signals, SUDO_DEBUG_EXEC)
 
     for (ss = saved_signals; ss->signo != -1; ss++)
 	sigaction(ss->signo, NULL, &ss->sa);
+
+    debug_return;
 }
 
 /*
@@ -189,9 +198,12 @@ void
 restore_signals(void)
 {
     struct signal_state *ss;
+    debug_decl(restore_signals, SUDO_DEBUG_EXEC)
 
     for (ss = saved_signals; ss->signo != -1; ss++)
 	sigaction(ss->signo, &ss->sa, NULL);
+
+    debug_return;
 }
 
 /*
@@ -207,6 +219,7 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
     fd_set *fdsr, *fdsw;
     sigaction_t sa;
     pid_t child;
+    debug_decl(sudo_execve, SUDO_DEBUG_EXEC)
 
     /* If running in background mode, fork and exit. */
     if (ISSET(details->flags, CD_BACKGROUND)) {
@@ -215,12 +228,15 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
 		cstat->type = CMD_ERRNO;
 		cstat->val = errno;
 		return -1;
+		debug_return_int(-1);
 	    case 0:
 		/* child continues without controlling terminal */
 		(void)setpgid(0, 0);
 		break;
 	    default:
 		/* parent exits (but does not flush buffers) */
+		sudo_debug_exit_int(__func__, __FILE__, __LINE__,
+		    sudo_debug_subsys, 0);
 		_exit(0);
 	}
     }
@@ -234,7 +250,7 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
 	log_io = TRUE;
 	if (ISSET(details->flags, CD_SET_UTMP))
 	    utmp_user = details->utmp_user ? details->utmp_user : user_details.username;
-	sudo_debug(8, "allocate pty for I/O logging");
+	sudo_debug_printf(SUDO_DEBUG_INFO, "allocate pty for I/O logging");
 	pty_setup(details->euid, user_details.tty, utmp_user);
     }
 
@@ -353,7 +369,8 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
 	    if (cstat->type == CMD_WSTATUS) {
 		if (WIFSTOPPED(cstat->val)) {
 		    /* Suspend parent and tell child how to resume on return. */
-		    sudo_debug(8, "child stopped, suspending parent");
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"child stopped, suspending parent");
 		    n = suspend_parent(WSTOPSIG(cstat->val));
 		    schedule_signal(n);
 		    continue;
@@ -397,7 +414,7 @@ done:
 	efree(sigfwd);
     }
 
-    return cstat->type == CMD_ERRNO ? -1 : 0;
+    debug_return_int(cstat->type == CMD_ERRNO ? -1 : 0);
 }
 
 /*
@@ -411,6 +428,7 @@ handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
     ssize_t nread;
     int status;
     pid_t pid;
+    debug_decl(handle_signals, SUDO_DEBUG_EXEC)
 
     for (;;) {
 	/* read signal pipe */
@@ -425,12 +443,13 @@ handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
 	    /* If pipe is empty, we are done. */
 	    if (errno == EAGAIN)
 		break;
-	    sudo_debug(9, "error reading signal pipe %s", strerror(errno));
+	    sudo_debug_printf(SUDO_DEBUG_SYSERR, "error reading signal pipe %s",
+		strerror(errno));
 	    cstat->type = CMD_ERRNO;
 	    cstat->val = errno;
-	    return -1;
+	    debug_return_int(-1);
 	}
-	sudo_debug(9, "received signal %d", signo);
+	sudo_debug_printf(SUDO_DEBUG_DIAG, "received signal %d", signo);
 	if (signo == SIGCHLD) {
 	    /*
 	     * If logging I/O, child is the intermediate process,
@@ -464,7 +483,7 @@ handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
 			/* Child has exited, we are done. */
 			cstat->type = CMD_WSTATUS;
 			cstat->val = status;
-			return 0;
+			debug_return_int(0);
 		    }
 		}
 		/* Else we get ECONNRESET on sv[0] if child dies. */
@@ -482,7 +501,7 @@ handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
 	    }
 	}
     }
-    return 1;
+    debug_return_int(1);
 }
 
 /*
@@ -494,11 +513,12 @@ forward_signals(int sock)
     struct sigforward *sigfwd;
     struct command_status cstat;
     ssize_t nsent;
+    debug_decl(forward_signals, SUDO_DEBUG_EXEC)
 
     while (!tq_empty(&sigfwd_list)) {
 	sigfwd = tq_first(&sigfwd_list);
-	sudo_debug(9, "sending signal %d to child over backchannel",
-	    sigfwd->signo);
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "sending signal %d to child over backchannel", sigfwd->signo);
 	cstat.type = CMD_SIGNO;
 	cstat.val = sigfwd->signo;
 	do {
@@ -518,6 +538,7 @@ forward_signals(int sock)
 	    break;
 	}
     }
+    debug_return;
 }
 
 /*
@@ -527,12 +548,17 @@ static void
 schedule_signal(int signo)
 {
     struct sigforward *sigfwd;
+    debug_decl(schedule_signal, SUDO_DEBUG_EXEC)
+
+    sudo_debug_printf(SUDO_DEBUG_DIAG, "forwarding signal %d to child", signo);
 
     sigfwd = emalloc(sizeof(*sigfwd));
     sigfwd->prev = sigfwd;
     sigfwd->next = NULL;
     sigfwd->signo = signo;
     tq_append(&sigfwd_list, sigfwd);
+
+    debug_return;
 }
 
 /*
@@ -560,6 +586,7 @@ int
 pipe_nonblock(int fds[2])
 {
     int flags, rval;
+    debug_decl(pipe_nonblock, SUDO_DEBUG_EXEC)
 
     rval = pipe(fds);
     if (rval != -1) {
@@ -577,5 +604,5 @@ pipe_nonblock(int fds[2])
 	}
     }
 
-    return rval;
+    debug_return_int(rval);
 }

@@ -656,6 +656,7 @@ switch_dir(struct include_stack *stack, char *dirpath)
     struct stat sb;
     struct path_list *pl, *first = NULL;
     struct path_list **sorted = NULL;
+    debug_decl(switch_dir, SUDO_DEBUG_PARSER)
 
     if (!(dir = opendir(dirpath))) {
 	if (errno != ENOENT) {
@@ -726,7 +727,7 @@ switch_dir(struct include_stack *stack, char *dirpath)
     }
 done:
     efree(dirpath);
-    return path;
+    debug_return_str(path);
 bad:
     while (first != NULL) {
 	pl = first;
@@ -737,7 +738,7 @@ bad:
     efree(sorted);
     efree(dirpath);
     efree(path);
-    return NULL;
+    debug_return_str(NULL);
 }
 
 #define MAX_SUDOERS_DEPTH	128
@@ -751,6 +752,7 @@ void
 init_lexer(void)
 {
     struct path_list *pl;
+    debug_decl(init_lexer, SUDO_DEBUG_PARSER)
 
     while (idepth) {
 	idepth--;
@@ -772,6 +774,8 @@ init_lexer(void)
     sawspace = FALSE;
     continued = FALSE;
     prev_state = INITIAL;
+
+    debug_return;
 }
 
 static int
@@ -779,31 +783,32 @@ _push_include(char *path, int isdir)
 {
     struct path_list *pl;
     FILE *fp;
+    debug_decl(_push_include, SUDO_DEBUG_PARSER)
 
     /* push current state onto stack */
     if (idepth >= istacksize) {
 	if (idepth > MAX_SUDOERS_DEPTH) {
 	    yyerror(_("too many levels of includes"));
-	    return FALSE;
+	    debug_return_bool(FALSE);
 	}
 	istacksize += SUDOERS_STACK_INCREMENT;
 	istack = (struct include_stack *) realloc(istack,
 	    sizeof(*istack) * istacksize);
 	if (istack == NULL) {
 	    yyerror(_("unable to allocate memory"));
-	    return FALSE;
+	    debug_return_bool(FALSE);
 	}
     }
     if (isdir) {
 	if (!(path = switch_dir(&istack[idepth], path))) {
 	    /* switch_dir() called yyerror() for us */
-	    return FALSE;
+	    debug_return_bool(FALSE);
 	}
 	while ((fp = open_sudoers(path, FALSE, &keepopen)) == NULL) {
 	    /* Unable to open path in includedir, go to next one, if any. */
 	    efree(path);
 	    if ((pl = istack[idepth].more) == NULL)
-		return FALSE;
+		debug_return_bool(FALSE);
 	    path = pl->path;
 	    istack[idepth].more = pl->next;
 	    efree(pl);
@@ -817,7 +822,7 @@ _push_include(char *path, int isdir)
 	    } else {
 		yyerror(_("unable to allocate memory"));
 	    }
-	    return FALSE;
+	    debug_return_bool(FALSE);
 	}
 	istack[idepth].more = NULL;
     }
@@ -831,7 +836,7 @@ _push_include(char *path, int isdir)
     sudoers = path;
     yy_switch_to_buffer(yy_create_buffer(fp, YY_BUF_SIZE));
 
-    return TRUE;
+    debug_return_bool(TRUE);
 }
 
 static int
@@ -839,9 +844,10 @@ pop_include(void)
 {
     struct path_list *pl;
     FILE *fp;
+    debug_decl(pop_include, SUDO_DEBUG_PARSER)
 
     if (idepth == 0)
-	return FALSE;
+	debug_return_bool(FALSE);
 
     if (!keepopen)
 	fclose(YY_CURRENT_BUFFER->yy_input_file);
@@ -872,7 +878,7 @@ pop_include(void)
 	sudolineno = istack[idepth].lineno;
 	keepopen = istack[idepth].keepopen;
     }
-    return TRUE;
+    debug_return_bool(TRUE);
 }
 
 static char *
@@ -881,6 +887,7 @@ parse_include(char *base)
     char *cp, *ep, *path;
     int len = 0, subst = 0;
     size_t shost_len = 0;
+    debug_decl(parse_include, SUDO_DEBUG_PARSER)
 
     /* Pull out path from #include line. */
     cp = base + sizeof("#include");
@@ -902,7 +909,7 @@ parse_include(char *base)
     len += (int)(ep - cp);
     if ((path = malloc(len + 1)) == NULL) {
 	yyerror(_("unable to allocate memory"));
-	return NULL;
+	debug_return_str(NULL);
     }
     if (subst) {
 	/* substitute for %h */
@@ -926,7 +933,7 @@ parse_include(char *base)
     if (*ep != '\0')
 	yyless((int)(ep - base));
 
-    return path;
+    debug_return_str(path);
 }
 
 #ifdef TRACELEXER

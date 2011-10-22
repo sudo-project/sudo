@@ -63,15 +63,18 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 {
     struct group *gr;
     gid_t ttygid = -1;
+    int rval = 0;
+    debug_decl(get_pty, SUDO_DEBUG_PTY)
 
     if ((gr = getgrnam("tty")) != NULL)
 	ttygid = gr->gr_gid;
 
-    if (openpty(master, slave, name, NULL, NULL) != 0)
-	return 0;
-    if (chown(name, ttyuid, ttygid) != 0)
-	return 0;
-    return 1;
+    if (openpty(master, slave, name, NULL, NULL) == 0) {
+	if (chown(name, ttyuid, ttygid) == 0)
+	    rval = 1;
+    }
+
+    debug_return_bool(rval);
 }
 
 #elif defined(HAVE__GETPTY)
@@ -79,19 +82,23 @@ int
 get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 {
     char *line;
+    int rval = 0;
+    debug_decl(get_pty, SUDO_DEBUG_PTY)
 
     /* IRIX-style dynamic ptys (may fork) */
     line = _getpty(master, O_RDWR, S_IRUSR|S_IWUSR|S_IWGRP, 0);
-    if (line == NULL)
-	return 0;
-    *slave = open(line, O_RDWR|O_NOCTTY, 0);
-    if (*slave == -1) {
-	close(*master);
-	return 0;
+    if (line != NULL) {
+	*slave = open(line, O_RDWR|O_NOCTTY, 0);
+	if (*slave != -1) {
+	    (void) chown(line, ttyuid, -1);
+	    strlcpy(name, line, namesz);
+	    rval = 1;
+	} else {
+	    close(*master);
+	    *master = -1;
+	}
     }
-    (void) chown(line, ttyuid, -1);
-    strlcpy(name, line, namesz);
-    return 1;
+    debug_return_bool(rval);
 }
 #elif defined(HAVE_GRANTPT)
 # ifndef HAVE_POSIX_OPENPT
@@ -113,33 +120,36 @@ int
 get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 {
     char *line;
+    int rval = 0;
+    debug_decl(get_pty, SUDO_DEBUG_PTY)
 
     *master = posix_openpt(O_RDWR|O_NOCTTY);
-    if (*master == -1)
-	return 0;
-
-    (void) grantpt(*master); /* may fork */
-    if (unlockpt(*master) != 0) {
-	close(*master);
-	return 0;
-    }
-    line = ptsname(*master);
-    if (line == NULL) {
-	close(*master);
-	return 0;
-    }
-    *slave = open(line, O_RDWR|O_NOCTTY, 0);
-    if (*slave == -1) {
-	close(*master);
-	return 0;
-    }
+    if (*master != -1) {
+	(void) grantpt(*master); /* may fork */
+	if (unlockpt(*master) != 0) {
+	    close(*master);
+	    goto done;
+	}
+	line = ptsname(*master);
+	if (line == NULL) {
+	    close(*master);
+	    goto done;
+	}
+	*slave = open(line, O_RDWR|O_NOCTTY, 0);
+	if (*slave == -1) {
+	    close(*master);
+	    goto done;
+	}
 # if defined(I_PUSH) && !defined(_AIX)
-    ioctl(*slave, I_PUSH, "ptem");	/* pseudo tty emulation module */
-    ioctl(*slave, I_PUSH, "ldterm");	/* line discipline module */
+	ioctl(*slave, I_PUSH, "ptem");	/* pseudo tty emulation module */
+	ioctl(*slave, I_PUSH, "ldterm");	/* line discipline module */
 # endif
-    (void) chown(line, ttyuid, -1);
-    strlcpy(name, line, namesz);
-    return 1;
+	(void) chown(line, ttyuid, -1);
+	strlcpy(name, line, namesz);
+	rval = 1;
+    }
+done:
+    debug_return_bool(rval);
 }
 
 #else /* Old-style BSD ptys */
@@ -152,6 +162,8 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
     char *bank, *cp;
     struct group *gr;
     gid_t ttygid = -1;
+    int rval = 0;
+    debug_decl(get_pty, SUDO_DEBUG_PTY)
 
     if ((gr = getgrnam("tty")) != NULL)
 	ttygid = gr->gr_gid;
@@ -163,7 +175,7 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 	    *master = open(line, O_RDWR|O_NOCTTY, 0);
 	    if (*master == -1) {
 		if (errno == ENOENT)
-		    return 0; /* out of ptys */
+		    goto done; /* out of ptys */
 		continue; /* already in use */
 	    }
 	    line[sizeof("/dev/p") - 2] = 't';
@@ -175,11 +187,13 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t ttyuid)
 	    *slave = open(line, O_RDWR|O_NOCTTY, 0);
 	    if (*slave != -1) {
 		    strlcpy(name, line, namesz);
-		    return 1; /* success */
+		    rval = 1; /* success */
+		    goto done;
 	    }
 	    (void) close(*master);
 	}
     }
-    return 0;
+done:
+    debug_return(rval);
 }
 #endif /* HAVE_OPENPTY */

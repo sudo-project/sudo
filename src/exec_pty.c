@@ -113,12 +113,16 @@ static int safe_close(int fd);
 void
 cleanup(int gotsignal)
 {
+    debug_decl(cleanup, SUDO_DEBUG_EXEC);
+
     if (!tq_empty(&io_plugins))
 	term_restore(io_fds[SFD_USERTTY], 0);
 #ifdef HAVE_SELINUX
     selinux_restore_tty();
 #endif
     utmp_logout(slavename, 0); /* XXX - only if CD_SET_UTMP */
+
+    debug_return;
 }
 
 /*
@@ -129,6 +133,8 @@ cleanup(int gotsignal)
 void
 pty_setup(uid_t uid, const char *tty, const char *utmp_user)
 {
+    debug_decl(pty_setup, SUDO_DEBUG_EXEC);
+
     io_fds[SFD_USERTTY] = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
     if (io_fds[SFD_USERTTY] != -1) {
 	if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
@@ -138,6 +144,8 @@ pty_setup(uid_t uid, const char *tty, const char *utmp_user)
 	if (utmp_user != NULL)
 	    utmp_login(tty, slavename, io_fds[SFD_SLAVE], utmp_user);
     }
+
+    debug_return;
 }
 
 /* Call I/O plugin tty input log method. */
@@ -147,9 +155,9 @@ log_ttyin(const char *buf, unsigned int n)
     struct plugin_container *plugin;
     sigset_t omask;
     int rval = TRUE;
+    debug_decl(log_ttyin, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
-
     tq_foreach_fwd(&io_plugins, plugin) {
 	if (plugin->u.io->log_ttyin) {
 	    if (!plugin->u.io->log_ttyin(buf, n)) {
@@ -158,9 +166,9 @@ log_ttyin(const char *buf, unsigned int n)
 	    }
 	}
     }
-
     sigprocmask(SIG_SETMASK, &omask, NULL);
-    return rval;
+
+    debug_return_int(rval);
 }
 
 /* Call I/O plugin stdin log method. */
@@ -170,9 +178,9 @@ log_stdin(const char *buf, unsigned int n)
     struct plugin_container *plugin;
     sigset_t omask;
     int rval = TRUE;
+    debug_decl(log_stdin, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
-
     tq_foreach_fwd(&io_plugins, plugin) {
 	if (plugin->u.io->log_stdin) {
 	    if (!plugin->u.io->log_stdin(buf, n)) {
@@ -181,9 +189,9 @@ log_stdin(const char *buf, unsigned int n)
 	    }
 	}
     }
-
     sigprocmask(SIG_SETMASK, &omask, NULL);
-    return rval;
+
+    debug_return_int(rval);
 }
 
 /* Call I/O plugin tty output log method. */
@@ -193,9 +201,9 @@ log_ttyout(const char *buf, unsigned int n)
     struct plugin_container *plugin;
     sigset_t omask;
     int rval = TRUE;
+    debug_decl(log_ttyout, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
-
     tq_foreach_fwd(&io_plugins, plugin) {
 	if (plugin->u.io->log_ttyout) {
 	    if (!plugin->u.io->log_ttyout(buf, n)) {
@@ -204,9 +212,9 @@ log_ttyout(const char *buf, unsigned int n)
 	    }
 	}
     }
-
     sigprocmask(SIG_SETMASK, &omask, NULL);
-    return rval;
+
+    debug_return_int(rval);
 }
 
 /* Call I/O plugin stdout log method. */
@@ -216,9 +224,9 @@ log_stdout(const char *buf, unsigned int n)
     struct plugin_container *plugin;
     sigset_t omask;
     int rval = TRUE;
+    debug_decl(log_stdout, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
-
     tq_foreach_fwd(&io_plugins, plugin) {
 	if (plugin->u.io->log_stdout) {
 	    if (!plugin->u.io->log_stdout(buf, n)) {
@@ -227,9 +235,9 @@ log_stdout(const char *buf, unsigned int n)
 	    }
 	}
     }
-
     sigprocmask(SIG_SETMASK, &omask, NULL);
-    return rval;
+
+    debug_return_int(rval);
 }
 
 /* Call I/O plugin stderr log method. */
@@ -239,9 +247,9 @@ log_stderr(const char *buf, unsigned int n)
     struct plugin_container *plugin;
     sigset_t omask;
     int rval = TRUE;
+    debug_decl(log_stderr, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
-
     tq_foreach_fwd(&io_plugins, plugin) {
 	if (plugin->u.io->log_stderr) {
 	    if (!plugin->u.io->log_stderr(buf, n)) {
@@ -250,9 +258,9 @@ log_stderr(const char *buf, unsigned int n)
 	    }
 	}
     }
-
     sigprocmask(SIG_SETMASK, &omask, NULL);
-    return rval;
+
+    debug_return_int(rval);
 }
 
 /*
@@ -263,6 +271,8 @@ log_stderr(const char *buf, unsigned int n)
 static void
 check_foreground(void)
 {
+    debug_decl(check_foreground, SUDO_DEBUG_EXEC);
+
     if (io_fds[SFD_USERTTY] != -1) {
 	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
 	if (foreground && !tty_initialized) {
@@ -272,6 +282,8 @@ check_foreground(void)
 	    }
 	}
     }
+
+    debug_return;
 }
 
 /*
@@ -284,6 +296,7 @@ suspend_parent(int signo)
 {
     sigaction_t sa, osa;
     int n, oldmode = ttymode, rval = 0;
+    debug_decl(suspend_parent, SUDO_DEBUG_EXEC);
 
     switch (signo) {
     case SIGTTOU:
@@ -321,7 +334,7 @@ suspend_parent(int signo)
 	/* Suspend self and continue child when we resume. */
 	sa.sa_handler = SIG_DFL;
 	sigaction(signo, &sa, &osa);
-	sudo_debug(8, "kill parent %d", signo);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "kill parent %d", signo);
 	if (killpg(ppgrp, signo) != 0)
 	    warning("killpg(%d, %d)", (int)ppgrp, signo);
 
@@ -332,7 +345,7 @@ suspend_parent(int signo)
 	 * Only modify term if we are foreground process and either
 	 * the old tty mode was not cooked or child got SIGTT{IN,OU}
 	 */
-	sudo_debug(8, "parent is in %s, ttymode %d -> %d",
+	sudo_debug_printf(SUDO_DEBUG_INFO, "parent is in %s, ttymode %d -> %d",
 	    foreground ? "foreground" : "background", oldmode, ttymode);
 
 	if (ttymode != TERM_COOKED) {
@@ -352,7 +365,7 @@ suspend_parent(int signo)
 	break;
     }
 
-    return rval;
+    debug_return_int(rval);
 }
 
 /*
@@ -361,20 +374,30 @@ suspend_parent(int signo)
 void
 terminate_child(pid_t pid, int use_pgrp)
 {
+    debug_decl(terminate_child, SUDO_DEBUG_EXEC);
+
     /*
      * Note that SIGCHLD will interrupt the sleep()
      */
     if (use_pgrp) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "killpg %d SIGHUP", pid);
 	killpg(pid, SIGHUP);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "killpg %d SIGTERM", pid);
 	killpg(pid, SIGTERM);
 	sleep(2);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "killpg %d SIGKILL", pid);
 	killpg(pid, SIGKILL);
     } else {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "kill %d SIGHUP", pid);
 	kill(pid, SIGHUP);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "kill %d SIGTERM", pid);
 	kill(pid, SIGTERM);
 	sleep(2);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "kill %d SIGKILL", pid);
 	kill(pid, SIGKILL);
     }
+
+    debug_return;
 }
 
 static struct io_buffer *
@@ -382,6 +405,7 @@ io_buf_new(int rfd, int wfd, int (*action)(const char *, unsigned int),
     struct io_buffer *head)
 {
     struct io_buffer *iob;
+    debug_decl(io_buf_new, SUDO_DEBUG_EXEC);
 
     iob = emalloc(sizeof(*iob));
     zero_bytes(iob, sizeof(*iob));
@@ -389,7 +413,8 @@ io_buf_new(int rfd, int wfd, int (*action)(const char *, unsigned int),
     iob->wfd = wfd;
     iob->action = action;
     iob->next = head;
-    return iob;
+
+    debug_return_ptr(iob);
 }
 
 /*
@@ -401,6 +426,7 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 {
     struct io_buffer *iob;
     int n, errors = 0;
+    debug_decl(perform_io, SUDO_DEBUG_EXEC);
 
     for (iob = iobufs; iob; iob = iob->next) {
 	if (iob->rfd != -1 && FD_ISSET(iob->rfd, fdsr)) {
@@ -413,6 +439,9 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 		    if (errno == EAGAIN)
 			break;
 		    if (errno != ENXIO && errno != EBADF) {
+			sudo_debug_printf(SUDO_DEBUG_SYSERR,
+			    "error reading fd %d: %s", iob->rfd,
+			    strerror(errno));
 			errors++;
 			break;
 		    }
@@ -445,8 +474,11 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 		    iob->wfd = -1;
 		    continue;
 		}
-		if (errno != EAGAIN)
+		if (errno != EAGAIN) {
 		    errors++;
+		    sudo_debug_printf(SUDO_DEBUG_SYSERR,
+			"error writing fd %d: %s", iob->wfd, strerror(errno));
+		}
 	    } else {
 		iob->off += n;
 	    }
@@ -456,7 +488,7 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 	cstat->type = CMD_ERRNO;
 	cstat->val = errno;
     }
-    return errors;
+    debug_return_int(errors);
 }
 
 /*
@@ -471,6 +503,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
     struct io_buffer *iob;
     int io_pipe[3][2], n;
     sigaction_t sa;
+    debug_decl(fork_pty, SUDO_DEBUG_EXEC);
         
     ppgrp = getpgrp(); /* parent's pgrp, so child can signal us */
      
@@ -618,13 +651,14 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
 	    (void) fcntl(iob->wfd, F_SETFL, n | O_NONBLOCK);
     }
 
-    return child;
+    debug_return_int(child);
 }
 
 void
 pty_close(struct command_status *cstat)
 {
     int n;
+    debug_decl(pty_close, SUDO_DEBUG_EXEC);
 
     /* Flush any remaining output (the plugin already got it) */
     if (io_fds[SFD_USERTTY] != -1) {
@@ -660,6 +694,7 @@ pty_close(struct command_status *cstat)
 	}
     }
     utmp_logout(slavename, cstat->type == CMD_WSTATUS ? cstat->val : 0); /* XXX - only if CD_SET_UTMP */
+    debug_return;
 }
 
 /*
@@ -670,6 +705,7 @@ void
 fd_set_iobs(fd_set *fdsr, fd_set *fdsw)
 {
     struct io_buffer *iob;
+    debug_decl(fd_set_iobs, SUDO_DEBUG_EXEC);
 
     for (iob = iobufs; iob; iob = iob->next) {
 	if (iob->rfd == -1 && iob->wfd == -1)
@@ -694,15 +730,17 @@ fd_set_iobs(fd_set *fdsr, fd_set *fdsw)
 		FD_SET(iob->wfd, fdsw);
 	}
     }
+    debug_return;
 }
 
 static void
 deliver_signal(pid_t pid, int signo)
 {
     int status;
+    debug_decl(deliver_signal, SUDO_DEBUG_EXEC);
 
     /* Handle signal from parent. */
-    sudo_debug(8, "signal %d from parent", signo);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "received signal %d from parent", signo);
     switch (signo) {
     case SIGALRM:
 	terminate_child(pid, TRUE);
@@ -729,6 +767,7 @@ deliver_signal(pid_t pid, int signo)
 	killpg(pid, signo);
 	break;
     }
+    debug_return;
 }
 
 /*
@@ -739,20 +778,22 @@ static int
 send_status(int fd, struct command_status *cstat)
 {
     int n = -1;
+    debug_decl(send_status, SUDO_DEBUG_EXEC);
 
     if (cstat->type != CMD_INVALID) {
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "sending status message to parent: [%d, %d]",
+	    cstat->type, cstat->val);
 	do {
 	    n = send(fd, cstat, sizeof(*cstat), 0);
 	} while (n == -1 && errno == EINTR);
 	if (n != sizeof(*cstat)) {
-	    sudo_debug(8, "unable to send status to parent: %s",
-		strerror(errno));
-	} else {
-	    sudo_debug(8, "sent status to parent");
+	    sudo_debug_printf(SUDO_DEBUG_SYSERR,
+		"unable to send status to parent: %s", strerror(errno));
 	}
 	cstat->type = CMD_INVALID; /* prevent re-sending */
     }
-    return n;
+    debug_return_int(n);
 }
 
 /*
@@ -766,6 +807,7 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 {
     int status, alive = TRUE;
     pid_t pid;
+    debug_decl(handle_sigchld, SUDO_DEBUG_EXEC);
 
     /* read child status */
     do {
@@ -776,22 +818,25 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 	    cstat->type = CMD_WSTATUS;
 	    cstat->val = status;
 	    if (WIFSTOPPED(status)) {
-		sudo_debug(8, "command stopped, signal %d", WSTOPSIG(status));
+		sudo_debug_printf(SUDO_DEBUG_INFO, "command stopped, signal %d",
+		    WSTOPSIG(status));
 		do {
 		    child_pgrp = tcgetpgrp(io_fds[SFD_SLAVE]);
 		} while (child_pgrp == -1 && errno == EINTR);
 		if (send_status(backchannel, cstat) == -1)
 		    return alive; /* XXX */
 	    } else if (WIFSIGNALED(status)) {
-		sudo_debug(8, "command killed, signal %d", WTERMSIG(status));
+		sudo_debug_printf(SUDO_DEBUG_INFO, "command killed, signal %d",
+		    WTERMSIG(status));
 	    } else {
-		sudo_debug(8, "command exited: %d", WEXITSTATUS(status));
+		sudo_debug_printf(SUDO_DEBUG_INFO, "command exited: %d",
+		    WEXITSTATUS(status));
 	    }
 	}
 	if (!WIFSTOPPED(status))
 	    alive = FALSE;
     }
-    return alive;
+    debug_return_int(alive);
 }
 
 /*
@@ -811,6 +856,7 @@ exec_monitor(struct command_details *details, int backchannel)
     int errpipe[2], maxfd, n, status;
     int alive = TRUE;
     unsigned char signo;
+    debug_decl(exec_monitor, SUDO_DEBUG_EXEC);
 
     /* Close unused fds. */
     if (io_fds[SFD_MASTER] != -1)
@@ -1004,10 +1050,11 @@ done:
 	/* Send parent status. */
 	send_status(backchannel, &cstat);
     }
+    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);
     _exit(1);
 
 bad:
-    return errno;
+    debug_return_int(errno);
 }
 
 /*
@@ -1021,6 +1068,7 @@ flush_output(void)
     struct timeval tv;
     fd_set *fdsr, *fdsw;
     int nready, nwriters, maxfd = -1;
+    debug_decl(flush_output, SUDO_DEBUG_EXEC);
 
     /* Determine maxfd */
     for (iob = iobufs; iob; iob = iob->next) {
@@ -1030,7 +1078,7 @@ flush_output(void)
 	    maxfd = iob->wfd;
     }
     if (maxfd == -1)
-	return;
+	debug_return;
 
     fdsr = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
     fdsw = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
@@ -1081,6 +1129,7 @@ flush_output(void)
     }
     efree(fdsr);
     efree(fdsw);
+    debug_return;
 }
 
 /*
@@ -1091,6 +1140,7 @@ static void
 exec_pty(struct command_details *details)
 {
     pid_t self = getpid();
+    debug_decl(exec_pty, SUDO_DEBUG_EXEC);
 
     /* Set child process group here too to avoid a race. */
     setpgid(0, self);
@@ -1117,6 +1167,9 @@ exec_pty(struct command_details *details)
     if (io_fds[SFD_STDERR] != io_fds[SFD_SLAVE])
 	close(io_fds[SFD_STDERR]);
 
+    sudo_debug_execve(SUDO_DEBUG_INFO, details->command,
+	details->argv, details->envp);
+
     if (details->closefrom >= 0)
 	closefrom(details->closefrom);
 #ifdef HAVE_SELINUX
@@ -1125,6 +1178,7 @@ exec_pty(struct command_details *details)
     else
 #endif
 	my_execve(details->command, details->argv, details->envp);
+    debug_return;
 }
 
 /*
@@ -1136,12 +1190,15 @@ sync_ttysize(int src, int dst)
 #ifdef TIOCGWINSZ
     struct winsize wsize;
     pid_t pgrp;
+    debug_decl(exec_pty, SUDO_DEBUG_EXEC);
 
     if (ioctl(src, TIOCGWINSZ, &wsize) == 0) {
 	    ioctl(dst, TIOCSWINSZ, &wsize);
 	    if ((pgrp = tcgetpgrp(dst)) != -1)
 		killpg(pgrp, SIGWINCH);
     }
+
+    debug_return;
 #endif
 }
 
@@ -1164,10 +1221,12 @@ sigwinch(int s)
 static int
 safe_close(int fd)
 {
+    debug_decl(safe_close, SUDO_DEBUG_EXEC);
+
     /* Avoid closing /dev/tty or std{in,out,err}. */
     if (fd < 3 || fd == io_fds[SFD_USERTTY]) {
 	errno = EINVAL;
 	return -1;
     }
-    return close(fd);
+    debug_return_int(fd);
 }

@@ -146,6 +146,7 @@ make_pwitem(const struct passwd *pw, const char *name)
     size_t nsize, psize, csize, gsize, dsize, ssize, total;
     struct cache_item *item;
     struct passwd *newpw;
+    debug_decl(make_pwitem, SUDO_DEBUG_NSS)
 
     /* If shell field is empty, expand to _PATH_BSHELL. */
     pw_shell = (pw->pw_shell == NULL || pw->pw_shell[0] == '\0')
@@ -200,28 +201,35 @@ make_pwitem(const struct passwd *pw, const char *name)
     item->d.pw = newpw;
     item->refcnt = 1;
 
-    return item;
+    debug_return_ptr(item);
 }
 
 void
 pw_addref(struct passwd *pw)
 {
+    debug_decl(pw_addref, SUDO_DEBUG_NSS)
     ptr_to_item(pw)->refcnt++;
+    debug_return;
 }
 
 static void
 pw_delref_item(void *v)
 {
     struct cache_item *item = v;
+    debug_decl(pw_delref_item, SUDO_DEBUG_NSS)
 
     if (--item->refcnt == 0)
 	efree(item);
+
+    debug_return;
 }
 
 void
 pw_delref(struct passwd *pw)
 {
+    debug_decl(pw_delref, SUDO_DEBUG_NSS)
     pw_delref_item(ptr_to_item(pw));
+    debug_return;
 }
 
 /*
@@ -233,6 +241,7 @@ sudo_getpwuid(uid_t uid)
 {
     struct cache_item key, *item;
     struct rbnode *node;
+    debug_decl(sudo_getpwuid, SUDO_DEBUG_NSS)
 
     key.k.uid = uid;
     if ((node = rbfind(pwcache_byuid, &key)) != NULL) {
@@ -264,7 +273,7 @@ sudo_getpwuid(uid_t uid)
 #endif
 done:
     item->refcnt++;
-    return item->d.pw;
+    debug_return_ptr(item->d.pw);
 }
 
 /*
@@ -277,6 +286,7 @@ sudo_getpwnam(const char *name)
     struct cache_item key, *item;
     struct rbnode *node;
     size_t len;
+    debug_decl(sudo_getpwnam, SUDO_DEBUG_NSS)
 
     key.k.name = (char *) name;
     if ((node = rbfind(pwcache_byname, &key)) != NULL) {
@@ -308,7 +318,7 @@ sudo_getpwnam(const char *name)
 #endif
 done:
     item->refcnt++;
-    return item->d.pw;
+    debug_return_ptr(item->d.pw);
 }
 
 /*
@@ -322,6 +332,7 @@ sudo_fakepwnamid(const char *user, uid_t uid, gid_t gid)
     struct rbnode *node;
     size_t len, namelen;
     int i;
+    debug_decl(sudo_fakepwnam, SUDO_DEBUG_NSS)
 
     namelen = strlen(user);
     len = sizeof(*item) + sizeof(*pw) + namelen + 1 /* pw_name */ +
@@ -364,7 +375,7 @@ sudo_fakepwnamid(const char *user, uid_t uid, gid_t gid)
 	}
     }
     item->refcnt++;
-    return pw;
+    debug_return_ptr(pw);
 }
 
 /*
@@ -382,16 +393,22 @@ sudo_fakepwnam(const char *user, gid_t gid)
 void
 sudo_setpwent(void)
 {
+    debug_decl(sudo_setpwent, SUDO_DEBUG_NSS)
+
     setpwent();
     if (pwcache_byuid == NULL)
 	pwcache_byuid = rbcreate(cmp_pwuid);
     if (pwcache_byname == NULL)
 	pwcache_byname = rbcreate(cmp_pwnam);
+
+    debug_return;
 }
 
 void
 sudo_freepwcache(void)
 {
+    debug_decl(sudo_freepwcache, SUDO_DEBUG_NSS)
+
     if (pwcache_byuid != NULL) {
 	rbdestroy(pwcache_byuid, pw_delref_item);
 	pwcache_byuid = NULL;
@@ -400,13 +417,19 @@ sudo_freepwcache(void)
 	rbdestroy(pwcache_byname, pw_delref_item);
 	pwcache_byname = NULL;
     }
+
+    debug_return;
 }
 
 void
 sudo_endpwent(void)
 {
+    debug_decl(sudo_endpwent, SUDO_DEBUG_NSS)
+
     endpwent();
     sudo_freepwcache();
+
+    debug_return;
 }
 
 /*
@@ -432,6 +455,7 @@ make_gritem(const struct group *gr, const char *name)
     size_t nsize, psize, nmem, total, len;
     struct cache_item *item;
     struct group *newgr;
+    debug_decl(make_gritem, SUDO_DEBUG_NSS)
 
     /* Allocate in one big chunk for easy freeing. */
     nsize = psize = nmem = 0;
@@ -482,7 +506,7 @@ make_gritem(const struct group *gr, const char *name)
     item->d.gr = newgr;
     item->refcnt = 1;
 
-    return item;
+    debug_return_ptr(item);
 }
 
 #ifdef HAVE_UTMPX_H
@@ -507,6 +531,7 @@ make_grlist_item(const char *user, GETGROUPS_T *gids, int ngids)
     struct cache_item *item;
     struct group_list *grlist;
     struct group *grp;
+    debug_decl(make_grlist_item, SUDO_DEBUG_NSS)
 
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb((char *) user);
@@ -575,28 +600,35 @@ again:
     aix_restoreauthdb();
 #endif
 
-    return item;
+    debug_return_ptr(item);
 }
 
 void
 gr_addref(struct group *gr)
 {
+    debug_decl(gr_addref, SUDO_DEBUG_NSS)
     ptr_to_item(gr)->refcnt++;
+    debug_return;
 }
 
 static void
 gr_delref_item(void *v)
 {
     struct cache_item *item = v;
+    debug_decl(gr_delref_item, SUDO_DEBUG_NSS)
 
     if (--item->refcnt == 0)
 	efree(item);
+
+    debug_return;
 }
 
 void
 gr_delref(struct group *gr)
 {
+    debug_decl(gr_delref, SUDO_DEBUG_NSS)
     gr_delref_item(ptr_to_item(gr));
+    debug_return;
 }
 
 /*
@@ -607,6 +639,7 @@ sudo_getgrgid(gid_t gid)
 {
     struct cache_item key, *item;
     struct rbnode *node;
+    debug_decl(sudo_getgrgid, SUDO_DEBUG_NSS)
 
     key.k.gid = gid;
     if ((node = rbfind(grcache_bygid, &key)) != NULL) {
@@ -632,7 +665,7 @@ sudo_getgrgid(gid_t gid)
     }
 done:
     item->refcnt++;
-    return item->d.gr;
+    debug_return_ptr(item->d.gr);
 }
 
 /*
@@ -644,6 +677,7 @@ sudo_getgrnam(const char *name)
     struct cache_item key, *item;
     struct rbnode *node;
     size_t len;
+    debug_decl(sudo_getgrnam, SUDO_DEBUG_NSS)
 
     key.k.name = (char *) name;
     if ((node = rbfind(grcache_byname, &key)) != NULL) {
@@ -669,7 +703,7 @@ sudo_getgrnam(const char *name)
     }
 done:
     item->refcnt++;
-    return item->d.gr;
+    debug_return_ptr(item->d.gr);
 }
 
 /*
@@ -683,6 +717,7 @@ sudo_fakegrnam(const char *group)
     struct rbnode *node;
     size_t len, namelen;
     int i;
+    debug_decl(sudo_fakegrnam, SUDO_DEBUG_NSS)
 
     namelen = strlen(group);
     len = sizeof(*item) + sizeof(*gr) + namelen + 1;
@@ -714,33 +749,42 @@ sudo_fakegrnam(const char *group)
 	}
     }
     item->refcnt++;
-    return gr;
+    debug_return_ptr(gr);
 }
 
 void
 grlist_addref(struct group_list *grlist)
 {
+    debug_decl(gr_addref, SUDO_DEBUG_NSS)
     ptr_to_item(grlist)->refcnt++;
+    debug_return;
 }
 
 static void
 grlist_delref_item(void *v)
 {
     struct cache_item *item = v;
+    debug_decl(gr_delref_item, SUDO_DEBUG_NSS)
 
     if (--item->refcnt == 0)
 	efree(item);
+
+    debug_return;
 }
 
 void
 grlist_delref(struct group_list *grlist)
 {
+    debug_decl(gr_delref, SUDO_DEBUG_NSS)
     grlist_delref_item(ptr_to_item(grlist));
+    debug_return;
 }
 
 void
 sudo_setgrent(void)
 {
+    debug_decl(sudo_setgrent, SUDO_DEBUG_NSS)
+
     setgrent();
     if (grcache_bygid == NULL)
 	grcache_bygid = rbcreate(cmp_grgid);
@@ -748,11 +792,15 @@ sudo_setgrent(void)
 	grcache_byname = rbcreate(cmp_grnam);
     if (grlist_cache == NULL)
 	grlist_cache = rbcreate(cmp_grnam);
+
+    debug_return;
 }
 
 void
 sudo_freegrcache(void)
 {
+    debug_decl(sudo_freegrcache, SUDO_DEBUG_NSS)
+
     if (grcache_bygid != NULL) {
 	rbdestroy(grcache_bygid, gr_delref_item);
 	grcache_bygid = NULL;
@@ -765,13 +813,19 @@ sudo_freegrcache(void)
 	rbdestroy(grlist_cache, grlist_delref_item);
 	grlist_cache = NULL;
     }
+
+    debug_return;
 }
 
 void
 sudo_endgrent(void)
 {
+    debug_decl(sudo_endgrent, SUDO_DEBUG_NSS)
+
     endgrent();
     sudo_freegrcache();
+
+    debug_return;
 }
 
 struct group_list *
@@ -782,6 +836,7 @@ get_group_list(struct passwd *pw)
     size_t len;
     GETGROUPS_T *gids;
     int ngids;
+    debug_decl(get_group_list, SUDO_DEBUG_NSS)
 
     key.k.name = pw->pw_name;
     if ((node = rbfind(grlist_cache, &key)) != NULL) {
@@ -802,7 +857,7 @@ get_group_list(struct passwd *pw)
 	gids = emalloc2(ngids, sizeof(GETGROUPS_T));
 	if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1) {
 	    efree(gids);
-	    return NULL;
+	    debug_return_ptr(NULL);
 	}
     }
     if (ngids > 0) {
@@ -826,7 +881,7 @@ get_group_list(struct passwd *pw)
     }
 done:
     item->refcnt++;
-    return item->d.grlist;
+    debug_return_ptr(item->d.grlist);
 }
 
 void
@@ -834,6 +889,7 @@ set_group_list(const char *user, GETGROUPS_T *gids, int ngids)
 {
     struct cache_item key, *item;
     struct rbnode *node;
+    debug_decl(set_group_list, SUDO_DEBUG_NSS)
 
     /*
      * Cache group db entry if it doesn't already exist
@@ -846,6 +902,7 @@ set_group_list(const char *user, GETGROUPS_T *gids, int ngids)
 	    errorx(1, "unable to cache group list for %s, already exists",
 		user);
     }
+    debug_return;
 }
 
 int
@@ -854,6 +911,7 @@ user_in_group(struct passwd *pw, const char *group)
     struct group_list *grlist;
     struct group *grp = NULL;
     int i, matched = FALSE;
+    debug_decl(user_in_group, SUDO_DEBUG_NSS)
 
     if ((grlist = get_group_list(pw)) != NULL) {
 	/*
@@ -896,5 +954,5 @@ done:
 	    gr_delref(grp);
 	grlist_delref(grlist);
     }
-    return matched;
+    debug_return_bool(matched);
 }

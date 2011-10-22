@@ -73,6 +73,7 @@ group_plugin_load(char *plugin_info)
     char *args, path[PATH_MAX];
     char **argv = NULL;
     int len, rc = -1;
+    debug_decl(group_plugin_load, SUDO_DEBUG_UTIL)
 
     /*
      * Fill in .so path and split out args (if any).
@@ -162,12 +163,14 @@ done:
 	}
     }
 
-    return rc;
+    debug_return_bool(rc);
 }
 
 void
 group_plugin_unload(void)
 {
+    debug_decl(group_plugin_unload, SUDO_DEBUG_UTIL)
+
     if (group_plugin != NULL) {
 	(group_plugin->cleanup)();
 	group_plugin = NULL;
@@ -176,15 +179,18 @@ group_plugin_unload(void)
 	dlclose(group_handle);
 	group_handle = NULL;
     }
+    debug_return;
 }
 
 int
 group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd)
 {
+    debug_decl(group_plugin_query, SUDO_DEBUG_UTIL)
+
     if (group_plugin == NULL)
-	return FALSE;
-    return (group_plugin->query)(user, group, pwd);
+	debug_return_bool(FALSE);
+    debug_return_bool((group_plugin->query)(user, group, pwd));
 }
 
 #else /* !HAVE_DLOPEN && !HAVE_SHL_LOAD */
@@ -202,20 +208,23 @@ struct passwd;
 int
 group_plugin_load(char *plugin_info)
 {
-    return FALSE;
+    debug_decl(group_plugin_load, SUDO_DEBUG_UTIL)
+    debug_return_bool(FALSE);
 }
 
 void
 group_plugin_unload(void)
 {
-    return;
+    debug_decl(group_plugin_unload, SUDO_DEBUG_UTIL)
+    debug_return_bool;
 }
 
 int
 group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd)
 {
-    return FALSE;
+    debug_decl(group_plugin_query, SUDO_DEBUG_UTIL)
+    debug_return_bool(FALSE);
 }
 
 #endif /* HAVE_DLOPEN || HAVE_SHL_LOAD */

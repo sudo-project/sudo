@@ -34,6 +34,7 @@
 #include "logging.h"
 #include "sudo_nss.h"
 #include "sudo_plugin.h"
+#include "sudo_debug.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudoers"
 #include "gettext.h"

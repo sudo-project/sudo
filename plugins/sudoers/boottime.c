@@ -53,6 +53,7 @@
 #endif /* !__linux__ */
 
 #include "missing.h"
+#include "sudo_debug.h"
 
 /*
  * Fill in a struct timeval with the time the system booted.
@@ -67,6 +68,7 @@ get_boottime(struct timeval *tv)
     size_t linesize = 0;
     ssize_t len;
     FILE * fp;
+    debug_decl(get_boottime, SUDO_DEBUG_UTIL)
 
     /* read btime from /proc/stat */
     fp = fopen("/proc/stat", "r");
@@ -75,14 +77,14 @@ get_boottime(struct timeval *tv)
 	    if (strncmp(line, "btime ", 6) == 0) {
 		tv->tv_sec = atoi(line + 6);
 		tv->tv_usec = 0;
-		return 1;
+		debug_return_bool(1);
 	    }
 	}
 	fclose(fp);
 	free(line);
     }
 
-    return 0;
+    debug_return_bool(0);
 }
 
 #elif defined(HAVE_SYSCTL) && defined(KERN_BOOTTIME)
@@ -92,14 +94,15 @@ get_boottime(struct timeval *tv)
 {
     size_t size;
     int mib[2];
+    debug_decl(get_boottime, SUDO_DEBUG_UTIL)
 
     mib[0] = CTL_KERN;
     mib[1] = KERN_BOOTTIME;
     size = sizeof(*tv);
     if (sysctl(mib, 2, tv, &size, NULL, 0) != -1)
-	return 1;
+	debug_return_bool(1);
 
-    return 0;
+    debug_return_bool(0);
 }
 
 #elif defined(HAVE_GETUTXID)
@@ -108,6 +111,7 @@ int
 get_boottime(struct timeval *tv)
 {
     struct utmpx *ut, key;
+    debug_decl(get_boottime, SUDO_DEBUG_UTIL)
 
     memset(&key, 0, sizeof(key));
     key.ut_type = BOOT_TIME;
@@ -117,7 +121,7 @@ get_boottime(struct timeval *tv)
 	tv->tv_usec = ut->ut_tv.tv_usec;
     }
     endutxent();
-    return ut != NULL;
+    debug_return_bool(ut != NULL);
 }
 
 #elif defined(HAVE_GETUTID)
@@ -126,6 +130,7 @@ int
 get_boottime(struct timeval *tv)
 {
     struct utmp *ut, key;
+    debug_decl(get_boottime, SUDO_DEBUG_UTIL)
 
     memset(&key, 0, sizeof(key));
     key.ut_type = BOOT_TIME;
@@ -135,7 +140,7 @@ get_boottime(struct timeval *tv)
 	tv->tv_usec = 0;
     }
     endutent();
-    return ut != NULL;
+    debug_return_bool(ut != NULL);
 }
 
 #else
@@ -143,6 +148,7 @@ get_boottime(struct timeval *tv)
 int
 get_boottime(struct timeval *tv)
 {
-    return 0;
+    debug_decl(get_boottime, SUDO_DEBUG_UTIL)
+    debug_return_bool(0);
 }
 #endif

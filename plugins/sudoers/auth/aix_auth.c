@@ -56,6 +56,7 @@ aixauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
     char *pass, *message = NULL;
     int result = 1, reenter = 0;
     int rval = AUTH_SUCCESS;
+    debug_decl(aixauth_verify, SUDO_DEBUG_AUTH)
 
     do {
 	pass = auth_getpass(prompt, def_passwd_timeout * 60,
@@ -84,14 +85,16 @@ aixauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	rval = pass ? AUTH_FAILURE : AUTH_INTR;
     }
     efree(message);
-    return rval;
+    debug_return_int(rval);
 }
 
 int
 aixauth_cleanup(struct passwd *pw, sudo_auth *auth)
 {
+    debug_decl(aixauth_cleanup, SUDO_DEBUG_AUTH)
+
     /* Unset AUTHSTATE as it may not be correct for the runas user. */
     unsetenv("AUTHSTATE");
 
-    return AUTH_SUCCESS;
+    debug_return_int(AUTH_SUCCESS);
 }

@@ -57,12 +57,13 @@ int
 bsdauth_init(struct passwd *pw, sudo_auth *auth)
 {
     static auth_session_t *as;
-    extern login_cap_t *lc;			/* from sudo.c */
+    extern login_cap_t *lc;			/* from sudoers.c */
+    debug_decl(bsdauth_init, SUDO_DEBUG_AUTH)
 
     if ((as = auth_open()) == NULL) {
 	log_error(USE_ERRNO|NO_EXIT|NO_MAIL,
 	    _("unable to begin bsd authentication"));
-	return AUTH_FATAL;
+	debug_return_int(AUTH_FATAL);
     }
 
     /* XXX - maybe sanity check the auth style earlier? */
@@ -70,7 +71,7 @@ bsdauth_init(struct passwd *pw, sudo_auth *auth)
     if (login_style == NULL) {
 	log_error(NO_EXIT|NO_MAIL, _("invalid authentication type"));
 	auth_close(as);
-	return AUTH_FATAL;
+	debug_return_int(AUTH_FATAL);
     }
 
      if (auth_setitem(as, AUTHV_STYLE, login_style) < 0 ||
@@ -78,11 +79,11 @@ bsdauth_init(struct passwd *pw, sudo_auth *auth)
 	auth_setitem(as, AUTHV_CLASS, login_class) < 0) {
 	log_error(NO_EXIT|NO_MAIL, _("unable to setup authentication"));
 	auth_close(as);
-	return AUTH_FATAL;
+	debug_return_int(AUTH_FATAL);
     }
 
     auth->data = (void *) as;
-    return AUTH_SUCCESS;
+    debug_return_int(AUTH_SUCCESS);
 }
 
 int
@@ -94,6 +95,7 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
     int authok = 0;
     sigaction_t sa, osa;
     auth_session_t *as = (auth_session_t *) auth->data;
+    debug_decl(bsdauth_verify, SUDO_DEBUG_AUTH)
 
     /* save old signal handler */
     sigemptyset(&sa.sa_mask);
@@ -140,22 +142,23 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
     (void) sigaction(SIGCHLD, &osa, NULL);
 
     if (authok)
-	return AUTH_SUCCESS;
+	debug_return_int(AUTH_SUCCESS);
 
     if (!pass)
-	return AUTH_INTR;
+	debug_return_int(AUTH_INTR);
 
     if ((s = auth_getvalue(as, "errormsg")) != NULL)
 	log_error(NO_EXIT|NO_MAIL, "%s", s);
-    return AUTH_FAILURE;
+    debug_return_int(AUTH_FAILURE);
 }
 
 int
 bsdauth_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     auth_session_t *as = (auth_session_t *) auth->data;
+    debug_decl(bsdauth_cleanup, SUDO_DEBUG_AUTH)
 
     auth_close(as);
 
-    return AUTH_SUCCESS;
+    debug_return_int(AUTH_SUCCESS);
 }

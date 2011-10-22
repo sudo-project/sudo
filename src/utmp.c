@@ -94,6 +94,7 @@ utmp_setid(sudo_utmp_t *old, sudo_utmp_t *new)
 {
     const char *line = new->ut_line;
     size_t idlen;
+    debug_decl(utmp_setid, SUDO_DEBUG_UTMP)
 
     /* Skip over "tty" in the id if old entry did too. */
     if (old != NULL) {
@@ -111,6 +112,8 @@ utmp_setid(sudo_utmp_t *old, sudo_utmp_t *new)
 	idlen = sizeof(new->ut_id);
     }
     strncpy(new->ut_id, line, idlen);
+
+    debug_return;
 }
 #endif /* HAVE_GETUTXID || HAVE_GETUTID */
 
@@ -121,6 +124,7 @@ static void
 utmp_settime(sudo_utmp_t *ut)
 {
     struct timeval tv;
+    debug_decl(utmp_settime, SUDO_DEBUG_UTMP)
 
     gettimeofday(&tv, NULL);
 
@@ -130,6 +134,8 @@ utmp_settime(sudo_utmp_t *ut)
 #else
     ut->ut_time = tv.tv_sec;
 #endif
+
+    debug_return;
 }
 
 /*
@@ -139,6 +145,8 @@ static void
 utmp_fill(const char *line, const char *user, sudo_utmp_t *ut_old,
     sudo_utmp_t *ut_new)
 {
+    debug_decl(utmp_file, SUDO_DEBUG_UTMP)
+
     if (ut_old == NULL) {
 	memset(ut_new, 0, sizeof(*ut_new));
 	if (user == NULL) {
@@ -161,6 +169,7 @@ utmp_fill(const char *line, const char *user, sudo_utmp_t *ut_old,
 #if defined(HAVE_STRUCT_UTMPX_UT_TYPE) || defined(HAVE_STRUCT_UTMP_UT_TYPE)
     ut_new->ut_type = USER_PROCESS;
 #endif
+    debug_return;
 }
 
 /*
@@ -178,6 +187,7 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd,
 {
     sudo_utmp_t utbuf, *ut_old = NULL;
     int rval = FALSE;
+    debug_decl(utmp_login, SUDO_DEBUG_UTMP)
 
     /* Strip off /dev/ prefix from line as needed. */
     if (strncmp(to_line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
@@ -197,7 +207,7 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd,
 	rval = TRUE;
     endutxent();
 
-    return rval;
+    debug_return_int(rval);
 }
 
 int
@@ -205,6 +215,7 @@ utmp_logout(const char *line, int status)
 {
     int rval = FALSE;
     sudo_utmp_t *ut, utbuf;
+    debug_decl(utmp_logout, SUDO_DEBUG_UTMP)
 
     /* Strip off /dev/ prefix from line as needed. */
     if (strncmp(line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
@@ -225,7 +236,7 @@ utmp_logout(const char *line, int status)
 	if (pututxline(ut) != NULL)
 	    rval = TRUE;
     }
-    return rval;
+    debug_return_int(rval);
 }
 
 #else /* !HAVE_GETUTXID && !HAVE_GETUTID */
@@ -241,6 +252,7 @@ utmp_slot(const char *line, int ttyfd)
 {
     int slot = 1;
     struct ttyent *tty;
+    debug_decl(utmp_slot, SUDO_DEBUG_UTMP)
 
     setttyent();
     while ((tty = getttyent()) != NULL) {
@@ -249,13 +261,14 @@ utmp_slot(const char *line, int ttyfd)
 	slot++;
     }
     endttyent();
-    return tty ? slot : 0;
+    debug_return_int(tty ? slot : 0);
 }
 # else
 static int
 utmp_slot(const char *line, int ttyfd)
 {
     int sfd, slot;
+    debug_decl(utmp_slot, SUDO_DEBUG_UTMP)
 
     /*
      * Temporarily point stdin to the tty since ttyslot()
@@ -270,7 +283,7 @@ utmp_slot(const char *line, int ttyfd)
 	error(1, _("unable to restore stdin"));
     close(sfd);
 
-    return slot;
+    debug_return_int(slot);
 }
 # endif /* HAVE_GETTTYENT */
 
@@ -281,6 +294,7 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd,
     sudo_utmp_t utbuf, *ut_old = NULL;
     int slot, rval = FALSE;
     FILE *fp;
+    debug_decl(utmp_login, SUDO_DEBUG_UTMP)
 
     /* Strip off /dev/ prefix from line as needed. */
     if (strncmp(to_line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
@@ -319,7 +333,7 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd,
     fclose(fp);
 
 done:
-    return rval;
+    debug_return_int(rval);
 }
 
 int
@@ -328,9 +342,10 @@ utmp_logout(const char *line, int status)
     sudo_utmp_t utbuf;
     int rval = FALSE;
     FILE *fp;
+    debug_decl(utmp_logout, SUDO_DEBUG_UTMP)
 
     if ((fp = fopen(_PATH_UTMP, "r+")) == NULL)
-	return rval;
+	debug_return_int(rval);
 
     /* Strip off /dev/ prefix from line as needed. */
     if (strncmp(line, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
@@ -353,6 +368,6 @@ utmp_logout(const char *line, int status)
     }
     fclose(fp);
 
-    return rval;
+    debug_return_int(rval);
 }
 #endif /* HAVE_GETUTXID || HAVE_GETUTID */

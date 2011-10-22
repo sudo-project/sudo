@@ -81,7 +81,7 @@ list2tq(void *vh, void *vl)
     if (l != NULL) {
 #ifdef DEBUG
 	if (l->prev == NULL) {
-	    warningx("list2tq called with non-semicircular list");
+	    warningx2("list2tq called with non-semicircular list");
 	    abort();
 	}
 #endif

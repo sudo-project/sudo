@@ -104,6 +104,7 @@ check_user(int validated, int mode)
     char *prompt;
     struct stat sb;
     int status, rval = TRUE;
+    debug_decl(check_user, SUDO_DEBUG_AUTH)
 
     /* Stash the tty's ctime for tty ticket comparison. */
     if (def_tty_tickets && user_ttypath && stat(user_ttypath, &sb) == 0) {
@@ -171,7 +172,7 @@ done:
     sudo_auth_cleanup(auth_pw);
     pw_delref(auth_pw);
 
-    return rval;
+    debug_return_int(rval);
 }
 
 #define DEFAULT_LECTURE "\n" \
@@ -192,10 +193,11 @@ lecture(int status)
     ssize_t nread;
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
+    debug_decl(lecture, SUDO_DEBUG_AUTH)
 
     if (def_lecture == never ||
 	(def_lecture == once && status != TS_MISSING && status != TS_ERROR))
-	return;
+	debug_return;
 
     memset(&msg, 0, sizeof(msg));
     memset(&repl, 0, sizeof(repl));
@@ -213,6 +215,7 @@ lecture(int status)
 	msg.msg = _(DEFAULT_LECTURE);
 	sudo_conv(1, &msg, &repl);
     }
+    debug_return;
 }
 
 /*
@@ -221,9 +224,11 @@ lecture(int status)
 static void
 update_timestamp(char *timestampdir, char *timestampfile)
 {
+    debug_decl(update_timestamp, SUDO_DEBUG_AUTH)
+
     /* If using tty timestamps but we have no tty there is nothing to do. */
     if (def_tty_tickets && !user_ttypath)
-	return;
+	debug_return;
 
     if (timestamp_uid != 0)
 	set_perms(PERM_TIMESTAMP);
@@ -252,6 +257,7 @@ update_timestamp(char *timestampdir, char *timestampfile)
     }
     if (timestamp_uid != 0)
 	restore_perms();
+    debug_return;
 }
 
 /*
@@ -264,6 +270,7 @@ expand_prompt(char *old_prompt, char *user, char *host)
     size_t len, n;
     int subst;
     char *p, *np, *new_prompt, *endp;
+    debug_decl(expand_prompt, SUDO_DEBUG_AUTH)
 
     /* How much space do we need to malloc for the prompt? */
     subst = 0;
@@ -374,7 +381,7 @@ expand_prompt(char *old_prompt, char *user, char *host)
     } else
 	new_prompt = old_prompt;
 
-    return new_prompt;
+    debug_return_str(new_prompt);
 
 oflow:
     /* We pre-allocate enough space, so this should never happen. */
@@ -387,9 +394,12 @@ oflow:
 int
 user_is_exempt(void)
 {
-    if (!def_exempt_group)
-	return FALSE;
-    return user_in_group(sudo_user.pw, def_exempt_group);
+    int rval = FALSE;
+    debug_decl(user_is_exempt, SUDO_DEBUG_AUTH)
+
+    if (def_exempt_group)
+	rval = user_in_group(sudo_user.pw, def_exempt_group);
+    debug_return_bool(rval);
 }
 
 /*
@@ -400,6 +410,7 @@ build_timestamp(char **timestampdir, char **timestampfile)
 {
     char *dirparent;
     int len;
+    debug_decl(build_timestamp, SUDO_DEBUG_AUTH)
 
     dirparent = def_timestampdir;
     len = easprintf(timestampdir, "%s/%s", dirparent, user_name);
@@ -432,10 +443,10 @@ build_timestamp(char **timestampdir, char **timestampfile)
     } else
 	*timestampfile = NULL;
 
-    return len;
+    debug_return_int(len);
 bad:
     log_error(0, _("timestamp path too long: %s"), *timestampfile);
-    return -1;
+    debug_return_int(-1);
 }
 
 /*
@@ -449,6 +460,7 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
     time_t now;
     char *dirparent = def_timestampdir;
     int status = TS_ERROR;		/* assume the worst */
+    debug_decl(timestamp_status, SUDO_DEBUG_AUTH)
 
     if (timestamp_uid != 0)
 	set_perms(PERM_TIMESTAMP);
@@ -633,7 +645,7 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 done:
     if (timestamp_uid != 0)
 	restore_perms();
-    return status;
+    debug_return_int(status);
 }
 
 /*
@@ -645,9 +657,10 @@ remove_timestamp(int remove)
     struct timeval tv;
     char *timestampdir, *timestampfile, *path;
     int status;
+    debug_decl(remove_timestamp, SUDO_DEBUG_AUTH)
 
     if (build_timestamp(&timestampdir, &timestampfile) == -1)
-	return;
+	debug_return;
 
     status = timestamp_status(timestampdir, timestampfile, user_name,
 	TS_REMOVE);
@@ -671,9 +684,10 @@ remove_timestamp(int remove)
 		error(1, _("unable to reset %s to the epoch"), path);
 	}
     }
-
     efree(timestampdir);
     efree(timestampfile);
+
+    debug_return;
 }
 
 /*
@@ -690,6 +704,7 @@ tty_is_devpts(const char *tty)
     int retval = FALSE;
 #ifdef __linux__
     struct statfs sfs;
+    debug_decl(tty_is_devpts, SUDO_DEBUG_PTY)
 
 #ifndef DEVPTS_SUPER_MAGIC
 # define DEVPTS_SUPER_MAGIC 0x1cd1
@@ -701,13 +716,16 @@ tty_is_devpts(const char *tty)
     }
 #elif defined(__sun) && defined(__SVR4)
     struct statvfs sfs;
+    debug_decl(tty_is_devpts, SUDO_DEBUG_PTY)
 
     if (statvfs(tty, &sfs) == 0) {
 	if (strcmp(sfs.f_fstr, "devices") == 0)
 	    retval = TRUE;
     }
+#else
+    debug_decl(tty_is_devpts, SUDO_DEBUG_PTY)
 #endif /* __linux__ */
-    return retval;
+    debug_return_bool(retval);
 }
 
 /*
@@ -719,6 +737,7 @@ static struct passwd *
 get_authpw(void)
 {
     struct passwd *pw;
+    debug_decl(get_authpw, SUDO_DEBUG_AUTH)
 
     if (def_rootpw) {
 	if ((pw = sudo_getpwuid(ROOT_UID)) == NULL)
@@ -737,5 +756,5 @@ get_authpw(void)
 	pw = sudo_user.pw;
     }
 
-    return pw;
+    debug_return_ptr(pw);
 }

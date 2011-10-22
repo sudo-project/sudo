@@ -112,6 +112,7 @@ mkdir_parents(char *path)
 {
     struct stat sb;
     char *slash = path;
+    debug_decl(mkdir_parents, SUDO_DEBUG_UTIL)
 
     for (;;) {
 	if ((slash = strchr(slash + 1, '/')) == NULL)
@@ -125,6 +126,7 @@ mkdir_parents(char *path)
 	}
 	*slash = '/';
     }
+    debug_return;
 }
 
 /*
@@ -143,6 +145,7 @@ io_nextid(char *iolog_dir, char sessid[7])
     ssize_t nread;
     char pathbuf[PATH_MAX];
     static const char b36char[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    debug_decl(io_nextid, SUDO_DEBUG_UTIL)
 
     /*
      * Create I/O log directory if it doesn't already exist.
@@ -198,6 +201,8 @@ io_nextid(char *iolog_dir, char sessid[7])
     if (lseek(fd, 0, SEEK_SET) == (off_t)-1 || write(fd, buf, 7) != 7)
 	log_error(USE_ERRNO, _("unable to write to %s"), pathbuf);
     close(fd);
+
+    debug_return;
 }
 
 /*
@@ -208,6 +213,7 @@ static size_t
 mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
 {
     size_t len;
+    debug_decl(mkdir_iopath, SUDO_DEBUG_UTIL)
 
     len = strlcpy(pathbuf, iolog_path, pathsize);
     if (len >= pathsize) {
@@ -228,7 +234,7 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
 	    log_error(USE_ERRNO, _("unable to create %s"), pathbuf);
     }
 
-    return len;
+    debug_return_size_t(len);
 }
 
 /*
@@ -242,6 +248,7 @@ open_io_fd(char *pathbuf, size_t len, const char *suffix, int docompress)
 {
     void *vfd = NULL;
     int fd;
+    debug_decl(open_io_fd, SUDO_DEBUG_UTIL)
 
     pathbuf[len] = '\0';
     strlcat(pathbuf, suffix, PATH_MAX);
@@ -255,7 +262,7 @@ open_io_fd(char *pathbuf, size_t len, const char *suffix, int docompress)
 #endif
 	    vfd = fdopen(fd, "w");
     }
-    return vfd;
+    debug_return_ptr(vfd);
 }
 
 /*
@@ -272,6 +279,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     unsigned long ulval;
     uid_t runas_uid = 0;
     gid_t runas_gid = 0;
+    debug_decl(iolog_deserialize_info, SUDO_DEBUG_UTIL)
 
     memset(details, 0, sizeof(*details));
 
@@ -402,6 +410,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	    details->runas_gr = sudo_fakegrnam(id);
 	}
     }
+    debug_return;
 }
 
 static int
@@ -417,6 +426,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     FILE *io_logfile;
     size_t len;
     int rval = -1;
+    debug_decl(sudoers_io_open, SUDO_DEBUG_UTIL)
 
     if (!sudo_conv)
 	sudo_conv = conversation;
@@ -425,7 +435,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 
     /* If we have no command (because -V was specified) just return. */
     if (argc == 0)
-	return TRUE;
+	debug_return_bool(TRUE);
 
     if (sigsetjmp(error_jmp, 1)) {
 	/* called via error(), errorx() or log_error() */
@@ -550,17 +560,18 @@ done:
 	gr_delref(details.runas_gr);
     sudo_endgrent();
 
-    return rval;
+    debug_return_bool(rval);
 }
 
 static void
 sudoers_io_close(int exit_status, int error)
 {
     int i;
+    debug_decl(sudoers_io_close, SUDO_DEBUG_UTIL)
 
     if (sigsetjmp(error_jmp, 1)) {
 	/* called via error(), errorx() or log_error() */
-	return;
+	debug_return;
     }
 
     for (i = 0; i < IOFD_MAX; i++) {
@@ -573,20 +584,23 @@ sudoers_io_close(int exit_status, int error)
 #endif
 	    fclose(io_fds[i].f);
     }
+    debug_return;
 }
 
 static int
 sudoers_io_version(int verbose)
 {
+    debug_decl(sudoers_io_version, SUDO_DEBUG_UTIL)
+
     if (sigsetjmp(error_jmp, 1)) {
 	/* called via error(), errorx() or log_error() */
-	return -1;
+	debug_return_bool(-1);
     }
 
     sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers I/O plugin version %s\n",
 	PACKAGE_VERSION);
 
-    return TRUE;
+    debug_return_bool(TRUE);
 }
 
 /*
@@ -596,12 +610,13 @@ static int
 sudoers_io_log(const char *buf, unsigned int len, int idx)
 {
     struct timeval now, delay;
+    debug_decl(sudoers_io_version, SUDO_DEBUG_UTIL)
 
     gettimeofday(&now, NULL);
 
     if (sigsetjmp(error_jmp, 1)) {
 	/* called via error(), errorx() or log_error() */
-	return -1;
+	debug_return_bool(-1);
     }
 
 #ifdef HAVE_ZLIB_H
@@ -624,7 +639,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     last_time.tv_sec = now.tv_sec;
     last_time.tv_usec = now.tv_usec;
 
-    return TRUE;
+    debug_return_bool(TRUE);
 }
 
 static int

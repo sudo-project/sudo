@@ -59,28 +59,30 @@ int
 securid_init(struct passwd *pw, sudo_auth *auth)
 {
     static struct SD_CLIENT sd_dat;		/* SecurID data block */
+    debug_decl(securid_init, SUDO_DEBUG_AUTH)
 
     auth->data = (void *) &sd_dat;		/* For method-specific data */
 
     if (creadcfg() == 0)
-	return AUTH_SUCCESS;
+	debug_return_int(AUTH_SUCCESS);
     else
-	return AUTH_FATAL;
+	debug_return_int(AUTH_FATAL);
 }
 
 int
 securid_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     struct SD_CLIENT *sd = (struct SD_CLIENT *) auth->data;
+    debug_decl(securid_setup, SUDO_DEBUG_AUTH)
 
     /* Re-initialize SecurID every time. */
     if (sd_init(sd) == 0) {
 	/* The programmer's guide says username is 32 bytes */
 	strlcpy(sd->username, pw->pw_name, 32);
-	return AUTH_SUCCESS;
+	debug_return_int(AUTH_SUCCESS);
     } else {
 	warningx(_("unable to contact the SecurID server"));
-	return AUTH_FATAL;
+	debug_return_int(AUTH_FATAL);
     }
 }
 
@@ -89,11 +91,12 @@ securid_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
     struct SD_CLIENT *sd = (struct SD_CLIENT *) auth->data;
     int rval;
+    debug_decl(securid_verify, SUDO_DEBUG_AUTH)
 
     rval = sd_auth(sd);
     sd_close();
     if (rval == ACM_OK)
-	return AUTH_SUCCESS;
+	debug_return_int(AUTH_SUCCESS);
     else
-	return AUTH_FAILURE;
+	debug_return_int(AUTH_FAILURE);
 }

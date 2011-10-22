@@ -79,6 +79,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     static const char *askpass;
     static char buf[SUDO_PASS_MAX + 1];
     int i, input, output, save_errno, neednl = 0, need_restart;
+    debug_decl(tgetpass, SUDO_DEBUG_CONV)
 
     (void) fflush(stdout);
 
@@ -93,7 +94,7 @@ tgetpass(const char *prompt, int timeout, int flags)
 	!tty_present()) {
 	if (askpass == NULL || getenv("DISPLAY") == NULL) {
 	    warningx(_("no tty present and no askpass program specified"));
-	    return NULL;
+	    debug_return_str(NULL);
 	}
 	SET(flags, TGP_ASKPASS);
     }
@@ -102,7 +103,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     if (ISSET(flags, TGP_ASKPASS)) {
 	if (askpass == NULL || *askpass == '\0')
 	    errorx(1, _("no askpass program specified, try setting SUDO_ASKPASS"));
-	return sudo_askpass(askpass, prompt);
+	debug_return_str_masked(sudo_askpass(askpass, prompt));
     }
 
 restart:
@@ -203,7 +204,8 @@ restore:
 
     if (save_errno)
 	errno = save_errno;
-    return pass;
+
+    debug_return_str_masked(pass);
 }
 
 /*
@@ -216,6 +218,7 @@ sudo_askpass(const char *askpass, const char *prompt)
     sigaction_t sa, saved_sa_pipe;
     int pfd[2];
     pid_t pid;
+    debug_decl(sudo_askpass, SUDO_DEBUG_CONV)
 
     if (pipe(pfd) == -1)
 	error(1, _("unable to create pipe"));
@@ -257,7 +260,7 @@ sudo_askpass(const char *askpass, const char *prompt)
     (void) close(pfd[0]);
     (void) sigaction(SIGPIPE, &saved_sa_pipe, NULL);
 
-    return pass;
+    debug_return_str_masked(pass);
 }
 
 extern int term_erase, term_kill;
@@ -269,10 +272,11 @@ getln(int fd, char *buf, size_t bufsiz, int feedback)
     ssize_t nr = -1;
     char *cp = buf;
     char c = '\0';
+    debug_decl(getln, SUDO_DEBUG_CONV)
 
     if (left == 0) {
 	errno = EINVAL;
-	return NULL;			/* sanity */
+	debug_return_str(NULL);		/* sanity */
     }
 
     while (--left) {
@@ -312,7 +316,7 @@ getln(int fd, char *buf, size_t bufsiz, int feedback)
 	}
     }
 
-    return nr == 1 ? buf : NULL;
+    debug_return_str_masked(nr == 1 ? buf : NULL);
 }
 
 static void
@@ -326,8 +330,9 @@ int
 tty_present(void)
 {
     int fd;
+    debug_decl(tty_present, SUDO_DEBUG_UTIL)
 
     if ((fd = open(_PATH_TTY, O_RDWR|O_NOCTTY)) != -1)
 	close(fd);
-    return fd != -1;
+    debug_return_bool(fd != -1);
 }

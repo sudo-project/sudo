@@ -30,6 +30,7 @@
 
 #include "missing.h"
 #include "logging.h"
+#include "sudo_debug.h"
 
 #ifdef HAVE_BSM_AUDIT
 # include "bsm_audit.h"
@@ -41,31 +42,36 @@
 void
 audit_success(char *exec_args[])
 {
-    if (exec_args == NULL)
-	return;
+    debug_decl(audit_success, SUDO_DEBUG_AUDIT)
 
+    if (exec_args != NULL) {
 #ifdef HAVE_BSM_AUDIT
-    bsm_audit_success(exec_args);
+	bsm_audit_success(exec_args);
 #endif
 #ifdef HAVE_LINUX_AUDIT
-    linux_audit_command(exec_args, 1);
+	linux_audit_command(exec_args, 1);
 #endif
+    }
+
+    debug_return;
 }
 
 void
 audit_failure(char *exec_args[], char const *const fmt, ...)
 {
     va_list ap;
+    debug_decl(audit_success, SUDO_DEBUG_AUDIT)
 
-    if (exec_args == NULL)
-	return;
-
-    va_start(ap, fmt);
+    if (exec_args != NULL) {
+	va_start(ap, fmt);
 #ifdef HAVE_BSM_AUDIT
-    bsm_audit_failure(exec_args, fmt, ap);
+	bsm_audit_failure(exec_args, fmt, ap);
 #endif
 #ifdef HAVE_LINUX_AUDIT
-    linux_audit_command(exec_args, 0);
+	linux_audit_command(exec_args, 0);
 #endif
-    va_end(ap);
+	va_end(ap);
+    }
+
+    debug_return;
 }

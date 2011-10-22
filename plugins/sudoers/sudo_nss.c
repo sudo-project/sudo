@@ -62,6 +62,7 @@ sudo_read_nss(void)
     int saw_ldap = FALSE;
     int got_match = FALSE;
     static struct sudo_nss_list snl;
+    debug_decl(sudo_read_nss, SUDO_DEBUG_NSS)
 
     if ((fp = fopen(_PATH_NSSWITCH_CONF, "r")) == NULL)
 	goto nomatch;
@@ -100,7 +101,7 @@ nomatch:
     if (tq_empty(&snl))
 	tq_append(&snl, &sudo_nss_file);
 
-    return &snl;
+    debug_return_ptr(&snl);
 }
 
 #else /* HAVE_LDAP && _PATH_NSSWITCH_CONF */
@@ -120,6 +121,7 @@ sudo_read_nss(void)
     int saw_ldap = FALSE;
     int got_match = FALSE;
     static struct sudo_nss_list snl;
+    debug_decl(sudo_read_nss, SUDO_DEBUG_NSS)
 
     if ((fp = fopen(_PATH_NETSVC_CONF, "r")) == NULL)
 	goto nomatch;
@@ -179,7 +181,7 @@ nomatch:
     if (tq_empty(&snl))
 	tq_append(&snl, &sudo_nss_file);
 
-    return &snl;
+    debug_return_ptr(&snl);
 }
 
 # else /* !_PATH_NETSVC_CONF && !_PATH_NSSWITCH_CONF */
@@ -191,13 +193,14 @@ struct sudo_nss_list *
 sudo_read_nss(void)
 {
     static struct sudo_nss_list snl;
+    debug_decl(sudo_read_nss, SUDO_DEBUG_NSS)
 
 #  ifdef HAVE_LDAP
     tq_append(&snl, &sudo_nss_ldap);
 #  endif
     tq_append(&snl, &sudo_nss_file);
 
-    return &snl;
+    debug_return_ptr(&snl);
 }
 
 # endif /* !HAVE_LDAP || !_PATH_NETSVC_CONF */
@@ -209,6 +212,7 @@ output(const char *buf)
 {
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
+    debug_decl(output, SUDO_DEBUG_NSS)
 
     /* Call conversation function */
     memset(&msg, 0, sizeof(msg));
@@ -216,8 +220,8 @@ output(const char *buf)
     msg.msg = buf;
     memset(&repl, 0, sizeof(repl));
     if (sudo_conv(1, &msg, &repl) == -1)
-	return 0;
-    return (int)strlen(buf);
+	debug_return_int(0);
+    debug_return_int(strlen(buf));
 }
 
 /*
@@ -230,6 +234,7 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
     struct sudo_nss *nss;
     struct lbuf defs, privs;
     int count, olen;
+    debug_decl(display_privs, SUDO_DEBUG_NSS)
 
     lbuf_init(&defs, output, 4, NULL, sudo_user.cols);
     lbuf_init(&privs, output, 4, NULL, sudo_user.cols);
@@ -277,6 +282,8 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 
     lbuf_destroy(&defs);
     lbuf_destroy(&privs);
+
+    debug_return;
 }
 
 /*
@@ -288,10 +295,11 @@ int
 display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
 {
     struct sudo_nss *nss;
+    debug_decl(display_cmnd, SUDO_DEBUG_NSS)
 
     tq_foreach_fwd(snl, nss) {
 	if (nss->display_cmnd(nss, pw) == 0)
-	    return TRUE;
+	    debug_return_bool(TRUE);
     }
-    return FALSE;
+    debug_return_bool(FALSE);
 }

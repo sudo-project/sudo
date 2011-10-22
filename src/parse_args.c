@@ -136,6 +136,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     char *cp, **env_add, **settings;
     int nenv = 0;
     int env_size = 32;
+    debug_decl(parse_args, SUDO_DEBUG_ARGS)
 
     env_add = emalloc2(env_size, sizeof(char *));
 
@@ -435,8 +436,8 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     settings = emalloc2(NUM_SETTINGS + 1, sizeof(char *));
     for (i = 0, j = 0; i < NUM_SETTINGS; i++) {
 	if (sudo_settings[i].value) {
-	    sudo_debug(9, "settings: %s=%s", sudo_settings[i].name,
-		sudo_settings[i].value);
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s=%s",
+		sudo_settings[i].name, sudo_settings[i].value);
 	    settings[j] = fmt_string(sudo_settings[i].name,
 		sudo_settings[i].value);
 	    if (settings[j] == NULL)
@@ -461,7 +462,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     *env_addp = env_add;
     *nargc = argc;
     *nargv = argv;
-    return mode | flags;
+    debug_return_int(mode | flags);
 }
 
 static int
@@ -524,6 +525,8 @@ usage(int fatal)
 static void
 usage_excl(int fatal)
 {
+    debug_decl(usage_excl, SUDO_DEBUG_ARGS)
+
     warningx(_("Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"));
     usage(fatal);
 }
@@ -534,6 +537,7 @@ help(void)
     struct lbuf lbuf;
     int indent = 16;
     const char *pname = getprogname();
+    debug_decl(help, SUDO_DEBUG_ARGS)
 
     lbuf_init(&lbuf, usage_out, indent, NULL, user_details.ts_cols);
     if (strcmp(pname, "sudoedit") == 0)
@@ -607,5 +611,6 @@ help(void)
 	_("stop processing command line arguments\n"));
     lbuf_print(&lbuf);
     lbuf_destroy(&lbuf);
+    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 0);
     exit(0);
 }

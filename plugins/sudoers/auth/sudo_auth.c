@@ -108,9 +108,10 @@ sudo_auth_init(struct passwd *pw)
 {
     sudo_auth *auth;
     int status = AUTH_SUCCESS;
+    debug_decl(sudo_auth_init, SUDO_DEBUG_AUTH)
 
     if (auth_switch[0].name == NULL)
-	return TRUE;
+	debug_return_int(TRUE);
 
     /* Make sure we haven't mixed standalone and shared auth methods. */
     standalone = IS_STANDALONE(&auth_switch[0]);
@@ -118,7 +119,7 @@ sudo_auth_init(struct passwd *pw)
 	audit_failure(NewArgv, "invalid authentication methods");
     	log_error(0, _("Invalid authentication methods compiled into sudo!  "
 	    "You may mix standalone and non-standalone authentication."));
-	return -1;
+	debug_return_int(-1);
     }
 
     /* Set FLAG_ONEANDONLY if there is only one auth method. */
@@ -145,7 +146,7 @@ sudo_auth_init(struct passwd *pw)
 	    }
 	}
     }
-    return status == AUTH_FATAL ? -1 : TRUE;
+    debug_return_int(status == AUTH_FATAL ? -1 : TRUE);
 }
 
 int
@@ -153,6 +154,7 @@ sudo_auth_cleanup(struct passwd *pw)
 {
     sudo_auth *auth;
     int status = AUTH_SUCCESS;
+    debug_decl(sudo_auth_cleanup, SUDO_DEBUG_AUTH)
 
     /* Call cleanup routines. */
     for (auth = auth_switch; auth->name; auth++) {
@@ -172,7 +174,7 @@ sudo_auth_cleanup(struct passwd *pw)
 	    }
 	}
     }
-    return status == AUTH_FATAL ? -1 : TRUE;
+    debug_return_int(status == AUTH_FATAL ? -1 : TRUE);
 }
 
 int
@@ -184,6 +186,7 @@ verify_user(struct passwd *pw, char *prompt)
     char *p;
     sudo_auth *auth;
     sigaction_t sa, osa;
+    debug_decl(verify_user, SUDO_DEBUG_AUTH)
 
     /* Enable suspend during password entry. */
     sigemptyset(&sa.sa_mask);
@@ -199,7 +202,7 @@ verify_user(struct passwd *pw, char *prompt)
 	    _("There are no authentication methods compiled into sudo!  "
 	    "If you want to turn off authentication, use the "
 	    "--disable-authentication configure option."));
-	return -1;
+	debug_return_int(-1);
     }
 
     while (--counter) {
@@ -219,7 +222,7 @@ verify_user(struct passwd *pw, char *prompt)
 		else if (status == AUTH_FATAL) {
 		    /* XXX log */
 		    audit_failure(NewArgv, "authentication failure");
-		    return -1;		/* assume error msg already printed */
+		    debug_return_int(-1);/* assume error msg already printed */
 		}
 	    }
 	}
@@ -282,7 +285,7 @@ done:
 	    break;
     }
 
-    return rval;
+    debug_return_int(rval);
 }
 
 int
@@ -290,6 +293,7 @@ sudo_auth_begin_session(struct passwd *pw)
 {
     sudo_auth *auth;
     int status;
+    debug_decl(auth_begin_session, SUDO_DEBUG_AUTH)
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->begin_session && !IS_DISABLED(auth)) {
@@ -297,11 +301,11 @@ sudo_auth_begin_session(struct passwd *pw)
 	    if (status == AUTH_FATAL) {
 		/* XXX log */
 		audit_failure(NewArgv, "authentication failure");
-		return -1;		/* assume error msg already printed */
+		debug_return_bool(-1);	/* assume error msg already printed */
 	    }
 	}
     }
-    return TRUE;
+    debug_return_bool(TRUE);
 }
 
 int
@@ -309,29 +313,33 @@ sudo_auth_end_session(struct passwd *pw)
 {
     sudo_auth *auth;
     int status;
+    debug_decl(auth_end_session, SUDO_DEBUG_AUTH)
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->end_session && !IS_DISABLED(auth)) {
 	    status = (auth->end_session)(pw, auth);
 	    if (status == AUTH_FATAL) {
 		/* XXX log */
-		return -1;		/* assume error msg already printed */
+		debug_return_bool(-1);	/* assume error msg already printed */
 	    }
 	}
     }
-    return TRUE;
+    debug_return_bool(TRUE);
 }
 
 static void
 pass_warn(void)
 {
     const char *warning = def_badpass_message;
+    debug_decl(pass_warn, SUDO_DEBUG_AUTH)
 
 #ifdef INSULT
     if (def_insults)
 	warning = INSULT;
 #endif
     sudo_printf(SUDO_CONV_ERROR_MSG, "%s\n", warning);
+
+    debug_return;
 }
 
 char *
@@ -339,6 +347,7 @@ auth_getpass(const char *prompt, int timeout, int type)
 {
     struct sudo_conv_message msg;
     struct sudo_conv_reply repl;
+    debug_decl(auth_getpass, SUDO_DEBUG_AUTH)
 
     /* Mask user input if pwfeedback set and echo is off. */
     if (type == SUDO_CONV_PROMPT_ECHO_OFF && def_pwfeedback)
@@ -356,16 +365,19 @@ auth_getpass(const char *prompt, int timeout, int type)
     memset(&repl, 0, sizeof(repl));
     sudo_conv(1, &msg, &repl);
     /* XXX - check for ENOTTY? */
-    return repl.reply;
+    debug_return_str_masked(repl.reply);
 }
 
 void
 dump_auth_methods(void)
 {
     sudo_auth *auth;
+    debug_decl(dump_auth_methods, SUDO_DEBUG_AUTH)
 
     sudo_printf(SUDO_CONV_INFO_MSG, _("Authentication methods:"));
     for (auth = auth_switch; auth->name; auth++)
 	sudo_printf(SUDO_CONV_INFO_MSG, " '%s'", auth->name);
     sudo_printf(SUDO_CONV_INFO_MSG, "\n");
+
+    debug_return;
 }

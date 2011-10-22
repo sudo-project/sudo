@@ -39,6 +39,7 @@
 #include <termios.h>
 
 #include "missing.h"
+#include "sudo_debug.h"
 
 #ifndef TCSASOFT
 # define TCSASOFT	0
@@ -69,21 +70,25 @@ int term_kill;
 int
 term_restore(int fd, int flush)
 {
+    debug_decl(term_restore, SUDO_DEBUG_UTIL)
+
     if (changed) {
 	int flags = TCSASOFT;
 	flags |= flush ? TCSAFLUSH : TCSADRAIN;
 	if (tcsetattr(fd, flags, &oterm) != 0)
-	    return 0;
+	    debug_return_int(0);
 	changed = 0;
     }
-    return 1;
+    debug_return_int(1);
 }
 
 int
 term_noecho(int fd)
 {
+    debug_decl(term_noecho, SUDO_DEBUG_UTIL)
+
     if (!changed && tcgetattr(fd, &oterm) != 0)
-	return 0;
+	debug_return_int(0);
     (void) memcpy(&term, &oterm, sizeof(term));
     CLR(term.c_lflag, ECHO|ECHONL);
 #ifdef VSTATUS
@@ -92,14 +97,16 @@ term_noecho(int fd)
     if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
 	return 1;
+	debug_return_int(1);
     }
-    return 0;
+    debug_return_int(0);
 }
 
 int
 term_raw(int fd, int isig)
 {
     struct termios term;
+    debug_decl(term_raw, SUDO_DEBUG_UTIL)
 
     if (!changed && tcgetattr(fd, &oterm) != 0)
 	return 0;
@@ -114,14 +121,16 @@ term_raw(int fd, int isig)
 	SET(term.c_lflag, ISIG);
     if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
-    	return 1;
+    	debug_return_int(1);
     }
-    return 0;
+    debug_return_int(0);
 }
 
 int
 term_cbreak(int fd)
 {
+    debug_decl(term_cbreak, SUDO_DEBUG_UTIL)
+
     if (!changed && tcgetattr(fd, &oterm) != 0)
 	return 0;
     (void) memcpy(&term, &oterm, sizeof(term));
@@ -137,19 +146,20 @@ term_cbreak(int fd)
 	term_erase = term.c_cc[VERASE];
 	term_kill = term.c_cc[VKILL];
 	changed = 1;
-	return 1;
+	debug_return_int(1);
     }
-    return 0;
+    debug_return_int(0);
 }
 
 int
 term_copy(int src, int dst)
 {
     struct termios tt;
+    debug_decl(term_copy, SUDO_DEBUG_UTIL)
 
     if (tcgetattr(src, &tt) != 0)
-	return 0;
+	debug_return_int(0);
     if (tcsetattr(dst, TCSANOW|TCSASOFT, &tt) != 0)
-	return 0;
-    return 1;
+	debug_return_int(0);
+    debug_return_int(1);
 }

@@ -61,6 +61,7 @@ set_interfaces(const char *ai)
 {
     char *addrinfo, *addr, *mask;
     struct interface *ifp;
+    debug_decl(set_interfaces, SUDO_DEBUG_NETIF)
 
     addrinfo = estrdup(ai);
     for (addr = strtok(addrinfo, " \t"); addr != NULL; addr = strtok(NULL, " \t")) {
@@ -97,12 +98,14 @@ set_interfaces(const char *ai)
 	interfaces = ifp;
     }
     efree(addrinfo);
+    debug_return;
 }
 
 void
 dump_interfaces(const char *ai)
 {
     char *cp, *addrinfo;
+    debug_decl(set_interfaces, SUDO_DEBUG_NETIF)
 
     addrinfo = estrdup(ai);
 
@@ -111,4 +114,5 @@ dump_interfaces(const char *ai)
 	sudo_printf(SUDO_CONV_INFO_MSG, "\t%s\n", cp);
 
     efree(addrinfo);
+    debug_return;
 }
