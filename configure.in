@@ -2206,6 +2206,25 @@ AC_CHECK_FUNCS(getprogname, , [
     fi
     AC_MSG_RESULT($sudo_cv___progname)
 ])
+dnl
+dnl Check for __func__ or __FUNCTION__
+dnl
+AC_MSG_CHECKING([for __func__])
+AC_CACHE_VAL(sudo_cv___func__, [
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[(void)puts(__func__);]])], [sudo_cv___func__=yes], [sudo_cv___func__=no])])
+AC_MSG_RESULT($sudo_cv___func__)
+if test "$sudo_cv___func__" = "yes"; then
+    AC_DEFINE(HAVE___FUNC__)
+elif test -n "$GCC"; then
+    AC_MSG_CHECKING([for __FUNCTION__])
+    AC_CACHE_VAL(sudo_cv___FUNCTION__, [
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[(void)puts(__FUNCTION__);]])], [sudo_cv___FUNCTION__=yes], [sudo_cv___FUNCTION__=no])])
+    AC_MSG_RESULT($sudo_cv___FUNCTION__)
+    if test "$sudo_cv___FUNCTION__" = "yes"; then
+	AC_DEFINE(HAVE___FUNC__)
+	AC_DEFINE(__func__, __FUNCTION__, [Define to __FUNCTION__ if your compiler support __FUNCTION__ but not __func__])
+    fi
+fi
 
 # gettext() and friends may be located in libc (Linux and Solaris)
 # or in libintl.  However, it is possible to have libintl installed
@@ -3201,6 +3220,7 @@ AH_TEMPLATE(sig_atomic_t, [Define to `int' if <signal.h> does not define.])
 AH_TEMPLATE(__signed, [Define to `signed' or nothing if compiler does not support a signed type qualifier.])
 AH_TEMPLATE(HAVE_STRUCT_UTMP_UT_EXIT, [Define to 1 if `ut_exit' is a member of `struct utmp'.])
 AH_TEMPLATE(HAVE_STRUCT_UTMPX_UT_EXIT, [Define to 1 if `ut_exit' is a member of `struct utmpx'.])
+AH_TEMPLATE(HAVE___FUNC__, [Define to 1 if the compiler supports the C99 __func__ variable.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in
