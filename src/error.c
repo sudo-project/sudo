@@ -33,7 +33,7 @@ static void _warning(int, const char *, va_list);
        void cleanup(int);
 
 void
-error(int eval, const char *fmt, ...)
+error2(int eval, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -44,7 +44,7 @@ error(int eval, const char *fmt, ...)
 }
 
 void
-errorx(int eval, const char *fmt, ...)
+errorx2(int eval, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -55,7 +55,7 @@ errorx(int eval, const char *fmt, ...)
 }
 
 void
-warning(const char *fmt, ...)
+warning2(const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -64,7 +64,7 @@ warning(const char *fmt, ...)
 }
 
 void
-warningx(const char *fmt, ...)
+warningx2(const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);

@@ -88,6 +88,8 @@
 
 #include <pathnames.h>
 
+#define SUDO_ERROR_WRAP 0 /* XXX */
+
 #include "missing.h"
 #include "alloc.h"
 #include "error.h"
