@@ -40,6 +40,7 @@ struct sudo_conv_message {
 #define SUDO_CONV_ERROR_MSG	    0x0003  /* error message */
 #define SUDO_CONV_INFO_MSG	    0x0004  /* informational message */
 #define SUDO_CONV_PROMPT_MASK	    0x0005  /* mask user input */
+#define SUDO_CONV_DEBUG_MSG	    0x0006  /* debugging message */
 #define SUDO_CONV_PROMPT_ECHO_OK    0x1000  /* flag: allow echo if no tty */
     int msg_type;
     int timeout;

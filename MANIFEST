@@ -16,6 +16,7 @@ common/fmt_string.c
 common/lbuf.c
 common/list.c
 common/setgroups.c
+common/sudo_debug.c
 common/term.c
 common/zero_bytes.c
 compat/Makefile.in
@@ -101,6 +102,7 @@ include/gettext.h
 include/lbuf.h
 include/list.h
 include/missing.h
+include/sudo_debug.h
 include/sudo_plugin.h
 indent.pro
 install-sh
