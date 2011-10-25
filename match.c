@@ -222,7 +222,7 @@ _runaslist_matches(user_list, group_list)
 		    break;
 		case ALIAS:
 		    if ((a = alias_find(m->name, RUNASALIAS)) != NULL) {
-			rval = _runaslist_matches(&a->members, &empty);
+			rval = _runaslist_matches(&empty, &a->members);
 			if (rval != UNSPEC)
 			    group_matched = m->negated ? !rval : rval;
 			break;
