@@ -42,6 +42,8 @@
 #include <grp.h>
 #include <time.h>
 
+#define SUDO_ERROR_WRAP 0
+
 #define _SUDO_MAIN
 #include "sudoers.h"
 #include "def_data.c"

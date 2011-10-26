@@ -36,6 +36,8 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 
+#define SUDO_ERROR_WRAP 0
+
 #include "missing.h"
 #include "error.h"
 
