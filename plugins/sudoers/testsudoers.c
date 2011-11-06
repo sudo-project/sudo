@@ -109,7 +109,8 @@ struct interface *interfaces;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
 static char *runas_group, *runas_user;
-extern int parse_error;
+extern int errorlineno, parse_error;
+extern char *errorfile;
 sudo_printf_t sudo_printf = testsudoers_printf;
 
 /* For getopt(3) */
@@ -251,7 +252,11 @@ main(int argc, char *argv[])
 
     if (yyparse() != 0 || parse_error) {
 	parse_error = TRUE;
-	(void) fputs("Does not parse", stdout);
+	if (errorlineno != -1)
+	    (void) printf("Parse error in %s near line %d",
+		errorfile, errorlineno);
+	else
+	    (void) printf("Parse error in %s", errorfile);
     } else {
 	(void) fputs("Parses OK", stdout);
     }
