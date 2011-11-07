@@ -140,7 +140,7 @@ o Upgrading from a version prior to 1.7.4:
     to preserve the old value of MAIL.
 
     NOTE: preserving HOME has security implications since many programs
-    use when searching for configuration files.  Adding HOME to env_keep
+    use it when searching for configuration files.  Adding HOME to env_keep
     may enable a user to run unrestricted commands via sudo.
 
     The default syslog facility has changed from "local2" to "authpriv"
