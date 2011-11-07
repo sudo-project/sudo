@@ -31,14 +31,13 @@
  * Note: order must match sudo_debug_priorities[]
  */
 #define SUDO_DEBUG_CRIT		1	/* critical errors */
-#define SUDO_DEBUG_SYSERR	2	/* system errors */
-#define SUDO_DEBUG_PROGERR	3	/* program errors */
-#define SUDO_DEBUG_WARN		4	/* non-fatal warnings */
-#define SUDO_DEBUG_NOTICE	5	/* non-error condition notices */
-#define SUDO_DEBUG_DIAG		6	/* diagnostic messages */
-#define SUDO_DEBUG_INFO		7	/* informational message */
-#define SUDO_DEBUG_TRACE	8	/* log function enter/exit */
-#define SUDO_DEBUG_DEBUG	9	/* very verbose debugging */
+#define SUDO_DEBUG_ERROR	2	/* non-critical errors */
+#define SUDO_DEBUG_WARN		3	/* non-fatal warnings */
+#define SUDO_DEBUG_NOTICE	4	/* non-error condition notices */
+#define SUDO_DEBUG_DIAG		5	/* diagnostic messages */
+#define SUDO_DEBUG_INFO		6	/* informational message */
+#define SUDO_DEBUG_TRACE	7	/* log function enter/exit */
+#define SUDO_DEBUG_DEBUG	8	/* very verbose debugging */
 
 /*
  * Sudo debug subsystems.

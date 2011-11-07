@@ -439,7 +439,7 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 		    if (errno == EAGAIN)
 			break;
 		    if (errno != ENXIO && errno != EBADF) {
-			sudo_debug_printf(SUDO_DEBUG_SYSERR,
+			sudo_debug_printf(SUDO_DEBUG_ERROR,
 			    "error reading fd %d: %s", iob->rfd,
 			    strerror(errno));
 			errors++;
@@ -476,7 +476,7 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 		}
 		if (errno != EAGAIN) {
 		    errors++;
-		    sudo_debug_printf(SUDO_DEBUG_SYSERR,
+		    sudo_debug_printf(SUDO_DEBUG_ERROR,
 			"error writing fd %d: %s", iob->wfd, strerror(errno));
 		}
 	    } else {
@@ -788,7 +788,7 @@ send_status(int fd, struct command_status *cstat)
 	    n = send(fd, cstat, sizeof(*cstat), 0);
 	} while (n == -1 && errno == EINTR);
 	if (n != sizeof(*cstat)) {
-	    sudo_debug_printf(SUDO_DEBUG_SYSERR,
+	    sudo_debug_printf(SUDO_DEBUG_ERROR,
 		"unable to send status to parent: %s", strerror(errno));
 	}
 	cstat->type = CMD_INVALID; /* prevent re-sending */
