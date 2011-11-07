@@ -190,11 +190,12 @@ main(int argc, char *argv[])
     if (argc < 2) {
 	if (!dflag)
 	    usage();
-	user_name = "root";
+	user_name = argc ? *argv++ : "root";
 	user_cmnd = user_base = "true";
+	argc = 0;
     } else {
-	user_name = *argv;
-	user_cmnd = *++argv;
+	user_name = *argv++;
+	user_cmnd = *argv++;
 	if ((p = strrchr(user_cmnd, '/')) != NULL)
 	    user_base = p + 1;
 	else
@@ -223,11 +224,11 @@ main(int argc, char *argv[])
 	char *to, **from;
 	size_t size, n;
 
-	for (size = 0, from = argv + 1; *from; from++)
+	for (size = 0, from = argv; *from; from++)
 	    size += strlen(*from) + 1;
 
 	user_args = (char *) emalloc(size);
-	for (to = user_args, from = argv + 1; *from; from++) {
+	for (to = user_args, from = argv; *from; from++) {
 	    n = strlcpy(to, *from, size - (to - user_args));
 	    if (n >= size - (to - user_args))
 		    errorx(1, _("internal error, init_vars() overflow"));
