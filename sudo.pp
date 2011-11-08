@@ -182,7 +182,7 @@ still allow people to get their work done."
 	$sbindir/visudo     0111
 	$bindir/sudoreplay  0111
 	$includedir/sudo_plugin.h
-	$libexecdir/*
+	$libexecdir/*		optional
 	$sudoersdir/sudoers.d/	0750 $sudoers_uid:$sudoers_gid
 	$timedir/		0700 root:
 	$docdir/
