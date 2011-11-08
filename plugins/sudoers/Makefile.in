@@ -417,7 +417,7 @@ check_iolog_path.o: $(srcdir)/regress/iolog_path/check_iolog_path.c \
                     $(devdir)/def_data.h $(srcdir)/logging.h \
                     $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
                     $(incdir)/sudo_debug.h $(incdir)/gettext.h \
-                    $(srcdir)/def_data.c
+                    $(devdir)/def_data.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/iolog_path/check_iolog_path.c
 check_wrap.o: $(srcdir)/regress/logging/check_wrap.c $(top_builddir)/config.h \
               $(incdir)/missing.h $(incdir)/error.h
@@ -435,7 +435,7 @@ defaults.lo: $(srcdir)/defaults.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
              $(srcdir)/defaults.h $(devdir)/def_data.h $(srcdir)/logging.h \
              $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_debug.h $(incdir)/gettext.h $(srcdir)/parse.h \
-             $(devdir)/gram.h $(srcdir)/def_data.c
+             $(devdir)/gram.h $(devdir)/def_data.c
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/defaults.c
 env.lo: $(srcdir)/env.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
         $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
@@ -486,7 +486,7 @@ gram.lo: $(devdir)/gram.c $(top_builddir)/config.h $(top_builddir)/config.h \
          $(incdir)/fileops.h $(srcdir)/defaults.h $(devdir)/def_data.h \
          $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
          $(incdir)/sudo_debug.h $(incdir)/gettext.h $(srcdir)/parse.h \
-         $(srcdir)/toke.h
+         $(srcdir)/toke.h $(devdir)/gram.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/gram.c
 group_plugin.lo: $(srcdir)/group_plugin.c $(top_builddir)/config.h \
                  $(top_srcdir)/compat/dlfcn.h $(srcdir)/sudoers.h \
