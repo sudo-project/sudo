@@ -97,12 +97,27 @@ static struct sudo_conf_paths sudo_conf_paths[] = {
     { NULL }
 };
 
+/*
+ * "Debug progname debug_file debug_flags"
+ */
 static int
 set_debug(const char *entry, void *data)
 {
-    size_t filelen;
+    size_t filelen, proglen;
+    const char *progname;
 
-    /* Parse Debug line */
+    /* Is this debug setting for me? */
+    progname = getprogname();
+    if (strcmp(progname, "sudoedit") == 0)
+	progname = "sudo";
+    proglen = strlen(progname);
+    if (strncmp(entry, progname, proglen) != 0 ||
+	!isblank((unsigned char)entry[proglen]))
+    	return FALSE;
+    entry += proglen + 1;
+    while (isblank((unsigned char)*entry))
+	entry++;
+
     debug_flags = strpbrk(entry, " \t");
     if (debug_flags == NULL)
     	return FALSE;
