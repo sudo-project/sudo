@@ -1418,7 +1418,7 @@ deserialize_info(char * const settings[], char * const user_info[])
     }
 
 #undef MATCHES
-    return flags;
+    debug_return_int(flags);
 }
 
 static char *
