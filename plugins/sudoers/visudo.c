@@ -83,7 +83,7 @@
 #include "redblack.h"
 #include "gettext.h"
 #include "sudoers_version.h"
-#include <gram.h>
+#include "gram.h"
 
 struct sudoersfile {
     struct sudoersfile *prev, *next;

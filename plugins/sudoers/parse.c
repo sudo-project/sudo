@@ -45,7 +45,7 @@
 #include "sudoers.h"
 #include "parse.h"
 #include "lbuf.h"
-#include <gram.h>
+#include "gram.h"
 
 /* Characters that must be quoted in sudoers */
 #define SUDOERS_QUOTED	":\\,=#\""

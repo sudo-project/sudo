@@ -70,7 +70,7 @@
 #include "sudoers.h"
 #include "parse.h"
 #include "toke.h"
-#include <gram.h>
+#include "gram.h"
 
 extern YYSTYPE yylval;
 extern int parse_error;

@@ -46,7 +46,7 @@
 
 #include "sudoers.h"
 #include "parse.h"
-#include <gram.h>
+#include "gram.h"
 
 /*
  * For converting between syslog numbers and strings.

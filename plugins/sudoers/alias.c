@@ -44,7 +44,7 @@
 #include "sudoers.h"
 #include "parse.h"
 #include "redblack.h"
-#include <gram.h>
+#include "gram.h"
 
 /*
  * Globals

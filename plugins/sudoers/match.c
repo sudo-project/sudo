@@ -76,7 +76,7 @@
 
 #include "sudoers.h"
 #include "parse.h"
-#include <gram.h>
+#include "gram.h"
 
 #ifndef HAVE_FNMATCH
 # include "compat/fnmatch.h"
