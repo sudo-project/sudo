@@ -22,7 +22,7 @@
 #ifndef _SUDO_DEFAULTS_H
 #define _SUDO_DEFAULTS_H
 
-#include "def_data.h"
+#include <def_data.h>
 
 struct list_member {
     char *value;

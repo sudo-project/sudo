@@ -52,7 +52,7 @@
 #include "sudoers.h"
 #include "parse.h"
 #include "toke.h"
-#include "gram.h"
+#include <gram.h>
 
 static int arg_len = 0;
 static int arg_size = 0;
