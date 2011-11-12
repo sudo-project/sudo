@@ -1475,6 +1475,7 @@ char *yytext;
 #include "parse.h"
 #include "toke.h"
 #include <gram.h>
+#include "lbuf.h"
 
 extern YYSTYPE yylval;
 extern int parse_error;
@@ -1488,11 +1489,7 @@ static int _push_include(char *, int);
 static int pop_include(void);
 static char *parse_include(char *);
 
-#ifdef TRACELEXER
 static int sudoers_trace_print(const char *msg);
-#else
-# define sudoers_trace_print NULL
-#endif
 int (*trace_print)(const char *msg) = sudoers_trace_print;
 
 #define LEXRETURN(n)	do {	\
@@ -1514,7 +1511,7 @@ int (*trace_print)(const char *msg) = sudoers_trace_print;
 
 #define INSTR 5
 
-#line 1517 "lex.yy.c"
+#line 1514 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -1668,9 +1665,9 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 125 "toke.l"
+#line 122 "toke.l"
 
-#line 1673 "lex.yy.c"
+#line 1670 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -1756,7 +1753,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 126 "toke.l"
+#line 123 "toke.l"
 {
 			    LEXTRACE(", ");
 			    LEXRETURN(',');
@@ -1764,12 +1761,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 131 "toke.l"
+#line 128 "toke.l"
 BEGIN STARTDEFS;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 133 "toke.l"
+#line 130 "toke.l"
 {
 			    BEGIN INDEFS;
 			    LEXTRACE("DEFVAR ");
@@ -1781,7 +1778,7 @@ YY_RULE_SETUP
 
 case 4:
 YY_RULE_SETUP
-#line 142 "toke.l"
+#line 139 "toke.l"
 {
 			    BEGIN STARTDEFS;
 			    LEXTRACE(", ");
@@ -1790,7 +1787,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 148 "toke.l"
+#line 145 "toke.l"
 {
 			    LEXTRACE("= ");
 			    LEXRETURN('=');
@@ -1798,7 +1795,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 153 "toke.l"
+#line 150 "toke.l"
 {
 			    LEXTRACE("+= ");
 			    LEXRETURN('+');
@@ -1806,7 +1803,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 158 "toke.l"
+#line 155 "toke.l"
 {
 			    LEXTRACE("-= ");
 			    LEXRETURN('-');
@@ -1814,7 +1811,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 163 "toke.l"
+#line 160 "toke.l"
 {
 			    LEXTRACE("BEGINSTR ");
 			    yylval.string = NULL;
@@ -1824,7 +1821,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 170 "toke.l"
+#line 167 "toke.l"
 {
 			    LEXTRACE("WORD(2) ");
 			    if (!fill(yytext, yyleng))
@@ -1836,7 +1833,7 @@ YY_RULE_SETUP
 
 case 10:
 YY_RULE_SETUP
-#line 179 "toke.l"
+#line 176 "toke.l"
 {
 			    /* Line continuation char followed by newline. */
 			    sudolineno++;
@@ -1845,7 +1842,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 185 "toke.l"
+#line 182 "toke.l"
 {
 			    LEXTRACE("ENDSTR ");
 			    BEGIN prev_state;
@@ -1880,7 +1877,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 217 "toke.l"
+#line 214 "toke.l"
 {
 			    LEXTRACE("BACKSLASH ");
 			    if (!append(yytext, yyleng))
@@ -1889,7 +1886,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 223 "toke.l"
+#line 220 "toke.l"
 {
 			    LEXTRACE("STRBODY ");
 			    if (!append(yytext, yyleng))
@@ -1900,7 +1897,7 @@ YY_RULE_SETUP
 
 case 14:
 YY_RULE_SETUP
-#line 231 "toke.l"
+#line 228 "toke.l"
 {
 			    /* quoted fnmatch glob char, pass verbatim */
 			    LEXTRACE("QUOTEDCHAR ");
@@ -1911,7 +1908,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 239 "toke.l"
+#line 236 "toke.l"
 {
 			    /* quoted sudoers special char, strip backslash */
 			    LEXTRACE("QUOTEDCHAR ");
@@ -1922,7 +1919,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 247 "toke.l"
+#line 244 "toke.l"
 {
 			    BEGIN INITIAL;
 			    yyless(0);
@@ -1931,7 +1928,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 253 "toke.l"
+#line 250 "toke.l"
 {
 			    LEXTRACE("ARG ");
 			    if (!fill_args(yytext, yyleng, sawspace))
@@ -1942,7 +1939,7 @@ YY_RULE_SETUP
 
 case 18:
 YY_RULE_SETUP
-#line 261 "toke.l"
+#line 258 "toke.l"
 {
 			    char *path;
 
@@ -1963,7 +1960,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 279 "toke.l"
+#line 276 "toke.l"
 {
 			    char *path;
 
@@ -1987,7 +1984,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 300 "toke.l"
+#line 297 "toke.l"
 {
 			    char deftype;
 			    int n;
@@ -2030,7 +2027,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 340 "toke.l"
+#line 337 "toke.l"
 {
 			    int n;
 
@@ -2059,7 +2056,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 366 "toke.l"
+#line 363 "toke.l"
 {
 				/* cmnd does not require passwd for this user */
 			    	LEXTRACE("NOPASSWD ");
@@ -2068,7 +2065,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 372 "toke.l"
+#line 369 "toke.l"
 {
 				/* cmnd requires passwd for this user */
 			    	LEXTRACE("PASSWD ");
@@ -2077,7 +2074,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 378 "toke.l"
+#line 375 "toke.l"
 {
 			    	LEXTRACE("NOEXEC ");
 			    	LEXRETURN(NOEXEC);
@@ -2085,7 +2082,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 383 "toke.l"
+#line 380 "toke.l"
 {
 			    	LEXTRACE("EXEC ");
 			    	LEXRETURN(EXEC);
@@ -2093,7 +2090,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 388 "toke.l"
+#line 385 "toke.l"
 {
 			    	LEXTRACE("SETENV ");
 			    	LEXRETURN(SETENV);
@@ -2101,7 +2098,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 393 "toke.l"
+#line 390 "toke.l"
 {
 			    	LEXTRACE("NOSETENV ");
 			    	LEXRETURN(NOSETENV);
@@ -2109,7 +2106,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 398 "toke.l"
+#line 395 "toke.l"
 {
 			    	LEXTRACE("LOG_OUTPUT ");
 			    	LEXRETURN(LOG_OUTPUT);
@@ -2117,7 +2114,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 403 "toke.l"
+#line 400 "toke.l"
 {
 			    	LEXTRACE("NOLOG_OUTPUT ");
 			    	LEXRETURN(NOLOG_OUTPUT);
@@ -2125,7 +2122,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 408 "toke.l"
+#line 405 "toke.l"
 {
 			    	LEXTRACE("LOG_INPUT ");
 			    	LEXRETURN(LOG_INPUT);
@@ -2133,7 +2130,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 413 "toke.l"
+#line 410 "toke.l"
 {
 			    	LEXTRACE("NOLOG_INPUT ");
 			    	LEXRETURN(NOLOG_INPUT);
@@ -2141,7 +2138,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 418 "toke.l"
+#line 415 "toke.l"
 {
 			    /* empty group or netgroup */
 			    LEXTRACE("ERROR ");
@@ -2150,7 +2147,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 424 "toke.l"
+#line 421 "toke.l"
 {
 			    /* netgroup */
 			    if (!fill(yytext, yyleng))
@@ -2161,7 +2158,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 432 "toke.l"
+#line 429 "toke.l"
 {
 			    /* group */
 			    if (!fill(yytext, yyleng))
@@ -2172,7 +2169,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 440 "toke.l"
+#line 437 "toke.l"
 {
 			    if (!fill(yytext, yyleng))
 				yyterminate();
@@ -2182,7 +2179,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 447 "toke.l"
+#line 444 "toke.l"
 {
 			    if (!fill(yytext, yyleng))
 				yyterminate();
@@ -2192,7 +2189,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 454 "toke.l"
+#line 451 "toke.l"
 {
 			    if (!ipv6_valid(yytext)) {
 				LEXTRACE("ERROR ");
@@ -2206,7 +2203,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 465 "toke.l"
+#line 462 "toke.l"
 {
 			    if (!ipv6_valid(yytext)) {
 				LEXTRACE("ERROR ");
@@ -2220,7 +2217,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 476 "toke.l"
+#line 473 "toke.l"
 {
 			    LEXTRACE("ALL ");
 			    LEXRETURN(ALL);
@@ -2229,7 +2226,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 482 "toke.l"
+#line 479 "toke.l"
 {
 #ifdef HAVE_SELINUX
 			    LEXTRACE("ROLE ");
@@ -2241,7 +2238,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 491 "toke.l"
+#line 488 "toke.l"
 {
 #ifdef HAVE_SELINUX
 			    LEXTRACE("TYPE ");
@@ -2253,7 +2250,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 500 "toke.l"
+#line 497 "toke.l"
 {
 #ifndef HAVE_SELINUX
 			got_alias:
@@ -2266,7 +2263,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 510 "toke.l"
+#line 507 "toke.l"
 {
 			    /* no command args allowed for Defaults!/path */
 			    if (!fill_cmnd(yytext, yyleng))
@@ -2277,7 +2274,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 518 "toke.l"
+#line 515 "toke.l"
 {
 			    BEGIN GOTCMND;
 			    LEXTRACE("COMMAND ");
@@ -2287,7 +2284,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 525 "toke.l"
+#line 522 "toke.l"
 {
 			    /* directories can't have args... */
 			    if (yytext[yyleng - 1] == '/') {
@@ -2305,7 +2302,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 540 "toke.l"
+#line 537 "toke.l"
 {
 			    LEXTRACE("BEGINSTR ");
 			    yylval.string = NULL;
@@ -2315,7 +2312,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 547 "toke.l"
+#line 544 "toke.l"
 {
 			    /* a word */
 			    if (!fill(yytext, yyleng))
@@ -2326,7 +2323,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 555 "toke.l"
+#line 552 "toke.l"
 {
 			    LEXTRACE("( ");
 			    LEXRETURN('(');
@@ -2334,7 +2331,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 560 "toke.l"
+#line 557 "toke.l"
 {
 			    LEXTRACE(") ");
 			    LEXRETURN(')');
@@ -2342,7 +2339,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 565 "toke.l"
+#line 562 "toke.l"
 {
 			    LEXTRACE(", ");
 			    LEXRETURN(',');
@@ -2350,7 +2347,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 570 "toke.l"
+#line 567 "toke.l"
 {
 			    LEXTRACE("= ");
 			    LEXRETURN('=');
@@ -2358,7 +2355,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 575 "toke.l"
+#line 572 "toke.l"
 {
 			    LEXTRACE(": ");
 			    LEXRETURN(':');
@@ -2366,7 +2363,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 580 "toke.l"
+#line 577 "toke.l"
 {
 			    if (yyleng & 1) {
 				LEXTRACE("!");
@@ -2376,7 +2373,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 587 "toke.l"
+#line 584 "toke.l"
 {
 			    if (YY_START == INSTR) {
 				LEXTRACE("ERROR ");
@@ -2391,14 +2388,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 599 "toke.l"
+#line 596 "toke.l"
 {			/* throw away space/tabs */
 			    sawspace = TRUE;	/* but remember for fill_args */
 			}
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 603 "toke.l"
+#line 600 "toke.l"
 {
 			    sawspace = TRUE;	/* remember for fill_args */
 			    sudolineno++;
@@ -2407,7 +2404,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 609 "toke.l"
+#line 606 "toke.l"
 {
 			    BEGIN INITIAL;
 			    sudolineno++;
@@ -2418,7 +2415,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 617 "toke.l"
+#line 614 "toke.l"
 {
 			    LEXTRACE("ERROR ");
 			    LEXRETURN(ERROR);
@@ -2430,7 +2427,7 @@ case YY_STATE_EOF(GOTCMND):
 case YY_STATE_EOF(STARTDEFS):
 case YY_STATE_EOF(INDEFS):
 case YY_STATE_EOF(INSTR):
-#line 622 "toke.l"
+#line 619 "toke.l"
 {
 			    if (YY_START != INITIAL) {
 			    	BEGIN INITIAL;
@@ -2443,10 +2440,10 @@ case YY_STATE_EOF(INSTR):
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 632 "toke.l"
+#line 629 "toke.l"
 ECHO;
 	YY_BREAK
-#line 2449 "lex.yy.c"
+#line 2446 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -3337,7 +3334,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 632 "toke.l"
+#line 629 "toke.l"
 
 struct path_list {
     char *path;
@@ -3656,5 +3653,27 @@ static int
 sudoers_trace_print(const char *msg)
 {
     return fputs(msg, stderr);
+}
+#else
+static int
+sudoers_trace_print(const char *msg)
+{
+    static int initialized;
+    static struct lbuf lbuf;
+
+    if (!initialized) {
+	initialized = TRUE;
+	lbuf_init(&lbuf, NULL, 0, NULL, 0);
+    }
+
+    lbuf_append(&lbuf, "%s", msg);
+    /* XXX - assumes a final newline */
+    if (strchr(msg, '\n') != NULL)
+    {
+	sudo_debug_printf2(SUDO_DEBUG_PARSER|SUDO_DEBUG_DEBUG, "%s:%d %s",
+	    sudoers, sudolineno, lbuf.buf);
+	lbuf.len = 0;
+    }
+    return 0;
 }
 #endif /* TRACELEXER */

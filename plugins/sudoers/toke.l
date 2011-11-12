@@ -71,6 +71,7 @@
 #include "parse.h"
 #include "toke.h"
 #include <gram.h>
+#include "lbuf.h"
 
 extern YYSTYPE yylval;
 extern int parse_error;
@@ -84,11 +85,7 @@ static int _push_include(char *, int);
 static int pop_include(void);
 static char *parse_include(char *);
 
-#ifdef TRACELEXER
 static int sudoers_trace_print(const char *msg);
-#else
-# define sudoers_trace_print NULL
-#endif
 int (*trace_print)(const char *msg) = sudoers_trace_print;
 
 #define LEXRETURN(n)	do {	\
@@ -947,5 +944,27 @@ static int
 sudoers_trace_print(const char *msg)
 {
     return fputs(msg, stderr);
+}
+#else
+static int
+sudoers_trace_print(const char *msg)
+{
+    static int initialized;
+    static struct lbuf lbuf;
+
+    if (!initialized) {
+	initialized = TRUE;
+	lbuf_init(&lbuf, NULL, 0, NULL, 0);
+    }
+
+    lbuf_append(&lbuf, "%s", msg);
+    /* XXX - assumes a final newline */
+    if (strchr(msg, '\n') != NULL)
+    {
+	sudo_debug_printf2(SUDO_DEBUG_PARSER|SUDO_DEBUG_DEBUG, "%s:%d %s",
+	    sudoers, sudolineno, lbuf.buf);
+	lbuf.len = 0;
+    }
+    return 0;
 }
 #endif /* TRACELEXER */
