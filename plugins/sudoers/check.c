@@ -212,7 +212,7 @@ lecture(int status)
 
     if (def_lecture_file && (fp = fopen(def_lecture_file, "r")) != NULL) {
 	while ((nread = fread(buf, sizeof(char), sizeof(buf) - 1, fp)) != 0) {
-	    buf[sizeof(buf) - 1] = '\0';
+	    buf[nread] = '\0';
 	    msg.msg_type = SUDO_CONV_ERROR_MSG;
 	    msg.msg = buf;
 	    sudo_conv(1, &msg, &repl);
