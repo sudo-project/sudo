@@ -47,8 +47,11 @@
 
 #include "sudo.h"
 #include "sudo_plugin.h"
+#include "sudo_plugin_int.h"
 
 extern int tgetpass_flags; /* XXX */
+
+sudo_conv_t sudo_conv;	/* NULL in sudo front-end */
 
 /*
  * Sudo conversation function.

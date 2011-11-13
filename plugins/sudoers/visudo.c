@@ -95,6 +95,8 @@ struct sudoersfile {
 };
 TQ_DECLARE(sudoersfile)
 
+sudo_conv_t sudo_conv;	/* NULL in non-plugin */
+
 /*
  * Function prototypes
  */

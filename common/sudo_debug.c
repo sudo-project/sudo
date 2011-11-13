@@ -46,6 +46,7 @@
 #include "alloc.h"
 #include "error.h"
 #include "gettext.h"
+#include "sudo_plugin.h"
 #include "sudo_debug.h"
 
 /*
@@ -103,6 +104,8 @@ const char *const sudo_debug_subsystems[] = {
 static int sudo_debug_settings[NUM_SUBSYSTEMS];
 static int sudo_debug_fd = -1;
 
+extern sudo_conv_t sudo_conv;
+
 /*
  * Parse settings string from sudo.conf and open debugfile.
  * Returns 1 on success, 0 if cannot open debugfile.
@@ -117,13 +120,16 @@ int sudo_debug_init(const char *debugfile, const char *settings)
     for (i = 0; i < NUM_SUBSYSTEMS; i++)
 	sudo_debug_settings[i] = -1;
 
-    /* Open debug file descriptor. */
-    if (sudo_debug_fd != -1)
-	close(sudo_debug_fd);
-    sudo_debug_fd = open(debugfile, O_WRONLY|O_APPEND|O_CREAT, S_IRUSR|S_IWUSR);
-    if (sudo_debug_fd == -1)
-	return 0;
-    (void)fcntl(sudo_debug_fd, F_SETFD, FD_CLOEXEC);
+    /* Open debug file if specified. */
+    if (debugfile != NULL) {
+	if (sudo_debug_fd != -1)
+	    close(sudo_debug_fd);
+	sudo_debug_fd = open(debugfile, O_WRONLY|O_APPEND|O_CREAT,
+	    S_IRUSR|S_IWUSR);
+	if (sudo_debug_fd == -1)
+	    return 0;
+	(void)fcntl(sudo_debug_fd, F_SETFD, FD_CLOEXEC);
+    }
 
     /* Parse settings string. */
     buf = estrdup(settings);
@@ -238,8 +244,22 @@ sudo_debug_write(const char *str, int len)
     struct iovec iov[5];
     int iovcnt = 4;
 
-    if (sudo_debug_fd == -1 || len <= 0)
+    if (len <= 0)
 	return;
+
+    if (sudo_debug_fd == -1) {
+	/* Use conversation function if no debug fd. */
+	struct sudo_conv_message msg;
+	struct sudo_conv_reply repl;
+
+	/* Call conversation function */
+	memset(&msg, 0, sizeof(msg));
+	memset(&repl, 0, sizeof(repl));
+	msg.msg_type = SUDO_CONV_DEBUG_MSG;
+	msg.msg = str;
+	sudo_conv(1, &msg, &repl);
+	return;
+    }
 
     /* Prepend program name with trailing space. */
     iov[1].iov_base = (char *)getprogname();
