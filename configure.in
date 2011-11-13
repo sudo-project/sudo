@@ -2468,27 +2468,9 @@ if test ${with_SecurID-'no'} != "no"; then
 	with_SecurID=/usr/ace
     fi
     CPPFLAGS="${CPPFLAGS} -I${with_SecurID}"
-    _LDFLAGS="${LDFLAGS}"
     SUDO_APPEND_LIBPATH(LDFLAGS, [${with_SecurID}])
-    #
-    # Determine whether to use the new or old SecurID API
-    #
-    AC_CHECK_LIB(aceclnt, SD_Init,
-	[
-	    AUTH_OBJS="$AUTH_OBJS securid5.lo";
-	    SUDOERS_LIBS="${SUDOERS_LIBS} -laceclnt -lpthread"
-	]
-	[
-	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_SecurID}])
-	], [
-	    AUTH_OBJS="$AUTH_OBJS securid.lo";
-	    SUDOERS_LIBS="${SUDOERS_LIBS} ${with_SecurID}/sdiclient.a"
-	],
-	[
-	    -lpthread
-	]
-    )
-    LDFLAGS="${_LDFLAGS}"
+    SUDOERS_LIBS="${SUDOERS_LIBS} -laceclnt -lpthread"
+    AUTH_OBJS="$AUTH_OBJS securid5.lo";
 fi
 
 dnl

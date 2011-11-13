@@ -18080,7 +18080,6 @@ if test ${with_SecurID-'no'} != "no"; then
 	with_SecurID=/usr/ace
     fi
     CPPFLAGS="${CPPFLAGS} -I${with_SecurID}"
-    _LDFLAGS="${LDFLAGS}"
 
     if test X"$with_rpath" = X"yes"; then
 	case "$host" in
@@ -18096,78 +18095,8 @@ if test ${with_SecurID-'no'} != "no"; then
 	blibpath_add="${blibpath_add}:${with_SecurID}"
     fi
 
-    #
-    # Determine whether to use the new or old SecurID API
-    #
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SD_Init in -laceclnt" >&5
-$as_echo_n "checking for SD_Init in -laceclnt... " >&6; }
-if ${ac_cv_lib_aceclnt_SD_Init_______lpthread_______+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-laceclnt
-	    -lpthread
-
-     $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char SD_Init ();
-int
-main ()
-{
-return SD_Init ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_aceclnt_SD_Init_______lpthread_______=yes
-else
-  ac_cv_lib_aceclnt_SD_Init_______lpthread_______=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_aceclnt_SD_Init_______lpthread_______" >&5
-$as_echo "$ac_cv_lib_aceclnt_SD_Init_______lpthread_______" >&6; }
-if test "x$ac_cv_lib_aceclnt_SD_Init_______lpthread_______" = xyes; then :
-
-	    AUTH_OBJS="$AUTH_OBJS securid5.lo";
-	    SUDOERS_LIBS="${SUDOERS_LIBS} -laceclnt -lpthread"
-
-
-
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_SecurID} -Wl,+b,${with_SecurID}"
-			;;
-	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_SecurID} -Wl,-R${with_SecurID}"
-			;;
-	esac
-    else
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_SecurID}"
-    fi
-    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:${with_SecurID}"
-    fi
-
-
-else
-
-	    AUTH_OBJS="$AUTH_OBJS securid.lo";
-	    SUDOERS_LIBS="${SUDOERS_LIBS} ${with_SecurID}/sdiclient.a"
-
-fi
-
-    LDFLAGS="${_LDFLAGS}"
+    SUDOERS_LIBS="${SUDOERS_LIBS} -laceclnt -lpthread"
+    AUTH_OBJS="$AUTH_OBJS securid5.lo";
 fi
 
 

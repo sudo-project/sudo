@@ -631,13 +631,6 @@ secureware.lo: $(authdir)/secureware.c $(top_builddir)/config.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
                $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/secureware.c
-securid.lo: $(authdir)/securid.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
-            $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/error.h \
-            $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
-            $(srcdir)/defaults.h $(devdir)/def_data.h $(srcdir)/logging.h \
-            $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
-            $(incdir)/sudo_debug.h $(incdir)/gettext.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/securid.c
 securid5.lo: $(authdir)/securid5.c $(top_builddir)/config.h \
              $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \
              $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
