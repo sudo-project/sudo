@@ -51,12 +51,12 @@
  * http://publib16.boulder.ibm.com/doc_link/en_US/a_doc_lib/libs/basetrf1/authenticate.htm
  */
 int
-aixauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
+sudo_aix_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 {
     char *pass, *message = NULL;
     int result = 1, reenter = 0;
     int rval = AUTH_SUCCESS;
-    debug_decl(aixauth_verify, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_aix_verify, SUDO_DEBUG_AUTH)
 
     do {
 	pass = auth_getpass(prompt, def_passwd_timeout * 60,
@@ -89,9 +89,9 @@ aixauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 }
 
 int
-aixauth_cleanup(struct passwd *pw, sudo_auth *auth)
+sudo_aix_cleanup(struct passwd *pw, sudo_auth *auth)
 {
-    debug_decl(aixauth_cleanup, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_aix_cleanup, SUDO_DEBUG_AUTH)
 
     /* Unset AUTHSTATE as it may not be correct for the runas user. */
     unsetenv("AUTHSTATE");

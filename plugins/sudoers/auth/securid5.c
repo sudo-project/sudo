@@ -67,10 +67,10 @@
  *                   success.
  */
 int
-securid_init(struct passwd *pw, sudo_auth *auth)
+sudo_securid_init(struct passwd *pw, sudo_auth *auth)
 {
     static SDI_HANDLE sd_dat;			/* SecurID handle */
-    debug_decl(securid_init, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_securid_init, SUDO_DEBUG_AUTH)
 
     auth->data = (void *) &sd_dat;		/* For method-specific data */
 
@@ -96,11 +96,11 @@ securid_init(struct passwd *pw, sudo_auth *auth)
  *                   otherwise
  */
 int
-securid_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
+sudo_securid_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     SDI_HANDLE *sd = (SDI_HANDLE *) auth->data;
     int retval;
-    debug_decl(securid_setup, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_securid_setup, SUDO_DEBUG_AUTH)
 
     /* Re-initialize SecurID every time. */
     if (SD_Init(sd) != ACM_OK) {
@@ -147,11 +147,11 @@ securid_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
  *                   incorrect authentication, fatal on errors
  */
 int
-securid_verify(struct passwd *pw, char *pass, sudo_auth *auth)
+sudo_securid_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
     SDI_HANDLE *sd = (SDI_HANDLE *) auth->data;
     int rval;
-    debug_decl(securid_verify, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_securid_verify, SUDO_DEBUG_AUTH)
 
     pass = auth_getpass("Enter your PASSCODE: ",
 	def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF);

@@ -88,10 +88,10 @@ krb5_get_init_creds_opt_free(krb5_get_init_creds_opt *opts)
 #endif
 
 int
-kerb5_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
+sudo_krb5_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     static char	*krb5_prompt;
-    debug_decl(kerb5_init, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_krb5_init, SUDO_DEBUG_AUTH)
 
     if (krb5_prompt == NULL) {
 	krb5_context	sudo_context;
@@ -125,14 +125,14 @@ kerb5_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 }
 
 int
-kerb5_init(struct passwd *pw, sudo_auth *auth)
+sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
 {
     krb5_context	sudo_context;
     krb5_ccache		ccache;
     krb5_principal	princ;
     krb5_error_code 	error;
     char		cache_name[64];
-    debug_decl(kerb5_init, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_krb5_init, SUDO_DEBUG_AUTH)
 
     auth->data = (void *) &sudo_krb5_data; /* Stash all our data here */
 
@@ -170,13 +170,13 @@ kerb5_init(struct passwd *pw, sudo_auth *auth)
 
 #ifdef HAVE_KRB5_VERIFY_USER
 int
-kerb5_verify(struct passwd *pw, char *pass, sudo_auth *auth)
+sudo_krb5_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
     krb5_context	sudo_context;
     krb5_principal	princ;
     krb5_ccache		ccache;
     krb5_error_code	error;
-    debug_decl(kerb5_verify, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_krb5_verify, SUDO_DEBUG_AUTH)
 
     sudo_context = ((sudo_krb5_datap) auth->data)->sudo_context;
     princ = ((sudo_krb5_datap) auth->data)->princ;
@@ -187,7 +187,7 @@ kerb5_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 }
 #else
 int
-kerb5_verify(struct passwd *pw, char *pass, sudo_auth *auth)
+sudo_krb5_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
     krb5_context	sudo_context;
     krb5_principal	princ;
@@ -195,7 +195,7 @@ kerb5_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     krb5_ccache		ccache;
     krb5_error_code	error;
     krb5_get_init_creds_opt *opts = NULL;
-    debug_decl(kerb5_verify, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_krb5_verify, SUDO_DEBUG_AUTH)
 
     sudo_context = ((sudo_krb5_datap) auth->data)->sudo_context;
     princ = ((sudo_krb5_datap) auth->data)->princ;
@@ -257,12 +257,12 @@ done:
 #endif
 
 int
-kerb5_cleanup(struct passwd *pw, sudo_auth *auth)
+sudo_krb5_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     krb5_context	sudo_context;
     krb5_principal	princ;
     krb5_ccache		ccache;
-    debug_decl(kerb5_cleanup, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_krb5_cleanup, SUDO_DEBUG_AUTH)
 
     sudo_context = ((sudo_krb5_datap) auth->data)->sudo_context;
     princ = ((sudo_krb5_datap) auth->data)->princ;

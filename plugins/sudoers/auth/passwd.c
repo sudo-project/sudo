@@ -49,9 +49,9 @@
 #define HAS_AGEINFO(p, l)	(l == 18 && p[DESLEN] == ',')
 
 int
-passwd_init(struct passwd *pw, sudo_auth *auth)
+sudo_passwd_init(struct passwd *pw, sudo_auth *auth)
 {
-    debug_decl(passwd_init, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_passwd_init, SUDO_DEBUG_AUTH)
 
 #ifdef HAVE_SKEYACCESS
     if (skeyaccess(pw, user_tty, NULL, NULL) == 0)
@@ -64,13 +64,13 @@ passwd_init(struct passwd *pw, sudo_auth *auth)
 }
 
 int
-passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth)
+sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
     char sav, *epass;
     char *pw_epasswd = auth->data;
     size_t pw_len;
     int error;
-    debug_decl(passwd_verify, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_passwd_verify, SUDO_DEBUG_AUTH)
 
     pw_len = strlen(pw_epasswd);
 
@@ -105,12 +105,12 @@ passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 }
 
 int
-passwd_cleanup(pw, auth)
+sudo_passwd_cleanup(pw, auth)
     struct passwd *pw;
     sudo_auth *auth;
 {
     char *pw_epasswd = auth->data;
-    debug_decl(passwd_cleanup, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_passwd_cleanup, SUDO_DEBUG_AUTH)
 
     if (pw_epasswd != NULL) {
 	zero_bytes(pw_epasswd, strlen(pw_epasswd));

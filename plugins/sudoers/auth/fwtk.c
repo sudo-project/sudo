@@ -50,11 +50,11 @@
 #include "sudo_auth.h"
 
 int
-fwtk_init(struct passwd *pw, sudo_auth *auth)
+sudo_fwtk_init(struct passwd *pw, sudo_auth *auth)
 {
     static Cfg *confp;			/* Configuration entry struct */
     char resp[128];			/* Response from the server */
-    debug_decl(fwtk_init, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_fwtk_init, SUDO_DEBUG_AUTH)
 
     if ((confp = cfg_read("sudo")) == (Cfg *)-1) {
 	warningx(_("unable to read fwtk config"));
@@ -80,13 +80,13 @@ fwtk_init(struct passwd *pw, sudo_auth *auth)
 }
 
 int
-fwtk_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
+sudo_fwtk_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 {
     char *pass;				/* Password from the user */
     char buf[SUDO_PASS_MAX + 12];	/* General prupose buffer */
     char resp[128];			/* Response from the server */
     int error;
-    debug_decl(fwtk_verify, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_fwtk_verify, SUDO_DEBUG_AUTH)
 
     /* Send username to authentication server. */
     (void) snprintf(buf, sizeof(buf), "authorize %s 'sudo'", pw->pw_name);
@@ -146,9 +146,9 @@ done:
 }
 
 int
-fwtk_cleanup(struct passwd *pw, sudo_auth *auth)
+sudo_fwtk_cleanup(struct passwd *pw, sudo_auth *auth)
 {
-    debug_decl(fwtk_cleanup, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_fwtk_cleanup, SUDO_DEBUG_AUTH)
 
     auth_close();
     debug_return_int(AUTH_SUCCESS);

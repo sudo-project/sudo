@@ -67,7 +67,7 @@
 static int check_dce_status(error_status_t, char *);
 
 int
-dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth)
+sudo_dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth)
 {
     struct passwd		temp_pw;
     sec_passwd_rec_t		password_rec;
@@ -75,7 +75,7 @@ dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth)
     boolean32			reset_passwd;
     sec_login_auth_src_t	auth_src;
     error_status_t		status;
-    debug_decl(dce_verify, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_dce_verify, SUDO_DEBUG_AUTH)
 
     /*
      * Create the local context of the DCE principal necessary

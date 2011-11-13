@@ -87,13 +87,13 @@ sudo_collect(int timeout, int rendition, uchar_t *title, int nprompts,
 }
 
 int
-sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
+sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     SIAENTITY *siah = NULL;
     int i;
     extern int NewArgc;
     extern char **NewArgv;
-    debug_decl(sia_setup, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_sia_setup, SUDO_DEBUG_AUTH)
 
     /* Rebuild argv for sia_ses_init() */
     sudo_argc = NewArgc + 1;
@@ -115,10 +115,10 @@ sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 }
 
 int
-sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
+sudo_sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 {
     SIAENTITY *siah = (SIAENTITY *) auth->data;
-    debug_decl(sia_verify, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_sia_verify, SUDO_DEBUG_AUTH)
 
     def_prompt = prompt;		/* for sudo_collect */
 
@@ -130,10 +130,10 @@ sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 }
 
 int
-sia_cleanup(struct passwd *pw, sudo_auth *auth)
+sudo_sia_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     SIAENTITY *siah = (SIAENTITY *) auth->data;
-    debug_decl(sia_cleanup, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_sia_cleanup, SUDO_DEBUG_AUTH)
 
     (void) sia_ses_release(&siah);
     efree(sudo_argv);
