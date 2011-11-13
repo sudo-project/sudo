@@ -83,8 +83,6 @@ int rfc1938_setup(struct passwd *pw, char **prompt, sudo_auth *auth);
 int rfc1938_verify(struct passwd *pw, char *pass, sudo_auth *auth);
 int afs_verify(struct passwd *pw, char *pass, sudo_auth *auth);
 int dce_verify(struct passwd *pw, char *pass, sudo_auth *auth);
-int kerb4_init(struct passwd *pw, sudo_auth *auth);
-int kerb4_verify(struct passwd *pw, char *pass, sudo_auth *auth);
 int kerb5_init(struct passwd *pw, sudo_auth *auth);
 int kerb5_setup(struct passwd *pw, char **prompt, sudo_auth *auth);
 int kerb5_verify(struct passwd *pw, char *pass, sudo_auth *auth);

@@ -82,9 +82,6 @@ static sudo_auth auth_switch[] = {
 #ifdef HAVE_DCE
     AUTH_ENTRY("dce", 0, NULL, NULL, dce_verify, NULL, NULL, NULL)
 #endif
-#ifdef HAVE_KERB4
-    AUTH_ENTRY("kerb4", 0, kerb4_init, NULL, kerb4_verify, NULL, NULL, NULL)
-#endif
 #ifdef HAVE_KERB5
     AUTH_ENTRY("kerb5", 0, kerb5_init, kerb5_setup, kerb5_verify, kerb5_cleanup, NULL, NULL)
 #endif

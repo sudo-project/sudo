@@ -402,15 +402,6 @@ AC_ARG_WITH(fwtk, [AS_HELP_STRING([--with-fwtk[[=DIR]]], [enable FWTK AuthSRV su
 		;;
 esac])
 
-AC_ARG_WITH(kerb4, [AS_HELP_STRING([--with-kerb4[[=DIR]]], [enable Kerberos IV support])],
-[case $with_kerb4 in
-    no)		;;
-    *)		AC_MSG_CHECKING(whether to try kerberos IV authentication)
-		AC_MSG_RESULT(yes)
-		AUTH_REG="$AUTH_REG kerb4"
-		;;
-esac])
-
 AC_ARG_WITH(kerb5, [AS_HELP_STRING([--with-kerb5[[=DIR]]], [enable Kerberos V support])],
 [case $with_kerb5 in
     no)		;;
@@ -2518,65 +2509,6 @@ if test -z "${AUTH_EXCL}" -a -n "$AUTH_DEF"; then
 fi
 
 dnl
-dnl Kerberos IV
-dnl
-if test ${with_kerb4-'no'} != "no"; then
-    AC_DEFINE(HAVE_KERB4)
-    dnl
-    dnl Use the specified directory, if any, else search for correct inc dir
-    dnl
-    O_LDFLAGS="$LDFLAGS"
-    if test "$with_kerb4" = "yes"; then
-	found=no
-	O_CPPFLAGS="$CPPFLAGS"
-	for dir in "" "kerberosIV/" "krb4/" "kerberos4/" "kerberosv4/"; do
-	    CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
-	    AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <krb.h>]])], [found=yes; break])
-	done
-	test X"$found" = X"no" && CPPFLAGS="$O_CPPFLAGS"
-    else
-	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_kerb4}/lib])
-	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_kerb4}/lib])
-	CPPFLAGS="$CPPFLAGS -I${with_kerb4}/include"
-	AC_CHECK_HEADER([krb.h], [found=yes], [found=no])
-    fi
-    if test X"$found" = X"no"; then
-	AC_MSG_WARN([Unable to locate Kerberos IV include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS])
-    fi
-
-    dnl
-    dnl Check for -ldes vs. -ldes425
-    dnl
-    AC_CHECK_LIB(des, des_cbc_encrypt, [K4LIBS="-ldes"], [
-	AC_CHECK_LIB(des425, des_cbc_encrypt, [K4LIBS="-ldes425"], [K4LIBS=""])
-    ])
-    dnl
-    dnl Try to determine whether we have KTH or MIT/CNS Kerberos IV
-    dnl
-    AC_MSG_CHECKING(whether we are using KTH Kerberos IV)
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <krb.h>]], [[const char *tmp = krb4_version;]])], [
-	    AC_MSG_RESULT(yes)
-	    K4LIBS="${K4LIBS} -lcom_err"
-	    AC_CHECK_LIB(roken, main, [K4LIBS="${K4LIBS} -lroken"])
-	], [
-	    AC_MSG_RESULT(no)
-	]
-    )
-    dnl
-    dnl The actual Kerberos IV lib might be -lkrb or -lkrb4
-    dnl
-    AC_CHECK_LIB(krb, main, [K4LIBS="-lkrb $K4LIBS"], [
-	AC_CHECK_LIB(krb4, main, [K4LIBS="-lkrb4 $K4LIBS"],
-	    [K4LIBS="-lkrb $K4LIBS"]
-	    [AC_MSG_WARN([Unable to locate Kerberos IV libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDOERS_LDFLAGS and possibly add Kerberos libs to SUDOERS_LIBS])]
-	, [$K4LIBS])
-    ], [$K4LIBS])
-    LDFLAGS="$O_LDFLAGS"
-    SUDOERS_LIBS="${SUDOERS_LIBS} $K4LIBS"
-    AUTH_OBJS="$AUTH_OBJS kerb4.lo"
-fi
-
-dnl
 dnl Kerberos V
 dnl There is an easy way and a hard way...
 dnl
@@ -3166,7 +3098,6 @@ AH_TEMPLATE(HAVE_HEIMDAL, [Define to 1 if your Kerberos is Heimdal.])
 AH_TEMPLATE(HAVE_IN6_ADDR, [Define to 1 if <netinet/in.h> contains struct in6_addr.])
 AH_TEMPLATE(HAVE_ISCOMSEC, [Define to 1 if you have the `iscomsec' function. (HP-UX >= 10.x check for shadow enabled)])
 AH_TEMPLATE(HAVE_ISSECURE, [Define to 1 if you have the `issecure' function. (SunOS 4.x check for shadow enabled)])
-AH_TEMPLATE(HAVE_KERB4, [Define to 1 if you use Kerberos IV.])
 AH_TEMPLATE(HAVE_KERB5, [Define to 1 if you use Kerberos V.])
 AH_TEMPLATE(HAVE_KRB5_GET_INIT_CREDS_OPT_ALLOC, [Define to 1 if you have the `krb5_get_init_creds_opt_alloc' function.])
 AH_TEMPLATE(HAVE_KRB5_GET_INIT_CREDS_OPT_FREE_TWO_ARGS, [Define to 1 if your `krb5_get_init_creds_opt_free' function takes two arguments.])

@@ -241,9 +241,6 @@
    shadow enabled) */
 #undef HAVE_ISSECURE
 
-/* Define to 1 if you use Kerberos IV. */
-#undef HAVE_KERB4
-
 /* Define to 1 if you use Kerberos V. */
 #undef HAVE_KERB5
 

@@ -134,7 +134,6 @@ plugins/sudoers/auth/aix_auth.c
 plugins/sudoers/auth/bsdauth.c
 plugins/sudoers/auth/dce.c
 plugins/sudoers/auth/fwtk.c
-plugins/sudoers/auth/kerb4.c
 plugins/sudoers/auth/kerb5.c
 plugins/sudoers/auth/pam.c
 plugins/sudoers/auth/passwd.c
