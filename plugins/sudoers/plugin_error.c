@@ -35,7 +35,7 @@
 static void _warning(int, const char *, va_list);
        void plugin_cleanup(int);
 
-sigjmp_buf error_jmp;
+extern sigjmp_buf error_jmp;
 
 extern sudo_conv_t sudo_conv;
 

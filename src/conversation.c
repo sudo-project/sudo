@@ -51,7 +51,9 @@
 
 extern int tgetpass_flags; /* XXX */
 
+#if defined(HAVE_DLOPEN) || defined(HAVE_SHL_LOAD)
 sudo_conv_t sudo_conv;	/* NULL in sudo front-end */
+#endif
 
 /*
  * Sudo conversation function.
