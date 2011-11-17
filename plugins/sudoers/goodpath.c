@@ -54,7 +54,8 @@ sudo_goodpath(const char *path, struct stat *sbp)
 	    rval = TRUE;
 	else
 	    errno = EACCES;
-	(void) memcpy(sbp, &sb, sizeof(struct stat));
+	if (sbp)
+	    (void) memcpy(sbp, &sb, sizeof(struct stat));
     }
 
     debug_return_int(rval);
