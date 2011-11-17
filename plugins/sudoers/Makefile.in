@@ -245,7 +245,9 @@ install-doc: install-dirs
 	@LDAP@$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0555 $(srcdir)/sudoers2ldif $(DESTDIR)$(docdir)
 
 install-plugin: sudoers.la install-dirs
-	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0755 .libs/sudoers$(soext) $(DESTDIR)$(plugindir)
+	if [ X"$(soext)" != X"" ]; then \
+	    $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0755 .libs/sudoers$(soext) $(DESTDIR)$(plugindir); \
+	fi
 
 install-sudoers: install-dirs
 	$(INSTALL) -d -O $(sudoers_uid) -G $(sudoers_gid) -M 0750 \
