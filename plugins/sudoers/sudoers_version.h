@@ -43,11 +43,12 @@
  * 38	sudo 1.7.4, added LOG_INPUT/LOG_OUTPUT and NOLOG_INPUT/NOLOG_OUTPUT tags
  * 39	sudo 1.7.6/1.8.1, White space is now permitted within a User_List in a per-user Defaults definition.
  * 40	sudo 1.7.6/1.8.1, A group ID is now allowed in a User_List or Runas_List.
+ * 41	sudo 1.7.6/1.8.4, Support for relative paths in #include and #includedir
 */
 
 #ifndef _SUDOERS_VERSION_H
 #define	_SUDOERS_VERSION_H
 
-#define SUDOERS_GRAMMAR_VERSION	40
+#define SUDOERS_GRAMMAR_VERSION	41
 
 #endif /* _SUDOERS_VERSION_H */
