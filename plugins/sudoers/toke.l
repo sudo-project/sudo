@@ -255,7 +255,7 @@ DEFVAR			[a-z_]+
 			}			/* a command line arg */
 }
 
-<INITIAL>^#include[[:blank:]]+\/.*\n {
+<INITIAL>^#include[[:blank:]]+.*\n {
 			    char *path;
 
 			    if (continued) {
@@ -273,7 +273,7 @@ DEFVAR			[a-z_]+
 				yyterminate();
 			}
 
-<INITIAL>^#includedir[[:blank:]]+\/.*\n {
+<INITIAL>^#includedir[[:blank:]]+.*\n {
 			    char *path;
 
 			    if (continued) {
@@ -887,8 +887,8 @@ pop_include(void)
 static char *
 parse_include(char *base)
 {
-    char *cp, *ep, *path;
-    int len = 0, subst = 0;
+    char *cp, *ep, *path, *pp;
+    int dirlen = 0, len = 0, subst = 0;
     size_t shost_len = 0;
     debug_decl(parse_include, SUDO_DEBUG_PARSER)
 
@@ -908,15 +908,26 @@ parse_include(char *base)
 	ep++;
     }
 
-    /* Make a copy of path and return it. */
+    /* Relative paths are located in the same dir as the sudoers file. */
+    if (*cp != '/') {
+	char *dirend = strrchr(sudoers, '/');
+	if (dirend != NULL)
+	    dirlen = (int)(dirend - sudoers) + 1;
+    }
+
+    /* Make a copy of the fully-qualified path and return it. */
     len += (int)(ep - cp);
-    if ((path = malloc(len + 1)) == NULL) {
+    path = pp = malloc(len + dirlen + 1);
+    if (path == NULL) {
 	yyerror(_("unable to allocate memory"));
 	debug_return_str(NULL);
     }
+    if (dirlen) {
+	memcpy(path, sudoers, dirlen);
+	pp += dirlen;
+    }
     if (subst) {
 	/* substitute for %h */
-	char *pp = path;
 	while (cp < ep) {
 	    if (cp[0] == '%' && cp[1] == 'h') {
 		memcpy(pp, user_shost, shost_len);
@@ -928,8 +939,8 @@ parse_include(char *base)
 	}
 	*pp = '\0';
     } else {
-	memcpy(path, cp, len);
-	path[len] = '\0';
+	memcpy(pp, cp, len);
+	pp[len] = '\0';
     }
 
     /* Push any excess characters (e.g. comment, newline) back to the lexer */

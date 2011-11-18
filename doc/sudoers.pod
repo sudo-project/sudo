@@ -655,7 +655,20 @@ F</etc/sudoers> will be processed.  Files that are included may
 themselves include other files.  A hard limit of 128 nested include
 files is enforced to prevent include file loops.
 
-The file name may include the C<%h> escape, signifying the short form
+If the path to the include file is not fully-qualified (does not
+begin with a F</>), it must be located in the same directory as the
+sudoers file it was included from.  For example, if F</etc/sudoers>
+contains the line:
+
+=over 4
+
+C<#include sudoers.local>
+
+=back
+
+the file that will be included is F</etc/sudoers.local>.
+
+The file name may also include the C<%h> escape, signifying the short form
 of the host name.  I.e., if the machine's host name is "xerxes", then
 
 C<#include /etc/sudoers.%h>
