@@ -151,13 +151,13 @@ sub mkdep {
 	}
     }
 
-    rename($file, $file . ".old");
-    if (!open(MF, ">$file")) {
-	warn("cannot open $file: $!\n");
-	rename($file . ".old", $file);
+    my $newfile = $file . ".new";
+    if (!open(MF, ">$newfile")) {
+	warn("cannot open $newfile: $!\n");
     } else {
-	print MF $new_makefile || warn("cannot write $file: $!\n");
-	close(MF);
+	print MF $new_makefile || warn("cannot write $newfile: $!\n");
+	close(MF) || warn("cannot close $newfile: $!\n");;
+	rename($newfile, $file);
     }
 }
 
