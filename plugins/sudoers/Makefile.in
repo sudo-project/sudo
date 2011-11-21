@@ -682,7 +682,7 @@ sudoers.lo: $(srcdir)/sudoers.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
 sudoreplay.o: $(srcdir)/sudoreplay.c $(top_builddir)/config.h \
               $(top_srcdir)/compat/timespec.h $(top_builddir)/pathnames.h \
               $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
-              $(incdir)/gettext.h
+              $(incdir)/gettext.h $(incdir)/sudo_plugin.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudoreplay.c
 testsudoers.o: $(srcdir)/testsudoers.c $(top_builddir)/config.h \
                $(srcdir)/tsgetgrpw.h $(top_builddir)/config.h \
@@ -702,7 +702,7 @@ toke.lo: $(devdir)/toke.c $(top_builddir)/config.h $(top_builddir)/config.h \
          $(incdir)/fileops.h $(srcdir)/defaults.h $(devdir)/def_data.h \
          $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
          $(incdir)/sudo_debug.h $(incdir)/gettext.h $(srcdir)/parse.h \
-         $(srcdir)/toke.h $(devdir)/gram.h
+         $(srcdir)/toke.h $(devdir)/gram.h $(incdir)/lbuf.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/toke.c
 toke_util.lo: $(srcdir)/toke_util.c $(top_builddir)/config.h \
               $(srcdir)/sudoers.h $(top_builddir)/pathnames.h \

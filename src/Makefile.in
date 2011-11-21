@@ -155,7 +155,8 @@ conversation.o: $(srcdir)/conversation.c $(top_builddir)/config.h \
                 $(srcdir)/sudo.h $(top_builddir)/pathnames.h \
                 $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
                 $(incdir)/fileops.h $(incdir)/list.h $(incdir)/sudo_debug.h \
-                $(incdir)/gettext.h $(incdir)/sudo_plugin.h
+                $(incdir)/gettext.h $(incdir)/sudo_plugin.h \
+                $(srcdir)/sudo_plugin_int.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/conversation.c
 error.o: $(srcdir)/error.c $(top_builddir)/config.h $(incdir)/missing.h \
          $(incdir)/error.h $(incdir)/gettext.h
