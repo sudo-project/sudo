@@ -2997,14 +2997,29 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no"; then
 	PROGS="${PROGS} libsudo_noexec.la"
 	INSTALL_NOEXEC="install-noexec"
 
-	eval noexec_file="$with_noexec"
+	noexec_file="$with_noexec"
+	_noexec_file=
+	while test X"$noexec_file" != X"$_noexec_file"; do
+	    _noexec_file="$noexec_file"
+	    eval noexec_file="$_noexec_file"
+	done
 	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$noexec_file", [The fully qualified pathname of sudo_noexec.so])
     fi
     if test X"$with_selinux" != X"no"; then
-	eval sesh_file="$libexecdir/sesh"
+	sesh_file="$libexecdir/sesh"
+	_sesh_file=
+	while test X"$sesh_file" != X"$_sesh_file"; do
+	    _sesh_file="$sesh_file"
+	    eval sesh_file="$_sesh_file"
+	done
 	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, "$sesh_file", [The fully qualified pathname of sesh])
     fi
-    eval PLUGINDIR="$with_plugindir"
+    PLUGINDIR="$with_plugindir"
+    _PLUGINDIR=
+    while test X"$PLUGINDIR" != X"$_PLUGINDIR"; do
+	_PLUGINDIR="$PLUGINDIR"
+	eval PLUGINDIR="$_PLUGINDIR"
+    done
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR/")
     SUDO_DEFINE_UNQUOTED(SUDOERS_PLUGIN, "sudoers${SOEXT}")
     exec_prefix="$oexec_prefix"
