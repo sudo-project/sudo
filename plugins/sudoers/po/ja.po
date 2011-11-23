@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: sudoers 1.8.3rc1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2011-09-16 16:52-0400\n"
-"PO-Revision-Date: 2011-10-20 05:47+0900\n"
+"PO-Revision-Date: 2011-11-23 09:39+0900\n"
 "Last-Translator: Yasuaki Taniguchi <yasuakit@gmail.com>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
 "Language: ja\n"
@@ -777,7 +777,7 @@ msgstr "コマンドが許可されていません"
 #: plugins/sudoers/logging.c:263
 #, c-format
 msgid "%s is not in the sudoers file.  This incident will be reported.\n"
-msgstr "%s は sudoers ファイルではありません。この事象は記録・報告されます。\n"
+msgstr "%s は sudoers ファイル内にありません。この事象は記録・報告されます。\n"
 
 #: plugins/sudoers/logging.c:266
 #, c-format
