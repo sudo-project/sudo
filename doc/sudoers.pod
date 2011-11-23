@@ -89,11 +89,11 @@ environment are inherited by the command to be run.  There are two
 distinct ways I<sudoers> can deal with environment variables.
 
 By default, the I<env_reset> option is enabled.  This causes commands
-to be executed with a minimal environment containing C<TERM>,
-C<PATH>, C<HOME>, C<MAIL>, C<SHELL>, C<LOGNAME>, C<USER> and C<USERNAME> in
-addition to variables from the invoking process permitted by the
-I<env_check> and I<env_keep> options.  This is effectively a whitelist
-for environment variables.
+to be executed with a minimal environment containing the C<TERM>,
+C<PATH>, C<HOME>, C<MAIL>, C<SHELL>, C<LOGNAME>, C<USER>, C<USERNAME>
+and C<SUDO_*> variables in addition to variables from the
+invoking process permitted by the I<env_check> and I<env_keep>
+options.  This is effectively a whitelist for environment variables.
 
 If, however, the I<env_reset> option is disabled, any variables not
 explicitly denied by the I<env_check> and I<env_delete> options are
@@ -122,6 +122,9 @@ variables remain unchanged; I<HOME>, I<MAIL>, I<SHELL>, I<USER>,
 and I<LOGNAME> are set based on the target user.  On Linux and AIX
 systems the contents of F</etc/environment> are also included.  All
 other environment variables are removed.
+
+Lastly, if the I<env_file> option is defined, any variables present
+in that file will be set to their specified values.
 
 =head1 SUDOERS FILE FORMAT
 
@@ -783,14 +786,17 @@ default.
 
 =item env_reset
 
-If set, B<sudo> will reset the environment to only contain the
-LOGNAME, MAIL, SHELL, USER, USERNAME and the C<SUDO_*> variables.  Any
+If set, B<sudo> will run the command in a minimal environment
+containing the C<TERM>, C<PATH>, C<HOME>, C<MAIL>, C<SHELL>,
+C<LOGNAME>, C<USER>, C<USERNAME> and C<SUDO_*> variables.  Any
 variables in the caller's environment that match the C<env_keep>
-and C<env_check> lists are then added.  The default contents of the
-C<env_keep> and C<env_check> lists are displayed when B<sudo> is
-run by root with the I<-V> option.  If the I<secure_path> option
-is set, its value will be used for the C<PATH> environment variable.
-This flag is I<@env_reset@> by default.
+and C<env_check> lists are then added, followed by any variables
+present in the file specified by the I<env_file> option (if any).
+The default contents of the C<env_keep> and C<env_check> lists are
+displayed when B<sudo> is run by root with the I<-V> option.  If
+the I<secure_path> option is set, its value will be used for the
+C<PATH> environment variable.  This flag is I<@env_reset@> by
+default.
 
 =item fast_glob
 
@@ -1371,7 +1377,7 @@ B<Strings that can be used in a boolean context>:
 
 =item env_file
 
-The I<env_file> options specifies the fully qualified path to a
+The I<env_file> option specifies the fully qualified path to a
 file containing variables to be set in the environment of the program
 being run.  Entries in this file should either be of the form
 C<VARIABLE=value> or C<export VARIABLE=value>.  The value may
