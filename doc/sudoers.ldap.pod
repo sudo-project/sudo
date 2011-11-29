@@ -103,8 +103,9 @@ the following attributes:
 
 =item B<sudoUser>
 
-A user name, uid (prefixed with C<'#'>), Unix group (prefixed with
-a C<'%'>) or user netgroup (prefixed with a C<'+'>).
+A user name, user ID (prefixed with C<'#'>), Unix group (prefixed with
+C<'%'>), Unix group ID (prefixed with C<'%#'>), or user netgroup
+(prefixed with C<'+'>).
 
 =item B<sudoHost>
 
