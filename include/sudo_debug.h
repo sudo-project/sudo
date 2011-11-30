@@ -180,6 +180,7 @@ extern const char *const sudo_debug_priorities[];
 extern const char *const sudo_debug_subsystems[];
 
 void sudo_debug_enter(const char *func, const char *file, int line, int subsys);
+void sudo_debug_execve2(int level, const char *path, char *const argv[], char *const envp[]);
 void sudo_debug_exit(const char *func, const char *file, int line, int subsys);
 void sudo_debug_exit_int(const char *func, const char *file, int line, int subsys, int rval);
 void sudo_debug_exit_long(const char *func, const char *file, int line, int subsys, long rval);
@@ -188,9 +189,9 @@ void sudo_debug_exit_bool(const char *func, const char *file, int line, int subs
 void sudo_debug_exit_str(const char *func, const char *file, int line, int subsys, const char *rval);
 void sudo_debug_exit_str_masked(const char *func, const char *file, int line, int subsys, const char *rval);
 void sudo_debug_exit_ptr(const char *func, const char *file, int line, int subsys, const void *rval);
+int sudo_debug_fd_set(int fd);
 int sudo_debug_init(const char *debugfile, const char *settings);
 void sudo_debug_printf2(int level, const char *format, ...) __printflike(2, 3);
 void sudo_debug_write(const char *str, int len);
-void sudo_debug_execve2(int level, const char *path, char *const argv[], char *const envp[]);
 
 #endif /* _SUDO_DEBUG_H */
