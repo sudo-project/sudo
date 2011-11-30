@@ -250,6 +250,9 @@ sudo_debug_write(const char *str, int len)
 
     if (sudo_debug_fd == -1) {
 	/* Use conversation function if no debug fd. */
+	if (sudo_conv == NULL)
+	    return;
+
 	struct sudo_conv_message msg;
 	struct sudo_conv_reply repl;
 
@@ -297,7 +300,7 @@ sudo_debug_printf2(int level, const char *fmt, ...)
     va_list ap;
     char *buf;
 
-    if (sudo_debug_fd == -1)
+    if (sudo_debug_fd == -1 && sudo_conv == NULL)
 	return;
 
     /* Extract pri and subsystem from level. */
@@ -325,11 +328,7 @@ sudo_debug_execve2(int level, const char *path, char *const argv[], char *const 
     int buflen, pri, subsys, log_envp = 0;
     size_t plen;
 
-    if (sudo_debug_fd == -1)
-	return;
-
-#define EXEC_PREFIX "exec "
-    if (sudo_debug_fd == -1)
+    if (sudo_debug_fd == -1 && sudo_conv == NULL)
 	return;
 
     /* Extract pri and subsystem from level. */
@@ -343,6 +342,8 @@ sudo_debug_execve2(int level, const char *path, char *const argv[], char *const 
     /* Log envp for debug level "debug". */
     if (sudo_debug_settings[subsys] >= SUDO_DEBUG_DEBUG - 1 && envp[0] != NULL)
 	log_envp = 1;
+
+#define EXEC_PREFIX "exec "
 
     /* Alloc and build up buffer. */
     plen = strlen(path);

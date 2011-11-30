@@ -61,7 +61,6 @@ const char *noexec_path = _PATH_SUDO_NOEXEC;
 #endif
 
 /* XXX - for parse_args() */
-const char *debug_file;
 const char *debug_flags;
 
 struct sudo_conf_table {
@@ -105,6 +104,7 @@ set_debug(const char *entry, void *data)
 {
     size_t filelen, proglen;
     const char *progname;
+    char *debug_file;
 
     /* Is this debug setting for me? */
     progname = getprogname();
@@ -129,6 +129,7 @@ set_debug(const char *entry, void *data)
     debug_file = estrndup(entry, filelen);
     debug_flags = estrdup(debug_flags);
     sudo_debug_init(debug_file, debug_flags);
+    efree(debug_file);
 
     return TRUE;
 }
