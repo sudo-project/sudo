@@ -189,6 +189,14 @@ case "$osversion" in
 	case "$osversion" in
 	    ubu*)
 		configure_opts="${configure_opts}${configure_opts+$tab}--enable-admin-flag${tab}--without-lecture"
+		if [ $osrelease -ge 1004 ]; then
+		    export CFLAGS="-O2 -g $F_PIE" LDFLAGS="-pie"
+		fi
+		;;
+	    deb*)
+		if [ $osrelease -ge 600 ]; then
+		    export CFLAGS="-O2 -g $F_PIE" LDFLAGS="-pie"
+		fi
 		;;
 	esac
 	# Note, must indent with tabs, not spaces due to IFS trickery
