@@ -157,52 +157,6 @@ AC_DEFUN([SUDO_IO_LOGDIR], [
 ])dnl
 
 dnl
-dnl SUDO_CHECK_TYPE(TYPE, DEFAULT)
-dnl XXX - should require the check for unistd.h...
-dnl
-AC_DEFUN([SUDO_CHECK_TYPE],
-[AC_REQUIRE([AC_HEADER_STDC])dnl
-AC_MSG_CHECKING(for $1)
-AC_CACHE_VAL(sudo_cv_type_$1,
-[AC_EGREP_CPP($1, [#include <sys/types.h>
-#include <stdio.h>
-#if STDC_HEADERS
-#include <stdlib.h>
-#endif
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif], sudo_cv_type_$1=yes, sudo_cv_type_$1=no)])dnl
-AC_MSG_RESULT($sudo_cv_type_$1)
-if test $sudo_cv_type_$1 = no; then
-  AC_DEFINE($1, $2, [Define if your system lacks the $1 type.])
-fi
-])
-
-dnl
-dnl Check for size_t declation
-dnl
-AC_DEFUN([SUDO_TYPE_SIZE_T],
-[SUDO_CHECK_TYPE(size_t, int)])
-
-dnl
-dnl Check for ssize_t declation
-dnl
-AC_DEFUN([SUDO_TYPE_SSIZE_T],
-[SUDO_CHECK_TYPE(ssize_t, int)])
-
-dnl
-dnl Check for dev_t declation
-dnl
-AC_DEFUN([SUDO_TYPE_DEV_T],
-[SUDO_CHECK_TYPE(dev_t, int)])
-
-dnl
-dnl Check for ino_t declation
-dnl
-AC_DEFUN([SUDO_TYPE_INO_T],
-[SUDO_CHECK_TYPE(ino_t, unsigned int)])
-
-dnl
 dnl check for working fnmatch(3)
 dnl
 AC_DEFUN([SUDO_FUNC_FNMATCH],

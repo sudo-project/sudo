@@ -810,13 +810,13 @@
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
 
-/* Define if your system lacks the dev_t type. */
+/* Define to `int' if <sys/types.h> does not define. */
 #undef dev_t
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef gid_t
 
-/* Define if your system lacks the ino_t type. */
+/* Define to `unsigned int' if <sys/types.h> does not define. */
 #undef ino_t
 
 /* Define to `int' if <sys/types.h> does not define. */
@@ -828,7 +828,10 @@
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 #undef size_t
 
-/* Define if your system lacks the ssize_t type. */
+/* Define to `unsigned int' if <sys/socket.h> doesn't define. */
+#undef socklen_t
+
+/* Define to `int' if <sys/types.h> does not define. */
 #undef ssize_t
 
 /* Define to `int' if <sys/types.h> doesn't define. */
