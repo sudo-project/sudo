@@ -17,11 +17,11 @@
 #ifndef _SUDO_TOKE_H
 #define _SUDO_TOKE_H
 
-int append(const char *, int);
-int fill_args(const char *, int, int);
-int fill_cmnd(const char *, int);
-int fill_txt(const char *, int, int);
-int ipv6_valid(const char *s);
+bool append(const char *, int);
+bool fill_args(const char *, int, int);
+bool fill_cmnd(const char *, int);
+bool fill_txt(const char *, int, int);
+bool ipv6_valid(const char *s);
 void yyerror(const char *);
 
 #ifndef FLEX_SCANNER

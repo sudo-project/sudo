@@ -50,7 +50,7 @@
 #include "sudoers.h"
 #include "interfaces.h"
 
-static int
+static bool
 addr_matches_if(char *n)
 {
     union sudo_in_addr_un addr;
@@ -79,27 +79,27 @@ addr_matches_if(char *n)
 		if (ifp->addr.ip4.s_addr == addr.ip4.s_addr ||
 		    (ifp->addr.ip4.s_addr & ifp->netmask.ip4.s_addr)
 		    == addr.ip4.s_addr)
-		    debug_return_bool(TRUE);
+		    debug_return_bool(true);
 		break;
 #ifdef HAVE_STRUCT_IN6_ADDR
 	    case AF_INET6:
 		if (memcmp(ifp->addr.ip6.s6_addr, addr.ip6.s6_addr,
 		    sizeof(addr.ip6.s6_addr)) == 0)
-		    debug_return_bool(TRUE);
+		    debug_return_bool(true);
 		for (j = 0; j < sizeof(addr.ip6.s6_addr); j++) {
 		    if ((ifp->addr.ip6.s6_addr[j] & ifp->netmask.ip6.s6_addr[j]) != addr.ip6.s6_addr[j])
 			break;
 		}
 		if (j == sizeof(addr.ip6.s6_addr))
-		    debug_return_bool(TRUE);
+		    debug_return_bool(true);
 #endif /* HAVE_STRUCT_IN6_ADDR */
 	}
     }
 
-    debug_return_bool(FALSE);
+    debug_return_bool(false);
 }
 
-static int
+static bool
 addr_matches_if_netmask(char *n, char *m)
 {
     int i;
@@ -159,7 +159,7 @@ addr_matches_if_netmask(char *n, char *m)
 	switch(family) {
 	    case AF_INET:
 		if ((ifp->addr.ip4.s_addr & mask.ip4.s_addr) == addr.ip4.s_addr)
-		    debug_return_bool(TRUE);
+		    debug_return_bool(true);
 #ifdef HAVE_STRUCT_IN6_ADDR
 	    case AF_INET6:
 		for (j = 0; j < sizeof(addr.ip6.s6_addr); j++) {
@@ -167,23 +167,23 @@ addr_matches_if_netmask(char *n, char *m)
 			break;
 		}
 		if (j == sizeof(addr.ip6.s6_addr))
-		    debug_return_bool(TRUE);
+		    debug_return_bool(true);
 #endif /* HAVE_STRUCT_IN6_ADDR */
 	}
     }
 
-    debug_return_bool(FALSE);
+    debug_return_bool(false);
 }
 
 /*
- * Returns TRUE if "n" is one of our ip addresses or if
- * "n" is a network that we are on, else returns FALSE.
+ * Returns true if "n" is one of our ip addresses or if
+ * "n" is a network that we are on, else returns false.
  */
-int
+bool
 addr_matches(char *n)
 {
     char *m;
-    int retval;
+    bool retval;
     debug_decl(addr_matches, SUDO_DEBUG_MATCH)
 
     /* If there's an explicit netmask, use it. */

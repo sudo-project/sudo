@@ -166,7 +166,8 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
     size_t len, prelen = 0;
     char *dst, *dst0, *path, *pathend, tmpbuf[PATH_MAX];
     const char *endbrace, *src = dir;
-    int pass, strfit;
+    int pass;
+    bool strfit;
     debug_decl(expand_iolog_path, SUDO_DEBUG_UTIL)
 
     /* Expanded path must be <= PATH_MAX */
@@ -188,7 +189,7 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 	file++;
 
     for (pass = 0; pass < 3; pass++) {
-	strfit = FALSE;
+	strfit = false;
 	switch (pass) {
 	case 0:
 	    src = dir;

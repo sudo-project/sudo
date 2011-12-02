@@ -29,6 +29,11 @@
 #  include <stdlib.h>
 # endif
 #endif /* STDC_HEADERS */
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
@@ -195,15 +200,16 @@ void sudo_debug_exit_long(const char *func, const char *file, int line,
 void sudo_debug_exit_size_t(const char *func, const char *file, int line,
     int subsys, size_t rval)
 {
-    /* XXX - should use %zu but snprintf.c doesn't support it */
+    /* XXX - should use %zu but our snprintf.c doesn't support it */
     sudo_debug_printf2(subsys | SUDO_DEBUG_TRACE, "<- %s @ %s:%d := %lu", func,
 	file, line, (unsigned long)rval);
 }
 
+/* We use int, not bool, here for functions that return -1 on error. */
 void sudo_debug_exit_bool(const char *func, const char *file, int line,
     int subsys, int rval)
 {
-    if (rval == 0 || rval == 1) {
+    if (rval == true || rval == false) {
 	sudo_debug_printf2(subsys | SUDO_DEBUG_TRACE, "<- %s @ %s:%d := %s",
 	    func, file, line, rval ? "true" : "false");
     } else {

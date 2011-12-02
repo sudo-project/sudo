@@ -85,15 +85,13 @@ struct io_buffer {
     int off; /* write position (how much already consumed) */
     int rfd;  /* reader (producer) */
     int wfd; /* writer (consumer) */
-    int (*action)(const char *buf, unsigned int len);
+    bool (*action)(const char *buf, unsigned int len);
     char buf[16 * 1024];
 };
 
 static char slavename[PATH_MAX];
-static int foreground;
+static bool foreground, pipeline, tty_initialized;
 static int io_fds[6] = { -1, -1, -1, -1, -1, -1};
-static int pipeline = FALSE;
-static int tty_initialized;
 static int ttymode = TERM_COOKED;
 static pid_t ppgrp, child, child_pgrp;
 static sigset_t ttyblock;
@@ -149,118 +147,118 @@ pty_setup(uid_t uid, const char *tty, const char *utmp_user)
 }
 
 /* Call I/O plugin tty input log method. */
-static int
+static bool
 log_ttyin(const char *buf, unsigned int n)
 {
     struct plugin_container *plugin;
     sigset_t omask;
-    int rval = TRUE;
+    bool rval = true;
     debug_decl(log_ttyin, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     tq_foreach_fwd(&io_plugins, plugin) {
 	if (plugin->u.io->log_ttyin) {
 	    if (!plugin->u.io->log_ttyin(buf, n)) {
-	    	rval = FALSE;
+	    	rval = false;
 		break;
 	    }
 	}
     }
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
-    debug_return_int(rval);
+    debug_return_bool(rval);
 }
 
 /* Call I/O plugin stdin log method. */
-static int
+static bool
 log_stdin(const char *buf, unsigned int n)
 {
     struct plugin_container *plugin;
     sigset_t omask;
-    int rval = TRUE;
+    bool rval = true;
     debug_decl(log_stdin, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     tq_foreach_fwd(&io_plugins, plugin) {
 	if (plugin->u.io->log_stdin) {
 	    if (!plugin->u.io->log_stdin(buf, n)) {
-	    	rval = FALSE;
+	    	rval = false;
 		break;
 	    }
 	}
     }
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
-    debug_return_int(rval);
+    debug_return_bool(rval);
 }
 
 /* Call I/O plugin tty output log method. */
-static int
+static bool
 log_ttyout(const char *buf, unsigned int n)
 {
     struct plugin_container *plugin;
     sigset_t omask;
-    int rval = TRUE;
+    bool rval = true;
     debug_decl(log_ttyout, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     tq_foreach_fwd(&io_plugins, plugin) {
 	if (plugin->u.io->log_ttyout) {
 	    if (!plugin->u.io->log_ttyout(buf, n)) {
-	    	rval = FALSE;
+	    	rval = false;
 		break;
 	    }
 	}
     }
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
-    debug_return_int(rval);
+    debug_return_bool(rval);
 }
 
 /* Call I/O plugin stdout log method. */
-static int
+static bool
 log_stdout(const char *buf, unsigned int n)
 {
     struct plugin_container *plugin;
     sigset_t omask;
-    int rval = TRUE;
+    bool rval = true;
     debug_decl(log_stdout, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     tq_foreach_fwd(&io_plugins, plugin) {
 	if (plugin->u.io->log_stdout) {
 	    if (!plugin->u.io->log_stdout(buf, n)) {
-	    	rval = FALSE;
+	    	rval = false;
 		break;
 	    }
 	}
     }
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
-    debug_return_int(rval);
+    debug_return_bool(rval);
 }
 
 /* Call I/O plugin stderr log method. */
-static int
+static bool
 log_stderr(const char *buf, unsigned int n)
 {
     struct plugin_container *plugin;
     sigset_t omask;
-    int rval = TRUE;
+    bool rval = true;
     debug_decl(log_stderr, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
     tq_foreach_fwd(&io_plugins, plugin) {
 	if (plugin->u.io->log_stderr) {
 	    if (!plugin->u.io->log_stderr(buf, n)) {
-	    	rval = FALSE;
+	    	rval = false;
 		break;
 	    }
 	}
     }
     sigprocmask(SIG_SETMASK, &omask, NULL);
 
-    debug_return_int(rval);
+    debug_return_bool(rval);
 }
 
 /*
@@ -277,7 +275,7 @@ check_foreground(void)
 	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
 	if (foreground && !tty_initialized) {
 	    if (term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
-		tty_initialized = 1;
+		tty_initialized = true;
 		sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
 	    }
 	}
@@ -372,7 +370,7 @@ suspend_parent(int signo)
  * Kill child with increasing urgency.
  */
 void
-terminate_child(pid_t pid, int use_pgrp)
+terminate_child(pid_t pid, bool use_pgrp)
 {
     debug_decl(terminate_child, SUDO_DEBUG_EXEC);
 
@@ -401,7 +399,7 @@ terminate_child(pid_t pid, int use_pgrp)
 }
 
 static struct io_buffer *
-io_buf_new(int rfd, int wfd, int (*action)(const char *, unsigned int),
+io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int),
     struct io_buffer *head)
 {
     struct io_buffer *iob;
@@ -453,7 +451,7 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 		    break;
 		default:
 		    if (!iob->action(iob->buf + iob->len, n))
-			terminate_child(child, TRUE);
+			terminate_child(child, true);
 		    iob->len += n;
 		    break;
 	    }
@@ -554,7 +552,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
      */
     memset(io_pipe, 0, sizeof(io_pipe));
     if (io_fds[SFD_STDIN] == -1 || !isatty(STDIN_FILENO)) {
-	pipeline = TRUE;
+	pipeline = true;
 	if (pipe(io_pipe[STDIN_FILENO]) != 0)
 	    error(1, _("unable to create pipe"));
 	iobufs = io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
@@ -562,7 +560,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
 	io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
     }
     if (io_fds[SFD_STDOUT] == -1 || !isatty(STDOUT_FILENO)) {
-	pipeline = TRUE;
+	pipeline = true;
 	if (pipe(io_pipe[STDOUT_FILENO]) != 0)
 	    error(1, _("unable to create pipe"));
 	iobufs = io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
@@ -585,7 +583,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
     if (foreground) {
 	/* Copy terminal attrs from user tty -> pty slave. */
 	if (term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
-	    tty_initialized = 1;
+	    tty_initialized = true;
 	    sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
 	}
 
@@ -611,7 +609,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
 	close(signal_pipe[0]);
 	close(signal_pipe[1]);
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
-	if (exec_setup(details, slavename, io_fds[SFD_SLAVE]) == TRUE) {
+	if (exec_setup(details, slavename, io_fds[SFD_SLAVE]) == true) {
 	    /* Close the other end of the stdin/stdout/stderr pipes and exec. */
 	    if (io_pipe[STDIN_FILENO][1])
 		close(io_pipe[STDIN_FILENO][1]);
@@ -743,7 +741,7 @@ deliver_signal(pid_t pid, int signo)
     sudo_debug_printf(SUDO_DEBUG_INFO, "received signal %d from parent", signo);
     switch (signo) {
     case SIGALRM:
-	terminate_child(pid, TRUE);
+	terminate_child(pid, true);
 	break;
     case SIGCONT_FG:
 	/* Continue in foreground, grant it controlling tty. */
@@ -800,12 +798,13 @@ send_status(int fd, struct command_status *cstat)
  * Wait for child status after receiving SIGCHLD.
  * If the child was stopped, the status is send back to the parent.
  * Otherwise, cstat is filled in but not sent.
- * Returns TRUE if child is still alive, else FALSE.
+ * Returns true if child is still alive, else false.
  */
-static int
+static bool
 handle_sigchld(int backchannel, struct command_status *cstat)
 {
-    int status, alive = TRUE;
+    bool alive = true;
+    int status;
     pid_t pid;
     debug_decl(handle_sigchld, SUDO_DEBUG_EXEC);
 
@@ -834,9 +833,9 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 	    }
 	}
 	if (!WIFSTOPPED(status))
-	    alive = FALSE;
+	    alive = false;
     }
-    debug_return_int(alive);
+    debug_return_bool(alive);
 }
 
 /*
@@ -854,7 +853,7 @@ exec_monitor(struct command_details *details, int backchannel)
     fd_set *fdsr;
     sigaction_t sa;
     int errpipe[2], maxfd, n, status;
-    int alive = TRUE;
+    bool alive = true;
     unsigned char signo;
     debug_decl(exec_monitor, SUDO_DEBUG_EXEC);
 
@@ -916,7 +915,7 @@ exec_monitor(struct command_details *details, int backchannel)
      * when it needs access to the controlling tty.
      */
     if (pipeline)
-	foreground = 0;
+	foreground = false;
 
     /* Start command and wait for it to stop or exit */
     if (pipe(errpipe) == -1)

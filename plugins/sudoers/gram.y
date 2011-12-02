@@ -73,9 +73,8 @@
 extern int sudolineno;
 extern int last_token;
 extern char *sudoers;
-static int verbose = FALSE;
-int parse_error = FALSE;
-int pedantic = FALSE;
+static bool verbose = false;
+bool parse_error = false;
 int errorlineno = -1;
 char *errorfile = NULL;
 
@@ -110,7 +109,7 @@ yyerror(const char *s)
     } else if (verbose && s != NULL) {
 	warningx(_(">>> %s: %s near line %d <<<"), sudoers, s, sudolineno);
     }
-    parse_error = TRUE;
+    parse_error = true;
     debug_return;
 }
 %}
@@ -244,13 +243,13 @@ defaults_list	:	defaults_entry
 		;
 
 defaults_entry	:	DEFVAR {
-			    $$ = new_default($1, NULL, TRUE);
+			    $$ = new_default($1, NULL, true);
 			}
 		|	'!' DEFVAR {
-			    $$ = new_default($2, NULL, FALSE);
+			    $$ = new_default($2, NULL, false);
 			}
 		|	DEFVAR '=' WORD {
-			    $$ = new_default($1, $3, TRUE);
+			    $$ = new_default($1, $3, true);
 			}
 		|	DEFVAR '+' WORD {
 			    $$ = new_default($1, $3, '+');
@@ -279,11 +278,11 @@ privilege	:	hostlist '=' cmndspeclist {
 
 ophost		:	host {
 			    $$ = $1;
-			    $$->negated = FALSE;
+			    $$->negated = false;
 			}
 		|	'!' host {
 			    $$ = $2;
-			    $$->negated = TRUE;
+			    $$->negated = true;
 			}
 		;
 
@@ -365,11 +364,11 @@ cmndspec	:	runasspec selinux cmndtag opcmnd {
 
 opcmnd		:	cmnd {
 			    $$ = $1;
-			    $$->negated = FALSE;
+			    $$->negated = false;
 			}
 		|	'!' cmnd {
 			    $$ = $2;
-			    $$->negated = TRUE;
+			    $$->negated = true;
 			}
 		;
 
@@ -435,34 +434,34 @@ cmndtag		:	/* empty */ {
 				$$.log_input = $$.log_output = UNSPEC;
 			}
 		|	cmndtag NOPASSWD {
-			    $$.nopasswd = TRUE;
+			    $$.nopasswd = true;
 			}
 		|	cmndtag PASSWD {
-			    $$.nopasswd = FALSE;
+			    $$.nopasswd = false;
 			}
 		|	cmndtag NOEXEC {
-			    $$.noexec = TRUE;
+			    $$.noexec = true;
 			}
 		|	cmndtag EXEC {
-			    $$.noexec = FALSE;
+			    $$.noexec = false;
 			}
 		|	cmndtag SETENV {
-			    $$.setenv = TRUE;
+			    $$.setenv = true;
 			}
 		|	cmndtag NOSETENV {
-			    $$.setenv = FALSE;
+			    $$.setenv = false;
 			}
 		|	cmndtag LOG_INPUT {
-			    $$.log_input = TRUE;
+			    $$.log_input = true;
 			}
 		|	cmndtag NOLOG_INPUT {
-			    $$.log_input = FALSE;
+			    $$.log_input = false;
 			}
 		|	cmndtag LOG_OUTPUT {
-			    $$.log_output = TRUE;
+			    $$.log_output = true;
 			}
 		|	cmndtag NOLOG_OUTPUT {
-			    $$.log_output = FALSE;
+			    $$.log_output = false;
 			}
 		;
 
@@ -555,11 +554,11 @@ userlist	:	opuser
 
 opuser		:	user {
 			    $$ = $1;
-			    $$->negated = FALSE;
+			    $$->negated = false;
 			}
 		|	'!' user {
 			    $$ = $2;
-			    $$->negated = TRUE;
+			    $$->negated = true;
 			}
 		;
 
@@ -589,11 +588,11 @@ grouplist	:	opgroup
 
 opgroup		:	group {
 			    $$ = $1;
-			    $$->negated = FALSE;
+			    $$->negated = false;
 			}
 		|	'!' group {
 			    $$ = $2;
-			    $$->negated = TRUE;
+			    $$->negated = true;
 			}
 		;
 
@@ -790,7 +789,7 @@ init_parser(const char *path, int quiet)
     efree(sudoers);
     sudoers = path ? estrdup(path) : NULL;
 
-    parse_error = FALSE;
+    parse_error = false;
     errorlineno = -1;
     errorfile = NULL;
     verbose = !quiet;

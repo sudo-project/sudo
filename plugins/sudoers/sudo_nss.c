@@ -58,9 +58,9 @@ sudo_read_nss(void)
 {
     FILE *fp;
     char *cp;
-    int saw_files = FALSE;
-    int saw_ldap = FALSE;
-    int got_match = FALSE;
+    bool saw_files = false;
+    bool saw_ldap = false;
+    bool got_match = false;
     static struct sudo_nss_list snl;
     debug_decl(sudo_read_nss, SUDO_DEBUG_NSS)
 
@@ -80,16 +80,16 @@ sudo_read_nss(void)
 	for ((cp = strtok(cp + 8, " \t")); cp != NULL; (cp = strtok(NULL, " \t"))) {
 	    if (strcasecmp(cp, "files") == 0 && !saw_files) {
 		tq_append(&snl, &sudo_nss_file);
-		got_match = TRUE;
+		got_match = true;
 	    } else if (strcasecmp(cp, "ldap") == 0 && !saw_ldap) {
 		tq_append(&snl, &sudo_nss_ldap);
-		got_match = TRUE;
+		got_match = true;
 	    } else if (strcasecmp(cp, "[NOTFOUND=return]") == 0 && got_match) {
 		/* NOTFOUND affects the most recent entry */
-		tq_last(&snl)->ret_if_notfound = TRUE;
-		got_match = FALSE;
+		tq_last(&snl)->ret_if_notfound = true;
+		got_match = false;
 	    } else
-		got_match = FALSE;
+		got_match = false;
 	}
 	/* Only parse the first "sudoers:" line */
 	break;
@@ -117,9 +117,9 @@ sudo_read_nss(void)
 {
     FILE *fp;
     char *cp, *ep;
-    int saw_files = FALSE;
-    int saw_ldap = FALSE;
-    int got_match = FALSE;
+    bool saw_files = false;
+    bool saw_ldap = false;
+    bool got_match = false;
     static struct sudo_nss_list snl;
     debug_decl(sudo_read_nss, SUDO_DEBUG_NSS)
 
@@ -149,15 +149,15 @@ sudo_read_nss(void)
 	    if (!saw_files && strncasecmp(cp, "files", 5) == 0 &&
 		(isspace((unsigned char)cp[5]) || cp[5] == '\0')) {
 		tq_append(&snl, &sudo_nss_file);
-		got_match = TRUE;
+		got_match = true;
 		ep = &cp[5];
 	    } else if (!saw_ldap && strncasecmp(cp, "ldap", 4) == 0 &&
 		(isspace((unsigned char)cp[4]) || cp[4] == '\0')) {
 		tq_append(&snl, &sudo_nss_ldap);
-		got_match = TRUE;
+		got_match = true;
 		ep = &cp[4];
 	    } else {
-		got_match = FALSE;
+		got_match = false;
 	    }
 
 	    /* check for = auth qualifier */
@@ -167,7 +167,7 @@ sudo_read_nss(void)
 		    cp++;
 		if (strncasecmp(cp, "auth", 4) == 0 &&
 		    (isspace((unsigned char)cp[4]) || cp[4] == '\0')) {
-		    tq_last(&snl)->ret_if_found = TRUE;
+		    tq_last(&snl)->ret_if_found = true;
 		}
 	    }
 	}
@@ -289,9 +289,9 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 /*
  * Check user_cmnd against sudoers and print the matching entry if the
  * command is allowed.
- * Returns TRUE if the command is allowed, else FALSE.
+ * Returns true if the command is allowed, else false.
  */
-int
+bool
 display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
 {
     struct sudo_nss *nss;
@@ -299,7 +299,7 @@ display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
 
     tq_foreach_fwd(snl, nss) {
 	if (nss->display_cmnd(nss, pw) == 0)
-	    debug_return_bool(TRUE);
+	    debug_return_bool(true);
     }
-    debug_return_bool(FALSE);
+    debug_return_bool(false);
 }

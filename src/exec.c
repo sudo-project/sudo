@@ -132,7 +132,7 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 	close(signal_pipe[1]);
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
 	restore_signals();
-	if (exec_setup(details, NULL, -1) == TRUE) {
+	if (exec_setup(details, NULL, -1) == true) {
 	    /* headed for execve() */
 	    sudo_debug_execve(SUDO_DEBUG_INFO, details->command,
 		details->argv, details->envp);
@@ -221,8 +221,9 @@ restore_signals(void)
 int
 sudo_execve(struct command_details *details, struct command_status *cstat)
 {
-    int maxfd, n, nready, sv[2], log_io = FALSE;
+    int maxfd, n, nready, sv[2];
     const char *utmp_user = NULL;
+    bool log_io = false;
     fd_set *fdsr, *fdsw;
     sigaction_t sa;
     pid_t child;
@@ -254,7 +255,7 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
      * as the io plugin tailqueue will be empty and no I/O logging will occur.
      */
     if (!tq_empty(&io_plugins) || ISSET(details->flags, CD_USE_PTY)) {
-	log_io = TRUE;
+	log_io = true;
 	if (ISSET(details->flags, CD_SET_UTMP))
 	    utmp_user = details->utmp_user ? details->utmp_user : user_details.username;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "allocate pty for I/O logging");
@@ -501,7 +502,7 @@ handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
 	    } else {
 		/* Nothing listening on sv[0], send directly. */
 		if (signo == SIGALRM)
-		    terminate_child(child, FALSE);
+		    terminate_child(child, false);
 		else if (kill(child, signo) != 0)
 		    warning("kill(%d, %d)", (int)child, signo);
 	    }

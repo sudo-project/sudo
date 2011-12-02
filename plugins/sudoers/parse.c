@@ -85,7 +85,7 @@ sudo_file_open(struct sudo_nss *nss)
 
     if (def_ignore_local_sudoers)
 	debug_return_int(-1);
-    nss->handle = open_sudoers(sudoers_file, FALSE, NULL);
+    nss->handle = open_sudoers(sudoers_file, false, NULL);
     debug_return_int(nss->handle ? 0 : -1);
 }
 
@@ -164,11 +164,11 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
      * Always check the host and user.
      */
     if (pwflag) {
-	int nopass;
+	bool nopass;
 	enum def_tuple pwcheck;
 
 	pwcheck = (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
-	nopass = (pwcheck == all) ? TRUE : FALSE;
+	nopass = (pwcheck == all) ? true : false;
 
 	if (list_pw == NULL)
 	    SET(validated, FLAG_NO_CHECK);
@@ -187,8 +187,8 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 			user_uid == list_pw->pw_uid ||
 			cmnd_matches(cs->cmnd) == ALLOW)
 			    match = ALLOW;
-		    if ((pwcheck == any && cs->tags.nopasswd == TRUE) ||
-			(pwcheck == all && cs->tags.nopasswd != TRUE))
+		    if ((pwcheck == any && cs->tags.nopasswd == true) ||
+			(pwcheck == all && cs->tags.nopasswd != true))
 			nopass = cs->tags.nopasswd;
 		}
 	    }
@@ -200,8 +200,8 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 	    SET(validated, VALIDATE_NOT_OK);
 	if (pwcheck == always && def_authenticate)
 	    SET(validated, FLAG_CHECK_USER);
-	else if (pwcheck == never || nopass == TRUE)
-	    def_authenticate = FALSE;
+	else if (pwcheck == never || nopass == true)
+	    def_authenticate = false;
 	debug_return_int(validated);
     }
 
@@ -485,7 +485,7 @@ sudo_file_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 		lbuf_append_quoted(lbuf, SUDOERS_QUOTED, "%s", d->val);
 	} else
 	    lbuf_append(lbuf, "%s%s%s", prefix,
-		d->op == FALSE ? "!" : "", d->var);
+		d->op == false ? "!" : "", d->var);
 	prefix = ", ";
 	nfound++;
     }
@@ -564,7 +564,7 @@ display_bound_defaults(int dtype, struct lbuf *lbuf)
 	    lbuf_append(lbuf, "%s%s%s", d->var, d->op == '+' ? "+=" :
 		d->op == '-' ? "-=" : "=", d->val);
 	} else
-	    lbuf_append(lbuf, "%s%s", d->op == FALSE ? "!" : "", d->var);
+	    lbuf_append(lbuf, "%s%s", d->op == false ? "!" : "", d->var);
     }
 
     debug_return_int(nfound);

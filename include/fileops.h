@@ -26,7 +26,7 @@
 
 struct timeval;
 
-int lock_file(int, int);
+bool lock_file(int, int);
 int touch(int, char *, struct timeval *);
 char *sudo_parseln(FILE *);
 

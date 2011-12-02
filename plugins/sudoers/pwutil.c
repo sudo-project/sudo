@@ -905,12 +905,13 @@ set_group_list(const char *user, GETGROUPS_T *gids, int ngids)
     debug_return;
 }
 
-int
+bool
 user_in_group(struct passwd *pw, const char *group)
 {
     struct group_list *grlist;
     struct group *grp = NULL;
-    int i, matched = FALSE;
+    int i;
+    bool matched = false;
     debug_decl(user_in_group, SUDO_DEBUG_NSS)
 
     if ((grlist = get_group_list(pw)) != NULL) {
@@ -920,12 +921,12 @@ user_in_group(struct passwd *pw, const char *group)
 	if (group[0] == '#') {
 	    gid_t gid = atoi(group + 1);
 	    if (gid == pw->pw_gid) {
-		matched = TRUE;
+		matched = true;
 		goto done;
 	    }
 	    for (i = 0; i < grlist->ngids; i++) {
 		if (gid == grlist->gids[i]) {
-		    matched = TRUE;
+		    matched = true;
 		    goto done;
 		}
 	    }
@@ -937,7 +938,7 @@ user_in_group(struct passwd *pw, const char *group)
 	 */
 	for (i = 0; i < grlist->ngroups; i++) {
 	    if (strcasecmp(group, grlist->groups[i]) == 0) {
-		matched = TRUE;
+		matched = true;
 		goto done;
 	    }
 	}
@@ -945,7 +946,7 @@ user_in_group(struct passwd *pw, const char *group)
 	/* Finally check against user's primary (passwd file) group. */
 	if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
 	    if (strcasecmp(group, grp->gr_name) == 0) {
-		matched = TRUE;
+		matched = true;
 		goto done;
 	    }
 	}

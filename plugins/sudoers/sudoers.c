@@ -109,7 +109,7 @@ struct interface *interfaces;
 int long_list;
 uid_t timestamp_uid;
 extern int errorlineno;
-extern int parse_error;
+extern bool parse_error;
 extern char *errorfile;
 #ifdef HAVE_LOGIN_CAP_H
 login_cap_t *lc;
@@ -212,7 +212,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
      * Initialize external group plugin, if any.
      */
     if (def_group_plugin) {
-	if (group_plugin_load(def_group_plugin) != TRUE)
+	if (group_plugin_load(def_group_plugin) != true)
 	    def_group_plugin = NULL;
     }
 
@@ -239,7 +239,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 
     restore_perms();
 
-    debug_return_bool(TRUE);
+    debug_return_bool(true);
 }
 
 static void
@@ -297,7 +297,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     struct sudo_nss *nss;
     int cmnd_status = -1, validated;
     volatile int info_len = 0;
-    volatile int rval = TRUE;
+    volatile int rval = true;
     debug_decl(sudoers_policy_main, SUDO_DEBUG_PLUGIN)
 
     if (sigsetjmp(error_jmp, 1)) {
@@ -348,7 +348,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* If given the -P option, set the "preserve_groups" flag. */
     if (ISSET(sudo_mode, MODE_PRESERVE_GROUPS))
-	def_preserve_groups = TRUE;
+	def_preserve_groups = true;
 
     /* Find command in path */
     cmnd_status = set_cmnd();
@@ -434,14 +434,14 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      */
     if (ISSET(sudo_mode, MODE_EDIT) ||
 	(ISSET(sudo_mode, MODE_PRESERVE_ENV) && def_setenv))
-	def_env_reset = FALSE;
+	def_env_reset = false;
 
     /* Build a new environment that avoids any nasty bits. */
     rebuild_env();
 
     /* Require a password if sudoers says so.  */
     rval = check_user(validated, sudo_mode);
-    if (rval != TRUE)
+    if (rval != true)
 	goto done;
 
     /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
@@ -591,13 +591,13 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
 #if defined(__linux__) || defined(_AIX)
 	/* Insert system-wide environment variables. */
-	read_env_file(_PATH_ENVIRONMENT, TRUE);
+	read_env_file(_PATH_ENVIRONMENT, true);
 #endif
     }
 
     /* Insert system-wide environment variables. */
     if (def_env_file)
-	read_env_file(def_env_file, FALSE);
+	read_env_file(def_env_file, false);
 
     /* Insert user-specified environment variables. */
     insert_env_vars(sudo_user.env_vars);
@@ -688,7 +688,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     goto done;
 
 bad:
-    rval = FALSE;
+    rval = false;
 
 done:
     rewind_perms();
@@ -926,7 +926,7 @@ set_cmnd(void)
  * Returns a handle to the sudoers file or NULL on error.
  */
 FILE *
-open_sudoers(const char *sudoers, int doedit, int *keepopen)
+open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 {
     struct stat statbuf;
     FILE *fp = NULL;
@@ -1135,7 +1135,7 @@ cb_runas_default(const char *user)
     /* Only reset runaspw if user didn't specify one. */
     if (!runas_user && !runas_group)
 	set_runaspw(user);
-    return TRUE;
+    return true;
 }
 
 /*
@@ -1190,7 +1190,7 @@ sudoers_policy_version(int verbose)
 	dump_interfaces(interfaces_string);
 	sudo_printf(SUDO_CONV_INFO_MSG, "\n");
     }
-    debug_return_bool(TRUE);
+    debug_return_bool(true);
 }
 
 static int
@@ -1225,59 +1225,59 @@ deserialize_info(char * const settings[], char * const user_info[])
 	}
 	if (MATCHES(*cur, "prompt=")) {
 	    user_prompt = *cur + sizeof("prompt=") - 1;
-	    def_passprompt_override = TRUE;
+	    def_passprompt_override = true;
 	    continue;
 	}
 	if (MATCHES(*cur, "set_home=")) {
-	    if (atobool(*cur + sizeof("set_home=") - 1) == TRUE)
+	    if (atobool(*cur + sizeof("set_home=") - 1) == true)
 		SET(flags, MODE_RESET_HOME);
 	    continue;
 	}
 	if (MATCHES(*cur, "preserve_environment=")) {
-	    if (atobool(*cur + sizeof("preserve_environment=") - 1) == TRUE)
+	    if (atobool(*cur + sizeof("preserve_environment=") - 1) == true)
 		SET(flags, MODE_PRESERVE_ENV);
 	    continue;
 	}
 	if (MATCHES(*cur, "run_shell=")) {
-	    if (atobool(*cur + sizeof("run_shell=") - 1) == TRUE)
+	    if (atobool(*cur + sizeof("run_shell=") - 1) == true)
 		SET(flags, MODE_SHELL);
 	    continue;
 	}
 	if (MATCHES(*cur, "login_shell=")) {
-	    if (atobool(*cur + sizeof("login_shell=") - 1) == TRUE) {
+	    if (atobool(*cur + sizeof("login_shell=") - 1) == true) {
 		SET(flags, MODE_LOGIN_SHELL);
-		def_env_reset = TRUE;
+		def_env_reset = true;
 	    }
 	    continue;
 	}
 	if (MATCHES(*cur, "implied_shell=")) {
-	    if (atobool(*cur + sizeof("implied_shell=") - 1) == TRUE)
+	    if (atobool(*cur + sizeof("implied_shell=") - 1) == true)
 		SET(flags, MODE_IMPLIED_SHELL);
 	    continue;
 	}
 	if (MATCHES(*cur, "preserve_groups=")) {
-	    if (atobool(*cur + sizeof("preserve_groups=") - 1) == TRUE)
+	    if (atobool(*cur + sizeof("preserve_groups=") - 1) == true)
 		SET(flags, MODE_PRESERVE_GROUPS);
 	    continue;
 	}
 	if (MATCHES(*cur, "ignore_ticket=")) {
-	    if (atobool(*cur + sizeof("ignore_ticket=") - 1) == TRUE)
+	    if (atobool(*cur + sizeof("ignore_ticket=") - 1) == true)
 		SET(flags, MODE_IGNORE_TICKET);
 	    continue;
 	}
 	if (MATCHES(*cur, "noninteractive=")) {
-	    if (atobool(*cur + sizeof("noninteractive=") - 1) == TRUE)
+	    if (atobool(*cur + sizeof("noninteractive=") - 1) == true)
 		SET(flags, MODE_NONINTERACTIVE);
 	    continue;
 	}
 	if (MATCHES(*cur, "sudoedit=")) {
-	    if (atobool(*cur + sizeof("sudoedit=") - 1) == TRUE)
+	    if (atobool(*cur + sizeof("sudoedit=") - 1) == true)
 		SET(flags, MODE_EDIT);
 	    continue;
 	}
 	if (MATCHES(*cur, "login_class=")) {
 	    login_class = *cur + sizeof("login_class=") - 1;
-	    def_use_loginclass = TRUE;
+	    def_use_loginclass = true;
 	    continue;
 	}
 #ifdef HAVE_SELINUX
@@ -1421,7 +1421,8 @@ static char *
 resolve_editor(char *editor, int nfiles, char **files, char ***argv_out)
 {
     char *cp, **nargv, *editor_path = NULL;
-    int ac, i, nargc, wasblank;
+    int ac, i, nargc;
+    bool wasblank;
     debug_decl(resolve_editor, SUDO_DEBUG_PLUGIN)
 
     editor = estrdup(editor); /* becomes part of argv_out */
@@ -1432,11 +1433,11 @@ resolve_editor(char *editor, int nfiles, char **files, char ***argv_out)
      * line args so look for those and alloc space for them too.
      */
     nargc = 1;
-    for (wasblank = FALSE, cp = editor; *cp != '\0'; cp++) {
+    for (wasblank = false, cp = editor; *cp != '\0'; cp++) {
 	if (isblank((unsigned char) *cp))
-	    wasblank = TRUE;
+	    wasblank = true;
 	else if (wasblank) {
-	    wasblank = FALSE;
+	    wasblank = false;
 	    nargc++;
 	}
     }

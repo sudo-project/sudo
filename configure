@@ -5461,12 +5461,12 @@ fi
 if test "$env_reset" = "on"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-    $as_echo "#define ENV_RESET TRUE" >>confdefs.h
+    $as_echo "#define ENV_RESET 1" >>confdefs.h
 
 else
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-    $as_echo "#define ENV_RESET FALSE" >>confdefs.h
+    $as_echo "#define ENV_RESET 0" >>confdefs.h
 
 fi
 

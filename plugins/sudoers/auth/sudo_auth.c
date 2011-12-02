@@ -108,7 +108,7 @@ sudo_auth_init(struct passwd *pw)
     debug_decl(sudo_auth_init, SUDO_DEBUG_AUTH)
 
     if (auth_switch[0].name == NULL)
-	debug_return_int(TRUE);
+	debug_return_int(true);
 
     /* Make sure we haven't mixed standalone and shared auth methods. */
     standalone = IS_STANDALONE(&auth_switch[0]);
@@ -143,7 +143,7 @@ sudo_auth_init(struct passwd *pw)
 	    }
 	}
     }
-    debug_return_int(status == AUTH_FATAL ? -1 : TRUE);
+    debug_return_int(status == AUTH_FATAL ? -1 : true);
 }
 
 int
@@ -171,7 +171,7 @@ sudo_auth_cleanup(struct passwd *pw)
 	    }
 	}
     }
-    debug_return_int(status == AUTH_FATAL ? -1 : TRUE);
+    debug_return_int(status == AUTH_FATAL ? -1 : true);
 }
 
 int
@@ -259,7 +259,7 @@ done:
     switch (success) {
 	case AUTH_SUCCESS:
 	    (void) sigaction(SIGTSTP, &osa, NULL);
-	    rval = TRUE;
+	    rval = true;
 	    break;
 	case AUTH_INTR:
 	case AUTH_FAILURE:
@@ -273,7 +273,7 @@ done:
 		    def_passwd_tries - counter), def_passwd_tries - counter);
 	    }
 	    audit_failure(NewArgv, "authentication failure");
-	    rval = FALSE;
+	    rval = false;
 	    break;
 	case AUTH_FATAL:
 	default:
@@ -302,7 +302,7 @@ sudo_auth_begin_session(struct passwd *pw)
 	    }
 	}
     }
-    debug_return_bool(TRUE);
+    debug_return_bool(true);
 }
 
 int
@@ -321,7 +321,7 @@ sudo_auth_end_session(struct passwd *pw)
 	    }
 	}
     }
-    debug_return_bool(TRUE);
+    debug_return_bool(true);
 }
 
 static void

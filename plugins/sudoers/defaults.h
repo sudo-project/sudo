@@ -107,7 +107,7 @@ struct sudo_defs_types {
  */
 void dump_default(void);
 void init_defaults(void);
-int  set_default(char *, char *, int);
+bool set_default(char *, char *, bool);
 int  update_defaults(int);
 
 extern struct sudo_defs_types sudo_defs_table[];

@@ -37,7 +37,7 @@ struct sudo_command {
 
 /*
  * Tags associated with a command.
- * Possible valus: TRUE, FALSE, UNSPEC.
+ * Possible values: true, false, UNSPEC.
  */
 struct cmndtag {
     __signed int nopasswd: 3;
@@ -148,7 +148,7 @@ struct defaults {
     char *val;				/* variable value */
     struct member_list binding;		/* user/host/runas binding */
     int type;				/* DEFAULTS{,_USER,_RUNAS,_HOST} */
-    int op;				/* TRUE, FALSE, '+', '-' */
+    int op;				/* true, false, '+', '-' */
 };
 
 /*
@@ -166,19 +166,19 @@ extern unsigned int alias_seqno;
  * Prototypes
  */
 char *alias_add(char *, int, struct member *);
-int addr_matches(char *);
+bool addr_matches(char *);
 int cmnd_matches(struct member *);
 int cmndlist_matches(struct member_list *);
-int command_matches(char *, char *);
+bool command_matches(char *, char *);
 int hostlist_matches(struct member_list *);
-int hostname_matches(char *, char *, char *);
-int netgr_matches(char *, char *, char *, char *);
-int no_aliases(void);
+bool hostname_matches(char *, char *, char *);
+bool netgr_matches(char *, char *, char *, char *);
+bool no_aliases(void);
 int runaslist_matches(struct member_list *, struct member_list *);
 int userlist_matches(struct passwd *, struct member_list *);
-int usergr_matches(char *, char *, struct passwd *);
-int userpw_matches(char *, char *, struct passwd *);
-int group_matches(char *, struct group *);
+bool usergr_matches(char *, char *, struct passwd *);
+bool userpw_matches(char *, char *, struct passwd *);
+bool group_matches(char *, struct group *);
 struct alias *alias_find(char *, int);
 struct alias *alias_remove(char *, int);
 void alias_free(void *);

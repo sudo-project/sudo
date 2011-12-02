@@ -28,6 +28,11 @@
 # include <sys/file.h>
 #endif /* HAVE_FLOCK */
 #include <stdio.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
@@ -84,7 +89,7 @@ touch(int fd, char *path, struct timeval *tvp)
  * Lock/unlock a file.
  */
 #ifdef HAVE_LOCKF
-int
+bool
 lock_file(int fd, int lockit)
 {
     int op = 0;
@@ -101,10 +106,10 @@ lock_file(int fd, int lockit)
 	    op = F_ULOCK;
 	    break;
     }
-    debug_return_int(lockf(fd, op, 0) == 0);
+    debug_return_bool(lockf(fd, op, 0) == 0);
 }
 #elif HAVE_FLOCK
-int
+bool
 lock_file(int fd, int lockit)
 {
     int op = 0;
@@ -121,10 +126,10 @@ lock_file(int fd, int lockit)
 	    op = LOCK_UN;
 	    break;
     }
-    debug_return_int(flock(fd, op) == 0);
+    debug_return_bool(flock(fd, op) == 0);
 }
 #else
-int
+bool
 lock_file(int fd, int lockit)
 {
 #ifdef F_SETLK
@@ -139,9 +144,9 @@ lock_file(int fd, int lockit)
     lock.l_whence = SEEK_SET;
     func = (lockit == SUDO_LOCK) ? F_SETLKW : F_SETLK;
 
-    debug_return_int(fcntl(fd, func, &lock) == 0);
+    debug_return_bool(fcntl(fd, func, &lock) == 0);
 #else
-    return TRUE;
+    return true;
 #endif
 }
 #endif

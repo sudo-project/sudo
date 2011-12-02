@@ -181,12 +181,12 @@ utmp_fill(const char *line, const char *user, sudo_utmp_t *ut_old,
  *  Legacy: sparse file indexed by ttyslot() * sizeof(struct utmp)
  */
 #if defined(HAVE_GETUTXID) || defined(HAVE_GETUTID)
-int
+bool
 utmp_login(const char *from_line, const char *to_line, int ttyfd,
     const char *user)
 {
     sudo_utmp_t utbuf, *ut_old = NULL;
-    int rval = FALSE;
+    bool rval = false;
     debug_decl(utmp_login, SUDO_DEBUG_UTMP)
 
     /* Strip off /dev/ prefix from line as needed. */
@@ -204,16 +204,16 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd,
     }
     utmp_fill(to_line, user, ut_old, &utbuf);
     if (pututxline(&utbuf) != NULL)
-	rval = TRUE;
+	rval = true;
     endutxent();
 
-    debug_return_int(rval);
+    debug_return_bool(rval);
 }
 
-int
+bool
 utmp_logout(const char *line, int status)
 {
-    int rval = FALSE;
+    bool rval = false;
     sudo_utmp_t *ut, utbuf;
     debug_decl(utmp_logout, SUDO_DEBUG_UTMP)
 
@@ -234,9 +234,9 @@ utmp_logout(const char *line, int status)
 # endif
 	utmp_settime(ut);
 	if (pututxline(ut) != NULL)
-	    rval = TRUE;
+	    rval = true;
     }
-    debug_return_int(rval);
+    debug_return_bool(rval);
 }
 
 #else /* !HAVE_GETUTXID && !HAVE_GETUTID */
@@ -287,12 +287,13 @@ utmp_slot(const char *line, int ttyfd)
 }
 # endif /* HAVE_GETTTYENT */
 
-int
+bool
 utmp_login(const char *from_line, const char *to_line, int ttyfd,
     const char *user)
 {
     sudo_utmp_t utbuf, *ut_old = NULL;
-    int slot, rval = FALSE;
+    bool rval = false;
+    int slot;
     FILE *fp;
     debug_decl(utmp_login, SUDO_DEBUG_UTMP)
 
@@ -328,19 +329,19 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd,
     utmp_fill(to_line, user, ut_old, &utbuf);
     if (fseek(fp, slot * (long)sizeof(utbuf), SEEK_SET) == 0) {
 	if (fwrite(&utbuf, sizeof(utbuf), 1, fp) == 1)
-	    rval = TRUE;
+	    rval = true;
     }
     fclose(fp);
 
 done:
-    debug_return_int(rval);
+    debug_return_bool(rval);
 }
 
-int
+bool
 utmp_logout(const char *line, int status)
 {
     sudo_utmp_t utbuf;
-    int rval = FALSE;
+    bool rval = false;
     FILE *fp;
     debug_decl(utmp_logout, SUDO_DEBUG_UTMP)
 
@@ -361,13 +362,13 @@ utmp_logout(const char *line, int status)
 	    /* Back up and overwrite record. */
 	    if (fseek(fp, 0L - (long)sizeof(utbuf), SEEK_CUR) == 0) {
 		if (fwrite(&utbuf, sizeof(utbuf), 1, fp) == 1)
-		    rval = TRUE;
+		    rval = true;
 	    }
 	    break;
 	}
     }
     fclose(fp);
 
-    debug_return_int(rval);
+    debug_return_bool(rval);
 }
 #endif /* HAVE_GETUTXID || HAVE_GETUTID */

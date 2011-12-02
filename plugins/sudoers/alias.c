@@ -143,13 +143,13 @@ alias_apply(int (*func)(void *, void *), void *cookie)
 }
 
 /*
- * Returns TRUE if there are no aliases, else FALSE.
+ * Returns true if there are no aliases, else false.
  */
-int
+bool
 no_aliases(void)
 {
     debug_decl(no_aliases, SUDO_DEBUG_ALIAS)
-    debug_return_int(rbisempty(aliases));
+    debug_return_bool(rbisempty(aliases));
 }
 
 /*

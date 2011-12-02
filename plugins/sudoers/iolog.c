@@ -240,11 +240,11 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
 /*
  * Append suffix to pathbuf after len chars and open the resulting file.
  * Note that the size of pathbuf is assumed to be PATH_MAX.
- * Uses zlib if docompress is TRUE.
+ * Uses zlib if docompress is true.
  * Returns the open file handle which has the close-on-exec flag set.
  */
 static void *
-open_io_fd(char *pathbuf, size_t len, const char *suffix, int docompress)
+open_io_fd(char *pathbuf, size_t len, const char *suffix, bool docompress)
 {
     void *vfd = NULL;
     int fd;
@@ -320,33 +320,33 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_stdin=", sizeof("iolog_stdin=") - 1) == 0) {
-		if (atobool(*cur + sizeof("iolog_stdin=") - 1) == TRUE)
-		    details->iolog_stdin = TRUE;
+		if (atobool(*cur + sizeof("iolog_stdin=") - 1) == true)
+		    details->iolog_stdin = true;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_stdout=", sizeof("iolog_stdout=") - 1) == 0) {
-		if (atobool(*cur + sizeof("iolog_stdout=") - 1) == TRUE)
-		    details->iolog_stdout = TRUE;
+		if (atobool(*cur + sizeof("iolog_stdout=") - 1) == true)
+		    details->iolog_stdout = true;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_stderr=", sizeof("iolog_stderr=") - 1) == 0) {
-		if (atobool(*cur + sizeof("iolog_stderr=") - 1) == TRUE)
-		    details->iolog_stderr = TRUE;
+		if (atobool(*cur + sizeof("iolog_stderr=") - 1) == true)
+		    details->iolog_stderr = true;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_ttyin=", sizeof("iolog_ttyin=") - 1) == 0) {
-		if (atobool(*cur + sizeof("iolog_ttyin=") - 1) == TRUE)
-		    details->iolog_ttyin = TRUE;
+		if (atobool(*cur + sizeof("iolog_ttyin=") - 1) == true)
+		    details->iolog_ttyin = true;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_ttyout=", sizeof("iolog_ttyout=") - 1) == 0) {
-		if (atobool(*cur + sizeof("iolog_ttyout=") - 1) == TRUE)
-		    details->iolog_ttyout = TRUE;
+		if (atobool(*cur + sizeof("iolog_ttyout=") - 1) == true)
+		    details->iolog_ttyout = true;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_compress=", sizeof("iolog_compress=") - 1) == 0) {
-		if (atobool(*cur + sizeof("iolog_compress=") - 1) == TRUE)
-		    iolog_compress = TRUE; /* must be global */
+		if (atobool(*cur + sizeof("iolog_compress=") - 1) == true)
+		    iolog_compress = true; /* must be global */
 		continue;
 	    }
 	    break;
@@ -435,7 +435,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 
     /* If we have no command (because -V was specified) just return. */
     if (argc == 0)
-	debug_return_bool(TRUE);
+	debug_return_bool(true);
 
     if (sigsetjmp(error_jmp, 1)) {
 	/* called via error(), errorx() or log_error() */
@@ -456,7 +456,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (!details.iolog_stdin && !details.iolog_ttyin &&
 	!details.iolog_stdout && !details.iolog_stderr &&
 	!details.iolog_ttyout) {
-	rval = FALSE;
+	rval = false;
 	goto done;
     }
 
@@ -483,7 +483,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     /*
      * We create 7 files: a log file, a timing file and 5 for input/output.
      */
-    io_logfile = open_io_fd(pathbuf, len, "/log", FALSE);
+    io_logfile = open_io_fd(pathbuf, len, "/log", false);
     if (io_logfile == NULL)
 	log_error(USE_ERRNO, _("unable to create %s"), pathbuf);
 
@@ -549,7 +549,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     fputc('\n', io_logfile);
     fclose(io_logfile);
 
-    rval = TRUE;
+    rval = true;
 
 done:
     efree(tofree);
@@ -600,7 +600,7 @@ sudoers_io_version(int verbose)
     sudo_printf(SUDO_CONV_INFO_MSG, "Sudoers I/O plugin version %s\n",
 	PACKAGE_VERSION);
 
-    debug_return_bool(TRUE);
+    debug_return_bool(true);
 }
 
 /*
@@ -639,7 +639,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
     last_time.tv_sec = now.tv_sec;
     last_time.tv_usec = now.tv_usec;
 
-    debug_return_bool(TRUE);
+    debug_return_bool(true);
 }
 
 static int

@@ -26,6 +26,11 @@
 
 #include <limits.h>
 #include <pathnames.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 
 #include "missing.h"
 #include "alloc.h"
@@ -40,14 +45,6 @@
 #else
 # define ROOT_UID       0
 #endif
-
-/*
- * Pseudo-boolean values
- */
-#undef TRUE
-#define TRUE                     1
-#undef FALSE
-#define FALSE                    0
 
 /*
  * Various modes sudo can be in (based on arguments) in hex
@@ -187,7 +184,7 @@ int term_restore(int, int);
 char *fmt_string(const char *var, const char *value);
 
 /* atobool.c */
-int atobool(const char *str);
+bool atobool(const char *str);
 
 /* parse_args.c */
 int parse_args(int argc, char **argv, int *nargc, char ***nargv,
@@ -201,7 +198,7 @@ int get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid);
 void get_ttysize(int *rowp, int *colp);
 
 /* sudo.c */
-int exec_setup(struct command_details *details, const char *ptyname, int ptyfd);
+bool exec_setup(struct command_details *details, const char *ptyname, int ptyfd);
 int run_command(struct command_details *details);
 extern int debug_level;
 extern const char *list_user, *runas_user, *runas_group;
