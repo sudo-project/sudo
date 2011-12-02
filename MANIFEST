@@ -43,6 +43,7 @@ compat/regress/fnmatch/fnm_test.in
 compat/regress/glob/files
 compat/regress/glob/globtest.c
 compat/regress/glob/globtest.in
+compat/stdbool.h
 compat/setenv.c
 compat/siglist.in
 compat/snprintf.c
