@@ -38,7 +38,7 @@ AC_SUBST([MAN_POSTINSTALL])
 AC_SUBST([SUDOERS_MODE])
 AC_SUBST([SUDOERS_UID])
 AC_SUBST([SUDOERS_GID])
-AC_SUBST([DEV])
+AC_SUBST([DEVEL])
 AC_SUBST([BAMAN])
 AC_SUBST([LCMAN])
 AC_SUBST([SEMAN])
@@ -158,7 +158,7 @@ PROGS="sudo"
 : ${SUDOERS_MODE='0440'}
 : ${SUDOERS_UID='0'}
 : ${SUDOERS_GID='0'}
-DEV="#"
+DEVEL=
 LDAP="#"
 BAMAN=0
 LCMAN=0
@@ -214,7 +214,7 @@ AC_ARG_WITH(devel, [AS_HELP_STRING([--with-devel], [add development options])],
 [case $with_devel in
     yes)	AC_MSG_NOTICE([Setting up for development: -Wall, flex, yacc])
 		OSDEFS="${OSDEFS} -DSUDO_DEVEL"
-		DEV=""
+		DEVEL="true"
 		devdir=.
 		;;
     no)		;;
