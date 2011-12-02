@@ -50,6 +50,7 @@
 
 struct sudo_user sudo_user;
 struct passwd *list_pw;
+sudo_conv_t sudo_conv;		/* NULL in non-plugin */
 
 static char sessid[7];
 

@@ -55,6 +55,8 @@ static int check_addr_printf(int msg_type, const char *fmt, ...);
 struct interface *interfaces;
 sudo_printf_t sudo_printf = check_addr_printf;
 
+sudo_conv_t sudo_conv;		/* NULL in non-plugin */
+
 static int
 check_addr(char *input)
 {

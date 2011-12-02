@@ -26,6 +26,11 @@
 #  include <stdlib.h>
 # endif
 #endif /* STDC_HEADERS */
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif /* HAVE_STRING_H */
@@ -40,11 +45,14 @@
 #include "list.h"
 #include "parse.h"
 #include "toke.h"
+#include "sudo_plugin.h"
 #include <gram.h>
 
 /*
  * TODO: test realloc
  */
+
+sudo_conv_t sudo_conv;		/* NULL in non-plugin */
 
 YYSTYPE yylval;
 
