@@ -74,6 +74,7 @@ OTHER_DOCS = $(top_srcdir)/ChangeLog $(top_srcdir)/README \
 OTHER_DOCS_LDAP = $(top_srcdir)/README.LDAP $(srcdir)/schema.*
 
 VERSION = @PACKAGE_VERSION@
+PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
 all: $(DEVDOCS) $(DOCS)
 
