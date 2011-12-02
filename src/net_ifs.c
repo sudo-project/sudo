@@ -264,10 +264,10 @@ get_net_ifs(char **addrinfo)
 
 	/* Set i to the subscript of the next interface. */
 	i += sizeof(struct ifreq);
-#ifdef HAVE_SA_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
 	if (ifr->ifr_addr.sa_len > sizeof(ifr->ifr_addr))
 	    i += ifr->ifr_addr.sa_len - sizeof(struct sockaddr);
-#endif /* HAVE_SA_LEN */
+#endif /* HAVE_STRUCT_SOCKADDR_SA_LEN */
 
 	/* Skip duplicates and interfaces with NULL addresses. */
 	sin = (struct sockaddr_in *) &ifr->ifr_addr;

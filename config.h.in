@@ -83,6 +83,10 @@
    */
 #undef HAVE_DECL_ERRNO
 
+/* Define to 1 if you have the declaration of `h_errno', and to 0 if you
+   don't. */
+#undef HAVE_DECL_H_ERRNO
+
 /* Define to 1 if you have the declaration of `sys_siglist', and to 0 if you
    don't. */
 #undef HAVE_DECL_SYS_SIGLIST
@@ -411,9 +415,6 @@
 /* Define to 1 if you have the <sasl/sasl.h> header file. */
 #undef HAVE_SASL_SASL_H
 
-/* Define if your struct sockadr has an sa_len field. */
-#undef HAVE_SA_LEN
-
 /* Define to 1 if you use SecurID for authentication. */
 #undef HAVE_SECURID
 
@@ -500,6 +501,9 @@
 
 /* Define to 1 if the system has the type `struct in6_addr'. */
 #undef HAVE_STRUCT_IN6_ADDR
+
+/* Define if your struct sockadr has an sa_len field. */
+#undef HAVE_STRUCT_SOCKADDR_SA_LEN
 
 /* Define to 1 if the system has the type `struct timespec'. */
 #undef HAVE_STRUCT_TIMESPEC
