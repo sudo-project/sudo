@@ -87,7 +87,6 @@ bsdauth_init(struct passwd *pw, sudo_auth *auth)
     }
 
     /* XXX - maybe sanity check the auth style earlier? */
-    /* XXX - leaks new value of login_style */
     login_style = login_getstyle(state.lc, login_style, "auth-sudo");
     if (login_style == NULL) {
 	log_error(NO_EXIT|NO_MAIL, _("invalid authentication type"));
