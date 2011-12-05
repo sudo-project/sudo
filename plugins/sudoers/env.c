@@ -98,7 +98,6 @@ struct environment {
 /*
  * Prototypes
  */
-static void sudo_setenv(const char *, const char *, int);
 static void sudo_putenv(char *, int, int);
 
 /*
@@ -240,7 +239,7 @@ env_get(void)
  * (not environ) and it always overwrites.  The dupcheck param determines
  * whether we need to verify that the variable is not already set.
  */
-static void
+void
 sudo_setenv(const char *var, const char *val, int dupcheck)
 {
     char *estring;

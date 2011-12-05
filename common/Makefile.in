@@ -102,8 +102,8 @@ atobool.lo: $(srcdir)/atobool.c $(top_builddir)/config.h $(incdir)/missing.h \
             $(incdir)/sudo_debug.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/atobool.c
 fileops.lo: $(srcdir)/fileops.c $(top_builddir)/config.h \
-            $(top_srcdir)/compat/timespec.h $(incdir)/missing.h \
-            $(incdir)/fileops.h $(incdir)/sudo_debug.h
+            $(top_srcdir)/compat/stdbool.h $(top_srcdir)/compat/timespec.h \
+            $(incdir)/missing.h $(incdir)/fileops.h $(incdir)/sudo_debug.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/fileops.c
 fmt_string.lo: $(srcdir)/fmt_string.c $(top_builddir)/config.h \
                $(incdir)/missing.h $(incdir)/sudo_debug.h
@@ -119,9 +119,9 @@ setgroups.lo: $(srcdir)/setgroups.c $(top_builddir)/config.h \
               $(incdir)/missing.h $(incdir)/sudo_debug.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/setgroups.c
 sudo_debug.lo: $(srcdir)/sudo_debug.c $(top_builddir)/config.h \
-               $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
-               $(incdir)/gettext.h $(incdir)/sudo_plugin.h \
-               $(incdir)/sudo_debug.h
+               $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h \
+               $(incdir)/alloc.h $(incdir)/error.h $(incdir)/gettext.h \
+               $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudo_debug.c
 term.lo: $(srcdir)/term.c $(top_builddir)/config.h $(incdir)/missing.h \
          $(incdir)/sudo_debug.h

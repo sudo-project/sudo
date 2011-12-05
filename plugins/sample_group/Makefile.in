@@ -123,5 +123,6 @@ cleandir: realclean
 getgrent.lo: $(srcdir)/getgrent.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/getgrent.c
 sample_group.lo: $(srcdir)/sample_group.c $(top_builddir)/config.h \
-                 $(incdir)/sudo_plugin.h $(incdir)/missing.h
+                 $(top_srcdir)/compat/stdbool.h $(incdir)/sudo_plugin.h \
+                 $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sample_group.c
