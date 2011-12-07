@@ -233,7 +233,7 @@ pre-install:
 	    ./visudo -c -f $(DESTDIR)$(sudoersdir)/sudoers; \
 	fi
 
-install: install-dirs install-plugin install-binaries install-sudoers install-doc
+install: install-plugin install-binaries install-sudoers install-doc
 
 install-dirs:
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(plugindir) \

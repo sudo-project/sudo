@@ -85,7 +85,7 @@ sample_plugin.la: $(OBJS)
 
 pre-install:
 
-install: install-dirs install-plugin
+install: install-plugin
 
 install-dirs:
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(plugindir)

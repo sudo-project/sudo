@@ -49,7 +49,7 @@ Makefile: $(srcdir)/Makefile.in
 
 pre-install:
 
-install: install-dirs install-includes
+install: install-includes
 
 install-dirs:
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(includedir)
