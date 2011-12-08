@@ -579,15 +579,6 @@ logging.lo: $(srcdir)/logging.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
             $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/logging.c
-login_class.lo: $(srcdir)/login_class.c $(top_builddir)/config.h \
-                $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
-                $(top_builddir)/pathnames.h $(incdir)/missing.h \
-                $(incdir)/error.h $(incdir)/alloc.h $(incdir)/list.h \
-                $(incdir)/fileops.h $(srcdir)/defaults.h $(devdir)/def_data.h \
-                $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-                $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
-                $(incdir)/gettext.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/login_class.c
 logwrap.lo: $(srcdir)/logwrap.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
             $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
