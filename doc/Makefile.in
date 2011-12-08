@@ -84,13 +84,14 @@ Makefile: $(srcdir)/Makefile.in
 .SUFFIXES: .man
 
 varsub: $(top_srcdir)/configure.in
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
 	    printf 's#@%s@#1#\ns#@%s@#1#\ns#@%s@#1#\ns#@%s@#/etc#g\ns#@%s@#/usr/local#g\ns#@%s@#4#g\ns#@%s@#1m#g\n' SEMAN BAMAN LCMAN sysconfdir prefix mansectform mansectsu > $@; \
 	    sed -n '/Begin initial values for man page substitution/,/End initial values for man page substitution/{;p;}' $(top_srcdir)/configure.in | sed -e '/^#/d' -e 's/^/s#@/' -e 's/=[\\"]*/@#/' -e 's/[\\"]*$$/#g/' >> $@; \
 	fi
 
 $(srcdir)/sudo.man.in: $(srcdir)/sudo.pod
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; \
 	    sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudo.pod > $@; \
@@ -101,12 +102,14 @@ sudo.man: $(srcdir)/sudo.man.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 $(srcdir)/sudo.cat: varsub $(srcdir)/sudo.man.in
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
 	    sed -f varsub $(srcdir)/sudo.man.in | $(NROFF) -man > $@; \
 	fi
 
 $(srcdir)/visudo.man.in: $(srcdir)/visudo.pod
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; \
 	    sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/visudo.pod > $@; \
@@ -117,12 +120,14 @@ visudo.man: $(srcdir)/visudo.man.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 $(srcdir)/visudo.cat: varsub $(srcdir)/visudo.man.in
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
 	    sed -f varsub $(srcdir)/visudo.man.in | $(NROFF) -man > $@; \
 	fi
 
 $(srcdir)/sudoers.man.in: $(srcdir)/sudoers.pod
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; \
 	    sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudoers.pod > $@; \
@@ -133,12 +138,14 @@ sudoers.man: $(srcdir)/sudoers.man.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 $(srcdir)/sudoers.cat: varsub $(srcdir)/sudoers.man.in
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
 	    sed -f varsub $(srcdir)/sudoers.man.in | $(NROFF) -man > $@; \
 	fi
 
 $(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.pod
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; \
 	    sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudoers.ldap.pod > $@; \
@@ -149,12 +156,14 @@ sudoers.ldap.man: $(srcdir)/sudoers.ldap.man.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 $(srcdir)/sudoers.ldap.cat: varsub $(srcdir)/sudoers.ldap.man.in
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
 	    sed -f varsub $(srcdir)/sudoers.ldap.man.in | $(NROFF) -man > $@; \
 	fi
 
 $(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.pod
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; \
 	    sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudoreplay.pod > $@; \
@@ -165,12 +174,14 @@ sudoreplay.man: $(srcdir)/sudoreplay.man.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 $(srcdir)/sudoreplay.cat: varsub $(srcdir)/sudoreplay.man.in
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
 	    sed -f varsub $(srcdir)/sudoreplay.man.in | $(NROFF) -man > $@; \
 	fi
 
 $(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.pod
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; \
 	    sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudo_plugin.pod > $@; \
@@ -181,22 +192,26 @@ sudo_plugin.man: $(srcdir)/sudo_plugin.man.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 $(srcdir)/sudo_plugin.cat: varsub $(srcdir)/sudo_plugin.man.in
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
 	    sed -f varsub $(srcdir)/sudo_plugin.man.in | $(NROFF) -man > $@; \
 	fi
 
 CONTRIBUTORS: $(srcdir)/contributors.pod
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
 	    pod2text -l -i0 $(srcdir)/contributors.pod | sed '1,3d' > $@; \
 	fi
 
 HISTORY: $(srcdir)/history.pod
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
 	    pod2text -l -i0 $(srcdir)/history.pod > $@; \
 	fi
 
 LICENSE: $(srcdir)/license.pod
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
 	    pod2text -l -i0 $(srcdir)/license.pod | sed '1,3d' > $@; \
 	fi
 
