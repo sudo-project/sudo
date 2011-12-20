@@ -100,7 +100,7 @@ sudo_edit(struct command_details *command_details)
 	char *ofile;
 	struct timeval omtim;
 	off_t osize;
-    } *tf;
+    } *tf = NULL;
     debug_decl(sudo_edit, SUDO_DEBUG_EDIT)
 
     /*
@@ -324,9 +324,11 @@ sudo_edit(struct command_details *command_details)
 
 cleanup:
     /* Clean up temp files and return. */
-    for (i = 0; i < nfiles; i++) {
-	if (tf[i].tfile != NULL)
-	    unlink(tf[i].tfile);
+    if (tf != NULL) {
+	for (i = 0; i < nfiles; i++) {
+	    if (tf[i].tfile != NULL)
+		unlink(tf[i].tfile);
+	}
     }
     debug_return_int(1);
 }
