@@ -1275,9 +1275,8 @@ Default is C<@mailsub@>.
 
 =item noexec_file
 
-This option is deprecated and will be removed in a future release
-of B<sudo>.  The path to the noexec file should now be set in the
-F<@sysconfdir@/sudo.conf> file.
+This option is no longer supported.  The path to the noexec file
+should now be set in the F<@sysconfdir@/sudo.conf> file.
 
 =item passprompt
 

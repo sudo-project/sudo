@@ -177,10 +177,7 @@ verifypw
 	never all any always
 noexec
 	T_FLAG
-	"Preload the dummy exec functions contained in 'noexec_file'"
-noexec_file
-	T_STR|T_PATH
-	"File containing dummy exec functions: %s"
+	"Preload the dummy exec functions contained in "_PATH_SUDO_NOEXEC
 ignore_local_sudoers
 	T_FLAG
 	"If LDAP directory is up, do we ignore local sudoers file"

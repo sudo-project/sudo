@@ -240,11 +240,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	def_data_verifypw,
     }, {
 	"noexec", T_FLAG,
-	N_("Preload the dummy exec functions contained in 'noexec_file'"),
-	NULL,
-    }, {
-	"noexec_file", T_STR|T_PATH,
-	N_("File containing dummy exec functions: %s"),
+	N_("Preload the dummy exec functions contained in \"_PATH_SUDO_NOEXEC"),
 	NULL,
     }, {
 	"ignore_local_sudoers", T_FLAG,
