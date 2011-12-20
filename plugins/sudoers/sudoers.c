@@ -1180,8 +1180,10 @@ sudoers_policy_version(int verbose)
 	dump_auth_methods();
 	dump_defaults();
 	sudo_printf(SUDO_CONV_INFO_MSG, "\n");
-	dump_interfaces(interfaces_string);
-	sudo_printf(SUDO_CONV_INFO_MSG, "\n");
+	if (interfaces_string != NULL) {
+	    dump_interfaces(interfaces_string);
+	    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
+	}
     }
     debug_return_bool(true);
 }
