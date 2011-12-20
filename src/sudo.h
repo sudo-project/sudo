@@ -37,6 +37,7 @@
 #include "error.h"
 #include "fileops.h"
 #include "list.h"
+#include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "gettext.h"
 
