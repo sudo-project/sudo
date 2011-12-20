@@ -209,7 +209,7 @@ main(int argc, char *argv[], char *envp[])
     user_info = get_user_info(&user_details);
 
     /* Read sudo.conf. */
-    sudo_read_conf();
+    sudo_conf_read();
 
     /* Parse command line arguments. */
     sudo_mode = parse_args(argc, argv, &nargc, &nargv, &settings, &env_add);
@@ -884,13 +884,13 @@ disable_execute(struct command_details *details)
      */
 # if defined(__darwin__) || defined(__APPLE__)
     nenvp[env_len++] = "DYLD_FORCE_FLAT_NAMESPACE=";
-    cp = fmt_string("DYLD_INSERT_LIBRARIES", noexec_path);
+    cp = fmt_string("DYLD_INSERT_LIBRARIES", sudo_conf_noexec_path());
 # elif defined(__osf__) || defined(__sgi)
-    easprintf(&cp, "_RLD_LIST=%s:DEFAULT", noexec_path);
+    easprintf(&cp, "_RLD_LIST=%s:DEFAULT", sudo_conf_noexec_path());
 # elif defined(_AIX)
-    cp = fmt_string("LDR_PRELOAD", noexec_path);
+    cp = fmt_string("LDR_PRELOAD", sudo_conf_noexec_path());
 # else
-    cp = fmt_string("LD_PRELOAD", noexec_path);
+    cp = fmt_string("LD_PRELOAD", sudo_conf_noexec_path());
 # endif
     if (cp == NULL)
 	error(1, NULL);

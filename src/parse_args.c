@@ -53,9 +53,6 @@
 extern char *optarg;
 extern int optind;
 
-/* XXX */
-extern const char *debug_flags;
-
 int tgetpass_flags;
 
 /*
@@ -130,7 +127,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     int flags = 0;		/* mode flags */
     int valid_flags, ch;
     int i, j;
-    char *cp, **env_add, **settings;
+    char *cp, **env_add, **settings, *debug_flags;
     int nenv = 0;
     int env_size = 32;
     debug_decl(parse_args, SUDO_DEBUG_ARGS)
@@ -151,6 +148,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	sudo_settings[ARG_NET_ADDRS].value = cp;
 
     /* Set debug file and flags from sudo.conf. */
+    debug_flags = sudo_conf_debug_flags();
     if (debug_flags != NULL)
 	sudo_settings[ARG_DEBUG_FLAGS].value = debug_flags;
 

@@ -187,7 +187,8 @@ load_plugins.o: $(srcdir)/load_plugins.c $(top_builddir)/config.h \
                 $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
                 $(incdir)/fileops.h $(incdir)/list.h $(incdir)/sudo_debug.h \
                 $(incdir)/gettext.h $(incdir)/sudo_plugin.h \
-                $(srcdir)/sudo_plugin_int.h $(incdir)/sudo_debug.h
+                $(srcdir)/sudo_plugin_int.h $(incdir)/sudo_conf.h \
+                $(incdir)/list.h $(incdir)/sudo_debug.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/load_plugins.c
 net_ifs.o: $(srcdir)/net_ifs.c $(top_builddir)/config.h $(incdir)/missing.h \
            $(incdir)/alloc.h $(incdir)/error.h $(incdir)/sudo_debug.h \

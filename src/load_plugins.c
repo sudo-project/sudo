@@ -42,203 +42,17 @@
 #else
 # include "compat/dlfcn.h"
 #endif
-#include <ctype.h>
 #include <errno.h>
-
-#define SUDO_ERROR_WRAP	0
 
 #include "sudo.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
+#include "sudo_conf.h"
 #include "sudo_debug.h"
 
 #ifndef RTLD_GLOBAL
 # define RTLD_GLOBAL	0
 #endif
-
-#ifdef _PATH_SUDO_NOEXEC
-const char *noexec_path = _PATH_SUDO_NOEXEC;
-#endif
-
-/* XXX - for parse_args() */
-const char *debug_flags;
-
-struct sudo_conf_table {
-    const char *name;
-    unsigned int namelen;
-    bool (*setter)(const char *entry, void *data);
-};
-
-struct sudo_conf_paths {
-    const char *pname;
-    unsigned int pnamelen;
-    const char **pval;
-};
-
-static bool set_debug(const char *entry, void *data);
-static bool set_path(const char *entry, void *data);
-static bool set_plugin(const char *entry, void *data);
-
-static struct plugin_info_list plugin_info_list;
-
-static struct sudo_conf_table sudo_conf_table[] = {
-    { "Debug", sizeof("Debug") - 1, set_debug },
-    { "Path", sizeof("Path") - 1, set_path },
-    { "Plugin", sizeof("Plugin") - 1, set_plugin },
-    { NULL }
-};
-
-static struct sudo_conf_paths sudo_conf_paths[] = {
-    { "askpass", sizeof("askpass"), &askpass_path },
-#ifdef _PATH_SUDO_NOEXEC
-    { "noexec", sizeof("noexec"), &noexec_path },
-#endif
-    { NULL }
-};
-
-/*
- * "Debug progname debug_file debug_flags"
- */
-static bool
-set_debug(const char *entry, void *data)
-{
-    size_t filelen, proglen;
-    const char *progname;
-    char *debug_file;
-
-    /* Is this debug setting for me? */
-    progname = getprogname();
-    if (strcmp(progname, "sudoedit") == 0)
-	progname = "sudo";
-    proglen = strlen(progname);
-    if (strncmp(entry, progname, proglen) != 0 ||
-	!isblank((unsigned char)entry[proglen]))
-    	return false;
-    entry += proglen + 1;
-    while (isblank((unsigned char)*entry))
-	entry++;
-
-    debug_flags = strpbrk(entry, " \t");
-    if (debug_flags == NULL)
-    	return false;
-    filelen = (size_t)(debug_flags - entry);
-    while (isblank((unsigned char)*debug_flags))
-	debug_flags++;
-
-    /* Set debug file and parse the flags. */
-    debug_file = estrndup(entry, filelen);
-    debug_flags = estrdup(debug_flags);
-    sudo_debug_init(debug_file, debug_flags);
-    efree(debug_file);
-
-    return true;
-}
-
-static bool
-set_path(const char *entry, void *data)
-{
-    const char *name, *path;
-    struct sudo_conf_paths *cur;
-
-    /* Parse Path line */
-    name = entry;
-    path = strpbrk(entry, " \t");
-    if (path == NULL)
-    	return false;
-    while (isblank((unsigned char)*path))
-	path++;
-
-    /* Match supported paths, ignore the rest. */
-    for (cur = sudo_conf_paths; cur->pname != NULL; cur++) {
-	if (strncasecmp(name, cur->pname, cur->pnamelen) == 0 &&
-	    isblank((unsigned char)name[cur->pnamelen])) {
-	    *(cur->pval) = estrdup(path);
-	    break;
-	}
-    }
-
-    return true;
-}
-
-static bool
-set_plugin(const char *entry, void *data)
-{
-    struct plugin_info_list *pil = data;
-    struct plugin_info *info;
-    const char *name, *path;
-    size_t namelen;
-
-    /* Parse Plugin line */
-    name = entry;
-    path = strpbrk(entry, " \t");
-    if (path == NULL)
-    	return false;
-    namelen = (size_t)(path - name);
-    while (isblank((unsigned char)*path))
-	path++;
-
-    info = emalloc(sizeof(*info));
-    info->symbol_name = estrndup(name, namelen);
-    info->path = estrdup(path);
-    info->prev = info;
-    info->next = NULL;
-    tq_append(pil, info);
-
-    return true;
-}
-
-/*
- * Reads in /etc/sudo.conf
- * Returns a list of plugins.
- */
-void
-sudo_read_conf(void)
-{
-    struct sudo_conf_table *cur;
-    struct plugin_info *info;
-    FILE *fp;
-    char *cp;
-
-    if ((fp = fopen(_PATH_SUDO_CONF, "r")) == NULL)
-	goto done;
-
-    while ((cp = sudo_parseln(fp)) != NULL) {
-	/* Skip blank or comment lines */
-	if (*cp == '\0')
-	    continue;
-
-	for (cur = sudo_conf_table; cur->name != NULL; cur++) {
-	    if (strncasecmp(cp, cur->name, cur->namelen) == 0 &&
-		isblank((unsigned char)cp[cur->namelen])) {
-		cp += cur->namelen;
-		while (isblank((unsigned char)*cp))
-		    cp++;
-		if (cur->setter(cp, &plugin_info_list))
-		    break;
-	    }
-	}
-    }
-    fclose(fp);
-
-done:
-    if (tq_empty(&plugin_info_list)) {
-	/* Default policy plugin */
-	info = emalloc(sizeof(*info));
-	info->symbol_name = "sudoers_policy";
-	info->path = SUDOERS_PLUGIN;
-	info->prev = info;
-	info->next = NULL;
-	tq_append(&plugin_info_list, info);
-
-	/* Default I/O plugin */
-	info = emalloc(sizeof(*info));
-	info->symbol_name = "sudoers_io";
-	info->path = SUDOERS_PLUGIN;
-	info->prev = info;
-	info->next = NULL;
-	tq_append(&plugin_info_list, info);
-    }
-}
 
 /*
  * Load the plugins listed in sudo.conf.
@@ -247,6 +61,7 @@ bool
 sudo_load_plugins(struct plugin_container *policy_plugin,
     struct plugin_container_list *io_plugins)
 {
+    struct plugin_info_list *plugins;
     struct generic_plugin *plugin;
     struct plugin_container *container;
     struct plugin_info *info;
@@ -254,9 +69,11 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
     void *handle;
     char path[PATH_MAX];
     bool rval = false;
+    debug_decl(sudo_load_plugins, SUDO_DEBUG_PLUGIN)
 
     /* Walk plugin list. */
-    tq_foreach_fwd(&plugin_info_list, info) {
+    plugins = sudo_conf_plugins();
+    tq_foreach_fwd(plugins, info) {
 	if (info->path[0] == '/') {
 	    if (strlcpy(path, info->path, sizeof(path)) >= sizeof(path)) {
 		warningx(_("%s: %s"), info->path, strerror(ENAMETOOLONG));
@@ -339,5 +156,5 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
     rval = true;
 
 done:
-    return rval;
+    debug_return_bool(rval);
 }
