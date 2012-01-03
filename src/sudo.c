@@ -422,6 +422,39 @@ get_user_groups(struct user_details *ud)
 }
 
 /*
+ * Return a string from ttyname() containing the tty to which the process is
+ * attached or NULL if there is no tty associated with the process (or its
+ * parent).  First tries std{in,out,err} then falls back to the parent's /proc
+ * entry.  We could try following the parent all the way to pid 1 but
+ * /proc/%d/status is system-specific (text on Linux, a struct on Solaris).
+ */
+static char *
+get_process_tty(void)
+{
+    char path[PATH_MAX], *tty = NULL;
+    pid_t ppid;
+    int i, fd;
+    debug_decl(get_process_tty, SUDO_DEBUG_UTIL)
+
+    if ((tty = ttyname(STDIN_FILENO)) == NULL &&
+	(tty = ttyname(STDOUT_FILENO)) == NULL &&
+	(tty = ttyname(STDERR_FILENO)) == NULL) {
+	/* No tty for child, check the parent via /proc. */
+	ppid = getppid();
+	for (i = STDIN_FILENO; i < STDERR_FILENO && tty == NULL; i++) {
+	    snprintf(path, sizeof(path), "/proc/%d/fd/%d", ppid, i);
+	    fd = open(path, O_RDONLY|O_NOCTTY, 0);
+	    if (fd != -1) {
+		tty = ttyname(fd);
+		close(fd);
+	    }
+	}
+    }
+
+    debug_return_str(tty);
+}
+
+/*
  * Return user information as an array of name=value pairs.
  * and fill in struct user_details (which shares the same strings).
  */
@@ -471,8 +504,7 @@ get_user_info(struct user_details *ud)
 	ud->cwd = user_info[i] + sizeof("cwd=") - 1;
     }
 
-    if ((cp = ttyname(STDIN_FILENO)) || (cp = ttyname(STDOUT_FILENO)) ||
-	(cp = ttyname(STDERR_FILENO))) {
+    if ((cp = get_process_tty()) != NULL) {
 	user_info[++i] = fmt_string("tty", cp);
 	if (user_info[i] == NULL)
 	    errorx(1, _("unable to allocate memory"));
