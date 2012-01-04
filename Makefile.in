@@ -114,11 +114,7 @@ uninstall: uninstall-nls
 uninstall-nls:
 	for pot in $(POTFILES); do \
 	    domain=`basename $$pot .pot`; \
-	    podir=`dirname $$pot`; \
-	    for po in $$podir/*.po; do \
-		lang=`basename $$po .po`; \
-		rm -f $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$$domain.mo; \
-	    done; \
+	    rm -f $(DESTDIR)$(localedir)/*/LC_MESSAGES/$$domain.mo; \
 	done
 
 autoconf:
@@ -233,12 +229,13 @@ install-nls:
 	    for pot in $(POTFILES); do \
 		podir=`dirname $$pot`; \
 		domain=`basename $$pot .pot`; \
+		SUDO_LINGUAS=$${LINGUAS-"`echo $$podir/*.mo|sed 's:'$$podir'/\([^ ]*\).mo:\1:g'`"}; \
 		echo $(ECHO_N) "Installing $$domain message catalogs:$(ECHO_C)"; \
-		for mo in $$podir/*.mo; do \
-		    lang=`basename $$mo .mo`; \
+		for lang in $$SUDO_LINGUAS; do \
+		    test -s $$podir/$$lang.mo || continue; \
 		    echo $(ECHO_N) " $$lang$(ECHO_C)"; \
 		    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES; \
-		    $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0644 $$mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$$domain.mo; \
+		    $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0644 $$podir/$$lang.mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$$domain.mo; \
 		done; \
 		echo ""; \
 	    done; \
