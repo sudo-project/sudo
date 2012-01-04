@@ -328,15 +328,15 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"group_plugin", T_STR,
-	N_("Plugin for non-Unix group support"),
+	N_("Plugin for non-Unix group support: %s"),
 	NULL,
     }, {
 	"iolog_dir", T_STR|T_PATH,
-	N_("Directory in which to store input/output logs"),
+	N_("Directory in which to store input/output logs: %s"),
 	NULL,
     }, {
 	"iolog_file", T_STR,
-	N_("File in which to store the input/output log"),
+	N_("File in which to store the input/output log: %s"),
 	NULL,
     }, {
 	"set_utmp", T_FLAG,
