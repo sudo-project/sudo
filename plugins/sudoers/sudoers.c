@@ -440,13 +440,9 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     rebuild_env();
 
     /* Require a password if sudoers says so.  */
-    if (def_authenticate) {
-	int rc = check_user(validated, sudo_mode);
-	if (rc != TRUE) {
-	    rval = rc;
-	    goto done;
-	}
-    }
+    rval = check_user(validated, sudo_mode);
+    if (rval != TRUE)
+	goto done;
 
     /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
     /* XXX - causes confusion when root is not listed in sudoers */
