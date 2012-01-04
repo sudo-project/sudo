@@ -219,7 +219,7 @@ sudoers_locale
 	"Locale to use while parsing sudoers: %s"
 visiblepw
 	T_FLAG
-	"Allow sudo to prompt for a password even if it would be visisble"
+	"Allow sudo to prompt for a password even if it would be visible"
 pwfeedback
 	T_FLAG
 	"Provide visual feedback at the password prompt when there is user input"

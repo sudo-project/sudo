@@ -296,7 +296,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"visiblepw", T_FLAG,
-	N_("Allow sudo to prompt for a password even if it would be visisble"),
+	N_("Allow sudo to prompt for a password even if it would be visible"),
 	NULL,
     }, {
 	"pwfeedback", T_FLAG,
