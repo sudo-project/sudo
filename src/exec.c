@@ -144,7 +144,7 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 	    else
 #endif
 		my_execve(details->command, details->argv, details->envp);
-	    sudo_debug_printf(SUDO_DEBUG_SYSERR, "unable to exec %s: %s",
+	    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to exec %s: %s",
 		details->command, strerror(errno));
 	}
 	cstat.type = CMD_ERRNO;
@@ -442,7 +442,7 @@ handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
 	    /* If pipe is empty, we are done. */
 	    if (errno == EAGAIN)
 		break;
-	    sudo_debug_printf(SUDO_DEBUG_SYSERR, "error reading signal pipe %s",
+	    sudo_debug_printf(SUDO_DEBUG_ERROR, "error reading signal pipe %s",
 		strerror(errno));
 	    cstat->type = CMD_ERRNO;
 	    cstat->val = errno;

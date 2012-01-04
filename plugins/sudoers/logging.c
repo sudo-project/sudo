@@ -425,7 +425,7 @@ send_mail(const char *fmt, ...)
 		case -1:
 		    /* Error. */
 		    mysyslog(LOG_ERR, _("unable to fork: %m"));
-		    sudo_debug_printf(SUDO_DEBUG_SYSERR, "unable to fork: %s",
+		    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to fork: %s",
 			strerror(errno));
 		    _exit(1);
 		case 0:
@@ -477,7 +477,7 @@ send_mail(const char *fmt, ...)
 
     if (pipe(pfd) == -1) {
 	mysyslog(LOG_ERR, _("unable to open pipe: %m"));
-	sudo_debug_printf(SUDO_DEBUG_SYSERR, "unable to open pipe: %s",
+	sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to open pipe: %s",
 	    strerror(errno));
 	sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 	_exit(1);
@@ -487,7 +487,7 @@ send_mail(const char *fmt, ...)
 	case -1:
 	    /* Error. */
 	    mysyslog(LOG_ERR, _("unable to fork: %m"));
-	    sudo_debug_printf(SUDO_DEBUG_SYSERR, "unable to fork: %s",
+	    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to fork: %s",
 		strerror(errno));
 	    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 	    _exit(1);
@@ -502,7 +502,7 @@ send_mail(const char *fmt, ...)
 		if (pfd[0] != STDIN_FILENO) {
 		    if (dup2(pfd[0], STDIN_FILENO) == -1) {
 			mysyslog(LOG_ERR, _("unable to dup stdin: %m"));
-			sudo_debug_printf(SUDO_DEBUG_SYSERR,
+			sudo_debug_printf(SUDO_DEBUG_ERROR,
 			    "unable to dup stdin: %s", strerror(errno));
 			_exit(127);
 		    }
@@ -538,7 +538,7 @@ send_mail(const char *fmt, ...)
 		execv(mpath, argv);
 #endif /* NO_ROOT_MAILER */
 		mysyslog(LOG_ERR, _("unable to execute %s: %m"), mpath);
-		sudo_debug_printf(SUDO_DEBUG_SYSERR, "unable to execute %s: %s",
+		sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to execute %s: %s",
 		    mpath, strerror(errno));
 		_exit(127);
 	    }

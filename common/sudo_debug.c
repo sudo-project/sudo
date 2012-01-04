@@ -57,8 +57,7 @@
 /* Note: this must match the order in sudo_debug.h */
 const char *const sudo_debug_priorities[] = {
     "crit",
-    "syserr",
-    "progerr",
+    "err",
     "warn",
     "notice",
     "diag",
