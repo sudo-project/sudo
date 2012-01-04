@@ -40,7 +40,7 @@
 #include "list.h"
 #include "parse.h"
 #include "toke.h"
-#include "gram.h"
+#include <gram.h>
 
 /*
  * TODO: test realloc

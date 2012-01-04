@@ -64,7 +64,7 @@
 #include "sudoers.h" /* XXX */
 #include "parse.h"
 #include "toke.h"
-#include "gram.h"
+#include <gram.h>
 
 /*
  * We must define SIZE_MAX for yacc's skeleton.c.
