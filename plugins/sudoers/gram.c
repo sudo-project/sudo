@@ -140,7 +140,7 @@ typedef union {
     int tok;
 } YYSTYPE;
 #endif /* YYSTYPE_DEFINED */
-#line 143 "y.tab.c"
+#line 143 "gram.c"
 #define COMMAND 257
 #define ALIAS 258
 #define DEFVAR 259
@@ -827,7 +827,7 @@ init_parser(const char *path, int quiet)
 
     debug_return;
 }
-#line 778 "y.tab.c"
+#line 778 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1596,7 +1596,7 @@ case 96:
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
-#line 1547 "y.tab.c"
+#line 1547 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

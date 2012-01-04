@@ -198,7 +198,7 @@ $(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y
 	    else \
 		gram_y="$(srcdir)/gram.y"; \
 	    fi; \
-	    cmd='$(YACC) -d '"$$gram_y"'; echo "#include <config.h>" > $(devdir)/gram.c; cat y.tab.c >> $(devdir)/gram.c; rm -f y.tab.c; mv -f y.tab.h $(devdir)/gram.h'; \
+	    cmd='$(YACC) -d '"$$gram_y"'; echo "#include <config.h>" > $(devdir)/gram.c; sed "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"gram.c\"/" y.tab.c >> $(devdir)/gram.c; rm -f y.tab.c; mv -f y.tab.h $(devdir)/gram.h'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
@@ -222,7 +222,7 @@ $(devdir)/getdate.c: $(srcdir)/getdate.y
 	    else \
 		getdate_y="$(srcdir)/getdate.y"; \
 	    fi; \
-	    cmd='$(YACC) '"$$getdate_y"'; echo "#include <config.h>" > $(devdir)/getdate.c; cat y.tab.c >> $(devdir)/getdate.c; rm -f y.tab.c'; \
+	    cmd='$(YACC) '"$$getdate_y"'; echo "#include <config.h>" > $(devdir)/getdate.c; sed "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"getdate.c\"/" y.tab.c >> $(devdir)/getdate.c; rm -f y.tab.c'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
