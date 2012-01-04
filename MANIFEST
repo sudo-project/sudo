@@ -16,6 +16,7 @@ common/fmt_string.c
 common/lbuf.c
 common/list.c
 common/setgroups.c
+common/sudo_conf.c
 common/sudo_debug.c
 common/term.c
 common/zero_bytes.c
@@ -45,10 +46,10 @@ compat/regress/fnmatch/fnm_test.in
 compat/regress/glob/files
 compat/regress/glob/globtest.c
 compat/regress/glob/globtest.in
-compat/stdbool.h
 compat/setenv.c
 compat/siglist.in
 compat/snprintf.c
+compat/stdbool.h
 compat/strlcat.c
 compat/strlcpy.c
 compat/strsignal.c
@@ -105,6 +106,7 @@ include/gettext.h
 include/lbuf.h
 include/list.h
 include/missing.h
+include/sudo_conf.h
 include/sudo_debug.h
 include/sudo_plugin.h
 indent.pro
