@@ -54,7 +54,6 @@ extern char *optarg;
 extern int optind;
 
 /* XXX */
-extern const char *debug_file;
 extern const char *debug_flags;
 
 int tgetpass_flags;
@@ -76,47 +75,45 @@ static struct sudo_settings {
     { "bsdauth_type" },
 #define ARG_LOGIN_CLASS 1
     { "login_class" },
-#define ARG_DEBUG_FILE 2
-    { "debug_file" },
-#define ARG_DEBUG_FLAGS 3
+#define ARG_DEBUG_FLAGS 2
     { "debug_flags" },
-#define ARG_DEBUG_LEVEL 4
+#define ARG_DEBUG_LEVEL 3
     { "debug_level" },
-#define ARG_PRESERVE_ENVIRONMENT 5
+#define ARG_PRESERVE_ENVIRONMENT 4
     { "preserve_environment" },
-#define ARG_RUNAS_GROUP 6
+#define ARG_RUNAS_GROUP 5
     { "runas_group" },
-#define ARG_SET_HOME 7
+#define ARG_SET_HOME 6
     { "set_home" },
-#define ARG_USER_SHELL 8
+#define ARG_USER_SHELL 7
     { "run_shell" },
-#define ARG_LOGIN_SHELL 9
+#define ARG_LOGIN_SHELL 8
     { "login_shell" },
-#define ARG_IGNORE_TICKET 10
+#define ARG_IGNORE_TICKET 9
     { "ignore_ticket" },
-#define ARG_PROMPT 11
+#define ARG_PROMPT 10
     { "prompt" },
-#define ARG_SELINUX_ROLE 12
+#define ARG_SELINUX_ROLE 11
     { "selinux_role" },
-#define ARG_SELINUX_TYPE 13
+#define ARG_SELINUX_TYPE 12
     { "selinux_type" },
-#define ARG_RUNAS_USER 14
+#define ARG_RUNAS_USER 13
     { "runas_user" },
-#define ARG_PROGNAME 15
+#define ARG_PROGNAME 14
     { "progname" },
-#define ARG_IMPLIED_SHELL 16
+#define ARG_IMPLIED_SHELL 15
     { "implied_shell" },
-#define ARG_PRESERVE_GROUPS 17
+#define ARG_PRESERVE_GROUPS 16
     { "preserve_groups" },
-#define ARG_NONINTERACTIVE 18
+#define ARG_NONINTERACTIVE 17
     { "noninteractive" },
-#define ARG_SUDOEDIT 19
+#define ARG_SUDOEDIT 18
     { "sudoedit" },
-#define ARG_CLOSEFROM 20
+#define ARG_CLOSEFROM 19
     { "closefrom" },
-#define ARG_NET_ADDRS 21
+#define ARG_NET_ADDRS 20
     { "network_addrs" },
-#define NUM_SETTINGS 22
+#define NUM_SETTINGS 21
     { NULL }
 };
 
@@ -154,8 +151,6 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	sudo_settings[ARG_NET_ADDRS].value = cp;
 
     /* Set debug file and flags from sudo.conf. */
-    if (debug_file != NULL)
-	sudo_settings[ARG_DEBUG_FILE].value = debug_file;
     if (debug_flags != NULL)
 	sudo_settings[ARG_DEBUG_FLAGS].value = debug_flags;
 

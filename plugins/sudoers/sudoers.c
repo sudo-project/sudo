@@ -1198,7 +1198,7 @@ deserialize_info(char * const settings[], char * const user_info[])
 {
     char * const *cur;
     const char *p, *groups = NULL;
-    const char *debug_file = NULL, *debug_flags = NULL;
+    const char *debug_flags = NULL;
     int flags = 0;
     debug_decl(deserialize_info, SUDO_DEBUG_PLUGIN)
 
@@ -1209,10 +1209,6 @@ deserialize_info(char * const settings[], char * const user_info[])
     for (cur = settings; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "closefrom=")) {
 	    user_closefrom = atoi(*cur + sizeof("closefrom=") - 1);
-	    continue;
-	}
-	if (MATCHES(*cur, "debug_file=")) {
-	    debug_file = *cur + sizeof("debug_file=") - 1;
 	    continue;
 	}
 	if (MATCHES(*cur, "debug_flags=")) {
@@ -1409,8 +1405,8 @@ deserialize_info(char * const settings[], char * const user_info[])
     }
 
     /* Setup debugging if indicated. */
-    if (debug_file != NULL && debug_flags != NULL) {
-	sudo_debug_init(debug_file, debug_flags);
+    if (debug_flags != NULL) {
+	sudo_debug_init(NULL, debug_flags);
 	for (cur = settings; *cur != NULL; cur++)
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s", *cur);
 	for (cur = user_info; *cur != NULL; cur++)
