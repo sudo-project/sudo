@@ -223,7 +223,7 @@ main(int argc, char *argv[], char *envp[])
 
     /* Open policy plugin. */
     ok = policy_open(&policy_plugin, settings, user_info, envp);
-    if (ok != TRUE) {
+    if (ok != 1) {
 	if (ok == -2)
 	    usage(1);
 	else
@@ -236,14 +236,14 @@ main(int argc, char *argv[], char *envp[])
 	    tq_foreach_fwd(&io_plugins, plugin) {
 		ok = iolog_open(plugin, settings, user_info, NULL,
 		    nargc, nargv, envp);
-		if (ok == TRUE)
+		if (ok == 1)
 		    iolog_show_version(plugin, !user_details.uid);
 	    }
 	    break;
 	case MODE_VALIDATE:
 	case MODE_VALIDATE|MODE_INVALIDATE:
 	    ok = policy_validate(&policy_plugin);
-	    exit(ok != TRUE);
+	    exit(ok != 1);
 	case MODE_KILL:
 	case MODE_INVALIDATE:
 	    policy_invalidate(&policy_plugin, sudo_mode == MODE_KILL);
@@ -255,13 +255,13 @@ main(int argc, char *argv[], char *envp[])
 	case MODE_LIST|MODE_INVALIDATE:
 	    ok = policy_list(&policy_plugin, nargc, nargv,
 		ISSET(sudo_mode, MODE_LONG_LIST), list_user);
-	    exit(ok != TRUE);
+	    exit(ok != 1);
 	case MODE_EDIT:
 	case MODE_RUN:
 	    ok = policy_check(&policy_plugin, nargc, nargv, env_add,
 		&command_info, &argv_out, &user_env_out);
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "policy plugin returns %d", ok);
-	    if (ok != TRUE) {
+	    if (ok != 1) {
 		if (ok == -2)
 		    usage(1);
 		exit(1); /* plugin printed error message */
@@ -272,9 +272,9 @@ main(int argc, char *argv[], char *envp[])
 		ok = iolog_open(plugin, settings, user_info,
 		    command_info, nargc, nargv, envp);
 		switch (ok) {
-		case TRUE:
+		case 1:
 		    break;
-		case FALSE:
+		case 0:
 		    /* I/O plugin asked to be disabled, remove from list. */
 		    tq_remove(&io_plugins, plugin);
 		    break;
@@ -557,7 +557,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    break;
 		}
 		if (strncmp("noexec=", info[i], sizeof("noexec=") - 1) == 0) {
-		    if (atobool(info[i] + sizeof("noexec=") - 1) == TRUE)
+		    if (atobool(info[i] + sizeof("noexec=") - 1) == true)
 			SET(details->flags, CD_NOEXEC);
 		    break;
 		}
@@ -571,7 +571,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		break;
 	    case 'p':
 		if (strncmp("preserve_groups=", info[i], sizeof("preserve_groups=") - 1) == 0) {
-		    if (atobool(info[i] + sizeof("preserve_groups=") - 1) == TRUE)
+		    if (atobool(info[i] + sizeof("preserve_groups=") - 1) == true)
 			SET(details->flags, CD_PRESERVE_GROUPS);
 		    break;
 		}
@@ -665,12 +665,12 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_STRING("selinux_role=", selinux_role)
 		SET_STRING("selinux_type=", selinux_type)
 		if (strncmp("set_utmp=", info[i], sizeof("set_utmp=") - 1) == 0) {
-		    if (atobool(info[i] + sizeof("set_utmp=") - 1) == TRUE)
+		    if (atobool(info[i] + sizeof("set_utmp=") - 1) == true)
 			SET(details->flags, CD_SET_UTMP);
 		    break;
 		}
 		if (strncmp("sudoedit=", info[i], sizeof("sudoedit=") - 1) == 0) {
-		    if (atobool(info[i] + sizeof("sudoedit=") - 1) == TRUE)
+		    if (atobool(info[i] + sizeof("sudoedit=") - 1) == true)
 			SET(details->flags, CD_SUDOEDIT);
 		    break;
 		}
@@ -707,7 +707,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    break;
 		}
 		if (strncmp("use_pty=", info[i], sizeof("use_pty=") - 1) == 0) {
-		    if (atobool(info[i] + sizeof("use_pty=") - 1) == TRUE)
+		    if (atobool(info[i] + sizeof("use_pty=") - 1) == true)
 			SET(details->flags, CD_USE_PTY);
 		    break;
 		}
@@ -906,12 +906,12 @@ disable_execute(struct command_details *details)
 
 /*
  * Setup the execution environment immediately prior to the call to execve()
- * Returns TRUE on success and FALSE on failure.
+ * Returns true on success and false on failure.
  */
-int
+bool
 exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 {
-    int rval = FALSE;
+    bool rval = false;
     struct passwd *pw;
     debug_decl(exec_setup, SUDO_DEBUG_EXEC)
 
@@ -927,7 +927,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
      * Call policy plugin's session init before other setup occurs.
      * The session init code is expected to print an error as needed.
      */
-    if (policy_init_session(&policy_plugin, pw) != TRUE)
+    if (policy_init_session(&policy_plugin, pw) != true)
 	goto done;
 
 #ifdef HAVE_SELINUX
@@ -1063,7 +1063,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     }
 #endif
 
-    rval = TRUE;
+    rval = true;
 
 done:
     debug_return_bool(rval);
@@ -1160,7 +1160,7 @@ policy_list(struct plugin_container *plugin, int argc, char * const argv[],
     if (plugin->u.policy->list == NULL) {
 	warningx(_("policy plugin %s does not support listing privileges"),
 	    plugin->name);
-	debug_return_bool(FALSE);
+	debug_return_bool(false);
     }
     debug_return_bool(plugin->u.policy->list(argc, argv, verbose, list_user));
 }
@@ -1172,7 +1172,7 @@ policy_validate(struct plugin_container *plugin)
     if (plugin->u.policy->validate == NULL) {
 	warningx(_("policy plugin %s does not support the -v option"),
 	    plugin->name);
-	debug_return_bool(FALSE);
+	debug_return_bool(false);
     }
     debug_return_bool(plugin->u.policy->validate());
 }
@@ -1195,7 +1195,7 @@ policy_init_session(struct plugin_container *plugin, struct passwd *pwd)
     debug_decl(policy_init_session, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->init_session)
 	debug_return_bool(plugin->u.policy->init_session(pwd));
-    debug_return_bool(TRUE);
+    debug_return_bool(true);
 }
 
 static int

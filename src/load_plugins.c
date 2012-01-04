@@ -66,7 +66,7 @@ const char *debug_flags;
 struct sudo_conf_table {
     const char *name;
     unsigned int namelen;
-    int (*setter)(const char *entry, void *data);
+    bool (*setter)(const char *entry, void *data);
 };
 
 struct sudo_conf_paths {
@@ -75,9 +75,9 @@ struct sudo_conf_paths {
     const char **pval;
 };
 
-static int set_debug(const char *entry, void *data);
-static int set_path(const char *entry, void *data);
-static int set_plugin(const char *entry, void *data);
+static bool set_debug(const char *entry, void *data);
+static bool set_path(const char *entry, void *data);
+static bool set_plugin(const char *entry, void *data);
 
 static struct plugin_info_list plugin_info_list;
 
@@ -99,7 +99,7 @@ static struct sudo_conf_paths sudo_conf_paths[] = {
 /*
  * "Debug progname debug_file debug_flags"
  */
-static int
+static bool
 set_debug(const char *entry, void *data)
 {
     size_t filelen, proglen;
@@ -113,14 +113,14 @@ set_debug(const char *entry, void *data)
     proglen = strlen(progname);
     if (strncmp(entry, progname, proglen) != 0 ||
 	!isblank((unsigned char)entry[proglen]))
-    	return FALSE;
+    	return false;
     entry += proglen + 1;
     while (isblank((unsigned char)*entry))
 	entry++;
 
     debug_flags = strpbrk(entry, " \t");
     if (debug_flags == NULL)
-    	return FALSE;
+    	return false;
     filelen = (size_t)(debug_flags - entry);
     while (isblank((unsigned char)*debug_flags))
 	debug_flags++;
@@ -131,10 +131,10 @@ set_debug(const char *entry, void *data)
     sudo_debug_init(debug_file, debug_flags);
     efree(debug_file);
 
-    return TRUE;
+    return true;
 }
 
-static int
+static bool
 set_path(const char *entry, void *data)
 {
     const char *name, *path;
@@ -144,7 +144,7 @@ set_path(const char *entry, void *data)
     name = entry;
     path = strpbrk(entry, " \t");
     if (path == NULL)
-    	return FALSE;
+    	return false;
     while (isblank((unsigned char)*path))
 	path++;
 
@@ -157,10 +157,10 @@ set_path(const char *entry, void *data)
 	}
     }
 
-    return TRUE;
+    return true;
 }
 
-static int
+static bool
 set_plugin(const char *entry, void *data)
 {
     struct plugin_info_list *pil = data;
@@ -172,7 +172,7 @@ set_plugin(const char *entry, void *data)
     name = entry;
     path = strpbrk(entry, " \t");
     if (path == NULL)
-    	return FALSE;
+    	return false;
     namelen = (size_t)(path - name);
     while (isblank((unsigned char)*path))
 	path++;
@@ -184,7 +184,7 @@ set_plugin(const char *entry, void *data)
     info->next = NULL;
     tq_append(pil, info);
 
-    return TRUE;
+    return true;
 }
 
 /*
@@ -243,7 +243,7 @@ done:
 /*
  * Load the plugins listed in sudo.conf.
  */
-int
+bool
 sudo_load_plugins(struct plugin_container *policy_plugin,
     struct plugin_container_list *io_plugins)
 {
@@ -253,7 +253,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
     struct stat sb;
     void *handle;
     char path[PATH_MAX];
-    int rval = FALSE;
+    bool rval = false;
 
     /* Walk plugin list. */
     tq_foreach_fwd(&plugin_info_list, info) {
@@ -336,7 +336,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	goto done;
     }
 
-    rval = TRUE;
+    rval = true;
 
 done:
     return rval;

@@ -131,14 +131,15 @@ group_plugin_load(char *plugin_info)
      * Split args into a vector if specified.
      */
     if (args != NULL) {
-	int ac = 0, wasblank = TRUE;
+	int ac = 0;
+	bool wasblank = true;
 	char *cp;
 
         for (cp = args; *cp != '\0'; cp++) {
             if (isblank((unsigned char)*cp)) {
-                wasblank = TRUE;
+                wasblank = true;
             } else if (wasblank) {
-                wasblank = FALSE;
+                wasblank = false;
                 ac++;
             }
         }
@@ -155,7 +156,7 @@ group_plugin_load(char *plugin_info)
 done:
     efree(argv);
 
-    if (rc != TRUE) {
+    if (rc != true) {
 	if (group_handle != NULL) {
 	    dlclose(group_handle);
 	    group_handle = NULL;
@@ -189,7 +190,7 @@ group_plugin_query(const char *user, const char *group,
     debug_decl(group_plugin_query, SUDO_DEBUG_UTIL)
 
     if (group_plugin == NULL)
-	debug_return_bool(FALSE);
+	debug_return_bool(false);
     debug_return_bool((group_plugin->query)(user, group, pwd));
 }
 
@@ -203,7 +204,7 @@ int
 group_plugin_load(char *plugin_info)
 {
     debug_decl(group_plugin_load, SUDO_DEBUG_UTIL)
-    debug_return_bool(FALSE);
+    debug_return_bool(false);
 }
 
 void
@@ -218,7 +219,7 @@ group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd)
 {
     debug_decl(group_plugin_query, SUDO_DEBUG_UTIL)
-    debug_return_bool(FALSE);
+    debug_return_bool(false);
 }
 
 #endif /* HAVE_DLOPEN || HAVE_SHL_LOAD */

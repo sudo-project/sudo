@@ -29,6 +29,11 @@
 #  include <stdlib.h>
 # endif
 #endif /* STDC_HEADERS */
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 #ifdef HAVE_STRING_H
 # if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
 #  include <memory.h>
@@ -56,13 +61,6 @@
  * same format as /etc/group.
  */
 
-#undef TRUE
-#define TRUE 1
-#undef FALSE
-#define FALSE 0
-#undef ERROR
-#define ERROR -1
-
 static sudo_printf_t sudo_log;
 
 extern void mysetgrfile(const char *);
@@ -82,30 +80,30 @@ sample_init(int version, sudo_printf_t sudo_printf, char *const argv[])
 	    "sample_group: incompatible major version %d, expected %d\n",
 	    GROUP_API_VERSION_GET_MAJOR(version),
 	    GROUP_API_VERSION_MAJOR);
-	return ERROR;
+	return -1;
     }
 
     /* Sanity check the specified group file. */
     if (argv == NULL || argv[0] == NULL) {
 	sudo_log(SUDO_CONV_ERROR_MSG,
 	    "sample_group: path to group file not specified\n");
-	return ERROR;
+	return -1;
     }
     if (stat(argv[0], &sb) != 0) {
 	sudo_log(SUDO_CONV_ERROR_MSG,
 	    "sample_group: %s: %s\n", argv[0], strerror(errno));
-	return ERROR;
+	return -1;
     }
     if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
 	sudo_log(SUDO_CONV_ERROR_MSG,
 	    "%s must be only be writable by owner\n", argv[0]);
-	return ERROR;
+	return -1;
     }
 
     mysetgrfile(argv[0]);
     mysetgrent();
 
-    return TRUE;
+    return true;
 }
 
 static void
@@ -115,7 +113,7 @@ sample_cleanup(void)
 }
 
 /*
- * Returns TRUE if "user" is a member of "group", else FALSE.
+ * Returns true if "user" is a member of "group", else false.
  */
 static int
 sample_query(const char *user, const char *group, const struct passwd *pwd)
@@ -127,11 +125,11 @@ sample_query(const char *user, const char *group, const struct passwd *pwd)
     if (grp != NULL) {
 	for (member = grp->gr_mem; *member != NULL; member++) {
 	    if (strcasecmp(user, *member) == 0)
-		return TRUE;
+		return true;
 	}
     }
 
-    return FALSE;
+    return false;
 }
 
 struct sudoers_group_plugin group_plugin = {

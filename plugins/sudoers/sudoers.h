@@ -23,6 +23,11 @@
 #define _SUDO_SUDOERS_H
 
 #include <limits.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 
 #include <pathnames.h>
 #include "missing.h"
@@ -97,14 +102,6 @@ struct sudo_user {
 #define FLAG_NO_USER		0x020
 #define FLAG_NO_HOST		0x040
 #define FLAG_NO_CHECK		0x080
-
-/*
- * Pseudo-boolean values
- */
-#undef TRUE
-#define TRUE                     1
-#undef FALSE
-#define FALSE                    0
 
 /*
  * find_path()/load_cmnd() return values
@@ -207,15 +204,15 @@ struct timeval;
 #define YY_DECL int yylex(void)
 
 /* goodpath.c */
-int sudo_goodpath(const char *, struct stat *);
+bool sudo_goodpath(const char *, struct stat *);
 
 /* findpath.c */
 int find_path(char *, char **, struct stat *, char *, int);
 
 /* check.c */
 int check_user(int, int);
-void remove_timestamp(int);
-int user_is_exempt(void);
+void remove_timestamp(bool);
+bool user_is_exempt(void);
 
 /* sudo_auth.c */
 int verify_user(struct passwd *, char *);
@@ -259,7 +256,7 @@ void zero_bytes(volatile void *, size_t);
 
 /* sudo_nss.c */
 void display_privs(struct sudo_nss_list *, struct passwd *);
-int display_cmnd(struct sudo_nss_list *, struct passwd *);
+bool display_cmnd(struct sudo_nss_list *, struct passwd *);
 
 /* pwutil.c */
 void sudo_setgrent(void);
@@ -283,7 +280,7 @@ void gr_addref(struct group *);
 void gr_delref(struct group *);
 void pw_addref(struct passwd *);
 void pw_delref(struct passwd *);
-int user_in_group(struct passwd *, const char *);
+bool user_in_group(struct passwd *, const char *);
 
 /* timestr.c */
 char *get_timestr(time_t, int);
@@ -316,7 +313,7 @@ char *fmt_string(const char *, const char *);
 /* sudoers.c */
 void plugin_cleanup(int);
 void set_fqdn(void);
-FILE *open_sudoers(const char *, int, int *);
+FILE *open_sudoers(const char *, bool, bool *);
 
 /* aix.c */
 void aix_restoreauthdb(void);

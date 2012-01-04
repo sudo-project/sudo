@@ -253,7 +253,7 @@ main(int argc, char *argv[])
     init_parser("sudoers", 0);
 
     if (yyparse() != 0 || parse_error) {
-	parse_error = TRUE;
+	parse_error = true;
 	if (errorlineno != -1)
 	    (void) printf("Parse error in %s near line %d",
 		errorfile, errorlineno);
@@ -267,7 +267,7 @@ main(int argc, char *argv[])
 	(void) fputs(" (problem with defaults entries)", stdout);
     puts(".");
 
-    if (def_group_plugin && group_plugin_load(def_group_plugin) != TRUE)
+    if (def_group_plugin && group_plugin_load(def_group_plugin) != true)
 	def_group_plugin = NULL;
 
     /*
@@ -370,7 +370,7 @@ cb_runas_default(const char *user)
     /* Only reset runaspw if user didn't specify one. */
     if (!runas_user && !runas_group)
         set_runaspw(user);
-    return TRUE;
+    return true;
 }
 
 void
@@ -392,7 +392,7 @@ set_fqdn(void)
 }
 
 FILE *
-open_sudoers(const char *path, int isdir, int *keepopen)
+open_sudoers(const char *path, bool doedit, bool *keepopen)
 {
     return fopen(path, "r");
 }
@@ -468,9 +468,9 @@ print_defaults(void)
 		putchar(',');
 	    print_member(m);
 	}
-	printf("\t%s%s", d->op == FALSE ? "!" : "", d->var);
+	printf("\t%s%s", d->op == false ? "!" : "", d->var);
 	if (d->val != NULL) {
-	    printf("%c%s", d->op == TRUE ? '=' : d->op, d->val);
+	    printf("%c%s", d->op == true ? '=' : d->op, d->val);
 	}
 	putchar('\n');
     }

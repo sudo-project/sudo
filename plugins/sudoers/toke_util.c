@@ -102,7 +102,7 @@ hexchar(const char *s)
     debug_return_int(result);
 }
 
-int
+bool
 fill_txt(const char *src, int len, int olen)
 {
     char *dst;
@@ -111,7 +111,7 @@ fill_txt(const char *src, int len, int olen)
     dst = olen ? realloc(yylval.string, olen + len + 1) : malloc(len + 1);
     if (dst == NULL) {
 	yyerror(_("unable to allocate memory"));
-	debug_return_bool(FALSE);
+	debug_return_bool(false);
     }
     yylval.string = dst;
 
@@ -135,10 +135,10 @@ fill_txt(const char *src, int len, int olen)
 	}
     }
     *dst = '\0';
-    debug_return_bool(TRUE);
+    debug_return_bool(true);
 }
 
-int
+bool
 append(const char *src, int len)
 {
     int olen = 0;
@@ -153,7 +153,7 @@ append(const char *src, int len)
 #define SPECIAL(c) \
     ((c) == ',' || (c) == ':' || (c) == '=' || (c) == ' ' || (c) == '\t' || (c) == '#')
 
-int
+bool
 fill_cmnd(const char *src, int len)
 {
     char *dst;
@@ -165,7 +165,7 @@ fill_cmnd(const char *src, int len)
     dst = yylval.command.cmnd = (char *) malloc(len + 1);
     if (yylval.command.cmnd == NULL) {
 	yyerror(_("unable to allocate memory"));
-	debug_return_bool(FALSE);
+	debug_return_bool(false);
     }
 
     /* Copy the string and collapse any escaped sudo-specific characters. */
@@ -178,10 +178,10 @@ fill_cmnd(const char *src, int len)
     *dst = '\0';
 
     yylval.command.args = NULL;
-    debug_return_bool(TRUE);
+    debug_return_bool(true);
 }
 
-int
+bool
 fill_args(const char *s, int len, int addspace)
 {
     int new_len;
@@ -205,7 +205,7 @@ fill_args(const char *s, int len, int addspace)
 	if (p == NULL) {
 	    efree(yylval.command.args);
 	    yyerror(_("unable to allocate memory"));
-	    debug_return_bool(FALSE);
+	    debug_return_bool(false);
 	} else
 	    yylval.command.args = p;
     }
@@ -216,18 +216,18 @@ fill_args(const char *s, int len, int addspace)
 	*p++ = ' ';
     if (strlcpy(p, s, arg_size - (p - yylval.command.args)) != len) {
 	yyerror(_("fill_args: buffer overflow"));	/* paranoia */
-	debug_return_bool(FALSE);
+	debug_return_bool(false);
     }
     arg_len = new_len;
-    debug_return_bool(TRUE);
+    debug_return_bool(true);
 }
 
 /*
  * Check to make sure an IPv6 address does not contain multiple instances
  * of the string "::".  Assumes strlen(s) >= 1.
- * Returns TRUE if address is valid else FALSE.
+ * Returns true if address is valid else false.
  */
-int
+bool
 ipv6_valid(const char *s)
 {
     int nmatch = 0;

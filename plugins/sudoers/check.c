@@ -89,11 +89,11 @@ static int   timestamp_status(char *, char *, char *, int);
 static char *expand_prompt(char *, char *, char *);
 static void  lecture(int);
 static void  update_timestamp(char *, char *);
-static int   tty_is_devpts(const char *);
+static bool  tty_is_devpts(const char *);
 static struct passwd *get_authpw(void);
 
 /*
- * Returns TRUE if the user successfully authenticates, else FALSE.
+ * Returns true if the user successfully authenticates, else false.
  */
 int
 check_user(int validated, int mode)
@@ -103,8 +103,8 @@ check_user(int validated, int mode)
     char *timestampfile = NULL;
     char *prompt;
     struct stat sb;
-    int status, rval = TRUE;
-    int need_pass = def_authenticate;
+    int status, rval = true;
+    bool need_pass = def_authenticate;
     debug_decl(check_user, SUDO_DEBUG_AUTH)
 
     /*
@@ -129,7 +129,7 @@ check_user(int validated, int mode)
 	    if (user_uid == 0 || (user_uid == runas_pw->pw_uid &&
 		(!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name)))
 		|| user_is_exempt())
-		need_pass = FALSE;
+		need_pass = false;
 	}
     }
     if (!need_pass)
@@ -170,7 +170,7 @@ check_user(int validated, int mode)
 	rval = verify_user(auth_pw, prompt);
     }
     /* Only update timestamp if user was validated. */
-    if (rval == TRUE && ISSET(validated, VALIDATE_OK) &&
+    if (rval == true && ISSET(validated, VALIDATE_OK) &&
 	!ISSET(mode, MODE_IGNORE_TICKET) && status != TS_ERROR)
 	update_timestamp(timestampdir, timestampfile);
     efree(timestampdir);
@@ -180,7 +180,7 @@ done:
     sudo_auth_cleanup(auth_pw);
     pw_delref(auth_pw);
 
-    debug_return_int(rval);
+    debug_return_bool(rval);
 }
 
 #define DEFAULT_LECTURE "\n" \
@@ -399,10 +399,10 @@ oflow:
 /*
  * Checks if the user is exempt from supplying a password.
  */
-int
+bool
 user_is_exempt(void)
 {
-    int rval = FALSE;
+    bool rval = false;
     debug_decl(user_is_exempt, SUDO_DEBUG_AUTH)
 
     if (def_exempt_group)
@@ -660,7 +660,7 @@ done:
  * Remove the timestamp ticket file/dir.
  */
 void
-remove_timestamp(int remove)
+remove_timestamp(bool remove)
 {
     struct timeval tv;
     char *timestampdir, *timestampfile, *path;
@@ -683,7 +683,7 @@ remove_timestamp(int remove)
 		log_error(NO_EXIT,
 		    _("unable to remove %s (%s), will reset to the epoch"),
 		    path, strerror(errno));
-		remove = FALSE;
+		remove = false;
 	    }
 	}
 	if (!remove) {
@@ -699,17 +699,17 @@ remove_timestamp(int remove)
 }
 
 /*
- * Returns TRUE if tty lives on a devpts or /devices filesystem, else FALSE.
+ * Returns true if tty lives on a devpts or /devices filesystem, else false.
  * Unlike most filesystems, the ctime of devpts nodes is not updated when
  * the device node is written to, only when the inode's status changes,
  * typically via the chmod, chown, link, rename, or utimes system calls.
  * Since the ctime is "stable" in this case, we can stash it the tty ticket
  * file and use it to determine whether the tty ticket file is stale.
  */
-static int
+static bool
 tty_is_devpts(const char *tty)
 {
-    int retval = FALSE;
+    bool retval = false;
 #ifdef __linux__
     struct statfs sfs;
     debug_decl(tty_is_devpts, SUDO_DEBUG_PTY)
@@ -720,7 +720,7 @@ tty_is_devpts(const char *tty)
 
     if (statfs(tty, &sfs) == 0) {
 	if (sfs.f_type == DEVPTS_SUPER_MAGIC)
-	    retval = TRUE;
+	    retval = true;
     }
 #elif defined(__sun) && defined(__SVR4)
     struct statvfs sfs;
@@ -728,7 +728,7 @@ tty_is_devpts(const char *tty)
 
     if (statvfs(tty, &sfs) == 0) {
 	if (strcmp(sfs.f_fstr, "devices") == 0)
-	    retval = TRUE;
+	    retval = true;
     }
 #else
     debug_decl(tty_is_devpts, SUDO_DEBUG_PTY)

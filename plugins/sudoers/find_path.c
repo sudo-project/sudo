@@ -60,8 +60,8 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
     static char command[PATH_MAX]; /* qualified filename */
     char *n;			/* for traversing path */
     char *origpath;		/* so we can free path later */
-    int found = FALSE;		/* did we find the command? */
-    int checkdot = FALSE;	/* check current dir? */
+    bool found = false;		/* did we find the command? */
+    bool checkdot = false;	/* check current dir? */
     int len;			/* length parameter */
     debug_decl(find_path, SUDO_DEBUG_UTIL)
 

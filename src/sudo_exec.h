@@ -39,12 +39,12 @@ void fd_set_iobs(fd_set *fdsr, fd_set *fdsw);
 void handler(int s);
 void pty_close(struct command_status *cstat);
 void pty_setup(uid_t uid, const char *tty, const char *utmp_user);
-void terminate_child(pid_t pid, int use_pgrp);
+void terminate_child(pid_t pid, bool use_pgrp);
 extern int signal_pipe[2];
 
 /* utmp.c */
-int utmp_login(const char *from_line, const char *to_line, int ttyfd,
+bool utmp_login(const char *from_line, const char *to_line, int ttyfd,
     const char *user);
-int utmp_logout(const char *line, int status);
+bool utmp_logout(const char *line, int status);
 
 #endif /* _SUDO_EXEC_H */

@@ -1272,10 +1272,10 @@ AC_ARG_ENABLE(env_reset,
 ])
 if test "$env_reset" = "on"; then
     AC_MSG_RESULT(yes)
-    AC_DEFINE(ENV_RESET, TRUE)
+    AC_DEFINE(ENV_RESET, 1)
 else
     AC_MSG_RESULT(no)
-    AC_DEFINE(ENV_RESET, FALSE)
+    AC_DEFINE(ENV_RESET, 0)
 fi
 
 AC_ARG_ENABLE(warnings,

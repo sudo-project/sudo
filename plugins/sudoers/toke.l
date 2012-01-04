@@ -74,15 +74,16 @@
 #include "lbuf.h"
 
 extern YYSTYPE yylval;
-extern int parse_error;
+extern bool parse_error;
 int sudolineno;
 int last_token;
 char *sudoers;
 
-static int continued, prev_state, sawspace;
+static bool continued, sawspace;
+static int prev_state;
 
-static int _push_include(char *, int);
-static int pop_include(void);
+static bool _push_include(char *, bool);
+static bool pop_include(void);
 static char *parse_include(char *);
 
 static int sudoers_trace_print(const char *msg);
@@ -93,8 +94,8 @@ int (*trace_print)(const char *msg) = sudoers_trace_print;
 	return (n);		\
 } while (0)
 
-#define	push_include(_p)	(_push_include((_p), FALSE))
-#define	push_includedir(_p)	(_push_include((_p), TRUE))
+#define	push_include(_p)	(_push_include((_p), false))
+#define	push_includedir(_p)	(_push_include((_p), true))
 %}
 
 HEX16			[0-9A-Fa-f]{1,4}
@@ -176,7 +177,7 @@ DEFVAR			[a-z_]+
     \\[[:blank:]]*\n[[:blank:]]*	{
 			    /* Line continuation char followed by newline. */
 			    sudolineno++;
-			    continued = TRUE;
+			    continued = true;
 			}
 
     \"			{
@@ -230,7 +231,7 @@ DEFVAR			[a-z_]+
 			    LEXTRACE("QUOTEDCHAR ");
 			    if (!fill_args(yytext, 2, sawspace))
 				yyterminate();
-			    sawspace = FALSE;
+			    sawspace = false;
 			}
 
     \\[:\\,= \t#]	{
@@ -238,7 +239,7 @@ DEFVAR			[a-z_]+
 			    LEXTRACE("QUOTEDCHAR ");
 			    if (!fill_args(yytext + 1, 1, sawspace))
 				yyterminate();
-			    sawspace = FALSE;
+			    sawspace = false;
 			}
 
     [#:\,=\n]		{
@@ -251,7 +252,7 @@ DEFVAR			[a-z_]+
 			    LEXTRACE("ARG ");
 			    if (!fill_args(yytext, yyleng, sawspace))
 				yyterminate();
-			    sawspace = FALSE;
+			    sawspace = false;
 			}			/* a command line arg */
 }
 
@@ -588,25 +589,25 @@ sudoedit		{
 			    }
 			    BEGIN INITIAL;
 			    sudolineno++;
-			    continued = FALSE;
+			    continued = false;
 			    LEXTRACE("\n");
 			    LEXRETURN(COMMENT);
 			}			/* return newline */
 
 <*>[[:blank:]]+		{			/* throw away space/tabs */
-			    sawspace = TRUE;	/* but remember for fill_args */
+			    sawspace = true;	/* but remember for fill_args */
 			}
 
 <*>\\[[:blank:]]*\n	{
-			    sawspace = TRUE;	/* remember for fill_args */
+			    sawspace = true;	/* remember for fill_args */
 			    sudolineno++;
-			    continued = TRUE;
+			    continued = true;
 			}			/* throw away EOL after \ */
 
 <INITIAL,STARTDEFS,INDEFS>#(-[^\n0-9].*|[^\n0-9-].*)?\n	{
 			    BEGIN INITIAL;
 			    sudolineno++;
-			    continued = FALSE;
+			    continued = false;
 			    LEXTRACE("#\n");
 			    LEXRETURN(COMMENT);
 			}			/* comment, not uid/gid */
@@ -637,7 +638,7 @@ struct include_stack {
     char *path;
     struct path_list *more; /* more files in case of includedir */
     int lineno;
-    int keepopen;
+    bool keepopen;
 };
 
 static int
@@ -749,7 +750,7 @@ bad:
 
 static size_t istacksize, idepth;
 static struct include_stack *istack;
-static int keepopen;
+static bool keepopen;
 
 void
 init_lexer(void)
@@ -773,16 +774,16 @@ init_lexer(void)
     istack = NULL;
     istacksize = idepth = 0;
     sudolineno = 1;
-    keepopen = FALSE;
-    sawspace = FALSE;
-    continued = FALSE;
+    keepopen = false;
+    sawspace = false;
+    continued = false;
     prev_state = INITIAL;
 
     debug_return;
 }
 
-static int
-_push_include(char *path, int isdir)
+static bool
+_push_include(char *path, bool isdir)
 {
     struct path_list *pl;
     FILE *fp;
@@ -792,32 +793,32 @@ _push_include(char *path, int isdir)
     if (idepth >= istacksize) {
 	if (idepth > MAX_SUDOERS_DEPTH) {
 	    yyerror(_("too many levels of includes"));
-	    debug_return_bool(FALSE);
+	    debug_return_bool(false);
 	}
 	istacksize += SUDOERS_STACK_INCREMENT;
 	istack = (struct include_stack *) realloc(istack,
 	    sizeof(*istack) * istacksize);
 	if (istack == NULL) {
 	    yyerror(_("unable to allocate memory"));
-	    debug_return_bool(FALSE);
+	    debug_return_bool(false);
 	}
     }
     if (isdir) {
 	if (!(path = switch_dir(&istack[idepth], path))) {
 	    /* switch_dir() called yyerror() for us */
-	    debug_return_bool(FALSE);
+	    debug_return_bool(false);
 	}
-	while ((fp = open_sudoers(path, FALSE, &keepopen)) == NULL) {
+	while ((fp = open_sudoers(path, false, &keepopen)) == NULL) {
 	    /* Unable to open path in includedir, go to next one, if any. */
 	    efree(path);
 	    if ((pl = istack[idepth].more) == NULL)
-		debug_return_bool(FALSE);
+		debug_return_bool(false);
 	    path = pl->path;
 	    istack[idepth].more = pl->next;
 	    efree(pl);
 	}
     } else {
-	if ((fp = open_sudoers(path, TRUE, &keepopen)) == NULL) {
+	if ((fp = open_sudoers(path, true, &keepopen)) == NULL) {
 	    char *errbuf;
 	    if (asprintf(&errbuf, _("%s: %s"), path, strerror(errno)) != -1) {
 		yyerror(errbuf);
@@ -825,7 +826,7 @@ _push_include(char *path, int isdir)
 	    } else {
 		yyerror(_("unable to allocate memory"));
 	    }
-	    debug_return_bool(FALSE);
+	    debug_return_bool(false);
 	}
 	istack[idepth].more = NULL;
     }
@@ -839,10 +840,10 @@ _push_include(char *path, int isdir)
     sudoers = path;
     yy_switch_to_buffer(yy_create_buffer(fp, YY_BUF_SIZE));
 
-    debug_return_bool(TRUE);
+    debug_return_bool(true);
 }
 
-static int
+static bool
 pop_include(void)
 {
     struct path_list *pl;
@@ -850,14 +851,14 @@ pop_include(void)
     debug_decl(pop_include, SUDO_DEBUG_PARSER)
 
     if (idepth == 0)
-	debug_return_bool(FALSE);
+	debug_return_bool(false);
 
     if (!keepopen)
 	fclose(YY_CURRENT_BUFFER->yy_input_file);
     yy_delete_buffer(YY_CURRENT_BUFFER);
     /* If we are in an include dir, move to the next file. */
     while ((pl = istack[idepth - 1].more) != NULL) {
-	fp = open_sudoers(pl->path, FALSE, &keepopen);
+	fp = open_sudoers(pl->path, false, &keepopen);
 	if (fp != NULL) {
 	    istack[idepth - 1].more = pl->next;
 	    efree(sudoers);
@@ -881,7 +882,7 @@ pop_include(void)
 	sudolineno = istack[idepth].lineno;
 	keepopen = istack[idepth].keepopen;
     }
-    debug_return_bool(TRUE);
+    debug_return_bool(true);
 }
 
 static char *
@@ -960,11 +961,11 @@ sudoers_trace_print(const char *msg)
 static int
 sudoers_trace_print(const char *msg)
 {
-    static int initialized;
+    static bool initialized;
     static struct lbuf lbuf;
 
     if (!initialized) {
-	initialized = TRUE;
+	initialized = true;
 	lbuf_init(&lbuf, NULL, 0, NULL, 0);
     }
 

@@ -223,90 +223,90 @@ static struct ldap_config {
 } ldap_conf;
 
 static struct ldap_config_table ldap_conf_table[] = {
-    { "sudoers_debug", CONF_INT, FALSE, -1, &ldap_conf.debug },
-    { "host", CONF_STR, FALSE, -1, &ldap_conf.host },
-    { "port", CONF_INT, FALSE, -1, &ldap_conf.port },
-    { "ssl", CONF_STR, FALSE, -1, &ldap_conf.ssl },
-    { "sslpath", CONF_STR, FALSE, -1, &ldap_conf.tls_certfile },
-    { "uri", CONF_LIST_STR, FALSE, -1, &ldap_conf.uri },
+    { "sudoers_debug", CONF_INT, false, -1, &ldap_conf.debug },
+    { "host", CONF_STR, false, -1, &ldap_conf.host },
+    { "port", CONF_INT, false, -1, &ldap_conf.port },
+    { "ssl", CONF_STR, false, -1, &ldap_conf.ssl },
+    { "sslpath", CONF_STR, false, -1, &ldap_conf.tls_certfile },
+    { "uri", CONF_LIST_STR, false, -1, &ldap_conf.uri },
 #ifdef LDAP_OPT_DEBUG_LEVEL
-    { "debug", CONF_INT, FALSE, LDAP_OPT_DEBUG_LEVEL, &ldap_conf.ldap_debug },
+    { "debug", CONF_INT, false, LDAP_OPT_DEBUG_LEVEL, &ldap_conf.ldap_debug },
 #endif
 #ifdef LDAP_OPT_PROTOCOL_VERSION
-    { "ldap_version", CONF_INT, TRUE, LDAP_OPT_PROTOCOL_VERSION,
+    { "ldap_version", CONF_INT, true, LDAP_OPT_PROTOCOL_VERSION,
 	&ldap_conf.version },
 #endif
 #ifdef LDAP_OPT_X_TLS_REQUIRE_CERT
-    { "tls_checkpeer", CONF_BOOL, FALSE, LDAP_OPT_X_TLS_REQUIRE_CERT,
+    { "tls_checkpeer", CONF_BOOL, false, LDAP_OPT_X_TLS_REQUIRE_CERT,
 	&ldap_conf.tls_checkpeer },
 #else
-    { "tls_checkpeer", CONF_BOOL, FALSE, -1, &ldap_conf.tls_checkpeer },
+    { "tls_checkpeer", CONF_BOOL, false, -1, &ldap_conf.tls_checkpeer },
 #endif
 #ifdef LDAP_OPT_X_TLS_CACERTFILE
-    { "tls_cacertfile", CONF_STR, FALSE, LDAP_OPT_X_TLS_CACERTFILE,
+    { "tls_cacertfile", CONF_STR, false, LDAP_OPT_X_TLS_CACERTFILE,
 	&ldap_conf.tls_cacertfile },
-    { "tls_cacert", CONF_STR, FALSE, LDAP_OPT_X_TLS_CACERTFILE,
+    { "tls_cacert", CONF_STR, false, LDAP_OPT_X_TLS_CACERTFILE,
 	&ldap_conf.tls_cacertfile },
 #endif
 #ifdef LDAP_OPT_X_TLS_CACERTDIR
-    { "tls_cacertdir", CONF_STR, FALSE, LDAP_OPT_X_TLS_CACERTDIR,
+    { "tls_cacertdir", CONF_STR, false, LDAP_OPT_X_TLS_CACERTDIR,
 	&ldap_conf.tls_cacertdir },
 #endif
 #ifdef LDAP_OPT_X_TLS_RANDOM_FILE
-    { "tls_randfile", CONF_STR, FALSE, LDAP_OPT_X_TLS_RANDOM_FILE,
+    { "tls_randfile", CONF_STR, false, LDAP_OPT_X_TLS_RANDOM_FILE,
 	&ldap_conf.tls_random_file },
 #endif
 #ifdef LDAP_OPT_X_TLS_CIPHER_SUITE
-    { "tls_ciphers", CONF_STR, FALSE, LDAP_OPT_X_TLS_CIPHER_SUITE,
+    { "tls_ciphers", CONF_STR, false, LDAP_OPT_X_TLS_CIPHER_SUITE,
 	&ldap_conf.tls_cipher_suite },
 #endif
 #ifdef LDAP_OPT_X_TLS_CERTFILE
-    { "tls_cert", CONF_STR, FALSE, LDAP_OPT_X_TLS_CERTFILE,
+    { "tls_cert", CONF_STR, false, LDAP_OPT_X_TLS_CERTFILE,
 	&ldap_conf.tls_certfile },
 #else
-    { "tls_cert", CONF_STR, FALSE, -1, &ldap_conf.tls_certfile },
+    { "tls_cert", CONF_STR, false, -1, &ldap_conf.tls_certfile },
 #endif
 #ifdef LDAP_OPT_X_TLS_KEYFILE
-    { "tls_key", CONF_STR, FALSE, LDAP_OPT_X_TLS_KEYFILE,
+    { "tls_key", CONF_STR, false, LDAP_OPT_X_TLS_KEYFILE,
 	&ldap_conf.tls_keyfile },
 #else
-    { "tls_key", CONF_STR, FALSE, -1, &ldap_conf.tls_keyfile },
+    { "tls_key", CONF_STR, false, -1, &ldap_conf.tls_keyfile },
 #endif
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
-    { "bind_timelimit", CONF_INT, TRUE, -1 /* needs timeval, set manually */,
+    { "bind_timelimit", CONF_INT, true, -1 /* needs timeval, set manually */,
 	&ldap_conf.bind_timelimit },
-    { "network_timeout", CONF_INT, TRUE, -1 /* needs timeval, set manually */,
+    { "network_timeout", CONF_INT, true, -1 /* needs timeval, set manually */,
 	&ldap_conf.bind_timelimit },
 #elif defined(LDAP_X_OPT_CONNECT_TIMEOUT)
-    { "bind_timelimit", CONF_INT, TRUE, LDAP_X_OPT_CONNECT_TIMEOUT,
+    { "bind_timelimit", CONF_INT, true, LDAP_X_OPT_CONNECT_TIMEOUT,
 	&ldap_conf.bind_timelimit },
-    { "network_timeout", CONF_INT, TRUE, LDAP_X_OPT_CONNECT_TIMEOUT,
+    { "network_timeout", CONF_INT, true, LDAP_X_OPT_CONNECT_TIMEOUT,
 	&ldap_conf.bind_timelimit },
 #endif
-    { "timelimit", CONF_INT, TRUE, LDAP_OPT_TIMELIMIT, &ldap_conf.timelimit },
+    { "timelimit", CONF_INT, true, LDAP_OPT_TIMELIMIT, &ldap_conf.timelimit },
 #ifdef LDAP_OPT_TIMEOUT
-    { "timeout", CONF_INT, TRUE, -1 /* needs timeval, set manually */,
+    { "timeout", CONF_INT, true, -1 /* needs timeval, set manually */,
 	&ldap_conf.timeout },
 #endif
 #ifdef LDAP_OPT_DEREF
-    { "deref", CONF_DEREF_VAL, TRUE, LDAP_OPT_DEREF, &ldap_conf.deref },
+    { "deref", CONF_DEREF_VAL, true, LDAP_OPT_DEREF, &ldap_conf.deref },
 #endif
-    { "binddn", CONF_STR, FALSE, -1, &ldap_conf.binddn },
-    { "bindpw", CONF_STR, FALSE, -1, &ldap_conf.bindpw },
-    { "rootbinddn", CONF_STR, FALSE, -1, &ldap_conf.rootbinddn },
-    { "sudoers_base", CONF_LIST_STR, FALSE, -1, &ldap_conf.base },
-    { "sudoers_timed", CONF_BOOL, FALSE, -1, &ldap_conf.timed },
-    { "sudoers_search_filter", CONF_STR, FALSE, -1, &ldap_conf.search_filter },
+    { "binddn", CONF_STR, false, -1, &ldap_conf.binddn },
+    { "bindpw", CONF_STR, false, -1, &ldap_conf.bindpw },
+    { "rootbinddn", CONF_STR, false, -1, &ldap_conf.rootbinddn },
+    { "sudoers_base", CONF_LIST_STR, false, -1, &ldap_conf.base },
+    { "sudoers_timed", CONF_BOOL, false, -1, &ldap_conf.timed },
+    { "sudoers_search_filter", CONF_STR, false, -1, &ldap_conf.search_filter },
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
-    { "use_sasl", CONF_BOOL, FALSE, -1, &ldap_conf.use_sasl },
-    { "sasl_auth_id", CONF_STR, FALSE, -1, &ldap_conf.sasl_auth_id },
-    { "rootuse_sasl", CONF_BOOL, FALSE, -1, &ldap_conf.rootuse_sasl },
-    { "rootsasl_auth_id", CONF_STR, FALSE, -1, &ldap_conf.rootsasl_auth_id },
+    { "use_sasl", CONF_BOOL, false, -1, &ldap_conf.use_sasl },
+    { "sasl_auth_id", CONF_STR, false, -1, &ldap_conf.sasl_auth_id },
+    { "rootuse_sasl", CONF_BOOL, false, -1, &ldap_conf.rootuse_sasl },
+    { "rootsasl_auth_id", CONF_STR, false, -1, &ldap_conf.rootsasl_auth_id },
 # ifdef LDAP_OPT_X_SASL_SECPROPS
-    { "sasl_secprops", CONF_STR, TRUE, LDAP_OPT_X_SASL_SECPROPS,
+    { "sasl_secprops", CONF_STR, true, LDAP_OPT_X_SASL_SECPROPS,
 	&ldap_conf.sasl_secprops },
 # endif
-    { "krb5_ccname", CONF_STR, FALSE, -1, &ldap_conf.krb5_ccname },
+    { "krb5_ccname", CONF_STR, false, -1, &ldap_conf.krb5_ccname },
 #endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
     { NULL }
 };
@@ -578,59 +578,59 @@ done:
 }
 
 /*
- * Walk through search results and return TRUE if we have a matching
- * netgroup, else FALSE.
+ * Walk through search results and return true if we have a matching
+ * netgroup, else false.
  */
-static int
+static bool
 sudo_ldap_check_user_netgroup(LDAP *ld, LDAPMessage *entry, char *user)
 {
     struct berval **bv, **p;
     char *val;
-    int ret = FALSE;
+    int ret = false;
     debug_decl(sudo_ldap_check_user_netgroup, SUDO_DEBUG_LDAP)
 
     if (!entry)
-	debug_return_int(ret);
+	debug_return_bool(ret);
 
     /* get the values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoUser");
     if (bv == NULL)
-	debug_return_int(ret);
+	debug_return_bool(ret);
 
     /* walk through values */
     for (p = bv; *p != NULL && !ret; p++) {
 	val = (*p)->bv_val;
 	/* match any */
 	if (netgr_matches(val, NULL, NULL, user))
-	    ret = TRUE;
+	    ret = true;
 	DPRINTF(("ldap sudoUser netgroup '%s' ... %s", val,
 	    ret ? "MATCH!" : "not"), 2 + ((ret) ? 0 : 1));
     }
 
     ldap_value_free_len(bv);	/* cleanup */
 
-    debug_return_int(ret);
+    debug_return_bool(ret);
 }
 
 /*
-* Walk through search results and return TRUE if we have a
-* host match, else FALSE.
+* Walk through search results and return true if we have a
+* host match, else false.
 */
-static int
+static bool
 sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry)
 {
     struct berval **bv, **p;
     char *val;
-    int ret = FALSE;
+    bool ret = false;
     debug_decl(sudo_ldap_check_host, SUDO_DEBUG_LDAP)
 
     if (!entry)
-	debug_return_int(ret);
+	debug_return_bool(ret);
 
     /* get the values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoHost");
     if (bv == NULL)
-	debug_return_int(ret);
+	debug_return_bool(ret);
 
     /* walk through values */
     for (p = bv; *p != NULL && !ret; p++) {
@@ -639,14 +639,14 @@ sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry)
 	if (!strcmp(val, "ALL") || addr_matches(val) ||
 	    netgr_matches(val, user_host, user_shost, NULL) ||
 	    hostname_matches(user_shost, user_host, val))
-	    ret = TRUE;
+	    ret = true;
 	DPRINTF(("ldap sudoHost '%s' ... %s", val,
 	    ret ? "MATCH!" : "not"), 2);
     }
 
     ldap_value_free_len(bv);	/* cleanup */
 
-    debug_return_int(ret);
+    debug_return_bool(ret);
 }
 
 static int
@@ -654,11 +654,11 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
 {
     struct berval **bv, **p;
     char *val;
-    int ret = FALSE;
+    bool ret = false;
     debug_decl(sudo_ldap_check_runas_user, SUDO_DEBUG_LDAP)
 
     if (!runas_pw)
-	debug_return_int(UNSPEC);
+	debug_return_bool(UNSPEC);
 
     /* get the runas user from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoRunAsUser");
@@ -687,7 +687,7 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
      * what the user specified on the command line.
      */
     if (bv == NULL)
-	debug_return_int(!strcasecmp(runas_pw->pw_name, def_runas_default));
+	debug_return_bool(!strcasecmp(runas_pw->pw_name, def_runas_default));
 
     /* walk through values returned, looking for a match */
     for (p = bv; *p != NULL && !ret; p++) {
@@ -695,21 +695,21 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
 	switch (val[0]) {
 	case '+':
 	    if (netgr_matches(val, NULL, NULL, runas_pw->pw_name))
-		ret = TRUE;
+		ret = true;
 	    break;
 	case '%':
 	    if (usergr_matches(val, runas_pw->pw_name, runas_pw))
-		ret = TRUE;
+		ret = true;
 	    break;
 	case 'A':
 	    if (strcmp(val, "ALL") == 0) {
-		ret = TRUE;
+		ret = true;
 		break;
 	    }
 	    /* FALLTHROUGH */
 	default:
 	    if (strcasecmp(val, runas_pw->pw_name) == 0)
-		ret = TRUE;
+		ret = true;
 	    break;
 	}
 	DPRINTF(("ldap sudoRunAsUser '%s' ... %s", val,
@@ -718,7 +718,7 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
 
     ldap_value_free_len(bv);	/* cleanup */
 
-    debug_return_int(ret);
+    debug_return_bool(ret);
 }
 
 static int
@@ -726,61 +726,62 @@ sudo_ldap_check_runas_group(LDAP *ld, LDAPMessage *entry)
 {
     struct berval **bv, **p;
     char *val;
-    int ret = FALSE;
+    bool ret = false;
     debug_decl(sudo_ldap_check_runas_group, SUDO_DEBUG_LDAP)
 
     /* runas_gr is only set if the user specified the -g flag */
     if (!runas_gr)
-	debug_return_int(UNSPEC);
+	debug_return_bool(UNSPEC);
 
     /* get the values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
     if (bv == NULL)
-	debug_return_int(ret);
+	debug_return_bool(ret);
 
     /* walk through values returned, looking for a match */
     for (p = bv; *p != NULL && !ret; p++) {
 	val = (*p)->bv_val;
 	if (strcmp(val, "ALL") == 0 || group_matches(val, runas_gr))
-	    ret = TRUE;
+	    ret = true;
 	DPRINTF(("ldap sudoRunAsGroup '%s' ... %s", val,
 	    ret ? "MATCH!" : "not"), 2);
     }
 
     ldap_value_free_len(bv);	/* cleanup */
 
-    debug_return_int(ret);
+    debug_return_bool(ret);
 }
 
 /*
- * Walk through search results and return TRUE if we have a runas match,
- * else FALSE.  RunAs info is optional.
+ * Walk through search results and return true if we have a runas match,
+ * else false.  RunAs info is optional.
  */
-static int
+static bool
 sudo_ldap_check_runas(LDAP *ld, LDAPMessage *entry)
 {
-    int ret;
+    bool ret;
     debug_decl(sudo_ldap_check_runas, SUDO_DEBUG_LDAP)
 
     if (!entry)
-	debug_return_bool(FALSE);
+	debug_return_bool(false);
 
-    ret = sudo_ldap_check_runas_user(ld, entry) != FALSE &&
-	sudo_ldap_check_runas_group(ld, entry) != FALSE;
+    ret = sudo_ldap_check_runas_user(ld, entry) != false &&
+	sudo_ldap_check_runas_group(ld, entry) != false;
 
     debug_return_bool(ret);
 }
 
 /*
- * Walk through search results and return TRUE if we have a command match,
- * FALSE if disallowed and UNSPEC if not matched.
+ * Walk through search results and return true if we have a command match,
+ * false if disallowed and UNSPEC if not matched.
  */
 static int
 sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
 {
     struct berval **bv, **p;
     char *allowed_cmnd, *allowed_args, *val;
-    int foundbang, ret = UNSPEC;
+    bool foundbang;
+    int ret = UNSPEC;
     debug_decl(sudo_ldap_check_command, SUDO_DEBUG_LDAP)
 
     if (!entry)
@@ -790,23 +791,23 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
     if (bv == NULL)
 	debug_return_bool(ret);
 
-    for (p = bv; *p != NULL && ret != FALSE; p++) {
+    for (p = bv; *p != NULL && ret != false; p++) {
 	val = (*p)->bv_val;
 	/* Match against ALL ? */
 	if (!strcmp(val, "ALL")) {
-	    ret = TRUE;
+	    ret = true;
 	    if (setenv_implied != NULL)
-		*setenv_implied = TRUE;
+		*setenv_implied = true;
 	    DPRINTF(("ldap sudoCommand '%s' ... MATCH!", val), 2);
 	    continue;
 	}
 
 	/* check for !command */
 	if (*val == '!') {
-	    foundbang = TRUE;
+	    foundbang = true;
 	    allowed_cmnd = estrdup(1 + val);	/* !command */
 	} else {
-	    foundbang = FALSE;
+	    foundbang = false;
 	    allowed_cmnd = estrdup(val);	/* command */
 	}
 
@@ -821,10 +822,10 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
 	     * If allowed (no bang) set ret but keep on checking.
 	     * If disallowed (bang), exit loop.
 	     */
-	    ret = foundbang ? FALSE : TRUE;
+	    ret = foundbang ? false : true;
 	}
 	DPRINTF(("ldap sudoCommand '%s' ... %s", val,
-	    ret == TRUE ? "MATCH!" : "not"), 2);
+	    ret == true ? "MATCH!" : "not"), 2);
 
 	efree(allowed_cmnd);	/* cleanup */
     }
@@ -836,7 +837,7 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
 
 /*
  * Search for boolean "option" in sudoOption.
- * Returns TRUE if found and allowed, FALSE if negated, else UNSPEC.
+ * Returns true if found and allowed, false if negated, else UNSPEC.
  */
 static int
 sudo_ldap_check_bool(LDAP *ld, LDAPMessage *entry, char *option)
@@ -903,14 +904,14 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
 		set_default(var, val, (int) op);
 	    } else {
 		/* case var=val */
-		set_default(var, val, TRUE);
+		set_default(var, val, true);
 	    }
 	} else if (*var == '!') {
 	    /* case !var Boolean False */
-	    set_default(var + 1, NULL, FALSE);
+	    set_default(var + 1, NULL, false);
 	} else {
 	    /* case var Boolean True */
-	    set_default(var, NULL, TRUE);
+	    set_default(var, NULL, true);
 	}
 	efree(var);
     }
@@ -1152,7 +1153,7 @@ sudo_ldap_read_secret(const char *path)
     debug_return;
 }
 
-static int
+static bool
 sudo_ldap_read_config(void)
 {
     FILE *fp;
@@ -1172,7 +1173,7 @@ sudo_ldap_read_config(void)
     ldap_conf.deref = -1;
 
     if ((fp = fopen(_PATH_LDAP_CONF, "r")) == NULL)
-	debug_return_bool(FALSE);
+	debug_return_bool(false);
 
     while ((cp = sudo_parseln(fp)) != NULL) {
 	if (*cp == '\0')
@@ -1205,7 +1206,7 @@ sudo_ldap_read_config(void)
 			*(int *)(cur->valp) = LDAP_DEREF_NEVER;
 		    break;
 		case CONF_BOOL:
-		    *(int *)(cur->valp) = atobool(value) == TRUE;
+		    *(int *)(cur->valp) = atobool(value) == true;
 		    break;
 		case CONF_INT:
 		    *(int *)(cur->valp) = atoi(value);
@@ -1337,7 +1338,7 @@ sudo_ldap_read_config(void)
 	sudo_printf(SUDO_CONV_ERROR_MSG, "===================\n");
     }
     if (!ldap_conf.base)
-	debug_return_bool(FALSE);	/* if no base is defined, ignore LDAP */
+	debug_return_bool(false);	/* if no base is defined, ignore LDAP */
 
     if (ldap_conf.bind_timelimit > 0)
 	ldap_conf.bind_timelimit *= 1000;	/* convert to ms */
@@ -1348,7 +1349,7 @@ sudo_ldap_read_config(void)
     if (ldap_conf.ssl != NULL) {
 	if (strcasecmp(ldap_conf.ssl, "start_tls") == 0)
 	    ldap_conf.ssl_mode = SUDO_LDAP_STARTTLS;
-	else if (atobool(ldap_conf.ssl) == TRUE)
+	else if (atobool(ldap_conf.ssl) == true)
 	    ldap_conf.ssl_mode = SUDO_LDAP_SSL;
     }
 
@@ -1364,7 +1365,7 @@ sudo_ldap_read_config(void)
     if (ldap_conf.uri) {
 	struct ldap_config_list_str *uri = ldap_conf.uri;
 	if (sudo_ldap_parse_uri(uri) != 0)
-	    debug_return_bool(FALSE);
+	    debug_return_bool(false);
 	do {
 	    ldap_conf.uri = uri->next;
 	    efree(uri);
@@ -1426,7 +1427,7 @@ sudo_ldap_read_config(void)
 	}
     }
 #endif
-    debug_return_bool(TRUE);
+    debug_return_bool(true);
 }
 
 /*
@@ -1717,7 +1718,8 @@ sudo_ldap_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
     LDAP *ld;
     struct ldap_result *lres;
     LDAPMessage *entry;
-    int i, found = FALSE;
+    bool found = false;
+    int i;
     debug_decl(sudo_ldap_display_cmnd, SUDO_DEBUG_LDAP)
 
     if (handle == NULL || handle->ld == NULL)
@@ -1734,7 +1736,7 @@ sudo_ldap_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 	entry = lres->entries[i].entry;
 	if (sudo_ldap_check_command(ld, entry, NULL) &&
 	    sudo_ldap_check_runas(ld, entry)) {
-	    found = TRUE;
+	    found = true;
 	    goto done;
 	}
     }
@@ -1892,8 +1894,8 @@ sudo_ldap_result_alloc(void)
     result->nentries = 0;
     result->entries = NULL;
     result->allocated_entries = 0;
-    result->user_matches = FALSE;
-    result->host_matches = FALSE;
+    result->user_matches = false;
+    result->host_matches = false;
     debug_return_ptr(result);
 }
 
@@ -1965,8 +1967,8 @@ sudo_ldap_bind_s(LDAP *ld)
     debug_decl(sudo_ldap_bind_s, SUDO_DEBUG_LDAP)
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
-    if (ldap_conf.rootuse_sasl == TRUE ||
-	(ldap_conf.rootuse_sasl != FALSE && ldap_conf.use_sasl == TRUE)) {
+    if (ldap_conf.rootuse_sasl == true ||
+	(ldap_conf.rootuse_sasl != false && ldap_conf.use_sasl == true)) {
 	void *auth_id = ldap_conf.rootsasl_auth_id ?
 	    ldap_conf.rootsasl_auth_id : ldap_conf.sasl_auth_id;
 
@@ -1978,7 +1980,7 @@ sudo_ldap_bind_s(LDAP *ld)
 		DPRINTF(("gss_krb5_ccache_name() failed: %d", status), 1);
 	    }
 # else
-	    setenv("KRB5CCNAME", ldap_conf.krb5_ccname, TRUE);
+	    setenv("KRB5CCNAME", ldap_conf.krb5_ccname, true);
 # endif
 	}
 	rc = ldap_sasl_interactive_bind_s(ld, ldap_conf.binddn, "GSSAPI",
@@ -1989,7 +1991,7 @@ sudo_ldap_bind_s(LDAP *ld)
 		    DPRINTF(("gss_krb5_ccache_name() failed: %d", status), 1);
 # else
 	    if (old_ccname != NULL)
-		setenv("KRB5CCNAME", old_ccname, TRUE);
+		setenv("KRB5CCNAME", old_ccname, true);
 	    else
 		unsetenv("KRB5CCNAME");
 # endif
@@ -2038,7 +2040,8 @@ static int
 sudo_ldap_open(struct sudo_nss *nss)
 {
     LDAP *ld;
-    int rc, ldapnoinit = FALSE;
+    int rc;
+    bool ldapnoinit = false;
     struct sudo_ldap_handle *handle;
     debug_decl(sudo_ldap_open, SUDO_DEBUG_LDAP)
 
@@ -2047,8 +2050,8 @@ sudo_ldap_open(struct sudo_nss *nss)
 
     /* Prevent reading of user ldaprc and system defaults. */
     if (getenv("LDAPNOINIT") == NULL) {
-	ldapnoinit = TRUE;
-	setenv("LDAPNOINIT", "1", TRUE);
+	ldapnoinit = true;
+	setenv("LDAPNOINIT", "1", true);
     }
 
     /* Connect to LDAP server */
@@ -2187,15 +2190,15 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	DPRINTF(("perform search for pwflag %d", pwflag), 1);
 	for (i = 0; i < lres->nentries; i++) {
 	    entry = lres->entries[i].entry;
-	    if ((pwcheck == any && doauth != FALSE) ||
-		(pwcheck == all && doauth == FALSE)) {
+	    if ((pwcheck == any && doauth != false) ||
+		(pwcheck == all && doauth == false)) {
 		doauth = sudo_ldap_check_bool(ld, entry, "authenticate");
 	    }
 	    /* Only check the command when listing another user. */
 	    if (user_uid == 0 || list_pw == NULL ||
 		user_uid == list_pw->pw_uid ||
 		sudo_ldap_check_command(ld, entry, NULL)) {
-		matched = TRUE;
+		matched = true;
 		break;
 	    }
 	}
@@ -2209,11 +2212,11 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 			break;
 		    case all:
 		    case any:
-			if (doauth == FALSE)
-			    def_authenticate = FALSE;
+			if (doauth == false)
+			    def_authenticate = false;
 			break;
 		    case never:
-			def_authenticate = FALSE;
+			def_authenticate = false;
 			break;
 		    default:
 			break;
@@ -2225,7 +2228,7 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 
     DPRINTF(("searching LDAP for sudoers entries"), 1);
 
-    setenv_implied = FALSE;
+    setenv_implied = false;
     for (i = 0; i < lres->nentries; i++) {
 	entry = lres->entries[i].entry;
 	if (!sudo_ldap_check_runas(ld, entry))
@@ -2233,12 +2236,12 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	rc = sudo_ldap_check_command(ld, entry, &setenv_implied);
 	if (rc != UNSPEC) {
 	    /* We have a match. */
-	    DPRINTF(("Command %sallowed", rc == TRUE ? "" : "NOT "), 1);
-	    if (rc == TRUE) {
+	    DPRINTF(("Command %sallowed", rc == true ? "" : "NOT "), 1);
+	    if (rc == true) {
 		DPRINTF(("LDAP entry: %p", entry), 1);
 		/* Apply entry-specific options. */
 		if (setenv_implied)
-		    def_setenv = TRUE;
+		    def_setenv = true;
 		sudo_ldap_parse_options(ld, entry);
 #ifdef HAVE_SELINUX
 		/* Set role and type if not specified on command line. */
@@ -2446,7 +2449,7 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 		DPRINTF(("nothing found for '%s'", filt), 1);
 		continue;
 	    }
-	    lres->user_matches = TRUE;
+	    lres->user_matches = true;
 
 	    /* Add the seach result to list of search results. */
 	    DPRINTF(("adding search result"), 1);
@@ -2455,7 +2458,7 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 		if ((!do_netgr ||
 		    sudo_ldap_check_user_netgroup(ld, entry, pw->pw_name)) &&
 		    sudo_ldap_check_host(ld, entry)) {
-		    lres->host_matches = TRUE;
+		    lres->host_matches = true;
 		    sudo_ldap_result_add_entry(lres, entry);
 		}
 	    }

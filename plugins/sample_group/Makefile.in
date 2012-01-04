@@ -36,7 +36,7 @@ INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 LIBS = $(LIBOBJDIR)/libreplace.la
 
 # C preprocessor flags
-CPPFLAGS = -I$(incdir) -I$(top_builddir) @CPPFLAGS@
+CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(top_srcdir) @CPPFLAGS@
 
 # Usually -O and/or -g
 CFLAGS = @CFLAGS@
