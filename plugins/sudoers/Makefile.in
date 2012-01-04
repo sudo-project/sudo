@@ -192,36 +192,30 @@ check_wrap: $(CHECK_WRAP_OBJS) $(LT_LIBS)
 GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate.c
 
 $(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y
-	if [ -n "$(DEVEL)" ]; then \
-	    $(YACC) -d $(srcdir)/gram.y; \
-	    echo "#include <config.h>" > $(devdir)/gram.c; \
-	    cat y.tab.c >> $(devdir)/gram.c; \
-	    rm -f y.tab.c; \
-	    mv -f y.tab.h $(devdir)/gram.h; \
+	@if [ -n "$(DEVEL)" ]; then \
+	    cmd='$(YACC) -d $(srcdir)/gram.y; echo "#include <config.h>" > $(devdir)/gram.c; cat y.tab.c >> $(devdir)/gram.c; rm -f y.tab.c; mv -f y.tab.h $(devdir)/gram.h'; \
+	    echo "$$cmd"; eval $$cmd; \
 	fi
 
 $(devdir)/toke.c: $(srcdir)/toke.l
-	if [ -n "$(DEVEL)" ]; then \
-	    $(FLEX) $(srcdir)/toke.l; \
-	    echo "#include <config.h>" > $(devdir)/toke.c; \
-	    cat lex.yy.c >> $(devdir)/toke.c; \
-	    rm -f lex.yy.c; \
+	@if [ -n "$(DEVEL)" ]; then \
+	    cmd='$(FLEX) $(srcdir)/toke.l; echo "#include <config.h>" > $(devdir)/toke.c; cat lex.yy.c >> $(devdir)/toke.c'; \
+	    echo "$$cmd"; eval $$cmd; \
 	fi
 
 # Uncomment the lines before -@true if you intend to modify getdate.y
 $(devdir)/getdate.c: $(srcdir)/getdate.y
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
 	    echo "expect 10 shift/reduce conflicts"; \
-	    $(YACC) $(srcdir)/getdate.y; \
-	    echo "#include <config.h>" > $(devdir)/getdate.c; \
-	    cat y.tab.c >> $(devdir)/getdate.c; \
-	    rm -f y.tab.c; \
+	    cmd='$(YACC) $(srcdir)/getdate.y; echo "#include <config.h>" > $(devdir)/getdate.c; cat y.tab.c >> $(devdir)/getdate.c; rm -f y.tab.c'; \
+	    echo "$$cmd"; eval $$cmd; \
 	fi
 
 # Uncomment the following if you intend to modify def_data.in
 $(devdir)/def_data.c $(devdir)/def_data.h: $(srcdir)/def_data.in
-	if [ -n "$(DEVEL)" ]; then \
-	    $(PERL) $(srcdir)/mkdefaults -o $(devdir)/def_data $(srcdir)/def_data.in; \
+	@if [ -n "$(DEVEL)" ]; then \
+	    cmd='$(PERL) $(srcdir)/mkdefaults -o $(devdir)/def_data $(srcdir)/def_data.in'; \
+	    echo "$$cmd"; eval $$cmd; \
 	fi
 
 sudoers: $(srcdir)/sudoers.in
@@ -350,8 +344,9 @@ mostlyclean: clean
 
 distclean: clean
 	-rm -rf Makefile sudoers sudoers.lo .libs $(LINKS)
-	if [ -n "$(DEVEL)" -a "$(devdir)" != "$(srcdir)" ]; then \
-	    rm -rf $(GENERATED); \
+	@if [ -n "$(DEVEL)" -a "$(devdir)" != "$(srcdir)" ]; then \
+	    cmd='rm -rf $(GENERATED)'; \
+	    echo "$$cmd"; eval $$cmd; \
 	fi
 
 clobber: distclean
