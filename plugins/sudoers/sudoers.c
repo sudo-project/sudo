@@ -342,7 +342,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	NewArgv = emalloc2(NewArgc + 2, sizeof(char *));
 	memcpy(++NewArgv, argv, argc * sizeof(char *));
 	NewArgv[NewArgc] = NULL;
-	if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
+	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && runas_pw != NULL)
 	    NewArgv[0] = estrdup(runas_pw->pw_shell);
     }
 
