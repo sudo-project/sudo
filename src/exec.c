@@ -136,8 +136,15 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 	    /* headed for execve() */
 	    sudo_debug_execve(SUDO_DEBUG_INFO, details->command,
 		details->argv, details->envp);
-	    if (details->closefrom >= 0)
-		closefrom(details->closefrom);
+	    if (details->closefrom >= 0) {
+		int maxfd = details->closefrom;
+		dup2(sv[1], maxfd);
+		(void)fcntl(maxfd, F_SETFD, FD_CLOEXEC);
+		sv[1] = maxfd++;
+		if (sudo_debug_fd_set(maxfd) != -1)
+		    maxfd++;
+		closefrom(maxfd);
+	    }
 #ifdef HAVE_SELINUX
 	    if (ISSET(details->flags, CD_RBAC_ENABLED))
 		selinux_execve(details->command, details->argv, details->envp);
