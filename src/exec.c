@@ -336,6 +336,7 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
 	if (log_io)
 	    fd_set_iobs(fdsr, fdsw); /* XXX - better name */
 	nready = select(maxfd + 1, fdsr, fdsw, NULL, NULL);
+	sudo_debug_printf(SUDO_DEBUG_DEBUG, "select returns %d", nready);
 	if (nready == -1) {
 	    if (errno == EINTR)
 		continue;
@@ -360,16 +361,28 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
 	if (FD_ISSET(sv[0], fdsr)) {
 	    /* read child status */
 	    n = recv(sv[0], cstat, sizeof(*cstat), 0);
-	    if (n == -1) {
-		if (errno == EINTR)
-		    continue;
-		/*
-		 * If not logging I/O we will receive ECONNRESET when
-		 * the command is executed.  It is safe to ignore this.
-		 */
-		if (log_io && errno != EAGAIN) {
-		    cstat->type = CMD_ERRNO;
-		    cstat->val = errno;
+	    if (n != sizeof(*cstat)) {
+		if (n == -1) {
+		    if (errno == EINTR)
+			continue;
+		    /*
+		     * If not logging I/O we may receive ECONNRESET when
+		     * the command is executed and sv is closed.
+		     * It is safe to ignore this.
+		     */
+		    if (log_io && errno != EAGAIN) {
+			cstat->type = CMD_ERRNO;
+			cstat->val = errno;
+			break;
+		    }
+		    sudo_debug_printf(SUDO_DEBUG_ERROR,
+			"failed to read child status: %s", strerror(errno));
+		} else {
+		    /* Short read or EOF. */
+		    sudo_debug_printf(SUDO_DEBUG_ERROR,
+			"failed to read child status: %s",
+			n ? "short read" : "EOF");
+		    /* XXX - should set cstat */
 		    break;
 		}
 	    }
@@ -383,16 +396,20 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
 		    continue;
 		} else {
 		    /* Child exited or was killed, either way we are done. */
+		    sudo_debug_printf(SUDO_DEBUG_INFO, "child exited or was killed");
 		    break;
 		}
 	    } else if (cstat->type == CMD_ERRNO) {
 		/* Child was unable to execute command or broken pipe. */
+		sudo_debug_printf(SUDO_DEBUG_INFO, "errno from child: %s",
+		    strerror(cstat->val));
 		break;
 	    }
 	}
 
 	if (perform_io(fdsr, fdsw, cstat) != 0) {
 	    /* I/O error, kill child if still alive and finish. */
+	    sudo_debug_printf(SUDO_DEBUG_ERROR, "I/O error, terminating child");
 	    schedule_signal(SIGKILL);
 	    forward_signals(sv[0]);
 	    break;
@@ -465,8 +482,22 @@ handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
 		pid = waitpid(child, &status, WUNTRACED|WNOHANG);
 	    } while (pid == -1 && errno == EINTR);
 	    if (pid == child) {
-		/* If not logging I/O and child has exited we are done. */
-		if (!log_io) {
+		if (log_io) {
+		    /*
+		     * On BSD we get ECONNRESET on sv[0] if monitor dies
+		     * and select() will return with sv[0] readable.
+		     * On Linux that doesn't appear to happen so we
+		     * treat the monitor dying as a fatal error.
+		     * Note that the wait status we return is that of
+		     * the monitor and not the command; unfortunately
+		     * that is the best that we can do here.
+		     */
+		    if (!WIFSTOPPED(status)) {
+			cstat->type = CMD_WSTATUS;
+			cstat->val = status;
+			debug_return_int(0);
+		    }
+		} else {
 		    if (WIFSTOPPED(status)) {
 			/*
 			 * Save the controlling terminal's process group
@@ -492,7 +523,6 @@ handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
 			debug_return_int(0);
 		    }
 		}
-		/* Else we get ECONNRESET on sv[0] if child dies. */
 	    }
 	} else {
 	    if (log_io) {
@@ -534,12 +564,15 @@ forward_signals(int sock)
 	efree(sigfwd);
 	if (nsent != sizeof(cstat)) {
 	    if (errno == EPIPE) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR,
+		    "broken pipe writing to child over backchannel");
 		/* Other end of socket gone, empty out sigfwd_list. */
 		while (!tq_empty(&sigfwd_list)) {
 		    sigfwd = tq_first(&sigfwd_list);
 		    tq_remove(&sigfwd_list, sigfwd);
 		    efree(sigfwd);
 		}
+		/* XXX - child (monitor) is dead, we should exit too? */
 	    }
 	    break;
 	}
