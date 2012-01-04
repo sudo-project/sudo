@@ -13446,6 +13446,7 @@ if test "$enable_shared" = "no"; then
     enable_dlopen=no
     lt_cv_dlopen=none
     lt_cv_dlopen_libs=
+    ac_cv_func_dlopen=no
 else
     eval _shrext="$shrext_cmds"
     # Darwin uses .dylib for libraries but .so for modules
