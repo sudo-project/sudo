@@ -94,6 +94,7 @@
 #include "alloc.h"
 #include "error.h"
 #include "gettext.h"
+#include "sudo_plugin.h"
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048
@@ -171,6 +172,8 @@ struct search_node {
 	void *ptr;
     } u;
 } *search_expr;
+
+sudo_conv_t sudo_conv;	/* NULL in non-plugin */
 
 #define STACK_NODE_SIZE	32
 static struct search_node *node_stack[32];
