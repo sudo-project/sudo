@@ -108,7 +108,7 @@ get_net_ifs(char **addrinfo)
 {
     struct ifaddrs *ifa, *ifaddrs;
     struct sockaddr_in *sin;
-#ifdef HAVE_IN6_ADDR
+#ifdef HAVE_STRUCT_IN6_ADDR
     struct sockaddr_in6 *sin6;
     char addrbuf[INET6_ADDRSTRLEN];
 #endif
@@ -128,7 +128,7 @@ get_net_ifs(char **addrinfo)
 
 	switch (ifa->ifa_addr->sa_family) {
 	    case AF_INET:
-#ifdef HAVE_IN6_ADDR
+#ifdef HAVE_STRUCT_IN6_ADDR
 	    case AF_INET6:
 #endif
 		num_interfaces++;
@@ -168,7 +168,7 @@ get_net_ifs(char **addrinfo)
 		}
 		cp += len;
 		break;
-#ifdef HAVE_IN6_ADDR
+#ifdef HAVE_STRUCT_IN6_ADDR
 	    case AF_INET6:
 		sin6 = (struct sockaddr_in6 *)ifa->ifa_addr;
 		inet_ntop(AF_INET6, &sin6->sin6_addr, addrbuf, sizeof(addrbuf));
@@ -189,7 +189,7 @@ get_net_ifs(char **addrinfo)
 		}
 		cp += len;
 		break;
-#endif /* HAVE_IN6_ADDR */
+#endif /* HAVE_STRUCT_IN6_ADDR */
 	}
     }
 

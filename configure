@@ -15579,7 +15579,6 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_SIGACTION_T 1
 _ACEOF
 
-$as_echo "#define HAVE_SIGACTION_T 1" >>confdefs.h
 
 fi
 
@@ -15590,7 +15589,11 @@ ac_fn_c_check_type "$LINENO" "struct timespec" "ac_cv_type_struct_timespec" "#in
 #include <time.h>
 "
 if test "x$ac_cv_type_struct_timespec" = xyes; then :
-  $as_echo "#define HAVE_TIMESPEC 1" >>confdefs.h
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_TIMESPEC 1
+_ACEOF
+
 
 fi
 
@@ -15603,7 +15606,6 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_IN6_ADDR 1
 _ACEOF
 
-$as_echo "#define HAVE_IN6_ADDR 1" >>confdefs.h
 
 fi
 
@@ -22074,8 +22076,6 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
-
-
 
 
 

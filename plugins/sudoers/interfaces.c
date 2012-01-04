@@ -74,7 +74,7 @@ set_interfaces(const char *ai)
 	ifp = emalloc(sizeof(*ifp));
 	if (strchr(addr, ':')) {
 	    /* IPv6 */
-#ifdef HAVE_IN6_ADDR
+#ifdef HAVE_STRUCT_IN6_ADDR
 	    ifp->family = AF_INET6;
 	    if (inet_pton(AF_INET6, addr, &ifp->addr.ip6) != 1 ||
 		inet_pton(AF_INET6, mask, &ifp->netmask.ip6) != 1)
