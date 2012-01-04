@@ -131,11 +131,6 @@ static const char *initial_badenv_table[] = {
 #ifdef __APPLE__
     "DYLD_*",
 #endif
-#ifdef HAVE_KERB4
-    "KRB_CONF*",
-    "KRBCONFDIR",
-    "KRBTKFILE",
-#endif /* HAVE_KERB4 */
 #ifdef HAVE_KERB5
     "KRB5_CONFIG*",
     "KRB5_KTNAME",

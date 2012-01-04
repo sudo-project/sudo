@@ -121,9 +121,6 @@ A) Sudo removes the following "dangerous" environment variables
      _RLD_*
      SHLIB_PATH (HP-UX only)
      LIBPATH (AIX only)
-     KRB_CONF (kerb4 only)
-     KRBCONFDIR (kerb4 only)
-     KRBTKFILE (kerb4 only)
      KRB5_CONFIG (kerb5 only)
      VAR_ACE (SecurID only)
      USR_ACE (SecurID only)

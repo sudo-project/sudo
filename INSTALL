@@ -173,12 +173,6 @@ Special features/options:
 	DIR is the base directory containing the compiled FWTK package
 	(or at least the library and header files).
 
-  --with-kerb4[=DIR]
-	Enable Kerberos IV support.  If specified, DIR is the base
-	directory containing the Kerberos IV include and lib dirs.
-	This uses Kerberos passphrases for authentication but does
-	not use the Kerberos cookie scheme.
-
   --with-kerb5[=DIR]
 	Enable Kerberos V support.  If specified, DIR is the base
 	directory containing the Kerberos V include and lib dirs.
