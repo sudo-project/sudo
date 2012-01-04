@@ -41,6 +41,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <time.h>
 
 #include "missing.h"
 #include "alloc.h"
