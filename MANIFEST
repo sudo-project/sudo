@@ -26,6 +26,8 @@ compat/dlfcn.h
 compat/dlopen.c
 compat/fnmatch.c
 compat/fnmatch.h
+compat/getaddrinfo.c
+compat/getaddrinfo.h
 compat/getcwd.c
 compat/getgrouplist.c
 compat/getline.c

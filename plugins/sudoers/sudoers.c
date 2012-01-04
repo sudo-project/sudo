@@ -76,6 +76,9 @@
 #endif
 #include <ctype.h>
 #include <setjmp.h>
+#ifndef HAVE_GETADDRINFO
+# include "compat/getaddrinfo.h"
+#endif
 
 #include "sudoers.h"
 #include "interfaces.h"
@@ -1050,34 +1053,22 @@ set_loginclass(struct passwd *pw)
 void
 set_fqdn(void)
 {
-#ifdef HAVE_GETADDRINFO
     struct addrinfo *res0, hint;
-#else
-    struct hostent *hp;
-#endif
     char *p;
     debug_decl(set_fqdn, SUDO_DEBUG_PLUGIN)
 
-#ifdef HAVE_GETADDRINFO
     zero_bytes(&hint, sizeof(hint));
     hint.ai_family = PF_UNSPEC;
     hint.ai_flags = AI_CANONNAME;
     if (getaddrinfo(user_host, NULL, &hint, &res0) != 0) {
-#else
-    if (!(hp = gethostbyname(user_host))) {
-#endif
 	log_error(MSG_ONLY|NO_EXIT,
 	    _("unable to resolve host %s"), user_host);
     } else {
 	if (user_shost != user_host)
 	    efree(user_shost);
 	efree(user_host);
-#ifdef HAVE_GETADDRINFO
 	user_host = estrdup(res0->ai_canonname);
 	freeaddrinfo(res0);
-#else
-	user_host = estrdup(hp->h_name);
-#endif
     }
     if ((p = strchr(user_host, '.')) != NULL)
 	user_shost = estrndup(user_host, (size_t)(p - user_host));

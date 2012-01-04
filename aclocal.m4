@@ -211,7 +211,7 @@ dnl check for sa_len field in struct sockaddr
 dnl
 AC_DEFUN([SUDO_SOCK_SA_LEN], [
     AC_CHECK_MEMBER([struct sockaddr.sa_len], 
-	[AC_DEFINE(HAVE_SA_LEN, 1, [Define if your struct sockadr has an sa_len field.])],    
+	[AC_DEFINE(HAVE_STRUCT_SOCKADDR_SA_LEN, 1, [Define if your struct sockadr has an sa_len field.])],    
 	[],
 	[ #include <sys/types.h>
 	  #include <sys/socket.h>] 
