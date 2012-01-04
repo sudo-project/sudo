@@ -51,19 +51,20 @@ int
 kerb4_init(struct passwd *pw, sudo_auth *auth)
 {
     static char realm[REALM_SZ];
+    debug_decl(kerb4_init, SUDO_DEBUG_AUTH)
 
     /* Don't try to verify root */
     if (pw->pw_uid == 0)
-	return AUTH_FAILURE;
+	debug_return_int(AUTH_FAILURE);
 
     /* Get the local realm, or retrun failure (no krb.conf) */
     if (krb_get_lrealm(realm, 1) != KSUCCESS)
-	return AUTH_FAILURE;
+	debug_return_int(AUTH_FAILURE);
 
     /* Stash a pointer to the realm (used in kerb4_verify) */
     auth->data = (void *) realm;
 
-    return AUTH_SUCCESS;
+    debug_return_int(AUTH_SUCCESS);
 }
 
 int
@@ -72,6 +73,7 @@ kerb4_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     char tkfile[sizeof(_PATH_SUDO_TIMEDIR) + 4 + MAX_UID_T_LEN];
     char *realm = (char *) auth->data;
     int error;
+    debug_decl(kerb4_verify, SUDO_DEBUG_AUTH)
 
     /*
      * Set the ticket file to be in sudo sudo timedir so we don't
@@ -88,7 +90,7 @@ kerb4_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     switch (error) {
 	case INTK_OK:
 	    dest_tkt();			/* we are done with the temp ticket */
-	    return AUTH_SUCCESS;
+	    debug_return_int(AUTH_SUCCESS);
 	    break;
 	case INTK_BADPW:
 	case KDC_PR_UNKNOWN:
@@ -98,5 +100,5 @@ kerb4_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 		krb_err_txt[error]);
     }
 
-    return AUTH_FAILURE;
+    debug_return_int(AUTH_FAILURE);
 }

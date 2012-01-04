@@ -58,6 +58,7 @@ static void
 switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
 {
     int serrno = errno;
+    debug_decl(switch_user, SUDO_DEBUG_EDIT)
 
     /* When restoring root, change euid first; otherwise change it last. */
     if (euid == ROOT_UID) {
@@ -74,8 +75,9 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
 	if (seteuid(euid) != 0)
 	    error(1, "seteuid(%d)", (int)euid);
     }
-
     errno = serrno;
+
+    debug_return;
 }
 
 /*
@@ -99,6 +101,7 @@ sudo_edit(struct command_details *command_details)
 	struct timeval omtim;
 	off_t osize;
     } *tf;
+    debug_decl(sudo_edit, SUDO_DEBUG_EDIT)
 
     /*
      * Set real, effective and saved uids to root.
@@ -106,7 +109,7 @@ sudo_edit(struct command_details *command_details)
      */
     if (setuid(ROOT_UID) != 0) {
 	warning(_("unable to change uid to root (%u)"), ROOT_UID);
-	return 1;
+	goto cleanup;
     }
 
     /*
@@ -138,7 +141,7 @@ sudo_edit(struct command_details *command_details)
     }
     if (nfiles == 0) {
 	warningx(_("plugin error: missing file list for sudoedit"));
-	return 1;
+	goto cleanup;
     }
 
     /*
@@ -220,7 +223,7 @@ sudo_edit(struct command_details *command_details)
 	j++;
     }
     if ((nfiles = j) == 0)
-	return 1;			/* no files readable, you lose */
+	goto cleanup;		/* no files readable, you lose */
 
     /*
      * Allocate space for the new argument vector and fill it in.
@@ -317,15 +320,15 @@ sudo_edit(struct command_details *command_details)
 	}
 	close(ofd);
     }
+    debug_return_int(rval);
 
-    return rval;
 cleanup:
     /* Clean up temp files and return. */
     for (i = 0; i < nfiles; i++) {
 	if (tf[i].tfile != NULL)
 	    unlink(tf[i].tfile);
     }
-    return 1;
+    debug_return_int(1);
 }
 
 #else /* HAVE_SETRESUID || HAVE_SETREUID || HAVE_SETEUID */
@@ -336,7 +339,8 @@ cleanup:
 int
 sudo_edit(struct command_details *command_details)
 {
-    return 1;
+    debug_decl(sudo_edit, SUDO_DEBUG_EDIT)
+    debug_return_int(1);
 }
 
 #endif /* HAVE_SETRESUID || HAVE_SETREUID || HAVE_SETEUID */

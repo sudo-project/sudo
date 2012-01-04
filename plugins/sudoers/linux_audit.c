@@ -35,19 +35,21 @@
 #include "error.h"
 #include "alloc.h"
 #include "gettext.h"
+#include "sudo_debug.h"
 #include "linux_audit.h"
 
 /*
  * Open audit connection if possible.
  * Returns audit fd on success and -1 on failure.
  */
-static int
-linux_audit_open(void)
+int
+static linux_audit_open(void)
 {
     static int au_fd = -1;
+    debug_decl(linux_audit_open, SUDO_DEBUG_AUDIT)
 
     if (au_fd != -1)
-	return au_fd;
+	debug_return_int(au_fd);
     au_fd = audit_open();
     if (au_fd == -1) {
 	/* Kernel may not have audit support. */
@@ -56,7 +58,7 @@ linux_audit_open(void)
     } else {
 	(void)fcntl(au_fd, F_SETFD, FD_CLOEXEC);
     }
-    return au_fd;
+    debug_return_int(au_fd);
 }
 
 int
@@ -65,9 +67,10 @@ linux_audit_command(char *argv[], int result)
     int au_fd, rc;
     char *command, *cp, **av;
     size_t size, n;
+    debug_decl(linux_audit_command, SUDO_DEBUG_AUDIT)
 
     if ((au_fd = linux_audit_open()) == -1)
-	return -1;
+	debug_return_int(-1);
 
     /* Convert argv to a flat string. */
     for (size = 0, av = argv; *av != NULL; av++)
@@ -89,5 +92,5 @@ linux_audit_command(char *argv[], int result)
 
     efree(command);
 
-    return rc;
+    debug_return_int(rc);
 }

@@ -83,6 +83,7 @@ struct rtentry;
 #include "missing.h"
 #include "alloc.h"
 #include "error.h"
+#include "sudo_debug.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "gettext.h"
@@ -113,9 +114,10 @@ get_net_ifs(char **addrinfo)
 #endif
     int ailen, i, len, num_interfaces = 0;
     char *cp;
+    debug_decl(get_net_ifs, SUDO_DEBUG_NETIF)
 
     if (getifaddrs(&ifaddrs))
-	return 0;
+	debug_return_int(0);
 
     /* Allocate space for the interfaces info string. */
     for (ifa = ifaddrs; ifa != NULL; ifa = ifa -> ifa_next) {
@@ -134,7 +136,7 @@ get_net_ifs(char **addrinfo)
 	}
     }
     if (num_interfaces == 0)
-	return 0;
+	debug_return_int(0);
     ailen = num_interfaces * 2 * INET6_ADDRSTRLEN;
     *addrinfo = cp = emalloc(ailen);
 
@@ -197,7 +199,7 @@ done:
 #else
     efree(ifaddrs);
 #endif
-    return num_interfaces;
+    debug_return_int(num_interfaces);
 }
 
 #elif defined(SIOCGIFCONF) && !defined(STUB_LOAD_INTERFACES)
@@ -218,6 +220,7 @@ get_net_ifs(char **addrinfo)
 #ifdef _ISC
     struct strioctl strioctl;
 #endif /* _ISC */
+    debug_decl(get_net_ifs, SUDO_DEBUG_NETIF)
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0)
@@ -250,7 +253,7 @@ get_net_ifs(char **addrinfo)
 
     /* Allocate space for the maximum number of interfaces that could exist. */
     if ((n = ifconf->ifc_len / sizeof(struct ifreq)) == 0)
-	return 0;
+	debug_return_int(0);
     ailen = n * 2 * INET6_ADDRSTRLEN;
     *addrinfo = cp = emalloc(ailen);
 
@@ -327,7 +330,7 @@ done:
     efree(ifconf_buf);
     (void) close(sock);
 
-    return num_interfaces;
+    debug_return_int(num_interfaces);
 }
 
 #else /* !SIOCGIFCONF || STUB_LOAD_INTERFACES */
@@ -338,7 +341,8 @@ done:
 int
 get_net_ifs(char **addrinfo)
 {
-    return 0;
+    debug_decl(get_net_ifs, SUDO_DEBUG_NETIF)
+    debug_return_int(0);
 }
 
 #endif /* SIOCGIFCONF && !STUB_LOAD_INTERFACES */

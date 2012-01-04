@@ -47,7 +47,6 @@
 
 #include "sudo.h"
 #include "sudo_plugin.h"
-#include "sudo_debug.h"
 
 extern int tgetpass_flags; /* XXX */
 

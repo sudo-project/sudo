@@ -39,10 +39,13 @@
 #endif /* HAVE_STRINGS_H */
 
 #include "missing.h"
+#include "sudo_debug.h"
 
 int
 atobool(const char *str)
 {
+    debug_decl(atobool, SUDO_DEBUG_UTIL)
+
     switch (*str) {
 	case '0':
 	case '1':
@@ -78,4 +81,5 @@ atobool(const char *str)
 	    break;
     }
     return -1;
+    debug_return_int(-1);
 }

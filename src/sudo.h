@@ -32,6 +32,7 @@
 #include "error.h"
 #include "fileops.h"
 #include "list.h"
+#include "sudo_debug.h"
 #include "gettext.h"
 
 #ifdef __TANDEM
@@ -202,7 +203,6 @@ void get_ttysize(int *rowp, int *colp);
 /* sudo.c */
 int exec_setup(struct command_details *details, const char *ptyname, int ptyfd);
 int run_command(struct command_details *details);
-void sudo_debug(int level, const char *format, ...) __printflike(2, 3);
 extern int debug_level;
 extern const char *list_user, *runas_user, *runas_group;
 extern struct user_details user_details;

@@ -54,6 +54,7 @@ afs_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
     struct ktc_encryptionKey afs_key;
     struct ktc_token afs_token;
+    debug_decl(afs_verify, SUDO_DEBUG_AUTH)
 
     /* Try to just check the password */
     ka_StringToKey(pass, NULL, &afs_key);
@@ -64,7 +65,7 @@ afs_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 			 0,			/* lifetime */
 			 &afs_token,		/* token */
 			 0) == 0)		/* new */
-	return AUTH_SUCCESS;
+	debug_return_int(AUTH_SUCCESS);
 
     /* Fall back on old method XXX - needed? */
     setpag();
@@ -77,7 +78,7 @@ afs_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 				   NULL,	/* expiration ptr (unused) */
 				   0,		/* spare */
 				   NULL) == 0)	/* reason */
-	return AUTH_SUCCESS;
+	debug_return_int(AUTH_SUCCESS);
 
-    return AUTH_FAILURE;
+    debug_return_int(AUTH_FAILURE);
 }

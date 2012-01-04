@@ -75,6 +75,7 @@ dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth)
     boolean32			reset_passwd;
     sec_login_auth_src_t	auth_src;
     error_status_t		status;
+    debug_decl(dce_verify, SUDO_DEBUG_AUTH)
 
     /*
      * Create the local context of the DCE principal necessary
@@ -86,7 +87,7 @@ dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth)
 	sec_login_no_flags, &login_context, &status)) {
 
 	if (check_dce_status(status, "sec_login_setup_identity(1):"))
-	    return AUTH_FAILURE;
+	    debug_return_int(AUTH_FAILURE);
 
 	password_rec.key.key_type = sec_passwd_plain;
 	password_rec.key.tagged_union.plain = (idl_char *) plain_pw;
@@ -98,7 +99,7 @@ dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth)
 	    &reset_passwd, &auth_src, &status)) {
 
 	    if (check_dce_status(status, "sec_login_validate_identity(1):"))
-		return AUTH_FAILURE;
+		debug_return_int(AUTH_FAILURE);
 
 	    /*
 	     * Certify that the DCE Security Server used to set
@@ -108,10 +109,10 @@ dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth)
 	    if (!sec_login_certify_identity(login_context, &status)) {
 		(void) fprintf(stderr, "Whoa! Bogus authentication server!\n");
 		(void) check_dce_status(status,"sec_login_certify_identity(1):");
-		return AUTH_FAILURE;
+		debug_return_int(AUTH_FAILURE);
 	    }
 	    if (check_dce_status(status, "sec_login_certify_identity(2):"))
-		return AUTH_FAILURE;
+		debug_return_int(AUTH_FAILURE);
 
 	    /*
 	     * Sets the network credentials to those specified
@@ -119,7 +120,7 @@ dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth)
 	     */
 	    sec_login_set_context(login_context, &status);
 	    if (check_dce_status(status, "sec_login_set_context:"))
-		return AUTH_FAILURE;
+		debug_return_int(AUTH_FAILURE);
 
 	    /*
 	     * Oops, your credentials were no good. Possibly
@@ -129,13 +130,13 @@ dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth)
 	    if (auth_src != sec_login_auth_src_network) {
 		    (void) fprintf(stderr,
 			"You have no network credentials.\n");
-		    return AUTH_FAILURE;
+		    debug_return_int(AUTH_FAILURE);
 	    }
 	    /* Check if the password has aged and is thus no good */
 	    if (reset_passwd) {
 		    (void) fprintf(stderr,
 			"Your DCE password needs resetting.\n");
-		    return AUTH_FAILURE;
+		    debug_return_int(AUTH_FAILURE);
 	    }
 
 	    /*
@@ -147,7 +148,7 @@ dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth)
 	    sec_login_get_pwent(login_context, (sec_login_passwd_t) &temp_pw,
 		&status);
 	    if (check_dce_status(status, "sec_login_get_pwent:"))
-		return AUTH_FAILURE;
+		debug_return_int(AUTH_FAILURE);
 
 	    /*
 	     * If we get to here, then the pwent above properly fetched
@@ -169,17 +170,17 @@ dce_verify(struct passwd *pw, char *plain_pw, sudo_auth *auth)
 	     * somewhere later in the program.
 	     */
 	    sec_login_purge_context(&login_context, &status);
-	    return AUTH_SUCCESS;
+	    debug_return_int(AUTH_SUCCESS);
 	} else {
 	    if(check_dce_status(status, "sec_login_validate_identity(2):"))
-		return AUTH_FAILURE;
+		debug_return_int(AUTH_FAILURE);
 	    sec_login_purge_context(&login_context, &status);
 	    if(check_dce_status(status, "sec_login_purge_context:"))
-		return AUTH_FAILURE;
+		debug_return_int(AUTH_FAILURE);
 	}
     }
     (void) check_dce_status(status, "sec_login_setup_identity(2):");
-    return AUTH_FAILURE;
+    debug_return_int(AUTH_FAILURE);
 }
 
 /* Returns 0 for DCE "ok" status, 1 otherwise */
@@ -188,10 +189,11 @@ check_dce_status(error_status_t input_status, char *comment)
 {
     int error_stat;
     unsigned char error_string[dce_c_error_string_len];
+    debug_decl(check_dce_status, SUDO_DEBUG_AUTH)
 
     if (input_status == rpc_s_ok)
-	return 0;
+	debug_return_bool(0);
     dce_error_inq_text(input_status, error_string, &error_stat);
     (void) fprintf(stderr, "%s %s\n", comment, error_string);
-    return 1;
+    debug_return_bool(1);
 }

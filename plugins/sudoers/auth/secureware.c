@@ -57,41 +57,47 @@ secureware_init(struct passwd *pw, sudo_auth *auth)
 {
 #ifdef __alpha
     extern int crypt_type;
+    debug_decl(secureware_init, SUDO_DEBUG_AUTH)
 
     if (crypt_type == INT_MAX)
-	return AUTH_FAILURE;			/* no shadow */
+	debug_return_int(AUTH_FAILURE);			/* no shadow */
+#else
+    debug_decl(secureware_init, SUDO_DEBUG_AUTH)
 #endif
     sudo_setspent();
     auth->data = sudo_getepw(pw);
     sudo_endspent();
-    return AUTH_SUCCESS;
+    debug_return_int(AUTH_SUCCESS);
 }
 
 int
 secureware_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
     char *pw_epasswd = auth->data;
+    debug_decl(secureware_verify, SUDO_DEBUG_AUTH)
 #ifdef __alpha
-    extern int crypt_type;
+    {
+	extern int crypt_type;
 
 #  ifdef HAVE_DISPCRYPT
-    if (strcmp(pw_epasswd, dispcrypt(pass, pw_epasswd, crypt_type)) == 0)
-	return AUTH_SUCCESS;
+	if (strcmp(pw_epasswd, dispcrypt(pass, pw_epasswd, crypt_type)) == 0)
+	    debug_return_int(AUTH_SUCCESS);
 #  else
-    if (crypt_type == AUTH_CRYPT_BIGCRYPT) {
-	if (strcmp(pw_epasswd, bigcrypt(pass, pw_epasswd)) == 0)
-	    return AUTH_SUCCESS;
-    } else if (crypt_type == AUTH_CRYPT_CRYPT16) {
-	if (strcmp(pw_epasswd, crypt(pass, pw_epasswd)) == 0)
-	    return AUTH_SUCCESS;
+	if (crypt_type == AUTH_CRYPT_BIGCRYPT) {
+	    if (strcmp(pw_epasswd, bigcrypt(pass, pw_epasswd)) == 0)
+		debug_return_int(AUTH_SUCCESS);
+	} else if (crypt_type == AUTH_CRYPT_CRYPT16) {
+	    if (strcmp(pw_epasswd, crypt(pass, pw_epasswd)) == 0)
+		debug_return_int(AUTH_SUCCESS);
+	}
     }
 #  endif /* HAVE_DISPCRYPT */
 #elif defined(HAVE_BIGCRYPT)
     if (strcmp(pw_epasswd, bigcrypt(pass, pw_epasswd)) == 0)
-	return AUTH_SUCCESS;
+	debug_return_int(AUTH_SUCCESS);
 #endif /* __alpha */
 
-	return AUTH_FAILURE;
+	debug_return_int(AUTH_FAILURE);
 }
 
 int
@@ -100,10 +106,11 @@ secureware_cleanup(pw, auth)
     sudo_auth *auth;
 {
     char *pw_epasswd = auth->data;
+    debug_decl(secureware_cleanup, SUDO_DEBUG_AUTH)
 
     if (pw_epasswd != NULL) {
 	zero_bytes(pw_epasswd, strlen(pw_epasswd));
 	efree(pw_epasswd);
     }
-    return AUTH_SUCCESS;
+    debug_return_int(AUTH_SUCCESS);
 }

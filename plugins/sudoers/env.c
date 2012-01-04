@@ -216,6 +216,7 @@ env_init(char * const envp[])
 {
     char * const *ep;
     size_t len;
+    debug_decl(env_init, SUDO_DEBUG_ENV)
 
     for (ep = envp; *ep != NULL; ep++)
 	continue;
@@ -229,6 +230,8 @@ env_init(char * const envp[])
 #endif
     memcpy(env.envp, envp, len * sizeof(char *));
     env.envp[len] = '\0';
+
+    debug_return;
 }
 
 char **
@@ -247,6 +250,7 @@ sudo_setenv(const char *var, const char *val, int dupcheck)
 {
     char *estring;
     size_t esize;
+    debug_decl(sudo_setenv, SUDO_DEBUG_ENV)
 
     esize = strlen(var) + 1 + strlen(val) + 1;
     estring = emalloc(esize);
@@ -259,6 +263,8 @@ sudo_setenv(const char *var, const char *val, int dupcheck)
 	errorx(1, _("internal error, sudo_setenv() overflow"));
     }
     sudo_putenv(estring, dupcheck, TRUE);
+
+    debug_return;
 }
 
 /*
@@ -273,6 +279,7 @@ sudo_putenv(char *str, int dupcheck, int overwrite)
     char **ep;
     size_t len;
     int found = FALSE;
+    debug_decl(sudo_putenv, SUDO_DEBUG_ENV)
 
     /* Make sure there is room for the new entry plus a NULL. */
     if (env.env_len + 2 > env.env_size) {
@@ -319,6 +326,7 @@ sudo_putenv(char *str, int dupcheck, int overwrite)
 	*ep++ = str;
 	*ep = NULL;
     }
+    debug_return;
 }
 
 /*
@@ -331,6 +339,7 @@ matches_env_delete(const char *var)
     struct list_member *cur;
     size_t len;
     int iswild, match = FALSE;
+    debug_decl(matches_env_delete, SUDO_DEBUG_ENV)
 
     /* Skip anything listed in env_delete. */
     for (cur = def_env_delete; cur; cur = cur->next) {
@@ -347,7 +356,7 @@ matches_env_delete(const char *var)
 	    break;
 	}
     }
-    return match;
+    debug_return_bool(match);
 }
 
 /*
@@ -361,6 +370,7 @@ matches_env_check(const char *var)
     struct list_member *cur;
     size_t len;
     int iswild, keepit = -1;
+    debug_decl(matches_env_check, SUDO_DEBUG_ENV)
 
     for (cur = def_env_check; cur; cur = cur->next) {
 	len = strlen(cur->value);
@@ -376,7 +386,7 @@ matches_env_check(const char *var)
 	    break;
 	}
     }
-    return keepit;
+    debug_return_bool(keepit);
 }
 
 /*

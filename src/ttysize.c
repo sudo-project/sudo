@@ -35,6 +35,7 @@
 #include <termios.h>
 
 #include "missing.h"
+#include "sudo_debug.h"
 
 /* Compatibility with older tty systems. */
 #if !defined(TIOCGWINSZ) && defined(TIOCGSIZE)
@@ -44,24 +45,43 @@
 # define ws_row		ts_lines
 #endif
 
-void
-get_ttysize(int *rowp, int *colp)
-{
-    char *p;
 #ifdef TIOCGWINSZ
+static int
+get_ttysize_ioctl(int *rowp, int *colp)
+{
     struct winsize wsize;
+    debug_decl(get_ttysize_ioctl, SUDO_DEBUG_EXEC)
 
     if (ioctl(STDERR_FILENO, TIOCGWINSZ, &wsize) == 0 &&
 	wsize.ws_row != 0 && wsize.ws_col  != 0) {
 	*rowp = wsize.ws_row;
 	*colp = wsize.ws_col;
-	return;
+	debug_return_int(0);
     }
-#endif
+    debug_return_int(-1);
+}
+#else
+static int
+get_ttysize_ioctl(int *rowp, int *colp)
+{
+    return -1;
+}
+#endif /* TIOCGWINSZ */
 
-    /* Fall back on $LINES and $COLUMNS. */
-    if ((p = getenv("LINES")) == NULL || (*rowp = atoi(p)) <= 0)
-	*rowp = 24;
-    if ((p = getenv("COLUMNS")) == NULL || (*colp = atoi(p)) <= 0)
-	*colp = 80;
+void
+get_ttysize(int *rowp, int *colp)
+{
+    debug_decl(fork_cmnd, SUDO_DEBUG_EXEC)
+
+    if (get_ttysize_ioctl(rowp, colp) == -1) {
+	char *p;
+
+	/* Fall back on $LINES and $COLUMNS. */
+	if ((p = getenv("LINES")) == NULL || (*rowp = atoi(p)) <= 0)
+	    *rowp = 24;
+	if ((p = getenv("COLUMNS")) == NULL || (*colp = atoi(p)) <= 0)
+	    *colp = 80;
+    }
+
+    debug_return;
 }

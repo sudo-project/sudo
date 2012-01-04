@@ -156,16 +156,19 @@ static struct rlimit nproclimit;
 int
 main(int argc, char *argv[], char *envp[])
 {
-    int nargc, sudo_mode, exitcode = 0;
+    int nargc, ok, sudo_mode, exitcode = 0;
     char **nargv, **settings, **env_add;
     char **user_info, **command_info, **argv_out, **user_env_out;
     struct plugin_container *plugin, *next;
     struct command_details command_details;
     sigset_t mask;
-    int ok;
+    debug_decl(main, SUDO_DEBUG_MAIN)
+
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
-    extern char *malloc_options;
-    malloc_options = "AFGJPR";
+    {
+	extern char *malloc_options;
+	malloc_options = "AFGJPR";
+    }
 #endif
 
 #if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
@@ -205,7 +208,7 @@ main(int argc, char *argv[], char *envp[])
 
     /* Parse command line arguments. */
     sudo_mode = parse_args(argc, argv, &nargc, &nargv, &settings, &env_add);
-    sudo_debug(9, "sudo_mode %d", sudo_mode);
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "sudo_mode %d", sudo_mode);
 
     /* Print sudo version early, in case of plugin init failure. */
     if (ISSET(sudo_mode, MODE_VERSION)) {
@@ -257,7 +260,7 @@ main(int argc, char *argv[], char *envp[])
 	case MODE_RUN:
 	    ok = policy_check(&policy_plugin, nargc, nargv, env_add,
 		&command_info, &argv_out, &user_env_out);
-	    sudo_debug(8, "policy plugin returns %d", ok);
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "policy plugin returns %d", ok);
 	    if (ok != TRUE) {
 		if (ok == -2)
 		    usage(1);
@@ -302,6 +305,7 @@ main(int argc, char *argv[], char *envp[])
 	default:
 	    errorx(1, _("unexpected sudo mode 0x%x"), sudo_mode);
     }
+    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);                
     exit(exitcode);
 }
 
@@ -313,6 +317,7 @@ static void
 fix_fds(void)
 {
     int miss[3], devnull = -1;
+    debug_decl(fix_fds, SUDO_DEBUG_UTIL)
 
     /*
      * stdin, stdout and stderr must be open; set them to /dev/null
@@ -333,6 +338,7 @@ fix_fds(void)
 	if (devnull > STDERR_FILENO)
 	    close(devnull);
     }
+    debug_return;
 }
 
 /*
@@ -343,6 +349,7 @@ static int
 fill_group_list(struct user_details *ud)
 {
     int maxgroups, tries, rval = -1;
+    debug_decl(fill_group_list, SUDO_DEBUG_UTIL)
 
 #if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
     maxgroups = (int)sysconf(_SC_NGROUPS_MAX);
@@ -363,7 +370,7 @@ fill_group_list(struct user_details *ud)
 	ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
 	rval = getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
     }
-    return rval;
+    debug_return_int(rval);
 }
 
 static char *
@@ -372,6 +379,7 @@ get_user_groups(struct user_details *ud)
     char *cp, *gid_list = NULL;
     size_t glsize;
     int i, len;
+    debug_decl(get_user_groups, SUDO_DEBUG_UTIL)
 
     /*
      * Systems with mbr_check_membership() support more than NGROUPS_MAX
@@ -405,7 +413,7 @@ get_user_groups(struct user_details *ud)
 	    i ? "," : "", (unsigned int)ud->groups[i]);
 	cp += len;
     }
-    return gid_list;
+    debug_return_str(gid_list);
 }
 
 /*
@@ -415,11 +423,10 @@ get_user_groups(struct user_details *ud)
 static char **
 get_user_info(struct user_details *ud)
 {
-    char cwd[PATH_MAX];
-    char host[MAXHOSTNAMELEN];
-    char **user_info, *cp;
+    char *cp, **user_info, cwd[PATH_MAX], host[MAXHOSTNAMELEN];
     struct passwd *pw;
     int i = 0;
+    debug_decl(get_user_info, SUDO_DEBUG_UTIL)
 
     /* XXX - bound check number of entries */
     user_info = emalloc2(32, sizeof(char *));
@@ -482,7 +489,7 @@ get_user_info(struct user_details *ud)
 
     user_info[++i] = NULL;
 
-    return user_info;
+    debug_return_ptr(user_info);
 }
 
 /*
@@ -495,6 +502,7 @@ command_info_to_details(char * const info[], struct command_details *details)
     long lval;
     unsigned long ulval;
     char *cp, *ep;
+    debug_decl(command_info_to_details, SUDO_DEBUG_UTIL)
 
     memset(details, 0, sizeof(*details));
     details->closefrom = -1;
@@ -505,8 +513,9 @@ command_info_to_details(char * const info[], struct command_details *details)
 	break; \
     }
 
+    sudo_debug_printf(SUDO_DEBUG_PCOMM, "command info from plugin:");
     for (i = 0; info[i] != NULL; i++) {
-	sudo_debug(9, "command info: %s", info[i]);
+	sudo_debug_printf(SUDO_DEBUG_PCOMM, "    %d: %s", i, info[i]);
 	switch (info[i][0]) {
 	    case 'c':
 		SET_STRING("chroot=", chroot)
@@ -714,6 +723,7 @@ command_info_to_details(char * const info[], struct command_details *details)
     if (details->selinux_role != NULL && is_selinux_enabled() > 0)
 	SET(details->flags, CD_RBAC_ENABLED);
 #endif
+    debug_return;
 }
 
 /*
@@ -727,6 +737,7 @@ disable_coredumps(void)
 #if defined(__linux__) || (defined(RLIMIT_CORE) && !defined(SUDO_DEVEL))
     struct rlimit rl;
 #endif
+    debug_decl(disable_coredumps, SUDO_DEBUG_UTIL)
 
 #if defined(__linux__)
     /*
@@ -751,6 +762,7 @@ disable_coredumps(void)
     rl.rlim_cur = 0;
     (void) setrlimit(RLIMIT_CORE, &rl);
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
+    debug_return;
 }
 
 #ifdef HAVE_PROJECT_H
@@ -760,6 +772,7 @@ set_project(struct passwd *pw)
     struct project proj;
     char buf[PROJECT_BUFSZ];
     int errval;
+    debug_decl(set_project, SUDO_DEBUG_UTIL)
 
     /*
      * Collect the default project for the user and settaskid
@@ -812,6 +825,7 @@ set_project(struct passwd *pw)
 	warning("getdefaultproj");
     }
     endprojent();
+    debug_return;
 }
 #endif /* HAVE_PROJECT_H */
 
@@ -827,11 +841,12 @@ disable_execute(struct command_details *details)
     char *cp, **ev, **nenvp;
     int env_len = 0, env_size = 128;
 #endif /* _PATH_SUDO_NOEXEC */
+    debug_decl(disable_execute, SUDO_DEBUG_UTIL)
 
 #ifdef HAVE_PRIV_SET
     /* Solaris privileges, remove PRIV_PROC_EXEC post-execve. */
     if (priv_set(PRIV_OFF, PRIV_LIMIT, "PRIV_PROC_EXEC", NULL) == 0)
-	return;
+	debug_return;
     warning(_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
 #endif /* HAVE_PRIV_SET */
 
@@ -886,6 +901,7 @@ disable_execute(struct command_details *details)
 
     details->envp = nenvp;
 #endif /* _PATH_SUDO_NOEXEC */
+    debug_return;
 }
 
 /*
@@ -897,6 +913,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 {
     int rval = FALSE;
     struct passwd *pw;
+    debug_decl(exec_setup, SUDO_DEBUG_EXEC)
 
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb(IDtouser(details->euid));
@@ -1049,7 +1066,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     rval = TRUE;
 
 done:
-    return rval;
+    debug_return_bool(rval);
 }
 
 /*
@@ -1061,6 +1078,7 @@ run_command(struct command_details *details)
     struct plugin_container *plugin;
     struct command_status cstat;
     int exitcode = 1;
+    debug_decl(run_command, SUDO_DEBUG_EXEC)
 
     cstat.type = CMD_INVALID;
     cstat.val = 0;
@@ -1070,20 +1088,22 @@ run_command(struct command_details *details)
     switch (cstat.type) {
     case CMD_ERRNO:
 	/* exec_setup() or execve() returned an error. */
-	sudo_debug(9, "calling policy close with errno");
+	sudo_debug_printf(SUDO_DEBUG_DEBUG, "calling policy close with errno");
 	policy_close(&policy_plugin, 0, cstat.val);
 	tq_foreach_fwd(&io_plugins, plugin) {
-	    sudo_debug(9, "calling I/O close with errno");
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG, "calling I/O close with errno");
 	    iolog_close(plugin, 0, cstat.val);
 	}
 	exitcode = 1;
 	break;
     case CMD_WSTATUS:
 	/* Command ran, exited or was killed. */
-	sudo_debug(9, "calling policy close with wait status");
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "calling policy close with wait status");
 	policy_close(&policy_plugin, cstat.val, 0);
 	tq_foreach_fwd(&io_plugins, plugin) {
-	    sudo_debug(9, "calling I/O close with wait status");
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
+		"calling I/O close with wait status");
 	    iolog_close(plugin, cstat.val, 0);
 	}
 	if (WIFEXITED(cstat.val))
@@ -1095,27 +1115,31 @@ run_command(struct command_details *details)
 	warningx(_("unexpected child termination condition: %d"), cstat.type);
 	break;
     }
-    return exitcode;
+    debug_return_int(exitcode);
 }
 
 static int
 policy_open(struct plugin_container *plugin, char * const settings[],
     char * const user_info[], char * const user_env[])
 {
-    return plugin->u.policy->open(SUDO_API_VERSION, sudo_conversation,
-	_sudo_printf, settings, user_info, user_env);
+    debug_decl(policy_open, SUDO_DEBUG_PCOMM)
+    debug_return_bool(plugin->u.policy->open(SUDO_API_VERSION,
+	sudo_conversation, _sudo_printf, settings, user_info, user_env));
 }
 
 static void
 policy_close(struct plugin_container *plugin, int exit_status, int error)
 {
+    debug_decl(policy_close, SUDO_DEBUG_PCOMM)
     plugin->u.policy->close(exit_status, error);
+    debug_return;
 }
 
 static int
 policy_show_version(struct plugin_container *plugin, int verbose)
 {
-    return plugin->u.policy->show_version(verbose);
+    debug_decl(policy_show_version, SUDO_DEBUG_PCOMM)
+    debug_return_bool(plugin->u.policy->show_version(verbose));
 }
 
 static int
@@ -1123,49 +1147,55 @@ policy_check(struct plugin_container *plugin, int argc, char * const argv[],
     char *env_add[], char **command_info[], char **argv_out[],
     char **user_env_out[])
 {
-    return plugin->u.policy->check_policy(argc, argv, env_add, command_info,
-	argv_out, user_env_out);
+    debug_decl(policy_check, SUDO_DEBUG_PCOMM)
+    debug_return_bool(plugin->u.policy->check_policy(argc, argv, env_add,
+	command_info, argv_out, user_env_out));
 }
 
 static int
 policy_list(struct plugin_container *plugin, int argc, char * const argv[],
     int verbose, const char *list_user)
 {
+    debug_decl(policy_list, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->list == NULL) {
 	warningx(_("policy plugin %s does not support listing privileges"),
 	    plugin->name);
-	return FALSE;
+	debug_return_bool(FALSE);
     }
-    return plugin->u.policy->list(argc, argv, verbose, list_user);
+    debug_return_bool(plugin->u.policy->list(argc, argv, verbose, list_user));
 }
 
 static int
 policy_validate(struct plugin_container *plugin)
 {
+    debug_decl(policy_validate, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->validate == NULL) {
 	warningx(_("policy plugin %s does not support the -v option"),
 	    plugin->name);
-	return FALSE;
+	debug_return_bool(FALSE);
     }
-    return plugin->u.policy->validate();
+    debug_return_bool(plugin->u.policy->validate());
 }
 
 static void
 policy_invalidate(struct plugin_container *plugin, int remove)
 {
+    debug_decl(policy_invalidate, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->invalidate == NULL) {
 	errorx(1, _("policy plugin %s does not support the -k/-K options"),
 	    plugin->name);
     }
     plugin->u.policy->invalidate(remove);
+    debug_return;
 }
 
 static int
 policy_init_session(struct plugin_container *plugin, struct passwd *pwd)
 {
+    debug_decl(policy_init_session, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->init_session)
-	return plugin->u.policy->init_session(pwd);
-    return TRUE;
+	debug_return_bool(plugin->u.policy->init_session(pwd));
+    debug_return_bool(TRUE);
 }
 
 static int
@@ -1174,6 +1204,7 @@ iolog_open(struct plugin_container *plugin, char * const settings[],
     int argc, char * const argv[], char * const user_env[])
 {
     int rval;
+    debug_decl(iolog_open, SUDO_DEBUG_PCOMM)
 
     /*
      * Backwards compatibility for API major 1, minor 0
@@ -1189,37 +1220,20 @@ iolog_open(struct plugin_container *plugin, char * const settings[],
 	    _sudo_printf, settings, user_info, command_info, argc, argv,
 	    user_env);
     }
-    return rval;
+    debug_return_bool(rval);
 }
 
 static void
 iolog_close(struct plugin_container *plugin, int exit_status, int error)
 {
+    debug_decl(iolog_close, SUDO_DEBUG_PCOMM)
     plugin->u.io->close(exit_status, error);
+    debug_return;
 }
 
 static int
 iolog_show_version(struct plugin_container *plugin, int verbose)
 {
-    return plugin->u.io->show_version(verbose);
-}
-
-/*
- * Simple debugging/logging.
- */
-void
-sudo_debug(int level, const char *fmt, ...)
-{
-    va_list ap;
-    char *fmt2;
-
-    if (level > debug_level)
-	return;
-
-    /* Backet fmt with program name and a newline to make it a single write */
-    easprintf(&fmt2, "%s: %s\n", getprogname(), fmt);
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt2, ap);
-    va_end(ap);
-    efree(fmt2);
+    debug_decl(iolog_show_version, SUDO_DEBUG_PCOMM)
+    debug_return_bool(plugin->u.io->show_version(verbose));
 }

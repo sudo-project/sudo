@@ -45,6 +45,8 @@
 #include <ctype.h>
 #include <errno.h>
 
+#define SUDO_ERROR_WRAP	0
+
 #include "sudo.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"

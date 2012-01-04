@@ -107,7 +107,6 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 struct interface *interfaces;
 int long_list;
-int debug_level;
 uid_t timestamp_uid;
 extern int errorlineno;
 extern int parse_error;
@@ -144,6 +143,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     volatile int sources = 0;
     sigaction_t sa;
     struct sudo_nss *nss;
+    debug_decl(sudoers_policy_open, SUDO_DEBUG_PLUGIN)
 
     if (!sudo_conv)
 	sudo_conv = conversation;
@@ -153,7 +153,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     if (sigsetjmp(error_jmp, 1)) {
 	/* called via error(), errorx() or log_error() */
 	rewind_perms();
-	return -1;
+	debug_return_bool(-1);
     }
 
     bindtextdomain("sudoers", LOCALEDIR);
@@ -203,7 +203,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     }
     if (sources == 0) {
 	warningx(_("no valid sudoers sources found, quitting"));
-	return -1;
+	debug_return_bool(-1);
     }
 
     /* XXX - collect post-sudoers parse settings into a function */
@@ -239,15 +239,17 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 
     restore_perms();
 
-    return TRUE;
+    debug_return_bool(TRUE);
 }
 
 static void
 sudoers_policy_close(int exit_status, int error_code)
 {
+    debug_decl(sudoers_policy_close, SUDO_DEBUG_PLUGIN)
+
     if (sigsetjmp(error_jmp, 1)) {
 	/* called via error(), errorx() or log_error() */
-	return;
+	debug_return;
     }
 
     /* We do not currently log the exit status. */
@@ -265,6 +267,8 @@ sudoers_policy_close(int exit_status, int error_code)
 	gr_delref(runas_gr);
     if (user_group_list != NULL)
 	grlist_delref(user_group_list);
+
+    debug_return;
 }
 
 /*
@@ -274,12 +278,14 @@ sudoers_policy_close(int exit_status, int error_code)
 static int
 sudoers_policy_init_session(struct passwd *pwd)
 {
+    debug_decl(sudoers_policy_init, SUDO_DEBUG_PLUGIN)
+
     if (sigsetjmp(error_jmp, 1)) {
 	/* called via error(), errorx() or log_error() */
 	return -1;
     }
 
-    return sudo_auth_begin_session(pwd);
+    debug_return_bool(sudo_auth_begin_session(pwd));
 }
 
 static int
@@ -292,6 +298,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     int cmnd_status = -1, validated;
     volatile int info_len = 0;
     volatile int rval = TRUE;
+    debug_decl(sudoers_policy_main, SUDO_DEBUG_PLUGIN)
 
     if (sigsetjmp(error_jmp, 1)) {
 	/* error recovery via error(), errorx() or log_error() */
@@ -694,37 +701,45 @@ done:
     sudo_endpwent();
     sudo_endgrent();
 
-    return rval;
+    debug_return_bool(rval);
 }
 
 static int
 sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     char **command_infop[], char **argv_out[], char **user_env_out[])
 {
+    debug_decl(sudoers_policy_check, SUDO_DEBUG_PLUGIN)
+
     if (!ISSET(sudo_mode, MODE_EDIT))
 	SET(sudo_mode, MODE_RUN);
 
-    return sudoers_policy_main(argc, argv, 0, env_add, command_infop,
-	argv_out, user_env_out);
+    debug_return_bool(sudoers_policy_main(argc, argv, 0, env_add, command_infop,
+	argv_out, user_env_out));
 }
 
 static int
 sudoers_policy_validate(void)
 {
+    debug_decl(sudoers_policy_validate, SUDO_DEBUG_PLUGIN)
+
     user_cmnd = "validate";
     SET(sudo_mode, MODE_VALIDATE);
 
-    return sudoers_policy_main(0, NULL, I_VERIFYPW, NULL, NULL, NULL, NULL);
+    debug_return_bool(sudoers_policy_main(0, NULL, I_VERIFYPW, NULL, NULL, NULL, NULL));
 }
 
 static void
 sudoers_policy_invalidate(int remove)
 {
+    debug_decl(sudoers_policy_invalidate, SUDO_DEBUG_PLUGIN)
+
     user_cmnd = "kill";
     if (sigsetjmp(error_jmp, 1) == 0) {
 	remove_timestamp(remove);
 	plugin_cleanup(0);
     }
+
+    debug_return;
 }
 
 static int
@@ -732,6 +747,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
     const char *list_user)
 {
     int rval;
+    debug_decl(sudoers_policy_list, SUDO_DEBUG_PLUGIN)
 
     user_cmnd = "list";
     if (argc)
@@ -744,7 +760,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 	list_pw = sudo_getpwnam(list_user);
 	if (list_pw == NULL) {
 	    warningx(_("unknown user: %s"), list_user);
-	    return -1;
+	    debug_return_bool(-1);
 	}
     }
     rval = sudoers_policy_main(argc, argv, I_LISTPW, NULL, NULL, NULL, NULL);
@@ -753,7 +769,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 	list_pw = NULL;
     }
 
-    return rval;
+    debug_return_bool(rval);
 }
 
 /*
@@ -764,6 +780,7 @@ static void
 init_vars(char * const envp[])
 {
     char * const * ep;
+    debug_decl(init_vars, SUDO_DEBUG_PLUGIN)
 
 #ifdef HAVE_TZSET
     (void) tzset();		/* set the timezone if applicable */
@@ -819,6 +836,7 @@ init_vars(char * const envp[])
     sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
 
     /* It is now safe to use log_error() and set_perms() */
+    debug_return;
 }
 
 /*
@@ -830,6 +848,7 @@ set_cmnd(void)
 {
     int rval;
     char *path = user_path;
+    debug_decl(set_cmnd, SUDO_DEBUG_PLUGIN)
 
     /* Resolve the path and return. */
     rval = FOUND;
@@ -903,7 +922,7 @@ set_cmnd(void)
     if (!update_defaults(SETDEF_CMND))
 	log_error(NO_STDERR|NO_EXIT, _("problem with defaults entries"));
 
-    return rval;
+    debug_return_int(rval);
 }
 
 /*
@@ -916,6 +935,7 @@ open_sudoers(const char *sudoers, int doedit, int *keepopen)
     struct stat statbuf;
     FILE *fp = NULL;
     int rootstat;
+    debug_decl(open_sudoers, SUDO_DEBUG_PLUGIN)
 
     /*
      * Fix the mode and group on sudoers file from old default.
@@ -980,7 +1000,7 @@ open_sudoers(const char *sudoers, int doedit, int *keepopen)
     }
 
     restore_perms();		/* change back to root */
-    return fp;
+    debug_return_ptr(fp);
 }
 
 #ifdef HAVE_LOGIN_CAP_H
@@ -988,6 +1008,7 @@ static void
 set_loginclass(struct passwd *pw)
 {
     int errflags;
+    debug_decl(set_loginclass, SUDO_DEBUG_PLUGIN)
 
     /*
      * Don't make it a fatal error if the user didn't specify the login
@@ -1016,6 +1037,7 @@ set_loginclass(struct passwd *pw)
 	if (!lc)
 	    lc = login_getclass(NULL);	/* needed for login_getstyle() later */
     }
+    debug_return;
 }
 #else
 static void
@@ -1036,6 +1058,7 @@ set_fqdn(void)
     struct hostent *hp;
 #endif
     char *p;
+    debug_decl(set_fqdn, SUDO_DEBUG_PLUGIN)
 
 #ifdef HAVE_GETADDRINFO
     zero_bytes(&hint, sizeof(hint));
@@ -1062,15 +1085,18 @@ set_fqdn(void)
 	user_shost = estrndup(user_host, (size_t)(p - user_host));
     else
 	user_shost = user_host;
+    debug_return;
 }
 
 /*
  * Get passwd entry for the user we are going to run commands as
  * and store it in runas_pw.  By default, commands run as "root".
  */
-void
+static void
 set_runaspw(const char *user)
 {
+    debug_decl(set_runaspw, SUDO_DEBUG_PLUGIN)
+
     if (runas_pw != NULL)
 	pw_delref(runas_pw);
     if (*user == '#') {
@@ -1080,6 +1106,7 @@ set_runaspw(const char *user)
 	if ((runas_pw = sudo_getpwnam(user)) == NULL)
 	    log_error(NO_MAIL|MSG_ONLY, _("unknown user: %s"), user);
     }
+    debug_return;
 }
 
 /*
@@ -1089,6 +1116,8 @@ set_runaspw(const char *user)
 static void
 set_runasgr(const char *group)
 {
+    debug_decl(set_runasgr, SUDO_DEBUG_PLUGIN)
+
     if (runas_gr != NULL)
 	gr_delref(runas_gr);
     if (*group == '#') {
@@ -1098,6 +1127,7 @@ set_runasgr(const char *group)
 	if ((runas_gr = sudo_getgrnam(group)) == NULL)
 	    log_error(NO_MAIL|MSG_ONLY, _("unknown group: %s"), group);
     }
+    debug_return;
 }
 
 /*
@@ -1121,6 +1151,7 @@ plugin_cleanup(int gotsignal)
     struct sudo_nss *nss;
 
     if (!gotsignal) {
+	debug_decl(plugin_cleanup, SUDO_DEBUG_PLUGIN)
 	if (snl != NULL) {
 	    tq_foreach_fwd(snl, nss)
 		nss->close(nss);
@@ -1129,15 +1160,18 @@ plugin_cleanup(int gotsignal)
 	    group_plugin_unload();
 	sudo_endpwent();
 	sudo_endgrent();
+	debug_return;
     }
 }
 
 static int
 sudoers_policy_version(int verbose)
 {
+    debug_decl(sudoers_policy_version, SUDO_DEBUG_PLUGIN)
+
     if (sigsetjmp(error_jmp, 1)) {
 	/* error recovery via error(), errorx() or log_error() */
-	return -1;
+	debug_return_bool(-1);
     }
 
     sudo_printf(SUDO_CONV_INFO_MSG, _("Sudoers policy plugin version %s\n"),
@@ -1160,7 +1194,7 @@ sudoers_policy_version(int verbose)
 	dump_interfaces(interfaces_string);
 	sudo_printf(SUDO_CONV_INFO_MSG, "\n");
     }
-    return TRUE;
+    debug_return_bool(TRUE);
 }
 
 static int
@@ -1168,7 +1202,9 @@ deserialize_info(char * const settings[], char * const user_info[])
 {
     char * const *cur;
     const char *p, *groups = NULL;
+    const char *debug_file = NULL, *debug_flags = NULL;
     int flags = 0;
+    debug_decl(deserialize_info, SUDO_DEBUG_PLUGIN)
 
 #define MATCHES(s, v) (strncmp(s, v, sizeof(v) - 1) == 0)
 
@@ -1179,8 +1215,12 @@ deserialize_info(char * const settings[], char * const user_info[])
 	    user_closefrom = atoi(*cur + sizeof("closefrom=") - 1);
 	    continue;
 	}
-	if (MATCHES(*cur, "debug_level=")) {
-	    debug_level = atoi(*cur + sizeof("debug_level=") - 1);
+	if (MATCHES(*cur, "debug_file=")) {
+	    debug_file = *cur + sizeof("debug_file=") - 1;
+	    continue;
+	}
+	if (MATCHES(*cur, "debug_flags=")) {
+	    debug_flags = *cur + sizeof("debug_flags=") - 1;
 	    continue;
 	}
 	if (MATCHES(*cur, "runas_user=")) {
@@ -1372,6 +1412,15 @@ deserialize_info(char * const settings[], char * const user_info[])
 	efree(gids);
     }
 
+    /* Setup debugging if indicated. */
+    if (debug_file != NULL && debug_flags != NULL) {
+	sudo_debug_init(debug_file, debug_flags);
+	for (cur = settings; *cur != NULL; cur++)
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "settings: %s", *cur);
+	for (cur = user_info; *cur != NULL; cur++)
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "user_info: %s", *cur);
+    }
+
 #undef MATCHES
     return flags;
 }
@@ -1381,6 +1430,7 @@ resolve_editor(char *editor, int nfiles, char **files, char ***argv_out)
 {
     char *cp, **nargv, *editor_path = NULL;
     int ac, i, nargc, wasblank;
+    debug_decl(resolve_editor, SUDO_DEBUG_PLUGIN)
 
     editor = estrdup(editor); /* becomes part of argv_out */
 
@@ -1403,7 +1453,7 @@ resolve_editor(char *editor, int nfiles, char **files, char ***argv_out)
     if (cp == NULL ||
 	find_path(cp, &editor_path, NULL, getenv("PATH"), 0) != FOUND) {
 	efree(editor);
-	return NULL;
+	debug_return_str(NULL);
     }
     nargv = (char **) emalloc2(nargc + 1 + nfiles + 1, sizeof(char *));
     for (ac = 0; cp != NULL && ac < nargc; ac++) {
@@ -1416,7 +1466,7 @@ resolve_editor(char *editor, int nfiles, char **files, char ***argv_out)
     nargv[ac] = NULL;
 
     *argv_out = nargv;
-    return editor_path;
+    debug_return_str(editor_path);
 }
 
 /*
@@ -1428,6 +1478,7 @@ static char *
 find_editor(int nfiles, char **files, char ***argv_out)
 {
     char *cp, *editor, *editor_path = NULL, **ev, *ev0[4];
+    debug_decl(find_editor, SUDO_DEBUG_PLUGIN)
 
     /*
      * If any of SUDO_EDITOR, VISUAL or EDITOR are set, choose the first one.
@@ -1458,7 +1509,7 @@ find_editor(int nfiles, char **files, char ***argv_out)
 	audit_failure(NewArgv, _("%s: command not found"), editor);
 	warningx(_("%s: command not found"), editor);
     }
-    return editor_path;
+    debug_return_str(editor_path);
 }
 
 #ifdef USE_ADMIN_FLAG
@@ -1468,16 +1519,17 @@ create_admin_success_flag(void)
     struct stat statbuf;
     char flagfile[PATH_MAX];
     int fd, n;
+    debug_decl(create_admin_success_flag, SUDO_DEBUG_PLUGIN)
 
     /* Check whether the user is in the admin group. */
     if (!user_in_group(sudo_user.pw, "admin"))
-	return;
+	debug_return;
 
     /* Build path to flag file. */
     n = snprintf(flagfile, sizeof(flagfile), "%s/.sudo_as_admin_successful",
 	user_dir);
     if (n <= 0 || n >= sizeof(flagfile))
-	return;
+	debug_return;
 
     /* Create admin flag file if it doesn't already exist. */
     set_perms(PERM_USER);
@@ -1486,6 +1538,7 @@ create_admin_success_flag(void)
 	close(fd);
     }
     restore_perms();
+    debug_return;
 }
 #else /* !USE_ADMIN_FLAG */
 static void

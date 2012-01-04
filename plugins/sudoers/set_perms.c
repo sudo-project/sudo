@@ -82,9 +82,13 @@ static int perm_stack_depth = 0;
 void
 rewind_perms(void)
 {
+    debug_decl(rewind_perms, SUDO_DEBUG_PERMS)
+
     while (perm_stack_depth > 1)
 	restore_perms();
     grlist_delref(perm_stack[0].grlist);
+
+    debug_return;
 }
 
 #ifdef HAVE_SETRESUID
@@ -101,6 +105,7 @@ set_perms(int perm)
     struct perm_state *state, *ostate = NULL;
     const char *errstr;
     int noexit;
+    debug_decl(set_perms, SUDO_DEBUG_PERMS)
 
     noexit = ISSET(perm, PERM_NOEXIT);
     CLR(perm, PERM_MASK);
@@ -279,13 +284,13 @@ set_perms(int perm)
 
 done:
     perm_stack_depth++;
-    return 1;
+    debug_return_bool(1);
 bad:
     /* XXX - better warnings inline */
     warningx("%s: %s", errstr,
 	errno == EAGAIN ? _("too many processes") : strerror(errno));
     if (noexit)
-	return 0;
+	debug_return_bool(0);
     exit(1);
 }
 
@@ -293,9 +298,10 @@ void
 restore_perms(void)
 {
     struct perm_state *state, *ostate;
+    debug_decl(restore_perms, SUDO_DEBUG_PERMS)
 
     if (perm_stack_depth < 2)
-	return;
+	debug_return;
 
     state = &perm_stack[perm_stack_depth - 1];
     ostate = &perm_stack[perm_stack_depth - 2];
@@ -329,7 +335,7 @@ restore_perms(void)
 	}
     }
     grlist_delref(state->grlist);
-    return;
+    debug_return;
 
 bad:
     exit(1);
@@ -350,6 +356,7 @@ set_perms(int perm)
     struct perm_state *state, *ostate = NULL;
     const char *errstr;
     int noexit;
+    debug_decl(set_perms, SUDO_DEBUG_PERMS)
 
     noexit = ISSET(perm, PERM_NOEXIT);
     CLR(perm, PERM_MASK);
@@ -509,13 +516,13 @@ set_perms(int perm)
 
 done:
     perm_stack_depth++;
-    return 1;
+    debug_return_bool(1);
 bad:
     /* XXX - better warnings inline */
     warningx("%s: %s", errstr,
 	errno == EAGAIN ? _("too many processes") : strerror(errno));
     if (noexit)
-	return 0;
+	debug_return_bool(0);
     exit(1);
 }
 
@@ -523,9 +530,10 @@ void
 restore_perms(void)
 {
     struct perm_state *state, *ostate;
+    debug_decl(restore_perms, SUDO_DEBUG_PERMS)
 
     if (perm_stack_depth < 2)
-	return;
+	debug_return;
 
     state = &perm_stack[perm_stack_depth - 1];
     ostate = &perm_stack[perm_stack_depth - 2];
@@ -562,7 +570,7 @@ restore_perms(void)
 	}
     }
     grlist_delref(state->grlist);
-    return;
+    debug_return;
 
 bad:
     exit(1);
@@ -583,6 +591,7 @@ set_perms(int perm)
     struct perm_state *state, *ostate = NULL;
     const char *errstr;
     int noexit;
+    debug_decl(set_perms, SUDO_DEBUG_PERMS)
 
     noexit = ISSET(perm, PERM_NOEXIT);
     CLR(perm, PERM_MASK);
@@ -747,13 +756,13 @@ set_perms(int perm)
 
 done:
     perm_stack_depth++;
-    return 1;
+    debug_return_bool(1);
 bad:
     /* XXX - better warnings inline */
     warningx("%s: %s", errstr,
 	errno == EAGAIN ? _("too many processes") : strerror(errno));
     if (noexit)
-	return 0;
+	debug_return_bool(0);
     exit(1);
 }
 
@@ -761,9 +770,10 @@ void
 restore_perms(void)
 {
     struct perm_state *state, *ostate;
+    debug_decl(restore_perms, SUDO_DEBUG_PERMS)
 
     if (perm_stack_depth < 2)
-	return;
+	debug_return;
 
     state = &perm_stack[perm_stack_depth - 1];
     ostate = &perm_stack[perm_stack_depth - 2];
@@ -798,7 +808,7 @@ restore_perms(void)
 	goto bad;
     }
     grlist_delref(state->grlist);
-    return;
+    debug_return;
 
 bad:
     exit(1);
@@ -817,6 +827,7 @@ set_perms(int perm)
     struct perm_state *state, *ostate = NULL;
     const char *errstr;
     int noexit;
+    debug_decl(set_perms, SUDO_DEBUG_PERMS)
 
     noexit = ISSET(perm, PERM_NOEXIT);
     CLR(perm, PERM_MASK);
@@ -887,13 +898,13 @@ set_perms(int perm)
 
 done:
     perm_stack_depth++;
-    return 1;
+    debug_return_bool(1);
 bad:
     /* XXX - better warnings inline */
     warningx("%s: %s", errstr,
 	errno == EAGAIN ? _("too many processes") : strerror(errno));
     if (noexit)
-	return 0;
+	debug_return_bool(0);
     exit(1);
 }
 
@@ -901,9 +912,10 @@ void
 restore_perms(void)
 {
     struct perm_state *state, *ostate;
+    debug_decl(restore_perms, SUDO_DEBUG_PERMS)
 
     if (perm_stack_depth < 2)
-	return;
+	debug_return;
 
     state = &perm_stack[perm_stack_depth - 1];
     ostate = &perm_stack[perm_stack_depth - 2];
@@ -924,7 +936,7 @@ restore_perms(void)
 	warning("setuid(%d)", (int)ostate->ruid);
 	goto bad;
     }
-    return;
+    debug_return;
 
 bad:
     exit(1);
@@ -938,10 +950,11 @@ runas_setgroups(void)
 {
     struct passwd *pw;
     struct group_list *grlist;
+    debug_decl(runas_setgroups, SUDO_DEBUG_PERMS)
 
     if (def_preserve_groups) {
 	grlist_addref(user_group_list);
-	return user_group_list;
+	debug_return_ptr(user_group_list);
     }
 
     pw = runas_pw ? runas_pw : sudo_user.pw;
@@ -954,5 +967,5 @@ runas_setgroups(void)
 #endif
     if (sudo_setgroups(grlist->ngids, grlist->gids) < 0)
 	log_error(USE_ERRNO|MSG_ONLY, _("unable to set runas group vector"));
-    return grlist;
+    debug_return_ptr(grlist);
 }
