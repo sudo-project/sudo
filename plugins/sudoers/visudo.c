@@ -75,6 +75,8 @@
 # include <locale.h>
 #endif
 
+#define SUDO_ERROR_WRAP 0 /* XXX */
+
 #include "sudoers.h"
 #include "interfaces.h"
 #include "parse.h"

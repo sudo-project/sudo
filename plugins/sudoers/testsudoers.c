@@ -59,6 +59,8 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
+#define SUDO_ERROR_WRAP 0 /* XXX */
+
 #include "tsgetgrpw.h"
 #include "sudoers.h"
 #include "interfaces.h"
