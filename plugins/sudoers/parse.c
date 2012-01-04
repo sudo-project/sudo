@@ -118,8 +118,12 @@ sudo_file_parse(struct sudo_nss *nss)
     init_parser(sudoers_file, 0);
     yyin = nss->handle;
     if (yyparse() != 0 || parse_error) {
-	log_error(NO_EXIT, _("parse error in %s near line %d"),
-	    errorfile, errorlineno);
+	if (errorlineno != -1) {
+	    log_error(NO_EXIT, _("parse error in %s near line %d"),
+		errorfile, errorlineno);
+	} else {
+	    log_error(NO_EXIT, _("parse error in %s"), errorfile);
+	}
 	debug_return_int(-1);
     }
     debug_return_int(0);

@@ -822,7 +822,7 @@ init_parser(const char *path, int quiet)
 
     parse_error = false;
     errorlineno = -1;
-    errorfile = NULL;
+    errorfile = sudoers;
     verbose = !quiet;
 
     debug_return;
