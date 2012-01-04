@@ -1990,6 +1990,7 @@ if test ${with_logincap-'no'} != "no"; then
 		SUDOERS_LIBS="${SUDOERS_LIBS} -lutil"
 		;;
 	esac
+	SUDOERS_OBJS="${SUDOERS_OBJS} login_class.lo"
     ])
 fi
 if test ${with_project-'no'} != "no"; then

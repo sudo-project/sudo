@@ -127,6 +127,9 @@ static char *runas_group;
 static struct sudo_nss_list *snl;
 static const char *interfaces_string;
 static sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp;
+#ifdef HAVE_LOGIN_CAP_H
+static login_cap_t *lc;
+#endif
 
 /* XXX - must be extern for audit bits of sudo_auth.c */
 int NewArgc;
@@ -592,8 +595,16 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 #if defined(__linux__) || defined(_AIX)
 	/* Insert system-wide environment variables. */
 	read_env_file(_PATH_ENVIRONMENT, true);
+#elif defined(HAVE_LOGIN_CAP_H)
+	/* Insert login class-specific environment variables. */
+	if (lc != NULL)
+	    sudo_login_setenv(lc, runas_pw);
 #endif
     }
+#ifdef HAVE_LOGIN_CAP_H
+    login_close(lc);
+    lc = NULL;
+#endif
 
     /* Insert system-wide environment variables. */
     if (def_env_file)
@@ -1004,7 +1015,6 @@ static void
 set_loginclass(struct passwd *pw)
 {
     int errflags;
-    login_cap_t *lc;
     debug_decl(set_loginclass, SUDO_DEBUG_PLUGIN)
 
     if (!def_use_loginclass)
@@ -1037,7 +1047,6 @@ set_loginclass(struct passwd *pw)
 	log_error(errflags, _("unknown login class: %s"), login_class);
 	def_use_loginclass = false;
     }
-    login_close(lc);
     debug_return;
 }
 #else

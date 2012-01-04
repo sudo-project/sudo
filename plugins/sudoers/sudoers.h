@@ -197,6 +197,7 @@ struct lbuf;
 struct passwd;
 struct stat;
 struct timeval;
+struct login_cap;
 
 /*
  * Function prototypes
@@ -305,6 +306,7 @@ void init_envtables(void);
 void insert_env_vars(char * const envp[]);
 void read_env_file(const char *, int);
 void rebuild_env(void);
+void sudo_setenv(const char *var, const char *val, int dupcheck);
 void validate_env_vars(char * const envp[]);
 
 /* fmt_string.c */
@@ -327,6 +329,9 @@ int group_plugin_query(const char *user, const char *group,
 
 /* setgroups.c */
 int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
+
+/* login_cap.c */
+int sudo_login_setenv(struct login_cap *lc, const struct passwd *pwd);
 
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;
