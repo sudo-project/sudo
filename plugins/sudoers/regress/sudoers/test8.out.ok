@@ -1,4 +1,4 @@
-Does not parse.
+Parse error in sudoers near line 8.
 
 
 User_Alias	UA1 = xy
