@@ -127,7 +127,8 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     int flags = 0;		/* mode flags */
     int valid_flags, ch;
     int i, j;
-    char *cp, **env_add, **settings, *debug_flags;
+    char *cp, **env_add, **settings;
+    const char *debug_flags;
     int nenv = 0;
     int env_size = 32;
     debug_decl(parse_args, SUDO_DEBUG_ARGS)
