@@ -35,6 +35,8 @@
 #include <grp.h>
 #include <pwd.h>
 
+#define SUDO_ERROR_WRAP 0
+
 #include "list.h"
 #include "parse.h"
 #include "toke.h"

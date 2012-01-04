@@ -43,6 +43,8 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
+#define SUDO_ERROR_WRAP 0
+
 #include "sudoers.h"
 #include "parse.h"
 #include "interfaces.h"
