@@ -63,13 +63,13 @@
 #include "sudo_auth.h"
 
 int
-rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
+sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 {
     char challenge[256];
     static char *orig_prompt = NULL, *new_prompt = NULL;
     static int op_len, np_size;
     static struct RFC1938 rfc1938;
-    debug_decl(rfc1938_setup, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_rfc1938_setup, SUDO_DEBUG_AUTH)
 
     /* Stash a pointer to the rfc1938 struct if we have not initialized */
     if (!auth->data)
@@ -125,9 +125,9 @@ rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 }
 
 int
-rfc1938_verify(struct passwd *pw, char *pass, sudo_auth *auth)
+sudo_rfc1938_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
-    debug_decl(rfc1938_verify, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_rfc1938_verify, SUDO_DEBUG_AUTH)
 
     if (rfc1938verify((struct RFC1938 *) auth->data, pass) == 0)
 	debug_return_int(AUTH_SUCCESS);

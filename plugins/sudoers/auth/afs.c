@@ -50,11 +50,11 @@
 #include "sudo_auth.h"
 
 int
-afs_verify(struct passwd *pw, char *pass, sudo_auth *auth)
+sudo_afs_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 {
     struct ktc_encryptionKey afs_key;
     struct ktc_token afs_token;
-    debug_decl(afs_verify, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_afs_verify, SUDO_DEBUG_AUTH)
 
     /* Try to just check the password */
     ka_StringToKey(pass, NULL, &afs_key);

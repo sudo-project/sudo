@@ -51,19 +51,19 @@
 static sudo_auth auth_switch[] = {
 /* Standalone entries first */
 #ifdef HAVE_PAM
-    AUTH_ENTRY("pam", FLAG_STANDALONE, pam_init, NULL, pam_verify, pam_cleanup, pam_begin_session, pam_end_session)
+    AUTH_ENTRY("pam", FLAG_STANDALONE, sudo_pam_init, NULL, sudo_pam_verify, sudo_pam_cleanup, sudo_pam_begin_session, sudo_pam_end_session)
 #endif
 #ifdef HAVE_SECURID
-    AUTH_ENTRY("SecurId", FLAG_STANDALONE, securid_init, securid_setup, securid_verify, NULL, NULL, NULL)
+    AUTH_ENTRY("SecurId", FLAG_STANDALONE, sudo_securid_init, sudo_securid_setup, sudo_securid_verify, NULL, NULL, NULL)
 #endif
 #ifdef HAVE_SIA_SES_INIT
-    AUTH_ENTRY("sia", FLAG_STANDALONE, NULL, sia_setup, sia_verify, sia_cleanup, NULL, NULL)
+    AUTH_ENTRY("sia", FLAG_STANDALONE, NULL, sudo_sia_setup, sudo_sia_verify, sudo_sia_cleanup, NULL, NULL)
 #endif
 #ifdef HAVE_AIXAUTH
-    AUTH_ENTRY("aixauth", FLAG_STANDALONE, NULL, NULL, aixauth_verify, aixauth_cleanup, NULL, NULL)
+    AUTH_ENTRY("aixauth", FLAG_STANDALONE, NULL, NULL, sudo_aix_verify, sudo_aix_cleanup, NULL, NULL)
 #endif
 #ifdef HAVE_FWTK
-    AUTH_ENTRY("fwtk", FLAG_STANDALONE, fwtk_init, NULL, fwtk_verify, fwtk_cleanup, NULL, NULL)
+    AUTH_ENTRY("fwtk", FLAG_STANDALONE, sudo_fwtk_init, NULL, sudo_fwtk_verify, sudo_fwtk_cleanup, NULL, NULL)
 #endif
 #ifdef HAVE_BSD_AUTH_H
     AUTH_ENTRY("bsdauth", FLAG_STANDALONE, bsdauth_init, NULL, bsdauth_verify, bsdauth_cleanup, NULL, NULL)
@@ -71,25 +71,25 @@ static sudo_auth auth_switch[] = {
 
 /* Non-standalone entries */
 #ifndef WITHOUT_PASSWD
-    AUTH_ENTRY("passwd", 0, passwd_init, NULL, passwd_verify, passwd_cleanup, NULL, NULL)
+    AUTH_ENTRY("passwd", 0, sudo_passwd_init, NULL, sudo_passwd_verify, sudo_passwd_cleanup, NULL, NULL)
 #endif
 #if defined(HAVE_GETPRPWNAM) && !defined(WITHOUT_PASSWD)
-    AUTH_ENTRY("secureware", 0, secureware_init, NULL, secureware_verify, secureware_cleanup, NULL, NULL)
+    AUTH_ENTRY("secureware", 0, sudo_secureware_init, NULL, sudo_secureware_verify, sudo_secureware_cleanup, NULL, NULL)
 #endif
 #ifdef HAVE_AFS
-    AUTH_ENTRY("afs", 0, NULL, NULL, afs_verify, NULL, NULL, NULL)
+    AUTH_ENTRY("afs", 0, NULL, NULL, sudo_afs_verify, NULL, NULL, NULL)
 #endif
 #ifdef HAVE_DCE
-    AUTH_ENTRY("dce", 0, NULL, NULL, dce_verify, NULL, NULL, NULL)
+    AUTH_ENTRY("dce", 0, NULL, NULL, sudo_dce_verify, NULL, NULL, NULL)
 #endif
 #ifdef HAVE_KERB5
-    AUTH_ENTRY("kerb5", 0, kerb5_init, kerb5_setup, kerb5_verify, kerb5_cleanup, NULL, NULL)
+    AUTH_ENTRY("kerb5", 0, sudo_krb5_init, sudo_krb5_setup, sudo_krb5_verify, sudo_krb5_cleanup, NULL, NULL)
 #endif
 #ifdef HAVE_SKEY
-    AUTH_ENTRY("S/Key", 0, NULL, rfc1938_setup, rfc1938_verify, NULL, NULL, NULL)
+    AUTH_ENTRY("S/Key", 0, NULL, sudo_rfc1938_setup, sudo_rfc1938_verify, NULL, NULL, NULL)
 #endif
 #ifdef HAVE_OPIE
-    AUTH_ENTRY("OPIE", 0, NULL, rfc1938_setup, rfc1938_verify, NULL, NULL, NULL)
+    AUTH_ENTRY("OPIE", 0, NULL, sudo_rfc1938_setup, sudo_rfc1938_verify, NULL, NULL, NULL)
 #endif
     AUTH_ENTRY(NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL)
 };

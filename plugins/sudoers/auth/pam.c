@@ -80,11 +80,11 @@ static int gotintr;
 static pam_handle_t *pamh;
 
 int
-pam_init(struct passwd *pw, sudo_auth *auth)
+sudo_pam_init(struct passwd *pw, sudo_auth *auth)
 {
     static struct pam_conv pam_conv;
     static int pam_status;
-    debug_decl(pam_init, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_pam_init, SUDO_DEBUG_AUTH)
 
     /* Initial PAM setup */
     if (auth != NULL)
@@ -124,11 +124,11 @@ pam_init(struct passwd *pw, sudo_auth *auth)
 }
 
 int
-pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
+sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 {
     const char *s;
     int *pam_status = (int *) auth->data;
-    debug_decl(pam_verify, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_pam_verify, SUDO_DEBUG_AUTH)
 
     def_prompt = prompt;	/* for converse */
 
@@ -181,10 +181,10 @@ pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 }
 
 int
-pam_cleanup(struct passwd *pw, sudo_auth *auth)
+sudo_pam_cleanup(struct passwd *pw, sudo_auth *auth)
 {
     int *pam_status = (int *) auth->data;
-    debug_decl(pam_cleanup, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_pam_cleanup, SUDO_DEBUG_AUTH)
 
     /* If successful, we can't close the session until pam_end_session() */
     if (*pam_status == AUTH_SUCCESS)
@@ -196,10 +196,10 @@ pam_cleanup(struct passwd *pw, sudo_auth *auth)
 }
 
 int
-pam_begin_session(struct passwd *pw, sudo_auth *auth)
+sudo_pam_begin_session(struct passwd *pw, sudo_auth *auth)
 {
     int status = PAM_SUCCESS;
-    debug_decl(pam_begin_session, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_pam_begin_session, SUDO_DEBUG_AUTH)
 
     /*
      * If there is no valid user we cannot open a PAM session.
@@ -243,10 +243,10 @@ done:
 }
 
 int
-pam_end_session(struct passwd *pw, sudo_auth *auth)
+sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 {
     int status = PAM_SUCCESS;
-    debug_decl(pam_end_session, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_pam_end_session, SUDO_DEBUG_AUTH)
 
     if (pamh != NULL) {
 #ifndef NO_PAM_SESSION
