@@ -658,8 +658,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	easprintf(&command_info[info_len++], "closefrom=%d", def_closefrom);
     if (def_noexec)
 	command_info[info_len++] = estrdup("noexec=true");
-    if (def_noexec_file)
-	command_info[info_len++] = fmt_string("noexec_file", def_noexec_file);
     if (def_set_utmp)
 	command_info[info_len++] = estrdup("set_utmp=true");
     if (def_use_pty)

@@ -566,13 +566,6 @@ command_info_to_details(char * const info[], struct command_details *details)
 			SET(details->flags, CD_NOEXEC);
 		    break;
 		}
-#ifdef _PATH_SUDO_NOEXEC
-		/* XXX - deprecated */
-		if (strncmp("noexec_file=", info[i], sizeof("noexec_file=") - 1) == 0) {
-		    noexec_path = info[i] + sizeof("noexec_file=") - 1;
-		    break;
-		}
-#endif /* _PATH_SUDO_NOEXEC */
 		break;
 	    case 'p':
 		if (strncmp("preserve_groups=", info[i], sizeof("preserve_groups=") - 1) == 0) {
