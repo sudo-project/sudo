@@ -193,13 +193,23 @@ GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate.c
 
 $(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y
 	@if [ -n "$(DEVEL)" ]; then \
-	    cmd='$(YACC) -d $(srcdir)/gram.y; echo "#include <config.h>" > $(devdir)/gram.c; cat y.tab.c >> $(devdir)/gram.c; rm -f y.tab.c; mv -f y.tab.h $(devdir)/gram.h'; \
+	    if test "$(srcdir)" = "."; then \
+		gram_y="gram.y"; \
+	    else \
+		gram_y="$(srcdir)/gram.y"; \
+	    fi; \
+	    cmd='$(YACC) -d '"$$gram_y"'; echo "#include <config.h>" > $(devdir)/gram.c; cat y.tab.c >> $(devdir)/gram.c; rm -f y.tab.c; mv -f y.tab.h $(devdir)/gram.h'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
 $(devdir)/toke.c: $(srcdir)/toke.l
 	@if [ -n "$(DEVEL)" ]; then \
-	    cmd='$(FLEX) $(srcdir)/toke.l; echo "#include <config.h>" > $(devdir)/toke.c; cat lex.yy.c >> $(devdir)/toke.c'; \
+	    if test "$(srcdir)" = "."; then \
+		toke_l="toke.l"; \
+	    else \
+		toke_l="$(srcdir)/toke.l"; \
+	    fi; \
+	    cmd='$(FLEX) '"$$toke_l"'; echo "#include <config.h>" > $(devdir)/toke.c; cat lex.yy.c >> $(devdir)/toke.c'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
@@ -207,7 +217,12 @@ $(devdir)/toke.c: $(srcdir)/toke.l
 $(devdir)/getdate.c: $(srcdir)/getdate.y
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "expect 10 shift/reduce conflicts"; \
-	    cmd='$(YACC) $(srcdir)/getdate.y; echo "#include <config.h>" > $(devdir)/getdate.c; cat y.tab.c >> $(devdir)/getdate.c; rm -f y.tab.c'; \
+	    if test "$(srcdir)" = "."; then \
+		getdate_y="getdate.y"; \
+	    else \
+		getdate_y="$(srcdir)/getdate.y"; \
+	    fi; \
+	    cmd='$(YACC) '"$$getdate_y"'; echo "#include <config.h>" > $(devdir)/getdate.c; cat y.tab.c >> $(devdir)/getdate.c; rm -f y.tab.c'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
