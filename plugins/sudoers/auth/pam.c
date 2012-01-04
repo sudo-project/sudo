@@ -192,7 +192,7 @@ sudo_pam_cleanup(struct passwd *pw, sudo_auth *auth)
 
     *pam_status = pam_end(pamh, *pam_status | PAM_DATA_SILENT);
     pamh = NULL;
-    return_debug_int(*pam_status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
+    debug_return_int(*pam_status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
 }
 
 int
@@ -239,7 +239,7 @@ sudo_pam_begin_session(struct passwd *pw, sudo_auth *auth)
 #endif
 
 done:
-    return_debug_int(status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
+    debug_return_int(status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
 }
 
 int
@@ -261,7 +261,7 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 	pamh = NULL;
     }
 
-    return_debug_int(status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
+    debug_return_int(status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
 }
 
 /*
@@ -280,7 +280,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
     debug_decl(converse, SUDO_DEBUG_AUTH)
 
     if ((*response = malloc(num_msg * sizeof(struct pam_response))) == NULL)
-	return_debug_int(PAM_SYSTEM_ERR);
+	debug_return_int(PAM_SYSTEM_ERR);
     zero_bytes(*response, num_msg * sizeof(struct pam_response));
 
     for (pr = *response, pm = *msg, n = num_msg; n--; pr++, pm++) {
@@ -342,7 +342,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 	}
     }
 
-    return_debug_int(PAM_SUCCESS);
+    debug_return_int(PAM_SUCCESS);
 
 err:
     /* Zero and free allocated memory and return an error. */
@@ -356,5 +356,5 @@ err:
     zero_bytes(*response, num_msg * sizeof(struct pam_response));
     free(*response);
     *response = NULL;
-    return_debug_int(gotintr ? PAM_AUTH_ERR : PAM_CONV_ERR);
+    debug_return_int(gotintr ? PAM_AUTH_ERR : PAM_CONV_ERR);
 }
