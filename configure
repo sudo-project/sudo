@@ -17552,6 +17552,74 @@ $as_echo "$sudo_cv___progname" >&6; }
 fi
 done
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for __func__" >&5
+$as_echo_n "checking for __func__... " >&6; }
+if ${sudo_cv___func__+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+(void)puts(__func__);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  sudo_cv___func__=yes
+else
+  sudo_cv___func__=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv___func__" >&5
+$as_echo "$sudo_cv___func__" >&6; }
+if test "$sudo_cv___func__" = "yes"; then
+    $as_echo "#define HAVE___FUNC__ 1" >>confdefs.h
+
+elif test -n "$GCC"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for __FUNCTION__" >&5
+$as_echo_n "checking for __FUNCTION__... " >&6; }
+    if ${sudo_cv___FUNCTION__+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+(void)puts(__FUNCTION__);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  sudo_cv___FUNCTION__=yes
+else
+  sudo_cv___FUNCTION__=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv___FUNCTION__" >&5
+$as_echo "$sudo_cv___FUNCTION__" >&6; }
+    if test "$sudo_cv___FUNCTION__" = "yes"; then
+	$as_echo "#define HAVE___FUNC__ 1" >>confdefs.h
+
+
+$as_echo "#define __func__ __FUNCTION__" >>confdefs.h
+
+    fi
+fi
 
 # gettext() and friends may be located in libc (Linux and Solaris)
 # or in libintl.  However, it is possible to have libintl installed
@@ -22328,6 +22396,7 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+
 
 
 

@@ -635,6 +635,9 @@
 /* Define to 1 if you have the `_innetgr' function. */
 #undef HAVE__INNETGR
 
+/* Define to 1 if the compiler supports the C99 __func__ variable. */
+#undef HAVE___FUNC__
+
 /* Define to 1 if your crt0.o defines the __progname symbol for you. */
 #undef HAVE___PROGNAME
 
@@ -798,6 +801,10 @@
 
 /* Define for large files, on AIX-style hosts. */
 #undef _LARGE_FILES
+
+/* Define to __FUNCTION__ if your compiler support __FUNCTION__ but not
+   __func__ */
+#undef __func__
 
 /* Define to `signed' or nothing if compiler does not support a signed type
    qualifier. */
