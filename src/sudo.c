@@ -103,6 +103,7 @@ struct plugin_container_list io_plugins;
 struct user_details user_details;
 const char *list_user, *runas_user, *runas_group; /* extern for parse_args.c */
 int debug_level;
+static int sudo_mode;
 
 /*
  * Local functions
@@ -153,10 +154,14 @@ static struct rlimit corelimit;
 static struct rlimit nproclimit;
 #endif
 
+#ifdef HAVE_LOGIN_CAP_H
+extern char **environ;
+#endif
+
 int
 main(int argc, char *argv[], char *envp[])
 {
-    int nargc, ok, sudo_mode, exitcode = 0;
+    int nargc, ok, exitcode = 0;
     char **nargv, **settings, **env_add;
     char **user_info, **command_info, **argv_out, **user_env_out;
     struct plugin_container *plugin, *next;
@@ -951,7 +956,8 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	    login_cap_t *lc;
 
 	    /*
-	     * We only use setusercontext() to set the nice value and rlimits.
+	     * We only use setusercontext() to set the nice value and rlimits
+	     * unless this is a login shell (sudo -i).
 	     */
 	    lc = login_getclass((char *)details->login_class);
 	    if (!lc) {
@@ -959,13 +965,26 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 		errno = ENOENT;
 		goto done;
 	    }
-	    flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
+	    if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+		/* Set everything except user, group and login name. */
+		flags = LOGIN_SETALL;
+		CLR(flags, LOGIN_SETGROUP|LOGIN_SETLOGIN|LOGIN_SETUSER);
+		CLR(details->flags, CD_SET_UMASK); /* LOGIN_UMASK instead */
+		/* Swap in the plugin-supplied environment for LOGIN_SETENV */
+		environ = details->envp;
+	    } else {
+		flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
+	    }
 	    if (setusercontext(lc, pw, pw->pw_uid, flags)) {
 		if (pw->pw_uid != ROOT_UID) {
 		    warning(_("unable to set user context"));
 		    goto done;
 		} else
 		    warning(_("unable to set user context"));
+	    }
+	    if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+		/* Stash the updated environment pointer in command details */
+		details->envp = environ;
 	    }
 	}
 #endif /* HAVE_LOGIN_CAP_H */

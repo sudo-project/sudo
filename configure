@@ -15445,7 +15445,6 @@ _ACEOF
 		SUDOERS_LIBS="${SUDOERS_LIBS} -lutil"
 		;;
 	esac
-	SUDOERS_OBJS="${SUDOERS_OBJS} login_class.lo"
 
 fi
 

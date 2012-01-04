@@ -179,7 +179,6 @@ plugins/sudoers/linux_audit.c
 plugins/sudoers/linux_audit.h
 plugins/sudoers/logging.c
 plugins/sudoers/logging.h
-plugins/sudoers/login_class.c
 plugins/sudoers/logwrap.c
 plugins/sudoers/match.c
 plugins/sudoers/match_addr.c
