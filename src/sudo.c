@@ -502,7 +502,7 @@ command_info_to_details(char * const info[], struct command_details *details)
     long lval;
     unsigned long ulval;
     char *cp, *ep;
-    debug_decl(command_info_to_details, SUDO_DEBUG_UTIL)
+    debug_decl(command_info_to_details, SUDO_DEBUG_PCOMM)
 
     memset(details, 0, sizeof(*details));
     details->closefrom = -1;
@@ -513,9 +513,9 @@ command_info_to_details(char * const info[], struct command_details *details)
 	break; \
     }
 
-    sudo_debug_printf(SUDO_DEBUG_PCOMM, "command info from plugin:");
+    sudo_debug_printf(SUDO_DEBUG_INFO, "command info from plugin:");
     for (i = 0; info[i] != NULL; i++) {
-	sudo_debug_printf(SUDO_DEBUG_PCOMM, "    %d: %s", i, info[i]);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "    %d: %s", i, info[i]);
 	switch (info[i][0]) {
 	    case 'c':
 		SET_STRING("chroot=", chroot)
