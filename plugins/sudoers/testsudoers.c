@@ -109,7 +109,8 @@ struct interface *interfaces;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
 static char *runas_group, *runas_user;
-extern int errorlineno, parse_error;
+extern int errorlineno;
+extern bool parse_error;
 extern char *errorfile;
 sudo_printf_t sudo_printf = testsudoers_printf;
 sudo_conv_t sudo_conv;	/* NULL in non-plugin */

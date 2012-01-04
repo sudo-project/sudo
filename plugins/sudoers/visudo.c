@@ -106,7 +106,7 @@ static char *get_editor(char **);
 static void get_hostname(void);
 static char whatnow(void);
 static int check_aliases(bool, bool);
-static int check_syntax(char *, bool, bool);
+static bool check_syntax(char *, bool, bool);
 static bool edit_sudoers(struct sudoersfile *, char *, char *, int);
 static bool install_sudoers(struct sudoersfile *, bool);
 static int print_unused(void *, void *);
@@ -128,7 +128,8 @@ extern void yyrestart(FILE *);
 extern struct rbtree *aliases;
 extern FILE *yyin;
 extern char *sudoers, *errorfile;
-extern int errorlineno, parse_error;
+extern int errorlineno;
+extern bool parse_error;
 /* For getopt(3) */
 extern char *optarg;
 extern int optind;
@@ -217,7 +218,7 @@ main(int argc, char *argv[])
     init_defaults();
 
     if (checkonly)
-	exit(check_syntax(sudoers_path, quiet, strict));
+	exit(check_syntax(sudoers_path, quiet, strict) ? 1 : 0);
 
     /*
      * Parse the existing sudoers file(s) in quiet mode to highlight any
@@ -746,11 +747,11 @@ run_command(char *path, char **argv)
     return WEXITSTATUS(status);
 }
 
-static int
+static bool
 check_syntax(char *sudoers_path, bool quiet, bool strict)
 {
     struct stat sb;
-    int rval;
+    bool rval;
 
     if (strcmp(sudoers_path, "-") == 0) {
 	yyin = stdin;
@@ -786,7 +787,7 @@ check_syntax(char *sudoers_path, bool quiet, bool strict)
     /* Check mode and owner in strict mode. */
     if (strict && yyin != stdin && fstat(fileno(yyin), &sb) == 0) {
 	if (sb.st_uid != SUDOERS_UID || sb.st_gid != SUDOERS_GID) {
-	    rval = 1;
+	    rval = true;
 	    if (!quiet) {
 		fprintf(stderr,
 		    _("%s: wrong owner (uid, gid) should be (%u, %u)\n"),
@@ -794,7 +795,7 @@ check_syntax(char *sudoers_path, bool quiet, bool strict)
 		}
 	}
 	if ((sb.st_mode & 07777) != SUDOERS_MODE) {
-	    rval = 1;
+	    rval = true;
 	    if (!quiet) {
 		fprintf(stderr, _("%s: bad permissions, should be mode 0%o\n"),
 		    sudoers_path, SUDOERS_MODE);

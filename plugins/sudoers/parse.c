@@ -70,7 +70,8 @@ struct sudo_nss sudo_nss_file = {
  */
 extern FILE *yyin;
 extern char *errorfile;
-extern int errorlineno, parse_error;
+extern int errorlineno;
+extern bool parse_error;
 
 /*
  * Local prototypes.
