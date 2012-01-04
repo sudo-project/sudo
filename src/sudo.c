@@ -200,6 +200,9 @@ main(int argc, char *argv[], char *envp[])
     memset(&user_details, 0, sizeof(user_details));
     user_info = get_user_info(&user_details);
 
+    /* Read sudo.conf. */
+    sudo_read_conf();
+
     /* Parse command line arguments. */
     sudo_mode = parse_args(argc, argv, &nargc, &nargv, &settings, &env_add);
     sudo_debug(9, "sudo_mode %d", sudo_mode);
@@ -211,8 +214,8 @@ main(int argc, char *argv[], char *envp[])
 	    (void) printf(_("Configure options: %s\n"), CONFIGURE_ARGS);
     }
 
-    /* Read sudo.conf and load plugins. */
-    if (!sudo_load_plugins(_PATH_SUDO_CONF, &policy_plugin, &io_plugins))
+    /* Load plugins. */
+    if (!sudo_load_plugins(&policy_plugin, &io_plugins))
 	errorx(1, _("fatal error, unable to load plugins"));
 
     /* Open policy plugin. */

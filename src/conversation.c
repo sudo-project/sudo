@@ -47,6 +47,7 @@
 
 #include "sudo.h"
 #include "sudo_plugin.h"
+#include "sudo_debug.h"
 
 extern int tgetpass_flags; /* XXX */
 
@@ -90,6 +91,10 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 	    case SUDO_CONV_ERROR_MSG:
 		if (msg->msg)
 		    (void) fputs(msg->msg, stderr);
+		break;
+	    case SUDO_CONV_DEBUG_MSG:
+		if (msg->msg)
+		    sudo_debug_write(msg->msg, strlen(msg->msg));
 		break;
 	    default:
 		goto err;

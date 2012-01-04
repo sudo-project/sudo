@@ -53,6 +53,10 @@
 extern char *optarg;
 extern int optind;
 
+/* XXX */
+extern const char *debug_file;
+extern const char *debug_flags;
+
 int tgetpass_flags;
 
 /*
@@ -72,43 +76,47 @@ static struct sudo_settings {
     { "bsdauth_type" },
 #define ARG_LOGIN_CLASS 1
     { "login_class" },
-#define ARG_DEBUG_LEVEL 2
+#define ARG_DEBUG_FILE 2
+    { "debug_file" },
+#define ARG_DEBUG_FLAGS 3
+    { "debug_flags" },
+#define ARG_DEBUG_LEVEL 4
     { "debug_level" },
-#define ARG_PRESERVE_ENVIRONMENT 3
+#define ARG_PRESERVE_ENVIRONMENT 5
     { "preserve_environment" },
-#define ARG_RUNAS_GROUP 4
+#define ARG_RUNAS_GROUP 6
     { "runas_group" },
-#define ARG_SET_HOME 5
+#define ARG_SET_HOME 7
     { "set_home" },
-#define ARG_USER_SHELL 6
+#define ARG_USER_SHELL 8
     { "run_shell" },
-#define ARG_LOGIN_SHELL 7
+#define ARG_LOGIN_SHELL 9
     { "login_shell" },
-#define ARG_IGNORE_TICKET 8
+#define ARG_IGNORE_TICKET 10
     { "ignore_ticket" },
-#define ARG_PROMPT 9
+#define ARG_PROMPT 11
     { "prompt" },
-#define ARG_SELINUX_ROLE 10
+#define ARG_SELINUX_ROLE 12
     { "selinux_role" },
-#define ARG_SELINUX_TYPE 11
+#define ARG_SELINUX_TYPE 13
     { "selinux_type" },
-#define ARG_RUNAS_USER 12
+#define ARG_RUNAS_USER 14
     { "runas_user" },
-#define ARG_PROGNAME 13
+#define ARG_PROGNAME 15
     { "progname" },
-#define ARG_IMPLIED_SHELL 14
+#define ARG_IMPLIED_SHELL 16
     { "implied_shell" },
-#define ARG_PRESERVE_GROUPS 15
+#define ARG_PRESERVE_GROUPS 17
     { "preserve_groups" },
-#define ARG_NONINTERACTIVE 16
+#define ARG_NONINTERACTIVE 18
     { "noninteractive" },
-#define ARG_SUDOEDIT 17
+#define ARG_SUDOEDIT 19
     { "sudoedit" },
-#define ARG_CLOSEFROM 18
+#define ARG_CLOSEFROM 20
     { "closefrom" },
-#define ARG_NET_ADDRS 19
+#define ARG_NET_ADDRS 21
     { "network_addrs" },
-#define NUM_SETTINGS 20
+#define NUM_SETTINGS 22
     { NULL }
 };
 
@@ -143,6 +151,12 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     /* Load local IP addresses and masks. */
     if (get_net_ifs(&cp) > 0)
 	sudo_settings[ARG_NET_ADDRS].value = cp;
+
+    /* Set debug file and flags from sudo.conf. */
+    if (debug_file != NULL)
+	sudo_settings[ARG_DEBUG_FILE].value = debug_file;
+    if (debug_flags != NULL)
+	sudo_settings[ARG_DEBUG_FLAGS].value = debug_flags;
 
     /* Returns true if the last option string was "--" */
 #define got_end_of_args	(optind > 1 && argv[optind - 1][0] == '-' && \
