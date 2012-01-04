@@ -985,17 +985,17 @@ get_hostname(void)
 }
 
 static int
-alias_remove_recursive(char *name, int type, int strict, int quiet)
+alias_remove_recursive(char *name, int type)
 {
     struct member *m;
     struct alias *a;
-    int error = 0;
+    int rval = TRUE;
 
     if ((a = alias_find(name, type)) != NULL) {
 	tq_foreach_fwd(&a->members, m) {
 	    if (m->type == ALIAS) {
-		if (!alias_remove_recursive(m->name, type, strict, quiet))
-		    error = 1;
+		if (!alias_remove_recursive(m->name, type))
+		    rval = FALSE;
 	    }
 	}
     }
@@ -1003,7 +1003,7 @@ alias_remove_recursive(char *name, int type, int strict, int quiet)
     a = alias_remove(name, type);
     if (a)
 	rbinsert(alias_freelist, a);
-    return error;
+    return rval;
 }
 
 static int
@@ -1093,7 +1093,7 @@ check_aliases(int strict, int quiet)
 	tq_foreach_fwd(&us->users, m) {
 	    if (m->type == ALIAS) {
 		alias_seqno++;
-		if (!alias_remove_recursive(m->name, USERALIAS, strict, quiet))
+		if (!alias_remove_recursive(m->name, USERALIAS))
 		    error++;
 	    }
 	}
@@ -1101,8 +1101,7 @@ check_aliases(int strict, int quiet)
 	    tq_foreach_fwd(&priv->hostlist, m) {
 		if (m->type == ALIAS) {
 		    alias_seqno++;
-		    if (!alias_remove_recursive(m->name, HOSTALIAS, strict,
-			quiet))
+		    if (!alias_remove_recursive(m->name, HOSTALIAS))
 			error++;
 		}
 	    }
@@ -1110,15 +1109,13 @@ check_aliases(int strict, int quiet)
 		tq_foreach_fwd(&cs->runasuserlist, m) {
 		    if (m->type == ALIAS) {
 			alias_seqno++;
-			if (!alias_remove_recursive(m->name, RUNASALIAS,
-			    strict, quiet))
+			if (!alias_remove_recursive(m->name, RUNASALIAS))
 			    error++;
 		    }
 		}
 		if ((m = cs->cmnd)->type == ALIAS) {
 		    alias_seqno++;
-		    if (!alias_remove_recursive(m->name, CMNDALIAS, strict,
-			quiet))
+		    if (!alias_remove_recursive(m->name, CMNDALIAS))
 			error++;
 		}
 	    }
@@ -1145,7 +1142,7 @@ check_aliases(int strict, int quiet)
 	    for (m = binding; m != NULL; m = m->next) {
 		if (m->type == ALIAS) {
 		    alias_seqno++;
-		    if (!alias_remove_recursive(m->name, atype, strict, quiet))
+		    if (!alias_remove_recursive(m->name, atype))
 			error++;
 		}
 	    }
