@@ -40,6 +40,9 @@
 
 #include "missing.h"
 #include "error.h"
+#include "sudo_plugin.h"
+
+sudo_conv_t sudo_conv;		/* NULL in non-plugin */
 
 extern void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
 
