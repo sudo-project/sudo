@@ -111,9 +111,6 @@ uid_t timestamp_uid;
 extern int errorlineno;
 extern bool parse_error;
 extern char *errorfile;
-#ifdef HAVE_LOGIN_CAP_H
-login_cap_t *lc;
-#endif /* HAVE_LOGIN_CAP_H */
 #ifdef HAVE_BSD_AUTH_H
 char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
@@ -235,7 +232,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 	set_fqdn();	/* deferred until after sudoers is parsed */
 
     /* Set login class if applicable. */
-    set_loginclass(sudo_user.pw);
+    set_loginclass(runas_pw ? runas_pw : sudo_user.pw);
 
     restore_perms();
 
@@ -667,8 +664,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (def_utmp_runas)
 	command_info[info_len++] = fmt_string("utmp_user", runas_pw->pw_name);
 #ifdef HAVE_LOGIN_CAP_H
-    if (lc != NULL)
-	command_info[info_len++] = fmt_string("login_class", lc->lc_class);
+    if (def_use_loginclass)
+	command_info[info_len++] = fmt_string("login_class", login_class);
 #endif /* HAVE_LOGIN_CAP_H */
 #ifdef HAVE_SELINUX
     if (user_role != NULL)
@@ -1004,7 +1001,11 @@ static void
 set_loginclass(struct passwd *pw)
 {
     int errflags;
+    login_cap_t *lc;
     debug_decl(set_loginclass, SUDO_DEBUG_PLUGIN)
+
+    if (!def_use_loginclass)
+	debug_return;
 
     /*
      * Don't make it a fatal error if the user didn't specify the login
@@ -1027,12 +1028,13 @@ set_loginclass(struct passwd *pw)
 		(pw->pw_uid == 0) ? LOGIN_DEFROOTCLASS : LOGIN_DEFCLASS;
     }
 
+    /* Make sure specified login class is valid. */
     lc = login_getclass(login_class);
     if (!lc || !lc->lc_class || strcmp(lc->lc_class, login_class) != 0) {
 	log_error(errflags, _("unknown login class: %s"), login_class);
-	if (!lc)
-	    lc = login_getclass(NULL);	/* needed for login_getstyle() later */
+	def_use_loginclass = false;
     }
+    login_close(lc);
     debug_return;
 }
 #else
