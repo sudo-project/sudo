@@ -718,7 +718,7 @@ devdir
 SEMAN
 LCMAN
 BAMAN
-DEV
+DEVEL
 SUDOERS_GID
 SUDOERS_UID
 SUDOERS_MODE
@@ -2919,7 +2919,7 @@ PROGS="sudo"
 : ${SUDOERS_MODE='0440'}
 : ${SUDOERS_UID='0'}
 : ${SUDOERS_GID='0'}
-DEV="#"
+DEVEL=
 LDAP="#"
 BAMAN=0
 LCMAN=0
@@ -2976,7 +2976,7 @@ if test "${with_devel+set}" = set; then :
     yes)	{ $as_echo "$as_me:${as_lineno-$LINENO}: Setting up for development: -Wall, flex, yacc" >&5
 $as_echo "$as_me: Setting up for development: -Wall, flex, yacc" >&6;}
 		OSDEFS="${OSDEFS} -DSUDO_DEVEL"
-		DEV=""
+		DEVEL="true"
 		devdir=.
 		;;
     no)		;;

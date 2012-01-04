@@ -38,6 +38,9 @@ CFLAGS = @CFLAGS@
 # OS dependent defines
 DEFS = @OSDEFS@
 
+# Set to non-empty for development mode
+DEVEL = @DEVEL@
+
 #### End of system configuration section. ####
 
 SHELL = @SHELL@
@@ -76,8 +79,10 @@ fnm_test: fnm_test.o libreplace.la
 globtest: globtest.o libreplace.la
 	$(LIBTOOL) --mode=link $(CC) -o $@ globtest.o libreplace.la
 
-@DEV@$(srcdir)/mksiglist.h: $(srcdir)/siglist.in
-@DEV@	awk 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (my_sys_siglist[SIG%s] == NULL)\n\tmy_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@
+$(srcdir)/mksiglist.h: $(srcdir)/siglist.in
+	if [ -n "$(DEVEL)" ]; then \
+	    awk 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (my_sys_siglist[SIG%s] == NULL)\n\tmy_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@; \
+	fi
 
 pre-install:
 

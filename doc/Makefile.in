@@ -47,6 +47,9 @@ mandirform = $(mandir)/$(mantype)$(mansectform)
 install_uid = 0
 install_gid = 0
 
+# Set to non-empty for development mode
+DEVEL = @DEVEL@
+
 #### End of system configuration section. ####
 
 SHELL = @SHELL@
@@ -54,24 +57,23 @@ SHELL = @SHELL@
 DOCS =	sudo.man visudo.man sudoers.man sudoers.ldap.man sudoers.man \
 	sudoreplay.man sudo_plugin.man
 
-@DEV@DEVDOCS =	$(srcdir)/sudo.man.in $(srcdir)/sudo.cat \
-@DEV@		$(srcdir)/visudo.man.in $(srcdir)/visudo.cat \
-@DEV@		$(srcdir)/sudoers.man.in $(srcdir)/sudoers.cat \
-@DEV@		$(srcdir)/sudoers.ldap.man.in $(srcdir)/sudoers.ldap.cat \
-@DEV@		$(srcdir)/sudoers.man.in $(srcdir)/sudoers.cat \
-@DEV@		$(srcdir)/sudoreplay.man.in $(srcdir)/sudoreplay.cat \
-@DEV@		$(srcdir)/sudo_plugin.man.in $(srcdir)/sudo_plugin.cat \
-@DEV@		$(srcdir)/HISTORY $(srcdir)/LICENSE $(srcdir)/CONTRIBUTORS
+DEVDOCS = $(srcdir)/sudo.man.in $(srcdir)/sudo.cat \
+	  $(srcdir)/visudo.man.in $(srcdir)/visudo.cat \
+	  $(srcdir)/sudoers.man.in $(srcdir)/sudoers.cat \
+	  $(srcdir)/sudoers.ldap.man.in $(srcdir)/sudoers.ldap.cat \
+	  $(srcdir)/sudoers.man.in $(srcdir)/sudoers.cat \
+	  $(srcdir)/sudoreplay.man.in $(srcdir)/sudoreplay.cat \
+	  $(srcdir)/sudo_plugin.man.in $(srcdir)/sudo_plugin.cat \
+	  $(srcdir)/HISTORY $(srcdir)/LICENSE $(srcdir)/CONTRIBUTORS
 
-OTHER_DOCS= $(top_srcdir)/ChangeLog $(top_srcdir)/README \
-	    $(top_srcdir)/NEWS $(srcdir)/HISTORY $(srcdir)/CONTRIBUTORS \
-	    $(srcdir)/LICENSE $(srcdir)/TROUBLESHOOTING $(srcdir)/UPGRADE \
-	    $(srcdir)/sample.*
-
-OTHER_DOCS_LDAP= $(top_srcdir)/README.LDAP $(srcdir)/schema.*
+OTHER_DOCS = $(top_srcdir)/ChangeLog $(top_srcdir)/README \
+	     $(top_srcdir)/NEWS $(srcdir)/HISTORY $(srcdir)/CONTRIBUTORS \
+	     $(srcdir)/LICENSE $(srcdir)/TROUBLESHOOTING $(srcdir)/UPGRADE \
+	     $(srcdir)/sample.*
+ 
+OTHER_DOCS_LDAP = $(top_srcdir)/README.LDAP $(srcdir)/schema.*
 
 VERSION = @PACKAGE_VERSION@
-PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
 all: $(DEVDOCS) $(DOCS)
 
@@ -80,71 +82,122 @@ Makefile: $(srcdir)/Makefile.in
 
 .SUFFIXES: .man
 
-@DEV@varsub: $(top_srcdir)/configure.in
-@DEV@	printf 's#@%s@#1#\ns#@%s@#1#\ns#@%s@#1#\ns#@%s@#/etc#g\ns#@%s@#/usr/local#g\ns#@%s@#4#g\ns#@%s@#1m#g\n' SEMAN BAMAN LCMAN sysconfdir prefix mansectform mansectsu > $@; sed -n '/Begin initial values for man page substitution/,/End initial values for man page substitution/{;p;}' $(top_srcdir)/configure.in | sed -e '/^#/d' -e 's/^/s#@/' -e 's/=[\\"]*/@#/' -e 's/[\\"]*$$/#g/' >> $@
+varsub: $(top_srcdir)/configure.in
+	if [ -n "$(DEVEL)" ]; then \
+	    printf 's#@%s@#1#\ns#@%s@#1#\ns#@%s@#1#\ns#@%s@#/etc#g\ns#@%s@#/usr/local#g\ns#@%s@#4#g\ns#@%s@#1m#g\n' SEMAN BAMAN LCMAN sysconfdir prefix mansectform mansectsu > $@; \
+	    sed -n '/Begin initial values for man page substitution/,/End initial values for man page substitution/{;p;}' $(top_srcdir)/configure.in | sed -e '/^#/d' -e 's/^/s#@/' -e 's/=[\\"]*/@#/' -e 's/[\\"]*$$/#g/' >> $@; \
+	fi
 
-@DEV@$(srcdir)/sudo.man.in: $(srcdir)/sudo.pod
-@DEV@	mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudo.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" $(srcdir)/sudo.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" | perl -p $(srcdir)/sudo.man.pl >> $@
+$(srcdir)/sudo.man.in: $(srcdir)/sudo.pod
+	if [ -n "$(DEVEL)" ]; then \
+	    mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; \
+	    mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; \
+	    sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudo.pod > $@; \
+	    pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" $(srcdir)/sudo.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" | perl -p $(srcdir)/sudo.man.pl >> $@; \
+	fi
 
 sudo.man: $(srcdir)/sudo.man.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
-@DEV@$(srcdir)/sudo.cat: varsub $(srcdir)/sudo.man.in
-@DEV@	sed -f varsub $(srcdir)/sudo.man.in | $(NROFF) -man > $@
+$(srcdir)/sudo.cat: varsub $(srcdir)/sudo.man.in
+	if [ -n "$(DEVEL)" ]; then \
+	    sed -f varsub $(srcdir)/sudo.man.in | $(NROFF) -man > $@; \
+	fi
 
-@DEV@$(srcdir)/visudo.man.in: $(srcdir)/visudo.pod
-@DEV@	mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/visudo.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" $(srcdir)/visudo.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@
+$(srcdir)/visudo.man.in: $(srcdir)/visudo.pod
+	if [ -n "$(DEVEL)" ]; then \
+	    mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; \
+	    mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; \
+	    sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/visudo.pod > $@; \
+	    pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" $(srcdir)/visudo.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@; \
+	fi
 
 visudo.man: $(srcdir)/visudo.man.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
-@DEV@$(srcdir)/visudo.cat: varsub $(srcdir)/visudo.man.in
-@DEV@	sed -f varsub $(srcdir)/visudo.man.in | $(NROFF) -man > $@
+$(srcdir)/visudo.cat: varsub $(srcdir)/visudo.man.in
+	if [ -n "$(DEVEL)" ]; then \
+	    sed -f varsub $(srcdir)/visudo.man.in | $(NROFF) -man > $@; \
+	fi
 
-@DEV@$(srcdir)/sudoers.man.in: $(srcdir)/sudoers.pod
-@DEV@	mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudoers.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectform --release=$(VERSION) --center="MAINTENANCE COMMANDS" $(srcdir)/sudoers.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" | perl -p $(srcdir)/sudoers.man.pl >> $@
+$(srcdir)/sudoers.man.in: $(srcdir)/sudoers.pod
+	if [ -n "$(DEVEL)" ]; then \
+	    mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; \
+	    mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; \
+	    sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudoers.pod > $@; \
+	    pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectform --release=$(VERSION) --center="MAINTENANCE COMMANDS" $(srcdir)/sudoers.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" | perl -p $(srcdir)/sudoers.man.pl >> $@; \
+	fi
 
 sudoers.man: $(srcdir)/sudoers.man.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
-@DEV@$(srcdir)/sudoers.cat: varsub $(srcdir)/sudoers.man.in
-@DEV@	sed -f varsub $(srcdir)/sudoers.man.in | $(NROFF) -man > $@
+$(srcdir)/sudoers.cat: varsub $(srcdir)/sudoers.man.in
+	if [ -n "$(DEVEL)" ]; then \
+	    sed -f varsub $(srcdir)/sudoers.man.in | $(NROFF) -man > $@; \
+	fi
 
-@DEV@$(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.pod
-@DEV@	mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudoers.ldap.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectform --release=$(VERSION) --center="MAINTENANCE COMMANDS" $(srcdir)/sudoers.ldap.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@
+$(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.pod
+	if [ -n "$(DEVEL)" ]; then \
+	    mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; \
+	    mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; \
+	    sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudoers.ldap.pod > $@; \
+	    pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectform --release=$(VERSION) --center="MAINTENANCE COMMANDS" $(srcdir)/sudoers.ldap.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@; \
+	fi
 
 sudoers.ldap.man: $(srcdir)/sudoers.ldap.man.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
-@DEV@$(srcdir)/sudoers.ldap.cat: varsub $(srcdir)/sudoers.ldap.man.in
-@DEV@	sed -f varsub $(srcdir)/sudoers.ldap.man.in | $(NROFF) -man > $@
+$(srcdir)/sudoers.ldap.cat: varsub $(srcdir)/sudoers.ldap.man.in
+	if [ -n "$(DEVEL)" ]; then \
+	    sed -f varsub $(srcdir)/sudoers.ldap.man.in | $(NROFF) -man > $@; \
+	fi
 
-@DEV@$(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.pod
-@DEV@	mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudoreplay.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" $(srcdir)/sudoreplay.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@
+$(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.pod
+	if [ -n "$(DEVEL)" ]; then \
+	    mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; \
+	    mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; \
+	    sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudoreplay.pod > $@; \
+	    pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" $(srcdir)/sudoreplay.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@; \
+	fi
 
 sudoreplay.man: $(srcdir)/sudoreplay.man.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
-@DEV@$(srcdir)/sudoreplay.cat: varsub $(srcdir)/sudoreplay.man.in
-@DEV@	sed -f varsub $(srcdir)/sudoreplay.man.in | $(NROFF) -man > $@
+$(srcdir)/sudoreplay.cat: varsub $(srcdir)/sudoreplay.man.in
+	if [ -n "$(DEVEL)" ]; then \
+	    sed -f varsub $(srcdir)/sudoreplay.man.in | $(NROFF) -man > $@; \
+	fi
 
-@DEV@$(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.pod
-@DEV@	mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudo_plugin.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" $(srcdir)/sudo_plugin.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@
+$(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.pod
+	if [ -n "$(DEVEL)" ]; then \
+	    mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; \
+	    mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; \
+	    sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudo_plugin.pod > $@; \
+	    pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" $(srcdir)/sudo_plugin.pod | sed -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@; \
+	fi
 
 sudo_plugin.man: $(srcdir)/sudo_plugin.man.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
-@DEV@$(srcdir)/sudo_plugin.cat: varsub $(srcdir)/sudo_plugin.man.in
-@DEV@	sed -f varsub $(srcdir)/sudo_plugin.man.in | $(NROFF) -man > $@
+$(srcdir)/sudo_plugin.cat: varsub $(srcdir)/sudo_plugin.man.in
+	if [ -n "$(DEVEL)" ]; then \
+	    sed -f varsub $(srcdir)/sudo_plugin.man.in | $(NROFF) -man > $@; \
+	fi
 
 CONTRIBUTORS: $(srcdir)/contributors.pod
-	pod2text -l -i0 $(srcdir)/contributors.pod | sed '1,3d' > $@
+	if [ -n "$(DEVEL)" ]; then \
+	    pod2text -l -i0 $(srcdir)/contributors.pod | sed '1,3d' > $@; \
+	fi
 
 HISTORY: $(srcdir)/history.pod
-	pod2text -l -i0 $(srcdir)/history.pod > $@
+	if [ -n "$(DEVEL)" ]; then \
+	    pod2text -l -i0 $(srcdir)/history.pod > $@; \
+	fi
 
 LICENSE: $(srcdir)/license.pod
-	pod2text -l -i0 $(srcdir)/license.pod | sed '1,3d' > $@
+	if [ -n "$(DEVEL)" ]; then \
+	    pod2text -l -i0 $(srcdir)/license.pod | sed '1,3d' > $@; \
+	fi
 
 pre-install:
 
