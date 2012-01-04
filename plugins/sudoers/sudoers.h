@@ -207,7 +207,7 @@ struct timeval;
 #define YY_DECL int yylex(void)
 
 /* goodpath.c */
-char *sudo_goodpath(const char *, struct stat *);
+int sudo_goodpath(const char *, struct stat *);
 
 /* findpath.c */
 int find_path(char *, char **, struct stat *, char *, int);
