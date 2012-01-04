@@ -166,7 +166,9 @@ libtool: $(LIBTOOL_DEPS)
 Makefile: $(srcdir)/Makefile.in
 	./config.status --file Makefile
 
-sync-po:
+sync-po: rsync-po compile-po
+
+rsync-po:
 	rsync -Lrtvz  translationproject.org::tp/latest/sudo/ src/po/
 	rsync -Lrtvz  translationproject.org::tp/latest/sudoers/ plugins/sudoers/po/
 
