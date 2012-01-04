@@ -19,9 +19,6 @@
 #include <sys/types.h>
 
 #include <errno.h>
-#ifndef HAVE_TIMESPEC
-# include <time.h>
-#endif
 #include <stdarg.h>
 
 #include "missing.h"
