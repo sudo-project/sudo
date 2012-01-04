@@ -341,7 +341,7 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
 	    n = handle_signals(signal_pipe[0], child, log_io, cstat);
 	    if (n == 0) {
 		/* Child has exited, cstat is set, we are done. */
-		goto done;
+		break;
 	    }
 	    if (n == -1) {
 		/* Error reading signal_pipe[0], should not happen. */
@@ -405,7 +405,6 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
     }
 #endif
 
-done:
     efree(fdsr);
     efree(fdsw);
     while (!tq_empty(&sigfwd_list)) {
