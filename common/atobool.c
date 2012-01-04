@@ -80,6 +80,5 @@ atobool(const char *str)
 		return 0;
 	    break;
     }
-    return -1;
     debug_return_int(-1);
 }

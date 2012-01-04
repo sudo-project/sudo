@@ -96,7 +96,6 @@ term_noecho(int fd)
 #endif
     if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
-	return 1;
 	debug_return_int(1);
     }
     debug_return_int(0);

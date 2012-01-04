@@ -235,7 +235,6 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
 	    case -1:
 		cstat->type = CMD_ERRNO;
 		cstat->val = errno;
-		return -1;
 		debug_return_int(-1);
 	    case 0:
 		/* child continues without controlling terminal */
