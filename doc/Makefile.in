@@ -202,7 +202,7 @@ LICENSE: $(srcdir)/license.pod
 
 pre-install:
 
-install: install-dirs install-doc
+install: install-doc
 
 install-dirs:
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(docdir) \
