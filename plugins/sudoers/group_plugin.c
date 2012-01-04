@@ -16,8 +16,6 @@
 
 #include <config.h>
 
-#if defined(HAVE_DLOPEN) || defined(HAVE_SHL_LOAD)
-
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
@@ -57,6 +55,8 @@
 #ifndef RTLD_GLOBAL
 # define RTLD_GLOBAL	0
 #endif
+
+#if defined(HAVE_DLOPEN) || defined(HAVE_SHL_LOAD)
 
 static void *group_handle;
 static struct sudoers_group_plugin *group_plugin;
@@ -199,12 +199,6 @@ group_plugin_query(const char *user, const char *group,
  * No loadable shared object support.
  */
 
-#ifndef FALSE
-#define FALSE	0
-#endif
-
-struct passwd;
-
 int
 group_plugin_load(char *plugin_info)
 {
@@ -216,7 +210,7 @@ void
 group_plugin_unload(void)
 {
     debug_decl(group_plugin_unload, SUDO_DEBUG_UTIL)
-    debug_return_bool;
+    debug_return;
 }
 
 int

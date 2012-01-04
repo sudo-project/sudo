@@ -132,8 +132,8 @@ static sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp;
 int NewArgc;
 char **NewArgv;
 
-/* plugin_error.c */
-extern sigjmp_buf error_jmp;
+/* Declared here instead of plugin_error.c for static sudo builds. */
+sigjmp_buf error_jmp;
 
 static int
 sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
