@@ -139,7 +139,6 @@ plugins/sudoers/auth/pam.c
 plugins/sudoers/auth/passwd.c
 plugins/sudoers/auth/rfc1938.c
 plugins/sudoers/auth/secureware.c
-plugins/sudoers/auth/securid.c
 plugins/sudoers/auth/securid5.c
 plugins/sudoers/auth/sia.c
 plugins/sudoers/auth/sudo_auth.c

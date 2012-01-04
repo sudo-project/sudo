@@ -166,7 +166,7 @@ Special features/options:
 
   --with-SecurID[=DIR]
 	Enable SecurID support.  If specified, DIR is directory containing
-	sdiclient.a, sdi_athd.h, sdconf.h, and sdacmvls.h.
+	libaceclnt.a, acexport.h, and sdacmvls.h.
 
   --with-fwtk[=DIR]
 	Enable TIS Firewall Toolkit (FWTK) 'authsrv' support. If specified,
