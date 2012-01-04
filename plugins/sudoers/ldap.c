@@ -999,7 +999,7 @@ static char *
 sudo_ldap_build_pass1(struct passwd *pw)
 {
     struct group *grp;
-    char *buf, timebuffer[TIMEFILTER_LENGTH];
+    char *buf, timebuffer[TIMEFILTER_LENGTH], gidbuf[MAX_UID_T_LEN];
     struct group_list *grlist;
     size_t sz = 0;
     int i;
@@ -1012,15 +1012,21 @@ sudo_ldap_build_pass1(struct passwd *pw)
     /* Then add (|(sudoUser=USERNAME)(sudoUser=ALL)) + NUL */
     sz += 29 + strlen(pw->pw_name);
 
-    /* Add space for primary and supplementary groups */
+    /* Add space for primary and supplementary groups and gids */
     if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
 	sz += 12 + strlen(grp->gr_name);
     }
+    sz += 13 + MAX_UID_T_LEN;
     if ((grlist = get_group_list(pw)) != NULL) {
 	for (i = 0; i < grlist->ngroups; i++) {
 	    if (grp != NULL && strcasecmp(grlist->groups[i], grp->gr_name) == 0)
 		continue;
 	    sz += 12 + strlen(grlist->groups[i]);
+	}
+	for (i = 0; i < grlist->ngids; i++) {
+	    if (pw->pw_gid == grlist->gids[i])
+		continue;
+	    sz += 13 + MAX_UID_T_LEN;
 	}
     }
 
@@ -1045,20 +1051,31 @@ sudo_ldap_build_pass1(struct passwd *pw)
     (void) strlcat(buf, pw->pw_name, sz);
     (void) strlcat(buf, ")", sz);
 
-    /* Append primary group */
+    /* Append primary group and gid */
     if (grp != NULL) {
 	(void) strlcat(buf, "(sudoUser=%", sz);
 	(void) strlcat(buf, grp->gr_name, sz);
 	(void) strlcat(buf, ")", sz);
     }
+    (void) snprintf(gidbuf, sizeof(gidbuf), "%u", (unsigned int)pw->pw_gid);
+    (void) strlcat(buf, "(sudoUser=%#", sz);
+    (void) strlcat(buf, gidbuf, sz);
+    (void) strlcat(buf, ")", sz);
 
-    /* Append supplementary groups */
+    /* Append supplementary groups and gids */
     if (grlist != NULL) {
 	for (i = 0; i < grlist->ngroups; i++) {
 	    if (grp != NULL && strcasecmp(grlist->groups[i], grp->gr_name) == 0)
 		continue;
 	    (void) strlcat(buf, "(sudoUser=%", sz);
 	    (void) strlcat(buf, grlist->groups[i], sz);
+	    (void) strlcat(buf, ")", sz);
+	}
+	for (i = 0; i < grlist->ngids; i++) {
+	    (void) snprintf(gidbuf, sizeof(gidbuf), "%u",
+		(unsigned int)grlist->gids[i]);
+	    (void) strlcat(buf, "(sudoUser=%#", sz);
+	    (void) strlcat(buf, gidbuf, sz);
 	    (void) strlcat(buf, ")", sz);
 	}
     }
