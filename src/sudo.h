@@ -201,7 +201,6 @@ void get_ttysize(int *rowp, int *colp);
 /* sudo.c */
 bool exec_setup(struct command_details *details, const char *ptyname, int ptyfd);
 int run_command(struct command_details *details);
-extern int debug_level;
 extern const char *list_user, *runas_user, *runas_group;
 extern struct user_details user_details;
 
