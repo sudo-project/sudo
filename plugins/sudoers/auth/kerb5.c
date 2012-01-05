@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2008, 2010-2011
+ * Copyright (c) 1999-2005, 2007-2008, 2010-2012
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -70,6 +70,12 @@ static struct _sudo_krb5_data {
 } sudo_krb5_data = { NULL, NULL, NULL };
 typedef struct _sudo_krb5_data *sudo_krb5_datap;
 
+#ifdef SUDO_KRB5_INSTANCE
+static const char *sudo_krb5_instance = SUDO_KRB5_INSTANCE;
+#else
+static const char *sudo_krb5_instance = NULL;
+#endif
+
 #ifndef HAVE_KRB5_GET_INIT_CREDS_OPT_ALLOC
 static krb5_error_code
 krb5_get_init_creds_opt_alloc(krb5_context context,
@@ -128,13 +134,16 @@ int
 sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
 {
     krb5_context	sudo_context;
-    krb5_ccache		ccache;
-    krb5_principal	princ;
     krb5_error_code 	error;
-    char		cache_name[64];
+    char		cache_name[64], *pname = pw->pw_name;
     debug_decl(sudo_krb5_init, SUDO_DEBUG_AUTH)
 
     auth->data = (void *) &sudo_krb5_data; /* Stash all our data here */
+
+    if (sudo_krb5_instance != NULL) {
+	easprintf(&pname, "%s%s%s", pw->pw_name,
+	    sudo_krb5_instance[0] != '/' ? "/" : "", sudo_krb5_instance);
+    }
 
 #ifdef HAVE_KRB5_INIT_SECURE_CONTEXT
     error = krb5_init_secure_context(&(sudo_krb5_data.sudo_context));
@@ -142,17 +151,16 @@ sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
     error = krb5_init_context(&(sudo_krb5_data.sudo_context));
 #endif
     if (error)
-	debug_return_int(AUTH_FAILURE);
+	goto done;
     sudo_context = sudo_krb5_data.sudo_context;
 
-    if ((error = krb5_parse_name(sudo_context, pw->pw_name,
-	&(sudo_krb5_data.princ)))) {
+    error = krb5_parse_name(sudo_context, pname, &(sudo_krb5_data.princ));
+    if (error) {
 	log_error(NO_EXIT|NO_MAIL,
-		  _("%s: unable to parse '%s': %s"), auth->name, pw->pw_name,
+		  _("%s: unable to parse '%s': %s"), auth->name, pname,
 		  error_message(error));
-	debug_return_int(AUTH_FAILURE);
+	goto done;
     }
-    princ = sudo_krb5_data.princ;
 
     (void) snprintf(cache_name, sizeof(cache_name), "MEMORY:sudocc_%ld",
 		    (long) getpid());
@@ -161,11 +169,13 @@ sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
 	log_error(NO_EXIT|NO_MAIL,
 		  _("%s: unable to resolve ccache: %s"), auth->name,
 		  error_message(error));
-	debug_return_int(AUTH_FAILURE);
+	goto done;
     }
-    ccache = sudo_krb5_data.ccache;
 
-    debug_return_int(AUTH_SUCCESS);
+done:
+    if (sudo_krb5_instance != NULL)
+	efree(pname);
+    debug_return_int(error ? AUTH_FAILURE : AUTH_SUCCESS);
 }
 
 #ifdef HAVE_KRB5_VERIFY_USER
