@@ -1,4 +1,4 @@
-Copyright (c) 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+Copyright (c) 2009-2012 Todd C. Miller <Todd.Miller@courtesan.com>
 
 Permission to use, copy, modify, and distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
@@ -163,9 +163,31 @@ itself but the I<value> might.
 
 =over 4
 
+=item debug_flags=string
+
+A comma-separated list of debug flags that correspond to B<sudo>'s
+C<Debug> entry in F<@sysconfdir@/sudo.conf>, if there is one.  The
+flags are passed to the plugin as they appear in F<@sysconfdir@/sudo.conf>.
+The syntax used by B<sudo> and the I<sudoers> plugin is
+I<subsystem>@I<priority> but the plugin is free to use a different
+format so long as it does not include a command C<,>.
+
+For reference, the priorities supported by the B<sudo> front end and
+I<sudoers> are: I<crit>, I<err>, I<warn>, I<notice>, I<diag>,
+I<info>, I<trace> and I<debug>.
+
+The following subsystems are defined: I<main>, I<memory>, I<args>,
+I<exec>, I<pty>, I<utmp>, I<conv>, I<pcomm>, I<util>, I<list>,
+I<netif>, I<audit>, I<edit>, I<selinux>, I<ldap>, I<match>, I<parser>,
+I<alias>, I<defaults>, I<auth>, I<env>, I<logging>, I<nss>, I<rbtree>,
+I<perms>, I<plugin>.  The subsystem I<all> includes every subsystem.
+
+There is not currently a way to specify a set of debug flags specific
+to the plugin--the flags are shared by B<sudo> and the plugin.
+
 =item debug_level=number
 
-A numeric debug level, from 1-9, if specified via the C<-D> flag.
+This setting has been deprecated in favor of I<debug_flags>.
 
 =item runas_user=string
 
@@ -1064,6 +1086,7 @@ convenient for simple messages where no use input is required.
  #define SUDO_CONV_ERROR_MSG	    0x0003 /* error message */
  #define SUDO_CONV_INFO_MSG	    0x0004 /* informational message */
  #define SUDO_CONV_PROMPT_MASK	    0x0005 /* mask user input */
+ #define SUDO_CONV_DEBUG_MSG	    0x0006 /* debugging message */
  #define SUDO_CONV_PROMPT_ECHO_OK   0x1000 /* flag: allow echo if no tty */
      int msg_type;
      int timeout;
@@ -1091,10 +1114,18 @@ freeing the reply buffer filled in to the C<struct sudo_conv_reply>,
 if any.
 
 The printf-style function uses the same underlying mechanism as the
-conversation function but only supports C<SUDO_CONV_INFO_MSG> and
-C<SUDO_CONV_ERROR_MSG> for the I<msg_type> parameter.  It can be
-more convenient than using the conversation function if no user
-reply is needed and supports standard printf() escape sequences.
+conversation function but only supports C<SUDO_CONV_INFO_MSG>,
+C<SUDO_CONV_ERROR_MSG> and C<SUDO_CONV_DEBUG_MSG> for the I<msg_type>
+parameter.  It can be more convenient than using the conversation
+function if no user reply is needed and supports standard printf()
+escape sequences.
+
+Unlike, C<SUDO_CONV_INFO_MSG> and C<SUDO_CONV_ERROR_MSG>, messages
+sent with the <SUDO_CONV_DEBUG_MSG> I<msg_type> are not directly
+user-visible.  Instead, they are logged to the file specified in
+the C<Debug> statement (if any) in the F<@sysconfdir@/sudo.conf>
+file.  This allows a plugin to log debugging information and is
+intended to be used in conjunction with the I<debug_flags> setting.
 
 See the sample plugin for an example of the conversation function usage.
 
