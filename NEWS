@@ -1,3 +1,69 @@
+What's new in Sudo 1.8.4?
+
+ * The -D flag in sudo has been replaced with a more general debugging
+   framework that is configured in sudo.conf.
+
+ * Fixed a false positive in visudo strict mode when aliases are
+   in use.
+
+ * Fixed a crash with "sudo -i" when a runas group was specified
+   without a runas user.
+
+ * The line on which a syntax error is reported in the sudoers file
+   is now more accurate.  Previously it was often off by a line.
+
+ * Fixed a bug where stack garbage could be printed at the end of
+   the lecture when the "lecture_file" option was enabled.
+
+ * "make install" now honors the LINGUAS environment variable.
+
+ * The #include and #includedir directives in sudoers now support
+   relative paths.  If the path is not fully qualified it is expected
+   to be located in the same directory of the sudoers file that is
+   including it.
+
+ * Serbian translation for sudo from translationproject.org.
+
+ * LDAP-based sudoers may now access by group ID in addition to
+   group name.
+
+ * visudo will now fix the mode on the sudoers file even if no changes
+   are made unless the -f option is specified.
+
+ * The "use_loginclass" sudoers option works properly again.
+
+ * On systems that use login.conf, "sudo -i" now sets environment
+   variables based on login.conf.
+
+ * For LDAP-based sudoers, values in the search expression are now
+   escaped as per RFC 4515.
+
+ * The plugin close function is now properly called when a login
+   session is killed (as opposed to the actual command being killed).
+   This can happen when an ssh session is disconnected or the
+   terminal window is closed.
+
+ * The deprecated "noexec_file" sudoers option is no longer supported.
+
+ * Fixed a race condition when I/O logging is not enabled that could
+   result in tty-generated signals (e.g. control-C) being received
+   by the command twice.
+
+ * If none of the standard input, output or error are connected to
+   a tty device, sudo will now check its parent's standard input,
+   output or error for the tty name on systems with /proc.  This
+   allow tty-based tickets to work properly even when, e.g. standard
+   input, output and error are redirected to /dev/null.
+
+ * Added the --enable-kerb5-instance configure option to allow
+   people using Kerberos V authentication to specify a custom
+   instance so the principal name can be, e.g. "username/sudo"
+   similar to how ksu uses "username/root".
+
+ * Fixed a bug where a pattern like "/usr/*" included /usr/bin/ in
+   the results, which would be incorrectly be interpreted as if the
+   sudoers file had specified a directory.
+
 What's new in Sudo 1.8.3p1?
 
  * Fixed a crash in the monitor process on Solaris when NOPASSWD
@@ -74,7 +140,7 @@ What's new in Sudo 1.8.2?
  * Visudo now checks the contents of an alias and warns about cycles
    when the alias is expanded.
 
- * If the user specifes a group via sudo's -g option that matches
+ * If the user specifies a group via sudo's -g option that matches
    the target user's group in the password database, it is now
    allowed even if no groups are present in the Runas_Spec.
 
