@@ -74,43 +74,41 @@ static struct sudo_settings {
     { "login_class" },
 #define ARG_DEBUG_FLAGS 2
     { "debug_flags" },
-#define ARG_DEBUG_LEVEL 3
-    { "debug_level" },
-#define ARG_PRESERVE_ENVIRONMENT 4
+#define ARG_PRESERVE_ENVIRONMENT 3
     { "preserve_environment" },
-#define ARG_RUNAS_GROUP 5
+#define ARG_RUNAS_GROUP 4
     { "runas_group" },
-#define ARG_SET_HOME 6
+#define ARG_SET_HOME 5
     { "set_home" },
-#define ARG_USER_SHELL 7
+#define ARG_USER_SHELL 6
     { "run_shell" },
-#define ARG_LOGIN_SHELL 8
+#define ARG_LOGIN_SHELL 7
     { "login_shell" },
-#define ARG_IGNORE_TICKET 9
+#define ARG_IGNORE_TICKET 8
     { "ignore_ticket" },
-#define ARG_PROMPT 10
+#define ARG_PROMPT 9
     { "prompt" },
-#define ARG_SELINUX_ROLE 11
+#define ARG_SELINUX_ROLE 10
     { "selinux_role" },
-#define ARG_SELINUX_TYPE 12
+#define ARG_SELINUX_TYPE 11
     { "selinux_type" },
-#define ARG_RUNAS_USER 13
+#define ARG_RUNAS_USER 12
     { "runas_user" },
-#define ARG_PROGNAME 14
+#define ARG_PROGNAME 13
     { "progname" },
-#define ARG_IMPLIED_SHELL 15
+#define ARG_IMPLIED_SHELL 14
     { "implied_shell" },
-#define ARG_PRESERVE_GROUPS 16
+#define ARG_PRESERVE_GROUPS 15
     { "preserve_groups" },
-#define ARG_NONINTERACTIVE 17
+#define ARG_NONINTERACTIVE 16
     { "noninteractive" },
-#define ARG_SUDOEDIT 18
+#define ARG_SUDOEDIT 17
     { "sudoedit" },
-#define ARG_CLOSEFROM 19
+#define ARG_CLOSEFROM 18
     { "closefrom" },
-#define ARG_NET_ADDRS 20
+#define ARG_NET_ADDRS 19
     { "network_addrs" },
-#define NUM_SETTINGS 21
+#define NUM_SETTINGS 20
     { NULL }
 };
 
@@ -197,11 +195,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    break;
 #endif
 		case 'D':
-		    if ((debug_level = atoi(optarg)) < 1 || debug_level > 9) {
-			warningx(_("the argument to -D must be between 1 and 9 inclusive"));
-			usage(1);
-		    }
-		    sudo_settings[ARG_DEBUG_LEVEL].value = optarg;
+		    /* Ignored for backwards compatibility. */
 		    break;
 		case 'E':
 		    sudo_settings[ARG_PRESERVE_ENVIRONMENT].value = "true";
