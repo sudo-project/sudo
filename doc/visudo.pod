@@ -187,13 +187,14 @@ L<vi(1)>, L<sudoers(5)>, L<sudo(8)>, L<vipw(8)>
 
 =head1 AUTHOR
 
-Many people have worked on I<sudo> over the years; this version of
+Many people have worked on B<sudo> over the years; this version of
 B<visudo> was written by:
 
  Todd Miller
 
-See the HISTORY file in the sudo distribution or visit
-http://www.sudo.ws/sudo/history.html for more details.
+See the CONTRIBUTORS file in the B<sudo> distribution
+(http://www.sudo.ws/sudo/contributors.html) for a list of people
+who have contributed to B<sudo>.
 
 =head1 CAVEATS
 

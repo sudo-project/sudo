@@ -687,9 +687,14 @@ version consists of code written primarily by:
 
 	Todd C. Miller
 
-See the HISTORY file in the B<sudo> distribution or visit
-http://www.sudo.ws/sudo/history.html for a short history
-of B<sudo>.
+See the CONTRIBUTORS file in the B<sudo> distribution
+(http://www.sudo.ws/sudo/contributors.html) for a list of people
+who have contributed to B<sudo>.
+
+=head1 HISTORY
+
+See the HISTORY file in the B<sudo> distribution
+(http://www.sudo.ws/sudo/history.html) for a brief history of sudo.
 
 =head1 CAVEATS
 
