@@ -1,4 +1,4 @@
-.\" Copyright (c) 1996,1998-2005, 2007-2011
+.\" Copyright (c) 1996,1998-2005, 2007-2012
 .\" 	Todd C. Miller <Todd.Miller@courtesan.com>
 .\" 
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -144,7 +144,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "September 16, 2011" "1.8.3" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "January  6, 2012" "1.8.4" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -282,15 +282,16 @@ the \fIsudoers\fR file.
 \&\fIvi\fR\|(1), \fIsudoers\fR\|(@mansectform@), \fIsudo\fR\|(@mansectsu@), \fIvipw\fR\|(@mansectsu@)
 .SH "AUTHOR"
 .IX Header "AUTHOR"
-Many people have worked on \fIsudo\fR over the years; this version of
+Many people have worked on \fBsudo\fR over the years; this version of
 \&\fBvisudo\fR was written by:
 .PP
 .Vb 1
 \& Todd Miller
 .Ve
 .PP
-See the \s-1HISTORY\s0 file in the sudo distribution or visit
-http://www.sudo.ws/sudo/history.html for more details.
+See the \s-1CONTRIBUTORS\s0 file in the \fBsudo\fR distribution
+(http://www.sudo.ws/sudo/contributors.html) for a list of people
+who have contributed to \fBsudo\fR.
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 There is no easy way to prevent a user from gaining a root shell if 

@@ -1,4 +1,4 @@
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2011
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2012
 .\" 	Todd C. Miller <Todd.Miller@courtesan.com>
 .\" 
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "September 16, 2011" "1.8.3" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "January  6, 2012" "1.8.4" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -158,24 +158,21 @@
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBsudo\fR [\fB\-D\fR\ \fIlevel\fR] \fB\-h\fR | \fB\-K\fR | \fB\-k\fR | \fB\-V\fR
+\&\fBsudo\fR \fB\-h\fR | \fB\-K\fR | \fB\-k\fR | \fB\-V\fR
 .PP
 \&\fBsudo\fR \fB\-v\fR [\fB\-AknS\fR]
 .if \n(BA [\fB\-a\fR\ \fIauth_type\fR]
-[\fB\-D\fR\ \fIlevel\fR]
 [\fB\-g\fR\ \fIgroup\ name\fR|\fI#gid\fR] [\fB\-p\fR\ \fIprompt\fR]
 [\fB\-u\fR\ \fIuser\ name\fR|\fI#uid\fR]
 .PP
 \&\fBsudo\fR \fB\-l[l]\fR [\fB\-AknS\fR]
 .if \n(BA [\fB\-a\fR\ \fIauth_type\fR]
-[\fB\-D\fR\ \fIlevel\fR]
 [\fB\-g\fR\ \fIgroup\ name\fR|\fI#gid\fR] [\fB\-p\fR\ \fIprompt\fR]
 [\fB\-U\fR\ \fIuser\ name\fR] [\fB\-u\fR\ \fIuser\ name\fR|\fI#uid\fR] [\fIcommand\fR]
 .PP
 \&\fBsudo\fR [\fB\-AbEHnPS\fR]
 .if \n(BA [\fB\-a\fR\ \fIauth_type\fR]
 [\fB\-C\fR\ \fIfd\fR]
-[\fB\-D\fR\ \fIlevel\fR]
 .if \n(LC [\fB\-c\fR\ \fIclass\fR|\fI\-\fR]
 [\fB\-g\fR\ \fIgroup\ name\fR|\fI#gid\fR] [\fB\-p\fR\ \fIprompt\fR]
 .if \n(SL [\fB\-r\fR\ \fIrole\fR] [\fB\-t\fR\ \fItype\fR]
@@ -186,7 +183,6 @@ sudo, sudoedit \- execute a command as another user
 .if \n(BA [\fB\-a\fR\ \fIauth_type\fR]
 [\fB\-C\fR\ \fIfd\fR]
 .if \n(LC [\fB\-c\fR\ \fIclass\fR|\fI\-\fR]
-[\fB\-D\fR\ \fIlevel\fR]
 [\fB\-g\fR\ \fIgroup\ name\fR|\fI#gid\fR] [\fB\-p\fR\ \fIprompt\fR]
 [\fB\-u\fR\ \fIuser\ name\fR|\fI#uid\fR] file ...
 .SH "DESCRIPTION"
@@ -200,7 +196,7 @@ option was specified).
 .PP
 \&\fBsudo\fR supports a plugin architecture for security policies and
 input/output logging.  Third parties can develop and distribute
-their own policy and I/O logging modules to work seemlessly with
+their own policy and I/O logging modules to work seamlessly with
 the \fBsudo\fR front end.  The default security policy is \fIsudoers\fR,
 which is configured via the file \fI@sysconfdir@/sudoers\fR, or via
 \&\s-1LDAP\s0.  See the \s-1PLUGINS\s0 section for more information.
@@ -288,10 +284,6 @@ argument specifies an existing user class, the command must be run
 as root, or the \fBsudo\fR command must be run from a shell that is already
 root.  This option is only available on systems with \s-1BSD\s0 login classes.
 \}
-.IP "\-D \fIlevel\fR" 12
-.IX Item "-D level"
-Enable debugging of \fBsudo\fR plugins and \fBsudo\fR itself.  The \fIlevel\fR
-may be a value from 1 through 9.
 .IP "\-E" 12
 .IX Item "-E"
 The \fB\-E\fR (\fIpreserve\fR \fIenvironment\fR) option indicates to the
@@ -520,7 +512,7 @@ command line are subject to the same restrictions as normal environment
 variables with one important exception.  If the \fIsetenv\fR option
 is set in \fIsudoers\fR, the command to be run has the \f(CW\*(C`SETENV\*(C'\fR tag
 set or the command matched is \f(CW\*(C`ALL\*(C'\fR, the user may set variables
-that would overwise be forbidden.  See \fIsudoers\fR\|(@mansectform@) for more information.
+that would otherwise be forbidden.  See \fIsudoers\fR\|(@mansectform@) for more information.
 .SH "PLUGINS"
 .IX Header "PLUGINS"
 Plugins are dynamically loaded based on the contents of the
@@ -537,6 +529,7 @@ which corresponds to the following \fI@sysconfdir@/sudo.conf\fR file.
 \& #   Plugin plugin_name plugin_path
 \& #   Path askpass /path/to/askpass
 \& #   Path noexec /path/to/noexec.so
+\& #   Debug sudo /var/log/sudo_debug all@warn
 \& #
 \& # The plugin_path is relative to @prefix@/libexec unless
 \& #   fully qualified.
@@ -585,6 +578,43 @@ versions of the \fIexecv()\fR, \fIexecve()\fR and \fIfexecve()\fR library functi
 that just return an error.  This is used to implement the \fInoexec\fR
 functionality on systems that support \f(CW\*(C`LD_PRELOAD\*(C'\fR or its equivalent.
 Defaults to \fI@noexec_file@\fR.
+.SH "DEBUG FLAGS"
+.IX Header "DEBUG FLAGS"
+\&\fBsudo\fR versions 1.8.4 and higher support a flexible debugging
+framework that can help track down what \fBsudo\fR is doing internally
+when there is a problem.
+.PP
+A \f(CW\*(C`Debug\*(C'\fR line consists of the \f(CW\*(C`Debug\*(C'\fR keyword, followed by the
+name of the program to debug (\fBsudo\fR, \fBvisudo\fR, \fBsudoreplay\fR),
+the debug file name and a comma-separated list of debug flags.
+The debug flag syntax used by \fBsudo\fR and the \fIsudoers\fR plugin is
+\&\fIsubsystem\fR@\fIpriority\fR but the plugin is free to use a different
+format so long as it does not include a command \f(CW\*(C`,\*(C'\fR.
+.PP
+For instance:
+.PP
+.Vb 1
+\& Debug sudo /var/log/sudo_debug all@warn,plugin@info
+.Ve
+.PP
+would log all debugging statements at the \fIwarn\fR level and higher
+in addition to those at the \fIinfo\fR level for the plugin subsystem.
+.PP
+Currently, only one \f(CW\*(C`Debug\*(C'\fR entry per program is supported.  The
+\&\f(CW\*(C`sudo\*(C'\fR \f(CW\*(C`Debug\*(C'\fR entry is shared by the \fBsudo\fR front end, \fBsudoedit\fR
+and the plugins.  A future release may add support for per-plugin
+\&\f(CW\*(C`Debug\*(C'\fR lines and/or support for multiple debugging files for a
+single program.
+.PP
+For reference, the priorities supported by the \fBsudo\fR front end and
+\&\fIsudoers\fR are: \fIcrit\fR, \fIerr\fR, \fIwarn\fR, \fInotice\fR, \fIdiag\fR,
+\&\fIinfo\fR, \fItrace\fR and \fIdebug\fR.
+.PP
+The following subsystems are defined: \fImain\fR, \fImemory\fR, \fIargs\fR,
+\&\fIexec\fR, \fIpty\fR, \fIutmp\fR, \fIconv\fR, \fIpcomm\fR, \fIutil\fR, \fIlist\fR,
+\&\fInetif\fR, \fIaudit\fR, \fIedit\fR, \fIselinux\fR, \fIldap\fR, \fImatch\fR, \fIparser\fR,
+\&\fIalias\fR, \fIdefaults\fR, \fIauth\fR, \fIenv\fR, \fIlogging\fR, \fInss\fR, \fIrbtree\fR,
+\&\fIperms\fR, \fIplugin\fR.  The subsystem \fIall\fR includes every subsystem.
 .SH "RETURN VALUES"
 .IX Header "RETURN VALUES"
 Upon successful execution of a program, the exit status from \fBsudo\fR
@@ -698,7 +728,7 @@ is not set
 .ie n .IP "\fI@sysconfdir@/sudo.conf\fR" 24
 .el .IP "\fI@sysconfdir@/sudo.conf\fR" 24
 .IX Item "@sysconfdir@/sudo.conf"
-\&\fBsudo\fR plugin and path configuration
+\&\fBsudo\fR front end configuration
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 Note: the following examples assume a properly configured security policy.
@@ -761,9 +791,13 @@ version consists of code written primarily by:
 \&        Todd C. Miller
 .Ve
 .PP
-See the \s-1HISTORY\s0 file in the \fBsudo\fR distribution or visit
-http://www.sudo.ws/sudo/history.html for a short history
-of \fBsudo\fR.
+See the \s-1CONTRIBUTORS\s0 file in the \fBsudo\fR distribution
+(http://www.sudo.ws/sudo/contributors.html) for a list of people
+who have contributed to \fBsudo\fR.
+.SH "HISTORY"
+.IX Header "HISTORY"
+See the \s-1HISTORY\s0 file in the \fBsudo\fR distribution
+(http://www.sudo.ws/sudo/history.html) for a brief history of sudo.
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 There is no easy way to prevent a user from gaining a root shell

@@ -71,8 +71,9 @@ DDEESSCCRRIIPPTTIIOONN
        following attributes:
 
        ssuuddooUUsseerr
-           A user name, uid (prefixed with '#'), Unix group (prefixed with a
-           '%') or user netgroup (prefixed with a '+').
+           A user name, user ID (prefixed with '#'), Unix group (prefixed with
+           '%'), Unix group ID (prefixed with '%#'), or user netgroup
+           (prefixed with '+').
 
        ssuuddooHHoosstt
            A host name, IP address, IP network, or host netgroup (prefixed
@@ -746,4 +747,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.3                         September 16, 2011               SUDOERS.LDAP(4)
+1.8.4                          January  6, 2012                SUDOERS.LDAP(4)

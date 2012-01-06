@@ -133,9 +133,31 @@ DDEESSCCRRIIPPTTIIOONN
                equal sign ('=') since the _n_a_m_e field will never include one
                itself but the _v_a_l_u_e might.
 
+               debug_flags=string
+                   A comma-separated list of debug flags that correspond to
+                   ssuuddoo's Debug entry in _/_e_t_c_/_s_u_d_o_._c_o_n_f, if there is one.  The
+                   flags are passed to the plugin as they appear in
+                   _/_e_t_c_/_s_u_d_o_._c_o_n_f.  The syntax used by ssuuddoo and the _s_u_d_o_e_r_s
+                   plugin is _s_u_b_s_y_s_t_e_m@_p_r_i_o_r_i_t_y but the plugin is free to use
+                   a different format so long as it does not include a command
+                   ,.
+
+                   For reference, the priorities supported by the ssuuddoo front
+                   end and _s_u_d_o_e_r_s are: _c_r_i_t, _e_r_r, _w_a_r_n, _n_o_t_i_c_e, _d_i_a_g, _i_n_f_o,
+                   _t_r_a_c_e and _d_e_b_u_g.
+
+                   The following subsystems are defined: _m_a_i_n, _m_e_m_o_r_y, _a_r_g_s,
+                   _e_x_e_c, _p_t_y, _u_t_m_p, _c_o_n_v, _p_c_o_m_m, _u_t_i_l, _l_i_s_t, _n_e_t_i_f, _a_u_d_i_t,
+                   _e_d_i_t, _s_e_l_i_n_u_x, _l_d_a_p, _m_a_t_c_h, _p_a_r_s_e_r, _a_l_i_a_s, _d_e_f_a_u_l_t_s, _a_u_t_h,
+                   _e_n_v, _l_o_g_g_i_n_g, _n_s_s, _r_b_t_r_e_e, _p_e_r_m_s, _p_l_u_g_i_n.  The subsystem
+                   _a_l_l includes every subsystem.
+
+                   There is not currently a way to specify a set of debug
+                   flags specific to the plugin--the flags are shared by ssuuddoo
+                   and the plugin.
+
                debug_level=number
-                   A numeric debug level, from 1-9, if specified via the -D
-                   flag.
+                   This setting has been deprecated in favor of _d_e_b_u_g___f_l_a_g_s.
 
                runas_user=string
                    The user name or uid to to run the command as, if specified
@@ -875,6 +897,7 @@ DDEESSCCRRIIPPTTIIOONN
         #define SUDO_CONV_ERROR_MSG        0x0003 /* error message */
         #define SUDO_CONV_INFO_MSG         0x0004 /* informational message */
         #define SUDO_CONV_PROMPT_MASK      0x0005 /* mask user input */
+        #define SUDO_CONV_DEBUG_MSG        0x0006 /* debugging message */
         #define SUDO_CONV_PROMPT_ECHO_OK   0x1000 /* flag: allow echo if no tty */
             int msg_type;
             int timeout;
@@ -901,10 +924,17 @@ DDEESSCCRRIIPPTTIIOONN
        buffer filled in to the struct sudo_conv_reply, if any.
 
        The printf-style function uses the same underlying mechanism as the
-       conversation function but only supports SUDO_CONV_INFO_MSG and
-       SUDO_CONV_ERROR_MSG for the _m_s_g___t_y_p_e parameter.  It can be more
-       convenient than using the conversation function if no user reply is
-       needed and supports standard _p_r_i_n_t_f_(_) escape sequences.
+       conversation function but only supports SUDO_CONV_INFO_MSG,
+       SUDO_CONV_ERROR_MSG and SUDO_CONV_DEBUG_MSG for the _m_s_g___t_y_p_e parameter.
+       It can be more convenient than using the conversation function if no
+       user reply is needed and supports standard _p_r_i_n_t_f_(_) escape sequences.
+
+       Unlike, SUDO_CONV_INFO_MSG and SUDO_CONV_ERROR_MSG, messages sent with
+       the <SUDO_CONV_DEBUG_MSG> _m_s_g___t_y_p_e are not directly user-visible.
+       Instead, they are logged to the file specified in the Debug statement
+       (if any) in the _/_e_t_c_/_s_u_d_o_._c_o_n_f file.  This allows a plugin to log
+       debugging information and is intended to be used in conjunction with
+       the _d_e_b_u_g___f_l_a_g_s setting.
 
        See the sample plugin for an example of the conversation function
        usage.
@@ -1030,4 +1060,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.3                         September 16, 2011               SUDO_PLUGIN(1m)
+1.8.4                          January  6, 2012                SUDO_PLUGIN(1m)

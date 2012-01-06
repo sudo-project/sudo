@@ -6,19 +6,19 @@ NNAAMMEE
        sudo, sudoedit - execute a command as another user
 
 SSYYNNOOPPSSIISS
-       ssuuddoo [--DD _l_e_v_e_l] --hh | --KK | --kk | --VV
+       ssuuddoo --hh | --KK | --kk | --VV
 
-       ssuuddoo --vv [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--DD _l_e_v_e_l] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d]
-       [--pp _p_r_o_m_p_t] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d]
+       ssuuddoo --vv [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t]
+       [--uu _u_s_e_r _n_a_m_e|_#_u_i_d]
 
-       ssuuddoo --ll[[ll]] [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--DD _l_e_v_e_l] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d]
-       [--pp _p_r_o_m_p_t] [--UU _u_s_e_r _n_a_m_e] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [_c_o_m_m_a_n_d]
+       ssuuddoo --ll[[ll]] [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t]
+       [--UU _u_s_e_r _n_a_m_e] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [_c_o_m_m_a_n_d]
 
-       ssuuddoo [--AAbbEEHHnnPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--DD _l_e_v_e_l] [--cc _c_l_a_s_s|_-]
+       ssuuddoo [--AAbbEEHHnnPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-]
        [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--rr _r_o_l_e] [--tt _t_y_p_e]
        [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [VVAARR=_v_a_l_u_e] [--ii | --ss] [_c_o_m_m_a_n_d]
 
-       ssuuddooeeddiitt [--AAnnSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-] [--DD _l_e_v_e_l]
+       ssuuddooeeddiitt [--AAnnSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-]
        [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] file ...
 
 DDEESSCCRRIIPPTTIIOONN
@@ -30,7 +30,7 @@ DDEESSCCRRIIPPTTIIOONN
 
        ssuuddoo supports a plugin architecture for security policies and
        input/output logging.  Third parties can develop and distribute their
-       own policy and I/O logging modules to work seemlessly with the ssuuddoo
+       own policy and I/O logging modules to work seamlessly with the ssuuddoo
        front end.  The default security policy is _s_u_d_o_e_r_s, which is configured
        via the file _/_e_t_c_/_s_u_d_o_e_r_s, or via LDAP.  See the PLUGINS section for
        more information.
@@ -109,9 +109,6 @@ OOPPTTIIOONNSS
                    as root, or the ssuuddoo command must be run from a shell that
                    is already root.  This option is only available on systems
                    with BSD login classes.
-
-       -D _l_e_v_e_l    Enable debugging of ssuuddoo plugins and ssuuddoo itself.  The
-                   _l_e_v_e_l may be a value from 1 through 9.
 
        -E          The --EE (_p_r_e_s_e_r_v_e _e_n_v_i_r_o_n_m_e_n_t) option indicates to the
                    security policy that the user wishes to preserve their
@@ -315,7 +312,7 @@ OOPPTTIIOONNSS
        line are subject to the same restrictions as normal environment
        variables with one important exception.  If the _s_e_t_e_n_v option is set in
        _s_u_d_o_e_r_s, the command to be run has the SETENV tag set or the command
-       matched is ALL, the user may set variables that would overwise be
+       matched is ALL, the user may set variables that would otherwise be
        forbidden.  See _s_u_d_o_e_r_s(4) for more information.
 
 PPLLUUGGIINNSS
@@ -332,6 +329,7 @@ PPLLUUGGIINNSS
         #   Plugin plugin_name plugin_path
         #   Path askpass /path/to/askpass
         #   Path noexec /path/to/noexec.so
+        #   Debug sudo /var/log/sudo_debug all@warn
         #
         # The plugin_path is relative to /usr/local/libexec unless
         #   fully qualified.
@@ -378,6 +376,38 @@ PPAATTHHSS
                        used to implement the _n_o_e_x_e_c functionality on systems
                        that support LD_PRELOAD or its equivalent.  Defaults to
                        _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c_/_s_u_d_o___n_o_e_x_e_c_._s_o.
+
+DDEEBBUUGG FFLLAAGGSS
+       ssuuddoo versions 1.8.4 and higher support a flexible debugging framework
+       that can help track down what ssuuddoo is doing internally when there is a
+       problem.
+
+       A Debug line consists of the Debug keyword, followed by the name of the
+       program to debug (ssuuddoo, vviissuuddoo, ssuuddoorreeppllaayy), the debug file name and a
+       comma-separated list of debug flags.  The debug flag syntax used by
+       ssuuddoo and the _s_u_d_o_e_r_s plugin is _s_u_b_s_y_s_t_e_m@_p_r_i_o_r_i_t_y but the plugin is
+       free to use a different format so long as it does not include a command
+       ,.
+
+       For instance:
+
+        Debug sudo /var/log/sudo_debug all@warn,plugin@info
+
+       would log all debugging statements at the _w_a_r_n level and higher in
+       addition to those at the _i_n_f_o level for the plugin subsystem.
+
+       Currently, only one Debug entry per program is supported.  The sudo
+       Debug entry is shared by the ssuuddoo front end, ssuuddooeeddiitt and the plugins.
+       A future release may add support for per-plugin Debug lines and/or
+       support for multiple debugging files for a single program.
+
+       For reference, the priorities supported by the ssuuddoo front end and
+       _s_u_d_o_e_r_s are: _c_r_i_t, _e_r_r, _w_a_r_n, _n_o_t_i_c_e, _d_i_a_g, _i_n_f_o, _t_r_a_c_e and _d_e_b_u_g.
+
+       The following subsystems are defined: _m_a_i_n, _m_e_m_o_r_y, _a_r_g_s, _e_x_e_c, _p_t_y,
+       _u_t_m_p, _c_o_n_v, _p_c_o_m_m, _u_t_i_l, _l_i_s_t, _n_e_t_i_f, _a_u_d_i_t, _e_d_i_t, _s_e_l_i_n_u_x, _l_d_a_p,
+       _m_a_t_c_h, _p_a_r_s_e_r, _a_l_i_a_s, _d_e_f_a_u_l_t_s, _a_u_t_h, _e_n_v, _l_o_g_g_i_n_g, _n_s_s, _r_b_t_r_e_e, _p_e_r_m_s,
+       _p_l_u_g_i_n.  The subsystem _a_l_l includes every subsystem.
 
 RREETTUURRNN VVAALLUUEESS
        Upon successful execution of a program, the exit status from ssuuddoo will
@@ -460,7 +490,7 @@ EENNVVIIRROONNMMEENNTT
                        SUDO_EDITOR is not set
 
 FFIILLEESS
-       _/_e_t_c_/_s_u_d_o_._c_o_n_f          ssuuddoo plugin and path configuration
+       _/_e_t_c_/_s_u_d_o_._c_o_n_f          ssuuddoo front end configuration
 
 EEXXAAMMPPLLEESS
        Note: the following examples assume a properly configured security
@@ -507,8 +537,13 @@ AAUUTTHHOORRSS
 
                Todd C. Miller
 
-       See the HISTORY file in the ssuuddoo distribution or visit
-       http://www.sudo.ws/sudo/history.html for a short history of ssuuddoo.
+       See the CONTRIBUTORS file in the ssuuddoo distribution
+       (http://www.sudo.ws/sudo/contributors.html) for a list of people who
+       have contributed to ssuuddoo.
+
+HHIISSTTOORRYY
+       See the HISTORY file in the ssuuddoo distribution
+       (http://www.sudo.ws/sudo/history.html) for a brief history of sudo.
 
 CCAAVVEEAATTSS
        There is no easy way to prevent a user from gaining a root shell if
@@ -547,4 +582,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.3                         September 16, 2011                      SUDO(1m)
+1.8.4                          January  6, 2012                       SUDO(1m)

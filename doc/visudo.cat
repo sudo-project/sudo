@@ -119,13 +119,14 @@ SSEEEE AALLSSOO
        _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(1m)
 
 AAUUTTHHOORR
-       Many people have worked on _s_u_d_o over the years; this version of vviissuuddoo
+       Many people have worked on ssuuddoo over the years; this version of vviissuuddoo
        was written by:
 
         Todd Miller
 
-       See the HISTORY file in the sudo distribution or visit
-       http://www.sudo.ws/sudo/history.html for more details.
+       See the CONTRIBUTORS file in the ssuuddoo distribution
+       (http://www.sudo.ws/sudo/contributors.html) for a list of people who
+       have contributed to ssuuddoo.
 
 CCAAVVEEAATTSS
        There is no easy way to prevent a user from gaining a root shell if the
@@ -149,4 +150,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.3                         September 16, 2011                    VISUDO(1m)
+1.8.4                          January  6, 2012                     VISUDO(1m)

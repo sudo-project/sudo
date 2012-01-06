@@ -140,7 +140,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "September 16, 2011" "1.8.3" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "January  6, 2012" "1.8.4" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -216,8 +216,9 @@ The equivalent of a sudoer in \s-1LDAP\s0 is a \f(CW\*(C`sudoRole\*(C'\fR.  It c
 the following attributes:
 .IP "\fBsudoUser\fR" 4
 .IX Item "sudoUser"
-A user name, uid (prefixed with \f(CW\*(Aq#\*(Aq\fR), Unix group (prefixed with
-a \f(CW\*(Aq%\*(Aq\fR) or user netgroup (prefixed with a \f(CW\*(Aq+\*(Aq\fR).
+A user name, user \s-1ID\s0 (prefixed with \f(CW\*(Aq#\*(Aq\fR), Unix group (prefixed with
+\&\f(CW\*(Aq%\*(Aq\fR), Unix group \s-1ID\s0 (prefixed with \f(CW\*(Aq%#\*(Aq\fR), or user netgroup
+(prefixed with \f(CW\*(Aq+\*(Aq\fR).
 .IP "\fBsudoHost\fR" 4
 .IX Item "sudoHost"
 A host name, \s-1IP\s0 address, \s-1IP\s0 network, or host netgroup (prefixed
