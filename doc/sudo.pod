@@ -1,4 +1,4 @@
-Copyright (c) 1994-1996, 1998-2005, 2007-2011
+Copyright (c) 1994-1996, 1998-2005, 2007-2012
 	Todd C. Miller <Todd.Miller@courtesan.com>
 
 Permission to use, copy, modify, and distribute this software for any
@@ -65,7 +65,7 @@ option was specified).
 
 B<sudo> supports a plugin architecture for security policies and
 input/output logging.  Third parties can develop and distribute
-their own policy and I/O logging modules to work seemlessly with
+their own policy and I/O logging modules to work seamlessly with
 the B<sudo> front end.  The default security policy is I<sudoers>,
 which is configured via the file F<@sysconfdir@/sudoers>, or via
 LDAP.  See the L<PLUGINS> section for more information.
@@ -407,7 +407,7 @@ command line are subject to the same restrictions as normal environment
 variables with one important exception.  If the I<setenv> option
 is set in I<sudoers>, the command to be run has the C<SETENV> tag
 set or the command matched is C<ALL>, the user may set variables
-that would overwise be forbidden.  See L<sudoers(5)> for more information.
+that would otherwise be forbidden.  See L<sudoers(5)> for more information.
 
 =head1 PLUGINS
 
@@ -424,6 +424,7 @@ which corresponds to the following F<@sysconfdir@/sudo.conf> file.
  #   Plugin plugin_name plugin_path
  #   Path askpass /path/to/askpass
  #   Path noexec /path/to/noexec.so
+ #   Debug sudo /var/log/sudo_debug all@warn
  #
  # The plugin_path is relative to @prefix@/libexec unless
  #   fully qualified.
@@ -476,6 +477,42 @@ functionality on systems that support C<LD_PRELOAD> or its equivalent.
 Defaults to F<@noexec_file@>.
 
 =back
+
+=head1 DEBUG FLAGS
+
+B<sudo> versions 1.8.4 and higher support a flexible debugging
+framework that can help track down what B<sudo> is doing internally
+when there is a problem.
+
+A C<Debug> line consists of the C<Debug> keyword, followed by the
+name of the program to debug (B<sudo>, B<visudo>, B<sudoreplay>),
+the debug file name and a comma-separated list of debug flags.
+The debug flag syntax used by B<sudo> and the I<sudoers> plugin is
+I<subsystem>@I<priority> but the plugin is free to use a different
+format so long as it does not include a command C<,>.
+
+For instance:
+
+ Debug sudo /var/log/sudo_debug all@warn,plugin@info
+
+would log all debugging statements at the I<warn> level and higher
+in addition to those at the I<info> level for the plugin subsystem.
+
+Currently, only one C<Debug> entry per program is supported.  The
+C<sudo> C<Debug> entry is shared by the B<sudo> front end, B<sudoedit>
+and the plugins.  A future release may add support for per-plugin
+C<Debug> lines and/or support for multiple debugging files for a
+single program.
+
+For reference, the priorities supported by the B<sudo> front end and
+I<sudoers> are: I<crit>, I<err>, I<warn>, I<notice>, I<diag>,
+I<info>, I<trace> and I<debug>.
+
+The following subsystems are defined: I<main>, I<memory>, I<args>,
+I<exec>, I<pty>, I<utmp>, I<conv>, I<pcomm>, I<util>, I<list>,
+I<netif>, I<audit>, I<edit>, I<selinux>, I<ldap>, I<match>, I<parser>,
+I<alias>, I<defaults>, I<auth>, I<env>, I<logging>, I<nss>, I<rbtree>,
+I<perms>, I<plugin>.  The subsystem I<all> includes every subsystem.
 
 =head1 RETURN VALUES
 
@@ -598,7 +635,7 @@ is not set
 
 =item F<@sysconfdir@/sudo.conf>
 
-B<sudo> plugin and path configuration
+B<sudo> front end configuration
 
 =back
 
