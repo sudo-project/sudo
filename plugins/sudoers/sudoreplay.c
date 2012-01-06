@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2012 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -85,16 +85,21 @@
 # include <locale.h>
 #endif
 #include <signal.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 
 #include <pathnames.h>
-
-#define SUDO_ERROR_WRAP 0 /* XXX */
 
 #include "missing.h"
 #include "alloc.h"
 #include "error.h"
 #include "gettext.h"
 #include "sudo_plugin.h"
+#include "sudo_conf.h"
+#include "sudo_debug.h"
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048
@@ -230,7 +235,7 @@ static int parse_timing(const char *buf, const char *decimal, int *idx, double *
 int
 main(int argc, char *argv[])
 {
-    int ch, idx, plen, nready, interactive = 0, listonly = 0;
+    int ch, idx, plen, nready, exitcode = 0, interactive = 0, listonly = 0;
     const char *id, *user = NULL, *pattern = NULL, *tty = NULL, *decimal = ".";
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
     double seconds, to_wait, speed = 1.0, max_wait = 0;
@@ -239,6 +244,14 @@ main(int argc, char *argv[])
     sigaction_t sa;
     size_t len, nbytes, nread, off;
     ssize_t nwritten;
+    debug_decl(main, SUDO_DEBUG_MAIN)
+
+#if defined(SUDO_DEVEL) && defined(__OpenBSD__)
+    {
+	extern char *malloc_options;
+	malloc_options = "AFGJPR";
+    }  
+#endif
 
 #if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
     setprogname(argc > 0 ? argv[0] : "sudoreplay");
@@ -250,6 +263,9 @@ main(int argc, char *argv[])
 #endif
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have sudoreplay domain */
     textdomain("sudoers");
+
+    /* Read sudo.conf. */
+    sudo_conf_read();
 
     while ((ch = getopt(argc, argv, "d:f:hlm:s:V")) != -1) {
 	switch(ch) {
@@ -290,7 +306,7 @@ main(int argc, char *argv[])
 	    break;
 	case 'V':
 	    (void) printf(_("%s version %s\n"), getprogname(), PACKAGE_VERSION);
-	    exit(0);
+	    goto done;
 	default:
 	    usage(1);
 	    /* NOTREACHED */
@@ -300,8 +316,10 @@ main(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    if (listonly)
-	exit(list_sessions(argc, argv, pattern, user, tty));
+    if (listonly) {
+	exitcode = list_sessions(argc, argv, pattern, user, tty);
+	goto done;
+    }
 
     if (argc != 1)
 	usage(1);
@@ -434,7 +452,9 @@ main(int argc, char *argv[])
 	}
     }
     term_restore(STDIN_FILENO, 1);
-    exit(0);
+done:
+    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
+    exit(exitcode);
 }
 
 static void
@@ -457,7 +477,7 @@ delay(double secs)
       rval = nanosleep(&ts, &rts);
     } while (rval == -1 && errno == EINTR);
     if (rval == -1) {
-	error(1, _("nanosleep: tv_sec %ld, tv_nsec %ld"),
+	error2(1, _("nanosleep: tv_sec %ld, tv_nsec %ld"),
 	    (long)ts.tv_sec, (long)ts.tv_nsec);
     }
 }
@@ -467,14 +487,14 @@ open_io_fd(char *path, int len, const char *suffix, union io_fd *fdp)
 {
     path[len] = '\0';
     strlcat(path, suffix, PATH_MAX);
+    debug_decl(open_io_fd, SUDO_DEBUG_UTIL)
 
 #ifdef HAVE_ZLIB_H
     fdp->g = gzopen(path, "r");
-    return fdp->g ? 0 : -1;
 #else
     fdp->f = fopen(path, "r");
-    return fdp->f ? 0 : -1;
 #endif
+    debug_return_int(fdp->v ? 0 : -1);
 }
 
 /*
@@ -485,6 +505,7 @@ parse_expr(struct search_node **headp, char *argv[])
 {
     struct search_node *sn, *newsn;
     char or = 0, not = 0, type, **av;
+    debug_decl(parse_expr, SUDO_DEBUG_UTIL)
 
     sn = *headp;
     for (av = argv; *av; av++) {
@@ -561,7 +582,7 @@ parse_expr(struct search_node **headp, char *argv[])
 		errorx(1, _("unmatched ')' in expression"));
 	    if (node_stack[stack_top])
 		sn->next = node_stack[stack_top]->next;
-	    return av - argv + 1;
+	    debug_return_int(av - argv + 1);
 	bad:
 	default:
 	    errorx(1, _("unknown search term \"%s\""), *av);
@@ -607,14 +628,15 @@ parse_expr(struct search_node **headp, char *argv[])
     if (not)
 	errorx(1, _("illegal trailing \"!\""));
 
-    return av - argv;
+    debug_return_int(av - argv);
 }
 
-static int
+static bool
 match_expr(struct search_node *head, struct log_info *log)
 {
     struct search_node *sn;
-    int matched = 1, rc;
+    bool matched = true, rc;
+    debug_decl(match_expr, SUDO_DEBUG_UTIL)
 
     for (sn = head; sn; sn = sn->next) {
 	/* If we have no match, skip ahead to the next OR entry. */
@@ -663,7 +685,7 @@ match_expr(struct search_node *head, struct log_info *log)
 	if (sn->negated)
 	    matched = !matched;
     }
-    return matched;
+    debug_return_bool(matched);
 }
 
 static int
@@ -674,6 +696,7 @@ list_session(char *logfile, REGEX_T *re, const char *user, const char *tty)
     struct log_info li;
     size_t bufsize = 0, cwdsize = 0, cmdsize = 0;
     int rval = -1;
+    debug_decl(list_session, SUDO_DEBUG_UTIL)
 
     fp = fopen(logfile, "r");
     if (fp == NULL) {
@@ -754,9 +777,10 @@ list_session(char *logfile, REGEX_T *re, const char *user, const char *tty)
 
 done:
     fclose(fp);
-    return rval;
+    debug_return_int(rval);
 }
 
+/* XXX - always returns 0, calls error() on failure */
 static int
 find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
 {
@@ -766,6 +790,7 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
     size_t sdlen;
     int len;
     char pathbuf[PATH_MAX];
+    debug_decl(find_sessions, SUDO_DEBUG_UTIL)
 
     d = opendir(dir);
     if (d == NULL)
@@ -804,14 +829,16 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
     }
     closedir(d);
 
-    return 0;
+    debug_return_int(0);
 }
 
+/* XXX - always returns 0, calls error() on failure */
 static int
 list_sessions(int argc, char **argv, const char *pattern, const char *user,
     const char *tty)
 {
     REGEX_T rebuf, *re = NULL;
+    debug_decl(list_sessions, SUDO_DEBUG_UTIL)
 
     /* Parse search expression if present */
     parse_expr(&search_expr, argv);
@@ -827,7 +854,7 @@ list_sessions(int argc, char **argv, const char *pattern, const char *user,
     re = (char *) pattern;
 #endif /* HAVE_REGCOMP */
 
-    return find_sessions(session_dir, re, user, tty);
+    debug_return_int(find_sessions(session_dir, re, user, tty));
 }
 
 /*
@@ -842,6 +869,7 @@ check_input(int ttyfd, double *speed)
     struct timeval tv;
     char ch;
     ssize_t n;
+    debug_decl(check_input, SUDO_DEBUG_UTIL)
 
     fdsr = (fd_set *)emalloc2(howmany(ttyfd + 1, NFDBITS), sizeof(fd_mask));
 
@@ -873,6 +901,7 @@ check_input(int ttyfd, double *speed)
 	}
     }
     free(fdsr);
+    debug_return;
 }
 
 /*
@@ -894,6 +923,7 @@ parse_timing(buf, decimal, idx, seconds, nbytes)
     long l;
     double d, fract = 0;
     char *cp, *ep;
+    debug_decl(parse_timing, SUDO_DEBUG_UTIL)
 
     /* Parse index */
     ul = strtoul(buf, &ep, 10);
@@ -934,9 +964,9 @@ parse_timing(buf, decimal, idx, seconds, nbytes)
 	goto bad;
     *nbytes = (size_t)ul;
 
-    return 1;
+    debug_return_int(1);
 bad:
-    return 0;
+    debug_return_int(0);
 }
 
 static void
