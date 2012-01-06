@@ -17,6 +17,7 @@ Makefile$
 
 ^ChangeLog$
 ^doc/.*\.man$
+^doc/varsub$
 
 ^pathnames\.h$
 ^src/sudo$
