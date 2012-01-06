@@ -767,6 +767,10 @@
 /* The name of the sudoers plugin, including extension. */
 #undef SUDOERS_PLUGIN
 
+/* An instance string to append to the username (separated by a slash) for
+   Kerberos V authentication */
+#undef SUDO_KRB5_INSTANCE
+
 /* The umask that the sudo-run prog should use. */
 #undef SUDO_UMASK
 

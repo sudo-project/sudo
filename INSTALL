@@ -180,6 +180,13 @@ Special features/options:
 	does not use the Kerberos cookie scheme.  Will not work for
 	Kerberos V older than version 1.1.
 
+  --enable-kerb5-instance=string
+        By default, the user name is used as the principal name
+        when authenticating via Kerberos V.  If this option is
+        enabled, the specified instance string will be appended to
+        the user name (separated by a slash) when creating the
+        principal name.
+
   --with-ldap[=DIR]
 	Enable LDAP support.  If specified, DIR is the base directory
 	containing the LDAP include and lib directories.  Please see

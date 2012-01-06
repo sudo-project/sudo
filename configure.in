@@ -2584,6 +2584,18 @@ if test ${with_kerb5-'no'} != "no"; then
   	AC_DEFINE(HAVE_KRB5_GET_INIT_CREDS_OPT_FREE_TWO_ARGS)
     fi
     LIBS="$_LIBS"
+    AC_MSG_CHECKING(whether to use an instance name for Kerberos V)
+    AC_ARG_ENABLE(kerb5-instance,
+    [AS_HELP_STRING([--enable-kerb5-instance], [instance string to append to the username (separated by a slash)])],
+	[ case "$enableval" in
+	    yes)	AC_MSG_ERROR(["must give --enable-kerb5-instance an argument."])
+			;;
+	    no)		AC_MSG_RESULT(no)
+			;;
+	    *)		SUDO_DEFINE_UNQUOTED(SUDO_KRB5_INSTANCE, "$enableval")
+			AC_MSG_RESULT([$enableval])
+			;;
+	esac], AC_MSG_RESULT(no))
 fi
 
 dnl
@@ -3166,6 +3178,7 @@ AH_TEMPLATE(socklen_t, [Define to `unsigned int' if <sys/socket.h> doesn't defin
 AH_TEMPLATE(HAVE_STRUCT_UTMP_UT_EXIT, [Define to 1 if `ut_exit' is a member of `struct utmp'.])
 AH_TEMPLATE(HAVE_STRUCT_UTMPX_UT_EXIT, [Define to 1 if `ut_exit' is a member of `struct utmpx'.])
 AH_TEMPLATE(HAVE___FUNC__, [Define to 1 if the compiler supports the C99 __func__ variable.])
+AH_TEMPLATE(SUDO_KRB5_INSTANCE, [An instance string to append to the username (separated by a slash) for Kerberos V authentication])
 
 dnl
 dnl Bits to copy verbatim into config.h.in

@@ -891,6 +891,7 @@ enable_sia
 enable_largefile
 with_pam_login
 enable_pam_session
+enable_kerb5_instance
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1547,6 +1548,8 @@ Optional Features:
   --disable-sia           Disable SIA on Digital UNIX
   --disable-largefile     omit support for large files
   --disable-pam-session   Disable PAM session support
+  --enable-kerb5-instance instance string to append to the username (separated
+                          by a slash)
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -18399,6 +18402,29 @@ done
 
     fi
     LIBS="$_LIBS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use an instance name for Kerberos V" >&5
+$as_echo_n "checking whether to use an instance name for Kerberos V... " >&6; }
+    # Check whether --enable-kerb5-instance was given.
+if test "${enable_kerb5_instance+set}" = set; then :
+  enableval=$enable_kerb5_instance;  case "$enableval" in
+	    yes)	as_fn_error $? "\"must give --enable-kerb5-instance an argument.\"" "$LINENO" 5
+			;;
+	    no)		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+			;;
+	    *)		cat >>confdefs.h <<EOF
+#define SUDO_KRB5_INSTANCE "$enableval"
+EOF
+
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enableval" >&5
+$as_echo "$enableval" >&6; }
+			;;
+	esac
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
 fi
 
 if test ${with_AFS-'no'} = "yes"; then
@@ -22036,6 +22062,7 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+
 
 
 
