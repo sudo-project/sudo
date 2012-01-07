@@ -17071,6 +17071,147 @@ if test -n "$NEED_SNPRINTF"; then
 esac
 
 fi
+found=no
+for ac_func in getaddrinfo
+do :
+  ac_fn_c_check_func "$LINENO" "getaddrinfo" "ac_cv_func_getaddrinfo"
+if test "x$ac_cv_func_getaddrinfo" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GETADDRINFO 1
+_ACEOF
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for getaddrinfo in -lsocket" >&5
+$as_echo_n "checking for getaddrinfo in -lsocket... " >&6; }
+if ${ac_cv_lib_socket_getaddrinfo+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lsocket  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char getaddrinfo ();
+int
+main ()
+{
+return getaddrinfo ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_socket_getaddrinfo=yes
+else
+  ac_cv_lib_socket_getaddrinfo=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_socket_getaddrinfo" >&5
+$as_echo "$ac_cv_lib_socket_getaddrinfo" >&6; }
+if test "x$ac_cv_lib_socket_getaddrinfo" = xyes; then :
+  NET_LIBS="${NET_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"; found=yes
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for getaddrinfo in -linet" >&5
+$as_echo_n "checking for getaddrinfo in -linet... " >&6; }
+if ${ac_cv_lib_inet_getaddrinfo+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-linet  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char getaddrinfo ();
+int
+main ()
+{
+return getaddrinfo ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_inet_getaddrinfo=yes
+else
+  ac_cv_lib_inet_getaddrinfo=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_inet_getaddrinfo" >&5
+$as_echo "$ac_cv_lib_inet_getaddrinfo" >&6; }
+if test "x$ac_cv_lib_inet_getaddrinfo" = xyes; then :
+  NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"; found=yes
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unable to find getaddrinfo() trying -lsocket -lnsl" >&5
+$as_echo "$as_me: WARNING: unable to find getaddrinfo() trying -lsocket -lnsl" >&2;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for getaddrinfo in -lsocket" >&5
+$as_echo_n "checking for getaddrinfo in -lsocket... " >&6; }
+if ${ac_cv_lib_socket_getaddrinfo_lnsl+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lsocket -lnsl $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char getaddrinfo ();
+int
+main ()
+{
+return getaddrinfo ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_socket_getaddrinfo_lnsl=yes
+else
+  ac_cv_lib_socket_getaddrinfo_lnsl=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_socket_getaddrinfo_lnsl" >&5
+$as_echo "$ac_cv_lib_socket_getaddrinfo_lnsl" >&6; }
+if test "x$ac_cv_lib_socket_getaddrinfo_lnsl" = xyes; then :
+  NET_LIBS="${NET_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"; found=yes
+fi
+
+fi
+
+fi
+
+fi
+done
+
+if test X"$found" != X"no"; then
+    $as_echo "#define HAVE_GETADDRINFO 1" >>confdefs.h
+
+fi
 ac_fn_c_check_func "$LINENO" "socket" "ac_cv_func_socket"
 if test "x$ac_cv_func_socket" = xyes; then :
 
@@ -17464,17 +17605,6 @@ fi
 fi
 
 fi
-
-for ac_func in getaddrinfo
-do :
-  ac_fn_c_check_func "$LINENO" "getaddrinfo" "ac_cv_func_getaddrinfo"
-if test "x$ac_cv_func_getaddrinfo" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_GETADDRINFO 1
-_ACEOF
-
-fi
-done
 
 for ac_func in getprogname
 do :
