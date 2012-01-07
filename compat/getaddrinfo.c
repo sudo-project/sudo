@@ -51,10 +51,12 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <netdb.h>
+#include <errno.h>
 
 #include <netinet/in.h>
 
 #include "compat/getaddrinfo.h"
+#include "missing.h"
 
 /* We need access to h_errno to map errors from gethostbyname. */
 #if !HAVE_DECL_H_ERRNO
