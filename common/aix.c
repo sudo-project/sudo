@@ -34,6 +34,7 @@
 #include "missing.h"
 #include "alloc.h"
 #include "error.h"
+#include "sudo_debug.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "gettext.h"
@@ -72,11 +73,12 @@ static int
 aix_getlimit(char *user, char *lim, rlim64_t *valp)
 {
     int val;
+    debug_decl(aix_getlimit, SUDO_DEBUG_UTIL)
 
     if (getuserattr(user, lim, &val, SEC_INT) != 0)
-	return -1;
+	debug_return_int(-1);
     *valp = val;
-    return 0;
+    debug_return_int(0);
 }
 
 static void
@@ -85,6 +87,7 @@ aix_setlimits(char *user)
     struct rlimit64 rlim;
     rlim64_t val;
     int n;
+    debug_decl(aix_setlimits, SUDO_DEBUG_UTIL)
 
     if (setuserdb(S_READ) != 0)
 	error(1, "unable to open userdb");
@@ -126,6 +129,7 @@ aix_setlimits(char *user)
 	(void)setrlimit64(aix_limits[n].resource, &rlim);
     }
     enduserdb();
+    debug_return;
 }
 
 #ifdef HAVE_SETAUTHDB
@@ -138,6 +142,7 @@ void
 aix_setauthdb(char *user)
 {
     char *registry;
+    debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
 
     if (user != NULL) {
 	if (setuserdb(S_READ) != 0)
@@ -149,6 +154,7 @@ aix_setauthdb(char *user)
 	}
 	enduserdb();
     }
+    debug_return;
 }
 
 /*
@@ -157,8 +163,12 @@ aix_setauthdb(char *user)
 void
 aix_restoreauthdb(void)
 {
+    debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
+
     if (setauthdb(NULL, NULL) != 0)
 	error(1, _("unable to restore registry"));
+
+    debug_return;
 }
 #endif
 
@@ -167,6 +177,7 @@ aix_prep_user(char *user, const char *tty)
 {
     char *info;
     int len;
+    debug_decl(aix_setauthdb, SUDO_DEBUG_UTIL)
 
     /* set usrinfo, like login(1) does */
     len = easprintf(&info, "NAME=%s%cLOGIN=%s%cLOGNAME=%s%cTTY=%s%c",
@@ -181,5 +192,7 @@ aix_prep_user(char *user, const char *tty)
 
     /* set resource limits */
     aix_setlimits(user);
+
+    debug_return;
 }
 #endif /* HAVE_GETUSERATTR */
