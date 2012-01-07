@@ -16816,19 +16816,6 @@ esac
 
   fi
 
-ac_fn_c_check_func "$LINENO" "getaddrinfo" "ac_cv_func_getaddrinfo"
-if test "x$ac_cv_func_getaddrinfo" = xyes; then :
-  $as_echo "#define HAVE_GETADDRINFO 1" >>confdefs.h
-
-else
-  case " $LIBOBJS " in
-  *" getaddrinfo.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS getaddrinfo.$ac_objext"
- ;;
-esac
-
-fi
-
 ac_fn_c_check_func "$LINENO" "memrchr" "ac_cv_func_memrchr"
 if test "x$ac_cv_func_memrchr" = xyes; then :
   $as_echo "#define HAVE_MEMRCHR 1" >>confdefs.h
@@ -17477,6 +17464,17 @@ fi
 fi
 
 fi
+
+for ac_func in getaddrinfo
+do :
+  ac_fn_c_check_func "$LINENO" "getaddrinfo" "ac_cv_func_getaddrinfo"
+if test "x$ac_cv_func_getaddrinfo" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GETADDRINFO 1
+_ACEOF
+
+fi
+done
 
 for ac_func in getprogname
 do :

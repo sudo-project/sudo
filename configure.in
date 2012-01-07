@@ -2137,7 +2137,7 @@ AC_CHECK_FUNCS(utimes, [AC_CHECK_FUNCS(futimes futimesat, [break])], [AC_CHECK_F
 AC_CHECK_FUNCS(killpg, [], [AC_LIBOBJ(killpg)])
 SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)])
 SUDO_FUNC_ISBLANK
-AC_REPLACE_FUNCS(getaddrinfo memrchr strlcpy strlcat setenv)
+AC_REPLACE_FUNCS(memrchr strlcpy strlcat setenv)
 AC_CHECK_FUNCS(nanosleep, [], [
     # On Solaris, nanosleep is in librt
     AC_CHECK_LIB(rt, nanosleep, [REPLAY_LIBS="${REPLAY_LIBS} -lrt"], [AC_LIBOBJ(nanosleep)])
@@ -2187,6 +2187,10 @@ dnl
 dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
 dnl
 AC_CHECK_FUNC(syslog, , [AC_CHECK_LIB(socket, syslog, [NET_LIBS="${NET_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(nsl, syslog, [NET_LIBS="${NET_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, syslog, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"])))])
+dnl
+dnl Defer getaddrinfo(3) check until after network libs are added to LIBS
+dnl
+AC_CHECK_FUNCS(getaddrinfo)
 dnl
 dnl Check for getprogname() or __progname
 dnl
