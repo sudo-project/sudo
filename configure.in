@@ -2188,9 +2188,15 @@ dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
 dnl
 AC_CHECK_FUNC(syslog, , [AC_CHECK_LIB(socket, syslog, [NET_LIBS="${NET_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(nsl, syslog, [NET_LIBS="${NET_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, syslog, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"])))])
 dnl
-dnl Defer getaddrinfo(3) check until after network libs are added to LIBS
+dnl If getaddrinfo(3) not in libc, check -lsocket and -linet
+dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols.
 dnl
-AC_CHECK_FUNCS(getaddrinfo)
+found=no
+AC_CHECK_FUNCS(getaddrinfo, [], [AC_CHECK_LIB(socket, getaddrinfo, [NET_LIBS="${NET_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"; found=yes], AC_CHECK_LIB(inet, getaddrinfo, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"; found=yes], AC_MSG_WARN(unable to find getaddrinfo() trying -lsocket -lnsl)
+AC_CHECK_LIB(socket, getaddrinfo, [NET_LIBS="${NET_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"; found=yes], [], -lnsl)))])
+if test X"$found" != X"no"; then
+    AC_DEFINE(HAVE_GETADDRINFO)
+fi
 dnl
 dnl Check for getprogname() or __progname
 dnl
