@@ -924,7 +924,7 @@ disable_execute(struct command_details *details)
     cp = fmt_string("LD_PRELOAD", sudo_conf_noexec_path());
 # endif
     if (cp == NULL)
-	error(1, NULL);
+	errorx(1, _("unable to allocate memory"));
     nenvp[env_len++] = cp;
     nenvp[env_len] = NULL;
 
