@@ -30,6 +30,8 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include "gettext.h"
+#include "sudo_debug.h"
 #include "bsm_audit.h"
 
 /*
