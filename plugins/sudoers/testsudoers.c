@@ -49,6 +49,8 @@
 #endif /* HAVE_UNISTD_H */
 #ifdef HAVE_FNMATCH
 # include <fnmatch.h>
+#else
+# include "compat/fnmatch.h"
 #endif /* HAVE_FNMATCH */
 #ifdef HAVE_NETGROUP_H
 # include <netgroup.h>
@@ -59,17 +61,12 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#define SUDO_ERROR_WRAP 0 /* XXX */
-
 #include "tsgetgrpw.h"
 #include "sudoers.h"
 #include "interfaces.h"
 #include "parse.h"
+#include "sudo_conf.h"
 #include <gram.h>
-
-#ifndef HAVE_FNMATCH
-# include "compat/fnmatch.h"
-#endif /* HAVE_FNMATCH */
 
 /*
  * Function Prototypes
@@ -135,7 +132,8 @@ main(int argc, char *argv[])
     char *p, *grfile, *pwfile;
     char hbuf[MAXHOSTNAMELEN + 1];
     int match, host_match, runas_match, cmnd_match;
-    int ch, dflag;
+    int ch, dflag, exitcode = 0;
+    debug_decl(main, SUDO_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     malloc_options = "AFGJPR";
@@ -147,6 +145,15 @@ main(int argc, char *argv[])
 #if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
     setprogname(argc > 0 ? argv[0] : "testsudoers");
 #endif
+
+#ifdef HAVE_SETLOCALE 
+    setlocale(LC_ALL, "");
+#endif
+    bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have own domain */
+    textdomain("sudoers");
+
+    /* Read sudo.conf. */
+    sudo_conf_read();
 
     dflag = 0;
     grfile = pwfile = NULL;
@@ -286,8 +293,10 @@ main(int argc, char *argv[])
     if (dflag) {
 	(void) putchar('\n');
 	dump_sudoers();
-	if (argc < 2)
-	    exit(parse_error ? 1 : 0);
+	if (argc < 2) {
+	    exitcode = parse_error ? 1 : 0;
+	    goto done;
+	}
     }
 
     /* This loop must match the one in sudo_file_lookup() */
@@ -329,14 +338,17 @@ main(int argc, char *argv[])
      *	2 - command not matched
      *	3 - command denied
      */
-    if (parse_error)
-	exit(1);
-    exit(match == ALLOW ? 0 : match + 3);
+    exitcode = parse_error ? 1 : (match == ALLOW ? 0 : match + 3);
+done:
+    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
+    exit(exitcode);
 }
 
 static void
 set_runaspw(const char *user)
 {
+    debug_decl(main, SUDO_DEBUG_UTIL)
+
     if (runas_pw != NULL)
 	pw_delref(runas_pw);
     if (*user == '#') {
@@ -346,11 +358,15 @@ set_runaspw(const char *user)
 	if ((runas_pw = sudo_getpwnam(user)) == NULL)
 	    errorx(1, _("unknown user: %s"), user);
     }
+
+    debug_return;
 }
 
 static void
 set_runasgr(const char *group)
 {
+    debug_decl(main, SUDO_DEBUG_UTIL)
+
     if (runas_gr != NULL)
 	gr_delref(runas_gr);
     if (*group == '#') {
@@ -360,6 +376,8 @@ set_runasgr(const char *group)
 	if ((runas_gr = sudo_getgrnam(group)) == NULL)
 	    errorx(1, _("unknown group: %s"), group);
     }
+
+    debug_return;
 }
 
 /* 
@@ -395,7 +413,9 @@ set_fqdn(void)
 FILE *
 open_sudoers(const char *path, bool doedit, bool *keepopen)
 {
-    return fopen(path, "r");
+    debug_decl(open_sudoers, SUDO_DEBUG_UTIL)
+
+    debug_return_ptr(fopen(path, "r"));
 }
 
 void
@@ -428,6 +448,7 @@ void
 print_member(struct member *m)
 {
     struct sudo_command *c;
+    debug_decl(print_member, SUDO_DEBUG_UTIL)
 
     if (m->negated)
 	putchar('!');
@@ -440,6 +461,8 @@ print_member(struct member *m)
 	printf("%s%s%s", c->cmnd, c->args ? " " : "",
 	    c->args ? c->args : "");
     }
+
+    debug_return;
 }
 
 void
@@ -447,6 +470,7 @@ print_defaults(void)
 {
     struct defaults *d;
     struct member *m;
+    debug_decl(print_member, SUDO_DEBUG_UTIL)
 
     tq_foreach_fwd(&defaults, d) {
 	(void) fputs("Defaults", stdout);
@@ -475,6 +499,8 @@ print_defaults(void)
 	}
 	putchar('\n');
     }
+
+    debug_return;
 }
 
 int
@@ -483,6 +509,7 @@ print_alias(void *v1, void *v2)
     struct alias *a = (struct alias *)v1;
     struct member *m;
     struct sudo_command *c;
+    debug_decl(print_alias, SUDO_DEBUG_UTIL)
 
     switch (a->type) {
 	case HOSTALIAS:
@@ -512,7 +539,7 @@ print_alias(void *v1, void *v2)
 	}
     }
     putchar('\n');
-    return 0;
+    debug_return_int(0);
 }
 
 void
@@ -522,6 +549,7 @@ print_privilege(struct privilege *priv)
     struct member *m;
     struct privilege *p;
     struct cmndtag tags;
+    debug_decl(print_privilege, SUDO_DEBUG_UTIL)
 
     for (p = priv; p != NULL; p = p->next) {
 	if (p != priv)
@@ -573,6 +601,7 @@ print_privilege(struct privilege *priv)
 	    memcpy(&tags, &cs->tags, sizeof(tags));
 	}
     }
+    debug_return;
 }
 
 void
@@ -580,6 +609,7 @@ print_userspecs(void)
 {
     struct member *m;
     struct userspec *us;
+    debug_decl(print_userspecs, SUDO_DEBUG_UTIL)
 
     tq_foreach_fwd(&userspecs, us) {
 	tq_foreach_fwd(&us->users, m) {
@@ -591,6 +621,7 @@ print_userspecs(void)
 	print_privilege(us->privileges.first); /* XXX */
 	putchar('\n');
     }
+    debug_return;
 }
 
 static int
@@ -598,6 +629,7 @@ testsudoers_printf(int msg_type, const char *fmt, ...)
 {
     va_list ap;
     FILE *fp;
+    debug_decl(testsudoers_printf, SUDO_DEBUG_UTIL)
             
     switch (msg_type) {
     case SUDO_CONV_INFO_MSG:
@@ -608,19 +640,21 @@ testsudoers_printf(int msg_type, const char *fmt, ...)
 	break;
     default:
 	errno = EINVAL;
-	return -1;
+	debug_return_int(-1);
     }
    
     va_start(ap, fmt);
     vfprintf(fp, fmt, ap);
     va_end(ap);
    
-    return 0;
+    debug_return_int(0);
 }
 
 void
 dump_sudoers(void)
 {
+    debug_decl(dump_sudoers, SUDO_DEBUG_UTIL)
+
     print_defaults();
 
     putchar('\n');
@@ -628,6 +662,8 @@ dump_sudoers(void)
 
     putchar('\n');
     print_userspecs();
+
+    debug_return;
 }
 
 static int testsudoers_print(const char *msg)
