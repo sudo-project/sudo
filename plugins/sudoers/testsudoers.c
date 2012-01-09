@@ -60,6 +60,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#ifdef HAVE_SETLOCALE
+# include <locale.h>
+#endif
 
 #include "tsgetgrpw.h"
 #include "sudoers.h"
