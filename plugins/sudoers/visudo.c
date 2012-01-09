@@ -1046,7 +1046,7 @@ alias_remove_recursive(char *name, int type)
     struct member *m;
     struct alias *a;
     bool rval = true;
-    debug_decl(alias_remove_recursive, SUDO_DEBUG_UTIL)
+    debug_decl(alias_remove_recursive, SUDO_DEBUG_ALIAS)
 
     if ((a = alias_find(name, type)) != NULL) {
 	tq_foreach_fwd(&a->members, m) {
@@ -1069,7 +1069,7 @@ check_alias(char *name, int type, int strict, int quiet)
     struct member *m;
     struct alias *a;
     int errors = 0;
-    debug_decl(check_alias, SUDO_DEBUG_UTIL)
+    debug_decl(check_alias, SUDO_DEBUG_ALIAS)
 
     if ((a = alias_find(name, type)) != NULL) {
 	/* check alias contents */
@@ -1113,7 +1113,7 @@ check_aliases(bool strict, bool quiet)
     struct userspec *us;
     struct defaults *d;
     int atype, errors = 0;
-    debug_decl(check_aliases, SUDO_DEBUG_UTIL)
+    debug_decl(check_aliases, SUDO_DEBUG_ALIAS)
 
     alias_freelist = rbcreate(alias_compare);
 
