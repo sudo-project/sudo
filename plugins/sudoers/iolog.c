@@ -423,6 +423,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     char pathbuf[PATH_MAX], sessid[7];
     char *tofree = NULL;
     char * const *cur;
+    const char *debug_flags = NULL;
     FILE *io_logfile;
     size_t len;
     int rval = -1;
@@ -447,6 +448,16 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 
     sudo_setpwent();
     sudo_setgrent();
+
+    /*
+     * Check for debug flags in settings list.
+     */
+    for (cur = settings; *cur != NULL; cur++) {
+	if (strncmp(*cur, "debug_flags=", sizeof("debug_flags=") - 1) == 0)
+	    debug_flags = *cur + sizeof("debug_flags=") - 1;
+    }
+    if (debug_flags != NULL)
+	sudo_debug_init(NULL, debug_flags);
 
     /*
      * Pull iolog settings out of command_info, if any.
