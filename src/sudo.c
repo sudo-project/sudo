@@ -89,6 +89,10 @@
 #ifdef HAVE_PRIV_SET
 # include <priv.h>
 #endif
+#ifdef HAVE_STRUCT_KINFO_PROC_KI_TDEV
+# include <sys/sysctl.h>
+# include <sys/user.h>
+#endif
 
 #include "sudo.h"
 #include "sudo_plugin.h"
@@ -420,6 +424,44 @@ get_user_groups(struct user_details *ud)
     debug_return_str(gid_list);
 }
 
+#ifdef HAVE_STRUCT_KINFO_PROC_KI_TDEV
+/*
+ * Return a string from ttyname() containing the tty to which the process is
+ * attached or NULL if there is no tty associated with the process (or its
+ * parent).  First tries std{in,out,err} then falls back to the parent's
+ * entry via sysctl.  We could try following the parent all the way to pid 1
+ * but that is probably overkill.
+ */
+static char *
+get_process_tty(void)
+{
+    char *tty = NULL;
+    struct kinfo_proc *ki_proc = NULL;
+    size_t size = sizeof(*ki_proc);
+    int mib[4], rc;
+    debug_decl(get_process_tty, SUDO_DEBUG_UTIL)
+
+    if ((tty = ttyname(STDIN_FILENO)) == NULL &&
+	(tty = ttyname(STDOUT_FILENO)) == NULL &&
+	(tty = ttyname(STDERR_FILENO)) == NULL) {
+	/* No tty for child, check the parent via sysctl. */
+	mib[0] = CTL_KERN;
+	mib[1] = KERN_PROC;
+	mib[2] = KERN_PROC_PID;
+	mib[3] = (int)getppid();
+	do {
+	    size += size / 10;
+	    ki_proc = erealloc(ki_proc, size);
+	    rc = sysctl(mib, 4, ki_proc, &size, NULL, 0);
+	} while (rc == -1 && errno == ENOMEM);
+	if (rc != -1)
+	    tty = devname(ki_proc->ki_tdev, S_IFCHR);
+	efree(ki_proc);
+    }
+
+    debug_return_str(tty);
+}
+#else
 /*
  * Return a string from ttyname() containing the tty to which the process is
  * attached or NULL if there is no tty associated with the process (or its
@@ -452,6 +494,7 @@ get_process_tty(void)
 
     debug_return_str(tty);
 }
+#endif /* HAVE_STRUCT_KINFO_PROC_KI_TDEV */
 
 /*
  * Return user information as an array of name=value pairs.

@@ -2028,6 +2028,12 @@ AC_INCLUDES_DEFAULT
 #include <sys/socket.h>])
 SUDO_UID_T_LEN
 SUDO_SOCK_SA_LEN
+AC_CHECK_MEMBER([struct kinfo_proc.ki_tdev], 
+    [AC_DEFINE(HAVE_STRUCT_KINFO_PROC_KI_TDEV, 1, [Define if your struct kinfo_proc has a ki_tdev field.])],    
+    [],
+    [ #include <sys/param.h>
+      #include <sys/user.h>]
+)
 dnl
 dnl Check for utmp/utmpx struct members.
 dnl We need to include OSDEFS for glibc which only has __e_termination
