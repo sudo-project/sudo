@@ -502,8 +502,14 @@
 /* Define to 1 if the system has the type `struct in6_addr'. */
 #undef HAVE_STRUCT_IN6_ADDR
 
-/* Define if your struct kinfo_proc has a ki_tdev field. */
+/* Define to 1 if `ki_tdev' is a member of `struct kinfo_proc'. */
 #undef HAVE_STRUCT_KINFO_PROC_KI_TDEV
+
+/* Define to 1 if `kp_eproc.e_tdev' is a member of `struct kinfo_proc'. */
+#undef HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV
+
+/* Define to 1 if `p_tdev' is a member of `struct kinfo_proc'. */
+#undef HAVE_STRUCT_KINFO_PROC_P_TDEV
 
 /* Define if your struct sockadr has an sa_len field. */
 #undef HAVE_STRUCT_SOCKADDR_SA_LEN
