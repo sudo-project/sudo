@@ -89,7 +89,9 @@
 #ifdef HAVE_PRIV_SET
 # include <priv.h>
 #endif
-#ifdef HAVE_STRUCT_KINFO_PROC_KI_TDEV
+#if defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined (HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV)
+# include <sys/sysctl.h>
+#elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
 # include <sys/sysctl.h>
 # include <sys/user.h>
 #endif
@@ -424,7 +426,21 @@ get_user_groups(struct user_details *ud)
     debug_return_str(gid_list);
 }
 
-#ifdef HAVE_STRUCT_KINFO_PROC_KI_TDEV
+/*
+ * How to access the tty device number in struct kinfo_proc.
+ */
+#if defined(HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV)
+# define sudo_kp_tdev		kp_eproc.e_tdev
+# define sudo_kp_namelen	4
+#elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
+# define sudo_kp_tdev		ki_tdev
+# define sudo_kp_namelen	4
+#elif defined(HAVE_STRUCT_KINFO_PROC_P_TDEV)
+# define sudo_kp_tdev		p_tdev
+# define sudo_kp_namelen	6
+#endif
+
+#ifdef sudo_kp_tdev
 /*
  * Return a string from ttyname() containing the tty to which the process is
  * attached or NULL if there is no tty associated with the process (or its
@@ -437,7 +453,7 @@ get_process_tty(void)
     char *tty = NULL;
     struct kinfo_proc *ki_proc = NULL;
     size_t size = sizeof(*ki_proc);
-    int i, mib[4], rc;
+    int i, mib[6], rc;
     debug_decl(get_process_tty, SUDO_DEBUG_UTIL)
 
     /*
@@ -449,13 +465,15 @@ get_process_tty(void)
 	mib[1] = KERN_PROC;
 	mib[2] = KERN_PROC_PID;
 	mib[3] = i ? (int)getppid() : (int)getpid();
+	mib[4] = sizeof(*ki_proc);
+	mib[5] = 1;
 	do {
 	    size += size / 10;
 	    ki_proc = erealloc(ki_proc, size);
-	    rc = sysctl(mib, 4, ki_proc, &size, NULL, 0);
+	    rc = sysctl(mib, sudo_kp_namelen, ki_proc, &size, NULL, 0);
 	} while (rc == -1 && errno == ENOMEM);
 	if (rc != -1)
-	    tty = devname(ki_proc->ki_tdev, S_IFCHR);
+	    tty = devname(ki_proc->sudo_kp_tdev, S_IFCHR);
     }
 
     /* If all else fails, fall back on ttyname(). */

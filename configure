@@ -16317,15 +16317,55 @@ if test "x$ac_cv_func_sysctl" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_SYSCTL 1
 _ACEOF
- ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "ki_tdev" "ac_cv_member_struct_kinfo_proc_ki_tdev" " #include <sys/param.h>
-      #include <sys/user.h>
+ ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "ki_tdev" "ac_cv_member_struct_kinfo_proc_ki_tdev" "
+	#include <sys/param.h>
+	#include <sys/sysctl.h>
+	#include <sys/user.h>
 
 "
 if test "x$ac_cv_member_struct_kinfo_proc_ki_tdev" = xyes; then :
 
-$as_echo "#define HAVE_STRUCT_KINFO_PROC_KI_TDEV 1" >>confdefs.h
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_KINFO_PROC_KI_TDEV 1
+_ACEOF
+
+
+else
+
+	ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "kp_eproc.e_tdev" "ac_cv_member_struct_kinfo_proc_kp_eproc_e_tdev" "
+	    #include <sys/param.h>
+	    #include <sys/sysctl.h>
+
+"
+if test "x$ac_cv_member_struct_kinfo_proc_kp_eproc_e_tdev" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV 1
+_ACEOF
+
+
+else
+
+	    ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "p_tdev" "ac_cv_member_struct_kinfo_proc_p_tdev" "
+		#include <sys/param.h>
+		#include <sys/sysctl.h>
+
+"
+if test "x$ac_cv_member_struct_kinfo_proc_p_tdev" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_KINFO_PROC_P_TDEV 1
+_ACEOF
+
 
 fi
+
+
+fi
+
+
+fi
+
 
 fi
 done
