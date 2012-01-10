@@ -428,9 +428,8 @@ get_user_groups(struct user_details *ud)
 /*
  * Return a string from ttyname() containing the tty to which the process is
  * attached or NULL if there is no tty associated with the process (or its
- * parent).  First tries std{in,out,err} then falls back to the parent's
- * entry via sysctl.  We could try following the parent all the way to pid 1
- * but that is probably overkill.
+ * parent).  First tries sysctl using the current pid, then the parent's pid.
+ * Falls back on ttyname of std{in,out,err} if that fails.
  */
 static char *
 get_process_tty(void)
@@ -438,17 +437,18 @@ get_process_tty(void)
     char *tty = NULL;
     struct kinfo_proc *ki_proc = NULL;
     size_t size = sizeof(*ki_proc);
-    int mib[4], rc;
+    int i, mib[4], rc;
     debug_decl(get_process_tty, SUDO_DEBUG_UTIL)
 
-    if ((tty = ttyname(STDIN_FILENO)) == NULL &&
-	(tty = ttyname(STDOUT_FILENO)) == NULL &&
-	(tty = ttyname(STDERR_FILENO)) == NULL) {
-	/* No tty for child, check the parent via sysctl. */
+    /*
+     * Lookup tty for this process and, failing that, our parent.
+     * Even if we redirect std{in,out,err} the kernel should still know.
+     */
+    for (i = 0; tty == NULL && i < 2; i++) {
 	mib[0] = CTL_KERN;
 	mib[1] = KERN_PROC;
 	mib[2] = KERN_PROC_PID;
-	mib[3] = (int)getppid();
+	mib[3] = i ? (int)getppid() : (int)getpid();
 	do {
 	    size += size / 10;
 	    ki_proc = erealloc(ki_proc, size);
@@ -456,7 +456,13 @@ get_process_tty(void)
 	} while (rc == -1 && errno == ENOMEM);
 	if (rc != -1)
 	    tty = devname(ki_proc->ki_tdev, S_IFCHR);
-	efree(ki_proc);
+    }
+
+    /* If all else fails, fall back on ttyname(). */
+    if (tty == NULL) {
+	if ((tty = ttyname(STDIN_FILENO)) == NULL &&
+	    (tty = ttyname(STDOUT_FILENO)) == NULL)
+	    tty = ttyname(STDERR_FILENO);
     }
 
     debug_return_str(tty);
