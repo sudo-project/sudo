@@ -15855,16 +15855,6 @@ $as_echo "#define HAVE_STRUCT_SOCKADDR_SA_LEN 1" >>confdefs.h
 fi
 
 
-ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "ki_tdev" "ac_cv_member_struct_kinfo_proc_ki_tdev" " #include <sys/param.h>
-      #include <sys/user.h>
-
-"
-if test "x$ac_cv_member_struct_kinfo_proc_ki_tdev" = xyes; then :
-
-$as_echo "#define HAVE_STRUCT_kinfo_proc_KI_TDEV 1" >>confdefs.h
-
-fi
-
 _CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS $OSDEFS"
 if test $ac_cv_header_utmpx_h = "yes"; then
@@ -16235,7 +16225,7 @@ LIBS=$ac_save_LIBS
 
 for ac_func in strrchr sysconf tzset strftime \
 	       regcomp setlocale nl_langinfo mbr_check_membership \
-	       setrlimit64 sysctl
+	       setrlimit64
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -16319,6 +16309,27 @@ fi
 done
 
 fi
+
+for ac_func in sysctl
+do :
+  ac_fn_c_check_func "$LINENO" "sysctl" "ac_cv_func_sysctl"
+if test "x$ac_cv_func_sysctl" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SYSCTL 1
+_ACEOF
+ ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "ki_tdev" "ac_cv_member_struct_kinfo_proc_ki_tdev" " #include <sys/param.h>
+      #include <sys/user.h>
+
+"
+if test "x$ac_cv_member_struct_kinfo_proc_ki_tdev" = xyes; then :
+
+$as_echo "#define HAVE_STRUCT_KINFO_PROC_KI_TDEV 1" >>confdefs.h
+
+fi
+
+fi
+done
+
 
 for ac_func in openpty
 do :

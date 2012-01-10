@@ -2028,12 +2028,6 @@ AC_INCLUDES_DEFAULT
 #include <sys/socket.h>])
 SUDO_UID_T_LEN
 SUDO_SOCK_SA_LEN
-AC_CHECK_MEMBER([struct kinfo_proc.ki_tdev], 
-    [AC_DEFINE(HAVE_STRUCT_KINFO_PROC_KI_TDEV, 1, [Define if your struct kinfo_proc has a ki_tdev field.])],    
-    [],
-    [ #include <sys/param.h>
-      #include <sys/user.h>]
-)
 dnl
 dnl Check for utmp/utmpx struct members.
 dnl We need to include OSDEFS for glibc which only has __e_termination
@@ -2084,7 +2078,7 @@ dnl
 AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS(strrchr sysconf tzset strftime \
 	       regcomp setlocale nl_langinfo mbr_check_membership \
-	       setrlimit64 sysctl)
+	       setrlimit64)
 AC_REPLACE_FUNCS(getgrouplist)
 AC_CHECK_FUNCS(getline, [], [
     AC_LIBOBJ(getline)
@@ -2095,6 +2089,13 @@ AC_CHECK_FUNCS(getutxid getutid, [utmp_style=POSIX; break])
 if test "$utmp_style" = "LEGACY"; then
     AC_CHECK_FUNCS(getttyent ttyslot, [break])
 fi
+
+AC_CHECK_FUNCS(sysctl, [AC_CHECK_MEMBER([struct kinfo_proc.ki_tdev], 
+    [AC_DEFINE(HAVE_STRUCT_KINFO_PROC_KI_TDEV, 1, [Define if your struct kinfo_proc has a ki_tdev field.])],    
+    [],
+    [ #include <sys/param.h>
+      #include <sys/user.h>]
+)])
 
 AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(libutil.h util.h pty.h, [break])], [
     AC_CHECK_LIB(util, openpty, [
