@@ -247,7 +247,6 @@ sudo_debug_write(const char *str, int len)
 {
     char *timestr;
     time_t now;
-    ssize_t n;
     struct iovec iov[5];
     int iovcnt = 4;
 
@@ -296,7 +295,7 @@ sudo_debug_write(const char *str, int len)
     iov[0].iov_len = 16;
 
     /* Write message in a single syscall */
-    n = writev(sudo_debug_fd, iov, iovcnt);
+    (void) writev(sudo_debug_fd, iov, iovcnt);
 }
 
 void
