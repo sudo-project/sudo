@@ -472,15 +472,33 @@ get_process_tty(void)
 	    ki_proc = erealloc(ki_proc, size);
 	    rc = sysctl(mib, sudo_kp_namelen, ki_proc, &size, NULL, 0);
 	} while (rc == -1 && errno == ENOMEM);
-	if (rc != -1)
-	    tty = devname(ki_proc->sudo_kp_tdev, S_IFCHR);
+	if (rc != -1) {
+	    char *dev = devname(ki_proc->sudo_kp_tdev, S_IFCHR);
+	    /* Some versions of devname() return NULL, others do not. */
+	    if (dev == NULL || *dev == '?' || *dev == '#') {
+		sudo_debug_printf(SUDO_DEBUG_WARN,
+		    "unable to map device number %u to name",
+		    ki_proc->sudo_kp_tdev);
+	    } else {
+		/* devname() doesn't use the /dev/ prefix, add one... */
+		size_t len = sizeof(_PATH_DEV) + strlen(dev);
+		tty = emalloc(len);
+		strlcpy(tty, _PATH_DEV, len);
+		strlcat(tty, dev, len);
+	    }
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_WARN,
+		"unable to resolve tty via KERN_PROC: %s", strerror(errno));
+	}
+	efree(ki_proc);
     }
 
     /* If all else fails, fall back on ttyname(). */
     if (tty == NULL) {
-	if ((tty = ttyname(STDIN_FILENO)) == NULL &&
-	    (tty = ttyname(STDOUT_FILENO)) == NULL)
-	    tty = ttyname(STDERR_FILENO);
+	if ((tty = ttyname(STDIN_FILENO)) != NULL ||
+	    (tty = ttyname(STDOUT_FILENO)) != NULL ||
+	    (tty = ttyname(STDERR_FILENO)) != NULL)
+	    tty = estrdup(tty);
     }
 
     debug_return_str(tty);
@@ -516,9 +534,9 @@ get_process_tty(void)
 	}
     }
 
-    debug_return_str(tty);
+    debug_return_str(estrdup(tty));
 }
-#endif /* HAVE_STRUCT_KINFO_PROC_KI_TDEV */
+#endif /* sudo_kp_tdev */
 
 /*
  * Return user information as an array of name=value pairs.
@@ -575,6 +593,7 @@ get_user_info(struct user_details *ud)
 	if (user_info[i] == NULL)
 	    errorx(1, _("unable to allocate memory"));
 	ud->tty = user_info[i] + sizeof("tty=") - 1;
+	efree(cp);
     }
 
     if (gethostname(host, sizeof(host)) == 0)
