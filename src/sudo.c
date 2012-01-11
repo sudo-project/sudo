@@ -472,8 +472,18 @@ get_process_tty(void)
 	    ki_proc = erealloc(ki_proc, size);
 	    rc = sysctl(mib, sudo_kp_namelen, ki_proc, &size, NULL, 0);
 	} while (rc == -1 && errno == ENOMEM);
-	if (rc != -1)
+	if (rc != -1) {
 	    tty = devname(ki_proc->sudo_kp_tdev, S_IFCHR);
+	    if (*tty != '/') {
+		sudo_debug_printf(SUDO_DEBUG_WARN,
+		    "unable to map device number %u to name: %s",
+		    ki_proc->sudo_kp_tdev, tty);
+		tty = NULL;
+	    }
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_WARN,
+		"unable to resolve tty via KERN_PROC: %s", strerror(errno));
+	}
     }
 
     /* If all else fails, fall back on ttyname(). */
@@ -518,7 +528,7 @@ get_process_tty(void)
 
     debug_return_str(tty);
 }
-#endif /* HAVE_STRUCT_KINFO_PROC_KI_TDEV */
+#endif /* sudo_kp_tdev */
 
 /*
  * Return user information as an array of name=value pairs.
