@@ -467,8 +467,16 @@ DDEESSCCRRIIPPTTIIOONN
        A hard limit of 128 nested include files is enforced to prevent include
        file loops.
 
-       The file name may include the %h escape, signifying the short form of
-       the host name.  I.e., if the machine's host name is "xerxes", then
+       If the path to the include file is not fully-qualified (does not begin
+       with a _/), it must be located in the same directory as the sudoers file
+       it was included from.  For example, if _/_e_t_c_/_s_u_d_o_e_r_s contains the line:
+
+           #include sudoers.local
+
+       the file that will be included is _/_e_t_c_/_s_u_d_o_e_r_s_._l_o_c_a_l.
+
+       The file name may also include the %h escape, signifying the short form
+       of the host name.  I.e., if the machine's host name is "xerxes", then
 
        #include /etc/sudoers.%h
 
@@ -569,15 +577,18 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        use the EDITOR or VISUAL if they match a value
                        specified in editor.  This flag is _o_f_f by default.
 
-       env_reset       If set, ssuuddoo will reset the environment to only contain
-                       the LOGNAME, MAIL, SHELL, USER, USERNAME and the SUDO_*
-                       variables.  Any variables in the caller's environment
-                       that match the env_keep and env_check lists are then
-                       added.  The default contents of the env_keep and
-                       env_check lists are displayed when ssuuddoo is run by root
-                       with the _-_V option.  If the _s_e_c_u_r_e___p_a_t_h option is set,
-                       its value will be used for the PATH environment
-                       variable.  This flag is _o_n by default.
+       env_reset       If set, ssuuddoo will run the command in a minimal
+                       environment containing the TERM, PATH, HOME, MAIL,
+                       SHELL, LOGNAME, USER, USERNAME and SUDO_* variables.
+                       Any variables in the caller's environment that match
+                       the env_keep and env_check lists are then added,
+                       followed by any variables present in the file specified
+                       by the _e_n_v___f_i_l_e option (if any).  The default contents
+                       of the env_keep and env_check lists are displayed when
+                       ssuuddoo is run by root with the _-_V option.  If the
+                       _s_e_c_u_r_e___p_a_t_h option is set, its value will be used for
+                       the PATH environment variable.  This flag is _o_n by
+                       default.
 
        fast_glob       Normally, ssuuddoo uses the _g_l_o_b(3) function to do shell-
                        style globbing when matching path names.  However,
@@ -1007,8 +1018,8 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                    _a_s_k_p_a_s_s may be overridden by the SUDO_ASKPASS environment
                    variable.
 
-       env_file    The _e_n_v___f_i_l_e options specifies the fully qualified path to
-                   a file containing variables to be set in the environment of
+       env_file    The _e_n_v___f_i_l_e option specifies the fully qualified path to a
+                   file containing variables to be set in the environment of
                    the program being run.  Entries in this file should either
                    be of the form VARIABLE=value or export VARIABLE=value.
                    The value may optionally be surrounded by single or double
@@ -1472,4 +1483,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.8                         September 16, 2011                    SUDOERS(4)
+1.7.9                          January 12, 2012                     SUDOERS(4)

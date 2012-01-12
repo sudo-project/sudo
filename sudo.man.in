@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "September 16, 2011" "1.7.8" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "January 12, 2012" "1.7.9" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -526,13 +526,14 @@ unreachable.
 .IX Header "SECURITY NOTES"
 \&\fBsudo\fR tries to be safe when executing external commands.
 .PP
-There are two distinct ways to deal with environment variables.
-By default, the \fIenv_reset\fR \fIsudoers\fR option is enabled.
-This causes commands to be executed with a minimal environment
-containing \f(CW\*(C`TERM\*(C'\fR, \f(CW\*(C`PATH\*(C'\fR, \f(CW\*(C`HOME\*(C'\fR, \f(CW\*(C`SHELL\*(C'\fR, \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR
-and \f(CW\*(C`USERNAME\*(C'\fR in addition to variables from the invoking process
-permitted by the \fIenv_check\fR and \fIenv_keep\fR \fIsudoers\fR options.
-There is effectively a whitelist for environment variables.
+There are two distinct ways to deal with environment variables.  By
+default, the \fIenv_reset\fR \fIsudoers\fR option is enabled.  This causes
+commands to be executed with a minimal environment containing the
+\&\f(CW\*(C`TERM\*(C'\fR, \f(CW\*(C`PATH\*(C'\fR, \f(CW\*(C`HOME\*(C'\fR, \f(CW\*(C`MAIL\*(C'\fR, \f(CW\*(C`SHELL\*(C'\fR, \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR,
+\&\f(CW\*(C`USERNAME\*(C'\fR and \f(CW\*(C`SUDO_*\*(C'\fR variables in addition to variables from
+the invoking process permitted by the \fIenv_check\fR and \fIenv_keep\fR
+\&\fIsudoers\fR options.  This is effectively a whitelist for environment
+variables.
 .PP
 If, however, the \fIenv_reset\fR option is disabled in \fIsudoers\fR, any
 variables not explicitly denied by the \fIenv_check\fR and \fIenv_delete\fR

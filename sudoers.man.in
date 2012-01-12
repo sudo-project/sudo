@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "September 16, 2011" "1.7.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "January 12, 2012" "1.7.9" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -708,7 +708,18 @@ Upon reaching the end of \fI/etc/sudoers.local\fR, the rest of
 themselves include other files.  A hard limit of 128 nested include
 files is enforced to prevent include file loops.
 .PP
-The file name may include the \f(CW%h\fR escape, signifying the short form
+If the path to the include file is not fully-qualified (does not
+begin with a \fI/\fR), it must be located in the same directory as the
+sudoers file it was included from.  For example, if \fI/etc/sudoers\fR
+contains the line:
+.Sp
+.RS 4
+\&\f(CW\*(C`#include sudoers.local\*(C'\fR
+.RE
+.PP
+the file that will be included is \fI/etc/sudoers.local\fR.
+.PP
+The file name may also include the \f(CW%h\fR escape, signifying the short form
 of the host name.  I.e., if the machine's host name is \*(L"xerxes\*(R", then
 .PP
 \&\f(CW\*(C`#include /etc/sudoers.%h\*(C'\fR
@@ -813,14 +824,17 @@ they match a value specified in \f(CW\*(C`editor\*(C'\fR.  This flag is \fI@env_
 default.
 .IP "env_reset" 16
 .IX Item "env_reset"
-If set, \fBsudo\fR will reset the environment to only contain the
-\&\s-1LOGNAME\s0, \s-1MAIL\s0, \s-1SHELL\s0, \s-1USER\s0, \s-1USERNAME\s0 and the \f(CW\*(C`SUDO_*\*(C'\fR variables.  Any
+If set, \fBsudo\fR will run the command in a minimal environment
+containing the \f(CW\*(C`TERM\*(C'\fR, \f(CW\*(C`PATH\*(C'\fR, \f(CW\*(C`HOME\*(C'\fR, \f(CW\*(C`MAIL\*(C'\fR, \f(CW\*(C`SHELL\*(C'\fR,
+\&\f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR, \f(CW\*(C`USERNAME\*(C'\fR and \f(CW\*(C`SUDO_*\*(C'\fR variables.  Any
 variables in the caller's environment that match the \f(CW\*(C`env_keep\*(C'\fR
-and \f(CW\*(C`env_check\*(C'\fR lists are then added.  The default contents of the
-\&\f(CW\*(C`env_keep\*(C'\fR and \f(CW\*(C`env_check\*(C'\fR lists are displayed when \fBsudo\fR is
-run by root with the \fI\-V\fR option.  If the \fIsecure_path\fR option
-is set, its value will be used for the \f(CW\*(C`PATH\*(C'\fR environment variable.
-This flag is \fI@env_reset@\fR by default.
+and \f(CW\*(C`env_check\*(C'\fR lists are then added, followed by any variables
+present in the file specified by the \fIenv_file\fR option (if any).
+The default contents of the \f(CW\*(C`env_keep\*(C'\fR and \f(CW\*(C`env_check\*(C'\fR lists are
+displayed when \fBsudo\fR is run by root with the \fI\-V\fR option.  If
+the \fIsecure_path\fR option is set, its value will be used for the
+\&\f(CW\*(C`PATH\*(C'\fR environment variable.  This flag is \fI@env_reset@\fR by
+default.
 .IP "fast_glob" 16
 .IX Item "fast_glob"
 Normally, \fBsudo\fR uses the \fIglob\fR\|(3) function to do shell-style
@@ -1267,7 +1281,7 @@ The value of \fIaskpass\fR may be overridden by the \f(CW\*(C`SUDO_ASKPASS\*(C'\
 environment variable.
 .IP "env_file" 12
 .IX Item "env_file"
-The \fIenv_file\fR options specifies the fully qualified path to a
+The \fIenv_file\fR option specifies the fully qualified path to a
 file containing variables to be set in the environment of the program
 being run.  Entries in this file should either be of the form
 \&\f(CW\*(C`VARIABLE=value\*(C'\fR or \f(CW\*(C`export VARIABLE=value\*(C'\fR.  The value may
