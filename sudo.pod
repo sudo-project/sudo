@@ -426,13 +426,14 @@ unreachable.
 
 B<sudo> tries to be safe when executing external commands.
 
-There are two distinct ways to deal with environment variables.
-By default, the I<env_reset> I<sudoers> option is enabled.
-This causes commands to be executed with a minimal environment
-containing C<TERM>, C<PATH>, C<HOME>, C<SHELL>, C<LOGNAME>, C<USER>
-and C<USERNAME> in addition to variables from the invoking process
-permitted by the I<env_check> and I<env_keep> I<sudoers> options.
-There is effectively a whitelist for environment variables.
+There are two distinct ways to deal with environment variables.  By
+default, the I<env_reset> I<sudoers> option is enabled.  This causes
+commands to be executed with a minimal environment containing the
+C<TERM>, C<PATH>, C<HOME>, C<MAIL>, C<SHELL>, C<LOGNAME>, C<USER>,
+C<USERNAME> and C<SUDO_*> variables in addition to variables from
+the invoking process permitted by the I<env_check> and I<env_keep>
+I<sudoers> options.  This is effectively a whitelist for environment
+variables.
 
 If, however, the I<env_reset> option is disabled in I<sudoers>, any
 variables not explicitly denied by the I<env_check> and I<env_delete>
