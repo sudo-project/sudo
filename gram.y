@@ -795,6 +795,6 @@ init_parser(path, quiet)
 
     parse_error = FALSE;
     errorlineno = -1;
-    errorfile = NULL;
+    errorfile = sudoers;
     verbose = !quiet;
 }

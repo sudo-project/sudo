@@ -826,7 +826,7 @@ init_parser(path, quiet)
 
     parse_error = FALSE;
     errorlineno = -1;
-    errorfile = NULL;
+    errorfile = sudoers;
     verbose = !quiet;
 }
 #line 780 "y.tab.c"
