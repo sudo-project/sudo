@@ -136,6 +136,7 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 static struct sudoersfile_list sudoerslist;
 static struct rbtree *alias_freelist;
+static int checkonly;
 
 int
 main(argc, argv)
@@ -144,7 +145,7 @@ main(argc, argv)
 {
     struct sudoersfile *sp;
     char *args, *editor, *sudoers_path;
-    int ch, checkonly, quiet, strict, oldperms;
+    int ch, quiet, strict, oldperms;
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     extern char *malloc_options;
     malloc_options = "AFGJPR";
@@ -828,6 +829,12 @@ open_sudoers(path, doedit, keepopen)
 {
     struct sudoersfile *entry;
     FILE *fp;
+    int open_flags;
+
+    if (checkonly)
+	open_flags = O_RDONLY;
+    else
+	open_flags = O_RDWR | O_CREAT;
 
     /* Check for existing entry */
     tq_foreach_fwd(&sudoerslist, entry) {
@@ -840,7 +847,7 @@ open_sudoers(path, doedit, keepopen)
 	entry->modified = 0;
 	entry->prev = entry;
 	entry->next = NULL;
-	entry->fd = open(entry->path, O_RDWR | O_CREAT, SUDOERS_MODE);
+	entry->fd = open(entry->path, open_flags, SUDOERS_MODE);
 	entry->tpath = NULL;
 	entry->doedit = doedit;
 	if (entry->fd == -1) {
@@ -848,7 +855,7 @@ open_sudoers(path, doedit, keepopen)
 	    efree(entry);
 	    return NULL;
 	}
-	if (!lock_file(entry->fd, SUDO_TLOCK))
+	if (!checkonly && !lock_file(entry->fd, SUDO_TLOCK))
 	    errorx(1, "%s busy, try again later", entry->path);
 	if ((fp = fdopen(entry->fd, "r")) == NULL)
 	    error(1, "%s", entry->path);
