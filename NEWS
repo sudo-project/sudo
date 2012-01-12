@@ -51,8 +51,9 @@ What's new in Sudo 1.8.4?
 
  * If none of the standard input, output or error are connected to
    a tty device, sudo will now check its parent's standard input,
-   output or error for the tty name on systems with /proc.  This
-   allow tty-based tickets to work properly even when, e.g. standard
+   output or error for the tty name on systems with /proc and BSD
+   systems that support the KERN_PROC_PID sysctl.  This allows
+   tty-based tickets to work properly even when, e.g. standard
    input, output and error are redirected to /dev/null.
 
  * Added the --enable-kerb5-instance configure option to allow
@@ -63,6 +64,13 @@ What's new in Sudo 1.8.4?
  * Fixed a bug where a pattern like "/usr/*" included /usr/bin/ in
    the results, which would be incorrectly be interpreted as if the
    sudoers file had specified a directory.
+
+ * "visudo -c" will now list any include files that were checked
+   in addition to the main sudoers file when everything parses OK.
+
+ * Users that only have read-only access to the sudoers file may
+   now run "visudo -c".  Previously, write permissions were required
+   even though no writing is down in check-only mode.
 
 What's new in Sudo 1.8.3p1?
 
