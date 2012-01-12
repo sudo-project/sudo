@@ -1992,10 +1992,10 @@ AC_CHECK_TYPES([struct in6_addr], [], [], [#include <sys/types.h>
 #include <netinet/in.h>])
 AC_TYPE_LONG_LONG_INT
 AC_CHECK_SIZEOF([long int])
-SUDO_TYPE_SIZE_T
-SUDO_TYPE_SSIZE_T
-SUDO_TYPE_DEV_T
-SUDO_TYPE_INO_T
+AC_CHECK_TYPE(size_t, unsigned int)
+AC_CHECK_TYPE(ssize_t, int)
+AC_CHECK_TYPE(dev_t, int)
+AC_CHECK_TYPE(ino_t, unsigned int)
 SUDO_UID_T_LEN
 SUDO_SOCK_SA_LEN
 dnl
