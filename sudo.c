@@ -1161,7 +1161,6 @@ set_loginclass(pw)
 	log_error(errflags, "unknown login class: %s", login_class);
 	def_use_loginclass = FALSE;
     }
-    login_close(lc);
 }
 #else
 static void
