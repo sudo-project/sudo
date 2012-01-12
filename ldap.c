@@ -80,6 +80,11 @@
 #include "parse.h"
 #include "lbuf.h"
 
+/* Older Netscape LDAP SDKs don't prototype ldapssl_set_strength() */
+#if defined(HAVE_LDAPSSL_SET_STRENGTH) && !defined(HAVE_LDAP_SSL_H) && !defined(HAVE_MPS_LDAP_SSL_H)
+extern int ldapssl_set_strength(LDAP *ldap, int strength);
+#endif
+
 #ifndef LDAP_OPT_SUCCESS
 # define LDAP_OPT_SUCCESS LDAP_SUCCESS
 #endif
