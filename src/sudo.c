@@ -479,12 +479,15 @@ get_process_tty(void)
 		sudo_debug_printf(SUDO_DEBUG_WARN,
 		    "unable to map device number %u to name",
 		    ki_proc->sudo_kp_tdev);
-	    } else {
+	    } else if (*dev != '/') {
 		/* devname() doesn't use the /dev/ prefix, add one... */
 		size_t len = sizeof(_PATH_DEV) + strlen(dev);
 		tty = emalloc(len);
 		strlcpy(tty, _PATH_DEV, len);
 		strlcat(tty, dev, len);
+	    } else {
+		/* Should not happen but just in case... */
+		tty = estrdup(dev);
 	    }
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_WARN,
