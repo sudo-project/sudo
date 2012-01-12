@@ -1,3 +1,46 @@
+What's new in Sudo 1.7.9?
+
+ * Fixed a false positive in visudo strict mode when aliases are
+   in use.
+
+ * The line on which a syntax error is reported in the sudoers file
+   is now more accurate.  Previously it was often off by a line.
+
+ * The #include and #includedir directives in sudoers now support
+   relative paths.  If the path is not fully qualified it is expected
+   to be located in the same directory of the sudoers file that is
+   including it.
+
+ * visudo will now fix the mode on the sudoers file even if no changes
+   are made unless the -f option is specified.
+
+ * The "use_loginclass" sudoers option works properly again.
+
+ * For LDAP-based sudoers, values in the search expression are now
+   escaped as per RFC 4515.
+
+ * Fixed a race condition when I/O logging is not enabled that could
+   result in tty-generated signals (e.g. control-C) being received
+   by the command twice.
+
+ * If none of the standard input, output or error are connected to
+   a tty device, sudo will now check its parent's standard input,
+   output or error for the tty name on systems with /proc and BSD
+   systems that support the KERN_PROC_PID sysctl.  This allows
+   tty-based tickets to work properly even when, e.g. standard
+   input, output and error are redirected to /dev/null.
+
+ * Fixed a bug where a pattern like "/usr/*" included /usr/bin/ in
+   the results, which would be incorrectly be interpreted as if the
+   sudoers file had specified a directory.
+
+ * "visudo -c" will now list any include files that were checked
+   in addition to the main sudoers file when everything parses OK.
+
+ * Users that only have read-only access to the sudoers file may
+   now run "visudo -c".  Previously, write permissions were required
+   even though no writing is down in check-only mode.
+
 What's new in Sudo 1.7.8p1?
 
  * Fixed matching of a Runas_Alias in the group section of a
