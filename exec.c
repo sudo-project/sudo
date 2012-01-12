@@ -118,6 +118,7 @@ static int fork_cmnd(path, argv, envp, sv, rbac_enabled)
     int sv[2];
     int rbac_enabled;
 {
+    int ttyfd, foreground = 0;
     struct command_status cstat;
     sigaction_t sa;
     pid_t child;
@@ -127,6 +128,12 @@ static int fork_cmnd(path, argv, envp, sv, rbac_enabled)
     sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
     sa.sa_handler = handler;
     sigaction(SIGCONT, &sa, NULL);
+
+    ttyfd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
+    if (ttyfd != -1) {
+	foreground = (tcgetpgrp(ttyfd) == getpgrp());
+	(void)fcntl(ttyfd, F_SETFD, FD_CLOEXEC);
+    }
 
     child = fork();
     switch (child) {
@@ -141,6 +148,16 @@ static int fork_cmnd(path, argv, envp, sv, rbac_enabled)
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
 	restore_signals();
 	if (exec_setup(rbac_enabled, user_ttypath, -1) == TRUE) {
+	    /* Set child process group here too to avoid a race. */
+	    child = getpid();
+	    setpgid(0, child);
+
+	    /* Wait for parent to grant us the tty if we are foreground. */
+	    if (foreground) {
+		while (tcgetpgrp(ttyfd) != child)
+		    ; /* spin */
+	    }
+
 	    /* headed for execve() */
 	    int maxfd = def_closefrom;
 	    dup2(sv[1], maxfd);
@@ -159,6 +176,19 @@ static int fork_cmnd(path, argv, envp, sv, rbac_enabled)
 	send(sv[1], &cstat, sizeof(cstat), 0);
 	_exit(1);
     }
+
+    /*
+     * Put child in its own process group.  If we are starting the command
+     * in the foreground, assign its pgrp to the tty.
+     */
+    setpgid(child, child);
+    if (foreground) {
+	while (tcsetpgrp(ttyfd, child) == -1 && errno == EINTR)
+	    continue;
+    }
+    if (ttyfd != -1)
+	close(ttyfd);
+
     return child;
 }
 
@@ -522,17 +552,17 @@ handle_signals(fd, child, cstat)
 			 */
 #ifdef HAVE_TCSETPGRP
 			pid_t saved_pgrp = (pid_t)-1;
-			int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
-			if (fd != -1)
-			    saved_pgrp = tcgetpgrp(fd);
+			int ttyfd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
+			if (ttyfd != -1)
+			    saved_pgrp = tcgetpgrp(ttyfd);
 #endif /* HAVE_TCSETPGRP */
 			if (kill(getpid(), WSTOPSIG(status)) != 0)
 			    warning("kill(%d, %d)", getpid(), WSTOPSIG(status));
 #ifdef HAVE_TCSETPGRP
-			if (fd != -1) {
+			if (ttyfd != -1) {
 			    if (saved_pgrp != (pid_t)-1)
-				(void)tcsetpgrp(fd, saved_pgrp);
-			    close(fd);
+				(void)tcsetpgrp(ttyfd, saved_pgrp);
+			    close(ttyfd);
 			}
 #endif /* HAVE_TCSETPGRP */
 		    } else {
