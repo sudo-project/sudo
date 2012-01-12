@@ -372,17 +372,23 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
 	if (FD_ISSET(sv[0], fdsr)) {
 	    /* read child status */
 	    n = recv(sv[0], cstat, sizeof(*cstat), 0);
-	    if (n == -1) {
-		if (errno == EINTR)
-		    continue;
+	    if (n != sizeof(*cstat)) {
+		if (n == -1) {
+		    if (errno == EINTR)
+			continue;
 #ifdef _PATH_SUDO_IO_LOGDIR
-		/*
-		 * If not logging I/O we will receive ECONNRESET when
-		 * the command is executed.  It is safe to ignore this.
-		 */
-		if (log_io && errno != EAGAIN) {
-		    cstat->type = CMD_ERRNO;
-		    cstat->val = errno;
+		    /*
+		     * If not logging I/O we will receive ECONNRESET when
+		     * the command is executed.  It is safe to ignore this.
+		     */
+		    if (log_io && errno != EAGAIN) {
+			cstat->type = CMD_ERRNO;
+			cstat->val = errno;
+			break;
+		    }
+		} else {
+		    /* Short read or EOF. */
+		    /* XXX - should set cstat */
 		    break;
 		}
 #endif
@@ -490,9 +496,23 @@ handle_signals(fd, child, cstat)
 #endif
 	    } while (pid == -1 && errno == EINTR);
 	    if (pid == child) {
-		/* If not logging I/O and child has exited we are done. */
 #ifdef _PATH_SUDO_IO_LOGDIR
-		if (!log_io)
+		if (log_io) {
+		    /*
+		     * On BSD we get ECONNRESET on sv[0] if monitor dies
+		     * and select() will return with sv[0] readable.
+		     * On Linux that doesn't appear to happen so we
+		     * treat the monitor dying as a fatal error.
+		     * Note that the wait status we return is that of
+		     * the monitor and not the command; unfortunately
+		     * that is the best that we can do here.
+		     */
+		    if (!WIFSTOPPED(status)) {
+			cstat->type = CMD_WSTATUS;
+			cstat->val = status;
+			return 0;
+		    }
+		} else
 #endif
 		{
 		    if (WIFSTOPPED(status)) {
@@ -522,7 +542,6 @@ handle_signals(fd, child, cstat)
 			return 0;
 		    }
 		}
-		/* Else we get ECONNRESET on sv[0] if child dies. */
 	    }
 	} else {
 #ifdef _PATH_SUDO_IO_LOGDIR
@@ -570,6 +589,7 @@ forward_signals(sock)
 		    tq_remove(&sigfwd_list, sigfwd);
 		    efree(sigfwd);
 		}
+		/* XXX - child (monitor) is dead, we should exit too? */
 	    }
 	    break;
 	}
