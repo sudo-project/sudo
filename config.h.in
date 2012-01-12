@@ -606,9 +606,6 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
-/* Define to 1 if you have struct timespec in sys/time.h */
-#undef HAVE_TIMESPEC
-
 /* Define to 1 if you have the `ttyslot' function. */
 #undef HAVE_TTYSLOT
 
