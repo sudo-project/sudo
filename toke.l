@@ -75,6 +75,7 @@
 extern YYSTYPE yylval;
 extern int parse_error;
 int sudolineno;
+int last_token;
 char *sudoers;
 
 static int continued, prev_state, sawspace;
@@ -84,6 +85,11 @@ static int pop_include		__P((void));
 static char *parse_include	__P((char *));
 
 #define fill(a, b)		fill_txt(a, b, 0)
+
+#define LEXRETURN(n)	do {	\
+	last_token = (n);	\
+	return (n);		\
+} while (0)
 
 #define	push_include(_p)	(_push_include((_p), FALSE))
 #define	push_includedir(_p)	(_push_include((_p), TRUE))
@@ -120,7 +126,7 @@ DEFVAR			[a-z_]+
 %%
 <GOTDEFS>[[:blank:]]*,[[:blank:]]* {
 			    LEXTRACE(", ");
-			    return ',';
+			    LEXRETURN(',');
 			}			/* return ',' */
 
 <GOTDEFS>[[:blank:]]+	BEGIN STARTDEFS;
@@ -130,29 +136,29 @@ DEFVAR			[a-z_]+
 			    LEXTRACE("DEFVAR ");
 			    if (!fill(yytext, yyleng))
 				yyterminate();
-			    return DEFVAR;
+			    LEXRETURN(DEFVAR);
 			}
 
 <INDEFS>{
     ,			{
 			    BEGIN STARTDEFS;
 			    LEXTRACE(", ");
-			    return ',';
+			    LEXRETURN(',');
 			}			/* return ',' */
 
     =			{
 			    LEXTRACE("= ");
-			    return '=';
+			    LEXRETURN('=');
 			}			/* return '=' */
 
     \+=			{
 			    LEXTRACE("+= ");
-			    return '+';
+			    LEXRETURN('+');
 			}			/* return '+' */
 
     -=			{
 			    LEXTRACE("-= ");
-			    return '-';
+			    LEXRETURN('-');
 			}			/* return '-' */
 
     \"			{
@@ -166,14 +172,14 @@ DEFVAR			[a-z_]+
 			    LEXTRACE("WORD(2) ");
 			    if (!fill(yytext, yyleng))
 				yyterminate();
-			    return WORD;
+			    LEXRETURN(WORD);
 			}
 }
 
 <INSTR>{
     \\[[:blank:]]*\n[[:blank:]]*	{
 			    /* Line continuation char followed by newline. */
-			    ++sudolineno;
+			    sudolineno++;
 			    continued = TRUE;
 			}
 
@@ -183,7 +189,7 @@ DEFVAR			[a-z_]+
 
 			    if (yylval.string == NULL) {
 				LEXTRACE("ERROR "); /* empty string */
-				return ERROR;
+				LEXRETURN(ERROR);
 			    }
 			    if (prev_state == INITIAL) {
 				switch (yylval.string[0]) {
@@ -192,21 +198,21 @@ DEFVAR			[a-z_]+
 					(yylval.string[1] == ':' &&
 					yylval.string[2] == '\0')) {
 					LEXTRACE("ERROR "); /* empty group */
-					return ERROR;
+					LEXRETURN(ERROR);
 				    }
 				    LEXTRACE("USERGROUP ");
-				    return USERGROUP;
+				    LEXRETURN(USERGROUP);
 				case '+':
 				    if (yylval.string[1] == '\0') {
 					LEXTRACE("ERROR "); /* empty netgroup */
-					return ERROR;
+					LEXRETURN(ERROR);
 				    }
 				    LEXTRACE("NETGROUP ");
-				    return NETGROUP;
+				    LEXRETURN(NETGROUP);
 				}
 			    }
 			    LEXTRACE("WORD(4) ");
-			    return WORD;
+			    LEXRETURN(WORD);
 			}
 
     \\			{
@@ -242,7 +248,7 @@ DEFVAR			[a-z_]+
     [#:\,=\n]		{
 			    BEGIN INITIAL;
 			    yyless(0);
-			    return COMMAND;
+			    LEXRETURN(COMMAND);
 			}			/* end of command line args */
 
     [^#\\:, \t\n]+ 	{
@@ -258,7 +264,7 @@ DEFVAR			[a-z_]+
 
 			    if (continued) {
 				LEXTRACE("ERROR ");
-				return ERROR;
+				LEXRETURN(ERROR);
 			    }
 
 			    if ((path = parse_include(yytext)) == NULL)
@@ -276,7 +282,7 @@ DEFVAR			[a-z_]+
 
 			    if (continued) {
 				LEXTRACE("ERROR ");
-				return ERROR;
+				LEXRETURN(ERROR);
 			    }
 
 			    if ((path = parse_include(yytext)) == NULL)
@@ -298,7 +304,7 @@ DEFVAR			[a-z_]+
 
 			    if (continued) {
 				LEXTRACE("ERROR ");
-				return ERROR;
+				LEXRETURN(ERROR);
 			    }
 
 			    for (n = 0; isblank((unsigned char)yytext[n]); n++)
@@ -313,22 +319,22 @@ DEFVAR			[a-z_]+
 				case ':':
 				    yyless(n);
 				    LEXTRACE("DEFAULTS_USER ");
-				    return DEFAULTS_USER;
+				    LEXRETURN(DEFAULTS_USER);
 				case '>':
 				    yyless(n);
 				    LEXTRACE("DEFAULTS_RUNAS ");
-				    return DEFAULTS_RUNAS;
+				    LEXRETURN(DEFAULTS_RUNAS);
 				case '@':
 				    yyless(n);
 				    LEXTRACE("DEFAULTS_HOST ");
-				    return DEFAULTS_HOST;
+				    LEXRETURN(DEFAULTS_HOST);
 				case '!':
 				    yyless(n);
 				    LEXTRACE("DEFAULTS_CMND ");
-				    return DEFAULTS_CMND;
+				    LEXRETURN(DEFAULTS_CMND);
 				default:
 				    LEXTRACE("DEFAULTS ");
-				    return DEFAULTS;
+				    LEXRETURN(DEFAULTS);
 			    }
 			}
 
@@ -337,7 +343,7 @@ DEFVAR			[a-z_]+
 
 			    if (continued) {
 				LEXTRACE("ERROR ");
-				return ERROR;
+				LEXRETURN(ERROR);
 			    }
 
 			    for (n = 0; isblank((unsigned char)yytext[n]); n++)
@@ -345,75 +351,75 @@ DEFVAR			[a-z_]+
 			    switch (yytext[n]) {
 				case 'H':
 				    LEXTRACE("HOSTALIAS ");
-				    return HOSTALIAS;
+				    LEXRETURN(HOSTALIAS);
 				case 'C':
 				    LEXTRACE("CMNDALIAS ");
-				    return CMNDALIAS;
+				    LEXRETURN(CMNDALIAS);
 				case 'U':
 				    LEXTRACE("USERALIAS ");
-				    return USERALIAS;
+				    LEXRETURN(USERALIAS);
 				case 'R':
 				    LEXTRACE("RUNASALIAS ");
-				    return RUNASALIAS;
+				    LEXRETURN(RUNASALIAS);
 			    }
 			}
 
 NOPASSWD[[:blank:]]*:	{
 				/* cmnd does not require passwd for this user */
 			    	LEXTRACE("NOPASSWD ");
-			    	return NOPASSWD;
+			    	LEXRETURN(NOPASSWD);
 			}
 
 PASSWD[[:blank:]]*:	{
 				/* cmnd requires passwd for this user */
 			    	LEXTRACE("PASSWD ");
-			    	return PASSWD;
+			    	LEXRETURN(PASSWD);
 			}
 
 NOEXEC[[:blank:]]*:	{
 			    	LEXTRACE("NOEXEC ");
-			    	return NOEXEC;
+			    	LEXRETURN(NOEXEC);
 			}
 
 EXEC[[:blank:]]*:	{
 			    	LEXTRACE("EXEC ");
-			    	return EXEC;
+			    	LEXRETURN(EXEC);
 			}
 
 SETENV[[:blank:]]*:	{
 			    	LEXTRACE("SETENV ");
-			    	return SETENV;
+			    	LEXRETURN(SETENV);
 			}
 
 NOSETENV[[:blank:]]*:	{
 			    	LEXTRACE("NOSETENV ");
-			    	return NOSETENV;
+			    	LEXRETURN(NOSETENV);
 			}
 
 LOG_OUTPUT[[:blank:]]*:	{
 			    	LEXTRACE("LOG_OUTPUT ");
-			    	return LOG_OUTPUT;
+			    	LEXRETURN(LOG_OUTPUT);
 			}
 
 NOLOG_OUTPUT[[:blank:]]*:	{
 			    	LEXTRACE("NOLOG_OUTPUT ");
-			    	return NOLOG_OUTPUT;
+			    	LEXRETURN(NOLOG_OUTPUT);
 			}
 
 LOG_INPUT[[:blank:]]*:	{
 			    	LEXTRACE("LOG_INPUT ");
-			    	return LOG_INPUT;
+			    	LEXRETURN(LOG_INPUT);
 			}
 
 NOLOG_INPUT[[:blank:]]*:	{
 			    	LEXTRACE("NOLOG_INPUT ");
-			    	return NOLOG_INPUT;
+			    	LEXRETURN(NOLOG_INPUT);
 			}
 
 <INITIAL,GOTDEFS>(\+|\%|\%:) {
 			    /* empty group or netgroup */
 			    LEXTRACE("ERROR ");
-			    return ERROR;
+			    LEXRETURN(ERROR);
 			}
 
 \+{WORD}		{
@@ -421,7 +427,7 @@ NOLOG_INPUT[[:blank:]]*:	{
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("NETGROUP ");
-			    return NETGROUP;
+			    LEXRETURN(NETGROUP);
 			}
 
 \%:?({WORD}|{ID})	{
@@ -429,55 +435,55 @@ NOLOG_INPUT[[:blank:]]*:	{
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("USERGROUP ");
-			    return USERGROUP;
+			    LEXRETURN(USERGROUP);
 			}
 
 {IPV4ADDR}(\/{IPV4ADDR})? {
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
-			    return NTWKADDR;
+			    LEXRETURN(NTWKADDR);
 			}
 
 {IPV4ADDR}\/([12]?[0-9]|3[0-2]) {
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
-			    return NTWKADDR;
+			    LEXRETURN(NTWKADDR);
 			}
 
 {IPV6ADDR}(\/{IPV6ADDR})? {
 			    if (!ipv6_valid(yytext)) {
 				LEXTRACE("ERROR ");
-				return ERROR;
+				LEXRETURN(ERROR);
 			    }
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
-			    return NTWKADDR;
+			    LEXRETURN(NTWKADDR);
 			}
 
 {IPV6ADDR}\/([0-9]|[1-9][0-9]|1[01][0-9]|12[0-8]) {
 			    if (!ipv6_valid(yytext)) {
 				LEXTRACE("ERROR ");
-				return ERROR;
+				LEXRETURN(ERROR);
 			    }
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
-			    return NTWKADDR;
+			    LEXRETURN(NTWKADDR);
 			}
 
 ALL {
 			    LEXTRACE("ALL ");
-			    return ALL;
+			    LEXRETURN(ALL);
 
 			}
 
 <INITIAL>ROLE {
 #ifdef HAVE_SELINUX
 			    LEXTRACE("ROLE ");
-			    return ROLE;
+			    LEXRETURN(ROLE);
 #else
 			    goto got_alias;
 #endif
@@ -486,7 +492,7 @@ ALL {
 <INITIAL>TYPE {
 #ifdef HAVE_SELINUX
 			    LEXTRACE("TYPE ");
-			    return TYPE;
+			    LEXRETURN(TYPE);
 #else
 			    goto got_alias;
 #endif
@@ -497,7 +503,7 @@ ALL {
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("ALIAS ");
-			    return ALIAS;
+			    LEXRETURN(ALIAS);
 			}
 
 <GOTDEFS>({PATH}|sudoedit) {
@@ -505,7 +511,7 @@ ALL {
 			    if (!fill_cmnd(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("COMMAND ");
-			    return COMMAND;
+			    LEXRETURN(COMMAND);
 			}
 
 sudoedit		{
@@ -521,7 +527,7 @@ sudoedit		{
 				LEXTRACE("COMMAND ");
 				if (!fill_cmnd(yytext, yyleng))
 				    yyterminate();
-				return COMMAND;
+				LEXRETURN(COMMAND);
 			    } else {
 				BEGIN GOTCMND;
 				LEXTRACE("COMMAND ");
@@ -542,51 +548,51 @@ sudoedit		{
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("WORD(5) ");
-			    return WORD;
+			    LEXRETURN(WORD);
 			}
 
 \(			{
 			    LEXTRACE("( ");
-			    return '(';
+			    LEXRETURN('(');
 			}
 
 \)			{
 			    LEXTRACE(") ");
-			    return ')';
+			    LEXRETURN(')');
 			}
 
 ,			{
 			    LEXTRACE(", ");
-			    return ',';
+			    LEXRETURN(',');
 			}			/* return ',' */
 
 =			{
 			    LEXTRACE("= ");
-			    return '=';
+			    LEXRETURN('=');
 			}			/* return '=' */
 
 :			{
 			    LEXTRACE(": ");
-			    return ':';
+			    LEXRETURN(':');
 			}			/* return ':' */
 
 <*>!+			{
 			    if (yyleng & 1) {
 				LEXTRACE("!");
-				return '!';	/* return '!' */
+				LEXRETURN('!');	/* return '!' */
 			    }
 			}
 
 <*>\n			{
 			    if (YY_START == INSTR) {
 				LEXTRACE("ERROR ");
-				return ERROR;	/* line break in string */
+				LEXRETURN(ERROR);	/* line break in string */
 			    }
 			    BEGIN INITIAL;
-			    ++sudolineno;
+			    sudolineno++;
 			    continued = FALSE;
 			    LEXTRACE("\n");
-			    return COMMENT;
+			    LEXRETURN(COMMENT);
 			}			/* return newline */
 
 <*>[[:blank:]]+		{			/* throw away space/tabs */
@@ -595,28 +601,28 @@ sudoedit		{
 
 <*>\\[[:blank:]]*\n	{
 			    sawspace = TRUE;	/* remember for fill_args */
-			    ++sudolineno;
+			    sudolineno++;
 			    continued = TRUE;
 			}			/* throw away EOL after \ */
 
 <INITIAL,STARTDEFS,INDEFS>#(-[^\n0-9].*|[^\n0-9-].*)?\n	{
 			    BEGIN INITIAL;
-			    ++sudolineno;
+			    sudolineno++;
 			    continued = FALSE;
 			    LEXTRACE("#\n");
-			    return COMMENT;
+			    LEXRETURN(COMMENT);
 			}			/* comment, not uid/gid */
 
 <*>.			{
 			    LEXTRACE("ERROR ");
-			    return ERROR;
+			    LEXRETURN(ERROR);
 			}	/* parse error */
 
 <*><<EOF>>		{
 			    if (YY_START != INITIAL) {
 			    	BEGIN INITIAL;
 				LEXTRACE("ERROR ");
-				return ERROR;
+				LEXRETURN(ERROR);
 			    }
 			    if (!pop_include())
 				yyterminate();

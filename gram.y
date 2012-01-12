@@ -51,6 +51,7 @@
 
 #include "sudo.h"
 #include "parse.h"
+#include "gram.h"
 
 /*
  * We must define SIZE_MAX for yacc's skeleton.c.
@@ -69,6 +70,7 @@
  * Globals
  */
 extern int sudolineno;
+extern int last_token;
 extern char *sudoers;
 static int verbose = FALSE;
 int parse_error = FALSE;
@@ -92,15 +94,19 @@ void
 yyerror(s)
     const char *s;
 {
+    /* If we last saw a newline the error is on the preceding line. */
+    if (last_token == COMMENT)
+	sudolineno--;
+
     /* Save the line the first error occurred on. */
     if (errorlineno == -1) {
-	errorlineno = sudolineno ? sudolineno - 1 : 0;
+	errorlineno = sudolineno;
 	errorfile = estrdup(sudoers);
     }
     if (verbose && s != NULL) {
 #ifndef TRACELEXER
 	(void) fprintf(stderr, ">>> %s: %s near line %d <<<\n", sudoers, s,
-	    sudolineno ? sudolineno - 1 : 0);
+	    sudolineno);
 #else
 	(void) fprintf(stderr, "<*> ");
 #endif
