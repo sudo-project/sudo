@@ -733,6 +733,17 @@ exec_monitor(path, argv, envp, backchannel, rbac)
     sa.sa_handler = handler;
     sigaction(SIGCHLD, &sa, NULL);
 
+    /* Catch common signals so we can cleanup properly. */
+    sa.sa_flags = SA_RESTART;
+    sa.sa_handler = handler;
+    sigaction(SIGHUP, &sa, NULL);
+    sigaction(SIGINT, &sa, NULL);
+    sigaction(SIGQUIT, &sa, NULL);
+    sigaction(SIGTERM, &sa, NULL);
+    sigaction(SIGTSTP, &sa, NULL);
+    sigaction(SIGUSR1, &sa, NULL);
+    sigaction(SIGUSR2, &sa, NULL);
+
     /*
      * Start a new session with the parent as the session leader
      * and the slave pty as the controlling terminal.
