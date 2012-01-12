@@ -22111,6 +22111,14 @@ fi
 
 if test "$with_pam" = "yes"; then
     case $host in
+	*-*-hpux*)
+	    if  -f /usr/lib/security/libpam_hpsec.so.1 ; then
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: You may wish to add the following line to /etc/pam.conf" >&5
+$as_echo "$as_me: You may wish to add the following line to /etc/pam.conf" >&6;}
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: sudo session required libpam_hpsec.so.1 bypass_umask bypass_last_login" >&5
+$as_echo "$as_me: sudo session required libpam_hpsec.so.1 bypass_umask bypass_last_login" >&6;}
+	    fi
+	    ;;
 	*-*-linux*)
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: You will need to customize sample.pam and install it as /etc/pam.d/sudo" >&5
 $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/pam.d/sudo" >&6;}

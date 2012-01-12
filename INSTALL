@@ -737,6 +737,12 @@ HP-UX:
 
     sudo	session	required	libpam_hpsec.so.1 bypass_umask
 
+    If every command run via sudo displays information about the last
+    successful login and the last authentication failure you should
+    make use an /etc/pam.conf line like:
+
+    sudo	session	required	libpam_hpsec.so.1 bypass_umask bypass_last_login
+
 Digital UNIX:
     By default, sudo will use SIA (Security Integration Architecture)
     to validate a user.  If you want to use an alternative authentication
