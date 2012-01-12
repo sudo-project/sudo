@@ -27,7 +27,7 @@
  */
 union sudo_in_addr_un {
     struct in_addr ip4;
-#ifdef HAVE_IN6_ADDR
+#ifdef HAVE_STRUCT_IN6_ADDR
     struct in6_addr ip6;
 #endif
 };

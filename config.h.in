@@ -212,9 +212,6 @@
 /* Define to 1 if your Kerberos is Heimdal. */
 #undef HAVE_HEIMDAL
 
-/* Define to 1 if <netinet/in.h> contains struct in6_addr. */
-#undef HAVE_IN6_ADDR
-
 /* Define to 1 if you have the `initgroups' function. */
 #undef HAVE_INITGROUPS
 
@@ -468,7 +465,7 @@
 /* Define to 1 if you have the `sigaction' function. */
 #undef HAVE_SIGACTION
 
-/* Define to 1 if <signal.h> has the sigaction_t typedef. */
+/* Define to 1 if the system has the type `sigaction_t'. */
 #undef HAVE_SIGACTION_T
 
 /* Define to 1 if you use S/Key. */
@@ -518,6 +515,9 @@
 
 /* Define to 1 if the system has the type `struct in6_addr'. */
 #undef HAVE_STRUCT_IN6_ADDR
+
+/* Define to 1 if the system has the type `struct timespec'. */
+#undef HAVE_STRUCT_TIMESPEC
 
 /* Define to 1 if your struct stat has an st_mtim member */
 #undef HAVE_ST_MTIM
@@ -572,9 +572,6 @@
 
 /* Define to 1 if you have the <termio.h> header file. */
 #undef HAVE_TERMIO_H
-
-/* Define to 1 if you have struct timespec in sys/time.h */
-#undef HAVE_TIMESPEC
 
 /* Define to 1 if you have the `tzset' function. */
 #undef HAVE_TZSET

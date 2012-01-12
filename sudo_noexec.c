@@ -19,7 +19,7 @@
 #include <sys/types.h>
 
 #include <errno.h>
-#ifndef HAVE_TIMESPEC
+#ifndef HAVE_STRUCT_TIMESPEC
 # include <time.h>
 #endif
 #ifdef __STDC__

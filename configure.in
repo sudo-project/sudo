@@ -1981,14 +1981,14 @@ AC_TYPE_UID_T
 AC_CHECK_TYPE([__signed char], [], [AC_CHECK_TYPE([signed char], [AC_DEFINE(__signed, signed)], [AC_DEFINE(__signed, [])])])
 AC_CHECK_TYPE([sig_atomic_t], [], [AC_DEFINE(sig_atomic_t, int)], [#include <sys/types.h>
 #include <signal.h>])
-AC_CHECK_TYPES([sigaction_t], [AC_DEFINE(HAVE_SIGACTION_T)], [], [#include <sys/types.h>
+AC_CHECK_TYPES([sigaction_t], [], [], [#include <sys/types.h>
 #include <signal.h>])
-AC_CHECK_TYPE([struct timespec], [AC_DEFINE(HAVE_TIMESPEC)], [], [#include <sys/types.h>
+AC_CHECK_TYPES([struct timespec], [], [], [#include <sys/types.h>
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 #endif
 #include <time.h>])
-AC_CHECK_TYPES([struct in6_addr], [AC_DEFINE(HAVE_IN6_ADDR)], [], [#include <sys/types.h>
+AC_CHECK_TYPES([struct in6_addr], [], [], [#include <sys/types.h>
 #include <netinet/in.h>])
 AC_TYPE_LONG_LONG_INT
 AC_CHECK_SIZEOF([long int])
@@ -3017,7 +3017,6 @@ AH_TEMPLATE(HAVE_GETSPNAM, [Define to 1 if you have the `getspnam' function (SVR
 AH_TEMPLATE(HAVE_GETSPWUID, [Define to 1 if you have the `getspwuid' function. (HP-UX <= 9.X shadow passwords)])
 AH_TEMPLATE(HAVE_GSS_KRB5_CCACHE_NAME, [Define to 1 if you have the `gss_krb5_ccache_name' function.])
 AH_TEMPLATE(HAVE_HEIMDAL, [Define to 1 if your Kerberos is Heimdal.])
-AH_TEMPLATE(HAVE_IN6_ADDR, [Define to 1 if <netinet/in.h> contains struct in6_addr.])
 AH_TEMPLATE(HAVE_ISCOMSEC, [Define to 1 if you have the `iscomsec' function. (HP-UX >= 10.x check for shadow enabled)])
 AH_TEMPLATE(HAVE_ISSECURE, [Define to 1 if you have the `issecure' function. (SunOS 4.x check for shadow enabled)])
 AH_TEMPLATE(HAVE_KERB4, [Define to 1 if you use Kerberos IV.])
@@ -3036,7 +3035,6 @@ AH_TEMPLATE(HAVE_PROJECT_H, [Define to 1 if you have the <project.h> header file
 AH_TEMPLATE(HAVE_SECURID, [Define to 1 if you use SecurID for authentication.])
 AH_TEMPLATE(HAVE_SELINUX, [Define to 1 to enable SELinux RBAC support.])
 AH_TEMPLATE(HAVE_SETKEYCREATECON, [Define to 1 if you have the `setkeycreatecon' function.])
-AH_TEMPLATE(HAVE_SIGACTION_T, [Define to 1 if <signal.h> has the sigaction_t typedef.])
 AH_TEMPLATE(HAVE_SKEY, [Define to 1 if you use S/Key.])
 AH_TEMPLATE(HAVE_SKEYACCESS, [Define to 1 if your S/Key library has skeyaccess().])
 AH_TEMPLATE(HAVE_RFC1938_SKEYCHALLENGE, [Define to 1 if the skeychallenge() function is RFC1938-compliant and takes 4 arguments])
@@ -3044,7 +3042,6 @@ AH_TEMPLATE(HAVE_ST__TIM, [Define to 1 if your struct stat uses an st__tim union
 AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member])
 AH_TEMPLATE(HAVE_ST_MTIMESPEC, [Define to 1 if your struct stat has an st_mtimespec member])
 AH_TEMPLATE(HAVE_TERMIOS_H, [Define to 1 if you have the <termios.h> header file and the `tcgetattr' function.])
-AH_TEMPLATE(HAVE_TIMESPEC, [Define to 1 if you have struct timespec in sys/time.h])
 AH_TEMPLATE(HAVE___PROGNAME, [Define to 1 if your crt0.o defines the __progname symbol for you.])
 AH_TEMPLATE(HOST_IN_LOG, [Define to 1 if you want the hostname to be entered into the log file.])
 AH_TEMPLATE(IGNORE_DOT_PATH, [Define to 1 if you want to ignore '.' and empty PATH elements])

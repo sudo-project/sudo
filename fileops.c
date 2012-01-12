@@ -43,7 +43,7 @@
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#ifndef HAVE_TIMESPEC
+#ifndef HAVE_STRUCT_TIMESPEC
 # include "emul/timespec.h"
 #endif
 
