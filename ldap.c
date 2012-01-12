@@ -1003,6 +1003,103 @@ sudo_ldap_build_default_filter()
     return filt;
 }
 
+ /*
+ * Determine length of query value after escaping characters
+ * as per RFC 4515.
+ */
+static size_t
+sudo_ldap_value_len(value)
+    const char *value;
+{
+    const char *s;
+    size_t len = 0;
+
+    for (s = value; *s != '\0'; s++) {
+	switch (*s) {
+	case '\\':
+	case '(':
+	case ')':
+	case '*':
+	    len += 2;
+	    break;
+	}
+    }
+    len += (size_t)(s - value);
+    return len;
+}
+
+/*
+ * Like strlcat() but escapes characters as per RFC 4515.
+ */
+static size_t
+sudo_ldap_value_cat(dst, src, size)
+    char *dst;
+    const char *src;
+    size_t size;
+{
+    char *d = dst;
+    const char *s = src;
+    size_t n = size;
+    size_t dlen;
+
+    /* Find the end of dst and adjust bytes left but don't go past end */
+    while (n-- != 0 && *d != '\0')
+	d++;
+    dlen = d - dst;
+    n = size - dlen;
+
+    if (n == 0)
+	return dlen + strlen(s);
+    while (*s != '\0') {
+	switch (*s) {
+	case '\\':
+	    if (n < 3)
+		goto done;
+	    *d++ = '\\';
+	    *d++ = '5';
+	    *d++ = 'c';
+	    n -= 3;
+	    break;
+	case '(':
+	    if (n < 3)
+		goto done;
+	    *d++ = '\\';
+	    *d++ = '2';
+	    *d++ = '8';
+	    n -= 3;
+	    break;
+	case ')':
+	    if (n < 3)
+		goto done;
+	    *d++ = '\\';
+	    *d++ = '2';
+	    *d++ = '9';
+	    n -= 3;
+	    break;
+	case '*':
+	    if (n < 3)
+		goto done;
+	    *d++ = '\\';
+	    *d++ = '2';
+	    *d++ = 'a';
+	    n -= 3;
+	    break;
+	default:
+	    if (n < 1)
+		goto done;
+	    *d++ = *s;
+	    n--;
+	    break;
+	}
+	s++;
+    }
+done:
+    *d = '\0';
+    while (*s != '\0')
+	s++;
+    return dlen + (s - src);	/* count does not include NUL */
+}
+
 /*
  * Builds up a filter to check against LDAP.
  */
@@ -1020,18 +1117,18 @@ sudo_ldap_build_pass1(pw)
 	sz += strlen(ldap_conf.search_filter) + 3;
 
     /* Then add (|(sudoUser=USERNAME)(sudoUser=ALL)) + NUL */
-    sz += 29 + strlen(pw->pw_name);
+    sz += 29 + sudo_ldap_value_len(pw->pw_name);
 
-    /* Add space for groups */
+    /* Add space for primary and supplementary groups. */
     if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
-	sz += 12 + strlen(grp->gr_name);	/* primary group */
+	sz += 12 + sudo_ldap_value_len(grp->gr_name);
 	gr_delref(grp);
     }
     for (i = 0; i < user_ngroups; i++) {
 	if (user_groups[i] == pw->pw_gid)
 	    continue;
 	if ((grp = sudo_getgrgid(user_groups[i])) != NULL) {
-	    sz += 12 + strlen(grp->gr_name);	/* supplementary group */
+	    sz += 12 + sudo_ldap_value_len(grp->gr_name);
 	    gr_delref(grp);
 	}
     }
@@ -1054,13 +1151,13 @@ sudo_ldap_build_pass1(pw)
 
     /* Global OR + sudoUser=user_name filter */
     (void) strlcat(buf, "(|(sudoUser=", sz);
-    (void) strlcat(buf, pw->pw_name, sz);
+    (void) sudo_ldap_value_cat(buf, pw->pw_name, sz);
     (void) strlcat(buf, ")", sz);
 
     /* Append primary group */
     if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
 	(void) strlcat(buf, "(sudoUser=%", sz);
-	(void) strlcat(buf, grp->gr_name, sz);
+	(void) sudo_ldap_value_cat(buf, grp->gr_name, sz);
 	(void) strlcat(buf, ")", sz);
 	gr_delref(grp);
     }
@@ -1071,7 +1168,7 @@ sudo_ldap_build_pass1(pw)
 	    continue;
 	if ((grp = sudo_getgrgid(user_groups[i])) != NULL) {
 	    (void) strlcat(buf, "(sudoUser=%", sz);
-	    (void) strlcat(buf, grp->gr_name, sz);
+	    (void) sudo_ldap_value_cat(buf, grp->gr_name, sz);
 	    (void) strlcat(buf, ")", sz);
 	    gr_delref(grp);
 	}
