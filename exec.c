@@ -142,7 +142,11 @@ static int fork_cmnd(path, argv, envp, sv, rbac_enabled)
 	restore_signals();
 	if (exec_setup(rbac_enabled, user_ttypath, -1) == TRUE) {
 	    /* headed for execve() */
-	    closefrom(def_closefrom);
+	    int maxfd = def_closefrom;
+	    dup2(sv[1], maxfd);
+	    (void)fcntl(maxfd, F_SETFD, FD_CLOEXEC);
+	    sv[1] = maxfd++;
+	    closefrom(maxfd);
 #ifdef HAVE_SELINUX
 	    if (rbac_enabled)
 		selinux_execve(path, argv, envp);

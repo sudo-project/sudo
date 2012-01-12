@@ -104,7 +104,7 @@ static void flush_output __P((void));
 static int exec_monitor __P((const char *path, char *argv[],
     char *envp[], int, int));
 static void exec_pty __P((const char *path, char *argv[],
-    char *envp[], int));
+    char *envp[], int, int *));
 static RETSIGTYPE sigwinch __P((int s));
 static void sync_ttysize __P((int src, int dst));
 static void deliver_signal __P((pid_t pid, int signo));
@@ -780,7 +780,7 @@ exec_monitor(path, argv, envp, backchannel, rbac)
 	restore_signals();
 
 	/* setup tty and exec command */
-	exec_pty(path, argv, envp, rbac);
+	exec_pty(path, argv, envp, rbac, &errpipe[1]);
 	cstat.type = CMD_ERRNO;
 	cstat.val = errno;
 	if (write(errpipe[1], &cstat, sizeof(cstat)) == -1)
@@ -977,12 +977,14 @@ flush_output()
  * Returns only if execve() fails.
  */
 static void
-exec_pty(path, argv, envp, rbac_enabled)
+exec_pty(path, argv, envp, rbac_enabled, errfd)
     const char *path;
     char *argv[];
     char *envp[];
     int rbac_enabled;
+    int *errfd;
 {
+    int maxfd = def_closefrom;
     pid_t self = getpid();
 
     /* Set child process group here too to avoid a race. */
@@ -1010,7 +1012,10 @@ exec_pty(path, argv, envp, rbac_enabled)
     if (io_fds[SFD_STDERR] != io_fds[SFD_SLAVE])
 	close(io_fds[SFD_STDERR]);
 
-    closefrom(def_closefrom);
+    dup2(*errfd, maxfd);
+    (void)fcntl(maxfd, F_SETFD, FD_CLOEXEC);
+    *errfd = maxfd++;
+    closefrom(maxfd);
 #ifdef HAVE_SELINUX
     if (rbac_enabled)
 	selinux_execve(path, argv, envp);
