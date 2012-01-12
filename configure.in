@@ -2022,7 +2022,28 @@ AC_CHECK_FUNCS(setsid, [], [
     AC_FUNC_SETPGRP
 ])
 
-AC_CHECK_FUNCS(sysctl getutxid getutid, [break])
+AC_CHECK_FUNCS(getutxid getutid, [break])
+
+AC_CHECK_FUNCS(sysctl, [AC_CHECK_MEMBERS([struct kinfo_proc.ki_tdev], 
+    [],
+    [
+	AC_CHECK_MEMBERS([struct kinfo_proc.kp_eproc.e_tdev], [], [
+	    AC_CHECK_MEMBERS([struct kinfo_proc.p_tdev], [], [], [
+		#include <sys/param.h>
+		#include <sys/sysctl.h>
+	    ])
+	],
+	[
+	    #include <sys/param.h>
+	    #include <sys/sysctl.h>
+	])
+    ],
+    [
+	#include <sys/param.h>
+	#include <sys/sysctl.h>
+	#include <sys/user.h>
+    ])
+])
 
 AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(libutil.h util.h pty.h, [break])], [
     AC_CHECK_LIB(util, openpty, [
