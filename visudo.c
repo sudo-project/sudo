@@ -235,12 +235,9 @@ main(argc, argv)
     /* Check edited files for a parse error and re-edit any that fail. */
     reparse_sudoers(editor, args, strict, quiet);
 
-    /* Install the sudoers temp files. */
+    /* Install the sudoers temp files as needed. */
     tq_foreach_fwd(&sudoerslist, sp) {
-	if (!sp->modified)
-	    (void) unlink(sp->tpath);
-	else
-	    (void) install_sudoers(sp, oldperms);
+	(void) install_sudoers(sp, oldperms);
     }
 
     exit(0);
@@ -532,6 +529,20 @@ install_sudoers(sp, oldperms)
     int oldperms;
 {
     struct stat sb;
+
+    if (!sp->modified) {
+	/*
+	 * No changes but fix owner/mode if needed.
+	 */
+	(void) unlink(sp->tpath);
+	if (!oldperms && fstat(sp->fd, &sb) != -1) {
+	    if (sb.st_uid != SUDOERS_UID || sb.st_gid != SUDOERS_GID)
+		(void) chown(sp->path, SUDOERS_UID, SUDOERS_GID);
+	    if ((sb.st_mode & 0777) != SUDOERS_MODE)
+		(void) chmod(sp->path, SUDOERS_MODE);
+	}
+	return TRUE;
+    }
 
     /*
      * Change mode and ownership of temp file so when
