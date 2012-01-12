@@ -788,7 +788,11 @@ check_syntax(sudoers_path, quiet, strict)
 	    else
 		(void) printf("parse error in %s\n", errorfile);
 	} else {
+	    struct sudoersfile *sp;
 	    (void) printf("%s: parsed OK\n", sudoers_path);
+	    tq_foreach_fwd(&sudoerslist, sp) {
+		(void) printf("%s: parsed OK\n", sp->path);
+	    }
 	}
     }
     /* Check mode and owner in strict mode. */
