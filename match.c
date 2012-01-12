@@ -492,7 +492,7 @@ command_matches_glob(sudoers_cmnd, sudoers_args)
      *  c) there are args in sudoers and on command line and they match
      * else return false.
      */
-#define GLOB_FLAGS	(GLOB_NOSORT | GLOB_MARK | GLOB_BRACE | GLOB_TILDE)
+#define GLOB_FLAGS	(GLOB_NOSORT | GLOB_BRACE | GLOB_TILDE)
     if (glob(sudoers_cmnd, GLOB_FLAGS, NULL, &gl) != 0 || gl.gl_pathc == 0) {
 	globfree(&gl);
 	return FALSE;
