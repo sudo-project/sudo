@@ -227,4 +227,7 @@ int get_net_ifs(char **addrinfo);
 /* setgroups.c */
 int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
 
+/* ttyname.c */
+char *get_process_ttyname(void);
+
 #endif /* _SUDO_SUDO_H */
