@@ -356,6 +356,9 @@ YY_DECL;
 /* zero_bytes.c */
 void zero_bytes		__P((volatile void *, size_t));
 
+/* ttyname.c */
+char *get_process_ttyname __P((void));
+
 /* Only provide extern declarations outside of sudo.c. */
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;

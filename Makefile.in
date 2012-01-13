@@ -114,9 +114,9 @@ SRCS = aix.c alias.c alloc.c audit.c boottime.c bsm_audit.c check.c \
        parse_args.c pwutil.c set_perms.c setsid.c sigaction.c snprintf.c \
        strcasecmp.c strerror.c strlcat.c strlcpy.c strsignal.c sudo.c \
        sudo_noexec.c sudo_edit.c sudo_nss.c term.c testsudoers.c tgetpass.c \
-       toke.c toke.l toke_util.c tsgetgrpw.c utimes.c vasgroups.c visudo.c \
-       zero_bytes.c redblack.c selinux.c sesh.c sudoreplay.c getdate.c \
-       getdate.y getline.c timestr.c $(AUTH_SRCS)
+       toke.c toke.l toke_util.c tsgetgrpw.c ttyname.c utimes.c vasgroups.c \
+       visudo.c zero_bytes.c redblack.c selinux.c sesh.c sudoreplay.c \
+       getdate.c getdate.y getline.c timestr.c $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/kerb4.c auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
@@ -139,7 +139,7 @@ COMMON_OBJS = alias.o alloc.o defaults.o error.o gram.o \
 SUDO_OBJS = $(AUTH_OBJS) @SUDO_OBJS@ audit.o boottime.o check.o env.o \
 	    exec.o gettime.o goodpath.o fileops.o find_path.o \
 	    interfaces.o lbuf.o logging.o logwrap.o parse.o parse_args.o \
-	    set_perms.o sudo.o sudo_edit.o sudo_nss.o tgetpass.o
+	    set_perms.o sudo.o sudo_edit.o sudo_nss.o tgetpass.o ttyname.o
 
 VISUDO_OBJS = visudo.o fileops.o gettime.o goodpath.o find_path.o
 
@@ -391,6 +391,8 @@ testsudoers.o: $(srcdir)/testsudoers.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/li
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/testsudoers.c
 tgetpass.o: $(srcdir)/tgetpass.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tgetpass.c
+ttyname.o: $(srcdir)/ttyname.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/ttyname.c
 timestr.o: $(srcdir)/timestr.c $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/timestr.c
 toke.o: $(devdir)/toke.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(srcdir)/toke.h $(devdir)/gram.h
