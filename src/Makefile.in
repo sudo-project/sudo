@@ -75,7 +75,7 @@ PROGS = @PROGS@
 
 OBJS = conversation.o error.o exec.o exec_pty.o get_pty.o net_ifs.o \
        load_plugins.o parse_args.o sudo.o sudo_edit.o tgetpass.o \
-       ttysize.o utmp.o @SUDO_OBJS@
+       ttyname.o ttysize.o utmp.o @SUDO_OBJS@
 
 LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
 
@@ -234,6 +234,12 @@ tgetpass.o: $(srcdir)/tgetpass.c $(top_builddir)/config.h $(srcdir)/sudo.h \
             $(incdir)/fileops.h $(incdir)/list.h $(incdir)/sudo_debug.h \
             $(incdir)/gettext.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/tgetpass.c
+ttyname.o: $(srcdir)/ttyname.c $(top_builddir)/config.h $(srcdir)/sudo.h \
+           $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
+           $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
+           $(incdir)/fileops.h $(incdir)/list.h $(incdir)/sudo_conf.h \
+           $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/ttyname.c
 ttysize.o: $(srcdir)/ttysize.c $(top_builddir)/config.h $(incdir)/missing.h \
            $(incdir)/sudo_debug.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/ttysize.c

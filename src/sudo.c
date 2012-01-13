@@ -25,9 +25,6 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
-#ifdef HAVE_SYS_SELECT_H
-# include <sys/select.h>
-#endif /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <stdio.h>
@@ -427,121 +424,6 @@ get_user_groups(struct user_details *ud)
 }
 
 /*
- * How to access the tty device number in struct kinfo_proc.
- */
-#if defined(HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV)
-# define sudo_kp_tdev		kp_eproc.e_tdev
-# define sudo_kp_namelen	4
-#elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
-# define sudo_kp_tdev		ki_tdev
-# define sudo_kp_namelen	4
-#elif defined(HAVE_STRUCT_KINFO_PROC_P_TDEV)
-# define sudo_kp_tdev		p_tdev
-# define sudo_kp_namelen	6
-#endif
-
-#ifdef sudo_kp_tdev
-/*
- * Return a string from ttyname() containing the tty to which the process is
- * attached or NULL if there is no tty associated with the process (or its
- * parent).  First tries sysctl using the current pid, then the parent's pid.
- * Falls back on ttyname of std{in,out,err} if that fails.
- */
-static char *
-get_process_tty(void)
-{
-    char *tty = NULL;
-    struct kinfo_proc *ki_proc = NULL;
-    size_t size = sizeof(*ki_proc);
-    int i, mib[6], rc;
-    debug_decl(get_process_tty, SUDO_DEBUG_UTIL)
-
-    /*
-     * Lookup tty for this process and, failing that, our parent.
-     * Even if we redirect std{in,out,err} the kernel should still know.
-     */
-    for (i = 0; tty == NULL && i < 2; i++) {
-	mib[0] = CTL_KERN;
-	mib[1] = KERN_PROC;
-	mib[2] = KERN_PROC_PID;
-	mib[3] = i ? (int)getppid() : (int)getpid();
-	mib[4] = sizeof(*ki_proc);
-	mib[5] = 1;
-	do {
-	    size += size / 10;
-	    ki_proc = erealloc(ki_proc, size);
-	    rc = sysctl(mib, sudo_kp_namelen, ki_proc, &size, NULL, 0);
-	} while (rc == -1 && errno == ENOMEM);
-	if (rc != -1) {
-	    char *dev = devname(ki_proc->sudo_kp_tdev, S_IFCHR);
-	    /* Some versions of devname() return NULL, others do not. */
-	    if (dev == NULL || *dev == '?' || *dev == '#') {
-		sudo_debug_printf(SUDO_DEBUG_WARN,
-		    "unable to map device number %u to name",
-		    ki_proc->sudo_kp_tdev);
-	    } else if (*dev != '/') {
-		/* devname() doesn't use the /dev/ prefix, add one... */
-		size_t len = sizeof(_PATH_DEV) + strlen(dev);
-		tty = emalloc(len);
-		strlcpy(tty, _PATH_DEV, len);
-		strlcat(tty, dev, len);
-	    } else {
-		/* Should not happen but just in case... */
-		tty = estrdup(dev);
-	    }
-	} else {
-	    sudo_debug_printf(SUDO_DEBUG_WARN,
-		"unable to resolve tty via KERN_PROC: %s", strerror(errno));
-	}
-	efree(ki_proc);
-    }
-
-    /* If all else fails, fall back on ttyname(). */
-    if (tty == NULL) {
-	if ((tty = ttyname(STDIN_FILENO)) != NULL ||
-	    (tty = ttyname(STDOUT_FILENO)) != NULL ||
-	    (tty = ttyname(STDERR_FILENO)) != NULL)
-	    tty = estrdup(tty);
-    }
-
-    debug_return_str(tty);
-}
-#else
-/*
- * Return a string from ttyname() containing the tty to which the process is
- * attached or NULL if there is no tty associated with the process (or its
- * parent).  First tries std{in,out,err} then falls back to the parent's /proc
- * entry.  We could try following the parent all the way to pid 1 but
- * /proc/%d/status is system-specific (text on Linux, a struct on Solaris).
- */
-static char *
-get_process_tty(void)
-{
-    char path[PATH_MAX], *tty = NULL;
-    pid_t ppid;
-    int i, fd;
-    debug_decl(get_process_tty, SUDO_DEBUG_UTIL)
-
-    if ((tty = ttyname(STDIN_FILENO)) == NULL &&
-	(tty = ttyname(STDOUT_FILENO)) == NULL &&
-	(tty = ttyname(STDERR_FILENO)) == NULL) {
-	/* No tty for child, check the parent via /proc. */
-	ppid = getppid();
-	for (i = STDIN_FILENO; i < STDERR_FILENO && tty == NULL; i++) {
-	    snprintf(path, sizeof(path), "/proc/%d/fd/%d", ppid, i);
-	    fd = open(path, O_RDONLY|O_NOCTTY, 0);
-	    if (fd != -1) {
-		tty = ttyname(fd);
-		close(fd);
-	    }
-	}
-    }
-
-    debug_return_str(estrdup(tty));
-}
-#endif /* sudo_kp_tdev */
-
-/*
  * Return user information as an array of name=value pairs.
  * and fill in struct user_details (which shares the same strings).
  */
@@ -591,7 +473,7 @@ get_user_info(struct user_details *ud)
 	ud->cwd = user_info[i] + sizeof("cwd=") - 1;
     }
 
-    if ((cp = get_process_tty()) != NULL) {
+    if ((cp = get_process_ttyname()) != NULL) {
 	user_info[++i] = fmt_string("tty", cp);
 	if (user_info[i] == NULL)
 	    errorx(1, _("unable to allocate memory"));
