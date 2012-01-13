@@ -12,7 +12,7 @@ limited root privileges to users and log root activity.  \
 The basic philosophy is to give as few privileges as possible but \
 still allow people to get their work done."
 	vendor="Todd C. Miller"
-	copyright="(c) 1993-1996,1998-2011 Todd C. Miller"
+	copyright="(c) 1993-1996,1998-2012 Todd C. Miller"
 
 %if [aix]
 	# AIX package summary is limited to 40 characters
@@ -176,7 +176,20 @@ still allow people to get their work done."
 	EOF
 %endif
 
+	# OS-level directories that should generally exist but might not.
+	extradirs=`echo ${pp_destdir}/${mandir}/[mc]* | sed "s#${pp_destdir}/##g"`
+	extradirs="$extradirs `dirname $docdir` `dirname $timedir`"
+	test -d ${pp_destdir}/etc/pam.d && extradirs="${extradirs} /etc/pam.d"
+	for dir in $bindir $sbindir $libexecdir $includedir $extradirs; do
+		while test "$dir" != "/"; do
+			osdirs="${osdirs}${osdirs+ }$dir/"
+			dir=`dirname $dir`
+		done
+	done
+	osdirs=`echo $osdirs | tr " " "\n" | sort -u`
+
 %files
+	$osdirs		       -
 	$bindir/sudo        4111 root:
 	$bindir/sudoedit    4111 root:
 	$sbindir/visudo     0111
