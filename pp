@@ -1,7 +1,7 @@
 #!/bin/sh
-# (c) 2011 Quest Software, Inc. All rights reserved
-pp_revision="305"
- # Copyright 2010 Quest Software, Inc.  All rights reserved.
+# Copyright 2012 Quest Software, Inc. ALL RIGHTS RESERVED
+pp_revision="333"
+ # Copyright 2011 Quest Software, Inc.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
  # modification, are permitted provided that the following conditions
@@ -31,7 +31,7 @@ pp_revision="305"
  # Please see <http://rc.quest.com/topics/polypkg/> for more information
 
 pp_version="1.0.0.$pp_revision"
-pp_copyright="Copyright 2010, Quest Software, Inc. All rights reserved."
+pp_copyright="Copyright 2011, Quest Software, Inc. ALL RIGHTS RESERVED."
 
 pp_opt_debug=false
 pp_opt_destdir="$DESTDIR"
@@ -802,7 +802,7 @@ pp_frontend_init () {
     version=
     summary="no summary"
     description="No description"
-    copyright="Copyright 2010 Quest Software, Inc. All rights reserved."
+    copyright="Copyright 2011 Quest Software, Inc. ALL RIGHTS RESERVED."
 
     #-- if the user supplied extra arguments on the command line
     #   then load them now.
@@ -961,7 +961,7 @@ pp_frontend () {
              fi
 	     test $# -eq 0 || pp_warn "ignoring extra arguments: $line"
 	     continue;;
-	  %pre|%post|%preun|%postup|%postun|%files|%depend|%check)
+	  %pre|%post|%preun|%postup|%postun|%files|%depend|%check|%conflict)
              pp_debug "processing new component section $*"
              s="$1"; shift
              if test $# -eq 0 || pp_is_qualifier "$1"; then
@@ -1056,7 +1056,7 @@ pp_frontend () {
 		. $pp_wrkdir/tmp
 		: > $pp_wrkdir/tmp
 		;;
-	%pre.*|%preun.*|%post.*|%postup.*|%postun.*|%depend.*|%check.*|%service.*|%fixup)
+	%pre.*|%preun.*|%post.*|%postup.*|%postun.*|%depend.*|%check.*|%conflict.*|%service.*|%fixup)
                 pp_debug "leaving $section: substituting $pp_wrkdir/tmp"
                 # cat $pp_wrkdir/tmp >&2    # debugging
                 $pp_opt_debug && pp_substitute < $pp_wrkdir/tmp >&2
@@ -1091,6 +1091,10 @@ pp_frontend () {
 	%depend.*)
 		pp_debug "Adding explicit dependency $@ to $cpt"
 		echo "$@" >> $pp_wrkdir/%depend.$cpt
+		;;
+	%conflict.*)
+		pp_debug "Adding explicit conflict $@ to $cpt"
+		echo "$@" >> $pp_wrkdir/%conflict.$cpt
 		;;
      esac
   done
@@ -1757,7 +1761,7 @@ pp_aix_add_service () {
 
 	set -- $cmd
 	cmd_cmd="$1"; shift
-	cmd_arg="$pp_aix_mkssys_cmd_args";
+	cmd_arg="$*";
 
 	case "$stop_signal" in
 		HUP) stop_signal=1;;
@@ -1787,7 +1791,7 @@ pp_aix_add_service () {
 	cat <<-. >> $pp_wrkdir/%post.$svc
 svc=$svc
 uid=0
-cmd_cmd=$daemon
+cmd_cmd="$cmd_cmd"
 cmd_arg="$cmd_arg"
 stop_signal=$stop_signal
 force_signal=9
@@ -1808,7 +1812,8 @@ mkssys -s \$svc -u \$uid -p "\$cmd_cmd" \${cmd_arg:+-a "\$cmd_arg"} -S -n \$stop
         #-- add code to start the service on reboot
         ${pp_aix_init_services_after_install} &&
           cat <<-. >> $pp_wrkdir/%post.$svc
-mkitab "\$svc:2:once:/usr/bin/startsrc -s \$svc" > /dev/null 2>&1
+id=\`echo "\$svc" | cut -c1-14\`
+mkitab "\$id:2:once:/usr/bin/startsrc -s \$svc" > /dev/null 2>&1
 .
 
 	${pp_aix_start_services_after_install} &&
@@ -1824,7 +1829,7 @@ mv $pp_wrkdir/%post.$svc $pp_wrkdir/%post.run
 
         ${pp_aix_init_services_after_install} &&
            pp_prepend $pp_wrkdir/%preun.$svc <<-.
-rmitab $svc
+rmitab `echo "$svc" | cut -c1-14` > /dev/null 2>&1
 .
 	pp_prepend $pp_wrkdir/%preun.$svc <<-.
 stopsrc -s $svc >/dev/null 2>&1
@@ -1891,6 +1896,7 @@ pp_backend_aix () {
                     -o -s $pp_wrkdir/%pre.$cmp \
                     -o -s $pp_wrkdir/%post.$cmp \
                     -o -s $pp_wrkdir/%preun.$cmp \
+                    -o -s $pp_wrkdir/%postun.$cmp \
                     -o -s $pp_wrkdir/%check.$cmp
             then
                 content=B
@@ -1963,6 +1969,11 @@ pp_backend_aix () {
 	    if test -r $pp_wrkdir/%preun.$cmp; then
 		pp_aix_make_script $root_wrkdir/$pp_aix_bff_name.$ex.unpost_i \
 			< $pp_wrkdir/%preun.$cmp
+	    fi
+
+	    if test -r $pp_wrkdir/%postun.$cmp; then
+		pp_aix_make_script $root_wrkdir/$pp_aix_bff_name.$ex.unpre_i \
+			< $pp_wrkdir/%postun.$cmp
 	    fi
 
 	    # remove empty files
@@ -2271,8 +2282,18 @@ pp_sd_write_files () {
         test x"$m" = x"-" && m=$dm
 
         case $t in
-            s) echo "$line $st $p";;
-            *) echo "$line -o $o -g $g -m $m $pp_destdir$p $p";;
+            s)
+		# swpackage will make unqualified links relative to the
+		# current working (source) directory, not the destination;
+		# we need to qualify them to prevent this.
+		case "$st" in
+		    /*) echo "$line $st $p";;
+		    *) echo "$line `dirname $p`/$st $p";;
+		esac
+		;;
+            *)
+		echo "$line -o $o -g $g -m $m $pp_destdir$p $p"
+		;;
         esac
 
     done
@@ -2294,49 +2315,49 @@ pp_sd_service_group_script () {
 .
 
     cat <<-'.' >> $out
-        #-- starts services in order.. stops them all if any break
-        pp_start () {
-            undo=
-            for svc in $svcs; do
-                /sbin/init.d/$svc start
-		case $? in
-		  0|4)
-		    undo="$svc $undo"
-		    ;;
-		  *)
-                    if test -n "$undo"; then
-                        for svc in $undo; do
-                           /sbin/init.d/$svc stop
-                        done
-                        return 1
-                    fi
-		    ;;
-                esac
-            done
-            return 0
+	#-- starts services in order.. stops them all if any break
+	pp_start () {
+	    undo=
+	    for svc in \$svcs; do
+	        /sbin/init.d/\$svc start
+	        case \$? in
+	          0|4)
+	            undo="\$svc \$undo"
+	            ;;
+	          *)
+	            if test -n "\$undo"; then
+	                for svc in \$undo; do
+	                    /sbin/init.d/\$svc stop
+	                done
+	                return 1
+	            fi
+	            ;;
+	        esac
+	    done
+	    return 0
+	}
+
+	#-- stops services in reverse
+	pp_stop () {
+	    reverse=
+	    for svc in \$svcs; do
+	        reverse="\$svc \$reverse"
+	    done
+	    rc=0
+	    for svc in \$reverse; do
+	        /sbin/init.d/\$svc stop || rc=\$?
+	    done
+	    return \$rc
         }
 
-        #-- stops services in reverse
-        pp_stop () {
-            reverse=
-            for svc in $svcs; do
-                reverse="$svc $reverse"
-            done
-            rc=0
-            for svc in $reverse; do
-                /sbin/init.d/$svc stop || rc=$?
-            done
-            return $rc
-        }
-
-        case $1 in
-            start_msg) echo "Starting $svcs";;
-            stop_msg)  echo "Stopping $svcs";;
+	case \$1 in
+	    start_msg) echo "Starting \$svcs";;
+	    stop_msg)  echo "Stopping \$svcs";;
 	    start)     pp_start;;
 	    stop)      pp_stop;;
-            *)	       echo "usage: $0 {start|stop|start_msg|stop_msg}"
-                       exit 1;;
-        esac
+	    *)	       echo "usage: \$0 {start|stop|start_msg|stop_msg}"
+	               exit 1;;
+	esac
 .
 }
 
@@ -2387,61 +2408,61 @@ pp_sd_service_script () {
 	}
 
 	pp_stop () {
-	    if test ! -s "$pidfile"; then
-		echo "Unable to stop $svc (no pid file)"
-		return 1
+	    if test ! -s "\$pidfile"; then
+	        echo "Unable to stop \$svc (no pid file)"
+	        return 1
 	    else
-		read pid < "$pidfile"
-		if kill -0 "$pid" 2>/dev/null; then
-		    if kill -${stop_signal:-TERM} "$pid"; then
-			rm -f "$pidfile"
-			return 0
-		    else
-			echo "Unable to stop $svc"
-			return 1
-		    fi
-		else
-		    rm -f "$pidfile"
-		    return 0
-		fi
+	        read pid < "\$pidfile"
+	        if kill -0 "\$pid" 2>/dev/null; then
+	            if kill -${stop_signal:-TERM} "\$pid"; then
+	                rm -f "\$pidfile"
+	                return 0
+	            else
+	                echo "Unable to stop \$svc"
+	                return 1
+	            fi
+	        else
+	            rm -f "\$pidfile"
+	            return 0
+	        fi
 	    fi
 	}
 
 	pp_running () {
-	    if test ! -s "$pidfile"; then
-		return 1
+	    if test ! -s "\$pidfile"; then
+	        return 1
 	    else
-		read pid < "$pidfile"
-		kill -0 "$pid" 2>/dev/null
+	        read pid < "\$pidfile"
+	        kill -0 "\$pid" 2>/dev/null
 	    fi
 	}
 
-	case $1 in
-	    start_msg) echo "Starting the $svc service";;
-	    stop_msg)  echo "Stopping the $svc service";;
+	case \$1 in
+	    start_msg) echo "Starting the \$svc service";;
+	    stop_msg)  echo "Stopping the \$svc service";;
 	    start)
-		    if test -f "$config_file"; then
-			. $config_file
-		    fi
-		    if pp_disabled; then
-			exit 2
-		    elif pp_running; then
-			echo "$svc already running";
-			exit 0
-		    elif pp_start; then
-			echo "$svc started";
-			# rc(1M) says we should exit 4, but nobody expects it!
-			exit 0
-		    else
-			exit 1
-		    fi;;
+	            if test -f "\$config_file"; then
+	                . \$config_file
+	            fi
+	            if pp_disabled; then
+	                exit 2
+	            elif pp_running; then
+	                echo "\$svc already running";
+	                exit 0
+	            elif pp_start; then
+	                echo "\$svc started";
+	                # rc(1M) says we should exit 4, but nobody expects it!
+	                exit 0
+	            else
+	                exit 1
+	            fi;;
 	    stop)   if pp_stop; then
-			echo "$svc stopped";
-			exit 0
-		    else
-			exit 1
-		    fi;;
-	    *) echo "usage: $0 {start|stop|start_msg|stop_msg}"
+	                echo "\$svc stopped";
+	                exit 0
+	            else
+	                exit 1
+	            fi;;
+	    *) echo "usage: \$0 {start|stop|start_msg|stop_msg}"
 	       exit 1;;
 	esac
 .
@@ -2529,6 +2550,22 @@ pp_sd_control () {
     echo "                $ctrl $script"
 }
 
+pp_sd_depend () {
+    typeset _name _vers
+    while read _name _vers; do
+	case "$_name" in ""| "#"*) continue ;; esac
+	echo "                prerequisites $_name ${_vers:+r>= $_vers}"
+    done
+}
+
+pp_sd_conflict () {
+    typeset _name _vers
+    while read _name _vers; do
+	case "$_name" in ""| "#"*) continue ;; esac
+	echo "                exrequisites $_name ${_vers:+r>= $_vers}"
+    done
+}
+
 pp_backend_sd () {
     typeset psf cpt svc outfile release swp_flags
 
@@ -2580,6 +2617,10 @@ pp_backend_sd () {
                 title           "${summary:-cpt}"
                 revision        $version
 .
+        test -s $pp_wrkdir/%depend.$cpt &&
+              pp_sd_depend < $pp_wrkdir/%depend.$cpt >> $psf
+        test -s $pp_wrkdir/%conflict.$cpt &&
+              pp_sd_conflict < $pp_wrkdir/%conflict.$cpt >> $psf
 
 	#-- make sure services are shut down during uninstall
         if test $cpt = run -a -n "$pp_services"; then
@@ -2911,6 +2952,16 @@ pp_solaris_depend () {
     done
 }
 
+pp_solaris_conflict () {
+    typeset _name _vers
+    while read _name _vers; do
+	if test -n "$_name"; then
+	    echo "I $_name $_name"
+	    test -n "$_vers" && echo " $_vers"
+	fi
+    done
+}
+
 pp_solaris_space() {
     echo "$2:$3:$1" >> $pp_wrkdir/space.cumulative
 }
@@ -2927,14 +2978,14 @@ pp_solaris_proto () {
 	typeset abi
 
 	while read t m o g f p st; do
-	  if test x"$o" = x"-"; then
-            o="root"
-          fi
-	  if test x"$g" = x"-"; then
-            g="bin"
-          fi
+	  # Use Solaris default mode, owner and group if all unspecified
+	  if test x"$m$o$g" = x"---"; then
+	    m="?"; o="?"; g="?"
+	  fi
+	  test x"$o" = x"-" && o="root"
 	  case "$t" in
-	    f) test x"$m" = x"-" && m=444
+	    f) test x"$g" = x"-" && g="bin"
+	       test x"$m" = x"-" && m=444
 	       case "$f" in
 		*v*) echo "v $1 $p=$pp_destdir$p $m $o $g";;
 		*)   echo "f $1 $p=$pp_destdir$p $m $o $g";;
@@ -2953,12 +3004,15 @@ pp_solaris_proto () {
 		  fi
 	       fi
                ;;
-	    d) test x"$m" = x"-" && m=555
+	    d) test x"$g" = x"-" && g="sys"
+	       test x"$m" = x"-" && m=555
 	       echo "d $1 $p $m $o $g"
                ;;
-	    s) test x"$m" = x"-" && m=777
-               test x"$m" = x"777" ||
+	    s) test x"$g" = x"-" && g="bin"
+	       test x"$m" = x"-" && m=777
+               if test x"$m" != x"777" -a x"$m" != x"?"; then
                   pp_warn "$p: invalid mode $m for symlink, should be 777 or -"
+	       fi
 	       echo "s $1 $p=$st $m $o $g"
                ;;
 	  esac
@@ -3021,6 +3075,7 @@ pp_backend_solaris () {
         #-- scripts to run before and after install
         : > $pp_wrkdir/postinstall
         : > $pp_wrkdir/preremove
+        : > $pp_wrkdir/postremove
 	for _cmp in $pp_components; do
         #-- add the preinstall scripts in definition order
         if test -s $pp_wrkdir/%pre.$_cmp; then
@@ -3037,15 +3092,22 @@ pp_backend_solaris () {
             pp_solaris_procedure $_cmp preremove < $pp_wrkdir/%preun.$_cmp |
                     pp_prepend $pp_wrkdir/preremove
         fi
+        #-- add the postremove scripts in definition order
+        if test -s $pp_wrkdir/%postun.$_cmp; then
+            pp_solaris_procedure $_cmp postremove < $pp_wrkdir/%postun.$_cmp \
+                >> $pp_wrkdir/postremove
+        fi
         #-- Add the check script in definition order
         if test -s $pp_wrkdir/%check.$_cmp; then
             pp_solaris_procedure $_cmp checkinstall \
                         < $pp_wrkdir/%check.$_cmp \
 			>> $pp_wrkdir/checkinstall
         fi
-        #-- All dependencies are merged together for Solaris pkgs
+        #-- All dependencies and conflicts are merged together for Solaris pkgs
         test -s $pp_wrkdir/%depend.$_cmp &&
-              pp_solaris_depend < $pp_wrkdir/%depend.$_cmp > $pp_wrkdir/depend
+              pp_solaris_depend < $pp_wrkdir/%depend.$_cmp >> $pp_wrkdir/depend
+        test -s $pp_wrkdir/%conflict.$_cmp &&
+              pp_solaris_conflict < $pp_wrkdir/%conflict.$_cmp >> $pp_wrkdir/depend
 	done
 
 
@@ -3060,6 +3122,7 @@ pp_backend_solaris () {
                 pp_solaris_make_service $_svc
                 pp_solaris_install_service $_svc | pp_prepend $pp_wrkdir/postinstall
                 pp_solaris_remove_service $_svc | pp_prepend $pp_wrkdir/preremove
+                pp_solaris_remove_service $_svc | pp_prepend $pp_wrkdir/postremove
                 unset pp_svc_xml_file
             done
 
@@ -3140,7 +3203,7 @@ fi >&2
 
 	pkgmk -d $pp_wrkdir/pkg -f $prototype \
 		|| { error "pkgmk failed"; return; }
-	pkgtrans -s $pp_wrkdir/pkg \
+        pkgtrans -s $pp_wrkdir/pkg \
 		$pp_wrkdir/`pp_backend_solaris_names` \
                 ${pp_solaris_name:-$name} \
 		|| { error "pkgtrans failed"; return; }
@@ -3339,13 +3402,14 @@ pp_solaris_smf () {
 
     pp_solaris_name=${pp_solaris_name:-$name}
     pp_solaris_manpath=${pp_solaris_manpath:-"/usr/share/man"}
+    pp_solaris_mansect=${pp_solaris_mansect:-1}
     smf_start_timeout=${smf_start_timeout:-60}
     smf_stop_timeout=${smf_stop_timeout:-60}
     smf_restart_timeout=${smf_restart_timeout:-60}
 
     svc=${pp_solaris_smf_service_name:-$1}
     _pp_solaris_service_script=${pp_solaris_service_script:-"/etc/init.d/${pp_solaris_service_script_name:-$svc}"}
-    _pp_solaris_manpage=${pp_solaris_manpage:-$pp_solaris_smf_service_name}
+    _pp_solaris_manpage=${pp_solaris_manpage:-$svc}
 
     if [ -z $pp_svc_xml_file ]; then
         pp_svc_xml_file="/var/svc/manifest/$_smf_category/$svc.xml"
@@ -3377,6 +3441,7 @@ pp_solaris_smf () {
     f=$pp_svc_xml_file
     pp_add_file_if_missing $f ||
         return 0
+    pp_solaris_add_parent_dirs "$f"
 
     _pp_solaris_smf_dependencies="
           <dependency name='pp_local_filesystems'
@@ -3440,7 +3505,7 @@ pp_solaris_smf () {
                   <loctext xml:lang='C'>$description</loctext>
               </common_name>
               <documentation>
-                  <manpage title='$pp_solaris_manpage' section='1' manpath='$pp_solaris_manpath'/>
+                  <manpage title='$pp_solaris_manpage' section='$pp_solaris_mansect' manpath='$pp_solaris_manpath'/>
               </documentation>
           </template>
         </service>
@@ -3456,8 +3521,9 @@ pp_solaris_make_service_group () {
     file="/etc/init.d/$group"
     out="$pp_destdir$file"
 
-    #-- return if the script is supplued already
+    #-- return if the script is supplied already
     pp_add_file_if_missing "$file" run 755 || return 0
+    pp_solaris_add_parent_dirs "$file"
 
     echo "#! /sbin/sh" > $out
     echo "# polypkg service group script for these services:" >> $out
@@ -3525,6 +3591,7 @@ pp_solaris_make_service () {
     #-- return if we don't need to create the init script
     pp_add_file_if_missing "$file" run 755 ||
         return 0
+    pp_solaris_add_parent_dirs "$file"
 
     echo "#! /sbin/sh" >$out
     echo "#-- This service init file generated by polypkg" >>$out
@@ -3540,12 +3607,13 @@ if [ -x /usr/sbin/svcadm ] && [ "x\$1" != "xstatus" ] && [ "t\$$_smf_method_envv
             /usr/sbin/svcadm enable -s $_smf_category/$svc
             RESULT=\$?
             if [ "\$RESULT" -ne 0 ] ; then
-                echo "Error \$RESULT starting $svc"
-                fi
+                echo "Error \$RESULT starting $svc" >&2
+            fi
             ;;
         stop)
             echo "stopping $svc"
             /usr/sbin/svcadm disable -ts $_smf_category/$svc
+	    RESULT=0
             ;;
         restart)
             echo "restarting $svc"
@@ -3554,14 +3622,14 @@ if [ -x /usr/sbin/svcadm ] && [ "x\$1" != "xstatus" ] && [ "t\$$_smf_method_envv
             /usr/sbin/svcadm enable -s $_smf_category/$svc
             RESULT=\$?
             if [ "\$RESULT" -ne 0 ] ; then
-                echo "Error \$RESULT starting $svc"
-                    fi
-                    ;;
+                echo "Error \$RESULT starting $svc" >&2
+            fi
+            ;;
         *)
-            echo "Usage: $file {start|stop|restart|status}"
-            exit 1
+            echo "Usage: $file {start|stop|restart|status}" >&2
+            RESULT=1
     esac
-    exit 0
+    exit $RESULT
 fi
 _EOF
     fi
@@ -3604,8 +3672,8 @@ _EOF
 
         # returns true if $svc is running
         pp_running () {
-            test -r "$pidfile" &&
-            read pid junk < "$pidfile" &&
+            test -s "$pidfile" || return 1
+            read pid junk < "$pidfile" 2>/dev/null
             test ${pid:-0} -gt 1 &&
             kill -0 "$pid" 2>/dev/null
         }
@@ -3741,6 +3809,18 @@ else
 fi'
 }
 
+pp_solaris_add_parent_dirs () {
+    typeset dir
+
+    dir=${1%/*}
+    while test -n "$dir"; do
+	if awk "\$6 == \"$dir/\" {exit 1}" < $pp_wrkdir/%files.run; then
+	    echo "d - - - - $dir/" >> $pp_wrkdir/%files.run
+	fi
+	dir=${dir%/*}
+    done
+}
+
 pp_platforms="$pp_platforms deb"
 
 pp_backend_deb_detect () {
@@ -3839,6 +3919,19 @@ pp_deb_version_final() {
     fi
 }
 
+pp_deb_conflict () {
+    local _name _vers _conflicts
+
+    _conflicts="Conflicts:"
+    while read _name _vers; do
+	case "$_name" in ""| "#"*) continue ;; esac
+	_conflicts="$_conflicts $_name"
+	test -n "$_vers" && _conflicts="$_conflicts $_name (>= $vers)"
+	_conflicts="${_conflicts},"
+    done
+    echo "${_conflicts%,}"
+}
+
 pp_deb_make_control() {
     package_name=`pp_deb_cmp_full_name "$1"`
     cat <<-.
@@ -3854,6 +3947,9 @@ pp_deb_make_control() {
     if test -s $pp_wrkdir/%depend."$1"; then
 	sed -ne '/^[ 	]*$/!s/^[ 	]*/Depends: /p' \
 	    < $pp_wrkdir/%depend."$1"
+    fi
+    if test -s $pp_wrkdir/%conflict."$1"; then
+	pp_deb_conflict < $pp_wrkdir/%conflict."$1"
     fi
 }
 
@@ -3964,6 +4060,11 @@ pp_deb_make_DEBIAN() {
         "$pp_wrkdir/%preun.$cmp" "Pre-uninstall script for $cmp_full_name"\
         || exit $?
 
+    # Create postrm
+    pp_deb_make_package_maintainer_script "$data/DEBIAN/postrm" \
+        "$pp_wrkdir/%postun.$cmp" "Post-uninstall script for $cmp_full_name"\
+        || exit $?
+
     umask $old_umask
 }
 
@@ -3973,6 +4074,12 @@ pp_deb_make_data() {
     cmp=$1
     data=$pp_wrkdir/`pp_deb_cmp_full_name $cmp`
     cat $pp_wrkdir/%files.${cmp} | while read t m o g f p st; do
+	if test x"$m" = x"-"; then
+	    case "$t" in
+		d) m=755;;
+		f) m=644;;
+	    esac
+	fi
 	test x"$o" = x"-" && o=root
 	test x"$g" = x"-" && g=root
         case "$t" in
@@ -4246,16 +4353,10 @@ pp_backend_deb_vas_platforms () {
     esac
 }
 pp_backend_deb_init_svc_vars () {
-    # Default multi-user runlevel on Debian is 2; 3-5 are also multi-user
-    pp_deb_default_start_runlevels="2 3 4 5"
-    pp_deb_default_svc_description="No description"
-}
-
-pp_backend_deb_init_svc_vars () {
 
     reload_signal=
-    start_runlevels=${pp_deb_default_start_runlevels}   # == lsb default-start
-    stop_runlevels="0 1 6"                              # == lsb default-stop
+    start_runlevels=${pp_deb_default_start_runlevels-"2 3 4 5"} # == lsb default-start
+    stop_runlevels=${pp_deb_default_stop_runlevels-"0 1 6"}     # == lsb default-stop
     svc_description="${pp_deb_default_svc_description}" # == lsb short descr
     svc_process=
 
@@ -4286,9 +4387,10 @@ pp_deb_service_make_init_script () {
     #_process=${svc_process:-"$1"} --? WTF
 
     #-- construct a start command that builds a pid file if needed
+    #-- the command name in /proc/[pid]/stat is limited to 15 characters 
     _cmd="$cmd";
     _cmd_path=`echo $cmd | cut -d" " -f1`
-    _cmd_name=`basename $_cmd_path`
+    _cmd_name=`basename $_cmd_path | cut -c1-15`
     _cmd_args=`echo $cmd | cut -d" " -f2-`
     test x"$_cmd_path" != x"$_cmd_args" || _cmd_args=
 
@@ -4301,7 +4403,7 @@ pp_deb_service_make_init_script () {
 	# Required-Stop: ${lsb_required_stop}
 	# Default-Start: ${start_runlevels}
 	# Default-Stop: ${stop_runlevels}
-	# Short-Description: ${svc_description}
+	# Short-Description: ${svc_description:-no description}
 	### END INIT INFO
 	# Generated by PolyPackage ${pp_version}
 	# ${copyright}
@@ -5399,6 +5501,8 @@ pp_rpm_writefiles () {
 		    farch=x86_64;;
 		*": ELF 32-bit MSB "*", PowerPC"*)
 		    farch=ppc;;
+		*": ELF 64-bit MSB "*", 64-bit PowerPC"*)
+		    farch=ppc64;;
 		*": ELF 64-bit LSB "*", IA-64"*)
 		    farch=ia64;;
 		*": ELF 32-bit MSB "*", IBM S/390"*)
@@ -5424,7 +5528,7 @@ pp_rpm_writefiles () {
 			farch=x86_64;;
 		    "ELF32 PowerPC")
 			farch=ppc;;
-		    "ELF64 PowerPC")
+		    "ELF64 PowerPC"*)
 			farch=ppc64;;
 		    "ELF64 IA-64")
 			farch=ia64;;
@@ -5457,9 +5561,18 @@ pp_rpm_subname () {
 }
 
 pp_rpm_depend () {
+    local _name _vers
     while read _name _vers; do
         case "$_name" in ""| "#"*) continue ;; esac
         echo "Requires: $_name ${_vers:+>= $_vers}"
+    done
+}
+
+pp_rpm_conflict () {
+    local _name _vers
+    while read _name _vers; do
+        case "$_name" in ""| "#"*) continue ;; esac
+        echo "Conflicts: $_name ${_vers:+>= $_vers}"
     done
 }
 
@@ -5528,6 +5641,9 @@ pp_backend_rpm () {
         elif test -s $pp_wrkdir/%depend.run; then
             pp_rpm_depend < $pp_wrkdir/%depend.run >> $specfile
         fi
+        if test -s $pp_wrkdir/%conflict.run; then
+            pp_rpm_conflict < $pp_wrkdir/%conflict.run >> $specfile
+        fi
 
 	pp_rpm_override_requires >> $specfile
 
@@ -5566,6 +5682,9 @@ pp_backend_rpm () {
                     eval pp_rpm_label Requires ${pp_rpm_name:-$name} $_pkg
                 elif test -s $pp_wrkdir/%depend.$cmp; then
                     pp_rpm_depend < $pp_wrkdir/%depend.$cmp >> $specfile
+                fi
+                if test -s $pp_wrkdir/%conflict.$cmp; then
+                    pp_rpm_conflict < $pp_wrkdir/%conflict.$cmp >> $specfile
                 fi
 
                 eval '_pkg="$pp_rpm_'$cmp'_provides"'
@@ -5651,6 +5770,13 @@ pp_backend_rpm () {
                 echo ""
                 echo "%preun $_subname"
                 cat $pp_wrkdir/%preun.$cmp
+                echo :   # causes script to exit true
+            fi
+
+            if test -s $pp_wrkdir/%postun.$cmp; then
+                echo ""
+                echo "%postun $_subname"
+                cat $pp_wrkdir/%postun.$cmp
                 echo :   # causes script to exit true
             fi
 	done >>$specfile
@@ -5886,11 +6012,6 @@ pp_backend_rpm_vas_platforms () {
     esac
 }
 
-pp_backend_rpm_init_svc_vars () {
-    pp_rpm_default_start_runlevels="2 3 4 5"
-    pp_rpm_default_svc_description="No description"
-}
-
 pp_rpm_service_install_common () {
     cat <<-'.'
 
@@ -5997,8 +6118,8 @@ pp_rpm_service_remove () {
 pp_backend_rpm_init_svc_vars () {
 
     reload_signal=
-    start_runlevels=${pp_rpm_default_start_runlevels}   # == lsb default-start
-    stop_runlevels="0 1 6"                              # == lsb default-stop
+    start_runlevels=${pp_rpm_default_start_runlevels-"2 3 4 5"} # == lsb default-start
+    stop_runlevels=${pp_rpm_default_stop_runlevels-"0 1 6"} # == lsb default-stop
     svc_description="${pp_rpm_default_svc_description}" # == lsb short descr
     svc_process=
 
