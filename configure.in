@@ -3000,7 +3000,7 @@ dnl
 if test "$with_pam" = "yes"; then
     case $host in
 	*-*-hpux*)
-	    if [ -f /usr/lib/security/libpam_hpsec.so.1 ]; then
+	    if test -f /usr/lib/security/libpam_hpsec.so.1; then
 		AC_MSG_NOTICE([You may wish to add the following line to /etc/pam.conf])
 		AC_MSG_NOTICE([sudo session required libpam_hpsec.so.1 bypass_umask bypass_last_login])
 	    fi
