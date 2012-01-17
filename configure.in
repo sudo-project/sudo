@@ -66,6 +66,7 @@ AC_SUBST([LIBDL])
 AC_SUBST([LT_STATIC])
 AC_SUBST([LIBINTL])
 AC_SUBST([SUDO_NLS])
+AC_SUBST([COMPAT_TEST_PROGS])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -2151,12 +2152,17 @@ fi
 AC_CHECK_FUNCS(glob, [AC_MSG_CHECKING(for GLOB_BRACE and GLOB_TILDE in glob.h)
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <glob.h>]], [[int i = GLOB_BRACE | GLOB_TILDE; (void)i;]])], [AC_DEFINE(HAVE_EXTENDED_GLOB)
     AC_MSG_RESULT(yes)], [AC_LIBOBJ(glob)
-    AC_MSG_RESULT(no)])], [AC_LIBOBJ(glob)])
+    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }globtest"
+    AC_MSG_RESULT(no)])], [AC_LIBOBJ(glob)]
+    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }globtest"
+    )
 AC_CHECK_FUNCS(lockf flock, [break])
 AC_CHECK_FUNCS(innetgr _innetgr, [AC_CHECK_FUNCS(getdomainname) [break]])
 AC_CHECK_FUNCS(utimes, [AC_CHECK_FUNCS(futimes futimesat, [break])], [AC_CHECK_FUNCS(futime) AC_LIBOBJ(utimes)])
 AC_CHECK_FUNCS(killpg, [], [AC_LIBOBJ(killpg)])
-SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)])
+SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)
+    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }fnm_test"
+])
 SUDO_FUNC_ISBLANK
 AC_REPLACE_FUNCS(memrchr strlcpy strlcat setenv)
 AC_CHECK_FUNCS(nanosleep, [], [

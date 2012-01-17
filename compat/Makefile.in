@@ -45,7 +45,7 @@ DEVEL = @DEVEL@
 
 SHELL = @SHELL@
 
-TEST_PROGS = fnm_test globtest
+TEST_PROGS = @COMPAT_TEST_PROGS@
 
 LIBOBJDIR = 
 
@@ -101,14 +101,20 @@ install-plugin:
 uninstall:
 
 check: $(TEST_PROGS)
-	@./fnm_test $(srcdir)/regress/fnmatch/fnm_test.in
-	@mkdir -p `sed 's@/[^/]*$$@@' $(srcdir)/regress/glob/files | sort -u`
-	@touch `cat $(srcdir)/regress/glob/files`
-	@chmod 0755 `grep '/r[^/]*$$' $(srcdir)/regress/glob/files`
-	@chmod 0444 `grep '/s[^/]*$$' $(srcdir)/regress/glob/files`
-	@chmod 0711 `grep '/t[^/]*$$' $(srcdir)/regress/glob/files`
-	@./globtest $(srcdir)/regress/glob/globtest.in
-	@rm -rf fake
+	@if [ -f fnm_test ]; then \
+	    ./fnm_test $(srcdir)/regress/fnmatch/fnm_test.in; \
+	fi
+	@if [ -f globtest ]; then \
+	    mkdir -p `sed 's@/[^/]*$$@@' $(srcdir)/regress/glob/files | sort -u`; \
+	    touch `cat $(srcdir)/regress/glob/files`; \
+	    chmod 0755 `grep '/r[^/]*$$' $(srcdir)/regress/glob/files`; \
+	    chmod 0444 `grep '/s[^/]*$$' $(srcdir)/regress/glob/files`; \
+	    chmod 0711 `grep '/t[^/]*$$' $(srcdir)/regress/glob/files`; \
+	    ./globtest $(srcdir)/regress/glob/globtest.in; \
+	    rval=$$?; \
+	    rm -rf fake; \
+	    exit $$rval; \
+	fi
 
 clean:
 	-$(LIBTOOL) --mode=clean rm -f $(TEST_PROGS) mksiglist siglist.c *.lo *.o *.la *.a stamp-* core *.core core.*
