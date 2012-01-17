@@ -109,7 +109,6 @@ my_execve(const char *path, char *const argv[], char *const envp[])
  */
 static int fork_cmnd(struct command_details *details, int sv[2])
 {
-    int ttyfd, foreground = 0;
     struct command_status cstat;
     sigaction_t sa;
     pid_t child;
@@ -120,12 +119,6 @@ static int fork_cmnd(struct command_details *details, int sv[2])
     sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
     sa.sa_handler = handler;
     sigaction(SIGCONT, &sa, NULL);
-
-    ttyfd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
-    if (ttyfd != -1) {
-	foreground = (tcgetpgrp(ttyfd) == getpgrp());
-	(void)fcntl(ttyfd, F_SETFD, FD_CLOEXEC);
-    }
 
     child = fork();
     switch (child) {
@@ -140,16 +133,6 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
 	restore_signals();
 	if (exec_setup(details, NULL, -1) == true) {
-	    /* Set child process group here too to avoid a race. */
-	    child = getpid();
-	    setpgid(0, child);
-
-	    /* Wait for parent to grant us the tty if we are foreground. */
-	    if (foreground) {
-		while (tcgetpgrp(ttyfd) != child)
-		    ; /* spin */
-	    }
-
 	    /* headed for execve() */
 	    sudo_debug_execve(SUDO_DEBUG_INFO, details->command,
 		details->argv, details->envp);
@@ -177,19 +160,6 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);
 	_exit(1);
     }
-
-    /*
-     * Put child in its own process group.  If we are starting the command
-     * in the foreground, assign its pgrp to the tty.
-     */
-    setpgid(child, child);
-    if (foreground) {
-	while (tcsetpgrp(ttyfd, child) == -1 && errno == EINTR)
-	    continue;
-    }
-    if (ttyfd != -1)
-	close(ttyfd);
-
     debug_return_int(child);
 }
 
@@ -534,17 +504,17 @@ handle_signals(int fd, pid_t child, int log_io, struct command_status *cstat)
 			 * so we can restore it after we resume.
 			 */
 			pid_t saved_pgrp = (pid_t)-1;
-			int ttyfd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
-			if (ttyfd != -1)
-			    saved_pgrp = tcgetpgrp(ttyfd);
+			int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
+			if (fd != -1)
+			    saved_pgrp = tcgetpgrp(fd);
 			if (kill(getpid(), WSTOPSIG(status)) != 0) {
 			    warning("kill(%d, %d)", (int)getpid(),
 				WSTOPSIG(status));
 			}
-			if (ttyfd != -1) {
+			if (fd != -1) {
 			    if (saved_pgrp != (pid_t)-1)
-				(void)tcsetpgrp(ttyfd, saved_pgrp);
-			    close(ttyfd);
+				(void)tcsetpgrp(fd, saved_pgrp);
+			    close(fd);
 			}
 		    } else {
 			/* Child has exited, we are done. */
