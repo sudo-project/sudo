@@ -988,6 +988,14 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     /*
      * Set groups, including supplementary group vector.
      */
+    if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
+	if (details->ngroups >= 0) {
+	    if (sudo_setgroups(details->ngroups, details->groups) < 0) {
+		warning(_("unable to set supplementary group IDs"));
+		goto done;
+	    }
+	}
+    }
 #ifdef HAVE_SETEUID
     if (ISSET(details->flags, CD_SET_EGID) && setegid(details->egid)) {
 	warning(_("unable to set effective gid to runas gid %u"),
@@ -999,15 +1007,6 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	warning(_("unable to set gid to runas gid %u"),
 	    (unsigned int)details->gid);
 	goto done;
-    }
-
-    if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
-	if (details->ngroups >= 0) {
-	    if (sudo_setgroups(details->ngroups, details->groups) < 0) {
-		warning(_("unable to set supplementary group IDs"));
-		goto done;
-	    }
-	}
     }
 
     if (ISSET(details->flags, CD_SET_PRIORITY)) {
