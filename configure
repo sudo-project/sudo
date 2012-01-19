@@ -17221,9 +17221,7 @@ $as_echo "$ac_cv_lib_inet_socket" >&6; }
 if test "x$ac_cv_lib_inet_socket" = xyes; then :
   NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unable to find socket() trying -lsocket -lnsl" >&5
-$as_echo "$as_me: WARNING: unable to find socket() trying -lsocket -lnsl" >&2;}
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for socket in -lsocket" >&5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for socket in -lsocket" >&5
 $as_echo_n "checking for socket in -lsocket... " >&6; }
 if ${ac_cv_lib_socket_socket_lnsl+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -17355,9 +17353,7 @@ $as_echo "$ac_cv_lib_inet_inet_addr" >&6; }
 if test "x$ac_cv_lib_inet_inet_addr" = xyes; then :
   NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unable to find inet_addr() trying -lsocket -lnsl" >&5
-$as_echo "$as_me: WARNING: unable to find inet_addr() trying -lsocket -lnsl" >&2;}
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for inet_addr in -lsocket" >&5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for inet_addr in -lsocket" >&5
 $as_echo_n "checking for inet_addr in -lsocket... " >&6; }
 if ${ac_cv_lib_socket_inet_addr_lnsl+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -17621,9 +17617,7 @@ $as_echo "$ac_cv_lib_inet_getaddrinfo" >&6; }
 if test "x$ac_cv_lib_inet_getaddrinfo" = xyes; then :
   NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"; found=yes
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unable to find getaddrinfo() trying -lsocket -lnsl" >&5
-$as_echo "$as_me: WARNING: unable to find getaddrinfo() trying -lsocket -lnsl" >&2;}
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for getaddrinfo in -lsocket" >&5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for getaddrinfo in -lsocket" >&5
 $as_echo_n "checking for getaddrinfo in -lsocket... " >&6; }
 if ${ac_cv_lib_socket_getaddrinfo_lnsl+:} false; then :
   $as_echo_n "(cached) " >&6

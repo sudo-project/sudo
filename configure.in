@@ -2202,14 +2202,12 @@ dnl If socket(2) not in libc, check -lsocket and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl In this case we look for main(), not socket() to avoid using a cached value
 dnl
-AC_CHECK_FUNC(socket, , [AC_CHECK_LIB(socket, socket, [NET_LIBS="${NET_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(inet, socket, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"], AC_MSG_WARN(unable to find socket() trying -lsocket -lnsl)
-AC_CHECK_LIB(socket, socket, [NET_LIBS="${NET_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , -lnsl)))])
+AC_CHECK_FUNC(socket, , [AC_CHECK_LIB(socket, socket, [NET_LIBS="${NET_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(inet, socket, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"], [AC_CHECK_LIB(socket, socket, [NET_LIBS="${NET_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , -lnsl)]))])
 dnl
 dnl If inet_addr(3) not in libc, check -lnsl and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl
-AC_CHECK_FUNC(inet_addr, , [AC_CHECK_FUNC(__inet_addr, , AC_CHECK_LIB(nsl, inet_addr, [NET_LIBS="${NET_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, inet_addr, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"], AC_MSG_WARN(unable to find inet_addr() trying -lsocket -lnsl)
-AC_CHECK_LIB(socket, inet_addr, [NET_LIBS="${NET_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , -lnsl))))])
+AC_CHECK_FUNC(inet_addr, , [AC_CHECK_FUNC(__inet_addr, , AC_CHECK_LIB(nsl, inet_addr, [NET_LIBS="${NET_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, inet_addr, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"], [AC_CHECK_LIB(socket, inet_addr, [NET_LIBS="${NET_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , -lnsl)])))])
 dnl
 dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
 dnl
@@ -2219,8 +2217,7 @@ dnl If getaddrinfo(3) not in libc, check -lsocket and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols.
 dnl
 found=no
-AC_CHECK_FUNCS(getaddrinfo, [], [AC_CHECK_LIB(socket, getaddrinfo, [NET_LIBS="${NET_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"; found=yes], AC_CHECK_LIB(inet, getaddrinfo, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"; found=yes], AC_MSG_WARN(unable to find getaddrinfo() trying -lsocket -lnsl)
-AC_CHECK_LIB(socket, getaddrinfo, [NET_LIBS="${NET_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"; found=yes], [], -lnsl)))])
+AC_CHECK_FUNCS(getaddrinfo, [], [AC_CHECK_LIB(socket, getaddrinfo, [NET_LIBS="${NET_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"; found=yes], AC_CHECK_LIB(inet, getaddrinfo, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"; found=yes], [AC_CHECK_LIB(socket, getaddrinfo, [NET_LIBS="${NET_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"; found=yes], [], -lnsl)]))])
 if test X"$found" != X"no"; then
     AC_DEFINE(HAVE_GETADDRINFO)
 fi
