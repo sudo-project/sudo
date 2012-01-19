@@ -17025,13 +17025,27 @@ ac_fn_c_check_func "$LINENO" "socket" "ac_cv_func_socket"
 if test "x$ac_cv_func_socket" = xyes; then :
 
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for socket in -lsocket" >&5
-$as_echo_n "checking for socket in -lsocket... " >&6; }
-if ${ac_cv_lib_socket_socket+:} false; then :
+
+    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
+	_libs=
+	for lib in $libs; do
+	    case "$NET_LIBS" in
+		*"$lib"*)   ;;
+		*)	    _libs="$_libs $lib";;
+	    esac
+	done
+	libs="${_libs# }"
+	test -z "$libs" && continue
+	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
+	extralibs="`echo \"$libs\"|sed 's/^-l[^ ]*//'`"
+	as_ac_Lib=`$as_echo "ac_cv_lib_$lib''_socket$extralibs" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for socket in -l$lib" >&5
+$as_echo_n "checking for socket in -l$lib... " >&6; }
+if eval \${$as_ac_Lib+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lsocket  $LIBS"
+LIBS="-l$lib $extralibs $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -17051,103 +17065,22 @@ return socket ();
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_socket_socket=yes
+  eval "$as_ac_Lib=yes"
 else
-  ac_cv_lib_socket_socket=no
+  eval "$as_ac_Lib=no"
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_socket_socket" >&5
-$as_echo "$ac_cv_lib_socket_socket" >&6; }
-if test "x$ac_cv_lib_socket_socket" = xyes; then :
-  NET_LIBS="${NET_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for socket in -linet" >&5
-$as_echo_n "checking for socket in -linet... " >&6; }
-if ${ac_cv_lib_inet_socket+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-linet  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char socket ();
-int
-main ()
-{
-return socket ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_inet_socket=yes
-else
-  ac_cv_lib_inet_socket=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_inet_socket" >&5
-$as_echo "$ac_cv_lib_inet_socket" >&6; }
-if test "x$ac_cv_lib_inet_socket" = xyes; then :
-  NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unable to find socket() trying -lsocket -lnsl" >&5
-$as_echo "$as_me: WARNING: unable to find socket() trying -lsocket -lnsl" >&2;}
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for socket in -lsocket" >&5
-$as_echo_n "checking for socket in -lsocket... " >&6; }
-if ${ac_cv_lib_socket_socket_lnsl+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lsocket -lnsl $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char socket ();
-int
-main ()
-{
-return socket ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_socket_socket_lnsl=yes
-else
-  ac_cv_lib_socket_socket_lnsl=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_socket_socket_lnsl" >&5
-$as_echo "$ac_cv_lib_socket_socket_lnsl" >&6; }
-if test "x$ac_cv_lib_socket_socket_lnsl" = xyes; then :
-  NET_LIBS="${NET_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"
+eval ac_res=\$$as_ac_Lib
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
+  NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break
 fi
 
-fi
-
-fi
+    done
 
 fi
 
@@ -17155,17 +17088,32 @@ ac_fn_c_check_func "$LINENO" "inet_addr" "ac_cv_func_inet_addr"
 if test "x$ac_cv_func_inet_addr" = xyes; then :
 
 else
-  ac_fn_c_check_func "$LINENO" "__inet_addr" "ac_cv_func___inet_addr"
+
+    ac_fn_c_check_func "$LINENO" "__inet_addr" "ac_cv_func___inet_addr"
 if test "x$ac_cv_func___inet_addr" = xyes; then :
 
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for inet_addr in -lnsl" >&5
-$as_echo_n "checking for inet_addr in -lnsl... " >&6; }
-if ${ac_cv_lib_nsl_inet_addr+:} false; then :
+
+	for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
+	    _libs=
+	    for lib in $libs; do
+		case "$NET_LIBS" in
+		    *"$lib"*)   ;;
+		    *)		_libs="$_libs $lib";;
+		esac
+	    done
+	    libs="${_libs# }"
+	    test -z "$libs" && continue
+	    lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
+	    extralibs="`echo \"$libs\"|sed 's/^-l[^ ]*//'`"
+	    as_ac_Lib=`$as_echo "ac_cv_lib_$lib''_inet_addr$extralibs" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for inet_addr in -l$lib" >&5
+$as_echo_n "checking for inet_addr in -l$lib... " >&6; }
+if eval \${$as_ac_Lib+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lnsl  $LIBS"
+LIBS="-l$lib $extralibs $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -17185,105 +17133,25 @@ return inet_addr ();
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_nsl_inet_addr=yes
+  eval "$as_ac_Lib=yes"
 else
-  ac_cv_lib_nsl_inet_addr=no
+  eval "$as_ac_Lib=no"
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_nsl_inet_addr" >&5
-$as_echo "$ac_cv_lib_nsl_inet_addr" >&6; }
-if test "x$ac_cv_lib_nsl_inet_addr" = xyes; then :
-  NET_LIBS="${NET_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for inet_addr in -linet" >&5
-$as_echo_n "checking for inet_addr in -linet... " >&6; }
-if ${ac_cv_lib_inet_inet_addr+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-linet  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+eval ac_res=\$$as_ac_Lib
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
+  NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break
+fi
 
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char inet_addr ();
-int
-main ()
-{
-return inet_addr ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_inet_inet_addr=yes
-else
-  ac_cv_lib_inet_inet_addr=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_inet_inet_addr" >&5
-$as_echo "$ac_cv_lib_inet_inet_addr" >&6; }
-if test "x$ac_cv_lib_inet_inet_addr" = xyes; then :
-  NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unable to find inet_addr() trying -lsocket -lnsl" >&5
-$as_echo "$as_me: WARNING: unable to find inet_addr() trying -lsocket -lnsl" >&2;}
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for inet_addr in -lsocket" >&5
-$as_echo_n "checking for inet_addr in -lsocket... " >&6; }
-if ${ac_cv_lib_socket_inet_addr_lnsl+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lsocket -lnsl $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char inet_addr ();
-int
-main ()
-{
-return inet_addr ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_socket_inet_addr_lnsl=yes
-else
-  ac_cv_lib_socket_inet_addr_lnsl=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_socket_inet_addr_lnsl" >&5
-$as_echo "$ac_cv_lib_socket_inet_addr_lnsl" >&6; }
-if test "x$ac_cv_lib_socket_inet_addr_lnsl" = xyes; then :
-  NET_LIBS="${NET_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"
-fi
+	done
 
 fi
 
-fi
-
-fi
 
 fi
 
@@ -17291,13 +17159,27 @@ ac_fn_c_check_func "$LINENO" "syslog" "ac_cv_func_syslog"
 if test "x$ac_cv_func_syslog" = xyes; then :
 
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for syslog in -lsocket" >&5
-$as_echo_n "checking for syslog in -lsocket... " >&6; }
-if ${ac_cv_lib_socket_syslog+:} false; then :
+
+    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
+	_libs=
+	for lib in $libs; do
+	    case "$NET_LIBS" in
+		*"$lib"*)   ;;
+		*)	    _libs="$_libs $lib";;
+	    esac
+	done
+	libs="${_libs# }"
+	test -z "$libs" && continue
+	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
+	extralibs="`echo \"$libs\"|sed 's/^-l[^ ]*//'`"
+	as_ac_Lib=`$as_echo "ac_cv_lib_$lib''_syslog$extralibs" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for syslog in -l$lib" >&5
+$as_echo_n "checking for syslog in -l$lib... " >&6; }
+if eval \${$as_ac_Lib+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lsocket  $LIBS"
+LIBS="-l$lib $extralibs $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -17317,101 +17199,22 @@ return syslog ();
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_socket_syslog=yes
+  eval "$as_ac_Lib=yes"
 else
-  ac_cv_lib_socket_syslog=no
+  eval "$as_ac_Lib=no"
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_socket_syslog" >&5
-$as_echo "$ac_cv_lib_socket_syslog" >&6; }
-if test "x$ac_cv_lib_socket_syslog" = xyes; then :
-  NET_LIBS="${NET_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for syslog in -lnsl" >&5
-$as_echo_n "checking for syslog in -lnsl... " >&6; }
-if ${ac_cv_lib_nsl_syslog+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lnsl  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char syslog ();
-int
-main ()
-{
-return syslog ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_nsl_syslog=yes
-else
-  ac_cv_lib_nsl_syslog=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_nsl_syslog" >&5
-$as_echo "$ac_cv_lib_nsl_syslog" >&6; }
-if test "x$ac_cv_lib_nsl_syslog" = xyes; then :
-  NET_LIBS="${NET_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for syslog in -linet" >&5
-$as_echo_n "checking for syslog in -linet... " >&6; }
-if ${ac_cv_lib_inet_syslog+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-linet  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char syslog ();
-int
-main ()
-{
-return syslog ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_inet_syslog=yes
-else
-  ac_cv_lib_inet_syslog=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_inet_syslog" >&5
-$as_echo "$ac_cv_lib_inet_syslog" >&6; }
-if test "x$ac_cv_lib_inet_syslog" = xyes; then :
-  NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"
+eval ac_res=\$$as_ac_Lib
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
+  NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break
 fi
 
-fi
-
-fi
+    done
 
 fi
 
