@@ -637,19 +637,33 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	command_info[info_len++] = "preserve_groups=true";
     } else {
 	int i, len;
+	gid_t egid;
 	size_t glsize;
 	char *cp, *gid_list;
 	struct group_list *grlist = get_group_list(runas_pw);
 
-	glsize = sizeof("runas_groups=") - 1 + (grlist->ngids * (MAX_UID_T_LEN + 1));
+	/* We reserve an extra spot in the list for the effective gid. */
+	glsize = sizeof("runas_groups=") - 1 +
+	    ((grlist->ngids + 1) * (MAX_UID_T_LEN + 1));
 	gid_list = emalloc(glsize);
 	memcpy(gid_list, "runas_groups=", sizeof("runas_groups=") - 1);
 	cp = gid_list + sizeof("runas_groups=") - 1;
+
+	/* On BSD systems the effective gid is the first group in the list. */
+	egid = runas_gr ? (unsigned int)runas_gr->gr_gid :
+	    (unsigned int)runas_pw->pw_gid;
+	len = snprintf(cp, glsize - (cp - gid_list), "%u", egid);
+	if (len < 0 || len >= glsize - (cp - gid_list))
+	    errorx(1, _("internal error, runas_groups overflow"));
+	cp += len;
 	for (i = 0; i < grlist->ngids; i++) {
-	    /* XXX - check rval */
-	    len = snprintf(cp, glsize - (cp - gid_list), "%s%u",
-		 i ? "," : "", (unsigned int) grlist->gids[i]);
-	    cp += len;
+	    if (grlist->gids[i] != egid) {
+		len = snprintf(cp, glsize - (cp - gid_list), ",%u",
+		     (unsigned int) grlist->gids[i]);
+		if (len < 0 || len >= glsize - (cp - gid_list))
+		    errorx(1, _("internal error, runas_groups overflow"));
+		cp += len;
+	    }
 	}
 	command_info[info_len++] = gid_list;
 	grlist_delref(grlist);
