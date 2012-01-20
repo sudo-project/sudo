@@ -185,6 +185,28 @@ AC_DEFUN([SUDO_FUNC_ISBLANK],
   fi
 ])
 
+AC_DEFUN([SUDO_CHECK_LIB], [
+    _sudo_check_lib_extras=`echo "$5"|sed -e 's/[ 	]*//g' -e 's/-l/_/g'`
+    AC_MSG_CHECKING([for $2 in -l$1${5+ }$5])
+    AC_CACHE_VAL([sudo_cv_lib_$1''_$2$_sudo_check_lib_extras], [
+	SUDO_CHECK_LIB_OLIBS="$LIBS"
+	LIBS="$LIBS -l$1${5+ }$5"
+	AC_LINK_IFELSE(
+	    [AC_LANG_CALL([], [$2])],
+	    [eval sudo_cv_lib_$1''_$2$_sudo_check_lib_extras=yes],
+	    [eval sudo_cv_lib_$1''_$2$_sudo_check_lib_extras=no]
+	)
+	LIBS="$SUDO_CHECK_LIB_OLIBS"
+    ])
+    if eval test \$sudo_cv_lib_$1''_$2$_sudo_check_lib_extras = "yes"; then
+	AC_MSG_RESULT([yes])
+	$3
+    else
+	AC_MSG_RESULT([no])
+	$4
+    fi
+])
+
 dnl
 dnl check unsetenv() return value
 dnl

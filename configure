@@ -17156,15 +17156,17 @@ else
 	test -z "$libs" && continue
 	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
 	extralibs="`echo \"$libs\"|sed 's/^-l[^ ]*//'`"
-	as_ac_Lib=`$as_echo "ac_cv_lib_$lib''_socket$extralibs" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for socket in -l$lib" >&5
-$as_echo_n "checking for socket in -l$lib... " >&6; }
-if eval \${$as_ac_Lib+:} false; then :
+
+    _sudo_check_lib_extras=`echo "$extralibs"|sed -e 's/ 	*//g' -e 's/-l/_/g'`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for socket in -l$lib${5+ }$extralibs" >&5
+$as_echo_n "checking for socket in -l$lib${5+ }$extralibs... " >&6; }
+    if { as_var=sudo_cv_lib_$lib''_socket$_sudo_check_lib_extras; eval \${$as_var+:} false; }; then :
   $as_echo_n "(cached) " >&6
 else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-l$lib $extralibs $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+
+	SUDO_CHECK_LIB_OLIBS="$LIBS"
+	LIBS="$LIBS -l$lib${5+ }$extralibs"
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
@@ -17183,20 +17185,26 @@ return socket ();
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  eval "$as_ac_Lib=yes"
+  eval sudo_cv_lib_$lib''_socket$_sudo_check_lib_extras=yes
 else
-  eval "$as_ac_Lib=no"
+  eval sudo_cv_lib_$lib''_socket$_sudo_check_lib_extras=no
+
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
+	LIBS="$SUDO_CHECK_LIB_OLIBS"
+
 fi
-eval ac_res=\$$as_ac_Lib
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
-  NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break
-fi
+
+    if eval test \$sudo_cv_lib_$lib''_socket$_sudo_check_lib_extras = "yes"; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break
+    else
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+    fi
 
     done
 
@@ -17224,15 +17232,17 @@ else
 	    test -z "$libs" && continue
 	    lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
 	    extralibs="`echo \"$libs\"|sed 's/^-l[^ ]*//'`"
-	    as_ac_Lib=`$as_echo "ac_cv_lib_$lib''_inet_addr$extralibs" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for inet_addr in -l$lib" >&5
-$as_echo_n "checking for inet_addr in -l$lib... " >&6; }
-if eval \${$as_ac_Lib+:} false; then :
+
+    _sudo_check_lib_extras=`echo "$extralibs"|sed -e 's/ 	*//g' -e 's/-l/_/g'`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for inet_addr in -l$lib${5+ }$extralibs" >&5
+$as_echo_n "checking for inet_addr in -l$lib${5+ }$extralibs... " >&6; }
+    if { as_var=sudo_cv_lib_$lib''_inet_addr$_sudo_check_lib_extras; eval \${$as_var+:} false; }; then :
   $as_echo_n "(cached) " >&6
 else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-l$lib $extralibs $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+
+	SUDO_CHECK_LIB_OLIBS="$LIBS"
+	LIBS="$LIBS -l$lib${5+ }$extralibs"
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
@@ -17251,20 +17261,26 @@ return inet_addr ();
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  eval "$as_ac_Lib=yes"
+  eval sudo_cv_lib_$lib''_inet_addr$_sudo_check_lib_extras=yes
 else
-  eval "$as_ac_Lib=no"
+  eval sudo_cv_lib_$lib''_inet_addr$_sudo_check_lib_extras=no
+
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
+	LIBS="$SUDO_CHECK_LIB_OLIBS"
+
 fi
-eval ac_res=\$$as_ac_Lib
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
-  NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break
-fi
+
+    if eval test \$sudo_cv_lib_$lib''_inet_addr$_sudo_check_lib_extras = "yes"; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break
+    else
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+    fi
 
 	done
 
@@ -17290,15 +17306,17 @@ else
 	test -z "$libs" && continue
 	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
 	extralibs="`echo \"$libs\"|sed 's/^-l[^ ]*//'`"
-	as_ac_Lib=`$as_echo "ac_cv_lib_$lib''_syslog$extralibs" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for syslog in -l$lib" >&5
-$as_echo_n "checking for syslog in -l$lib... " >&6; }
-if eval \${$as_ac_Lib+:} false; then :
+
+    _sudo_check_lib_extras=`echo "$extralibs"|sed -e 's/ 	*//g' -e 's/-l/_/g'`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for syslog in -l$lib${5+ }$extralibs" >&5
+$as_echo_n "checking for syslog in -l$lib${5+ }$extralibs... " >&6; }
+    if { as_var=sudo_cv_lib_$lib''_syslog$_sudo_check_lib_extras; eval \${$as_var+:} false; }; then :
   $as_echo_n "(cached) " >&6
 else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-l$lib $extralibs $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+
+	SUDO_CHECK_LIB_OLIBS="$LIBS"
+	LIBS="$LIBS -l$lib${5+ }$extralibs"
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
@@ -17317,20 +17335,26 @@ return syslog ();
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  eval "$as_ac_Lib=yes"
+  eval sudo_cv_lib_$lib''_syslog$_sudo_check_lib_extras=yes
 else
-  eval "$as_ac_Lib=no"
+  eval sudo_cv_lib_$lib''_syslog$_sudo_check_lib_extras=no
+
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
+	LIBS="$SUDO_CHECK_LIB_OLIBS"
+
 fi
-eval ac_res=\$$as_ac_Lib
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
-  NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break
-fi
+
+    if eval test \$sudo_cv_lib_$lib''_syslog$_sudo_check_lib_extras = "yes"; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break
+    else
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+    fi
 
     done
 
@@ -17359,15 +17383,17 @@ else
 	test -z "$libs" && continue
 	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
 	extralibs="`echo \"$libs\"|sed 's/^-l[^ ]*//'`"
-	as_ac_Lib=`$as_echo "ac_cv_lib_$lib''_getaddrinfo$extralibs" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for getaddrinfo in -l$lib" >&5
-$as_echo_n "checking for getaddrinfo in -l$lib... " >&6; }
-if eval \${$as_ac_Lib+:} false; then :
+
+    _sudo_check_lib_extras=`echo "$extralibs"|sed -e 's/ 	*//g' -e 's/-l/_/g'`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for getaddrinfo in -l$lib${5+ }$extralibs" >&5
+$as_echo_n "checking for getaddrinfo in -l$lib${5+ }$extralibs... " >&6; }
+    if { as_var=sudo_cv_lib_$lib''_getaddrinfo$_sudo_check_lib_extras; eval \${$as_var+:} false; }; then :
   $as_echo_n "(cached) " >&6
 else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-l$lib $extralibs $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+
+	SUDO_CHECK_LIB_OLIBS="$LIBS"
+	LIBS="$LIBS -l$lib${5+ }$extralibs"
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
@@ -17386,20 +17412,26 @@ return getaddrinfo ();
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  eval "$as_ac_Lib=yes"
+  eval sudo_cv_lib_$lib''_getaddrinfo$_sudo_check_lib_extras=yes
 else
-  eval "$as_ac_Lib=no"
+  eval sudo_cv_lib_$lib''_getaddrinfo$_sudo_check_lib_extras=no
+
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
+	LIBS="$SUDO_CHECK_LIB_OLIBS"
+
 fi
-eval ac_res=\$$as_ac_Lib
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
-  NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; found=yes; break
-fi
+
+    if eval test \$sudo_cv_lib_$lib''_getaddrinfo$_sudo_check_lib_extras = "yes"; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; found=yes; break
+    else
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+    fi
 
     done
     if test X"$found" != X"no"; then
