@@ -2137,7 +2137,7 @@ AC_CHECK_FUNC(socket, [], [
 	test -z "$libs" && continue
 	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
 	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	AC_CHECK_LIB($lib, socket, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break], [], [$extralibs])
+	SUDO_CHECK_LIB($lib, socket, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break], [], [$extralibs])
     done
 ])
 dnl
@@ -2158,7 +2158,7 @@ AC_CHECK_FUNC(inet_addr, [], [
 	    test -z "$libs" && continue
 	    lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
 	    extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	    AC_CHECK_LIB($lib, inet_addr, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break], [], [$extralibs])
+	    SUDO_CHECK_LIB($lib, inet_addr, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break], [], [$extralibs])
 	done
     ])
 ])
@@ -2178,7 +2178,7 @@ AC_CHECK_FUNC(syslog, [], [
 	test -z "$libs" && continue
 	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
 	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	AC_CHECK_LIB($lib, syslog, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break], [], [$extralibs])
+	SUDO_CHECK_LIB($lib, syslog, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break], [], [$extralibs])
     done
 ])
 dnl
