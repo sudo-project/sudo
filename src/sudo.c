@@ -1020,10 +1020,12 @@ run_command(struct command_details *details)
     switch (cstat.type) {
     case CMD_ERRNO:
 	/* exec_setup() or execve() returned an error. */
-	sudo_debug_printf(SUDO_DEBUG_DEBUG, "calling policy close with errno");
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "calling policy close with errno %d", cstat.val);
 	policy_close(&policy_plugin, 0, cstat.val);
 	tq_foreach_fwd(&io_plugins, plugin) {
-	    sudo_debug_printf(SUDO_DEBUG_DEBUG, "calling I/O close with errno");
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
+		"calling I/O close with errno %d", cstat.val);
 	    iolog_close(plugin, 0, cstat.val);
 	}
 	exitcode = 1;
@@ -1031,11 +1033,11 @@ run_command(struct command_details *details)
     case CMD_WSTATUS:
 	/* Command ran, exited or was killed. */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
-	    "calling policy close with wait status");
+	    "calling policy close with wait status %d", cstat.val);
 	policy_close(&policy_plugin, cstat.val, 0);
 	tq_foreach_fwd(&io_plugins, plugin) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
-		"calling I/O close with wait status");
+		"calling I/O close with wait status %d", cstat.val);
 	    iolog_close(plugin, cstat.val, 0);
 	}
 	if (WIFEXITED(cstat.val))
