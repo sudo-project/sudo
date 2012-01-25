@@ -170,7 +170,7 @@ extern const char *noexec_path;
 void zero_bytes(volatile void *, size_t);
 
 /* exec.c */
-int sudo_execve(struct command_details *details, struct command_status *cstat);
+int sudo_execute(struct command_details *details, struct command_status *cstat);
 void save_signals(void);
 void restore_signals(void);
 
@@ -214,7 +214,8 @@ void usage(int);
 int selinux_restore_tty(void);
 int selinux_setup(const char *role, const char *type, const char *ttyn,
     int ttyfd);
-void selinux_execve(const char *path, char *argv[], char *envp[]);
+void selinux_execve(const char *path, char *const argv[], char *const envp[],
+    int noexec);
 
 /* aix.c */
 void aix_prep_user(char *user, const char *tty);

@@ -28,10 +28,12 @@
  */
 
 /* exec.c */
-int my_execve(const char *path, char *const argv[], char *const envp[]);
+int sudo_execve(const char *path, char *const argv[], char *const envp[], int noexec);
 int pipe_nonblock(int fds[2]);
 
 /* exec_pty.c */
+struct command_details;
+struct command_status;
 int fork_pty(struct command_details *details, int sv[], int *maxfd);
 int perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat);
 int suspend_parent(int signo);

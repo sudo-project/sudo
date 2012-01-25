@@ -19,8 +19,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <err.h>
-#include <errno.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,14 +27,37 @@
 #ifdef HAVE_SETLOCALE
 # include <locale.h>
 #endif
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 
 #include "missing.h"
 #include "gettext.h"
+#include "error.h"
+#include "sudo_conf.h"
+#include "sudo_debug.h"
+#include "sudo_exec.h"
+#include "sudo_plugin.h"
+
+sudo_conv_t sudo_conv;  /* NULL in non-plugin */
+
+/*
+ * Cleanup hook for error()/errorx()
+ */
+void
+cleanup(int gotsignal)
+{
+    return;
+}
 
 int
-main (int argc, char *argv[])
+main(int argc, char *argv[], char *envp[])
 {
     char *cp, *cmnd;
+    int noexec = 0;
+    debug_decl(main, SUDO_DEBUG_MAIN)
 
 #ifdef HAVE_SETLOCALE 
     setlocale(LC_ALL, "");
@@ -45,22 +66,28 @@ main (int argc, char *argv[])
     textdomain(PACKAGE_NAME);
 
     if (argc < 2)
-	errx(EXIT_FAILURE, _("requires at least one argument"));
+	errorx(EXIT_FAILURE, _("requires at least one argument"));
+
+    /* Read sudo.conf. */
+    sudo_conf_read();
+
+    /* If argv[0] ends in -noexec, pass the flag to sudo_execve() */
+    if ((cp = strrchr(argv[0], '-')) != NULL && cp != argv[0])
+	noexec = strcmp(cp, "-noexec") == 0;
 
     /* Shift argv and make a copy of the command to execute. */
     argv++;
     argc--;
-    cmnd = strdup(argv[0]);
-    if (cmnd == NULL)
-	err(EXIT_FAILURE, NULL);
+    cmnd = estrdup(argv[0]);
 
     /* If invoked as a login shell, modify argv[0] accordingly. */
-    if (argv[0][0] == '-') {
+    if (argv[-1][0] == '-') {
 	if ((cp = strrchr(argv[0], '/')) == NULL)
 	    cp = argv[0];
 	*cp = '-';
     }
-    execv(cmnd, argv);
-    warn(_("unable to execute %s"), argv[0]);
+    sudo_execve(cmnd, argv, envp, noexec);
+    warning(_("unable to execute %s"), argv[0]);
+    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, EXIT_FAILURE);                
     _exit(EXIT_FAILURE);
 }

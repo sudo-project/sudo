@@ -73,8 +73,8 @@ SHELL = @SHELL@
 
 PROGS = @PROGS@
 
-OBJS = conversation.o error.o exec.o exec_pty.o get_pty.o net_ifs.o \
-       load_plugins.o parse_args.o sudo.o sudo_edit.o tgetpass.o \
+OBJS = conversation.o error.o exec.o exec_common.o exec_pty.o get_pty.o \
+       net_ifs.o load_plugins.o parse_args.o sudo.o sudo_edit.o tgetpass.o \
        ttyname.o ttysize.o utmp.o @SUDO_OBJS@
 
 LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
@@ -100,8 +100,8 @@ sudo: $(OBJS) $(LT_LIBS)
 libsudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LTLDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
 
-sesh: sesh.o
-	$(CC) -o $@ sesh.o
+sesh: sesh.o error.o exec_common.o @LIBINTL@ $(LT_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ sesh.o error.o exec_common.o @LIBINTL@ $(LIBS) -static-libtool-libs
 
 pre-install:
 
@@ -170,6 +170,13 @@ exec.o: $(srcdir)/exec.c $(top_builddir)/config.h $(srcdir)/sudo.h \
         $(srcdir)/sudo_exec.h $(incdir)/sudo_plugin.h \
         $(srcdir)/sudo_plugin_int.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/exec.c
+exec_common.o: $(srcdir)/exec_common.c $(top_builddir)/config.h \
+               $(srcdir)/sudo.h $(top_builddir)/pathnames.h \
+               $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h \
+               $(incdir)/alloc.h $(incdir)/error.h $(incdir)/fileops.h \
+               $(incdir)/list.h $(incdir)/sudo_conf.h $(incdir)/list.h \
+               $(incdir)/sudo_debug.h $(incdir)/gettext.h $(srcdir)/sudo_exec.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/exec_common.c
 exec_pty.o: $(srcdir)/exec_pty.c $(top_builddir)/config.h $(srcdir)/sudo.h \
             $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
             $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
@@ -212,8 +219,10 @@ selinux.o: $(srcdir)/selinux.c $(top_builddir)/config.h $(srcdir)/sudo.h \
            $(incdir)/fileops.h $(incdir)/list.h $(incdir)/sudo_conf.h \
            $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/selinux.c
-sesh.o: $(srcdir)/sesh.c $(top_builddir)/config.h $(incdir)/missing.h \
-        $(incdir)/gettext.h
+sesh.o: $(srcdir)/sesh.c $(top_builddir)/config.h \
+        $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h $(incdir)/gettext.h \
+        $(incdir)/error.h $(incdir)/sudo_conf.h $(incdir)/list.h \
+        $(incdir)/sudo_debug.h $(srcdir)/sudo_exec.h $(incdir)/sudo_plugin.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sesh.c
 sudo.o: $(srcdir)/sudo.c $(top_builddir)/config.h $(srcdir)/sudo.h \
         $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
