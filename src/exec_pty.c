@@ -1190,11 +1190,15 @@ exec_pty(struct command_details *details, int *errfd)
 	closefrom(maxfd);
     }
 #ifdef HAVE_SELINUX
-    if (ISSET(details->flags, CD_RBAC_ENABLED))
-	selinux_execve(details->command, details->argv, details->envp);
-    else
+    if (ISSET(details->flags, CD_RBAC_ENABLED)) {
+	selinux_execve(details->command, details->argv, details->envp,
+	    ISSET(details->flags, CD_NOEXEC));
+    } else
 #endif
-	my_execve(details->command, details->argv, details->envp);
+    {
+	sudo_execve(details->command, details->argv, details->envp,
+	    ISSET(details->flags, CD_NOEXEC));
+    }
     sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to exec %s: %s",
 	details->command, strerror(errno));
     debug_return;

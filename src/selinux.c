@@ -361,7 +361,8 @@ done:
 }
 
 void
-selinux_execve(const char *path, char *argv[], char *envp[])
+selinux_execve(const char *path, char *const argv[], char *const envp[],
+    int noexec)
 {
     char **nargv;
     int argc, serrno;
@@ -381,16 +382,23 @@ selinux_execve(const char *path, char *argv[], char *envp[])
     }
 #endif /* HAVE_SETKEYCREATECON */
 
+    /*
+     * Build new argv with sesh as argv[0].
+     * If argv[0] ends in -noexec, sesh will disable execute
+     * for the command it runs.
+     */
     for (argc = 0; argv[argc] != NULL; argc++)
 	continue;
-
-    /* Build new argv with sesh as argv[0]. */
     nargv = emalloc2(argc + 2, sizeof(char *));
-    nargv[0] = *argv[0] == '-' ? "-sesh" : "sesh";
+    if (noexec)
+	nargv[0] = *argv[0] == '-' ? "-sesh-noexec" : "sesh-noexec";
+    else
+	nargv[0] = *argv[0] == '-' ? "-sesh" : "sesh";
     nargv[1] = (char *)path;
     memcpy(&nargv[2], &argv[1], argc * sizeof(char *)); /* copies NULL */
 
-    execve(_PATH_SUDO_SESH, nargv, envp);
+    /* sesh will handle noexec for us. */
+    sudo_execve(_PATH_SUDO_SESH, nargv, envp, 0);
     serrno = errno;
     free(nargv);
     errno = serrno;

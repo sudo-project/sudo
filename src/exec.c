@@ -83,30 +83,6 @@ static void handler_nofwd(int s, siginfo_t *info, void *context);
 #endif
 
 /*
- * Like execve(2) but falls back to running through /bin/sh
- * ala execvp(3) if we get ENOEXEC.
- */
-int
-my_execve(const char *path, char *const argv[], char *const envp[])
-{
-    execve(path, argv, envp);
-    if (errno == ENOEXEC) {
-	int argc;
-	char **nargv;
-
-	for (argc = 0; argv[argc] != NULL; argc++)
-	    continue;
-	nargv = emalloc2(argc + 2, sizeof(char *));
-	nargv[0] = "sh";
-	nargv[1] = (char *)path;
-	memcpy(nargv + 2, argv + 1, argc * sizeof(char *));
-	execve(_PATH_BSHELL, nargv, envp);
-	efree(nargv);
-    }
-    return -1;
-}
-
-/*
  * Fork and execute a command, returns the child's pid.
  * Sends errno back on sv[1] if execve() fails.
  */
@@ -149,11 +125,15 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 		closefrom(maxfd);
 	    }
 #ifdef HAVE_SELINUX
-	    if (ISSET(details->flags, CD_RBAC_ENABLED))
-		selinux_execve(details->command, details->argv, details->envp);
-	    else
+	    if (ISSET(details->flags, CD_RBAC_ENABLED)) {
+		selinux_execve(details->command, details->argv, details->envp,
+		    ISSET(details->flags, CD_NOEXEC));
+	    } else
 #endif
-		my_execve(details->command, details->argv, details->envp);
+	    {
+		sudo_execve(details->command, details->argv, details->envp,
+		    ISSET(details->flags, CD_NOEXEC));
+	    }
 	    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to exec %s: %s",
 		details->command, strerror(errno));
 	}
@@ -222,7 +202,7 @@ restore_signals(void)
  * we fact that we have two different controlling terminals to deal with.
  */
 int
-sudo_execve(struct command_details *details, struct command_status *cstat)
+sudo_execute(struct command_details *details, struct command_status *cstat)
 {
     int maxfd, n, nready, sv[2];
     const char *utmp_user = NULL;
@@ -230,7 +210,7 @@ sudo_execve(struct command_details *details, struct command_status *cstat)
     fd_set *fdsr, *fdsw;
     sigaction_t sa;
     pid_t child;
-    debug_decl(sudo_execve, SUDO_DEBUG_EXEC)
+    debug_decl(sudo_execute, SUDO_DEBUG_EXEC)
 
     /* If running in background mode, fork and exit. */
     if (ISSET(details->flags, CD_BACKGROUND)) {

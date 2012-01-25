@@ -267,6 +267,7 @@ src/Makefile.in
 src/conversation.c
 src/error.c
 src/exec.c
+src/exec_common.c
 src/exec_pty.c
 src/get_pty.c
 src/load_plugins.c

@@ -83,9 +83,6 @@
 # endif /* __hpux */
 # include <prot.h>
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
-#ifdef HAVE_PRIV_SET
-# include <priv.h>
-#endif
 #if defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined (HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV)
 # include <sys/sysctl.h>
 #elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
@@ -830,81 +827,6 @@ set_project(struct passwd *pw)
 #endif /* HAVE_PROJECT_H */
 
 /*
- * Disable execution of child processes in the command we are about
- * to run.  On systems with privilege sets, we can remove the exec
- * privilege.  On other systems we use LD_PRELOAD and the like.
- */
-static void
-disable_execute(struct command_details *details)
-{
-#ifdef _PATH_SUDO_NOEXEC
-    char *cp, **ev, **nenvp;
-    int env_len = 0, env_size = 128;
-#endif /* _PATH_SUDO_NOEXEC */
-    debug_decl(disable_execute, SUDO_DEBUG_UTIL)
-
-#ifdef HAVE_PRIV_SET
-    /* Solaris privileges, remove PRIV_PROC_EXEC post-execve. */
-    if (priv_set(PRIV_OFF, PRIV_LIMIT, "PRIV_PROC_EXEC", NULL) == 0)
-	debug_return;
-    warning(_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
-#endif /* HAVE_PRIV_SET */
-
-#ifdef _PATH_SUDO_NOEXEC
-    nenvp = emalloc2(env_size, sizeof(char *));
-    for (ev = details->envp; *ev != NULL; ev++) {
-	if (env_len + 2 > env_size) {
-	    env_size += 128;
-	    nenvp = erealloc3(nenvp, env_size, sizeof(char *));
-	}
-	/*
-	 * Prune out existing preloaded libraries.
-	 * XXX - should save and append instead of replacing.
-	 */
-# if defined(__darwin__) || defined(__APPLE__)
-	if (strncmp(*ev, "DYLD_INSERT_LIBRARIES=", sizeof("DYLD_INSERT_LIBRARIES=") - 1) == 0)
-	    continue;
-	if (strncmp(*ev, "DYLD_FORCE_FLAT_NAMESPACE=", sizeof("DYLD_INSERT_LIBRARIES=") - 1) == 0)
-	    continue;
-# elif defined(__osf__) || defined(__sgi)
-	if (strncmp(*ev, "_RLD_LIST=", sizeof("_RLD_LIST=") - 1) == 0)
-	    continue;
-# elif defined(_AIX)
-	if (strncmp(*ev, "LDR_PRELOAD=", sizeof("LDR_PRELOAD=") - 1) == 0)
-	    continue;
-# else
-	if (strncmp(*ev, "LD_PRELOAD=", sizeof("LD_PRELOAD=") - 1) == 0)
-	    continue;
-# endif
-	nenvp[env_len++] = *ev;
-    }
-
-    /*
-     * Preload a noexec file?  For a list of LD_PRELOAD-alikes, see
-     * http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html
-     * XXX - need to support 32-bit and 64-bit variants
-     */
-# if defined(__darwin__) || defined(__APPLE__)
-    nenvp[env_len++] = "DYLD_FORCE_FLAT_NAMESPACE=";
-    cp = fmt_string("DYLD_INSERT_LIBRARIES", sudo_conf_noexec_path());
-# elif defined(__osf__) || defined(__sgi)
-    easprintf(&cp, "_RLD_LIST=%s:DEFAULT", sudo_conf_noexec_path());
-# elif defined(_AIX)
-    cp = fmt_string("LDR_PRELOAD", sudo_conf_noexec_path());
-# else
-    cp = fmt_string("LD_PRELOAD", sudo_conf_noexec_path());
-# endif
-    if (cp == NULL)
-	errorx(1, _("unable to allocate memory"));
-    nenvp[env_len++] = cp;
-    nenvp[env_len] = NULL;
-
-    details->envp = nenvp;
-#endif /* _PATH_SUDO_NOEXEC */
-    debug_return;
-}
-
-/*
  * Setup the execution environment immediately prior to the call to execve()
  * Returns true on success and false on failure.
  */
@@ -1024,9 +946,6 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	}
     }
 
-    if (ISSET(details->flags, CD_NOEXEC))
-	disable_execute(details);
-
 #ifdef HAVE_SETRESUID
     if (setresuid(details->uid, details->euid, details->euid) != 0) {
 	warning(_("unable to change to runas uid (%u, %u)"), details->uid,
@@ -1096,7 +1015,7 @@ run_command(struct command_details *details)
     cstat.type = CMD_INVALID;
     cstat.val = 0;
 
-    sudo_execve(details, &cstat);
+    sudo_execute(details, &cstat);
 
     switch (cstat.type) {
     case CMD_ERRNO:
