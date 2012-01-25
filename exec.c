@@ -84,7 +84,7 @@ static void schedule_signal __P((int signo));
 static int log_io;
 #endif /* _PATH_SUDO_IO_LOGDIR */
 
-static int handle_signals __P((int fd, pid_t child,
+static int handle_signals __P((int sv[2], pid_t child,
     struct command_status *cstat));
 #ifdef SA_SIGINFO
 static void handler_nofwd __P((int s, siginfo_t *info, void *context));
@@ -377,7 +377,7 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
 	}
 #endif /* _PATH_SUDO_IO_LOGDIR */
 	if (FD_ISSET(signal_pipe[0], fdsr)) {
-	    n = handle_signals(signal_pipe[0], child, cstat);
+	    n = handle_signals(sv, child, cstat);
 	    if (n == 0) {
 		/* Child has exited, cstat is set, we are done. */
 		goto done;
@@ -476,8 +476,8 @@ done:
  * Returns -1 on error, 0 on child exit, else 1.
  */
 static int
-handle_signals(fd, child, cstat)
-    int fd;
+handle_signals(sv, child, cstat)
+    int sv[2];
     pid_t child;
     struct command_status *cstat;
 {
@@ -521,17 +521,11 @@ handle_signals(fd, child, cstat)
 		    /*
 		     * On BSD we get ECONNRESET on sv[0] if monitor dies
 		     * and select() will return with sv[0] readable.
-		     * On Linux that doesn't appear to happen so we
-		     * treat the monitor dying as a fatal error.
-		     * Note that the wait status we return is that of
-		     * the monitor and not the command; unfortunately
-		     * that is the best that we can do here.
+		     * On Linux that doesn't appear to happen so if the
+		     * monitor dies, shut down the socketpair to force a
+		     * select() notification.
 		     */
-		    if (!WIFSTOPPED(status)) {
-			cstat->type = CMD_WSTATUS;
-			cstat->val = status;
-			return 0;
-		    }
+		    (void) shutdown(sv[0], SHUT_WR);
 		} else
 #endif
 		{
