@@ -41,6 +41,9 @@ What's new in Sudo 1.7.9?
    now run "visudo -c".  Previously, write permissions were required
    even though no writing is down in check-only mode.
 
+ * Fixed a crash in the monitor process on Solaris when NOPASSWD
+   was specified or when authentication was disabled.
+     
 What's new in Sudo 1.7.8p1?
 
  * Fixed matching of a Runas_Alias in the group section of a
