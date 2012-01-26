@@ -432,8 +432,7 @@ main(argc, argv, envp)
     rebuild_env(def_noexec);
 
     /* Require a password if sudoers says so.  */
-    if (def_authenticate)
-	check_user(validated, sudo_mode);
+    check_user(validated, sudo_mode);
 
     /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
     /* XXX - causes confusion when root is not listed in sudoers */
