@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.4\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-01-06 15:10-0500\n"
+"POT-Creation-Date: 2012-01-29 14:50-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,30 +20,42 @@ msgstr ""
 msgid ": "
 msgstr ""
 
-#: src/exec.c:133 src/exec_pty.c:604 src/exec_pty.c:936 src/tgetpass.c:227
+#: src/exec.c:105 src/exec_pty.c:604 src/exec_pty.c:936 src/tgetpass.c:227
 #, c-format
 msgid "unable to fork"
 msgstr ""
 
-#: src/exec.c:299
+#: src/exec.c:252
 #, c-format
 msgid "unable to create sockets"
 msgstr ""
 
-#: src/exec.c:306 src/exec_pty.c:557 src/exec_pty.c:565 src/exec_pty.c:572
+#: src/exec.c:259 src/exec_pty.c:557 src/exec_pty.c:565 src/exec_pty.c:572
 #: src/exec_pty.c:871 src/exec_pty.c:933 src/tgetpass.c:224
 #, c-format
 msgid "unable to create pipe"
 msgstr ""
 
-#: src/exec.c:373 src/exec_pty.c:1000 src/exec_pty.c:1135
+#: src/exec.c:340 src/exec_pty.c:1000 src/exec_pty.c:1135
 #, c-format
 msgid "select failed"
 msgstr ""
 
-#: src/exec.c:458
+#: src/exec.c:425
 #, c-format
 msgid "unable to restore tty label"
+msgstr ""
+
+#: src/exec_common.c:66
+#, c-format
+msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
+msgstr ""
+
+#: src/exec_common.c:114 src/parse_args.c:432 src/sudo.c:449 src/sudo.c:469
+#: src/sudo.c:476 src/sudo.c:487 common/alloc.c:85 common/alloc.c:105
+#: common/alloc.c:123 common/alloc.c:145 common/alloc.c:203 common/alloc.c:217
+#, c-format
+msgid "unable to allocate memory"
 msgstr ""
 
 #: src/exec_pty.c:140
@@ -185,13 +197,6 @@ msgstr ""
 #: src/parse_args.c:363
 #, c-format
 msgid "the `-A' and `-S' options may not be used together"
-msgstr ""
-
-#: src/parse_args.c:432 src/sudo.c:482 src/sudo.c:502 src/sudo.c:509
-#: src/sudo.c:519 common/alloc.c:85 common/alloc.c:105 common/alloc.c:123
-#: common/alloc.c:145 common/alloc.c:203 common/alloc.c:217
-#, c-format
-msgid "unable to allocate memory"
 msgstr ""
 
 #: src/parse_args.c:445
@@ -416,21 +421,22 @@ msgstr ""
 msgid "unable to setup tty context for %s"
 msgstr ""
 
-#: src/selinux.c:371
+#: src/selinux.c:372
 #, c-format
 msgid "unable to set exec context to %s"
 msgstr ""
 
-#: src/selinux.c:378
+#: src/selinux.c:379
 #, c-format
 msgid "unable to set key creation context to %s"
 msgstr ""
 
-#: src/sesh.c:48
+#: src/sesh.c:69
+#, c-format
 msgid "requires at least one argument"
 msgstr ""
 
-#: src/sesh.c:64
+#: src/sesh.c:90
 #, c-format
 msgid "unable to execute %s"
 msgstr ""
@@ -475,122 +481,117 @@ msgstr ""
 msgid "unable to get group vector"
 msgstr ""
 
-#: src/sudo.c:478
+#: src/sudo.c:445
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr ""
 
-#: src/sudo.c:818
+#: src/sudo.c:786
 #, c-format
 msgid "resource control limit has been reached"
 msgstr ""
 
-#: src/sudo.c:821
+#: src/sudo.c:789
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
 msgstr ""
 
-#: src/sudo.c:825
+#: src/sudo.c:793
 #, c-format
 msgid "the invoking task is final"
 msgstr ""
 
-#: src/sudo.c:828
+#: src/sudo.c:796
 #, c-format
 msgid "could not join project \"%s\""
 msgstr ""
 
-#: src/sudo.c:833
+#: src/sudo.c:801
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:837
+#: src/sudo.c:805
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:841
+#: src/sudo.c:809
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:847
+#: src/sudo.c:815
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:849
+#: src/sudo.c:817
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:879
-#, c-format
-msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
-msgstr ""
-
-#: src/sudo.c:988
+#: src/sudo.c:881
 #, c-format
 msgid "unknown login class %s"
 msgstr ""
 
-#: src/sudo.c:1004 src/sudo.c:1007
+#: src/sudo.c:897 src/sudo.c:900
 #, c-format
 msgid "unable to set user context"
 msgstr ""
 
-#: src/sudo.c:1022
-#, c-format
-msgid "unable to set effective gid to runas gid %u"
-msgstr ""
-
-#: src/sudo.c:1028
-#, c-format
-msgid "unable to set gid to runas gid %u"
-msgstr ""
-
-#: src/sudo.c:1036
+#: src/sudo.c:916
 #, c-format
 msgid "unable to set supplementary group IDs"
 msgstr ""
 
-#: src/sudo.c:1044
+#: src/sudo.c:923
+#, c-format
+msgid "unable to set effective gid to runas gid %u"
+msgstr ""
+
+#: src/sudo.c:929
+#, c-format
+msgid "unable to set gid to runas gid %u"
+msgstr ""
+
+#: src/sudo.c:936
 #, c-format
 msgid "unable to set process priority"
 msgstr ""
 
-#: src/sudo.c:1052
+#: src/sudo.c:944
 #, c-format
 msgid "unable to change root to %s"
 msgstr ""
 
-#: src/sudo.c:1062 src/sudo.c:1068 src/sudo.c:1074
+#: src/sudo.c:951 src/sudo.c:957 src/sudo.c:963
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr ""
 
-#: src/sudo.c:1088
+#: src/sudo.c:977
 #, c-format
 msgid "unable to change directory to %s"
 msgstr ""
 
-#: src/sudo.c:1158
+#: src/sudo.c:1049
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr ""
 
-#: src/sudo.c:1204
+#: src/sudo.c:1095
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr ""
 
-#: src/sudo.c:1216
+#: src/sudo.c:1107
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr ""
 
-#: src/sudo.c:1228
+#: src/sudo.c:1119
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr ""
@@ -680,17 +681,17 @@ msgstr ""
 msgid "unable to restore stdin"
 msgstr ""
 
-#: common/aix.c:144
+#: common/aix.c:149
 #, c-format
 msgid "unable to open userdb"
 msgstr ""
 
-#: common/aix.c:147
+#: common/aix.c:152
 #, c-format
 msgid "unable to switch to registry \"%s\" for %s"
 msgstr ""
 
-#: common/aix.c:161
+#: common/aix.c:169
 #, c-format
 msgid "unable to restore registry"
 msgstr ""
