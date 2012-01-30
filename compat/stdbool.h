@@ -10,7 +10,7 @@
 
 #ifndef __cplusplus
 
-#if (defined(__GNUC__) && __GNUC__ >= 3) || (defined(__SUNPRO_C) && __SUNPRO_C >= 0x550) || defined(__PCC__) || defined(lint)
+#if (defined(HAVE__BOOL) && HAVE__BOOL > 0) || defined(lint)
 /* Support for _C99: type _Bool is already built-in. */
 #define false	0
 #define true	1
