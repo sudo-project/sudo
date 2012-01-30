@@ -54,7 +54,7 @@ disable_execute(char *const envp[])
 {
 #ifdef _PATH_SUDO_NOEXEC
     char * const *ev;
-    char *cp, **nenvp;
+    char *preload, **nenvp;
     int env_len = 0, env_size = 128;
 #endif /* _PATH_SUDO_NOEXEC */
     debug_decl(disable_execute, SUDO_DEBUG_UTIL)
@@ -66,10 +66,29 @@ disable_execute(char *const envp[])
     warning(_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
 #endif /* HAVE_PRIV_SET */
 
+    /*
+     * Preload a noexec file.  For a list of LD_PRELOAD-alikes, see
+     * http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html
+     * XXX - need to support 32-bit and 64-bit variants
+     */
+# if defined(__darwin__) || defined(__APPLE__)
+    nenvp[env_len++] = "DYLD_FORCE_FLAT_NAMESPACE=";
+    preload = fmt_string("DYLD_INSERT_LIBRARIES", sudo_conf_noexec_path());
+# elif defined(__osf__) || defined(__sgi)
+    easprintf(&preload, "_RLD_LIST=%s:DEFAULT", sudo_conf_noexec_path());
+# elif defined(_AIX)
+    preload = fmt_string("LDR_PRELOAD", sudo_conf_noexec_path());
+# else
+    preload = fmt_string("LD_PRELOAD", sudo_conf_noexec_path());
+# endif
+    if (preload == NULL)
+	errorx(1, _("unable to allocate memory"));
+
 #ifdef _PATH_SUDO_NOEXEC
     nenvp = emalloc2(env_size, sizeof(char *));
     for (ev = envp; *ev != NULL; ev++) {
-	if (env_len + 2 > env_size) {
+	/* Need at least 3 slots for current element, LD_PRELOAD, and NULL. */
+	if (env_len + 3 > env_size) {
 	    env_size += 128;
 	    nenvp = erealloc3(nenvp, env_size, sizeof(char *));
 	}
@@ -94,25 +113,7 @@ disable_execute(char *const envp[])
 # endif
 	nenvp[env_len++] = *ev;
     }
-
-    /*
-     * Preload a noexec file?  For a list of LD_PRELOAD-alikes, see
-     * http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html
-     * XXX - need to support 32-bit and 64-bit variants
-     */
-# if defined(__darwin__) || defined(__APPLE__)
-    nenvp[env_len++] = "DYLD_FORCE_FLAT_NAMESPACE=";
-    cp = fmt_string("DYLD_INSERT_LIBRARIES", sudo_conf_noexec_path());
-# elif defined(__osf__) || defined(__sgi)
-    easprintf(&cp, "_RLD_LIST=%s:DEFAULT", sudo_conf_noexec_path());
-# elif defined(_AIX)
-    cp = fmt_string("LDR_PRELOAD", sudo_conf_noexec_path());
-# else
-    cp = fmt_string("LD_PRELOAD", sudo_conf_noexec_path());
-# endif
-    if (cp == NULL)
-	errorx(1, _("unable to allocate memory"));
-    nenvp[env_len++] = cp;
+    nenvp[env_len++] = preload;
     nenvp[env_len] = NULL;
     envp = nenvp;
 #endif /* _PATH_SUDO_NOEXEC */
