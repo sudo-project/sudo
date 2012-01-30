@@ -2021,6 +2021,12 @@ AC_CHECK_FUNCS(setsid, [], [
     AC_LIBOBJ(setsid)
     AC_FUNC_SETPGRP
 ])
+dnl
+dnl If libc supports _FORTIFY_SOURCE check functions, use it.
+dnl
+O_CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
+AC_CHECK_FUNC(__sprintf_chk, [OSDEFS="${OSDEFS} -D_FORTIFY_SOURCE=2"], [])
+CPPFLAGS="$O_CPPFLAGS"
 
 AC_CHECK_FUNCS(getutxid getutid, [break])
 
