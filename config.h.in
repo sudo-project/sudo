@@ -469,7 +469,7 @@
 /* Define to 1 if you have the `snprintf' function. */
 #undef HAVE_SNPRINTF
 
-/* Define to 1 if you have the <stdbool.h> header file. */
+/* Define to 1 if stdbool.h conforms to C99. */
 #undef HAVE_STDBOOL_H
 
 /* Define to 1 if you have the <stdint.h> header file. */
@@ -638,6 +638,9 @@
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #undef HAVE_ZLIB_H
+
+/* Define to 1 if the system has the type `_Bool'. */
+#undef HAVE__BOOL
 
 /* Define to 1 if you have the `_getpty' function. */
 #undef HAVE__GETPTY
