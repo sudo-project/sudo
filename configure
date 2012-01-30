@@ -16376,6 +16376,14 @@ done
 fi
 done
 
+O_CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
+ac_fn_c_check_func "$LINENO" "__sprintf_chk" "ac_cv_func___sprintf_chk"
+if test "x$ac_cv_func___sprintf_chk" = xyes; then :
+  OSDEFS="${OSDEFS} -D_FORTIFY_SOURCE=2"
+fi
+
+CPPFLAGS="$O_CPPFLAGS"
+
 utmp_style=LEGACY
 for ac_func in getutxid getutid
 do :

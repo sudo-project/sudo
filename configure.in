@@ -2086,6 +2086,13 @@ AC_CHECK_FUNCS(getline, [], [
     AC_LIBOBJ(getline)
     AC_CHECK_FUNCS(fgetln)
 ])
+dnl
+dnl If libc supports _FORTIFY_SOURCE check functions, use it.
+dnl
+O_CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
+AC_CHECK_FUNC(__sprintf_chk, [OSDEFS="${OSDEFS} -D_FORTIFY_SOURCE=2"], [])
+CPPFLAGS="$O_CPPFLAGS"
+
 utmp_style=LEGACY
 AC_CHECK_FUNCS(getutxid getutid, [utmp_style=POSIX; break])
 if test "$utmp_style" = "LEGACY"; then
