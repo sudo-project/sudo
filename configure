@@ -16379,7 +16379,24 @@ done
 O_CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
 ac_fn_c_check_func "$LINENO" "__sprintf_chk" "ac_cv_func___sprintf_chk"
 if test "x$ac_cv_func___sprintf_chk" = xyes; then :
+
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+char buf[4]; (void)sprintf(buf, "%s", "foo");
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
   OSDEFS="${OSDEFS} -D_FORTIFY_SOURCE=2"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
 fi
 
 CPPFLAGS="$O_CPPFLAGS"
