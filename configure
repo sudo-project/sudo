@@ -18026,10 +18026,58 @@ if test -z "${AUTH_EXCL}${AUTH_REG}" -a -n "$AUTH_EXCL_DEF"; then
 fi
 
 if test ${with_pam-"no"} != "no"; then
-    # We already link with -ldl (see LIBDL below) so no need for that here.
-    SUDOERS_LIBS="${SUDOERS_LIBS} -lpam"
+    #
+    # Check for pam_start() in libpam first, then for pam_appl.h.
+    #
+    found_pam_lib=no
+    as_ac_Lib=`$as_echo "ac_cv_lib_pam_pam_start$lt_cv_dlopen_libs" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for pam_start in -lpam" >&5
+$as_echo_n "checking for pam_start in -lpam... " >&6; }
+if eval \${$as_ac_Lib+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpam $lt_cv_dlopen_libs $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
 
-                    for ac_header in security/pam_appl.h pam/pam_appl.h
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char pam_start ();
+int
+main ()
+{
+return pam_start ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  eval "$as_ac_Lib=yes"
+else
+  eval "$as_ac_Lib=no"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+eval ac_res=\$$as_ac_Lib
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
+  found_pam_lib=yes
+fi
+
+    #
+    # Some PAM implementations (MacOS X for example) put the PAM headers
+    # in /usr/include/pam instead of /usr/include/security...
+    #
+    found_pam_hdrs=no
+    for ac_header in security/pam_appl.h pam/pam_appl.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -18037,12 +18085,33 @@ if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
- with_pam=yes; break
+ found_pam_hdrs=yes; break
 fi
 
 done
 
+    if test "$found_pam_lib" = "yes" -a "$found_pam_hdrs" = "yes"; then
+	# Found both PAM libs and headers
+	with_pam=yes
+    elif test "$with_pam" = "yes"; then
+	if test "$found_pam_lib" = "no"; then
+	    as_fn_error $? "\"--with-pam specified but unable to locate PAM development library.\"" "$LINENO" 5
+	fi
+	if test "$found_pam_hdrs" = "no"; then
+	    as_fn_error $? "\"--with-pam specified but unable to locate PAM development headers.\"" "$LINENO" 5
+	fi
+    elif test "$found_pam_lib" != "$found_pam_hdrs"; then
+	if test "$found_pam_lib" = "no"; then
+	    as_fn_error $? "\"found PAM headers but no PAM development library; specify --without-pam to build without PAM\"" "$LINENO" 5
+	fi
+	if test "$found_pam_hdrs" = "no"; then
+	    as_fn_error $? "\"found PAM library but no PAM development headers; specify --without-pam to build without PAM\"" "$LINENO" 5
+	fi
+    fi
+
     if test "$with_pam" = "yes"; then
+	# We already link with -ldl if needed (see LIBDL below)
+	SUDOERS_LIBS="${SUDOERS_LIBS} -lpam"
 	$as_echo "#define HAVE_PAM 1" >>confdefs.h
 
 	AUTH_OBJS="$AUTH_OBJS pam.lo";
