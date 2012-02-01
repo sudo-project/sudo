@@ -2483,15 +2483,39 @@ dnl PAM support.  Systems that use PAM by default set with_pam=default
 dnl and we do the actual tests here.
 dnl
 if test ${with_pam-"no"} != "no"; then
-    # We already link with -ldl (see LIBDL below) so no need for that here.
-    SUDOERS_LIBS="${SUDOERS_LIBS} -lpam"
+    #
+    # Check for pam_start() in libpam first, then for pam_appl.h.
+    #
+    found_pam_lib=no
+    AC_CHECK_LIB(pam, pam_start, [found_pam_lib=yes], [], [$lt_cv_dlopen_libs])
+    #
+    # Some PAM implementations (MacOS X for example) put the PAM headers
+    # in /usr/include/pam instead of /usr/include/security...
+    #
+    found_pam_hdrs=no
+    AC_CHECK_HEADERS([security/pam_appl.h] [pam/pam_appl.h], [found_pam_hdrs=yes; break])
+    if test "$found_pam_lib" = "yes" -a "$found_pam_hdrs" = "yes"; then
+	# Found both PAM libs and headers
+	with_pam=yes
+    elif test "$with_pam" = "yes"; then
+	if test "$found_pam_lib" = "no"; then
+	    AC_MSG_ERROR(["--with-pam specified but unable to locate PAM development library."])
+	fi
+	if test "$found_pam_hdrs" = "no"; then
+	    AC_MSG_ERROR(["--with-pam specified but unable to locate PAM development headers."])
+	fi
+    elif test "$found_pam_lib" != "$found_pam_hdrs"; then
+	if test "$found_pam_lib" = "no"; then
+	    AC_MSG_ERROR(["found PAM headers but no PAM development library; specify --without-pam to build without PAM"])
+	fi
+	if test "$found_pam_hdrs" = "no"; then
+	    AC_MSG_ERROR(["found PAM library but no PAM development headers; specify --without-pam to build without PAM"])
+	fi
+    fi
 
-    dnl
-    dnl Some PAM implementations (MacOS X for example) put the PAM headers
-    dnl in /usr/include/pam instead of /usr/include/security...
-    dnl
-    AC_CHECK_HEADERS([security/pam_appl.h] [pam/pam_appl.h], [with_pam=yes; break])
     if test "$with_pam" = "yes"; then
+	# We already link with -ldl if needed (see LIBDL below)
+	SUDOERS_LIBS="${SUDOERS_LIBS} -lpam"
 	AC_DEFINE(HAVE_PAM)
 	AUTH_OBJS="$AUTH_OBJS pam.lo";
 	AUTH_EXCL=PAM
