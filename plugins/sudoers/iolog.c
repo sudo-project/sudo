@@ -427,7 +427,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     FILE *io_logfile;
     size_t len;
     int rval = -1;
-    debug_decl(sudoers_io_open, SUDO_DEBUG_UTIL)
+    debug_decl(sudoers_io_open, SUDO_DEBUG_PLUGIN)
 
     if (!sudo_conv)
 	sudo_conv = conversation;
@@ -578,7 +578,7 @@ static void
 sudoers_io_close(int exit_status, int error)
 {
     int i;
-    debug_decl(sudoers_io_close, SUDO_DEBUG_UTIL)
+    debug_decl(sudoers_io_close, SUDO_DEBUG_PLUGIN)
 
     if (sigsetjmp(error_jmp, 1)) {
 	/* called via error(), errorx() or log_error() */
@@ -601,7 +601,7 @@ sudoers_io_close(int exit_status, int error)
 static int
 sudoers_io_version(int verbose)
 {
-    debug_decl(sudoers_io_version, SUDO_DEBUG_UTIL)
+    debug_decl(sudoers_io_version, SUDO_DEBUG_PLUGIN)
 
     if (sigsetjmp(error_jmp, 1)) {
 	/* called via error(), errorx() or log_error() */
@@ -621,7 +621,7 @@ static int
 sudoers_io_log(const char *buf, unsigned int len, int idx)
 {
     struct timeval now, delay;
-    debug_decl(sudoers_io_version, SUDO_DEBUG_UTIL)
+    debug_decl(sudoers_io_version, SUDO_DEBUG_PLUGIN)
 
     gettimeofday(&now, NULL);
 
