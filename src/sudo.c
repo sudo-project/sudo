@@ -137,9 +137,9 @@ static void iolog_close(struct plugin_container *plugin, int exit_status,
     int error);
 static int iolog_show_version(struct plugin_container *plugin, int verbose);
 
-#if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
+#ifdef RLIMIT_CORE
 static struct rlimit corelimit;
-#endif /* RLIMIT_CORE && !SUDO_DEVEL */
+#endif /* RLIMIT_CORE */
 #if defined(__linux__)
 static struct rlimit nproclimit;
 #endif
@@ -188,10 +188,9 @@ main(int argc, char *argv[], char *envp[])
     if (geteuid() != 0)
 	errorx(1, _("must be setuid root"));
 
-    /* Reset signal mask, disable core dumps and make sure fds 0-2 are open. */
+    /* Reset signal mask and make sure fds 0-2 are open. */
     (void) sigemptyset(&mask);
     (void) sigprocmask(SIG_SETMASK, &mask, NULL);
-    disable_coredumps();
     fix_fds();
 
     /* Fill in user_info with user name, uid, cwd, etc. */
@@ -200,6 +199,9 @@ main(int argc, char *argv[], char *envp[])
 
     /* Read sudo.conf. */
     sudo_conf_read();
+
+    /* Disable core dumps if not enabled in sudo.conf. */
+    disable_coredumps();
 
     /* Parse command line arguments. */
     sudo_mode = parse_args(argc, argv, &nargc, &nargv, &settings, &env_add);
@@ -287,9 +289,10 @@ main(int argc, char *argv[], char *envp[])
 	    if (ISSET(sudo_mode, MODE_BACKGROUND))
 		SET(command_details.flags, CD_BACKGROUND);
 	    /* Restore coredumpsize resource limit before running. */
-#if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
-	    (void) setrlimit(RLIMIT_CORE, &corelimit);
-#endif /* RLIMIT_CORE && !SUDO_DEVEL */
+#ifdef RLIMIT_CORE
+	    if (sudo_conf_disable_coredump())
+		(void) setrlimit(RLIMIT_CORE, &corelimit);
+#endif /* RLIMIT_CORE */
 	    if (ISSET(command_details.flags, CD_SUDOEDIT)) {
 		exitcode = sudo_edit(&command_details);
 	    } else {
@@ -722,7 +725,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 static void
 disable_coredumps(void)
 {
-#if defined(__linux__) || (defined(RLIMIT_CORE) && !defined(SUDO_DEVEL))
+#if defined(__linux__) || defined(RLIMIT_CORE)
     struct rlimit rl;
 #endif
     debug_decl(disable_coredumps, SUDO_DEBUG_UTIL)
@@ -741,15 +744,17 @@ disable_coredumps(void)
 	(void)setrlimit(RLIMIT_NPROC, &rl);
     }
 #endif /* __linux__ */
-#if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
+#ifdef RLIMIT_CORE
     /*
-     * Turn off core dumps.
+     * Turn off core dumps?
      */
-    (void) getrlimit(RLIMIT_CORE, &corelimit);
-    memcpy(&rl, &corelimit, sizeof(struct rlimit));
-    rl.rlim_cur = 0;
-    (void) setrlimit(RLIMIT_CORE, &rl);
-#endif /* RLIMIT_CORE && !SUDO_DEVEL */
+    if (sudo_conf_disable_coredump()) {
+	(void) getrlimit(RLIMIT_CORE, &corelimit);
+	memcpy(&rl, &corelimit, sizeof(struct rlimit));
+	rl.rlim_cur = 0;
+	(void) setrlimit(RLIMIT_CORE, &rl);
+    }
+#endif /* RLIMIT_CORE */
     debug_return;
 }
 

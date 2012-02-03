@@ -72,6 +72,16 @@ What's new in Sudo 1.8.4?
    now run "visudo -c".  Previously, write permissions were required
    even though no writing is down in check-only mode.
 
+ * It is now possible to prevent the disabling of core dumps from
+   within sudo itself by adding a line to the sudo.conf file like
+   "Set disable_coredump false".
+
+What's new in Sudo 1.8.3p2?
+
+ * Fixed a format string vulnerability when the sudo binary (or a
+   symbolic link to the sudo binary) contains printf format escapes
+   and the -D (debugging) flag is used.
+
 What's new in Sudo 1.8.3p1?
 
  * Fixed a crash in the monitor process on Solaris when NOPASSWD

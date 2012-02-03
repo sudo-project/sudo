@@ -425,6 +425,7 @@ which corresponds to the following F<@sysconfdir@/sudo.conf> file.
  #   Path askpass /path/to/askpass
  #   Path noexec /path/to/noexec.so
  #   Debug sudo /var/log/sudo_debug all@warn
+ #   Set disable_coredump true
  #
  # The plugin_path is relative to @prefix@/libexec unless
  #   fully qualified.
@@ -552,6 +553,20 @@ Because of this, care must be taken when giving users access to
 commands via B<sudo> to verify that the command does not inadvertently
 give the user an effective root shell.  For more information, please
 see the C<PREVENTING SHELL ESCAPES> section in L<sudoers(5)>.
+
+To prevent the disclosure of potentially sensitive information,
+B<sudo> disables core dumps by default while it is executing (they
+are re-enabled for the command that is run).  To aid in debugging
+B<sudo> crashes, you may wish to re-enable core dumps by setting
+"disable_coredump" to false in the F<@sysconfdir@/sudo.conf> file.
+
+ Set disable_coredump false
+
+Note that by default, most operating systems disable core dumps
+from setuid programs, which includes B<sudo>.  To actually get a
+B<sudo> core file you may need to enable core dumps for setuid
+processes.  On BSD and Linux systems this is accomplished via the
+sysctl command, on Solaris the coreadm command can be used.
 
 =head1 ENVIRONMENT
 

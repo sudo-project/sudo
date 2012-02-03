@@ -35,5 +35,6 @@ const char *sudo_conf_askpass_path(void);
 const char *sudo_conf_noexec_path(void);
 const char *sudo_conf_debug_flags(void);
 struct plugin_info_list *sudo_conf_plugins(void);
+bool sudo_conf_disable_coredump(void);
 
 #endif /* _SUDO_CONF_H */
