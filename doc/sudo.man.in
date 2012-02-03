@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "January  6, 2012" "1.8.4" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "February  3, 2012" "1.8.4" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -530,6 +530,7 @@ which corresponds to the following \fI@sysconfdir@/sudo.conf\fR file.
 \& #   Path askpass /path/to/askpass
 \& #   Path noexec /path/to/noexec.so
 \& #   Debug sudo /var/log/sudo_debug all@warn
+\& #   Set disable_coredump true
 \& #
 \& # The plugin_path is relative to @prefix@/libexec unless
 \& #   fully qualified.
@@ -652,6 +653,22 @@ Because of this, care must be taken when giving users access to
 commands via \fBsudo\fR to verify that the command does not inadvertently
 give the user an effective root shell.  For more information, please
 see the \f(CW\*(C`PREVENTING SHELL ESCAPES\*(C'\fR section in \fIsudoers\fR\|(@mansectform@).
+.PP
+To prevent the disclosure of potentially sensitive information,
+\&\fBsudo\fR disables core dumps by default while it is executing (they
+are re-enabled for the command that is run).  To aid in debugging
+\&\fBsudo\fR crashes, you may wish to re-enable core dumps by setting
+\&\*(L"disable_coredump\*(R" to false in the \fI@sysconfdir@/sudo.conf\fR file.
+.PP
+.Vb 1
+\& Set disable_coredump false
+.Ve
+.PP
+Note that by default, most operating systems disable core dumps
+from setuid programs, which includes \fBsudo\fR.  To actually get a
+\&\fBsudo\fR core file you may need to enable core dumps for setuid
+processes.  On \s-1BSD\s0 and Linux systems this is accomplished via the
+sysctl command, on Solaris the coreadm command can be used.
 .SH "ENVIRONMENT"
 .IX Header "ENVIRONMENT"
 \&\fBsudo\fR utilizes the following environment variables.  The security

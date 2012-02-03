@@ -330,6 +330,7 @@ PPLLUUGGIINNSS
         #   Path askpass /path/to/askpass
         #   Path noexec /path/to/noexec.so
         #   Debug sudo /var/log/sudo_debug all@warn
+        #   Set disable_coredump true
         #
         # The plugin_path is relative to /usr/local/libexec unless
         #   fully qualified.
@@ -444,6 +445,20 @@ SSEECCUURRIITTYY NNOOTTEESS
        does not inadvertently give the user an effective root shell.  For more
        information, please see the PREVENTING SHELL ESCAPES section in
        _s_u_d_o_e_r_s(4).
+
+       To prevent the disclosure of potentially sensitive information, ssuuddoo
+       disables core dumps by default while it is executing (they are re-
+       enabled for the command that is run).  To aid in debugging ssuuddoo
+       crashes, you may wish to re-enable core dumps by setting
+       "disable_coredump" to false in the _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
+
+        Set disable_coredump false
+
+       Note that by default, most operating systems disable core dumps from
+       setuid programs, which includes ssuuddoo.  To actually get a ssuuddoo core file
+       you may need to enable core dumps for setuid processes.  On BSD and
+       Linux systems this is accomplished via the sysctl command, on Solaris
+       the coreadm command can be used.
 
 EENNVVIIRROONNMMEENNTT
        ssuuddoo utilizes the following environment variables.  The security policy
@@ -582,4 +597,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.4                          January  6, 2012                       SUDO(1m)
+1.8.4                          February  3, 2012                      SUDO(1m)

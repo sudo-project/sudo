@@ -59,6 +59,8 @@
 # define _PATH_SUDO_ASKPASS	NULL
 #endif
 
+extern bool atobool(const char *str); /* atobool.c */
+
 struct sudo_conf_table {
     const char *name;
     unsigned int namelen;
@@ -74,19 +76,23 @@ struct sudo_conf_paths {
 static bool set_debug(const char *entry);
 static bool set_path(const char *entry);
 static bool set_plugin(const char *entry);
+static bool set_variable(const char *entry);
 
 static struct sudo_conf_table sudo_conf_table[] = {
     { "Debug", sizeof("Debug") - 1, set_debug },
     { "Path", sizeof("Path") - 1, set_path },
     { "Plugin", sizeof("Plugin") - 1, set_plugin },
+    { "Set", sizeof("Set") - 1, set_variable },
     { NULL }
 };
 
 static struct sudo_conf_data {
+    bool disable_coredump;
     const char *debug_flags;
     struct sudo_conf_paths paths[3];
     struct plugin_info_list plugins;
 } sudo_conf_data = {
+    true,
     NULL,
     {
 #define SUDO_CONF_ASKPASS_IDX	0
@@ -98,6 +104,26 @@ static struct sudo_conf_data {
 	{ NULL }
     }
 };
+
+/*
+ * "Set variable_name value"
+ */
+static bool
+set_variable(const char *entry)
+{
+#undef DC_LEN
+#define DC_LEN (sizeof("disable_coredump") - 1)
+    /* Currently the only variable supported is "disable_coredump". */
+    if (strncmp(entry, "disable_coredump", DC_LEN) == 0 &&
+	isblank((unsigned char)entry[DC_LEN])) {
+	entry += DC_LEN + 1;
+	while (isblank((unsigned char)*entry))
+	    entry++;
+	sudo_conf_data.disable_coredump = atobool(entry);
+    }
+#undef DC_LEN
+    return true;
+}
 
 /*
  * "Debug progname debug_file debug_flags"
@@ -215,6 +241,12 @@ struct plugin_info_list *
 sudo_conf_plugins(void)
 {
     return &sudo_conf_data.plugins;
+}
+
+bool
+sudo_conf_disable_coredump(void)
+{
+    return sudo_conf_data.disable_coredump;
 }
 
 /*
