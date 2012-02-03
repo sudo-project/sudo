@@ -112,15 +112,6 @@ static void disable_coredumps(void);
 static char **get_user_info(struct user_details *);
 static void command_info_to_details(char * const info[],
     struct command_details *details);
-static int policy_open(struct plugin_container *plugin, char * const settings[],
-    char * const user_info[], char * const user_env[]);
-static void policy_close(struct plugin_container *plugin, int exit_status,
-    int error);
-static int iolog_open(struct plugin_container *plugin, char * const settings[],
-    char * const user_info[], char * const command_details[],
-    int argc, char * const argv[], char * const user_env[]);
-static void iolog_close(struct plugin_container *plugin, int exit_status,
-    int error);
 
 /* Policy plugin convenience functions. */
 static int policy_open(struct plugin_container *plugin, char * const settings[],
