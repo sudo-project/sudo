@@ -22,7 +22,7 @@ What's new in Sudo 1.8.4?
    to be located in the same directory of the sudoers file that is
    including it.
 
- * Serbian translation for sudo from translationproject.org.
+ * Serbian and Spanish translations for sudo from translationproject.org.
 
  * LDAP-based sudoers may now access by group ID in addition to
    group name.
