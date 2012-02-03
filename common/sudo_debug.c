@@ -107,8 +107,14 @@ const char *const sudo_debug_subsystems[] = {
 
 #define NUM_SUBSYSTEMS	(sizeof(sudo_debug_subsystems) / sizeof(sudo_debug_subsystems[0]) - 1)
 
+/* Values for sudo_debug_mode */
+#define SUDO_DEBUG_MODE_DISABLED	0
+#define SUDO_DEBUG_MODE_FILE		1
+#define SUDO_DEBUG_MODE_CONV		2
+
 static int sudo_debug_settings[NUM_SUBSYSTEMS];
 static int sudo_debug_fd = -1;
+static int sudo_debug_mode;
 
 extern sudo_conv_t sudo_conv;
 
@@ -135,6 +141,10 @@ int sudo_debug_init(const char *debugfile, const char *settings)
 	if (sudo_debug_fd == -1)
 	    return 0;
 	(void)fcntl(sudo_debug_fd, F_SETFD, FD_CLOEXEC);
+	sudo_debug_mode = SUDO_DEBUG_MODE_FILE;
+    } else {
+	/* Called from the plugin, no debug file. */
+	sudo_debug_mode = SUDO_DEBUG_MODE_CONV;
     }
 
     /* Parse settings string. */
@@ -253,49 +263,49 @@ sudo_debug_write(const char *str, int len)
     if (len <= 0)
 	return;
 
-    if (sudo_debug_fd == -1) {
-	/* Use conversation function if no debug fd. */
-	if (sudo_conv == NULL)
-	    return;
-
-	struct sudo_conv_message msg;
-	struct sudo_conv_reply repl;
-
+    switch (sudo_debug_mode) {
+    case SUDO_DEBUG_MODE_CONV:
 	/* Call conversation function */
-	memset(&msg, 0, sizeof(msg));
-	memset(&repl, 0, sizeof(repl));
-	msg.msg_type = SUDO_CONV_DEBUG_MSG;
-	msg.msg = str;
-	sudo_conv(1, &msg, &repl);
-	return;
+	if (sudo_conv != NULL) {
+	    struct sudo_conv_message msg;
+	    struct sudo_conv_reply repl;
+
+	    memset(&msg, 0, sizeof(msg));
+	    memset(&repl, 0, sizeof(repl));
+	    msg.msg_type = SUDO_CONV_DEBUG_MSG;
+	    msg.msg = str;
+	    sudo_conv(1, &msg, &repl);
+	}
+	break;
+    case SUDO_DEBUG_MODE_FILE:
+	/* Prepend program name with trailing space. */
+	iov[1].iov_base = (char *)getprogname();
+	iov[1].iov_len = strlen(iov[1].iov_base);
+	iov[2].iov_base = " ";
+	iov[2].iov_len = 1;
+
+	/* Add string along with newline if it doesn't have one. */
+	iov[3].iov_base = (char *)str;
+	iov[3].iov_len = len;
+	if (str[len - 1] != '\n') {
+	    /* force newline */
+	    iov[4].iov_base = "\n";
+	    iov[4].iov_len = 1;
+	    iovcnt++;
+	}
+
+	/* Do timestamp last due to ctime's static buffer. */
+	now = time(NULL);
+	timestr = ctime(&now) + 4;
+	timestr[15] = ' ';	/* replace year with a space */
+	timestr[16] = '\0';
+	iov[0].iov_base = timestr;
+	iov[0].iov_len = 16;
+
+	/* Write message in a single syscall */
+	(void) writev(sudo_debug_fd, iov, iovcnt);
+	break;
     }
-
-    /* Prepend program name with trailing space. */
-    iov[1].iov_base = (char *)getprogname();
-    iov[1].iov_len = strlen(iov[1].iov_base);
-    iov[2].iov_base = " ";
-    iov[2].iov_len = 1;
-
-    /* Add string along with newline if it doesn't have one. */
-    iov[3].iov_base = (char *)str;
-    iov[3].iov_len = len;
-    if (str[len - 1] != '\n') {
-	/* force newline */
-	iov[4].iov_base = "\n";
-	iov[4].iov_len = 1;
-	iovcnt++;
-    }
-
-    /* Do timestamp last due to ctime's static buffer. */
-    now = time(NULL);
-    timestr = ctime(&now) + 4;
-    timestr[15] = ' ';	/* replace year with a space */
-    timestr[16] = '\0';
-    iov[0].iov_base = timestr;
-    iov[0].iov_len = 16;
-
-    /* Write message in a single syscall */
-    (void) writev(sudo_debug_fd, iov, iovcnt);
 }
 
 void
@@ -305,7 +315,7 @@ sudo_debug_printf2(int level, const char *fmt, ...)
     va_list ap;
     char *buf;
 
-    if (sudo_debug_fd == -1 && sudo_conv == NULL)
+    if (!sudo_debug_mode)
 	return;
 
     /* Extract pri and subsystem from level. */
@@ -333,7 +343,7 @@ sudo_debug_execve2(int level, const char *path, char *const argv[], char *const 
     int buflen, pri, subsys, log_envp = 0;
     size_t plen;
 
-    if (sudo_debug_fd == -1 && sudo_conv == NULL)
+    if (!sudo_debug_mode)
 	return;
 
     /* Extract pri and subsystem from level. */
