@@ -1903,6 +1903,96 @@ to unintended privilege escalation.  In the specific case of an
 editor, a safer approach is to give the user permission to run
 B<sudoedit>.
 
+=head1 DEBUG FLAGS
+
+Versions 1.8.4 and higher of the I<sudoers> plugin supports a
+debugging framework that can help track down what the plugin is
+doing internally if there is a problem.  This can be configured in
+the F<@sysconfdir@/sudo.conf> file as described in L<sudo(8)>.
+
+The I<sudoers> plugin uses the same debug flag format as B<sudo>
+itself: I<subsystem>@I<priority>.
+
+The priorities used by I<sudoers>, in order of decreasing severity,
+are: I<crit>, I<err>, I<warn>, I<notice>, I<diag>, I<info>, I<trace>
+and I<debug>.  Each priority, when specified, also includes all
+priorities higher than it.  For example, a priority of I<notice>
+would include debug messages logged at I<notice> and higher.
+
+The following subsystems are used by I<sudoers>:
+
+=over 10
+
+=item I<alias>
+
+C<User_Alias>, C<Runas_Alias>, C<Host_Alias> and C<Cmnd_Alias> processing
+
+=item I<all>
+
+matches every subsystem
+
+=item I<audit>
+
+BSM and Linux audit code
+
+=item I<auth>
+
+user authentication
+
+=item I<defaults>
+
+I<sudoers> I<Defaults> settings
+
+=item I<env>
+
+environment handling
+
+=item I<ldap>
+
+LDAP-based sudoers
+
+=item I<logging>
+
+logging support
+
+=item I<match>
+
+matching of users, groups, hosts and netgroups in I<sudoers>
+
+=item I<netif>
+
+network interface handling
+
+=item I<nss>
+
+network service switch handling in I<sudoers>
+
+=item I<parser>
+
+I<sudoers> file parsing
+
+=item I<perms>
+
+permission setting
+
+=item I<plugin>
+
+The equivalent of I<main> for the plugin.
+
+=item I<pty>
+
+pseudo-tty related code
+
+=item I<rbtree>
+
+redblack tree internals
+
+=item I<util>
+
+utility functions 
+
+=back
+
 =head1 SECURITY NOTES
 
 I<sudoers> will check the ownership of its time stamp directory
