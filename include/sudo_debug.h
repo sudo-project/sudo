@@ -45,31 +45,29 @@
  * Note: order must match sudo_debug_subsystems[]
  */
 #define SUDO_DEBUG_MAIN		(1<<4)	/* sudo main() */
-#define SUDO_DEBUG_MEMORY	(2<<4)	/* memory subsystems */
-#define SUDO_DEBUG_ARGS		(3<<4)	/* command line argument processing */
-#define SUDO_DEBUG_EXEC		(4<<4)	/* command execution */
-#define SUDO_DEBUG_PTY		(5<<4)	/* pseudo-tty */
-#define SUDO_DEBUG_UTMP		(6<<4)	/* utmp file ops */
-#define SUDO_DEBUG_CONV		(7<<4)	/* user conversation */
-#define SUDO_DEBUG_PCOMM	(8<<4)	/* plugin communications */
-#define SUDO_DEBUG_UTIL		(9<<4)	/* utility functions */
-#define SUDO_DEBUG_LIST		(10<<4)	/* linked list functions */
-#define SUDO_DEBUG_NETIF	(11<<4)	/* network interface functions */
-#define SUDO_DEBUG_AUDIT	(12<<4)	/* audit */
-#define SUDO_DEBUG_EDIT		(13<<4)	/* sudoedit */
-#define SUDO_DEBUG_SELINUX	(14<<4)	/* selinux */
-#define SUDO_DEBUG_LDAP		(15<<4)	/* sudoers LDAP */
-#define SUDO_DEBUG_MATCH	(16<<4)	/* sudoers matching */
-#define SUDO_DEBUG_PARSER	(17<<4)	/* sudoers parser */
-#define SUDO_DEBUG_ALIAS	(18<<4)	/* sudoers alias functions */
-#define SUDO_DEBUG_DEFAULTS	(19<<4)	/* sudoers defaults settings */
-#define SUDO_DEBUG_AUTH		(20<<4)	/* authentication functions */
-#define SUDO_DEBUG_ENV		(21<<4)	/* environment handling */
-#define SUDO_DEBUG_LOGGING	(22<<4)	/* logging functions */
-#define SUDO_DEBUG_NSS		(23<<4)	/* network service switch */
-#define SUDO_DEBUG_RBTREE	(24<<4)	/* red-black tree functions */
-#define SUDO_DEBUG_PERMS	(25<<4)	/* uid/gid swapping functions */
-#define SUDO_DEBUG_PLUGIN	(26<<4)	/* main plugin functions */
+#define SUDO_DEBUG_ARGS		(2<<4)	/* command line argument processing */
+#define SUDO_DEBUG_EXEC		(3<<4)	/* command execution */
+#define SUDO_DEBUG_PTY		(4<<4)	/* pseudo-tty */
+#define SUDO_DEBUG_UTMP		(5<<4)	/* utmp file ops */
+#define SUDO_DEBUG_CONV		(6<<4)	/* user conversation */
+#define SUDO_DEBUG_PCOMM	(7<<4)	/* plugin communications */
+#define SUDO_DEBUG_UTIL		(8<<4)	/* utility functions */
+#define SUDO_DEBUG_NETIF	(9<<4)	/* network interface functions */
+#define SUDO_DEBUG_AUDIT	(10<<4)	/* audit */
+#define SUDO_DEBUG_EDIT		(11<<4)	/* sudoedit */
+#define SUDO_DEBUG_SELINUX	(12<<4)	/* selinux */
+#define SUDO_DEBUG_LDAP		(13<<4)	/* sudoers LDAP */
+#define SUDO_DEBUG_MATCH	(14<<4)	/* sudoers matching */
+#define SUDO_DEBUG_PARSER	(15<<4)	/* sudoers parser */
+#define SUDO_DEBUG_ALIAS	(16<<4)	/* sudoers alias functions */
+#define SUDO_DEBUG_DEFAULTS	(17<<4)	/* sudoers defaults settings */
+#define SUDO_DEBUG_AUTH		(18<<4)	/* authentication functions */
+#define SUDO_DEBUG_ENV		(19<<4)	/* environment handling */
+#define SUDO_DEBUG_LOGGING	(20<<4)	/* logging functions */
+#define SUDO_DEBUG_NSS		(21<<4)	/* network service switch */
+#define SUDO_DEBUG_RBTREE	(22<<4)	/* red-black tree functions */
+#define SUDO_DEBUG_PERMS	(23<<4)	/* uid/gid swapping functions */
+#define SUDO_DEBUG_PLUGIN	(24<<4)	/* main plugin functions */
 #define SUDO_DEBUG_ALL		0xfff0	/* all subsystems */
 
 /* Extract priority and convert to an index. */

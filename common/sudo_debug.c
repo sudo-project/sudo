@@ -77,7 +77,6 @@ const char *const sudo_debug_priorities[] = {
 /* Note: this must match the order in sudo_debug.h */
 const char *const sudo_debug_subsystems[] = {
     "main",
-    "memory",
     "args",
     "exec",
     "pty",
@@ -85,7 +84,6 @@ const char *const sudo_debug_subsystems[] = {
     "conv",
     "pcomm",
     "util",
-    "list",
     "netif",
     "audit",
     "edit",
