@@ -1621,6 +1621,57 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
        privilege escalation.  In the specific case of an editor, a safer
        approach is to give the user permission to run ssuuddooeeddiitt.
 
+DDEEBBUUGG FFLLAAGGSS
+       Versions 1.8.4 and higher of the _s_u_d_o_e_r_s plugin supports a debugging
+       framework that can help track down what the plugin is doing internally
+       if there is a problem.  This can be configured in the _/_e_t_c_/_s_u_d_o_._c_o_n_f
+       file as described in _s_u_d_o(1m).
+
+       The _s_u_d_o_e_r_s plugin uses the same debug flag format as ssuuddoo itself:
+       _s_u_b_s_y_s_t_e_m@_p_r_i_o_r_i_t_y.
+
+       The priorities used by _s_u_d_o_e_r_s, in order of decreasing severity, are:
+       _c_r_i_t, _e_r_r, _w_a_r_n, _n_o_t_i_c_e, _d_i_a_g, _i_n_f_o, _t_r_a_c_e and _d_e_b_u_g.  Each priority,
+       when specified, also includes all priorities higher than it.  For
+       example, a priority of _n_o_t_i_c_e would include debug messages logged at
+       _n_o_t_i_c_e and higher.
+
+       The following subsystems are used by _s_u_d_o_e_r_s:
+
+       _a_l_i_a_s     User_Alias, Runas_Alias, Host_Alias and Cmnd_Alias processing
+
+       _a_l_l       matches every subsystem
+
+       _a_u_d_i_t     BSM and Linux audit code
+
+       _a_u_t_h      user authentication
+
+       _d_e_f_a_u_l_t_s  _s_u_d_o_e_r_s _D_e_f_a_u_l_t_s settings
+
+       _e_n_v       environment handling
+
+       _l_d_a_p      LDAP-based sudoers
+
+       _l_o_g_g_i_n_g   logging support
+
+       _m_a_t_c_h     matching of users, groups, hosts and netgroups in _s_u_d_o_e_r_s
+
+       _n_e_t_i_f     network interface handling
+
+       _n_s_s       network service switch handling in _s_u_d_o_e_r_s
+
+       _p_a_r_s_e_r    _s_u_d_o_e_r_s file parsing
+
+       _p_e_r_m_s     permission setting
+
+       _p_l_u_g_i_n    The equivalent of _m_a_i_n for the plugin.
+
+       _p_t_y       pseudo-tty related code
+
+       _r_b_t_r_e_e    redblack tree internals
+
+       _u_t_i_l      utility functions
+
 SSEECCUURRIITTYY NNOOTTEESS
        _s_u_d_o_e_r_s will check the ownership of its time stamp directory
        (_/_v_a_r_/_a_d_m_/_s_u_d_o by default) and ignore the directory's contents if it is
@@ -1698,4 +1749,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.4                          January  6, 2012                     SUDOERS(4)
+1.8.4                          February  5, 2012                    SUDOERS(4)

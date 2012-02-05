@@ -1,4 +1,4 @@
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2011
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2012
 .\" 	Todd C. Miller <Todd.Miller@courtesan.com>
 .\" 
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "January  6, 2012" "1.8.4" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "February  5, 2012" "1.8.4" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -1972,6 +1972,74 @@ operations (such as changing or overwriting files) that could lead
 to unintended privilege escalation.  In the specific case of an
 editor, a safer approach is to give the user permission to run
 \&\fBsudoedit\fR.
+.SH "DEBUG FLAGS"
+.IX Header "DEBUG FLAGS"
+Versions 1.8.4 and higher of the \fIsudoers\fR plugin supports a
+debugging framework that can help track down what the plugin is
+doing internally if there is a problem.  This can be configured in
+the \fI@sysconfdir@/sudo.conf\fR file as described in \fIsudo\fR\|(@mansectsu@).
+.PP
+The \fIsudoers\fR plugin uses the same debug flag format as \fBsudo\fR
+itself: \fIsubsystem\fR@\fIpriority\fR.
+.PP
+The priorities used by \fIsudoers\fR, in order of decreasing severity,
+are: \fIcrit\fR, \fIerr\fR, \fIwarn\fR, \fInotice\fR, \fIdiag\fR, \fIinfo\fR, \fItrace\fR
+and \fIdebug\fR.  Each priority, when specified, also includes all
+priorities higher than it.  For example, a priority of \fInotice\fR
+would include debug messages logged at \fInotice\fR and higher.
+.PP
+The following subsystems are used by \fIsudoers\fR:
+.IP "\fIalias\fR" 10
+.IX Item "alias"
+\&\f(CW\*(C`User_Alias\*(C'\fR, \f(CW\*(C`Runas_Alias\*(C'\fR, \f(CW\*(C`Host_Alias\*(C'\fR and \f(CW\*(C`Cmnd_Alias\*(C'\fR processing
+.IP "\fIall\fR" 10
+.IX Item "all"
+matches every subsystem
+.IP "\fIaudit\fR" 10
+.IX Item "audit"
+\&\s-1BSM\s0 and Linux audit code
+.IP "\fIauth\fR" 10
+.IX Item "auth"
+user authentication
+.IP "\fIdefaults\fR" 10
+.IX Item "defaults"
+\&\fIsudoers\fR \fIDefaults\fR settings
+.IP "\fIenv\fR" 10
+.IX Item "env"
+environment handling
+.IP "\fIldap\fR" 10
+.IX Item "ldap"
+LDAP-based sudoers
+.IP "\fIlogging\fR" 10
+.IX Item "logging"
+logging support
+.IP "\fImatch\fR" 10
+.IX Item "match"
+matching of users, groups, hosts and netgroups in \fIsudoers\fR
+.IP "\fInetif\fR" 10
+.IX Item "netif"
+network interface handling
+.IP "\fInss\fR" 10
+.IX Item "nss"
+network service switch handling in \fIsudoers\fR
+.IP "\fIparser\fR" 10
+.IX Item "parser"
+\&\fIsudoers\fR file parsing
+.IP "\fIperms\fR" 10
+.IX Item "perms"
+permission setting
+.IP "\fIplugin\fR" 10
+.IX Item "plugin"
+The equivalent of \fImain\fR for the plugin.
+.IP "\fIpty\fR" 10
+.IX Item "pty"
+pseudo-tty related code
+.IP "\fIrbtree\fR" 10
+.IX Item "rbtree"
+redblack tree internals
+.IP "\fIutil\fR" 10
+.IX Item "util"
+utility functions
 .SH "SECURITY NOTES"
 .IX Header "SECURITY NOTES"
 \&\fIsudoers\fR will check the ownership of its time stamp directory

@@ -380,7 +380,7 @@ PPAATTHHSS
 
 DDEEBBUUGG FFLLAAGGSS
        ssuuddoo versions 1.8.4 and higher support a flexible debugging framework
-       that can help track down what ssuuddoo is doing internally when there is a
+       that can help track down what ssuuddoo is doing internally if there is a
        problem.
 
        A Debug line consists of the Debug keyword, followed by the name of the
@@ -402,13 +402,39 @@ DDEEBBUUGG FFLLAAGGSS
        A future release may add support for per-plugin Debug lines and/or
        support for multiple debugging files for a single program.
 
-       For reference, the priorities supported by the ssuuddoo front end and
-       _s_u_d_o_e_r_s are: _c_r_i_t, _e_r_r, _w_a_r_n, _n_o_t_i_c_e, _d_i_a_g, _i_n_f_o, _t_r_a_c_e and _d_e_b_u_g.
+       The priorities used by the ssuuddoo front end, in order of decreasing
+       severity, are: _c_r_i_t, _e_r_r, _w_a_r_n, _n_o_t_i_c_e, _d_i_a_g, _i_n_f_o, _t_r_a_c_e and _d_e_b_u_g.
+       Each priority, when specified, also includes all priorities higher than
+       it.  For example, a priority of _n_o_t_i_c_e would include debug messages
+       logged at _n_o_t_i_c_e and higher.
 
-       The following subsystems are defined: _m_a_i_n, _m_e_m_o_r_y, _a_r_g_s, _e_x_e_c, _p_t_y,
-       _u_t_m_p, _c_o_n_v, _p_c_o_m_m, _u_t_i_l, _l_i_s_t, _n_e_t_i_f, _a_u_d_i_t, _e_d_i_t, _s_e_l_i_n_u_x, _l_d_a_p,
-       _m_a_t_c_h, _p_a_r_s_e_r, _a_l_i_a_s, _d_e_f_a_u_l_t_s, _a_u_t_h, _e_n_v, _l_o_g_g_i_n_g, _n_s_s, _r_b_t_r_e_e, _p_e_r_m_s,
-       _p_l_u_g_i_n.  The subsystem _a_l_l includes every subsystem.
+       The following subsystems are used by ssuuddoo:
+
+       _a_l_l       matches every subsystem
+
+       _a_r_g_s      command line argument processing
+
+       _c_o_n_v      user conversation
+
+       _e_d_i_t      sudoedit
+
+       _e_x_e_c      command execution
+
+       _m_a_i_n      ssuuddoo main function
+
+       _n_e_t_i_f     network interface handling
+
+       _p_c_o_m_m     communication with the plugin
+
+       _p_l_u_g_i_n    plugin configuration
+
+       _p_t_y       pseudo-tty related code
+
+       _s_e_l_i_n_u_x   SELinux-specific handling
+
+       _u_t_i_l      utility functions
+
+       _u_t_m_p      utmp handling
 
 RREETTUURRNN VVAALLUUEESS
        Upon successful execution of a program, the exit status from ssuuddoo will
@@ -597,4 +623,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.4                          February  3, 2012                      SUDO(1m)
+1.8.4                          February  5, 2012                      SUDO(1m)

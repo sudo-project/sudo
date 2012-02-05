@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "February  3, 2012" "1.8.4" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "February  5, 2012" "1.8.4" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -583,7 +583,7 @@ Defaults to \fI@noexec_file@\fR.
 .IX Header "DEBUG FLAGS"
 \&\fBsudo\fR versions 1.8.4 and higher support a flexible debugging
 framework that can help track down what \fBsudo\fR is doing internally
-when there is a problem.
+if there is a problem.
 .PP
 A \f(CW\*(C`Debug\*(C'\fR line consists of the \f(CW\*(C`Debug\*(C'\fR keyword, followed by the
 name of the program to debug (\fBsudo\fR, \fBvisudo\fR, \fBsudoreplay\fR),
@@ -607,15 +607,52 @@ and the plugins.  A future release may add support for per-plugin
 \&\f(CW\*(C`Debug\*(C'\fR lines and/or support for multiple debugging files for a
 single program.
 .PP
-For reference, the priorities supported by the \fBsudo\fR front end and
-\&\fIsudoers\fR are: \fIcrit\fR, \fIerr\fR, \fIwarn\fR, \fInotice\fR, \fIdiag\fR,
-\&\fIinfo\fR, \fItrace\fR and \fIdebug\fR.
+The priorities used by the \fBsudo\fR front end, in order of decreasing
+severity, are: \fIcrit\fR, \fIerr\fR, \fIwarn\fR, \fInotice\fR, \fIdiag\fR, \fIinfo\fR,
+\&\fItrace\fR and \fIdebug\fR.  Each priority, when specified, also includes
+all priorities higher than it.  For example, a priority of \fInotice\fR
+would include debug messages logged at \fInotice\fR and higher.
 .PP
-The following subsystems are defined: \fImain\fR, \fImemory\fR, \fIargs\fR,
-\&\fIexec\fR, \fIpty\fR, \fIutmp\fR, \fIconv\fR, \fIpcomm\fR, \fIutil\fR, \fIlist\fR,
-\&\fInetif\fR, \fIaudit\fR, \fIedit\fR, \fIselinux\fR, \fIldap\fR, \fImatch\fR, \fIparser\fR,
-\&\fIalias\fR, \fIdefaults\fR, \fIauth\fR, \fIenv\fR, \fIlogging\fR, \fInss\fR, \fIrbtree\fR,
-\&\fIperms\fR, \fIplugin\fR.  The subsystem \fIall\fR includes every subsystem.
+The following subsystems are used by \fBsudo\fR:
+.IP "\fIall\fR" 10
+.IX Item "all"
+matches every subsystem
+.IP "\fIargs\fR" 10
+.IX Item "args"
+command line argument processing
+.IP "\fIconv\fR" 10
+.IX Item "conv"
+user conversation
+.IP "\fIedit\fR" 10
+.IX Item "edit"
+sudoedit
+.IP "\fIexec\fR" 10
+.IX Item "exec"
+command execution
+.IP "\fImain\fR" 10
+.IX Item "main"
+\&\fBsudo\fR main function
+.IP "\fInetif\fR" 10
+.IX Item "netif"
+network interface handling
+.IP "\fIpcomm\fR" 10
+.IX Item "pcomm"
+communication with the plugin
+.IP "\fIplugin\fR" 10
+.IX Item "plugin"
+plugin configuration
+.IP "\fIpty\fR" 10
+.IX Item "pty"
+pseudo-tty related code
+.IP "\fIselinux\fR" 10
+.IX Item "selinux"
+SELinux-specific handling
+.IP "\fIutil\fR" 10
+.IX Item "util"
+utility functions
+.IP "\fIutmp\fR" 10
+.IX Item "utmp"
+utmp handling
 .SH "RETURN VALUES"
 .IX Header "RETURN VALUES"
 Upon successful execution of a program, the exit status from \fBsudo\fR
