@@ -483,7 +483,7 @@ Defaults to F<@noexec_file@>.
 
 B<sudo> versions 1.8.4 and higher support a flexible debugging
 framework that can help track down what B<sudo> is doing internally
-when there is a problem.
+if there is a problem.
 
 A C<Debug> line consists of the C<Debug> keyword, followed by the
 name of the program to debug (B<sudo>, B<visudo>, B<sudoreplay>),
@@ -505,15 +505,69 @@ and the plugins.  A future release may add support for per-plugin
 C<Debug> lines and/or support for multiple debugging files for a
 single program.
 
-For reference, the priorities supported by the B<sudo> front end and
-I<sudoers> are: I<crit>, I<err>, I<warn>, I<notice>, I<diag>,
-I<info>, I<trace> and I<debug>.
+The priorities used by the B<sudo> front end, in order of decreasing
+severity, are: I<crit>, I<err>, I<warn>, I<notice>, I<diag>, I<info>,
+I<trace> and I<debug>.  Each priority, when specified, also includes
+all priorities higher than it.  For example, a priority of I<notice>
+would include debug messages logged at I<notice> and higher.
 
-The following subsystems are defined: I<main>, I<memory>, I<args>,
-I<exec>, I<pty>, I<utmp>, I<conv>, I<pcomm>, I<util>, I<list>,
-I<netif>, I<audit>, I<edit>, I<selinux>, I<ldap>, I<match>, I<parser>,
-I<alias>, I<defaults>, I<auth>, I<env>, I<logging>, I<nss>, I<rbtree>,
-I<perms>, I<plugin>.  The subsystem I<all> includes every subsystem.
+The following subsystems are used by B<sudo>:
+
+=over 10
+
+=item I<all>
+
+matches every subsystem
+
+=item I<args>
+
+command line argument processing
+
+=item I<conv>
+
+user conversation
+
+=item I<edit>
+
+sudoedit
+
+=item I<exec>
+
+command execution
+
+=item I<main>
+
+B<sudo> main function
+
+=item I<netif>
+
+network interface handling
+
+=item I<pcomm>
+
+communication with the plugin
+
+=item I<plugin>
+
+plugin configuration
+
+=item I<pty>
+
+pseudo-tty related code
+
+=item I<selinux>
+
+SELinux-specific handling
+
+=item I<util>
+
+utility functions
+
+=item I<utmp>
+
+utmp handling
+
+=back
 
 =head1 RETURN VALUES
 
