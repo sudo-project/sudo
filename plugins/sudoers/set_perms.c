@@ -392,12 +392,13 @@ set_perms(int perm)
 
     case PERM_ROOT:
 	/*
-	 * setreuid(0, 0) may fail on some systems
-	 * when the euid is not already 0.
+	 * setuid(0) may fail on some systems if the euid is not already 0.
 	 */
-	if (setreuid(-1, ROOT_UID)) {
-	    errstr = "setreuid(-1, ROOT_UID)";
-	    goto bad;
+	if (ostate->euid != ROOT_UID) {
+	    if (setreuid(-1, ROOT_UID)) {
+		errstr = "setreuid(-1, ROOT_UID)";
+		goto bad;
+	    }
 	}
 	if (setuid(ROOT_UID)) {
 	    errstr = "setuid(ROOT_UID)";
