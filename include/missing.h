@@ -335,6 +335,9 @@ int mkstemps(char *, int);
 #ifndef HAVE_NANOSLEEP
 int nanosleep(const struct timespec *, struct timespec *);
 #endif
+#ifndef HAVE_PW_DUP
+struct passwd *pw_dup(const struct passwd *);
+#endif
 #ifndef HAVE_SETENV
 int setenv(const char *, const char *, int);
 #endif

@@ -396,6 +396,9 @@
 /* Define to 1 if you have the <pty.h> header file. */
 #undef HAVE_PTY_H
 
+/* Define to 1 if you have the `pw_dup' function. */
+#undef HAVE_PW_DUP
+
 /* Define to 1 if you have the `random' function. */
 #undef HAVE_RANDOM
 
