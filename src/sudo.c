@@ -836,7 +836,8 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb(IDtouser(details->euid));
 #endif
-    pw = getpwuid(details->euid);
+    if ((pw = getpwuid(details->euid)) != NULL && (pw = pw_dup(pw)) == NULL)
+	errorx(1, _("unable to allocate memory"));
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -994,6 +995,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     rval = true;
 
 done:
+    efree(pw);
     debug_return_bool(rval);
 }
 

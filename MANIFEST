@@ -41,6 +41,7 @@ compat/mksiglist.c
 compat/mksiglist.h
 compat/mktemp.c
 compat/nanosleep.c
+compat/pw_dup.c
 compat/regress/fnmatch/fnm_test.c
 compat/regress/fnmatch/fnm_test.in
 compat/regress/glob/files

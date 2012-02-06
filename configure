@@ -17014,6 +17014,19 @@ esac
 
 fi
 
+ac_fn_c_check_func "$LINENO" "pw_dup" "ac_cv_func_pw_dup"
+if test "x$ac_cv_func_pw_dup" = xyes; then :
+  $as_echo "#define HAVE_PW_DUP 1" >>confdefs.h
+
+else
+  case " $LIBOBJS " in
+  *" pw_dup.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS pw_dup.$ac_objext"
+ ;;
+esac
+
+fi
+
 ac_fn_c_check_func "$LINENO" "strlcpy" "ac_cv_func_strlcpy"
 if test "x$ac_cv_func_strlcpy" = xyes; then :
   $as_echo "#define HAVE_STRLCPY 1" >>confdefs.h
