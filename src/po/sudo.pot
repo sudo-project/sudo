@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.x\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-01-29 14:47-0500\n"
+"POT-Creation-Date: 2012-02-06 13:40-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,9 +51,10 @@ msgstr ""
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr ""
 
-#: src/exec_common.c:114 src/parse_args.c:432 src/sudo.c:449 src/sudo.c:469
-#: src/sudo.c:476 src/sudo.c:487 common/alloc.c:85 common/alloc.c:105
-#: common/alloc.c:123 common/alloc.c:145 common/alloc.c:203 common/alloc.c:217
+#: src/exec_common.c:85 src/parse_args.c:432 src/sudo.c:445 src/sudo.c:465
+#: src/sudo.c:472 src/sudo.c:483 src/sudo.c:842 common/alloc.c:85
+#: common/alloc.c:105 common/alloc.c:123 common/alloc.c:145 common/alloc.c:203
+#: common/alloc.c:217
 #, c-format
 msgid "unable to allocate memory"
 msgstr ""
@@ -376,7 +377,7 @@ msgstr ""
 msgid "unable to set new tty context"
 msgstr ""
 
-#: src/selinux.c:195 src/selinux.c:208 src/sudo.c:335
+#: src/selinux.c:195 src/selinux.c:208 src/sudo.c:331
 #, c-format
 msgid "unable to open %s"
 msgstr ""
@@ -441,137 +442,137 @@ msgstr ""
 msgid "unable to execute %s"
 msgstr ""
 
-#: src/sudo.c:198
+#: src/sudo.c:189
 #, c-format
 msgid "must be setuid root"
 msgstr ""
 
-#: src/sudo.c:219
+#: src/sudo.c:212
 #, c-format
 msgid "Sudo version %s\n"
 msgstr ""
 
-#: src/sudo.c:221
+#: src/sudo.c:214
 #, c-format
 msgid "Configure options: %s\n"
 msgstr ""
 
-#: src/sudo.c:226
+#: src/sudo.c:219
 #, c-format
 msgid "fatal error, unable to load plugins"
 msgstr ""
 
-#: src/sudo.c:234
+#: src/sudo.c:227
 #, c-format
 msgid "unable to initialize policy plugin"
 msgstr ""
 
-#: src/sudo.c:289
+#: src/sudo.c:282
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr ""
 
-#: src/sudo.c:310
+#: src/sudo.c:306
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr ""
 
-#: src/sudo.c:404
+#: src/sudo.c:400
 #, c-format
 msgid "unable to get group vector"
 msgstr ""
 
-#: src/sudo.c:445
+#: src/sudo.c:441
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr ""
 
-#: src/sudo.c:786
+#: src/sudo.c:784
 #, c-format
 msgid "resource control limit has been reached"
 msgstr ""
 
-#: src/sudo.c:789
+#: src/sudo.c:787
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
 msgstr ""
 
-#: src/sudo.c:793
+#: src/sudo.c:791
 #, c-format
 msgid "the invoking task is final"
 msgstr ""
 
-#: src/sudo.c:796
+#: src/sudo.c:794
 #, c-format
 msgid "could not join project \"%s\""
 msgstr ""
 
-#: src/sudo.c:801
+#: src/sudo.c:799
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:805
+#: src/sudo.c:803
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:809
+#: src/sudo.c:807
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:815
+#: src/sudo.c:813
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:817
+#: src/sudo.c:815
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:881
+#: src/sudo.c:880
 #, c-format
 msgid "unknown login class %s"
 msgstr ""
 
-#: src/sudo.c:897 src/sudo.c:900
+#: src/sudo.c:896 src/sudo.c:899
 #, c-format
 msgid "unable to set user context"
 msgstr ""
 
-#: src/sudo.c:916
+#: src/sudo.c:915
 #, c-format
 msgid "unable to set supplementary group IDs"
 msgstr ""
 
-#: src/sudo.c:923
+#: src/sudo.c:922
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:929
+#: src/sudo.c:928
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:936
+#: src/sudo.c:935
 #, c-format
 msgid "unable to set process priority"
 msgstr ""
 
-#: src/sudo.c:944
+#: src/sudo.c:943
 #, c-format
 msgid "unable to change root to %s"
 msgstr ""
 
-#: src/sudo.c:951 src/sudo.c:957 src/sudo.c:963
+#: src/sudo.c:950 src/sudo.c:956 src/sudo.c:962
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr ""
 
-#: src/sudo.c:977
+#: src/sudo.c:976
 #, c-format
 msgid "unable to change directory to %s"
 msgstr ""

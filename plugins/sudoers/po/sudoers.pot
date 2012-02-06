@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.x\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-01-29 14:47-0500\n"
+"POT-Creation-Date: 2012-02-06 13:40-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -893,37 +893,37 @@ msgid "unable to cache group %s, already exists"
 msgstr ""
 
 #: plugins/sudoers/set_perms.c:114 plugins/sudoers/set_perms.c:365
-#: plugins/sudoers/set_perms.c:600 plugins/sudoers/set_perms.c:836
+#: plugins/sudoers/set_perms.c:601 plugins/sudoers/set_perms.c:837
 msgid "perm stack overflow"
 msgstr ""
 
 #: plugins/sudoers/set_perms.c:122 plugins/sudoers/set_perms.c:373
-#: plugins/sudoers/set_perms.c:608 plugins/sudoers/set_perms.c:844
+#: plugins/sudoers/set_perms.c:609 plugins/sudoers/set_perms.c:845
 msgid "perm stack underflow"
 msgstr ""
 
-#: plugins/sudoers/set_perms.c:228 plugins/sudoers/set_perms.c:465
-#: plugins/sudoers/set_perms.c:705
+#: plugins/sudoers/set_perms.c:228 plugins/sudoers/set_perms.c:466
+#: plugins/sudoers/set_perms.c:706
 msgid "unable to change to runas gid"
 msgstr ""
 
-#: plugins/sudoers/set_perms.c:236 plugins/sudoers/set_perms.c:472
-#: plugins/sudoers/set_perms.c:712
+#: plugins/sudoers/set_perms.c:236 plugins/sudoers/set_perms.c:473
+#: plugins/sudoers/set_perms.c:713
 msgid "unable to change to runas uid"
 msgstr ""
 
-#: plugins/sudoers/set_perms.c:250 plugins/sudoers/set_perms.c:485
-#: plugins/sudoers/set_perms.c:725
+#: plugins/sudoers/set_perms.c:250 plugins/sudoers/set_perms.c:486
+#: plugins/sudoers/set_perms.c:726
 #, c-format
 msgid "unable to change to sudoers gid"
 msgstr ""
 
-#: plugins/sudoers/set_perms.c:291 plugins/sudoers/set_perms.c:523
-#: plugins/sudoers/set_perms.c:763 plugins/sudoers/set_perms.c:905
+#: plugins/sudoers/set_perms.c:291 plugins/sudoers/set_perms.c:524
+#: plugins/sudoers/set_perms.c:764 plugins/sudoers/set_perms.c:906
 msgid "too many processes"
 msgstr ""
 
-#: plugins/sudoers/set_perms.c:969
+#: plugins/sudoers/set_perms.c:970
 msgid "unable to set runas group vector"
 msgstr ""
 
