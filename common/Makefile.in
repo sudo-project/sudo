@@ -36,7 +36,7 @@ CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(top_srcdir) @CPPFLAGS@
 CFLAGS = @CFLAGS@
 
 # OS dependent defines
-DEFS = @OSDEFS@
+DEFS = @OSDEFS@ -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\"
 
 #### End of system configuration section. ####
 
