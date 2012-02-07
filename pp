@@ -6576,7 +6576,7 @@ pp_backend_macos_init () {
     pp_macos_prog_packagemaker=/Developer/usr/bin/packagemaker
     pp_macos_pkg_domain=anywhere
     pp_macos_pkg_extra_flags=
-    pp_macos_sudo=
+    pp_macos_sudo=sudo
     # OS X puts the library version *before* the .dylib extension
     pp_shlib_suffix='*.dylib'
 }
@@ -6775,6 +6775,7 @@ pp_macos_mkbom () {
     pp_warn "mkbom workaround: copying source files to staging area"
 
     bomstage=$pp_wrkdir/bom_stage
+    $pp_macos_sudo /bin/mkdir "$bomstage"
     while IFS='	' read path mode ugid size cksumi linkpath; do
 	if test -h "$pp_destdir/$path"; then
 	    $pp_macos_sudo /bin/ln -s "$linkpath" "$bomstage/$path"
@@ -6961,7 +6962,7 @@ CompressedSize 0
     cat $pp_wrkdir/%files.* | awk '{ print "." $6 }' | sed '/\/$/d' | sort | /bin/pax -w -f - | gzip -9 -c > $Contents/Archive.pax.gz
     )
 
-	$pp_macos_sudo rm -rf $pp_wrkdir/bom_stage
+    test -d $pp_wrkdir/bom_stage && $pp_macos_sudo rm -rf $pp_wrkdir/bom_stage
 
     rm -f ${name}-${version}.dmg
     hdiutil create -fs HFS+ -srcfolder $pkgdir -volname $name ${name}-${version}.dmg
