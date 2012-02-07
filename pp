@@ -1,7 +1,7 @@
 #!/bin/sh
 # Copyright 2012 Quest Software, Inc. ALL RIGHTS RESERVED
-pp_revision="333"
- # Copyright 2011 Quest Software, Inc.  ALL RIGHTS RESERVED.
+pp_revision="335"
+ # Copyright 2012 Quest Software, Inc.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
  # modification, are permitted provided that the following conditions
@@ -31,7 +31,7 @@ pp_revision="333"
  # Please see <http://rc.quest.com/topics/polypkg/> for more information
 
 pp_version="1.0.0.$pp_revision"
-pp_copyright="Copyright 2011, Quest Software, Inc. ALL RIGHTS RESERVED."
+pp_copyright="Copyright 2012, Quest Software, Inc. ALL RIGHTS RESERVED."
 
 pp_opt_debug=false
 pp_opt_destdir="$DESTDIR"
@@ -802,7 +802,7 @@ pp_frontend_init () {
     version=
     summary="no summary"
     description="No description"
-    copyright="Copyright 2011 Quest Software, Inc. ALL RIGHTS RESERVED."
+    copyright="Copyright 2012 Quest Software, Inc. ALL RIGHTS RESERVED."
 
     #-- if the user supplied extra arguments on the command line
     #   then load them now.
@@ -6701,19 +6701,25 @@ pp_macos_files_bom () {
 
 	case $t in
 	    f)
+		test x"$m" = x"000-" && m=0644
 		echo ".$p	10$m	$owner	`
 		    /usr/bin/cksum < "${pp_destdir}$p" |
-		    awk '{print $2 "	" $1}'`";;
+		    awk '{print $2 "	" $1}'`"
+		;;
 	    d)
-		echo ".${p%/}	4$m	$owner";;
+		test x"$m" = x"000-" && m=0755
+		echo ".${p%/}	4$m	$owner"
+		;;
 	    s)
+		test x"$m" = x"000-" && m=0755
 		rl=`/usr/bin/readlink "${pp_destdir}$p"`
 		#test x"$rl" = x"$st" ||
 		#    pp_error "symlink mismatch $rl != $st"
 		echo ".$p	12$m	$owner	`
 		    /usr/bin/readlink -n "${pp_destdir}$p" |
 		    /usr/bin/cksum |
-		    awk '{print $2 "	" $1}'`	$st";;
+		    awk '{print $2 "	" $1}'`	$st"
+		;;
 	esac
     done
 }
@@ -6820,7 +6826,7 @@ pp_backend_macos () {
     case $mac_version in
         "10.6"*)
             xattr -w "com.apple.TextEncoding" "macintosh;0" "$Resources/package_version"
-            xattr -w "com.apple.TextEncoding" "macintosh;0" "$Resources/PkgInfo"
+            xattr -w "com.apple.TextEncoding" "macintosh;0" "$Contents/PkgInfo"
             ;;
     esac
 
@@ -6957,6 +6963,7 @@ CompressedSize 0
 
 	$pp_macos_sudo rm -rf $pp_wrkdir/bom_stage
 
+    rm -f ${name}-${version}.dmg
     hdiutil create -fs HFS+ -srcfolder $pkgdir -volname $name ${name}-${version}.dmg
 }
 
