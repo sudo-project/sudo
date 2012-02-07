@@ -226,6 +226,23 @@ case "$osversion" in
 		--with-secure-path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/X11R6/bin
 		$configure_opts"
 	;;
+    macos*)
+	# Build universal binaries, curently intel-only
+	export CFLAGS="-O2 -g -arch i386 -arch x86_64"
+	export LDFLAGS="-arch i386 -arch x86_64"
+	# Note, must indent with tabs, not spaces due to IFS trickery
+	configure_opts="--prefix=$prefix
+		--with-pam
+		--without-tty-tickets
+		--enable-zlib=system
+		--with-ldap
+		--with-insults=disabled
+		--with-logging=syslog
+		--with-logfac=authpriv
+		--with-editor=/usr/bin/vim
+		--with-env-editor
+		$configure_opts"
+	;;
     *)
 	# For Solaris, add project support and use let configure choose zlib.
 	# For all others, use the builtin zlib and disable NLS support.
