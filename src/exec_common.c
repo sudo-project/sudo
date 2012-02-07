@@ -66,6 +66,9 @@ disable_execute(char *const envp[])
     warning(_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
 #endif /* HAVE_PRIV_SET */
 
+#ifdef _PATH_SUDO_NOEXEC
+    nenvp = emalloc2(env_size, sizeof(char *));
+
     /*
      * Preload a noexec file.  For a list of LD_PRELOAD-alikes, see
      * http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html
@@ -83,18 +86,12 @@ disable_execute(char *const envp[])
 # endif
     if (preload == NULL)
 	errorx(1, _("unable to allocate memory"));
+    nenvp[env_len++] = preload;
 
-#ifdef _PATH_SUDO_NOEXEC
-    nenvp = emalloc2(env_size, sizeof(char *));
     for (ev = envp; *ev != NULL; ev++) {
-	/* Need at least 3 slots for current element, LD_PRELOAD, and NULL. */
-	if (env_len + 3 > env_size) {
-	    env_size += 128;
-	    nenvp = erealloc3(nenvp, env_size, sizeof(char *));
-	}
 	/*
 	 * Prune out existing preloaded libraries.
-	 * XXX - should save and append instead of replacing.
+	 * XXX - should append to new value instead.
 	 */
 # if defined(__darwin__) || defined(__APPLE__)
 	if (strncmp(*ev, "DYLD_INSERT_LIBRARIES=", sizeof("DYLD_INSERT_LIBRARIES=") - 1) == 0)
@@ -111,9 +108,13 @@ disable_execute(char *const envp[])
 	if (strncmp(*ev, "LD_PRELOAD=", sizeof("LD_PRELOAD=") - 1) == 0)
 	    continue;
 # endif
+	/* Need at least 2 slots for current element and a NULL. */
+	if (env_len + 2 > env_size) {
+	    env_size += 128;
+	    nenvp = erealloc3(nenvp, env_size, sizeof(char *));
+	}
 	nenvp[env_len++] = *ev;
     }
-    nenvp[env_len++] = preload;
     nenvp[env_len] = NULL;
     envp = nenvp;
 #endif /* _PATH_SUDO_NOEXEC */
