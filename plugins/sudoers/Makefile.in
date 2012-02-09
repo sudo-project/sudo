@@ -247,28 +247,29 @@ install: install-plugin install-binaries install-sudoers install-doc
 install-dirs:
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(plugindir) \
 	    $(DESTDIR)$(visudodir) $(DESTDIR)$(replaydir) \
-	    $(DESTDIR)$(sudoersdir) $(DESTDIR)$(docdir)
-	$(SHELL) $(top_srcdir)/mkinstalldirs -m 0700 $(DESTDIR)$(timedir)
+	    $(DESTDIR)$(sudoersdir) $(DESTDIR)$(docdir) \
+	    `echo $(DESTDIR)$(timedir)|sed 's,/[^/]*$$,,'`
+	$(INSTALL) -d -O $(install_uid) -G $(install_gid) -m 0700 $(DESTDIR)$(timedir)
 
 install-binaries: visudo sudoreplay install-dirs
-	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0111 sudoreplay $(DESTDIR)$(replaydir)/sudoreplay
-	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0111 visudo $(DESTDIR)$(visudodir)/visudo
+	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m 0111 sudoreplay $(DESTDIR)$(replaydir)/sudoreplay
+	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m 0111 visudo $(DESTDIR)$(visudodir)/visudo
 
 install-includes:
 
 install-doc: install-dirs
-	@LDAP@$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0555 $(srcdir)/sudoers2ldif $(DESTDIR)$(docdir)
+	@LDAP@$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0555 $(srcdir)/sudoers2ldif $(DESTDIR)$(docdir)
 
 install-plugin: sudoers.la install-dirs
 	if [ X"$(soext)" != X"" ]; then \
-	    $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0755 .libs/sudoers$(soext) $(DESTDIR)$(plugindir); \
+	    $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m 0755 .libs/sudoers$(soext) $(DESTDIR)$(plugindir); \
 	fi
 
 install-sudoers: install-dirs
-	$(INSTALL) -d -O $(sudoers_uid) -G $(sudoers_gid) -M 0750 \
+	$(INSTALL) -d -O $(sudoers_uid) -G $(sudoers_gid) -m 0750 \
 	    $(DESTDIR)$(sudoersdir)/sudoers.d
 	test -r $(DESTDIR)$(sudoersdir)/sudoers || \
-	    $(INSTALL) -O $(sudoers_uid) -G $(sudoers_gid) -M $(sudoers_mode) \
+	    $(INSTALL) -O $(sudoers_uid) -G $(sudoers_gid) -m $(sudoers_mode) \
 		sudoers $(DESTDIR)$(sudoersdir)/sudoers
 
 uninstall:

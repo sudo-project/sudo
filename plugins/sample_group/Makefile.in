@@ -97,7 +97,7 @@ install-includes:
 install-doc:
 
 install-plugin: install-dirs sample_group.la
-	$(INSTALL) -b~ -M 0755 .libs/sample_group$(soext) $(DESTDIR)$(plugindir)
+	$(INSTALL) -b~ -m 0755 .libs/sample_group$(soext) $(DESTDIR)$(plugindir)
 
 uninstall:
 	-rm -f $(DESTDIR)$(plugindir)/sample_group$(soext)
