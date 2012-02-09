@@ -551,37 +551,38 @@ install-dirs:
 	$(SHELL) $(srcdir)/mkinstalldirs $(DESTDIR)$(sudodir) \
 	    $(DESTDIR)$(visudodir) $(DESTDIR)$(noexecdir) \
 	    $(DESTDIR)$(sudoersdir) $(DESTDIR)$(docdir) \
-	    $(DESTDIR)$(mandirsu) $(DESTDIR)$(mandirform)
-	$(SHELL) $(srcdir)/mkinstalldirs -m 0700 $(DESTDIR)$(timedir)
+	    $(DESTDIR)$(mandirsu) $(DESTDIR)$(mandirform) \
+	    `echo $(DESTDIR)$(timedir)|sed 's,/[^/]*$$,,'`
+	$(INSTALL) -d -O $(install_uid) -G $(install_gid) -m 0700 $(DESTDIR)$(timedir)
 
 install-binaries: install-dirs $(PROGS)
 	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 04111 sudo $(DESTDIR)$(sudodir)/sudo
 	rm -f $(DESTDIR)$(sudodir)/sudoedit
 	ln $(DESTDIR)$(sudodir)/sudo $(DESTDIR)$(sudodir)/sudoedit
-	if [ -f sudoreplay ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0111 sudoreplay $(DESTDIR)$(sudodir)/sudoreplay; fi
-	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0111 visudo $(DESTDIR)$(visudodir)/visudo
-	if [ -f sesh ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0111 sesh $(DESTDIR)$(libexecdir)/sesh; fi
+	if [ -f sudoreplay ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m 0111 sudoreplay $(DESTDIR)$(sudodir)/sudoreplay; fi
+	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m 0111 visudo $(DESTDIR)$(visudodir)/visudo
+	if [ -f sesh ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m 0111 sesh $(DESTDIR)$(libexecdir)/sesh; fi
 
 install-noexec: install-dirs libsudo_noexec.la
-	if [ -f .libs/lib$(noexecfile) ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0755 .libs/lib$(noexecfile) $(DESTDIR)$(noexecdir)/$(noexecfile); fi
+	if [ -f .libs/lib$(noexecfile) ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m 0755 .libs/lib$(noexecfile) $(DESTDIR)$(noexecdir)/$(noexecfile); fi
 
 install-sudoers: install-dirs
-	$(INSTALL) -d -O $(sudoers_uid) -G $(sudoers_gid) -M 0750 \
+	$(INSTALL) -d -O $(sudoers_uid) -G $(sudoers_gid) -m 0750 \
 	    $(DESTDIR)$(sudoersdir)/sudoers.d
 	test -f $(DESTDIR)$(sudoersdir)/sudoers || \
-	    $(INSTALL) -O $(sudoers_uid) -G $(sudoers_gid) -M $(sudoers_mode) \
+	    $(INSTALL) -O $(sudoers_uid) -G $(sudoers_gid) -m $(sudoers_mode) \
 		sudoers $(DESTDIR)$(sudoersdir)/sudoers
 
 install-doc: install-dirs ChangeLog
-	(cd $(srcdir) && for f in ChangeLog HISTORY LICENSE NEWS README TROUBLESHOOTING UPGRADE sample.*; do $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $$f $(DESTDIR)$(docdir); done)
-	@LDAP@(cd $(srcdir) && for f in README.LDAP schema.* sudoers2ldif; do $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $$f $(DESTDIR)$(docdir); done)
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/sudo.$(mantype) $(DESTDIR)$(mandirsu)/sudo.$(mansectsu)
+	(cd $(srcdir) && for f in ChangeLog HISTORY LICENSE NEWS README TROUBLESHOOTING UPGRADE sample.*; do $(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 $$f $(DESTDIR)$(docdir); done)
+	@LDAP@(cd $(srcdir) && for f in README.LDAP schema.* sudoers2ldif; do $(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 $$f $(DESTDIR)$(docdir); done)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 @mansrcdir@/sudo.$(mantype) $(DESTDIR)$(mandirsu)/sudo.$(mansectsu)
 	@rm -f $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)
 	ln $(DESTDIR)$(mandirsu)/sudo.$(mansectsu) $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)
-	@REPLAY@$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/sudoreplay.$(mantype) $(DESTDIR)$(mandirsu)/sudoreplay.$(mansectsu)
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/visudo.$(mantype) $(DESTDIR)$(mandirsu)/visudo.$(mansectsu)
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/sudoers.$(mantype) $(DESTDIR)$(mandirform)/sudoers.$(mansectform)
-	@LDAP@$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/sudoers.ldap.$(mantype) $(DESTDIR)$(mandirform)/sudoers.ldap.$(mansectform)
+	@REPLAY@$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 @mansrcdir@/sudoreplay.$(mantype) $(DESTDIR)$(mandirsu)/sudoreplay.$(mansectsu)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 @mansrcdir@/visudo.$(mantype) $(DESTDIR)$(mandirsu)/visudo.$(mansectsu)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 @mansrcdir@/sudoers.$(mantype) $(DESTDIR)$(mandirform)/sudoers.$(mansectform)
+	@LDAP@$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 @mansrcdir@/sudoers.ldap.$(mantype) $(DESTDIR)$(mandirform)/sudoers.ldap.$(mansectform)
 @MAN_POSTINSTALL@
 
 check:
