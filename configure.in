@@ -2024,7 +2024,8 @@ AC_CHECK_FUNCS(setsid, [], [
 dnl
 dnl If libc supports _FORTIFY_SOURCE check functions, use it.
 dnl
-O_CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
+O_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
 AC_CHECK_FUNC(__sprintf_chk, [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[char buf[4]; (void)sprintf(buf, "%s", "foo");]])], [OSDEFS="${OSDEFS} -D_FORTIFY_SOURCE=2"], [])
 ], [])
