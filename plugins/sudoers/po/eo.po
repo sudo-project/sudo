@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: sudoers 1.8.4rc1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2012-02-06 15:48-0500\n"
-"PO-Revision-Date: 2012-02-07 20:30-0500\n"
+"PO-Revision-Date: 2012-02-09 20:56-0500\n"
 "Last-Translator: Keith Bowes <zooplah@gmail.com>\n"
 "Language-Team: Esperanto <translation-team-eo@lists.sourceforge.net>\n"
 "Language: eo\n"
@@ -29,7 +29,7 @@ msgstr "getaudit: malsukcesis"
 
 #: plugins/sudoers/bsm_audit.c:91 plugins/sudoers/bsm_audit.c:154
 msgid "Could not determine audit condition"
-msgstr "Ne eblis determini aŭdan kondiĉon"
+msgstr "Ne eblis determini revizian kondiĉon"
 
 #: plugins/sudoers/bsm_audit.c:102
 msgid "getauid failed"
@@ -53,7 +53,7 @@ msgstr "getaudit: malsukcesis"
 
 #: plugins/sudoers/bsm_audit.c:130 plugins/sudoers/bsm_audit.c:191
 msgid "unable to commit audit record"
-msgstr "ne eblis konservi aŭdan rekordon"
+msgstr "ne eblis konservi revizian rekordon"
 
 #: plugins/sudoers/bsm_audit.c:161
 msgid "getauid: failed"
@@ -91,7 +91,7 @@ msgstr "ne eblas mkdir-i: %s"
 #: plugins/sudoers/check.c:396
 #, c-format
 msgid "internal error, expand_prompt() overflow"
-msgstr "ena eraro, expand_prompte() superfluo"
+msgstr "ena eraro, superfluo en expand_prompt()"
 
 #: plugins/sudoers/check.c:456
 #, c-format
@@ -125,7 +125,7 @@ msgstr "ne eblas stat-i: %s"
 #: plugins/sudoers/check.c:571
 #, c-format
 msgid "%s exists but is not a regular file (0%o)"
-msgstr "%s ekzistas sed ne estas regula dosiero (0%o)"
+msgstr "%s ekzistas sed ne estas normala dosiero (0%o)"
 
 #: plugins/sudoers/check.c:583
 #, c-format
@@ -222,7 +222,7 @@ msgstr "Postulas, ke uzantoj konstatas aŭtomate"
 
 #: plugins/sudoers/def_data.c:83
 msgid "Root may run sudo"
-msgstr "Radiko rajtas plenumigi: sudo"
+msgstr "Ĉefuzanto rajtas plenumigi: sudo"
 
 #: plugins/sudoers/def_data.c:87
 msgid "Log the hostname in the (non-syslog) log file"
@@ -549,7 +549,7 @@ msgstr "parametro '%s' ne povas havi valoron"
 #: plugins/sudoers/env.c:258
 #, c-format
 msgid "internal error, sudo_setenv() overflow"
-msgstr "ena eraro, sudo_setenv() superfluo"
+msgstr "ena eraro, superfluo en sudo_setenv()"
 
 #: plugins/sudoers/env.c:291
 #, c-format
@@ -737,17 +737,17 @@ msgstr "nevalida atributo de sudoOrdo: %s"
 #: plugins/sudoers/linux_audit.c:57
 #, c-format
 msgid "unable to open audit system"
-msgstr "ne eblas malfermi aŭdan sistemon"
+msgstr "ne eblas malfermi revizian sistemon"
 
 #: plugins/sudoers/linux_audit.c:82
 #, c-format
 msgid "internal error, linux_audit_command() overflow"
-msgstr "ena eraro, linux_audit_command() superfluo"
+msgstr "ena eraro, superfluo en linux_audit_command()"
 
 #: plugins/sudoers/linux_audit.c:91
 #, c-format
 msgid "unable to send audit message"
-msgstr "ne eblas sendi aŭdan mesaĝon"
+msgstr "ne eblas sendi revizian mesaĝon"
 
 #: plugins/sudoers/logging.c:198
 #, c-format
@@ -761,7 +761,7 @@ msgstr "ne eblas ŝlosi protokolon: %s: %s"
 
 #: plugins/sudoers/logging.c:256
 msgid "user NOT in sudoers"
-msgstr "uzanto NE en sudoers"
+msgstr "uzanto NE estas en sudoers"
 
 #: plugins/sudoers/logging.c:258
 msgid "user NOT authorized on host"
@@ -946,7 +946,7 @@ msgstr "Uzanto %s rajtas plenumigi la jenajn komandojn en ĉi tiu gastiganto:\n"
 #: plugins/sudoers/sudo_nss.c:279
 #, c-format
 msgid "User %s is not allowed to run sudo on %s.\n"
-msgstr "Uzanto %s ne rajton plenumigi sudo-on en %s.\n"
+msgstr "Uzanto %s ne rajtas plenumigi sudo-on en %s.\n"
 
 #: plugins/sudoers/sudoers.c:201 plugins/sudoers/sudoers.c:232
 #: plugins/sudoers/sudoers.c:931
@@ -966,7 +966,7 @@ msgstr "ne eblas plenumigi %s-on: %s"
 #: plugins/sudoers/sudoers.c:311
 #, c-format
 msgid "sudoers specifies that root is not allowed to sudo"
-msgstr "sudoers specifas, ke ĉefradiko ne rajtas sudo-i"
+msgstr "sudoers specifas, ke ĉefuzanto ne rajtas sudo-i"
 
 #: plugins/sudoers/sudoers.c:318
 #, c-format
@@ -976,7 +976,7 @@ msgstr "vi ne rajtas uzi la parametron -C"
 #: plugins/sudoers/sudoers.c:408
 #, c-format
 msgid "timestamp owner (%s): No such user"
-msgstr "tempo-indikila estro (%s): Nenia uzanto"
+msgstr "posedanto de tempindiko estas %s -- sed tiu uzanto ne ekzistas"
 
 #: plugins/sudoers/sudoers.c:424
 msgid "no tty"
@@ -1023,12 +1023,12 @@ msgstr "bedaŭre vi ne rajtas konservi la medion"
 #: plugins/sudoers/sudoers.c:657 plugins/sudoers/sudoers.c:664
 #, c-format
 msgid "internal error, runas_groups overflow"
-msgstr "ena eraro, runas_groups suprfluo"
+msgstr "ena eraro, runas_groups superfluo"
 
 #: plugins/sudoers/sudoers.c:914
 #, c-format
 msgid "internal error, set_cmnd() overflow"
-msgstr "ena eraro, set_cmnd() superfluo"
+msgstr "ena eraro, superfluo en set_cmnd()"
 
 #: plugins/sudoers/sudoers.c:957
 #, c-format
@@ -1053,7 +1053,7 @@ msgstr "ne eblas fiksi reĝimon en %s"
 #: plugins/sudoers/sudoers.c:980
 #, c-format
 msgid "%s is not a regular file"
-msgstr "%s ne estas regula dosiero"
+msgstr "%s ne estas normala dosiero"
 
 #: plugins/sudoers/sudoers.c:982
 #, c-format
@@ -1083,7 +1083,7 @@ msgstr "nekonata ensaluta klaso: %s"
 #: plugins/sudoers/sudoers.c:1077
 #, c-format
 msgid "unable to resolve host %s"
-msgstr "ne eblas solvi gastiganton %s"
+msgstr "ne eblas trovi gastiganton %s"
 
 #: plugins/sudoers/sudoers.c:1129 plugins/sudoers/testsudoers.c:380
 #, c-format
@@ -1192,7 +1192,7 @@ msgstr "ambigua esprimo \"%s\""
 #: plugins/sudoers/sudoreplay.c:571
 #, c-format
 msgid "too many parenthesized expressions, max %d"
-msgstr "tro da esprimoj en krampoj, maksimumo: %d"
+msgstr "tro da esprimoj en krampoj; maksimumo estas %d"
 
 #: plugins/sudoers/sudoreplay.c:582
 #, c-format
@@ -1282,7 +1282,7 @@ msgstr ""
 #: plugins/sudoers/testsudoers.c:246
 #, c-format
 msgid "internal error, init_vars() overflow"
-msgstr "ena eraro, init_vars() suprfluo"
+msgstr "ena eraro, superfluo en init_vars()"
 
 #: plugins/sudoers/testsudoers.c:331
 msgid "\thost  unmatched"
@@ -1319,7 +1319,7 @@ msgstr "ne eblas generi memoron"
 
 #: toke.l:795
 msgid "too many levels of includes"
-msgstr "tro da niveloj de inluzivaĵoj"
+msgstr "tro da niveloj de inkluzivaĵoj"
 
 #: plugins/sudoers/toke_util.c:218
 msgid "fill_args: buffer overflow"
@@ -1403,7 +1403,7 @@ msgstr "komando malsukcesis: '%s %s %s', %s neŝanĝita"
 #: plugins/sudoers/visudo.c:639
 #, c-format
 msgid "error renaming %s, %s unchanged"
-msgstr "eraro alinomanta %s-on, %s neŝanĝita"
+msgstr "eraro dum alinomi %s-on; %s neŝanĝita"
 
 #: plugins/sudoers/visudo.c:702
 msgid "What now? "
@@ -1542,7 +1542,7 @@ msgstr "ne eblas akiri ensalutan klason por uzanto %s"
 
 #: plugins/sudoers/auth/bsdauth.c:84
 msgid "unable to begin bsd authentication"
-msgstr "ne eblas komenci bsd-konstatado"
+msgstr "ne eblas komenci bsd-konstatadn"
 
 #: plugins/sudoers/auth/bsdauth.c:92
 msgid "invalid authentication type"
@@ -1560,7 +1560,7 @@ msgstr "ne eblas legi fwtk-agordon"
 #: plugins/sudoers/auth/fwtk.c:65
 #, c-format
 msgid "unable to connect to authentication server"
-msgstr "ne eblas konekti al konstatanta servilo"
+msgstr "ne eblas konektiĝi al konstatanta servilo"
 
 #: plugins/sudoers/auth/fwtk.c:71 plugins/sudoers/auth/fwtk.c:95
 #: plugins/sudoers/auth/fwtk.c:128
