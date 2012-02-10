@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2012 Quest Software, Inc. ALL RIGHTS RESERVED
-pp_revision="335"
+pp_revision="340"
  # Copyright 2012 Quest Software, Inc.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -6576,6 +6576,9 @@ pp_backend_macos_init () {
     pp_macos_prog_packagemaker=/Developer/usr/bin/packagemaker
     pp_macos_pkg_domain=anywhere
     pp_macos_pkg_extra_flags=
+    pp_macos_pkg_license=
+    pp_macos_pkg_readme=
+    pp_macos_pkg_welcome=
     pp_macos_sudo=sudo
     # OS X puts the library version *before* the .dylib extension
     pp_shlib_suffix='*.dylib'
@@ -6617,63 +6620,87 @@ pp_macos_plist () {
 pp_macos_rewrite_cpio () {
     typeset script
     script=$pp_wrkdir/cpio-rewrite.pl
-    # rely on the fact that OS X comes with perl. It is a little easier to
-    # re-write a binary stream with perl than it is with posix :)
-    #
-    # A CPIO header block has octal fields at the following offset/lengths:
-    #   0  6 magic
-    #   6  6 dev
-    #  12  6 ino
-    #  18  6 mode
-    #  24  6 uid
-    #  30  6 gid
-    #  36  6 nlink
-    #  42  6 rdev
-    #  48 11 mtime
-    #  59  6 namesize
-    #  65 11 filesize
-    #  76    --
     cat <<-'.' >$script
+	#!/usr/bin/perl
+	#
+	# Filter a cpio file, applying the user/group/mode specified in %files
+	#
+	# A CPIO header block has octal fields at the following offset/lengths:
+	#   0  6 magic
+	#   6  6 dev
+	#  12  6 ino
+	#  18  6 mode
+	#  24  6 uid
+	#  30  6 gid
+	#  36  6 nlink
+	#  42  6 rdev
+	#  48 11 mtime
+	#  59  6 namesize (including NUL terminator)
+	#  65 11 filesize
+	#  76    --
+	#
+	use strict;
+	use warnings;
+	no strict 'subs';
+
+	# set %uid, %gid, %mode based on %files
+	my (%uid, %gid, %mode, %users, %groups);
+	my %type_map = ( d => 0040000, f => 0100000, s => 0120000 );
 	while (<DATA>) {
-		my ($type,$mode,$uid,$gid,$flags,$name) =
-		    m/^(.) (\d+) (\S+) (\S+) (\S+) (.*)/;
-		$uid = 0 if $uid eq "-";
-		$gid = 0 if $gid eq "-";
-		if ($uid ne "=" and $uid =~ m/\D/) {
-			my @pw = getpwnam($uid) or die "bad username '$uid'";
-			$uid = $pw[2];
-		}
-		if ($gid ne "=" and $gid =~ m/\D/) {
-			my @gr = getgrnam($gid) or die "bad group '$gid'";
-			$gid = $gr[2];
-		}
-		$name = ".".$name."\0";
-		$ok{$name} = 1;
-		$uid{$name} = sprintf("%06o",int($uid)) unless $uid eq "=";
-		$gid{$name} = sprintf("%06o",int($gid)) unless $gid eq "=";
-		$mode{$name} = sprintf("%06o",oct($mode)) unless $mode eq "=";
+	    my ($type,$mode,$uid,$gid,$flags,$name) =
+	        m/^(.) (\S+) (\S+) (\S+) (\S+) (\S+)/;
+	    $mode = $type eq "f" ? "0644" : "0755" if $mode eq "-";
+	    $uid = 0 if $uid eq "-";
+	    $gid = 0 if $gid eq "-";
+	    if ($uid ne "=" and $uid =~ m/\D/) {
+	        unless (exists $users{$uid}) {
+	            my @pw = getpwnam($uid) or die "bad username '$uid'";
+	            $users{$uid} = $pw[2];
+	        }
+	        $uid = $users{$uid};
+	    }
+	    if ($gid ne "=" and $gid =~ m/\D/) {
+	        unless (exists $groups{$gid}) {
+	            my @gr = getgrnam($gid) or die "bad group'$gid'";
+	            $groups{$gid} = $gr[2];
+	        }
+	        $gid = $groups{$gid};
+	    }
+	    $name =~ s:/$:: if $type eq "d";
+	    $name = ".".$name."\0";
+	    $uid{$name} = sprintf("%06o",int($uid)) unless $uid eq "=";
+	    $gid{$name} = sprintf("%06o",int($gid)) unless $gid eq "=";
+	    $mode{$name} = sprintf("%06o",oct($mode)|$type_map{$type}) unless $mode eq "=";
 	}
-	$ok{"TRAILER!!!\0"} = 1;
-	while (!eof STDIN) {
-		read STDIN, $header, 76;
-		die "bad magic" unless $header =~ m/^070707/;
-		$namesize = oct(substr($header,59,6));
-		$filesize = oct(substr($header,65,11));
-		read STDIN, $name, $namesize;
-		# convert uid and gid to 0
-		substr($header, 24, 6) = $uid{$name} if defined($uid{$name});
-		substr($header, 30, 6) = $gid{$name} if defined($gid{$name});
-		substr($header, 18, 6) = $mode{$name} if defined($mode{$name});
-		print ($header, $name) if $ok{$name};
-		# copy-through the file data
-		while ($filesize > 0) {
-			my $seg = 8192;
-			$seg = $filesize if $filesize < $seg;
-			undef $data;
-			read STDIN, $data, $seg;
-			print $data if $ok{$name};
-			$filesize -= $seg;
-		}
+	undef %users;
+	undef %groups;
+	# parse the cpio file
+	while (read(STDIN, my $header, 76)) {
+	    die "bad magic" unless $header =~ m/^070707/;
+	    my $namesize = oct(substr($header, 59, 6));
+	    my $filesize = oct(substr($header, 65, 11));
+	    read(STDIN, my $name, $namesize);
+	    # update uid, gid and mode
+	    substr($header, 24, 6) = $uid{$name} if exists $uid{$name};
+	    substr($header, 30, 6) = $gid{$name} if exists $gid{$name};
+	    substr($header, 18, 6) = $mode{$name} if exists $mode{$name};
+	    print($header, $name);
+	    # check for trailer at EOF
+	    last if $filesize == 0 && $name eq "TRAILER!!!\0";
+	    # copy-through the file data
+	    while ($filesize > 0) {
+	        my $seg = 8192;
+	        $seg = $filesize if $filesize < $seg;
+	        read(STDIN, my $data, $seg);
+	        print $data;
+	        $filesize -= $seg;
+	    }
+	}
+	# pass through any padding at the end (blocksize-dependent)
+	for (;;) {
+	    my $numread = read(STDIN, my $data, 8192);
+	    last unless $numread;
+	    print $data;
 	}
 	exit(0);
 	__DATA__
@@ -6733,8 +6760,11 @@ pp_macos_bom_fix_parents () {
 		      print "$d\t40755\t0/0\n";
 		  }
 		}
-	m/^\S+/;
-	&chk(&dirname($&));'
+	m/^(\S+)\s+(\d+)/;
+	if (oct($2) & 040000) {
+	    $seen{$1}++; # directory
+	}
+	&chk(&dirname($1));'
 }
 
 pp_macos_files_size () {
@@ -6797,7 +6827,7 @@ pp_macos_mkbom () {
 pp_backend_macos () {
     typeset pkgdir Contents Resources lprojdir
     typeset Info_plist Description_plist
-    typeset bundle_vendor bundle_version size
+    typeset bundle_vendor bundle_version size cmp filelists
 
     mac_version=`sw_vers -productVersion`
     bundle_vendor=${pp_macos_bundle_vendor:-$vendor}
@@ -6831,8 +6861,46 @@ pp_backend_macos () {
             ;;
     esac
 
+    # Copy welcome file/dir for display at package install time.
+    if test -n "$pp_macos_pkg_welcome"; then
+	typeset sfx
+	sfx=`echo "$pp_macos_pkg_welcome"|sed 's/^.*\.\([^\.]*\)$/\1/'`
+	case "$sfx" in
+	    rtf|html|rtfd|txt) ;;
+	    *) sfx=txt;;
+	esac
+	cp -R ${pp_macos_pkg_welcome} $Resources/Welcome.$sfx
+    fi
+
+    # Copy readme file/dir for display at package install time.
+    if test -n "$pp_macos_pkg_readme"; then
+	typeset sfx
+	sfx=`echo "$pp_macos_pkg_readme"|sed 's/^.*\.\([^\.]*\)$/\1/'`
+	case "$sfx" in
+	    rtf|html|rtfd|txt) ;;
+	    *) sfx=txt;;
+	esac
+	cp -R ${pp_macos_pkg_readme} $Resources/ReadMe.$sfx
+    fi
+
+    # Copy license file/dir for display at package install time.
+    if test -n "$pp_macos_pkg_license"; then
+	typeset sfx
+	sfx=`echo "$pp_macos_pkg_license"|sed 's/^.*\.\([^\.]*\)$/\1/'`
+	case "$sfx" in
+	    rtf|html|rtfd|txt) ;;
+	    *) sfx=txt;;
+	esac
+	cp -R ${pp_macos_pkg_license} $Resources/License.$sfx
+    fi
+
+    # Find file lists (%files.* includes ignore files)
+    for cmp in $pp_components; do
+	test -f $pp_wrkdir/%files.$cmp && filelists="$filelists${filelists:+ }$pp_wrkdir/%files.$cmp"
+    done
+
     # compute the installed size
-    size=`cat $pp_wrkdir/%files.* | pp_macos_files_size`
+    size=`cat $filelists | pp_macos_files_size`
 
     #-- Create Info.plist
     Info_plist=$Contents/Info.plist
@@ -6873,8 +6941,8 @@ pp_backend_macos () {
 	    key IFPkgDescriptionVersion string "$version" \
  	\} end-plist > $Description_plist
 
- 	# write Resources/files
-    cat $pp_wrkdir/%files.* | awk '{print $6}' > $Resources/files
+    # write Resources/files
+    awk '{print $6}' $filelists > $Resources/files
 
     # write package size file
     printf \
@@ -6950,16 +7018,15 @@ CompressedSize 0
     fi
 
     # Create the bill-of-materials (Archive.bom)
-    cat $pp_wrkdir/%files.* | pp_macos_files_bom | sort |
+    cat $filelists | pp_macos_files_bom | sort |
 	pp_macos_bom_fix_parents > $pp_wrkdir/tmp.bomls
 
     pp_macos_mkbom $pp_wrkdir/tmp.bomls $Contents/Archive.bom
 
     # Create the cpio archive (Archive.pax.gz)
-    # On 10.5, we used "-f -" to write explicitly to stdout
     (
     cd $pp_destdir &&
-    cat $pp_wrkdir/%files.* | awk '{ print "." $6 }' | sed '/\/$/d' | sort | /bin/pax -w -f - | gzip -9 -c > $Contents/Archive.pax.gz
+    awk '{ print "." $6 }' $filelists | sed 's:/$::' | sort | /usr/bin/cpio -o | pp_macos_rewrite_cpio $filelists | gzip -9f -c > $Contents/Archive.pax.gz
     )
 
     test -d $pp_wrkdir/bom_stage && $pp_macos_sudo rm -rf $pp_wrkdir/bom_stage
