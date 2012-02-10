@@ -63,8 +63,8 @@ find_path(infile, outfile, sbp, path, ignore_dot)
     static char command[PATH_MAX]; /* qualified filename */
     char *n;			/* for traversing path */
     char *origpath;		/* so we can free path later */
-    char *result = NULL;	/* result of path/file lookup */
-    int checkdot = 0;		/* check current dir? */
+    int found = FALSE;		/* did we find the command? */
+    int checkdot = FALSE;	/* check current dir? */
     int len;			/* length parameter */
 
     if (strlen(infile) >= PATH_MAX)
@@ -108,7 +108,7 @@ find_path(infile, outfile, sbp, path, ignore_dot)
 	len = snprintf(command, sizeof(command), "%s/%s", path, infile);
 	if (len <= 0 || len >= sizeof(command))
 	    errorx(1, "%s: File name too long", infile);
-	if ((result = sudo_goodpath(command, sbp)))
+	if ((found = sudo_goodpath(command, sbp)))
 	    break;
 
 	path = n + 1;
@@ -119,17 +119,17 @@ find_path(infile, outfile, sbp, path, ignore_dot)
     /*
      * Check current dir if dot was in the PATH
      */
-    if (!result && checkdot) {
+    if (!found && checkdot) {
 	len = snprintf(command, sizeof(command), "./%s", infile);
 	if (len <= 0 || len >= sizeof(command))
 	    errorx(1, "%s: File name too long", infile);
-	result = sudo_goodpath(command, sbp);
-	if (result && ignore_dot)
+	found = sudo_goodpath(command, sbp);
+	if (found && ignore_dot)
 	    return NOT_FOUND_DOT;
     }
 
-    if (result) {
-	*outfile = result;
+    if (found) {
+	*outfile = command;
 	return FOUND;
     } else
 	return NOT_FOUND;

@@ -253,7 +253,7 @@ char *sudo_getepw	__P((const struct passwd *));
 int gettime		__P((struct timeval *));
 
 /* goodpath.c */
-char *sudo_goodpath	__P((const char *, struct stat *));
+int sudo_goodpath	__P((const char *, struct stat *));
 
 /* gram.y */
 int yyparse		__P((void));
