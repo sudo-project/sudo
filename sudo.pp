@@ -189,17 +189,18 @@ still allow people to get their work done."
 	osdirs=`echo $osdirs | tr " " "\n" | sort -u`
 
 %files
-	$osdirs		       -
-	$bindir/sudo        4111 root:
-	$bindir/sudoedit    4111 root:
-	$sbindir/visudo     0111
-	$bindir/sudoreplay  0111
-	$libexecdir/*		optional
+	$osdirs			-
+	$bindir/sudo        	4111 root:
+	$bindir/sudoedit    	4111 root:
+	$sbindir/visudo     	0111
+	$bindir/sudoreplay  	0111
+	$libexecdir/*		0755 optional
 	$sudoersdir/sudoers.d/	0750 $sudoers_uid:$sudoers_gid
 	$timedir/		0700 root:
 	$docdir/
-	$docdir/*
-	/etc/pam.d/*		volatile,optional
+	$docdir/sudoers2ldif	0555 optional,ignore-others
+	$docdir/*		0444
+	/etc/pam.d/*		0444 volatile,optional
 %if [rpm,deb]
 	$sudoersdir/sudoers $sudoers_mode $sudoers_uid:$sudoers_gid volatile
 %else
