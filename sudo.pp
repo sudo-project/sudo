@@ -177,6 +177,7 @@ still allow people to get their work done."
 %endif
 
 %if [macos]
+	pp_macos_pkg_type=flat
 	pp_macos_bundle_id=ws.sudo.pkg.sudo
 	pp_macos_pkg_license=doc/LICENSE
 	pp_macos_pkg_readme=${pp_wrkdir}/ReadMe.txt

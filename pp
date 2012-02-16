@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2012 Quest Software, Inc. ALL RIGHTS RESERVED
-pp_revision="340"
+pp_revision="341"
  # Copyright 2012 Quest Software, Inc.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -6573,9 +6573,7 @@ pp_backend_macos_init () {
     pp_macos_bundle_vendor=
     pp_macos_bundle_version=
     pp_macos_bundle_info_string=
-    pp_macos_prog_packagemaker=/Developer/usr/bin/packagemaker
-    pp_macos_pkg_domain=anywhere
-    pp_macos_pkg_extra_flags=
+    pp_macos_pkg_type=bundle
     pp_macos_pkg_license=
     pp_macos_pkg_readme=
     pp_macos_pkg_welcome=
@@ -6718,7 +6716,7 @@ pp_macos_files_bom () {
 	    ?) m="000$m";;
 	    ??) m="00$m";;
 	    ???) m="0$m";;
-	    ?????*) pp_fatal "pp_macos_writebom: mode '$m' too long";;
+	    ?????*) pp_error "pp_macos_writebom: mode '$m' too long";;
 	esac
 
 	# convert owner,group into owner/group in octal
@@ -6825,6 +6823,15 @@ pp_macos_mkbom () {
 }
 
 pp_backend_macos () {
+    : ${pp_macos_bundle_id:=$pp_macos_default_bundle_id_prefix$name}
+    case "$pp_macos_pkg_type" in
+	bundle) pp_backend_macos_bundle;;
+	flat) pp_backend_macos_flat;;
+	*) pp_error "unsupported package type $pp_macos_pkg_type";;
+    esac
+}
+
+pp_backend_macos_bundle () {
     typeset pkgdir Contents Resources lprojdir
     typeset Info_plist Description_plist
     typeset bundle_vendor bundle_version size cmp filelists
@@ -6835,9 +6842,6 @@ pp_backend_macos () {
     if test -z "$pp_macos_bundle_version"; then
         bundle_version=`echo "$version.0.0.0" | sed -n -e 's/[^0-9.]//g' \
             -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/p'`
-        #if test x"$bundle_version" != x"$version"; then
-        #    pp_warn "converted version from '$version' to '$bundle_version'"
-        #fi
     else
         bundle_version="$pp_macos_bundle_version"
     fi
@@ -6849,7 +6853,7 @@ pp_backend_macos () {
     Resources=$Contents/Resources
     lprojdir=$Resources/en.lproj
     mkdir $pkgdir $Contents $Resources $lprojdir ||
-	pp_fatal "Can't make package temporary directories"
+	pp_error "Can't make package temporary directories"
 
     echo "major: 1" > $Resources/package_version
     echo "minor: 0" >> $Resources/package_version
@@ -6909,7 +6913,7 @@ pp_backend_macos () {
 	key CFBundleGetInfoString string \
 	    "${pp_macos_bundle_info_string:-$version $bundle_vendor}" \
 	key CFBundleIdentifier string \
-	    "${pp_macos_bundle_id:-$pp_macos_default_bundle_id_prefix$name}" \
+	    "${pp_macos_bundle_id}" \
     key CFBundleName string "$name" \
 	key CFBundleShortVersionString string "$bundle_version" \
 	key IFMajorVersion integer 1 \
@@ -6951,7 +6955,7 @@ InstalledSize $size
 CompressedSize 0
 " > $Resources/$name.sizes
 
-    # write Resources/postinstall
+    # write Resources/preinstall
     for cmp in $pp_components; do
 	if test -s $pp_wrkdir/%pre.$cmp; then
 	    if test ! -s $Resources/preinstall; then
@@ -6975,7 +6979,7 @@ CompressedSize 0
 	fi
     done
 
-    # write Resources/postupgrade)
+    # write Resources/postupgrade
     for cmp in $pp_components; do
 	if test -s $pp_wrkdir/%postup.$cmp; then
 	    if test ! -s $Resources/postupgrade; then
@@ -6987,7 +6991,7 @@ CompressedSize 0
 	fi
     done
 
-    # write Resources/preremove)
+    # write Resources/preremove
     for cmp in $pp_components; do
 	if test -s $pp_wrkdir/%preun.$cmp; then
 	    if test ! -s $Resources/preremove; then
@@ -6999,7 +7003,7 @@ CompressedSize 0
 	fi
     done
 
-    # write Resources/postremove)
+    # write Resources/postremove
     for cmp in $pp_components; do
 	if test -s $pp_wrkdir/%postun.$cmp; then
 	    if test ! -s $Resources/postremove; then
@@ -7035,12 +7039,177 @@ CompressedSize 0
     hdiutil create -fs HFS+ -srcfolder $pkgdir -volname $name ${name}-${version}.dmg
 }
 
+pp_backend_macos_flat () {
+    typeset pkgdir bundledir Resources lprojdir
+    typeset Info_plist Description_plist
+    typeset bundle_vendor bundle_version size numfiles cmp filelists
+
+    mac_version=`sw_vers -productVersion`
+    bundle_vendor=${pp_macos_bundle_vendor:-$vendor}
+
+    if test -z "$pp_macos_bundle_version"; then
+        bundle_version=`echo "$version.0.0.0" | sed -n -e 's/[^0-9.]//g' \
+            -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/p'`
+    else
+        bundle_version="$pp_macos_bundle_version"
+    fi
+    source_version=`echo $version | sed 's/.*\.//'`
+
+    # build the flat package layout
+    pkgdir=$pp_wrkdir/pkg
+    bundledir=$pp_wrkdir/pkg/$name.pkg
+    Resources=$pkgdir/Resources
+    lprojdir=$Resources/en.lproj
+    mkdir $pkgdir $bundledir $Resources $lprojdir ||
+	pp_error "Can't make package temporary directories"
+
+    # Find file lists (%files.* includes ignore files)
+    for cmp in $pp_components; do
+	test -f $pp_wrkdir/%files.$cmp && filelists="$filelists${filelists:+ }$pp_wrkdir/%files.$cmp"
+    done
+
+    # compute the installed size and number of files/dirs
+    size=`cat $filelists | pp_macos_files_size`
+    numfiles=`cat $filelists | wc -l`
+    numfiles="${numfiles##* }"
+
+    # Write Distribution file
+    cat <<-. >$pkgdir/Distribution
+	<?xml version="1.0" encoding="UTF-8"?>
+	<installer-script minSpecVersion="1.000000" authoringTool="com.quest.rc.PolyPkg" authoringToolVersion="$pp_version" authoringToolBuild="$pp_revision">
+	    <title>$name $version</title>
+	    <options customize="never" allow-external-scripts="no"/>
+	    <domains enable_localSystem="true"/>
+.
+    if test -n "$pp_macos_pkg_welcome"; then
+	cp -R "${pp_macos_pkg_welcome}" $Resources
+	echo "    <welcome file=\"${pp_macos_pkg_welcome##*/}\"/>" >>$pkgdir/Distribution
+    fi
+    if test -n "$pp_macos_pkg_readme"; then
+	cp -R "${pp_macos_pkg_readme}" $Resources
+	echo "    <readme file=\"${pp_macos_pkg_readme##*/}\"/>" >>$pkgdir/Distribution
+    fi
+    if test -n "$pp_macos_pkg_license"; then
+	cp -R "${pp_macos_pkg_license}" $Resources
+	echo "    <license file=\"${pp_macos_pkg_license##*/}\"/>" >>$pkgdir/Distribution
+    fi
+    cat <<-. >>$pkgdir/Distribution
+	    <choices-outline>
+	        <line choice="choice0"/>
+	    </choices-outline>
+	    <choice id="choice0" title="$name $version">
+	        <pkg-ref id="${pp_macos_bundle_id}"/>
+	    </choice>
+	    <pkg-ref id="${pp_macos_bundle_id}" installKBytes="$size" version="$version" auth="Root">#$name.pkg</pkg-ref>
+	</installer-script>
+.
+
+    # write scripts archive
+    # XXX - missing preupgrade, preflight, postflight
+    mkdir $pp_wrkdir/scripts
+    for cmp in $pp_components; do
+	if test -s $pp_wrkdir/%pre.$cmp; then
+	    if test ! -s $pp_wrkdir/scripts/preinstall; then
+		echo "#!/bin/sh" > $pp_wrkdir/scripts/preinstall
+		chmod +x $pp_wrkdir/scripts/preinstall
+	    fi
+	    cat $pp_wrkdir/%pre.$cmp >> $pp_wrkdir/scripts/preinstall
+	    echo : >> $pp_wrkdir/scripts/preinstall
+	fi
+	if test -s $pp_wrkdir/%post.$cmp; then
+	    if test ! -s $pp_wrkdir/scripts/postinstall; then
+		echo "#!/bin/sh" > $pp_wrkdir/scripts/postinstall
+		chmod +x $pp_wrkdir/scripts/postinstall
+	    fi
+	    cat $pp_wrkdir/%post.$cmp >> $pp_wrkdir/scripts/postinstall
+	    echo : >> $pp_wrkdir/scripts/postinstall
+	fi
+	if test -s $pp_wrkdir/%postup.$cmp; then
+	    if test ! -s $pp_wrkdir/scripts/postupgrade; then
+		echo "#!/bin/sh" > $pp_wrkdir/scripts/postupgrade
+		chmod +x $pp_wrkdir/scripts/postupgrade
+	    fi
+	    cat $pp_wrkdir/%postup.$cmp >> $pp_wrkdir/scripts/postupgrade
+	    echo : >> $pp_wrkdir/scripts/postupgrade
+	fi
+	# XXX - not supported
+	if test -s $pp_wrkdir/%preun.$cmp; then
+	    if test ! -s $pp_wrkdir/scripts/preremove; then
+		echo "#!/bin/sh" > $pp_wrkdir/scripts/preremove
+		chmod +x $pp_wrkdir/scripts/preremove
+	    fi
+	    cat $pp_wrkdir/%preun.$cmp >> $pp_wrkdir/scripts/preremove
+	    echo : >> $pp_wrkdir/scripts/preremove
+	fi
+	# XXX - not supported
+	if test -s $pp_wrkdir/%postun.$cmp; then
+	    if test ! -s $pp_wrkdir/scripts/postremove; then
+		echo "#!/bin/sh" > $pp_wrkdir/scripts/postremove
+		chmod +x $pp_wrkdir/scripts/postremove
+	    fi
+	    cat $pp_wrkdir/%postun.$cmp >> $pp_wrkdir/scripts/postremove
+	    echo : >> $pp_wrkdir/scripts/postremove
+	fi
+    done
+    if test "`echo $pp_wrkdir/scripts/*`" != "$pp_wrkdir/scripts/*"; then
+	# write scripts archive, scripts are mode 0755 uid/gid 0/0
+	# resetting the owner and mode is not strictly required
+	(
+	cd $pp_wrkdir/scripts || pp_error "Can't cd to $pp_wrkdir/scripts"
+	rm -f $pp_wrkdir/tmp.files.scripts
+	for s in *; do
+	    echo "f 0755 0 0 - ./$s" >>$pp_wrkdir/tmp.files.scripts
+	done
+	find . -type f | /usr/bin/cpio -o | pp_macos_rewrite_cpio $pp_wrkdir/tmp.files.scripts | gzip -9f -c > $bundledir/Scripts
+	)
+    fi
+
+    # Write PackageInfo file
+    cat <<-. >$bundledir/PackageInfo
+	<?xml version="1.0" encoding="UTF-8"?>
+	<pkg-info format-version="2" identifier="${pp_macos_bundle_id}" version="$version" install-location="/" relocatable="false" overwrite-permissions="true" followSymLinks="true" auth="root">
+	    <payload installKBytes="$size" numberOfFiles="$numfiles"/>
+.
+    if test -s $bundledir/Scripts; then
+	echo "    <scripts>" >>$bundledir/PackageInfo
+	for s in preflight postflight preinstall postinstall preupgrade postupgrade; do
+	    if test -s "$pp_wrkdir/scripts/$s"; then
+		echo "	<$s file=\"$s\"/>" >>$bundledir/PackageInfo
+	    fi
+	done
+	echo "    </scripts>" >>$bundledir/PackageInfo
+    fi
+    cat <<-. >>$bundledir/PackageInfo
+	</pkg-info>
+.
+
+    # Create the bill-of-materials (Bom)
+    cat $filelists | pp_macos_files_bom | sort |
+	pp_macos_bom_fix_parents > $pp_wrkdir/tmp.bomls
+    pp_macos_mkbom $pp_wrkdir/tmp.bomls $bundledir/Bom
+
+    # Create the cpio payload
+    (
+    cd $pp_destdir || pp_error "Can't cd to $pp_destdir"
+    awk '{ print "." $6 }' $filelists | sed 's:/$::' | sort | /usr/bin/cpio -o | pp_macos_rewrite_cpio $filelists | gzip -9f -c > $bundledir/Payload
+    )
+
+    test -d $pp_wrkdir/bom_stage && $pp_macos_sudo rm -rf $pp_wrkdir/bom_stage
+
+    # Create the flat package with xar (like pkgutil --flatten does)
+    (cd $pkgdir && /usr/bin/xar --distribution --no-compress Scripts --no-compress Payload -jcf "../$name-$version.pkg" *)
+}
+
 pp_backend_macos_cleanup () {
     :
 }
 
 pp_backend_macos_names () {
-    echo ${name}.pkg
+    case "$pp_macos_pkg_type" in
+	bundle) echo ${name}.pkg;;
+	flat) echo ${name}-${version}.pkg;;
+	*) pp_error "unsupported package type $pp_macos_pkg_type";;
+    esac
 }
 
 pp_backend_macos_install_script () {
