@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.x\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-02-06 13:40-0500\n"
+"POT-Creation-Date: 2012-02-16 17:03-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,7 +51,7 @@ msgstr ""
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr ""
 
-#: src/exec_common.c:85 src/parse_args.c:432 src/sudo.c:445 src/sudo.c:465
+#: src/exec_common.c:88 src/parse_args.c:432 src/sudo.c:445 src/sudo.c:465
 #: src/sudo.c:472 src/sudo.c:483 src/sudo.c:842 common/alloc.c:85
 #: common/alloc.c:105 common/alloc.c:123 common/alloc.c:145 common/alloc.c:203
 #: common/alloc.c:217
