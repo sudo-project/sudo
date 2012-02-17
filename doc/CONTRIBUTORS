@@ -4,23 +4,32 @@ maintaining it in 1993.  This list is known to be incomplete--if
 you believe you should be listed, please send a note to sudo@sudo.ws.
 
     Matt Ackeret
+    Mark Adler
+    Russ Allbery
     Nick Andrew
     Dimitry Andric
     Danny Barron
     Tom Bates
+    Zdenek Behan
     Ray Bellis
     Elias Benali
     Jamie Beverly
     Spider Boardman
-    Keith Garry Boyce
+    Jakub Bogusz
     P.J. Bostley
+    Keith Bowes
+    Keith Garry Boyce
     Michael Brantley
     Rob Braun
     Piete Brooks
     Jerry Brown
+    Michael E Burr
     Andreas Bussjaeger
     Gary Calvin
     Aaron Campbell
+    Milo Casagrande
+    Yuri Chornoivan
+    Vitezslav Cizek
     Chris Coleman
     Deven T. Corzine
     Frank Cusack
@@ -35,8 +44,11 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Ariel Faigon
     Brian Farrell
     Steve Fobes
+    Mike Frysinger
+    Jean-loup Gailly
     Simon J. Gerraty
     B. Guillory
+    Joe Hansen
     Randy M. Hayman
     Joachim Henke
     YOSHIFUJI Hideaki
@@ -53,6 +65,7 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Timo Juhani
     Ayamura KIKUCHI
     Kevin Kadow
+    Jorma Karvonen
     Stepan Kasal
     Mike Kienenberger
     Dale King
@@ -60,19 +73,21 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Tim Knox
     Alek O. Komarnitsky
     Daniel Kopecek
+    Yuri Kozlov
     Paul Kranenburg
     David Krause
     Case Larsen
     Dmitry V. Levin
     Kendall Libby
     Phillip E. Lobbes
+    Jason McIntyre
     David J. MacKenzie
+    Tom McLaughlin
     Jeff Makey
     Michael D. Marchionna
     Paul Markham
     Emin Martinian
-    Jason McIntyre
-    Tom McLaughlin
+    Pavel Maryanov
     Michael Meskes
     Todd C. Miller
     Loic Minier
@@ -82,6 +97,7 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Dworkin Muller
     Jeff Nieusma
     Peter A. Nikitser
+    Miroslav Nikolic
     Ludwig Nussel
     Eric Paquet
     Chantal Paradis
@@ -90,10 +106,13 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Alexander Peslyak
     Toby Peterson
     Diego Elio Petteno
+    Joel Pickett
     Alex Plotnick
     Gudleik Rasch
     Matt Richards
+    Guido van Rossum
     John P. Rouillard
+    William A. Rowe Jr.
     Alain Roy
     Elan Ruusamae
     Eygene Ryabinkin
@@ -101,7 +120,9 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Wilfredo Sanchez
     Jean-Francois Saucier
     Patrick Schoenfeld
+    Arno Schuring
     Dougal Scott
+    Abel Sendón
     Nick Sieger
     Thor Lancelot Simon
     Marc Slemko
@@ -114,17 +135,21 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Russell Street
     Tilo Stritzky
     Michael Stroucken
+    Yasuaki Taniguchi
     Robert Tarrall
     Matthew Thomas
     Giles Todd
     Martin Toft
+    Chris Torek
     Darren Tucker
     Robert Uhl
+    Mikel Olasagasti Uranga
     Petr Uzel
     Reznic Valery
     Martynas Venckus
     Klaus Wagner
     Dan Walsh
+    Wylmer Wang
     John Warburton
     Kirk Webb
     Timm Wetzel
