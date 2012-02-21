@@ -91,15 +91,15 @@ static struct strmap priorities[] = {
 /*
  * Local prototypes.
  */
-static bool store_int(char *, struct sudo_defs_types *, bool);
-static bool store_list(char *, struct sudo_defs_types *, bool);
-static bool store_mode(char *, struct sudo_defs_types *, bool);
-static bool store_str(char *, struct sudo_defs_types *, bool);
-static bool store_syslogfac(char *, struct sudo_defs_types *, bool);
-static bool store_syslogpri(char *, struct sudo_defs_types *, bool);
-static bool store_tuple(char *, struct sudo_defs_types *, bool);
-static bool store_uint(char *, struct sudo_defs_types *, bool);
-static bool store_float(char *, struct sudo_defs_types *, bool);
+static bool store_int(char *, struct sudo_defs_types *, int);
+static bool store_list(char *, struct sudo_defs_types *, int);
+static bool store_mode(char *, struct sudo_defs_types *, int);
+static bool store_str(char *, struct sudo_defs_types *, int);
+static bool store_syslogfac(char *, struct sudo_defs_types *, int);
+static bool store_syslogpri(char *, struct sudo_defs_types *, int);
+static bool store_tuple(char *, struct sudo_defs_types *, int);
+static bool store_uint(char *, struct sudo_defs_types *, int);
+static bool store_float(char *, struct sudo_defs_types *, int);
 static void list_op(char *, size_t, struct sudo_defs_types *, enum list_ops);
 static const char *logfac2str(int);
 static const char *logpri2str(int);
@@ -194,7 +194,7 @@ dump_defaults(void)
  * This is only meaningful for variables that are *optional*.
  */
 bool
-set_default(char *var, char *val, bool op)
+set_default(char *var, char *val, int op)
 {
     struct sudo_defs_types *cur;
     int num;
@@ -529,7 +529,7 @@ update_defaults(int what)
 }
 
 static bool
-store_int(char *val, struct sudo_defs_types *def, bool op)
+store_int(char *val, struct sudo_defs_types *def, int op)
 {
     char *endp;
     long l;
@@ -550,7 +550,7 @@ store_int(char *val, struct sudo_defs_types *def, bool op)
 }
 
 static bool
-store_uint(char *val, struct sudo_defs_types *def, bool op)
+store_uint(char *val, struct sudo_defs_types *def, int op)
 {
     char *endp;
     long l;
@@ -571,7 +571,7 @@ store_uint(char *val, struct sudo_defs_types *def, bool op)
 }
 
 static bool
-store_float(char *val, struct sudo_defs_types *def, bool op)
+store_float(char *val, struct sudo_defs_types *def, int op)
 {
     char *endp;
     double d;
@@ -592,7 +592,7 @@ store_float(char *val, struct sudo_defs_types *def, bool op)
 }
 
 static bool
-store_tuple(char *val, struct sudo_defs_types *def, bool op)
+store_tuple(char *val, struct sudo_defs_types *def, int op)
 {
     struct def_values *v;
     debug_decl(store_tuple, SUDO_DEBUG_DEFAULTS)
@@ -622,7 +622,7 @@ store_tuple(char *val, struct sudo_defs_types *def, bool op)
 }
 
 static bool
-store_str(char *val, struct sudo_defs_types *def, bool op)
+store_str(char *val, struct sudo_defs_types *def, int op)
 {
     debug_decl(store_str, SUDO_DEBUG_DEFAULTS)
 
@@ -637,7 +637,7 @@ store_str(char *val, struct sudo_defs_types *def, bool op)
 }
 
 static bool
-store_list(char *str, struct sudo_defs_types *def, bool op)
+store_list(char *str, struct sudo_defs_types *def, int op)
 {
     char *start, *end;
     debug_decl(store_list, SUDO_DEBUG_DEFAULTS)
@@ -666,7 +666,7 @@ store_list(char *str, struct sudo_defs_types *def, bool op)
 }
 
 static bool
-store_syslogfac(char *val, struct sudo_defs_types *def, bool op)
+store_syslogfac(char *val, struct sudo_defs_types *def, int op)
 {
     struct strmap *fac;
     debug_decl(store_syslogfac, SUDO_DEBUG_DEFAULTS)
@@ -706,7 +706,7 @@ logfac2str(int n)
 }
 
 static bool
-store_syslogpri(char *val, struct sudo_defs_types *def, bool op)
+store_syslogpri(char *val, struct sudo_defs_types *def, int op)
 {
     struct strmap *pri;
     debug_decl(store_syslogpri, SUDO_DEBUG_DEFAULTS)
@@ -735,7 +735,7 @@ logpri2str(int n)
 }
 
 static bool
-store_mode(char *val, struct sudo_defs_types *def, bool op)
+store_mode(char *val, struct sudo_defs_types *def, int op)
 {
     char *endp;
     long l;
