@@ -1,3 +1,9 @@
+What's new in Sudo 1.8.4p1?
+
+ * Fixed a bug introduced in sudo 1.8.4 that broke adding to or
+   deleting from the env_keep, env_check and env_delete lists in
+   sudoers on some platforms.
+
 What's new in Sudo 1.8.4?
 
  * The -D flag in sudo has been replaced with a more general debugging
