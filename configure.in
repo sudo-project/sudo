@@ -185,6 +185,14 @@ shadow_libs_optional=
 CONFIGURE_ARGS="$@"
 
 dnl
+dnl LD_PRELOAD equivalents
+dnl
+RTLD_PRELOAD_VAR="LD_PRELOAD"
+RTLD_PRELOAD_ENABLE_VAR=
+RTLD_PRELOAD_DELIM=":"
+RTLD_PRELOAD_DEFAULT=
+
+dnl
 dnl libc replacement functions live in compat
 dnl
 AC_CONFIG_LIBOBJ_DIR(compat)
@@ -1465,6 +1473,9 @@ fi
 
 case "$host" in
     *-*-sunos4*)
+		# LD_PRELOAD is space-delimited
+		RTLD_PRELOAD_DELIM=" "
+
 		# getcwd(3) opens a pipe to getpwd(1)!?!
 		BROKEN_GETCWD=1
 
@@ -1476,6 +1487,9 @@ case "$host" in
 		shadow_funcs="getpwanam issecure"
 		;;
     *-*-solaris2*)
+		# LD_PRELOAD is space-delimited
+		RTLD_PRELOAD_DELIM=" "
+
 		# To get the crypt(3) prototype (so we pass -Wall)
 		OSDEFS="${OSDEFS} -D__EXTENSIONS__"
 		# AFS support needs -lucb
@@ -1538,6 +1552,8 @@ case "$host" in
 		# LDR_PRELOAD is only supported in AIX 5.3 and later
 		if test $OSMAJOR -lt 5; then
 		    with_noexec=no
+		else
+		    RTLD_PRELOAD_VAR="LDR_PRELOAD"
 		fi
 
 		# AIX-specific functions
@@ -1671,6 +1687,9 @@ case "$host" in
 		]], [[exit(0);]])], [AC_MSG_RESULT(no)], [AC_MSG_RESULT([yes, fixing locally])
 		sed 's:<acl.h>:<sys/acl.h>:g' < /usr/include/prot.h > prot.h
 		])
+		# ":DEFAULT" must be appended to _RLD_LIST
+		RTLD_PRELOAD_VAR="_RLD_LIST"
+		RTLD_PRELOAD_DEFAULT="DEFAULT"
 		: ${mansectsu='8'}
 		: ${mansectform='4'}
 		;;
@@ -1698,6 +1717,9 @@ case "$host" in
 		if test "$OSMAJOR" -le 4; then
 		    AC_CHECK_LIB(sun, getpwnam, [LIBS="${LIBS} -lsun"])
 		fi
+		# ":DEFAULT" must be appended to _RLD_LIST
+		RTLD_PRELOAD_VAR="_RLD_LIST"
+		RTLD_PRELOAD_DEFAULT="DEFAULT"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		;;
@@ -1840,11 +1862,15 @@ case "$host" in
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
+		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
+		RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
 		;;
     *-*-nextstep*)
 		# lockf() on is broken on the NeXT -- use flock instead
 		ac_cv_func_lockf=no
 		ac_cv_func_flock=yes
+		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
+		RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
 		;;
     *-*-*sysv4*)
 		: ${mansectsu='1m'}
@@ -1859,6 +1885,20 @@ case "$host" in
 		OSDEFS="${OSDEFS} -D_GNU_SOURCE"
 		;;
 esac
+
+dnl
+dnl Library preloading to support NOEXEC
+dnl
+if test -n "$with_noexec"; then
+    SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_VAR, "$RTLD_PRELOAD_VAR")
+    SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_DELIM, "$RTLD_PRELOAD_DELIM")
+    if test -n "$RTLD_PRELOAD_DEFAULT"; then
+	SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_DEFAULT, "$RTLD_PRELOAD_DEFAULT")
+    fi
+    if test -n "$RTLD_PRELOAD_ENABLE_VAR"; then
+	SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_ENABLE_VAR, "$RTLD_PRELOAD_ENABLE_VAR")
+    fi
+fi
 
 dnl
 dnl Check for mixing mutually exclusive and regular auth methods
@@ -3308,6 +3348,10 @@ AH_TEMPLATE(HAVE_STRUCT_UTMP_UT_EXIT, [Define to 1 if `ut_exit' is a member of `
 AH_TEMPLATE(HAVE_STRUCT_UTMPX_UT_EXIT, [Define to 1 if `ut_exit' is a member of `struct utmpx'.])
 AH_TEMPLATE(HAVE___FUNC__, [Define to 1 if the compiler supports the C99 __func__ variable.])
 AH_TEMPLATE(SUDO_KRB5_INSTANCE, [An instance string to append to the username (separated by a slash) for Kerberos V authentication])
+AH_TEMPLATE(RTLD_PRELOAD_VAR, [The environment variable that controls preloading of dynamic objects.])
+AH_TEMPLATE(RTLD_PRELOAD_ENABLE_VAR, [An extra environment variable that is required to enable preloading (if any).])
+AH_TEMPLATE(RTLD_PRELOAD_DELIM, [The delimiter to use when defining multiple preloaded objects.])
+AH_TEMPLATE(RTLD_PRELOAD_DEFAULT, [The default value of preloaded objects (if any).])
 
 dnl
 dnl Bits to copy verbatim into config.h.in

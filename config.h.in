@@ -745,6 +745,19 @@
 /* The syslog priority sudo will use for successful attempts. */
 #undef PRI_SUCCESS
 
+/* The default value of preloaded objects (if any). */
+#undef RTLD_PRELOAD_DEFAULT
+
+/* The delimiter to use when defining multiple preloaded objects. */
+#undef RTLD_PRELOAD_DELIM
+
+/* An extra environment variable that is required to enable preloading (if
+   any). */
+#undef RTLD_PRELOAD_ENABLE_VAR
+
+/* The environment variable that controls preloading of dynamic objects. */
+#undef RTLD_PRELOAD_VAR
+
 /* The user sudo should run commands as by default. */
 #undef RUNAS_DEFAULT
 
