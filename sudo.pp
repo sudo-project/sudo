@@ -74,14 +74,17 @@ still allow people to get their work done."
 	# Note that the order must match that of sudoers.
 	case "$pp_rpm_distro" in
 	centos*|rhel*)
+		chmod u+w ${pp_destdir}${sudoersdir}/sudoers
 		/bin/ed - ${pp_destdir}${sudoersdir}/sudoers <<-'EOF'
 		/Locale settings/+1,s/^# //
 		/Desktop path settings/+1,s/^# //
 		w
 		q
 		EOF
+		chmod u-w ${pp_destdir}${sudoersdir}/sudoers
 		;;
 	sles*)
+		chmod u+w ${pp_destdir}${sudoersdir}/sudoers
 		/bin/ed - ${pp_destdir}${sudoersdir}/sudoers <<-'EOF'
 		/Locale settings/+1,s/^# //
 		/ConsoleKit session/+1,s/^# //
@@ -90,6 +93,7 @@ still allow people to get their work done."
 		w
 		q
 		EOF
+		chmod u-w ${pp_destdir}${sudoersdir}/sudoers
 		;;
 	esac
 
