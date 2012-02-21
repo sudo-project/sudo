@@ -41,6 +41,9 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef _AIX
+# include <sys/id.h>
+#endif
 #include <pwd.h>
 #include <errno.h>
 #include <grp.h>
@@ -59,12 +62,12 @@ static struct group_list *runas_setgroups(void);
 struct perm_state {
     uid_t ruid;
     uid_t euid;
-#ifdef HAVE_SETRESUID
+#if defined(HAVE_SETRESUID) || defined(ID_SAVED)
     uid_t suid;
 #endif
     gid_t rgid;
     gid_t egid;
-#ifdef HAVE_SETRESUID
+#if defined(HAVE_SETRESUID) || defined(ID_SAVED)
     gid_t sgid;
 #endif
     struct group_list *grlist;
@@ -91,7 +94,7 @@ rewind_perms(void)
     debug_return;
 }
 
-#ifdef HAVE_SETRESUID
+#if defined(HAVE_SETRESUID)
 
 /*
  * Set real and effective and saved uids and gids based on perm.
@@ -341,13 +344,303 @@ bad:
     exit(1);
 }
 
-#else
-# ifdef HAVE_SETREUID
+#elif defined(_AIX) && defined(ID_SAVED)
 
 /*
- * Set real and effective uids and gids based on perm.
- * We always retain a real or effective uid of ROOT_UID unless
- * we are headed for an exec().
+ * Set real and effective and saved uids and gids based on perm.
+ * We always retain a saved uid of 0 unless we are headed for an exec().
+ * We only flip the effective gid since it only changes for PERM_SUDOERS.
+ * This version of set_perms() works fine with the "stay_setuid" option.
+ */
+int
+set_perms(int perm)
+{
+    struct perm_state *state, *ostate = NULL;
+    const char *errstr;
+    int noexit;
+    debug_decl(set_perms, SUDO_DEBUG_PERMS)
+
+    noexit = ISSET(perm, PERM_NOEXIT);
+    CLR(perm, PERM_MASK);
+
+    if (perm_stack_depth == PERM_STACK_MAX) {
+	errstr = _("perm stack overflow");
+	errno = EINVAL;
+	goto bad;
+    }
+
+    state = &perm_stack[perm_stack_depth];
+    if (perm != PERM_INITIAL) {
+	if (perm_stack_depth == 0) {
+	    errstr = _("perm stack underflow");
+	    errno = EINVAL;
+	    goto bad;
+	}
+	ostate = &perm_stack[perm_stack_depth - 1];
+	if (memcmp(state, ostate, sizeof(*state)) == 0)
+	    goto done;
+    }
+
+    switch (perm) {
+    case PERM_INITIAL:
+	/* Stash initial state */
+	state->ruid = getuidx(ID_REAL);
+	state->euid = getuidx(ID_EFFECTIVE);
+	state->suid = getuidx(ID_SAVED);
+	state->rgid = getgidx(ID_REAL);
+	state->egid = getgidx(ID_EFFECTIVE);
+	state->sgid = getgidx(ID_SAVED);
+	state->grlist = user_group_list;
+	grlist_addref(state->grlist);
+	break;
+
+    case PERM_ROOT:
+	if (setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID)) {
+	    errstr = "setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID)";
+	    goto bad;
+	}
+	state->ruid = ROOT_UID;
+	state->euid = ROOT_UID;
+	state->suid = ROOT_UID;
+	state->rgid = -1;
+	state->egid = -1;
+	state->sgid = -1;
+	state->grlist = ostate->grlist;
+	grlist_addref(state->grlist);
+	break;
+
+    case PERM_USER:
+	state->rgid = -1;
+	state->egid = user_gid;
+	state->sgid = -1;
+	if (setgidx(ID_EFFECTIVE, user_gid)) {
+	    errstr = "setgidx(ID_EFFECTIVE, user_gid)";
+	    goto bad;
+	}
+	state->grlist = user_group_list;
+	grlist_addref(state->grlist);
+	if (state->grlist != ostate->grlist) {
+	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
+		errstr = "setgroups()";
+		goto bad;
+	    }
+	}
+	if (ID(ruid) != ROOT_UID || ID(euid) != ROOT_UID || ID(suid) != ROOT_UID) {
+	    if (setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID)) {
+		errstr = "setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID)";
+		goto bad;
+	    }
+	}
+	state->ruid = user_uid;
+	state->euid = user_uid;
+	state->suid = ROOT_UID;
+	if (setuidx(ID_EFFECTIVE|ID_REAL, user_uid)) {
+	    errstr = "setuidx(ID_EFFECTIVE|ID_REAL, user_uid)";
+	    goto bad;
+	}
+	break;
+
+    case PERM_FULL_USER:
+	/* headed for exec() */
+	state->rgid = user_gid;
+	state->egid = user_gid;
+	state->sgid = user_gid;
+	if (setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, user_gid)) {
+	    errstr = "setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, user_gid)";
+	    goto bad;
+	}
+	state->grlist = user_group_list;
+	grlist_addref(state->grlist);
+	if (state->grlist != ostate->grlist) {
+	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
+		errstr = "setgroups()";
+		goto bad;
+	    }
+	}
+	state->ruid = user_uid;
+	state->euid = user_uid;
+	state->suid = user_uid;
+	if (setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, user_uid)) {
+	    errstr = "setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, user_uid)";
+	    goto bad;
+	}
+	break;
+
+    case PERM_RUNAS:
+	state->rgid = -1;
+	state->egid = runas_gr ? runas_gr->gr_gid : runas_pw->pw_gid;
+	state->sgid = -1;
+	if (setgidx(ID_EFFECTIVE, state->egid)) {
+	    errstr = _("unable to change to runas gid");
+	    goto bad;
+	}
+	state->grlist = runas_setgroups();
+	state->ruid = -1;
+	state->euid = runas_pw ? runas_pw->pw_uid : user_uid;
+	state->suid = -1;
+	if (setuidx(ID_EFFECTIVE, state->euid)) {
+	    errstr = _("unable to change to runas uid");
+	    goto bad;
+	}
+	break;
+
+    case PERM_SUDOERS:
+	state->grlist = ostate->grlist;
+	grlist_addref(state->grlist);
+
+	/* assume euid == ROOT_UID, ruid == user */
+	state->rgid = -1;
+	state->egid = sudoers_gid;
+	state->sgid = -1;
+	if (setgidx(ID_EFFECTIVE, sudoers_gid))
+	    error(1, _("unable to change to sudoers gid"));
+
+	state->ruid = ROOT_UID;
+	/*
+	 * If sudoers_uid == ROOT_UID and sudoers_mode is group readable
+	 * we use a non-zero uid in order to avoid NFS lossage.
+	 * Using uid 1 is a bit bogus but should work on all OS's.
+	 */
+	if (sudoers_uid == ROOT_UID && (sudoers_mode & 040))
+	    state->euid = 1;
+	else
+	    state->euid = sudoers_uid;
+	state->suid = ROOT_UID;
+	if (ID(ruid) != ROOT_UID || ID(suid) != ROOT_UID) {
+	    if (setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID)) {
+		errstr = "setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID)";
+		goto bad;
+	    }
+	}
+	if (setuidx(ID_EFFECTIVE, state->euid)) {
+	    errstr = "setuidx(ID_EFFECTIVE, SUDOERS_UID)";
+	    goto bad;
+	}
+	break;
+
+    case PERM_TIMESTAMP:
+	state->grlist = ostate->grlist;
+	grlist_addref(state->grlist);
+	state->rgid = -1;
+	state->egid = -1;
+	state->sgid = -1;
+	state->ruid = ROOT_UID;
+	state->euid = timestamp_uid;
+	state->suid = ROOT_UID;
+	if (ID(ruid) != ROOT_UID || ID(suid) != ROOT_UID) {
+	    if (setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID)) {
+		errstr = "setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID)";
+		goto bad;
+	    }
+	}
+	if (setuidx(ID_EFFECTIVE, timestamp_uid)) {
+	    errstr = "setuidx(ID_EFFECTIVE, timestamp_uid)";
+	    goto bad;
+	}
+	break;
+    }
+
+done:
+    perm_stack_depth++;
+    debug_return_bool(1);
+bad:
+    /* XXX - better warnings inline */
+    warningx("%s: %s", errstr,
+	errno == EAGAIN ? _("too many processes") : strerror(errno));
+    if (noexit)
+	debug_return_bool(0);
+    exit(1);
+}
+
+void
+restore_perms(void)
+{
+    struct perm_state *state, *ostate;
+    debug_decl(restore_perms, SUDO_DEBUG_PERMS)
+
+    if (perm_stack_depth < 2)
+	debug_return;
+
+    state = &perm_stack[perm_stack_depth - 1];
+    ostate = &perm_stack[perm_stack_depth - 2];
+    perm_stack_depth--;
+
+    if (OID(ruid) != -1 && OID(euid) != -1 && OID(suid) != -1) {
+	/* XXX - more cases here where euid != ruid */
+	if (OID(euid) == ROOT_UID && state->euid != ROOT_UID) {
+	    if (setuidx(ID_EFFECTIVE, ROOT_UID)) {
+		warning("setuidx() [%d, %d, %d] -> [%d, %d, %d]",
+		    (int)state->ruid, (int)state->euid, (int)state->suid,
+		    -1, ROOT_UID, -1);
+		goto bad;
+	    }
+	}
+	if (OID(ruid) == OID(euid) == OID(suid)) {
+	    if (setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, OID(ruid))) {
+		warning("setuidx() [%d, %d, %d] -> [%d, %d, %d]",
+		    (int)state->ruid, (int)state->euid, (int)state->suid,
+		    (int)OID(ruid), (int)OID(euid), (int)OID(suid));
+		goto bad;
+	    }
+	} else if (OID(ruid) == -1 && OID(suid) == -1) {
+	    if (setuidx(ID_EFFECTIVE, OID(euid))) {
+		warning("setuidx(ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
+		    (int)state->ruid, (int)state->euid, (int)state->suid,
+		    (int)OID(ruid), (int)OID(euid), (int)OID(suid));
+		goto bad;
+	    }
+	} else if (OID(suid) == -1) {
+	    if (setuidx(ID_REAL|ID_EFFECTIVE, OID(ruid))) {
+		warning("setuidx(ID_REAL|ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
+		    (int)state->ruid, (int)state->euid, (int)state->suid,
+		    (int)OID(ruid), (int)OID(euid), (int)OID(suid));
+		goto bad;
+	    }
+	}
+    }
+    if (OID(rgid) != -1 && OID(egid) != -1 && OID(sgid) != -1) {
+	if (OID(rgid) == OID(egid) == OID(sgid)) {
+	    if (setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, OID(rgid))) {
+		warning("setgidx() [%d, %d, %d] -> [%d, %d, %d]",
+		    (int)state->rgid, (int)state->egid, (int)state->sgid,
+		    (int)OID(rgid), (int)OID(egid), (int)OID(sgid));
+		goto bad;
+	    }
+	} else if (OID(rgid) == -1 && OID(sgid) == -1) {
+	    if (setgidx(ID_EFFECTIVE, OID(egid))) {
+		warning("setgidx(ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
+		    (int)state->rgid, (int)state->egid, (int)state->sgid,
+		    (int)OID(rgid), (int)OID(egid), (int)OID(sgid));
+		goto bad;
+	    }
+	} else if (OID(sgid) == -1) {
+	    if (setgidx(ID_REAL|ID_EFFECTIVE, OID(rgid))) {
+		warning("setgidx(ID_REAL|ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
+		    (int)state->rgid, (int)state->egid, (int)state->sgid,
+		    (int)OID(rgid), (int)OID(egid), (int)OID(sgid));
+		goto bad;
+	    }
+	}
+    }
+    if (state->grlist != ostate->grlist) {
+	if (sudo_setgroups(ostate->grlist->ngids, ostate->grlist->gids)) {
+	    warning("setgroups()");
+	    goto bad;
+	}
+    }
+    grlist_delref(state->grlist);
+    debug_return;
+
+bad:
+    exit(1);
+}
+
+#elif defined(HAVE_SETREUID)
+
+/*
+ * Set real and effective and saved uids and gids based on perm.
+ * We always retain a saved uid of 0 unless we are headed for an exec().
+ * We only flip the effective gid since it only changes for PERM_SUDOERS.
  * This version of set_perms() works fine with the "stay_setuid" option.
  */
 int
@@ -577,8 +870,7 @@ bad:
     exit(1);
 }
 
-# else /* !HAVE_SETRESUID && !HAVE_SETREUID */
-# ifdef HAVE_SETEUID
+#elif defined(HAVE_SETEUID)
 
 /*
  * Set real and effective uids and gids based on perm.
@@ -815,7 +1107,7 @@ bad:
     exit(1);
 }
 
-# else /* !HAVE_SETRESUID && !HAVE_SETREUID && !HAVE_SETEUID */
+#else /* !HAVE_SETRESUID && !HAVE_SETREUID && !HAVE_SETEUID */
 
 /*
  * Set uids and gids based on perm via setuid() and setgid().
@@ -942,9 +1234,7 @@ restore_perms(void)
 bad:
     exit(1);
 }
-#  endif /* HAVE_SETEUID */
-# endif /* HAVE_SETREUID */
-#endif /* HAVE_SETRESUID */
+#endif /* HAVE_SETRESUID || HAVE_SETREUID || HAVE_SETEUID */
 
 static struct group_list *
 runas_setgroups(void)
