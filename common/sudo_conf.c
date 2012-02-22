@@ -43,6 +43,7 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <ctype.h>
+#include <errno.h>
 
 #define SUDO_ERROR_WRAP	0
 
@@ -54,6 +55,14 @@
 #include "sudo_plugin.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
+#include "secure_path.h"
+#include "gettext.h"
+
+#ifdef __TANDEM
+# define ROOT_UID	65535
+#else
+# define ROOT_UID	0
+#endif
 
 #ifndef _PATH_SUDO_ASKPASS
 # define _PATH_SUDO_ASKPASS	NULL
@@ -250,19 +259,48 @@ sudo_conf_disable_coredump(void)
 }
 
 /*
- * Reads in /etc/sudo.conf
- * Returns a list of plugins.
+ * Reads in /etc/sudo.conf and populates sudo_conf_data.
  */
 void
 sudo_conf_read(void)
 {
     struct sudo_conf_table *cur;
     struct plugin_info *info;
+    struct stat sb;
     FILE *fp;
     char *cp;
 
-    if ((fp = fopen(_PATH_SUDO_CONF, "r")) == NULL)
+    switch (sudo_secure_path(_PATH_SUDO_CONF, ROOT_UID, -1, &sb)) {
+	case SUDO_PATH_SECURE:
+	    break;
+	case SUDO_PATH_MISSING:
+	    /* Root should always be able to read sudo.conf. */
+	    if (errno != ENOENT && geteuid() == ROOT_UID)
+		warning(_("unable to stat %s"), _PATH_SUDO_CONF);
+	    goto done;
+	case SUDO_PATH_BAD_TYPE:
+	    warningx(_("%s is not a regular file"), _PATH_SUDO_CONF);
+	    goto done;
+	case SUDO_PATH_WRONG_OWNER:
+	    warningx(_("%s is owned by uid %u, should be %u"),
+		_PATH_SUDO_CONF, (unsigned int) sb.st_uid, ROOT_UID);
+	    goto done;
+	case SUDO_PATH_WORLD_WRITABLE:
+	    warningx(_("%s is world writable"), _PATH_SUDO_CONF);
+	    goto done;
+	case SUDO_PATH_GROUP_WRITABLE:
+	    warningx(_("%s is group writable"), _PATH_SUDO_CONF);
+	    goto done;
+	default:
+	    /* NOTREACHED */
+	    goto done;
+    }
+
+    if ((fp = fopen(_PATH_SUDO_CONF, "r")) == NULL) {
+	if (errno != ENOENT && geteuid() == ROOT_UID)
+	    warning(_("unable to open %s"), _PATH_SUDO_CONF);
 	goto done;
+    }
 
     while ((cp = sudo_parseln(fp)) != NULL) {
 	/* Skip blank or comment lines */

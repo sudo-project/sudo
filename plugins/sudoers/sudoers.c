@@ -84,6 +84,7 @@
 #include "interfaces.h"
 #include "sudoers_version.h"
 #include "auth/sudo_auth.h"
+#include "secure_path.h"
 
 /*
  * Prototypes
@@ -940,74 +941,57 @@ set_cmnd(void)
 FILE *
 open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 {
-    struct stat statbuf;
+    struct stat sb;
     FILE *fp = NULL;
-    int rootstat;
     debug_decl(open_sudoers, SUDO_DEBUG_PLUGIN)
 
-    /*
-     * Fix the mode and group on sudoers file from old default.
-     * Only works if file system is readable/writable by root.
-     */
-    if ((rootstat = stat_sudoers(sudoers, &statbuf)) == 0 &&
-	sudoers_uid == statbuf.st_uid && sudoers_mode != 0400 &&
-	(statbuf.st_mode & 0007777) == 0400) {
-
-	if (chmod(sudoers, sudoers_mode) == 0) {
-	    warningx(_("fixed mode on %s"), sudoers);
-	    SET(statbuf.st_mode, sudoers_mode);
-	    if (statbuf.st_gid != sudoers_gid) {
-		if (chown(sudoers, (uid_t) -1, sudoers_gid) == 0) {
-		    warningx(_("set group on %s"), sudoers);
-		    statbuf.st_gid = sudoers_gid;
-		} else
-		    warning(_("unable to set group on %s"), sudoers);
-	    }
-	} else
-	    warning(_("unable to fix mode on %s"), sudoers);
-    }
-
-    /*
-     * Sanity checks on sudoers file.  Must be done as sudoers
-     * file owner.  We already did a stat as root, so use that
-     * data if we can't stat as sudoers file owner.
-     */
     set_perms(PERM_SUDOERS);
 
-    if (rootstat != 0 && stat_sudoers(sudoers, &statbuf) != 0)
-	log_error(USE_ERRNO|NO_EXIT, _("unable to stat %s"), sudoers);
-    else if (!S_ISREG(statbuf.st_mode))
-	log_error(NO_EXIT, _("%s is not a regular file"), sudoers);
-    else if ((statbuf.st_mode & 07577) != (sudoers_mode & 07577))
-	log_error(NO_EXIT, _("%s is mode 0%o, should be 0%o"), sudoers,
-	    (unsigned int) (statbuf.st_mode & 07777),
-	    (unsigned int) sudoers_mode);
-    else if (statbuf.st_uid != sudoers_uid)
-	log_error(NO_EXIT, _("%s is owned by uid %u, should be %u"), sudoers,
-	    (unsigned int) statbuf.st_uid, (unsigned int) sudoers_uid);
-    else if (statbuf.st_gid != sudoers_gid && ISSET(statbuf.st_mode, S_IRGRP|S_IWGRP))
-	log_error(NO_EXIT, _("%s is owned by gid %u, should be %u"), sudoers,
-	    (unsigned int) statbuf.st_gid, (unsigned int) sudoers_gid);
-    else if ((fp = fopen(sudoers, "r")) == NULL)
-	log_error(USE_ERRNO|NO_EXIT, _("unable to open %s"), sudoers);
-    else {
-	/*
-	 * Make sure we can actually read sudoers so we can present the
-	 * user with a reasonable error message (unlike the lexer).
-	 */
-	if (statbuf.st_size != 0 && fgetc(fp) == EOF) {
-	    log_error(USE_ERRNO|NO_EXIT, _("unable to read %s"), sudoers);
-	    fclose(fp);
-	    fp = NULL;
-	}
-    }
-
-    if (fp != NULL) {
-	rewind(fp);
-	(void) fcntl(fileno(fp), F_SETFD, 1);
+    switch (sudo_secure_path(sudoers, sudoers_uid, sudoers_gid, &sb)) {
+	case SUDO_PATH_SECURE:
+	    if ((fp = fopen(sudoers, "r")) == NULL) {
+		log_error(USE_ERRNO|NO_EXIT, _("unable to open %s"), sudoers);
+	    } else {
+		/*
+		 * Make sure we can actually read sudoers so we can present the
+		 * user with a reasonable error message (unlike the lexer).
+		 */
+		if (sb.st_size != 0 && fgetc(fp) == EOF) {
+		    log_error(USE_ERRNO|NO_EXIT, _("unable to read %s"),
+			sudoers);
+		    fclose(fp);
+		    fp = NULL;
+		} else {
+		    /* Rewind fp and set close on exec flag. */
+		    rewind(fp);
+		    (void) fcntl(fileno(fp), F_SETFD, 1);
+		}
+	    }
+	    break;
+	case SUDO_PATH_MISSING:
+	    log_error(USE_ERRNO|NO_EXIT, _("unable to stat %s"), sudoers);
+	    break;
+	case SUDO_PATH_BAD_TYPE:
+	    log_error(NO_EXIT, _("%s is not a regular file"), sudoers);
+	    break;
+	case SUDO_PATH_WRONG_OWNER:
+	    log_error(NO_EXIT, _("%s is owned by uid %u, should be %u"),
+		sudoers, (unsigned int) sb.st_uid, (unsigned int) sudoers_uid);
+	    break;
+	case SUDO_PATH_WORLD_WRITABLE:
+	    log_error(NO_EXIT, _("%s is world writable"), sudoers);
+	    break;
+	case SUDO_PATH_GROUP_WRITABLE:
+	    log_error(NO_EXIT, _("%s is owned by gid %u, should be %u"),
+		sudoers, (unsigned int) sb.st_gid, (unsigned int) sudoers_gid);
+	    break;
+	default:
+	    /* NOTREACHED */
+	    break;
     }
 
     restore_perms();		/* change back to root */
+
     debug_return_ptr(fp);
 }
 

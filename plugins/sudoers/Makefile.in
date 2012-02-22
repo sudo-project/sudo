@@ -715,7 +715,8 @@ sudoers.lo: $(srcdir)/sudoers.c $(top_builddir)/config.h \
             $(srcdir)/defaults.h $(devdir)/def_data.h $(srcdir)/logging.h \
             $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
             $(incdir)/sudo_debug.h $(incdir)/gettext.h $(srcdir)/interfaces.h \
-            $(srcdir)/sudoers_version.h $(srcdir)/auth/sudo_auth.h
+            $(srcdir)/sudoers_version.h $(srcdir)/auth/sudo_auth.h \
+            $(incdir)/secure_path.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudoers.c
 sudoreplay.o: $(srcdir)/sudoreplay.c $(top_builddir)/config.h \
               $(top_srcdir)/compat/timespec.h $(top_srcdir)/compat/stdbool.h \
