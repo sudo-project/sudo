@@ -227,9 +227,11 @@ case "$osversion" in
 		$configure_opts"
 	;;
     macos*)
-	# Build universal binaries, curently intel-only
-	export CFLAGS="-O2 -g -arch i386 -arch x86_64"
-	export LDFLAGS="-arch i386 -arch x86_64"
+	# Build universal binaries (intel-only) targetting Mac OS X 10.5
+	ARCH_FLAGS="-arch i386 -arch x86_64"
+	SDK_FLAGS="-isysroot /Developer/SDKs/MacOSX10.5.sdk -mmacosx-version-min=10.5"
+	export CFLAGS="-O2 -g $ARCH_FLAGS $SDK_FLAGS"
+	export LDFLAGS="$ARCH_FLAGS $SDK_FLAGS"
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	configure_opts="--prefix=$prefix
 		--with-pam
