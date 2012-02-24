@@ -1166,6 +1166,8 @@ sudo_ldap_build_pass1(struct passwd *pw)
 	    (void) strlcat(buf, ")", sz);
 	}
 	for (i = 0; i < grlist->ngids; i++) {
+	    if (pw->pw_gid == grlist->gids[i])
+		continue;
 	    (void) snprintf(gidbuf, sizeof(gidbuf), "%u",
 		(unsigned int)grlist->gids[i]);
 	    (void) strlcat(buf, "(sudoUser=%#", sz);
