@@ -202,6 +202,17 @@ A) ssh does not allocate a tty by default when running a remote command.
    Alternately, if you do not mind your password being echoed to the
    screen, you can use the "visiblepw" sudoers option to allow this.
 
+Q) When I run sudo on AIX I get the following error:
+    setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID): Operation not permitted.
+A) AIX's Enhanced RBAC is preventing sudo from running.  To fix
+   this, add the following entry to /etc/security/privcmds (adjust
+   the path to sudo as needed) and run the setkst command as root:
+
+    /usr/local/bin/sudo:
+	    accessauths = ALLOW_ALL
+	    innateprivs = PV_DAC_UID,PV_DAC_GID
+	    secflags = FSF_EPS
+
 Q) How do you pronounce `sudo'?
 A) The official pronunciation is soo-doo (for su "do").  However, an
    alternate pronunciation, a homophone of "pseudo", is also common.
