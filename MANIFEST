@@ -202,6 +202,8 @@ plugins/sudoers/po/fi.mo
 plugins/sudoers/po/fi.po
 plugins/sudoers/po/ja.mo
 plugins/sudoers/po/ja.po
+plugins/sudoers/po/lt.mo
+plugins/sudoers/po/lt.po
 plugins/sudoers/po/pl.mo
 plugins/sudoers/po/pl.po
 plugins/sudoers/po/sudoers.pot
