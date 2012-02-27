@@ -32,6 +32,11 @@ INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 
 # Where to install things...
 prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+sbindir = @sbindir@
+sysconfdir = @sysconfdir@
+libexecdir = @libexecdir@
 datarootdir = @datarootdir@
 localstatedir = @localstatedir@
 mandir = @mandir@
