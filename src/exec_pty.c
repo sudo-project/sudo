@@ -446,10 +446,14 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 		    /* FALLTHROUGH */
 		case 0:
 		    /* got EOF or pty has gone away */
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"read EOF from fd %d", iob->rfd);
 		    safe_close(iob->rfd);
 		    iob->rfd = -1;
 		    break;
 		default:
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"read %d bytes from fd %d", n, iob->rfd);
 		    if (!iob->action(iob->buf + iob->len, n))
 			terminate_child(child, true);
 		    iob->len += n;
@@ -463,6 +467,9 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 	    } while (n == -1 && errno == EINTR);
 	    if (n == -1) {
 		if (errno == EPIPE || errno == ENXIO || errno == EBADF) {
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"unable to write %d bytes to fd %d",
+			    iob->len - iob->off, iob->wfd);
 		    /* other end of pipe closed or pty revoked */
 		    if (iob->rfd != -1) {
 			safe_close(iob->rfd);
@@ -478,6 +485,8 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 			"error writing fd %d: %s", iob->wfd, strerror(errno));
 		}
 	    } else {
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "wrote %d bytes to fd %d", n, iob->wfd);
 		iob->off += n;
 	    }
 	}
@@ -552,6 +561,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
      */
     memset(io_pipe, 0, sizeof(io_pipe));
     if (io_fds[SFD_STDIN] == -1 || !isatty(STDIN_FILENO)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "stdin not a tty, creating a pipe");
 	pipeline = true;
 	if (pipe(io_pipe[STDIN_FILENO]) != 0)
 	    error(1, _("unable to create pipe"));
@@ -560,6 +570,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
 	io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
     }
     if (io_fds[SFD_STDOUT] == -1 || !isatty(STDOUT_FILENO)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "stdout not a tty, creating a pipe");
 	pipeline = true;
 	if (pipe(io_pipe[STDOUT_FILENO]) != 0)
 	    error(1, _("unable to create pipe"));
@@ -568,6 +579,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
 	io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
     }
     if (io_fds[SFD_STDERR] == -1 || !isatty(STDERR_FILENO)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "stderr not a tty, creating a pipe");
 	if (pipe(io_pipe[STDERR_FILENO]) != 0)
 	    error(1, _("unable to create pipe"));
 	iobufs = io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
