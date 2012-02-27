@@ -1251,5 +1251,5 @@ safe_close(int fd)
 	errno = EINVAL;
 	return -1;
     }
-    debug_return_int(fd);
+    debug_return_int(close(fd));
 }
