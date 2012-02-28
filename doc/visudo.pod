@@ -70,10 +70,10 @@ B<visudo> accepts the following command line options:
 =item -c
 
 Enable B<check-only> mode.  The existing I<sudoers> file will be
-checked for syntax and a message will be printed to the
-standard output detailing the status of I<sudoers>.
-If the syntax check completes successfully, B<visudo> will
-exit with a value of 0.  If a syntax error is encountered,
+checked for syntax errors, owner and mode.  A message will be printed
+to the standard output describing the status of I<sudoers> unless
+the B<-q> option was specified.  If the check completes successfully,
+B<visudo> will exit with a value of 0.  If an error is encountered,
 B<visudo> will exit with a value of 1.
 
 =item -f I<sudoers>

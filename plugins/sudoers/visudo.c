@@ -105,7 +105,7 @@ static char *get_editor(char **);
 static void get_hostname(void);
 static int whatnow(void);
 static int check_aliases(bool, bool);
-static bool check_syntax(char *, bool, bool);
+static bool check_syntax(char *, bool, bool, bool);
 static bool edit_sudoers(struct sudoersfile *, char *, char *, int);
 static bool install_sudoers(struct sudoersfile *, bool);
 static int print_unused(void *, void *);
@@ -225,7 +225,7 @@ main(int argc, char *argv[])
     init_defaults();
 
     if (checkonly) {
-	exitcode = check_syntax(sudoers_path, quiet, strict) ? 0 : 1;
+	exitcode = check_syntax(sudoers_path, quiet, strict, oldperms) ? 0 : 1;
 	goto done;
     }
 
@@ -776,9 +776,35 @@ run_command(char *path, char **argv)
 }
 
 static bool
-check_syntax(char *sudoers_path, bool quiet, bool strict)
+check_owner(const char *path, bool quiet)
 {
     struct stat sb;
+    bool ok = true;
+    debug_decl(check_owner, SUDO_DEBUG_UTIL)
+
+    if (stat(path, &sb) == 0) {
+	if (sb.st_uid != SUDOERS_UID || sb.st_gid != SUDOERS_GID) {
+	    ok = false;
+	    if (!quiet) {
+		fprintf(stderr,
+		    _("%s: wrong owner (uid, gid) should be (%u, %u)\n"),
+		    path, SUDOERS_UID, SUDOERS_GID);
+		}
+	}
+	if ((sb.st_mode & 07777) != SUDOERS_MODE) {
+	    ok = false;
+	    if (!quiet) {
+		fprintf(stderr, _("%s: bad permissions, should be mode 0%o\n"),
+		    path, SUDOERS_MODE);
+	    }
+	}
+    }
+    debug_return_bool(ok);
+}
+
+static bool
+check_syntax(char *sudoers_path, bool quiet, bool strict, bool oldperms)
+{
     bool ok = false;
     debug_decl(check_syntax, SUDO_DEBUG_UTIL)
 
@@ -802,37 +828,28 @@ check_syntax(char *sudoers_path, bool quiet, bool strict)
 	errorfile = sudoers_path;
     }
     ok = !parse_error;
-    if (!quiet) {
-	if (parse_error) {
+
+    if (parse_error) {
+	if (!quiet) {
 	    if (errorlineno != -1)
 		(void) printf(_("parse error in %s near line %d\n"),
 		    errorfile, errorlineno);
 	    else
 		(void) printf(_("parse error in %s\n"), errorfile);
-	} else {
-	    struct sudoersfile *sp;
+	}
+    } else {
+	struct sudoersfile *sp;
+
+	/* Parsed OK, check mode and owner. */
+	if (oldperms || check_owner(sudoers_path, quiet))
 	    (void) printf(_("%s: parsed OK\n"), sudoers_path);
-	    tq_foreach_fwd(&sudoerslist, sp) {
+	else
+	    ok = false;
+	tq_foreach_fwd(&sudoerslist, sp) {
+	    if (oldperms || check_owner(sp->path, quiet))
 		(void) printf(_("%s: parsed OK\n"), sp->path);
-	    }
-	}
-    }
-    /* Check mode and owner in strict mode. */
-    if (strict && yyin != stdin && fstat(fileno(yyin), &sb) == 0) {
-	if (sb.st_uid != SUDOERS_UID || sb.st_gid != SUDOERS_GID) {
-	    ok = false;
-	    if (!quiet) {
-		fprintf(stderr,
-		    _("%s: wrong owner (uid, gid) should be (%u, %u)\n"),
-		    sudoers_path, SUDOERS_UID, SUDOERS_GID);
-		}
-	}
-	if ((sb.st_mode & 07777) != SUDOERS_MODE) {
-	    ok = false;
-	    if (!quiet) {
-		fprintf(stderr, _("%s: bad permissions, should be mode 0%o\n"),
-		    sudoers_path, SUDOERS_MODE);
-	    }
+	    else
+		ok = false;
 	}
     }
 
