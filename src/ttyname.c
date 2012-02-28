@@ -42,7 +42,7 @@
 #endif /* HAVE_UNISTD_H */
 #include <errno.h>
 #include <fcntl.h>
-#if defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined (HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV)
+#if defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined (HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV) || defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV)
 # include <sys/sysctl.h>
 #elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
 # include <sys/sysctl.h>
@@ -54,15 +54,26 @@
 /*
  * How to access the tty device number in struct kinfo_proc.
  */
-#if defined(HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV)
-# define sudo_kp_tdev		kp_eproc.e_tdev
-# define sudo_kp_namelen	4
-#elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
-# define sudo_kp_tdev		ki_tdev
-# define sudo_kp_namelen	4
-#elif defined(HAVE_STRUCT_KINFO_PROC_P_TDEV)
+#if defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV)
+# define SUDO_KERN_PROC		KERN_PROC2
+# define sudo_kinfo_proc	kinfo_proc2
 # define sudo_kp_tdev		p_tdev
 # define sudo_kp_namelen	6
+#elif defined(HAVE_STRUCT_KINFO_PROC_P_TDEV)
+# define SUDO_KERN_PROC		KERN_PROC
+# define sudo_kinfo_proc	kinfo_proc
+# define sudo_kp_tdev		p_tdev
+# define sudo_kp_namelen	6
+#elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
+# define SUDO_KERN_PROC		KERN_PROC
+# define sudo_kinfo_proc	kinfo_proc
+# define sudo_kp_tdev		ki_tdev
+# define sudo_kp_namelen	4
+#elif defined(HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV)
+# define SUDO_KERN_PROC		KERN_PROC
+# define sudo_kinfo_proc	kinfo_proc
+# define sudo_kp_tdev		kp_eproc.e_tdev
+# define sudo_kp_namelen	4
 #endif
 
 #ifdef sudo_kp_tdev
@@ -76,7 +87,7 @@ char *
 get_process_ttyname(void)
 {
     char *tty = NULL;
-    struct kinfo_proc *ki_proc = NULL;
+    struct sudo_kinfo_proc *ki_proc = NULL;
     size_t size = sizeof(*ki_proc);
     int i, mib[6], rc;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
@@ -87,7 +98,7 @@ get_process_ttyname(void)
      */
     for (i = 0; tty == NULL && i < 2; i++) {
 	mib[0] = CTL_KERN;
-	mib[1] = KERN_PROC;
+	mib[1] = SUDO_KERN_PROC;
 	mib[2] = KERN_PROC_PID;
 	mib[3] = i ? (int)getppid() : (int)getpid();
 	mib[4] = sizeof(*ki_proc);

@@ -505,6 +505,9 @@
 /* Define to 1 if the system has the type `struct in6_addr'. */
 #undef HAVE_STRUCT_IN6_ADDR
 
+/* Define to 1 if `p_tdev' is a member of `struct kinfo_proc2'. */
+#undef HAVE_STRUCT_KINFO_PROC2_P_TDEV
+
 /* Define to 1 if `ki_tdev' is a member of `struct kinfo_proc'. */
 #undef HAVE_STRUCT_KINFO_PROC_KI_TDEV
 
