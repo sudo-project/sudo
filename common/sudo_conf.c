@@ -270,7 +270,7 @@ sudo_conf_read(void)
     FILE *fp;
     char *cp;
 
-    switch (sudo_secure_path(_PATH_SUDO_CONF, ROOT_UID, -1, &sb)) {
+    switch (sudo_secure_file(_PATH_SUDO_CONF, ROOT_UID, -1, &sb)) {
 	case SUDO_PATH_SECURE:
 	    break;
 	case SUDO_PATH_MISSING:

@@ -24,6 +24,8 @@
 #define SUDO_PATH_WORLD_WRITABLE	-4
 #define SUDO_PATH_GROUP_WRITABLE	-5
 
-int sudo_secure_path(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
+int sudo_secure_dir(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
+int sudo_secure_file(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
+int sudo_secure_path(const char *path, int type, uid_t uid, gid_t gid, struct stat *sbp);
 
 #endif /* _SUDO_SECURE_PATH_H */

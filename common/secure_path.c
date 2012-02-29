@@ -36,17 +36,17 @@
 #include "secure_path.h"
 
 /*
- * Verify that path is a regular file and not writable by other users.
+ * Verify that path is the right type and not writable by other users.
  */
 int
-sudo_secure_path(const char *path, uid_t uid, gid_t gid, struct stat *sbp)
+sudo_secure_path(const char *path, int type, uid_t uid, gid_t gid, struct stat *sbp)
 {
     struct stat sb;
     int rval = SUDO_PATH_MISSING;
     debug_decl(sudo_secure_path, SUDO_DEBUG_UTIL)
 
     if (path != NULL && stat_sudoers(path, &sb) == 0) {
-	if (!S_ISREG(sb.st_mode)) {
+	if ((sb.st_mode & _S_IFMT) != type) {
 	    rval = SUDO_PATH_BAD_TYPE;
 	} else if (uid != (uid_t)-1 && sb.st_uid != uid) {
 	    rval = SUDO_PATH_WRONG_OWNER;
@@ -63,4 +63,22 @@ sudo_secure_path(const char *path, uid_t uid, gid_t gid, struct stat *sbp)
     }
 
     debug_return_int(rval);
+}
+
+/*
+ * Verify that path is a regular file and not writable by other users.
+ */
+int
+sudo_secure_file(const char *path, uid_t uid, gid_t gid, struct stat *sbp)
+{
+    return sudo_secure_path(path, _S_IFREG, uid, gid, sbp);
+}
+
+/*
+ * Verify that path is a directory and not writable by other users.
+ */
+int
+sudo_secure_dir(const char *path, uid_t uid, gid_t gid, struct stat *sbp)
+{
+    return sudo_secure_path(path, _S_IFDIR, uid, gid, sbp);
 }

@@ -103,10 +103,6 @@ static void create_admin_success_flag(void);
 /*
  * Globals
  */
-const char *sudoers_file = _PATH_SUDOERS;
-mode_t sudoers_mode = SUDOERS_MODE;
-uid_t sudoers_uid = SUDOERS_UID;
-gid_t sudoers_gid = SUDOERS_GID;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
 struct interface *interfaces;
@@ -947,7 +943,7 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 
     set_perms(PERM_SUDOERS);
 
-    switch (sudo_secure_path(sudoers, sudoers_uid, sudoers_gid, &sb)) {
+    switch (sudo_secure_file(sudoers, sudoers_uid, sudoers_gid, &sb)) {
 	case SUDO_PATH_SECURE:
 	    if ((fp = fopen(sudoers, "r")) == NULL) {
 		log_error(USE_ERRNO|NO_EXIT, _("unable to open %s"), sudoers);

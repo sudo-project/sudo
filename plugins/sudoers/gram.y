@@ -73,7 +73,7 @@
 extern int sudolineno;
 extern int last_token;
 extern char *sudoers;
-static bool verbose = false;
+bool sudoers_warnings = true;
 bool parse_error = false;
 int errorlineno = -1;
 char *errorfile = NULL;
@@ -106,7 +106,7 @@ yyerror(const char *s)
     }
     if (trace_print != NULL) {
 	LEXTRACE("<*> ");
-    } else if (verbose && s != NULL) {
+    } else if (sudoers_warnings && s != NULL) {
 	warningx(_(">>> %s: %s near line %d <<<"), sudoers, s, sudolineno);
     }
     parse_error = true;
@@ -792,7 +792,7 @@ init_parser(const char *path, int quiet)
     parse_error = false;
     errorlineno = -1;
     errorfile = sudoers;
-    verbose = !quiet;
+    sudoers_warnings = !quiet;
 
     debug_return;
 }

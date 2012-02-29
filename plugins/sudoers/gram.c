@@ -12,7 +12,7 @@
 #define YYPREFIX "yy"
 #line 2 "gram.y"
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2011
+ * Copyright (c) 1996, 1998-2005, 2007-2012
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -85,7 +85,7 @@
 extern int sudolineno;
 extern int last_token;
 extern char *sudoers;
-static bool verbose = false;
+bool sudoers_warnings = true;
 bool parse_error = false;
 int errorlineno = -1;
 char *errorfile = NULL;
@@ -118,7 +118,7 @@ yyerror(const char *s)
     }
     if (trace_print != NULL) {
 	LEXTRACE("<*> ");
-    } else if (verbose && s != NULL) {
+    } else if (sudoers_warnings && s != NULL) {
 	warningx(_(">>> %s: %s near line %d <<<"), sudoers, s, sudolineno);
     }
     parse_error = true;
@@ -823,7 +823,7 @@ init_parser(const char *path, int quiet)
     parse_error = false;
     errorlineno = -1;
     errorfile = sudoers;
-    verbose = !quiet;
+    sudoers_warnings = !quiet;
 
     debug_return;
 }
@@ -849,7 +849,7 @@ static int yygrowstack()
 #ifdef SIZE_MAX
 #define YY_SIZE_MAX SIZE_MAX
 #else
-#define YY_SIZE_MAX 0x7fffffff
+#define YY_SIZE_MAX 0xffffffffU
 #endif
     if (newsize && YY_SIZE_MAX / newsize < sizeof *newss)
         goto bail;

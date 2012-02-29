@@ -1,6 +1,6 @@
 %{
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2011
+ * Copyright (c) 1996, 1998-2005, 2007-2012
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -72,12 +72,20 @@
 #include "toke.h"
 #include <gram.h>
 #include "lbuf.h"
+#include "secure_path.h"
 
 extern YYSTYPE yylval;
 extern bool parse_error;
+extern bool sudoers_warnings;
 int sudolineno;
 int last_token;
 char *sudoers;
+
+/* Default sudoers path, mode and owner */
+const char *sudoers_file = _PATH_SUDOERS;
+mode_t sudoers_mode = SUDOERS_MODE;
+uid_t sudoers_uid = SUDOERS_UID;
+gid_t sudoers_gid = SUDOERS_GID;
 
 static bool continued, sawspace;
 static int prev_state;
@@ -804,6 +812,39 @@ _push_include(char *path, bool isdir)
 	}
     }
     if (isdir) {
+	struct stat sb;
+	switch (sudo_secure_dir(path, sudoers_uid, sudoers_gid, &sb)) {
+	    case SUDO_PATH_MISSING:
+		debug_return_bool(false);
+	    case SUDO_PATH_BAD_TYPE:
+		errno = ENOTDIR;
+		if (sudoers_warnings) {
+		    warning(path);
+		}
+		debug_return_bool(false);
+	    case SUDO_PATH_WRONG_OWNER:
+		if (sudoers_warnings) {
+		    warningx(_("%s is owned by uid %u, should be %u"),   
+			path, (unsigned int) sb.st_uid,
+			(unsigned int) sudoers_uid);
+		}
+		debug_return_bool(false);
+	    case SUDO_PATH_WORLD_WRITABLE:
+		if (sudoers_warnings) {
+		    warningx(_("%s is world writable"), path);
+		}
+		debug_return_bool(false);
+	    case SUDO_PATH_GROUP_WRITABLE:
+		if (sudoers_warnings) {
+		    warningx(_("%s is owned by gid %u, should be %u"),
+			path, (unsigned int) sb.st_gid,
+			(unsigned int) sudoers_gid);
+		}
+		debug_return_bool(false);
+	    default:
+		/* NOTREACHED */
+		debug_return_bool(false);
+	}
 	if (!(path = switch_dir(&istack[idepth], path))) {
 	    /* switch_dir() called yyerror() for us */
 	    debug_return_bool(false);
