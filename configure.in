@@ -1953,6 +1953,15 @@ dnl
 AC_PROG_GCC_TRADITIONAL
 AC_C_CONST
 AC_C_VOLATILE
+# Check for variadic macro support in cpp
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+AC_INCLUDES_DEFAULT
+#if defined(__GNUC__) && __GNUC__ == 2
+# define sudo_fprintf(fp, fmt...) fprintf((fp), (fmt))
+#else
+# define sudo_fprintf(fp, ...) fprintf((fp), __VA_ARGS__)
+#endif
+], [sudo_fprintf(stderr, "a %s", "test");])], [], [AC_MSG_ERROR([Your C compiler doesn't support variadic macros, try building with gcc instead])])
 if test X"$with_gnu_ld" != "yes" -a -n "$GCC"; then
     _CFLAGS="$CFLAGS"
     CFLAGS="$CFLAGS -static-libgcc"

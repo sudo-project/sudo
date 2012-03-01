@@ -14584,6 +14584,31 @@ $as_echo "#define volatile /**/" >>confdefs.h
 
 fi
 
+# Check for variadic macro support in cpp
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+$ac_includes_default
+#if defined(__GNUC__) && __GNUC__ == 2
+# define sudo_fprintf(fp, fmt...) fprintf((fp), (fmt))
+#else
+# define sudo_fprintf(fp, ...) fprintf((fp), __VA_ARGS__)
+#endif
+
+int
+main ()
+{
+sudo_fprintf(stderr, "a %s", "test");
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
+else
+  as_fn_error $? "Your C compiler doesn't support variadic macros, try building with gcc instead" "$LINENO" 5
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 if test X"$with_gnu_ld" != "yes" -a -n "$GCC"; then
     _CFLAGS="$CFLAGS"
     CFLAGS="$CFLAGS -static-libgcc"
