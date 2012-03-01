@@ -745,7 +745,7 @@ toke.lo: $(devdir)/toke.c $(top_builddir)/config.h $(top_builddir)/config.h \
          $(srcdir)/defaults.h $(devdir)/def_data.h $(srcdir)/logging.h \
          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
          $(incdir)/gettext.h $(srcdir)/parse.h $(srcdir)/toke.h \
-         $(devdir)/gram.h $(incdir)/lbuf.h
+         $(devdir)/gram.h $(incdir)/lbuf.h $(incdir)/secure_path.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(devdir)/toke.c
 toke_util.lo: $(srcdir)/toke_util.c $(top_builddir)/config.h \
               $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
