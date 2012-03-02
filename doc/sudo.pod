@@ -421,7 +421,7 @@ which corresponds to the following F<@sysconfdir@/sudo.conf> file.
  # Default @sysconfdir@/sudo.conf file
  #
  # Format:
- #   Plugin plugin_name plugin_path
+ #   Plugin plugin_name plugin_path plugin_args ...
  #   Path askpass /path/to/askpass
  #   Path noexec /path/to/noexec.so
  #   Debug sudo /var/log/sudo_debug all@warn
@@ -431,6 +431,7 @@ which corresponds to the following F<@sysconfdir@/sudo.conf> file.
  #   fully qualified.
  # The plugin_name corresponds to a global symbol in the plugin
  #   that contains the plugin interface structure.
+ # The plugin_args are optional.
  #
  Plugin policy_plugin sudoers.so
  Plugin io_plugin sudoers.so 
@@ -441,8 +442,9 @@ plugin.  The I<symbol_name> is the name of the C<struct policy_plugin>
 or C<struct io_plugin> in the plugin shared object.  The I<path>
 may be fully qualified or relative.  If not fully qualified it is
 relative to the F<@prefix@/libexec> directory.  Any additional
-parameters after the I<path> are ignored.  Lines that don't begin
-with C<Plugin> or C<Path> are silently ignored
+parameters after the I<path> are passed as arguments to the plugin's
+I<open> function.  Lines that don't begin with C<Plugin>, C<Path>,
+C<Debug> or C<Set> are silently ignored.
 
 For more information, see the L<sudo_plugin(8)> manual.
 

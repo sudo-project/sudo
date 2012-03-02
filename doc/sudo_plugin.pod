@@ -48,8 +48,9 @@ plugin.  The I<symbol_name> is the name of the C<struct policy_plugin>
 or C<struct io_plugin> in the plugin shared object.  The I<path>
 may be fully qualified or relative.  If not fully qualified it is
 relative to the F<@prefix@/libexec> directory.  Any additional
-parameters after the I<path> are ignored.  Lines that don't begin
-with C<Plugin> or C<Path> are silently ignored.
+parameters after the I<path> are passed as arguments to the plugin's
+I<open> function.  Lines that don't begin with C<Plugin>, C<Path>,
+C<Debug> or C<Set> are silently ignored.
 
 The same shared object may contain multiple plugins, each with a
 different symbol name.  The shared object file must be owned by uid
@@ -61,13 +62,17 @@ This limitation does not apply to I/O plugins.
  # Default @sysconfdir@/sudo.conf file
  #
  # Format:
- #   Plugin plugin_name plugin_path
+ #   Plugin plugin_name plugin_path optional_args
  #   Path askpass /path/to/askpass
+ #   Path noexec /path/to/noexec.so
+ #   Debug sudo /var/log/sudo_debug all@warn
+ #   Set disable_coredump true
  #
  # The plugin_path is relative to @prefix@/libexec unless
  #   fully qualified.
  # The plugin_name corresponds to a global symbol in the plugin
  #   that contains the plugin interface structure.
+ # The plugin_args are optional.
  #
  Plugin sudoers_policy sudoers.so
  Plugin sudoers_io sudoers.so
@@ -85,8 +90,9 @@ so that B<sudo> can load it.
      unsigned int type; /* always SUDO_POLICY_PLUGIN */
      unsigned int version; /* always SUDO_API_VERSION */
      int (*open)(unsigned int version, sudo_conv_t conversation,
-		 sudo_printf_t plugin_printf, char * const settings[],
-		 char * const user_info[], char * const user_env[]);
+                 sudo_printf_t plugin_printf, char * const settings[],
+                 char * const user_info[], char * const user_env[],
+                 char * const plugin_args[]);
      void (*close)(int exit_status, int error);
      int (*show_version)(int verbose);
      int (*check_policy)(int argc, char * const argv[],
@@ -118,7 +124,8 @@ built against.
 
  int (*open)(unsigned int version, sudo_conv_t conversation,
              sudo_printf_t plugin_printf, char * const settings[],
-             char * const user_info[], char * const user_env[]);
+             char * const user_info[], char * const user_env[],
+             char * const plugin_args[]);
 
 Returns 1 on success, 0 on failure, -1 if a general error occurred,
 or -2 if there was a usage error.  In the latter case, B<sudo> will
@@ -368,6 +375,19 @@ The user's environment in the form of a C<NULL>-terminated vector of
 When parsing I<user_env>, the plugin should split on the B<first>
 equal sign ('=') since the I<name> field will never include one
 itself but the I<value> might.
+
+=item plugin_args
+
+Any (non-comment) strings immediately after the plugin path are
+treated as arguments to the plugin.  These arguments are split on
+a whitespace boundary and are passed to the plugin in the form of
+a C<NULL>-terminated array of strings.  If no arguments were
+specified, I<plugin_args> will be the NULL pointer.
+
+NOTE: the I<plugin_args> parameter is only available starting with
+API version 1.2.  A plugin B<must> check the API version specified
+by the B<sudo> front end before using I<plugin_args>.  Failure to
+do so may result in a crash.
 
 =back
 
@@ -762,7 +782,7 @@ error information to the user.
      int (*open)(unsigned int version, sudo_conv_t conversation
                  sudo_printf_t plugin_printf, char * const settings[],
                  char * const user_info[], int argc, char * const argv[],
-                 char * const user_env[]);
+                 char * const user_env[], char * const plugin_args[]);
      void (*close)(int exit_status, int error); /* wait status or error */
      int (*show_version)(int verbose);
      int (*log_ttyin)(const char *buf, unsigned int len);
@@ -811,7 +831,7 @@ built against.
  int (*open)(unsigned int version, sudo_conv_t conversation
              sudo_printf_t plugin_printf, char * const settings[],
              char * const user_info[], int argc, char * const argv[],
-             char * const user_env[]);
+             char * const user_env[], char * const plugin_args[]);
 
 The I<open> function is run before the I<log_input>, I<log_output>
 or I<show_version> functions are called.  It is only called if the
@@ -894,6 +914,19 @@ The user's environment in the form of a C<NULL>-terminated vector of
 When parsing I<user_env>, the plugin should split on the B<first>
 equal sign ('=') since the I<name> field will never include one
 itself but the I<value> might.
+
+=item plugin_args
+
+Any (non-comment) strings immediately after the plugin path are
+treated as arguments to the plugin.  These arguments are split on
+a whitespace boundary and are passed to the plugin in the form of
+a C<NULL>-terminated array of strings.  If no arguments were
+specified, I<plugin_args> will be the NULL pointer.
+
+NOTE: the I<plugin_args> parameter is only available starting with
+API version 1.2.  A plugin B<must> check the API version specified
+by the B<sudo> front end before using I<plugin_args>.  Failure to
+do so may result in a crash.
 
 =back
 

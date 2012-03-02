@@ -540,7 +540,7 @@ and F</usr/bin/vi> but shell escapes will be disabled.
 
  aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 
-See the L<PREVENTING SHELL ESCAPES> section below for more details
+See the L<Preventing Shell Escapes> section below for more details
 on how C<NOEXEC> works and whether or not it will work on your system.
 
 =head3 SETENV and NOSETENV
@@ -940,8 +940,8 @@ by default.
 
 If set, all commands run via B<sudo> will behave as if the C<NOEXEC>
 tag has been set, unless overridden by a C<EXEC> tag.  See the
-description of I<NOEXEC and EXEC> below as well as the L<PREVENTING SHELL
-ESCAPES> section at the end of this manual.  This flag is I<off> by default.
+description of I<NOEXEC and EXEC> below as well as the L<Preventing Shell
+Escapes> section at the end of this manual.  This flag is I<off> by default.
 
 =item path_info
 
@@ -1594,9 +1594,165 @@ is displayed when B<sudo> is run by root with the I<-V> option.
 
 =back
 
+=head1 SUDO.CONF
+
+The F<@sysconfdir@/sudo.conf> file determines which plugins the
+B<sudo> front end will load.  If no F<@sysconfdir@/sudo.conf> file
+is present, or it contains no C<Plugin> lines, B<sudo> will use the
+I<sudoers> security policy and I/O logging, which corresponds to
+the following F<@sysconfdir@/sudo.conf> file.
+
+ #
+ # Default @sysconfdir@/sudo.conf file
+ #
+ # Format:
+ #   Plugin plugin_name plugin_path plugin_args ...
+ #   Path askpass /path/to/askpass
+ #   Path noexec /path/to/noexec.so
+ #   Debug sudo /var/log/sudo_debug all@warn
+ #   Set disable_coredump true
+ #
+ # The plugin_path is relative to @prefix@/libexec unless
+ #   fully qualified.
+ # The plugin_name corresponds to a global symbol in the plugin
+ #   that contains the plugin interface structure.
+ # The plugin_args are optional.
+ #
+ Plugin policy_plugin sudoers.so
+ Plugin io_plugin sudoers.so 
+
+=head2 PLUGIN OPTIONS
+
+Starting with B<sudo> 1.8.5 it is possible to pass options to the
+I<sudoers> plugin.  Options may be listed after the path to the
+plugin (i.e. after F<sudoers.so>); multiple options should be
+space-separated.  For example:
+
+ Plugin sudoers_policy sudoers.so sudoers_file=/etc/sudoers sudoers_uid=0 sudoers_gid=0 sudoers_mode=0440
+
+The following plugin options are supported:
+
+=over 10
+
+=item sudoers_file=pathname
+
+The I<sudoers_file> option can be used to override the default path
+to the I<sudoers> file.
+
+=item sudoers_uid=uid
+
+The I<sudoers_uid> option can be used to override the default owner
+of the sudoers file.  It should be specified as a numeric user ID.
+
+=item sudoers_gid=gid
+
+The I<sudoers_gid> option can be used to override the default group
+of the sudoers file.  It should be specified as a numeric group ID.
+
+=item sudoers_mode=mode
+
+The I<sudoers_mode> option can be used to override the default file
+mode for the sudoers file.  It should be specified as an octal value.
+
+=back
+
+=head2 DEBUG FLAGS
+
+Versions 1.8.4 and higher of the I<sudoers> plugin supports a
+debugging framework that can help track down what the plugin is
+doing internally if there is a problem.  This can be configured in
+the F<@sysconfdir@/sudo.conf> file as described in L<sudo(8)>.
+
+The I<sudoers> plugin uses the same debug flag format as B<sudo>
+itself: I<subsystem>@I<priority>.
+
+The priorities used by I<sudoers>, in order of decreasing severity,
+are: I<crit>, I<err>, I<warn>, I<notice>, I<diag>, I<info>, I<trace>
+and I<debug>.  Each priority, when specified, also includes all
+priorities higher than it.  For example, a priority of I<notice>
+would include debug messages logged at I<notice> and higher.
+
+The following subsystems are used by I<sudoers>:
+
+=over 10
+
+=item I<alias>
+
+C<User_Alias>, C<Runas_Alias>, C<Host_Alias> and C<Cmnd_Alias> processing
+
+=item I<all>
+
+matches every subsystem
+
+=item I<audit>
+
+BSM and Linux audit code
+
+=item I<auth>
+
+user authentication
+
+=item I<defaults>
+
+I<sudoers> I<Defaults> settings
+
+=item I<env>
+
+environment handling
+
+=item I<ldap>
+
+LDAP-based sudoers
+
+=item I<logging>
+
+logging support
+
+=item I<match>
+
+matching of users, groups, hosts and netgroups in I<sudoers>
+
+=item I<netif>
+
+network interface handling
+
+=item I<nss>
+
+network service switch handling in I<sudoers>
+
+=item I<parser>
+
+I<sudoers> file parsing
+
+=item I<perms>
+
+permission setting
+
+=item I<plugin>
+
+The equivalent of I<main> for the plugin.
+
+=item I<pty>
+
+pseudo-tty related code
+
+=item I<rbtree>
+
+redblack tree internals
+
+=item I<util>
+
+utility functions 
+
+=back
+
 =head1 FILES
 
 =over 24
+
+=item F<@sysconfdir@/sudo.conf>
+
+Sudo front end configuration
 
 =item F<@sysconfdir@/sudoers>
 
@@ -1810,6 +1966,8 @@ for encapsulating in a shell script.
 
 =head1 SECURITY NOTES
 
+=head2 Limitations of the '!' operator
+
 It is generally not effective to "subtract" commands from C<ALL>
 using the '!' operator.  A user can trivially circumvent this
 by copying the desired command to a different name and then
@@ -1823,7 +1981,14 @@ different name, or use a shell escape from an editor or other
 program.  Therefore, these kind of restrictions should be considered
 advisory at best (and reinforced by policy).
 
-Furthermore, if the I<fast_glob> option is in use, it is not possible
+In general, if a user has sudo C<ALL> there is nothing to prevent
+them from creating their own program that gives them a root shell
+(or making their own copy of a shell) regardless of any '!' elements
+in the user specification.
+
+=head2 Security implications of I<fast_glob>
+
+If the I<fast_glob> option is in use, it is not possible
 to reliably negate commands where the path name includes globbing
 (aka wildcard) characters.  This is because the C library's
 L<fnmatch(3)> function cannot resolve relative paths.  While this
@@ -1839,7 +2004,7 @@ For example, given the following I<sudoers> entry:
 User B<john> can still run C</usr/bin/passwd root> if I<fast_glob> is
 enabled by changing to F</usr/bin> and running C<./passwd root> instead.
 
-=head1 PREVENTING SHELL ESCAPES
+=head2 Preventing Shell Escapes
 
 Once B<sudo> executes a program, that program is free to do whatever
 it pleases, including run other programs.  This can be a security
@@ -1903,97 +2068,7 @@ to unintended privilege escalation.  In the specific case of an
 editor, a safer approach is to give the user permission to run
 B<sudoedit>.
 
-=head1 DEBUG FLAGS
-
-Versions 1.8.4 and higher of the I<sudoers> plugin supports a
-debugging framework that can help track down what the plugin is
-doing internally if there is a problem.  This can be configured in
-the F<@sysconfdir@/sudo.conf> file as described in L<sudo(8)>.
-
-The I<sudoers> plugin uses the same debug flag format as B<sudo>
-itself: I<subsystem>@I<priority>.
-
-The priorities used by I<sudoers>, in order of decreasing severity,
-are: I<crit>, I<err>, I<warn>, I<notice>, I<diag>, I<info>, I<trace>
-and I<debug>.  Each priority, when specified, also includes all
-priorities higher than it.  For example, a priority of I<notice>
-would include debug messages logged at I<notice> and higher.
-
-The following subsystems are used by I<sudoers>:
-
-=over 10
-
-=item I<alias>
-
-C<User_Alias>, C<Runas_Alias>, C<Host_Alias> and C<Cmnd_Alias> processing
-
-=item I<all>
-
-matches every subsystem
-
-=item I<audit>
-
-BSM and Linux audit code
-
-=item I<auth>
-
-user authentication
-
-=item I<defaults>
-
-I<sudoers> I<Defaults> settings
-
-=item I<env>
-
-environment handling
-
-=item I<ldap>
-
-LDAP-based sudoers
-
-=item I<logging>
-
-logging support
-
-=item I<match>
-
-matching of users, groups, hosts and netgroups in I<sudoers>
-
-=item I<netif>
-
-network interface handling
-
-=item I<nss>
-
-network service switch handling in I<sudoers>
-
-=item I<parser>
-
-I<sudoers> file parsing
-
-=item I<perms>
-
-permission setting
-
-=item I<plugin>
-
-The equivalent of I<main> for the plugin.
-
-=item I<pty>
-
-pseudo-tty related code
-
-=item I<rbtree>
-
-redblack tree internals
-
-=item I<util>
-
-utility functions 
-
-=back
-
-=head1 SECURITY NOTES
+=head2 Time stamp file checks
 
 I<sudoers> will check the ownership of its time stamp directory
 (F<@timedir@> by default) and ignore the directory's contents if
@@ -2033,11 +2108,6 @@ monotonically increase the inode number of devices as they are
 created (such as Mac OS X), I<sudoers> is able to determine when a
 tty-based time stamp file is stale and will ignore it.  Administrators
 should not rely on this feature as it is not universally available.
-
-If users have sudo C<ALL> there is nothing to prevent them from
-creating their own program that gives them a root shell (or making
-their own copy of a shell) regardless of any '!' elements in the
-user specification.
 
 =head1 SEE ALSO
 

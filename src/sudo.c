@@ -1056,9 +1056,24 @@ static int
 policy_open(struct plugin_container *plugin, char * const settings[],
     char * const user_info[], char * const user_env[])
 {
+    int rval;
     debug_decl(policy_open, SUDO_DEBUG_PCOMM)
-    debug_return_bool(plugin->u.policy->open(SUDO_API_VERSION,
-	sudo_conversation, _sudo_printf, settings, user_info, user_env));
+
+    /*
+     * Backwards compatibility for older API versions
+     */
+    switch (plugin->u.generic->version) {
+    case SUDO_API_MKVERSION(1, 0):
+    case SUDO_API_MKVERSION(1, 1):
+	rval = plugin->u.policy_1_0->open(plugin->u.io_1_0->version,
+	    sudo_conversation, _sudo_printf, settings, user_info, user_env);
+	break;
+    default:
+	rval = plugin->u.policy->open(SUDO_API_VERSION, sudo_conversation,
+	    _sudo_printf, settings, user_info, user_env, plugin->args);
+    }
+
+    debug_return_bool(rval);
 }
 
 static void
@@ -1141,7 +1156,7 @@ iolog_open(struct plugin_container *plugin, char * const settings[],
     debug_decl(iolog_open, SUDO_DEBUG_PCOMM)
 
     /*
-     * Backwards compatibility for API major 1, minor 0
+     * Backwards compatibility for older API versions
      */
     switch (plugin->u.generic->version) {
     case SUDO_API_MKVERSION(1, 0):
@@ -1149,10 +1164,15 @@ iolog_open(struct plugin_container *plugin, char * const settings[],
 	    sudo_conversation, _sudo_printf, settings, user_info, argc, argv,
 	    user_env);
 	break;
+    case SUDO_API_MKVERSION(1, 1):
+	rval = plugin->u.io_1_1->open(plugin->u.io_1_1->version,
+	    sudo_conversation, _sudo_printf, settings, user_info,
+	    command_info, argc, argv, user_env);
+	break;
     default:
 	rval = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation,
-	    _sudo_printf, settings, user_info, command_info, argc, argv,
-	    user_env);
+	    _sudo_printf, settings, user_info, command_info,
+	    argc, argv, user_env, plugin->args);
     }
     debug_return_bool(rval);
 }

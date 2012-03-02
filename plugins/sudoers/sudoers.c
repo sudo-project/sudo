@@ -96,7 +96,8 @@ static void set_runaspw(const char *);
 static void set_runasgr(const char *);
 static int cb_runas_default(const char *);
 static int sudoers_policy_version(int verbose);
-static int deserialize_info(char * const settings[], char * const user_info[]);
+static int deserialize_info(char * const args[], char * const settings[],
+    char * const user_info[]);
 static char *find_editor(int nfiles, char **files, char ***argv_out);
 static void create_admin_success_flag(void);
 
@@ -135,12 +136,16 @@ sigjmp_buf error_jmp;
 static int
 sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t plugin_printf, char * const settings[],
-    char * const user_info[], char * const envp[])
+    char * const user_info[], char * const envp[], char * const args[])
 {
     volatile int sources = 0;
     sigaction_t sa;
     struct sudo_nss *nss;
     debug_decl(sudoers_policy_open, SUDO_DEBUG_PLUGIN)
+
+    /* Plugin args are only specified for API version 1.2 and higher. */
+    if (version < SUDO_API_MKVERSION(1, 2))
+	args = NULL;
 
     if (!sudo_conv)
 	sudo_conv = conversation;
@@ -178,8 +183,8 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     /* Setup defaults data structures. */
     init_defaults();
 
-    /* Parse settings and user_info */
-    sudo_mode = deserialize_info(settings, user_info);
+    /* Parse args, settings and user_info */
+    sudo_mode = deserialize_info(args, settings, user_info);
 
     init_vars(envp);		/* XXX - move this later? */
 
@@ -1181,7 +1186,7 @@ sudoers_policy_version(int verbose)
 }
 
 static int
-deserialize_info(char * const settings[], char * const user_info[])
+deserialize_info(char * const args[], char * const settings[], char * const user_info[])
 {
     char * const *cur;
     const char *p, *groups = NULL;
@@ -1190,6 +1195,29 @@ deserialize_info(char * const settings[], char * const user_info[])
     debug_decl(deserialize_info, SUDO_DEBUG_PLUGIN)
 
 #define MATCHES(s, v) (strncmp(s, v, sizeof(v) - 1) == 0)
+
+    /* Parse sudo.conf plugin args. */
+    if (args != NULL) {
+	for (cur = args; *cur != NULL; cur++) {
+	    if (MATCHES(*cur, "sudoers_file=")) {
+		sudoers_file = *cur + sizeof("sudoers_file=") - 1;
+		continue;
+	    }
+	    if (MATCHES(*cur, "sudoers_uid=")) {
+		sudoers_uid = (uid_t) atoi(*cur + sizeof("sudoers_uid=") - 1);
+		continue;
+	    }
+	    if (MATCHES(*cur, "sudoers_gid=")) {
+		sudoers_gid = (gid_t) atoi(*cur + sizeof("sudoers_gid=") - 1);
+		continue;
+	    }
+	    if (MATCHES(*cur, "sudoers_mode=")) {
+		sudoers_mode = (mode_t) strtol(*cur + sizeof("sudoers_mode=") - 1,
+		    NULL, 8);
+		continue;
+	    }
+	}
+    }
 
     /* Parse command line settings. */
     user_closefrom = -1;
@@ -1292,23 +1320,6 @@ deserialize_info(char * const settings[], char * const user_info[])
 	if (MATCHES(*cur, "network_addrs=")) {
 	    interfaces_string = *cur + sizeof("network_addrs=") - 1;
 	    set_interfaces(interfaces_string);
-	    continue;
-	}
-	if (MATCHES(*cur, "sudoers_file=")) {
-	    sudoers_file = *cur + sizeof("sudoers_file=") - 1;
-	    continue;
-	}
-	if (MATCHES(*cur, "sudoers_uid=")) {
-	    sudoers_uid = (uid_t) atoi(*cur + sizeof("sudoers_uid=") - 1);
-	    continue;
-	}
-	if (MATCHES(*cur, "sudoers_gid=")) {
-	    sudoers_gid = (gid_t) atoi(*cur + sizeof("sudoers_gid=") - 1);
-	    continue;
-	}
-	if (MATCHES(*cur, "sudoers_mode=")) {
-	    sudoers_mode = (mode_t) strtol(*cur + sizeof("sudoers_mode=") - 1,
-		NULL, 8);
 	    continue;
 	}
     }

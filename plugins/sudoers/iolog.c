@@ -417,7 +417,7 @@ static int
 sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t plugin_printf, char * const settings[],
     char * const user_info[], char * const command_info[],
-    int argc, char * const argv[], char * const user_env[])
+    int argc, char * const argv[], char * const user_env[], char * const args[])
 {
     struct iolog_details details;
     char pathbuf[PATH_MAX], sessid[7];

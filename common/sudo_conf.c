@@ -204,8 +204,10 @@ static bool
 set_plugin(const char *entry)
 {
     struct plugin_info *info;
-    const char *name, *path;
-    size_t namelen;
+    const char *name, *path, *cp, *ep;
+    char **args = NULL;
+    size_t namelen, pathlen;
+    unsigned int nargs;
 
     /* Parse Plugin line */
     name = entry;
@@ -215,10 +217,35 @@ set_plugin(const char *entry)
     namelen = (size_t)(path - name);
     while (isblank((unsigned char)*path))
 	path++;
+    if ((cp = strpbrk(path, " \t")) != NULL) {
+	/* Convert extra args to an array. */
+	pathlen = (size_t)(cp - path);
+	while (isblank((unsigned char)*cp))
+	    cp++;
+	/* Count number of args and allocate array. */
+	for (ep = cp, nargs = 1; (ep = strpbrk(ep, " \t")) != NULL; nargs++) {
+	    while (isblank((unsigned char)*ep))
+		ep++;
+	}
+	args = emalloc2(nargs + 1, sizeof(*args));
+	/* Fill in args array, there is at least one element. */
+	for (nargs = 0; (ep = strpbrk(cp, " \t")) != NULL; ) {
+	    args[nargs++] = estrndup(cp, (size_t)(ep - cp));
+	    while (isblank((unsigned char)*ep))
+		ep++;
+	    cp = ep;
+	}
+	args[nargs++] = estrdup(cp);
+	args[nargs] = NULL;
+    } else {
+	/* No extra args. */
+	pathlen = strlen(path);
+    }
 
     info = emalloc(sizeof(*info));
     info->symbol_name = estrndup(name, namelen);
-    info->path = estrdup(path);
+    info->path = estrndup(path, pathlen);
+    info->args = args;
     info->prev = info;
     info->next = NULL;
     tq_append(&sudo_conf_data.plugins, info);

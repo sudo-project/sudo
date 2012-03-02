@@ -111,7 +111,7 @@ fmt_string(const char *var, const char *val)
 static int
 policy_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t sudo_printf, char * const settings[],
-    char * const user_info[], char * const user_env[])
+    char * const user_info[], char * const user_env[], char * const args[])
 {
     char * const *ui;
     struct passwd *pw;
@@ -422,7 +422,7 @@ static int
 io_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t sudo_printf, char * const settings[],
     char * const user_info[], char * const command_info[],
-    int argc, char * const argv[], char * const user_env[])
+    int argc, char * const argv[], char * const user_env[], char * const args[])
 {
     int fd;
     char path[PATH_MAX];

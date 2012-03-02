@@ -24,6 +24,7 @@ struct plugin_info {
     struct plugin_info *next; /* required */
     const char *path;
     const char *symbol_name;
+    char * const * args;
 };
 TQ_DECLARE(plugin_info)
 

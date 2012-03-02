@@ -29,6 +29,23 @@ struct generic_plugin {
 /*
  * Backwards-compatible structures for API bumps.
  */
+struct policy_plugin_1_0 {
+    unsigned int type;
+    unsigned int version;
+    int (*open)(unsigned int version, sudo_conv_t conversation,
+	sudo_printf_t sudo_printf, char * const settings[],
+	char * const user_info[], char * const user_env[]);
+    void (*close)(int exit_status, int error); /* wait status or error */
+    int (*show_version)(int verbose);
+    int (*check_policy)(int argc, char * const argv[],
+	char *env_add[], char **command_info[],
+	char **argv_out[], char **user_env_out[]);
+    int (*list)(int argc, char * const argv[], int verbose,
+	const char *list_user);
+    int (*validate)(void);
+    void (*invalidate)(int remove);
+    int (*init_session)(struct passwd *pwd);
+};
 struct io_plugin_1_0 {
     unsigned int type;
     unsigned int version;
@@ -44,6 +61,21 @@ struct io_plugin_1_0 {
     int (*log_stdout)(const char *buf, unsigned int len);
     int (*log_stderr)(const char *buf, unsigned int len);
 };
+struct io_plugin_1_1 {
+    unsigned int type;
+    unsigned int version;
+    int (*open)(unsigned int version, sudo_conv_t conversation,
+	sudo_printf_t sudo_printf, char * const settings[],
+	char * const user_info[], char * const command_info[],
+	int argc, char * const argv[], char * const user_env[]);
+    void (*close)(int exit_status, int error); /* wait status or error */
+    int (*show_version)(int verbose);
+    int (*log_ttyin)(const char *buf, unsigned int len);
+    int (*log_ttyout)(const char *buf, unsigned int len);
+    int (*log_stdin)(const char *buf, unsigned int len);
+    int (*log_stdout)(const char *buf, unsigned int len);
+    int (*log_stderr)(const char *buf, unsigned int len);
+};
 
 /*
  * Sudo plugin internals.
@@ -52,12 +84,15 @@ struct plugin_container {
     struct plugin_container *prev; /* required */
     struct plugin_container *next; /* required */
     const char *name;
+    char * const *args;
     void *handle;
     union {
 	struct generic_plugin *generic;
 	struct policy_plugin *policy;
+	struct policy_plugin_1_0 *policy_1_0;
 	struct io_plugin *io;
 	struct io_plugin_1_0 *io_1_0;
+	struct io_plugin_1_1 *io_1_1;
     } u;
 };
 TQ_DECLARE(plugin_container)

@@ -81,7 +81,7 @@ int sudolineno;
 int last_token;
 char *sudoers;
 
-/* Default sudoers path, mode and owner */
+/* Default sudoers path, mode and owner (may be set via sudo.conf) */
 const char *sudoers_file = _PATH_SUDOERS;
 mode_t sudoers_mode = SUDOERS_MODE;
 uid_t sudoers_uid = SUDOERS_UID;
