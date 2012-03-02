@@ -423,7 +423,7 @@ which corresponds to the following F<@sysconfdir@/sudo.conf> file.
  # Format:
  #   Plugin plugin_name plugin_path plugin_args ...
  #   Path askpass /path/to/askpass
- #   Path noexec /path/to/noexec.so
+ #   Path noexec /path/to/sudo_noexec.so
  #   Debug sudo /var/log/sudo_debug all@warn
  #   Set disable_coredump true
  #
