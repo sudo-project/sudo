@@ -302,6 +302,8 @@ src/po/sr.po
 src/po/sudo.pot
 src/po/uk.mo
 src/po/uk.po
+src/po/vi.mo
+src/po/vi.po
 src/po/zh_CN.mo
 src/po/zh_CN.po
 src/preload.c

@@ -1,0 +1,736 @@
+# Vietnamese translation for sudo.
+# Copyright © 2012 Free Software Foundation, Inc.
+# This file is distributed under the same license as the sudo package.
+# Trần Ngọc Quân <vnwildman@gmail.com>, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sudo-1.8.4rc1\n"
+"Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
+"POT-Creation-Date: 2012-02-06 15:48-0500\n"
+"PO-Revision-Date: 2012-03-05 13:15+0700\n"
+"Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
+"Language-Team: Vietnamese <vi-VN@googlegroups.com>\n"
+"Language: vi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=1;\n"
+"X-Generator: LocFactoryEditor 1.8\n"
+"X-Poedit-Language: Vietnamese\n"
+"X-Poedit-Country: VIET NAM\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: src/error.c:82 src/error.c:86
+msgid ": "
+msgstr ": "
+
+#: src/exec.c:105 src/exec_pty.c:604 src/exec_pty.c:936 src/tgetpass.c:227
+#, c-format
+msgid "unable to fork"
+msgstr "không thể tạo tiến trình con"
+
+#: src/exec.c:252
+#, c-format
+msgid "unable to create sockets"
+msgstr "không thể tạo sockets"
+
+#: src/exec.c:259 src/exec_pty.c:557 src/exec_pty.c:565 src/exec_pty.c:572
+#: src/exec_pty.c:871 src/exec_pty.c:933 src/tgetpass.c:224
+#, c-format
+msgid "unable to create pipe"
+msgstr "không tạo được đường ống pipe"
+
+#: src/exec.c:340 src/exec_pty.c:1000 src/exec_pty.c:1135
+#, c-format
+msgid "select failed"
+msgstr "lựa chọn gặp lỗi"
+
+#: src/exec.c:425
+#, c-format
+msgid "unable to restore tty label"
+msgstr "không thể phục hồi nhãn cho tty"
+
+#: src/exec_common.c:66
+#, c-format
+msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
+msgstr "không thể xóa bỏ PRIV_PROC_EXEC từ PRIV_LIMIT"
+
+#: src/exec_common.c:85 src/parse_args.c:432 src/sudo.c:445 src/sudo.c:465
+#: src/sudo.c:472 src/sudo.c:483 src/sudo.c:842 common/alloc.c:85
+#: common/alloc.c:105 common/alloc.c:123 common/alloc.c:145 common/alloc.c:203
+#: common/alloc.c:217
+#, c-format
+msgid "unable to allocate memory"
+msgstr "không thể cấp phát vùng nhớ"
+
+#: src/exec_pty.c:140
+#, c-format
+msgid "unable to allocate pty"
+msgstr "không thể phân bổ pty"
+
+#: src/exec_pty.c:597
+#, c-format
+msgid "unable to set terminal to raw mode"
+msgstr "không thể đặt thiết bị cuối sang chế độ raw"
+
+#: src/exec_pty.c:914
+#, c-format
+msgid "unable to set controlling tty"
+msgstr "không thể đặt điều khiển cho tty"
+
+#: src/exec_pty.c:1008
+#, c-format
+msgid "error reading from signal pipe"
+msgstr "lỗi khi đọc từ đường ống dẫn tín hiệu"
+
+#: src/exec_pty.c:1027
+#, c-format
+msgid "error reading from pipe"
+msgstr "gặp lỗi khi đọc từ một đường ống dẫn lệnh"
+
+#: src/exec_pty.c:1043
+#, c-format
+msgid "error reading from socketpair"
+msgstr "gặp lỗi khi đọc từ socketpair"
+
+#: src/exec_pty.c:1047
+#, c-format
+msgid "unexpected reply type on backchannel: %d"
+msgstr "kiểu trả về không như mong đợi từ backchannel: %d"
+
+#: src/load_plugins.c:79
+#, c-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: src/load_plugins.c:85
+#, c-format
+msgid "%s%s: %s"
+msgstr "%s%s: %s"
+
+#: src/load_plugins.c:95
+#, c-format
+msgid "%s must be owned by uid %d"
+msgstr "%s phải được sở hữu bởi uid %d"
+
+#: src/load_plugins.c:99
+#, c-format
+msgid "%s must be only be writable by owner"
+msgstr "%s phải là những thứ chỉ có thể ghi bởi chủ sở hữu"
+
+#: src/load_plugins.c:106
+#, c-format
+msgid "unable to dlopen %s: %s"
+msgstr "không thể dlopen %s: %s"
+
+#: src/load_plugins.c:111
+#, c-format
+msgid "%s: unable to find symbol %s"
+msgstr "%s: không thể tìm thấy liên kết tượng trưng (symbol) %s"
+
+#: src/load_plugins.c:117
+#, c-format
+msgid "%s: unknown policy type %d"
+msgstr "%s: không hiểu kiểu chính sách %d"
+
+#: src/load_plugins.c:121
+#, c-format
+msgid "%s: incompatible policy major version %d, expected %d"
+msgstr "%s: chính sách không tương thích với phiên bản %d, mong chờ %d"
+
+#: src/load_plugins.c:128
+#, c-format
+msgid "%s: only a single policy plugin may be loaded"
+msgstr "%s: chỉ có một chính sách được tải lên thôi"
+
+#: src/load_plugins.c:146
+#, c-format
+msgid "%s: at least one policy plugin must be specified"
+msgstr "%s: phải xác định ít nhất một phần bổ xung chính sách"
+
+#: src/load_plugins.c:151
+#, c-format
+msgid "policy plugin %s does not include a check_policy method"
+msgstr "phần bổ xung chính sách %s không bao gồm phương thức kiểm tra chính sách"
+
+#: src/net_ifs.c:157 src/net_ifs.c:166 src/net_ifs.c:178 src/net_ifs.c:187
+#: src/net_ifs.c:298 src/net_ifs.c:322
+#, c-format
+msgid "load_interfaces: overflow detected"
+msgstr "load_interfaces: bị tràn"
+
+#: src/net_ifs.c:227
+#, c-format
+msgid "unable to open socket"
+msgstr "không mở được socket"
+
+#: src/parse_args.c:187
+#, c-format
+msgid "the argument to -C must be a number greater than or equal to 3"
+msgstr "đối số cho -C phải là một số lớn hơn hoặc bằng 3"
+
+#: src/parse_args.c:276
+#, c-format
+msgid "unknown user: %s"
+msgstr "không hiểu người dùng: %s"
+
+#: src/parse_args.c:335
+#, c-format
+msgid "you may not specify both the `-i' and `-s' options"
+msgstr "bạn không thể chỉ định cả hai tùy chọn `-i' và `-s'"
+
+#: src/parse_args.c:339
+#, c-format
+msgid "you may not specify both the `-i' and `-E' options"
+msgstr "bạn không thể chỉ định cả hai tùy chọn `-i' và `-E'"
+
+#: src/parse_args.c:349
+#, c-format
+msgid "the `-E' option is not valid in edit mode"
+msgstr "tùy chọn `-E' không hợp lệ trong chế độ chỉnh sửa"
+
+#: src/parse_args.c:351
+#, c-format
+msgid "you may not specify environment variables in edit mode"
+msgstr "bạn không được phpứ chỉ định biến môi trường trong chế độ soạn thảo"
+
+#: src/parse_args.c:359
+#, c-format
+msgid "the `-U' option may only be used with the `-l' option"
+msgstr "tùy chọn `-U' chỉ sử dụng cùng với tùy chọn `-l'"
+
+#: src/parse_args.c:363
+#, c-format
+msgid "the `-A' and `-S' options may not be used together"
+msgstr "tùy chọn `-A' và `-S' không thể dùng cùng một lúc với nhau"
+
+#: src/parse_args.c:445
+#, c-format
+msgid "sudoedit is not supported on this platform"
+msgstr "sudoedit không được hỗ trợ trên nền tảng này"
+
+#: src/parse_args.c:518
+#, c-format
+msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
+msgstr "Chỉ có một trong số các tùy chọn -e, -h, -i, -K, -l, -s, -v hay -V được chỉ định"
+
+#: src/parse_args.c:532
+#, c-format
+msgid ""
+"%s - edit files as another user\n"
+"\n"
+msgstr ""
+"%s - sửa chữa các tệp tin trên danh nghĩa người dùng khác\n"
+"\n"
+
+#: src/parse_args.c:534
+#, c-format
+msgid ""
+"%s - execute a command as another user\n"
+"\n"
+msgstr ""
+"%s - thực hiện câu lệnh với người dùng khác\n"
+"\n"
+
+#: src/parse_args.c:539
+#, c-format
+msgid ""
+"\n"
+"Options:\n"
+msgstr ""
+"\n"
+"Tùy chọn:\n"
+
+#: src/parse_args.c:542
+msgid "use helper program for password prompting\n"
+msgstr "sử dụng chương trình trợ giúp cho hỏi đáp mật khẩu\n"
+
+#: src/parse_args.c:545
+msgid "use specified BSD authentication type\n"
+msgstr "sử dụng kiểu xác thực BSD được chỉ ra\n"
+
+#: src/parse_args.c:547
+msgid "run command in the background\n"
+msgstr "chạy lệnh ở chế độ nền\n"
+
+#: src/parse_args.c:549
+msgid "close all file descriptors >= fd\n"
+msgstr "đóng tất cả các mô tả của tệp tin >= fd\n"
+
+#: src/parse_args.c:552
+msgid "run command with specified login class\n"
+msgstr "chạy lệnh với một lớp đăng nhập được chỉ ra\n"
+
+#: src/parse_args.c:555
+msgid "preserve user environment when executing command\n"
+msgstr "ngăn ngừa môi trường người dùng khi thi hành lệnh\n"
+
+#: src/parse_args.c:557
+msgid "edit files instead of running a command\n"
+msgstr "chỉnh sửa các tệp tin thay vì chạy lệnh\n"
+
+#: src/parse_args.c:559
+msgid "execute command as the specified group\n"
+msgstr "thực hiện câu lệnh như là nhóm được chỉ định\n"
+
+#: src/parse_args.c:561
+msgid "set HOME variable to target user's home dir.\n"
+msgstr "đặt biến HOME cho thư mục home của người dùng đích.\n"
+
+#: src/parse_args.c:563
+msgid "display help message and exit\n"
+msgstr "hiển thị trợ giúp này rồi thoát\n"
+
+#: src/parse_args.c:565
+msgid "run a login shell as target user\n"
+msgstr "chạy shell đăng nhập như là người dùng đích\n"
+
+#: src/parse_args.c:567
+msgid "remove timestamp file completely\n"
+msgstr "gỡ bỏ timestamp tệp tin\n"
+
+#: src/parse_args.c:569
+msgid "invalidate timestamp file\n"
+msgstr "làm mất hiệu lực timestamp của tệp tin\n"
+
+#: src/parse_args.c:571
+msgid "list user's available commands\n"
+msgstr "danh sách các câu lệnh người dùng có thể sử dụng\n"
+
+#: src/parse_args.c:573
+msgid "non-interactive mode, will not prompt user\n"
+msgstr "chế độ không tương tác, không hỏi tên tài khoản người dùng\n"
+
+#: src/parse_args.c:575
+msgid "preserve group vector instead of setting to target's\n"
+msgstr "ngăn ngừa véc tơ nhóm thay vì các cài đặt cho đích\n"
+
+#: src/parse_args.c:577
+msgid "use specified password prompt\n"
+msgstr "sử dụng nhắc nhập mật khẩu.\n"
+
+#: src/parse_args.c:580 src/parse_args.c:588
+msgid "create SELinux security context with specified role\n"
+msgstr "tạo ngữ cảnh an ninh SELinux với vai trò được chỉ định\n"
+
+#: src/parse_args.c:583
+msgid "read password from standard input\n"
+msgstr "đọc mật khẩu từ đầu vào tiêu chuẩn\n"
+
+#: src/parse_args.c:585
+msgid "run a shell as target user\n"
+msgstr "chạy shell như là người dùng đích\n"
+
+#: src/parse_args.c:591
+msgid "when listing, list specified user's privileges\n"
+msgstr "khi liệt kê, liệt kê các đặc quyền của người dùng\n"
+
+#: src/parse_args.c:593
+msgid "run command (or edit file) as specified user\n"
+msgstr "chạy lệnh (hay sửa chữa tệp tin) trên tư cách của người dùng đã chỉ định\n"
+
+#: src/parse_args.c:595
+msgid "display version information and exit\n"
+msgstr "hiển thị thông tin phiên bản rồi thoát\n"
+
+#: src/parse_args.c:597
+msgid "update user's timestamp without running a command\n"
+msgstr "cập nhật dấu thời gian (timestamp) của người dùng mà không chạy một lệnh\n"
+
+#: src/parse_args.c:599
+msgid "stop processing command line arguments\n"
+msgstr "dừng việc xử lý đối số dòng lệnh\n"
+
+#: src/selinux.c:76
+#, c-format
+msgid "unable to open audit system"
+msgstr "không thể mở hệ thống audit"
+
+#: src/selinux.c:84
+#, c-format
+msgid "unable to send audit message"
+msgstr "không thể gửi thông tin audit"
+
+#: src/selinux.c:112
+#, c-format
+msgid "unable to fgetfilecon %s"
+msgstr "không thể fgetfilecon %s"
+
+#: src/selinux.c:117
+#, c-format
+msgid "%s changed labels"
+msgstr "%s nhãn đã thay đổi"
+
+#: src/selinux.c:122
+#, c-format
+msgid "unable to restore context for %s"
+msgstr "Không thể phục hồi ngữ cảnh cho %s"
+
+#: src/selinux.c:162
+#, c-format
+msgid "unable to open %s, not relabeling tty"
+msgstr "không thể mở %s, không phải là tty liên quan"
+
+#: src/selinux.c:171
+#, c-format
+msgid "unable to get current tty context, not relabeling tty"
+msgstr "không thể lấy ngữ cảnh tty hiện hành, không phải là tty có liên quan"
+
+#: src/selinux.c:178
+#, c-format
+msgid "unable to get new tty context, not relabeling tty"
+msgstr "không thể lấy ngữ cảnh tty mới, không phải là tty có liên quan"
+
+#: src/selinux.c:185
+#, c-format
+msgid "unable to set new tty context"
+msgstr "không thể đặt ngữ cảnh tty mới"
+
+#: src/selinux.c:195 src/selinux.c:208 src/sudo.c:331
+#, c-format
+msgid "unable to open %s"
+msgstr "không mở được %s"
+
+#: src/selinux.c:251
+#, c-format
+msgid "you must specify a role for type %s"
+msgstr "bạn phải chỉ định một kiểu vai trò cho %s"
+
+#: src/selinux.c:257
+#, c-format
+msgid "unable to get default type for role %s"
+msgstr "không thể lấy kiểu mặc định cho vai trò %s"
+
+#: src/selinux.c:275
+#, c-format
+msgid "failed to set new role %s"
+msgstr "lỗi khi đặt đặt vai trò mới %s"
+
+#: src/selinux.c:279
+#, c-format
+msgid "failed to set new type %s"
+msgstr "lỗi khi đặt kiểu mới %s"
+
+#: src/selinux.c:288
+#, c-format
+msgid "%s is not a valid context"
+msgstr "%s không phải là một ngữ cảnh hợp lệ"
+
+#: src/selinux.c:323
+#, c-format
+msgid "failed to get old_context"
+msgstr "lỗi lấy ngữ cảnh cũ"
+
+#: src/selinux.c:329
+#, c-format
+msgid "unable to determine enforcing mode."
+msgstr "không thể xác định rõ chế độ ép buộc."
+
+#: src/selinux.c:341
+#, c-format
+msgid "unable to setup tty context for %s"
+msgstr "không thể cài đặt ngữ cảnh tty mới cho %s"
+
+#: src/selinux.c:372
+#, c-format
+msgid "unable to set exec context to %s"
+msgstr "không thể đặt ngữ cảnh bảo thực thi thành %s"
+
+#: src/selinux.c:379
+#, c-format
+msgid "unable to set key creation context to %s"
+msgstr "không thể đặt ngữ cảnh tạo khóa thành %s"
+
+#: src/sesh.c:69
+#, c-format
+msgid "requires at least one argument"
+msgstr "cần thiết ít nhất một đối số"
+
+#: src/sesh.c:90
+#, c-format
+msgid "unable to execute %s"
+msgstr "không thể thực thi %s"
+
+#: src/sudo.c:189
+#, c-format
+msgid "must be setuid root"
+msgstr "phải được đặt setuid của root"
+
+#: src/sudo.c:212
+#, c-format
+msgid "Sudo version %s\n"
+msgstr "Phiên bản sudo %s\n"
+
+#: src/sudo.c:214
+#, c-format
+msgid "Configure options: %s\n"
+msgstr "Cấu hình các tùy chọn: %s\n"
+
+#: src/sudo.c:219
+#, c-format
+msgid "fatal error, unable to load plugins"
+msgstr "lỗi nghiêm trọng, không thể tải plugins"
+
+#: src/sudo.c:227
+#, c-format
+msgid "unable to initialize policy plugin"
+msgstr "không thể khởi tạo phần bổ xung chính sách"
+
+#: src/sudo.c:282
+#, c-format
+msgid "error initializing I/O plugin %s"
+msgstr "Gặp lỗi khi nạp phần bổ sung I/O %s"
+
+#: src/sudo.c:306
+#, c-format
+msgid "unexpected sudo mode 0x%x"
+msgstr "không mong đợi chế độ sudo 0x%x"
+
+#: src/sudo.c:400
+#, c-format
+msgid "unable to get group vector"
+msgstr "không thể lấy véc tơ nhóm"
+
+#: src/sudo.c:441
+#, c-format
+msgid "unknown uid %u: who are you?"
+msgstr "không hiểu uid %u: bạn là ai?"
+
+#: src/sudo.c:784
+#, c-format
+msgid "resource control limit has been reached"
+msgstr "giới hạn điều khiển tài nguyên đã tới hạn"
+
+#: src/sudo.c:787
+#, c-format
+msgid "user \"%s\" is not a member of project \"%s\""
+msgstr "người dùng \"%s\" không phải là thành viên của dự án \"%s\""
+
+#: src/sudo.c:791
+#, c-format
+msgid "the invoking task is final"
+msgstr "tác vụ được gọi đã kết thúc"
+
+#: src/sudo.c:794
+#, c-format
+msgid "could not join project \"%s\""
+msgstr "không thể gia nhập dự án \"%s\""
+
+#: src/sudo.c:799
+#, c-format
+msgid "no resource pool accepting default bindings exists for project \"%s\""
+msgstr "không kho tài nguyên chung nào được thừa nhận ràng buộc đã tồn tại sẵn cho dự án \"%s\""
+
+#: src/sudo.c:803
+#, c-format
+msgid "specified resource pool does not exist for project \"%s\""
+msgstr "nguồn tài nguyên chung được chỉ ra chưa tồn tại cho dự án \"%s\""
+
+#: src/sudo.c:807
+#, c-format
+msgid "could not bind to default resource pool for project \"%s\""
+msgstr "không thể buộc phần tài nguyên chung mặc định cho dự án \"%s\""
+
+#: src/sudo.c:813
+#, c-format
+msgid "setproject failed for project \"%s\""
+msgstr "đặt dự án cho dự án \"%s\" gặp lỗi"
+
+#: src/sudo.c:815
+#, c-format
+msgid "warning, resource control assignment failed for project \"%s\""
+msgstr "cảnh báo, nguồn điều khiển gán gặp lỗi cho dự án \"%s\""
+
+#: src/sudo.c:880
+#, c-format
+msgid "unknown login class %s"
+msgstr "không rõ lớp đăng nhập %s"
+
+#: src/sudo.c:896 src/sudo.c:899
+#, c-format
+msgid "unable to set user context"
+msgstr "không thể đặt ngữ cảnh người dùng"
+
+#: src/sudo.c:915
+#, c-format
+msgid "unable to set supplementary group IDs"
+msgstr "không thể đặt nhóm phụ IDs"
+
+#: src/sudo.c:922
+#, c-format
+msgid "unable to set effective gid to runas gid %u"
+msgstr "không thể đặt hiệu ứng gid chạy như là gid %u"
+
+#: src/sudo.c:928
+#, c-format
+msgid "unable to set gid to runas gid %u"
+msgstr "không thể thay đổi gid thành runas gid %u"
+
+#: src/sudo.c:935
+#, c-format
+msgid "unable to set process priority"
+msgstr "không thể đặt ưu tiên cho quá trình"
+
+#: src/sudo.c:943
+#, c-format
+msgid "unable to change root to %s"
+msgstr "không thể chuyển đổi thư mục gốc thành %s"
+
+#: src/sudo.c:950 src/sudo.c:956 src/sudo.c:962
+#, c-format
+msgid "unable to change to runas uid (%u, %u)"
+msgstr "không thể thay đổi thành runas uid (%u, %u)"
+
+#: src/sudo.c:976
+#, c-format
+msgid "unable to change directory to %s"
+msgstr "không thể thay đổi thư mục thành %s"
+
+#: src/sudo.c:1049
+#, c-format
+msgid "unexpected child termination condition: %d"
+msgstr "biểu thức điều kiện con kết thúc không như mong đợi: %d"
+
+#: src/sudo.c:1095
+#, c-format
+msgid "policy plugin %s does not support listing privileges"
+msgstr "phần bổ xung chính sách %s không hỗ trợ liệt kê đặc quyền"
+
+#: src/sudo.c:1107
+#, c-format
+msgid "policy plugin %s does not support the -v option"
+msgstr "phần bổ xung chính sách %s không hỗ trợ tùy chọn -v"
+
+#: src/sudo.c:1119
+#, c-format
+msgid "policy plugin %s does not support the -k/-K options"
+msgstr "phần bổ xung chính sách %s không hỗ trợ tùy chọn -k/-K"
+
+#: src/sudo_edit.c:111
+#, c-format
+msgid "unable to change uid to root (%u)"
+msgstr "không thể thay đổi uid thành root (%u)"
+
+#: src/sudo_edit.c:143
+#, c-format
+msgid "plugin error: missing file list for sudoedit"
+msgstr "lỗi phần bổ xung: thiếu danh sách tệp tin cho sudoedit"
+
+#: src/sudo_edit.c:171 src/sudo_edit.c:271
+#, c-format
+msgid "%s: not a regular file"
+msgstr "%s: không phải là tập tin thường"
+
+#: src/sudo_edit.c:205 src/sudo_edit.c:307
+#, c-format
+msgid "%s: short write"
+msgstr "%s: ghi ngắn"
+
+#: src/sudo_edit.c:272
+#, c-format
+msgid "%s left unmodified"
+msgstr "%s chưa thay đổi"
+
+#: src/sudo_edit.c:285
+#, c-format
+msgid "%s unchanged"
+msgstr "%s không thay đổi"
+
+#: src/sudo_edit.c:297 src/sudo_edit.c:318
+#, c-format
+msgid "unable to write to %s"
+msgstr "không thể ghi vào %s"
+
+#: src/sudo_edit.c:298 src/sudo_edit.c:316 src/sudo_edit.c:319
+#, c-format
+msgid "contents of edit session left in %s"
+msgstr "nội dung của phiên chỉnh sửa chỉ còn %s"
+
+#: src/sudo_edit.c:315
+#, c-format
+msgid "unable to read temporary file"
+msgstr "Không đọc tập tin tạm thời"
+
+#: src/tgetpass.c:96
+#, c-format
+msgid "no tty present and no askpass program specified"
+msgstr "không có tty hiện diện và không có chương trình hỏi mật khẩu nào được chỉ ra"
+
+#: src/tgetpass.c:105
+#, c-format
+msgid "no askpass program specified, try setting SUDO_ASKPASS"
+msgstr "không có chương trình hỏi mật khẩu nào được chỉ ra, hãy thử cài đặt SUDO_ASKPASS"
+
+#: src/tgetpass.c:237
+#, c-format
+msgid "unable to set gid to %u"
+msgstr "không thể đặt gid thành %u"
+
+#: src/tgetpass.c:241
+#, c-format
+msgid "unable to set uid to %u"
+msgstr "không thể đặt uid thành %u"
+
+#: src/tgetpass.c:246
+#, c-format
+msgid "unable to run %s"
+msgstr "không thể chạy %s"
+
+#: src/utmp.c:278
+#, c-format
+msgid "unable to save stdin"
+msgstr "không thể ghi lại stdin"
+
+#: src/utmp.c:280
+#, c-format
+msgid "unable to dup2 stdin"
+msgstr "không thể dup2 stdin"
+
+#: src/utmp.c:283
+#, c-format
+msgid "unable to restore stdin"
+msgstr "không thể phục hồi stdin"
+
+#: common/aix.c:149
+#, c-format
+msgid "unable to open userdb"
+msgstr "không thể mở userdb"
+
+#: common/aix.c:152
+#, c-format
+msgid "unable to switch to registry \"%s\" for %s"
+msgstr "không thể chuyển đến sổ đăng ký \"%s\" cho %s"
+
+#: common/aix.c:169
+#, c-format
+msgid "unable to restore registry"
+msgstr "không thể phục hồi sổ đăng ký"
+
+#: common/alloc.c:82
+msgid "internal error, tried to emalloc(0)"
+msgstr "lỗi nội bộ, dùng thử erealloc(0)"
+
+#: common/alloc.c:99
+msgid "internal error, tried to emalloc2(0)"
+msgstr "lỗi nội bộ, dùng thử erealloc2(0)"
+
+#: common/alloc.c:101
+msgid "internal error, emalloc2() overflow"
+msgstr "lỗi nội bộ, erealloc2() bị tràn"
+
+#: common/alloc.c:119
+msgid "internal error, tried to erealloc(0)"
+msgstr "lỗi nội bộ, dùng thử erealloc(0)"
+
+#: common/alloc.c:138
+msgid "internal error, tried to erealloc3(0)"
+msgstr "lỗi nội bộ, dùng thử erealloc3(0)"
+
+#: common/alloc.c:140
+msgid "internal error, erealloc3() overflow"
+msgstr "lỗi nội bộ, erealloc3() bị tràn"
+
+#: compat/strsignal.c:47
+msgid "Unknown signal"
+msgstr "Không hiểu tín hiệu"
