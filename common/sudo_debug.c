@@ -100,6 +100,7 @@ const char *const sudo_debug_subsystems[] = {
     "rbtree",
     "perms",
     "plugin",
+    "hooks",
     NULL
 };
 

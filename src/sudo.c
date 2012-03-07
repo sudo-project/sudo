@@ -845,6 +845,13 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 #endif
 
     /*
+     * Swap in the plugin-supplied environment in case session init
+     * modifies the environment.  Also needed for LOGIN_SETENV.
+     * This is kind of a hack.
+     */
+    environ = details->envp;
+
+    /*
      * Call policy plugin's session init before other setup occurs.
      * The session init code is expected to print an error as needed.
      */
@@ -886,8 +893,6 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 		flags = LOGIN_SETALL;
 		CLR(flags, LOGIN_SETGROUP|LOGIN_SETLOGIN|LOGIN_SETUSER);
 		CLR(details->flags, CD_SET_UMASK); /* LOGIN_UMASK instead */
-		/* Swap in the plugin-supplied environment for LOGIN_SETENV */
-		environ = details->envp;
 	    } else {
 		flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
 	    }
@@ -898,13 +903,12 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 		} else
 		    warning(_("unable to set user context"));
 	    }
-	    if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
-		/* Stash the updated environment pointer in command details */
-		details->envp = environ;
-	    }
 	}
 #endif /* HAVE_LOGIN_CAP_H */
     }
+
+    /* Update the environment pointer in command details */
+    details->envp = environ;
 
     /*
      * Set groups, including supplementary group vector.

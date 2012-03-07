@@ -2127,7 +2127,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS(strrchr sysconf tzset strftime \
+AC_CHECK_FUNCS(strrchr sysconf tzset strftime setenv \
 	       regcomp setlocale nl_langinfo mbr_check_membership \
 	       setrlimit64)
 AC_REPLACE_FUNCS(getgrouplist)
@@ -2194,7 +2194,8 @@ AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(libutil.h util.h pty.h, [break])], [
 	])
     ])
 ])
-AC_CHECK_FUNCS(unsetenv, [SUDO_FUNC_UNSETENV_VOID], [AC_LIBOBJ(unsetenv)])
+AC_CHECK_FUNCS(unsetenv, [SUDO_FUNC_UNSETENV_VOID], [])
+SUDO_FUNC_PUTENV_CONST
 if test -z "$SKIP_SETRESUID"; then
     AC_CHECK_FUNCS(setresuid, [
 	SKIP_SETREUID=yes
@@ -2228,7 +2229,7 @@ SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }fnm_test"
 ])
 SUDO_FUNC_ISBLANK
-AC_REPLACE_FUNCS(memrchr pw_dup strlcpy strlcat setenv)
+AC_REPLACE_FUNCS(memrchr pw_dup strlcpy strlcat)
 AC_CHECK_FUNCS(nanosleep, [], [
     # On Solaris, nanosleep is in librt
     AC_CHECK_LIB(rt, nanosleep, [REPLAY_LIBS="${REPLAY_LIBS} -lrt"], [AC_LIBOBJ(nanosleep)])

@@ -222,6 +222,16 @@ void aix_prep_user(char *user, const char *tty);
 void aix_restoreauthdb(void);
 void aix_setauthdb(char *user);
 
+/* hooks.c */
+/* XXX - move to sudo_plugin_int.h? */
+struct sudo_hook;
+int register_hook(struct sudo_hook *hook);
+int deregister_hook(struct sudo_hook *hook);
+int process_hooks_getenv(const char *name, char **val);
+int process_hooks_setenv(const char *name, const char *value, int overwrite);
+int process_hooks_putenv(char *string);
+int process_hooks_unsetenv(const char *name);
+
 /* interfaces.c */
 int get_net_ifs(char **addrinfo);
 

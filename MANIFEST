@@ -48,7 +48,6 @@ compat/regress/fnmatch/fnm_test.in
 compat/regress/glob/files
 compat/regress/glob/globtest.c
 compat/regress/glob/globtest.in
-compat/setenv.c
 compat/siglist.in
 compat/snprintf.c
 compat/stdbool.h
@@ -56,7 +55,6 @@ compat/strlcat.c
 compat/strlcpy.c
 compat/strsignal.c
 compat/timespec.h
-compat/unsetenv.c
 compat/utime.h
 compat/utimes.c
 config.guess
@@ -270,11 +268,13 @@ plugins/sudoers/visudo.c
 pp
 src/Makefile.in
 src/conversation.c
+src/env_hooks.c
 src/error.c
 src/exec.c
 src/exec_common.c
 src/exec_pty.c
 src/get_pty.c
+src/hooks.c
 src/load_plugins.c
 src/net_ifs.c
 src/parse_args.c

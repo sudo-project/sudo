@@ -697,7 +697,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     *command_infop = command_info;
 
     *argv_out = edit_argv ? edit_argv : NewArgv;
-    *user_env_out = env_get(); /* our private copy */
+
+    /* Get private version of the environment and zero out stashed copy. */
+    *user_env_out = env_get();
+    env_init(NULL);
 
     goto done;
 
@@ -1539,6 +1542,31 @@ create_admin_success_flag(void)
 }
 #endif /* USE_ADMIN_FLAG */
 
+static void
+sudoers_policy_register_hooks(int version, int (*register_hook)(struct sudo_hook *hook))
+{
+    struct sudo_hook hook;
+
+    memset(&hook, 0, sizeof(hook));
+    hook.hook_version = SUDO_HOOK_VERSION;
+
+    hook.hook_type = SUDO_HOOK_SETENV;
+    hook.hook_fn = sudoers_hook_setenv;
+    register_hook(&hook);
+
+    hook.hook_type = SUDO_HOOK_UNSETENV;
+    hook.hook_fn = sudoers_hook_unsetenv;
+    register_hook(&hook);
+
+    hook.hook_type = SUDO_HOOK_GETENV;
+    hook.hook_fn = sudoers_hook_getenv;
+    register_hook(&hook);
+
+    hook.hook_type = SUDO_HOOK_PUTENV;
+    hook.hook_fn = sudoers_hook_putenv;
+    register_hook(&hook);
+}
+
 struct policy_plugin sudoers_policy = {
     SUDO_POLICY_PLUGIN,
     SUDO_API_VERSION,
@@ -1549,5 +1577,6 @@ struct policy_plugin sudoers_policy = {
     sudoers_policy_list,
     sudoers_policy_validate,
     sudoers_policy_invalidate,
-    sudoers_policy_init_session
+    sudoers_policy_init_session,
+    sudoers_policy_register_hooks
 };

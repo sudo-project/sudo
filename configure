@@ -16388,7 +16388,7 @@ $as_echo "#define HAVE_GETGROUPS 1" >>confdefs.h
 fi
 LIBS=$ac_save_LIBS
 
-for ac_func in strrchr sysconf tzset strftime \
+for ac_func in strrchr sysconf tzset strftime setenv \
 	       regcomp setlocale nl_langinfo mbr_check_membership \
 	       setrlimit64
 do :
@@ -16768,15 +16768,44 @@ $as_echo "#define UNSETENV_VOID 1" >>confdefs.h
 
     fi
 
-else
-  case " $LIBOBJS " in
-  *" unsetenv.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS unsetenv.$ac_objext"
- ;;
-esac
-
 fi
 done
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether putenv takes a const argument" >&5
+$as_echo_n "checking whether putenv takes a const argument... " >&6; }
+if ${sudo_cv_func_putenv_const+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+int putenv(const char *string) {return 0;}
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  sudo_cv_func_putenv_const=yes
+else
+  sudo_cv_func_putenv_const=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_func_putenv_const" >&5
+$as_echo "$sudo_cv_func_putenv_const" >&6; }
+  if test $sudo_cv_func_putenv_const = yes; then
+
+$as_echo "#define PUTENV_CONST const" >>confdefs.h
+
+  else
+    $as_echo "#define PUTENV_CONST /**/" >>confdefs.h
+
+  fi
 
 if test -z "$SKIP_SETRESUID"; then
     for ac_func in setresuid
@@ -17137,19 +17166,6 @@ else
   case " $LIBOBJS " in
   *" strlcat.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS strlcat.$ac_objext"
- ;;
-esac
-
-fi
-
-ac_fn_c_check_func "$LINENO" "setenv" "ac_cv_func_setenv"
-if test "x$ac_cv_func_setenv" = xyes; then :
-  $as_echo "#define HAVE_SETENV 1" >>confdefs.h
-
-else
-  case " $LIBOBJS " in
-  *" setenv.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS setenv.$ac_objext"
  ;;
 esac
 

@@ -2075,7 +2075,7 @@ sudo_ldap_bind_s(LDAP *ld)
 		DPRINTF(("gss_krb5_ccache_name() failed: %d", status), 1);
 	    }
 # else
-	    setenv("KRB5CCNAME", ldap_conf.krb5_ccname, true);
+	    sudo_setenv("KRB5CCNAME", ldap_conf.krb5_ccname, true);
 # endif
 	}
 	rc = ldap_sasl_interactive_bind_s(ld, ldap_conf.binddn, "GSSAPI",
@@ -2086,9 +2086,9 @@ sudo_ldap_bind_s(LDAP *ld)
 		    DPRINTF(("gss_krb5_ccache_name() failed: %d", status), 1);
 # else
 	    if (old_ccname != NULL)
-		setenv("KRB5CCNAME", old_ccname, true);
+		sudo_setenv("KRB5CCNAME", old_ccname, true);
 	    else
-		unsetenv("KRB5CCNAME");
+		sudo_unsetenv("KRB5CCNAME");
 # endif
 	}
 	if (rc != LDAP_SUCCESS) {
@@ -2144,9 +2144,9 @@ sudo_ldap_open(struct sudo_nss *nss)
 	debug_return_int(-1);
 
     /* Prevent reading of user ldaprc and system defaults. */
-    if (getenv("LDAPNOINIT") == NULL) {
+    if (sudo_getenv("LDAPNOINIT") == NULL) {
 	ldapnoinit = true;
-	setenv("LDAPNOINIT", "1", true);
+	sudo_setenv("LDAPNOINIT", "1", true);
     }
 
     /* Connect to LDAP server */
@@ -2165,7 +2165,7 @@ sudo_ldap_open(struct sudo_nss *nss)
     }
 
     if (ldapnoinit)
-	unsetenv("LDAPNOINIT");
+	sudo_unsetenv("LDAPNOINIT");
 
     /* Set LDAP options */
     if (sudo_ldap_set_options(ld) < 0)

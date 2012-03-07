@@ -68,6 +68,7 @@
 #define SUDO_DEBUG_RBTREE	(22<<4)	/* red-black tree functions */
 #define SUDO_DEBUG_PERMS	(23<<4)	/* uid/gid swapping functions */
 #define SUDO_DEBUG_PLUGIN	(24<<4)	/* main plugin functions */
+#define SUDO_DEBUG_HOOKS	(25<<4)	/* hook functions */
 #define SUDO_DEBUG_ALL		0xfff0	/* all subsystems */
 
 /* Extract priority and convert to an index. */

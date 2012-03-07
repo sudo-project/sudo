@@ -310,6 +310,13 @@ void insert_env_vars(char * const envp[]);
 void read_env_file(const char *, int);
 void rebuild_env(void);
 void validate_env_vars(char * const envp[]);
+int sudo_setenv(const char *var, const char *val, int overwrite);
+int sudo_unsetenv(const char *var);
+char *sudo_getenv(const char *name);
+int sudoers_hook_getenv(const char *name, char **value, void *closure);
+int sudoers_hook_putenv(char *string, void *closure);
+int sudoers_hook_setenv(const char *name, const char *value, int overwrite, void *closure);
+int sudoers_hook_unsetenv(const char *name, void *closure);
 
 /* fmt_string.c */
 char *fmt_string(const char *, const char *);
