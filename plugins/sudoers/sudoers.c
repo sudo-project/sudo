@@ -70,6 +70,9 @@
 # ifndef LOGIN_DEFROOTCLASS
 #  define LOGIN_DEFROOTCLASS	"daemon"
 # endif
+# ifndef LOGIN_SETENV
+#  define LOGIN_SETENV	0
+# endif
 #endif
 #ifdef HAVE_SELINUX
 # include <selinux/selinux.h>
@@ -595,6 +598,16 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	/* Insert system-wide environment variables. */
 	read_env_file(_PATH_ENVIRONMENT, true);
 #endif
+#ifdef HAVE_LOGIN_CAP_H
+	/* Set environment based on login class. */
+	if (login_class) {
+	    login_cap_t *lc = login_getclass(login_class);
+	    if (lc != NULL) {
+		setusercontext(lc, runas_pw, runas_pw->pw_uid, LOGIN_SETPATH|LOGIN_SETENV);
+		login_close(lc);
+	    }
+	}
+#endif /* HAVE_LOGIN_CAP_H */
     }
 
     /* Insert system-wide environment variables. */

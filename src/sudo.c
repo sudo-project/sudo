@@ -63,6 +63,9 @@
 #endif
 #ifdef HAVE_LOGIN_CAP_H
 # include <login_cap.h>
+# ifndef LOGIN_SETENV
+#  define LOGIN_SETENV	0
+# endif
 #endif
 #ifdef HAVE_PROJECT_H
 # include <project.h>
@@ -846,8 +849,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 
     /*
      * Swap in the plugin-supplied environment in case session init
-     * modifies the environment.  Also needed for LOGIN_SETENV.
-     * This is kind of a hack.
+     * modifies the environment.  This is kind of a hack.
      */
     environ = details->envp;
 
@@ -891,7 +893,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	    if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 		/* Set everything except user, group and login name. */
 		flags = LOGIN_SETALL;
-		CLR(flags, LOGIN_SETGROUP|LOGIN_SETLOGIN|LOGIN_SETUSER);
+		CLR(flags, LOGIN_SETGROUP|LOGIN_SETLOGIN|LOGIN_SETUSER|LOGIN_SETENV|LOGIN_SETPATH);
 		CLR(details->flags, CD_SET_UMASK); /* LOGIN_UMASK instead */
 	    } else {
 		flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
