@@ -286,7 +286,7 @@ Special features/options:
         older PAM implementations or on operating systems where
         opening a PAM session changes the utmp or wtmp files.  If
         PAM session support is disabled, resource limits may not
-        be updatedin for command being run.
+        be updated for the command being run.
 
   --disable-root-mailer
 	By default sudo will run the mailer as root when tattling
