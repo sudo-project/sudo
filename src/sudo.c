@@ -287,6 +287,10 @@ main(int argc, char *argv[], char *envp[])
 			plugin->name);
 		}
 	    }
+	    /* Now that we have the command's environment, disable env hooks. */
+	    deregister_env_hooks();
+
+	    /* Setup command details and run command/edit. */
 	    command_info_to_details(command_info, &command_details);
 	    command_details.argv = argv_out;
 	    command_details.envp = user_env_out;

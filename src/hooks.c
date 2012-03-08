@@ -278,3 +278,29 @@ deregister_hook(struct sudo_hook *hook)
 
     debug_return_int(rval);
 }
+
+/* Deregister all environment handling hooks. */
+void
+deregister_env_hooks(void)
+{
+    struct sudo_hook_list *tofree;
+    debug_decl(deregister_env_hooks, SUDO_DEBUG_HOOKS)
+
+    while ((tofree = sudo_hook_setenv_list) != NULL) {
+	sudo_hook_setenv_list = sudo_hook_setenv_list->next;
+	efree(tofree);
+    }
+    while ((tofree = sudo_hook_unsetenv_list) != NULL) {
+	sudo_hook_unsetenv_list = sudo_hook_unsetenv_list->next;
+	efree(tofree);
+    }
+    while ((tofree = sudo_hook_getenv_list) != NULL) {
+	sudo_hook_getenv_list = sudo_hook_getenv_list->next;
+	efree(tofree);
+    }
+    while ((tofree = sudo_hook_putenv_list) != NULL) {
+	sudo_hook_putenv_list = sudo_hook_putenv_list->next;
+	efree(tofree);
+    }
+    debug_return;
+}
