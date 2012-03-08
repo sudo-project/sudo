@@ -139,6 +139,7 @@ static int iolog_open(struct plugin_container *plugin, char * const settings[],
 static void iolog_close(struct plugin_container *plugin, int exit_status,
     int error);
 static int iolog_show_version(struct plugin_container *plugin, int verbose);
+static void iolog_unlink(struct plugin_container *plugin);
 
 #ifdef RLIMIT_CORE
 static struct rlimit corelimit;
@@ -275,8 +276,8 @@ main(int argc, char *argv[], char *envp[])
 		case 1:
 		    break;
 		case 0:
-		    /* I/O plugin asked to be disabled, remove from list. */
-		    tq_remove(&io_plugins, plugin);
+		    /* I/O plugin asked to be disabled, remove and free. */
+		    iolog_unlink(plugin);
 		    break;
 		case -2:
 		    usage(1);
@@ -1196,4 +1197,26 @@ iolog_show_version(struct plugin_container *plugin, int verbose)
 {
     debug_decl(iolog_show_version, SUDO_DEBUG_PCOMM)
     debug_return_bool(plugin->u.io->show_version(verbose));
+}
+
+/*
+ * Remove the specified I/O logging plugin from the io_plugins list.
+ * Deregisters any hooks before unlinking, then frees the container.
+ */
+static void
+iolog_unlink(struct plugin_container *plugin)
+{
+    debug_decl(iolog_unlink, SUDO_DEBUG_PCOMM)
+
+    /* Deregister hooks, if any. */
+    if (plugin->u.io->version >= SUDO_API_MKVERSION(1, 2)) {
+	if (plugin->u.io->deregister_hooks != NULL)
+	    plugin->u.io->deregister_hooks(SUDO_HOOK_VERSION,
+		deregister_hook);
+    }
+    /* Remove from io_plugins list and free. */
+    tq_remove(&io_plugins, plugin);
+    efree(plugin);
+
+    debug_return;
 }

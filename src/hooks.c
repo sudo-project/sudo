@@ -41,42 +41,35 @@
 #include "sudo_plugin_int.h"
 #include "sudo_debug.h"
 
-/* XXX - autogen from config file? */
-/* XXX - implement deregister_hook */
-
-/* HOOK: setenv */
-
-static struct sudo_hook_setenv {
-    struct sudo_hook_setenv *next;
-    sudo_hook_fn_setenv_t hook_fn;
+/* Singly linked hook list. */
+struct sudo_hook_list {
+    struct sudo_hook_list *next;
+    union {
+	sudo_hook_fn_t generic_fn;
+	sudo_hook_fn_setenv_t setenv_fn;
+	sudo_hook_fn_unsetenv_t unsetenv_fn;
+	sudo_hook_fn_getenv_t getenv_fn;
+	sudo_hook_fn_putenv_t putenv_fn;
+    } u;
     void *closure;
-} *sudo_hook_setenv_list;
+};
 
-static void
-register_hook_setenv(int (*hook_fn)(), void *closure)
-{
-    struct sudo_hook_setenv *hook;
-    debug_decl(add_hook_setenv, SUDO_DEBUG_HOOKS)
-
-    hook = emalloc(sizeof(*hook));
-    hook->hook_fn = (sudo_hook_fn_setenv_t)hook_fn;
-    hook->closure = closure;
-    hook->next = sudo_hook_setenv_list;
-    sudo_hook_setenv_list = hook;
-
-    debug_return;
-}
+/* Each hook type gets own hook list. */
+static struct sudo_hook_list *sudo_hook_setenv_list;
+static struct sudo_hook_list *sudo_hook_unsetenv_list;
+static struct sudo_hook_list *sudo_hook_getenv_list;
+static struct sudo_hook_list *sudo_hook_putenv_list;
 
 int
 process_hooks_setenv(const char *name, const char *value, int overwrite)
 {
-    struct sudo_hook_setenv *hook;
+    struct sudo_hook_list *hook;
     int rc = SUDO_HOOK_RET_NEXT;
     debug_decl(process_hooks_setenv, SUDO_DEBUG_HOOKS)
 
     /* First process the hooks. */
     for (hook = sudo_hook_setenv_list; hook != NULL; hook = hook->next) {
-	rc = hook->hook_fn(name, value, overwrite, hook->closure);
+	rc = hook->u.setenv_fn(name, value, overwrite, hook->closure);
 	switch (rc) {
 	    case SUDO_HOOK_RET_NEXT:
 		break;
@@ -92,39 +85,16 @@ done:
     debug_return_int(rc);
 }
 
-/* HOOK: putenv */
-
-static struct sudo_hook_putenv {
-    struct sudo_hook_putenv *next;
-    sudo_hook_fn_putenv_t hook_fn;
-    void *closure;
-} *sudo_hook_putenv_list;
-
-static void
-register_hook_putenv(int (*hook_fn)(), void *closure)
-{
-    struct sudo_hook_putenv *hook;
-    debug_decl(add_hook_putenv, SUDO_DEBUG_HOOKS)
-
-    hook = emalloc(sizeof(*hook));
-    hook->hook_fn = (sudo_hook_fn_putenv_t)hook_fn;
-    hook->closure = closure;
-    hook->next = sudo_hook_putenv_list;
-    sudo_hook_putenv_list = hook;
-
-    debug_return;
-}
-
 int
 process_hooks_putenv(char *string)
 {
-    struct sudo_hook_putenv *hook;
+    struct sudo_hook_list *hook;
     int rc = SUDO_HOOK_RET_NEXT;
     debug_decl(process_hooks_putenv, SUDO_DEBUG_HOOKS)
 
     /* First process the hooks. */
     for (hook = sudo_hook_putenv_list; hook != NULL; hook = hook->next) {
-	rc = hook->hook_fn(string, hook->closure);
+	rc = hook->u.putenv_fn(string, hook->closure);
 	switch (rc) {
 	    case SUDO_HOOK_RET_NEXT:
 		break;
@@ -140,40 +110,17 @@ done:
     debug_return_int(rc);
 }
 
-/* HOOK: getenv */
-
-static struct sudo_hook_getenv {
-    struct sudo_hook_getenv *next;
-    sudo_hook_fn_getenv_t hook_fn;
-    void *closure;
-} *sudo_hook_getenv_list;
-
-static void
-register_hook_getenv(int (*hook_fn)(), void *closure)
-{
-    struct sudo_hook_getenv *hook;
-    debug_decl(add_hook_putenv, SUDO_DEBUG_HOOKS)
-
-    hook = emalloc(sizeof(*hook));
-    hook->hook_fn = (sudo_hook_fn_getenv_t)hook_fn;
-    hook->closure = closure;
-    hook->next = sudo_hook_getenv_list;
-    sudo_hook_getenv_list = hook;
-
-    debug_return;
-}
-
 int
 process_hooks_getenv(const char *name, char **value)
 {
-    struct sudo_hook_getenv *hook;
+    struct sudo_hook_list *hook;
     char *val = NULL;
     int rc = SUDO_HOOK_RET_NEXT;
     debug_decl(process_hooks_getenv, SUDO_DEBUG_HOOKS)
 
     /* First process the hooks. */
     for (hook = sudo_hook_getenv_list; hook != NULL; hook = hook->next) {
-	rc = hook->hook_fn(name, &val, hook->closure);
+	rc = hook->u.getenv_fn(name, &val, hook->closure);
 	switch (rc) {
 	    case SUDO_HOOK_RET_NEXT:
 		break;
@@ -191,39 +138,16 @@ done:
     debug_return_int(rc);
 }
 
-/* HOOK: unsetenv */
-
-static struct sudo_hook_unsetenv {
-    struct sudo_hook_unsetenv *next;
-    sudo_hook_fn_unsetenv_t hook_fn;
-    void *closure;
-} *sudo_hook_unsetenv_list;
-
-static void
-register_hook_unsetenv(int (*hook_fn)(), void *closure)
-{
-    struct sudo_hook_unsetenv *hook;
-    debug_decl(add_hook_unsetenv, SUDO_DEBUG_HOOKS)
-
-    hook = emalloc(sizeof(*hook));
-    hook->hook_fn = (sudo_hook_fn_unsetenv_t)hook_fn;
-    hook->closure = closure;
-    hook->next = sudo_hook_unsetenv_list;
-    sudo_hook_unsetenv_list = hook;
-
-    debug_return;
-}
-
 int
 process_hooks_unsetenv(const char *name)
 {
-    struct sudo_hook_unsetenv *hook;
+    struct sudo_hook_list *hook;
     int rc = SUDO_HOOK_RET_NEXT;
     debug_decl(process_hooks_unsetenv, SUDO_DEBUG_HOOKS)
 
     /* First process the hooks. */
     for (hook = sudo_hook_unsetenv_list; hook != NULL; hook = hook->next) {
-	rc = hook->hook_fn(name, hook->closure);
+	rc = hook->u.unsetenv_fn(name, hook->closure);
 	switch (rc) {
 	    case SUDO_HOOK_RET_NEXT:
 		break;
@@ -239,6 +163,23 @@ done:
     debug_return_int(rc);
 }
 
+/* Hook registration internals. */
+static void
+register_hook_internal(struct sudo_hook_list **head,
+    int (*hook_fn)(), void *closure)
+{
+    struct sudo_hook_list *hook;
+    debug_decl(register_hook_internal, SUDO_DEBUG_HOOKS)
+
+    hook = emalloc(sizeof(*hook));
+    hook->u.generic_fn = hook_fn;
+    hook->closure = closure;
+    hook->next = *head;
+    *head = hook;
+
+    debug_return;
+}
+
 /* Register the specified hook. */
 int
 register_hook(struct sudo_hook *hook)
@@ -252,16 +193,81 @@ register_hook(struct sudo_hook *hook)
     } else {
 	switch (hook->hook_type) {
 	    case SUDO_HOOK_GETENV:
-		register_hook_getenv(hook->hook_fn, hook->closure);
+		register_hook_internal(&sudo_hook_getenv_list, hook->hook_fn,
+		    hook->closure);
 		break;
 	    case SUDO_HOOK_PUTENV:
-		register_hook_putenv(hook->hook_fn, hook->closure);
+		register_hook_internal(&sudo_hook_putenv_list, hook->hook_fn,
+		    hook->closure);
 		break;
 	    case SUDO_HOOK_SETENV:
-		register_hook_setenv(hook->hook_fn, hook->closure);
+		register_hook_internal(&sudo_hook_setenv_list, hook->hook_fn,
+		    hook->closure);
 		break;
 	    case SUDO_HOOK_UNSETENV:
-		register_hook_unsetenv(hook->hook_fn, hook->closure);
+		register_hook_internal(&sudo_hook_unsetenv_list, hook->hook_fn,
+		    hook->closure);
+		break;
+	    default:
+		/* XXX - use define for unknown value */
+		rval = 1;
+		break;
+	}
+    }
+
+    debug_return_int(rval);
+}
+
+/* Hook deregistration internals. */
+static void
+deregister_hook_internal(struct sudo_hook_list **head,
+    int (*hook_fn)(), void *closure)
+{
+    struct sudo_hook_list *hook, *prev = NULL;
+    debug_decl(deregister_hook_internal, SUDO_DEBUG_HOOKS)
+
+    for (hook = *head, prev = NULL; hook != NULL; prev = hook, hook = hook->next) {
+	if (hook->u.generic_fn == hook_fn && hook->closure == closure) {
+	    /* Remove from list and free. */
+	    if (prev == NULL)
+		*head = hook->next;
+	    else
+		prev->next = hook->next;
+	    efree(hook);
+	    break;
+	}
+    }
+
+    debug_return;
+}
+
+/* Deregister the specified hook. */
+int
+deregister_hook(struct sudo_hook *hook)
+{
+    int rval = 0;
+    debug_decl(deregister_hook, SUDO_DEBUG_HOOKS)
+
+    if (SUDO_HOOK_VERSION_GET_MAJOR(hook->hook_version) != SUDO_HOOK_VERSION_MAJOR) {
+	/* Major versions must match. */
+	rval = -1;
+    } else {
+	switch (hook->hook_type) {
+	    case SUDO_HOOK_GETENV:
+		deregister_hook_internal(&sudo_hook_getenv_list, hook->hook_fn,
+		    hook->closure);
+		break;
+	    case SUDO_HOOK_PUTENV:
+		deregister_hook_internal(&sudo_hook_putenv_list, hook->hook_fn,
+		    hook->closure);
+		break;
+	    case SUDO_HOOK_SETENV:
+		deregister_hook_internal(&sudo_hook_setenv_list, hook->hook_fn,
+		    hook->closure);
+		break;
+	    case SUDO_HOOK_UNSETENV:
+		deregister_hook_internal(&sudo_hook_unsetenv_list, hook->hook_fn,
+		    hook->closure);
 		break;
 	    default:
 		/* XXX - use define for unknown value */
