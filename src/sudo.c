@@ -148,9 +148,7 @@ static struct rlimit corelimit;
 static struct rlimit nproclimit;
 #endif
 
-#ifdef HAVE_LOGIN_CAP_H
 extern char **environ;
-#endif
 
 int
 main(int argc, char *argv[], char *envp[])
