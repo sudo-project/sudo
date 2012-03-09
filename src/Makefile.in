@@ -100,7 +100,7 @@ libsudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LTLDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
 
 sesh: sesh.o error.o exec_common.o @LIBINTL@ $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ sesh.o error.o exec_common.o @LIBINTL@ $(LIBS) -static-libtool-libs
+	$(LIBTOOL) --mode=link $(CC) -o $@ sesh.o error.o exec_common.o $(LDFLAGS) @LIBINTL@ $(LIBS) -static-libtool-libs
 
 pre-install:
 
