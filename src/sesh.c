@@ -34,8 +34,9 @@
 #endif /* HAVE_STDBOOL_H */
 
 #include "missing.h"
-#include "gettext.h"
+#include "alloc.h"
 #include "error.h"
+#include "gettext.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_exec.h"
