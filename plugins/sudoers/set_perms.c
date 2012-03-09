@@ -53,7 +53,9 @@
 /*
  * Prototypes
  */
+#if defined(HAVE_SETRESUID) || defined(HAVE_SETREUID) || defined(HAVE_SETEUID)
 static struct group_list *runas_setgroups(void);
+#endif
 
 /*
  * We keep track of the current permisstions and use a stack to restore
@@ -1417,7 +1419,7 @@ set_perms(int perm)
 	grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
-		strlcpy(errbuf, "PERM_FULL_USER: setgroups", sizeof(errbuf))
+		strlcpy(errbuf, "PERM_FULL_USER: setgroups", sizeof(errbuf));
 		goto bad;
 	    }
 	}
@@ -1436,6 +1438,7 @@ set_perms(int perm)
     case PERM_RUNAS:
     case PERM_TIMESTAMP:
 	/* Unsupported since we can't set euid. */
+	perm_stack_depth--;
 	break;
     }
 
@@ -1464,7 +1467,7 @@ restore_perms(void)
     perm_stack_depth--;
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: uid: [%d] -> [%d]",
-	__func__, (int)state->ruid, (int)ostate->ruid)
+	__func__, (int)state->ruid, (int)ostate->ruid);
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: gid: [%d] -> [%d]",
 	__func__, (int)state->rgid, (int)ostate->rgid);
 
@@ -1490,6 +1493,7 @@ bad:
 }
 #endif /* HAVE_SETRESUID || HAVE_SETREUID || HAVE_SETEUID */
 
+#if defined(HAVE_SETRESUID) || defined(HAVE_SETREUID) || defined(HAVE_SETEUID)
 static struct group_list *
 runas_setgroups(void)
 {
@@ -1514,3 +1518,4 @@ runas_setgroups(void)
 	log_error(USE_ERRNO|MSG_ONLY, _("unable to set runas group vector"));
     debug_return_ptr(grlist);
 }
+#endif /* HAVE_SETRESUID || HAVE_SETREUID || HAVE_SETEUID */
