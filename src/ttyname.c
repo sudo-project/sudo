@@ -164,7 +164,7 @@ get_process_ttyname(void)
 	/* No tty for child, check the parent via /proc. */
 	ppid = getppid();
 	for (i = STDIN_FILENO; i < STDERR_FILENO && tty == NULL; i++) {
-	    snprintf(path, sizeof(path), "/proc/%d/fd/%d", ppid, i);
+	    snprintf(path, sizeof(path), "/proc/%d/fd/%d", (int)ppid, i);
 	    fd = open(path, O_RDONLY|O_NOCTTY, 0);
 	    if (fd != -1) {
 		tty = ttyname(fd);

@@ -378,20 +378,20 @@ terminate_child(pid_t pid, bool use_pgrp)
      * Note that SIGCHLD will interrupt the sleep()
      */
     if (use_pgrp) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "killpg %d SIGHUP", pid);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "killpg %d SIGHUP", (int)pid);
 	killpg(pid, SIGHUP);
-	sudo_debug_printf(SUDO_DEBUG_INFO, "killpg %d SIGTERM", pid);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "killpg %d SIGTERM", (int)pid);
 	killpg(pid, SIGTERM);
 	sleep(2);
-	sudo_debug_printf(SUDO_DEBUG_INFO, "killpg %d SIGKILL", pid);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "killpg %d SIGKILL", (int)pid);
 	killpg(pid, SIGKILL);
     } else {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "kill %d SIGHUP", pid);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "kill %d SIGHUP", (int)pid);
 	kill(pid, SIGHUP);
-	sudo_debug_printf(SUDO_DEBUG_INFO, "kill %d SIGTERM", pid);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "kill %d SIGTERM", (int)pid);
 	kill(pid, SIGTERM);
 	sleep(2);
-	sudo_debug_printf(SUDO_DEBUG_INFO, "kill %d SIGKILL", pid);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "kill %d SIGKILL", (int)pid);
 	kill(pid, SIGKILL);
     }
 
