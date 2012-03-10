@@ -298,8 +298,10 @@ set_perms(int perm)
 	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
 	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
 	    (int)state->rgid, (int)state->egid, (int)state->sgid);
-	if (GID_CHANGED && setresgid(ID(rgid), ID(egid), ID(sgid)))
-	    error(1, _("unable to change to sudoers gid"));
+	if (GID_CHANGED && setresgid(ID(rgid), ID(egid), ID(sgid))) {
+	    strlcpy(errbuf, _("unable to change to sudoers gid"), sizeof(errbuf));
+	    goto bad;
+	}
 
 	state->ruid = ROOT_UID;
 	/*
@@ -609,8 +611,10 @@ set_perms(int perm)
 	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
 	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
 	    (int)state->rgid, (int)state->egid, (int)state->sgid);
-	if (GID_CHANGED && setgidx(ID_EFFECTIVE, sudoers_gid))
-	    error(1, _("unable to change to sudoers gid"));
+	if (GID_CHANGED && setgidx(ID_EFFECTIVE, sudoers_gid)) {
+	    strlcpy(errbuf, _("unable to change to sudoers gid"), sizeof(errbuf));
+	    goto bad;
+	}
 
 	state->ruid = ROOT_UID;
 	/*
@@ -955,8 +959,10 @@ set_perms(int perm)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_SUDOERS: gid: "
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
 	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
-	if (GID_CHANGED && setregid(ID(rgid), ID(egid)))
-	    error(1, _("unable to change to sudoers gid"));
+	if (GID_CHANGED && setregid(ID(rgid), ID(egid))) {
+	    strlcpy(errbuf, _("unable to change to sudoers gid"), sizeof(errbuf));
+	    goto bad;
+	}
 
 	state->ruid = ROOT_UID;
 	/*
@@ -1242,8 +1248,10 @@ set_perms(int perm)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_SUDOERS: gid: "
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
 	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
-	if (GID_CHANGED && setegid(sudoers_gid))
-	    error(1, _("unable to change to sudoers gid"));
+	if (GID_CHANGED && setegid(sudoers_gid)) {
+	    strlcpy(errbuf, _("unable to change to sudoers gid"), sizeof(errbuf));
+	    goto bad;
+	}
 
 	state->ruid = ROOT_UID;
 	/*
