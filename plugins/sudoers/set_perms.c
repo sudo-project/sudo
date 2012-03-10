@@ -1389,7 +1389,7 @@ set_perms(int perm)
     switch (perm) {
     case PERM_INITIAL:
 	/* Stash initial state */
-	state->ruid = getuid();
+	state->ruid = geteuid() == ROOT_UID ? ROOT_UID : getuid();
 	state->rgid = getgid();
 	state->grlist = user_group_list;
 	grlist_addref(state->grlist);
@@ -1438,7 +1438,10 @@ set_perms(int perm)
     case PERM_RUNAS:
     case PERM_TIMESTAMP:
 	/* Unsupported since we can't set euid. */
-	perm_stack_depth--;
+	state->ruid = ostate->ruid;
+	state->rgid = ostate->rgid;
+	state->grlist = ostate->grlist;
+	grlist_addref(state->grlist);
 	break;
     }
 
