@@ -829,7 +829,7 @@ validate_env_vars(char * const env_vars[])
     char * const *ep;
     char *eq, *bad = NULL;
     size_t len, blen = 0, bsize = 0;
-    bool okvar;
+    int okvar;
 
     if (env_vars == NULL)
 	return;
