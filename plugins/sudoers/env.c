@@ -557,10 +557,13 @@ matches_env_keep(const char *var)
     struct list_member *cur;
     size_t len;
     bool iswild, keepit = false;
+    debug_decl(matches_env_keep, SUDO_DEBUG_ENV)
 
     /* Preserve SHELL variable for "sudo -s". */
-    if (ISSET(sudo_mode, MODE_SHELL) && strncmp(var, "SHELL=", 6) == 0)
-	return true;
+    if (ISSET(sudo_mode, MODE_SHELL) && strncmp(var, "SHELL=", 6) == 0) {
+	keepit = true;
+	goto done;
+    }
 
     for (cur = def_env_keep; cur; cur = cur->next) {
 	len = strlen(cur->value);
@@ -576,7 +579,41 @@ matches_env_keep(const char *var)
 	    break;
 	}
     }
-    return keepit;
+done:
+    debug_return_bool(keepit);
+}
+
+/*
+ * Look up var in the env_delete and env_check.
+ * Returns true if we should delete the variable, else false.
+ */
+static bool
+env_should_delete(const char *var)
+{
+    int delete_it;
+    debug_decl(env_should_delete, SUDO_DEBUG_ENV);
+
+    delete_it = matches_env_delete(var);
+    if (!delete_it)
+	delete_it = matches_env_check(var) == false;
+    debug_return_bool(delete_it);
+}
+
+/*
+ * Lookup var in the env_check and env_keep lists.
+ * Returns true if the variable is allowed else false.
+ */
+static bool
+env_should_keep(const char *var)
+{
+    int keepit;
+    debug_decl(env_should_keep, SUDO_DEBUG_ENV)
+
+    keepit = matches_env_check(var);
+    if (keepit == -1)
+	keepit = matches_env_keep(var);
+
+    debug_return_bool(keepit == true);
 }
 
 /*
@@ -616,7 +653,7 @@ rebuild_env(void)
     if (def_env_reset || ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	/* Pull in vars we want to keep from the old environment. */
 	for (ep = old_envp; *ep; ep++) {
-	    int keepit;
+	    bool keepit;
 
 	    /* Skip variables with values beginning with () (bash functions) */
 	    if ((cp = strchr(*ep, '=')) != NULL) {
@@ -625,15 +662,14 @@ rebuild_env(void)
 	    }
 
 	    /*
-	     * First check certain variables for '%' and '/' characters.
-	     * If no match there, check the keep list.
-	     * If nothing matched, we remove it from the environment.
+	     * Look up the variable in the env_check and env_keep lists.
 	     */
-	    keepit = matches_env_check(*ep);
-	    if (keepit == -1)
-		keepit = matches_env_keep(*ep);
+	    keepit = env_should_keep(*ep);
 
-	    /* For SUDO_PS1 -> PS1 conversion. */
+	    /*
+	     * Do SUDO_PS1 -> PS1 conversion.
+	     * This must happen *after* env_should_keep() is called.
+	     */
 	    if (strncmp(*ep, "SUDO_PS1=", 8) == 0)
 		ps1 = *ep + 5;
 
@@ -723,23 +759,14 @@ rebuild_env(void)
 	 * env_check.
 	 */
 	for (ep = old_envp; *ep; ep++) {
-	    bool okvar;
-
 	    /* Skip variables with values beginning with () (bash functions) */
 	    if ((cp = strchr(*ep, '=')) != NULL) {
 		if (strncmp(cp, "=() ", 3) == 0)
 		    continue;
 	    }
 
-	    /*
-	     * First check variables against the blacklist in env_delete.
-	     * If no match there check for '%' and '/' characters.
-	     */
-	    okvar = matches_env_delete(*ep) != true;
-	    if (okvar)
-		okvar = matches_env_check(*ep) != false;
-
-	    if (okvar) {
+	    /* Add variable unless it matches a black list. */
+	    if (!env_should_delete(*ep)) {
 		if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
 		    ps1 = *ep + 5;
 		else if (strncmp(*ep, "PATH=", 5) == 0)
@@ -829,7 +856,7 @@ validate_env_vars(char * const env_vars[])
     char * const *ep;
     char *eq, *bad = NULL;
     size_t len, blen = 0, bsize = 0;
-    int okvar;
+    bool okvar;
 
     if (env_vars == NULL)
 	return;
@@ -840,13 +867,9 @@ validate_env_vars(char * const env_vars[])
 	    strncmp(*ep, "PATH=", 5) == 0) {
 	    okvar = false;
 	} else if (def_env_reset) {
-	    okvar = matches_env_check(*ep);
-	    if (okvar == -1)
-		okvar = matches_env_keep(*ep);
+	    okvar = env_should_keep(*ep);
 	} else {
-	    okvar = matches_env_delete(*ep) == false;
-	    if (okvar == false)
-		okvar = matches_env_check(*ep) != false;
+	    okvar = !env_should_delete(*ep);
 	}
 	if (okvar == false) {
 	    /* Not allowed, add to error string, allocating as needed. */
