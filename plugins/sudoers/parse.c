@@ -169,7 +169,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
      * Always check the host and user.
      */
     if (pwflag) {
-	bool nopass;
+	int nopass;
 	enum def_tuple pwcheck;
 
 	pwcheck = (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
