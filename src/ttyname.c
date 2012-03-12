@@ -87,7 +87,7 @@ char *
 get_process_ttyname(void)
 {
     char *tty = NULL;
-    struct sudo_kinfo_proc *ki_proc;
+    struct sudo_kinfo_proc *ki_proc = NULL;
     size_t size = sizeof(*ki_proc);
     int i, mib[6], rc;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
@@ -105,7 +105,7 @@ get_process_ttyname(void)
 	mib[5] = 1;
 	do {
 	    size += size / 10;
-	    ki_proc = emalloc(size);
+	    ki_proc = erealloc(ki_proc, size);
 	    rc = sysctl(mib, sudo_kp_namelen, ki_proc, &size, NULL, 0);
 	} while (rc == -1 && errno == ENOMEM);
 	if (rc != -1) {
@@ -130,6 +130,7 @@ get_process_ttyname(void)
 		"unable to resolve tty via KERN_PROC: %s", strerror(errno));
 	}
 	efree(ki_proc);
+	ki_proc = NULL;
     }
 
     /* If all else fails, fall back on ttyname(). */
