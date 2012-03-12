@@ -161,6 +161,7 @@ still allow people to get their work done."
 %if [deb]
 	# Uncomment some Defaults and the %sudo rule in sudoers
 	# Note that the order must match that of sudoers and be tab-indented.
+	chmod u+w ${pp_destdir}${sudoersdir}/sudoers
 	/bin/ed - ${pp_destdir}${sudoersdir}/sudoers <<-'EOF'
 	/Locale settings/+1,s/^# //
 	/X11 resource/+1,s/^# //
@@ -168,6 +169,7 @@ still allow people to get their work done."
 	w
 	q
 	EOF
+	chmod u-w ${pp_destdir}${sudoersdir}/sudoers
 	mkdir -p ${pp_destdir}/etc/pam.d
 	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
 	#%PAM-1.0
