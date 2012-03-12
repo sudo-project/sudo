@@ -144,7 +144,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "January  6, 2012" "1.8.4" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "March 12, 2012" "1.8.4" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -192,10 +192,10 @@ error occurred (if the editor supports this feature).
 .IP "\-c" 12
 .IX Item "-c"
 Enable \fBcheck-only\fR mode.  The existing \fIsudoers\fR file will be
-checked for syntax and a message will be printed to the
-standard output detailing the status of \fIsudoers\fR.
-If the syntax check completes successfully, \fBvisudo\fR will
-exit with a value of 0.  If a syntax error is encountered,
+checked for syntax errors, owner and mode.  A message will be printed
+to the standard output describing the status of \fIsudoers\fR unless
+the \fB\-q\fR option was specified.  If the check completes successfully,
+\&\fBvisudo\fR will exit with a value of 0.  If an error is encountered,
 \&\fBvisudo\fR will exit with a value of 1.
 .IP "\-f \fIsudoers\fR" 12
 .IX Item "-f sudoers"

@@ -42,11 +42,12 @@ OOPPTTIIOONNSS
        vviissuuddoo accepts the following command line options:
 
        -c          Enable cchheecckk--oonnllyy mode.  The existing _s_u_d_o_e_r_s file will be
-                   checked for syntax and a message will be printed to the
-                   standard output detailing the status of _s_u_d_o_e_r_s.  If the
-                   syntax check completes successfully, vviissuuddoo will exit with
-                   a value of 0.  If a syntax error is encountered, vviissuuddoo
-                   will exit with a value of 1.
+                   checked for syntax errors, owner and mode.  A message will
+                   be printed to the standard output describing the status of
+                   _s_u_d_o_e_r_s unless the --qq option was specified.  If the check
+                   completes successfully, vviissuuddoo will exit with a value of 0.
+                   If an error is encountered, vviissuuddoo will exit with a value
+                   of 1.
 
        -f _s_u_d_o_e_r_s  Specify and alternate _s_u_d_o_e_r_s file location.  With this
                    option vviissuuddoo will edit (or check) the _s_u_d_o_e_r_s file of your
@@ -150,4 +151,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.4                          January  6, 2012                     VISUDO(1m)
+1.8.4                           March 12, 2012                      VISUDO(1m)
