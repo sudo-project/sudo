@@ -129,9 +129,8 @@ get_process_ttyname(void)
 	    sudo_debug_printf(SUDO_DEBUG_WARN,
 		"unable to resolve tty via KERN_PROC: %s", strerror(errno));
 	}
-	efree(ki_proc);
-	ki_proc = NULL;
     }
+    efree(ki_proc);
 
     /* If all else fails, fall back on ttyname(). */
     if (tty == NULL) {
