@@ -1,3 +1,15 @@
+What's new in Sudo 1.8.4p3?
+
+ * Fixed a crash on FreeBSD when no tty is present.
+
+ * Fixed a bug introduced in Sudo 1.8.4 that allowed users to
+   specify environment variables to set on the command line without
+   having sudo "ALL" permissions or the "SETENV" tag.
+
+ * When visudo is run with the -c (check) option, the sudoers
+   file(s) owner and mode are now also checked unless the -f option
+   was specified.
+
 What's new in Sudo 1.8.4p2?
 
  * Fixed a bug introduced in Sudo 1.8.4 where insufficient space
