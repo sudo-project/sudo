@@ -213,6 +213,15 @@ A) AIX's Enhanced RBAC is preventing sudo from running.  To fix
 	    innateprivs = PV_DAC_UID,PV_DAC_GID
 	    secflags = FSF_EPS
 
+Q) When I run configure I get the following error:
+    dlopen present but libtool doesn't appear to support your platform.
+A) Libtool doesn't know how to support dynamic linking on the operating
+   system you are building for.  If you are cross-compiling, you need to
+   specify the operating system, not just the CPU type.  For example:
+	--host powerpc-unknown-linux
+   instead of just:
+	--host powerpc
+
 Q) How do you pronounce `sudo'?
 A) The official pronunciation is soo-doo (for su "do").  However, an
    alternate pronunciation, a homophone of "pseudo", is also common.
