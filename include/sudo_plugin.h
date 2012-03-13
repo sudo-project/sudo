@@ -56,13 +56,21 @@ typedef int (*sudo_conv_t)(int num_msgs, const struct sudo_conv_message msgs[],
 typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
 
 /*
- * Hook structure for the optional plugin hook list.
- * This allows the plugin to hook into specific sudo and/or libc functions.
+ * Hooks allow a plugin to hook into specific sudo and/or libc functions.
  */
+
+/* Hook functions typedefs. */
+typedef int (*sudo_hook_fn_t)();
+typedef int (*sudo_hook_fn_setenv_t)(const char *name, const char *value, int overwrite, void *closure);
+typedef int (*sudo_hook_fn_putenv_t)(char *string, void *closure);
+typedef int (*sudo_hook_fn_getenv_t)(const char *name, char **value, void *closure);
+typedef int (*sudo_hook_fn_unsetenv_t)(const char *name, void *closure);
+
+/* Hook structure definition. */
 struct sudo_hook {
     int hook_version;
     int hook_type;
-    int (*hook_fn)();
+    sudo_hook_fn_t hook_fn;
     void *closure;
 };
 
@@ -87,7 +95,7 @@ struct sudo_hook {
  */
 #define SUDO_HOOK_RET_ERROR	-1	/* error */
 #define SUDO_HOOK_RET_NEXT	0	/* go to the next hook in the list */
-#define SUDO_HOOK_RET_STOP	1	/* stop here, skip the rest of tghe list */
+#define SUDO_HOOK_RET_STOP	1	/* stop hook processing for this type */
 
 /*
  * Hooks for setenv/unsetenv/putenv/getenv.
@@ -99,15 +107,6 @@ struct sudo_hook {
 #define SUDO_HOOK_UNSETENV	2
 #define SUDO_HOOK_PUTENV	3
 #define SUDO_HOOK_GETENV	4
-
-/*
- * Hook functions types.
- */
-typedef int (*sudo_hook_fn_t)();
-typedef int (*sudo_hook_fn_setenv_t)(const char *name, const char *value, int overwrite, void *closure);
-typedef int (*sudo_hook_fn_putenv_t)(char *string, void *closure);
-typedef int (*sudo_hook_fn_getenv_t)(const char *name, char **value, void *closure);
-typedef int (*sudo_hook_fn_unsetenv_t)(const char *name, void *closure);
 
 /* Policy plugin type and defines */
 struct passwd;
