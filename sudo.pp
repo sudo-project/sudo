@@ -234,7 +234,11 @@ still allow people to get their work done."
 
 %post [!rpm,deb]
 	# Don't overwrite an existing sudoers file
+%if [solaris]
+	sudoersdir=${PKG_INSTALL_ROOT}%{sudoersdir}
+%else
 	sudoersdir=%{sudoersdir}
+%endif
 	if test ! -r $sudoersdir/sudoers; then
 		cp $sudoersdir/sudoers.dist $sudoersdir/sudoers
 		chmod %{sudoers_mode} $sudoersdir/sudoers
