@@ -1,7 +1,5 @@
+SUDO_PLUGIN(1m)              MAINTENANCE COMMANDS              SUDO_PLUGIN(1m)
 
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 NNAAMMEE
@@ -34,8 +32,8 @@ DDEESSCCRRIIPPTTIIOONN
        io_plugin in the plugin shared object.  The _p_a_t_h may be fully qualified
        or relative.  If not fully qualified it is relative to the
        _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c directory.  Any additional parameters after the _p_a_t_h
-       are ignored.  Lines that don't begin with Plugin or Path are silently
-       ignored.
+       are passed as arguments to the plugin's _o_p_e_n function.  Lines that
+       don't begin with Plugin, Path, Debug or Set are silently ignored.
 
        The same shared object may contain multiple plugins, each with a
        different symbol name.  The shared object file must be owned by uid 0
@@ -47,28 +45,20 @@ DDEESSCCRRIIPPTTIIOONN
         # Default /etc/sudo.conf file
         #
         # Format:
-        #   Plugin plugin_name plugin_path
+        #   Plugin plugin_name plugin_path optional_args
         #   Path askpass /path/to/askpass
+        #   Path noexec /path/to/sudo_noexec.so
+        #   Debug sudo /var/log/sudo_debug all@warn
+        #   Set disable_coredump true
         #
         # The plugin_path is relative to /usr/local/libexec unless
         #   fully qualified.
         # The plugin_name corresponds to a global symbol in the plugin
         #   that contains the plugin interface structure.
+        # The plugin_args are optional.
         #
         Plugin sudoers_policy sudoers.so
         Plugin sudoers_io sudoers.so
-
-
-
-
-1.8.0rc1                February 21, 2011                       1
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
 
    PPoolliiccyy PPlluuggiinn AAPPII
        A policy plugin must declare and populate a policy_plugin struct in the
@@ -83,7 +73,8 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
             unsigned int version; /* always SUDO_API_VERSION */
             int (*open)(unsigned int version, sudo_conv_t conversation,
                         sudo_printf_t plugin_printf, char * const settings[],
-                        char * const user_info[], char * const user_env[]);
+                        char * const user_info[], char * const user_env[],
+                        char * const plugin_args[]);
             void (*close)(int exit_status, int error);
             int (*show_version)(int verbose);
             int (*check_policy)(int argc, char * const argv[],
@@ -94,6 +85,10 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
             int (*validate)(void);
             void (*invalidate)(int remove);
             int (*init_session)(struct passwd *pwd);
+            void (*register_hooks)(int version,
+               int (*register_hook)(struct sudo_hook *hook));
+            void (*deregister_hooks)(int version,
+               int (*deregister_hook)(struct sudo_hook *hook));
         };
 
        The policy_plugin struct has the following fields:
@@ -110,7 +105,8 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
        open
             int (*open)(unsigned int version, sudo_conv_t conversation,
                         sudo_printf_t plugin_printf, char * const settings[],
-                        char * const user_info[], char * const user_env[]);
+                        char * const user_info[], char * const user_env[],
+                        char * const plugin_args[]);
 
            Returns 1 on success, 0 on failure, -1 if a general error occurred,
            or -2 if there was a usage error.  In the latter case, ssuuddoo will
@@ -124,18 +120,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            version
                The version passed in by ssuuddoo allows the plugin to determine
                the major and minor version number of the plugin API supported
-
-
-
-1.8.0rc1                February 21, 2011                       2
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
                by ssuuddoo.
 
            conversation
@@ -159,9 +143,31 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                equal sign ('=') since the _n_a_m_e field will never include one
                itself but the _v_a_l_u_e might.
 
+               debug_flags=string
+                   A comma-separated list of debug flags that correspond to
+                   ssuuddoo's Debug entry in _/_e_t_c_/_s_u_d_o_._c_o_n_f, if there is one.  The
+                   flags are passed to the plugin as they appear in
+                   _/_e_t_c_/_s_u_d_o_._c_o_n_f.  The syntax used by ssuuddoo and the _s_u_d_o_e_r_s
+                   plugin is _s_u_b_s_y_s_t_e_m@_p_r_i_o_r_i_t_y but the plugin is free to use
+                   a different format so long as it does not include a command
+                   ,.
+
+                   For reference, the priorities supported by the ssuuddoo front
+                   end and _s_u_d_o_e_r_s are: _c_r_i_t, _e_r_r, _w_a_r_n, _n_o_t_i_c_e, _d_i_a_g, _i_n_f_o,
+                   _t_r_a_c_e and _d_e_b_u_g.
+
+                   The following subsystems are defined: _m_a_i_n, _m_e_m_o_r_y, _a_r_g_s,
+                   _e_x_e_c, _p_t_y, _u_t_m_p, _c_o_n_v, _p_c_o_m_m, _u_t_i_l, _l_i_s_t, _n_e_t_i_f, _a_u_d_i_t,
+                   _e_d_i_t, _s_e_l_i_n_u_x, _l_d_a_p, _m_a_t_c_h, _p_a_r_s_e_r, _a_l_i_a_s, _d_e_f_a_u_l_t_s, _a_u_t_h,
+                   _e_n_v, _l_o_g_g_i_n_g, _n_s_s, _r_b_t_r_e_e, _p_e_r_m_s, _p_l_u_g_i_n.  The subsystem
+                   _a_l_l includes every subsystem.
+
+                   There is not currently a way to specify a set of debug
+                   flags specific to the plugin--the flags are shared by ssuuddoo
+                   and the plugin.
+
                debug_level=number
-                   A numeric debug level, from 1-9, if specified via the -D
-                   flag.
+                   This setting has been deprecated in favor of _d_e_b_u_g___f_l_a_g_s.
 
                runas_user=string
                    The user name or uid to to run the command as, if specified
@@ -184,24 +190,16 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                    Set to true if the user specified the -E flag, indicating
                    that the user wishes to preserve the environment.
 
+               run_shell=bool
+                   Set to true if the user specified the -s flag, indicating
+                   that the user wishes to run a shell.
+
                login_shell=bool
                    Set to true if the user specified the -i flag, indicating
                    that the user wishes to run a login shell.
 
                implied_shell=bool
                    If the user does not specify a program on the command line,
-
-
-
-1.8.0rc1                February 21, 2011                       3
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
                    ssuuddoo will pass the plugin the path to the user's shell and
                    set _i_m_p_l_i_e_d___s_h_e_l_l to true.  This allows ssuuddoo with no
                    arguments to be used similarly to _s_u(1).  If the plugin
@@ -256,18 +254,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                sudoedit=bool
                    Set to true when the -e flag is is specified or if invoked
                    as ssuuddooeeddiitt.  The plugin shall substitute an editor into
-
-
-
-1.8.0rc1                February 21, 2011                       4
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
                    _a_r_g_v in the _c_h_e_c_k___p_o_l_i_c_y function or return -2 with a usage
                    error if the plugin does not support _s_u_d_o_e_d_i_t.  For more
                    information, see the _c_h_e_c_k___p_o_l_i_c_y section.
@@ -322,18 +308,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
                cols=int
                    The number of columns the user's terminal supports.  If
-
-
-
-1.8.0rc1                February 21, 2011                       5
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
                    there is no terminal device available, a default value of
                    80 is used.
 
@@ -344,6 +318,18 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                When parsing _u_s_e_r___e_n_v, the plugin should split on the ffiirrsstt
                equal sign ('=') since the _n_a_m_e field will never include one
                itself but the _v_a_l_u_e might.
+
+           plugin_args
+               Any (non-comment) strings immediately after the plugin path are
+               treated as arguments to the plugin.  These arguments are split
+               on a whitespace boundary and are passed to the plugin in the
+               form of a NULL-terminated array of strings.  If no arguments
+               were specified, _p_l_u_g_i_n___a_r_g_s will be the NULL pointer.
+
+               NOTE: the _p_l_u_g_i_n___a_r_g_s parameter is only available starting with
+               API version 1.2.  A plugin mmuusstt check the API version specified
+               by the ssuuddoo front end before using _p_l_u_g_i_n___a_r_g_s.  Failure to do
+               so may result in a crash.
 
        close
             void (*close)(int exit_status, int error);
@@ -388,18 +374,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            with the user's credentials instead of with elevated privileges.
            ssuuddoo achieves this by creating user-writable temporary copies of
            the files to be edited and then overwriting the originals with the
-
-
-
-1.8.0rc1                February 21, 2011                       6
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
            temporary copies after editing is complete.  If the plugin supports
            ssuuddooeeddiitt, it should choose the editor to be used, potentially from
            a variable in the user's environment, such as EDITOR, and include
@@ -454,18 +428,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                runas_uid=uid
                    User ID to run the command as.
 
-
-
-
-1.8.0rc1                February 21, 2011                       7
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
                runas_euid=uid
                    Effective user ID to run the command as.  If not specified,
                    the value of _r_u_n_a_s___u_i_d is used.
@@ -482,7 +444,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                    the form of a comma-separated list of group IDs.  If
                    _p_r_e_s_e_r_v_e___g_r_o_u_p_s is set, this option is ignored.
 
-               login_class=login_class
+               login_class=string
                    BSD login class to use when setting resource limits and
                    nice value (optional).  This option is only set on systems
                    that support login classes.
@@ -518,19 +480,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                timeout=int
                    Command timeout.  If non-zero then when the timeout expires
                    the command will be killed.
-
-
-
-
-
-1.8.0rc1                February 21, 2011                       8
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
 
                sudoedit=bool
                    Set to true when in _s_u_d_o_e_d_i_t mode.  The plugin may enable
@@ -585,24 +534,25 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                    screen, not output to a pipe or file.  This is a hint to
                    the I/O logging plugin which may choose to ignore it.
 
-
-
-
-
-1.8.0rc1                February 21, 2011                       9
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
                use_pty=bool
                    Allocate a pseudo-tty to run the command in, regardless of
                    whether or not I/O logging is in use.  By default, ssuuddoo
                    will only run the command in a pty when an I/O log plugin
                    is loaded.
+
+               set_utmp=bool
+                   Create a utmp (or utmpx) entry when a pseudo-tty is
+                   allocated.  By default, the new entry will be a copy of the
+                   user's existing utmp entry (if any), with the tty, time,
+                   type and pid fields updated.
+
+               utmp_user=string
+                   User name to use when constructing a new utmp (or utmpx)
+                   entry when _s_e_t___u_t_m_p is enabled.  This option can be used to
+                   set the user field in the utmp entry to the user the
+                   command runs as rather than the invoking user.  If not set,
+                   ssuuddoo will base the new entry on the invoking user's
+                   existing entry.
 
                Unsupported values will be ignored.
 
@@ -652,18 +602,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
        validate
             int (*validate)(void);
 
-
-
-
-1.8.0rc1                February 21, 2011                      10
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
            The validate function is called when ssuuddoo is run with the -v flag.
            For policy plugins such as _s_u_d_o_e_r_s that cache authentication
            credentials, this function will validate and cache the credentials.
@@ -706,8 +644,63 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            function with SUDO_CONF_ERROR_MSG to present additional error
            information to the user.
 
-       _V_e_r_s_i_o_n _m_a_c_r_o_s
+       register_hooks
+            void (*register_hooks)(int version,
+               int (*register_hook)(struct sudo_hook *hook));
 
+           The register_hooks function is called by the sudo front end to
+           register any hooks the plugin needs.  If the plugin does not
+           support hooks, register_hooks should be set to the NULL pointer.
+
+           The _v_e_r_s_i_o_n argument describes the version of the hooks API
+           supported by the ssuuddoo front end.
+
+           The register_hook function should be used to register any suppored
+           hooks the plugin needs.  It returns 0 on success, 1 if the hook
+           type is not supported and -1 if the major version in struct hook
+           does not match the front end's major hook API version.
+
+           See the "Hook Function API" section below for more information
+           about hooks.
+
+           NOTE: the register_hooks function is only available starting with
+           API version 1.2.  If the ssuuddoo front end doesn't support API version
+           1.2 or higher, register_hooks will not be called.
+
+       deregister_hooks
+            void (*deregister_hooks)(int version,
+               int (*deregister_hook)(struct sudo_hook *hook));
+
+           The deregister_hooks function is called by the sudo front end to
+           deregister any hooks the plugin has registered.  If the plugin does
+           not support hooks, deregister_hooks should be set to the NULL
+           pointer.
+
+           The _v_e_r_s_i_o_n argument describes the version of the hooks API
+           supported by the ssuuddoo front end.
+
+           The deregister_hook function should be used to deregister any hooks
+           that were put in place by the register_hook function.  If the
+           plugin tries to deregister a hook that the front end does not
+           support, deregister_hook will return an error.
+
+           See the "Hook Function API" section below for more information
+           about hooks.
+
+           NOTE: the deregister_hooks function is only available starting with
+           API version 1.2.  If the ssuuddoo front end doesn't support API version
+           1.2 or higher, deregister_hooks will not be called.
+
+       _P_o_l_i_c_y _P_l_u_g_i_n _V_e_r_s_i_o_n _M_a_c_r_o_s
+
+        /* Plugin API version major/minor. */
+        #define SUDO_API_VERSION_MAJOR 1
+        #define SUDO_API_VERSION_MINOR 2
+        #define SUDO_API_MKVERSION(x, y) ((x << 16) | y)
+        #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR,\
+                                                    SUDO_API_VERSION_MINOR)
+
+        /* Getters and setters for API version */
         #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
         #define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
         #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \
@@ -717,23 +710,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
             *(vp) = (*(vp) & 0xffff0000) | (n); \
         } while(0)
 
-        #define SUDO_API_VERSION_MAJOR 1
-
-
-
-1.8.0rc1                February 21, 2011                      11
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
-        #define SUDO_API_VERSION_MINOR 0
-        #define SUDO_API_VERSION ((SUDO_API_VERSION_MAJOR << 16) | \
-                                  SUDO_API_VERSION_MINOR)
-
    II//OO PPlluuggiinn AAPPII
         struct io_plugin {
         #define SUDO_IO_PLUGIN         2
@@ -742,7 +718,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
             int (*open)(unsigned int version, sudo_conv_t conversation
                         sudo_printf_t plugin_printf, char * const settings[],
                         char * const user_info[], int argc, char * const argv[],
-                        char * const user_env[]);
+                        char * const user_env[], char * const plugin_args[]);
             void (*close)(int exit_status, int error); /* wait status or error */
             int (*show_version)(int verbose);
             int (*log_ttyin)(const char *buf, unsigned int len);
@@ -750,6 +726,10 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
             int (*log_stdin)(const char *buf, unsigned int len);
             int (*log_stdout)(const char *buf, unsigned int len);
             int (*log_stderr)(const char *buf, unsigned int len);
+            void (*register_hooks)(int version,
+               int (*register_hook)(struct sudo_hook *hook));
+            void (*deregister_hooks)(int version,
+               int (*deregister_hook)(struct sudo_hook *hook));
         };
 
        When an I/O plugin is loaded, ssuuddoo runs the command in a pseudo-tty.
@@ -782,24 +762,10 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            against.
 
        open
-
-
-
-
-
-1.8.0rc1                February 21, 2011                      12
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
             int (*open)(unsigned int version, sudo_conv_t conversation
                         sudo_printf_t plugin_printf, char * const settings[],
                         char * const user_info[], int argc, char * const argv[],
-                        char * const user_env[]);
+                        char * const user_env[], char * const plugin_args[]);
 
            The _o_p_e_n function is run before the _l_o_g___i_n_p_u_t, _l_o_g___o_u_t_p_u_t or
            _s_h_o_w___v_e_r_s_i_o_n functions are called.  It is only called if the
@@ -850,18 +816,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            user_info
                A vector of information about the user running the command in
                the form of "name=value" strings.  The vector is terminated by
-
-
-
-1.8.0rc1                February 21, 2011                      13
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
                a NULL pointer.
 
                When parsing _u_s_e_r___i_n_f_o, the plugin should split on the ffiirrsstt
@@ -887,6 +841,18 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                When parsing _u_s_e_r___e_n_v, the plugin should split on the ffiirrsstt
                equal sign ('=') since the _n_a_m_e field will never include one
                itself but the _v_a_l_u_e might.
+
+           plugin_args
+               Any (non-comment) strings immediately after the plugin path are
+               treated as arguments to the plugin.  These arguments are split
+               on a whitespace boundary and are passed to the plugin in the
+               form of a NULL-terminated array of strings.  If no arguments
+               were specified, _p_l_u_g_i_n___a_r_g_s will be the NULL pointer.
+
+               NOTE: the _p_l_u_g_i_n___a_r_g_s parameter is only available starting with
+               API version 1.2.  A plugin mmuusstt check the API version specified
+               by the ssuuddoo front end before using _p_l_u_g_i_n___a_r_g_s.  Failure to do
+               so may result in a crash.
 
        close
             void (*close)(int exit_status, int error);
@@ -914,19 +880,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            the user via the conversation or plugin_printf function using
            SUDO_CONV_INFO_MSG.  If the user requests detailed version
            information, the verbose flag will be set.
-
-
-
-
-
-1.8.0rc1                February 21, 2011                      14
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
 
        log_ttyin
             int (*log_ttyin)(const char *buf, unsigned int len);
@@ -982,18 +935,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
            The _l_o_g___s_t_d_o_u_t function is only used if the standard output does
            not correspond to a tty device.  It is called whenever data can be
-
-
-
-1.8.0rc1                February 21, 2011                      15
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
            read from the command but before it is written to the standard
            output.  This allows the plugin to reject data if it chooses to
            (for instance if the output contains banned content).  Returns 1 if
@@ -1023,9 +964,159 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
            len The length of _b_u_f in bytes.
 
-       _V_e_r_s_i_o_n _m_a_c_r_o_s
+       register_hooks
+           See the "Policy Plugin API" section for a description of
+           register_hooks.
+
+       deregister_hooks
+           See the "Policy Plugin API" section for a description of
+           deregister_hooks.
+
+       _I_/_O _P_l_u_g_i_n _V_e_r_s_i_o_n _M_a_c_r_o_s
 
        Same as for the "Policy Plugin API".
+
+   HHooookk FFuunnccttiioonn AAPPII
+       Beginning with plugin API version 1.2, it is possible to install hooks
+       for certain functions called by the ssuuddoo front end.
+
+       Currently, the only supported hooks relate to the handling of
+       environment variables.  Hooks can be used to intercept attempts to get,
+       set, or remove environment variables so that these changes can be
+       reflected in the version of the environment that is used to execute a
+       command.  A future version of the API will support hooking internal
+       ssuuddoo front end functions as well.
+
+       Environment-related hooks are disabled prior to the execution of the
+       init_session policy plugin function (if any).  This is necessary
+       because init_session has no way of passing back a modified environment
+       pointer.  However, since the user environment specified by the
+       check_policy function is already in place, there should be no need to
+       hook the environment functions at that time.
+
+       _H_o_o_k _s_t_r_u_c_t_u_r_e
+
+       Hooks in ssuuddoo are described by the following structure:
+
+        typedef int (*sudo_hook_fn_t)();
+
+        struct sudo_hook {
+            int hook_version;
+            int hook_type;
+            sudo_hook_fn_t hook_fn;
+            void *closure;
+        };
+
+       The sudo_hook structure has the following fields:
+
+       hook_version
+           The hook_version field should be set to SUDO_HOOK_VERSION.
+
+       hook_type
+           The hook_type field may be one of the following supported hook
+           types:
+
+           SUDO_HOOK_SETENV
+               The C library setenv() function.  Any registered hooks will run
+               before the C library implementation.  The hook_fn field should
+               be a function that matches the following typedef:
+
+                typedef int (*sudo_hook_fn_setenv_t)(const char *name,
+                   const char *value, int overwrite, void *closure);
+
+               If the registered hook does not match the typedef the results
+               are unspecified.
+
+           SUDO_HOOK_UNSETENV
+               The C library unsetenv() function.  Any registered hooks will
+               run before the C library implementation.  The hook_fn field
+               should be a function that matches the following typedef:
+
+                typedef int (*sudo_hook_fn_unsetenv_t)(const char *name,
+                   void *closure);
+
+           SUDO_HOOK_GETENV
+               The C library getenv() function.  Any registered hooks will run
+               before the C library implementation.  The hook_fn field should
+               be a function that matches the following typedef:
+
+                typedef int (*sudo_hook_fn_getenv_t)(const char *name,
+                   char **value, void *closure);
+
+               If the registered hook does not match the typedef the results
+               are unspecified.
+
+           SUDO_HOOK_PUTENV
+               The C library putenv() function.  Any registered hooks will run
+               before the C library implementation.  The hook_fn field should
+               be a function that matches the following typedef:
+
+                typedef int (*sudo_hook_fn_putenv_t)(char *string,
+                   void *closure);
+
+               If the registered hook does not match the typedef the results
+               are unspecified.
+
+       hook_fn
+            sudo_hook_fn_t hook_fn;
+
+           The hook_fn field should be set to the plugin's hook
+           implementation.  The actual function arguments will vary depending
+           on the hook_type (see hook_type above).  In all cases, the closure
+           field of struct sudo_hook is passed as the last function parameter.
+           This can be used to pass arbitrary data to the plugin's hook
+           implementation.
+
+           The function return value may be one of the following:
+
+           SUDO_HOOK_RET_ERROR
+               The hook function encountered an error.
+
+           SUDO_HOOK_RET_NEXT
+               The hook completed without error, go on to the next hook
+               (including the native implementation if applicable).  For
+               example, a getenv hook might return SUDO_HOOK_RET_NEXT if the
+               specified variable was not found in the private copy of the
+               environment.
+
+           SUDO_HOOK_RET_STOP
+               The hook completed without error, stop processing hooks for
+               this invocation.  This can be used to replace the native
+               implementation.  For example, a setenv hook that operates on a
+               private copy of the environment but leaves environ unchanged.
+
+       Note that it is very easy to create an infinite loop when hooking C
+       library functions.  For example, a getenv hook that calls the snprintf
+       function may create a loop if the snprintf implementation calls getenv
+       to check the locale.  To prevent this, you may wish to use a static
+       variable in the hook function to guard against nested calls.  E.g.
+
+        static int in_progress = 0; /* avoid recursion */
+        if (in_progress)
+            return SUDO_HOOK_RET_NEXT;
+        in_progress = 1;
+        ...
+        in_progress = 0;
+        return SUDO_HOOK_RET_STOP;
+
+       _H_o_o_k _A_P_I _V_e_r_s_i_o_n _M_a_c_r_o_s
+
+        /* Hook API version major/minor */
+        #define SUDO_HOOK_VERSION_MAJOR 1
+        #define SUDO_HOOK_VERSION_MINOR 0
+        #define SUDO_HOOK_MKVERSION(x, y) ((x << 16) | y)
+        #define SUDO_HOOK_VERSION SUDO_HOOK_MKVERSION(SUDO_HOOK_VERSION_MAJOR,\
+                                                      SUDO_HOOK_VERSION_MINOR)
+
+        /* Getters and setters for hook API version */
+        #define SUDO_HOOK_VERSION_GET_MAJOR(v) ((v) >> 16)
+        #define SUDO_HOOK_VERSION_GET_MINOR(v) ((v) & 0xffff)
+        #define SUDO_HOOK_VERSION_SET_MAJOR(vp, n) do { \
+            *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
+        } while(0)
+        #define SUDO_HOOK_VERSION_SET_MINOR(vp, n) do { \
+            *(vp) = (*(vp) & 0xffff0000) | (n); \
+        } while(0)
 
    CCoonnvveerrssaattiioonn AAPPII
        If the plugin needs to interact with the user, it may do so via the
@@ -1038,34 +1129,13 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
        informational or error messages to the user, which is usually more
        convenient for simple messages where no use input is required.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.8.0rc1                February 21, 2011                      16
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
         struct sudo_conv_message {
         #define SUDO_CONV_PROMPT_ECHO_OFF  0x0001 /* do not echo user input */
         #define SUDO_CONV_PROMPT_ECHO_ON   0x0002 /* echo user input */
         #define SUDO_CONV_ERROR_MSG        0x0003 /* error message */
         #define SUDO_CONV_INFO_MSG         0x0004 /* informational message */
         #define SUDO_CONV_PROMPT_MASK      0x0005 /* mask user input */
+        #define SUDO_CONV_DEBUG_MSG        0x0006 /* debugging message */
         #define SUDO_CONV_PROMPT_ECHO_OK   0x1000 /* flag: allow echo if no tty */
             int msg_type;
             int timeout;
@@ -1092,10 +1162,17 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
        buffer filled in to the struct sudo_conv_reply, if any.
 
        The printf-style function uses the same underlying mechanism as the
-       conversation function but only supports SUDO_CONV_INFO_MSG and
-       SUDO_CONV_ERROR_MSG for the _m_s_g___t_y_p_e parameter.  It can be more
-       convenient than using the conversation function if no user reply is
-       needed and supports standard _p_r_i_n_t_f_(_) escape sequences.
+       conversation function but only supports SUDO_CONV_INFO_MSG,
+       SUDO_CONV_ERROR_MSG and SUDO_CONV_DEBUG_MSG for the _m_s_g___t_y_p_e parameter.
+       It can be more convenient than using the conversation function if no
+       user reply is needed and supports standard _p_r_i_n_t_f_(_) escape sequences.
+
+       Unlike, SUDO_CONV_INFO_MSG and SUDO_CONV_ERROR_MSG, messages sent with
+       the <SUDO_CONV_DEBUG_MSG> _m_s_g___t_y_p_e are not directly user-visible.
+       Instead, they are logged to the file specified in the Debug statement
+       (if any) in the _/_e_t_c_/_s_u_d_o_._c_o_n_f file.  This allows a plugin to log
+       debugging information and is intended to be used in conjunction with
+       the _d_e_b_u_g___f_l_a_g_s setting.
 
        See the sample plugin for an example of the conversation function
        usage.
@@ -1110,21 +1187,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
        A group plugin must declare and populate a sudoers_group_plugin struct
        in the global scope.  This structure contains pointers to the functions
        that implement plugin initialization, cleanup and group lookup.
-
-
-
-
-
-
-
-1.8.0rc1                February 21, 2011                      17
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
 
         struct sudoers_group_plugin {
            unsigned int version;
@@ -1179,19 +1241,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            close open file handles.
 
        query
-
-
-
-
-1.8.0rc1                February 21, 2011                      18
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
             int (*query)(const char *user, const char *group,
                          const struct passwd *pwd);
 
@@ -1210,7 +1259,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            pwd The password database entry for _u_s_e_r, if any.  If _u_s_e_r is not
                present in the password database, _p_w_d will be NULL.
 
-       _V_e_r_s_i_o_n _M_a_c_r_o_s
+       _G_r_o_u_p _A_P_I _V_e_r_s_i_o_n _M_a_c_r_o_s
 
         /* Sudoers group plugin version major/minor */
         #define GROUP_API_VERSION_MAJOR 1
@@ -1249,6 +1298,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.0rc1                February 21, 2011                      19
-
-
+1.8.5                           March 14, 2012                 SUDO_PLUGIN(1m)

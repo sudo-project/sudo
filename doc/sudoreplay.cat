@@ -1,7 +1,5 @@
+SUDOREPLAY(1m)               MAINTENANCE COMMANDS               SUDOREPLAY(1m)
 
-
-
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
 
 NNAAMMEE
@@ -14,12 +12,17 @@ SSYYNNOOPPSSIISS
        ssuuddoorreeppllaayy [--hh] [--dd _d_i_r_e_c_t_o_r_y] -l [search expression]
 
 DDEESSCCRRIIPPTTIIOONN
-       ssuuddoorreeppllaayy plays back or lists the session logs created by ssuuddoo.  When
+       ssuuddoorreeppllaayy plays back or lists the output logs created by ssuuddoo.  When
        replaying, ssuuddoorreeppllaayy can play the session back in real-time, or the
        playback speed may be adjusted (faster or slower) based on the command
-       line options.  The _I_D should be a six character sequence of digits and
-       upper case letters, e.g.  0100A5, which is logged by ssuuddoo when a
-       command is run with session logging enabled.
+       line options.
+
+       The _I_D should either be a six character sequence of digits and upper
+       case letters, e.g. 0100A5, or a pattern matching the _i_o_l_o_g___f_i_l_e option
+       in the _s_u_d_o_e_r_s file.  When a command is run via ssuuddoo with _l_o_g___o_u_t_p_u_t
+       enabled in the _s_u_d_o_e_r_s file, a TSID=ID string is logged via syslog or
+       to the ssuuddoo log file.  The _I_D may also be determined using ssuuddoorreeppllaayy's
+       list mode.
 
        In list mode, ssuuddoorreeppllaayy can be used to find the ID of a session based
        on a number of criteria such as the user, tty or command run.
@@ -56,19 +59,6 @@ OOPPTTIIOONNSS
                    specified, it will be used to restrict the IDs that are
                    displayed.  An expression is composed of the following
                    predicates:
-
-
-
-
-
-1.8.0rc1                February 21, 2011                       1
-
-
-
-
-
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
-
 
                    command _c_o_m_m_a_n_d _p_a_t_t_e_r_n
                            Evaluates to true if the command run matches
@@ -124,18 +114,6 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
        -m _m_a_x___w_a_i_t Specify an upper bound on how long to wait between key
                    presses or output data.  By default, ssuuddoo__rreeppllaayy will
-
-
-
-1.8.0rc1                February 21, 2011                       2
-
-
-
-
-
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
-
-
                    accurately reproduce the delays between key presses or
                    program output.  However, this can be tedious when the
                    session includes long pauses.  When the _-_m option is
@@ -190,17 +168,6 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
        2 hours ago
                2 hours ago.
-
-
-
-1.8.0rc1                February 21, 2011                       3
-
-
-
-
-
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
-
 
        next Friday
                The first second of the next Friday.
@@ -257,17 +224,6 @@ EEXXAAMMPPLLEESS
 
         sudoreplay -l user millert
 
-
-
-1.8.0rc1                February 21, 2011                       4
-
-
-
-
-
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
-
-
        List sessions run by user _b_o_b with a command containing the string vi:
 
         sudoreplay -l user bob command vi
@@ -304,27 +260,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.8.0rc1                February 21, 2011                       5
-
-
+1.8.5                           March 14, 2012                  SUDOREPLAY(1m)

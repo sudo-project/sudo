@@ -140,7 +140,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "February 21, 2011" "1.8.0rc1" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "March 14, 2012" "1.8.5" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -216,8 +216,9 @@ The equivalent of a sudoer in \s-1LDAP\s0 is a \f(CW\*(C`sudoRole\*(C'\fR.  It c
 the following attributes:
 .IP "\fBsudoUser\fR" 4
 .IX Item "sudoUser"
-A user name, uid (prefixed with \f(CW\*(Aq#\*(Aq\fR), Unix group (prefixed with
-a \f(CW\*(Aq%\*(Aq\fR) or user netgroup (prefixed with a \f(CW\*(Aq+\*(Aq\fR).
+A user name, user \s-1ID\s0 (prefixed with \f(CW\*(Aq#\*(Aq\fR), Unix group (prefixed with
+\&\f(CW\*(Aq%\*(Aq\fR), Unix group \s-1ID\s0 (prefixed with \f(CW\*(Aq%#\*(Aq\fR), or user netgroup
+(prefixed with \f(CW\*(Aq+\*(Aq\fR).
 .IP "\fBsudoHost\fR" 4
 .IX Item "sudoHost"
 A host name, \s-1IP\s0 address, \s-1IP\s0 network, or host netgroup (prefixed
@@ -254,22 +255,24 @@ The \f(CW\*(C`sudoRunAsGroup\*(C'\fR attribute is only available in \fBsudo\fR v
 1.7.0 and higher.
 .IP "\fBsudoNotBefore\fR" 4
 .IX Item "sudoNotBefore"
-A timestamp in the form \f(CW\*(C`yyyymmddHHMMZ\*(C'\fR that can be used to provide
+A timestamp in the form \f(CW\*(C`yyyymmddHHMMSSZ\*(C'\fR that can be used to provide
 a start date/time for when the \f(CW\*(C`sudoRole\*(C'\fR will be valid.  If
 multiple \f(CW\*(C`sudoNotBefore\*(C'\fR entries are present, the earliest is used.
 Note that timestamps must be in Coordinated Universal Time (\s-1UTC\s0),
-not the local timezone.
+not the local timezone.  The minute and seconds portions are optional,
+but some \s-1LDAP\s0 servers require that they be present (contrary to the \s-1RFC\s0).
 .Sp
 The \f(CW\*(C`sudoNotBefore\*(C'\fR attribute is only available in \fBsudo\fR versions
 1.7.5 and higher and must be explicitly enabled via the \fB\s-1SUDOERS_TIMED\s0\fR
 option in \fI@ldap_conf@\fR.
 .IP "\fBsudoNotAfter\fR" 4
 .IX Item "sudoNotAfter"
-A timestamp in the form \f(CW\*(C`yyyymmddHHMMZ\*(C'\fR that indicates an expiration
+A timestamp in the form \f(CW\*(C`yyyymmddHHMMSSZ\*(C'\fR that indicates an expiration
 date/time, after which the \f(CW\*(C`sudoRole\*(C'\fR will no longer be valid.  If
 multiple \f(CW\*(C`sudoNotBefore\*(C'\fR entries are present, the last one is used.
 Note that timestamps must be in Coordinated Universal Time (\s-1UTC\s0),
-not the local timezone.
+not the local timezone.  The minute and seconds portions are optional,
+but some \s-1LDAP\s0 servers require that they be present (contrary to the \s-1RFC\s0).
 .Sp
 The \f(CW\*(C`sudoNotAfter\*(C'\fR attribute is only available in \fBsudo\fR versions
 1.7.5 and higher and must be explicitly enabled via the \fB\s-1SUDOERS_TIMED\s0\fR
@@ -463,6 +466,11 @@ The base \s-1DN\s0 to use when performing \fBsudo\fR \s-1LDAP\s0 queries.  Typic
 this is of the form \f(CW\*(C`ou=SUDOers,dc=example,dc=com\*(C'\fR for the domain
 \&\f(CW\*(C`example.com\*(C'\fR.  Multiple \fB\s-1SUDOERS_BASE\s0\fR lines may be specified,
 in which case they are queried in the order specified.
+.IP "\fB\s-1SUDOERS_SEARCH_FILTER\s0\fR ldap_filter" 4
+.IX Item "SUDOERS_SEARCH_FILTER ldap_filter"
+An \s-1LDAP\s0 filter which is used to restrict the set of records returned
+when performing a \fBsudo\fR \s-1LDAP\s0 query.  Typically, this is of the
+form \f(CW\*(C`attribute=value\*(C'\fR or \f(CW\*(C`(&(attribute=value)(attribute2=value2))\*(C'\fR.
 .IP "\fB\s-1SUDOERS_TIMED\s0\fR on/true/yes/off/false/no" 4
 .IX Item "SUDOERS_TIMED on/true/yes/off/false/no"
 Whether or not to evaluate the \f(CW\*(C`sudoNotBefore\*(C'\fR and \f(CW\*(C`sudoNotAfter\*(C'\fR
@@ -600,6 +608,10 @@ The \s-1SASL\s0 user name to use when \fB\s-1ROOTUSE_SASL\s0\fR is enabled.
 .IX Item "KRB5_CCNAME file name"
 The path to the Kerberos 5 credential cache to use when authenticating
 with the remote server.
+.IP "\fB\s-1DEREF\s0\fR never/searching/finding/always" 4
+.IX Item "DEREF never/searching/finding/always"
+How alias dereferencing is to be performed when searching.  See the
+\&\fIldap.conf\fR\|(@mansectform@) manual for a full description of this option.
 .PP
 See the \f(CW\*(C`ldap.conf\*(C'\fR entry in the \s-1EXAMPLES\s0 section.
 .SS "Configuring nsswitch.conf"

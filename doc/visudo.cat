@@ -1,7 +1,5 @@
+VISUDO(1m)                   MAINTENANCE COMMANDS                   VISUDO(1m)
 
-
-
-VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
 
 NNAAMMEE
@@ -44,11 +42,12 @@ OOPPTTIIOONNSS
        vviissuuddoo accepts the following command line options:
 
        -c          Enable cchheecckk--oonnllyy mode.  The existing _s_u_d_o_e_r_s file will be
-                   checked for syntax and a message will be printed to the
-                   standard output detailing the status of _s_u_d_o_e_r_s.  If the
-                   syntax check completes successfully, vviissuuddoo will exit with
-                   a value of 0.  If a syntax error is encountered, vviissuuddoo
-                   will exit with a value of 1.
+                   checked for syntax errors, owner and mode.  A message will
+                   be printed to the standard output describing the status of
+                   _s_u_d_o_e_r_s unless the --qq option was specified.  If the check
+                   completes successfully, vviissuuddoo will exit with a value of 0.
+                   If an error is encountered, vviissuuddoo will exit with a value
+                   of 1.
 
        -f _s_u_d_o_e_r_s  Specify and alternate _s_u_d_o_e_r_s file location.  With this
                    option vviissuuddoo will edit (or check) the _s_u_d_o_e_r_s file of your
@@ -57,18 +56,6 @@ OOPPTTIIOONNSS
                    appended to it.  In cchheecckk--oonnllyy mode only, the argument to
                    --ff may be "-", indicating that _s_u_d_o_e_r_s will be read from
                    the standard input.
-
-
-
-
-1.8.0rc1                February 21, 2011                       1
-
-
-
-
-
-VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
-
 
        -h          The --hh (_h_e_l_p) option causes vviissuuddoo to print a short help
                    message to the standard output and exit.
@@ -123,30 +110,24 @@ DDIIAAGGNNOOSSTTIICCSS
            used.  You may wish to comment out or remove the unused alias.  In
            --ss (strict) mode this is an error, not a warning.
 
-
-
-
-
-1.8.0rc1                February 21, 2011                       2
-
-
-
-
-
-VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
-
+       Warning: cycle in {User,Runas,Host,Cmnd}_Alias
+           The specified {User,Runas,Host,Cmnd}_Alias includes a reference to
+           itself, either directly or through an alias it includes.  This is
+           only a warning by default as ssuuddoo will ignore cycles when parsing
+           the _s_u_d_o_e_r_s file.
 
 SSEEEE AALLSSOO
        _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(1m)
 
 AAUUTTHHOORR
-       Many people have worked on _s_u_d_o over the years; this version of vviissuuddoo
+       Many people have worked on ssuuddoo over the years; this version of vviissuuddoo
        was written by:
 
         Todd Miller
 
-       See the HISTORY file in the sudo distribution or visit
-       http://www.sudo.ws/sudo/history.html for more details.
+       See the CONTRIBUTORS file in the ssuuddoo distribution
+       (http://www.sudo.ws/sudo/contributors.html) for a list of people who
+       have contributed to ssuuddoo.
 
 CCAAVVEEAATTSS
        There is no easy way to prevent a user from gaining a root shell if the
@@ -170,29 +151,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.8.0rc1                February 21, 2011                       3
-
-
+1.8.5                           March 14, 2012                      VISUDO(1m)

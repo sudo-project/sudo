@@ -1,26 +1,24 @@
+SUDO(1m)                     MAINTENANCE COMMANDS                     SUDO(1m)
 
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 NNAAMMEE
        sudo, sudoedit - execute a command as another user
 
 SSYYNNOOPPSSIISS
-       ssuuddoo [--DD _l_e_v_e_l] --hh | --KK | --kk | --VV
+       ssuuddoo --hh | --KK | --kk | --VV
 
-       ssuuddoo --vv [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--DD _l_e_v_e_l] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d]
-       [--pp _p_r_o_m_p_t] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d]
+       ssuuddoo --vv [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t]
+       [--uu _u_s_e_r _n_a_m_e|_#_u_i_d]
 
-       ssuuddoo --ll[[ll]] [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--DD _l_e_v_e_l] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d]
-       [--pp _p_r_o_m_p_t] [--UU _u_s_e_r _n_a_m_e] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [_c_o_m_m_a_n_d]
+       ssuuddoo --ll[[ll]] [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t]
+       [--UU _u_s_e_r _n_a_m_e] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [_c_o_m_m_a_n_d]
 
-       ssuuddoo [--AAbbEEHHnnPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--DD _l_e_v_e_l] [--cc _c_l_a_s_s|_-]
+       ssuuddoo [--AAbbEEHHnnPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-]
        [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--rr _r_o_l_e] [--tt _t_y_p_e]
        [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [VVAARR=_v_a_l_u_e] [--ii | --ss] [_c_o_m_m_a_n_d]
 
-       ssuuddooeeddiitt [--AAnnSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-] [--DD _l_e_v_e_l]
+       ssuuddooeeddiitt [--AAnnSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-]
        [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] file ...
 
 DDEESSCCRRIIPPTTIIOONN
@@ -32,7 +30,7 @@ DDEESSCCRRIIPPTTIIOONN
 
        ssuuddoo supports a plugin architecture for security policies and
        input/output logging.  Third parties can develop and distribute their
-       own policy and I/O logging modules to work seemlessly with the ssuuddoo
+       own policy and I/O logging modules to work seamlessly with the ssuuddoo
        front end.  The default security policy is _s_u_d_o_e_r_s, which is configured
        via the file _/_e_t_c_/_s_u_d_o_e_r_s, or via LDAP.  See the PLUGINS section for
        more information.
@@ -56,19 +54,6 @@ DDEESSCCRRIIPPTTIIOONN
        Security policies may log successful and failed attempts to use ssuuddoo.
        If an I/O plugin is configured, the running command's input and output
        may be logged as well.
-
-
-
-
-
-1.8.0rc1                February 21, 2011                       1
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
 OOPPTTIIOONNSS
        ssuuddoo accepts the following command line options:
@@ -125,22 +110,8 @@ OOPPTTIIOONNSS
                    is already root.  This option is only available on systems
                    with BSD login classes.
 
-
-
-1.8.0rc1                February 21, 2011                       2
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
-       -D _l_e_v_e_l    Enable debugging of ssuuddoo plugins and ssuuddoo itself.  The
-                   _l_e_v_e_l may be a value from 1 through 9.
-
        -E          The --EE (_p_r_e_s_e_r_v_e _e_n_v_i_r_o_n_m_e_n_t) option indicates to the
-                   security policy that the uses wishes to preserve their
+                   security policy that the user wishes to preserve their
                    existing environment variables.  The security policy may
                    return an error if the --EE option is specified and the user
                    does not have permission to preserve the environment.
@@ -190,18 +161,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    behavior.
 
        -h          The --hh (_h_e_l_p) option causes ssuuddoo to print a short help
-
-
-
-1.8.0rc1                February 21, 2011                       3
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
                    message to the standard output and exit.
 
        -i [command]
@@ -215,7 +174,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    to change to that user's home directory before running the
                    shell.  The security policy shall initialize the
                    environment to a minimal set of variables, similar to what
-                   is present when a user logs in.
+                   is present when a user logs in.  The _C_o_m_m_a_n_d _E_n_v_i_r_o_n_m_e_n_t
+                   section in the _s_u_d_o_e_r_s(4) manual documents how the --ii
+                   option affects the environment in which a command is run
+                   when the _s_u_d_o_e_r_s policy is in use.
 
        -K          The --KK (sure _k_i_l_l) option is like --kk except that it removes
                    the user's cached credentials entirely and may not be used
@@ -256,18 +218,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    messages and exit.
 
        -P          The --PP (_p_r_e_s_e_r_v_e _g_r_o_u_p _v_e_c_t_o_r) option causes ssuuddoo to
-
-
-
-1.8.0rc1                February 21, 2011                       4
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
                    preserve the invoking user's group vector unaltered.  By
                    default, the _s_u_d_o_e_r_s policy will initialize the group
                    vector to the list of groups the target user is in.  The
@@ -322,18 +272,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    role.
 
        -U _u_s_e_r     The --UU (_o_t_h_e_r _u_s_e_r) option is used in conjunction with the
-
-
-
-1.8.0rc1                February 21, 2011                       5
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
                    --ll option to specify the user whose privileges should be
                    listed.  The security policy may restrict listing other
                    users' privileges.  The _s_u_d_o_e_r_s policy only allows root or
@@ -374,7 +312,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        line are subject to the same restrictions as normal environment
        variables with one important exception.  If the _s_e_t_e_n_v option is set in
        _s_u_d_o_e_r_s, the command to be run has the SETENV tag set or the command
-       matched is ALL, the user may set variables that would overwise be
+       matched is ALL, the user may set variables that would otherwise be
        forbidden.  See _s_u_d_o_e_r_s(4) for more information.
 
 PPLLUUGGIINNSS
@@ -384,33 +322,21 @@ PPLLUUGGIINNSS
        security policy and I/O logging, which corresponds to the following
        _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
 
-
-
-
-
-
-
-
-1.8.0rc1                February 21, 2011                       6
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
         #
         # Default /etc/sudo.conf file
         #
         # Format:
-        #   Plugin plugin_name plugin_path
-        #   Path askpass path/to/askpass
+        #   Plugin plugin_name plugin_path plugin_args ...
+        #   Path askpass /path/to/askpass
+        #   Path noexec /path/to/sudo_noexec.so
+        #   Debug sudo /var/log/sudo_debug all@warn
+        #   Set disable_coredump true
         #
         # The plugin_path is relative to /usr/local/libexec unless
         #   fully qualified.
         # The plugin_name corresponds to a global symbol in the plugin
         #   that contains the plugin interface structure.
+        # The plugin_args are optional.
         #
         Plugin policy_plugin sudoers.so
         Plugin io_plugin sudoers.so
@@ -421,10 +347,95 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        io_plugin in the plugin shared object.  The _p_a_t_h may be fully qualified
        or relative.  If not fully qualified it is relative to the
        _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c directory.  Any additional parameters after the _p_a_t_h
-       are ignored.  Lines that don't begin with Plugin or Path are silently
-       ignored
+       are passed as arguments to the plugin's _o_p_e_n function.  Lines that
+       don't begin with Plugin, Path, Debug or Set are silently ignored.
 
        For more information, see the _s_u_d_o___p_l_u_g_i_n(1m) manual.
+
+PPAATTHHSS
+       A Path line consists of the Path keyword, followed by the name of the
+       path to set and its value.  E.g.
+
+        Path noexec /usr/local/libexec/sudo_noexec.so
+        Path askpass /usr/X11R6/bin/ssh-askpass
+
+       The following plugin-agnostic paths may be set in the _/_e_t_c_/_s_u_d_o_._c_o_n_f
+       file.
+
+       askpass         The fully qualified path to a helper program used to
+                       read the user's password when no terminal is available.
+                       This may be the case when ssuuddoo is executed from a
+                       graphical (as opposed to text-based) application.  The
+                       program specified by _a_s_k_p_a_s_s should display the
+                       argument passed to it as the prompt and write the
+                       user's password to the standard output.  The value of
+                       _a_s_k_p_a_s_s may be overridden by the SUDO_ASKPASS
+                       environment variable.
+
+       noexec          The fully-qualified path to a shared library containing
+                       dummy versions of the _e_x_e_c_v_(_), _e_x_e_c_v_e_(_) and _f_e_x_e_c_v_e_(_)
+                       library functions that just return an error.  This is
+                       used to implement the _n_o_e_x_e_c functionality on systems
+                       that support LD_PRELOAD or its equivalent.  Defaults to
+                       _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c_/_s_u_d_o___n_o_e_x_e_c_._s_o.
+
+DDEEBBUUGG FFLLAAGGSS
+       ssuuddoo versions 1.8.4 and higher support a flexible debugging framework
+       that can help track down what ssuuddoo is doing internally if there is a
+       problem.
+
+       A Debug line consists of the Debug keyword, followed by the name of the
+       program to debug (ssuuddoo, vviissuuddoo, ssuuddoorreeppllaayy), the debug file name and a
+       comma-separated list of debug flags.  The debug flag syntax used by
+       ssuuddoo and the _s_u_d_o_e_r_s plugin is _s_u_b_s_y_s_t_e_m@_p_r_i_o_r_i_t_y but the plugin is
+       free to use a different format so long as it does not include a command
+       ,.
+
+       For instance:
+
+        Debug sudo /var/log/sudo_debug all@warn,plugin@info
+
+       would log all debugging statements at the _w_a_r_n level and higher in
+       addition to those at the _i_n_f_o level for the plugin subsystem.
+
+       Currently, only one Debug entry per program is supported.  The sudo
+       Debug entry is shared by the ssuuddoo front end, ssuuddooeeddiitt and the plugins.
+       A future release may add support for per-plugin Debug lines and/or
+       support for multiple debugging files for a single program.
+
+       The priorities used by the ssuuddoo front end, in order of decreasing
+       severity, are: _c_r_i_t, _e_r_r, _w_a_r_n, _n_o_t_i_c_e, _d_i_a_g, _i_n_f_o, _t_r_a_c_e and _d_e_b_u_g.
+       Each priority, when specified, also includes all priorities higher than
+       it.  For example, a priority of _n_o_t_i_c_e would include debug messages
+       logged at _n_o_t_i_c_e and higher.
+
+       The following subsystems are used by ssuuddoo:
+
+       _a_l_l       matches every subsystem
+
+       _a_r_g_s      command line argument processing
+
+       _c_o_n_v      user conversation
+
+       _e_d_i_t      sudoedit
+
+       _e_x_e_c      command execution
+
+       _m_a_i_n      ssuuddoo main function
+
+       _n_e_t_i_f     network interface handling
+
+       _p_c_o_m_m     communication with the plugin
+
+       _p_l_u_g_i_n    plugin configuration
+
+       _p_t_y       pseudo-tty related code
+
+       _s_e_l_i_n_u_x   SELinux-specific handling
+
+       _u_t_i_l      utility functions
+
+       _u_t_m_p      utmp handling
 
 RREETTUURRNN VVAALLUUEESS
        Upon successful execution of a program, the exit status from ssuuddoo will
@@ -454,18 +465,6 @@ SSEECCUURRIITTYY NNOOTTEESS
        runs.  If a user runs a command such as sudo su or sudo sh, subsequent
        commands run from that shell are not subject to ssuuddoo's security policy.
        The same is true for commands that offer shell escapes (including most
-
-
-
-1.8.0rc1                February 21, 2011                       7
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        editors).  If I/O logging is enabled, subsequent commands will have
        their input and/or output logged, but there will not be traditional
        logs for those commands.  Because of this, care must be taken when
@@ -473,6 +472,20 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        does not inadvertently give the user an effective root shell.  For more
        information, please see the PREVENTING SHELL ESCAPES section in
        _s_u_d_o_e_r_s(4).
+
+       To prevent the disclosure of potentially sensitive information, ssuuddoo
+       disables core dumps by default while it is executing (they are re-
+       enabled for the command that is run).  To aid in debugging ssuuddoo
+       crashes, you may wish to re-enable core dumps by setting
+       "disable_coredump" to false in the _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
+
+        Set disable_coredump false
+
+       Note that by default, most operating systems disable core dumps from
+       setuid programs, which includes ssuuddoo.  To actually get a ssuuddoo core file
+       you may need to enable core dumps for setuid processes.  On BSD and
+       Linux systems this is accomplished via the sysctl command, on Solaris
+       the coreadm command can be used.
 
 EENNVVIIRROONNMMEENNTT
        ssuuddoo utilizes the following environment variables.  The security policy
@@ -519,18 +532,7 @@ EENNVVIIRROONNMMEENNTT
                        SUDO_EDITOR is not set
 
 FFIILLEESS
-       _/_e_t_c_/_s_u_d_o_._c_o_n_f          ssuuddoo plugin and path configuration
-
-
-
-1.8.0rc1                February 21, 2011                       8
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
+       _/_e_t_c_/_s_u_d_o_._c_o_n_f          ssuuddoo front end configuration
 
 EEXXAAMMPPLLEESS
        Note: the following examples assume a properly configured security
@@ -577,8 +579,13 @@ AAUUTTHHOORRSS
 
                Todd C. Miller
 
-       See the HISTORY file in the ssuuddoo distribution or visit
-       http://www.sudo.ws/sudo/history.html for a short history of ssuuddoo.
+       See the CONTRIBUTORS file in the ssuuddoo distribution
+       (http://www.sudo.ws/sudo/contributors.html) for a list of people who
+       have contributed to ssuuddoo.
+
+HHIISSTTOORRYY
+       See the HISTORY file in the ssuuddoo distribution
+       (http://www.sudo.ws/sudo/history.html) for a brief history of sudo.
 
 CCAAVVEEAATTSS
        There is no easy way to prevent a user from gaining a root shell if
@@ -586,18 +593,6 @@ CCAAVVEEAATTSS
        programs (such as editors) allow the user to run commands via shell
        escapes, thus avoiding ssuuddoo's checks.  However, on most systems it is
        possible to prevent shell escapes with the _s_u_d_o_e_r_s(4) module's _n_o_e_x_e_c
-
-
-
-1.8.0rc1                February 21, 2011                       9
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        functionality.
 
        It is not meaningful to run the cd command directly via sudo, e.g.,
@@ -629,32 +624,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.8.0rc1                February 21, 2011                      10
-
-
+1.8.5                           March 14, 2012                        SUDO(1m)
