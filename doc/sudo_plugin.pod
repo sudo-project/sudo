@@ -103,6 +103,10 @@ so that B<sudo> can load it.
      int (*validate)(void);
      void (*invalidate)(int remove);
      int (*init_session)(struct passwd *pwd);
+     void (*register_hooks)(int version,
+	int (*register_hook)(struct sudo_hook *hook));
+     void (*deregister_hooks)(int version,
+	int (*deregister_hook)(struct sudo_hook *hook));
  };
 
 The policy_plugin struct has the following fields:
@@ -755,10 +759,67 @@ On error, the plugin may optionally call the conversation or plugin_printf
 function with C<SUDO_CONF_ERROR_MSG> to present additional
 error information to the user.
 
+=item register_hooks
+
+ void (*register_hooks)(int version,
+    int (*register_hook)(struct sudo_hook *hook));
+
+The C<register_hooks> function is called by the sudo front end to
+register any hooks the plugin needs.  If the plugin does not support
+hooks, C<register_hooks> should be set to the NULL pointer.
+
+The I<version> argument describes the version of the hooks API
+supported by the B<sudo> front end.
+
+The C<register_hook> function should be used to register any suppored
+hooks the plugin needs.  It returns 0 on success, 1 if the hook
+type is not supported and -1 if the major version in C<struct hook>
+does not match the front end's major hook API version.
+
+See the L<Hook Function API> section below for more information
+about hooks.
+
+NOTE: the C<register_hooks> function is only available starting
+with API version 1.2.  If the B<sudo> front end doesn't support API
+version 1.2 or higher, C<register_hooks> will not be called.
+
+=item deregister_hooks
+
+ void (*deregister_hooks)(int version,
+    int (*deregister_hook)(struct sudo_hook *hook));
+
+The C<deregister_hooks> function is called by the sudo front end
+to deregister any hooks the plugin has registered.  If the plugin
+does not support hooks, C<deregister_hooks> should be set to the
+NULL pointer.
+
+The I<version> argument describes the version of the hooks API
+supported by the B<sudo> front end.
+
+The C<deregister_hook> function should be used to deregister any
+hooks that were put in place by the C<register_hook> function.  If
+the plugin tries to deregister a hook that the front end does not
+support, C<deregister_hook> will return an error.
+
+See the L<Hook Function API> section below for more information
+about hooks.
+
+NOTE: the C<deregister_hooks> function is only available starting
+with API version 1.2.  If the B<sudo> front end doesn't support API
+version 1.2 or higher, C<deregister_hooks> will not be called.
+
 =back
 
-=head3 Version macros
+=head3 Policy Plugin Version Macros
 
+ /* Plugin API version major/minor. */
+ #define SUDO_API_VERSION_MAJOR 1
+ #define SUDO_API_VERSION_MINOR 2
+ #define SUDO_API_MKVERSION(x, y) ((x << 16) | y)
+ #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR,\
+					     SUDO_API_VERSION_MINOR)
+
+ /* Getters and setters for API version */
  #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
  #define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
  #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \
@@ -767,11 +828,6 @@ error information to the user.
  #define SUDO_VERSION_SET_MINOR(vp, n) do { \
      *(vp) = (*(vp) & 0xffff0000) | (n); \
  } while(0)
-
- #define SUDO_API_VERSION_MAJOR 1
- #define SUDO_API_VERSION_MINOR 0
- #define SUDO_API_VERSION ((SUDO_API_VERSION_MAJOR << 16) | \
-                           SUDO_API_VERSION_MINOR)
 
 =head2 I/O Plugin API
 
@@ -790,6 +846,10 @@ error information to the user.
      int (*log_stdin)(const char *buf, unsigned int len);
      int (*log_stdout)(const char *buf, unsigned int len);
      int (*log_stderr)(const char *buf, unsigned int len);
+     void (*register_hooks)(int version,
+	int (*register_hook)(struct sudo_hook *hook));
+     void (*deregister_hooks)(int version,
+	int (*deregister_hook)(struct sudo_hook *hook));
  };
 
 When an I/O plugin is loaded, B<sudo> runs the command in a pseudo-tty.
@@ -1095,11 +1155,184 @@ The length of I<buf> in bytes.
 
 =back
 
+=item register_hooks
+
+See the L<Policy Plugin API> section for a description of
+C<register_hooks>.
+
+=item deregister_hooks
+
+See the L<Policy Plugin API> section for a description of
+C<deregister_hooks>.
+
 =back
 
-=head3 Version macros
+=head3 I/O Plugin Version Macros
 
 Same as for the L<Policy Plugin API>.
+
+=head2 Hook Function API
+
+Beginning with plugin API version 1.2, it is possible to install
+hooks for certain functions called by the B<sudo> front end.
+
+Currently, the only supported hooks relate to the handling of
+environment variables.  Hooks can be used to intercept attempts to
+get, set, or remove environment variables so that these changes can
+be reflected in the version of the environment that is used to
+execute a command.  A future version of the API will support
+hooking internal B<sudo> front end functions as well.
+
+Environment-related hooks are disabled prior to the execution of
+the C<init_session> policy plugin function (if any).  This is
+necessary because C<init_session> has no way of passing back a
+modified environment pointer.  However, since the user environment
+specified by the C<check_policy> function is already in place, there
+should be no need to hook the environment functions at that time.
+
+=head3 Hook structure
+
+Hooks in B<sudo> are described by the following structure:
+
+ typedef int (*sudo_hook_fn_t)();
+
+ struct sudo_hook {
+     int hook_version;
+     int hook_type;
+     sudo_hook_fn_t hook_fn;
+     void *closure;
+ };
+
+The C<sudo_hook> structure has the following fields:
+
+=over 4
+
+=item hook_version
+
+The C<hook_version> field should be set to SUDO_HOOK_VERSION.
+
+=item hook_type
+
+The C<hook_type> field may be one of the following supported hook types:
+
+=over 4
+
+=item SUDO_HOOK_SETENV
+
+The C library C<setenv()> function.  Any registered hooks will run
+before the C library implementation.  The C<hook_fn> field should
+be a function that matches the following typedef:
+
+ typedef int (*sudo_hook_fn_setenv_t)(const char *name,
+    const char *value, int overwrite, void *closure);
+
+If the registered hook does not match the typedef the results are
+unspecified.
+
+=item SUDO_HOOK_UNSETENV
+
+The C library C<unsetenv()> function.  Any registered hooks will run
+before the C library implementation.  The C<hook_fn> field should
+be a function that matches the following typedef:
+
+ typedef int (*sudo_hook_fn_unsetenv_t)(const char *name,
+    void *closure);
+
+=item SUDO_HOOK_GETENV
+
+The C library C<getenv()> function.  Any registered hooks will run
+before the C library implementation.  The C<hook_fn> field should
+be a function that matches the following typedef:
+
+ typedef int (*sudo_hook_fn_getenv_t)(const char *name,
+    char **value, void *closure);
+
+If the registered hook does not match the typedef the results are
+unspecified.
+
+=item SUDO_HOOK_PUTENV
+
+The C library C<putenv()> function.  Any registered hooks will run
+before the C library implementation.  The C<hook_fn> field should
+be a function that matches the following typedef:
+
+ typedef int (*sudo_hook_fn_putenv_t)(char *string,
+    void *closure);
+
+If the registered hook does not match the typedef the results are
+unspecified.
+
+=back
+
+=item hook_fn
+
+ sudo_hook_fn_t hook_fn;
+
+The C<hook_fn> field should be set to the plugin's hook implementation.
+The actual function arguments will vary depending on the C<hook_type>
+(see C<hook_type> above).  In all cases, the C<closure> field of
+C<struct sudo_hook> is passed as the last function parameter.  This
+can be used to pass arbitrary data to the plugin's hook implementation.
+
+The function return value may be one of the following:
+
+=over 4
+
+=item SUDO_HOOK_RET_ERROR
+
+The hook function encountered an error.
+
+=item SUDO_HOOK_RET_NEXT
+
+The hook completed without error, go on to the next hook (including
+the native implementation if applicable).  For example, a C<getenv>
+hook might return C<SUDO_HOOK_RET_NEXT> if the specified variable
+was not found in the private copy of the environment.
+
+=item SUDO_HOOK_RET_STOP
+
+The hook completed without error, stop processing hooks for this
+invocation.  This can be used to replace the native implementation.
+For example, a C<setenv> hook that operates on a private copy of
+the environment but leaves C<environ> unchanged.
+
+=back
+
+=back
+
+Note that it is very easy to create an infinite loop when hooking
+C library functions.  For example, a C<getenv> hook that calls the
+C<snprintf> function may create a loop if the C<snprintf> implementation
+calls C<getenv> to check the locale.  To prevent this, you may wish
+to use a static variable in the hook function to guard against
+nested calls.  E.g.
+
+ static int in_progress = 0; /* avoid recursion */
+ if (in_progress)
+     return SUDO_HOOK_RET_NEXT;
+ in_progress = 1;
+ ...
+ in_progress = 0;
+ return SUDO_HOOK_RET_STOP;
+
+=head3 Hook API Version Macros
+
+ /* Hook API version major/minor */
+ #define SUDO_HOOK_VERSION_MAJOR 1
+ #define SUDO_HOOK_VERSION_MINOR 0
+ #define SUDO_HOOK_MKVERSION(x, y) ((x << 16) | y)
+ #define SUDO_HOOK_VERSION SUDO_HOOK_MKVERSION(SUDO_HOOK_VERSION_MAJOR,\
+					       SUDO_HOOK_VERSION_MINOR)
+
+ /* Getters and setters for hook API version */
+ #define SUDO_HOOK_VERSION_GET_MAJOR(v) ((v) >> 16)
+ #define SUDO_HOOK_VERSION_GET_MINOR(v) ((v) & 0xffff)
+ #define SUDO_HOOK_VERSION_SET_MAJOR(vp, n) do { \
+     *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
+ } while(0)
+ #define SUDO_HOOK_VERSION_SET_MINOR(vp, n) do { \
+     *(vp) = (*(vp) & 0xffff0000) | (n); \
+ } while(0)
 
 =head2 Conversation API
 
@@ -1268,7 +1501,7 @@ present in the password database, I<pwd> will be C<NULL>.
 
 =back
 
-=head3 Version Macros
+=head3 Group API Version Macros
 
  /* Sudoers group plugin version major/minor */
  #define GROUP_API_VERSION_MAJOR 1
