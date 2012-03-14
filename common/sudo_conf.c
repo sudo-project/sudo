@@ -353,6 +353,7 @@ done:
 	info = emalloc(sizeof(*info));
 	info->symbol_name = "sudoers_policy";
 	info->path = SUDOERS_PLUGIN;
+	info->args = NULL;
 	info->prev = info;
 	info->next = NULL;
 	tq_append(&sudo_conf_data.plugins, info);
@@ -361,6 +362,7 @@ done:
 	info = emalloc(sizeof(*info));
 	info->symbol_name = "sudoers_io";
 	info->path = SUDOERS_PLUGIN;
+	info->args = NULL;
 	info->prev = info;
 	info->next = NULL;
 	tq_append(&sudo_conf_data.plugins, info);
