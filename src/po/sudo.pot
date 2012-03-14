@@ -5,9 +5,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.x\n"
+"Project-Id-Version: sudo 1.8.5\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-02-16 17:03-0500\n"
+"POT-Creation-Date: 2012-03-14 14:20-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,7 +20,7 @@ msgstr ""
 msgid ": "
 msgstr ""
 
-#: src/exec.c:105 src/exec_pty.c:604 src/exec_pty.c:936 src/tgetpass.c:227
+#: src/exec.c:105 src/exec_pty.c:616 src/exec_pty.c:948 src/tgetpass.c:227
 #, c-format
 msgid "unable to fork"
 msgstr ""
@@ -30,13 +30,13 @@ msgstr ""
 msgid "unable to create sockets"
 msgstr ""
 
-#: src/exec.c:259 src/exec_pty.c:557 src/exec_pty.c:565 src/exec_pty.c:572
-#: src/exec_pty.c:871 src/exec_pty.c:933 src/tgetpass.c:224
+#: src/exec.c:259 src/exec_pty.c:567 src/exec_pty.c:576 src/exec_pty.c:584
+#: src/exec_pty.c:883 src/exec_pty.c:945 src/tgetpass.c:224
 #, c-format
 msgid "unable to create pipe"
 msgstr ""
 
-#: src/exec.c:340 src/exec_pty.c:1000 src/exec_pty.c:1135
+#: src/exec.c:340 src/exec_pty.c:1012 src/exec_pty.c:1147
 #, c-format
 msgid "select failed"
 msgstr ""
@@ -46,13 +46,13 @@ msgstr ""
 msgid "unable to restore tty label"
 msgstr ""
 
-#: src/exec_common.c:66
+#: src/exec_common.c:69
 #, c-format
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr ""
 
-#: src/exec_common.c:88 src/parse_args.c:432 src/sudo.c:445 src/sudo.c:465
-#: src/sudo.c:472 src/sudo.c:483 src/sudo.c:842 common/alloc.c:85
+#: src/exec_common.c:111 src/parse_args.c:432 src/sudo.c:451 src/sudo.c:471
+#: src/sudo.c:478 src/sudo.c:489 src/sudo.c:848 common/alloc.c:85
 #: common/alloc.c:105 common/alloc.c:123 common/alloc.c:145 common/alloc.c:203
 #: common/alloc.c:217
 #, c-format
@@ -64,32 +64,32 @@ msgstr ""
 msgid "unable to allocate pty"
 msgstr ""
 
-#: src/exec_pty.c:597
+#: src/exec_pty.c:609
 #, c-format
 msgid "unable to set terminal to raw mode"
 msgstr ""
 
-#: src/exec_pty.c:914
+#: src/exec_pty.c:926
 #, c-format
 msgid "unable to set controlling tty"
 msgstr ""
 
-#: src/exec_pty.c:1008
+#: src/exec_pty.c:1020
 #, c-format
 msgid "error reading from signal pipe"
 msgstr ""
 
-#: src/exec_pty.c:1027
+#: src/exec_pty.c:1039
 #, c-format
 msgid "error reading from pipe"
 msgstr ""
 
-#: src/exec_pty.c:1043
+#: src/exec_pty.c:1055
 #, c-format
 msgid "error reading from socketpair"
 msgstr ""
 
-#: src/exec_pty.c:1047
+#: src/exec_pty.c:1059
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr ""
@@ -139,12 +139,12 @@ msgstr ""
 msgid "%s: only a single policy plugin may be loaded"
 msgstr ""
 
-#: src/load_plugins.c:146
+#: src/load_plugins.c:148
 #, c-format
 msgid "%s: at least one policy plugin must be specified"
 msgstr ""
 
-#: src/load_plugins.c:151
+#: src/load_plugins.c:153
 #, c-format
 msgid "policy plugin %s does not include a check_policy method"
 msgstr ""
@@ -377,7 +377,7 @@ msgstr ""
 msgid "unable to set new tty context"
 msgstr ""
 
-#: src/selinux.c:195 src/selinux.c:208 src/sudo.c:331
+#: src/selinux.c:195 src/selinux.c:208 src/sudo.c:337 common/sudo_conf.c:328
 #, c-format
 msgid "unable to open %s"
 msgstr ""
@@ -432,167 +432,167 @@ msgstr ""
 msgid "unable to set key creation context to %s"
 msgstr ""
 
-#: src/sesh.c:69
+#: src/sesh.c:70
 #, c-format
 msgid "requires at least one argument"
 msgstr ""
 
-#: src/sesh.c:90
+#: src/sesh.c:91
 #, c-format
 msgid "unable to execute %s"
 msgstr ""
 
-#: src/sudo.c:189
+#: src/sudo.c:191
 #, c-format
 msgid "must be setuid root"
 msgstr ""
 
-#: src/sudo.c:212
+#: src/sudo.c:214
 #, c-format
 msgid "Sudo version %s\n"
 msgstr ""
 
-#: src/sudo.c:214
+#: src/sudo.c:216
 #, c-format
 msgid "Configure options: %s\n"
 msgstr ""
 
-#: src/sudo.c:219
+#: src/sudo.c:221
 #, c-format
 msgid "fatal error, unable to load plugins"
 msgstr ""
 
-#: src/sudo.c:227
+#: src/sudo.c:229
 #, c-format
 msgid "unable to initialize policy plugin"
 msgstr ""
 
-#: src/sudo.c:282
+#: src/sudo.c:284
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr ""
 
-#: src/sudo.c:306
+#: src/sudo.c:312
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr ""
 
-#: src/sudo.c:400
+#: src/sudo.c:406
 #, c-format
 msgid "unable to get group vector"
 msgstr ""
 
-#: src/sudo.c:441
+#: src/sudo.c:447
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr ""
 
-#: src/sudo.c:784
+#: src/sudo.c:790
 #, c-format
 msgid "resource control limit has been reached"
 msgstr ""
 
-#: src/sudo.c:787
+#: src/sudo.c:793
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
 msgstr ""
 
-#: src/sudo.c:791
+#: src/sudo.c:797
 #, c-format
 msgid "the invoking task is final"
 msgstr ""
 
-#: src/sudo.c:794
+#: src/sudo.c:800
 #, c-format
 msgid "could not join project \"%s\""
 msgstr ""
 
-#: src/sudo.c:799
+#: src/sudo.c:805
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:803
+#: src/sudo.c:809
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:807
+#: src/sudo.c:813
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:813
+#: src/sudo.c:819
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:815
+#: src/sudo.c:821
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:880
+#: src/sudo.c:892
 #, c-format
 msgid "unknown login class %s"
 msgstr ""
 
-#: src/sudo.c:896 src/sudo.c:899
+#: src/sudo.c:906 src/sudo.c:909
 #, c-format
 msgid "unable to set user context"
 msgstr ""
 
-#: src/sudo.c:915
+#: src/sudo.c:924
 #, c-format
 msgid "unable to set supplementary group IDs"
 msgstr ""
 
-#: src/sudo.c:922
+#: src/sudo.c:931
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:928
+#: src/sudo.c:937
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:935
+#: src/sudo.c:944
 #, c-format
 msgid "unable to set process priority"
 msgstr ""
 
-#: src/sudo.c:943
+#: src/sudo.c:952
 #, c-format
 msgid "unable to change root to %s"
 msgstr ""
 
-#: src/sudo.c:950 src/sudo.c:956 src/sudo.c:962
+#: src/sudo.c:959 src/sudo.c:965 src/sudo.c:971
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr ""
 
-#: src/sudo.c:976
+#: src/sudo.c:985
 #, c-format
 msgid "unable to change directory to %s"
 msgstr ""
 
-#: src/sudo.c:1049
+#: src/sudo.c:1058
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr ""
 
-#: src/sudo.c:1095
+#: src/sudo.c:1119
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr ""
 
-#: src/sudo.c:1107
+#: src/sudo.c:1131
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr ""
 
-#: src/sudo.c:1119
+#: src/sudo.c:1143
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr ""
@@ -719,6 +719,31 @@ msgstr ""
 
 #: common/alloc.c:140
 msgid "internal error, erealloc3() overflow"
+msgstr ""
+
+#: common/sudo_conf.c:306
+#, c-format
+msgid "unable to stat %s"
+msgstr ""
+
+#: common/sudo_conf.c:309
+#, c-format
+msgid "%s is not a regular file"
+msgstr ""
+
+#: common/sudo_conf.c:312
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr ""
+
+#: common/sudo_conf.c:316
+#, c-format
+msgid "%s is world writable"
+msgstr ""
+
+#: common/sudo_conf.c:319
+#, c-format
+msgid "%s is group writable"
 msgstr ""
 
 #: compat/strsignal.c:47
