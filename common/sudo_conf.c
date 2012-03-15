@@ -205,9 +205,9 @@ set_plugin(const char *entry)
 {
     struct plugin_info *info;
     const char *name, *path, *cp, *ep;
-    char **args = NULL;
+    char **options = NULL;
     size_t namelen, pathlen;
-    unsigned int nargs;
+    unsigned int nopts;
 
     /* Parse Plugin line */
     name = entry;
@@ -218,34 +218,34 @@ set_plugin(const char *entry)
     while (isblank((unsigned char)*path))
 	path++;
     if ((cp = strpbrk(path, " \t")) != NULL) {
-	/* Convert extra args to an array. */
+	/* Convert any options to an array. */
 	pathlen = (size_t)(cp - path);
 	while (isblank((unsigned char)*cp))
 	    cp++;
-	/* Count number of args and allocate array. */
-	for (ep = cp, nargs = 1; (ep = strpbrk(ep, " \t")) != NULL; nargs++) {
+	/* Count number of options and allocate array. */
+	for (ep = cp, nopts = 1; (ep = strpbrk(ep, " \t")) != NULL; nopts++) {
 	    while (isblank((unsigned char)*ep))
 		ep++;
 	}
-	args = emalloc2(nargs + 1, sizeof(*args));
-	/* Fill in args array, there is at least one element. */
-	for (nargs = 0; (ep = strpbrk(cp, " \t")) != NULL; ) {
-	    args[nargs++] = estrndup(cp, (size_t)(ep - cp));
+	options = emalloc2(nopts + 1, sizeof(*options));
+	/* Fill in options array, there is at least one element. */
+	for (nopts = 0; (ep = strpbrk(cp, " \t")) != NULL; ) {
+	    options[nopts++] = estrndup(cp, (size_t)(ep - cp));
 	    while (isblank((unsigned char)*ep))
 		ep++;
 	    cp = ep;
 	}
-	args[nargs++] = estrdup(cp);
-	args[nargs] = NULL;
+	options[nopts++] = estrdup(cp);
+	options[nopts] = NULL;
     } else {
-	/* No extra args. */
+	/* No extra options. */
 	pathlen = strlen(path);
     }
 
     info = emalloc(sizeof(*info));
     info->symbol_name = estrndup(name, namelen);
     info->path = estrndup(path, pathlen);
-    info->args = args;
+    info->options = options;
     info->prev = info;
     info->next = NULL;
     tq_append(&sudo_conf_data.plugins, info);
@@ -353,7 +353,7 @@ done:
 	info = emalloc(sizeof(*info));
 	info->symbol_name = "sudoers_policy";
 	info->path = SUDOERS_PLUGIN;
-	info->args = NULL;
+	info->options = NULL;
 	info->prev = info;
 	info->next = NULL;
 	tq_append(&sudo_conf_data.plugins, info);
@@ -362,7 +362,7 @@ done:
 	info = emalloc(sizeof(*info));
 	info->symbol_name = "sudoers_io";
 	info->path = SUDOERS_PLUGIN;
-	info->args = NULL;
+	info->options = NULL;
 	info->prev = info;
 	info->next = NULL;
 	tq_append(&sudo_conf_data.plugins, info);

@@ -1065,7 +1065,7 @@ policy_open(struct plugin_container *plugin, char * const settings[],
 	break;
     default:
 	rval = plugin->u.policy->open(SUDO_API_VERSION, sudo_conversation,
-	    _sudo_printf, settings, user_info, user_env, plugin->args);
+	    _sudo_printf, settings, user_info, user_env, plugin->options);
     }
 
     debug_return_bool(rval);
@@ -1180,7 +1180,7 @@ iolog_open(struct plugin_container *plugin, char * const settings[],
     default:
 	rval = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation,
 	    _sudo_printf, settings, user_info, command_info,
-	    argc, argv, user_env, plugin->args);
+	    argc, argv, user_env, plugin->options);
     }
     debug_return_bool(rval);
 }

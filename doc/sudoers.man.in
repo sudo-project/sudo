@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "March 14, 2012" "1.8.5" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "March 15, 2012" "1.8.5" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -1644,7 +1644,7 @@ the following \fI@sysconfdir@/sudo.conf\fR file.
 \& # Default @sysconfdir@/sudo.conf file
 \& #
 \& # Format:
-\& #   Plugin plugin_name plugin_path plugin_args ...
+\& #   Plugin plugin_name plugin_path plugin_options ...
 \& #   Path askpass /path/to/askpass
 \& #   Path noexec /path/to/sudo_noexec.so
 \& #   Debug sudo /var/log/sudo_debug all@warn
@@ -1654,7 +1654,7 @@ the following \fI@sysconfdir@/sudo.conf\fR file.
 \& #   fully qualified.
 \& # The plugin_name corresponds to a global symbol in the plugin
 \& #   that contains the plugin interface structure.
-\& # The plugin_args are optional.
+\& # The plugin_options are optional.
 \& #
 \& Plugin policy_plugin sudoers.so
 \& Plugin io_plugin sudoers.so

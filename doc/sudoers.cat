@@ -1350,7 +1350,7 @@ SSUUDDOO..CCOONNFF
         # Default /etc/sudo.conf file
         #
         # Format:
-        #   Plugin plugin_name plugin_path plugin_args ...
+        #   Plugin plugin_name plugin_path plugin_options ...
         #   Path askpass /path/to/askpass
         #   Path noexec /path/to/sudo_noexec.so
         #   Debug sudo /var/log/sudo_debug all@warn
@@ -1360,7 +1360,7 @@ SSUUDDOO..CCOONNFF
         #   fully qualified.
         # The plugin_name corresponds to a global symbol in the plugin
         #   that contains the plugin interface structure.
-        # The plugin_args are optional.
+        # The plugin_options are optional.
         #
         Plugin policy_plugin sudoers.so
         Plugin io_plugin sudoers.so
@@ -1806,4 +1806,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.5                           March 14, 2012                      SUDOERS(4)
+1.8.5                           March 15, 2012                      SUDOERS(4)

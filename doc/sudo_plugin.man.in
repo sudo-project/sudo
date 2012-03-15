@@ -174,7 +174,7 @@ plugin.  The \fIsymbol_name\fR is the name of the \f(CW\*(C`struct policy_plugin
 or \f(CW\*(C`struct io_plugin\*(C'\fR in the plugin shared object.  The \fIpath\fR
 may be fully qualified or relative.  If not fully qualified it is
 relative to the \fI@prefix@/libexec\fR directory.  Any additional
-parameters after the \fIpath\fR are passed as arguments to the plugin's
+parameters after the \fIpath\fR are passed as options to the plugin's
 \&\fIopen\fR function.  Lines that don't begin with \f(CW\*(C`Plugin\*(C'\fR, \f(CW\*(C`Path\*(C'\fR,
 \&\f(CW\*(C`Debug\*(C'\fR or \f(CW\*(C`Set\*(C'\fR are silently ignored.
 .PP
@@ -189,7 +189,7 @@ This limitation does not apply to I/O plugins.
 \& # Default @sysconfdir@/sudo.conf file
 \& #
 \& # Format:
-\& #   Plugin plugin_name plugin_path optional_args
+\& #   Plugin plugin_name plugin_path plugin_options ...
 \& #   Path askpass /path/to/askpass
 \& #   Path noexec /path/to/sudo_noexec.so
 \& #   Debug sudo /var/log/sudo_debug all@warn
@@ -199,7 +199,7 @@ This limitation does not apply to I/O plugins.
 \& #   fully qualified.
 \& # The plugin_name corresponds to a global symbol in the plugin
 \& #   that contains the plugin interface structure.
-\& # The plugin_args are optional.
+\& # The plugin_options are optional.
 \& #
 \& Plugin sudoers_policy sudoers.so
 \& Plugin sudoers_io sudoers.so
@@ -220,7 +220,7 @@ so that \fBsudo\fR can load it.
 \&     int (*open)(unsigned int version, sudo_conv_t conversation,
 \&                 sudo_printf_t plugin_printf, char * const settings[],
 \&                 char * const user_info[], char * const user_env[],
-\&                 char * const plugin_args[]);
+\&                 char * const plugin_options[]);
 \&     void (*close)(int exit_status, int error);
 \&     int (*show_version)(int verbose);
 \&     int (*check_policy)(int argc, char * const argv[],
@@ -254,7 +254,7 @@ built against.
 \& int (*open)(unsigned int version, sudo_conv_t conversation,
 \&             sudo_printf_t plugin_printf, char * const settings[],
 \&             char * const user_info[], char * const user_env[],
-\&             char * const plugin_args[]);
+\&             char * const plugin_options[]);
 .Ve
 .Sp
 Returns 1 on success, 0 on failure, \-1 if a general error occurred,
@@ -468,17 +468,17 @@ The user's environment in the form of a \f(CW\*(C`NULL\*(C'\fR\-terminated vecto
 When parsing \fIuser_env\fR, the plugin should split on the \fBfirst\fR
 equal sign ('=') since the \fIname\fR field will never include one
 itself but the \fIvalue\fR might.
-.IP "plugin_args" 4
-.IX Item "plugin_args"
+.IP "plugin_options" 4
+.IX Item "plugin_options"
 Any (non-comment) strings immediately after the plugin path are
 treated as arguments to the plugin.  These arguments are split on
 a white space boundary and are passed to the plugin in the form of
 a \f(CW\*(C`NULL\*(C'\fR\-terminated array of strings.  If no arguments were
-specified, \fIplugin_args\fR will be the \s-1NULL\s0 pointer.
+specified, \fIplugin_options\fR will be the \s-1NULL\s0 pointer.
 .Sp
-\&\s-1NOTE:\s0 the \fIplugin_args\fR parameter is only available starting with
+\&\s-1NOTE:\s0 the \fIplugin_options\fR parameter is only available starting with
 \&\s-1API\s0 version 1.2.  A plugin \fBmust\fR check the \s-1API\s0 version specified
-by the \fBsudo\fR front end before using \fIplugin_args\fR.  Failure to
+by the \fBsudo\fR front end before using \fIplugin_options\fR.  Failure to
 do so may result in a crash.
 .RE
 .RS 4
@@ -909,7 +909,7 @@ version 1.2 or higher, \f(CW\*(C`deregister_hooks\*(C'\fR will not be called.
 \&     int (*open)(unsigned int version, sudo_conv_t conversation
 \&                 sudo_printf_t plugin_printf, char * const settings[],
 \&                 char * const user_info[], int argc, char * const argv[],
-\&                 char * const user_env[], char * const plugin_args[]);
+\&                 char * const user_env[], char * const plugin_options[]);
 \&     void (*close)(int exit_status, int error); /* wait status or error */
 \&     int (*show_version)(int verbose);
 \&     int (*log_ttyin)(const char *buf, unsigned int len);
@@ -959,7 +959,7 @@ built against.
 \& int (*open)(unsigned int version, sudo_conv_t conversation
 \&             sudo_printf_t plugin_printf, char * const settings[],
 \&             char * const user_info[], int argc, char * const argv[],
-\&             char * const user_env[], char * const plugin_args[]);
+\&             char * const user_env[], char * const plugin_options[]);
 .Ve
 .Sp
 The \fIopen\fR function is run before the \fIlog_input\fR, \fIlog_output\fR
@@ -1034,17 +1034,17 @@ The user's environment in the form of a \f(CW\*(C`NULL\*(C'\fR\-terminated vecto
 When parsing \fIuser_env\fR, the plugin should split on the \fBfirst\fR
 equal sign ('=') since the \fIname\fR field will never include one
 itself but the \fIvalue\fR might.
-.IP "plugin_args" 4
-.IX Item "plugin_args"
+.IP "plugin_options" 4
+.IX Item "plugin_options"
 Any (non-comment) strings immediately after the plugin path are
 treated as arguments to the plugin.  These arguments are split on
 a white space boundary and are passed to the plugin in the form of
 a \f(CW\*(C`NULL\*(C'\fR\-terminated array of strings.  If no arguments were
-specified, \fIplugin_args\fR will be the \s-1NULL\s0 pointer.
+specified, \fIplugin_options\fR will be the \s-1NULL\s0 pointer.
 .Sp
-\&\s-1NOTE:\s0 the \fIplugin_args\fR parameter is only available starting with
+\&\s-1NOTE:\s0 the \fIplugin_options\fR parameter is only available starting with
 \&\s-1API\s0 version 1.2.  A plugin \fBmust\fR check the \s-1API\s0 version specified
-by the \fBsudo\fR front end before using \fIplugin_args\fR.  Failure to
+by the \fBsudo\fR front end before using \fIplugin_options\fR.  Failure to
 do so may result in a crash.
 .RE
 .RS 4

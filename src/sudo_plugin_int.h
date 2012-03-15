@@ -84,7 +84,7 @@ struct plugin_container {
     struct plugin_container *prev; /* required */
     struct plugin_container *next; /* required */
     const char *name;
-    char * const *args;
+    char * const *options;
     void *handle;
     union {
 	struct generic_plugin *generic;

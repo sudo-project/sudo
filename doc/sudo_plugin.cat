@@ -32,8 +32,8 @@ DDEESSCCRRIIPPTTIIOONN
        io_plugin in the plugin shared object.  The _p_a_t_h may be fully qualified
        or relative.  If not fully qualified it is relative to the
        _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c directory.  Any additional parameters after the _p_a_t_h
-       are passed as arguments to the plugin's _o_p_e_n function.  Lines that
-       don't begin with Plugin, Path, Debug or Set are silently ignored.
+       are passed as options to the plugin's _o_p_e_n function.  Lines that don't
+       begin with Plugin, Path, Debug or Set are silently ignored.
 
        The same shared object may contain multiple plugins, each with a
        different symbol name.  The shared object file must be owned by uid 0
@@ -45,7 +45,7 @@ DDEESSCCRRIIPPTTIIOONN
         # Default /etc/sudo.conf file
         #
         # Format:
-        #   Plugin plugin_name plugin_path optional_args
+        #   Plugin plugin_name plugin_path plugin_options ...
         #   Path askpass /path/to/askpass
         #   Path noexec /path/to/sudo_noexec.so
         #   Debug sudo /var/log/sudo_debug all@warn
@@ -55,7 +55,7 @@ DDEESSCCRRIIPPTTIIOONN
         #   fully qualified.
         # The plugin_name corresponds to a global symbol in the plugin
         #   that contains the plugin interface structure.
-        # The plugin_args are optional.
+        # The plugin_options are optional.
         #
         Plugin sudoers_policy sudoers.so
         Plugin sudoers_io sudoers.so
@@ -74,7 +74,7 @@ DDEESSCCRRIIPPTTIIOONN
             int (*open)(unsigned int version, sudo_conv_t conversation,
                         sudo_printf_t plugin_printf, char * const settings[],
                         char * const user_info[], char * const user_env[],
-                        char * const plugin_args[]);
+                        char * const plugin_options[]);
             void (*close)(int exit_status, int error);
             int (*show_version)(int verbose);
             int (*check_policy)(int argc, char * const argv[],
@@ -106,7 +106,7 @@ DDEESSCCRRIIPPTTIIOONN
             int (*open)(unsigned int version, sudo_conv_t conversation,
                         sudo_printf_t plugin_printf, char * const settings[],
                         char * const user_info[], char * const user_env[],
-                        char * const plugin_args[]);
+                        char * const plugin_options[]);
 
            Returns 1 on success, 0 on failure, -1 if a general error occurred,
            or -2 if there was a usage error.  In the latter case, ssuuddoo will
@@ -319,17 +319,17 @@ DDEESSCCRRIIPPTTIIOONN
                equal sign ('=') since the _n_a_m_e field will never include one
                itself but the _v_a_l_u_e might.
 
-           plugin_args
+           plugin_options
                Any (non-comment) strings immediately after the plugin path are
                treated as arguments to the plugin.  These arguments are split
                on a white space boundary and are passed to the plugin in the
                form of a NULL-terminated array of strings.  If no arguments
-               were specified, _p_l_u_g_i_n___a_r_g_s will be the NULL pointer.
+               were specified, _p_l_u_g_i_n___o_p_t_i_o_n_s will be the NULL pointer.
 
-               NOTE: the _p_l_u_g_i_n___a_r_g_s parameter is only available starting with
-               API version 1.2.  A plugin mmuusstt check the API version specified
-               by the ssuuddoo front end before using _p_l_u_g_i_n___a_r_g_s.  Failure to do
-               so may result in a crash.
+               NOTE: the _p_l_u_g_i_n___o_p_t_i_o_n_s parameter is only available starting
+               with API version 1.2.  A plugin mmuusstt check the API version
+               specified by the ssuuddoo front end before using _p_l_u_g_i_n___o_p_t_i_o_n_s.
+               Failure to do so may result in a crash.
 
        close
             void (*close)(int exit_status, int error);
@@ -730,7 +730,7 @@ DDEESSCCRRIIPPTTIIOONN
             int (*open)(unsigned int version, sudo_conv_t conversation
                         sudo_printf_t plugin_printf, char * const settings[],
                         char * const user_info[], int argc, char * const argv[],
-                        char * const user_env[], char * const plugin_args[]);
+                        char * const user_env[], char * const plugin_options[]);
             void (*close)(int exit_status, int error); /* wait status or error */
             int (*show_version)(int verbose);
             int (*log_ttyin)(const char *buf, unsigned int len);
@@ -777,7 +777,7 @@ DDEESSCCRRIIPPTTIIOONN
             int (*open)(unsigned int version, sudo_conv_t conversation
                         sudo_printf_t plugin_printf, char * const settings[],
                         char * const user_info[], int argc, char * const argv[],
-                        char * const user_env[], char * const plugin_args[]);
+                        char * const user_env[], char * const plugin_options[]);
 
            The _o_p_e_n function is run before the _l_o_g___i_n_p_u_t, _l_o_g___o_u_t_p_u_t or
            _s_h_o_w___v_e_r_s_i_o_n functions are called.  It is only called if the
@@ -854,17 +854,17 @@ DDEESSCCRRIIPPTTIIOONN
                equal sign ('=') since the _n_a_m_e field will never include one
                itself but the _v_a_l_u_e might.
 
-           plugin_args
+           plugin_options
                Any (non-comment) strings immediately after the plugin path are
                treated as arguments to the plugin.  These arguments are split
                on a white space boundary and are passed to the plugin in the
                form of a NULL-terminated array of strings.  If no arguments
-               were specified, _p_l_u_g_i_n___a_r_g_s will be the NULL pointer.
+               were specified, _p_l_u_g_i_n___o_p_t_i_o_n_s will be the NULL pointer.
 
-               NOTE: the _p_l_u_g_i_n___a_r_g_s parameter is only available starting with
-               API version 1.2.  A plugin mmuusstt check the API version specified
-               by the ssuuddoo front end before using _p_l_u_g_i_n___a_r_g_s.  Failure to do
-               so may result in a crash.
+               NOTE: the _p_l_u_g_i_n___o_p_t_i_o_n_s parameter is only available starting
+               with API version 1.2.  A plugin mmuusstt check the API version
+               specified by the ssuuddoo front end before using _p_l_u_g_i_n___o_p_t_i_o_n_s.
+               Failure to do so may result in a crash.
 
        close
             void (*close)(int exit_status, int error);
