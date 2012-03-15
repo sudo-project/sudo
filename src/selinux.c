@@ -48,6 +48,7 @@
 #endif
 
 #include "sudo.h"
+#include "sudo_exec.h"
 
 static struct selinux_state {
     security_context_t old_context;
