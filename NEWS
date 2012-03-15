@@ -1,3 +1,67 @@
+What's new in Sudo 1.8.5?
+
+ * When "noexec" is enabled, sudo_noexec.so will now be prepended
+   to any existing LD_PRELOAD variable instead of replacing it.
+
+ * The user/group/mode checks on sudoers files have been relaxed.
+   As long as the file is owned by the sudoers uid, not world-writable
+   and not writable by a group other than the sudoers gid, the file
+   is considered OK.  Note that visudo will still set the mode to
+   the value specified at configure time.
+
+ * It is now possible to specify the sudoers path, uid, gid and
+   file mode as options to the plugin in the sudo.conf file.
+
+ * Lithuanian and Vietnamese translations from translationproject.org.
+
+ * /etc/environment is no longer read directly on Linux systems
+   when PAM is used.  Sudo now merges the PAM environment into the
+   user's environment which is typically set by the pam_env module.
+
+ * The plugin API has been extended in three ways.  First, options
+   specified in sudo.conf after the plugin pathname are passed to
+   the plugin's open function.  Second, sudo has limited support
+   for hooks that can be used by plugins.  Currently, the hooks are
+   limited to environment handling functions.  Third, the init_session
+   policy plugin function is passed a pointer to the user environment
+   which can be updated during session setup.  The plugin API version
+   has been incremented to version 1.2.  See the sudo_plugin manual
+   for more information.
+
+What's new in Sudo 1.8.4p4?
+
+ * Fixed a bug introduced in Sudo 1.8.4 which prevented "sudo -v"
+   from working.
+
+What's new in Sudo 1.8.4p3?
+
+ * Fixed a crash on FreeBSD when no tty is present.
+
+ * Fixed a bug introduced in Sudo 1.8.4 that allowed users to
+   specify environment variables to set on the command line without
+   having sudo "ALL" permissions or the "SETENV" tag.
+
+ * When visudo is run with the -c (check) option, the sudoers
+   file(s) owner and mode are now also checked unless the -f option
+   was specified.
+
+What's new in Sudo 1.8.4p2?
+
+ * Fixed a bug introduced in Sudo 1.8.4 where insufficient space
+   was allocated for group IDs in the LDAP filter.
+
+ * Fixed a bug introduced in Sudo 1.8.4 where the path to sudo.conf
+   was "/sudo.conf" instead of "/etc/sudo.conf".
+
+ * Fixed a bug introduced in Sudo 1.8.4 which could cause a hang
+   when I/O logging is enabled and input is from a pipe or file.
+
+What's new in Sudo 1.8.4p1?
+
+ * Fixed a bug introduced in sudo 1.8.4 that broke adding to or
+   deleting from the env_keep, env_check and env_delete lists in
+   sudoers on some platforms.
+
 What's new in Sudo 1.8.4?
 
  * The -D flag in sudo has been replaced with a more general debugging
