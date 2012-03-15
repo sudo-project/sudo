@@ -196,7 +196,7 @@ sudo_pam_cleanup(struct passwd *pw, sudo_auth *auth)
 }
 
 int
-sudo_pam_begin_session(struct passwd *pw, sudo_auth *auth)
+sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 {
     int status = PAM_SUCCESS;
     debug_decl(sudo_pam_begin_session, SUDO_DEBUG_AUTH)
@@ -229,6 +229,26 @@ sudo_pam_begin_session(struct passwd *pw, sudo_auth *auth)
      * We can't call pam_acct_mgmt() with Linux-PAM for a similar reason.
      */
     (void) pam_setcred(pamh, PAM_ESTABLISH_CRED);
+
+#ifdef HAVE_PAM_GETENVLIST
+    /*
+     * Update environment based on what is stored in pamh.
+     * If no authentication is done we will only have environment
+     * variables if pam_env is called via session.
+     */
+    if (user_envp != NULL) {
+	char **pam_envp = pam_getenvlist(pamh);
+	if (pam_envp != NULL) {
+	    /* Merge pam env with user env but do not overwrite. */
+	    env_init(*user_envp);
+	    env_merge(pam_envp, false);
+	    *user_envp = env_get();
+	    env_init(NULL);
+	    efree(pam_envp);
+	    /* XXX - we leak any duplicates that were in pam_envp */
+	}
+    }
+#endif /* HAVE_PAM_GETENVLIST */
 
 #ifndef NO_PAM_SESSION
     status = pam_open_session(pamh, 0);

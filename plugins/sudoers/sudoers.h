@@ -215,9 +215,9 @@ void remove_timestamp(bool);
 bool user_is_exempt(void);
 
 /* sudo_auth.c */
-int verify_user(struct passwd *, char *);
-int sudo_auth_begin_session(struct passwd *);
-int sudo_auth_end_session(struct passwd *);
+int verify_user(struct passwd *pw, char *prompt);
+int sudo_auth_begin_session(struct passwd *pw, char **user_env[]);
+int sudo_auth_end_session(struct passwd *pw);
 int sudo_auth_init(struct passwd *pw);
 int sudo_auth_cleanup(struct passwd *pw);
 
@@ -304,6 +304,7 @@ char *expand_iolog_path(const char *prefix, const char *dir, const char *file,
 
 /* env.c */
 char **env_get(void);
+void env_merge(char * const envp[], bool overwrite);
 void env_init(char * const envp[]);
 void init_envtables(void);
 void insert_env_vars(char * const envp[]);

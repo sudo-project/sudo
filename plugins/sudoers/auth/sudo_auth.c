@@ -286,7 +286,7 @@ done:
 }
 
 int
-sudo_auth_begin_session(struct passwd *pw)
+sudo_auth_begin_session(struct passwd *pw, char **user_env[])
 {
     sudo_auth *auth;
     int status;
@@ -294,7 +294,7 @@ sudo_auth_begin_session(struct passwd *pw)
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->begin_session && !IS_DISABLED(auth)) {
-	    status = (auth->begin_session)(pw, auth);
+	    status = (auth->begin_session)(pw, user_env, auth);
 	    if (status == AUTH_FATAL) {
 		/* XXX log */
 		audit_failure(NewArgv, "authentication failure");

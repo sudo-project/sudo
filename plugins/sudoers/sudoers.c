@@ -122,6 +122,7 @@ sudo_conv_t sudo_conv;
 sudo_printf_t sudo_printf;
 int sudo_mode;
 
+static int sudo_version;
 static char *prev_user;
 static char *runas_user;
 static char *runas_group;
@@ -146,14 +147,15 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     struct sudo_nss *nss;
     debug_decl(sudoers_policy_open, SUDO_DEBUG_PLUGIN)
 
-    /* Plugin args are only specified for API version 1.2 and higher. */
-    if (version < SUDO_API_MKVERSION(1, 2))
-	args = NULL;
-
+    sudo_version = version;
     if (!sudo_conv)
 	sudo_conv = conversation;
     if (!sudo_printf)
 	sudo_printf = plugin_printf;
+
+    /* Plugin args are only specified for API version 1.2 and higher. */
+    if (sudo_version < SUDO_API_MKVERSION(1, 2))
+	args = NULL;
 
     if (sigsetjmp(error_jmp, 1)) {
 	/* called via error(), errorx() or log_error() */
@@ -281,16 +283,20 @@ sudoers_policy_close(int exit_status, int error_code)
  * and before uid/gid changes occur.
  */
 static int
-sudoers_policy_init_session(struct passwd *pwd)
+sudoers_policy_init_session(struct passwd *pwd, char **user_env[])
 {
     debug_decl(sudoers_policy_init, SUDO_DEBUG_PLUGIN)
+
+    /* user_env is only specified for API version 1.2 and higher. */
+    if (sudo_version < SUDO_API_MKVERSION(1, 2))
+	user_env = NULL;
 
     if (sigsetjmp(error_jmp, 1)) {
 	/* called via error(), errorx() or log_error() */
 	return -1;
     }
 
-    debug_return_bool(sudo_auth_begin_session(pwd));
+    debug_return_bool(sudo_auth_begin_session(pwd, user_env));
 }
 
 static int

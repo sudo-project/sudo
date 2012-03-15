@@ -90,6 +90,7 @@
 #define KEPT_MAX    	0xff00
 
 struct environment {
+    char * const *old_envp;	/* pointer the environment we passed back */
     char **envp;		/* pointer to the new environment */
     size_t env_size;		/* size of new_environ in char **'s */
     size_t env_len;		/* number of slots used, not counting NULL */
@@ -208,8 +209,10 @@ env_init(char * const envp[])
     debug_decl(env_init, SUDO_DEBUG_ENV)
 
     if (envp == NULL) {
-	/* Reset to initial state. */
+	/* Reset to initial state but keep a pointer to what we allocated. */
+	envp = env.envp;
 	memset(&env, 0, sizeof(env));
+	env.old_envp = envp;
     } else {
 	/* Make private copy of envp. */
 	for (ep = envp; *ep != NULL; ep++)
@@ -224,6 +227,10 @@ env_init(char * const envp[])
 #endif
 	memcpy(env.envp, envp, len * sizeof(char *));
 	env.envp[len] = '\0';
+
+	/* Free the old envp we allocated, if any. */
+	if (env.old_envp != NULL)
+	    efree((void *)env.old_envp);
     }
 
     debug_return;
@@ -483,6 +490,21 @@ sudo_getenv(const char *name)
     val = sudo_getenv_nodebug(name);
 
     debug_return_str(val);
+}
+
+/*
+ * Merge another environment with our private copy.
+ */
+void
+env_merge(char * const envp[], bool overwrite)
+{
+    char * const *ep;
+    debug_decl(env_merge, SUDO_DEBUG_ENV)
+
+    for (ep = envp; *ep != NULL; ep++)
+	sudo_putenv(*ep, true, overwrite);
+
+    debug_return;
 }
 
 /*

@@ -130,7 +130,7 @@ static int policy_list(struct plugin_container *plugin, int argc,
 static int policy_validate(struct plugin_container *plugin);
 static void policy_invalidate(struct plugin_container *plugin, int remove);
 static int policy_init_session(struct plugin_container *plugin,
-    struct passwd *pwd);
+    struct passwd *pwd, char **user_env[]);
 
 /* I/O log plugin convenience functions. */
 static int iolog_open(struct plugin_container *plugin, char * const settings[],
@@ -147,8 +147,6 @@ static struct rlimit corelimit;
 #if defined(__linux__)
 static struct rlimit nproclimit;
 #endif
-
-extern char **environ;
 
 int
 main(int argc, char *argv[], char *envp[])
@@ -285,9 +283,6 @@ main(int argc, char *argv[], char *envp[])
 			plugin->name);
 		}
 	    }
-	    /* Now that we have the command's environment, disable env hooks. */
-	    deregister_env_hooks();
-
 	    /* Setup command details and run command/edit. */
 	    command_info_to_details(command_info, &command_details);
 	    command_details.argv = argv_out;
@@ -851,16 +846,10 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 #endif
 
     /*
-     * Swap in the plugin-supplied environment in case session init
-     * modifies the environment.  This is kind of a hack.
-     */
-    environ = details->envp;
-
-    /*
      * Call policy plugin's session init before other setup occurs.
      * The session init code is expected to print an error as needed.
      */
-    if (policy_init_session(&policy_plugin, pw) != true)
+    if (policy_init_session(&policy_plugin, pw, &details->envp) != true)
 	goto done;
 
 #ifdef HAVE_SELINUX
@@ -911,9 +900,6 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	}
 #endif /* HAVE_LOGIN_CAP_H */
     }
-
-    /* Update the environment pointer in command details */
-    details->envp = environ;
 
     /*
      * Set groups, including supplementary group vector.
@@ -1148,12 +1134,25 @@ policy_invalidate(struct plugin_container *plugin, int remove)
 }
 
 static int
-policy_init_session(struct plugin_container *plugin, struct passwd *pwd)
+policy_init_session(struct plugin_container *plugin, struct passwd *pwd, char **user_env[])
 {
+    int rval = true;
     debug_decl(policy_init_session, SUDO_DEBUG_PCOMM)
-    if (plugin->u.policy->init_session)
-	debug_return_bool(plugin->u.policy->init_session(pwd));
-    debug_return_bool(true);
+
+    if (plugin->u.policy->init_session) {
+	/*
+	 * Backwards compatibility for older API versions
+	 */
+	switch (plugin->u.generic->version) {
+	case SUDO_API_MKVERSION(1, 0):
+	case SUDO_API_MKVERSION(1, 1):
+	    rval = plugin->u.policy_1_0->init_session(pwd);
+	    break;
+	default:
+	    rval = plugin->u.policy->init_session(pwd, user_env);
+	}
+    }
+    debug_return_bool(rval);
 }
 
 static int
