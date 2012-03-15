@@ -232,12 +232,14 @@ selinux.o: $(srcdir)/selinux.c $(top_builddir)/config.h $(srcdir)/sudo.h \
            $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
            $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
            $(incdir)/fileops.h $(incdir)/list.h $(incdir)/sudo_conf.h \
-           $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
+           $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
+           $(srcdir)/sudo_exec.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/selinux.c
 sesh.o: $(srcdir)/sesh.c $(top_builddir)/config.h \
-        $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h $(incdir)/gettext.h \
-        $(incdir)/error.h $(incdir)/sudo_conf.h $(incdir)/list.h \
-        $(incdir)/sudo_debug.h $(srcdir)/sudo_exec.h $(incdir)/sudo_plugin.h
+        $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h $(incdir)/alloc.h \
+        $(incdir)/error.h $(incdir)/gettext.h $(incdir)/sudo_conf.h \
+        $(incdir)/list.h $(incdir)/sudo_debug.h $(srcdir)/sudo_exec.h \
+        $(incdir)/sudo_plugin.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sesh.c
 sudo.o: $(srcdir)/sudo.c $(top_builddir)/config.h $(srcdir)/sudo.h \
         $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
