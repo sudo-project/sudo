@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO_PLUGIN @mansectsu@"
-.TH SUDO_PLUGIN @mansectsu@ "March 14, 2012" "1.8.5" "MAINTENANCE COMMANDS"
+.TH SUDO_PLUGIN @mansectsu@ "March 15, 2012" "1.8.5" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -230,7 +230,7 @@ so that \fBsudo\fR can load it.
 \&                 const char *list_user);
 \&     int (*validate)(void);
 \&     void (*invalidate)(int remove);
-\&     int (*init_session)(struct passwd *pwd);
+\&     int (*init_session)(struct passwd *pwd, char **user_env[]);
 \&     void (*register_hooks)(int version,
 \&        int (*register_hook)(struct sudo_hook *hook));
 \&     void (*deregister_hooks)(int version,
@@ -472,7 +472,7 @@ itself but the \fIvalue\fR might.
 .IX Item "plugin_args"
 Any (non-comment) strings immediately after the plugin path are
 treated as arguments to the plugin.  These arguments are split on
-a whitespace boundary and are passed to the plugin in the form of
+a white space boundary and are passed to the plugin in the form of
 a \f(CW\*(C`NULL\*(C'\fR\-terminated array of strings.  If no arguments were
 specified, \fIplugin_args\fR will be the \s-1NULL\s0 pointer.
 .Sp
@@ -797,7 +797,7 @@ support credential caching.
 .IP "init_session" 4
 .IX Item "init_session"
 .Vb 1
-\& int (*init_session)(struct passwd *pwd);
+\& int (*init_session)(struct passwd *pwd, char **user_envp[);
 .Ve
 .Sp
 The \f(CW\*(C`init_session\*(C'\fR function is called when \fBsudo\fR sets up the
@@ -809,6 +809,18 @@ by \fIcommand_info\fR, such as opening the \s-1PAM\s0 session.
 The \fIpwd\fR argument points to a passwd struct for the user the
 command will be run as if the uid the command will run as was found
 in the password database, otherwise it will be \s-1NULL\s0.
+.Sp
+The \fIuser_env\fR argument points to the environment the command will
+run in, in the form of a \f(CW\*(C`NULL\*(C'\fR\-terminated vector of \*(L"name=value\*(R"
+strings.  This is the same string passed back to the front end via
+the Policy Plugin's \fIuser_env_out\fR parameter.  If the \f(CW\*(C`init_session\*(C'\fR
+function needs to modify the user environment, it should update the
+pointer stored in \fIuser_env\fR.  The expected use case is to merge
+the contents of the \s-1PAM\s0 environment (if any) with the contents of
+\&\fIuser_env\fR.  \s-1NOTE:\s0 the \fIuser_env\fR parameter is only available
+starting with \s-1API\s0 version 1.2.  A plugin \fBmust\fR check the \s-1API\s0
+version specified by the \fBsudo\fR front end before using \fIuser_env\fR.
+Failure to do so may result in a crash.
 .Sp
 Returns 1 on success, 0 on failure and \-1 on error.
 On error, the plugin may optionally call the conversation or plugin_printf
@@ -828,7 +840,7 @@ hooks, \f(CW\*(C`register_hooks\*(C'\fR should be set to the \s-1NULL\s0 pointer
 The \fIversion\fR argument describes the version of the hooks \s-1API\s0
 supported by the \fBsudo\fR front end.
 .Sp
-The \f(CW\*(C`register_hook\*(C'\fR function should be used to register any suppored
+The \f(CW\*(C`register_hook\*(C'\fR function should be used to register any supported
 hooks the plugin needs.  It returns 0 on success, 1 if the hook
 type is not supported and \-1 if the major version in \f(CW\*(C`struct hook\*(C'\fR
 does not match the front end's major hook \s-1API\s0 version.
@@ -1026,7 +1038,7 @@ itself but the \fIvalue\fR might.
 .IX Item "plugin_args"
 Any (non-comment) strings immediately after the plugin path are
 treated as arguments to the plugin.  These arguments are split on
-a whitespace boundary and are passed to the plugin in the form of
+a white space boundary and are passed to the plugin in the form of
 a \f(CW\*(C`NULL\*(C'\fR\-terminated array of strings.  If no arguments were
 specified, \fIplugin_args\fR will be the \s-1NULL\s0 pointer.
 .Sp
@@ -1221,13 +1233,6 @@ get, set, or remove environment variables so that these changes can
 be reflected in the version of the environment that is used to
 execute a command.  A future version of the \s-1API\s0 will support
 hooking internal \fBsudo\fR front end functions as well.
-.PP
-Environment-related hooks are disabled prior to the execution of
-the \f(CW\*(C`init_session\*(C'\fR policy plugin function (if any).  This is
-necessary because \f(CW\*(C`init_session\*(C'\fR has no way of passing back a
-modified environment pointer.  However, since the user environment
-specified by the \f(CW\*(C`check_policy\*(C'\fR function is already in place, there
-should be no need to hook the environment functions at that time.
 .PP
 \fIHook structure\fR
 .IX Subsection "Hook structure"

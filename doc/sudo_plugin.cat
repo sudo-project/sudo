@@ -84,7 +84,7 @@ DDEESSCCRRIIPPTTIIOONN
                         const char *list_user);
             int (*validate)(void);
             void (*invalidate)(int remove);
-            int (*init_session)(struct passwd *pwd);
+            int (*init_session)(struct passwd *pwd, char **user_env[]);
             void (*register_hooks)(int version,
                int (*register_hook)(struct sudo_hook *hook));
             void (*deregister_hooks)(int version,
@@ -322,7 +322,7 @@ DDEESSCCRRIIPPTTIIOONN
            plugin_args
                Any (non-comment) strings immediately after the plugin path are
                treated as arguments to the plugin.  These arguments are split
-               on a whitespace boundary and are passed to the plugin in the
+               on a white space boundary and are passed to the plugin in the
                form of a NULL-terminated array of strings.  If no arguments
                were specified, _p_l_u_g_i_n___a_r_g_s will be the NULL pointer.
 
@@ -627,7 +627,7 @@ DDEESSCCRRIIPPTTIIOONN
            support credential caching.
 
        init_session
-            int (*init_session)(struct passwd *pwd);
+            int (*init_session)(struct passwd *pwd, char **user_envp[);
 
            The init_session function is called when ssuuddoo sets up the execution
            environment for the command, immediately before the contents of the
@@ -638,6 +638,18 @@ DDEESSCCRRIIPPTTIIOONN
            The _p_w_d argument points to a passwd struct for the user the command
            will be run as if the uid the command will run as was found in the
            password database, otherwise it will be NULL.
+
+           The _u_s_e_r___e_n_v argument points to the environment the command will
+           run in, in the form of a NULL-terminated vector of "name=value"
+           strings.  This is the same string passed back to the front end via
+           the Policy Plugin's _u_s_e_r___e_n_v___o_u_t parameter.  If the init_session
+           function needs to modify the user environment, it should update the
+           pointer stored in _u_s_e_r___e_n_v.  The expected use case is to merge the
+           contents of the PAM environment (if any) with the contents of
+           _u_s_e_r___e_n_v.  NOTE: the _u_s_e_r___e_n_v parameter is only available starting
+           with API version 1.2.  A plugin mmuusstt check the API version
+           specified by the ssuuddoo front end before using _u_s_e_r___e_n_v.  Failure to
+           do so may result in a crash.
 
            Returns 1 on success, 0 on failure and -1 on error.  On error, the
            plugin may optionally call the conversation or plugin_printf
@@ -655,7 +667,7 @@ DDEESSCCRRIIPPTTIIOONN
            The _v_e_r_s_i_o_n argument describes the version of the hooks API
            supported by the ssuuddoo front end.
 
-           The register_hook function should be used to register any suppored
+           The register_hook function should be used to register any supported
            hooks the plugin needs.  It returns 0 on success, 1 if the hook
            type is not supported and -1 if the major version in struct hook
            does not match the front end's major hook API version.
@@ -845,7 +857,7 @@ DDEESSCCRRIIPPTTIIOONN
            plugin_args
                Any (non-comment) strings immediately after the plugin path are
                treated as arguments to the plugin.  These arguments are split
-               on a whitespace boundary and are passed to the plugin in the
+               on a white space boundary and are passed to the plugin in the
                form of a NULL-terminated array of strings.  If no arguments
                were specified, _p_l_u_g_i_n___a_r_g_s will be the NULL pointer.
 
@@ -986,13 +998,6 @@ DDEESSCCRRIIPPTTIIOONN
        reflected in the version of the environment that is used to execute a
        command.  A future version of the API will support hooking internal
        ssuuddoo front end functions as well.
-
-       Environment-related hooks are disabled prior to the execution of the
-       init_session policy plugin function (if any).  This is necessary
-       because init_session has no way of passing back a modified environment
-       pointer.  However, since the user environment specified by the
-       check_policy function is already in place, there should be no need to
-       hook the environment functions at that time.
 
        _H_o_o_k _s_t_r_u_c_t_u_r_e
 
@@ -1298,4 +1303,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.5                           March 14, 2012                 SUDO_PLUGIN(1m)
+1.8.5                           March 15, 2012                 SUDO_PLUGIN(1m)
