@@ -488,7 +488,10 @@ struct policy_plugin sample_policy = {
     policy_check,
     policy_list,
     NULL, /* validate */
-    NULL /* invalidate */
+    NULL, /* invalidate */
+    NULL, /* init_session */
+    NULL, /* register_hooks */
+    NULL /* deregister_hooks */
 };
 
 /*
