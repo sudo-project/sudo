@@ -375,6 +375,9 @@
 /* Define to 1 if you use PAM authentication. */
 #undef HAVE_PAM
 
+/* Define to 1 if you have the `pam_getenvlist' function. */
+#undef HAVE_PAM_GETENVLIST
+
 /* Define to 1 if you use a specific PAM session for sudo -i. */
 #undef HAVE_PAM_LOGIN
 

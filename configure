@@ -18228,6 +18228,22 @@ done
     fi
 
     if test "$with_pam" = "yes"; then
+	# Older PAM implementations lack pam_getenvlist
+	OLIBS="$LIBS"
+	LIBS="$LIBS -lpam $lt_cv_dlopen_libs"
+	for ac_func in pam_getenvlist
+do :
+  ac_fn_c_check_func "$LINENO" "pam_getenvlist" "ac_cv_func_pam_getenvlist"
+if test "x$ac_cv_func_pam_getenvlist" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PAM_GETENVLIST 1
+_ACEOF
+
+fi
+done
+
+	LIBS="$OLIBS"
+
 	# We already link with -ldl if needed (see LIBDL below)
 	SUDOERS_LIBS="${SUDOERS_LIBS} -lpam"
 	$as_echo "#define HAVE_PAM 1" >>confdefs.h
