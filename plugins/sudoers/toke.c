@@ -1485,7 +1485,7 @@ int sudolineno;
 int last_token;
 char *sudoers;
 
-/* Default sudoers path, mode and owner */
+/* Default sudoers path, mode and owner (may be set via sudo.conf) */
 const char *sudoers_file = _PATH_SUDOERS;
 mode_t sudoers_mode = SUDOERS_MODE;
 uid_t sudoers_uid = SUDOERS_UID;
@@ -3528,7 +3528,7 @@ _push_include(char *path, bool isdir)
 	    case SUDO_PATH_BAD_TYPE:
 		errno = ENOTDIR;
 		if (sudoers_warnings) {
-		    warning(path);
+		    warning("%s", path);
 		}
 		debug_return_bool(false);
 	    case SUDO_PATH_WRONG_OWNER:

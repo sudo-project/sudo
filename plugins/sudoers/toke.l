@@ -819,7 +819,7 @@ _push_include(char *path, bool isdir)
 	    case SUDO_PATH_BAD_TYPE:
 		errno = ENOTDIR;
 		if (sudoers_warnings) {
-		    warning(path);
+		    warning("%s", path);
 		}
 		debug_return_bool(false);
 	    case SUDO_PATH_WRONG_OWNER:
