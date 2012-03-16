@@ -1282,6 +1282,28 @@ DDEESSCCRRIIPPTTIIOONN
             *(vp) = (*(vp) & 0xffff0000) | (n); \
         } while(0)
 
+PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
+       The following revisions have been made to the Sudo Plugin API.
+
+       Version 1.0
+           Initial API version.
+
+       Version 1.1
+           The I/O logging plugin's open function was modified to take the
+           command_info list as an argument.
+
+       Version 1.2
+           The Policy and I/O logging plugins' open functions are now passed a
+           list of plugin options if any are specified in _/_e_t_c_/_s_u_d_o_._c_o_n_f.
+
+           A simple hooks API has been introduced to allow plugins to hook in
+           to the system's environment handling functions.
+
+           The init_session Policy plugin function is now passed a pointer to
+           the user environment which can be updated as needed.  This can be
+           used to merge in environment variables stored in the PAM handle
+           before a command is run.
+
 SSEEEE AALLSSOO
        _s_u_d_o_e_r_s(4), _s_u_d_o(1m)
 
@@ -1303,4 +1325,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.5                           March 15, 2012                 SUDO_PLUGIN(1m)
+1.8.5b2                         March 16, 2012                 SUDO_PLUGIN(1m)

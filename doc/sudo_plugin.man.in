@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO_PLUGIN @mansectsu@"
-.TH SUDO_PLUGIN @mansectsu@ "March 15, 2012" "1.8.5" "MAINTENANCE COMMANDS"
+.TH SUDO_PLUGIN @mansectsu@ "March 16, 2012" "1.8.5b2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -1563,6 +1563,28 @@ present in the password database, \fIpwd\fR will be \f(CW\*(C`NULL\*(C'\fR.
 \&     *(vp) = (*(vp) & 0xffff0000) | (n); \e
 \& } while(0)
 .Ve
+.SH "PLUGIN API CHANGELOG"
+.IX Header "PLUGIN API CHANGELOG"
+The following revisions have been made to the Sudo Plugin \s-1API\s0.
+.IP "Version 1.0" 4
+.IX Item "Version 1.0"
+Initial \s-1API\s0 version.
+.IP "Version 1.1" 4
+.IX Item "Version 1.1"
+The I/O logging plugin's \f(CW\*(C`open\*(C'\fR function was modified to take the
+\&\f(CW\*(C`command_info\*(C'\fR list as an argument.
+.IP "Version 1.2" 4
+.IX Item "Version 1.2"
+The Policy and I/O logging plugins' \f(CW\*(C`open\*(C'\fR functions are now passed
+a list of plugin options if any are specified in \fI@sysconfdir@/sudo.conf\fR.
+.Sp
+A simple hooks \s-1API\s0 has been introduced to allow plugins to hook in to the
+system's environment handling functions.
+.Sp
+The \f(CW\*(C`init_session\*(C'\fR Policy plugin function is now passed a pointer
+to the user environment which can be updated as needed.  This can
+be used to merge in environment variables stored in the \s-1PAM\s0 handle
+before a command is run.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIsudoers\fR\|(@mansectform@), \fIsudo\fR\|(@mansectsu@)

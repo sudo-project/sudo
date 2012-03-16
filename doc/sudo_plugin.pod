@@ -1524,6 +1524,37 @@ present in the password database, I<pwd> will be C<NULL>.
      *(vp) = (*(vp) & 0xffff0000) | (n); \
  } while(0)
 
+=head1 PLUGIN API CHANGELOG
+
+The following revisions have been made to the Sudo Plugin API.
+
+=over 4
+
+=item Version 1.0
+
+Initial API version.
+
+=item Version 1.1
+
+The I/O logging plugin's C<open> function was modified to take the
+C<command_info> list as an argument.
+
+=item Version 1.2
+
+The Policy and I/O logging plugins' C<open> functions are now passed
+a list of plugin options if any are specified in F<@sysconfdir@/sudo.conf>.
+
+A simple hooks API has been introduced to allow plugins to hook in to the
+system's environment handling functions.
+
+The C<init_session> Policy plugin function is now passed a pointer
+to the user environment which can be updated as needed.  This can
+be used to merge in environment variables stored in the PAM handle
+before a command is run.
+
+=back
+
+
 =head1 SEE ALSO
 
 L<sudoers(5)>, L<sudo(8)>
