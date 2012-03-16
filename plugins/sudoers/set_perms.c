@@ -132,8 +132,6 @@ set_perms(int perm)
 	    goto bad;
 	}
 	ostate = &perm_stack[perm_stack_depth - 1];
-	if (memcmp(state, ostate, sizeof(*state)) == 0)
-	    goto done;
     }
 
     switch (perm) {
@@ -449,8 +447,6 @@ set_perms(int perm)
 	    goto bad;
 	}
 	ostate = &perm_stack[perm_stack_depth - 1];
-	if (memcmp(state, ostate, sizeof(*state)) == 0)
-	    goto done;
     }
 
     switch (perm) {
@@ -816,8 +812,6 @@ set_perms(int perm)
 	    goto bad;
 	}
 	ostate = &perm_stack[perm_stack_depth - 1];
-	if (memcmp(state, ostate, sizeof(*state)) == 0)
-	    goto done;
     }
 
     switch (perm) {
@@ -1105,8 +1099,6 @@ set_perms(int perm)
 	    goto bad;
 	}
 	ostate = &perm_stack[perm_stack_depth - 1];
-	if (memcmp(state, ostate, sizeof(*state)) == 0)
-	    goto done;
     }
 
     /*
@@ -1390,8 +1382,6 @@ set_perms(int perm)
 	    goto bad;
 	}
 	ostate = &perm_stack[perm_stack_depth - 1];
-	if (memcmp(state, ostate, sizeof(*state)) == 0)
-	    goto done;
     }
 
     switch (perm) {
