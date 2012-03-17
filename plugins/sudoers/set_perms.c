@@ -346,7 +346,6 @@ set_perms(int perm)
 	break;
     }
 
-done:
     perm_stack_depth++;
     debug_return_bool(1);
 bad:
@@ -675,7 +674,6 @@ set_perms(int perm)
 	break;
     }
 
-done:
     perm_stack_depth++;
     debug_return_bool(1);
 bad:
@@ -996,7 +994,6 @@ set_perms(int perm)
 	break;
     }
 
-done:
     perm_stack_depth++;
     debug_return_bool(1);
 bad:
@@ -1283,7 +1280,6 @@ set_perms(int perm)
 	break;
     }
 
-done:
     perm_stack_depth++;
     debug_return_bool(1);
 bad:
@@ -1443,7 +1439,6 @@ set_perms(int perm)
 	break;
     }
 
-done:
     perm_stack_depth++;
     debug_return_bool(1);
 bad:
