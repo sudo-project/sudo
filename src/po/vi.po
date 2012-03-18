@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo-1.8.4rc1\n"
+"Project-Id-Version: sudo-1.8.5-b1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-02-06 15:48-0500\n"
-"PO-Revision-Date: 2012-03-05 13:15+0700\n"
+"POT-Creation-Date: 2012-03-14 14:20-0400\n"
+"PO-Revision-Date: 2012-03-18 07:51+0700\n"
 "Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
 "Language-Team: Vietnamese <vi-VN@googlegroups.com>\n"
 "Language: vi\n"
@@ -25,7 +25,7 @@ msgstr ""
 msgid ": "
 msgstr ": "
 
-#: src/exec.c:105 src/exec_pty.c:604 src/exec_pty.c:936 src/tgetpass.c:227
+#: src/exec.c:105 src/exec_pty.c:616 src/exec_pty.c:948 src/tgetpass.c:227
 #, c-format
 msgid "unable to fork"
 msgstr "không thể tạo tiến trình con"
@@ -35,13 +35,13 @@ msgstr "không thể tạo tiến trình con"
 msgid "unable to create sockets"
 msgstr "không thể tạo sockets"
 
-#: src/exec.c:259 src/exec_pty.c:557 src/exec_pty.c:565 src/exec_pty.c:572
-#: src/exec_pty.c:871 src/exec_pty.c:933 src/tgetpass.c:224
+#: src/exec.c:259 src/exec_pty.c:567 src/exec_pty.c:576 src/exec_pty.c:584
+#: src/exec_pty.c:883 src/exec_pty.c:945 src/tgetpass.c:224
 #, c-format
 msgid "unable to create pipe"
 msgstr "không tạo được đường ống pipe"
 
-#: src/exec.c:340 src/exec_pty.c:1000 src/exec_pty.c:1135
+#: src/exec.c:340 src/exec_pty.c:1012 src/exec_pty.c:1147
 #, c-format
 msgid "select failed"
 msgstr "lựa chọn gặp lỗi"
@@ -51,13 +51,13 @@ msgstr "lựa chọn gặp lỗi"
 msgid "unable to restore tty label"
 msgstr "không thể phục hồi nhãn cho tty"
 
-#: src/exec_common.c:66
+#: src/exec_common.c:69
 #, c-format
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "không thể xóa bỏ PRIV_PROC_EXEC từ PRIV_LIMIT"
 
-#: src/exec_common.c:85 src/parse_args.c:432 src/sudo.c:445 src/sudo.c:465
-#: src/sudo.c:472 src/sudo.c:483 src/sudo.c:842 common/alloc.c:85
+#: src/exec_common.c:111 src/parse_args.c:432 src/sudo.c:451 src/sudo.c:471
+#: src/sudo.c:478 src/sudo.c:489 src/sudo.c:848 common/alloc.c:85
 #: common/alloc.c:105 common/alloc.c:123 common/alloc.c:145 common/alloc.c:203
 #: common/alloc.c:217
 #, c-format
@@ -69,32 +69,32 @@ msgstr "không thể cấp phát vùng nhớ"
 msgid "unable to allocate pty"
 msgstr "không thể phân bổ pty"
 
-#: src/exec_pty.c:597
+#: src/exec_pty.c:609
 #, c-format
 msgid "unable to set terminal to raw mode"
 msgstr "không thể đặt thiết bị cuối sang chế độ raw"
 
-#: src/exec_pty.c:914
+#: src/exec_pty.c:926
 #, c-format
 msgid "unable to set controlling tty"
 msgstr "không thể đặt điều khiển cho tty"
 
-#: src/exec_pty.c:1008
+#: src/exec_pty.c:1020
 #, c-format
 msgid "error reading from signal pipe"
 msgstr "lỗi khi đọc từ đường ống dẫn tín hiệu"
 
-#: src/exec_pty.c:1027
+#: src/exec_pty.c:1039
 #, c-format
 msgid "error reading from pipe"
 msgstr "gặp lỗi khi đọc từ một đường ống dẫn lệnh"
 
-#: src/exec_pty.c:1043
+#: src/exec_pty.c:1055
 #, c-format
 msgid "error reading from socketpair"
 msgstr "gặp lỗi khi đọc từ socketpair"
 
-#: src/exec_pty.c:1047
+#: src/exec_pty.c:1059
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "kiểu trả về không như mong đợi từ backchannel: %d"
@@ -144,12 +144,12 @@ msgstr "%s: chính sách không tương thích với phiên bản %d, mong chờ
 msgid "%s: only a single policy plugin may be loaded"
 msgstr "%s: chỉ có một chính sách được tải lên thôi"
 
-#: src/load_plugins.c:146
+#: src/load_plugins.c:148
 #, c-format
 msgid "%s: at least one policy plugin must be specified"
 msgstr "%s: phải xác định ít nhất một phần bổ xung chính sách"
 
-#: src/load_plugins.c:151
+#: src/load_plugins.c:153
 #, c-format
 msgid "policy plugin %s does not include a check_policy method"
 msgstr "phần bổ xung chính sách %s không bao gồm phương thức kiểm tra chính sách"
@@ -387,7 +387,7 @@ msgstr "không thể lấy ngữ cảnh tty mới, không phải là tty có li�
 msgid "unable to set new tty context"
 msgstr "không thể đặt ngữ cảnh tty mới"
 
-#: src/selinux.c:195 src/selinux.c:208 src/sudo.c:331
+#: src/selinux.c:195 src/selinux.c:208 src/sudo.c:337 common/sudo_conf.c:328
 #, c-format
 msgid "unable to open %s"
 msgstr "không mở được %s"
@@ -442,167 +442,167 @@ msgstr "không thể đặt ngữ cảnh bảo thực thi thành %s"
 msgid "unable to set key creation context to %s"
 msgstr "không thể đặt ngữ cảnh tạo khóa thành %s"
 
-#: src/sesh.c:69
+#: src/sesh.c:70
 #, c-format
 msgid "requires at least one argument"
 msgstr "cần thiết ít nhất một đối số"
 
-#: src/sesh.c:90
+#: src/sesh.c:91
 #, c-format
 msgid "unable to execute %s"
 msgstr "không thể thực thi %s"
 
-#: src/sudo.c:189
+#: src/sudo.c:191
 #, c-format
 msgid "must be setuid root"
 msgstr "phải được đặt setuid của root"
 
-#: src/sudo.c:212
+#: src/sudo.c:214
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Phiên bản sudo %s\n"
 
-#: src/sudo.c:214
+#: src/sudo.c:216
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "Cấu hình các tùy chọn: %s\n"
 
-#: src/sudo.c:219
+#: src/sudo.c:221
 #, c-format
 msgid "fatal error, unable to load plugins"
 msgstr "lỗi nghiêm trọng, không thể tải plugins"
 
-#: src/sudo.c:227
+#: src/sudo.c:229
 #, c-format
 msgid "unable to initialize policy plugin"
 msgstr "không thể khởi tạo phần bổ xung chính sách"
 
-#: src/sudo.c:282
+#: src/sudo.c:284
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "Gặp lỗi khi nạp phần bổ sung I/O %s"
 
-#: src/sudo.c:306
+#: src/sudo.c:312
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "không mong đợi chế độ sudo 0x%x"
 
-#: src/sudo.c:400
+#: src/sudo.c:406
 #, c-format
 msgid "unable to get group vector"
 msgstr "không thể lấy véc tơ nhóm"
 
-#: src/sudo.c:441
+#: src/sudo.c:447
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "không hiểu uid %u: bạn là ai?"
 
-#: src/sudo.c:784
+#: src/sudo.c:790
 #, c-format
 msgid "resource control limit has been reached"
 msgstr "giới hạn điều khiển tài nguyên đã tới hạn"
 
-#: src/sudo.c:787
+#: src/sudo.c:793
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
 msgstr "người dùng \"%s\" không phải là thành viên của dự án \"%s\""
 
-#: src/sudo.c:791
+#: src/sudo.c:797
 #, c-format
 msgid "the invoking task is final"
 msgstr "tác vụ được gọi đã kết thúc"
 
-#: src/sudo.c:794
+#: src/sudo.c:800
 #, c-format
 msgid "could not join project \"%s\""
 msgstr "không thể gia nhập dự án \"%s\""
 
-#: src/sudo.c:799
+#: src/sudo.c:805
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "không kho tài nguyên chung nào được thừa nhận ràng buộc đã tồn tại sẵn cho dự án \"%s\""
 
-#: src/sudo.c:803
+#: src/sudo.c:809
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "nguồn tài nguyên chung được chỉ ra chưa tồn tại cho dự án \"%s\""
 
-#: src/sudo.c:807
+#: src/sudo.c:813
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "không thể buộc phần tài nguyên chung mặc định cho dự án \"%s\""
 
-#: src/sudo.c:813
+#: src/sudo.c:819
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "đặt dự án cho dự án \"%s\" gặp lỗi"
 
-#: src/sudo.c:815
+#: src/sudo.c:821
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "cảnh báo, nguồn điều khiển gán gặp lỗi cho dự án \"%s\""
 
-#: src/sudo.c:880
+#: src/sudo.c:892
 #, c-format
 msgid "unknown login class %s"
 msgstr "không rõ lớp đăng nhập %s"
 
-#: src/sudo.c:896 src/sudo.c:899
+#: src/sudo.c:906 src/sudo.c:909
 #, c-format
 msgid "unable to set user context"
 msgstr "không thể đặt ngữ cảnh người dùng"
 
-#: src/sudo.c:915
+#: src/sudo.c:924
 #, c-format
 msgid "unable to set supplementary group IDs"
 msgstr "không thể đặt nhóm phụ IDs"
 
-#: src/sudo.c:922
+#: src/sudo.c:931
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "không thể đặt hiệu ứng gid chạy như là gid %u"
 
-#: src/sudo.c:928
+#: src/sudo.c:937
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "không thể thay đổi gid thành runas gid %u"
 
-#: src/sudo.c:935
+#: src/sudo.c:944
 #, c-format
 msgid "unable to set process priority"
 msgstr "không thể đặt ưu tiên cho quá trình"
 
-#: src/sudo.c:943
+#: src/sudo.c:952
 #, c-format
 msgid "unable to change root to %s"
 msgstr "không thể chuyển đổi thư mục gốc thành %s"
 
-#: src/sudo.c:950 src/sudo.c:956 src/sudo.c:962
+#: src/sudo.c:959 src/sudo.c:965 src/sudo.c:971
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "không thể thay đổi thành runas uid (%u, %u)"
 
-#: src/sudo.c:976
+#: src/sudo.c:985
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "không thể thay đổi thư mục thành %s"
 
-#: src/sudo.c:1049
+#: src/sudo.c:1058
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "biểu thức điều kiện con kết thúc không như mong đợi: %d"
 
-#: src/sudo.c:1095
+#: src/sudo.c:1119
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "phần bổ xung chính sách %s không hỗ trợ liệt kê đặc quyền"
 
-#: src/sudo.c:1107
+#: src/sudo.c:1131
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "phần bổ xung chính sách %s không hỗ trợ tùy chọn -v"
 
-#: src/sudo.c:1119
+#: src/sudo.c:1143
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "phần bổ xung chính sách %s không hỗ trợ tùy chọn -k/-K"
@@ -730,6 +730,31 @@ msgstr "lỗi nội bộ, dùng thử erealloc3(0)"
 #: common/alloc.c:140
 msgid "internal error, erealloc3() overflow"
 msgstr "lỗi nội bộ, erealloc3() bị tràn"
+
+#: common/sudo_conf.c:306
+#, c-format
+msgid "unable to stat %s"
+msgstr "không thể lấy trạng thái về %s"
+
+#: common/sudo_conf.c:309
+#, c-format
+msgid "%s is not a regular file"
+msgstr "%s không phải tập tin thường"
+
+#: common/sudo_conf.c:312
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s được sở hữu bởi uid %u, nên là %u"
+
+#: common/sudo_conf.c:316
+#, c-format
+msgid "%s is world writable"
+msgstr "%s ai ghi cũng được"
+
+#: common/sudo_conf.c:319
+#, c-format
+msgid "%s is group writable"
+msgstr "%s là nhóm có thể ghi"
 
 #: compat/strsignal.c:47
 msgid "Unknown signal"

@@ -1,14 +1,15 @@
 # Japanese messages for sudo
 # This file is put in the public domain.
 # Yasuaki Taniguchi <yasuakit@gmail.com>, 2011.
+# Takeshi Hamasaki <hmatrjp@users.sourceforge.jp>, 2012
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.3rc1\n"
+"Project-Id-Version: sudo 1.8.5-b1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2011-09-16 13:37-0400\n"
-"PO-Revision-Date: 2011-10-09 22:21+0900\n"
-"Last-Translator: Yasuaki Taniguchi <yasuakit@gmail.com>\n"
+"POT-Creation-Date: 2012-03-14 14:20-0400\n"
+"PO-Revision-Date: 2012-03-18 11:58+0900\n"
+"Last-Translator: Takeshi Hamasaki <hmatrjp@users.sourceforge.jp>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
@@ -20,196 +21,197 @@ msgstr ""
 msgid ": "
 msgstr ": "
 
-#: src/exec.c:125 src/exec_pty.c:573 src/exec_pty.c:880 src/tgetpass.c:224
+#: src/exec.c:105 src/exec_pty.c:616 src/exec_pty.c:948 src/tgetpass.c:227
 #, c-format
 msgid "unable to fork"
 msgstr "fork できません"
 
-#: src/exec.c:246
+#: src/exec.c:252
 #, c-format
 msgid "unable to create sockets"
 msgstr "ソケットを作成できません"
 
-#: src/exec.c:253 src/exec_pty.c:526 src/exec_pty.c:534 src/exec_pty.c:541
-#: src/exec_pty.c:826 src/exec_pty.c:877 src/tgetpass.c:221
+#: src/exec.c:259 src/exec_pty.c:567 src/exec_pty.c:576 src/exec_pty.c:584
+#: src/exec_pty.c:883 src/exec_pty.c:945 src/tgetpass.c:224
 #, c-format
 msgid "unable to create pipe"
 msgstr "パイプを作成できません"
 
-#: src/exec.c:319 src/exec_pty.c:944 src/exec_pty.c:1077
+#: src/exec.c:340 src/exec_pty.c:1012 src/exec_pty.c:1147
 #, c-format
 msgid "select failed"
 msgstr "select に失敗しました"
 
-#: src/exec.c:387
+#: src/exec.c:425
 #, c-format
 msgid "unable to restore tty label"
 msgstr "tty ラベルを復旧できません"
 
-#: src/exec_pty.c:136
+#: src/exec_common.c:69
 #, c-format
-msgid "unable to allocate pty"
-msgstr "pty を割り当てられません"
+msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
+msgstr "PRIV_LIMIT から PRIV_PROC_EXEC を取り除くことができません"
 
-#: src/exec_pty.c:566
-#, c-format
-msgid "unable to set terminal to raw mode"
-msgstr "端末を raw モードに設定できません"
-
-#: src/exec_pty.c:858
-#, c-format
-msgid "unable to set controlling tty"
-msgstr "tty の制御設定ができません"
-
-#: src/exec_pty.c:952
-#, c-format
-msgid "error reading from signal pipe"
-msgstr "シグナルパイプからの読み込み中にエラーが発生しました"
-
-#: src/exec_pty.c:971
-#, c-format
-msgid "error reading from pipe"
-msgstr "パイプからの読み込み中にエラーが発生しました"
-
-#: src/exec_pty.c:987
-#, c-format
-msgid "error reading from socketpair"
-msgstr "ソケットペアからの読み込み中にエラーが発生しました"
-
-#: src/exec_pty.c:991
-#, c-format
-msgid "unexpected reply type on backchannel: %d"
-msgstr "バックチャンネルに関する予期しないリプレイタイプです: %d"
-
-#: src/load_plugins.c:158
-#, c-format
-msgid "%s: %s"
-msgstr "%s: %s"
-
-#: src/load_plugins.c:164
-#, c-format
-msgid "%s%s: %s"
-msgstr "%s%s: %s"
-
-#: src/load_plugins.c:174
-#, c-format
-msgid "%s must be owned by uid %d"
-msgstr "%s の所有者は uid %d でなければいけません"
-
-#: src/load_plugins.c:178
-#, c-format
-msgid "%s must be only be writable by owner"
-msgstr "%s は所有者のみ書き込み可能で無ければいけません"
-
-#: src/load_plugins.c:185
-#, c-format
-msgid "unable to dlopen %s: %s"
-msgstr "dlopen %s を行うことができません: %s"
-
-#: src/load_plugins.c:190
-#, c-format
-msgid "%s: unable to find symbol %s"
-msgstr "%s: シンボル %s を見つけることができません"
-
-#: src/load_plugins.c:196
-#, c-format
-msgid "%s: unknown policy type %d"
-msgstr "%s: 不明なポリシータイプ %d です"
-
-#: src/load_plugins.c:200
-#, c-format
-msgid "%s: incompatible policy major version %d, expected %d"
-msgstr "%s: 互換性の無いポリシーメジャーバージョン %d です。予期されるのは %d です"
-
-#: src/load_plugins.c:207
-#, c-format
-msgid "%s: only a single policy plugin may be loaded"
-msgstr "%s: 一つのポリシープラグインのみロードされているようです"
-
-#: src/load_plugins.c:225
-#, c-format
-msgid "%s: at least one policy plugin must be specified"
-msgstr "%s: 最低でも一つ以上のポリシープラグインを指定しなければいけません"
-
-#: src/load_plugins.c:230
-#, c-format
-msgid "policy plugin %s does not include a check_policy method"
-msgstr "ポリシープラグイン %s には check_policy メソッドが含まれていません"
-
-#: src/net_ifs.c:155 src/net_ifs.c:164 src/net_ifs.c:176 src/net_ifs.c:185
-#: src/net_ifs.c:295 src/net_ifs.c:319
-#, c-format
-msgid "load_interfaces: overflow detected"
-msgstr "load_interfaces: オーバーフローが検出されました"
-
-#: src/net_ifs.c:224
-#, c-format
-msgid "unable to open socket"
-msgstr "ソケットを開くことができません"
-
-#: src/parse_args.c:180
-#, c-format
-msgid "the argument to -C must be a number greater than or equal to 3"
-msgstr "-C の引数は 3 以上の数値でなければいけません"
-
-#: src/parse_args.c:192
-#, c-format
-msgid "the argument to -D must be between 1 and 9 inclusive"
-msgstr "-D の引数は 1 から 9 の間でなければいけません"
-
-#: src/parse_args.c:273
-#, c-format
-msgid "unknown user: %s"
-msgstr "不明なユーザーです: %s"
-
-#: src/parse_args.c:332
-#, c-format
-msgid "you may not specify both the `-i' and `-s' options"
-msgstr "`-i' と `-s' オプションを同時に指定することはできません"
-
-#: src/parse_args.c:336
-#, c-format
-msgid "you may not specify both the `-i' and `-E' options"
-msgstr "`-i' と `-E' オプションを同時に指定することはできません"
-
-#: src/parse_args.c:346
-#, c-format
-msgid "the `-E' option is not valid in edit mode"
-msgstr "`-E' オプションは編集モードでは無効です"
-
-#: src/parse_args.c:348
-#, c-format
-msgid "you may not specify environment variables in edit mode"
-msgstr "編集モードでは環境変数を指定できません"
-
-#: src/parse_args.c:356
-#, c-format
-msgid "the `-U' option may only be used with the `-l' option"
-msgstr "`-U' オプションは `-l' オプションのみと同時に指定できます"
-
-#: src/parse_args.c:360
-#, c-format
-msgid "the `-A' and `-S' options may not be used together"
-msgstr "`-A' と `-S' オプションは同時に指定することはできません"
-
-#: src/parse_args.c:429 src/sudo.c:435 src/sudo.c:455 src/sudo.c:463
-#: src/sudo.c:473 common/alloc.c:85 common/alloc.c:105 common/alloc.c:123
-#: common/alloc.c:145 common/alloc.c:203 common/alloc.c:217
+#: src/exec_common.c:111 src/parse_args.c:432 src/sudo.c:451 src/sudo.c:471
+#: src/sudo.c:478 src/sudo.c:489 src/sudo.c:848 common/alloc.c:85
+#: common/alloc.c:105 common/alloc.c:123 common/alloc.c:145 common/alloc.c:203
+#: common/alloc.c:217
 #, c-format
 msgid "unable to allocate memory"
 msgstr "メモリ割り当てを行えませんでした"
 
-#: src/parse_args.c:442
+#: src/exec_pty.c:140
+#, c-format
+msgid "unable to allocate pty"
+msgstr "pty を割り当てられません"
+
+#: src/exec_pty.c:609
+#, c-format
+msgid "unable to set terminal to raw mode"
+msgstr "端末を raw モードに設定できません"
+
+#: src/exec_pty.c:926
+#, c-format
+msgid "unable to set controlling tty"
+msgstr "tty の制御設定ができません"
+
+#: src/exec_pty.c:1020
+#, c-format
+msgid "error reading from signal pipe"
+msgstr "シグナルパイプからの読み込み中にエラーが発生しました"
+
+#: src/exec_pty.c:1039
+#, c-format
+msgid "error reading from pipe"
+msgstr "パイプからの読み込み中にエラーが発生しました"
+
+#: src/exec_pty.c:1055
+#, c-format
+msgid "error reading from socketpair"
+msgstr "ソケットペアからの読み込み中にエラーが発生しました"
+
+#: src/exec_pty.c:1059
+#, c-format
+msgid "unexpected reply type on backchannel: %d"
+msgstr "バックチャンネルに関する予期しないリプレイタイプです: %d"
+
+#: src/load_plugins.c:79
+#, c-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: src/load_plugins.c:85
+#, c-format
+msgid "%s%s: %s"
+msgstr "%s%s: %s"
+
+#: src/load_plugins.c:95
+#, c-format
+msgid "%s must be owned by uid %d"
+msgstr "%s の所有者は uid %d でなければいけません"
+
+#: src/load_plugins.c:99
+#, c-format
+msgid "%s must be only be writable by owner"
+msgstr "%s は所有者のみ書き込み可能で無ければいけません"
+
+#: src/load_plugins.c:106
+#, c-format
+msgid "unable to dlopen %s: %s"
+msgstr "dlopen %s を行うことができません: %s"
+
+#: src/load_plugins.c:111
+#, c-format
+msgid "%s: unable to find symbol %s"
+msgstr "%s: シンボル %s を見つけることができません"
+
+#: src/load_plugins.c:117
+#, c-format
+msgid "%s: unknown policy type %d"
+msgstr "%s: 不明なポリシータイプ %d です"
+
+#: src/load_plugins.c:121
+#, c-format
+msgid "%s: incompatible policy major version %d, expected %d"
+msgstr "%s: 互換性の無いポリシーメジャーバージョン %d です。予期されるのは %d です"
+
+#: src/load_plugins.c:128
+#, c-format
+msgid "%s: only a single policy plugin may be loaded"
+msgstr "%s: 一つのポリシープラグインのみロードされているようです"
+
+#: src/load_plugins.c:148
+#, c-format
+msgid "%s: at least one policy plugin must be specified"
+msgstr "%s: 最低でも一つ以上のポリシープラグインを指定しなければいけません"
+
+#: src/load_plugins.c:153
+#, c-format
+msgid "policy plugin %s does not include a check_policy method"
+msgstr "ポリシープラグイン %s には check_policy メソッドが含まれていません"
+
+#: src/net_ifs.c:157 src/net_ifs.c:166 src/net_ifs.c:178 src/net_ifs.c:187
+#: src/net_ifs.c:298 src/net_ifs.c:322
+#, c-format
+msgid "load_interfaces: overflow detected"
+msgstr "load_interfaces: オーバーフローが検出されました"
+
+#: src/net_ifs.c:227
+#, c-format
+msgid "unable to open socket"
+msgstr "ソケットを開くことができません"
+
+#: src/parse_args.c:187
+#, c-format
+msgid "the argument to -C must be a number greater than or equal to 3"
+msgstr "-C の引数は 3 以上の数値でなければいけません"
+
+#: src/parse_args.c:276
+#, c-format
+msgid "unknown user: %s"
+msgstr "不明なユーザーです: %s"
+
+#: src/parse_args.c:335
+#, c-format
+msgid "you may not specify both the `-i' and `-s' options"
+msgstr "`-i' と `-s' オプションを同時に指定することはできません"
+
+#: src/parse_args.c:339
+#, c-format
+msgid "you may not specify both the `-i' and `-E' options"
+msgstr "`-i' と `-E' オプションを同時に指定することはできません"
+
+#: src/parse_args.c:349
+#, c-format
+msgid "the `-E' option is not valid in edit mode"
+msgstr "`-E' オプションは編集モードでは無効です"
+
+#: src/parse_args.c:351
+#, c-format
+msgid "you may not specify environment variables in edit mode"
+msgstr "編集モードでは環境変数を指定できません"
+
+#: src/parse_args.c:359
+#, c-format
+msgid "the `-U' option may only be used with the `-l' option"
+msgstr "`-U' オプションは `-l' オプションのみと同時に指定できます"
+
+#: src/parse_args.c:363
+#, c-format
+msgid "the `-A' and `-S' options may not be used together"
+msgstr "`-A' と `-S' オプションは同時に指定することはできません"
+
+#: src/parse_args.c:445
 #, c-format
 msgid "sudoedit is not supported on this platform"
 msgstr "sudoedit はこのプラットフォームではサポートされていません"
 
-#: src/parse_args.c:513
+#: src/parse_args.c:518
 #, c-format
 msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr "-e, -h, -i, -K, -l, -s, -v または -V のうち一つのみ指定できます"
 
-#: src/parse_args.c:526
+#: src/parse_args.c:532
 #, c-format
 msgid ""
 "%s - edit files as another user\n"
@@ -218,7 +220,7 @@ msgstr ""
 "%s - 別のユーザーとしてファイルを編集します\n"
 "\n"
 
-#: src/parse_args.c:528
+#: src/parse_args.c:534
 #, c-format
 msgid ""
 "%s - execute a command as another user\n"
@@ -227,7 +229,7 @@ msgstr ""
 "%s - 別のユーザーとしてコマンドを実行します\n"
 "\n"
 
-#: src/parse_args.c:533
+#: src/parse_args.c:539
 #, c-format
 msgid ""
 "\n"
@@ -236,112 +238,112 @@ msgstr ""
 "\n"
 "オプション:\n"
 
-#: src/parse_args.c:536
+#: src/parse_args.c:542
 msgid "use helper program for password prompting\n"
 msgstr "パスワード要求のために補助プログラムを使用する\n"
 
-#: src/parse_args.c:539
+#: src/parse_args.c:545
 msgid "use specified BSD authentication type\n"
 msgstr "指定した BSD 認証タイプを使用する\n"
 
-#: src/parse_args.c:541
+#: src/parse_args.c:547
 msgid "run command in the background\n"
 msgstr "コマンドをバックグラウンドで実行する\n"
 
-#: src/parse_args.c:543
+#: src/parse_args.c:549
 msgid "close all file descriptors >= fd\n"
 msgstr "fd 以上のすべてのファイル記述子を閉じる\n"
 
-#: src/parse_args.c:546
+#: src/parse_args.c:552
 msgid "run command with specified login class\n"
 msgstr "指定したログインクラスでコマンドを実行する\n"
 
-#: src/parse_args.c:549
+#: src/parse_args.c:555
 msgid "preserve user environment when executing command\n"
 msgstr "コマンドを実行する時にユーザーの環境変数を保護する\n"
 
-#: src/parse_args.c:551
+#: src/parse_args.c:557
 msgid "edit files instead of running a command\n"
 msgstr "コマンドを実行する代わりにファイルを編集する\n"
 
-#: src/parse_args.c:553
+#: src/parse_args.c:559
 msgid "execute command as the specified group\n"
 msgstr "指定したグループでコマンドを実行する\n"
 
-#: src/parse_args.c:555
+#: src/parse_args.c:561
 msgid "set HOME variable to target user's home dir.\n"
 msgstr "HOME 変数を変更先となるユーザーのホームディレクトリに設定する\n"
 
-#: src/parse_args.c:557
+#: src/parse_args.c:563
 msgid "display help message and exit\n"
 msgstr "ヘルプメッセージを表示して終了する\n"
 
-#: src/parse_args.c:559
+#: src/parse_args.c:565
 msgid "run a login shell as target user\n"
 msgstr "変更先のユーザーとしてログインシェルを実行する\n"
 
-#: src/parse_args.c:561
+#: src/parse_args.c:567
 msgid "remove timestamp file completely\n"
 msgstr "タイムスタンプファイルを完全に削除する\n"
 
-#: src/parse_args.c:563
+#: src/parse_args.c:569
 msgid "invalidate timestamp file\n"
 msgstr "タイムスタンプファイルを無効にする\n"
 
-#: src/parse_args.c:565
+#: src/parse_args.c:571
 msgid "list user's available commands\n"
 msgstr "ユーザーが使用可能なコマンドを一覧表示する\n"
 
-#: src/parse_args.c:567
+#: src/parse_args.c:573
 msgid "non-interactive mode, will not prompt user\n"
 msgstr "非対話モードで実行し、ユーザーに入力を求めない\n"
 
-#: src/parse_args.c:569
+#: src/parse_args.c:575
 msgid "preserve group vector instead of setting to target's\n"
 msgstr "グループベクトルを保護する (変更先のユーザーのものに設定しない)\n"
 
-#: src/parse_args.c:571
+#: src/parse_args.c:577
 msgid "use specified password prompt\n"
 msgstr "指定したパスワードプロンプトを使用する\n"
 
-#: src/parse_args.c:574 src/parse_args.c:582
+#: src/parse_args.c:580 src/parse_args.c:588
 msgid "create SELinux security context with specified role\n"
 msgstr "指定した役割で SELinux セキュリティーコンテキストを作成する\n"
 
-#: src/parse_args.c:577
+#: src/parse_args.c:583
 msgid "read password from standard input\n"
 msgstr "標準入力からパスワードを読み込む\n"
 
-#: src/parse_args.c:579
+#: src/parse_args.c:585
 msgid "run a shell as target user\n"
 msgstr "変更先のユーザーとしてシェルを実行する\n"
 
-#: src/parse_args.c:585
+#: src/parse_args.c:591
 msgid "when listing, list specified user's privileges\n"
 msgstr "一覧表示する時に、指定したユーザーの権限を一覧表示する\n"
 
-#: src/parse_args.c:587
+#: src/parse_args.c:593
 msgid "run command (or edit file) as specified user\n"
 msgstr "指定したユーザーでコマンドを実行する (またはファイルを編集する)\n"
 
-#: src/parse_args.c:589
+#: src/parse_args.c:595
 msgid "display version information and exit\n"
 msgstr "バージョン情報を表示して終了する\n"
 
-#: src/parse_args.c:591
+#: src/parse_args.c:597
 msgid "update user's timestamp without running a command\n"
 msgstr "コマンドを実行せずにユーザーのタイムスタンプを更新する\n"
 
-#: src/parse_args.c:593
+#: src/parse_args.c:599
 msgid "stop processing command line arguments\n"
 msgstr "コマンドライン引数の処理を終了する\n"
 
-#: src/selinux.c:75
+#: src/selinux.c:76
 #, c-format
 msgid "unable to open audit system"
 msgstr "監査システムを開くことができません"
 
-#: src/selinux.c:85
+#: src/selinux.c:84
 #, c-format
 msgid "unable to send audit message"
 msgstr "監査メッセージを送ることができません"
@@ -361,86 +363,87 @@ msgstr "%s はラベルを変更しました"
 msgid "unable to restore context for %s"
 msgstr "%s 用のコンテキストを復元することができません"
 
-#: src/selinux.c:161
+#: src/selinux.c:162
 #, c-format
 msgid "unable to open %s, not relabeling tty"
 msgstr "%s を開くことができません。tty の再ラベル付けを行いません"
 
-#: src/selinux.c:170
+#: src/selinux.c:171
 #, c-format
 msgid "unable to get current tty context, not relabeling tty"
 msgstr "現在の tty コンテキストを取得できません。 tty の再ラベル付けを行いません"
 
-#: src/selinux.c:177
+#: src/selinux.c:178
 #, c-format
 msgid "unable to get new tty context, not relabeling tty"
 msgstr "新しい tty コンテキストを取得できません。 tty の再ラベル付けを行いません"
 
-#: src/selinux.c:184
+#: src/selinux.c:185
 #, c-format
 msgid "unable to set new tty context"
 msgstr "新しい tty コンテキストを設定できません"
 
-#: src/selinux.c:194 src/selinux.c:207 src/sudo.c:323
+#: src/selinux.c:195 src/selinux.c:208 src/sudo.c:337 common/sudo_conf.c:328
 #, c-format
 msgid "unable to open %s"
 msgstr "%s を開けません"
 
-#: src/selinux.c:249
+#: src/selinux.c:251
 #, c-format
 msgid "you must specify a role for type %s"
 msgstr "タイプ %s 用の役割を指定しなければいけません"
 
-#: src/selinux.c:255
+#: src/selinux.c:257
 #, c-format
 msgid "unable to get default type for role %s"
 msgstr "役割 %s 用のデフォルトのタイプを取得できません"
 
-#: src/selinux.c:273
+#: src/selinux.c:275
 #, c-format
 msgid "failed to set new role %s"
 msgstr "新しい役割 %s の設定に失敗しました"
 
-#: src/selinux.c:277
+#: src/selinux.c:279
 #, c-format
 msgid "failed to set new type %s"
 msgstr "新しいタイプ %s の設定に失敗しました"
 
-#: src/selinux.c:286
+#: src/selinux.c:288
 #, c-format
 msgid "%s is not a valid context"
 msgstr "%s は有効なコンテキストではありません"
 
-#: src/selinux.c:320
+#: src/selinux.c:323
 #, c-format
 msgid "failed to get old_context"
 msgstr "古いコンテキスト (old_context) の取得に失敗しました"
 
-#: src/selinux.c:326
+#: src/selinux.c:329
 #, c-format
 msgid "unable to determine enforcing mode."
 msgstr "強制モードを決定することができません。"
 
-#: src/selinux.c:338
+#: src/selinux.c:341
 #, c-format
 msgid "unable to setup tty context for %s"
 msgstr "%s 用の tty コンテキストをセットアップできません"
 
-#: src/selinux.c:367
+#: src/selinux.c:372
 #, c-format
 msgid "unable to set exec context to %s"
 msgstr "実行コンテキストを %s に設定できません"
 
-#: src/selinux.c:374
+#: src/selinux.c:379
 #, c-format
 msgid "unable to set key creation context to %s"
 msgstr "キー作成コンテキストを %s へ設定できません"
 
-#: src/sesh.c:48
+#: src/sesh.c:70
+#, c-format
 msgid "requires at least one argument"
 msgstr "最低でも一つ以上おの引数が必要です"
 
-#: src/sesh.c:64
+#: src/sesh.c:91
 #, c-format
 msgid "unable to execute %s"
 msgstr "%s を実行できません"
@@ -450,291 +453,308 @@ msgstr "%s を実行できません"
 msgid "must be setuid root"
 msgstr "setuid root されていなければいけません"
 
-#: src/sudo.c:209
+#: src/sudo.c:214
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Sudo バージョン %s\n"
 
-#: src/sudo.c:211
+#: src/sudo.c:216
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "configure オプション: %s\n"
 
-#: src/sudo.c:216
+#: src/sudo.c:221
 #, c-format
 msgid "fatal error, unable to load plugins"
 msgstr "致命的エラー、プラグインをロードできません"
 
-#: src/sudo.c:224
+#: src/sudo.c:229
 #, c-format
 msgid "unable to initialize policy plugin"
 msgstr "ポリシープラグインを初期化できません"
 
-#: src/sudo.c:279
+#: src/sudo.c:284
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "I/O プラグイン %s を初期化中にエラーが発生しました"
 
-#: src/sudo.c:300
+#: src/sudo.c:312
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "予期しない sudo のモード 0x%x です"
 
-#: src/sudo.c:389
+#: src/sudo.c:406
 #, c-format
 msgid "unable to get group vector"
 msgstr "グループベクトルを取得できません"
 
-#: src/sudo.c:431
+#: src/sudo.c:447
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "不明なユーザーID %u です: 誰ですか?"
 
-#: src/sudo.c:773
+#: src/sudo.c:790
 #, c-format
 msgid "resource control limit has been reached"
 msgstr "資源制御の制限の最大値に達しました"
 
-#: src/sudo.c:776
+#: src/sudo.c:793
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
 msgstr "ユーザー \"%s\" はプロジェクト \"%s\" のメンバーではありません"
 
-#: src/sudo.c:780
+#: src/sudo.c:797
 #, c-format
 msgid "the invoking task is final"
 msgstr "起動しているタスクは最後 (final) です"
 
-#: src/sudo.c:783
+#: src/sudo.c:800
 #, c-format
 msgid "could not join project \"%s\""
 msgstr "プロジェクト \"%s\" に参加できません"
 
-#: src/sudo.c:788
+#: src/sudo.c:805
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "プロジェクト \"%s\" 用にはデフォルト割り当てとして受け付けられる資源プールがありません"
 
-#: src/sudo.c:792
+#: src/sudo.c:809
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "プロジェクト \"%s\" 用として指定した資源プールは存在しません"
 
-#: src/sudo.c:796
+#: src/sudo.c:813
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "プロジェクト \"%s\" 用にデフォルト資源プールを割り当てられませんでした"
 
-#: src/sudo.c:802
+#: src/sudo.c:819
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "プロジェクト\"%s\" への setproject に失敗しました"
 
-#: src/sudo.c:804
+#: src/sudo.c:821
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "警告、プロジェクト \"%s\" への資源制御割り当てに失敗しました"
 
-#: src/sudo.c:832
-#, c-format
-msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
-msgstr "PRIV_LIMIT から PRIV_PROC_EXEC を取り除くことができません"
-
-#: src/sudo.c:938
+#: src/sudo.c:892
 #, c-format
 msgid "unknown login class %s"
 msgstr "不明なログインクラス %s です"
 
-#: src/sudo.c:945 src/sudo.c:948
+#: src/sudo.c:906 src/sudo.c:909
 #, c-format
 msgid "unable to set user context"
 msgstr "ユーザーコンテキストを設定できません"
 
-#: src/sudo.c:959
-#, c-format
-msgid "unable to set effective gid to runas gid %u"
-msgstr "実行時のグループID (gid) %u を実効グループIDに設定できません"
-
-#: src/sudo.c:965
-#, c-format
-msgid "unable to set gid to runas gid %u"
-msgstr "実行時のグループID (gid) %u をグループIDに設定できません"
-
-#: src/sudo.c:973
+#: src/sudo.c:924
 #, c-format
 msgid "unable to set supplementary group IDs"
 msgstr "追加のグループIDを設定できません"
 
-#: src/sudo.c:981
+#: src/sudo.c:931
+#, c-format
+msgid "unable to set effective gid to runas gid %u"
+msgstr "実行時のグループID (gid) %u を実効グループIDに設定できません"
+
+#: src/sudo.c:937
+#, c-format
+msgid "unable to set gid to runas gid %u"
+msgstr "実行時のグループID (gid) %u をグループIDに設定できません"
+
+#: src/sudo.c:944
 #, c-format
 msgid "unable to set process priority"
 msgstr "プロセス優先度を設定できません"
 
-#: src/sudo.c:989
+#: src/sudo.c:952
 #, c-format
 msgid "unable to change root to %s"
 msgstr "root を %s へ変更できません"
 
-#: src/sudo.c:999 src/sudo.c:1005 src/sudo.c:1011
+#: src/sudo.c:959 src/sudo.c:965 src/sudo.c:971
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "実行時のユーザーID (uid) (%u, %u) へ変更できません"
 
-#: src/sudo.c:1025
+#: src/sudo.c:985
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "ディレクトリーを %s に変更できません"
 
-#: src/sudo.c:1092
+#: src/sudo.c:1058
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "予期しない子プロセスの終了コードです: %d"
 
-#: src/sudo.c:1132
+#: src/sudo.c:1119
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "ポリシープラグイン %s は権限の一覧表示をサポートしていません"
 
-#: src/sudo.c:1143
+#: src/sudo.c:1131
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "ポリシープラグイン %s は -v オプションをサポートしません"
 
-#: src/sudo.c:1154
+#: src/sudo.c:1143
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "ポリシープラグイン %s は -k/-K オプションをサポートしません"
 
-#: src/sudo_edit.c:108
+#: src/sudo_edit.c:111
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "ユーザーID (uid) を root (%u) に変更できません"
 
-#: src/sudo_edit.c:140
+#: src/sudo_edit.c:143
 #, c-format
 msgid "plugin error: missing file list for sudoedit"
 msgstr "プラグインエラー: sudoedit 用のファイル一覧がありません"
 
-#: src/sudo_edit.c:168 src/sudo_edit.c:268
+#: src/sudo_edit.c:171 src/sudo_edit.c:271
 #, c-format
 msgid "%s: not a regular file"
 msgstr "%s: 通常ファイルではありません"
 
-#: src/sudo_edit.c:202 src/sudo_edit.c:304
+#: src/sudo_edit.c:205 src/sudo_edit.c:307
 #, c-format
 msgid "%s: short write"
 msgstr "%s: 短い書き込みです"
 
-#: src/sudo_edit.c:269
+#: src/sudo_edit.c:272
 #, c-format
 msgid "%s left unmodified"
 msgstr "%s を修正しないままにします"
 
-#: src/sudo_edit.c:282
+#: src/sudo_edit.c:285
 #, c-format
 msgid "%s unchanged"
 msgstr "%s を変更しません"
 
-#: src/sudo_edit.c:294 src/sudo_edit.c:315
+#: src/sudo_edit.c:297 src/sudo_edit.c:318
 #, c-format
 msgid "unable to write to %s"
 msgstr "%s へ書き込むことができません"
 
-#: src/sudo_edit.c:295 src/sudo_edit.c:313 src/sudo_edit.c:316
+#: src/sudo_edit.c:298 src/sudo_edit.c:316 src/sudo_edit.c:319
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "編集セッションの内容が %s 内に残っています"
 
-#: src/sudo_edit.c:312
+#: src/sudo_edit.c:315
 #, c-format
 msgid "unable to read temporary file"
 msgstr "一時ファイルを読み込むことができません"
 
-#: src/tgetpass.c:95
+#: src/tgetpass.c:96
 #, c-format
 msgid "no tty present and no askpass program specified"
 msgstr "端末 (tty) が存在せず、パスワードを尋ねる (askpass) プログラムが指定されていません"
 
-#: src/tgetpass.c:104
+#: src/tgetpass.c:105
 #, c-format
 msgid "no askpass program specified, try setting SUDO_ASKPASS"
 msgstr "パスワードを尋ねる (askpass) プログラムが指定されていません。 SUDO_ASKPASS の設定を試みます"
 
-#: src/tgetpass.c:234
+#: src/tgetpass.c:237
 #, c-format
 msgid "unable to set gid to %u"
 msgstr "グループIDを %u に設定できません"
 
-#: src/tgetpass.c:238
+#: src/tgetpass.c:241
 #, c-format
 msgid "unable to set uid to %u"
 msgstr "ユーザーIDを %u に設定できません"
 
-#: src/tgetpass.c:243
+#: src/tgetpass.c:246
 #, c-format
 msgid "unable to run %s"
 msgstr "%s を実行できません"
 
-#: src/utmp.c:263
+#: src/utmp.c:278
 #, c-format
 msgid "unable to save stdin"
 msgstr "標準入力を保存できません"
 
-#: src/utmp.c:265
+#: src/utmp.c:280
 #, c-format
 msgid "unable to dup2 stdin"
 msgstr "標準入力へ dup2 を実行できません"
 
-#: src/utmp.c:268
+#: src/utmp.c:283
 #, c-format
 msgid "unable to restore stdin"
 msgstr "標準入力を復元できません"
 
-#: common/aix.c:144
+#: common/aix.c:149
 #, c-format
 msgid "unable to open userdb"
 msgstr "ユーザーデータベースを開くことができません"
 
-#: common/aix.c:147
+#: common/aix.c:152
 #, c-format
 msgid "unable to switch to registry \"%s\" for %s"
 msgstr "%s 用のレジストリー \"%s\" へ切り替えることができません"
 
-#: common/aix.c:161
+#: common/aix.c:169
 #, c-format
 msgid "unable to restore registry"
 msgstr "レジストリーを復元できません"
 
 #: common/alloc.c:82
-#, c-format
 msgid "internal error, tried to emalloc(0)"
 msgstr "内部エラー、emalloc(0) を試みました"
 
 #: common/alloc.c:99
-#, c-format
 msgid "internal error, tried to emalloc2(0)"
 msgstr "内部エラー、 emalloc2(0) を試みました"
 
 #: common/alloc.c:101
-#, c-format
 msgid "internal error, emalloc2() overflow"
 msgstr "内部エラー、 emalloc2() がオーバーフローしました"
 
 #: common/alloc.c:119
-#, c-format
 msgid "internal error, tried to erealloc(0)"
 msgstr "内部エラー、 erealloc(0) を試みました"
 
 #: common/alloc.c:138
-#, c-format
 msgid "internal error, tried to erealloc3(0)"
 msgstr "内部エラー、 erealloc3(0) を試みました"
 
 #: common/alloc.c:140
-#, c-format
 msgid "internal error, erealloc3() overflow"
 msgstr "内部エラー、 erealloc3() がオーバーフローしました"
+
+#: common/sudo_conf.c:306
+#, c-format
+msgid "unable to stat %s"
+msgstr "%s の状態取得 (stat) ができません"
+
+#: common/sudo_conf.c:309
+#, c-format
+msgid "%s is not a regular file"
+msgstr "%s は通常ファイルではありません"
+
+#: common/sudo_conf.c:312
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s はユーザーID %u によって所有されています。これは %u であるべきです"
+
+#: common/sudo_conf.c:316
+#, c-format
+msgid "%s is world writable"
+msgstr "%s は誰でも書き込み可能です"
+
+#: common/sudo_conf.c:319
+#, c-format
+msgid "%s is group writable"
+msgstr "%s はグループのメンバーによる書き込みが可能です"
 
 #: compat/strsignal.c:47
 msgid "Unknown signal"
 msgstr "不明なシグナルです"
+
+#~ msgid "the argument to -D must be between 1 and 9 inclusive"
+#~ msgstr "-D の引数は 1 から 9 の間でなければいけません"
