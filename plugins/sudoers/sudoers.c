@@ -884,7 +884,7 @@ set_cmnd(void)
 
     /* Resolve the path and return. */
     rval = FOUND;
-    user_stat = emalloc(sizeof(struct stat));
+    user_stat = ecalloc(1, sizeof(struct stat));
 
     /* Default value for cmnd, overridden below. */
     if (user_cmnd == NULL)

@@ -116,10 +116,10 @@ alias_add(char *name, int type, struct member *members)
     struct alias *a;
     debug_decl(alias_add, SUDO_DEBUG_ALIAS)
 
-    a = emalloc(sizeof(*a));
+    a = ecalloc(1, sizeof(*a));
     a->name = name;
     a->type = type;
-    a->seqno = 0;
+    /* a->seqno = 0; */
     list2tq(&a->members, members);
     if (rbinsert(aliases, a)) {
 	snprintf(errbuf, sizeof(errbuf), _("Alias `%s' already defined"), name);

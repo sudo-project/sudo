@@ -320,11 +320,11 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
      * In the event loop we pass input from user tty to master
      * and pass output from master to stdout and IO plugin.
      */
-    fdsr = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
-    fdsw = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
+    fdsr = emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
+    fdsw = emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
     for (;;) {
-	zero_bytes(fdsw, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
-	zero_bytes(fdsr, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
+	memset(fdsw, 0, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
+	memset(fdsr, 0, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
 
 	FD_SET(signal_pipe[0], fdsr);
 	FD_SET(sv[0], fdsr);
@@ -582,9 +582,9 @@ schedule_signal(int signo)
 
     sudo_debug_printf(SUDO_DEBUG_DIAG, "forwarding signal %d to child", signo);
 
-    sigfwd = emalloc(sizeof(*sigfwd));
+    sigfwd = ecalloc(1, sizeof(*sigfwd));
     sigfwd->prev = sigfwd;
-    sigfwd->next = NULL;
+    /* sigfwd->next = NULL; */
     sigfwd->signo = signo;
     tq_append(&sigfwd_list, sigfwd);
 

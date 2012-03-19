@@ -645,14 +645,14 @@ new_default(char *var, char *val, int op)
     struct defaults *d;
     debug_decl(new_default, SUDO_DEBUG_PARSER)
 
-    d = emalloc(sizeof(struct defaults));
+    d = ecalloc(1, sizeof(struct defaults));
     d->var = var;
     d->val = val;
     tq_init(&d->binding);
-    d->type = 0;
+    /* d->type = 0; */
     d->op = op;
     d->prev = d;
-    d->next = NULL;
+    /* d->next = NULL; */
 
     debug_return_ptr(d);
 }
@@ -663,11 +663,11 @@ new_member(char *name, int type)
     struct member *m;
     debug_decl(new_member, SUDO_DEBUG_PARSER)
 
-    m = emalloc(sizeof(struct member));
+    m = ecalloc(1, sizeof(struct member));
     m->name = name;
     m->type = type;
     m->prev = m;
-    m->next = NULL;
+    /* m->next = NULL; */
 
     debug_return_ptr(m);
 }
@@ -712,11 +712,11 @@ add_userspec(struct member *members, struct privilege *privs)
     struct userspec *u;
     debug_decl(add_userspec, SUDO_DEBUG_PARSER)
 
-    u = emalloc(sizeof(*u));
+    u = ecalloc(1, sizeof(*u));
     list2tq(&u->users, members);
     list2tq(&u->privileges, privs);
     u->prev = u;
-    u->next = NULL;
+    /* u->next = NULL; */
     tq_append(&userspecs, u);
 
     debug_return;
@@ -1155,11 +1155,11 @@ break;
 case 26:
 #line 269 "gram.y"
 {
-			    struct privilege *p = emalloc(sizeof(*p));
+			    struct privilege *p = ecalloc(1, sizeof(*p));
 			    list2tq(&p->hostlist, yyvsp[-2].member);
 			    list2tq(&p->cmndlist, yyvsp[0].cmndspec);
 			    p->prev = p;
-			    p->next = NULL;
+			    /* p->next = NULL; */
 			    yyval.privilege = p;
 			}
 break;
@@ -1243,7 +1243,7 @@ break;
 case 36:
 #line 339 "gram.y"
 {
-			    struct cmndspec *cs = emalloc(sizeof(*cs));
+			    struct cmndspec *cs = ecalloc(1, sizeof(*cs));
 			    if (yyvsp[-3].runas != NULL) {
 				list2tq(&cs->runasuserlist, yyvsp[-3].runas->runasusers);
 				list2tq(&cs->runasgrouplist, yyvsp[-3].runas->runasgroups);
@@ -1343,15 +1343,15 @@ break;
 case 48:
 #line 415 "gram.y"
 {
-			    yyval.runas = emalloc(sizeof(struct runascontainer));
+			    yyval.runas = ecalloc(1, sizeof(struct runascontainer));
 			    yyval.runas->runasusers = yyvsp[0].member;
-			    yyval.runas->runasgroups = NULL;
+			    /* $$->runasgroups = NULL; */
 			}
 break;
 case 49:
 #line 420 "gram.y"
 {
-			    yyval.runas = emalloc(sizeof(struct runascontainer));
+			    yyval.runas = ecalloc(1, sizeof(struct runascontainer));
 			    yyval.runas->runasusers = yyvsp[-2].member;
 			    yyval.runas->runasgroups = yyvsp[0].member;
 			}
@@ -1359,8 +1359,8 @@ break;
 case 50:
 #line 425 "gram.y"
 {
-			    yyval.runas = emalloc(sizeof(struct runascontainer));
-			    yyval.runas->runasusers = NULL;
+			    yyval.runas = ecalloc(1, sizeof(struct runascontainer));
+			    /* $$->runasusers = NULL; */
 			    yyval.runas->runasgroups = yyvsp[0].member;
 			}
 break;
@@ -1446,7 +1446,7 @@ break;
 case 64:
 #line 474 "gram.y"
 {
-			    struct sudo_command *c = emalloc(sizeof(*c));
+			    struct sudo_command *c = ecalloc(1, sizeof(*c));
 			    c->cmnd = yyvsp[0].command.cmnd;
 			    c->args = yyvsp[0].command.args;
 			    yyval.member = new_member((char *)c, COMMAND);

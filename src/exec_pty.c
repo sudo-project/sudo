@@ -405,7 +405,7 @@ io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int),
     struct io_buffer *iob;
     debug_decl(io_buf_new, SUDO_DEBUG_EXEC);
 
-    iob = emalloc(sizeof(*iob));
+    iob = ecalloc(1, sizeof(*iob));
     zero_bytes(iob, sizeof(*iob));
     iob->rfd = rfd;
     iob->wfd = wfd;
@@ -989,9 +989,8 @@ exec_monitor(struct command_details *details, int backchannel)
 
     /* Wait for errno on pipe, signal on backchannel or for SIGCHLD */
     maxfd = MAX(MAX(errpipe[0], signal_pipe[0]), backchannel);
-    fdsr = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
-    zero_bytes(fdsr, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
-    zero_bytes(&cstat, sizeof(cstat));
+    fdsr = ecalloc(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
+    memset(&cstat, 0, sizeof(cstat));
     tv.tv_sec = 0;
     tv.tv_usec = 0;
     for (;;) {
@@ -1102,11 +1101,11 @@ flush_output(void)
     if (maxfd == -1)
 	debug_return;
 
-    fdsr = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
-    fdsw = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
+    fdsr = emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
+    fdsw = emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
     for (;;) {
-	zero_bytes(fdsw, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
-	zero_bytes(fdsr, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
+	memset(fdsw, 0, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
+	memset(fdsr, 0, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
 
 	nwriters = 0;
 	for (iob = iobufs; iob; iob = iob->next) {

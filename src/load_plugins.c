@@ -134,9 +134,9 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	    policy_plugin->options = info->options;
 	    policy_plugin->u.generic = plugin;
 	} else if (plugin->type == SUDO_IO_PLUGIN) {
-	    container = emalloc(sizeof(*container));
+	    container = ecalloc(1, sizeof(*container));
 	    container->prev = container;
-	    container->next = NULL;
+	    /* container->next = NULL; */
 	    container->handle = handle;
 	    container->name = info->symbol_name;
 	    container->options = info->options;

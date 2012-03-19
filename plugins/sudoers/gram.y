@@ -267,11 +267,11 @@ privileges	:	privilege
 		;
 
 privilege	:	hostlist '=' cmndspeclist {
-			    struct privilege *p = emalloc(sizeof(*p));
+			    struct privilege *p = ecalloc(1, sizeof(*p));
 			    list2tq(&p->hostlist, $1);
 			    list2tq(&p->cmndlist, $3);
 			    p->prev = p;
-			    p->next = NULL;
+			    /* p->next = NULL; */
 			    $$ = p;
 			}
 		;
@@ -337,7 +337,7 @@ cmndspeclist	:	cmndspec
 		;
 
 cmndspec	:	runasspec selinux cmndtag opcmnd {
-			    struct cmndspec *cs = emalloc(sizeof(*cs));
+			    struct cmndspec *cs = ecalloc(1, sizeof(*cs));
 			    if ($1 != NULL) {
 				list2tq(&cs->runasuserlist, $1->runasusers);
 				list2tq(&cs->runasgrouplist, $1->runasgroups);
@@ -413,18 +413,18 @@ runasspec	:	/* empty */ {
 		;
 
 runaslist	:	userlist {
-			    $$ = emalloc(sizeof(struct runascontainer));
+			    $$ = ecalloc(1, sizeof(struct runascontainer));
 			    $$->runasusers = $1;
-			    $$->runasgroups = NULL;
+			    /* $$->runasgroups = NULL; */
 			}
 		|	userlist ':' grouplist {
-			    $$ = emalloc(sizeof(struct runascontainer));
+			    $$ = ecalloc(1, sizeof(struct runascontainer));
 			    $$->runasusers = $1;
 			    $$->runasgroups = $3;
 			}
 		|	':' grouplist {
-			    $$ = emalloc(sizeof(struct runascontainer));
-			    $$->runasusers = NULL;
+			    $$ = ecalloc(1, sizeof(struct runascontainer));
+			    /* $$->runasusers = NULL; */
 			    $$->runasgroups = $2;
 			}
 		;
@@ -472,7 +472,7 @@ cmnd		:	ALL {
 			    $$ = new_member($1, ALIAS);
 			}
 		|	COMMAND {
-			    struct sudo_command *c = emalloc(sizeof(*c));
+			    struct sudo_command *c = ecalloc(1, sizeof(*c));
 			    c->cmnd = $1.cmnd;
 			    c->args = $1.args;
 			    $$ = new_member((char *)c, COMMAND);
@@ -614,14 +614,14 @@ new_default(char *var, char *val, int op)
     struct defaults *d;
     debug_decl(new_default, SUDO_DEBUG_PARSER)
 
-    d = emalloc(sizeof(struct defaults));
+    d = ecalloc(1, sizeof(struct defaults));
     d->var = var;
     d->val = val;
     tq_init(&d->binding);
-    d->type = 0;
+    /* d->type = 0; */
     d->op = op;
     d->prev = d;
-    d->next = NULL;
+    /* d->next = NULL; */
 
     debug_return_ptr(d);
 }
@@ -632,11 +632,11 @@ new_member(char *name, int type)
     struct member *m;
     debug_decl(new_member, SUDO_DEBUG_PARSER)
 
-    m = emalloc(sizeof(struct member));
+    m = ecalloc(1, sizeof(struct member));
     m->name = name;
     m->type = type;
     m->prev = m;
-    m->next = NULL;
+    /* m->next = NULL; */
 
     debug_return_ptr(m);
 }
@@ -681,11 +681,11 @@ add_userspec(struct member *members, struct privilege *privs)
     struct userspec *u;
     debug_decl(add_userspec, SUDO_DEBUG_PARSER)
 
-    u = emalloc(sizeof(*u));
+    u = ecalloc(1, sizeof(*u));
     list2tq(&u->users, members);
     list2tq(&u->privileges, privs);
     u->prev = u;
-    u->next = NULL;
+    /* u->next = NULL; */
     tq_append(&userspecs, u);
 
     debug_return;

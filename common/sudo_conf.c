@@ -242,12 +242,12 @@ set_plugin(const char *entry)
 	pathlen = strlen(path);
     }
 
-    info = emalloc(sizeof(*info));
+    info = ecalloc(1, sizeof(*info));
     info->symbol_name = estrndup(name, namelen);
     info->path = estrndup(path, pathlen);
     info->options = options;
     info->prev = info;
-    info->next = NULL;
+    /* info->next = NULL; */
     tq_append(&sudo_conf_data.plugins, info);
 
     return true;
@@ -350,21 +350,21 @@ sudo_conf_read(void)
 done:
     if (tq_empty(&sudo_conf_data.plugins)) {
 	/* Default policy plugin */
-	info = emalloc(sizeof(*info));
+	info = ecalloc(1, sizeof(*info));
 	info->symbol_name = "sudoers_policy";
 	info->path = SUDOERS_PLUGIN;
-	info->options = NULL;
+	/* info->options = NULL; */
 	info->prev = info;
-	info->next = NULL;
+	/* info->next = NULL; */
 	tq_append(&sudo_conf_data.plugins, info);
 
 	/* Default I/O plugin */
-	info = emalloc(sizeof(*info));
+	info = ecalloc(1, sizeof(*info));
 	info->symbol_name = "sudoers_io";
 	info->path = SUDOERS_PLUGIN;
-	info->options = NULL;
+	/* info->options = NULL; */
 	info->prev = info;
-	info->next = NULL;
+	/* info->next = NULL; */
 	tq_append(&sudo_conf_data.plugins, info);
     }
 }

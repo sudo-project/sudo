@@ -880,13 +880,13 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	    break;
     }
     if (entry == NULL) {
-	entry = emalloc(sizeof(*entry));
+	entry = ecalloc(1, sizeof(*entry));
 	entry->path = estrdup(path);
-	entry->modified = 0;
+	/* entry->modified = 0; */
 	entry->prev = entry;
-	entry->next = NULL;
+	/* entry->next = NULL; */
 	entry->fd = open(entry->path, open_flags, SUDOERS_MODE);
-	entry->tpath = NULL;
+	/* entry->tpath = NULL; */
 	entry->doedit = doedit;
 	if (entry->fd == -1) {
 	    warning("%s", entry->path);

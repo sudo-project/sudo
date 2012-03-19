@@ -71,7 +71,7 @@ set_interfaces(const char *ai)
 	*mask++ = '\0';
 
 	/* Parse addr and store in list. */
-	ifp = emalloc(sizeof(*ifp));
+	ifp = ecalloc(1, sizeof(*ifp));
 	if (strchr(addr, ':')) {
 	    /* IPv6 */
 #ifdef HAVE_STRUCT_IN6_ADDR

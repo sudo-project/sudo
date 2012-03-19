@@ -171,7 +171,7 @@ register_hook_internal(struct sudo_hook_list **head,
     struct sudo_hook_list *hook;
     debug_decl(register_hook_internal, SUDO_DEBUG_HOOKS)
 
-    hook = emalloc(sizeof(*hook));
+    hook = ecalloc(1, sizeof(*hook));
     hook->u.generic_fn = hook_fn;
     hook->closure = closure;
     hook->next = *head;
