@@ -22,10 +22,12 @@
 int	 easprintf(char **, const char *, ...) __printflike(2, 3);
 int	 evasprintf(char **, const char *, va_list) __printflike(2, 0);
 void	 efree(void *);
+void	*ecalloc(size_t, size_t);
 void	*emalloc(size_t);
 void	*emalloc2(size_t, size_t);
 void	*erealloc(void *, size_t);
 void	*erealloc3(void *, size_t, size_t);
+void	*erecalloc(void *, size_t, size_t, size_t);
 char	*estrdup(const char *);
 char	*estrndup(const char *, size_t);
 

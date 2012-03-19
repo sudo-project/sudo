@@ -107,6 +107,29 @@ emalloc2(size_t nmemb, size_t size)
 }
 
 /*
+ * ecalloc() allocates nmemb * size bytes and exits with an error
+ * if overflow would occur or if the system malloc(3) fails.
+ * On success, the allocated space is zero-filled.
+ */
+void *
+ecalloc(size_t nmemb, size_t size)
+{
+    void *ptr;
+
+    if (nmemb == 0 || size == 0)
+	errorx2(1, _("internal error, tried to ecalloc(0)"));
+    if (nmemb != 1) {
+	if (nmemb > SIZE_MAX / size)
+	    errorx2(1, _("internal error, ecalloc() overflow"));
+	size *= nmemb;
+    }
+    if ((ptr = malloc(size)) == NULL)
+	errorx2(1, _("unable to allocate memory"));
+    memset(ptr, 0, size);
+    return ptr;
+}
+
+/*
  * erealloc() calls the system realloc(3) and exits with an error if
  * realloc(3) fails.  You can call erealloc() with a NULL pointer even
  * if the system realloc(3) does not support this.
@@ -146,6 +169,35 @@ erealloc3(void *ptr, size_t nmemb, size_t size)
     return ptr;
 }
 
+#ifdef notyet
+/*
+ * erecalloc() realloc(3)s nmemb * msize bytes and exits with an error
+ * if overflow would occur or if the system malloc(3)/realloc(3) fails.
+ * On success, the new space is zero-filled.  You can call ereallocz()
+ * with a NULL pointer even if the system realloc(3) does not support this.
+ */
+void *
+erecalloc(void *ptr, size_t onmemb, size_t nmemb, size_t msize)
+{
+    size_t size;
+
+    if (nmemb == 0 || msize == 0)
+	errorx2(1, _("internal error, tried to erealloc3(0)"));
+    if (nmemb > SIZE_MAX / msize)
+	errorx2(1, _("internal error, erealloc3() overflow"));
+
+    size = nmemb * msize;
+    ptr = ptr ? realloc(ptr, size) : malloc(size);
+    if (ptr == NULL)
+	errorx2(1, _("unable to allocate memory"));
+    if (nmemb > onmemb) {
+	size = (nmemb - onmemb) * msize;
+	memset((char *)ptr + (onmemb * msize), 0, size);
+    }
+    return ptr;
+}
+#endif
+
 /*
  * estrdup() is like strdup(3) except that it exits with an error if
  * malloc(3) fails.  NOTE: unlike strdup(3), estrdup(NULL) is legal.
@@ -173,12 +225,13 @@ char *
 estrndup(const char *src, size_t maxlen)
 {
     char *dst = NULL;
-    size_t len;
+    size_t len = 0;
 
     if (src != NULL) {
-	len = strlen(src);
-	if (len > maxlen)
-	    len = maxlen;
+	while (maxlen != 0 && src[len] != '\0') {
+	    len++;
+	    maxlen--;
+	}
 	dst = (char *) emalloc(len + 1);
 	(void) memcpy(dst, src, len);
 	dst[len] = '\0';
