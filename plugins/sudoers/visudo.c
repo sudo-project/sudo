@@ -207,9 +207,8 @@ main(int argc, char *argv[])
 		usage(1);
 	}
     }
-    argc -= optind;
-    argv += optind;
-    if (argc)
+    /* There should be no other command line arguments. */
+    if (argc - optind != 0)
 	usage(1);
 
     sudo_setpwent();
