@@ -113,7 +113,7 @@ sudo_krb5_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 	 * API does not currently provide this unless the auth is standalone.
 	 */
 	if ((error = krb5_unparse_name(sudo_context, princ, &pname))) {
-	    log_error(NO_EXIT|NO_MAIL,
+	    log_error(NO_MAIL,
 		      _("%s: unable to unparse princ ('%s'): %s"), auth->name,
 		      pw->pw_name, error_message(error));
 	    debug_return_int(AUTH_FAILURE);
@@ -156,7 +156,7 @@ sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
 
     error = krb5_parse_name(sudo_context, pname, &(sudo_krb5_data.princ));
     if (error) {
-	log_error(NO_EXIT|NO_MAIL,
+	log_error(NO_MAIL,
 		  _("%s: unable to parse '%s': %s"), auth->name, pname,
 		  error_message(error));
 	goto done;
@@ -166,7 +166,7 @@ sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
 		    (long) getpid());
     if ((error = krb5_cc_resolve(sudo_context, cache_name,
 	&(sudo_krb5_data.ccache)))) {
-	log_error(NO_EXIT|NO_MAIL,
+	log_error(NO_MAIL,
 		  _("%s: unable to resolve ccache: %s"), auth->name,
 		  error_message(error));
 	goto done;
@@ -214,7 +214,7 @@ sudo_krb5_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     /* Set default flags based on the local config file. */
     error = krb5_get_init_creds_opt_alloc(sudo_context, &opts);
     if (error) {
-	log_error(NO_EXIT|NO_MAIL,
+	log_error(NO_MAIL,
 		  _("%s: unable to allocate options: %s"), auth->name,
 		  error_message(error));
 	goto done;
@@ -230,7 +230,7 @@ sudo_krb5_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 					     NULL, 0, NULL, opts))) {
 	/* Don't print error if just a bad password */
 	if (error != KRB5KRB_AP_ERR_BAD_INTEGRITY)
-	    log_error(NO_EXIT|NO_MAIL,
+	    log_error(NO_MAIL,
 		      _("%s: unable to get credentials: %s"), auth->name,
 		      error_message(error));
 	goto done;
@@ -243,11 +243,11 @@ sudo_krb5_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 
     /* Store cred in cred cache. */
     if ((error = krb5_cc_initialize(sudo_context, ccache, princ))) {
-	log_error(NO_EXIT|NO_MAIL,
+	log_error(NO_MAIL,
 		  _("%s: unable to initialize ccache: %s"), auth->name,
 		  error_message(error));
     } else if ((error = krb5_cc_store_cred(sudo_context, ccache, creds))) {
-	log_error(NO_EXIT|NO_MAIL,
+	log_error(NO_MAIL,
 		  _("%s: unable to store cred in ccache: %s"), auth->name,
 		  error_message(error));
     }
@@ -312,7 +312,7 @@ verify_krb_v5_tgt(krb5_context sudo_context, krb5_creds *cred, char *auth_name)
      */
     if ((error = krb5_sname_to_principal(sudo_context, NULL, NULL,
 					KRB5_NT_SRV_HST, &server))) {
-	log_error(NO_EXIT|NO_MAIL,
+	log_error(NO_MAIL,
 		  _("%s: unable to get host principal: %s"), auth_name,
 		  error_message(error));
 	debug_return_int(-1);
@@ -327,7 +327,7 @@ verify_krb_v5_tgt(krb5_context sudo_context, krb5_creds *cred, char *auth_name)
 				   NULL, &vopt);
     krb5_free_principal(sudo_context, server);
     if (error)
-	log_error(NO_EXIT|NO_MAIL,
+	log_error(NO_MAIL,
 		  _("%s: Cannot verify TGT! Possible attack!: %s"),
 		  auth_name, error_message(error));
     debug_return_int(error);

@@ -325,18 +325,18 @@ log_allowed(int status)
     debug_return;
 }
 
-void
-log_error(int flags, const char *fmt, ...)
+/*
+ * Perform logging for log_error()/log_fatal()
+ */
+static void
+vlog_error(int flags, const char *fmt, va_list ap)
 {
     int serrno = errno;
     char *logline, *message;
-    va_list ap;
-    debug_decl(log_error, SUDO_DEBUG_LOGGING)
+    debug_decl(vlog_error, SUDO_DEBUG_LOGGING)
 
     /* Expand printf-style format + args. */
-    va_start(ap, fmt);
     evasprintf(&message, fmt, ap);
-    va_end(ap);
 
     /* Become root if we are not already to avoid user interference */
     set_perms(PERM_ROOT|PERM_NOEXIT);
@@ -376,11 +376,38 @@ log_error(int flags, const char *fmt, ...)
 
     restore_perms();
 
-    if (!ISSET(flags, NO_EXIT)) {
-	plugin_cleanup(0);
-	siglongjmp(error_jmp, 1);
-    }
     debug_return;
+}
+
+void
+log_error(int flags, const char *fmt, ...)
+{
+    va_list ap;
+    debug_decl(log_error, SUDO_DEBUG_LOGGING)
+
+    /* Log the error. */
+    va_start(ap, fmt);
+    vlog_error(flags, fmt, ap);
+    va_end(ap);
+
+    debug_return;
+}
+
+void
+log_fatal(int flags, const char *fmt, ...)
+{
+    va_list ap;
+    debug_decl(log_error, SUDO_DEBUG_LOGGING)
+
+    /* Log the error. */
+    va_start(ap, fmt);
+    vlog_error(flags, fmt, ap);
+    va_end(ap);
+
+    /* Exit the plugin. */
+    plugin_cleanup(0);
+    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
+    siglongjmp(error_jmp, 1);
 }
 
 #define MAX_MAILFLAGS	63
