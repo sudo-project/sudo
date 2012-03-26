@@ -415,11 +415,14 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    pw = sudo_getpwuid(atoi(def_timestampowner + 1));
 	else
 	    pw = sudo_getpwnam(def_timestampowner);
-	if (!pw)
-	    log_fatal(0, _("timestamp owner (%s): No such user"),
+	if (pw != NULL) {
+	    timestamp_uid = pw->pw_uid;
+	    pw_delref(pw);
+	} else {
+	    log_error(0, _("timestamp owner (%s): No such user"),
 		def_timestampowner);
-	timestamp_uid = pw->pw_uid;
-	pw_delref(pw);
+	    timestamp_uid = ROOT_UID;
+	}
     }
 
     /* If no command line args and "shell_noargs" is not set, error out. */
