@@ -61,12 +61,6 @@ static void handler(int);
 static char *getln(int, char *, size_t, int);
 static char *sudo_askpass(const char *, const char *);
 
-#ifdef _PATH_SUDO_ASKPASS
-const char *askpass_path = _PATH_SUDO_ASKPASS;
-#else
-const char *askpass_path;
-#endif
-
 /*
  * Like getpass(3) but with timeout and echo flags.
  */
@@ -86,7 +80,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     if (askpass == NULL) {
 	askpass = getenv("SUDO_ASKPASS");
 	if (askpass == NULL || *askpass == '\0')
-	    askpass = askpass_path;
+	    askpass = sudo_conf_askpass_path();
     }
 
     /* If no tty present and we need to disable echo, try askpass. */
