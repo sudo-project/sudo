@@ -254,6 +254,9 @@ sudo_askpass(const char *askpass, const char *prompt)
     (void) close(pfd[0]);
     (void) sigaction(SIGPIPE, &saved_sa_pipe, NULL);
 
+    if (pass == NULL)
+	errno = EINTR;	/* make cancel button simulate ^C */
+
     debug_return_str_masked(pass);
 }
 
