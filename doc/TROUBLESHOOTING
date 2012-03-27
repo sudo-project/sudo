@@ -16,9 +16,27 @@ A) As part of the build process, sudo creates a temporary library containing
    you may need to install the SUNWbtool package.  On other systems
    "ar" may be included in the GNU binutils package.
 
-Q) Sudo compiles but when I run it I get "Sorry, sudo must be setuid root."
-   and sudo quits.
-A) Sudo must be setuid root to do its work.  You need to do something like
+Q) Sudo compiles and installs OK but when I try to run it I get:
+   /usr/local/bin/sudo must be owned by uid 0 and have the setuid bit set
+A) Sudo must be setuid root to do its work.  Either /usr/local/bin/sudo
+   is not owned by uid 0 or the setuid bit is not set.  This should have
+   been done for you by "make install" but you can fix it manually by
+   running the following as root:
+    # chown root /usr/local/bin/sudo; chmod 4111 /usr/local/bin/sudo
+
+Q) Sudo compiles and installs OK but when I try to run it I get:
+    effective uid is not 0, is /usr/local/bin/sudo on a file system with the
+    'nosuid' option set or an NFS file system without root privileges?
+A) The owner and permissions on the sudo binary appear to be OK but when
+   sudo ran, the setuid bit did not have an effect.  There are two common
+   causes for this.  The first is that the file system the sudo binary
+   is located on is mounted with the 'nosuid' mount option, which disables
+   setuid binaries.  The other is that sudo is installed on an NFS-mounted
+   file system that is exported without root privileges.  By default, NFS
+   file systems are exported with uid 0 mapped to a non-privileged uid
+   (usually -2).
+
+You need to do something like
    `chmod 4111 /usr/local/bin/sudo'.  Also, the file system sudo resides
    on must *not* be mounted (or exported) with the nosuid option or sudo
    will not be able to work.  Another possibility is you may have '.' in

@@ -112,6 +112,7 @@ static int sudo_mode;
  */
 static void fix_fds(void);
 static void disable_coredumps(void);
+static void sudo_check_suid(const char *path);
 static char **get_user_info(struct user_details *);
 static void command_info_to_details(char * const info[],
     struct command_details *details);
@@ -185,8 +186,8 @@ main(int argc, char *argv[], char *envp[])
 # endif
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
-    if (geteuid() != 0)
-	errorx(1, _("must be setuid root"));
+    /* Make sure we are setuid root. */
+    sudo_check_suid(argv[0]);
 
     /* Reset signal mask and make sure fds 0-2 are open. */
     (void) sigemptyset(&mask);
@@ -717,6 +718,33 @@ command_info_to_details(char * const info[], struct command_details *details)
     if (details->selinux_role != NULL && is_selinux_enabled() > 0)
 	SET(details->flags, CD_RBAC_ENABLED);
 #endif
+    debug_return;
+}
+
+static void
+sudo_check_suid(const char *path)
+{
+    struct stat sb;
+    debug_decl(sudo_check_suid, SUDO_DEBUG_PCOMM)
+
+    if (geteuid() != 0) {
+	if (strchr(path, '/') != NULL && stat(path, &sb) == 0) {
+	    /* Try to determine why sudo was not running as root. */
+	    if (sb.st_uid != ROOT_UID || !ISSET(sb.st_mode, S_ISUID)) {
+		errorx(1,
+		    _("%s must be owned by uid %d and have the setuid bit set"),
+		    path, ROOT_UID);
+	    } else {
+		errorx(1, _("effective uid is not %d, is %s on a file system "
+		    "with the 'nosuid' option set or an NFS file system without"
+		    " root privileges?"), ROOT_UID, path);
+	    }
+	} else {
+	    errorx(1,
+		_("effective uid is not %d, is sudo installed setuid root?"),
+		ROOT_UID);
+	}
+    }
     debug_return;
 }
 
