@@ -105,10 +105,10 @@ static struct sudo_conf_data {
     NULL,
     {
 #define SUDO_CONF_ASKPASS_IDX	0
-	{ "askpass", sizeof("askpass"), _PATH_SUDO_ASKPASS },
+	{ "askpass", sizeof("askpass") - 1, _PATH_SUDO_ASKPASS },
 #ifdef _PATH_SUDO_NOEXEC
 #define SUDO_CONF_NOEXEC_IDX	1
-	{ "noexec", sizeof("noexec"), _PATH_SUDO_NOEXEC },
+	{ "noexec", sizeof("noexec") - 1, _PATH_SUDO_NOEXEC },
 #endif
 	{ NULL }
     }
