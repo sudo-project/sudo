@@ -228,6 +228,9 @@ sudo_askpass(prompt)
     (void) close(pfd[0]);
     (void) sigaction(SIGPIPE, &saved_sa_pipe, NULL);
 
+    if (pass == NULL)
+	errno = EINTR;	/* make cancel button simulate ^C */
+
     return pass;
 }
 
