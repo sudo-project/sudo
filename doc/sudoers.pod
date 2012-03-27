@@ -89,11 +89,16 @@ environment are inherited by the command to be run.  There are two
 distinct ways I<sudoers> can deal with environment variables.
 
 By default, the I<env_reset> option is enabled.  This causes commands
-to be executed with a minimal environment containing the C<TERM>,
-C<PATH>, C<HOME>, C<MAIL>, C<SHELL>, C<LOGNAME>, C<USER>, C<USERNAME>
-and C<SUDO_*> variables in addition to variables from the
-invoking process permitted by the I<env_check> and I<env_keep>
-options.  This is effectively a whitelist for environment variables.
+to be executed with a new, minimal environment.  On AIX (and Linux
+systems without PAM), the environment is initialized with the
+contents of the F</etc/environment> file.  On BSD systems, if the
+I<use_loginclass> option is enabled, the environment is initialized
+based on the I<path> and I<setenv> settings in F</etc/login.conf>.
+The new environment contains the C<TERM>, C<PATH>, C<HOME>, C<MAIL>,
+C<SHELL>, C<LOGNAME>, C<USER>, C<USERNAME> and C<SUDO_*> variables
+in addition to variables from the invoking process permitted by the
+I<env_check> and I<env_keep> options.  This is effectively a whitelist
+for environment variables.
 
 If, however, the I<env_reset> option is disabled, any variables not
 explicitly denied by the I<env_check> and I<env_delete> options are
@@ -119,12 +124,15 @@ As a special case, if B<sudo>'s B<-i> option (initial login) is
 specified, I<sudoers> will initialize the environment regardless
 of the value of I<env_reset>.  The I<DISPLAY>, I<PATH> and I<TERM>
 variables remain unchanged; I<HOME>, I<MAIL>, I<SHELL>, I<USER>,
-and I<LOGNAME> are set based on the target user.  On Linux and AIX
-systems the contents of F</etc/environment> are also included.  All
-other environment variables are removed.
+and I<LOGNAME> are set based on the target user.  On AIX (and Linux
+systems without PAM), the contents of F</etc/environment> are also
+included.  On BSD systems, if the I<use_loginclass> option is
+enabled, the I<path> and I<setenv> variables in F</etc/login.conf>
+are also applied.  All other environment variables are removed.
 
-Lastly, if the I<env_file> option is defined, any variables present
-in that file will be set to their specified values.
+Finally, if the I<env_file> option is defined, any variables present
+in that file will be set to their specified values as long as they
+would not conflict with an existing environment variable.
 
 =head1 SUDOERS FILE FORMAT
 
@@ -1776,7 +1784,7 @@ Directory containing time stamps for the I<sudoers> security policy
 
 =item F</etc/environment>
 
-Initial environment for B<-i> mode on Linux and AIX
+Initial environment for B<-i> mode on AIX and Linux systems
 
 =back
 

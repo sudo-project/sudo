@@ -42,6 +42,12 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE_LOGIN_CAP_H
+# include <login_cap.h>
+# ifndef LOGIN_SETENV
+#  define LOGIN_SETENV	0
+# endif
+#endif /* HAVE_LOGIN_CAP_H */
 #include <ctype.h>
 #include <errno.h>
 #include <pwd.h>
@@ -638,6 +644,43 @@ env_should_keep(const char *var)
     debug_return_bool(keepit == true);
 }
 
+static void
+env_update_didvar(const char *ep, int *didvar)
+{
+    switch (*ep) {
+	case 'H':
+	    if (strncmp(ep, "HOME=", 5) == 0)
+		SET(*didvar, DID_HOME);
+	    break;
+	case 'L':
+	    if (strncmp(ep, "LOGNAME=", 8) == 0)
+		SET(*didvar, DID_LOGNAME);
+	    break;
+	case 'M':
+	    if (strncmp(ep, "MAIL=", 5) == 0)
+		SET(*didvar, DID_MAIL);
+	    break;
+	case 'P':
+	    if (strncmp(ep, "PATH=", 5) == 0)
+		SET(*didvar, DID_PATH);
+	    break;
+	case 'S':
+	    if (strncmp(ep, "SHELL=", 6) == 0)
+		SET(*didvar, DID_SHELL);
+	    break;
+	case 'T':
+	    if (strncmp(ep, "TERM=", 5) == 0)
+		SET(*didvar, DID_TERM);
+	    break;
+	case 'U':
+	    if (strncmp(ep, "USER=", 5) == 0)
+		SET(*didvar, DID_USER);
+	    if (strncmp(ep, "USERNAME=", 5) == 0)
+		SET(*didvar, DID_USERNAME);
+	    break;
+    }
+}
+
 /*
  * Build a new environment and ether clear potentially dangerous
  * variables from the old one or start with a clean slate.
@@ -662,6 +705,8 @@ rebuild_env(void)
     env.envp = emalloc2(env.env_size, sizeof(char *));
 #ifdef ENV_DEBUG
     memset(env.envp, 0, env.env_size * sizeof(char *));
+#else
+    env.envp[0] = NULL;
 #endif
 
     /* Reset HOME based on target user if configured to. */
@@ -673,6 +718,32 @@ rebuild_env(void)
     }
 
     if (def_env_reset || ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+	/*
+	 * If starting with a fresh environment, initialize it based on
+	 * /etc/environment or login.conf.  For "sudo -i" we want those
+	 * variables to override the invoking user's environment, so we
+	 * defer reading them until later.
+	 */
+	if (!ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+#ifdef HAVE_LOGIN_CAP_H
+	    /* Insert login class environment variables. */
+	    if (login_class) {
+		login_cap_t *lc = login_getclass(login_class);
+		if (lc != NULL) {
+		    setusercontext(lc, runas_pw, runas_pw->pw_uid,
+			LOGIN_SETPATH|LOGIN_SETENV);
+		    login_close(lc);
+		}
+	    }
+#endif /* HAVE_LOGIN_CAP_H */
+#if defined(_AIX) || (defined(__linux__) && !defined(HAVE_PAM))
+	    /* Insert system-wide environment variables. */
+	    read_env_file(_PATH_ENVIRONMENT, true);
+#endif
+	    for (ep = env.envp; *ep; ep++)
+		env_update_didvar(*ep, &didvar);
+	}
+
 	/* Pull in vars we want to keep from the old environment. */
 	for (ep = old_envp; *ep; ep++) {
 	    bool keepit;
@@ -697,39 +768,8 @@ rebuild_env(void)
 
 	    if (keepit) {
 		/* Preserve variable. */
-		switch (**ep) {
-		    case 'H':
-			if (strncmp(*ep, "HOME=", 5) == 0)
-			    SET(didvar, DID_HOME);
-			break;
-		    case 'L':
-			if (strncmp(*ep, "LOGNAME=", 8) == 0)
-			    SET(didvar, DID_LOGNAME);
-			break;
-		    case 'M':
-			if (strncmp(*ep, "MAIL=", 5) == 0)
-			    SET(didvar, DID_MAIL);
-			break;
-		    case 'P':
-			if (strncmp(*ep, "PATH=", 5) == 0)
-			    SET(didvar, DID_PATH);
-			break;
-		    case 'S':
-			if (strncmp(*ep, "SHELL=", 6) == 0)
-			    SET(didvar, DID_SHELL);
-			break;
-		    case 'T':
-			if (strncmp(*ep, "TERM=", 5) == 0)
-			    SET(didvar, DID_TERM);
-			break;
-		    case 'U':
-			if (strncmp(*ep, "USER=", 5) == 0)
-			    SET(didvar, DID_USER);
-			if (strncmp(*ep, "USERNAME=", 5) == 0)
-			    SET(didvar, DID_USERNAME);
-			break;
-		}
 		sudo_putenv(*ep, false, false);
+		env_update_didvar(*ep, &didvar);
 	    }
 	}
 	didvar |= didvar << 8;		/* convert DID_* to KEPT_* */
