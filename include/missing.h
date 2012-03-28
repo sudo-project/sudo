@@ -34,15 +34,6 @@
 # define __attribute__(x)
 #endif
 
-/* For silencing gcc warnings about rcsids */
-#ifndef __unused
-# if defined(__GNUC__) && (__GNUC__ > 2 || __GNUC__ == 2 && __GNUC_MINOR__ > 7)
-#  define __unused	__attribute__((__unused__))
-# else
-#  define __unused
-# endif
-#endif
-
 /* For catching format string mismatches */
 #ifndef __printflike
 # if defined(__GNUC__) && (__GNUC__ > 2 || __GNUC__ == 2 && __GNUC_MINOR__ >= 7)
