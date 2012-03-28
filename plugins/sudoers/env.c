@@ -198,9 +198,6 @@ static const char *initial_keepenv_table[] = {
     "TZ",
     "XAUTHORITY",
     "XAUTHORIZATION",
-#ifdef _AIX
-    "ODMDIR",
-#endif
     NULL
 };
 
