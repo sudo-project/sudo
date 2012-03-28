@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "March 15, 2012" "1.8.5" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "March 28, 2012" "1.8.5" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -218,11 +218,16 @@ environment are inherited by the command to be run.  There are two
 distinct ways \fIsudoers\fR can deal with environment variables.
 .PP
 By default, the \fIenv_reset\fR option is enabled.  This causes commands
-to be executed with a minimal environment containing the \f(CW\*(C`TERM\*(C'\fR,
-\&\f(CW\*(C`PATH\*(C'\fR, \f(CW\*(C`HOME\*(C'\fR, \f(CW\*(C`MAIL\*(C'\fR, \f(CW\*(C`SHELL\*(C'\fR, \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR, \f(CW\*(C`USERNAME\*(C'\fR
-and \f(CW\*(C`SUDO_*\*(C'\fR variables in addition to variables from the
-invoking process permitted by the \fIenv_check\fR and \fIenv_keep\fR
-options.  This is effectively a whitelist for environment variables.
+to be executed with a new, minimal environment.  On \s-1AIX\s0 (and Linux
+systems without \s-1PAM\s0), the environment is initialized with the
+contents of the \fI/etc/environment\fR file.  On \s-1BSD\s0 systems, if the
+\&\fIuse_loginclass\fR option is enabled, the environment is initialized
+based on the \fIpath\fR and \fIsetenv\fR settings in \fI/etc/login.conf\fR.
+The new environment contains the \f(CW\*(C`TERM\*(C'\fR, \f(CW\*(C`PATH\*(C'\fR, \f(CW\*(C`HOME\*(C'\fR, \f(CW\*(C`MAIL\*(C'\fR,
+\&\f(CW\*(C`SHELL\*(C'\fR, \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR, \f(CW\*(C`USERNAME\*(C'\fR and \f(CW\*(C`SUDO_*\*(C'\fR variables
+in addition to variables from the invoking process permitted by the
+\&\fIenv_check\fR and \fIenv_keep\fR options.  This is effectively a whitelist
+for environment variables.
 .PP
 If, however, the \fIenv_reset\fR option is disabled, any variables not
 explicitly denied by the \fIenv_check\fR and \fIenv_delete\fR options are
@@ -248,12 +253,15 @@ As a special case, if \fBsudo\fR's \fB\-i\fR option (initial login) is
 specified, \fIsudoers\fR will initialize the environment regardless
 of the value of \fIenv_reset\fR.  The \fI\s-1DISPLAY\s0\fR, \fI\s-1PATH\s0\fR and \fI\s-1TERM\s0\fR
 variables remain unchanged; \fI\s-1HOME\s0\fR, \fI\s-1MAIL\s0\fR, \fI\s-1SHELL\s0\fR, \fI\s-1USER\s0\fR,
-and \fI\s-1LOGNAME\s0\fR are set based on the target user.  On Linux and \s-1AIX\s0
-systems the contents of \fI/etc/environment\fR are also included.  All
-other environment variables are removed.
+and \fI\s-1LOGNAME\s0\fR are set based on the target user.  On \s-1AIX\s0 (and Linux
+systems without \s-1PAM\s0), the contents of \fI/etc/environment\fR are also
+included.  On \s-1BSD\s0 systems, if the \fIuse_loginclass\fR option is
+enabled, the \fIpath\fR and \fIsetenv\fR variables in \fI/etc/login.conf\fR
+are also applied.  All other environment variables are removed.
 .PP
-Lastly, if the \fIenv_file\fR option is defined, any variables present
-in that file will be set to their specified values.
+Finally, if the \fIenv_file\fR option is defined, any variables present
+in that file will be set to their specified values as long as they
+would not conflict with an existing environment variable.
 .SH "SUDOERS FILE FORMAT"
 .IX Header "SUDOERS FILE FORMAT"
 The \fIsudoers\fR file is composed of two types of entries: aliases
@@ -1781,7 +1789,7 @@ I/O log files
 Directory containing time stamps for the \fIsudoers\fR security policy
 .IP "\fI/etc/environment\fR" 24
 .IX Item "/etc/environment"
-Initial environment for \fB\-i\fR mode on Linux and \s-1AIX\s0
+Initial environment for \fB\-i\fR mode on \s-1AIX\s0 and Linux systems
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 Below are example \fIsudoers\fR entries.  Admittedly, some of
