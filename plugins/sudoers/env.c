@@ -642,7 +642,7 @@ env_should_keep(const char *var)
 }
 
 static void
-env_update_didvar(const char *ep, int *didvar)
+env_update_didvar(const char *ep, unsigned int *didvar)
 {
     switch (*ep) {
 	case 'H':
