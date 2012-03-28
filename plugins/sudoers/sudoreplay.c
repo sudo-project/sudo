@@ -633,7 +633,8 @@ static bool
 match_expr(struct search_node *head, struct log_info *log)
 {
     struct search_node *sn;
-    bool matched = true, rc;
+    bool matched = true;
+    int rc;
     debug_decl(match_expr, SUDO_DEBUG_UTIL)
 
     for (sn = head; sn; sn = sn->next) {
