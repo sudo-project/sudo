@@ -78,13 +78,13 @@ getenv(const char *name)
 	case SUDO_HOOK_RET_ERROR:
 	    return NULL;
 	default: {
-#if defined(HAVE_DLOPEN)
+#if defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
 	    char * (*fn)(const char *);
 
 	    fn = dlsym(RTLD_NEXT, "getenv");
 	    if (fn != NULL)
 		return fn(name);
-#endif /* HAVE_DLOPEN */
+#endif /* HAVE_DLOPEN && RTLD_NEXT */
 	    return rpl_getenv(name);
 	}
     }
@@ -141,13 +141,13 @@ putenv(PUTENV_CONST char *string)
 	case SUDO_HOOK_RET_ERROR:
 	    return -1;
 	default: {
-#if defined(HAVE_DLOPEN)
+#if defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
 	    int (*fn)(PUTENV_CONST char *);
 
 	    fn = dlsym(RTLD_NEXT, "putenv");
 	    if (fn != NULL)
 		return fn(string);
-#endif /* HAVE_DLOPEN */
+#endif /* HAVE_DLOPEN && RTLD_NEXT */
 	    return rpl_putenv(string);
 	}
     }
@@ -204,13 +204,13 @@ setenv(const char *var, const char *val, int overwrite)
 	case SUDO_HOOK_RET_ERROR:
 	    return -1;
 	default: {
-#if defined(HAVE_SETENV) && defined(HAVE_DLOPEN)
+#if defined(HAVE_SETENV) && defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
 	    int (*fn)(const char *, const char *, int);
 
 	    fn = dlsym(RTLD_NEXT, "setenv");
 	    if (fn != NULL)
 		return fn(var, val, overwrite);
-#endif /* HAVE_SETENV && HAVE_DLOPEN */
+#endif /* HAVE_SETENV && HAVE_DLOPEN && RTLD_NEXT */
 	    return rpl_setenv(var, val, overwrite);
 	}
     }
@@ -262,14 +262,14 @@ unsetenv(const char *var)
 	case SUDO_HOOK_RET_ERROR:
 	    return -1;
 	default: {
-#if defined(HAVE_UNSETENV) && defined(HAVE_DLOPEN)
+#if defined(HAVE_UNSETENV) && defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
 	    void (*fn)(const char *);
 
 	    fn = dlsym(RTLD_NEXT, "unsetenv");
 	    if (fn != NULL)
 		fn(var);
 	    else
-#endif /* HAVE_UNSETENV && HAVE_DLOPEN */
+#endif /* HAVE_UNSETENV && HAVE_DLOPEN && RTLD_NEXT */
 		rpl_unsetenv(var);
 	}
     }
@@ -284,13 +284,13 @@ unsetenv(const char *var)
 	case SUDO_HOOK_RET_ERROR:
 	    return -1;
 	default: {
-#if defined(HAVE_UNSETENV) && defined(HAVE_DLOPEN)
+#if defined(HAVE_UNSETENV) && defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
 	    int (*fn)(const char *);
 
 	    fn = dlsym(RTLD_NEXT, "unsetenv");
 	    if (fn != NULL)
 		return fn(var);
-#endif /* HAVE_UNSETENV && HAVE_DLOPEN */
+#endif /* HAVE_UNSETENV && HAVE_DLOPEN && RTLD_NEXT */
 	    return rpl_unsetenv(var);
 	}
     }
