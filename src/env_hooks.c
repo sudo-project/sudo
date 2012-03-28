@@ -101,7 +101,7 @@ rpl_putenv(PUTENV_CONST char *string)
     len = (strchr(string, '=') - string) + 1;
     for (ep = environ; *ep != NULL; ep++) {
 	if (strncmp(string, *ep, len) == 0) {
-	    *ep = string;
+	    *ep = (char *)string;
 	    found = true;
 	    break;
 	}
@@ -125,7 +125,7 @@ rpl_putenv(PUTENV_CONST char *string)
 	char **envp = erealloc3(priv_environ, env_len + 2, sizeof(char *));
 	if (environ != priv_environ)
 	    memcpy(envp, environ, env_len * sizeof(char *));
-	envp[env_len++] = string;
+	envp[env_len++] = (char *)string;
 	envp[env_len] = NULL;
 	priv_environ = environ = envp;
     }
