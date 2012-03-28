@@ -632,7 +632,7 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 
 #ifdef HAVE_ZLIB_H
     if (iolog_compress)
-	gzwrite(io_fds[idx].g, buf, len);
+	gzwrite(io_fds[idx].g, (const voidp)buf, len);
     else
 #endif
 	fwrite(buf, 1, len, io_fds[idx].f);
