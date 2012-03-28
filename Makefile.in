@@ -179,7 +179,7 @@ update-pot:
 		    *) echo unknown domain $$domain; continue;; \
 		esac; \
 		$(XGETTEXT) $(XGETTEXT_OPTS) -d$$domain $$cfiles -o $$pot.tmp; \
-		if diff -I'^.POT-Creation-Date' -I'^#' $$pot.tmp $$pot >/dev/null; then \
+		if diff -I'^.POT-Creation-Date' -I'^.Project-Id-Version' -I'^#' $$pot.tmp $$pot >/dev/null; then \
 		    rm -f $$pot.tmp; \
 		else \
 		    mv -f $$pot.tmp $$pot; \
