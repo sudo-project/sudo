@@ -17963,7 +17963,7 @@ fi
     *)
 	$as_echo "#define HAVE_ZLIB_H 1" >>confdefs.h
 
-	CPPFLAGS="${CPPFLAGS} -I${enable_zlib}/include"
+	CPPFLAGS="-I${enable_zlib}/include ${CPPFLAGS}"
 
     if test X"$with_rpath" = X"yes"; then
 	case "$host" in
@@ -17985,7 +17985,7 @@ esac
 if test X"$enable_zlib" = X"builtin"; then
     $as_echo "#define HAVE_ZLIB_H 1" >>confdefs.h
 
-    CPPFLAGS="${CPPFLAGS}"' -I$(top_srcdir)/zlib'
+    CPPFLAGS='-I$(top_builddir)/zlib -I$(top_srcdir)/zlib '"${CPPFLAGS}"
     ZLIB="${ZLIB}"' $(top_builddir)/zlib/libz.la'
     ZLIB_SRC=zlib
     ac_config_headers="$ac_config_headers zlib/zconf.h"

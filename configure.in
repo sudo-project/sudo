@@ -2436,6 +2436,8 @@ fi
 dnl
 dnl Deferred zlib option processing.
 dnl By default we use the system zlib if it is present.
+dnl If a directory was specified for zlib (or we are use sudo's version),
+dnl prepend the include dir to make sure we get the right zlib header.
 dnl
 case "$enable_zlib" in
     yes)
@@ -2454,14 +2456,14 @@ case "$enable_zlib" in
 	;;
     *)
 	AC_DEFINE(HAVE_ZLIB_H)
-	CPPFLAGS="${CPPFLAGS} -I${enable_zlib}/include"
+	CPPFLAGS="-I${enable_zlib}/include ${CPPFLAGS}"
 	SUDO_APPEND_LIBPATH(ZLIB, [$enable_zlib/lib])
 	ZLIB="${ZLIB} -lz"
 	;;
 esac
 if test X"$enable_zlib" = X"builtin"; then
     AC_DEFINE(HAVE_ZLIB_H)
-    CPPFLAGS="${CPPFLAGS}"' -I$(top_srcdir)/zlib'
+    CPPFLAGS='-I$(top_builddir)/zlib -I$(top_srcdir)/zlib '"${CPPFLAGS}"
     ZLIB="${ZLIB}"' $(top_builddir)/zlib/libz.la'
     ZLIB_SRC=zlib
     AC_CONFIG_HEADER([zlib/zconf.h])
