@@ -695,11 +695,9 @@ pty_close(struct command_status *cstat)
 		io_fds[SFD_USERTTY] : STDOUT_FILENO;
 	    if (write(n, reason, strlen(reason)) != -1) {
 		if (WCOREDUMP(cstat->val)) {
-		    if (write(n, " (core dumped)", 14) == -1)
-			/* shut up glibc */;
+		    ignore_result(write(n, " (core dumped)", 14));
 		}
-		if (write(n, "\n", 1) == -1)
-		    /* shut up glibc */;
+		ignore_result(write(n, "\n", 1));
 	    }
 	}
     }
@@ -961,8 +959,7 @@ exec_monitor(struct command_details *details, int backchannel)
 	exec_pty(details, &errpipe[1]);
 	cstat.type = CMD_ERRNO;
 	cstat.val = errno;
-	if (write(errpipe[1], &cstat, sizeof(cstat)) == -1)
-	    /* shut up glibc */;
+	ignore_result(write(errpipe[1], &cstat, sizeof(cstat)));
 	_exit(1);
     }
     close(errpipe[1]);

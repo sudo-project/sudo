@@ -632,10 +632,10 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 
 #ifdef HAVE_ZLIB_H
     if (iolog_compress)
-	gzwrite(io_fds[idx].g, (const voidp)buf, len);
+	ignore_result(gzwrite(io_fds[idx].g, (const voidp)buf, len));
     else
 #endif
-	fwrite(buf, 1, len, io_fds[idx].f);
+	ignore_result(fwrite(buf, 1, len, io_fds[idx].f));
     delay.tv_sec = now.tv_sec;
     delay.tv_usec = now.tv_usec;
     timevalsub(&delay, &last_time);

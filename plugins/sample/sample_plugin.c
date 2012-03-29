@@ -468,14 +468,14 @@ io_version(int verbose)
 static int
 io_log_input(const char *buf, unsigned int len)
 {
-    fwrite(buf, len, 1, input);
+    ignore_result(fwrite(buf, len, 1, input));
     return true;
 }
 
 static int
 io_log_output(const char *buf, unsigned int len)
 {
-    fwrite(buf, len, 1, output);
+    ignore_result(fwrite(buf, len, 1, output));
     return true;
 }
 

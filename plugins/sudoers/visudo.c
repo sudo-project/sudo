@@ -563,9 +563,9 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 	(void) unlink(sp->tpath);
 	if (!oldperms && fstat(sp->fd, &sb) != -1) {
 	    if (sb.st_uid != SUDOERS_UID || sb.st_gid != SUDOERS_GID)
-		(void) chown(sp->path, SUDOERS_UID, SUDOERS_GID);
+		ignore_result(chown(sp->path, SUDOERS_UID, SUDOERS_GID));
 	    if ((sb.st_mode & 0777) != SUDOERS_MODE)
-		(void) chmod(sp->path, SUDOERS_MODE);
+		ignore_result(chmod(sp->path, SUDOERS_MODE));
 	}
 	rval = true;
 	goto done;
@@ -1279,11 +1279,10 @@ quit(int signo)
 #define	emsg	 " exiting due to signal: "
     myname = getprogname();
     signame = strsignal(signo);
-    if (write(STDERR_FILENO, myname, strlen(myname)) == -1 ||
-	write(STDERR_FILENO, emsg, sizeof(emsg) - 1) == -1 ||
-	write(STDERR_FILENO, signame, strlen(signame)) == -1 ||
-	write(STDERR_FILENO, "\n", 1) == -1)
-	/* shut up glibc */;
+    ignore_result(write(STDERR_FILENO, myname, strlen(myname)));
+    ignore_result(write(STDERR_FILENO, emsg, sizeof(emsg) - 1));
+    ignore_result(write(STDERR_FILENO, signame, strlen(signame)));
+    ignore_result(write(STDERR_FILENO, "\n", 1));
     _exit(signo);
 }
 

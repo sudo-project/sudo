@@ -67,6 +67,8 @@ rpl_getenv(const char *name)
     return val;
 }
 
+typedef char * (*sudo_fn_getenv_t)(const char *);
+
 char *
 getenv(const char *name)
 {
@@ -79,9 +81,9 @@ getenv(const char *name)
 	    return NULL;
 	default: {
 #if defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
-	    char * (*fn)(const char *);
+	    sudo_fn_getenv_t fn;
 
-	    fn = dlsym(RTLD_NEXT, "getenv");
+	    fn = (sudo_fn_getenv_t)dlsym(RTLD_NEXT, "getenv");
 	    if (fn != NULL)
 		return fn(name);
 #endif /* HAVE_DLOPEN && RTLD_NEXT */
@@ -132,6 +134,8 @@ rpl_putenv(PUTENV_CONST char *string)
     return 0;
 }
 
+typedef int (*sudo_fn_putenv_t)(PUTENV_CONST char *);
+
 int
 putenv(PUTENV_CONST char *string)
 {
@@ -142,9 +146,9 @@ putenv(PUTENV_CONST char *string)
 	    return -1;
 	default: {
 #if defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
-	    int (*fn)(PUTENV_CONST char *);
+	    sudo_fn_putenv_t fn;
 
-	    fn = dlsym(RTLD_NEXT, "putenv");
+	    fn = (sudo_fn_putenv_t)dlsym(RTLD_NEXT, "putenv");
 	    if (fn != NULL)
 		return fn(string);
 #endif /* HAVE_DLOPEN && RTLD_NEXT */
@@ -195,6 +199,8 @@ rpl_setenv(const char *var, const char *val, int overwrite)
     return rpl_putenv(envstr);
 }
 
+typedef int (*sudo_fn_setenv_t)(const char *, const char *, int);
+
 int
 setenv(const char *var, const char *val, int overwrite)
 {
@@ -205,9 +211,9 @@ setenv(const char *var, const char *val, int overwrite)
 	    return -1;
 	default: {
 #if defined(HAVE_SETENV) && defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
-	    int (*fn)(const char *, const char *, int);
+	    sudo_fn_setenv_t fn;
 
-	    fn = dlsym(RTLD_NEXT, "setenv");
+	    fn = (sudo_fn_setenv_t)dlsym(RTLD_NEXT, "setenv");
 	    if (fn != NULL)
 		return fn(var, val, overwrite);
 #endif /* HAVE_SETENV && HAVE_DLOPEN && RTLD_NEXT */
@@ -253,6 +259,12 @@ rpl_unsetenv(const char *var)
 }
 
 #ifdef UNSETENV_VOID
+typedef void (*sudo_fn_unsetenv_t)(const char *);
+#else
+typedef int (*sudo_fn_unsetenv_t)(const char *);
+#endif
+
+#ifdef UNSETENV_VOID
 void
 unsetenv(const char *var)
 {
@@ -263,9 +275,9 @@ unsetenv(const char *var)
 	    return -1;
 	default: {
 #if defined(HAVE_UNSETENV) && defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
-	    void (*fn)(const char *);
+	    sudo_fn_unsetenv_t fn;
 
-	    fn = dlsym(RTLD_NEXT, "unsetenv");
+	    fn = (sudo_fn_unsetenv_t)dlsym(RTLD_NEXT, "unsetenv");
 	    if (fn != NULL)
 		fn(var);
 	    else
@@ -285,9 +297,9 @@ unsetenv(const char *var)
 	    return -1;
 	default: {
 #if defined(HAVE_UNSETENV) && defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
-	    int (*fn)(const char *);
+	    sudo_fn_unsetenv_t fn;
 
-	    fn = dlsym(RTLD_NEXT, "unsetenv");
+	    fn = (sudo_fn_unsetenv_t)dlsym(RTLD_NEXT, "unsetenv");
 	    if (fn != NULL)
 		return fn(var);
 #endif /* HAVE_UNSETENV && HAVE_DLOPEN && RTLD_NEXT */

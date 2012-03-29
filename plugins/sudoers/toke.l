@@ -102,6 +102,8 @@ int (*trace_print)(const char *msg) = sudoers_trace_print;
 	return (n);		\
 } while (0)
 
+#define ECHO	ignore_result(fwrite(yytext, yyleng, 1, yyout))
+
 #define	push_include(_p)	(_push_include((_p), false))
 #define	push_includedir(_p)	(_push_include((_p), true))
 %}

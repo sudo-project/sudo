@@ -302,7 +302,7 @@ sudo_debug_write(const char *str, int len)
 	iov[0].iov_len = 16;
 
 	/* Write message in a single syscall */
-	(void) writev(sudo_debug_fd, iov, iovcnt);
+	ignore_result(writev(sudo_debug_fd, iov, iovcnt));
 	break;
     }
 }
