@@ -3407,6 +3407,15 @@ AH_BOTTOM([/*
 # endif /* HAVE_ST_MTIMESPEC */
 #endif /* HAVE_ST_MTIM */
 
+#ifdef __GNUC__
+# define ignore_result(x) do {						       \
+    __typeof__(x) y = (x);						       \
+    (void)y;								       \
+} while(0)
+#else
+# define ignore_result(x)	(void)(x)
+#endif
+
 /* GNU stow needs /etc/sudoers to be a symlink. */
 #ifdef USE_STOW
 # define stat_sudoers	stat
