@@ -396,11 +396,14 @@ main(argc, argv, envp)
 	    pw = sudo_getpwuid(atoi(def_timestampowner + 1));
 	else
 	    pw = sudo_getpwnam(def_timestampowner);
-	if (!pw)
-	    log_error(0, "timestamp owner (%s): No such user",
+	if (pw != NULL) {
+	    timestamp_uid = pw->pw_uid;
+	    pw_delref(pw);
+	} else {
+	    log_error(NO_EXIT, "timestamp owner (%s): No such user",
 		def_timestampowner);
-	timestamp_uid = pw->pw_uid;
-	pw_delref(pw);
+	    timestamp_uid = 0;
+	}
     }
 
     /* If no command line args and "set_home" is not set, error out. */
