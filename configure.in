@@ -2298,6 +2298,11 @@ if test ${with_pam-"no"} != "no"; then
     fi
  
     if test "$with_pam" = "yes"; then
+	# Older PAM implementations lack pam_getenvlist
+	OLIBS="$LIBS"
+	LIBS="$LIBS -lpam $lt_cv_dlopen_libs"
+	AC_CHECK_FUNCS(pam_getenvlist)
+	LIBS="$OLIBS"
 	dnl
 	dnl Some platforms need libdl for dlopen
 	dnl
