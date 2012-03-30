@@ -115,6 +115,12 @@
 # define CMND_WAIT	FALSE
 #endif
 
+#ifdef __TANDEM
+# define ROOT_UID	65535
+#else
+# define ROOT_UID	0
+#endif
+
 /*
  * Prototypes
  */
@@ -129,6 +135,7 @@ static void show_version		__P((void));
 static void create_admin_success_flag	__P((void));
 extern int sudo_edit			__P((int, char **, char **));
 int run_command __P((const char *path, char *argv[], char *envp[], uid_t uid, int dowait)); /* XXX should be in sudo.h */
+static void sudo_check_suid		__P((const char *path));
 
 /*
  * Globals
@@ -197,8 +204,8 @@ main(argc, argv, envp)
 # endif
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
-    if (geteuid() != 0)
-	errorx(1, "must be setuid root");
+    /* Make sure we are setuid root. */
+    sudo_check_suid(argv[0]);
 
     /*
      * Signal setup:
@@ -402,7 +409,7 @@ main(argc, argv, envp)
 	} else {
 	    log_error(NO_EXIT, "timestamp owner (%s): No such user",
 		def_timestampowner);
-	    timestamp_uid = 0;
+	    timestamp_uid = ROOT_UID;
 	}
     }
 
@@ -1069,6 +1076,29 @@ open_sudoers(sudoers, doedit, keepopen)
 
     set_perms(PERM_ROOT);		/* change back to root */
     return fp;
+}
+
+static void
+sudo_check_suid(path)
+    const char *path;
+{
+    struct stat sb;
+
+    if (geteuid() != 0) {
+	if (strchr(path, '/') != NULL && stat(path, &sb) == 0) {
+	    /* Try to determine why sudo was not running as root. */
+	    if (sb.st_uid != ROOT_UID || !ISSET(sb.st_mode, S_ISUID)) {
+		errorx(1,
+		    "%s must be owned by uid %d and have the setuid bit set",
+		    path, ROOT_UID);
+	    } else {
+		errorx(1, "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?", ROOT_UID, path);
+	    }
+	} else {
+	    errorx(1, "effective uid is not %d, is sudo installed setuid root?",
+		ROOT_UID);
+	}
+    }
 }
 
 /*
