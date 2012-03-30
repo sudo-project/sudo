@@ -87,6 +87,9 @@
 # ifndef LOGIN_DEFROOTCLASS
 #  define LOGIN_DEFROOTCLASS	"daemon"
 # endif
+# ifndef LOGIN_SETENV
+#  define LOGIN_SETENV	0
+# endif
 #endif
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
 # include <membership.h>
@@ -540,6 +543,17 @@ main(argc, argv, envp)
 	    /* Insert system-wide environment variables. */
 	    read_env_file(_PATH_ENVIRONMENT, TRUE);
 #endif
+#ifdef HAVE_LOGIN_CAP_H
+	    /* Set environment based on login class. */
+	    if (login_class) {
+		login_cap_t *lc = login_getclass(login_class);
+		if (lc != NULL) {
+		    setusercontext(lc, runas_pw, runas_pw->pw_uid,
+			LOGIN_SETPATH|LOGIN_SETENV);
+		    login_close(lc);
+		}
+	    }
+#endif /* HAVE_LOGIN_CAP_H */
 	}
 
 	if (ISSET(sudo_mode, MODE_RUN)) {
