@@ -206,6 +206,9 @@ int
 pam_begin_session(pw)
     struct passwd *pw;
 {
+#ifdef HAVE_PAM_GETENVLIST
+    char **pam_envp;
+#endif
     int status = PAM_SUCCESS;
 
     /*
@@ -236,6 +239,20 @@ pam_begin_session(pw)
      * We can't call pam_acct_mgmt() with Linux-PAM for a similar reason.
      */
     (void) pam_setcred(pamh, PAM_ESTABLISH_CRED);
+
+#ifdef HAVE_PAM_GETENVLIST
+    /*
+     * Update environment based on what is stored in pamh.
+     * If no authentication is done we will only have environment
+     * variables if pam_env is called via session.
+     */
+    if ((pam_envp = pam_getenvlist(pamh)) != NULL) {
+	/* Merge pam env with user env but do not overwrite. */
+	env_merge(pam_envp, FALSE);
+	efree(pam_envp);
+	/* XXX - we leak any duplicates that were in pam_envp */
+    }
+#endif /* HAVE_PAM_GETENVLIST */
 
 #ifndef NO_PAM_SESSION
     status = pam_open_session(pamh, 0);

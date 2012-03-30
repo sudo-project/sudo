@@ -497,6 +497,18 @@ sudo_putenv(str, dupcheck, overwrite)
 }
 
 /*
+ * Merge another environment with our private copy.
+ */
+void
+env_merge(char * const envp[], int overwrite)
+{
+    char * const *ep;
+  
+    for (ep = envp; *ep != NULL; ep++)
+	sudo_putenv(*ep, TRUE, overwrite);
+}
+
+/*
  * Check the env_delete blacklist.
  * Returns TRUE if the variable was found, else false.
  */
