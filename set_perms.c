@@ -141,8 +141,10 @@ set_perms(perm)
 
 	case PERM_SUDOERS:
 				/* assume euid == ROOT_UID, ruid == user */
-				if (setresgid(-1, SUDOERS_GID, -1))
-				    error(1, "unable to change to sudoers gid");
+				if (setresgid(-1, SUDOERS_GID, -1)) {
+				    errstr = "unable to change to sudoers gid";
+				    goto bad;
+				}
 
 				/*
 				 * If SUDOERS_UID == ROOT_UID and SUDOERS_MODE
@@ -258,8 +260,10 @@ set_perms(perm)
 
 	case PERM_SUDOERS:
 				/* assume euid == ROOT_UID, ruid == user */
-				if (setregid(-1, SUDOERS_GID))
-				    error(1, "unable to change to sudoers gid");
+				if (setregid(-1, SUDOERS_GID)) {
+				    errstr = "unable to change to sudoers gid";
+				    goto bad;
+				}
 
 				/*
 				 * If SUDOERS_UID == ROOT_UID and SUDOERS_MODE
@@ -377,8 +381,10 @@ set_perms(perm)
 				break;
 
 	case PERM_SUDOERS:
-				if (setegid(SUDOERS_GID))
-				    error(1, "unable to change to sudoers gid");
+				if (setegid(SUDOERS_GID)) {
+				    errstr = "unable to change to sudoers gid";
+				    goto bad;
+				}
 
 				/*
 				 * If SUDOERS_UID == ROOT_UID and SUDOERS_MODE
