@@ -406,7 +406,6 @@ io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int),
     debug_decl(io_buf_new, SUDO_DEBUG_EXEC);
 
     iob = ecalloc(1, sizeof(*iob));
-    zero_bytes(iob, sizeof(*iob));
     iob->rfd = rfd;
     iob->wfd = wfd;
     iob->action = action;
