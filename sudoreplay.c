@@ -192,7 +192,6 @@ extern time_t get_date __P((char *));
 extern char *get_timestr __P((time_t, int));
 extern int term_raw __P((int, int));
 extern int term_restore __P((int, int));
-extern void zero_bytes __P((volatile void *, size_t));
 RETSIGTYPE cleanup __P((int));
 
 static int list_sessions __P((int, char **, const char *, const char *, const char *));
@@ -333,7 +332,7 @@ main(argc, argv)
     fclose(lfile);
 
     fflush(stdout);
-    zero_bytes(&sa, sizeof(sa));
+    memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESETHAND;
     sa.sa_handler = cleanup;
@@ -356,8 +355,7 @@ main(argc, argv)
 	if (!term_raw(STDIN_FILENO, 1))
 	    error(1, "cannot set tty to raw mode");
     }
-    fdsw = (fd_set *)emalloc2(howmany(STDOUT_FILENO + 1, NFDBITS),
-	sizeof(fd_mask));
+    fdsw = ecalloc(howmany(STDOUT_FILENO + 1, NFDBITS), sizeof(fd_mask));
 
     /*
      * Timing file consists of line of the format: "%f %d\n"
@@ -554,11 +552,11 @@ parse_expr(headp, argv)
 	}
 
 	/* Allocate new search node */
-	newsn = emalloc(sizeof(*newsn));
-	newsn->next = NULL;
+	newsn = ecalloc(1, sizeof(*newsn));
 	newsn->type = type;
 	newsn->or = or;
 	newsn->negated = not;
+	/* newsn->next = NULL; */
 	if (type == ST_EXPR) {
 	    av += parse_expr(&newsn->u.expr, av + 1);
 	} else {
@@ -846,7 +844,7 @@ check_input(ttyfd, speed)
     char ch;
     ssize_t n;
 
-    fdsr = (fd_set *)emalloc2(howmany(ttyfd + 1, NFDBITS), sizeof(fd_mask));
+    fdsr = ecalloc(howmany(ttyfd + 1, NFDBITS), sizeof(fd_mask));
 
     for (;;) {
 	FD_SET(ttyfd, fdsr);

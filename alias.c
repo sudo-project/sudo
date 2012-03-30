@@ -119,10 +119,10 @@ alias_add(name, type, members)
     static char errbuf[512];
     struct alias *a;
 
-    a = emalloc(sizeof(*a));
+    a = ecalloc(1, sizeof(*a));
     a->name = name;
     a->type = type;
-    a->seqno = 0;
+    /* a->seqno = 0; */
     list2tq(&a->members, members);
     if (rbinsert(aliases, a)) {
 	snprintf(errbuf, sizeof(errbuf), "Alias `%s' already defined", name);

@@ -833,7 +833,7 @@ list_op(val, len, def, op)
 
     /* Add new node to the head of the list. */
     if (op == add) {
-	cur = emalloc(sizeof(struct list_member));
+	cur = ecalloc(1, sizeof(struct list_member));
 	cur->value = emalloc(len + 1);
 	(void) memcpy(cur->value, val, len);
 	cur->value[len] = '\0';

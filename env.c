@@ -1021,7 +1021,7 @@ init_envtables()
 
     /* Fill in the "env_delete" list. */
     for (p = initial_badenv_table; *p; p++) {
-	cur = emalloc(sizeof(struct list_member));
+	cur = ecalloc(1, sizeof(struct list_member));
 	cur->value = estrdup(*p);
 	cur->next = def_env_delete;
 	def_env_delete = cur;
@@ -1029,7 +1029,7 @@ init_envtables()
 
     /* Fill in the "env_check" list. */
     for (p = initial_checkenv_table; *p; p++) {
-	cur = emalloc(sizeof(struct list_member));
+	cur = ecalloc(1, sizeof(struct list_member));
 	cur->value = estrdup(*p);
 	cur->next = def_env_check;
 	def_env_check = cur;
@@ -1037,7 +1037,7 @@ init_envtables()
 
     /* Fill in the "env_keep" list. */
     for (p = initial_keepenv_table; *p; p++) {
-	cur = emalloc(sizeof(struct list_member));
+	cur = ecalloc(1, sizeof(struct list_member));
 	cur->value = estrdup(*p);
 	cur->next = def_env_keep;
 	def_env_keep = cur;

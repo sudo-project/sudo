@@ -254,10 +254,10 @@ sudo_getpwuid(uid)
 	    errorx(1, "unable to cache uid %u (%s), already exists",
 		(unsigned int) uid, item->d.pw->pw_name);
     } else {
-	item = emalloc(sizeof(*item));
+	item = ecalloc(1, sizeof(*item));
 	item->refcnt = 1;
 	item->k.uid = uid;
-	item->d.pw = NULL;
+	/* item->d.pw = NULL; */
 	if (rbinsert(pwcache_byuid, item) != NULL)
 	    errorx(1, "unable to cache uid %u, already exists",
 		(unsigned int) uid);
@@ -299,11 +299,11 @@ sudo_getpwnam(name)
 	    errorx(1, "unable to cache user %s, already exists", name);
     } else {
 	len = strlen(name) + 1;
-	item = emalloc(sizeof(*item) + len);
+	item = ecalloc(1, sizeof(*item) + len);
 	item->refcnt = 1;
 	item->k.name = (char *) item + sizeof(*item);
 	memcpy(item->k.name, name, len);
-	item->d.pw = NULL;
+	/* item->d.pw = NULL; */
 	if (rbinsert(pwcache_byname, item) != NULL)
 	    errorx(1, "unable to cache user %s, already exists", name);
     }
@@ -333,8 +333,7 @@ sudo_fakepwnamid(user, uid, gid)
 	sizeof("/") /* pw_dir */ + sizeof(_PATH_BSHELL);
 
     for (i = 0; i < 2; i++) {
-	item = emalloc(len);
-	zero_bytes(item, sizeof(*item) + sizeof(*pw));
+	item = ecalloc(1, len);
 	pw = (struct passwd *) ((char *)item + sizeof(*item));
 	pw->pw_uid = uid;
 	pw->pw_gid = gid;
@@ -558,10 +557,10 @@ sudo_getgrgid(gid)
 	    errorx(1, "unable to cache gid %u (%s), already exists",
 		(unsigned int) gid, key.d.gr->gr_name);
     } else {
-	item = emalloc(sizeof(*item));
+	item = ecalloc(1, sizeof(*item));
 	item->refcnt = 1;
 	item->k.gid = gid;
-	item->d.gr = NULL;
+	/* item->d.gr = NULL; */
 	if (rbinsert(grcache_bygid, item) != NULL)
 	    errorx(1, "unable to cache gid %u, already exists",
 		(unsigned int) gid);
@@ -596,11 +595,11 @@ sudo_getgrnam(name)
 	    errorx(1, "unable to cache group %s, already exists", name);
     } else {
 	len = strlen(name) + 1;
-	item = emalloc(sizeof(*item) + len);
+	item = ecalloc(1, sizeof(*item) + len);
 	item->refcnt = 1;
 	item->k.name = (char *) item + sizeof(*item);
 	memcpy(item->k.name, name, len);
-	item->d.gr = NULL;
+	/* item->d.gr = NULL; */
 	if (rbinsert(grcache_byname, item) != NULL)
 	    errorx(1, "unable to cache group %s, already exists", name);
     }
@@ -626,8 +625,7 @@ sudo_fakegrnam(group)
     len = sizeof(*item) + sizeof(*gr) + namelen + 1;
 
     for (i = 0; i < 2; i++) {
-	item = emalloc(len);
-	zero_bytes(item, sizeof(*item) + sizeof(*gr));
+	item = ecalloc(1, len);
 	gr = (struct group *) ((char *)item + sizeof(*item));
 	gr->gr_gid = (gid_t) atoi(group + 1);
 	gr->gr_name = (char *)gr + sizeof(struct group);

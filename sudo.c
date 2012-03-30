@@ -797,7 +797,7 @@ set_cmnd(sudo_mode)
 
     /* Resolve the path and return. */
     rval = FOUND;
-    user_stat = emalloc(sizeof(struct stat));
+    user_stat = ecalloc(1, sizeof(struct stat));
     if (sudo_mode & (MODE_RUN | MODE_EDIT | MODE_CHECK)) {
 	if (ISSET(sudo_mode, MODE_RUN | MODE_CHECK)) {
 	    if (def_secure_path && !user_is_exempt())

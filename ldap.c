@@ -1996,16 +1996,7 @@ sudo_ldap_set_options(ld)
 static struct ldap_result *
 sudo_ldap_result_alloc()
 {
-    struct ldap_result *result;
-
-    result = emalloc(sizeof(*result));
-    result->searches = NULL;
-    result->nentries = 0;
-    result->entries = NULL;
-    result->allocated_entries = 0;
-    result->user_matches = FALSE;
-    result->host_matches = FALSE;
-    return result;
+    return ecalloc(1, sizeof(struct ldap_result));
 }
 
 /*
@@ -2044,10 +2035,10 @@ sudo_ldap_result_add_search(lres, ldap, searchresult)
 {
     struct ldap_search_list *s, *news;
 
-    news = emalloc(sizeof(struct ldap_search_list));
-    news->next = NULL;
+    news = ecalloc(1, sizeof(struct ldap_search_list));
     news->ldap = ldap;
     news->searchresult = searchresult;
+    /* news->next = NULL; */
 
     /* Add entry to the end of the chain (XXX - tailq instead?). */
     if (lres->searches) {
@@ -2212,11 +2203,11 @@ sudo_ldap_open(nss)
 	return -1;
 
     /* Create a handle container. */
-    handle = emalloc(sizeof(struct sudo_ldap_handle));
+    handle = ecalloc(1, sizeof(struct sudo_ldap_handle));
     handle->ld = ld;
-    handle->result = NULL;
-    handle->username = NULL;
-    handle->groups = NULL;
+    /* handle->result = NULL; */
+    /* handle->username = NULL; *
+    /* handle->groups = NULL; *
     nss->handle = handle;
 
     return 0;
