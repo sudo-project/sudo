@@ -300,11 +300,11 @@ main(argc, argv, envp)
 	if (nss->open(nss) == 0 && nss->parse(nss) == 0) {
 	    sources++;
 	    if (nss->setdefs(nss) != 0)
-		log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
+		log_error(NO_STDERR, "problem with defaults entries");
 	}
     }
     if (sources == 0)
-	log_error(0, "no valid sudoers sources found, quitting");
+	log_fatal(0, "no valid sudoers sources found, quitting");
 
     /* XXX - collect post-sudoers parse settings into a function */
 
@@ -321,7 +321,7 @@ main(argc, argv, envp)
 	set_runaspw(runas_user ? runas_user : def_runas_default);
 
     if (!update_defaults(SETDEF_RUNAS))
-	log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
+	log_error(NO_STDERR, "problem with defaults entries");
 
     if (def_fqdn)
 	set_fqdn();	/* deferred until after sudoers is parsed */
@@ -410,7 +410,7 @@ main(argc, argv, envp)
 	    timestamp_uid = pw->pw_uid;
 	    pw_delref(pw);
 	} else {
-	    log_error(NO_EXIT, "timestamp owner (%s): No such user",
+	    log_error(0, "timestamp owner (%s): No such user",
 		def_timestampowner);
 	    timestamp_uid = ROOT_UID;
 	}
@@ -424,7 +424,7 @@ main(argc, argv, envp)
     if (def_requiretty) {
 	if ((fd = open(_PATH_TTY, O_RDWR|O_NOCTTY)) == -1) {
 	    audit_failure(NewArgv, "no tty");
-	    log_error(NO_MAIL, "sorry, you must have a tty to run sudo");
+	    log_fatal(NO_MAIL, "sorry, you must have a tty to run sudo");
 	} else
 	    (void) close(fd);
     }
@@ -480,7 +480,7 @@ main(argc, argv, envp)
 	/* If user specified env vars make sure sudoers allows it. */
 	if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
 	    if (ISSET(sudo_mode, MODE_PRESERVE_ENV))
-		log_error(NO_MAIL,
+		log_fatal(NO_MAIL,
 		    "sorry, you are not allowed to preserve the environment");
 	    else
 		validate_env_vars(sudo_user.env_vars);
@@ -700,9 +700,9 @@ init_vars(envp)
 	if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE)
 	    errorx(1, "unknown uid: %u", (unsigned int) uid);
 
-	/* Need to make a fake struct passwd for the call to log_error(). */
+	/* Need to make a fake struct passwd for the call to log_fatal(). */
 	sudo_user.pw = sudo_fakepwuid(uid, gid);
-	log_error(0, "unknown uid: %u", (unsigned int) uid);
+	log_fatal(0, "unknown uid: %u", (unsigned int) uid);
     }
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
     mbr_uid_to_uuid(user_uid, user_uuid);
@@ -710,18 +710,18 @@ init_vars(envp)
     if (user_shell == NULL || *user_shell == '\0')
 	user_shell = estrdup(sudo_user.pw->pw_shell);
 
-    /* It is now safe to use log_error() and set_perms() */
+    /* It is now safe to use log_fatal() and set_perms() */
 
 #ifdef HAVE_GETGROUPS
     if ((user_ngroups = getgroups(0, NULL)) > 0) {
 	user_groups = emalloc2(user_ngroups, sizeof(GETGROUPS_T));
 	if (getgroups(user_ngroups, user_groups) < 0)
-	    log_error(USE_ERRNO|MSG_ONLY, "can't get group vector");
+	    log_fatal(USE_ERRNO|MSG_ONLY, "can't get group vector");
     }
 #endif
 
     if (nohostname)
-	log_error(USE_ERRNO|MSG_ONLY, "can't get hostname");
+	log_fatal(USE_ERRNO|MSG_ONLY, "can't get hostname");
 
     /*
      * Get current working directory.  Try as user, fall back to root.
@@ -862,7 +862,7 @@ set_cmnd(sudo_mode)
 	user_base = user_cmnd;
 
     if (!update_defaults(SETDEF_CMND))
-	log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
+	log_error(NO_STDERR, "problem with defaults entries");
 
     return rval;
 }
@@ -1056,28 +1056,28 @@ open_sudoers(sudoers, doedit, keepopen)
     set_perms(PERM_SUDOERS);
 
     if (rootstat != 0 && stat_sudoers(sudoers, &statbuf) != 0)
-	log_error(USE_ERRNO|NO_EXIT, "can't stat %s", sudoers);
+	log_error(USE_ERRNO, "can't stat %s", sudoers);
     else if (!S_ISREG(statbuf.st_mode))
-	log_error(NO_EXIT, "%s is not a regular file", sudoers);
+	log_error(0, "%s is not a regular file", sudoers);
     else if ((statbuf.st_mode & 07577) != (SUDOERS_MODE & 07577))
-	log_error(NO_EXIT, "%s is mode 0%o, should be 0%o", sudoers,
+	log_error(0, "%s is mode 0%o, should be 0%o", sudoers,
 	    (unsigned int) (statbuf.st_mode & 07777),
 	    (unsigned int) SUDOERS_MODE);
     else if (statbuf.st_uid != SUDOERS_UID)
-	log_error(NO_EXIT, "%s is owned by uid %u, should be %u", sudoers,
+	log_error(0, "%s is owned by uid %u, should be %u", sudoers,
 	    (unsigned int) statbuf.st_uid, (unsigned int) SUDOERS_UID);
     else if (statbuf.st_gid != SUDOERS_GID && ISSET(statbuf.st_mode, S_IRGRP|S_IWGRP))
-	log_error(NO_EXIT, "%s is owned by gid %u, should be %u", sudoers,
+	log_error(0, "%s is owned by gid %u, should be %u", sudoers,
 	    (unsigned int) statbuf.st_gid, (unsigned int) SUDOERS_GID);
     else if ((fp = fopen(sudoers, "r")) == NULL)
-	log_error(USE_ERRNO|NO_EXIT, "can't open %s", sudoers);
+	log_error(USE_ERRNO, "can't open %s", sudoers);
     else {
 	/*
 	 * Make sure we can actually read sudoers so we can present the
 	 * user with a reasonable error message (unlike the lexer).
 	 */
 	if (statbuf.st_size != 0 && fgetc(fp) == EOF) {
-	    log_error(USE_ERRNO|NO_EXIT, "can't read %s", sudoers);
+	    log_error(USE_ERRNO, "can't read %s", sudoers);
 	    fclose(fp);
 	    fp = NULL;
 	}
@@ -1182,20 +1182,10 @@ static void
 set_loginclass(pw)
     struct passwd *pw;
 {
-    int errflags;
+    const int errflags = NO_MAIL|MSG_ONLY;
 
     if (!def_use_loginclass)
 	return;
-
-    /*
-     * Don't make it a fatal error if the user didn't specify the login
-     * class themselves.  We do this because if login.conf gets
-     * corrupted we want the admin to be able to use sudo to fix it.
-     */
-    if (login_class)
-	errflags = NO_MAIL|MSG_ONLY;
-    else
-	errflags = NO_MAIL|MSG_ONLY|NO_EXIT;
 
     if (login_class && strcmp(login_class, "-") != 0) {
 	if (user_uid != 0 &&
@@ -1211,7 +1201,15 @@ set_loginclass(pw)
     /* Make sure specified login class is valid. */
     lc = login_getclass(login_class);
     if (!lc || !lc->lc_class || strcmp(lc->lc_class, login_class) != 0) {
-	log_error(errflags, "unknown login class: %s", login_class);
+	/*
+	 * Don't make it a fatal error if the user didn't specify the login
+	 * class themselves.  We do this because if login.conf gets
+	 * corrupted we want the admin to be able to use sudo to fix it.
+	 */
+	if (login_class)
+	    log_fatal(errflags, "unknown login class: %s", login_class);
+	else
+	    log_error(errflags, "unknown login class: %s", login_class);
 	def_use_loginclass = FALSE;
     }
 }
@@ -1244,8 +1242,7 @@ set_fqdn()
 #else
     if (!(hp = gethostbyname(user_host))) {
 #endif
-	log_error(MSG_ONLY|NO_EXIT,
-	    "unable to resolve host %s", user_host);
+	log_error(MSG_ONLY, "unable to resolve host %s", user_host);
     } else {
 	if (user_shost != user_host)
 	    efree(user_shost);
@@ -1282,7 +1279,7 @@ set_runaspw(user)
     } else {
 	if ((runas_pw = sudo_getpwnam(user)) == NULL) {
 	    audit_failure(NewArgv, "unknown user: %s", user);
-	    log_error(NO_MAIL|MSG_ONLY, "unknown user: %s", user);
+	    log_fatal(NO_MAIL|MSG_ONLY, "unknown user: %s", user);
 	}
     }
 }
@@ -1302,7 +1299,7 @@ set_runasgr(group)
 	    runas_gr = sudo_fakegrnam(group);
     } else {
 	if ((runas_gr = sudo_getgrnam(group)) == NULL)
-	    log_error(NO_MAIL|MSG_ONLY, "unknown group: %s", group);
+	    log_fatal(NO_MAIL|MSG_ONLY, "unknown group: %s", group);
     }
 }
 

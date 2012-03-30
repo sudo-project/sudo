@@ -30,12 +30,11 @@
 #define SLOG_FILE		0x02
 #define SLOG_BOTH		0x03
 
-/* Flags for log_error() */
+/* Flags for log_error()/log_fatal() */
 #define MSG_ONLY		0x01
 #define USE_ERRNO		0x02
 #define NO_MAIL			0x04
-#define NO_EXIT			0x08
-#define NO_STDERR		0x10
+#define NO_STDERR		0x08
 
 /*
  * Maximum number of characters to log per entry.  The syslogger
@@ -58,6 +57,9 @@ void log_allowed		__P((int));
 void log_denial			__P((int, int));
 void log_error			__P((int flags, const char *fmt, ...))
 				    __printflike(2, 3);
+void log_fatal			__P((int flags, const char *fmt, ...))
+				    __printflike(2, 3)
+				    __attribute__((__noreturn__));
 RETSIGTYPE reapchild		__P((int));
 void writeln_wrap		__P((FILE *, char *, size_t, size_t));
 

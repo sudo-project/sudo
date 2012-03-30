@@ -116,10 +116,10 @@ sudo_file_parse(nss)
     yyin = nss->handle;
     if (yyparse() != 0 || parse_error) {
 	if (errorlineno != -1) {
-	    log_error(NO_EXIT, "parse error in %s near line %d",
+	    log_error(0, "parse error in %s near line %d",
 		errorfile, errorlineno);
 	} else {
-	    log_error(NO_EXIT, "parse error in %s", errorfile);
+	    log_error(0, "parse error in %s", errorfile);
 	}
 	return -1;
     }

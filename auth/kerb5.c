@@ -111,7 +111,7 @@ kerb5_setup(pw, promptp, auth)
 	 * API does not currently provide this unless the auth is standalone.
 	 */
 	if ((error = krb5_unparse_name(sudo_context, princ, &pname))) {
-	    log_error(NO_EXIT|NO_MAIL,
+	    log_error(NO_MAIL,
 		      "%s: unable to unparse princ ('%s'): %s", auth->name,
 		      pw->pw_name, error_message(error));
 	    return AUTH_FAILURE;
@@ -152,7 +152,7 @@ kerb5_init(pw, auth)
 
     if ((error = krb5_parse_name(sudo_context, pw->pw_name,
 	&(sudo_krb5_data.princ)))) {
-	log_error(NO_EXIT|NO_MAIL,
+	log_error(NO_MAIL,
 		  "%s: unable to parse '%s': %s", auth->name, pw->pw_name,
 		  error_message(error));
 	return AUTH_FAILURE;
@@ -163,7 +163,7 @@ kerb5_init(pw, auth)
 		    (long) getpid());
     if ((error = krb5_cc_resolve(sudo_context, cache_name,
 	&(sudo_krb5_data.ccache)))) {
-	log_error(NO_EXIT|NO_MAIL,
+	log_error(NO_MAIL,
 		  "%s: unable to resolve ccache: %s", auth->name,
 		  error_message(error));
 	return AUTH_FAILURE;
@@ -213,7 +213,7 @@ kerb5_verify(pw, pass, auth)
     /* Set default flags based on the local config file. */
     error = krb5_get_init_creds_opt_alloc(sudo_context, &opts);
     if (error) {
-	log_error(NO_EXIT|NO_MAIL,
+	log_error(NO_MAIL,
 		  "%s: unable to allocate options: %s", auth->name,
 		  error_message(error));
 	goto done;
@@ -229,7 +229,7 @@ kerb5_verify(pw, pass, auth)
 					     NULL, 0, NULL, opts))) {
 	/* Don't print error if just a bad password */
 	if (error != KRB5KRB_AP_ERR_BAD_INTEGRITY)
-	    log_error(NO_EXIT|NO_MAIL,
+	    log_error(NO_MAIL,
 		      "%s: unable to get credentials: %s", auth->name,
 		      error_message(error));
 	goto done;
@@ -242,11 +242,11 @@ kerb5_verify(pw, pass, auth)
 
     /* Store cred in cred cache. */
     if ((error = krb5_cc_initialize(sudo_context, ccache, princ))) {
-	log_error(NO_EXIT|NO_MAIL,
+	log_error(NO_MAIL,
 		  "%s: unable to initialize ccache: %s", auth->name,
 		  error_message(error));
     } else if ((error = krb5_cc_store_cred(sudo_context, ccache, creds))) {
-	log_error(NO_EXIT|NO_MAIL,
+	log_error(NO_MAIL,
 		  "%s: unable to store cred in ccache: %s", auth->name,
 		  error_message(error));
     }
@@ -314,7 +314,7 @@ verify_krb_v5_tgt(sudo_context, cred, auth_name)
      */
     if ((error = krb5_sname_to_principal(sudo_context, NULL, NULL,
 					KRB5_NT_SRV_HST, &server))) {
-	log_error(NO_EXIT|NO_MAIL,
+	log_error(NO_MAIL,
 		  "%s: unable to get host principal: %s", auth_name,
 		  error_message(error));
 	return -1;
@@ -329,7 +329,7 @@ verify_krb_v5_tgt(sudo_context, cred, auth_name)
 				   NULL, &vopt);
     krb5_free_principal(sudo_context, server);
     if (error)
-	log_error(NO_EXIT|NO_MAIL,
+	log_error(NO_MAIL,
 		  "%s: Cannot verify TGT! Possible attack!: %s", auth_name,
 		  error_message(error));
     return error;

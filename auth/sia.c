@@ -99,7 +99,7 @@ sia_setup(pw, promptp, auth)
     if (sia_ses_init(&siah, Argc, Argv, NULL, pw->pw_name, ttyname(0), 1, NULL)
 	!= SIASUCCESS) {
 
-	log_error(USE_ERRNO|NO_EXIT|NO_MAIL,
+	log_error(USE_ERRNO|NO_MAIL,
 	    "unable to initialize SIA session");
 	return AUTH_FATAL;
     }

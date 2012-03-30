@@ -101,9 +101,9 @@ io_nextid()
      */
     if (stat(def_iolog_dir, &sb) != 0) {
 	if (mkdir(def_iolog_dir, S_IRWXU) != 0)
-	    log_error(USE_ERRNO, "Can't mkdir %s", def_iolog_dir);
+	    log_fatal(USE_ERRNO, "Can't mkdir %s", def_iolog_dir);
     } else if (!S_ISDIR(sb.st_mode)) {
-	log_error(0, "%s exists but is not a directory (0%o)",
+	log_fatal(0, "%s exists but is not a directory (0%o)",
 	    def_iolog_dir, (unsigned int) sb.st_mode);
     }
 
@@ -113,21 +113,21 @@ io_nextid()
     len = snprintf(pathbuf, sizeof(pathbuf), "%s/seq", def_iolog_dir);
     if (len <= 0 || len >= sizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
-	log_error(USE_ERRNO, "%s/seq", pathbuf);
+	log_fatal(USE_ERRNO, "%s/seq", pathbuf);
     }
     fd = open(pathbuf, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
     if (fd == -1)
-	log_error(USE_ERRNO, "cannot open %s", pathbuf);
+	log_fatal(USE_ERRNO, "cannot open %s", pathbuf);
     lock_file(fd, SUDO_LOCK);
 
     /* Read seq number (base 36). */
     nread = read(fd, buf, sizeof(buf));
     if (nread != 0) {
 	if (nread == -1)
-	    log_error(USE_ERRNO, "cannot read %s", pathbuf);
+	    log_fatal(USE_ERRNO, "cannot read %s", pathbuf);
 	id = strtoul(buf, &ep, 36);
 	if (buf == ep || id >= SESSID_MAX)
-	    log_error(0, "invalid sequence number %s", pathbuf);
+	    log_fatal(0, "invalid sequence number %s", pathbuf);
     }
     id++;
 
@@ -147,7 +147,7 @@ io_nextid()
 
     /* Rewind and overwrite old seq file. */
     if (lseek(fd, 0, SEEK_SET) == (off_t)-1 || write(fd, buf, 7) != 7)
-	log_error(USE_ERRNO, "Can't write to %s", pathbuf);
+	log_fatal(USE_ERRNO, "Can't write to %s", pathbuf);
     close(fd);
 }
 
@@ -160,7 +160,7 @@ build_idpath(pathbuf, pathsize)
     int i, len;
 
     if (sudo_user.sessid[0] == '\0')
-	log_error(0, "tried to build a session id path without a session id");
+	log_fatal(0, "tried to build a session id path without a session id");
 
     /*
      * Path is of the form /var/log/sudo-io/00/00/01.
@@ -170,7 +170,7 @@ build_idpath(pathbuf, pathsize)
 	sudo_user.sessid[3], sudo_user.sessid[4], sudo_user.sessid[5]);
     if (len <= 0 && len >= pathsize) {
 	errno = ENAMETOOLONG;
-	log_error(USE_ERRNO, "%s/%s", def_iolog_dir, sudo_user.sessid);
+	log_fatal(USE_ERRNO, "%s/%s", def_iolog_dir, sudo_user.sessid);
     }
 
     /*
@@ -180,9 +180,9 @@ build_idpath(pathbuf, pathsize)
 	pathbuf[len - i] = '\0';
 	if (stat(pathbuf, &sb) != 0) {
 	    if (mkdir(pathbuf, S_IRWXU) != 0)
-		log_error(USE_ERRNO, "Can't mkdir %s", pathbuf);
+		log_fatal(USE_ERRNO, "Can't mkdir %s", pathbuf);
 	} else if (!S_ISDIR(sb.st_mode)) {
-	    log_error(0, "%s: %s", pathbuf, strerror(ENOTDIR));
+	    log_fatal(0, "%s: %s", pathbuf, strerror(ENOTDIR));
 	}
 	pathbuf[len - i] = '/';
     }
@@ -234,47 +234,47 @@ io_log_open()
 	return -1;
 
     if (mkdir(pathbuf, S_IRUSR|S_IWUSR|S_IXUSR) != 0)
-	log_error(USE_ERRNO, "Can't mkdir %s", pathbuf);
+	log_fatal(USE_ERRNO, "Can't mkdir %s", pathbuf);
 
     /*
      * We create 7 files: a log file, a timing file and 5 for input/output.
      */
     io_logfile = open_io_fd(pathbuf, len, "/log", FALSE);
     if (io_logfile == NULL)
-	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+	log_fatal(USE_ERRNO, "Can't create %s", pathbuf);
 
     io_fds[IOFD_TIMING].v = open_io_fd(pathbuf, len, "/timing", def_compress_io);
     if (io_fds[IOFD_TIMING].v == NULL)
-	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+	log_fatal(USE_ERRNO, "Can't create %s", pathbuf);
 
     if (def_log_input) {
 	io_fds[IOFD_TTYIN].v = open_io_fd(pathbuf, len, "/ttyin", def_compress_io);
 	if (io_fds[IOFD_TTYIN].v == NULL)
-	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+	    log_fatal(USE_ERRNO, "Can't create %s", pathbuf);
     }
 
     if (def_log_output) {
 	io_fds[IOFD_TTYOUT].v = open_io_fd(pathbuf, len, "/ttyout", def_compress_io);
 	if (io_fds[IOFD_TTYOUT].v == NULL)
-	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+	    log_fatal(USE_ERRNO, "Can't create %s", pathbuf);
     }
 
     if (def_log_input) {
 	io_fds[IOFD_STDIN].v = open_io_fd(pathbuf, len, "/stdin", def_compress_io);
 	if (io_fds[IOFD_STDIN].v == NULL)
-	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+	    log_fatal(USE_ERRNO, "Can't create %s", pathbuf);
     }
 
     if (def_log_output) {
 	io_fds[IOFD_STDOUT].v = open_io_fd(pathbuf, len, "/stdout", def_compress_io);
 	if (io_fds[IOFD_STDOUT].v == NULL)
-	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+	    log_fatal(USE_ERRNO, "Can't create %s", pathbuf);
     }
 
     if (def_log_output) {
 	io_fds[IOFD_STDERR].v = open_io_fd(pathbuf, len, "/stderr", def_compress_io);
 	if (io_fds[IOFD_STDERR].v == NULL)
-	    log_error(USE_ERRNO, "Can't create %s", pathbuf);
+	    log_fatal(USE_ERRNO, "Can't create %s", pathbuf);
     }
 
     /* So we can block tty-generated signals */

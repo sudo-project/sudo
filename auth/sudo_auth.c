@@ -172,7 +172,7 @@ verify_user(pw, prompt)
 #ifdef HAVE_BSM_AUDIT
 	audit_failure(NewArgv, "no authentication methods");
 #endif
-    	log_error(0, "%s  %s %s",
+    	log_fatal(0, "%s  %s %s",
 	    "There are no authentication methods compiled into sudo!",
 	    "If you want to turn off authentication, use the",
 	    "--disable-authentication configure option.");
@@ -249,7 +249,7 @@ done:
 #ifdef HAVE_BSM_AUDIT
 		audit_failure(NewArgv, "authentication failure");
 #endif
-		log_error(flags, "%d incorrect password attempt%s",
+		log_fatal(flags, "%d incorrect password attempt%s",
 		    def_passwd_tries - counter,
 		    (def_passwd_tries - counter == 1) ? "" : "s");
 	    }

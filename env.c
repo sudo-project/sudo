@@ -901,7 +901,7 @@ insert_env_vars(env_vars)
 /*
  * Validate the list of environment variables passed in on the command
  * line against env_delete, env_check, and env_keep.
- * Calls log_error() if any specified variables are not allowed.
+ * Calls log_fatal() if any specified variables are not allowed.
  */
 void
 validate_env_vars(env_vars)
@@ -947,7 +947,7 @@ validate_env_vars(env_vars)
     }
     if (bad != NULL) {
 	bad[blen - 2] = '\0';		/* remove trailing ", " */
-	log_error(NO_MAIL,
+	log_fatal(NO_MAIL,
 	    "sorry, you are not allowed to set the following environment variables: %s", bad);
 	/* NOTREACHED */
 	efree(bad);

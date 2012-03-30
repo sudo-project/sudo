@@ -100,7 +100,7 @@ pam_init(pw, auth)
 	pam_status = pam_start("sudo", pw->pw_name, &pam_conv, &pamh);
 
     if (pam_status != PAM_SUCCESS) {
-	log_error(USE_ERRNO|NO_EXIT|NO_MAIL, "unable to initialize PAM");
+	log_error(USE_ERRNO|NO_MAIL, "unable to initialize PAM");
 	return AUTH_FATAL;
     }
 
@@ -146,11 +146,11 @@ pam_verify(pw, prompt, auth)
 		case PAM_SUCCESS:
 		    return AUTH_SUCCESS;
 		case PAM_AUTH_ERR:
-		    log_error(NO_EXIT|NO_MAIL,
+		    log_error(NO_MAIL,
 			"account validation failure, is your account locked?");
 		    return AUTH_FATAL;
 		case PAM_NEW_AUTHTOK_REQD:
-		    log_error(NO_EXIT|NO_MAIL, "%s, %s",
+		    log_error(NO_MAIL, "%s, %s",
 			"Account or password is expired",
 			"reset your password and try again");
 		    *pam_status = pam_chauthtok(pamh,
@@ -158,14 +158,14 @@ pam_verify(pw, prompt, auth)
 		    if (*pam_status == PAM_SUCCESS)
 			return AUTH_SUCCESS;
 		    if ((s = pam_strerror(pamh, *pam_status)))
-			log_error(NO_EXIT|NO_MAIL, "pam_chauthtok: %s", s);
+			log_error(NO_MAIL, "pam_chauthtok: %s", s);
 		    return AUTH_FAILURE;
 		case PAM_AUTHTOK_EXPIRED:
-		    log_error(NO_EXIT|NO_MAIL,
+		    log_error(NO_MAIL,
 			"Password expired, contact your system administrator");
 		    return AUTH_FATAL;
 		case PAM_ACCT_EXPIRED:
-		    log_error(NO_EXIT|NO_MAIL, "%s %s",
+		    log_error(NO_MAIL, "%s %s",
 			"Account expired or PAM config lacks an \"account\"",
 			"section for sudo, contact your system administrator");
 		    return AUTH_FATAL;
@@ -181,7 +181,7 @@ pam_verify(pw, prompt, auth)
 	    return AUTH_FAILURE;
 	default:
 	    if ((s = pam_strerror(pamh, *pam_status)))
-		log_error(NO_EXIT|NO_MAIL, "pam_authenticate: %s", s);
+		log_error(NO_MAIL, "pam_authenticate: %s", s);
 	    return AUTH_FATAL;
     }
 }

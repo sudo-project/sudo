@@ -324,32 +324,24 @@ log_allowed(status)
     efree(logline);
 }
 
-void
-#ifdef __STDC__
-log_error(int flags, const char *fmt, ...)
-#else
-log_error(flags, fmt, va_alist)
+/*
+ * Perform logging for log_error()/log_fatal()
+ */
+static void
+vlog_error(flags, fmt, ap)
     int flags;
     const char *fmt;
-    va_dcl
-#endif
+    va_list ap;
 {
     int serrno = errno;
     char *message;
     char *logline;
-    va_list ap;
-#ifdef __STDC__
-    va_start(ap, fmt);
-#else
-    va_start(ap);
-#endif
 
     /* Become root if we are not already to avoid user interference */
     set_perms(PERM_ROOT|PERM_NOEXIT);
 
     /* Expand printf-style format + args. */
     evasprintf(&message, fmt, ap);
-    va_end(ap);
 
     if (ISSET(flags, MSG_ONLY))
 	logline = message;
@@ -383,11 +375,54 @@ log_error(flags, fmt, va_alist)
 	do_logfile(logline);
 
     efree(logline);
+}
 
-    if (!ISSET(flags, NO_EXIT)) {
-	cleanup(0);
-	exit(1);
-    }
+void
+#ifdef __STDC__
+log_error(int flags, const char *fmt, ...)
+#else
+log_error(flags, fmt, va_alist)
+    int flags;
+    const char *fmt;
+    va_dcl
+#endif
+{
+    va_list ap;
+
+    /* Log the error. */
+#ifdef __STDC__
+    va_start(ap, fmt);
+#else
+    va_start(ap);
+#endif
+    vlog_error(flags, fmt, ap);
+    va_end(ap);
+}
+
+void
+#ifdef __STDC__
+log_fatal(int flags, const char *fmt, ...)
+#else
+log_fatal(flags, fmt, va_alist)
+    int flags;
+    const char *fmt;
+    va_dcl
+#endif
+{
+    va_list ap;
+
+    /* Log the error. */
+#ifdef __STDC__
+    va_start(ap, fmt);
+#else
+    va_start(ap);
+#endif
+    vlog_error(flags, fmt, ap);
+    va_end(ap);
+
+    /* Clean up and exit. */
+    cleanup(0);
+    exit(1);
 }
 
 #define MAX_MAILFLAGS	63
