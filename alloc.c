@@ -107,6 +107,31 @@ emalloc2(nmemb, size)
 }
 
 /*
+ * ecalloc() allocates nmemb * size bytes and exits with an error
+ * if overflow would occur or if the system malloc(3) fails.  
+ * On success, the allocated space is zero-filled.
+ */
+void *
+ecalloc(nmemb, size)
+    size_t nmemb;
+    size_t size;
+{
+    void *ptr;
+
+    if (nmemb == 0 || size == 0)
+	errorx(1, "internal error, tried to ecalloc(0)");
+    if (nmemb != 1) {
+	if (nmemb > SIZE_MAX / size)
+	    errorx(1, "internal error, ecalloc() overflow");
+	size *= nmemb;
+    }
+    if ((ptr = malloc(size)) == NULL)
+	errorx(1, "unable to allocate memory");
+    memset(ptr, 0, size);
+    return ptr;
+}
+
+/*
  * erealloc() calls the system realloc(3) and exits with an error if
  * realloc(3) fails.  You can call erealloc() with a NULL pointer even
  * if the system realloc(3) does not support this.
