@@ -125,7 +125,7 @@ classmatch(pattern, test, foldcase, ep)
 		pattern = "lower:]";
 	for (cc = cclasses; cc->name != NULL; cc++) {
 		if (!strncmp(pattern, cc->name, len) && cc->name[len] == '\0') {
-			if (cc->isctype(test))
+			if (cc->isctype((unsigned char)test))
 				rval = RANGE_MATCH;
 			break;
 		}
@@ -225,10 +225,11 @@ leadingclosebrace:
                 /* XXX: handle locale/MBCS comparison, advance by MBCS char width */
                 if ((**string >= *startch) && (**string <= **pattern))
                     result = 0;
-                else if (nocase && (isupper(**string) || isupper(*startch)
-                                                      || isupper(**pattern))
-                            && (tolower(**string) >= tolower(*startch)) 
-                            && (tolower(**string) <= tolower(**pattern)))
+                else if (nocase && (isupper((unsigned char)**string) ||
+				    isupper((unsigned char)*startch) ||
+				    isupper((unsigned char)**pattern))
+                            && (tolower((unsigned char)**string) >= tolower((unsigned char)*startch)) 
+                            && (tolower((unsigned char)**string) <= tolower((unsigned char)**pattern)))
                     result = 0;
 
                 ++*pattern;
@@ -238,8 +239,9 @@ leadingclosebrace:
             /* XXX: handle locale/MBCS comparison, advance by MBCS char width */
             if ((**string == **pattern))
                 result = 0;
-            else if (nocase && (isupper(**string) || isupper(**pattern))
-                            && (tolower(**string) == tolower(**pattern)))
+            else if (nocase && (isupper((unsigned char)**string) ||
+				isupper((unsigned char)**pattern))
+                            && (tolower((unsigned char)**string) == tolower((unsigned char)**pattern)))
                 result = 0;
 
             ++*pattern;
@@ -265,8 +267,8 @@ leadingclosebrace:
     /* XXX: handle locale/MBCS comparison, advance by the MBCS char width */
     if (**string == **pattern)
         result = 0;
-    else if (nocase && (isupper(**string) || isupper(**pattern))
-                    && (tolower(**string) == tolower(**pattern)))
+    else if (nocase && (isupper((unsigned char)**string) || isupper((unsigned char)**pattern))
+                    && (tolower((unsigned char)**string) == tolower((unsigned char)**pattern)))
         result = 0;
 
     /* Refuse to advance over trailing slash or nulls
