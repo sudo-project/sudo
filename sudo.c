@@ -526,7 +526,7 @@ main(argc, argv, envp)
 		NewArgv[1] = "--login";
 	    }
 
-#if defined(__linux__) || defined(_AIX)
+#if defined(_AIX) || (defined(__linux__) && !defined(HAVE_PAM))
 	    /* Insert system-wide environment variables. */
 	    read_env_file(_PATH_ENVIRONMENT, TRUE);
 #endif
