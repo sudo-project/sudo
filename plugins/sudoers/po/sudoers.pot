@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.5\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-03-28 14:06-0400\n"
+"POT-Creation-Date: 2012-03-30 15:44-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -565,8 +565,8 @@ msgstr ""
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr ""
 
-#: plugins/sudoers/env.c:341 plugins/sudoers/env.c:411 toke.l:680 toke.l:810
-#: toke.l:868 toke.l:964 plugins/sudoers/toke_util.c:113
+#: plugins/sudoers/env.c:341 plugins/sudoers/env.c:411 toke.l:682 toke.l:812
+#: toke.l:870 toke.l:966 plugins/sudoers/toke_util.c:113
 #: plugins/sudoers/toke_util.c:167 plugins/sudoers/toke_util.c:207
 #, c-format
 msgid "unable to allocate memory"
@@ -589,8 +589,8 @@ msgid ""
 msgstr ""
 
 #: plugins/sudoers/find_path.c:69 plugins/sudoers/find_path.c:108
-#: plugins/sudoers/find_path.c:123 plugins/sudoers/iolog.c:125
-#: plugins/sudoers/sudoers.c:950 toke.l:676 toke.l:864
+#: plugins/sudoers/find_path.c:123 plugins/sudoers/iolog.c:125 toke.l:678
+#: toke.l:866 plugins/sudoers/sudoers.c:950
 #, c-format
 msgid "%s: %s"
 msgstr ""
@@ -759,6 +759,25 @@ msgstr ""
 msgid "invalid sudoOrder attribute: %s"
 msgstr ""
 
+#: toke.l:805
+msgid "too many levels of includes"
+msgstr ""
+
+#: toke.l:829 plugins/sudoers/sudoers.c:1004
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr ""
+
+#: toke.l:836 plugins/sudoers/sudoers.c:1008
+#, c-format
+msgid "%s is world writable"
+msgstr ""
+
+#: toke.l:841 plugins/sudoers/sudoers.c:1011
+#, c-format
+msgid "%s is owned by gid %u, should be %u"
+msgstr ""
+
 #: plugins/sudoers/linux_audit.c:57
 #, c-format
 msgid "unable to open audit system"
@@ -899,17 +918,17 @@ msgstr ""
 msgid "unable to cache user %s, already exists"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:655
+#: plugins/sudoers/pwutil.c:653
 #, c-format
 msgid "unable to cache gid %u (%s), already exists"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:663
+#: plugins/sudoers/pwutil.c:661
 #, c-format
 msgid "unable to cache gid %u, already exists"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:693 plugins/sudoers/pwutil.c:702
+#: plugins/sudoers/pwutil.c:691 plugins/sudoers/pwutil.c:700
 #, c-format
 msgid "unable to cache group %s, already exists"
 msgstr ""
@@ -1054,21 +1073,6 @@ msgstr ""
 #: plugins/sudoers/sudoers.c:1001
 #, c-format
 msgid "%s is not a regular file"
-msgstr ""
-
-#: plugins/sudoers/sudoers.c:1004 toke.l:827
-#, c-format
-msgid "%s is owned by uid %u, should be %u"
-msgstr ""
-
-#: plugins/sudoers/sudoers.c:1008 toke.l:834
-#, c-format
-msgid "%s is world writable"
-msgstr ""
-
-#: plugins/sudoers/sudoers.c:1011 toke.l:839
-#, c-format
-msgid "%s is owned by gid %u, should be %u"
 msgstr ""
 
 #: plugins/sudoers/sudoers.c:1038
@@ -1295,10 +1299,6 @@ msgid ""
 "Command unmatched"
 msgstr ""
 
-#: toke.l:803
-msgid "too many levels of includes"
-msgstr ""
-
 #: plugins/sudoers/toke_util.c:218
 msgid "fill_args: buffer overflow"
 msgstr ""
@@ -1480,14 +1480,14 @@ msgstr ""
 msgid "%s: unused %s_Alias %s"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:1302
+#: plugins/sudoers/visudo.c:1301
 #, c-format
 msgid ""
 "%s - safely edit the sudoers file\n"
 "\n"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:1304
+#: plugins/sudoers/visudo.c:1303
 msgid ""
 "\n"
 "Options:\n"
