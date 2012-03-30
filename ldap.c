@@ -2206,8 +2206,8 @@ sudo_ldap_open(nss)
     handle = ecalloc(1, sizeof(struct sudo_ldap_handle));
     handle->ld = ld;
     /* handle->result = NULL; */
-    /* handle->username = NULL; *
-    /* handle->groups = NULL; *
+    /* handle->username = NULL; */
+    /* handle->groups = NULL; */
     nss->handle = handle;
 
     return 0;
