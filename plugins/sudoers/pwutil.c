@@ -169,7 +169,7 @@ make_pwitem(const struct passwd *pw, const char *name)
 	total += strlen(name) + 1;
 
     /* Allocate space for struct item, struct passwd and the strings. */
-    item = emalloc(total);
+    item = ecalloc(1, total);
     cp = (char *) item + sizeof(struct cache_item);
 
     /*
@@ -260,10 +260,10 @@ sudo_getpwuid(uid_t uid)
 	    errorx(1, _("unable to cache uid %u (%s), already exists"),
 		(unsigned int) uid, item->d.pw->pw_name);
     } else {
-	item = emalloc(sizeof(*item));
+	item = ecalloc(1, sizeof(*item));
 	item->refcnt = 1;
 	item->k.uid = uid;
-	item->d.pw = NULL;
+	/* item->d.pw = NULL; */
 	if (rbinsert(pwcache_byuid, item) != NULL)
 	    errorx(1, _("unable to cache uid %u, already exists"),
 		(unsigned int) uid);
@@ -305,11 +305,11 @@ sudo_getpwnam(const char *name)
 	    errorx(1, _("unable to cache user %s, already exists"), name);
     } else {
 	len = strlen(name) + 1;
-	item = emalloc(sizeof(*item) + len);
+	item = ecalloc(1, sizeof(*item) + len);
 	item->refcnt = 1;
 	item->k.name = (char *) item + sizeof(*item);
 	memcpy(item->k.name, name, len);
-	item->d.pw = NULL;
+	/* item->d.pw = NULL; */
 	if (rbinsert(pwcache_byname, item) != NULL)
 	    errorx(1, _("unable to cache user %s, already exists"), name);
     }
@@ -340,8 +340,7 @@ sudo_fakepwnamid(const char *user, uid_t uid, gid_t gid)
 	sizeof("/") /* pw_dir */ + sizeof(_PATH_BSHELL);
 
     for (i = 0; i < 2; i++) {
-	item = emalloc(len);
-	zero_bytes(item, sizeof(*item) + sizeof(*pw));
+	item = ecalloc(1, len);
 	pw = (struct passwd *) ((char *)item + sizeof(*item));
 	pw->pw_uid = uid;
 	pw->pw_gid = gid;
@@ -471,7 +470,7 @@ make_gritem(const struct group *gr, const char *name)
     if (name != NULL)
 	total += strlen(name) + 1;
 
-    item = emalloc(total);
+    item = ecalloc(1, total);
     cp = (char *) item + sizeof(struct cache_item);
 
     /*
@@ -545,7 +544,7 @@ make_grlist_item(const char *user, GETGROUPS_T *gids, int ngids)
     total += GROUPNAME_LEN * ngids;
 
 again:
-    item = emalloc(total);
+    item = ecalloc(1, total);
     cp = (char *) item + sizeof(struct cache_item);
 
     /*
@@ -554,7 +553,6 @@ again:
      * immediately after struct group to guarantee proper alignment.
      */
     grlist = (struct group_list *)cp;
-    zero_bytes(grlist, sizeof(struct group_list));
     cp += sizeof(struct group_list);
     grlist->groups = (char **)cp;
     cp += sizeof(char *) * ngids;
@@ -655,10 +653,10 @@ sudo_getgrgid(gid_t gid)
 	    errorx(1, _("unable to cache gid %u (%s), already exists"),
 		(unsigned int) gid, key.d.gr->gr_name);
     } else {
-	item = emalloc(sizeof(*item));
+	item = ecalloc(1, sizeof(*item));
 	item->refcnt = 1;
 	item->k.gid = gid;
-	item->d.gr = NULL;
+	/* item->d.gr = NULL; */
 	if (rbinsert(grcache_bygid, item) != NULL)
 	    errorx(1, _("unable to cache gid %u, already exists"),
 		(unsigned int) gid);
@@ -693,11 +691,11 @@ sudo_getgrnam(const char *name)
 	    errorx(1, _("unable to cache group %s, already exists"), name);
     } else {
 	len = strlen(name) + 1;
-	item = emalloc(sizeof(*item) + len);
+	item = ecalloc(1, sizeof(*item) + len);
 	item->refcnt = 1;
 	item->k.name = (char *) item + sizeof(*item);
 	memcpy(item->k.name, name, len);
-	item->d.gr = NULL;
+	/* item->d.gr = NULL; */
 	if (rbinsert(grcache_byname, item) != NULL)
 	    errorx(1, _("unable to cache group %s, already exists"), name);
     }
@@ -723,8 +721,7 @@ sudo_fakegrnam(const char *group)
     len = sizeof(*item) + sizeof(*gr) + namelen + 1;
 
     for (i = 0; i < 2; i++) {
-	item = emalloc(len);
-	zero_bytes(item, sizeof(*item) + sizeof(*gr));
+	item = ecalloc(1, len);
 	gr = (struct group *) ((char *)item + sizeof(*item));
 	gr->gr_gid = (gid_t) atoi(group + 1);
 	gr->gr_name = (char *)gr + sizeof(struct group);
@@ -870,11 +867,11 @@ get_group_list(struct passwd *pw)
     } else {
 	/* Should not happen. */
 	len = strlen(pw->pw_name) + 1;
-	item = emalloc(sizeof(*item) + len);
+	item = ecalloc(1, sizeof(*item) + len);
 	item->refcnt = 1;
 	item->k.name = (char *) item + sizeof(*item);
 	memcpy(item->k.name, pw->pw_name, len);
-	item->d.grlist = NULL;
+	/* item->d.grlist = NULL; */
 	if (rbinsert(grlist_cache, item) != NULL)
 	    errorx(1, "unable to cache group list for %s, already exists",
 		pw->pw_name);
