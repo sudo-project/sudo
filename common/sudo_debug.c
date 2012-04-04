@@ -252,12 +252,13 @@ void sudo_debug_exit_ptr(const char *func, const char *file, int line,
 }
 
 void
-sudo_debug_write(const char *str, int len)
+sudo_debug_write(const char *str, int len, int errno_val)
 {
     char *timestr;
     time_t now;
-    struct iovec iov[5];
+    struct iovec iov[7];
     int iovcnt = 4;
+    bool need_newline = false;
 
     if (len <= 0)
 	return;
@@ -266,14 +267,22 @@ sudo_debug_write(const char *str, int len)
     case SUDO_DEBUG_MODE_CONV:
 	/* Call conversation function */
 	if (sudo_conv != NULL) {
-	    struct sudo_conv_message msg;
-	    struct sudo_conv_reply repl;
+	    struct sudo_conv_message msg[3];
+	    struct sudo_conv_reply repl[3];
+	    int msgcnt = 1;
 
-	    memset(&msg, 0, sizeof(msg));
-	    memset(&repl, 0, sizeof(repl));
-	    msg.msg_type = SUDO_CONV_DEBUG_MSG;
-	    msg.msg = str;
-	    sudo_conv(1, &msg, &repl);
+	    memset(msg, 0, sizeof(msg));
+	    memset(repl, 0, sizeof(repl));
+	    msg[0].msg_type = SUDO_CONV_DEBUG_MSG;
+	    msg[0].msg = str;
+	    if (errno_val) {
+		msgcnt = 3;
+		msg[1].msg_type = SUDO_CONV_DEBUG_MSG;
+		msg[1].msg = ": ";
+		msg[2].msg_type = SUDO_CONV_DEBUG_MSG;
+		msg[2].msg = strerror(errno_val);
+	    }
+	    sudo_conv(msgcnt, msg, repl);
 	}
 	break;
     case SUDO_DEBUG_MODE_FILE:
@@ -286,10 +295,30 @@ sudo_debug_write(const char *str, int len)
 	/* Add string along with newline if it doesn't have one. */
 	iov[3].iov_base = (char *)str;
 	iov[3].iov_len = len;
-	if (str[len - 1] != '\n') {
+	if (str[len - 1] != '\n')
+	    need_newline = true;
+
+	/* Append error string if errno is specified. */
+	if (errno_val) {
+	    iov[iovcnt].iov_base = ": ";
+	    iov[iovcnt].iov_len = 2;
+	    iovcnt++;
+	    iov[iovcnt].iov_base = strerror(errno_val);
+	    iov[iovcnt].iov_len = strlen(iov[iovcnt].iov_base);
+	    iovcnt++;
+
+	    /* Move newline to the end. */
+	    if (!need_newline) {
+		need_newline = true;
+		iov[3].iov_len--;
+	    }
+	}
+
+	/* Append newline as needed. */
+	if (need_newline) {
 	    /* force newline */
-	    iov[4].iov_base = "\n";
-	    iov[4].iov_len = 1;
+	    iov[iovcnt].iov_base = "\n";
+	    iov[iovcnt].iov_len = 1;
 	    iovcnt++;
 	}
 
@@ -310,7 +339,7 @@ sudo_debug_write(const char *str, int len)
 void
 sudo_debug_printf2(int level, const char *fmt, ...)
 {
-    int buflen, pri, subsys;
+    int buflen, pri, subsys, saved_errno = errno;
     va_list ap;
     char *buf;
 
@@ -322,16 +351,20 @@ sudo_debug_printf2(int level, const char *fmt, ...)
     subsys = SUDO_DEBUG_SUBSYS(level);
 
     /* Make sure we want debug info at this level. */
-    if (subsys >= NUM_SUBSYSTEMS || sudo_debug_settings[subsys] < pri)
-	return;
-
-    va_start(ap, fmt);
-    buflen = vasprintf(&buf, fmt, ap);
-    va_end(ap);
-    if (buflen != -1) {
-	sudo_debug_write(buf, buflen);
-	free(buf);
+    if (subsys < NUM_SUBSYSTEMS && sudo_debug_settings[subsys] >= pri) {
+	va_start(ap, fmt);
+	buflen = vasprintf(&buf, fmt, ap);
+	va_end(ap);
+	if (buflen != -1) {
+	    if (ISSET(level, SUDO_DEBUG_ERRNO))
+		sudo_debug_write(buf, buflen, saved_errno);
+	    else
+		sudo_debug_write(buf, buflen, 0);
+	    free(buf);
+	}
     }
+
+    errno = saved_errno;
 }
 
 void
@@ -411,7 +444,7 @@ sudo_debug_execve2(int level, const char *path, char *const argv[], char *const 
 
     *cp = '\0';
 
-    sudo_debug_write(buf, buflen);
+    sudo_debug_write(buf, buflen, 0);
     free(buf);
 }
 

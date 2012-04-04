@@ -98,7 +98,7 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		break;
 	    case SUDO_CONV_DEBUG_MSG:
 		if (msg->msg)
-		    sudo_debug_write(msg->msg, strlen(msg->msg));
+		    sudo_debug_write(msg->msg, strlen(msg->msg), 0);
 		break;
 	    default:
 		goto err;

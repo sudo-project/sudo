@@ -21,8 +21,9 @@
 
 /*
  * The priority and subsystem are encoded in a single 32-bit value.
- * The lower 4 bits are the priority and the top 28 bits are the subsystem.
+ * The lower 4 bits are the priority and the top 27 bits are the subsystem.
  * This allows for 16 priorities and a very large number of subsystems.
+ * Bit 5 is used as a flag to specify whether to log the errno value.
  */
 
 /*
@@ -44,38 +45,41 @@
  * This includes subsystems in the sudoers plugin.
  * Note: order must match sudo_debug_subsystems[]
  */
-#define SUDO_DEBUG_MAIN		(1<<4)	/* sudo main() */
-#define SUDO_DEBUG_ARGS		(2<<4)	/* command line argument processing */
-#define SUDO_DEBUG_EXEC		(3<<4)	/* command execution */
-#define SUDO_DEBUG_PTY		(4<<4)	/* pseudo-tty */
-#define SUDO_DEBUG_UTMP		(5<<4)	/* utmp file ops */
-#define SUDO_DEBUG_CONV		(6<<4)	/* user conversation */
-#define SUDO_DEBUG_PCOMM	(7<<4)	/* plugin communications */
-#define SUDO_DEBUG_UTIL		(8<<4)	/* utility functions */
-#define SUDO_DEBUG_NETIF	(9<<4)	/* network interface functions */
-#define SUDO_DEBUG_AUDIT	(10<<4)	/* audit */
-#define SUDO_DEBUG_EDIT		(11<<4)	/* sudoedit */
-#define SUDO_DEBUG_SELINUX	(12<<4)	/* selinux */
-#define SUDO_DEBUG_LDAP		(13<<4)	/* sudoers LDAP */
-#define SUDO_DEBUG_MATCH	(14<<4)	/* sudoers matching */
-#define SUDO_DEBUG_PARSER	(15<<4)	/* sudoers parser */
-#define SUDO_DEBUG_ALIAS	(16<<4)	/* sudoers alias functions */
-#define SUDO_DEBUG_DEFAULTS	(17<<4)	/* sudoers defaults settings */
-#define SUDO_DEBUG_AUTH		(18<<4)	/* authentication functions */
-#define SUDO_DEBUG_ENV		(19<<4)	/* environment handling */
-#define SUDO_DEBUG_LOGGING	(20<<4)	/* logging functions */
-#define SUDO_DEBUG_NSS		(21<<4)	/* network service switch */
-#define SUDO_DEBUG_RBTREE	(22<<4)	/* red-black tree functions */
-#define SUDO_DEBUG_PERMS	(23<<4)	/* uid/gid swapping functions */
-#define SUDO_DEBUG_PLUGIN	(24<<4)	/* main plugin functions */
-#define SUDO_DEBUG_HOOKS	(25<<4)	/* hook functions */
+#define SUDO_DEBUG_MAIN		( 1<<5)	/* sudo main() */
+#define SUDO_DEBUG_ARGS		( 2<<5)	/* command line argument processing */
+#define SUDO_DEBUG_EXEC		( 3<<5)	/* command execution */
+#define SUDO_DEBUG_PTY		( 4<<5)	/* pseudo-tty */
+#define SUDO_DEBUG_UTMP		( 5<<5)	/* utmp file ops */
+#define SUDO_DEBUG_CONV		( 6<<5)	/* user conversation */
+#define SUDO_DEBUG_PCOMM	( 7<<5)	/* plugin communications */
+#define SUDO_DEBUG_UTIL		( 8<<5)	/* utility functions */
+#define SUDO_DEBUG_NETIF	( 9<<5)	/* network interface functions */
+#define SUDO_DEBUG_AUDIT	(10<<5)	/* audit */
+#define SUDO_DEBUG_EDIT		(11<<5)	/* sudoedit */
+#define SUDO_DEBUG_SELINUX	(12<<5)	/* selinux */
+#define SUDO_DEBUG_LDAP		(13<<5)	/* sudoers LDAP */
+#define SUDO_DEBUG_MATCH	(14<<5)	/* sudoers matching */
+#define SUDO_DEBUG_PARSER	(15<<5)	/* sudoers parser */
+#define SUDO_DEBUG_ALIAS	(16<<5)	/* sudoers alias functions */
+#define SUDO_DEBUG_DEFAULTS	(17<<5)	/* sudoers defaults settings */
+#define SUDO_DEBUG_AUTH		(18<<5)	/* authentication functions */
+#define SUDO_DEBUG_ENV		(19<<5)	/* environment handling */
+#define SUDO_DEBUG_LOGGING	(20<<5)	/* logging functions */
+#define SUDO_DEBUG_NSS		(21<<5)	/* network service switch */
+#define SUDO_DEBUG_RBTREE	(22<<5)	/* red-black tree functions */
+#define SUDO_DEBUG_PERMS	(23<<5)	/* uid/gid swapping functions */
+#define SUDO_DEBUG_PLUGIN	(24<<5)	/* main plugin functions */
+#define SUDO_DEBUG_HOOKS	(25<<5)	/* hook functions */
 #define SUDO_DEBUG_ALL		0xfff0	/* all subsystems */
+
+/* Flag to include string version of errno in debug info. */
+#define SUDO_DEBUG_ERRNO	(1<<4)
 
 /* Extract priority and convert to an index. */
 #define SUDO_DEBUG_PRI(n) (((n) & 0xf) - 1)
 
 /* Extract subsystem and convert to an index. */
-#define SUDO_DEBUG_SUBSYS(n) (((n) >> 4) - 1)
+#define SUDO_DEBUG_SUBSYS(n) (((n) >> 5) - 1)
 
 /*
  * Wrapper for sudo_debug_enter() that declares __func__ as needed
@@ -191,6 +195,6 @@ void sudo_debug_exit_ptr(const char *func, const char *file, int line, int subsy
 int sudo_debug_fd_set(int fd);
 int sudo_debug_init(const char *debugfile, const char *settings);
 void sudo_debug_printf2(int level, const char *format, ...) __printflike(2, 3);
-void sudo_debug_write(const char *str, int len);
+void sudo_debug_write(const char *str, int len, int errno_val);
 
 #endif /* _SUDO_DEBUG_H */
