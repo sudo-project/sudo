@@ -113,8 +113,11 @@ cleanup(int gotsignal)
 {
     debug_decl(cleanup, SUDO_DEBUG_EXEC);
 
-    if (!tq_empty(&io_plugins))
-	term_restore(io_fds[SFD_USERTTY], 0);
+    if (!tq_empty(&io_plugins) && io_fds[SFD_USERTTY] != -1) {
+	check_foreground();
+	if (foreground) {
+	    term_restore(io_fds[SFD_USERTTY], 0);
+    }
 #ifdef HAVE_SELINUX
     selinux_restore_tty();
 #endif
@@ -680,9 +683,12 @@ pty_close(struct command_status *cstat)
     flush_output();
 
     if (io_fds[SFD_USERTTY] != -1) {
-	do {
-	    n = term_restore(io_fds[SFD_USERTTY], 0);
-	} while (!n && errno == EINTR);
+	check_foreground();
+	if (foreground) {
+	    do {
+		n = term_restore(io_fds[SFD_USERTTY], 0);
+	    } while (!n && errno == EINTR);
+	}
     }
 
     /* If child was signalled, write the reason to stdout like the shell. */
@@ -1004,7 +1010,7 @@ exec_monitor(struct command_details *details, int backchannel)
 		goto done;
 	    if (errno == EINTR)
 		continue;
-	    error(1, _("select failed"));
+	    error(1, "monitor: %s", _("select failed"));
 	}
 
 	if (FD_ISSET(signal_pipe[0], fdsr)) {
@@ -1256,7 +1262,7 @@ safe_close(int fd)
     /* Avoid closing /dev/tty or std{in,out,err}. */
     if (fd < 3 || fd == io_fds[SFD_USERTTY]) {
 	errno = EINVAL;
-	return -1;
+	debug_return_int(-1);
     }
     debug_return_int(close(fd));
 }
