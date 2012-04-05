@@ -421,10 +421,11 @@ sudo_debug_printf2(const char *func, const char *file, int lineno, int level,
 	buflen = vasprintf(&buf, fmt, ap);
 	va_end(ap);
 	if (buflen != -1) {
-	    if (ISSET(level, SUDO_DEBUG_ERRNO))
-		sudo_debug_write2(func, file, lineno, buf, buflen, saved_errno);
+	    int errcode = ISSET(level, SUDO_DEBUG_ERRNO) ? saved_errno : 0;
+	    if (ISSET(level, SUDO_DEBUG_LINENO))
+		sudo_debug_write2(func, file, lineno, buf, buflen, errcode);
 	    else
-		sudo_debug_write2(func, file, lineno, buf, buflen, 0);
+		sudo_debug_write2(NULL, NULL, 0, buf, buflen, errcode);
 	    free(buf);
 	}
     }

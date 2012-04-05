@@ -21,9 +21,10 @@
 
 /*
  * The priority and subsystem are encoded in a single 32-bit value.
- * The lower 4 bits are the priority and the top 27 bits are the subsystem.
+ * The lower 4 bits are the priority and the top 26 bits are the subsystem.
  * This allows for 16 priorities and a very large number of subsystems.
  * Bit 5 is used as a flag to specify whether to log the errno value.
+ * Bit 6 specifies whether to log the function, file and line number data.
  */
 
 /*
@@ -45,41 +46,44 @@
  * This includes subsystems in the sudoers plugin.
  * Note: order must match sudo_debug_subsystems[]
  */
-#define SUDO_DEBUG_MAIN		( 1<<5)	/* sudo main() */
-#define SUDO_DEBUG_ARGS		( 2<<5)	/* command line argument processing */
-#define SUDO_DEBUG_EXEC		( 3<<5)	/* command execution */
-#define SUDO_DEBUG_PTY		( 4<<5)	/* pseudo-tty */
-#define SUDO_DEBUG_UTMP		( 5<<5)	/* utmp file ops */
-#define SUDO_DEBUG_CONV		( 6<<5)	/* user conversation */
-#define SUDO_DEBUG_PCOMM	( 7<<5)	/* plugin communications */
-#define SUDO_DEBUG_UTIL		( 8<<5)	/* utility functions */
-#define SUDO_DEBUG_NETIF	( 9<<5)	/* network interface functions */
-#define SUDO_DEBUG_AUDIT	(10<<5)	/* audit */
-#define SUDO_DEBUG_EDIT		(11<<5)	/* sudoedit */
-#define SUDO_DEBUG_SELINUX	(12<<5)	/* selinux */
-#define SUDO_DEBUG_LDAP		(13<<5)	/* sudoers LDAP */
-#define SUDO_DEBUG_MATCH	(14<<5)	/* sudoers matching */
-#define SUDO_DEBUG_PARSER	(15<<5)	/* sudoers parser */
-#define SUDO_DEBUG_ALIAS	(16<<5)	/* sudoers alias functions */
-#define SUDO_DEBUG_DEFAULTS	(17<<5)	/* sudoers defaults settings */
-#define SUDO_DEBUG_AUTH		(18<<5)	/* authentication functions */
-#define SUDO_DEBUG_ENV		(19<<5)	/* environment handling */
-#define SUDO_DEBUG_LOGGING	(20<<5)	/* logging functions */
-#define SUDO_DEBUG_NSS		(21<<5)	/* network service switch */
-#define SUDO_DEBUG_RBTREE	(22<<5)	/* red-black tree functions */
-#define SUDO_DEBUG_PERMS	(23<<5)	/* uid/gid swapping functions */
-#define SUDO_DEBUG_PLUGIN	(24<<5)	/* main plugin functions */
-#define SUDO_DEBUG_HOOKS	(25<<5)	/* hook functions */
+#define SUDO_DEBUG_MAIN		( 1<<6)	/* sudo main() */
+#define SUDO_DEBUG_ARGS		( 2<<6)	/* command line argument processing */
+#define SUDO_DEBUG_EXEC		( 3<<6)	/* command execution */
+#define SUDO_DEBUG_PTY		( 4<<6)	/* pseudo-tty */
+#define SUDO_DEBUG_UTMP		( 5<<6)	/* utmp file ops */
+#define SUDO_DEBUG_CONV		( 6<<6)	/* user conversation */
+#define SUDO_DEBUG_PCOMM	( 7<<6)	/* plugin communications */
+#define SUDO_DEBUG_UTIL		( 8<<6)	/* utility functions */
+#define SUDO_DEBUG_NETIF	( 9<<6)	/* network interface functions */
+#define SUDO_DEBUG_AUDIT	(10<<6)	/* audit */
+#define SUDO_DEBUG_EDIT		(11<<6)	/* sudoedit */
+#define SUDO_DEBUG_SELINUX	(12<<6)	/* selinux */
+#define SUDO_DEBUG_LDAP		(13<<6)	/* sudoers LDAP */
+#define SUDO_DEBUG_MATCH	(14<<6)	/* sudoers matching */
+#define SUDO_DEBUG_PARSER	(15<<6)	/* sudoers parser */
+#define SUDO_DEBUG_ALIAS	(16<<6)	/* sudoers alias functions */
+#define SUDO_DEBUG_DEFAULTS	(17<<6)	/* sudoers defaults settings */
+#define SUDO_DEBUG_AUTH		(18<<6)	/* authentication functions */
+#define SUDO_DEBUG_ENV		(19<<6)	/* environment handling */
+#define SUDO_DEBUG_LOGGING	(20<<6)	/* logging functions */
+#define SUDO_DEBUG_NSS		(21<<6)	/* network service switch */
+#define SUDO_DEBUG_RBTREE	(22<<6)	/* red-black tree functions */
+#define SUDO_DEBUG_PERMS	(23<<6)	/* uid/gid swapping functions */
+#define SUDO_DEBUG_PLUGIN	(24<<6)	/* main plugin functions */
+#define SUDO_DEBUG_HOOKS	(25<<6)	/* hook functions */
 #define SUDO_DEBUG_ALL		0xfff0	/* all subsystems */
 
 /* Flag to include string version of errno in debug info. */
 #define SUDO_DEBUG_ERRNO	(1<<4)
 
+/* Flag to include function, file and line number in debug info. */
+#define SUDO_DEBUG_LINENO	(1<<5)
+
 /* Extract priority and convert to an index. */
 #define SUDO_DEBUG_PRI(n) (((n) & 0xf) - 1)
 
 /* Extract subsystem and convert to an index. */
-#define SUDO_DEBUG_SUBSYS(n) (((n) >> 5) - 1)
+#define SUDO_DEBUG_SUBSYS(n) (((n) >> 6) - 1)
 
 /*
  * Wrapper for sudo_debug_enter() that declares __func__ as needed
@@ -167,10 +171,12 @@
  */
 #if defined(__GNUC__) && __GNUC__ == 2
 # define sudo_debug_printf(pri, fmt...) \
-    sudo_debug_printf2(NULL, NULL, 0, (pri)|sudo_debug_subsys, (fmt))
+    sudo_debug_printf2(__func__, __FILE__, __LINE__, (pri)|sudo_debug_subsys, \
+    (fmt))
 #else
 # define sudo_debug_printf(pri, ...) \
-    sudo_debug_printf2(NULL, NULL, 0, (pri)|sudo_debug_subsys, __VA_ARGS__)
+    sudo_debug_printf2(__func__, __FILE__, __LINE__, (pri)|sudo_debug_subsys, \
+    __VA_ARGS__)
 #endif
 
 #define sudo_debug_execve(pri, path, argv, envp) \

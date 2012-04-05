@@ -39,43 +39,47 @@
 # if defined(__GNUC__) && __GNUC__ == 2
 #  define error(rval, fmt...) do {					       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
-	SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|sudo_debug_subsys, (fmt));	       \
+	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys, \
+	(fmt));								       \
     error2((rval), (fmt));						       \
 } while (0)
 #  define errorx(rval, fmt...) do {					       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
-	SUDO_DEBUG_ERROR|sudo_debug_subsys, (fmt));			       \
+	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt));	       \
     errorx2((rval), (fmt));						       \
 } while (0)
 #  define warning(fmt...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
-	SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|sudo_debug_subsys, (fmt));	       \
+	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys, \
+	(fmt));								       \
     warning2((fmt));							       \
 } while (0)
 #  define warningx(fmt...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
-	SUDO_DEBUG_ERROR|sudo_debug_subsys, (fmt));			       \
+	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt));	       \
     warningx2((fmt));							       \
 } while (0)
 # else
 #  define error(rval, ...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
-	SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|sudo_debug_subsys, __VA_ARGS__);     \
+	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys, \
+	__VA_ARGS__);							       \
     error2((rval), __VA_ARGS__);					       \
 } while (0)
 #  define errorx(rval, ...) do {					       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
-	SUDO_DEBUG_ERROR|sudo_debug_subsys, __VA_ARGS__);		       \
+	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, __VA_ARGS__);    \
     errorx2((rval), __VA_ARGS__);					       \
 } while (0)
 #  define warning(...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
-	SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|sudo_debug_subsys, __VA_ARGS__);      \
+	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys,  \
+	__VA_ARGS__);							       \
     warning2(__VA_ARGS__);						       \
 } while (0)
 #  define warningx(...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
-	SUDO_DEBUG_WARN|sudo_debug_subsys, __VA_ARGS__);		       \
+	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|sudo_debug_subsys, __VA_ARGS__);     \
     warningx2(__VA_ARGS__);						       \
 } while (0)
 # endif /* __GNUC__ == 2 */
