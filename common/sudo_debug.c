@@ -181,37 +181,37 @@ void
 sudo_debug_enter(const char *func, const char *file, int line,
     int subsys)
 {
-    sudo_debug_printf2(subsys | SUDO_DEBUG_TRACE, "-> %s @ %s:%d", func,
-	file, line);
+    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	"-> %s @ %s:%d", func, file, line);
 }
 
 void sudo_debug_exit(const char *func, const char *file, int line,
     int subsys)
 {
-    sudo_debug_printf2(subsys | SUDO_DEBUG_TRACE, "<- %s @ %s:%d", func,
-	file, line);
+    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	"<- %s @ %s:%d", func, file, line);
 }
 
 void sudo_debug_exit_int(const char *func, const char *file, int line,
     int subsys, int rval)
 {
-    sudo_debug_printf2(subsys | SUDO_DEBUG_TRACE, "<- %s @ %s:%d := %d", func,
-	file, line, rval);
+    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	"<- %s @ %s:%d := %d", func, file, line, rval);
 }
 
 void sudo_debug_exit_long(const char *func, const char *file, int line,
     int subsys, long rval)
 {
-    sudo_debug_printf2(subsys | SUDO_DEBUG_TRACE, "<- %s @ %s:%d := %ld", func,
-	file, line, rval);
+    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	"<- %s @ %s:%d := %ld", func, file, line, rval);
 }
 
 void sudo_debug_exit_size_t(const char *func, const char *file, int line,
     int subsys, size_t rval)
 {
     /* XXX - should use %zu but our snprintf.c doesn't support it */
-    sudo_debug_printf2(subsys | SUDO_DEBUG_TRACE, "<- %s @ %s:%d := %lu", func,
-	file, line, (unsigned long)rval);
+    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	"<- %s @ %s:%d := %lu", func, file, line, (unsigned long)rval);
 }
 
 /* We use int, not bool, here for functions that return -1 on error. */
@@ -219,19 +219,19 @@ void sudo_debug_exit_bool(const char *func, const char *file, int line,
     int subsys, int rval)
 {
     if (rval == true || rval == false) {
-	sudo_debug_printf2(subsys | SUDO_DEBUG_TRACE, "<- %s @ %s:%d := %s",
-	    func, file, line, rval ? "true" : "false");
+	sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	    "<- %s @ %s:%d := %s", func, file, line, rval ? "true" : "false");
     } else {
-	sudo_debug_printf2(subsys | SUDO_DEBUG_TRACE, "<- %s @ %s:%d := %d",
-	    func, file, line, rval);
+	sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	    "<- %s @ %s:%d := %d", func, file, line, rval);
     }
 }
 
 void sudo_debug_exit_str(const char *func, const char *file, int line,
     int subsys, const char *rval)
 {
-    sudo_debug_printf2(subsys | SUDO_DEBUG_TRACE, "<- %s @ %s:%d := %s", func,
-	file, line, rval ? rval : "(null)");
+    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	"<- %s @ %s:%d := %s", func, file, line, rval ? rval : "(null)");
 }
 
 void sudo_debug_exit_str_masked(const char *func, const char *file, int line,
@@ -240,104 +240,169 @@ void sudo_debug_exit_str_masked(const char *func, const char *file, int line,
     static const char stars[] = "********************************************************************************";
     int len = rval ? strlen(rval) : sizeof("(null)") - 1;
 
-    sudo_debug_printf2(subsys | SUDO_DEBUG_TRACE, "<- %s @ %s:%d := %.*s", func,
-	file, line, len, rval ? stars : "(null)");
+    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	"<- %s @ %s:%d := %.*s", func, file, line, len, rval ? stars : "(null)");
 }
 
 void sudo_debug_exit_ptr(const char *func, const char *file, int line,
     int subsys, const void *rval)
 {
-    sudo_debug_printf2(subsys | SUDO_DEBUG_TRACE, "<- %s @ %s:%d := %p", func,
-	file, line, rval);
+    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	"<- %s @ %s:%d := %p", func, file, line, rval);
 }
 
-void
-sudo_debug_write(const char *str, int len, int errno_val)
+static void
+sudo_debug_write_conv(const char *func, const char *file, int lineno,
+    const char *str, int len, int errno_val)
 {
-    char *timestr;
+    struct sudo_conv_message msg;
+    struct sudo_conv_reply repl;
+    char *buf = NULL;
+
+    /* Call conversation function */
+    if (sudo_conv != NULL) {
+	/* Remove the newline at the end if appending extra info. */
+	if (str[len - 1] == '\n')
+	    len--;
+
+	if (func != NULL && file != NULL && lineno != 0) {
+	    if (errno_val) {
+		easprintf(&buf, "%.*s: %s @ %s() %s:%d", len, str,
+		    strerror(errno_val), func, file, lineno);
+	    } else {
+		easprintf(&buf, "%.*s @ %s() %s:%d", len, str,
+		    func, file, lineno);
+	    }
+	    str = buf;
+	} else if (errno_val) {
+	    easprintf(&buf, "%.*s: %s", len, str, strerror(errno_val));
+	    str = buf;
+	}
+	memset(&msg, 0, sizeof(msg));
+	memset(&repl, 0, sizeof(repl));
+	msg.msg_type = SUDO_CONV_DEBUG_MSG;
+	msg.msg = str;
+	sudo_conv(1, &msg, &repl);
+	if (buf != NULL)
+	    efree(buf);
+    }
+}
+
+static void
+sudo_debug_write_file(const char *func, const char *file, int lineno,
+    const char *str, int len, int errno_val)
+{
+    char *timestr, numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
     time_t now;
-    struct iovec iov[7];
+    struct iovec iov[12];
     int iovcnt = 4;
     bool need_newline = false;
 
+    /* Prepend program name with trailing space. */
+    iov[1].iov_base = (char *)getprogname();
+    iov[1].iov_len = strlen(iov[1].iov_base);
+    iov[2].iov_base = " ";
+    iov[2].iov_len = 1;
+
+    /* Add string along with newline if it doesn't have one. */
+    iov[3].iov_base = (char *)str;
+    iov[3].iov_len = len;
+    if (str[len - 1] != '\n')
+	need_newline = true;
+
+    /* Append error string if errno is specified. */
+    if (errno_val) {
+	iov[iovcnt].iov_base = ": ";
+	iov[iovcnt].iov_len = 2;
+	iovcnt++;
+	iov[iovcnt].iov_base = strerror(errno_val);
+	iov[iovcnt].iov_len = strlen(iov[iovcnt].iov_base);
+	iovcnt++;
+
+	/* Move newline to the end. */
+	if (!need_newline) {
+	    need_newline = true;
+	    iov[3].iov_len--;
+	}
+    }
+
+    /* If function, file and lineno are specified, append them. */
+    if (func != NULL && file != NULL && lineno != 0) {
+	iov[iovcnt].iov_base = " @ ";
+	iov[iovcnt].iov_len = 3;
+	iovcnt++;
+
+	iov[iovcnt].iov_base = (char *)func;
+	iov[iovcnt].iov_len = strlen(func);
+	iovcnt++;
+
+	iov[iovcnt].iov_base = "() ";
+	iov[iovcnt].iov_len = 3;
+	iovcnt++;
+
+	iov[iovcnt].iov_base = (char *)file;
+	iov[iovcnt].iov_len = strlen(file);
+	iovcnt++;
+
+	(void)snprintf(numbuf, sizeof(numbuf), ":%d", lineno);
+	iov[iovcnt].iov_base = numbuf;
+	iov[iovcnt].iov_len = strlen(numbuf);
+	iovcnt++;
+
+	/* Move newline to the end. */
+	if (!need_newline) {
+	    need_newline = true;
+	    iov[3].iov_len--;
+	}
+    }
+
+    /* Append newline as needed. */
+    if (need_newline) {
+	/* force newline */
+	iov[iovcnt].iov_base = "\n";
+	iov[iovcnt].iov_len = 1;
+	iovcnt++;
+    }
+
+    /* Do timestamp last due to ctime's static buffer. */
+    now = time(NULL);
+    timestr = ctime(&now) + 4;
+    timestr[15] = ' ';	/* replace year with a space */
+    timestr[16] = '\0';
+    iov[0].iov_base = timestr;
+    iov[0].iov_len = 16;
+
+    /* Write message in a single syscall */
+    ignore_result(writev(sudo_debug_fd, iov, iovcnt));
+}
+
+void
+sudo_debug_write2(const char *func, const char *file, int lineno,
+    const char *str, int len, int errno_val)
+{
     if (len <= 0)
 	return;
 
     switch (sudo_debug_mode) {
     case SUDO_DEBUG_MODE_CONV:
-	/* Call conversation function */
-	if (sudo_conv != NULL) {
-	    struct sudo_conv_message msg[3];
-	    struct sudo_conv_reply repl[3];
-	    int msgcnt = 1;
-
-	    memset(msg, 0, sizeof(msg));
-	    memset(repl, 0, sizeof(repl));
-	    msg[0].msg_type = SUDO_CONV_DEBUG_MSG;
-	    msg[0].msg = str;
-	    if (errno_val) {
-		msgcnt = 3;
-		msg[1].msg_type = SUDO_CONV_DEBUG_MSG;
-		msg[1].msg = ": ";
-		msg[2].msg_type = SUDO_CONV_DEBUG_MSG;
-		msg[2].msg = strerror(errno_val);
-	    }
-	    sudo_conv(msgcnt, msg, repl);
-	}
+	sudo_debug_write_conv(func, file, lineno, str, len, errno_val);
 	break;
     case SUDO_DEBUG_MODE_FILE:
-	/* Prepend program name with trailing space. */
-	iov[1].iov_base = (char *)getprogname();
-	iov[1].iov_len = strlen(iov[1].iov_base);
-	iov[2].iov_base = " ";
-	iov[2].iov_len = 1;
-
-	/* Add string along with newline if it doesn't have one. */
-	iov[3].iov_base = (char *)str;
-	iov[3].iov_len = len;
-	if (str[len - 1] != '\n')
-	    need_newline = true;
-
-	/* Append error string if errno is specified. */
-	if (errno_val) {
-	    iov[iovcnt].iov_base = ": ";
-	    iov[iovcnt].iov_len = 2;
-	    iovcnt++;
-	    iov[iovcnt].iov_base = strerror(errno_val);
-	    iov[iovcnt].iov_len = strlen(iov[iovcnt].iov_base);
-	    iovcnt++;
-
-	    /* Move newline to the end. */
-	    if (!need_newline) {
-		need_newline = true;
-		iov[3].iov_len--;
-	    }
-	}
-
-	/* Append newline as needed. */
-	if (need_newline) {
-	    /* force newline */
-	    iov[iovcnt].iov_base = "\n";
-	    iov[iovcnt].iov_len = 1;
-	    iovcnt++;
-	}
-
-	/* Do timestamp last due to ctime's static buffer. */
-	now = time(NULL);
-	timestr = ctime(&now) + 4;
-	timestr[15] = ' ';	/* replace year with a space */
-	timestr[16] = '\0';
-	iov[0].iov_base = timestr;
-	iov[0].iov_len = 16;
-
-	/* Write message in a single syscall */
-	ignore_result(writev(sudo_debug_fd, iov, iovcnt));
+	sudo_debug_write_file(func, file, lineno, str, len, errno_val);
 	break;
     }
 }
 
+/* XXX - turn into a macro */
 void
-sudo_debug_printf2(int level, const char *fmt, ...)
+sudo_debug_write(const char *str, int len, int errno_val)
+{
+    sudo_debug_write2(NULL, NULL, 0, str, len, errno_val);
+}
+
+void
+sudo_debug_printf2(const char *func, const char *file, int lineno, int level,
+    const char *fmt, ...)
 {
     int buflen, pri, subsys, saved_errno = errno;
     va_list ap;
@@ -357,9 +422,9 @@ sudo_debug_printf2(int level, const char *fmt, ...)
 	va_end(ap);
 	if (buflen != -1) {
 	    if (ISSET(level, SUDO_DEBUG_ERRNO))
-		sudo_debug_write(buf, buflen, saved_errno);
+		sudo_debug_write2(func, file, lineno, buf, buflen, saved_errno);
 	    else
-		sudo_debug_write(buf, buflen, 0);
+		sudo_debug_write2(func, file, lineno, buf, buflen, 0);
 	    free(buf);
 	}
     }

@@ -167,10 +167,10 @@
  */
 #if defined(__GNUC__) && __GNUC__ == 2
 # define sudo_debug_printf(pri, fmt...) \
-    sudo_debug_printf2((pri)|sudo_debug_subsys, (fmt))
+    sudo_debug_printf2(NULL, NULL, 0, (pri)|sudo_debug_subsys, (fmt))
 #else
 # define sudo_debug_printf(pri, ...) \
-    sudo_debug_printf2((pri)|sudo_debug_subsys, __VA_ARGS__)
+    sudo_debug_printf2(NULL, NULL, 0, (pri)|sudo_debug_subsys, __VA_ARGS__)
 #endif
 
 #define sudo_debug_execve(pri, path, argv, envp) \
@@ -194,7 +194,8 @@ void sudo_debug_exit_str_masked(const char *func, const char *file, int line, in
 void sudo_debug_exit_ptr(const char *func, const char *file, int line, int subsys, const void *rval);
 int sudo_debug_fd_set(int fd);
 int sudo_debug_init(const char *debugfile, const char *settings);
-void sudo_debug_printf2(int level, const char *format, ...) __printflike(2, 3);
+void sudo_debug_printf2(const char *func, const char *file, int line, int level, const char *format, ...) __printflike(5, 6);
 void sudo_debug_write(const char *str, int len, int errno_val);
+void sudo_debug_write2(const char *func, const char *file, int line, const char *str, int len, int errno_val);
 
 #endif /* _SUDO_DEBUG_H */

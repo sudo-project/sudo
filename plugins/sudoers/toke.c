@@ -3725,8 +3725,8 @@ sudoers_trace_print(const char *msg)
     /* XXX - assumes a final newline */
     if (strchr(msg, '\n') != NULL)
     {
-	sudo_debug_printf2(SUDO_DEBUG_PARSER|SUDO_DEBUG_DEBUG, "%s:%d %s",
-	    sudoers, sudolineno, lbuf.buf);
+	sudo_debug_printf2(NULL, NULL, 0, SUDO_DEBUG_PARSER|SUDO_DEBUG_DEBUG,
+	    "%s:%d %s", sudoers, sudolineno, lbuf.buf);
 	lbuf.len = 0;
     }
     return 0;
