@@ -104,6 +104,7 @@ static void sigwinch(int s);
 static void sync_ttysize(int src, int dst);
 static void deliver_signal(pid_t pid, int signo);
 static int safe_close(int fd);
+static void check_foreground(void);
 
 /*
  * Cleanup hook for error()/errorx()
@@ -115,7 +116,7 @@ cleanup(int gotsignal)
 
     if (!tq_empty(&io_plugins) && io_fds[SFD_USERTTY] != -1) {
 	check_foreground();
-	if (foreground) {
+	if (foreground)
 	    term_restore(io_fds[SFD_USERTTY], 0);
     }
 #ifdef HAVE_SELINUX
