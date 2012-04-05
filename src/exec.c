@@ -337,6 +337,10 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 	if (nready == -1) {
 	    if (errno == EINTR)
 		continue;
+	    if (errno == EBADF) {
+		/* One of the ttys must have gone away. */
+		goto do_tty_io;
+	    }
 	    error(1, _("select failed"));
 	}
 	if (FD_ISSET(sv[0], fdsw)) {
@@ -403,7 +407,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 		break;
 	    }
 	}
-
+do_tty_io:
 	if (perform_io(fdsr, fdsw, cstat) != 0) {
 	    /* I/O error, kill child if still alive and finish. */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR, "I/O error, terminating child");
