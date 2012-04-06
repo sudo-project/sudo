@@ -441,7 +441,7 @@ send_mail(const char *fmt, ...)
 	debug_return;
 
     /* Fork and return, child will daemonize. */
-    switch (pid = fork()) {
+    switch (pid = sudo_debug_fork()) {
 	case -1:
 	    /* Error. */
 	    error(1, _("unable to fork"));
@@ -510,7 +510,7 @@ send_mail(const char *fmt, ...)
 	_exit(1);
     }
 
-    switch (pid = fork()) {
+    switch (pid = sudo_debug_fork()) {
 	case -1:
 	    /* Error. */
 	    mysyslog(LOG_ERR, _("unable to fork: %m"));

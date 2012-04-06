@@ -203,5 +203,6 @@ int sudo_debug_init(const char *debugfile, const char *settings);
 void sudo_debug_printf2(const char *func, const char *file, int line, int level, const char *format, ...) __printflike(5, 6);
 void sudo_debug_write(const char *str, int len, int errno_val);
 void sudo_debug_write2(const char *func, const char *file, int line, const char *str, int len, int errno_val);
+pid_t sudo_debug_fork(void);
 
 #endif /* _SUDO_DEBUG_H */

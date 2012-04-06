@@ -751,7 +751,7 @@ run_command(char *path, char **argv)
     pid_t pid, rv;
     debug_decl(run_command, SUDO_DEBUG_UTIL)
 
-    switch (pid = fork()) {
+    switch (pid = sudo_debug_fork()) {
 	case -1:
 	    error(1, _("unable to execute %s"), path);
 	    break;	/* NOTREACHED */

@@ -99,7 +99,7 @@ static int fork_cmnd(struct command_details *details, int sv[2])
     sa.sa_handler = handler;
     sigaction(SIGCONT, &sa, NULL);
 
-    child = fork();
+    child = sudo_debug_fork();
     switch (child) {
     case -1:
 	error(1, _("unable to fork"));
@@ -214,7 +214,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 
     /* If running in background mode, fork and exit. */
     if (ISSET(details->flags, CD_BACKGROUND)) {
-	switch (fork()) {
+	switch (sudo_debug_fork()) {
 	    case -1:
 		cstat->type = CMD_ERRNO;
 		cstat->val = errno;

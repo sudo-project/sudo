@@ -618,7 +618,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
 	}
     }
 
-    child = fork();
+    child = sudo_debug_fork();
     switch (child) {
     case -1:
 	error(1, _("unable to fork"));
@@ -953,7 +953,7 @@ exec_monitor(struct command_details *details, int backchannel)
     /* Start command and wait for it to stop or exit */
     if (pipe(errpipe) == -1)
 	error(1, _("unable to create pipe"));
-    child = fork();
+    child = sudo_debug_fork();
     if (child == -1) {
 	warning(_("unable to fork"));
 	goto bad;

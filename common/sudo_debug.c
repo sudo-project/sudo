@@ -114,6 +114,8 @@ const char *const sudo_debug_subsystems[] = {
 static int sudo_debug_settings[NUM_SUBSYSTEMS];
 static int sudo_debug_fd = -1;
 static int sudo_debug_mode;
+static char sudo_debug_pidstr[(((sizeof(int) * 8) + 2) / 3) + 3];
+static size_t sudo_debug_pidlen;
 
 extern sudo_conv_t sudo_conv;
 
@@ -174,7 +176,25 @@ int sudo_debug_init(const char *debugfile, const char *settings)
     }
     efree(buf);
 
+    (void)snprintf(sudo_debug_pidstr, sizeof(sudo_debug_pidstr), "[%d] ",
+	(int)getpid());
+    sudo_debug_pidlen = strlen(sudo_debug_pidstr);
+
     return 1;
+}
+
+pid_t
+sudo_debug_fork(void)
+{
+    pid_t pid;
+
+    if ((pid = fork()) == 0) {
+	(void)snprintf(sudo_debug_pidstr, sizeof(sudo_debug_pidstr), "[%d] ",
+	    (int)getpid());
+	sudo_debug_pidlen = strlen(sudo_debug_pidstr);
+    }
+
+    return pid;
 }
 
 void
@@ -298,11 +318,11 @@ sudo_debug_write_file(const char *func, const char *file, int lineno,
     int iovcnt = 4;
     bool need_newline = false;
 
-    /* Prepend program name with trailing space. */
+    /* Prepend program name and pid with a trailing space. */
     iov[1].iov_base = (char *)getprogname();
     iov[1].iov_len = strlen(iov[1].iov_base);
-    iov[2].iov_base = " ";
-    iov[2].iov_len = 1;
+    iov[2].iov_base = sudo_debug_pidstr;
+    iov[2].iov_len = sudo_debug_pidlen;
 
     /* Add string along with newline if it doesn't have one. */
     iov[3].iov_base = (char *)str;
