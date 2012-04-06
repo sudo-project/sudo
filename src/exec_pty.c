@@ -102,7 +102,7 @@ static int exec_monitor(struct command_details *details, int backchannel);
 static void exec_pty(struct command_details *detail, int *errfd);
 static void sigwinch(int s);
 static void sync_ttysize(int src, int dst);
-static void deliver_signal(pid_t pid, int signo);
+static void deliver_signal(pid_t pid, int signo, bool from_parent);
 static int safe_close(int fd);
 static void check_foreground(void);
 
@@ -748,13 +748,14 @@ fd_set_iobs(fd_set *fdsr, fd_set *fdsw)
 }
 
 static void
-deliver_signal(pid_t pid, int signo)
+deliver_signal(pid_t pid, int signo, bool from_parent)
 {
     int status;
     debug_decl(deliver_signal, SUDO_DEBUG_EXEC);
 
     /* Handle signal from parent. */
-    sudo_debug_printf(SUDO_DEBUG_INFO, "received signal %d from parent", signo);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "received signal %d%s", signo,
+	from_parent ? " from parent" : "");
     switch (signo) {
     case SIGALRM:
 	terminate_child(pid, true);
@@ -1029,7 +1030,7 @@ exec_monitor(struct command_details *details, int backchannel)
 	    if (signo == SIGCHLD)
 		alive = handle_sigchld(backchannel, &cstat);
 	    else
-		deliver_signal(child, signo);
+		deliver_signal(child, signo, false);
 	    continue;
 	}
 	if (errpipe[0] != -1 && FD_ISSET(errpipe[0], fdsr)) {
@@ -1062,7 +1063,7 @@ exec_monitor(struct command_details *details, int backchannel)
 		    cstmp.type);
 		continue;
 	    }
-	    deliver_signal(child, cstmp.val);
+	    deliver_signal(child, cstmp.val, true);
 	}
     }
 
