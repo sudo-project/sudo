@@ -20,6 +20,7 @@ common/setgroups.c
 common/sudo_conf.c
 common/sudo_debug.c
 common/term.c
+common/ttysize.c
 common/zero_bytes.c
 compat/Makefile.in
 compat/charclass.h
@@ -322,7 +323,6 @@ src/sudo_plugin_int.h
 src/sudo_usage.h.in
 src/tgetpass.c
 src/ttyname.c
-src/ttysize.c
 src/utmp.c
 sudo.pp
 zlib/Makefile.in

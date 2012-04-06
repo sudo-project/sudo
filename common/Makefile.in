@@ -54,7 +54,7 @@ SHELL = @SHELL@
 
 LTOBJS = alloc.lo atobool.lo fileops.lo fmt_string.lo lbuf.lo list.lo \
 	 secure_path.lo setgroups.lo sudo_conf.lo sudo_debug.lo term.lo \
-	 zero_bytes.lo @COMMON_OBJS@
+	 ttysize.lo zero_bytes.lo @COMMON_OBJS@
 
 all: libcommon.la
 
@@ -149,6 +149,9 @@ sudo_debug.lo: $(srcdir)/sudo_debug.c $(top_builddir)/config.h \
 term.lo: $(srcdir)/term.c $(top_builddir)/config.h $(incdir)/missing.h \
          $(incdir)/sudo_debug.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/term.c
+ttysize.lo: $(srcdir)/ttysize.c $(top_builddir)/config.h $(incdir)/missing.h \
+            $(incdir)/sudo_debug.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/ttysize.c
 zero_bytes.lo: $(srcdir)/zero_bytes.c $(top_builddir)/config.h \
                $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/zero_bytes.c
