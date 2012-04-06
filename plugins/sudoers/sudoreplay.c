@@ -141,6 +141,8 @@ struct log_info {
     char *tty;
     char *cmd;
     time_t tstamp;
+    int rows;
+    int cols;
 };
 
 /*
@@ -200,6 +202,7 @@ extern time_t get_date(char *);
 extern char *get_timestr(time_t, int);
 extern int term_raw(int, int);
 extern int term_restore(int, int);
+extern void get_ttysize(int *rowp, int *colp);
 void cleanup(int);
 
 static int list_sessions(int, char **, const char *, const char *, const char *);
@@ -210,6 +213,8 @@ static void help(void) __attribute__((__noreturn__));
 static void usage(int);
 static int open_io_fd(char *pathbuf, int len, const char *suffix, union io_fd *fdp);
 static int parse_timing(const char *buf, const char *decimal, int *idx, double *seconds, size_t *nbytes);
+static int parse_logfile(char *logfile, struct log_info *li);
+static void free_log_info(struct log_info *li);
 
 #ifdef HAVE_REGCOMP
 # define REGEX_T	regex_t
@@ -235,14 +240,15 @@ int
 main(int argc, char *argv[])
 {
     int ch, idx, plen, nready, exitcode = 0, interactive = 0, listonly = 0;
+    int rows = 0, cols = 0;
     const char *id, *user = NULL, *pattern = NULL, *tty = NULL, *decimal = ".";
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
     double seconds, to_wait, speed = 1.0, max_wait = 0;
-    FILE *lfile;
     fd_set *fdsw;
     sigaction_t sa;
     size_t len, nbytes, nread, off;
     ssize_t nwritten;
+    struct log_info li;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -348,23 +354,24 @@ main(int argc, char *argv[])
 	}
     }
 
-    /* Read log file. */
+    /* Parse log file. */
     path[plen] = '\0';
     strlcat(path, "/log", sizeof(path));
-    lfile = fopen(path, "r");
-    if (lfile == NULL)
-	error(1, _("unable to open %s"), path);
-    cp = NULL;
-    len = 0;
-    /* Pull out command (third line). */
-    if (getline(&cp, &len, lfile) == -1 ||
-	getline(&cp, &len, lfile) == -1 ||
-	getline(&cp, &len, lfile) == -1) {
-	errorx(1, _("invalid log file %s"), path);
+    if (parse_logfile(path, &li) != 0)
+	exit(1);
+    printf(_("Replaying sudo session: %s\n"), li.cmd);
+
+    /* Make sure the terminal is large enough. */
+    get_ttysize(&rows, &cols);
+    if (li.rows != 0 && li.cols != 0) {
+	if (li.rows > rows) {
+	    printf(_("Warning: your terminal is too small to properly replay the log.\n"));
+	    printf(_("Log geometry is %d x %d, your terminal's geometry is %d x %d."), li.rows, li.cols, rows, cols);
+	}
     }
-    printf(_("Replaying sudo session: %s"), cp);
-    free(cp);
-    fclose(lfile);
+
+    /* Done with parsed log file. */
+    free_log_info(&li);
 
     fflush(stdout);
     memset(&sa, 0, sizeof(sa));
@@ -688,11 +695,10 @@ match_expr(struct search_node *head, struct log_info *log)
 }
 
 static int
-list_session(char *logfile, REGEX_T *re, const char *user, const char *tty)
+parse_logfile(char *logfile, struct log_info *li)
 {
     FILE *fp;
-    char *buf = NULL, *cmd = NULL, *cwd = NULL, idbuf[7], *idstr, *cp;
-    struct log_info li;
+    char *buf = NULL, *cmd = NULL, *cwd = NULL, *cp, *ep;
     size_t bufsize = 0, cwdsize = 0, cmdsize = 0;
     int rval = -1;
     debug_decl(list_session, SUDO_DEBUG_UTIL)
@@ -715,36 +721,91 @@ list_session(char *logfile, REGEX_T *re, const char *user, const char *tty)
 	goto done;
     }
 
-    /* crack the log line: timestamp:user:runas_user:runas_group:tty */
+    /*
+     * Crack the log line (rows and cols not present in old versions).
+     *	timestamp:user:runas_user:runas_group:tty:rows:cols
+     */
+    memset(li, 0, sizeof(*li));
     buf[strcspn(buf, "\n")] = '\0';
-    if ((li.tstamp = atoi(buf)) == 0)
+
+    /* timestamp */
+    if ((ep = strchr(buf, ':')) == NULL)
+	goto done;
+    if ((li->tstamp = atoi(buf)) == 0)
 	goto done;
 
-    if ((cp = strchr(buf, ':')) == NULL)
+    /* user */
+    cp = ep + 1;
+    if ((ep = strchr(cp, ':')) == NULL)
 	goto done;
-    *cp++ = '\0';
-    li.user = cp;
+    li->user = estrndup(cp, (size_t)(ep - cp));
 
-    if ((cp = strchr(cp, ':')) == NULL)
+    /* runas user */
+    cp = ep + 1;
+    if ((ep = strchr(cp, ':')) == NULL)
 	goto done;
-    *cp++ = '\0';
-    li.runas_user = cp;
+    li->runas_user = estrndup(cp, (size_t)(ep - cp));
 
-    if ((cp = strchr(cp, ':')) == NULL)
+    /* runas group */
+    cp = ep + 1;
+    if ((ep = strchr(cp, ':')) == NULL)
 	goto done;
-    *cp++ = '\0';
-    li.runas_group = cp;
+    if (cp != ep)
+	li->runas_group = estrndup(cp, (size_t)(ep - cp));
 
-    if ((cp = strchr(cp, ':')) == NULL)
-	goto done;
-    *cp++ = '\0';
-    li.tty = cp;
+    /* tty, followed by optional rows + columns */
+    cp = ep + 1;
+    if ((ep = strchr(cp, ':')) == NULL) {
+	li->tty = estrdup(cp);
+    } else {
+	li->tty = estrndup(cp, (size_t)(ep - cp));
+	cp = ep + 1;
+	li->rows = atoi(cp);
+	if ((ep = strchr(cp, ':')) != NULL) {
+	    cp = ep + 1;
+	    li->cols = atoi(cp);
+	}
+    }
 
     cwd[strcspn(cwd, "\n")] = '\0';
-    li.cwd = cwd;
+    li->cwd = cwd;
 
     cmd[strcspn(cmd, "\n")] = '\0';
-    li.cmd = cmd;
+    li->cmd = cmd;
+
+    rval = 0;
+
+done:
+    fclose(fp);
+    efree(buf);
+    if (rval != 0) {
+	efree(cwd);
+	efree(cmd);
+    }
+    debug_return_int(rval);
+}
+
+static void
+free_log_info(struct log_info *li)
+{
+    efree(li->cwd);
+    efree(li->user);
+    efree(li->runas_user);
+    efree(li->runas_group);
+    efree(li->tty);
+    efree(li->cmd);
+}
+
+static int
+list_session(char *logfile, REGEX_T *re, const char *user, const char *tty)
+{
+    char idbuf[7], *idstr, *cp;
+    struct log_info li;
+    int rval = -1;
+    debug_decl(list_session, SUDO_DEBUG_UTIL)
+
+    if (parse_logfile(logfile, &li) != 0)
+	goto done;
 
     /* Match on search expression if there is one. */
     if (search_expr && !match_expr(search_expr, &li))
@@ -766,16 +827,17 @@ list_session(char *logfile, REGEX_T *re, const char *user, const char *tty)
 	cp[strlen(cp) - 4] = '\0';
 	idstr = cp;
     }
+    /* XXX - print rows + cols? */
     printf("%s : %s : TTY=%s ; CWD=%s ; USER=%s ; ",
 	get_timestr(li.tstamp, 1), li.user, li.tty, li.cwd, li.runas_user);
-    if (*li.runas_group)
+    if (li.runas_group)
 	printf("GROUP=%s ; ", li.runas_group);
     printf("TSID=%s ; COMMAND=%s\n", idstr, li.cmd);
 
     rval = 0;
 
 done:
-    fclose(fp);
+    free_log_info(&li);
     debug_return_int(rval);
 }
 
