@@ -1,14 +1,14 @@
 # traducción al español de sudo.
 # This file is distributed under the same license as the sudo package.
 #
-# Abel Sendón <abelnicolas1976@gmail.com>, 2012.
+# Abel Sendon <abelnicolas1976@gmail.com>, 2012.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.4b1\n"
+"Project-Id-Version: sudo 1.8.5-b1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-01-06 15:10-0500\n"
-"PO-Revision-Date: 2012-02-03 00:09-0300\n"
-"Last-Translator: Abel Sendón <abelnicolas1976@gmail.com>\n"
+"POT-Creation-Date: 2012-03-14 14:20-0400\n"
+"PO-Revision-Date: 2012-03-26 14:42-0300\n"
+"Last-Translator: Abel Sendon <abelnicolas1976@gmail.com>\n"
 "Language-Team: Spanish <es@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -23,63 +23,76 @@ msgstr ""
 msgid ": "
 msgstr ": "
 
-#: src/exec.c:133 src/exec_pty.c:604 src/exec_pty.c:936 src/tgetpass.c:227
+#: src/exec.c:105 src/exec_pty.c:616 src/exec_pty.c:948 src/tgetpass.c:227
 #, c-format
 msgid "unable to fork"
 msgstr "no se puede bifurcar"
 
-#: src/exec.c:299
+#: src/exec.c:252
 #, c-format
 msgid "unable to create sockets"
 msgstr "no se puede crear sockets"
 
-#: src/exec.c:306 src/exec_pty.c:557 src/exec_pty.c:565 src/exec_pty.c:572
-#: src/exec_pty.c:871 src/exec_pty.c:933 src/tgetpass.c:224
+#: src/exec.c:259 src/exec_pty.c:567 src/exec_pty.c:576 src/exec_pty.c:584
+#: src/exec_pty.c:883 src/exec_pty.c:945 src/tgetpass.c:224
 #, c-format
 msgid "unable to create pipe"
 msgstr "no se puede crear tubería"
 
-#: src/exec.c:373 src/exec_pty.c:1000 src/exec_pty.c:1135
+#: src/exec.c:340 src/exec_pty.c:1012 src/exec_pty.c:1147
 #, c-format
 msgid "select failed"
 msgstr "selección fallida"
 
-#: src/exec.c:458
+#: src/exec.c:425
 #, c-format
 msgid "unable to restore tty label"
 msgstr "no se puede restaurar la etiqueta tty"
+
+#: src/exec_common.c:69
+#, c-format
+msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
+msgstr "no se puede remover PRIV_PROC_EXEC desde PRIV_LIMIT"
+
+#: src/exec_common.c:111 src/parse_args.c:432 src/sudo.c:451 src/sudo.c:471
+#: src/sudo.c:478 src/sudo.c:489 src/sudo.c:848 common/alloc.c:85
+#: common/alloc.c:105 common/alloc.c:123 common/alloc.c:145 common/alloc.c:203
+#: common/alloc.c:217
+#, c-format
+msgid "unable to allocate memory"
+msgstr "no se puede de asignar memoria"
 
 #: src/exec_pty.c:140
 #, c-format
 msgid "unable to allocate pty"
 msgstr "no se puede asignar pty"
 
-#: src/exec_pty.c:597
+#: src/exec_pty.c:609
 #, c-format
 msgid "unable to set terminal to raw mode"
 msgstr "no se puede establecer la terminal en modo directo"
 
-#: src/exec_pty.c:914
+#: src/exec_pty.c:926
 #, c-format
 msgid "unable to set controlling tty"
 msgstr "no se puede establecer el controlador tty"
 
-#: src/exec_pty.c:1008
+#: src/exec_pty.c:1020
 #, c-format
 msgid "error reading from signal pipe"
 msgstr "error al leer desde la tubería de la señal"
 
-#: src/exec_pty.c:1027
+#: src/exec_pty.c:1039
 #, c-format
 msgid "error reading from pipe"
 msgstr "error al leer de la tubería"
 
-#: src/exec_pty.c:1043
+#: src/exec_pty.c:1055
 #, c-format
 msgid "error reading from socketpair"
 msgstr "error leyendo de socketpair"
 
-#: src/exec_pty.c:1047
+#: src/exec_pty.c:1059
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "tipo de respuesta inesperada en canales alternos %d"
@@ -129,12 +142,12 @@ msgstr "%s: incompatible la versión principal de la política %d, se esperaba %
 msgid "%s: only a single policy plugin may be loaded"
 msgstr "%s: se puede cargar sólo una política de plugin"
 
-#: src/load_plugins.c:146
+#: src/load_plugins.c:148
 #, c-format
 msgid "%s: at least one policy plugin must be specified"
 msgstr "%s: debe ser especificada al menos una política de plugin"
 
-#: src/load_plugins.c:151
+#: src/load_plugins.c:153
 #, c-format
 msgid "policy plugin %s does not include a check_policy method"
 msgstr "la política del plugin %s no incluye un método check_policy"
@@ -189,13 +202,6 @@ msgstr "la opción '-U' sólo se puede usar con la opcion '-l'"
 #, c-format
 msgid "the `-A' and `-S' options may not be used together"
 msgstr "las opciones '-A' y '-S' no se pueden utilizar conjuntamente"
-
-#: src/parse_args.c:432 src/sudo.c:482 src/sudo.c:502 src/sudo.c:509
-#: src/sudo.c:519 common/alloc.c:85 common/alloc.c:105 common/alloc.c:123
-#: common/alloc.c:145 common/alloc.c:203 common/alloc.c:217
-#, c-format
-msgid "unable to allocate memory"
-msgstr "no se puede de asignar memoria"
 
 #: src/parse_args.c:445
 #, c-format
@@ -379,7 +385,7 @@ msgstr "no se puede obtener el nuevo contexto tty, no volver a etiquetar tty"
 msgid "unable to set new tty context"
 msgstr "no se puede establecer nuevo contexto tty"
 
-#: src/selinux.c:195 src/selinux.c:208 src/sudo.c:335
+#: src/selinux.c:195 src/selinux.c:208 src/sudo.c:337 common/sudo_conf.c:328
 #, c-format
 msgid "unable to open %s"
 msgstr "no se pudo abrir %s"
@@ -424,181 +430,177 @@ msgstr "no se puede determinar el método de forzado"
 msgid "unable to setup tty context for %s"
 msgstr "no se puede establecer el contexto tty para %s"
 
-#: src/selinux.c:371
+#: src/selinux.c:372
 #, c-format
 msgid "unable to set exec context to %s"
 msgstr "no se puede establecer el contexto de ejecución a %s"
 
-#: src/selinux.c:378
+#: src/selinux.c:379
 #, c-format
 msgid "unable to set key creation context to %s"
 msgstr "no se puede establecer la clave de creación de contexto a %s"
 
-#: src/sesh.c:48
+#: src/sesh.c:70
+#, c-format
 msgid "requires at least one argument"
 msgstr "requiere al menos un argumento"
 
-#: src/sesh.c:64
+#: src/sesh.c:91
 #, c-format
 msgid "unable to execute %s"
 msgstr "no se puede ejecutar %s"
 
-#: src/sudo.c:198
+#: src/sudo.c:191
 #, c-format
 msgid "must be setuid root"
 msgstr "debe ser setuid root"
 
-#: src/sudo.c:219
+#: src/sudo.c:214
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Sudo versión %s\n"
 
-#: src/sudo.c:221
+#: src/sudo.c:216
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "Opciones de configuración: %s\n"
 
-#: src/sudo.c:226
+#: src/sudo.c:221
 #, c-format
 msgid "fatal error, unable to load plugins"
 msgstr "error fatal, no se puede cargar los plugins"
 
-#: src/sudo.c:234
+#: src/sudo.c:229
 #, c-format
 msgid "unable to initialize policy plugin"
 msgstr "no se puede inicializar la política de plugin"
 
-#: src/sudo.c:289
+#: src/sudo.c:284
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "error al inicializar los plugins de E/S %s"
 
-#: src/sudo.c:310
+#: src/sudo.c:312
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "inesperado modo sudo 0x%x"
 
-#: src/sudo.c:404
+#: src/sudo.c:406
 #, c-format
 msgid "unable to get group vector"
 msgstr "no se puede obtener el vector de grupo"
 
-#: src/sudo.c:478
+#: src/sudo.c:447
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "uid desconocido %u: quién es usted?"
 
-#: src/sudo.c:818
+#: src/sudo.c:790
 #, c-format
 msgid "resource control limit has been reached"
 msgstr "el límite de control de recursos ha sido alcanzado"
 
-#: src/sudo.c:821
+#: src/sudo.c:793
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
 msgstr "el usuario \"%s\" no es miembro del proyecto \"%s\""
 
-#: src/sudo.c:825
+#: src/sudo.c:797
 #, c-format
 msgid "the invoking task is final"
 msgstr "la tarea que invoca es definitiva"
 
-#: src/sudo.c:828
+#: src/sudo.c:800
 #, c-format
 msgid "could not join project \"%s\""
 msgstr "no podría unirse al proyecto \"%s\""
 
-#: src/sudo.c:833
+#: src/sudo.c:805
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "no hay fondo de recursos aceptando las asignaciones existentes para el proyecto \"%s\""
 
-#: src/sudo.c:837
+#: src/sudo.c:809
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "el fondo de recursos especificado no existe para el proyecto \"%s\""
 
-#: src/sudo.c:841
+#: src/sudo.c:813
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "no se podría enlazar al fondo de recursos predeterminado para el proyecto \"%s\" "
 
-#: src/sudo.c:847
+#: src/sudo.c:819
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "configuración del proyecto fallida \"%s\" "
 
-#: src/sudo.c:849
+#: src/sudo.c:821
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "aviso, el control de asignación de recursos falló para el proyecto \"%s\""
 
-#: src/sudo.c:879
-#, c-format
-msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
-msgstr "no se puede remover PRIV_PROC_EXEC desde PRIV_LIMIT"
-
-#: src/sudo.c:988
+#: src/sudo.c:892
 #, c-format
 msgid "unknown login class %s"
 msgstr "clase de inicio de sesión desconocida %s"
 
-#: src/sudo.c:1004 src/sudo.c:1007
+#: src/sudo.c:906 src/sudo.c:909
 #, c-format
 msgid "unable to set user context"
 msgstr "no se puede establecer el contexto del usuario"
 
-#: src/sudo.c:1022
-#, c-format
-msgid "unable to set effective gid to runas gid %u"
-msgstr "no se puede establecer el gid efectivo para ejecutar como gid %u"
-
-#: src/sudo.c:1028
-#, c-format
-msgid "unable to set gid to runas gid %u"
-msgstr "no se puede establecer el gid para ejecutar como gid %u"
-
-#: src/sudo.c:1036
+#: src/sudo.c:924
 #, c-format
 msgid "unable to set supplementary group IDs"
 msgstr "no se puede establecer el grupo suplementario de IDs"
 
-#: src/sudo.c:1044
+#: src/sudo.c:931
+#, c-format
+msgid "unable to set effective gid to runas gid %u"
+msgstr "no se puede establecer el gid efectivo para ejecutar como gid %u"
+
+#: src/sudo.c:937
+#, c-format
+msgid "unable to set gid to runas gid %u"
+msgstr "no se puede establecer el gid para ejecutar como gid %u"
+
+#: src/sudo.c:944
 #, c-format
 msgid "unable to set process priority"
 msgstr "no se puede establecer la prioridad de proceso"
 
-#: src/sudo.c:1052
+#: src/sudo.c:952
 #, c-format
 msgid "unable to change root to %s"
 msgstr "no se puede cambiar de root a %s"
 
-#: src/sudo.c:1062 src/sudo.c:1068 src/sudo.c:1074
+#: src/sudo.c:959 src/sudo.c:965 src/sudo.c:971
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "no se puede cambiar a runas uid (%u, %u)"
 
-#: src/sudo.c:1088
+#: src/sudo.c:985
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "no se puede cambiar al directorio %s"
 
-#: src/sudo.c:1158
+#: src/sudo.c:1058
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "inesperada terminación de condición hija: %d"
 
-#: src/sudo.c:1204
+#: src/sudo.c:1119
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "la política del plugin %s no soporta listado de privilegios"
 
-#: src/sudo.c:1216
+#: src/sudo.c:1131
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "la política del plugin %s no soporta la opción -v"
 
-#: src/sudo.c:1228
+#: src/sudo.c:1143
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "la política del plugin %s no soporta las opciones -k/-K"
@@ -688,17 +690,17 @@ msgstr "no se puede hacer dup2 stdin"
 msgid "unable to restore stdin"
 msgstr "no se puede restaurar stdin"
 
-#: common/aix.c:144
+#: common/aix.c:149
 #, c-format
 msgid "unable to open userdb"
 msgstr "no se puede abrir userdb"
 
-#: common/aix.c:147
+#: common/aix.c:152
 #, c-format
 msgid "unable to switch to registry \"%s\" for %s"
 msgstr "no se puede cambiar al registro \"%s\" para %s"
 
-#: common/aix.c:161
+#: common/aix.c:169
 #, c-format
 msgid "unable to restore registry"
 msgstr "no se puede restaurar el registro"
@@ -726,6 +728,31 @@ msgstr "error interno: trató erealloc3(0)"
 #: common/alloc.c:140
 msgid "internal error, erealloc3() overflow"
 msgstr "error interno: desbordamiento de erealloc3()"
+
+#: common/sudo_conf.c:306
+#, c-format
+msgid "unable to stat %s"
+msgstr "no se puede stat en %s"
+
+#: common/sudo_conf.c:309
+#, c-format
+msgid "%s is not a regular file"
+msgstr "%s no es un archivo regular"
+
+#: common/sudo_conf.c:312
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s es adueñado por uid %u, sería %u"
+
+#: common/sudo_conf.c:316
+#, c-format
+msgid "%s is world writable"
+msgstr "%s es escribible por todos"
+
+#: common/sudo_conf.c:319
+#, c-format
+msgid "%s is group writable"
+msgstr "%s es escribible por el grupo"
 
 #: compat/strsignal.c:47
 msgid "Unknown signal"
