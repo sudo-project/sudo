@@ -317,7 +317,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     if (!mode) {
 	/* Defer -k mode setting until we know whether it is a flag or not */
 	if (sudo_settings[ARG_IGNORE_TICKET].value != NULL) {
-	    if (argc == 0) {
+	    if (argc == 0 && !(flags & (MODE_SHELL|MODE_LOGIN_SHELL))) {
 		mode = MODE_INVALIDATE;	/* -k by itself */
 		sudo_settings[ARG_IGNORE_TICKET].value = NULL;
 		valid_flags = 0;
