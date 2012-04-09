@@ -721,11 +721,18 @@ parse_logfile(char *logfile, struct log_info *li)
 	goto done;
     }
 
+    memset(li, 0, sizeof(*li));
+
+    /* Strip the newline from the cwd and command. */
+    cwd[strcspn(cwd, "\n")] = '\0';
+    li->cwd = cwd;
+    cmd[strcspn(cmd, "\n")] = '\0';
+    li->cmd = cmd;
+
     /*
      * Crack the log line (rows and cols not present in old versions).
      *	timestamp:user:runas_user:runas_group:tty:rows:cols
      */
-    memset(li, 0, sizeof(*li));
     buf[strcspn(buf, "\n")] = '\0';
 
     /* timestamp */
@@ -767,21 +774,13 @@ parse_logfile(char *logfile, struct log_info *li)
 	}
     }
 
-    cwd[strcspn(cwd, "\n")] = '\0';
-    li->cwd = cwd;
-
-    cmd[strcspn(cmd, "\n")] = '\0';
-    li->cmd = cmd;
-
     rval = 0;
 
 done:
     fclose(fp);
     efree(buf);
-    if (rval != 0) {
-	efree(cwd);
-	efree(cmd);
-    }
+    if (rval != 0)
+	free_log_info(li);
     debug_return_int(rval);
 }
 
