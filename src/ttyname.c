@@ -19,6 +19,9 @@
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
+#ifdef HAVE_SYS_SYSMACROS_H
+# include <sys/sysmacros.h>
+#endif
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -148,12 +151,13 @@ get_process_ttyname(void)
  * attached or NULL if there is no tty associated with the process (or its
  * parent).  First tries std{in,out,err} then falls back to the parent's /proc
  * entry.  We could try following the parent all the way to pid 1 but
- * /proc/%d/status is system-specific (text on Linux, a struct on Solaris).
+ * /proc/%d/status is system-specific (text on Linux, a struct on SVR4).
  */
 char *
 get_process_ttyname(void)
 {
     char path[PATH_MAX], *tty = NULL;
+    struct stat sb;
     pid_t ppid;
     int i, fd;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
@@ -165,6 +169,25 @@ get_process_ttyname(void)
 	ppid = getppid();
 	for (i = STDIN_FILENO; i <= STDERR_FILENO && tty == NULL; i++) {
 	    snprintf(path, sizeof(path), "/proc/%d/fd/%d", (int)ppid, i);
+	    if (stat(path, &sb) != 0)
+		continue;
+	    /*
+	     * SVR4-style /proc doesn't allow /proc/pid/fd/[0-2]
+	     * to be used if it is a device and sets the mode to 0000.
+	     * Linux-style /proc uses a link to the actual tty.
+	     */
+	    if (S_ISCHR(sb.st_mode) &&
+		(sb.st_mode & (S_IRWXU|S_IRWXG|S_IRWXO)) == 0) {
+		/*
+		 * We can't open it but maybe we can determine
+		 * the pts device using the minor number.
+		 */
+		dev_t fd_dev = sb.st_rdev;
+		(void)snprintf(path, sizeof(path), "/dev/pts/%u",
+		    (unsigned int)minor(sb.st_rdev));
+		if (stat(path, &sb) != 0 || sb.st_rdev != fd_dev)
+		    continue;
+	    }
 	    fd = open(path, O_RDONLY|O_NOCTTY|O_NONBLOCK, 0);
 	    if (fd != -1) {
 		tty = ttyname(fd);
