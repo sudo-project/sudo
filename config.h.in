@@ -390,6 +390,9 @@
 /* Define to 1 if you have the `priv_set' function. */
 #undef HAVE_PRIV_SET
 
+/* Define to 1 if you have the <procfs.h> header file. */
+#undef HAVE_PROCFS_H
+
 /* Define to 1 if you have the <project.h> header file. */
 #undef HAVE_PROJECT_H
 
@@ -520,6 +523,9 @@
 /* Define to 1 if `p_tdev' is a member of `struct kinfo_proc'. */
 #undef HAVE_STRUCT_KINFO_PROC_P_TDEV
 
+/* Define to 1 if `pr_ttydev' is a member of `struct psinfo'. */
+#undef HAVE_STRUCT_PSINFO_PR_TTYDEV
+
 /* Define if your struct sockadr has an sa_len field. */
 #undef HAVE_STRUCT_SOCKADDR_SA_LEN
 
@@ -596,6 +602,9 @@
 /* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
    */
 #undef HAVE_SYS_NDIR_H
+
+/* Define to 1 if you have the <sys/procfs.h> header file. */
+#undef HAVE_SYS_PROCFS_H
 
 /* Define to 1 if you have the <sys/select.h> header file. */
 #undef HAVE_SYS_SELECT_H

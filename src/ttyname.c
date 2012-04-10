@@ -16,6 +16,12 @@
 
 #include <config.h>
 
+/* Large files not supported by procfs.h */
+#if defined(HAVE_PROCFS_H) || defined(HAVE_SYS_PROCFS_H)
+# undef _FILE_OFFSET_BITS
+# undef _LARGE_FILES
+#endif
+
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
@@ -51,6 +57,11 @@
 # include <sys/sysctl.h>
 # include <sys/user.h>
 #endif
+#if defined(HAVE_PROCFS_H)
+# include <procfs.h>
+#elif defined(HAVE_SYS_PROCFS_H)
+# include <sys/procfs.h>
+#endif
 
 #include "sudo.h"
 
@@ -79,7 +90,7 @@
 # define sudo_kp_namelen	4
 #endif
 
-#ifdef sudo_kp_tdev
+#if defined(sudo_kp_tdev)
 /*
  * Return a string from ttyname() containing the tty to which the process is
  * attached or NULL if there is no tty associated with the process (or its
@@ -145,13 +156,59 @@ get_process_ttyname(void)
 
     debug_return_str(tty);
 }
+#elif defined(HAVE_STRUCT_PSINFO_PR_TTYDEV)
+/*
+ * Return a string from ttyname() containing the tty to which the process is
+ * attached or NULL if there is no tty associated with the process (or its
+ * parent).  First tries std{in,out,err} then falls back to our /proc entry,
+ * or our parent's if that doesn't work.
+ */
+char *
+get_process_ttyname(void)
+{
+    char path[PATH_MAX], *tty = NULL;
+    struct stat sb;
+    struct psinfo psinfo;
+    ssize_t nread;
+    int i, fd;
+    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
+
+    if ((tty = ttyname(STDIN_FILENO)) == NULL &&
+	(tty = ttyname(STDOUT_FILENO)) == NULL &&
+	(tty = ttyname(STDERR_FILENO)) == NULL) {
+	/*
+	 * No tty hooked up to std{in,out,err}, check /proc.
+	 * We try to map pr_ttydev in psinfo to /dev/pts/N
+	 */
+	for (i = 0; tty == NULL && i < 2; i++) {
+	    snprintf(path, sizeof(path), "/proc/%u/psinfo",
+		i ? (unsigned int)getppid() : (unsigned int)getpid());
+	    if ((fd = open(path, O_RDONLY, 0)) == -1)
+		continue;
+	    nread = read(fd, &psinfo, sizeof(psinfo));
+	    close(fd);
+	    if (nread != (ssize_t)sizeof(psinfo) || psinfo.pr_ttydev == PRNODEV)
+		continue;
+	    (void)snprintf(path, sizeof(path), "%spts/%u", _PATH_DEV,
+		(unsigned int)minor(psinfo.pr_ttydev));
+	    if (stat(path, &sb) == 0 && sb.st_rdev == psinfo.pr_ttydev) {
+		fd = open(path, O_RDONLY|O_NOCTTY|O_NONBLOCK, 0);
+		if (fd != -1) {
+		    tty = ttyname(fd);
+		    close(fd);
+		}
+	    }
+	}
+    }
+
+    debug_return_str(estrdup(tty));
+}
 #else
 /*
  * Return a string from ttyname() containing the tty to which the process is
  * attached or NULL if there is no tty associated with the process (or its
- * parent).  First tries std{in,out,err} then falls back to the parent's /proc
- * entry.  We could try following the parent all the way to pid 1 but
- * /proc/%d/status is system-specific (text on Linux, a struct on SVR4).
+ * parent).  First tries std{in,out,err} then falls back to our parent's /proc
+ * entry.
  */
 char *
 get_process_ttyname(void)
@@ -168,26 +225,8 @@ get_process_ttyname(void)
 	/* No tty for child, check the parent via /proc. */
 	ppid = getppid();
 	for (i = STDIN_FILENO; i <= STDERR_FILENO && tty == NULL; i++) {
-	    snprintf(path, sizeof(path), "/proc/%d/fd/%d", (int)ppid, i);
-	    if (stat(path, &sb) != 0)
-		continue;
-	    /*
-	     * SVR4-style /proc doesn't allow /proc/pid/fd/[0-2]
-	     * to be used if it is a device and sets the mode to 0000.
-	     * Linux-style /proc uses a link to the actual tty.
-	     */
-	    if (S_ISCHR(sb.st_mode) &&
-		(sb.st_mode & (S_IRWXU|S_IRWXG|S_IRWXO)) == 0) {
-		/*
-		 * We can't open it but maybe we can determine
-		 * the pts device using the minor number.
-		 */
-		dev_t fd_dev = sb.st_rdev;
-		(void)snprintf(path, sizeof(path), "/dev/pts/%u",
-		    (unsigned int)minor(sb.st_rdev));
-		if (stat(path, &sb) != 0 || sb.st_rdev != fd_dev)
-		    continue;
-	    }
+	    snprintf(path, sizeof(path), "/proc/%u/fd/%d",
+		(unsigned int)ppid, i);
 	    fd = open(path, O_RDONLY|O_NOCTTY|O_NONBLOCK, 0);
 	    if (fd != -1) {
 		tty = ttyname(fd);
@@ -198,4 +237,4 @@ get_process_ttyname(void)
 
     debug_return_str(estrdup(tty));
 }
-#endif /* sudo_kp_tdev */
+#endif /* !sudo_kp_tdev && !HAVE_STRUCT_PSINFO_PR_TTYDEV */
