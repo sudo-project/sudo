@@ -157,6 +157,9 @@ get_process_ttyname(void)
     debug_return_str(tty);
 }
 #elif defined(HAVE_STRUCT_PSINFO_PR_TTYDEV)
+# ifndef PRNODEV
+#  define PRNODEV	((dev_t)-1)
+# endif
 /*
  * Return a string from ttyname() containing the tty to which the process is
  * attached or NULL if there is no tty associated with the process (or its
