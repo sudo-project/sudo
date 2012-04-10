@@ -437,16 +437,15 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 	    } while (n == -1 && errno == EINTR);
 	    switch (n) {
 		case -1:
-		    if (errno == EAGAIN)
-			break;
-		    if (errno != ENXIO && errno != EBADF) {
+		    if (errno != EAGAIN) {
+			/* treat read error as fatal and close the fd */
 			sudo_debug_printf(SUDO_DEBUG_ERROR,
 			    "error reading fd %d: %s", iob->rfd,
 			    strerror(errno));
-			errors++;
-			break;
+			safe_close(iob->rfd);
+			iob->rfd = -1;
 		    }
-		    /* FALLTHROUGH */
+		    break;
 		case 0:
 		    /* got EOF or pty has gone away */
 		    sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -469,7 +468,7 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 		    iob->len - iob->off);
 	    } while (n == -1 && errno == EINTR);
 	    if (n == -1) {
-		if (errno == EPIPE || errno == ENXIO || errno == EBADF) {
+		if (errno == EPIPE || errno == ENXIO || errno == EIO || errno == EBADF) {
 		    sudo_debug_printf(SUDO_DEBUG_INFO,
 			"unable to write %d bytes to fd %d",
 			    iob->len - iob->off, iob->wfd);
