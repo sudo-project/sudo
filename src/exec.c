@@ -335,13 +335,18 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 	nready = select(maxfd + 1, fdsr, fdsw, NULL, NULL);
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "select returns %d", nready);
 	if (nready == -1) {
-	    if (errno == EINTR)
+	    if (errno == EINTR || errno == ENOMEM)
 		continue;
-	    if (errno == EBADF) {
+	    if (errno == EBADF || errno == EIO) {
 		/* One of the ttys must have gone away. */
 		goto do_tty_io;
 	    }
-	    error(1, _("select failed"));
+	    warning(_("select failed"));
+	    sudo_debug_printf(SUDO_DEBUG_ERROR,
+		"select failure, terminating child");
+	    schedule_signal(SIGKILL);
+	    forward_signals(sv[0]);
+	    break;
 	}
 	if (FD_ISSET(sv[0], fdsw)) {
 	    forward_signals(sv[0]);

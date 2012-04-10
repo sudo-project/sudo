@@ -1015,9 +1015,10 @@ exec_monitor(struct command_details *details, int backchannel)
 	if (n <= 0) {
 	    if (n == 0)
 		goto done;
-	    if (errno == EINTR)
+	    if (errno == EINTR || errno == ENOMEM)
 		continue;
-	    error(1, "monitor: %s", _("select failed"));
+	    warning("monitor: %s", _("select failed"));
+	    break;
 	}
 
 	if (FD_ISSET(signal_pipe[0], fdsr)) {
@@ -1152,11 +1153,11 @@ flush_output(void)
 	if (nready <= 0) {
 	    if (nready == 0)
 		break; /* all I/O flushed */
-	    if (errno == EINTR)
+	    if (errno == EINTR || errno == ENOMEM)
 		continue;
-	    error(1, _("select failed"));
+	    warning(_("select failed"));
 	}
-	if (perform_io(fdsr, fdsw, NULL) != 0)
+	if (perform_io(fdsr, fdsw, NULL) != 0 || nready == -1)
 	    break;
     }
     efree(fdsr);
