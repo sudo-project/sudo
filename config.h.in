@@ -666,6 +666,9 @@
 /* Define to 1 if you have the `_innetgr' function. */
 #undef HAVE__INNETGR
 
+/* Define to 1 if you have the `_ttyname_dev' function. */
+#undef HAVE__TTYNAME_DEV
+
 /* Define to 1 if the compiler supports the C99 __func__ variable. */
 #undef HAVE___FUNC__
 
