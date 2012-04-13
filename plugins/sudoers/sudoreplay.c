@@ -239,8 +239,8 @@ static void free_log_info(struct log_info *li);
 int
 main(int argc, char *argv[])
 {
-    int ch, idx, plen, nready, exitcode = 0, interactive = 0, listonly = 0;
-    int rows = 0, cols = 0;
+    int ch, idx, plen, nready, exitcode = 0, rows = 0, cols = 0;
+    bool interactive = false, listonly = false;
     const char *id, *user = NULL, *pattern = NULL, *tty = NULL, *decimal = ".";
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
     double seconds, to_wait, speed = 1.0, max_wait = 0;
@@ -295,7 +295,7 @@ main(int argc, char *argv[])
 	    help();
 	    /* NOTREACHED */
 	case 'l':
-	    listonly = 1;
+	    listonly = true;
 	    break;
 	case 'm':
 	    errno = 0;
@@ -841,6 +841,14 @@ done:
     debug_return_int(rval);
 }
 
+static int
+session_compare(const void *v1, const void *v2)
+{
+    const char *s1 = *(const char **)v1;
+    const char *s2 = *(const char **)v2;
+    return strcmp(s1, s2);
+}
+
 /* XXX - always returns 0, calls error() on failure */
 static int
 find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
@@ -848,9 +856,9 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
     DIR *d;
     struct dirent *dp;
     struct stat sb;
-    size_t sdlen;
-    int len;
-    char pathbuf[PATH_MAX];
+    size_t sdlen, sessions_len = 0, sessions_size = 36*36;
+    int i, len;
+    char pathbuf[PATH_MAX], **sessions = NULL;
     debug_decl(find_sessions, SUDO_DEBUG_UTIL)
 
     d = opendir(dir);
@@ -865,18 +873,34 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
     }
     pathbuf[sdlen++] = '/';
     pathbuf[sdlen] = '\0';
+
+    /* Store potential session dirs for sorting. */
+    sessions = emalloc2(sessions_size, sizeof(char *));
     while ((dp = readdir(d)) != NULL) {
 	/* Skip "." and ".." */
 	if (dp->d_name[0] == '.' && (dp->d_name[1] == '\0' ||
 	    (dp->d_name[1] == '.' && dp->d_name[2] == '\0')))
 	    continue;
 
+	/* Add name to session list. */
+	if (sessions_len + 1 > sessions_size) {
+	    sessions_size <<= 1;
+	    sessions = erealloc3(sessions, sessions_size, sizeof(char *));
+	}
+	sessions[sessions_len++] = estrdup(dp->d_name);
+    }
+    closedir(d);
+
+    /* Sort and list the sessions. */
+    qsort(sessions, sessions_len, sizeof(char *), session_compare);
+    for (i = 0; i < sessions_len; i++) {
 	len = snprintf(&pathbuf[sdlen], sizeof(pathbuf) - sdlen,
-	    "%s/log", dp->d_name);
+	    "%s/log", sessions[i]);
 	if (len <= 0 || len >= sizeof(pathbuf) - sdlen) {
 	    errno = ENAMETOOLONG;
-	    error(1, "%s/%s/log", dir, dp->d_name);
+	    error(1, "%s/%s/log", dir, sessions[i]);
 	}
+	efree(sessions[i]);
 
 	/* Check for dir with a log file. */
 	if (lstat(pathbuf, &sb) == 0 && S_ISREG(sb.st_mode)) {
@@ -888,7 +912,7 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
 		find_sessions(pathbuf, re, user, tty);
 	}
     }
-    closedir(d);
+    efree(sessions);
 
     debug_return_int(0);
 }
