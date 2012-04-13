@@ -17358,6 +17358,20 @@ rm -f core conftest.err conftest.$ac_objext \
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+ac_fn_c_check_member "$LINENO" "struct dirent" "d_type" "ac_cv_member_struct_dirent_d_type" "
+$ac_includes_default
+#include <$ac_header_dirent>
+
+"
+if test "x$ac_cv_member_struct_dirent_d_type" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_DIRENT_D_TYPE 1
+_ACEOF
+
+
+fi
+
 if test -n "$NEED_SNPRINTF"; then
     case " $LIBOBJS " in
   *" snprintf.$ac_objext "* ) ;;
