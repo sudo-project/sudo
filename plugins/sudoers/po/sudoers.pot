@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.5\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-03-30 15:44-0400\n"
+"POT-Creation-Date: 2012-04-13 16:21-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -80,9 +80,9 @@ msgid "sorry, a password is required to run %s"
 msgstr ""
 
 #: plugins/sudoers/check.c:249 plugins/sudoers/iolog.c:172
-#: plugins/sudoers/sudoers.c:979 plugins/sudoers/sudoreplay.c:347
-#: plugins/sudoers/sudoreplay.c:356 plugins/sudoers/sudoreplay.c:702
-#: plugins/sudoers/sudoreplay.c:796 plugins/sudoers/visudo.c:815
+#: plugins/sudoers/sudoers.c:979 plugins/sudoers/sudoreplay.c:353
+#: plugins/sudoers/sudoreplay.c:709 plugins/sudoers/sudoreplay.c:866
+#: plugins/sudoers/visudo.c:815
 #, c-format
 msgid "unable to open %s"
 msgstr ""
@@ -934,39 +934,39 @@ msgid "unable to cache group %s, already exists"
 msgstr ""
 
 #: plugins/sudoers/set_perms.c:122 plugins/sudoers/set_perms.c:436
-#: plugins/sudoers/set_perms.c:800 plugins/sudoers/set_perms.c:1086
-#: plugins/sudoers/set_perms.c:1368
+#: plugins/sudoers/set_perms.c:828 plugins/sudoers/set_perms.c:1114
+#: plugins/sudoers/set_perms.c:1396
 msgid "perm stack overflow"
 msgstr ""
 
 #: plugins/sudoers/set_perms.c:130 plugins/sudoers/set_perms.c:444
-#: plugins/sudoers/set_perms.c:808 plugins/sudoers/set_perms.c:1094
-#: plugins/sudoers/set_perms.c:1376
+#: plugins/sudoers/set_perms.c:836 plugins/sudoers/set_perms.c:1122
+#: plugins/sudoers/set_perms.c:1404
 msgid "perm stack underflow"
 msgstr ""
 
 #: plugins/sudoers/set_perms.c:270 plugins/sudoers/set_perms.c:580
-#: plugins/sudoers/set_perms.c:929 plugins/sudoers/set_perms.c:1215
+#: plugins/sudoers/set_perms.c:957 plugins/sudoers/set_perms.c:1243
 msgid "unable to change to runas gid"
 msgstr ""
 
 #: plugins/sudoers/set_perms.c:282 plugins/sudoers/set_perms.c:592
-#: plugins/sudoers/set_perms.c:939 plugins/sudoers/set_perms.c:1225
+#: plugins/sudoers/set_perms.c:967 plugins/sudoers/set_perms.c:1253
 msgid "unable to change to runas uid"
 msgstr ""
 
 #: plugins/sudoers/set_perms.c:300 plugins/sudoers/set_perms.c:610
-#: plugins/sudoers/set_perms.c:955 plugins/sudoers/set_perms.c:1241
+#: plugins/sudoers/set_perms.c:983 plugins/sudoers/set_perms.c:1269
 msgid "unable to change to sudoers gid"
 msgstr ""
 
 #: plugins/sudoers/set_perms.c:353 plugins/sudoers/set_perms.c:681
-#: plugins/sudoers/set_perms.c:1001 plugins/sudoers/set_perms.c:1287
-#: plugins/sudoers/set_perms.c:1446
+#: plugins/sudoers/set_perms.c:1029 plugins/sudoers/set_perms.c:1315
+#: plugins/sudoers/set_perms.c:1474
 msgid "too many processes"
 msgstr ""
 
-#: plugins/sudoers/set_perms.c:1514
+#: plugins/sudoers/set_perms.c:1542
 msgid "unable to set runas group vector"
 msgstr ""
 
@@ -1127,139 +1127,144 @@ msgstr ""
 msgid "ldap.secret path: %s\n"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:285
+#: plugins/sudoers/sudoreplay.c:291
 #, c-format
 msgid "invalid filter option: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:298
+#: plugins/sudoers/sudoreplay.c:304
 #, c-format
 msgid "invalid max wait: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:304
+#: plugins/sudoers/sudoreplay.c:310
 #, c-format
 msgid "invalid speed factor: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:307 plugins/sudoers/visudo.c:187
+#: plugins/sudoers/sudoreplay.c:313 plugins/sudoers/visudo.c:187
 #, c-format
 msgid "%s version %s\n"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:332
+#: plugins/sudoers/sudoreplay.c:338
 #, c-format
 msgid "%s/%.2s/%.2s/%.2s/timing: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:338
+#: plugins/sudoers/sudoreplay.c:344
 #, c-format
 msgid "%s/%s/timing: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:363
+#: plugins/sudoers/sudoreplay.c:362
 #, c-format
-msgid "invalid log file %s"
+msgid "Replaying sudo session: %s\n"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:365
+#: plugins/sudoers/sudoreplay.c:368
 #, c-format
-msgid "Replaying sudo session: %s"
+msgid "Warning: your terminal is too small to properly replay the log.\n"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:391
+#: plugins/sudoers/sudoreplay.c:369
+#, c-format
+msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
+msgstr ""
+
+#: plugins/sudoers/sudoreplay.c:399
 #, c-format
 msgid "unable to set tty to raw mode"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:404
+#: plugins/sudoers/sudoreplay.c:412
 #, c-format
 msgid "invalid timing file line: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:446
+#: plugins/sudoers/sudoreplay.c:454
 #, c-format
 msgid "writing to standard output"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:478
+#: plugins/sudoers/sudoreplay.c:486
 #, c-format
 msgid "nanosleep: tv_sec %ld, tv_nsec %ld"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:527 plugins/sudoers/sudoreplay.c:552
+#: plugins/sudoers/sudoreplay.c:535 plugins/sudoers/sudoreplay.c:560
 #, c-format
 msgid "ambiguous expression \"%s\""
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:569
+#: plugins/sudoers/sudoreplay.c:577
 #, c-format
 msgid "too many parenthesized expressions, max %d"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:580
+#: plugins/sudoers/sudoreplay.c:588
 #, c-format
 msgid "unmatched ')' in expression"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:586
+#: plugins/sudoers/sudoreplay.c:594
 #, c-format
 msgid "unknown search term \"%s\""
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:600
+#: plugins/sudoers/sudoreplay.c:608
 #, c-format
 msgid "%s requires an argument"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:604
+#: plugins/sudoers/sudoreplay.c:612
 #, c-format
 msgid "invalid regular expression: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:610
+#: plugins/sudoers/sudoreplay.c:618
 #, c-format
 msgid "could not parse date \"%s\""
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:623
+#: plugins/sudoers/sudoreplay.c:631
 #, c-format
 msgid "unmatched '(' in expression"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:625
+#: plugins/sudoers/sudoreplay.c:633
 #, c-format
 msgid "illegal trailing \"or\""
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:627
+#: plugins/sudoers/sudoreplay.c:635
 #, c-format
 msgid "illegal trailing \"!\""
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:850
+#: plugins/sudoers/sudoreplay.c:942
 #, c-format
 msgid "invalid regex: %s"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:974
+#: plugins/sudoers/sudoreplay.c:1066
 #, c-format
 msgid "usage: %s [-h] [-d directory] [-m max_wait] [-s speed_factor] ID\n"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:977
+#: plugins/sudoers/sudoreplay.c:1069
 #, c-format
 msgid "usage: %s [-h] [-d directory] -l [search expression]\n"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:986
+#: plugins/sudoers/sudoreplay.c:1078
 #, c-format
 msgid ""
 "%s - replay sudo session logs\n"
 "\n"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:988
+#: plugins/sudoers/sudoreplay.c:1080
 msgid ""
 "\n"
 "Options:\n"
@@ -1611,16 +1616,16 @@ msgid ""
 "your system administrator"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:178
+#: plugins/sudoers/auth/pam.c:180
 #, c-format
 msgid "pam_authenticate: %s"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:326
+#: plugins/sudoers/auth/pam.c:330
 msgid "Password: "
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:327
+#: plugins/sudoers/auth/pam.c:331
 msgid "Password:"
 msgstr ""
 
