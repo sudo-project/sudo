@@ -155,8 +155,6 @@ sudo_ttyname_dev(dev_t tdev)
 #else
 /*
  * Devices to search before doing a breadth-first scan.
- * XXX - use /etc/ttysrch too (for Solaris).
- * XXX - add tty* w/ wildcards?
  */
 static char *search_devs[] = {
     "/dev/console",
