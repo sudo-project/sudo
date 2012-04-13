@@ -276,11 +276,40 @@ DDEESSCCRRIIPPTTIIOONN
                equal sign ('=') since the _n_a_m_e field will never include one
                itself but the _v_a_l_u_e might.
 
+               pid=int
+                   The process ID of the running ssuuddoo process.  Only available
+                   starting with API version 1.2
+
+               ppid=int
+                   The parent process ID of the running ssuuddoo process.  Only
+                   available starting with API version 1.2
+
+               sid=int
+                   The session ID of the running ssuuddoo process or 0 if ssuuddoo is
+                   not part of a POSIX job control session.  Only available
+                   starting with API version 1.2
+
+               pgid=int
+                   The ID of the process group that the running ssuuddoo process
+                   belongs to.  Only available starting with API version 1.2
+
+               tcpgid=int
+                   The ID of the forground process group associated with the
+                   terminal device associcated with the ssuuddoo process or -1 if
+                   there is no terminal present.  Only available starting with
+                   API version 1.2
+
                user=string
                    The name of the user invoking ssuuddoo.
 
+               euid=uid_t
+                   The effective user ID of the user invoking ssuuddoo.
+
                uid=uid_t
                    The real user ID of the user invoking ssuuddoo.
+
+               egid=gid_t
+                   The effective group ID of the user invoking ssuuddoo.
 
                gid=gid_t
                    The real group ID of the user invoking ssuuddoo.
@@ -1325,4 +1354,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.5                           March 28, 2012                 SUDO_PLUGIN(1m)
+1.8.5                           April 13, 2012                 SUDO_PLUGIN(1m)

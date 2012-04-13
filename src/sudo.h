@@ -92,6 +92,11 @@
 #define TGP_NOECHO_TRY	0x10		/* turn off echo if possible */
 
 struct user_details {
+    pid_t pid;
+    pid_t ppid;
+    pid_t pgid;
+    pid_t tcpgid;
+    pid_t sid;
     uid_t uid;
     uid_t euid;
     uid_t gid;

@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO_PLUGIN @mansectsu@"
-.TH SUDO_PLUGIN @mansectsu@ "March 28, 2012" "1.8.5" "MAINTENANCE COMMANDS"
+.TH SUDO_PLUGIN @mansectsu@ "April 13, 2012" "1.8.5" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -424,12 +424,42 @@ When parsing \fIuser_info\fR, the plugin should split on the \fBfirst\fR
 equal sign ('=') since the \fIname\fR field will never include one
 itself but the \fIvalue\fR might.
 .RS 4
+.IP "pid=int" 4
+.IX Item "pid=int"
+The process \s-1ID\s0 of the running \fBsudo\fR process.
+Only available starting with \s-1API\s0 version 1.2
+.IP "ppid=int" 4
+.IX Item "ppid=int"
+The parent process \s-1ID\s0 of the running \fBsudo\fR process.
+Only available starting with \s-1API\s0 version 1.2
+.IP "sid=int" 4
+.IX Item "sid=int"
+The session \s-1ID\s0 of the running \fBsudo\fR process or 0 if \fBsudo\fR is
+not part of a \s-1POSIX\s0 job control session.
+Only available starting with \s-1API\s0 version 1.2
+.IP "pgid=int" 4
+.IX Item "pgid=int"
+The \s-1ID\s0 of the process group that the running \fBsudo\fR process belongs
+to.
+Only available starting with \s-1API\s0 version 1.2
+.IP "tcpgid=int" 4
+.IX Item "tcpgid=int"
+The \s-1ID\s0 of the forground process group associated with the terminal
+device associcated with the \fBsudo\fR process or \-1 if there is no
+terminal present.
+Only available starting with \s-1API\s0 version 1.2
 .IP "user=string" 4
 .IX Item "user=string"
 The name of the user invoking \fBsudo\fR.
+.IP "euid=uid_t" 4
+.IX Item "euid=uid_t"
+The effective user \s-1ID\s0 of the user invoking \fBsudo\fR.
 .IP "uid=uid_t" 4
 .IX Item "uid=uid_t"
 The real user \s-1ID\s0 of the user invoking \fBsudo\fR.
+.IP "egid=gid_t" 4
+.IX Item "egid=gid_t"
+The effective group \s-1ID\s0 of the user invoking \fBsudo\fR.
 .IP "gid=gid_t" 4
 .IX Item "gid=gid_t"
 The real group \s-1ID\s0 of the user invoking \fBsudo\fR.

@@ -427,11 +427,22 @@ get_user_info(struct user_details *ud)
 {
     char *cp, **user_info, cwd[PATH_MAX], host[MAXHOSTNAMELEN];
     struct passwd *pw;
-    int i = 0;
+    int fd, i = 0;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL)
 
     /* XXX - bound check number of entries */
     user_info = emalloc2(32, sizeof(char *));
+
+    ud->pid = getpid();
+    ud->ppid = getppid();
+    ud->pgid = getpgid(0);
+    ud->tcpgid = (pid_t)-1;
+    fd = open(_PATH_TTY, O_RDWR|O_NOCTTY|O_NONBLOCK, 0);
+    if (fd != -1) {
+	ud->tcpgid = tcgetpgrp(fd);
+	close(fd);
+    }
+    ud->sid = getsid(0);
 
     ud->uid = getuid();
     ud->euid = geteuid();
@@ -452,6 +463,12 @@ get_user_info(struct user_details *ud)
 	ud->shell = pw->pw_shell[0] ? pw->pw_shell : _PATH_BSHELL;
     }
     ud->shell = estrdup(ud->shell);
+
+    easprintf(&user_info[++i], "pid=%d", (int)ud->pid);
+    easprintf(&user_info[++i], "ppid=%d", (int)ud->ppid);
+    easprintf(&user_info[++i], "pgid=%d", (int)ud->pgid);
+    easprintf(&user_info[++i], "tcpgid=%d", (int)ud->tcpgid);
+    easprintf(&user_info[++i], "sid=%d", (int)ud->sid);
 
     easprintf(&user_info[++i], "uid=%u", (unsigned int)ud->uid);
     easprintf(&user_info[++i], "euid=%u", (unsigned int)ud->euid);

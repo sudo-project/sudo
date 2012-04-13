@@ -327,13 +327,50 @@ itself but the I<value> might.
 
 =over 4
 
+=item pid=int
+
+The process ID of the running B<sudo> process.
+Only available starting with API version 1.2
+
+=item ppid=int
+
+The parent process ID of the running B<sudo> process.
+Only available starting with API version 1.2
+
+=item sid=int
+
+The session ID of the running B<sudo> process or 0 if B<sudo> is
+not part of a POSIX job control session.
+Only available starting with API version 1.2
+
+=item pgid=int
+
+The ID of the process group that the running B<sudo> process belongs
+to.
+Only available starting with API version 1.2
+
+=item tcpgid=int
+
+The ID of the forground process group associated with the terminal
+device associcated with the B<sudo> process or -1 if there is no
+terminal present.
+Only available starting with API version 1.2
+
 =item user=string
 
 The name of the user invoking B<sudo>.
 
+=item euid=uid_t
+
+The effective user ID of the user invoking B<sudo>.
+
 =item uid=uid_t
 
 The real user ID of the user invoking B<sudo>.
+
+=item egid=gid_t
+
+The effective group ID of the user invoking B<sudo>.
 
 =item gid=gid_t
 
