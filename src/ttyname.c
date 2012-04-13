@@ -154,7 +154,7 @@ sudo_ttyname_dev(dev_t tdev)
 }
 #else
 /*
- * Devices to search before doing a depth-first scan.
+ * Devices to search before doing a breadth-first scan.
  * XXX - use /etc/ttysrch too (for Solaris).
  * XXX - add tty* w/ wildcards?
  */
@@ -177,14 +177,14 @@ static char *ignore_devs[] = {
 };
 
 /*
- * Do a depth-first scan of dir looking for the specified device.
+ * Do a breadth-first scan of dir looking for the specified device.
  */
 static
 char *sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 {
     DIR *d;
-    char pathbuf[PATH_MAX], *devname = NULL;
-    size_t sdlen, d_len, len;
+    char pathbuf[PATH_MAX], **subdirs = NULL, *devname = NULL;
+    size_t sdlen, d_len, len, num_subdirs = 0, max_subdirs = 0;
     struct dirent *dp;
     struct stat sb;
     int i;
@@ -237,21 +237,41 @@ char *sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 	    if (search_devs[i] != NULL)
 		continue;
 	}
-	if (stat(pathbuf, &sb) == 0) {
-	    if (S_ISDIR(sb.st_mode)) {
-		if (!builtin)
-		    devname = sudo_ttyname_scan(pathbuf, rdev, builtin);
-		continue;
+# if defined(HAVE_STRUCT_DIRENT_D_TYPE) && defined(DTTOIF)
+	/* Use d_type to avoid a stat() if possible. */
+	/* Convert d_type to stat-style type bits but follow links. */
+	if (dp->d_type != DT_LNK && dp->d_type != DT_CHR)
+	    sb.st_mode = DTTOIF(dp->d_type);
+	else
+# endif
+	if (stat(pathbuf, &sb) == -1)
+	    continue;
+	if (S_ISDIR(sb.st_mode)) {
+	    if (!builtin) {
+		/* Add to list of subdirs to search. */
+		if (num_subdirs + 1 > max_subdirs) {
+		    max_subdirs += 64;
+		    subdirs = erealloc3(subdirs, max_subdirs, sizeof(char *));
+		}
+		subdirs[num_subdirs++] = estrdup(pathbuf);
 	    }
-	    if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
-		devname = estrdup(pathbuf);
-		break;
-	    }
+	    continue;
+	}
+	if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
+	    devname = estrdup(pathbuf);
+	    break;
 	}
     }
     closedir(d);
 
+    /* Search subdirs if we didn't find it in the root level. */
+    for (i = 0; devname == NULL && i < num_subdirs; i++)
+	devname = sudo_ttyname_scan(subdirs[i], rdev, false);
+
 done:
+    for (i = 0; i < num_subdirs; i++)
+	efree(subdirs[i]);
+    efree(subdirs);
     debug_return_str(devname);
 }
 
@@ -299,7 +319,7 @@ sudo_ttyname_dev(dev_t rdev)
     }
 
     /*
-     * Not found?  Do a depth-first traversal of /dev/.
+     * Not found?  Do a breadth-first traversal of /dev/.
      */
     if (tty == NULL)
 	tty = sudo_ttyname_scan(_PATH_DEV, rdev, false);
