@@ -52,6 +52,22 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#ifdef HAVE_DIRENT_H
+# include <dirent.h>
+# define NAMLEN(dirent) strlen((dirent)->d_name)
+#else
+# define dirent direct
+# define NAMLEN(dirent) (dirent)->d_namlen
+# ifdef HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif
+# ifdef HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif
+# ifdef HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif
 #if defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined (HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV) || defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV)
 # include <sys/sysctl.h>
 #elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
@@ -130,44 +146,165 @@ extern char *_ttyname_dev(dev_t rdev, char *buffer, size_t buflen);
 static char *
 sudo_ttyname_dev(dev_t tdev)
 {
-    char buf[TTYNAME_MAX], *tty;
-    struct stat sb;
     debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL)
 
-    /* Check if it is a pseudo-tty slave, falling back on _ttyname_dev() */
-    (void)snprintf(buf, sizeof(buf), "%spts/%u", _PATH_DEV,
-	(unsigned int)minor(tdev));
-    if (stat(buf, &sb) == 0 && sb.st_rdev == tdev) {
-	tty = buf;
-    } else {
-	tty = _ttyname_dev(tdev, buf, sizeof(buf));
-    }
+    tty = _ttyname_dev(tdev, buf, sizeof(buf));
 
     debug_return_str(estrdup(tty));
 }
 #else
+/*
+ * Devices to search before doing a depth-first scan.
+ * XXX - use /etc/ttysrch too (for Solaris).
+ * XXX - add tty* w/ wildcards?
+ */
+static char *search_devs[] = {
+    "/dev/console",
+    "/dev/wscons",
+    "/dev/pts/",
+    "/dev/vt/",
+    "/dev/term/",
+    "/dev/zcons/",
+    NULL
+};
+
+static char *ignore_devs[] = {
+    "/dev/fd/",
+    "/dev/stdin",
+    "/dev/stdout",
+    "/dev/stderr",
+    NULL
+};
+
+/*
+ * Do a depth-first scan of dir looking for the specified device.
+ */
+static
+char *sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
+{
+    DIR *d;
+    char pathbuf[PATH_MAX], *devname = NULL;
+    size_t sdlen, d_len, len;
+    struct dirent *dp;
+    struct stat sb;
+    int i;
+    debug_decl(sudo_ttyname_scan, SUDO_DEBUG_UTIL)
+
+    if (dir[0] == '\0' || (d = opendir(dir)) == NULL)
+	goto done;
+
+    sdlen = strlen(dir);
+    if (dir[sdlen - 1] == '/')
+	sdlen--;
+    if (sdlen + 1 >= sizeof(pathbuf)) {
+	errno = ENAMETOOLONG;
+	warning("%.*s/", (int)sdlen, dir);
+	goto done;
+    }
+    memcpy(pathbuf, dir, sdlen);
+    pathbuf[sdlen++] = '/';
+    pathbuf[sdlen] = '\0';
+
+    while ((dp = readdir(d)) != NULL) {
+	/* Skip anything starting with "." */
+	if (dp->d_name[0] == '.')
+	    continue;
+
+	d_len = NAMLEN(dp);
+	if (sdlen + d_len >= sizeof(pathbuf))
+	    continue;
+	memcpy(&pathbuf[sdlen], dp->d_name, d_len + 1); /* copy NUL too */
+	d_len += sdlen;
+
+	for (i = 0; ignore_devs[i] != NULL; i++) {
+	    len = strlen(ignore_devs[i]);
+	    if (ignore_devs[i][len - 1] == '/')
+		len--;
+	    if (d_len == len && strncmp(pathbuf, ignore_devs[i], len) == 0)
+		break;
+	}
+	if (ignore_devs[i] != NULL)
+	    continue;
+	if (!builtin) {
+	    /* Skip entries in search_devs; we already checked them. */
+	    for (i = 0; search_devs[i] != NULL; i++) {
+		len = strlen(search_devs[i]);
+		if (search_devs[i][len - 1] == '/')
+		    len--;
+		if (d_len == len && strncmp(pathbuf, search_devs[i], len) == 0)
+		    break;
+	    }
+	    if (search_devs[i] != NULL)
+		continue;
+	}
+	if (stat(pathbuf, &sb) == 0) {
+	    if (S_ISDIR(sb.st_mode)) {
+		if (!builtin)
+		    devname = sudo_ttyname_scan(pathbuf, rdev, builtin);
+		continue;
+	    }
+	    if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
+		devname = estrdup(pathbuf);
+		break;
+	    }
+	}
+    }
+    closedir(d);
+
+done:
+    debug_return_str(devname);
+}
+
 /*
  * Like ttyname() but uses a dev_t instead of an open fd.
  * Caller is responsible for freeing the returned string.
  * Generic version.
  */
 static char *
-sudo_ttyname_dev(dev_t tdev)
+sudo_ttyname_dev(dev_t rdev)
 {
-    char buf[PATH_MAX], *tty = NULL;
     struct stat sb;
+    size_t len;
+    char buf[PATH_MAX], **sd, *devname, *tty = NULL;
     debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL)
 
-    /* First, check if it is a pseudo-tty slave. */
-    (void)snprintf(buf, sizeof(buf), "%spts/%u", _PATH_DEV,
-	(unsigned int)minor(tdev));
-    if (stat(buf, &sb) == 0 && sb.st_rdev == tdev) {
-	tty = buf;
-    } else {
-	/* XXX - fallback to scanning /dev/ */
+    /*
+     * First check search_devs.
+     */
+    for (sd = search_devs; (devname = *sd) != NULL; sd++) {
+	len = strlen(devname);
+	if (devname[len - 1] == '/') {
+	    /* Special case /dev/pts */
+	    if (strcmp(devname, "/dev/pts/") == 0) {
+		(void)snprintf(buf, sizeof(buf), "%spts/%u", _PATH_DEV,
+		    (unsigned int)minor(rdev));
+		if (stat(buf, &sb) == 0) {
+		    if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
+			tty = estrdup(buf);
+			break;
+		    }
+		}
+		continue;
+	    }
+	    /* Traverse directory */
+	    tty = sudo_ttyname_scan(devname, rdev, true);
+	} else {
+	    if (stat(devname, &sb) == 0) {
+		if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
+		    tty = estrdup(devname);
+		    break;
+		}
+	    }
+	}
     }
 
-    debug_return_str(estrdup(tty));
+    /*
+     * Not found?  Do a depth-first traversal of /dev/.
+     */
+    if (tty == NULL)
+	tty = sudo_ttyname_scan(_PATH_DEV, rdev, false);
+
+    debug_return_str(tty);
 }
 #endif
 
