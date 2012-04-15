@@ -146,6 +146,7 @@ extern char *_ttyname_dev(dev_t rdev, char *buffer, size_t buflen);
 static char *
 sudo_ttyname_dev(dev_t tdev)
 {
+    char buf[TTYNAME_MAX], *tty;
     debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL)
 
     tty = _ttyname_dev(tdev, buf, sizeof(buf));
