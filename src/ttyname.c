@@ -25,7 +25,9 @@
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
-#ifdef HAVE_SYS_SYSMACROS_H
+#if defined(HAVE_SYS_MKDEV_H)
+# include <sys/mkdev.h>
+#elif defined(HAVE_SYS_SYSMACROS_H)
 # include <sys/sysmacros.h>
 #endif
 #include <stdio.h>
