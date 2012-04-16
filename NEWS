@@ -39,6 +39,26 @@ What's new in Sudo 1.8.5?
  * Fixed parsing of "Path askpass" and "Path noexec" in sudo.conf,
    which was broken in version 1.8.4.
 
+ * On systems with an SVR4-style /proc file system, the /proc/pid/psinfo
+   file is now uses to determine the controlling terminal, if possible.
+   This allows tty-based tickets to work properly even when, e.g.
+   standard input, output and error are redirected to /dev/null.
+
+ * The output of "sudoreplay -l" is now sorted by file name (or
+   sequence number).  Previously, entries were displayed in the
+   order in which they were found on the file system.
+
+ * Sudo now behaves properly when I/O logging is enabled and the
+   controlling terminal is revoked (e.g. the running sshd is killed).
+   Previously, sudo may have exited without calling the I/O plugin's
+   close function which can lead to an incomplete I/O log.
+
+ * Sudo can now detect when a user has logged out and back in again
+   on Solaris 11, just like it can on Solaris 10.
+
+ * The built-in zlib included with Sudo has been upgraded to version
+   1.2.6.
+
 What's new in Sudo 1.8.4p4?
 
  * Fixed a bug introduced in Sudo 1.8.4 which prevented "sudo -v"
