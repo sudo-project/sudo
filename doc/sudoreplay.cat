@@ -55,10 +55,11 @@ OOPPTTIIOONNSS
 
        -l [_s_e_a_r_c_h _e_x_p_r_e_s_s_i_o_n]
                    Enable "list mode".  In this mode, ssuuddoorreeppllaayy will list
-                   available session IDs.  If a _s_e_a_r_c_h _e_x_p_r_e_s_s_i_o_n is
-                   specified, it will be used to restrict the IDs that are
-                   displayed.  An expression is composed of the following
-                   predicates:
+                   available sessions in a format similar to the ssuuddoo log file
+                   format, sorted by file name (or sequence number).  If a
+                   _s_e_a_r_c_h _e_x_p_r_e_s_s_i_o_n is specified, it will be used to restrict
+                   the IDs that are displayed.  An expression is composed of
+                   the following predicates:
 
                    command _c_o_m_m_a_n_d _p_a_t_t_e_r_n
                            Evaluates to true if the command run matches
@@ -260,4 +261,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.5                           March 14, 2012                  SUDOREPLAY(1m)
+1.8.5                           April 16, 2012                  SUDOREPLAY(1m)
