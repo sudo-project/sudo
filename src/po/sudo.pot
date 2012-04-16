@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.5\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-03-28 14:06-0400\n"
+"POT-Creation-Date: 2012-04-16 12:54-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,11 +16,100 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: common/aix.c:149
+#, c-format
+msgid "unable to open userdb"
+msgstr ""
+
+#: common/aix.c:152
+#, c-format
+msgid "unable to switch to registry \"%s\" for %s"
+msgstr ""
+
+#: common/aix.c:169
+#, c-format
+msgid "unable to restore registry"
+msgstr ""
+
+#: common/alloc.c:82
+msgid "internal error, tried to emalloc(0)"
+msgstr ""
+
+#: common/alloc.c:85 common/alloc.c:105 common/alloc.c:127 common/alloc.c:146
+#: common/alloc.c:168 common/alloc.c:192 common/alloc.c:256 common/alloc.c:270
+#: src/exec_common.c:111 src/parse_args.c:432 src/sudo.c:458 src/sudo.c:484
+#: src/sudo.c:491 src/sudo.c:502 src/sudo.c:888
+#, c-format
+msgid "unable to allocate memory"
+msgstr ""
+
+#: common/alloc.c:99
+msgid "internal error, tried to emalloc2(0)"
+msgstr ""
+
+#: common/alloc.c:101
+msgid "internal error, emalloc2() overflow"
+msgstr ""
+
+#: common/alloc.c:120
+msgid "internal error, tried to ecalloc(0)"
+msgstr ""
+
+#: common/alloc.c:123
+msgid "internal error, ecalloc() overflow"
+msgstr ""
+
+#: common/alloc.c:142
+msgid "internal error, tried to erealloc(0)"
+msgstr ""
+
+#: common/alloc.c:161 common/alloc.c:185
+msgid "internal error, tried to erealloc3(0)"
+msgstr ""
+
+#: common/alloc.c:163 common/alloc.c:187
+msgid "internal error, erealloc3() overflow"
+msgstr ""
+
+#: common/sudo_conf.c:306
+#, c-format
+msgid "unable to stat %s"
+msgstr ""
+
+#: common/sudo_conf.c:309
+#, c-format
+msgid "%s is not a regular file"
+msgstr ""
+
+#: common/sudo_conf.c:312
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr ""
+
+#: common/sudo_conf.c:316
+#, c-format
+msgid "%s is world writable"
+msgstr ""
+
+#: common/sudo_conf.c:319
+#, c-format
+msgid "%s is group writable"
+msgstr ""
+
+#: common/sudo_conf.c:328 src/selinux.c:196 src/selinux.c:209 src/sudo.c:333
+#, c-format
+msgid "unable to open %s"
+msgstr ""
+
+#: compat/strsignal.c:47
+msgid "Unknown signal"
+msgstr ""
+
 #: src/error.c:82 src/error.c:86
 msgid ": "
 msgstr ""
 
-#: src/exec.c:105 src/exec_pty.c:616 src/exec_pty.c:948 src/tgetpass.c:221
+#: src/exec.c:105 src/exec_pty.c:623 src/exec_pty.c:957 src/tgetpass.c:221
 #, c-format
 msgid "unable to fork"
 msgstr ""
@@ -30,18 +119,18 @@ msgstr ""
 msgid "unable to create sockets"
 msgstr ""
 
-#: src/exec.c:259 src/exec_pty.c:567 src/exec_pty.c:576 src/exec_pty.c:584
-#: src/exec_pty.c:883 src/exec_pty.c:945 src/tgetpass.c:218
+#: src/exec.c:259 src/exec_pty.c:569 src/exec_pty.c:578 src/exec_pty.c:586
+#: src/exec_pty.c:892 src/exec_pty.c:954 src/tgetpass.c:218
 #, c-format
 msgid "unable to create pipe"
 msgstr ""
 
-#: src/exec.c:340 src/exec_pty.c:1011 src/exec_pty.c:1146
+#: src/exec.c:344 src/exec_pty.c:1019 src/exec_pty.c:1157
 #, c-format
 msgid "select failed"
 msgstr ""
 
-#: src/exec.c:425
+#: src/exec.c:434
 #, c-format
 msgid "unable to restore tty label"
 msgstr ""
@@ -51,45 +140,37 @@ msgstr ""
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr ""
 
-#: src/exec_common.c:111 src/parse_args.c:432 src/sudo.c:447 src/sudo.c:467
-#: src/sudo.c:474 src/sudo.c:485 src/sudo.c:871 common/alloc.c:85
-#: common/alloc.c:105 common/alloc.c:127 common/alloc.c:146 common/alloc.c:168
-#: common/alloc.c:192 common/alloc.c:256 common/alloc.c:270
-#, c-format
-msgid "unable to allocate memory"
-msgstr ""
-
-#: src/exec_pty.c:140
+#: src/exec_pty.c:144
 #, c-format
 msgid "unable to allocate pty"
 msgstr ""
 
-#: src/exec_pty.c:609
+#: src/exec_pty.c:616
 #, c-format
 msgid "unable to set terminal to raw mode"
 msgstr ""
 
-#: src/exec_pty.c:926
+#: src/exec_pty.c:935
 #, c-format
 msgid "unable to set controlling tty"
 msgstr ""
 
-#: src/exec_pty.c:1019
+#: src/exec_pty.c:1028
 #, c-format
 msgid "error reading from signal pipe"
 msgstr ""
 
-#: src/exec_pty.c:1038
+#: src/exec_pty.c:1049
 #, c-format
 msgid "error reading from pipe"
 msgstr ""
 
-#: src/exec_pty.c:1054
+#: src/exec_pty.c:1065
 #, c-format
 msgid "error reading from socketpair"
 msgstr ""
 
-#: src/exec_pty.c:1058
+#: src/exec_pty.c:1069
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr ""
@@ -377,11 +458,6 @@ msgstr ""
 msgid "unable to set new tty context"
 msgstr ""
 
-#: src/selinux.c:196 src/selinux.c:209 src/sudo.c:333 common/sudo_conf.c:328
-#, c-format
-msgid "unable to open %s"
-msgstr ""
-
 #: src/selinux.c:252
 #, c-format
 msgid "you must specify a role for type %s"
@@ -477,134 +553,134 @@ msgstr ""
 msgid "unable to get group vector"
 msgstr ""
 
-#: src/sudo.c:443
+#: src/sudo.c:454
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr ""
 
-#: src/sudo.c:735
+#: src/sudo.c:752
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr ""
 
-#: src/sudo.c:738
+#: src/sudo.c:755
 #, c-format
 msgid ""
 "effective uid is not %d, is %s on a file system with the 'nosuid' option set "
 "or an NFS file system without root privileges?"
 msgstr ""
 
-#: src/sudo.c:744
+#: src/sudo.c:761
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr ""
 
-#: src/sudo.c:813
+#: src/sudo.c:830
 #, c-format
 msgid "resource control limit has been reached"
 msgstr ""
 
-#: src/sudo.c:816
+#: src/sudo.c:833
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
 msgstr ""
 
-#: src/sudo.c:820
+#: src/sudo.c:837
 #, c-format
 msgid "the invoking task is final"
 msgstr ""
 
-#: src/sudo.c:823
+#: src/sudo.c:840
 #, c-format
 msgid "could not join project \"%s\""
 msgstr ""
 
-#: src/sudo.c:828
+#: src/sudo.c:845
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:832
+#: src/sudo.c:849
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:836
+#: src/sudo.c:853
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:842
+#: src/sudo.c:859
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:844
+#: src/sudo.c:861
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:909
+#: src/sudo.c:926
 #, c-format
 msgid "unknown login class %s"
 msgstr ""
 
-#: src/sudo.c:923 src/sudo.c:926
+#: src/sudo.c:940 src/sudo.c:943
 #, c-format
 msgid "unable to set user context"
 msgstr ""
 
-#: src/sudo.c:938
+#: src/sudo.c:955
 #, c-format
 msgid "unable to set supplementary group IDs"
 msgstr ""
 
-#: src/sudo.c:945
+#: src/sudo.c:962
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:951
+#: src/sudo.c:968
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:958
+#: src/sudo.c:975
 #, c-format
 msgid "unable to set process priority"
 msgstr ""
 
-#: src/sudo.c:966
+#: src/sudo.c:983
 #, c-format
 msgid "unable to change root to %s"
 msgstr ""
 
-#: src/sudo.c:973 src/sudo.c:979 src/sudo.c:985
+#: src/sudo.c:990 src/sudo.c:996 src/sudo.c:1002
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr ""
 
-#: src/sudo.c:999
+#: src/sudo.c:1016
 #, c-format
 msgid "unable to change directory to %s"
 msgstr ""
 
-#: src/sudo.c:1072
+#: src/sudo.c:1089
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr ""
 
-#: src/sudo.c:1133
+#: src/sudo.c:1150
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr ""
 
-#: src/sudo.c:1145
+#: src/sudo.c:1162
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr ""
 
-#: src/sudo.c:1157
+#: src/sudo.c:1174
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr ""
@@ -692,80 +768,4 @@ msgstr ""
 #: src/utmp.c:283
 #, c-format
 msgid "unable to restore stdin"
-msgstr ""
-
-#: common/aix.c:149
-#, c-format
-msgid "unable to open userdb"
-msgstr ""
-
-#: common/aix.c:152
-#, c-format
-msgid "unable to switch to registry \"%s\" for %s"
-msgstr ""
-
-#: common/aix.c:169
-#, c-format
-msgid "unable to restore registry"
-msgstr ""
-
-#: common/alloc.c:82
-msgid "internal error, tried to emalloc(0)"
-msgstr ""
-
-#: common/alloc.c:99
-msgid "internal error, tried to emalloc2(0)"
-msgstr ""
-
-#: common/alloc.c:101
-msgid "internal error, emalloc2() overflow"
-msgstr ""
-
-#: common/alloc.c:120
-msgid "internal error, tried to ecalloc(0)"
-msgstr ""
-
-#: common/alloc.c:123
-msgid "internal error, ecalloc() overflow"
-msgstr ""
-
-#: common/alloc.c:142
-msgid "internal error, tried to erealloc(0)"
-msgstr ""
-
-#: common/alloc.c:161 common/alloc.c:185
-msgid "internal error, tried to erealloc3(0)"
-msgstr ""
-
-#: common/alloc.c:163 common/alloc.c:187
-msgid "internal error, erealloc3() overflow"
-msgstr ""
-
-#: common/sudo_conf.c:306
-#, c-format
-msgid "unable to stat %s"
-msgstr ""
-
-#: common/sudo_conf.c:309
-#, c-format
-msgid "%s is not a regular file"
-msgstr ""
-
-#: common/sudo_conf.c:312
-#, c-format
-msgid "%s is owned by uid %u, should be %u"
-msgstr ""
-
-#: common/sudo_conf.c:316
-#, c-format
-msgid "%s is world writable"
-msgstr ""
-
-#: common/sudo_conf.c:319
-#, c-format
-msgid "%s is group writable"
-msgstr ""
-
-#: compat/strsignal.c:47
-msgid "Unknown signal"
 msgstr ""

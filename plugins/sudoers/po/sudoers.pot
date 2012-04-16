@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.5\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-04-13 16:21-0400\n"
+"POT-Creation-Date: 2012-04-16 12:54-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,9 +17,211 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
+#: gram.y:110
+#, c-format
+msgid ">>> %s: %s near line %d <<<"
+msgstr ""
+
 #: plugins/sudoers/alias.c:125
 #, c-format
 msgid "Alias `%s' already defined"
+msgstr ""
+
+#: plugins/sudoers/auth/bsdauth.c:78
+#, c-format
+msgid "unable to get login class for user %s"
+msgstr ""
+
+#: plugins/sudoers/auth/bsdauth.c:84
+msgid "unable to begin bsd authentication"
+msgstr ""
+
+#: plugins/sudoers/auth/bsdauth.c:92
+msgid "invalid authentication type"
+msgstr ""
+
+#: plugins/sudoers/auth/bsdauth.c:101
+msgid "unable to setup authentication"
+msgstr ""
+
+#: plugins/sudoers/auth/fwtk.c:60
+#, c-format
+msgid "unable to read fwtk config"
+msgstr ""
+
+#: plugins/sudoers/auth/fwtk.c:65
+#, c-format
+msgid "unable to connect to authentication server"
+msgstr ""
+
+#: plugins/sudoers/auth/fwtk.c:71 plugins/sudoers/auth/fwtk.c:95
+#: plugins/sudoers/auth/fwtk.c:128
+#, c-format
+msgid "lost connection to authentication server"
+msgstr ""
+
+#: plugins/sudoers/auth/fwtk.c:75
+#, c-format
+msgid ""
+"authentication server error:\n"
+"%s"
+msgstr ""
+
+#: plugins/sudoers/auth/kerb5.c:117
+#, c-format
+msgid "%s: unable to unparse princ ('%s'): %s"
+msgstr ""
+
+#: plugins/sudoers/auth/kerb5.c:160
+#, c-format
+msgid "%s: unable to parse '%s': %s"
+msgstr ""
+
+#: plugins/sudoers/auth/kerb5.c:170
+#, c-format
+msgid "%s: unable to resolve ccache: %s"
+msgstr ""
+
+#: plugins/sudoers/auth/kerb5.c:218
+#, c-format
+msgid "%s: unable to allocate options: %s"
+msgstr ""
+
+#: plugins/sudoers/auth/kerb5.c:234
+#, c-format
+msgid "%s: unable to get credentials: %s"
+msgstr ""
+
+#: plugins/sudoers/auth/kerb5.c:247
+#, c-format
+msgid "%s: unable to initialize ccache: %s"
+msgstr ""
+
+#: plugins/sudoers/auth/kerb5.c:251
+#, c-format
+msgid "%s: unable to store cred in ccache: %s"
+msgstr ""
+
+#: plugins/sudoers/auth/kerb5.c:316
+#, c-format
+msgid "%s: unable to get host principal: %s"
+msgstr ""
+
+#: plugins/sudoers/auth/kerb5.c:331
+#, c-format
+msgid "%s: Cannot verify TGT! Possible attack!: %s"
+msgstr ""
+
+#: plugins/sudoers/auth/pam.c:100
+msgid "unable to initialize PAM"
+msgstr ""
+
+#: plugins/sudoers/auth/pam.c:144
+msgid "account validation failure, is your account locked?"
+msgstr ""
+
+#: plugins/sudoers/auth/pam.c:148
+msgid "Account or password is expired, reset your password and try again"
+msgstr ""
+
+#: plugins/sudoers/auth/pam.c:155
+#, c-format
+msgid "pam_chauthtok: %s"
+msgstr ""
+
+#: plugins/sudoers/auth/pam.c:159
+msgid "Password expired, contact your system administrator"
+msgstr ""
+
+#: plugins/sudoers/auth/pam.c:163
+msgid ""
+"Account expired or PAM config lacks an \"account\" section for sudo, contact "
+"your system administrator"
+msgstr ""
+
+#: plugins/sudoers/auth/pam.c:180
+#, c-format
+msgid "pam_authenticate: %s"
+msgstr ""
+
+#: plugins/sudoers/auth/pam.c:330
+msgid "Password: "
+msgstr ""
+
+#: plugins/sudoers/auth/pam.c:331
+msgid "Password:"
+msgstr ""
+
+#: plugins/sudoers/auth/rfc1938.c:104 plugins/sudoers/visudo.c:220
+#, c-format
+msgid "you do not exist in the %s database"
+msgstr ""
+
+#: plugins/sudoers/auth/securid5.c:81
+#, c-format
+msgid "failed to initialise the ACE API library"
+msgstr ""
+
+#: plugins/sudoers/auth/securid5.c:107
+#, c-format
+msgid "unable to contact the SecurID server"
+msgstr ""
+
+#: plugins/sudoers/auth/securid5.c:116
+#, c-format
+msgid "User ID locked for SecurID Authentication"
+msgstr ""
+
+#: plugins/sudoers/auth/securid5.c:120 plugins/sudoers/auth/securid5.c:171
+#, c-format
+msgid "invalid username length for SecurID"
+msgstr ""
+
+#: plugins/sudoers/auth/securid5.c:124 plugins/sudoers/auth/securid5.c:176
+#, c-format
+msgid "invalid Authentication Handle for SecurID"
+msgstr ""
+
+#: plugins/sudoers/auth/securid5.c:128
+#, c-format
+msgid "SecurID communication failed"
+msgstr ""
+
+#: plugins/sudoers/auth/securid5.c:132 plugins/sudoers/auth/securid5.c:215
+#, c-format
+msgid "unknown SecurID error"
+msgstr ""
+
+#: plugins/sudoers/auth/securid5.c:166
+#, c-format
+msgid "invalid passcode length for SecurID"
+msgstr ""
+
+#: plugins/sudoers/auth/sia.c:109
+msgid "unable to initialize SIA session"
+msgstr ""
+
+#: plugins/sudoers/auth/sudo_auth.c:117
+msgid ""
+"Invalid authentication methods compiled into sudo!  You may mix standalone "
+"and non-standalone authentication."
+msgstr ""
+
+#: plugins/sudoers/auth/sudo_auth.c:199
+msgid ""
+"There are no authentication methods compiled into sudo!  If you want to turn "
+"off authentication, use the --disable-authentication configure option."
+msgstr ""
+
+#: plugins/sudoers/auth/sudo_auth.c:271
+#, c-format
+msgid "%d incorrect password attempt"
+msgid_plural "%d incorrect password attempts"
+msgstr[0] ""
+msgstr[1] ""
+
+#: plugins/sudoers/auth/sudo_auth.c:374
+msgid "Authentication methods:"
 msgstr ""
 
 #: plugins/sudoers/bsm_audit.c:60 plugins/sudoers/bsm_audit.c:63
@@ -565,9 +767,9 @@ msgstr ""
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr ""
 
-#: plugins/sudoers/env.c:341 plugins/sudoers/env.c:411 toke.l:682 toke.l:812
-#: toke.l:870 toke.l:966 plugins/sudoers/toke_util.c:113
-#: plugins/sudoers/toke_util.c:167 plugins/sudoers/toke_util.c:207
+#: plugins/sudoers/env.c:341 plugins/sudoers/env.c:411
+#: plugins/sudoers/toke_util.c:113 plugins/sudoers/toke_util.c:167
+#: plugins/sudoers/toke_util.c:207 toke.l:682 toke.l:812 toke.l:870 toke.l:966
 #, c-format
 msgid "unable to allocate memory"
 msgstr ""
@@ -589,15 +791,10 @@ msgid ""
 msgstr ""
 
 #: plugins/sudoers/find_path.c:69 plugins/sudoers/find_path.c:108
-#: plugins/sudoers/find_path.c:123 plugins/sudoers/iolog.c:125 toke.l:678
-#: toke.l:866 plugins/sudoers/sudoers.c:950
+#: plugins/sudoers/find_path.c:123 plugins/sudoers/iolog.c:125
+#: plugins/sudoers/sudoers.c:950 toke.l:678 toke.l:866
 #, c-format
 msgid "%s: %s"
-msgstr ""
-
-#: gram.y:110
-#, c-format
-msgid ">>> %s: %s near line %d <<<"
 msgstr ""
 
 #: plugins/sudoers/group_plugin.c:91
@@ -757,25 +954,6 @@ msgstr ""
 #: plugins/sudoers/ldap.c:2423
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
-msgstr ""
-
-#: toke.l:805
-msgid "too many levels of includes"
-msgstr ""
-
-#: toke.l:829 plugins/sudoers/sudoers.c:1004
-#, c-format
-msgid "%s is owned by uid %u, should be %u"
-msgstr ""
-
-#: toke.l:836 plugins/sudoers/sudoers.c:1008
-#, c-format
-msgid "%s is world writable"
-msgstr ""
-
-#: toke.l:841 plugins/sudoers/sudoers.c:1011
-#, c-format
-msgid "%s is owned by gid %u, should be %u"
 msgstr ""
 
 #: plugins/sudoers/linux_audit.c:57
@@ -1075,6 +1253,21 @@ msgstr ""
 msgid "%s is not a regular file"
 msgstr ""
 
+#: plugins/sudoers/sudoers.c:1004 toke.l:829
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr ""
+
+#: plugins/sudoers/sudoers.c:1008 toke.l:836
+#, c-format
+msgid "%s is world writable"
+msgstr ""
+
+#: plugins/sudoers/sudoers.c:1011 toke.l:841
+#, c-format
+msgid "%s is owned by gid %u, should be %u"
+msgstr ""
+
 #: plugins/sudoers/sudoers.c:1038
 #, c-format
 msgid "only root can use `-c %s'"
@@ -1313,11 +1506,6 @@ msgstr ""
 msgid "%s grammar version %d\n"
 msgstr ""
 
-#: plugins/sudoers/visudo.c:220 plugins/sudoers/auth/rfc1938.c:104
-#, c-format
-msgid "you do not exist in the %s database"
-msgstr ""
-
 #: plugins/sudoers/visudo.c:252 plugins/sudoers/visudo.c:538
 #, c-format
 msgid "press return to edit %s: "
@@ -1504,194 +1692,6 @@ msgid ""
 "  -V          display version information and exit"
 msgstr ""
 
-#: plugins/sudoers/auth/bsdauth.c:78
-#, c-format
-msgid "unable to get login class for user %s"
-msgstr ""
-
-#: plugins/sudoers/auth/bsdauth.c:84
-msgid "unable to begin bsd authentication"
-msgstr ""
-
-#: plugins/sudoers/auth/bsdauth.c:92
-msgid "invalid authentication type"
-msgstr ""
-
-#: plugins/sudoers/auth/bsdauth.c:101
-msgid "unable to setup authentication"
-msgstr ""
-
-#: plugins/sudoers/auth/fwtk.c:60
-#, c-format
-msgid "unable to read fwtk config"
-msgstr ""
-
-#: plugins/sudoers/auth/fwtk.c:65
-#, c-format
-msgid "unable to connect to authentication server"
-msgstr ""
-
-#: plugins/sudoers/auth/fwtk.c:71 plugins/sudoers/auth/fwtk.c:95
-#: plugins/sudoers/auth/fwtk.c:128
-#, c-format
-msgid "lost connection to authentication server"
-msgstr ""
-
-#: plugins/sudoers/auth/fwtk.c:75
-#, c-format
-msgid ""
-"authentication server error:\n"
-"%s"
-msgstr ""
-
-#: plugins/sudoers/auth/kerb5.c:117
-#, c-format
-msgid "%s: unable to unparse princ ('%s'): %s"
-msgstr ""
-
-#: plugins/sudoers/auth/kerb5.c:160
-#, c-format
-msgid "%s: unable to parse '%s': %s"
-msgstr ""
-
-#: plugins/sudoers/auth/kerb5.c:170
-#, c-format
-msgid "%s: unable to resolve ccache: %s"
-msgstr ""
-
-#: plugins/sudoers/auth/kerb5.c:218
-#, c-format
-msgid "%s: unable to allocate options: %s"
-msgstr ""
-
-#: plugins/sudoers/auth/kerb5.c:234
-#, c-format
-msgid "%s: unable to get credentials: %s"
-msgstr ""
-
-#: plugins/sudoers/auth/kerb5.c:247
-#, c-format
-msgid "%s: unable to initialize ccache: %s"
-msgstr ""
-
-#: plugins/sudoers/auth/kerb5.c:251
-#, c-format
-msgid "%s: unable to store cred in ccache: %s"
-msgstr ""
-
-#: plugins/sudoers/auth/kerb5.c:316
-#, c-format
-msgid "%s: unable to get host principal: %s"
-msgstr ""
-
-#: plugins/sudoers/auth/kerb5.c:331
-#, c-format
-msgid "%s: Cannot verify TGT! Possible attack!: %s"
-msgstr ""
-
-#: plugins/sudoers/auth/pam.c:100
-msgid "unable to initialize PAM"
-msgstr ""
-
-#: plugins/sudoers/auth/pam.c:144
-msgid "account validation failure, is your account locked?"
-msgstr ""
-
-#: plugins/sudoers/auth/pam.c:148
-msgid "Account or password is expired, reset your password and try again"
-msgstr ""
-
-#: plugins/sudoers/auth/pam.c:155
-#, c-format
-msgid "pam_chauthtok: %s"
-msgstr ""
-
-#: plugins/sudoers/auth/pam.c:159
-msgid "Password expired, contact your system administrator"
-msgstr ""
-
-#: plugins/sudoers/auth/pam.c:163
-msgid ""
-"Account expired or PAM config lacks an \"account\" section for sudo, contact "
-"your system administrator"
-msgstr ""
-
-#: plugins/sudoers/auth/pam.c:180
-#, c-format
-msgid "pam_authenticate: %s"
-msgstr ""
-
-#: plugins/sudoers/auth/pam.c:330
-msgid "Password: "
-msgstr ""
-
-#: plugins/sudoers/auth/pam.c:331
-msgid "Password:"
-msgstr ""
-
-#: plugins/sudoers/auth/securid5.c:81
-#, c-format
-msgid "failed to initialise the ACE API library"
-msgstr ""
-
-#: plugins/sudoers/auth/securid5.c:107
-#, c-format
-msgid "unable to contact the SecurID server"
-msgstr ""
-
-#: plugins/sudoers/auth/securid5.c:116
-#, c-format
-msgid "User ID locked for SecurID Authentication"
-msgstr ""
-
-#: plugins/sudoers/auth/securid5.c:120 plugins/sudoers/auth/securid5.c:171
-#, c-format
-msgid "invalid username length for SecurID"
-msgstr ""
-
-#: plugins/sudoers/auth/securid5.c:124 plugins/sudoers/auth/securid5.c:176
-#, c-format
-msgid "invalid Authentication Handle for SecurID"
-msgstr ""
-
-#: plugins/sudoers/auth/securid5.c:128
-#, c-format
-msgid "SecurID communication failed"
-msgstr ""
-
-#: plugins/sudoers/auth/securid5.c:132 plugins/sudoers/auth/securid5.c:215
-#, c-format
-msgid "unknown SecurID error"
-msgstr ""
-
-#: plugins/sudoers/auth/securid5.c:166
-#, c-format
-msgid "invalid passcode length for SecurID"
-msgstr ""
-
-#: plugins/sudoers/auth/sia.c:109
-msgid "unable to initialize SIA session"
-msgstr ""
-
-#: plugins/sudoers/auth/sudo_auth.c:117
-msgid ""
-"Invalid authentication methods compiled into sudo!  You may mix standalone "
-"and non-standalone authentication."
-msgstr ""
-
-#: plugins/sudoers/auth/sudo_auth.c:199
-msgid ""
-"There are no authentication methods compiled into sudo!  If you want to turn "
-"off authentication, use the --disable-authentication configure option."
-msgstr ""
-
-#: plugins/sudoers/auth/sudo_auth.c:271
-#, c-format
-msgid "%d incorrect password attempt"
-msgid_plural "%d incorrect password attempts"
-msgstr[0] ""
-msgstr[1] ""
-
-#: plugins/sudoers/auth/sudo_auth.c:374
-msgid "Authentication methods:"
+#: toke.l:805
+msgid "too many levels of includes"
 msgstr ""
