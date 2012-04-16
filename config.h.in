@@ -602,9 +602,6 @@
    */
 #undef HAVE_SYS_DIR_H
 
-/* Define to 1 if you have the <sys/mkdev.h> header file. */
-#undef HAVE_SYS_MKDEV_H
-
 /* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
    */
 #undef HAVE_SYS_NDIR_H
@@ -708,6 +705,14 @@
 
 /* The user or email address that sudo mail is sent to. */
 #undef MAILTO
+
+/* Define to 1 if `major', `minor', and `makedev' are declared in <mkdev.h>.
+   */
+#undef MAJOR_IN_MKDEV
+
+/* Define to 1 if `major', `minor', and `makedev' are declared in
+   <sysmacros.h>. */
+#undef MAJOR_IN_SYSMACROS
 
 /* The max number of chars per log file line (for line wrapping). */
 #undef MAXLOGFILELEN
