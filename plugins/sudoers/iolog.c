@@ -193,7 +193,7 @@ io_nextid(char *iolog_dir, char sessid[7])
     }
     buf[6] = '\n';
 
-    /* Stash id logging purposes */
+    /* Stash id for logging purposes. */
     memcpy(sessid, buf, 6);
     sessid[6] = '\0';
 
