@@ -199,6 +199,8 @@ plugins/sudoers/po/eu.mo
 plugins/sudoers/po/eu.po
 plugins/sudoers/po/fi.mo
 plugins/sudoers/po/fi.po
+plugins/sudoers/po/hr.mo
+plugins/sudoers/po/hr.po
 plugins/sudoers/po/ja.mo
 plugins/sudoers/po/ja.po
 plugins/sudoers/po/lt.mo
@@ -284,6 +286,8 @@ src/parse_args.c
 src/po/README
 src/po/da.mo
 src/po/da.po
+src/po/de.mo
+src/po/de.po
 src/po/eo.mo
 src/po/eo.po
 src/po/es.mo
