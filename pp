@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2012 Quest Software, Inc. ALL RIGHTS RESERVED
-pp_revision="341"
+pp_revision="352"
  # Copyright 2012 Quest Software, Inc.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -1595,7 +1595,7 @@ pp_aix_detect_os () {
 
 pp_aix_version_fix () {
     typeset v
-    v=`echo $1 | tr -c -d '[0-9].\012'`
+    v=`echo $1 | sed 's/[-+]/./' | tr -c -d '[0-9].\012' | awk -F"." '{ printf "%d.%d.%d.%.4s", $1, $2, $3, $4 }' | sed 's/[.]*$//g'`
     if test x"$v" != x"$1"; then
         pp_warn "stripped version '$1' to '$v'"
     fi
@@ -1796,6 +1796,7 @@ cmd_arg="$cmd_arg"
 stop_signal=$stop_signal
 force_signal=9
 srcgroup="$pp_aix_mkssys_group"
+instances_allowed=${pp_aix_mkssys_instances_allowed:--Q}
 
 lssrc -s \$svc > /dev/null 2>&1
 if [ \$? -eq 0 ]; then
@@ -1806,7 +1807,7 @@ if [ \$? -eq 0 ]; then
   rmsys -s \$svc > /dev/null 2>&1
 fi
 
-mkssys -s \$svc -u \$uid -p "\$cmd_cmd" \${cmd_arg:+-a "\$cmd_arg"} -S -n \$stop_signal -f 9 ${pp_aix_mkssys_args} \${srcgroup:+-G \$srcgroup}
+mkssys -s \$svc -u \$uid -p "\$cmd_cmd" \${cmd_arg:+-a "\$cmd_arg"} -S -n \$stop_signal -f 9 ${pp_aix_mkssys_args} \${srcgroup:+-G \$srcgroup} \$instances_allowed
 .
 
         #-- add code to start the service on reboot
@@ -1912,7 +1913,7 @@ pp_backend_aix () {
 	    bosboot=N; pp_contains_any "$pp_aix_bosboot" $cmp && bosboot=b
 
             echo $pp_aix_bff_name.$ex \
-                 ${pp_aix_version:-`pp_aix_version_fix "$version"`} \
+             `[ $pp_aix_version ] && pp_aix_version_fix $pp_aix_version || pp_aix_version_fix "$version"` \
 	         1 $bosboot $content \
 	         $pp_aix_lang "$summary $briefex"
 	    echo "["
@@ -2062,7 +2063,7 @@ pp_backend_aix_cleanup () {
 }
 
 pp_backend_aix_names () {
-	echo "$name.${pp_aix_version:-`pp_aix_version_fix "$version"`}.bff"
+    echo "$name.`[ $pp_aix_version ] && pp_aix_version_fix $pp_aix_version || pp_aix_version_fix "$version"`.bff"
 }
 
 pp_backend_aix_install_script () {
@@ -2181,7 +2182,7 @@ pp_backend_aix_vas_platforms () {
     esac
 }
 pp_backend_aix_function () {
-    case $1 in
+    case "$1" in
     pp_mkgroup) cat <<'.';;
             /usr/sbin/lsgroup "$1" >/dev/null &&
 		return 0
@@ -2782,7 +2783,7 @@ pp_backend_sd_init_svc_vars () {
     :
 }
 pp_backend_sd_function () {
-    case $1 in
+    case "$1" in
         pp_mkgroup) cat <<'.';;
 	    /usr/sbin/groupmod "$1" 2>/dev/null ||
 		/usr/sbin/groupadd "$1"
@@ -3355,7 +3356,7 @@ pp_backend_solaris_vas_platforms () {
     esac
 }
 pp_backend_solaris_function() {
-    case $1 in
+    case "$1" in
         pp_mkgroup) cat<<'.';;
 	    /usr/sbin/groupmod "$1" 2>/dev/null && return 0
             /usr/sbin/groupadd "$1"
@@ -4601,7 +4602,7 @@ esac
     chmod 755 $out
 }
 pp_backend_deb_function() {
-    case $1 in
+    case "$1" in
         pp_mkgroup) cat<<'.';;
 	    /usr/sbin/groupmod "$1" 2>/dev/null && return 0
             /usr/sbin/groupadd "$1"
@@ -4952,7 +4953,7 @@ cat <<-'.' >> $out
 	        return $rc
 	}
 
-	case $1 in
+	case "$1" in
 	    start_msg) echo "Starting $svcs";;
 	stop_msg)  echo "Stopping $svcs";;
 	start)     pp_start;;
@@ -5018,7 +5019,7 @@ pp_kit_service_script () {
 	            kill -0 "$pid" 2>/dev/null
 	        fi
 	    }
-	    case $1 in
+	    case "$1" in
 	        start_msg) echo "Starting the $svc service";;
 	        stop_msg)  echo "Stopping the $svc service";;
 	        start)
@@ -6416,7 +6417,7 @@ pp_rpm_service_make_init_script () {
     chmod 755 $out
 }
 pp_backend_rpm_function () {
-    case $1 in
+    case "$1" in
         pp_mkgroup) cat<<'.';;
             /usr/sbin/groupadd -f -r "$1"
 .
@@ -6527,7 +6528,7 @@ pp_backend_rpm_function () {
     Examples found in /System/Library/LaunchDaemons/
     See manual page launchd.plist(5) for details:
 
-    { Label: "com.quest.vintela.foo",                        # required
+    { Label: "com.quest.rc.foo",                        # required
       Program: "/sbin/program",
       ProgramArguments: [ "/sbin/program", "arg1", "arg2" ], # required
       RunAtLoad: true,
@@ -6673,18 +6674,55 @@ pp_macos_rewrite_cpio () {
 	undef %users;
 	undef %groups;
 	# parse the cpio file
-	while (read(STDIN, my $header, 76)) {
-	    die "bad magic" unless $header =~ m/^070707/;
-	    my $namesize = oct(substr($header, 59, 6));
-	    my $filesize = oct(substr($header, 65, 11));
-	    read(STDIN, my $name, $namesize);
-	    # update uid, gid and mode
+	my $hdrlen = 76;
+	while (read(STDIN, my $header, $hdrlen)) {
+	    my ($name, $namesize, $filesize);
+	    my $filepad = 0;
+	    if ($header =~ m/^07070[12]/) {
+	        # SVR4 ASCII format, convert to ODC
+	        if ($hdrlen == 76) {
+	            # Read in rest of header and update header len for SVR4
+	            read(STDIN, $header, 110 - 76, 76);
+	            $hdrlen = 110;
+	        }
+	        my $ino = hex(substr($header, 6, 8)) & 0x3ffff;
+	        my $mode = hex(substr($header, 14, 8)) & 0x3ffff;
+	        my $uid = hex(substr($header, 22, 8)) & 0x3ffff;
+	        my $gid = hex(substr($header, 30, 8)) & 0x3ffff;
+	        my $nlink = hex(substr($header, 38, 8)) & 0x3ffff;
+	        my $mtime = hex(substr($header, 46, 8)) & 0xffffffff;
+	        $filesize = hex(substr($header, 54, 8)) & 0xffffffff;
+	        my $dev_maj = hex(substr($header, 62, 8));
+	        my $dev_min = hex(substr($header, 70, 8));
+	        my $dev = &makedev($dev_maj, $dev_min) & 0x3ffff;
+	        my $rdev_maj = hex(substr($header, 78, 8));
+	        my $rdev_min = hex(substr($header, 86, 8));
+	        my $rdev = &makedev($rdev_maj, $rdev_min) & 0x3ffff;
+	        $namesize = hex(substr($header, 94, 8)) & 0x3ffff;
+	        read(STDIN, $name, $namesize);
+	        # Header + name is padded to a multiple of 4 bytes
+	        my $namepad = (($hdrlen + $namesize + 3) & 0xfffffffc) - ($hdrlen + $namesize);
+	        read(STDIN, my $padding, $namepad) if ($namepad);
+	        # File data is padded to be a multiple of 4 bytes
+	        $filepad = (($filesize + 3) & 0xfffffffc) - $filesize;
+
+	        my $new_header = sprintf("070707%06o%06o%06o%06o%06o%06o%06o%011o%06o%011o", $dev, $ino, $mode, $uid, $gid, $nlink, $rdev, $mtime, $namesize, $filesize);
+	        $header = $new_header;
+	    } elsif ($header =~ m/^070707/) {
+	        # POSIX Portable ASCII Format
+	        $namesize = oct(substr($header, 59, 6));
+	        $filesize = oct(substr($header, 65, 11));
+	        read(STDIN, $name, $namesize);
+	    } else {
+	        die "bad magic";
+	    }
+	    # update uid, gid and mode (already in octal)
 	    substr($header, 24, 6) = $uid{$name} if exists $uid{$name};
 	    substr($header, 30, 6) = $gid{$name} if exists $gid{$name};
 	    substr($header, 18, 6) = $mode{$name} if exists $mode{$name};
 	    print($header, $name);
 	    # check for trailer at EOF
-	    last if $filesize == 0 && $name eq "TRAILER!!!\0";
+	    last if $filesize == 0 && $name =~ /^TRAILER!!!\0/;
 	    # copy-through the file data
 	    while ($filesize > 0) {
 	        my $seg = 8192;
@@ -6693,6 +6731,8 @@ pp_macos_rewrite_cpio () {
 	        print $data;
 	        $filesize -= $seg;
 	    }
+	    # If file data is padded, skip it
+	    read(STDIN, my $padding, $filepad) if ($filepad);
 	}
 	# pass through any padding at the end (blocksize-dependent)
 	for (;;) {
@@ -6701,6 +6741,10 @@ pp_macos_rewrite_cpio () {
 	    print $data;
 	}
 	exit(0);
+
+	sub makedev {
+	    (((($_[0] & 0xff)) << 24) | ($_[1] & 0xffffff));
+	}
 	__DATA__
 .
     # Append to the script the %files data
@@ -6832,7 +6876,7 @@ pp_backend_macos () {
 }
 
 pp_backend_macos_bundle () {
-    typeset pkgdir Contents Resources lprojdir
+    typeset pkgdir Contents Resources lprojdir svc
     typeset Info_plist Description_plist
     typeset bundle_vendor bundle_version size cmp filelists
 
@@ -6897,6 +6941,12 @@ pp_backend_macos_bundle () {
 	esac
 	cp -R ${pp_macos_pkg_license} $Resources/License.$sfx
     fi
+
+    # Add services (may modify %files)
+    for svc in $pp_services .; do
+	test . = "$svc" && continue
+	pp_macos_add_service $svc
+    done
 
     # Find file lists (%files.* includes ignore files)
     for cmp in $pp_components; do
@@ -7021,6 +7071,8 @@ CompressedSize 0
         echo "requires=$pp_macos_requires" >> $Resources/uninstall
     fi
 
+    . $pp_wrkdir/%fixup
+
     # Create the bill-of-materials (Archive.bom)
     cat $filelists | pp_macos_files_bom | sort |
 	pp_macos_bom_fix_parents > $pp_wrkdir/tmp.bomls
@@ -7040,7 +7092,7 @@ CompressedSize 0
 }
 
 pp_backend_macos_flat () {
-    typeset pkgdir bundledir Resources lprojdir
+    typeset pkgdir bundledir Resources lprojdir svc
     typeset Info_plist Description_plist
     typeset bundle_vendor bundle_version size numfiles cmp filelists
 
@@ -7062,6 +7114,12 @@ pp_backend_macos_flat () {
     lprojdir=$Resources/en.lproj
     mkdir $pkgdir $bundledir $Resources $lprojdir ||
 	pp_error "Can't make package temporary directories"
+
+    # Add services (may modify %files)
+    for svc in $pp_services .; do
+	test . = "$svc" && continue
+	pp_macos_add_service $svc
+    done
 
     # Find file lists (%files.* includes ignore files)
     for cmp in $pp_components; do
@@ -7183,6 +7241,8 @@ pp_backend_macos_flat () {
 	</pkg-info>
 .
 
+    . $pp_wrkdir/%fixup
+
     # Create the bill-of-materials (Bom)
     cat $filelists | pp_macos_files_bom | sort |
 	pp_macos_bom_fix_parents > $pp_wrkdir/tmp.bomls
@@ -7197,7 +7257,13 @@ pp_backend_macos_flat () {
     test -d $pp_wrkdir/bom_stage && $pp_macos_sudo rm -rf $pp_wrkdir/bom_stage
 
     # Create the flat package with xar (like pkgutil --flatten does)
-    (cd $pkgdir && /usr/bin/xar --distribution --no-compress Scripts --no-compress Payload -jcf "../$name-$version.pkg" *)
+    # Note that --distribution is only supported by Mac OS X 10.6 and above
+    xar_flags="--compression=bzip2 --no-compress Scripts --no-compress Payload"
+    case $mac_version in
+        "10.5"*) ;;
+	*)	 xar_flags="$xar_flags --distribution";;
+    esac
+    (cd $pkgdir && /usr/bin/xar $xar_flags -cf "../$name-$version.pkg" *)
 }
 
 pp_backend_macos_cleanup () {
@@ -7273,7 +7339,106 @@ pp_backend_macos_install_script () {
 }
 
 pp_backend_macos_init_svc_vars () {
-    :
+    pp_macos_start_services_after_install=false
+    pp_macos_service_name=
+    pp_macos_default_service_id_prefix="com.quest.rc."
+    pp_macos_service_id=
+    pp_macos_service_user=
+    pp_macos_service_group=
+    pp_macos_service_initgroups=
+    pp_macos_service_umask=
+    pp_macos_service_cwd=
+    pp_macos_service_nice=
+    pp_macos_svc_plist_file=
+}
+
+pp_macos_launchd_plist () {
+    typeset svc svc_id
+
+    svc="$1"
+    svc_id="$2"
+
+    set -- $cmd
+
+    if [ -n "$pp_macos_svc_plist_file" ]; then
+        echo "## Launchd plist file already defined at $pp_macos_svc_plist_file"
+        return
+    fi
+
+    echo "## Generating the launchd plist file for $svc"
+    pp_macos_svc_plist_file="$pp_wrkdir/$svc.plist"
+    cat <<-. > $pp_macos_svc_plist_file
+	<?xml version="1.0" encoding="UTF-8"?>
+	<!DOCTYPE plist PUBLIC -//Apple Computer//DTD PLIST 1.0//EN
+	http://www.apple.com/DTDs/PropertyList-1.0.dtd >
+	<plist version="1.0">
+	<dict>
+	    <key>Label</key>
+	    <string>$svc_id</string>
+	    <key>ProgramArguments</key>
+	    <array>
+.
+    while test $# != 0; do
+	printf "        <string>$1</string>\n" >> $pp_macos_svc_plist_file
+	shift
+    done
+    cat <<-. >> $pp_macos_svc_plist_file
+	    </array>
+	    <key>KeepAlive</key>
+	    <true/>
+.
+    if test -n "$pp_macos_service_user"; then
+	printf "    <key>UserName</key>\n" >> $pp_macos_svc_plist_file
+	printf "    <string>$pp_macos_service_user</string>\n" >> $pp_macos_svc_plist_file
+    fi
+    if test -n "$pp_macos_service_group"; then
+	printf "    <key>GroupName</key>\n" >> $pp_macos_svc_plist_file
+	printf "    <string>$pp_macos_service_group</string>\n" >> $pp_macos_svc_plist_file
+    fi
+    if test -n "$pp_macos_service_initgroups"; then
+	printf "    <key>InitGroups</key>\n" >> $pp_macos_svc_plist_file
+	printf "    <string>$pp_macos_service_initgroups</string>\n" >> $pp_macos_svc_plist_file
+    fi
+    if test -n "$pp_macos_service_umask"; then
+	printf "    <key>Umask</key>\n" >> $pp_macos_svc_plist_file
+	printf "    <string>$pp_macos_service_umask</string>\n" >> $pp_macos_svc_plist_file
+    fi
+    if test -n "$pp_macos_service_cwd"; then
+	printf "    <key>WorkingDirectory</key>\n" >> $pp_macos_svc_plist_file
+	printf "    <string>$pp_macos_service_cwd</string>\n" >> $pp_macos_svc_plist_file
+    fi
+    if test -n "$pp_macos_service_nice"; then
+	printf "    <key>Nice</key>\n" >> $pp_macos_svc_plist_file
+	printf "    <string>$pp_macos_service_nice</string>\n" >> $pp_macos_svc_plist_file
+    fi
+    cat <<-. >> $pp_macos_svc_plist_file
+	</dict>
+	</plist>
+.
+}
+
+pp_macos_add_service () {
+    typeset svc svc_id plist_file plist_dir
+
+    pp_load_service_vars "$1"
+    svc=${pp_macos_service_name:-$1}
+    svc_id=${pp_macos_service_id:-$pp_macos_default_service_id_prefix$svc}
+
+    #-- create a plist file for svc
+    pp_macos_launchd_plist "$svc" "$svc_id"
+
+    #-- copy the plist file into place and add to %files
+    plist_dir="/Library/LaunchDaemons"
+    plist_file="$plist_dir/$svc_id.plist"
+    mkdir -p "$pp_destdir/$plist_dir"
+    cp "$pp_macos_svc_plist_file" "$pp_destdir/$plist_file"
+    pp_add_file_if_missing "$plist_file"
+
+    #-- add code to start the service on install
+    ${pp_macos_start_services_after_install} && <<-. >> $pp_wrkdir/%post.$svc
+	# start service '$svc' automatically after install
+	launchctl load "$plist_file"
+.
 }
 
 pp_backend_macos_probe () {
@@ -7291,7 +7456,7 @@ pp_backend_macos_vas_platforms () {
     echo "osx"    # XXX non-really sure what they do.. it should be "macos"
 }
 pp_backend_macos_function () {
-    case $1 in
+    case "$1" in
 	_pp_macos_search_unused) cat<<'.';;
 	    # Find an unused value in the given path
 	    # args: path attribute minid [maxid]
