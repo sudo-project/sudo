@@ -227,8 +227,12 @@ case "$osversion" in
 		$configure_opts"
 	;;
     macos*)
-	# Build universal binaries (intel-only) targetting Mac OS X 10.5
-	ARCH_FLAGS="-arch i386 -arch x86_64"
+	case "$osversion" in
+	    *i386|*x86_64)
+		# Build intel-only universal binaries
+		ARCH_FLAGS="-arch i386 -arch x86_64"
+		;;
+	esac
 	if test "${osversion}" != "`$top_srcdir/pp --probe`"; then
 	    sdkvers=`echo "${osversion}" | sed 's/^macos\([0-9][0-9]\)\([0-9]*\)-.*$/\1.\2/'`
 	    SDK_FLAGS="-isysroot /Developer/SDKs/MacOSX${sdkvers}.sdk -mmacosx-version-min=${sdkvers}"
