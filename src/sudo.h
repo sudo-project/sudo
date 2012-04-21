@@ -138,6 +138,7 @@ struct command_details {
     int ngroups;
     int closefrom;
     int flags;
+    struct passwd *pw;
     GETGROUPS_T *groups;
     const char *command;
     const char *cwd;

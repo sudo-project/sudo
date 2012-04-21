@@ -731,6 +731,16 @@ command_info_to_details(char * const info[], struct command_details *details)
     if (!ISSET(details->flags, CD_SET_EUID))
 	details->euid = details->uid;
 
+#ifdef HAVE_SETAUTHDB
+    aix_setauthdb(IDtouser(details->euid));
+#endif
+    details->pw = getpwuid(details->euid);
+    if (details->pw != NULL && (details->pw = pw_dup(details->pw)) == NULL)
+	errorx(1, _("unable to allocate memory"));
+#ifdef HAVE_SETAUTHDB
+    aix_restoreauthdb();
+#endif
+
 #ifdef HAVE_SELINUX
     if (details->selinux_role != NULL && is_selinux_enabled() > 0)
 	SET(details->flags, CD_RBAC_ENABLED);
@@ -878,23 +888,13 @@ bool
 exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 {
     bool rval = false;
-    struct passwd *pw;
     debug_decl(exec_setup, SUDO_DEBUG_EXEC)
-
-#ifdef HAVE_SETAUTHDB
-    aix_setauthdb(IDtouser(details->euid));
-#endif
-    if ((pw = getpwuid(details->euid)) != NULL && (pw = pw_dup(pw)) == NULL)
-	errorx(1, _("unable to allocate memory"));
-#ifdef HAVE_SETAUTHDB
-    aix_restoreauthdb();
-#endif
 
     /*
      * Call policy plugin's session init before other setup occurs.
      * The session init code is expected to print an error as needed.
      */
-    if (policy_init_session(&policy_plugin, pw, &details->envp) != true)
+    if (policy_init_session(&policy_plugin, details->pw, &details->envp) != true)
 	goto done;
 
 #ifdef HAVE_SELINUX
@@ -905,12 +905,12 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     }
 #endif
 
-    if (pw != NULL) {
+    if (details->pw != NULL) {
 #ifdef HAVE_PROJECT_H
-	set_project(pw);
+	set_project(details->pw);
 #endif
 #ifdef HAVE_GETUSERATTR
-	aix_prep_user(pw->pw_name, ptyname ? ptyname : user_details.tty);
+	aix_prep_user(details->pw->pw_name, ptyname ? ptyname : user_details.tty);
 #endif
 #ifdef HAVE_LOGIN_CAP_H
 	if (details->login_class) {
@@ -935,8 +935,8 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	    } else {
 		flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
 	    }
-	    if (setusercontext(lc, pw, pw->pw_uid, flags)) {
-		if (pw->pw_uid != ROOT_UID) {
+	    if (setusercontext(lc, details->pw, details->pw->pw_uid, flags)) {
+		if (details->pw->pw_uid != ROOT_UID) {
 		    warning(_("unable to set user context"));
 		    goto done;
 		} else
@@ -1037,7 +1037,6 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     rval = true;
 
 done:
-    efree(pw);
     debug_return_bool(rval);
 }
 
