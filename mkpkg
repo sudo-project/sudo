@@ -227,9 +227,18 @@ case "$osversion" in
 		$configure_opts"
 	;;
     macos*)
-	# Build universal binaries, curently intel-only
-	export CFLAGS="-O2 -g -arch i386 -arch x86_64"
-	export LDFLAGS="-arch i386 -arch x86_64"
+	case "$osversion" in
+	    *i386|*x86_64)
+		# Build intel-only universal binaries
+		ARCH_FLAGS="-arch i386 -arch x86_64"
+		;;
+	esac
+	if test "${osversion}" != "`$top_srcdir/pp --probe`"; then
+	    sdkvers=`echo "${osversion}" | sed 's/^macos\([0-9][0-9]\)\([0-9]*\)-.*$/\1.\2/'`
+	    SDK_FLAGS="-isysroot /Developer/SDKs/MacOSX${sdkvers}.sdk -mmacosx-version-min=${sdkvers}"
+	fi
+	export CFLAGS="-O2 -g $ARCH_FLAGS $SDK_FLAGS"
+	export LDFLAGS="$ARCH_FLAGS $SDK_FLAGS"
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	configure_opts="--prefix=$prefix
 		--with-pam
