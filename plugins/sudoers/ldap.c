@@ -529,31 +529,41 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 	rc = ldapssl_clientauth_init(ldap_conf.tls_certfile, NULL,
 	    ldap_conf.tls_keyfile != NULL, ldap_conf.tls_keyfile, NULL);
 	/*
-	 * Mozilla-derived SDKs have a bug starting with version 5.0
-	 * where the path can no longer be a file name and must be a dir.
+	 * Starting with version 5.0, Mozilla-derived LDAP SDKs require
+	 * the cert and key paths to be a directory, not a file.
+	 * If the user specified a file and it fails, try the parent dir.
 	 */
 	if (rc != LDAP_SUCCESS) {
-	    char *cp;
-	    if (ldap_conf.tls_certfile) {
-		cp = strrchr(ldap_conf.tls_certfile, '/');
-		if (cp != NULL && strncmp(cp + 1, "cert", 4) == 0)
+	    bool retry = false;
+	    if (ldap_conf.tls_certfile != NULL) {
+		char *cp = strrchr(ldap_conf.tls_certfile, '/');
+		if (cp != NULL && strncmp(cp + 1, "cert", 4) == 0) {
 		    *cp = '\0';
+		    retry = true;
+		}
 	    }
-	    if (ldap_conf.tls_keyfile) {
-		cp = strrchr(ldap_conf.tls_keyfile, '/');
-		if (cp != NULL && strncmp(cp + 1, "key", 3) == 0)
+	    if (ldap_conf.tls_keyfile != NULL) {
+		char *cp = strrchr(ldap_conf.tls_keyfile, '/');
+		if (cp != NULL && strncmp(cp + 1, "key", 3) == 0) {
 		    *cp = '\0';
+		    retry = true;
+		}
 	    }
-	    DPRINTF(("ldapssl_clientauth_init(%s, %s)",
-		ldap_conf.tls_certfile ? ldap_conf.tls_certfile : "NULL",
-		ldap_conf.tls_keyfile ? ldap_conf.tls_keyfile : "NULL"), 2);
-	    rc = ldapssl_clientauth_init(ldap_conf.tls_certfile, NULL,
-		ldap_conf.tls_keyfile != NULL, ldap_conf.tls_keyfile, NULL);
-	    if (rc != LDAP_SUCCESS) {
-		warningx(_("unable to initialize SSL cert and key db: %s"),
-		    ldapssl_err2string(rc));
-		goto done;
+	    if (retry) {
+		DPRINTF(("ldapssl_clientauth_init(%s, %s)",
+		    ldap_conf.tls_certfile ? ldap_conf.tls_certfile : "NULL",
+		    ldap_conf.tls_keyfile ? ldap_conf.tls_keyfile : "NULL"), 2);
+		rc = ldapssl_clientauth_init(ldap_conf.tls_certfile, NULL,
+		    ldap_conf.tls_keyfile != NULL, ldap_conf.tls_keyfile, NULL);
 	    }
+	}
+	if (rc != LDAP_SUCCESS) {
+	    warningx(_("unable to initialize SSL cert and key db: %s"),
+		ldapssl_err2string(rc));
+	    if (ldap_conf.tls_certfile == NULL)
+		warningx(_("you must set TLS_CERT in %s to use SSL"),
+		    _PATH_LDAP_CONF);
+	    goto done;
 	}
 
 	DPRINTF(("ldapssl_init(%s, %d, 1)", host, port), 2);
