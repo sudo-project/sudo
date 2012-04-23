@@ -1,5 +1,6 @@
 # German translation for sudo.
 # This file is distributed under the same license as the sudo package.
+# Mario Blättermann <mario.blaettermann@gmail.com>, 2012.
 # Jakob Kramer <jakob.kramer@gmx.de>, 2012.
 #
 msgid ""
@@ -7,7 +8,7 @@ msgstr ""
 "Project-Id-Version: sudo 1.8.5rc1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2012-03-28 14:06-0400\n"
-"PO-Revision-Date: 2012-04-18 12:35+0200\n"
+"PO-Revision-Date: 2012-04-19 23:37+0200\n"
 "Last-Translator: Jakob Kramer <jakob.kramer@gmx.de>\n"
 "Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
 "Language: \n"
@@ -15,6 +16,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
 
 #: src/error.c:82 src/error.c:86
 msgid ": "
@@ -34,7 +37,7 @@ msgstr "Sockets konnten nicht hergestellt werden"
 #: src/exec_pty.c:883 src/exec_pty.c:945 src/tgetpass.c:218
 #, c-format
 msgid "unable to create pipe"
-msgstr "Pipe konnte nicht hergestellt werden"
+msgstr "Weiterleitung konnte nicht erstellt werden"
 
 #: src/exec.c:340 src/exec_pty.c:1011 src/exec_pty.c:1146
 #, c-format
@@ -67,7 +70,7 @@ msgstr "PTY konnte nicht vergeben werden"
 #: src/exec_pty.c:609
 #, c-format
 msgid "unable to set terminal to raw mode"
-msgstr "Terminal konnte nicht in den Rohmodus gewechselt werden"
+msgstr "Terminal konnte nicht in den Rohmodus gesetzt werden"
 
 #: src/exec_pty.c:926
 #, c-format
@@ -107,7 +110,7 @@ msgstr "%s%s: %s"
 #: src/load_plugins.c:95
 #, c-format
 msgid "%s must be owned by uid %d"
-msgstr "%s muss Nutzer mit UID %d gehören"
+msgstr "%s muss Benutzer mit UID %d gehören"
 
 #: src/load_plugins.c:99
 #, c-format
@@ -168,7 +171,7 @@ msgstr "Das Argument für -C muss eine Zahl größergleich 3 sein"
 #: src/parse_args.c:276
 #, c-format
 msgid "unknown user: %s"
-msgstr "Unbekannter Nutzer: %s"
+msgstr "Unbekannter Benutzer: %s"
 
 #: src/parse_args.c:335
 #, c-format
@@ -181,12 +184,12 @@ msgid "you may not specify both the `-i' and `-E' options"
 msgstr "Die Optionen »-i« und »-E« können nicht gemeinsam benutzt werden"
 
 #: src/parse_args.c:349
-#, fuzzy, c-format
+#, c-format
 msgid "the `-E' option is not valid in edit mode"
 msgstr "Die Option »-E« ist im Bearbeiten-Modus ungültig"
 
 #: src/parse_args.c:351
-#, fuzzy, c-format
+#, c-format
 msgid "you may not specify environment variables in edit mode"
 msgstr "Im Bearbeiten-Modus können keine Umgebungsvariablen gesetzt werden"
 
@@ -216,7 +219,7 @@ msgid ""
 "%s - edit files as another user\n"
 "\n"
 msgstr ""
-"%s - Dateien als anderer Nutzer verändern\n"
+"%s - Dateien als anderer Benutzer verändern\n"
 "\n"
 
 #: src/parse_args.c:534
@@ -225,7 +228,7 @@ msgid ""
 "%s - execute a command as another user\n"
 "\n"
 msgstr ""
-"%s - Einen Befehl als anderer Nutzer ausführen\n"
+"%s - Einen Befehl als anderer Benutzer ausführen\n"
 "\n"
 
 #: src/parse_args.c:539
@@ -243,7 +246,7 @@ msgstr "Hilfsprogramm zum Eingeben des Passworts verwenden\n"
 
 #: src/parse_args.c:545
 msgid "use specified BSD authentication type\n"
-msgstr "Angegebenen BSD-Authentifikationstypen verwenden\n"
+msgstr "Angegebenen BSD-Legitimierungstypen verwenden\n"
 
 #: src/parse_args.c:547
 msgid "run command in the background\n"
@@ -271,7 +274,7 @@ msgstr "Befehl unter angegebener Gruppe ausführen\n"
 
 #: src/parse_args.c:561
 msgid "set HOME variable to target user's home dir.\n"
-msgstr "HOME-Variable als Home-Verzeichnis des Zielnutzers setzen.\n"
+msgstr "HOME-Variable als Home-Ordner des Zielnutzers setzen.\n"
 
 #: src/parse_args.c:563
 msgid "display help message and exit\n"
@@ -279,11 +282,11 @@ msgstr "Hilfe ausgeben und beenden\n"
 
 #: src/parse_args.c:565
 msgid "run a login shell as target user\n"
-msgstr "Eine Login-Shell als Zielnutzer starten\n"
+msgstr "Eine Anmeldeshell als Zielnutzer starten\n"
 
 #: src/parse_args.c:567
 msgid "remove timestamp file completely\n"
-msgstr "Zeitstempel-Dateien komplett entfernen\n"
+msgstr "Zeitstempeldateien komplett entfernen\n"
 
 #: src/parse_args.c:569
 msgid "invalidate timestamp file\n"
@@ -291,11 +294,11 @@ msgstr "Zeitstempeldatei ungültig machen\n"
 
 #: src/parse_args.c:571
 msgid "list user's available commands\n"
-msgstr "Für den Nutzer verfügbare Befehle auflisten\n"
+msgstr "Für den Benutzer verfügbare Befehle auflisten\n"
 
 #: src/parse_args.c:573
 msgid "non-interactive mode, will not prompt user\n"
-msgstr "Nicht-interaktiver Modus, der Nutzer wird zu nichts aufgefordert werden\n"
+msgstr "Nicht-interaktiver Modus, der Benutzer wird zu nichts aufgefordert werden\n"
 
 #: src/parse_args.c:575
 msgid "preserve group vector instead of setting to target's\n"
@@ -303,10 +306,9 @@ msgstr "Gruppen-Vektor beibehalten, statt zu dem des Zielnutzers zu setzen\n"
 
 #: src/parse_args.c:577
 msgid "use specified password prompt\n"
-msgstr "Angegebenen Password-Prompt benutzen\n"
+msgstr "Angegebenen Passwort-Prompt benutzen\n"
 
 #: src/parse_args.c:580 src/parse_args.c:588
-#, fuzzy
 msgid "create SELinux security context with specified role\n"
 msgstr "SELinux-Sicherheitskontext mit angegebener Funktion erstellen\n"
 
@@ -320,11 +322,11 @@ msgstr "Eine Shell als Zielnutzer ausführen\n"
 
 #: src/parse_args.c:591
 msgid "when listing, list specified user's privileges\n"
-msgstr "Wenn aufgelistet wird, Berechtigungen des angegebenen Nutzers auflisten\n"
+msgstr "Wenn aufgelistet wird, Berechtigungen des angegebenen Benutzers auflisten\n"
 
 #: src/parse_args.c:593
 msgid "run command (or edit file) as specified user\n"
-msgstr "Befehl oder Datei als angegebener Nutzer ausführen bzw. ändern\n"
+msgstr "Befehl oder Datei als angegebener Benutzer ausführen bzw. ändern\n"
 
 #: src/parse_args.c:595
 msgid "display version information and exit\n"
@@ -332,7 +334,7 @@ msgstr "Versionsinformation anzeigen und beenden\n"
 
 #: src/parse_args.c:597
 msgid "update user's timestamp without running a command\n"
-msgstr "Den Zeitstempel des Nutzers erneuern, ohne einen Befehl auszuführen\n"
+msgstr "Den Zeitstempel des Benutzers erneuern, ohne einen Befehl auszuführen\n"
 
 #: src/parse_args.c:599
 msgid "stop processing command line arguments\n"
@@ -393,24 +395,24 @@ msgid "unable to open %s"
 msgstr "%s konnte nicht geöffnet werden"
 
 #: src/selinux.c:252
-#, fuzzy, c-format
+#, c-format
 msgid "you must specify a role for type %s"
 msgstr "Für den Typen %s muss eine Funktion angegeben werden"
 
 #: src/selinux.c:258
 #, c-format
 msgid "unable to get default type for role %s"
-msgstr ""
+msgstr "Standardtyp für Funktion %s konnte nicht ermittelt werden"
 
 #: src/selinux.c:276
 #, c-format
 msgid "failed to set new role %s"
-msgstr ""
+msgstr "Neue Funktion %s konnte nicht festgelegt werden"
 
 #: src/selinux.c:280
 #, c-format
 msgid "failed to set new type %s"
-msgstr "Neuer Typ %s konnte nicht gesetzt werden"
+msgstr "Neuer Typ %s konnte nicht festgelegt werden"
 
 #: src/selinux.c:289
 #, c-format
@@ -460,12 +462,12 @@ msgstr "Sudo-Version %s\n"
 #: src/sudo.c:215
 #, c-format
 msgid "Configure options: %s\n"
-msgstr "Optionen an »configure«: %s\n"
+msgstr "Optionen für »configure«: %s\n"
 
 #: src/sudo.c:220
 #, c-format
 msgid "fatal error, unable to load plugins"
-msgstr "Fataler Fehler, Plugins konnte nicht geladen werden"
+msgstr "Schwerwiegender Fehler, Plugins konnten nicht geladen werden"
 
 #: src/sudo.c:228
 #, c-format
@@ -495,12 +497,12 @@ msgstr "Unbekannte UID %u: Wer sind Sie?"
 #: src/sudo.c:735
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
-msgstr "%s muss dem Nutzer mit UID %d gehören und das »setuid«-Bit gesetzt haben"
+msgstr "%s muss dem Benutzer mit UID %d gehören und das »setuid«-Bit gesetzt haben"
 
 #: src/sudo.c:738
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
-msgstr "Effektive UID ist nicht %d. Liegt %s auf einem Dateisystem mit der »nosuid«-Option gesetzt oder auf einem NFS-Dateisystem ohne Root-Rechte?"
+msgstr "Effektive UID ist nicht %d. Liegt %s auf einem Dateisystem mit gesetzter »nosuid«-Option oder auf einem NFS-Dateisystem ohne Root-Rechte?"
 
 #: src/sudo.c:744
 #, c-format
@@ -585,7 +587,7 @@ msgstr "Prozesspriorität konnte nicht gesetzt werden"
 #: src/sudo.c:966
 #, c-format
 msgid "unable to change root to %s"
-msgstr "Wurzelverzeichnis konnte nicht zu %s geändert werden"
+msgstr "Wurzelordner konnte nicht zu %s geändert werden"
 
 #: src/sudo.c:973 src/sudo.c:979 src/sudo.c:985
 #, c-format
@@ -595,17 +597,17 @@ msgstr ""
 #: src/sudo.c:999
 #, c-format
 msgid "unable to change directory to %s"
-msgstr "Verzeichnis %s konnte nicht betreten werden"
+msgstr "In Ordner %s konnte nicht gewechselt werden"
 
 #: src/sudo.c:1072
 #, c-format
 msgid "unexpected child termination condition: %d"
-msgstr "Unerwartete Abbruchsbedingung eines Kindprozesses: %d"
+msgstr "Unerwartete Abbruchsbedingung eines Unterprozesses: %d"
 
 #: src/sudo.c:1133
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
-msgstr "Regelwerks-Plugin %s unterstützt das Auflisten von Privilegen nicht"
+msgstr "Regelwerks-Plugin %s unterstützt das Auflisten von Privilegien nicht"
 
 #: src/sudo.c:1145
 #, c-format
@@ -762,7 +764,7 @@ msgstr "%s ist keine reguläre Datei"
 #: common/sudo_conf.c:312
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
-msgstr "%s gehört Nutzer mit UID %u, sollte allerdings %u gehören"
+msgstr "%s gehört Benutzer mit UID %u, sollte allerdings %u gehören"
 
 #: common/sudo_conf.c:316
 #, c-format

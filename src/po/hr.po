@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.5-b4\n"
+"Project-Id-Version: sudo 1.8.5rc1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2012-03-28 14:06-0400\n"
-"PO-Revision-Date: 2012-04-13 17:20+0200\n"
+"PO-Revision-Date: 2012-04-17 22:01+0200\n"
 "Last-Translator: Tomislav Krznar <tomislav.krznar@gmail.com>\n"
 "Language-Team: Croatian <lokalizacija@linux.hr>\n"
 "Language: \n"
@@ -28,13 +28,13 @@ msgstr "ne mogu razdvojiti"
 #: src/exec.c:252
 #, c-format
 msgid "unable to create sockets"
-msgstr "ne mogu stvoriti utičnice"
+msgstr "ne mogu napraviti utičnice"
 
 #: src/exec.c:259 src/exec_pty.c:567 src/exec_pty.c:576 src/exec_pty.c:584
 #: src/exec_pty.c:883 src/exec_pty.c:945 src/tgetpass.c:218
 #, c-format
 msgid "unable to create pipe"
-msgstr "ne mogu stvoriti cjevovod"
+msgstr "ne mogu napraviti cjevovod"
 
 #: src/exec.c:340 src/exec_pty.c:1011 src/exec_pty.c:1146
 #, c-format
@@ -173,17 +173,17 @@ msgstr "nepoznat korisnik: %s"
 #: src/parse_args.c:335
 #, c-format
 msgid "you may not specify both the `-i' and `-s' options"
-msgstr "ne možete navesti opcije `-i' i `-s' zajedno"
+msgstr "ne možete navesti opcije „-i” i „-s” zajedno"
 
 #: src/parse_args.c:339
 #, c-format
 msgid "you may not specify both the `-i' and `-E' options"
-msgstr "ne možete navesti opcije `-i' i `-E' zajedno"
+msgstr "ne možete navesti opcije „-i” i „-E” zajedno"
 
 #: src/parse_args.c:349
 #, c-format
 msgid "the `-E' option is not valid in edit mode"
-msgstr "opcija `-E' nije ispravna u načinu uređivanja"
+msgstr "opcija „-E” nije ispravna u načinu uređivanja"
 
 #: src/parse_args.c:351
 #, c-format
@@ -193,12 +193,12 @@ msgstr "ne možete navesti varijable okoline u načinu uređivanja"
 #: src/parse_args.c:359
 #, c-format
 msgid "the `-U' option may only be used with the `-l' option"
-msgstr "opciju `-U' možete koristiti samo uz opciju `-l'"
+msgstr "opciju „-U” možete koristiti samo uz opciju „-l”"
 
 #: src/parse_args.c:363
 #, c-format
 msgid "the `-A' and `-S' options may not be used together"
-msgstr "ne možete koristiti opcije `-A' i `-S' zajedno"
+msgstr "ne možete koristiti opcije „-A” i „-S” zajedno"
 
 #: src/parse_args.c:445
 #, c-format
@@ -495,7 +495,7 @@ msgstr "vlasnik %s mora biti uid %d i mora imati postavljen setuid bit"
 #: src/sudo.c:738
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
-msgstr "efektivni uid nije %d, je li %s na datotečnom sustavu s postavljenom opcijom 'nosuid' ili NFS datotečnom sustavu bez administratorskih ovlasti?"
+msgstr "efektivni uid nije %d, je li %s na datotečnom sustavu s postavljenom opcijom „nosuid” ili NFS datotečnom sustavu bez administratorskih ovlasti?"
 
 #: src/sudo.c:744
 #, c-format
@@ -510,7 +510,7 @@ msgstr "dosegnuta je granica upravljanja resursima"
 #: src/sudo.c:816
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
-msgstr "korisnik \"%s\" nije član projekta \"%s\""
+msgstr "korisnik „%s” nije član projekta „%s”"
 
 #: src/sudo.c:820
 #, c-format
@@ -520,32 +520,32 @@ msgstr "pozivanje zadatka je konačno"
 #: src/sudo.c:823
 #, c-format
 msgid "could not join project \"%s\""
-msgstr "ne mogu pridružiti projektu \"%s\""
+msgstr "ne mogu pridružiti projektu „%s”"
 
 #: src/sudo.c:828
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
-msgstr "ne postoji skladište resursa koje prihvaća zadane poveznice za projekt \"%s\""
+msgstr "ne postoji skladište resursa koje prihvaća zadane poveznice za projekt „%s”"
 
 #: src/sudo.c:832
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
-msgstr "ne postoji navedeno skladište resursa za projekt \"%s\""
+msgstr "ne postoji navedeno skladište resursa za projekt „%s”"
 
 #: src/sudo.c:836
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
-msgstr "ne mogu povezati na zadano skladište resursa za projekt \"%s\""
+msgstr "ne mogu povezati na zadano skladište resursa za projekt „%s”"
 
 #: src/sudo.c:842
 #, c-format
 msgid "setproject failed for project \"%s\""
-msgstr "setproject nije uspio za projekt \"%s\""
+msgstr "setproject nije uspio za projekt „%s”"
 
 #: src/sudo.c:844
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
-msgstr "upozorenje, zadatak upravljanja resursima nije uspio za projekt \"%s\""
+msgstr "upozorenje, zadatak upravljanja resursima nije uspio za projekt „%s”"
 
 #: src/sudo.c:909
 #, c-format
@@ -570,7 +570,7 @@ msgstr "ne mogu postaviti efektivni gid u runas gid %u"
 #: src/sudo.c:951
 #, c-format
 msgid "unable to set gid to runas gid %u"
-msgstr "ne mogu postaviti gid u runas gid %u"
+msgstr "ne mogu postaviti gid u runas (pokreni kao) gid %u"
 
 #: src/sudo.c:958
 #, c-format
@@ -585,7 +585,7 @@ msgstr "ne mogu promijeniti korijen u %s"
 #: src/sudo.c:973 src/sudo.c:979 src/sudo.c:985
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
-msgstr "ne mogu promijeniti u runas uid (%u, %u)"
+msgstr "ne mogu promijeniti u runas (pokreni kao) uid (%u, %u)"
 
 #: src/sudo.c:999
 #, c-format
@@ -705,7 +705,7 @@ msgstr "ne mogu otvoriti korisničku bazu podataka"
 #: common/aix.c:152
 #, c-format
 msgid "unable to switch to registry \"%s\" for %s"
-msgstr "ne mogu promijeniti u registar \"%s\" za %s"
+msgstr "ne mogu promijeniti u registar „%s” za %s"
 
 #: common/aix.c:169
 #, c-format

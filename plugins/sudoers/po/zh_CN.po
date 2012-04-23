@@ -4,13 +4,13 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.8.5-b4\n"
+"Project-Id-Version: sudoers 1.8.5rc1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-03-30 15:44-0400\n"
-"PO-Revision-Date: 2012-04-05 09:01+0800\n"
+"POT-Creation-Date: 2012-04-13 16:21-0400\n"
+"PO-Revision-Date: 2012-04-20 09:01+0800\n"
 "Last-Translator: Wylmer Wang <wantinghard@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
-"Language: \n"
+"Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -79,9 +79,9 @@ msgid "sorry, a password is required to run %s"
 msgstr "抱歉，执行 %s 需要密码"
 
 #: plugins/sudoers/check.c:249 plugins/sudoers/iolog.c:172
-#: plugins/sudoers/sudoers.c:979 plugins/sudoers/sudoreplay.c:347
-#: plugins/sudoers/sudoreplay.c:356 plugins/sudoers/sudoreplay.c:702
-#: plugins/sudoers/sudoreplay.c:796 plugins/sudoers/visudo.c:815
+#: plugins/sudoers/sudoers.c:979 plugins/sudoers/sudoreplay.c:353
+#: plugins/sudoers/sudoreplay.c:709 plugins/sudoers/sudoreplay.c:866
+#: plugins/sudoers/visudo.c:815
 #, c-format
 msgid "unable to open %s"
 msgstr "无法打开 %s"
@@ -263,9 +263,8 @@ msgid "Require fully-qualified hostnames in the sudoers file"
 msgstr "要求 sudoers 文件中包含完全限定的主机名"
 
 #: plugins/sudoers/def_data.c:115
-#, fuzzy
 msgid "Insult the user when they enter an incorrect password"
-msgstr "在用户输入错误密码时对其警告"
+msgstr "在用户输入错误密码时对他们进行(玩笑式的)嘲讽"
 
 #: plugins/sudoers/def_data.c:119
 msgid "Only allow the user to run sudo if they have a tty"
@@ -936,41 +935,39 @@ msgid "unable to cache group %s, already exists"
 msgstr "无法缓存组 %s，已存在"
 
 #: plugins/sudoers/set_perms.c:122 plugins/sudoers/set_perms.c:436
-#: plugins/sudoers/set_perms.c:800 plugins/sudoers/set_perms.c:1086
-#: plugins/sudoers/set_perms.c:1368
-#, fuzzy
+#: plugins/sudoers/set_perms.c:828 plugins/sudoers/set_perms.c:1114
+#: plugins/sudoers/set_perms.c:1396
 msgid "perm stack overflow"
-msgstr "perm 堆栈上溢"
+msgstr "权限堆栈上溢"
 
 #: plugins/sudoers/set_perms.c:130 plugins/sudoers/set_perms.c:444
-#: plugins/sudoers/set_perms.c:808 plugins/sudoers/set_perms.c:1094
-#: plugins/sudoers/set_perms.c:1376
-#, fuzzy
+#: plugins/sudoers/set_perms.c:836 plugins/sudoers/set_perms.c:1122
+#: plugins/sudoers/set_perms.c:1404
 msgid "perm stack underflow"
-msgstr "perm 堆栈下溢"
+msgstr "权限堆栈下溢"
 
 #: plugins/sudoers/set_perms.c:270 plugins/sudoers/set_perms.c:580
-#: plugins/sudoers/set_perms.c:929 plugins/sudoers/set_perms.c:1215
+#: plugins/sudoers/set_perms.c:957 plugins/sudoers/set_perms.c:1243
 msgid "unable to change to runas gid"
 msgstr "无法切换为 runas 组 ID"
 
 #: plugins/sudoers/set_perms.c:282 plugins/sudoers/set_perms.c:592
-#: plugins/sudoers/set_perms.c:939 plugins/sudoers/set_perms.c:1225
+#: plugins/sudoers/set_perms.c:967 plugins/sudoers/set_perms.c:1253
 msgid "unable to change to runas uid"
 msgstr "无法切换为 runas 用户 ID"
 
 #: plugins/sudoers/set_perms.c:300 plugins/sudoers/set_perms.c:610
-#: plugins/sudoers/set_perms.c:955 plugins/sudoers/set_perms.c:1241
+#: plugins/sudoers/set_perms.c:983 plugins/sudoers/set_perms.c:1269
 msgid "unable to change to sudoers gid"
 msgstr "无法切换为 sudoers 组 ID"
 
 #: plugins/sudoers/set_perms.c:353 plugins/sudoers/set_perms.c:681
-#: plugins/sudoers/set_perms.c:1001 plugins/sudoers/set_perms.c:1287
-#: plugins/sudoers/set_perms.c:1446
+#: plugins/sudoers/set_perms.c:1029 plugins/sudoers/set_perms.c:1315
+#: plugins/sudoers/set_perms.c:1474
 msgid "too many processes"
 msgstr "进程过多"
 
-#: plugins/sudoers/set_perms.c:1514
+#: plugins/sudoers/set_perms.c:1542
 msgid "unable to set runas group vector"
 msgstr "无法设置 runas 组向量"
 
@@ -1135,132 +1132,137 @@ msgstr "ldap.conf 路径：%s\n"
 msgid "ldap.secret path: %s\n"
 msgstr "ldap.secret 路径：%s\n"
 
-#: plugins/sudoers/sudoreplay.c:285
+#: plugins/sudoers/sudoreplay.c:291
 #, c-format
 msgid "invalid filter option: %s"
 msgstr "无效的过滤器选项：%s"
 
-#: plugins/sudoers/sudoreplay.c:298
+#: plugins/sudoers/sudoreplay.c:304
 #, c-format
 msgid "invalid max wait: %s"
 msgstr "无效的最大等待：%s"
 
-#: plugins/sudoers/sudoreplay.c:304
+#: plugins/sudoers/sudoreplay.c:310
 #, c-format
 msgid "invalid speed factor: %s"
 msgstr "无法的速度系数：%s"
 
-#: plugins/sudoers/sudoreplay.c:307 plugins/sudoers/visudo.c:187
+#: plugins/sudoers/sudoreplay.c:313 plugins/sudoers/visudo.c:187
 #, c-format
 msgid "%s version %s\n"
 msgstr "%s 版本 %s\n"
 
-#: plugins/sudoers/sudoreplay.c:332
-#, fuzzy, c-format
+#: plugins/sudoers/sudoreplay.c:338
+#, c-format
 msgid "%s/%.2s/%.2s/%.2s/timing: %s"
 msgstr "%s/%.2s/%.2s/%.2s/时序：%s"
 
-#: plugins/sudoers/sudoreplay.c:338
-#, fuzzy, c-format
+#: plugins/sudoers/sudoreplay.c:344
+#, c-format
 msgid "%s/%s/timing: %s"
 msgstr "%s/%s/时序：%s"
 
-#: plugins/sudoers/sudoreplay.c:363
+#: plugins/sudoers/sudoreplay.c:362
 #, c-format
-msgid "invalid log file %s"
-msgstr "无效的日志文件 %s"
+msgid "Replaying sudo session: %s\n"
+msgstr "回放 sudo 会话：%s\n"
 
-#: plugins/sudoers/sudoreplay.c:365
+#: plugins/sudoers/sudoreplay.c:368
 #, c-format
-msgid "Replaying sudo session: %s"
-msgstr "回放 sudo 会话：%s"
+msgid "Warning: your terminal is too small to properly replay the log.\n"
+msgstr "警告：您的终端尺寸太小，不能正常地回放日志。\n"
 
-#: plugins/sudoers/sudoreplay.c:391
+#: plugins/sudoers/sudoreplay.c:369
+#, c-format
+msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
+msgstr "日志的几何尺寸为 %dx%d，您终端的几何尺寸为 %dx%d。"
+
+#: plugins/sudoers/sudoreplay.c:399
 #, c-format
 msgid "unable to set tty to raw mode"
 msgstr "无法将终端设为原始模式"
 
-#: plugins/sudoers/sudoreplay.c:404
-#, fuzzy, c-format
+#: plugins/sudoers/sudoreplay.c:412
+#, c-format
 msgid "invalid timing file line: %s"
 msgstr "无效的时序文件行：%s"
 
-#: plugins/sudoers/sudoreplay.c:446
+#: plugins/sudoers/sudoreplay.c:454
 #, c-format
 msgid "writing to standard output"
 msgstr "写入标准输出"
 
-#: plugins/sudoers/sudoreplay.c:478
+#: plugins/sudoers/sudoreplay.c:486
 #, c-format
 msgid "nanosleep: tv_sec %ld, tv_nsec %ld"
 msgstr "nanosleep：tv_sec %ld，tv_nsec %ld"
 
-#: plugins/sudoers/sudoreplay.c:527 plugins/sudoers/sudoreplay.c:552
+#: plugins/sudoers/sudoreplay.c:535 plugins/sudoers/sudoreplay.c:560
 #, c-format
 msgid "ambiguous expression \"%s\""
 msgstr "有歧义的表达式“%s”"
 
-#: plugins/sudoers/sudoreplay.c:569
+#: plugins/sudoers/sudoreplay.c:577
 #, c-format
 msgid "too many parenthesized expressions, max %d"
 msgstr "括号表达式过多，最多 %d"
 
-#: plugins/sudoers/sudoreplay.c:580
+#: plugins/sudoers/sudoreplay.c:588
 #, c-format
 msgid "unmatched ')' in expression"
 msgstr "表达式中的“)”不匹配"
 
-#: plugins/sudoers/sudoreplay.c:586
+#: plugins/sudoers/sudoreplay.c:594
 #, c-format
 msgid "unknown search term \"%s\""
 msgstr "未知的搜索词“%s”"
 
-#: plugins/sudoers/sudoreplay.c:600
+#: plugins/sudoers/sudoreplay.c:608
 #, c-format
 msgid "%s requires an argument"
 msgstr "%s 需要参数"
 
-#: plugins/sudoers/sudoreplay.c:604
+#: plugins/sudoers/sudoreplay.c:612
 #, c-format
 msgid "invalid regular expression: %s"
 msgstr "无效的正则表达式：%s"
 
-#: plugins/sudoers/sudoreplay.c:610
+#: plugins/sudoers/sudoreplay.c:618
 #, c-format
 msgid "could not parse date \"%s\""
 msgstr "无法解析日期“%s”"
 
-#: plugins/sudoers/sudoreplay.c:623
+#: plugins/sudoers/sudoreplay.c:631
 #, c-format
 msgid "unmatched '(' in expression"
 msgstr "表达式中的“(”不匹配"
 
-#: plugins/sudoers/sudoreplay.c:625
+#: plugins/sudoers/sudoreplay.c:633
 #, c-format
 msgid "illegal trailing \"or\""
 msgstr "非法的结尾字符“or”"
 
-#: plugins/sudoers/sudoreplay.c:627
+#: plugins/sudoers/sudoreplay.c:635
 #, c-format
 msgid "illegal trailing \"!\""
 msgstr "非法的结尾字符“!”"
 
-#: plugins/sudoers/sudoreplay.c:850
+#: plugins/sudoers/sudoreplay.c:942
 #, c-format
 msgid "invalid regex: %s"
 msgstr "无效的正则表达式：%s"
 
-#: plugins/sudoers/sudoreplay.c:974
+#: plugins/sudoers/sudoreplay.c:1066
 #, c-format
 msgid "usage: %s [-h] [-d directory] [-m max_wait] [-s speed_factor] ID\n"
 msgstr "用法：%s [-h] [-d 目录] [-m 最长等待] [-s 速度系数] ID\n"
 
-#: plugins/sudoers/sudoreplay.c:977
+#: plugins/sudoers/sudoreplay.c:1069
 #, c-format
 msgid "usage: %s [-h] [-d directory] -l [search expression]\n"
 msgstr "用法：%s [-h] [-d 目录] -l [搜索表达式]\n"
 
-#: plugins/sudoers/sudoreplay.c:986
+#: plugins/sudoers/sudoreplay.c:1078
 #, c-format
 msgid ""
 "%s - replay sudo session logs\n"
@@ -1269,7 +1271,7 @@ msgstr ""
 "%s - 回放 sudo 会话记录\n"
 "\n"
 
-#: plugins/sudoers/sudoreplay.c:988
+#: plugins/sudoers/sudoreplay.c:1080
 msgid ""
 "\n"
 "Options:\n"
@@ -1495,12 +1497,12 @@ msgid "Warning: cycle in %s_Alias `%s'"
 msgstr "警告：在 %s_Alias “%s”中循环"
 
 #: plugins/sudoers/visudo.c:1109
-#, fuzzy, c-format
+#, c-format
 msgid "Error: %s_Alias `%s' referenced but not defined"
 msgstr "错误：引用了 %s_Alias “%s”但尚未定义"
 
 #: plugins/sudoers/visudo.c:1110
-#, fuzzy, c-format
+#, c-format
 msgid "Warning: %s_Alias `%s' referenced but not defined"
 msgstr "警告：引用了 %s_Alias “%s”但尚未定义"
 
@@ -1539,9 +1541,9 @@ msgstr ""
 "  -V          显示版本信息并退出"
 
 #: plugins/sudoers/auth/bsdauth.c:78
-#, fuzzy, c-format
+#, c-format
 msgid "unable to get login class for user %s"
-msgstr "无法获取用户 %s 的登录类别"
+msgstr "无法获取用户 %s 的登录类别(login class)"
 
 #: plugins/sudoers/auth/bsdauth.c:84
 msgid "unable to begin bsd authentication"
@@ -1611,14 +1613,14 @@ msgid "%s: unable to initialize ccache: %s"
 msgstr "%s：无法初始化 ccache：%s"
 
 #: plugins/sudoers/auth/kerb5.c:251
-#, fuzzy, c-format
+#, c-format
 msgid "%s: unable to store cred in ccache: %s"
-msgstr "%s：无法储存 ccache 中的凭据"
+msgstr "%s：无法在 ccache 中储存凭据：%s"
 
 #: plugins/sudoers/auth/kerb5.c:316
 #, c-format
 msgid "%s: unable to get host principal: %s"
-msgstr ""
+msgstr "%s：无法获取主机主体(principal)：%s"
 
 #: plugins/sudoers/auth/kerb5.c:331
 #, c-format
@@ -1650,16 +1652,16 @@ msgstr "密码过期，联系您的系统管理员"
 msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
 msgstr "账户过期，或 PAM 配置缺少 sudo 使用的“account”节，联系您的系统管理员"
 
-#: plugins/sudoers/auth/pam.c:178
+#: plugins/sudoers/auth/pam.c:180
 #, c-format
 msgid "pam_authenticate: %s"
 msgstr "pam_authenticate：%s"
 
-#: plugins/sudoers/auth/pam.c:326
+#: plugins/sudoers/auth/pam.c:330
 msgid "Password: "
 msgstr "密码："
 
-#: plugins/sudoers/auth/pam.c:327
+#: plugins/sudoers/auth/pam.c:331
 msgid "Password:"
 msgstr "密码："
 
@@ -1708,7 +1710,6 @@ msgid "unable to initialize SIA session"
 msgstr "无法初始化 SIA 会话"
 
 #: plugins/sudoers/auth/sudo_auth.c:117
-#, fuzzy
 msgid "Invalid authentication methods compiled into sudo!  You may mix standalone and non-standalone authentication."
 msgstr "编译进 sudo 的认证方法无效！您可能混用了独立和非独立认证。"
 
@@ -1725,6 +1726,9 @@ msgstr[0] "%d 次错误密码尝试"
 #: plugins/sudoers/auth/sudo_auth.c:374
 msgid "Authentication methods:"
 msgstr "认证方法："
+
+#~ msgid "invalid log file %s"
+#~ msgstr "无效的日志文件 %s"
 
 #, fuzzy
 #~ msgid "fixed mode on %s"

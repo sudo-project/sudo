@@ -5,12 +5,12 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo-1.8.5-b4\n"
+"Project-Id-Version: sudo-1.8.5rc1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2012-03-28 14:06-0400\n"
-"PO-Revision-Date: 2012-04-02 13:56+0700\n"
+"PO-Revision-Date: 2012-04-18 07:22+0700\n"
 "Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
-"Language-Team: Vietnamese <vi-VN@googlegroups.com>\n"
+"Language-Team: Vietnamese <translation-team-vi@lists.sourceforge.net>\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -142,7 +142,7 @@ msgstr "%s: chính sách không tương thích với phiên bản %d, mong chờ
 #: src/load_plugins.c:128
 #, c-format
 msgid "%s: only a single policy plugin may be loaded"
-msgstr "%s: chỉ có một chính sách được tải lên thôi"
+msgstr "%s: chỉ có một phần bổ xung chính sách được tải lên thôi"
 
 #: src/load_plugins.c:148
 #, c-format
@@ -193,7 +193,7 @@ msgstr "tùy chọn `-E' không hợp lệ trong chế độ chỉnh sửa"
 #: src/parse_args.c:351
 #, c-format
 msgid "you may not specify environment variables in edit mode"
-msgstr "bạn không được phpứ chỉ định biến môi trường trong chế độ soạn thảo"
+msgstr "bạn có lẽ không được chỉ định biến môi trường trong chế độ soạn thảo"
 
 #: src/parse_args.c:359
 #, c-format
@@ -221,7 +221,7 @@ msgid ""
 "%s - edit files as another user\n"
 "\n"
 msgstr ""
-"%s - sửa chữa các tệp tin trên danh nghĩa người dùng khác\n"
+"%s - sửa chữa các tập tin trên danh nghĩa người dùng khác\n"
 "\n"
 
 #: src/parse_args.c:534
@@ -256,7 +256,7 @@ msgstr "chạy lệnh ở chế độ nền\n"
 
 #: src/parse_args.c:549
 msgid "close all file descriptors >= fd\n"
-msgstr "đóng tất cả các mô tả của tệp tin >= fd\n"
+msgstr "đóng tất cả các mô tả của tập tin >= fd\n"
 
 #: src/parse_args.c:552
 msgid "run command with specified login class\n"
@@ -268,7 +268,7 @@ msgstr "ngăn ngừa môi trường người dùng khi thi hành lệnh\n"
 
 #: src/parse_args.c:557
 msgid "edit files instead of running a command\n"
-msgstr "chỉnh sửa các tệp tin thay vì chạy lệnh\n"
+msgstr "chỉnh sửa các tập tin thay vì chạy lệnh\n"
 
 #: src/parse_args.c:559
 msgid "execute command as the specified group\n"
@@ -288,11 +288,11 @@ msgstr "chạy shell đăng nhập như là người dùng đích\n"
 
 #: src/parse_args.c:567
 msgid "remove timestamp file completely\n"
-msgstr "gỡ bỏ timestamp tệp tin\n"
+msgstr "gỡ bỏ timestamp tập tin\n"
 
 #: src/parse_args.c:569
 msgid "invalidate timestamp file\n"
-msgstr "làm mất hiệu lực timestamp của tệp tin\n"
+msgstr "làm mất hiệu lực timestamp của tập tin\n"
 
 #: src/parse_args.c:571
 msgid "list user's available commands\n"
@@ -312,7 +312,7 @@ msgstr "sử dụng nhắc nhập mật khẩu.\n"
 
 #: src/parse_args.c:580 src/parse_args.c:588
 msgid "create SELinux security context with specified role\n"
-msgstr "tạo ngữ cảnh an ninh SELinux với vai trò được chỉ định\n"
+msgstr "tạo ngữ cảnh an ninh SELinux với vai trò đã được chỉ định\n"
 
 #: src/parse_args.c:583
 msgid "read password from standard input\n"
@@ -328,7 +328,7 @@ msgstr "khi liệt kê, liệt kê các đặc quyền của người dùng\n"
 
 #: src/parse_args.c:593
 msgid "run command (or edit file) as specified user\n"
-msgstr "chạy lệnh (hay sửa chữa tệp tin) trên tư cách của người dùng đã chỉ định\n"
+msgstr "chạy lệnh (hay sửa chữa tập tin) trên tư cách của người dùng đã chỉ định\n"
 
 #: src/parse_args.c:595
 msgid "display version information and exit\n"
@@ -500,7 +500,7 @@ msgstr "%s phải được sở hữu bởi uid %d và bít setuid phải đư�
 #: src/sudo.c:738
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
-msgstr "uid hữu hiệu thì không là %d, %s trên hệ thống tệp tin với tuỳ chọn  'nosuid' được đặt, hay một hệ thống tệp tin NFS không có đặc quyền của root có phải vậy không?"
+msgstr "uid hữu hiệu thì không là %d, %s trên hệ thống tập tin với tuỳ chọn  'nosuid' được đặt, hay một hệ thống tập tin NFS không có đặc quyền của root có phải vậy không?"
 
 #: src/sudo.c:744
 #, c-format
@@ -625,7 +625,7 @@ msgstr "không thể thay đổi uid thành root (%u)"
 #: src/sudo_edit.c:143
 #, c-format
 msgid "plugin error: missing file list for sudoedit"
-msgstr "lỗi phần bổ xung: thiếu danh sách tệp tin cho sudoedit"
+msgstr "lỗi phần bổ xung: thiếu danh sách tập tin cho sudoedit"
 
 #: src/sudo_edit.c:171 src/sudo_edit.c:271
 #, c-format
@@ -640,7 +640,7 @@ msgstr "%s: ghi ngắn"
 #: src/sudo_edit.c:272
 #, c-format
 msgid "%s left unmodified"
-msgstr "%s chưa thay đổi"
+msgstr "%s còn lại chưa thay đổi"
 
 #: src/sudo_edit.c:285
 #, c-format
