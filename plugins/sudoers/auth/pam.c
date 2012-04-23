@@ -274,6 +274,7 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 	/*
 	 * Update PAM_USER to reference the user we are running the command
 	 * as, as opposed to the user we authenticated as.
+	 * XXX - still needed now that session init is in parent?
 	 */
 	(void) pam_set_item(pamh, PAM_USER, pw->pw_name);
 #ifndef NO_PAM_SESSION

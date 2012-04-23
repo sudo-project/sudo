@@ -658,11 +658,12 @@ DDEESSCCRRIIPPTTIIOONN
        init_session
             int (*init_session)(struct passwd *pwd, char **user_envp[);
 
-           The init_session function is called when ssuuddoo sets up the execution
-           environment for the command, immediately before the contents of the
-           _c_o_m_m_a_n_d___i_n_f_o list are applied (before the uid changes).  This can
-           be used to do session setup that is not supported by _c_o_m_m_a_n_d___i_n_f_o,
-           such as opening the PAM session.
+           The init_session function is called before ssuuddoo sets up the
+           execution environment for the command.  It is run in the parent
+           ssuuddoo process and before any uid or gid changes.  This can be used
+           to perform session setup that is not supported by _c_o_m_m_a_n_d___i_n_f_o,
+           such as opening the PAM session.  The close function can be used to
+           tear down the session that was opened by init_session.
 
            The _p_w_d argument points to a passwd struct for the user the command
            will be run as if the uid the command will run as was found in the
@@ -1354,4 +1355,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.5                           April 13, 2012                 SUDO_PLUGIN(1m)
+1.8.5                           April 23, 2012                 SUDO_PLUGIN(1m)

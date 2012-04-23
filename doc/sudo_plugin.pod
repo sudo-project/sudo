@@ -781,11 +781,12 @@ support credential caching.
 
  int (*init_session)(struct passwd *pwd, char **user_envp[);
 
-The C<init_session> function is called when B<sudo> sets up the
-execution environment for the command, immediately before the
-contents of the I<command_info> list are applied (before the uid
-changes).  This can be used to do session setup that is not supported
-by I<command_info>, such as opening the PAM session.
+The C<init_session> function is called before B<sudo> sets up the
+execution environment for the command.  It is run in the parent
+B<sudo> process and before any uid or gid changes.  This can be used
+to perform session setup that is not supported by I<command_info>,
+such as opening the PAM session.  The C<close> function can be
+used to tear down the session that was opened by C<init_session>.
 
 The I<pwd> argument points to a passwd struct for the user the
 command will be run as if the uid the command will run as was found

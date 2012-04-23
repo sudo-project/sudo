@@ -130,8 +130,6 @@ static int policy_list(struct plugin_container *plugin, int argc,
     char * const argv[], int verbose, const char *list_user);
 static int policy_validate(struct plugin_container *plugin);
 static void policy_invalidate(struct plugin_container *plugin, int remove);
-static int policy_init_session(struct plugin_container *plugin,
-    struct passwd *pwd, char **user_env[]);
 
 /* I/O log plugin convenience functions. */
 static int iolog_open(struct plugin_container *plugin, char * const settings[],
@@ -890,13 +888,6 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     bool rval = false;
     debug_decl(exec_setup, SUDO_DEBUG_EXEC)
 
-    /*
-     * Call policy plugin's session init before other setup occurs.
-     * The session init code is expected to print an error as needed.
-     */
-    if (policy_init_session(&policy_plugin, details->pw, &details->envp) != true)
-	goto done;
-
 #ifdef HAVE_SELINUX
     if (ISSET(details->flags, CD_RBAC_ENABLED)) {
 	if (selinux_setup(details->selinux_role, details->selinux_type,
@@ -1177,23 +1168,24 @@ policy_invalidate(struct plugin_container *plugin, int remove)
     debug_return;
 }
 
-static int
-policy_init_session(struct plugin_container *plugin, struct passwd *pwd, char **user_env[])
+int
+policy_init_session(struct command_details *details)
 {
     int rval = true;
     debug_decl(policy_init_session, SUDO_DEBUG_PCOMM)
 
-    if (plugin->u.policy->init_session) {
+    if (policy_plugin.u.policy->init_session) {
 	/*
 	 * Backwards compatibility for older API versions
 	 */
-	switch (plugin->u.generic->version) {
+	switch (policy_plugin.u.generic->version) {
 	case SUDO_API_MKVERSION(1, 0):
 	case SUDO_API_MKVERSION(1, 1):
-	    rval = plugin->u.policy_1_0->init_session(pwd);
+	    rval = policy_plugin.u.policy_1_0->init_session(details->pw);
 	    break;
 	default:
-	    rval = plugin->u.policy->init_session(pwd, user_env);
+	    rval = policy_plugin.u.policy->init_session(details->pw,
+		&details->envp);
 	}
     }
     debug_return_bool(rval);

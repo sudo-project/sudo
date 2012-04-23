@@ -99,6 +99,13 @@ static int fork_cmnd(struct command_details *details, int sv[2])
     sa.sa_handler = handler;
     sigaction(SIGCONT, &sa, NULL);
 
+    /*
+     * The policy plugin's session init must be run before we fork
+     * or certain pam modules won't be able to track their state.
+     */
+    if (policy_init_session(details) != true)
+	errorx(1, _("policy plugin failed session initialization"));
+
     child = sudo_debug_fork();
     switch (child) {
     case -1:
