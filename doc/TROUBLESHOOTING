@@ -220,6 +220,26 @@ A) ssh does not allocate a tty by default when running a remote command.
    Alternately, if you do not mind your password being echoed to the
    screen, you can use the "visiblepw" sudoers option to allow this.
 
+Q) When I try to use SSL-enabled LDAP with sudo I get an error:
+    unable to initialize SSL cert and key db: security library: bad database.
+    you must set TLS_CERT in /etc/ldap.conf to use SSL
+A) On systems that use a Mozilla-derived LDAP SDK there must be a
+   certificate database in place to use SSL-encrypted LDAP connections.
+   This file is usually /var/ldap/cert8.db or /etc/ldap/cert8.db.
+   The actual number after "cert" will vary, depending on the version
+   of the LDAP SDK that is being used.  If you do not have a certificate
+   database you can either copy one from a mozilla-derived browser, such
+   as firefox, or create one using the "certutil" command.  You can run
+   "certutil" as follows and press the <return> (or <enter>) key at the
+   password prompt:
+    # certutil -N -d /var/ldap
+    Enter a password which will be used to encrypt your keys.
+    The password should be at least 8 characters long,
+    and should contain at least one non-alphabetic character.
+
+    Enter new password: <return>
+    Re-enter password: <return>
+
 Q) When I run sudo on AIX I get the following error:
     setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID): Operation not permitted.
 A) AIX's Enhanced RBAC is preventing sudo from running.  To fix
