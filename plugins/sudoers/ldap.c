@@ -1952,7 +1952,7 @@ sudo_ldap_set_options_table(LDAP *ld, struct ldap_config_table *table)
  * Set LDAP options based on the global config table.
  */
 static int
-sudo_ldap_set_options_global(LDAP *ld)
+sudo_ldap_set_options_global(void)
 {
     int rc;
     debug_decl(sudo_ldap_set_options_global, SUDO_DEBUG_LDAP)
@@ -1964,7 +1964,7 @@ sudo_ldap_set_options_global(LDAP *ld)
 #endif
 
     /* Parse global LDAP options table. */
-    rc = sudo_ldap_set_options_table(ld, ldap_conf_global);
+    rc = sudo_ldap_set_options_table(NULL, ldap_conf_global);
     if (rc == -1)
 	debug_return_int(-1);
     debug_return_int(0);
@@ -2200,7 +2200,7 @@ sudo_ldap_open(struct sudo_nss *nss)
     }
 
     /* Set global LDAP options */
-    if (sudo_ldap_set_options_global(ld) < 0)
+    if (sudo_ldap_set_options_global() < 0)
 	debug_return_int(-1);
 
     /* Connect to LDAP server */
