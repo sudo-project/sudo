@@ -206,7 +206,6 @@ case "$osversion" in
 	fi
 	configure_opts="--prefix=/usr
 		--with-all-insults
-		--with-exempt=sudo
 		--with-pam
 		--enable-zlib=system
 		--with-fqdn
