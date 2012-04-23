@@ -192,6 +192,9 @@ suspend_parent(signo)
 	}
 
 	/* Suspend self and continue child when we resume. */
+	zero_bytes(&sa, sizeof(sa));
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
 	sa.sa_handler = SIG_DFL;
 	sigaction(signo, &sa, &osa);
 	if (killpg(ppgrp, signo) != 0)
