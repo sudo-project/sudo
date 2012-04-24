@@ -36,6 +36,11 @@ What's new in Sudo 1.8.5?
    has been incremented to version 1.2.  See the sudo_plugin manual
    for more information.
 
+ * The policy plugin's init_session function is now called by the
+   parent sudo process, not the child process that executes the
+   command.  This allows the PAM session to be open and closed in
+   the same process, which some PAM modules require.
+
  * Fixed parsing of "Path askpass" and "Path noexec" in sudo.conf,
    which was broken in version 1.8.4.
 
@@ -58,6 +63,13 @@ What's new in Sudo 1.8.5?
 
  * The built-in zlib included with Sudo has been upgraded to version
    1.2.6.
+
+ * Setting the SSL parameter to start_tls in ldap.conf now works
+   properly when using Mozilla-based SDKs that support the
+   ldap_start_tls_s() function.
+
+ * The TLS_CHECKPEER parameter in ldap.conf now works when the
+   Mozilla NSS crypto backend is used with OpenLDAP.
 
 What's new in Sudo 1.8.4p4?
 
