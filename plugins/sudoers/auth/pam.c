@@ -280,7 +280,7 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 #ifndef NO_PAM_SESSION
 	(void) pam_close_session(pamh, PAM_SILENT);
 #endif
-	(void) pam_setcred(pamh, PAM_DELETE_CRED);
+	(void) pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
 	status = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
 	pamh = NULL;
     }
