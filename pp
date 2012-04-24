@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2012 Quest Software, Inc. ALL RIGHTS RESERVED
-pp_revision="352"
+pp_revision="353"
  # Copyright 2012 Quest Software, Inc.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -1595,7 +1595,7 @@ pp_aix_detect_os () {
 
 pp_aix_version_fix () {
     typeset v
-    v=`echo $1 | sed 's/[-+]/./' | tr -c -d '[0-9].\012' | awk -F"." '{ printf "%d.%d.%d.%.4s", $1, $2, $3, $4 }' | sed 's/[.]*$//g'`
+    v=`echo $1 | sed 's/[-+]/./' | tr -c -d '[0-9].\012' | awk -F"." '{ printf "%d.%d.%d.%.4s\n", $1, $2, $3, $4 }' | sed 's/[.]*$//g'`
     if test x"$v" != x"$1"; then
         pp_warn "stripped version '$1' to '$v'"
     fi
