@@ -456,7 +456,7 @@ sudo_ldap_parse_uri(const struct ldap_config_list_str *uri_list)
 	    }
 	}
 	if (hostbuf[0] == '\0') {
-	    warningx(_("invalid uri: %s"), uri_list);
+	    warningx(_("invalid uri: %s"), uri_list->val);
 	    goto done;
 	}
 
