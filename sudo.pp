@@ -211,7 +211,7 @@ still allow people to get their work done."
 	$libexecdir/*		0755 optional
 	$sudoersdir/sudoers.d/	0750 $sudoers_uid:$sudoers_gid
 	$timedir/		0700 root:
-	$docdir/
+	$docdir/		0755
 	$docdir/sudoers2ldif	0555 optional,ignore-others
 	$docdir/*		0444
 	/etc/pam.d/*		0444 volatile,optional
