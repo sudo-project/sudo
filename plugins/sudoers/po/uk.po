@@ -4,10 +4,10 @@
 # Yuri Chornoivan <yurchor@ukr.net>, 2011, 2012.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.8.5rc1\n"
+"Project-Id-Version: sudoers 1.8.5rc3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-04-13 16:21-0400\n"
-"PO-Revision-Date: 2012-04-17 22:30+0300\n"
+"POT-Creation-Date: 2012-04-24 13:41-0400\n"
+"PO-Revision-Date: 2012-04-29 12:00+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
 "Language: uk\n"
@@ -17,10 +17,210 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=n==1 ? 3 : n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Lokalize 1.5\n"
 
+#: gram.y:110
+#, c-format
+msgid ">>> %s: %s near line %d <<<"
+msgstr ">>> %s: %s поблизу рядка %d <<<"
+
 #: plugins/sudoers/alias.c:125
 #, c-format
 msgid "Alias `%s' already defined"
 msgstr "Замінник «%s» вже визначено"
+
+#: plugins/sudoers/auth/bsdauth.c:78
+#, c-format
+msgid "unable to get login class for user %s"
+msgstr "не вдалося отримати клас входу до системи для користувача %s"
+
+#: plugins/sudoers/auth/bsdauth.c:84
+msgid "unable to begin bsd authentication"
+msgstr "не вдалося розпочати розпізнавання за BSD"
+
+#: plugins/sudoers/auth/bsdauth.c:92
+msgid "invalid authentication type"
+msgstr "некоректний тип розпізнавання"
+
+#: plugins/sudoers/auth/bsdauth.c:101
+msgid "unable to setup authentication"
+msgstr "не вдалося налаштувати розпізнавання"
+
+#: plugins/sudoers/auth/fwtk.c:60
+#, c-format
+msgid "unable to read fwtk config"
+msgstr "не вдалося прочитати налаштування fwtk"
+
+#: plugins/sudoers/auth/fwtk.c:65
+#, c-format
+msgid "unable to connect to authentication server"
+msgstr "не вдалося встановити з’єднання з сервером розпізнавання"
+
+#: plugins/sudoers/auth/fwtk.c:71 plugins/sudoers/auth/fwtk.c:95
+#: plugins/sudoers/auth/fwtk.c:128
+#, c-format
+msgid "lost connection to authentication server"
+msgstr "втрачено зв’язок з сервером розпізнавання"
+
+#: plugins/sudoers/auth/fwtk.c:75
+#, c-format
+msgid ""
+"authentication server error:\n"
+"%s"
+msgstr ""
+"помилка сервера розпізнавання:\n"
+"%s"
+
+#: plugins/sudoers/auth/kerb5.c:117
+#, c-format
+msgid "%s: unable to unparse princ ('%s'): %s"
+msgstr "%s: не вдалося зібрати princ ('%s'): %s"
+
+#: plugins/sudoers/auth/kerb5.c:160
+#, c-format
+msgid "%s: unable to parse '%s': %s"
+msgstr "%s: не вдалося обробити «%s»: %s"
+
+#: plugins/sudoers/auth/kerb5.c:170
+#, c-format
+msgid "%s: unable to resolve ccache: %s"
+msgstr "%s: не вдалося визначити ccache: %s"
+
+#: plugins/sudoers/auth/kerb5.c:218
+#, c-format
+msgid "%s: unable to allocate options: %s"
+msgstr "%s: не вдалося розмістити параметри: %s"
+
+#: plugins/sudoers/auth/kerb5.c:234
+#, c-format
+msgid "%s: unable to get credentials: %s"
+msgstr "%s: не вдалося отримати реєстраційні дані: %s"
+
+#: plugins/sudoers/auth/kerb5.c:247
+#, c-format
+msgid "%s: unable to initialize ccache: %s"
+msgstr "%s: не вдалося ініціалізувати ccache: %s"
+
+#: plugins/sudoers/auth/kerb5.c:251
+#, c-format
+msgid "%s: unable to store cred in ccache: %s"
+msgstr "%s: не вдалося зберегти реєстраційні дані у ccache: %s"
+
+#: plugins/sudoers/auth/kerb5.c:316
+#, c-format
+msgid "%s: unable to get host principal: %s"
+msgstr "%s: не вдалося отримати реєстраційний запис вузла: %s"
+
+#: plugins/sudoers/auth/kerb5.c:331
+#, c-format
+msgid "%s: Cannot verify TGT! Possible attack!: %s"
+msgstr "%s: спроба перевірки TGT зазнала невдачі! Ймовірно, вас атаковано: %s"
+
+#: plugins/sudoers/auth/pam.c:100
+msgid "unable to initialize PAM"
+msgstr "не вдалося ініціалізувати PAM"
+
+#: plugins/sudoers/auth/pam.c:144
+msgid "account validation failure, is your account locked?"
+msgstr "помилка під час спроби перевірки облікового запису. Ваш обліковий запис заблоковано?"
+
+#: plugins/sudoers/auth/pam.c:148
+msgid "Account or password is expired, reset your password and try again"
+msgstr "Строк дії облікового запису або пароля збіг, визначте новий пароль і повторіть спробу"
+
+#: plugins/sudoers/auth/pam.c:155
+#, c-format
+msgid "pam_chauthtok: %s"
+msgstr "pam_chauthtok: %s"
+
+#: plugins/sudoers/auth/pam.c:159
+msgid "Password expired, contact your system administrator"
+msgstr "Строк дії пароля збіг, зверніться до адміністратора вашої системи щодо поновлення пароля"
+
+#: plugins/sudoers/auth/pam.c:163
+msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
+msgstr "Строк дії облікового запису збіг або у файлі налаштувань PAM немає розділу \"account\" для sudo. Повідомте про це адміністратора вашої системи."
+
+#: plugins/sudoers/auth/pam.c:180
+#, c-format
+msgid "pam_authenticate: %s"
+msgstr "pam_authenticate: %s"
+
+#: plugins/sudoers/auth/pam.c:332
+msgid "Password: "
+msgstr "Пароль: "
+
+#: plugins/sudoers/auth/pam.c:333
+msgid "Password:"
+msgstr "Пароль:"
+
+#: plugins/sudoers/auth/rfc1938.c:104 plugins/sudoers/visudo.c:220
+#, c-format
+msgid "you do not exist in the %s database"
+msgstr "вас немає у базі даних %s"
+
+#: plugins/sudoers/auth/securid5.c:81
+#, c-format
+msgid "failed to initialise the ACE API library"
+msgstr "не вдалося ініціалізувати бібліотеку програмного інтерфейсу до ACE"
+
+#: plugins/sudoers/auth/securid5.c:107
+#, c-format
+msgid "unable to contact the SecurID server"
+msgstr "не вдалося встановити зв’язок з сервером SecurID"
+
+#: plugins/sudoers/auth/securid5.c:116
+#, c-format
+msgid "User ID locked for SecurID Authentication"
+msgstr "Ідентифікатор користувача заблоковано для розпізнавання SecurID"
+
+#: plugins/sudoers/auth/securid5.c:120 plugins/sudoers/auth/securid5.c:171
+#, c-format
+msgid "invalid username length for SecurID"
+msgstr "некоректна довжина імені користувача для SecurID"
+
+#: plugins/sudoers/auth/securid5.c:124 plugins/sudoers/auth/securid5.c:176
+#, c-format
+msgid "invalid Authentication Handle for SecurID"
+msgstr "некоректний дескриптор розпізнавання для SecurID"
+
+#: plugins/sudoers/auth/securid5.c:128
+#, c-format
+msgid "SecurID communication failed"
+msgstr "спроба обміну даними з SecurID зазнала невдачі"
+
+#: plugins/sudoers/auth/securid5.c:132 plugins/sudoers/auth/securid5.c:215
+#, c-format
+msgid "unknown SecurID error"
+msgstr "невідома помилка SecurID"
+
+#: plugins/sudoers/auth/securid5.c:166
+#, c-format
+msgid "invalid passcode length for SecurID"
+msgstr "некоректна довжина коду пароля для SecurID"
+
+#: plugins/sudoers/auth/sia.c:109
+msgid "unable to initialize SIA session"
+msgstr "не вдалося ініціалізувати сеанс SIA"
+
+#: plugins/sudoers/auth/sudo_auth.c:117
+msgid "Invalid authentication methods compiled into sudo!  You may mix standalone and non-standalone authentication."
+msgstr "sudo зібрано з підтримкою некоректних способів розпізнавання! Можливе змішування власних і зовнішніх способів розпізнавання."
+
+#: plugins/sudoers/auth/sudo_auth.c:199
+msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
+msgstr "sudo зібрано без можливостей з взаємодії з інструментами розпізнавання! Якщо ви хочете вимкнути розпізнавання, скористайтеся параметром налаштування --disable-authentication."
+
+#: plugins/sudoers/auth/sudo_auth.c:271
+#, c-format
+msgid "%d incorrect password attempt"
+msgid_plural "%d incorrect password attempts"
+msgstr[0] "%d невдала спроба введення пароля"
+msgstr[1] "%d невдалих спроби введення пароля"
+msgstr[2] "%d невдалих спроб введення пароля"
+msgstr[3] "одна невдала спроба введення пароля"
+
+#: plugins/sudoers/auth/sudo_auth.c:374
+msgid "Authentication methods:"
+msgstr "Способи розпізнавання:"
 
 #: plugins/sudoers/bsm_audit.c:60 plugins/sudoers/bsm_audit.c:63
 #: plugins/sudoers/bsm_audit.c:112 plugins/sudoers/bsm_audit.c:116
@@ -562,9 +762,9 @@ msgstr "параметру «%s» не потрібно передавати з�
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr "sudo_putenv: помилкове значення envp, невідповідність довжин"
 
-#: plugins/sudoers/env.c:341 plugins/sudoers/env.c:411 toke.l:682 toke.l:812
-#: toke.l:870 toke.l:966 plugins/sudoers/toke_util.c:113
-#: plugins/sudoers/toke_util.c:167 plugins/sudoers/toke_util.c:207
+#: plugins/sudoers/env.c:341 plugins/sudoers/env.c:411
+#: plugins/sudoers/toke_util.c:113 plugins/sudoers/toke_util.c:167
+#: plugins/sudoers/toke_util.c:207 toke.l:682 toke.l:812 toke.l:870 toke.l:966
 #, c-format
 msgid "unable to allocate memory"
 msgstr "не вдалося отримати потрібний об’єм пам’яті"
@@ -585,16 +785,11 @@ msgid "sorry, you are not allowed to set the following environment variables: %s
 msgstr "вибачте, вам не дозволено встановлювати такі змінні середовища: %s"
 
 #: plugins/sudoers/find_path.c:69 plugins/sudoers/find_path.c:108
-#: plugins/sudoers/find_path.c:123 plugins/sudoers/iolog.c:125 toke.l:678
-#: toke.l:866 plugins/sudoers/sudoers.c:950
+#: plugins/sudoers/find_path.c:123 plugins/sudoers/iolog.c:125
+#: plugins/sudoers/sudoers.c:950 toke.l:678 toke.l:866
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
-
-#: gram.y:110
-#, c-format
-msgid ">>> %s: %s near line %d <<<"
-msgstr ">>> %s: %s поблизу рядка %d <<<"
 
 #: plugins/sudoers/group_plugin.c:91
 #, c-format
@@ -654,67 +849,72 @@ msgstr "не вдалося створити %s"
 msgid "unable to set locale to \"%s\", using \"C\""
 msgstr "не вдалося встановити локаль у значення «%s», використовуємо локаль «C»"
 
-#: plugins/sudoers/ldap.c:374
+#: plugins/sudoers/ldap.c:378
 #, c-format
 msgid "sudo_ldap_conf_add_ports: port too large"
 msgstr "sudo_ldap_conf_add_ports: занадто великий номер порту"
 
-#: plugins/sudoers/ldap.c:397
+#: plugins/sudoers/ldap.c:401
 #, c-format
 msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
 msgstr "sudo_ldap_conf_add_ports: вихід за межі розширеного буфера вузла"
 
-#: plugins/sudoers/ldap.c:427
+#: plugins/sudoers/ldap.c:431
 #, c-format
 msgid "unsupported LDAP uri type: %s"
 msgstr "непідтримуваний тип адреси LDAP: %s"
 
-#: plugins/sudoers/ldap.c:456
+#: plugins/sudoers/ldap.c:460
 #, c-format
 msgid "invalid uri: %s"
 msgstr "некоректна адреса: %s"
 
-#: plugins/sudoers/ldap.c:462
+#: plugins/sudoers/ldap.c:466
 #, c-format
 msgid "unable to mix ldap and ldaps URIs"
 msgstr "не можна використовувати суміш з адрес ldap і ldaps"
 
-#: plugins/sudoers/ldap.c:466
+#: plugins/sudoers/ldap.c:470
 #, c-format
 msgid "unable to mix ldaps and starttls"
 msgstr "не можна використовувати суміш з ldaps і starttls"
 
-#: plugins/sudoers/ldap.c:485
+#: plugins/sudoers/ldap.c:489
 #, c-format
 msgid "sudo_ldap_parse_uri: out of space building hostbuf"
 msgstr "sudo_ldap_parse_uri: вихід за межі пам’яті під час побудови буфера вузла"
 
-#: plugins/sudoers/ldap.c:550
+#: plugins/sudoers/ldap.c:563
 #, c-format
 msgid "unable to initialize SSL cert and key db: %s"
 msgstr "не вдалося ініціалізувати базу даних сертифікатів і ключів SSL: %s"
 
-#: plugins/sudoers/ldap.c:958
+#: plugins/sudoers/ldap.c:566
+#, c-format
+msgid "you must set TLS_CERT in %s to use SSL"
+msgstr "щоб скористатися SSL, вам слід встановити для TLS_CERT значення %s"
+
+#: plugins/sudoers/ldap.c:973
 #, c-format
 msgid "unable to get GMT time"
 msgstr "не вдалося отримати гринвіцький час"
 
-#: plugins/sudoers/ldap.c:964
+#: plugins/sudoers/ldap.c:979
 #, c-format
 msgid "unable to format timestamp"
 msgstr "не вдалося виконати форматування часового штампа"
 
-#: plugins/sudoers/ldap.c:972
+#: plugins/sudoers/ldap.c:987
 #, c-format
 msgid "unable to build time filter"
 msgstr "не вдалося побудувати фільтр часу"
 
-#: plugins/sudoers/ldap.c:1187
+#: plugins/sudoers/ldap.c:1202
 #, c-format
 msgid "sudo_ldap_build_pass1 allocation mismatch"
 msgstr "sudo_ldap_build_pass1: невідповідність розміщення"
 
-#: plugins/sudoers/ldap.c:1707
+#: plugins/sudoers/ldap.c:1738
 #, c-format
 msgid ""
 "\n"
@@ -723,7 +923,7 @@ msgstr ""
 "\n"
 "Роль LDAP: %s\n"
 
-#: plugins/sudoers/ldap.c:1709
+#: plugins/sudoers/ldap.c:1740
 #, c-format
 msgid ""
 "\n"
@@ -732,49 +932,30 @@ msgstr ""
 "\n"
 "Роль у LDAP: НЕВІДОМА\n"
 
-#: plugins/sudoers/ldap.c:1756
+#: plugins/sudoers/ldap.c:1787
 #, c-format
 msgid "    Order: %s\n"
 msgstr "    Порядок: %s\n"
 
-#: plugins/sudoers/ldap.c:1764
+#: plugins/sudoers/ldap.c:1795
 #, c-format
 msgid "    Commands:\n"
 msgstr "    Команди:\n"
 
-#: plugins/sudoers/ldap.c:2156
+#: plugins/sudoers/ldap.c:2216
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr "не вдалося ініціалізувати LDAP: %s"
 
-#: plugins/sudoers/ldap.c:2187
+#: plugins/sudoers/ldap.c:2250
 #, c-format
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
 msgstr "start_tls вказано, але у бібліотеках LDAP не передбачено підтримки ldap_start_tls_s() або ldap_start_tls_s_np()"
 
-#: plugins/sudoers/ldap.c:2423
+#: plugins/sudoers/ldap.c:2486
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr "некоректний атрибут sudoOrder: %s"
-
-#: toke.l:805
-msgid "too many levels of includes"
-msgstr "занадто високий рівень вкладеності"
-
-#: toke.l:829 plugins/sudoers/sudoers.c:1004
-#, c-format
-msgid "%s is owned by uid %u, should be %u"
-msgstr "%s належить uid %u, має належати %u"
-
-#: toke.l:836 plugins/sudoers/sudoers.c:1008
-#, c-format
-msgid "%s is world writable"
-msgstr "Запис до «%s» можливий для довільного користувача"
-
-#: toke.l:841 plugins/sudoers/sudoers.c:1011
-#, c-format
-msgid "%s is owned by gid %u, should be %u"
-msgstr "%s належить gid %u, має належати %u"
 
 #: plugins/sudoers/linux_audit.c:57
 #, c-format
@@ -1079,6 +1260,21 @@ msgstr "внутрішня помилка, переповнення set_cmnd()"
 msgid "%s is not a regular file"
 msgstr "%s не є звичайним файлом"
 
+#: plugins/sudoers/sudoers.c:1004 toke.l:829
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s належить uid %u, має належати %u"
+
+#: plugins/sudoers/sudoers.c:1008 toke.l:836
+#, c-format
+msgid "%s is world writable"
+msgstr "Запис до «%s» можливий для довільного користувача"
+
+#: plugins/sudoers/sudoers.c:1011 toke.l:841
+#, c-format
+msgid "%s is owned by gid %u, should be %u"
+msgstr "%s належить gid %u, має належати %u"
+
 #: plugins/sudoers/sudoers.c:1038
 #, c-format
 msgid "only root can use `-c %s'"
@@ -1336,11 +1532,6 @@ msgstr "fill_args: переповнення буфера"
 msgid "%s grammar version %d\n"
 msgstr "Граматична перевірка %s, версія %d\n"
 
-#: plugins/sudoers/visudo.c:220 plugins/sudoers/auth/rfc1938.c:104
-#, c-format
-msgid "you do not exist in the %s database"
-msgstr "вас немає у базі даних %s"
-
 #: plugins/sudoers/visudo.c:252 plugins/sudoers/visudo.c:538
 #, c-format
 msgid "press return to edit %s: "
@@ -1541,195 +1732,9 @@ msgstr ""
 "  -s          строга перевірка синтаксису\n"
 "  -V          показати дані щодо версії і завершити роботу"
 
-#: plugins/sudoers/auth/bsdauth.c:78
-#, c-format
-msgid "unable to get login class for user %s"
-msgstr "не вдалося отримати клас входу до системи для користувача %s"
-
-#: plugins/sudoers/auth/bsdauth.c:84
-msgid "unable to begin bsd authentication"
-msgstr "не вдалося розпочати розпізнавання за BSD"
-
-#: plugins/sudoers/auth/bsdauth.c:92
-msgid "invalid authentication type"
-msgstr "некоректний тип розпізнавання"
-
-#: plugins/sudoers/auth/bsdauth.c:101
-msgid "unable to setup authentication"
-msgstr "не вдалося налаштувати розпізнавання"
-
-#: plugins/sudoers/auth/fwtk.c:60
-#, c-format
-msgid "unable to read fwtk config"
-msgstr "не вдалося прочитати налаштування fwtk"
-
-#: plugins/sudoers/auth/fwtk.c:65
-#, c-format
-msgid "unable to connect to authentication server"
-msgstr "не вдалося встановити з’єднання з сервером розпізнавання"
-
-#: plugins/sudoers/auth/fwtk.c:71 plugins/sudoers/auth/fwtk.c:95
-#: plugins/sudoers/auth/fwtk.c:128
-#, c-format
-msgid "lost connection to authentication server"
-msgstr "втрачено зв’язок з сервером розпізнавання"
-
-#: plugins/sudoers/auth/fwtk.c:75
-#, c-format
-msgid ""
-"authentication server error:\n"
-"%s"
-msgstr ""
-"помилка сервера розпізнавання:\n"
-"%s"
-
-#: plugins/sudoers/auth/kerb5.c:117
-#, c-format
-msgid "%s: unable to unparse princ ('%s'): %s"
-msgstr "%s: не вдалося зібрати princ ('%s'): %s"
-
-#: plugins/sudoers/auth/kerb5.c:160
-#, c-format
-msgid "%s: unable to parse '%s': %s"
-msgstr "%s: не вдалося обробити «%s»: %s"
-
-#: plugins/sudoers/auth/kerb5.c:170
-#, c-format
-msgid "%s: unable to resolve ccache: %s"
-msgstr "%s: не вдалося визначити ccache: %s"
-
-#: plugins/sudoers/auth/kerb5.c:218
-#, c-format
-msgid "%s: unable to allocate options: %s"
-msgstr "%s: не вдалося розмістити параметри: %s"
-
-#: plugins/sudoers/auth/kerb5.c:234
-#, c-format
-msgid "%s: unable to get credentials: %s"
-msgstr "%s: не вдалося отримати реєстраційні дані: %s"
-
-#: plugins/sudoers/auth/kerb5.c:247
-#, c-format
-msgid "%s: unable to initialize ccache: %s"
-msgstr "%s: не вдалося ініціалізувати ccache: %s"
-
-#: plugins/sudoers/auth/kerb5.c:251
-#, c-format
-msgid "%s: unable to store cred in ccache: %s"
-msgstr "%s: не вдалося зберегти реєстраційні дані у ccache: %s"
-
-#: plugins/sudoers/auth/kerb5.c:316
-#, c-format
-msgid "%s: unable to get host principal: %s"
-msgstr "%s: не вдалося отримати реєстраційний запис вузла: %s"
-
-#: plugins/sudoers/auth/kerb5.c:331
-#, c-format
-msgid "%s: Cannot verify TGT! Possible attack!: %s"
-msgstr "%s: спроба перевірки TGT зазнала невдачі! Ймовірно, вас атаковано: %s"
-
-#: plugins/sudoers/auth/pam.c:100
-msgid "unable to initialize PAM"
-msgstr "не вдалося ініціалізувати PAM"
-
-#: plugins/sudoers/auth/pam.c:144
-msgid "account validation failure, is your account locked?"
-msgstr "помилка під час спроби перевірки облікового запису. Ваш обліковий запис заблоковано?"
-
-#: plugins/sudoers/auth/pam.c:148
-msgid "Account or password is expired, reset your password and try again"
-msgstr "Строк дії облікового запису або пароля збіг, визначте новий пароль і повторіть спробу"
-
-#: plugins/sudoers/auth/pam.c:155
-#, c-format
-msgid "pam_chauthtok: %s"
-msgstr "pam_chauthtok: %s"
-
-#: plugins/sudoers/auth/pam.c:159
-msgid "Password expired, contact your system administrator"
-msgstr "Строк дії пароля збіг, зверніться до адміністратора вашої системи щодо поновлення пароля"
-
-#: plugins/sudoers/auth/pam.c:163
-msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
-msgstr "Строк дії облікового запису збіг або у файлі налаштувань PAM немає розділу \"account\" для sudo. Повідомте про це адміністратора вашої системи."
-
-#: plugins/sudoers/auth/pam.c:180
-#, c-format
-msgid "pam_authenticate: %s"
-msgstr "pam_authenticate: %s"
-
-#: plugins/sudoers/auth/pam.c:330
-msgid "Password: "
-msgstr "Пароль: "
-
-#: plugins/sudoers/auth/pam.c:331
-msgid "Password:"
-msgstr "Пароль:"
-
-#: plugins/sudoers/auth/securid5.c:81
-#, c-format
-msgid "failed to initialise the ACE API library"
-msgstr "не вдалося ініціалізувати бібліотеку програмного інтерфейсу до ACE"
-
-#: plugins/sudoers/auth/securid5.c:107
-#, c-format
-msgid "unable to contact the SecurID server"
-msgstr "не вдалося встановити зв’язок з сервером SecurID"
-
-#: plugins/sudoers/auth/securid5.c:116
-#, c-format
-msgid "User ID locked for SecurID Authentication"
-msgstr "Ідентифікатор користувача заблоковано для розпізнавання SecurID"
-
-#: plugins/sudoers/auth/securid5.c:120 plugins/sudoers/auth/securid5.c:171
-#, c-format
-msgid "invalid username length for SecurID"
-msgstr "некоректна довжина імені користувача для SecurID"
-
-#: plugins/sudoers/auth/securid5.c:124 plugins/sudoers/auth/securid5.c:176
-#, c-format
-msgid "invalid Authentication Handle for SecurID"
-msgstr "некоректний дескриптор розпізнавання для SecurID"
-
-#: plugins/sudoers/auth/securid5.c:128
-#, c-format
-msgid "SecurID communication failed"
-msgstr "спроба обміну даними з SecurID зазнала невдачі"
-
-#: plugins/sudoers/auth/securid5.c:132 plugins/sudoers/auth/securid5.c:215
-#, c-format
-msgid "unknown SecurID error"
-msgstr "невідома помилка SecurID"
-
-#: plugins/sudoers/auth/securid5.c:166
-#, c-format
-msgid "invalid passcode length for SecurID"
-msgstr "некоректна довжина коду пароля для SecurID"
-
-#: plugins/sudoers/auth/sia.c:109
-msgid "unable to initialize SIA session"
-msgstr "не вдалося ініціалізувати сеанс SIA"
-
-#: plugins/sudoers/auth/sudo_auth.c:117
-msgid "Invalid authentication methods compiled into sudo!  You may mix standalone and non-standalone authentication."
-msgstr "sudo зібрано з підтримкою некоректних способів розпізнавання! Можливе змішування власних і зовнішніх способів розпізнавання."
-
-#: plugins/sudoers/auth/sudo_auth.c:199
-msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
-msgstr "sudo зібрано без можливостей з взаємодії з інструментами розпізнавання! Якщо ви хочете вимкнути розпізнавання, скористайтеся параметром налаштування --disable-authentication."
-
-#: plugins/sudoers/auth/sudo_auth.c:271
-#, c-format
-msgid "%d incorrect password attempt"
-msgid_plural "%d incorrect password attempts"
-msgstr[0] "%d невдала спроба введення пароля"
-msgstr[1] "%d невдалих спроби введення пароля"
-msgstr[2] "%d невдалих спроб введення пароля"
-msgstr[3] "одна невдала спроба введення пароля"
-
-#: plugins/sudoers/auth/sudo_auth.c:374
-msgid "Authentication methods:"
-msgstr "Способи розпізнавання:"
+#: toke.l:805
+msgid "too many levels of includes"
+msgstr "занадто високий рівень вкладеності"
 
 #~ msgid "invalid log file %s"
 #~ msgstr "некоректний файл журналу %s"

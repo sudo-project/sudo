@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.5-b4\n"
+"Project-Id-Version: sudo 1.8.5rc3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-03-28 14:06-0400\n"
-"PO-Revision-Date: 2012-04-02 22:40+0900\n"
+"POT-Creation-Date: 2012-04-24 13:41-0400\n"
+"PO-Revision-Date: 2012-04-30 16:14+0900\n"
 "Last-Translator: Takeshi Hamasaki <hmatrjp@users.sourceforge.jp>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
 "Language: ja\n"
@@ -17,32 +17,126 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+#: common/aix.c:149
+#, c-format
+msgid "unable to open userdb"
+msgstr "ユーザーデータベースを開くことができません"
+
+#: common/aix.c:152
+#, c-format
+msgid "unable to switch to registry \"%s\" for %s"
+msgstr "%s 用のレジストリー \"%s\" へ切り替えることができません"
+
+#: common/aix.c:169
+#, c-format
+msgid "unable to restore registry"
+msgstr "レジストリーを復元できません"
+
+#: common/alloc.c:82
+msgid "internal error, tried to emalloc(0)"
+msgstr "内部エラー、emalloc(0) を試みました"
+
+#: common/alloc.c:85 common/alloc.c:105 common/alloc.c:127 common/alloc.c:146
+#: common/alloc.c:168 common/alloc.c:192 common/alloc.c:256 common/alloc.c:270
+#: src/exec_common.c:111 src/parse_args.c:432 src/sudo.c:456 src/sudo.c:482
+#: src/sudo.c:489 src/sudo.c:500 src/sudo.c:737
+#, c-format
+msgid "unable to allocate memory"
+msgstr "メモリ割り当てを行えませんでした"
+
+#: common/alloc.c:99
+msgid "internal error, tried to emalloc2(0)"
+msgstr "内部エラー、 emalloc2(0) を試みました"
+
+#: common/alloc.c:101
+msgid "internal error, emalloc2() overflow"
+msgstr "内部エラー、 emalloc2() がオーバーフローしました"
+
+#: common/alloc.c:120
+msgid "internal error, tried to ecalloc(0)"
+msgstr "内部エラー、ecalloc(0) を試みました"
+
+#: common/alloc.c:123
+msgid "internal error, ecalloc() overflow"
+msgstr "内部エラー、 ecalloc() がオーバーフローしました"
+
+#: common/alloc.c:142
+msgid "internal error, tried to erealloc(0)"
+msgstr "内部エラー、 erealloc(0) を試みました"
+
+#: common/alloc.c:161 common/alloc.c:185
+msgid "internal error, tried to erealloc3(0)"
+msgstr "内部エラー、 erealloc3(0) を試みました"
+
+#: common/alloc.c:163 common/alloc.c:187
+msgid "internal error, erealloc3() overflow"
+msgstr "内部エラー、 erealloc3() がオーバーフローしました"
+
+#: common/sudo_conf.c:306
+#, c-format
+msgid "unable to stat %s"
+msgstr "%s の状態取得 (stat) ができません"
+
+#: common/sudo_conf.c:309
+#, c-format
+msgid "%s is not a regular file"
+msgstr "%s は通常ファイルではありません"
+
+#: common/sudo_conf.c:312
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s はユーザーID %u によって所有されています。これは %u であるべきです"
+
+#: common/sudo_conf.c:316
+#, c-format
+msgid "%s is world writable"
+msgstr "%s は誰でも書き込み可能です"
+
+#: common/sudo_conf.c:319
+#, c-format
+msgid "%s is group writable"
+msgstr "%s はグループのメンバーによる書き込みが可能です"
+
+#: common/sudo_conf.c:328 src/selinux.c:196 src/selinux.c:209 src/sudo.c:331
+#, c-format
+msgid "unable to open %s"
+msgstr "%s を開けません"
+
+#: compat/strsignal.c:47
+msgid "Unknown signal"
+msgstr "不明なシグナルです"
+
 #: src/error.c:82 src/error.c:86
 msgid ": "
 msgstr ": "
 
-#: src/exec.c:105 src/exec_pty.c:616 src/exec_pty.c:948 src/tgetpass.c:221
+#: src/exec.c:107 src/exec_pty.c:628
+#, c-format
+msgid "policy plugin failed session initialization"
+msgstr "ポリシープラグインがセッションの初期化に失敗しました"
+
+#: src/exec.c:112 src/exec_pty.c:633 src/exec_pty.c:967 src/tgetpass.c:221
 #, c-format
 msgid "unable to fork"
 msgstr "fork できません"
 
-#: src/exec.c:252
+#: src/exec.c:259
 #, c-format
 msgid "unable to create sockets"
 msgstr "ソケットを作成できません"
 
-#: src/exec.c:259 src/exec_pty.c:567 src/exec_pty.c:576 src/exec_pty.c:584
-#: src/exec_pty.c:883 src/exec_pty.c:945 src/tgetpass.c:218
+#: src/exec.c:266 src/exec_pty.c:572 src/exec_pty.c:581 src/exec_pty.c:589
+#: src/exec_pty.c:902 src/exec_pty.c:964 src/tgetpass.c:218
 #, c-format
 msgid "unable to create pipe"
 msgstr "パイプを作成できません"
 
-#: src/exec.c:340 src/exec_pty.c:1011 src/exec_pty.c:1146
+#: src/exec.c:351 src/exec_pty.c:1029 src/exec_pty.c:1167
 #, c-format
 msgid "select failed"
 msgstr "select に失敗しました"
 
-#: src/exec.c:425
+#: src/exec.c:441
 #, c-format
 msgid "unable to restore tty label"
 msgstr "tty ラベルを復旧できません"
@@ -52,45 +146,37 @@ msgstr "tty ラベルを復旧できません"
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "PRIV_LIMIT から PRIV_PROC_EXEC を取り除くことができません"
 
-#: src/exec_common.c:111 src/parse_args.c:432 src/sudo.c:447 src/sudo.c:467
-#: src/sudo.c:474 src/sudo.c:485 src/sudo.c:871 common/alloc.c:85
-#: common/alloc.c:105 common/alloc.c:127 common/alloc.c:146 common/alloc.c:168
-#: common/alloc.c:192 common/alloc.c:256 common/alloc.c:270
-#, c-format
-msgid "unable to allocate memory"
-msgstr "メモリ割り当てを行えませんでした"
-
-#: src/exec_pty.c:140
+#: src/exec_pty.c:144
 #, c-format
 msgid "unable to allocate pty"
 msgstr "pty を割り当てられません"
 
-#: src/exec_pty.c:609
+#: src/exec_pty.c:619
 #, c-format
 msgid "unable to set terminal to raw mode"
 msgstr "端末を raw モードに設定できません"
 
-#: src/exec_pty.c:926
+#: src/exec_pty.c:945
 #, c-format
 msgid "unable to set controlling tty"
 msgstr "tty の制御設定ができません"
 
-#: src/exec_pty.c:1019
+#: src/exec_pty.c:1038
 #, c-format
 msgid "error reading from signal pipe"
 msgstr "シグナルパイプからの読み込み中にエラーが発生しました"
 
-#: src/exec_pty.c:1038
+#: src/exec_pty.c:1059
 #, c-format
 msgid "error reading from pipe"
 msgstr "パイプからの読み込み中にエラーが発生しました"
 
-#: src/exec_pty.c:1054
+#: src/exec_pty.c:1075
 #, c-format
 msgid "error reading from socketpair"
 msgstr "ソケットペアからの読み込み中にエラーが発生しました"
 
-#: src/exec_pty.c:1058
+#: src/exec_pty.c:1079
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "バックチャンネルに関する予期しないリプレイタイプです: %d"
@@ -383,11 +469,6 @@ msgstr "新しい tty コンテキストを取得できません。 tty の再�
 msgid "unable to set new tty context"
 msgstr "新しい tty コンテキストを設定できません"
 
-#: src/selinux.c:196 src/selinux.c:209 src/sudo.c:333 common/sudo_conf.c:328
-#, c-format
-msgid "unable to open %s"
-msgstr "%s を開けません"
-
 #: src/selinux.c:252
 #, c-format
 msgid "you must specify a role for type %s"
@@ -448,167 +529,167 @@ msgstr "最低でも一つ以上おの引数が必要です"
 msgid "unable to execute %s"
 msgstr "%s を実行できません"
 
-#: src/sudo.c:213
+#: src/sudo.c:211
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Sudo バージョン %s\n"
 
-#: src/sudo.c:215
+#: src/sudo.c:213
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "configure オプション: %s\n"
 
-#: src/sudo.c:220
+#: src/sudo.c:218
 #, c-format
 msgid "fatal error, unable to load plugins"
 msgstr "致命的エラー、プラグインをロードできません"
 
-#: src/sudo.c:228
+#: src/sudo.c:226
 #, c-format
 msgid "unable to initialize policy plugin"
 msgstr "ポリシープラグインを初期化できません"
 
-#: src/sudo.c:283
+#: src/sudo.c:281
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "I/O プラグイン %s を初期化中にエラーが発生しました"
 
-#: src/sudo.c:308
+#: src/sudo.c:306
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "予期しない sudo のモード 0x%x です"
 
-#: src/sudo.c:402
+#: src/sudo.c:400
 #, c-format
 msgid "unable to get group vector"
 msgstr "グループベクトルを取得できません"
 
-#: src/sudo.c:443
+#: src/sudo.c:452
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "不明なユーザーID %u です: 誰ですか?"
 
-#: src/sudo.c:735
+#: src/sudo.c:760
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s は所有者が uid %d である必要があり、かつ setuid が設定されている必要があります"
 
-#: src/sudo.c:738
+#: src/sudo.c:763
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "実効 uid が %d ではありません、%s は 'nosuid' が設定されたファイルシステムにあるか、root 権限のないNFSファイルシステムにあるのでは？"
 
-#: src/sudo.c:744
+#: src/sudo.c:769
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "実効 uid が %d ではありません、sudo は setuid root を設定してインストールされていますか？"
 
-#: src/sudo.c:813
+#: src/sudo.c:838
 #, c-format
 msgid "resource control limit has been reached"
 msgstr "資源制御の制限の最大値に達しました"
 
-#: src/sudo.c:816
+#: src/sudo.c:841
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
 msgstr "ユーザー \"%s\" はプロジェクト \"%s\" のメンバーではありません"
 
-#: src/sudo.c:820
+#: src/sudo.c:845
 #, c-format
 msgid "the invoking task is final"
 msgstr "起動しているタスクは最後 (final) です"
 
-#: src/sudo.c:823
+#: src/sudo.c:848
 #, c-format
 msgid "could not join project \"%s\""
 msgstr "プロジェクト \"%s\" に参加できません"
 
-#: src/sudo.c:828
+#: src/sudo.c:853
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "プロジェクト \"%s\" 用にはデフォルト割り当てとして受け付けられる資源プールがありません"
 
-#: src/sudo.c:832
+#: src/sudo.c:857
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "プロジェクト \"%s\" 用として指定した資源プールは存在しません"
 
-#: src/sudo.c:836
+#: src/sudo.c:861
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "プロジェクト \"%s\" 用にデフォルト資源プールを割り当てられませんでした"
 
-#: src/sudo.c:842
+#: src/sudo.c:867
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "プロジェクト\"%s\" への setproject に失敗しました"
 
-#: src/sudo.c:844
+#: src/sudo.c:869
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "警告、プロジェクト \"%s\" への資源制御割り当てに失敗しました"
 
-#: src/sudo.c:909
+#: src/sudo.c:917
 #, c-format
 msgid "unknown login class %s"
 msgstr "不明なログインクラス %s です"
 
-#: src/sudo.c:923 src/sudo.c:926
+#: src/sudo.c:931 src/sudo.c:934
 #, c-format
 msgid "unable to set user context"
 msgstr "ユーザーコンテキストを設定できません"
 
-#: src/sudo.c:938
+#: src/sudo.c:946
 #, c-format
 msgid "unable to set supplementary group IDs"
 msgstr "追加のグループIDを設定できません"
 
-#: src/sudo.c:945
+#: src/sudo.c:953
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "実行時のグループID (gid) %u を実効グループIDに設定できません"
 
-#: src/sudo.c:951
+#: src/sudo.c:959
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "実行時のグループID (gid) %u をグループIDに設定できません"
 
-#: src/sudo.c:958
+#: src/sudo.c:966
 #, c-format
 msgid "unable to set process priority"
 msgstr "プロセス優先度を設定できません"
 
-#: src/sudo.c:966
+#: src/sudo.c:974
 #, c-format
 msgid "unable to change root to %s"
 msgstr "root を %s へ変更できません"
 
-#: src/sudo.c:973 src/sudo.c:979 src/sudo.c:985
+#: src/sudo.c:981 src/sudo.c:987 src/sudo.c:993
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "実行時のユーザーID (uid) (%u, %u) へ変更できません"
 
-#: src/sudo.c:999
+#: src/sudo.c:1007
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "ディレクトリーを %s に変更できません"
 
-#: src/sudo.c:1072
+#: src/sudo.c:1079
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "予期しない子プロセスの終了コードです: %d"
 
-#: src/sudo.c:1133
+#: src/sudo.c:1140
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "ポリシープラグイン %s は権限の一覧表示をサポートしていません"
 
-#: src/sudo.c:1145
+#: src/sudo.c:1152
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "ポリシープラグイン %s は -v オプションをサポートしません"
 
-#: src/sudo.c:1157
+#: src/sudo.c:1164
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "ポリシープラグイン %s は -k/-K オプションをサポートしません"
@@ -697,82 +778,6 @@ msgstr "標準入力へ dup2 を実行できません"
 #, c-format
 msgid "unable to restore stdin"
 msgstr "標準入力を復元できません"
-
-#: common/aix.c:149
-#, c-format
-msgid "unable to open userdb"
-msgstr "ユーザーデータベースを開くことができません"
-
-#: common/aix.c:152
-#, c-format
-msgid "unable to switch to registry \"%s\" for %s"
-msgstr "%s 用のレジストリー \"%s\" へ切り替えることができません"
-
-#: common/aix.c:169
-#, c-format
-msgid "unable to restore registry"
-msgstr "レジストリーを復元できません"
-
-#: common/alloc.c:82
-msgid "internal error, tried to emalloc(0)"
-msgstr "内部エラー、emalloc(0) を試みました"
-
-#: common/alloc.c:99
-msgid "internal error, tried to emalloc2(0)"
-msgstr "内部エラー、 emalloc2(0) を試みました"
-
-#: common/alloc.c:101
-msgid "internal error, emalloc2() overflow"
-msgstr "内部エラー、 emalloc2() がオーバーフローしました"
-
-#: common/alloc.c:120
-msgid "internal error, tried to ecalloc(0)"
-msgstr "内部エラー、ecalloc(0) を試みました"
-
-#: common/alloc.c:123
-msgid "internal error, ecalloc() overflow"
-msgstr "内部エラー、 ecalloc() がオーバーフローしました"
-
-#: common/alloc.c:142
-msgid "internal error, tried to erealloc(0)"
-msgstr "内部エラー、 erealloc(0) を試みました"
-
-#: common/alloc.c:161 common/alloc.c:185
-msgid "internal error, tried to erealloc3(0)"
-msgstr "内部エラー、 erealloc3(0) を試みました"
-
-#: common/alloc.c:163 common/alloc.c:187
-msgid "internal error, erealloc3() overflow"
-msgstr "内部エラー、 erealloc3() がオーバーフローしました"
-
-#: common/sudo_conf.c:306
-#, c-format
-msgid "unable to stat %s"
-msgstr "%s の状態取得 (stat) ができません"
-
-#: common/sudo_conf.c:309
-#, c-format
-msgid "%s is not a regular file"
-msgstr "%s は通常ファイルではありません"
-
-#: common/sudo_conf.c:312
-#, c-format
-msgid "%s is owned by uid %u, should be %u"
-msgstr "%s はユーザーID %u によって所有されています。これは %u であるべきです"
-
-#: common/sudo_conf.c:316
-#, c-format
-msgid "%s is world writable"
-msgstr "%s は誰でも書き込み可能です"
-
-#: common/sudo_conf.c:319
-#, c-format
-msgid "%s is group writable"
-msgstr "%s はグループのメンバーによる書き込みが可能です"
-
-#: compat/strsignal.c:47
-msgid "Unknown signal"
-msgstr "不明なシグナルです"
 
 #~ msgid "must be setuid root"
 #~ msgstr "setuid root されていなければいけません"

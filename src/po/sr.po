@@ -3,10 +3,10 @@
 # Мирослав Николић <miroslavnikolic@rocketmail.com>, 2011, 2012.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.5-b1\n"
+"Project-Id-Version: sudo 1.8.5rc3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-03-14 14:20-0400\n"
-"PO-Revision-Date: 2012-03-26 22:28+0200\n"
+"POT-Creation-Date: 2012-04-24 13:41-0400\n"
+"PO-Revision-Date: 2012-05-02 10:11+0200\n"
 "Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: Serbian <gnu@prevod.org>\n"
 "Language: sr\n"
@@ -15,32 +15,126 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
+#: common/aix.c:149
+#, c-format
+msgid "unable to open userdb"
+msgstr "не могу да отворим корисничку базу података"
+
+#: common/aix.c:152
+#, c-format
+msgid "unable to switch to registry \"%s\" for %s"
+msgstr "не могу да се пребацим на регистар „%s“ за %s"
+
+#: common/aix.c:169
+#, c-format
+msgid "unable to restore registry"
+msgstr "не могу да повратим регистар"
+
+#: common/alloc.c:82
+msgid "internal error, tried to emalloc(0)"
+msgstr "унутрашња грешка, покушах да обавим „emalloc(0)“"
+
+#: common/alloc.c:85 common/alloc.c:105 common/alloc.c:127 common/alloc.c:146
+#: common/alloc.c:168 common/alloc.c:192 common/alloc.c:256 common/alloc.c:270
+#: src/exec_common.c:111 src/parse_args.c:432 src/sudo.c:456 src/sudo.c:482
+#: src/sudo.c:489 src/sudo.c:500 src/sudo.c:737
+#, c-format
+msgid "unable to allocate memory"
+msgstr "не могу да доделим меморију"
+
+#: common/alloc.c:99
+msgid "internal error, tried to emalloc2(0)"
+msgstr "унутрашња грешка, покушах да обавим „emalloc2(0)“"
+
+#: common/alloc.c:101
+msgid "internal error, emalloc2() overflow"
+msgstr "унутрашња грешка, прекорачење функције „emalloc2()“"
+
+#: common/alloc.c:120
+msgid "internal error, tried to ecalloc(0)"
+msgstr "унутрашња грешка, покушах „ecalloc(0)“"
+
+#: common/alloc.c:123
+msgid "internal error, ecalloc() overflow"
+msgstr "унутрашња грешка, прекорачење функције „ecalloc()“"
+
+#: common/alloc.c:142
+msgid "internal error, tried to erealloc(0)"
+msgstr "унутрашња грешка, покушах да обавим „erealloc(0)“"
+
+#: common/alloc.c:161 common/alloc.c:185
+msgid "internal error, tried to erealloc3(0)"
+msgstr "унутрашња грешка, покушах да обавим „erealloc3(0)“"
+
+#: common/alloc.c:163 common/alloc.c:187
+msgid "internal error, erealloc3() overflow"
+msgstr "унутрашња грешка, прекорачење функције „erealloc3()“"
+
+#: common/sudo_conf.c:306
+#, c-format
+msgid "unable to stat %s"
+msgstr "не могу да добијем податке о „%s“"
+
+#: common/sudo_conf.c:309
+#, c-format
+msgid "%s is not a regular file"
+msgstr "„%s“ није обична датотека"
+
+#: common/sudo_conf.c:312
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s је у власништву уиб-а %u, а треба бити %u"
+
+#: common/sudo_conf.c:316
+#, c-format
+msgid "%s is world writable"
+msgstr "%s је светски уписив"
+
+#: common/sudo_conf.c:319
+#, c-format
+msgid "%s is group writable"
+msgstr "%s је групно уписив"
+
+#: common/sudo_conf.c:328 src/selinux.c:196 src/selinux.c:209 src/sudo.c:331
+#, c-format
+msgid "unable to open %s"
+msgstr "не могу да отворим %s"
+
+#: compat/strsignal.c:47
+msgid "Unknown signal"
+msgstr "Непознати сигнал"
+
 #: src/error.c:82 src/error.c:86
 msgid ": "
 msgstr ": "
 
-#: src/exec.c:105 src/exec_pty.c:616 src/exec_pty.c:948 src/tgetpass.c:227
+#: src/exec.c:107 src/exec_pty.c:628
+#, c-format
+msgid "policy plugin failed session initialization"
+msgstr "није успело покретање сесије прикључка политике"
+
+#: src/exec.c:112 src/exec_pty.c:633 src/exec_pty.c:967 src/tgetpass.c:221
 #, c-format
 msgid "unable to fork"
 msgstr "не могу да поделим"
 
-#: src/exec.c:252
+#: src/exec.c:259
 #, c-format
 msgid "unable to create sockets"
 msgstr "не могу да направим утичнице"
 
-#: src/exec.c:259 src/exec_pty.c:567 src/exec_pty.c:576 src/exec_pty.c:584
-#: src/exec_pty.c:883 src/exec_pty.c:945 src/tgetpass.c:224
+#: src/exec.c:266 src/exec_pty.c:572 src/exec_pty.c:581 src/exec_pty.c:589
+#: src/exec_pty.c:902 src/exec_pty.c:964 src/tgetpass.c:218
 #, c-format
 msgid "unable to create pipe"
 msgstr "не могу да направим спојку"
 
-#: src/exec.c:340 src/exec_pty.c:1012 src/exec_pty.c:1147
+#: src/exec.c:351 src/exec_pty.c:1029 src/exec_pty.c:1167
 #, c-format
 msgid "select failed"
 msgstr "избор није успео"
 
-#: src/exec.c:425
+#: src/exec.c:441
 #, c-format
 msgid "unable to restore tty label"
 msgstr "не могу да повратим tty натпис"
@@ -50,45 +144,37 @@ msgstr "не могу да повратим tty натпис"
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "не могу да уклоним PRIV_PROC_EXEC из PRIV_LIMIT"
 
-#: src/exec_common.c:111 src/parse_args.c:432 src/sudo.c:451 src/sudo.c:471
-#: src/sudo.c:478 src/sudo.c:489 src/sudo.c:848 common/alloc.c:85
-#: common/alloc.c:105 common/alloc.c:123 common/alloc.c:145 common/alloc.c:203
-#: common/alloc.c:217
-#, c-format
-msgid "unable to allocate memory"
-msgstr "не могу да доделим меморију"
-
-#: src/exec_pty.c:140
+#: src/exec_pty.c:144
 #, c-format
 msgid "unable to allocate pty"
 msgstr "не могу да доделим pty"
 
-#: src/exec_pty.c:609
+#: src/exec_pty.c:619
 #, c-format
 msgid "unable to set terminal to raw mode"
 msgstr "не могу да подесим терминал у сирови режим"
 
-#: src/exec_pty.c:926
+#: src/exec_pty.c:945
 #, c-format
 msgid "unable to set controlling tty"
 msgstr "не могу да подесим контролисање tty"
 
-#: src/exec_pty.c:1020
+#: src/exec_pty.c:1038
 #, c-format
 msgid "error reading from signal pipe"
 msgstr "грешка у читању из спојке сигнала"
 
-#: src/exec_pty.c:1039
+#: src/exec_pty.c:1059
 #, c-format
 msgid "error reading from pipe"
 msgstr "грешка у читању из спојке"
 
-#: src/exec_pty.c:1055
+#: src/exec_pty.c:1075
 #, c-format
 msgid "error reading from socketpair"
 msgstr "грешка у читању из пара прикључка"
 
-#: src/exec_pty.c:1059
+#: src/exec_pty.c:1079
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "неочекивана врста одговора на повратном каналу: %d"
@@ -336,102 +422,97 @@ msgstr "освежава кориснички запис датума и вре�
 msgid "stop processing command line arguments\n"
 msgstr "зауставља обрађивање аргумената линије наредби\n"
 
-#: src/selinux.c:76
+#: src/selinux.c:77
 #, c-format
 msgid "unable to open audit system"
 msgstr "не могу да отворим аудит систем"
 
-#: src/selinux.c:84
+#: src/selinux.c:85
 #, c-format
 msgid "unable to send audit message"
 msgstr "не могу да пошаљем аудит поруку"
 
-#: src/selinux.c:112
+#: src/selinux.c:113
 #, c-format
 msgid "unable to fgetfilecon %s"
 msgstr "не могу да добавим контекст отворене датотеке %s"
 
-#: src/selinux.c:117
+#: src/selinux.c:118
 #, c-format
 msgid "%s changed labels"
 msgstr "%s измењена натписа"
 
-#: src/selinux.c:122
+#: src/selinux.c:123
 #, c-format
 msgid "unable to restore context for %s"
 msgstr "не могу да повратим контекст за %s"
 
-#: src/selinux.c:162
+#: src/selinux.c:163
 #, c-format
 msgid "unable to open %s, not relabeling tty"
 msgstr "не могу да отворим %s, није тту за поновно натписивање"
 
-#: src/selinux.c:171
+#: src/selinux.c:172
 #, c-format
 msgid "unable to get current tty context, not relabeling tty"
 msgstr "не могу да добавим текући тту контекст, није тту за поновно натписивање"
 
-#: src/selinux.c:178
+#: src/selinux.c:179
 #, c-format
 msgid "unable to get new tty context, not relabeling tty"
 msgstr "не могу да добавим нови тту контекст, није тту за поновно натписивање"
 
-#: src/selinux.c:185
+#: src/selinux.c:186
 #, c-format
 msgid "unable to set new tty context"
 msgstr "не могу да подесим нови тту контекст"
 
-#: src/selinux.c:195 src/selinux.c:208 src/sudo.c:337 common/sudo_conf.c:328
-#, c-format
-msgid "unable to open %s"
-msgstr "не могу да отворим %s"
-
-#: src/selinux.c:251
+#: src/selinux.c:252
 #, c-format
 msgid "you must specify a role for type %s"
 msgstr "морате да наведете улогу за врсту %s"
 
-#: src/selinux.c:257
+#: src/selinux.c:258
 #, c-format
 msgid "unable to get default type for role %s"
 msgstr "не могу да добавим основну врсту за улогу %s"
 
-#: src/selinux.c:275
+#: src/selinux.c:276
 #, c-format
 msgid "failed to set new role %s"
 msgstr "нисам успео да подесим нову улогу %s"
 
-#: src/selinux.c:279
+#: src/selinux.c:280
 #, c-format
 msgid "failed to set new type %s"
 msgstr "нисам успео да подесим нову врсту %s"
 
-#: src/selinux.c:288
+#: src/selinux.c:289
 #, c-format
 msgid "%s is not a valid context"
 msgstr "%s није исправан контекст"
 
-#: src/selinux.c:323
+#: src/selinux.c:324
 #, c-format
 msgid "failed to get old_context"
 msgstr "нисам успео да добавим стари_контекст"
 
-#: src/selinux.c:329
+#: src/selinux.c:330
 #, c-format
 msgid "unable to determine enforcing mode."
 msgstr "не могу да одредим режим присиљавања."
 
-#: src/selinux.c:341
+#: src/selinux.c:342
 #, c-format
 msgid "unable to setup tty context for %s"
 msgstr "не могу да подесим тту контекст за %s"
 
-#: src/selinux.c:372
+#: src/selinux.c:373
 #, c-format
 msgid "unable to set exec context to %s"
 msgstr "не могу да подесим извршни контекст за %s"
 
-#: src/selinux.c:379
+#: src/selinux.c:380
 #, c-format
 msgid "unable to set key creation context to %s"
 msgstr "не могу да подесим контекст стварања кључа за %s"
@@ -446,157 +527,167 @@ msgstr "захтева барем један аргумент"
 msgid "unable to execute %s"
 msgstr "не могу да извршим %s"
 
-#: src/sudo.c:191
-#, c-format
-msgid "must be setuid root"
-msgstr "морате бити сетуид администратор"
-
-#: src/sudo.c:214
+#: src/sudo.c:211
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Судо издање %s\n"
 
-#: src/sudo.c:216
+#: src/sudo.c:213
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "Опције подешавања: %s\n"
 
-#: src/sudo.c:221
+#: src/sudo.c:218
 #, c-format
 msgid "fatal error, unable to load plugins"
 msgstr "кобна грешка, не могу да учитам прикључке"
 
-#: src/sudo.c:229
+#: src/sudo.c:226
 #, c-format
 msgid "unable to initialize policy plugin"
 msgstr "не могу да започнем прикључак сигурности"
 
-#: src/sudo.c:284
+#: src/sudo.c:281
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "грешка приликом покретања У/И прикључка %s"
 
-#: src/sudo.c:312
+#: src/sudo.c:306
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "неочекивани судо режим 0x%x"
 
-#: src/sudo.c:406
+#: src/sudo.c:400
 #, c-format
 msgid "unable to get group vector"
 msgstr "не могу да добавим вектор групе"
 
-#: src/sudo.c:447
+#: src/sudo.c:452
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "непознати уид %u: ко сте ви?"
 
-#: src/sudo.c:790
+#: src/sudo.c:760
+#, c-format
+msgid "%s must be owned by uid %d and have the setuid bit set"
+msgstr "%s мора бити власништвo уида %d и треба да има подешен бит „setuid“"
+
+#: src/sudo.c:763
+#, c-format
+msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
+msgstr "стварни уид није %d, већ %s на систему датотека са подешеном опцијом „nosuid“ или је НФС систем датотека без администраторских привилегија?"
+
+#: src/sudo.c:769
+#, c-format
+msgid "effective uid is not %d, is sudo installed setuid root?"
+msgstr "стварни уид није %d, већ сетуид администратор инсталиран судоом?"
+
+#: src/sudo.c:838
 #, c-format
 msgid "resource control limit has been reached"
 msgstr "ограничење контроле ресурса је достигнуто"
 
-#: src/sudo.c:793
+#: src/sudo.c:841
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
 msgstr "корисник „%s“ није члан пројекта „%s“"
 
-#: src/sudo.c:797
+#: src/sudo.c:845
 #, c-format
 msgid "the invoking task is final"
 msgstr "задатак призивања је завршни"
 
-#: src/sudo.c:800
+#: src/sudo.c:848
 #, c-format
 msgid "could not join project \"%s\""
 msgstr "не могу да приступим пројекту „%s“"
 
-#: src/sudo.c:805
+#: src/sudo.c:853
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "не постоји депо извора који прихвата основне пречице за пројекат „%s“"
 
-#: src/sudo.c:809
+#: src/sudo.c:857
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "наведени депо извора не постоји за пројекат „%s“"
 
-#: src/sudo.c:813
+#: src/sudo.c:861
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "не могу да се повежем са основним депоом извора за пројекат „%s“"
 
-#: src/sudo.c:819
+#: src/sudo.c:867
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "подешавање пројекта није успело за пројекат „%s“"
 
-#: src/sudo.c:821
+#: src/sudo.c:869
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "упозорење, није успело додељивање контроле ресурса за пројекат „%s“"
 
-#: src/sudo.c:892
+#: src/sudo.c:917
 #, c-format
 msgid "unknown login class %s"
 msgstr "непозната класа пријаве %s"
 
-#: src/sudo.c:906 src/sudo.c:909
+#: src/sudo.c:931 src/sudo.c:934
 #, c-format
 msgid "unable to set user context"
 msgstr "не могу да подесим кориснички контекст"
 
-#: src/sudo.c:924
+#: src/sudo.c:946
 #, c-format
 msgid "unable to set supplementary group IDs"
 msgstr "не могу да подесим додатне ИБ-ове групе"
 
-#: src/sudo.c:931
+#: src/sudo.c:953
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "не могу да подесим ефективан гид да се покрене_као гид %u"
 
-#: src/sudo.c:937
+#: src/sudo.c:959
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "не могу да подесим гид да се покрене као гид %u"
 
-#: src/sudo.c:944
+#: src/sudo.c:966
 #, c-format
 msgid "unable to set process priority"
 msgstr "не могу да подесим приоритет процеса"
 
-#: src/sudo.c:952
+#: src/sudo.c:974
 #, c-format
 msgid "unable to change root to %s"
 msgstr "не могу да променим администратора на %s"
 
-#: src/sudo.c:959 src/sudo.c:965 src/sudo.c:971
+#: src/sudo.c:981 src/sudo.c:987 src/sudo.c:993
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "не могу да се пребацим у покрени_као уид (%u, %u)"
 
-#: src/sudo.c:985
+#: src/sudo.c:1007
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "не могу да променим директоријум у %s"
 
-#: src/sudo.c:1058
+#: src/sudo.c:1079
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "неочекивани услов завршетка потпроцеса: %d"
 
-#: src/sudo.c:1119
+#: src/sudo.c:1140
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "прикључак сигурности %s не подржава привилегије исписивања"
 
-#: src/sudo.c:1131
+#: src/sudo.c:1152
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "прикључак сигурности %s не подржава опцију -v"
 
-#: src/sudo.c:1143
+#: src/sudo.c:1164
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "прикључак сигурности %s не подржава опције -k/-K"
@@ -646,27 +737,27 @@ msgstr "садржај сесије уређивања је остао у %s"
 msgid "unable to read temporary file"
 msgstr "не могу да прочитам привремену датотеку"
 
-#: src/tgetpass.c:96
+#: src/tgetpass.c:90
 #, c-format
 msgid "no tty present and no askpass program specified"
 msgstr "тту не постоји и није наведен програм за пропуштање"
 
-#: src/tgetpass.c:105
+#: src/tgetpass.c:99
 #, c-format
 msgid "no askpass program specified, try setting SUDO_ASKPASS"
 msgstr "није наведен програм за пропуштање, покушајте да подесите SUDO_ASKPASS"
 
-#: src/tgetpass.c:237
+#: src/tgetpass.c:231
 #, c-format
 msgid "unable to set gid to %u"
 msgstr "не могу да подесим гид у %u"
 
-#: src/tgetpass.c:241
+#: src/tgetpass.c:235
 #, c-format
 msgid "unable to set uid to %u"
 msgstr "не могу да подесим уид у %u"
 
-#: src/tgetpass.c:246
+#: src/tgetpass.c:240
 #, c-format
 msgid "unable to run %s"
 msgstr "не могу да покренем %s"
@@ -686,73 +777,8 @@ msgstr "не могу да дуп2 стандардни улаз"
 msgid "unable to restore stdin"
 msgstr "не могу да повратим стандардни улаз"
 
-#: common/aix.c:149
-#, c-format
-msgid "unable to open userdb"
-msgstr "не могу да отворим корисничку базу података"
-
-#: common/aix.c:152
-#, c-format
-msgid "unable to switch to registry \"%s\" for %s"
-msgstr "не могу да се пребацим на регистар „%s“ за %s"
-
-#: common/aix.c:169
-#, c-format
-msgid "unable to restore registry"
-msgstr "не могу да повратим регистар"
-
-#: common/alloc.c:82
-msgid "internal error, tried to emalloc(0)"
-msgstr "унутрашња грешка, покушах да обавим „emalloc(0)“"
-
-#: common/alloc.c:99
-msgid "internal error, tried to emalloc2(0)"
-msgstr "унутрашња грешка, покушах да обавим „emalloc2(0)“"
-
-#: common/alloc.c:101
-msgid "internal error, emalloc2() overflow"
-msgstr "унутрашња грешка, прекорачење функције „emalloc2()“"
-
-#: common/alloc.c:119
-msgid "internal error, tried to erealloc(0)"
-msgstr "унутрашња грешка, покушах да обавим „erealloc(0)“"
-
-#: common/alloc.c:138
-msgid "internal error, tried to erealloc3(0)"
-msgstr "унутрашња грешка, покушах да обавим „erealloc3(0)“"
-
-#: common/alloc.c:140
-msgid "internal error, erealloc3() overflow"
-msgstr "унутрашња грешка, прекорачење функције „erealloc3()“"
-
-#: common/sudo_conf.c:306
-#, c-format
-msgid "unable to stat %s"
-msgstr "не могу да добијем податке о „%s“"
-
-#: common/sudo_conf.c:309
-#, c-format
-msgid "%s is not a regular file"
-msgstr "„%s“ није обична датотека"
-
-#: common/sudo_conf.c:312
-#, c-format
-msgid "%s is owned by uid %u, should be %u"
-msgstr "%s је у власништву уиб-а %u, а треба бити %u"
-
-#: common/sudo_conf.c:316
-#, c-format
-msgid "%s is world writable"
-msgstr "%s је светски уписив"
-
-#: common/sudo_conf.c:319
-#, c-format
-msgid "%s is group writable"
-msgstr "%s је групно уписив"
-
-#: compat/strsignal.c:47
-msgid "Unknown signal"
-msgstr "Непознати сигнал"
+#~ msgid "must be setuid root"
+#~ msgstr "морате бити сетуид администратор"
 
 #~ msgid "the argument to -D must be between 1 and 9 inclusive"
 #~ msgstr "аргумент уз -D мора бити између 1 и 9 укључујући"

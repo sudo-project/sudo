@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo-1.8.5rc1\n"
+"Project-Id-Version: sudo-1.8.5rc3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-03-28 14:06-0400\n"
-"PO-Revision-Date: 2012-04-20 09:50+0800\n"
+"POT-Creation-Date: 2012-04-24 13:41-0400\n"
+"PO-Revision-Date: 2012-04-29 17:01+0800\n"
 "Last-Translator: Wylmer Wang <wantinghard@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -16,32 +16,126 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: common/aix.c:149
+#, c-format
+msgid "unable to open userdb"
+msgstr "无法打开 userdb"
+
+#: common/aix.c:152
+#, c-format
+msgid "unable to switch to registry \"%s\" for %s"
+msgstr "无法为 %2$s 切换到注册表“%1$s”"
+
+#: common/aix.c:169
+#, c-format
+msgid "unable to restore registry"
+msgstr "无法恢复注册表"
+
+#: common/alloc.c:82
+msgid "internal error, tried to emalloc(0)"
+msgstr "内部错误，试图 emalloc(0)"
+
+#: common/alloc.c:85 common/alloc.c:105 common/alloc.c:127 common/alloc.c:146
+#: common/alloc.c:168 common/alloc.c:192 common/alloc.c:256 common/alloc.c:270
+#: src/exec_common.c:111 src/parse_args.c:432 src/sudo.c:456 src/sudo.c:482
+#: src/sudo.c:489 src/sudo.c:500 src/sudo.c:737
+#, c-format
+msgid "unable to allocate memory"
+msgstr "无法分配内存"
+
+#: common/alloc.c:99
+msgid "internal error, tried to emalloc2(0)"
+msgstr "内部错误，试图 emalloc2(0)"
+
+#: common/alloc.c:101
+msgid "internal error, emalloc2() overflow"
+msgstr "内部错误，emalloc2() 溢出"
+
+#: common/alloc.c:120
+msgid "internal error, tried to ecalloc(0)"
+msgstr "内部错误，试图 ecalloc(0)"
+
+#: common/alloc.c:123
+msgid "internal error, ecalloc() overflow"
+msgstr "内部错误，ecalloc() 溢出"
+
+#: common/alloc.c:142
+msgid "internal error, tried to erealloc(0)"
+msgstr "内部错误，试图 erealloc(0)"
+
+#: common/alloc.c:161 common/alloc.c:185
+msgid "internal error, tried to erealloc3(0)"
+msgstr "内部错误，试图 erealloc3(0)"
+
+#: common/alloc.c:163 common/alloc.c:187
+msgid "internal error, erealloc3() overflow"
+msgstr "内部错误，erealloc3() 错误"
+
+#: common/sudo_conf.c:306
+#, c-format
+msgid "unable to stat %s"
+msgstr "无法 stat %s"
+
+#: common/sudo_conf.c:309
+#, c-format
+msgid "%s is not a regular file"
+msgstr "%s 不是常规文件"
+
+#: common/sudo_conf.c:312
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s 属于用户 ID %u，应为 %u"
+
+#: common/sudo_conf.c:316
+#, c-format
+msgid "%s is world writable"
+msgstr "%s 可被任何人写"
+
+#: common/sudo_conf.c:319
+#, c-format
+msgid "%s is group writable"
+msgstr "%s 可被用户组写"
+
+#: common/sudo_conf.c:328 src/selinux.c:196 src/selinux.c:209 src/sudo.c:331
+#, c-format
+msgid "unable to open %s"
+msgstr "打不开 %s"
+
+#: compat/strsignal.c:47
+msgid "Unknown signal"
+msgstr "未知信号"
+
 #: src/error.c:82 src/error.c:86
 msgid ": "
 msgstr "："
 
-#: src/exec.c:105 src/exec_pty.c:616 src/exec_pty.c:948 src/tgetpass.c:221
+#: src/exec.c:107 src/exec_pty.c:628
+#, c-format
+msgid "policy plugin failed session initialization"
+msgstr "策略插件会话初始化失败"
+
+#: src/exec.c:112 src/exec_pty.c:633 src/exec_pty.c:967 src/tgetpass.c:221
 #, c-format
 msgid "unable to fork"
 msgstr "无法执行 fork"
 
-#: src/exec.c:252
+#: src/exec.c:259
 #, c-format
 msgid "unable to create sockets"
 msgstr "无法创建套接字"
 
-#: src/exec.c:259 src/exec_pty.c:567 src/exec_pty.c:576 src/exec_pty.c:584
-#: src/exec_pty.c:883 src/exec_pty.c:945 src/tgetpass.c:218
+#: src/exec.c:266 src/exec_pty.c:572 src/exec_pty.c:581 src/exec_pty.c:589
+#: src/exec_pty.c:902 src/exec_pty.c:964 src/tgetpass.c:218
 #, c-format
 msgid "unable to create pipe"
 msgstr "无法创建管道"
 
-#: src/exec.c:340 src/exec_pty.c:1011 src/exec_pty.c:1146
+#: src/exec.c:351 src/exec_pty.c:1029 src/exec_pty.c:1167
 #, c-format
 msgid "select failed"
 msgstr "select 失败"
 
-#: src/exec.c:425
+#: src/exec.c:441
 #, c-format
 msgid "unable to restore tty label"
 msgstr "无法恢复终端标签"
@@ -51,45 +145,37 @@ msgstr "无法恢复终端标签"
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "无法从 PRIV_LIMIT 中移除 PRIV_PROC_EXEC"
 
-#: src/exec_common.c:111 src/parse_args.c:432 src/sudo.c:447 src/sudo.c:467
-#: src/sudo.c:474 src/sudo.c:485 src/sudo.c:871 common/alloc.c:85
-#: common/alloc.c:105 common/alloc.c:127 common/alloc.c:146 common/alloc.c:168
-#: common/alloc.c:192 common/alloc.c:256 common/alloc.c:270
-#, c-format
-msgid "unable to allocate memory"
-msgstr "无法分配内存"
-
-#: src/exec_pty.c:140
+#: src/exec_pty.c:144
 #, c-format
 msgid "unable to allocate pty"
 msgstr "无法分配伪终端"
 
-#: src/exec_pty.c:609
+#: src/exec_pty.c:619
 #, c-format
 msgid "unable to set terminal to raw mode"
 msgstr "无法将终端设为原始模式"
 
-#: src/exec_pty.c:926
+#: src/exec_pty.c:945
 #, c-format
 msgid "unable to set controlling tty"
 msgstr "无法设置控制终端"
 
-#: src/exec_pty.c:1019
+#: src/exec_pty.c:1038
 #, c-format
 msgid "error reading from signal pipe"
 msgstr "从单管道读取出错"
 
-#: src/exec_pty.c:1038
+#: src/exec_pty.c:1059
 #, c-format
 msgid "error reading from pipe"
 msgstr "从管道读取出错"
 
-#: src/exec_pty.c:1054
+#: src/exec_pty.c:1075
 #, c-format
 msgid "error reading from socketpair"
 msgstr "从套接字对读取出错"
 
-#: src/exec_pty.c:1058
+#: src/exec_pty.c:1079
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "联络通道的回应类型异常：%d"
@@ -382,11 +468,6 @@ msgstr "无法获取新终端的环境，将不重新标记终端"
 msgid "unable to set new tty context"
 msgstr "无法设置新终端的环境"
 
-#: src/selinux.c:196 src/selinux.c:209 src/sudo.c:333 common/sudo_conf.c:328
-#, c-format
-msgid "unable to open %s"
-msgstr "打不开 %s"
-
 #: src/selinux.c:252
 #, c-format
 msgid "you must specify a role for type %s"
@@ -447,167 +528,167 @@ msgstr "要求至少有一个参数"
 msgid "unable to execute %s"
 msgstr "无法执行 %s"
 
-#: src/sudo.c:213
+#: src/sudo.c:211
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Sudo 版本 %s\n"
 
-#: src/sudo.c:215
+#: src/sudo.c:213
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "当前选项：%s\n"
 
-#: src/sudo.c:220
+#: src/sudo.c:218
 #, c-format
 msgid "fatal error, unable to load plugins"
 msgstr "致命错误，无法加载插件"
 
-#: src/sudo.c:228
+#: src/sudo.c:226
 #, c-format
 msgid "unable to initialize policy plugin"
 msgstr "无法初始化策略插件"
 
-#: src/sudo.c:283
+#: src/sudo.c:281
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "初始化 I/O 插件 %s 出错"
 
-#: src/sudo.c:308
+#: src/sudo.c:306
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "异常的 sudo 模式 0x%x"
 
-#: src/sudo.c:402
+#: src/sudo.c:400
 #, c-format
 msgid "unable to get group vector"
 msgstr "无法获取组向量"
 
-#: src/sudo.c:443
+#: src/sudo.c:452
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "未知的用户 ID %u：您是？"
 
-#: src/sudo.c:735
+#: src/sudo.c:760
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s 必须属于用户 ID %d(的用户)并且设置 setuid 位"
 
-#: src/sudo.c:738
+#: src/sudo.c:763
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "有效用户 ID 不是 %d，%s 位于一个设置了“nosuid”选项的文件系统或没有 root 权限的 NFS 文件系统中吗？"
 
-#: src/sudo.c:744
+#: src/sudo.c:769
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "有效用户 ID 不是 %d，sudo 属于 root 并设置了 setuid 位吗？"
 
-#: src/sudo.c:813
+#: src/sudo.c:838
 #, c-format
 msgid "resource control limit has been reached"
 msgstr "达到了资源控制限制"
 
-#: src/sudo.c:816
+#: src/sudo.c:841
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
 msgstr "用户“%s”不是项目“%s”的成员"
 
-#: src/sudo.c:820
+#: src/sudo.c:845
 #, c-format
 msgid "the invoking task is final"
 msgstr "调用的任务是最终的(final)"
 
-#: src/sudo.c:823
+#: src/sudo.c:848
 #, c-format
 msgid "could not join project \"%s\""
 msgstr "无法加入项目“%s”"
 
-#: src/sudo.c:828
+#: src/sudo.c:853
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "不存在对应于项目“%s”的、接受默认绑定的资源池"
 
-#: src/sudo.c:832
+#: src/sudo.c:857
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "指定的对应于项目“%s”的资源池不存在"
 
-#: src/sudo.c:836
+#: src/sudo.c:861
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "无法为项目“%s”绑定到默认的资源池"
 
-#: src/sudo.c:842
+#: src/sudo.c:867
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "对项目“%s”执行 setproject 失败"
 
-#: src/sudo.c:844
+#: src/sudo.c:869
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "警告，对项目“%s”的资源控制分配失败"
 
-#: src/sudo.c:909
+#: src/sudo.c:917
 #, c-format
 msgid "unknown login class %s"
 msgstr "未知的登录类别 %s"
 
-#: src/sudo.c:923 src/sudo.c:926
+#: src/sudo.c:931 src/sudo.c:934
 #, c-format
 msgid "unable to set user context"
 msgstr "无法设置用户环境"
 
-#: src/sudo.c:938
+#: src/sudo.c:946
 #, c-format
 msgid "unable to set supplementary group IDs"
 msgstr "无法设置补充组 ID"
 
-#: src/sudo.c:945
+#: src/sudo.c:953
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "无法设置有效组 ID 来以组 ID %u 运行"
 
-#: src/sudo.c:951
+#: src/sudo.c:959
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "无法设置组 ID 来以组 ID %u 运行"
 
-#: src/sudo.c:958
+#: src/sudo.c:966
 #, c-format
 msgid "unable to set process priority"
 msgstr "无法设置进程优先级"
 
-#: src/sudo.c:966
+#: src/sudo.c:974
 #, c-format
 msgid "unable to change root to %s"
 msgstr "无法从 root 切换到 %s"
 
-#: src/sudo.c:973 src/sudo.c:979 src/sudo.c:985
+#: src/sudo.c:981 src/sudo.c:987 src/sudo.c:993
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "无法切换到以用户 ID(%u，%u)运行"
 
-#: src/sudo.c:999
+#: src/sudo.c:1007
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "无法将目录切换到 %s"
 
-#: src/sudo.c:1072
+#: src/sudo.c:1079
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "异常的子进程终止条件：%d"
 
-#: src/sudo.c:1133
+#: src/sudo.c:1140
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "策略插件 %s 不支持列出权限"
 
-#: src/sudo.c:1145
+#: src/sudo.c:1152
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "策略插件 %s不支持 -v 选项"
 
-#: src/sudo.c:1157
+#: src/sudo.c:1164
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "策略插件 %s 不支持 -k/-K 选项"
@@ -696,82 +777,6 @@ msgstr "无法 dup2 stdin"
 #, c-format
 msgid "unable to restore stdin"
 msgstr "无法恢复 stdin"
-
-#: common/aix.c:149
-#, c-format
-msgid "unable to open userdb"
-msgstr "无法打开 userdb"
-
-#: common/aix.c:152
-#, c-format
-msgid "unable to switch to registry \"%s\" for %s"
-msgstr "无法为 %2$s 切换到注册表“%1$s”"
-
-#: common/aix.c:169
-#, c-format
-msgid "unable to restore registry"
-msgstr "无法恢复注册表"
-
-#: common/alloc.c:82
-msgid "internal error, tried to emalloc(0)"
-msgstr "内部错误，试图 emalloc(0)"
-
-#: common/alloc.c:99
-msgid "internal error, tried to emalloc2(0)"
-msgstr "内部错误，试图 emalloc2(0)"
-
-#: common/alloc.c:101
-msgid "internal error, emalloc2() overflow"
-msgstr "内部错误，emalloc2() 溢出"
-
-#: common/alloc.c:120
-msgid "internal error, tried to ecalloc(0)"
-msgstr "内部错误，试图 ecalloc(0)"
-
-#: common/alloc.c:123
-msgid "internal error, ecalloc() overflow"
-msgstr "内部错误，ecalloc() 溢出"
-
-#: common/alloc.c:142
-msgid "internal error, tried to erealloc(0)"
-msgstr "内部错误，试图 erealloc(0)"
-
-#: common/alloc.c:161 common/alloc.c:185
-msgid "internal error, tried to erealloc3(0)"
-msgstr "内部错误，试图 erealloc3(0)"
-
-#: common/alloc.c:163 common/alloc.c:187
-msgid "internal error, erealloc3() overflow"
-msgstr "内部错误，erealloc3() 错误"
-
-#: common/sudo_conf.c:306
-#, c-format
-msgid "unable to stat %s"
-msgstr "无法 stat %s"
-
-#: common/sudo_conf.c:309
-#, c-format
-msgid "%s is not a regular file"
-msgstr "%s 不是常规文件"
-
-#: common/sudo_conf.c:312
-#, c-format
-msgid "%s is owned by uid %u, should be %u"
-msgstr "%s 属于用户 ID %u，应为 %u"
-
-#: common/sudo_conf.c:316
-#, c-format
-msgid "%s is world writable"
-msgstr "%s 可被任何人写"
-
-#: common/sudo_conf.c:319
-#, c-format
-msgid "%s is group writable"
-msgstr "%s 可被用户组写"
-
-#: compat/strsignal.c:47
-msgid "Unknown signal"
-msgstr "未知信号"
 
 #~ msgid "must be setuid root"
 #~ msgstr "必须为 setuid root"

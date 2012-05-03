@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.5rc1\n"
+"Project-Id-Version: sudo 1.8.5rc3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-03-28 14:06-0400\n"
-"PO-Revision-Date: 2012-04-19 23:37+0200\n"
+"POT-Creation-Date: 2012-04-24 13:41-0400\n"
+"PO-Revision-Date: 2012-04-29 14:32+0200\n"
 "Last-Translator: Jakob Kramer <jakob.kramer@gmx.de>\n"
 "Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
 "Language: \n"
@@ -19,32 +19,126 @@ msgstr ""
 "X-Poedit-Language: German\n"
 "X-Poedit-Country: GERMANY\n"
 
+#: common/aix.c:149
+#, c-format
+msgid "unable to open userdb"
+msgstr "Nutzerdatenbank konnte nicht geöffnet werden"
+
+#: common/aix.c:152
+#, c-format
+msgid "unable to switch to registry \"%s\" for %s"
+msgstr "Es konnte nicht zur Registrierungsdatenbank »%s« von %s gewechselt werden"
+
+#: common/aix.c:169
+#, c-format
+msgid "unable to restore registry"
+msgstr "Registrierungsdatenbank konnte nicht wiederhergestellt werden"
+
+#: common/alloc.c:82
+msgid "internal error, tried to emalloc(0)"
+msgstr "Interner Fehler: Es wurde versucht, emalloc(0) auszuführen"
+
+#: common/alloc.c:85 common/alloc.c:105 common/alloc.c:127 common/alloc.c:146
+#: common/alloc.c:168 common/alloc.c:192 common/alloc.c:256 common/alloc.c:270
+#: src/exec_common.c:111 src/parse_args.c:432 src/sudo.c:456 src/sudo.c:482
+#: src/sudo.c:489 src/sudo.c:500 src/sudo.c:737
+#, c-format
+msgid "unable to allocate memory"
+msgstr "Speicher konnte nicht zugewiesen werden"
+
+#: common/alloc.c:99
+msgid "internal error, tried to emalloc2(0)"
+msgstr "Interner Fehler: Es wurde versucht, emalloc2(0) auszuführen"
+
+#: common/alloc.c:101
+msgid "internal error, emalloc2() overflow"
+msgstr "Interner Fehler: Überlauf bei emalloc2()"
+
+#: common/alloc.c:120
+msgid "internal error, tried to ecalloc(0)"
+msgstr "Interner Fehler: Es wurde versucht, ecalloc(0) auszuführen"
+
+#: common/alloc.c:123
+msgid "internal error, ecalloc() overflow"
+msgstr "Interner Fehler: Überlauf bei ecalloc()"
+
+#: common/alloc.c:142
+msgid "internal error, tried to erealloc(0)"
+msgstr "Interner Fehler: Es wurde versucht, erealloc(0) auszuführen"
+
+#: common/alloc.c:161 common/alloc.c:185
+msgid "internal error, tried to erealloc3(0)"
+msgstr "Interner Fehler: Es wurde versucht, erealloc3(0) auszuführen"
+
+#: common/alloc.c:163 common/alloc.c:187
+msgid "internal error, erealloc3() overflow"
+msgstr "Interner Fehler, Überlauf bei erealloc3()"
+
+#: common/sudo_conf.c:306
+#, c-format
+msgid "unable to stat %s"
+msgstr "stat konnte nicht auf %s angewandt werden"
+
+#: common/sudo_conf.c:309
+#, c-format
+msgid "%s is not a regular file"
+msgstr "%s ist keine reguläre Datei"
+
+#: common/sudo_conf.c:312
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s gehört Benutzer mit UID %u, sollte allerdings %u gehören"
+
+#: common/sudo_conf.c:316
+#, c-format
+msgid "%s is world writable"
+msgstr "%s kann von allen verändert werden"
+
+#: common/sudo_conf.c:319
+#, c-format
+msgid "%s is group writable"
+msgstr "%s kann von der Gruppe verändert werden"
+
+#: common/sudo_conf.c:328 src/selinux.c:196 src/selinux.c:209 src/sudo.c:331
+#, c-format
+msgid "unable to open %s"
+msgstr "%s konnte nicht geöffnet werden"
+
+#: compat/strsignal.c:47
+msgid "Unknown signal"
+msgstr "Unbekanntes Signal"
+
 #: src/error.c:82 src/error.c:86
 msgid ": "
 msgstr ": "
 
-#: src/exec.c:105 src/exec_pty.c:616 src/exec_pty.c:948 src/tgetpass.c:221
+#: src/exec.c:107 src/exec_pty.c:628
+#, c-format
+msgid "policy plugin failed session initialization"
+msgstr "Regelwerks-Plugin konnte Sitzung nicht initialisieren"
+
+#: src/exec.c:112 src/exec_pty.c:633 src/exec_pty.c:967 src/tgetpass.c:221
 #, c-format
 msgid "unable to fork"
 msgstr "Es konnte nicht geforkt werden"
 
-#: src/exec.c:252
+#: src/exec.c:259
 #, c-format
 msgid "unable to create sockets"
 msgstr "Sockets konnten nicht hergestellt werden"
 
-#: src/exec.c:259 src/exec_pty.c:567 src/exec_pty.c:576 src/exec_pty.c:584
-#: src/exec_pty.c:883 src/exec_pty.c:945 src/tgetpass.c:218
+#: src/exec.c:266 src/exec_pty.c:572 src/exec_pty.c:581 src/exec_pty.c:589
+#: src/exec_pty.c:902 src/exec_pty.c:964 src/tgetpass.c:218
 #, c-format
 msgid "unable to create pipe"
 msgstr "Weiterleitung konnte nicht erstellt werden"
 
-#: src/exec.c:340 src/exec_pty.c:1011 src/exec_pty.c:1146
+#: src/exec.c:351 src/exec_pty.c:1029 src/exec_pty.c:1167
 #, c-format
 msgid "select failed"
 msgstr "»select« schlug fehl"
 
-#: src/exec.c:425
+#: src/exec.c:441
 #, c-format
 msgid "unable to restore tty label"
 msgstr "TTY-Kennzeichnung konnte nicht wiederhergestellt werden"
@@ -54,45 +148,37 @@ msgstr "TTY-Kennzeichnung konnte nicht wiederhergestellt werden"
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "PRIV_PROC_EXEC konnte nicht von PRIV_LIMIT entfernt werden"
 
-#: src/exec_common.c:111 src/parse_args.c:432 src/sudo.c:447 src/sudo.c:467
-#: src/sudo.c:474 src/sudo.c:485 src/sudo.c:871 common/alloc.c:85
-#: common/alloc.c:105 common/alloc.c:127 common/alloc.c:146 common/alloc.c:168
-#: common/alloc.c:192 common/alloc.c:256 common/alloc.c:270
-#, c-format
-msgid "unable to allocate memory"
-msgstr "Speicher konnte nicht zugewiesen werden"
-
-#: src/exec_pty.c:140
+#: src/exec_pty.c:144
 #, c-format
 msgid "unable to allocate pty"
 msgstr "PTY konnte nicht vergeben werden"
 
-#: src/exec_pty.c:609
+#: src/exec_pty.c:619
 #, c-format
 msgid "unable to set terminal to raw mode"
 msgstr "Terminal konnte nicht in den Rohmodus gesetzt werden"
 
-#: src/exec_pty.c:926
+#: src/exec_pty.c:945
 #, c-format
 msgid "unable to set controlling tty"
 msgstr "Kontrollierendes TTY konnte nicht gesetzt werden"
 
-#: src/exec_pty.c:1019
+#: src/exec_pty.c:1038
 #, c-format
 msgid "error reading from signal pipe"
 msgstr "Fehler beim Lesen der Signal-Pipe"
 
-#: src/exec_pty.c:1038
+#: src/exec_pty.c:1059
 #, c-format
 msgid "error reading from pipe"
 msgstr "Fehler beim Lesen der Pipe"
 
-#: src/exec_pty.c:1054
+#: src/exec_pty.c:1075
 #, c-format
 msgid "error reading from socketpair"
 msgstr "Fehler beim Lesen des Socket-Paars"
 
-#: src/exec_pty.c:1058
+#: src/exec_pty.c:1079
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "Unerwarteter Antworttyp auf Rückmeldungskanal: %d"
@@ -389,11 +475,6 @@ msgstr ""
 msgid "unable to set new tty context"
 msgstr "Neuer TTY-Kontext konnte nicht festgestellt werden"
 
-#: src/selinux.c:196 src/selinux.c:209 src/sudo.c:333 common/sudo_conf.c:328
-#, c-format
-msgid "unable to open %s"
-msgstr "%s konnte nicht geöffnet werden"
-
 #: src/selinux.c:252
 #, c-format
 msgid "you must specify a role for type %s"
@@ -437,7 +518,7 @@ msgstr "TTY-Kontext konnte für %s nicht aufgesetzt werden"
 #: src/selinux.c:373
 #, c-format
 msgid "unable to set exec context to %s"
-msgstr ""
+msgstr "Ausführungskontext konnte nicht auf »%s« gesetzt werden"
 
 #: src/selinux.c:380
 #, c-format
@@ -454,167 +535,167 @@ msgstr "Benötigt mindestens ein Argument"
 msgid "unable to execute %s"
 msgstr "%s konnte nicht ausgeführt werden"
 
-#: src/sudo.c:213
+#: src/sudo.c:211
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Sudo-Version %s\n"
 
-#: src/sudo.c:215
+#: src/sudo.c:213
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "Optionen für »configure«: %s\n"
 
-#: src/sudo.c:220
+#: src/sudo.c:218
 #, c-format
 msgid "fatal error, unable to load plugins"
 msgstr "Schwerwiegender Fehler, Plugins konnten nicht geladen werden"
 
-#: src/sudo.c:228
+#: src/sudo.c:226
 #, c-format
 msgid "unable to initialize policy plugin"
 msgstr "Regelwerks-Plugin konnte nicht initialisiert werden"
 
-#: src/sudo.c:283
+#: src/sudo.c:281
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "E/A-Plugin %s konnte nicht initialisiert werden"
 
-#: src/sudo.c:308
+#: src/sudo.c:306
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "Unerwarteter Sudo-Modus 0x%x"
 
-#: src/sudo.c:402
+#: src/sudo.c:400
 #, c-format
 msgid "unable to get group vector"
 msgstr ""
 
-#: src/sudo.c:443
+#: src/sudo.c:452
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "Unbekannte UID %u: Wer sind Sie?"
 
-#: src/sudo.c:735
+#: src/sudo.c:760
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s muss dem Benutzer mit UID %d gehören und das »setuid«-Bit gesetzt haben"
 
-#: src/sudo.c:738
+#: src/sudo.c:763
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "Effektive UID ist nicht %d. Liegt %s auf einem Dateisystem mit gesetzter »nosuid«-Option oder auf einem NFS-Dateisystem ohne Root-Rechte?"
 
-#: src/sudo.c:744
+#: src/sudo.c:769
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
-msgstr ""
+msgstr "Effektive UID ist nicht %d. Wurde sudo mit »setuid root« installiert?"
 
-#: src/sudo.c:813
+#: src/sudo.c:838
 #, c-format
 msgid "resource control limit has been reached"
 msgstr ""
 
-#: src/sudo.c:816
+#: src/sudo.c:841
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
-msgstr ""
+msgstr "Benutzer »%s« ist kein Mitglied des Projekts »%s«"
 
-#: src/sudo.c:820
+#: src/sudo.c:845
 #, c-format
 msgid "the invoking task is final"
 msgstr ""
 
-#: src/sudo.c:823
+#: src/sudo.c:848
 #, c-format
 msgid "could not join project \"%s\""
-msgstr ""
+msgstr "Projekt »%s« konnte nicht beigetreten werden"
 
-#: src/sudo.c:828
+#: src/sudo.c:853
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:832
+#: src/sudo.c:857
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
-msgstr ""
+msgstr "Den angegebenen Ressourcen-Pool gibt es für das Projekt »%s« nicht"
 
-#: src/sudo.c:836
+#: src/sudo.c:861
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
-msgstr ""
+msgstr "Es konnte nicht zum Standard-Ressourcen-Pool für Projekt »%s« verbunden werden."
 
-#: src/sudo.c:842
+#: src/sudo.c:867
 #, c-format
 msgid "setproject failed for project \"%s\""
-msgstr ""
+msgstr "»setproject« schlug für Projekt »%s« fehl"
 
-#: src/sudo.c:844
+#: src/sudo.c:869
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr ""
 
-#: src/sudo.c:909
+#: src/sudo.c:917
 #, c-format
 msgid "unknown login class %s"
-msgstr "Unbekannte Login-Klasse %s"
+msgstr "Unbekannte Anmeldungsklasse %s"
 
-#: src/sudo.c:923 src/sudo.c:926
+#: src/sudo.c:931 src/sudo.c:934
 #, c-format
 msgid "unable to set user context"
 msgstr "Nutzerkontext konnte nicht gesetzt werden"
 
-#: src/sudo.c:938
+#: src/sudo.c:946
 #, c-format
 msgid "unable to set supplementary group IDs"
-msgstr ""
+msgstr "Zusätzliche Gruppenkennungen konnten nicht gesetzt werden"
 
-#: src/sudo.c:945
+#: src/sudo.c:953
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
-msgstr ""
+msgstr "Effektive GID konnte nicht zu »runas«-GID %u gesetzt werden"
 
-#: src/sudo.c:951
+#: src/sudo.c:959
 #, c-format
 msgid "unable to set gid to runas gid %u"
-msgstr ""
+msgstr "GID konnte nicht zu »runas«-GID %u gesetzt werden"
 
-#: src/sudo.c:958
+#: src/sudo.c:966
 #, c-format
 msgid "unable to set process priority"
 msgstr "Prozesspriorität konnte nicht gesetzt werden"
 
-#: src/sudo.c:966
+#: src/sudo.c:974
 #, c-format
 msgid "unable to change root to %s"
 msgstr "Wurzelordner konnte nicht zu %s geändert werden"
 
-#: src/sudo.c:973 src/sudo.c:979 src/sudo.c:985
+#: src/sudo.c:981 src/sudo.c:987 src/sudo.c:993
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
-msgstr ""
+msgstr "Es konnte nicht zu »runas«-GID gewechselt werden (%u, %u)"
 
-#: src/sudo.c:999
+#: src/sudo.c:1007
 #, c-format
 msgid "unable to change directory to %s"
-msgstr "In Ordner %s konnte nicht gewechselt werden"
+msgstr "In Ordner »%s« konnte nicht gewechselt werden"
 
-#: src/sudo.c:1072
+#: src/sudo.c:1079
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "Unerwartete Abbruchsbedingung eines Unterprozesses: %d"
 
-#: src/sudo.c:1133
+#: src/sudo.c:1140
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "Regelwerks-Plugin %s unterstützt das Auflisten von Privilegien nicht"
 
-#: src/sudo.c:1145
+#: src/sudo.c:1152
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "Regelwerks-Plugin %s unterstützt die Option -v nicht"
 
-#: src/sudo.c:1157
+#: src/sudo.c:1164
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "Regelwerks-Plugin %s unterstützt die Optionen -k und -K nicht"
@@ -657,7 +738,7 @@ msgstr "%s konnte nicht beschrieben werden"
 #: src/sudo_edit.c:298 src/sudo_edit.c:316 src/sudo_edit.c:319
 #, c-format
 msgid "contents of edit session left in %s"
-msgstr ""
+msgstr "Bearbeitungssitzung wurden in %s gelassen"
 
 #: src/sudo_edit.c:315
 #, c-format
@@ -703,79 +784,3 @@ msgstr "dup2 konnte nicht auf die Standardeingabe angewandt werden"
 #, c-format
 msgid "unable to restore stdin"
 msgstr "Standardeingabe konnte nicht wiederhergestellt werden"
-
-#: common/aix.c:149
-#, c-format
-msgid "unable to open userdb"
-msgstr "Nutzerdatenbank konnte nicht geöffnet werden"
-
-#: common/aix.c:152
-#, c-format
-msgid "unable to switch to registry \"%s\" for %s"
-msgstr "Es konnte nicht zur Registrierungsdatenbank »%s« von %s gewechselt werden"
-
-#: common/aix.c:169
-#, c-format
-msgid "unable to restore registry"
-msgstr "Registrierungsdatenbank konnte nicht wiederhergestellt werden"
-
-#: common/alloc.c:82
-msgid "internal error, tried to emalloc(0)"
-msgstr "Interner Fehler: Es wurde versucht, emalloc(0) auszuführen"
-
-#: common/alloc.c:99
-msgid "internal error, tried to emalloc2(0)"
-msgstr "Interner Fehler: Es wurde versucht, emalloc2(0) auszuführen"
-
-#: common/alloc.c:101
-msgid "internal error, emalloc2() overflow"
-msgstr "Interner Fehler: Überlauf bei emalloc2()"
-
-#: common/alloc.c:120
-msgid "internal error, tried to ecalloc(0)"
-msgstr "Interner Fehler: Es wurde versucht, ecalloc(0) auszuführen"
-
-#: common/alloc.c:123
-msgid "internal error, ecalloc() overflow"
-msgstr "Interner Fehler: Überlauf bei ecalloc()"
-
-#: common/alloc.c:142
-msgid "internal error, tried to erealloc(0)"
-msgstr "Interner Fehler: Es wurde versucht, erealloc(0) auszuführen"
-
-#: common/alloc.c:161 common/alloc.c:185
-msgid "internal error, tried to erealloc3(0)"
-msgstr "Interner Fehler: Es wurde versucht, erealloc3(0) auszuführen"
-
-#: common/alloc.c:163 common/alloc.c:187
-msgid "internal error, erealloc3() overflow"
-msgstr "Interner Fehler, Überlauf bei erealloc3()"
-
-#: common/sudo_conf.c:306
-#, c-format
-msgid "unable to stat %s"
-msgstr "stat konnte nicht auf %s angewandt werden"
-
-#: common/sudo_conf.c:309
-#, c-format
-msgid "%s is not a regular file"
-msgstr "%s ist keine reguläre Datei"
-
-#: common/sudo_conf.c:312
-#, c-format
-msgid "%s is owned by uid %u, should be %u"
-msgstr "%s gehört Benutzer mit UID %u, sollte allerdings %u gehören"
-
-#: common/sudo_conf.c:316
-#, c-format
-msgid "%s is world writable"
-msgstr "%s kann von allen verändert werden"
-
-#: common/sudo_conf.c:319
-#, c-format
-msgid "%s is group writable"
-msgstr "%s kann von der Gruppe verändert werden"
-
-#: compat/strsignal.c:47
-msgid "Unknown signal"
-msgstr "Unbekanntes Signal"

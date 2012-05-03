@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.8.5rc1\n"
+"Project-Id-Version: sudoers 1.8.5rc3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-04-13 16:21-0400\n"
-"PO-Revision-Date: 2012-04-20 09:01+0800\n"
+"POT-Creation-Date: 2012-04-24 13:41-0400\n"
+"PO-Revision-Date: 2012-04-29 17:01+0800\n"
 "Last-Translator: Wylmer Wang <wantinghard@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -16,10 +16,207 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+#: gram.y:110
+#, c-format
+msgid ">>> %s: %s near line %d <<<"
+msgstr ">>> %s：%s 在行 %d 附近<<<"
+
 #: plugins/sudoers/alias.c:125
 #, c-format
 msgid "Alias `%s' already defined"
 msgstr "别名“%s”已定义"
+
+#: plugins/sudoers/auth/bsdauth.c:78
+#, c-format
+msgid "unable to get login class for user %s"
+msgstr "无法获取用户 %s 的登录类别(login class)"
+
+#: plugins/sudoers/auth/bsdauth.c:84
+msgid "unable to begin bsd authentication"
+msgstr "无法开始 bsd 认证"
+
+#: plugins/sudoers/auth/bsdauth.c:92
+msgid "invalid authentication type"
+msgstr "无效的认证类型"
+
+#: plugins/sudoers/auth/bsdauth.c:101
+msgid "unable to setup authentication"
+msgstr "无法设置认证"
+
+#: plugins/sudoers/auth/fwtk.c:60
+#, c-format
+msgid "unable to read fwtk config"
+msgstr "无法读取 fwtk 配置"
+
+#: plugins/sudoers/auth/fwtk.c:65
+#, c-format
+msgid "unable to connect to authentication server"
+msgstr "无法连接到认证服务器"
+
+#: plugins/sudoers/auth/fwtk.c:71 plugins/sudoers/auth/fwtk.c:95
+#: plugins/sudoers/auth/fwtk.c:128
+#, c-format
+msgid "lost connection to authentication server"
+msgstr "丢失了到认证服务器的连接"
+
+#: plugins/sudoers/auth/fwtk.c:75
+#, c-format
+msgid ""
+"authentication server error:\n"
+"%s"
+msgstr ""
+"认证服务器错误：\n"
+"%s"
+
+#: plugins/sudoers/auth/kerb5.c:117
+#, c-format
+msgid "%s: unable to unparse princ ('%s'): %s"
+msgstr "%s：无法解析 princ(“%s”)：%s"
+
+#: plugins/sudoers/auth/kerb5.c:160
+#, c-format
+msgid "%s: unable to parse '%s': %s"
+msgstr "%s：无法解析“%s”：%s"
+
+#: plugins/sudoers/auth/kerb5.c:170
+#, c-format
+msgid "%s: unable to resolve ccache: %s"
+msgstr "%s：无法解析 ccache：%s"
+
+#: plugins/sudoers/auth/kerb5.c:218
+#, c-format
+msgid "%s: unable to allocate options: %s"
+msgstr "%s：无法分配选项：%s"
+
+#: plugins/sudoers/auth/kerb5.c:234
+#, c-format
+msgid "%s: unable to get credentials: %s"
+msgstr "%s：无法获取凭据：%s"
+
+#: plugins/sudoers/auth/kerb5.c:247
+#, c-format
+msgid "%s: unable to initialize ccache: %s"
+msgstr "%s：无法初始化 ccache：%s"
+
+#: plugins/sudoers/auth/kerb5.c:251
+#, c-format
+msgid "%s: unable to store cred in ccache: %s"
+msgstr "%s：无法在 ccache 中储存凭据：%s"
+
+#: plugins/sudoers/auth/kerb5.c:316
+#, c-format
+msgid "%s: unable to get host principal: %s"
+msgstr "%s：无法获取主机主体(principal)：%s"
+
+#: plugins/sudoers/auth/kerb5.c:331
+#, c-format
+msgid "%s: Cannot verify TGT! Possible attack!: %s"
+msgstr "%s：无法验证目标！可能遭到了攻击！：%s"
+
+#: plugins/sudoers/auth/pam.c:100
+msgid "unable to initialize PAM"
+msgstr "无法初始化 PAM"
+
+#: plugins/sudoers/auth/pam.c:144
+msgid "account validation failure, is your account locked?"
+msgstr "账户验证失败，您的账户是不是上锁了？"
+
+#: plugins/sudoers/auth/pam.c:148
+msgid "Account or password is expired, reset your password and try again"
+msgstr "账户或密码过期，重置您的密码并重试"
+
+#: plugins/sudoers/auth/pam.c:155
+#, c-format
+msgid "pam_chauthtok: %s"
+msgstr "pam_chauthtok：%s"
+
+#: plugins/sudoers/auth/pam.c:159
+msgid "Password expired, contact your system administrator"
+msgstr "密码过期，联系您的系统管理员"
+
+#: plugins/sudoers/auth/pam.c:163
+msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
+msgstr "账户过期，或 PAM 配置缺少 sudo 使用的“account”节，联系您的系统管理员"
+
+#: plugins/sudoers/auth/pam.c:180
+#, c-format
+msgid "pam_authenticate: %s"
+msgstr "pam_authenticate：%s"
+
+#: plugins/sudoers/auth/pam.c:332
+msgid "Password: "
+msgstr "密码："
+
+#: plugins/sudoers/auth/pam.c:333
+msgid "Password:"
+msgstr "密码："
+
+#: plugins/sudoers/auth/rfc1938.c:104 plugins/sudoers/visudo.c:220
+#, c-format
+msgid "you do not exist in the %s database"
+msgstr "%s 数据库中没有您"
+
+#: plugins/sudoers/auth/securid5.c:81
+#, c-format
+msgid "failed to initialise the ACE API library"
+msgstr "初始化 ACE API 库失败"
+
+#: plugins/sudoers/auth/securid5.c:107
+#, c-format
+msgid "unable to contact the SecurID server"
+msgstr "无法联络 SecurID 服务器"
+
+#: plugins/sudoers/auth/securid5.c:116
+#, c-format
+msgid "User ID locked for SecurID Authentication"
+msgstr "为进行 SecurID 认证，已锁定用户 ID"
+
+#: plugins/sudoers/auth/securid5.c:120 plugins/sudoers/auth/securid5.c:171
+#, c-format
+msgid "invalid username length for SecurID"
+msgstr "SecurID 的用户名长度无效"
+
+#: plugins/sudoers/auth/securid5.c:124 plugins/sudoers/auth/securid5.c:176
+#, c-format
+msgid "invalid Authentication Handle for SecurID"
+msgstr "SecurID 的认证句柄无效"
+
+#: plugins/sudoers/auth/securid5.c:128
+#, c-format
+msgid "SecurID communication failed"
+msgstr "SecurID 通讯失败"
+
+#: plugins/sudoers/auth/securid5.c:132 plugins/sudoers/auth/securid5.c:215
+#, c-format
+msgid "unknown SecurID error"
+msgstr "未知的 SecurID 错误"
+
+#: plugins/sudoers/auth/securid5.c:166
+#, c-format
+msgid "invalid passcode length for SecurID"
+msgstr "无效的 SecurID 密码长度"
+
+#: plugins/sudoers/auth/sia.c:109
+msgid "unable to initialize SIA session"
+msgstr "无法初始化 SIA 会话"
+
+#: plugins/sudoers/auth/sudo_auth.c:117
+msgid "Invalid authentication methods compiled into sudo!  You may mix standalone and non-standalone authentication."
+msgstr "编译进 sudo 的认证方法无效！您可能混用了独立和非独立认证。"
+
+#: plugins/sudoers/auth/sudo_auth.c:199
+msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
+msgstr "sudo 编译时没有加入任何认证方法！如果您想关闭认证，使用 --disable-authentication 配置选项。"
+
+#: plugins/sudoers/auth/sudo_auth.c:271
+#, c-format
+msgid "%d incorrect password attempt"
+msgid_plural "%d incorrect password attempts"
+msgstr[0] "%d 次错误密码尝试"
+
+#: plugins/sudoers/auth/sudo_auth.c:374
+msgid "Authentication methods:"
+msgstr "认证方法："
 
 #: plugins/sudoers/bsm_audit.c:60 plugins/sudoers/bsm_audit.c:63
 #: plugins/sudoers/bsm_audit.c:112 plugins/sudoers/bsm_audit.c:116
@@ -561,9 +758,9 @@ msgstr "“%s”选项不带值"
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr "sudo_putenv：envp 损坏，长度不符"
 
-#: plugins/sudoers/env.c:341 plugins/sudoers/env.c:411 toke.l:682 toke.l:812
-#: toke.l:870 toke.l:966 plugins/sudoers/toke_util.c:113
-#: plugins/sudoers/toke_util.c:167 plugins/sudoers/toke_util.c:207
+#: plugins/sudoers/env.c:341 plugins/sudoers/env.c:411
+#: plugins/sudoers/toke_util.c:113 plugins/sudoers/toke_util.c:167
+#: plugins/sudoers/toke_util.c:207 toke.l:682 toke.l:812 toke.l:870 toke.l:966
 #, c-format
 msgid "unable to allocate memory"
 msgstr "无法分配内存"
@@ -584,16 +781,11 @@ msgid "sorry, you are not allowed to set the following environment variables: %s
 msgstr "对不起，您无权设置以下环境变量：%s"
 
 #: plugins/sudoers/find_path.c:69 plugins/sudoers/find_path.c:108
-#: plugins/sudoers/find_path.c:123 plugins/sudoers/iolog.c:125 toke.l:678
-#: toke.l:866 plugins/sudoers/sudoers.c:950
+#: plugins/sudoers/find_path.c:123 plugins/sudoers/iolog.c:125
+#: plugins/sudoers/sudoers.c:950 toke.l:678 toke.l:866
 #, c-format
 msgid "%s: %s"
 msgstr "%s：%s"
-
-#: gram.y:110
-#, c-format
-msgid ">>> %s: %s near line %d <<<"
-msgstr ">>> %s：%s 在行 %d 附近<<<"
 
 #: plugins/sudoers/group_plugin.c:91
 #, c-format
@@ -653,67 +845,72 @@ msgstr "无法创建 %s"
 msgid "unable to set locale to \"%s\", using \"C\""
 msgstr "无法将区域设置为“%s”，将使用“C”"
 
-#: plugins/sudoers/ldap.c:374
+#: plugins/sudoers/ldap.c:378
 #, c-format
 msgid "sudo_ldap_conf_add_ports: port too large"
 msgstr "sudo_ldap_conf_add_ports：端口太大"
 
-#: plugins/sudoers/ldap.c:397
+#: plugins/sudoers/ldap.c:401
 #, c-format
 msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
 msgstr "sudo_ldap_conf_add_ports：扩展主机缓存时空间不足"
 
-#: plugins/sudoers/ldap.c:427
+#: plugins/sudoers/ldap.c:431
 #, c-format
 msgid "unsupported LDAP uri type: %s"
 msgstr "不支持的 LDAP URI 类型：%s"
 
-#: plugins/sudoers/ldap.c:456
+#: plugins/sudoers/ldap.c:460
 #, c-format
 msgid "invalid uri: %s"
 msgstr "无效的 URI：%s"
 
-#: plugins/sudoers/ldap.c:462
+#: plugins/sudoers/ldap.c:466
 #, c-format
 msgid "unable to mix ldap and ldaps URIs"
 msgstr "无法混合 ldap 和 ldaps URI"
 
-#: plugins/sudoers/ldap.c:466
+#: plugins/sudoers/ldap.c:470
 #, c-format
 msgid "unable to mix ldaps and starttls"
 msgstr "无法混合 ldaps 和 starttls"
 
-#: plugins/sudoers/ldap.c:485
+#: plugins/sudoers/ldap.c:489
 #, c-format
 msgid "sudo_ldap_parse_uri: out of space building hostbuf"
 msgstr "sudo_ldap_parse_uri：构建主机缓存时空间不足"
 
-#: plugins/sudoers/ldap.c:550
+#: plugins/sudoers/ldap.c:563
 #, c-format
 msgid "unable to initialize SSL cert and key db: %s"
 msgstr "无法初始化 SSL 证书和密钥数据库：%s"
 
-#: plugins/sudoers/ldap.c:958
+#: plugins/sudoers/ldap.c:566
+#, c-format
+msgid "you must set TLS_CERT in %s to use SSL"
+msgstr "要使用 SSL，您必须在 %s 中设置 TLS_CERT"
+
+#: plugins/sudoers/ldap.c:973
 #, c-format
 msgid "unable to get GMT time"
 msgstr "无法获取 GMT 时间"
 
-#: plugins/sudoers/ldap.c:964
+#: plugins/sudoers/ldap.c:979
 #, c-format
 msgid "unable to format timestamp"
 msgstr "无法格式化时间戳"
 
-#: plugins/sudoers/ldap.c:972
+#: plugins/sudoers/ldap.c:987
 #, c-format
 msgid "unable to build time filter"
 msgstr "无法构建时间过滤器"
 
-#: plugins/sudoers/ldap.c:1187
+#: plugins/sudoers/ldap.c:1202
 #, c-format
 msgid "sudo_ldap_build_pass1 allocation mismatch"
 msgstr "sudo_ldap_build_pass1 分配不匹配"
 
-#: plugins/sudoers/ldap.c:1707
+#: plugins/sudoers/ldap.c:1738
 #, c-format
 msgid ""
 "\n"
@@ -722,7 +919,7 @@ msgstr ""
 "\n"
 "LDAP 角色：%s\n"
 
-#: plugins/sudoers/ldap.c:1709
+#: plugins/sudoers/ldap.c:1740
 #, c-format
 msgid ""
 "\n"
@@ -731,49 +928,30 @@ msgstr ""
 "\n"
 "LDAP 角色：未知\n"
 
-#: plugins/sudoers/ldap.c:1756
+#: plugins/sudoers/ldap.c:1787
 #, c-format
 msgid "    Order: %s\n"
 msgstr "    顺序：%s\n"
 
-#: plugins/sudoers/ldap.c:1764
+#: plugins/sudoers/ldap.c:1795
 #, c-format
 msgid "    Commands:\n"
 msgstr "    命令：\n"
 
-#: plugins/sudoers/ldap.c:2156
+#: plugins/sudoers/ldap.c:2216
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr "无法初始化 LDAP：%s"
 
-#: plugins/sudoers/ldap.c:2187
+#: plugins/sudoers/ldap.c:2250
 #, c-format
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
 msgstr "指定了 start_tls，但 LDAP 库不支持 ldap_start_tls_s() 或 ldap_start_tls_s_np()"
 
-#: plugins/sudoers/ldap.c:2423
+#: plugins/sudoers/ldap.c:2486
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr "无效的 sudoOrder 属性：%s"
-
-#: toke.l:805
-msgid "too many levels of includes"
-msgstr "include 嵌套层数过多"
-
-#: toke.l:829 plugins/sudoers/sudoers.c:1004
-#, c-format
-msgid "%s is owned by uid %u, should be %u"
-msgstr "%s 属于用户 ID %u，应为 %u"
-
-#: toke.l:836 plugins/sudoers/sudoers.c:1008
-#, c-format
-msgid "%s is world writable"
-msgstr "%s 可被任何人写"
-
-#: toke.l:841 plugins/sudoers/sudoers.c:1011
-#, c-format
-msgid "%s is owned by gid %u, should be %u"
-msgstr "%s 属于组 ID %u，应为 %u"
 
 #: plugins/sudoers/linux_audit.c:57
 #, c-format
@@ -1078,6 +1256,21 @@ msgstr "内部错误：set_cmnd() 溢出"
 msgid "%s is not a regular file"
 msgstr "%s 不是常规文件"
 
+#: plugins/sudoers/sudoers.c:1004 toke.l:829
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s 属于用户 ID %u，应为 %u"
+
+#: plugins/sudoers/sudoers.c:1008 toke.l:836
+#, c-format
+msgid "%s is world writable"
+msgstr "%s 可被任何人写"
+
+#: plugins/sudoers/sudoers.c:1011 toke.l:841
+#, c-format
+msgid "%s is owned by gid %u, should be %u"
+msgstr "%s 属于组 ID %u，应为 %u"
+
 #: plugins/sudoers/sudoers.c:1038
 #, c-format
 msgid "only root can use `-c %s'"
@@ -1335,11 +1528,6 @@ msgstr "fill_args：缓存溢出"
 msgid "%s grammar version %d\n"
 msgstr "%s 语法版本 %d\n"
 
-#: plugins/sudoers/visudo.c:220 plugins/sudoers/auth/rfc1938.c:104
-#, c-format
-msgid "you do not exist in the %s database"
-msgstr "%s 数据库中没有您"
-
 #: plugins/sudoers/visudo.c:252 plugins/sudoers/visudo.c:538
 #, c-format
 msgid "press return to edit %s: "
@@ -1540,192 +1728,9 @@ msgstr ""
 "  -s          严格语法检查\n"
 "  -V          显示版本信息并退出"
 
-#: plugins/sudoers/auth/bsdauth.c:78
-#, c-format
-msgid "unable to get login class for user %s"
-msgstr "无法获取用户 %s 的登录类别(login class)"
-
-#: plugins/sudoers/auth/bsdauth.c:84
-msgid "unable to begin bsd authentication"
-msgstr "无法开始 bsd 认证"
-
-#: plugins/sudoers/auth/bsdauth.c:92
-msgid "invalid authentication type"
-msgstr "无效的认证类型"
-
-#: plugins/sudoers/auth/bsdauth.c:101
-msgid "unable to setup authentication"
-msgstr "无法设置认证"
-
-#: plugins/sudoers/auth/fwtk.c:60
-#, c-format
-msgid "unable to read fwtk config"
-msgstr "无法读取 fwtk 配置"
-
-#: plugins/sudoers/auth/fwtk.c:65
-#, c-format
-msgid "unable to connect to authentication server"
-msgstr "无法连接到认证服务器"
-
-#: plugins/sudoers/auth/fwtk.c:71 plugins/sudoers/auth/fwtk.c:95
-#: plugins/sudoers/auth/fwtk.c:128
-#, c-format
-msgid "lost connection to authentication server"
-msgstr "丢失了到认证服务器的连接"
-
-#: plugins/sudoers/auth/fwtk.c:75
-#, c-format
-msgid ""
-"authentication server error:\n"
-"%s"
-msgstr ""
-"认证服务器错误：\n"
-"%s"
-
-#: plugins/sudoers/auth/kerb5.c:117
-#, c-format
-msgid "%s: unable to unparse princ ('%s'): %s"
-msgstr "%s：无法解析 princ(“%s”)：%s"
-
-#: plugins/sudoers/auth/kerb5.c:160
-#, c-format
-msgid "%s: unable to parse '%s': %s"
-msgstr "%s：无法解析“%s”：%s"
-
-#: plugins/sudoers/auth/kerb5.c:170
-#, c-format
-msgid "%s: unable to resolve ccache: %s"
-msgstr "%s：无法解析 ccache：%s"
-
-#: plugins/sudoers/auth/kerb5.c:218
-#, c-format
-msgid "%s: unable to allocate options: %s"
-msgstr "%s：无法分配选项：%s"
-
-#: plugins/sudoers/auth/kerb5.c:234
-#, c-format
-msgid "%s: unable to get credentials: %s"
-msgstr "%s：无法获取凭据：%s"
-
-#: plugins/sudoers/auth/kerb5.c:247
-#, c-format
-msgid "%s: unable to initialize ccache: %s"
-msgstr "%s：无法初始化 ccache：%s"
-
-#: plugins/sudoers/auth/kerb5.c:251
-#, c-format
-msgid "%s: unable to store cred in ccache: %s"
-msgstr "%s：无法在 ccache 中储存凭据：%s"
-
-#: plugins/sudoers/auth/kerb5.c:316
-#, c-format
-msgid "%s: unable to get host principal: %s"
-msgstr "%s：无法获取主机主体(principal)：%s"
-
-#: plugins/sudoers/auth/kerb5.c:331
-#, c-format
-msgid "%s: Cannot verify TGT! Possible attack!: %s"
-msgstr "%s：无法验证目标！可能遭到了攻击！：%s"
-
-#: plugins/sudoers/auth/pam.c:100
-msgid "unable to initialize PAM"
-msgstr "无法初始化 PAM"
-
-#: plugins/sudoers/auth/pam.c:144
-msgid "account validation failure, is your account locked?"
-msgstr "账户验证失败，您的账户是不是上锁了？"
-
-#: plugins/sudoers/auth/pam.c:148
-msgid "Account or password is expired, reset your password and try again"
-msgstr "账户或密码过期，重置您的密码并重试"
-
-#: plugins/sudoers/auth/pam.c:155
-#, c-format
-msgid "pam_chauthtok: %s"
-msgstr "pam_chauthtok：%s"
-
-#: plugins/sudoers/auth/pam.c:159
-msgid "Password expired, contact your system administrator"
-msgstr "密码过期，联系您的系统管理员"
-
-#: plugins/sudoers/auth/pam.c:163
-msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
-msgstr "账户过期，或 PAM 配置缺少 sudo 使用的“account”节，联系您的系统管理员"
-
-#: plugins/sudoers/auth/pam.c:180
-#, c-format
-msgid "pam_authenticate: %s"
-msgstr "pam_authenticate：%s"
-
-#: plugins/sudoers/auth/pam.c:330
-msgid "Password: "
-msgstr "密码："
-
-#: plugins/sudoers/auth/pam.c:331
-msgid "Password:"
-msgstr "密码："
-
-#: plugins/sudoers/auth/securid5.c:81
-#, c-format
-msgid "failed to initialise the ACE API library"
-msgstr "初始化 ACE API 库失败"
-
-#: plugins/sudoers/auth/securid5.c:107
-#, c-format
-msgid "unable to contact the SecurID server"
-msgstr "无法联络 SecurID 服务器"
-
-#: plugins/sudoers/auth/securid5.c:116
-#, c-format
-msgid "User ID locked for SecurID Authentication"
-msgstr "为进行 SecurID 认证，已锁定用户 ID"
-
-#: plugins/sudoers/auth/securid5.c:120 plugins/sudoers/auth/securid5.c:171
-#, c-format
-msgid "invalid username length for SecurID"
-msgstr "SecurID 的用户名长度无效"
-
-#: plugins/sudoers/auth/securid5.c:124 plugins/sudoers/auth/securid5.c:176
-#, c-format
-msgid "invalid Authentication Handle for SecurID"
-msgstr "SecurID 的认证句柄无效"
-
-#: plugins/sudoers/auth/securid5.c:128
-#, c-format
-msgid "SecurID communication failed"
-msgstr "SecurID 通讯失败"
-
-#: plugins/sudoers/auth/securid5.c:132 plugins/sudoers/auth/securid5.c:215
-#, c-format
-msgid "unknown SecurID error"
-msgstr "未知的 SecurID 错误"
-
-#: plugins/sudoers/auth/securid5.c:166
-#, c-format
-msgid "invalid passcode length for SecurID"
-msgstr "无效的 SecurID 密码长度"
-
-#: plugins/sudoers/auth/sia.c:109
-msgid "unable to initialize SIA session"
-msgstr "无法初始化 SIA 会话"
-
-#: plugins/sudoers/auth/sudo_auth.c:117
-msgid "Invalid authentication methods compiled into sudo!  You may mix standalone and non-standalone authentication."
-msgstr "编译进 sudo 的认证方法无效！您可能混用了独立和非独立认证。"
-
-#: plugins/sudoers/auth/sudo_auth.c:199
-msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
-msgstr "sudo 编译时没有加入任何认证方法！如果您想关闭认证，使用 --disable-authentication 配置选项。"
-
-#: plugins/sudoers/auth/sudo_auth.c:271
-#, c-format
-msgid "%d incorrect password attempt"
-msgid_plural "%d incorrect password attempts"
-msgstr[0] "%d 次错误密码尝试"
-
-#: plugins/sudoers/auth/sudo_auth.c:374
-msgid "Authentication methods:"
-msgstr "认证方法："
+#: toke.l:805
+msgid "too many levels of includes"
+msgstr "include 嵌套层数过多"
 
 #~ msgid "invalid log file %s"
 #~ msgstr "无效的日志文件 %s"
