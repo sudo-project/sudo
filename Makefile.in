@@ -47,7 +47,7 @@ sudoers_mode = @SUDOERS_MODE@
 
 SUBDIRS = compat common @ZLIB_SRC@ plugins/sudoers src include doc
 
-SAMPLES = plugins/sample plugins/sample_group
+SAMPLES = plugins/sample plugins/sample_group plugins/system_group
 
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
