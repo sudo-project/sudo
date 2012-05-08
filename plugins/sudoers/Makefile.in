@@ -411,7 +411,8 @@ bsdauth.lo: $(authdir)/bsdauth.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(authdir)/bsdauth.c
 bsm_audit.lo: $(srcdir)/bsm_audit.c $(top_builddir)/config.h \
-              $(incdir)/gettext.h $(incdir)/sudo_debug.h $(srcdir)/bsm_audit.h
+              $(incdir)/gettext.h $(incdir)/error.h $(incdir)/sudo_debug.h \
+              $(srcdir)/bsm_audit.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/bsm_audit.c
 check.lo: $(srcdir)/check.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \

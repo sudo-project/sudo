@@ -132,12 +132,14 @@ depend: siglist.c
 	    $(srcdir)/compat/Makefile.in $(srcdir)/plugins/sample/Makefile.in \
 	    $(srcdir)/plugins/sample_group/Makefile.in \
 	    $(srcdir)/plugins/sudoers/Makefile.in \
+	    $(srcdir)/plugins/system_group/Makefile.in \
 	    $(srcdir)/src/Makefile.in $(srcdir)/zlib/Makefile.in; \
 	./config.status --file $(srcdir)/common/Makefile \
 	    --file $(srcdir)/compat/Makefile \
 	    --file $(srcdir)/plugins/sample/Makefile \
 	    --file $(srcdir)/plugins/sample_group/Makefile \
 	    --file $(srcdir)/plugins/sudoers/Makefile \
+	    --file $(srcdir)/plugins/system_group/Makefile \
 	    --file $(srcdir)/src/Makefile --file $(srcdir)/zlib/Makefile
 
 ChangeLog:
