@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.5-b4\n"
+"Project-Id-Version: sudo 1.8.5rc3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-03-28 14:06-0400\n"
-"PO-Revision-Date: 2012-04-02 18:33+0100\n"
+"POT-Creation-Date: 2012-04-24 13:41-0400\n"
+"PO-Revision-Date: 2012-05-06 21:33+0200\n"
 "Last-Translator: Jakub Bogusz <qboosh@pld-linux.org>\n"
 "Language-Team: Polish <translation-team-pl@lists.sourceforge.net>\n"
 "Language: pl\n"
@@ -15,32 +15,126 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: common/aix.c:149
+#, c-format
+msgid "unable to open userdb"
+msgstr "nie udało się otworzyć userdb"
+
+#: common/aix.c:152
+#, c-format
+msgid "unable to switch to registry \"%s\" for %s"
+msgstr "nie udało się przełączyć na rejestr \"%s\" dla %s"
+
+#: common/aix.c:169
+#, c-format
+msgid "unable to restore registry"
+msgstr "nie udało się odtworzyć rejestru"
+
+#: common/alloc.c:82
+msgid "internal error, tried to emalloc(0)"
+msgstr "błąd wewnętrzny, próbowano wykonać emalloc(0)"
+
+#: common/alloc.c:85 common/alloc.c:105 common/alloc.c:127 common/alloc.c:146
+#: common/alloc.c:168 common/alloc.c:192 common/alloc.c:256 common/alloc.c:270
+#: src/exec_common.c:111 src/parse_args.c:432 src/sudo.c:456 src/sudo.c:482
+#: src/sudo.c:489 src/sudo.c:500 src/sudo.c:737
+#, c-format
+msgid "unable to allocate memory"
+msgstr "nie udało się przydzielić pamięci"
+
+#: common/alloc.c:99
+msgid "internal error, tried to emalloc2(0)"
+msgstr "błąd wewnętrzny, próbowano wykonać emalloc2(0)"
+
+#: common/alloc.c:101
+msgid "internal error, emalloc2() overflow"
+msgstr "błąd wewnętrzny, przepełnienie emalloc2()"
+
+#: common/alloc.c:120
+msgid "internal error, tried to ecalloc(0)"
+msgstr "błąd wewnętrzny, próbowano wykonać ecalloc(0)"
+
+#: common/alloc.c:123
+msgid "internal error, ecalloc() overflow"
+msgstr "błąd wewnętrzny, przepełnienie ecalloc()"
+
+#: common/alloc.c:142
+msgid "internal error, tried to erealloc(0)"
+msgstr "błąd wewnętrzny, próbowano wykonać erealloc(0)"
+
+#: common/alloc.c:161 common/alloc.c:185
+msgid "internal error, tried to erealloc3(0)"
+msgstr "błąd wewnętrzny, próbowano wykonać erealloc3(0)"
+
+#: common/alloc.c:163 common/alloc.c:187
+msgid "internal error, erealloc3() overflow"
+msgstr "błąd wewnętrzny, przepełnienie erealloc3()"
+
+#: common/sudo_conf.c:306
+#, c-format
+msgid "unable to stat %s"
+msgstr "nie udało się wykonać stat na %s"
+
+#: common/sudo_conf.c:309
+#, c-format
+msgid "%s is not a regular file"
+msgstr "%s nie jest zwykłym plikiem"
+
+#: common/sudo_conf.c:312
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "właścicielem %s jest uid %u, powinien być %u"
+
+#: common/sudo_conf.c:316
+#, c-format
+msgid "%s is world writable"
+msgstr "%s jest zapisywalny dla świata"
+
+#: common/sudo_conf.c:319
+#, c-format
+msgid "%s is group writable"
+msgstr "%s jest zapisywalny dla grupy"
+
+#: common/sudo_conf.c:328 src/selinux.c:196 src/selinux.c:209 src/sudo.c:331
+#, c-format
+msgid "unable to open %s"
+msgstr "nie udało się otworzyć %s"
+
+#: compat/strsignal.c:47
+msgid "Unknown signal"
+msgstr "Nieznany sygnał"
+
 #: src/error.c:82 src/error.c:86
 msgid ": "
 msgstr ": "
 
-#: src/exec.c:105 src/exec_pty.c:616 src/exec_pty.c:948 src/tgetpass.c:221
+#: src/exec.c:107 src/exec_pty.c:628
+#, c-format
+msgid "policy plugin failed session initialization"
+msgstr "nie udało się zainicjować sesji przez wtyczkę polityki"
+
+#: src/exec.c:112 src/exec_pty.c:633 src/exec_pty.c:967 src/tgetpass.c:221
 #, c-format
 msgid "unable to fork"
 msgstr "nie udało się wykonać fork"
 
-#: src/exec.c:252
+#: src/exec.c:259
 #, c-format
 msgid "unable to create sockets"
 msgstr "nie udało się utworzyć gniazd"
 
-#: src/exec.c:259 src/exec_pty.c:567 src/exec_pty.c:576 src/exec_pty.c:584
-#: src/exec_pty.c:883 src/exec_pty.c:945 src/tgetpass.c:218
+#: src/exec.c:266 src/exec_pty.c:572 src/exec_pty.c:581 src/exec_pty.c:589
+#: src/exec_pty.c:902 src/exec_pty.c:964 src/tgetpass.c:218
 #, c-format
 msgid "unable to create pipe"
 msgstr "nie udało się utworzyć potoku"
 
-#: src/exec.c:340 src/exec_pty.c:1011 src/exec_pty.c:1146
+#: src/exec.c:351 src/exec_pty.c:1029 src/exec_pty.c:1167
 #, c-format
 msgid "select failed"
 msgstr "wywołanie select nie powiodło się"
 
-#: src/exec.c:425
+#: src/exec.c:441
 #, c-format
 msgid "unable to restore tty label"
 msgstr "nie udało się przywrócić etykiety tty"
@@ -50,45 +144,37 @@ msgstr "nie udało się przywrócić etykiety tty"
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "nie udało się usunąć PRIV_PROC_EXEC z PRIV_LIMIT"
 
-#: src/exec_common.c:111 src/parse_args.c:432 src/sudo.c:447 src/sudo.c:467
-#: src/sudo.c:474 src/sudo.c:485 src/sudo.c:871 common/alloc.c:85
-#: common/alloc.c:105 common/alloc.c:127 common/alloc.c:146 common/alloc.c:168
-#: common/alloc.c:192 common/alloc.c:256 common/alloc.c:270
-#, c-format
-msgid "unable to allocate memory"
-msgstr "nie udało się przydzielić pamięci"
-
-#: src/exec_pty.c:140
+#: src/exec_pty.c:144
 #, c-format
 msgid "unable to allocate pty"
 msgstr "nie udało się przydzielić pty"
 
-#: src/exec_pty.c:609
+#: src/exec_pty.c:619
 #, c-format
 msgid "unable to set terminal to raw mode"
 msgstr "nie udało się przestawić terminala w tryb surowy"
 
-#: src/exec_pty.c:926
+#: src/exec_pty.c:945
 #, c-format
 msgid "unable to set controlling tty"
 msgstr "nie udało się ustawić sterującego tty"
 
-#: src/exec_pty.c:1019
+#: src/exec_pty.c:1038
 #, c-format
 msgid "error reading from signal pipe"
 msgstr "błąd odczytu z potoku sygnałowego"
 
-#: src/exec_pty.c:1038
+#: src/exec_pty.c:1059
 #, c-format
 msgid "error reading from pipe"
 msgstr "błąd odczytu z potoku"
 
-#: src/exec_pty.c:1054
+#: src/exec_pty.c:1075
 #, c-format
 msgid "error reading from socketpair"
 msgstr "błąd odczytu z pary gniazd"
 
-#: src/exec_pty.c:1058
+#: src/exec_pty.c:1079
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "nieoczekiwany typ odpowiedzi z kanału zwrotnego: %d"
@@ -381,11 +467,6 @@ msgstr "nie udało się uzyskać nowego kontekstu tty, bez zmiany etykiety tty"
 msgid "unable to set new tty context"
 msgstr "nie udało się ustawić nowego kontekstu tty"
 
-#: src/selinux.c:196 src/selinux.c:209 src/sudo.c:333 common/sudo_conf.c:328
-#, c-format
-msgid "unable to open %s"
-msgstr "nie udało się otworzyć %s"
-
 #: src/selinux.c:252
 #, c-format
 msgid "you must specify a role for type %s"
@@ -446,167 +527,167 @@ msgstr "wymagany jest przynajmniej jeden argument"
 msgid "unable to execute %s"
 msgstr "nie udało się wykonać %s"
 
-#: src/sudo.c:213
+#: src/sudo.c:211
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Sudo wersja %s\n"
 
-#: src/sudo.c:215
+#: src/sudo.c:213
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "Opcje konfiguracji: %s\n"
 
-#: src/sudo.c:220
+#: src/sudo.c:218
 #, c-format
 msgid "fatal error, unable to load plugins"
 msgstr "błąd krytyczny, nie udało się załadować wtyczek"
 
-#: src/sudo.c:228
+#: src/sudo.c:226
 #, c-format
 msgid "unable to initialize policy plugin"
 msgstr "nie udało się zainicjować wtyczki polityki"
 
-#: src/sudo.c:283
+#: src/sudo.c:281
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "błąd inicjalizacji wtyczki we/wy %s"
 
-#: src/sudo.c:308
+#: src/sudo.c:306
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "nieoczekiwany tryb sudo 0x%x"
 
-#: src/sudo.c:402
+#: src/sudo.c:400
 #, c-format
 msgid "unable to get group vector"
 msgstr "nie udało się uzyskać wektora grup"
 
-#: src/sudo.c:443
+#: src/sudo.c:452
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "nieznany uid %u: kim jesteś?"
 
-#: src/sudo.c:735
+#: src/sudo.c:760
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s musi mieć uid %d jako właściciela oraz ustawiony bit setuid"
 
-#: src/sudo.c:738
+#: src/sudo.c:763
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "efektywny uid nie wynosi %d, czy %s jest na systemie plików z opcją 'nosuid' albo systemie plików NFS bez uprawnień roota?"
 
-#: src/sudo.c:744
+#: src/sudo.c:769
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "efektywny uid nie wynosi %d, czy sudo jest zainstalowane z setuid root?"
 
-#: src/sudo.c:813
+#: src/sudo.c:838
 #, c-format
 msgid "resource control limit has been reached"
 msgstr "osiągnięto limit kontroli zasobów"
 
-#: src/sudo.c:816
+#: src/sudo.c:841
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
 msgstr "użytkownik \"%s\" nie jest członkiem projektu \"%s\""
 
-#: src/sudo.c:820
+#: src/sudo.c:845
 #, c-format
 msgid "the invoking task is final"
 msgstr "zadanie uruchamiające jest ostatnim"
 
-#: src/sudo.c:823
+#: src/sudo.c:848
 #, c-format
 msgid "could not join project \"%s\""
 msgstr "nie udało się dołączyć do projektu \"%s\""
 
-#: src/sudo.c:828
+#: src/sudo.c:853
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "nie istnieje pula zasobów akceptująca domyślne przypisania dla projektu \"%s\""
 
-#: src/sudo.c:832
+#: src/sudo.c:857
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "podana pula zasobów nie istnieje w projekcie \"%s\""
 
-#: src/sudo.c:836
+#: src/sudo.c:861
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "nie można przypisać do domyślnej puli zasobów w projekcie \"%s\""
 
-#: src/sudo.c:842
+#: src/sudo.c:867
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "setproject dla projektu \"%s\" nie powiodło się"
 
-#: src/sudo.c:844
+#: src/sudo.c:869
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "uwaga: przypisanie kontroli zasobów dla projektu \"%s\" nie powiodło się"
 
-#: src/sudo.c:909
+#: src/sudo.c:917
 #, c-format
 msgid "unknown login class %s"
 msgstr "nieznana klasa logowania %s"
 
-#: src/sudo.c:923 src/sudo.c:926
+#: src/sudo.c:931 src/sudo.c:934
 #, c-format
 msgid "unable to set user context"
 msgstr "nie udało się ustawić kontekstu użytkownika"
 
-#: src/sudo.c:938
+#: src/sudo.c:946
 #, c-format
 msgid "unable to set supplementary group IDs"
 msgstr "nie udało się ustawić ID dodatkowych grup"
 
-#: src/sudo.c:945
+#: src/sudo.c:953
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "nie udało się ustawić efektywnego gid-a w celu działania jako gid %u"
 
-#: src/sudo.c:951
+#: src/sudo.c:959
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "nie udało się ustawić gid-a w celu działania jako gid %u"
 
-#: src/sudo.c:958
+#: src/sudo.c:966
 #, c-format
 msgid "unable to set process priority"
 msgstr "nie udało się ustawić priorytetu procesu"
 
-#: src/sudo.c:966
+#: src/sudo.c:974
 #, c-format
 msgid "unable to change root to %s"
 msgstr "nie udało się zmienić katalogu głównego na %s"
 
-#: src/sudo.c:973 src/sudo.c:979 src/sudo.c:985
+#: src/sudo.c:981 src/sudo.c:987 src/sudo.c:993
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "nie udało się zmienić uid-ów, aby działać jako (%u, %u)"
 
-#: src/sudo.c:999
+#: src/sudo.c:1007
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "nie udało się zmienić katalogu na %s"
 
-#: src/sudo.c:1072
+#: src/sudo.c:1079
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "nieoczekiwane zakończenie procesu potomnego: %d"
 
-#: src/sudo.c:1133
+#: src/sudo.c:1140
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "wtyczka polityki %s nie obsługuje wypisywania uprawnień"
 
-#: src/sudo.c:1145
+#: src/sudo.c:1152
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "wtyczka polityki %s nie obsługuje opcji -v"
 
-#: src/sudo.c:1157
+#: src/sudo.c:1164
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "wtyczka polityki %s nie obsługuje opcji -k/-K"
@@ -695,79 +776,3 @@ msgstr "nie udało się wykonać dup2 na standardowym wejściu"
 #, c-format
 msgid "unable to restore stdin"
 msgstr "nie udało się przywrócić standardowego wejścia"
-
-#: common/aix.c:149
-#, c-format
-msgid "unable to open userdb"
-msgstr "nie udało się otworzyć userdb"
-
-#: common/aix.c:152
-#, c-format
-msgid "unable to switch to registry \"%s\" for %s"
-msgstr "nie udało się przełączyć na rejestr \"%s\" dla %s"
-
-#: common/aix.c:169
-#, c-format
-msgid "unable to restore registry"
-msgstr "nie udało się odtworzyć rejestru"
-
-#: common/alloc.c:82
-msgid "internal error, tried to emalloc(0)"
-msgstr "błąd wewnętrzny, próbowano wykonać emalloc(0)"
-
-#: common/alloc.c:99
-msgid "internal error, tried to emalloc2(0)"
-msgstr "błąd wewnętrzny, próbowano wykonać emalloc2(0)"
-
-#: common/alloc.c:101
-msgid "internal error, emalloc2() overflow"
-msgstr "błąd wewnętrzny, przepełnienie emalloc2()"
-
-#: common/alloc.c:120
-msgid "internal error, tried to ecalloc(0)"
-msgstr "błąd wewnętrzny, próbowano wykonać ecalloc(0)"
-
-#: common/alloc.c:123
-msgid "internal error, ecalloc() overflow"
-msgstr "błąd wewnętrzny, przepełnienie ecalloc()"
-
-#: common/alloc.c:142
-msgid "internal error, tried to erealloc(0)"
-msgstr "błąd wewnętrzny, próbowano wykonać erealloc(0)"
-
-#: common/alloc.c:161 common/alloc.c:185
-msgid "internal error, tried to erealloc3(0)"
-msgstr "błąd wewnętrzny, próbowano wykonać erealloc3(0)"
-
-#: common/alloc.c:163 common/alloc.c:187
-msgid "internal error, erealloc3() overflow"
-msgstr "błąd wewnętrzny, przepełnienie erealloc3()"
-
-#: common/sudo_conf.c:306
-#, c-format
-msgid "unable to stat %s"
-msgstr "nie udało się wykonać stat na %s"
-
-#: common/sudo_conf.c:309
-#, c-format
-msgid "%s is not a regular file"
-msgstr "%s nie jest zwykłym plikiem"
-
-#: common/sudo_conf.c:312
-#, c-format
-msgid "%s is owned by uid %u, should be %u"
-msgstr "właścicielem %s jest uid %u, powinien być %u"
-
-#: common/sudo_conf.c:316
-#, c-format
-msgid "%s is world writable"
-msgstr "%s jest zapisywalny dla świata"
-
-#: common/sudo_conf.c:319
-#, c-format
-msgid "%s is group writable"
-msgstr "%s jest zapisywalny dla grupy"
-
-#: compat/strsignal.c:47
-msgid "Unknown signal"
-msgstr "Nieznany sygnał"
