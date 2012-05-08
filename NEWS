@@ -71,6 +71,11 @@ What's new in Sudo 1.8.5?
  * The TLS_CHECKPEER parameter in ldap.conf now works when the
    Mozilla NSS crypto backend is used with OpenLDAP.
 
+ * A new group provider plugin, system_group, is included which
+   performs group look ups by name using the system groups database.
+   This can be used to restore the pre-1.7.3 sudo group lookup
+   behavior.
+
 What's new in Sudo 1.8.4p4?
 
  * Fixed a bug introduced in Sudo 1.8.4 which prevented "sudo -v"
