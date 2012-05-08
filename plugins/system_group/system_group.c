@@ -75,15 +75,16 @@ static sudo_printf_t sudo_log;
 
 typedef struct group * (*sysgroup_getgrnam_t)(const char *);
 typedef struct group * (*sysgroup_getgrgid_t)(gid_t);
+typedef void (*sysgroup_gr_delref_t)(struct group *);
 
 static sysgroup_getgrnam_t sysgroup_getgrnam;
 static sysgroup_getgrgid_t sysgroup_getgrgid;
+static sysgroup_gr_delref_t sysgroup_gr_delref;
 static bool need_setent;
 
 static int
 sysgroup_init(int version, sudo_printf_t sudo_printf, char *const argv[])
 {
-    struct stat sb;
     void *handle;
 
     sudo_log = sudo_printf;
@@ -113,6 +114,10 @@ sysgroup_init(int version, sudo_printf_t sudo_printf, char *const argv[])
 	need_setent = true;
     }
 
+    handle = dlsym(RTLD_DEFAULT, "gr_delref");
+    if (handle != NULL)
+	sysgroup_gr_delref = (sysgroup_gr_delref_t)handle;
+
     if (need_setent)
 	setgrent();
 
@@ -134,7 +139,6 @@ sysgroup_query(const char *user, const char *group, const struct passwd *pwd)
 {
     char **member, *ep = '\0';
     struct group *grp;
-    gid_t gid;
 
     grp = sysgroup_getgrnam(group);
     if (grp == NULL && group[0] == '#' && group[1] != '\0') {
@@ -147,11 +151,13 @@ sysgroup_query(const char *user, const char *group, const struct passwd *pwd)
     if (grp != NULL) {
 	for (member = grp->gr_mem; *member != NULL; member++) {
 	    if (strcasecmp(user, *member) == 0) {
-		gr_delref(grp);
+		if (sysgroup_gr_delref)
+		    sysgroup_gr_delref(grp);
 		return true;
 	    }
 	}
-	gr_delref(grp);
+	if (sysgroup_gr_delref)
+	    sysgroup_gr_delref(grp);
     }
 
     return false;
