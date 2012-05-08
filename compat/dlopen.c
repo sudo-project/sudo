@@ -77,7 +77,13 @@ sudo_dlsym(void *vhandle, const char *symbol)
     shl_t handle = vhandle;
     void *value = NULL;
 
-    (void)shl_findsym(&handle, symbol, TYPE_UNDEFINED, &value);
+    /* RTLD_NEXT is not unsupported with shl_findsym(). */
+    if (vhandle == RTLD_DEFAULT)
+	(void)shl_findsym(NULL, symbol, TYPE_UNDEFINED, &value);
+    else if (vhandle == RTLD_SELF)
+	(void)shl_findsym(PROG_HANDLE, symbol, TYPE_UNDEFINED, &value);
+    else if (vhandle != RTLD_NEXT)
+	(void)shl_findsym(&handle, symbol, TYPE_UNDEFINED, &value);
 
     return value;
 }
@@ -117,9 +123,11 @@ sudo_dlsym(void *handle, const char *symbol)
 {
     struct sudo_preload_table *sym;
 
-    for (sym = sudo_preload_table; sym->name != NULL; sym++) {
-	if (strcmp(symbol, sym->name) == 0)
-	    return sym->address;
+    if (symbol != RTLD_NEXT && symbol != RTLD_DEFAULT && symbol != RTLD_SELF) {
+	for (sym = sudo_preload_table; sym->name != NULL; sym++) {
+	    if (strcmp(symbol, sym->name) == 0)
+		return sym->address;
+	}
     }
     return NULL;
 }
