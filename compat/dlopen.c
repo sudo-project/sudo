@@ -77,13 +77,26 @@ sudo_dlsym(void *vhandle, const char *symbol)
     shl_t handle = vhandle;
     void *value = NULL;
 
-    /* RTLD_NEXT is not unsupported with shl_findsym(). */
-    if (vhandle == RTLD_DEFAULT)
-	(void)shl_findsym(NULL, symbol, TYPE_UNDEFINED, &value);
-    else if (vhandle == RTLD_SELF)
-	(void)shl_findsym(PROG_HANDLE, symbol, TYPE_UNDEFINED, &value);
-    else if (vhandle != RTLD_NEXT)
+    /*
+     * Note that the behavior of of RTLD_NEXT and RTLD_SELF 
+     * differs from most implementations when called from
+     * a shared library.
+     */
+    if (vhandle == RTLD_NEXT) {
+	/* Iterate over all shared libs looking for symbol. */
+	struct shl_descriptor *desc;
+	int idx = 0;
+	while (shl_get(idx++, &desc) == 0) {
+	    if (shl_findsym(&desc->handle, symbol, TYPE_UNDEFINED, &value) == 0)
+		break;
+	}
+    } else {
+	if (vhandle == RTLD_DEFAULT)
+	    handle = NULL;
+	else if (vhandle == RTLD_SELF)
+	    handle = PROG_HANDLE;
 	(void)shl_findsym(&handle, symbol, TYPE_UNDEFINED, &value);
+    }
 
     return value;
 }
