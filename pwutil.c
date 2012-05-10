@@ -66,8 +66,11 @@ static int  cmp_grgid	__P((const void *, const void *));
 
 #define cmp_grnam	cmp_pwnam
 
-#define ptr_to_item(p) ((struct cache_item *)((char *)(p) - sizeof(struct cache_item)))
+#define ptr_to_item(p) ((struct cache_item *)((char *)p - offsetof(struct cache_item_##p, p)))
 
+/*
+ * Generic cache element.
+ */
 struct cache_item {
     unsigned int refcnt;
     /* key */
@@ -81,6 +84,20 @@ struct cache_item {
 	struct passwd *pw;
 	struct group *gr;
     } d;
+};
+
+/*
+ * Container structs to simpify size and offset calculations and guarantee
+ * proper aligment of struct passwd, group and group_list.
+ */
+struct cache_item_pw {
+    struct cache_item cache;
+    struct passwd pw;
+};
+
+struct cache_item_gr {
+    struct cache_item cache;
+    struct group gr;
 };
 
 /*
@@ -130,9 +147,6 @@ do {							\
  * Dynamically allocate space for a struct item plus the key and data
  * elements.  If name is non-NULL it is used as the key, else the
  * uid is the key.  Fills in datum from struct password.
- *
- * We would like to fill in the encrypted password too but the
- * call to the shadow function could overwrite the pw buffer (NIS).
  */
 static struct cache_item *
 make_pwitem(pw, name)
@@ -142,7 +156,7 @@ make_pwitem(pw, name)
     char *cp;
     const char *pw_shell;
     size_t nsize, psize, csize, gsize, dsize, ssize, total;
-    struct cache_item *item;
+    struct cache_item_pw *pwitem;
     struct passwd *newpw;
 
     /* If shell field is empty, expand to _PATH_BSHELL. */
@@ -151,7 +165,7 @@ make_pwitem(pw, name)
 
     /* Allocate in one big chunk for easy freeing. */
     nsize = psize = csize = gsize = dsize = ssize = 0;
-    total = sizeof(struct cache_item) + sizeof(struct passwd);
+    total = sizeof(*pwitem);
     FIELD_SIZE(pw, pw_name, nsize);
     FIELD_SIZE(pw, pw_passwd, psize);
 #ifdef HAVE_LOGIN_CAP_H
@@ -166,17 +180,15 @@ make_pwitem(pw, name)
 	total += strlen(name) + 1;
 
     /* Allocate space for struct item, struct passwd and the strings. */
-    if ((item = malloc(total)) == NULL)
-	    return NULL;
-    cp = (char *) item + sizeof(struct cache_item);
+    pwitem = ecalloc(1, total);
 
     /*
      * Copy in passwd contents and make strings relative to space
      * at the end of the buffer.
      */
-    newpw = (struct passwd *) cp;
-    memcpy(newpw, pw, sizeof(struct passwd));
-    cp += sizeof(struct passwd);
+    newpw = &pwitem->pw;
+    memcpy(newpw, pw, sizeof(*pw));
+    cp = (char *)(pwitem + 1);
     FIELD_COPY(pw, newpw, pw_name, nsize);
     FIELD_COPY(pw, newpw, pw_passwd, psize);
 #ifdef HAVE_LOGIN_CAP_H
@@ -192,14 +204,14 @@ make_pwitem(pw, name)
     /* Set key and datum. */
     if (name != NULL) {
 	memcpy(cp, name, strlen(name) + 1);
-	item->k.name = cp;
+	pwitem->cache.k.name = cp;
     } else {
-	item->k.uid = pw->pw_uid;
+	pwitem->cache.k.uid = pw->pw_uid;
     }
-    item->d.pw = newpw;
-    item->refcnt = 1;
+    pwitem->cache.d.pw = newpw;
+    pwitem->cache.refcnt = 1;
 
-    return item;
+    return &pwitem->cache;
 }
 
 void
@@ -228,7 +240,6 @@ pw_delref(pw)
 
 /*
  * Get a password entry by uid and allocate space for it.
- * Fills in pw_passwd from shadow file if necessary.
  */
 struct passwd *
 sudo_getpwuid(uid)
@@ -272,7 +283,6 @@ done:
 
 /*
  * Get a password entry by name and allocate space for it.
- * Fills in pw_passwd from shadow file if necessary.
  */
 struct passwd *
 sudo_getpwnam(name)
@@ -321,23 +331,23 @@ sudo_fakepwnamid(user, uid, gid)
     uid_t uid;
     gid_t gid;
 {
-    struct cache_item *item;
+    struct cache_item_pw *pwitem;
     struct passwd *pw;
     struct rbnode *node;
     size_t len, namelen;
     int i;
 
     namelen = strlen(user);
-    len = sizeof(*item) + sizeof(*pw) + namelen + 1 /* pw_name */ +
+    len = sizeof(*pwitem) + namelen + 1 /* pw_name */ +
 	sizeof("*") /* pw_passwd */ + sizeof("") /* pw_gecos */ +
 	sizeof("/") /* pw_dir */ + sizeof(_PATH_BSHELL);
 
     for (i = 0; i < 2; i++) {
-	item = ecalloc(1, len);
-	pw = (struct passwd *) ((char *)item + sizeof(*item));
+	pwitem = ecalloc(1, len);
+	pw = &pwitem->pw;
 	pw->pw_uid = uid;
 	pw->pw_gid = gid;
-	pw->pw_name = (char *)pw + sizeof(struct passwd);
+	pw->pw_name = (char *)(pwitem + 1);
 	memcpy(pw->pw_name, user, namelen + 1);
 	pw->pw_passwd = pw->pw_name + namelen + 1;
 	memcpy(pw->pw_passwd, "*", 2);
@@ -348,25 +358,25 @@ sudo_fakepwnamid(user, uid, gid)
 	pw->pw_shell = pw->pw_dir + 2;
 	memcpy(pw->pw_shell, _PATH_BSHELL, sizeof(_PATH_BSHELL));
 
-	item->refcnt = 1;
-	item->d.pw = pw;
+	pwitem->cache.refcnt = 1;
+	pwitem->cache.d.pw = pw;
 	if (i == 0) {
 	    /* Store by uid, overwriting cached version. */
-	    item->k.uid = pw->pw_uid;
-	    if ((node = rbinsert(pwcache_byuid, item)) != NULL) {
+	    pwitem->cache.k.uid = pw->pw_uid;
+	    if ((node = rbinsert(pwcache_byuid, &pwitem->cache)) != NULL) {
 		pw_delref_item(node->data);
-		node->data = item;
+		node->data = &pwitem->cache;
 	    }
 	} else {
 	    /* Store by name, overwriting cached version. */
-	    item->k.name = pw->pw_name;
-	    if ((node = rbinsert(pwcache_byname, item)) != NULL) {
+	    pwitem->cache.k.name = pw->pw_name;
+	    if ((node = rbinsert(pwcache_byname, &pwitem->cache)) != NULL) {
 		pw_delref_item(node->data);
-		node->data = item;
+		node->data = &pwitem->cache;
 	    }
 	}
     }
-    item->refcnt++;
+    pwitem->cache.refcnt++;
     return pw;
 }
 
@@ -453,12 +463,12 @@ make_gritem(gr, name)
 {
     char *cp;
     size_t nsize, psize, nmem, total, len;
-    struct cache_item *item;
+    struct cache_item_gr *gritem;
     struct group *newgr;
 
     /* Allocate in one big chunk for easy freeing. */
     nsize = psize = nmem = 0;
-    total = sizeof(struct cache_item) + sizeof(struct group);
+    total = sizeof(*gritem);
     FIELD_SIZE(gr, gr_name, nsize);
     FIELD_SIZE(gr, gr_passwd, psize);
     if (gr->gr_mem) {
@@ -470,18 +480,16 @@ make_gritem(gr, name)
     if (name != NULL)
 	total += strlen(name) + 1;
 
-    if ((item = malloc(total)) == NULL)
-	    return NULL;
-    cp = (char *) item + sizeof(struct cache_item);
+    gritem = ecalloc(1, total);
 
     /*
      * Copy in group contents and make strings relative to space
      * at the end of the buffer.  Note that gr_mem must come
      * immediately after struct group to guarantee proper alignment.
      */
-    newgr = (struct group *)cp;
-    memcpy(newgr, gr, sizeof(struct group));
-    cp += sizeof(struct group);
+    newgr = &gritem->gr;
+    memcpy(newgr, gr, sizeof(*gr));
+    cp = (char *)(gritem + 1);
     if (gr->gr_mem) {
 	newgr->gr_mem = (char **)cp;
 	cp += sizeof(char *) * nmem;
@@ -499,14 +507,14 @@ make_gritem(gr, name)
     /* Set key and datum. */
     if (name != NULL) {
 	memcpy(cp, name, strlen(name) + 1);
-	item->k.name = cp;
+	gritem->cache.k.name = cp;
     } else {
-	item->k.gid = gr->gr_gid;
+	gritem->cache.k.gid = gr->gr_gid;
     }
-    item->d.gr = newgr;
-    item->refcnt = 1;
+    gritem->cache.d.gr = newgr;
+    gritem->cache.refcnt = 1;
 
-    return item;
+    return &gritem->cache;
 }
 
 void
@@ -615,41 +623,41 @@ struct group *
 sudo_fakegrnam(group)
     const char *group;
 {
-    struct cache_item *item;
+    struct cache_item_gr *gritem;
     struct group *gr;
     struct rbnode *node;
     size_t len, namelen;
     int i;
 
     namelen = strlen(group);
-    len = sizeof(*item) + sizeof(*gr) + namelen + 1;
+    len = sizeof(*gritem) + namelen + 1;
 
     for (i = 0; i < 2; i++) {
-	item = ecalloc(1, len);
-	gr = (struct group *) ((char *)item + sizeof(*item));
+	gritem = ecalloc(1, len);
+	gr = &gritem->gr;
 	gr->gr_gid = (gid_t) atoi(group + 1);
-	gr->gr_name = (char *)gr + sizeof(struct group);
+	gr->gr_name = (char *)(gritem + 1);
 	memcpy(gr->gr_name, group, namelen + 1);
 
-	item->refcnt = 1;
-	item->d.gr = gr;
+	gritem->cache.refcnt = 1;
+	gritem->cache.d.gr = gr;
 	if (i == 0) {
 	    /* Store by gid, overwriting cached version. */
-	    item->k.gid = gr->gr_gid;
-	    if ((node = rbinsert(grcache_bygid, item)) != NULL) {
+	    gritem->cache.k.gid = gr->gr_gid;
+	    if ((node = rbinsert(grcache_bygid, &gritem->cache)) != NULL) {
 		gr_delref_item(node->data);
-		node->data = item;
+		node->data = &gritem->cache;
 	    }
 	} else {
 	    /* Store by name, overwriting cached version. */
-	    item->k.name = gr->gr_name;
-	    if ((node = rbinsert(grcache_byname, item)) != NULL) {
+	    gritem->cache.k.name = gr->gr_name;
+	    if ((node = rbinsert(grcache_byname, &gritem->cache)) != NULL) {
 		gr_delref_item(node->data);
-		node->data = item;
+		node->data = &gritem->cache;
 	    }
 	}
     }
-    item->refcnt++;
+    gritem->cache.refcnt++;
     return gr;
 }
 
