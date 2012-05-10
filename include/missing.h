@@ -123,6 +123,17 @@
 #endif
 
 /*
+ * Older systems may be missing stddef.h and/or offsetof macro
+ */
+#ifndef offsetof
+# ifdef __offsetof
+#  define offsetof(type, field) __offsetof(type, field)
+# else
+#  define offsetof(type, field) ((size_t)(&((type *)0)->field))
+# endif
+#endif
+
+/*
  * Simple isblank() macro and function for systems without it.
  */
 #ifndef HAVE_ISBLANK
