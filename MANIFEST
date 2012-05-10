@@ -131,6 +131,9 @@ plugins/sample_group/getgrent.c
 plugins/sample_group/plugin_test.c
 plugins/sample_group/sample_group.c
 plugins/sample_group/sample_group.sym
+plugins/system_group/Makefile.in
+plugins/system_group/system_group.c
+plugins/system_group/system_group.sym
 plugins/sudoers/Makefile.in
 plugins/sudoers/aixcrypt.exp
 plugins/sudoers/alias.c
