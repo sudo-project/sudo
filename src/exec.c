@@ -636,7 +636,7 @@ handler_nofwd(int s, siginfo_t *info, void *context)
     unsigned char signo = (unsigned char)s;
 
     /* Only forward user-generated signals. */
-    if (info->si_code <= 0) {
+    if (info == NULL || info->si_code <= 0) {
 	/*
 	 * The pipe is non-blocking, if we overflow the kernel's pipe
 	 * buffer we drop the signal.  This is not a problem in practice.
