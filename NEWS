@@ -1,3 +1,10 @@
+What's new in Sudo 1.7.9p1?
+
+ * Fixed a bug when matching against an IP address with an associated
+   netmask in the sudoers file.  In certain circumstances, this
+   could allow users to run commands on hosts they are not authorized
+   for.
+
 What's new in Sudo 1.7.9?
 
  * Fixed a false positive in visudo strict mode when aliases are
