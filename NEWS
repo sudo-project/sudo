@@ -76,6 +76,13 @@ What's new in Sudo 1.8.5?
    This can be used to restore the pre-1.7.3 sudo group lookup
    behavior.
 
+What's new in Sudo 1.8.4p5?
+
+ * Fixed a bug when matching against an IP address with an associated
+   netmask in the sudoers file.  In certain circumstances, this
+   could allow users to run commands on hosts they are not authorized
+   for.
+
 What's new in Sudo 1.8.4p4?
 
  * Fixed a bug introduced in Sudo 1.8.4 which prevented "sudo -v"
