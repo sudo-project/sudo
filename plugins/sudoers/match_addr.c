@@ -74,7 +74,7 @@ addr_matches_if(char *n)
     for (ifp = interfaces; ifp != NULL; ifp = ifp->next) {
 	if (ifp->family != family)
 	    continue;
-	switch(family) {
+	switch (family) {
 	    case AF_INET:
 		if (ifp->addr.ip4.s_addr == addr.ip4.s_addr ||
 		    (ifp->addr.ip4.s_addr & ifp->netmask.ip4.s_addr)
@@ -92,6 +92,7 @@ addr_matches_if(char *n)
 		}
 		if (j == sizeof(addr.ip6.s6_addr))
 		    debug_return_bool(true);
+		break;
 #endif /* HAVE_STRUCT_IN6_ADDR */
 	}
     }
@@ -156,10 +157,11 @@ addr_matches_if_netmask(char *n, char *m)
     for (ifp = interfaces; ifp != NULL; ifp = ifp->next) {
 	if (ifp->family != family)
 	    continue;
-	switch(family) {
+	switch (family) {
 	    case AF_INET:
 		if ((ifp->addr.ip4.s_addr & mask.ip4.s_addr) == addr.ip4.s_addr)
 		    debug_return_bool(true);
+		break;
 #ifdef HAVE_STRUCT_IN6_ADDR
 	    case AF_INET6:
 		for (j = 0; j < sizeof(addr.ip6.s6_addr); j++) {
@@ -168,6 +170,7 @@ addr_matches_if_netmask(char *n, char *m)
 		}
 		if (j == sizeof(addr.ip6.s6_addr))
 		    debug_return_bool(true);
+		break;
 #endif /* HAVE_STRUCT_IN6_ADDR */
 	}
     }
