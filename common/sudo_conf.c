@@ -43,6 +43,7 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <ctype.h>
+#include <errno.h>
 
 #define SUDO_ERROR_WRAP	0
 
@@ -54,6 +55,14 @@
 #include "sudo_plugin.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
+#include "secure_path.h"
+#include "gettext.h"
+
+#ifdef __TANDEM
+# define ROOT_UID	65535
+#else
+# define ROOT_UID	0
+#endif
 
 #ifndef _PATH_SUDO_ASKPASS
 # define _PATH_SUDO_ASKPASS	NULL
@@ -96,10 +105,10 @@ static struct sudo_conf_data {
     NULL,
     {
 #define SUDO_CONF_ASKPASS_IDX	0
-	{ "askpass", sizeof("askpass"), _PATH_SUDO_ASKPASS },
+	{ "askpass", sizeof("askpass") - 1, _PATH_SUDO_ASKPASS },
 #ifdef _PATH_SUDO_NOEXEC
 #define SUDO_CONF_NOEXEC_IDX	1
-	{ "noexec", sizeof("noexec"), _PATH_SUDO_NOEXEC },
+	{ "noexec", sizeof("noexec") - 1, _PATH_SUDO_NOEXEC },
 #endif
 	{ NULL }
     }
@@ -195,8 +204,10 @@ static bool
 set_plugin(const char *entry)
 {
     struct plugin_info *info;
-    const char *name, *path;
-    size_t namelen;
+    const char *name, *path, *cp, *ep;
+    char **options = NULL;
+    size_t namelen, pathlen;
+    unsigned int nopts;
 
     /* Parse Plugin line */
     name = entry;
@@ -206,12 +217,37 @@ set_plugin(const char *entry)
     namelen = (size_t)(path - name);
     while (isblank((unsigned char)*path))
 	path++;
+    if ((cp = strpbrk(path, " \t")) != NULL) {
+	/* Convert any options to an array. */
+	pathlen = (size_t)(cp - path);
+	while (isblank((unsigned char)*cp))
+	    cp++;
+	/* Count number of options and allocate array. */
+	for (ep = cp, nopts = 1; (ep = strpbrk(ep, " \t")) != NULL; nopts++) {
+	    while (isblank((unsigned char)*ep))
+		ep++;
+	}
+	options = emalloc2(nopts + 1, sizeof(*options));
+	/* Fill in options array, there is at least one element. */
+	for (nopts = 0; (ep = strpbrk(cp, " \t")) != NULL; ) {
+	    options[nopts++] = estrndup(cp, (size_t)(ep - cp));
+	    while (isblank((unsigned char)*ep))
+		ep++;
+	    cp = ep;
+	}
+	options[nopts++] = estrdup(cp);
+	options[nopts] = NULL;
+    } else {
+	/* No extra options. */
+	pathlen = strlen(path);
+    }
 
-    info = emalloc(sizeof(*info));
+    info = ecalloc(1, sizeof(*info));
     info->symbol_name = estrndup(name, namelen);
-    info->path = estrdup(path);
+    info->path = estrndup(path, pathlen);
+    info->options = options;
     info->prev = info;
-    info->next = NULL;
+    /* info->next = NULL; */
     tq_append(&sudo_conf_data.plugins, info);
 
     return true;
@@ -250,19 +286,48 @@ sudo_conf_disable_coredump(void)
 }
 
 /*
- * Reads in /etc/sudo.conf
- * Returns a list of plugins.
+ * Reads in /etc/sudo.conf and populates sudo_conf_data.
  */
 void
 sudo_conf_read(void)
 {
     struct sudo_conf_table *cur;
     struct plugin_info *info;
+    struct stat sb;
     FILE *fp;
     char *cp;
 
-    if ((fp = fopen(_PATH_SUDO_CONF, "r")) == NULL)
+    switch (sudo_secure_file(_PATH_SUDO_CONF, ROOT_UID, -1, &sb)) {
+	case SUDO_PATH_SECURE:
+	    break;
+	case SUDO_PATH_MISSING:
+	    /* Root should always be able to read sudo.conf. */
+	    if (errno != ENOENT && geteuid() == ROOT_UID)
+		warning(_("unable to stat %s"), _PATH_SUDO_CONF);
+	    goto done;
+	case SUDO_PATH_BAD_TYPE:
+	    warningx(_("%s is not a regular file"), _PATH_SUDO_CONF);
+	    goto done;
+	case SUDO_PATH_WRONG_OWNER:
+	    warningx(_("%s is owned by uid %u, should be %u"),
+		_PATH_SUDO_CONF, (unsigned int) sb.st_uid, ROOT_UID);
+	    goto done;
+	case SUDO_PATH_WORLD_WRITABLE:
+	    warningx(_("%s is world writable"), _PATH_SUDO_CONF);
+	    goto done;
+	case SUDO_PATH_GROUP_WRITABLE:
+	    warningx(_("%s is group writable"), _PATH_SUDO_CONF);
+	    goto done;
+	default:
+	    /* NOTREACHED */
+	    goto done;
+    }
+
+    if ((fp = fopen(_PATH_SUDO_CONF, "r")) == NULL) {
+	if (errno != ENOENT && geteuid() == ROOT_UID)
+	    warning(_("unable to open %s"), _PATH_SUDO_CONF);
 	goto done;
+    }
 
     while ((cp = sudo_parseln(fp)) != NULL) {
 	/* Skip blank or comment lines */
@@ -285,19 +350,21 @@ sudo_conf_read(void)
 done:
     if (tq_empty(&sudo_conf_data.plugins)) {
 	/* Default policy plugin */
-	info = emalloc(sizeof(*info));
+	info = ecalloc(1, sizeof(*info));
 	info->symbol_name = "sudoers_policy";
 	info->path = SUDOERS_PLUGIN;
+	/* info->options = NULL; */
 	info->prev = info;
-	info->next = NULL;
+	/* info->next = NULL; */
 	tq_append(&sudo_conf_data.plugins, info);
 
 	/* Default I/O plugin */
-	info = emalloc(sizeof(*info));
+	info = ecalloc(1, sizeof(*info));
 	info->symbol_name = "sudoers_io";
 	info->path = SUDOERS_PLUGIN;
+	/* info->options = NULL; */
 	info->prev = info;
-	info->next = NULL;
+	/* info->next = NULL; */
 	tq_append(&sudo_conf_data.plugins, info);
     }
 }

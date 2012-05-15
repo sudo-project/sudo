@@ -207,9 +207,8 @@ main(int argc, char *argv[])
 		usage(1);
 	}
     }
-    argc -= optind;
-    argv += optind;
-    if (argc)
+    /* There should be no other command line arguments. */
+    if (argc - optind != 0)
 	usage(1);
 
     sudo_setpwent();
@@ -564,9 +563,9 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 	(void) unlink(sp->tpath);
 	if (!oldperms && fstat(sp->fd, &sb) != -1) {
 	    if (sb.st_uid != SUDOERS_UID || sb.st_gid != SUDOERS_GID)
-		(void) chown(sp->path, SUDOERS_UID, SUDOERS_GID);
+		ignore_result(chown(sp->path, SUDOERS_UID, SUDOERS_GID));
 	    if ((sb.st_mode & 0777) != SUDOERS_MODE)
-		(void) chmod(sp->path, SUDOERS_MODE);
+		ignore_result(chmod(sp->path, SUDOERS_MODE));
 	}
 	rval = true;
 	goto done;
@@ -752,7 +751,7 @@ run_command(char *path, char **argv)
     pid_t pid, rv;
     debug_decl(run_command, SUDO_DEBUG_UTIL)
 
-    switch (pid = fork()) {
+    switch (pid = sudo_debug_fork()) {
 	case -1:
 	    error(1, _("unable to execute %s"), path);
 	    break;	/* NOTREACHED */
@@ -880,13 +879,13 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	    break;
     }
     if (entry == NULL) {
-	entry = emalloc(sizeof(*entry));
+	entry = ecalloc(1, sizeof(*entry));
 	entry->path = estrdup(path);
-	entry->modified = 0;
+	/* entry->modified = 0; */
 	entry->prev = entry;
-	entry->next = NULL;
+	/* entry->next = NULL; */
 	entry->fd = open(entry->path, open_flags, SUDOERS_MODE);
-	entry->tpath = NULL;
+	/* entry->tpath = NULL; */
 	entry->doedit = doedit;
 	if (entry->fd == -1) {
 	    warning("%s", entry->path);
@@ -1280,11 +1279,10 @@ quit(int signo)
 #define	emsg	 " exiting due to signal: "
     myname = getprogname();
     signame = strsignal(signo);
-    if (write(STDERR_FILENO, myname, strlen(myname)) == -1 ||
-	write(STDERR_FILENO, emsg, sizeof(emsg) - 1) == -1 ||
-	write(STDERR_FILENO, signame, strlen(signame)) == -1 ||
-	write(STDERR_FILENO, "\n", 1) == -1)
-	/* shut up glibc */;
+    ignore_result(write(STDERR_FILENO, myname, strlen(myname)));
+    ignore_result(write(STDERR_FILENO, emsg, sizeof(emsg) - 1));
+    ignore_result(write(STDERR_FILENO, signame, strlen(signame)));
+    ignore_result(write(STDERR_FILENO, "\n", 1));
     _exit(signo);
 }
 

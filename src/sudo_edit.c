@@ -16,8 +16,6 @@
 
 #include <config.h>
 
-#if defined(HAVE_SETRESUID) || defined(HAVE_SETREUID) || defined(HAVE_SETEUID)
-
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
@@ -53,6 +51,8 @@
 #endif
 
 #include "sudo.h"
+
+#if defined(HAVE_SETRESUID) || defined(HAVE_SETREUID) || defined(HAVE_SETEUID)
 
 static void
 switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)

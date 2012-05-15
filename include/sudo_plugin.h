@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2012 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,7 +19,7 @@
 
 /* API version major/minor */
 #define SUDO_API_VERSION_MAJOR 1
-#define SUDO_API_VERSION_MINOR 1
+#define SUDO_API_VERSION_MINOR 2
 #define SUDO_API_MKVERSION(x, y) ((x << 16) | y)
 #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR, SUDO_API_VERSION_MINOR)
 
@@ -29,7 +29,7 @@
 #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \
     *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
 } while(0)
-#define SUDO_VERSION_SET_MINOR(vp, n) do { \
+#define SUDO_API_VERSION_SET_MINOR(vp, n) do { \
     *(vp) = (*(vp) & 0xffff0000) | (n); \
 } while(0)
 
@@ -55,6 +55,59 @@ typedef int (*sudo_conv_t)(int num_msgs, const struct sudo_conv_message msgs[],
 	struct sudo_conv_reply replies[]);
 typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
 
+/*
+ * Hooks allow a plugin to hook into specific sudo and/or libc functions.
+ */
+
+/* Hook functions typedefs. */
+typedef int (*sudo_hook_fn_t)();
+typedef int (*sudo_hook_fn_setenv_t)(const char *name, const char *value, int overwrite, void *closure);
+typedef int (*sudo_hook_fn_putenv_t)(char *string, void *closure);
+typedef int (*sudo_hook_fn_getenv_t)(const char *name, char **value, void *closure);
+typedef int (*sudo_hook_fn_unsetenv_t)(const char *name, void *closure);
+
+/* Hook structure definition. */
+struct sudo_hook {
+    int hook_version;
+    int hook_type;
+    sudo_hook_fn_t hook_fn;
+    void *closure;
+};
+
+/* Hook API version major/minor */
+#define SUDO_HOOK_VERSION_MAJOR	1
+#define SUDO_HOOK_VERSION_MINOR	0
+#define SUDO_HOOK_MKVERSION(x, y) ((x << 16) | y)
+#define SUDO_HOOK_VERSION SUDO_HOOK_MKVERSION(SUDO_HOOK_VERSION_MAJOR, SUDO_HOOK_VERSION_MINOR)
+
+/* Getters and setters for hook API version */
+#define SUDO_HOOK_VERSION_GET_MAJOR(v) ((v) >> 16)
+#define SUDO_HOOK_VERSION_GET_MINOR(v) ((v) & 0xffff)
+#define SUDO_HOOK_VERSION_SET_MAJOR(vp, n) do { \
+    *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
+} while(0)
+#define SUDO_HOOK_VERSION_SET_MINOR(vp, n) do { \
+    *(vp) = (*(vp) & 0xffff0000) | (n); \
+} while(0)
+
+/*
+ * Hook function return values.
+ */
+#define SUDO_HOOK_RET_ERROR	-1	/* error */
+#define SUDO_HOOK_RET_NEXT	0	/* go to the next hook in the list */
+#define SUDO_HOOK_RET_STOP	1	/* stop hook processing for this type */
+
+/*
+ * Hooks for setenv/unsetenv/putenv/getenv.
+ * This allows the plugin to be notified when a PAM module modifies
+ * the environment so it can update the copy of the environment that
+ * is passed to execve().
+ */
+#define SUDO_HOOK_SETENV	1
+#define SUDO_HOOK_UNSETENV	2
+#define SUDO_HOOK_PUTENV	3
+#define SUDO_HOOK_GETENV	4
+
 /* Policy plugin type and defines */
 struct passwd;
 struct policy_plugin {
@@ -63,7 +116,8 @@ struct policy_plugin {
     unsigned int version; /* always SUDO_API_VERSION */
     int (*open)(unsigned int version, sudo_conv_t conversation,
 	sudo_printf_t sudo_printf, char * const settings[],
-	char * const user_info[], char * const user_env[]);
+	char * const user_info[], char * const user_env[],
+	char * const plugin_plugins[]);
     void (*close)(int exit_status, int error); /* wait status or error */
     int (*show_version)(int verbose);
     int (*check_policy)(int argc, char * const argv[],
@@ -73,7 +127,9 @@ struct policy_plugin {
 	const char *list_user);
     int (*validate)(void);
     void (*invalidate)(int remove);
-    int (*init_session)(struct passwd *pwd);
+    int (*init_session)(struct passwd *pwd, char **user_env_out[]);
+    void (*register_hooks)(int version, int (*register_hook)(struct sudo_hook *hook));
+    void (*deregister_hooks)(int version, int (*deregister_hook)(struct sudo_hook *hook));
 };
 
 /* I/O plugin type and defines */
@@ -84,7 +140,8 @@ struct io_plugin {
     int (*open)(unsigned int version, sudo_conv_t conversation,
 	sudo_printf_t sudo_printf, char * const settings[],
 	char * const user_info[], char * const command_info[],
-	int argc, char * const argv[], char * const user_env[]);
+	int argc, char * const argv[], char * const user_env[],
+	char * const plugin_plugins[]);
     void (*close)(int exit_status, int error); /* wait status or error */
     int (*show_version)(int verbose);
     int (*log_ttyin)(const char *buf, unsigned int len);
@@ -92,6 +149,8 @@ struct io_plugin {
     int (*log_stdin)(const char *buf, unsigned int len);
     int (*log_stdout)(const char *buf, unsigned int len);
     int (*log_stderr)(const char *buf, unsigned int len);
+    void (*register_hooks)(int version, int (*register_hook)(struct sudo_hook *hook));
+    void (*deregister_hooks)(int version, int (*deregister_hook)(struct sudo_hook *hook));
 };
 
 /* Sudoers group plugin version major/minor */

@@ -74,13 +74,13 @@ bsdauth_init(struct passwd *pw, sudo_auth *auth)
     else
 	state.lc = login_getclass(pw->pw_uid ? LOGIN_DEFCLASS : LOGIN_DEFROOTCLASS);
     if (state.lc == NULL) {
-	log_error(USE_ERRNO|NO_EXIT|NO_MAIL,
+	log_error(USE_ERRNO|NO_MAIL,
 	    _("unable to get login class for user %s"), pw->pw_name);
 	debug_return_int(AUTH_FATAL);
     }
 
     if ((state.as = auth_open()) == NULL) {
-	log_error(USE_ERRNO|NO_EXIT|NO_MAIL,
+	log_error(USE_ERRNO|NO_MAIL,
 	    _("unable to begin bsd authentication"));
 	login_close(state.lc);
 	debug_return_int(AUTH_FATAL);
@@ -89,7 +89,7 @@ bsdauth_init(struct passwd *pw, sudo_auth *auth)
     /* XXX - maybe sanity check the auth style earlier? */
     login_style = login_getstyle(state.lc, login_style, "auth-sudo");
     if (login_style == NULL) {
-	log_error(NO_EXIT|NO_MAIL, _("invalid authentication type"));
+	log_error(NO_MAIL, _("invalid authentication type"));
 	auth_close(state.as);
 	login_close(state.lc);
 	debug_return_int(AUTH_FATAL);
@@ -98,7 +98,7 @@ bsdauth_init(struct passwd *pw, sudo_auth *auth)
      if (auth_setitem(state.as, AUTHV_STYLE, login_style) < 0 ||
 	auth_setitem(state.as, AUTHV_NAME, pw->pw_name) < 0 ||
 	auth_setitem(state.as, AUTHV_CLASS, login_class) < 0) {
-	log_error(NO_EXIT|NO_MAIL, _("unable to setup authentication"));
+	log_error(NO_MAIL, _("unable to setup authentication"));
 	auth_close(state.as);
 	login_close(state.lc);
 	debug_return_int(AUTH_FATAL);
@@ -170,7 +170,7 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	debug_return_int(AUTH_INTR);
 
     if ((s = auth_getvalue(as, "errormsg")) != NULL)
-	log_error(NO_EXIT|NO_MAIL, "%s", s);
+	log_error(NO_MAIL, "%s", s);
     debug_return_int(AUTH_FAILURE);
 }
 

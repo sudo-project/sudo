@@ -131,13 +131,15 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	    }
 	    policy_plugin->handle = handle;
 	    policy_plugin->name = info->symbol_name;
+	    policy_plugin->options = info->options;
 	    policy_plugin->u.generic = plugin;
 	} else if (plugin->type == SUDO_IO_PLUGIN) {
-	    container = emalloc(sizeof(*container));
+	    container = ecalloc(1, sizeof(*container));
 	    container->prev = container;
-	    container->next = NULL;
+	    /* container->next = NULL; */
 	    container->handle = handle;
 	    container->name = info->symbol_name;
+	    container->options = info->options;
 	    container->u.generic = plugin;
 	    tq_append(io_plugins, container);
 	}
@@ -151,6 +153,16 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	warningx(_("policy plugin %s does not include a check_policy method"),
 	    policy_plugin->name);
 	goto done;
+    }
+
+    /* Install hooks (XXX - later). */
+    if (policy_plugin->u.policy->version >= SUDO_API_MKVERSION(1, 2)) {
+	if (policy_plugin->u.policy->register_hooks != NULL)
+	    policy_plugin->u.policy->register_hooks(SUDO_HOOK_VERSION, register_hook);
+	tq_foreach_fwd(io_plugins, container) {
+	    if (container->u.io->register_hooks != NULL)
+		container->u.io->register_hooks(SUDO_HOOK_VERSION, register_hook);
+	}
     }
 
     rval = true;

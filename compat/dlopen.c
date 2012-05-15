@@ -77,7 +77,26 @@ sudo_dlsym(void *vhandle, const char *symbol)
     shl_t handle = vhandle;
     void *value = NULL;
 
-    (void)shl_findsym(&handle, symbol, TYPE_UNDEFINED, &value);
+    /*
+     * Note that the behavior of of RTLD_NEXT and RTLD_SELF 
+     * differs from most implementations when called from
+     * a shared library.
+     */
+    if (vhandle == RTLD_NEXT) {
+	/* Iterate over all shared libs looking for symbol. */
+	struct shl_descriptor *desc;
+	int idx = 0;
+	while (shl_get(idx++, &desc) == 0) {
+	    if (shl_findsym(&desc->handle, symbol, TYPE_UNDEFINED, &value) == 0)
+		break;
+	}
+    } else {
+	if (vhandle == RTLD_DEFAULT)
+	    handle = NULL;
+	else if (vhandle == RTLD_SELF)
+	    handle = PROG_HANDLE;
+	(void)shl_findsym(&handle, symbol, TYPE_UNDEFINED, &value);
+    }
 
     return value;
 }
@@ -117,9 +136,11 @@ sudo_dlsym(void *handle, const char *symbol)
 {
     struct sudo_preload_table *sym;
 
-    for (sym = sudo_preload_table; sym->name != NULL; sym++) {
-	if (strcmp(symbol, sym->name) == 0)
-	    return sym->address;
+    if (symbol != RTLD_NEXT && symbol != RTLD_DEFAULT && symbol != RTLD_SELF) {
+	for (sym = sudo_preload_table; sym->name != NULL; sym++) {
+	    if (strcmp(symbol, sym->name) == 0)
+		return sym->address;
+	}
     }
     return NULL;
 }

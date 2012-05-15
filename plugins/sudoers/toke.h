@@ -33,11 +33,6 @@ extern int (*trace_print)(const char *msg);
 /* realloc() to size + COMMANDARGINC to make room for command args */
 #define COMMANDARGINC   64
 
-/*
- * XXX - want to use debug file for lexer tracing, e.g.
- *       sudo_debug_printf2(SUDO_DEBUG_PARSER|SUDO_DEBUG_DEBUG, "%s", msg);
- *       but need to add buffering so that it is line oriented.
- */
 #define LEXTRACE(msg)   do {						\
     if (trace_print != NULL)						\
 	(*trace_print)(msg);						\

@@ -48,8 +48,9 @@ plugin.  The I<symbol_name> is the name of the C<struct policy_plugin>
 or C<struct io_plugin> in the plugin shared object.  The I<path>
 may be fully qualified or relative.  If not fully qualified it is
 relative to the F<@prefix@/libexec> directory.  Any additional
-parameters after the I<path> are ignored.  Lines that don't begin
-with C<Plugin> or C<Path> are silently ignored.
+parameters after the I<path> are passed as options to the plugin's
+I<open> function.  Lines that don't begin with C<Plugin>, C<Path>,
+C<Debug> or C<Set> are silently ignored.
 
 The same shared object may contain multiple plugins, each with a
 different symbol name.  The shared object file must be owned by uid
@@ -61,13 +62,17 @@ This limitation does not apply to I/O plugins.
  # Default @sysconfdir@/sudo.conf file
  #
  # Format:
- #   Plugin plugin_name plugin_path
+ #   Plugin plugin_name plugin_path plugin_options ...
  #   Path askpass /path/to/askpass
+ #   Path noexec /path/to/sudo_noexec.so
+ #   Debug sudo /var/log/sudo_debug all@warn
+ #   Set disable_coredump true
  #
  # The plugin_path is relative to @prefix@/libexec unless
  #   fully qualified.
  # The plugin_name corresponds to a global symbol in the plugin
  #   that contains the plugin interface structure.
+ # The plugin_options are optional.
  #
  Plugin sudoers_policy sudoers.so
  Plugin sudoers_io sudoers.so
@@ -85,8 +90,9 @@ so that B<sudo> can load it.
      unsigned int type; /* always SUDO_POLICY_PLUGIN */
      unsigned int version; /* always SUDO_API_VERSION */
      int (*open)(unsigned int version, sudo_conv_t conversation,
-		 sudo_printf_t plugin_printf, char * const settings[],
-		 char * const user_info[], char * const user_env[]);
+                 sudo_printf_t plugin_printf, char * const settings[],
+                 char * const user_info[], char * const user_env[],
+                 char * const plugin_options[]);
      void (*close)(int exit_status, int error);
      int (*show_version)(int verbose);
      int (*check_policy)(int argc, char * const argv[],
@@ -96,7 +102,11 @@ so that B<sudo> can load it.
                  const char *list_user);
      int (*validate)(void);
      void (*invalidate)(int remove);
-     int (*init_session)(struct passwd *pwd);
+     int (*init_session)(struct passwd *pwd, char **user_env[]);
+     void (*register_hooks)(int version,
+	int (*register_hook)(struct sudo_hook *hook));
+     void (*deregister_hooks)(int version,
+	int (*deregister_hook)(struct sudo_hook *hook));
  };
 
 The policy_plugin struct has the following fields:
@@ -118,7 +128,8 @@ built against.
 
  int (*open)(unsigned int version, sudo_conv_t conversation,
              sudo_printf_t plugin_printf, char * const settings[],
-             char * const user_info[], char * const user_env[]);
+             char * const user_info[], char * const user_env[],
+             char * const plugin_options[]);
 
 Returns 1 on success, 0 on failure, -1 if a general error occurred,
 or -2 if there was a usage error.  In the latter case, B<sudo> will
@@ -316,13 +327,50 @@ itself but the I<value> might.
 
 =over 4
 
+=item pid=int
+
+The process ID of the running B<sudo> process.
+Only available starting with API version 1.2
+
+=item ppid=int
+
+The parent process ID of the running B<sudo> process.
+Only available starting with API version 1.2
+
+=item sid=int
+
+The session ID of the running B<sudo> process or 0 if B<sudo> is
+not part of a POSIX job control session.
+Only available starting with API version 1.2
+
+=item pgid=int
+
+The ID of the process group that the running B<sudo> process belongs
+to.
+Only available starting with API version 1.2
+
+=item tcpgid=int
+
+The ID of the forground process group associated with the terminal
+device associcated with the B<sudo> process or -1 if there is no
+terminal present.
+Only available starting with API version 1.2
+
 =item user=string
 
 The name of the user invoking B<sudo>.
 
+=item euid=uid_t
+
+The effective user ID of the user invoking B<sudo>.
+
 =item uid=uid_t
 
 The real user ID of the user invoking B<sudo>.
+
+=item egid=gid_t
+
+The effective group ID of the user invoking B<sudo>.
 
 =item gid=gid_t
 
@@ -368,6 +416,19 @@ The user's environment in the form of a C<NULL>-terminated vector of
 When parsing I<user_env>, the plugin should split on the B<first>
 equal sign ('=') since the I<name> field will never include one
 itself but the I<value> might.
+
+=item plugin_options
+
+Any (non-comment) strings immediately after the plugin path are
+treated as arguments to the plugin.  These arguments are split on
+a white space boundary and are passed to the plugin in the form of
+a C<NULL>-terminated array of strings.  If no arguments were
+specified, I<plugin_options> will be the NULL pointer.
+
+NOTE: the I<plugin_options> parameter is only available starting with
+API version 1.2.  A plugin B<must> check the API version specified
+by the B<sudo> front end before using I<plugin_options>.  Failure to
+do so may result in a crash.
 
 =back
 
@@ -718,27 +779,97 @@ support credential caching.
 
 =item init_session
 
- int (*init_session)(struct passwd *pwd);
+ int (*init_session)(struct passwd *pwd, char **user_envp[);
 
-The C<init_session> function is called when B<sudo> sets up the
-execution environment for the command, immediately before the
-contents of the I<command_info> list are applied (before the uid
-changes).  This can be used to do session setup that is not supported
-by I<command_info>, such as opening the PAM session.
+The C<init_session> function is called before B<sudo> sets up the
+execution environment for the command.  It is run in the parent
+B<sudo> process and before any uid or gid changes.  This can be used
+to perform session setup that is not supported by I<command_info>,
+such as opening the PAM session.  The C<close> function can be
+used to tear down the session that was opened by C<init_session>.
 
 The I<pwd> argument points to a passwd struct for the user the
 command will be run as if the uid the command will run as was found
 in the password database, otherwise it will be NULL.
+
+The I<user_env> argument points to the environment the command will
+run in, in the form of a C<NULL>-terminated vector of "name=value"
+strings.  This is the same string passed back to the front end via
+the Policy Plugin's I<user_env_out> parameter.  If the C<init_session>
+function needs to modify the user environment, it should update the
+pointer stored in I<user_env>.  The expected use case is to merge
+the contents of the PAM environment (if any) with the contents of
+I<user_env>.  NOTE: the I<user_env> parameter is only available
+starting with API version 1.2.  A plugin B<must> check the API
+version specified by the B<sudo> front end before using I<user_env>.
+Failure to do so may result in a crash.
 
 Returns 1 on success, 0 on failure and -1 on error.
 On error, the plugin may optionally call the conversation or plugin_printf
 function with C<SUDO_CONF_ERROR_MSG> to present additional
 error information to the user.
 
+=item register_hooks
+
+ void (*register_hooks)(int version,
+    int (*register_hook)(struct sudo_hook *hook));
+
+The C<register_hooks> function is called by the sudo front end to
+register any hooks the plugin needs.  If the plugin does not support
+hooks, C<register_hooks> should be set to the NULL pointer.
+
+The I<version> argument describes the version of the hooks API
+supported by the B<sudo> front end.
+
+The C<register_hook> function should be used to register any supported
+hooks the plugin needs.  It returns 0 on success, 1 if the hook
+type is not supported and -1 if the major version in C<struct hook>
+does not match the front end's major hook API version.
+
+See the L<Hook Function API> section below for more information
+about hooks.
+
+NOTE: the C<register_hooks> function is only available starting
+with API version 1.2.  If the B<sudo> front end doesn't support API
+version 1.2 or higher, C<register_hooks> will not be called.
+
+=item deregister_hooks
+
+ void (*deregister_hooks)(int version,
+    int (*deregister_hook)(struct sudo_hook *hook));
+
+The C<deregister_hooks> function is called by the sudo front end
+to deregister any hooks the plugin has registered.  If the plugin
+does not support hooks, C<deregister_hooks> should be set to the
+NULL pointer.
+
+The I<version> argument describes the version of the hooks API
+supported by the B<sudo> front end.
+
+The C<deregister_hook> function should be used to deregister any
+hooks that were put in place by the C<register_hook> function.  If
+the plugin tries to deregister a hook that the front end does not
+support, C<deregister_hook> will return an error.
+
+See the L<Hook Function API> section below for more information
+about hooks.
+
+NOTE: the C<deregister_hooks> function is only available starting
+with API version 1.2.  If the B<sudo> front end doesn't support API
+version 1.2 or higher, C<deregister_hooks> will not be called.
+
 =back
 
-=head3 Version macros
+=head3 Policy Plugin Version Macros
 
+ /* Plugin API version major/minor. */
+ #define SUDO_API_VERSION_MAJOR 1
+ #define SUDO_API_VERSION_MINOR 2
+ #define SUDO_API_MKVERSION(x, y) ((x << 16) | y)
+ #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR,\
+					     SUDO_API_VERSION_MINOR)
+
+ /* Getters and setters for API version */
  #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
  #define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
  #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \
@@ -747,11 +878,6 @@ error information to the user.
  #define SUDO_VERSION_SET_MINOR(vp, n) do { \
      *(vp) = (*(vp) & 0xffff0000) | (n); \
  } while(0)
-
- #define SUDO_API_VERSION_MAJOR 1
- #define SUDO_API_VERSION_MINOR 0
- #define SUDO_API_VERSION ((SUDO_API_VERSION_MAJOR << 16) | \
-                           SUDO_API_VERSION_MINOR)
 
 =head2 I/O Plugin API
 
@@ -762,7 +888,7 @@ error information to the user.
      int (*open)(unsigned int version, sudo_conv_t conversation
                  sudo_printf_t plugin_printf, char * const settings[],
                  char * const user_info[], int argc, char * const argv[],
-                 char * const user_env[]);
+                 char * const user_env[], char * const plugin_options[]);
      void (*close)(int exit_status, int error); /* wait status or error */
      int (*show_version)(int verbose);
      int (*log_ttyin)(const char *buf, unsigned int len);
@@ -770,6 +896,10 @@ error information to the user.
      int (*log_stdin)(const char *buf, unsigned int len);
      int (*log_stdout)(const char *buf, unsigned int len);
      int (*log_stderr)(const char *buf, unsigned int len);
+     void (*register_hooks)(int version,
+	int (*register_hook)(struct sudo_hook *hook));
+     void (*deregister_hooks)(int version,
+	int (*deregister_hook)(struct sudo_hook *hook));
  };
 
 When an I/O plugin is loaded, B<sudo> runs the command in a pseudo-tty.
@@ -811,7 +941,7 @@ built against.
  int (*open)(unsigned int version, sudo_conv_t conversation
              sudo_printf_t plugin_printf, char * const settings[],
              char * const user_info[], int argc, char * const argv[],
-             char * const user_env[]);
+             char * const user_env[], char * const plugin_options[]);
 
 The I<open> function is run before the I<log_input>, I<log_output>
 or I<show_version> functions are called.  It is only called if the
@@ -894,6 +1024,19 @@ The user's environment in the form of a C<NULL>-terminated vector of
 When parsing I<user_env>, the plugin should split on the B<first>
 equal sign ('=') since the I<name> field will never include one
 itself but the I<value> might.
+
+=item plugin_options
+
+Any (non-comment) strings immediately after the plugin path are
+treated as arguments to the plugin.  These arguments are split on
+a white space boundary and are passed to the plugin in the form of
+a C<NULL>-terminated array of strings.  If no arguments were
+specified, I<plugin_options> will be the NULL pointer.
+
+NOTE: the I<plugin_options> parameter is only available starting with
+API version 1.2.  A plugin B<must> check the API version specified
+by the B<sudo> front end before using I<plugin_options>.  Failure to
+do so may result in a crash.
 
 =back
 
@@ -1062,11 +1205,177 @@ The length of I<buf> in bytes.
 
 =back
 
+=item register_hooks
+
+See the L<Policy Plugin API> section for a description of
+C<register_hooks>.
+
+=item deregister_hooks
+
+See the L<Policy Plugin API> section for a description of
+C<deregister_hooks>.
+
 =back
 
-=head3 Version macros
+=head3 I/O Plugin Version Macros
 
 Same as for the L<Policy Plugin API>.
+
+=head2 Hook Function API
+
+Beginning with plugin API version 1.2, it is possible to install
+hooks for certain functions called by the B<sudo> front end.
+
+Currently, the only supported hooks relate to the handling of
+environment variables.  Hooks can be used to intercept attempts to
+get, set, or remove environment variables so that these changes can
+be reflected in the version of the environment that is used to
+execute a command.  A future version of the API will support
+hooking internal B<sudo> front end functions as well.
+
+=head3 Hook structure
+
+Hooks in B<sudo> are described by the following structure:
+
+ typedef int (*sudo_hook_fn_t)();
+
+ struct sudo_hook {
+     int hook_version;
+     int hook_type;
+     sudo_hook_fn_t hook_fn;
+     void *closure;
+ };
+
+The C<sudo_hook> structure has the following fields:
+
+=over 4
+
+=item hook_version
+
+The C<hook_version> field should be set to SUDO_HOOK_VERSION.
+
+=item hook_type
+
+The C<hook_type> field may be one of the following supported hook types:
+
+=over 4
+
+=item SUDO_HOOK_SETENV
+
+The C library C<setenv()> function.  Any registered hooks will run
+before the C library implementation.  The C<hook_fn> field should
+be a function that matches the following typedef:
+
+ typedef int (*sudo_hook_fn_setenv_t)(const char *name,
+    const char *value, int overwrite, void *closure);
+
+If the registered hook does not match the typedef the results are
+unspecified.
+
+=item SUDO_HOOK_UNSETENV
+
+The C library C<unsetenv()> function.  Any registered hooks will run
+before the C library implementation.  The C<hook_fn> field should
+be a function that matches the following typedef:
+
+ typedef int (*sudo_hook_fn_unsetenv_t)(const char *name,
+    void *closure);
+
+=item SUDO_HOOK_GETENV
+
+The C library C<getenv()> function.  Any registered hooks will run
+before the C library implementation.  The C<hook_fn> field should
+be a function that matches the following typedef:
+
+ typedef int (*sudo_hook_fn_getenv_t)(const char *name,
+    char **value, void *closure);
+
+If the registered hook does not match the typedef the results are
+unspecified.
+
+=item SUDO_HOOK_PUTENV
+
+The C library C<putenv()> function.  Any registered hooks will run
+before the C library implementation.  The C<hook_fn> field should
+be a function that matches the following typedef:
+
+ typedef int (*sudo_hook_fn_putenv_t)(char *string,
+    void *closure);
+
+If the registered hook does not match the typedef the results are
+unspecified.
+
+=back
+
+=item hook_fn
+
+ sudo_hook_fn_t hook_fn;
+
+The C<hook_fn> field should be set to the plugin's hook implementation.
+The actual function arguments will vary depending on the C<hook_type>
+(see C<hook_type> above).  In all cases, the C<closure> field of
+C<struct sudo_hook> is passed as the last function parameter.  This
+can be used to pass arbitrary data to the plugin's hook implementation.
+
+The function return value may be one of the following:
+
+=over 4
+
+=item SUDO_HOOK_RET_ERROR
+
+The hook function encountered an error.
+
+=item SUDO_HOOK_RET_NEXT
+
+The hook completed without error, go on to the next hook (including
+the native implementation if applicable).  For example, a C<getenv>
+hook might return C<SUDO_HOOK_RET_NEXT> if the specified variable
+was not found in the private copy of the environment.
+
+=item SUDO_HOOK_RET_STOP
+
+The hook completed without error, stop processing hooks for this
+invocation.  This can be used to replace the native implementation.
+For example, a C<setenv> hook that operates on a private copy of
+the environment but leaves C<environ> unchanged.
+
+=back
+
+=back
+
+Note that it is very easy to create an infinite loop when hooking
+C library functions.  For example, a C<getenv> hook that calls the
+C<snprintf> function may create a loop if the C<snprintf> implementation
+calls C<getenv> to check the locale.  To prevent this, you may wish
+to use a static variable in the hook function to guard against
+nested calls.  E.g.
+
+ static int in_progress = 0; /* avoid recursion */
+ if (in_progress)
+     return SUDO_HOOK_RET_NEXT;
+ in_progress = 1;
+ ...
+ in_progress = 0;
+ return SUDO_HOOK_RET_STOP;
+
+=head3 Hook API Version Macros
+
+ /* Hook API version major/minor */
+ #define SUDO_HOOK_VERSION_MAJOR 1
+ #define SUDO_HOOK_VERSION_MINOR 0
+ #define SUDO_HOOK_MKVERSION(x, y) ((x << 16) | y)
+ #define SUDO_HOOK_VERSION SUDO_HOOK_MKVERSION(SUDO_HOOK_VERSION_MAJOR,\
+					       SUDO_HOOK_VERSION_MINOR)
+
+ /* Getters and setters for hook API version */
+ #define SUDO_HOOK_VERSION_GET_MAJOR(v) ((v) >> 16)
+ #define SUDO_HOOK_VERSION_GET_MINOR(v) ((v) & 0xffff)
+ #define SUDO_HOOK_VERSION_SET_MAJOR(vp, n) do { \
+     *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
+ } while(0)
+ #define SUDO_HOOK_VERSION_SET_MINOR(vp, n) do { \
+     *(vp) = (*(vp) & 0xffff0000) | (n); \
+ } while(0)
 
 =head2 Conversation API
 
@@ -1235,7 +1544,7 @@ present in the password database, I<pwd> will be C<NULL>.
 
 =back
 
-=head3 Version Macros
+=head3 Group API Version Macros
 
  /* Sudoers group plugin version major/minor */
  #define GROUP_API_VERSION_MAJOR 1
@@ -1252,6 +1561,37 @@ present in the password database, I<pwd> will be C<NULL>.
  #define GROUP_API_VERSION_SET_MINOR(vp, n) do { \
      *(vp) = (*(vp) & 0xffff0000) | (n); \
  } while(0)
+
+=head1 PLUGIN API CHANGELOG
+
+The following revisions have been made to the Sudo Plugin API.
+
+=over 4
+
+=item Version 1.0
+
+Initial API version.
+
+=item Version 1.1
+
+The I/O logging plugin's C<open> function was modified to take the
+C<command_info> list as an argument.
+
+=item Version 1.2
+
+The Policy and I/O logging plugins' C<open> functions are now passed
+a list of plugin options if any are specified in F<@sysconfdir@/sudo.conf>.
+
+A simple hooks API has been introduced to allow plugins to hook in to the
+system's environment handling functions.
+
+The C<init_session> Policy plugin function is now passed a pointer
+to the user environment which can be updated as needed.  This can
+be used to merge in environment variables stored in the PAM handle
+before a command is run.
+
+=back
+
 
 =head1 SEE ALSO
 

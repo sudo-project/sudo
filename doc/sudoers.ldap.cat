@@ -12,25 +12,25 @@ DDEESSCCRRIIPPTTIIOONN
 
        Using LDAP for _s_u_d_o_e_r_s has several benefits:
 
-       +o   ssuuddoo no longer needs to read _s_u_d_o_e_r_s in its entirety.  When LDAP is
+       o   ssuuddoo no longer needs to read _s_u_d_o_e_r_s in its entirety.  When LDAP is
            used, there are only two or three LDAP queries per invocation.
            This makes it especially fast and particularly usable in LDAP
            environments.
 
-       +o   ssuuddoo no longer exits if there is a typo in _s_u_d_o_e_r_s.  It is not
+       o   ssuuddoo no longer exits if there is a typo in _s_u_d_o_e_r_s.  It is not
            possible to load LDAP data into the server that does not conform to
            the sudoers schema, so proper syntax is guaranteed.  It is still
            possible to have typos in a user or host name, but this will not
            prevent ssuuddoo from running.
 
-       +o   It is possible to specify per-entry options that override the
+       o   It is possible to specify per-entry options that override the
            global default options.  _/_e_t_c_/_s_u_d_o_e_r_s only supports default options
            and limited options associated with user/host/commands/aliases.
            The syntax is complicated and can be difficult for users to
            understand.  Placing the options directly in the entry is more
            natural.
 
-       +o   The vviissuuddoo program is no longer needed.  vviissuuddoo provides locking
+       o   The vviissuuddoo program is no longer needed.  vviissuuddoo provides locking
            and syntax checking of the _/_e_t_c_/_s_u_d_o_e_r_s file.  Since LDAP updates
            are atomic, locking is no longer necessary.  Because syntax is
            checked when the data is inserted into LDAP, there is no need for a
@@ -747,4 +747,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.4                          January  6, 2012                SUDOERS.LDAP(4)
+1.8.5                           March 14, 2012                 SUDOERS.LDAP(4)

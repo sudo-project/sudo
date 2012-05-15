@@ -53,9 +53,12 @@ static char * const *
 disable_execute(char *const envp[])
 {
 #ifdef _PATH_SUDO_NOEXEC
-    char * const *ev;
-    char *preload, **nenvp;
-    int env_len = 0, env_size = 128;
+    char *preload, **nenvp = NULL;
+    int env_len, env_size;
+    int preload_idx = -1;
+# ifdef RTLD_PRELOAD_ENABLE_VAR
+    bool enabled = false;
+# endif
 #endif /* _PATH_SUDO_NOEXEC */
     debug_decl(disable_execute, SUDO_DEBUG_UTIL)
 
@@ -67,55 +70,59 @@ disable_execute(char *const envp[])
 #endif /* HAVE_PRIV_SET */
 
 #ifdef _PATH_SUDO_NOEXEC
-    nenvp = emalloc2(env_size, sizeof(char *));
-
     /*
      * Preload a noexec file.  For a list of LD_PRELOAD-alikes, see
      * http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html
      * XXX - need to support 32-bit and 64-bit variants
      */
-# if defined(__darwin__) || defined(__APPLE__)
-    nenvp[env_len++] = "DYLD_FORCE_FLAT_NAMESPACE=";
-    preload = fmt_string("DYLD_INSERT_LIBRARIES", sudo_conf_noexec_path());
-# elif defined(__osf__) || defined(__sgi)
-    easprintf(&preload, "_RLD_LIST=%s:DEFAULT", sudo_conf_noexec_path());
-# elif defined(_AIX)
-    preload = fmt_string("LDR_PRELOAD", sudo_conf_noexec_path());
-# else
-    preload = fmt_string("LD_PRELOAD", sudo_conf_noexec_path());
-# endif
-    if (preload == NULL)
-	errorx(1, _("unable to allocate memory"));
-    nenvp[env_len++] = preload;
 
-    for (ev = envp; *ev != NULL; ev++) {
-	/*
-	 * Prune out existing preloaded libraries.
-	 * XXX - should append to new value instead.
-	 */
-# if defined(__darwin__) || defined(__APPLE__)
-	if (strncmp(*ev, "DYLD_INSERT_LIBRARIES=", sizeof("DYLD_INSERT_LIBRARIES=") - 1) == 0)
+    /* Count entries in envp, looking for LD_PRELOAD as we go. */
+    for (env_len = 0; envp[env_len] != NULL; env_len++) {
+	if (strncmp(envp[env_len], RTLD_PRELOAD_VAR "=", sizeof(RTLD_PRELOAD_VAR)) == 0) {
+	    preload_idx = env_len;
 	    continue;
-	if (strncmp(*ev, "DYLD_FORCE_FLAT_NAMESPACE=", sizeof("DYLD_INSERT_LIBRARIES=") - 1) == 0)
-	    continue;
-# elif defined(__osf__) || defined(__sgi)
-	if (strncmp(*ev, "_RLD_LIST=", sizeof("_RLD_LIST=") - 1) == 0)
-	    continue;
-# elif defined(_AIX)
-	if (strncmp(*ev, "LDR_PRELOAD=", sizeof("LDR_PRELOAD=") - 1) == 0)
-	    continue;
-# else
-	if (strncmp(*ev, "LD_PRELOAD=", sizeof("LD_PRELOAD=") - 1) == 0)
-	    continue;
-# endif
-	/* Need at least 2 slots for current element and a NULL. */
-	if (env_len + 2 > env_size) {
-	    env_size += 128;
-	    nenvp = erealloc3(nenvp, env_size, sizeof(char *));
 	}
-	nenvp[env_len++] = *ev;
+#ifdef RTLD_PRELOAD_ENABLE_VAR
+	if (strncmp(envp[env_len], RTLD_PRELOAD_ENABLE_VAR "=", sizeof(RTLD_PRELOAD_ENABLE_VAR)) == 0) {
+	    enabled = true;
+	    continue;
+	}
+#endif
     }
+
+    /* Make a new copy of envp as needed. */
+    env_size = env_len + 1 + (preload_idx == -1);
+#ifdef RTLD_PRELOAD_ENABLE_VAR
+    if (!enabled)
+	env_size++;
+#endif
+    nenvp = emalloc2(env_size, sizeof(*envp));
+    memcpy(nenvp, envp, env_len * sizeof(*envp));
     nenvp[env_len] = NULL;
+
+    /* Prepend our LD_PRELOAD to existing value or add new entry at the end. */
+    if (preload_idx == -1) {
+# ifdef RTLD_PRELOAD_DEFAULT
+	easprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
+# else
+	preload = fmt_string(RTLD_PRELOAD_VAR, sudo_conf_noexec_path());
+# endif
+	if (preload == NULL)
+	    errorx(1, _("unable to allocate memory"));
+	nenvp[env_len++] = preload;
+	nenvp[env_len] = NULL;
+    } else {
+	easprintf(&preload, "%s=%s%s%s", RTLD_PRELOAD_VAR, sudo_conf_noexec_path(), RTLD_PRELOAD_DELIM, nenvp[preload_idx]);
+	nenvp[preload_idx] = preload;
+    }
+# ifdef RTLD_PRELOAD_ENABLE_VAR
+    if (!enabled) {
+	nenvp[env_len++] = RTLD_PRELOAD_ENABLE_VAR "=";
+	nenvp[env_len] = NULL;
+    }
+# endif
+
+    /* Install new env pointer. */
     envp = nenvp;
 #endif /* _PATH_SUDO_NOEXEC */
 

@@ -115,9 +115,6 @@
 /* Define to 1 if you have the `dlopen' function. */
 #undef HAVE_DLOPEN
 
-/* Define to 1 if your glob.h defines the GLOB_BRACE and GLOB_TILDE flags. */
-#undef HAVE_EXTENDED_GLOB
-
 /* Define to 1 if your system has the F_CLOSEM fcntl. */
 #undef HAVE_FCNTL_CLOSEM
 
@@ -375,6 +372,9 @@
 /* Define to 1 if you use PAM authentication. */
 #undef HAVE_PAM
 
+/* Define to 1 if you have the `pam_getenvlist' function. */
+#undef HAVE_PAM_GETENVLIST
+
 /* Define to 1 if you use a specific PAM session for sudo -i. */
 #undef HAVE_PAM_LOGIN
 
@@ -389,6 +389,9 @@
 
 /* Define to 1 if you have the `priv_set' function. */
 #undef HAVE_PRIV_SET
+
+/* Define to 1 if you have the <procfs.h> header file. */
+#undef HAVE_PROCFS_H
 
 /* Define to 1 if you have the <project.h> header file. */
 #undef HAVE_PROJECT_H
@@ -472,6 +475,9 @@
 /* Define to 1 if you have the `snprintf' function. */
 #undef HAVE_SNPRINTF
 
+/* Define to 1 if you have the <spawn.h> header file. */
+#undef HAVE_SPAWN_H
+
 /* Define to 1 if stdbool.h conforms to C99. */
 #undef HAVE_STDBOOL_H
 
@@ -502,6 +508,9 @@
 /* Define to 1 if you have the `strsignal' function. */
 #undef HAVE_STRSIGNAL
 
+/* Define to 1 if `d_type' is a member of `struct dirent'. */
+#undef HAVE_STRUCT_DIRENT_D_TYPE
+
 /* Define to 1 if the system has the type `struct in6_addr'. */
 #undef HAVE_STRUCT_IN6_ADDR
 
@@ -516,6 +525,9 @@
 
 /* Define to 1 if `p_tdev' is a member of `struct kinfo_proc'. */
 #undef HAVE_STRUCT_KINFO_PROC_P_TDEV
+
+/* Define to 1 if `pr_ttydev' is a member of `struct psinfo'. */
+#undef HAVE_STRUCT_PSINFO_PR_TTYDEV
 
 /* Define if your struct sockadr has an sa_len field. */
 #undef HAVE_STRUCT_SOCKADDR_SA_LEN
@@ -594,6 +606,9 @@
    */
 #undef HAVE_SYS_NDIR_H
 
+/* Define to 1 if you have the <sys/procfs.h> header file. */
+#undef HAVE_SYS_PROCFS_H
+
 /* Define to 1 if you have the <sys/select.h> header file. */
 #undef HAVE_SYS_SELECT_H
 
@@ -654,6 +669,9 @@
 /* Define to 1 if you have the `_innetgr' function. */
 #undef HAVE__INNETGR
 
+/* Define to 1 if you have the `_ttyname_dev' function. */
+#undef HAVE__TTYNAME_DEV
+
 /* Define to 1 if the compiler supports the C99 __func__ variable. */
 #undef HAVE___FUNC__
 
@@ -687,6 +705,14 @@
 
 /* The user or email address that sudo mail is sent to. */
 #undef MAILTO
+
+/* Define to 1 if `major', `minor', and `makedev' are declared in <mkdev.h>.
+   */
+#undef MAJOR_IN_MKDEV
+
+/* Define to 1 if `major', `minor', and `makedev' are declared in
+   <sysmacros.h>. */
+#undef MAJOR_IN_SYSMACROS
 
 /* The max number of chars per log file line (for line wrapping). */
 #undef MAXLOGFILELEN
@@ -747,6 +773,22 @@
 
 /* The syslog priority sudo will use for successful attempts. */
 #undef PRI_SUCCESS
+
+/* Define to const if the `putenv' takes a const argument. */
+#undef PUTENV_CONST
+
+/* The default value of preloaded objects (if any). */
+#undef RTLD_PRELOAD_DEFAULT
+
+/* The delimiter to use when defining multiple preloaded objects. */
+#undef RTLD_PRELOAD_DELIM
+
+/* An extra environment variable that is required to enable preloading (if
+   any). */
+#undef RTLD_PRELOAD_ENABLE_VAR
+
+/* The environment variable that controls preloading of dynamic objects. */
+#undef RTLD_PRELOAD_VAR
 
 /* The user sudo should run commands as by default. */
 #undef RUNAS_DEFAULT
@@ -892,6 +934,15 @@
 #  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtime; (_y)->tv_usec = 0; } while (0)
 # endif /* HAVE_ST_MTIMESPEC */
 #endif /* HAVE_ST_MTIM */
+
+#ifdef __GNUC__
+# define ignore_result(x) do {						       \
+    __typeof__(x) y = (x);						       \
+    (void)y;								       \
+} while(0)
+#else
+# define ignore_result(x)	(void)(x)
+#endif
 
 /* GNU stow needs /etc/sudoers to be a symlink. */
 #ifdef USE_STOW

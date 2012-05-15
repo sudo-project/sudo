@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO_PLUGIN @mansectsu@"
-.TH SUDO_PLUGIN @mansectsu@ "January  6, 2012" "1.8.4" "MAINTENANCE COMMANDS"
+.TH SUDO_PLUGIN @mansectsu@ "April 23, 2012" "1.8.5" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -174,8 +174,9 @@ plugin.  The \fIsymbol_name\fR is the name of the \f(CW\*(C`struct policy_plugin
 or \f(CW\*(C`struct io_plugin\*(C'\fR in the plugin shared object.  The \fIpath\fR
 may be fully qualified or relative.  If not fully qualified it is
 relative to the \fI@prefix@/libexec\fR directory.  Any additional
-parameters after the \fIpath\fR are ignored.  Lines that don't begin
-with \f(CW\*(C`Plugin\*(C'\fR or \f(CW\*(C`Path\*(C'\fR are silently ignored.
+parameters after the \fIpath\fR are passed as options to the plugin's
+\&\fIopen\fR function.  Lines that don't begin with \f(CW\*(C`Plugin\*(C'\fR, \f(CW\*(C`Path\*(C'\fR,
+\&\f(CW\*(C`Debug\*(C'\fR or \f(CW\*(C`Set\*(C'\fR are silently ignored.
 .PP
 The same shared object may contain multiple plugins, each with a
 different symbol name.  The shared object file must be owned by uid
@@ -188,13 +189,17 @@ This limitation does not apply to I/O plugins.
 \& # Default @sysconfdir@/sudo.conf file
 \& #
 \& # Format:
-\& #   Plugin plugin_name plugin_path
+\& #   Plugin plugin_name plugin_path plugin_options ...
 \& #   Path askpass /path/to/askpass
+\& #   Path noexec /path/to/sudo_noexec.so
+\& #   Debug sudo /var/log/sudo_debug all@warn
+\& #   Set disable_coredump true
 \& #
 \& # The plugin_path is relative to @prefix@/libexec unless
 \& #   fully qualified.
 \& # The plugin_name corresponds to a global symbol in the plugin
 \& #   that contains the plugin interface structure.
+\& # The plugin_options are optional.
 \& #
 \& Plugin sudoers_policy sudoers.so
 \& Plugin sudoers_io sudoers.so
@@ -214,7 +219,8 @@ so that \fBsudo\fR can load it.
 \&     unsigned int version; /* always SUDO_API_VERSION */
 \&     int (*open)(unsigned int version, sudo_conv_t conversation,
 \&                 sudo_printf_t plugin_printf, char * const settings[],
-\&                 char * const user_info[], char * const user_env[]);
+\&                 char * const user_info[], char * const user_env[],
+\&                 char * const plugin_options[]);
 \&     void (*close)(int exit_status, int error);
 \&     int (*show_version)(int verbose);
 \&     int (*check_policy)(int argc, char * const argv[],
@@ -224,7 +230,11 @@ so that \fBsudo\fR can load it.
 \&                 const char *list_user);
 \&     int (*validate)(void);
 \&     void (*invalidate)(int remove);
-\&     int (*init_session)(struct passwd *pwd);
+\&     int (*init_session)(struct passwd *pwd, char **user_env[]);
+\&     void (*register_hooks)(int version,
+\&        int (*register_hook)(struct sudo_hook *hook));
+\&     void (*deregister_hooks)(int version,
+\&        int (*deregister_hook)(struct sudo_hook *hook));
 \& };
 .Ve
 .PP
@@ -240,10 +250,11 @@ This allows \fBsudo\fR to determine the \s-1API\s0 version the plugin was
 built against.
 .IP "open" 4
 .IX Item "open"
-.Vb 3
+.Vb 4
 \& int (*open)(unsigned int version, sudo_conv_t conversation,
 \&             sudo_printf_t plugin_printf, char * const settings[],
-\&             char * const user_info[], char * const user_env[]);
+\&             char * const user_info[], char * const user_env[],
+\&             char * const plugin_options[]);
 .Ve
 .Sp
 Returns 1 on success, 0 on failure, \-1 if a general error occurred,
@@ -413,12 +424,42 @@ When parsing \fIuser_info\fR, the plugin should split on the \fBfirst\fR
 equal sign ('=') since the \fIname\fR field will never include one
 itself but the \fIvalue\fR might.
 .RS 4
+.IP "pid=int" 4
+.IX Item "pid=int"
+The process \s-1ID\s0 of the running \fBsudo\fR process.
+Only available starting with \s-1API\s0 version 1.2
+.IP "ppid=int" 4
+.IX Item "ppid=int"
+The parent process \s-1ID\s0 of the running \fBsudo\fR process.
+Only available starting with \s-1API\s0 version 1.2
+.IP "sid=int" 4
+.IX Item "sid=int"
+The session \s-1ID\s0 of the running \fBsudo\fR process or 0 if \fBsudo\fR is
+not part of a \s-1POSIX\s0 job control session.
+Only available starting with \s-1API\s0 version 1.2
+.IP "pgid=int" 4
+.IX Item "pgid=int"
+The \s-1ID\s0 of the process group that the running \fBsudo\fR process belongs
+to.
+Only available starting with \s-1API\s0 version 1.2
+.IP "tcpgid=int" 4
+.IX Item "tcpgid=int"
+The \s-1ID\s0 of the forground process group associated with the terminal
+device associcated with the \fBsudo\fR process or \-1 if there is no
+terminal present.
+Only available starting with \s-1API\s0 version 1.2
 .IP "user=string" 4
 .IX Item "user=string"
 The name of the user invoking \fBsudo\fR.
+.IP "euid=uid_t" 4
+.IX Item "euid=uid_t"
+The effective user \s-1ID\s0 of the user invoking \fBsudo\fR.
 .IP "uid=uid_t" 4
 .IX Item "uid=uid_t"
 The real user \s-1ID\s0 of the user invoking \fBsudo\fR.
+.IP "egid=gid_t" 4
+.IX Item "egid=gid_t"
+The effective group \s-1ID\s0 of the user invoking \fBsudo\fR.
 .IP "gid=gid_t" 4
 .IX Item "gid=gid_t"
 The real group \s-1ID\s0 of the user invoking \fBsudo\fR.
@@ -457,6 +498,18 @@ The user's environment in the form of a \f(CW\*(C`NULL\*(C'\fR\-terminated vecto
 When parsing \fIuser_env\fR, the plugin should split on the \fBfirst\fR
 equal sign ('=') since the \fIname\fR field will never include one
 itself but the \fIvalue\fR might.
+.IP "plugin_options" 4
+.IX Item "plugin_options"
+Any (non-comment) strings immediately after the plugin path are
+treated as arguments to the plugin.  These arguments are split on
+a white space boundary and are passed to the plugin in the form of
+a \f(CW\*(C`NULL\*(C'\fR\-terminated array of strings.  If no arguments were
+specified, \fIplugin_options\fR will be the \s-1NULL\s0 pointer.
+.Sp
+\&\s-1NOTE:\s0 the \fIplugin_options\fR parameter is only available starting with
+\&\s-1API\s0 version 1.2.  A plugin \fBmust\fR check the \s-1API\s0 version specified
+by the \fBsudo\fR front end before using \fIplugin_options\fR.  Failure to
+do so may result in a crash.
 .RE
 .RS 4
 .RE
@@ -774,28 +827,100 @@ support credential caching.
 .IP "init_session" 4
 .IX Item "init_session"
 .Vb 1
-\& int (*init_session)(struct passwd *pwd);
+\& int (*init_session)(struct passwd *pwd, char **user_envp[);
 .Ve
 .Sp
-The \f(CW\*(C`init_session\*(C'\fR function is called when \fBsudo\fR sets up the
-execution environment for the command, immediately before the
-contents of the \fIcommand_info\fR list are applied (before the uid
-changes).  This can be used to do session setup that is not supported
-by \fIcommand_info\fR, such as opening the \s-1PAM\s0 session.
+The \f(CW\*(C`init_session\*(C'\fR function is called before \fBsudo\fR sets up the
+execution environment for the command.  It is run in the parent
+\&\fBsudo\fR process and before any uid or gid changes.  This can be used
+to perform session setup that is not supported by \fIcommand_info\fR,
+such as opening the \s-1PAM\s0 session.  The \f(CW\*(C`close\*(C'\fR function can be
+used to tear down the session that was opened by \f(CW\*(C`init_session\*(C'\fR.
 .Sp
 The \fIpwd\fR argument points to a passwd struct for the user the
 command will be run as if the uid the command will run as was found
 in the password database, otherwise it will be \s-1NULL\s0.
 .Sp
+The \fIuser_env\fR argument points to the environment the command will
+run in, in the form of a \f(CW\*(C`NULL\*(C'\fR\-terminated vector of \*(L"name=value\*(R"
+strings.  This is the same string passed back to the front end via
+the Policy Plugin's \fIuser_env_out\fR parameter.  If the \f(CW\*(C`init_session\*(C'\fR
+function needs to modify the user environment, it should update the
+pointer stored in \fIuser_env\fR.  The expected use case is to merge
+the contents of the \s-1PAM\s0 environment (if any) with the contents of
+\&\fIuser_env\fR.  \s-1NOTE:\s0 the \fIuser_env\fR parameter is only available
+starting with \s-1API\s0 version 1.2.  A plugin \fBmust\fR check the \s-1API\s0
+version specified by the \fBsudo\fR front end before using \fIuser_env\fR.
+Failure to do so may result in a crash.
+.Sp
 Returns 1 on success, 0 on failure and \-1 on error.
 On error, the plugin may optionally call the conversation or plugin_printf
 function with \f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present additional
 error information to the user.
+.IP "register_hooks" 4
+.IX Item "register_hooks"
+.Vb 2
+\& void (*register_hooks)(int version,
+\&    int (*register_hook)(struct sudo_hook *hook));
+.Ve
+.Sp
+The \f(CW\*(C`register_hooks\*(C'\fR function is called by the sudo front end to
+register any hooks the plugin needs.  If the plugin does not support
+hooks, \f(CW\*(C`register_hooks\*(C'\fR should be set to the \s-1NULL\s0 pointer.
+.Sp
+The \fIversion\fR argument describes the version of the hooks \s-1API\s0
+supported by the \fBsudo\fR front end.
+.Sp
+The \f(CW\*(C`register_hook\*(C'\fR function should be used to register any supported
+hooks the plugin needs.  It returns 0 on success, 1 if the hook
+type is not supported and \-1 if the major version in \f(CW\*(C`struct hook\*(C'\fR
+does not match the front end's major hook \s-1API\s0 version.
+.Sp
+See the \*(L"Hook Function \s-1API\s0\*(R" section below for more information
+about hooks.
+.Sp
+\&\s-1NOTE:\s0 the \f(CW\*(C`register_hooks\*(C'\fR function is only available starting
+with \s-1API\s0 version 1.2.  If the \fBsudo\fR front end doesn't support \s-1API\s0
+version 1.2 or higher, \f(CW\*(C`register_hooks\*(C'\fR will not be called.
+.IP "deregister_hooks" 4
+.IX Item "deregister_hooks"
+.Vb 2
+\& void (*deregister_hooks)(int version,
+\&    int (*deregister_hook)(struct sudo_hook *hook));
+.Ve
+.Sp
+The \f(CW\*(C`deregister_hooks\*(C'\fR function is called by the sudo front end
+to deregister any hooks the plugin has registered.  If the plugin
+does not support hooks, \f(CW\*(C`deregister_hooks\*(C'\fR should be set to the
+\&\s-1NULL\s0 pointer.
+.Sp
+The \fIversion\fR argument describes the version of the hooks \s-1API\s0
+supported by the \fBsudo\fR front end.
+.Sp
+The \f(CW\*(C`deregister_hook\*(C'\fR function should be used to deregister any
+hooks that were put in place by the \f(CW\*(C`register_hook\*(C'\fR function.  If
+the plugin tries to deregister a hook that the front end does not
+support, \f(CW\*(C`deregister_hook\*(C'\fR will return an error.
+.Sp
+See the \*(L"Hook Function \s-1API\s0\*(R" section below for more information
+about hooks.
+.Sp
+\&\s-1NOTE:\s0 the \f(CW\*(C`deregister_hooks\*(C'\fR function is only available starting
+with \s-1API\s0 version 1.2.  If the \fBsudo\fR front end doesn't support \s-1API\s0
+version 1.2 or higher, \f(CW\*(C`deregister_hooks\*(C'\fR will not be called.
 .PP
-\fIVersion macros\fR
-.IX Subsection "Version macros"
+\fIPolicy Plugin Version Macros\fR
+.IX Subsection "Policy Plugin Version Macros"
 .PP
-.Vb 8
+.Vb 6
+\& /* Plugin API version major/minor. */
+\& #define SUDO_API_VERSION_MAJOR 1
+\& #define SUDO_API_VERSION_MINOR 2
+\& #define SUDO_API_MKVERSION(x, y) ((x << 16) | y)
+\& #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR,\e
+\&                                             SUDO_API_VERSION_MINOR)
+\&
+\& /* Getters and setters for API version */
 \& #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
 \& #define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
 \& #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \e
@@ -804,11 +929,6 @@ error information to the user.
 \& #define SUDO_VERSION_SET_MINOR(vp, n) do { \e
 \&     *(vp) = (*(vp) & 0xffff0000) | (n); \e
 \& } while(0)
-\&
-\& #define SUDO_API_VERSION_MAJOR 1
-\& #define SUDO_API_VERSION_MINOR 0
-\& #define SUDO_API_VERSION ((SUDO_API_VERSION_MAJOR << 16) | \e
-\&                           SUDO_API_VERSION_MINOR)
 .Ve
 .SS "I/O Plugin \s-1API\s0"
 .IX Subsection "I/O Plugin API"
@@ -820,7 +940,7 @@ error information to the user.
 \&     int (*open)(unsigned int version, sudo_conv_t conversation
 \&                 sudo_printf_t plugin_printf, char * const settings[],
 \&                 char * const user_info[], int argc, char * const argv[],
-\&                 char * const user_env[]);
+\&                 char * const user_env[], char * const plugin_options[]);
 \&     void (*close)(int exit_status, int error); /* wait status or error */
 \&     int (*show_version)(int verbose);
 \&     int (*log_ttyin)(const char *buf, unsigned int len);
@@ -828,6 +948,10 @@ error information to the user.
 \&     int (*log_stdin)(const char *buf, unsigned int len);
 \&     int (*log_stdout)(const char *buf, unsigned int len);
 \&     int (*log_stderr)(const char *buf, unsigned int len);
+\&     void (*register_hooks)(int version,
+\&        int (*register_hook)(struct sudo_hook *hook));
+\&     void (*deregister_hooks)(int version,
+\&        int (*deregister_hook)(struct sudo_hook *hook));
 \& };
 .Ve
 .PP
@@ -866,7 +990,7 @@ built against.
 \& int (*open)(unsigned int version, sudo_conv_t conversation
 \&             sudo_printf_t plugin_printf, char * const settings[],
 \&             char * const user_info[], int argc, char * const argv[],
-\&             char * const user_env[]);
+\&             char * const user_env[], char * const plugin_options[]);
 .Ve
 .Sp
 The \fIopen\fR function is run before the \fIlog_input\fR, \fIlog_output\fR
@@ -941,6 +1065,18 @@ The user's environment in the form of a \f(CW\*(C`NULL\*(C'\fR\-terminated vecto
 When parsing \fIuser_env\fR, the plugin should split on the \fBfirst\fR
 equal sign ('=') since the \fIname\fR field will never include one
 itself but the \fIvalue\fR might.
+.IP "plugin_options" 4
+.IX Item "plugin_options"
+Any (non-comment) strings immediately after the plugin path are
+treated as arguments to the plugin.  These arguments are split on
+a white space boundary and are passed to the plugin in the form of
+a \f(CW\*(C`NULL\*(C'\fR\-terminated array of strings.  If no arguments were
+specified, \fIplugin_options\fR will be the \s-1NULL\s0 pointer.
+.Sp
+\&\s-1NOTE:\s0 the \fIplugin_options\fR parameter is only available starting with
+\&\s-1API\s0 version 1.2.  A plugin \fBmust\fR check the \s-1API\s0 version specified
+by the \fBsudo\fR front end before using \fIplugin_options\fR.  Failure to
+do so may result in a crash.
 .RE
 .RS 4
 .RE
@@ -1104,11 +1240,178 @@ The length of \fIbuf\fR in bytes.
 .RE
 .RS 4
 .RE
+.IP "register_hooks" 4
+.IX Item "register_hooks"
+See the \*(L"Policy Plugin \s-1API\s0\*(R" section for a description of
+\&\f(CW\*(C`register_hooks\*(C'\fR.
+.IP "deregister_hooks" 4
+.IX Item "deregister_hooks"
+See the \*(L"Policy Plugin \s-1API\s0\*(R" section for a description of
+\&\f(CW\*(C`deregister_hooks\*(C'\fR.
 .PP
-\fIVersion macros\fR
-.IX Subsection "Version macros"
+\fII/O Plugin Version Macros\fR
+.IX Subsection "I/O Plugin Version Macros"
 .PP
 Same as for the \*(L"Policy Plugin \s-1API\s0\*(R".
+.SS "Hook Function \s-1API\s0"
+.IX Subsection "Hook Function API"
+Beginning with plugin \s-1API\s0 version 1.2, it is possible to install
+hooks for certain functions called by the \fBsudo\fR front end.
+.PP
+Currently, the only supported hooks relate to the handling of
+environment variables.  Hooks can be used to intercept attempts to
+get, set, or remove environment variables so that these changes can
+be reflected in the version of the environment that is used to
+execute a command.  A future version of the \s-1API\s0 will support
+hooking internal \fBsudo\fR front end functions as well.
+.PP
+\fIHook structure\fR
+.IX Subsection "Hook structure"
+.PP
+Hooks in \fBsudo\fR are described by the following structure:
+.PP
+.Vb 1
+\& typedef int (*sudo_hook_fn_t)();
+\&
+\& struct sudo_hook {
+\&     int hook_version;
+\&     int hook_type;
+\&     sudo_hook_fn_t hook_fn;
+\&     void *closure;
+\& };
+.Ve
+.PP
+The \f(CW\*(C`sudo_hook\*(C'\fR structure has the following fields:
+.IP "hook_version" 4
+.IX Item "hook_version"
+The \f(CW\*(C`hook_version\*(C'\fR field should be set to \s-1SUDO_HOOK_VERSION\s0.
+.IP "hook_type" 4
+.IX Item "hook_type"
+The \f(CW\*(C`hook_type\*(C'\fR field may be one of the following supported hook types:
+.RS 4
+.IP "\s-1SUDO_HOOK_SETENV\s0" 4
+.IX Item "SUDO_HOOK_SETENV"
+The C library \f(CW\*(C`setenv()\*(C'\fR function.  Any registered hooks will run
+before the C library implementation.  The \f(CW\*(C`hook_fn\*(C'\fR field should
+be a function that matches the following typedef:
+.Sp
+.Vb 2
+\& typedef int (*sudo_hook_fn_setenv_t)(const char *name,
+\&    const char *value, int overwrite, void *closure);
+.Ve
+.Sp
+If the registered hook does not match the typedef the results are
+unspecified.
+.IP "\s-1SUDO_HOOK_UNSETENV\s0" 4
+.IX Item "SUDO_HOOK_UNSETENV"
+The C library \f(CW\*(C`unsetenv()\*(C'\fR function.  Any registered hooks will run
+before the C library implementation.  The \f(CW\*(C`hook_fn\*(C'\fR field should
+be a function that matches the following typedef:
+.Sp
+.Vb 2
+\& typedef int (*sudo_hook_fn_unsetenv_t)(const char *name,
+\&    void *closure);
+.Ve
+.IP "\s-1SUDO_HOOK_GETENV\s0" 4
+.IX Item "SUDO_HOOK_GETENV"
+The C library \f(CW\*(C`getenv()\*(C'\fR function.  Any registered hooks will run
+before the C library implementation.  The \f(CW\*(C`hook_fn\*(C'\fR field should
+be a function that matches the following typedef:
+.Sp
+.Vb 2
+\& typedef int (*sudo_hook_fn_getenv_t)(const char *name,
+\&    char **value, void *closure);
+.Ve
+.Sp
+If the registered hook does not match the typedef the results are
+unspecified.
+.IP "\s-1SUDO_HOOK_PUTENV\s0" 4
+.IX Item "SUDO_HOOK_PUTENV"
+The C library \f(CW\*(C`putenv()\*(C'\fR function.  Any registered hooks will run
+before the C library implementation.  The \f(CW\*(C`hook_fn\*(C'\fR field should
+be a function that matches the following typedef:
+.Sp
+.Vb 2
+\& typedef int (*sudo_hook_fn_putenv_t)(char *string,
+\&    void *closure);
+.Ve
+.Sp
+If the registered hook does not match the typedef the results are
+unspecified.
+.RE
+.RS 4
+.RE
+.IP "hook_fn" 4
+.IX Item "hook_fn"
+.Vb 1
+\& sudo_hook_fn_t hook_fn;
+.Ve
+.Sp
+The \f(CW\*(C`hook_fn\*(C'\fR field should be set to the plugin's hook implementation.
+The actual function arguments will vary depending on the \f(CW\*(C`hook_type\*(C'\fR
+(see \f(CW\*(C`hook_type\*(C'\fR above).  In all cases, the \f(CW\*(C`closure\*(C'\fR field of
+\&\f(CW\*(C`struct sudo_hook\*(C'\fR is passed as the last function parameter.  This
+can be used to pass arbitrary data to the plugin's hook implementation.
+.Sp
+The function return value may be one of the following:
+.RS 4
+.IP "\s-1SUDO_HOOK_RET_ERROR\s0" 4
+.IX Item "SUDO_HOOK_RET_ERROR"
+The hook function encountered an error.
+.IP "\s-1SUDO_HOOK_RET_NEXT\s0" 4
+.IX Item "SUDO_HOOK_RET_NEXT"
+The hook completed without error, go on to the next hook (including
+the native implementation if applicable).  For example, a \f(CW\*(C`getenv\*(C'\fR
+hook might return \f(CW\*(C`SUDO_HOOK_RET_NEXT\*(C'\fR if the specified variable
+was not found in the private copy of the environment.
+.IP "\s-1SUDO_HOOK_RET_STOP\s0" 4
+.IX Item "SUDO_HOOK_RET_STOP"
+The hook completed without error, stop processing hooks for this
+invocation.  This can be used to replace the native implementation.
+For example, a \f(CW\*(C`setenv\*(C'\fR hook that operates on a private copy of
+the environment but leaves \f(CW\*(C`environ\*(C'\fR unchanged.
+.RE
+.RS 4
+.RE
+.PP
+Note that it is very easy to create an infinite loop when hooking
+C library functions.  For example, a \f(CW\*(C`getenv\*(C'\fR hook that calls the
+\&\f(CW\*(C`snprintf\*(C'\fR function may create a loop if the \f(CW\*(C`snprintf\*(C'\fR implementation
+calls \f(CW\*(C`getenv\*(C'\fR to check the locale.  To prevent this, you may wish
+to use a static variable in the hook function to guard against
+nested calls.  E.g.
+.PP
+.Vb 7
+\& static int in_progress = 0; /* avoid recursion */
+\& if (in_progress)
+\&     return SUDO_HOOK_RET_NEXT;
+\& in_progress = 1;
+\& ...
+\& in_progress = 0;
+\& return SUDO_HOOK_RET_STOP;
+.Ve
+.PP
+\fIHook \s-1API\s0 Version Macros\fR
+.IX Subsection "Hook API Version Macros"
+.PP
+.Vb 6
+\& /* Hook API version major/minor */
+\& #define SUDO_HOOK_VERSION_MAJOR 1
+\& #define SUDO_HOOK_VERSION_MINOR 0
+\& #define SUDO_HOOK_MKVERSION(x, y) ((x << 16) | y)
+\& #define SUDO_HOOK_VERSION SUDO_HOOK_MKVERSION(SUDO_HOOK_VERSION_MAJOR,\e
+\&                                               SUDO_HOOK_VERSION_MINOR)
+\&
+\& /* Getters and setters for hook API version */
+\& #define SUDO_HOOK_VERSION_GET_MAJOR(v) ((v) >> 16)
+\& #define SUDO_HOOK_VERSION_GET_MINOR(v) ((v) & 0xffff)
+\& #define SUDO_HOOK_VERSION_SET_MAJOR(vp, n) do { \e
+\&     *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \e
+\& } while(0)
+\& #define SUDO_HOOK_VERSION_SET_MINOR(vp, n) do { \e
+\&     *(vp) = (*(vp) & 0xffff0000) | (n); \e
+\& } while(0)
+.Ve
 .SS "Conversation \s-1API\s0"
 .IX Subsection "Conversation API"
 If the plugin needs to interact with the user, it may do so via the
@@ -1271,8 +1574,8 @@ present in the password database, \fIpwd\fR will be \f(CW\*(C`NULL\*(C'\fR.
 .RS 4
 .RE
 .PP
-\fIVersion Macros\fR
-.IX Subsection "Version Macros"
+\fIGroup \s-1API\s0 Version Macros\fR
+.IX Subsection "Group API Version Macros"
 .PP
 .Vb 5
 \& /* Sudoers group plugin version major/minor */
@@ -1291,6 +1594,28 @@ present in the password database, \fIpwd\fR will be \f(CW\*(C`NULL\*(C'\fR.
 \&     *(vp) = (*(vp) & 0xffff0000) | (n); \e
 \& } while(0)
 .Ve
+.SH "PLUGIN API CHANGELOG"
+.IX Header "PLUGIN API CHANGELOG"
+The following revisions have been made to the Sudo Plugin \s-1API\s0.
+.IP "Version 1.0" 4
+.IX Item "Version 1.0"
+Initial \s-1API\s0 version.
+.IP "Version 1.1" 4
+.IX Item "Version 1.1"
+The I/O logging plugin's \f(CW\*(C`open\*(C'\fR function was modified to take the
+\&\f(CW\*(C`command_info\*(C'\fR list as an argument.
+.IP "Version 1.2" 4
+.IX Item "Version 1.2"
+The Policy and I/O logging plugins' \f(CW\*(C`open\*(C'\fR functions are now passed
+a list of plugin options if any are specified in \fI@sysconfdir@/sudo.conf\fR.
+.Sp
+A simple hooks \s-1API\s0 has been introduced to allow plugins to hook in to the
+system's environment handling functions.
+.Sp
+The \f(CW\*(C`init_session\*(C'\fR Policy plugin function is now passed a pointer
+to the user environment which can be updated as needed.  This can
+be used to merge in environment variables stored in the \s-1PAM\s0 handle
+before a command is run.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIsudoers\fR\|(@mansectform@), \fIsudo\fR\|(@mansectsu@)

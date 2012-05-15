@@ -71,7 +71,7 @@
 static int converse(int, PAM_CONST struct pam_message **,
 		    struct pam_response **, void *);
 static char *def_prompt = "Password:";
-static int gotintr;
+static int getpass_error;
 
 #ifndef PAM_DATA_SILENT
 #define PAM_DATA_SILENT	0
@@ -97,7 +97,7 @@ sudo_pam_init(struct passwd *pw, sudo_auth *auth)
 #endif
 	pam_status = pam_start("sudo", pw->pw_name, &pam_conv, &pamh);
     if (pam_status != PAM_SUCCESS) {
-	log_error(USE_ERRNO|NO_EXIT|NO_MAIL, _("unable to initialize PAM"));
+	log_error(USE_ERRNO|NO_MAIL, _("unable to initialize PAM"));
 	debug_return_int(AUTH_FATAL);
     }
 
@@ -141,41 +141,43 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 		case PAM_SUCCESS:
 		    debug_return_int(AUTH_SUCCESS);
 		case PAM_AUTH_ERR:
-		    log_error(NO_EXIT|NO_MAIL, _("account validation failure, "
+		    log_error(NO_MAIL, _("account validation failure, "
 			"is your account locked?"));
 		    debug_return_int(AUTH_FATAL);
 		case PAM_NEW_AUTHTOK_REQD:
-		    log_error(NO_EXIT|NO_MAIL, _("Account or password is "
+		    log_error(NO_MAIL, _("Account or password is "
 			"expired, reset your password and try again"));
 		    *pam_status = pam_chauthtok(pamh,
 			PAM_CHANGE_EXPIRED_AUTHTOK);
 		    if (*pam_status == PAM_SUCCESS)
 			debug_return_int(AUTH_SUCCESS);
 		    if ((s = pam_strerror(pamh, *pam_status)))
-			log_error(NO_EXIT|NO_MAIL, _("pam_chauthtok: %s"), s);
+			log_error(NO_MAIL, _("pam_chauthtok: %s"), s);
 		    debug_return_int(AUTH_FAILURE);
 		case PAM_AUTHTOK_EXPIRED:
-		    log_error(NO_EXIT|NO_MAIL,
+		    log_error(NO_MAIL,
 			_("Password expired, contact your system administrator"));
 		    debug_return_int(AUTH_FATAL);
 		case PAM_ACCT_EXPIRED:
-		    log_error(NO_EXIT|NO_MAIL,
+		    log_error(NO_MAIL,
 			_("Account expired or PAM config lacks an \"account\" "
 			"section for sudo, contact your system administrator"));
 		    debug_return_int(AUTH_FATAL);
 	    }
 	    /* FALLTHROUGH */
 	case PAM_AUTH_ERR:
-	    if (gotintr) {
+	case PAM_AUTHINFO_UNAVAIL:
+	    if (getpass_error) {
 		/* error or ^C from tgetpass() */
 		debug_return_int(AUTH_INTR);
 	    }
+	    /* FALLTHROUGH */
 	case PAM_MAXTRIES:
 	case PAM_PERM_DENIED:
 	    debug_return_int(AUTH_FAILURE);
 	default:
 	    if ((s = pam_strerror(pamh, *pam_status)))
-		log_error(NO_EXIT|NO_MAIL, _("pam_authenticate: %s"), s);
+		log_error(NO_MAIL, _("pam_authenticate: %s"), s);
 	    debug_return_int(AUTH_FATAL);
     }
 }
@@ -196,7 +198,7 @@ sudo_pam_cleanup(struct passwd *pw, sudo_auth *auth)
 }
 
 int
-sudo_pam_begin_session(struct passwd *pw, sudo_auth *auth)
+sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 {
     int status = PAM_SUCCESS;
     debug_decl(sudo_pam_begin_session, SUDO_DEBUG_AUTH)
@@ -230,6 +232,26 @@ sudo_pam_begin_session(struct passwd *pw, sudo_auth *auth)
      */
     (void) pam_setcred(pamh, PAM_ESTABLISH_CRED);
 
+#ifdef HAVE_PAM_GETENVLIST
+    /*
+     * Update environment based on what is stored in pamh.
+     * If no authentication is done we will only have environment
+     * variables if pam_env is called via session.
+     */
+    if (user_envp != NULL) {
+	char **pam_envp = pam_getenvlist(pamh);
+	if (pam_envp != NULL) {
+	    /* Merge pam env with user env but do not overwrite. */
+	    env_init(*user_envp);
+	    env_merge(pam_envp, false);
+	    *user_envp = env_get();
+	    env_init(NULL);
+	    efree(pam_envp);
+	    /* XXX - we leak any duplicates that were in pam_envp */
+	}
+    }
+#endif /* HAVE_PAM_GETENVLIST */
+
 #ifndef NO_PAM_SESSION
     status = pam_open_session(pamh, 0);
     if (status != PAM_SUCCESS) {
@@ -249,14 +271,16 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
     debug_decl(sudo_pam_end_session, SUDO_DEBUG_AUTH)
 
     if (pamh != NULL) {
-#ifndef NO_PAM_SESSION
 	/*
 	 * Update PAM_USER to reference the user we are running the command
-	 * as to match the call to pam_open_session().
+	 * as, as opposed to the user we authenticated as.
+	 * XXX - still needed now that session init is in parent?
 	 */
 	(void) pam_set_item(pamh, PAM_USER, pw->pw_name);
+#ifndef NO_PAM_SESSION
 	(void) pam_close_session(pamh, PAM_SILENT);
 #endif
+	(void) pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
 	status = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
 	pamh = NULL;
     }
@@ -277,6 +301,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
     const char *prompt;
     char *pass;
     int n, type, std_prompt;
+    int ret = PAM_AUTH_ERR;
     debug_decl(converse, SUDO_DEBUG_AUTH)
 
     if ((*response = malloc(num_msg * sizeof(struct pam_response))) == NULL)
@@ -288,12 +313,13 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 	switch (pm->msg_style) {
 	    case PAM_PROMPT_ECHO_ON:
 		type = SUDO_CONV_PROMPT_ECHO_ON;
+		/* FALLTHROUGH */
 	    case PAM_PROMPT_ECHO_OFF:
 		prompt = def_prompt;
 
 		/* Error out if the last password read was interrupted. */
-		if (gotintr)
-		    goto err;
+		if (getpass_error)
+		    goto done;
 
 		/* Is the sudo prompt standard? (If so, we'l just use PAM's) */
 		std_prompt =  strncmp(def_prompt, "Password:", 9) == 0 &&
@@ -315,13 +341,12 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		/* Read the password unless interrupted. */
 		pass = auth_getpass(prompt, def_passwd_timeout * 60, type);
 		if (pass == NULL) {
-		    /* We got ^C instead of a password; abort quickly. */
-		    if (errno == EINTR)
-			gotintr = 1;
-#if defined(__darwin__) || defined(__APPLE__)
+		    /* Error (or ^C) reading password, don't try again. */
+		    getpass_error = 1;
+#if (defined(__darwin__) || defined(__APPLE__)) && !defined(OPENPAM_VERSION)
 		    pass = "";
 #else
-		    goto err;
+		    goto done;
 #endif
 		}
 		pr->resp = estrdup(pass);
@@ -338,23 +363,25 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		}
 		break;
 	    default:
-		goto err;
+		ret = PAM_CONV_ERR;
+		goto done;
 	}
     }
+    ret = PAM_SUCCESS;
 
-    debug_return_int(PAM_SUCCESS);
-
-err:
-    /* Zero and free allocated memory and return an error. */
-    for (pr = *response, n = num_msg; n--; pr++) {
-	if (pr->resp != NULL) {
-	    zero_bytes(pr->resp, strlen(pr->resp));
-	    free(pr->resp);
-	    pr->resp = NULL;
+done:
+    if (ret != PAM_SUCCESS) {
+	/* Zero and free allocated memory and return an error. */
+	for (pr = *response, n = num_msg; n--; pr++) {
+	    if (pr->resp != NULL) {
+		zero_bytes(pr->resp, strlen(pr->resp));
+		free(pr->resp);
+		pr->resp = NULL;
+	    }
 	}
+	zero_bytes(*response, num_msg * sizeof(struct pam_response));
+	free(*response);
+	*response = NULL;
     }
-    zero_bytes(*response, num_msg * sizeof(struct pam_response));
-    free(*response);
-    *response = NULL;
-    debug_return_int(gotintr ? PAM_AUTH_ERR : PAM_CONV_ERR);
+    debug_return_int(ret);
 }

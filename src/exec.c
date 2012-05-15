@@ -99,7 +99,14 @@ static int fork_cmnd(struct command_details *details, int sv[2])
     sa.sa_handler = handler;
     sigaction(SIGCONT, &sa, NULL);
 
-    child = fork();
+    /*
+     * The policy plugin's session init must be run before we fork
+     * or certain pam modules won't be able to track their state.
+     */
+    if (policy_init_session(details) != true)
+	errorx(1, _("policy plugin failed session initialization"));
+
+    child = sudo_debug_fork();
     switch (child) {
     case -1:
 	error(1, _("unable to fork"));
@@ -214,7 +221,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 
     /* If running in background mode, fork and exit. */
     if (ISSET(details->flags, CD_BACKGROUND)) {
-	switch (fork()) {
+	switch (sudo_debug_fork()) {
 	    case -1:
 		cstat->type = CMD_ERRNO;
 		cstat->val = errno;
@@ -320,11 +327,11 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
      * In the event loop we pass input from user tty to master
      * and pass output from master to stdout and IO plugin.
      */
-    fdsr = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
-    fdsw = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
+    fdsr = emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
+    fdsw = emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
     for (;;) {
-	zero_bytes(fdsw, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
-	zero_bytes(fdsr, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
+	memset(fdsw, 0, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
+	memset(fdsr, 0, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
 
 	FD_SET(signal_pipe[0], fdsr);
 	FD_SET(sv[0], fdsr);
@@ -335,9 +342,18 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 	nready = select(maxfd + 1, fdsr, fdsw, NULL, NULL);
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "select returns %d", nready);
 	if (nready == -1) {
-	    if (errno == EINTR)
+	    if (errno == EINTR || errno == ENOMEM)
 		continue;
-	    error(1, _("select failed"));
+	    if (errno == EBADF || errno == EIO) {
+		/* One of the ttys must have gone away. */
+		goto do_tty_io;
+	    }
+	    warning(_("select failed"));
+	    sudo_debug_printf(SUDO_DEBUG_ERROR,
+		"select failure, terminating child");
+	    schedule_signal(SIGKILL);
+	    forward_signals(sv[0]);
+	    break;
 	}
 	if (FD_ISSET(sv[0], fdsw)) {
 	    forward_signals(sv[0]);
@@ -403,7 +419,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 		break;
 	    }
 	}
-
+do_tty_io:
 	if (perform_io(fdsr, fdsw, cstat) != 0) {
 	    /* I/O error, kill child if still alive and finish. */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR, "I/O error, terminating child");
@@ -582,9 +598,9 @@ schedule_signal(int signo)
 
     sudo_debug_printf(SUDO_DEBUG_DIAG, "forwarding signal %d to child", signo);
 
-    sigfwd = emalloc(sizeof(*sigfwd));
+    sigfwd = ecalloc(1, sizeof(*sigfwd));
     sigfwd->prev = sigfwd;
-    sigfwd->next = NULL;
+    /* sigfwd->next = NULL; */
     sigfwd->signo = signo;
     tq_append(&sigfwd_list, sigfwd);
 
@@ -604,8 +620,7 @@ handler(int s)
      * The pipe is non-blocking, if we overflow the kernel's pipe
      * buffer we drop the signal.  This is not a problem in practice.
      */
-    if (write(signal_pipe[1], &signo, sizeof(signo)) == -1)
-	/* shut up glibc */;
+    ignore_result(write(signal_pipe[1], &signo, sizeof(signo)));
 }
 
 #ifdef SA_SIGINFO
@@ -621,13 +636,12 @@ handler_nofwd(int s, siginfo_t *info, void *context)
     unsigned char signo = (unsigned char)s;
 
     /* Only forward user-generated signals. */
-    if (info->si_code <= 0) {
+    if (info == NULL || info->si_code <= 0) {
 	/*
 	 * The pipe is non-blocking, if we overflow the kernel's pipe
 	 * buffer we drop the signal.  This is not a problem in practice.
 	 */
-	if (write(signal_pipe[1], &signo, sizeof(signo)) == -1)
-	    /* shut up glibc */;
+	ignore_result(write(signal_pipe[1], &signo, sizeof(signo)));
     }
 }
 #endif /* SA_SIGINFO */

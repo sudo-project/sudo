@@ -20,6 +20,9 @@
 
 #include <errno.h>
 #include <stdarg.h>
+#ifdef HAVE_SPAWN_H
+#include <spawn.h>
+#endif
 
 #include "missing.h"
 
@@ -47,6 +50,11 @@ int						\
 fn(t1 a1, t2 a2, t3 a3)				\
 DUMMY_BODY
 
+#define DUMMY6(fn, t1, t2, t3, t4, t5, t6)	\
+int						\
+fn(t1 a1, t2 a2, t3 a3, t4 a4, t5 a5, t6 a6)	\
+DUMMY_BODY
+
 #define DUMMY_VA(fn, t1, t2)			\
 int						\
 fn(t1 a1, t2 a2, ...)				\
@@ -61,6 +69,9 @@ DUMMY_VA(__execle, const char *, const char *)
 DUMMY_VA(execlp, const char *, const char *)
 DUMMY_VA(_execlp, const char *, const char *)
 DUMMY_VA(__execlp, const char *, const char *)
+DUMMY3(exect, const char *, char * const *, char * const *)
+DUMMY3(_exect, const char *, char * const *, char * const *)
+DUMMY3(__exect, const char *, char * const *, char * const *)
 DUMMY2(execv, const char *, char * const *)
 DUMMY2(_execv, const char *, char * const *)
 DUMMY2(__execv, const char *, char * const *)
@@ -73,6 +84,17 @@ DUMMY3(__execvP, const char *, const char *, char * const *)
 DUMMY3(execve, const char *, char * const *, char * const *)
 DUMMY3(_execve, const char *, char * const *, char * const *)
 DUMMY3(__execve, const char *, char * const *, char * const *)
+DUMMY3(execvpe, const char *, char * const *, char * const *)
+DUMMY3(_execvpe, const char *, char * const *, char * const *)
+DUMMY3(__execvpe, const char *, char * const *, char * const *)
 DUMMY3(fexecve, int , char * const *, char * const *)
 DUMMY3(_fexecve, int , char * const *, char * const *)
 DUMMY3(__fexecve, int , char * const *, char * const *)
+#ifdef HAVE_SPAWN_H
+DUMMY6(posix_spawn, pid_t *, const char *, const posix_spawn_file_actions_t *, const posix_spawnattr_t *, char * const *, char * const *)
+DUMMY6(_posix_spawn, pid_t *, const char *, const posix_spawn_file_actions_t *, const posix_spawnattr_t *, char * const *, char * const *)
+DUMMY6(__posix_spawn, pid_t *, const char *, const posix_spawn_file_actions_t *, const posix_spawnattr_t *, char * const *, char * const *)
+DUMMY6(posix_spawnp, pid_t *, const char *, const posix_spawn_file_actions_t *, const posix_spawnattr_t *, char * const *, char * const *)
+DUMMY6(_posix_spawnp, pid_t *, const char *, const posix_spawn_file_actions_t *, const posix_spawnattr_t *, char * const *, char * const *)
+DUMMY6(__posix_spawnp, pid_t *, const char *, const posix_spawn_file_actions_t *, const posix_spawnattr_t *, char * const *, char * const *)
+#endif /* HAVE_SPAWN_H */

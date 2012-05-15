@@ -140,7 +140,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "January  6, 2012" "1.8.4" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "March 14, 2012" "1.8.5" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l

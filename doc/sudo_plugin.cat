@@ -32,8 +32,8 @@ DDEESSCCRRIIPPTTIIOONN
        io_plugin in the plugin shared object.  The _p_a_t_h may be fully qualified
        or relative.  If not fully qualified it is relative to the
        _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c directory.  Any additional parameters after the _p_a_t_h
-       are ignored.  Lines that don't begin with Plugin or Path are silently
-       ignored.
+       are passed as options to the plugin's _o_p_e_n function.  Lines that don't
+       begin with Plugin, Path, Debug or Set are silently ignored.
 
        The same shared object may contain multiple plugins, each with a
        different symbol name.  The shared object file must be owned by uid 0
@@ -45,13 +45,17 @@ DDEESSCCRRIIPPTTIIOONN
         # Default /etc/sudo.conf file
         #
         # Format:
-        #   Plugin plugin_name plugin_path
+        #   Plugin plugin_name plugin_path plugin_options ...
         #   Path askpass /path/to/askpass
+        #   Path noexec /path/to/sudo_noexec.so
+        #   Debug sudo /var/log/sudo_debug all@warn
+        #   Set disable_coredump true
         #
         # The plugin_path is relative to /usr/local/libexec unless
         #   fully qualified.
         # The plugin_name corresponds to a global symbol in the plugin
         #   that contains the plugin interface structure.
+        # The plugin_options are optional.
         #
         Plugin sudoers_policy sudoers.so
         Plugin sudoers_io sudoers.so
@@ -69,7 +73,8 @@ DDEESSCCRRIIPPTTIIOONN
             unsigned int version; /* always SUDO_API_VERSION */
             int (*open)(unsigned int version, sudo_conv_t conversation,
                         sudo_printf_t plugin_printf, char * const settings[],
-                        char * const user_info[], char * const user_env[]);
+                        char * const user_info[], char * const user_env[],
+                        char * const plugin_options[]);
             void (*close)(int exit_status, int error);
             int (*show_version)(int verbose);
             int (*check_policy)(int argc, char * const argv[],
@@ -79,7 +84,11 @@ DDEESSCCRRIIPPTTIIOONN
                         const char *list_user);
             int (*validate)(void);
             void (*invalidate)(int remove);
-            int (*init_session)(struct passwd *pwd);
+            int (*init_session)(struct passwd *pwd, char **user_env[]);
+            void (*register_hooks)(int version,
+               int (*register_hook)(struct sudo_hook *hook));
+            void (*deregister_hooks)(int version,
+               int (*deregister_hook)(struct sudo_hook *hook));
         };
 
        The policy_plugin struct has the following fields:
@@ -96,7 +105,8 @@ DDEESSCCRRIIPPTTIIOONN
        open
             int (*open)(unsigned int version, sudo_conv_t conversation,
                         sudo_printf_t plugin_printf, char * const settings[],
-                        char * const user_info[], char * const user_env[]);
+                        char * const user_info[], char * const user_env[],
+                        char * const plugin_options[]);
 
            Returns 1 on success, 0 on failure, -1 if a general error occurred,
            or -2 if there was a usage error.  In the latter case, ssuuddoo will
@@ -266,11 +276,40 @@ DDEESSCCRRIIPPTTIIOONN
                equal sign ('=') since the _n_a_m_e field will never include one
                itself but the _v_a_l_u_e might.
 
+               pid=int
+                   The process ID of the running ssuuddoo process.  Only available
+                   starting with API version 1.2
+
+               ppid=int
+                   The parent process ID of the running ssuuddoo process.  Only
+                   available starting with API version 1.2
+
+               sid=int
+                   The session ID of the running ssuuddoo process or 0 if ssuuddoo is
+                   not part of a POSIX job control session.  Only available
+                   starting with API version 1.2
+
+               pgid=int
+                   The ID of the process group that the running ssuuddoo process
+                   belongs to.  Only available starting with API version 1.2
+
+               tcpgid=int
+                   The ID of the forground process group associated with the
+                   terminal device associcated with the ssuuddoo process or -1 if
+                   there is no terminal present.  Only available starting with
+                   API version 1.2
+
                user=string
                    The name of the user invoking ssuuddoo.
 
+               euid=uid_t
+                   The effective user ID of the user invoking ssuuddoo.
+
                uid=uid_t
                    The real user ID of the user invoking ssuuddoo.
+
+               egid=gid_t
+                   The effective group ID of the user invoking ssuuddoo.
 
                gid=gid_t
                    The real group ID of the user invoking ssuuddoo.
@@ -308,6 +347,18 @@ DDEESSCCRRIIPPTTIIOONN
                When parsing _u_s_e_r___e_n_v, the plugin should split on the ffiirrsstt
                equal sign ('=') since the _n_a_m_e field will never include one
                itself but the _v_a_l_u_e might.
+
+           plugin_options
+               Any (non-comment) strings immediately after the plugin path are
+               treated as arguments to the plugin.  These arguments are split
+               on a white space boundary and are passed to the plugin in the
+               form of a NULL-terminated array of strings.  If no arguments
+               were specified, _p_l_u_g_i_n___o_p_t_i_o_n_s will be the NULL pointer.
+
+               NOTE: the _p_l_u_g_i_n___o_p_t_i_o_n_s parameter is only available starting
+               with API version 1.2.  A plugin mmuusstt check the API version
+               specified by the ssuuddoo front end before using _p_l_u_g_i_n___o_p_t_i_o_n_s.
+               Failure to do so may result in a crash.
 
        close
             void (*close)(int exit_status, int error);
@@ -605,25 +656,93 @@ DDEESSCCRRIIPPTTIIOONN
            support credential caching.
 
        init_session
-            int (*init_session)(struct passwd *pwd);
+            int (*init_session)(struct passwd *pwd, char **user_envp[);
 
-           The init_session function is called when ssuuddoo sets up the execution
-           environment for the command, immediately before the contents of the
-           _c_o_m_m_a_n_d___i_n_f_o list are applied (before the uid changes).  This can
-           be used to do session setup that is not supported by _c_o_m_m_a_n_d___i_n_f_o,
-           such as opening the PAM session.
+           The init_session function is called before ssuuddoo sets up the
+           execution environment for the command.  It is run in the parent
+           ssuuddoo process and before any uid or gid changes.  This can be used
+           to perform session setup that is not supported by _c_o_m_m_a_n_d___i_n_f_o,
+           such as opening the PAM session.  The close function can be used to
+           tear down the session that was opened by init_session.
 
            The _p_w_d argument points to a passwd struct for the user the command
            will be run as if the uid the command will run as was found in the
            password database, otherwise it will be NULL.
+
+           The _u_s_e_r___e_n_v argument points to the environment the command will
+           run in, in the form of a NULL-terminated vector of "name=value"
+           strings.  This is the same string passed back to the front end via
+           the Policy Plugin's _u_s_e_r___e_n_v___o_u_t parameter.  If the init_session
+           function needs to modify the user environment, it should update the
+           pointer stored in _u_s_e_r___e_n_v.  The expected use case is to merge the
+           contents of the PAM environment (if any) with the contents of
+           _u_s_e_r___e_n_v.  NOTE: the _u_s_e_r___e_n_v parameter is only available starting
+           with API version 1.2.  A plugin mmuusstt check the API version
+           specified by the ssuuddoo front end before using _u_s_e_r___e_n_v.  Failure to
+           do so may result in a crash.
 
            Returns 1 on success, 0 on failure and -1 on error.  On error, the
            plugin may optionally call the conversation or plugin_printf
            function with SUDO_CONF_ERROR_MSG to present additional error
            information to the user.
 
-       _V_e_r_s_i_o_n _m_a_c_r_o_s
+       register_hooks
+            void (*register_hooks)(int version,
+               int (*register_hook)(struct sudo_hook *hook));
 
+           The register_hooks function is called by the sudo front end to
+           register any hooks the plugin needs.  If the plugin does not
+           support hooks, register_hooks should be set to the NULL pointer.
+
+           The _v_e_r_s_i_o_n argument describes the version of the hooks API
+           supported by the ssuuddoo front end.
+
+           The register_hook function should be used to register any supported
+           hooks the plugin needs.  It returns 0 on success, 1 if the hook
+           type is not supported and -1 if the major version in struct hook
+           does not match the front end's major hook API version.
+
+           See the "Hook Function API" section below for more information
+           about hooks.
+
+           NOTE: the register_hooks function is only available starting with
+           API version 1.2.  If the ssuuddoo front end doesn't support API version
+           1.2 or higher, register_hooks will not be called.
+
+       deregister_hooks
+            void (*deregister_hooks)(int version,
+               int (*deregister_hook)(struct sudo_hook *hook));
+
+           The deregister_hooks function is called by the sudo front end to
+           deregister any hooks the plugin has registered.  If the plugin does
+           not support hooks, deregister_hooks should be set to the NULL
+           pointer.
+
+           The _v_e_r_s_i_o_n argument describes the version of the hooks API
+           supported by the ssuuddoo front end.
+
+           The deregister_hook function should be used to deregister any hooks
+           that were put in place by the register_hook function.  If the
+           plugin tries to deregister a hook that the front end does not
+           support, deregister_hook will return an error.
+
+           See the "Hook Function API" section below for more information
+           about hooks.
+
+           NOTE: the deregister_hooks function is only available starting with
+           API version 1.2.  If the ssuuddoo front end doesn't support API version
+           1.2 or higher, deregister_hooks will not be called.
+
+       _P_o_l_i_c_y _P_l_u_g_i_n _V_e_r_s_i_o_n _M_a_c_r_o_s
+
+        /* Plugin API version major/minor. */
+        #define SUDO_API_VERSION_MAJOR 1
+        #define SUDO_API_VERSION_MINOR 2
+        #define SUDO_API_MKVERSION(x, y) ((x << 16) | y)
+        #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR,\
+                                                    SUDO_API_VERSION_MINOR)
+
+        /* Getters and setters for API version */
         #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
         #define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
         #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \
@@ -633,11 +752,6 @@ DDEESSCCRRIIPPTTIIOONN
             *(vp) = (*(vp) & 0xffff0000) | (n); \
         } while(0)
 
-        #define SUDO_API_VERSION_MAJOR 1
-        #define SUDO_API_VERSION_MINOR 0
-        #define SUDO_API_VERSION ((SUDO_API_VERSION_MAJOR << 16) | \
-                                  SUDO_API_VERSION_MINOR)
-
    II//OO PPlluuggiinn AAPPII
         struct io_plugin {
         #define SUDO_IO_PLUGIN         2
@@ -646,7 +760,7 @@ DDEESSCCRRIIPPTTIIOONN
             int (*open)(unsigned int version, sudo_conv_t conversation
                         sudo_printf_t plugin_printf, char * const settings[],
                         char * const user_info[], int argc, char * const argv[],
-                        char * const user_env[]);
+                        char * const user_env[], char * const plugin_options[]);
             void (*close)(int exit_status, int error); /* wait status or error */
             int (*show_version)(int verbose);
             int (*log_ttyin)(const char *buf, unsigned int len);
@@ -654,6 +768,10 @@ DDEESSCCRRIIPPTTIIOONN
             int (*log_stdin)(const char *buf, unsigned int len);
             int (*log_stdout)(const char *buf, unsigned int len);
             int (*log_stderr)(const char *buf, unsigned int len);
+            void (*register_hooks)(int version,
+               int (*register_hook)(struct sudo_hook *hook));
+            void (*deregister_hooks)(int version,
+               int (*deregister_hook)(struct sudo_hook *hook));
         };
 
        When an I/O plugin is loaded, ssuuddoo runs the command in a pseudo-tty.
@@ -689,7 +807,7 @@ DDEESSCCRRIIPPTTIIOONN
             int (*open)(unsigned int version, sudo_conv_t conversation
                         sudo_printf_t plugin_printf, char * const settings[],
                         char * const user_info[], int argc, char * const argv[],
-                        char * const user_env[]);
+                        char * const user_env[], char * const plugin_options[]);
 
            The _o_p_e_n function is run before the _l_o_g___i_n_p_u_t, _l_o_g___o_u_t_p_u_t or
            _s_h_o_w___v_e_r_s_i_o_n functions are called.  It is only called if the
@@ -765,6 +883,18 @@ DDEESSCCRRIIPPTTIIOONN
                When parsing _u_s_e_r___e_n_v, the plugin should split on the ffiirrsstt
                equal sign ('=') since the _n_a_m_e field will never include one
                itself but the _v_a_l_u_e might.
+
+           plugin_options
+               Any (non-comment) strings immediately after the plugin path are
+               treated as arguments to the plugin.  These arguments are split
+               on a white space boundary and are passed to the plugin in the
+               form of a NULL-terminated array of strings.  If no arguments
+               were specified, _p_l_u_g_i_n___o_p_t_i_o_n_s will be the NULL pointer.
+
+               NOTE: the _p_l_u_g_i_n___o_p_t_i_o_n_s parameter is only available starting
+               with API version 1.2.  A plugin mmuusstt check the API version
+               specified by the ssuuddoo front end before using _p_l_u_g_i_n___o_p_t_i_o_n_s.
+               Failure to do so may result in a crash.
 
        close
             void (*close)(int exit_status, int error);
@@ -876,9 +1006,152 @@ DDEESSCCRRIIPPTTIIOONN
 
            len The length of _b_u_f in bytes.
 
-       _V_e_r_s_i_o_n _m_a_c_r_o_s
+       register_hooks
+           See the "Policy Plugin API" section for a description of
+           register_hooks.
+
+       deregister_hooks
+           See the "Policy Plugin API" section for a description of
+           deregister_hooks.
+
+       _I_/_O _P_l_u_g_i_n _V_e_r_s_i_o_n _M_a_c_r_o_s
 
        Same as for the "Policy Plugin API".
+
+   HHooookk FFuunnccttiioonn AAPPII
+       Beginning with plugin API version 1.2, it is possible to install hooks
+       for certain functions called by the ssuuddoo front end.
+
+       Currently, the only supported hooks relate to the handling of
+       environment variables.  Hooks can be used to intercept attempts to get,
+       set, or remove environment variables so that these changes can be
+       reflected in the version of the environment that is used to execute a
+       command.  A future version of the API will support hooking internal
+       ssuuddoo front end functions as well.
+
+       _H_o_o_k _s_t_r_u_c_t_u_r_e
+
+       Hooks in ssuuddoo are described by the following structure:
+
+        typedef int (*sudo_hook_fn_t)();
+
+        struct sudo_hook {
+            int hook_version;
+            int hook_type;
+            sudo_hook_fn_t hook_fn;
+            void *closure;
+        };
+
+       The sudo_hook structure has the following fields:
+
+       hook_version
+           The hook_version field should be set to SUDO_HOOK_VERSION.
+
+       hook_type
+           The hook_type field may be one of the following supported hook
+           types:
+
+           SUDO_HOOK_SETENV
+               The C library setenv() function.  Any registered hooks will run
+               before the C library implementation.  The hook_fn field should
+               be a function that matches the following typedef:
+
+                typedef int (*sudo_hook_fn_setenv_t)(const char *name,
+                   const char *value, int overwrite, void *closure);
+
+               If the registered hook does not match the typedef the results
+               are unspecified.
+
+           SUDO_HOOK_UNSETENV
+               The C library unsetenv() function.  Any registered hooks will
+               run before the C library implementation.  The hook_fn field
+               should be a function that matches the following typedef:
+
+                typedef int (*sudo_hook_fn_unsetenv_t)(const char *name,
+                   void *closure);
+
+           SUDO_HOOK_GETENV
+               The C library getenv() function.  Any registered hooks will run
+               before the C library implementation.  The hook_fn field should
+               be a function that matches the following typedef:
+
+                typedef int (*sudo_hook_fn_getenv_t)(const char *name,
+                   char **value, void *closure);
+
+               If the registered hook does not match the typedef the results
+               are unspecified.
+
+           SUDO_HOOK_PUTENV
+               The C library putenv() function.  Any registered hooks will run
+               before the C library implementation.  The hook_fn field should
+               be a function that matches the following typedef:
+
+                typedef int (*sudo_hook_fn_putenv_t)(char *string,
+                   void *closure);
+
+               If the registered hook does not match the typedef the results
+               are unspecified.
+
+       hook_fn
+            sudo_hook_fn_t hook_fn;
+
+           The hook_fn field should be set to the plugin's hook
+           implementation.  The actual function arguments will vary depending
+           on the hook_type (see hook_type above).  In all cases, the closure
+           field of struct sudo_hook is passed as the last function parameter.
+           This can be used to pass arbitrary data to the plugin's hook
+           implementation.
+
+           The function return value may be one of the following:
+
+           SUDO_HOOK_RET_ERROR
+               The hook function encountered an error.
+
+           SUDO_HOOK_RET_NEXT
+               The hook completed without error, go on to the next hook
+               (including the native implementation if applicable).  For
+               example, a getenv hook might return SUDO_HOOK_RET_NEXT if the
+               specified variable was not found in the private copy of the
+               environment.
+
+           SUDO_HOOK_RET_STOP
+               The hook completed without error, stop processing hooks for
+               this invocation.  This can be used to replace the native
+               implementation.  For example, a setenv hook that operates on a
+               private copy of the environment but leaves environ unchanged.
+
+       Note that it is very easy to create an infinite loop when hooking C
+       library functions.  For example, a getenv hook that calls the snprintf
+       function may create a loop if the snprintf implementation calls getenv
+       to check the locale.  To prevent this, you may wish to use a static
+       variable in the hook function to guard against nested calls.  E.g.
+
+        static int in_progress = 0; /* avoid recursion */
+        if (in_progress)
+            return SUDO_HOOK_RET_NEXT;
+        in_progress = 1;
+        ...
+        in_progress = 0;
+        return SUDO_HOOK_RET_STOP;
+
+       _H_o_o_k _A_P_I _V_e_r_s_i_o_n _M_a_c_r_o_s
+
+        /* Hook API version major/minor */
+        #define SUDO_HOOK_VERSION_MAJOR 1
+        #define SUDO_HOOK_VERSION_MINOR 0
+        #define SUDO_HOOK_MKVERSION(x, y) ((x << 16) | y)
+        #define SUDO_HOOK_VERSION SUDO_HOOK_MKVERSION(SUDO_HOOK_VERSION_MAJOR,\
+                                                      SUDO_HOOK_VERSION_MINOR)
+
+        /* Getters and setters for hook API version */
+        #define SUDO_HOOK_VERSION_GET_MAJOR(v) ((v) >> 16)
+        #define SUDO_HOOK_VERSION_GET_MINOR(v) ((v) & 0xffff)
+        #define SUDO_HOOK_VERSION_SET_MAJOR(vp, n) do { \
+            *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
+        } while(0)
+        #define SUDO_HOOK_VERSION_SET_MINOR(vp, n) do { \
+            *(vp) = (*(vp) & 0xffff0000) | (n); \
+        } while(0)
 
    CCoonnvveerrssaattiioonn AAPPII
        If the plugin needs to interact with the user, it may do so via the
@@ -1021,7 +1294,7 @@ DDEESSCCRRIIPPTTIIOONN
            pwd The password database entry for _u_s_e_r, if any.  If _u_s_e_r is not
                present in the password database, _p_w_d will be NULL.
 
-       _V_e_r_s_i_o_n _M_a_c_r_o_s
+       _G_r_o_u_p _A_P_I _V_e_r_s_i_o_n _M_a_c_r_o_s
 
         /* Sudoers group plugin version major/minor */
         #define GROUP_API_VERSION_MAJOR 1
@@ -1038,6 +1311,28 @@ DDEESSCCRRIIPPTTIIOONN
         #define GROUP_API_VERSION_SET_MINOR(vp, n) do { \
             *(vp) = (*(vp) & 0xffff0000) | (n); \
         } while(0)
+
+PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
+       The following revisions have been made to the Sudo Plugin API.
+
+       Version 1.0
+           Initial API version.
+
+       Version 1.1
+           The I/O logging plugin's open function was modified to take the
+           command_info list as an argument.
+
+       Version 1.2
+           The Policy and I/O logging plugins' open functions are now passed a
+           list of plugin options if any are specified in _/_e_t_c_/_s_u_d_o_._c_o_n_f.
+
+           A simple hooks API has been introduced to allow plugins to hook in
+           to the system's environment handling functions.
+
+           The init_session Policy plugin function is now passed a pointer to
+           the user environment which can be updated as needed.  This can be
+           used to merge in environment variables stored in the PAM handle
+           before a command is run.
 
 SSEEEE AALLSSOO
        _s_u_d_o_e_r_s(4), _s_u_d_o(1m)
@@ -1060,4 +1355,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.4                          January  6, 2012                SUDO_PLUGIN(1m)
+1.8.5                           April 23, 2012                 SUDO_PLUGIN(1m)

@@ -111,7 +111,7 @@ fmt_string(const char *var, const char *val)
 static int
 policy_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t sudo_printf, char * const settings[],
-    char * const user_info[], char * const user_env[])
+    char * const user_info[], char * const user_env[], char * const args[])
 {
     char * const *ui;
     struct passwd *pw;
@@ -422,7 +422,7 @@ static int
 io_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t sudo_printf, char * const settings[],
     char * const user_info[], char * const command_info[],
-    int argc, char * const argv[], char * const user_env[])
+    int argc, char * const argv[], char * const user_env[], char * const args[])
 {
     int fd;
     char path[PATH_MAX];
@@ -468,14 +468,14 @@ io_version(int verbose)
 static int
 io_log_input(const char *buf, unsigned int len)
 {
-    fwrite(buf, len, 1, input);
+    ignore_result(fwrite(buf, len, 1, input));
     return true;
 }
 
 static int
 io_log_output(const char *buf, unsigned int len)
 {
-    fwrite(buf, len, 1, output);
+    ignore_result(fwrite(buf, len, 1, output));
     return true;
 }
 
@@ -488,7 +488,10 @@ struct policy_plugin sample_policy = {
     policy_check,
     policy_list,
     NULL, /* validate */
-    NULL /* invalidate */
+    NULL, /* invalidate */
+    NULL, /* init_session */
+    NULL, /* register_hooks */
+    NULL /* deregister_hooks */
 };
 
 /*

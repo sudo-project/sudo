@@ -34,15 +34,6 @@
 # define __attribute__(x)
 #endif
 
-/* For silencing gcc warnings about rcsids */
-#ifndef __unused
-# if defined(__GNUC__) && (__GNUC__ > 2 || __GNUC__ == 2 && __GNUC_MINOR__ > 7)
-#  define __unused	__attribute__((__unused__))
-# else
-#  define __unused
-# endif
-#endif
-
 /* For catching format string mismatches */
 #ifndef __printflike
 # if defined(__GNUC__) && (__GNUC__ > 2 || __GNUC__ == 2 && __GNUC_MINOR__ >= 7)
@@ -129,6 +120,17 @@
 #endif
 #ifndef MAX
 # define MAX(a,b) (((a)>(b))?(a):(b))
+#endif
+
+/*
+ * Older systems may be missing stddef.h and/or offsetof macro
+ */
+#ifndef offsetof
+# ifdef __offsetof
+#  define offsetof(type, field) __offsetof(type, field)
+# else
+#  define offsetof(type, field) ((size_t)(&((type *)0)->field))
+# endif
 #endif
 
 /*

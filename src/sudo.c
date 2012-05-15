@@ -63,6 +63,9 @@
 #endif
 #ifdef HAVE_LOGIN_CAP_H
 # include <login_cap.h>
+# ifndef LOGIN_SETENV
+#  define LOGIN_SETENV	0
+# endif
 #endif
 #ifdef HAVE_PROJECT_H
 # include <project.h>
@@ -109,6 +112,7 @@ static int sudo_mode;
  */
 static void fix_fds(void);
 static void disable_coredumps(void);
+static void sudo_check_suid(const char *path);
 static char **get_user_info(struct user_details *);
 static void command_info_to_details(char * const info[],
     struct command_details *details);
@@ -126,8 +130,6 @@ static int policy_list(struct plugin_container *plugin, int argc,
     char * const argv[], int verbose, const char *list_user);
 static int policy_validate(struct plugin_container *plugin);
 static void policy_invalidate(struct plugin_container *plugin, int remove);
-static int policy_init_session(struct plugin_container *plugin,
-    struct passwd *pwd);
 
 /* I/O log plugin convenience functions. */
 static int iolog_open(struct plugin_container *plugin, char * const settings[],
@@ -136,16 +138,13 @@ static int iolog_open(struct plugin_container *plugin, char * const settings[],
 static void iolog_close(struct plugin_container *plugin, int exit_status,
     int error);
 static int iolog_show_version(struct plugin_container *plugin, int verbose);
+static void iolog_unlink(struct plugin_container *plugin);
 
 #ifdef RLIMIT_CORE
 static struct rlimit corelimit;
 #endif /* RLIMIT_CORE */
 #if defined(__linux__)
 static struct rlimit nproclimit;
-#endif
-
-#ifdef HAVE_LOGIN_CAP_H
-extern char **environ;
 #endif
 
 int
@@ -185,8 +184,8 @@ main(int argc, char *argv[], char *envp[])
 # endif
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
-    if (geteuid() != 0)
-	errorx(1, _("must be setuid root"));
+    /* Make sure we are setuid root. */
+    sudo_check_suid(argv[0]);
 
     /* Reset signal mask and make sure fds 0-2 are open. */
     (void) sigemptyset(&mask);
@@ -272,8 +271,8 @@ main(int argc, char *argv[], char *envp[])
 		case 1:
 		    break;
 		case 0:
-		    /* I/O plugin asked to be disabled, remove from list. */
-		    tq_remove(&io_plugins, plugin);
+		    /* I/O plugin asked to be disabled, remove and free. */
+		    iolog_unlink(plugin);
 		    break;
 		case -2:
 		    usage(1);
@@ -283,6 +282,7 @@ main(int argc, char *argv[], char *envp[])
 			plugin->name);
 		}
 	    }
+	    /* Setup command details and run command/edit. */
 	    command_info_to_details(command_info, &command_details);
 	    command_details.argv = argv_out;
 	    command_details.envp = user_env_out;
@@ -425,11 +425,22 @@ get_user_info(struct user_details *ud)
 {
     char *cp, **user_info, cwd[PATH_MAX], host[MAXHOSTNAMELEN];
     struct passwd *pw;
-    int i = 0;
+    int fd, i = 0;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL)
 
     /* XXX - bound check number of entries */
     user_info = emalloc2(32, sizeof(char *));
+
+    ud->pid = getpid();
+    ud->ppid = getppid();
+    ud->pgid = getpgid(0);
+    ud->tcpgid = (pid_t)-1;
+    fd = open(_PATH_TTY, O_RDWR|O_NOCTTY|O_NONBLOCK, 0);
+    if (fd != -1) {
+	ud->tcpgid = tcgetpgrp(fd);
+	close(fd);
+    }
+    ud->sid = getsid(0);
 
     ud->uid = getuid();
     ud->euid = geteuid();
@@ -450,6 +461,12 @@ get_user_info(struct user_details *ud)
 	ud->shell = pw->pw_shell[0] ? pw->pw_shell : _PATH_BSHELL;
     }
     ud->shell = estrdup(ud->shell);
+
+    easprintf(&user_info[++i], "pid=%d", (int)ud->pid);
+    easprintf(&user_info[++i], "ppid=%d", (int)ud->ppid);
+    easprintf(&user_info[++i], "pgid=%d", (int)ud->pgid);
+    easprintf(&user_info[++i], "tcpgid=%d", (int)ud->tcpgid);
+    easprintf(&user_info[++i], "sid=%d", (int)ud->sid);
 
     easprintf(&user_info[++i], "uid=%u", (unsigned int)ud->uid);
     easprintf(&user_info[++i], "euid=%u", (unsigned int)ud->euid);
@@ -712,10 +729,47 @@ command_info_to_details(char * const info[], struct command_details *details)
     if (!ISSET(details->flags, CD_SET_EUID))
 	details->euid = details->uid;
 
+#ifdef HAVE_SETAUTHDB
+    aix_setauthdb(IDtouser(details->euid));
+#endif
+    details->pw = getpwuid(details->euid);
+    if (details->pw != NULL && (details->pw = pw_dup(details->pw)) == NULL)
+	errorx(1, _("unable to allocate memory"));
+#ifdef HAVE_SETAUTHDB
+    aix_restoreauthdb();
+#endif
+
 #ifdef HAVE_SELINUX
     if (details->selinux_role != NULL && is_selinux_enabled() > 0)
 	SET(details->flags, CD_RBAC_ENABLED);
 #endif
+    debug_return;
+}
+
+static void
+sudo_check_suid(const char *path)
+{
+    struct stat sb;
+    debug_decl(sudo_check_suid, SUDO_DEBUG_PCOMM)
+
+    if (geteuid() != 0) {
+	if (strchr(path, '/') != NULL && stat(path, &sb) == 0) {
+	    /* Try to determine why sudo was not running as root. */
+	    if (sb.st_uid != ROOT_UID || !ISSET(sb.st_mode, S_ISUID)) {
+		errorx(1,
+		    _("%s must be owned by uid %d and have the setuid bit set"),
+		    path, ROOT_UID);
+	    } else {
+		errorx(1, _("effective uid is not %d, is %s on a file system "
+		    "with the 'nosuid' option set or an NFS file system without"
+		    " root privileges?"), ROOT_UID, path);
+	    }
+	} else {
+	    errorx(1,
+		_("effective uid is not %d, is sudo installed setuid root?"),
+		ROOT_UID);
+	}
+    }
     debug_return;
 }
 
@@ -832,24 +886,7 @@ bool
 exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 {
     bool rval = false;
-    struct passwd *pw;
     debug_decl(exec_setup, SUDO_DEBUG_EXEC)
-
-#ifdef HAVE_SETAUTHDB
-    aix_setauthdb(IDtouser(details->euid));
-#endif
-    if ((pw = getpwuid(details->euid)) != NULL && (pw = pw_dup(pw)) == NULL)
-	errorx(1, _("unable to allocate memory"));
-#ifdef HAVE_SETAUTHDB
-    aix_restoreauthdb();
-#endif
-
-    /*
-     * Call policy plugin's session init before other setup occurs.
-     * The session init code is expected to print an error as needed.
-     */
-    if (policy_init_session(&policy_plugin, pw) != true)
-	goto done;
 
 #ifdef HAVE_SELINUX
     if (ISSET(details->flags, CD_RBAC_ENABLED)) {
@@ -859,12 +896,12 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     }
 #endif
 
-    if (pw != NULL) {
+    if (details->pw != NULL) {
 #ifdef HAVE_PROJECT_H
-	set_project(pw);
+	set_project(details->pw);
 #endif
 #ifdef HAVE_GETUSERATTR
-	aix_prep_user(pw->pw_name, ptyname ? ptyname : user_details.tty);
+	aix_prep_user(details->pw->pw_name, ptyname ? ptyname : user_details.tty);
 #endif
 #ifdef HAVE_LOGIN_CAP_H
 	if (details->login_class) {
@@ -884,23 +921,17 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	    if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 		/* Set everything except user, group and login name. */
 		flags = LOGIN_SETALL;
-		CLR(flags, LOGIN_SETGROUP|LOGIN_SETLOGIN|LOGIN_SETUSER);
+		CLR(flags, LOGIN_SETGROUP|LOGIN_SETLOGIN|LOGIN_SETUSER|LOGIN_SETENV|LOGIN_SETPATH);
 		CLR(details->flags, CD_SET_UMASK); /* LOGIN_UMASK instead */
-		/* Swap in the plugin-supplied environment for LOGIN_SETENV */
-		environ = details->envp;
 	    } else {
 		flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
 	    }
-	    if (setusercontext(lc, pw, pw->pw_uid, flags)) {
-		if (pw->pw_uid != ROOT_UID) {
+	    if (setusercontext(lc, details->pw, details->pw->pw_uid, flags)) {
+		if (details->pw->pw_uid != ROOT_UID) {
 		    warning(_("unable to set user context"));
 		    goto done;
 		} else
 		    warning(_("unable to set user context"));
-	    }
-	    if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
-		/* Stash the updated environment pointer in command details */
-		details->envp = environ;
 	    }
 	}
 #endif /* HAVE_LOGIN_CAP_H */
@@ -997,7 +1028,6 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     rval = true;
 
 done:
-    efree(pw);
     debug_return_bool(rval);
 }
 
@@ -1056,9 +1086,24 @@ static int
 policy_open(struct plugin_container *plugin, char * const settings[],
     char * const user_info[], char * const user_env[])
 {
+    int rval;
     debug_decl(policy_open, SUDO_DEBUG_PCOMM)
-    debug_return_bool(plugin->u.policy->open(SUDO_API_VERSION,
-	sudo_conversation, _sudo_printf, settings, user_info, user_env));
+
+    /*
+     * Backwards compatibility for older API versions
+     */
+    switch (plugin->u.generic->version) {
+    case SUDO_API_MKVERSION(1, 0):
+    case SUDO_API_MKVERSION(1, 1):
+	rval = plugin->u.policy_1_0->open(plugin->u.io_1_0->version,
+	    sudo_conversation, _sudo_printf, settings, user_info, user_env);
+	break;
+    default:
+	rval = plugin->u.policy->open(SUDO_API_VERSION, sudo_conversation,
+	    _sudo_printf, settings, user_info, user_env, plugin->options);
+    }
+
+    debug_return_bool(rval);
 }
 
 static void
@@ -1123,13 +1168,27 @@ policy_invalidate(struct plugin_container *plugin, int remove)
     debug_return;
 }
 
-static int
-policy_init_session(struct plugin_container *plugin, struct passwd *pwd)
+int
+policy_init_session(struct command_details *details)
 {
+    int rval = true;
     debug_decl(policy_init_session, SUDO_DEBUG_PCOMM)
-    if (plugin->u.policy->init_session)
-	debug_return_bool(plugin->u.policy->init_session(pwd));
-    debug_return_bool(true);
+
+    if (policy_plugin.u.policy->init_session) {
+	/*
+	 * Backwards compatibility for older API versions
+	 */
+	switch (policy_plugin.u.generic->version) {
+	case SUDO_API_MKVERSION(1, 0):
+	case SUDO_API_MKVERSION(1, 1):
+	    rval = policy_plugin.u.policy_1_0->init_session(details->pw);
+	    break;
+	default:
+	    rval = policy_plugin.u.policy->init_session(details->pw,
+		&details->envp);
+	}
+    }
+    debug_return_bool(rval);
 }
 
 static int
@@ -1141,7 +1200,7 @@ iolog_open(struct plugin_container *plugin, char * const settings[],
     debug_decl(iolog_open, SUDO_DEBUG_PCOMM)
 
     /*
-     * Backwards compatibility for API major 1, minor 0
+     * Backwards compatibility for older API versions
      */
     switch (plugin->u.generic->version) {
     case SUDO_API_MKVERSION(1, 0):
@@ -1149,10 +1208,15 @@ iolog_open(struct plugin_container *plugin, char * const settings[],
 	    sudo_conversation, _sudo_printf, settings, user_info, argc, argv,
 	    user_env);
 	break;
+    case SUDO_API_MKVERSION(1, 1):
+	rval = plugin->u.io_1_1->open(plugin->u.io_1_1->version,
+	    sudo_conversation, _sudo_printf, settings, user_info,
+	    command_info, argc, argv, user_env);
+	break;
     default:
 	rval = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation,
-	    _sudo_printf, settings, user_info, command_info, argc, argv,
-	    user_env);
+	    _sudo_printf, settings, user_info, command_info,
+	    argc, argv, user_env, plugin->options);
     }
     debug_return_bool(rval);
 }
@@ -1170,4 +1234,26 @@ iolog_show_version(struct plugin_container *plugin, int verbose)
 {
     debug_decl(iolog_show_version, SUDO_DEBUG_PCOMM)
     debug_return_bool(plugin->u.io->show_version(verbose));
+}
+
+/*
+ * Remove the specified I/O logging plugin from the io_plugins list.
+ * Deregisters any hooks before unlinking, then frees the container.
+ */
+static void
+iolog_unlink(struct plugin_container *plugin)
+{
+    debug_decl(iolog_unlink, SUDO_DEBUG_PCOMM)
+
+    /* Deregister hooks, if any. */
+    if (plugin->u.io->version >= SUDO_API_MKVERSION(1, 2)) {
+	if (plugin->u.io->deregister_hooks != NULL)
+	    plugin->u.io->deregister_hooks(SUDO_HOOK_VERSION,
+		deregister_hook);
+    }
+    /* Remove from io_plugins list and free. */
+    tq_remove(&io_plugins, plugin);
+    efree(plugin);
+
+    debug_return;
 }

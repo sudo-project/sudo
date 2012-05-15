@@ -16,9 +16,27 @@ A) As part of the build process, sudo creates a temporary library containing
    you may need to install the SUNWbtool package.  On other systems
    "ar" may be included in the GNU binutils package.
 
-Q) Sudo compiles but when I run it I get "Sorry, sudo must be setuid root."
-   and sudo quits.
-A) Sudo must be setuid root to do its work.  You need to do something like
+Q) Sudo compiles and installs OK but when I try to run it I get:
+   /usr/local/bin/sudo must be owned by uid 0 and have the setuid bit set
+A) Sudo must be setuid root to do its work.  Either /usr/local/bin/sudo
+   is not owned by uid 0 or the setuid bit is not set.  This should have
+   been done for you by "make install" but you can fix it manually by
+   running the following as root:
+    # chown root /usr/local/bin/sudo; chmod 4111 /usr/local/bin/sudo
+
+Q) Sudo compiles and installs OK but when I try to run it I get:
+    effective uid is not 0, is /usr/local/bin/sudo on a file system with the
+    'nosuid' option set or an NFS file system without root privileges?
+A) The owner and permissions on the sudo binary appear to be OK but when
+   sudo ran, the setuid bit did not have an effect.  There are two common
+   causes for this.  The first is that the file system the sudo binary
+   is located on is mounted with the 'nosuid' mount option, which disables
+   setuid binaries.  The other is that sudo is installed on an NFS-mounted
+   file system that is exported without root privileges.  By default, NFS
+   file systems are exported with uid 0 mapped to a non-privileged uid
+   (usually -2).
+
+You need to do something like
    `chmod 4111 /usr/local/bin/sudo'.  Also, the file system sudo resides
    on must *not* be mounted (or exported) with the nosuid option or sudo
    will not be able to work.  Another possibility is you may have '.' in
@@ -202,6 +220,26 @@ A) ssh does not allocate a tty by default when running a remote command.
    Alternately, if you do not mind your password being echoed to the
    screen, you can use the "visiblepw" sudoers option to allow this.
 
+Q) When I try to use SSL-enabled LDAP with sudo I get an error:
+    unable to initialize SSL cert and key db: security library: bad database.
+    you must set TLS_CERT in /etc/ldap.conf to use SSL
+A) On systems that use a Mozilla-derived LDAP SDK there must be a
+   certificate database in place to use SSL-encrypted LDAP connections.
+   This file is usually /var/ldap/cert8.db or /etc/ldap/cert8.db.
+   The actual number after "cert" will vary, depending on the version
+   of the LDAP SDK that is being used.  If you do not have a certificate
+   database you can either copy one from a mozilla-derived browser, such
+   as firefox, or create one using the "certutil" command.  You can run
+   "certutil" as follows and press the <return> (or <enter>) key at the
+   password prompt:
+    # certutil -N -d /var/ldap
+    Enter a password which will be used to encrypt your keys.
+    The password should be at least 8 characters long,
+    and should contain at least one non-alphabetic character.
+
+    Enter new password: <return>
+    Re-enter password: <return>
+
 Q) When I run sudo on AIX I get the following error:
     setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID): Operation not permitted.
 A) AIX's Enhanced RBAC is preventing sudo from running.  To fix
@@ -210,8 +248,17 @@ A) AIX's Enhanced RBAC is preventing sudo from running.  To fix
 
     /usr/local/bin/sudo:
 	    accessauths = ALLOW_ALL
-	    innateprivs = PV_DAC_UID,PV_DAC_GID
+	    innateprivs = PV_DAC_GID,PV_DAC_O,PV_DAC_R,PV_DAC_UID,PV_DAC_W,PV_DAC_X,PV_FS_CHOWN,PV_PROC_ENV,PV_PROC_PRIO,PV_PROC_RAC
 	    secflags = FSF_EPS
+
+Q) When I run configure I get the following error:
+    dlopen present but libtool doesn't appear to support your platform.
+A) Libtool doesn't know how to support dynamic linking on the operating
+   system you are building for.  If you are cross-compiling, you need to
+   specify the operating system, not just the CPU type.  For example:
+	--host powerpc-unknown-linux
+   instead of just:
+	--host powerpc
 
 Q) How do you pronounce `sudo'?
 A) The official pronunciation is soo-doo (for su "do").  However, an

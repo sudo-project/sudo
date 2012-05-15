@@ -62,12 +62,12 @@ do {							\
 struct passwd *
 pw_dup(const struct passwd *pw)
 {
-	char		*cp;
-	size_t		 nsize, psize, gsize, dsize, ssize, total;
+	size_t nsize = 0, psize = 0, gsize = 0, dsize = 0, ssize = 0, total;
 #ifdef HAVE_LOGIN_CAP_H
-	size_t		 csize;
+	size_t csize;
 #endif
-	struct passwd	*newpw;
+	struct passwd *newpw;
+	char *cp;
 
 	/* Allocate in one big chunk for easy freeing */
 	total = sizeof(struct passwd);
@@ -81,7 +81,7 @@ pw_dup(const struct passwd *pw)
 	PW_SIZE(pw_shell, ssize);
 
 	if ((cp = malloc(total)) == NULL)
-		return (NULL);
+		return NULL;
 	newpw = (struct passwd *)cp;
 
 	/*

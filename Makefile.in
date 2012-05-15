@@ -47,7 +47,7 @@ sudoers_mode = @SUDOERS_MODE@
 
 SUBDIRS = compat common @ZLIB_SRC@ plugins/sudoers src include doc
 
-SAMPLES = plugins/sample plugins/sample_group
+SAMPLES = plugins/sample plugins/sample_group plugins/system_group
 
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
@@ -67,7 +67,7 @@ POTFILES = src/po/sudo.pot plugins/sudoers/po/sudoers.pot
 MSGFMT = msgfmt
 MSGMERGE = msgmerge
 XGETTEXT = xgettext
-XGETTEXT_OPTS = -k_ -kN_ --copyright-holder="Todd C. Miller" \
+XGETTEXT_OPTS = -F -k_ -kN_ --copyright-holder="Todd C. Miller" \
 		"--msgid-bugs-address=http://www.sudo.ws/bugs" \
 		--package-name=@PACKAGE_NAME@ --package-version=$(VERSION) \
 		--flag warning:1:c-format --flag warningx:1:c-format \
@@ -132,12 +132,14 @@ depend: siglist.c
 	    $(srcdir)/compat/Makefile.in $(srcdir)/plugins/sample/Makefile.in \
 	    $(srcdir)/plugins/sample_group/Makefile.in \
 	    $(srcdir)/plugins/sudoers/Makefile.in \
+	    $(srcdir)/plugins/system_group/Makefile.in \
 	    $(srcdir)/src/Makefile.in $(srcdir)/zlib/Makefile.in; \
 	./config.status --file $(srcdir)/common/Makefile \
 	    --file $(srcdir)/compat/Makefile \
 	    --file $(srcdir)/plugins/sample/Makefile \
 	    --file $(srcdir)/plugins/sample_group/Makefile \
 	    --file $(srcdir)/plugins/sudoers/Makefile \
+	    --file $(srcdir)/plugins/system_group/Makefile \
 	    --file $(srcdir)/src/Makefile --file $(srcdir)/zlib/Makefile
 
 # The 1.8 branch started February 25, 2011
@@ -180,7 +182,7 @@ update-pot:
 		    *) echo unknown domain $$domain; continue;; \
 		esac; \
 		$(XGETTEXT) $(XGETTEXT_OPTS) -d$$domain $$cfiles -o $$pot.tmp; \
-		if diff -I'^.POT-Creation-Date' $$pot.tmp $$pot >/dev/null; then \
+		if diff -I'^.POT-Creation-Date' -I'^.Project-Id-Version' -I'^#' $$pot.tmp $$pot >/dev/null; then \
 		    rm -f $$pot.tmp; \
 		else \
 		    mv -f $$pot.tmp $$pot; \

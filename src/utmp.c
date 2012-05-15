@@ -63,8 +63,8 @@
 #if !defined(HAVE_GETUTXID) && defined(HAVE_GETUTID)
 # define getutxline(u)	getutline(u)
 # define pututxline(u)	pututline(u)
-# define setutxent	setutent(u)
-# define endutxent	endutent(u)
+# define setutxent()	setutent()
+# define endutxent()	endutent()
 #endif /* !HAVE_GETUTXID && HAVE_GETUTID */
 
 #ifdef HAVE_GETUTXID

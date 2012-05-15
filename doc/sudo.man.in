@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "February  5, 2012" "1.8.4" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "March 15, 2012" "1.8.5" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -526,9 +526,9 @@ which corresponds to the following \fI@sysconfdir@/sudo.conf\fR file.
 \& # Default @sysconfdir@/sudo.conf file
 \& #
 \& # Format:
-\& #   Plugin plugin_name plugin_path
+\& #   Plugin plugin_name plugin_path plugin_options ...
 \& #   Path askpass /path/to/askpass
-\& #   Path noexec /path/to/noexec.so
+\& #   Path noexec /path/to/sudo_noexec.so
 \& #   Debug sudo /var/log/sudo_debug all@warn
 \& #   Set disable_coredump true
 \& #
@@ -536,6 +536,7 @@ which corresponds to the following \fI@sysconfdir@/sudo.conf\fR file.
 \& #   fully qualified.
 \& # The plugin_name corresponds to a global symbol in the plugin
 \& #   that contains the plugin interface structure.
+\& # The plugin_options are optional.
 \& #
 \& Plugin policy_plugin sudoers.so
 \& Plugin io_plugin sudoers.so
@@ -547,8 +548,9 @@ plugin.  The \fIsymbol_name\fR is the name of the \f(CW\*(C`struct policy_plugin
 or \f(CW\*(C`struct io_plugin\*(C'\fR in the plugin shared object.  The \fIpath\fR
 may be fully qualified or relative.  If not fully qualified it is
 relative to the \fI@prefix@/libexec\fR directory.  Any additional
-parameters after the \fIpath\fR are ignored.  Lines that don't begin
-with \f(CW\*(C`Plugin\*(C'\fR or \f(CW\*(C`Path\*(C'\fR are silently ignored
+parameters after the \fIpath\fR are passed as arguments to the plugin's
+\&\fIopen\fR function.  Lines that don't begin with \f(CW\*(C`Plugin\*(C'\fR, \f(CW\*(C`Path\*(C'\fR,
+\&\f(CW\*(C`Debug\*(C'\fR or \f(CW\*(C`Set\*(C'\fR are silently ignored.
 .PP
 For more information, see the \fIsudo_plugin\fR\|(@mansectsu@) manual.
 .SH "PATHS"

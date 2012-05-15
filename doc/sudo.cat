@@ -326,9 +326,9 @@ PPLLUUGGIINNSS
         # Default /etc/sudo.conf file
         #
         # Format:
-        #   Plugin plugin_name plugin_path
+        #   Plugin plugin_name plugin_path plugin_options ...
         #   Path askpass /path/to/askpass
-        #   Path noexec /path/to/noexec.so
+        #   Path noexec /path/to/sudo_noexec.so
         #   Debug sudo /var/log/sudo_debug all@warn
         #   Set disable_coredump true
         #
@@ -336,6 +336,7 @@ PPLLUUGGIINNSS
         #   fully qualified.
         # The plugin_name corresponds to a global symbol in the plugin
         #   that contains the plugin interface structure.
+        # The plugin_options are optional.
         #
         Plugin policy_plugin sudoers.so
         Plugin io_plugin sudoers.so
@@ -346,8 +347,8 @@ PPLLUUGGIINNSS
        io_plugin in the plugin shared object.  The _p_a_t_h may be fully qualified
        or relative.  If not fully qualified it is relative to the
        _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c directory.  Any additional parameters after the _p_a_t_h
-       are ignored.  Lines that don't begin with Plugin or Path are silently
-       ignored
+       are passed as arguments to the plugin's _o_p_e_n function.  Lines that
+       don't begin with Plugin, Path, Debug or Set are silently ignored.
 
        For more information, see the _s_u_d_o___p_l_u_g_i_n(1m) manual.
 
@@ -623,4 +624,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.4                          February  5, 2012                      SUDO(1m)
+1.8.5                           March 15, 2012                        SUDO(1m)

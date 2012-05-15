@@ -47,9 +47,9 @@
 #ifdef HAVE_FNMATCH
 # include <fnmatch.h>
 #endif /* HAVE_FNMATCH */
-#ifdef HAVE_EXTENDED_GLOB
+#ifdef HAVE_GLOB
 # include <glob.h>
-#endif /* HAVE_EXTENDED_GLOB */
+#endif /* HAVE_GLOB */
 #ifdef HAVE_NETGROUP_H
 # include <netgroup.h>
 #endif /* HAVE_NETGROUP_H */
@@ -81,9 +81,9 @@
 #ifndef HAVE_FNMATCH
 # include "compat/fnmatch.h"
 #endif /* HAVE_FNMATCH */
-#ifndef HAVE_EXTENDED_GLOB
+#ifndef HAVE_GLOB
 # include "compat/glob.h"
-#endif /* HAVE_EXTENDED_GLOB */
+#endif /* HAVE_GLOB */
 
 static struct member_list empty;
 
@@ -477,8 +477,7 @@ command_matches_glob(char *sudoers_cmnd, char *sudoers_args)
      *  c) there are args in sudoers and on command line and they match
      * else return false.
      */
-#define GLOB_FLAGS	(GLOB_NOSORT | GLOB_BRACE | GLOB_TILDE)
-    if (glob(sudoers_cmnd, GLOB_FLAGS, NULL, &gl) != 0 || gl.gl_pathc == 0) {
+    if (glob(sudoers_cmnd, GLOB_NOSORT, NULL, &gl) != 0 || gl.gl_pathc == 0) {
 	globfree(&gl);
 	debug_return_bool(false);
     }

@@ -1,0 +1,757 @@
+# Swedish translation for sudo.
+# Copyright (C) 2012 Free Software Foundation, Inc.
+# This file is put in the public domain.
+# Daniel Nylander <po@danielnylander.se>, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sudo 1.8.5-b1\n"
+"Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
+"POT-Creation-Date: 2012-03-14 14:20-0400\n"
+"PO-Revision-Date: 2012-03-19 12:10+0100\n"
+"Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
+"Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/error.c:82 src/error.c:86
+msgid ": "
+msgstr ": "
+
+#: src/exec.c:105 src/exec_pty.c:616 src/exec_pty.c:948 src/tgetpass.c:227
+#, c-format
+msgid "unable to fork"
+msgstr "kunde inte grena process"
+
+#: src/exec.c:252
+#, c-format
+msgid "unable to create sockets"
+msgstr "kunde inte skapa uttag"
+
+#: src/exec.c:259 src/exec_pty.c:567 src/exec_pty.c:576 src/exec_pty.c:584
+#: src/exec_pty.c:883 src/exec_pty.c:945 src/tgetpass.c:224
+#, c-format
+msgid "unable to create pipe"
+msgstr "kunde inte skapa rör"
+
+#: src/exec.c:340 src/exec_pty.c:1012 src/exec_pty.c:1147
+#, c-format
+msgid "select failed"
+msgstr ""
+
+#: src/exec.c:425
+#, c-format
+msgid "unable to restore tty label"
+msgstr ""
+
+#: src/exec_common.c:69
+#, c-format
+msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
+msgstr ""
+
+#: src/exec_common.c:111 src/parse_args.c:432 src/sudo.c:451 src/sudo.c:471
+#: src/sudo.c:478 src/sudo.c:489 src/sudo.c:848 common/alloc.c:85
+#: common/alloc.c:105 common/alloc.c:123 common/alloc.c:145 common/alloc.c:203
+#: common/alloc.c:217
+#, c-format
+msgid "unable to allocate memory"
+msgstr "kunde inte allokera minne"
+
+#: src/exec_pty.c:140
+#, c-format
+msgid "unable to allocate pty"
+msgstr "kunde inte allokera pty"
+
+#: src/exec_pty.c:609
+#, c-format
+msgid "unable to set terminal to raw mode"
+msgstr ""
+
+#: src/exec_pty.c:926
+#, c-format
+msgid "unable to set controlling tty"
+msgstr ""
+
+#: src/exec_pty.c:1020
+#, c-format
+msgid "error reading from signal pipe"
+msgstr "fel vid läsning från signalrör"
+
+#: src/exec_pty.c:1039
+#, c-format
+msgid "error reading from pipe"
+msgstr "fel vid läsning från rör"
+
+#: src/exec_pty.c:1055
+#, c-format
+msgid "error reading from socketpair"
+msgstr ""
+
+#: src/exec_pty.c:1059
+#, c-format
+msgid "unexpected reply type on backchannel: %d"
+msgstr ""
+
+#: src/load_plugins.c:79
+#, c-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: src/load_plugins.c:85
+#, c-format
+msgid "%s%s: %s"
+msgstr "%s%s: %s"
+
+#: src/load_plugins.c:95
+#, c-format
+msgid "%s must be owned by uid %d"
+msgstr "%s måste ägas av uid %d"
+
+#: src/load_plugins.c:99
+#, c-format
+msgid "%s must be only be writable by owner"
+msgstr "%s får endast vara skrivbar av ägaren"
+
+#: src/load_plugins.c:106
+#, c-format
+msgid "unable to dlopen %s: %s"
+msgstr "kunde inte köra dlopen %s: %s"
+
+#: src/load_plugins.c:111
+#, c-format
+msgid "%s: unable to find symbol %s"
+msgstr "%s: kunde inte hitta symbolen %s"
+
+#: src/load_plugins.c:117
+#, c-format
+msgid "%s: unknown policy type %d"
+msgstr "%s: okänd policytyp %d"
+
+#: src/load_plugins.c:121
+#, c-format
+msgid "%s: incompatible policy major version %d, expected %d"
+msgstr ""
+
+#: src/load_plugins.c:128
+#, c-format
+msgid "%s: only a single policy plugin may be loaded"
+msgstr ""
+
+#: src/load_plugins.c:148
+#, c-format
+msgid "%s: at least one policy plugin must be specified"
+msgstr "%s: minst en policyinsticksmodul måste anges"
+
+#: src/load_plugins.c:153
+#, c-format
+msgid "policy plugin %s does not include a check_policy method"
+msgstr ""
+
+#: src/net_ifs.c:157 src/net_ifs.c:166 src/net_ifs.c:178 src/net_ifs.c:187
+#: src/net_ifs.c:298 src/net_ifs.c:322
+#, c-format
+msgid "load_interfaces: overflow detected"
+msgstr "load_interfaces: stackspill upptäcktes"
+
+#: src/net_ifs.c:227
+#, c-format
+msgid "unable to open socket"
+msgstr "kunde inte öppna uttag"
+
+#: src/parse_args.c:187
+#, c-format
+msgid "the argument to -C must be a number greater than or equal to 3"
+msgstr "argumentet till -C måste vara ett tal större än eller lika med 3"
+
+#: src/parse_args.c:276
+#, c-format
+msgid "unknown user: %s"
+msgstr "okänd användare: %s"
+
+#: src/parse_args.c:335
+#, c-format
+msgid "you may not specify both the `-i' and `-s' options"
+msgstr "du får inte ange flaggorna \"-i\" och \"-s\" samtidigt"
+
+#: src/parse_args.c:339
+#, c-format
+msgid "you may not specify both the `-i' and `-E' options"
+msgstr "du får inte ange flaggorna \"-i\" och \"-E\" samtidigt"
+
+#: src/parse_args.c:349
+#, c-format
+msgid "the `-E' option is not valid in edit mode"
+msgstr "flaggan \"-E\" är inte giltig i redigeringsläget"
+
+#: src/parse_args.c:351
+#, c-format
+msgid "you may not specify environment variables in edit mode"
+msgstr "du får inte ange miljövariabler i redigeringsläget"
+
+#: src/parse_args.c:359
+#, c-format
+msgid "the `-U' option may only be used with the `-l' option"
+msgstr "the `-U' option may only be used with the `-l' option"
+
+#: src/parse_args.c:363
+#, c-format
+msgid "the `-A' and `-S' options may not be used together"
+msgstr "flaggorna \"-A\" och \"-S\" får inte användas tillsammans"
+
+#: src/parse_args.c:445
+#, c-format
+msgid "sudoedit is not supported on this platform"
+msgstr "sudoedit stöds inte på denna plattform"
+
+#: src/parse_args.c:518
+#, c-format
+msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
+msgstr "Endast en av flaggorna -e, -h, -i, -K, -l, -s, -v eller -V får anges"
+
+#: src/parse_args.c:532
+#, c-format
+msgid ""
+"%s - edit files as another user\n"
+"\n"
+msgstr ""
+"%s - redigera filer som en annan användare\n"
+"\n"
+
+#: src/parse_args.c:534
+#, c-format
+msgid ""
+"%s - execute a command as another user\n"
+"\n"
+msgstr ""
+"%s - kör ett kommando som en annan användare\n"
+"\n"
+
+#: src/parse_args.c:539
+#, c-format
+msgid ""
+"\n"
+"Options:\n"
+msgstr ""
+"\n"
+"Flaggor:\n"
+
+#: src/parse_args.c:542
+msgid "use helper program for password prompting\n"
+msgstr "använd hjälpprogram för att fråga efter lösenord\n"
+
+#: src/parse_args.c:545
+msgid "use specified BSD authentication type\n"
+msgstr "använd angiven BSD-autentiseringstyp\n"
+
+#: src/parse_args.c:547
+msgid "run command in the background\n"
+msgstr "kör kommando i bakgrunden\n"
+
+#: src/parse_args.c:549
+msgid "close all file descriptors >= fd\n"
+msgstr ""
+
+#: src/parse_args.c:552
+msgid "run command with specified login class\n"
+msgstr "kör kommando med angiven inloggningsklass\n"
+
+#: src/parse_args.c:555
+msgid "preserve user environment when executing command\n"
+msgstr "bevara användarens miljö när kommandot körs\n"
+
+#: src/parse_args.c:557
+msgid "edit files instead of running a command\n"
+msgstr "redigera filer istället för att köra ett kommando\n"
+
+#: src/parse_args.c:559
+msgid "execute command as the specified group\n"
+msgstr "kör kommando som angiven grupp\n"
+
+#: src/parse_args.c:561
+msgid "set HOME variable to target user's home dir.\n"
+msgstr "ställ in HOME-variabeln till målanvändarens hemkatalog.\n"
+
+#: src/parse_args.c:563
+msgid "display help message and exit\n"
+msgstr "visa hjälpmeddelande och avsluta\n"
+
+#: src/parse_args.c:565
+msgid "run a login shell as target user\n"
+msgstr "kör ett inloggningsskal som målanvändaren\n"
+
+#: src/parse_args.c:567
+msgid "remove timestamp file completely\n"
+msgstr "ta bort tidsstämpelfilen helt\n"
+
+#: src/parse_args.c:569
+msgid "invalidate timestamp file\n"
+msgstr ""
+
+#: src/parse_args.c:571
+msgid "list user's available commands\n"
+msgstr "lista användarens tillgängliga kommandon\n"
+
+#: src/parse_args.c:573
+msgid "non-interactive mode, will not prompt user\n"
+msgstr ""
+
+#: src/parse_args.c:575
+msgid "preserve group vector instead of setting to target's\n"
+msgstr ""
+
+#: src/parse_args.c:577
+msgid "use specified password prompt\n"
+msgstr "använd angiven lösenordsprompt\n"
+
+#: src/parse_args.c:580 src/parse_args.c:588
+msgid "create SELinux security context with specified role\n"
+msgstr "skapa SELinux-säkerhetskontext med angiven roll\n"
+
+#: src/parse_args.c:583
+msgid "read password from standard input\n"
+msgstr "läs lösenord från standard in\n"
+
+#: src/parse_args.c:585
+msgid "run a shell as target user\n"
+msgstr "kör ett skal som målanvändaren\n"
+
+#: src/parse_args.c:591
+msgid "when listing, list specified user's privileges\n"
+msgstr ""
+
+#: src/parse_args.c:593
+msgid "run command (or edit file) as specified user\n"
+msgstr "kör kommando (eller redigera fil) som angiven användare\n"
+
+#: src/parse_args.c:595
+msgid "display version information and exit\n"
+msgstr "visa versionsinformation och avsluta\n"
+
+#: src/parse_args.c:597
+msgid "update user's timestamp without running a command\n"
+msgstr "uppdatera användarens tidsstämpel utan att köra ett kommando\n"
+
+#: src/parse_args.c:599
+msgid "stop processing command line arguments\n"
+msgstr ""
+
+#: src/selinux.c:76
+#, c-format
+msgid "unable to open audit system"
+msgstr ""
+
+#: src/selinux.c:84
+#, c-format
+msgid "unable to send audit message"
+msgstr ""
+
+#: src/selinux.c:112
+#, c-format
+msgid "unable to fgetfilecon %s"
+msgstr ""
+
+#: src/selinux.c:117
+#, c-format
+msgid "%s changed labels"
+msgstr ""
+
+#: src/selinux.c:122
+#, c-format
+msgid "unable to restore context for %s"
+msgstr ""
+
+#: src/selinux.c:162
+#, c-format
+msgid "unable to open %s, not relabeling tty"
+msgstr ""
+
+#: src/selinux.c:171
+#, c-format
+msgid "unable to get current tty context, not relabeling tty"
+msgstr ""
+
+#: src/selinux.c:178
+#, c-format
+msgid "unable to get new tty context, not relabeling tty"
+msgstr ""
+
+#: src/selinux.c:185
+#, c-format
+msgid "unable to set new tty context"
+msgstr ""
+
+#: src/selinux.c:195 src/selinux.c:208 src/sudo.c:337 common/sudo_conf.c:328
+#, c-format
+msgid "unable to open %s"
+msgstr "kunde inte öppna %s"
+
+#: src/selinux.c:251
+#, c-format
+msgid "you must specify a role for type %s"
+msgstr "du måste ange en roll för typen %s"
+
+#: src/selinux.c:257
+#, c-format
+msgid "unable to get default type for role %s"
+msgstr "kunde inte få tag på standardtyp för rollen %s"
+
+#: src/selinux.c:275
+#, c-format
+msgid "failed to set new role %s"
+msgstr "misslyckades med att ställa in nya rollen %s"
+
+#: src/selinux.c:279
+#, c-format
+msgid "failed to set new type %s"
+msgstr "misslyckades med att ställa in nya typen %s"
+
+#: src/selinux.c:288
+#, c-format
+msgid "%s is not a valid context"
+msgstr "%s är inte en giltig kontext"
+
+#: src/selinux.c:323
+#, c-format
+msgid "failed to get old_context"
+msgstr "misslyckades med att få tag på old_context"
+
+#: src/selinux.c:329
+#, c-format
+msgid "unable to determine enforcing mode."
+msgstr ""
+
+#: src/selinux.c:341
+#, c-format
+msgid "unable to setup tty context for %s"
+msgstr ""
+
+#: src/selinux.c:372
+#, c-format
+msgid "unable to set exec context to %s"
+msgstr "kunde inte ställa in körkontext till %s"
+
+#: src/selinux.c:379
+#, c-format
+msgid "unable to set key creation context to %s"
+msgstr ""
+
+#: src/sesh.c:70
+#, c-format
+msgid "requires at least one argument"
+msgstr "kräver minst ett argument"
+
+#: src/sesh.c:91
+#, c-format
+msgid "unable to execute %s"
+msgstr "kunde inte köra %s"
+
+#: src/sudo.c:191
+#, c-format
+msgid "must be setuid root"
+msgstr "måste vara setuid root"
+
+#: src/sudo.c:214
+#, c-format
+msgid "Sudo version %s\n"
+msgstr "Sudo version %s\n"
+
+#: src/sudo.c:216
+#, c-format
+msgid "Configure options: %s\n"
+msgstr "Konfigurationsflaggor: %s\n"
+
+#: src/sudo.c:221
+#, c-format
+msgid "fatal error, unable to load plugins"
+msgstr "ödesdigert fel, kunde inte läsa in insticksmoduler"
+
+#: src/sudo.c:229
+#, c-format
+msgid "unable to initialize policy plugin"
+msgstr ""
+
+#: src/sudo.c:284
+#, c-format
+msgid "error initializing I/O plugin %s"
+msgstr ""
+
+#: src/sudo.c:312
+#, c-format
+msgid "unexpected sudo mode 0x%x"
+msgstr ""
+
+#: src/sudo.c:406
+#, c-format
+msgid "unable to get group vector"
+msgstr ""
+
+#: src/sudo.c:447
+#, c-format
+msgid "unknown uid %u: who are you?"
+msgstr "okänt uid %u: vem är du?"
+
+#: src/sudo.c:790
+#, c-format
+msgid "resource control limit has been reached"
+msgstr ""
+
+#: src/sudo.c:793
+#, c-format
+msgid "user \"%s\" is not a member of project \"%s\""
+msgstr "användaren \"%s\" är inte medlem av projektet \"%s\""
+
+#: src/sudo.c:797
+#, c-format
+msgid "the invoking task is final"
+msgstr ""
+
+#: src/sudo.c:800
+#, c-format
+msgid "could not join project \"%s\""
+msgstr "kunde inte gå med i projektet \"%s\""
+
+#: src/sudo.c:805
+#, c-format
+msgid "no resource pool accepting default bindings exists for project \"%s\""
+msgstr ""
+
+#: src/sudo.c:809
+#, c-format
+msgid "specified resource pool does not exist for project \"%s\""
+msgstr "angiven resurspool finns inte för projektet \"%s\""
+
+#: src/sudo.c:813
+#, c-format
+msgid "could not bind to default resource pool for project \"%s\""
+msgstr ""
+
+#: src/sudo.c:819
+#, c-format
+msgid "setproject failed for project \"%s\""
+msgstr "setproject misslyckades för projektet \"%s\""
+
+#: src/sudo.c:821
+#, c-format
+msgid "warning, resource control assignment failed for project \"%s\""
+msgstr ""
+
+#: src/sudo.c:892
+#, c-format
+msgid "unknown login class %s"
+msgstr "okänd inloggningsklass %s"
+
+#: src/sudo.c:906 src/sudo.c:909
+#, c-format
+msgid "unable to set user context"
+msgstr "kunde inte ställa in användarens kontext"
+
+#: src/sudo.c:924
+#, c-format
+msgid "unable to set supplementary group IDs"
+msgstr ""
+
+#: src/sudo.c:931
+#, c-format
+msgid "unable to set effective gid to runas gid %u"
+msgstr "kunde inte ställa in effektiv gid till runas gid %u"
+
+#: src/sudo.c:937
+#, c-format
+msgid "unable to set gid to runas gid %u"
+msgstr "kunde inte ställa in gid för runas gid %u"
+
+#: src/sudo.c:944
+#, c-format
+msgid "unable to set process priority"
+msgstr "kunde inte ställa in processprioritet"
+
+#: src/sudo.c:952
+#, c-format
+msgid "unable to change root to %s"
+msgstr "kunde inte ändra rot till %s"
+
+#: src/sudo.c:959 src/sudo.c:965 src/sudo.c:971
+#, c-format
+msgid "unable to change to runas uid (%u, %u)"
+msgstr "kunde inte ändra till runas uid (%u, %u)"
+
+#: src/sudo.c:985
+#, c-format
+msgid "unable to change directory to %s"
+msgstr "kunde inte ändra katalog till %s"
+
+#: src/sudo.c:1058
+#, c-format
+msgid "unexpected child termination condition: %d"
+msgstr ""
+
+#: src/sudo.c:1119
+#, c-format
+msgid "policy plugin %s does not support listing privileges"
+msgstr ""
+
+#: src/sudo.c:1131
+#, c-format
+msgid "policy plugin %s does not support the -v option"
+msgstr ""
+
+#: src/sudo.c:1143
+#, c-format
+msgid "policy plugin %s does not support the -k/-K options"
+msgstr ""
+
+#: src/sudo_edit.c:111
+#, c-format
+msgid "unable to change uid to root (%u)"
+msgstr "kunde inte ändra uid till root (%u)"
+
+#: src/sudo_edit.c:143
+#, c-format
+msgid "plugin error: missing file list for sudoedit"
+msgstr ""
+
+#: src/sudo_edit.c:171 src/sudo_edit.c:271
+#, c-format
+msgid "%s: not a regular file"
+msgstr "%s: inte en vanlig fil"
+
+#: src/sudo_edit.c:205 src/sudo_edit.c:307
+#, c-format
+msgid "%s: short write"
+msgstr "%s: kort skrivning"
+
+#: src/sudo_edit.c:272
+#, c-format
+msgid "%s left unmodified"
+msgstr "%s lämnad oförändrad"
+
+#: src/sudo_edit.c:285
+#, c-format
+msgid "%s unchanged"
+msgstr "%s oförändrad"
+
+#: src/sudo_edit.c:297 src/sudo_edit.c:318
+#, c-format
+msgid "unable to write to %s"
+msgstr "kunde inte skriva till %s"
+
+#: src/sudo_edit.c:298 src/sudo_edit.c:316 src/sudo_edit.c:319
+#, c-format
+msgid "contents of edit session left in %s"
+msgstr "innehåll av redigeringssession finns kvar i %s"
+
+#: src/sudo_edit.c:315
+#, c-format
+msgid "unable to read temporary file"
+msgstr "kunde inte läsa  temporärfilen"
+
+#: src/tgetpass.c:96
+#, c-format
+msgid "no tty present and no askpass program specified"
+msgstr "ingen tty finns tillgänglig och inget askpass-program angivet"
+
+#: src/tgetpass.c:105
+#, c-format
+msgid "no askpass program specified, try setting SUDO_ASKPASS"
+msgstr "inget askpass-program angivet, prova att ställ in SUDO_ASKPASS"
+
+#: src/tgetpass.c:237
+#, c-format
+msgid "unable to set gid to %u"
+msgstr "kunde inte ställa in gid till %u"
+
+#: src/tgetpass.c:241
+#, c-format
+msgid "unable to set uid to %u"
+msgstr "kunde inte ställa in uid till %u"
+
+#: src/tgetpass.c:246
+#, c-format
+msgid "unable to run %s"
+msgstr "kunde inte köra %s"
+
+#: src/utmp.c:278
+#, c-format
+msgid "unable to save stdin"
+msgstr "kunde inte spara standard in"
+
+#: src/utmp.c:280
+#, c-format
+msgid "unable to dup2 stdin"
+msgstr ""
+
+#: src/utmp.c:283
+#, c-format
+msgid "unable to restore stdin"
+msgstr ""
+
+#: common/aix.c:149
+#, c-format
+msgid "unable to open userdb"
+msgstr "kunde inte öppna användardatabasen"
+
+#: common/aix.c:152
+#, c-format
+msgid "unable to switch to registry \"%s\" for %s"
+msgstr "kunde inte växla till registret \"%s\" för %s"
+
+#: common/aix.c:169
+#, c-format
+msgid "unable to restore registry"
+msgstr "kunde inte återställa registret"
+
+#: common/alloc.c:82
+msgid "internal error, tried to emalloc(0)"
+msgstr "internt fel, försökte med emalloc(0)"
+
+#: common/alloc.c:99
+msgid "internal error, tried to emalloc2(0)"
+msgstr "internt fel, försökte med emalloc2(0)"
+
+#: common/alloc.c:101
+msgid "internal error, emalloc2() overflow"
+msgstr "internt fel, stackspill i emalloc2()"
+
+#: common/alloc.c:119
+msgid "internal error, tried to erealloc(0)"
+msgstr "internt fel, försökte med erealloc(0)"
+
+#: common/alloc.c:138
+msgid "internal error, tried to erealloc3(0)"
+msgstr "internt fel, försökte med erealloc3(0)"
+
+#: common/alloc.c:140
+msgid "internal error, erealloc3() overflow"
+msgstr "internt fel, stackspill i erealloc3()"
+
+#: common/sudo_conf.c:306
+#, c-format
+msgid "unable to stat %s"
+msgstr "kunde inte ta status på %s"
+
+#: common/sudo_conf.c:309
+#, c-format
+msgid "%s is not a regular file"
+msgstr "%s är inte en vanlig fil"
+
+#: common/sudo_conf.c:312
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s ägs av uid %u, ska vara %u"
+
+#: common/sudo_conf.c:316
+#, c-format
+msgid "%s is world writable"
+msgstr "%s är skrivbar för alla"
+
+#: common/sudo_conf.c:319
+#, c-format
+msgid "%s is group writable"
+msgstr "%s är skrivbar för gruppen"
+
+#: compat/strsignal.c:47
+msgid "Unknown signal"
+msgstr "Okänd signal"

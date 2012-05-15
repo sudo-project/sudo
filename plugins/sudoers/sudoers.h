@@ -215,9 +215,9 @@ void remove_timestamp(bool);
 bool user_is_exempt(void);
 
 /* sudo_auth.c */
-int verify_user(struct passwd *, char *);
-int sudo_auth_begin_session(struct passwd *);
-int sudo_auth_end_session(struct passwd *);
+int verify_user(struct passwd *pw, char *prompt);
+int sudo_auth_begin_session(struct passwd *pw, char **user_env[]);
+int sudo_auth_end_session(struct passwd *pw);
 int sudo_auth_init(struct passwd *pw);
 int sudo_auth_cleanup(struct passwd *pw);
 
@@ -243,6 +243,10 @@ int yyparse(void);
 
 /* toke.l */
 YY_DECL;
+extern const char *sudoers_file;
+extern mode_t sudoers_mode;
+extern uid_t sudoers_uid;
+extern gid_t sudoers_gid;
 
 /* defaults.c */
 void dump_defaults(void);
@@ -300,12 +304,20 @@ char *expand_iolog_path(const char *prefix, const char *dir, const char *file,
 
 /* env.c */
 char **env_get(void);
+void env_merge(char * const envp[], bool overwrite);
 void env_init(char * const envp[]);
 void init_envtables(void);
 void insert_env_vars(char * const envp[]);
 void read_env_file(const char *, int);
 void rebuild_env(void);
 void validate_env_vars(char * const envp[]);
+int sudo_setenv(const char *var, const char *val, int overwrite);
+int sudo_unsetenv(const char *var);
+char *sudo_getenv(const char *name);
+int sudoers_hook_getenv(const char *name, char **value, void *closure);
+int sudoers_hook_putenv(char *string, void *closure);
+int sudoers_hook_setenv(const char *name, const char *value, int overwrite, void *closure);
+int sudoers_hook_unsetenv(const char *name, void *closure);
 
 /* fmt_string.c */
 char *fmt_string(const char *, const char *);
@@ -331,10 +343,6 @@ int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;
 extern struct passwd *list_pw;
-extern const char *sudoers_file;
-extern mode_t sudoers_mode;
-extern uid_t sudoers_uid;
-extern gid_t sudoers_gid;
 extern int long_list;
 extern int sudo_mode;
 extern uid_t timestamp_uid;

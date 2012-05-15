@@ -88,9 +88,10 @@ help message to the standard output and exit.
 =item -l [I<search expression>]
 
 Enable "list mode".  In this mode, B<sudoreplay> will list available
-session IDs.  If a I<search expression> is specified, it will be
-used to restrict the IDs that are displayed.  An expression is
-composed of the following predicates:
+sessions in a format similar to the B<sudo> log file format, sorted
+by file name (or sequence number).  If a I<search expression> is
+specified, it will be used to restrict the IDs that are displayed.
+An expression is composed of the following predicates:
 
 =over 8
 

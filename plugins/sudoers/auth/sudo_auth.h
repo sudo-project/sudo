@@ -32,7 +32,7 @@ typedef struct sudo_auth {
     int (*setup)(struct passwd *pw, char **prompt, struct sudo_auth *auth);
     int (*verify)(struct passwd *pw, char *p, struct sudo_auth *auth);
     int (*cleanup)(struct passwd *pw, struct sudo_auth *auth);
-    int (*begin_session)(struct passwd *pw, struct sudo_auth *auth);
+    int (*begin_session)(struct passwd *pw, char **user_env[], struct sudo_auth *auth);
     int (*end_session)(struct passwd *pw, struct sudo_auth *auth);
 } sudo_auth;
 
@@ -66,7 +66,7 @@ int sudo_fwtk_cleanup(struct passwd *pw, sudo_auth *auth);
 int sudo_pam_init(struct passwd *pw, sudo_auth *auth);
 int sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth);
 int sudo_pam_cleanup(struct passwd *pw, sudo_auth *auth);
-int sudo_pam_begin_session(struct passwd *pw, sudo_auth *auth);
+int sudo_pam_begin_session(struct passwd *pw, char **user_env[], sudo_auth *auth);
 int sudo_pam_end_session(struct passwd *pw, sudo_auth *auth);
 int sudo_securid_init(struct passwd *pw, sudo_auth *auth);
 int sudo_securid_setup(struct passwd *pw, char **prompt, sudo_auth *auth);

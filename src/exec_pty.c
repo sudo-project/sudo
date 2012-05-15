@@ -102,8 +102,9 @@ static int exec_monitor(struct command_details *details, int backchannel);
 static void exec_pty(struct command_details *detail, int *errfd);
 static void sigwinch(int s);
 static void sync_ttysize(int src, int dst);
-static void deliver_signal(pid_t pid, int signo);
+static void deliver_signal(pid_t pid, int signo, bool from_parent);
 static int safe_close(int fd);
+static void check_foreground(void);
 
 /*
  * Cleanup hook for error()/errorx()
@@ -113,8 +114,11 @@ cleanup(int gotsignal)
 {
     debug_decl(cleanup, SUDO_DEBUG_EXEC);
 
-    if (!tq_empty(&io_plugins))
-	term_restore(io_fds[SFD_USERTTY], 0);
+    if (!tq_empty(&io_plugins) && io_fds[SFD_USERTTY] != -1) {
+	check_foreground();
+	if (foreground)
+	    term_restore(io_fds[SFD_USERTTY], 0);
+    }
 #ifdef HAVE_SELINUX
     selinux_restore_tty();
 #endif
@@ -330,6 +334,9 @@ suspend_parent(int signo)
 	}
 
 	/* Suspend self and continue child when we resume. */
+	zero_bytes(&sa, sizeof(sa));
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
 	sa.sa_handler = SIG_DFL;
 	sigaction(signo, &sa, &osa);
 	sudo_debug_printf(SUDO_DEBUG_INFO, "kill parent %d", signo);
@@ -405,8 +412,7 @@ io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int),
     struct io_buffer *iob;
     debug_decl(io_buf_new, SUDO_DEBUG_EXEC);
 
-    iob = emalloc(sizeof(*iob));
-    zero_bytes(iob, sizeof(*iob));
+    iob = ecalloc(1, sizeof(*iob));
     iob->rfd = rfd;
     iob->wfd = wfd;
     iob->action = action;
@@ -434,22 +440,25 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 	    } while (n == -1 && errno == EINTR);
 	    switch (n) {
 		case -1:
-		    if (errno == EAGAIN)
-			break;
-		    if (errno != ENXIO && errno != EBADF) {
+		    if (errno != EAGAIN) {
+			/* treat read error as fatal and close the fd */
 			sudo_debug_printf(SUDO_DEBUG_ERROR,
 			    "error reading fd %d: %s", iob->rfd,
 			    strerror(errno));
-			errors++;
-			break;
+			safe_close(iob->rfd);
+			iob->rfd = -1;
 		    }
-		    /* FALLTHROUGH */
+		    break;
 		case 0:
 		    /* got EOF or pty has gone away */
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"read EOF from fd %d", iob->rfd);
 		    safe_close(iob->rfd);
 		    iob->rfd = -1;
 		    break;
 		default:
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"read %d bytes from fd %d", n, iob->rfd);
 		    if (!iob->action(iob->buf + iob->len, n))
 			terminate_child(child, true);
 		    iob->len += n;
@@ -462,7 +471,10 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 		    iob->len - iob->off);
 	    } while (n == -1 && errno == EINTR);
 	    if (n == -1) {
-		if (errno == EPIPE || errno == ENXIO || errno == EBADF) {
+		if (errno == EPIPE || errno == ENXIO || errno == EIO || errno == EBADF) {
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"unable to write %d bytes to fd %d",
+			    iob->len - iob->off, iob->wfd);
 		    /* other end of pipe closed or pty revoked */
 		    if (iob->rfd != -1) {
 			safe_close(iob->rfd);
@@ -478,6 +490,8 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 			"error writing fd %d: %s", iob->wfd, strerror(errno));
 		}
 	    } else {
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "wrote %d bytes to fd %d", n, iob->wfd);
 		iob->off += n;
 	    }
 	}
@@ -552,6 +566,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
      */
     memset(io_pipe, 0, sizeof(io_pipe));
     if (io_fds[SFD_STDIN] == -1 || !isatty(STDIN_FILENO)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "stdin not a tty, creating a pipe");
 	pipeline = true;
 	if (pipe(io_pipe[STDIN_FILENO]) != 0)
 	    error(1, _("unable to create pipe"));
@@ -560,6 +575,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
 	io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
     }
     if (io_fds[SFD_STDOUT] == -1 || !isatty(STDOUT_FILENO)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "stdout not a tty, creating a pipe");
 	pipeline = true;
 	if (pipe(io_pipe[STDOUT_FILENO]) != 0)
 	    error(1, _("unable to create pipe"));
@@ -568,6 +584,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
 	io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
     }
     if (io_fds[SFD_STDERR] == -1 || !isatty(STDERR_FILENO)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "stderr not a tty, creating a pipe");
 	if (pipe(io_pipe[STDERR_FILENO]) != 0)
 	    error(1, _("unable to create pipe"));
 	iobufs = io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
@@ -579,6 +596,11 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
     sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
     sa.sa_handler = handler;
     sigaction(SIGTSTP, &sa, NULL);
+
+    /* We don't want to receive SIGTTIN/SIGTTOU, getting EIO is preferable. */
+    sa.sa_handler = SIG_IGN;
+    sigaction(SIGTTIN, &sa, NULL);
+    sigaction(SIGTTOU, &sa, NULL);
 
     if (foreground) {
 	/* Copy terminal attrs from user tty -> pty slave. */
@@ -598,7 +620,14 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
 	}
     }
 
-    child = fork();
+    /*
+     * The policy plugin's session init must be run before we fork
+     * or certain pam modules won't be able to track their state.
+     */
+    if (policy_init_session(details) != true)
+	errorx(1, _("policy plugin failed session initialization"));
+
+    child = sudo_debug_fork();
     switch (child) {
     case -1:
 	error(1, _("unable to fork"));
@@ -669,9 +698,12 @@ pty_close(struct command_status *cstat)
     flush_output();
 
     if (io_fds[SFD_USERTTY] != -1) {
-	do {
-	    n = term_restore(io_fds[SFD_USERTTY], 0);
-	} while (!n && errno == EINTR);
+	check_foreground();
+	if (foreground) {
+	    do {
+		n = term_restore(io_fds[SFD_USERTTY], 0);
+	    } while (!n && errno == EINTR);
+	}
     }
 
     /* If child was signalled, write the reason to stdout like the shell. */
@@ -683,11 +715,9 @@ pty_close(struct command_status *cstat)
 		io_fds[SFD_USERTTY] : STDOUT_FILENO;
 	    if (write(n, reason, strlen(reason)) != -1) {
 		if (WCOREDUMP(cstat->val)) {
-		    if (write(n, " (core dumped)", 14) == -1)
-			/* shut up glibc */;
+		    ignore_result(write(n, " (core dumped)", 14));
 		}
-		if (write(n, "\n", 1) == -1)
-		    /* shut up glibc */;
+		ignore_result(write(n, "\n", 1));
 	    }
 	}
     }
@@ -732,13 +762,14 @@ fd_set_iobs(fd_set *fdsr, fd_set *fdsw)
 }
 
 static void
-deliver_signal(pid_t pid, int signo)
+deliver_signal(pid_t pid, int signo, bool from_parent)
 {
     int status;
     debug_decl(deliver_signal, SUDO_DEBUG_EXEC);
 
     /* Handle signal from parent. */
-    sudo_debug_printf(SUDO_DEBUG_INFO, "received signal %d from parent", signo);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "received signal %d%s", signo,
+	from_parent ? " from parent" : "");
     switch (signo) {
     case SIGALRM:
 	terminate_child(pid, true);
@@ -931,7 +962,7 @@ exec_monitor(struct command_details *details, int backchannel)
     /* Start command and wait for it to stop or exit */
     if (pipe(errpipe) == -1)
 	error(1, _("unable to create pipe"));
-    child = fork();
+    child = sudo_debug_fork();
     if (child == -1) {
 	warning(_("unable to fork"));
 	goto bad;
@@ -949,8 +980,7 @@ exec_monitor(struct command_details *details, int backchannel)
 	exec_pty(details, &errpipe[1]);
 	cstat.type = CMD_ERRNO;
 	cstat.val = errno;
-	if (write(errpipe[1], &cstat, sizeof(cstat)) == -1)
-	    /* shut up glibc */;
+	ignore_result(write(errpipe[1], &cstat, sizeof(cstat)));
 	_exit(1);
     }
     close(errpipe[1]);
@@ -977,9 +1007,8 @@ exec_monitor(struct command_details *details, int backchannel)
 
     /* Wait for errno on pipe, signal on backchannel or for SIGCHLD */
     maxfd = MAX(MAX(errpipe[0], signal_pipe[0]), backchannel);
-    fdsr = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
-    zero_bytes(fdsr, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
-    zero_bytes(&cstat, sizeof(cstat));
+    fdsr = ecalloc(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
+    memset(&cstat, 0, sizeof(cstat));
     tv.tv_sec = 0;
     tv.tv_usec = 0;
     for (;;) {
@@ -995,9 +1024,10 @@ exec_monitor(struct command_details *details, int backchannel)
 	if (n <= 0) {
 	    if (n == 0)
 		goto done;
-	    if (errno == EINTR)
+	    if (errno == EINTR || errno == ENOMEM)
 		continue;
-	    error(1, _("select failed"));
+	    warning("monitor: %s", _("select failed"));
+	    break;
 	}
 
 	if (FD_ISSET(signal_pipe[0], fdsr)) {
@@ -1012,10 +1042,12 @@ exec_monitor(struct command_details *details, int backchannel)
 	     * Handle SIGCHLD specially and deliver other signals
 	     * directly to the child.
 	     */
-	    if (signo == SIGCHLD)
-		alive = handle_sigchld(backchannel, &cstat);
-	    else
-		deliver_signal(child, signo);
+	    if (signo == SIGCHLD) {
+		if (!handle_sigchld(backchannel, &cstat))
+		    alive = false;
+	    } else {
+		deliver_signal(child, signo, false);
+	    }
 	    continue;
 	}
 	if (errpipe[0] != -1 && FD_ISSET(errpipe[0], fdsr)) {
@@ -1048,7 +1080,7 @@ exec_monitor(struct command_details *details, int backchannel)
 		    cstmp.type);
 		continue;
 	    }
-	    deliver_signal(child, cstmp.val);
+	    deliver_signal(child, cstmp.val, true);
 	}
     }
 
@@ -1090,11 +1122,11 @@ flush_output(void)
     if (maxfd == -1)
 	debug_return;
 
-    fdsr = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
-    fdsw = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
+    fdsr = emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
+    fdsw = emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
     for (;;) {
-	zero_bytes(fdsw, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
-	zero_bytes(fdsr, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
+	memset(fdsw, 0, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
+	memset(fdsr, 0, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
 
 	nwriters = 0;
 	for (iob = iobufs; iob; iob = iob->next) {
@@ -1130,11 +1162,11 @@ flush_output(void)
 	if (nready <= 0) {
 	    if (nready == 0)
 		break; /* all I/O flushed */
-	    if (errno == EINTR)
+	    if (errno == EINTR || errno == ENOMEM)
 		continue;
-	    error(1, _("select failed"));
+	    warning(_("select failed"));
 	}
-	if (perform_io(fdsr, fdsw, NULL) != 0)
+	if (perform_io(fdsr, fdsw, NULL) != 0 || nready == -1)
 	    break;
     }
     efree(fdsr);
@@ -1249,7 +1281,7 @@ safe_close(int fd)
     /* Avoid closing /dev/tty or std{in,out,err}. */
     if (fd < 3 || fd == io_fds[SFD_USERTTY]) {
 	errno = EINVAL;
-	return -1;
+	debug_return_int(-1);
     }
     debug_return_int(close(fd));
 }

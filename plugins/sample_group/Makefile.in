@@ -33,7 +33,8 @@ LIBTOOL = @LIBTOOL@ @LT_STATIC@
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 
 # Libraries
-LIBS = $(LIBOBJDIR)/libreplace.la
+LT_LIBS = $(LIBOBJDIR)libreplace.la
+LIBS = $(LT_LIBS)
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(top_srcdir) @CPPFLAGS@
@@ -80,7 +81,7 @@ Makefile: $(srcdir)/Makefile.in
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 
-sample_group.la: $(OBJS)
+sample_group.la: $(OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LTLDFLAGS) -o $@ $(OBJS) $(LIBS) -module -export-symbols $(srcdir)/sample_group.sym -avoid-version -rpath $(plugindir)
 
 pre-install:

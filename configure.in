@@ -3,7 +3,7 @@ dnl Process this file with GNU autoconf to produce a configure script.
 dnl
 dnl Copyright (c) 1994-1996,1998-2012 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
-AC_INIT([sudo], [1.8.4p5], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.8.5], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 dnl
 dnl Note: this must come after AC_INIT
@@ -183,6 +183,14 @@ shadow_funcs=
 shadow_libs=
 shadow_libs_optional=
 CONFIGURE_ARGS="$@"
+
+dnl
+dnl LD_PRELOAD equivalents
+dnl
+RTLD_PRELOAD_VAR="LD_PRELOAD"
+RTLD_PRELOAD_ENABLE_VAR=
+RTLD_PRELOAD_DELIM=":"
+RTLD_PRELOAD_DEFAULT=
 
 dnl
 dnl libc replacement functions live in compat
@@ -1465,6 +1473,9 @@ fi
 
 case "$host" in
     *-*-sunos4*)
+		# LD_PRELOAD is space-delimited
+		RTLD_PRELOAD_DELIM=" "
+
 		# getcwd(3) opens a pipe to getpwd(1)!?!
 		BROKEN_GETCWD=1
 
@@ -1476,6 +1487,9 @@ case "$host" in
 		shadow_funcs="getpwanam issecure"
 		;;
     *-*-solaris2*)
+		# LD_PRELOAD is space-delimited
+		RTLD_PRELOAD_DELIM=" "
+
 		# To get the crypt(3) prototype (so we pass -Wall)
 		OSDEFS="${OSDEFS} -D__EXTENSIONS__"
 		# AFS support needs -lucb
@@ -1538,6 +1552,8 @@ case "$host" in
 		# LDR_PRELOAD is only supported in AIX 5.3 and later
 		if test $OSMAJOR -lt 5; then
 		    with_noexec=no
+		else
+		    RTLD_PRELOAD_VAR="LDR_PRELOAD"
 		fi
 
 		# AIX-specific functions
@@ -1671,6 +1687,9 @@ case "$host" in
 		]], [[exit(0);]])], [AC_MSG_RESULT(no)], [AC_MSG_RESULT([yes, fixing locally])
 		sed 's:<acl.h>:<sys/acl.h>:g' < /usr/include/prot.h > prot.h
 		])
+		# ":DEFAULT" must be appended to _RLD_LIST
+		RTLD_PRELOAD_VAR="_RLD_LIST"
+		RTLD_PRELOAD_DEFAULT="DEFAULT"
 		: ${mansectsu='8'}
 		: ${mansectform='4'}
 		;;
@@ -1698,6 +1717,9 @@ case "$host" in
 		if test "$OSMAJOR" -le 4; then
 		    AC_CHECK_LIB(sun, getpwnam, [LIBS="${LIBS} -lsun"])
 		fi
+		# ":DEFAULT" must be appended to _RLD_LIST
+		RTLD_PRELOAD_VAR="_RLD_LIST"
+		RTLD_PRELOAD_DEFAULT="DEFAULT"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		;;
@@ -1840,11 +1862,15 @@ case "$host" in
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
+		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
+		RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
 		;;
     *-*-nextstep*)
 		# lockf() on is broken on the NeXT -- use flock instead
 		ac_cv_func_lockf=no
 		ac_cv_func_flock=yes
+		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
+		RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
 		;;
     *-*-*sysv4*)
 		: ${mansectsu='1m'}
@@ -1859,6 +1885,20 @@ case "$host" in
 		OSDEFS="${OSDEFS} -D_GNU_SOURCE"
 		;;
 esac
+
+dnl
+dnl Library preloading to support NOEXEC
+dnl
+if test -n "$with_noexec"; then
+    SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_VAR, "$RTLD_PRELOAD_VAR")
+    SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_DELIM, "$RTLD_PRELOAD_DELIM")
+    if test -n "$RTLD_PRELOAD_DEFAULT"; then
+	SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_DEFAULT, "$RTLD_PRELOAD_DEFAULT")
+    fi
+    if test -n "$RTLD_PRELOAD_ENABLE_VAR"; then
+	SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_ENABLE_VAR, "$RTLD_PRELOAD_ENABLE_VAR")
+    fi
+fi
 
 dnl
 dnl Check for mixing mutually exclusive and regular auth methods
@@ -1966,7 +2006,17 @@ AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_TIME
 AC_HEADER_STDBOOL
-AC_CHECK_HEADERS(malloc.h paths.h utime.h netgroup.h utmpx.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h)
+AC_HEADER_MAJOR
+AC_CHECK_HEADERS(malloc.h netgroup.h paths.h spawn.h utime.h utmpx.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h)
+AC_CHECK_HEADERS([procfs.h] [sys/procfs.h], [AC_CHECK_MEMBERS(struct psinfo.pr_ttydev, [AC_CHECK_FUNCS(_ttyname_dev)], [], [AC_INCLUDES_DEFAULT
+#ifdef HAVE_PROCFS_H
+#include <procfs.h>
+#endif
+#ifdef HAVE_SYS_PROCFS_H
+#include <sys/procfs.h>
+#endif
+])]
+break)
 dnl
 dnl Check for large file support.  HP-UX 11.23 has a broken sys/type.h
 dnl when large files support is enabled so work around it.
@@ -2087,7 +2137,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS(strrchr sysconf tzset strftime \
+AC_CHECK_FUNCS(glob strrchr sysconf tzset strftime setenv \
 	       regcomp setlocale nl_langinfo mbr_check_membership \
 	       setrlimit64)
 AC_REPLACE_FUNCS(getgrouplist)
@@ -2154,7 +2204,8 @@ AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(libutil.h util.h pty.h, [break])], [
 	])
     ])
 ])
-AC_CHECK_FUNCS(unsetenv, [SUDO_FUNC_UNSETENV_VOID], [AC_LIBOBJ(unsetenv)])
+AC_CHECK_FUNCS(unsetenv, [SUDO_FUNC_UNSETENV_VOID], [])
+SUDO_FUNC_PUTENV_CONST
 if test -z "$SKIP_SETRESUID"; then
     AC_CHECK_FUNCS(setresuid, [
 	SKIP_SETREUID=yes
@@ -2173,13 +2224,6 @@ fi
 if test -z "$BROKEN_GETCWD"; then
     AC_REPLACE_FUNCS(getcwd)
 fi
-AC_CHECK_FUNCS(glob, [AC_MSG_CHECKING(for GLOB_BRACE and GLOB_TILDE in glob.h)
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <glob.h>]], [[int i = GLOB_BRACE | GLOB_TILDE; (void)i;]])], [AC_DEFINE(HAVE_EXTENDED_GLOB)
-    AC_MSG_RESULT(yes)], [AC_LIBOBJ(glob)
-    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }globtest"
-    AC_MSG_RESULT(no)])], [AC_LIBOBJ(glob)]
-    COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }globtest"
-    )
 AC_CHECK_FUNCS(lockf flock, [break])
 AC_CHECK_FUNCS(innetgr _innetgr, [AC_CHECK_FUNCS(getdomainname) [break]])
 AC_CHECK_FUNCS(utimes, [AC_CHECK_FUNCS(futimes futimesat, [break])], [AC_CHECK_FUNCS(futime) AC_LIBOBJ(utimes)])
@@ -2188,7 +2232,7 @@ SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }fnm_test"
 ])
 SUDO_FUNC_ISBLANK
-AC_REPLACE_FUNCS(memrchr pw_dup strlcpy strlcat setenv)
+AC_REPLACE_FUNCS(memrchr pw_dup strlcpy strlcat)
 AC_CHECK_FUNCS(nanosleep, [], [
     # On Solaris, nanosleep is in librt
     AC_CHECK_LIB(rt, nanosleep, [REPLAY_LIBS="${REPLAY_LIBS} -lrt"], [AC_LIBOBJ(nanosleep)])
@@ -2214,6 +2258,10 @@ dnl
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
 #include <$ac_header_dirent>]], [[DIR *d; (void)dirfd(d);]])], [AC_DEFINE(HAVE_DIRFD)], [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
 #include <$ac_header_dirent>]], [[DIR d; memset(&d, 0, sizeof(d)); return(d.dd_fd);]])], [AC_DEFINE(HAVE_DD_FD)], [])])
+AC_CHECK_MEMBERS([struct dirent.d_type], [], [], [
+AC_INCLUDES_DEFAULT
+#include <$ac_header_dirent>
+])
 dnl
 dnl If NEED_SNPRINTF is set, add snprintf.c to LIBOBJS
 dnl (it contains snprintf, vsnprintf, asprintf, and vasprintf)
@@ -2395,6 +2443,8 @@ fi
 dnl
 dnl Deferred zlib option processing.
 dnl By default we use the system zlib if it is present.
+dnl If a directory was specified for zlib (or we are use sudo's version),
+dnl prepend the include dir to make sure we get the right zlib header.
 dnl
 case "$enable_zlib" in
     yes)
@@ -2413,14 +2463,14 @@ case "$enable_zlib" in
 	;;
     *)
 	AC_DEFINE(HAVE_ZLIB_H)
-	CPPFLAGS="${CPPFLAGS} -I${enable_zlib}/include"
+	CPPFLAGS="-I${enable_zlib}/include ${CPPFLAGS}"
 	SUDO_APPEND_LIBPATH(ZLIB, [$enable_zlib/lib])
 	ZLIB="${ZLIB} -lz"
 	;;
 esac
 if test X"$enable_zlib" = X"builtin"; then
     AC_DEFINE(HAVE_ZLIB_H)
-    CPPFLAGS="${CPPFLAGS}"' -I$(top_srcdir)/zlib'
+    CPPFLAGS='-I$(top_builddir)/zlib -I$(top_srcdir)/zlib '"${CPPFLAGS}"
     ZLIB="${ZLIB}"' $(top_builddir)/zlib/libz.la'
     ZLIB_SRC=zlib
     AC_CONFIG_HEADER([zlib/zconf.h])
@@ -2528,6 +2578,12 @@ if test ${with_pam-"no"} != "no"; then
     fi
 
     if test "$with_pam" = "yes"; then
+	# Older PAM implementations lack pam_getenvlist
+	OLIBS="$LIBS"
+	LIBS="$LIBS -lpam $lt_cv_dlopen_libs"
+	AC_CHECK_FUNCS(pam_getenvlist)
+	LIBS="$OLIBS"
+
 	# We already link with -ldl if needed (see LIBDL below)
 	SUDOERS_LIBS="${SUDOERS_LIBS} -lpam"
 	AC_DEFINE(HAVE_PAM)
@@ -3211,7 +3267,7 @@ dnl
 dnl Substitute into the Makefile and man pages
 dnl
 dnl AC_CONFIG_FILES([doc/sudo.man doc/visudo.man doc/sudoers.man doc/sudoers.ldap.man doc/sudoreplay.man src/Makefile src/sudo_usage.h])
-AC_CONFIG_FILES([Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/sample_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+AC_CONFIG_FILES([Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/sample_group/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 AC_OUTPUT
 
 dnl
@@ -3254,7 +3310,6 @@ AH_TEMPLATE(HAVE_DD_FD, [Define to 1 if your `DIR' contains dd_fd.])
 AH_TEMPLATE(HAVE_DIRFD, [Define to 1 if you have the `dirfd' function or macro.])
 AH_TEMPLATE(HAVE_DISPCRYPT, [Define to 1 if you have the `dispcrypt' function.])
 AH_TEMPLATE(HAVE_DLOPEN, [Define to 1 if you have the `dlopen' function.])
-AH_TEMPLATE(HAVE_EXTENDED_GLOB, [Define to 1 if your glob.h defines the GLOB_BRACE and GLOB_TILDE flags.])
 AH_TEMPLATE(HAVE_FCNTL_CLOSEM, [Define to 1 if your system has the F_CLOSEM fcntl.])
 AH_TEMPLATE(HAVE_FNMATCH, [Define to 1 if you have the `fnmatch' function.])
 AH_TEMPLATE(HAVE_FWTK, [Define to 1 if you use the FWTK authsrv daemon.])
@@ -3321,6 +3376,10 @@ AH_TEMPLATE(HAVE_STRUCT_UTMP_UT_EXIT, [Define to 1 if `ut_exit' is a member of `
 AH_TEMPLATE(HAVE_STRUCT_UTMPX_UT_EXIT, [Define to 1 if `ut_exit' is a member of `struct utmpx'.])
 AH_TEMPLATE(HAVE___FUNC__, [Define to 1 if the compiler supports the C99 __func__ variable.])
 AH_TEMPLATE(SUDO_KRB5_INSTANCE, [An instance string to append to the username (separated by a slash) for Kerberos V authentication])
+AH_TEMPLATE(RTLD_PRELOAD_VAR, [The environment variable that controls preloading of dynamic objects.])
+AH_TEMPLATE(RTLD_PRELOAD_ENABLE_VAR, [An extra environment variable that is required to enable preloading (if any).])
+AH_TEMPLATE(RTLD_PRELOAD_DELIM, [The delimiter to use when defining multiple preloaded objects.])
+AH_TEMPLATE(RTLD_PRELOAD_DEFAULT, [The default value of preloaded objects (if any).])
 
 dnl
 dnl Bits to copy verbatim into config.h.in
@@ -3353,6 +3412,15 @@ AH_BOTTOM([/*
 #  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtime; (_y)->tv_usec = 0; } while (0)
 # endif /* HAVE_ST_MTIMESPEC */
 #endif /* HAVE_ST_MTIM */
+
+#ifdef __GNUC__
+# define ignore_result(x) do {						       \
+    __typeof__(x) y = (x);						       \
+    (void)y;								       \
+} while(0)
+#else
+# define ignore_result(x)	(void)(x)
+#endif
 
 /* GNU stow needs /etc/sudoers to be a symlink. */
 #ifdef USE_STOW

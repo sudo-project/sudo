@@ -790,10 +790,8 @@ list_op(char *val, size_t len, struct sudo_defs_types *def, enum list_ops op)
 
     /* Add new node to the head of the list. */
     if (op == add) {
-	cur = emalloc(sizeof(struct list_member));
-	cur->value = emalloc(len + 1);
-	(void) memcpy(cur->value, val, len);
-	cur->value[len] = '\0';
+	cur = ecalloc(1, sizeof(struct list_member));
+	cur->value = estrndup(val, len);
 	cur->next = def->sd_un.list;
 	def->sd_un.list = cur;
     }

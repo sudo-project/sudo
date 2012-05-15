@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "February  5, 2012" "1.8.4" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "March 28, 2012" "1.8.5" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -218,11 +218,16 @@ environment are inherited by the command to be run.  There are two
 distinct ways \fIsudoers\fR can deal with environment variables.
 .PP
 By default, the \fIenv_reset\fR option is enabled.  This causes commands
-to be executed with a minimal environment containing the \f(CW\*(C`TERM\*(C'\fR,
-\&\f(CW\*(C`PATH\*(C'\fR, \f(CW\*(C`HOME\*(C'\fR, \f(CW\*(C`MAIL\*(C'\fR, \f(CW\*(C`SHELL\*(C'\fR, \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR, \f(CW\*(C`USERNAME\*(C'\fR
-and \f(CW\*(C`SUDO_*\*(C'\fR variables in addition to variables from the
-invoking process permitted by the \fIenv_check\fR and \fIenv_keep\fR
-options.  This is effectively a whitelist for environment variables.
+to be executed with a new, minimal environment.  On \s-1AIX\s0 (and Linux
+systems without \s-1PAM\s0), the environment is initialized with the
+contents of the \fI/etc/environment\fR file.  On \s-1BSD\s0 systems, if the
+\&\fIuse_loginclass\fR option is enabled, the environment is initialized
+based on the \fIpath\fR and \fIsetenv\fR settings in \fI/etc/login.conf\fR.
+The new environment contains the \f(CW\*(C`TERM\*(C'\fR, \f(CW\*(C`PATH\*(C'\fR, \f(CW\*(C`HOME\*(C'\fR, \f(CW\*(C`MAIL\*(C'\fR,
+\&\f(CW\*(C`SHELL\*(C'\fR, \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR, \f(CW\*(C`USERNAME\*(C'\fR and \f(CW\*(C`SUDO_*\*(C'\fR variables
+in addition to variables from the invoking process permitted by the
+\&\fIenv_check\fR and \fIenv_keep\fR options.  This is effectively a whitelist
+for environment variables.
 .PP
 If, however, the \fIenv_reset\fR option is disabled, any variables not
 explicitly denied by the \fIenv_check\fR and \fIenv_delete\fR options are
@@ -248,12 +253,15 @@ As a special case, if \fBsudo\fR's \fB\-i\fR option (initial login) is
 specified, \fIsudoers\fR will initialize the environment regardless
 of the value of \fIenv_reset\fR.  The \fI\s-1DISPLAY\s0\fR, \fI\s-1PATH\s0\fR and \fI\s-1TERM\s0\fR
 variables remain unchanged; \fI\s-1HOME\s0\fR, \fI\s-1MAIL\s0\fR, \fI\s-1SHELL\s0\fR, \fI\s-1USER\s0\fR,
-and \fI\s-1LOGNAME\s0\fR are set based on the target user.  On Linux and \s-1AIX\s0
-systems the contents of \fI/etc/environment\fR are also included.  All
-other environment variables are removed.
+and \fI\s-1LOGNAME\s0\fR are set based on the target user.  On \s-1AIX\s0 (and Linux
+systems without \s-1PAM\s0), the contents of \fI/etc/environment\fR are also
+included.  On \s-1BSD\s0 systems, if the \fIuse_loginclass\fR option is
+enabled, the \fIpath\fR and \fIsetenv\fR variables in \fI/etc/login.conf\fR
+are also applied.  All other environment variables are removed.
 .PP
-Lastly, if the \fIenv_file\fR option is defined, any variables present
-in that file will be set to their specified values.
+Finally, if the \fIenv_file\fR option is defined, any variables present
+in that file will be set to their specified values as long as they
+would not conflict with an existing environment variable.
 .SH "SUDOERS FILE FORMAT"
 .IX Header "SUDOERS FILE FORMAT"
 The \fIsudoers\fR file is composed of two types of entries: aliases
@@ -696,7 +704,7 @@ and \fI/usr/bin/vi\fR but shell escapes will be disabled.
 \& aaron  shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 .Ve
 .PP
-See the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\*(R" section below for more details
+See the \*(L"Preventing Shell Escapes\*(R" section below for more details
 on how \f(CW\*(C`NOEXEC\*(C'\fR works and whether or not it will work on your system.
 .PP
 \fI\s-1SETENV\s0 and \s-1NOSETENV\s0\fR
@@ -1062,8 +1070,8 @@ by default.
 .IX Item "noexec"
 If set, all commands run via \fBsudo\fR will behave as if the \f(CW\*(C`NOEXEC\*(C'\fR
 tag has been set, unless overridden by a \f(CW\*(C`EXEC\*(C'\fR tag.  See the
-description of \fI\s-1NOEXEC\s0 and \s-1EXEC\s0\fR below as well as the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0
-\&\s-1ESCAPES\s0\*(R" section at the end of this manual.  This flag is \fIoff\fR by default.
+description of \fI\s-1NOEXEC\s0 and \s-1EXEC\s0\fR below as well as the \*(L"Preventing Shell
+Escapes\*(R" section at the end of this manual.  This flag is \fIoff\fR by default.
 .IP "path_info" 16
 .IX Item "path_info"
 Normally, \fBsudo\fR will tell the user when a command could not be
@@ -1631,8 +1639,136 @@ single value without double-quotes.  The list can be replaced, added
 to, deleted from, or disabled by using the \f(CW\*(C`=\*(C'\fR, \f(CW\*(C`+=\*(C'\fR, \f(CW\*(C`\-=\*(C'\fR, and
 \&\f(CW\*(C`!\*(C'\fR operators respectively.  The default list of variables to keep
 is displayed when \fBsudo\fR is run by root with the \fI\-V\fR option.
+.SH "SUDO.CONF"
+.IX Header "SUDO.CONF"
+The \fI@sysconfdir@/sudo.conf\fR file determines which plugins the
+\&\fBsudo\fR front end will load.  If no \fI@sysconfdir@/sudo.conf\fR file
+is present, or it contains no \f(CW\*(C`Plugin\*(C'\fR lines, \fBsudo\fR will use the
+\&\fIsudoers\fR security policy and I/O logging, which corresponds to
+the following \fI@sysconfdir@/sudo.conf\fR file.
+.PP
+.Vb 10
+\& #
+\& # Default @sysconfdir@/sudo.conf file
+\& #
+\& # Format:
+\& #   Plugin plugin_name plugin_path plugin_options ...
+\& #   Path askpass /path/to/askpass
+\& #   Path noexec /path/to/sudo_noexec.so
+\& #   Debug sudo /var/log/sudo_debug all@warn
+\& #   Set disable_coredump true
+\& #
+\& # The plugin_path is relative to @prefix@/libexec unless
+\& #   fully qualified.
+\& # The plugin_name corresponds to a global symbol in the plugin
+\& #   that contains the plugin interface structure.
+\& # The plugin_options are optional.
+\& #
+\& Plugin policy_plugin sudoers.so
+\& Plugin io_plugin sudoers.so
+.Ve
+.SS "\s-1PLUGIN\s0 \s-1OPTIONS\s0"
+.IX Subsection "PLUGIN OPTIONS"
+Starting with \fBsudo\fR 1.8.5 it is possible to pass options to the
+\&\fIsudoers\fR plugin.  Options may be listed after the path to the
+plugin (i.e. after \fIsudoers.so\fR); multiple options should be
+space-separated.  For example:
+.PP
+.Vb 1
+\& Plugin sudoers_policy sudoers.so sudoers_file=/etc/sudoers sudoers_uid=0 sudoers_gid=0 sudoers_mode=0440
+.Ve
+.PP
+The following plugin options are supported:
+.IP "sudoers_file=pathname" 10
+.IX Item "sudoers_file=pathname"
+The \fIsudoers_file\fR option can be used to override the default path
+to the \fIsudoers\fR file.
+.IP "sudoers_uid=uid" 10
+.IX Item "sudoers_uid=uid"
+The \fIsudoers_uid\fR option can be used to override the default owner
+of the sudoers file.  It should be specified as a numeric user \s-1ID\s0.
+.IP "sudoers_gid=gid" 10
+.IX Item "sudoers_gid=gid"
+The \fIsudoers_gid\fR option can be used to override the default group
+of the sudoers file.  It should be specified as a numeric group \s-1ID\s0.
+.IP "sudoers_mode=mode" 10
+.IX Item "sudoers_mode=mode"
+The \fIsudoers_mode\fR option can be used to override the default file
+mode for the sudoers file.  It should be specified as an octal value.
+.SS "\s-1DEBUG\s0 \s-1FLAGS\s0"
+.IX Subsection "DEBUG FLAGS"
+Versions 1.8.4 and higher of the \fIsudoers\fR plugin supports a
+debugging framework that can help track down what the plugin is
+doing internally if there is a problem.  This can be configured in
+the \fI@sysconfdir@/sudo.conf\fR file as described in \fIsudo\fR\|(@mansectsu@).
+.PP
+The \fIsudoers\fR plugin uses the same debug flag format as \fBsudo\fR
+itself: \fIsubsystem\fR@\fIpriority\fR.
+.PP
+The priorities used by \fIsudoers\fR, in order of decreasing severity,
+are: \fIcrit\fR, \fIerr\fR, \fIwarn\fR, \fInotice\fR, \fIdiag\fR, \fIinfo\fR, \fItrace\fR
+and \fIdebug\fR.  Each priority, when specified, also includes all
+priorities higher than it.  For example, a priority of \fInotice\fR
+would include debug messages logged at \fInotice\fR and higher.
+.PP
+The following subsystems are used by \fIsudoers\fR:
+.IP "\fIalias\fR" 10
+.IX Item "alias"
+\&\f(CW\*(C`User_Alias\*(C'\fR, \f(CW\*(C`Runas_Alias\*(C'\fR, \f(CW\*(C`Host_Alias\*(C'\fR and \f(CW\*(C`Cmnd_Alias\*(C'\fR processing
+.IP "\fIall\fR" 10
+.IX Item "all"
+matches every subsystem
+.IP "\fIaudit\fR" 10
+.IX Item "audit"
+\&\s-1BSM\s0 and Linux audit code
+.IP "\fIauth\fR" 10
+.IX Item "auth"
+user authentication
+.IP "\fIdefaults\fR" 10
+.IX Item "defaults"
+\&\fIsudoers\fR \fIDefaults\fR settings
+.IP "\fIenv\fR" 10
+.IX Item "env"
+environment handling
+.IP "\fIldap\fR" 10
+.IX Item "ldap"
+LDAP-based sudoers
+.IP "\fIlogging\fR" 10
+.IX Item "logging"
+logging support
+.IP "\fImatch\fR" 10
+.IX Item "match"
+matching of users, groups, hosts and netgroups in \fIsudoers\fR
+.IP "\fInetif\fR" 10
+.IX Item "netif"
+network interface handling
+.IP "\fInss\fR" 10
+.IX Item "nss"
+network service switch handling in \fIsudoers\fR
+.IP "\fIparser\fR" 10
+.IX Item "parser"
+\&\fIsudoers\fR file parsing
+.IP "\fIperms\fR" 10
+.IX Item "perms"
+permission setting
+.IP "\fIplugin\fR" 10
+.IX Item "plugin"
+The equivalent of \fImain\fR for the plugin.
+.IP "\fIpty\fR" 10
+.IX Item "pty"
+pseudo-tty related code
+.IP "\fIrbtree\fR" 10
+.IX Item "rbtree"
+redblack tree internals
+.IP "\fIutil\fR" 10
+.IX Item "util"
+utility functions
 .SH "FILES"
 .IX Header "FILES"
+.ie n .IP "\fI@sysconfdir@/sudo.conf\fR" 24
+.el .IP "\fI@sysconfdir@/sudo.conf\fR" 24
+.IX Item "@sysconfdir@/sudo.conf"
+Sudo front end configuration
 .ie n .IP "\fI@sysconfdir@/sudoers\fR" 24
 .el .IP "\fI@sysconfdir@/sudoers\fR" 24
 .IX Item "@sysconfdir@/sudoers"
@@ -1653,7 +1789,7 @@ I/O log files
 Directory containing time stamps for the \fIsudoers\fR security policy
 .IP "\fI/etc/environment\fR" 24
 .IX Item "/etc/environment"
-Initial environment for \fB\-i\fR mode on Linux and \s-1AIX\s0
+Initial environment for \fB\-i\fR mode on \s-1AIX\s0 and Linux systems
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 Below are example \fIsudoers\fR entries.  Admittedly, some of
@@ -1881,6 +2017,8 @@ This is a bit tedious for users to type, so it is a prime candidate
 for encapsulating in a shell script.
 .SH "SECURITY NOTES"
 .IX Header "SECURITY NOTES"
+.SS "Limitations of the '!' operator"
+.IX Subsection "Limitations of the '!' operator"
 It is generally not effective to \*(L"subtract\*(R" commands from \f(CW\*(C`ALL\*(C'\fR
 using the '!' operator.  A user can trivially circumvent this
 by copying the desired command to a different name and then
@@ -1896,7 +2034,13 @@ different name, or use a shell escape from an editor or other
 program.  Therefore, these kind of restrictions should be considered
 advisory at best (and reinforced by policy).
 .PP
-Furthermore, if the \fIfast_glob\fR option is in use, it is not possible
+In general, if a user has sudo \f(CW\*(C`ALL\*(C'\fR there is nothing to prevent
+them from creating their own program that gives them a root shell
+(or making their own copy of a shell) regardless of any '!' elements
+in the user specification.
+.SS "Security implications of \fIfast_glob\fP"
+.IX Subsection "Security implications of fast_glob"
+If the \fIfast_glob\fR option is in use, it is not possible
 to reliably negate commands where the path name includes globbing
 (aka wildcard) characters.  This is because the C library's
 \&\fIfnmatch\fR\|(3) function cannot resolve relative paths.  While this
@@ -1913,8 +2057,8 @@ For example, given the following \fIsudoers\fR entry:
 .PP
 User \fBjohn\fR can still run \f(CW\*(C`/usr/bin/passwd root\*(C'\fR if \fIfast_glob\fR is
 enabled by changing to \fI/usr/bin\fR and running \f(CW\*(C`./passwd root\*(C'\fR instead.
-.SH "PREVENTING SHELL ESCAPES"
-.IX Header "PREVENTING SHELL ESCAPES"
+.SS "Preventing Shell Escapes"
+.IX Subsection "Preventing Shell Escapes"
 Once \fBsudo\fR executes a program, that program is free to do whatever
 it pleases, including run other programs.  This can be a security
 issue since it is not uncommon for a program to allow shell escapes,
@@ -1972,76 +2116,8 @@ operations (such as changing or overwriting files) that could lead
 to unintended privilege escalation.  In the specific case of an
 editor, a safer approach is to give the user permission to run
 \&\fBsudoedit\fR.
-.SH "DEBUG FLAGS"
-.IX Header "DEBUG FLAGS"
-Versions 1.8.4 and higher of the \fIsudoers\fR plugin supports a
-debugging framework that can help track down what the plugin is
-doing internally if there is a problem.  This can be configured in
-the \fI@sysconfdir@/sudo.conf\fR file as described in \fIsudo\fR\|(@mansectsu@).
-.PP
-The \fIsudoers\fR plugin uses the same debug flag format as \fBsudo\fR
-itself: \fIsubsystem\fR@\fIpriority\fR.
-.PP
-The priorities used by \fIsudoers\fR, in order of decreasing severity,
-are: \fIcrit\fR, \fIerr\fR, \fIwarn\fR, \fInotice\fR, \fIdiag\fR, \fIinfo\fR, \fItrace\fR
-and \fIdebug\fR.  Each priority, when specified, also includes all
-priorities higher than it.  For example, a priority of \fInotice\fR
-would include debug messages logged at \fInotice\fR and higher.
-.PP
-The following subsystems are used by \fIsudoers\fR:
-.IP "\fIalias\fR" 10
-.IX Item "alias"
-\&\f(CW\*(C`User_Alias\*(C'\fR, \f(CW\*(C`Runas_Alias\*(C'\fR, \f(CW\*(C`Host_Alias\*(C'\fR and \f(CW\*(C`Cmnd_Alias\*(C'\fR processing
-.IP "\fIall\fR" 10
-.IX Item "all"
-matches every subsystem
-.IP "\fIaudit\fR" 10
-.IX Item "audit"
-\&\s-1BSM\s0 and Linux audit code
-.IP "\fIauth\fR" 10
-.IX Item "auth"
-user authentication
-.IP "\fIdefaults\fR" 10
-.IX Item "defaults"
-\&\fIsudoers\fR \fIDefaults\fR settings
-.IP "\fIenv\fR" 10
-.IX Item "env"
-environment handling
-.IP "\fIldap\fR" 10
-.IX Item "ldap"
-LDAP-based sudoers
-.IP "\fIlogging\fR" 10
-.IX Item "logging"
-logging support
-.IP "\fImatch\fR" 10
-.IX Item "match"
-matching of users, groups, hosts and netgroups in \fIsudoers\fR
-.IP "\fInetif\fR" 10
-.IX Item "netif"
-network interface handling
-.IP "\fInss\fR" 10
-.IX Item "nss"
-network service switch handling in \fIsudoers\fR
-.IP "\fIparser\fR" 10
-.IX Item "parser"
-\&\fIsudoers\fR file parsing
-.IP "\fIperms\fR" 10
-.IX Item "perms"
-permission setting
-.IP "\fIplugin\fR" 10
-.IX Item "plugin"
-The equivalent of \fImain\fR for the plugin.
-.IP "\fIpty\fR" 10
-.IX Item "pty"
-pseudo-tty related code
-.IP "\fIrbtree\fR" 10
-.IX Item "rbtree"
-redblack tree internals
-.IP "\fIutil\fR" 10
-.IX Item "util"
-utility functions
-.SH "SECURITY NOTES"
-.IX Header "SECURITY NOTES"
+.SS "Time stamp file checks"
+.IX Subsection "Time stamp file checks"
 \&\fIsudoers\fR will check the ownership of its time stamp directory
 (\fI@timedir@\fR by default) and ignore the directory's contents if
 it is not owned by root or if it is writable by a user other than
@@ -2080,11 +2156,6 @@ monotonically increase the inode number of devices as they are
 created (such as Mac \s-1OS\s0 X), \fIsudoers\fR is able to determine when a
 tty-based time stamp file is stale and will ignore it.  Administrators
 should not rely on this feature as it is not universally available.
-.PP
-If users have sudo \f(CW\*(C`ALL\*(C'\fR there is nothing to prevent them from
-creating their own program that gives them a root shell (or making
-their own copy of a shell) regardless of any '!' elements in the
-user specification.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), \fIglob\fR\|(3), \fImktemp\fR\|(3), \fIstrftime\fR\|(3),

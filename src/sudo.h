@@ -92,6 +92,11 @@
 #define TGP_NOECHO_TRY	0x10		/* turn off echo if possible */
 
 struct user_details {
+    pid_t pid;
+    pid_t ppid;
+    pid_t pgid;
+    pid_t tcpgid;
+    pid_t sid;
     uid_t uid;
     uid_t euid;
     uid_t gid;
@@ -133,6 +138,7 @@ struct command_details {
     int ngroups;
     int closefrom;
     int flags;
+    struct passwd *pw;
     GETGROUPS_T *groups;
     const char *command;
     const char *cwd;
@@ -163,8 +169,6 @@ void cleanup(int);
 /* tgetpass.c */
 char *tgetpass(const char *, int, int);
 int tty_present(void);
-extern const char *askpass_path;
-extern const char *noexec_path;
 
 /* zero_bytes.c */
 void zero_bytes(volatile void *, size_t);
@@ -200,6 +204,7 @@ void get_ttysize(int *rowp, int *colp);
 
 /* sudo.c */
 bool exec_setup(struct command_details *details, const char *ptyname, int ptyfd);
+int policy_init_session(struct command_details *details);
 int run_command(struct command_details *details);
 extern const char *list_user, *runas_user, *runas_group;
 extern struct user_details user_details;
@@ -221,6 +226,16 @@ void selinux_execve(const char *path, char *const argv[], char *const envp[],
 void aix_prep_user(char *user, const char *tty);
 void aix_restoreauthdb(void);
 void aix_setauthdb(char *user);
+
+/* hooks.c */
+/* XXX - move to sudo_plugin_int.h? */
+struct sudo_hook;
+int register_hook(struct sudo_hook *hook);
+int deregister_hook(struct sudo_hook *hook);
+int process_hooks_getenv(const char *name, char **val);
+int process_hooks_setenv(const char *name, const char *value, int overwrite);
+int process_hooks_putenv(char *string);
+int process_hooks_unsetenv(const char *name);
 
 /* interfaces.c */
 int get_net_ifs(char **addrinfo);
