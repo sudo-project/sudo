@@ -238,6 +238,10 @@ case "$osversion" in
 	fi
 	export CFLAGS="-O2 -g $ARCH_FLAGS $SDK_FLAGS"
 	export LDFLAGS="$ARCH_FLAGS $SDK_FLAGS"
+	if [ $osrelease -ge 105 ]; then
+	    CFLAGS="$CFLAGS $F_PIE"
+	    LDFLAGS="$LDFLAGS -Wl,-pie"
+	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	configure_opts="--prefix=$prefix
 		--with-pam
