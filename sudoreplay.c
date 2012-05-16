@@ -200,7 +200,7 @@ static void check_input __P((int, double *));
 static void delay __P((double));
 static void help __P((void)) __attribute__((__noreturn__));
 static void usage __P((int));
-static void *open_io_fd __P((char *pathbuf, int len, const char *suffix));
+static int open_io_fd __P((char *pathbuf, int len, const char *suffix, union io_fd *fdp));
 static int parse_timing __P((const char *buf, const char *decimal, int *idx, double *seconds, size_t *nbytes));
 
 #ifdef HAVE_REGCOMP
@@ -300,15 +300,14 @@ main(argc, argv)
     plen = snprintf(path, sizeof(path), "%s/%.2s/%.2s/%.2s/timing",
 	session_dir, id, &id[2], &id[4]);
     if (plen <= 0 || plen >= sizeof(path))
-	errorx(1, "%s/%.2s/%.2s/%.2s/%.2s/timing: %s", session_dir,
+	errorx(1, "%s/%.2s/%.2s/%.2s/timing: %s", session_dir,
 	    id, &id[2], &id[4], strerror(ENAMETOOLONG));
     plen -= 7;
 
     /* Open files for replay, applying replay filter for the -f flag. */
     for (idx = 0; idx < IOFD_MAX; idx++) {
 	if (ISSET(replay_filter, 1 << idx) || idx == IOFD_TIMING) {
-	    io_fds[idx].v = open_io_fd(path, plen, io_fnames[idx]);
-	    if (io_fds[idx].v == NULL)
+	    if (open_io_fd(path, plen, io_fnames[idx], &io_fds[idx]) == -1)
 		error(1, "unable to open %s", path);
 	}
     }
@@ -442,19 +441,22 @@ delay(secs)
 	error(1, "nanosleep: tv_sec %ld, tv_nsec %ld", ts.tv_sec, ts.tv_nsec);
 }
 
-static void *
-open_io_fd(path, len, suffix)
+static int
+open_io_fd(path, len, suffix, fdp)
     char *path;
     int len;
     const char *suffix;
+    union io_fd *fdp;
 {
     path[len] = '\0';
     strlcat(path, suffix, PATH_MAX);
 
 #ifdef HAVE_ZLIB_H
-    return gzopen(path, "r");
+    fdp->g = gzopen(path, "r");
+    return fdp->g ? 0 : -1;
 #else
-    return fopen(path, "r");
+    fdp->f = fopen(path, "r");
+    return fdp->f ? 0 : -1;
 #endif
 }
 

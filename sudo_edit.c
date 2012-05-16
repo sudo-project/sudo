@@ -81,7 +81,7 @@ sudo_edit(argc, argv, envp)
 	char *ofile;
 	struct timeval omtim;
 	off_t osize;
-    } *tf;
+    } *tf = NULL;
 
     /* Determine user's editor. */
     editor = find_editor(&editor_argc, &editor_argv);
@@ -282,9 +282,11 @@ sudo_edit(argc, argv, envp)
     return rval;
 cleanup:
     /* Clean up temp files and return. */
-    for (i = 0; i < nfiles; i++) {
-	if (tf[i].tfile != NULL)
-	    unlink(tf[i].tfile);
+    if (tf != NULL) {
+	for (i = 0; i < nfiles; i++) {
+	    if (tf[i].tfile != NULL)
+		unlink(tf[i].tfile);
+	}
     }
     return 1;
 }
