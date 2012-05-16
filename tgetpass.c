@@ -275,8 +275,7 @@ getln(fd, buf, bufsiz, feedback)
 		}
 		continue;
 	    }
-	    if (write(fd, "*", 1) == -1)
-		/* shut up glibc */;
+	    ignore_result(write(fd, "*", 1));
 	}
 	*cp++ = c;
     }

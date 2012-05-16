@@ -538,9 +538,9 @@ install_sudoers(sp, oldperms)
 	(void) unlink(sp->tpath);
 	if (!oldperms && fstat(sp->fd, &sb) != -1) {
 	    if (sb.st_uid != SUDOERS_UID || sb.st_gid != SUDOERS_GID)
-		(void) chown(sp->path, SUDOERS_UID, SUDOERS_GID);
+		ignore_result(chown(sp->path, SUDOERS_UID, SUDOERS_GID));
 	    if ((sb.st_mode & 0777) != SUDOERS_MODE)
-		(void) chmod(sp->path, SUDOERS_MODE);
+		ignore_result(chmod(sp->path, SUDOERS_MODE));
 	}
 	return TRUE;
     }
@@ -1249,9 +1249,8 @@ quit(signo)
 {
     cleanup(signo);
 #define	emsg	 " exiting due to signal.\n"
-    if (write(STDERR_FILENO, getprogname(), strlen(getprogname())) == -1 ||
-	write(STDERR_FILENO, emsg, sizeof(emsg) - 1) == -1)
-	/* shut up glibc */;
+    ignore_result(write(STDERR_FILENO, getprogname(), strlen(getprogname())));
+    ignore_result(write(STDERR_FILENO, emsg, sizeof(emsg) - 1));
     _exit(signo);
 }
 

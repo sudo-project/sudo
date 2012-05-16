@@ -80,6 +80,8 @@ char *sudoers;
 
 static int continued, prev_state, sawspace;
 
+#define ECHO	ignore_result(fwrite(yytext, yyleng, 1, yyout))
+
 static int _push_include	__P((char *, int));
 static int pop_include		__P((void));
 static char *parse_include	__P((char *));

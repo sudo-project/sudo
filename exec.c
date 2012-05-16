@@ -641,8 +641,7 @@ handler(s)
      * The pipe is non-blocking, if we overflow the kernel's pipe
      * buffer we drop the signal.  This is not a problem in practice.
      */
-    if (write(signal_pipe[1], &signo, sizeof(signo)) == -1)
-	/* shut up glibc */;
+    ignore_result(write(signal_pipe[1], &signo, sizeof(signo)));
 }
 
 #ifdef SA_SIGINFO
@@ -666,8 +665,7 @@ handler_nofwd(s, info, context)
 	 * The pipe is non-blocking, if we overflow the kernel's pipe
 	 * buffer we drop the signal.  This is not a problem in practice.
 	 */
-	if (write(signal_pipe[1], &signo, sizeof(signo)) == -1)
-	    /* shut up glibc */;
+	ignore_result(write(signal_pipe[1], &signo, sizeof(signo)));
     }
 }
 #endif /* SA_SIGINFO */
