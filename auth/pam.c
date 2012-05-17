@@ -72,7 +72,7 @@
 static int sudo_conv __P((int, PAM_CONST struct pam_message **,
 			  struct pam_response **, void *));
 static char *def_prompt = "Password:";
-static int gotintr;
+static int getpass_error;
 
 #ifndef PAM_DATA_SILENT
 #define PAM_DATA_SILENT	0
@@ -172,10 +172,12 @@ pam_verify(pw, prompt, auth)
 	    }
 	    /* FALLTHROUGH */
 	case PAM_AUTH_ERR:
-	    if (gotintr) {
+	case PAM_AUTHINFO_UNAVAIL:
+	    if (getpass) {
 		/* error or ^C from tgetpass() */
 		return AUTH_INTR;
 	    }
+	    /* FALLTHROUGH */
 	case PAM_MAXTRIES:
 	case PAM_PERM_DENIED:
 	    return AUTH_FAILURE;
@@ -304,6 +306,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
     const char *prompt;
     char *pass;
     int n, flags, std_prompt;
+    int ret = PAM_AUTH_ERR;
 
     if ((*response = malloc(num_msg * sizeof(struct pam_response))) == NULL)
 	return PAM_SYSTEM_ERR;
@@ -314,12 +317,13 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 	switch (pm->msg_style) {
 	    case PAM_PROMPT_ECHO_ON:
 		SET(flags, TGP_ECHO);
+		/* FALLTHROUGH */
 	    case PAM_PROMPT_ECHO_OFF:
 		prompt = def_prompt;
 
 		/* Error out if the last password read was interrupted. */
-		if (gotintr)
-		    goto err;
+		if (getpass_error)
+		    goto done;
 
 		/* Is the sudo prompt standard? (If so, we'l just use PAM's) */
 		std_prompt =  strncmp(def_prompt, "Password:", 9) == 0 &&
@@ -341,13 +345,12 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		/* Read the password unless interrupted. */
 		pass = tgetpass(prompt, def_passwd_timeout * 60, flags);
 		if (pass == NULL) {
-		    /* We got ^C instead of a password; abort quickly. */
-		    if (errno == EINTR)
-			gotintr = 1;
-#if defined(__darwin__) || defined(__APPLE__)
+		    /* Error (or ^C) reading password, don't try again. */
+		    getpass_error = 1;
+#if (defined(__darwin__) || defined(__APPLE__)) && !defined(OPENPAM_VERSION)
 		    pass = "";
 #else
-		    goto err;
+		    goto done;
 #endif
 		}
 		pr->resp = estrdup(pass);
@@ -364,23 +367,25 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		}
 		break;
 	    default:
-		goto err;
+		ret = PAM_CONV_ERR;
+		goto done;
 	}
     }
+    ret = PAM_SUCCESS;
 
-    return PAM_SUCCESS;
-
-err:
-    /* Zero and free allocated memory and return an error. */
-    for (pr = *response, n = num_msg; n--; pr++) {
-	if (pr->resp != NULL) {
-	    zero_bytes(pr->resp, strlen(pr->resp));
-	    free(pr->resp);
-	    pr->resp = NULL;
+done:
+    if (ret != PAM_SUCCESS) {
+	/* Zero and free allocated memory and return an error. */
+	for (pr = *response, n = num_msg; n--; pr++) {
+	    if (pr->resp != NULL) {
+		zero_bytes(pr->resp, strlen(pr->resp));
+		free(pr->resp);
+		pr->resp = NULL;
+	    }
 	}
+	zero_bytes(*response, num_msg * sizeof(struct pam_response));
+	free(*response);
+	*response = NULL;
     }
-    zero_bytes(*response, num_msg * sizeof(struct pam_response));
-    free(*response);
-    *response = NULL;
-    return gotintr ? PAM_AUTH_ERR : PAM_CONV_ERR;
+    return ret;
 }
