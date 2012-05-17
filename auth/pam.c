@@ -275,14 +275,15 @@ pam_end_session(pw)
     int status = PAM_SUCCESS;
 
     if (pamh != NULL) {
-#ifndef NO_PAM_SESSION
 	/*
 	 * Update PAM_USER to reference the user we are running the command
-	 * as to match the call to pam_open_session().
+	 * as, as opposed to the user we authenticated as.
 	 */
 	(void) pam_set_item(pamh, PAM_USER, pw->pw_name);
+#ifndef NO_PAM_SESSION
 	(void) pam_close_session(pamh, PAM_SILENT);
 #endif
+	(void) pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
 	status = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
 	pamh = NULL;
     }
