@@ -1,3 +1,8 @@
+What's new in Sudo 1.8.5p1?
+
+ * Fixed a bug that prevented files in an include directory from
+   being evaluated.
+
 What's new in Sudo 1.8.5?
 
  * When "noexec" is enabled, sudo_noexec.so will now be prepended
