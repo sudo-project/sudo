@@ -3525,6 +3525,8 @@ _push_include(char *path, bool isdir)
     if (isdir) {
 	struct stat sb;
 	switch (sudo_secure_dir(path, sudoers_uid, sudoers_gid, &sb)) {
+	    case SUDO_PATH_SECURE:
+		break;
 	    case SUDO_PATH_MISSING:
 		debug_return_bool(false);
 	    case SUDO_PATH_BAD_TYPE:
