@@ -814,6 +814,8 @@ _push_include(path, isdir)
     if (isdir) {
 	struct stat sb;
 	switch (sudo_secure_dir(path, SUDOERS_UID, SUDOERS_GID, &sb)) {
+	    case SUDO_PATH_SECURE:
+		break;
 	    case SUDO_PATH_MISSING:
 		return FALSE;
 	    case SUDO_PATH_BAD_TYPE:
