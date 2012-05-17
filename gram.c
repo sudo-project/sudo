@@ -84,7 +84,7 @@
 extern int sudolineno;
 extern int last_token;
 extern char *sudoers;
-static int verbose = FALSE;
+int sudoers_warnings = TRUE;
 int parse_error = FALSE;
 int pedantic = FALSE;
 int errorlineno = -1;
@@ -115,7 +115,7 @@ yyerror(s)
 	errorlineno = sudolineno;
 	errorfile = estrdup(sudoers);
     }
-    if (verbose && s != NULL) {
+    if (sudoers_warnings && s != NULL) {
 #ifndef TRACELEXER
 	(void) fprintf(stderr, ">>> %s: %s near line %d <<<\n", sudoers, s,
 	    sudolineno);
@@ -827,7 +827,7 @@ init_parser(path, quiet)
     parse_error = FALSE;
     errorlineno = -1;
     errorfile = sudoers;
-    verbose = !quiet;
+    sudoers_warnings = !quiet;
 }
 #line 780 "y.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
@@ -847,22 +847,20 @@ static int yygrowstack()
         return -1;
     else if ((newsize *= 2) > YYMAXDEPTH)
         newsize = YYMAXDEPTH;
-    i = yyssp - yyss;
 #ifdef SIZE_MAX
 #define YY_SIZE_MAX SIZE_MAX
 #else
 #define YY_SIZE_MAX 0x7fffffff
 #endif
-    if (newsize && YY_SIZE_MAX / newsize < sizeof *newss)
+    if (YY_SIZE_MAX / newsize < sizeof *newss)
         goto bail;
+    i = yyssp - yyss;
     newss = yyss ? (short *)realloc(yyss, newsize * sizeof *newss) :
       (short *)malloc(newsize * sizeof *newss); /* overflow check above */
     if (newss == NULL)
         goto bail;
     yyss = newss;
     yyssp = newss + i;
-    if (newsize && YY_SIZE_MAX / newsize < sizeof *newvs)
-        goto bail;
     newvs = yyvs ? (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs) :
       (YYSTYPE *)malloc(newsize * sizeof *newvs); /* overflow check above */
     if (newvs == NULL)
@@ -1598,7 +1596,7 @@ case 96:
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
-#line 1549 "y.tab.c"
+#line 1547 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

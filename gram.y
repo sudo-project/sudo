@@ -72,7 +72,7 @@
 extern int sudolineno;
 extern int last_token;
 extern char *sudoers;
-static int verbose = FALSE;
+int sudoers_warnings = TRUE;
 int parse_error = FALSE;
 int pedantic = FALSE;
 int errorlineno = -1;
@@ -103,7 +103,7 @@ yyerror(s)
 	errorlineno = sudolineno;
 	errorfile = estrdup(sudoers);
     }
-    if (verbose && s != NULL) {
+    if (sudoers_warnings && s != NULL) {
 #ifndef TRACELEXER
 	(void) fprintf(stderr, ">>> %s: %s near line %d <<<\n", sudoers, s,
 	    sudolineno);
@@ -796,5 +796,5 @@ init_parser(path, quiet)
     parse_error = FALSE;
     errorlineno = -1;
     errorfile = sudoers;
-    verbose = !quiet;
+    sudoers_warnings = !quiet;
 }

@@ -1,6 +1,6 @@
 %{
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2011
+ * Copyright (c) 1996, 1998-2005, 2007-2012
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -71,9 +71,11 @@
 #include "parse.h"
 #include "toke.h"
 #include <gram.h>
+#include "secure_path.h"
 
 extern YYSTYPE yylval;
 extern int parse_error;
+extern int sudoers_warnings;
 int sudolineno;
 int last_token;
 char *sudoers;
@@ -810,6 +812,39 @@ _push_include(path, isdir)
 	}
     }
     if (isdir) {
+	struct stat sb;
+	switch (sudo_secure_dir(path, SUDOERS_UID, SUDOERS_GID, &sb)) {
+	    case SUDO_PATH_MISSING:
+		return FALSE;
+	    case SUDO_PATH_BAD_TYPE:
+		errno = ENOTDIR;
+		if (sudoers_warnings) {
+		    warning(path);
+		}
+		return FALSE;
+	    case SUDO_PATH_WRONG_OWNER:
+		if (sudoers_warnings) {
+		    warningx("%s is owned by uid %u, should be %u",
+			path, (unsigned int) sb.st_uid,
+			(unsigned int) SUDOERS_UID);
+		}
+		return FALSE;
+	    case SUDO_PATH_WORLD_WRITABLE:
+		if (sudoers_warnings) {
+		    warningx("%s is world writable", path);
+		}
+		return FALSE;
+	    case SUDO_PATH_GROUP_WRITABLE:
+		if (sudoers_warnings) {
+		    warningx("%s is owned by gid %u, should be %u",
+			path, (unsigned int) sb.st_gid,
+			(unsigned int) SUDOERS_GID);
+		}
+		return FALSE;
+	    default:
+		/* NOTREACHED */
+		return FALSE;
+	}
 	if (!(path = switch_dir(&istack[idepth], path))) {
 	    /* switch_dir() called yyerror() for us */
 	    return FALSE;

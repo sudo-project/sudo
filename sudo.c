@@ -106,6 +106,7 @@
 #include "sudo.h"
 #include "lbuf.h"
 #include "interfaces.h"
+#include "secure_path.h"
 #include <sudo_usage.h>
 
 #ifdef USING_NONUNIX_GROUPS
@@ -1022,73 +1023,56 @@ open_sudoers(sudoers, doedit, keepopen)
     int doedit;
     int *keepopen;
 {
-    struct stat statbuf;
+    struct stat sb;
     FILE *fp = NULL;
-    int rootstat;
 
-    /*
-     * Fix the mode and group on sudoers file from old default.
-     * Only works if file system is readable/writable by root.
-     */
-    if ((rootstat = stat_sudoers(sudoers, &statbuf)) == 0 &&
-	SUDOERS_UID == statbuf.st_uid && SUDOERS_MODE != 0400 &&
-	(statbuf.st_mode & 0007777) == 0400) {
-
-	if (chmod(sudoers, SUDOERS_MODE) == 0) {
-	    warningx("fixed mode on %s", sudoers);
-	    SET(statbuf.st_mode, SUDOERS_MODE);
-	    if (statbuf.st_gid != SUDOERS_GID) {
-		if (chown(sudoers, (uid_t) -1, SUDOERS_GID) == 0) {
-		    warningx("set group on %s", sudoers);
-		    statbuf.st_gid = SUDOERS_GID;
-		} else
-		    warning("unable to set group on %s", sudoers);
-	    }
-	} else
-	    warning("unable to fix mode on %s", sudoers);
-    }
-
-    /*
-     * Sanity checks on sudoers file.  Must be done as sudoers
-     * file owner.  We already did a stat as root, so use that
-     * data if we can't stat as sudoers file owner.
-     */
     set_perms(PERM_SUDOERS);
 
-    if (rootstat != 0 && stat_sudoers(sudoers, &statbuf) != 0)
-	log_error(USE_ERRNO, "can't stat %s", sudoers);
-    else if (!S_ISREG(statbuf.st_mode))
-	log_error(0, "%s is not a regular file", sudoers);
-    else if ((statbuf.st_mode & 07577) != (SUDOERS_MODE & 07577))
-	log_error(0, "%s is mode 0%o, should be 0%o", sudoers,
-	    (unsigned int) (statbuf.st_mode & 07777),
-	    (unsigned int) SUDOERS_MODE);
-    else if (statbuf.st_uid != SUDOERS_UID)
-	log_error(0, "%s is owned by uid %u, should be %u", sudoers,
-	    (unsigned int) statbuf.st_uid, (unsigned int) SUDOERS_UID);
-    else if (statbuf.st_gid != SUDOERS_GID && ISSET(statbuf.st_mode, S_IRGRP|S_IWGRP))
-	log_error(0, "%s is owned by gid %u, should be %u", sudoers,
-	    (unsigned int) statbuf.st_gid, (unsigned int) SUDOERS_GID);
-    else if ((fp = fopen(sudoers, "r")) == NULL)
-	log_error(USE_ERRNO, "can't open %s", sudoers);
-    else {
-	/*
-	 * Make sure we can actually read sudoers so we can present the
-	 * user with a reasonable error message (unlike the lexer).
-	 */
-	if (statbuf.st_size != 0 && fgetc(fp) == EOF) {
-	    log_error(USE_ERRNO, "can't read %s", sudoers);
-	    fclose(fp);
-	    fp = NULL;
-	}
-    }
-
-    if (fp != NULL) {
-	rewind(fp);
-	(void) fcntl(fileno(fp), F_SETFD, 1);
+    switch (sudo_secure_file(sudoers, SUDOERS_UID, SUDOERS_GID, &sb)) {
+	case SUDO_PATH_SECURE:
+	    if ((fp = fopen(sudoers, "r")) == NULL) {
+		log_error(USE_ERRNO, "unable to open %s", sudoers);
+	    } else {
+		/*
+		 * Make sure we can actually read sudoers so we can present the
+		 * user with a reasonable error message (unlike the lexer).
+		 */
+		if (sb.st_size != 0 && fgetc(fp) == EOF) {
+		    log_error(USE_ERRNO, "unable to read %s",
+			sudoers);
+		    fclose(fp);
+		    fp = NULL;
+		} else {
+		    /* Rewind fp and set close on exec flag. */
+		    rewind(fp);
+		    (void) fcntl(fileno(fp), F_SETFD, 1);
+		}
+	    }
+	    break;
+	case SUDO_PATH_MISSING:
+	    log_error(USE_ERRNO, "unable to stat %s", sudoers);
+	    break;
+	case SUDO_PATH_BAD_TYPE:
+	    log_error(0, "%s is not a regular file", sudoers);
+	    break;
+	case SUDO_PATH_WRONG_OWNER:
+	    log_error(0, "%s is owned by uid %u, should be %u",
+		sudoers, (unsigned int) sb.st_uid, (unsigned int) SUDOERS_UID);
+	    break;
+	case SUDO_PATH_WORLD_WRITABLE:
+	    log_error(0, "%s is world writable", sudoers);
+	    break;
+	case SUDO_PATH_GROUP_WRITABLE:
+	    log_error(0, "%s is owned by gid %u, should be %u",
+		sudoers, (unsigned int) sb.st_gid, (unsigned int) SUDOERS_GID);
+	    break;
+	default:
+	    /* NOTREACHED */
+	    break;
     }
 
     set_perms(PERM_ROOT);		/* change back to root */
+
     return fp;
 }
 
