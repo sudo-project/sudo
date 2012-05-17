@@ -124,6 +124,7 @@ extern int ldapssl_set_strength(LDAP *ldap, int strength);
 #define CONF_LIST_STR	4
 #define CONF_DEREF_VAL	5
 
+#define SUDO_LDAP_CLEAR		0
 #define SUDO_LDAP_SSL		1
 #define SUDO_LDAP_STARTTLS	2
 
@@ -524,7 +525,8 @@ sudo_ldap_init(ldp, host, port)
     int rc = LDAP_CONNECT_ERROR;
 
 #ifdef HAVE_LDAPSSL_INIT
-    if (ldap_conf.ssl_mode == SUDO_LDAP_SSL) {
+    if (ldap_conf.ssl_mode != SUDO_LDAP_CLEAR) {
+	const int defsecure = ldap_conf.ssl_mode == SUDO_LDAP_SSL;
 	DPRINTF(("ldapssl_clientauth_init(%s, %s)",
 	    ldap_conf.tls_certfile ? ldap_conf.tls_certfile : "NULL",
 	    ldap_conf.tls_keyfile ? ldap_conf.tls_keyfile : "NULL"), 2);
@@ -568,8 +570,8 @@ sudo_ldap_init(ldp, host, port)
 	    goto done;
 	}
 
-	DPRINTF(("ldapssl_init(%s, %d, 1)", host, port), 2);
-	if ((ld = ldapssl_init(host, port, 1)) != NULL)
+	DPRINTF(("ldapssl_init(%s, %d, %d)", host, port, defsecure), 2);
+	if ((ld = ldapssl_init(host, port, defsecure)) != NULL)
 	    rc = LDAP_SUCCESS;
     } else
 #endif
