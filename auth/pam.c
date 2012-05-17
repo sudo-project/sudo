@@ -173,7 +173,7 @@ pam_verify(pw, prompt, auth)
 	    /* FALLTHROUGH */
 	case PAM_AUTH_ERR:
 	case PAM_AUTHINFO_UNAVAIL:
-	    if (getpass) {
+	    if (getpass_error) {
 		/* error or ^C from tgetpass() */
 		return AUTH_INTR;
 	    }
