@@ -281,6 +281,7 @@ uninstall:
 
 check: $(TEST_PROGS) visudo testsudoers
 	@-rval=0; \
+	PWD=`pwd`; \
 	./check_addr $(srcdir)/regress/parser/check_addr.in; \
 	rval=`expr $$rval + $$?`; \
 	./check_fill; \
@@ -326,7 +327,7 @@ check: $(TEST_PROGS) visudo testsudoers
 		base=`basename $$t .sh`; \
 		out="$${base}.out"; \
 		err="$${base}.err"; \
-		$(SHELL) $$t >$$out 2>$$err; \
+		TESTDIR=$$PWD/$$dir $(SHELL) $$t >$$out 2>$$err; \
 		if cmp $$out $$dir/$$out.ok >/dev/null; then \
 		    passed=`expr $$passed + 1`; \
 		    echo "$$dirbase/$$base: OK"; \
