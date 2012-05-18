@@ -160,7 +160,7 @@ main(int argc, char *argv[])
 
     dflag = 0;
     grfile = pwfile = NULL;
-    while ((ch = getopt(argc, argv, "dg:G:h:p:tu:")) != -1) {
+    while ((ch = getopt(argc, argv, "dg:G:h:p:tu:U:")) != -1) {
 	switch (ch) {
 	    case 'd':
 		dflag = 1;
@@ -179,6 +179,9 @@ main(int argc, char *argv[])
 		break;
 	    case 't':
 		trace_print = testsudoers_print;
+		break;
+	    case 'U':
+		sudoers_uid = atoi(optarg);
 		break;
 	    case 'u':
 		runas_user = optarg;
@@ -677,6 +680,6 @@ static int testsudoers_print(const char *msg)
 void
 usage(void)
 {
-    (void) fprintf(stderr, "usage: %s [-dt] [-G grfile] [-g group] [-h host] [-p pwfile] [-u user] <user> <command> [args]\n", getprogname());
+    (void) fprintf(stderr, "usage: %s [-dt] [-G grfile] [-g group] [-h host] [-p pwfile] [-U sudoers_uid] [-u user] <user> <command> [args]\n", getprogname());
     exit(1);
 }
