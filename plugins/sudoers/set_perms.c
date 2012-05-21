@@ -307,7 +307,7 @@ set_perms(int perm)
 	 * we use a non-zero uid in order to avoid NFS lossage.
 	 * Using uid 1 is a bit bogus but should work on all OS's.
 	 */
-	if (sudoers_uid == ROOT_UID && (sudoers_mode & 040))
+	if (sudoers_uid == ROOT_UID && (sudoers_mode & S_IRGRP))
 	    state->euid = 1;
 	else
 	    state->euid = sudoers_uid;
@@ -617,7 +617,7 @@ set_perms(int perm)
 	 * we use a non-zero uid in order to avoid NFS lossage.
 	 * Using uid 1 is a bit bogus but should work on all OS's.
 	 */
-	if (sudoers_uid == ROOT_UID && (sudoers_mode & 040))
+	if (sudoers_uid == ROOT_UID && (sudoers_mode & S_IRGRP))
 	    state->euid = 1;
 	else
 	    state->euid = sudoers_uid;
@@ -990,7 +990,7 @@ set_perms(int perm)
 	 * we use a non-zero uid in order to avoid NFS lossage.
 	 * Using uid 1 is a bit bogus but should work on all OS's.
 	 */
-	if (sudoers_uid == ROOT_UID && (sudoers_mode & 040))
+	if (sudoers_uid == ROOT_UID && (sudoers_mode & S_IRGRP))
 	    state->euid = 1;
 	else
 	    state->euid = sudoers_uid;
@@ -1276,7 +1276,7 @@ set_perms(int perm)
 	 * we use a non-zero uid in order to avoid NFS lossage.
 	 * Using uid 1 is a bit bogus but should work on all OS's.
 	 */
-	if (sudoers_uid == ROOT_UID && (sudoers_mode & 040))
+	if (sudoers_uid == ROOT_UID && (sudoers_mode & S_IRGRP))
 	    state->euid = 1;
 	else
 	    state->euid = sudoers_uid;
