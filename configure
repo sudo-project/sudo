@@ -1635,7 +1635,7 @@ Optional Packages:
                           offensive ones
   --with-secure-path      override the user's path with a built-in one
   --without-interfaces    don't try to read the ip addr of ether interfaces
-  --with-stow             properly handle GNU stow packaging
+  --with-stow             deprecated
   --with-askpass=PATH     Fully qualified pathname of askpass helper
   --with-plugindir        set directory to load plugins from
   --with-selinux          enable SELinux support
@@ -5131,26 +5131,14 @@ $as_echo "yes" >&6; }
 fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether stow should be used" >&5
-$as_echo_n "checking whether stow should be used... " >&6; }
 
 # Check whether --with-stow was given.
 if test "${with_stow+set}" = set; then :
   withval=$with_stow; case $with_stow in
-    yes)	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-		$as_echo "#define USE_STOW 1" >>confdefs.h
-
-		;;
-    no)		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-		;;
-    *)		as_fn_error $? "\"--with-stow does not take an argument.\"" "$LINENO" 5
+    *)		{ $as_echo "$as_me:${as_lineno-$LINENO}: --with-stow option deprecated, now is defalt behavior" >&5
+$as_echo "$as_me: --with-stow option deprecated, now is defalt behavior" >&6;}
 		;;
 esac
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
 fi
 
 

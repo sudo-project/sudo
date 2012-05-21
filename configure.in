@@ -1075,17 +1075,11 @@ AC_ARG_WITH(interfaces, [AS_HELP_STRING([--without-interfaces], [don't try to re
 		;;
 esac], AC_MSG_RESULT(yes))
 
-AC_MSG_CHECKING(whether stow should be used)
-AC_ARG_WITH(stow, [AS_HELP_STRING([--with-stow], [properly handle GNU stow packaging])],
+AC_ARG_WITH(stow, [AS_HELP_STRING([--with-stow], [deprecated])],
 [case $with_stow in
-    yes)	AC_MSG_RESULT(yes)
-		AC_DEFINE(USE_STOW)
+    *)		AC_MSG_NOTICE([--with-stow option deprecated, now is defalt behavior])
 		;;
-    no)		AC_MSG_RESULT(no)
-		;;
-    *)		AC_MSG_ERROR(["--with-stow does not take an argument."])
-		;;
-esac], AC_MSG_RESULT(no))
+esac])
 
 AC_MSG_CHECKING(whether to use an askpass helper)
 AC_ARG_WITH(askpass, [AS_HELP_STRING([--with-askpass=PATH], [Fully qualified pathname of askpass helper])],
@@ -3420,13 +3414,6 @@ AH_BOTTOM([/*
 } while(0)
 #else
 # define ignore_result(x)	(void)(x)
-#endif
-
-/* GNU stow needs /etc/sudoers to be a symlink. */
-#ifdef USE_STOW
-# define stat_sudoers	stat
-#else
-# define stat_sudoers	lstat
 #endif
 
 /* Macros to set/clear/test flags. */

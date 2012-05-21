@@ -344,11 +344,6 @@ Special features/options:
   --with-otp-only
 	This option is now just an alias for --without-passwd.
 
-  --with-stow
-	Properly handle GNU stow packaging.  The sudoers file will
-	physically live in ${prefix}/etc and /etc/sudoers will be
-	a symbolic link.
-
   --with-selinux 
 	Enable support for role based access control (RBAC) on
 	systems that support SELinux.
