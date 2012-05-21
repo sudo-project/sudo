@@ -154,7 +154,7 @@ set_perms(perm)
 				 * work on all OS's.
 				 */
 				if (SUDOERS_UID == ROOT_UID) {
-				    if ((SUDOERS_MODE & 040) && setresuid(ROOT_UID, 1, ROOT_UID)) {
+				    if ((SUDOERS_MODE & S_IRGRP) && setresuid(ROOT_UID, 1, ROOT_UID)) {
 					errstr = "setresuid(ROOT_UID, 1, ROOT_UID)";
 					goto bad;
 				    }
@@ -273,7 +273,7 @@ set_perms(perm)
 				 * work on all OS's.
 				 */
 				if (SUDOERS_UID == ROOT_UID) {
-				    if ((SUDOERS_MODE & 040) && setreuid(ROOT_UID, 1)) {
+				    if ((SUDOERS_MODE & S_IRGRP) && setreuid(ROOT_UID, 1)) {
 					errstr = "setreuid(ROOT_UID, 1)";
 					goto bad;
 				    }
@@ -394,7 +394,7 @@ set_perms(perm)
 				 * work on all OS's.
 				 */
 				if (SUDOERS_UID == ROOT_UID) {
-				    if ((SUDOERS_MODE & 040) && seteuid(1)) {
+				    if ((SUDOERS_MODE & S_IRGRP) && seteuid(1)) {
 					errstr = "seteuid(1)";
 					goto bad;
 				    }

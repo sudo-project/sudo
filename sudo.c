@@ -1030,13 +1030,21 @@ open_sudoers(sudoers, doedit, keepopen)
 
     switch (sudo_secure_file(sudoers, SUDOERS_UID, SUDOERS_GID, &sb)) {
 	case SUDO_PATH_SECURE:
+	    /*
+	     * If we are expecting sudoers to be group readable but
+	     * it is not, we must open the file as root, not uid 1.
+	     */
+	    if (SUDOERS_UID == ROOT_UID && (SUDOERS_MODE & S_IRGRP)) {
+		if ((sb.st_mode & S_IRGRP) == 0)
+		    set_perms(PERM_ROOT);
+	    }
+	    /*
+	     * Open sudoers and make sure we can read it so we can present
+	     * the user with a reasonable error message (unlike the lexer).
+	     */
 	    if ((fp = fopen(sudoers, "r")) == NULL) {
 		log_error(USE_ERRNO, "unable to open %s", sudoers);
 	    } else {
-		/*
-		 * Make sure we can actually read sudoers so we can present the
-		 * user with a reasonable error message (unlike the lexer).
-		 */
 		if (sb.st_size != 0 && fgetc(fp) == EOF) {
 		    log_error(USE_ERRNO, "unable to read %s",
 			sudoers);
