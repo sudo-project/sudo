@@ -69,6 +69,7 @@
 #include "interfaces.h"
 #include "parse.h"
 #include "sudo_conf.h"
+#include "secure_path.h"
 #include <gram.h>
 
 /*
@@ -160,7 +161,7 @@ main(int argc, char *argv[])
 
     dflag = 0;
     grfile = pwfile = NULL;
-    while ((ch = getopt(argc, argv, "dg:G:h:p:tu:U:")) != -1) {
+    while ((ch = getopt(argc, argv, "dg:G:h:P:p:tu:U:")) != -1) {
 	switch (ch) {
 	    case 'd':
 		dflag = 1;
@@ -169,7 +170,7 @@ main(int argc, char *argv[])
 		user_host = optarg;
 		break;
 	    case 'G':
-		grfile = optarg;
+		sudoers_gid = (gid_t)atoi(optarg);
 		break;
 	    case 'g':
 		runas_group = optarg;
@@ -177,11 +178,14 @@ main(int argc, char *argv[])
 	    case 'p':
 		pwfile = optarg;
 		break;
+	    case 'P':
+		grfile = optarg;
+		break;
 	    case 't':
 		trace_print = testsudoers_print;
 		break;
 	    case 'U':
-		sudoers_uid = atoi(optarg);
+		sudoers_uid = (uid_t)atoi(optarg);
 		break;
 	    case 'u':
 		runas_user = optarg;
@@ -417,11 +421,44 @@ set_fqdn(void)
 }
 
 FILE *
-open_sudoers(const char *path, bool doedit, bool *keepopen)
+open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 {
+    struct stat sb;
+    FILE *fp = NULL;
+    char *sudoers_base;
     debug_decl(open_sudoers, SUDO_DEBUG_UTIL)
 
-    debug_return_ptr(fopen(path, "r"));
+    sudoers_base = strrchr(sudoers, '/');
+    if (sudoers_base != NULL)
+	sudoers_base++;
+
+    switch (sudo_secure_file(sudoers, sudoers_uid, sudoers_gid, &sb)) {
+	case SUDO_PATH_SECURE:
+	    fp = fopen(sudoers, "r");
+	    break;
+	case SUDO_PATH_MISSING:
+	    warning("unable to stat %s", sudoers_base);
+	    break;
+	case SUDO_PATH_BAD_TYPE:
+	    warningx("%s is not a regular file", sudoers_base);
+	    break;
+	case SUDO_PATH_WRONG_OWNER:
+	    warningx("%s should be owned by uid %u",
+		sudoers_base, (unsigned int) sudoers_uid);
+	    break;
+	case SUDO_PATH_WORLD_WRITABLE:
+	    warningx("%s is world writable", sudoers_base);
+	    break;
+	case SUDO_PATH_GROUP_WRITABLE:
+	    warningx("%s should be owned by gid %u",
+		sudoers_base, (unsigned int) sudoers_gid);
+	    break;
+	default:
+	    /* NOTREACHED */
+	    break;
+    }
+
+    debug_return_ptr(fp);
 }
 
 void
@@ -680,6 +717,6 @@ static int testsudoers_print(const char *msg)
 void
 usage(void)
 {
-    (void) fprintf(stderr, "usage: %s [-dt] [-G grfile] [-g group] [-h host] [-p pwfile] [-U sudoers_uid] [-u user] <user> <command> [args]\n", getprogname());
+    (void) fprintf(stderr, "usage: %s [-dt] [-G sudoers_gid] [-g group] [-h host] [-p grfile] [-p pwfile] [-U sudoers_uid] [-u user] <user> <command> [args]\n", getprogname());
     exit(1);
 }

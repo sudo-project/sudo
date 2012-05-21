@@ -5,6 +5,7 @@
 # This is RedHat bug Bug 667103.
 #
 
+exec 2>&1
 ./testsudoers -g bin root id <<EOF
 root ALL = ALL
 EOF
