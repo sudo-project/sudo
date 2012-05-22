@@ -626,6 +626,12 @@ The following options are also configurable at runtime:
   --enable-werror
 	Enable the -Werror compiler option when building sudo with gcc.
 
+  --disable-hardening
+	Disable the use of compiler/linker exploit mitigation options
+	which are enabled by default.  This includes compiling with
+	_FORTIFY_SOURCE defined to 2, building with -fstack-protector
+	and linking with -zrelro, where supported.
+
   --enable-admin-flag
 	Enable the creation of an Ubuntu-style admin flag file
 	the first time sudo is run.

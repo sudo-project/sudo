@@ -875,6 +875,7 @@ enable_zlib
 enable_env_reset
 enable_warnings
 enable_werror
+enable_hardening
 enable_admin_flag
 enable_nls
 with_selinux
@@ -1537,6 +1538,8 @@ Optional Features:
   --enable-env-reset      Whether to enable environment resetting by default.
   --enable-warnings       Whether to enable compiler warnings
   --enable-werror         Whether to enable the -Werror compiler option
+  --disable-hardening     Do not use compiler/linker exploit mitigation
+                          options
   --enable-admin-flag     Whether to create a Ubuntu-style admin flag file
   --disable-nls           Disable natural language support using gettext
   --enable-gss-krb5-ccache-name
@@ -5491,6 +5494,14 @@ $as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-werror: $enable
 	    ;;
   esac
 
+fi
+
+
+# Check whether --enable-hardening was given.
+if test "${enable_hardening+set}" = set; then :
+  enableval=$enable_hardening;
+else
+  enable_hardening=yes
 fi
 
 
@@ -14634,6 +14645,116 @@ $as_echo "$sudo_cv_var_gcc_static_libgcc" >&6; }
 	LTLDFLAGS="$LTLDFLAGS -Wc,-static-libgcc"
     fi
 fi
+if test "$enable_hardening" != "no"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fstack-protector" >&5
+$as_echo_n "checking whether C compiler accepts -fstack-protector... " >&6; }
+if ${ax_cv_check_cflags___fstack_protector+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -fstack-protector"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ax_cv_check_cflags___fstack_protector=yes
+else
+  ax_cv_check_cflags___fstack_protector=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fstack_protector" >&5
+$as_echo "$ax_cv_check_cflags___fstack_protector" >&6; }
+if test x"$ax_cv_check_cflags___fstack_protector" = xyes; then :
+  CFLAGS="${CFLAGS} -fstack-protector"
+else
+  :
+fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fstack-protector" >&5
+$as_echo_n "checking whether the linker accepts -fstack-protector... " >&6; }
+if ${ax_cv_check_ldflags___fstack_protector+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -fstack-protector"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ax_cv_check_ldflags___fstack_protector=yes
+else
+  ax_cv_check_ldflags___fstack_protector=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fstack_protector" >&5
+$as_echo "$ax_cv_check_ldflags___fstack_protector" >&6; }
+if test x"$ax_cv_check_ldflags___fstack_protector" = xyes; then :
+  LDFLAGS="${LDFLAGS} -fstack-protector"
+else
+  :
+fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,z,relro" >&5
+$as_echo_n "checking whether the linker accepts -Wl,z,relro... " >&6; }
+if ${ax_cv_check_ldflags___Wl_z_relro+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -Wl,z,relro"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ax_cv_check_ldflags___Wl_z_relro=yes
+else
+  ax_cv_check_ldflags___Wl_z_relro=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl_z_relro" >&5
+$as_echo "$ax_cv_check_ldflags___Wl_z_relro" >&6; }
+if test x"$ax_cv_check_ldflags___Wl_z_relro" = xyes; then :
+  LDFLAGS="${LDFLAGS} -Wl,z,relro"
+else
+  :
+fi
+
+fi
+
 for ac_prog in 'bison -y' byacc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
@@ -16526,12 +16647,13 @@ done
 fi
 done
 
-O_CPPFLAGS="$CPPFLAGS"
-CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
-ac_fn_c_check_func "$LINENO" "__sprintf_chk" "ac_cv_func___sprintf_chk"
+if test "$enable_hardening" != "no"; then
+    O_CPPFLAGS="$CPPFLAGS"
+    CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
+    ac_fn_c_check_func "$LINENO" "__sprintf_chk" "ac_cv_func___sprintf_chk"
 if test "x$ac_cv_func___sprintf_chk" = xyes; then :
 
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 int
@@ -16550,7 +16672,8 @@ rm -f core conftest.err conftest.$ac_objext \
 
 fi
 
-CPPFLAGS="$O_CPPFLAGS"
+    CPPFLAGS="$O_CPPFLAGS"
+fi
 
 utmp_style=LEGACY
 for ac_func in getutxid getutid
