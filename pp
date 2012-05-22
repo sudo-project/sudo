@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2012 Quest Software, Inc. ALL RIGHTS RESERVED
-pp_revision="352"
+pp_revision="355"
  # Copyright 2012 Quest Software, Inc.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -1595,7 +1595,7 @@ pp_aix_detect_os () {
 
 pp_aix_version_fix () {
     typeset v
-    v=`echo $1 | sed 's/[-+]/./' | tr -c -d '[0-9].\012' | awk -F"." '{ printf "%d.%d.%d.%.4s", $1, $2, $3, $4 }' | sed 's/[.]*$//g'`
+    v=`echo $1 | sed 's/[-+]/./' | tr -c -d '[0-9].\012' | awk -F"." '{ printf "%d.%d.%d.%.4s\n", $1, $2, $3, $4 }' | sed 's/[.]*$//g'`
     if test x"$v" != x"$1"; then
         pp_warn "stripped version '$1' to '$v'"
     fi
@@ -1761,7 +1761,7 @@ pp_aix_add_service () {
 
 	set -- $cmd
 	cmd_cmd="$1"; shift
-	cmd_arg="$*";
+	cmd_arg="${pp_aix_mkssys_cmd_args:-$*}";
 
 	case "$stop_signal" in
 		HUP) stop_signal=1;;
@@ -5425,6 +5425,7 @@ pp_rpm_detect_distro () {
        pp_rpm_distro=`awk '
           /^Red Hat Enterprise Linux/ { print "rhel" $7; exit; }
           /^CentOS release/           { print "centos" $3; exit; }
+          /^CentOS Linux release/     { print "centos" $4; exit; }
           /^Red Hat Linux release/    { print "rh" $5; exit; }
        ' /etc/redhat-release`
     elif test -f /etc/SuSE-release; then
