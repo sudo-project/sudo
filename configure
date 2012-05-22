@@ -14717,14 +14717,14 @@ else
   :
 fi
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,z,relro" >&5
-$as_echo_n "checking whether the linker accepts -Wl,z,relro... " >&6; }
-if ${ax_cv_check_ldflags___Wl_z_relro+:} false; then :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-z,relro" >&5
+$as_echo_n "checking whether the linker accepts -Wl,-z,relro... " >&6; }
+if ${ax_cv_check_ldflags___Wl__z_relro+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
   ax_check_save_flags=$LDFLAGS
-  LDFLAGS="$LDFLAGS  -Wl,z,relro"
+  LDFLAGS="$LDFLAGS  -Wl,-z,relro"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -14737,18 +14737,18 @@ main ()
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ax_cv_check_ldflags___Wl_z_relro=yes
+  ax_cv_check_ldflags___Wl__z_relro=yes
 else
-  ax_cv_check_ldflags___Wl_z_relro=no
+  ax_cv_check_ldflags___Wl__z_relro=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
   LDFLAGS=$ax_check_save_flags
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl_z_relro" >&5
-$as_echo "$ax_cv_check_ldflags___Wl_z_relro" >&6; }
-if test x"$ax_cv_check_ldflags___Wl_z_relro" = xyes; then :
-  LDFLAGS="${LDFLAGS} -Wl,z,relro"
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__z_relro" >&5
+$as_echo "$ax_cv_check_ldflags___Wl__z_relro" >&6; }
+if test x"$ax_cv_check_ldflags___Wl__z_relro" = xyes; then :
+  LDFLAGS="${LDFLAGS} -Wl,-z,relro"
 else
   :
 fi

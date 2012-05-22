@@ -1983,7 +1983,7 @@ dnl
 if test "$enable_hardening" != "no"; then
     AX_CHECK_COMPILE_FLAG([-fstack-protector], [CFLAGS="${CFLAGS} -fstack-protector"])
     AX_CHECK_LINK_FLAG([-fstack-protector], [LDFLAGS="${LDFLAGS} -fstack-protector"])
-    AX_CHECK_LINK_FLAG([-Wl,z,relro], [LDFLAGS="${LDFLAGS} -Wl,z,relro"])
+    AX_CHECK_LINK_FLAG([-Wl,-z,relro], [LDFLAGS="${LDFLAGS} -Wl,-z,relro"])
 fi
 
 dnl
