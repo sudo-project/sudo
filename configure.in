@@ -1306,6 +1306,10 @@ AC_ARG_ENABLE(werror,
   esac
 ])
 
+AC_ARG_ENABLE(hardening,
+[AS_HELP_STRING([--disable-hardening], [Do not use compiler/linker exploit mitigation options])],
+[], [enable_hardening=yes])
+
 AC_ARG_ENABLE(admin-flag,
 [AS_HELP_STRING([--enable-admin-flag], [Whether to create a Ubuntu-style admin flag file])],
 [ case "$enableval" in
@@ -1901,6 +1905,15 @@ AC_PROG_GCC_TRADITIONAL
 AC_C_CONST
 AC_C_VOLATILE
 dnl
+dnl Check for -fstack-protector and -z relro support
+dnl
+if test "$enable_hardening" != "no"; then
+    AX_CHECK_COMPILE_FLAG([-fstack-protector], [CFLAGS="${CFLAGS} -fstack-protector"])
+    AX_CHECK_LINK_FLAG([-fstack-protector], [LDFLAGS="${LDFLAGS} -fstack-protector"])
+    AX_CHECK_LINK_FLAG([-Wl,z,relro], [LDFLAGS="${LDFLAGS} -Wl,z,relro"])
+fi
+
+dnl
 dnl Program checks
 dnl
 AC_PROG_YACC
@@ -2024,12 +2037,14 @@ AC_CHECK_FUNCS(setsid, [], [
 dnl
 dnl If libc supports _FORTIFY_SOURCE check functions, use it.
 dnl
-O_CPPFLAGS="$CPPFLAGS"
-CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
-AC_CHECK_FUNC(__sprintf_chk, [
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[char buf[4]; (void)sprintf(buf, "%s", "foo");]])], [OSDEFS="${OSDEFS} -D_FORTIFY_SOURCE=2"], [])
-], [])
-CPPFLAGS="$O_CPPFLAGS"
+if test "$enable_hardening" != "no"; then
+    O_CPPFLAGS="$CPPFLAGS"
+    CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
+    AC_CHECK_FUNC(__sprintf_chk, [
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[char buf[4]; (void)sprintf(buf, "%s", "foo");]])], [OSDEFS="${OSDEFS} -D_FORTIFY_SOURCE=2"], [])
+    ], [])
+    CPPFLAGS="$O_CPPFLAGS"
+fi
 
 AC_CHECK_FUNCS(getutxid getutid, [break])
 
