@@ -141,7 +141,7 @@ io_nextid()
     }
     buf[6] = '\n';
 
-    /* Stash id logging purposes */
+    /* Stash id for logging purposes. */
     memcpy(sudo_user.sessid, buf, 6);
     sudo_user.sessid[6] = '\0';
 
