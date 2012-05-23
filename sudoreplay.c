@@ -871,6 +871,10 @@ find_sessions(dir, re, user, tty)
 	if (dp->d_name[0] == '.' && (dp->d_name[1] == '\0' ||
 	    (dp->d_name[1] == '.' && dp->d_name[2] == '\0')))
 	    continue;
+#ifdef HAVE_STRUCT_DIRENT_D_TYPE
+	if (dp->d_type != DT_DIR)
+	    continue;
+#endif
 
 	/* Add name to session list. */
 	if (sessions_len + 1 > sessions_size) {
@@ -898,7 +902,9 @@ find_sessions(dir, re, user, tty)
 	} else {
 	    /* Strip off "/log" and recurse if a dir. */
 	    pathbuf[sdlen + len - 4] = '\0';
+#ifndef HAVE_STRUCT_DIRENT_D_TYPE
 	    if (lstat(pathbuf, &sb) == 0 && S_ISDIR(sb.st_mode))
+#endif
 		find_sessions(pathbuf, re, user, tty);
 	}
     }
