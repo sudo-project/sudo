@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "January 12, 2012" "1.7.9" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "May 23, 2012" "1.7.10" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -528,12 +528,16 @@ unreachable.
 .PP
 There are two distinct ways to deal with environment variables.  By
 default, the \fIenv_reset\fR \fIsudoers\fR option is enabled.  This causes
-commands to be executed with a minimal environment containing the
-\&\f(CW\*(C`TERM\*(C'\fR, \f(CW\*(C`PATH\*(C'\fR, \f(CW\*(C`HOME\*(C'\fR, \f(CW\*(C`MAIL\*(C'\fR, \f(CW\*(C`SHELL\*(C'\fR, \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR,
-\&\f(CW\*(C`USERNAME\*(C'\fR and \f(CW\*(C`SUDO_*\*(C'\fR variables in addition to variables from
-the invoking process permitted by the \fIenv_check\fR and \fIenv_keep\fR
-\&\fIsudoers\fR options.  This is effectively a whitelist for environment
-variables.
+commands to be executed with a new, minimal environment containing.
+On \s-1AIX\s0 (and Linux systems without \s-1PAM\s0), the environment is initialized
+with the contents of the \fI/etc/environment\fR file.  On \s-1BSD\s0 systems,
+if the \fIuse_loginclass\fR option is enabled, the environment is
+initialized based on the \fIpath\fR and \fIsetenv\fR settings in
+\&\fI/etc/login.conf\fR.  The new environment contains the \f(CW\*(C`TERM\*(C'\fR,
+\&\f(CW\*(C`PATH\*(C'\fR, \f(CW\*(C`HOME\*(C'\fR, \f(CW\*(C`MAIL\*(C'\fR, \f(CW\*(C`SHELL\*(C'\fR, \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR, \f(CW\*(C`USERNAME\*(C'\fR
+and \f(CW\*(C`SUDO_*\*(C'\fR variables in addition to variables from the invoking
+process permitted by the \fIenv_check\fR and \fIenv_keep\fR options.  This
+is effectively a whitelist for environment variables.
 .PP
 If, however, the \fIenv_reset\fR option is disabled in \fIsudoers\fR, any
 variables not explicitly denied by the \fIenv_check\fR and \fIenv_delete\fR
@@ -694,7 +698,7 @@ List of who can run what
 Directory containing time stamps
 .IP "\fI/etc/environment\fR" 24
 .IX Item "/etc/environment"
-Initial environment for \fB\-i\fR mode on Linux and \s-1AIX\s0
+Initial environment for \fB\-i\fR mode on \s-1AIX\s0 and Linux systems
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 Note: the following examples assume suitable \fIsudoers\fR\|(@mansectform@) entries.
