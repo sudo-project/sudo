@@ -1898,14 +1898,6 @@ dnl
 AC_PROG_GCC_TRADITIONAL
 AC_C_CONST
 AC_C_VOLATILE
-dnl
-dnl Check for -fstack-protector and -z relro support
-dnl
-if test "$enable_hardening" != "no"; then
-    AX_CHECK_COMPILE_FLAG([-fstack-protector], [CFLAGS="${CFLAGS} -fstack-protector"])
-    AX_CHECK_LINK_FLAG([-fstack-protector], [LDFLAGS="${LDFLAGS} -fstack-protector"])
-    AX_CHECK_LINK_FLAG([-Wl,-z,relro], [LDFLAGS="${LDFLAGS} -Wl,-z,relro"])
-fi
 
 dnl
 dnl Program checks
@@ -2982,6 +2974,20 @@ if test "${with_iologdir-yes}" != "no"; then
 	AC_MSG_WARN([Disabling I/O log support due to lack of tcsetpgrp function])
 	with_iologdir=no
     ])
+fi
+
+dnl
+dnl Check for -fstack-protector and -z relro support
+dnl This must be towards the end as it turns warnings
+dnl into fatal errors (and there is no way to undo that)
+dnl
+if test "$enable_hardening" != "no"; then
+    AC_LANG_WERROR
+    AX_CHECK_COMPILE_FLAG([-fstack-protector], [
+	CFLAGS="${CFLAGS} -fstack-protector"
+	AX_CHECK_LINK_FLAG([-fstack-protector], [LDFLAGS="${LDFLAGS} -fstack-protector"])
+    ])
+    AX_CHECK_LINK_FLAG([-Wl,-z,relro], [LDFLAGS="${LDFLAGS} -Wl,-z,relro"])
 fi
 
 dnl
