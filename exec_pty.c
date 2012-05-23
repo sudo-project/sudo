@@ -432,6 +432,11 @@ fork_pty(path, argv, envp, sv, rbac_enabled, bgmode, maxfd)
     sa.sa_handler = handler;
     sigaction(SIGTSTP, &sa, NULL);
 
+    /* We don't want to receive SIGTTIN/SIGTTOU, getting EIO is preferable. */
+    sa.sa_handler = SIG_IGN;
+    sigaction(SIGTTIN, &sa, NULL);
+    sigaction(SIGTTOU, &sa, NULL);
+
     if (foreground) {
 	/* Copy terminal attrs from user tty -> pty slave. */
 	if (term_copy(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE])) {
@@ -857,10 +862,12 @@ exec_monitor(path, argv, envp, backchannel, rbac)
 	     * Handle SIGCHLD specially and deliver other signals
 	     * directly to the child.
 	     */
-	    if (signo == SIGCHLD)
-		alive = handle_sigchld(backchannel, &cstat);
-	    else
+	    if (signo == SIGCHLD) {
+		if (!handle_sigchld(backchannel, &cstat))
+		    alive = FALSE;
+	    } else {
 		deliver_signal(child, signo);
+	    }
 	    continue;
 	}
 	if (errpipe[0] != -1 && FD_ISSET(errpipe[0], fdsr)) {
