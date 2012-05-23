@@ -114,8 +114,8 @@ SRCS = aix.c alias.c alloc.c audit.c boottime.c bsm_audit.c check.c \
        parse_args.c pwutil.c secure_path.c set_perms.c setsid.c sigaction.c \
        snprintf.c strcasecmp.c strerror.c strlcat.c strlcpy.c strsignal.c \
        sudo.c sudo_noexec.c sudo_edit.c sudo_nss.c term.c testsudoers.c \
-       tgetpass.c toke.c toke.l toke_util.c tsgetgrpw.c ttyname.c utimes.c \
-       vasgroups.c visudo.c zero_bytes.c redblack.c selinux.c sesh.c \
+       tgetpass.c toke.c toke.l toke_util.c tsgetgrpw.c ttyname.c ttysize.c \
+       utimes.c vasgroups.c visudo.c zero_bytes.c redblack.c selinux.c sesh.c \
        sudoreplay.c getdate.c getdate.y getline.c timestr.c $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
@@ -143,7 +143,7 @@ SUDO_OBJS = $(AUTH_OBJS) @SUDO_OBJS@ audit.o boottime.o check.o env.o \
 
 VISUDO_OBJS = visudo.o fileops.o gettime.o goodpath.o find_path.o
 
-REPLAY_OBJS = getdate.o sudoreplay.o
+REPLAY_OBJS = getdate.o sudoreplay.o ttysize.o
 
 TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o
 
@@ -395,6 +395,8 @@ tgetpass.o: $(srcdir)/tgetpass.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tgetpass.c
 ttyname.o: $(srcdir)/ttyname.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/ttyname.c
+ttysize.o: $(srcdir)/ttysize.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/ttysize.c
 timestr.o: $(srcdir)/timestr.c $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/timestr.c
 toke.o: $(devdir)/toke.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(srcdir)/toke.h $(devdir)/gram.h

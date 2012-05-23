@@ -28,6 +28,7 @@ void	*emalloc2(size_t, size_t);
 void	*erealloc(void *, size_t);
 void	*erealloc3(void *, size_t, size_t);
 char	*estrdup(const char *);
+char	*estrndup(const char *, size_t);
 #else
 # include <varargs.h>
 int	 easprintf();
@@ -39,6 +40,7 @@ void	*emalloc2();
 void	*erealloc();
 void	*erealloc3();
 char	*estrdup();
+char	*estrndup();
 #endif /* __STDC__ */
 
 #endif /* _SUDO_ALLOC_H */

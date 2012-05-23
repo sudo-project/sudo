@@ -197,6 +197,30 @@ estrdup(src)
 }
 
 /*
+ * estrdup() is like strndup(3) except that it exits with an error if
+ * malloc(3) fails.  NOTE: unlike strdup(3), estrdup(NULL) is legal.
+ */
+char *
+estrndup(src, maxlen)
+    const char *src;
+    size_t maxlen;
+{
+    char *dst = NULL;
+    size_t len = 0;
+
+    if (src != NULL) {
+	while (maxlen != 0 && src[len] != '\0') {
+	    len++;
+	    maxlen--;
+	}
+	dst = (char *) emalloc(len + 1);
+	(void) memcpy(dst, src, len);
+	dst[len] = '\0';
+    }
+    return dst;
+}
+
+/*
  * easprintf() calls vasprintf() and exits with an error if vasprintf()
  * returns -1 (out of memory).
  */
