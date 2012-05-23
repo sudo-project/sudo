@@ -828,6 +828,16 @@ done:
 }
 
 static int
+session_compare(v1, v2)
+    const void *v1;
+    const void *v2;
+{
+    const char *s1 = *(const char **)v1;
+    const char *s2 = *(const char **)v2;
+    return strcmp(s1, s2);
+}
+
+static int
 find_sessions(dir, re, user, tty)
     const char *dir;
     REGEX_T *re;
@@ -837,9 +847,9 @@ find_sessions(dir, re, user, tty)
     DIR *d;
     struct dirent *dp;
     struct stat sb;
-    size_t sdlen;
-    int len;
-    char pathbuf[PATH_MAX];
+    size_t sdlen, sessions_len = 0, sessions_size = 36*36;
+    int i, len;
+    char pathbuf[PATH_MAX], **sessions = NULL;
 
     d = opendir(dir);
     if (d == NULL)
@@ -853,18 +863,34 @@ find_sessions(dir, re, user, tty)
     }
     pathbuf[sdlen++] = '/';
     pathbuf[sdlen] = '\0';
+
+    /* Store potential session dirs for sorting. */
+    sessions = emalloc2(sessions_size, sizeof(char *));
     while ((dp = readdir(d)) != NULL) {
 	/* Skip "." and ".." */
 	if (dp->d_name[0] == '.' && (dp->d_name[1] == '\0' ||
 	    (dp->d_name[1] == '.' && dp->d_name[2] == '\0')))
 	    continue;
 
+	/* Add name to session list. */
+	if (sessions_len + 1 > sessions_size) {
+	    sessions_size <<= 1;
+	    sessions = erealloc3(sessions, sessions_size, sizeof(char *));
+	}
+	sessions[sessions_len++] = estrdup(dp->d_name);
+    }
+    closedir(d);
+
+    /* Sort and list the sessions. */
+    qsort(sessions, sessions_len, sizeof(char *), session_compare);
+    for (i = 0; i < sessions_len; i++) {
 	len = snprintf(&pathbuf[sdlen], sizeof(pathbuf) - sdlen,
-	    "%s/log", dp->d_name);
+	    "%s/log", sessions[i]);
 	if (len <= 0 || len >= sizeof(pathbuf) - sdlen) {
 	    errno = ENAMETOOLONG;
-	    error(1, "%s/%s/log", dir, dp->d_name);
+	    error(1, "%s/%s/log", dir, sessions[i]);
 	}
+	efree(sessions[i]);
 
 	/* Check for dir with a log file. */
 	if (lstat(pathbuf, &sb) == 0 && S_ISREG(sb.st_mode)) {
@@ -876,7 +902,7 @@ find_sessions(dir, re, user, tty)
 		find_sessions(pathbuf, re, user, tty);
 	}
     }
-    closedir(d);
+    efree(sessions);
 
     return 0;
 }
