@@ -267,7 +267,7 @@ char *sudo_ttyname_scan(dir, rdev, builtin)
 
     /* Search subdirs if we didn't find it in the root level. */
     for (i = 0; devname == NULL && i < num_subdirs; i++)
-	devname = sudo_ttyname_scan(subdirs[i], rdev, false);
+	devname = sudo_ttyname_scan(subdirs[i], rdev, FALSE);
 
 done:
     for (i = 0; i < num_subdirs; i++)
@@ -308,7 +308,7 @@ sudo_ttyname_dev(rdev)
 		continue;
 	    }
 	    /* Traverse directory */
-	    tty = sudo_ttyname_scan(devname, rdev, 1);
+	    tty = sudo_ttyname_scan(devname, rdev, TRUE);
 	} else {
 	    if (stat(devname, &sb) == 0) {
 		if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
@@ -323,7 +323,7 @@ sudo_ttyname_dev(rdev)
      * Not found?  Do a breadth-first traversal of /dev/.
      */
     if (tty == NULL)
-	tty = sudo_ttyname_scan(_PATH_DEV, rdev, 0);
+	tty = sudo_ttyname_scan(_PATH_DEV, rdev, FALSE);
 
     return tty;
 }
