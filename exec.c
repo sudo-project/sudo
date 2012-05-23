@@ -406,12 +406,12 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
 			cstat->val = errno;
 			break;
 		    }
+#endif
 		} else {
 		    /* Short read or EOF. */
 		    /* XXX - should set cstat */
 		    break;
 		}
-#endif
 	    }
 #ifdef _PATH_SUDO_IO_LOGDIR /* XXX */
 	    if (cstat->type == CMD_WSTATUS) {
