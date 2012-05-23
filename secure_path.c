@@ -48,7 +48,7 @@ sudo_secure_path(path, type, uid, gid, sbp)
     struct stat sb;
     int rval = SUDO_PATH_MISSING;
 
-    if (path != NULL && stat_sudoers(path, &sb) == 0) {
+    if (path != NULL && stat(path, &sb) == 0) {
 	if ((sb.st_mode & _S_IFMT) != type) {
 	    rval = SUDO_PATH_BAD_TYPE;
 	} else if (uid != (uid_t)-1 && sb.st_uid != uid) {
