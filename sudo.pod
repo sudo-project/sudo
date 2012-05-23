@@ -606,7 +606,7 @@ Directory containing time stamps
 
 =item F</etc/environment>
 
-Initial environment for B<-i> mode on AIX Linux systems
+Initial environment for B<-i> mode on AIX and Linux systems
 
 =back
 
