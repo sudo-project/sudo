@@ -251,13 +251,15 @@ parse_args(argc, argv)
 
     if (!mode) {
 	/* Defer -k mode setting until we know whether it is a flag or not */
-	if (ISSET(flags, MODE_INVALIDATE) && NewArgc == 0) {
-	    mode = MODE_INVALIDATE;	/* -k by itself */
-	    CLR(flags, MODE_INVALIDATE);
-	    valid_flags = 0;
-	} else {
-	    mode = MODE_RUN;		/* running a command */
+	if (ISSET(flags, MODE_INVALIDATE)) {
+	    if (NewArgc == 0 && !(flags & (MODE_SHELL|MODE_LOGIN_SHELL))) {
+		mode = MODE_INVALIDATE;	/* -k by itself */
+		CLR(flags, MODE_INVALIDATE);
+		valid_flags = 0;
+	    }
 	}
+	if (!mode)
+	    mode = MODE_RUN;		/* running a command */
     }
 
     if (NewArgc > 0 && mode == MODE_LIST)
