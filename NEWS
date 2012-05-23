@@ -1,3 +1,55 @@
+What's new in Sudo 1.7.10?
+
+ * If the user is a member of the "exempt" group in sudoers, they
+   will no longer be prompted for a password even if the -k flag
+   is specified with the command.  This makes "sudo -k command"
+   consistent with the behavior one would get if the user ran "sudo
+   -k" immediately before running the command.
+
+ * The sudoers file may now be a symbolic link.  Previously, sudo
+   would refuse to read sudoers unless it was a regular file.
+
+ * The user/group/mode checks on sudoers files have been relaxed.
+   As long as the file is owned by the sudoers uid, not world-writable
+   and not writable by a group other than the sudoers gid, the file
+   is considered OK.  Note that visudo will still set the mode to
+   the value specified at configure time.
+
+ * /etc/environment is no longer read directly on Linux systems
+   when PAM is used.  Sudo now merges the PAM environment into the
+   user's environment which is typically set by the pam_env module.
+
+ * The initial evironment created when env_reset is in effect now
+   includes the contents of /etc/environment on AIX systems and the
+   "setenv" and "path" entries from /etc/login.conf on BSD systems.
+
+ * On systems with an SVR4-style /proc file system, the /proc/pid/psinfo
+   file is now uses to determine the controlling terminal, if possible.
+   This allows tty-based tickets to work properly even when, e.g.
+   standard input, output and error are redirected to /dev/null.
+
+ * The output of "sudoreplay -l" is now sorted by file name (or
+   sequence number).  Previously, entries were displayed in the
+   order in which they were found on the file system.
+
+ * Sudo now behaves properly when I/O logging is enabled and the
+   controlling terminal is revoked (e.g. the running sshd is killed).
+   Previously, sudo may have exited without calling the I/O plugin's
+   close function which can lead to an incomplete I/O log.
+
+ * Sudo can now detect when a user has logged out and back in again
+   on Solaris 11, just like it can on Solaris 10.
+
+ * The built-in zlib included with Sudo has been upgraded to version
+   1.2.6.
+
+ * Setting the SSL parameter to start_tls in ldap.conf now works
+   properly when using Mozilla-based SDKs that support the
+   ldap_start_tls_s() function.
+
+ * The TLS_CHECKPEER parameter in ldap.conf now works when the
+   Mozilla NSS crypto backend is used with OpenLDAP.
+
 What's new in Sudo 1.7.9p1?
 
  * Fixed a bug when matching against an IP address with an associated
