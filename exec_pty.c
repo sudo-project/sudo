@@ -822,7 +822,6 @@ exec_monitor(path, argv, envp, backchannel, rbac)
     /* Wait for errno on pipe, signal on backchannel or for SIGCHLD */
     maxfd = MAX(MAX(errpipe[0], signal_pipe[0]), backchannel);
     fdsr = ecalloc(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
-    zero_bytes(&cstat, sizeof(cstat));
     tv.tv_sec = 0;
     tv.tv_usec = 0;
     for (;;) {
