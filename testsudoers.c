@@ -126,7 +126,7 @@ main(argc, argv)
 
     dflag = 0;
     grfile = pwfile = runas_group = runas_user = NULL;
-    while ((ch = getopt(argc, argv, "dg:G:h:p:u:")) != -1) {
+    while ((ch = getopt(argc, argv, "dg:P:h:p:u:")) != -1) {
 	switch (ch) {
 	    case 'd':
 		dflag = 1;
@@ -134,11 +134,11 @@ main(argc, argv)
 	    case 'h':
 		user_host = optarg;
 		break;
-	    case 'G':
-		grfile = optarg;
-		break;
 	    case 'g':
 		runas_group = optarg;
+		break;
+	    case 'P':
+		grfile = optarg;
 		break;
 	    case 'p':
 		pwfile = optarg;
@@ -567,6 +567,6 @@ dump_sudoers()
 void
 usage()
 {
-    (void) fprintf(stderr, "usage: %s [-d] [-G grfile] [-g group] [-h host] [-p pwfile] [-u user] <user> <command> [args]\n", getprogname());
+    (void) fprintf(stderr, "usage: %s [-d] [-g group] [-h host] [-P grfile] [-p pwfile] [-u user] <user> <command> [args]\n", getprogname());
     exit(1);
 }

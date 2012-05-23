@@ -106,29 +106,24 @@ check_user(validated, mode)
     char *timestampfile = NULL;
     char *prompt;
     struct stat sb;
-    int status, need_pass = def_authenticate;
+    int status;
 
     /* Init authentication system regardless of whether we need a password. */
     auth_pw = get_authpw();
     sudo_auth_init(auth_pw);
 
-    if (need_pass) {
-	/* Always need a password when -k was specified with the command. */
-	if (ISSET(mode, MODE_INVALIDATE)) {
-	    SET(validated, FLAG_CHECK_USER);
-	} else {
-	    /*
-	     * Don't prompt for the root passwd or if the user is exempt.
-	     * If the user is not changing uid/gid, no need for a password.
-	     */
-	    if (user_uid == 0 || (user_uid == runas_pw->pw_uid &&
-		(!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name)))
-		|| user_is_exempt())
-		need_pass = FALSE;		
-	}
-    }
-    if (!need_pass)
+    /*
+     * Don't prompt for the root passwd or if the user is exempt.
+     * If the user is not changing uid/gid, no need for a password.
+     */
+    if (!def_authenticate || user_uid == 0 || (user_uid == runas_pw->pw_uid &&
+	(!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name)))
+	|| user_is_exempt())
 	goto done;
+
+    /* Always need a password when -k was specified with the command. */
+    if (ISSET(mode, MODE_INVALIDATE))
+	SET(validated, FLAG_CHECK_USER);
 
     /* Stash the tty's ctime for tty ticket comparison. */
     if (def_tty_tickets && user_ttypath && stat(user_ttypath, &sb) == 0) {
