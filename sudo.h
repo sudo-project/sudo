@@ -239,6 +239,9 @@ int sudo_execve __P((const char *path, char *argv[], char *envp[], uid_t uid,
 void save_signals __P((void));
 void restore_signals __P((void));
 
+/* exec_pty.c */
+void cleanup_pty __P((int gotsignal));
+
 /* fileops.c */
 char *sudo_parseln	__P((FILE *));
 int lock_file		__P((int, int));

@@ -525,9 +525,12 @@ pty_close(cstat)
     flush_output();
 
     if (io_fds[SFD_USERTTY] != -1) {
-	do {
-	    n = term_restore(io_fds[SFD_USERTTY], 0);
-	} while (!n && errno == EINTR);
+	check_foreground();
+	if (foreground) {
+	    do {
+		n = term_restore(io_fds[SFD_USERTTY], 0);
+	    } while (!n && errno == EINTR);
+	}
     }
 
     /* If child was signalled, write the reason to stdout like the shell. */
@@ -1079,4 +1082,15 @@ safe_close(fd)
 	return -1;
     }
     return close(fd);
+}
+
+void
+cleanup_pty(gotsignal)
+    int gotsignal;
+{
+    if (io_fds[SFD_USERTTY] != -1) {
+	check_foreground();
+	if (foreground)
+	    term_restore(io_fds[SFD_USERTTY], 0);
+    }
 }

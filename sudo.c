@@ -1331,7 +1331,9 @@ cleanup(gotsignal)
 	io_log_close();
 #endif
     }
-    term_restore(STDIN_FILENO, 0);
+#ifdef _PATH_SUDO_IO_LOGDIR
+    cleanup_pty(gotsignal);
+#endif
 #ifdef HAVE_SELINUX
     selinux_restore_tty();
 #endif
