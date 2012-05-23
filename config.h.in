@@ -389,6 +389,9 @@
 /* Define to 1 if you have the `posix_openpt' function. */
 #undef HAVE_POSIX_OPENPT
 
+/* Define to 1 if you have the <procfs.h> header file. */
+#undef HAVE_PROCFS_H
+
 /* Define to 1 if you have the <project.h> header file. */
 #undef HAVE_PROJECT_H
 
@@ -534,6 +537,9 @@
 /* Define to 1 if `p_tdev' is a member of `struct kinfo_proc'. */
 #undef HAVE_STRUCT_KINFO_PROC_P_TDEV
 
+/* Define to 1 if `pr_ttydev' is a member of `struct psinfo'. */
+#undef HAVE_STRUCT_PSINFO_PR_TTYDEV
+
 /* Define to 1 if the system has the type `struct timespec'. */
 #undef HAVE_STRUCT_TIMESPEC
 
@@ -562,6 +568,9 @@
 /* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
    */
 #undef HAVE_SYS_NDIR_H
+
+/* Define to 1 if you have the <sys/procfs.h> header file. */
+#undef HAVE_SYS_PROCFS_H
 
 /* Define to 1 if you have the <sys/select.h> header file. */
 #undef HAVE_SYS_SELECT_H
@@ -630,6 +639,9 @@
 /* Define to 1 if you have the `_innetgr' function. */
 #undef HAVE__INNETGR
 
+/* Define to 1 if you have the `_ttyname_dev' function. */
+#undef HAVE__TTYNAME_DEV
+
 /* Define to 1 if your crt0.o defines the __progname symbol for you. */
 #undef HAVE___PROGNAME
 
@@ -663,6 +675,14 @@
 
 /* The user or email address that sudo mail is sent to. */
 #undef MAILTO
+
+/* Define to 1 if `major', `minor', and `makedev' are declared in <mkdev.h>.
+   */
+#undef MAJOR_IN_MKDEV
+
+/* Define to 1 if `major', `minor', and `makedev' are declared in
+   <sysmacros.h>. */
+#undef MAJOR_IN_SYSMACROS
 
 /* The max number of chars per log file line (for line wrapping). */
 #undef MAXLOGFILELEN
