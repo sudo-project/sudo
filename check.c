@@ -681,9 +681,9 @@ remove_timestamp(remove)
 }
 
 /*
- * Returns TRUE if tty lives on a devpts or /devices filesystem, else FALSE.
- * Unlike most filesystems, the ctime of devpts nodes is not updated when
- * the device node is written to, only when the inode's status changes,
+ * Returns TRUE if tty lives on a devpts, /dev or /devices filesystem, else
+ * FALSE.  Unlike most filesystems, the ctime of devpts nodes is not updated
+ * when the device node is written to, only when the inode's status changes,
  * typically via the chmod, chown, link, rename, or utimes system calls.
  * Since the ctime is "stable" in this case, we can stash it the tty ticket
  * file and use it to determine whether the tty ticket file is stale.
@@ -708,7 +708,7 @@ tty_is_devpts(tty)
     struct statvfs sfs;
 
     if (statvfs(tty, &sfs) == 0) {
-	if (strcmp(sfs.f_fstr, "devices") == 0)
+	if (strcmp(sfs.f_fstr, "dev") == 0 || strcmp(sfs.f_fstr, "devices") == 0)
 	    retval = TRUE;
     }
 #endif /* __linux__ */
