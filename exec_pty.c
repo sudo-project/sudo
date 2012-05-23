@@ -845,9 +845,10 @@ exec_monitor(path, argv, envp, backchannel, rbac)
 	if (n <= 0) {
 	    if (n == 0)
 		goto done;
-	    if (errno == EINTR)
+	    if (errno == EINTR || errno == ENOMEM)
 		continue;
-	    error(1, "select failed");
+	    warning("monitor: select failed");
+	    break;
 	}
 
 	if (FD_ISSET(signal_pipe[0], fdsr)) {
@@ -979,11 +980,11 @@ flush_output()
 	if (nready <= 0) {
 	    if (nready == 0)
 		break; /* all I/O flushed */
-	    if (errno == EINTR)
+	    if (errno == EINTR || errno == ENOMEM)
 		continue;
-	    error(1, "select failed");
+	    warning("select failed");
 	}
-	if (perform_io(fdsr, fdsw, NULL) != 0)
+	if (perform_io(fdsr, fdsw, NULL) != 0 || nready == -1)
 	    break;
     }
     efree(fdsr);

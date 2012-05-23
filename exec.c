@@ -367,15 +367,20 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
 #endif
 	nready = select(maxfd + 1, fdsr, fdsw, NULL, NULL);
 	if (nready == -1) {
-	    if (errno == EINTR)
+	    if (errno == EINTR || errno == ENOMEM)
 		continue;
 #ifdef _PATH_SUDO_IO_LOGDIR
-	    if (errno == EBADF) {
+	    if (errno == EBADF || errno == EIO) {
 		/* One of the ttys must have gone away. */
 		goto do_tty_io;
 	    }
 #endif
-	    error(1, "select failed");
+	    warning("select failed");
+#ifdef _PATH_SUDO_IO_LOGDIR
+	    schedule_signal(SIGKILL);
+	    forward_signals(sv[0]);
+#endif
+	    break;
 	}
 #ifdef _PATH_SUDO_IO_LOGDIR
 	if (FD_ISSET(sv[0], fdsw)) {
