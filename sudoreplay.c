@@ -451,8 +451,10 @@ delay(secs)
       memcpy(&ts, &rts, sizeof(ts));
       rval = nanosleep(&ts, &rts);
     } while (rval == -1 && errno == EINTR);
-    if (rval == -1)
-	error(1, "nanosleep: tv_sec %ld, tv_nsec %ld", ts.tv_sec, ts.tv_nsec);
+    if (rval == -1) {
+	error(1, "nanosleep: tv_sec %ld, tv_nsec %ld",
+	    (long)ts.tv_sec, (long)ts.tv_nsec);
+    }
 }
 
 static int
