@@ -123,8 +123,8 @@ get_process_ttyname()
 		}
 	    }
 	}
-	efree(ki_proc);
     }
+    efree(ki_proc);
 
     /* If all else fails, fall back on ttyname(). */
     if (tty == NULL) {
