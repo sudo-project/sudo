@@ -221,7 +221,7 @@ static int parse_timing __P((const char *buf, const char *decimal, int *idx, dou
     (s)[5] == '/' && \
     isalnum((unsigned char)(s)[6]) && isalnum((unsigned char)(s)[7]) && \
     (s)[8] == '/' && (s)[9] == 'l' && (s)[10] == 'o' && (s)[11] == 'g' && \
-    (s)[9] == '\0')
+    (s)[12] == '\0')
 
 int
 main(argc, argv)
@@ -738,12 +738,12 @@ list_session(logfile, re, user, tty)
     /* Convert from /var/log/sudo-sessions/00/00/01/log to 000001 */
     cp = logfile + strlen(session_dir) + 1;
     if (IS_IDLOG(cp)) {
-	idbuf[0] = cp[7];
-	idbuf[1] = cp[6];
-	idbuf[2] = cp[4];
-	idbuf[3] = cp[3];
-	idbuf[4] = cp[1];
-	idbuf[5] = cp[0];
+	idbuf[0] = cp[0];
+	idbuf[1] = cp[1];
+	idbuf[2] = cp[3];
+	idbuf[3] = cp[4];
+	idbuf[4] = cp[6];
+	idbuf[5] = cp[7];
 	idbuf[6] = '\0';
 	idstr = idbuf;
     } else {
