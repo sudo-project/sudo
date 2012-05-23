@@ -294,13 +294,12 @@ perform_io(fdsr, fdsw, cstat)
 	    } while (n == -1 && errno == EINTR);
 	    switch (n) {
 		case -1:
-		    if (errno == EAGAIN)
-			break;
-		    if (errno != ENXIO && errno != EBADF) {
-			errors++;
-			break;
+		    if (errno != EAGAIN) {
+			/* treat read error as fatal and close the fd */
+			safe_close(iob->rfd);
+			iob->rfd = -1;
 		    }
-		    /* FALLTHROUGH */
+		    break;
 		case 0:
 		    /* got EOF or pty has gone away */
 		    safe_close(iob->rfd);
@@ -319,7 +318,7 @@ perform_io(fdsr, fdsw, cstat)
 		    iob->len - iob->off);
 	    } while (n == -1 && errno == EINTR);
 	    if (n == -1) {
-		if (errno == EPIPE || errno == ENXIO || errno == EBADF) {
+		if (errno == EPIPE || errno == ENXIO || errno == EIO || errno == EBADF) {
 		    /* other end of pipe closed or pty revoked */
 		    if (iob->rfd != -1) {
 			safe_close(iob->rfd);
