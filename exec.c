@@ -369,6 +369,12 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
 	if (nready == -1) {
 	    if (errno == EINTR)
 		continue;
+#ifdef _PATH_SUDO_IO_LOGDIR
+	    if (errno == EBADF) {
+		/* One of the ttys must have gone away. */
+		goto do_tty_io;
+	    }
+#endif
 	    error(1, "select failed");
 	}
 #ifdef _PATH_SUDO_IO_LOGDIR
@@ -433,6 +439,7 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
 	}
 
 #ifdef _PATH_SUDO_IO_LOGDIR
+do_tty_io:
 	if (perform_io(fdsr, fdsw, cstat) != 0) {
 	    /* I/O error, kill child if still alive and finish. */
 	    schedule_signal(SIGKILL);
