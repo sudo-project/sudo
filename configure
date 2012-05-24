@@ -19866,7 +19866,6 @@ fi
 $as_echo "$ax_cv_check_cflags___fstack_protector" >&6; }
 if test x"$ax_cv_check_cflags___fstack_protector" = xyes; then :
 
-	CFLAGS="${CFLAGS} -fstack-protector"
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fstack-protector" >&5
 $as_echo_n "checking whether the linker accepts -fstack-protector... " >&6; }
 if ${ax_cv_check_ldflags___fstack_protector+:} false; then :
@@ -19898,7 +19897,10 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fstack_protector" >&5
 $as_echo "$ax_cv_check_ldflags___fstack_protector" >&6; }
 if test x"$ax_cv_check_ldflags___fstack_protector" = xyes; then :
-  LDFLAGS="${LDFLAGS} -fstack-protector"
+
+	    CFLAGS="${CFLAGS} -fstack-protector"
+	    LDFLAGS="${LDFLAGS} -fstack-protector"
+
 else
   :
 fi
