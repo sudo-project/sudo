@@ -612,6 +612,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
+ac_c_werror_flag=
 ac_subst_vars='LTLIBOBJS
 KRB5CONFIG
 LIBOBJS
@@ -14645,115 +14646,6 @@ $as_echo "$sudo_cv_var_gcc_static_libgcc" >&6; }
 	LTLDFLAGS="$LTLDFLAGS -Wc,-static-libgcc"
     fi
 fi
-if test "$enable_hardening" != "no"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fstack-protector" >&5
-$as_echo_n "checking whether C compiler accepts -fstack-protector... " >&6; }
-if ${ax_cv_check_cflags___fstack_protector+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-  ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -fstack-protector"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ax_cv_check_cflags___fstack_protector=yes
-else
-  ax_cv_check_cflags___fstack_protector=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  CFLAGS=$ax_check_save_flags
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fstack_protector" >&5
-$as_echo "$ax_cv_check_cflags___fstack_protector" >&6; }
-if test x"$ax_cv_check_cflags___fstack_protector" = xyes; then :
-  CFLAGS="${CFLAGS} -fstack-protector"
-else
-  :
-fi
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fstack-protector" >&5
-$as_echo_n "checking whether the linker accepts -fstack-protector... " >&6; }
-if ${ax_cv_check_ldflags___fstack_protector+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-  ax_check_save_flags=$LDFLAGS
-  LDFLAGS="$LDFLAGS  -fstack-protector"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ax_cv_check_ldflags___fstack_protector=yes
-else
-  ax_cv_check_ldflags___fstack_protector=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-  LDFLAGS=$ax_check_save_flags
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fstack_protector" >&5
-$as_echo "$ax_cv_check_ldflags___fstack_protector" >&6; }
-if test x"$ax_cv_check_ldflags___fstack_protector" = xyes; then :
-  LDFLAGS="${LDFLAGS} -fstack-protector"
-else
-  :
-fi
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-z,relro" >&5
-$as_echo_n "checking whether the linker accepts -Wl,-z,relro... " >&6; }
-if ${ax_cv_check_ldflags___Wl__z_relro+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-  ax_check_save_flags=$LDFLAGS
-  LDFLAGS="$LDFLAGS  -Wl,-z,relro"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ax_cv_check_ldflags___Wl__z_relro=yes
-else
-  ax_cv_check_ldflags___Wl__z_relro=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-  LDFLAGS=$ax_check_save_flags
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__z_relro" >&5
-$as_echo "$ax_cv_check_ldflags___Wl__z_relro" >&6; }
-if test x"$ax_cv_check_ldflags___Wl__z_relro" = xyes; then :
-  LDFLAGS="${LDFLAGS} -Wl,-z,relro"
-else
-  :
-fi
-
-fi
 
 for ac_prog in 'bison -y' byacc
 do
@@ -20166,6 +20058,122 @@ EOF
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $iolog_dir" >&5
 $as_echo "$iolog_dir" >&6; }
 
+
+if test "$enable_hardening" != "no"; then
+
+ac_c_werror_flag=yes
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fstack-protector" >&5
+$as_echo_n "checking whether C compiler accepts -fstack-protector... " >&6; }
+if ${ax_cv_check_cflags___fstack_protector+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -fstack-protector"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ax_cv_check_cflags___fstack_protector=yes
+else
+  ax_cv_check_cflags___fstack_protector=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fstack_protector" >&5
+$as_echo "$ax_cv_check_cflags___fstack_protector" >&6; }
+if test x"$ax_cv_check_cflags___fstack_protector" = xyes; then :
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fstack-protector" >&5
+$as_echo_n "checking whether the linker accepts -fstack-protector... " >&6; }
+if ${ax_cv_check_ldflags___fstack_protector+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -fstack-protector"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ax_cv_check_ldflags___fstack_protector=yes
+else
+  ax_cv_check_ldflags___fstack_protector=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fstack_protector" >&5
+$as_echo "$ax_cv_check_ldflags___fstack_protector" >&6; }
+if test x"$ax_cv_check_ldflags___fstack_protector" = xyes; then :
+
+	    CFLAGS="${CFLAGS} -fstack-protector"
+	    LDFLAGS="${LDFLAGS} -fstack-protector"
+
+else
+  :
+fi
+
+
+else
+  :
+fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-z,relro" >&5
+$as_echo_n "checking whether the linker accepts -Wl,-z,relro... " >&6; }
+if ${ax_cv_check_ldflags___Wl__z_relro+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -Wl,-z,relro"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ax_cv_check_ldflags___Wl__z_relro=yes
+else
+  ax_cv_check_ldflags___Wl__z_relro=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__z_relro" >&5
+$as_echo "$ax_cv_check_ldflags___Wl__z_relro" >&6; }
+if test x"$ax_cv_check_ldflags___Wl__z_relro" = xyes; then :
+  LDFLAGS="${LDFLAGS} -Wl,-z,relro"
+else
+  :
+fi
+
+fi
 
 case "$with_passwd" in
 yes|maybe)

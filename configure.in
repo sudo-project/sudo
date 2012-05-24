@@ -1977,14 +1977,6 @@ if test X"$with_gnu_ld" != "yes" -a -n "$GCC"; then
 	LTLDFLAGS="$LTLDFLAGS -Wc,-static-libgcc"
     fi
 fi
-dnl
-dnl Check for -fstack-protector and -z relro support
-dnl
-if test "$enable_hardening" != "no"; then
-    AX_CHECK_COMPILE_FLAG([-fstack-protector], [CFLAGS="${CFLAGS} -fstack-protector"])
-    AX_CHECK_LINK_FLAG([-fstack-protector], [LDFLAGS="${LDFLAGS} -fstack-protector"])
-    AX_CHECK_LINK_FLAG([-Wl,-z,relro], [LDFLAGS="${LDFLAGS} -Wl,-z,relro"])
-fi
 
 dnl
 dnl Program checks
@@ -3160,6 +3152,22 @@ fi
 SUDO_LOGFILE
 SUDO_TIMEDIR
 SUDO_IO_LOGDIR
+
+dnl
+dnl Check for -fstack-protector and -z relro support
+dnl This must be towards the end as it turns warnings
+dnl into fatal errors (and there is no way to undo that)
+dnl
+if test "$enable_hardening" != "no"; then
+    AC_LANG_WERROR
+    AX_CHECK_COMPILE_FLAG([-fstack-protector], [
+	AX_CHECK_LINK_FLAG([-fstack-protector], [
+	    CFLAGS="${CFLAGS} -fstack-protector"
+	    LDFLAGS="${LDFLAGS} -fstack-protector"
+	])
+    ])
+    AX_CHECK_LINK_FLAG([-Wl,-z,relro], [LDFLAGS="${LDFLAGS} -Wl,-z,relro"])
+fi
 
 dnl
 dnl Use passwd auth module?
