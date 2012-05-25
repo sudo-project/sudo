@@ -215,6 +215,7 @@ static int open_io_fd(char *pathbuf, int len, const char *suffix, union io_fd *f
 static int parse_timing(const char *buf, const char *decimal, int *idx, double *seconds, size_t *nbytes);
 static struct log_info *parse_logfile(char *logfile);
 static void free_log_info(struct log_info *li);
+static size_t blocking_write(int fd, const void *buf, size_t nbytes);
 
 #ifdef HAVE_REGCOMP
 # define REGEX_T	regex_t
@@ -239,15 +240,13 @@ static void free_log_info(struct log_info *li);
 int
 main(int argc, char *argv[])
 {
-    int ch, idx, plen, nready, exitcode = 0, rows = 0, cols = 0;
-    bool interactive = false, listonly = false;
+    int ch, idx, plen, exitcode = 0, rows = 0, cols = 0;
+    bool interactive = false, listonly = false, need_nlcr = false;
     const char *id, *user = NULL, *pattern = NULL, *tty = NULL, *decimal = ".";
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
     double seconds, to_wait, speed = 1.0, max_wait = 0;
-    fd_set *fdsw;
     sigaction_t sa;
-    size_t len, nbytes, nread, off;
-    ssize_t nwritten;
+    size_t len, nbytes, nread, nwritten, off;
     struct log_info *li;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
@@ -398,7 +397,6 @@ main(int argc, char *argv[])
 	if (!term_raw(STDIN_FILENO, 1))
 	    error(1, _("unable to set tty to raw mode"));
     }
-    fdsw = ecalloc(howmany(STDOUT_FILENO + 1, NFDBITS), sizeof(fd_mask));
 
     /*
      * Timing file consists of line of the format: "%f %d\n"
@@ -424,6 +422,10 @@ main(int argc, char *argv[])
 	if (io_fds[idx].v == NULL)
 	    continue;
 
+	/* Check whether we need to convert newline to CR LF pairs. */
+	if (interactive)
+	    need_nlcr = (idx == IOFD_STDOUT || idx == IOFD_STDERR);
+
 	/* All output is sent to stdout. */
 	while (nbytes != 0) {
 	    if (nbytes > sizeof(buf))
@@ -438,21 +440,19 @@ main(int argc, char *argv[])
 	    nbytes -= nread;
 	    off = 0;
 	    do {
-		/* no stdio, must be unbuffered */
-		nwritten = write(STDOUT_FILENO, buf + off, nread - off);
-		if (nwritten == -1) {
-		    if (errno == EINTR)
-			continue;
-		    if (errno == EAGAIN) {
-			FD_SET(STDOUT_FILENO, fdsw);
-			do {
-			    nready = select(STDOUT_FILENO + 1, NULL, fdsw, NULL, NULL);
-			} while (nready == -1 && errno == EINTR);
-			if (nready == 1)
-			    continue;
+		/* Convert newline to carriage return + linefeed if needed. */
+		if (need_nlcr) {
+		    cp = buf + off;
+		    while ((cp = memchr(cp, '\n', nread - off)) != NULL) {
+			/* Write out line followed by \r\n pair. */
+			nwritten = blocking_write(STDOUT_FILENO, buf + off,
+			    (size_t)(cp - (buf + off))) + 1;
+			(void)blocking_write(STDOUT_FILENO, "\r\n", 2);
+			off += nwritten;
+			cp++;
 		    }
-		    error(1, _("writing to standard output"));
 		}
+		nwritten = blocking_write(STDOUT_FILENO, buf + off, nread - off);
 		off += nwritten;
 	    } while (nread > off);
 	}
@@ -501,6 +501,36 @@ open_io_fd(char *path, int len, const char *suffix, union io_fd *fdp)
     fdp->f = fopen(path, "r");
 #endif
     debug_return_int(fdp->v ? 0 : -1);
+}
+
+static size_t
+blocking_write(int fd, const void *buf, size_t nbytes)
+{
+    ssize_t nwritten = 0;
+    debug_decl(blocking_write, SUDO_DEBUG_UTIL)
+
+    if (nbytes != 0) {
+	for (;;) {
+	    nwritten = write(STDOUT_FILENO, buf, nbytes);
+	    if (nwritten >= 0)
+		break;
+	    if (errno == EINTR)
+		continue;
+	    if (errno == EAGAIN) {
+		int nready;
+		fd_set fdsw;
+		FD_ZERO(&fdsw);
+		FD_SET(STDOUT_FILENO, &fdsw);
+		do {
+		    nready = select(STDOUT_FILENO + 1, NULL, &fdsw, NULL, NULL);
+		} while (nready == -1 && errno == EINTR);
+		if (nready == 1)
+		    continue;
+	    }
+	    error(1, _("writing to standard output"));
+	}
+    }
+    debug_return_size_t(nwritten);
 }
 
 /*
