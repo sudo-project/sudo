@@ -207,6 +207,7 @@ static int open_io_fd __P((char *pathbuf, int len, const char *suffix, union io_
 static int parse_timing __P((const char *buf, const char *decimal, int *idx, double *seconds, size_t *nbytes));
 static struct log_info *parse_logfile __P((char *logfile));
 static void free_log_info __P((struct log_info *li));
+static size_t blocking_write __P((int fd, const void *buf, size_t nbytes));
 
 #ifdef HAVE_REGCOMP
 # define REGEX_T	regex_t
@@ -233,15 +234,13 @@ main(argc, argv)
     int argc;
     char *argv[];
 {
-    int ch, idx, plen, nready, interactive = 0, listonly = 0;
+    int ch, idx, plen, interactive = 0, listonly = 0, need_nlcr = 0;
     int rows = 0, cols = 0;
     const char *id, *user = NULL, *pattern = NULL, *tty = NULL, *decimal = ".";
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
     double seconds, to_wait, speed = 1.0, max_wait = 0;
-    fd_set *fdsw;
     sigaction_t sa;
-    size_t len, nbytes, nread, off;
-    ssize_t nwritten;
+    size_t len, nbytes, nread, nwritten, off;
     struct log_info *li;
 
     Argc = argc;
@@ -337,7 +336,7 @@ main(argc, argv)
     strlcat(path, "/log", sizeof(path));
     if ((li = parse_logfile(path)) == NULL)
 	exit(1);
-    printf("Replaying sudo session: %s", li->cmd);
+    printf("Replaying sudo session: %s\n", li->cmd);
 
     /* Make sure the terminal is large enough. */
     get_ttysize(&rows, &cols);
@@ -376,7 +375,6 @@ main(argc, argv)
 	if (!term_raw(STDIN_FILENO, 1))
 	    error(1, "cannot set tty to raw mode");
     }
-    fdsw = ecalloc(howmany(STDOUT_FILENO + 1, NFDBITS), sizeof(fd_mask));
 
     /*
      * Timing file consists of line of the format: "%f %d\n"
@@ -402,6 +400,10 @@ main(argc, argv)
 	if (io_fds[idx].v == NULL)
 	    continue;
 
+	/* Check whether we need to convert newline to CR LF pairs. */
+	if (interactive)
+	    need_nlcr = (idx == IOFD_STDOUT || idx == IOFD_STDERR);
+
 	/* All output is sent to stdout. */
 	while (nbytes != 0) {
 	    if (nbytes > sizeof(buf))
@@ -416,21 +418,19 @@ main(argc, argv)
 	    nbytes -= nread;
 	    off = 0;
 	    do {
-		/* no stdio, must be unbuffered */
-		nwritten = write(STDOUT_FILENO, buf + off, nread - off);
-		if (nwritten == -1) {
-		    if (errno == EINTR)
-			continue;
-		    if (errno == EAGAIN) {
-			FD_SET(STDOUT_FILENO, fdsw);
-			do {
-			    nready = select(STDOUT_FILENO + 1, NULL, fdsw, NULL, NULL);
-			} while (nready == -1 && errno == EINTR);
-			if (nready == 1)
-			    continue;
+		/* Convert newline to carriage return + linefeed if needed. */
+		if (need_nlcr) {
+		    cp = buf + off;
+		    while ((cp = memchr(cp, '\n', nread - off)) != NULL) {
+			/* Write out line followed by \r\n pair. */
+			nwritten = blocking_write(STDOUT_FILENO, buf + off,
+			    (size_t)(cp - (buf + off))) + 1;
+			(void)blocking_write(STDOUT_FILENO, "\r\n", 2);
+			off += nwritten;
+			cp++;
 		    }
-		    error(1, "writing to standard output");
 		}
+		nwritten = blocking_write(STDOUT_FILENO, buf + off, nread - off);
 		off += nwritten;
 	    } while (nread > off);
 	}
@@ -482,6 +482,38 @@ open_io_fd(path, len, suffix, fdp)
     fdp->f = fopen(path, "r");
     return fdp->f ? 0 : -1;
 #endif
+}
+
+static size_t
+blocking_write(fd, buf, nbytes)
+    int fd;
+    const void *buf;
+    size_t nbytes;
+{
+    ssize_t nwritten = 0;
+
+    if (nbytes != 0) {
+	for (;;) {
+	    nwritten = write(STDOUT_FILENO, buf, nbytes);
+	    if (nwritten >= 0)
+		break;
+	    if (errno == EINTR)
+		continue;
+	    if (errno == EAGAIN) {
+		int nready;
+		fd_set fdsw;
+		FD_ZERO(&fdsw);
+		FD_SET(STDOUT_FILENO, &fdsw);
+		do {
+		    nready = select(STDOUT_FILENO + 1, NULL, &fdsw, NULL, NULL);
+		} while (nready == -1 && errno == EINTR);
+		if (nready == 1)
+		    continue;
+	    }
+	    error(1, "writing to standard output");
+	}
+    }
+    return nwritten;
 }
 
 /*
