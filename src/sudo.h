@@ -237,6 +237,9 @@ int process_hooks_setenv(const char *name, const char *value, int overwrite);
 int process_hooks_putenv(char *string);
 int process_hooks_unsetenv(const char *name);
 
+/* env_hooks.c */
+char *getenv_unhooked(const char *name);
+
 /* interfaces.c */
 int get_net_ifs(char **addrinfo);
 

@@ -78,7 +78,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     (void) fflush(stdout);
 
     if (askpass == NULL) {
-	askpass = getenv("SUDO_ASKPASS");
+	askpass = getenv_unhooked("SUDO_ASKPASS");
 	if (askpass == NULL || *askpass == '\0')
 	    askpass = sudo_conf_askpass_path();
     }
@@ -86,7 +86,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     /* If no tty present and we need to disable echo, try askpass. */
     if (!ISSET(flags, TGP_STDIN|TGP_ECHO|TGP_ASKPASS|TGP_NOECHO_TRY) &&
 	!tty_present()) {
-	if (askpass == NULL || getenv("DISPLAY") == NULL) {
+	if (askpass == NULL || getenv_unhooked("DISPLAY") == NULL) {
 	    warningx(_("no tty present and no askpass program specified"));
 	    debug_return_str(NULL);
 	}

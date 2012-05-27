@@ -70,6 +70,19 @@ rpl_getenv(const char *name)
 typedef char * (*sudo_fn_getenv_t)(const char *);
 
 char *
+getenv_unhooked(const char *name)
+{
+#if defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
+    sudo_fn_getenv_t fn;
+
+    fn = (sudo_fn_getenv_t)dlsym(RTLD_NEXT, "getenv");
+    if (fn != NULL)
+	return fn(name);
+#endif /* HAVE_DLOPEN && RTLD_NEXT */
+    return rpl_getenv(name);
+}
+
+char *
 getenv(const char *name)
 {
     char *val = NULL;
@@ -79,16 +92,8 @@ getenv(const char *name)
 	    return val;
 	case SUDO_HOOK_RET_ERROR:
 	    return NULL;
-	default: {
-#if defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
-	    sudo_fn_getenv_t fn;
-
-	    fn = (sudo_fn_getenv_t)dlsym(RTLD_NEXT, "getenv");
-	    if (fn != NULL)
-		return fn(name);
-#endif /* HAVE_DLOPEN && RTLD_NEXT */
-	    return rpl_getenv(name);
-	}
+	default:
+	    return getenv_unhooked(name);
     }
 }
 
@@ -136,6 +141,19 @@ rpl_putenv(PUTENV_CONST char *string)
 
 typedef int (*sudo_fn_putenv_t)(PUTENV_CONST char *);
 
+static int
+putenv_unhooked(PUTENV_CONST char *string)
+{
+#if defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
+    sudo_fn_putenv_t fn;
+
+    fn = (sudo_fn_putenv_t)dlsym(RTLD_NEXT, "putenv");
+    if (fn != NULL)
+	return fn(string);
+#endif /* HAVE_DLOPEN && RTLD_NEXT */
+    return rpl_putenv(string);
+}
+
 int
 putenv(PUTENV_CONST char *string)
 {
@@ -144,16 +162,8 @@ putenv(PUTENV_CONST char *string)
 	    return 0;
 	case SUDO_HOOK_RET_ERROR:
 	    return -1;
-	default: {
-#if defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
-	    sudo_fn_putenv_t fn;
-
-	    fn = (sudo_fn_putenv_t)dlsym(RTLD_NEXT, "putenv");
-	    if (fn != NULL)
-		return fn(string);
-#endif /* HAVE_DLOPEN && RTLD_NEXT */
-	    return rpl_putenv(string);
-	}
+	default:
+	    return putenv_unhooked(string);
     }
 }
 
@@ -201,6 +211,19 @@ rpl_setenv(const char *var, const char *val, int overwrite)
 
 typedef int (*sudo_fn_setenv_t)(const char *, const char *, int);
 
+static int
+setenv_unhooked(const char *var, const char *val, int overwrite)
+{
+#if defined(HAVE_SETENV) && defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
+    sudo_fn_setenv_t fn;
+
+    fn = (sudo_fn_setenv_t)dlsym(RTLD_NEXT, "setenv");
+    if (fn != NULL)
+	return fn(var, val, overwrite);
+#endif /* HAVE_SETENV && HAVE_DLOPEN && RTLD_NEXT */
+    return rpl_setenv(var, val, overwrite);
+}
+
 int
 setenv(const char *var, const char *val, int overwrite)
 {
@@ -209,24 +232,12 @@ setenv(const char *var, const char *val, int overwrite)
 	    return 0;
 	case SUDO_HOOK_RET_ERROR:
 	    return -1;
-	default: {
-#if defined(HAVE_SETENV) && defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
-	    sudo_fn_setenv_t fn;
-
-	    fn = (sudo_fn_setenv_t)dlsym(RTLD_NEXT, "setenv");
-	    if (fn != NULL)
-		return fn(var, val, overwrite);
-#endif /* HAVE_SETENV && HAVE_DLOPEN && RTLD_NEXT */
-	    return rpl_setenv(var, val, overwrite);
-	}
+	default:
+	    return setenv_unhooked(var, val, overwrite);
     }
 }
 
-#ifdef UNSETENV_VOID
-static void
-#else
-int
-#endif
+static int
 rpl_unsetenv(const char *var)
 {
     char **ep = environ;
@@ -234,11 +245,7 @@ rpl_unsetenv(const char *var)
 
     if (var == NULL || *var == '\0' || strchr(var, '=') != NULL) {
 	errno = EINVAL;
-#ifdef UNSETENV_VOID
-	return;
-#else
 	return -1;
-#endif
     }
 
     len = strlen(var);
@@ -253,9 +260,7 @@ rpl_unsetenv(const char *var)
 	    ep++;
 	}
     }
-#ifndef UNSETENV_VOID
     return 0;
-#endif
 }
 
 #ifdef UNSETENV_VOID
@@ -264,47 +269,49 @@ typedef void (*sudo_fn_unsetenv_t)(const char *);
 typedef int (*sudo_fn_unsetenv_t)(const char *);
 #endif
 
+static int
+unsetenv_unhooked(const char *var)
+{
+    int rval = 0;
+#if defined(HAVE_UNSETENV) && defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
+    sudo_fn_unsetenv_t fn;
+
+    fn = (sudo_fn_unsetenv_t)dlsym(RTLD_NEXT, "unsetenv");
+    if (fn != NULL) {
+# ifdef UNSETENV_VOID
+	fn(var);
+# else
+	rval = fn(var);
+# endif
+    } else
+#endif /* HAVE_UNSETENV && HAVE_DLOPEN && RTLD_NEXT */
+    {
+	rval = rpl_unsetenv(var);
+    }
+    return rval;
+}
+
 #ifdef UNSETENV_VOID
 void
-unsetenv(const char *var)
-{
-    switch (process_hooks_unsetenv(var)) {
-	case SUDO_HOOK_RET_STOP:
-	    return 0;
-	case SUDO_HOOK_RET_ERROR:
-	    return -1;
-	default: {
-#if defined(HAVE_UNSETENV) && defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
-	    sudo_fn_unsetenv_t fn;
-
-	    fn = (sudo_fn_unsetenv_t)dlsym(RTLD_NEXT, "unsetenv");
-	    if (fn != NULL)
-		fn(var);
-	    else
-#endif /* HAVE_UNSETENV && HAVE_DLOPEN && RTLD_NEXT */
-		rpl_unsetenv(var);
-	}
-    }
-}
 #else
 int
+#endif
 unsetenv(const char *var)
 {
+    int rval;
+
     switch (process_hooks_unsetenv(var)) {
 	case SUDO_HOOK_RET_STOP:
-	    return 0;
+	    rval = 0;
+	    break;
 	case SUDO_HOOK_RET_ERROR:
-	    return -1;
-	default: {
-#if defined(HAVE_UNSETENV) && defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
-	    sudo_fn_unsetenv_t fn;
-
-	    fn = (sudo_fn_unsetenv_t)dlsym(RTLD_NEXT, "unsetenv");
-	    if (fn != NULL)
-		return fn(var);
-#endif /* HAVE_UNSETENV && HAVE_DLOPEN && RTLD_NEXT */
-	    return rpl_unsetenv(var);
-	}
+	    rval = -1;
+	    break;
+	default:
+	    rval = unsetenv_unhooked(var);
+	    break;
     }
+#ifndef UNSETENV_VOID
+    return rval;
+#endif
 }
-#endif /* UNSETENV_VOID */
