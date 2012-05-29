@@ -1,3 +1,12 @@
+What's new in Sudo 1.8.5p2?
+
+ * Fixed use of the SUDO_ASKPASS environment variable which was
+   broken in Sudo 1.8.5.
+
+ * Fixed a problem reading the sudoers file when the file mode is
+   more restrictive than the expected mode.  For example, when the
+   expected sudoers file mode is 0440 but the actual mode is 0400.
+
 What's new in Sudo 1.8.5p1?
 
  * Fixed a bug that prevented files in an include directory from
