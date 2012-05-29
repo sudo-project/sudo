@@ -18,6 +18,7 @@
 
 #include <sys/types.h>
 #include <sys/param.h>
+#include <sys/uio.h>
 #ifdef HAVE_SYS_SYSMACROS_H
 # include <sys/sysmacros.h>
 #endif
@@ -207,7 +208,7 @@ static int open_io_fd __P((char *pathbuf, int len, const char *suffix, union io_
 static int parse_timing __P((const char *buf, const char *decimal, int *idx, double *seconds, size_t *nbytes));
 static struct log_info *parse_logfile __P((char *logfile));
 static void free_log_info __P((struct log_info *li));
-static size_t blocking_write __P((int fd, const void *buf, size_t nbytes));
+static size_t atomic_writev __P((int fd, struct iovec *iov, int iovcnt));
 
 #ifdef HAVE_REGCOMP
 # define REGEX_T	regex_t
@@ -242,6 +243,8 @@ main(argc, argv)
     sigaction_t sa;
     size_t len, nbytes, nread, nwritten, off;
     struct log_info *li;
+    struct iovec *iov = NULL;
+    int iovcnt = 0, iovmax = 0;
 
     Argc = argc;
     Argv = argv;
@@ -374,6 +377,9 @@ main(argc, argv)
 	    (void) fcntl(STDIN_FILENO, F_SETFL, ch | O_NONBLOCK);
 	if (!term_raw(STDIN_FILENO, 1))
 	    error(1, "cannot set tty to raw mode");
+	iovcnt = 0;
+	iovmax = 32;
+	iov = ecalloc(iovmax, sizeof(*iov));
     }
 
     /*
@@ -401,7 +407,7 @@ main(argc, argv)
 	    continue;
 
 	/* Check whether we need to convert newline to CR LF pairs. */
-	if (interactive)
+	if (interactive) 
 	    need_nlcr = (idx == IOFD_STDOUT || idx == IOFD_STDERR);
 
 	/* All output is sent to stdout. */
@@ -420,18 +426,46 @@ main(argc, argv)
 	    do {
 		/* Convert newline to carriage return + linefeed if needed. */
 		if (need_nlcr) {
+		    size_t linelen;
 		    cp = buf + off;
-		    while ((cp = memchr(cp, '\n', nread - off)) != NULL) {
-			/* Write out line followed by \r\n pair. */
-			nwritten = blocking_write(STDOUT_FILENO, buf + off,
-			    (size_t)(cp - (buf + off))) + 1;
-			(void)blocking_write(STDOUT_FILENO, "\r\n", 2);
-			off += nwritten;
-			cp++;
+		    iovcnt = 0;
+		    while ((ep = memchr(cp, '\n', nread - off)) != NULL) {
+			/* Is there already a carriage return? */
+			if (cp != ep && ep[-1] == '\r')
+			    continue;
+
+			/* Store the line in iov followed by \r\n pair. */
+			if (iovcnt + 3 > iovmax) {
+			    iovmax <<= 1;
+			    iov = erealloc3(iov, iovmax, sizeof(*iov));
+			}
+			linelen = (size_t)(ep - cp);
+			iov[iovcnt].iov_base = cp;
+			iov[iovcnt].iov_len = linelen;
+			iovcnt++;
+			iov[iovcnt].iov_base = "\r\n";
+			iov[iovcnt].iov_len = 2;
+			iovcnt++;
+			off += linelen + 1;
+			cp = ep + 1;
 		    }
+		    if (nread - off != 0) {
+			linelen = nread - off;
+			iov[iovcnt].iov_base = cp;
+			iov[iovcnt].iov_len = linelen;
+			iovcnt++;
+			off += linelen;
+		    }
+		    /* Note: off already adjusted above. */
+		    (void)atomic_writev(STDOUT_FILENO, iov, iovcnt);
+		} else {
+		    /* No conversion needed. */
+		    iov[0].iov_base = buf + off;
+		    iov[0].iov_len = nread - off;
+		    iovcnt = 1;
+		    nwritten = atomic_writev(STDOUT_FILENO, iov, iovcnt);
+		    off += nwritten;
 		}
-		nwritten = blocking_write(STDOUT_FILENO, buf + off, nread - off);
-		off += nwritten;
 	    } while (nread > off);
 	}
     }
@@ -484,34 +518,66 @@ open_io_fd(path, len, suffix, fdp)
 #endif
 }
 
+/*
+ * Call writev(), restarting as needed and handling EAGAIN since
+ * fd may be in non-blocking mode.
+ */
 static size_t
-blocking_write(fd, buf, nbytes)
+atomic_writev(fd, iov, iovcnt)
     int fd;
-    const void *buf;
-    size_t nbytes;
+    struct iovec *iov;
+    int iovcnt;
 {
-    ssize_t nwritten = 0;
+    ssize_t n, nwritten = 0;
+    size_t count, remainder, nbytes = 0;
+    int i;
 
-    if (nbytes != 0) {
-	for (;;) {
-	    nwritten = write(STDOUT_FILENO, buf, nbytes);
-	    if (nwritten >= 0)
+    for (i = 0; i < iovcnt; i++)
+	nbytes += iov[i].iov_len;
+
+    for (;;) {
+	n = writev(STDOUT_FILENO, iov, iovcnt);
+	if (n > 0) {
+	    nwritten += n;
+	    remainder = nbytes - nwritten;
+	    if (remainder == 0)
 		break;
-	    if (errno == EINTR)
-		continue;
-	    if (errno == EAGAIN) {
-		int nready;
-		fd_set fdsw;
-		FD_ZERO(&fdsw);
-		FD_SET(STDOUT_FILENO, &fdsw);
-		do {
-		    nready = select(STDOUT_FILENO + 1, NULL, &fdsw, NULL, NULL);
-		} while (nready == -1 && errno == EINTR);
-		if (nready == 1)
-		    continue;
+	    /* short writev, adjust iov and do the rest. */
+	    count = 0;
+	    i = iovcnt;
+	    while (i--) {
+		count += iov[i].iov_len;
+		if (count == remainder) {
+		    iov += i;
+		    iovcnt -= i;
+		    break;
+		}
+		if (count > remainder) {
+		    size_t off = (count - remainder);
+		    /* XXX - side effect prevents iov from being const */
+		    iov[i].iov_base = (char *)iov[i].iov_base + off;
+		    iov[i].iov_len -= off;
+		    iov += i;
+		    iovcnt -= i;
+		    break;
+		}
 	    }
-	    error(1, "writing to standard output");
+	    continue;
 	}
+	if (n == 0 || errno == EAGAIN) {
+	    int nready;
+	    fd_set fdsw;
+	    FD_ZERO(&fdsw);
+	    FD_SET(STDOUT_FILENO, &fdsw);
+	    do {
+		nready = select(STDOUT_FILENO + 1, NULL, &fdsw, NULL, NULL);
+	    } while (nready == -1 && errno == EINTR);
+	    if (nready == 1)
+		continue;
+	}
+	if (errno == EINTR)
+	    continue;
+	error(1, "writing to standard output");
     }
     return nwritten;
 }
