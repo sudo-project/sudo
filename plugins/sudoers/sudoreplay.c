@@ -247,7 +247,7 @@ main(int argc, char *argv[])
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
     double seconds, to_wait, speed = 1.0, max_wait = 0;
     sigaction_t sa;
-    size_t len, nbytes, nread, nwritten, off;
+    size_t len, nbytes, nread;
     struct log_info *li;
     struct iovec *iov = NULL;
     int iovcnt = 0, iovmax = 0;
@@ -412,6 +412,8 @@ main(int argc, char *argv[])
 #else
     while (fgets(buf, sizeof(buf), io_fds[IOFD_TIMING].f) != NULL) {
 #endif
+	char last_char = '\0';
+
 	if (!parse_timing(buf, decimal, &idx, &seconds, &nbytes))
 	    errorx(1, _("invalid timing file line: %s"), buf);
 
@@ -444,51 +446,59 @@ main(int argc, char *argv[])
 	    nread = fread(buf, 1, len, io_fds[idx].f);
 #endif
 	    nbytes -= nread;
-	    off = 0;
-	    do {
-		/* Convert newline to carriage return + linefeed if needed. */
-		if (need_nlcr) {
-		    size_t linelen;
-		    cp = buf + off;
-		    iovcnt = 0;
-		    while ((ep = memchr(cp, '\n', nread - off)) != NULL) {
-			/* Is there already a carriage return? */
-			if (cp != ep && ep[-1] == '\r')
-			    continue;
 
-			/* Store the line in iov followed by \r\n pair. */
-			if (iovcnt + 3 > iovmax) {
-			    iovmax <<= 1;
-			    iov = erealloc3(iov, iovmax, sizeof(*iov));
-			}
-			linelen = (size_t)(ep - cp);
-			iov[iovcnt].iov_base = cp;
-			iov[iovcnt].iov_len = linelen;
-			iovcnt++;
-			iov[iovcnt].iov_base = "\r\n";
-			iov[iovcnt].iov_len = 2;
-			iovcnt++;
-			off += linelen + 1;
-			cp = ep + 1;
-		    }
-		    if (nread - off != 0) {
-			linelen = nread - off;
-			iov[iovcnt].iov_base = cp;
-			iov[iovcnt].iov_len = linelen;
-			iovcnt++;
-			off += linelen;
-		    }
-		    /* Note: off already adjusted above. */
-		    (void)atomic_writev(STDOUT_FILENO, iov, iovcnt);
-		} else {
-		    /* No conversion needed. */
-		    iov[0].iov_base = buf + off;
-		    iov[0].iov_len = nread - off;
-		    iovcnt = 1;
-		    nwritten = atomic_writev(STDOUT_FILENO, iov, iovcnt);
-		    off += nwritten;
+	    /* Convert newline to carriage return + linefeed if needed. */
+	    if (need_nlcr) {
+		size_t remainder = nread;
+		size_t linelen;
+		iovcnt = 0;
+		cp = buf;
+		ep = cp - 1;
+		/* Handle a "\r\n" pair that spans a buffer. */
+		if (last_char == '\r' && buf[0] == '\n') {
+		    ep++;
+		    remainder--;
 		}
-	    } while (nread > off);
+		while ((ep = memchr(ep + 1, '\n', remainder)) != NULL) {
+		    /* Is there already a carriage return? */
+		    if (cp != ep && ep[-1] == '\r') {
+			remainder = (size_t)(&buf[nread - 1] - ep);
+		    	continue;
+		    }
+
+		    /* Store the line in iov followed by \r\n pair. */
+		    if (iovcnt + 3 > iovmax) {
+			iovmax <<= 1;
+			iov = erealloc3(iov, iovmax, sizeof(*iov));
+		    }
+		    linelen = (size_t)(ep - cp) + 1;
+		    iov[iovcnt].iov_base = cp;
+		    iov[iovcnt].iov_len = linelen - 1; /* not including \n */
+		    iovcnt++;
+		    iov[iovcnt].iov_base = "\r\n";
+		    iov[iovcnt].iov_len = 2;
+		    iovcnt++;
+		    cp = ep + 1;
+		    remainder -= linelen;
+		}
+		if (cp - buf != nread) {
+		    /*
+		     * Partial line without a linefeed or multiple lines
+		     * with \r\n pairs.
+		     */
+		    iov[iovcnt].iov_base = cp;
+		    iov[iovcnt].iov_len = nread - (cp - buf);
+		    iovcnt++;
+		}
+		last_char = buf[nread - 1]; /* stash last char of old buffer */
+	    } else {
+		/* No conversion needed. */
+		iov[0].iov_base = buf;
+		iov[0].iov_len = nread;
+		iovcnt = 1;
+	    }
+	    if (atomic_writev(STDOUT_FILENO, iov, iovcnt) == -1)
+		error(1, _("writing to standard output"));
 	}
     }
     term_restore(STDIN_FILENO, 1);
@@ -594,7 +604,8 @@ atomic_writev(int fd, struct iovec *iov, int iovcnt)
 	}
 	if (errno == EINTR)
 	    continue;
-	error(1, "writing to standard output");
+	nwritten = -1;
+	break;
     }
     debug_return_size_t(nwritten);
 }
