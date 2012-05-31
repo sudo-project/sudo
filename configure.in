@@ -34,7 +34,8 @@ AC_SUBST([GETGROUPS_LIB])
 AC_SUBST([OSDEFS])
 AC_SUBST([AUTH_OBJS])
 AC_SUBST([MANTYPE])
-AC_SUBST([MAN_POSTINSTALL])
+AC_SUBST([MANCOMPRESS])
+AC_SUBST([MANCOMPRESSEXT])
 AC_SUBST([SUDOERS_MODE])
 AC_SUBST([SUDOERS_UID])
 AC_SUBST([SUDOERS_GID])
@@ -1694,7 +1695,6 @@ case "$host" in
     *-*-irix*)
 		OSDEFS="${OSDEFS} -D_BSD_TYPES"
 		if test -z "$NROFFPROG"; then
-		    MAN_POSTINSTALL='	/bin/rm -f $(mandirsu)/sudo.$(mansectsu).z $(mandirsu)/visudo.$(mansectsu).z $(mandirform)/sudoers.$(mansectform).z ; /usr/bin/pack $(mandirsu)/sudo.$(mansectsu) $(mandirsu)/visudo.$(mansectsu) $(mandirform)/sudoers.$(mansectform)'
 		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
 			if test -d /usr/share/catman/local; then
 			    mandir="/usr/share/catman/local"
@@ -1702,6 +1702,9 @@ case "$host" in
 			    mandir="/usr/catman/local"
 			fi
 		    fi
+		    # Compress cat pages with pack
+		    MANCOMPRESS='pack'
+		    MANCOMPRESSEXT='.z'
 		else
 		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
 			if test -d "/usr/share/man/local"; then

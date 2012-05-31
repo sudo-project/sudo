@@ -26,6 +26,8 @@ top_srcdir = @top_srcdir@
 
 # Tools to use
 NROFF = @NROFFPROG@
+MANCOMPRESS = @MANCOMPRESS@
+MANCOMPRESSEXT = @MANCOMPRESSEXT@
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
@@ -236,14 +238,24 @@ install-doc: install-dirs
 	for f in $(OTHER_DOCS); do $(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 $$f $(DESTDIR)$(docdir); done
 	@LDAP@for f in $(OTHER_DOCS_LDAP); do $(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 $$f $(DESTDIR)$(docdir); done
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 @mansrcdir@/sudo.$(mantype) $(DESTDIR)$(mandirsu)/sudo.$(mansectsu)
-	@rm -f $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)
-	ln $(DESTDIR)$(mandirsu)/sudo.$(mansectsu) $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 @mansrcdir@/sudo_plugin.$(mantype) $(DESTDIR)$(mandirsu)/sudo_plugin.$(mansectsu)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 @mansrcdir@/sudoreplay.$(mantype) $(DESTDIR)$(mandirsu)/sudoreplay.$(mansectsu)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 @mansrcdir@/visudo.$(mantype) $(DESTDIR)$(mandirsu)/visudo.$(mansectsu)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 @mansrcdir@/sudoers.$(mantype) $(DESTDIR)$(mandirform)/sudoers.$(mansectform)
 	@LDAP@$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 @mansrcdir@/sudoers.ldap.$(mantype) $(DESTDIR)$(mandirform)/sudoers.ldap.$(mansectform)
-@MAN_POSTINSTALL@
+	@if test -n "$(MANCOMPRESS)"; then \
+	    for f in $(mandirsu)/sudo.$(mansectsu) $(mandirsu)/sudo_plugin.$(mansectsu) $(mandirsu)/sudoreplay.$(mansectsu) $(mandirsu)/visudo.$(mansectsu) $(mandirform)/sudoers.$(mansectform) $(mandirform)/sudoers.ldap.$(mansectform); do \
+		if test -f $(DESTDIR)$$f; then \
+		    echo $(MANCOMPRESS) -f $(DESTDIR)$$f; \
+		    $(MANCOMPRESS) -f $(DESTDIR)$$f; \
+		fi; \
+	    done; \
+	    rm -f $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)$(MANCOMPRESSEXT); \
+	    ln $(DESTDIR)$(mandirsu)/sudo.$(mansectsu)$(MANCOMPRESSEXT) $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)$(MANCOMPRESSEXT); \
+	else \
+	    rm -f $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu); \
+	    ln $(DESTDIR)$(mandirsu)/sudo.$(mansectsu) $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu); \
+	fi
 
 install-plugin:
 

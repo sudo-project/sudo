@@ -724,7 +724,8 @@ DEVEL
 SUDOERS_GID
 SUDOERS_UID
 SUDOERS_MODE
-MAN_POSTINSTALL
+MANCOMPRESSEXT
+MANCOMPRESS
 MANTYPE
 AUTH_OBJS
 OSDEFS
@@ -2790,6 +2791,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -14078,7 +14080,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     *-*-irix*)
 		OSDEFS="${OSDEFS} -D_BSD_TYPES"
 		if test -z "$NROFFPROG"; then
-		    MAN_POSTINSTALL='	/bin/rm -f $(mandirsu)/sudo.$(mansectsu).z $(mandirsu)/visudo.$(mansectsu).z $(mandirform)/sudoers.$(mansectform).z ; /usr/bin/pack $(mandirsu)/sudo.$(mansectsu) $(mandirsu)/visudo.$(mansectsu) $(mandirform)/sudoers.$(mansectform)'
 		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
 			if test -d /usr/share/catman/local; then
 			    mandir="/usr/share/catman/local"
@@ -14086,6 +14087,9 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 			    mandir="/usr/catman/local"
 			fi
 		    fi
+		    # Compress cat pages with pack
+		    MANCOMPRESS='pack'
+		    MANCOMPRESSEXT='.z'
 		else
 		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
 			if test -d "/usr/share/man/local"; then
