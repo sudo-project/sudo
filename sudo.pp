@@ -68,6 +68,25 @@ still allow people to get their work done."
 	printf "$name ($pp_deb_version-$pp_deb_release) admin; urgency=low\n\n  * see upstream changelog\n\n -- $pp_deb_maintainer  `date '+%a, %d %b %Y %T %z'`\n" > ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog.Debian
 	chmod 644 ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog.Debian
 	gzip -9f ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog.Debian
+	# Create lintian override file
+	mkdir -p ${pp_wrkdir}/${name}/usr/share/lintian/overrides
+	cat >${pp_wrkdir}/${name}/usr/share/lintian/overrides/${name} <<-EOF
+	# The sudo binary must be setuid root (sudoedit is a link to sudo)
+	$name: setuid-binary usr/bin/sudo 4755 root/root
+	$name: setuid-binary usr/bin/sudoedit 4755 root/root
+	# Sudo configuration and data dirs must not be world-readable
+	$name: non-standard-file-perm etc/sudoers 0440 != 0644
+	$name: non-standard-dir-perm etc/sudoers.d/ 0750 != 0755
+	$name: non-standard-dir-perm var/lib/sudo/ 0700 != 0755
+	# Sudo ships with debugging symbols
+	$name: unstripped-binary-or-object ./usr/bin/sudo
+	$name: unstripped-binary-or-object ./usr/bin/sudoedit
+	$name: unstripped-binary-or-object ./usr/bin/sudoreplay
+	$name: unstripped-binary-or-object ./usr/lib/sudo/sudo_noexec.so
+	$name: unstripped-binary-or-object ./usr/lib/sudo/sudoers.so
+	$name: unstripped-binary-or-object ./usr/sbin/visudo
+	EOF
+	chmod 644 ${pp_wrkdir}/${name}/usr/share/lintian/overrides/${name}
 %endif
 
 %if [rpm]
@@ -216,16 +235,16 @@ still allow people to get their work done."
 
 %files
 	$osdirs			-
-	$bindir/sudo        	4111 root:
-	$bindir/sudoedit    	4111 root:
-	$sbindir/visudo     	0111
-	$bindir/sudoreplay  	0111
+	$bindir/sudo        	4755 root:
+	$bindir/sudoedit    	4755 root:
+	$sbindir/visudo     	0755
+	$bindir/sudoreplay  	0755
 	$includedir/sudo_plugin.h 0644
 	$libexecdir/*		$shmode optional
 	$sudoersdir/sudoers.d/	0750 $sudoers_uid:$sudoers_gid
 	$timedir/		0700 root:
 	$docdir/		0755
-	$docdir/sudoers2ldif	0555 optional,ignore-others
+	$docdir/sudoers2ldif	0755 optional,ignore-others
 %if [deb]
 	$docdir/LICENSE		ignore,ignore-others
 	$docdir/ChangeLog	ignore,ignore-others
