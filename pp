@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2012 Quest Software, Inc. ALL RIGHTS RESERVED
-pp_revision="356"
+pp_revision="357"
  # Copyright 2012 Quest Software, Inc.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -4141,7 +4141,7 @@ pp_deb_makedeb () {
 
     # Create md5sums
     pp_deb_make_md5sums $cmp `(cd $package_build_dir;
-	find . -type f -a -not -name DEBIAN | sed "s,^\./,,")` ||
+	find . -name DEBIAN -prune -o -type f -print | sed "s,^\./,,")` ||
 	    pp_die "Could not make DEBIAN md5sums for $cmp"
 }
 
