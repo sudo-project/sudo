@@ -564,7 +564,7 @@ install-dirs:
 install-binaries: install-dirs $(PROGS)
 	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 04111 sudo $(DESTDIR)$(sudodir)/sudo
 	rm -f $(DESTDIR)$(sudodir)/sudoedit
-	ln $(DESTDIR)$(sudodir)/sudo $(DESTDIR)$(sudodir)/sudoedit
+	ln -s sudo $(DESTDIR)$(sudodir)/sudoedit
 	if [ -f sudoreplay ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0111 sudoreplay $(DESTDIR)$(sudodir)/sudoreplay; fi
 	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0111 visudo $(DESTDIR)$(visudodir)/visudo
 	if [ -f sesh ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0111 sesh $(DESTDIR)$(libexecdir)/sesh; fi
@@ -595,10 +595,10 @@ install-doc: install-dirs ChangeLog
 		fi; \
 	    done; \
 	    rm -f $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)$(MANCOMPRESSEXT); \
-	    ln $(DESTDIR)$(mandirsu)/sudo.$(mansectsu)$(MANCOMPRESSEXT) $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)$(MANCOMPRESSEXT)
+	    ln -s sudo.$(mansectsu)$(MANCOMPRESSEXT) $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)$(MANCOMPRESSEXT); \
 	else \
 	    rm -f $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu); \
-	    ln $(DESTDIR)$(mandirsu)/sudo.$(mansectsu) $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)
+	    ln -s sudo.$(mansectsu) $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu); \
 	fi
 
 check:

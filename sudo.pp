@@ -13,6 +13,9 @@ The basic philosophy is to give as few privileges as possible but \
 still allow people to get their work done."
 	vendor="Todd C. Miller"
 	copyright="(c) 1993-1996,1998-2012 Todd C. Miller"
+	shmode=0644
+	sudoedit_man=`echo $mandir/*/sudoedit.*|sed 's:^${pp_destdir}::'`
+	sudoedit_man_target=`basename $sudoedit_man | sed 's/edit//'`
 
 %if [aix]
 	# AIX package summary is limited to 40 characters
@@ -30,6 +33,8 @@ still allow people to get their work done."
 
 %if [sd]
 	pp_sd_vendor_tag="TCM"
+	# HP-UX shared objects must be executable
+	shmode=0755
 %endif
 
 %if [solaris]
@@ -48,14 +53,40 @@ still allow people to get their work done."
 	if test -n "$linux_audit"; then
 		pp_rpm_requires="audit-libs >= $linux_audit"
 	fi
-
-	pp_deb_maintainer="$pp_rpm_packager"
-	pp_deb_release="$pp_rpm_release"
-	pp_deb_version="$pp_rpm_version"
 %else
 	# For all but RPM and Debian we need to install sudoers with a different
 	# name and make a copy of it if there is no existing file.
 	mv ${pp_destdir}$sudoersdir/sudoers ${pp_destdir}$sudoersdir/sudoers.dist
+%endif
+
+%if [deb]
+	pp_deb_maintainer="$pp_rpm_packager"
+	pp_deb_release="$pp_rpm_release"
+	pp_deb_version="$pp_rpm_version"
+	pp_deb_section=admin
+	install -D -m 644 ${pp_destdir}$docdir/LICENSE ${pp_wrkdir}/${name}/usr/share/doc/${name}/copyright
+	install -D -m 644 ${pp_destdir}$docdir/ChangeLog ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog
+	gzip -9f ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog
+	printf "$name ($pp_deb_version-$pp_deb_release) admin; urgency=low\n\n  * see upstream changelog\n\n -- $pp_deb_maintainer  `date '+%a, %d %b %Y %T %z'`\n" > ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog.Debian
+	chmod 644 ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog.Debian
+	gzip -9f ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog.Debian
+	# Create lintian override file
+	mkdir -p ${pp_wrkdir}/${name}/usr/share/lintian/overrides
+	cat >${pp_wrkdir}/${name}/usr/share/lintian/overrides/${name} <<-EOF
+	# The sudo binary must be setuid root
+	$name: setuid-binary usr/bin/sudo 4755 root/root
+	# Sudo configuration and data dirs must not be world-readable
+	$name: non-standard-file-perm etc/sudoers 0440 != 0644
+	$name: non-standard-dir-perm etc/sudoers.d/ 0750 != 0755
+	$name: non-standard-dir-perm var/lib/sudo/ 0700 != 0755
+	# Sudo ships with debugging symbols
+	$name: unstripped-binary-or-object ./usr/bin/sudo
+	$name: unstripped-binary-or-object ./usr/bin/sudoreplay
+	$name: unstripped-binary-or-object ./usr/lib/sudo/sudo_noexec.so
+	$name: unstripped-binary-or-object ./usr/lib/sudo/sudoers.so
+	$name: unstripped-binary-or-object ./usr/sbin/visudo
+	EOF
+	chmod 644 ${pp_wrkdir}/${name}/usr/share/lintian/overrides/${name}
 %endif
 
 %if [rpm]
@@ -204,17 +235,21 @@ still allow people to get their work done."
 
 %files
 	$osdirs			-
-	$bindir/sudo        	4111 root:
-	$bindir/sudoedit    	4111 root:
-	$sbindir/visudo     	0111
-	$bindir/sudoreplay  	0111
-	$libexecdir/*		0755 optional
+	$bindir/sudo        	4755 root:
+	$bindir/sudoedit    	4755 root: symlink sudo
+	$sbindir/visudo     	0755
+	$bindir/sudoreplay  	0755
+	$libexecdir/*		$shmode optional
 	$sudoersdir/sudoers.d/	0750 $sudoers_uid:$sudoers_gid
 	$timedir/		0700 root:
 	$docdir/		0755
-	$docdir/sudoers2ldif	0555 optional,ignore-others
-	$docdir/*		0444
-	/etc/pam.d/*		0444 volatile,optional
+	$docdir/sudoers2ldif	0755 optional,ignore-others
+%if [deb]
+	$docdir/LICENSE		ignore,ignore-others
+	$docdir/ChangeLog	ignore,ignore-others
+%endif
+	$docdir/*		0644
+	/etc/pam.d/*		0644 volatile,optional
 %if [rpm,deb]
 	$sudoersdir/sudoers $sudoers_mode $sudoers_uid:$sudoers_gid volatile
 %else
@@ -222,12 +257,14 @@ still allow people to get their work done."
 %endif
 
 %files [!aix]
-	$mandir/man*/*
+	$sudoedit_man		0644 symlink,ignore-others $sudoedit_man_target
+	$mandir/man*/*		0644
 
 %files [aix]
 	# Some versions use catpages, some use manpages.
-	$mandir/cat*/* optional
-	$mandir/man*/* optional
+	$sudoedit_man		0644 symlink,ignore-others $sudoedit_man_target
+	$mandir/cat*/*		0644 optional
+	$mandir/man*/*		0644 optional
 
 %post [!rpm,deb]
 	# Don't overwrite an existing sudoers file
@@ -244,6 +281,8 @@ still allow people to get their work done."
 	fi
 
 %post [deb]
+	set -e
+
 	# dpkg-deb does not maintain the mode on the sudoers file, and
 	# installs it 0640 when sudo requires 0440
 	chmod %{sudoers_mode} %{sudoersdir}/sudoers
@@ -278,6 +317,8 @@ still allow people to get their work done."
 	'
 
 %preun [deb]
+	set -e
+
 	# Remove the /etc/ldap/ldap.conf -> /etc/sudo-ldap.conf symlink if
 	# it matches what we created in the postinstall script.
 	if test X"%{flavor}" = X"ldap" -a \
