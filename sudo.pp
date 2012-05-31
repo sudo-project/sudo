@@ -83,7 +83,6 @@ still allow people to get their work done."
 	$name: unstripped-binary-or-object ./usr/bin/sudo
 	$name: unstripped-binary-or-object ./usr/bin/sudoreplay
 	$name: unstripped-binary-or-object ./usr/lib/sudo/sudo_noexec.so
-	$name: unstripped-binary-or-object ./usr/lib/sudo/sudoers.so
 	$name: unstripped-binary-or-object ./usr/sbin/visudo
 	EOF
 	chmod 644 ${pp_wrkdir}/${name}/usr/share/lintian/overrides/${name}
