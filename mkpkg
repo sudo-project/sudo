@@ -185,6 +185,9 @@ case "$osversion" in
 	;;
     deb*|ubu*)
 	prefix=/usr
+	# Man pages should be compressed in .deb files
+	export MANCOMPRESS='gzip -9'
+	export MANCOMPRESSEXT='.gz'
 	# If Ubuntu, add --enable-admin-flag
 	case "$osversion" in
 	    ubu*)
