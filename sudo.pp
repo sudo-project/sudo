@@ -13,6 +13,7 @@ The basic philosophy is to give as few privileges as possible but \
 still allow people to get their work done."
 	vendor="Todd C. Miller"
 	copyright="(c) 1993-1996,1998-2012 Todd C. Miller"
+	shmode=0644
 
 %if [aix]
 	# AIX package summary is limited to 40 characters
@@ -30,6 +31,8 @@ still allow people to get their work done."
 
 %if [sd]
 	pp_sd_vendor_tag="TCM"
+	# HP-UX shared objects must be executable
+	shmode=0755
 %endif
 
 %if [solaris]
@@ -48,14 +51,23 @@ still allow people to get their work done."
 	if test -n "$linux_audit"; then
 		pp_rpm_requires="audit-libs >= $linux_audit"
 	fi
-
-	pp_deb_maintainer="$pp_rpm_packager"
-	pp_deb_release="$pp_rpm_release"
-	pp_deb_version="$pp_rpm_version"
 %else
 	# For all but RPM and Debian we need to install sudoers with a different
 	# name and make a copy of it if there is no existing file.
 	mv ${pp_destdir}$sudoersdir/sudoers ${pp_destdir}$sudoersdir/sudoers.dist
+%endif
+
+%if [deb]
+	pp_deb_maintainer="$pp_rpm_packager"
+	pp_deb_release="$pp_rpm_release"
+	pp_deb_version="$pp_rpm_version"
+	pp_deb_section=admin
+	install -D -m 644 ${pp_destdir}$docdir/LICENSE ${pp_wrkdir}/${name}/usr/share/doc/${name}/copyright
+	install -D -m 644 ${pp_destdir}$docdir/ChangeLog ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog
+	gzip -9f ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog
+	printf "$name ($pp_deb_version-$pp_deb_release) admin; urgency=low\n\n  * see upstream changelog\n\n -- $pp_deb_maintainer  `date '+%a, %d %b %Y %T %z'`\n" > ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog.Debian
+	chmod 644 ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog.Debian
+	gzip -9f ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog.Debian
 %endif
 
 %if [rpm]
@@ -208,16 +220,20 @@ still allow people to get their work done."
 	$bindir/sudoedit    	4111 root:
 	$sbindir/visudo     	0111
 	$bindir/sudoreplay  	0111
-	$includedir/sudo_plugin.h 0444
-	$libexecdir/*		0755 optional
+	$includedir/sudo_plugin.h 0644
+	$libexecdir/*		$shmode optional
 	$sudoersdir/sudoers.d/	0750 $sudoers_uid:$sudoers_gid
 	$timedir/		0700 root:
 	$docdir/		0755
 	$docdir/sudoers2ldif	0555 optional,ignore-others
-	$docdir/*		0444
+%if [deb]
+	$docdir/LICENSE		ignore,ignore-others
+	$docdir/ChangeLog	ignore,ignore-others
+%endif
+	$docdir/*		0644
 	$localedir/		-    optional
-	$localedir/**		0444 optional
-	/etc/pam.d/*		0444 volatile,optional
+	$localedir/**		-    optional
+	/etc/pam.d/*		0644 volatile,optional
 %if [rpm,deb]
 	$sudoersdir/sudoers $sudoers_mode $sudoers_uid:$sudoers_gid volatile
 %else
@@ -225,12 +241,12 @@ still allow people to get their work done."
 %endif
 
 %files [!aix]
-	$mandir/man*/*
+	$mandir/man*/* 0644
 
 %files [aix]
 	# Some versions use catpages, some use manpages.
-	$mandir/cat*/* optional
-	$mandir/man*/* optional
+	$mandir/cat*/* optional 0644
+	$mandir/man*/* optional 0644
 
 %post [!rpm,deb]
 	# Don't overwrite an existing sudoers file
