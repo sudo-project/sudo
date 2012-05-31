@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2012 Quest Software, Inc. ALL RIGHTS RESERVED
-pp_revision="355"
+pp_revision="356"
  # Copyright 2012 Quest Software, Inc.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -3847,7 +3847,7 @@ pp_backend_deb_init () {
     pp_deb_release=
     pp_deb_arch=
     pp_deb_arch_std=
-    pp_deb_maintainer=support@quest.com
+    pp_deb_maintainer="Quest Software, Inc <support@quest.com>"
     pp_deb_copyright=
     pp_deb_distro=
     pp_deb_control_description=

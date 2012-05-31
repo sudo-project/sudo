@@ -44,7 +44,7 @@ still allow people to get their work done."
 	pp_rpm_license="BSD"
 	pp_rpm_url="http://www.sudo.ws/"
 	pp_rpm_group="Applications/System"
-	pp_rpm_packager="Todd.Miller@courtesan.com"
+	pp_rpm_packager="Todd C. Miller <Todd.Miller@courtesan.com>"
 	if test -n "$linux_audit"; then
 		pp_rpm_requires="audit-libs >= $linux_audit"
 	fi
