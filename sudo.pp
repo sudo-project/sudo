@@ -284,6 +284,8 @@ still allow people to get their work done."
 	fi
 
 %post [deb]
+	set -e
+
 	# dpkg-deb does not maintain the mode on the sudoers file, and
 	# installs it 0640 when sudo requires 0440
 	chmod %{sudoers_mode} %{sudoersdir}/sudoers
@@ -318,6 +320,8 @@ still allow people to get their work done."
 	'
 
 %preun [deb]
+	set -e
+
 	# Remove the /etc/ldap/ldap.conf -> /etc/sudo-ldap.conf symlink if
 	# it matches what we created in the postinstall script.
 	if test X"%{flavor}" = X"ldap" -a \
