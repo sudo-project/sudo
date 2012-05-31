@@ -14,6 +14,8 @@ still allow people to get their work done."
 	vendor="Todd C. Miller"
 	copyright="(c) 1993-1996,1998-2012 Todd C. Miller"
 	shmode=0644
+	sudoedit_man=`echo $mandir/*/sudoedit.*|sed 's:^${pp_destdir}::'`
+	sudoedit_man_target=`basename $sudoedit_man | sed 's/edit//'`
 
 %if [aix]
 	# AIX package summary is limited to 40 characters
@@ -71,16 +73,14 @@ still allow people to get their work done."
 	# Create lintian override file
 	mkdir -p ${pp_wrkdir}/${name}/usr/share/lintian/overrides
 	cat >${pp_wrkdir}/${name}/usr/share/lintian/overrides/${name} <<-EOF
-	# The sudo binary must be setuid root (sudoedit is a link to sudo)
+	# The sudo binary must be setuid root
 	$name: setuid-binary usr/bin/sudo 4755 root/root
-	$name: setuid-binary usr/bin/sudoedit 4755 root/root
 	# Sudo configuration and data dirs must not be world-readable
 	$name: non-standard-file-perm etc/sudoers 0440 != 0644
 	$name: non-standard-dir-perm etc/sudoers.d/ 0750 != 0755
 	$name: non-standard-dir-perm var/lib/sudo/ 0700 != 0755
 	# Sudo ships with debugging symbols
 	$name: unstripped-binary-or-object ./usr/bin/sudo
-	$name: unstripped-binary-or-object ./usr/bin/sudoedit
 	$name: unstripped-binary-or-object ./usr/bin/sudoreplay
 	$name: unstripped-binary-or-object ./usr/lib/sudo/sudo_noexec.so
 	$name: unstripped-binary-or-object ./usr/lib/sudo/sudoers.so
@@ -236,7 +236,7 @@ still allow people to get their work done."
 %files
 	$osdirs			-
 	$bindir/sudo        	4755 root:
-	$bindir/sudoedit    	4755 root:
+	$bindir/sudoedit    	4755 root: symlink sudo
 	$sbindir/visudo     	0755
 	$bindir/sudoreplay  	0755
 	$includedir/sudo_plugin.h 0644
@@ -260,12 +260,14 @@ still allow people to get their work done."
 %endif
 
 %files [!aix]
-	$mandir/man*/* 0644
+	$sudoedit_man		0644 symlink,ignore-others $sudoedit_man_target
+	$mandir/man*/*		0644
 
 %files [aix]
 	# Some versions use catpages, some use manpages.
-	$mandir/cat*/* optional 0644
-	$mandir/man*/* optional 0644
+	$sudoedit_man		0644 symlink,ignore-others $sudoedit_man_target
+	$mandir/cat*/*		0644 optional
+	$mandir/man*/*		0644 optional
 
 %post [!rpm,deb]
 	# Don't overwrite an existing sudoers file
