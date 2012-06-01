@@ -272,13 +272,14 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
     tq_foreach_fwd(snl, nss) {
 	count += nss->display_privs(nss, pw, &privs);
     }
-    if (count) {
-	lbuf_print(&defs);
-	lbuf_print(&privs);
-    } else {
-	printf(_("User %s is not allowed to run sudo on %s.\n"), pw->pw_name,
-	    user_shost);
+    if (count == 0) {
+	defs.len = 0;
+	privs.len = 0;
+	lbuf_append(&privs, _("User %s is not allowed to run sudo on %s.\n"),
+	    pw->pw_name, user_shost);
     }
+    lbuf_print(&defs);
+    lbuf_print(&privs);
 
     lbuf_destroy(&defs);
     lbuf_destroy(&privs);
