@@ -80,11 +80,7 @@ still allow people to get their work done."
 	$name: non-standard-dir-perm etc/sudoers.d/ 0750 != 0755
 	$name: non-standard-dir-perm var/lib/sudo/ 0700 != 0755
 	# Sudo ships with debugging symbols
-	$name: unstripped-binary-or-object ./usr/bin/sudo
-	$name: unstripped-binary-or-object ./usr/bin/sudoreplay
-	$name: unstripped-binary-or-object ./usr/lib/sudo/sudo_noexec.so
-	$name: unstripped-binary-or-object ./usr/lib/sudo/sudoers.so
-	$name: unstripped-binary-or-object ./usr/sbin/visudo
+	$name: unstripped-binary-or-object
 	EOF
 	chmod 644 ${pp_wrkdir}/${name}/usr/share/lintian/overrides/${name}
 %endif
