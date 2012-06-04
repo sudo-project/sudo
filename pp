@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2012 Quest Software, Inc. ALL RIGHTS RESERVED
-pp_revision="357"
+pp_revision="359"
  # Copyright 2012 Quest Software, Inc.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -3863,9 +3863,6 @@ pp_backend_deb_init () {
 
     # Make sure any programs we require are installed
     pp_deb_check_required_programs
-
-    # Set generated/interrogated platforms variables
-    pp_deb_munge_description
 }
 
 pp_deb_check_required_programs () {
@@ -3896,10 +3893,8 @@ pp_deb_check_required_programs () {
 pp_deb_munge_description () {
     # Insert a leading space on each line, replace blank lines with a
     #space followed by a full-stop.
-    pp_deb_control_description=`echo ${pp_deb_description:-$description} | \
-        sed "s,^\(.*\)$, \1, " \
-        | sed "s,^[ \t]*$, .,g"`
-
+    pp_deb_control_description="`echo ${pp_deb_description:-$description} | \
+        sed 's,^\(.*\)$, \1, " \ | sed 's,^[ \t]*$, .,g' | fmt -w 80`"
 }
 
 pp_deb_detect_arch () {
@@ -4147,6 +4142,9 @@ pp_deb_makedeb () {
 
 pp_backend_deb () {
     local debname
+
+    # Munge description for control file inclusion
+    pp_deb_munge_description
 
     # Handle services
     pp_deb_handle_services $cmp
