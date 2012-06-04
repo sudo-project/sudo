@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2012 Quest Software, Inc. ALL RIGHTS RESERVED
-pp_revision="359"
+pp_revision="361"
  # Copyright 2012 Quest Software, Inc.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -3894,7 +3894,7 @@ pp_deb_munge_description () {
     # Insert a leading space on each line, replace blank lines with a
     #space followed by a full-stop.
     pp_deb_control_description="`echo ${pp_deb_description:-$description} | \
-        sed 's,^\(.*\)$, \1, " \ | sed 's,^[ \t]*$, .,g' | fmt -w 80`"
+        sed 's,^\(.*\)$, \1, ' | sed 's,^[ \t]*$, .,g' | fmt -w 80`"
 }
 
 pp_deb_detect_arch () {
@@ -3929,7 +3929,13 @@ pp_deb_conflict () {
 }
 
 pp_deb_make_control() {
-    package_name=`pp_deb_cmp_full_name "$1"`
+    local cmp="$1"
+    local installed_size
+
+    # compute the installed size
+    installed_size=`pp_deb_files_size < $pp_wrkdir/%files.$cmp`
+
+    package_name=`pp_deb_cmp_full_name "$cmp"`
     cat <<-.
 	Package: ${package_name}
 	Version: `pp_deb_version_final`-${pp_deb_release:-1}
@@ -3939,13 +3945,14 @@ pp_deb_make_control() {
 	Maintainer: ${pp_deb_maintainer:-$maintainer}
 	Description: ${pp_deb_summary:-$summary}
 	${pp_deb_control_description}
+	Installed-Size: ${installed_size}
 .
-    if test -s $pp_wrkdir/%depend."$1"; then
+    if test -s $pp_wrkdir/%depend."$cmp"; then
 	sed -ne '/^[ 	]*$/!s/^[ 	]*/Depends: /p' \
-	    < $pp_wrkdir/%depend."$1"
+	    < $pp_wrkdir/%depend."$cmp"
     fi
-    if test -s $pp_wrkdir/%conflict."$1"; then
-	pp_deb_conflict < $pp_wrkdir/%conflict."$1"
+    if test -s $pp_wrkdir/%conflict."$cmp"; then
+	pp_deb_conflict < $pp_wrkdir/%conflict."$cmp"
     fi
 }
 
@@ -4023,6 +4030,16 @@ pp_deb_fakeroot () {
     else
 	fakeroot -s $pp_wrkdir/fakeroot.save "$@"
     fi
+}
+
+pp_deb_files_size () {
+    local t m o g f p st
+    while read t m o g f p st; do
+        case $t in
+            f|s) du -k "${pp_destdir}$p";;
+            d)   echo 4;;
+        esac
+    done | awk '{n+=$1} END {print n}'
 }
 
 pp_deb_make_DEBIAN() {
