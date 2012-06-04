@@ -233,6 +233,22 @@ still allow people to get their work done."
 	done
 	osdirs=`echo $osdirs | tr " " "\n" | sort -u`
 
+%depend [deb]
+	libc6, libpam0g, libpam-modules, zlib1g
+
+%fixup [deb]
+	# Add Conflicts, Replaces headers and add libldap depedency as needed.
+	if test -z "%{flavor}"; then
+	    echo "Conflicts: sudo-ldap" >> %{pp_wrkdir}/%{name}/DEBIAN/control
+	    echo "Replaces: sudo-ldap" >> %{pp_wrkdir}/%{name}/DEBIAN/control
+	elif test "%{flavor}" = "ldap"; then
+	    echo "Conflicts: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
+	    echo "Replaces: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
+	    cp -p %{pp_wrkdir}/%{name}/DEBIAN/control %{pp_wrkdir}/%{name}/DEBIAN/control.$$
+	    sed 's/^\(Depends:.*\) *$/\1, libldap/' %{pp_wrkdir}/%{name}/DEBIAN/control.$$ > %{pp_wrkdir}/%{name}/DEBIAN/control
+	    rm -f %{pp_wrkdir}/%{name}/DEBIAN/control.$$
+	fi
+
 %files
 	$osdirs			-
 	$bindir/sudo        	4755 root:
