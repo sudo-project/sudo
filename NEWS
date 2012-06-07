@@ -37,6 +37,9 @@ What's new in Sudo 1.7.10?
    sequence number).  Previously, entries were displayed in the
    order in which they were found on the file system.
 
+ * The sudoreplay command can now properly replay sessions where
+   no tty was present.
+
  * Sudo now behaves properly when I/O logging is enabled and the
    controlling terminal is revoked (e.g. the running sshd is killed).
    Previously, sudo may have exited without calling the I/O plugin's
