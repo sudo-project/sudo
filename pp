@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2012 Quest Software, Inc. ALL RIGHTS RESERVED
-pp_revision="361"
+pp_revision="363"
  # Copyright 2012 Quest Software, Inc.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -2288,9 +2288,9 @@ pp_sd_write_files () {
 		# current working (source) directory, not the destination;
 		# we need to qualify them to prevent this.
 		case "$st" in
-		    /*) echo "$line $st $p";;
-		    *) echo "$line `dirname $p`/$st $p";;
+		    [!/]*) st="`dirname \"$p\"`/$st";;
 		esac
+		echo "$line -o $o -g $g -m $m $st $p"
 		;;
             *)
 		echo "$line -o $o -g $g -m $m $pp_destdir$p $p"
@@ -4005,19 +4005,19 @@ pp_deb_handle_services() {
 	    test x"yes" = x"$enable" &&
             cat<<-. >> $pp_wrkdir/%post.run
 		# Install the service links
-		/usr/sbin/update-rc.d $svc defaults
+		update-rc.d $svc defaults
 .
 
             #-- prepend %preun code to stop svc
             cat<<-. | pp_prepend $pp_wrkdir/%preun.run
 		# Stop the $svc service
-		if test -x /usr/sbin/invoke-rc.d; then
-		    /usr/sbin/invoke-rc.d $svc stop
-		else
-		    /etc/init.d/$svc stop
-		fi
+		invoke-rc.d $svc stop
+.
+
+            #-- prepend %preun code to remove service
+            cat<<-. | pp_prepend $pp_wrkdir/%postun.run
 		# Remove the service links
-		/usr/sbin/update-rc.d -f $svc remove
+		update-rc.d -f $svc remove
 .
         done
         #pp_deb_service_remove_common | pp_prepend $pp_wrkdir/%preun.run
@@ -4378,7 +4378,7 @@ pp_backend_deb_init_svc_vars () {
 
     lsb_required_start='$local_fs $network'
     lsb_should_start=
-    lsb_required_stop=
+    lsb_required_stop='$local_fs'
     lsb_description=
 
     start_priority=50
@@ -4391,7 +4391,7 @@ pp_deb_service_make_init_script () {
     local out=$pp_destdir$script
     local _process _cmd
 
-    pp_add_file_if_missing $script run 755 || return 0
+    pp_add_file_if_missing $script run 755 v || return 0
 
     #-- start out as an empty shell script
     cat <<-'.' >$out
