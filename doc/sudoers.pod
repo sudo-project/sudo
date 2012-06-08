@@ -254,15 +254,15 @@ following formats:
 
 =item *
 
-Group in the same domain: "Group Name"
+Group in the same domain: "%:Group Name"
 
 =item *
 
-Group in any domain: "Group Name@FULLY.QUALIFIED.DOMAIN"
+Group in any domain: "%:Group Name@FULLY.QUALIFIED.DOMAIN"
 
 =item *
 
-Group SID: "S-1-2-34-5678901234-5678901234-5678901234-567"
+Group SID: "%:S-1-2-34-5678901234-5678901234-5678901234-567"
 
 =back
 
