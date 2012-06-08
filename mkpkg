@@ -78,9 +78,6 @@ top_srcdir=`dirname $0`
 test -n "$osversion" || exit 1
 osrelease=`echo "$osversion" | sed -e 's/^[^0-9]*//' -e 's/-.*$//'`
 
-# Default paths
-prefix=/usr/local
-
 # Linux distros may build binaries as pie files.
 # This is really something libtool should figure out, but it does not.
 case "$osversion" in
@@ -120,7 +117,6 @@ fi
 # We use the same configure options as vendor packages when possible.
 case "$osversion" in
     centos*|rhel*)
-	prefix=/usr
 	if [ $osrelease -ge 40 ]; then
 	    # RHEL 4 and up support SELinux
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-selinux"
@@ -134,7 +130,7 @@ case "$osversion" in
 	    PPVARS="${PPVARS}${PPVARS+$space}linux_audit=1.4.0"
 	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
-	configure_opts="--prefix=$prefix
+	configure_opts="--prefix=/usr
 		--with-logging=syslog
 		--with-logfac=authpriv
 		--with-pam
@@ -148,7 +144,6 @@ case "$osversion" in
 		$configure_opts"
 	;;
     sles*)
-	prefix=/usr
 	if [ $osrelease -ge 10 ]; then
 	    # SLES 10 and higher build pies
 	    export CFLAGS="-O2 -g $F_PIE" LDFLAGS="-pie"
@@ -165,8 +160,8 @@ case "$osversion" in
 	esac
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	# XXX - SuSE uses secure path but only for env_reset
-	configure_opts="--prefix=$prefix
-		--libexecdir=$prefix/$libexec/sudo
+	configure_opts="--prefix=/usr
+		--libexecdir=/usr/$libexec/sudo
 		--with-logging=syslog
 		--with-logfac=auth
 		--with-all-insults
@@ -184,7 +179,6 @@ case "$osversion" in
 	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
 	;;
     deb*|ubu*)
-	prefix=/usr
 	# Man pages should be compressed in .deb files
 	export MANCOMPRESS='gzip -9'
 	export MANCOMPRESSEXT='.gz'
@@ -247,8 +241,7 @@ case "$osversion" in
 	    LDFLAGS="$LDFLAGS -Wl,-pie"
 	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
-	configure_opts="--prefix=$prefix
-		--with-pam
+	configure_opts="--with-pam
 		--without-tty-tickets
 		--enable-zlib=system
 		--with-ldap
@@ -270,7 +263,7 @@ case "$osversion" in
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap"
 	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
-	configure_opts="--prefix=$prefix
+	configure_opts="
 		--with-insults=disabled
 		--with-logging=syslog
 		--with-logfac=auth
