@@ -105,11 +105,11 @@ DDEESSCCRRIIPPTTIIOONN
        implementation.  For instance, the QAS AD backend supports the
        following formats:
 
-       o   Group in the same domain: "Group Name"
+       o   Group in the same domain: "%:Group Name"
 
-       o   Group in any domain: "Group Name@FULLY.QUALIFIED.DOMAIN"
+       o   Group in any domain: "%:Group Name@FULLY.QUALIFIED.DOMAIN"
 
-       o   Group SID: "S-1-2-34-5678901234-5678901234-5678901234-567"
+       o   Group SID: "%:S-1-2-34-5678901234-5678901234-5678901234-567"
 
        Note that quotes around group names are optional.  Unquoted strings
        must use a backslash (\) to escape spaces and special characters.  See
@@ -1483,4 +1483,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.10                           May 23, 2012                       SUDOERS(4)
+1.7.10b2                         June  8, 2012                      SUDOERS(4)
