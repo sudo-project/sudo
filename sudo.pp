@@ -14,7 +14,7 @@ still allow people to get their work done."
 	vendor="Todd C. Miller"
 	copyright="(c) 1993-1996,1998-2012 Todd C. Miller"
 	shmode=0644
-	sudoedit_man=`echo $mandir/*/sudoedit.*|sed 's:^${pp_destdir}::'`
+	sudoedit_man=`echo ${pp_destdir}$mandir/*/sudoedit.*|sed "s:^${pp_destdir}::"`
 	sudoedit_man_target=`basename $sudoedit_man | sed 's/edit//'`
 
 %if [aix]
