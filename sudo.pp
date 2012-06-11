@@ -214,6 +214,15 @@ still allow people to get their work done."
 	perl -pe 'last if (/^What/i && $seen++)' NEWS > ${pp_wrkdir}/ReadMe.txt
 %endif
 
+%if X"$aix_freeware" = X"true"
+	# Create links from /opt/freeware/{bin,sbin} -> /usr/{bin.sbin}
+	mkdir -p ${pp_destdir}/usr/bin ${pp_destdir}/usr/sbin
+	ln -s -f ${bindir}/sudo ${pp_destdir}/usr/bin
+	ln -s -f ${bindir}/sudoedit ${pp_destdir}/usr/bin
+	ln -s -f ${bindir}/sudoreplay ${pp_destdir}/usr/bin
+	ln -s -f ${sbindir}/visudo ${pp_destdir}/usr/sbin
+%endif
+
 	# OS-level directories that should generally exist but might not.
 	extradirs=`echo ${pp_destdir}/${mandir}/[mc]* | sed "s#${pp_destdir}/##g"`
 	extradirs="$extradirs `dirname $docdir` `dirname $timedir`"
@@ -266,6 +275,13 @@ still allow people to get their work done."
 	$sudoersdir/sudoers $sudoers_mode $sudoers_uid:$sudoers_gid volatile
 %else
 	$sudoersdir/sudoers.dist $sudoers_mode $sudoers_uid:$sudoers_gid volatile
+%endif
+%if X"$aix_freeware" = X"true"
+	# Links for binaries from /opt/freeware to /usr
+	/usr/bin/sudo    	0755 root: symlink $bindir/sudo
+	/usr/bin/sudoedit    	0755 root: symlink $bindir/sudoedit
+	/usr/bin/sudoreplay    	0755 root: symlink $bindir/sudoreplay
+	/usr/sbin/visudo    	0755 root: symlink $sbindir/visudo
 %endif
 
 %files [!aix]

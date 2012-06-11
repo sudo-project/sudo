@@ -252,6 +252,22 @@ case "$osversion" in
 		--with-env-editor
 		$configure_opts"
 	;;
+    aix*)
+	# Note, must indent with tabs, not spaces due to IFS trickery
+	# Note: we include our own zlib instead of relying on the
+	#       AIX freeware version being installed.
+	configure_opts="
+		--prefix=/opt/freeware
+		--mandir=/opt/freeware/man
+		--with-insults=disabled
+		--with-logging=syslog
+		--with-logfac=auth
+		--with-editor=/usr/bin/vi
+		--with-env-editor
+		--enable-zlib=builtin
+		$configure_opts"
+	PPVARS="${PPVARS}${PPVARS+$space}aix_freeware=$true"
+	;;
     *)
 	# For Solaris, add project support and use let configure choose zlib.
 	# For all others, use the builtin zlib and disable NLS support.
