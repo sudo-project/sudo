@@ -97,6 +97,7 @@ install_gid = 0
 sudoers_uid = @SUDOERS_UID@
 sudoers_gid = @SUDOERS_GID@
 sudoers_mode = @SUDOERS_MODE@
+shlib_mode = @SHLIB_MODE@
 
 # Pass in paths and uid/gid + OS dependent defined
 DEFS = @OSDEFS@ -D_PATH_SUDOERS=\"$(sudoersdir)/sudoers\" -DSUDOERS_UID=$(sudoers_uid) -DSUDOERS_GID=$(sudoers_gid) -DSUDOERS_MODE=$(sudoers_mode)
@@ -570,7 +571,7 @@ install-binaries: install-dirs $(PROGS)
 	if [ -f sesh ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m 0755 sesh $(DESTDIR)$(libexecdir)/sesh; fi
 
 install-noexec: install-dirs libsudo_noexec.la
-	if [ -f .libs/lib$(noexecfile) ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m 0755 .libs/lib$(noexecfile) $(DESTDIR)$(noexecdir)/$(noexecfile); fi
+	if [ -f .libs/lib$(noexecfile) ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m $(shlib_mode) .libs/lib$(noexecfile) $(DESTDIR)$(noexecdir)/$(noexecfile); fi
 
 install-sudoers: install-dirs
 	$(INSTALL) -d -O $(sudoers_uid) -G $(sudoers_gid) -m 0750 \
@@ -647,6 +648,7 @@ package: sudo.pp
 	    sudoers_uid=$(sudoers_uid) \
 	    sudoers_gid=$(sudoers_gid) \
 	    sudoers_mode=$(sudoers_mode) \
+	    shlib_mode=$(shlib_mode) \
 	    version=$(VERSION) $(PPVARS)
 
 .PHONY:	ChangeLog
