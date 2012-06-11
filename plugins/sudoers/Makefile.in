@@ -72,8 +72,9 @@ datarootdir = @datarootdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
 
-# File extension for shared objects
+# File extension and mode to use for shared libraries/objects
 soext = @SOEXT@
+shlib_mode = @SHLIB_MODE@
 
 # Directory in which to install the sudoers plugin
 plugindir = @PLUGINDIR@
@@ -262,7 +263,7 @@ install-doc: install-dirs
 
 install-plugin: sudoers.la install-dirs
 	if [ X"$(soext)" != X"" ]; then \
-	    $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m 0755 .libs/sudoers$(soext) $(DESTDIR)$(plugindir); \
+	    $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m $(shlib_mode) .libs/sudoers$(soext) $(DESTDIR)$(plugindir); \
 	fi
 
 install-sudoers: install-dirs

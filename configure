@@ -724,6 +724,7 @@ DEVEL
 SUDOERS_GID
 SUDOERS_UID
 SUDOERS_MODE
+SHLIB_MODE
 MANCOMPRESSEXT
 MANCOMPRESS
 MANTYPE
@@ -2880,6 +2881,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -2927,6 +2929,7 @@ devdir='$(srcdir)'
 PROGS="sudo"
 : ${MANTYPE='man'}
 : ${mansrcdir='.'}
+: ${SHLIB_MODE='0644'}
 : ${SUDOERS_MODE='0440'}
 : ${SUDOERS_UID='0'}
 : ${SUDOERS_GID='0'}
@@ -13890,6 +13893,9 @@ done
     *-*-hiuxmpp*)
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+
+		# HP-UX shared libs must be executable
+		SHLIB_MODE=0755
 		;;
     *-*-hpux*)
 		# AFS support needs -lBSD
@@ -13898,6 +13904,9 @@ done
 		fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+
+		# HP-UX shared libs must be executable
+		SHLIB_MODE=0755
 
 		# The HP bundled compiler cannot generate shared libs
 		if test -z "$GCC"; then

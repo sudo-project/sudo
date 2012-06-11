@@ -44,6 +44,7 @@ sudoersdir = $(sysconfdir)
 sudoers_uid = @SUDOERS_UID@
 sudoers_gid = @SUDOERS_GID@
 sudoers_mode = @SUDOERS_MODE@
+shlib_mode = @SHLIB_MODE@
 
 SUBDIRS = compat common @ZLIB_SRC@ plugins/sudoers src include doc
 
@@ -276,6 +277,7 @@ package: sudo.pp
 	    sudoers_uid=$(sudoers_uid) \
 	    sudoers_gid=$(sudoers_gid) \
 	    sudoers_mode=$(sudoers_mode) \
+	    shlib_mode=$(shlib_mode) \
 	    version=$(VERSION) $(PPVARS)
 
 clean: config.status

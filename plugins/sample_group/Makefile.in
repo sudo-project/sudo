@@ -56,7 +56,10 @@ libexecdir = @libexecdir@
 datarootdir = @datarootdir@
 localstatedir = @localstatedir@
 plugindir = @PLUGINDIR@
+
+# File extension and mode to use for shared libraries/objects
 soext = @SOEXT@
+shlib_mode = @SHLIB_MODE@
 
 # OS dependent defines
 DEFS = @OSDEFS@
@@ -98,7 +101,7 @@ install-includes:
 install-doc:
 
 install-plugin: install-dirs sample_group.la
-	$(INSTALL) -b~ -m 0755 .libs/sample_group$(soext) $(DESTDIR)$(plugindir)
+	$(INSTALL) -b~ -m $(shlib_mode) .libs/sample_group$(soext) $(DESTDIR)$(plugindir)
 
 uninstall:
 	-rm -f $(DESTDIR)$(plugindir)/sample_group$(soext)

@@ -13,7 +13,6 @@ The basic philosophy is to give as few privileges as possible but \
 still allow people to get their work done."
 	vendor="Todd C. Miller"
 	copyright="(c) 1993-1996,1998-2012 Todd C. Miller"
-	shmode=0644
 	sudoedit_man=`echo ${pp_destdir}$mandir/*/sudoedit.*|sed "s:^${pp_destdir}::"`
 	sudoedit_man_target=`basename $sudoedit_man | sed 's/edit//'`
 
@@ -33,8 +32,6 @@ still allow people to get their work done."
 
 %if [sd]
 	pp_sd_vendor_tag="TCM"
-	# HP-UX shared objects must be executable
-	shmode=0755
 %endif
 
 %if [solaris]
@@ -252,7 +249,7 @@ still allow people to get their work done."
 	$sbindir/visudo     	0755
 	$bindir/sudoreplay  	0755
 	$includedir/sudo_plugin.h 0644
-	$libexecdir/*		$shmode optional
+	$libexecdir/*		$shlib_mode optional
 	$sudoersdir/sudoers.d/	0750 $sudoers_uid:$sudoers_gid
 	$timedir/		0700 root:
 	$docdir/		0755
