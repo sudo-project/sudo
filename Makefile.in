@@ -236,7 +236,7 @@ install-nls:
 		    test -s $$podir/$$lang.mo || continue; \
 		    echo $(ECHO_N) " $$lang$(ECHO_C)"; \
 		    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES; \
-		    $(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 $$podir/$$lang.mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$$domain.mo; \
+		    $(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 $$podir/$$lang.mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$$domain.mo; \
 		done; \
 		echo ""; \
 	    done; \

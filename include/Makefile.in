@@ -64,7 +64,7 @@ install-binaries:
 install-doc:
 
 install-includes: install-dirs
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 $(srcdir)/sudo_plugin.h $(DESTDIR)$(includedir)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 $(srcdir)/sudo_plugin.h $(DESTDIR)$(includedir)
 
 install-plugin:
 
