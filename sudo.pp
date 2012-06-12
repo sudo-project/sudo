@@ -226,6 +226,7 @@ still allow people to get their work done."
 	# OS-level directories that should generally exist but might not.
 	extradirs=`echo ${pp_destdir}/${mandir}/[mc]* | sed "s#${pp_destdir}/##g"`
 	extradirs="$extradirs `dirname $docdir` `dirname $timedir`"
+	test -d ${pp_destdir}${localedir} && extradirs="$extradirs $localedir"
 	test -d ${pp_destdir}/etc/pam.d && extradirs="${extradirs} /etc/pam.d"
 	for dir in $bindir $sbindir $libexecdir $includedir $extradirs; do
 		while test "$dir" != "/"; do
@@ -268,8 +269,9 @@ still allow people to get their work done."
 	$docdir/ChangeLog	ignore,ignore-others
 %endif
 	$docdir/*		0644
-	$localedir/		-    optional
-	$localedir/**		-    optional
+	$localedir/*/		-    optional
+	$localedir/*/LC_MESSAGES/ -    optional
+	$localedir/*/LC_MESSAGES/* 0644    optional
 	/etc/pam.d/*		0644 volatile,optional
 %if [rpm,deb]
 	$sudoersdir/sudoers $sudoers_mode $sudoers_uid:$sudoers_gid volatile
