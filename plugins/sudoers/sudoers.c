@@ -1596,7 +1596,7 @@ sudoers_policy_register_hooks(int version, int (*register_hook)(struct sudo_hook
     register_hook(&hook);
 }
 
-struct policy_plugin sudoers_policy = {
+__dso_public struct policy_plugin sudoers_policy = {
     SUDO_POLICY_PLUGIN,
     SUDO_API_VERSION,
     sudoers_policy_open,

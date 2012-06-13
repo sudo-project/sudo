@@ -1,0 +1,7 @@
+sample_group.so {
+	global:
+		# Group plugin structure
+		group_plugin;
+	local:
+		*;
+};

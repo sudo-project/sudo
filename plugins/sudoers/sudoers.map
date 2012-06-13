@@ -1,0 +1,8 @@
+sudoers.so {
+	global:
+		# Policy and I/O plugin structs
+		sudoers_policy;
+		sudoers_io;
+	local:
+		*;
+};

@@ -695,6 +695,7 @@ iolog_dir
 COMPAT_TEST_PROGS
 SUDO_NLS
 LIBINTL
+LTEXP
 LT_STATIC
 LIBDL
 CONFIGURE_ARGS
@@ -2882,6 +2883,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -2935,6 +2937,7 @@ PROGS="sudo"
 : ${SUDOERS_GID='0'}
 DEVEL=
 LDAP="#"
+LTEXP=""
 BAMAN=0
 LCMAN=0
 SEMAN=0
@@ -20072,9 +20075,118 @@ EOF
 $as_echo "$iolog_dir" >&6; }
 
 
-if test "$enable_hardening" != "no"; then
 
 ac_c_werror_flag=yes
+as_CACHEVAR=`$as_echo "ax_cv_check_cflags__-fvisibility=hidden" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fvisibility=hidden" >&5
+$as_echo_n "checking whether C compiler accepts -fvisibility=hidden... " >&6; }
+if eval \${$as_CACHEVAR+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -fvisibility=hidden"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  eval "$as_CACHEVAR=yes"
+else
+  eval "$as_CACHEVAR=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+eval ac_res=\$$as_CACHEVAR
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if test x"`eval 'as_val=${'$as_CACHEVAR'};$as_echo "$as_val"'`" = xyes; then :
+
+    CFLAGS="${CFLAGS} -fvisibility=hidden"
+    LTEXP="#"
+
+else
+  :
+fi
+
+
+if test -z "$LTEXP"; then
+    if test "$lt_cv_prog_gnu_ld" = "yes"; then
+	cat > conftest.map <<-EOF
+	VERS_1.0 {
+	    global: foo;
+	    local:  *;
+	};
+	EOF
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ld supports map files" >&5
+$as_echo_n "checking whether ld supports map files... " >&6; }
+	_LDFLAGS="$LDFLAGS"
+	LDFLAGS="$LDFLAGS -fPIC -shared -Wl,--version-script,./conftest.map"
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+int foo;
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+	    LTEXP="#"; LTLDFLAGS="$LTLDFLAGS -Wl,--version-script,\$(mapfile)"
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+	LDFLAGS="$_LDFLAGS"
+    else
+	case "$host" in
+	    *-*-solaris2*)
+		cat > conftest.map <<-EOF
+		VERS_1.0 {
+		    global: foo;
+		    local:  *;
+		};
+		EOF
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ld supports map files" >&5
+$as_echo_n "checking whether ld supports map files... " >&6; }
+		_LDFLAGS="$LDFLAGS"
+		LDFLAGS="$LDFLAGS -fPIC -shared -Wl,-M,./conftest.map"
+		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+int foo;
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+		    LTEXP="#"; LTLDFLAGS="$LTLDFLAGS -Wl,-M,\$(mapfile)"
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+		LDFLAGS="$_LDFLAGS"
+		;;
+	esac
+    fi
+fi
+
+if test "$enable_hardening" != "no"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fstack-protector" >&5
 $as_echo_n "checking whether C compiler accepts -fstack-protector... " >&6; }
 if ${ax_cv_check_cflags___fstack_protector+:} false; then :

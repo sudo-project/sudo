@@ -66,6 +66,7 @@ AC_SUBST([ac_config_libobj_dir])
 AC_SUBST([CONFIGURE_ARGS])
 AC_SUBST([LIBDL])
 AC_SUBST([LT_STATIC])
+AC_SUBST([LTEXP])
 AC_SUBST([LIBINTL])
 AC_SUBST([SUDO_NLS])
 AC_SUBST([COMPAT_TEST_PROGS])
@@ -164,6 +165,7 @@ PROGS="sudo"
 : ${SUDOERS_GID='0'}
 DEVEL=
 LDAP="#"
+LTEXP=""
 BAMAN=0
 LCMAN=0
 SEMAN=0
@@ -3165,12 +3167,62 @@ SUDO_TIMEDIR
 SUDO_IO_LOGDIR
 
 dnl
-dnl Check for -fstack-protector and -z relro support
+dnl Check for gcc 4.0-style symbol visibility support.
 dnl This must be towards the end as it turns warnings
 dnl into fatal errors (and there is no way to undo that)
 dnl
+AC_LANG_WERROR
+AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [
+    CFLAGS="${CFLAGS} -fvisibility=hidden"
+    LTEXP="#"
+])
+
+dnl
+dnl If the compiler doesn't have symbol visibility support, it may
+dnl support version scripts (only GNU and Solaris ld).
+dnl
+if test -z "$LTEXP"; then
+    if test "$lt_cv_prog_gnu_ld" = "yes"; then
+	cat > conftest.map <<-EOF
+	VERS_1.0 {
+	    global: foo;
+	    local:  *;
+	};
+	EOF
+	AC_MSG_CHECKING([whether ld supports map files])
+	_LDFLAGS="$LDFLAGS"
+	LDFLAGS="$LDFLAGS -fPIC -shared -Wl,--version-script,./conftest.map"
+	AC_TRY_LINK([int foo;], [], [
+	    LTEXP="#"; LTLDFLAGS="$LTLDFLAGS -Wl,--version-script,\$(mapfile)"
+	])
+	LDFLAGS="$_LDFLAGS"
+    else
+	case "$host" in
+	    *-*-solaris2*)
+		cat > conftest.map <<-EOF
+		VERS_1.0 {
+		    global: foo;
+		    local:  *;
+		};
+		EOF
+		AC_MSG_CHECKING([whether ld supports map files])
+		_LDFLAGS="$LDFLAGS"
+		LDFLAGS="$LDFLAGS -fPIC -shared -Wl,-M,./conftest.map"
+		AC_TRY_LINK([int foo;], [], [
+		    LTEXP="#"; LTLDFLAGS="$LTLDFLAGS -Wl,-M,\$(mapfile)"
+		])
+		LDFLAGS="$_LDFLAGS"
+		;;
+	esac
+    fi
+fi
+
+dnl
+dnl Check for -fstack-protector and -z relro support
+dnl This after the call to AC_LANG_WERROR so that warnings
+dnl are treated as fatal errors.
+dnl
 if test "$enable_hardening" != "no"; then
-    AC_LANG_WERROR
     AX_CHECK_COMPILE_FLAG([-fstack-protector], [
 	AX_CHECK_LINK_FLAG([-fstack-protector], [
 	    CFLAGS="${CFLAGS} -fstack-protector"

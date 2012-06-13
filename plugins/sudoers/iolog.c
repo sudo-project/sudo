@@ -683,7 +683,7 @@ sudoers_io_log_stderr(const char *buf, unsigned int len)
     return sudoers_io_log(buf, len, IOFD_STDERR);
 }
 
-struct io_plugin sudoers_io = {
+__dso_public struct io_plugin sudoers_io = {
     SUDO_IO_PLUGIN,
     SUDO_API_VERSION,
     sudoers_io_open,

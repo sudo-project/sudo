@@ -60,6 +60,7 @@ CFLAGS = @CFLAGS@
 LDFLAGS = @LDFLAGS@
 SUDOERS_LDFLAGS = $(LDFLAGS) @SUDOERS_LDFLAGS@
 LTLDFLAGS = @LTLDFLAGS@
+@LTEXP@LTEXPORTS = -export-symbols $(srcdir)/sudoers.sym
 
 # Where to install things...
 prefix = @prefix@
@@ -72,9 +73,10 @@ datarootdir = @datarootdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
 
-# File extension and mode to use for shared libraries/objects
+# File extension, mode and map file to use for shared libraries/objects
 soext = @SOEXT@
 shlib_mode = @SHLIB_MODE@
+mapfile = $(srcdir)/sudoers.map
 
 # Directory in which to install the sudoers plugin
 plugindir = @PLUGINDIR@
@@ -167,7 +169,7 @@ libparsesudoers.la: $(LIBPARSESUDOERS_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LIBPARSESUDOERS_OBJS) -no-install
 
 sudoers.la: $(SUDOERS_OBJS) $(LT_LIBS) libparsesudoers.la
-	$(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(SUDOERS_LDFLAGS) $(LTLDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module -export-symbols $(srcdir)/sudoers.sym -avoid-version -rpath $(plugindir)
+	$(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(SUDOERS_LDFLAGS) $(LTLDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module $(LTEXPORTS) -avoid-version -rpath $(plugindir)
 
 visudo: libparsesudoers.la $(VISUDO_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) libparsesudoers.la $(LIBS) $(NET_LIBS)
@@ -737,7 +739,8 @@ testsudoers.o: $(srcdir)/testsudoers.c $(top_builddir)/config.h \
                $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
                $(incdir)/gettext.h $(srcdir)/interfaces.h $(srcdir)/parse.h \
-               $(incdir)/sudo_conf.h $(incdir)/list.h $(devdir)/gram.h
+               $(incdir)/sudo_conf.h $(incdir)/list.h $(incdir)/secure_path.h \
+               $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/testsudoers.c
 timestr.lo: $(srcdir)/timestr.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/timestr.c

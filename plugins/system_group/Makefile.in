@@ -45,6 +45,7 @@ CFLAGS = @CFLAGS@
 # Flags to pass to the link stage
 LDFLAGS = @LDFLAGS@
 LTLDFLAGS = @LTLDFLAGS@
+@LTEXP@LTEXPORTS = -export-symbols $(srcdir)/system_group.sym
 
 # Where to install things...
 prefix = @prefix@
@@ -57,9 +58,10 @@ datarootdir = @datarootdir@
 localstatedir = @localstatedir@
 plugindir = @PLUGINDIR@
 
-# File extension and mode to use for shared libraries/objects
+# File extension, mode and map file to use for shared libraries/objects
 soext = @SOEXT@
 shlib_mode = @SHLIB_MODE@
+mapfile = $(srcdir)/system_group.map
 
 # OS dependent defines
 DEFS = @OSDEFS@
@@ -85,7 +87,7 @@ Makefile: $(srcdir)/Makefile.in
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 
 system_group.la: $(OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LTLDFLAGS) -o $@ $(OBJS) $(LIBS) -module -export-symbols $(srcdir)/system_group.sym -avoid-version -rpath $(plugindir)
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LTLDFLAGS) -o $@ $(OBJS) $(LIBS) -module $(LTEXPORTS) -avoid-version -rpath $(plugindir)
 
 pre-install:
 

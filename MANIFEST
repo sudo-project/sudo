@@ -127,15 +127,14 @@ mkpkg
 pathnames.h.in
 plugins/sample/Makefile.in
 plugins/sample/sample_plugin.c
+plugins/sample/sample_plugin.map
 plugins/sample/sample_plugin.sym
 plugins/sample_group/Makefile.in
 plugins/sample_group/getgrent.c
 plugins/sample_group/plugin_test.c
 plugins/sample_group/sample_group.c
+plugins/sample_group/sample_group.map
 plugins/sample_group/sample_group.sym
-plugins/system_group/Makefile.in
-plugins/system_group/system_group.c
-plugins/system_group/system_group.sym
 plugins/sudoers/Makefile.in
 plugins/sudoers/aixcrypt.exp
 plugins/sudoers/alias.c
@@ -262,6 +261,7 @@ plugins/sudoers/sudo_nss.h
 plugins/sudoers/sudoers.c
 plugins/sudoers/sudoers.h
 plugins/sudoers/sudoers.in
+plugins/sudoers/sudoers.map
 plugins/sudoers/sudoers.sym
 plugins/sudoers/sudoers2ldif
 plugins/sudoers/sudoers_version.h
@@ -275,6 +275,10 @@ plugins/sudoers/toke_util.c
 plugins/sudoers/tsgetgrpw.c
 plugins/sudoers/tsgetgrpw.h
 plugins/sudoers/visudo.c
+plugins/system_group/Makefile.in
+plugins/system_group/system_group.c
+plugins/system_group/system_group.map
+plugins/system_group/system_group.sym
 pp
 src/Makefile.in
 src/conversation.c
@@ -332,6 +336,7 @@ src/sudo.h
 src/sudo_edit.c
 src/sudo_exec.h
 src/sudo_noexec.c
+src/sudo_noexec.map
 src/sudo_plugin_int.h
 src/sudo_usage.h.in
 src/tgetpass.c
