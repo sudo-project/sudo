@@ -115,6 +115,9 @@
 /* Define to 1 if you have the `dlopen' function. */
 #undef HAVE_DLOPEN
 
+/* Define to 1 if the compiler supports the __visibility__ attribute. */
+#undef HAVE_DSO_VISIBILITY
+
 /* Define to 1 if your system has the F_CLOSEM fcntl. */
 #undef HAVE_FCNTL_CLOSEM
 

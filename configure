@@ -20110,6 +20110,8 @@ eval ac_res=\$$as_CACHEVAR
 $as_echo "$ac_res" >&6; }
 if test x"`eval 'as_val=${'$as_CACHEVAR'};$as_echo "$as_val"'`" = xyes; then :
 
+    $as_echo "#define HAVE_DSO_VISIBILITY 1" >>confdefs.h
+
     CFLAGS="${CFLAGS} -fvisibility=hidden"
     LTEXP="#"
 
@@ -22647,6 +22649,7 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+
 
 
 

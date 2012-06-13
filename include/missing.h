@@ -53,7 +53,7 @@
 #endif
 
 #ifndef __dso_public
-# if __GNUC_PREREQ__(4, 0)
+# ifdef HAVE_DSO_VISIBILITY
 #  define __dso_public	__attribute__((__visibility__("default")))
 #  define __dso_hidden	__attribute__((__visibility__("hidden")))
 # else

@@ -3173,6 +3173,7 @@ dnl into fatal errors (and there is no way to undo that)
 dnl
 AC_LANG_WERROR
 AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [
+    AC_DEFINE(HAVE_DSO_VISIBILITY)
     CFLAGS="${CFLAGS} -fvisibility=hidden"
     LTEXP="#"
 ])
@@ -3460,6 +3461,7 @@ AH_TEMPLATE(RTLD_PRELOAD_VAR, [The environment variable that controls preloading
 AH_TEMPLATE(RTLD_PRELOAD_ENABLE_VAR, [An extra environment variable that is required to enable preloading (if any).])
 AH_TEMPLATE(RTLD_PRELOAD_DELIM, [The delimiter to use when defining multiple preloaded objects.])
 AH_TEMPLATE(RTLD_PRELOAD_DEFAULT, [The default value of preloaded objects (if any).])
+AH_TEMPLATE(HAVE_DSO_VISIBILITY, [Define to 1 if the compiler supports the __visibility__ attribute.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in
