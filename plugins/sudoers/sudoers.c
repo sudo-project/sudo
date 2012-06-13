@@ -268,12 +268,12 @@ sudoers_policy_close(int exit_status, int error_code)
 	(void)sudo_auth_end_session(runas_pw);
 
     /* Free remaining references to password and group entries. */
-    pw_delref(sudo_user.pw);
-    pw_delref(runas_pw);
+    sudo_pw_delref(sudo_user.pw);
+    sudo_pw_delref(runas_pw);
     if (runas_gr != NULL)
-	gr_delref(runas_gr);
+	sudo_gr_delref(runas_gr);
     if (user_group_list != NULL)
-	grlist_delref(user_group_list);
+	sudo_grlist_delref(user_group_list);
 
     debug_return;
 }
@@ -417,7 +417,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    pw = sudo_getpwnam(def_timestampowner);
 	if (pw != NULL) {
 	    timestamp_uid = pw->pw_uid;
-	    pw_delref(pw);
+	    sudo_pw_delref(pw);
 	} else {
 	    log_error(0, _("timestamp owner (%s): No such user"),
 		def_timestampowner);
@@ -466,7 +466,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
 	    if ((pw = sudo_getpwnam(prev_user)) != NULL) {
 		    if (sudo_user.pw != NULL)
-			pw_delref(sudo_user.pw);
+			sudo_pw_delref(sudo_user.pw);
 		    sudo_user.pw = pw;
 	    }
 	}
@@ -664,7 +664,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	gid_t egid;
 	size_t glsize;
 	char *cp, *gid_list;
-	struct group_list *grlist = get_group_list(runas_pw);
+	struct group_list *grlist = sudo_get_grlist(runas_pw);
 
 	/* We reserve an extra spot in the list for the effective gid. */
 	glsize = sizeof("runas_groups=") - 1 +
@@ -690,7 +690,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    }
 	}
 	command_info[info_len++] = gid_list;
-	grlist_delref(grlist);
+	sudo_grlist_delref(grlist);
     }
     if (def_closefrom >= 0)
 	easprintf(&command_info[info_len++], "closefrom=%d", def_closefrom);
@@ -800,7 +800,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
     }
     rval = sudoers_policy_main(argc, argv, I_LISTPW, NULL, NULL, NULL, NULL);
     if (list_user) {
-	pw_delref(list_pw);
+	sudo_pw_delref(list_pw);
 	list_pw = NULL;
     }
 
@@ -865,7 +865,7 @@ init_vars(char * const envp[])
      * Get group list.
      */
     if (user_group_list == NULL)
-	user_group_list = get_group_list(sudo_user.pw);
+	user_group_list = sudo_get_grlist(sudo_user.pw);
 
     /* Set runas callback. */
     sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
@@ -1116,7 +1116,7 @@ set_runaspw(const char *user)
     debug_decl(set_runaspw, SUDO_DEBUG_PLUGIN)
 
     if (runas_pw != NULL)
-	pw_delref(runas_pw);
+	sudo_pw_delref(runas_pw);
     if (*user == '#') {
 	if ((runas_pw = sudo_getpwuid(atoi(user + 1))) == NULL)
 	    runas_pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
@@ -1137,7 +1137,7 @@ set_runasgr(const char *group)
     debug_decl(set_runasgr, SUDO_DEBUG_PLUGIN)
 
     if (runas_gr != NULL)
-	gr_delref(runas_gr);
+	sudo_gr_delref(runas_gr);
     if (*group == '#') {
 	if ((runas_gr = sudo_getgrgid(atoi(group + 1))) == NULL)
 	    runas_gr = sudo_fakegrnam(group);
@@ -1430,7 +1430,7 @@ deserialize_info(char * const args[], char * const settings[], char * const user
 		break;
 	    cp++; /* skip over comma */
 	}
-	set_group_list(user_name, gids, ngids);
+	sudo_set_grlist(user_name, gids, ngids);
 	efree(gids);
     }
 

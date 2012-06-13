@@ -360,7 +360,7 @@ set_runaspw(const char *user)
     debug_decl(main, SUDO_DEBUG_UTIL)
 
     if (runas_pw != NULL)
-	pw_delref(runas_pw);
+	sudo_pw_delref(runas_pw);
     if (*user == '#') {
 	if ((runas_pw = sudo_getpwuid(atoi(user + 1))) == NULL)
 	    runas_pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
@@ -378,7 +378,7 @@ set_runasgr(const char *group)
     debug_decl(main, SUDO_DEBUG_UTIL)
 
     if (runas_gr != NULL)
-	gr_delref(runas_gr);
+	sudo_gr_delref(runas_gr);
     if (*group == '#') {
 	if ((runas_gr = sudo_getgrgid(atoi(group + 1))) == NULL)
 	    runas_gr = sudo_fakegrnam(group);

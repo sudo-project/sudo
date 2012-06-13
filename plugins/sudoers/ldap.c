@@ -1126,7 +1126,7 @@ sudo_ldap_build_pass1(struct passwd *pw)
 	sz += 12 + sudo_ldap_value_len(grp->gr_name);
     }
     sz += 13 + MAX_UID_T_LEN;
-    if ((grlist = get_group_list(pw)) != NULL) {
+    if ((grlist = sudo_get_grlist(pw)) != NULL) {
 	for (i = 0; i < grlist->ngroups; i++) {
 	    if (grp != NULL && strcasecmp(grlist->groups[i], grp->gr_name) == 0)
 		continue;
@@ -1193,9 +1193,9 @@ sudo_ldap_build_pass1(struct passwd *pw)
 
     /* Done with groups. */
     if (grlist != NULL)
-	grlist_delref(grlist);
+	sudo_grlist_delref(grlist);
     if (grp != NULL)
-	gr_delref(grp);
+	sudo_gr_delref(grp);
 
     /* Add ALL to list and end the global OR */
     if (strlcat(buf, "(sudoUser=ALL)", sz) >= sz)

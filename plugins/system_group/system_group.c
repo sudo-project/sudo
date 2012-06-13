@@ -114,7 +114,7 @@ sysgroup_init(int version, sudo_printf_t sudo_printf, char *const argv[])
 	need_setent = true;
     }
 
-    handle = dlsym(RTLD_DEFAULT, "gr_delref");
+    handle = dlsym(RTLD_DEFAULT, "sudo_gr_delref");
     if (handle != NULL)
 	sysgroup_gr_delref = (sysgroup_gr_delref_t)handle;
 

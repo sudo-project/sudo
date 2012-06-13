@@ -565,10 +565,10 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 done:
     efree(tofree);
     if (details.runas_pw)
-	pw_delref(details.runas_pw);
+	sudo_pw_delref(details.runas_pw);
     sudo_endpwent();
     if (details.runas_gr)
-	gr_delref(details.runas_gr);
+	sudo_gr_delref(details.runas_gr);
     sudo_endgrent();
 
     debug_return_bool(rval);

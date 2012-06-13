@@ -172,7 +172,7 @@ check_user(int validated, int mode)
 
 done:
     sudo_auth_cleanup(auth_pw);
-    pw_delref(auth_pw);
+    sudo_pw_delref(auth_pw);
 
     debug_return_bool(rval);
 }
@@ -751,10 +751,10 @@ get_authpw(void)
 	if (runas_pw->pw_name == NULL)
 	    log_fatal(NO_MAIL|MSG_ONLY, _("unknown uid: %u"),
 		(unsigned int) runas_pw->pw_uid);
-	pw_addref(runas_pw);
+	sudo_pw_addref(runas_pw);
 	pw = runas_pw;
     } else {
-	pw_addref(sudo_user.pw);
+	sudo_pw_addref(sudo_user.pw);
 	pw = sudo_user.pw;
     }
 

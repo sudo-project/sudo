@@ -700,7 +700,7 @@ usergr_matches(char *group, char *user, struct passwd *pw)
 
 done:
     if (pw0 != NULL)
-	pw_delref(pw0);
+	sudo_pw_delref(pw0);
 
     debug_return_bool(matched);
 }

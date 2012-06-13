@@ -3,6 +3,11 @@ sudoers.so {
 		# Policy and I/O plugin structs
 		sudoers_policy;
 		sudoers_io;
+		# Group cache functions for system_group plugin
+		sudo_getgrgid;
+		sudo_getgrnam;
+		sudo_gr_addref;
+		sudo_gr_delref;
 	local:
 		*;
 };

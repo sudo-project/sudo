@@ -102,7 +102,7 @@ fill_group(char *str, size_t strsize)
 
     if ((grp = sudo_getgrgid(user_gid)) != NULL) {
 	len = strlcpy(str, grp->gr_name, strsize);
-	gr_delref(grp);
+	sudo_gr_delref(grp);
     } else {
 	len = strlen(str);
 	len = snprintf(str + len, strsize - len, "#%u",
@@ -130,7 +130,7 @@ fill_runas_group(char *str, size_t strsize)
     } else {
 	if ((grp = sudo_getgrgid(runas_pw->pw_gid)) != NULL) {
 	    len = strlcpy(str, grp->gr_name, strsize);
-	    gr_delref(grp);
+	    sudo_gr_delref(grp);
 	} else {
 	    len = strlen(str);
 	    len = snprintf(str + len, strsize - len, "#%u",
