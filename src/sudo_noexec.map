@@ -1,5 +1,0 @@
-sudo_noexec.so {
-	global:
-		# All symbols are exported
-		*;
-};

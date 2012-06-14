@@ -695,7 +695,6 @@ iolog_dir
 COMPAT_TEST_PROGS
 SUDO_NLS
 LIBINTL
-LTEXP
 LT_STATIC
 LIBDL
 CONFIGURE_ARGS
@@ -740,7 +739,9 @@ SUDO_LIBS
 SUDO_OBJS
 SUDOERS_OBJS
 COMMON_OBJS
-LTLDFLAGS
+LT_LDEXPORTS
+LT_LDMAP
+LT_LDFLAGS
 SUDOERS_LDFLAGS
 LDFLAGS
 CPPFLAGS
@@ -2884,6 +2885,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -2937,7 +2939,6 @@ PROGS="sudo"
 : ${SUDOERS_GID='0'}
 DEVEL=
 LDAP="#"
-LTEXP=""
 BAMAN=0
 LCMAN=0
 SEMAN=0
@@ -2950,6 +2951,7 @@ AUTH_EXCL=
 AUTH_EXCL_DEF=
 AUTH_DEF=passwd
 SUDO_NLS=disabled
+LT_LDEXPORTS="-export-symbols \$(symfile)"
 
 CHECKSHADOW=true
 shadow_defs=
@@ -14011,6 +14013,7 @@ $as_echo "$sudo_cv_var_daportable" >&6; }
 		;;
     *-dec-osf*)
 		# ignore envariables wrt dynamic lib path
+		# XXX - sudo LDFLAGS instead?
 		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-no_library_replacement"
 
 		: ${CHECKSIA='true'}
@@ -14659,7 +14662,7 @@ fi
 $as_echo "$sudo_cv_var_gcc_static_libgcc" >&6; }
     CFLAGS="$_CFLAGS"
     if test "$sudo_cv_var_gcc_static_libgcc" = "yes"; then
-	LTLDFLAGS="$LTLDFLAGS -Wc,-static-libgcc"
+	LT_LDFLAGS="$LT_LDFLAGS -Wc,-static-libgcc"
     fi
 fi
 
@@ -20113,14 +20116,14 @@ if test x"`eval 'as_val=${'$as_CACHEVAR'};$as_echo "$as_val"'`" = xyes; then :
     $as_echo "#define HAVE_DSO_VISIBILITY 1" >>confdefs.h
 
     CFLAGS="${CFLAGS} -fvisibility=hidden"
-    LTEXP="#"
+    LT_LDEXPORTS=
 
 else
   :
 fi
 
 
-if test -z "$LTEXP"; then
+if test -n "$LT_LDEXPORTS"; then
     if test "$lt_cv_prog_gnu_ld" = "yes"; then
 	cat > conftest.map <<-EOF
 	VERS_1.0 {
@@ -20145,7 +20148,7 @@ main ()
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
 
-	    LTEXP="#"; LTLDFLAGS="$LTLDFLAGS -Wl,--version-script,\$(mapfile)"
+	    LT_LDEXPORTS=; LT_LDMAP="-Wl,--version-script,\$(mapfile)"
 
 fi
 rm -f core conftest.err conftest.$ac_objext \
@@ -20177,7 +20180,7 @@ main ()
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
 
-		    LTEXP="#"; LTLDFLAGS="$LTLDFLAGS -Wl,-M,\$(mapfile)"
+		    LT_LDEXPORTS=; LT_LDMAP="-Wl,-M,\$(mapfile)"
 
 fi
 rm -f core conftest.err conftest.$ac_objext \

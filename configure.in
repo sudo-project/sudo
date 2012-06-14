@@ -20,7 +20,9 @@ AC_SUBST([PROGS])
 AC_SUBST([CPPFLAGS])
 AC_SUBST([LDFLAGS])
 AC_SUBST([SUDOERS_LDFLAGS])
-AC_SUBST([LTLDFLAGS])
+AC_SUBST([LT_LDFLAGS])
+AC_SUBST([LT_LDMAP])
+AC_SUBST([LT_LDEXPORTS])
 AC_SUBST([COMMON_OBJS])
 AC_SUBST([SUDOERS_OBJS])
 AC_SUBST([SUDO_OBJS])
@@ -66,7 +68,6 @@ AC_SUBST([ac_config_libobj_dir])
 AC_SUBST([CONFIGURE_ARGS])
 AC_SUBST([LIBDL])
 AC_SUBST([LT_STATIC])
-AC_SUBST([LTEXP])
 AC_SUBST([LIBINTL])
 AC_SUBST([SUDO_NLS])
 AC_SUBST([COMPAT_TEST_PROGS])
@@ -165,7 +166,6 @@ PROGS="sudo"
 : ${SUDOERS_GID='0'}
 DEVEL=
 LDAP="#"
-LTEXP=""
 BAMAN=0
 LCMAN=0
 SEMAN=0
@@ -178,6 +178,7 @@ AUTH_EXCL=
 AUTH_EXCL_DEF=
 AUTH_DEF=passwd
 SUDO_NLS=disabled
+LT_LDEXPORTS="-export-symbols \$(symfile)"
 
 dnl
 dnl Other vaiables
@@ -1653,6 +1654,7 @@ case "$host" in
 		;;
     *-dec-osf*)
 		# ignore envariables wrt dynamic lib path
+		# XXX - sudo LDFLAGS instead?
 		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-no_library_replacement"
 
 		: ${CHECKSIA='true'}
@@ -1987,7 +1989,7 @@ if test X"$with_gnu_ld" != "yes" -a -n "$GCC"; then
     )
     CFLAGS="$_CFLAGS"
     if test "$sudo_cv_var_gcc_static_libgcc" = "yes"; then
-	LTLDFLAGS="$LTLDFLAGS -Wc,-static-libgcc"
+	LT_LDFLAGS="$LT_LDFLAGS -Wc,-static-libgcc"
     fi
 fi
 
@@ -3175,14 +3177,14 @@ AC_LANG_WERROR
 AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [
     AC_DEFINE(HAVE_DSO_VISIBILITY)
     CFLAGS="${CFLAGS} -fvisibility=hidden"
-    LTEXP="#"
+    LT_LDEXPORTS=
 ])
 
 dnl
 dnl If the compiler doesn't have symbol visibility support, it may
 dnl support version scripts (only GNU and Solaris ld).
 dnl
-if test -z "$LTEXP"; then
+if test -n "$LT_LDEXPORTS"; then
     if test "$lt_cv_prog_gnu_ld" = "yes"; then
 	cat > conftest.map <<-EOF
 	VERS_1.0 {
@@ -3194,7 +3196,7 @@ if test -z "$LTEXP"; then
 	_LDFLAGS="$LDFLAGS"
 	LDFLAGS="$LDFLAGS -fPIC -shared -Wl,--version-script,./conftest.map"
 	AC_TRY_LINK([int foo;], [], [
-	    LTEXP="#"; LTLDFLAGS="$LTLDFLAGS -Wl,--version-script,\$(mapfile)"
+	    LT_LDEXPORTS=; LT_LDMAP="-Wl,--version-script,\$(mapfile)"
 	])
 	LDFLAGS="$_LDFLAGS"
     else
@@ -3210,7 +3212,7 @@ if test -z "$LTEXP"; then
 		_LDFLAGS="$LDFLAGS"
 		LDFLAGS="$LDFLAGS -fPIC -shared -Wl,-M,./conftest.map"
 		AC_TRY_LINK([int foo;], [], [
-		    LTEXP="#"; LTLDFLAGS="$LTLDFLAGS -Wl,-M,\$(mapfile)"
+		    LT_LDEXPORTS=; LT_LDMAP="-Wl,-M,\$(mapfile)"
 		])
 		LDFLAGS="$_LDFLAGS"
 		;;

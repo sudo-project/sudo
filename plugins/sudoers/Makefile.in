@@ -58,9 +58,7 @@ CFLAGS = @CFLAGS@
 
 # Flags to pass to the link stage
 LDFLAGS = @LDFLAGS@
-SUDOERS_LDFLAGS = $(LDFLAGS) @SUDOERS_LDFLAGS@
-LTLDFLAGS = @LTLDFLAGS@
-@LTEXP@LTEXPORTS = -export-symbols $(srcdir)/sudoers.sym
+LT_LDFLAGS = @SUDOERS_LDFLAGS@ @LT_LDFLAGS@ @LT_LDMAP@ @LT_LDEXPORTS@
 
 # Where to install things...
 prefix = @prefix@
@@ -77,6 +75,7 @@ localstatedir = @localstatedir@
 soext = @SOEXT@
 shlib_mode = @SHLIB_MODE@
 mapfile = $(srcdir)/sudoers.map
+symfile = $(srcdir)/sudoers.sym
 
 # Directory in which to install the sudoers plugin
 plugindir = @PLUGINDIR@
@@ -169,7 +168,7 @@ libparsesudoers.la: $(LIBPARSESUDOERS_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LIBPARSESUDOERS_OBJS) -no-install
 
 sudoers.la: $(SUDOERS_OBJS) $(LT_LIBS) libparsesudoers.la
-	$(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(SUDOERS_LDFLAGS) $(LTLDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module $(LTEXPORTS) -avoid-version -rpath $(plugindir)
+	$(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir)
 
 visudo: libparsesudoers.la $(VISUDO_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) libparsesudoers.la $(LIBS) $(NET_LIBS)

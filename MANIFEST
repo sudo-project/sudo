@@ -336,7 +336,6 @@ src/sudo.h
 src/sudo_edit.c
 src/sudo_exec.h
 src/sudo_noexec.c
-src/sudo_noexec.map
 src/sudo_plugin_int.h
 src/sudo_usage.h.in
 src/tgetpass.c
