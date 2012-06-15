@@ -54,8 +54,16 @@
 
 #ifndef __dso_public
 # ifdef HAVE_DSO_VISIBILITY
-#  define __dso_public	__attribute__((__visibility__("default")))
-#  define __dso_hidden	__attribute__((__visibility__("hidden")))
+#  if defined(__GNUC__)
+#   define __dso_public	__attribute__((__visibility__("default")))
+#   define __dso_hidden	__attribute__((__visibility__("hidden")))
+#  elif defined(__SUNPRO_C)
+#   define __dso_public	__global
+#   define __dso_hidden __hidden
+#  else
+#   define __dso_public	__declspec(dllexport)
+#   define __dso_hidden
+#  endif
 # else
 #  define __dso_public
 #  define __dso_hidden

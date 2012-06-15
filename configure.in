@@ -3178,6 +3178,25 @@ AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [
     AC_DEFINE(HAVE_DSO_VISIBILITY)
     CFLAGS="${CFLAGS} -fvisibility=hidden"
     LT_LDEXPORTS=
+], [
+    if test -z "$GCC"; then
+	case "$host" in
+	    *-*-hpux*)
+		AX_CHECK_COMPILE_FLAG([-Bhidden_def], [
+		    AC_DEFINE(HAVE_DSO_VISIBILITY)
+		    CFLAGS="${CFLAGS} -Bhidden_def"
+		    LT_LDEXPORTS=
+		])
+		;;
+	    *-*-solaris2*)
+		AX_CHECK_COMPILE_FLAG([-xldscope=hidden], [
+		    AC_DEFINE(HAVE_DSO_VISIBILITY)
+		    CFLAGS="${CFLAGS} -xldscope=hidden"
+		    LT_LDEXPORTS=
+		])
+		;;
+	esac
+    fi
 ])
 
 dnl
