@@ -1,3 +1,27 @@
+What's new in Sudo 1.8.6?
+
+ * Sudo is now built with the -fstack-protector flag if the the
+   compiler supports it.  Also, the -zrelro linker flag is used if
+   supported.  The --disable-hardening configure option can be used
+   to build sudo without stack smashing support.
+
+ * If the user is a member of the "exempt" group in sudoers, they
+   will no longer be prompted for a password even if the -k flag
+   is specified with the command.  This makes "sudo -k command"
+   consistent with the behavior one would get if the user ran "sudo
+   -k" immediately before running the command.
+
+ * The sudoers file may now be a symbolic link.  Previously, sudo
+   would refuse to read sudoers unless it was a regular file.
+
+ * The sudoreplay command can now properly replay sessions where
+   no tty was present.
+
+ * The sudoers plugin now takes advantage of symbol visibility
+   controls when supported by the compiler or linker.  As a result,
+   only a small number of symbols are exported which significantly
+   reduces the chances of a conflict with other shared objects.
+
 What's new in Sudo 1.8.5p2?
 
  * Fixed use of the SUDO_ASKPASS environment variable which was
