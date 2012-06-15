@@ -135,7 +135,7 @@ mkdir_parents(char *path)
  * Uses file locking to avoid sequence number collisions.
  */
 void
-io_nextid(char *iolog_dir, char sessid[7])
+io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 {
     struct stat sb;
     char buf[32], *ep;
@@ -172,14 +172,41 @@ io_nextid(char *iolog_dir, char sessid[7])
 	log_fatal(USE_ERRNO, _("unable to open %s"), pathbuf);
     lock_file(fd, SUDO_LOCK);
 
-    /* Read seq number (base 36). */
-    nread = read(fd, buf, sizeof(buf));
-    if (nread != 0) {
-	if (nread == -1)
-	    log_fatal(USE_ERRNO, _("unable to read %s"), pathbuf);
-	id = strtoul(buf, &ep, 36);
-	if (buf == ep || id >= SESSID_MAX)
-	    log_fatal(0, _("invalid sequence number %s"), pathbuf);
+    /*
+     * If there is no seq file in iolog_dir and a fallback dir was
+     * specified, look for seq in the fallback dir.  This is to work
+     * around a bug in sudo 1.8.5 and older where iolog_dir was not
+     * expanded before the sequence number was updated.
+     */
+    if (iolog_dir_fallback != NULL && fstat(fd, &sb) == 0 && sb.st_size == 0) {
+	char fallback[PATH_MAX];
+
+	len = snprintf(fallback, sizeof(fallback), "%s/seq",
+	    iolog_dir_fallback);
+	if (len > 0 && len < sizeof(fallback)) {
+	    int fd2 = open(fallback, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
+	    if (fd2 != -1) {
+		nread = read(fd2, buf, sizeof(buf));
+		if (nread > 0) {
+		    id = strtoul(buf, &ep, 36);
+		    if (buf == ep || id >= SESSID_MAX)
+			id = 0;
+		}
+		close(fd2);
+	    }
+	}
+    }
+
+    /* Read current seq number (base 36). */
+    if (id == 0) {
+	nread = read(fd, buf, sizeof(buf));
+	if (nread != 0) {
+	    if (nread == -1)
+		log_fatal(USE_ERRNO, _("unable to read %s"), pathbuf);
+	    id = strtoul(buf, &ep, 36);
+	    if (buf == ep || id >= SESSID_MAX)
+		log_fatal(0, _("invalid sequence number %s"), pathbuf);
+	}
     }
     id++;
 
@@ -476,7 +503,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	/* Get next session ID and convert it into a path. */
 	tofree = emalloc(sizeof(_PATH_SUDO_IO_LOGDIR) + sizeof(sessid) + 2);
 	memcpy(tofree, _PATH_SUDO_IO_LOGDIR, sizeof(_PATH_SUDO_IO_LOGDIR));
-	io_nextid(tofree, sessid);
+	io_nextid(tofree, NULL, sessid);
 	snprintf(tofree + sizeof(_PATH_SUDO_IO_LOGDIR), sizeof(sessid) + 2,
 	    "%c%c/%c%c/%c%c", sessid[0], sessid[1], sessid[2], sessid[3],
 	    sessid[4], sessid[5]);

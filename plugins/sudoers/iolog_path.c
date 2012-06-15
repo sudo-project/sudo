@@ -46,18 +46,19 @@
 
 struct path_escape {
     const char *name;
-    size_t (*copy_fn)(char *, size_t);
+    size_t (*copy_fn)(char *, size_t, char *);
 };
 
-static size_t fill_seq(char *, size_t);
-static size_t fill_user(char *, size_t);
-static size_t fill_group(char *, size_t);
-static size_t fill_runas_user(char *, size_t);
-static size_t fill_runas_group(char *, size_t);
-static size_t fill_hostname(char *, size_t);
-static size_t fill_command(char *, size_t);
+static size_t fill_seq(char *, size_t, char *);
+static size_t fill_user(char *, size_t, char *);
+static size_t fill_group(char *, size_t, char *);
+static size_t fill_runas_user(char *, size_t, char *);
+static size_t fill_runas_group(char *, size_t, char *);
+static size_t fill_hostname(char *, size_t, char *);
+static size_t fill_command(char *, size_t, char *);
 
-static struct path_escape escapes[] = {
+/* Note: "seq" must be first in the list. */
+static struct path_escape io_path_escapes[] = {
     { "seq", fill_seq },
     { "user", fill_user },
     { "group", fill_group },
@@ -69,14 +70,14 @@ static struct path_escape escapes[] = {
 };
 
 static size_t
-fill_seq(char *str, size_t strsize)
+fill_seq(char *str, size_t strsize, char *logdir)
 {
     static char sessid[7];
     int len;
     debug_decl(sudoers_io_version, SUDO_DEBUG_UTIL)
 
     if (sessid[0] == '\0')
-	io_nextid(def_iolog_dir, sessid);
+	io_nextid(logdir, def_iolog_dir, sessid);
 
     /* Path is of the form /var/log/sudo-io/00/00/01. */
     len = snprintf(str, strsize, "%c%c/%c%c/%c%c", sessid[0],
@@ -87,14 +88,14 @@ fill_seq(char *str, size_t strsize)
 }
 
 static size_t
-fill_user(char *str, size_t strsize)
+fill_user(char *str, size_t strsize, char *unused)
 {
     debug_decl(fill_user, SUDO_DEBUG_UTIL)
     debug_return_size_t(strlcpy(str, user_name, strsize));
 }
 
 static size_t
-fill_group(char *str, size_t strsize)
+fill_group(char *str, size_t strsize, char *unused)
 {
     struct group *grp;
     size_t len;
@@ -112,14 +113,14 @@ fill_group(char *str, size_t strsize)
 }
 
 static size_t
-fill_runas_user(char *str, size_t strsize)
+fill_runas_user(char *str, size_t strsize, char *unused)
 {
     debug_decl(fill_runas_user, SUDO_DEBUG_UTIL)
     debug_return_size_t(strlcpy(str, runas_pw->pw_name, strsize));
 }
 
 static size_t
-fill_runas_group(char *str, size_t strsize)
+fill_runas_group(char *str, size_t strsize, char *unused)
 {
     struct group *grp;
     size_t len;
@@ -141,14 +142,14 @@ fill_runas_group(char *str, size_t strsize)
 }
 
 static size_t
-fill_hostname(char *str, size_t strsize)
+fill_hostname(char *str, size_t strsize, char *unused)
 {
     debug_decl(fill_hostname, SUDO_DEBUG_UTIL)
     debug_return_size_t(strlcpy(str, user_shost, strsize));
 }
 
 static size_t
-fill_command(char *str, size_t strsize)
+fill_command(char *str, size_t strsize, char *unused)
 {
     debug_decl(fill_command, SUDO_DEBUG_UTIL)
     debug_return_size_t(strlcpy(str, user_base, strsize));
@@ -165,7 +166,9 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 {
     size_t len, prelen = 0;
     char *dst, *dst0, *path, *pathend, tmpbuf[PATH_MAX];
+    char *slash = NULL;
     const char *endbrace, *src = dir;
+    static struct path_escape *escapes;
     int pass;
     bool strfit;
     debug_decl(expand_iolog_path, SUDO_DEBUG_UTIL)
@@ -193,17 +196,20 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 	switch (pass) {
 	case 0:
 	    src = dir;
+	    escapes = io_path_escapes + 1; /* skip "${seq}" */
 	    break;
 	case 1:
 	    /* Trim trailing slashes from dir component. */
 	    while (dst - path - 1 > prelen && dst[-1] == '/')
 		dst--;
-	    if (slashp)
-		*slashp = dst;
-	    src = "/";
-	    break;
+	    /* The NUL will be replaced with a '/' at the end. */
+	    if (dst + 1 >= pathend)
+		goto bad;
+	    slash = dst++;
+	    continue;
 	case 2:
 	    src = file;
+	    escapes = io_path_escapes;
 	    break;
 	}
 	dst0 = dst;
@@ -220,7 +226,8 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 				break;
 			}
 			if (esc->name != NULL) {
-			    len = esc->copy_fn(dst, (size_t)(pathend - dst));
+			    len = esc->copy_fn(dst, (size_t)(pathend - dst),
+				path + prelen);
 			    if (len >= (size_t)(pathend - dst))
 				goto bad;
 			    dst += len;
@@ -275,6 +282,9 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 	    *dst = '\0';
 	}
     }
+    if (slashp)
+	*slashp = slash;
+    *slash = '/';
 
     debug_return_str(path);
 bad:
