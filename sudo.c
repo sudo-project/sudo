@@ -742,16 +742,12 @@ init_vars(envp)
      * such as "list", we need to redo NewArgv and NewArgc.
      */
     if (ISSET(sudo_mode, MODE_SHELL)) {
-	char **av;
+	char **av, *cmnd = NULL;
+	int ac = 1;
 
-	/* Allocate 2 extra slots for --login and execve() failure (ENOEXEC). */
-	av = (char **) emalloc2(6, sizeof(char *));
-	av += 2;
-
-	av[0] = user_shell;	/* may be updated later */
 	if (NewArgc > 0) {
 	    /* shell -c "command" */
-	    char *cmnd, *src, *dst;
+	    char *src, *dst;
 	    size_t cmnd_size = (size_t) (NewArgv[NewArgc - 1] - NewArgv[0]) +
 		    strlen(NewArgv[NewArgc - 1]) + 1;
 
@@ -769,12 +765,19 @@ init_vars(envp)
 		dst--;	/* replace last space with a NUL */
 	    *dst = '\0';
 
+	    ac += 2; /* -c cmnd */
+	}
+
+	/* Allocate 2 extra slots for --login and execve() failure (ENOEXEC). */
+	av = (char **) emalloc2(ac + 3, sizeof(char *));
+	av[0] = user_shell;	/* may be updated later */
+	if (cmnd != NULL) {
 	    av[1] = "-c";
 	    av[2] = cmnd;
-	    NewArgc = 2;
 	}
-	av[++NewArgc] = NULL;
+	av[ac] = NULL;
 	NewArgv = av;
+	NewArgc = ac;
     } else if (ISSET(sudo_mode, MODE_EDIT) || NewArgc == 0) {
 	NewArgv--;
 	NewArgc++;
