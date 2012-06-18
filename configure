@@ -13553,7 +13553,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_noexec" >&5
 $as_echo "$with_noexec" >&6; }
 NOEXECFILE="sudo_noexec$_shrext"
-NOEXECDIR="`echo $with_noexec|sed 's:^\(.*\)/[^/]*:\1:'`"
+NOEXECDIR="`echo $with_noexec|sed -e 's:^${\([^}]*\)}:$(\1):' -e 's:^\(.*\)/[^/]*:\1:'`"
 
 # Extract the first word of "uname", so it can be a program name with args.
 set dummy uname; ac_word=$2
@@ -20051,6 +20051,8 @@ test "$libexecdir" = '${exec_prefix}/libexec' && libexecdir='$(exec_prefix)/libe
 test "$includedir" = '${prefix}/include' && includedir='$(prefix)/include'
 test "$datarootdir" = '${prefix}/share' && datarootdir='$(prefix)/share'
 test "$docdir" = '${datarootdir}/doc/${PACKAGE_TARNAME}' && docdir='$(datarootdir)/doc/$(PACKAGE_TARNAME)'
+test "$localedir" = '${datarootdir}/locale' && localedir='$(datarootdir)/locale'
+test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
 test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
 
 ac_config_files="$ac_config_files Makefile sudo.man visudo.man sudoers.man sudoers.ldap.man sudoreplay.man sudo_usage.h sudoers"
