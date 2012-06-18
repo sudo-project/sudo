@@ -535,9 +535,10 @@ delay(double secs)
 static int
 open_io_fd(char *path, int len, const char *suffix, union io_fd *fdp)
 {
+    debug_decl(open_io_fd, SUDO_DEBUG_UTIL)
+
     path[len] = '\0';
     strlcat(path, suffix, PATH_MAX);
-    debug_decl(open_io_fd, SUDO_DEBUG_UTIL)
 
 #ifdef HAVE_ZLIB_H
     fdp->g = gzopen(path, "r");

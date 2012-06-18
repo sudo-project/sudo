@@ -130,10 +130,12 @@ do_syslog(int pri, char *msg)
     size_t len, maxlen;
     char *p, *tmp, save;
     const char *fmt;
+#ifdef HAVE_SETLOCALE
+    const char *old_locale = estrdup(setlocale(LC_ALL, NULL));
+#endif
     debug_decl(do_syslog, SUDO_DEBUG_LOGGING)
 
 #ifdef HAVE_SETLOCALE
-    const char *old_locale = estrdup(setlocale(LC_ALL, NULL));
     if (!setlocale(LC_ALL, def_sudoers_locale))
 	setlocale(LC_ALL, "C");
 #endif /* HAVE_SETLOCALE */
