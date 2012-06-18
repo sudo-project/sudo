@@ -172,7 +172,7 @@
 #if defined(__GNUC__) && __GNUC__ == 2
 # define sudo_debug_printf(pri, fmt...) \
     sudo_debug_printf2(__func__, __FILE__, __LINE__, (pri)|sudo_debug_subsys, \
-    (fmt))
+    fmt)
 #else
 # define sudo_debug_printf(pri, ...) \
     sudo_debug_printf2(__func__, __FILE__, __LINE__, (pri)|sudo_debug_subsys, \
