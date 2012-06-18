@@ -19929,10 +19929,10 @@ if test X"$LIBDL" != X""; then
     SUDOERS_LIBS="${SUDOERS_LIBS} $LIBDL"
 fi
 
-# On HP-UX, you cannot dlopen() a shared object that uses pthreads
-# unless the main program is linked against -lpthread.  Since we
-# have no knowledge what libraries a plugin may depend on, we always
-# link against -lpthread on HP-UX if it is available.
+# On HP-UX, you cannot dlopen() a shared object that uses pthreads unless
+# the main program is linked against -lpthread.  We have no knowledge of
+# what libraries a plugin may depend on (e.g. HP-UX LDAP which uses pthreads)
+# so always link against -lpthread on HP-UX if it is available.
 # This check should go after all other libraries tests.
 case "$host" in
     *-*-hpux*)
