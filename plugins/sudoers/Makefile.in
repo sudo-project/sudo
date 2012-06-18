@@ -112,7 +112,7 @@ SHELL = @SHELL@
 
 PROGS = sudoers.la visudo sudoreplay testsudoers
 
-TEST_PROGS = check_iolog_path check_fill check_wrap check_addr
+TEST_PROGS = check_iolog_path check_fill check_wrap check_addr check_symbols
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
@@ -138,6 +138,8 @@ CHECK_FILL_OBJS = check_fill.o toke_util.o error.o
 
 CHECK_IOLOG_PATH_OBJS = check_iolog_path.o error.o iolog_path.o pwutil.o \
 			redblack.o
+
+CHECK_SYMBOLS_OBJS = check_symbols.o error.o
 
 CHECK_WRAP_OBJS = check_wrap.o logwrap.o error.o
 
@@ -187,6 +189,9 @@ check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) $(LT_LIBS)
 
 check_fill: $(CHECK_FILL_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_FILL_OBJS) $(LDFLAGS) $(LIBS)
+
+check_symbols: $(CHECK_SYMBOLS_OBJS) $(LT_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_SYMBOLS_OBJS) $(LDFLAGS) $(LIBS)
 
 check_wrap: $(CHECK_WRAP_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_WRAP_OBJS) $(LDFLAGS) $(LIBS)
@@ -290,6 +295,10 @@ check: $(TEST_PROGS) visudo testsudoers
 	rval=`expr $$rval + $$?`; \
 	./check_iolog_path $(srcdir)/regress/iolog_path/data; \
 	rval=`expr $$rval + $$?`; \
+	if [ X"$(soext)" != X"" ]; then \
+	    ./check_symbols .libs/sudoers$(soext) $(symfile); \
+	    rval=`expr $$rval + $$?`; \
+	fi; \
 	./check_wrap $(srcdir)/regress/logging/check_wrap.in > check_wrap.out; \
 	diff check_wrap.out $(srcdir)/regress/logging/check_wrap.out.ok; \
 	rval=`expr $$rval + $$?`; \
@@ -448,6 +457,9 @@ check_iolog_path.o: $(srcdir)/regress/iolog_path/check_iolog_path.c \
                     $(incdir)/sudo_debug.h $(incdir)/gettext.h \
                     $(devdir)/def_data.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/iolog_path/check_iolog_path.c
+check_symbols.o: $(srcdir)/regress/check_symbols/check_symbols.c $(top_builddir)/config.h \
+              $(incdir)/missing.h $(incdir)/error.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/check_symbols/check_symbols.c
 check_wrap.o: $(srcdir)/regress/logging/check_wrap.c $(top_builddir)/config.h \
               $(incdir)/missing.h $(incdir)/error.h $(incdir)/sudo_plugin.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/regress/logging/check_wrap.c
