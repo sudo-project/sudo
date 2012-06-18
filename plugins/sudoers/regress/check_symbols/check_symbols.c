@@ -67,6 +67,10 @@ main(int argc, char *argv[])
     FILE *fp;
     int ntests = 0, errors = 0;
 
+#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
+    setprogname(argc > 0 ? argv[0] : "check_symbols");
+#endif
+
     if (argc != 3)
 	usage();
     plugin_path = argv[1];
@@ -90,6 +94,17 @@ main(int argc, char *argv[])
 	    errors++;
 	}
     }
+
+    /*
+     * Make sure unexported symbols are not available.
+     */
+    sym = dlsym(handle, "errorx");
+    if (sym != NULL) {
+	warningx2("able to resolve local symbol errorx");
+	errors++;
+    }
+    ntests++;
+
     dlclose(handle);
 
     printf("check_symbols: %d tests run, %d errors, %d%% success rate\n",
