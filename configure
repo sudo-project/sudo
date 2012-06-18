@@ -17912,7 +17912,20 @@ fi
 	eval gettext_result="\$$gettext_name"
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gettext_result" >&5
 $as_echo "$gettext_result" >&6; }
-	test "$gettext_result" = "yes" && break
+	if test "$gettext_result" = "yes"; then
+	    for ac_func in ngettext
+do :
+  ac_fn_c_check_func "$LINENO" "ngettext" "ac_cv_func_ngettext"
+if test "x$ac_cv_func_ngettext" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NGETTEXT 1
+_ACEOF
+
+fi
+done
+
+	    break
+	fi
     done
     LIBS="$OLIBS"
 

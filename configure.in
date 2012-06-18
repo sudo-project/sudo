@@ -2421,7 +2421,10 @@ if test "$enable_nls" != "no"; then
 	])
 	eval gettext_result="\$$gettext_name"
 	AC_MSG_RESULT($gettext_result)
-	test "$gettext_result" = "yes" && break
+	if test "$gettext_result" = "yes"; then
+	    AC_CHECK_FUNCS(ngettext)
+	    break
+	fi
     done
     LIBS="$OLIBS"
 

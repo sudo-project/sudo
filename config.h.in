@@ -363,6 +363,9 @@
 /* Define to 1 if you have the <netgroup.h> header file. */
 #undef HAVE_NETGROUP_H
 
+/* Define to 1 if you have the `ngettext' function. */
+#undef HAVE_NGETTEXT
+
 /* Define to 1 if you have the `nl_langinfo' function. */
 #undef HAVE_NL_LANGINFO
 

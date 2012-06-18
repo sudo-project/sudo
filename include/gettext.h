@@ -43,6 +43,15 @@
     dngettext(DEFAULT_TEXT_DOMAIN, String, String_Plural, N)
 # endif
 
+/*
+ * Older versions of Solaris lack ngettext() so we have to kludge it.
+ */
+# ifndef HAVE_NGETTEXT
+#  undef ngettext
+#  define ngettext(String, String_Plural, N) \
+    ((N) == 1 ? gettext(String) : gettext(String_Plural))
+# endif
+
 /* Gettext convenience macros */
 # define _(String) gettext(String)
 # define gettext_noop(String) String
