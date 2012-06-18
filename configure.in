@@ -1975,23 +1975,6 @@ AC_INCLUDES_DEFAULT
 # define sudo_fprintf(fp, ...) fprintf((fp), __VA_ARGS__)
 #endif
 ], [sudo_fprintf(stderr, "a %s", "test");])], [], [AC_MSG_ERROR([Your C compiler doesn't support variadic macros, try building with gcc instead])])
-if test X"$with_gnu_ld" != "yes" -a -n "$GCC"; then
-    _CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -static-libgcc"
-    AC_CACHE_CHECK([whether $CC understands -static-libgcc],
-	[sudo_cv_var_gcc_static_libgcc],
-	[AC_LINK_IFELSE(
-	    [AC_LANG_PROGRAM([[]], [[]])],
-		[sudo_cv_var_gcc_static_libgcc=yes],
-		[sudo_cv_var_gcc_static_libgcc=no]
-	    )
-	]
-    )
-    CFLAGS="$_CFLAGS"
-    if test "$sudo_cv_var_gcc_static_libgcc" = "yes"; then
-	LT_LDFLAGS="$LT_LDFLAGS -Wc,-static-libgcc"
-    fi
-fi
 
 dnl
 dnl Program checks
@@ -3169,11 +3152,25 @@ SUDO_TIMEDIR
 SUDO_IO_LOGDIR
 
 dnl
-dnl Check for gcc 4.0-style symbol visibility support.
-dnl This must be towards the end as it turns warnings
-dnl into fatal errors (and there is no way to undo that)
+dnl Turn warnings into errors.
+dnl All compiler/loader tests after this point will fail if 
+dnl a warning is displayed (nornally, warnings are not fata).
 dnl
 AC_LANG_WERROR
+
+dnl
+dnl If compiler supports the -static-libgcc flag use it unless we have
+dnl GNU ld (which can avoid linking in libgcc when it is not needed).
+dnl This test relies on AC_LANG_WERROR
+dnl
+if test -n "$GCC" -a "$lt_cv_prog_gnu_ld" != "yes" -a -n "$GCC"; then
+    AX_CHECK_COMPILE_FLAG([-static-libgcc], [LT_LDFLAGS="$LT_LDFLAGS -Wc,-static-libgcc"])
+fi
+
+dnl
+dnl Check for symbol visibility support.
+dnl This test relies on AC_LANG_WERROR
+dnl
 AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [
     AC_DEFINE(HAVE_DSO_VISIBILITY)
     CFLAGS="${CFLAGS} -fvisibility=hidden"
@@ -3202,6 +3199,7 @@ AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [
 dnl
 dnl If the compiler doesn't have symbol visibility support, it may
 dnl support version scripts (only GNU and Solaris ld).
+dnl This test relies on AC_LANG_WERROR
 dnl
 if test -n "$LT_LDEXPORTS"; then
     if test "$lt_cv_prog_gnu_ld" = "yes"; then
@@ -3241,8 +3239,7 @@ fi
 
 dnl
 dnl Check for -fstack-protector and -z relro support
-dnl This after the call to AC_LANG_WERROR so that warnings
-dnl are treated as fatal errors.
+dnl This test relies on AC_LANG_WERROR
 dnl
 if test "$enable_hardening" != "no"; then
     AX_CHECK_COMPILE_FLAG([-fstack-protector], [
