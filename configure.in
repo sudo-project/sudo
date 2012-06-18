@@ -1409,7 +1409,7 @@ AC_ARG_WITH(noexec, [AS_HELP_STRING([--with-noexec[=PATH]], [fully qualified pat
 esac], [with_noexec="$libexecdir/sudo_noexec$_shrext"])
 AC_MSG_RESULT($with_noexec)
 NOEXECFILE="sudo_noexec$_shrext"
-NOEXECDIR="`echo $with_noexec|sed 's:^\(.*\)/[[^/]]*:\1:'`"
+NOEXECDIR="`echo $with_noexec|sed -e 's:^${\([[^}]]*\)}:$(\1):' -e 's:^\(.*\)/[[^/]]*:\1:'`"
 
 dnl
 dnl Find programs we use
@@ -3363,6 +3363,8 @@ test "$libexecdir" = '${exec_prefix}/libexec' && libexecdir='$(exec_prefix)/libe
 test "$includedir" = '${prefix}/include' && includedir='$(prefix)/include'
 test "$datarootdir" = '${prefix}/share' && datarootdir='$(prefix)/share'
 test "$docdir" = '${datarootdir}/doc/${PACKAGE_TARNAME}' && docdir='$(datarootdir)/doc/$(PACKAGE_TARNAME)'
+test "$localedir" = '${datarootdir}/locale' && localedir='$(datarootdir)/locale'
+test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
 test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
 
 dnl
