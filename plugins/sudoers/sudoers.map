@@ -1,4 +1,4 @@
-sudoers.so {
+{
 	global:
 		# Policy and I/O plugin structs
 		sudoers_policy;

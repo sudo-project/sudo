@@ -1,4 +1,4 @@
-sample_plugin.so {
+{
 	global:
 		# Policy and I/O plugin structs
 		sample_policy;
