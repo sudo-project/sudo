@@ -3207,12 +3207,12 @@ dnl
 if test -n "$LT_LDEXPORTS"; then
     if test "$lt_cv_prog_gnu_ld" = "yes"; then
 	cat > conftest.map <<-EOF
-	VERS_1.0 {
+	{
 	    global: foo;
 	    local:  *;
 	};
 	EOF
-	AC_MSG_CHECKING([whether ld supports map files])
+	AC_MSG_CHECKING([whether ld supports anonymous map files])
 	_LDFLAGS="$LDFLAGS"
 	LDFLAGS="$LDFLAGS -fPIC -shared -Wl,--version-script,./conftest.map"
 	AC_TRY_LINK([int foo;], [], [
@@ -3223,12 +3223,12 @@ if test -n "$LT_LDEXPORTS"; then
 	case "$host" in
 	    *-*-solaris2*)
 		cat > conftest.map <<-EOF
-		VERS_1.0 {
+		{
 		    global: foo;
 		    local:  *;
 		};
 		EOF
-		AC_MSG_CHECKING([whether ld supports map files])
+		AC_MSG_CHECKING([whether ld supports anonymous map files])
 		_LDFLAGS="$LDFLAGS"
 		LDFLAGS="$LDFLAGS -fPIC -shared -Wl,-M,./conftest.map"
 		AC_TRY_LINK([int foo;], [], [

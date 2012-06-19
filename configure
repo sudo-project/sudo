@@ -20232,13 +20232,13 @@ fi
 if test -n "$LT_LDEXPORTS"; then
     if test "$lt_cv_prog_gnu_ld" = "yes"; then
 	cat > conftest.map <<-EOF
-	VERS_1.0 {
+	{
 	    global: foo;
 	    local:  *;
 	};
 	EOF
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ld supports map files" >&5
-$as_echo_n "checking whether ld supports map files... " >&6; }
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ld supports anonymous map files" >&5
+$as_echo_n "checking whether ld supports anonymous map files... " >&6; }
 	_LDFLAGS="$LDFLAGS"
 	LDFLAGS="$LDFLAGS -fPIC -shared -Wl,--version-script,./conftest.map"
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -20264,13 +20264,13 @@ rm -f core conftest.err conftest.$ac_objext \
 	case "$host" in
 	    *-*-solaris2*)
 		cat > conftest.map <<-EOF
-		VERS_1.0 {
+		{
 		    global: foo;
 		    local:  *;
 		};
 		EOF
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ld supports map files" >&5
-$as_echo_n "checking whether ld supports map files... " >&6; }
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ld supports anonymous map files" >&5
+$as_echo_n "checking whether ld supports anonymous map files... " >&6; }
 		_LDFLAGS="$LDFLAGS"
 		LDFLAGS="$LDFLAGS -fPIC -shared -Wl,-M,./conftest.map"
 		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
