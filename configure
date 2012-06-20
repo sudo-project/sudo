@@ -692,6 +692,7 @@ password_timeout
 timeout
 timedir
 iolog_dir
+CROSS_COMPILING
 COMPAT_TEST_PROGS
 SUDO_NLS
 LIBINTL
@@ -2796,6 +2797,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -20497,6 +20499,8 @@ if test -n "$GCC"; then
 	CFLAGS="${CFLAGS} -Werror"
     fi
 fi
+
+CROSS_COMPILING="$cross_compiling"
 
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
 

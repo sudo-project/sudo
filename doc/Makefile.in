@@ -23,6 +23,7 @@ srcdir = @srcdir@
 docdir = @docdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+cross_compiling = @CROSS_COMPILING@
 
 # Tools to use
 NROFF = @NROFFPROG@

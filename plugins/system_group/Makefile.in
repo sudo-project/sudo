@@ -24,6 +24,7 @@ devdir = @devdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
+cross_compiling = @CROSS_COMPILING@
 
 # Compiler & tools to use
 CC = @CC@

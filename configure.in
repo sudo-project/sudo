@@ -73,6 +73,7 @@ AC_SUBST([LT_STATIC])
 AC_SUBST([LIBINTL])
 AC_SUBST([SUDO_NLS])
 AC_SUBST([COMPAT_TEST_PROGS])
+AC_SUBST([CROSS_COMPILING])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -3329,6 +3330,11 @@ if test -n "$GCC"; then
 	CFLAGS="${CFLAGS} -Werror"
     fi
 fi
+
+dnl
+dnl Skip regress tests and sudoers sanity check if cross compiling.
+dnl
+CROSS_COMPILING="$cross_compiling"
 
 dnl
 dnl Set exec_prefix

@@ -23,6 +23,7 @@ srcdir = @srcdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 includedir = @includedir@
+cross_compiling = @CROSS_COMPILING@
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
