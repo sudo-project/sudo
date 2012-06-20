@@ -22,6 +22,8 @@ AC_SUBST([LDFLAGS])
 AC_SUBST([SUDOERS_LDFLAGS])
 AC_SUBST([LT_LDFLAGS])
 AC_SUBST([LT_LDMAP])
+AC_SUBST([LT_LDOPT])
+AC_SUBST([LT_LDDEP])
 AC_SUBST([LT_LDEXPORTS])
 AC_SUBST([COMMON_OBJS])
 AC_SUBST([SUDOERS_OBJS])
@@ -178,7 +180,8 @@ AUTH_EXCL=
 AUTH_EXCL_DEF=
 AUTH_DEF=passwd
 SUDO_NLS=disabled
-LT_LDEXPORTS="-export-symbols \$(symfile)"
+LT_LDEXPORTS="-export-symbols \$(shlib_exp)"
+LT_LDDEP="\$(shlib_exp)"
 
 dnl
 dnl Other vaiables
@@ -3178,6 +3181,7 @@ AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [
     AC_DEFINE(HAVE_DSO_VISIBILITY)
     CFLAGS="${CFLAGS} -fvisibility=hidden"
     LT_LDEXPORTS=
+    LT_LDDEP=
 ], [
     if test -z "$GCC"; then
 	case "$host" in
@@ -3186,6 +3190,7 @@ AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [
 		    AC_DEFINE(HAVE_DSO_VISIBILITY)
 		    CFLAGS="${CFLAGS} -Bhidden_def"
 		    LT_LDEXPORTS=
+		    LT_LDDEP=
 		])
 		;;
 	    *-*-solaris2*)
@@ -3193,6 +3198,7 @@ AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [
 		    AC_DEFINE(HAVE_DSO_VISIBILITY)
 		    CFLAGS="${CFLAGS} -xldscope=hidden"
 		    LT_LDEXPORTS=
+		    LT_LDDEP=
 		])
 		;;
 	esac
@@ -3213,11 +3219,14 @@ if test -n "$LT_LDEXPORTS"; then
 	};
 	EOF
 	AC_MSG_CHECKING([whether ld supports anonymous map files])
+	_CFLAGS="$CFLAGS"
+	CFLAGS="$CFLAGS $lt_prog_compiler_pic"
 	_LDFLAGS="$LDFLAGS"
-	LDFLAGS="$LDFLAGS -fPIC -shared -Wl,--version-script,./conftest.map"
+	LDFLAGS="$LDFLAGS -fpic -shared -Wl,--version-script,./conftest.map"
 	AC_TRY_LINK([int foo;], [], [
-	    LT_LDEXPORTS=; LT_LDMAP="-Wl,--version-script,\$(mapfile)"
+	    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_map)"; LT_LDMAP="-Wl,--version-script,\$(shlib_map)"
 	])
+	CFLAGS="$_CFLAGS"
 	LDFLAGS="$_LDFLAGS"
     else
 	case "$host" in
@@ -3229,11 +3238,33 @@ if test -n "$LT_LDEXPORTS"; then
 		};
 		EOF
 		AC_MSG_CHECKING([whether ld supports anonymous map files])
+		_CFLAGS="$CFLAGS"
+		CFLAGS="$CFLAGS $lt_prog_compiler_pic"
 		_LDFLAGS="$LDFLAGS"
-		LDFLAGS="$LDFLAGS -fPIC -shared -Wl,-M,./conftest.map"
+		LDFLAGS="$LDFLAGS -shared -Wl,-M,./conftest.map"
 		AC_TRY_LINK([int foo;], [], [
-		    LT_LDEXPORTS=; LT_LDMAP="-Wl,-M,\$(mapfile)"
+		    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_map)"; LT_LDMAP="-Wl,-M,\$(shlib_map)"
 		])
+		CFLAGS="$_CFLAGS"
+		LDFLAGS="$_LDFLAGS"
+		;;
+	    *-*-hpux*)
+		cat > conftest.opt <<-EOF
+		+e foo
+		EOF
+		AC_MSG_CHECKING([whether ld supports controlling exported symbols])
+		_CFLAGS="$CFLAGS"
+		CFLAGS="$CFLAGS $lt_prog_compiler_pic"
+		_LDFLAGS="$LDFLAGS"
+		if test -n "$GCC"; then
+		    LDFLAGS="$LDFLAGS -shared -Wl,-c,./conftest.opt"
+		else
+		    LDFLAGS="$LDFLAGS -Wl,-b -Wl,-c,./conftest.opt"
+		fi
+		AC_TRY_LINK([int foo;], [], [
+		    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_opt)"; LT_LDOPT="-Wl,-c,\$(shlib_opt)"
+		])
+		CFLAGS="$_CFLAGS"
 		LDFLAGS="$_LDFLAGS"
 		;;
 	esac

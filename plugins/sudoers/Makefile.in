@@ -58,7 +58,7 @@ CFLAGS = @CFLAGS@
 
 # Flags to pass to the link stage
 LDFLAGS = @LDFLAGS@
-LT_LDFLAGS = @SUDOERS_LDFLAGS@ @LT_LDFLAGS@ @LT_LDMAP@ @LT_LDEXPORTS@
+LT_LDFLAGS = @SUDOERS_LDFLAGS@ @LT_LDFLAGS@ @LT_LDMAP@ @LT_LDOPT@ @LT_LDEXPORTS@
 
 # Where to install things...
 prefix = @prefix@
@@ -74,8 +74,9 @@ localstatedir = @localstatedir@
 # File extension, mode and map file to use for shared libraries/objects
 soext = @SOEXT@
 shlib_mode = @SHLIB_MODE@
-mapfile = $(srcdir)/sudoers.map
-symfile = $(srcdir)/sudoers.sym
+shlib_exp = $(srcdir)/sudoers.exp
+shlib_map = sudoers.map
+shlib_opt = sudoers.opt
 
 # Directory in which to install the sudoers plugin
 plugindir = @PLUGINDIR@
@@ -158,6 +159,12 @@ all: $(PROGS)
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 
+$(shlib_map): $(shlib_exp)
+	@awk 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
+
+$(shlib_opt): $(shlib_exp)
+	@sed 's/^/+e /' $(shlib_exp) > $@
+
 # Prevent default rules from building .c files from .l and .y files
 .l.c:
 
@@ -169,7 +176,7 @@ Makefile: $(srcdir)/Makefile.in
 libparsesudoers.la: $(LIBPARSESUDOERS_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LIBPARSESUDOERS_OBJS) -no-install
 
-sudoers.la: $(SUDOERS_OBJS) $(LT_LIBS) libparsesudoers.la
+sudoers.la: $(SUDOERS_OBJS) $(LT_LIBS) libparsesudoers.la @LT_LDDEP@
 	$(LIBTOOL) @LT_STATIC@ --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(SUDOERS_OBJS) libparsesudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir)
 
 visudo: libparsesudoers.la $(VISUDO_OBJS) $(LT_LIBS)
@@ -296,7 +303,7 @@ check: $(TEST_PROGS) visudo testsudoers
 	./check_iolog_path $(srcdir)/regress/iolog_path/data; \
 	rval=`expr $$rval + $$?`; \
 	if [ X"$(soext)" != X"" ]; then \
-	    ./check_symbols .libs/sudoers$(soext) $(symfile); \
+	    ./check_symbols .libs/sudoers$(soext) $(shlib_exp); \
 	    rval=`expr $$rval + $$?`; \
 	fi; \
 	./check_wrap $(srcdir)/regress/logging/check_wrap.in > check_wrap.out; \

@@ -1,7 +1,0 @@
-{
-	global:
-		# Group plugin structure
-		group_plugin;
-	local:
-		*;
-};

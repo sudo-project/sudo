@@ -44,7 +44,7 @@ CFLAGS = @CFLAGS@
 
 # Flags to pass to the link stage
 LDFLAGS = @LDFLAGS@
-LT_LDFLAGS = @LT_LDFLAGS@ @LT_LDMAP@ @LT_LDEXPORTS@
+LT_LDFLAGS = @LT_LDFLAGS@ @LT_LDMAP@ @LT_LDOPT@ @LT_LDEXPORTS@
 
 # Where to install things...
 prefix = @prefix@
@@ -60,8 +60,9 @@ plugindir = @PLUGINDIR@
 # File extension, mode and map file to use for shared libraries/objects
 soext = @SOEXT@
 shlib_mode = @SHLIB_MODE@
-mapfile = $(srcdir)/sample_group.map
-symfile = $(srcdir)/sample_group.sym
+shlib_exp = $(srcdir)/sample_group.exp
+shlib_map = sample_group.map
+shlib_opt = sample_group.opt
 
 # OS dependent defines
 DEFS = @OSDEFS@
@@ -86,7 +87,13 @@ Makefile: $(srcdir)/Makefile.in
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 
-sample_group.la: $(OBJS) $(LT_LIBS)
+$(shlib_map): $(shlib_exp)
+	@awk 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
+
+$(shlib_opt): $(shlib_exp)
+	@sed 's/^/+e /' $(shlib_exp) > $@
+
+sample_group.la: $(OBJS) $(LT_LIBS) @LT_LDDEP@
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(OBJS) $(LIBS) -module -avoid-version -rpath $(plugindir)
 
 pre-install:

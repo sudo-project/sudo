@@ -740,6 +740,8 @@ SUDO_OBJS
 SUDOERS_OBJS
 COMMON_OBJS
 LT_LDEXPORTS
+LT_LDDEP
+LT_LDOPT
 LT_LDMAP
 LT_LDFLAGS
 SUDOERS_LDFLAGS
@@ -2886,6 +2888,8 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
+
 #
 # Begin initial values for man page substitution
 #
@@ -2951,7 +2955,8 @@ AUTH_EXCL=
 AUTH_EXCL_DEF=
 AUTH_DEF=passwd
 SUDO_NLS=disabled
-LT_LDEXPORTS="-export-symbols \$(symfile)"
+LT_LDEXPORTS="-export-symbols \$(shlib_exp)"
+LT_LDDEP="\$(shlib_exp)"
 
 CHECKSHADOW=true
 shadow_defs=
@@ -20132,6 +20137,7 @@ if test x"`eval 'as_val=${'$as_CACHEVAR'};$as_echo "$as_val"'`" = xyes; then :
 
     CFLAGS="${CFLAGS} -fvisibility=hidden"
     LT_LDEXPORTS=
+    LT_LDDEP=
 
 else
 
@@ -20173,6 +20179,7 @@ if test x"$ax_cv_check_cflags___Bhidden_def" = xyes; then :
 
 		    CFLAGS="${CFLAGS} -Bhidden_def"
 		    LT_LDEXPORTS=
+		    LT_LDDEP=
 
 else
   :
@@ -20217,6 +20224,7 @@ if test x"`eval 'as_val=${'$as_CACHEVAR'};$as_echo "$as_val"'`" = xyes; then :
 
 		    CFLAGS="${CFLAGS} -xldscope=hidden"
 		    LT_LDEXPORTS=
+		    LT_LDDEP=
 
 else
   :
@@ -20239,8 +20247,10 @@ if test -n "$LT_LDEXPORTS"; then
 	EOF
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ld supports anonymous map files" >&5
 $as_echo_n "checking whether ld supports anonymous map files... " >&6; }
+	_CFLAGS="$CFLAGS"
+	CFLAGS="$CFLAGS $lt_prog_compiler_pic"
 	_LDFLAGS="$LDFLAGS"
-	LDFLAGS="$LDFLAGS -fPIC -shared -Wl,--version-script,./conftest.map"
+	LDFLAGS="$LDFLAGS -fpic -shared -Wl,--version-script,./conftest.map"
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 int foo;
@@ -20254,11 +20264,12 @@ main ()
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
 
-	    LT_LDEXPORTS=; LT_LDMAP="-Wl,--version-script,\$(mapfile)"
+	    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_map)"; LT_LDMAP="-Wl,--version-script,\$(shlib_map)"
 
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+	CFLAGS="$_CFLAGS"
 	LDFLAGS="$_LDFLAGS"
     else
 	case "$host" in
@@ -20271,8 +20282,10 @@ rm -f core conftest.err conftest.$ac_objext \
 		EOF
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ld supports anonymous map files" >&5
 $as_echo_n "checking whether ld supports anonymous map files... " >&6; }
+		_CFLAGS="$CFLAGS"
+		CFLAGS="$CFLAGS $lt_prog_compiler_pic"
 		_LDFLAGS="$LDFLAGS"
-		LDFLAGS="$LDFLAGS -fPIC -shared -Wl,-M,./conftest.map"
+		LDFLAGS="$LDFLAGS -shared -Wl,-M,./conftest.map"
 		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 int foo;
@@ -20286,11 +20299,47 @@ main ()
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
 
-		    LT_LDEXPORTS=; LT_LDMAP="-Wl,-M,\$(mapfile)"
+		    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_map)"; LT_LDMAP="-Wl,-M,\$(shlib_map)"
 
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+		CFLAGS="$_CFLAGS"
+		LDFLAGS="$_LDFLAGS"
+		;;
+	    *-*-hpux*)
+		cat > conftest.opt <<-EOF
+		+e foo
+		EOF
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ld supports controlling exported symbols" >&5
+$as_echo_n "checking whether ld supports controlling exported symbols... " >&6; }
+		_CFLAGS="$CFLAGS"
+		CFLAGS="$CFLAGS $lt_prog_compiler_pic"
+		_LDFLAGS="$LDFLAGS"
+		if test -n "$GCC"; then
+		    LDFLAGS="$LDFLAGS -shared -Wl,-c,./conftest.opt"
+		else
+		    LDFLAGS="$LDFLAGS -Wl,-b -Wl,-c,./conftest.opt"
+		fi
+		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+int foo;
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+		    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_opt)"; LT_LDOPT="-Wl,-c,\$(shlib_opt)"
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+		CFLAGS="$_CFLAGS"
 		LDFLAGS="$_LDFLAGS"
 		;;
 	esac
