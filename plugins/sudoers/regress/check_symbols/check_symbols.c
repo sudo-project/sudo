@@ -98,9 +98,9 @@ main(int argc, char *argv[])
     /*
      * Make sure unexported symbols are not available.
      */
-    sym = dlsym(handle, "errorx");
+    sym = dlsym(handle, "user_in_group");
     if (sym != NULL) {
-	warningx2("able to resolve local symbol errorx");
+	warningx2("able to resolve local symbol user_in_group");
 	errors++;
     }
     ntests++;
