@@ -266,7 +266,7 @@ case "$osversion" in
 		--with-env-editor
 		--enable-zlib=builtin
 		$configure_opts"
-	PPVARS="${PPVARS}${PPVARS+$space}aix_freeware=$true"
+	PPVARS="${PPVARS}${PPVARS+$space}aix_freeware=true"
 	;;
     *)
 	# For Solaris, add project support and use let configure choose zlib.
