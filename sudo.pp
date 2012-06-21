@@ -32,7 +32,6 @@ still allow people to get their work done."
 
 %if [sd]
 	pp_sd_vendor_tag="TCM"
-	# HP-UX shared objects must be executable
 %endif
 
 %if [solaris]
