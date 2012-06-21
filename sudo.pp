@@ -251,6 +251,8 @@ still allow people to get their work done."
 	    sed 's/^\(Depends:.*\) *$/\1, libldap2/' %{pp_wrkdir}/%{name}/DEBIAN/control.$$ > %{pp_wrkdir}/%{name}/DEBIAN/control
 	    rm -f %{pp_wrkdir}/%{name}/DEBIAN/control.$$
 	fi
+	echo "Homepage: http://www.sudo.ws/sudo/" >> %{pp_wrkdir}/%{name}/DEBIAN/control
+	echo "Bugs: http://www.sudo.ws/bugs/" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 
 %files
 	$osdirs			-
