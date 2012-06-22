@@ -240,7 +240,7 @@ still allow people to get their work done."
 	libc6, libpam0g, libpam-modules, zlib1g, libselinux1
 
 %fixup [deb]
-	# Add Conflicts, Replaces headers and add libldap2 depedency as needed.
+	# Add Conflicts, Replaces headers and add libldap depedency as needed.
 	if test -z "%{flavor}"; then
 	    echo "Conflicts: sudo-ldap" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    echo "Replaces: sudo-ldap" >> %{pp_wrkdir}/%{name}/DEBIAN/control
@@ -248,7 +248,7 @@ still allow people to get their work done."
 	    echo "Conflicts: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    echo "Replaces: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    cp -p %{pp_wrkdir}/%{name}/DEBIAN/control %{pp_wrkdir}/%{name}/DEBIAN/control.$$
-	    sed 's/^\(Depends:.*\) *$/\1, libldap2/' %{pp_wrkdir}/%{name}/DEBIAN/control.$$ > %{pp_wrkdir}/%{name}/DEBIAN/control
+	    sed 's/^\(Depends:.*\) *$/\1, libldap-2.4-2/' %{pp_wrkdir}/%{name}/DEBIAN/control.$$ > %{pp_wrkdir}/%{name}/DEBIAN/control
 	    rm -f %{pp_wrkdir}/%{name}/DEBIAN/control.$$
 	fi
 	echo "Homepage: http://www.sudo.ws/sudo/" >> %{pp_wrkdir}/%{name}/DEBIAN/control
