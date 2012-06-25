@@ -298,6 +298,19 @@ still allow people to get their work done."
 	$mandir/cat*/*		0644 optional
 	$mandir/man*/*		0644 optional
 
+%pre [aix]
+	if rpm -q %{name} >/dev/null 2>&1; then
+		echo "Another version of sudo is currently installed via rpm." 2>&1
+		echo "Please either uninstall the rpm version of sudo by running \"rpm -e sudo\"" 2>&1
+		echo "or upgrade the existing version of sudo using the .rpm packagae instead" 2>&1
+		echo "instead of the .bff package." 2>&1
+		echo "" 2>&1
+		echo "Note that you may need to pass rpm the --oldpackage flag when upgrading" 2>&1
+		echo "the AIX Toolbox version of sudo to the latest sudo rpm from sudo.ws." 2>&1
+		echo "" 2>&1
+		exit 1
+	fi
+
 %post [!rpm,deb]
 	# Don't overwrite an existing sudoers file
 %if [solaris]
