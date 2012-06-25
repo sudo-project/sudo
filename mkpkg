@@ -265,6 +265,7 @@ case "$osversion" in
 		--with-editor=/usr/bin/vi
 		--with-env-editor
 		--enable-zlib=builtin
+		--disable-nls
 		$configure_opts"
 	PPVARS="${PPVARS}${PPVARS+$space}aix_freeware=true"
 	;;
