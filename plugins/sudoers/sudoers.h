@@ -83,6 +83,8 @@ struct sudo_user {
 #endif
     char *cwd;
     char *iolog_file;
+    GETGROUPS_T *gids;
+    int   ngids;
     int   closefrom;
     int   lines;
     int   cols;
@@ -158,6 +160,8 @@ struct sudo_user {
 #define user_passwd		(sudo_user.pw->pw_passwd)
 #define user_uuid		(sudo_user.uuid)
 #define user_dir		(sudo_user.pw->pw_dir)
+#define user_gids		(sudo_user.gids)
+#define user_ngids		(sudo_user.ngids)
 #define user_group_list		(sudo_user.group_list)
 #define user_tty		(sudo_user.tty)
 #define user_ttypath		(sudo_user.ttypath)
@@ -281,7 +285,6 @@ void sudo_grlist_addref(struct group_list *);
 void sudo_grlist_delref(struct group_list *);
 void sudo_pw_addref(struct passwd *);
 void sudo_pw_delref(struct passwd *);
-void sudo_set_grlist(const char *, GETGROUPS_T *gids, int ngids);
 void sudo_setgrent(void);
 void sudo_setpwent(void);
 void sudo_setspent(void);

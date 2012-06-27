@@ -1430,8 +1430,8 @@ deserialize_info(char * const args[], char * const settings[], char * const user
 		break;
 	    cp++; /* skip over comma */
 	}
-	sudo_set_grlist(user_name, gids, ngids);
-	efree(gids);
+	user_gids = gids;
+	user_ngids = ngids;
     }
 
     /* Setup debugging if indicated. */

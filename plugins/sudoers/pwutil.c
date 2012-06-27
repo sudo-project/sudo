@@ -857,19 +857,27 @@ sudo_get_grlist(struct passwd *pw)
     }
     /*
      * Cache group db entry if it exists or a negative response if not.
+     * Use gids list from front-end if possible, otherwise getgrouplist().
      */
+    if (pw == sudo_user.pw && sudo_user.gids != NULL) {
+	gids = user_gids;
+	ngids = user_ngids;
+	user_gids = NULL;
+	user_ngids = 0;
+    } else {
 #if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
-    ngids = (int)sysconf(_SC_NGROUPS_MAX) * 2;
-    if (ngids < 0)
+	ngids = (int)sysconf(_SC_NGROUPS_MAX) * 2;
+	if (ngids < 0)
 #endif
-	ngids = NGROUPS_MAX * 2;
-    gids = emalloc2(ngids, sizeof(GETGROUPS_T));
-    if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1) {
-	efree(gids);
+	    ngids = NGROUPS_MAX * 2;
 	gids = emalloc2(ngids, sizeof(GETGROUPS_T));
 	if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1) {
 	    efree(gids);
-	    debug_return_ptr(NULL);
+	    gids = emalloc2(ngids, sizeof(GETGROUPS_T));
+	    if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1) {
+		efree(gids);
+		debug_return_ptr(NULL);
+	    }
 	}
     }
     if (ngids > 0) {
@@ -894,27 +902,6 @@ sudo_get_grlist(struct passwd *pw)
 done:
     item->refcnt++;
     debug_return_ptr(item->d.grlist);
-}
-
-void
-sudo_set_grlist(const char *user, GETGROUPS_T *gids, int ngids)
-{
-    struct cache_item key, *item;
-    struct rbnode *node;
-    debug_decl(sudo_set_grlist, SUDO_DEBUG_NSS)
-
-    /*
-     * Cache group db entry if it doesn't already exist
-     */
-    key.k.name = (char *) user;
-    if ((node = rbfind(grlist_cache, &key)) == NULL) {
-	if ((item = make_grlist_item(user, gids, ngids)) == NULL)
-	    errorx(1, "unable to parse group list for %s", user);
-	if (rbinsert(grlist_cache, item) != NULL)
-	    errorx(1, "unable to cache group list for %s, already exists",
-		user);
-    }
-    debug_return;
 }
 
 bool
