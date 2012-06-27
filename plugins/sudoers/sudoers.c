@@ -269,12 +269,19 @@ sudoers_policy_close(int exit_status, int error_code)
 
     /* Free remaining references to password and group entries. */
     sudo_pw_delref(sudo_user.pw);
+    sudo_user.pw = NULL;
     sudo_pw_delref(runas_pw);
-    if (runas_gr != NULL)
+    runas_pw = NULL;
+    if (runas_gr != NULL) {
 	sudo_gr_delref(runas_gr);
-    if (user_group_list != NULL)
+	runas_gr = NULL;
+    }
+    if (user_group_list != NULL) {
 	sudo_grlist_delref(user_group_list);
+	user_group_list = NULL;
+    }
     efree(user_gids);
+    user_gids = NULL;
 
     debug_return;
 }
