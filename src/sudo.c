@@ -192,12 +192,12 @@ main(int argc, char *argv[], char *envp[])
     (void) sigprocmask(SIG_SETMASK, &mask, NULL);
     fix_fds();
 
+    /* Read sudo.conf. */
+    sudo_conf_read();
+
     /* Fill in user_info with user name, uid, cwd, etc. */
     memset(&user_details, 0, sizeof(user_details));
     user_info = get_user_info(&user_details);
-
-    /* Read sudo.conf. */
-    sudo_conf_read();
 
     /* Disable core dumps if not enabled in sudo.conf. */
     disable_coredumps();
