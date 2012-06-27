@@ -1108,7 +1108,7 @@ static char *
 sudo_ldap_build_pass1(struct passwd *pw)
 {
     struct group *grp;
-    char *buf, timebuffer[TIMEFILTER_LENGTH], gidbuf[MAX_UID_T_LEN];
+    char *buf, timebuffer[TIMEFILTER_LENGTH], gidbuf[MAX_UID_T_LEN + 1];
     struct group_list *grlist;
     size_t sz = 0;
     int i;

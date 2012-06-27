@@ -687,7 +687,7 @@ void
 rebuild_env(void)
 {
     char **old_envp, **ep, *cp, *ps1;
-    char idbuf[MAX_UID_T_LEN];
+    char idbuf[MAX_UID_T_LEN + 1];
     unsigned int didvar;
     bool reset_home = false;
 
