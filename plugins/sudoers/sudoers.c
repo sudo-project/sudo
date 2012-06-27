@@ -274,6 +274,7 @@ sudoers_policy_close(int exit_status, int error_code)
 	sudo_gr_delref(runas_gr);
     if (user_group_list != NULL)
 	sudo_grlist_delref(user_group_list);
+    efree(user_gids);
 
     debug_return;
 }
