@@ -85,6 +85,10 @@
 extern int ldapssl_set_strength(LDAP *ldap, int strength);
 #endif
 
+#if !defined(LDAP_OPT_NETWORK_TIMEOUT) && defined(LDAP_OPT_CONNECT_TIMEOUT)
+# define LDAP_OPT_NETWORK_TIMEOUT LDAP_OPT_CONNECT_TIMEOUT
+#endif
+
 #ifndef LDAP_OPT_SUCCESS
 # define LDAP_OPT_SUCCESS LDAP_SUCCESS
 #endif
@@ -1923,7 +1927,7 @@ sudo_ldap_set_options_table(ld, table)
     struct ldap_config_table *table;
 {
     struct ldap_config_table *cur;
-    int ival, rc;
+    int ival, rc, errors = 0;
     char *sval;
 
     for (cur = table; cur->conf_str != NULL; cur++) {
@@ -1935,30 +1939,30 @@ sudo_ldap_set_options_table(ld, table)
 	case CONF_INT:
 	    ival = *(int *)(cur->valp);
 	    if (ival >= 0) {
+		DPRINTF(("ldap_set_option: %s -> %d", cur->conf_str, ival), 1);
 		rc = ldap_set_option(ld, cur->opt_val, &ival);
 		if (rc != LDAP_OPT_SUCCESS) {
 		    warningx("ldap_set_option: %s -> %d: %s",
 			cur->conf_str, ival, ldap_err2string(rc));
-		    return -1;
+		    errors++;
 		}
-		DPRINTF(("ldap_set_option: %s -> %d", cur->conf_str, ival), 1);
 	    }
 	    break;
 	case CONF_STR:
 	    sval = *(char **)(cur->valp);
 	    if (sval != NULL) {
+		DPRINTF(("ldap_set_option: %s -> %s", cur->conf_str, sval), 1);
 		rc = ldap_set_option(ld, cur->opt_val, sval);
 		if (rc != LDAP_OPT_SUCCESS) {
 		    warningx("ldap_set_option: %s -> %s: %s",
 			cur->conf_str, sval, ldap_err2string(rc));
-		    return -1;
+		    errors++;
 		}
-		DPRINTF(("ldap_set_option: %s -> %s", cur->conf_str, sval), 1);
 	    }
 	    break;
 	}
     }
-    return 0;
+    return errors ? -1 : 0;
 }
 
 /*
