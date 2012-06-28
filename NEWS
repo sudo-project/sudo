@@ -22,6 +22,9 @@ What's new in Sudo 1.8.6?
    only a small number of symbols are exported which significantly
    reduces the chances of a conflict with other shared objects.
 
+ * The BIND_TIMELIMIT parameter in ldap.conf is now supported with
+   Tivoli Directory Server 6.3 and higher.
+
 What's new in Sudo 1.8.5p2?
 
  * Fixed use of the SUDO_ASKPASS environment variable which was
