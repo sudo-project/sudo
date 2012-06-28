@@ -2006,14 +2006,13 @@ sudo_ldap_set_options_conn(ld)
 	struct timeval tv;
 	tv.tv_sec = ldap_conf.timeout;
 	tv.tv_usec = 0;
+	DPRINTF(("ldap_set_option(LDAP_OPT_TIMEOUT, %ld)",
+	    (long)tv.tv_sec), 1);
 	rc = ldap_set_option(ld, LDAP_OPT_TIMEOUT, &tv);
 	if (rc != LDAP_OPT_SUCCESS) {
 	    warningx("ldap_set_option(TIMEOUT, %ld): %s",
 		(long)tv.tv_sec, ldap_err2string(rc));
-	    return -1;
 	}
-	DPRINTF(("ldap_set_option(LDAP_OPT_TIMEOUT, %ld)",
-	    (long)tv.tv_sec), 1);
     }
 #endif
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
@@ -2022,27 +2021,29 @@ sudo_ldap_set_options_conn(ld)
 	struct timeval tv;
 	tv.tv_sec = ldap_conf.bind_timelimit / 1000;
 	tv.tv_usec = 0;
+	DPRINTF(("ldap_set_option(LDAP_OPT_NETWORK_TIMEOUT, %ld)",
+	    (long)tv.tv_sec), 1);
 	rc = ldap_set_option(ld, LDAP_OPT_NETWORK_TIMEOUT, &tv);
+# if !defined(LDAP_OPT_CONNECT_TIMEOUT) || LDAP_VENDOR_VERSION != 510
+	/* Tivoli Directory Server 6.3 libs always return a (bogus) error. */
 	if (rc != LDAP_OPT_SUCCESS) {
 	    warningx("ldap_set_option(NETWORK_TIMEOUT, %ld): %s",
 		(long)tv.tv_sec, ldap_err2string(rc));
-	    return -1;
 	}
-	DPRINTF(("ldap_set_option(LDAP_OPT_NETWORK_TIMEOUT, %ld)",
-	    (long)tv.tv_sec), 1);
+# endif
     }
 #endif
 
 #if defined(LDAP_OPT_X_TLS) && !defined(HAVE_LDAPSSL_INIT)
     if (ldap_conf.ssl_mode == SUDO_LDAP_SSL) {
 	int val = LDAP_OPT_X_TLS_HARD;
+	DPRINTF(("ldap_set_option(LDAP_OPT_X_TLS, LDAP_OPT_X_TLS_HARD)"), 1);
 	rc = ldap_set_option(ld, LDAP_OPT_X_TLS, &val);
 	if (rc != LDAP_SUCCESS) {
 	    warningx("ldap_set_option(LDAP_OPT_X_TLS, LDAP_OPT_X_TLS_HARD): %s",
 		ldap_err2string(rc));
 	    return -1;
 	}
-	DPRINTF(("ldap_set_option(LDAP_OPT_X_TLS, LDAP_OPT_X_TLS_HARD)"), 1);
     }
 #endif
     return 0;
