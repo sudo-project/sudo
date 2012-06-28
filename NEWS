@@ -58,6 +58,9 @@ What's new in Sudo 1.7.10?
  * The TLS_CHECKPEER parameter in ldap.conf now works when the
    Mozilla NSS crypto backend is used with OpenLDAP.
 
+ * The BIND_TIMELIMIT parameter in ldap.conf is now supported with
+   Tivoli Directory Server 6.3 and higher.
+
  * Fixed a crash introduced in version 1.7.7 when "sudo -s" is
    specified with a command.
 
