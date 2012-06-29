@@ -22,8 +22,11 @@ What's new in Sudo 1.8.6?
    only a small number of symbols are exported which significantly
    reduces the chances of a conflict with other shared objects.
 
- * The BIND_TIMELIMIT parameter in ldap.conf is now supported with
-   Tivoli Directory Server 6.3 and higher.
+ * Improved support for the Tivoli Directory Server LDAP client
+   libraries.  This includes support for using LDAP over SSL (ldaps)
+   as well as support for the BIND_TIMELIMIT, TLS_KEY and TLS_CIPHERS
+   ldap.conf options.  A new ldap.conf option, TLS_KEYPW can be
+   used to specify a password to decrypt the key database.
 
 What's new in Sudo 1.8.5p2?
 

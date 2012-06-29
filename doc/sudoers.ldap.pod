@@ -1,4 +1,4 @@
-Copyright (c) 2003-2011
+Copyright (c) 2003-2012
 	Todd C. Miller <Todd.Miller@courtesan.com>
 
 Permission to use, copy, modify, and distribute this software for any
@@ -300,8 +300,8 @@ section.
 Sudo reads the F<@ldap_conf@> file for LDAP-specific configuration.
 Typically, this file is shared amongst different LDAP-aware clients.
 As such, most of the settings are not B<sudo>-specific.  Note that
-B<sudo> parses F<@ldap_conf@> itself and may support options
-that differ from those described in the L<ldap.conf(5)> manual.
+B<sudo> parses F<@ldap_conf@> itself and may support options that
+differ from those described in the system's L<ldap.conf(5)> manual.
 
 Also note that on systems using the OpenLDAP libraries, default
 values specified in F</etc/openldap/ldap.conf> or the user's
@@ -323,9 +323,9 @@ B<ldap> or B<ldaps>, the latter being for servers that support TLS
 is specified, B<sudo> will connect to B<localhost>.  Multiple B<URI>
 lines are treated identically to a B<URI> line containing multiple
 entries.  Only systems using the OpenSSL libraries support the
-mixing of C<ldap://> and C<ldaps://> URIs.  The Netscape-derived
-libraries used on most commercial versions of Unix are only capable
-of supporting one or the other.
+mixing of C<ldap://> and C<ldaps://> URIs.  Both the Netscape-derived
+and Tivoli LDAP libraries used on most commercial versions of Unix
+are only capable of supporting one or the other.
 
 =item B<HOST> name[:port] ...
 
@@ -443,7 +443,8 @@ authority), B<sudo> will be unable to connect to it.  If B<TLS_CHECKPEER>
 is disabled, no check is made.  Note that disabling the check creates
 an opportunity for man-in-the-middle attacks since the server's
 identity will not be authenticated.  If possible, the CA's certificate
-should be installed locally so it can be verified.
+should be installed locally so it can be verified.  This option is
+not supported by the Tivoli Directory Server LDAP libraries.
 
 =item B<TLS_CACERT> file name
 
@@ -479,6 +480,10 @@ OpenLDAP:
 Netscape-derived:
     C<tls_cert /var/ldap/cert7.db>
 
+Tivoli Directory Server:
+    Unused, the key database specified by B<TLS_KEY> contains both
+    keys and certificates.
+
 When using Netscape-derived libraries, this file may also contain
 Certificate Authority certificates.
 
@@ -495,6 +500,24 @@ OpenLDAP:
 Netscape-derived:
     C<tls_key /var/ldap/key3.db>
 
+Tivoli Directory Server:
+    C<tls_cert /usr/ldap/ldapkey.kdb>
+
+When using Tivoli LDAP libraries, this file may also contain
+Certificate Authority and client certificates and may be encrypted.
+
+=item B<TLS_KEYPW> secret
+
+The B<TLS_KEYPW> contains the password used to decrypt the key
+database on clients using the Tivoli Directory Server LDAP library.
+If no B<TLS_KEYPW> is specified, a I<stash file> will be used if
+it exists.  The I<stash file> must have the same path as the file
+specified by B<TLS_KEY>, but use a C<.sth> file extension instead
+of C<.kdb>, e.g. C<ldapkey.sth>.  The default C<ldapkey.kdb> that
+ships with Tivoli Directory Server is encrypted with the password
+C<ssl_password>.  This option is only supported by the Tivoli LDAP
+libraries.
+
 =item B<TLS_RANDFILE> file name
 
 The B<TLS_RANDFILE> parameter specifies the path to an entropy
@@ -504,10 +527,10 @@ This option is only supported by the OpenLDAP libraries.
 
 =item B<TLS_CIPHERS> cipher list
 
-The B<TLS_CIPHERS> parameter allows the administer to restrict
-which encryption algorithms may be used for TLS (SSL) connections.
-See the OpenSSL manual for a list of valid ciphers.
-This option is only supported by the OpenLDAP libraries.
+The B<TLS_CIPHERS> parameter allows the administer to restrict which
+encryption algorithms may be used for TLS (SSL) connections.  See
+the OpenLDAP or Tivoli Directory Server manual for a list of valid
+ciphers.  This option is not supported by Netscape-derived libraries.
 
 =item B<USE_SASL> on/true/yes/off/false/no
 
