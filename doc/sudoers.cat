@@ -210,11 +210,11 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
        below).  For instance, the QAS AD plugin supports the following
        formats:
 
-       o   Group in the same domain: "Group Name"
+       o   Group in the same domain: "%:Group Name"
 
-       o   Group in any domain: "Group Name@FULLY.QUALIFIED.DOMAIN"
+       o   Group in any domain: "%:Group Name@FULLY.QUALIFIED.DOMAIN"
 
-       o   Group SID: "S-1-2-34-5678901234-5678901234-5678901234-567"
+       o   Group SID: "%:S-1-2-34-5678901234-5678901234-5678901234-567"
 
        Note that quotes around group names are optional.  Unquoted strings
        must use a backslash (\) to escape spaces and special characters.  See
@@ -1814,4 +1814,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.5                           March 28, 2012                      SUDOERS(4)
+1.8.6                            June 29, 2012                      SUDOERS(4)

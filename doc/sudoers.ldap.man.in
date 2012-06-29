@@ -1,4 +1,4 @@
-.\" Copyright (c) 2003-2011
+.\" Copyright (c) 2003-2012
 .\" 	Todd C. Miller <Todd.Miller@courtesan.com>
 .\" 
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -140,7 +140,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "March 14, 2012" "1.8.5" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "June 29, 2012" "1.8.6" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -405,8 +405,8 @@ section.
 Sudo reads the \fI@ldap_conf@\fR file for LDAP-specific configuration.
 Typically, this file is shared amongst different LDAP-aware clients.
 As such, most of the settings are not \fBsudo\fR\-specific.  Note that
-\&\fBsudo\fR parses \fI@ldap_conf@\fR itself and may support options
-that differ from those described in the \fIldap.conf\fR\|(@mansectform@) manual.
+\&\fBsudo\fR parses \fI@ldap_conf@\fR itself and may support options that
+differ from those described in the system's \fIldap.conf\fR\|(@mansectform@) manual.
 .PP
 Also note that on systems using the OpenLDAP libraries, default
 values specified in \fI/etc/openldap/ldap.conf\fR or the user's
@@ -425,9 +425,9 @@ the \s-1LDAP\s0 server(s) to connect to.  The \fIprotocol\fR may be either
 is specified, \fBsudo\fR will connect to \fBlocalhost\fR.  Multiple \fB\s-1URI\s0\fR
 lines are treated identically to a \fB\s-1URI\s0\fR line containing multiple
 entries.  Only systems using the OpenSSL libraries support the
-mixing of \f(CW\*(C`ldap://\*(C'\fR and \f(CW\*(C`ldaps://\*(C'\fR URIs.  The Netscape-derived
-libraries used on most commercial versions of Unix are only capable
-of supporting one or the other.
+mixing of \f(CW\*(C`ldap://\*(C'\fR and \f(CW\*(C`ldaps://\*(C'\fR URIs.  Both the Netscape-derived
+and Tivoli \s-1LDAP\s0 libraries used on most commercial versions of Unix
+are only capable of supporting one or the other.
 .IP "\fB\s-1HOST\s0\fR name[:port] ..." 4
 .IX Item "HOST name[:port] ..."
 If no \fB\s-1URI\s0\fR is specified, the \fB\s-1HOST\s0\fR parameter specifies a
@@ -528,7 +528,8 @@ authority), \fBsudo\fR will be unable to connect to it.  If \fB\s-1TLS_CHECKPEER
 is disabled, no check is made.  Note that disabling the check creates
 an opportunity for man-in-the-middle attacks since the server's
 identity will not be authenticated.  If possible, the \s-1CA\s0's certificate
-should be installed locally so it can be verified.
+should be installed locally so it can be verified.  This option is
+not supported by the Tivoli Directory Server \s-1LDAP\s0 libraries.
 .IP "\fB\s-1TLS_CACERT\s0\fR file name" 4
 .IX Item "TLS_CACERT file name"
 An alias for \fB\s-1TLS_CACERTFILE\s0\fR for OpenLDAP compatibility.
@@ -560,6 +561,10 @@ OpenLDAP:
 Netscape-derived:
     \f(CW\*(C`tls_cert /var/ldap/cert7.db\*(C'\fR
 .Sp
+Tivoli Directory Server:
+    Unused, the key database specified by \fB\s-1TLS_KEY\s0\fR contains both
+    keys and certificates.
+.Sp
 When using Netscape-derived libraries, this file may also contain
 Certificate Authority certificates.
 .IP "\fB\s-1TLS_KEY\s0\fR file name" 4
@@ -574,6 +579,23 @@ OpenLDAP:
 .Sp
 Netscape-derived:
     \f(CW\*(C`tls_key /var/ldap/key3.db\*(C'\fR
+.Sp
+Tivoli Directory Server:
+    \f(CW\*(C`tls_cert /usr/ldap/ldapkey.kdb\*(C'\fR
+.Sp
+When using Tivoli \s-1LDAP\s0 libraries, this file may also contain
+Certificate Authority and client certificates and may be encrypted.
+.IP "\fB\s-1TLS_KEYPW\s0\fR secret" 4
+.IX Item "TLS_KEYPW secret"
+The \fB\s-1TLS_KEYPW\s0\fR contains the password used to decrypt the key
+database on clients using the Tivoli Directory Server \s-1LDAP\s0 library.
+If no \fB\s-1TLS_KEYPW\s0\fR is specified, a \fIstash file\fR will be used if
+it exists.  The \fIstash file\fR must have the same path as the file
+specified by \fB\s-1TLS_KEY\s0\fR, but use a \f(CW\*(C`.sth\*(C'\fR file extension instead
+of \f(CW\*(C`.kdb\*(C'\fR, e.g. \f(CW\*(C`ldapkey.sth\*(C'\fR.  The default \f(CW\*(C`ldapkey.kdb\*(C'\fR that
+ships with Tivoli Directory Server is encrypted with the password
+\&\f(CW\*(C`ssl_password\*(C'\fR.  This option is only supported by the Tivoli \s-1LDAP\s0
+libraries.
 .IP "\fB\s-1TLS_RANDFILE\s0\fR file name" 4
 .IX Item "TLS_RANDFILE file name"
 The \fB\s-1TLS_RANDFILE\s0\fR parameter specifies the path to an entropy
@@ -582,10 +604,10 @@ in conjunction with \fIprngd\fR or \fIegd\fR.
 This option is only supported by the OpenLDAP libraries.
 .IP "\fB\s-1TLS_CIPHERS\s0\fR cipher list" 4
 .IX Item "TLS_CIPHERS cipher list"
-The \fB\s-1TLS_CIPHERS\s0\fR parameter allows the administer to restrict
-which encryption algorithms may be used for \s-1TLS\s0 (\s-1SSL\s0) connections.
-See the OpenSSL manual for a list of valid ciphers.
-This option is only supported by the OpenLDAP libraries.
+The \fB\s-1TLS_CIPHERS\s0\fR parameter allows the administer to restrict which
+encryption algorithms may be used for \s-1TLS\s0 (\s-1SSL\s0) connections.  See
+the OpenLDAP or Tivoli Directory Server manual for a list of valid
+ciphers.  This option is not supported by Netscape-derived libraries.
 .IP "\fB\s-1USE_SASL\s0\fR on/true/yes/off/false/no" 4
 .IX Item "USE_SASL on/true/yes/off/false/no"
 Enable \fB\s-1USE_SASL\s0\fR for \s-1LDAP\s0 servers that support \s-1SASL\s0 authentication.

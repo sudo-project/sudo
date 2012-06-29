@@ -254,7 +254,7 @@ DDEESSCCRRIIPPTTIIOONN
        Typically, this file is shared amongst different LDAP-aware clients.
        As such, most of the settings are not ssuuddoo-specific.  Note that ssuuddoo
        parses _/_e_t_c_/_l_d_a_p_._c_o_n_f itself and may support options that differ from
-       those described in the _l_d_a_p_._c_o_n_f(4) manual.
+       those described in the system's _l_d_a_p_._c_o_n_f(4) manual.
 
        Also note that on systems using the OpenLDAP libraries, default values
        specified in _/_e_t_c_/_o_p_e_n_l_d_a_p_/_l_d_a_p_._c_o_n_f or the user's _._l_d_a_p_r_c files are
@@ -273,9 +273,9 @@ DDEESSCCRRIIPPTTIIOONN
            ssuuddoo will connect to llooccaallhhoosstt.  Multiple UURRII lines are treated
            identically to a UURRII line containing multiple entries.  Only
            systems using the OpenSSL libraries support the mixing of ldap://
-           and ldaps:// URIs.  The Netscape-derived libraries used on most
-           commercial versions of Unix are only capable of supporting one or
-           the other.
+           and ldaps:// URIs.  Both the Netscape-derived and Tivoli LDAP
+           libraries used on most commercial versions of Unix are only capable
+           of supporting one or the other.
 
        HHOOSSTT name[:port] ...
            If no UURRII is specified, the HHOOSSTT parameter specifies a whitespace-
@@ -379,7 +379,8 @@ DDEESSCCRRIIPPTTIIOONN
            the check creates an opportunity for man-in-the-middle attacks
            since the server's identity will not be authenticated.  If
            possible, the CA's certificate should be installed locally so it
-           can be verified.
+           can be verified.  This option is not supported by the Tivoli
+           Directory Server LDAP libraries.
 
        TTLLSS__CCAACCEERRTT file name
            An alias for TTLLSS__CCAACCEERRTTFFIILLEE for OpenLDAP compatibility.
@@ -410,6 +411,10 @@ DDEESSCCRRIIPPTTIIOONN
            Netscape-derived:
                tls_cert /var/ldap/cert7.db
 
+           Tivoli Directory Server:
+               Unused, the key database specified by TTLLSS__KKEEYY contains both
+               keys and certificates.
+
            When using Netscape-derived libraries, this file may also contain
            Certificate Authority certificates.
 
@@ -425,6 +430,23 @@ DDEESSCCRRIIPPTTIIOONN
            Netscape-derived:
                tls_key /var/ldap/key3.db
 
+           Tivoli Directory Server:
+               tls_cert /usr/ldap/ldapkey.kdb
+
+           When using Tivoli LDAP libraries, this file may also contain
+           Certificate Authority and client certificates and may be encrypted.
+
+       TTLLSS__KKEEYYPPWW secret
+           The TTLLSS__KKEEYYPPWW contains the password used to decrypt the key
+           database on clients using the Tivoli Directory Server LDAP library.
+           If no TTLLSS__KKEEYYPPWW is specified, a _s_t_a_s_h _f_i_l_e will be used if it
+           exists.  The _s_t_a_s_h _f_i_l_e must have the same path as the file
+           specified by TTLLSS__KKEEYY, but use a .sth file extension instead of
+           .kdb, e.g. ldapkey.sth.  The default ldapkey.kdb that ships with
+           Tivoli Directory Server is encrypted with the password
+           ssl_password.  This option is only supported by the Tivoli LDAP
+           libraries.
+
        TTLLSS__RRAANNDDFFIILLEE file name
            The TTLLSS__RRAANNDDFFIILLEE parameter specifies the path to an entropy source
            for systems that lack a random device.  It is generally used in
@@ -434,8 +456,9 @@ DDEESSCCRRIIPPTTIIOONN
        TTLLSS__CCIIPPHHEERRSS cipher list
            The TTLLSS__CCIIPPHHEERRSS parameter allows the administer to restrict which
            encryption algorithms may be used for TLS (SSL) connections.  See
-           the OpenSSL manual for a list of valid ciphers.  This option is
-           only supported by the OpenLDAP libraries.
+           the OpenLDAP or Tivoli Directory Server manual for a list of valid
+           ciphers.  This option is not supported by Netscape-derived
+           libraries.
 
        UUSSEE__SSAASSLL on/true/yes/off/false/no
            Enable UUSSEE__SSAASSLL for LDAP servers that support SASL authentication.
@@ -747,4 +770,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.5                           March 14, 2012                 SUDOERS.LDAP(4)
+1.8.6                            June 29, 2012                 SUDOERS.LDAP(4)

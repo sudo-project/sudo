@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "March 28, 2012" "1.8.5" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "June 29, 2012" "1.8.6" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -382,11 +382,11 @@ the underlying group provider plugin (see the \fIgroup_plugin\fR
 description below).  For instance, the \s-1QAS\s0 \s-1AD\s0 plugin supports the
 following formats:
 .IP "\(bu" 4
-Group in the same domain: \*(L"Group Name\*(R"
+Group in the same domain: \*(L"%:Group Name\*(R"
 .IP "\(bu" 4
-Group in any domain: \*(L"Group Name@FULLY.QUALIFIED.DOMAIN\*(R"
+Group in any domain: \*(L"%:Group Name@FULLY.QUALIFIED.DOMAIN\*(R"
 .IP "\(bu" 4
-Group \s-1SID:\s0 \*(L"S\-1\-2\-34\-5678901234\-5678901234\-5678901234\-567\*(R"
+Group \s-1SID:\s0 \*(L"%:S\-1\-2\-34\-5678901234\-5678901234\-5678901234\-567\*(R"
 .PP
 Note that quotes around group names are optional.  Unquoted strings
 must use a backslash (\e) to escape spaces and special characters.
