@@ -220,6 +220,7 @@ static struct ldap_config {
     char *tls_cipher_suite;
     char *tls_certfile;
     char *tls_keyfile;
+    char *tls_keypw;
     char *sasl_auth_id;
     char *rootsasl_auth_id;
     char *sasl_secprops;
@@ -259,6 +260,9 @@ static struct ldap_config_table ldap_conf_global[] = {
 #ifdef LDAP_OPT_X_TLS_CIPHER_SUITE
     { "tls_ciphers", CONF_STR, LDAP_OPT_X_TLS_CIPHER_SUITE,
 	&ldap_conf.tls_cipher_suite },
+#elif defined(LDAP_OPT_SSL_CIPHER)
+    { "tls_ciphers", CONF_STR, LDAP_OPT_SSL_CIPHER,
+	&ldap_conf.tls_cipher_suite },
 #endif
 #ifdef LDAP_OPT_X_TLS_CERTFILE
     { "tls_cert", CONF_STR, LDAP_OPT_X_TLS_CERTFILE,
@@ -271,6 +275,9 @@ static struct ldap_config_table ldap_conf_global[] = {
 	&ldap_conf.tls_keyfile },
 #else
     { "tls_key", CONF_STR, -1, &ldap_conf.tls_keyfile },
+#endif
+#ifdef HAVE_LDAP_SSL_CLIENT_INIT
+    { "tls_keypw", CONF_STR, -1, &ldap_conf.tls_keypw },
 #endif
     { "binddn", CONF_STR, -1, &ldap_conf.binddn },
     { "bindpw", CONF_STR, -1, &ldap_conf.bindpw },
@@ -576,6 +583,16 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 	if ((ld = ldapssl_init(host, port, defsecure)) != NULL)
 	    rc = LDAP_SUCCESS;
     } else
+#elif defined(HAVE_LDAP_SSL_INIT) && defined(HAVE_LDAP_SSL_CLIENT_INIT)
+    if (ldap_conf.ssl_mode == SUDO_LDAP_SSL) {
+	if (ldap_ssl_client_init(ldap_conf.tls_keyfile, ldap_conf.tls_keypw, 0, &rc) != LDAP_SUCCESS) {
+	    warningx("ldap_ssl_client_init(): %s", ldap_err2string(rc));
+	    debug_return_int(-1);
+	}
+	DPRINTF(("ldap_ssl_init(%s, %d, NULL)", host, port), 2);
+	if ((ld = ldap_ssl_init((char *)host, port, NULL)) != NULL)
+	    rc = LDAP_SUCCESS;
+    } else
 #endif
     {
 #ifdef HAVE_LDAP_CREATE
@@ -586,7 +603,7 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 	rc = ldap_set_option(ld, LDAP_OPT_HOST_NAME, host);
 #else
 	DPRINTF(("ldap_init(%s, %d)", host, port), 2);
-	if ((ld = ldap_init(host, port)) != NULL)
+	if ((ld = ldap_init((char *)host, port)) != NULL)
 	    rc = LDAP_SUCCESS;
 #endif
     }
@@ -2241,7 +2258,7 @@ sudo_ldap_open(struct sudo_nss *nss)
 	}
 	DPRINTF(("ldap_start_tls_s() ok"), 1);
 #elif defined(HAVE_LDAP_SSL_CLIENT_INIT) && defined(HAVE_LDAP_START_TLS_S_NP)
-	if (ldap_ssl_client_init(NULL, NULL, 0, &rc) != LDAP_SUCCESS) {
+	if (ldap_ssl_client_init(ldap_conf.tls_keyfile, ldap_conf.tls_keypw, 0, &rc) != LDAP_SUCCESS) {
 	    warningx("ldap_ssl_client_init(): %s", ldap_err2string(rc));
 	    debug_return_int(-1);
 	}
