@@ -20413,7 +20413,7 @@ $as_echo "$ax_cv_check_ldflags___fstack_protector" >&6; }
 if test x"$ax_cv_check_ldflags___fstack_protector" = xyes; then :
 
 	    CFLAGS="${CFLAGS} -fstack-protector"
-	    LDFLAGS="${LDFLAGS} -fstack-protector"
+	    LT_LDFLAGS="${LT_LDFLAGS} -Wc,-fstack-protector"
 
 else
   :
