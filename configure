@@ -692,6 +692,7 @@ password_timeout
 timeout
 timedir
 iolog_dir
+NO_VIZ
 PIE_CFLAGS
 PIE_LDFLAGS
 CROSS_COMPILING
@@ -2899,6 +2900,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -2966,6 +2968,7 @@ AUTH_DEF=passwd
 SUDO_NLS=disabled
 LT_LDEXPORTS="-export-symbols \$(shlib_exp)"
 LT_LDDEP="\$(shlib_exp)"
+NO_VIZ=
 
 CHECKSHADOW=true
 shadow_defs=
@@ -20158,6 +20161,7 @@ if test x"`eval 'as_val=${'$as_CACHEVAR'};$as_echo "$as_val"'`" = xyes; then :
 
 else
 
+    NO_VIZ="-DNO_VIZ"
     if test -z "$GCC"; then
 	case "$host" in
 	    *-*-hpux*)

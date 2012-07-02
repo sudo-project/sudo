@@ -76,6 +76,7 @@ AC_SUBST([COMPAT_TEST_PROGS])
 AC_SUBST([CROSS_COMPILING])
 AC_SUBST([PIE_LDFLAGS])
 AC_SUBST([PIE_CFLAGS])
+AC_SUBST([NO_VIZ])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -185,6 +186,7 @@ AUTH_DEF=passwd
 SUDO_NLS=disabled
 LT_LDEXPORTS="-export-symbols \$(shlib_exp)"
 LT_LDDEP="\$(shlib_exp)"
+NO_VIZ=
 
 dnl
 dnl Other vaiables
@@ -3190,6 +3192,7 @@ AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [
     LT_LDEXPORTS=
     LT_LDDEP=
 ], [
+    NO_VIZ="-DNO_VIZ"
     if test -z "$GCC"; then
 	case "$host" in
 	    *-*-hpux*)
