@@ -19860,7 +19860,7 @@ done
 
 fi
 
-if test "$enable_pie" != "no"; then
+if test "$enable_pie" != "no" -a -n "$GCC"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fPIE" >&5
 $as_echo_n "checking whether C compiler accepts -fPIE... " >&6; }
 if ${ax_cv_check_cflags___fPIE+:} false; then :
