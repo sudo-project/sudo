@@ -78,17 +78,6 @@ top_srcdir=`dirname $0`
 test -n "$osversion" || exit 1
 osrelease=`echo "$osversion" | sed -e 's/^[^0-9]*//' -e 's/-.*$//'`
 
-# Linux distros may build binaries as pie files.
-# This is really something libtool should figure out, but it does not.
-case "$osversion" in
-    *-s390*|*-sparc*|*-alpha*)
-	F_PIE=-fPIE
-	;;
-    *)
-	F_PIE=-fpie
-	;;
-esac
-
 # Choose compiler options by osversion if not cross-compiling.
 if [ "$crossbuild" = "false" ]; then
     case "$osversion" in
@@ -122,9 +111,8 @@ case "$osversion" in
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-selinux"
 	fi
 	if [ $osrelease -ge 50 ]; then
-	    # RHEL 5 and up build pies, have audit support and use a
-	    # separate PAM config file for "sudo -i".
-	    export CFLAGS="-O2 -g $F_PIE" LDFLAGS="-pie"
+	    # RHEL 5 and up has audit support and uses a separate PAM
+	    # config file for "sudo -i".
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-linux-audit"
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-pam-login"
 	    PPVARS="${PPVARS}${PPVARS+$space}linux_audit=1.4.0"
@@ -145,10 +133,8 @@ case "$osversion" in
 	;;
     sles*)
 	if [ $osrelease -ge 10 ]; then
-	    # SLES 10 and higher build pies
-	    export CFLAGS="-O2 -g $F_PIE" LDFLAGS="-pie"
+	    # SLES 11 and higher has SELinux
 	    if [ $osrelease -ge 11 ]; then
-		# SLES 11 and higher has SELinux
 		configure_opts="${configure_opts}${configure_opts+$tab}--with-selinux"
 	    fi
 	fi
@@ -186,14 +172,6 @@ case "$osversion" in
 	case "$osversion" in
 	    ubu*)
 		configure_opts="${configure_opts}${configure_opts+$tab}--enable-admin-flag${tab}--without-lecture"
-		if [ $osrelease -ge 1004 ]; then
-		    export CFLAGS="-O2 -g $F_PIE" LDFLAGS="-pie"
-		fi
-		;;
-	    deb*)
-		if [ $osrelease -ge 600 ]; then
-		    export CFLAGS="-O2 -g $F_PIE" LDFLAGS="-pie"
-		fi
 		;;
 	esac
 	# Note, must indent with tabs, not spaces due to IFS trickery
@@ -236,10 +214,6 @@ case "$osversion" in
 	fi
 	export CFLAGS="-O2 -g $ARCH_FLAGS $SDK_FLAGS"
 	export LDFLAGS="$ARCH_FLAGS $SDK_FLAGS"
-	if [ $osrelease -ge 105 ]; then
-	    CFLAGS="$CFLAGS $F_PIE"
-	    LDFLAGS="$LDFLAGS -Wl,-pie"
-	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	configure_opts="--with-pam
 		--without-tty-tickets

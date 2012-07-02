@@ -691,6 +691,8 @@ password_timeout
 timeout
 timedir
 iolog_dir
+PIE_CFLAGS
+PIE_LDFLAGS
 CONFIGURE_ARGS
 ZLIB_DEP
 ZLIB
@@ -867,6 +869,7 @@ enable_env_reset
 enable_warnings
 enable_werror
 enable_hardening
+enable_pie
 enable_admin_flag
 with_selinux
 enable_gss_krb5_ccache_name
@@ -1529,6 +1532,8 @@ Optional Features:
   --enable-werror         Whether to enable the -Werror compiler option
   --disable-hardening     Do not use compiler/linker exploit mitigation
                           options
+  --disable-pie           Do not build position independent executables, even
+                          if the compiler/linker supports them
   --enable-admin-flag     Whether to create a Ubuntu-style admin flag file
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
@@ -2780,6 +2785,8 @@ ac_config_headers="$ac_config_headers config.h pathnames.h zlib/zconf.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
+
 
 
 
@@ -5545,6 +5552,14 @@ if test "${enable_hardening+set}" = set; then :
   enableval=$enable_hardening;
 else
   enable_hardening=yes
+fi
+
+
+# Check whether --enable-pie was given.
+if test "${enable_pie+set}" = set; then :
+  enableval=$enable_pie;
+else
+  enable_pie=yes
 fi
 
 
@@ -19842,6 +19857,87 @@ $as_echo "$as_me: WARNING: Disabling I/O log support due to lack of tcsetpgrp fu
 
 fi
 done
+
+fi
+
+if test "$enable_pie" != "no"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fPIE" >&5
+$as_echo_n "checking whether C compiler accepts -fPIE... " >&6; }
+if ${ax_cv_check_cflags___fPIE+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -fPIE"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ax_cv_check_cflags___fPIE=yes
+else
+  ax_cv_check_cflags___fPIE=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fPIE" >&5
+$as_echo "$ax_cv_check_cflags___fPIE" >&6; }
+if test x"$ax_cv_check_cflags___fPIE" = xyes; then :
+
+	_CFLAGS="$CFLAGS"
+	CFLAGS="$CFLAGS -fPIE"
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -pie" >&5
+$as_echo_n "checking whether the linker accepts -pie... " >&6; }
+if ${ax_cv_check_ldflags___pie+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -pie"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ax_cv_check_ldflags___pie=yes
+else
+  ax_cv_check_ldflags___pie=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___pie" >&5
+$as_echo "$ax_cv_check_ldflags___pie" >&6; }
+if test x"$ax_cv_check_ldflags___pie" = xyes; then :
+
+	    PIE_CFLAGS="-fPIE"
+	    PIE_LDFLAGS="-pie"
+
+else
+  :
+fi
+
+	CFLAGS="$_CFLAGS"
+
+else
+  :
+fi
 
 fi
 
