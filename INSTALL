@@ -632,6 +632,11 @@ The following options are also configurable at runtime:
 	_FORTIFY_SOURCE defined to 2, building with -fstack-protector
 	and linking with -zrelro, where supported.
 
+  --disable-pie
+	Disable the creation of position independent executables (PIE)
+        even when the compiler and linker support them.
+	By default, sudo will be built as a PIE where possible.
+
   --enable-admin-flag
 	Enable the creation of an Ubuntu-style admin flag file
 	the first time sudo is run.

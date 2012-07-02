@@ -46,6 +46,10 @@ CFLAGS = @CFLAGS@
 LDFLAGS = @LDFLAGS@
 LT_LDFLAGS = @LT_LDFLAGS@ @LT_LDMAP@ @LT_LDOPT@ @LT_LDEXPORTS@
 
+# PIE flags
+PIE_CFLAGS = @PIE_CFLAGS@
+PIE_LDFLAGS = @PIE_LDFLAGS@
+
 # Where to install things...
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -85,7 +89,7 @@ Makefile: $(srcdir)/Makefile.in
 .SUFFIXES: .o .c .h .lo
 
 .c.lo:
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $<
 
 $(shlib_map): $(shlib_exp)
 	@awk 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
@@ -136,4 +140,4 @@ cleandir: realclean
 sample_plugin.lo: $(srcdir)/sample_plugin.c $(top_builddir)/config.h \
                   $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
                   $(incdir)/sudo_plugin.h $(incdir)/missing.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sample_plugin.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/sample_plugin.c

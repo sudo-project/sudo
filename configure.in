@@ -74,6 +74,8 @@ AC_SUBST([LIBINTL])
 AC_SUBST([SUDO_NLS])
 AC_SUBST([COMPAT_TEST_PROGS])
 AC_SUBST([CROSS_COMPILING])
+AC_SUBST([PIE_LDFLAGS])
+AC_SUBST([PIE_CFLAGS])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -1314,6 +1316,10 @@ AC_ARG_ENABLE(werror,
 AC_ARG_ENABLE(hardening,
 [AS_HELP_STRING([--disable-hardening], [Do not use compiler/linker exploit mitigation options])],
 [], [enable_hardening=yes])
+
+AC_ARG_ENABLE(pie,
+[AS_HELP_STRING([--disable-pie], [Do not build position independent executables, even if the compiler/linker supports them])],
+[], [enable_pie=yes])
 
 AC_ARG_ENABLE(admin-flag,
 [AS_HELP_STRING([--enable-admin-flag], [Whether to create a Ubuntu-style admin flag file])],
@@ -3270,6 +3276,22 @@ if test -n "$LT_LDEXPORTS"; then
 		;;
 	esac
     fi
+fi
+
+dnl
+dnl Check for PIE executable support if using gcc.
+dnl This test relies on AC_LANG_WERROR
+dnl
+if test "$enable_pie" != "no"; then
+    AX_CHECK_COMPILE_FLAG([-fPIE], [
+	_CFLAGS="$CFLAGS"
+	CFLAGS="$CFLAGS -fPIE"
+	AX_CHECK_LINK_FLAG([-pie], [
+	    PIE_CFLAGS="-fPIE"
+	    PIE_LDFLAGS="-pie"
+	])
+	CFLAGS="$_CFLAGS"
+    ])
 fi
 
 dnl
