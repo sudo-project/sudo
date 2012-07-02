@@ -256,7 +256,7 @@ still allow people to get their work done."
 
 %files
 	$osdirs			-
-	$bindir/sudo        	04755 root:
+	$bindir/sudo        	4755 root:
 	$bindir/sudoedit    	0755 root: symlink sudo
 	$sbindir/visudo     	0755
 	$bindir/sudoreplay  	0755
