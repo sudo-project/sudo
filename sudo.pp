@@ -247,6 +247,7 @@ still allow people to get their work done."
 	elif test "%{flavor}" = "ldap"; then
 	    echo "Conflicts: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    echo "Replaces: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
+	    echo "Provides: sudo" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 	    cp -p %{pp_wrkdir}/%{name}/DEBIAN/control %{pp_wrkdir}/%{name}/DEBIAN/control.$$
 	    sed 's/^\(Depends:.*\) *$/\1, libldap-2.4-2/' %{pp_wrkdir}/%{name}/DEBIAN/control.$$ > %{pp_wrkdir}/%{name}/DEBIAN/control
 	    rm -f %{pp_wrkdir}/%{name}/DEBIAN/control.$$
