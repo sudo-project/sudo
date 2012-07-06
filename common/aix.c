@@ -108,9 +108,10 @@ aix_setlimits(char *user)
 	    else
 		rlim.rlim_cur = rlim.rlim_max;	/* soft not specd, use hard */
 	} else {
-	    /* No hard limit set, try soft limit. */
-	    if (aix_getlimit(user, aix_limits[n].soft, &val) == 0)
-		rlim.rlim_cur = val == -1 ? RLIM64_INFINITY : val * aix_limits[n].factor;
+	    /* No hard limit set, try soft limit, if it exists. */
+	    if (aix_getlimit(user, aix_limits[n].soft, &val) == -1)
+		continue;
+	    rlim.rlim_cur = val == -1 ? RLIM64_INFINITY : val * aix_limits[n].factor;
 
 	    /* Set hard limit per AIX /etc/security/limits documentation. */
 	    switch (aix_limits[n].resource) {
