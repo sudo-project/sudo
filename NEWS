@@ -28,6 +28,11 @@ What's new in Sudo 1.8.6?
    ldap.conf options.  A new ldap.conf option, TLS_KEYPW can be
    used to specify a password to decrypt the key database.
 
+ * If a user fails to authenticate and the command would be rejected
+   by sudoers, it is now logged with "command not allowed" instead
+   of "N incorrect password attempts".  Likewise, the "mail_no_perms"
+   sudoers option now takes precedence over "mail_badpass".
+
 What's new in Sudo 1.8.5p2?
 
  * Fixed use of the SUDO_ASKPASS environment variable which was
