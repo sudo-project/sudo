@@ -922,8 +922,11 @@ This flag is I<off> by default.
 
 =item mail_badpass
 
-Send mail to the I<mailto> user if the user running B<sudo> does not
-enter the correct password.  This flag is I<off> by default.
+Send mail to the I<mailto> user if the user running B<sudo> does
+not enter the correct password.  If the command the user is attempting
+to run is not permitted by I<sudoers> and one of the I<mail_always>,
+I<mail_no_host>, I<mail_no_perms> or I<mail_no_user> flags are set,
+this flag will have no effect.  This flag is I<off> by default.
 
 =item mail_no_host
 

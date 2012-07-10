@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "June 29, 2012" "1.8.6" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "July 10, 2012" "1.8.6" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -1048,8 +1048,11 @@ Send mail to the \fImailto\fR user every time a users runs \fBsudo\fR.
 This flag is \fIoff\fR by default.
 .IP "mail_badpass" 16
 .IX Item "mail_badpass"
-Send mail to the \fImailto\fR user if the user running \fBsudo\fR does not
-enter the correct password.  This flag is \fIoff\fR by default.
+Send mail to the \fImailto\fR user if the user running \fBsudo\fR does
+not enter the correct password.  If the command the user is attempting
+to run is not permitted by \fIsudoers\fR and one of the \fImail_always\fR,
+\&\fImail_no_host\fR, \fImail_no_perms\fR or \fImail_no_user\fR flags are set,
+this flag will have no effect.  This flag is \fIoff\fR by default.
 .IP "mail_no_host" 16
 .IX Item "mail_no_host"
 If set, mail will be sent to the \fImailto\fR user if the invoking
