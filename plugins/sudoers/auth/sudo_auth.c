@@ -100,6 +100,10 @@ extern char **NewArgv; /* XXX - for auditing */
 
 static void pass_warn(void);
 
+/*
+ * Initialize sudoers authentication method(s).
+ * Returns 0 on success and -1 on error.
+ */
 int
 sudo_auth_init(struct passwd *pw)
 {
@@ -108,7 +112,7 @@ sudo_auth_init(struct passwd *pw)
     debug_decl(sudo_auth_init, SUDO_DEBUG_AUTH)
 
     if (auth_switch[0].name == NULL)
-	debug_return_int(true);
+	debug_return_int(0);
 
     /* Make sure we haven't mixed standalone and shared auth methods. */
     standalone = IS_STANDALONE(&auth_switch[0]);
@@ -134,18 +138,20 @@ sudo_auth_init(struct passwd *pw)
 	    if (NEEDS_USER(auth))
 		restore_perms();
 
+	    /* Disable if it failed to init unless there was a fatal error. */
 	    if (status == AUTH_FAILURE)
 		SET(auth->flags, FLAG_DISABLED);
-	    else if (status == AUTH_FATAL) {
-		/* XXX log */
-		audit_failure(NewArgv, "authentication failure");
+	    else if (status == AUTH_FATAL)
 		break;		/* assume error msg already printed */
-	    }
 	}
     }
-    debug_return_int(status == AUTH_FATAL ? -1 : true);
+    debug_return_int(status == AUTH_FATAL ? -1 : 0);
 }
 
+/*
+ * Cleanup all authentication methods.
+ * Returns 0 on success and -1 on error.
+ */
 int
 sudo_auth_cleanup(struct passwd *pw)
 {
@@ -164,22 +170,23 @@ sudo_auth_cleanup(struct passwd *pw)
 	    if (NEEDS_USER(auth))
 		restore_perms();
 
-	    if (status == AUTH_FATAL) {
-		/* XXX log */
-		audit_failure(NewArgv, "authentication failure");
+	    if (status == AUTH_FATAL)
 		break;		/* assume error msg already printed */
-	    }
 	}
     }
-    debug_return_int(status == AUTH_FATAL ? -1 : true);
+    debug_return_int(status == AUTH_FATAL ? -1 : 0);
 }
 
+/*
+ * Verify the specified user.
+ * Returns true if verified, false if not or -1 on error.
+ */
 int
-verify_user(struct passwd *pw, char *prompt)
+verify_user(struct passwd *pw, char *prompt, int validated)
 {
     int counter = def_passwd_tries + 1;
     int success = AUTH_FAILURE;
-    int flags, status, rval;
+    int status, rval;
     char *p;
     sudo_auth *auth;
     sigaction_t sa, osa;
@@ -216,11 +223,8 @@ verify_user(struct passwd *pw, char *prompt)
 
 		if (status == AUTH_FAILURE)
 		    SET(auth->flags, FLAG_DISABLED);
-		else if (status == AUTH_FATAL) {
-		    /* XXX log */
-		    audit_failure(NewArgv, "authentication failure");
-		    debug_return_int(-1);/* assume error msg already printed */
-		}
+		else if (status == AUTH_FATAL)
+		    goto done;		/* assume error msg already printed */
 	    }
 	}
 
@@ -263,21 +267,14 @@ done:
 	    break;
 	case AUTH_INTR:
 	case AUTH_FAILURE:
-	    if (counter != def_passwd_tries) {
-		if (def_mail_badpass || def_mail_always)
-		    flags = 0;
-		else
-		    flags = NO_MAIL;
-		log_fatal(flags, ngettext("%d incorrect password attempt",
-		    "%d incorrect password attempts",
-		    def_passwd_tries - counter), def_passwd_tries - counter);
-	    }
-	    audit_failure(NewArgv, "authentication failure");
+	    if (counter != def_passwd_tries)
+		validated |= FLAG_BAD_PASSWORD;
+	    log_auth_failure(validated, def_passwd_tries - counter);
 	    rval = false;
 	    break;
 	case AUTH_FATAL:
 	default:
-	    audit_failure(NewArgv, "authentication failure");
+	    log_auth_failure(validated | FLAG_AUTH_ERROR, 0);
 	    rval = -1;
 	    break;
     }
@@ -285,43 +282,46 @@ done:
     debug_return_int(rval);
 }
 
+/*
+ * Call authentication method begin session hooks.
+ * Returns 1 on success and -1 on error.
+ */
 int
 sudo_auth_begin_session(struct passwd *pw, char **user_env[])
 {
     sudo_auth *auth;
-    int status;
+    int status = AUTH_SUCCESS;
     debug_decl(auth_begin_session, SUDO_DEBUG_AUTH)
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->begin_session && !IS_DISABLED(auth)) {
 	    status = (auth->begin_session)(pw, user_env, auth);
-	    if (status == AUTH_FATAL) {
-		/* XXX log */
-		audit_failure(NewArgv, "authentication failure");
-		debug_return_bool(-1);	/* assume error msg already printed */
-	    }
+	    if (status == AUTH_FATAL)
+		break;		/* assume error msg already printed */
 	}
     }
-    debug_return_bool(true);
+    debug_return_int(status == AUTH_FATAL ? -1 : 1);
 }
 
+/*
+ * Call authentication method end session hooks.
+ * Returns 1 on success and -1 on error.
+ */
 int
 sudo_auth_end_session(struct passwd *pw)
 {
     sudo_auth *auth;
-    int status;
+    int status = AUTH_SUCCESS;
     debug_decl(auth_end_session, SUDO_DEBUG_AUTH)
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->end_session && !IS_DISABLED(auth)) {
 	    status = (auth->end_session)(pw, auth);
-	    if (status == AUTH_FATAL) {
-		/* XXX log */
-		debug_return_bool(-1);	/* assume error msg already printed */
-	    }
+	    if (status == AUTH_FATAL)
+		break;			/* assume error msg already printed */
 	}
     }
-    debug_return_bool(true);
+    debug_return_int(status == AUTH_FATAL ? -1 : 1);
 }
 
 static void

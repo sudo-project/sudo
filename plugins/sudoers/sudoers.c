@@ -289,6 +289,7 @@ sudoers_policy_close(int exit_status, int error_code)
 /*
  * The init_session function is called before executing the command
  * and before uid/gid changes occur.
+ * Returns 1 on success, 0 on failure and -1 on error.
  */
 static int
 sudoers_policy_init_session(struct passwd *pwd, char **user_env[])
@@ -301,7 +302,7 @@ sudoers_policy_init_session(struct passwd *pwd, char **user_env[])
 
     if (sigsetjmp(error_jmp, 1)) {
 	/* called via error(), errorx() or log_fatal() */
-	return -1;
+	debug_return_bool(-1);
     }
 
     debug_return_bool(sudo_auth_begin_session(pwd, user_env));
@@ -371,10 +372,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Find command in path */
     cmnd_status = set_cmnd();
-    if (cmnd_status == -1) {
-	rval = -1;
-	goto done;
-    }
 
 #ifdef HAVE_SETLOCALE
     if (!setlocale(LC_ALL, def_sudoers_locale)) {
@@ -463,8 +460,11 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Require a password if sudoers says so.  */
     rval = check_user(validated, sudo_mode);
-    if (rval != true)
+    if (rval != true) {
+	if (!ISSET(validated, VALIDATE_OK))
+	    log_failure(validated, cmnd_status);
 	goto done;
+    }
 
     /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
     /* XXX - causes confusion when root is not listed in sudoers */
@@ -482,30 +482,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* If the user was not allowed to run the command we are done. */
     if (!ISSET(validated, VALIDATE_OK)) {
-	if (ISSET(validated, FLAG_NO_USER | FLAG_NO_HOST)) {
-	    audit_failure(NewArgv, _("No user or host"));
-	    log_denial(validated, 1);
-	} else {
-	    if (def_path_info) {
-		/*
-		 * We'd like to not leak path info at all here, but that can
-		 * *really* confuse the users.  To really close the leak we'd
-		 * have to say "not allowed to run foo" even when the problem
-		 * is just "no foo in path" since the user can trivially set
-		 * their path to just contain a single dir.
-		 */
-		log_denial(validated,
-		    !(cmnd_status == NOT_FOUND_DOT || cmnd_status == NOT_FOUND));
-		if (cmnd_status == NOT_FOUND)
-		    warningx(_("%s: command not found"), user_cmnd);
-		else if (cmnd_status == NOT_FOUND_DOT)
-		    warningx(_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
-	    } else {
-		/* Just tell the user they are not allowed to run foo. */
-		log_denial(validated, 1);
-	    }
-	    audit_failure(NewArgv, _("validation failure"));
-	}
+	log_failure(validated, cmnd_status);
 	goto bad;
     }
 

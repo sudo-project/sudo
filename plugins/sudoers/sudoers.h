@@ -104,6 +104,9 @@ struct sudo_user {
 #define FLAG_NO_USER		0x020
 #define FLAG_NO_HOST		0x040
 #define FLAG_NO_CHECK		0x080
+#define FLAG_NON_INTERACTIVE	0x100
+#define FLAG_BAD_PASSWORD	0x200
+#define FLAG_AUTH_ERROR		0x400
 
 /*
  * find_path()/load_cmnd() return values
@@ -219,7 +222,7 @@ void remove_timestamp(bool);
 bool user_is_exempt(void);
 
 /* sudo_auth.c */
-int verify_user(struct passwd *pw, char *prompt);
+int verify_user(struct passwd *pw, char *prompt, int validated);
 int sudo_auth_begin_session(struct passwd *pw, char **user_env[]);
 int sudo_auth_end_session(struct passwd *pw);
 int sudo_auth_init(struct passwd *pw);

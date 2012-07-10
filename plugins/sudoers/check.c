@@ -149,7 +149,8 @@ check_user(int validated, int mode)
     if (status != TS_CURRENT || ISSET(validated, FLAG_CHECK_USER)) {
 	/* Bail out if we are non-interactive and a password is required */
 	if (ISSET(mode, MODE_NONINTERACTIVE)) {
-	    warningx(_("sorry, a password is required to run %s"), getprogname());
+	    validated |= FLAG_NON_INTERACTIVE;
+	    log_auth_failure(validated, 0);
 	    rval = -1;
 	    goto done;
 	}
@@ -161,7 +162,7 @@ check_user(int validated, int mode)
 	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
 	    user_name, user_shost);
 
-	rval = verify_user(auth_pw, prompt);
+	rval = verify_user(auth_pw, prompt, validated);
     }
     /* Only update timestamp if user was validated. */
     if (rval == true && ISSET(validated, VALIDATE_OK) &&

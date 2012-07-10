@@ -73,6 +73,8 @@ static char *new_logline(const char *, int);
 
 extern sigjmp_buf error_jmp;
 
+extern char **NewArgv; /* XXX - for auditing */
+
 #define MAXSYSLOGTRIES	16	/* num of retries for broken syslogs */
 
 /*
@@ -247,8 +249,8 @@ do_logfile(char *msg)
 /*
  * Log and mail the denial message, optionally informing the user.
  */
-void
-log_denial(int status, int inform_user)
+static void
+log_denial(int status, bool inform_user)
 {
     char *logline, *message;
     debug_decl(log_denial, SUDO_DEBUG_LOGGING)
@@ -299,6 +301,81 @@ log_denial(int status, int inform_user)
 
     efree(logline);
     debug_return;
+}
+
+/*
+ * Log and audit that user was not allowed to run the command.
+ */
+void
+log_failure(int status, int flags)
+{
+    debug_decl(log_failure, SUDO_DEBUG_LOGGING)
+    bool inform_user;
+
+    /* Handle auditing first. */
+    if (ISSET(status, FLAG_NO_USER | FLAG_NO_HOST))
+	audit_failure(NewArgv, _("No user or host"));
+    else
+	audit_failure(NewArgv, _("validation failure"));
+
+    /* The user doesn't always get to see the log message (path info). */
+    inform_user = def_path_info && (flags == NOT_FOUND_DOT || flags == NOT_FOUND);
+    log_denial(status, inform_user);
+
+    if (!inform_user) {
+	/*
+	 * We'd like to not leak path info at all here, but that can
+	 * *really* confuse the users.  To really close the leak we'd
+	 * have to say "not allowed to run foo" even when the problem
+	 * is just "no foo in path" since the user can trivially set
+	 * their path to just contain a single dir.
+	 */
+	if (flags == NOT_FOUND)
+	    warningx(_("%s: command not found"), user_cmnd);
+	else if (flags == NOT_FOUND_DOT)
+	    warningx(_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
+    }
+}
+
+/*
+ * Log and audit that user was not able to authenticate themselves.
+ */
+void
+log_auth_failure(int status, int tries)
+{
+    int flags = NO_MAIL;
+    debug_decl(log_auth_failure, SUDO_DEBUG_LOGGING)
+
+    /* Handle auditing first. */
+    audit_failure(NewArgv, _("authentication failure"));
+
+    /*
+     * Do we need to send mail?
+     * We want to avoid sending multiple messages for the same command
+     * so if we are going to send an email about the denial, that takes
+     * precedence.
+     */
+    if (ISSET(status, VALIDATE_OK)) {
+	/* Command allowed, auth failed; do we need to send mail? */
+	if (def_mail_badpass || def_mail_always)
+	    flags = 0;
+    } else {
+	/* Command denied, auth failed; make sure we don't send mail twice. */
+	if (def_mail_badpass && !should_mail(status))
+	    flags = 0;
+	/* Don't log the bad password message, we'll log a denial instead. */
+	flags |= NO_LOG;
+    }
+
+    /*
+     * If sudoers denied the command we'll log that separately.
+     */
+    if (ISSET(status, FLAG_BAD_PASSWORD)) {
+	log_error(flags, ngettext("%d incorrect password attempt",
+	    "%d incorrect password attempts", tries), tries);
+    } else if (ISSET(status, FLAG_NON_INTERACTIVE)) {
+	log_error(flags, _("password required"));
+    }
 }
 
 /*
@@ -369,10 +446,12 @@ vlog_error(int flags, const char *fmt, va_list ap)
     /*
      * Log to syslog and/or a file.
      */
-    if (def_syslog)
-	do_syslog(def_syslog_badpri, logline);
-    if (def_logfile)
-	do_logfile(logline);
+    if (!ISSET(flags, NO_LOG)) {
+	if (def_syslog)
+	    do_syslog(def_syslog_badpri, logline);
+	if (def_logfile)
+	    do_logfile(logline);
+    }
 
     efree(logline);
 
