@@ -374,7 +374,7 @@ log_auth_failure(int status, int tries)
 	log_error(flags, ngettext("%d incorrect password attempt",
 	    "%d incorrect password attempts", tries), tries);
     } else if (ISSET(status, FLAG_NON_INTERACTIVE)) {
-	log_error(flags, _("password required"));
+	log_error(flags, _("a password is required"));
     }
 }
 
