@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "June 29, 2012" "1.8.6" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "July 12, 2012" "1.8.6" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -393,7 +393,7 @@ specified multiple times, a longer list format is used.
 .IX Item "-n"
 The \fB\-n\fR (\fInon-interactive\fR) option prevents \fBsudo\fR from prompting
 the user for a password.  If a password is required for the command
-to run, \fBsudo\fR will display an error messages and exit.
+to run, \fBsudo\fR will display an error message and exit.
 .IP "\-P" 12
 .IX Item "-P"
 The \fB\-P\fR (\fIpreserve\fR \fIgroup vector\fR) option causes \fBsudo\fR to
@@ -427,7 +427,7 @@ expanded to the name of the user whose password is being requested
 .el .IP "\f(CW%U\fR" 4
 .IX Item "%U"
 expanded to the login name of the user the command will be run as
-(defaults to root unless the \f(CW\*(C`\-u\*(C'\fR option is also specified)
+(defaults to root unless the \fB\-u\fR option is also specified)
 .ie n .IP "%u" 4
 .el .IP "\f(CW%u\fR" 4
 .IX Item "%u"
@@ -490,7 +490,7 @@ not set.  Other security policies may not support this.
 The \fB\-V\fR (\fIversion\fR) option causes \fBsudo\fR to print its version
 string and the version string of the security policy plugin and any
 I/O plugins.  If the invoking user is already root the \fB\-V\fR option
-will display the arguments passed to configure when \fIsudo\fR was
+will display the arguments passed to configure when \fBsudo\fR was
 built and plugins may display more verbose information such as
 default options.
 .IP "\-v" 12
@@ -499,7 +499,7 @@ When given the \fB\-v\fR (\fIvalidate\fR) option, \fBsudo\fR will update the
 user's cached credentials, authenticating the user's password if
 necessary.  For the \fIsudoers\fR plugin, this extends the \fBsudo\fR
 timeout for another \f(CW\*(C`@timeout@\*(C'\fR minutes (or whatever the timeout
-is set to in \fIsudoers\fR) but does not run a command.  Not all
+is set to by the security policy) but does not run a command.  Not all
 security policies support cached credentials.
 .IP "\-\-" 12
 The \fB\-\-\fR option indicates that \fBsudo\fR should stop processing command
@@ -592,7 +592,7 @@ name of the program to debug (\fBsudo\fR, \fBvisudo\fR, \fBsudoreplay\fR),
 the debug file name and a comma-separated list of debug flags.
 The debug flag syntax used by \fBsudo\fR and the \fIsudoers\fR plugin is
 \&\fIsubsystem\fR@\fIpriority\fR but the plugin is free to use a different
-format so long as it does not include a command \f(CW\*(C`,\*(C'\fR.
+format so long as it does not include a comma (`\f(CW\*(C`,\*(C'\fR').
 .PP
 For instance:
 .PP
@@ -655,8 +655,8 @@ utility functions
 .IP "\fIutmp\fR" 10
 .IX Item "utmp"
 utmp handling
-.SH "RETURN VALUES"
-.IX Header "RETURN VALUES"
+.SH "EXIT VALUE"
+.IX Header "EXIT VALUE"
 Upon successful execution of a program, the exit status from \fBsudo\fR
 will simply be the exit status of the program that was executed.
 .PP
@@ -716,19 +716,19 @@ policy has control over the content of the command's environment.
 .el .IP "\f(CW\*(C`EDITOR\*(C'\fR" 16
 .IX Item "EDITOR"
 Default editor to use in \fB\-e\fR (sudoedit) mode if neither \f(CW\*(C`SUDO_EDITOR\*(C'\fR
-nor \f(CW\*(C`VISUAL\*(C'\fR is set
+nor \f(CW\*(C`VISUAL\*(C'\fR is set.
 .ie n .IP "\*(C`MAIL\*(C'" 16
 .el .IP "\f(CW\*(C`MAIL\*(C'\fR" 16
 .IX Item "MAIL"
 In \fB\-i\fR mode or when \fIenv_reset\fR is enabled in \fIsudoers\fR, set
-to the mail spool of the target user
+to the mail spool of the target user.
 .ie n .IP "\*(C`HOME\*(C'" 16
 .el .IP "\f(CW\*(C`HOME\*(C'\fR" 16
 .IX Item "HOME"
 Set to the home directory of the target user if \fB\-i\fR or \fB\-H\fR are
 specified, \fIenv_reset\fR or \fIalways_set_home\fR are set in \fIsudoers\fR,
 or when the \fB\-s\fR option is specified and \fIset_home\fR is set in
-\&\fIsudoers\fR
+\&\fIsudoers\fR.
 .ie n .IP "\*(C`PATH\*(C'" 16
 .el .IP "\f(CW\*(C`PATH\*(C'\fR" 16
 .IX Item "PATH"
@@ -736,49 +736,49 @@ May be overridden by the security policy.
 .ie n .IP "\*(C`SHELL\*(C'" 16
 .el .IP "\f(CW\*(C`SHELL\*(C'\fR" 16
 .IX Item "SHELL"
-Used to determine shell to run with \f(CW\*(C`\-s\*(C'\fR option
+Used to determine shell to run with \fB\-s\fR option.
 .ie n .IP "\*(C`SUDO_ASKPASS\*(C'" 16
 .el .IP "\f(CW\*(C`SUDO_ASKPASS\*(C'\fR" 16
 .IX Item "SUDO_ASKPASS"
 Specifies the path to a helper program used to read the password
-if no terminal is available or if the \f(CW\*(C`\-A\*(C'\fR option is specified.
+if no terminal is available or if the \fB\-A\fR option is specified.
 .ie n .IP "\*(C`SUDO_COMMAND\*(C'" 16
 .el .IP "\f(CW\*(C`SUDO_COMMAND\*(C'\fR" 16
 .IX Item "SUDO_COMMAND"
-Set to the command run by sudo
+Set to the command run by sudo.
 .ie n .IP "\*(C`SUDO_EDITOR\*(C'" 16
 .el .IP "\f(CW\*(C`SUDO_EDITOR\*(C'\fR" 16
 .IX Item "SUDO_EDITOR"
-Default editor to use in \fB\-e\fR (sudoedit) mode
+Default editor to use in \fB\-e\fR (sudoedit) mode.
 .ie n .IP "\*(C`SUDO_GID\*(C'" 16
 .el .IP "\f(CW\*(C`SUDO_GID\*(C'\fR" 16
 .IX Item "SUDO_GID"
-Set to the group \s-1ID\s0 of the user who invoked sudo
+Set to the group \s-1ID\s0 of the user who invoked sudo.
 .ie n .IP "\*(C`SUDO_PROMPT\*(C'" 16
 .el .IP "\f(CW\*(C`SUDO_PROMPT\*(C'\fR" 16
 .IX Item "SUDO_PROMPT"
-Used as the default password prompt
+Used as the default password prompt.
 .ie n .IP "\*(C`SUDO_PS1\*(C'" 16
 .el .IP "\f(CW\*(C`SUDO_PS1\*(C'\fR" 16
 .IX Item "SUDO_PS1"
-If set, \f(CW\*(C`PS1\*(C'\fR will be set to its value for the program being run
+If set, \f(CW\*(C`PS1\*(C'\fR will be set to its value for the program being run.
 .ie n .IP "\*(C`SUDO_UID\*(C'" 16
 .el .IP "\f(CW\*(C`SUDO_UID\*(C'\fR" 16
 .IX Item "SUDO_UID"
-Set to the user \s-1ID\s0 of the user who invoked sudo
+Set to the user \s-1ID\s0 of the user who invoked sudo.
 .ie n .IP "\*(C`SUDO_USER\*(C'" 16
 .el .IP "\f(CW\*(C`SUDO_USER\*(C'\fR" 16
 .IX Item "SUDO_USER"
-Set to the login of the user who invoked sudo
+Set to the login name of the user who invoked sudo.
 .ie n .IP "\*(C`USER\*(C'" 16
 .el .IP "\f(CW\*(C`USER\*(C'\fR" 16
 .IX Item "USER"
-Set to the target user (root unless the \fB\-u\fR option is specified)
+Set to the target user (root unless the \fB\-u\fR option is specified).
 .ie n .IP "\*(C`VISUAL\*(C'" 16
 .el .IP "\f(CW\*(C`VISUAL\*(C'\fR" 16
 .IX Item "VISUAL"
 Default editor to use in \fB\-e\fR (sudoedit) mode if \f(CW\*(C`SUDO_EDITOR\*(C'\fR
-is not set
+is not set.
 .SH "FILES"
 .IX Header "FILES"
 .ie n .IP "\fI@sysconfdir@/sudo.conf\fR" 24
@@ -838,6 +838,10 @@ to make the \f(CW\*(C`cd\*(C'\fR and file redirection work.
 \&\fIgrep\fR\|(1), \fIsu\fR\|(1), \fIstat\fR\|(2),
 .if \n(LC \&\fIlogin_cap\fR\|(3),
 \&\fIpasswd\fR\|(@mansectform@), \fIsudoers\fR\|(@mansectform@), \fIsudo_plugin\fR\|(@mansectsu@), \fIsudoreplay\fR\|(@mansectsu@), \fIvisudo\fR\|(@mansectsu@)
+.SH "HISTORY"
+.IX Header "HISTORY"
+See the \s-1HISTORY\s0 file in the \fBsudo\fR distribution
+(http://www.sudo.ws/sudo/history.html) for a brief history of sudo.
 .SH "AUTHORS"
 .IX Header "AUTHORS"
 Many people have worked on \fBsudo\fR over the years; this
@@ -848,12 +852,8 @@ version consists of code written primarily by:
 .Ve
 .PP
 See the \s-1CONTRIBUTORS\s0 file in the \fBsudo\fR distribution
-(http://www.sudo.ws/sudo/contributors.html) for a list of people
+(http://www.sudo.ws/sudo/contributors.html) for an exhaustive list of people
 who have contributed to \fBsudo\fR.
-.SH "HISTORY"
-.IX Header "HISTORY"
-See the \s-1HISTORY\s0 file in the \fBsudo\fR distribution
-(http://www.sudo.ws/sudo/history.html) for a brief history of sudo.
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 There is no easy way to prevent a user from gaining a root shell

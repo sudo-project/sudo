@@ -278,7 +278,7 @@ specified multiple times, a longer list format is used.
 
 The B<-n> (I<non-interactive>) option prevents B<sudo> from prompting
 the user for a password.  If a password is required for the command
-to run, B<sudo> will display an error messages and exit.
+to run, B<sudo> will display an error message and exit.
 
 =item -P
 
@@ -315,7 +315,7 @@ L<sudoers(5)>)
 =item C<%U>
 
 expanded to the login name of the user the command will be run as
-(defaults to root unless the C<-u> option is also specified)
+(defaults to root unless the B<-u> option is also specified)
 
 =item C<%u>
 
@@ -380,7 +380,7 @@ not set.  Other security policies may not support this.
 The B<-V> (I<version>) option causes B<sudo> to print its version
 string and the version string of the security policy plugin and any
 I/O plugins.  If the invoking user is already root the B<-V> option
-will display the arguments passed to configure when I<sudo> was
+will display the arguments passed to configure when B<sudo> was
 built and plugins may display more verbose information such as
 default options.
 
@@ -390,7 +390,7 @@ When given the B<-v> (I<validate>) option, B<sudo> will update the
 user's cached credentials, authenticating the user's password if
 necessary.  For the I<sudoers> plugin, this extends the B<sudo>
 timeout for another C<@timeout@> minutes (or whatever the timeout
-is set to in I<sudoers>) but does not run a command.  Not all
+is set to by the security policy) but does not run a command.  Not all
 security policies support cached credentials.
 
 =item --
@@ -492,7 +492,7 @@ name of the program to debug (B<sudo>, B<visudo>, B<sudoreplay>),
 the debug file name and a comma-separated list of debug flags.
 The debug flag syntax used by B<sudo> and the I<sudoers> plugin is
 I<subsystem>@I<priority> but the plugin is free to use a different
-format so long as it does not include a command C<,>.
+format so long as it does not include a comma (`C<,>').
 
 For instance:
 
@@ -571,7 +571,7 @@ utmp handling
 
 =back
 
-=head1 RETURN VALUES
+=head1 EXIT VALUE
 
 Upon successful execution of a program, the exit status from B<sudo>
 will simply be the exit status of the program that was executed.
@@ -634,19 +634,19 @@ policy has control over the content of the command's environment.
 =item C<EDITOR>
 
 Default editor to use in B<-e> (sudoedit) mode if neither C<SUDO_EDITOR>
-nor C<VISUAL> is set
+nor C<VISUAL> is set.
 
 =item C<MAIL>
 
 In B<-i> mode or when I<env_reset> is enabled in I<sudoers>, set
-to the mail spool of the target user
+to the mail spool of the target user.
 
 =item C<HOME>
 
 Set to the home directory of the target user if B<-i> or B<-H> are
 specified, I<env_reset> or I<always_set_home> are set in I<sudoers>,
 or when the B<-s> option is specified and I<set_home> is set in
-I<sudoers>
+I<sudoers>.
 
 =item C<PATH>
 
@@ -654,49 +654,49 @@ May be overridden by the security policy.
 
 =item C<SHELL>
 
-Used to determine shell to run with C<-s> option
+Used to determine shell to run with B<-s> option.
 
 =item C<SUDO_ASKPASS>
 
 Specifies the path to a helper program used to read the password
-if no terminal is available or if the C<-A> option is specified.
+if no terminal is available or if the B<-A> option is specified.
 
 =item C<SUDO_COMMAND>
 
-Set to the command run by sudo
+Set to the command run by sudo.
 
 =item C<SUDO_EDITOR>
 
-Default editor to use in B<-e> (sudoedit) mode
+Default editor to use in B<-e> (sudoedit) mode.
 
 =item C<SUDO_GID>
 
-Set to the group ID of the user who invoked sudo
+Set to the group ID of the user who invoked sudo.
 
 =item C<SUDO_PROMPT>
 
-Used as the default password prompt
+Used as the default password prompt.
 
 =item C<SUDO_PS1>
 
-If set, C<PS1> will be set to its value for the program being run
+If set, C<PS1> will be set to its value for the program being run.
 
 =item C<SUDO_UID>
 
-Set to the user ID of the user who invoked sudo
+Set to the user ID of the user who invoked sudo.
 
 =item C<SUDO_USER>
 
-Set to the login of the user who invoked sudo
+Set to the login name of the user who invoked sudo.
 
 =item C<USER>
 
-Set to the target user (root unless the B<-u> option is specified)
+Set to the target user (root unless the B<-u> option is specified).
 
 =item C<VISUAL>
 
 Default editor to use in B<-e> (sudoedit) mode if C<SUDO_EDITOR>
-is not set
+is not set.
 
 =back
 
@@ -751,6 +751,11 @@ L<grep(1)>, L<su(1)>, L<stat(2)>,
 L<login_cap(3)>,
 L<passwd(5)>, L<sudoers(5)>, L<sudo_plugin(8)>, L<sudoreplay(8)>, L<visudo(8)>
 
+=head1 HISTORY
+
+See the HISTORY file in the B<sudo> distribution
+(http://www.sudo.ws/sudo/history.html) for a brief history of sudo.
+
 =head1 AUTHORS
 
 Many people have worked on B<sudo> over the years; this
@@ -759,13 +764,8 @@ version consists of code written primarily by:
 	Todd C. Miller
 
 See the CONTRIBUTORS file in the B<sudo> distribution
-(http://www.sudo.ws/sudo/contributors.html) for a list of people
+(http://www.sudo.ws/sudo/contributors.html) for an exhaustive list of people
 who have contributed to B<sudo>.
-
-=head1 HISTORY
-
-See the HISTORY file in the B<sudo> distribution
-(http://www.sudo.ws/sudo/history.html) for a brief history of sudo.
 
 =head1 CAVEATS
 
