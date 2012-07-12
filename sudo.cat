@@ -214,7 +214,7 @@ OOPPTTIIOONNSS
        -n          The --nn (_n_o_n_-_i_n_t_e_r_a_c_t_i_v_e) option prevents ssuuddoo from
                    prompting the user for a password.  If a password is
                    required for the command to run, ssuuddoo will display an error
-                   messages and exit.
+                   message and exit.
 
        -P          The --PP (_p_r_e_s_e_r_v_e _g_r_o_u_p _v_e_c_t_o_r) option causes ssuuddoo to
                    preserve the invoking user's group vector unaltered.  By
@@ -304,7 +304,7 @@ OOPPTTIIOONNSS
        matched is ALL, the user may set variables that would overwise be
        forbidden.  See _s_u_d_o_e_r_s(4) for more information.
 
-RREETTUURRNN VVAALLUUEESS
+EEXXIITT VVAALLUUEE
        Upon successful execution of a program, the exit status from ssuuddoo will
        simply be the exit status of the program that was executed.
 
@@ -415,45 +415,45 @@ EENNVVIIRROONNMMEENNTT
        ssuuddoo utilizes the following environment variables:
 
        EDITOR          Default editor to use in --ee (sudoedit) mode if neither
-                       SUDO_EDITOR nor VISUAL is set
+                       SUDO_EDITOR nor VISUAL is set.
 
        MAIL            In --ii mode or when _e_n_v___r_e_s_e_t is enabled in _s_u_d_o_e_r_s, set
-                       to the mail spool of the target user
+                       to the mail spool of the target user.
 
        HOME            Set to the home directory of the target user if --ii or
                        --HH are specified, _e_n_v___r_e_s_e_t or _a_l_w_a_y_s___s_e_t___h_o_m_e are set
                        in _s_u_d_o_e_r_s, or when the --ss option is specified and
-                       _s_e_t___h_o_m_e is set in _s_u_d_o_e_r_s
+                       _s_e_t___h_o_m_e is set in _s_u_d_o_e_r_s.
 
        PATH            Set to a sane value if the _s_e_c_u_r_e___p_a_t_h sudoers option
                        is set.
 
-       SHELL           Used to determine shell to run with -s option
+       SHELL           Used to determine shell to run with --ss option.
 
        SUDO_ASKPASS    Specifies the path to a helper program used to read the
-                       password if no terminal is available or if the -A
+                       password if no terminal is available or if the --AA
                        option is specified.
 
-       SUDO_COMMAND    Set to the command run by sudo
+       SUDO_COMMAND    Set to the command run by sudo.
 
-       SUDO_EDITOR     Default editor to use in --ee (sudoedit) mode
+       SUDO_EDITOR     Default editor to use in --ee (sudoedit) mode.
 
-       SUDO_GID        Set to the group ID of the user who invoked sudo
+       SUDO_GID        Set to the group ID of the user who invoked sudo.
 
-       SUDO_PROMPT     Used as the default password prompt
+       SUDO_PROMPT     Used as the default password prompt.
 
        SUDO_PS1        If set, PS1 will be set to its value for the program
-                       being run
+                       being run.
 
-       SUDO_UID        Set to the user ID of the user who invoked sudo
+       SUDO_UID        Set to the user ID of the user who invoked sudo.
 
-       SUDO_USER       Set to the login of the user who invoked sudo
+       SUDO_USER       Set to the login of the user who invoked sudo.
 
        USER            Set to the target user (root unless the --uu option is
-                       specified)
+                       specified).
 
        VISUAL          Default editor to use in --ee (sudoedit) mode if
-                       SUDO_EDITOR is not set
+                       SUDO_EDITOR is not set.
 
 FFIILLEESS
        _/_e_t_c_/_s_u_d_o_e_r_s            List of who can run what
@@ -551,4 +551,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.10                           May 23, 2012                         SUDO(1m)
+1.7.10                           July 12, 2012                        SUDO(1m)

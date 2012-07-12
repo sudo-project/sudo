@@ -281,7 +281,7 @@ is specified multiple times, a longer list format is used.
 
 The B<-n> (I<non-interactive>) option prevents B<sudo> from prompting
 the user for a password.  If a password is required for the command
-to run, B<sudo> will display an error messages and exit.
+to run, B<sudo> will display an error message and exit.
 
 =item -P
 
@@ -405,7 +405,7 @@ is set in I<sudoers>, the command to be run has the C<SETENV> tag
 set or the command matched is C<ALL>, the user may set variables
 that would overwise be forbidden.  See L<sudoers(5)> for more information.
 
-=head1 RETURN VALUES
+=head1 EXIT VALUE
 
 Upon successful execution of a program, the exit status from B<sudo>
 will simply be the exit status of the program that was executed.
@@ -526,19 +526,19 @@ B<sudo> utilizes the following environment variables:
 =item C<EDITOR>
 
 Default editor to use in B<-e> (sudoedit) mode if neither C<SUDO_EDITOR>
-nor C<VISUAL> is set
+nor C<VISUAL> is set.
 
 =item C<MAIL>
 
 In B<-i> mode or when I<env_reset> is enabled in I<sudoers>, set
-to the mail spool of the target user
+to the mail spool of the target user.
 
 =item C<HOME>
 
 Set to the home directory of the target user if B<-i> or B<-H> are
 specified, I<env_reset> or I<always_set_home> are set in I<sudoers>,
 or when the B<-s> option is specified and I<set_home> is set in
-I<sudoers>
+I<sudoers>.
 
 =item C<PATH>
 
@@ -546,49 +546,49 @@ Set to a sane value if the I<secure_path> sudoers option is set.
 
 =item C<SHELL>
 
-Used to determine shell to run with C<-s> option
+Used to determine shell to run with B<-s> option.
 
 =item C<SUDO_ASKPASS>
 
 Specifies the path to a helper program used to read the password
-if no terminal is available or if the C<-A> option is specified.
+if no terminal is available or if the B<-A> option is specified.
 
 =item C<SUDO_COMMAND>
 
-Set to the command run by sudo
+Set to the command run by sudo.
 
 =item C<SUDO_EDITOR>
 
-Default editor to use in B<-e> (sudoedit) mode
+Default editor to use in B<-e> (sudoedit) mode.
 
 =item C<SUDO_GID>
 
-Set to the group ID of the user who invoked sudo
+Set to the group ID of the user who invoked sudo.
 
 =item C<SUDO_PROMPT>
 
-Used as the default password prompt
+Used as the default password prompt.
 
 =item C<SUDO_PS1>
 
-If set, C<PS1> will be set to its value for the program being run
+If set, C<PS1> will be set to its value for the program being run.
 
 =item C<SUDO_UID>
 
-Set to the user ID of the user who invoked sudo
+Set to the user ID of the user who invoked sudo.
 
 =item C<SUDO_USER>
 
-Set to the login of the user who invoked sudo
+Set to the login of the user who invoked sudo.
 
 =item C<USER>
 
-Set to the target user (root unless the B<-u> option is specified)
+Set to the target user (root unless the B<-u> option is specified).
 
 =item C<VISUAL>
 
 Default editor to use in B<-e> (sudoedit) mode if C<SUDO_EDITOR>
-is not set
+is not set.
 
 =back
 
