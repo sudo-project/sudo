@@ -6,8 +6,8 @@ NNAAMMEE
        sudoreplay - replay sudo session logs
 
 SSYYNNOOPPSSIISS
-       ssuuddoorreeppllaayy [--hh] [--dd _d_i_r_e_c_t_o_r_y] [--ff _f_i_l_t_e_r] [--mm _m_a_x___w_a_i_t] [--ss
-       _s_p_e_e_d___f_a_c_t_o_r] ID
+       ssuuddoorreeppllaayy [--hh] [--dd _d_i_r_e_c_t_o_r_y] [--ff _f_i_l_t_e_r] [--mm _m_a_x___w_a_i_t]
+       [--ss _s_p_e_e_d___f_a_c_t_o_r] ID
 
        ssuuddoorreeppllaayy [--hh] [--dd _d_i_r_e_c_t_o_r_y] -l [search expression]
 
@@ -61,13 +61,13 @@ OOPPTTIIOONNSS
                    the IDs that are displayed.  An expression is composed of
                    the following predicates:
 
-                   command _c_o_m_m_a_n_d _p_a_t_t_e_r_n
+                   command _p_a_t_t_e_r_n
                            Evaluates to true if the command run matches
-                           _c_o_m_m_a_n_d _p_a_t_t_e_r_n.  On systems with POSIX regular
-                           expression support, the pattern may be an extended
-                           regular expression.  On systems without POSIX
-                           regular expression support, a simple substring
-                           match is performed instead.
+                           _p_a_t_t_e_r_n.  On systems with POSIX regular expression
+                           support, the pattern may be an extended regular
+                           expression.  On systems without POSIX regular
+                           expression support, a simple substring match is
+                           performed instead.
 
                    cwd _d_i_r_e_c_t_o_r_y
                            Evaluates to true if the command was run with the
@@ -94,8 +94,9 @@ OOPPTTIIOONNSS
                            prior to _d_a_t_e.  See "Date and time format" for a
                            description of supported date and time formats.
 
-                   tty _t_t_y Evaluates to true if the command was run on the
-                           specified terminal device.  The _t_t_y should be
+                   tty _t_t_y _n_a_m_e
+                           Evaluates to true if the command was run on the
+                           specified terminal device.  The _t_t_y _n_a_m_e should be
                            specified without the _/_d_e_v_/ prefix, e.g.  _t_t_y_0_1
                            instead of _/_d_e_v_/_t_t_y_0_1.
 
@@ -114,20 +115,20 @@ OOPPTTIIOONNSS
                    _a_n_d unless separated by an _o_r.
 
        -m _m_a_x___w_a_i_t Specify an upper bound on how long to wait between key
-                   presses or output data.  By default, ssuuddoo__rreeppllaayy will
+                   presses or output data.  By default, ssuuddoorreeppllaayy will
                    accurately reproduce the delays between key presses or
                    program output.  However, this can be tedious when the
                    session includes long pauses.  When the _-_m option is
                    specified, ssuuddoorreeppllaayy will limit these pauses to at most
                    _m_a_x___w_a_i_t seconds.  The value may be specified as a floating
-                   point number, .e.g. _2_._5.
+                   point number, e.g. _2_._5.
 
        -s _s_p_e_e_d___f_a_c_t_o_r
                    This option causes ssuuddoorreeppllaayy to adjust the number of
                    seconds it will wait between key presses or program output.
                    This can be used to slow down or speed up the display.  For
                    example, a _s_p_e_e_d___f_a_c_t_o_r of _2 would make the output twice as
-                   fast whereas a _s_p_e_e_d___f_a_c_t_o_r of <.5> would make the output
+                   fast whereas a _s_p_e_e_d___f_a_c_t_o_r of _._5 would make the output
                    twice as slow.
 
        -V          The --VV (version) option causes ssuuddoorreeppllaayy to print its
@@ -155,7 +156,7 @@ OOPPTTIIOONNSS
        optional.  If no date is specified, the current day is assumed; if no
        time is specified, the first second of the specified date is used.  The
        less significant parts of both time and date may also be omitted, in
-       which case zero is assumed.  For example, the following are all valid:
+       which case zero is assumed.
 
        The following are all valid time and date specifications:
 
@@ -223,24 +224,24 @@ FFIILLEESS
 EEXXAAMMPPLLEESS
        List sessions run by user _m_i_l_l_e_r_t:
 
-        sudoreplay -l user millert
+        # sudoreplay -l user millert
 
        List sessions run by user _b_o_b with a command containing the string vi:
 
-        sudoreplay -l user bob command vi
+        # sudoreplay -l user bob command vi
 
        List sessions run by user _j_e_f_f that match a regular expression:
 
-        sudoreplay -l user jeff command '/bin/[a-z]*sh'
+        # sudoreplay -l user jeff command '/bin/[a-z]*sh'
 
        List sessions run by jeff or bob on the console:
 
-        sudoreplay -l ( user jeff or user bob ) tty console
+        # sudoreplay -l ( user jeff or user bob ) tty console
 
 SSEEEE AALLSSOO
        _s_u_d_o(1m), _s_c_r_i_p_t(1)
 
-AAUUTTHHOORR
+AAUUTTHHOORRSS
        Todd C. Miller
 
 BBUUGGSS
@@ -261,4 +262,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.6                            June 29, 2012                  SUDOREPLAY(1m)
+1.8.6                            July 17, 2012                  SUDOREPLAY(1m)

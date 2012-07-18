@@ -140,7 +140,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "June 29, 2012" "1.8.6" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "July 17, 2012" "1.8.6" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -676,7 +676,7 @@ sudoers line, the following default is assumed:
 .Ve
 .PP
 Note that \fI@nsswitch_conf@\fR is supported even when the underlying
-operating system does not use an nsswitch.conf file.
+operating system does not use an nsswitch.conf file, except on \s-1AIX\s0 (see below).
 .SS "Configuring netsvc.conf"
 .IX Subsection "Configuring netsvc.conf"
 On \s-1AIX\s0 systems, the \fI@netsvc_conf@\fR file is consulted instead of

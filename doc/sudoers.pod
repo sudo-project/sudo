@@ -65,7 +65,7 @@ lookup is still done for root, not the user specified by C<SUDO_USER>.
 I<sudoers> uses time stamp files for credential caching.  Once a
 user has been authenticated, a time stamp is updated and the user
 may then use sudo without a password for a short period of time
-(C<@timeout@> minutes unless overridden by the I<timeout> option.
+(C<@timeout@> minutes unless overridden by the I<timeout> option).
 By default, I<sudoers> uses a tty-based time stamp which means that
 there is a separate time stamp for each of a user's login sessions.
 The I<tty_tickets> option can be disabled to force the use of a
@@ -380,7 +380,7 @@ Parameters may be B<flags>, B<integer> values, B<strings>, or B<lists>.
 Flags are implicitly boolean and can be turned off via the '!'
 operator.  Some integer, string and list parameters may also be
 used in a boolean context to disable them.  Values may be enclosed
-in double quotes (C<">) when they contain multiple words.  Special
+in double quotes (C<"">) when they contain multiple words.  Special
 characters may be escaped with a backslash (C<\>).
 
 Lists have two additional assignment operators, C<+=> and C<-=>.
@@ -458,7 +458,7 @@ but  F</bin/kill> and F</usr/bin/lprm> as B<root>.
 We can extend this to allow B<dgb> to run C</bin/ls> with either
 the user or group set to B<operator>:
 
- dgb	boulder = (operator : operator) /bin/ls, (root) /bin/kill, \
+ dgb	boulder = (operator : operator) /bin/ls, (root) /bin/kill,\
 	/usr/bin/lprm
 
 Note that while the group portion of the C<Runas_Spec> permits the
@@ -474,7 +474,7 @@ entry.  The following would all be permitted by the sudoers entry above:
 In the following example, user B<tcm> may run commands that access
 a modem device file with the dialer group.
 
- tcm	boulder = (:dialer) /usr/bin/tip, /usr/bin/cu, \
+ tcm	boulder = (:dialer) /usr/bin/tip, /usr/bin/cu,\
 	/usr/local/bin/minicom
 
 Note that in this example only the group will be set, the command
@@ -502,11 +502,11 @@ however, will supercede the values in I<sudoers>.
 =head2 Tag_Spec
 
 A command may have zero or more tags associated with it.  There are
-eight possible tag values, C<NOPASSWD>, C<PASSWD>, C<NOEXEC>,
+ten possible tag values, C<NOPASSWD>, C<PASSWD>, C<NOEXEC>,
 C<EXEC>, C<SETENV>, C<NOSETENV>, C<LOG_INPUT>, C<NOLOG_INPUT>,
 C<LOG_OUTPUT> and C<NOLOG_OUTPUT>.  Once a tag is set on a C<Cmnd>,
 subsequent C<Cmnd>s in the C<Cmnd_Spec_List>, inherit the tag unless
-it is overridden by the opposite tag (i.e.: C<PASSWD> overrides
+it is overridden by the opposite tag (in other words, C<PASSWD> overrides
 C<NOPASSWD> and C<NOEXEC> overrides C<EXEC>).
 
 =head3 NOPASSWD and PASSWD
@@ -604,7 +604,7 @@ Matches any character B<not> in the specified range.
 =item C<\x>
 
 For any character "x", evaluates to "x".  This is used to
-escape special characters such as: "*", "?", "[", and "}".
+escape special characters such as: "*", "?", "[", and "]".
 
 =back
 
@@ -667,7 +667,7 @@ themselves include other files.  A hard limit of 128 nested include
 files is enforced to prevent include file loops.
 
 If the path to the include file is not fully-qualified (does not
-begin with a F</>), it must be located in the same directory as the
+begin with a C</>), it must be located in the same directory as the
 sudoers file it was included from.  For example, if F</etc/sudoers>
 contains the line:
 
@@ -680,7 +680,7 @@ C<#include sudoers.local>
 the file that will be included is F</etc/sudoers.local>.
 
 The file name may also include the C<%h> escape, signifying the short form
-of the host name.  I.e., if the machine's host name is "xerxes", then
+of the host name.  In other words, if the machine's host name is "xerxes", then
 
 C<#include /etc/sudoers.%h>
 
@@ -706,7 +706,7 @@ problems.
 Note that unlike files included via C<#include>, B<visudo> will not
 edit the files in a C<#includedir> directory unless one of them
 contains a syntax error.  It is still possible to run B<visudo>
-with the C<-f> flag to edit the files directly.
+with the B<-f> flag to edit the files directly.
 
 =head2 Other special characters and reserved words
 
@@ -801,7 +801,7 @@ variables in the caller's environment that match the C<env_keep>
 and C<env_check> lists are then added, followed by any variables
 present in the file specified by the I<env_file> option (if any).
 The default contents of the C<env_keep> and C<env_check> lists are
-displayed when B<sudo> is run by root with the I<-V> option.  If
+displayed when B<sudo> is run by root with the B<-V> option.  If
 the I<secure_path> option is set, its value will be used for the
 C<PATH> environment variable.  This flag is I<@env_reset@> by
 default.
@@ -826,7 +826,8 @@ This flag is I<off> by default.
 =item fqdn
 
 Set this flag if you want to put fully qualified host names in the
-I<sudoers> file.  I.e., instead of myhost you would use myhost.mydomain.edu.
+I<sudoers> file.
+In other words, instead of myhost you would use myhost.mydomain.edu.
 You may still use the short form if you wish (and even mix the two).
 Beware that turning on I<fqdn> requires B<sudo> to make DNS lookups
 which may make B<sudo> unusable if DNS stops working (for example
@@ -840,7 +841,7 @@ I<fqdn>.  This flag is I<@fqdn@> by default.
 
 =item ignore_dot
 
-If set, B<sudo> will ignore '.' or '' (current dir) in the C<PATH>
+If set, B<sudo> will ignore "." or "" (current dir) in the C<PATH>
 environment variable; the C<PATH> itself is not modified.  This
 flag is I<@ignore_dot@> by default.
 
@@ -875,7 +876,7 @@ input is also captured and stored in a separate log file.
 
 Input is logged to the directory specified by the I<iolog_dir>
 option (F<@iolog_dir@> by default) using a unique session ID that
-is included in the normal B<sudo> log line, prefixed with I<TSID=>.
+is included in the normal B<sudo> log line, prefixed with "C<TSID=>".
 The I<iolog_file> option may be used to control the format of the
 session ID.
 
@@ -895,7 +896,7 @@ log files.
 
 Output is logged to the directory specified by the I<iolog_dir>
 option (F<@iolog_dir@> by default) using a unique session ID that
-is included in the normal B<sudo> log line, prefixed with I<TSID=>.
+is included in the normal B<sudo> log line, prefixed with "C<TSID=>".
 The I<iolog_file> option may be used to control the format of the
 session ID.
 
@@ -1131,8 +1132,8 @@ By default, B<sudo> will refuse to run if the user must enter a
 password but it is not possible to disable echo on the terminal.
 If the I<visiblepw> flag is set, B<sudo> will prompt for a password
 even when it would be visible on the screen.  This makes it possible
-to run things like C<"rsh somehost sudo ls"> since L<rsh(1)> does
-not allocate a tty.  This flag is I<off> by default.
+to run things like C<"ssh somehost sudo ls"> since by default, L<ssh(1)> does
+not allocate a tty when running a command.  This flag is I<off> by default.
 
 =back
 
@@ -1282,7 +1283,7 @@ of digits and letters, similar to the mktemp() function.
 
 Subject of the mail sent to the I<mailto> user. The escape C<%h>
 will expand to the host name of the machine.
-Default is C<@mailsub@>.
+Default is "C<@mailsub@>".
 
 =item noexec_file
 
@@ -1327,7 +1328,7 @@ two consecutive C<%> characters are collapsed into a single C<%> character
 
 =back
 
-The default value is C<@passprompt@>.
+The default value is "C<@passprompt@>".
 
 =item role
 
@@ -1410,7 +1411,7 @@ path, either fully-qualified or relative to the F<@prefix@/libexec>
 directory, followed by any configuration arguments the plugin
 requires.  These arguments (if any) will be passed to the plugin's
 initialization function.  If arguments are present, the string must
-be enclosed in double quotes (C<">).
+be enclosed in double quotes (C<"">).
 
 For example, given F</etc/sudo-group>, a group file in Unix group
 format, the sample group plugin can be used:
@@ -1499,14 +1500,14 @@ Defaults to the path to sendmail found at configure time.
 =item mailfrom
 
 Address to use for the "from" address when sending warning and error
-mail.  The address should be enclosed in double quotes (C<">) to
+mail.  The address should be enclosed in double quotes (C<"">) to
 protect against B<sudo> interpreting the C<@> sign.  Defaults to
 the name of the user running B<sudo>.
 
 =item mailto
 
 Address to send warning and error mail to.  The address should
-be enclosed in double quotes (C<">) to protect against B<sudo>
+be enclosed in double quotes (C<"">) to protect against B<sudo>
 interpreting the C<@> sign.  Defaults to C<@mailto@>.
 
 =item secure_path
@@ -1577,7 +1578,7 @@ of whether the C<env_reset> option is enabled or disabled, variables
 specified by C<env_check> will be preserved in the environment if
 they pass the aforementioned check.  The default list of environment
 variables to check is displayed when B<sudo> is run by root with
-the I<-V> option.
+the B<-V> option.
 
 =item env_delete
 
@@ -1587,7 +1588,7 @@ be a double-quoted, space-separated list or a single value without
 double-quotes.  The list can be replaced, added to, deleted from,
 or disabled by using the C<=>, C<+=>, C<-=>, and C<!> operators
 respectively.  The default list of environment variables to remove
-is displayed when B<sudo> is run by root with the I<-V> option.
+is displayed when B<sudo> is run by root with the B<-V> option.
 Note that many operating systems will remove potentially dangerous
 variables from the environment of any setuid process (such as
 B<sudo>).
@@ -1601,7 +1602,7 @@ The argument may be a double-quoted, space-separated list or a
 single value without double-quotes.  The list can be replaced, added
 to, deleted from, or disabled by using the C<=>, C<+=>, C<-=>, and
 C<!> operators respectively.  The default list of variables to keep
-is displayed when B<sudo> is run by root with the I<-V> option.
+is displayed when B<sudo> is run by root with the B<-V> option.
 
 =back
 
@@ -1830,8 +1831,8 @@ variables to pass and then define our I<aliases>:
  Cmnd_Alias	SHUTDOWN = /usr/sbin/shutdown
  Cmnd_Alias	HALT = /usr/sbin/halt
  Cmnd_Alias	REBOOT = /usr/sbin/reboot
- Cmnd_Alias	SHELLS = /usr/bin/sh, /usr/bin/csh, /usr/bin/ksh, \
-			 /usr/local/bin/tcsh, /usr/bin/rsh, \
+ Cmnd_Alias	SHELLS = /usr/bin/sh, /usr/bin/csh, /usr/bin/ksh,\
+			 /usr/local/bin/tcsh, /usr/bin/rsh,\
 			 /usr/local/bin/zsh
  Cmnd_Alias	SU = /usr/bin/su
  Cmnd_Alias	PAGERS = /usr/bin/more, /usr/bin/pg, /usr/bin/less
@@ -2009,7 +2010,7 @@ privileges.
 
 For example, given the following I<sudoers> entry:
 
- john	ALL = /usr/bin/passwd [a-zA-Z0-9]*, /usr/bin/chsh [a-zA-Z0-9]*,
+ john	ALL = /usr/bin/passwd [a-zA-Z0-9]*, /usr/bin/chsh [a-zA-Z0-9]*,\
       /usr/bin/chfn [a-zA-Z0-9]*, !/usr/bin/* root
 
 User B<john> can still run C</usr/bin/passwd root> if I<fast_glob> is

@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO_PLUGIN @mansectsu@"
-.TH SUDO_PLUGIN @mansectsu@ "June 29, 2012" "1.8.6" "MAINTENANCE COMMANDS"
+.TH SUDO_PLUGIN @mansectsu@ "July 17, 2012" "1.8.6" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -165,8 +165,8 @@ The plugin \s-1API\s0 is defined by the \f(CW\*(C`sudo_plugin.h\*(C'\fR header f
 .SS "The sudo.conf File"
 .IX Subsection "The sudo.conf File"
 The \fI@sysconfdir@/sudo.conf\fR file contains plugin configuration directives.
-Currently, the only supported keyword is the \f(CW\*(C`Plugin\*(C'\fR directive,
-which causes a plugin plugin to be loaded.
+The primary keyword is the \f(CW\*(C`Plugin\*(C'\fR directive, which causes a plugin
+to be loaded.
 .PP
 A \f(CW\*(C`Plugin\*(C'\fR line consists of the \f(CW\*(C`Plugin\*(C'\fR keyword, followed by the
 \&\fIsymbol_name\fR and the \fIpath\fR to the shared object containing the
@@ -300,7 +300,7 @@ A comma-separated list of debug flags that correspond to \fBsudo\fR's
 flags are passed to the plugin as they appear in \fI@sysconfdir@/sudo.conf\fR.
 The syntax used by \fBsudo\fR and the \fIsudoers\fR plugin is
 \&\fIsubsystem\fR@\fIpriority\fR but the plugin is free to use a different
-format so long as it does not include a command \f(CW\*(C`,\*(C'\fR.
+format so long as it does not include a comma (\f(CW\*(C`,\*(C'\fR).
 .Sp
 For reference, the priorities supported by the \fBsudo\fR front end and
 \&\fIsudoers\fR are: \fIcrit\fR, \fIerr\fR, \fIwarn\fR, \fInotice\fR, \fIdiag\fR,
@@ -320,30 +320,30 @@ This setting has been deprecated in favor of \fIdebug_flags\fR.
 .IP "runas_user=string" 4
 .IX Item "runas_user=string"
 The user name or uid to to run the command as, if specified via the
-\&\f(CW\*(C`\-u\*(C'\fR flag.
+\&\fB\-u\fR flag.
 .IP "runas_group=string" 4
 .IX Item "runas_group=string"
 The group name or gid to to run the command as, if specified via
-the \f(CW\*(C`\-g\*(C'\fR flag.
+the \fB\-g\fR flag.
 .IP "prompt=string" 4
 .IX Item "prompt=string"
 The prompt to use when requesting a password, if specified via
-the \f(CW\*(C`\-p\*(C'\fR flag.
+the \fB\-p\fR flag.
 .IP "set_home=bool" 4
 .IX Item "set_home=bool"
-Set to true if the user specified the \f(CW\*(C`\-H\*(C'\fR flag.  If true, set the
+Set to true if the user specified the \fB\-H\fR flag.  If true, set the
 \&\f(CW\*(C`HOME\*(C'\fR environment variable to the target user's home directory.
 .IP "preserve_environment=bool" 4
 .IX Item "preserve_environment=bool"
-Set to true if the user specified the \f(CW\*(C`\-E\*(C'\fR flag, indicating that
+Set to true if the user specified the \fB\-E\fR flag, indicating that
 the user wishes to preserve the environment.
 .IP "run_shell=bool" 4
 .IX Item "run_shell=bool"
-Set to true if the user specified the \f(CW\*(C`\-s\*(C'\fR flag, indicating that
+Set to true if the user specified the \fB\-s\fR flag, indicating that
 the user wishes to run a shell.
 .IP "login_shell=bool" 4
 .IX Item "login_shell=bool"
-Set to true if the user specified the \f(CW\*(C`\-i\*(C'\fR flag, indicating that
+Set to true if the user specified the \fB\-i\fR flag, indicating that
 the user wishes to run a login shell.
 .IP "implied_shell=bool" 4
 .IX Item "implied_shell=bool"
@@ -356,35 +356,35 @@ function, which will cause \fBsudo\fR to print a usage message and
 exit.
 .IP "preserve_groups=bool" 4
 .IX Item "preserve_groups=bool"
-Set to true if the user specified the \f(CW\*(C`\-P\*(C'\fR flag, indicating that
+Set to true if the user specified the \fB\-P\fR flag, indicating that
 the user wishes to preserve the group vector instead of setting it
 based on the runas user.
 .IP "ignore_ticket=bool" 4
 .IX Item "ignore_ticket=bool"
-Set to true if the user specified the \f(CW\*(C`\-k\*(C'\fR flag along with a
+Set to true if the user specified the \fB\-k\fR flag along with a
 command, indicating that the user wishes to ignore any cached
 authentication credentials.
 .IP "noninteractive=bool" 4
 .IX Item "noninteractive=bool"
-Set to true if the user specified the \f(CW\*(C`\-n\*(C'\fR flag, indicating that
+Set to true if the user specified the \fB\-n\fR flag, indicating that
 \&\fBsudo\fR should operate in non-interactive mode.  The plugin may
 reject a command run in non-interactive mode if user interaction
 is required.
 .IP "login_class=string" 4
 .IX Item "login_class=string"
 \&\s-1BSD\s0 login class to use when setting resource limits and nice value,
-if specified by the \f(CW\*(C`\-c\*(C'\fR flag.
+if specified by the \fB\-c\fR flag.
 .IP "selinux_role=string" 4
 .IX Item "selinux_role=string"
 SELinux role to use when executing the command, if specified by
-the \f(CW\*(C`\-r\*(C'\fR flag.
+the \fB\-r\fR flag.
 .IP "selinux_type=string" 4
 .IX Item "selinux_type=string"
 SELinux type to use when executing the command, if specified by
-the \f(CW\*(C`\-t\*(C'\fR flag.
+the \fB\-t\fR flag.
 .IP "bsdauth_type=string" 4
 .IX Item "bsdauth_type=string"
-Authentication type, if specified by the \f(CW\*(C`\-a\*(C'\fR flag, to use on
+Authentication type, if specified by the \fB\-a\fR flag, to use on
 systems where \s-1BSD\s0 authentication is supported.
 .IP "network_addrs=list" 4
 .IX Item "network_addrs=list"
@@ -398,14 +398,14 @@ it is an IPv6 address, else it is IPv4.
 The command name that sudo was run as, typically \*(L"sudo\*(R" or \*(L"sudoedit\*(R".
 .IP "sudoedit=bool" 4
 .IX Item "sudoedit=bool"
-Set to true when the \f(CW\*(C`\-e\*(C'\fR flag is is specified or if invoked as
+Set to true when the \fB\-e\fR flag is is specified or if invoked as
 \&\fBsudoedit\fR.  The plugin shall substitute an editor into \fIargv\fR
 in the \fIcheck_policy\fR function or return \f(CW\*(C`\-2\*(C'\fR with a usage error
 if the plugin does not support \fIsudoedit\fR.  For more information,
 see the \fIcheck_policy\fR section.
 .IP "closefrom=number" 4
 .IX Item "closefrom=number"
-If specified, the user has requested via the \f(CW\*(C`\-C\*(C'\fR flag that \fBsudo\fR
+If specified, the user has requested via the \fB\-C\fR flag that \fBsudo\fR
 close all files descriptors with a value of \fInumber\fR or higher.
 The plugin may optionally pass this, or another value, back in the
 \&\fIcommand_info\fR list.
@@ -545,7 +545,7 @@ function.  If the command was successfully executed, the value of
 .Ve
 .Sp
 The \f(CW\*(C`show_version\*(C'\fR function is called by \fBsudo\fR when the user specifies
-the \f(CW\*(C`\-V\*(C'\fR option.  The plugin may display its version information
+the \fB\-V\fR option.  The plugin may display its version information
 to the user via the conversation or plugin_printf function using
 \&\f(CW\*(C`SUDO_CONV_INFO_MSG\*(C'\fR.  If the user requests detailed version
 information, the verbose flag will be set.
@@ -799,7 +799,7 @@ displayed along with any command line arguments.
 .Ve
 .Sp
 The \f(CW\*(C`validate\*(C'\fR function is called when \fBsudo\fR is run with the
-\&\f(CW\*(C`\-v\*(C'\fR flag.  For policy plugins such as \fIsudoers\fR that cache
+\&\fB\-v\fR flag.  For policy plugins such as \fIsudoers\fR that cache
 authentication credentials, this function will validate and cache
 the credentials.
 .Sp
@@ -817,7 +817,7 @@ error information to the user.
 .Ve
 .Sp
 The \f(CW\*(C`invalidate\*(C'\fR function is called when \fBsudo\fR is called with
-the \f(CW\*(C`\-k\*(C'\fR or \f(CW\*(C`\-K\*(C'\fR flag.  For policy plugins such as \fIsudoers\fR that
+the \fB\-k\fR or \fB\-K\fR flag.  For policy plugins such as \fIsudoers\fR that
 cache authentication credentials, this function will invalidate the
 credentials.  If the \fIremove\fR flag is set, the plugin may remove
 the credentials instead of simply invalidating them.
@@ -1110,7 +1110,7 @@ successfully executed, the value of \f(CW\*(C`error\*(C'\fR is 0.
 .Ve
 .Sp
 The \f(CW\*(C`show_version\*(C'\fR function is called by \fBsudo\fR when the user specifies
-the \f(CW\*(C`\-V\*(C'\fR option.  The plugin may display its version information
+the \fB\-V\fR option.  The plugin may display its version information
 to the user via the conversation or plugin_printf function using
 \&\f(CW\*(C`SUDO_CONV_INFO_MSG\*(C'\fR.  If the user requests detailed version
 information, the verbose flag will be set.
@@ -1467,7 +1467,7 @@ function if no user reply is needed and supports standard \fIprintf()\fR
 escape sequences.
 .PP
 Unlike, \f(CW\*(C`SUDO_CONV_INFO_MSG\*(C'\fR and \f(CW\*(C`SUDO_CONV_ERROR_MSG\*(C'\fR, messages
-sent with the <\s-1SUDO_CONV_DEBUG_MSG\s0> \fImsg_type\fR are not directly
+sent with the \f(CW\*(C`SUDO_CONV_DEBUG_MSG\*(C'\fR \fImsg_type\fR are not directly
 user-visible.  Instead, they are logged to the file specified in
 the \f(CW\*(C`Debug\*(C'\fR statement (if any) in the \fI@sysconfdir@/sudo.conf\fR
 file.  This allows a plugin to log debugging information and is

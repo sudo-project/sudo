@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOREPLAY @mansectsu@"
-.TH SUDOREPLAY @mansectsu@ "June 29, 2012" "1.8.6" "MAINTENANCE COMMANDS"
+.TH SUDOREPLAY @mansectsu@ "July 17, 2012" "1.8.6" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -148,9 +148,9 @@
 sudoreplay \- replay sudo session logs
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBsudoreplay\fR [\fB\-h\fR] [\fB\-d\fR \fIdirectory\fR] [\fB\-f\fR \fIfilter\fR] [\fB\-m\fR \fImax_wait\fR] [\fB\-s\fR \fIspeed_factor\fR] \s-1ID\s0
+\&\fBsudoreplay\fR [\fB\-h\fR] [\fB\-d\fR\ \fIdirectory\fR] [\fB\-f\fR\ \fIfilter\fR] [\fB\-m\fR\ \fImax_wait\fR] [\fB\-s\fR\ \fIspeed_factor\fR] \s-1ID\s0
 .PP
-\&\fBsudoreplay\fR [\fB\-h\fR] [\fB\-d\fR \fIdirectory\fR] \-l [search expression]
+\&\fBsudoreplay\fR [\fB\-h\fR] [\fB\-d\fR\ \fIdirectory\fR] \-l [search\ expression]
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 \&\fBsudoreplay\fR plays back or lists the output logs created by \fBsudo\fR.
@@ -183,7 +183,7 @@ Double the playback speed.
 .IP "\-d \fIdirectory\fR" 12
 .IX Item "-d directory"
 Use \fIdirectory\fR to for the session logs instead of the default,
-\&\fI/var/log/sudo\-io\fR.
+\&\fI@iolog_dir@\fR.
 .IP "\-f \fIfilter\fR" 12
 .IX Item "-f filter"
 By default, \fBsudoreplay\fR will play back the command's standard
@@ -203,9 +203,9 @@ by file name (or sequence number).  If a \fIsearch expression\fR is
 specified, it will be used to restrict the IDs that are displayed.
 An expression is composed of the following predicates:
 .RS 12
-.IP "command \fIcommand pattern\fR" 8
-.IX Item "command command pattern"
-Evaluates to true if the command run matches \fIcommand pattern\fR.
+.IP "command \fIpattern\fR" 8
+.IX Item "command pattern"
+Evaluates to true if the command run matches \fIpattern\fR.
 On systems with \s-1POSIX\s0 regular expression support, the pattern may
 be an extended regular expression.  On systems without \s-1POSIX\s0 regular
 expression support, a simple substring match is performed instead.
@@ -232,10 +232,10 @@ Note that \fBsudo\fR runs commands as user \fIroot\fR by default.
 Evaluates to true if the command was run on or prior to \fIdate\fR.
 See \*(L"Date and time format\*(R" for a description of supported
 date and time formats.
-.IP "tty \fItty\fR" 8
-.IX Item "tty tty"
+.IP "tty \fItty name\fR" 8
+.IX Item "tty tty name"
 Evaluates to true if the command was run on the specified terminal
-device.  The \fItty\fR should be specified without the \fI/dev/\fR prefix,
+device.  The \fItty name\fR should be specified without the \fI/dev/\fR prefix,
 e.g.  \fItty01\fR instead of \fI/dev/tty01\fR.
 .IP "user \fIuser name\fR" 8
 .IX Item "user user name"
@@ -255,19 +255,19 @@ by an \fIor\fR.
 .IP "\-m \fImax_wait\fR" 12
 .IX Item "-m max_wait"
 Specify an upper bound on how long to wait between key presses or
-output data.  By default, \fBsudo_replay\fR will accurately reproduce
+output data.  By default, \fBsudoreplay\fR will accurately reproduce
 the delays between key presses or program output.  However, this
 can be tedious when the session includes long pauses.  When the
 \&\fI\-m\fR option is specified, \fBsudoreplay\fR will limit these pauses
 to at most \fImax_wait\fR seconds.  The value may be specified as a
-floating point number, .e.g. \fI2.5\fR.
+floating point number, e.g. \fI2.5\fR.
 .IP "\-s \fIspeed_factor\fR" 12
 .IX Item "-s speed_factor"
 This option causes \fBsudoreplay\fR to adjust the number of seconds
 it will wait between key presses or program output.  This can be
 used to slow down or speed up the display.  For example, a
 \&\fIspeed_factor\fR of \fI2\fR would make the output twice as fast whereas
-a \fIspeed_factor\fR of <.5> would make the output twice as slow.
+a \fIspeed_factor\fR of \fI.5\fR would make the output twice as slow.
 .IP "\-V" 12
 .IX Item "-V"
 The \fB\-V\fR (version) option causes \fBsudoreplay\fR to print its version number
@@ -294,8 +294,7 @@ Either time or date may be omitted, the am/pm and timezone are
 optional.  If no date is specified, the current day is assumed; if
 no time is specified, the first second of the specified date is
 used.  The less significant parts of both time and date may also
-be omitted, in which case zero is assumed.  For example, the following
-are all valid:
+be omitted, in which case zero is assumed.
 .PP
 The following are all valid time and date specifications:
 .IP "now" 8
@@ -336,29 +335,37 @@ The current time but 14 days ago.
 10:01 am, September 17, 2009.
 .SH "FILES"
 .IX Header "FILES"
-.IP "\fI/var/log/sudo\-io\fR" 24
-.IX Item "/var/log/sudo-io"
+.ie n .IP "\fI@iolog_dir@\fR" 24
+.el .IP "\fI@iolog_dir@\fR" 24
+.IX Item "@iolog_dir@"
 The default I/O log directory.
-.IP "\fI/var/log/sudo\-io/00/00/01/log\fR" 24
-.IX Item "/var/log/sudo-io/00/00/01/log"
+.ie n .IP "\fI@iolog_dir@/00/00/01/log\fR" 24
+.el .IP "\fI@iolog_dir@/00/00/01/log\fR" 24
+.IX Item "@iolog_dir@/00/00/01/log"
 Example session log info.
-.IP "\fI/var/log/sudo\-io/00/00/01/stdin\fR" 24
-.IX Item "/var/log/sudo-io/00/00/01/stdin"
+.ie n .IP "\fI@iolog_dir@/00/00/01/stdin\fR" 24
+.el .IP "\fI@iolog_dir@/00/00/01/stdin\fR" 24
+.IX Item "@iolog_dir@/00/00/01/stdin"
 Example session standard input log.
-.IP "\fI/var/log/sudo\-io/00/00/01/stdout\fR" 24
-.IX Item "/var/log/sudo-io/00/00/01/stdout"
+.ie n .IP "\fI@iolog_dir@/00/00/01/stdout\fR" 24
+.el .IP "\fI@iolog_dir@/00/00/01/stdout\fR" 24
+.IX Item "@iolog_dir@/00/00/01/stdout"
 Example session standard output log.
-.IP "\fI/var/log/sudo\-io/00/00/01/stderr\fR" 24
-.IX Item "/var/log/sudo-io/00/00/01/stderr"
+.ie n .IP "\fI@iolog_dir@/00/00/01/stderr\fR" 24
+.el .IP "\fI@iolog_dir@/00/00/01/stderr\fR" 24
+.IX Item "@iolog_dir@/00/00/01/stderr"
 Example session standard error log.
-.IP "\fI/var/log/sudo\-io/00/00/01/ttyin\fR" 24
-.IX Item "/var/log/sudo-io/00/00/01/ttyin"
+.ie n .IP "\fI@iolog_dir@/00/00/01/ttyin\fR" 24
+.el .IP "\fI@iolog_dir@/00/00/01/ttyin\fR" 24
+.IX Item "@iolog_dir@/00/00/01/ttyin"
 Example session tty input file.
-.IP "\fI/var/log/sudo\-io/00/00/01/ttyout\fR" 24
-.IX Item "/var/log/sudo-io/00/00/01/ttyout"
+.ie n .IP "\fI@iolog_dir@/00/00/01/ttyout\fR" 24
+.el .IP "\fI@iolog_dir@/00/00/01/ttyout\fR" 24
+.IX Item "@iolog_dir@/00/00/01/ttyout"
 Example session tty output file.
-.IP "\fI/var/log/sudo\-io/00/00/01/timing\fR" 24
-.IX Item "/var/log/sudo-io/00/00/01/timing"
+.ie n .IP "\fI@iolog_dir@/00/00/01/timing\fR" 24
+.el .IP "\fI@iolog_dir@/00/00/01/timing\fR" 24
+.IX Item "@iolog_dir@/00/00/01/timing"
 Example session timing file.
 .PP
 Note that the \fIstdin\fR, \fIstdout\fR and \fIstderr\fR files will be empty
@@ -369,31 +376,31 @@ command.
 List sessions run by user \fImillert\fR:
 .PP
 .Vb 1
-\& sudoreplay \-l user millert
+\& # sudoreplay \-l user millert
 .Ve
 .PP
 List sessions run by user \fIbob\fR with a command containing the string vi:
 .PP
 .Vb 1
-\& sudoreplay \-l user bob command vi
+\& # sudoreplay \-l user bob command vi
 .Ve
 .PP
 List sessions run by user \fIjeff\fR that match a regular expression:
 .PP
 .Vb 1
-\& sudoreplay \-l user jeff command \*(Aq/bin/[a\-z]*sh\*(Aq
+\& # sudoreplay \-l user jeff command \*(Aq/bin/[a\-z]*sh\*(Aq
 .Ve
 .PP
 List sessions run by jeff or bob on the console:
 .PP
 .Vb 1
-\& sudoreplay \-l ( user jeff or user bob ) tty console
+\& # sudoreplay \-l ( user jeff or user bob ) tty console
 .Ve
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIsudo\fR\|(@mansectsu@), \fIscript\fR\|(1)
-.SH "AUTHOR"
-.IX Header "AUTHOR"
+.SH "AUTHORS"
+.IX Header "AUTHORS"
 Todd C. Miller
 .SH "BUGS"
 .IX Header "BUGS"

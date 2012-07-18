@@ -144,7 +144,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "June 29, 2012" "1.8.6" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "July 13, 2012" "1.8.6" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -258,10 +258,10 @@ Someone else is currently editing the \fIsudoers\fR file.
 You didn't run \fBvisudo\fR as root.
 .IP "Can't find you in the passwd database" 4
 .IX Item "Can't find you in the passwd database"
-Your userid does not appear in the system passwd file.
+Your user \s-1ID\s0 does not appear in the system passwd file.
 .IP "Warning: {User,Runas,Host,Cmnd}_Alias referenced but not defined" 4
 .IX Item "Warning: {User,Runas,Host,Cmnd}_Alias referenced but not defined"
-Either you are trying to use an undeclare {User,Runas,Host,Cmnd}_Alias
+Either you are trying to use an undeclared {User,Runas,Host,Cmnd}_Alias
 or you have a user or host name listed that consists solely of
 uppercase letters, digits, and the underscore ('_') character.  In
 the latter case, you can ignore the warnings (\fBsudo\fR will not
@@ -280,17 +280,17 @@ the \fIsudoers\fR file.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIvi\fR\|(1), \fIsudoers\fR\|(@mansectform@), \fIsudo\fR\|(@mansectsu@), \fIvipw\fR\|(@mansectsu@)
-.SH "AUTHOR"
-.IX Header "AUTHOR"
+.SH "AUTHORS"
+.IX Header "AUTHORS"
 Many people have worked on \fBsudo\fR over the years; this version of
 \&\fBvisudo\fR was written by:
 .PP
 .Vb 1
-\& Todd Miller
+\& Todd C. Miller
 .Ve
 .PP
 See the \s-1CONTRIBUTORS\s0 file in the \fBsudo\fR distribution
-(http://www.sudo.ws/sudo/contributors.html) for a list of people
+(http://www.sudo.ws/sudo/contributors.html) for an exhaustive list of people
 who have contributed to \fBsudo\fR.
 .SH "CAVEATS"
 .IX Header "CAVEATS"

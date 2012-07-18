@@ -519,7 +519,8 @@ DDEESSCCRRIIPPTTIIOONN
            sudoers: files
 
        Note that _/_e_t_c_/_n_s_s_w_i_t_c_h_._c_o_n_f is supported even when the underlying
-       operating system does not use an nsswitch.conf file.
+       operating system does not use an nsswitch.conf file, except on AIX (see
+       below).
 
    CCoonnffiigguurriinngg nneettssvvcc..ccoonnff
        On AIX systems, the _/_e_t_c_/_n_e_t_s_v_c_._c_o_n_f file is consulted instead of
@@ -770,4 +771,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.6                            June 29, 2012                 SUDOERS.LDAP(4)
+1.8.6                            July 17, 2012                 SUDOERS.LDAP(4)

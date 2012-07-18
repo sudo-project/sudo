@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "July 10, 2012" "1.8.6" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "July 18, 2012" "1.8.6" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -195,7 +195,7 @@ lookup is still done for root, not the user specified by \f(CW\*(C`SUDO_USER\*(C
 \&\fIsudoers\fR uses time stamp files for credential caching.  Once a
 user has been authenticated, a time stamp is updated and the user
 may then use sudo without a password for a short period of time
-(\f(CW\*(C`@timeout@\*(C'\fR minutes unless overridden by the \fItimeout\fR option.
+(\f(CW\*(C`@timeout@\*(C'\fR minutes unless overridden by the \fItimeout\fR option).
 By default, \fIsudoers\fR uses a tty-based time stamp which means that
 there is a separate time stamp for each of a user's login sessions.
 The \fItty_tickets\fR option can be disabled to force the use of a
@@ -650,11 +650,11 @@ however, will supercede the values in \fIsudoers\fR.
 .SS "Tag_Spec"
 .IX Subsection "Tag_Spec"
 A command may have zero or more tags associated with it.  There are
-eight possible tag values, \f(CW\*(C`NOPASSWD\*(C'\fR, \f(CW\*(C`PASSWD\*(C'\fR, \f(CW\*(C`NOEXEC\*(C'\fR,
+ten possible tag values, \f(CW\*(C`NOPASSWD\*(C'\fR, \f(CW\*(C`PASSWD\*(C'\fR, \f(CW\*(C`NOEXEC\*(C'\fR,
 \&\f(CW\*(C`EXEC\*(C'\fR, \f(CW\*(C`SETENV\*(C'\fR, \f(CW\*(C`NOSETENV\*(C'\fR, \f(CW\*(C`LOG_INPUT\*(C'\fR, \f(CW\*(C`NOLOG_INPUT\*(C'\fR,
 \&\f(CW\*(C`LOG_OUTPUT\*(C'\fR and \f(CW\*(C`NOLOG_OUTPUT\*(C'\fR.  Once a tag is set on a \f(CW\*(C`Cmnd\*(C'\fR,
 subsequent \f(CW\*(C`Cmnd\*(C'\fRs in the \f(CW\*(C`Cmnd_Spec_List\*(C'\fR, inherit the tag unless
-it is overridden by the opposite tag (i.e.: \f(CW\*(C`PASSWD\*(C'\fR overrides
+it is overridden by the opposite tag (in other words, \f(CW\*(C`PASSWD\*(C'\fR overrides
 \&\f(CW\*(C`NOPASSWD\*(C'\fR and \f(CW\*(C`NOEXEC\*(C'\fR overrides \f(CW\*(C`EXEC\*(C'\fR).
 .PP
 \fI\s-1NOPASSWD\s0 and \s-1PASSWD\s0\fR
@@ -760,7 +760,7 @@ Matches any character \fBnot\fR in the specified range.
 .el .IP "\f(CW\*(C`\ex\*(C'\fR" 8
 .IX Item "x"
 For any character \*(L"x\*(R", evaluates to \*(L"x\*(R".  This is used to
-escape special characters such as: \*(L"*\*(R", \*(L"?\*(R", \*(L"[\*(R", and \*(L"}\*(R".
+escape special characters such as: \*(L"*\*(R", \*(L"?\*(R", \*(L"[\*(R", and \*(L"]\*(R".
 .PP
 \&\s-1POSIX\s0 character classes may also be used if your system's \fIglob\fR\|(3)
 and \fIfnmatch\fR\|(3) functions support them.  However, because the
@@ -817,7 +817,7 @@ themselves include other files.  A hard limit of 128 nested include
 files is enforced to prevent include file loops.
 .PP
 If the path to the include file is not fully-qualified (does not
-begin with a \fI/\fR), it must be located in the same directory as the
+begin with a \f(CW\*(C`/\*(C'\fR), it must be located in the same directory as the
 sudoers file it was included from.  For example, if \fI/etc/sudoers\fR
 contains the line:
 .Sp
@@ -828,7 +828,7 @@ contains the line:
 the file that will be included is \fI/etc/sudoers.local\fR.
 .PP
 The file name may also include the \f(CW%h\fR escape, signifying the short form
-of the host name.  I.e., if the machine's host name is \*(L"xerxes\*(R", then
+of the host name.  In other words, if the machine's host name is \*(L"xerxes\*(R", then
 .PP
 \&\f(CW\*(C`#include /etc/sudoers.%h\*(C'\fR
 .PP
@@ -854,7 +854,7 @@ problems.
 Note that unlike files included via \f(CW\*(C`#include\*(C'\fR, \fBvisudo\fR will not
 edit the files in a \f(CW\*(C`#includedir\*(C'\fR directory unless one of them
 contains a syntax error.  It is still possible to run \fBvisudo\fR
-with the \f(CW\*(C`\-f\*(C'\fR flag to edit the files directly.
+with the \fB\-f\fR flag to edit the files directly.
 .SS "Other special characters and reserved words"
 .IX Subsection "Other special characters and reserved words"
 The pound sign ('#') is used to indicate a comment (unless it is
@@ -939,7 +939,7 @@ variables in the caller's environment that match the \f(CW\*(C`env_keep\*(C'\fR
 and \f(CW\*(C`env_check\*(C'\fR lists are then added, followed by any variables
 present in the file specified by the \fIenv_file\fR option (if any).
 The default contents of the \f(CW\*(C`env_keep\*(C'\fR and \f(CW\*(C`env_check\*(C'\fR lists are
-displayed when \fBsudo\fR is run by root with the \fI\-V\fR option.  If
+displayed when \fBsudo\fR is run by root with the \fB\-V\fR option.  If
 the \fIsecure_path\fR option is set, its value will be used for the
 \&\f(CW\*(C`PATH\*(C'\fR environment variable.  This flag is \fI@env_reset@\fR by
 default.
@@ -962,7 +962,8 @@ This flag is \fIoff\fR by default.
 .IP "fqdn" 16
 .IX Item "fqdn"
 Set this flag if you want to put fully qualified host names in the
-\&\fIsudoers\fR file.  I.e., instead of myhost you would use myhost.mydomain.edu.
+\&\fIsudoers\fR file.
+In other words, instead of myhost you would use myhost.mydomain.edu.
 You may still use the short form if you wish (and even mix the two).
 Beware that turning on \fIfqdn\fR requires \fBsudo\fR to make \s-1DNS\s0 lookups
 which may make \fBsudo\fR unusable if \s-1DNS\s0 stops working (for example
@@ -975,7 +976,7 @@ command) is already fully qualified you shouldn't need to set
 \&\fIfqdn\fR.  This flag is \fI@fqdn@\fR by default.
 .IP "ignore_dot" 16
 .IX Item "ignore_dot"
-If set, \fBsudo\fR will ignore '.' or '' (current dir) in the \f(CW\*(C`PATH\*(C'\fR
+If set, \fBsudo\fR will ignore \*(L".\*(R" or "" (current dir) in the \f(CW\*(C`PATH\*(C'\fR
 environment variable; the \f(CW\*(C`PATH\*(C'\fR itself is not modified.  This
 flag is \fI@ignore_dot@\fR by default.
 .IP "ignore_local_sudoers" 16
@@ -1006,7 +1007,7 @@ input is also captured and stored in a separate log file.
 .Sp
 Input is logged to the directory specified by the \fIiolog_dir\fR
 option (\fI@iolog_dir@\fR by default) using a unique session \s-1ID\s0 that
-is included in the normal \fBsudo\fR log line, prefixed with \fITSID=\fR.
+is included in the normal \fBsudo\fR log line, prefixed with "\f(CW\*(C`TSID=\*(C'\fR".
 The \fIiolog_file\fR option may be used to control the format of the
 session \s-1ID\s0.
 .Sp
@@ -1025,7 +1026,7 @@ log files.
 .Sp
 Output is logged to the directory specified by the \fIiolog_dir\fR
 option (\fI@iolog_dir@\fR by default) using a unique session \s-1ID\s0 that
-is included in the normal \fBsudo\fR log line, prefixed with \fITSID=\fR.
+is included in the normal \fBsudo\fR log line, prefixed with "\f(CW\*(C`TSID=\*(C'\fR".
 The \fIiolog_file\fR option may be used to control the format of the
 session \s-1ID\s0.
 .Sp
@@ -1234,8 +1235,8 @@ By default, \fBsudo\fR will refuse to run if the user must enter a
 password but it is not possible to disable echo on the terminal.
 If the \fIvisiblepw\fR flag is set, \fBsudo\fR will prompt for a password
 even when it would be visible on the screen.  This makes it possible
-to run things like \f(CW"rsh somehost sudo ls"\fR since \fIrsh\fR\|(1) does
-not allocate a tty.  This flag is \fIoff\fR by default.
+to run things like \f(CW"ssh somehost sudo ls"\fR since by default, \fIssh\fR\|(1) does
+not allocate a tty when running a command.  This flag is \fIoff\fR by default.
 .PP
 \&\fBIntegers\fR:
 .IP "closefrom" 16
@@ -1619,7 +1620,7 @@ of whether the \f(CW\*(C`env_reset\*(C'\fR option is enabled or disabled, variab
 specified by \f(CW\*(C`env_check\*(C'\fR will be preserved in the environment if
 they pass the aforementioned check.  The default list of environment
 variables to check is displayed when \fBsudo\fR is run by root with
-the \fI\-V\fR option.
+the \fB\-V\fR option.
 .IP "env_delete" 16
 .IX Item "env_delete"
 Environment variables to be removed from the user's environment
@@ -1628,7 +1629,7 @@ be a double-quoted, space-separated list or a single value without
 double-quotes.  The list can be replaced, added to, deleted from,
 or disabled by using the \f(CW\*(C`=\*(C'\fR, \f(CW\*(C`+=\*(C'\fR, \f(CW\*(C`\-=\*(C'\fR, and \f(CW\*(C`!\*(C'\fR operators
 respectively.  The default list of environment variables to remove
-is displayed when \fBsudo\fR is run by root with the \fI\-V\fR option.
+is displayed when \fBsudo\fR is run by root with the \fB\-V\fR option.
 Note that many operating systems will remove potentially dangerous
 variables from the environment of any setuid process (such as
 \&\fBsudo\fR).
@@ -1641,7 +1642,7 @@ The argument may be a double-quoted, space-separated list or a
 single value without double-quotes.  The list can be replaced, added
 to, deleted from, or disabled by using the \f(CW\*(C`=\*(C'\fR, \f(CW\*(C`+=\*(C'\fR, \f(CW\*(C`\-=\*(C'\fR, and
 \&\f(CW\*(C`!\*(C'\fR operators respectively.  The default list of variables to keep
-is displayed when \fBsudo\fR is run by root with the \fI\-V\fR option.
+is displayed when \fBsudo\fR is run by root with the \fB\-V\fR option.
 .SH "SUDO.CONF"
 .IX Header "SUDO.CONF"
 The \fI@sysconfdir@/sudo.conf\fR file determines which plugins the
@@ -2054,7 +2055,7 @@ privileges.
 For example, given the following \fIsudoers\fR entry:
 .PP
 .Vb 2
-\& john   ALL = /usr/bin/passwd [a\-zA\-Z0\-9]*, /usr/bin/chsh [a\-zA\-Z0\-9]*,
+\& john   ALL = /usr/bin/passwd [a\-zA\-Z0\-9]*, /usr/bin/chsh [a\-zA\-Z0\-9]*,\e
 \&      /usr/bin/chfn [a\-zA\-Z0\-9]*, !/usr/bin/* root
 .Ve
 .PP

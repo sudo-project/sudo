@@ -21,9 +21,9 @@ sudoreplay - replay sudo session logs
 
 =head1 SYNOPSIS
 
-B<sudoreplay> [B<-h>] [B<-d> I<directory>] [B<-f> I<filter>] [B<-m> I<max_wait>] [B<-s> I<speed_factor>] ID
+B<sudoreplay> [B<-h>] S<[B<-d> I<directory>]> S<[B<-f> I<filter>]> S<[B<-m> I<max_wait>]> S<[B<-s> I<speed_factor>]> ID
 
-B<sudoreplay> [B<-h>] [B<-d> I<directory>] -l [search expression]
+B<sudoreplay> [B<-h>] S<[B<-d> I<directory>]> -l S<[search expression]>
 
 =head1 DESCRIPTION
 
@@ -70,7 +70,7 @@ B<sudoreplay> accepts the following command line options:
 =item -d I<directory>
 
 Use I<directory> to for the session logs instead of the default,
-F</var/log/sudo-io>.
+F<@iolog_dir@>.
 
 =item -f I<filter>
 
@@ -95,9 +95,9 @@ An expression is composed of the following predicates:
 
 =over 8
 
-=item command I<command pattern>
+=item command I<pattern>
 
-Evaluates to true if the command run matches I<command pattern>.
+Evaluates to true if the command run matches I<pattern>.
 On systems with POSIX regular expression support, the pattern may
 be an extended regular expression.  On systems without POSIX regular
 expression support, a simple substring match is performed instead.
@@ -130,10 +130,10 @@ Evaluates to true if the command was run on or prior to I<date>.
 See L<"Date and time format"> for a description of supported
 date and time formats.
 
-=item tty I<tty>
+=item tty I<tty name>
 
 Evaluates to true if the command was run on the specified terminal
-device.  The I<tty> should be specified without the F</dev/> prefix,
+device.  The I<tty name> should be specified without the F</dev/> prefix,
 e.g.  F<tty01> instead of F</dev/tty01>.
 
 =item user I<user name>
@@ -154,12 +154,12 @@ by an I<or>.
 =item -m I<max_wait>
 
 Specify an upper bound on how long to wait between key presses or
-output data.  By default, B<sudo_replay> will accurately reproduce
+output data.  By default, B<sudoreplay> will accurately reproduce
 the delays between key presses or program output.  However, this
 can be tedious when the session includes long pauses.  When the
 I<-m> option is specified, B<sudoreplay> will limit these pauses
 to at most I<max_wait> seconds.  The value may be specified as a
-floating point number, .e.g. I<2.5>.
+floating point number, e.g. I<2.5>.
 
 =item -s I<speed_factor>
 
@@ -167,7 +167,7 @@ This option causes B<sudoreplay> to adjust the number of seconds
 it will wait between key presses or program output.  This can be
 used to slow down or speed up the display.  For example, a
 I<speed_factor> of I<2> would make the output twice as fast whereas
-a I<speed_factor> of <.5> would make the output twice as slow.
+a I<speed_factor> of I<.5> would make the output twice as slow.
 
 =item -V
 
@@ -206,8 +206,7 @@ Either time or date may be omitted, the am/pm and timezone are
 optional.  If no date is specified, the current day is assumed; if
 no time is specified, the first second of the specified date is
 used.  The less significant parts of both time and date may also
-be omitted, in which case zero is assumed.  For example, the following
-are all valid:
+be omitted, in which case zero is assumed.
 
 The following are all valid time and date specifications:
 
@@ -267,35 +266,35 @@ The current time but 14 days ago.
 
 =over 24
 
-=item F</var/log/sudo-io>
+=item F<@iolog_dir@>
 
 The default I/O log directory.
 
-=item F</var/log/sudo-io/00/00/01/log>
+=item F<@iolog_dir@/00/00/01/log>
 
 Example session log info.
 
-=item F</var/log/sudo-io/00/00/01/stdin>
+=item F<@iolog_dir@/00/00/01/stdin>
 
 Example session standard input log.
 
-=item F</var/log/sudo-io/00/00/01/stdout>
+=item F<@iolog_dir@/00/00/01/stdout>
 
 Example session standard output log.
 
-=item F</var/log/sudo-io/00/00/01/stderr>
+=item F<@iolog_dir@/00/00/01/stderr>
 
 Example session standard error log.
 
-=item F</var/log/sudo-io/00/00/01/ttyin>
+=item F<@iolog_dir@/00/00/01/ttyin>
 
 Example session tty input file.
 
-=item F</var/log/sudo-io/00/00/01/ttyout>
+=item F<@iolog_dir@/00/00/01/ttyout>
 
 Example session tty output file.
 
-=item F</var/log/sudo-io/00/00/01/timing>
+=item F<@iolog_dir@/00/00/01/timing>
 
 Example session timing file.
 
@@ -309,25 +308,25 @@ command.
 
 List sessions run by user I<millert>:
 
- sudoreplay -l user millert
+ # sudoreplay -l user millert
 
 List sessions run by user I<bob> with a command containing the string vi:
 
- sudoreplay -l user bob command vi
+ # sudoreplay -l user bob command vi
 
 List sessions run by user I<jeff> that match a regular expression:
 
- sudoreplay -l user jeff command '/bin/[a-z]*sh'
+ # sudoreplay -l user jeff command '/bin/[a-z]*sh'
 
 List sessions run by jeff or bob on the console:
 
- sudoreplay -l ( user jeff or user bob ) tty console
+ # sudoreplay -l ( user jeff or user bob ) tty console
 
 =head1 SEE ALSO
 
 L<sudo(8)>, L<script(1)>
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Todd C. Miller
 

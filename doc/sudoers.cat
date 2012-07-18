@@ -43,10 +43,11 @@ DDEESSCCRRIIPPTTIIOONN
        _s_u_d_o_e_r_s uses time stamp files for credential caching.  Once a user has
        been authenticated, a time stamp is updated and the user may then use
        sudo without a password for a short period of time (5 minutes unless
-       overridden by the _t_i_m_e_o_u_t option.  By default, _s_u_d_o_e_r_s uses a tty-based
-       time stamp which means that there is a separate time stamp for each of
-       a user's login sessions.  The _t_t_y___t_i_c_k_e_t_s option can be disabled to
-       force the use of a single time stamp for all of a user's sessions.
+       overridden by the _t_i_m_e_o_u_t option).  By default, _s_u_d_o_e_r_s uses a tty-
+       based time stamp which means that there is a separate time stamp for
+       each of a user's login sessions.  The _t_t_y___t_i_c_k_e_t_s option can be
+       disabled to force the use of a single time stamp for all of a user's
+       sessions.
 
        _s_u_d_o_e_r_s can log both successful and unsuccessful attempts (as well as
        errors) to _s_y_s_l_o_g(3), a log file, or both.  By default, _s_u_d_o_e_r_s will
@@ -440,11 +441,11 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
        however, will supercede the values in _s_u_d_o_e_r_s.
 
    TTaagg__SSppeecc
-       A command may have zero or more tags associated with it.  There are
-       eight possible tag values, NOPASSWD, PASSWD, NOEXEC, EXEC, SETENV,
-       NOSETENV, LOG_INPUT, NOLOG_INPUT, LOG_OUTPUT and NOLOG_OUTPUT.  Once a
-       tag is set on a Cmnd, subsequent Cmnds in the Cmnd_Spec_List, inherit
-       the tag unless it is overridden by the opposite tag (i.e.: PASSWD
+       A command may have zero or more tags associated with it.  There are ten
+       possible tag values, NOPASSWD, PASSWD, NOEXEC, EXEC, SETENV, NOSETENV,
+       LOG_INPUT, NOLOG_INPUT, LOG_OUTPUT and NOLOG_OUTPUT.  Once a tag is set
+       on a Cmnd, subsequent Cmnds in the Cmnd_Spec_List, inherit the tag
+       unless it is overridden by the opposite tag (in other words, PASSWD
        overrides NOPASSWD and NOEXEC overrides EXEC).
 
        _N_O_P_A_S_S_W_D _a_n_d _P_A_S_S_W_D
@@ -527,7 +528,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
        [!...]  Matches any character nnoott in the specified range.
 
        \x      For any character "x", evaluates to "x".  This is used to
-               escape special characters such as: "*", "?", "[", and "}".
+               escape special characters such as: "*", "?", "[", and "]".
 
        POSIX character classes may also be used if your system's _g_l_o_b(3) and
        _f_n_m_a_t_c_h(3) functions support them.  However, because the ':' character
@@ -573,7 +574,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
        file loops.
 
        If the path to the include file is not fully-qualified (does not begin
-       with a _/), it must be located in the same directory as the sudoers file
+       with a /), it must be located in the same directory as the sudoers file
        it was included from.  For example, if _/_e_t_c_/_s_u_d_o_e_r_s contains the line:
 
            #include sudoers.local
@@ -581,7 +582,8 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
        the file that will be included is _/_e_t_c_/_s_u_d_o_e_r_s_._l_o_c_a_l.
 
        The file name may also include the %h escape, signifying the short form
-       of the host name.  I.e., if the machine's host name is "xerxes", then
+       of the host name.  In other words, if the machine's host name is
+       "xerxes", then
 
        #include /etc/sudoers.%h
 
@@ -604,7 +606,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
        Note that unlike files included via #include, vviissuuddoo will not edit the
        files in a #includedir directory unless one of them contains a syntax
-       error.  It is still possible to run vviissuuddoo with the -f flag to edit the
+       error.  It is still possible to run vviissuuddoo with the --ff flag to edit the
        files directly.
 
    OOtthheerr ssppeecciiaall cchhaarraacctteerrss aanndd rreesseerrvveedd wwoorrddss
@@ -690,7 +692,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        followed by any variables present in the file specified
                        by the _e_n_v___f_i_l_e option (if any).  The default contents
                        of the env_keep and env_check lists are displayed when
-                       ssuuddoo is run by root with the _-_V option.  If the
+                       ssuuddoo is run by root with the --VV option.  If the
                        _s_e_c_u_r_e___p_a_t_h option is set, its value will be used for
                        the PATH environment variable.  This flag is _o_n by
                        default.
@@ -714,22 +716,22 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        flag is _o_f_f by default.
 
        fqdn            Set this flag if you want to put fully qualified host
-                       names in the _s_u_d_o_e_r_s file.  I.e., instead of myhost you
-                       would use myhost.mydomain.edu.  You may still use the
-                       short form if you wish (and even mix the two).  Beware
-                       that turning on _f_q_d_n requires ssuuddoo to make DNS lookups
-                       which may make ssuuddoo unusable if DNS stops working (for
-                       example if the machine is not plugged into the
-                       network).  Also note that you must use the host's
-                       official name as DNS knows it.  That is, you may not
-                       use a host alias (CNAME entry) due to performance
-                       issues and the fact that there is no way to get all
-                       aliases from DNS.  If your machine's host name (as
-                       returned by the hostname command) is already fully
+                       names in the _s_u_d_o_e_r_s file.  In other words, instead of
+                       myhost you would use myhost.mydomain.edu.  You may
+                       still use the short form if you wish (and even mix the
+                       two).  Beware that turning on _f_q_d_n requires ssuuddoo to
+                       make DNS lookups which may make ssuuddoo unusable if DNS
+                       stops working (for example if the machine is not
+                       plugged into the network).  Also note that you must use
+                       the host's official name as DNS knows it.  That is, you
+                       may not use a host alias (CNAME entry) due to
+                       performance issues and the fact that there is no way to
+                       get all aliases from DNS.  If your machine's host name
+                       (as returned by the hostname command) is already fully
                        qualified you shouldn't need to set _f_q_d_n.  This flag is
                        _o_f_f by default.
 
-       ignore_dot      If set, ssuuddoo will ignore '.' or '' (current dir) in the
+       ignore_dot      If set, ssuuddoo will ignore "." or "" (current dir) in the
                        PATH environment variable; the PATH itself is not
                        modified.  This flag is _o_f_f by default.
 
@@ -761,7 +763,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        Input is logged to the directory specified by the
                        _i_o_l_o_g___d_i_r option (_/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o by default) using a
                        unique session ID that is included in the normal ssuuddoo
-                       log line, prefixed with _T_S_I_D_=.  The _i_o_l_o_g___f_i_l_e option
+                       log line, prefixed with "TSID=".  The _i_o_l_o_g___f_i_l_e option
                        may be used to control the format of the session ID.
 
                        Note that user input may contain sensitive information
@@ -781,7 +783,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        Output is logged to the directory specified by the
                        _i_o_l_o_g___d_i_r option (_/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o by default) using a
                        unique session ID that is included in the normal ssuuddoo
-                       log line, prefixed with _T_S_I_D_=.  The _i_o_l_o_g___f_i_l_e option
+                       log line, prefixed with "TSID=".  The _i_o_l_o_g___f_i_l_e option
                        may be used to control the format of the session ID.
 
                        Output logs may be viewed with the _s_u_d_o_r_e_p_l_a_y(1m)
@@ -987,8 +989,9 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        on the terminal.  If the _v_i_s_i_b_l_e_p_w flag is set, ssuuddoo
                        will prompt for a password even when it would be
                        visible on the screen.  This makes it possible to run
-                       things like "rsh somehost sudo ls" since _r_s_h(1) does
-                       not allocate a tty.  This flag is _o_f_f by default.
+                       things like "ssh somehost sudo ls" since by default,
+                       _s_s_h(1) does not allocate a tty when running a command.
+                       This flag is _o_f_f by default.
 
        IInntteeggeerrss:
 
@@ -1326,7 +1329,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        env_check will be preserved in the environment if they
                        pass the aforementioned check.  The default list of
                        environment variables to check is displayed when ssuuddoo
-                       is run by root with the _-_V option.
+                       is run by root with the --VV option.
 
        env_delete      Environment variables to be removed from the user's
                        environment when the _e_n_v___r_e_s_e_t option is not in effect.
@@ -1335,7 +1338,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        can be replaced, added to, deleted from, or disabled by
                        using the =, +=, -=, and ! operators respectively.  The
                        default list of environment variables to remove is
-                       displayed when ssuuddoo is run by root with the _-_V option.
+                       displayed when ssuuddoo is run by root with the --VV option.
                        Note that many operating systems will remove
                        potentially dangerous variables from the environment of
                        any setuid process (such as ssuuddoo).
@@ -1349,7 +1352,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        added to, deleted from, or disabled by using the =, +=,
                        -=, and ! operators respectively.  The default list of
                        variables to keep is displayed when ssuuddoo is run by root
-                       with the _-_V option.
+                       with the --VV option.
 
 SSUUDDOO..CCOONNFF
        The _/_e_t_c_/_s_u_d_o_._c_o_n_f file determines which plugins the ssuuddoo front end
@@ -1682,7 +1685,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
        For example, given the following _s_u_d_o_e_r_s entry:
 
-        john   ALL = /usr/bin/passwd [a-zA-Z0-9]*, /usr/bin/chsh [a-zA-Z0-9]*,
+        john   ALL = /usr/bin/passwd [a-zA-Z0-9]*, /usr/bin/chsh [a-zA-Z0-9]*,\
              /usr/bin/chfn [a-zA-Z0-9]*, !/usr/bin/* root
 
        User jjoohhnn can still run /usr/bin/passwd root if _f_a_s_t___g_l_o_b is enabled by
@@ -1817,4 +1820,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.8.6                            July 10, 2012                      SUDOERS(4)
+1.8.6                            July 18, 2012                      SUDOERS(4)

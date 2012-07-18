@@ -601,7 +601,7 @@ sudoers line, the following default is assumed:
     sudoers: files
 
 Note that F<@nsswitch_conf@> is supported even when the underlying
-operating system does not use an nsswitch.conf file.
+operating system does not use an nsswitch.conf file, except on AIX (see below).
 
 =head2 Configuring netsvc.conf
 

@@ -39,8 +39,8 @@ The plugin API is defined by the C<sudo_plugin.h> header file.
 =head2 The sudo.conf File
 
 The F<@sysconfdir@/sudo.conf> file contains plugin configuration directives.
-Currently, the only supported keyword is the C<Plugin> directive,
-which causes a plugin plugin to be loaded.
+The primary keyword is the C<Plugin> directive, which causes a plugin
+to be loaded.
 
 A C<Plugin> line consists of the C<Plugin> keyword, followed by the
 I<symbol_name> and the I<path> to the shared object containing the
@@ -86,7 +86,7 @@ be specified in F<@sysconfdir@/sudo.conf> along with a path to the plugin
 so that B<sudo> can load it.
 
  struct policy_plugin {
- #define SUDO_POLICY_PLUGIN	1
+ #define SUDO_POLICY_PLUGIN     1
      unsigned int type; /* always SUDO_POLICY_PLUGIN */
      unsigned int version; /* always SUDO_API_VERSION */
      int (*open)(unsigned int version, sudo_conv_t conversation,
@@ -104,9 +104,9 @@ so that B<sudo> can load it.
      void (*invalidate)(int remove);
      int (*init_session)(struct passwd *pwd, char **user_env[]);
      void (*register_hooks)(int version,
-	int (*register_hook)(struct sudo_hook *hook));
+        int (*register_hook)(struct sudo_hook *hook));
      void (*deregister_hooks)(int version,
-	int (*deregister_hook)(struct sudo_hook *hook));
+        int (*deregister_hook)(struct sudo_hook *hook));
  };
 
 The policy_plugin struct has the following fields:
@@ -181,7 +181,7 @@ C<Debug> entry in F<@sysconfdir@/sudo.conf>, if there is one.  The
 flags are passed to the plugin as they appear in F<@sysconfdir@/sudo.conf>.
 The syntax used by B<sudo> and the I<sudoers> plugin is
 I<subsystem>@I<priority> but the plugin is free to use a different
-format so long as it does not include a command C<,>.
+format so long as it does not include a comma (C<,>).
 
 For reference, the priorities supported by the B<sudo> front end and
 I<sudoers> are: I<crit>, I<err>, I<warn>, I<notice>, I<diag>,
@@ -203,36 +203,36 @@ This setting has been deprecated in favor of I<debug_flags>.
 =item runas_user=string
 
 The user name or uid to to run the command as, if specified via the
-C<-u> flag.
+B<-u> flag.
 
 =item runas_group=string
 
 The group name or gid to to run the command as, if specified via
-the C<-g> flag.
+the B<-g> flag.
 
 =item prompt=string
 
 The prompt to use when requesting a password, if specified via
-the C<-p> flag.
+the B<-p> flag.
 
 =item set_home=bool
 
-Set to true if the user specified the C<-H> flag.  If true, set the
+Set to true if the user specified the B<-H> flag.  If true, set the
 C<HOME> environment variable to the target user's home directory.
 
 =item preserve_environment=bool
 
-Set to true if the user specified the C<-E> flag, indicating that
+Set to true if the user specified the B<-E> flag, indicating that
 the user wishes to preserve the environment.
 
 =item run_shell=bool
 
-Set to true if the user specified the C<-s> flag, indicating that
+Set to true if the user specified the B<-s> flag, indicating that
 the user wishes to run a shell.
 
 =item login_shell=bool
 
-Set to true if the user specified the C<-i> flag, indicating that
+Set to true if the user specified the B<-i> flag, indicating that
 the user wishes to run a login shell.
 
 =item implied_shell=bool
@@ -247,19 +247,19 @@ exit.
 
 =item preserve_groups=bool
 
-Set to true if the user specified the C<-P> flag, indicating that
+Set to true if the user specified the B<-P> flag, indicating that
 the user wishes to preserve the group vector instead of setting it
 based on the runas user.
 
 =item ignore_ticket=bool
 
-Set to true if the user specified the C<-k> flag along with a
+Set to true if the user specified the B<-k> flag along with a
 command, indicating that the user wishes to ignore any cached
 authentication credentials.
 
 =item noninteractive=bool
 
-Set to true if the user specified the C<-n> flag, indicating that
+Set to true if the user specified the B<-n> flag, indicating that
 B<sudo> should operate in non-interactive mode.  The plugin may
 reject a command run in non-interactive mode if user interaction
 is required.
@@ -267,21 +267,21 @@ is required.
 =item login_class=string
 
 BSD login class to use when setting resource limits and nice value,
-if specified by the C<-c> flag.
+if specified by the B<-c> flag.
 
 =item selinux_role=string
 
 SELinux role to use when executing the command, if specified by
-the C<-r> flag.
+the B<-r> flag.
 
 =item selinux_type=string
 
 SELinux type to use when executing the command, if specified by
-the C<-t> flag.
+the B<-t> flag.
 
 =item bsdauth_type=string
 
-Authentication type, if specified by the C<-a> flag, to use on
+Authentication type, if specified by the B<-a> flag, to use on
 systems where BSD authentication is supported.
 
 =item network_addrs=list
@@ -298,7 +298,7 @@ The command name that sudo was run as, typically "sudo" or "sudoedit".
 
 =item sudoedit=bool
 
-Set to true when the C<-e> flag is is specified or if invoked as
+Set to true when the B<-e> flag is is specified or if invoked as
 B<sudoedit>.  The plugin shall substitute an editor into I<argv>
 in the I<check_policy> function or return C<-2> with a usage error
 if the plugin does not support I<sudoedit>.  For more information,
@@ -306,7 +306,7 @@ see the I<check_policy> section.
 
 =item closefrom=number
 
-If specified, the user has requested via the C<-C> flag that B<sudo>
+If specified, the user has requested via the B<-C> flag that B<sudo>
 close all files descriptors with a value of I<number> or higher.
 The plugin may optionally pass this, or another value, back in the
 I<command_info> list.
@@ -463,7 +463,7 @@ C<error> is 0.
  int (*show_version)(int verbose);
 
 The C<show_version> function is called by B<sudo> when the user specifies
-the C<-V> option.  The plugin may display its version information
+the B<-V> option.  The plugin may display its version information
 to the user via the conversation or plugin_printf function using
 C<SUDO_CONV_INFO_MSG>.  If the user requests detailed version
 information, the verbose flag will be set.
@@ -752,7 +752,7 @@ displayed along with any command line arguments.
  int (*validate)(void);
 
 The C<validate> function is called when B<sudo> is run with the
-C<-v> flag.  For policy plugins such as I<sudoers> that cache
+B<-v> flag.  For policy plugins such as I<sudoers> that cache
 authentication credentials, this function will validate and cache
 the credentials.
 
@@ -769,7 +769,7 @@ error information to the user.
  void (*invalidate)(int remove);
 
 The C<invalidate> function is called when B<sudo> is called with
-the C<-k> or C<-K> flag.  For policy plugins such as I<sudoers> that
+the B<-k> or B<-K> flag.  For policy plugins such as I<sudoers> that
 cache authentication credentials, this function will invalidate the
 credentials.  If the I<remove> flag is set, the plugin may remove
 the credentials instead of simply invalidating them.
@@ -867,7 +867,7 @@ version 1.2 or higher, C<deregister_hooks> will not be called.
  #define SUDO_API_VERSION_MINOR 2
  #define SUDO_API_MKVERSION(x, y) ((x << 16) | y)
  #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR,\
-					     SUDO_API_VERSION_MINOR)
+                                             SUDO_API_VERSION_MINOR)
 
  /* Getters and setters for API version */
  #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
@@ -882,7 +882,7 @@ version 1.2 or higher, C<deregister_hooks> will not be called.
 =head2 I/O Plugin API
 
  struct io_plugin {
- #define SUDO_IO_PLUGIN		2
+ #define SUDO_IO_PLUGIN         2
      unsigned int type; /* always SUDO_IO_PLUGIN */
      unsigned int version; /* always SUDO_API_VERSION */
      int (*open)(unsigned int version, sudo_conv_t conversation
@@ -897,9 +897,9 @@ version 1.2 or higher, C<deregister_hooks> will not be called.
      int (*log_stdout)(const char *buf, unsigned int len);
      int (*log_stderr)(const char *buf, unsigned int len);
      void (*register_hooks)(int version,
-	int (*register_hook)(struct sudo_hook *hook));
+        int (*register_hook)(struct sudo_hook *hook));
      void (*deregister_hooks)(int version,
-	int (*deregister_hook)(struct sudo_hook *hook));
+        int (*deregister_hook)(struct sudo_hook *hook));
  };
 
 When an I/O plugin is loaded, B<sudo> runs the command in a pseudo-tty.
@@ -1069,7 +1069,7 @@ successfully executed, the value of C<error> is 0.
  int (*show_version)(int verbose);
 
 The C<show_version> function is called by B<sudo> when the user specifies
-the C<-V> option.  The plugin may display its version information
+the B<-V> option.  The plugin may display its version information
 to the user via the conversation or plugin_printf function using
 C<SUDO_CONV_INFO_MSG>.  If the user requests detailed version
 information, the verbose flag will be set.
@@ -1365,7 +1365,7 @@ nested calls.  E.g.
  #define SUDO_HOOK_VERSION_MINOR 0
  #define SUDO_HOOK_MKVERSION(x, y) ((x << 16) | y)
  #define SUDO_HOOK_VERSION SUDO_HOOK_MKVERSION(SUDO_HOOK_VERSION_MAJOR,\
-					       SUDO_HOOK_VERSION_MINOR)
+                                               SUDO_HOOK_VERSION_MINOR)
 
  /* Getters and setters for hook API version */
  #define SUDO_HOOK_VERSION_GET_MAJOR(v) ((v) >> 16)
@@ -1392,10 +1392,10 @@ convenient for simple messages where no use input is required.
  struct sudo_conv_message {
  #define SUDO_CONV_PROMPT_ECHO_OFF  0x0001 /* do not echo user input */
  #define SUDO_CONV_PROMPT_ECHO_ON   0x0002 /* echo user input */
- #define SUDO_CONV_ERROR_MSG	    0x0003 /* error message */
- #define SUDO_CONV_INFO_MSG	    0x0004 /* informational message */
- #define SUDO_CONV_PROMPT_MASK	    0x0005 /* mask user input */
- #define SUDO_CONV_DEBUG_MSG	    0x0006 /* debugging message */
+ #define SUDO_CONV_ERROR_MSG        0x0003 /* error message */
+ #define SUDO_CONV_INFO_MSG         0x0004 /* informational message */
+ #define SUDO_CONV_PROMPT_MASK      0x0005 /* mask user input */
+ #define SUDO_CONV_DEBUG_MSG        0x0006 /* debugging message */
  #define SUDO_CONV_PROMPT_ECHO_OK   0x1000 /* flag: allow echo if no tty */
      int msg_type;
      int timeout;
@@ -1407,7 +1407,7 @@ convenient for simple messages where no use input is required.
  };
 
  typedef int (*sudo_conv_t)(int num_msgs,
-	      const struct sudo_conv_message msgs[],
+              const struct sudo_conv_message msgs[],
               struct sudo_conv_reply replies[]);
 
  typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
@@ -1430,7 +1430,7 @@ function if no user reply is needed and supports standard printf()
 escape sequences.
 
 Unlike, C<SUDO_CONV_INFO_MSG> and C<SUDO_CONV_ERROR_MSG>, messages
-sent with the <SUDO_CONV_DEBUG_MSG> I<msg_type> are not directly
+sent with the C<SUDO_CONV_DEBUG_MSG> I<msg_type> are not directly
 user-visible.  Instead, they are logged to the file specified in
 the C<Debug> statement (if any) in the F<@sysconfdir@/sudo.conf>
 file.  This allows a plugin to log debugging information and is
