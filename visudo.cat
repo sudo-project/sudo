@@ -94,10 +94,10 @@ DDIIAAGGNNOOSSTTIICCSS
            You didn't run vviissuuddoo as root.
 
        Can't find you in the passwd database
-           Your userid does not appear in the system passwd file.
+           Your user ID does not appear in the system passwd file.
 
        Warning: {User,Runas,Host,Cmnd}_Alias referenced but not defined
-           Either you are trying to use an undeclare
+           Either you are trying to use an undeclared
            {User,Runas,Host,Cmnd}_Alias or you have a user or host name listed
            that consists solely of uppercase letters, digits, and the
            underscore ('_') character.  In the latter case, you can ignore the
@@ -112,11 +112,11 @@ DDIIAAGGNNOOSSTTIICCSS
 SSEEEE AALLSSOO
        _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(8)
 
-AAUUTTHHOORR
+AAUUTTHHOORRSS
        Many people have worked on _s_u_d_o over the years; this version of vviissuuddoo
        was written by:
 
-        Todd Miller
+        Todd C. Miller
 
        See the HISTORY file in the sudo distribution or visit
        http://www.sudo.ws/sudo/history.html for more details.
@@ -143,4 +143,4 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.10                           May 23, 2012                       VISUDO(1m)
+1.7.10                           July 18, 2012                      VISUDO(1m)

@@ -156,11 +156,11 @@ You didn't run B<visudo> as root.
 
 =item Can't find you in the passwd database
 
-Your userid does not appear in the system passwd file.
+Your user ID does not appear in the system passwd file.
 
 =item Warning: {User,Runas,Host,Cmnd}_Alias referenced but not defined
 
-Either you are trying to use an undeclare {User,Runas,Host,Cmnd}_Alias
+Either you are trying to use an undeclared {User,Runas,Host,Cmnd}_Alias
 or you have a user or host name listed that consists solely of
 uppercase letters, digits, and the underscore ('_') character.  In
 the latter case, you can ignore the warnings (B<sudo> will not
@@ -178,12 +178,12 @@ B<-s> (strict) mode this is an error, not a warning.
 
 L<vi(1)>, L<sudoers(5)>, L<sudo(8)>, L<vipw(8)>
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Many people have worked on I<sudo> over the years; this version of
 B<visudo> was written by:
 
- Todd Miller
+ Todd C. Miller
 
 See the HISTORY file in the sudo distribution or visit
 http://www.sudo.ws/sudo/history.html for more details.
