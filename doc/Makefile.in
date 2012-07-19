@@ -167,7 +167,7 @@ $(srcdir)/sudoers.cat: varsub $(srcdir)/sudoers.mdoc.in
 	    sed -f varsub $(srcdir)/sudoers.mdoc.in | $(NROFF) -mdoc | sed -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
-$(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.mdoc
+$(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; \
@@ -190,7 +190,7 @@ $(srcdir)/sudoers.ldap.cat: varsub $(srcdir)/sudoers.ldap.mdoc.in
 	    sed -f varsub $(srcdir)/sudoers.ldap.mdoc.in | $(NROFF) -mdoc | sed -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
-$(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.mdoc
+$(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; \
@@ -213,7 +213,7 @@ $(srcdir)/sudoreplay.cat: varsub $(srcdir)/sudoreplay.mdoc.in
 	    sed -f varsub $(srcdir)/sudoreplay.mdoc.in | $(NROFF) -mdoc | sed -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
-$(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.mdoc
+$(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; \
