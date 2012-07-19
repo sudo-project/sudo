@@ -15,8 +15,8 @@
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
 .Dd July 16, 2012
-.Dt SUDO_PLUGIN 5
-.Os
+.Dt SUDO_PLUGIN @mansectform@
+.Os Sudo @PACKAGE_VERSION@
 .Sh NAME
 .Nm sudo_plugin
 .Nd Sudo Plugin API
@@ -2133,8 +2133,8 @@ This can be used to merge in environment variables stored in the PAM
 handle before a command is run.
 .El
 .Sh SEE ALSO
-.Xr sudoers 5 ,
-.Xr sudo 8
+.Xr sudoers @mansectform@ ,
+.Xr sudo @mansectsu@
 .Sh BUGS
 If you feel you have found a bug in
 .Nm sudo ,

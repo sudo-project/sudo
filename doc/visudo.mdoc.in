@@ -20,8 +20,8 @@
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
 .Dd July 12, 2012
-.Dt VISUDO 8
-.Os
+.Dt VISUDO @mansectsu@
+.Os Sudo @PACKAGE_VERSION@
 .Sh NAME
 .Nm visudo
 .Nd edit the sudoers file
@@ -36,7 +36,7 @@
 edits the
 .Em sudoers
 file in a safe fashion, analogous to
-.Xr vipw 8 .
+.Xr vipw @mansectsu@ .
 .Nm visudo
 locks the
 .Em sudoers
@@ -278,9 +278,9 @@ file.
 .El
 .Sh SEE ALSO
 .Xr vi 1 ,
-.Xr sudoers 5 ,
-.Xr sudo 8 ,
-.Xr vipw 8
+.Xr sudoers @mansectform@ ,
+.Xr sudo @mansectsu@ ,
+.Xr vipw @mansectsu@
 .Sh AUTHORS
 Many people have worked on
 .Nm sudo

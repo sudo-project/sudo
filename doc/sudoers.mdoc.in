@@ -20,8 +20,8 @@
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
 .Dd July 16, 2012
-.Dt SUDOERS 5
-.Os
+.Dt SUDOERS @mansectform@
+.Os Sudo @PACKAGE_VERSION@
 .Sh NAME
 .Nm sudoers
 .Nd default sudo security policy module
@@ -45,7 +45,7 @@ For information on storing
 .Em sudoers
 policy information
 in LDAP, please see
-.Xr sudoers.ldap 5 .
+.Xr sudoers.ldap @mansectform@ .
 .Ss Authentication and Logging
 The
 .Em sudoers
@@ -1087,7 +1087,7 @@ regular expressions.
 .Bl -tag -width 8n
 .It Li *
 Matches any set of zero or more characters.
-.It Li \?
+.It Li \&?
 Matches any single character.
 .It Li [...]
 Matches any character in the specified range.
@@ -1102,7 +1102,7 @@ evaluates to
 .Sq x .
 This is used to escape special characters such as:
 .Ql * ,
-.Ql \? ,
+.Ql \&? ,
 .Ql [\& ,
 and
 .Ql ]\& .
@@ -1661,7 +1661,7 @@ The
 option may be used to control the format of the session ID.
 .Pp
 Output logs may be viewed with the
-.Xr sudoreplay 8
+.Xr sudoreplay @mansectsu@
 utility, which can also be used to list or search the available logs.
 .It log_year
 If set, the four-digit year will be logged in the (non-syslog)
@@ -1820,7 +1820,7 @@ will only run when the user is logged in to a real tty.
 When this flag is set,
 .Nm sudo
 can only be run from a login session and not via other means such as
-.Xr cron 8
+.Xr cron @mansectsu@
 or cgi-bin scripts.
 This flag is
 .Em off
@@ -2432,7 +2432,7 @@ Defaults group_plugin="sample_group.so /etc/sudo-group"
 .Ed
 .Pp
 For more information see
-.Xr sudo_plugin 5 .
+.Xr sudo_plugin @mansectform@ .
 .It lecture
 This option controls when a short lecture will be printed along with
 the password prompt.
@@ -2783,7 +2783,7 @@ plugin is doing internally if there is a problem.
 This can be configured in the
 .Pa @sysconfdir@/sudo.conf
 file as described in
-.Xr sudo 8 .
+.Xr sudo @mansectsu@ .
 .Pp
 The
 .Em sudoers
@@ -3451,10 +3451,10 @@ available.
 .Xr glob 3 ,
 .Xr mktemp 3 ,
 .Xr strftime 3 ,
-.Xr sudoers.ldap 5 ,
-.Xr sudo_plugin 8 ,
-.Xr sudo 8 ,
-.Xr visudo 8
+.Xr sudoers.ldap @mansectform@ ,
+.Xr sudo_plugin @mansectsu@ ,
+.Xr sudo @mansectsu@ ,
+.Xr visudo @mansectsu@
 .Sh CAVEATS
 The
 .Em sudoers

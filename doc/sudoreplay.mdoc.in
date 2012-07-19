@@ -15,8 +15,8 @@
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
 .Dd July 12, 2012
-.Dt SUDOREPLAY 8
-.Os
+.Dt SUDOREPLAY @mansectsu@
+.Os Sudo @PACKAGE_VERSION@
 .Sh NAME
 .Nm sudoreplay
 .Nd replay sudo session logs
@@ -350,7 +350,7 @@ List sessions run by jeff or bob on the console:
 # sudoreplay -l ( user jeff or user bob ) tty console
 .Ed
 .Sh SEE ALSO
-.Xr sudo 8 ,
+.Xr sudo @mansectsu@ ,
 .Xr script 1
 .Sh AUTHORS
 Todd C. Miller

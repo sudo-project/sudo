@@ -20,8 +20,8 @@
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
 .Dd July 10, 2012
-.Dt SUDO 8
-.Os
+.Dt SUDO @mansectsu@
+.Os Sudo @PACKAGE_VERSION@
 .Sh NAME
 .Nm sudo ,
 .Nm sudoedit
@@ -172,7 +172,7 @@ The
 policy caches credentials for
 .Li @timeout@
 minutes, unless overridden in
-.Xr sudoers 5 .
+.Xr sudoers @mansectform@ .
 By running
 .Nm sudo
 with the
@@ -332,7 +332,7 @@ or
 .Ev EDITOR
 are set, the first program listed in the
 .Em editor
-.Xr sudoers 5
+.Xr sudoers @mansectform@
 option is used.
 .It
 If they have been modified, the temporary files are copied back to
@@ -416,7 +416,7 @@ set of variables, similar to what is present when a user logs in.
 The
 .Em Command Environment
 section in the
-.Xr sudoers 5
+.Xr sudoers @mansectform@
 manual documents how the
 .Fl i
 option affects the environment in which a command is run when the
@@ -523,7 +523,7 @@ expanded to the host name including the domain name (on if the
 machine's host name is fully qualified or the
 .Em fqdn
 option is set in
-.Xr sudoers 5 )
+.Xr sudoers @mansectform@ )
 .It Li %h
 expanded to the local host name without the domain name
 .It Li %p
@@ -534,7 +534,7 @@ expanded to the name of the user whose password is being requested
 and
 .Em runaspw
 flags in
-.Xr sudoers 5 )
+.Xr sudoers @mansectform@ )
 .It Li %U
 expanded to the login name of the user the command will be run as
 (defaults to root unless the
@@ -687,7 +687,7 @@ tag set or the command matched is
 .Li ALL ,
 the user may set variables that would otherwise be forbidden.
 See
-.Xr sudoers 5
+.Xr sudoers @mansectform@
 for more information.
 .Sh PLUGINS
 Plugins are dynamically loaded based on the contents of the
@@ -761,7 +761,7 @@ or
 are silently ignored.
 .Pp
 For more information, see the
-.Xr sudo_plugin 8
+.Xr sudo_plugin @mansectsu@
 manual.
 .Sh PATHS
 A
@@ -976,7 +976,7 @@ effective root shell.
 For more information, please see the
 .Em PREVENTING SHELL ESCAPES
 section in
-.Xr sudoers 5 .
+.Xr sudoers @mansectform@ .
 .Pp
 To prevent the disclosure of potentially sensitive information,
 .Nm sudo
@@ -1136,11 +1136,11 @@ $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 .Xr su 1 ,
 .Xr stat 2 ,
 .Xr login_cap 3 ,
-.Xr passwd 5 ,
-.Xr sudoers 5 ,
-.Xr sudo_plugin 8 ,
-.Xr sudoreplay 8 ,
-.Xr visudo 8
+.Xr passwd @mansectform@ ,
+.Xr sudoers @mansectform@ ,
+.Xr sudo_plugin @mansectsu@ ,
+.Xr sudoreplay @mansectsu@ ,
+.Xr visudo @mansectsu@
 .Sh HISTORY
 See the HISTORY file in the
 .Nm sudo
@@ -1168,7 +1168,7 @@ via shell escapes, thus avoiding
 .Nm sudo No Ns 's
 checks.
 However, on most systems it is possible to prevent shell escapes with the
-.Xr sudoers 5
+.Xr sudoers @mansectform@
 module's
 .Em noexec
 functionality.

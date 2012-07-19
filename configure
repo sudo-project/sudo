@@ -731,6 +731,7 @@ SUDOERS_MODE
 SHLIB_MODE
 MANCOMPRESSEXT
 MANCOMPRESS
+MANDIRTYPE
 MANTYPE
 AUTH_OBJS
 OSDEFS
@@ -871,6 +872,8 @@ with_interfaces
 with_stow
 with_askpass
 with_plugindir
+with_man
+with_mdoc
 enable_authentication
 enable_root_mailer
 enable_setreuid
@@ -1655,6 +1658,8 @@ Optional Packages:
   --with-stow             deprecated
   --with-askpass=PATH     Fully qualified pathname of askpass helper
   --with-plugindir        set directory to load plugins from
+  --with-man              manual pages use man macros
+  --with-mdoc             manual pages use mdoc macros
   --with-selinux          enable SELinux support
   --with-pic[=PKGS]       try to use only PIC/non-PIC objects [default=use
                           both]
@@ -2901,6 +2906,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -2946,7 +2952,7 @@ secure_path="not set"
 INSTALL_NOEXEC=
 devdir='$(srcdir)'
 PROGS="sudo"
-: ${MANTYPE='man'}
+: ${MANDIRTYPE='man'}
 : ${mansrcdir='.'}
 : ${SHLIB_MODE='0644'}
 : ${SUDOERS_MODE='0440'}
@@ -5204,6 +5210,34 @@ if test "${with_plugindir+set}" = set; then :
 esac
 else
   with_plugindir="$libexecdir"
+fi
+
+
+
+# Check whether --with-man was given.
+if test "${with_man+set}" = set; then :
+  withval=$with_man; case $with_man in
+    yes)	MANTYPE=man
+		;;
+    no)		as_fn_error $? "\"--without-man not supported.\"" "$LINENO" 5
+		;;
+    *)		as_fn_error $? "\"ignoring unknown argument to --with-man: $with_man.\"" "$LINENO" 5
+		;;
+esac
+fi
+
+
+
+# Check whether --with-mdoc was given.
+if test "${with_mdoc+set}" = set; then :
+  withval=$with_mdoc; case $with_mdoc in
+    yes)	MANTYPE=mdoc
+		;;
+    no)		as_fn_error $? "\"--without-mdoc not supported.\"" "$LINENO" 5
+		;;
+    *)		as_fn_error $? "\"ignoring unknown argument to --with-mdoc: $with_mdoc.\"" "$LINENO" 5
+		;;
+esac
 fi
 
 
@@ -13649,7 +13683,7 @@ $as_echo "no" >&6; }
 fi
 
 
-for ac_prog in nroff mandoc
+for ac_prog in mandoc nroff
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -13692,6 +13726,29 @@ fi
 done
 
 if test -n "$NROFFPROG"; then
+    test -n "$MANTYPE" && sudo_cv_var_mantype="$MANTYPE"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking which macro set to use for manual pages" >&5
+$as_echo_n "checking which macro set to use for manual pages... " >&6; }
+if ${sudo_cv_var_mantype+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  sudo_cv_var_mantype="man"
+	if test "$NROFFPROG" != "no"; then
+	    echo ".Sh NAME" > conftest
+	    echo ".Nm sudo" >> conftest
+	    echo ".Nd sudo" >> conftest
+	    echo ".Sh DESCRIPTION" >> conftest
+	    echo "sudo" >> conftest
+	    if $NROFFPROG -mdoc conftest >/dev/null 2>&1; then
+		sudo_cv_var_mantype="mdoc"
+	    fi
+	    rm -f conftest
+	fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_mantype" >&5
+$as_echo "$sudo_cv_var_mantype" >&6; }
+    MANTYPE="$sudo_cv_var_mantype"
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $NROFFPROG supports the -c option" >&5
 $as_echo_n "checking whether $NROFFPROG supports the -c option... " >&6; }
 if ${sudo_cv_var_nroff_opt_c+:} false; then :
@@ -13709,7 +13766,7 @@ $as_echo "$sudo_cv_var_nroff_opt_c" >&6; }
     if test "$sudo_cv_var_nroff_opt_c" = "yes"; then
 	NROFFPROG="$NROFFPROG -c"
     fi
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $NROFFPROG supports the -Tascii option" >&5
+                { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $NROFFPROG supports the -Tascii option" >&5
 $as_echo_n "checking whether $NROFFPROG supports the -Tascii option... " >&6; }
 if ${sudo_cv_var_nroff_opt_Tascii+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -13719,15 +13776,16 @@ else
 	else
 	    sudo_cv_var_nroff_opt_Tascii=no
 	fi
-    if test "$sudo_cv_var_nroff_opt_Tascii" = "yes"; then
-	NROFFPROG="$NROFFPROG -Tascii"
-    fi
 
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_nroff_opt_Tascii" >&5
 $as_echo "$sudo_cv_var_nroff_opt_Tascii" >&6; }
+    if test "$sudo_cv_var_nroff_opt_Tascii" = "yes"; then
+	NROFFPROG="$NROFFPROG -Tascii"
+    fi
 else
-    MANTYPE="cat"
+    MANTYPE=cat
+    MANDIRTYPE=cat
     mansrcdir='$(srcdir)'
 fi
 

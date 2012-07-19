@@ -38,6 +38,7 @@ AC_SUBST([GETGROUPS_LIB])
 AC_SUBST([OSDEFS])
 AC_SUBST([AUTH_OBJS])
 AC_SUBST([MANTYPE])
+AC_SUBST([MANDIRTYPE])
 AC_SUBST([MANCOMPRESS])
 AC_SUBST([MANCOMPRESSEXT])
 AC_SUBST([SHLIB_MODE])
@@ -164,7 +165,7 @@ dnl
 INSTALL_NOEXEC=
 devdir='$(srcdir)'
 PROGS="sudo"
-: ${MANTYPE='man'}
+: ${MANDIRTYPE='man'}
 : ${mansrcdir='.'}
 : ${SHLIB_MODE='0644'}
 : ${SUDOERS_MODE='0440'}
@@ -1112,6 +1113,26 @@ AC_ARG_WITH(plugindir, [AS_HELP_STRING([--with-plugindir], [set directory to loa
     *)		;;
 esac], [with_plugindir="$libexecdir"])
 
+AC_ARG_WITH(man, [AS_HELP_STRING([--with-man], [manual pages use man macros])],
+[case $with_man in
+    yes)	MANTYPE=man
+		;;
+    no)		AC_MSG_ERROR(["--without-man not supported."])
+		;;
+    *)		AC_MSG_ERROR(["ignoring unknown argument to --with-man: $with_man."])
+		;;
+esac])
+
+AC_ARG_WITH(mdoc, [AS_HELP_STRING([--with-mdoc], [manual pages use mdoc macros])],
+[case $with_mdoc in
+    yes)	MANTYPE=mdoc
+		;;
+    no)		AC_MSG_ERROR(["--without-mdoc not supported."])
+		;;
+    *)		AC_MSG_ERROR(["ignoring unknown argument to --with-mdoc: $with_mdoc."])
+		;;
+esac])
+
 dnl
 dnl Options for --enable
 dnl
@@ -1428,8 +1449,25 @@ dnl Find programs we use
 dnl
 AC_CHECK_PROG(UNAMEPROG, [uname], [uname])
 AC_CHECK_PROG(TRPROG, [tr], [tr])
-AC_CHECK_PROGS(NROFFPROG, [nroff mandoc])
+AC_CHECK_PROGS(NROFFPROG, [mandoc nroff])
 if test -n "$NROFFPROG"; then
+    test -n "$MANTYPE" && sudo_cv_var_mantype="$MANTYPE"
+    AC_CACHE_CHECK([which macro set to use for manual pages],
+	[sudo_cv_var_mantype],
+	[sudo_cv_var_mantype="man"
+	if test "$NROFFPROG" != "no"; then
+	    echo ".Sh NAME" > conftest
+	    echo ".Nm sudo" >> conftest
+	    echo ".Nd sudo" >> conftest
+	    echo ".Sh DESCRIPTION" >> conftest
+	    echo "sudo" >> conftest
+	    if $NROFFPROG -mdoc conftest >/dev/null 2>&1; then
+		sudo_cv_var_mantype="mdoc"
+	    fi
+	    rm -f conftest
+	fi]
+    )
+    MANTYPE="$sudo_cv_var_mantype"
     AC_CACHE_CHECK([whether $NROFFPROG supports the -c option],
 	[sudo_cv_var_nroff_opt_c],
 	[if $NROFFPROG -c </dev/null >/dev/null 2>&1; then
@@ -1441,6 +1479,9 @@ if test -n "$NROFFPROG"; then
     if test "$sudo_cv_var_nroff_opt_c" = "yes"; then
 	NROFFPROG="$NROFFPROG -c"
     fi
+    dnl
+    dnl This test will fail for mandoc but it is the default anyway...
+    dnl
     AC_CACHE_CHECK([whether $NROFFPROG supports the -Tascii option],
 	[sudo_cv_var_nroff_opt_Tascii],
 	[if $NROFFPROG -Tascii </dev/null >/dev/null 2>&1; then
@@ -1448,12 +1489,13 @@ if test -n "$NROFFPROG"; then
 	else
 	    sudo_cv_var_nroff_opt_Tascii=no
 	fi]
+    )
     if test "$sudo_cv_var_nroff_opt_Tascii" = "yes"; then
 	NROFFPROG="$NROFFPROG -Tascii"
     fi
-    )
 else
-    MANTYPE="cat"
+    MANTYPE=cat
+    MANDIRTYPE=cat
     mansrcdir='$(srcdir)'
 fi
 
@@ -2884,7 +2926,7 @@ if test "${with_skey-'no'}" = "yes"; then
 	for dir in "" "/usr/local" "/usr/contrib"; do
 	    test -n "$dir" && CPPFLAGS="$O_CPPFLAGS -I${dir}/include"
 	    AC_CHECK_HEADER([skey.h], [found=yes; break], [],
-		[#include <stdio.h>]) 
+		[#include <stdio.h>])
 	done
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
@@ -3168,7 +3210,7 @@ SUDO_IO_LOGDIR
 
 dnl
 dnl Turn warnings into errors.
-dnl All compiler/loader tests after this point will fail if 
+dnl All compiler/loader tests after this point will fail if
 dnl a warning is displayed (nornally, warnings are not fata).
 dnl
 AC_LANG_WERROR
@@ -3451,7 +3493,6 @@ test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/
 dnl
 dnl Substitute into the Makefile and man pages
 dnl
-dnl AC_CONFIG_FILES([doc/sudo.man doc/visudo.man doc/sudoers.man doc/sudoers.ldap.man doc/sudoreplay.man src/Makefile src/sudo_usage.h])
 AC_CONFIG_FILES([Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/sample_group/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 AC_OUTPUT
 

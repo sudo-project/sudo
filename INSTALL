@@ -348,6 +348,16 @@ Special features/options:
 	Enable support for role based access control (RBAC) on
 	systems that support SELinux.
 
+  --with-man
+        Use the "man" macros for manual pages.  By default, mdoc
+        versions of the manuals are installed.  This can be used
+        to override configure's test for "nroff -mdoc" support.
+
+  --with-mdoc
+        Use the "mdoc" macros for manual pages.  By default, mdoc
+        versions of the manuals are installed.  This can be used
+        to override configure's test for "nroff -mdoc" support.
+
 The following options are also configurable at runtime:
 
   --with-long-otp-prompt

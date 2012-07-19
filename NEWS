@@ -33,6 +33,9 @@ What's new in Sudo 1.8.6?
    of "N incorrect password attempts".  Likewise, the "mail_no_perms"
    sudoers option now takes precedence over "mail_badpass".
 
+ * The sudo manuals are now formatted in mdoc.  Versions using the
+   legacy man macros are provided for systems that lack mdoc.
+
 What's new in Sudo 1.8.5p2?
 
  * Fixed use of the SUDO_ASKPASS environment variable which was
