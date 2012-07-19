@@ -535,7 +535,7 @@ and
 .Em runaspw
 flags in
 .Xr sudoers @mansectform@ )
-.It Li %U
+.It Li \&%U
 expanded to the login name of the user the command will be run as
 (defaults to root unless the
 .Fl u
@@ -622,12 +622,12 @@ many shells require that the
 be escaped with a backslash
 .Pq Ql \e .
 Security policies may restrict
-.Em uid No Ns s
+.Em uid Ns No s
 to those listed in the password database.
 The
 .Em sudoers
 policy allows
-.Em uid No Ns s
+.Em uid Ns No s
 that are not in the password database as long as the
 .Em targetpw
 option is not set.
@@ -671,9 +671,9 @@ should stop processing command line arguments.
 .Pp
 Environment variables to be set for the command may also be passed
 on the command line in the form of
-.Sy VAR No Ns = Ns Em value ,
+.Sy VAR Ns No = Ns Em value ,
 e.g.\&
-.Sy LD_LIBRARY_PATH No Ns = Ns Em /usr/local/pkg/lib .
+.Sy LD_LIBRARY_PATH Ns No = Ns Em /usr/local/pkg/lib .
 Variables passed on the command line are subject to the same
 restrictions as normal environment variables with one important
 exception.
@@ -829,7 +829,7 @@ The debug flag syntax used by
 and the
 .Em sudoers
 plugin is
-.Em subsystem No Ns @ Ns Em priority
+.Em subsystem Ns No @ Ns Em priority
 but the plugin is free to use a different format so long as it does
 not include a comma
 .Pq Ql \&, .
@@ -963,7 +963,7 @@ If a user runs a command such as
 or
 .Li sudo sh ,
 subsequent commands run from that shell are not subject to
-.Nm sudo No Ns 's
+.Nm sudo Ns No 's
 security policy.
 The same is true for commands that offer shell escapes (including
 most editors).
@@ -1165,7 +1165,7 @@ if that user is allowed to run arbitrary commands via
 .Nm sudo .
 Also, many programs (such as editors) allow the user to run commands
 via shell escapes, thus avoiding
-.Nm sudo No Ns 's
+.Nm sudo Ns No 's
 checks.
 However, on most systems it is possible to prevent shell escapes with the
 .Xr sudoers @mansectform@

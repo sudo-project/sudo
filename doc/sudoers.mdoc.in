@@ -2305,7 +2305,7 @@ and
 .Em runaspw
 flags in
 .Em sudoers )
-.It Li %U
+.It Li \&%U
 expanded to the login name of the user the command will
 be run as (defaults to root)
 .It Li %u
