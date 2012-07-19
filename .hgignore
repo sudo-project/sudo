@@ -17,6 +17,7 @@ Makefile$
 
 ^ChangeLog$
 ^doc/.*\.man$
+^doc/.*\.mdoc$
 ^doc/varsub$
 
 ^pathnames\.h$
