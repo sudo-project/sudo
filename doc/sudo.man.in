@@ -22,6 +22,8 @@
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
 .TH "SUDO" "@mansectsu@" "July 10, 2012" "1.8.6" "System Manager's Manual"
+.nh
+.if n .ad l
 .SH "NAME"
 \fBsudo\fR,
 \fBsudoedit\fR
@@ -29,53 +31,54 @@
 .SH "SYNOPSIS"
 .HP 5n
 \fBsudo\fR
-\fB-h\fR | \fB-K\fR | \fB-k\fR | \fB-V\fR
-.sp -1v
+\fB\-h\fR | \fB\-K\fR | \fB\-k\fR | \fB\-V\fR
+.PD 0
 .HP 5n
 \fBsudo\fR
-\fB-v\fR
-[\fB-AknS\fR]
-[\fB-a\fR\~\fIauth_type\fR]
-[\fB-g\fR\~\fIgroup\~name\fR\~|\~\fI#gid\fR]
-[\fB-p\fR\~\fIprompt\fR]
-[\fB-u\fR\~\fIuser\~name\fR\~|\~\fI#uid\fR]
-.sp -1v
+\fB\-v\fR
+[\fB\-AknS\fR]
+[\fB\-a\fR\ \fIauth_type\fR]
+[\fB\-g\fR\ \fIgroup\ name\fR\ |\ \fI#gid\fR]
+[\fB\-p\fR\ \fIprompt\fR]
+[\fB\-u\fR\ \fIuser\ name\fR\ |\ \fI#uid\fR]
+.br
 .HP 5n
 \fBsudo\fR
-\fB-l\fR[\fIl\fR]
-[\fB-AknS\fR]
-[\fB-a\fR\~\fIauth_type\fR]
-[\fB-g\fR\~\fIgroup\~name\fR\~|\~\fI#gid\fR]
-[\fB-p\fR\~\fIprompt\fR]
-[\fB-U\fR\~\fIuser\~name\fR]
-[\fB-u\fR\~\fIuser\~name\fR\~|\~\fI#uid\fR]
+\fB\-l\fR[\fIl\fR]
+[\fB\-AknS\fR]
+[\fB\-a\fR\ \fIauth_type\fR]
+[\fB\-g\fR\ \fIgroup\ name\fR\ |\ \fI#gid\fR]
+[\fB\-p\fR\ \fIprompt\fR]
+[\fB\-U\fR\ \fIuser\ name\fR]
+[\fB\-u\fR\ \fIuser\ name\fR\ |\ \fI#uid\fR]
 [\fIcommand\fR]
-.sp -1v
+.br
 .HP 5n
 \fBsudo\fR
-[\fB-AbEHnPS\fR]
-[\fB-a\fR\~\fIauth_type\fR]
-[\fB-C\fR\~\fIfd\fR]
-[\fB-c\fR\~\fIclass\fR\~|\~\fI-\fR]
-[\fB-g\fR\~\fIgroup\~name\fR\~|\~\fI#gid\fR]
-[\fB-p\fR\~\fIprompt\fR]
-[\fB-r\fR\~\fIrole\fR]
-[\fB-t\fR\~\fItype\fR]
-[\fB-u\fR\~\fIuser\~name\fR\~|\~\fI#uid\fR]
+[\fB\-AbEHnPS\fR]
+[\fB\-a\fR\ \fIauth_type\fR]
+[\fB\-C\fR\ \fIfd\fR]
+[\fB\-c\fR\ \fIclass\fR\ |\ \fI-\fR]
+[\fB\-g\fR\ \fIgroup\ name\fR\ |\ \fI#gid\fR]
+[\fB\-p\fR\ \fIprompt\fR]
+[\fB\-r\fR\ \fIrole\fR]
+[\fB\-t\fR\ \fItype\fR]
+[\fB\-u\fR\ \fIuser\ name\fR\ |\ \fI#uid\fR]
 [\fBVAR\fR=\fIvalue\fR]
-\fB-i\fR\~|\~\fB-s\fR
+\fB\-i\fR\ |\ \fB\-s\fR
 [\fIcommand\fR]
-.sp -1v
+.br
 .HP 9n
 \fBsudoedit\fR
-[\fB-AnS\fR]
-[\fB-a\fR\~\fIauth_type\fR]
-[\fB-C\fR\~\fIfd\fR]
-[\fB-c\fR\~\fIclass\fR\~|\~\fI-\fR]
-[\fB-g\fR\~\fIgroup\~name\fR\~|\~\fI#gid\fR]
-[\fB-p\fR\~\fIprompt\fR]
-[\fB-u\fR\~\fIuser\~name\fR\~|\~\fI#uid\fR]
+[\fB\-AnS\fR]
+[\fB\-a\fR\ \fIauth_type\fR]
+[\fB\-C\fR\ \fIfd\fR]
+[\fB\-c\fR\ \fIclass\fR\ |\ \fI-\fR]
+[\fB\-g\fR\ \fIgroup\ name\fR\ |\ \fI#gid\fR]
+[\fB\-p\fR\ \fIprompt\fR]
+[\fB\-u\fR\ \fIuser\ name\fR\ |\ \fI#uid\fR]
 file ...
+.PD
 .SH "DESCRIPTION"
 \fBsudo\fR
 allows a permitted user to execute a
@@ -85,7 +88,7 @@ policy.
 The real and effective uid and gid are set to match those of the
 target user, as specified in the password database, and the group
 vector is initialized based on the group database (unless the
-\fB-P\fR
+\fB\-P\fR
 option was specified).
 .PP
 \fBsudo\fR
@@ -133,14 +136,14 @@ sudoers(@mansectform@).
 By running
 \fBsudo\fR
 with the
-\fB-v\fR
+\fB\-v\fR
 option, a user can update the cached credentials without running a
 \fIcommand\fR.
 .PP
 When invoked as
 \fBsudoedit\fR,
 the
-\fB-e\fR
+\fB\-e\fR
 option (described below), is implied.
 .PP
 Security policies may log successful and failed attempts to use
@@ -151,12 +154,12 @@ output may be logged as well.
 \fBsudo\fR
 accepts the following command line options:
 .TP 12n
-\fB-A\fR
+\fB\-A\fR
 Normally, if
 \fBsudo\fR
 requires a password, it will read it from the user's terminal.
 If the
-\fB-A\fR (\fIaskpass\fR)
+\fB\-A\fR (\fIaskpass\fR)
 option is specified, a (possibly graphical) helper program is
 executed to read the user's password and output the password to the
 standard output.
@@ -183,11 +186,11 @@ If no askpass program is available,
 will exit with an error.
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 12n
-\fB-a\fR \fItype\fR
+\fB\-a\fR \fItype\fR
 The
-\fB-a\fR (\fIauthentication type\fR)
+\fB\-a\fR (\fIauthentication type\fR)
 option causes
 \fBsudo\fR
 to use the specified authentication type when validating the user,
@@ -199,43 +202,44 @@ authentication methods by adding an
 entry in
 \fI/etc/login.conf\fR.
 This option is only available on systems that support BSD authentication.
+.PD
 .TP 12n
-\fB-b\fR
+\fB\-b\fR
 The
-\fB-b\fR (\fIbackground\fR)
+\fB\-b\fR (\fIbackground\fR)
 option tells
 \fBsudo\fR
 to run the given command in the background.
 Note that if you use the
-\fB-b\fR
+\fB\-b\fR
 option you cannot use shell job control to manipulate the process.
 Most interactive commands will fail to work properly in background
 mode.
 .TP 12n
-\fB-C\fR \fIfd\fR
+\fB\-C\fR \fIfd\fR
 Normally,
 \fBsudo\fR
 will close all open file descriptors other than standard input,
 standard output and standard error.
 The
-\fB-C\fR (\fIclose from\fR)
+\fB\-C\fR (\fIclose from\fR)
 option allows the user to specify a starting point above the standard
 error (file descriptor three).
 Values less than three are not permitted.
 The security policy may restrict the user's ability to use the
-\fB-C\fR
+\fB\-C\fR
 option.
 The
 \fIsudoers\fR
 policy only permits use of the
-\fB-C\fR
+\fB\-C\fR
 option when the administrator has enabled the
 \fIclosefrom_override\fR
 option.
 .TP 12n
-\fB-c\fR \fIclass\fR
+\fB\-c\fR \fIclass\fR
 The
-\fB-c\fR (\fIclass\fR)
+\fB\-c\fR (\fIclass\fR)
 option causes
 \fBsudo\fR
 to run the specified command with resources limited by the specified
@@ -261,19 +265,19 @@ as root, or the
 command must be run from a shell that is already root.
 This option is only available on systems with BSD login classes.
 .TP 12n
-\fB-E\fR
+\fB\-E\fR
 The
-\fB-E\fR (\fIpreserve environment\fR)
+\fB\-E\fR (\fIpreserve environment\fR)
 option indicates to the security policy that the user wishes to
 preserve their existing environment variables.
 The security policy may return an error if the
-\fB-E\fR
+\fB\-E\fR
 option is specified and the user does not have permission to preserve
 the environment.
 .TP 12n
-\fB-e\fR
+\fB\-e\fR
 The
-\fB-e\fR (\fIedit\fR)
+\fB\-e\fR (\fIedit\fR)
 option indicates that, instead of running a command, the user wishes
 to edit one or more files.
 In lieu of a command, the string "sudoedit" is used when consulting
@@ -324,16 +328,16 @@ receive a warning and the edited copy will remain in a temporary
 file.
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 12n
-\fB-g\fR \fIgroup\fR
+\fB\-g\fR \fIgroup\fR
 Normally,
 \fBsudo\fR
 runs a command with the primary group set to the one specified by
 the password database for the user the command is being run as (by
 default, root).
 The
-\fB-g\fR (\fIgroup\fR)
+\fB\-g\fR (\fIgroup\fR)
 option causes
 \fBsudo\fR
 to run the command with the primary group set to
@@ -352,31 +356,32 @@ many shells require that the
 be escaped with a backslash
 (`\e').
 If no
-\fB-u\fR
+\fB\-u\fR
 option is specified, the command will be run as the invoking user
 (not root).
 In either case, the primary group will be set to
 \fIgroup\fR.
+.PD
 .TP 12n
-\fB-H\fR
+\fB\-H\fR
 The
-\fB-H\fR (\fIHOME\fR)
+\fB\-H\fR (\fIHOME\fR)
 option requests that the security policy set the
 \fRHOME\fR
 environment variable to the home directory of the target user (root
 by default) as specified by the password database.
 Depending on the policy, this may be the default behavior.
 .TP 12n
-\fB-h\fR
+\fB\-h\fR
 The
-\fB-h\fR (\fIhelp\fR)
+\fB\-h\fR (\fIhelp\fR)
 option causes
 \fBsudo\fR
 to print a short help message to the standard output and exit.
 .TP 12n
-\fB-i\fR [\fIcommand\fR]
+\fB\-i\fR [\fIcommand\fR]
 The
-\fB-i\fR (\fIsimulate initial login\fR)
+\fB\-i\fR (\fIsimulate initial login\fR)
 option runs the shell specified by the password database entry of
 the target user as a login shell.
 This means that login-specific resource files such as
@@ -386,7 +391,7 @@ or
 will be read by the shell.
 If a command is specified, it is passed to the shell for execution
 via the shell's
-\fB-c\fR
+\fB\-c\fR
 option.
 If no command is specified, an interactive shell is executed.
 \fBsudo\fR
@@ -399,24 +404,24 @@ The
 section in the
 sudoers(@mansectform@)
 manual documents how the
-\fB-i\fR
+\fB\-i\fR
 option affects the environment in which a command is run when the
 \fIsudoers\fR
 policy is in use.
 .TP 12n
-\fB-K\fR
+\fB\-K\fR
 The
-\fB-K\fR (sure \fIkill\fR)
+\fB\-K\fR (sure \fIkill\fR)
 option is like
-\fB-k\fR
+\fB\-k\fR
 except that it removes the user's cached credentials entirely and
 may not be used in conjunction with a command or other option.
 This option does not require a password.
 Not all security policies support credential caching.
 .TP 12n
-\fB-k\fR [\fIcommand\fR]
+\fB\-k\fR [\fIcommand\fR]
 When used alone, the
-\fB-k\fR (\fIkill\fR)
+\fB\-k\fR (\fIkill\fR)
 option to
 \fBsudo\fR
 invalidates the user's cached credentials.
@@ -433,7 +438,7 @@ Not all security policies support credential caching.
 .sp
 When used in conjunction with a command or an option that may require
 a password, the
-\fB-k\fR
+\fB\-k\fR
 option will cause
 \fBsudo\fR
 to ignore the user's cached credentials.
@@ -442,14 +447,14 @@ As a result,
 will prompt for a password (if one is required by the security
 policy) and will not update the user's cached credentials.
 .TP 12n
-\fB-l\fR[\fBl\fR] [\fIcommand\fR]
+\fB\-l\fR[\fBl\fR] [\fIcommand\fR]
 If no
 \fIcommand\fR
 is specified, the
-\fB-l\fR (\fIlist\fR)
+\fB\-l\fR (\fIlist\fR)
 option will list the allowed (and forbidden) commands for the
 invoking user (or the user specified by the
-\fB-U\fR
+\fB\-U\fR
 option) on the current host.
 If a
 \fIcommand\fR
@@ -462,18 +467,18 @@ is specified but not allowed,
 \fBsudo\fR
 will exit with a status value of 1.
 If the
-\fB-l\fR
+\fB\-l\fR
 option is specified with an
 \fIl\fR
 argument
-(i.e.\& \fB-ll\fR),
+(i.e.\& \fB\-ll\fR),
 or if
-\fB-l\fR
+\fB\-l\fR
 is specified multiple times, a longer list format is used.
 .TP 12n
-\fB-n\fR
+\fB\-n\fR
 The
-\fB-n\fR (\fInon-interactive\fR)
+\fB\-n\fR (\fInon-interactive\fR)
 option prevents
 \fBsudo\fR
 from prompting the user for a password.
@@ -481,9 +486,9 @@ If a password is required for the command to run,
 \fBsudo\fR
 will display an error message and exit.
 .TP 12n
-\fB-P\fR
+\fB\-P\fR
 The
-\fB-P\fR (\fIpreserve group vector\fR)
+\fB\-P\fR (\fIpreserve group vector\fR)
 option causes
 \fBsudo\fR
 to preserve the invoking user's group vector unaltered.
@@ -494,9 +499,9 @@ target user is in.
 The real and effective group IDs, however, are still set to match
 the target user.
 .TP 12n
-\fB-p\fR \fIprompt\fR
+\fB\-p\fR \fIprompt\fR
 The
-\fB-p\fR (\fIprompt\fR)
+\fB\-p\fR (\fIprompt\fR)
 option allows you to override the default password prompt and use
 a custom one.
 The following percent
@@ -526,10 +531,10 @@ and
 flags in
 sudoers(@mansectform@))
 .TP 4n
-\fR%U\fR
+\fR\&%U\fR
 expanded to the login name of the user the command will be run as
 (defaults to root unless the
-\fB-u\fR
+\fB\-u\fR
 option is also specified)
 .TP 4n
 \fR%u\fR
@@ -545,7 +550,7 @@ character
 .RS
 .PP
 The prompt specified by the
-\fB-p\fR
+\fB\-p\fR
 option will override the system password prompt on systems that
 support PAM unless the
 \fIpassprompt_override\fR
@@ -553,51 +558,52 @@ flag is disabled in
 \fIsudoers\fR.
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 12n
-\fB-r\fR \fIrole\fR
+\fB\-r\fR \fIrole\fR
 The
-\fB-r\fR (\fIrole\fR)
+\fB\-r\fR (\fIrole\fR)
 option causes the new (SELinux) security context to have the role
 specified by
 \fIrole\fR.
+.PD
 .TP 12n
-\fB-S\fR
+\fB\-S\fR
 The
-\fB-S\fR (\fIstdin\fR)
+\fB\-S\fR (\fIstdin\fR)
 option causes
 \fBsudo\fR
 to read the password from the standard input instead of the terminal
 device.
 The password must be followed by a newline character.
 .TP 12n
-\fB-s\fR [\fIcommand\fR]
+\fB\-s\fR [\fIcommand\fR]
 The
-\fB-s\fR (\fIshell\fR)
+\fB\-s\fR (\fIshell\fR)
 option runs the shell specified by the
 \fRSHELL\fR
 environment variable if it is set or the shell as specified in the
 password database.
 If a command is specified, it is passed to the shell for execution
 via the shell's
-\fB-c\fR
+\fB\-c\fR
 option.
 If no command is specified, an interactive shell is executed.
 .TP 12n
-\fB-t\fR \fItype\fR
+\fB\-t\fR \fItype\fR
 The
-\fB-t\fR (\fItype\fR)
+\fB\-t\fR (\fItype\fR)
 option causes the new (SELinux) security context to have the type
 specified by
 \fItype\fR.
 If no type is specified, the default type is derived from the
 specified role.
 .TP 12n
-\fB-U\fR \fIuser\fR
+\fB\-U\fR \fIuser\fR
 The
-\fB-U\fR (\fIother user\fR)
+\fB\-U\fR (\fIother user\fR)
 option is used in conjunction with the
-\fB-l\fR
+\fB\-l\fR
 option to specify the user whose privileges should be listed.
 The security policy may restrict listing other users' privileges.
 The
@@ -606,9 +612,9 @@ policy only allows root or a user with the
 \fRALL\fR
 privilege on the current host to use this option.
 .TP 12n
-\fB-u\fR \fIuser\fR
+\fB\-u\fR \fIuser\fR
 The
-\fB-u\fR (\fIuser\fR)
+\fB\-u\fR (\fIuser\fR)
 option causes
 \fBsudo\fR
 to run the specified command as a user other than
@@ -636,23 +642,23 @@ that are not in the password database as long as the
 option is not set.
 Other security policies may not support this.
 .TP 12n
-\fB-V\fR
+\fB\-V\fR
 The
-\fB-V\fR (\fIversion\fR)
+\fB\-V\fR (\fIversion\fR)
 option causes
 \fBsudo\fR
 to print its version string and the version string of the security
 policy plugin and any I/O plugins.
 If the invoking user is already root the
-\fB-V\fR
+\fB\-V\fR
 option will display the arguments passed to configure when
 \fBsudo\fR
 was built and plugins may display more verbose information such as
 default options.
 .TP 12n
-\fB-v\fR
+\fB\-v\fR
 When given the
-\fB-v\fR (\fIvalidate\fR)
+\fB\-v\fR (\fIvalidate\fR)
 option,
 \fBsudo\fR
 will update the user's cached credentials, authenticating the user's
@@ -667,9 +673,9 @@ minutes (or whatever the timeout is set to by the security policy)
 but does not run a command.
 Not all security policies support cached credentials.
 .TP 12n
-\fB--\fR
+\fB\--\fR
 The
-\fB--\fR
+\fB\--\fR
 option indicates that
 \fBsudo\fR
 should stop processing command line arguments.
@@ -1037,7 +1043,7 @@ environment.
 .TP 17n
 \fREDITOR\fR
 Default editor to use in
-\fB-e\fR
+\fB\-e\fR
 (sudoedit) mode if neither
 \fRSUDO_EDITOR\fR
 nor
@@ -1046,7 +1052,7 @@ is set.
 .TP 17n
 \fRMAIL\fR
 In
-\fB-i\fR
+\fB\-i\fR
 mode or when
 \fIenv_reset\fR
 is enabled in
@@ -1055,9 +1061,9 @@ set to the mail spool of the target user.
 .TP 17n
 \fRHOME\fR
 Set to the home directory of the target user if
-\fB-i\fR
+\fB\-i\fR
 or
-\fB-H\fR
+\fB\-H\fR
 are specified,
 \fIenv_reset\fR
 or
@@ -1065,7 +1071,7 @@ or
 are set in
 \fIsudoers\fR,
 or when the
-\fB-s\fR
+\fB\-s\fR
 option is specified and
 \fIset_home\fR
 is set in
@@ -1076,13 +1082,13 @@ May be overridden by the security policy.
 .TP 17n
 \fRSHELL\fR
 Used to determine shell to run with
-\fB-s\fR
+\fB\-s\fR
 option.
 .TP 17n
 \fRSUDO_ASKPASS\fR
 Specifies the path to a helper program used to read the password
 if no terminal is available or if the
-\fB-A\fR
+\fB\-A\fR
 option is specified.
 .TP 17n
 \fRSUDO_COMMAND\fR
@@ -1090,7 +1096,7 @@ Set to the command run by sudo.
 .TP 17n
 \fRSUDO_EDITOR\fR
 Default editor to use in
-\fB-e\fR
+\fB\-e\fR
 (sudoedit) mode.
 .TP 17n
 \fRSUDO_GID\fR
@@ -1112,12 +1118,12 @@ Set to the login name of the user who invoked sudo.
 .TP 17n
 \fRUSER\fR
 Set to the target user (root unless the
-\fB-u\fR
+\fB\-u\fR
 option is specified).
 .TP 17n
 \fRVISUAL\fR
 Default editor to use in
-\fB-e\fR
+\fB\-e\fR
 (sudoedit) mode if
 \fRSUDO_EDITOR\fR
 is not set.

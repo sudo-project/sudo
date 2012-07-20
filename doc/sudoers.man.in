@@ -22,6 +22,8 @@
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
 .TH "SUDOERS" "@mansectsu@" "July 16, 2012" "1.8.6" "Programmer's Manual"
+.nh
+.if n .ad l
 .SH "NAME"
 \fBsudoers\fR
 \- default sudo security policy module
@@ -86,9 +88,9 @@ Note that mail will not be sent if an unauthorized user tries to
 run
 \fBsudo\fR
 with the
-\fB-l\fR
+\fB\-l\fR
 or
-\fB-v\fR
+\fB\-v\fR
 option.
 This allows users to
 determine for themselves whether or not they are allowed to use
@@ -107,7 +109,7 @@ This can be used by a user to log commands
 through sudo even when a root shell has been invoked.
 It also
 allows the
-\fB-e\fR
+\fB\-e\fR
 option to remain useful even when invoked via a
 sudo-run script or program.
 Note, however, that the
@@ -266,7 +268,7 @@ to preserve them.
 .PP
 As a special case, if
 \fBsudo\fR's
-\fB-i\fR
+\fB\-i\fR
 option (initial login) is
 specified,
 \fIsudoers\fR
@@ -658,7 +660,7 @@ The special command
 is used to permit a user to run
 \fBsudo\fR
 with the
-\fB-e\fR
+\fB\-e\fR
 option (or as
 \fBsudoedit\fR).
 It may take command line arguments just as a normal command does.
@@ -781,11 +783,11 @@ The first
 indicates
 which users the command may be run as via
 \fBsudo\fR's
-\fB-u\fR
+\fB\-u\fR
 option.
 The second defines a list of groups that can be specified via
 \fBsudo\fR's
-\fB-g\fR
+\fB\-g\fR
 option.
 If both
 \fRRunas_List\fRs
@@ -794,7 +796,7 @@ and groups listed in their respective
 \fRRunas_List\fRs.
 If only the first is specified, the command may be run as any user
 in the list but no
-\fB-g\fR
+\fB\-g\fR
 option
 may be specified.
 If the first
@@ -921,9 +923,9 @@ $ sudo -g dialer /usr/bin/cu
 Multiple users and groups may be present in a
 \fRRunas_Spec\fR,
 in which case the user may select any combination of users and groups via the
-\fB-u\fR
+\fB\-u\fR
 and
-\fB-g\fR
+\fB\-g\fR
 options.
 In this example:
 .nf
@@ -1089,7 +1091,7 @@ Note that if
 has been set for a command, the user may disable the
 \fIenv_reset\fR
 option from the command line via the
-\fB-E\fR
+\fB\-E\fR
 option.
 Additionally, environment variables set on the command
 line are not subject to the restrictions imposed by
@@ -1357,7 +1359,7 @@ directory unless one of them contains a syntax error.
 It is still possible to run
 \fBvisudo\fR
 with the
-\fB-f\fR
+\fB\-f\fR
 flag to edit the files directly.
 .SS "Other special characters and reserved words"
 The pound sign
@@ -1449,10 +1451,10 @@ will set the
 \fRHOME\fR
 environment variable to the home directory of the target user
 (which is root unless the
-\fB-u\fR
+\fB\-u\fR
 option is used).
 This effectively means that the
-\fB-H\fR
+\fB\-H\fR
 option is always implied.
 Note that
 \fRHOME\fR
@@ -1486,7 +1488,7 @@ by default.
 closefrom_override
 If set, the user may use
 \fBsudo\fR's
-\fB-C\fR
+\fB\-C\fR
 option which overrides the default starting point at which
 \fBsudo\fR
 begins closing open file descriptors.
@@ -1565,7 +1567,7 @@ and
 lists are displayed when
 \fBsudo\fR
 is run by root with the
-\fB-V\fR
+\fB\-V\fR
 option.
 If the
 \fIsecure_path\fR
@@ -1968,17 +1970,17 @@ set_home
 If enabled and
 \fBsudo\fR
 is invoked with the
-\fB-s\fR
+\fB\-s\fR
 option the
 \fRHOME\fR
 environment variable will be set to the home directory of the target
 user (which is root unless the
-\fB-u\fR
+\fB\-u\fR
 option is used).
 This effectively makes the
-\fB-s\fR
+\fB\-s\fR
 option imply
-\fB-H\fR.
+\fB\-H\fR.
 Note that
 \fRHOME\fR
 is already set when the the
@@ -2006,7 +2008,7 @@ will set the
 and
 \fRUSERNAME\fR
 environment variables to the name of the target user (usually root unless the
-\fB-u\fR
+\fB\-u\fR
 option is given).
 However, since some programs (including the RCS revision control system) use
 \fRLOGNAME\fR
@@ -2046,7 +2048,7 @@ setenv
 Allow the user to disable the
 \fIenv_reset\fR
 option from the command line via the
-\fB-E\fR
+\fB\-E\fR
 option.
 Additionally, environment variables set via the command line are
 not subject to the restrictions imposed by
@@ -2063,7 +2065,7 @@ shell_noargs
 If set and
 \fBsudo\fR
 is invoked with no arguments it acts as if the
-\fB-s\fR
+\fB\-s\fR
 option had been given.
 That is, it runs a shell as root (the shell is determined by the
 \fRSHELL\fR
@@ -2099,14 +2101,14 @@ If set,
 \fBsudo\fR
 will prompt for the password of the user specified
 by the
-\fB-u\fR
+\fB\-u\fR
 option (defaults to
 \fRroot\fR)
 instead of the password of the invoking user.
 In addition, the timestamp file name will include the target user's name.
 Note that this flag precludes the use of a uid not listed in the passwd
 database as an argument to the
-\fB-u\fR
+\fB\-u\fR
 option.
 This flag is
 \fIoff\fR
@@ -2362,7 +2364,7 @@ character, the string
 should be used.
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 18n
 iolog_file
 The path name, relative to
@@ -2396,6 +2398,7 @@ will have the
 replaced with a unique combination of digits and letters, similar to the
 mktemp(3)
 function.
+.PD
 .TP 18n
 mailsub
 Subject of the mail sent to the
@@ -2415,7 +2418,7 @@ file.
 .TP 18n
 passprompt
 The default prompt to use when asking for a password; can be overridden via the
-\fB-p\fR
+\fB\-p\fR
 option or the
 \fRSUDO_PROMPT\fR
 environment variable.
@@ -2442,7 +2445,7 @@ and
 flags in
 \fIsudoers\fR)
 .TP 6n
-\fR%U\fR
+\fR\&%U\fR
 expanded to the login name of the user the command will
 be run as (defaults to root)
 .TP 6n
@@ -2462,7 +2465,7 @@ The default value is
 ``\fR@passprompt@\fR''.
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 18n
 role
 The default SELinux role to use when constructing a new security
@@ -2473,10 +2476,11 @@ or via command line options.
 This option is only available whe
 \fBsudo\fR
 is built with SELinux support.
+.PD
 .TP 18n
 runas_default
 The default user to run commands as if the
-\fB-u\fR
+\fB\-u\fR
 option is not specified on the command line.
 This defaults to
 \fR@runas_default@\fR.
@@ -2591,13 +2595,14 @@ For more information see
 sudo_plugin(@mansectform@).
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 14n
 lecture
 This option controls when a short lecture will be printed along with
 the password prompt.
 It has the following possible values:
 .RS
+.PD
 .TP 8n
 always
 Always lecture the user.
@@ -2621,7 +2626,7 @@ The default value is
 \fI@lecture@\fR.
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 14n
 lecture_file
 Path to a file containing an alternate
@@ -2631,12 +2636,13 @@ file exists.
 By default,
 \fBsudo\fR
 uses a built-in lecture.
+.PD
 .TP 14n
 listpw
 This option controls when a password will be required when a user runs
 \fBsudo\fR
 with the
-\fB-l\fR
+\fB\-l\fR
 option.
 It has the following possible values:
 .RS
@@ -2651,7 +2657,7 @@ flag set to avoid entering a password.
 .TP 10n
 always
 The user must always enter a password to use the
-\fB-l\fR
+\fB\-l\fR
 option.
 .TP 10n
 any
@@ -2664,7 +2670,7 @@ flag set to avoid entering a password.
 .TP 10n
 never
 The user need never enter a password to use the
-\fB-l\fR
+\fB\-l\fR
 option.
 .RE
 .RS
@@ -2679,7 +2685,7 @@ The default value is
 \fIany\fR.
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 14n
 logfile
 Path to the
@@ -2690,10 +2696,11 @@ negating this option turns it off.
 By default,
 \fBsudo\fR
 logs via syslog.
+.PD
 .TP 14n
 mailerflags
 Flags to use when invoking mailer. Defaults to
-\fB-t\fR.
+\fB\-t\fR.
 .TP 14n
 mailerpath
 Path to mail program used to send warning mail.
@@ -2771,7 +2778,7 @@ verifypw
 This option controls when a password will be required when a user runs
 \fBsudo\fR
 with the
-\fB-v\fR
+\fB\-v\fR
 option.
 It has the following possible values:
 .RS
@@ -2785,7 +2792,7 @@ flag set to avoid entering a password.
 .TP 8n
 always
 The user must always enter a password to use the
-\fB-v\fR
+\fB\-v\fR
 option.
 .TP 8n
 any
@@ -2797,7 +2804,7 @@ flag set to avoid entering a password.
 .TP 8n
 never
 The user need never enter a password to use the
-\fB-v\fR
+\fB\-v\fR
 option.
 .RE
 .RS
@@ -2842,7 +2849,7 @@ The default list of environment variables to check is displayed when
 \fBsudo\fR
 is run by root with
 the
-\fB-V\fR
+\fB\-V\fR
 option.
 .TP 18n
 env_delete
@@ -2861,7 +2868,7 @@ operators respectively.
 The default list of environment variables to remove is displayed when
 \fBsudo\fR
 is run by root with the
-\fB-V\fR
+\fB\-V\fR
 option.
 Note that many operating systems will remove potentially dangerous
 variables from the environment of any setuid process (such as
@@ -2887,7 +2894,7 @@ The default list of variables to keep
 is displayed when
 \fBsudo\fR
 is run by root with the
-\fB-V\fR
+\fB\-V\fR
 option.
 .SH "SUDO.CONF"
 The
@@ -3100,7 +3107,7 @@ security policy
 .TP 26n
 \fI/etc/environment\fR
 Initial environment for
-\fB-i\fR
+\fB\-i\fR
 mode on AIX and Linux systems
 .SH "EXAMPLES"
 Below are example

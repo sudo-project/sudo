@@ -22,14 +22,16 @@
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
 .TH "VISUDO" "@mansectsu@" "July 12, 2012" "1.8.6" "System Manager's Manual"
+.nh
+.if n .ad l
 .SH "NAME"
 \fBvisudo\fR
 \- edit the sudoers file
 .SH "SYNOPSIS"
 .HP 7n
 \fBvisudo\fR
-[\fB-chqsV\fR]
-[\fB-f\fR\~\fIsudoers\fR]
+[\fB\-chqsV\fR]
+[\fB\-f\fR\ \fIsudoers\fR]
 .SH "DESCRIPTION"
 \fBvisudo\fR
 edits the
@@ -123,7 +125,7 @@ the line where the error occurred (if the editor supports this feature).
 accepts the following command line options:
 accepts the following command line options:
 .TP 12n
-\fB-c\fR
+\fB\-c\fR
 Enable
 \fIcheck-only\fR
 mode.
@@ -134,7 +136,7 @@ checked for syntax errors, owner and mode.
 A message will be printed to the standard output describing the status of
 \fIsudoers\fR
 unless the
-\fB-q\fR
+\fB\-q\fR
 option was specified.
 If the check completes successfully,
 \fBvisudo\fR
@@ -143,7 +145,8 @@ If an error is encountered,
 \fBvisudo\fR
 will exit with a value of 1.
 .TP 12n
-\fB-f\fR \fIsudoers\fR
+\fB\-f\fR \fIsudoers\fR
+.br
 Specify and alternate
 \fIsudoers\fR
 file location.
@@ -162,32 +165,32 @@ appended to it.
 In
 \fIcheck-only\fR
 mode only, the argument to
-\fB-f\fR
+\fB\-f\fR
 may be
 `-',
 indicating that
 \fIsudoers\fR
 will be read from the standard input.
 .TP 12n
-\fB-h\fR
+\fB\-h\fR
 The
-\fB-h\fR (\fIhelp\fR)
+\fB\-h\fR (\fIhelp\fR)
 option causes
 \fBvisudo\fR
 to print a short help message
 to the standard output and exit.
 .TP 12n
-\fB-q\fR
+\fB\-q\fR
 Enable
 \fIquiet\fR
 mode.
 In this mode details about syntax errors are not printed.
 This option is only useful when combined with
 the
-\fB-c\fR
+\fB\-c\fR
 option.
 .TP 12n
-\fB-s\fR
+\fB\-s\fR
 Enable
 \fIstrict\fR
 checking of the
@@ -202,9 +205,9 @@ letters, digits, and the underscore
 (`_')
 character.
 .TP 12n
-\fB-V\fR
+\fB\-V\fR
 The
-\fB-V\fR (\fIversion\fR)
+\fB\-V\fR (\fIversion\fR)
 option causes
 \fBvisudo\fR
 to print its version number
@@ -262,7 +265,7 @@ In the latter case, you can ignore the warnings
 will not complain)
 \&.
 In
-\fB-s\fR
+\fB\-s\fR
 (strict) mode these are errors, not warnings.
 .TP 6n
 \fRWarning: unused {User,Runas,Host,Cmnd}_Alias\fR
@@ -270,7 +273,7 @@ The specified {User,Runas,Host,Cmnd}_Alias was defined but never
 used.
 You may wish to comment out or remove the unused alias.
 In
-\fB-s\fR
+\fB\-s\fR
 (strict) mode this is an error, not a warning.
 .TP 6n
 \fRWarning: cycle in {User,Runas,Host,Cmnd}_Alias\fR

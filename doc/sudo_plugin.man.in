@@ -17,6 +17,8 @@
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
 .TH "SUDO_PLUGIN" "5" "July 16, 2012" "1.8.6" "OpenBSD Programmer's Manual"
+.nh
+.if n .ad l
 .SH "NAME"
 \fBsudo_plugin\fR
 \- Sudo Plugin API
@@ -204,7 +206,7 @@ The function arguments are as follows:
 .RS
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 version
 The version passed in by
@@ -212,6 +214,7 @@ The version passed in by
 allows the plugin to determine the
 major and minor version number of the plugin API supported by
 \fBsudo\fR.
+.PD
 .TP 6n
 conversation
 A pointer to the
@@ -330,24 +333,24 @@ This setting has been deprecated in favor of
 .TP 6n
 runas_user=string
 The user name or uid to to run the command as, if specified via the
-\fB-u\fR
+\fB\-u\fR
 flag.
 .TP 6n
 runas_group=string
 The group name or gid to to run the command as, if specified via
 the
-\fB-g\fR
+\fB\-g\fR
 flag.
 .TP 6n
 prompt=string
 The prompt to use when requesting a password, if specified via
 the
-\fB-p\fR
+\fB\-p\fR
 flag.
 .TP 6n
 set_home=bool
 Set to true if the user specified the
-\fB-H\fR
+\fB\-H\fR
 flag.
 If true, set the
 \fRHOME\fR
@@ -355,19 +358,19 @@ environment variable to the target user's home directory.
 .TP 6n
 preserve_environment=bool
 Set to true if the user specified the
-\fB-E\fR
+\fB\-E\fR
 flag, indicating that
 the user wishes to preserve the environment.
 .TP 6n
 run_shell=bool
 Set to true if the user specified the
-\fB-s\fR
+\fB\-s\fR
 flag, indicating that
 the user wishes to run a shell.
 .TP 6n
 login_shell=bool
 Set to true if the user specified the
-\fB-i\fR
+\fB\-i\fR
 flag, indicating that
 the user wishes to run a login shell.
 .TP 6n
@@ -392,21 +395,21 @@ exit.
 .TP 6n
 preserve_groups=bool
 Set to true if the user specified the
-\fB-P\fR
+\fB\-P\fR
 flag, indicating that
 the user wishes to preserve the group vector instead of setting it
 based on the runas user.
 .TP 6n
 ignore_ticket=bool
 Set to true if the user specified the
-\fB-k\fR
+\fB\-k\fR
 flag along with a
 command, indicating that the user wishes to ignore any cached
 authentication credentials.
 .TP 6n
 noninteractive=bool
 Set to true if the user specified the
-\fB-n\fR
+\fB\-n\fR
 flag, indicating that
 \fBsudo\fR
 should operate in non-interactive mode.
@@ -416,24 +419,24 @@ interaction is required.
 login_class=string
 BSD login class to use when setting resource limits and nice value,
 if specified by the
-\fB-c\fR
+\fB\-c\fR
 flag.
 .TP 6n
 selinux_role=string
 SELinux role to use when executing the command, if specified by
 the
-\fB-r\fR
+\fB\-r\fR
 flag.
 .TP 6n
 selinux_type=string
 SELinux type to use when executing the command, if specified by
 the
-\fB-t\fR
+\fB\-t\fR
 flag.
 .TP 6n
 bsdauth_type=string
 Authentication type, if specified by the
-\fB-a\fR
+\fB\-a\fR
 flag, to use on
 systems where BSD authentication is supported.
 .TP 6n
@@ -457,7 +460,7 @@ or
 .TP 6n
 sudoedit=bool
 Set to true when the
-\fB-e\fR
+\fB\-e\fR
 flag is is specified or if invoked as
 \fBsudoedit\fR.
 The plugin shall substitute an editor into
@@ -473,7 +476,7 @@ section.
 .TP 6n
 closefrom=number
 If specified, the user has requested via the
-\fB-C\fR
+\fB\-C\fR
 flag that
 \fBsudo\fR
 close all files descriptors with a value of
@@ -489,7 +492,7 @@ Additional settings may be added in the future so the plugin should
 silently ignore settings that it does not recognize.
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 user_info
 A vector of information about the user running the command in the form of
@@ -512,6 +515,7 @@ itself but the
 \fIvalue\fR
 might.
 .RS
+.PD
 .TP 6n
 pid=int
 The process ID of the running
@@ -663,7 +667,7 @@ The function arguments are as follows:
 .RS
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 exit_status
 The command's exit status, as returned by the
@@ -674,6 +678,7 @@ The value of
 is undefined if
 \fRerror\fR
 is non-zero.
+.PD
 .TP 6n
 error
 .br
@@ -706,7 +711,7 @@ function is called by
 \fBsudo\fR
 when the user specifies
 the
-\fB-V\fR
+\fB\-V\fR
 option.
 The plugin may display its version information to the user via the
 \fBconversation\fR()
@@ -717,7 +722,7 @@ function using
 If the user requests detailed version information, the verbose flag will be set.
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 check_policy
 .nf
@@ -804,9 +809,10 @@ to present additional error information to the user.
 .sp
 The function arguments are as follows:
 .RS
+.PD
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 argc
 The number of elements in
@@ -814,6 +820,7 @@ The number of elements in
 not counting the final
 \fRNULL\fR
 pointer.
+.PD
 .TP 6n
 argv
 The argument vector describing the command the user wishes to run,
@@ -1022,7 +1029,7 @@ the invoking user's existing entry.
 Unsupported values will be ignored.
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 argv_out
 The
@@ -1031,6 +1038,7 @@ argument vector to pass to the
 execve(2)
 system call when executing the command.
 The plugin is responsible for allocating and populating the vector.
+.PD
 .TP 6n
 user_env_out
 The
@@ -1068,10 +1076,11 @@ function using
 .RS
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 verbose
 Flag indicating whether to list in verbose mode or not.
+.PD
 .TP 6n
 list_user
 The name of a different user to list privileges for if the policy
@@ -1112,7 +1121,7 @@ The
 function is called when
 \fBsudo\fR
 is run with the
-\fB-v\fR
+\fB\-v\fR
 flag.
 For policy plugins such as
 \fIsudoers\fR
@@ -1137,7 +1146,7 @@ to present additional
 error information to the user.
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 invalidate
 .nf
@@ -1153,9 +1162,9 @@ function is called when
 \fBsudo\fR
 is called with
 the
-\fB-k\fR
+\fB\-k\fR
 or
-\fB-K\fR
+\fB\-K\fR
 flag.
 For policy plugins such as
 \fIsudoers\fR
@@ -1172,9 +1181,10 @@ The
 function should be
 \fRNULL\fR
 if the plugin does not support credential caching.
+.PD
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 init_session
 .nf
@@ -1251,9 +1261,10 @@ function with
 \fRSUDO_CONF_ERROR_MSG\fR
 to present additional
 error information to the user.
+.PD
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 register_hooks
 .nf
@@ -1305,9 +1316,10 @@ front end doesn't support API
 version 1.2 or higher,
 \fRregister_hooks\fR
 will not be called.
+.PD
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 deregister_hooks
 .nf
@@ -1361,6 +1373,7 @@ version 1.2 or higher,
 \fRderegister_hooks\fR
 will not be called.
 .RE
+.PD
 .PP
 \fIPolicy Plugin Version Macros\fR
 .nf
@@ -1500,7 +1513,7 @@ The function arguments are as follows:
 .RS
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 version
 The version passed in by
@@ -1508,6 +1521,7 @@ The version passed in by
 allows the plugin to determine the
 major and minor version number of the plugin API supported by
 \fBsudo\fR.
+.PD
 .TP 6n
 conversation
 A pointer to the
@@ -1675,7 +1689,7 @@ The function arguments are as follows:
 .RS
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 exit_status
 The command's exit status, as returned by the
@@ -1686,6 +1700,7 @@ The value of
 is undefined if
 \fRerror\fR
 is non-zero.
+.PD
 .TP 6n
 error
 .br
@@ -1713,7 +1728,7 @@ function is called by
 \fBsudo\fR
 when the user specifies
 the
-\fB-V\fR
+\fB\-V\fR
 option.
 The plugin may display its version information to the user via the
 \fBconversation\fR()
@@ -1724,7 +1739,7 @@ function using
 If the user requests detailed version information, the verbose flag will be set.
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 log_ttyin
 .nf
@@ -1745,12 +1760,14 @@ is rejected (which will terminate the command) or \-1 if an error occurred.
 .sp
 The function arguments are as follows:
 .RS
+.PD
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 buf
 The buffer containing user input.
+.PD
 .TP 6n
 len
 The length of
@@ -1779,10 +1796,11 @@ The function arguments are as follows:
 .RS
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 buf
 The buffer containing command output.
+.PD
 .TP 6n
 len
 The length of
@@ -1813,10 +1831,11 @@ The function arguments are as follows:
 .RS
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 buf
 The buffer containing user input.
+.PD
 .TP 6n
 len
 The length of
@@ -1847,10 +1866,11 @@ The function arguments are as follows:
 .RS
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 buf
 The buffer containing command output.
+.PD
 .TP 6n
 len
 The length of
@@ -1881,10 +1901,11 @@ The function arguments are as follows:
 .RS
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 buf
 The buffer containing command output.
+.PD
 .TP 6n
 len
 The length of
@@ -1980,7 +2001,7 @@ If the registered hook does not match the typedef the results are
 unspecified.
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 \fRSUDO_HOOK_UNSETENV\fR
 The C library
@@ -1999,9 +2020,10 @@ typedef int (*sudo_hook_fn_unsetenv_t)(const char *name,
 .RE
 .fi
 .RS
+.PD
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 \fRSUDO_HOOK_GETENV\fR
 The C library
@@ -2023,9 +2045,10 @@ typedef int (*sudo_hook_fn_getenv_t)(const char *name,
 .sp
 If the registered hook does not match the typedef the results are
 unspecified.
+.PD
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 \fRSUDO_HOOK_PUTENV\fR
 The C library
@@ -2048,9 +2071,10 @@ typedef int (*sudo_hook_fn_putenv_t)(char *string,
 If the registered hook does not match the typedef the results are
 unspecified.
 .RE
+.PD
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 hook_fn
 sudo_hook_fn_t hook_fn;
@@ -2072,6 +2096,7 @@ This can be used to pass arbitrary data to the plugin's hook implementation.
 .sp
 The function return value may be one of the following:
 .RS
+.PD
 .TP 6n
 \fRSUDO_HOOK_RET_ERROR\fR
 The hook function encountered an error.
@@ -2329,7 +2354,7 @@ The function arguments are as follows:
 .RS
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 version
 The version passed in by
@@ -2337,6 +2362,7 @@ The version passed in by
 allows the plugin to determine the
 major and minor version number of the group plugin API supported by
 \fIsudoers\fR.
+.PD
 .TP 6n
 plugin_printf
 A pointer to a
@@ -2374,7 +2400,7 @@ group checks.
 The plugin should free any memory it has allocated and close open file handles.
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 query
 .br
@@ -2395,12 +2421,14 @@ is a member of
 .sp
 The function arguments are as follows:
 .RS
+.PD
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 user
 The name of the user being looked up in the external group database.
+.PD
 .TP 6n
 group
 .br

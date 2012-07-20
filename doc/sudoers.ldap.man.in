@@ -17,6 +17,8 @@
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
 .TH "SUDOERS.LDAP" "8" "July 12, 2012" "1.8.6" "OpenBSD System Manager's Manual"
+.nh
+.if n .ad l
 .SH "NAME"
 \fBsudoers.ldap\fR
 \- sudo LDAP configuration
@@ -727,14 +729,15 @@ Netscape-derived:
 Tivoli Directory Server:
 \fRtls_cert /usr/ldap/ldapkey.kdb\fR
 .RE
-.sp -1v
 .RS
+.PD 0
 .PP
+.PD
 When using Tivoli LDAP libraries, this file may also contain
 Certificate Authority and client certificates and may be encrypted.
 .PP
 .RE
-.sp -1v
+.PD 0
 .TP 6n
 \fBTLS_KEYPW\fR \fIsecret\fR
 The
@@ -761,6 +764,7 @@ The default
 that ships with Tivoli Directory Server is encrypted with the password
 \fRssl_password\fR.
 This option is only supported by the Tivoli LDAP libraries.
+.PD
 .TP 6n
 \fBTLS_RANDFILE\fR \fIfile name\fR
 The
@@ -847,10 +851,11 @@ The following sources are recognized:
 files
 read sudoers from
 \fI@sysconfdir@/sudoers\fR
-.sp -1v
+.PD 0
 .TP 10n
 ldap
 read sudoers from LDAP
+.PD
 .PP
 In addition, the entry
 \fR[NOTFOUND=return]\fR
