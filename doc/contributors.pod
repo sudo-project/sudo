@@ -37,6 +37,7 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Deven T. Corzine
     Frank Cusack
     Theo de Raadt
+    Francisco Dieguez
     David Dill
     Theo Van Dinter
     Jeff Earickson
@@ -77,8 +78,11 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Alek O. Komarnitsky
     Daniel Kopecek
     Yuri Kozlov
+    Jakob Kramer
     Paul Kranenburg
     David Krause
+    Tomislav Krznar
+    Eric Lakin
     Case Larsen
     Dmitry V. Levin
     Kendall Libby
@@ -88,6 +92,7 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Tom McLaughlin
     Jeff Makey
     Michael D. Marchionna
+    Algimantas Margevicius
     Paul Markham
     Emin Martinian
     Pavel Maryanov
@@ -102,6 +107,7 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Peter A. Nikitser
     Miroslav Nikolic
     Ludwig Nussel
+    Daniel Nylander
     Eric Paquet
     Chantal Paradis
     Ted Percival
@@ -111,6 +117,7 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Diego Elio Petteno
     Joel Pickett
     Alex Plotnick
+    Tran Ngoc Quan 
     Gudleik Rasch
     Matt Richards
     Guido van Rossum
@@ -158,3 +165,4 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Timm Wetzel
     Marco van Wieringen
     David Wood
+    Gustavo Zacarias
