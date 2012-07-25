@@ -2350,8 +2350,6 @@ expanded to the local host name without the domain name
 .TP 6n
 \fR%{command}\fR
 expanded to the base name of the command being run
-.RE
-.RS
 .PP
 In addition, any escape sequences supported by the system's
 strftime(3)
@@ -2458,8 +2456,6 @@ two consecutive
 characters are collapsed into a single
 \fR%\fR
 character
-.RE
-.RS
 .PP
 The default value is
 ``\fR@passprompt@\fR''.
@@ -2583,13 +2579,13 @@ If arguments are present, the string must be enclosed in double quotes
 For example, given
 \fI/etc/sudo-group\fR,
 a group file in Unix group format, the sample group plugin can be used:
+.RS
 .nf
 .sp
-.RS 14n
+.RS 0n
 Defaults group_plugin="sample_group.so /etc/sudo-group"
 .RE
 .fi
-.RS
 .sp
 For more information see
 sudo_plugin(@mansectform@).
@@ -2613,8 +2609,6 @@ Never lecture the user.
 once
 Only lecture the user the first time they run
 \fBsudo\fR.
-.RE
-.RS
 .PP
 If no value is specified, a value of
 \fIonce\fR
@@ -2672,8 +2666,6 @@ never
 The user need never enter a password to use the
 \fB\-l\fR
 option.
-.RE
-.RS
 .PP
 If no value is specified, a value of
 \fIany\fR
@@ -2806,8 +2798,6 @@ never
 The user need never enter a password to use the
 \fB\-v\fR
 option.
-.RE
-.RS
 .PP
 If no value is specified, a value of
 \fIall\fR
@@ -3640,13 +3630,13 @@ for a command, use the
 tag as documented
 in the User Specification section above.
 Here is that example again:
+.RS
 .nf
 .sp
-.RS 10n
+.RS 0n
 aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 .RE
 .fi
-.RS
 .sp
 This allows user
 \fBaaron\fR

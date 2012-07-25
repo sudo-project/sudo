@@ -195,8 +195,6 @@ instead of
 user \fIuser name\fR
 Evaluates to true if the ID matches a command run by
 \fIuser name\fR.
-.RE
-.RS
 .PP
 Predicates may be abbreviated to the shortest unique string (currently
 all predicates may be shortened to a single character).

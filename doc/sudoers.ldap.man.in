@@ -710,7 +710,9 @@ contains both keys and certificates.
 .sp
 When using Netscape-derived libraries, this file may also contain
 Certificate Authority certificates.
+.PP
 .RE
+.PD 0
 .TP 6n
 \fBTLS_KEY\fR \fIfile name\fR
 The path to a file containing the private key which matches the
@@ -719,6 +721,7 @@ certificate specified by
 The private key must not be password-protected.
 The key type depends on the LDAP libraries used.
 .RS
+.PD
 .TP 6n
 OpenLDAP:
 \fRtls_key /etc/ssl/client_key.pem\fR
@@ -728,8 +731,6 @@ Netscape-derived:
 .TP 6n
 Tivoli Directory Server:
 \fRtls_cert /usr/ldap/ldapkey.kdb\fR
-.RE
-.RS
 .PD 0
 .PP
 .PD

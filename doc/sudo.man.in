@@ -172,14 +172,14 @@ Otherwise, if
 contains a line specifying the askpass program, that value will be
 used.
 For example:
+.RS
 .nf
 .sp
-.RS 13n
+.RS 1n
     # Path to askpass helper program
     Path askpass /usr/X11R6/bin/ssh-askpass
 .RE
 .fi
-.RS
 .sp
 If no askpass program is available,
 \fBsudo\fR
@@ -314,8 +314,6 @@ option is used.
 3.
 If they have been modified, the temporary files are copied back to
 their original location and the temporary versions are removed.
-.RE
-.RS
 .PP
 If the specified file does not exist, it will be created.
 Note that unlike most commands run by
@@ -546,8 +544,6 @@ two consecutive
 characters are collapsed into a single
 \fR%\fR
 character
-.RE
-.RS
 .PP
 The prompt specified by the
 \fB\-p\fR
