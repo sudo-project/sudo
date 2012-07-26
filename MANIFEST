@@ -81,7 +81,9 @@ doc/schema.OpenLDAP
 doc/schema.iPlanet
 doc/sudo.cat
 doc/sudo.man.in
+doc/sudo.man.sh
 doc/sudo.mdoc.in
+doc/sudo.mdoc.sh
 doc/sudo_plugin.cat
 doc/sudo_plugin.man.in
 doc/sudo_plugin.mdoc.in
@@ -90,7 +92,9 @@ doc/sudoers.ldap.cat
 doc/sudoers.ldap.man.in
 doc/sudoers.ldap.mdoc.in
 doc/sudoers.man.in
+doc/sudoers.man.sh
 doc/sudoers.mdoc.in
+doc/sudoers.mdoc.sh
 doc/sudoreplay.cat
 doc/sudoreplay.man.in
 doc/sudoreplay.mdoc.in
