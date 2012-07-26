@@ -228,11 +228,10 @@ $(devdir)/toke.c: $(srcdir)/toke.l
 	    else \
 		toke_l="$(srcdir)/toke.l"; \
 	    fi; \
-	    cmd='$(FLEX) '"$$toke_l"'; echo "#include <config.h>" > $(devdir)/toke.c; cat lex.yy.c >> $(devdir)/toke.c'; \
+	    cmd='$(FLEX) '"$$toke_l"'; echo "#include <config.h>" > $(devdir)/toke.c; cat lex.yy.c >> $(devdir)/toke.c; rm -f lex.yy.c'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
-# Uncomment the lines before -@true if you intend to modify getdate.y
 $(devdir)/getdate.c: $(srcdir)/getdate.y
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "expect 10 shift/reduce conflicts"; \
@@ -245,7 +244,6 @@ $(devdir)/getdate.c: $(srcdir)/getdate.y
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
-# Uncomment the following if you intend to modify def_data.in
 $(devdir)/def_data.c $(devdir)/def_data.h: $(srcdir)/def_data.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    cmd='$(PERL) $(srcdir)/mkdefaults -o $(devdir)/def_data $(srcdir)/def_data.in'; \
