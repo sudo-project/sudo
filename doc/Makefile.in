@@ -95,7 +95,7 @@ Makefile: $(srcdir)/Makefile.in
 
 varsub: $(top_srcdir)/configure.in
 	@if [ -n "$(DEVEL)" ]; then \
-	    printf 's#@%s@#1#\ns#@%s@#1#\ns#@%s@#1#\ns#@%s@#/etc#g\ns#@%s@#/usr/local#g\ns#@%s@#5#g\ns#@%s@#8#g\ns#@%s@#%s#\n' SEMAN BAMAN LCMAN sysconfdir prefix mansectform mansectsu PACKAGE_VERSION $(VERSION) > $@; \
+	    printf 's#@%s@#1#\ns#@%s@#1#\ns#@%s@#1#\ns#@%s@#1#\ns#@%s@#/etc#g\ns#@%s@#/usr/local#g\ns#@%s@#5#g\ns#@%s@#8#g\ns#@%s@#%s#\n' SEMAN BAMAN LCMAN PSMAN sysconfdir prefix mansectform mansectsu PACKAGE_VERSION $(VERSION) > $@; \
 	    sed -n '/Begin initial values for man page substitution/,/End initial values for man page substitution/{;p;}' $(top_srcdir)/configure.in | sed -e '/^#/d' -e 's/^/s#@/' -e 's/=[\\"]*/@#/' -e 's/[\\"]*$$/#g/' >> $@; \
 	fi
 

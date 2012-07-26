@@ -742,11 +742,13 @@ User_Spec ::= User_List Host_List '=' Cmnd_Spec_List \e
 Cmnd_Spec_List ::= Cmnd_Spec |
                    Cmnd_Spec ',' Cmnd_Spec_List
 
-Cmnd_Spec ::= Runas_Spec? SELinux_Spec? Tag_Spec* Cmnd
+Cmnd_Spec ::= Runas_Spec? SELinux_Spec? Solaris_Priv_Spec? Tag_Spec* Cmnd
 
 Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
 SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
+
+Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
 Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
               'SETENV:' | 'NOSETENV:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
@@ -950,6 +952,14 @@ specified in
 \fIsudoers\fR.
 A role or type specified on the command line,
 however, will supercede the values in
+\fIsudoers\fR.
+.SS "Solaris_Priv_Spec"
+On Solaris systems,
+\fIsudoers\fR
+entries may optionally specify Solaris privilege set and/or limit
+privilege set associated with a command.
+If privileges or limit privileges are specified with the command
+it will override any default values specified in
 \fIsudoers\fR.
 .SS "Tag_Spec"
 A command may have zero or more tags associated with it.
@@ -2398,6 +2408,16 @@ mktemp(3)
 function.
 .PD
 .TP 18n
+limitprivs
+The default Solaris limit privileges to use when constructing a new
+privilege set for a command.
+This bounds all privileges of the executing process.
+The default limit privileges may be overridden on a per-command basis in
+\fIsudoers\fR.
+This option is only available if
+\fBsudoers\fR
+is built on Solaris 10 or higher.
+.TP 18n
 mailsub
 Subject of the mail sent to the
 \fImailto\fR
@@ -2463,16 +2483,33 @@ The default value is
 .RE
 .PD 0
 .TP 18n
+privs
+The default Solaris privileges to use when constructing a new
+privilege set for a command.
+This is passed to the executing process via the inherited privilege set,
+but is bounded by the limit privileges.
+If the
+\fIprivs\fR
+option is specified but the
+\fIlimitprivs\fR
+option is not, the limit privileges of the executing process is set to
+\fIprivs\fR.
+The default privileges may be overridden on a per-command basis in
+\fIsudoers\fR.
+This option is only available if
+\fBsudoers\fR
+is built on Solaris 10 or higher.
+.PD
+.TP 18n
 role
 The default SELinux role to use when constructing a new security
 context to run the command.
 The default role may be overridden on a per-command basis in
 \fIsudoers\fR
 or via command line options.
-This option is only available whe
+This option is only available when
 \fBsudo\fR
 is built with SELinux support.
-.PD
 .TP 18n
 runas_default
 The default user to run commands as if the

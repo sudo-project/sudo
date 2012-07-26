@@ -339,11 +339,13 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      Cmnd_Spec_List ::= Cmnd_Spec |
                         Cmnd_Spec ',' Cmnd_Spec_List
 
-     Cmnd_Spec ::= Runas_Spec? SELinux_Spec? Tag_Spec* Cmnd
+     Cmnd_Spec ::= Runas_Spec? SELinux_Spec? Solaris_Priv_Spec? Tag_Spec* Cmnd
 
      Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
      SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
+
+     Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
      Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
                    'SETENV:' | 'NOSETENV:' | 'LOG_INPUT:' | 'NOLOG_INPUT:' |
@@ -431,6 +433,12 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      specified with the command it will override any default values specified
      in _s_u_d_o_e_r_s.  A role or type specified on the command line, however, will
      supercede the values in _s_u_d_o_e_r_s.
+
+   SSoollaarriiss__PPrriivv__SSppeecc
+     On Solaris systems, _s_u_d_o_e_r_s entries may optionally specify Solaris
+     privilege set and/or limit privilege set associated with a command.  If
+     privileges or limit privileges are specified with the command it will
+     override any default values specified in _s_u_d_o_e_r_s.
 
    TTaagg__SSppeecc
      A command may have zero or more tags associated with it.  There are ten
@@ -1108,6 +1116,13 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        unique combination of digits and letters, similar to
                        the mktemp(3) function.
 
+     limitprivs        The default Solaris limit privileges to use when
+                       constructing a new privilege set for a command.  This
+                       bounds all privileges of the executing process.  The
+                       default limit privileges may be overridden on a per-
+                       command basis in _s_u_d_o_e_r_s.  This option is only
+                       available if ssuuddooeerrss is built on Solaris 10 or higher.
+
      mailsub           Subject of the mail sent to the _m_a_i_l_t_o user.  The
                        escape %h will expand to the host name of the machine.
                        Default is ``*** SECURITY information for %h ***''.
@@ -1142,11 +1157,21 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
                        The default value is ``Password:''.
 
+     privs             The default Solaris privileges to use when constructing
+                       a new privilege set for a command.  This is passed to
+                       the executing process via the inherited privilege set,
+                       but is bounded by the limit privileges.  If the _p_r_i_v_s
+                       option is specified but the _l_i_m_i_t_p_r_i_v_s option is not,
+                       the limit privileges of the executing process is set to
+                       _p_r_i_v_s.  The default privileges may be overridden on a
+                       per-command basis in _s_u_d_o_e_r_s.  This option is only
+                       available if ssuuddooeerrss is built on Solaris 10 or higher.
+
      role              The default SELinux role to use when constructing a new
                        security context to run the command.  The default role
                        may be overridden on a per-command basis in _s_u_d_o_e_r_s or
                        via command line options.  This option is only
-                       available whe ssuuddoo is built with SELinux support.
+                       available when ssuuddoo is built with SELinux support.
 
      runas_default     The default user to run commands as if the --uu option is
                        not specified on the command line.  This defaults to

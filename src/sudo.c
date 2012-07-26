@@ -670,6 +670,28 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    }
 		    break;
 		}
+#ifdef HAVE_PRIV_SET
+		if (strncmp("runas_privs=", info[i], sizeof("runas_privs=") - 1) == 0) {
+                    const char *endp;
+		    cp = info[i] + sizeof("runas_privs=") - 1;
+	            if (*cp == '\0')
+		        break;
+	            errno = 0;
+	            details->privs = priv_str_to_set(cp, ",", &endp);
+		    if (details->privs == NULL)
+			    warning("invalid runas_privs %s", endp);
+		}
+		if (strncmp("runas_limitprivs=", info[i], sizeof("runas_limitprivs=") - 1) == 0) {
+                    const char *endp;
+		    cp = info[i] + sizeof("runas_limitprivs=") - 1;
+	            if (*cp == '\0')
+		        break;
+	            errno = 0;
+	            details->limitprivs = priv_str_to_set(cp, ",", &endp);
+		    if (details->limitprivs == NULL)
+			    warning("invalid runas_limitprivs %s", endp);
+		}
+#endif /* HAVE_PRIV_SET */
 		break;
 	    case 's':
 		SET_STRING("selinux_role=", selinux_role)
@@ -900,6 +922,26 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 #ifdef HAVE_PROJECT_H
 	set_project(details->pw);
 #endif
+#ifdef HAVE_PRIV_SET
+    if (details->privs != NULL) {
+	if (setppriv(PRIV_SET, PRIV_INHERITABLE, details->privs) != 0) {
+	    warning("unable to set privileges");
+	    goto done;
+	}
+    }
+    if (details->limitprivs != NULL) {
+        if (setppriv(PRIV_SET, PRIV_LIMIT, details->limitprivs) != 0) {
+	    warning("unable to set limit privileges");
+	    goto done;
+	}
+    } else if (details->privs != NULL) {
+	if (setppriv(PRIV_SET, PRIV_LIMIT, details->privs) != 0) {
+	    warning("unable to set limit privileges");
+	    goto done;
+	}
+    }
+#endif /* HAVE_PRIV_SET */
+
 #ifdef HAVE_GETUSERATTR
 	aix_prep_user(details->pw->pw_name, ptyname ? ptyname : user_details.tty);
 #endif

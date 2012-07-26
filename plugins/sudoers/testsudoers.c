@@ -636,6 +636,12 @@ print_privilege(struct privilege *priv)
 	    if (cs->type)
 		printf("TYPE=%s ", cs->type);
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+	    if (cs->privs)
+		printf("PRIVS=%s ", cs->privs);
+	    if (cs->limitprivs)
+		printf("LIMITPRIVS=%s ", cs->limitprivs);
+#endif /* HAVE_PRIV_SET */
 	    if (cs->tags.nopasswd != UNSPEC && cs->tags.nopasswd != tags.nopasswd)
 		printf("%sPASSWD: ", cs->tags.nopasswd ? "NO" : "");
 	    if (cs->tags.noexec != UNSPEC && cs->tags.noexec != tags.noexec)

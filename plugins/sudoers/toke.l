@@ -504,6 +504,23 @@ ALL {
 			    goto got_alias;
 #endif
 			}
+<INITIAL>PRIVS {
+#ifdef HAVE_PRIV_SET
+			    LEXTRACE("PRIVS ");
+			    LEXRETURN(PRIVS);
+#else
+			    goto got_alias;
+#endif
+			}
+
+<INITIAL>LIMITPRIVS {
+#ifdef HAVE_PRIV_SET
+			    LEXTRACE("LIMITPRIVS ");
+			    LEXRETURN(LIMITPRIVS);
+#else
+			    goto got_alias;
+#endif
+			}
 
 [[:upper:]][[:upper:][:digit:]_]* {
 #ifndef HAVE_SELINUX

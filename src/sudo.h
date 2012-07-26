@@ -41,6 +41,10 @@
 #include "sudo_debug.h"
 #include "gettext.h"
 
+#ifdef HAVE_PRIV_SET
+# include <priv.h>
+#endif
+
 #ifdef __TANDEM
 # define ROOT_UID       65535
 #else
@@ -149,6 +153,10 @@ struct command_details {
     const char *utmp_user;
     char **argv;
     char **envp;
+#ifdef HAVE_PRIV_SET
+    priv_set_t *privs;
+    priv_set_t *limitprivs;
+#endif
 };
 
 /* Status passed between parent and child via socketpair */

@@ -239,6 +239,13 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 			if (user_type == NULL)
 			    user_type = cs->type ? estrdup(cs->type) : def_type;
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+			/* Set Solaris privilege sets */
+			if (runas_privs == NULL)
+			    runas_privs = cs->privs ? estrdup(cs->privs) : def_privs;
+			if (runas_limitprivs == NULL)
+			    runas_limitprivs = cs->limitprivs ? estrdup(cs->limitprivs) : def_limitprivs;
+#endif /* HAVE_PRIV_SET */
 			goto matched2;
 		    }
 		}
@@ -281,6 +288,12 @@ sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
     struct member *m;
     debug_decl(sudo_file_append_cmnd, SUDO_DEBUG_NSS)
 
+#ifdef HAVE_PRIV_SET
+    if (cs->privs)
+	lbuf_append(lbuf, "PRIVS=\"%s\" ", cs->privs);
+    if (cs->limitprivs)
+	lbuf_append(lbuf, "LIMITPRIVS=\"%s\" ", cs->limitprivs);
+#endif /* HAVE_PRIV_SET */
 #ifdef HAVE_SELINUX
     if (cs->role)
 	lbuf_append(lbuf, "ROLE=%s ", cs->role);

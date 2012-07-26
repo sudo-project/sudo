@@ -123,6 +123,7 @@ yyerror(const char *s)
     struct sudo_command command;
     struct cmndtag tag;
     struct selinux_info seinfo;
+    struct solaris_privs_info privinfo;
     char *string;
     int tok;
 }
@@ -161,6 +162,8 @@ yyerror(const char *s)
 %token <tok>	 ERROR
 %token <tok>	 TYPE			/* SELinux type */
 %token <tok>	 ROLE			/* SELinux role */
+%token <tok>	 PRIVS			/* Solaris privileges */
+%token <tok>	 LIMITPRIVS		/* Solaris limit privileges */
 
 %type <cmndspec>  cmndspec
 %type <cmndspec>  cmndspeclist
@@ -186,6 +189,9 @@ yyerror(const char *s)
 %type <seinfo>	  selinux
 %type <string>	  rolespec
 %type <string>	  typespec
+%type <privinfo>  solarisprivs
+%type <string>	  privsspec
+%type <string>	  limitprivsspec
 
 %%
 
@@ -313,6 +319,13 @@ cmndspeclist	:	cmndspec
 			    if ($3->type == NULL)
 				$3->type = $3->prev->type;
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+			    /* propagate privs & limitprivs */
+			    if ($3->privs == NULL)
+			        $3->privs = $3->prev->privs;
+			    if ($3->limitprivs == NULL)
+			        $3->limitprivs = $3->prev->limitprivs;
+#endif /* HAVE_PRIV_SET */
 			    /* propagate tags and runas list */
 			    if ($3->tags.nopasswd == UNSPEC)
 				$3->tags.nopasswd = $3->prev->tags.nopasswd;
@@ -336,7 +349,7 @@ cmndspeclist	:	cmndspec
 			}
 		;
 
-cmndspec	:	runasspec selinux cmndtag opcmnd {
+cmndspec	:	runasspec selinux solarisprivs cmndtag opcmnd {
 			    struct cmndspec *cs = ecalloc(1, sizeof(*cs));
 			    if ($1 != NULL) {
 				list2tq(&cs->runasuserlist, $1->runasusers);
@@ -350,8 +363,12 @@ cmndspec	:	runasspec selinux cmndtag opcmnd {
 			    cs->role = $2.role;
 			    cs->type = $2.type;
 #endif
-			    cs->tags = $3;
-			    cs->cmnd = $4;
+#ifdef HAVE_PRIV_SET
+			    cs->privs = $3.privs;
+			    cs->limitprivs = $3.limitprivs;
+#endif
+			    cs->tags = $4;
+			    cs->cmnd = $5;
 			    cs->prev = cs;
 			    cs->next = NULL;
 			    /* sudo "ALL" implies the SETENV tag */
@@ -403,6 +420,36 @@ selinux		:	/* empty */ {
 			    $$.role = $2;
 			}
 		;
+
+privsspec	:	PRIVS '=' WORD {
+			    $$ = $3;
+			}
+		;
+limitprivsspec	:	LIMITPRIVS '=' WORD {
+			    $$ = $3;
+			}
+		;
+
+solarisprivs	:	/* empty */ {
+			    $$.privs = NULL;
+			    $$.limitprivs = NULL;
+			}
+		|	privsspec {
+			    $$.privs = $1;
+			    $$.limitprivs = NULL;
+			}	
+		|	limitprivsspec {
+			    $$.privs = NULL;
+			    $$.limitprivs = $1;
+			}	
+		|	privsspec limitprivsspec {
+			    $$.privs = $1;
+			    $$.limitprivs = $2;
+			}	
+		|	limitprivsspec privsspec {
+			    $$.limitprivs = $1;
+			    $$.privs = $2;
+			}	
 
 runasspec	:	/* empty */ {
 			    $$ = NULL;
@@ -716,6 +763,9 @@ init_parser(const char *path, int quiet)
 #ifdef HAVE_SELINUX
 	    char *role = NULL, *type = NULL;
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+	    char *privs = NULL, *limitprivs = NULL;
+#endif /* HAVE_PRIV_SET */
 
 	    while ((m = tq_pop(&priv->hostlist)) != NULL) {
 		efree(m->name);
@@ -733,6 +783,17 @@ init_parser(const char *path, int quiet)
 		    efree(cs->type);
 		}
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+		/* Only free the first instance of privs/limitprivs. */
+		if (cs->privs != privs) {
+		    privs = cs->privs;
+		    efree(cs->privs);
+		}
+		if (cs->limitprivs != limitprivs) {
+		    limitprivs = cs->limitprivs;
+		    efree(cs->limitprivs);
+		}
+#endif /* HAVE_PRIV_SET */
 		if (tq_last(&cs->runasuserlist) != runasuser) {
 		    runasuser = tq_last(&cs->runasuserlist);
 		    while ((m = tq_pop(&cs->runasuserlist)) != NULL) {

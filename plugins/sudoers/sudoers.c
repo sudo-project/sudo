@@ -697,6 +697,12 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (user_type != NULL)
 	command_info[info_len++] = fmt_string("selinux_type", user_type);
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+    if (runas_privs != NULL)
+	command_info[info_len++] = fmt_string("runas_privs", runas_privs);
+    if (runas_limitprivs != NULL)
+	command_info[info_len++] = fmt_string("runas_limitprivs", runas_limitprivs);
+#endif /* HAVE_SELINUX */
 
     /* Must audit before uid change. */
     audit_success(NewArgv);
@@ -1312,6 +1318,16 @@ deserialize_info(char * const args[], char * const settings[], char * const user
 	    def_use_loginclass = true;
 	    continue;
 	}
+#ifdef HAVE_PRIV_SET
+	if (MATCHES(*cur, "runas_privs=")) {
+	    def_privs = *cur + sizeof("runas_privs=") - 1;
+	    continue;
+	}
+	if (MATCHES(*cur, "runas_limitprivs=")) {
+	    def_limitprivs = *cur + sizeof("runas_limitprivs=") - 1;
+	    continue;
+	}
+#endif /* HAVE_PRIV_SET */
 #ifdef HAVE_SELINUX
 	if (MATCHES(*cur, "selinux_role=")) {
 	    user_role = *cur + sizeof("selinux_role=") - 1;

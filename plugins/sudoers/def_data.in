@@ -253,3 +253,9 @@ set_utmp
 utmp_runas
 	T_FLAG
 	"Set the user in utmp to the runas user, not the invoking user"
+privs
+	T_STR
+	"Set of permitted privileges"
+limitprivs
+	T_STR
+	"Set of limit privileges"

@@ -36,6 +36,10 @@ What's new in Sudo 1.8.6?
  * The sudo manuals are now formatted in mdoc.  Versions using the
    legacy man macros are provided for systems that lack mdoc.
 
+ * New support for Solaris privilege sets.  This makes it possible
+   to specify fine-grained privileges in the sudoers file on Solaris
+   10 and above.
+
 What's new in Sudo 1.8.5p2?
 
  * Fixed use of the SUDO_ASKPASS environment variable which was

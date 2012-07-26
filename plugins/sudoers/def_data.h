@@ -158,6 +158,10 @@
 #define I_SET_UTMP              78
 #define def_utmp_runas          (sudo_defs_table[79].sd_un.flag)
 #define I_UTMP_RUNAS            79
+#define def_privs               (sudo_defs_table[80].sd_un.str)
+#define I_PRIVS                 80
+#define def_limitprivs          (sudo_defs_table[81].sd_un.str)
+#define I_LIMITPRIVS            81
 
 enum def_tuple {
 	never,

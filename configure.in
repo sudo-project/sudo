@@ -48,6 +48,7 @@ AC_SUBST([SUDOERS_GID])
 AC_SUBST([DEVEL])
 AC_SUBST([BAMAN])
 AC_SUBST([LCMAN])
+AC_SUBST([PSMAN])
 AC_SUBST([SEMAN])
 AC_SUBST([devdir])
 AC_SUBST([mansectsu])
@@ -175,6 +176,7 @@ DEVEL=
 LDAP="#"
 BAMAN=0
 LCMAN=0
+PSMAN=0
 SEMAN=0
 LIBINTL=
 ZLIB=
@@ -1558,7 +1560,7 @@ case "$host" in
 		: ${mansectform='4'}
 		: ${with_rpath='yes'}
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
-		AC_CHECK_FUNCS(priv_set)
+		AC_CHECK_FUNCS(priv_set, [PSMAN=1])
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)

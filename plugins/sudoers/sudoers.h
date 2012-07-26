@@ -81,6 +81,10 @@ struct sudo_user {
     char *role;
     char *type;
 #endif
+#ifdef HAVE_PRIV_SET
+    char *privs;
+    char *limitprivs;
+#endif
     char *cwd;
     char *iolog_file;
     GETGROUPS_T *gids;
@@ -185,6 +189,8 @@ struct sudo_user {
 #define user_role		(sudo_user.role)
 #define user_type		(sudo_user.type)
 #define user_closefrom		(sudo_user.closefrom)
+#define	runas_privs		(sudo_user.privs)
+#define	runas_limitprivs	(sudo_user.limitprivs)
 
 #ifdef __TANDEM
 # define ROOT_UID       65535

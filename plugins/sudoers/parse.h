@@ -57,7 +57,17 @@ struct selinux_info {
 };
 
 /*
- * The parses sudoers file is stored as a collection of linked lists,
+ * Solaris privileges container struct
+ * Currently just contains permitted and limit privileges.
+ * It could have PFEXEC and PRIV_AWARE flags added in the future.
+ */
+struct solaris_privs_info {
+    char *privs;
+    char *limitprivs;
+};
+
+/*
+ * The parsed sudoers file is stored as a collection of linked lists,
  * modelled after the yacc grammar.
  *
  * Other than the alias struct, which is stored in a red-black tree,
@@ -110,6 +120,9 @@ struct cmndspec {
     struct cmndtag tags;		/* tag specificaion */
 #ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
+#endif
+#ifdef HAVE_PRIV_SET
+    char *privs, *limitprivs;		/* Solaris privilege sets */
 #endif
 };
 
