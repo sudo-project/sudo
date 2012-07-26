@@ -112,10 +112,10 @@ $(srcdir)/sudo.man.in: $(srcdir)/sudo.mdoc.in
 	fi
 
 sudo.man: $(srcdir)/sudo.man.in $(srcdir)/sudo.man.sh
-	$(SHELL) $(top_builddir)/config.status --file=- < $@.in | SED=$(SED) BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ $(SHELL) $(srcdir)/$@.sh > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | SED=$(SED) BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ $(SHELL) $(srcdir)/$@.sh > $@
 
 sudo.mdoc: $(srcdir)/sudo.mdoc.in $(srcdir)/sudo.mdoc.sh
-	$(SHELL) $(top_builddir)/config.status --file=- < $@.in | SED=$(SED) BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ $(SHELL) $(srcdir)/$@.sh > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | SED=$(SED) BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ $(SHELL) $(srcdir)/$@.sh > $@
 
 $(srcdir)/sudo.cat: varsub $(srcdir)/sudo.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -158,10 +158,10 @@ $(srcdir)/sudoers.man.in: $(srcdir)/sudoers.mdoc.in
 	fi
 
 sudoers.man: $(srcdir)/sudoers.man.in $(srcdir)/sudoers.man.sh
-	$(SHELL) $(top_builddir)/config.status --file=- < $@.in | SED=$(SED) LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/$@.sh > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | SED=$(SED) LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/$@.sh > $@
 
 sudoers.mdoc: $(srcdir)/sudoers.mdoc.in $(srcdir)/sudoers.mdoc.sh
-	$(SHELL) $(top_builddir)/config.status --file=- < $@.in | SED=$(SED) LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/$@.sh > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | SED=$(SED) LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/$@.sh > $@
 
 $(srcdir)/sudoers.cat: varsub $(srcdir)/sudoers.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
