@@ -44,11 +44,12 @@
  * 39	sudo 1.7.6/1.8.1, White space is now permitted within a User_List in a per-user Defaults definition.
  * 40	sudo 1.7.6/1.8.1, A group ID is now allowed in a User_List or Runas_List.
  * 41	sudo 1.7.6/1.8.4, Support for relative paths in #include and #includedir
+ * 42	sudo 1.8.6, Support for Solaris Privilege Sets (PRIVS= and LIMITPRIVS=).
 */
 
 #ifndef _SUDOERS_VERSION_H
 #define	_SUDOERS_VERSION_H
 
-#define SUDOERS_GRAMMAR_VERSION	41
+#define SUDOERS_GRAMMAR_VERSION	42
 
 #endif /* _SUDOERS_VERSION_H */
