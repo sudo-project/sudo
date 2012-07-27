@@ -310,7 +310,7 @@ void
 log_failure(int status, int flags)
 {
     debug_decl(log_failure, SUDO_DEBUG_LOGGING)
-    bool inform_user;
+    bool inform_user = true;
 
     /* Handle auditing first. */
     if (ISSET(status, FLAG_NO_USER | FLAG_NO_HOST))
@@ -319,7 +319,9 @@ log_failure(int status, int flags)
 	audit_failure(NewArgv, _("validation failure"));
 
     /* The user doesn't always get to see the log message (path info). */
-    inform_user = def_path_info && (flags == NOT_FOUND_DOT || flags == NOT_FOUND);
+    if (!ISSET(status, FLAG_NO_USER | FLAG_NO_HOST) && def_path_info &&
+	(flags == NOT_FOUND_DOT || flags == NOT_FOUND))
+	inform_user = false;
     log_denial(status, inform_user);
 
     if (!inform_user) {
