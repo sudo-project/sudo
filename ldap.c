@@ -132,14 +132,12 @@ extern int ldapssl_set_strength(LDAP *ldap, int strength);
 #define SUDO_LDAP_SSL		1
 #define SUDO_LDAP_STARTTLS	2
 
-/* The TIMEFILTER_LENGTH includes the filter itself plus the global AND
-   wrapped around the user filter and the time filter when timed entries
+/* The TIMEFILTER_LENGTH is the length of the filter when timed entries
    are used. The length is computed as follows:
-       85       for the filter
-       + 2 * 13 for the now timestamp
-       +      3 for the global AND
+       81       for the filter itself
+       + 2 * 17 for the now timestamp
 */
-#define TIMEFILTER_LENGTH	114    
+#define TIMEFILTER_LENGTH	115
 
 /*
  * The ldap_search structure implements a linked list of ldap and
@@ -996,7 +994,7 @@ sudo_ldap_timefilter(buffer, buffersize)
 {
     struct tm *tp;
     time_t now;
-    char timebuffer[16];
+    char timebuffer[sizeof("20120727121554.0Z")];
     int bytes = 0;
 
     /* Make sure we have a formatted timestamp for __now__. */
@@ -1007,8 +1005,8 @@ sudo_ldap_timefilter(buffer, buffersize)
     }
 
     /* Format the timestamp according to the RFC. */
-    if (strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%M%SZ", tp) == 0) {
-	warning("unable to format timestamp");
+    if (strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%M%S.0Z", tp) == 0) {
+	warningx("unable to format timestamp");
 	goto done;
     }
 
@@ -1144,13 +1142,17 @@ sudo_ldap_build_pass1(pw)
     struct passwd *pw;
 {
     struct group *grp;
-    char *buf, timebuffer[TIMEFILTER_LENGTH];
+    char *buf, timebuffer[TIMEFILTER_LENGTH + 1];
     size_t sz = 0;
     int i;
 
-    /* Start with LDAP search filter length + 3 */
+    /* If there is a filter, allocate space for the global AND. */
+    if (ldap_conf.timed || ldap_conf.search_filter)
+	sz += 3;
+
+    /* Add LDAP search filter if present. */
     if (ldap_conf.search_filter)
-	sz += strlen(ldap_conf.search_filter) + 3;
+	sz += strlen(ldap_conf.search_filter);
 
     /* Then add (|(sudoUser=USERNAME)(sudoUser=ALL)) + NUL */
     sz += 29 + sudo_ldap_value_len(pw->pw_name);
@@ -1233,7 +1235,7 @@ sudo_ldap_build_pass1(pw)
 static char *
 sudo_ldap_build_pass2()
 {
-    char *filt, timebuffer[TIMEFILTER_LENGTH];
+    char *filt, timebuffer[TIMEFILTER_LENGTH + 1];
 
     if (ldap_conf.timed)
 	sudo_ldap_timefilter(timebuffer, sizeof(timebuffer));
