@@ -523,7 +523,7 @@ ALL {
 			}
 
 [[:upper:]][[:upper:][:digit:]_]* {
-#ifndef HAVE_SELINUX
+#if defined(HAVE_SELINUX) || !defined(HAVE_PRIV_SET)
 			got_alias:
 #endif
 			    if (!fill(yytext, yyleng))

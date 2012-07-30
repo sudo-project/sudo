@@ -2277,7 +2277,7 @@ case 44:
 YY_RULE_SETUP
 #line 525 "toke.l"
 {
-#ifndef HAVE_SELINUX
+#if defined(HAVE_SELINUX) || !defined(HAVE_PRIV_SET)
 			got_alias:
 #endif
 			    if (!fill(yytext, yyleng))
