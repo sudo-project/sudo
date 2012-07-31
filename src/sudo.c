@@ -1053,14 +1053,26 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     }
 
     /*
-     * Restore nproc resource limit if pam_limits didn't do it for us.
+     * SuSE Enterprise Linux uses RLIMIT_NPROC and _SC_CHILD_MAX
+     * interchangably.  This causes problems when setting RLIMIT_NPROC
+     * to RLIM_INFINITY due to a bug in bash where bash tries to honor
+     * the value of _SC_CHILD_MAX but treats a value of -1 as an error,
+     * and uses a default value of 32 instead.
+     *
+     * To work around this problem, we restore the nproc resource limit
+     * if sysconf(_SC_CHILD_MAX) is negative.  In most cases, pam_limits
+     * will set RLIMIT_NPROC for us.
+     *
      * We must do this *after* the uid change to avoid potential EAGAIN
      * from setuid().
      */
-#if defined(__linux__)
+#if defined(__linux__) && defined(_SC_CHILD_MAX)
     {
 	struct rlimit rl;
-	if (getrlimit(RLIMIT_NPROC, &rl) == 0) {
+	long l;
+	errno = 0;
+	l = sysconf(_SC_CHILD_MAX);
+	if (l == -1 && errno == 0 && getrlimit(RLIMIT_NPROC, &rl) == 0) {
 	    if (rl.rlim_cur == RLIM_INFINITY && rl.rlim_max == RLIM_INFINITY)
 		(void) setrlimit(RLIMIT_NPROC, &nproclimit);
 	}
