@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOREPLAY" "@mansectsu@" "July 12, 2012" "1.8.6" "System Manager's Manual"
+.TH "SUDOREPLAY" "@mansectsu@" "July 12, 2012" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
