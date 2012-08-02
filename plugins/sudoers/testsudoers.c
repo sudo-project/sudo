@@ -268,7 +268,7 @@ main(int argc, char *argv[])
 	set_interfaces(p);
 
     /* Allocate space for data structures in the parser. */
-    init_parser("sudoers", 0);
+    init_parser("sudoers", false);
 
     if (yyparse() != 0 || parse_error) {
 	parse_error = true;

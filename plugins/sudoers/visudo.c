@@ -188,7 +188,7 @@ main(int argc, char *argv[])
 		(void) printf(_("%s grammar version %d\n"), getprogname(), SUDOERS_GRAMMAR_VERSION);
 		goto done;
 	    case 'c':
-		checkonly++;		/* check mode */
+		checkonly = true;	/* check mode */
 		break;
 	    case 'f':
 		sudoers_path = optarg;	/* sudoers file path */
@@ -198,10 +198,10 @@ main(int argc, char *argv[])
 		help();
 		break;
 	    case 's':
-		strict++;		/* strict mode */
+		strict = true;		/* strict mode */
 		break;
 	    case 'q':
-		quiet++;		/* quiet mode */
+		quiet = false;		/* quiet mode */
 		break;
 	    default:
 		usage(1);
@@ -235,7 +235,7 @@ main(int argc, char *argv[])
     if ((yyin = open_sudoers(sudoers_path, true, NULL)) == NULL) {
 	error(1, "%s", sudoers_path);
     }
-    init_parser(sudoers_path, 0);
+    init_parser(sudoers_path, false);
     yyparse();
     (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER);
 
