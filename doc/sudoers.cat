@@ -370,8 +370,9 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      specified, the command may be run as any user in the list but no --gg
      option may be specified.  If the first Runas_List is empty but the second
      is specified, the command may be run as the invoking user with the group
-     set to any listed in the Runas_List.  If no Runas_Spec is specified the
-     command may be run as rroooott and no group may be specified.
+     set to any listed in the Runas_List.  If both Runas_Lists are empty, the
+     command may only be run as the invoking user.  If no Runas_Spec is
+     specified the command may be run as rroooott and no group may be specified.
 
      A Runas_Spec sets the default for the commands that follow it.  What this
      means is that for the entry:

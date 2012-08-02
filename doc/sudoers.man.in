@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "@mansectsu@" "July 16, 2012" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
+.TH "SUDOERS" "@mansectsu@" "July 16, 2012" "1.8.6" "Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -807,6 +807,9 @@ is empty but the
 second is specified, the command may be run as the invoking user
 with the group set to any listed in the
 \fRRunas_List\fR.
+If both
+\fRRunas_List\fRs
+are empty, the command may only be run as the invoking user.
 If no
 \fRRunas_Spec\fR
 is specified the command may be run as

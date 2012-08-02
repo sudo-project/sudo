@@ -31,6 +31,7 @@
 #define ROLE 287
 #define PRIVS 288
 #define LIMITPRIVS 289
+#define MYSELF 290
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {

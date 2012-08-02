@@ -778,6 +778,9 @@ is empty but the
 second is specified, the command may be run as the invoking user
 with the group set to any listed in the
 .Li Runas_List .
+If both
+.Li Runas_List Ns No s
+are empty, the command may only be run as the invoking user.
 If no
 .Li Runas_Spec
 is specified the command may be run as

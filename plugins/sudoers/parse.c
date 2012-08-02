@@ -650,6 +650,9 @@ _print_member(struct lbuf *lbuf, char *name, int type, int negated,
 	case ALL:
 	    lbuf_append(lbuf, "%sALL", negated ? "!" : "");
 	    break;
+	case MYSELF:
+	    lbuf_append(lbuf, "%s%s", negated ? "!" : "", user_name);
+	    break;
 	case COMMAND:
 	    c = (struct sudo_command *) name;
 	    if (negated)

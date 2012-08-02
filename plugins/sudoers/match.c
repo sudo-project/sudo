@@ -193,6 +193,10 @@ _runaslist_matches(struct member_list *user_list, struct member_list *group_list
 		    if (userpw_matches(m->name, runas_pw->pw_name, runas_pw))
 			user_matched = !m->negated;
 		    break;
+		case MYSELF:
+		    if (strcmp(user_name, runas_pw->pw_name) == 0)
+			user_matched = !m->negated;
+		    break;
 	    }
 	    if (user_matched != UNSPEC)
 		break;

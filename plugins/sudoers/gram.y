@@ -164,6 +164,7 @@ yyerror(const char *s)
 %token <tok>	 ROLE			/* SELinux role */
 %token <tok>	 PRIVS			/* Solaris privileges */
 %token <tok>	 LIMITPRIVS		/* Solaris limit privileges */
+%token <tok>	 MYSELF			/* run as myself, not another user */
 
 %type <cmndspec>  cmndspec
 %type <cmndspec>  cmndspeclist
@@ -459,7 +460,12 @@ runasspec	:	/* empty */ {
 			}
 		;
 
-runaslist	:	userlist {
+runaslist	:	/* empty */ {
+			    $$ = ecalloc(1, sizeof(struct runascontainer));
+			    $$->runasusers = new_member(NULL, MYSELF);
+			    /* $$->runasgroups = NULL; */
+			}
+		|	userlist {
 			    $$ = ecalloc(1, sizeof(struct runascontainer));
 			    $$->runasusers = $1;
 			    /* $$->runasgroups = NULL; */
@@ -473,6 +479,11 @@ runaslist	:	userlist {
 			    $$ = ecalloc(1, sizeof(struct runascontainer));
 			    /* $$->runasusers = NULL; */
 			    $$->runasgroups = $2;
+			}
+		|	':' {
+			    $$ = ecalloc(1, sizeof(struct runascontainer));
+			    $$->runasusers = new_member(NULL, MYSELF);
+			    /* $$->runasgroups = NULL; */
 			}
 		;
 
