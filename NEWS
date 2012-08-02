@@ -33,12 +33,14 @@ What's new in Sudo 1.8.6?
    of "N incorrect password attempts".  Likewise, the "mail_no_perms"
    sudoers option now takes precedence over "mail_badpass".
 
- * The sudo manuals are now formatted in mdoc.  Versions using the
-   legacy man macros are provided for systems that lack mdoc.
+ * The sudo manuals are now formatted using the mdoc macros.  Versions
+   using the legacy man macros are provided for systems that lack mdoc.
 
  * New support for Solaris privilege sets.  This makes it possible
    to specify fine-grained privileges in the sudoers file on Solaris
-   10 and above.
+   10 and above.  A Runas_Spec that contains no Runas_Lists can be
+   used to give a user the ability to run a command as themselves
+   but with an expanded privilege set.
 
 What's new in Sudo 1.8.5p2?
 
