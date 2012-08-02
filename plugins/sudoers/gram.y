@@ -104,11 +104,10 @@ yyerror(const char *s)
 	errorlineno = sudolineno;
 	errorfile = estrdup(sudoers);
     }
-    if (trace_print != NULL) {
-	LEXTRACE("<*> ");
-    } else if (sudoers_warnings && s != NULL) {
-	warningx(_(">>> %s: %s near line %d <<<"), sudoers, s, sudolineno);
-    }
+    LEXTRACE("<*> ");
+#ifndef TRACELEXER
+    warningx(_(">>> %s: %s near line %d <<<"), sudoers, s, sudolineno);
+#endif
     parse_error = true;
     debug_return;
 }
