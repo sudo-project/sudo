@@ -92,9 +92,16 @@ struct sudo_user {
     int   closefrom;
     int   lines;
     int   cols;
+    int   flags;
     uid_t uid;
     uid_t gid;
 };
+
+/*
+ * sudo_user flag values
+ */
+#define RUNAS_USER_SPECIFIED	0x01
+#define RUNAS_GROUP_SPECIFIED	0x02
 
 /*
  * Return values for sudoers_lookup(), also used as arguments for log_auth()

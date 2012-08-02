@@ -507,7 +507,7 @@ update_defaults(int what)
 		break;
 	    case DEFAULTS_RUNAS:
 		if (ISSET(what, SETDEF_RUNAS) &&
-		    runaslist_matches(&def->binding, NULL) == ALLOW &&
+		    runaslist_matches(&def->binding, NULL, NULL, NULL) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
 		    rc = false;
 		break;

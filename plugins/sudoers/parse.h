@@ -187,7 +187,7 @@ int hostlist_matches(struct member_list *);
 bool hostname_matches(char *, char *, char *);
 bool netgr_matches(char *, char *, char *, char *);
 bool no_aliases(void);
-int runaslist_matches(struct member_list *, struct member_list *);
+int runaslist_matches(struct member_list *, struct member_list *, struct member **, struct member **);
 int userlist_matches(struct passwd *, struct member_list *);
 bool usergr_matches(char *, char *, struct passwd *);
 bool userpw_matches(char *, char *, struct passwd *);

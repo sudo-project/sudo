@@ -120,10 +120,18 @@ check_user(int validated, int mode)
      * Don't prompt for the root passwd or if the user is exempt.
      * If the user is not changing uid/gid, no need for a password.
      */
-    if (!def_authenticate || user_uid == 0 || (user_uid == runas_pw->pw_uid &&
-	(!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name)))
-	|| user_is_exempt())
+    if (!def_authenticate || user_uid == 0 || user_is_exempt())
 	goto done;
+    if (user_uid == runas_pw->pw_uid &&
+	(!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name))) {
+#ifdef HAVE_SELINUX
+	if (user_role == NULL && user_type == NULL)
+#endif
+#ifdef HAVE_PRIV_SET
+	if (runas_privs == NULL && runas_limitprivs == NULL)
+#endif
+	    goto done;
+    }
 
     /* Always need a password when -k was specified with the command. */
     if (ISSET(mode, MODE_IGNORE_TICKET))

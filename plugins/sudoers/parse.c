@@ -158,6 +158,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
     struct cmndtag *tags = NULL;
     struct privilege *priv;
     struct userspec *us;
+    struct member *matching_user;
     debug_decl(sudo_file_lookup, SUDO_DEBUG_NSS)
 
     if (nss->handle == NULL)
@@ -225,8 +226,9 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 	    else
 		continue;
 	    tq_foreach_rev(&priv->cmndlist, cs) {
+		matching_user = NULL;
 		runas_match = runaslist_matches(&cs->runasuserlist,
-		    &cs->runasgrouplist);
+		    &cs->runasgrouplist, &matching_user, NULL);
 		if (runas_match == ALLOW) {
 		    cmnd_match = cmnd_matches(cs->cmnd);
 		    if (cmnd_match != UNSPEC) {
@@ -246,6 +248,16 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 			if (runas_limitprivs == NULL)
 			    runas_limitprivs = cs->limitprivs ? estrdup(cs->limitprivs) : def_limitprivs;
 #endif /* HAVE_PRIV_SET */
+			/*
+			 * If user is running command as himself,
+			 * set runas_pw = sudo_user.pw.
+			 * XXX - hack, want more general solution
+			 */
+			if (matching_user->type == MYSELF) {
+			    sudo_pw_delref(runas_pw);
+			    sudo_pw_addref(sudo_user.pw);
+			    runas_pw = sudo_user.pw;
+			}
 			goto matched2;
 		    }
 		}
@@ -613,7 +625,7 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 		continue;
 	    tq_foreach_rev(&priv->cmndlist, cs) {
 		runas_match = runaslist_matches(&cs->runasuserlist,
-		    &cs->runasgrouplist);
+		    &cs->runasgrouplist, NULL, NULL);
 		if (runas_match == ALLOW) {
 		    cmnd_match = cmnd_matches(cs->cmnd);
 		    if (cmnd_match != UNSPEC) {

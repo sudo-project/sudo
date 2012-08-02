@@ -324,7 +324,7 @@ main(int argc, char *argv[])
 		puts("\thost  matched");
 		tq_foreach_rev(&priv->cmndlist, cs) {
 		    runas_match = runaslist_matches(&cs->runasuserlist,
-			&cs->runasgrouplist);
+			&cs->runasgrouplist, NULL, NULL);
 		    if (runas_match == ALLOW) {
 			puts("\trunas matched");
 			cmnd_match = cmnd_matches(cs->cmnd);

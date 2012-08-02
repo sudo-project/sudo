@@ -154,7 +154,9 @@ userlist_matches(struct passwd *pw, struct member_list *list)
  * Returns ALLOW, DENY or UNSPEC.
  */
 static int
-_runaslist_matches(struct member_list *user_list, struct member_list *group_list)
+_runaslist_matches(struct member_list *user_list,
+    struct member_list *group_list, struct member **matching_user,
+    struct member **matching_group)
 {
     struct member *m;
     struct alias *a;
@@ -183,7 +185,8 @@ _runaslist_matches(struct member_list *user_list, struct member_list *group_list
 		    break;
 		case ALIAS:
 		    if ((a = alias_find(m->name, RUNASALIAS)) != NULL) {
-			rval = _runaslist_matches(&a->members, &empty);
+			rval = _runaslist_matches(&a->members, &empty,
+			    matching_user, NULL);
 			if (rval != UNSPEC)
 			    user_matched = m->negated ? !rval : rval;
 			break;
@@ -194,12 +197,16 @@ _runaslist_matches(struct member_list *user_list, struct member_list *group_list
 			user_matched = !m->negated;
 		    break;
 		case MYSELF:
-		    if (strcmp(user_name, runas_pw->pw_name) == 0)
+		    if (!ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) ||
+			strcmp(user_name, runas_pw->pw_name) == 0)
 			user_matched = !m->negated;
 		    break;
 	    }
-	    if (user_matched != UNSPEC)
+	    if (user_matched != UNSPEC) {
+		if (matching_user != NULL && m->type != ALIAS)
+		    *matching_user = m;
 		break;
+	    }
 	}
     }
 
@@ -215,7 +222,8 @@ _runaslist_matches(struct member_list *user_list, struct member_list *group_list
 		    break;
 		case ALIAS:
 		    if ((a = alias_find(m->name, RUNASALIAS)) != NULL) {
-			rval = _runaslist_matches(&empty, &a->members);
+			rval = _runaslist_matches(&empty, &a->members,
+			    NULL, matching_group);
 			if (rval != UNSPEC)
 			    group_matched = m->negated ? !rval : rval;
 			break;
@@ -226,8 +234,11 @@ _runaslist_matches(struct member_list *user_list, struct member_list *group_list
 			group_matched = !m->negated;
 		    break;
 	    }
-	    if (group_matched != UNSPEC)
+	    if (group_matched != UNSPEC) {
+		if (matching_group != NULL && m->type != ALIAS)
+		    *matching_group = m;
 		break;
+	    }
 	}
 	if (group_matched == UNSPEC) {
 	    if (runas_pw != NULL && runas_pw->pw_gid == runas_gr->gr_gid)
@@ -243,11 +254,13 @@ _runaslist_matches(struct member_list *user_list, struct member_list *group_list
 }
 
 int
-runaslist_matches(struct member_list *user_list, struct member_list *group_list)
+runaslist_matches(struct member_list *user_list,
+    struct member_list *group_list, struct member **matching_user,
+    struct member **matching_group)
 {
     alias_seqno++;
     return _runaslist_matches(user_list ? user_list : &empty,
-	group_list ? group_list : &empty);
+	group_list ? group_list : &empty, matching_user, matching_group);
 }
 
 /*
