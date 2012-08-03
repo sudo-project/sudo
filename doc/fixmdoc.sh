@@ -106,6 +106,9 @@ case "$OUTFILE" in
 			/^\.It privs$/,/^\.It/ {
 				/^\.It [^p][^r][^i][^v][^s]$/!d
 			}
+			/^On Solaris 10/,/^\.Pp/ {
+				d
+			}
 		EOF
 	fi
 

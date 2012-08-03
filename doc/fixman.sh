@@ -56,5 +56,65 @@ case "$OUTFILE" in
 	fi
 		;;
     sudoers.man.sed)
+	# Subsections to remove (SELinux and Solaris are adjacent)
+	RM_SS=
+	if [ X"$PSMAN" != X"1" ]; then
+	    if [ X"$SEMAN" != X"1" ]; then
+		RM_SS='/^\.SS "SELinux_Spec"/,/^\.SS "[^S]/{;/^\.SS "[^S][^o][^l]/!d;};'
+	    else
+		RM_SS='/^\.SS "Solaris_Priv_Spec"/,/^\.SS/{;/^\.SS "[^S][^o][^l]/!d;};'
+	    fi
+	elif [ X"$SEMAN" != X"1" ]; then
+		RM_SS='/^\.SS "SELinux_Spec"/,/^\.SS/{;/^\.SS "[^S][^E][^L]/!d;};'
+	fi
+	if [ -n "$RM_SS" ]; then
+		cat >>"$OUTFILE" <<-EOF
+			$RM_SS
+		EOF
+	fi
+
+	# BSD login class
+	if [ X"$LCMAN" != X"1" ]; then
+		cat >>"$OUTFILE" <<-EOF
+			/^On BSD systems/,/\.$/ {
+				d
+			}
+			/^use_loginclass$/,/^\.TP 18n$/ {
+				/^\.PD$/!d
+			}
+		EOF
+	fi
+
+	# Solaris PrivSpec
+	if [ X"$PSMAN" != X"1" ]; then
+		cat >>"$OUTFILE" <<-EOF
+			s/Solaris_Priv_Spec? //
+			/^Solaris_Priv_Spec ::=/ {
+				N
+				d
+			}
+			/^l*i*m*i*t*privs$/,/^\.TP 18n$/ {
+				/^\.PD$/!d
+			}
+			/^On Solaris 10/,/^\.[sP][pP]/ {
+				d
+			}
+		EOF
+	fi
+
+	# SELinux
+	SE_SED=
+	if [ X"$SEMAN" != X"1" ]; then
+		cat >>"$OUTFILE" <<-EOF
+			s/SELinux_Spec? //
+			/^SELinux_Spec ::=/ {
+				N
+				d
+			}
+			/^[rt][oy][lp]e$/,/^\.TP 18n$/ {
+				/^\.PD$/!d
+			}
+		EOF
+	fi
 	;;
 esac
