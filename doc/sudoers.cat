@@ -441,6 +441,26 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      privileges or limit privileges are specified with the command it will
      override any default values specified in _s_u_d_o_e_r_s.
 
+     A privilege set is a comma-separated list of privilege names.  The
+     ppriv(1) command can be used to list all privileges known to the system.
+     For example:
+
+     $ ppriv -l
+
+     In addition, there are several ``special'' privilege strings:
+
+     none      the empty set
+
+     all       the set of all privileges
+
+     zone      the set of all privileges available in the current zone
+
+     basic     the default set of privileges normal users are granted at login
+               time
+
+     Privileges can be excluded from a set by prefixing the privilege name
+     with either an `!' or `-' character.
+
    TTaagg__SSppeecc
      A command may have zero or more tags associated with it.  There are ten
      possible tag values: NOPASSWD, PASSWD, NOEXEC, EXEC, SETENV, NOSETENV,

@@ -964,6 +964,41 @@ privilege set associated with a command.
 If privileges or limit privileges are specified with the command
 it will override any default values specified in
 \fIsudoers\fR.
+.PP
+A privilege set is a comma-separated list of privilege names.
+The
+ppriv(1)
+command can be used to list all privileges known to the system.
+For example:
+.nf
+.sp
+.RS 0n
+$ ppriv -l
+.RE
+.fi
+.PP
+In addition, there are several
+``special''
+privilege strings:
+.TP 10n
+none
+the empty set
+.TP 10n
+all
+the set of all privileges
+.TP 10n
+zone
+the set of all privileges available in the current zone
+.TP 10n
+basic
+the default set of privileges normal users are granted at login time
+.PP
+Privileges can be excluded from a set by prefixing the privilege
+name with either an
+`\&!'
+or
+`\-'
+character.
 .SS "Tag_Spec"
 A command may have zero or more tags associated with it.
 There are

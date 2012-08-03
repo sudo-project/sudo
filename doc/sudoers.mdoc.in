@@ -911,6 +911,36 @@ privilege set associated with a command.
 If privileges or limit privileges are specified with the command
 it will override any default values specified in
 .Em sudoers .
+.Pp
+A privilege set is a comma-separated list of privilege names.
+The
+.Xr ppriv 1
+command can be used to list all privileges known to the system.
+For example:
+.Bd -literal
+$ ppriv -l
+.Ed
+.Pp
+In addition, there are several
+.Dq special
+privilege strings:
+.Bl -tag -width 8n
+.It none
+the empty set
+.It all
+the set of all privileges
+.It zone
+the set of all privileges available in the current zone
+.It basic
+the default set of privileges normal users are granted at login time
+.El
+.Pp
+Privileges can be excluded from a set by prefixing the privilege
+name with either an
+.Ql \&!
+or
+.Ql \-
+character.
 .Ss Tag_Spec
 A command may have zero or more tags associated with it.
 There are
