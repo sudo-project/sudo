@@ -165,6 +165,7 @@ struct command_status {
 #define CMD_ERRNO 1
 #define CMD_WSTATUS 2
 #define CMD_SIGNO 3
+#define CMD_PID 4
     int type;
     int val;
 };

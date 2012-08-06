@@ -74,12 +74,14 @@ struct sigforward {
 TQ_DECLARE(sigforward)
 static struct sigforward_list sigfwd_list;
 
+volatile pid_t cmnd_pid = -1;
+
 static int handle_signals(int sv[2], pid_t child, int log_io,
     struct command_status *cstat);
 static void forward_signals(int fd);
 static void schedule_signal(int signo);
 #ifdef SA_SIGINFO
-static void handler_nofwd(int s, siginfo_t *info, void *context);
+static void handler_user_only(int s, siginfo_t *info, void *context);
 #endif
 
 /*
@@ -90,13 +92,17 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 {
     struct command_status cstat;
     sigaction_t sa;
-    pid_t child;
     debug_decl(fork_cmnd, SUDO_DEBUG_EXEC)
 
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
+#ifdef SA_SIGINFO
+    sa.sa_flags |= SA_SIGINFO;
+    sa.sa_sigaction = handler;
+#else
     sa.sa_handler = handler;
+#endif
     sigaction(SIGCONT, &sa, NULL);
 
     /*
@@ -106,8 +112,8 @@ static int fork_cmnd(struct command_details *details, int sv[2])
     if (policy_init_session(details) != true)
 	errorx(1, _("policy plugin failed session initialization"));
 
-    child = sudo_debug_fork();
-    switch (child) {
+    cmnd_pid = sudo_debug_fork();
+    switch (cmnd_pid) {
     case -1:
 	error(1, _("unable to fork"));
 	break;
@@ -150,7 +156,9 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);
 	_exit(1);
     }
-    debug_return_int(child);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d", details->command,
+	cmnd_pid);
+    debug_return_int(cmnd_pid);
 }
 
 static struct signal_state {
@@ -216,6 +224,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     bool log_io = false;
     fd_set *fdsr, *fdsw;
     sigaction_t sa;
+    sigset_t omask;
     pid_t child;
     debug_decl(sudo_execute, SUDO_DEBUG_EXEC)
 
@@ -273,7 +282,12 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
      * Note: HP-UX select() will not be interrupted if SA_RESTART set.
      */
     sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
+#ifdef SA_SIGINFO
+    sa.sa_flags |= SA_SIGINFO;
+    sa.sa_sigaction = handler;
+#else
     sa.sa_handler = handler;
+#endif
     sigaction(SIGALRM, &sa, NULL);
     sigaction(SIGCHLD, &sa, NULL);
     sigaction(SIGPIPE, &sa, NULL);
@@ -291,7 +305,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 #ifdef SA_SIGINFO
     if (!log_io) {
 	sa.sa_flags |= SA_SIGINFO;
-	sa.sa_sigaction = handler_nofwd;
+	sa.sa_sigaction = handler_user_only;
     }
 #endif
     sigaction(SIGHUP, &sa, NULL);
@@ -306,7 +320,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
      * to and from pty.  Adjusts maxfd as needed.
      */
     if (log_io)
-	child = fork_pty(details, sv, &maxfd);
+	child = fork_pty(details, sv, &maxfd, &omask);
     else
 	child = fork_cmnd(details, sv);
     close(sv[1]);
@@ -399,7 +413,19 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 		    break;
 		}
 	    }
-	    if (cstat->type == CMD_WSTATUS) {
+	    if (cstat->type == CMD_PID) {
+		/*
+                 * Once we know the command's pid we can unblock
+                 * signals which ere blocked in fork_pty().  This
+                 * avoids a race between exec of the command and
+                 * receipt of a fatal signal from it.
+		 */
+		cmnd_pid = cstat->val;
+		sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d",
+		    details->command, cmnd_pid);
+		if (log_io)
+		    sigprocmask(SIG_SETMASK, &omask, NULL);
+	    } else if (cstat->type == CMD_WSTATUS) {
 		if (WIFSTOPPED(cstat->val)) {
 		    /* Suspend parent and tell child how to resume on return. */
 		    sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -538,7 +564,7 @@ handle_signals(int sv[2], pid_t child, int log_io, struct command_status *cstat)
 	    } else {
 		/* Nothing listening on sv[0], send directly. */
 		if (signo == SIGALRM)
-		    terminate_child(child, false);
+		    terminate_command(child, false);
 		else if (kill(child, signo) != 0)
 		    warning("kill(%d, %d)", (int)child, signo);
 	    }
@@ -611,6 +637,28 @@ schedule_signal(int signo)
  * Generic handler for signals passed from parent -> child.
  * The other end of signal_pipe is checked in the main event loop.
  */
+#ifdef SA_SIGINFO
+void
+handler(int s, siginfo_t *info, void *context)
+{
+    unsigned char signo = (unsigned char)s;
+
+    /*
+     * If the signal came from the command we ran, just ignore
+     * it since we don't want the child to indirectly kill itself.
+     * This can happen with, e.g. BSD-derived versions of reboot
+     * that call kill(-1, SIGTERM) to kill all other processes.
+     */
+    if (info != NULL && info->si_code == SI_USER && info->si_pid == cmnd_pid)
+	    return;
+
+    /*
+     * The pipe is non-blocking, if we overflow the kernel's pipe
+     * buffer we drop the signal.  This is not a problem in practice.
+     */
+    ignore_result(write(signal_pipe[1], &signo, sizeof(signo)));
+}
+#else
 void
 handler(int s)
 {
@@ -622,6 +670,7 @@ handler(int s)
      */
     ignore_result(write(signal_pipe[1], &signo, sizeof(signo)));
 }
+#endif
 
 #ifdef SA_SIGINFO
 /*
@@ -631,7 +680,7 @@ handler(int s)
  * signals that are generated by the kernel.
  */
 static void
-handler_nofwd(int s, siginfo_t *info, void *context)
+handler_user_only(int s, siginfo_t *info, void *context)
 {
     unsigned char signo = (unsigned char)s;
 

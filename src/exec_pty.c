@@ -93,7 +93,7 @@ static char slavename[PATH_MAX];
 static bool foreground, pipeline, tty_initialized;
 static int io_fds[6] = { -1, -1, -1, -1, -1, -1};
 static int ttymode = TERM_COOKED;
-static pid_t ppgrp, child, child_pgrp;
+static pid_t ppgrp, cmnd_pgrp;
 static sigset_t ttyblock;
 static struct io_buffer *iobufs;
 
@@ -126,6 +126,45 @@ cleanup(int gotsignal)
 
     debug_return;
 }
+
+/*
+ * Generic handler for signals recieved by the monitor process.
+ * The other end of signal_pipe is checked in the monitor event loop.
+ */
+#ifdef SA_SIGINFO
+void
+mon_handler(int s, siginfo_t *info, void *context)
+{
+    unsigned char signo = (unsigned char)s;
+
+    /*
+     * If the signal came from the command we ran, just ignore
+     * it since we don't want the child to indirectly kill itself.
+     * This can happen with, e.g. BSD-derived versions of reboot
+     * that call kill(-1, SIGTERM) to kill all other processes.
+     */
+    if (info != NULL && info->si_code == SI_USER && info->si_pid == cmnd_pid)
+	    return;
+
+    /*
+     * The pipe is non-blocking, if we overflow the kernel's pipe
+     * buffer we drop the signal.  This is not a problem in practice.
+     */
+    ignore_result(write(signal_pipe[1], &signo, sizeof(signo)));
+}
+#else
+void
+mon_handler(int s)
+{
+    unsigned char signo = (unsigned char)s;
+
+    /*
+     * The pipe is non-blocking, if we overflow the kernel's pipe
+     * buffer we drop the signal.  This is not a problem in practice.
+     */
+    ignore_result(write(signal_pipe[1], &signo, sizeof(signo)));
+}
+#endif
 
 /*
  * Allocate a pty if /dev/tty is a tty.
@@ -290,7 +329,7 @@ check_foreground(void)
 
 /*
  * Suspend sudo if the underlying command is suspended.
- * Returns SIGCONT_FG if the child should be resume in the
+ * Returns SIGCONT_FG if the command should be resumed in the
  * foreground or SIGCONT_BG if it is a background process.
  */
 int
@@ -304,7 +343,7 @@ suspend_parent(int signo)
     case SIGTTOU:
     case SIGTTIN:
 	/*
-	 * If we are the foreground process, just resume the child.
+	 * If we are the foreground process, just resume the command.
 	 * Otherwise, re-send the signal with the handler disabled.
 	 */
 	if (!foreground)
@@ -316,7 +355,7 @@ suspend_parent(int signo)
 		} while (!n && errno == EINTR);
 		ttymode = TERM_RAW;
 	    }
-	    rval = SIGCONT_FG; /* resume child in foreground */
+	    rval = SIGCONT_FG; /* resume command in foreground */
 	    break;
 	}
 	ttymode = TERM_RAW;
@@ -333,7 +372,7 @@ suspend_parent(int signo)
 	    } while (!n && errno == EINTR);
 	}
 
-	/* Suspend self and continue child when we resume. */
+	/* Suspend self and continue command when we resume. */
 	zero_bytes(&sa, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
@@ -348,7 +387,7 @@ suspend_parent(int signo)
 
 	/*
 	 * Only modify term if we are foreground process and either
-	 * the old tty mode was not cooked or child got SIGTT{IN,OU}
+	 * the old tty mode was not cooked or command got SIGTT{IN,OU}
 	 */
 	sudo_debug_printf(SUDO_DEBUG_INFO, "parent is in %s, ttymode %d -> %d",
 	    foreground ? "foreground" : "background", oldmode, ttymode);
@@ -374,12 +413,12 @@ suspend_parent(int signo)
 }
 
 /*
- * Kill child with increasing urgency.
+ * Kill command with increasing urgency.
  */
 void
-terminate_child(pid_t pid, bool use_pgrp)
+terminate_command(pid_t pid, bool use_pgrp)
 {
-    debug_decl(terminate_child, SUDO_DEBUG_EXEC);
+    debug_decl(terminate_command, SUDO_DEBUG_EXEC);
 
     /*
      * Note that SIGCHLD will interrupt the sleep()
@@ -460,7 +499,7 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
 		    sudo_debug_printf(SUDO_DEBUG_INFO,
 			"read %d bytes from fd %d", n, iob->rfd);
 		    if (!iob->action(iob->buf + iob->len, n))
-			terminate_child(child, true);
+			terminate_command(cmnd_pid, true);
 		    iob->len += n;
 		    break;
 	    }
@@ -509,12 +548,14 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
  * Returns the child pid.
  */
 int
-fork_pty(struct command_details *details, int sv[], int *maxfd)
+fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 {
     struct command_status cstat;
     struct io_buffer *iob;
     int io_pipe[3][2], n;
     sigaction_t sa;
+    sigset_t mask;
+    pid_t child;
     debug_decl(fork_pty, SUDO_DEBUG_EXEC);
         
     ppgrp = getpgrp(); /* parent's pgrp, so child can signal us */
@@ -594,7 +635,12 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
 
     /* Job control signals to relay from parent to child. */
     sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
+#ifdef SA_SIGINFO
+    sa.sa_flags |= SA_SIGINFO;
+    sa.sa_sigaction = handler;
+#else
     sa.sa_handler = handler;
+#endif
     sigaction(SIGTSTP, &sa, NULL);
 
     /* We don't want to receive SIGTTIN/SIGTTOU, getting EIO is preferable. */
@@ -627,6 +673,17 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
     if (policy_init_session(details) != true)
 	errorx(1, _("policy plugin failed session initialization"));
 
+    /*
+     * Block some signals until cmnd_pid is set in the parent to avoid a
+     * race between exec of the command and receipt of a fatal signal from it.
+     */
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGTERM);
+    sigaddset(&mask, SIGHUP);
+    sigaddset(&mask, SIGINT);
+    sigaddset(&mask, SIGQUIT);
+    sigprocmask(SIG_BLOCK, &mask, omask);
+
     child = sudo_debug_fork();
     switch (child) {
     case -1:
@@ -638,6 +695,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
 	close(signal_pipe[0]);
 	close(signal_pipe[1]);
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
+	sigprocmask(SIG_SETMASK, omask, NULL);
 	if (exec_setup(details, slavename, io_fds[SFD_SLAVE]) == true) {
 	    /* Close the other end of the stdin/stdout/stderr pipes and exec. */
 	    if (io_pipe[STDIN_FILENO][1])
@@ -650,7 +708,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd)
 	}
 	cstat.type = CMD_ERRNO;
 	cstat.val = errno;
-	send(sv[1], &cstat, sizeof(cstat), 0);
+	ignore_result(send(sv[1], &cstat, sizeof(cstat), 0));
 	_exit(1);
     }
 
@@ -772,12 +830,12 @@ deliver_signal(pid_t pid, int signo, bool from_parent)
 	from_parent ? " from parent" : "");
     switch (signo) {
     case SIGALRM:
-	terminate_child(pid, true);
+	terminate_command(pid, true);
 	break;
     case SIGCONT_FG:
 	/* Continue in foreground, grant it controlling tty. */
 	do {
-	    status = tcsetpgrp(io_fds[SFD_SLAVE], child_pgrp);
+	    status = tcsetpgrp(io_fds[SFD_SLAVE], cmnd_pgrp);
 	} while (status == -1 && errno == EINTR);
 	killpg(pid, SIGCONT);
 	break;
@@ -792,7 +850,7 @@ deliver_signal(pid_t pid, int signo, bool from_parent)
 	_exit(1); /* XXX */
 	/* NOTREACHED */
     default:
-	/* Relay signal to child. */
+	/* Relay signal to command. */
 	killpg(pid, signo);
 	break;
     }
@@ -826,10 +884,10 @@ send_status(int fd, struct command_status *cstat)
 }
 
 /*
- * Wait for child status after receiving SIGCHLD.
- * If the child was stopped, the status is send back to the parent.
+ * Wait for command status after receiving SIGCHLD.
+ * If the command was stopped, the status is send back to the parent.
  * Otherwise, cstat is filled in but not sent.
- * Returns true if child is still alive, else false.
+ * Returns true if command is still alive, else false.
  */
 static bool
 handle_sigchld(int backchannel, struct command_status *cstat)
@@ -839,11 +897,11 @@ handle_sigchld(int backchannel, struct command_status *cstat)
     pid_t pid;
     debug_decl(handle_sigchld, SUDO_DEBUG_EXEC);
 
-    /* read child status */
+    /* read command status */
     do {
-	pid = waitpid(child, &status, WUNTRACED|WNOHANG);
+	pid = waitpid(cmnd_pid, &status, WUNTRACED|WNOHANG);
     } while (pid == -1 && errno == EINTR);
-    if (pid == child) {
+    if (pid == cmnd_pid) {
 	if (cstat->type != CMD_ERRNO) {
 	    cstat->type = CMD_WSTATUS;
 	    cstat->val = status;
@@ -851,8 +909,8 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 		sudo_debug_printf(SUDO_DEBUG_INFO, "command stopped, signal %d",
 		    WSTOPSIG(status));
 		do {
-		    child_pgrp = tcgetpgrp(io_fds[SFD_SLAVE]);
-		} while (child_pgrp == -1 && errno == EINTR);
+		    cmnd_pgrp = tcgetpgrp(io_fds[SFD_SLAVE]);
+		} while (cmnd_pgrp == -1 && errno == EINTR);
 		if (send_status(backchannel, cstat) == -1)
 		    return alive; /* XXX */
 	    } else if (WIFSIGNALED(status)) {
@@ -916,12 +974,22 @@ exec_monitor(struct command_details *details, int backchannel)
 
     /* Note: HP-UX select() will not be interrupted if SA_RESTART set */
     sa.sa_flags = SA_INTERRUPT;
-    sa.sa_handler = handler;
+#ifdef SA_SIGINFO
+    sa.sa_flags |= SA_SIGINFO;
+    sa.sa_sigaction = mon_handler;
+#else
+    sa.sa_handler = mon_handler;
+#endif
     sigaction(SIGCHLD, &sa, NULL);
 
     /* Catch common signals so we can cleanup properly. */
     sa.sa_flags = SA_RESTART;
-    sa.sa_handler = handler;
+#ifdef SA_SIGINFO
+    sa.sa_flags |= SA_SIGINFO;
+    sa.sa_sigaction = mon_handler;
+#else
+    sa.sa_handler = mon_handler;
+#endif
     sigaction(SIGHUP, &sa, NULL);
     sigaction(SIGINT, &sa, NULL);
     sigaction(SIGQUIT, &sa, NULL);
@@ -933,7 +1001,7 @@ exec_monitor(struct command_details *details, int backchannel)
     /*
      * Start a new session with the parent as the session leader
      * and the slave pty as the controlling terminal.
-     * This allows us to be notified when the child has been suspended.
+     * This allows us to be notified when the command has been suspended.
      */
     if (setsid() == -1) {
 	warning("setsid");
@@ -962,12 +1030,12 @@ exec_monitor(struct command_details *details, int backchannel)
     /* Start command and wait for it to stop or exit */
     if (pipe(errpipe) == -1)
 	error(1, _("unable to create pipe"));
-    child = sudo_debug_fork();
-    if (child == -1) {
+    cmnd_pid = sudo_debug_fork();
+    if (cmnd_pid == -1) {
 	warning(_("unable to fork"));
 	goto bad;
     }
-    if (child == 0) {
+    if (cmnd_pid == 0) {
 	/* We pass errno back to our parent via pipe on exec failure. */
 	close(backchannel);
 	close(signal_pipe[0]);
@@ -985,6 +1053,11 @@ exec_monitor(struct command_details *details, int backchannel)
     }
     close(errpipe[1]);
 
+    /* Send the command's pid to main sudo process. */
+    cstat.type = CMD_PID;
+    cstat.val = cmnd_pid;
+    ignore_result(send(backchannel, &cstat, sizeof(cstat), 0));
+
     /* If any of stdin/stdout/stderr are pipes, close them in parent. */
     if (io_fds[SFD_STDIN] != io_fds[SFD_SLAVE])
 	close(io_fds[SFD_STDIN]);
@@ -994,14 +1067,14 @@ exec_monitor(struct command_details *details, int backchannel)
 	close(io_fds[SFD_STDERR]);
 
     /*
-     * Put child in its own process group.  If we are starting the command
+     * Put command in its own process group.  If we are starting the command
      * in the foreground, assign its pgrp to the tty.
      */
-    child_pgrp = child;
-    setpgid(child, child_pgrp);
+    cmnd_pgrp = cmnd_pid;
+    setpgid(cmnd_pid, cmnd_pgrp);
     if (foreground) {
 	do {
-	    status = tcsetpgrp(io_fds[SFD_SLAVE], child_pgrp);
+	    status = tcsetpgrp(io_fds[SFD_SLAVE], cmnd_pgrp);
 	} while (status == -1 && errno == EINTR);
     }
 
@@ -1040,13 +1113,13 @@ exec_monitor(struct command_details *details, int backchannel)
 	    }
 	    /*
 	     * Handle SIGCHLD specially and deliver other signals
-	     * directly to the child.
+	     * directly to the command.
 	     */
 	    if (signo == SIGCHLD) {
 		if (!handle_sigchld(backchannel, &cstat))
 		    alive = false;
 	    } else {
-		deliver_signal(child, signo, false);
+		deliver_signal(cmnd_pid, signo, false);
 	    }
 	    continue;
 	}
@@ -1080,14 +1153,14 @@ exec_monitor(struct command_details *details, int backchannel)
 		    cstmp.type);
 		continue;
 	    }
-	    deliver_signal(child, cstmp.val, true);
+	    deliver_signal(cmnd_pid, cstmp.val, true);
 	}
     }
 
 done:
     if (alive) {
 	/* XXX An error occurred, should send an error back. */
-	kill(child, SIGKILL);
+	kill(cmnd_pid, SIGKILL);
     } else {
 	/* Send parent status. */
 	send_status(backchannel, &cstat);
@@ -1184,7 +1257,7 @@ exec_pty(struct command_details *details, int *errfd)
     pid_t self = getpid();
     debug_decl(exec_pty, SUDO_DEBUG_EXEC);
 
-    /* Set child process group here too to avoid a race. */
+    /* Set command process group here too to avoid a race. */
     setpgid(0, self);
 
     /* Wire up standard fds, note that stdout/stderr may be pipes. */
