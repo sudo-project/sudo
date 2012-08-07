@@ -1046,22 +1046,20 @@ static int yygrowstack()
         return -1;
     else if ((newsize *= 2) > YYMAXDEPTH)
         newsize = YYMAXDEPTH;
-    i = yyssp - yyss;
 #ifdef SIZE_MAX
 #define YY_SIZE_MAX SIZE_MAX
 #else
 #define YY_SIZE_MAX 0x7fffffff
 #endif
-    if (newsize && YY_SIZE_MAX / newsize < sizeof *newss)
+    if (YY_SIZE_MAX / newsize < sizeof *newss)
         goto bail;
+    i = yyssp - yyss;
     newss = yyss ? (short *)realloc(yyss, newsize * sizeof *newss) :
       (short *)malloc(newsize * sizeof *newss); /* overflow check above */
     if (newss == NULL)
         goto bail;
     yyss = newss;
     yyssp = newss + i;
-    if (newsize && YY_SIZE_MAX / newsize < sizeof *newvs)
-        goto bail;
     newvs = yyvs ? (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs) :
       (YYSTYPE *)malloc(newsize * sizeof *newvs); /* overflow check above */
     if (newvs == NULL)
@@ -1523,7 +1521,7 @@ case 41:
 	    yyval.Meridian = yyvsp[0].Meridian;
 	}
 break;
-#line 1474 "y.tab.c"
+#line 1472 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
