@@ -56,7 +56,7 @@ getline(bufp, bufsizep, fp)
     buf = fgetln(fp, &len);
     if (buf) {
 	bufsize = *bufp ? *bufsizep : 0;
-	if (bufsize < len + 1) {
+	if (bufsize == 0 || bufsize < len + 1) {
 	    bufsize = len + 1;
 	    *bufp = erealloc(*bufp, bufsize);
 	    *bufsizep = bufsize;

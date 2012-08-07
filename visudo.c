@@ -451,6 +451,9 @@ reparse_sudoers(editor, args, strict, quiet)
     FILE *fp;
     int ch;
 
+    if (tq_empty(&sudoerslist))
+	return TRUE;
+
     /*
      * Parse the edited sudoers files and do sanity checking
      */

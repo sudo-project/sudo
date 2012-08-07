@@ -42,6 +42,9 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE_INTTYPES_H
+# include <inttypes.h>
+#endif
 #ifdef HAVE_LOGIN_CAP_H
 # include <login_cap.h>
 # ifndef LOGIN_SETENV
@@ -50,9 +53,24 @@
 #endif /* HAVE_LOGIN_CAP_H */
 #include <ctype.h>
 #include <errno.h>
+#include <limits.h>
 #include <pwd.h>
 
 #include "sudo.h"
+
+/*
+ * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t
+ * could be signed (as it is on SunOS 4.x).  This just means that
+ * emalloc2() and erealloc3() cannot allocate huge amounts on such a
+ * platform but that is OK since sudo doesn't need to do so anyway.
+ */
+#ifndef SIZE_MAX
+# ifdef SIZE_T_MAX
+#  define SIZE_MAX	SIZE_T_MAX
+# else
+#  define SIZE_MAX	INT_MAX
+# endif /* SIZE_T_MAX */
+#endif /* SIZE_MAX */
 
 /*
  * Flags used in rebuild_env()
@@ -244,7 +262,7 @@ env_init(lazy)
 	memset(env.envp, 0, env.env_size * sizeof(char *));
 #endif
 	memcpy(env.envp, environ, len * sizeof(char *));
-	env.envp[len] = '\0';
+	env.envp[len] = NULL;
 	env.owned = TRUE;
     }
 }
@@ -445,7 +463,9 @@ sudo_putenv(str, dupcheck, overwrite)
     int found = FALSE;
 
     /* Make sure there is room for the new entry plus a NULL. */
-    if (env.env_len + 2 > env.env_size) {
+    if (env.env_size > 2 && env.env_len > env.env_size - 2) {
+	if (env.env_size > SIZE_MAX - 128)
+	    errorx(1, "internal error, sudo_putenv() overflow");
 	env.env_size += 128;
 	if (env.owned) {
 	    env.envp = erealloc3(env.envp, env.env_size, sizeof(char *));
@@ -469,11 +489,12 @@ sudo_putenv(str, dupcheck, overwrite)
 
     if (dupcheck) {
 	len = (strchr(str, '=') - str) + 1;
-	for (ep = env.envp; !found && *ep != NULL; ep++) {
+	for (ep = env.envp; *ep != NULL; ep++) {
 	    if (strncmp(str, *ep, len) == 0) {
 		if (overwrite)
 		    *ep = str;
 		found = TRUE;
+		break;
 	    }
 	}
 	/* Prune out duplicate variables. */
