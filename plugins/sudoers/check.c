@@ -424,6 +424,7 @@ build_timestamp(char **timestampdir, char **timestampfile)
     debug_decl(build_timestamp, SUDO_DEBUG_AUTH)
 
     dirparent = def_timestampdir;
+    *timestampfile = NULL;
     len = easprintf(timestampdir, "%s/%s", dirparent, user_name);
     if (len >= PATH_MAX)
 	goto bad;
@@ -456,7 +457,9 @@ build_timestamp(char **timestampdir, char **timestampfile)
 
     debug_return_int(len);
 bad:
-    log_fatal(0, _("timestamp path too long: %s"), *timestampfile);
+    log_fatal(0, _("timestamp path too long: %s"),
+	*timestampfile ? *timestampfile : *timestampdir);
+    /* NOTREACHED */
     debug_return_int(-1);
 }
 

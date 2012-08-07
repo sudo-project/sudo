@@ -472,6 +472,9 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
     int ch;
     debug_decl(reparse_sudoers, SUDO_DEBUG_UTIL)
 
+    if (tq_empty(&sudoerslist))
+	debug_return;
+
     /*
      * Parse the edited sudoers files and do sanity checking
      */

@@ -52,7 +52,7 @@ getline(char **bufp, size_t *bufsizep, FILE *fp)
     buf = fgetln(fp, &len);
     if (buf) {
 	bufsize = *bufp ? *bufsizep : 0;
-	if (bufsize < len + 1) {
+	if (bufsize == 0 || bufsize - 1 < len) {
 	    bufsize = len + 1;
 	    cp = *bufp ? realloc(*bufp, bufsize) : malloc(bufsize);
 	    if (cp == NULL)

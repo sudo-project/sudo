@@ -42,6 +42,9 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE_INTTYPES_H
+# include <inttypes.h>
+#endif
 #ifdef HAVE_LOGIN_CAP_H
 # include <login_cap.h>
 # ifndef LOGIN_SETENV
@@ -50,10 +53,25 @@
 #endif /* HAVE_LOGIN_CAP_H */
 #include <ctype.h>
 #include <errno.h>
+#include <limits.h>
 #include <pwd.h>
 
 #include "sudoers.h"
 
+/*
+ * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t
+ * could be signed (as it is on SunOS 4.x).  This just means that
+ * emalloc2() and erealloc3() cannot allocate huge amounts on such a
+ * platform but that is OK since sudo doesn't need to do so anyway.
+ */
+#ifndef SIZE_MAX
+# ifdef SIZE_T_MAX
+#  define SIZE_MAX	SIZE_T_MAX
+# else
+#  define SIZE_MAX	INT_MAX
+# endif /* SIZE_T_MAX */
+#endif /* SIZE_MAX */
+	
 /*
  * Flags used in rebuild_env()
  */
@@ -229,7 +247,7 @@ env_init(char * const envp[])
 	memset(env.envp, 0, env.env_size * sizeof(char *));
 #endif
 	memcpy(env.envp, envp, len * sizeof(char *));
-	env.envp[len] = '\0';
+	env.envp[len] = NULL;
 
 	/* Free the old envp we allocated, if any. */
 	if (env.old_envp != NULL)
@@ -263,11 +281,16 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
     bool found = false;
 
     /* Make sure there is room for the new entry plus a NULL. */
-    if (env.env_len + 2 > env.env_size) {
+    if (env.env_size > 2 && env.env_len > env.env_size - 2) {
 	char **nenvp;
-	size_t nsize = env.env_size + 128;
-	nenvp = env.envp ? realloc(env.envp, nsize * sizeof(char *)) :
-	    malloc(nsize * sizeof(char *));
+	size_t nsize;
+
+	if (env.env_size > SIZE_MAX - 128)
+	    errorx2(1, _("internal error, sudo_putenv_nodebug() overflow"));
+	nsize = env.env_size + 128;
+	if (nsize > SIZE_MAX / sizeof(char *))
+	    errorx2(1, _("internal error, sudo_putenv_nodebug() overflow"));
+	nenvp = realloc(env.envp, nsize * sizeof(char *));
 	if (nenvp == NULL) {
 	    errno = ENOMEM;
 	    return -1;
@@ -289,11 +312,12 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 
     if (dupcheck) {
 	len = (strchr(str, '=') - str) + 1;
-	for (ep = env.envp; !found && *ep != NULL; ep++) {
+	for (ep = env.envp; *ep != NULL; ep++) {
 	    if (strncmp(str, *ep, len) == 0) {
 		if (overwrite)
 		    *ep = str;
 		found = true;
+		break;
 	    }
 	}
 	/* Prune out duplicate variables. */
@@ -353,6 +377,7 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
 {
     char *estring;
     size_t esize;
+    int rval;
     debug_decl(sudo_setenv2, SUDO_DEBUG_ENV)
 
     esize = strlen(var) + 1 + strlen(val) + 1;
@@ -365,7 +390,10 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
 
 	errorx(1, _("internal error, sudo_setenv2() overflow"));
     }
-    debug_return_int(sudo_putenv(estring, dupcheck, overwrite));
+    rval = sudo_putenv(estring, dupcheck, overwrite);
+    if (rval == -1)
+	efree(estring);
+    debug_return_int(rval);
 }
 
 /*
@@ -377,11 +405,12 @@ sudo_setenv_nodebug(const char *var, const char *val, int overwrite)
 {
     char *estring;
     size_t esize;
+    int rval = -1;
 
     esize = strlen(var) + 1 + strlen(val) + 1;
     if ((estring = malloc(esize)) == NULL) {
 	errno = ENOMEM;
-	return -1;
+	goto done;
     }
 
     /* Build environment string and insert it. */
@@ -390,9 +419,13 @@ sudo_setenv_nodebug(const char *var, const char *val, int overwrite)
 	strlcat(estring, val, esize) >= esize) {
 
 	errno = EINVAL;
-	return -1;
+	goto done;
     }
-    return sudo_putenv_nodebug(estring, true, overwrite);
+    rval = sudo_putenv_nodebug(estring, true, overwrite);
+done:
+    if (rval == -1)
+	efree(estring);
+    return rval;
 }
 
 /*
