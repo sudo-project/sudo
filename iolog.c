@@ -146,7 +146,7 @@ io_nextid()
     sudo_user.sessid[6] = '\0';
 
     /* Rewind and overwrite old seq file. */
-    if (lseek(fd, 0, SEEK_SET) == (off_t)-1 || write(fd, buf, 7) != 7)
+    if (lseek(fd, (off_t)0, SEEK_SET) == (off_t)-1 || write(fd, buf, 7) != 7)
 	log_fatal(USE_ERRNO, "Can't write to %s", pathbuf);
     close(fd);
 }
