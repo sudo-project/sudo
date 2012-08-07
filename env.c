@@ -524,7 +524,9 @@ sudo_putenv(str, dupcheck, overwrite)
  * Merge another environment with our private copy.
  */
 void
-env_merge(char * const envp[], int overwrite)
+env_merge(envp, overwrite)
+    char * const envp[];
+    int overwrite;
 {
     char * const *ep;
   
@@ -626,7 +628,9 @@ matches_env_keep(var)
 }
 
 static void
-env_update_didvar(const char *ep, unsigned int *didvar)
+env_update_didvar(ep, didvar)
+    const char *ep;
+    unsigned int *didvar;
 {
     switch (*ep) {
 	case 'H':

@@ -66,7 +66,11 @@ static int  cmp_grgid	__P((const void *, const void *));
 
 #define cmp_grnam	cmp_pwnam
 
-#define ptr_to_item(p) ((struct cache_item *)((char *)p - offsetof(struct cache_item_##p, p)))
+#ifdef __STDC__
+# define ptr_to_item(p) ((struct cache_item *)((char *)p - offsetof(struct cache_item_##p, p)))
+#else
+# define ptr_to_item(p) ((struct cache_item *)((char *)p - offsetof(struct cache_item_/**/p, p)))
+#endif
 
 /*
  * Generic cache element.

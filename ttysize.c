@@ -46,7 +46,9 @@
 
 #ifdef TIOCGWINSZ
 static int
-get_ttysize_ioctl(int *rowp, int *colp)
+get_ttysize_ioctl(rowp, colp)
+    int *rowp;
+    int *colp;
 {
     struct winsize wsize;
 
@@ -60,14 +62,18 @@ get_ttysize_ioctl(int *rowp, int *colp)
 }
 #else
 static int
-get_ttysize_ioctl(int *rowp, int *colp)
+get_ttysize_ioctl(rowp, colp)
+    int *rowp;
+    int *colp;
 {
     return -1;
 }
 #endif /* TIOCGWINSZ */
 
 void
-get_ttysize(int *rowp, int *colp)
+get_ttysize(rowp, colp)
+    int *rowp;
+    int *colp;
 {
     if (get_ttysize_ioctl(rowp, colp) == -1) {
 	char *p;
