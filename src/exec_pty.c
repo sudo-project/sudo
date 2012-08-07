@@ -139,7 +139,7 @@ mon_handler(int s, siginfo_t *info, void *context)
 
     /*
      * If the signal came from the command we ran, just ignore
-     * it since we don't want the child to indirectly kill itself.
+     * it since we don't want the command to indirectly kill itself.
      * This can happen with, e.g. BSD-derived versions of reboot
      * that call kill(-1, SIGTERM) to kill all other processes.
      */

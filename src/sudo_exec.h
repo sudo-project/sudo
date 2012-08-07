@@ -35,7 +35,7 @@ extern volatile pid_t cmnd_pid;
 /* exec_pty.c */
 struct command_details;
 struct command_status;
-int fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *oset);
+int fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask);
 int perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat);
 int suspend_parent(int signo);
 void fd_set_iobs(fd_set *fdsr, fd_set *fdsw);
