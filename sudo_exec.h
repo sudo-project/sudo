@@ -30,14 +30,19 @@
 /* exec.c */
 int my_execve __P((const char *path, char *argv[], char *envp[]));
 int pipe_nonblock __P((int fds[2]));
+extern volatile pid_t cmnd_pid;
 
 /* exec_pty.c */
 int fork_pty __P((const char *path, char *argv[], char *envp[], int sv[],
-    int rbac_enabled, int bgmode, int *maxfd));
+    int rbac_enabled, int bgmode, int *maxfd, sigset_t *omask));
 int perform_io __P((fd_set *fdsr, fd_set *fdsw, struct command_status *cstat));
 int suspend_parent __P((int signo));
 void fd_set_iobs __P((fd_set *fdsr, fd_set *fdsw));
+#ifdef SA_SIGINFO
+RETSIGTYPE handler __P((int s, siginfo_t *info, void *context));
+#else
 RETSIGTYPE handler __P((int s));
+#endif
 void pty_close __P((struct command_status *cstat));
 void pty_setup __P((uid_t uid));
 extern int signal_pipe[2];
