@@ -292,7 +292,6 @@ void
 sudo_conf_read(void)
 {
     struct sudo_conf_table *cur;
-    struct plugin_info *info;
     struct stat sb;
     FILE *fp;
     char *cp;
@@ -346,25 +345,6 @@ sudo_conf_read(void)
 	}
     }
     fclose(fp);
-
 done:
-    if (tq_empty(&sudo_conf_data.plugins)) {
-	/* Default policy plugin */
-	info = ecalloc(1, sizeof(*info));
-	info->symbol_name = "sudoers_policy";
-	info->path = SUDOERS_PLUGIN;
-	/* info->options = NULL; */
-	info->prev = info;
-	/* info->next = NULL; */
-	tq_append(&sudo_conf_data.plugins, info);
-
-	/* Default I/O plugin */
-	info = ecalloc(1, sizeof(*info));
-	info->symbol_name = "sudoers_io";
-	info->path = SUDOERS_PLUGIN;
-	/* info->options = NULL; */
-	info->prev = info;
-	/* info->next = NULL; */
-	tq_append(&sudo_conf_data.plugins, info);
-    }
+    return;
 }
