@@ -1175,10 +1175,6 @@ will
 .Sy not
 be matched by
 wildcards used in the path name.
-When matching the command line arguments, however, a slash
-.Sy does
-get matched by
-wildcards.
 This is to make a path like:
 .Bd -literal -offset 4n
 /usr/bin/*
@@ -1188,9 +1184,38 @@ match
 .Pa /usr/bin/who
 but not
 .Pa /usr/bin/X11/xterm .
+.Pp
+When matching the command line arguments, however, a slash
+.Sy does
+get matched by wildcards since command line arguments may contain
+arbitrary strings and not just pathnames.
+.Pp
+Wildcards in command line arguments should be used with care.
+Because command line arguments are matched as a single, concatenated
+string, a wildcard such as
+.Ql \&?
+or
+.Ql *
+can match multiple words.
+For example, while a sudoers entry like:
+.Bd -literal -offset 4n
+%operator ALL = /bin/cat /var/log/messages*
+.Ed
+.Pp
+will allow command like:
+.Bd -literal -offset 4n
+$ sudo cat /var/log/messages.1
+.Ed
+.Pp
+It will also allow:
+.Bd -literal -offset 4n
+$ sudo cat /var/log/messages /etc/shadow
+.Ed
+.Pp
+which is probaby not what was intended.
 .Ss Exceptions to wildcard rules
 The following exceptions apply to the above rules:
-.Bl -tag -width 4n
+.Bl -tag -width 8n
 .It Li \&""
 If the empty string
 .Li \&""
@@ -1199,6 +1224,12 @@ is the only command line argument in the
 entry it means that command is not allowed to be run with
 .Sy any
 arguments.
+.It sudoedit
+Command line arguments to the
+.Em sudoedit
+built-in command should always be pathnames, so a forward slash
+.Pq Ql /
+will not be matched by a wildcard.
 .El
 .Ss Including other files from within sudoers
 It is possible to include other
@@ -3513,7 +3544,7 @@ ignore it.
 Administrators should not rely on this feature as it is not universally
 available.
 .Sh SEE ALSO
-.Xr rsh 1 ,
+.Xr ssh 1 ,
 .Xr su 1 ,
 .Xr fnmatch 3 ,
 .Xr glob 3 ,

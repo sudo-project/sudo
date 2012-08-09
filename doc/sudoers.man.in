@@ -1248,10 +1248,6 @@ will
 \fBnot\fR
 be matched by
 wildcards used in the path name.
-When matching the command line arguments, however, a slash
-\fBdoes\fR
-get matched by
-wildcards.
 This is to make a path like:
 .nf
 .sp
@@ -1264,9 +1260,47 @@ match
 \fI/usr/bin/who\fR
 but not
 \fI/usr/bin/X11/xterm\fR.
+.PP
+When matching the command line arguments, however, a slash
+\fBdoes\fR
+get matched by wildcards since command line arguments may contain
+arbitrary strings and not just pathnames.
+.PP
+Wildcards in command line arguments should be used with care.
+Because command line arguments are matched as a single, concatenated
+string, a wildcard such as
+`\&?'
+or
+`*'
+can match multiple words.
+For example, while a sudoers entry like:
+.nf
+.sp
+.RS 4n
+%operator ALL = /bin/cat /var/log/messages*
+.RE
+.fi
+.PP
+will allow command like:
+.nf
+.sp
+.RS 4n
+$ sudo cat /var/log/messages.1
+.RE
+.fi
+.PP
+It will also allow:
+.nf
+.sp
+.RS 4n
+$ sudo cat /var/log/messages /etc/shadow
+.RE
+.fi
+.PP
+which is probaby not what was intended.
 .SS "Exceptions to wildcard rules"
 The following exceptions apply to the above rules:
-.TP 6n
+.TP 10n
 \fR\&""\fR
 If the empty string
 \fR\&""\fR
@@ -1275,6 +1309,13 @@ is the only command line argument in the
 entry it means that command is not allowed to be run with
 \fBany\fR
 arguments.
+.TP 10n
+sudoedit
+Command line arguments to the
+\fIsudoedit\fR
+built-in command should always be pathnames, so a forward slash
+(`/')
+will not be matched by a wildcard.
 .SS "Including other files from within sudoers"
 It is possible to include other
 \fIsudoers\fR
@@ -3801,7 +3842,7 @@ ignore it.
 Administrators should not rely on this feature as it is not universally
 available.
 .SH "SEE ALSO"
-rsh(1),
+ssh(1),
 su(1),
 fnmatch(3),
 glob(3),

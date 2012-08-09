@@ -560,19 +560,43 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      Would match any file name beginning with a letter.
 
      Note that a forward slash (`/') will nnoott be matched by wildcards used in
-     the path name.  When matching the command line arguments, however, a
-     slash ddooeess get matched by wildcards.  This is to make a path like:
+     the path name.  This is to make a path like:
 
          /usr/bin/*
 
      match _/_u_s_r_/_b_i_n_/_w_h_o but not _/_u_s_r_/_b_i_n_/_X_1_1_/_x_t_e_r_m.
 
+     When matching the command line arguments, however, a slash ddooeess get
+     matched by wildcards since command line arguments may contain arbitrary
+     strings and not just pathnames.
+
+     Wildcards in command line arguments should be used with care.  Because
+     command line arguments are matched as a single, concatenated string, a
+     wildcard such as `?' or `*' can match multiple words.  For example, while
+     a sudoers entry like:
+
+         %operator ALL = /bin/cat /var/log/messages*
+
+     will allow command like:
+
+         $ sudo cat /var/log/messages.1
+
+     It will also allow:
+
+         $ sudo cat /var/log/messages /etc/shadow
+
+     which is probaby not what was intended.
+
    EExxcceeppttiioonnss ttoo wwiillddccaarrdd rruulleess
      The following exceptions apply to the above rules:
 
-     ""    If the empty string "" is the only command line argument in the
-           _s_u_d_o_e_r_s entry it means that command is not allowed to be run with
-           aannyy arguments.
+     ""        If the empty string "" is the only command line argument in the
+               _s_u_d_o_e_r_s entry it means that command is not allowed to be run
+               with aannyy arguments.
+
+     sudoedit  Command line arguments to the _s_u_d_o_e_d_i_t built-in command should
+               always be pathnames, so a forward slash (`/') will not be
+               matched by a wildcard.
 
    IInncclluuddiinngg ootthheerr ffiilleess ffrroomm wwiitthhiinn ssuuddooeerrss
      It is possible to include other _s_u_d_o_e_r_s files from within the _s_u_d_o_e_r_s
@@ -1827,7 +1851,7 @@ SSEECCUURRIITTYY NNOOTTEESS
      on this feature as it is not universally available.
 
 SSEEEE AALLSSOO
-     rsh(1), su(1), fnmatch(3), glob(3), mktemp(3), strftime(3),
+     ssh(1), su(1), fnmatch(3), glob(3), mktemp(3), strftime(3),
      sudoers.ldap(4), sudo_plugin(1m), sudo(1m), visudo(1m)
 
 CCAAVVEEAATTSS
