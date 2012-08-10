@@ -190,9 +190,8 @@ Security policies may log successful and failed attempts to use
 .Nm sudo .
 If an I/O plugin is configured, the running command's input and
 output may be logged as well.
-.Sh OPTIONS
-.Nm sudo
-accepts the following command line options:
+.Pp
+The options are as follows:
 .Bl -tag -width Fl
 .It Fl A
 Normally, if

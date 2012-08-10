@@ -33,8 +33,7 @@ DDEESSCCRRIIPPTTIIOONN
 
      `>'           Double the playback speed.
 
-OOPPTTIIOONNSS
-     ssuuddoorreeppllaayy accepts the following command line options:
+     The options are as follows:
 
      --dd _d_i_r_e_c_t_o_r_y  Use _d_i_r_e_c_t_o_r_y to for the session logs instead of the
                    default, _/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o.

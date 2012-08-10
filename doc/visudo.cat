@@ -35,9 +35,7 @@ DDEESSCCRRIIPPTTIIOONN
      been detected, the cursor will be placed on the line where the error
      occurred (if the editor supports this feature).
 
-OOPPTTIIOONNSS
-     vviissuuddoo accepts the following command line options: accepts the following
-     command line options:
+     The options are as follows:
 
      --cc          Enable _c_h_e_c_k_-_o_n_l_y mode.  The existing _s_u_d_o_e_r_s file will be
                  checked for syntax errors, owner and mode.  A message will be

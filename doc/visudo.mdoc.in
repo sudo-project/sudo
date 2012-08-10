@@ -119,10 +119,8 @@ is typed to edit the
 .Em sudoers
 file after a parse error has been detected, the cursor will be placed on
 the line where the error occurred (if the editor supports this feature).
-.Sh OPTIONS
-.Nm visudo
-accepts the following command line options:
-accepts the following command line options:
+.Pp
+The options are as follows:
 .Bl -tag -width Fl
 .It Fl c
 Enable

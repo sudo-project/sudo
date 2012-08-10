@@ -49,8 +49,7 @@ DDEESSCCRRIIPPTTIIOONN
      an I/O plugin is configured, the running command's input and output may
      be logged as well.
 
-OOPPTTIIOONNSS
-     ssuuddoo accepts the following command line options:
+     The options are as follows:
 
      --AA          Normally, if ssuuddoo requires a password, it will read it from
                  the user's terminal.  If the --AA (_a_s_k_p_a_s_s) option is

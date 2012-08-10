@@ -90,9 +90,8 @@ Reduce the playback speed by one half.
 .TP 14n
 `>'
 Double the playback speed.
-.SH "OPTIONS"
-\fBsudoreplay\fR
-accepts the following command line options:
+.PP
+The options are as follows:
 .TP 14n
 \fB\-d\fR \fIdirectory\fR
 .br

@@ -120,10 +120,8 @@ is typed to edit the
 \fIsudoers\fR
 file after a parse error has been detected, the cursor will be placed on
 the line where the error occurred (if the editor supports this feature).
-.SH "OPTIONS"
-\fBvisudo\fR
-accepts the following command line options:
-accepts the following command line options:
+.PP
+The options are as follows:
 .TP 12n
 \fB\-c\fR
 Enable

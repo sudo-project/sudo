@@ -96,9 +96,8 @@ Reduce the playback speed by one half.
 .It Ql >
 Double the playback speed.
 .El
-.Sh OPTIONS
-.Nm sudoreplay
-accepts the following command line options:
+.Pp
+The options are as follows:
 .Bl -tag -width 12n
 .It Fl d Ar directory
 Use
