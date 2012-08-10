@@ -667,14 +667,14 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    (unsigned int)runas_pw->pw_gid;
 	len = snprintf(cp, glsize - (cp - gid_list), "%u", egid);
 	if (len < 0 || len >= glsize - (cp - gid_list))
-	    errorx(1, _("internal error, runas_groups overflow"));
+	    errorx(1, _("internal error, %s overflow"), "runas_groups");
 	cp += len;
 	for (i = 0; i < grlist->ngids; i++) {
 	    if (grlist->gids[i] != egid) {
 		len = snprintf(cp, glsize - (cp - gid_list), ",%u",
 		     (unsigned int) grlist->gids[i]);
 		if (len < 0 || len >= glsize - (cp - gid_list))
-		    errorx(1, _("internal error, runas_groups overflow"));
+		    errorx(1, _("internal error, %s overflow"), "runas_groups");
 		cp += len;
 	    }
 	}
@@ -933,7 +933,7 @@ set_cmnd(void)
 		for (to = user_args, av = NewArgv + 1; *av; av++) {
 		    n = strlcpy(to, *av, size - (to - user_args));
 		    if (n >= size - (to - user_args))
-			errorx(1, _("internal error, set_cmnd() overflow"));
+			errorx(1, _("internal error, %s overflow"), "set_cmnd()");
 		    to += n;
 		    *to++ = ' ';
 		}

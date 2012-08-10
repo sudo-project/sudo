@@ -98,7 +98,7 @@ emalloc2(size_t nmemb, size_t size)
     if (nmemb == 0 || size == 0)
 	errorx2(1, _("internal error, tried to emalloc2(0)"));
     if (nmemb > SIZE_MAX / size)
-	errorx2(1, _("internal error, emalloc2() overflow"));
+	errorx2(1, _("internal error, %s overflow"), "emalloc2()");
 
     size *= nmemb;
     if ((ptr = malloc(size)) == NULL)
@@ -120,7 +120,7 @@ ecalloc(size_t nmemb, size_t size)
 	errorx2(1, _("internal error, tried to ecalloc(0)"));
     if (nmemb != 1) {
 	if (nmemb > SIZE_MAX / size)
-	    errorx2(1, _("internal error, ecalloc() overflow"));
+	    errorx2(1, _("internal error, %s overflow"), "ecalloc()");
 	size *= nmemb;
     }
     if ((ptr = malloc(size)) == NULL)
@@ -160,7 +160,7 @@ erealloc3(void *ptr, size_t nmemb, size_t size)
     if (nmemb == 0 || size == 0)
 	errorx2(1, _("internal error, tried to erealloc3(0)"));
     if (nmemb > SIZE_MAX / size)
-	errorx2(1, _("internal error, erealloc3() overflow"));
+	errorx2(1, _("internal error, %s overflow"), "erealloc3()");
 
     size *= nmemb;
     ptr = ptr ? realloc(ptr, size) : malloc(size);
@@ -182,9 +182,9 @@ erecalloc(void *ptr, size_t onmemb, size_t nmemb, size_t msize)
     size_t size;
 
     if (nmemb == 0 || msize == 0)
-	errorx2(1, _("internal error, tried to erealloc3(0)"));
+	errorx2(1, _("internal error, tried to erecalloc(0)"));
     if (nmemb > SIZE_MAX / msize)
-	errorx2(1, _("internal error, erealloc3() overflow"));
+	errorx2(1, _("internal error, %s overflow"), "erecalloc()");
 
     size = nmemb * msize;
     ptr = ptr ? realloc(ptr, size) : malloc(size);

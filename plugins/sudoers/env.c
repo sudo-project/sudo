@@ -285,11 +285,15 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 	char **nenvp;
 	size_t nsize;
 
-	if (env.env_size > SIZE_MAX - 128)
-	    errorx2(1, _("internal error, sudo_putenv_nodebug() overflow"));
+	if (env.env_size > SIZE_MAX - 128) {
+	    errorx2(1, _("internal error, %s overflow"),
+		"sudo_putenv_nodebug()");
+	}
 	nsize = env.env_size + 128;
-	if (nsize > SIZE_MAX / sizeof(char *))
-	    errorx2(1, _("internal error, sudo_putenv_nodebug() overflow"));
+	if (nsize > SIZE_MAX / sizeof(char *)) {
+	    errorx2(1, _("internal error, %s overflow"),
+		"sudo_putenv_nodebug()");
+	}
 	nenvp = realloc(env.envp, nsize * sizeof(char *));
 	if (nenvp == NULL) {
 	    errno = ENOMEM;
@@ -388,7 +392,7 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
 	strlcat(estring, "=", esize) >= esize ||
 	strlcat(estring, val, esize) >= esize) {
 
-	errorx(1, _("internal error, sudo_setenv2() overflow"));
+	errorx(1, _("internal error, %s overflow"), "sudo_setenv2()");
     }
     rval = sudo_putenv(estring, dupcheck, overwrite);
     if (rval == -1)
@@ -440,7 +444,7 @@ sudo_setenv(const char *var, const char *val, int overwrite)
     rval = sudo_setenv_nodebug(var, val, overwrite);
     if (rval == -1) {
 	if (errno == EINVAL)
-	    errorx(1, _("internal error, sudo_setenv() overflow"));
+	    errorx(1, _("internal error, %s overflow"), "sudo_setenv()");
 	errorx(1, _("unable to allocate memory"));
     }
     debug_return_int(rval);

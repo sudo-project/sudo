@@ -78,8 +78,10 @@ linux_audit_command(char *argv[], int result)
     command = cp = emalloc(size);
     for (av = argv; *av != NULL; av++) {
 	n = strlcpy(cp, *av, size - (cp - command));
-	if (n >= size - (cp - command))
-	    errorx(1, _("internal error, linux_audit_command() overflow"));
+	if (n >= size - (cp - command)) {
+	    errorx(1, _("internal error, %s overflow"),
+		"linux_audit_command()");
+	}
 	cp += n;
 	*cp++ = ' ';
     }
