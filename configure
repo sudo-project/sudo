@@ -661,6 +661,7 @@ editor
 secure_path
 netsvc_conf
 nsswitch_conf
+sssd_lib
 ldap_secret
 ldap_conf
 path_info
@@ -722,6 +723,7 @@ mansectform
 mansectsu
 devdir
 SEMAN
+PSMAN
 LCMAN
 BAMAN
 DEVEL
@@ -805,6 +807,8 @@ with_rpath
 with_blibpath
 with_bsm_audit
 with_linux_audit
+with_sssd
+with_sssd_lib
 with_incpath
 with_libpath
 with_libraries
@@ -1583,6 +1587,8 @@ Optional Packages:
   --with-blibpath=PATH    pass -blibpath flag to ld for additional lib paths
   --with-bsm-audit        enable BSM audit support
   --with-linux-audit      enable Linux audit support
+  --with-sssd             enable SSSD support
+  --with-sssd-lib         path to the SSSD library
   --with-incpath          additional places to look for include files
   --with-libpath          additional places to look for libraries
   --with-libraries        additional libraries to link with
@@ -2907,6 +2913,8 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
+
 #
 # Begin initial values for man page substitution
 #
@@ -2962,6 +2970,7 @@ DEVEL=
 LDAP="#"
 BAMAN=0
 LCMAN=0
+PSMAN=0
 SEMAN=0
 LIBINTL=
 ZLIB=
@@ -3909,6 +3918,34 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 		;;
 esac
 fi
+
+
+
+# Check whether --with-sssd was given.
+if test "${with_sssd+set}" = set; then :
+  withval=$with_sssd; case $with_sssd in
+    yes)	SUDOERS_OBJS="${SUDOERS_OBJS} sssd.lo"
+		$as_echo "#define HAVE_SSSD 1" >>confdefs.h
+
+		;;
+    no)		;;
+    *)		as_fn_error $? "\"--with-sssd does not take an argument.\"" "$LINENO" 5
+		;;
+esac
+fi
+
+
+
+# Check whether --with-sssd-lib was given.
+if test "${with_sssd_lib+set}" = set; then :
+  withval=$with_sssd_lib;
+fi
+
+sssd_lib="\"LIBDIR\""
+test -n "$with_sssd_lib" && sssd_lib="$with_sssd_lib"
+cat >>confdefs.h <<EOF
+#define _PATH_SSSD_LIB "$sssd_lib"
+EOF
 
 
 
@@ -13860,7 +13897,7 @@ if test "x$ac_cv_func_priv_set" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_PRIV_SET 1
 _ACEOF
-
+ PSMAN=1
 fi
 done
 
@@ -23005,6 +23042,7 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+
 
 
 

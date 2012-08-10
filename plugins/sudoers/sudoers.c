@@ -145,6 +145,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     volatile int sources = 0;
     sigaction_t sa;
     struct sudo_nss *nss;
+    struct sudo_nss *nss_next;
     debug_decl(sudoers_policy_open, SUDO_DEBUG_PLUGIN)
 
     sudo_version = version;
@@ -201,12 +202,15 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     set_perms(PERM_ROOT);
 
     /* Open and parse sudoers, set global defaults */
-    tq_foreach_fwd(snl, nss) {
-	if (nss->open(nss) == 0 && nss->parse(nss) == 0) {
-	    sources++;
-	    if (nss->setdefs(nss) != 0)
-		log_error(NO_STDERR, _("problem with defaults entries"));
-	}
+    for (nss = snl->first; nss != NULL; nss = nss_next) {
+        nss_next = nss->next;
+        if (nss->open(nss) == 0 && nss->parse(nss) == 0) {
+            sources++;
+            if (nss->setdefs(nss) != 0)
+                log_error(NO_STDERR, _("problem with defaults entries"));
+        } else {
+            tq_remove(snl, nss);
+        }
     }
     if (sources == 0) {
 	warningx(_("no valid sudoers sources found, quitting"));

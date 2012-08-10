@@ -113,6 +113,7 @@ AC_SUBST([root_sudo])
 AC_SUBST([path_info])
 AC_SUBST([ldap_conf])
 AC_SUBST([ldap_secret])
+AC_SUBST([sssd_lib])
 AC_SUBST([nsswitch_conf])
 AC_SUBST([netsvc_conf])
 AC_SUBST([secure_path])
@@ -300,6 +301,24 @@ AC_ARG_WITH(linux-audit, [AS_HELP_STRING([--with-linux-audit], [enable Linux aud
     *)		AC_MSG_ERROR(["--with-linux-audit does not take an argument."])
 		;;
 esac])
+
+dnl
+dnl Handle SSSD support.
+dnl
+AC_ARG_WITH(sssd, [AS_HELP_STRING([--with-sssd], [enable SSSD support])],
+[case $with_sssd in
+    yes)	SUDOERS_OBJS="${SUDOERS_OBJS} sssd.lo"
+		AC_DEFINE(HAVE_SSSD)
+		;;
+    no)		;;
+    *)		AC_MSG_ERROR(["--with-sssd does not take an argument."])
+		;;
+esac])
+
+AC_ARG_WITH(sssd-lib, [AS_HELP_STRING([--with-sssd-lib], [path to the SSSD library])])
+sssd_lib="\"LIBDIR\""
+test -n "$with_sssd_lib" && sssd_lib="$with_sssd_lib"
+SUDO_DEFINE_UNQUOTED(_PATH_SSSD_LIB, "$sssd_lib", [Path to the SSSD library])
 
 AC_ARG_WITH(incpath, [AS_HELP_STRING([--with-incpath], [additional places to look for include files])],
 [case $with_incpath in
@@ -3559,6 +3578,7 @@ AH_TEMPLATE(HAVE_LBER_H, [Define to 1 if your LDAP needs <lber.h>. (OpenLDAP doe
 AH_TEMPLATE(HAVE_LDAP, [Define to 1 if you use LDAP for sudoers.])
 AH_TEMPLATE(HAVE_LIBINTL_H, [Define to 1 if you have the <libintl.h> header file.])
 AH_TEMPLATE(HAVE_LINUX_AUDIT, [Define to 1 to enable Linux audit support.])
+AH_TEMPLATE(HAVE_SSSD, [Define to 1 to enable SSSD support.])
 AH_TEMPLATE(HAVE_OPIE, [Define to 1 if you use NRL OPIE.])
 AH_TEMPLATE(HAVE_PAM, [Define to 1 if you use PAM authentication.])
 AH_TEMPLATE(HAVE_PAM_LOGIN, [Define to 1 if you use a specific PAM session for sudo -i.])

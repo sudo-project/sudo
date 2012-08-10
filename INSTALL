@@ -201,6 +201,15 @@ Special features/options:
 	this file instead of /etc/ldap.secret to read the secret password
 	when rootbinddn is specified in the ldap config file.
 
+  --with-sssd
+        Enable support for using the System Security Services Daemon
+        (SSSD) as a sudoers data source.  For more informaton on
+        SSD, see http://fedorahosted.org/sssd/
+
+  --with-sssd-lib=PATH
+        Specify the path to the SSSD shared library, which is loaded
+        at run-time.
+
   --with-nsswitch[=PATH]
 	Path to nsswitch.conf or "no" to disable nsswitch support.
 	If specified, sudo uses this file instead of /etc/nsswitch.conf.

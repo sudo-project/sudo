@@ -157,6 +157,10 @@
 #undef	_PATH_LDAP_SECRET
 #endif /* _PATH_LDAP_SECRET */
 
+#ifndef _PATH_SSSD_LIB
+#undef  _PATH_SSSD_LIB
+#endif /* _PATH_SSSD_LIB */
+
 #ifndef _PATH_NSSWITCH_CONF
 #undef	_PATH_NSSWITCH_CONF
 #endif /* _PATH_NSSWITCH_CONF */

@@ -42,6 +42,9 @@ What's new in Sudo 1.8.6?
    used to give a user the ability to run a command as themselves
    but with an expanded privilege set.
 
+ * Support for using the System Security Services Daemon (SSSD) as
+   a source of sudoers data.
+
 What's new in Sudo 1.8.5p2?
 
  * Fixed use of the SUDO_ASKPASS environment variable which was

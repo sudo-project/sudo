@@ -47,8 +47,11 @@ extern struct sudo_nss sudo_nss_file;
 #ifdef HAVE_LDAP
 extern struct sudo_nss sudo_nss_ldap;
 #endif
+#ifdef HAVE_SSSD
+extern struct sudo_nss sudo_nss_sss;
+#endif
 
-#if defined(HAVE_LDAP) && defined(_PATH_NSSWITCH_CONF)
+#if (defined(HAVE_LDAP) || defined(HAVE_SSSD)) && defined(_PATH_NSSWITCH_CONF)
 /*
  * Read in /etc/nsswitch.conf
  * Returns a tail queue of matches.
@@ -58,6 +61,9 @@ sudo_read_nss(void)
 {
     FILE *fp;
     char *cp;
+#ifdef HAVE_SSSD
+    bool saw_sss = false;
+#endif
     bool saw_files = false;
     bool saw_ldap = false;
     bool got_match = false;
@@ -84,6 +90,11 @@ sudo_read_nss(void)
 	    } else if (strcasecmp(cp, "ldap") == 0 && !saw_ldap) {
 		tq_append(&snl, &sudo_nss_ldap);
 		got_match = true;
+#ifdef HAVE_SSSD
+	    } else if (strcasecmp(cp, "sss") == 0 && !saw_sss) {
+		tq_append(&snl, &sudo_nss_sss);
+		got_match = true;
+#endif
 	    } else if (strcasecmp(cp, "[NOTFOUND=return]") == 0 && got_match) {
 		/* NOTFOUND affects the most recent entry */
 		tq_last(&snl)->ret_if_notfound = true;
@@ -104,9 +115,9 @@ nomatch:
     debug_return_ptr(&snl);
 }
 
-#else /* HAVE_LDAP && _PATH_NSSWITCH_CONF */
+#else /* (HAVE_LDAP || HAVE_SSSD) && _PATH_NSSWITCH_CONF */
 
-# if defined(HAVE_LDAP) && defined(_PATH_NETSVC_CONF)
+# if (defined(HAVE_LDAP) || defined(HAVE_SSSD)) && defined(_PATH_NETSVC_CONF)
 
 /*
  * Read in /etc/netsvc.conf (like nsswitch.conf on AIX)
@@ -117,6 +128,9 @@ sudo_read_nss(void)
 {
     FILE *fp;
     char *cp, *ep;
+#ifdef HAVE_SSSD
+    bool saw_sss = false;
+#endif
     bool saw_files = false;
     bool saw_ldap = false;
     bool got_match = false;
@@ -156,6 +170,13 @@ sudo_read_nss(void)
 		tq_append(&snl, &sudo_nss_ldap);
 		got_match = true;
 		ep = &cp[4];
+#ifdef HAVE_SSSD
+	    } else if (!saw_sss && strncasecmp(cp, "sss", 3) == 0 &&
+		(isspace((unsigned char)cp[3]) || cp[3] == '\0')) {
+		tq_append(&snl, &sudo_nss_sss);
+		got_match = true;
+		ep = &cp[3];
+#endif
 	    } else {
 		got_match = false;
 	    }
@@ -195,6 +216,9 @@ sudo_read_nss(void)
     static struct sudo_nss_list snl;
     debug_decl(sudo_read_nss, SUDO_DEBUG_NSS)
 
+#  ifdef HAVE_SSSD
+    tq_append(&snl, &sudo_nss_sss);
+#  endif
 #  ifdef HAVE_LDAP
     tq_append(&snl, &sudo_nss_ldap);
 #  endif
