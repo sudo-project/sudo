@@ -53,6 +53,7 @@
 # include <ttyent.h>
 #endif
 #include <fcntl.h>
+#include <signal.h>
 
 #include "sudo.h"
 #include "sudo_exec.h"
