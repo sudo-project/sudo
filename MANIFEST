@@ -206,6 +206,8 @@ plugins/sudoers/po/lt.mo
 plugins/sudoers/po/lt.po
 plugins/sudoers/po/pl.mo
 plugins/sudoers/po/pl.po
+plugins/sudoers/po/sl.mo  
+plugins/sudoers/po/sl.po
 plugins/sudoers/po/sudoers.pot
 plugins/sudoers/po/sv.mo
 plugins/sudoers/po/sv.po
@@ -311,6 +313,8 @@ src/po/pl.mo
 src/po/pl.po
 src/po/ru.mo
 src/po/ru.po
+src/po/sl.mo
+src/po/sl.po
 src/po/sr.mo
 src/po/sr.po
 src/po/sudo.pot

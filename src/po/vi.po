@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo-1.8.5rc3\n"
+"Project-Id-Version: sudo-1.8.6b3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2012-04-24 13:41-0400\n"
-"PO-Revision-Date: 2012-04-30 07:00+0700\n"
+"PO-Revision-Date: 2012-08-03 08:03+0700\n"
 "Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
 "Language-Team: Vietnamese <translation-team-vi@lists.sourceforge.net>\n"
 "Language: vi\n"
@@ -541,7 +541,7 @@ msgstr "Phiên bản sudo %s\n"
 #: src/sudo.c:213
 #, c-format
 msgid "Configure options: %s\n"
-msgstr "Cấu hình các tùy chọn: %s\n"
+msgstr "Các tùy chọn cấu hình: %s\n"
 
 #: src/sudo.c:218
 #, c-format

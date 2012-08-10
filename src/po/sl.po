@@ -1,23 +1,19 @@
-# Danish translation of sudo.
+# Slovenian translation of sudo.
 # This file is put in the public domain.
-# Joe Hansen <joedalton2@yahoo.dk>, 2011, 2012.
+# This file is distributed under the same license as the sudo package.
 #
-# audit -> overvågning
-# overflow -> overløb
-#
-# projekt bruger konsekvent små bogstaver, og så i starten af sætninger, så 
-# dette er også  valgt på dansk uanset at der er : som efterfølgende normalt 
-# ville have stort begyndelsesbogstav på dansk.
+# Damir Jerovšek <damir.jerovsek@gmail.com>, 2012.
+# Klemen Košir <klemen.kosir@gmx.com>, 2012.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.6b3\n"
+"Project-Id-Version: sudo-1.8.6b3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2012-04-24 13:41-0400\n"
-"PO-Revision-Date: 2012-08-06 23:06+0100\n"
-"Last-Translator: Joe Hansen <joedalton2@yahoo.dk>\n"
-"Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
-"Language: da\n"
+"PO-Revision-Date: 2012-08-10 18:07+0100\n"
+"Last-Translator: Klemen Košir <klemen.kosir@gmx.com>\n"
+"Language-Team: Slovenian <translation-team-sl@lists.sourceforge.net>\n"
+"Language: sl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -25,21 +21,21 @@ msgstr ""
 #: common/aix.c:149
 #, c-format
 msgid "unable to open userdb"
-msgstr "kan ikke åbne userdb"
+msgstr "ni mogoče odpreti userdb"
 
 #: common/aix.c:152
 #, c-format
 msgid "unable to switch to registry \"%s\" for %s"
-msgstr "kan ikke skifte til register »%s« for %s"
+msgstr "ni mogoče preklopiti na vpisnik \"%s\" za %s"
 
 #: common/aix.c:169
 #, c-format
 msgid "unable to restore registry"
-msgstr "kan ikke gendanne register"
+msgstr "ni mogoče obnoviti  vpisnika"
 
 #: common/alloc.c:82
 msgid "internal error, tried to emalloc(0)"
-msgstr "intern fejl, forsøgte at emalloc(0)"
+msgstr "notranja napaka, poskus uporabe emalloc(0)"
 
 #: common/alloc.c:85 common/alloc.c:105 common/alloc.c:127 common/alloc.c:146
 #: common/alloc.c:168 common/alloc.c:192 common/alloc.c:256 common/alloc.c:270
@@ -47,69 +43,69 @@ msgstr "intern fejl, forsøgte at emalloc(0)"
 #: src/sudo.c:489 src/sudo.c:500 src/sudo.c:737
 #, c-format
 msgid "unable to allocate memory"
-msgstr "kunne ikke allokere hukommelse"
+msgstr "ni mogoče dodeliti pomnilnika"
 
 #: common/alloc.c:99
 msgid "internal error, tried to emalloc2(0)"
-msgstr "intern fejl, forsøgte at emalloc2(0)"
+msgstr "notranja napaka, poskus uporabe emalloc2(0)"
 
 #: common/alloc.c:101
 msgid "internal error, emalloc2() overflow"
-msgstr "intern fejl, emalloc2()-overløb"
+msgstr "notranja napaka, prekoračitev emalloc2(0)"
 
 #: common/alloc.c:120
 msgid "internal error, tried to ecalloc(0)"
-msgstr "intern fejl, forsøgte at ecalloc(0)"
+msgstr "notranja napaka med izvajanjem funkcije ecalloc(0)"
 
 #: common/alloc.c:123
 msgid "internal error, ecalloc() overflow"
-msgstr "intern fejl, ecalloc()-overløb"
+msgstr "notranja napaka, prekoračitev funkcije ecalloc()"
 
 #: common/alloc.c:142
 msgid "internal error, tried to erealloc(0)"
-msgstr "intern fejl, forsøgte at erealloc(0)"
+msgstr "notranja napaka, poskus uporabe erealloc(0)"
 
 #: common/alloc.c:161 common/alloc.c:185
 msgid "internal error, tried to erealloc3(0)"
-msgstr "intern fejl, forsøgte at erealloc3(0)"
+msgstr "notranja napaka, poskus uporabe erealloc3(0)"
 
 #: common/alloc.c:163 common/alloc.c:187
 msgid "internal error, erealloc3() overflow"
-msgstr "intern fejl, erealloc3()-overløb"
+msgstr "notranja napaka, prekoračitev erealloc3(0)"
 
 #: common/sudo_conf.c:306
 #, c-format
 msgid "unable to stat %s"
-msgstr "kan ikke køre stat %s"
+msgstr "stanja datoteke %s ni mogoče izpisati"
 
 #: common/sudo_conf.c:309
 #, c-format
 msgid "%s is not a regular file"
-msgstr "%s er ikke en regulær fil"
+msgstr "%s ni običajna datoteka"
 
 #: common/sudo_conf.c:312
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
-msgstr "%s er ejet af uid %u, burde være %u"
+msgstr "%s je v lasti uporabnika z ID-jem %u, moral bi biti %u"
 
 #: common/sudo_conf.c:316
 #, c-format
 msgid "%s is world writable"
-msgstr "%s er skrivbar for alle"
+msgstr "v datoteko %s lahko zapisujejo vsi uporabniki"
 
 #: common/sudo_conf.c:319
 #, c-format
 msgid "%s is group writable"
-msgstr "%s er skrivbar for gruppe"
+msgstr "%s"
 
 #: common/sudo_conf.c:328 src/selinux.c:196 src/selinux.c:209 src/sudo.c:331
 #, c-format
 msgid "unable to open %s"
-msgstr "kan ikke åbne %s"
+msgstr "ni mogoče odpreti %s"
 
 #: compat/strsignal.c:47
 msgid "Unknown signal"
-msgstr "ukendt signal"
+msgstr "Neznan signal"
 
 #: src/error.c:82 src/error.c:86
 msgid ": "
@@ -118,73 +114,73 @@ msgstr ": "
 #: src/exec.c:107 src/exec_pty.c:628
 #, c-format
 msgid "policy plugin failed session initialization"
-msgstr "udvidelsesmodul for politik mislykkedes i sessionsinitialisering"
+msgstr "vstavek za pravilnik ni mogel zagnati seje"
 
 #: src/exec.c:112 src/exec_pty.c:633 src/exec_pty.c:967 src/tgetpass.c:221
 #, c-format
 msgid "unable to fork"
-msgstr "kunne ikke forgrene"
+msgstr "ni mogoče razvejiti"
 
 #: src/exec.c:259
 #, c-format
 msgid "unable to create sockets"
-msgstr "kunne ikke oprette sokler"
+msgstr "ni mogoče ustvariti vtičev"
 
 #: src/exec.c:266 src/exec_pty.c:572 src/exec_pty.c:581 src/exec_pty.c:589
 #: src/exec_pty.c:902 src/exec_pty.c:964 src/tgetpass.c:218
 #, c-format
 msgid "unable to create pipe"
-msgstr "kunne ikke oprette datakanal (pipe)"
+msgstr "ni mogoče ustvariti cevi"
 
 #: src/exec.c:351 src/exec_pty.c:1029 src/exec_pty.c:1167
 #, c-format
 msgid "select failed"
-msgstr "select fejlede"
+msgstr "izbira je spodletela"
 
 #: src/exec.c:441
 #, c-format
 msgid "unable to restore tty label"
-msgstr "kunne ikke gendanne tty-etiket"
+msgstr "ni mogoče obnoviti oznake tty"
 
 #: src/exec_common.c:69
 #, c-format
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
-msgstr "kan ikke fjerne PRIV_PROC_EXEC fra PRIV_LIMIT"
+msgstr "ni mogoče odstraniti PRIV_PROC_EXEC iz PRIV_LIMIT"
 
 #: src/exec_pty.c:144
 #, c-format
 msgid "unable to allocate pty"
-msgstr "kunne ikke allokere pty"
+msgstr "ni mogoče dodeliti pty"
 
 #: src/exec_pty.c:619
 #, c-format
 msgid "unable to set terminal to raw mode"
-msgstr "kunne ikke angive terminal til tilstanden rå (raw)"
+msgstr "ni mogoče postaviti terminala v surov način"
 
 #: src/exec_pty.c:945
 #, c-format
 msgid "unable to set controlling tty"
-msgstr "kunne ikke angive kontrollerende tty"
+msgstr "ni mogoče nastaviti nadzora tty"
 
 #: src/exec_pty.c:1038
 #, c-format
 msgid "error reading from signal pipe"
-msgstr "fejl under læsning fra signaldatakanal"
+msgstr "napaka med branjem iz cevi signala"
 
 #: src/exec_pty.c:1059
 #, c-format
 msgid "error reading from pipe"
-msgstr "fejl ved læsning fra datakanal"
+msgstr "napaka med branjem iz cevovoda"
 
 #: src/exec_pty.c:1075
 #, c-format
 msgid "error reading from socketpair"
-msgstr "fejl ved læsning fra socketpair"
+msgstr "napaka med branjem iz para vtičev"
 
 #: src/exec_pty.c:1079
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
-msgstr "uventet svartype på bagkanal (backchannel): %d"
+msgstr "nepričakovana vrsta odgovora na ozadnem kanalu: %d"
 
 #: src/load_plugins.c:79
 #, c-format
@@ -199,109 +195,108 @@ msgstr "%s%s: %s"
 #: src/load_plugins.c:95
 #, c-format
 msgid "%s must be owned by uid %d"
-msgstr "%s skal være ejet af uid %d"
+msgstr "%s mora biti v lasti ID-ja uporabnika %d"
 
-# engelsk fejl be dobbelt?
 #: src/load_plugins.c:99
 #, c-format
 msgid "%s must be only be writable by owner"
-msgstr "%s må kun være skrivbar for ejeren"
+msgstr "%s mora biti zapisljiv samo za lastnika"
 
 #: src/load_plugins.c:106
 #, c-format
 msgid "unable to dlopen %s: %s"
-msgstr "kunne ikke dlopen %s: %s"
+msgstr "ni mogoče uporabiti dlopen %s: %s"
 
 #: src/load_plugins.c:111
 #, c-format
 msgid "%s: unable to find symbol %s"
-msgstr "%s: kunne ikke finde symbol %s"
+msgstr "%s: ni mogoče najti simbola %s"
 
 #: src/load_plugins.c:117
 #, c-format
 msgid "%s: unknown policy type %d"
-msgstr "%s: ukendt politiktype %d"
+msgstr "%s: neznana vrsta pravilnika %d"
 
 #: src/load_plugins.c:121
 #, c-format
 msgid "%s: incompatible policy major version %d, expected %d"
-msgstr "%s: inkompatibel politik hovedversion %d, forventede %d"
+msgstr "%s: nezdružljiva glavna različica pravil %d, pričakovana %d"
 
 #: src/load_plugins.c:128
 #, c-format
 msgid "%s: only a single policy plugin may be loaded"
-msgstr "%s: kun et udvidelsesmodul for én politik må være indlæst"
+msgstr "%s: naložen je lahko le en vstavek pravilnika"
 
 #: src/load_plugins.c:148
 #, c-format
 msgid "%s: at least one policy plugin must be specified"
-msgstr "%s: mindst et udvidelsesmodul for politik skal være angivet"
+msgstr "%s: naveden mora biti vsaj en vstavek pravilnika"
 
 #: src/load_plugins.c:153
 #, c-format
 msgid "policy plugin %s does not include a check_policy method"
-msgstr "politikudvidelsesmodulet %s inkluderer ikke en metode for check_policy"
+msgstr "vstavek pravilnika %s ne vključuje načina check_policy"
 
 #: src/net_ifs.c:157 src/net_ifs.c:166 src/net_ifs.c:178 src/net_ifs.c:187
 #: src/net_ifs.c:298 src/net_ifs.c:322
 #, c-format
 msgid "load_interfaces: overflow detected"
-msgstr "load_interfaces: overløb detekteret"
+msgstr "load_interfaces: zaznana je bila prekoračitev"
 
 #: src/net_ifs.c:227
 #, c-format
 msgid "unable to open socket"
-msgstr "kunne ikke åbne sokkel"
+msgstr "ni mogoče odpreti vtiča"
 
 #: src/parse_args.c:187
 #, c-format
 msgid "the argument to -C must be a number greater than or equal to 3"
-msgstr "argumentet for -C skal være et tal større end eller lig 3"
+msgstr "argument k -C mora biti številka, večja kot ali enaka 3"
 
 #: src/parse_args.c:276
 #, c-format
 msgid "unknown user: %s"
-msgstr "ukendt bruger: %s"
+msgstr "neznan uporabnik: %s"
 
 #: src/parse_args.c:335
 #, c-format
 msgid "you may not specify both the `-i' and `-s' options"
-msgstr "du kan ikke samtidig angive tilvalgene »-i« og »-s«"
+msgstr "možnosti `-i' in `-s' ne smeta biti navedeni hkrati"
 
 #: src/parse_args.c:339
 #, c-format
 msgid "you may not specify both the `-i' and `-E' options"
-msgstr "du kan ikke samtidig angive tilvalgende »-i« og »-E«"
+msgstr "možnosti `-i' in `-E' ne smeta biti navedeni hkrati"
 
 #: src/parse_args.c:349
 #, c-format
 msgid "the `-E' option is not valid in edit mode"
-msgstr "tilvalget »-E« er ikke gyldigt i redigeringstilstand"
+msgstr "možnost `-E' ni veljavna v načinu urejanja"
 
 #: src/parse_args.c:351
 #, c-format
 msgid "you may not specify environment variables in edit mode"
-msgstr "du må ikke angive miljøvariabler i redigeringstilstand"
+msgstr "v načinu urejanja se ne sme podati spremenljivk okolja"
 
 #: src/parse_args.c:359
 #, c-format
 msgid "the `-U' option may only be used with the `-l' option"
-msgstr "tilvalget »-U« må kun bruges med tilvalget »-l«"
+msgstr "možnost `-U' se lahko uporabi samo z možnostjo `-l'"
 
 #: src/parse_args.c:363
 #, c-format
 msgid "the `-A' and `-S' options may not be used together"
-msgstr "tilvalgene »-A« og »-S« må ikke bruges sammen"
+msgstr "možnosti `-A' in `-S' se ne smeta uporabljati hkrati"
 
 #: src/parse_args.c:445
 #, c-format
 msgid "sudoedit is not supported on this platform"
-msgstr "sudoedit er ikke understøttet på denne platform"
+msgstr "sudoedit ni podprt v tem okolju"
 
 #: src/parse_args.c:518
 #, c-format
 msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
-msgstr "Kun et af tilvalgene -e, -h, -i, -K, -l, -s, -v eller -V må angives"
+msgstr "Od -e, -h, -i, -K, -l, -s, -v ali -V je lahko navedena samo ena možnost"
 
 #: src/parse_args.c:532
 #, c-format
@@ -309,7 +304,7 @@ msgid ""
 "%s - edit files as another user\n"
 "\n"
 msgstr ""
-"%s - rediger filer som en anden bruger\n"
+"%s - urejaj datoteke kot drug uporabnik\n"
 "\n"
 
 #: src/parse_args.c:534
@@ -318,7 +313,7 @@ msgid ""
 "%s - execute a command as another user\n"
 "\n"
 msgstr ""
-"%s - udfør en kommando som en anden bruger\n"
+"%s - izvedi ukaz kot drug uporabnik\n"
 "\n"
 
 #: src/parse_args.c:539
@@ -328,466 +323,459 @@ msgid ""
 "Options:\n"
 msgstr ""
 "\n"
-"Tilvalg:\n"
+"Možnosti:\n"
 
 #: src/parse_args.c:542
 msgid "use helper program for password prompting\n"
-msgstr "brug hjælpeprogram for indhentelse af adgangskode\n"
+msgstr "uporabi program pomagalnik za pozive za vnos gesla\n"
 
 #: src/parse_args.c:545
 msgid "use specified BSD authentication type\n"
-msgstr "brug angivet BSD-godkendelsestype\n"
+msgstr "uporabi navedeno vrsto urejanja BSD\n"
 
 #: src/parse_args.c:547
 msgid "run command in the background\n"
-msgstr "kør kommando i baggrunden\n"
+msgstr "zaženi ukaz v ozadju\n"
 
 #: src/parse_args.c:549
 msgid "close all file descriptors >= fd\n"
-msgstr "luk alle filbeskrivelser >= fd\n"
+msgstr "zapri vse opisnike datotek >= fd\n"
 
 #: src/parse_args.c:552
 msgid "run command with specified login class\n"
-msgstr "kør kommando med angivet logindklasse\n"
+msgstr "zaženi ukaz z navedenim prijavnim razredom\n"
 
 #: src/parse_args.c:555
 msgid "preserve user environment when executing command\n"
-msgstr "bevar brugermiljø når kommando udføres\n"
+msgstr "ohrani okolje uporabnika, kadar se izvajajo ukazi\n"
 
 #: src/parse_args.c:557
 msgid "edit files instead of running a command\n"
-msgstr "rediger filer i stedet for at køre en kommando\n"
+msgstr "namesto izvedbe ukaza uredi datoteke\n"
 
 #: src/parse_args.c:559
 msgid "execute command as the specified group\n"
-msgstr "udfør kommando som den angivne gruppe\n"
+msgstr "izvedi ukaz kot navedena skupina\n"
 
 #: src/parse_args.c:561
 msgid "set HOME variable to target user's home dir.\n"
-msgstr "angiv HOME-variabel til målbrugers hjemmemappe.\n"
+msgstr "nastavi spremenljivko HOME kot cilj v domači mapi uporabnika\n"
 
 #: src/parse_args.c:563
 msgid "display help message and exit\n"
-msgstr "vis hjælpetekst og afslut\n"
+msgstr "prikaži sporočilo pomoči in končaj\n"
 
 #: src/parse_args.c:565
 msgid "run a login shell as target user\n"
-msgstr "kør en logindskal som målbruger\n"
+msgstr "zaženi lupino prijave kot ciljni uporabnik\n"
 
 #: src/parse_args.c:567
 msgid "remove timestamp file completely\n"
-msgstr "fjern tidsstempelfil fuldstændig\n"
+msgstr "popolnoma odstrani datoteko s časovnimi žigi\n"
 
 #: src/parse_args.c:569
 msgid "invalidate timestamp file\n"
-msgstr "ugyldiggør tidsstempelfil\n"
+msgstr "razveljavi veljavnost datoteke s časovnimi žigi\n"
 
 #: src/parse_args.c:571
 msgid "list user's available commands\n"
-msgstr "vis brugers tilgængelige kommandoer\n"
+msgstr "prikaži razpoložljive ukaze uporabnika\n"
 
 #: src/parse_args.c:573
 msgid "non-interactive mode, will not prompt user\n"
-msgstr "ikkeinteraktiv tilstand, vil ikke spørge bruger\n"
+msgstr "nevzajemni način, ne bo poziva uporabnika\n"
 
 #: src/parse_args.c:575
 msgid "preserve group vector instead of setting to target's\n"
-msgstr "bevar gruppevektor i stedet for at sætte til målets\n"
+msgstr "ohrani vektor skupine namesto nastavitve tarči\n"
 
 #: src/parse_args.c:577
 msgid "use specified password prompt\n"
-msgstr "brug angivet logind for adgangskode\n"
+msgstr "uporabi določen poziv za vnos gesla\n"
 
 #: src/parse_args.c:580 src/parse_args.c:588
 msgid "create SELinux security context with specified role\n"
-msgstr "opret SELinux-sikkerhedskontekt med angivet rolle\n"
+msgstr "ustvari varnostno vsebino SELinux z določeno vlogo\n"
 
 #: src/parse_args.c:583
 msgid "read password from standard input\n"
-msgstr "læs adgangskode fra standardinddata\n"
+msgstr "preberi geslo s standardnega vnosa\n"
 
 #: src/parse_args.c:585
 msgid "run a shell as target user\n"
-msgstr "kør en skal som målbruger\n"
+msgstr "zaženi lupino kot ciljni uporabnik\n"
 
 #: src/parse_args.c:591
 msgid "when listing, list specified user's privileges\n"
-msgstr "når der listes, så list angivne brugers privilegier\n"
+msgstr "med naštevanjem prikaži določena dovoljenja uporabnika\n"
 
 #: src/parse_args.c:593
 msgid "run command (or edit file) as specified user\n"
-msgstr "kør kommando (eller rediger fil) som angivet bruger\n"
+msgstr "zaženi ukaz (ali uredi datoteko) kot določen uporabnik\n"
 
 #: src/parse_args.c:595
 msgid "display version information and exit\n"
-msgstr "vis versionsinformation og afslut\n"
+msgstr "prikaži podrobnosti različice in končaj\n"
 
 #: src/parse_args.c:597
 msgid "update user's timestamp without running a command\n"
-msgstr "opdater brugers tidsstempel uden at køre en kommando\n"
+msgstr "posodobi časovni žig uporabnika brez izvajanja ukaza\n"
 
 #: src/parse_args.c:599
 msgid "stop processing command line arguments\n"
-msgstr "stop behandling af parametre for kommandolinjen\n"
+msgstr "zaustavi obdelovanje argumentov ukazne vrstice\n"
 
 #: src/selinux.c:77
 #, c-format
 msgid "unable to open audit system"
-msgstr "kunne ikke åbne overvågningssystem"
+msgstr "ni mogoče odpreti nadzornega sistema"
 
 #: src/selinux.c:85
 #, c-format
 msgid "unable to send audit message"
-msgstr "kunne ikke sende overvågningsbesked"
+msgstr "ni mogoče poslati nadzornega sporočila"
 
 #: src/selinux.c:113
 #, c-format
 msgid "unable to fgetfilecon %s"
-msgstr "kunne ikke fgetfilecon %s"
+msgstr "ni mogoče uporabiti fgetfilecon %s"
 
 #: src/selinux.c:118
 #, c-format
 msgid "%s changed labels"
-msgstr "%s ændrede etiketter"
+msgstr "%s spremenjenih oznak"
 
 #: src/selinux.c:123
 #, c-format
 msgid "unable to restore context for %s"
-msgstr "kan ikke gendanne kontekst for %s"
+msgstr "ni mogoče obnoviti vsebine za %s"
 
 #: src/selinux.c:163
 #, c-format
 msgid "unable to open %s, not relabeling tty"
-msgstr "kan ikke åbne %s, giver ikke ny etiket til tty"
+msgstr "ni mogoče odpreti %s, brez ponovnega označevanja tty"
 
 #: src/selinux.c:172
 #, c-format
 msgid "unable to get current tty context, not relabeling tty"
-msgstr "kan ikke indhente aktuel tty-kontekst, giver ikke ny etiket til tty"
+msgstr "ni mogoče pridobiti trenutne vsebine tty, brez ponovnega označevanja tty"
 
 #: src/selinux.c:179
 #, c-format
 msgid "unable to get new tty context, not relabeling tty"
-msgstr "kan ikke indhente ny tty-kontekst, giver ikke nyt etiket til tty"
+msgstr "ni mogoče pridobiti nove vsebine tty, brez ponovnega označevanja tty"
 
 #: src/selinux.c:186
 #, c-format
 msgid "unable to set new tty context"
-msgstr "kan ikke angive ny tty-kontekst"
+msgstr "ni mogoče nastaviti nove vsebine tty"
 
 #: src/selinux.c:252
 #, c-format
 msgid "you must specify a role for type %s"
-msgstr "du skal angive en rolle for type %s"
+msgstr "podati morate vlogo za vrsto %s"
 
 #: src/selinux.c:258
 #, c-format
 msgid "unable to get default type for role %s"
-msgstr "kan ikke indhente standardtype for rolle %s"
+msgstr "ni mogoče pridobiti privzete vrste za vlogo %s"
 
 #: src/selinux.c:276
 #, c-format
 msgid "failed to set new role %s"
-msgstr "kunne ikke angive ny rolle %s"
+msgstr "nastavitev nove vloge %s ni uspela"
 
 #: src/selinux.c:280
 #, c-format
 msgid "failed to set new type %s"
-msgstr "kunne ikke angive ny type %s"
+msgstr "nastavitev nove vrste %s ni uspela"
 
 #: src/selinux.c:289
 #, c-format
 msgid "%s is not a valid context"
-msgstr "%s er ikke en gyldig kontekst"
+msgstr "%s ni veljavna vsebina"
 
 #: src/selinux.c:324
 #, c-format
 msgid "failed to get old_context"
-msgstr "kunne ikke indhente gammel_kontekst (old_context)"
+msgstr "pridobitev stare_vsebine je spodletela"
 
 #: src/selinux.c:330
 #, c-format
 msgid "unable to determine enforcing mode."
-msgstr "kunne ikke bestemme tilstanden gennemtving (enforcing)."
+msgstr "ni mogoče določiti načina vsiljenja"
 
 #: src/selinux.c:342
 #, c-format
 msgid "unable to setup tty context for %s"
-msgstr "kunne ikke opsætte tty-kontekst for %s"
+msgstr "ni mogoče nastaviti vsebine tty za %s"
 
 #: src/selinux.c:373
 #, c-format
 msgid "unable to set exec context to %s"
-msgstr "kunne ikke angive kørselskontekt til %s"
+msgstr "ni mogoče nastavite izvedene vsebine k %s"
 
-# engelsk: mangler vist lidt info her tast eller nøgle. mon ikke det er nøgle
 #: src/selinux.c:380
 #, c-format
 msgid "unable to set key creation context to %s"
-msgstr "kunne ikke angive nøgleoprettelseskontekst til %s"
+msgstr "ni mogoče nastaviti vsebine ustvarjenja ključa k %s"
 
 #: src/sesh.c:70
 #, c-format
 msgid "requires at least one argument"
-msgstr "kræver mindst et argument"
+msgstr "zahteva vsaj en argument"
 
 #: src/sesh.c:91
 #, c-format
 msgid "unable to execute %s"
-msgstr "kan ikke køre %s"
+msgstr "ni mogoče izvršiti %s"
 
 #: src/sudo.c:211
 #, c-format
 msgid "Sudo version %s\n"
-msgstr "Sudo version %s\n"
+msgstr "Sudo različica %s\n"
 
 #: src/sudo.c:213
 #, c-format
 msgid "Configure options: %s\n"
-msgstr "Konfigurationsindstillinger: %s\n"
+msgstr "Nastavitev možnosti: %s\n"
 
 #: src/sudo.c:218
 #, c-format
 msgid "fatal error, unable to load plugins"
-msgstr "fatal fejl, kan ikke indlæse udvidelsesmoduler"
+msgstr "usodna napaka, ni mogoče naložiti vstavka"
 
 #: src/sudo.c:226
 #, c-format
 msgid "unable to initialize policy plugin"
-msgstr "kan ikke initialisere udvidelsesmodul for politik"
+msgstr "ni mogoče začenjati vstavka pravilnika"
 
 #: src/sudo.c:281
 #, c-format
 msgid "error initializing I/O plugin %s"
-msgstr "fejl under initialisering af I/O-udvidelsesmodulet %s"
+msgstr "napaka med začenjanjem I/O vstavka %s"
 
 #: src/sudo.c:306
 #, c-format
 msgid "unexpected sudo mode 0x%x"
-msgstr "uventet sudo-tilstand 0x%x"
+msgstr "nepričakovan način sudo 0x%x"
 
 #: src/sudo.c:400
 #, c-format
 msgid "unable to get group vector"
-msgstr "kan ikke indhente gruppevektor"
+msgstr "ni mogoče pridobiti vektorja skupine"
 
 #: src/sudo.c:452
 #, c-format
 msgid "unknown uid %u: who are you?"
-msgstr "ukendt uid %u: hvem er du?"
+msgstr "neznan ID uporabnika %u: kdo ste?"
 
 #: src/sudo.c:760
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
-msgstr "%s skal være ejet af uid %d og have setuid bit angivet"
+msgstr "%s si mora lastiti uporabnik z ID-jem %d and mora imeti nastavljen bit setuid"
 
 #: src/sudo.c:763
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
-msgstr "effektiv uid er ikke %d, er %s på et filsystem med indstillingen »nosuid« angivet eller et NFS-filsytsem uden administratorprivilegier (root)?"
+msgstr "trenutni ID uporabnika ni %d. Ali je %s na datotečnem sistemu z nastavljeno možnostjo \"nosuid\" ali datotečnem sistemu NFS brez dovoljenj skrbnika?"
 
 #: src/sudo.c:769
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
-msgstr "effektiv uid er ikke %d, er sudo installeret setuid root?"
+msgstr "trenutni uid ni %d. Ali je sudo pravilno nameščen?"
 
 #: src/sudo.c:838
 #, c-format
 msgid "resource control limit has been reached"
-msgstr "grænse for ressourcekontrol er nået"
+msgstr "meja omejitve virov je bila dosežena"
 
 #: src/sudo.c:841
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
-msgstr "bruger »%s« er ikke medlem af projektet »%s«"
+msgstr "uporabnik \"%s\" ni član projekta \"%s\""
 
 #: src/sudo.c:845
 #, c-format
 msgid "the invoking task is final"
-msgstr "start af opgave er færdig"
+msgstr "priklicana naloga je končna"
 
 #: src/sudo.c:848
 #, c-format
 msgid "could not join project \"%s\""
-msgstr "kunne ikke slutte til projekt »%s«"
+msgstr "ni mogoče pridružiti projekta \"%s\""
 
 #: src/sudo.c:853
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
-msgstr "ingen ressourcekø som accepterer standardbindinger findes for projekt »%s«"
+msgstr "nobene zaloge virov, ki sprejemajo privzete vezi, ne obstajajo za projekt \"% s\""
 
 #: src/sudo.c:857
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
-msgstr "angivet ressourcekø findes ikke for projekt »%s«"
+msgstr "določen vir zalog ne obstaja za projekt \"%s\""
 
 #: src/sudo.c:861
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
-msgstr "kunne ikke binde til standardressourcekø for projekt »%s«"
+msgstr "ni mogoče vezati na privzet vir zalog za projekt \"%s\""
 
 #: src/sudo.c:867
 #, c-format
 msgid "setproject failed for project \"%s\""
-msgstr "setproject fejlede for projekt »%s«"
+msgstr "setproject je spodletel za projekt \"%s\""
 
 #: src/sudo.c:869
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
-msgstr "advarsel, ressourcekontroltildeling fejlede for projekt »%s«"
+msgstr "opozorilo, naloga nadzora virov je spodletela za projekt \"%s\""
 
 #: src/sudo.c:917
 #, c-format
 msgid "unknown login class %s"
-msgstr "ukendt logindklasse %s"
+msgstr "neznan razred prijave %s"
 
 #: src/sudo.c:931 src/sudo.c:934
 #, c-format
 msgid "unable to set user context"
-msgstr "kan ikke angive brugerkontekst"
+msgstr "ni mogoče nastaviti vsebine uporabnika"
 
 #: src/sudo.c:946
 #, c-format
 msgid "unable to set supplementary group IDs"
-msgstr "kunne ikke angive supplerende gruppe-id'er"
+msgstr "ni mogoče nastaviti dopolnilnih ID-jev skupin"
 
 #: src/sudo.c:953
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
-msgstr "kan ikke angive effektiv gid til runas gid %u"
+msgstr "ni mogoče nastaviti učinkovitega ID-ja skupine, da se zažene kot ID skupine %u"
 
 #: src/sudo.c:959
 #, c-format
 msgid "unable to set gid to runas gid %u"
-msgstr "kunne ikke angive gid til runas gid %u"
+msgstr "ni mogoče nastaviti ID-ja skupine, da se zažene kot ID skupine %u"
 
 #: src/sudo.c:966
 #, c-format
 msgid "unable to set process priority"
-msgstr "kunne ikke angive procesprioritet"
+msgstr "ni mogoče nastaviti prednosti opravil"
 
 #: src/sudo.c:974
 #, c-format
 msgid "unable to change root to %s"
-msgstr "kunne ikke ændre administrator (root) til %s"
+msgstr "ni mogoče spremeniti skrbnika v %s"
 
 #: src/sudo.c:981 src/sudo.c:987 src/sudo.c:993
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
-msgstr "kunne ikke ændre til runas uid (%u, %u)"
+msgstr "ni mogoče spremeniti ID uporabnika zaženi kot (%u, %u)"
 
 #: src/sudo.c:1007
 #, c-format
 msgid "unable to change directory to %s"
-msgstr "kunne ikke ændre mappe til %s"
+msgstr "ni mogoče spremeniti mape v %s"
 
 #: src/sudo.c:1079
 #, c-format
 msgid "unexpected child termination condition: %d"
-msgstr "uventet underbetingelse for terminering: %d"
+msgstr "nepričakovan pogoj uničenja podrejenega opravila: %d"
 
 #: src/sudo.c:1140
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
-msgstr "politikudvidelsesmodul %s understøter ikke listning af privilegier"
+msgstr "vstavek pravilnika %s ne podpira navajanja dovoljenj"
 
 #: src/sudo.c:1152
 #, c-format
 msgid "policy plugin %s does not support the -v option"
-msgstr "politikudvidelsesmodul %s understøtter ikke tilvalget -v"
+msgstr "vstavek pravilnika %s ne podpira možnosti -v"
 
 #: src/sudo.c:1164
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
-msgstr "politikudvidelsesmodul %s understøtter ikke tilvalget -k/-K"
+msgstr "vstavek pravilnika %s ne podpira možnosti -k/-K"
 
 #: src/sudo_edit.c:111
 #, c-format
 msgid "unable to change uid to root (%u)"
-msgstr "kunne ikke ændre uid til root (%u)"
+msgstr "ni mogoče spremeniti ID-ja uporabnika v skrbnika (%u)"
 
 #: src/sudo_edit.c:143
 #, c-format
 msgid "plugin error: missing file list for sudoedit"
-msgstr "fejl i udvidelsesmodul: mangler filliste for sudoedit"
+msgstr "napaka vstavka: manjka seznam datotek za sudoedit"
 
 #: src/sudo_edit.c:171 src/sudo_edit.c:271
 #, c-format
 msgid "%s: not a regular file"
-msgstr "%s: ikke en regulær fil"
+msgstr "%s: ni običajna datoteka"
 
 #: src/sudo_edit.c:205 src/sudo_edit.c:307
 #, c-format
 msgid "%s: short write"
-msgstr "%s: kort skrivning"
+msgstr "%s: kratko pisanje"
 
 #: src/sudo_edit.c:272
 #, c-format
 msgid "%s left unmodified"
-msgstr "%s tilbage uændrede"
+msgstr "%s je ostalo nespremenjeno"
 
 #: src/sudo_edit.c:285
 #, c-format
 msgid "%s unchanged"
-msgstr "%s uændrede"
+msgstr "%s nespremenjeno"
 
 #: src/sudo_edit.c:297 src/sudo_edit.c:318
 #, c-format
 msgid "unable to write to %s"
-msgstr "kan ikke skrive til %s"
+msgstr "ni mogoče pisati v %s"
 
 #: src/sudo_edit.c:298 src/sudo_edit.c:316 src/sudo_edit.c:319
 #, c-format
 msgid "contents of edit session left in %s"
-msgstr "indhold fra redigeringssession tilbage i %s"
+msgstr "vsebina seje urejanja je ostala v %s"
 
 #: src/sudo_edit.c:315
 #, c-format
 msgid "unable to read temporary file"
-msgstr "kan ikke læse midlertidig fil"
+msgstr "ni mogoče brati začasne datoteke"
 
 #: src/tgetpass.c:90
 #, c-format
 msgid "no tty present and no askpass program specified"
-msgstr "ingen tty til stede og intet askpass-program angivet"
+msgstr "prisotnega ni nobenega tty in določen ni noben program askpass"
 
 #: src/tgetpass.c:99
 #, c-format
 msgid "no askpass program specified, try setting SUDO_ASKPASS"
-msgstr "intet askpass-program angivet, forsøg at angive SUDO_ASKPASS"
+msgstr "določenega ni nobenega programa askpass, poskusite nastaviti SUDO_ASKPASS"
 
 #: src/tgetpass.c:231
 #, c-format
 msgid "unable to set gid to %u"
-msgstr "kan ikke angive gid til %u"
+msgstr "ni mogoče nastaviti ID skupine v %u"
 
 #: src/tgetpass.c:235
 #, c-format
 msgid "unable to set uid to %u"
-msgstr "kan ikke angive uid til %u"
+msgstr "ni mogoče nastaviti ID uporabnika v %u"
 
 #: src/tgetpass.c:240
 #, c-format
 msgid "unable to run %s"
-msgstr "kan ikke køre %s"
+msgstr "ni mogoče zagnati %s"
 
 #: src/utmp.c:278
 #, c-format
 msgid "unable to save stdin"
-msgstr "kan ikke gemme til stdin"
+msgstr "ni mogoče shraniti stdin"
 
 #: src/utmp.c:280
 #, c-format
 msgid "unable to dup2 stdin"
-msgstr "kan ikke dup2 stdin"
+msgstr "ni mogoče uporabiti dup2 za stdin"
 
 #: src/utmp.c:283
 #, c-format
 msgid "unable to restore stdin"
-msgstr "kan ikke gendanne stdin"
-
-#~ msgid "must be setuid root"
-#~ msgstr "skal være setuid root"
-
-#~ msgid "the argument to -D must be between 1 and 9 inclusive"
-#~ msgstr "argumentet for -D skal være mellem 1 og 9; begge tal inkluderet"
+msgstr "ni mogoče obnoviti stdin"

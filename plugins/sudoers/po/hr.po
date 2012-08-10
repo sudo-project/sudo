@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.8.5rc1\n"
+"Project-Id-Version: sudoers 1.8.5rc3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2012-04-13 16:21-0400\n"
-"PO-Revision-Date: 2012-04-18 01:56+0200\n"
+"POT-Creation-Date: 2012-04-24 13:41-0400\n"
+"PO-Revision-Date: 2012-05-25 16:14+0200\n"
 "Last-Translator: Tomislav Krznar <tomislav.krznar@gmail.com>\n"
 "Language-Team: Croatian <lokalizacija@linux.hr>\n"
 "Language: \n"
@@ -16,10 +16,209 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
 
+#: gram.y:110
+#, c-format
+msgid ">>> %s: %s near line %d <<<"
+msgstr ">>> %s: %s kod retka %d <<<"
+
 #: plugins/sudoers/alias.c:125
 #, c-format
 msgid "Alias `%s' already defined"
 msgstr "Alias „%s” je već definiran"
+
+#: plugins/sudoers/auth/bsdauth.c:78
+#, c-format
+msgid "unable to get login class for user %s"
+msgstr "ne mogu dobiti razred prijave korisnika %s"
+
+#: plugins/sudoers/auth/bsdauth.c:84
+msgid "unable to begin bsd authentication"
+msgstr "ne mogu započeti bsd autentifikaciju"
+
+#: plugins/sudoers/auth/bsdauth.c:92
+msgid "invalid authentication type"
+msgstr "neispravna vrsta autentifikacije"
+
+#: plugins/sudoers/auth/bsdauth.c:101
+msgid "unable to setup authentication"
+msgstr "ne mogu postaviti autentifikaciju"
+
+#: plugins/sudoers/auth/fwtk.c:60
+#, c-format
+msgid "unable to read fwtk config"
+msgstr "ne mogu čitati fwtk konfiguraciju"
+
+#: plugins/sudoers/auth/fwtk.c:65
+#, c-format
+msgid "unable to connect to authentication server"
+msgstr "ne mogu se spojiti na autentifikacijski poslužitelj"
+
+#: plugins/sudoers/auth/fwtk.c:71 plugins/sudoers/auth/fwtk.c:95
+#: plugins/sudoers/auth/fwtk.c:128
+#, c-format
+msgid "lost connection to authentication server"
+msgstr "izgubljena veza na autentifikacijski poslužitelj"
+
+#: plugins/sudoers/auth/fwtk.c:75
+#, c-format
+msgid ""
+"authentication server error:\n"
+"%s"
+msgstr ""
+"greška autentifikacijskog poslužitelja:\n"
+"%s"
+
+#: plugins/sudoers/auth/kerb5.c:117
+#, c-format
+msgid "%s: unable to unparse princ ('%s'): %s"
+msgstr "%s: ne mogu ukloniti analizu upravitelja („%s”): %s"
+
+#: plugins/sudoers/auth/kerb5.c:160
+#, c-format
+msgid "%s: unable to parse '%s': %s"
+msgstr "%s: ne mogu analizirati „%s”: %s"
+
+#: plugins/sudoers/auth/kerb5.c:170
+#, c-format
+msgid "%s: unable to resolve ccache: %s"
+msgstr "%s: ne mogu pronaći ccache: %s"
+
+#: plugins/sudoers/auth/kerb5.c:218
+#, c-format
+msgid "%s: unable to allocate options: %s"
+msgstr "%s: ne mogu alocirati opcije: %s"
+
+#: plugins/sudoers/auth/kerb5.c:234
+#, c-format
+msgid "%s: unable to get credentials: %s"
+msgstr "%s: ne mogu dobiti vjerodajnice: %s"
+
+#: plugins/sudoers/auth/kerb5.c:247
+#, c-format
+msgid "%s: unable to initialize ccache: %s"
+msgstr "%s: ne mogu inicijalizirati ccache: %s"
+
+#: plugins/sudoers/auth/kerb5.c:251
+#, c-format
+msgid "%s: unable to store cred in ccache: %s"
+msgstr "%s: ne mogu spremiti vjerodajnicu u ccache: %s"
+
+#: plugins/sudoers/auth/kerb5.c:316
+#, c-format
+msgid "%s: unable to get host principal: %s"
+msgstr "%s: ne mogu dobiti upravitelja računala: %s"
+
+#: plugins/sudoers/auth/kerb5.c:331
+#, c-format
+msgid "%s: Cannot verify TGT! Possible attack!: %s"
+msgstr "%s: Ne mogu provjeriti TGT! Moguć napad!: %s"
+
+#: plugins/sudoers/auth/pam.c:100
+msgid "unable to initialize PAM"
+msgstr "ne mogu inicijalizirati PAM"
+
+#: plugins/sudoers/auth/pam.c:144
+msgid "account validation failure, is your account locked?"
+msgstr "potvrđivanje računa nije uspjelo, je li vaš račun zaključan?"
+
+#: plugins/sudoers/auth/pam.c:148
+msgid "Account or password is expired, reset your password and try again"
+msgstr "Račun ili lozinka su istekli, vratite izvornu lozinku i pokušajte ponovo"
+
+#: plugins/sudoers/auth/pam.c:155
+#, c-format
+msgid "pam_chauthtok: %s"
+msgstr "pam_chauthtok: %s"
+
+#: plugins/sudoers/auth/pam.c:159
+msgid "Password expired, contact your system administrator"
+msgstr "Lozinka je istekla, javite vašem administratoru sustava"
+
+#: plugins/sudoers/auth/pam.c:163
+msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
+msgstr "Račun je istekao ili PAM konfiguracija nema odjeljak „account” za sudo, javite vašem administratoru sustava"
+
+#: plugins/sudoers/auth/pam.c:180
+#, c-format
+msgid "pam_authenticate: %s"
+msgstr "pam_authenticate: %s"
+
+#: plugins/sudoers/auth/pam.c:332
+msgid "Password: "
+msgstr "Lozinka: "
+
+#: plugins/sudoers/auth/pam.c:333
+msgid "Password:"
+msgstr "Lozinka:"
+
+#: plugins/sudoers/auth/rfc1938.c:104 plugins/sudoers/visudo.c:220
+#, c-format
+msgid "you do not exist in the %s database"
+msgstr "niste navedeni u %s bazi podataka"
+
+#: plugins/sudoers/auth/securid5.c:81
+#, c-format
+msgid "failed to initialise the ACE API library"
+msgstr "nisam uspio inicijalizirati ACE API biblioteku"
+
+#: plugins/sudoers/auth/securid5.c:107
+#, c-format
+msgid "unable to contact the SecurID server"
+msgstr "ne mogu uspostaviti vezu s SecurID poslužiteljem"
+
+#: plugins/sudoers/auth/securid5.c:116
+#, c-format
+msgid "User ID locked for SecurID Authentication"
+msgstr "Korisnički ID zaključan za SecurID autentifikaciju"
+
+#: plugins/sudoers/auth/securid5.c:120 plugins/sudoers/auth/securid5.c:171
+#, c-format
+msgid "invalid username length for SecurID"
+msgstr "neispravna duljina korisničkog imena za SecurID"
+
+#: plugins/sudoers/auth/securid5.c:124 plugins/sudoers/auth/securid5.c:176
+#, c-format
+msgid "invalid Authentication Handle for SecurID"
+msgstr "neispravni postupak autentifikacije za SecurID"
+
+#: plugins/sudoers/auth/securid5.c:128
+#, c-format
+msgid "SecurID communication failed"
+msgstr "SecurID komunikacija nije uspjela"
+
+#: plugins/sudoers/auth/securid5.c:132 plugins/sudoers/auth/securid5.c:215
+#, c-format
+msgid "unknown SecurID error"
+msgstr "nepoznata SecurID greška"
+
+#: plugins/sudoers/auth/securid5.c:166
+#, c-format
+msgid "invalid passcode length for SecurID"
+msgstr "neispravna duljina lozinke za SecurID"
+
+#: plugins/sudoers/auth/sia.c:109
+msgid "unable to initialize SIA session"
+msgstr "ne mogu inicijalizirati SIA sjednicu"
+
+#: plugins/sudoers/auth/sudo_auth.c:117
+msgid "Invalid authentication methods compiled into sudo!  You may mix standalone and non-standalone authentication."
+msgstr "Neispravne autentifikacijske metode kompajlirane u sudo!  Možete miješati samostalne i nesamostalne autentifikacije."
+
+#: plugins/sudoers/auth/sudo_auth.c:199
+msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
+msgstr "Nema autentifikacijskih metoda kompajliranih u sudo!  Ako želite isključiti autentifikaciju, koristite konfiguracijsku opciju --disable-authentication."
+
+#: plugins/sudoers/auth/sudo_auth.c:271
+#, c-format
+msgid "%d incorrect password attempt"
+msgid_plural "%d incorrect password attempts"
+msgstr[0] "%d netočan pokušaj unosa lozinke"
+msgstr[1] "%d netočna pokušaja unosa lozinke"
+msgstr[2] "%d netočnih pokušaja unosa lozinke"
+
+#: plugins/sudoers/auth/sudo_auth.c:374
+msgid "Authentication methods:"
+msgstr "Metode autentifikacije:"
 
 #: plugins/sudoers/bsm_audit.c:60 plugins/sudoers/bsm_audit.c:63
 #: plugins/sudoers/bsm_audit.c:112 plugins/sudoers/bsm_audit.c:116
@@ -561,9 +760,9 @@ msgstr "opcija „%s” ne prihvaća vrijednost"
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr "sudo_putenv: oštećen envp, duljina ne odgovara"
 
-#: plugins/sudoers/env.c:341 plugins/sudoers/env.c:411 toke.l:682 toke.l:812
-#: toke.l:870 toke.l:966 plugins/sudoers/toke_util.c:113
-#: plugins/sudoers/toke_util.c:167 plugins/sudoers/toke_util.c:207
+#: plugins/sudoers/env.c:341 plugins/sudoers/env.c:411
+#: plugins/sudoers/toke_util.c:113 plugins/sudoers/toke_util.c:167
+#: plugins/sudoers/toke_util.c:207 toke.l:682 toke.l:812 toke.l:870 toke.l:966
 #, c-format
 msgid "unable to allocate memory"
 msgstr "ne mogu alocirati memoriju"
@@ -584,16 +783,11 @@ msgid "sorry, you are not allowed to set the following environment variables: %s
 msgstr "žao mi je, nemate dozvolu za postavljanje sljedećih varijabli okoline: %s"
 
 #: plugins/sudoers/find_path.c:69 plugins/sudoers/find_path.c:108
-#: plugins/sudoers/find_path.c:123 plugins/sudoers/iolog.c:125 toke.l:678
-#: toke.l:866 plugins/sudoers/sudoers.c:950
+#: plugins/sudoers/find_path.c:123 plugins/sudoers/iolog.c:125
+#: plugins/sudoers/sudoers.c:950 toke.l:678 toke.l:866
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
-
-#: gram.y:110
-#, c-format
-msgid ">>> %s: %s near line %d <<<"
-msgstr ">>> %s: %s kod retka %d <<<"
 
 #: plugins/sudoers/group_plugin.c:91
 #, c-format
@@ -653,67 +847,72 @@ msgstr "ne mogu napraviti %s"
 msgid "unable to set locale to \"%s\", using \"C\""
 msgstr "ne mogu postaviti lokal u „%s”, koristim „C”"
 
-#: plugins/sudoers/ldap.c:374
+#: plugins/sudoers/ldap.c:378
 #, c-format
 msgid "sudo_ldap_conf_add_ports: port too large"
 msgstr "sudo_ldap_conf_add_ports: port je prevelik"
 
-#: plugins/sudoers/ldap.c:397
+#: plugins/sudoers/ldap.c:401
 #, c-format
 msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
 msgstr "sudo_ldap_conf_add_ports: nema dovoljno prostora za proširenje međuspremnika računala"
 
-#: plugins/sudoers/ldap.c:427
+#: plugins/sudoers/ldap.c:431
 #, c-format
 msgid "unsupported LDAP uri type: %s"
 msgstr "nepodržana vrsta LDAP uri-ja: %s"
 
-#: plugins/sudoers/ldap.c:456
+#: plugins/sudoers/ldap.c:460
 #, c-format
 msgid "invalid uri: %s"
 msgstr "neispravan uri: %s"
 
-#: plugins/sudoers/ldap.c:462
+#: plugins/sudoers/ldap.c:466
 #, c-format
 msgid "unable to mix ldap and ldaps URIs"
 msgstr "ne mogu miješati ldap i ldaps URI-je"
 
-#: plugins/sudoers/ldap.c:466
+#: plugins/sudoers/ldap.c:470
 #, c-format
 msgid "unable to mix ldaps and starttls"
 msgstr "ne mogu miješati ldaps i starttls"
 
-#: plugins/sudoers/ldap.c:485
+#: plugins/sudoers/ldap.c:489
 #, c-format
 msgid "sudo_ldap_parse_uri: out of space building hostbuf"
 msgstr "sudo_ldap_parse_uri: nema dovoljno prostora za izgradnju međuspremnika računala"
 
-#: plugins/sudoers/ldap.c:550
+#: plugins/sudoers/ldap.c:563
 #, c-format
 msgid "unable to initialize SSL cert and key db: %s"
 msgstr "ne mogu inicijalizirati SSL certifikat i bazu podataka ključeva: %s"
 
-#: plugins/sudoers/ldap.c:958
+#: plugins/sudoers/ldap.c:566
+#, c-format
+msgid "you must set TLS_CERT in %s to use SSL"
+msgstr "morate postaviti TLS_CERT u %s za korištenje SSL-a"
+
+#: plugins/sudoers/ldap.c:973
 #, c-format
 msgid "unable to get GMT time"
 msgstr "ne mogu dohvatiti GMT vrijeme"
 
-#: plugins/sudoers/ldap.c:964
+#: plugins/sudoers/ldap.c:979
 #, c-format
 msgid "unable to format timestamp"
 msgstr "ne mogu oblikovati vremensku oznaku"
 
-#: plugins/sudoers/ldap.c:972
+#: plugins/sudoers/ldap.c:987
 #, c-format
 msgid "unable to build time filter"
 msgstr "ne mogu izgraditi filtar vremena"
 
-#: plugins/sudoers/ldap.c:1187
+#: plugins/sudoers/ldap.c:1202
 #, c-format
 msgid "sudo_ldap_build_pass1 allocation mismatch"
 msgstr "neodgovarajuća sudo_ldap_build_pass1 alokacija"
 
-#: plugins/sudoers/ldap.c:1707
+#: plugins/sudoers/ldap.c:1738
 #, c-format
 msgid ""
 "\n"
@@ -722,7 +921,7 @@ msgstr ""
 "\n"
 "LDAP uloga: %s\n"
 
-#: plugins/sudoers/ldap.c:1709
+#: plugins/sudoers/ldap.c:1740
 #, c-format
 msgid ""
 "\n"
@@ -731,49 +930,30 @@ msgstr ""
 "\n"
 "LDAP uloga: NEPOZNATA\n"
 
-#: plugins/sudoers/ldap.c:1756
+#: plugins/sudoers/ldap.c:1787
 #, c-format
 msgid "    Order: %s\n"
 msgstr "    Redoslijed: %s\n"
 
-#: plugins/sudoers/ldap.c:1764
+#: plugins/sudoers/ldap.c:1795
 #, c-format
 msgid "    Commands:\n"
 msgstr "    Naredbe:\n"
 
-#: plugins/sudoers/ldap.c:2156
+#: plugins/sudoers/ldap.c:2216
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr "ne mogu inicijalizirati LDAP: %s"
 
-#: plugins/sudoers/ldap.c:2187
+#: plugins/sudoers/ldap.c:2250
 #, c-format
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
 msgstr "naveden je start_tls, ali LDAP biblioteke ne podržavaju ldap_start_tls_s() ili ldap_start_tls_s_np()"
 
-#: plugins/sudoers/ldap.c:2423
+#: plugins/sudoers/ldap.c:2486
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr "neispravno sudoOrder svojstvo: %s"
-
-#: toke.l:805
-msgid "too many levels of includes"
-msgstr "previše razina uključivanja"
-
-#: toke.l:829 plugins/sudoers/sudoers.c:1004
-#, c-format
-msgid "%s is owned by uid %u, should be %u"
-msgstr "vlasnik %s je uid %u, treba biti %u"
-
-#: toke.l:836 plugins/sudoers/sudoers.c:1008
-#, c-format
-msgid "%s is world writable"
-msgstr "%s ima dozvole za pisanje svih korisnika"
-
-#: toke.l:841 plugins/sudoers/sudoers.c:1011
-#, c-format
-msgid "%s is owned by gid %u, should be %u"
-msgstr "vlasnik %s je gid %u, treba biti %u"
 
 #: plugins/sudoers/linux_audit.c:57
 #, c-format
@@ -1078,6 +1258,21 @@ msgstr "interna greška, set_cmnd() preljev"
 msgid "%s is not a regular file"
 msgstr "%s nije obična datoteka"
 
+#: plugins/sudoers/sudoers.c:1004 toke.l:829
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "vlasnik %s je uid %u, treba biti %u"
+
+#: plugins/sudoers/sudoers.c:1008 toke.l:836
+#, c-format
+msgid "%s is world writable"
+msgstr "%s ima dozvole za pisanje svih korisnika"
+
+#: plugins/sudoers/sudoers.c:1011 toke.l:841
+#, c-format
+msgid "%s is owned by gid %u, should be %u"
+msgstr "vlasnik %s je gid %u, treba biti %u"
+
 #: plugins/sudoers/sudoers.c:1038
 #, c-format
 msgid "only root can use `-c %s'"
@@ -1336,11 +1531,6 @@ msgstr "fill_args: preljev međuspremnika"
 msgid "%s grammar version %d\n"
 msgstr "%s inačica gramatike %d\n"
 
-#: plugins/sudoers/visudo.c:220 plugins/sudoers/auth/rfc1938.c:104
-#, c-format
-msgid "you do not exist in the %s database"
-msgstr "niste navedeni u %s bazi podataka"
-
 #: plugins/sudoers/visudo.c:252 plugins/sudoers/visudo.c:538
 #, c-format
 msgid "press return to edit %s: "
@@ -1541,191 +1731,6 @@ msgstr ""
 "  -s          strogo provjeravanje sintakse\n"
 "  -V          prikaži informacije o inačici i izađi"
 
-#: plugins/sudoers/auth/bsdauth.c:78
-#, c-format
-msgid "unable to get login class for user %s"
-msgstr "ne mogu dobiti razred prijave korisnika %s"
-
-#: plugins/sudoers/auth/bsdauth.c:84
-msgid "unable to begin bsd authentication"
-msgstr "ne mogu započeti bsd autentifikaciju"
-
-#: plugins/sudoers/auth/bsdauth.c:92
-msgid "invalid authentication type"
-msgstr "neispravna vrsta autentifikacije"
-
-#: plugins/sudoers/auth/bsdauth.c:101
-msgid "unable to setup authentication"
-msgstr "ne mogu postaviti autentifikaciju"
-
-#: plugins/sudoers/auth/fwtk.c:60
-#, c-format
-msgid "unable to read fwtk config"
-msgstr "ne mogu čitati fwtk konfiguraciju"
-
-#: plugins/sudoers/auth/fwtk.c:65
-#, c-format
-msgid "unable to connect to authentication server"
-msgstr "ne mogu se spojiti na autentifikacijski poslužitelj"
-
-#: plugins/sudoers/auth/fwtk.c:71 plugins/sudoers/auth/fwtk.c:95
-#: plugins/sudoers/auth/fwtk.c:128
-#, c-format
-msgid "lost connection to authentication server"
-msgstr "izgubljena veza na autentifikacijski poslužitelj"
-
-#: plugins/sudoers/auth/fwtk.c:75
-#, c-format
-msgid ""
-"authentication server error:\n"
-"%s"
-msgstr ""
-"greška autentifikacijskog poslužitelja:\n"
-"%s"
-
-#: plugins/sudoers/auth/kerb5.c:117
-#, c-format
-msgid "%s: unable to unparse princ ('%s'): %s"
-msgstr "%s: ne mogu ukloniti analizu upravitelja („%s”): %s"
-
-#: plugins/sudoers/auth/kerb5.c:160
-#, c-format
-msgid "%s: unable to parse '%s': %s"
-msgstr "%s: ne mogu analizirati „%s”: %s"
-
-#: plugins/sudoers/auth/kerb5.c:170
-#, c-format
-msgid "%s: unable to resolve ccache: %s"
-msgstr "%s: ne mogu pronaći ccache: %s"
-
-#: plugins/sudoers/auth/kerb5.c:218
-#, c-format
-msgid "%s: unable to allocate options: %s"
-msgstr "%s: ne mogu alocirati opcije: %s"
-
-#: plugins/sudoers/auth/kerb5.c:234
-#, c-format
-msgid "%s: unable to get credentials: %s"
-msgstr "%s: ne mogu dobiti vjerodajnice: %s"
-
-#: plugins/sudoers/auth/kerb5.c:247
-#, c-format
-msgid "%s: unable to initialize ccache: %s"
-msgstr "%s: ne mogu inicijalizirati ccache: %s"
-
-#: plugins/sudoers/auth/kerb5.c:251
-#, c-format
-msgid "%s: unable to store cred in ccache: %s"
-msgstr "%s: ne mogu spremiti vjerodajnicu u ccache: %s"
-
-#: plugins/sudoers/auth/kerb5.c:316
-#, c-format
-msgid "%s: unable to get host principal: %s"
-msgstr "%s: ne mogu dobiti upravitelja računala: %s"
-
-#: plugins/sudoers/auth/kerb5.c:331
-#, c-format
-msgid "%s: Cannot verify TGT! Possible attack!: %s"
-msgstr "%s: Ne mogu provjeriti TGT! Moguć napad!: %s"
-
-#: plugins/sudoers/auth/pam.c:100
-msgid "unable to initialize PAM"
-msgstr "ne mogu inicijalizirati PAM"
-
-#: plugins/sudoers/auth/pam.c:144
-msgid "account validation failure, is your account locked?"
-msgstr "potvrđivanje računa nije uspjelo, je li vaš račun zaključan?"
-
-#: plugins/sudoers/auth/pam.c:148
-msgid "Account or password is expired, reset your password and try again"
-msgstr "Račun ili lozinka su istekli, vratite izvornu lozinku i pokušajte ponovo"
-
-#: plugins/sudoers/auth/pam.c:155
-#, c-format
-msgid "pam_chauthtok: %s"
-msgstr "pam_chauthtok: %s"
-
-#: plugins/sudoers/auth/pam.c:159
-msgid "Password expired, contact your system administrator"
-msgstr "Lozinka je istekla, javite vašem administratoru sustava"
-
-#: plugins/sudoers/auth/pam.c:163
-msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
-msgstr "Račun je istekao ili PAM konfiguracija nema odjeljak „account” za sudo, javite vašem administratoru sustava"
-
-#: plugins/sudoers/auth/pam.c:180
-#, c-format
-msgid "pam_authenticate: %s"
-msgstr "pam_authenticate: %s"
-
-#: plugins/sudoers/auth/pam.c:330
-msgid "Password: "
-msgstr "Lozinka: "
-
-#: plugins/sudoers/auth/pam.c:331
-msgid "Password:"
-msgstr "Lozinka:"
-
-#: plugins/sudoers/auth/securid5.c:81
-#, c-format
-msgid "failed to initialise the ACE API library"
-msgstr "nisam uspio inicijalizirati ACE API biblioteku"
-
-#: plugins/sudoers/auth/securid5.c:107
-#, c-format
-msgid "unable to contact the SecurID server"
-msgstr "ne mogu uspostaviti vezu s SecurID poslužiteljem"
-
-#: plugins/sudoers/auth/securid5.c:116
-#, c-format
-msgid "User ID locked for SecurID Authentication"
-msgstr "Korisnički ID zaključan za SecurID autentifikaciju"
-
-#: plugins/sudoers/auth/securid5.c:120 plugins/sudoers/auth/securid5.c:171
-#, c-format
-msgid "invalid username length for SecurID"
-msgstr "neispravna duljina korisničkog imena za SecurID"
-
-#: plugins/sudoers/auth/securid5.c:124 plugins/sudoers/auth/securid5.c:176
-#, c-format
-msgid "invalid Authentication Handle for SecurID"
-msgstr "neispravni postupak autentifikacije za SecurID"
-
-#: plugins/sudoers/auth/securid5.c:128
-#, c-format
-msgid "SecurID communication failed"
-msgstr "SecurID komunikacija nije uspjela"
-
-#: plugins/sudoers/auth/securid5.c:132 plugins/sudoers/auth/securid5.c:215
-#, c-format
-msgid "unknown SecurID error"
-msgstr "nepoznata SecurID greška"
-
-#: plugins/sudoers/auth/securid5.c:166
-#, c-format
-msgid "invalid passcode length for SecurID"
-msgstr "neispravna duljina lozinke za SecurID"
-
-#: plugins/sudoers/auth/sia.c:109
-msgid "unable to initialize SIA session"
-msgstr "ne mogu inicijalizirati SIA sjednicu"
-
-#: plugins/sudoers/auth/sudo_auth.c:117
-msgid "Invalid authentication methods compiled into sudo!  You may mix standalone and non-standalone authentication."
-msgstr "Neispravne autentifikacijske metode kompajlirane u sudo!  Možete miješati samostalne i nesamostalne autentifikacije."
-
-#: plugins/sudoers/auth/sudo_auth.c:199
-msgid "There are no authentication methods compiled into sudo!  If you want to turn off authentication, use the --disable-authentication configure option."
-msgstr "Nema autentifikacijskih metoda kompajliranih u sudo!  Ako želite isključiti autentifikaciju, koristite konfiguracijsku opciju --disable-authentication."
-
-#: plugins/sudoers/auth/sudo_auth.c:271
-#, c-format
-msgid "%d incorrect password attempt"
-msgid_plural "%d incorrect password attempts"
-msgstr[0] "%d netočan pokušaj unosa lozinke"
-msgstr[1] "%d netočna pokušaja unosa lozinke"
-msgstr[2] "%d netočnih pokušaja unosa lozinke"
-
-#: plugins/sudoers/auth/sudo_auth.c:374
-msgid "Authentication methods:"
-msgstr "Metode autentifikacije:"
+#: toke.l:805
+msgid "too many levels of includes"
+msgstr "previše razina uključivanja"

@@ -51,6 +51,8 @@ What's new in Sudo 1.8.6?
  * Support for using the System Security Services Daemon (SSSD) as
    a source of sudoers data.
 
+ * Slovenian translation for sudo and sudoers from translationproject.org.
+
 What's new in Sudo 1.8.5p2?
 
  * Fixed use of the SUDO_ASKPASS environment variable which was
