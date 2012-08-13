@@ -2797,6 +2797,181 @@ is run by root with the
 .Fl V
 option.
 .El
+.Sh LOG FORMAT
+.Nm sudoers
+can log events using either
+.Xr syslog 3
+or a simple log file.
+In each case the log format is almost identical.
+.Ss Command log entries
+Commands that sudo runs are logged using the following format (split
+into multiple lines for readability):
+.Bd -literal -offset 4n
+date hostname progname: username : TTY=ttyname ; PWD=cwd ; \e
+    USER=runasuser ; GROUP=runasgroup ; TSID=logid ; \e
+    ENV=env_vars COMMAND=command
+.Ed
+.Pp
+Where the fields are as follows:
+.Bl -tag -width 12n
+.It date
+The date the command was run.
+Typically, this is in the format
+.Dq MMM, DD, HH:MM:SS .
+If logging via
+.Xr syslog 3 ,
+the actual date format is controlled by the syslog daemon.
+If logging to a file and the
+.Em log_year
+option is enabled,
+the date will also include the year.
+.It hostname
+The name of the host
+.Nm sudo
+was run on.
+This field is only present when logging via
+.Xr syslog 3 .
+.It progname
+The name of the program, usually
+.Em sudo
+or
+.Em sudoedit .
+This field is only present when logging via
+.Xr syslog 3 .
+.It username
+The login name of the user who ran
+.Nm sudo .
+.It ttyname
+The short name of the terminal (e.g.\&
+.Dq console ,
+.Dq tty01 ,
+or
+.Dq pts/0 )
+.Nm sudo
+was run on, or
+.Dq unknown
+if there was no terminal present.
+.It cwd
+The current working directory that
+.Nm sudo
+was run in.
+.It runasuser
+The user the command was run as.
+.It runasgroup
+The group the command was run as if one was specified on the command line.
+.It logid
+An I/O log identifier that can be used to replay the command's output.
+This is only present when the
+.Em log_input
+or
+.Em log_output
+option is enabled.
+.It env_vars
+A list of environment variables specified on the command line,
+if specified.
+.It command
+The actual command that was executed.
+.El
+.Pp
+Messages are logged using the locale specified by
+.Em sudoers_locale ,
+which defaults to the
+.Dq Li C
+locale.
+.Ss Error log entries
+If there was a problem running the command, an error string will follow
+the user name.
+Possible errors include:
+.Bl -tag -width 4
+.It user NOT in sudoers
+The user is not listed in the
+.Em sudoers
+file.
+.It user NOT authorized on host
+The user is listed in the
+.Em sudoers
+file but is not allowed to run commands on the host.
+.It command not allowed
+The user is listed in the
+.Em
+sudoers
+file for the host but they are not allowed to run the specified command.
+.It 3 incorrect password attempts
+The user failed to enter their password after 3 tries.
+The actual number of tries will vary based on the number of
+failed attempts and the value of the
+.Em passwd_tries
+option.
+.It a password is required
+.Nm sudo Ns No 's
+.Fl n
+option was specified but a password was required.
+.El
+.Ss Notes on logging via syslog
+By default,
+.Em sudoers
+logs messages via
+.Xr syslog 3 .
+The
+.Em date ,
+.Em hostname ,
+and
+.Em progname
+fields are added by the syslog daemon, not
+.Em sudoers
+itself.
+As such, they may vary in format on different systems.
+.Pp
+On most systems,
+.Xr syslog 3
+has a relatively small log buffer.
+To prevent the command line arguments from being truncated,
+.Nm sudoers
+will split up log messages that are larger than 960 characters
+(not including the date, hostname, and the string
+.Dq sudo ) .
+When a message is split, additional parts will include the string
+.Dq Pq command continued
+after the user name and before the continued command line arguments.
+.Ss Notes on logging to a file
+If the
+.Em logfile
+option is set,
+.Em sudoers
+will log to a local file, such as
+.Pa /var/log/sudo .
+When logging to a file,
+.Em sudoers
+uses a format similar to
+.Xr syslog 3 ,
+with a few important differences:
+.Bl -enum
+.It
+The
+.Em progname
+and
+.Em hostname
+fields are not present.
+.It
+If the
+.Em log_year
+option is enabled,
+the date will also include the year.
+.It
+Lines that are longer than
+.Em loglinelen
+characters (80 by default) are word-wrapped and continued on the
+next line with a four character indent.
+This makes entries easier to read for a human being, but makes it
+more difficult to use
+.Xr grep 1
+on the log files.
+If the
+.Em loglinelen
+option is set to 0 (or negated with a
+.Ql \&! ) ,
+word wrap will be disabled.
+.El
 .Sh SUDO.CONF
 The
 .Pa @sysconfdir@/sudo.conf
@@ -2835,7 +3010,7 @@ file.
 Plugin policy_plugin sudoers.so
 Plugin io_plugin sudoers.so
 .Ed
-.Ss PLUGIN OPTIONS
+.Ss Plugin Options
 Starting with
 .Nm sudo
 1.8.5, it is possible to pass options to the
@@ -2874,7 +3049,7 @@ The
 option can be used to override the default file mode for the sudoers file.
 It should be specified as an octal value.
 .El
-.Ss DEBUG FLAGS
+.Ss Debug Flags
 Versions 1.8.4 and higher of the
 .Em sudoers
 plugin supports a debugging framework that can help track down what the

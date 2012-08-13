@@ -3002,6 +3002,196 @@ is displayed when
 is run by root with the
 \fB\-V\fR
 option.
+.SH "LOG FORMAT"
+\fBsudoers\fR
+can log events using either
+syslog(3)
+or a simple log file.
+In each case the log format is almost identical.
+.SS "Command log entries"
+Commands that sudo runs are logged using the following format (split
+into multiple lines for readability):
+.nf
+.sp
+.RS 4n
+date hostname progname: username : TTY=ttyname ; PWD=cwd ; \e
+    USER=runasuser ; GROUP=runasgroup ; TSID=logid ; \e
+    ENV=env_vars COMMAND=command
+.RE
+.fi
+.PP
+Where the fields are as follows:
+.TP 14n
+date
+The date the command was run.
+Typically, this is in the format
+``MMM, DD, HH:MM:SS''.
+If logging via
+syslog(3),
+the actual date format is controlled by the syslog daemon.
+If logging to a file and the
+\fIlog_year\fR
+option is enabled,
+the date will also include the year.
+.TP 14n
+hostname
+The name of the host
+\fBsudo\fR
+was run on.
+This field is only present when logging via
+syslog(3).
+.TP 14n
+progname
+The name of the program, usually
+\fIsudo\fR
+or
+\fIsudoedit\fR.
+This field is only present when logging via
+syslog(3).
+.TP 14n
+username
+The login name of the user who ran
+\fBsudo\fR.
+.TP 14n
+ttyname
+The short name of the terminal (e.g.\&
+``console'',
+``tty01'',
+or
+``pts/0'')
+\fBsudo\fR
+was run on, or
+``unknown''
+if there was no terminal present.
+.TP 14n
+cwd
+The current working directory that
+\fBsudo\fR
+was run in.
+.TP 14n
+runasuser
+The user the command was run as.
+.TP 14n
+runasgroup
+The group the command was run as if one was specified on the command line.
+.TP 14n
+logid
+An I/O log identifier that can be used to replay the command's output.
+This is only present when the
+\fIlog_input\fR
+or
+\fIlog_output\fR
+option is enabled.
+.TP 14n
+env_vars
+A list of environment variables specified on the command line,
+if specified.
+.TP 14n
+command
+The actual command that was executed.
+.PP
+Messages are logged using the locale specified by
+\fIsudoers_locale\fR,
+which defaults to the
+``\fRC\fR''
+locale.
+.SS "Error log entries"
+If there was a problem running the command, an error string will follow
+the user name.
+Possible errors include:
+.TP 3n
+user NOT in sudoers
+The user is not listed in the
+\fIsudoers\fR
+file.
+.TP 3n
+user NOT authorized on host
+The user is listed in the
+\fIsudoers\fR
+file but is not allowed to run commands on the host.
+.TP 3n
+command not allowed
+The user is listed in the
+sudoers
+file for the host but they are not allowed to run the specified command.
+.TP 3n
+3 incorrect password attempts
+The user failed to enter their password after 3 tries.
+The actual number of tries will vary based on the number of
+failed attempts and the value of the
+\fIpasswd_tries\fR
+option.
+.TP 3n
+a password is required
+\fBsudo\fR's
+\fB\-n\fR
+option was specified but a password was required.
+.SS "Notes on logging via syslog"
+By default,
+\fIsudoers\fR
+logs messages via
+syslog(3).
+The
+\fIdate\fR,
+\fIhostname\fR,
+and
+\fIprogname\fR
+fields are added by the syslog daemon, not
+\fIsudoers\fR
+itself.
+As such, they may vary in format on different systems.
+.PP
+On most systems,
+syslog(3)
+has a relatively small log buffer.
+To prevent the command line arguments from being truncated,
+\fBsudoers\fR
+will split up log messages that are larger than 960 characters
+(not including the date, hostname, and the string
+``sudo'').
+When a message is split, additional parts will include the string
+``(command continued)''
+after the user name and before the continued command line arguments.
+.SS "Notes on logging to a file"
+If the
+\fIlogfile\fR
+option is set,
+\fIsudoers\fR
+will log to a local file, such as
+\fI/var/log/sudo\fR.
+When logging to a file,
+\fIsudoers\fR
+uses a format similar to
+syslog(3),
+with a few important differences:
+.TP 5n
+1.
+The
+\fIprogname\fR
+and
+\fIhostname\fR
+fields are not present.
+.TP 5n
+2.
+If the
+\fIlog_year\fR
+option is enabled,
+the date will also include the year.
+.TP 5n
+3.
+Lines that are longer than
+\fIloglinelen\fR
+characters (80 by default) are word-wrapped and continued on the
+next line with a four character indent.
+This makes entries easier to read for a human being, but makes it
+more difficult to use
+grep(1)
+on the log files.
+If the
+\fIloglinelen\fR
+option is set to 0 (or negated with a
+`\&!'),
+word wrap will be disabled.
 .SH "SUDO.CONF"
 The
 \fI@sysconfdir@/sudo.conf\fR
@@ -3043,7 +3233,7 @@ Plugin policy_plugin sudoers.so
 Plugin io_plugin sudoers.so
 .RE
 .fi
-.SS "PLUGIN OPTIONS"
+.SS "Plugin Options"
 Starting with
 \fBsudo\fR
 1.8.5, it is possible to pass options to the
@@ -3087,7 +3277,7 @@ The
 \fIsudoers_mode\fR
 option can be used to override the default file mode for the sudoers file.
 It should be specified as an octal value.
-.SS "DEBUG FLAGS"
+.SS "Debug Flags"
 Versions 1.8.4 and higher of the
 \fIsudoers\fR
 plugin supports a debugging framework that can help track down what the
