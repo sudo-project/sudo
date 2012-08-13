@@ -53,6 +53,11 @@ What's new in Sudo 1.8.6?
 
  * Slovenian translation for sudo and sudoers from translationproject.org.
 
+What's new in Sudo 1.8.5p3?
+
+ * Fixed the loading of I/O plugins that conform to a plugin API
+   version older than 1.2.
+
 What's new in Sudo 1.8.5p2?
 
  * Fixed use of the SUDO_ASKPASS environment variable which was
