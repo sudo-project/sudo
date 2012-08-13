@@ -207,7 +207,9 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
     if (policy_plugin->u.policy->version >= SUDO_API_MKVERSION(1, 2)) {
 	if (policy_plugin->u.policy->register_hooks != NULL)
 	    policy_plugin->u.policy->register_hooks(SUDO_HOOK_VERSION, register_hook);
-	tq_foreach_fwd(io_plugins, container) {
+    }
+    tq_foreach_fwd(io_plugins, container) {
+	if (container->u.io->version >= SUDO_API_MKVERSION(1, 2)) {
 	    if (container->u.io->register_hooks != NULL)
 		container->u.io->register_hooks(SUDO_HOOK_VERSION, register_hook);
 	}
