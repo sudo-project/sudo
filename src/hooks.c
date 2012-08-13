@@ -60,12 +60,12 @@ static struct sudo_hook_list *sudo_hook_unsetenv_list;
 static struct sudo_hook_list *sudo_hook_getenv_list;
 static struct sudo_hook_list *sudo_hook_putenv_list;
 
+/* NOTE: must not anything that might call setenv() */
 int
 process_hooks_setenv(const char *name, const char *value, int overwrite)
 {
     struct sudo_hook_list *hook;
     int rc = SUDO_HOOK_RET_NEXT;
-    debug_decl(process_hooks_setenv, SUDO_DEBUG_HOOKS)
 
     /* First process the hooks. */
     for (hook = sudo_hook_setenv_list; hook != NULL; hook = hook->next) {
@@ -77,20 +77,20 @@ process_hooks_setenv(const char *name, const char *value, int overwrite)
 	    case SUDO_HOOK_RET_STOP:
 		goto done;
 	    default:
-		warningx("invalid setenv hook return value: %d", rc);
+		warningx2("invalid setenv hook return value: %d", rc);
 		break;
 	}
     }
 done:
-    debug_return_int(rc);
+    return rc;
 }
 
+/* NOTE: must not anything that might call putenv() */
 int
 process_hooks_putenv(char *string)
 {
     struct sudo_hook_list *hook;
     int rc = SUDO_HOOK_RET_NEXT;
-    debug_decl(process_hooks_putenv, SUDO_DEBUG_HOOKS)
 
     /* First process the hooks. */
     for (hook = sudo_hook_putenv_list; hook != NULL; hook = hook->next) {
@@ -102,21 +102,21 @@ process_hooks_putenv(char *string)
 	    case SUDO_HOOK_RET_STOP:
 		goto done;
 	    default:
-		warningx("invalid putenv hook return value: %d", rc);
+		warningx2("invalid putenv hook return value: %d", rc);
 		break;
 	}
     }
 done:
-    debug_return_int(rc);
+    return rc;
 }
 
+/* NOTE: must not anything that might call getenv() */
 int
 process_hooks_getenv(const char *name, char **value)
 {
     struct sudo_hook_list *hook;
     char *val = NULL;
     int rc = SUDO_HOOK_RET_NEXT;
-    debug_decl(process_hooks_getenv, SUDO_DEBUG_HOOKS)
 
     /* First process the hooks. */
     for (hook = sudo_hook_getenv_list; hook != NULL; hook = hook->next) {
@@ -128,22 +128,22 @@ process_hooks_getenv(const char *name, char **value)
 	    case SUDO_HOOK_RET_STOP:
 		goto done;
 	    default:
-		warningx("invalid getenv hook return value: %d", rc);
+		warningx2("invalid getenv hook return value: %d", rc);
 		break;
 	}
     }
 done:
     if (val != NULL)
 	*value = val;
-    debug_return_int(rc);
+    return rc;
 }
 
+/* NOTE: must not anything that might call unsetenv() */
 int
 process_hooks_unsetenv(const char *name)
 {
     struct sudo_hook_list *hook;
     int rc = SUDO_HOOK_RET_NEXT;
-    debug_decl(process_hooks_unsetenv, SUDO_DEBUG_HOOKS)
 
     /* First process the hooks. */
     for (hook = sudo_hook_unsetenv_list; hook != NULL; hook = hook->next) {
@@ -155,12 +155,12 @@ process_hooks_unsetenv(const char *name)
 	    case SUDO_HOOK_RET_STOP:
 		goto done;
 	    default:
-		warningx("invalid unsetenv hook return value: %d", rc);
+		warningx2("invalid unsetenv hook return value: %d", rc);
 		break;
 	}
     }
 done:
-    debug_return_int(rc);
+    return rc;
 }
 
 /* Hook registration internals. */
