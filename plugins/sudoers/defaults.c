@@ -485,7 +485,7 @@ init_defaults(void)
  * Update the defaults based on what was set by sudoers.
  * Pass in an OR'd list of which default types to update.
  */
-int
+bool
 update_defaults(int what)
 {
     struct defaults *def;
@@ -523,6 +523,54 @@ update_defaults(int what)
 		    !set_default(def->var, def->val, def->op))
 		    rc = false;
 		break;
+	}
+    }
+    debug_return_bool(rc);
+}
+
+/*
+ * Check the defaults entries without actually setting them.
+ * Pass in an OR'd list of which default types to check.
+ */
+bool
+check_defaults(int what, bool quiet)
+{
+    struct sudo_defs_types *cur;
+    struct defaults *def;
+    bool rc = true;
+    debug_decl(check_defaults, SUDO_DEBUG_DEFAULTS)
+
+    tq_foreach_fwd(&defaults, def) {
+	switch (def->type) {
+	    case DEFAULTS:
+		if (!ISSET(what, SETDEF_GENERIC))
+		    continue;
+		break;
+	    case DEFAULTS_USER:
+		if (!ISSET(what, SETDEF_USER))
+		    continue;
+		break;
+	    case DEFAULTS_RUNAS:
+		if (!ISSET(what, SETDEF_RUNAS))
+		    continue;
+		break;
+	    case DEFAULTS_HOST:
+		if (!ISSET(what, SETDEF_HOST))
+		    continue;
+		break;
+	    case DEFAULTS_CMND:
+		if (!ISSET(what, SETDEF_CMND))
+		    continue;
+		break;
+	}
+	for (cur = sudo_defs_table; cur->name != NULL; cur++) {
+	    if (strcmp(def->var, cur->name) == 0)
+		break;
+	}
+	if (cur->name == NULL) {
+	    if (!quiet)
+		warningx(_("unknown defaults entry `%s'"), def->var);
+	    rc = false;
 	}
     }
     debug_return_bool(rc);

@@ -500,10 +500,10 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 	}
 	fclose(yyin);
 	if (!parse_error) {
-	    if (!update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER) ||
+	    if (!check_defaults(SETDEF_ALL, quiet) ||
 		check_aliases(strict, quiet) != 0) {
 		parse_error = true;
-		errorfile = sp->path;
+		errorfile = NULL;
 	    }
 	}
 
@@ -527,10 +527,11 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 	    tq_foreach_fwd(&sudoerslist, sp) {
 		if (errorfile == NULL || strcmp(sp->path, errorfile) == 0) {
 		    edit_sudoers(sp, editor, args, errorlineno);
-		    break;
+		    if (errorfile != NULL)
+			break;
 		}
 	    }
-	    if (sp == NULL) {
+	    if (errorfile != NULL && sp == NULL) {
 		errorx(1, _("internal error, unable to find %s in list!"),
 		    sudoers);
 	    }
@@ -825,9 +826,12 @@ check_syntax(char *sudoers_path, bool quiet, bool strict, bool oldperms)
 	parse_error = true;
 	errorfile = sudoers_path;
     }
-    if (!parse_error && check_aliases(strict, quiet) != 0) {
-	parse_error = true;
-	errorfile = sudoers_path;
+    if (!parse_error) {
+	if (!check_defaults(SETDEF_ALL, quiet) ||
+	    check_aliases(strict, quiet) != 0) {
+	    parse_error = true;
+	    errorfile = NULL;
+	}
     }
     ok = !parse_error;
 
