@@ -615,7 +615,7 @@ fully qualified path name ending in a
 When you specify a directory in a
 .Li Cmnd_List ,
 the user will be able to run any file within that directory
-(but not in any subdirectories therein).
+(but not in any sub-directories therein).
 .Pp
 If a
 .Li Cmnd
@@ -642,7 +642,7 @@ option (or as
 It may take command line arguments just as a normal command does.
 .Ss Defaults
 Certain configuration options may be changed from their default
-values at runtime via one or more
+values at run-time via one or more
 .Li Default_Entry
 lines.
 These may affect all users on any host, all users on a specific host, a
@@ -901,7 +901,7 @@ type is specified with the command it will override any default values
 specified in
 .Em sudoers .
 A role or type specified on the command line,
-however, will supercede the values in
+however, will supersede the values in
 .Em sudoers .
 .Ss Solaris_Priv_Spec
 On Solaris systems,
@@ -1032,7 +1032,11 @@ Additionally, a user may only run
 without a password if the
 .Li NOPASSWD
 tag is present for all a user's entries that pertain to the current host.
-This behavior may be overridden via the verifypw and listpw options.
+This behavior may be overridden via the
+.Em verifypw
+and
+.Em listpw
+options.
 .Pp
 .Em NOEXEC and EXEC
 .Pp
@@ -1188,7 +1192,7 @@ but not
 When matching the command line arguments, however, a slash
 .Sy does
 get matched by wildcards since command line arguments may contain
-arbitrary strings and not just pathnames.
+arbitrary strings and not just path names.
 .Pp
 Wildcards in command line arguments should be used with care.
 Because command line arguments are matched as a single, concatenated
@@ -1212,7 +1216,7 @@ It will also allow:
 $ sudo cat /var/log/messages /etc/shadow
 .Ed
 .Pp
-which is probaby not what was intended.
+which is probably not what was intended.
 .Ss Exceptions to wildcard rules
 The following exceptions apply to the above rules:
 .Bl -tag -width 8n
@@ -1227,7 +1231,7 @@ arguments.
 .It sudoedit
 Command line arguments to the
 .Em sudoedit
-built-in command should always be pathnames, so a forward slash
+built-in command should always be path names, so a forward slash
 .Pq Ql /
 will not be matched by a wildcard.
 .El
@@ -1408,7 +1412,7 @@ Long lines can be continued with a backslash
 .Pq Ql \e
 as the last character on the line.
 .Pp
-Whitespace between elements in a list as well as special syntactic
+White space between elements in a list as well as special syntactic
 characters in a
 .Em User Specification
 .Po
@@ -1576,7 +1580,7 @@ However, since it accesses the file system,
 .Xr glob 3
 can take a long time to complete for some patterns, especially
 when the pattern references a network file system that is mounted
-on demand (automounted).
+on demand (auto mounted).
 The
 .Em fast_glob
 option causes
@@ -2069,7 +2073,7 @@ by the
 option (defaults to
 .Li root )
 instead of the password of the invoking user.
-In addition, the timestamp file name will include the target user's name.
+In addition, the time stamp file name will include the target user's name.
 Note that this flag precludes the use of a uid not listed in the passwd
 database as an argument to the
 .Fl u
@@ -2217,8 +2221,8 @@ Set this to
 to always prompt for a password.
 If set to a value less than
 .Li 0
-the user's timestamp will never expire.
-This can be used to allow users to create or delete their own timestamps via
+the user's time stamp will never expire.
+This can be used to allow users to create or delete their own time stamps via
 .Dq Li sudo -v
 and
 .Dq Li sudo -k
@@ -2466,11 +2470,11 @@ Defaults to
 .It timestampdir
 The directory in which
 .Nm sudo
-stores its timestamp files.
+stores its time stamp files.
 The default is
 .Pa @timedir@ .
 .It timestampowner
-The owner of the timestamp directory and the timestamps stored therein.
+The owner of the time stamp directory and the time stamps stored therein.
 The default is
 .Li root .
 .It type
@@ -2479,7 +2483,7 @@ context to run the command.
 The default type may be overridden on a per-command basis in
 .Em sudoers
 or via command line options.
-This option is only available whe
+This option is only available when
 .Nm sudo
 is built with SELinux support.
 .El
@@ -2803,7 +2807,7 @@ can log events using either
 .Xr syslog 3
 or a simple log file.
 In each case the log format is almost identical.
-.Ss Command log entries
+.Ss Accepted command log entries
 Commands that sudo runs are logged using the following format (split
 into multiple lines for readability):
 .Bd -literal -offset 4n
@@ -2878,10 +2882,10 @@ Messages are logged using the locale specified by
 which defaults to the
 .Dq Li C
 locale.
-.Ss Error log entries
-If there was a problem running the command, an error string will follow
-the user name.
-Possible errors include:
+.Ss Denied command log entries
+If the user is not allowed to run the command, the reason for the denial
+will follow the user name.
+Possible reasons include:
 .Bl -tag -width 4
 .It user NOT in sudoers
 The user is not listed in the
@@ -2893,8 +2897,7 @@ The user is listed in the
 file but is not allowed to run commands on the host.
 .It command not allowed
 The user is listed in the
-.Em
-sudoers
+.Em sudoers
 file for the host but they are not allowed to run the specified command.
 .It 3 incorrect password attempts
 The user failed to enter their password after 3 tries.
@@ -2906,6 +2909,103 @@ option.
 .Nm sudo Ns No 's
 .Fl n
 option was specified but a password was required.
+.It sorry, you are not allowed to set the following environment variables
+The user specified environment variables on the command line that
+were not allowed by
+.Em sudoers .
+.El
+.Ss Error log entries
+If an error occurs,
+.Nm sudoers
+will log a message and, in most cases, send a message to the
+administrator via email.
+Possible errors include:
+.Bl -tag -width 4
+.It parse error in @sysconfdir@/sudoers near line N
+.Nm sudoers
+encountered an error when parsing the specified file.
+In some cases, the actual error may be one line above or below the
+line number listed, depending on the type of error.
+.It problem with defaults entries
+The sudoers file contains one or more unknown Defaults settings.
+This does not prevent
+.Nm sudo
+from running, but the sudoers file should be checked using
+.Nm visudo .
+.It timestamp owner (@timestampowner@): \&No such user
+The time stamp directory owner, which defaults to
+@timestampowner@ but which may be specified via the
+.Em timestampowner
+setting, could not be found in the password database.
+.It unable to open/read @sysconfdir@/sudoers
+The sudoers file could not be opened for reading.
+This can happen when the sudoers file is located on a remote
+file system that maps user ID 0 to a different value.
+Normally,
+.Nm sudoers
+tries to open sudoers using group permissions to avoid this problem.
+Consider changing the ownership of
+.Pa @sysconfdir@/sudoers
+by adding an option like
+.Dq sudoers_uid=N
+(where
+.Sq N
+is the user ID that owns the sudoers file)
+to the
+.Nm sudoers
+plugin line in the
+.Pa @sysconfdir@/sudo.conf
+file.
+.It unable to stat @sysconfdir@/sudoers
+The
+.Pa @sysconfdir@/sudoers
+file is missing.
+.It @sysconfdir@/sudoers is not a regular file
+The
+.Pa @sysconfdir@/sudoers
+file exists but is not a regular file or symbolic link.
+.It @sysconfdir@/sudoers is owned by uid N, should be 0
+The sudoers file has the wrong owner.
+If you wish to change the sudoers file owner, please add
+.Dq sudoers_uid=N
+(where
+.Sq N
+is the user ID that owns the sudoers file) to the
+.Nm sudoers
+plugin line in the
+.Pa @sysconfdir@/sudo.conf
+file.
+.It @sysconfdir@/sudoers is world writable
+The permissions on the sudoers file allow all users to write to it.
+The sudoers file must not be world-writable, the default file mode
+is 0440 (readable by owner and group, writable by none).
+The default mode may be changed via the
+.Dq sudoers_mode
+option to the
+.Nm sudoers
+plugin line in the
+.Pa @sysconfdir@/sudo.conf
+file.
+.It @sysconfdir@/sudoers is owned by gid N, should be 1
+The sudoers file has the wrong group ownership.
+If you wish to change the sudoers file group ownership, please add
+.Dq sudoers_gid=N
+(where
+.Sq N
+is the group ID that owns the sudoers file) to the
+.Nm sudoers
+plugin line in the
+.Pa @sysconfdir@/sudo.conf
+file.
+.It unable to open @timedir@/username/ttyname
+.Em sudoers
+was unable to read or create the user's time stamp file.
+.It unable to write to @timedir@/username/ttyname
+.Em sudoers
+was unable to write to the user's time stamp file.
+.It unable to mkdir to @timedir@/username
+.Em sudoers
+was unable to create the user's time stamp directory.
 .El
 .Ss Notes on logging via syslog
 By default,
