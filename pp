@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2012 Quest Software, Inc. ALL RIGHTS RESERVED
-pp_revision="363"
+pp_revision="368"
  # Copyright 2012 Quest Software, Inc.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -4004,20 +4004,32 @@ pp_deb_handle_services() {
             #-- append %post code to install the svc
 	    test x"yes" = x"$enable" &&
             cat<<-. >> $pp_wrkdir/%post.run
-		# Install the service links
-		update-rc.d $svc defaults
+		case "\$1" in
+		    configure)
+		        # Install the service links
+		        update-rc.d $svc defaults
+		        ;;
+		esac
 .
 
             #-- prepend %preun code to stop svc
             cat<<-. | pp_prepend $pp_wrkdir/%preun.run
-		# Stop the $svc service
-		invoke-rc.d $svc stop
+		case "\$1" in
+		    remove|deconfigure|upgrade)
+		        # Stop the $svc service
+		        invoke-rc.d $svc stop
+		        ;;
+		esac
 .
 
-            #-- prepend %preun code to remove service
+            #-- prepend %postun code to remove service
             cat<<-. | pp_prepend $pp_wrkdir/%postun.run
-		# Remove the service links
-		update-rc.d -f $svc remove
+		case "\$1" in
+		    purge)
+		        # Remove the service links
+		        update-rc.d $svc remove
+		        ;;
+		esac
 .
         done
         #pp_deb_service_remove_common | pp_prepend $pp_wrkdir/%preun.run
@@ -4063,9 +4075,14 @@ pp_deb_make_DEBIAN() {
 	cp $pp_wrkdir/%conffiles.$cmp $data/DEBIAN/conffiles
     fi
 
+    # Create preinst
+    pp_deb_make_package_maintainer_script "$data/DEBIAN/preinst" \
+        "$pp_wrkdir/%pre.$cmp" "Pre-install script for $cmp_full_name"\
+        || exit $?
+
     # Create postinst
     pp_deb_make_package_maintainer_script "$data/DEBIAN/postinst" \
-        "$pp_wrkdir/%post.$cmp" "Post install script for $cmp_full_name"\
+        "$pp_wrkdir/%post.$cmp" "Post-install script for $cmp_full_name"\
         || exit $?
 
     # Create prerm
@@ -6815,7 +6832,19 @@ pp_macos_bom_fix_parents () {
 	sub chk { my $d=shift;
 		  &chk(&dirname($d)) if $d =~ m,/,;
 		  unless ($seen{$d}++) {
+		    # Make sure we do not override system directories
+		    if ($d =~ m:^\./(etc|var)$:) {
+		      my $tgt = "private/$1";
+		      my $_ = `/usr/bin/printf "$tgt" | /usr/bin/cksum /dev/stdin`;
+		      my ($sum, $len) = split;
+		      print "$d\t120755\t0/0\t$len\t$sum\t$tgt\n";
+		    } elsif ($d eq "." || $d eq "./Library") {
+		      print "$d\t41775\t0/80\n";
+		    } elsif ($d eq "./Applications" || $d eq "./Developer") {
+		      print "$d\t40775\t0/80\n";
+		    } else {
 		      print "$d\t40755\t0/0\n";
+		    }
 		  }
 		}
 	m/^(\S+)\s+(\d+)/;
