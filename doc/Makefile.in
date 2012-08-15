@@ -129,6 +129,8 @@ $(srcdir)/sudo.cat: varsub $(srcdir)/sudo.mdoc.in
 	    $(SED) -f varsub $(srcdir)/sudo.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
+sudo.cat: $(srcdir)/sudo.cat
+
 $(srcdir)/visudo.man.in: $(srcdir)/visudo.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
@@ -154,6 +156,8 @@ $(srcdir)/visudo.cat: varsub $(srcdir)/visudo.mdoc.in
 	    echo "Generating $@"; \
 	    $(SED) -f varsub $(srcdir)/visudo.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
+
+visudo.cat: $(srcdir)/visudo.cat
 
 $(srcdir)/sudoers.man.in: $(srcdir)/sudoers.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -184,6 +188,8 @@ $(srcdir)/sudoers.cat: varsub $(srcdir)/sudoers.mdoc.in
 	    $(SED) -f varsub $(srcdir)/sudoers.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
+sudoers.cat: $(srcdir)/sudoers.cat
+
 $(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
@@ -209,6 +215,8 @@ $(srcdir)/sudoers.ldap.cat: varsub $(srcdir)/sudoers.ldap.mdoc.in
 	    echo "Generating $@"; \
 	    $(SED) -f varsub $(srcdir)/sudoers.ldap.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
+
+sudoers.ldap.cat: $(srcdir)/sudoers.ldap.cat
 
 $(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -236,6 +244,8 @@ $(srcdir)/sudoreplay.cat: varsub $(srcdir)/sudoreplay.mdoc.in
 	    $(SED) -f varsub $(srcdir)/sudoreplay.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
+sudoreplay.cat: $(srcdir)/sudoreplay.cat
+
 $(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
@@ -261,6 +271,8 @@ $(srcdir)/sudo_plugin.cat: varsub $(srcdir)/sudo_plugin.mdoc.in
 	    echo "Generating $@"; \
 	    $(SED) -f varsub $(srcdir)/sudo_plugin.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
+
+sudo_plugin.cat: $(srcdir)/sudo_plugin.cat
 
 pre-install:
 
