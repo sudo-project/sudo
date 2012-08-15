@@ -620,6 +620,7 @@ FLEX
 YFLAGS
 YACC
 NROFFPROG
+MANDOCPROG
 TRPROG
 UNAMEPROG
 OTOOL64
@@ -13650,20 +13651,22 @@ NOEXECDIR="`echo $with_noexec|sed -e 's:^${\([^}]*\)}:$(\1):' -e 's:^\(.*\)/[^/]
 set dummy uname; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_UNAMEPROG+:} false; then :
+if ${ac_cv_path_UNAMEPROG+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  if test -n "$UNAMEPROG"; then
-  ac_cv_prog_UNAMEPROG="$UNAMEPROG" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+  case $UNAMEPROG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_UNAMEPROG="$UNAMEPROG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
     for ac_exec_ext in '' $ac_executable_extensions; do
   if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_UNAMEPROG="uname"
+    ac_cv_path_UNAMEPROG="$as_dir/$ac_word$ac_exec_ext"
     $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -13671,9 +13674,11 @@ done
   done
 IFS=$as_save_IFS
 
+  test -z "$ac_cv_path_UNAMEPROG" && ac_cv_path_UNAMEPROG="uname"
+  ;;
+esac
 fi
-fi
-UNAMEPROG=$ac_cv_prog_UNAMEPROG
+UNAMEPROG=$ac_cv_path_UNAMEPROG
 if test -n "$UNAMEPROG"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $UNAMEPROG" >&5
 $as_echo "$UNAMEPROG" >&6; }
@@ -13687,20 +13692,22 @@ fi
 set dummy tr; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_TRPROG+:} false; then :
+if ${ac_cv_path_TRPROG+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  if test -n "$TRPROG"; then
-  ac_cv_prog_TRPROG="$TRPROG" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+  case $TRPROG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_TRPROG="$TRPROG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
     for ac_exec_ext in '' $ac_executable_extensions; do
   if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_TRPROG="tr"
+    ac_cv_path_TRPROG="$as_dir/$ac_word$ac_exec_ext"
     $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -13708,9 +13715,11 @@ done
   done
 IFS=$as_save_IFS
 
+  test -z "$ac_cv_path_TRPROG" && ac_cv_path_TRPROG="tr"
+  ;;
+esac
 fi
-fi
-TRPROG=$ac_cv_prog_TRPROG
+TRPROG=$ac_cv_path_TRPROG
 if test -n "$TRPROG"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $TRPROG" >&5
 $as_echo "$TRPROG" >&6; }
@@ -13720,26 +13729,26 @@ $as_echo "no" >&6; }
 fi
 
 
-for ac_prog in mandoc nroff
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
+# Extract the first word of "mandoc", so it can be a program name with args.
+set dummy mandoc; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_NROFFPROG+:} false; then :
+if ${ac_cv_path_MANDOCPROG+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  if test -n "$NROFFPROG"; then
-  ac_cv_prog_NROFFPROG="$NROFFPROG" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+  case $MANDOCPROG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_MANDOCPROG="$MANDOCPROG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
     for ac_exec_ext in '' $ac_executable_extensions; do
   if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_NROFFPROG="$ac_prog"
+    ac_cv_path_MANDOCPROG="$as_dir/$ac_word$ac_exec_ext"
     $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -13747,9 +13756,54 @@ done
   done
 IFS=$as_save_IFS
 
+  test -z "$ac_cv_path_MANDOCPROG" && ac_cv_path_MANDOCPROG="mandoc"
+  ;;
+esac
 fi
+MANDOCPROG=$ac_cv_path_MANDOCPROG
+if test -n "$MANDOCPROG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MANDOCPROG" >&5
+$as_echo "$MANDOCPROG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
 fi
-NROFFPROG=$ac_cv_prog_NROFFPROG
+
+
+if test "$MANDOCPROG" != "mandoc"; then
+    : ${MANTYPE='mdoc'}
+else
+    # Extract the first word of "nroff", so it can be a program name with args.
+set dummy nroff; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_NROFFPROG+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $NROFFPROG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_NROFFPROG="$NROFFPROG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_NROFFPROG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+NROFFPROG=$ac_cv_path_NROFFPROG
 if test -n "$NROFFPROG"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $NROFFPROG" >&5
 $as_echo "$NROFFPROG" >&6; }
@@ -13759,71 +13813,35 @@ $as_echo "no" >&6; }
 fi
 
 
-  test -n "$NROFFPROG" && break
-done
-
-if test -n "$NROFFPROG"; then
-    test -n "$MANTYPE" && sudo_cv_var_mantype="$MANTYPE"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking which macro set to use for manual pages" >&5
+    if test -n "$NROFFPROG"; then
+	test -n "$MANTYPE" && sudo_cv_var_mantype="$MANTYPE"
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking which macro set to use for manual pages" >&5
 $as_echo_n "checking which macro set to use for manual pages... " >&6; }
 if ${sudo_cv_var_mantype+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  sudo_cv_var_mantype="man"
-	if test "$NROFFPROG" != "no"; then
-	    echo ".Sh NAME" > conftest
-	    echo ".Nm sudo" >> conftest
-	    echo ".Nd sudo" >> conftest
-	    echo ".Sh DESCRIPTION" >> conftest
-	    echo "sudo" >> conftest
-	    if $NROFFPROG -mdoc conftest >/dev/null 2>&1; then
-		sudo_cv_var_mantype="mdoc"
-	    fi
-	    rm -f conftest
-	fi
+
+		sudo_cv_var_mantype="man"
+		echo ".Sh NAME" > conftest
+		echo ".Nm sudo" >> conftest
+		echo ".Nd sudo" >> conftest
+		echo ".Sh DESCRIPTION" >> conftest
+		echo "sudo" >> conftest
+		if $NROFFPROG -mdoc conftest >/dev/null 2>&1; then
+		    sudo_cv_var_mantype="mdoc"
+		fi
+		rm -f conftest
+
 
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_mantype" >&5
 $as_echo "$sudo_cv_var_mantype" >&6; }
-    MANTYPE="$sudo_cv_var_mantype"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $NROFFPROG supports the -c option" >&5
-$as_echo_n "checking whether $NROFFPROG supports the -c option... " >&6; }
-if ${sudo_cv_var_nroff_opt_c+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if $NROFFPROG -c </dev/null >/dev/null 2>&1; then
-	    sudo_cv_var_nroff_opt_c=yes
-	else
-	    sudo_cv_var_nroff_opt_c=no
-	fi
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_nroff_opt_c" >&5
-$as_echo "$sudo_cv_var_nroff_opt_c" >&6; }
-    if test "$sudo_cv_var_nroff_opt_c" = "yes"; then
-	NROFFPROG="$NROFFPROG -c"
+	MANTYPE="$sudo_cv_var_mantype"
+    else
+	MANTYPE=cat
+	MANDIRTYPE=cat
+	mansrcdir='$(srcdir)'
     fi
-                { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $NROFFPROG supports the -Tascii option" >&5
-$as_echo_n "checking whether $NROFFPROG supports the -Tascii option... " >&6; }
-if ${sudo_cv_var_nroff_opt_Tascii+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if $NROFFPROG -Tascii </dev/null >/dev/null 2>&1; then
-	    sudo_cv_var_nroff_opt_Tascii=yes
-	else
-	    sudo_cv_var_nroff_opt_Tascii=no
-	fi
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_nroff_opt_Tascii" >&5
-$as_echo "$sudo_cv_var_nroff_opt_Tascii" >&6; }
-    if test "$sudo_cv_var_nroff_opt_Tascii" = "yes"; then
-	NROFFPROG="$NROFFPROG -Tascii"
-    fi
-else
-    MANTYPE=cat
-    MANDIRTYPE=cat
-    mansrcdir='$(srcdir)'
 fi
 
 if test -n "$sudo_cv_prev_host"; then

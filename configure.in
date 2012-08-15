@@ -1468,56 +1468,36 @@ NOEXECDIR="`echo $with_noexec|sed -e 's:^${\([[^}]]*\)}:$(\1):' -e 's:^\(.*\)/[[
 dnl
 dnl Find programs we use
 dnl
-AC_CHECK_PROG(UNAMEPROG, [uname], [uname])
-AC_CHECK_PROG(TRPROG, [tr], [tr])
-AC_CHECK_PROGS(NROFFPROG, [mandoc nroff])
-if test -n "$NROFFPROG"; then
-    test -n "$MANTYPE" && sudo_cv_var_mantype="$MANTYPE"
-    AC_CACHE_CHECK([which macro set to use for manual pages],
-	[sudo_cv_var_mantype],
-	[sudo_cv_var_mantype="man"
-	if test "$NROFFPROG" != "no"; then
-	    echo ".Sh NAME" > conftest
-	    echo ".Nm sudo" >> conftest
-	    echo ".Nd sudo" >> conftest
-	    echo ".Sh DESCRIPTION" >> conftest
-	    echo "sudo" >> conftest
-	    if $NROFFPROG -mdoc conftest >/dev/null 2>&1; then
-		sudo_cv_var_mantype="mdoc"
-	    fi
-	    rm -f conftest
-	fi]
-    )
-    MANTYPE="$sudo_cv_var_mantype"
-    AC_CACHE_CHECK([whether $NROFFPROG supports the -c option],
-	[sudo_cv_var_nroff_opt_c],
-	[if $NROFFPROG -c </dev/null >/dev/null 2>&1; then
-	    sudo_cv_var_nroff_opt_c=yes
-	else
-	    sudo_cv_var_nroff_opt_c=no
-	fi]
-    )
-    if test "$sudo_cv_var_nroff_opt_c" = "yes"; then
-	NROFFPROG="$NROFFPROG -c"
-    fi
-    dnl
-    dnl This test will fail for mandoc but it is the default anyway...
-    dnl
-    AC_CACHE_CHECK([whether $NROFFPROG supports the -Tascii option],
-	[sudo_cv_var_nroff_opt_Tascii],
-	[if $NROFFPROG -Tascii </dev/null >/dev/null 2>&1; then
-	    sudo_cv_var_nroff_opt_Tascii=yes
-	else
-	    sudo_cv_var_nroff_opt_Tascii=no
-	fi]
-    )
-    if test "$sudo_cv_var_nroff_opt_Tascii" = "yes"; then
-	NROFFPROG="$NROFFPROG -Tascii"
-    fi
+AC_PATH_PROG(UNAMEPROG, [uname], [uname])
+AC_PATH_PROG(TRPROG, [tr], [tr])
+AC_PATH_PROG(MANDOCPROG, [mandoc], [mandoc])
+if test "$MANDOCPROG" != "mandoc"; then
+    : ${MANTYPE='mdoc'}
 else
-    MANTYPE=cat
-    MANDIRTYPE=cat
-    mansrcdir='$(srcdir)'
+    AC_PATH_PROG(NROFFPROG, [nroff])
+    if test -n "$NROFFPROG"; then
+	test -n "$MANTYPE" && sudo_cv_var_mantype="$MANTYPE"
+	AC_CACHE_CHECK([which macro set to use for manual pages],
+	    [sudo_cv_var_mantype],
+	    [
+		sudo_cv_var_mantype="man"
+		echo ".Sh NAME" > conftest
+		echo ".Nm sudo" >> conftest
+		echo ".Nd sudo" >> conftest
+		echo ".Sh DESCRIPTION" >> conftest
+		echo "sudo" >> conftest
+		if $NROFFPROG -mdoc conftest >/dev/null 2>&1; then
+		    sudo_cv_var_mantype="mdoc"
+		fi
+		rm -f conftest
+	    ]
+	)
+	MANTYPE="$sudo_cv_var_mantype"
+    else
+	MANTYPE=cat
+	MANDIRTYPE=cat
+	mansrcdir='$(srcdir)'
+    fi
 fi
 
 dnl
