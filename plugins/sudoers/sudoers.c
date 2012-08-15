@@ -1072,8 +1072,13 @@ set_loginclass(struct passwd *pw)
 }
 #endif /* HAVE_LOGIN_CAP_H */
 
+#ifndef AI_FQDN
+# define AI_FQDN AI_CANONNAME
+#endif
+
 /*
  * Look up the fully qualified domain name and set user_host and user_shost.
+ * Use AI_FQDN if available since "canonical" is not always the same as fqdn.
  */
 void
 set_fqdn(void)
@@ -1084,7 +1089,7 @@ set_fqdn(void)
 
     zero_bytes(&hint, sizeof(hint));
     hint.ai_family = PF_UNSPEC;
-    hint.ai_flags = AI_CANONNAME;
+    hint.ai_flags = AI_FQDN;
     if (getaddrinfo(user_host, NULL, &hint, &res0) != 0) {
 	log_error(MSG_ONLY, _("unable to resolve host %s"), user_host);
     } else {
@@ -1093,11 +1098,11 @@ set_fqdn(void)
 	efree(user_host);
 	user_host = estrdup(res0->ai_canonname);
 	freeaddrinfo(res0);
+	if ((p = strchr(user_host, '.')) != NULL)
+	    user_shost = estrndup(user_host, (size_t)(p - user_host));
+	else
+	    user_shost = user_host;
     }
-    if ((p = strchr(user_host, '.')) != NULL)
-	user_shost = estrndup(user_host, (size_t)(p - user_host));
-    else
-	user_shost = user_host;
     debug_return;
 }
 
