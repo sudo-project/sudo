@@ -281,7 +281,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      the command may only be run wwiitthhoouutt command line arguments.  A directory
      is a fully qualified path name ending in a `/'.  When you specify a
      directory in a Cmnd_List, the user will be able to run any file within
-     that directory (but not in any subdirectories therein).
+     that directory (but not in any sub-directories therein).
 
      If a Cmnd has associated command line arguments, then the arguments in
      the Cmnd must match exactly those given by the user on the command line
@@ -293,7 +293,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
    DDeeffaauullttss
      Certain configuration options may be changed from their default values at
-     runtime via one or more Default_Entry lines.  These may affect all users
+     run-time via one or more Default_Entry lines.  These may affect all users
      on any host, all users on a specific host, a specific user, a specific
      command, or commands being run as a specific user.  Note that per-command
      entries may not include command line arguments.  If you need to specify
@@ -433,7 +433,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      SELinux role and/or type associated with a command.  If a role or type is
      specified with the command it will override any default values specified
      in _s_u_d_o_e_r_s.  A role or type specified on the command line, however, will
-     supercede the values in _s_u_d_o_e_r_s.
+     supersede the values in _s_u_d_o_e_r_s.
 
    SSoollaarriiss__PPrriivv__SSppeecc
      On Solaris systems, _s_u_d_o_e_r_s entries may optionally specify Solaris
@@ -494,7 +494,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      without a password.  Additionally, a user may only run ``sudo -v''
      without a password if the NOPASSWD tag is present for all a user's
      entries that pertain to the current host.  This behavior may be
-     overridden via the verifypw and listpw options.
+     overridden via the _v_e_r_i_f_y_p_w and _l_i_s_t_p_w options.
 
      _N_O_E_X_E_C _a_n_d _E_X_E_C
 
@@ -568,7 +568,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
      When matching the command line arguments, however, a slash ddooeess get
      matched by wildcards since command line arguments may contain arbitrary
-     strings and not just pathnames.
+     strings and not just path names.
 
      Wildcards in command line arguments should be used with care.  Because
      command line arguments are matched as a single, concatenated string, a
@@ -585,7 +585,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
          $ sudo cat /var/log/messages /etc/shadow
 
-     which is probaby not what was intended.
+     which is probably not what was intended.
 
    EExxcceeppttiioonnss ttoo wwiillddccaarrdd rruulleess
      The following exceptions apply to the above rules:
@@ -595,7 +595,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
                with aannyy arguments.
 
      sudoedit  Command line arguments to the _s_u_d_o_e_d_i_t built-in command should
-               always be pathnames, so a forward slash (`/') will not be
+               always be path names, so a forward slash (`/') will not be
                matched by a wildcard.
 
    IInncclluuddiinngg ootthheerr ffiilleess ffrroomm wwiitthhiinn ssuuddooeerrss
@@ -677,7 +677,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      Long lines can be continued with a backslash (`\') as the last character
      on the line.
 
-     Whitespace between elements in a list as well as special syntactic
+     White space between elements in a list as well as special syntactic
      characters in a _U_s_e_r _S_p_e_c_i_f_i_c_a_t_i_o_n (`=', `:', `(', `)') is optional.
 
      The following characters must be escaped with a backslash (`\') when used
@@ -746,7 +746,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        since it accesses the file system, glob(3) can take a
                        long time to complete for some patterns, especially
                        when the pattern references a network file system that
-                       is mounted on demand (automounted).  The _f_a_s_t___g_l_o_b
+                       is mounted on demand (auto mounted).  The _f_a_s_t___g_l_o_b
                        option causes ssuuddoo to use the fnmatch(3) function,
                        which does not access the file system to do its
                        matching.  The disadvantage of _f_a_s_t___g_l_o_b is that it is
@@ -760,20 +760,48 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        flag is _o_f_f by default.
 
      fqdn              Set this flag if you want to put fully qualified host
-                       names in the _s_u_d_o_e_r_s file.  In other words, instead of
-                       myhost you would use myhost.mydomain.edu.  You may
-                       still use the short form if you wish (and even mix the
-                       two).  Beware that turning on _f_q_d_n requires ssuuddoo to
-                       make DNS lookups which may make ssuuddoo unusable if DNS
-                       stops working (for example if the machine is not
-                       plugged into the network).  Also note that you must use
-                       the host's official name as DNS knows it.  That is, you
-                       may not use a host alias (CNAME entry) due to
-                       performance issues and the fact that there is no way to
-                       get all aliases from DNS.  If your machine's host name
-                       (as returned by the hostname command) is already fully
-                       qualified you shouldn't need to set _f_q_d_n.  This flag is
-                       _o_f_f by default.
+                       names in the _s_u_d_o_e_r_s file when the local host name (as
+                       returned by the hostname command) does not contain the
+                       domain name.  In other words, instead of myhost you
+                       would use myhost.mydomain.edu.  You may still use the
+                       short form if you wish (and even mix the two).  This
+                       option is only effective when the ``canonical'' host
+                       name, as returned by the ggeettaaddddrriinnffoo() or
+                       ggeetthhoossttbbyynnaammee() function, is a fully-qualified domain
+                       name.  This is usually the case when the system is
+                       configured to use DNS for host name resolution.
+
+                       If the system is configured to use the _/_e_t_c_/_h_o_s_t_s file
+                       in preference to DNS, the ``canonical'' host name may
+                       not be fully-qualified.  The order that sources are
+                       queried for hosts name resolution is usually specified
+                       in the _/_e_t_c_/_n_s_s_w_i_t_c_h_._c_o_n_f, _/_e_t_c_/_n_e_t_s_v_c_._c_o_n_f,
+                       _/_e_t_c_/_h_o_s_t_._c_o_n_f, or, in some cases, _/_e_t_c_/_r_e_s_o_l_v_._c_o_n_f
+                       file.  In the _/_e_t_c_/_h_o_s_t_s file, the first host name of
+                       the entry is considered to be the ``canonical'' name;
+                       subsequent names are aliases that are not used by
+                       ssuuddooeerrss.  For example, the following hosts file line
+                       for the machine ``xyzzy'' has the fully-qualified
+                       domain name as the ``canonical'' host name, and the
+                       short version as an alias.
+
+                             192.168.1.1    xyzzy.sudo.ws xyzzy
+
+                       If the machine's hosts file entry is not formatted
+                       properly, the _f_q_d_n option will not be effective if it
+                       is queried before DNS.
+
+                       Beware that when using DNS for host name resolution,
+                       turning on _f_q_d_n requires ssuuddooeerrss to make DNS lookups
+                       which renders ssuuddoo unusable if DNS stops working (for
+                       example if the machine is disconnected from the
+                       network).  Also note that just like with the hosts
+                       file, you must use the ``canonical'' name as DNS knows
+                       it.  That is, you may not use a host alias (CNAME
+                       entry) due to performance issues and the fact that
+                       there is no way to get all aliases from DNS.
+
+                       This flag is _o_f_f by default.
 
      ignore_dot        If set, ssuuddoo will ignore "." or "" (both denoting
                        current directory) in the PATH environment variable;
@@ -995,7 +1023,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
      targetpw          If set, ssuuddoo will prompt for the password of the user
                        specified by the --uu option (defaults to root) instead
                        of the password of the invoking user.  In addition, the
-                       timestamp file name will include the target user's
+                       time stamp file name will include the target user's
                        name.  Note that this flag precludes the use of a uid
                        not listed in the passwd database as an argument to the
                        --uu option.  This flag is _o_f_f by default.
@@ -1073,9 +1101,9 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        fractional component if minute granularity is
                        insufficient, for example 2.5.  The default is 5.  Set
                        this to 0 to always prompt for a password.  If set to a
-                       value less than 0 the user's timestamp will never
+                       value less than 0 the user's time stamp will never
                        expire.  This can be used to allow users to create or
-                       delete their own timestamps via ``sudo -v'' and ``sudo
+                       delete their own time stamps via ``sudo -v'' and ``sudo
                        -k'' respectively.
 
      umask             Umask to use when running the command.  Negate this
@@ -1239,17 +1267,17 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        locale may affect how sudoers is interpreted.  Defaults
                        to ``C''.
 
-     timestampdir      The directory in which ssuuddoo stores its timestamp files.
-                       The default is _/_v_a_r_/_a_d_m_/_s_u_d_o.
+     timestampdir      The directory in which ssuuddoo stores its time stamp
+                       files.  The default is _/_v_a_r_/_a_d_m_/_s_u_d_o.
 
-     timestampowner    The owner of the timestamp directory and the timestamps
-                       stored therein.  The default is root.
+     timestampowner    The owner of the time stamp directory and the time
+                       stamps stored therein.  The default is root.
 
      type              The default SELinux type to use when constructing a new
                        security context to run the command.  The default type
                        may be overridden on a per-command basis in _s_u_d_o_e_r_s or
                        via command line options.  This option is only
-                       available whe ssuuddoo is built with SELinux support.
+                       available when ssuuddoo is built with SELinux support.
 
      SSttrriinnggss tthhaatt ccaann bbee uusseedd iinn aa bboooolleeaann ccoonntteexxtt:
 
@@ -1422,7 +1450,7 @@ LLOOGG FFOORRMMAATT
      ssuuddooeerrss can log events using either syslog(3) or a simple log file.  In
      each case the log format is almost identical.
 
-   CCoommmmaanndd lloogg eennttrriieess
+   AAcccceepptteedd ccoommmmaanndd lloogg eennttrriieess
      Commands that sudo runs are logged using the following format (split into
      multiple lines for readability):
 
@@ -1469,9 +1497,9 @@ LLOOGG FFOORRMMAATT
      Messages are logged using the locale specified by _s_u_d_o_e_r_s___l_o_c_a_l_e, which
      defaults to the ``C'' locale.
 
-   EErrrroorr lloogg eennttrriieess
-     If there was a problem running the command, an error string will follow
-     the user name.  Possible errors include:
+   DDeenniieedd ccoommmmaanndd lloogg eennttrriieess
+     If the user is not allowed to run the command, the reason for the denial
+     will follow the user name.  Possible reasons include:
 
      user NOT in sudoers
         The user is not listed in the _s_u_d_o_e_r_s file.
@@ -1481,7 +1509,7 @@ LLOOGG FFOORRMMAATT
         commands on the host.
 
      command not allowed
-        The user is listed in the sudoers file for the host but they are not
+        The user is listed in the _s_u_d_o_e_r_s file for the host but they are not
         allowed to run the specified command.
 
      3 incorrect password attempts
@@ -1491,6 +1519,73 @@ LLOOGG FFOORRMMAATT
 
      a password is required
         ssuuddoo's --nn option was specified but a password was required.
+
+     sorry, you are not allowed to set the following environment variables
+        The user specified environment variables on the command line that were
+        not allowed by _s_u_d_o_e_r_s.
+
+   EErrrroorr lloogg eennttrriieess
+     If an error occurs, ssuuddooeerrss will log a message and, in most cases, send a
+     message to the administrator via email.  Possible errors include:
+
+     parse error in /etc/sudoers near line N
+        ssuuddooeerrss encountered an error when parsing the specified file.  In some
+        cases, the actual error may be one line above or below the line number
+        listed, depending on the type of error.
+
+     problem with defaults entries
+        The sudoers file contains one or more unknown Defaults settings.  This
+        does not prevent ssuuddoo from running, but the sudoers file should be
+        checked using vviissuuddoo.
+
+     timestamp owner (@timestampowner@): No such user
+        The time stamp directory owner, which defaults to @timestampowner@ but
+        which may be specified via the _t_i_m_e_s_t_a_m_p_o_w_n_e_r setting, could not be
+        found in the password database.
+
+     unable to open/read /etc/sudoers
+        The sudoers file could not be opened for reading.  This can happen
+        when the sudoers file is located on a remote file system that maps
+        user ID 0 to a different value.  Normally, ssuuddooeerrss tries to open
+        sudoers using group permissions to avoid this problem.  Consider
+        changing the ownership of _/_e_t_c_/_s_u_d_o_e_r_s by adding an option like
+        ``sudoers_uid=N'' (where `N' is the user ID that owns the sudoers
+        file) to the ssuuddooeerrss plugin line in the _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
+
+     unable to stat /etc/sudoers
+        The _/_e_t_c_/_s_u_d_o_e_r_s file is missing.
+
+     /etc/sudoers is not a regular file
+        The _/_e_t_c_/_s_u_d_o_e_r_s file exists but is not a regular file or symbolic
+        link.
+
+     /etc/sudoers is owned by uid N, should be 0
+        The sudoers file has the wrong owner.  If you wish to change the
+        sudoers file owner, please add ``sudoers_uid=N'' (where `N' is the
+        user ID that owns the sudoers file) to the ssuuddooeerrss plugin line in the
+        _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
+
+     /etc/sudoers is world writable
+        The permissions on the sudoers file allow all users to write to it.
+        The sudoers file must not be world-writable, the default file mode is
+        0440 (readable by owner and group, writable by none).  The default
+        mode may be changed via the ``sudoers_mode'' option to the ssuuddooeerrss
+        plugin line in the _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
+
+     /etc/sudoers is owned by gid N, should be 1
+        The sudoers file has the wrong group ownership.  If you wish to change
+        the sudoers file group ownership, please add ``sudoers_gid=N'' (where
+        `N' is the group ID that owns the sudoers file) to the ssuuddooeerrss plugin
+        line in the _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
+
+     unable to open /var/adm/sudo/username/ttyname
+        _s_u_d_o_e_r_s was unable to read or create the user's time stamp file.
+
+     unable to write to /var/adm/sudo/username/ttyname
+        _s_u_d_o_e_r_s was unable to write to the user's time stamp file.
+
+     unable to mkdir to /var/adm/sudo/username
+        _s_u_d_o_e_r_s was unable to create the user's time stamp directory.
 
    NNootteess oonn llooggggiinngg vviiaa ssyysslloogg
      By default, _s_u_d_o_e_r_s logs messages via syslog(3).  The _d_a_t_e, _h_o_s_t_n_a_m_e, and
@@ -1984,4 +2079,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.6b4                     July 16, 2012                    Sudo 1.8.6b4
+Sudo 1.8.6                       July 16, 2012                      Sudo 1.8.6

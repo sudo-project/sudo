@@ -1608,18 +1608,63 @@ by default.
 .It fqdn
 Set this flag if you want to put fully qualified host names in the
 .Em sudoers
-file.
+file when the local host name (as returned by the
+.Li hostname
+command) does not contain the domain name.
 In other words, instead of myhost you would use myhost.mydomain.edu.
 You may still use the short form if you wish (and even mix the two).
-Beware that turning on
+This option is only effective when the
+.Dq canonical
+host name, as returned by the
+.Fn getaddrinfo
+or
+.Fn gethostbyname
+function, is a fully-qualified domain name.
+This is usually the case when the system is configured to use DNS
+for host name resolution.
+.Pp
+If the system is configured to use the
+.Pa /etc/hosts
+file in preference to DNS, the
+.Dq canonical
+host name may not be fully-qualified.
+The order that sources are queried for hosts name resolution
+is usually specified in the
+.Pa @nsswitch_conf@ ,
+.Pa @netsvc_conf@ ,
+.Pa /etc/host.conf ,
+or, in some cases, 
+.Pa /etc/resolv.conf
+file.
+In the
+.Pa /etc/hosts
+file, the first host name of the entry is considered to be the
+.Dq canonical
+name; subsequent names are aliases that are not used by
+.Nm sudoers .
+For example, the following hosts file line for the machine
+.Dq xyzzy
+has the fully-qualified domain name as the
+.Dq canonical
+host name, and the short version as an alias.
+.sp
+.Dl 192.168.1.1	xyzzy.sudo.ws xyzzy
+.sp
+If the machine's hosts file entry is not formatted properly, the
+.Em fqdn
+option will not be effective if it is queried before DNS.
+.Pp
+Beware that when using DNS for host name resolution, turning on
 .Em fqdn
 requires
+.Nm sudoers
+to make DNS lookups which renders
 .Nm sudo
-to make DNS lookups which may make
-.Nm sudo
-unusable if DNS stops working (for example if the machine is not plugged
-into the network).
-Also note that you must use the host's official name as DNS knows it.
+unusable if DNS stops working (for example if the machine is disconnected
+from the network).
+Also note that just like with the hosts file, you must use the
+.Dq canonical
+name as DNS knows it.
 That is, you may not use a host alias
 .Po
 .Li CNAME
@@ -1627,10 +1672,7 @@ entry
 .Pc
 due to performance issues and the fact that there is no way to get all
 aliases from DNS.
-If your machine's host name (as returned by the
-.Li hostname
-command) is already fully qualified you shouldn't need to set
-.Em fqdn .
+.Pp
 This flag is
 .Em @fqdn@
 by default.

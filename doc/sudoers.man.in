@@ -639,7 +639,7 @@ fully qualified path name ending in a
 When you specify a directory in a
 \fRCmnd_List\fR,
 the user will be able to run any file within that directory
-(but not in any subdirectories therein).
+(but not in any sub-directories therein).
 .PP
 If a
 \fRCmnd\fR
@@ -666,7 +666,7 @@ option (or as
 It may take command line arguments just as a normal command does.
 .SS "Defaults"
 Certain configuration options may be changed from their default
-values at runtime via one or more
+values at run-time via one or more
 \fRDefault_Entry\fR
 lines.
 These may affect all users on any host, all users on a specific host, a
@@ -954,7 +954,7 @@ type is specified with the command it will override any default values
 specified in
 \fIsudoers\fR.
 A role or type specified on the command line,
-however, will supercede the values in
+however, will supersede the values in
 \fIsudoers\fR.
 .SS "Solaris_Priv_Spec"
 On Solaris systems,
@@ -1096,7 +1096,11 @@ Additionally, a user may only run
 without a password if the
 \fRNOPASSWD\fR
 tag is present for all a user's entries that pertain to the current host.
-This behavior may be overridden via the verifypw and listpw options.
+This behavior may be overridden via the
+\fIverifypw\fR
+and
+\fIlistpw\fR
+options.
 .PP
 \fINOEXEC and EXEC\fR
 .PP
@@ -1264,7 +1268,7 @@ but not
 When matching the command line arguments, however, a slash
 \fBdoes\fR
 get matched by wildcards since command line arguments may contain
-arbitrary strings and not just pathnames.
+arbitrary strings and not just path names.
 .PP
 Wildcards in command line arguments should be used with care.
 Because command line arguments are matched as a single, concatenated
@@ -1297,7 +1301,7 @@ $ sudo cat /var/log/messages /etc/shadow
 .RE
 .fi
 .PP
-which is probaby not what was intended.
+which is probably not what was intended.
 .SS "Exceptions to wildcard rules"
 The following exceptions apply to the above rules:
 .TP 10n
@@ -1313,7 +1317,7 @@ arguments.
 sudoedit
 Command line arguments to the
 \fIsudoedit\fR
-built-in command should always be pathnames, so a forward slash
+built-in command should always be path names, so a forward slash
 (`/')
 will not be matched by a wildcard.
 .SS "Including other files from within sudoers"
@@ -1505,7 +1509,7 @@ Long lines can be continued with a backslash
 (`\e')
 as the last character on the line.
 .PP
-Whitespace between elements in a list as well as special syntactic
+White space between elements in a list as well as special syntactic
 characters in a
 \fIUser Specification\fR
 (`=\&',
@@ -1677,7 +1681,7 @@ However, since it accesses the file system,
 glob(3)
 can take a long time to complete for some patterns, especially
 when the pattern references a network file system that is mounted
-on demand (automounted).
+on demand (auto mounted).
 The
 \fIfast_glob\fR
 option causes
@@ -1706,27 +1710,71 @@ by default.
 fqdn
 Set this flag if you want to put fully qualified host names in the
 \fIsudoers\fR
-file.
+file when the local host name (as returned by the
+\fRhostname\fR
+command) does not contain the domain name.
 In other words, instead of myhost you would use myhost.mydomain.edu.
 You may still use the short form if you wish (and even mix the two).
-Beware that turning on
+This option is only effective when the
+``canonical''
+host name, as returned by the
+\fBgetaddrinfo\fR()
+or
+\fBgethostbyname\fR()
+function, is a fully-qualified domain name.
+This is usually the case when the system is configured to use DNS
+for host name resolution.
+.sp
+If the system is configured to use the
+\fI/etc/hosts\fR
+file in preference to DNS, the
+``canonical''
+host name may not be fully-qualified.
+The order that sources are queried for hosts name resolution
+is usually specified in the
+\fI@nsswitch_conf@\fR,
+\fI@netsvc_conf@\fR,
+\fI/etc/host.conf\fR,
+or, in some cases,
+\fI/etc/resolv.conf\fR
+file.
+In the
+\fI/etc/hosts\fR
+file, the first host name of the entry is considered to be the
+``canonical''
+name; subsequent names are aliases that are not used by
+\fBsudoers\fR.
+For example, the following hosts file line for the machine
+``xyzzy''
+has the fully-qualified domain name as the
+``canonical''
+host name, and the short version as an alias.
+.sp
+.RS 6n
+192.168.1.1	xyzzy.sudo.ws xyzzy
+.RE
+.sp
+If the machine's hosts file entry is not formatted properly, the
+\fIfqdn\fR
+option will not be effective if it is queried before DNS.
+.sp
+Beware that when using DNS for host name resolution, turning on
 \fIfqdn\fR
 requires
+\fBsudoers\fR
+to make DNS lookups which renders
 \fBsudo\fR
-to make DNS lookups which may make
-\fBsudo\fR
-unusable if DNS stops working (for example if the machine is not plugged
-into the network).
-Also note that you must use the host's official name as DNS knows it.
+unusable if DNS stops working (for example if the machine is disconnected
+from the network).
+Also note that just like with the hosts file, you must use the
+``canonical''
+name as DNS knows it.
 That is, you may not use a host alias
 (\fRCNAME\fR
 entry)
 due to performance issues and the fact that there is no way to get all
 aliases from DNS.
-If your machine's host name (as returned by the
-\fRhostname\fR
-command) is already fully qualified you shouldn't need to set
-\fIfqdn\fR.
+.sp
 This flag is
 \fI@fqdn@\fR
 by default.
@@ -2194,7 +2242,7 @@ by the
 option (defaults to
 \fRroot\fR)
 instead of the password of the invoking user.
-In addition, the timestamp file name will include the target user's name.
+In addition, the time stamp file name will include the target user's name.
 Note that this flag precludes the use of a uid not listed in the passwd
 database as an argument to the
 \fB\-u\fR
@@ -2350,8 +2398,8 @@ Set this to
 to always prompt for a password.
 If set to a value less than
 \fR0\fR
-the user's timestamp will never expire.
-This can be used to allow users to create or delete their own timestamps via
+the user's time stamp will never expire.
+This can be used to allow users to create or delete their own time stamps via
 ``\fRsudo -v\fR''
 and
 ``\fRsudo -k\fR''
@@ -2632,12 +2680,12 @@ Defaults to
 timestampdir
 The directory in which
 \fBsudo\fR
-stores its timestamp files.
+stores its time stamp files.
 The default is
 \fI@timedir@\fR.
 .TP 18n
 timestampowner
-The owner of the timestamp directory and the timestamps stored therein.
+The owner of the time stamp directory and the time stamps stored therein.
 The default is
 \fRroot\fR.
 .TP 18n
@@ -2647,7 +2695,7 @@ context to run the command.
 The default type may be overridden on a per-command basis in
 \fIsudoers\fR
 or via command line options.
-This option is only available whe
+This option is only available when
 \fBsudo\fR
 is built with SELinux support.
 .PP
@@ -3008,7 +3056,7 @@ can log events using either
 syslog(3)
 or a simple log file.
 In each case the log format is almost identical.
-.SS "Command log entries"
+.SS "Accepted command log entries"
 Commands that sudo runs are logged using the following format (split
 into multiple lines for readability):
 .nf
@@ -3095,10 +3143,10 @@ Messages are logged using the locale specified by
 which defaults to the
 ``\fRC\fR''
 locale.
-.SS "Error log entries"
-If there was a problem running the command, an error string will follow
-the user name.
-Possible errors include:
+.SS "Denied command log entries"
+If the user is not allowed to run the command, the reason for the denial
+will follow the user name.
+Possible reasons include:
 .TP 3n
 user NOT in sudoers
 The user is not listed in the
@@ -3112,7 +3160,7 @@ file but is not allowed to run commands on the host.
 .TP 3n
 command not allowed
 The user is listed in the
-sudoers
+\fIsudoers\fR
 file for the host but they are not allowed to run the specified command.
 .TP 3n
 3 incorrect password attempts
@@ -3126,6 +3174,114 @@ a password is required
 \fBsudo\fR's
 \fB\-n\fR
 option was specified but a password was required.
+.TP 3n
+sorry, you are not allowed to set the following environment variables
+The user specified environment variables on the command line that
+were not allowed by
+\fIsudoers\fR.
+.SS "Error log entries"
+If an error occurs,
+\fBsudoers\fR
+will log a message and, in most cases, send a message to the
+administrator via email.
+Possible errors include:
+.TP 3n
+parse error in @sysconfdir@/sudoers near line N
+\fBsudoers\fR
+encountered an error when parsing the specified file.
+In some cases, the actual error may be one line above or below the
+line number listed, depending on the type of error.
+.TP 3n
+problem with defaults entries
+The sudoers file contains one or more unknown Defaults settings.
+This does not prevent
+\fBsudo\fR
+from running, but the sudoers file should be checked using
+\fBvisudo\fR.
+.TP 3n
+timestamp owner (@timestampowner@): \&No such user
+The time stamp directory owner, which defaults to
+@timestampowner@ but which may be specified via the
+\fItimestampowner\fR
+setting, could not be found in the password database.
+.TP 3n
+unable to open/read @sysconfdir@/sudoers
+The sudoers file could not be opened for reading.
+This can happen when the sudoers file is located on a remote
+file system that maps user ID 0 to a different value.
+Normally,
+\fBsudoers\fR
+tries to open sudoers using group permissions to avoid this problem.
+Consider changing the ownership of
+\fI@sysconfdir@/sudoers\fR
+by adding an option like
+``sudoers_uid=N''
+(where
+`N'
+is the user ID that owns the sudoers file)
+to the
+\fBsudoers\fR
+plugin line in the
+\fI@sysconfdir@/sudo.conf\fR
+file.
+.TP 3n
+unable to stat @sysconfdir@/sudoers
+The
+\fI@sysconfdir@/sudoers\fR
+file is missing.
+.TP 3n
+@sysconfdir@/sudoers is not a regular file
+The
+\fI@sysconfdir@/sudoers\fR
+file exists but is not a regular file or symbolic link.
+.TP 3n
+@sysconfdir@/sudoers is owned by uid N, should be 0
+The sudoers file has the wrong owner.
+If you wish to change the sudoers file owner, please add
+``sudoers_uid=N''
+(where
+`N'
+is the user ID that owns the sudoers file) to the
+\fBsudoers\fR
+plugin line in the
+\fI@sysconfdir@/sudo.conf\fR
+file.
+.TP 3n
+@sysconfdir@/sudoers is world writable
+The permissions on the sudoers file allow all users to write to it.
+The sudoers file must not be world-writable, the default file mode
+is 0440 (readable by owner and group, writable by none).
+The default mode may be changed via the
+``sudoers_mode''
+option to the
+\fBsudoers\fR
+plugin line in the
+\fI@sysconfdir@/sudo.conf\fR
+file.
+.TP 3n
+@sysconfdir@/sudoers is owned by gid N, should be 1
+The sudoers file has the wrong group ownership.
+If you wish to change the sudoers file group ownership, please add
+``sudoers_gid=N''
+(where
+`N'
+is the group ID that owns the sudoers file) to the
+\fBsudoers\fR
+plugin line in the
+\fI@sysconfdir@/sudo.conf\fR
+file.
+.TP 3n
+unable to open @timedir@/username/ttyname
+\fIsudoers\fR
+was unable to read or create the user's time stamp file.
+.TP 3n
+unable to write to @timedir@/username/ttyname
+\fIsudoers\fR
+was unable to write to the user's time stamp file.
+.TP 3n
+unable to mkdir to @timedir@/username
+\fIsudoers\fR
+was unable to create the user's time stamp directory.
 .SS "Notes on logging via syslog"
 By default,
 \fIsudoers\fR
