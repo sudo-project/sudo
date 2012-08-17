@@ -103,7 +103,6 @@ case "$OUTFILE" in
 	fi
 
 	# SELinux
-	SE_SED=
 	if [ X"$SEMAN" != X"1" ]; then
 		cat >>"$OUTFILE" <<-EOF
 			s/SELinux_Spec? //

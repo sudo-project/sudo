@@ -95,7 +95,7 @@ option was specified).
 supports a plugin architecture for security policies and input/output
 logging.
 Third parties can develop and distribute their own policy and I/O
-logging modules to work seamlessly with the
+logging plugins to work seamlessly with the
 \fBsudo\fR
 front end.
 The default security policy is
@@ -174,9 +174,9 @@ For example:
 .RS
 .nf
 .sp
-.RS 1n
-    # Path to askpass helper program
-    Path askpass /usr/X11R6/bin/ssh-askpass
+.RS 4n
+# Path to askpass helper program
+Path askpass /usr/X11R6/bin/ssh-askpass
 .RE
 .fi
 .sp
@@ -539,9 +539,9 @@ expanded to the invoking user's login name
 .TP 4n
 \fR%%\fR
 two consecutive
-\fR%\fR
+`%'
 characters are collapsed into a single
-\fR%\fR
+`%'
 character
 .PP
 The prompt specified by the
@@ -971,7 +971,8 @@ To prevent command spoofing,
 \fBsudo\fR
 checks "." and "" (both denoting current directory) last when
 searching for a command in the user's
-\fRPATH (if one or both are in the\fR
+\fRPATH\fR
+(if one or both are in the
 \fRPATH\fR).
 Note, however, that the actual
 \fRPATH\fR
@@ -1232,7 +1233,7 @@ via shell escapes, thus avoiding
 checks.
 However, on most systems it is possible to prevent shell escapes with the
 sudoers(@mansectform@)
-module's
+plugin's
 \fInoexec\fR
 functionality.
 .PP

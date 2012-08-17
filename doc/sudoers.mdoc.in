@@ -1633,7 +1633,7 @@ is usually specified in the
 .Pa @nsswitch_conf@ ,
 .Pa @netsvc_conf@ ,
 .Pa /etc/host.conf ,
-or, in some cases, 
+or, in some cases,
 .Pa /etc/resolv.conf
 file.
 In the
@@ -2969,31 +2969,41 @@ encountered an error when parsing the specified file.
 In some cases, the actual error may be one line above or below the
 line number listed, depending on the type of error.
 .It problem with defaults entries
-The sudoers file contains one or more unknown Defaults settings.
+The
+.Em sudoers
+file contains one or more unknown Defaults settings.
 This does not prevent
 .Nm sudo
-from running, but the sudoers file should be checked using
+from running, but the
+.Em sudoers
+file should be checked using
 .Nm visudo .
-.It timestamp owner (@timestampowner@): \&No such user
-The time stamp directory owner, which defaults to
-@timestampowner@ but which may be specified via the
+.It timestamp owner (username): \&No such user
+The time stamp directory owner, as specified by the
 .Em timestampowner
 setting, could not be found in the password database.
 .It unable to open/read @sysconfdir@/sudoers
-The sudoers file could not be opened for reading.
-This can happen when the sudoers file is located on a remote
-file system that maps user ID 0 to a different value.
+The
+.Em sudoers
+file could not be opened for reading.
+This can happen when the
+.Em sudoers
+file is located on a remote file system that maps user ID 0 to
+a different value.
 Normally,
 .Nm sudoers
-tries to open sudoers using group permissions to avoid this problem.
+tries to open
+.Em sudoers
+using group permissions to avoid this problem.
 Consider changing the ownership of
 .Pa @sysconfdir@/sudoers
 by adding an option like
 .Dq sudoers_uid=N
 (where
 .Sq N
-is the user ID that owns the sudoers file)
-to the
+is the user ID that owns the
+.Em sudoers
+file) to the
 .Nm sudoers
 plugin line in the
 .Pa @sysconfdir@/sudo.conf
@@ -3007,19 +3017,29 @@ The
 .Pa @sysconfdir@/sudoers
 file exists but is not a regular file or symbolic link.
 .It @sysconfdir@/sudoers is owned by uid N, should be 0
-The sudoers file has the wrong owner.
-If you wish to change the sudoers file owner, please add
+The
+.Em sudoers
+file has the wrong owner.
+If you wish to change the
+.Em sudoers
+file owner, please add
 .Dq sudoers_uid=N
 (where
 .Sq N
-is the user ID that owns the sudoers file) to the
+is the user ID that owns the
+.Em sudoers
+file) to the
 .Nm sudoers
 plugin line in the
 .Pa @sysconfdir@/sudo.conf
 file.
 .It @sysconfdir@/sudoers is world writable
-The permissions on the sudoers file allow all users to write to it.
-The sudoers file must not be world-writable, the default file mode
+The permissions on the
+.Em sudoers
+file allow all users to write to it.
+The
+.Em sudoers
+file must not be world-writable, the default file mode
 is 0440 (readable by owner and group, writable by none).
 The default mode may be changed via the
 .Dq sudoers_mode
@@ -3029,12 +3049,18 @@ plugin line in the
 .Pa @sysconfdir@/sudo.conf
 file.
 .It @sysconfdir@/sudoers is owned by gid N, should be 1
-The sudoers file has the wrong group ownership.
-If you wish to change the sudoers file group ownership, please add
+The
+.Em sudoers
+file has the wrong group ownership.
+If you wish to change the
+.Em sudoers
+file group ownership, please add
 .Dq sudoers_gid=N
 (where
 .Sq N
-is the group ID that owns the sudoers file) to the
+is the group ID that owns the
+.Em sudoers
+file) to the
 .Nm sudoers
 plugin line in the
 .Pa @sysconfdir@/sudo.conf

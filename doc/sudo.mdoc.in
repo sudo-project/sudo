@@ -135,7 +135,7 @@ option was specified).
 supports a plugin architecture for security policies and input/output
 logging.
 Third parties can develop and distribute their own policy and I/O
-logging modules to work seamlessly with the
+logging plugins to work seamlessly with the
 .Nm sudo
 front end.
 The default security policy is
@@ -211,9 +211,9 @@ Otherwise, if
 contains a line specifying the askpass program, that value will be
 used.
 For example:
-.Bd -literal -offset 4
-    # Path to askpass helper program
-    Path askpass /usr/X11R6/bin/ssh-askpass
+.Bd -literal -offset 4n
+# Path to askpass helper program
+Path askpass /usr/X11R6/bin/ssh-askpass
 .Ed
 .Pp
 If no askpass program is available,
@@ -543,9 +543,9 @@ option is also specified)
 expanded to the invoking user's login name
 .It Li %%
 two consecutive
-.Li %
+.Ql %
 characters are collapsed into a single
-.Li %
+.Ql %
 character
 .El
 .Pp
@@ -944,7 +944,8 @@ To prevent command spoofing,
 .Nm sudo
 checks "." and "" (both denoting current directory) last when
 searching for a command in the user's
-.Ev PATH (if one or both are in the
+.Ev PATH
+(if one or both are in the
 .Ev PATH ) .
 Note, however, that the actual
 .Ev PATH
@@ -1168,7 +1169,7 @@ via shell escapes, thus avoiding
 checks.
 However, on most systems it is possible to prevent shell escapes with the
 .Xr sudoers @mansectform@
-module's
+plugin's
 .Em noexec
 functionality.
 .Pp

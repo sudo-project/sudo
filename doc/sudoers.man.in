@@ -3193,33 +3193,43 @@ In some cases, the actual error may be one line above or below the
 line number listed, depending on the type of error.
 .TP 3n
 problem with defaults entries
-The sudoers file contains one or more unknown Defaults settings.
+The
+\fIsudoers\fR
+file contains one or more unknown Defaults settings.
 This does not prevent
 \fBsudo\fR
-from running, but the sudoers file should be checked using
+from running, but the
+\fIsudoers\fR
+file should be checked using
 \fBvisudo\fR.
 .TP 3n
-timestamp owner (@timestampowner@): \&No such user
-The time stamp directory owner, which defaults to
-@timestampowner@ but which may be specified via the
+timestamp owner (username): \&No such user
+The time stamp directory owner, as specified by the
 \fItimestampowner\fR
 setting, could not be found in the password database.
 .TP 3n
 unable to open/read @sysconfdir@/sudoers
-The sudoers file could not be opened for reading.
-This can happen when the sudoers file is located on a remote
-file system that maps user ID 0 to a different value.
+The
+\fIsudoers\fR
+file could not be opened for reading.
+This can happen when the
+\fIsudoers\fR
+file is located on a remote file system that maps user ID 0 to
+a different value.
 Normally,
 \fBsudoers\fR
-tries to open sudoers using group permissions to avoid this problem.
+tries to open
+\fIsudoers\fR
+using group permissions to avoid this problem.
 Consider changing the ownership of
 \fI@sysconfdir@/sudoers\fR
 by adding an option like
 ``sudoers_uid=N''
 (where
 `N'
-is the user ID that owns the sudoers file)
-to the
+is the user ID that owns the
+\fIsudoers\fR
+file) to the
 \fBsudoers\fR
 plugin line in the
 \fI@sysconfdir@/sudo.conf\fR
@@ -3236,20 +3246,30 @@ The
 file exists but is not a regular file or symbolic link.
 .TP 3n
 @sysconfdir@/sudoers is owned by uid N, should be 0
-The sudoers file has the wrong owner.
-If you wish to change the sudoers file owner, please add
+The
+\fIsudoers\fR
+file has the wrong owner.
+If you wish to change the
+\fIsudoers\fR
+file owner, please add
 ``sudoers_uid=N''
 (where
 `N'
-is the user ID that owns the sudoers file) to the
+is the user ID that owns the
+\fIsudoers\fR
+file) to the
 \fBsudoers\fR
 plugin line in the
 \fI@sysconfdir@/sudo.conf\fR
 file.
 .TP 3n
 @sysconfdir@/sudoers is world writable
-The permissions on the sudoers file allow all users to write to it.
-The sudoers file must not be world-writable, the default file mode
+The permissions on the
+\fIsudoers\fR
+file allow all users to write to it.
+The
+\fIsudoers\fR
+file must not be world-writable, the default file mode
 is 0440 (readable by owner and group, writable by none).
 The default mode may be changed via the
 ``sudoers_mode''
@@ -3260,12 +3280,18 @@ plugin line in the
 file.
 .TP 3n
 @sysconfdir@/sudoers is owned by gid N, should be 1
-The sudoers file has the wrong group ownership.
-If you wish to change the sudoers file group ownership, please add
+The
+\fIsudoers\fR
+file has the wrong group ownership.
+If you wish to change the
+\fIsudoers\fR
+file group ownership, please add
 ``sudoers_gid=N''
 (where
 `N'
-is the group ID that owns the sudoers file) to the
+is the group ID that owns the
+\fIsudoers\fR
+file) to the
 \fBsudoers\fR
 plugin line in the
 \fI@sysconfdir@/sudo.conf\fR

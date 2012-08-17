@@ -1534,22 +1534,21 @@ LLOOGG FFOORRMMAATT
         listed, depending on the type of error.
 
      problem with defaults entries
-        The sudoers file contains one or more unknown Defaults settings.  This
-        does not prevent ssuuddoo from running, but the sudoers file should be
+        The _s_u_d_o_e_r_s file contains one or more unknown Defaults settings.  This
+        does not prevent ssuuddoo from running, but the _s_u_d_o_e_r_s file should be
         checked using vviissuuddoo.
 
-     timestamp owner (@timestampowner@): No such user
-        The time stamp directory owner, which defaults to @timestampowner@ but
-        which may be specified via the _t_i_m_e_s_t_a_m_p_o_w_n_e_r setting, could not be
-        found in the password database.
+     timestamp owner (username): No such user
+        The time stamp directory owner, as specified by the _t_i_m_e_s_t_a_m_p_o_w_n_e_r
+        setting, could not be found in the password database.
 
      unable to open/read /etc/sudoers
-        The sudoers file could not be opened for reading.  This can happen
-        when the sudoers file is located on a remote file system that maps
+        The _s_u_d_o_e_r_s file could not be opened for reading.  This can happen
+        when the _s_u_d_o_e_r_s file is located on a remote file system that maps
         user ID 0 to a different value.  Normally, ssuuddooeerrss tries to open
-        sudoers using group permissions to avoid this problem.  Consider
+        _s_u_d_o_e_r_s using group permissions to avoid this problem.  Consider
         changing the ownership of _/_e_t_c_/_s_u_d_o_e_r_s by adding an option like
-        ``sudoers_uid=N'' (where `N' is the user ID that owns the sudoers
+        ``sudoers_uid=N'' (where `N' is the user ID that owns the _s_u_d_o_e_r_s
         file) to the ssuuddooeerrss plugin line in the _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
 
      unable to stat /etc/sudoers
@@ -1560,22 +1559,22 @@ LLOOGG FFOORRMMAATT
         link.
 
      /etc/sudoers is owned by uid N, should be 0
-        The sudoers file has the wrong owner.  If you wish to change the
-        sudoers file owner, please add ``sudoers_uid=N'' (where `N' is the
-        user ID that owns the sudoers file) to the ssuuddooeerrss plugin line in the
+        The _s_u_d_o_e_r_s file has the wrong owner.  If you wish to change the
+        _s_u_d_o_e_r_s file owner, please add ``sudoers_uid=N'' (where `N' is the
+        user ID that owns the _s_u_d_o_e_r_s file) to the ssuuddooeerrss plugin line in the
         _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
 
      /etc/sudoers is world writable
-        The permissions on the sudoers file allow all users to write to it.
-        The sudoers file must not be world-writable, the default file mode is
+        The permissions on the _s_u_d_o_e_r_s file allow all users to write to it.
+        The _s_u_d_o_e_r_s file must not be world-writable, the default file mode is
         0440 (readable by owner and group, writable by none).  The default
         mode may be changed via the ``sudoers_mode'' option to the ssuuddooeerrss
         plugin line in the _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
 
      /etc/sudoers is owned by gid N, should be 1
-        The sudoers file has the wrong group ownership.  If you wish to change
-        the sudoers file group ownership, please add ``sudoers_gid=N'' (where
-        `N' is the group ID that owns the sudoers file) to the ssuuddooeerrss plugin
+        The _s_u_d_o_e_r_s file has the wrong group ownership.  If you wish to change
+        the _s_u_d_o_e_r_s file group ownership, please add ``sudoers_gid=N'' (where
+        `N' is the group ID that owns the _s_u_d_o_e_r_s file) to the ssuuddooeerrss plugin
         line in the _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
 
      unable to open /var/adm/sudo/username/ttyname

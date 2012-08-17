@@ -25,7 +25,7 @@ DDEESSCCRRIIPPTTIIOONN
 
      ssuuddoo supports a plugin architecture for security policies and
      input/output logging.  Third parties can develop and distribute their own
-     policy and I/O logging modules to work seamlessly with the ssuuddoo front
+     policy and I/O logging plugins to work seamlessly with the ssuuddoo front
      end.  The default security policy is _s_u_d_o_e_r_s, which is configured via the
      file _/_e_t_c_/_s_u_d_o_e_r_s, or via LDAP.  See the _P_L_U_G_I_N_S section for more
      information.
@@ -60,8 +60,8 @@ DDEESSCCRRIIPPTTIIOONN
                  if _/_e_t_c_/_s_u_d_o_._c_o_n_f contains a line specifying the askpass
                  program, that value will be used.  For example:
 
-                      # Path to askpass helper program
-                      Path askpass /usr/X11R6/bin/ssh-askpass
+                     # Path to askpass helper program
+                     Path askpass /usr/X11R6/bin/ssh-askpass
 
                  If no askpass program is available, ssuuddoo will exit with an
                  error.
@@ -232,8 +232,8 @@ DDEESSCCRRIIPPTTIIOONN
 
                  %u  expanded to the invoking user's login name
 
-                 %%  two consecutive % characters are collapsed into a single
-                     % character
+                 %%  two consecutive `%' characters are collapsed into a
+                     single `%' character
 
                  The prompt specified by the --pp option will override the
                  system password prompt on systems that support PAM unless the
@@ -574,7 +574,7 @@ CCAAVVEEAATTSS
      user is allowed to run arbitrary commands via ssuuddoo.  Also, many programs
      (such as editors) allow the user to run commands via shell escapes, thus
      avoiding ssuuddoo's checks.  However, on most systems it is possible to
-     prevent shell escapes with the sudoers(4) module's _n_o_e_x_e_c functionality.
+     prevent shell escapes with the sudoers(4) plugin's _n_o_e_x_e_c functionality.
 
      It is not meaningful to run the cd command directly via sudo, e.g.,
 
