@@ -1216,6 +1216,10 @@ set_loginclass(pw)
 }
 #endif /* HAVE_LOGIN_CAP_H */
 
+#ifndef AI_FQDN
+# define AI_FQDN AI_CANONNAME
+#endif
+
 /*
  * Look up the fully qualified domain name and set user_host and user_shost.
  */
@@ -1232,7 +1236,7 @@ set_fqdn()
 #ifdef HAVE_GETADDRINFO
     zero_bytes(&hint, sizeof(hint));
     hint.ai_family = PF_UNSPEC;
-    hint.ai_flags = AI_CANONNAME;
+    hint.ai_flags = AI_FQDN;
     if (getaddrinfo(user_host, NULL, &hint, &res0) != 0) {
 #else
     if (!(hp = gethostbyname(user_host))) {
@@ -1248,13 +1252,13 @@ set_fqdn()
 #else
 	user_host = estrdup(hp->h_name);
 #endif
-    }
-    if ((p = strchr(user_host, '.'))) {
-	*p = '\0';
-	user_shost = estrdup(user_host);
-	*p = '.';
-    } else {
-	user_shost = user_host;
+	if ((p = strchr(user_host, '.'))) {
+	    *p = '\0';
+	    user_shost = estrdup(user_host);
+	    *p = '.';
+	} else {
+	    user_shost = user_host;
+	}
     }
 }
 
