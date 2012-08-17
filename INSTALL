@@ -334,7 +334,7 @@ Special features/options:
   --with-otp-only
 	This option is now just an alias for --without-passwd.
 
-  --with-selinux 
+  --with-selinux
 	Enable support for role based access control (RBAC) on
 	systems that support SELinux.
 
@@ -347,6 +347,16 @@ Special features/options:
 	The path to search when loading libvas.so (or an alternate
 	name as specified by --with-libvas).  This option only has
 	an effect when --with-libvas is specified.
+
+  --with-man
+	Use the "man" macros for manual pages.  By default, mdoc
+	versions of the manuals are installed.  This can be used
+	to override configure's test for "nroff -mdoc" support.
+
+  --with-mdoc
+	Use the "mdoc" macros for manual pages.  By default, mdoc
+	versions of the manuals are installed.  This can be used
+	to override configure's test for "nroff -mdoc" support.
 
 The following options are also configurable at runtime:
 

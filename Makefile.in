@@ -33,10 +33,12 @@ top_builddir = .
 CC = @CC@
 FLEX = @FLEX@
 YACC = @YACC@
-NROFF = @NROFFPROG@ -Tascii
 LIBTOOL = @LIBTOOL@
 AR=@AR@
 RANLIB=@RANLIB@
+SED=@SED@
+TR = @TRPROG@
+MANDOC = @MANDOCPROG@
 MANCOMPRESS = @MANCOMPRESS@
 MANCOMPRESSEXT = @MANCOMPRESSEXT@
 
@@ -90,8 +92,8 @@ sudoersdir = $(sysconfdir)
 mantype = @MANTYPE@
 mansectsu = @mansectsu@
 mansectform = @mansectform@
-mandirsu = $(mandir)/$(mantype)$(mansectsu)
-mandirform = $(mandir)/$(mantype)$(mansectform)
+mandirsu = $(mandir)/@MANDIRTYPE@$(mansectsu)
+mandirform = $(mandir)/@MANDIRTYPE@$(mansectform)
 
 # User and group ids the installed files should be "owned" by
 install_uid = 0
@@ -105,6 +107,9 @@ shlib_mode = @SHLIB_MODE@
 
 # Pass in paths and uid/gid + OS dependent defined
 DEFS = @OSDEFS@ -D_PATH_SUDOERS=\"$(sudoersdir)/sudoers\" -DSUDOERS_UID=$(sudoers_uid) -DSUDOERS_GID=$(sudoers_gid) -DSUDOERS_MODE=$(sudoers_mode)
+
+# Set to non-empty for development mode
+DEVEL = @DEVEL@
 
 #### End of system configuration section. ####
 
@@ -167,14 +172,15 @@ DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
 	    LICENSE Makefile.in NEWS PORTING README README.LDAP \
 	    TROUBLESHOOTING UPGRADE aclocal.m4 aixcrypt.exp config.guess \
 	    config.h.in config.sub configure configure.in def_data.in \
-	    indent.pro install-sh ltmain.sh m4 mkdefaults mkinstalldirs \
-	    mkpkg pathnames.h.in pp sample.pam sample.syslog.conf \
-	    sample.sudoers schema.ActiveDirectory schema.OpenLDAP \
-	    schema.iPlanet siglist.in sudo.cat sudo.man.in sudo.pod sudo.pp \
-	    sudo_usage.h.in sudoers.in sudoers.cat sudoers.man.in sudoers.pod \
-	    sudoers.ldap.cat sudoers.ldap.man.in sudoers.ldap.pod \
-	    sudoers2ldif sudoreplay.cat sudoreplay.man.in sudoreplay.pod \
-	    visudo.cat visudo.man.in visudo.pod auth/API sudo.man.pl \
+	    fixman.sh fixmdoc.sh indent.pro install-sh ltmain.sh m4 \
+	    mkdefaults mkinstalldirs mkpkg pathnames.h.in pp sample.pam \
+	    sample.syslog.conf sample.sudoers schema.ActiveDirectory \
+	    schema.OpenLDAP schema.iPlanet siglist.in sudo.cat sudo.man.in \
+	    sudo.mdoc.in sudo.pp sudo_usage.h.in sudoers.in sudoers.cat \
+	    sudoers.man.in sudoers.mdoc.in sudoers.ldap.cat \
+	    sudoers.ldap.man.in sudoers.ldap.mdoc.in sudoers2ldif \
+	    sudoreplay.cat sudoreplay.man.in sudoreplay.mdoc.in \
+	    visudo.cat visudo.man.in visudo.mdoc.in auth/API sudo.man.pl \
 	    sudoers.man.pl $(ZLIB_FILES)
 
 ZLIB_FILES = zlib/adler32.c zlib/compress.c zlib/crc32.c zlib/crc32.h \
@@ -195,7 +201,18 @@ AUTHDEP = $(SUDODEP) $(authdir)/sudo_auth.h
 INSDEP = $(srcdir)/ins_2001.h $(srcdir)/ins_classic.h $(srcdir)/ins_csops.h \
 	 $(srcdir)/ins_goons.h $(srcdir)/insults.h
 
-all: $(PROGS)
+DOCS =	sudo.$(mantype) visudo.$(mantype) sudoers.$(mantype) \
+	sudoers.ldap.$(mantype) sudoers.$(mantype) \
+	sudoreplay.$(mantype)
+
+DEVDOCS = $(srcdir)/sudo.man.in $(srcdir)/sudo.cat \
+	  $(srcdir)/visudo.man.in $(srcdir)/visudo.cat \
+	  $(srcdir)/sudoers.man.in $(srcdir)/sudoers.cat \
+	  $(srcdir)/sudoers.ldap.man.in $(srcdir)/sudoers.ldap.cat \
+	  $(srcdir)/sudoers.man.in $(srcdir)/sudoers.cat \
+	  $(srcdir)/sudoreplay.man.in $(srcdir)/sudoreplay.cat
+
+all: $(PROGS) $(DEVDOCS) $(DOCS)
 
 .SUFFIXES: .o .c .h .l .y .lo
 
@@ -231,38 +248,47 @@ sudo_noexec.lo: $(srcdir)/sudo_noexec.c
 libsudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
 
-# Uncomment the following if you want "make distclean" to clean the parser
-@DEV@GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate
+GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate.c
 
-# Uncomment the lines before -@true if you intend to modify gram.y
 $(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y
-@DEV@	$(YACC) -d $(srcdir)/gram.y
-@DEV@	echo "#include <config.h>" > $(devdir)/gram.c
-@DEV@	cat y.tab.c >> $(devdir)/gram.c
-@DEV@	rm -f y.tab.c
-@DEV@	mv -f y.tab.h $(devdir)/gram.h
-	-@true
+	@if [ -n "$(DEVEL)" ]; then \
+	    if test "$(srcdir)" = "."; then \
+		gram_y="gram.y"; \
+	    else \
+		gram_y="$(srcdir)/gram.y"; \
+	    fi; \
+	    cmd='$(YACC) -d '"$$gram_y"'; echo "#include <config.h>" > $(devdir)/gram.c; sed "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"gram.c\"/" y.tab.c >> $(devdir)/gram.c; rm -f y.tab.c; mv -f y.tab.h $(devdir)/gram.h'; \
+	    echo "$$cmd"; eval $$cmd; \
+	fi
 
-# Uncomment the lines before -@true if you intend to modify toke.l
 $(devdir)/toke.c: $(srcdir)/toke.l
-@DEV@	$(FLEX) $(srcdir)/toke.l
-@DEV@	echo "#include <config.h>" > $(devdir)/toke.c
-@DEV@	cat lex.yy.c >> $(devdir)/toke.c
-@DEV@	rm -f lex.yy.c
-	-@true
+	@if [ -n "$(DEVEL)" ]; then \
+	    if test "$(srcdir)" = "."; then \
+		toke_l="toke.l"; \
+	    else \
+		toke_l="$(srcdir)/toke.l"; \
+	    fi; \
+	    cmd='$(FLEX) '"$$toke_l"'; echo "#include <config.h>" > $(devdir)/toke.c; cat lex.yy.c >> $(devdir)/toke.c; rm -f lex.yy.c'; \
+	    echo "$$cmd"; eval $$cmd; \
+	fi
 
-# Uncomment the lines before -@true if you intend to modify getdate.y
 $(devdir)/getdate.c: $(srcdir)/getdate.y
-@DEV@	echo "expect 10 shift/reduce conflicts"
-@DEV@	$(YACC) $(srcdir)/getdate.y
-@DEV@	echo "#include <config.h>" > $(devdir)/getdate.c
-@DEV@	cat y.tab.c >> $(devdir)/getdate.c
-@DEV@	rm -f y.tab.c
-	-@true
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "expect 10 shift/reduce conflicts"; \
+	    if test "$(srcdir)" = "."; then \
+		getdate_y="getdate.y"; \
+	    else \
+		getdate_y="$(srcdir)/getdate.y"; \
+	    fi; \
+	    cmd='$(YACC) '"$$getdate_y"'; echo "#include <config.h>" > $(devdir)/getdate.c; sed "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"getdate.c\"/" y.tab.c >> $(devdir)/getdate.c; rm -f y.tab.c'; \
+	    echo "$$cmd"; eval $$cmd; \
+	fi
 
-# Uncomment the following if you intend to modify def_data.in
-@DEV@$(devdir)/def_data.h $(devdir)/def_data.c: $(srcdir)/def_data.in
-@DEV@	perl $(srcdir)/mkdefaults -o def_data $(srcdir)/def_data.in
+$(devdir)/def_data.c $(devdir)/def_data.h: $(srcdir)/def_data.in
+	@if [ -n "$(DEVEL)" ]; then \
+	    cmd='$(PERL) $(srcdir)/mkdefaults -o $(devdir)/def_data $(srcdir)/def_data.in'; \
+	    echo "$$cmd"; eval $$cmd; \
+	fi
 
 siglist.c: mksiglist
 	./mksiglist > $@
@@ -270,8 +296,10 @@ siglist.c: mksiglist
 mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(srcdir)/missing.h config.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/mksiglist.c -o $@
 
-@DEV@$(srcdir)/mksiglist.h: $(srcdir)/siglist.in
-@DEV@	awk 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (my_sys_siglist[SIG%s] == NULL)\n\tmy_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@
+$(srcdir)/mksiglist.h: $(srcdir)/siglist.in
+	@if [ -n "$(DEVEL)" ]; then \
+	    awk 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (my_sys_siglist[SIG%s] == NULL)\n\tmy_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@; \
+	fi
 
 # Dependencies (not counting auth functions)
 aix.o: $(srcdir)/aix.c
@@ -483,56 +511,160 @@ uncompr.o: $(srcdir)/zlib/zlib.h zlib/zconf.h
 zutil.o: $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h
 	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(srcdir)/zlib/zutil.c
 
-@DEV@varsub: $(srcdir)/configure.in
-@DEV@	printf 's#@%s@#1#\ns#@%s@#1#\ns#@%s@#1#\ns#@%s@#/etc#g\ns#@%s@#/usr/local#g\ns#@%s@#4#g\ns#@%s@#1m#g\n' SEMAN BAMAN LCMAN sysconfdir prefix mansectform mansectsu > $@; sed -n '/Begin initial values for man page substitution/,/End initial values for man page substitution/{;p;}' $(srcdir)/configure.in | sed -e '/^#/d' -e 's/^/s#@/' -e 's/=[\\"]*/@#/' -e 's/[\\"]*$$/#g/' >> $@
+varsub: $(srcdir)/configure.in
+	@if [ -n "$(DEVEL)" ]; then \
+	    printf 's#@%s@#1#\ns#@%s@#1#\ns#@%s@#1#\ns#@%s@#/etc#g\ns#@%s@#/usr/local#g\ns#@%s@#5#g\ns#@%s@#8#g\ns#@%s@#%s#\n' SEMAN BAMAN LCMAN sysconfdir prefix mansectform mansectsu PACKAGE_VERSION $(VERSION) > $@; \
+	    $(SED) -n '/Begin initial values for man page substitution/,/End initial values for man page substitution/{;p;}' $(srcdir)/configure.in | $(SED) -e '/^#/d' -e 's/^/s#@/' -e 's/=[\\"]*/@#/' -e 's/[\\"]*$$/#g/' >> $@; \
+	fi
 
-@DEV@$(srcdir)/sudo.man.in: $(srcdir)/sudo.pod
-@DEV@	mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudo.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" $(srcdir)/sudo.pod | sed -e "s/(5)/($$mansectform)/" -e "s/(8)/($$mansectsu)/" | perl -p $(srcdir)/sudo.man.pl >> $@
+$(srcdir)/sudo.man.in: $(srcdir)/sudo.mdoc.in
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
+	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
+	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
+	    printf '.\\" DO NOT EDIT THIS FILE, IT IS NOT THE MASTER!\n' > $@; \
+	    printf '.\\" IT IS GENERATED AUTOMATICALLY FROM sudo.mdoc.in\n' >> $@; \
+	    $(SED) -n -e '/^.Dd/q' -e '/^\.\\/p' $(srcdir)/sudo.mdoc.in >> $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" >> $@; \
+	fi
 
-sudo.man: $(srcdir)/sudo.man.in
-	$(SHELL) config.status --file=$@
+sudo.man.sed: $(srcdir)/fixman.sh
+	BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ $(SHELL) $(srcdir)/fixman.sh $@
 
-@DEV@$(srcdir)/sudo.cat: varsub $(srcdir)/sudo.man.in
-@DEV@	sed -f varsub $(srcdir)/sudo.man.in | $(NROFF) -man > $@
+sudo.man: $(srcdir)/sudo.man.in sudo.man.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
 
-@DEV@$(srcdir)/visudo.man.in: $(srcdir)/visudo.pod
-@DEV@	mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/visudo.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" $(srcdir)/visudo.pod | sed -e "s/(5)/($$mansectform)/" -e "s/(8)/($$mansectsu)/" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@
+sudo.mdoc.sed: $(srcdir)/fixmdoc.sh
+	BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ $(SHELL) $(srcdir)/fixmdoc.sh $@
 
-visudo.man: $(srcdir)/visudo.man.in
-	$(SHELL) config.status --file=$@
+sudo.mdoc: $(srcdir)/sudo.mdoc.in sudo.mdoc.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
 
-@DEV@$(srcdir)/visudo.cat: varsub $(srcdir)/visudo.man.in
-@DEV@	sed -f varsub $(srcdir)/visudo.man.in | $(NROFF) -man > $@
+$(srcdir)/sudo.cat: varsub $(srcdir)/sudo.mdoc.in
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
+	    $(SED) -f varsub $(srcdir)/sudo.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	fi
 
-@DEV@$(srcdir)/sudoers.man.in: $(srcdir)/sudoers.pod
-@DEV@	mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudoers.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectform --release=$(VERSION) --center="MAINTENANCE COMMANDS" $(srcdir)/sudoers.pod | sed -e "s/(5)/($$mansectform)/" -e "s/(8)/($$mansectsu)/" | perl -p $(srcdir)/sudoers.man.pl >> $@
+sudo.cat: $(srcdir)/sudo.cat
 
-sudoers.man: $(srcdir)/sudoers.man.in
-	$(SHELL) config.status --file=$@
+$(srcdir)/visudo.man.in: $(srcdir)/visudo.mdoc.in
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
+	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
+	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
+	    printf '.\\" DO NOT EDIT THIS FILE, IT IS NOT THE MASTER!\n' > $@; \
+	    printf '.\\" IT IS GENERATED AUTOMATICALLY FROM visudo.mdoc.in\n' >> $@; \
+	    $(SED) -n -e '/^.Dd/q' -e '/^\.\\/p' $(srcdir)/visudo.mdoc.in >> $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/visudo.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "VISUDO" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" >> $@; \
+	fi
 
-@DEV@$(srcdir)/sudoers.cat: varsub $(srcdir)/sudoers.man.in
-@DEV@	sed -f varsub $(srcdir)/sudoers.man.in | $(NROFF) -man > $@
+visudo.man.sed: $(srcdir)/fixman.sh
+	$(SHELL) $(srcdir)/fixman.sh $@
 
-@DEV@$(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.pod
-@DEV@	mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudoers.ldap.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectform --release=$(VERSION) --center="MAINTENANCE COMMANDS" $(srcdir)/sudoers.ldap.pod | sed -e "s/(5)/($$mansectform)/" -e "s/(8)/($$mansectsu)/" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@
+visudo.man: $(srcdir)/visudo.man.in visudo.man.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
 
-sudoers.ldap.man: $(srcdir)/sudoers.ldap.man.in
-	$(SHELL) config.status --file=$@
+visudo.mdoc: $(srcdir)/visudo.mdoc.in
+	(cd $(top_builddir) && $(SHELL) config.status --file=$@)
 
-@DEV@$(srcdir)/sudoers.ldap.cat: varsub $(srcdir)/sudoers.ldap.man.in
-@DEV@	sed -f varsub $(srcdir)/sudoers.ldap.man.in | $(NROFF) -man > $@
+$(srcdir)/visudo.cat: varsub $(srcdir)/visudo.mdoc.in
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
+	    $(SED) -f varsub $(srcdir)/visudo.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	fi
 
-@DEV@$(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.pod
-@DEV@	mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' $(srcdir)/sudoreplay.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" $(srcdir)/sudoreplay.pod | sed -e "s/(5)/($$mansectform)/" -e "s/(8)/($$mansectsu)/" -e 's|\\fI\\f\((CW*\)*I@\([^@]*\)\\fI@|\\fI@\2@|g' >> $@
+visudo.cat: $(srcdir)/visudo.cat
 
-sudoreplay.man: $(srcdir)/sudoreplay.man.in
-	$(SHELL) config.status --file=$@
+$(srcdir)/sudoers.man.in: $(srcdir)/sudoers.mdoc.in
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
+	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
+	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
+	    printf '.\\" DO NOT EDIT THIS FILE, IT IS NOT THE MASTER!\n' > $@; \
+	    printf '.\\" IT IS GENERATED AUTOMATICALLY FROM sudoers.mdoc.in\n' >> $@; \
+	    $(SED) -n -e '/^.Dd/q' -e '/^\.\\/p' $(srcdir)/sudoers.mdoc.in >> $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS" \)"5"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" >> $@; \
+	fi
 
-@DEV@$(srcdir)/sudoreplay.cat: varsub $(srcdir)/sudoreplay.man.in
-@DEV@	sed -f varsub $(srcdir)/sudoreplay.man.in | $(NROFF) -man > $@
+sudoers.man.sed: $(srcdir)/fixman.sh
+	LCMAN=@LCMAN@ SEMAN=@SEMAN@ $(SHELL) $(srcdir)/fixman.sh $@
+
+sudoers.man: $(srcdir)/sudoers.man.in sudoers.man.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
+
+sudoers.mdoc.sed: $(srcdir)/fixmdoc.sh
+	LCMAN=@LCMAN@ SEMAN=@SEMAN@ $(SHELL) $(srcdir)/fixmdoc.sh $@
+
+sudoers.mdoc: $(srcdir)/sudoers.mdoc.in sudoers.mdoc.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
+
+$(srcdir)/sudoers.cat: varsub $(srcdir)/sudoers.mdoc.in
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
+	    $(SED) -f varsub $(srcdir)/sudoers.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	fi
+
+sudoers.cat: $(srcdir)/sudoers.cat
+
+$(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.mdoc.in
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
+	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
+	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
+	    printf '.\\" DO NOT EDIT THIS FILE, IT IS NOT THE MASTER!\n' > $@; \
+	    printf '.\\" IT IS GENERATED AUTOMATICALLY FROM sudoers.ldap.mdoc.in\n' >> $@; \
+	    $(SED) -n -e '/^.Dd/q' -e '/^\.\\/p' $(srcdir)/sudoers.ldap.mdoc.in >> $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers.ldap.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS.LDAP" \)"5"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" >> $@; \
+	fi
+
+sudoers.ldap.man.sed: $(srcdir)/fixman.sh
+	$(SHELL) $(srcdir)/fixman.sh $@
+
+sudoers.ldap.man: $(srcdir)/sudoers.ldap.man.in sudoers.ldap.man.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
+
+sudoers.ldap.mdoc: $(srcdir)/sudoers.ldap.mdoc.in
+	(cd $(top_builddir) && $(SHELL) config.status --file=$@)
+
+$(srcdir)/sudoers.ldap.cat: varsub $(srcdir)/sudoers.ldap.mdoc.in
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
+	    $(SED) -f varsub $(srcdir)/sudoers.ldap.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	fi
+
+sudoers.ldap.cat: $(srcdir)/sudoers.ldap.cat
+
+$(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.mdoc.in
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
+	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
+	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
+	    printf '.\\" DO NOT EDIT THIS FILE, IT IS NOT THE MASTER!\n' > $@; \
+	    printf '.\\" IT IS GENERATED AUTOMATICALLY FROM sudoreplay.mdoc.in\n' >> $@; \
+	    $(SED) -n -e '/^.Dd/q' -e '/^\.\\/p' $(srcdir)/sudoreplay.mdoc.in >> $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoreplay.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOREPLAY" \)"8"\(.*"\)OpenBSD \(.*\)/\1"'$$mansectsu'"\2\3/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" >> $@; \
+	fi
+
+sudoreplay.man.sed: $(srcdir)/fixman.sh
+	$(SHELL) $(srcdir)/fixman.sh $@
+
+sudoreplay.man: $(srcdir)/sudoreplay.man.in sudoreplay.man.sed
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
+
+sudoreplay.mdoc: $(srcdir)/sudoreplay.mdoc.in
+	(cd $(top_builddir) && $(SHELL) config.status --file=$@)
+
+$(srcdir)/sudoreplay.cat: varsub $(srcdir)/sudoreplay.mdoc.in
+	@if [ -n "$(DEVEL)" ]; then \
+	    echo "Generating $@"; \
+	    $(SED) -f varsub $(srcdir)/sudoreplay.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
+	fi
+
+sudoreplay.cat: $(srcdir)/sudoreplay.cat
 
 sudoers: $(srcdir)/sudoers.in
-	(cd $(top_builddir) && $(SHELL) config.status --file=plugins/sudoers/$@)
+	(cd $(top_builddir) && $(SHELL) config.status --file=$@)
 
 # The 1.7 branch started Jan 18, 2010
 ChangeLog:

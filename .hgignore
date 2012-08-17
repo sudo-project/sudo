@@ -18,6 +18,9 @@ Makefile$
 
 ^ChangeLog$
 ^.*\.man$
+^.*\.man\.sed$
+^.*\.mdoc$
+^.*\.mdoc\.sed$
 ^varsub$
 ^zlib/zconf.h$
 
