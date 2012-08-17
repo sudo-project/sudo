@@ -95,7 +95,7 @@ globtest: globtest.o libreplace.la
 	$(LIBTOOL) --mode=link $(CC) -o $@ globtest.o libreplace.la
 
 $(srcdir)/mksiglist.h: $(srcdir)/siglist.in
-	if [ -n "$(DEVEL)" ]; then \
+	@if [ -n "$(DEVEL)" ]; then \
 	    awk 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (my_sys_siglist[SIG%s] == NULL)\n\tmy_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@; \
 	fi
 
