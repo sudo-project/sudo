@@ -552,6 +552,55 @@ update_defaults(what)
     return rc;
 }
 
+/*
+ * Check the defaults entries without actually setting them.
+ * Pass in an OR'd list of which default types to check.
+ */
+int
+check_defaults(what, quiet)
+    int what;
+    int quiet;
+{
+    struct sudo_defs_types *cur;
+    struct defaults *def;
+    int rc = TRUE;
+
+    tq_foreach_fwd(&defaults, def) {
+	switch (def->type) {
+	    case DEFAULTS:
+		if (!ISSET(what, SETDEF_GENERIC))
+		    continue;
+		break;
+	    case DEFAULTS_USER:
+		if (!ISSET(what, SETDEF_USER))
+		    continue;
+		break;
+	    case DEFAULTS_RUNAS:
+		if (!ISSET(what, SETDEF_RUNAS))
+		    continue;
+		break;
+	    case DEFAULTS_HOST:
+		if (!ISSET(what, SETDEF_HOST))
+		    continue;
+		break;
+	    case DEFAULTS_CMND:
+		if (!ISSET(what, SETDEF_CMND))
+		    continue;
+		break;
+	}
+	for (cur = sudo_defs_table; cur->name != NULL; cur++) {
+	    if (strcmp(def->var, cur->name) == 0)
+		break;
+	}
+	if (cur->name == NULL) {
+	    if (!quiet)
+		warningx("unknown defaults entry `%s'", def->var);
+	    rc = FALSE;
+	}
+    }
+    return rc;
+}
+
 static int
 store_int(val, def, op)
     char *val;
