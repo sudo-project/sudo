@@ -300,4 +300,15 @@ clobber: distclean
 
 realclean: distclean
 
-.PHONY: ChangeLog
+me:
+
+a:
+
+sandwich:
+	@if test -n "$$SUDO_USER"; then \
+	    echo "Okay."; \
+	else \
+	    echo "What?  Make it yourself!"; \
+	fi
+
+.PHONY: ChangeLog me a sandwhich
