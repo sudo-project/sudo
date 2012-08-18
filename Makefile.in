@@ -168,12 +168,12 @@ ZLIB_OBJS = adler32.o compress.o crc32.o deflate.o gzclose.o gzlib.o \
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
-DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
-	    LICENSE Makefile.in NEWS PORTING README README.LDAP \
-	    TROUBLESHOOTING UPGRADE aclocal.m4 aixcrypt.exp config.guess \
-	    config.h.in config.sub configure configure.in def_data.in \
-	    fixman.sh fixmdoc.sh indent.pro install-sh ltmain.sh m4 \
-	    mkdefaults mkinstalldirs mkpkg pathnames.h.in pp sample.pam \
+DISTFILES = $(SRCS) $(HDRS) ChangeLog CONTRIBUTORS HISTORY INSTALL \
+	    INSTALL.configure LICENSE Makefile.in NEWS PORTING README \
+	    README.LDAP TROUBLESHOOTING UPGRADE aclocal.m4 aixcrypt.exp \
+	    config.guess config.h.in config.sub configure configure.in \
+	    def_data.in fixman.sh fixmdoc.sh indent.pro install-sh ltmain.sh \
+	    m4 mkdefaults mkinstalldirs mkpkg pathnames.h.in pp sample.pam \
 	    sample.syslog.conf sample.sudoers schema.ActiveDirectory \
 	    schema.OpenLDAP schema.iPlanet siglist.in sudo.cat sudo.man.in \
 	    sudo.mdoc.in sudo.pp sudo_usage.h.in sudoers.in sudoers.cat \
