@@ -781,4 +781,15 @@ package: sudo.pp
 	    shlib_mode=$(shlib_mode) \
 	    version=$(VERSION) $(PPVARS)
 
-.PHONY:	ChangeLog
+me:
+
+a:
+
+sandwich:
+	@if test -n "$$SUDO_USER"; then \
+	    echo "Okay."; \
+	else \
+	    echo "What?  Make it yourself!"; \
+	fi
+
+.PHONY: ChangeLog me a sandwhich
