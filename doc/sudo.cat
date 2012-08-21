@@ -18,10 +18,7 @@ SSYYNNOOPPSSIISS
 
 DDEESSCCRRIIPPTTIIOONN
      ssuuddoo allows a permitted user to execute a _c_o_m_m_a_n_d as the superuser or
-     another user, as specified by the security policy.  The real and
-     effective uid and gid are set to match those of the target user, as
-     specified in the password database, and the group vector is initialized
-     based on the group database (unless the --PP option was specified).
+     another user, as specified by the security policy.
 
      ssuuddoo supports a plugin architecture for security policies and
      input/output logging.  Third parties can develop and distribute their own
@@ -299,6 +296,74 @@ DDEESSCCRRIIPPTTIIOONN
      command to be run has the SETENV tag set or the command matched is ALL,
      the user may set variables that would otherwise be forbidden.  See
      sudoers(4) for more information.
+
+CCOOMMMMAANNDD EEXXEECCUUTTIIOONN
+     When ssuuddoo executes a command, the security policy specifies the execution
+     envionment for the command.  Typically, the real and effective uid and
+     gid are set to match those of the target user, as specified in the
+     password database, and the group vector is initialized based on the group
+     database (unless the --PP option was specified).
+
+     The following parameters may be specified by security policy:
+
+     oo   real and effective user ID
+
+     oo   real and effective group ID
+
+     oo   supplementary group IDs
+
+     oo   the environment list
+
+     oo   current working directory
+
+     oo   file creation mode mask (umask)
+
+     oo   SELinux role and type
+
+     oo   Solaris project
+
+     oo   Solaris privileges
+
+     oo   BSD login class
+
+     oo   scheduling priority (aka nice value)
+
+   PPrroocceessss MMooddeell
+     When ssuuddoo runs a command, it calls fork(2), sets up the execution
+     environment as described above, and calls the execve system call in the
+     child process.  The main ssuuddoo process waits until the command has
+     completed, then passes the command's exit status to the security policy's
+     close method and exits.  If an I/O logging plugin is configured, a new
+     pseudo-terminal (``pty'') is created and a second ssuuddoo process is used to
+     relay job control signals between the user's existing pty and the new pty
+     the command is being run in.  This extra process makes it possible to,
+     for example, suspend and resume the command.  Without it, the command
+     would be in what POSIX terms an ``orphaned process group'' and it would
+     not receive any job control signals.
+
+   SSiiggnnaall HHaannddlliinngg
+     Because the command is run as a child of the ssuuddoo process, ssuuddoo will
+     relay signals it receives to the command.  Unless the command is being
+     run in a new pty, the SIGHUP, SIGINT and SIGQUIT signals are not relayed
+     unless they are sent by a user process, not the kernel.  Otherwise, the
+     command would receive SIGINT twice every time the user entered control-C.
+     Some signals, such as SIGSTOP and SIGKILL, cannot be caught and thus will
+     not be relayed to the command.  As a general rule, SIGTSTP should be used
+     instead of SIGSTOP when you wish to suspend a command being run by ssuuddoo.
+
+     As a special case, ssuuddoo will not relay signals that were sent by the
+     command it is running.  This prevents the command from accidentally
+     killing itself.  On some systems, the reboot(1m) command sends SIGTERM to
+     all non-system processes other than itself before rebooting the systyem.
+     This prevents ssuuddoo from relaying the SIGTERM signal it received back to
+     reboot(1m), which might then exit before the system was actually rebooted,
+     leaving it in a half-dead state similar to single user mode.  Note,
+     however, that this check only applies to the command run by ssuuddoo and not
+     any other processes that the command may create.  As a result, running a
+     script that calls reboot(1m) or shutdown(1m) via ssuuddoo may cause the system
+     to end up in this undefined state unless the reboot(1m) or shutdown(1m) are
+     run using the eexxeecc() family of functions instead of ssyysstteemm() (which
+     interposes a shell between the command and the calling process).
 
 PPLLUUGGIINNSS
      Plugins are dynamically loaded based on the contents of the

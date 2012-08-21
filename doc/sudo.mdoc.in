@@ -125,11 +125,6 @@ allows a permitted user to execute a
 .Ar command
 as the superuser or another user, as specified by the security
 policy.
-The real and effective uid and gid are set to match those of the
-target user, as specified in the password database, and the group
-vector is initialized based on the group database (unless the
-.Fl P
-option was specified).
 .Pp
 .Nm sudo
 supports a plugin architecture for security policies and input/output
@@ -688,6 +683,130 @@ the user may set variables that would otherwise be forbidden.
 See
 .Xr sudoers @mansectform@
 for more information.
+.Sh COMMAND EXECUTION
+When
+.Nm sudo
+executes a command, the security policy specifies the execution
+envionment for the command.
+Typically, the real and effective uid and gid are set to
+match those of the target user, as specified in the password database,
+and the group vector is initialized based on the group database
+(unless the
+.Fl P
+option was specified).
+.Pp
+The following parameters may be specified by security policy:
+.Bl -bullet
+.It
+real and effective user ID
+.It
+real and effective group ID
+.It
+supplementary group IDs
+.It
+the environment list
+.It
+current working directory
+.It
+file creation mode mask (umask)
+.It
+SELinux role and type
+.It
+Solaris project
+.It
+Solaris privileges
+.It
+BSD login class
+.It
+scheduling priority (aka nice value)
+.El
+.Ss Process Model
+When
+.Nm sudo
+runs a command, it calls
+.Xr fork 2 ,
+sets up the execution environment as described above, and calls the 
+.Xr execve
+system call in the child process.
+The main
+.Nm sudo
+process waits until the command has completed, then passes the
+command's exit status to the security policy's close method and exits.
+If an I/O logging plugin is configured, a new  pseudo-terminal
+.Pq Dq pty
+is created and a second
+.Nm sudo
+process is used to relay job control signals between the user's
+existing pty and the new pty the command is being run in.
+This extra process makes it possible to, for example, suspend
+and resume the command.
+Without it, the command would be in what POSIX terms an
+.Dq orphaned process group
+and it would not receive any job control signals.
+.Ss Signal Handling
+Because the command is run as a child of the
+.Nm sudo
+process,
+.Nm sudo
+will relay signals it receives to the command.
+Unless the command is being run in a new pty, the
+.Dv SIGHUP ,
+.Dv SIGINT
+and
+.Dv SIGQUIT
+signals are not relayed unless they are sent by a user process,
+not the kernel.
+Otherwise, the command would receive
+.Dv SIGINT
+twice every time the user entered control-C.
+Some signals, such as
+.Dv SIGSTOP
+and
+.Dv SIGKILL ,
+cannot be caught and thus will not be relayed to the command.
+As a general rule,
+.Dv SIGTSTP
+should be used instead of
+.Dv SIGSTOP
+when you wish to suspend a command being run by
+.Nm sudo .
+.Pp
+As a special case,
+.Nm sudo
+will not relay signals that were sent by the command it is running.
+This prevents the command from accidentally killing itself.
+On some systems, the
+.Xr reboot @mansectsu@
+command sends
+.Dv SIGTERM
+to all non-system processes other than itself before rebooting
+the systyem.
+This prevents
+.Nm sudo
+from relaying the
+.Dv SIGTERM
+signal it received back to
+.Xr reboot @mansectsu@ ,
+which might then exit before the system was actually rebooted,
+leaving it in a half-dead state similar to single user mode.
+Note, however, that this check only applies to the command run by
+.Nm sudo
+and not any other processes that the command may create.
+As a result, running a script that calls
+.Xr reboot @mansectsu@
+or
+.Xr shutdown @mansectsu@
+via
+.Nm sudo
+may cause the system to end up in this undefined state unless the
+.Xr reboot @mansectsu@
+or
+.Xr shutdown @mansectsu@
+are run using the
+.Fn exec
+family of functions instead of
+.Fn system
+(which interposes a shell between the command and the calling process).
 .Sh PLUGINS
 Plugins are dynamically loaded based on the contents of the
 .Pa @sysconfdir@/sudo.conf

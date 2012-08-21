@@ -85,11 +85,6 @@ allows a permitted user to execute a
 \fIcommand\fR
 as the superuser or another user, as specified by the security
 policy.
-The real and effective uid and gid are set to match those of the
-target user, as specified in the password database, and the group
-vector is initialized based on the group database (unless the
-\fB\-P\fR
-option was specified).
 .PP
 \fBsudo\fR
 supports a plugin architecture for security policies and input/output
@@ -695,6 +690,139 @@ the user may set variables that would otherwise be forbidden.
 See
 sudoers(@mansectform@)
 for more information.
+.SH "COMMAND EXECUTION"
+When
+\fBsudo\fR
+executes a command, the security policy specifies the execution
+envionment for the command.
+Typically, the real and effective uid and gid are set to
+match those of the target user, as specified in the password database,
+and the group vector is initialized based on the group database
+(unless the
+\fB\-P\fR
+option was specified).
+.PP
+The following parameters may be specified by security policy:
+.TP 4n
+\fBo\fR
+real and effective user ID
+.TP 4n
+\fBo\fR
+real and effective group ID
+.TP 4n
+\fBo\fR
+supplementary group IDs
+.TP 4n
+\fBo\fR
+the environment list
+.TP 4n
+\fBo\fR
+current working directory
+.TP 4n
+\fBo\fR
+file creation mode mask (umask)
+.TP 4n
+\fBo\fR
+SELinux role and type
+.TP 4n
+\fBo\fR
+Solaris project
+.TP 4n
+\fBo\fR
+Solaris privileges
+.TP 4n
+\fBo\fR
+BSD login class
+.TP 4n
+\fBo\fR
+scheduling priority (aka nice value)
+.SS "Process Model"
+When
+\fBsudo\fR
+runs a command, it calls
+fork(2),
+sets up the execution environment as described above, and calls the
+execve
+system call in the child process.
+The main
+\fBsudo\fR
+process waits until the command has completed, then passes the
+command's exit status to the security policy's close method and exits.
+If an I/O logging plugin is configured, a new  pseudo-terminal
+(``pty'')
+is created and a second
+\fBsudo\fR
+process is used to relay job control signals between the user's
+existing pty and the new pty the command is being run in.
+This extra process makes it possible to, for example, suspend
+and resume the command.
+Without it, the command would be in what POSIX terms an
+``orphaned process group''
+and it would not receive any job control signals.
+.SS "Signal Handling"
+Because the command is run as a child of the
+\fBsudo\fR
+process,
+\fBsudo\fR
+will relay signals it receives to the command.
+Unless the command is being run in a new pty, the
+\fRSIGHUP\fR,
+\fRSIGINT\fR
+and
+\fRSIGQUIT\fR
+signals are not relayed unless they are sent by a user process,
+not the kernel.
+Otherwise, the command would receive
+\fRSIGINT\fR
+twice every time the user entered control-C.
+Some signals, such as
+\fRSIGSTOP\fR
+and
+\fRSIGKILL\fR,
+cannot be caught and thus will not be relayed to the command.
+As a general rule,
+\fRSIGTSTP\fR
+should be used instead of
+\fRSIGSTOP\fR
+when you wish to suspend a command being run by
+\fBsudo\fR.
+.PP
+As a special case,
+\fBsudo\fR
+will not relay signals that were sent by the command it is running.
+This prevents the command from accidentally killing itself.
+On some systems, the
+reboot(@mansectsu@)
+command sends
+\fRSIGTERM\fR
+to all non-system processes other than itself before rebooting
+the systyem.
+This prevents
+\fBsudo\fR
+from relaying the
+\fRSIGTERM\fR
+signal it received back to
+reboot(@mansectsu@),
+which might then exit before the system was actually rebooted,
+leaving it in a half-dead state similar to single user mode.
+Note, however, that this check only applies to the command run by
+\fBsudo\fR
+and not any other processes that the command may create.
+As a result, running a script that calls
+reboot(@mansectsu@)
+or
+shutdown(@mansectsu@)
+via
+\fBsudo\fR
+may cause the system to end up in this undefined state unless the
+reboot(@mansectsu@)
+or
+shutdown(@mansectsu@)
+are run using the
+\fBexec\fR()
+family of functions instead of
+\fBsystem\fR()
+(which interposes a shell between the command and the calling process).
 .SH "PLUGINS"
 Plugins are dynamically loaded based on the contents of the
 \fI@sysconfdir@/sudo.conf\fR

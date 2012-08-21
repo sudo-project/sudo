@@ -111,13 +111,13 @@ $(srcdir)/sudo.man.in: $(srcdir)/sudo.mdoc.in
 	fi
 
 sudo.man.sed: $(srcdir)/fixman.sh
-	BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ $(SHELL) $(srcdir)/fixman.sh $@
+	BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixman.sh $@
 
 sudo.man: $(srcdir)/sudo.man.in sudo.man.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
 
 sudo.mdoc.sed: $(srcdir)/fixmdoc.sh
-	BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ $(SHELL) $(srcdir)/fixmdoc.sh $@
+	BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixmdoc.sh $@
 
 sudo.mdoc: $(srcdir)/sudo.mdoc.in sudo.mdoc.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
