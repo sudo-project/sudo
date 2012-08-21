@@ -946,8 +946,6 @@ supplementary group IDs
 .It
 the environment list
 .It
-file creation mode mask (umask)
-.It
 SELinux role and type
 .It
 Solaris project
@@ -955,6 +953,8 @@ Solaris project
 Solaris privileges
 .It
 BSD login class
+.It
+file creation mode mask (umask)
 .El
 .Pp
 See the

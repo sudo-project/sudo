@@ -384,8 +384,6 @@ CCOOMMMMAANNDD EEXXEECCUUTTIIOONN
 
      oo   the environment list
 
-     oo   file creation mode mask (umask)
-
      oo   SELinux role and type
 
      oo   Solaris project
@@ -393,6 +391,8 @@ CCOOMMMMAANNDD EEXXEECCUUTTIIOONN
      oo   Solaris privileges
 
      oo   BSD login class
+
+     oo   file creation mode mask (umask)
 
      See the _C_o_m_m_a_n_d _E_n_v_i_r_o_n_m_e_n_t section for details on how the environment
      list is constructed.

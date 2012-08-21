@@ -949,9 +949,6 @@ supplementary group IDs
 the environment list
 .TP 4n
 \fBo\fR
-file creation mode mask (umask)
-.TP 4n
-\fBo\fR
 SELinux role and type
 .TP 4n
 \fBo\fR
@@ -962,6 +959,9 @@ Solaris privileges
 .TP 4n
 \fBo\fR
 BSD login class
+.TP 4n
+\fBo\fR
+file creation mode mask (umask)
 .PP
 See the
 \fICommand Environment\fR

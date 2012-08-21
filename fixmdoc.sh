@@ -35,6 +35,10 @@ case "$OUTFILE" in
 				d
 			}
 			/^\.Xr login_cap 3 ,$/d
+			/^BSD login class$/ {
+				N
+				/^BSD login class\n\.It$/d
+			}
 		EOF
 	fi
 
@@ -48,6 +52,22 @@ case "$OUTFILE" in
 			}
 			/^\.It Fl t Ar type/,/specified role\.$/ {
 				d
+			}
+			/^SELinux role and type$/ {
+				N
+				/^SELinux role and type\n\.It$/d
+			}
+		EOF
+	fi
+
+	# Solaris privileges
+	if [ X"$PSMAN" != X"1" ]; then
+		cat >>"$OUTFILE" <<-'EOF'
+			/^Solaris project$/ {
+				N
+				N
+				N
+				/^Solaris project\n\.It\nSolaris privileges\n\.It$/d
 			}
 		EOF
 	fi
