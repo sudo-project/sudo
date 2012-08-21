@@ -47,7 +47,7 @@ major version matches.
 The plugin API is defined by the
 \fRsudo_plugin.h\fR
 header file.
-.SS "The sudo.conf File"
+.SS "The sudo.conf file"
 The
 \fI@sysconfdir@/sudo.conf\fR
 file contains plugin configuration directives.
@@ -119,7 +119,7 @@ Plugin sudoers_policy sudoers.so
 Plugin sudoers_io sudoers.so
 .RE
 .fi
-.SS "Policy Plugin API"
+.SS "Policy plugin API"
 A policy plugin must declare and populate a
 \fRpolicy_plugin\fR
 struct in the global scope.
@@ -1293,7 +1293,7 @@ if the major version in
 does not match the front end's major hook API version.
 .sp
 See the
-\fIHook Function API\fR
+\fIHook function API\fR
 section below for more information
 about hooks.
 .sp
@@ -1349,7 +1349,7 @@ If the plugin tries to deregister a hook that the front end does not support,
 will return an error.
 .sp
 See the
-\fIHook Function API\fR
+\fIHook function API\fR
 section below for more information
 about hooks.
 .sp
@@ -1388,7 +1388,7 @@ will not be called.
 } while(0)
 .RE
 .fi
-.SS "I/O Plugin API"
+.SS "I/O plugin API"
 .nf
 .RS 0n
 struct io_plugin {
@@ -1566,7 +1566,7 @@ itself but the
 might.
 .sp
 See the
-\fIPolicy Plugin API\fR
+\fIPolicy plugin API\fR
 section for a list of all possible settings.
 .TP 6n
 user_info
@@ -1591,7 +1591,7 @@ itself but the
 might.
 .sp
 See the
-\fIPolicy Plugin API\fR
+\fIPolicy plugin API\fR
 section for a list of all possible strings.
 .TP 6n
 argc
@@ -1891,22 +1891,22 @@ in bytes.
 .TP 6n
 register_hooks
 See the
-\fIPolicy Plugin API\fR
+\fIPolicy plugin API\fR
 section for a description of
 \fRregister_hooks\fR.
 .PD
 .TP 6n
 deregister_hooks
 See the
-\fIPolicy Plugin API\fR
+\fIPolicy plugin API\fR
 section for a description of
 \fRderegister_hooks.\fR
 .PP
 \fII/O Plugin Version Macros\fR
 .PP
 Same as for the
-\fIPolicy Plugin API\fR.
-.SS "Hook Function API"
+\fIPolicy plugin API\fR.
+.SS "Hook function API"
 Beginning with plugin API version 1.2, it is possible to install
 hooks for certain functions called by the
 \fBsudo\fR
@@ -2258,7 +2258,7 @@ setting.
 See the sample plugin for an example of the
 \fBconversation\fR()
 function usage.
-.SS "Sudoers Group Plugin API"
+.SS "Sudoers group plugin API"
 The
 \fIsudoers\fR
 module supports a plugin interface to allow non-Unix

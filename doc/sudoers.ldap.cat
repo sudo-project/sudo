@@ -232,7 +232,7 @@ DDEESSCCRRIIPPTTIIOONN
          sudoHost: ALL
          sudoHost: !web01
 
-   SSuuddooeerrss SScchheemmaa
+   SSuuddooeerrss sscchheemmaa
      In order to use ssuuddoo's LDAP support, the ssuuddoo schema must be installed on
      your LDAP server.  In addition, be sure to index the sudoUser attribute.
 

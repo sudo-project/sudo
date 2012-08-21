@@ -48,7 +48,7 @@ For information on storing
 policy information
 in LDAP, please see
 sudoers.ldap(@mansectform@).
-.SS "Authentication and Logging"
+.SS "Authentication and logging"
 The
 \fIsudoers\fR
 security policy requires that most users authenticate
@@ -164,7 +164,7 @@ Defaults flags as well as the
 and
 \fRLOG_OUTPUT\fR
 command tags.
-.SS "Command Environment"
+.SS "Command environment"
 Since environment variables can influence program behavior,
 \fIsudoers\fR
 provides a means to restrict which variables from the user's
@@ -733,7 +733,7 @@ defaults.
 See
 \fISUDOERS OPTIONS\fR
 for a list of supported Defaults parameters.
-.SS "User Specification"
+.SS "User specification"
 .nf
 .RS 0n
 User_Spec ::= User_List Host_List '=' Cmnd_Spec_List \e
@@ -1128,7 +1128,7 @@ aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 .fi
 .PP
 See the
-\fIPreventing Shell Escapes\fR
+\fIPreventing shell escapes\fR
 section below for more details on how
 \fRNOEXEC\fR
 works and whether or not it will work on your system.
@@ -1979,7 +1979,7 @@ tag.
 See the description of
 \fINOEXEC and EXEC\fR
 below as well as the
-\fIPreventing Shell Escapes\fR
+\fIPreventing shell escapes\fR
 section at the end of this manual.
 This flag is
 \fIoff\fR
@@ -3415,7 +3415,7 @@ Plugin policy_plugin sudoers.so
 Plugin io_plugin sudoers.so
 .RE
 .fi
-.SS "Plugin Options"
+.SS "Plugin options"
 Starting with
 \fBsudo\fR
 1.8.5, it is possible to pass options to the
@@ -3459,7 +3459,7 @@ The
 \fIsudoers_mode\fR
 option can be used to override the default file mode for the sudoers file.
 It should be specified as an octal value.
-.SS "Debug Flags"
+.SS "Debug flags"
 Versions 1.8.4 and higher of the
 \fIsudoers\fR
 plugin supports a debugging framework that can help track down what the
@@ -4049,7 +4049,7 @@ is enabled by changing to
 and running
 \fR./passwd root\fR
 instead.
-.SS "Preventing Shell Escapes"
+.SS "Preventing shell escapes"
 Once
 \fBsudo\fR
 executes a program, that program is free to do whatever

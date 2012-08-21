@@ -18,7 +18,7 @@ DDEESSCCRRIIPPTTIIOONN
 
      The plugin API is defined by the sudo_plugin.h header file.
 
-   TThhee ssuuddoo..ccoonnff FFiillee
+   TThhee ssuuddoo..ccoonnff ffiillee
      The _/_e_t_c_/_s_u_d_o_._c_o_n_f file contains plugin configuration directives.  The
      primary keyword is the Plugin directive, which causes a plugin to be
      loaded.
@@ -57,7 +57,7 @@ DDEESSCCRRIIPPTTIIOONN
      Plugin sudoers_policy sudoers.so
      Plugin sudoers_io sudoers.so
 
-   PPoolliiccyy PPlluuggiinn AAPPII
+   PPoolliiccyy pplluuggiinn AAPPII
      A policy plugin must declare and populate a policy_plugin struct in the
      global scope.  This structure contains pointers to the functions that
      implement the ssuuddoo policy checks.  The name of the symbol should be
@@ -709,7 +709,7 @@ DDEESSCCRRIIPPTTIIOONN
            the hook type is not supported and -1 if the major version in
            struct hook does not match the front end's major hook API version.
 
-           See the _H_o_o_k _F_u_n_c_t_i_o_n _A_P_I section below for more information about
+           See the _H_o_o_k _f_u_n_c_t_i_o_n _A_P_I section below for more information about
            hooks.
 
            NOTE: the rreeggiisstteerr__hhooookkss() function is only available starting with
@@ -733,7 +733,7 @@ DDEESSCCRRIIPPTTIIOONN
            the plugin tries to deregister a hook that the front end does not
            support, deregister_hook will return an error.
 
-           See the _H_o_o_k _F_u_n_c_t_i_o_n _A_P_I section below for more information about
+           See the _H_o_o_k _f_u_n_c_t_i_o_n _A_P_I section below for more information about
            hooks.
 
            NOTE: the ddeerreeggiisstteerr__hhooookkss() function is only available starting
@@ -759,7 +759,7 @@ DDEESSCCRRIIPPTTIIOONN
          *(vp) = (*(vp) & 0xffff0000) | (n); \
      } while(0)
 
-   II//OO PPlluuggiinn AAPPII
+   II//OO pplluuggiinn AAPPII
      struct io_plugin {
      #define SUDO_IO_PLUGIN 2
          unsigned int type; /* always SUDO_IO_PLUGIN */
@@ -860,7 +860,7 @@ DDEESSCCRRIIPPTTIIOONN
                  equal sign (`=') since the _n_a_m_e field will never include one
                  itself but the _v_a_l_u_e might.
 
-                 See the _P_o_l_i_c_y _P_l_u_g_i_n _A_P_I section for a list of all possible
+                 See the _P_o_l_i_c_y _p_l_u_g_i_n _A_P_I section for a list of all possible
                  settings.
 
            user_info
@@ -872,7 +872,7 @@ DDEESSCCRRIIPPTTIIOONN
                  equal sign (`=') since the _n_a_m_e field will never include one
                  itself but the _v_a_l_u_e might.
 
-                 See the _P_o_l_i_c_y _P_l_u_g_i_n _A_P_I section for a list of all possible
+                 See the _P_o_l_i_c_y _p_l_u_g_i_n _A_P_I section for a list of all possible
                  strings.
 
            argc  The number of elements in _a_r_g_v, not counting the final NULL
@@ -1014,18 +1014,18 @@ DDEESSCCRRIIPPTTIIOONN
            len   The length of _b_u_f in bytes.
 
      register_hooks
-           See the _P_o_l_i_c_y _P_l_u_g_i_n _A_P_I section for a description of
+           See the _P_o_l_i_c_y _p_l_u_g_i_n _A_P_I section for a description of
            register_hooks.
 
      deregister_hooks
-           See the _P_o_l_i_c_y _P_l_u_g_i_n _A_P_I section for a description of
+           See the _P_o_l_i_c_y _p_l_u_g_i_n _A_P_I section for a description of
            deregister_hooks.
 
      _I_/_O _P_l_u_g_i_n _V_e_r_s_i_o_n _M_a_c_r_o_s
 
-     Same as for the _P_o_l_i_c_y _P_l_u_g_i_n _A_P_I.
+     Same as for the _P_o_l_i_c_y _p_l_u_g_i_n _A_P_I.
 
-   HHooookk FFuunnccttiioonn AAPPII
+   HHooookk ffuunnccttiioonn AAPPII
      Beginning with plugin API version 1.2, it is possible to install hooks
      for certain functions called by the ssuuddoo front end.
 
@@ -1223,7 +1223,7 @@ DDEESSCCRRIIPPTTIIOONN
      See the sample plugin for an example of the ccoonnvveerrssaattiioonn() function
      usage.
 
-   SSuuddooeerrss GGrroouupp PPlluuggiinn AAPPII
+   SSuuddooeerrss ggrroouupp pplluuggiinn AAPPII
      The _s_u_d_o_e_r_s module supports a plugin interface to allow non-Unix group
      lookups.  This can be used to query a group source other than the
      standard Unix group database.  A sample group plugin is bundled with ssuuddoo

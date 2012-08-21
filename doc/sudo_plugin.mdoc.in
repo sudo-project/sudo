@@ -45,7 +45,7 @@ major version matches.
 The plugin API is defined by the
 .Li sudo_plugin.h
 header file.
-.Ss The sudo.conf File
+.Ss The sudo.conf file
 The
 .Pa @sysconfdir@/sudo.conf
 file contains plugin configuration directives.
@@ -114,7 +114,7 @@ This limitation does not apply to I/O plugins.
 Plugin sudoers_policy sudoers.so
 Plugin sudoers_io sudoers.so
 .Ed
-.Ss Policy Plugin API
+.Ss Policy plugin API
 A policy plugin must declare and populate a
 .Li policy_plugin
 struct in the global scope.
@@ -1130,7 +1130,7 @@ if the major version in
 does not match the front end's major hook API version.
 .Pp
 See the
-.Sx Hook Function API
+.Sx Hook function API
 section below for more information
 about hooks.
 .Pp
@@ -1178,7 +1178,7 @@ If the plugin tries to deregister a hook that the front end does not support,
 will return an error.
 .Pp
 See the
-.Sx Hook Function API
+.Sx Hook function API
 section below for more information
 about hooks.
 .Pp
@@ -1213,7 +1213,7 @@ will not be called.
     *(vp) = (*(vp) & 0xffff0000) | (n); \e
 } while(0)
 .Ed
-.Ss I/O Plugin API
+.Ss I/O plugin API
 .Bd -literal
 struct io_plugin {
 #define SUDO_IO_PLUGIN 2
@@ -1381,7 +1381,7 @@ itself but the
 might.
 .Pp
 See the
-.Sx Policy Plugin API
+.Sx Policy plugin API
 section for a list of all possible settings.
 .It user_info
 A vector of information about the user running the command in the form of
@@ -1405,7 +1405,7 @@ itself but the
 might.
 .Pp
 See the
-.Sx Policy Plugin API
+.Sx Policy plugin API
 section for a list of all possible strings.
 .It argc
 The number of elements in
@@ -1640,12 +1640,12 @@ in bytes.
 .El
 .It register_hooks
 See the
-.Sx Policy Plugin API
+.Sx Policy plugin API
 section for a description of
 .Li register_hooks .
 .It deregister_hooks
 See the
-.Sx Policy Plugin API
+.Sx Policy plugin API
 section for a description of
 .Li deregister_hooks.
 .El
@@ -1653,8 +1653,8 @@ section for a description of
 .Em I/O Plugin Version Macros
 .Pp
 Same as for the
-.Sx Policy Plugin API .
-.Ss Hook Function API
+.Sx Policy plugin API .
+.Ss Hook function API
 Beginning with plugin API version 1.2, it is possible to install
 hooks for certain functions called by the
 .Nm sudo
@@ -1954,7 +1954,7 @@ setting.
 See the sample plugin for an example of the
 .Fn conversation
 function usage.
-.Ss Sudoers Group Plugin API
+.Ss Sudoers group plugin API
 The
 .Em sudoers
 module supports a plugin interface to allow non-Unix

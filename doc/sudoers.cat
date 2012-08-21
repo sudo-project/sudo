@@ -10,7 +10,7 @@ DDEESSCCRRIIPPTTIIOONN
      the _S_U_D_O_E_R_S _F_I_L_E _F_O_R_M_A_T section.  For information on storing _s_u_d_o_e_r_s
      policy information in LDAP, please see sudoers.ldap(4).
 
-   AAuutthheennttiiccaattiioonn aanndd LLooggggiinngg
+   AAuutthheennttiiccaattiioonn aanndd llooggggiinngg
      The _s_u_d_o_e_r_s security policy requires that most users authenticate
      themselves before they can use ssuuddoo.  A password is not required if the
      invoking user is root, if the target user is the same as the invoking
@@ -55,7 +55,7 @@ DDEESSCCRRIIPPTTIIOONN
      _l_o_g___o_u_t_p_u_t Defaults flags as well as the LOG_INPUT and LOG_OUTPUT command
      tags.
 
-   CCoommmmaanndd EEnnvviirroonnmmeenntt
+   CCoommmmaanndd eennvviirroonnmmeenntt
      Since environment variables can influence program behavior, _s_u_d_o_e_r_s
      provides a means to restrict which variables from the user's environment
      are inherited by the command to be run.  There are two distinct ways
@@ -332,7 +332,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
      See _S_U_D_O_E_R_S _O_P_T_I_O_N_S for a list of supported Defaults parameters.
 
-   UUsseerr SSppeecciiffiiccaattiioonn
+   UUsseerr ssppeecciiffiiccaattiioonn
      User_Spec ::= User_List Host_List '=' Cmnd_Spec_List \
                    (':' Host_List '=' Cmnd_Spec_List)*
 
@@ -507,7 +507,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
 
      aaron   shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 
-     See the _P_r_e_v_e_n_t_i_n_g _S_h_e_l_l _E_s_c_a_p_e_s section below for more details on how
+     See the _P_r_e_v_e_n_t_i_n_g _s_h_e_l_l _e_s_c_a_p_e_s section below for more details on how
      NOEXEC works and whether or not it will work on your system.
 
      _S_E_T_E_N_V _a_n_d _N_O_S_E_T_E_N_V
@@ -903,7 +903,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
      noexec            If set, all commands run via ssuuddoo will behave as if the
                        NOEXEC tag has been set, unless overridden by a EXEC
                        tag.  See the description of _N_O_E_X_E_C _a_n_d _E_X_E_C below as
-                       well as the _P_r_e_v_e_n_t_i_n_g _S_h_e_l_l _E_s_c_a_p_e_s section at the end
+                       well as the _P_r_e_v_e_n_t_i_n_g _s_h_e_l_l _e_s_c_a_p_e_s section at the end
                        of this manual.  This flag is _o_f_f by default.
 
      path_info         Normally, ssuuddoo will tell the user when a command could
@@ -1640,7 +1640,7 @@ SSUUDDOO..CCOONNFF
      Plugin policy_plugin sudoers.so
      Plugin io_plugin sudoers.so
 
-   PPlluuggiinn OOppttiioonnss
+   PPlluuggiinn ooppttiioonnss
      Starting with ssuuddoo 1.8.5, it is possible to pass options to the _s_u_d_o_e_r_s
      plugin.  Options may be listed after the path to the plugin (i.e. after
      _s_u_d_o_e_r_s_._s_o); multiple options should be space-separated.  For example:
@@ -1668,7 +1668,7 @@ SSUUDDOO..CCOONNFF
                file mode for the sudoers file.  It should be specified as an
                octal value.
 
-   DDeebbuugg FFllaaggss
+   DDeebbuugg ffllaaggss
      Versions 1.8.4 and higher of the _s_u_d_o_e_r_s plugin supports a debugging
      framework that can help track down what the plugin is doing internally if
      there is a problem.  This can be configured in the _/_e_t_c_/_s_u_d_o_._c_o_n_f file as
@@ -1952,7 +1952,7 @@ SSEECCUURRIITTYY NNOOTTEESS
      User jjoohhnn can still run /usr/bin/passwd root if _f_a_s_t___g_l_o_b is enabled by
      changing to _/_u_s_r_/_b_i_n and running ./passwd root instead.
 
-   PPrreevveennttiinngg SShheellll EEssccaappeess
+   PPrreevveennttiinngg sshheellll eessccaappeess
      Once ssuuddoo executes a program, that program is free to do whatever it
      pleases, including run other programs.  This can be a security issue
      since it is not uncommon for a program to allow shell escapes, which lets

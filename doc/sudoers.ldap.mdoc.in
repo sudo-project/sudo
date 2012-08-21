@@ -373,7 +373,7 @@ sudoUser: !joe
 sudoHost: ALL
 sudoHost: !web01
 .Ed
-.Ss Sudoers Schema
+.Ss Sudoers schema
 In order to use
 .Nm sudo Ns No 's
 LDAP support, the

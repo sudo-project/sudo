@@ -328,7 +328,7 @@ CCOOMMMMAANNDD EEXXEECCUUTTIIOONN
 
      oo   scheduling priority (aka nice value)
 
-   PPrroocceessss MMooddeell
+   PPrroocceessss mmooddeell
      When ssuuddoo runs a command, it calls fork(2), sets up the execution
      environment as described above, and calls the execve system call in the
      child process.  The main ssuuddoo process waits until the command has
@@ -341,7 +341,7 @@ CCOOMMMMAANNDD EEXXEECCUUTTIIOONN
      would be in what POSIX terms an ``orphaned process group'' and it would
      not receive any job control signals.
 
-   SSiiggnnaall HHaannddlliinngg
+   SSiiggnnaall hhaannddlliinngg
      Because the command is run as a child of the ssuuddoo process, ssuuddoo will
      relay signals it receives to the command.  Unless the command is being
      run in a new pty, the SIGHUP, SIGINT and SIGQUIT signals are not relayed

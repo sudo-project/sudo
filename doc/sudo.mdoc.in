@@ -720,7 +720,7 @@ BSD login class
 .It
 scheduling priority (aka nice value)
 .El
-.Ss Process Model
+.Ss Process model
 When
 .Nm sudo
 runs a command, it calls
@@ -743,7 +743,7 @@ and resume the command.
 Without it, the command would be in what POSIX terms an
 .Dq orphaned process group
 and it would not receive any job control signals.
-.Ss Signal Handling
+.Ss Signal handling
 Because the command is run as a child of the
 .Nm sudo
 process,

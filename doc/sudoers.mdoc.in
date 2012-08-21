@@ -46,7 +46,7 @@ For information on storing
 policy information
 in LDAP, please see
 .Xr sudoers.ldap @mansectform@ .
-.Ss Authentication and Logging
+.Ss Authentication and logging
 The
 .Em sudoers
 security policy requires that most users authenticate
@@ -163,7 +163,7 @@ Defaults flags as well as the
 and
 .Li LOG_OUTPUT
 command tags.
-.Ss Command Environment
+.Ss Command environment
 Since environment variables can influence program behavior,
 .Em sudoers
 provides a means to restrict which variables from the user's
@@ -706,7 +706,7 @@ defaults.
 See
 .Sx SUDOERS OPTIONS
 for a list of supported Defaults parameters.
-.Ss User Specification
+.Ss User specification
 .Bd -literal
 User_Spec ::= User_List Host_List '=' Cmnd_Spec_List \e
               (':' Host_List '=' Cmnd_Spec_List)*
@@ -1061,7 +1061,7 @@ aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 .Ed
 .Pp
 See the
-.Sx Preventing Shell Escapes
+.Sx Preventing shell escapes
 section below for more details on how
 .Li NOEXEC
 works and whether or not it will work on your system.
@@ -1867,7 +1867,7 @@ tag.
 See the description of
 .Em NOEXEC and EXEC
 below as well as the
-.Sx Preventing Shell Escapes
+.Sx Preventing shell escapes
 section at the end of this manual.
 This flag is
 .Em off
@@ -3178,7 +3178,7 @@ file.
 Plugin policy_plugin sudoers.so
 Plugin io_plugin sudoers.so
 .Ed
-.Ss Plugin Options
+.Ss Plugin options
 Starting with
 .Nm sudo
 1.8.5, it is possible to pass options to the
@@ -3217,7 +3217,7 @@ The
 option can be used to override the default file mode for the sudoers file.
 It should be specified as an octal value.
 .El
-.Ss Debug Flags
+.Ss Debug flags
 Versions 1.8.4 and higher of the
 .Em sudoers
 plugin supports a debugging framework that can help track down what the
@@ -3725,7 +3725,7 @@ is enabled by changing to
 and running
 .Li ./passwd root
 instead.
-.Ss Preventing Shell Escapes
+.Ss Preventing shell escapes
 Once
 .Nm sudo
 executes a program, that program is free to do whatever

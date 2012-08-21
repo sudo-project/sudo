@@ -736,7 +736,7 @@ BSD login class
 .TP 4n
 \fBo\fR
 scheduling priority (aka nice value)
-.SS "Process Model"
+.SS "Process model"
 When
 \fBsudo\fR
 runs a command, it calls
@@ -759,7 +759,7 @@ and resume the command.
 Without it, the command would be in what POSIX terms an
 ``orphaned process group''
 and it would not receive any job control signals.
-.SS "Signal Handling"
+.SS "Signal handling"
 Because the command is run as a child of the
 \fBsudo\fR
 process,
