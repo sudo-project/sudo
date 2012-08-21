@@ -142,7 +142,7 @@ DDEESSCCRRIIPPTTIIOONN
                  to change to that user's home directory before running the
                  shell.  It also initializes the environment to a minimal set
                  of variables, similar to what is present when a user logs in.
-                 The _C_o_m_m_a_n_d _E_n_v_i_r_o_n_m_e_n_t section below documents in detail how
+                 The _C_o_m_m_a_n_d _e_n_v_i_r_o_n_m_e_n_t section below documents in detail how
                  the --ii option affects the environment in which a command is
                  run.
 
@@ -274,7 +274,7 @@ DDEESSCCRRIIPPTTIIOONN
      the user may set variables that would otherwise be forbidden.  See
      sudoers(4) for more information.
 
-   AAuutthheennttiiccaattiioonn aanndd LLooggggiinngg
+   AAuutthheennttiiccaattiioonn aanndd llooggggiinngg
      ssuuddoo requires that most users authenticate themselves by default.  A
      password is not required if the invoking user is root, if the target user
      is the same as the invoking user, or if the authentication has been
@@ -317,7 +317,7 @@ DDEESSCCRRIIPPTTIIOONN
      _l_o_g___o_u_t_p_u_t Defaults flags as well as the LOG_INPUT and LOG_OUTPUT command
      tags.
 
-   CCoommmmaanndd EEnnvviirroonnmmeenntt
+   CCoommmmaanndd eennvviirroonnmmeenntt
      Since environment variables can influence program behavior, ssuuddoo provides
      a means to restrict which variables from the user's environment are
      inherited by the command to be run.  There are two distinct ways _s_u_d_o_e_r_s
@@ -394,10 +394,10 @@ CCOOMMMMAANNDD EEXXEECCUUTTIIOONN
 
      oo   file creation mode mask (umask)
 
-     See the _C_o_m_m_a_n_d _E_n_v_i_r_o_n_m_e_n_t section for details on how the environment
+     See the _C_o_m_m_a_n_d _e_n_v_i_r_o_n_m_e_n_t section for details on how the environment
      list is constructed.
 
-   PPrroocceessss MMooddeell
+   PPrroocceessss mmooddeell
      If ssuuddoo has been configured with PAM support or if I/O logging is
      enabled, ssuuddoo must wait until the command has completed before it will
      exit.  In the case of PAM, ssuuddoo must remain running so that it can close
@@ -413,7 +413,7 @@ CCOOMMMMAANNDD EEXXEECCUUTTIIOONN
      an ``orphaned process group'' and it would not receive any job control
      signals.
 
-   SSiiggnnaall HHaannddlliinngg
+   SSiiggnnaall hhaannddlliinngg
      If the command is run as a child of the ssuuddoo process (due to PAM or I/O
      logging), ssuuddoo will relay signals it receives to the command.  Unless the
      command is being run in a new pty, the SIGHUP, SIGINT and SIGQUIT signals

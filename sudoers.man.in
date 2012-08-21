@@ -448,7 +448,7 @@ defaults.
 See
 \fISUDOERS OPTIONS\fR
 for a list of supported Defaults parameters.
-.SS "User Specification"
+.SS "User specification"
 .nf
 .RS 0n
 User_Spec ::= User_List Host_List '=' Cmnd_Spec_List \e
@@ -795,7 +795,7 @@ aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 .fi
 .PP
 See the
-\fIPreventing Shell Escapes\fR
+\fIPreventing shell escapes\fR
 section below for more details on how
 \fRNOEXEC\fR
 works and whether or not it will work on your system.
@@ -1640,7 +1640,7 @@ tag.
 See the description of
 \fINOEXEC and EXEC\fR
 below as well as the
-\fIPreventing Shell Escapes\fR
+\fIPreventing shell escapes\fR
 section at the end of this manual.
 This flag is
 \fIoff\fR
@@ -3046,7 +3046,7 @@ is enabled by changing to
 and running
 \fR./passwd root\fR
 instead.
-.SS "Preventing Shell Escapes"
+.SS "Preventing shell escapes"
 Once
 \fBsudo\fR
 executes a program, that program is free to do whatever

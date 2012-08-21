@@ -396,7 +396,7 @@ sudoHost: ALL
 sudoHost: !web01
 .RE
 .fi
-.SS "Sudoers Schema"
+.SS "Sudoers schema"
 In order to use
 \fBsudo\fR's
 LDAP support, the

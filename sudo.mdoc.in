@@ -388,7 +388,7 @@ shell.
 It also initializes the environment to a minimal
 set of variables, similar to what is present when a user logs in.
 The
-.Sx Command Environment
+.Sx Command environment
 section below documents in detail how the
 .Fl i
 option affects the environment in which a command is run.
@@ -657,7 +657,7 @@ the user may set variables that would otherwise be forbidden.
 See
 .Xr sudoers @mansectform@
 for more information.
-.Ss Authentication and Logging
+.Ss Authentication and logging
 .Nm sudo
 requires that most users authenticate themselves by default.
 A password is not required
@@ -774,7 +774,7 @@ Defaults flags as well as the
 and
 .Li LOG_OUTPUT
 command tags.
-.Ss Command Environment
+.Ss Command environment
 Since environment variables can influence program behavior,
 .Nm sudo
 provides a means to restrict which variables from the user's
@@ -958,9 +958,9 @@ file creation mode mask (umask)
 .El
 .Pp
 See the
-.Sx Command Environment
+.Sx Command environment
 section for details on how the environment list is constructed.
-.Ss Process Model
+.Ss Process model
 If
 .Nm sudo
 has been configured with PAM support or if I/O logging is enabled,
@@ -990,7 +990,7 @@ and resume the command.
 Without it, the command would be in what POSIX terms an
 .Dq orphaned process group
 and it would not receive any job control signals.
-.Ss Signal Handling
+.Ss Signal handling
 If the command is run as a child of the
 .Nm sudo
 process (due to PAM or I/O logging),

@@ -420,7 +420,7 @@ defaults.
 See
 .Sx SUDOERS OPTIONS
 for a list of supported Defaults parameters.
-.Ss User Specification
+.Ss User specification
 .Bd -literal
 User_Spec ::= User_List Host_List '=' Cmnd_Spec_List \e
               (':' Host_List '=' Cmnd_Spec_List)*
@@ -732,7 +732,7 @@ aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 .Ed
 .Pp
 See the
-.Sx Preventing Shell Escapes
+.Sx Preventing shell escapes
 section below for more details on how
 .Li NOEXEC
 works and whether or not it will work on your system.
@@ -1532,7 +1532,7 @@ tag.
 See the description of
 .Em NOEXEC and EXEC
 below as well as the
-.Sx Preventing Shell Escapes
+.Sx Preventing shell escapes
 section at the end of this manual.
 This flag is
 .Em off
@@ -2802,7 +2802,7 @@ is enabled by changing to
 and running
 .Li ./passwd root
 instead.
-.Ss Preventing Shell Escapes
+.Ss Preventing shell escapes
 Once
 .Nm sudo
 executes a program, that program is free to do whatever
