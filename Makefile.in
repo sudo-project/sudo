@@ -744,9 +744,13 @@ mostlyclean: clean
 
 distclean: clean
 	-rm -rf Makefile pathnames.h config.h config.status config.cache \
-		config.log libtool sudoers sudo_noexec.lo .libs $(GENERATED) \
+		config.log libtool sudoers sudo_noexec.lo .libs \
 		sudo.man sudoers.man sudoers.ldap.man sudoreplay.man \
 		visudo.man sudo_usage.h Makefile.binary zlib/zconf.h
+	@if [ -n "$(DEVEL)" -a "$(devdir)" != "$(srcdir)" ]; then \
+		cmd='rm -rf $(GENERATED)'; \
+		echo "$$cmd"; eval $$cmd; \
+	fi
 
 clobber: distclean
 
