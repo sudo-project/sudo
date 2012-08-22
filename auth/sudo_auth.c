@@ -48,6 +48,8 @@
 #include "sudo_auth.h"
 #include "insults.h"
 
+extern char **NewArgv; /* XXX */
+
 sudo_auth auth_switch[] = {
 #ifdef AUTH_STANDALONE
     AUTH_STANDALONE
@@ -80,7 +82,11 @@ sudo_auth auth_switch[] = {
     AUTH_ENTRY(0, NULL, NULL, NULL, NULL, NULL)
 };
 
-void
+/*
+ * Initialize sudoers authentication method(s).
+ * Returns 0 on success and -1 on error.
+ */
+int
 sudo_auth_init(pw)
     struct passwd *pw;
 {
@@ -88,7 +94,7 @@ sudo_auth_init(pw)
     int status;
 
     if (auth_switch[0].name == NULL)
-	return;
+	return 0;
 
     /* Set FLAG_ONEANDONLY if there is only one auth method. */
     if (auth_switch[1].name == NULL)
@@ -105,19 +111,21 @@ sudo_auth_init(pw)
 	    if (NEEDS_USER(auth))
 		set_perms(PERM_ROOT);
 
+	    /* Disable if it failed to init unless there was a fatal error. */
 	    if (status == AUTH_FAILURE)
 		CLR(auth->flags, FLAG_CONFIGURED);
-	    else if (status == AUTH_FATAL) {	/* XXX log */
-#ifdef HAVE_BSM_AUDIT
-		audit_failure(NewArgv, "authentication failure");
-#endif
-		exit(1);		/* assume error msg already printed */
-	    }
+	    else if (status == AUTH_FATAL)
+		break;		/* assume error msg already printed */
 	}
     }
+    return status == AUTH_FATAL ? -1 : 0;
 }
 
-void
+/*
+ * Cleanup all authentication methods.
+ * Returns 0 on success and -1 on error.
+ */
+int
 sudo_auth_cleanup(pw)
     struct passwd *pw;
 {
@@ -135,31 +143,29 @@ sudo_auth_cleanup(pw)
 	    if (NEEDS_USER(auth))
 		set_perms(PERM_ROOT);
 
-	    if (status == AUTH_FATAL) {	/* XXX log */
-#ifdef HAVE_BSM_AUDIT
-		audit_failure(NewArgv, "authentication failure");
-#endif
-		exit(1);		/* assume error msg already printed */
-	    }
+	    if (status == AUTH_FATAL)
+		break;		/* assume error msg already printed */
 	}
     }
+    return status == AUTH_FATAL ? -1 : 0;
 }
 
-void
-verify_user(pw, prompt)
+/*
+ * Verify the specified user.
+ * Returns TRUE if verified, FALSE if not or -1 on error.
+ */
+int
+verify_user(pw, prompt, validated)
     struct passwd *pw;
     char *prompt;
+    int validated;
 {
     int counter = def_passwd_tries + 1;
     int success = AUTH_FAILURE;
-    int status;
-    int flags;
+    int status, rval;
     char *p;
     sudo_auth *auth;
     sigaction_t sa, osa;
-#ifdef HAVE_BSM_AUDIT
-    extern char **NewArgv;
-#endif
 
     /* Enable suspend during password entry. */
     sigemptyset(&sa.sa_mask);
@@ -168,14 +174,14 @@ verify_user(pw, prompt)
     (void) sigaction(SIGTSTP, &sa, &osa);
 
     /* Make sure we have at least one auth method. */
+    /* XXX - check FLAG_DISABLED too */
     if (auth_switch[0].name == NULL) {
-#ifdef HAVE_BSM_AUDIT
 	audit_failure(NewArgv, "no authentication methods");
-#endif
-    	log_fatal(0, "%s  %s %s",
+    	log_error(0, "%s  %s %s",
 	    "There are no authentication methods compiled into sudo!",
 	    "If you want to turn off authentication, use the",
 	    "--disable-authentication configure option.");
+	return -1;
     }
 
     while (--counter) {
@@ -192,11 +198,8 @@ verify_user(pw, prompt)
 
 		if (status == AUTH_FAILURE)
 		    CLR(auth->flags, FLAG_CONFIGURED);
-		else if (status == AUTH_FATAL) {/* XXX log */
-#ifdef HAVE_BSM_AUDIT
-		    audit_failure(NewArgv, "authentication failure");
-#endif
-		    exit(1);		/* assume error msg already printed */
+		else if (status == AUTH_FATAL) {
+		    goto done;		/* assume error msg already printed */
 		}
 	    }
 	}
@@ -238,29 +241,21 @@ done:
     switch (success) {
 	case AUTH_SUCCESS:
 	    (void) sigaction(SIGTSTP, &osa, NULL);
-	    return;
+	    rval = TRUE;
+	    break;
 	case AUTH_INTR:
 	case AUTH_FAILURE:
-	    if (counter != def_passwd_tries) {
-		if (def_mail_badpass || def_mail_always)
-		    flags = 0;
-		else
-		    flags = NO_MAIL;
-#ifdef HAVE_BSM_AUDIT
-		audit_failure(NewArgv, "authentication failure");
-#endif
-		log_fatal(flags, "%d incorrect password attempt%s",
-		    def_passwd_tries - counter,
-		    (def_passwd_tries - counter == 1) ? "" : "s");
-	    }
-	    /* FALLTHROUGH */
+	    if (counter != def_passwd_tries)
+		validated |= FLAG_BAD_PASSWORD;
+	    log_auth_failure(validated, def_passwd_tries - counter);
+	    rval = FALSE;
+	    break;
 	case AUTH_FATAL:
-#ifdef HAVE_BSM_AUDIT
-	    audit_failure(NewArgv, "authentication failure");
-#endif
-	    exit(1);
+	    log_auth_failure(validated | FLAG_AUTH_ERROR, 0);
+	    rval = -1;
+	    break;
     }
-    /* NOTREACHED */
+    return rval;
 }
 
 void

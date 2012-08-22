@@ -184,7 +184,7 @@ main(argc, argv, envp)
     char *envp[];
 {
     int sources = 0, validated;
-    int fd, cmnd_status, pwflag, rc = 0;
+    int fd, cmnd_status, pwflag, rval = TRUE;
     sigaction_t sa;
     struct sudo_nss *nss;
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -269,7 +269,7 @@ main(argc, argv, envp)
 		break;
 	    case MODE_LISTDEFS:
 		list_options();
-		exit(0);
+		goto done;
 		break;
 	    case MODE_LIST:
 	    case MODE_LIST|MODE_INVALIDATE:
@@ -337,8 +337,7 @@ main(argc, argv, envp)
     /* This goes after sudoers is parsed since it may have timestamp options. */
     if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE) {
 	remove_timestamp((sudo_mode == MODE_KILL));
-	cleanup(0);
-	exit(0);
+	goto done;
     }
 
     /* Is root even allowed to run sudo? */
@@ -346,15 +345,16 @@ main(argc, argv, envp)
 	(void) fprintf(stderr,
 	    "Sorry, %s has been configured to not allow root to run it.\n",
 	    getprogname());
-	exit(1);
+	goto bad;
     }
 
     /* Check for -C overriding def_closefrom. */
     if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
-	if (!def_closefrom_override)
-	    errorx(1, "you are not permitted to use the -C option");
-	else
-	    def_closefrom = user_closefrom;
+	if (!def_closefrom_override) {
+	    warningx("you are not permitted to use the -C option");
+	    goto bad;
+	}
+	def_closefrom = user_closefrom;
     }
 
     /* If given the -P option, set the "preserve_groups" flag. */
@@ -446,7 +446,12 @@ main(argc, argv, envp)
     rebuild_env(def_noexec);
 
     /* Require a password if sudoers says so.  */
-    check_user(validated, sudo_mode);
+    rval = check_user(validated, sudo_mode);
+    if (rval != TRUE) {
+	if (!ISSET(validated, VALIDATE_OK))
+	    log_failure(validated, cmnd_status);
+	goto done;
+    }
 
     /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
     /* XXX - causes confusion when root is not listed in sudoers */
@@ -465,145 +470,130 @@ main(argc, argv, envp)
 	}
     }
 
-    if (ISSET(validated, VALIDATE_OK)) {
-	/* Create Ubuntu-style dot file to indicate sudo was successful. */
-	create_admin_success_flag();
+    /* If the user was not allowed to run the command we are done. */
+    if (!ISSET(validated, VALIDATE_OK)) {
+	log_failure(validated, cmnd_status);
+	goto bad;
+    }
 
-	/* Finally tell the user if the command did not exist. */
-	if (cmnd_status == NOT_FOUND_DOT) {
-	    audit_failure(NewArgv, "command in current directory");
-	    errorx(1, "ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.", user_cmnd, user_cmnd, user_cmnd);
-	} else if (cmnd_status == NOT_FOUND) {
-	    audit_failure(NewArgv, "%s: command not found", user_cmnd);
-	    errorx(1, "%s: command not found", user_cmnd);
-	}
+    /* Create Ubuntu-style dot file to indicate sudo was successful. */
+    create_admin_success_flag();
 
-	/* If user specified env vars make sure sudoers allows it. */
-	if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
-	    if (ISSET(sudo_mode, MODE_PRESERVE_ENV))
-		log_fatal(NO_MAIL,
-		    "sorry, you are not allowed to preserve the environment");
-	    else
-		validate_env_vars(sudo_user.env_vars);
-	}
+    /* Finally tell the user if the command did not exist. */
+    if (cmnd_status == NOT_FOUND_DOT) {
+	audit_failure(NewArgv, "command in current directory");
+	warningx("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.", user_cmnd, user_cmnd, user_cmnd);
+	goto bad;
+    } else if (cmnd_status == NOT_FOUND) {
+	audit_failure(NewArgv, "%s: command not found", user_cmnd);
+	warningx("%s: command not found", user_cmnd);
+	goto bad;
+    }
+
+    /* If user specified env vars make sure sudoers allows it. */
+    if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
+	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
+	    warningx("sorry, you are not allowed to preserve the environment");
+	    goto bad;
+	} else
+	    validate_env_vars(sudo_user.env_vars);
+    }
 
 #ifdef _PATH_SUDO_IO_LOGDIR
-	/* Get next session ID so we can log it. */
-	if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)) && (def_log_input || def_log_output))
-	    io_nextid();
+    /* Get next session ID so we can log it. */
+    if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)) && (def_log_input || def_log_output))
+	io_nextid();
 #endif
-	log_allowed(validated);
-	if (ISSET(sudo_mode, MODE_CHECK))
-	    rc = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw);
-	else if (ISSET(sudo_mode, MODE_LIST))
-	    display_privs(snl, list_pw ? list_pw : sudo_user.pw);
+    log_allowed(validated);
+    if (ISSET(sudo_mode, MODE_CHECK))
+	rval = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw);
+    else if (ISSET(sudo_mode, MODE_LIST))
+	display_privs(snl, list_pw ? list_pw : sudo_user.pw);
 
-	/* Cleanup sudoers sources */
-	tq_foreach_fwd(snl, nss)
-	    nss->close(nss);
-
+    /* Cleanup sudoers sources */
+    tq_foreach_fwd(snl, nss) {
+	nss->close(nss);
+    }
 #ifdef USING_NONUNIX_GROUPS
-	/* Finished with the groupcheck code */
-	sudo_nonunix_groupcheck_cleanup();
+    /* Finished with the groupcheck code */
+    sudo_nonunix_groupcheck_cleanup();
 #endif
 
-	/* Deferred exit due to sudo_ldap_close() */
-	if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST))) {
-	    if (list_pw != NULL)
-		pw_delref(list_pw);
-	    exit(rc);
+    if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST))) {
+	/* rval already set appropriately */
+	goto done;
+    }
+
+    /* Must audit before uid change. */
+    audit_success(NewArgv);
+
+    if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+	char *p;
+
+	/* Convert /bin/sh -> -sh so shell knows it is a login shell */
+	if ((p = strrchr(NewArgv[0], '/')) == NULL)
+	    p = NewArgv[0];
+	*p = '-';
+	NewArgv[0] = p;
+
+	/*
+	 * Newer versions of bash require the --login option to be used
+	 * in conjunction with the -c option even if the shell name starts
+	 * with a '-'.  Unfortunately, bash 1.x uses -login, not --login
+	 * so this will cause an error for that.
+	 */
+	if (NewArgc > 1 && strcmp(NewArgv[0], "-bash") == 0) {
+	    /* Use an extra slot before NewArgv so we can store --login. */
+	    NewArgv--;
+	    NewArgc++;
+	    NewArgv[0] = NewArgv[1];
+	    NewArgv[1] = "--login";
 	}
-
-	/* Must audit before uid change. */
-	audit_success(NewArgv);
-
-	if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
-	    char *p;
-
-	    /* Convert /bin/sh -> -sh so shell knows it is a login shell */
-	    if ((p = strrchr(NewArgv[0], '/')) == NULL)
-		p = NewArgv[0];
-	    *p = '-';
-	    NewArgv[0] = p;
-
-	    /*
-	     * Newer versions of bash require the --login option to be used
-	     * in conjunction with the -c option even if the shell name starts
-	     * with a '-'.  Unfortunately, bash 1.x uses -login, not --login
-	     * so this will cause an error for that.
-	     */
-	    if (NewArgc > 1 && strcmp(NewArgv[0], "-bash") == 0) {
-		/* Use an extra slot before NewArgv so we can store --login. */
-		NewArgv--;
-		NewArgc++;
-		NewArgv[0] = NewArgv[1];
-		NewArgv[1] = "--login";
-	    }
 
 #if defined(_AIX) || (defined(__linux__) && !defined(HAVE_PAM))
-	    /* Insert system-wide environment variables. */
-	    read_env_file(_PATH_ENVIRONMENT, TRUE);
+	/* Insert system-wide environment variables. */
+	read_env_file(_PATH_ENVIRONMENT, TRUE);
 #endif
 #ifdef HAVE_LOGIN_CAP_H
-	    /* Set environment based on login class. */
-	    if (login_class) {
-		login_cap_t *lc = login_getclass(login_class);
-		if (lc != NULL) {
-		    setusercontext(lc, runas_pw, runas_pw->pw_uid,
-			LOGIN_SETPATH|LOGIN_SETENV);
-		    login_close(lc);
-		}
+	/* Set environment based on login class. */
+	if (login_class) {
+	    login_cap_t *lc = login_getclass(login_class);
+	    if (lc != NULL) {
+		setusercontext(lc, runas_pw, runas_pw->pw_uid,
+		    LOGIN_SETPATH|LOGIN_SETENV);
+		login_close(lc);
 	    }
+	}
 #endif /* HAVE_LOGIN_CAP_H */
-	}
-
-	if (ISSET(sudo_mode, MODE_RUN)) {
-	    /* Insert system-wide environment variables. */
-	    if (def_env_file)
-		read_env_file(def_env_file, FALSE);
-
-	    /* Insert user-specified environment variables. */
-	    insert_env_vars(sudo_user.env_vars);
-	}
-
-	/* Restore signal handlers before we exec. */
-	(void) sigaction(SIGINT, &saved_sa_int, NULL);
-	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
-	(void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
-
-	if (ISSET(sudo_mode, MODE_EDIT)) {
-	    exit(sudo_edit(NewArgc, NewArgv, envp));
-	} else {
-	    exit(run_command(safe_cmnd, NewArgv, env_get(), runas_pw->pw_uid,
-		CMND_WAIT));
-	}
-    } else if (ISSET(validated, FLAG_NO_USER | FLAG_NO_HOST)) {
-	audit_failure(NewArgv, "No user or host");
-	log_denial(validated, 1);
-	exit(1);
-    } else {
-	if (def_path_info) {
-	    /*
-	     * We'd like to not leak path info at all here, but that can
-	     * *really* confuse the users.  To really close the leak we'd
-	     * have to say "not allowed to run foo" even when the problem
-	     * is just "no foo in path" since the user can trivially set
-	     * their path to just contain a single dir.
-	     */
-	    log_denial(validated,
-		!(cmnd_status == NOT_FOUND_DOT || cmnd_status == NOT_FOUND));
-	    if (cmnd_status == NOT_FOUND)
-		warningx("%s: command not found", user_cmnd);
-	    else if (cmnd_status == NOT_FOUND_DOT)
-		warningx("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.", user_cmnd, user_cmnd, user_cmnd);
-	} else {
-	    /* Just tell the user they are not allowed to run foo. */
-	    log_denial(validated, 1);
-	}
-	audit_failure(NewArgv, "validation failure");
-	exit(1);
     }
-    exit(0);	/* not reached */
+
+    if (ISSET(sudo_mode, MODE_RUN)) {
+	/* Insert system-wide environment variables. */
+	if (def_env_file)
+	    read_env_file(def_env_file, FALSE);
+
+	/* Insert user-specified environment variables. */
+	insert_env_vars(sudo_user.env_vars);
+    }
+
+    /* Restore signal handlers before we exec. */
+    (void) sigaction(SIGINT, &saved_sa_int, NULL);
+    (void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
+    (void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
+
+    if (ISSET(sudo_mode, MODE_EDIT)) {
+	exit(sudo_edit(NewArgc, NewArgv, envp));
+    } else {
+	exit(run_command(safe_cmnd, NewArgv, env_get(), runas_pw->pw_uid,
+	    CMND_WAIT));
+    }
+
+bad:
+    rval = FALSE;
+
+done:
+    cleanup(0);
+    exit(!rval);
 }
 
 /*

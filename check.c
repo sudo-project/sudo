@@ -84,7 +84,7 @@ static struct tty_info {
     struct timeval ctime;	/* tty inode change time */
 } tty_info;
 
-static void  build_timestamp	__P((char **, char **));
+static int   build_timestamp	__P((char **, char **));
 static int   timestamp_status	__P((char *, char *, char *, int));
 static char *expand_prompt	__P((char *, char *, char *));
 static void  lecture		__P((int));
@@ -93,10 +93,10 @@ static int   tty_is_devpts	__P((const char *));
 static struct passwd *get_authpw __P((void));
 
 /*
- * This function only returns if the user can successfully
- * verify who he/she is.
+ * Returns TRUE if the user successfully authenticates, FALSE if not
+ * or -1 on error.
  */
-void
+int
 check_user(validated, mode)
     int validated;
     int mode;
@@ -106,20 +106,28 @@ check_user(validated, mode)
     char *timestampfile = NULL;
     char *prompt;
     struct stat sb;
-    int status;
+    int status, rval = TRUE;
 
     /* Init authentication system regardless of whether we need a password. */
     auth_pw = get_authpw();
-    sudo_auth_init(auth_pw);
+    if (sudo_auth_init(auth_pw) == -1) {
+	rval = -1;
+	goto done;
+    }
 
     /*
      * Don't prompt for the root passwd or if the user is exempt.
      * If the user is not changing uid/gid, no need for a password.
      */
-    if (!def_authenticate || user_uid == 0 || (user_uid == runas_pw->pw_uid &&
-	(!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name)))
-	|| user_is_exempt())
+    if (!def_authenticate || user_uid == 0 || user_is_exempt())
 	goto done;
+    if (user_uid == runas_pw->pw_uid &&
+	(!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name))) {
+#ifdef HAVE_SELINUX
+	if (user_role == NULL && user_type == NULL)
+#endif
+	    goto done;
+    }
 
     /* Always need a password when -k was specified with the command. */
     if (ISSET(mode, MODE_INVALIDATE))
@@ -134,14 +142,22 @@ check_user(validated, mode)
 	    ctim_get(&sb, &tty_info.ctime);
     }
 
-    build_timestamp(&timestampdir, &timestampfile);
+    if (build_timestamp(&timestampdir, &timestampfile) == -1) {
+	rval = -1;
+	goto done;
+    }
+
     status = timestamp_status(timestampdir, timestampfile, user_name,
 	TS_MAKE_DIRS);
 
     if (status != TS_CURRENT || ISSET(validated, FLAG_CHECK_USER)) {
 	/* Bail out if we are non-interactive and a password is required */
-	if (ISSET(mode, MODE_NONINTERACTIVE))
-	    errorx(1, "sorry, a password is required to run %s", getprogname());
+	if (ISSET(mode, MODE_NONINTERACTIVE)) {
+	    validated |= FLAG_NON_INTERACTIVE;
+	    log_auth_failure(validated, 0);
+	    rval = -1;
+	    goto done;
+	}
 
 	/* If user specified -A, make sure we have an askpass helper. */
 	if (ISSET(tgetpass_flags, TGP_ASKPASS)) {
@@ -167,10 +183,11 @@ check_user(validated, mode)
 	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
 	    user_name, user_shost);
 
-	verify_user(auth_pw, prompt);
+	rval = verify_user(auth_pw, prompt, validated);
     }
     /* Only update timestamp if user was validated. */
-    if (ISSET(validated, VALIDATE_OK) && !ISSET(mode, MODE_INVALIDATE) && status != TS_ERROR)
+    if (rval == TRUE && ISSET(validated, VALIDATE_OK) &&
+	!ISSET(mode, MODE_INVALIDATE) && status != TS_ERROR)
 	update_timestamp(timestampdir, timestampfile);
     efree(timestampdir);
     efree(timestampfile);
@@ -178,6 +195,8 @@ check_user(validated, mode)
 done:
     sudo_auth_cleanup(auth_pw);
     pw_delref(auth_pw);
+
+    return rval;
 }
 
 /*
@@ -392,7 +411,7 @@ user_is_exempt()
 /*
  * Fills in timestampdir as well as timestampfile if using tty tickets.
  */
-static void
+static int
 build_timestamp(timestampdir, timestampfile)
     char **timestampdir;
     char **timestampfile;
@@ -403,7 +422,7 @@ build_timestamp(timestampdir, timestampfile)
     dirparent = def_timestampdir;
     len = easprintf(timestampdir, "%s/%s", dirparent, user_name);
     if (len >= PATH_MAX)
-	log_fatal(0, "timestamp path too long: %s", *timestampdir);
+	goto bad;
 
     /*
      * Timestamp file may be a file in the directory or NUL to use
@@ -422,14 +441,20 @@ build_timestamp(timestampdir, timestampfile)
 	else
 	    len = easprintf(timestampfile, "%s/%s/%s", dirparent, user_name, p);
 	if (len >= PATH_MAX)
-	    log_fatal(0, "timestamp path too long: %s", *timestampfile);
+	    goto bad;
     } else if (def_targetpw) {
 	len = easprintf(timestampfile, "%s/%s/%s", dirparent, user_name,
 	    runas_pw->pw_name);
 	if (len >= PATH_MAX)
-	    log_fatal(0, "timestamp path too long: %s", *timestampfile);
+	    goto bad;
     } else
 	*timestampfile = NULL;
+
+    return len;
+bad:
+    log_fatal(0, "timestamp path too long: %s",
+	*timestampfile ? *timestampfile : *timestampdir);
+    return -1;
 }
 
 /*
@@ -648,7 +673,9 @@ remove_timestamp(remove)
     char *timestampdir, *timestampfile, *path;
     int status;
 
-    build_timestamp(&timestampdir, &timestampfile);
+    if (build_timestamp(&timestampdir, &timestampfile) == -1)
+	return;
+
     status = timestamp_status(timestampdir, timestampfile, user_name,
 	TS_REMOVE);
     if (status == TS_OLD || status == TS_CURRENT) {

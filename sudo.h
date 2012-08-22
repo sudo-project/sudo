@@ -97,6 +97,9 @@ struct command_status {
 #define FLAG_NO_USER		0x020
 #define FLAG_NO_HOST		0x040
 #define FLAG_NO_CHECK		0x080
+#define FLAG_NON_INTERACTIVE	0x100
+#define FLAG_BAD_PASSWORD	0x200
+#define FLAG_AUTH_ERROR		0x400
 
 /*
  * Pseudo-boolean values
@@ -220,8 +223,8 @@ void aix_restoreauthdb __P((void));
 int get_boottime __P((struct timeval *));
 
 /* check.c */
+int check_user		__P((int, int));
 int user_is_exempt	__P((void));
-void check_user		__P((int, int));
 void remove_timestamp	__P((int));
 
 /* env.c */
@@ -330,11 +333,11 @@ RETSIGTYPE cleanup	__P((int));
 void set_fqdn		__P((void));
 
 /* sudo_auth.c */
-void verify_user	__P((struct passwd *, char *));
-void pass_warn		__P((FILE *));
+int sudo_auth_cleanup	__P((struct passwd *));
+int sudo_auth_init	__P((struct passwd *));
+int verify_user		__P((struct passwd *, char *, int));
 void dump_auth_methods	__P((void));
-void sudo_auth_init	__P((struct passwd *));
-void sudo_auth_cleanup	__P((struct passwd *));
+void pass_warn		__P((FILE *));
 
 /* sudo_nss.c */
 void display_privs	__P((struct sudo_nss_list *, struct passwd *));
