@@ -202,7 +202,7 @@ verify_user(struct passwd *pw, char *prompt, int validated)
     /* XXX - check FLAG_DISABLED too */
     if (auth_switch[0].name == NULL) {
 	audit_failure(NewArgv, "no authentication methods");
-    	log_fatal(0,
+    	log_error(0,
 	    _("There are no authentication methods compiled into sudo!  "
 	    "If you want to turn off authentication, use the "
 	    "--disable-authentication configure option."));
