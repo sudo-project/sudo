@@ -67,6 +67,23 @@ What's new in Sudo 1.7.10?
  * Fixed a crash introduced in version 1.7.7 when "sudo -s" is
    specified with a command.
 
+ * If a user fails to authenticate and the command would be rejected
+   by sudoers, it is now logged with "command not allowed" instead
+   of "N incorrect password attempts".  Likewise, the "mail_no_perms"
+   sudoers option now takes precedence over "mail_badpass".
+
+ * The sudo manuals are now formatted using the mdoc macros.  Versions
+   using the legacy man macros are provided for systems that lack mdoc.
+
+ * Fixed a problem with the reboot and shutdown commands on some
+   systems (such as HP-UX and BSD).  On these systems, reboot sends
+   all processes (except itself) SIGTERM.  When sudo received
+   SIGTERM, it would relay it to the reboot process, thus killing
+   reboot before it had a chance to actually reboot the system.
+
+ * Visudo will now warn about unknown Defaults entries that are
+   per-host, per-user, per-runas or per-command.
+
 What's new in Sudo 1.7.9p1?
 
  * Fixed a bug when matching against an IP address with an associated
