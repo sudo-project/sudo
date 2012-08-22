@@ -337,6 +337,8 @@ log_failure(int status, int flags)
 	else if (flags == NOT_FOUND_DOT)
 	    warningx(_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
     }
+
+    debug_return;
 }
 
 /*
@@ -378,6 +380,8 @@ log_auth_failure(int status, int tries)
     } else if (ISSET(status, FLAG_NON_INTERACTIVE)) {
 	log_error(flags, _("a password is required"));
     }
+
+    debug_return;
 }
 
 /*
