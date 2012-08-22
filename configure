@@ -721,6 +721,7 @@ SUDOERS_MODE
 SHLIB_MODE
 MANCOMPRESSEXT
 MANCOMPRESS
+MANDIRTYPE
 MANTYPE
 AUTH_OBJS
 OSDEFS
@@ -2790,6 +2791,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h zlib/zconf.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
