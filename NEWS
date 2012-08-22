@@ -53,6 +53,9 @@ What's new in Sudo 1.8.6?
 
  * Slovenian translation for sudo and sudoers from translationproject.org.
 
+ * Visudo will now warn about unknown Defaults entries that are
+   per-host, per-user, per-runas or per-command.
+
 What's new in Sudo 1.8.5p3?
 
  * Fixed the loading of I/O plugins that conform to a plugin API
