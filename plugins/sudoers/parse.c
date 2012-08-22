@@ -253,7 +253,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 			 * set runas_pw = sudo_user.pw.
 			 * XXX - hack, want more general solution
 			 */
-			if (matching_user->type == MYSELF) {
+			if (matching_user && matching_user->type == MYSELF) {
 			    sudo_pw_delref(runas_pw);
 			    sudo_pw_addref(sudo_user.pw);
 			    runas_pw = sudo_user.pw;
