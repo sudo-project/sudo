@@ -93,7 +93,8 @@ static bool  tty_is_devpts(const char *);
 static struct passwd *get_authpw(void);
 
 /*
- * Returns true if the user successfully authenticates, else false.
+ * Returns true if the user successfully authenticates, false if not
+ * or -1 on error.
  */
 int
 check_user(int validated, int mode)
