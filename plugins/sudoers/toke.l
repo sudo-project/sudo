@@ -94,7 +94,6 @@ static bool _push_include(char *, bool);
 static bool pop_include(void);
 static char *parse_include(char *);
 
-static int sudoers_trace_print(const char *msg);
 int (*trace_print)(const char *msg) = sudoers_trace_print;
 
 #define LEXRETURN(n)	do {	\
@@ -1012,13 +1011,13 @@ parse_include(char *base)
 }
 
 #ifdef TRACELEXER
-static int
+int
 sudoers_trace_print(const char *msg)
 {
     return fputs(msg, stderr);
 }
 #else
-static int
+int
 sudoers_trace_print(const char *msg)
 {
     static bool initialized;

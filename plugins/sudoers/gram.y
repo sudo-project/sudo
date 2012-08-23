@@ -109,7 +109,8 @@ yyerror(const char *s)
     }
     LEXTRACE("<*> ");
 #ifndef TRACELEXER
-    warningx(_(">>> %s: %s near line %d <<<"), sudoers, s, sudolineno);
+    if (trace_print == NULL || trace_print == sudoers_trace_print)
+	warningx(_(">>> %s: %s near line %d <<<"), sudoers, s, sudolineno);
 #endif
     parse_error = true;
     debug_return;
