@@ -4,7 +4,7 @@
 #
 
 # Create test file
-TESTFILE=`pwd`/test5.inc
+TESTFILE=`pwd`/regress/testsudoers/test5.inc
 cat >$TESTFILE <<EOF
 root ALL = ALL
 EOF
@@ -24,3 +24,5 @@ chmod 664 $TESTFILE
 ./testsudoers -U $UID -G 1 root id <<EOF
 #include $TESTFILE
 EOF
+
+rm -f $TESTFILE
