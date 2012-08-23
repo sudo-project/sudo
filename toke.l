@@ -862,13 +862,8 @@ _push_include(path, isdir)
 	}
     } else {
 	if ((fp = open_sudoers(path, TRUE, &keepopen)) == NULL) {
-	    char *errbuf;
-	    if (asprintf(&errbuf, "%s: %s", path, strerror(errno)) != -1) {
-		yyerror(errbuf);
-		free(errbuf);
-	    } else {
-		yyerror("unable to allocate memory");
-	    }
+	    /* The error was already printed by open_sudoers() */
+	    yyerror(NULL);
 	    return FALSE;
 	}
 	istack[idepth].more = NULL;
