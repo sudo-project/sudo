@@ -216,7 +216,7 @@ lecture(status)
 
     if (def_lecture_file && (fp = fopen(def_lecture_file, "r")) != NULL) {
 	while ((nread = fread(buf, sizeof(char), sizeof(buf), fp)) != 0)
-	    fwrite(buf, nread, 1, stderr);
+	    ignore_result(fwrite(buf, nread, 1, stderr));
 	fclose(fp);
     } else {
 	(void) fputs("\n\
