@@ -91,7 +91,7 @@ sudo_auth_init(pw)
     struct passwd *pw;
 {
     sudo_auth *auth;
-    int status;
+    int status = AUTH_SUCCESS;
 
     if (auth_switch[0].name == NULL)
 	return 0;
@@ -130,7 +130,7 @@ sudo_auth_cleanup(pw)
     struct passwd *pw;
 {
     sudo_auth *auth;
-    int status;
+    int status = AUTH_SUCCESS;
 
     /* Call cleanup routines. */
     for (auth = auth_switch; auth->name; auth++) {
@@ -251,6 +251,7 @@ done:
 	    rval = FALSE;
 	    break;
 	case AUTH_FATAL:
+	default:
 	    log_auth_failure(validated | FLAG_AUTH_ERROR, 0);
 	    rval = -1;
 	    break;
