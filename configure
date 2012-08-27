@@ -18309,6 +18309,97 @@ fi
 done
 
 
+for ac_func in strsigname
+do :
+  ac_fn_c_check_func "$LINENO" "strsigname" "ac_cv_func_strsigname"
+if test "x$ac_cv_func_strsigname" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_STRSIGNAME 1
+_ACEOF
+
+else
+
+    case " $LIBOBJS " in
+  *" strsigname.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS strsigname.$ac_objext"
+ ;;
+esac
+
+    HAVE_SIGNAME="false"
+    ac_fn_c_check_decl "$LINENO" "sys_signame" "ac_cv_have_decl_sys_signame" "
+$ac_includes_default
+#include <signal.h>
+
+"
+if test "x$ac_cv_have_decl_sys_signame" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_SYS_SIGNAME $ac_have_decl
+_ACEOF
+if test $ac_have_decl = 1; then :
+
+	HAVE_SIGNAME="true"
+	break
+
+fi
+ac_fn_c_check_decl "$LINENO" "_sys_signame" "ac_cv_have_decl__sys_signame" "
+$ac_includes_default
+#include <signal.h>
+
+"
+if test "x$ac_cv_have_decl__sys_signame" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL__SYS_SIGNAME $ac_have_decl
+_ACEOF
+if test $ac_have_decl = 1; then :
+
+	HAVE_SIGNAME="true"
+	break
+
+fi
+ac_fn_c_check_decl "$LINENO" "__sys_signame" "ac_cv_have_decl___sys_signame" "
+$ac_includes_default
+#include <signal.h>
+
+"
+if test "x$ac_cv_have_decl___sys_signame" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL___SYS_SIGNAME $ac_have_decl
+_ACEOF
+if test $ac_have_decl = 1; then :
+
+	HAVE_SIGNAME="true"
+	break
+
+fi
+
+    if test "$HAVE_SIGNAME" != "true"; then
+	case " $LIBOBJS " in
+  *" signame.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS signame.$ac_objext"
+ ;;
+esac
+
+    fi
+
+fi
+done
+
+
 if test ${with_netsvc-"no"} != "no"; then
     cat >>confdefs.h <<EOF
 #define _PATH_NETSVC_CONF "${with_netsvc-/etc/netsvc.conf}"

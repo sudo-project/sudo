@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2012 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,24 +26,24 @@
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "gettext.h"
 
-#if defined(HAVE_DECL_SYS_SIGLIST) && HAVE_DECL_SYS_SIGLIST == 1
-# define sudo_sys_siglist	sys_siglist
-#elif defined(HAVE_DECL__SYS_SIGLIST) && HAVE_DECL__SYS_SIGLIST == 1
-# define sudo_sys_siglist	_sys_siglist
-#elif defined(HAVE_DECL___SYS_SIGLIST) && HAVE_DECL___SYS_SIGLIST == 1
-# define sudo_sys_siglist	__sys_siglist
+#if defined(HAVE_DECL_SYS_SIGNAME) && HAVE_DECL_SYS_SIGNAME == 1
+# define sudo_sys_signame	sys_signame
+#elif defined(HAVE_DECL__SYS_SIGNAME) && HAVE_DECL__SYS_SIGNAME == 1
+# define sudo_sys_signame	_sys_signame
+#elif defined(HAVE_DECL___SYS_SIGNAME) && HAVE_DECL___SYS_SIGNAME == 1
+# define sudo_sys_signame	__sys_signame
 #else
-extern const char *const sudo_sys_siglist[NSIG];
+extern const char *const sudo_sys_signame[NSIG];
 #endif
 
 /*
- * Get signal description string
+ * Return signal name
  */
 char *
-strsignal(int signo)
+strsigname(int signo)
 {
     if (signo > 0 && signo < NSIG)
-	return (char *)sudo_sys_siglist[signo];
+	return (char *)sudo_sys_signame[signo];
     /* XXX - should be "Unknown signal: %s" */
     return _("Unknown signal");
 }

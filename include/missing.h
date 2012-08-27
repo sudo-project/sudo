@@ -376,5 +376,8 @@ int unsetenv(const char *);
 #ifndef HAVE_STRSIGNAL
 char *strsignal(int);
 #endif
+#ifndef HAVE_STRSIGNAME
+char *strsigname(int);
+#endif
 
 #endif /* _SUDO_MISSING_H */

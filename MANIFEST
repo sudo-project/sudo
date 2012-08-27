@@ -41,6 +41,8 @@ compat/isblank.c
 compat/memrchr.c
 compat/mksiglist.c
 compat/mksiglist.h
+compat/mksigname.c
+compat/mksigname.h
 compat/mktemp.c
 compat/nanosleep.c
 compat/pw_dup.c
@@ -55,6 +57,7 @@ compat/stdbool.h
 compat/strlcat.c
 compat/strlcpy.c
 compat/strsignal.c
+compat/strsigname.c
 compat/timespec.h
 compat/utime.h
 compat/utimes.c

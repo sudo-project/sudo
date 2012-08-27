@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2012 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,36 +14,44 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
 #include <config.h>
 
 #include <sys/types.h>
 
 #include <stdio.h>
+#ifdef STDC_HEADERS
+# include <stdlib.h>
+# include <stddef.h>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif /* STDC_HEADERS */
 #include <signal.h>
 
 #include "missing.h"
 
-#define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "gettext.h"
-
-#if defined(HAVE_DECL_SYS_SIGLIST) && HAVE_DECL_SYS_SIGLIST == 1
-# define sudo_sys_siglist	sys_siglist
-#elif defined(HAVE_DECL__SYS_SIGLIST) && HAVE_DECL__SYS_SIGLIST == 1
-# define sudo_sys_siglist	_sys_siglist
-#elif defined(HAVE_DECL___SYS_SIGLIST) && HAVE_DECL___SYS_SIGLIST == 1
-# define sudo_sys_siglist	__sys_siglist
-#else
-extern const char *const sudo_sys_siglist[NSIG];
-#endif
-
-/*
- * Get signal description string
- */
-char *
-strsignal(int signo)
+int
+main(int argc, char *argv[])
 {
-    if (signo > 0 && signo < NSIG)
-	return (char *)sudo_sys_siglist[signo];
-    /* XXX - should be "Unknown signal: %s" */
-    return _("Unknown signal");
+    static char *my_sys_signame[NSIG];
+    int i;
+
+#include "compat/mksigname.h"
+
+    printf("#include <config.h>\n");
+    printf("#include <signal.h>\n");
+    printf("#include \"missing.h\"\n\n");
+    printf("const char *const my_sys_signame[NSIG] = {\n");
+    for (i = 0; i < NSIG; i++) {
+	if (my_sys_signame[i] != NULL) {
+	    printf("    \"%s\",\n", my_sys_signame[i]);
+	} else {
+	    printf("    \"Signal %d\",\n", i);
+	}
+    }
+    printf("};\n");
+
+    exit(0);
 }

@@ -91,13 +91,25 @@
    don't. */
 #undef HAVE_DECL_SYS_SIGLIST
 
+/* Define to 1 if you have the declaration of `sys_signame', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SYS_SIGNAME
+
 /* Define to 1 if you have the declaration of `_sys_siglist', and to 0 if you
    don't. */
 #undef HAVE_DECL__SYS_SIGLIST
 
+/* Define to 1 if you have the declaration of `_sys_signame', and to 0 if you
+   don't. */
+#undef HAVE_DECL__SYS_SIGNAME
+
 /* Define to 1 if you have the declaration of `__sys_siglist', and to 0 if you
    don't. */
 #undef HAVE_DECL___SYS_SIGLIST
+
+/* Define to 1 if you have the declaration of `__sys_signame', and to 0 if you
+   don't. */
+#undef HAVE_DECL___SYS_SIGNAME
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
@@ -487,6 +499,9 @@
 /* Define to 1 if you have the <spawn.h> header file. */
 #undef HAVE_SPAWN_H
 
+/* Define to 1 to enable SSSD support. */
+#undef HAVE_SSSD
+
 /* Define to 1 if stdbool.h conforms to C99. */
 #undef HAVE_STDBOOL_H
 
@@ -516,6 +531,9 @@
 
 /* Define to 1 if you have the `strsignal' function. */
 #undef HAVE_STRSIGNAL
+
+/* Define to 1 if you have the `strsigname' function. */
+#undef HAVE_STRSIGNAME
 
 /* Define to 1 if `d_type' is a member of `struct dirent'. */
 #undef HAVE_STRUCT_DIRENT_D_TYPE

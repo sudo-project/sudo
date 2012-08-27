@@ -2569,6 +2569,24 @@ AC_INCLUDES_DEFAULT
 ])
 
 dnl
+dnl Check for strsigname() or sys_signame
+dnl
+AC_CHECK_FUNCS(strsigname, [], [
+    AC_LIBOBJ(strsigname)
+    HAVE_SIGNAME="false"
+    AC_CHECK_DECLS([sys_signame, _sys_signame, __sys_signame], [
+	HAVE_SIGNAME="true"
+	break
+    ], [ ], [
+AC_INCLUDES_DEFAULT
+#include <signal.h>
+    ])
+    if test "$HAVE_SIGNAME" != "true"; then
+	AC_LIBOBJ(signame)
+    fi
+])
+
+dnl
 dnl nsswitch.conf and its equivalents
 dnl
 if test ${with_netsvc-"no"} != "no"; then

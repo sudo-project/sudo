@@ -85,8 +85,14 @@ libreplace.la: $(LTLIBOBJS)
 siglist.c: mksiglist
 	./mksiglist > $@
 
+signame.c: mksigname
+	./mksigname > $@
+
 mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(incdir)/missing.h $(top_builddir)/config.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/mksiglist.c -o $@
+
+mksigname: $(srcdir)/mksigname.c $(srcdir)/mksigname.h $(incdir)/missing.h $(top_builddir)/config.h
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/mksigname.c -o $@
 
 fnm_test: fnm_test.o libreplace.la
 	$(LIBTOOL) --mode=link $(CC) -o $@ fnm_test.o libreplace.la
@@ -96,7 +102,12 @@ globtest: globtest.o libreplace.la
 
 $(srcdir)/mksiglist.h: $(srcdir)/siglist.in
 	@if [ -n "$(DEVEL)" ]; then \
-	    awk 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (my_sys_siglist[SIG%s] == NULL)\n\tmy_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@; \
+	    awk 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (sudo_sys_siglist[SIG%s] == NULL)\n\tsudo_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@; \
+	fi
+
+$(srcdir)/mksigname.h: $(srcdir)/siglist.in
+	@if [ -n "$(DEVEL)" ]; then \
+	    awk 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (sudo_sys_signame[SIG%s] == NULL)\n\tsudo_sys_signame[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, $$1)}' < $(srcdir)/siglist.in > $@; \
 	fi
 
 pre-install:
@@ -134,7 +145,7 @@ check: $(TEST_PROGS)
 	fi
 
 clean:
-	-$(LIBTOOL) --mode=clean rm -f $(TEST_PROGS) mksiglist siglist.c *.lo *.o *.la *.a stamp-* core *.core core.*
+	-$(LIBTOOL) --mode=clean rm -f $(TEST_PROGS) mksiglist mksignal siglist.c signame.c *.lo *.o *.la *.a stamp-* core *.core core.*
 
 mostlyclean: clean
 
@@ -183,6 +194,9 @@ memrchr.lo: $(srcdir)/memrchr.c $(top_builddir)/config.h $(incdir)/missing.h
 mksiglist.lo: $(srcdir)/mksiglist.c $(top_builddir)/config.h \
               $(incdir)/missing.h $(top_srcdir)/compat/mksiglist.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/mksiglist.c
+mksigname.lo: $(srcdir)/mksigname.c $(top_builddir)/config.h \
+              $(incdir)/missing.h $(top_srcdir)/compat/mksigname.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/mksigname.c
 mktemp.lo: $(srcdir)/mktemp.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/mktemp.c
 nanosleep.lo: $(srcdir)/nanosleep.c $(top_builddir)/config.h \
@@ -201,6 +215,9 @@ strlcpy.lo: $(srcdir)/strlcpy.c $(top_builddir)/config.h $(incdir)/missing.h
 strsignal.lo: $(srcdir)/strsignal.c $(top_builddir)/config.h \
               $(incdir)/missing.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/strsignal.c
+strsigname.lo: $(srcdir)/strsigname.c $(top_builddir)/config.h \
+               $(incdir)/missing.h $(incdir)/gettext.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/strsigname.c
 utimes.lo: $(srcdir)/utimes.c $(top_builddir)/config.h \
            $(top_srcdir)/compat/utime.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/utimes.c
