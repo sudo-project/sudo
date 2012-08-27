@@ -73,6 +73,7 @@ struct sigforward {
 };
 TQ_DECLARE(sigforward)
 static struct sigforward_list sigfwd_list;
+static pid_t ppgrp = -1;
 
 volatile pid_t cmnd_pid = -1;
 
@@ -94,6 +95,12 @@ static int fork_cmnd(struct command_details *details, int sv[2])
     sigaction_t sa;
     debug_decl(fork_cmnd, SUDO_DEBUG_EXEC)
 
+    ppgrp = getpgrp();	/* parent's process group */
+
+    /*
+     * XXX - should only send SIGCONT when command pgrp != parent pgrp 
+     *       OR we were suspended by a user (not kernel or tty) signal.
+     */
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
@@ -534,17 +541,28 @@ handle_signals(int sv[2], pid_t child, int log_io, struct command_status *cstat)
 		    if (WIFSTOPPED(status)) {
 			/*
 			 * Save the controlling terminal's process group
-			 * so we can restore it after we resume.
+			 * so we can restore it after we resume, if needed.
+			 * Most well-behaved shells change the pgrp back to
+			 * its original value before suspending so we must
+			 * not try to restore in that case, lest we race with
+			 * the child upon resume, potentially stopping sudo
+			 * with SIGTTOU while the command continues to run.
 			 */
 			pid_t saved_pgrp = (pid_t)-1;
 			int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
-			if (fd != -1)
-			    saved_pgrp = tcgetpgrp(fd);
+			if (fd != -1) {
+			    if ((saved_pgrp = tcgetpgrp(fd)) == ppgrp)
+				saved_pgrp = -1;
+			}
 			if (kill(getpid(), WSTOPSIG(status)) != 0) {
 			    warning("kill(%d, SIG%s)", (int)getpid(),
 				strsigname(WSTOPSIG(status)));
 			}
 			if (fd != -1) {
+			    /*
+			     * Restore command's process group if different.
+			     * Otherwise, we cannot resume some shells.
+			     */
 			    if (saved_pgrp != (pid_t)-1)
 				(void)tcsetpgrp(fd, saved_pgrp);
 			    close(fd);
