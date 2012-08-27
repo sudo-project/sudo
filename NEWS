@@ -84,6 +84,18 @@ What's new in Sudo 1.7.10?
  * Visudo will now warn about unknown Defaults entries that are
    per-host, per-user, per-runas or per-command.
 
+ * When constructing a time filter for use with LDAP sudoNotBefore
+   and sudoNotAfter attributes, the current time now includes tenths
+   of a second.  This fixes a problem with timed entries on Active
+   Directory.
+
+ * Fixed a race condition that could cause sudo to receive SIGTTOU
+   (and stop) when resuming a shell that was run via sudo when I/O
+   logging (and use_pty) is not enabled.
+
+ * Sending SIGTSTP directly to the sudo process will now suspend the
+   running command when I/O logging (and use_pty) is not enabled.
+
 What's new in Sudo 1.7.9p1?
 
  * Fixed a bug when matching against an IP address with an associated
