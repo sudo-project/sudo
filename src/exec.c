@@ -98,8 +98,17 @@ static int fork_cmnd(struct command_details *details, int sv[2])
     ppgrp = getpgrp();	/* parent's process group */
 
     /*
-     * XXX - should only send SIGCONT when command pgrp != parent pgrp 
-     *       OR we were suspended by a user (not kernel or tty) signal.
+     * Handle suspend/restore of sudo and the command.
+     * In most cases, the command will be in the same process group as
+     * sudo and job control will "just work".  However, if the command
+     * changes its process group ID and does not change it back (or is
+     * kill by SIGSTOP which is not catchable), we need to resume the
+     * command manually.  Also, if SIGTSTP is sent directly to sudo,
+     * we need to suspend the command, and then suspend ourself, restoring
+     * the default SIGTSTP handler temporarily.
+     *
+     * XXX - currently we send SIGCONT upon resume in some cases where
+     * we don't need to (e.g. command pgrp == parent pgrp).
      */
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
@@ -111,6 +120,10 @@ static int fork_cmnd(struct command_details *details, int sv[2])
     sa.sa_handler = handler;
 #endif
     sigaction(SIGCONT, &sa, NULL);
+#ifdef SA_SIGINFO
+    sa.sa_sigaction = handler_user_only;
+#endif
+    sigaction(SIGTSTP, &sa, NULL);
 
     /*
      * The policy plugin's session init must be run before we fork
@@ -548,16 +561,26 @@ handle_signals(int sv[2], pid_t child, int log_io, struct command_status *cstat)
 			 * the child upon resume, potentially stopping sudo
 			 * with SIGTTOU while the command continues to run.
 			 */
+			sigaction_t sa, osa;
 			pid_t saved_pgrp = (pid_t)-1;
+			int signo = WSTOPSIG(status);
 			int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
 			if (fd != -1) {
 			    if ((saved_pgrp = tcgetpgrp(fd)) == ppgrp)
 				saved_pgrp = -1;
 			}
-			if (kill(getpid(), WSTOPSIG(status)) != 0) {
-			    warning("kill(%d, SIG%s)", (int)getpid(),
-				strsigname(WSTOPSIG(status)));
+			if (signo == SIGTSTP) {
+			    zero_bytes(&sa, sizeof(sa));
+			    sigemptyset(&sa.sa_mask);
+			    sa.sa_handler = SIG_DFL;
+			    sigaction(SIGTSTP, &sa, NULL);
 			}
+			if (kill(getpid(), signo) != 0) {
+			    warning("kill(%d, SIG%s)", (int)getpid(),
+				strsigname(signo));
+			}
+			if (signo == SIGTSTP)
+			    sigaction(SIGTSTP, &osa, NULL);
 			if (fd != -1) {
 			    /*
 			     * Restore command's process group if different.
