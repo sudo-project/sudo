@@ -44,6 +44,6 @@ strsigname(int signo)
 {
     if (signo > 0 && signo < NSIG)
 	return (char *)sudo_sys_signame[signo];
-    /* XXX - should be "Unknown signal: %s" */
+    /* XXX - should be "Unknown signal: %d" */
     return _("Unknown signal");
 }
