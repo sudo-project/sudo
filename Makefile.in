@@ -298,7 +298,7 @@ mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(srcdir)/missing.h confi
 
 $(srcdir)/mksiglist.h: $(srcdir)/siglist.in
 	@if [ -n "$(DEVEL)" ]; then \
-	    awk 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (my_sys_siglist[SIG%s] == NULL)\n\tmy_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@; \
+	    awk 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (sudo_sys_siglist[SIG%s] == NULL)\n\tsudo_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, substr($$0, 13))}' < $(srcdir)/siglist.in > $@; \
 	fi
 
 # Dependencies (not counting auth functions)

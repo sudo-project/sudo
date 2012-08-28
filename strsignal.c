@@ -24,13 +24,13 @@
 #include "missing.h"
 
 #if defined(HAVE_DECL_SYS_SIGLIST) && HAVE_DECL_SYS_SIGLIST == 1
-# define my_sys_siglist	sys_siglist
+# define sudo_sys_siglist	sys_siglist
 #elif defined(HAVE_DECL__SYS_SIGLIST) && HAVE_DECL__SYS_SIGLIST == 1
-# define my_sys_siglist	_sys_siglist
+# define sudo_sys_siglist	_sys_siglist
 #elif defined(HAVE_DECL___SYS_SIGLIST) && HAVE_DECL___SYS_SIGLIST == 1
-# define my_sys_siglist	__sys_siglist
+# define sudo_sys_siglist	__sys_siglist
 #else
-extern const char *const my_sys_siglist[NSIG];
+extern const char *const sudo_sys_siglist[NSIG];
 #endif
 
 /*
@@ -41,6 +41,7 @@ strsignal(signo)
     int signo;
 {
     if (signo > 0 && signo < NSIG)
-	return (char *)my_sys_siglist[signo];
+	return (char *)sudo_sys_siglist[signo];
+    /* XXX - should be "Unknown signal: %d" */
     return "Unknown signal";
 }
