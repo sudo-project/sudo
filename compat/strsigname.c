@@ -32,7 +32,13 @@
 # define sudo_sys_signame	_sys_signame
 #elif defined(HAVE_DECL___SYS_SIGNAME) && HAVE_DECL___SYS_SIGNAME == 1
 # define sudo_sys_signame	__sys_signame
+#elif defined(HAVE_DECL_SYS_SIGABBREV) && HAVE_DECL_SYS_SIGABBREV == 1
+# define sudo_sys_signame	sys_sigabbrev
 #else
+# ifdef HAVE_SYS_SIGABBREV
+   /* sys_sigabbrev is not declared by glibc */
+#  define sudo_sys_signame	sys_sigabbrev
+# endif
 extern const char *const sudo_sys_signame[NSIG];
 #endif
 

@@ -2574,7 +2574,7 @@ dnl
 AC_CHECK_FUNCS(strsigname, [], [
     AC_LIBOBJ(strsigname)
     HAVE_SIGNAME="false"
-    AC_CHECK_DECLS([sys_signame, _sys_signame, __sys_signame], [
+    AC_CHECK_DECLS([sys_signame, _sys_signame, __sys_signame, sys_sigabbrev], [
 	HAVE_SIGNAME="true"
 	break
     ], [ ], [
@@ -2582,7 +2582,20 @@ AC_INCLUDES_DEFAULT
 #include <signal.h>
     ])
     if test "$HAVE_SIGNAME" != "true"; then
-	AC_LIBOBJ(signame)
+	AC_CACHE_CHECK([for undeclared sys_sigabbrev],
+	    [sudo_cv_var_sys_sigabbrev],
+	    [AC_LINK_IFELSE(
+		[AC_LANG_PROGRAM([[extern char **sys_sigabbrev;]], [[return sys_sigabbrev[1];]])],
+		    [sudo_cv_var_sys_sigabbrev=yes],
+		    [sudo_cv_var_sys_sigabbrev=no]
+		)
+	    ]
+	)
+	if test "$sudo_cv_var_sys_sigabbrev" = yes; then
+	    AC_DEFINE(HAVE_SYS_SIGABBREV)
+	else
+	    AC_LIBOBJ(signame)
+	fi
     fi
 ])
 
@@ -3627,6 +3640,7 @@ AH_TEMPLATE(RTLD_PRELOAD_ENABLE_VAR, [An extra environment variable that is requ
 AH_TEMPLATE(RTLD_PRELOAD_DELIM, [The delimiter to use when defining multiple preloaded objects.])
 AH_TEMPLATE(RTLD_PRELOAD_DEFAULT, [The default value of preloaded objects (if any).])
 AH_TEMPLATE(HAVE_DSO_VISIBILITY, [Define to 1 if the compiler supports the __visibility__ attribute.])
+AH_TEMPLATE(HAVE_SYS_SIGABBREV, [Define to 1 if your libc has the `sys_sigabbrev' symbol.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in

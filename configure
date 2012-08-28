@@ -18386,14 +18386,68 @@ if test $ac_have_decl = 1; then :
 	break
 
 fi
+ac_fn_c_check_decl "$LINENO" "sys_sigabbrev" "ac_cv_have_decl_sys_sigabbrev" "
+$ac_includes_default
+#include <signal.h>
+
+"
+if test "x$ac_cv_have_decl_sys_sigabbrev" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_SYS_SIGABBREV $ac_have_decl
+_ACEOF
+if test $ac_have_decl = 1; then :
+
+	HAVE_SIGNAME="true"
+	break
+
+fi
 
     if test "$HAVE_SIGNAME" != "true"; then
-	case " $LIBOBJS " in
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for undeclared sys_sigabbrev" >&5
+$as_echo_n "checking for undeclared sys_sigabbrev... " >&6; }
+if ${sudo_cv_var_sys_sigabbrev+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+extern char **sys_sigabbrev;
+int
+main ()
+{
+return sys_sigabbrev[1];
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  sudo_cv_var_sys_sigabbrev=yes
+else
+  sudo_cv_var_sys_sigabbrev=no
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_sys_sigabbrev" >&5
+$as_echo "$sudo_cv_var_sys_sigabbrev" >&6; }
+	if test "$sudo_cv_var_sys_sigabbrev" = yes; then
+	    $as_echo "#define HAVE_SYS_SIGABBREV 1" >>confdefs.h
+
+	else
+	    case " $LIBOBJS " in
   *" signame.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS signame.$ac_objext"
  ;;
 esac
 
+	fi
     fi
 
 fi
@@ -23151,6 +23205,7 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+
 
 
 

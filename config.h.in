@@ -87,6 +87,10 @@
    don't. */
 #undef HAVE_DECL_H_ERRNO
 
+/* Define to 1 if you have the declaration of `sys_sigabbrev', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SYS_SIGABBREV
+
 /* Define to 1 if you have the declaration of `sys_siglist', and to 0 if you
    don't. */
 #undef HAVE_DECL_SYS_SIGLIST
@@ -638,6 +642,9 @@
 
 /* Define to 1 if you have the <sys/select.h> header file. */
 #undef HAVE_SYS_SELECT_H
+
+/* Define to 1 if your libc has the `sys_sigabbrev' symbol. */
+#undef HAVE_SYS_SIGABBREV
 
 /* Define to 1 if you have the <sys/sockio.h> header file. */
 #undef HAVE_SYS_SOCKIO_H
