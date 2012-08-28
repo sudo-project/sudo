@@ -42,7 +42,7 @@ extern const char *const sudo_sys_signame[NSIG];
 char *
 strsigname(int signo)
 {
-    if (signo > 0 && signo < NSIG)
+    if (signo > 0 && signo < NSIG && sudo_sys_signame[signo] != NULL)
 	return (char *)sudo_sys_signame[signo];
     /* XXX - should be "Unknown signal: %d" */
     return _("Unknown signal");
