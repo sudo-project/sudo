@@ -145,7 +145,7 @@ check: $(TEST_PROGS)
 	fi
 
 clean:
-	-$(LIBTOOL) --mode=clean rm -f $(TEST_PROGS) mksiglist mksignal siglist.c signame.c *.lo *.o *.la *.a stamp-* core *.core core.*
+	-$(LIBTOOL) --mode=clean rm -f $(TEST_PROGS) mksiglist mksigname siglist.c signame.c *.lo *.o *.la *.a stamp-* core *.core core.*
 
 mostlyclean: clean
 
@@ -204,11 +204,12 @@ nanosleep.lo: $(srcdir)/nanosleep.c $(top_builddir)/config.h \
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/nanosleep.c
 pw_dup.lo: $(srcdir)/pw_dup.c $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/pw_dup.c
-sig2str.lo: $(srcdir)/sig2str.c $(top_builddir)/config.h $(incdir)/missing.h \
-            $(incdir)/gettext.h
+sig2str.lo: $(srcdir)/sig2str.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/sig2str.c
 siglist.lo: siglist.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) siglist.c
+signame.lo: signame.c $(top_builddir)/config.h $(incdir)/missing.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) signame.c
 snprintf.lo: $(srcdir)/snprintf.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/snprintf.c
 strlcat.lo: $(srcdir)/strlcat.c $(top_builddir)/config.h $(incdir)/missing.h

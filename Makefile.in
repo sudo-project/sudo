@@ -121,10 +121,10 @@ uninstall-nls:
 autoconf:
 	autoconf -I m4
 
-siglist.c:
+siglist.c signame.c:
 	(cd compat && exec $(MAKE) $@)
 
-depend: siglist.c
+depend: siglist.c signame.c
 	@if test "$(srcdir)" != "."; then \
 	    echo "make depend only supported in the source directory"; \
 	    exit 1; \
