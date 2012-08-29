@@ -328,7 +328,11 @@ utmp_login(const char *from_line, const char *to_line, int ttyfd,
 	}
     }
     utmp_fill(to_line, user, ut_old, &utbuf);
+#ifdef HAVE_FSEEKO
+    if (fseeko(fp, slot * (off_t)sizeof(utbuf), SEEK_SET) == 0) {
+#else
     if (fseek(fp, slot * (long)sizeof(utbuf), SEEK_SET) == 0) {
+#endif
 	if (fwrite(&utbuf, sizeof(utbuf), 1, fp) == 1)
 	    rval = true;
     }
@@ -361,7 +365,11 @@ utmp_logout(const char *line, int status)
 # endif
 	    utmp_settime(&utbuf);
 	    /* Back up and overwrite record. */
+#ifdef HAVE_FSEEKO
+	    if (fseeko(fp, (off_t)0 - (off_t)sizeof(utbuf), SEEK_CUR) == 0) {
+#else
 	    if (fseek(fp, 0L - (long)sizeof(utbuf), SEEK_CUR) == 0) {
+#endif
 		if (fwrite(&utbuf, sizeof(utbuf), 1, fp) == 1)
 		    rval = true;
 	    }

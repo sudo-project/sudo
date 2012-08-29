@@ -149,6 +149,9 @@
 /* Define to 1 if you have the `freeifaddrs' function. */
 #undef HAVE_FREEIFADDRS
 
+/* Define to 1 if you have the `fseeko' function. */
+#undef HAVE_FSEEKO
+
 /* Define to 1 if you have the `futime' function. */
 #undef HAVE_FUTIME
 

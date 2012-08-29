@@ -2213,6 +2213,7 @@ utmp_style=LEGACY
 AC_CHECK_FUNCS(getutxid getutid, [utmp_style=POSIX; break])
 if test "$utmp_style" = "LEGACY"; then
     AC_CHECK_FUNCS(getttyent ttyslot, [break])
+    AC_CHECK_FUNCS(fseeko)
 fi
 
 AC_CHECK_FUNCS(sysctl, [AC_CHECK_MEMBERS([struct kinfo_proc.ki_tdev], [],

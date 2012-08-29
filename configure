@@ -16713,6 +16713,17 @@ _ACEOF
 fi
 done
 
+    for ac_func in fseeko
+do :
+  ac_fn_c_check_func "$LINENO" "fseeko" "ac_cv_func_fseeko"
+if test "x$ac_cv_func_fseeko" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_FSEEKO 1
+_ACEOF
+
+fi
+done
+
 fi
 
 for ac_func in sysctl
