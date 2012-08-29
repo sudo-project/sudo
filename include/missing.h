@@ -284,6 +284,11 @@ extern int errno;
 # endif
 #endif
 
+/* For sig2str() */
+#ifndef SIG2STR_MAX
+# define SIG2STR_MAX 32
+#endif
+
 #ifndef WCOREDUMP
 # define WCOREDUMP(x)	((x) & 0x80)
 #endif
@@ -376,8 +381,8 @@ int unsetenv(const char *);
 #ifndef HAVE_STRSIGNAL
 char *strsignal(int);
 #endif
-#ifndef HAVE_STRSIGNAME
-char *strsigname(int);
+#ifndef HAVE_SIG2STR
+int sig2str(int, char *);
 #endif
 
 #endif /* _SUDO_MISSING_H */

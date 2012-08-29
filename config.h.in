@@ -491,6 +491,9 @@
 /* Define to 1 if you have the `sia_ses_init' function. */
 #undef HAVE_SIA_SES_INIT
 
+/* Define to 1 if you have the `sig2str' function. */
+#undef HAVE_SIG2STR
+
 /* Define to 1 if the system has the type `sigaction_t'. */
 #undef HAVE_SIGACTION_T
 
@@ -538,9 +541,6 @@
 
 /* Define to 1 if you have the `strsignal' function. */
 #undef HAVE_STRSIGNAL
-
-/* Define to 1 if you have the `strsigname' function. */
-#undef HAVE_STRSIGNAME
 
 /* Define to 1 if `d_type' is a member of `struct dirent'. */
 #undef HAVE_STRUCT_DIRENT_D_TYPE

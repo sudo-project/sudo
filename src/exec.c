@@ -506,6 +506,7 @@ do_tty_io:
 static int
 handle_signals(int sv[2], pid_t child, int log_io, struct command_status *cstat)
 {
+    char signame[SIG2STR_MAX];
     unsigned char signo;
     ssize_t nread;
     int status;
@@ -531,7 +532,9 @@ handle_signals(int sv[2], pid_t child, int log_io, struct command_status *cstat)
 	    cstat->val = errno;
 	    debug_return_int(-1);
 	}
-	sudo_debug_printf(SUDO_DEBUG_DIAG, "received SIG%s", strsigname(signo));
+	if (sig2str(signo, signame) == -1)
+	    snprintf(signame, sizeof(signame), "%d", signo);
+	sudo_debug_printf(SUDO_DEBUG_DIAG, "received SIG%s", signame);
 	if (signo == SIGCHLD) {
 	    /*
 	     * If logging I/O, child is the intermediate process,
@@ -575,10 +578,8 @@ handle_signals(int sv[2], pid_t child, int log_io, struct command_status *cstat)
 			    sa.sa_handler = SIG_DFL;
 			    sigaction(SIGTSTP, &sa, NULL);
 			}
-			if (kill(getpid(), signo) != 0) {
-			    warning("kill(%d, SIG%s)", (int)getpid(),
-				strsigname(signo));
-			}
+			if (kill(getpid(), signo) != 0)
+			    warning("kill(%d, SIG%s)", (int)getpid(), signame);
 			if (signo == SIGTSTP)
 			    sigaction(SIGTSTP, &osa, NULL);
 			if (fd != -1) {
@@ -607,7 +608,7 @@ handle_signals(int sv[2], pid_t child, int log_io, struct command_status *cstat)
 		if (signo == SIGALRM)
 		    terminate_command(child, false);
 		else if (kill(child, signo) != 0)
-		    warning("kill(%d, SIG%s)", (int)child, strsigname(signo));
+		    warning("kill(%d, SIG%s)", (int)child, signame);
 	    }
 	}
     }
@@ -620,6 +621,7 @@ handle_signals(int sv[2], pid_t child, int log_io, struct command_status *cstat)
 static void
 forward_signals(int sock)
 {
+    char signame[SIG2STR_MAX];
     struct sigforward *sigfwd;
     struct command_status cstat;
     ssize_t nsent;
@@ -627,9 +629,10 @@ forward_signals(int sock)
 
     while (!tq_empty(&sigfwd_list)) {
 	sigfwd = tq_first(&sigfwd_list);
+	if (sig2str(sigfwd->signo, signame) == -1)
+	    snprintf(signame, sizeof(signame), "%d", sigfwd->signo);
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "sending SIG%s to child over backchannel",
-	    strsigname(sigfwd->signo));
+	    "sending SIG%s to child over backchannel", signame);
 	cstat.type = CMD_SIGNO;
 	cstat.val = sigfwd->signo;
 	do {
@@ -662,10 +665,12 @@ static void
 schedule_signal(int signo)
 {
     struct sigforward *sigfwd;
+    char signame[SIG2STR_MAX];
     debug_decl(schedule_signal, SUDO_DEBUG_EXEC)
 
-    sudo_debug_printf(SUDO_DEBUG_DIAG, "forwarding SIG%s to child",
-	strsigname(signo));
+    if (sig2str(signo, signame) == -1)
+	snprintf(signame, sizeof(signame), "%d", signo);
+    sudo_debug_printf(SUDO_DEBUG_DIAG, "forwarding SIG%s to child", signame);
 
     sigfwd = ecalloc(1, sizeof(*sigfwd));
     sigfwd->prev = sigfwd;

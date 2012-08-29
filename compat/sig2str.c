@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2012 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,22 +18,34 @@
 
 #include <sys/types.h>
 
+#include <errno.h>
 #include <stdio.h>
+#ifdef STDC_HEADERS
+# include <stdlib.h>
+# include <stddef.h>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif /* STDC_HEADERS */
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif /* HAVE_STRINGS_H */
 #include <signal.h>
 
 #include "missing.h"
 
-#define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "gettext.h"
-
 #if defined(HAVE_DECL_SYS_SIGNAME) && HAVE_DECL_SYS_SIGNAME == 1
-# define sudo_sys_signame	sys_signame
+#  define sudo_sys_signame	sys_signame
 #elif defined(HAVE_DECL__SYS_SIGNAME) && HAVE_DECL__SYS_SIGNAME == 1
-# define sudo_sys_signame	_sys_signame
+#  define sudo_sys_signame	_sys_signame
 #elif defined(HAVE_DECL___SYS_SIGNAME) && HAVE_DECL___SYS_SIGNAME == 1
-# define sudo_sys_signame	__sys_signame
+#  define sudo_sys_signame	__sys_signame
 #elif defined(HAVE_DECL_SYS_SIGABBREV) && HAVE_DECL_SYS_SIGABBREV == 1
-# define sudo_sys_signame	sys_sigabbrev
+#  define sudo_sys_signame	sys_sigabbrev
 #else
 # ifdef HAVE_SYS_SIGABBREV
    /* sys_sigabbrev is not declared by glibc */
@@ -43,13 +55,22 @@ extern const char *const sudo_sys_signame[NSIG];
 #endif
 
 /*
- * Return signal name
+ * Translate signal number to name.
  */
-char *
-strsigname(int signo)
+int
+sig2str(int signo, char *signame)
 {
-    if (signo > 0 && signo < NSIG && sudo_sys_signame[signo] != NULL)
-	return (char *)sudo_sys_signame[signo];
-    /* XXX - should be "Unknown signal: %d" */
-    return _("Unknown signal");
+#if defined(SIGRTMIN) && defined(SIGRTMAX)
+    /* Realtime signal support as per Solaris. */
+    if (signo >= SIGRTMIN && signo <= SIGRTMAX) {
+	snprintf(signame, SIG2STR_MAX, "RTMIN+%d", (signo - SIGRTMIN));
+	return 0;
+    }
+#endif
+    if (signo > 0 && signo < NSIG && sudo_sys_signame[signo] != NULL) {
+	strlcpy(signame, sudo_sys_signame[signo], SIG2STR_MAX);
+	return 0;
+    }
+    errno = EINVAL;
+    return -1;
 }

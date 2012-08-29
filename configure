@@ -18320,19 +18320,19 @@ fi
 done
 
 
-for ac_func in strsigname
+for ac_func in sig2str
 do :
-  ac_fn_c_check_func "$LINENO" "strsigname" "ac_cv_func_strsigname"
-if test "x$ac_cv_func_strsigname" = xyes; then :
+  ac_fn_c_check_func "$LINENO" "sig2str" "ac_cv_func_sig2str"
+if test "x$ac_cv_func_sig2str" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_STRSIGNAME 1
+#define HAVE_SIG2STR 1
 _ACEOF
 
 else
 
     case " $LIBOBJS " in
-  *" strsigname.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS strsigname.$ac_objext"
+  *" sig2str.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS sig2str.$ac_objext"
  ;;
 esac
 

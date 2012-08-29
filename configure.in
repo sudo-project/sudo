@@ -2570,10 +2570,10 @@ AC_INCLUDES_DEFAULT
 ])
 
 dnl
-dnl Check for strsigname() or sys_signame
+dnl Check for sig2str(), sys_signame or sys_sigabbrev
 dnl
-AC_CHECK_FUNCS(strsigname, [], [
-    AC_LIBOBJ(strsigname)
+AC_CHECK_FUNCS(sig2str, [], [
+    AC_LIBOBJ(sig2str)
     HAVE_SIGNAME="false"
     AC_CHECK_DECLS([sys_signame, _sys_signame, __sys_signame, sys_sigabbrev], [
 	HAVE_SIGNAME="true"

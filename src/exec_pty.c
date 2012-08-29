@@ -335,6 +335,7 @@ check_foreground(void)
 int
 suspend_parent(int signo)
 {
+    char signame[SIG2STR_MAX];
     sigaction_t sa, osa;
     int n, oldmode = ttymode, rval = 0;
     debug_decl(suspend_parent, SUDO_DEBUG_EXEC);
@@ -372,16 +373,18 @@ suspend_parent(int signo)
 	    } while (!n && errno == EINTR);
 	}
 
+	if (sig2str(signo, signame) == -1)
+	    snprintf(signame, sizeof(signame), "%d", signo);
+
 	/* Suspend self and continue command when we resume. */
 	zero_bytes(&sa, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
 	sa.sa_handler = SIG_DFL;
 	sigaction(signo, &sa, &osa);
-	sudo_debug_printf(SUDO_DEBUG_INFO, "kill parent SIG%s",
-	    strsigname(signo));
+	sudo_debug_printf(SUDO_DEBUG_INFO, "kill parent SIG%s", signame);
 	if (killpg(ppgrp, signo) != 0)
-	    warning("killpg(%d, SIG%s)", (int)ppgrp, strsigname(signo));
+	    warning("killpg(%d, SIG%s)", (int)ppgrp, signame);
 
 	/* Check foreground/background status on resume. */
 	check_foreground();
@@ -823,12 +826,16 @@ fd_set_iobs(fd_set *fdsr, fd_set *fdsw)
 static void
 deliver_signal(pid_t pid, int signo, bool from_parent)
 {
+    char signame[SIG2STR_MAX];
     int status;
     debug_decl(deliver_signal, SUDO_DEBUG_EXEC);
 
+    if (sig2str(signo, signame) == -1)
+	snprintf(signame, sizeof(signame), "%d", signo);
+
     /* Handle signal from parent. */
     sudo_debug_printf(SUDO_DEBUG_INFO, "received SIG%s%s",
-	strsigname(signo), from_parent ? " from parent" : "");
+	signame, from_parent ? " from parent" : "");
     switch (signo) {
     case SIGALRM:
 	terminate_command(pid, true);
@@ -904,19 +911,25 @@ handle_sigchld(int backchannel, struct command_status *cstat)
     } while (pid == -1 && errno == EINTR);
     if (pid == cmnd_pid) {
 	if (cstat->type != CMD_ERRNO) {
+	    char signame[SIG2STR_MAX];
+
 	    cstat->type = CMD_WSTATUS;
 	    cstat->val = status;
 	    if (WIFSTOPPED(status)) {
+		if (sig2str(WSTOPSIG(status), signame) == -1)
+		    snprintf(signame, sizeof(signame), "%d", WSTOPSIG(status));
 		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "command stopped, SIG%s", strsigname(WSTOPSIG(status)));
+		    "command stopped, SIG%s", signame);
 		do {
 		    cmnd_pgrp = tcgetpgrp(io_fds[SFD_SLAVE]);
 		} while (cmnd_pgrp == -1 && errno == EINTR);
 		if (send_status(backchannel, cstat) == -1)
 		    return alive; /* XXX */
 	    } else if (WIFSIGNALED(status)) {
+		if (sig2str(WTERMSIG(status), signame) == -1)
+		    snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
 		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "command killed, SIG%s", strsigname(WTERMSIG(status)));
+		    "command killed, SIG%s", signame);
 	    } else {
 		sudo_debug_printf(SUDO_DEBUG_INFO, "command exited: %d",
 		    WEXITSTATUS(status));

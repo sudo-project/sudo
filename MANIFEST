@@ -51,13 +51,13 @@ compat/regress/fnmatch/fnm_test.in
 compat/regress/glob/files
 compat/regress/glob/globtest.c
 compat/regress/glob/globtest.in
+compat/sig2str.c
 compat/siglist.in
 compat/snprintf.c
 compat/stdbool.h
 compat/strlcat.c
 compat/strlcpy.c
 compat/strsignal.c
-compat/strsigname.c
 compat/timespec.h
 compat/utime.h
 compat/utimes.c
