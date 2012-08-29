@@ -177,7 +177,7 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 	_exit(1);
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d", details->command,
-	cmnd_pid);
+	(int)cmnd_pid);
     debug_return_int(cmnd_pid);
 }
 
@@ -442,7 +442,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 		 */
 		cmnd_pid = cstat->val;
 		sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d",
-		    details->command, cmnd_pid);
+		    details->command, (int)cmnd_pid);
 		if (log_io)
 		    sigprocmask(SIG_SETMASK, &omask, NULL);
 	    } else if (cstat->type == CMD_WSTATUS) {

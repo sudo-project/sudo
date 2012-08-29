@@ -398,7 +398,6 @@ char *
 get_process_ttyname(void)
 {
     char path[PATH_MAX], *tty = NULL;
-    struct stat sb;
     struct psinfo psinfo;
     ssize_t nread;
     int i, fd;
