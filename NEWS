@@ -3,7 +3,10 @@ What's new in Sudo 1.8.6?
  * Sudo is now built with the -fstack-protector flag if the the
    compiler supports it.  Also, the -zrelro linker flag is used if
    supported.  The --disable-hardening configure option can be used
-   to build sudo without stack smashing support.
+   to build sudo without stack smashing protection.
+
+ * Sudo is now built as a Position Independent Executable (PIE)
+   if supported by the compiler and linker.
 
  * If the user is a member of the "exempt" group in sudoers, they
    will no longer be prompted for a password even if the -k flag
