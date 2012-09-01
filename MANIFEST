@@ -218,6 +218,7 @@ plugins/sudoers/po/sv.mo
 plugins/sudoers/po/sv.po
 plugins/sudoers/po/uk.mo
 plugins/sudoers/po/uk.po
+plugins/sudoers/po/vi.po
 plugins/sudoers/po/zh_CN.mo
 plugins/sudoers/po/zh_CN.po
 plugins/sudoers/pwutil.c
