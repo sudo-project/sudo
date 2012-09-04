@@ -261,6 +261,7 @@ plugins/sudoers/regress/sudoers/test8.toke.ok
 plugins/sudoers/regress/testsudoers/test1.out.ok
 plugins/sudoers/regress/testsudoers/test1.sh
 plugins/sudoers/set_perms.c
+plugins/sudoers/sssd.c
 plugins/sudoers/sudo_nss.c
 plugins/sudoers/sudo_nss.h
 plugins/sudoers/sudoers.c
