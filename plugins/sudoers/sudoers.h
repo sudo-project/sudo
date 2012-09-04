@@ -81,14 +81,27 @@ struct sudo_user {
     char *role;
     char *type;
 #endif
+#ifdef HAVE_PRIV_SET
+    char *privs;
+    char *limitprivs;
+#endif
     char *cwd;
     char *iolog_file;
+    GETGROUPS_T *gids;
+    int   ngids;
     int   closefrom;
     int   lines;
     int   cols;
+    int   flags;
     uid_t uid;
     uid_t gid;
 };
+
+/*
+ * sudo_user flag values
+ */
+#define RUNAS_USER_SPECIFIED	0x01
+#define RUNAS_GROUP_SPECIFIED	0x02
 
 /*
  * Return values for sudoers_lookup(), also used as arguments for log_auth()
@@ -102,6 +115,9 @@ struct sudo_user {
 #define FLAG_NO_USER		0x020
 #define FLAG_NO_HOST		0x040
 #define FLAG_NO_CHECK		0x080
+#define FLAG_NON_INTERACTIVE	0x100
+#define FLAG_BAD_PASSWORD	0x200
+#define FLAG_AUTH_ERROR		0x400
 
 /*
  * find_path()/load_cmnd() return values
@@ -158,6 +174,8 @@ struct sudo_user {
 #define user_passwd		(sudo_user.pw->pw_passwd)
 #define user_uuid		(sudo_user.uuid)
 #define user_dir		(sudo_user.pw->pw_dir)
+#define user_gids		(sudo_user.gids)
+#define user_ngids		(sudo_user.ngids)
 #define user_group_list		(sudo_user.group_list)
 #define user_tty		(sudo_user.tty)
 #define user_ttypath		(sudo_user.ttypath)
@@ -178,6 +196,8 @@ struct sudo_user {
 #define user_role		(sudo_user.role)
 #define user_type		(sudo_user.type)
 #define user_closefrom		(sudo_user.closefrom)
+#define	runas_privs		(sudo_user.privs)
+#define	runas_limitprivs	(sudo_user.limitprivs)
 
 #ifdef __TANDEM
 # define ROOT_UID       65535
@@ -215,7 +235,7 @@ void remove_timestamp(bool);
 bool user_is_exempt(void);
 
 /* sudo_auth.c */
-int verify_user(struct passwd *pw, char *prompt);
+int verify_user(struct passwd *pw, char *prompt, int validated);
 int sudo_auth_begin_session(struct passwd *pw, char **user_env[]);
 int sudo_auth_end_session(struct passwd *pw);
 int sudo_auth_init(struct passwd *pw);
@@ -263,28 +283,27 @@ void display_privs(struct sudo_nss_list *, struct passwd *);
 bool display_cmnd(struct sudo_nss_list *, struct passwd *);
 
 /* pwutil.c */
-void sudo_setgrent(void);
-void sudo_endgrent(void);
-void sudo_setpwent(void);
-void sudo_endpwent(void);
-void sudo_setspent(void);
-void sudo_endspent(void);
-struct group_list *get_group_list(struct passwd *pw);
-void set_group_list(const char *, GETGROUPS_T *gids, int ngids);
-struct passwd *sudo_getpwnam(const char *);
-struct passwd *sudo_fakepwnamid(const char *user, uid_t uid, gid_t gid);
-struct passwd *sudo_fakepwnam(const char *, gid_t);
-struct passwd *sudo_getpwuid(uid_t);
-struct group *sudo_getgrnam(const char *);
-struct group *sudo_fakegrnam(const char *);
-struct group *sudo_getgrgid(gid_t);
-void grlist_addref(struct group_list *);
-void grlist_delref(struct group_list *);
-void gr_addref(struct group *);
-void gr_delref(struct group *);
-void pw_addref(struct passwd *);
-void pw_delref(struct passwd *);
+__dso_public struct group *sudo_getgrgid(gid_t);
+__dso_public struct group *sudo_getgrnam(const char *);
+__dso_public void sudo_gr_addref(struct group *);
+__dso_public void sudo_gr_delref(struct group *);
 bool user_in_group(struct passwd *, const char *);
+struct group *sudo_fakegrnam(const char *);
+struct group_list *sudo_get_grlist(struct passwd *pw);
+struct passwd *sudo_fakepwnam(const char *, gid_t);
+struct passwd *sudo_fakepwnamid(const char *user, uid_t uid, gid_t gid);
+struct passwd *sudo_getpwnam(const char *);
+struct passwd *sudo_getpwuid(uid_t);
+void sudo_endgrent(void);
+void sudo_endpwent(void);
+void sudo_endspent(void);
+void sudo_grlist_addref(struct group_list *);
+void sudo_grlist_delref(struct group_list *);
+void sudo_pw_addref(struct passwd *);
+void sudo_pw_delref(struct passwd *);
+void sudo_setgrent(void);
+void sudo_setpwent(void);
+void sudo_setspent(void);
 
 /* timestr.c */
 char *get_timestr(time_t, int);
@@ -296,7 +315,7 @@ int atobool(const char *str);
 int get_boottime(struct timeval *);
 
 /* iolog.c */
-void io_nextid(char *iolog_dir, char sessid[7]);
+void io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7]);
 
 /* iolog_path.c */
 char *expand_iolog_path(const char *prefix, const char *dir, const char *file,

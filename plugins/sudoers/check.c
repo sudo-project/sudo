@@ -93,7 +93,8 @@ static bool  tty_is_devpts(const char *);
 static struct passwd *get_authpw(void);
 
 /*
- * Returns true if the user successfully authenticates, else false.
+ * Returns true if the user successfully authenticates, false if not
+ * or -1 on error.
  */
 int
 check_user(int validated, int mode)
@@ -104,7 +105,6 @@ check_user(int validated, int mode)
     char *prompt;
     struct stat sb;
     int status, rval = true;
-    bool need_pass = def_authenticate;
     debug_decl(check_user, SUDO_DEBUG_AUTH)
 
     /*
@@ -117,23 +117,26 @@ check_user(int validated, int mode)
 	goto done;
     }
 
-    if (need_pass) {
-	/* Always need a password when -k was specified with the command. */
-	if (ISSET(mode, MODE_IGNORE_TICKET)) {
-	    SET(validated, FLAG_CHECK_USER);
-	} else {
-	    /*
-	     * Don't prompt for the root passwd or if the user is exempt.
-	     * If the user is not changing uid/gid, no need for a password.
-	     */
-	    if (user_uid == 0 || (user_uid == runas_pw->pw_uid &&
-		(!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name)))
-		|| user_is_exempt())
-		need_pass = false;
-	}
-    }
-    if (!need_pass)
+    /*
+     * Don't prompt for the root passwd or if the user is exempt.
+     * If the user is not changing uid/gid, no need for a password.
+     */
+    if (!def_authenticate || user_uid == 0 || user_is_exempt())
 	goto done;
+    if (user_uid == runas_pw->pw_uid &&
+	(!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name))) {
+#ifdef HAVE_SELINUX
+	if (user_role == NULL && user_type == NULL)
+#endif
+#ifdef HAVE_PRIV_SET
+	if (runas_privs == NULL && runas_limitprivs == NULL)
+#endif
+	    goto done;
+    }
+
+    /* Always need a password when -k was specified with the command. */
+    if (ISSET(mode, MODE_IGNORE_TICKET))
+	SET(validated, FLAG_CHECK_USER);
 
     /* Stash the tty's ctime for tty ticket comparison. */
     if (def_tty_tickets && user_ttypath && stat(user_ttypath, &sb) == 0) {
@@ -155,7 +158,8 @@ check_user(int validated, int mode)
     if (status != TS_CURRENT || ISSET(validated, FLAG_CHECK_USER)) {
 	/* Bail out if we are non-interactive and a password is required */
 	if (ISSET(mode, MODE_NONINTERACTIVE)) {
-	    warningx(_("sorry, a password is required to run %s"), getprogname());
+	    validated |= FLAG_NON_INTERACTIVE;
+	    log_auth_failure(validated, 0);
 	    rval = -1;
 	    goto done;
 	}
@@ -167,7 +171,7 @@ check_user(int validated, int mode)
 	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
 	    user_name, user_shost);
 
-	rval = verify_user(auth_pw, prompt);
+	rval = verify_user(auth_pw, prompt, validated);
     }
     /* Only update timestamp if user was validated. */
     if (rval == true && ISSET(validated, VALIDATE_OK) &&
@@ -178,7 +182,7 @@ check_user(int validated, int mode)
 
 done:
     sudo_auth_cleanup(auth_pw);
-    pw_delref(auth_pw);
+    sudo_pw_delref(auth_pw);
 
     debug_return_bool(rval);
 }
@@ -393,7 +397,7 @@ expand_prompt(char *old_prompt, char *user, char *host)
 
 oflow:
     /* We pre-allocate enough space, so this should never happen. */
-    errorx(1, _("internal error, expand_prompt() overflow"));
+    errorx(1, _("internal error, %s overflow"), "expand_prompt()");
 }
 
 /*
@@ -421,6 +425,7 @@ build_timestamp(char **timestampdir, char **timestampfile)
     debug_decl(build_timestamp, SUDO_DEBUG_AUTH)
 
     dirparent = def_timestampdir;
+    *timestampfile = NULL;
     len = easprintf(timestampdir, "%s/%s", dirparent, user_name);
     if (len >= PATH_MAX)
 	goto bad;
@@ -453,7 +458,9 @@ build_timestamp(char **timestampdir, char **timestampfile)
 
     debug_return_int(len);
 bad:
-    log_fatal(0, _("timestamp path too long: %s"), *timestampfile);
+    log_fatal(0, _("timestamp path too long: %s"),
+	*timestampfile ? *timestampfile : *timestampdir);
+    /* NOTREACHED */
     debug_return_int(-1);
 }
 
@@ -757,10 +764,10 @@ get_authpw(void)
 	if (runas_pw->pw_name == NULL)
 	    log_fatal(NO_MAIL|MSG_ONLY, _("unknown uid: %u"),
 		(unsigned int) runas_pw->pw_uid);
-	pw_addref(runas_pw);
+	sudo_pw_addref(runas_pw);
 	pw = runas_pw;
     } else {
-	pw_addref(sudo_user.pw);
+	sudo_pw_addref(sudo_user.pw);
 	pw = sudo_user.pw;
     }
 

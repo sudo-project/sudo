@@ -45,7 +45,7 @@ sudo_secure_path(const char *path, int type, uid_t uid, gid_t gid, struct stat *
     int rval = SUDO_PATH_MISSING;
     debug_decl(sudo_secure_path, SUDO_DEBUG_UTIL)
 
-    if (path != NULL && stat_sudoers(path, &sb) == 0) {
+    if (path != NULL && stat(path, &sb) == 0) {
 	if ((sb.st_mode & _S_IFMT) != type) {
 	    rval = SUDO_PATH_BAD_TYPE;
 	} else if (uid != (uid_t)-1 && sb.st_uid != uid) {

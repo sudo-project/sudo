@@ -237,7 +237,7 @@ check_passwd(void)
 }
 
 static char **
-build_command_info(char *command)
+build_command_info(const char *command)
 {
     static char **command_info;
     int i = 0;
@@ -308,9 +308,12 @@ find_editor(int nfiles, char * const files[], char **argv_out[])
 	(editor_path = find_in_path(editor, plugin_state.envp)) == NULL) {
 	return NULL;
     }
+    if (editor_path != editor)
+	free(editor);
     nargv = (char **) malloc((nargc + 1 + nfiles + 1) * sizeof(char *));
     if (nargv == NULL) {
 	sudo_log(SUDO_CONV_ERROR_MSG, "unable to allocate memory\n");
+	free(editor_path);
 	return NULL;
     }
     for (ac = 0; cp != NULL && ac < nargc; ac++) {
@@ -357,6 +360,7 @@ policy_check(int argc, char * const argv[],
 
     if (use_sudoedit) {
 	/* Rebuild argv using editor */
+	free(command);
 	command = find_editor(argc - 1, argv + 1, argv_out);
 	if (command == NULL) {
 	    sudo_log(SUDO_CONV_ERROR_MSG, "unable to find valid editor\n");
@@ -373,6 +377,7 @@ policy_check(int argc, char * const argv[],
 
     /* Setup command info. */
     *command_info_out = build_command_info(command);
+    free(command);
     if (*command_info_out == NULL) {
 	sudo_log(SUDO_CONV_ERROR_MSG, "out of memory\n");
 	return -1;

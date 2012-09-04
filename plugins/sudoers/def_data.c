@@ -343,6 +343,14 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Set the user in utmp to the runas user, not the invoking user"),
 	NULL,
     }, {
+	"privs", T_STR,
+	N_("Set of permitted privileges"),
+	NULL,
+    }, {
+	"limitprivs", T_STR,
+	N_("Set of limit privileges"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

@@ -23,6 +23,7 @@ srcdir = @srcdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 includedir = @includedir@
+cross_compiling = @CROSS_COMPILING@
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
@@ -64,7 +65,7 @@ install-binaries:
 install-doc:
 
 install-includes: install-dirs
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 $(srcdir)/sudo_plugin.h $(DESTDIR)$(includedir)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 $(srcdir)/sudo_plugin.h $(DESTDIR)$(includedir)
 
 install-plugin:
 

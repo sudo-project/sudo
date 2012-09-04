@@ -201,6 +201,15 @@ Special features/options:
 	this file instead of /etc/ldap.secret to read the secret password
 	when rootbinddn is specified in the ldap config file.
 
+  --with-sssd
+        Enable support for using the System Security Services Daemon
+        (SSSD) as a sudoers data source.  For more informaton on
+        SSD, see http://fedorahosted.org/sssd/
+
+  --with-sssd-lib=PATH
+        Specify the path to the SSSD shared library, which is loaded
+        at run-time.
+
   --with-nsswitch[=PATH]
 	Path to nsswitch.conf or "no" to disable nsswitch support.
 	If specified, sudo uses this file instead of /etc/nsswitch.conf.
@@ -344,14 +353,19 @@ Special features/options:
   --with-otp-only
 	This option is now just an alias for --without-passwd.
 
-  --with-stow
-	Properly handle GNU stow packaging.  The sudoers file will
-	physically live in ${prefix}/etc and /etc/sudoers will be
-	a symbolic link.
-
   --with-selinux 
 	Enable support for role based access control (RBAC) on
 	systems that support SELinux.
+
+  --with-man
+        Use the "man" macros for manual pages.  By default, mdoc
+        versions of the manuals are installed.  This can be used
+        to override configure's test for "nroff -mdoc" support.
+
+  --with-mdoc
+        Use the "mdoc" macros for manual pages.  By default, mdoc
+        versions of the manuals are installed.  This can be used
+        to override configure's test for "nroff -mdoc" support.
 
 The following options are also configurable at runtime:
 
@@ -630,6 +644,17 @@ The following options are also configurable at runtime:
 
   --enable-werror
 	Enable the -Werror compiler option when building sudo with gcc.
+
+  --disable-hardening
+	Disable the use of compiler/linker exploit mitigation options
+	which are enabled by default.  This includes compiling with
+	_FORTIFY_SOURCE defined to 2, building with -fstack-protector
+	and linking with -zrelro, where supported.
+
+  --disable-pie
+	Disable the creation of position independent executables (PIE)
+        even when the compiler and linker support them.
+	By default, sudo will be built as a PIE where possible.
 
   --enable-admin-flag
 	Enable the creation of an Ubuntu-style admin flag file

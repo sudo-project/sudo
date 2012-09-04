@@ -22,6 +22,7 @@
 srcdir = @srcdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+cross_compiling = @CROSS_COMPILING@
 
 # Compiler & tools to use
 CC = @CC@
@@ -34,7 +35,7 @@ CPPFLAGS = -I. -I$(srcdir)
 CFLAGS = @CFLAGS@
 
 # OS dependent defines
-DEFS = @OSDEFS@
+DEFS = @OSDEFS@ @NO_VIZ@
 
 #### End of system configuration section. ####
 

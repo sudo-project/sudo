@@ -21,7 +21,7 @@
  * Solaris locale.h includes libintl.h which causes problems when we
  * redefine the gettext functions.  We include it first to avoid this.
  */
-#if defined(HAVE_LOCALE_H) && defined(__sun__) && defined(__svr4__)
+#if defined(HAVE_SETLOCALE) && defined(__sun__) && defined(__svr4__)
 # include <locale.h>
 #endif
 
@@ -41,6 +41,15 @@
 #  undef ngettext
 #  define ngettext(String, String_Plural, N) \
     dngettext(DEFAULT_TEXT_DOMAIN, String, String_Plural, N)
+# endif
+
+/*
+ * Older versions of Solaris lack ngettext() so we have to kludge it.
+ */
+# ifndef HAVE_NGETTEXT
+#  undef ngettext
+#  define ngettext(String, String_Plural, N) \
+    ((N) == 1 ? gettext(String) : gettext(String_Plural))
 # endif
 
 /* Gettext convenience macros */

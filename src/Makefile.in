@@ -24,6 +24,7 @@ devdir = @devdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
+cross_compiling = @CROSS_COMPILING@
 
 # Compiler & tools to use
 CC = @CC@
@@ -44,7 +45,11 @@ CFLAGS = @CFLAGS@
 
 # Flags to pass to the link stage
 LDFLAGS = @LDFLAGS@
-LTLDFLAGS = @LTLDFLAGS@
+LT_LDFLAGS = @LT_LDFLAGS@
+
+# PIE flags
+PIE_CFLAGS = @PIE_CFLAGS@
+PIE_LDFLAGS = @PIE_LDFLAGS@
 
 # Where to install things...
 prefix = @prefix@
@@ -62,6 +67,9 @@ noexecdir = @NOEXECDIR@
 # User and group ids the installed files should be "owned" by
 install_uid = 0
 install_gid = 0
+
+# File mode to use for shared libraries/objects
+shlib_mode = @SHLIB_MODE@
 
 # OS dependent defines
 DEFS = @OSDEFS@ -DLOCALEDIR=\"$(localedir)\" 
@@ -88,19 +96,19 @@ Makefile: $(srcdir)/Makefile.in
 .SUFFIXES: .c .h .lo .o
 
 .c.o:
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $<
 
 .c.lo:
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $<
 
 sudo: $(OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(LIBS)
 
 libsudo_noexec.la: sudo_noexec.lo
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LTLDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
 
 sesh: sesh.o error.o exec_common.o @LIBINTL@ $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ sesh.o error.o exec_common.o $(LDFLAGS) @LIBINTL@ $(LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ sesh.o error.o exec_common.o $(LDFLAGS) $(PIE_LDFLAGS) @LIBINTL@ $(LIBS)
 
 pre-install:
 
@@ -111,10 +119,10 @@ install-dirs:
 	    $(DESTDIR)$(noexecdir)
 
 install-binaries: install-dirs $(PROGS)
-	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 04111 sudo $(DESTDIR)$(bindir)/sudo
+	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m 04755 sudo $(DESTDIR)$(bindir)/sudo
 	rm -f $(DESTDIR)$(bindir)/sudoedit
-	ln $(DESTDIR)$(bindir)/sudo $(DESTDIR)$(bindir)/sudoedit
-	if [ -f sesh ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0111 sesh $(DESTDIR)$(libexecdir)/sesh; fi
+	ln -s sudo $(DESTDIR)$(bindir)/sudoedit
+	if [ -f sesh ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0755 sesh $(DESTDIR)$(libexecdir)/sesh; fi
 
 install-doc:
 
@@ -123,14 +131,14 @@ install-includes:
 # We install sudo_noexec by hand so we can avoid a "lib" prefix
 # and a version number.  Since we use LD_PRELOAD, neither is needed.
 install-noexec: install-dirs libsudo_noexec.la
-	if [ -f .libs/lib$(noexecfile) ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m 0755 .libs/lib$(noexecfile) $(DESTDIR)$(noexecdir)/$(noexecfile); fi
+	if [ -f .libs/lib$(noexecfile) ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m $(shlib_mode) .libs/lib$(noexecfile) $(DESTDIR)$(noexecdir)/$(noexecfile); fi
 
 install-plugin:
 
 uninstall:
 	-rm -f	$(DESTDIR)$(bindir)/sudo $(DESTDIR)$(bindir)/sudoedit \
 		$(DESTDIR)$(libexecdir)/sesh \
-		$(DESTDIR)$(noexecdir)/$(noexecfile) \
+		$(DESTDIR)$(noexecdir)/$(noexecfile)
 
 check:
 
@@ -157,7 +165,7 @@ conversation.o: $(srcdir)/conversation.c $(top_builddir)/config.h \
                 $(incdir)/list.h $(incdir)/sudo_conf.h $(incdir)/list.h \
                 $(incdir)/sudo_debug.h $(incdir)/gettext.h \
                 $(incdir)/sudo_plugin.h $(srcdir)/sudo_plugin_int.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/conversation.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/conversation.c
 env_hooks.o: $(srcdir)/env_hooks.c $(top_builddir)/config.h \
              $(top_srcdir)/compat/dlfcn.h $(srcdir)/sudo.h \
              $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
@@ -165,10 +173,10 @@ env_hooks.o: $(srcdir)/env_hooks.c $(top_builddir)/config.h \
              $(incdir)/fileops.h $(incdir)/list.h $(incdir)/sudo_conf.h \
              $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
              $(incdir)/sudo_plugin.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/env_hooks.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/env_hooks.c
 error.o: $(srcdir)/error.c $(top_builddir)/config.h $(incdir)/missing.h \
          $(incdir)/error.h $(incdir)/gettext.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/error.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/error.c
 exec.o: $(srcdir)/exec.c $(top_builddir)/config.h $(srcdir)/sudo.h \
         $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
         $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
@@ -176,14 +184,14 @@ exec.o: $(srcdir)/exec.c $(top_builddir)/config.h $(srcdir)/sudo.h \
         $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
         $(srcdir)/sudo_exec.h $(incdir)/sudo_plugin.h \
         $(srcdir)/sudo_plugin_int.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/exec.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/exec.c
 exec_common.o: $(srcdir)/exec_common.c $(top_builddir)/config.h \
                $(srcdir)/sudo.h $(top_builddir)/pathnames.h \
                $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h \
                $(incdir)/alloc.h $(incdir)/error.h $(incdir)/fileops.h \
                $(incdir)/list.h $(incdir)/sudo_conf.h $(incdir)/list.h \
                $(incdir)/sudo_debug.h $(incdir)/gettext.h $(srcdir)/sudo_exec.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/exec_common.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/exec_common.c
 exec_pty.o: $(srcdir)/exec_pty.c $(top_builddir)/config.h $(srcdir)/sudo.h \
             $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
             $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
@@ -191,13 +199,13 @@ exec_pty.o: $(srcdir)/exec_pty.c $(top_builddir)/config.h $(srcdir)/sudo.h \
             $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
             $(srcdir)/sudo_exec.h $(incdir)/sudo_plugin.h \
             $(srcdir)/sudo_plugin_int.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/exec_pty.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/exec_pty.c
 get_pty.o: $(srcdir)/get_pty.c $(top_builddir)/config.h $(srcdir)/sudo.h \
            $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
            $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
            $(incdir)/fileops.h $(incdir)/list.h $(incdir)/sudo_conf.h \
            $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/get_pty.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/get_pty.c
 hooks.o: $(srcdir)/hooks.c $(top_builddir)/config.h $(srcdir)/sudo.h \
          $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
          $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
@@ -205,7 +213,7 @@ hooks.o: $(srcdir)/hooks.c $(top_builddir)/config.h $(srcdir)/sudo.h \
          $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
          $(incdir)/sudo_plugin.h $(srcdir)/sudo_plugin_int.h \
          $(incdir)/sudo_debug.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/hooks.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/hooks.c
 load_plugins.o: $(srcdir)/load_plugins.c $(top_builddir)/config.h \
                 $(top_srcdir)/compat/dlfcn.h $(srcdir)/sudo.h \
                 $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
@@ -214,65 +222,65 @@ load_plugins.o: $(srcdir)/load_plugins.c $(top_builddir)/config.h \
                 $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
                 $(incdir)/sudo_plugin.h $(srcdir)/sudo_plugin_int.h \
                 $(incdir)/sudo_conf.h $(incdir)/list.h $(incdir)/sudo_debug.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/load_plugins.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/load_plugins.c
 net_ifs.o: $(srcdir)/net_ifs.c $(top_builddir)/config.h $(incdir)/missing.h \
            $(incdir)/alloc.h $(incdir)/error.h $(incdir)/sudo_debug.h \
            $(incdir)/gettext.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/net_ifs.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/net_ifs.c
 parse_args.o: $(srcdir)/parse_args.c $(top_builddir)/config.h ./sudo_usage.h \
               $(srcdir)/sudo.h $(top_builddir)/pathnames.h \
               $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h \
               $(incdir)/alloc.h $(incdir)/error.h $(incdir)/fileops.h \
               $(incdir)/list.h $(incdir)/sudo_conf.h $(incdir)/list.h \
               $(incdir)/sudo_debug.h $(incdir)/gettext.h $(incdir)/lbuf.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/parse_args.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/parse_args.c
 preload.o: $(srcdir)/preload.c $(top_builddir)/config.h $(incdir)/sudo_plugin.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/preload.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/preload.c
 selinux.o: $(srcdir)/selinux.c $(top_builddir)/config.h $(srcdir)/sudo.h \
            $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
            $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
            $(incdir)/fileops.h $(incdir)/list.h $(incdir)/sudo_conf.h \
            $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
            $(srcdir)/sudo_exec.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/selinux.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/selinux.c
 sesh.o: $(srcdir)/sesh.c $(top_builddir)/config.h \
         $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h $(incdir)/alloc.h \
         $(incdir)/error.h $(incdir)/gettext.h $(incdir)/sudo_conf.h \
         $(incdir)/list.h $(incdir)/sudo_debug.h $(srcdir)/sudo_exec.h \
         $(incdir)/sudo_plugin.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sesh.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/sesh.c
 sudo.o: $(srcdir)/sudo.c $(top_builddir)/config.h $(srcdir)/sudo.h \
         $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
         $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
         $(incdir)/fileops.h $(incdir)/list.h $(incdir)/sudo_conf.h \
         $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
         $(incdir)/sudo_plugin.h $(srcdir)/sudo_plugin_int.h ./sudo_usage.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudo.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/sudo.c
 sudo_edit.o: $(srcdir)/sudo_edit.c $(top_builddir)/config.h $(srcdir)/sudo.h \
              $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
              $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
              $(incdir)/fileops.h $(incdir)/list.h $(incdir)/sudo_conf.h \
              $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudo_edit.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/sudo_edit.c
 sudo_noexec.lo: $(srcdir)/sudo_noexec.c $(top_builddir)/config.h \
                 $(incdir)/missing.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/sudo_noexec.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/sudo_noexec.c
 tgetpass.o: $(srcdir)/tgetpass.c $(top_builddir)/config.h $(srcdir)/sudo.h \
             $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
             $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
             $(incdir)/fileops.h $(incdir)/list.h $(incdir)/sudo_conf.h \
             $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/tgetpass.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/tgetpass.c
 ttyname.o: $(srcdir)/ttyname.c $(top_builddir)/config.h $(srcdir)/sudo.h \
            $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
            $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
            $(incdir)/fileops.h $(incdir)/list.h $(incdir)/sudo_conf.h \
            $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/ttyname.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/ttyname.c
 utmp.o: $(srcdir)/utmp.c $(top_builddir)/config.h $(srcdir)/sudo.h \
         $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
         $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
         $(incdir)/fileops.h $(incdir)/list.h $(incdir)/sudo_conf.h \
         $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
         $(srcdir)/sudo_exec.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/utmp.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/utmp.c

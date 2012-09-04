@@ -44,6 +44,7 @@ sudoersdir = $(sysconfdir)
 sudoers_uid = @SUDOERS_UID@
 sudoers_gid = @SUDOERS_GID@
 sudoers_mode = @SUDOERS_MODE@
+shlib_mode = @SHLIB_MODE@
 
 SUBDIRS = compat common @ZLIB_SRC@ plugins/sudoers src include doc
 
@@ -120,10 +121,10 @@ uninstall-nls:
 autoconf:
 	autoconf -I m4
 
-siglist.c:
+siglist.c signame.c:
 	(cd compat && exec $(MAKE) $@)
 
-depend: siglist.c
+depend: siglist.c signame.c
 	@if test "$(srcdir)" != "."; then \
 	    echo "make depend only supported in the source directory"; \
 	    exit 1; \
@@ -236,7 +237,7 @@ install-nls:
 		    test -s $$podir/$$lang.mo || continue; \
 		    echo $(ECHO_N) " $$lang$(ECHO_C)"; \
 		    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES; \
-		    $(INSTALL) -O $(install_uid) -G $(install_gid) -m 0444 $$podir/$$lang.mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$$domain.mo; \
+		    $(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 $$podir/$$lang.mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$$domain.mo; \
 		done; \
 		echo ""; \
 	    done; \
@@ -276,6 +277,7 @@ package: sudo.pp
 	    sudoers_uid=$(sudoers_uid) \
 	    sudoers_gid=$(sudoers_gid) \
 	    sudoers_mode=$(sudoers_mode) \
+	    shlib_mode=$(shlib_mode) \
 	    version=$(VERSION) $(PPVARS)
 
 clean: config.status
@@ -298,4 +300,15 @@ clobber: distclean
 
 realclean: distclean
 
-.PHONY: ChangeLog
+me:
+
+a:
+
+sandwich:
+	@if test -n "$$SUDO_USER"; then \
+	    echo "Okay."; \
+	else \
+	    echo "What?  Make it yourself!"; \
+	fi
+
+.PHONY: ChangeLog me a sandwhich

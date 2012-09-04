@@ -29,6 +29,9 @@
 #define ERROR 285
 #define TYPE 286
 #define ROLE 287
+#define PRIVS 288
+#define LIMITPRIVS 289
+#define MYSELF 290
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {
@@ -40,6 +43,7 @@ typedef union {
     struct sudo_command command;
     struct cmndtag tag;
     struct selinux_info seinfo;
+    struct solaris_privs_info privinfo;
     char *string;
     int tok;
 } YYSTYPE;

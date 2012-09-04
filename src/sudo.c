@@ -192,12 +192,12 @@ main(int argc, char *argv[], char *envp[])
     (void) sigprocmask(SIG_SETMASK, &mask, NULL);
     fix_fds();
 
+    /* Read sudo.conf. */
+    sudo_conf_read();
+
     /* Fill in user_info with user name, uid, cwd, etc. */
     memset(&user_details, 0, sizeof(user_details));
     user_info = get_user_info(&user_details);
-
-    /* Read sudo.conf. */
-    sudo_conf_read();
 
     /* Disable core dumps if not enabled in sudo.conf. */
     disable_coredumps();
@@ -670,6 +670,28 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    }
 		    break;
 		}
+#ifdef HAVE_PRIV_SET
+		if (strncmp("runas_privs=", info[i], sizeof("runas_privs=") - 1) == 0) {
+                    const char *endp;
+		    cp = info[i] + sizeof("runas_privs=") - 1;
+	            if (*cp == '\0')
+		        break;
+	            errno = 0;
+	            details->privs = priv_str_to_set(cp, ",", &endp);
+		    if (details->privs == NULL)
+			    warning("invalid runas_privs %s", endp);
+		}
+		if (strncmp("runas_limitprivs=", info[i], sizeof("runas_limitprivs=") - 1) == 0) {
+                    const char *endp;
+		    cp = info[i] + sizeof("runas_limitprivs=") - 1;
+	            if (*cp == '\0')
+		        break;
+	            errno = 0;
+	            details->limitprivs = priv_str_to_set(cp, ",", &endp);
+		    if (details->limitprivs == NULL)
+			    warning("invalid runas_limitprivs %s", endp);
+		}
+#endif /* HAVE_PRIV_SET */
 		break;
 	    case 's':
 		SET_STRING("selinux_role=", selinux_role)
@@ -900,6 +922,26 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 #ifdef HAVE_PROJECT_H
 	set_project(details->pw);
 #endif
+#ifdef HAVE_PRIV_SET
+    if (details->privs != NULL) {
+	if (setppriv(PRIV_SET, PRIV_INHERITABLE, details->privs) != 0) {
+	    warning("unable to set privileges");
+	    goto done;
+	}
+    }
+    if (details->limitprivs != NULL) {
+        if (setppriv(PRIV_SET, PRIV_LIMIT, details->limitprivs) != 0) {
+	    warning("unable to set limit privileges");
+	    goto done;
+	}
+    } else if (details->privs != NULL) {
+	if (setppriv(PRIV_SET, PRIV_LIMIT, details->privs) != 0) {
+	    warning("unable to set limit privileges");
+	    goto done;
+	}
+    }
+#endif /* HAVE_PRIV_SET */
+
 #ifdef HAVE_GETUSERATTR
 	aix_prep_user(details->pw->pw_name, ptyname ? ptyname : user_details.tty);
 #endif
@@ -1011,14 +1053,26 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     }
 
     /*
-     * Restore nproc resource limit if pam_limits didn't do it for us.
+     * SuSE Enterprise Linux uses RLIMIT_NPROC and _SC_CHILD_MAX
+     * interchangably.  This causes problems when setting RLIMIT_NPROC
+     * to RLIM_INFINITY due to a bug in bash where bash tries to honor
+     * the value of _SC_CHILD_MAX but treats a value of -1 as an error,
+     * and uses a default value of 32 instead.
+     *
+     * To work around this problem, we restore the nproc resource limit
+     * if sysconf(_SC_CHILD_MAX) is negative.  In most cases, pam_limits
+     * will set RLIMIT_NPROC for us.
+     *
      * We must do this *after* the uid change to avoid potential EAGAIN
      * from setuid().
      */
-#if defined(__linux__)
+#if defined(__linux__) && defined(_SC_CHILD_MAX)
     {
 	struct rlimit rl;
-	if (getrlimit(RLIMIT_NPROC, &rl) == 0) {
+	long l;
+	errno = 0;
+	l = sysconf(_SC_CHILD_MAX);
+	if (l == -1 && errno == 0 && getrlimit(RLIMIT_NPROC, &rl) == 0) {
 	    if (rl.rlim_cur == RLIM_INFINITY && rl.rlim_max == RLIM_INFINITY)
 		(void) setrlimit(RLIMIT_NPROC, &nproclimit);
 	}

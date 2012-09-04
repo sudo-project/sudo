@@ -188,7 +188,7 @@ main(int argc, char *argv[])
 		(void) printf(_("%s grammar version %d\n"), getprogname(), SUDOERS_GRAMMAR_VERSION);
 		goto done;
 	    case 'c':
-		checkonly++;		/* check mode */
+		checkonly = true;	/* check mode */
 		break;
 	    case 'f':
 		sudoers_path = optarg;	/* sudoers file path */
@@ -198,10 +198,10 @@ main(int argc, char *argv[])
 		help();
 		break;
 	    case 's':
-		strict++;		/* strict mode */
+		strict = true;		/* strict mode */
 		break;
 	    case 'q':
-		quiet++;		/* quiet mode */
+		quiet = false;		/* quiet mode */
 		break;
 	    default:
 		usage(1);
@@ -235,7 +235,7 @@ main(int argc, char *argv[])
     if ((yyin = open_sudoers(sudoers_path, true, NULL)) == NULL) {
 	error(1, "%s", sudoers_path);
     }
-    init_parser(sudoers_path, 0);
+    init_parser(sudoers_path, false);
     yyparse();
     (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER);
 
@@ -472,6 +472,9 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
     int ch;
     debug_decl(reparse_sudoers, SUDO_DEBUG_UTIL)
 
+    if (tq_empty(&sudoerslist))
+	debug_return;
+
     /*
      * Parse the edited sudoers files and do sanity checking
      */
@@ -497,10 +500,10 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 	}
 	fclose(yyin);
 	if (!parse_error) {
-	    if (!update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER) ||
+	    if (!check_defaults(SETDEF_ALL, quiet) ||
 		check_aliases(strict, quiet) != 0) {
 		parse_error = true;
-		errorfile = sp->path;
+		errorfile = NULL;
 	    }
 	}
 
@@ -524,10 +527,11 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 	    tq_foreach_fwd(&sudoerslist, sp) {
 		if (errorfile == NULL || strcmp(sp->path, errorfile) == 0) {
 		    edit_sudoers(sp, editor, args, errorlineno);
-		    break;
+		    if (errorfile != NULL)
+			break;
 		}
 	    }
-	    if (sp == NULL) {
+	    if (errorfile != NULL && sp == NULL) {
 		errorx(1, _("internal error, unable to find %s in list!"),
 		    sudoers);
 	    }
@@ -822,9 +826,12 @@ check_syntax(char *sudoers_path, bool quiet, bool strict, bool oldperms)
 	parse_error = true;
 	errorfile = sudoers_path;
     }
-    if (!parse_error && check_aliases(strict, quiet) != 0) {
-	parse_error = true;
-	errorfile = sudoers_path;
+    if (!parse_error) {
+	if (!check_defaults(SETDEF_ALL, quiet) ||
+	    check_aliases(strict, quiet) != 0) {
+	    parse_error = true;
+	    errorfile = NULL;
+	}
     }
     ok = !parse_error;
 

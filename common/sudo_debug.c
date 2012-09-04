@@ -101,6 +101,7 @@ const char *const sudo_debug_subsystems[] = {
     "perms",
     "plugin",
     "hooks",
+    "sssd",
     NULL
 };
 

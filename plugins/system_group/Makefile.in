@@ -24,6 +24,7 @@ devdir = @devdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
+cross_compiling = @CROSS_COMPILING@
 
 # Compiler & tools to use
 CC = @CC@
@@ -44,7 +45,11 @@ CFLAGS = @CFLAGS@
 
 # Flags to pass to the link stage
 LDFLAGS = @LDFLAGS@
-LTLDFLAGS = @LTLDFLAGS@
+LT_LDFLAGS = @LT_LDFLAGS@ @LT_LDMAP@ @LT_LDOPT@ @LT_LDEXPORTS@
+
+# PIE flags
+PIE_CFLAGS = @PIE_CFLAGS@
+PIE_LDFLAGS = @PIE_LDFLAGS@
 
 # Where to install things...
 prefix = @prefix@
@@ -56,7 +61,13 @@ libexecdir = @libexecdir@
 datarootdir = @datarootdir@
 localstatedir = @localstatedir@
 plugindir = @PLUGINDIR@
+
+# File extension, mode and map file to use for shared libraries/objects
 soext = @SOEXT@
+shlib_mode = @SHLIB_MODE@
+shlib_exp = $(srcdir)/system_group.exp
+shlib_map = system_group.map
+shlib_opt = system_group.opt
 
 # OS dependent defines
 DEFS = @OSDEFS@
@@ -79,10 +90,16 @@ Makefile: $(srcdir)/Makefile.in
 .SUFFIXES: .o .c .h .lo
 
 .c.lo:
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $<
 
-system_group.la: $(OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LTLDFLAGS) -o $@ $(OBJS) $(LIBS) -module -export-symbols $(srcdir)/system_group.sym -avoid-version -rpath $(plugindir)
+$(shlib_map): $(shlib_exp)
+	@awk 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
+
+$(shlib_opt): $(shlib_exp)
+	@sed 's/^/+e /' $(shlib_exp) > $@
+
+system_group.la: $(OBJS) $(LT_LIBS) @LT_LDDEP@
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ $(OBJS) $(LIBS) -module -avoid-version -rpath $(plugindir)
 
 pre-install:
 
@@ -98,7 +115,7 @@ install-includes:
 install-doc:
 
 install-plugin: install-dirs system_group.la
-	$(INSTALL) -b~ -m 0755 .libs/system_group$(soext) $(DESTDIR)$(plugindir)
+	$(INSTALL) -b~ -m $(shlib_mode) .libs/system_group$(soext) $(DESTDIR)$(plugindir)
 
 uninstall:
 	-rm -f $(DESTDIR)$(plugindir)/system_group$(soext)
@@ -124,4 +141,4 @@ cleandir: realclean
 system_group.lo: $(srcdir)/system_group.c $(top_builddir)/config.h \
                  $(top_srcdir)/compat/stdbool.h $(top_srcdir)/compat/dlfcn.h \
                  $(incdir)/sudo_plugin.h $(incdir)/missing.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/system_group.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/system_group.c

@@ -35,7 +35,7 @@
 int
 main(int argc, char *argv[])
 {
-    static char *my_sys_siglist[NSIG];
+    static char *sudo_sys_siglist[NSIG];
     int i;
 
 #include "compat/mksiglist.h"
@@ -43,10 +43,10 @@ main(int argc, char *argv[])
     printf("#include <config.h>\n");
     printf("#include <signal.h>\n");
     printf("#include \"missing.h\"\n\n");
-    printf("const char *const my_sys_siglist[NSIG] = {\n");
+    printf("const char *const sudo_sys_siglist[NSIG] = {\n");
     for (i = 0; i < NSIG; i++) {
-	if (my_sys_siglist[i] != NULL) {
-	    printf("    \"%s\",\n", my_sys_siglist[i]);
+	if (sudo_sys_siglist[i] != NULL) {
+	    printf("    \"%s\",\n", sudo_sys_siglist[i]);
 	} else {
 	    printf("    \"Signal %d\",\n", i);
 	}

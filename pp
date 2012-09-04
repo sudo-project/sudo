@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2012 Quest Software, Inc. ALL RIGHTS RESERVED
-pp_revision="355"
+pp_revision="368"
  # Copyright 2012 Quest Software, Inc.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -2288,9 +2288,9 @@ pp_sd_write_files () {
 		# current working (source) directory, not the destination;
 		# we need to qualify them to prevent this.
 		case "$st" in
-		    /*) echo "$line $st $p";;
-		    *) echo "$line `dirname $p`/$st $p";;
+		    [!/]*) st="`dirname \"$p\"`/$st";;
 		esac
+		echo "$line -o $o -g $g -m $m $st $p"
 		;;
             *)
 		echo "$line -o $o -g $g -m $m $pp_destdir$p $p"
@@ -3847,7 +3847,7 @@ pp_backend_deb_init () {
     pp_deb_release=
     pp_deb_arch=
     pp_deb_arch_std=
-    pp_deb_maintainer=support@quest.com
+    pp_deb_maintainer="Quest Software, Inc <support@quest.com>"
     pp_deb_copyright=
     pp_deb_distro=
     pp_deb_control_description=
@@ -3863,9 +3863,6 @@ pp_backend_deb_init () {
 
     # Make sure any programs we require are installed
     pp_deb_check_required_programs
-
-    # Set generated/interrogated platforms variables
-    pp_deb_munge_description
 }
 
 pp_deb_check_required_programs () {
@@ -3896,10 +3893,8 @@ pp_deb_check_required_programs () {
 pp_deb_munge_description () {
     # Insert a leading space on each line, replace blank lines with a
     #space followed by a full-stop.
-    pp_deb_control_description=`echo ${pp_deb_description:-$description} | \
-        sed "s,^\(.*\)$, \1, " \
-        | sed "s,^[ \t]*$, .,g"`
-
+    pp_deb_control_description="`echo ${pp_deb_description:-$description} | \
+        sed 's,^\(.*\)$, \1, ' | sed 's,^[ \t]*$, .,g' | fmt -w 80`"
 }
 
 pp_deb_detect_arch () {
@@ -3934,7 +3929,13 @@ pp_deb_conflict () {
 }
 
 pp_deb_make_control() {
-    package_name=`pp_deb_cmp_full_name "$1"`
+    local cmp="$1"
+    local installed_size
+
+    # compute the installed size
+    installed_size=`pp_deb_files_size < $pp_wrkdir/%files.$cmp`
+
+    package_name=`pp_deb_cmp_full_name "$cmp"`
     cat <<-.
 	Package: ${package_name}
 	Version: `pp_deb_version_final`-${pp_deb_release:-1}
@@ -3944,13 +3945,14 @@ pp_deb_make_control() {
 	Maintainer: ${pp_deb_maintainer:-$maintainer}
 	Description: ${pp_deb_summary:-$summary}
 	${pp_deb_control_description}
+	Installed-Size: ${installed_size}
 .
-    if test -s $pp_wrkdir/%depend."$1"; then
+    if test -s $pp_wrkdir/%depend."$cmp"; then
 	sed -ne '/^[ 	]*$/!s/^[ 	]*/Depends: /p' \
-	    < $pp_wrkdir/%depend."$1"
+	    < $pp_wrkdir/%depend."$cmp"
     fi
-    if test -s $pp_wrkdir/%conflict."$1"; then
-	pp_deb_conflict < $pp_wrkdir/%conflict."$1"
+    if test -s $pp_wrkdir/%conflict."$cmp"; then
+	pp_deb_conflict < $pp_wrkdir/%conflict."$cmp"
     fi
 }
 
@@ -4002,20 +4004,32 @@ pp_deb_handle_services() {
             #-- append %post code to install the svc
 	    test x"yes" = x"$enable" &&
             cat<<-. >> $pp_wrkdir/%post.run
-		# Install the service links
-		/usr/sbin/update-rc.d $svc defaults
+		case "\$1" in
+		    configure)
+		        # Install the service links
+		        update-rc.d $svc defaults
+		        ;;
+		esac
 .
 
             #-- prepend %preun code to stop svc
             cat<<-. | pp_prepend $pp_wrkdir/%preun.run
-		# Stop the $svc service
-		if test -x /usr/sbin/invoke-rc.d; then
-		    /usr/sbin/invoke-rc.d $svc stop
-		else
-		    /etc/init.d/$svc stop
-		fi
-		# Remove the service links
-		/usr/sbin/update-rc.d -f $svc remove
+		case "\$1" in
+		    remove|deconfigure|upgrade)
+		        # Stop the $svc service
+		        invoke-rc.d $svc stop
+		        ;;
+		esac
+.
+
+            #-- prepend %postun code to remove service
+            cat<<-. | pp_prepend $pp_wrkdir/%postun.run
+		case "\$1" in
+		    purge)
+		        # Remove the service links
+		        update-rc.d $svc remove
+		        ;;
+		esac
 .
         done
         #pp_deb_service_remove_common | pp_prepend $pp_wrkdir/%preun.run
@@ -4028,6 +4042,16 @@ pp_deb_fakeroot () {
     else
 	fakeroot -s $pp_wrkdir/fakeroot.save "$@"
     fi
+}
+
+pp_deb_files_size () {
+    local t m o g f p st
+    while read t m o g f p st; do
+        case $t in
+            f|s) du -k "${pp_destdir}$p";;
+            d)   echo 4;;
+        esac
+    done | awk '{n+=$1} END {print n}'
 }
 
 pp_deb_make_DEBIAN() {
@@ -4051,9 +4075,14 @@ pp_deb_make_DEBIAN() {
 	cp $pp_wrkdir/%conffiles.$cmp $data/DEBIAN/conffiles
     fi
 
+    # Create preinst
+    pp_deb_make_package_maintainer_script "$data/DEBIAN/preinst" \
+        "$pp_wrkdir/%pre.$cmp" "Pre-install script for $cmp_full_name"\
+        || exit $?
+
     # Create postinst
     pp_deb_make_package_maintainer_script "$data/DEBIAN/postinst" \
-        "$pp_wrkdir/%post.$cmp" "Post install script for $cmp_full_name"\
+        "$pp_wrkdir/%post.$cmp" "Post-install script for $cmp_full_name"\
         || exit $?
 
     # Create prerm
@@ -4141,12 +4170,15 @@ pp_deb_makedeb () {
 
     # Create md5sums
     pp_deb_make_md5sums $cmp `(cd $package_build_dir;
-	find . -type f -a -not -name DEBIAN | sed "s,^\./,,")` ||
+	find . -name DEBIAN -prune -o -type f -print | sed "s,^\./,,")` ||
 	    pp_die "Could not make DEBIAN md5sums for $cmp"
 }
 
 pp_backend_deb () {
     local debname
+
+    # Munge description for control file inclusion
+    pp_deb_munge_description
 
     # Handle services
     pp_deb_handle_services $cmp
@@ -4363,7 +4395,7 @@ pp_backend_deb_init_svc_vars () {
 
     lsb_required_start='$local_fs $network'
     lsb_should_start=
-    lsb_required_stop=
+    lsb_required_stop='$local_fs'
     lsb_description=
 
     start_priority=50
@@ -4376,7 +4408,7 @@ pp_deb_service_make_init_script () {
     local out=$pp_destdir$script
     local _process _cmd
 
-    pp_add_file_if_missing $script run 755 || return 0
+    pp_add_file_if_missing $script run 755 v || return 0
 
     #-- start out as an empty shell script
     cat <<-'.' >$out
@@ -6800,7 +6832,19 @@ pp_macos_bom_fix_parents () {
 	sub chk { my $d=shift;
 		  &chk(&dirname($d)) if $d =~ m,/,;
 		  unless ($seen{$d}++) {
+		    # Make sure we do not override system directories
+		    if ($d =~ m:^\./(etc|var)$:) {
+		      my $tgt = "private/$1";
+		      my $_ = `/usr/bin/printf "$tgt" | /usr/bin/cksum /dev/stdin`;
+		      my ($sum, $len) = split;
+		      print "$d\t120755\t0/0\t$len\t$sum\t$tgt\n";
+		    } elsif ($d eq "." || $d eq "./Library") {
+		      print "$d\t41775\t0/80\n";
+		    } elsif ($d eq "./Applications" || $d eq "./Developer") {
+		      print "$d\t40775\t0/80\n";
+		    } else {
 		      print "$d\t40755\t0/0\n";
+		    }
 		  }
 		}
 	m/^(\S+)\s+(\d+)/;

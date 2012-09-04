@@ -41,22 +41,22 @@
 }
 
 #define DUMMY2(fn, t1, t2)			\
-int						\
+__dso_public int				\
 fn(t1 a1, t2 a2)				\
 DUMMY_BODY
 
 #define DUMMY3(fn, t1, t2, t3)			\
-int						\
+__dso_public int				\
 fn(t1 a1, t2 a2, t3 a3)				\
 DUMMY_BODY
 
 #define DUMMY6(fn, t1, t2, t3, t4, t5, t6)	\
-int						\
+__dso_public int				\
 fn(t1 a1, t2 a2, t3 a3, t4 a4, t5 a5, t6 a6)	\
 DUMMY_BODY
 
 #define DUMMY_VA(fn, t1, t2)			\
-int						\
+__dso_public int				\
 fn(t1 a1, t2 a2, ...)				\
 DUMMY_BODY
 

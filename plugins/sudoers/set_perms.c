@@ -91,7 +91,7 @@ rewind_perms(void)
 
     while (perm_stack_depth > 1)
 	restore_perms();
-    grlist_delref(perm_stack[0].grlist);
+    sudo_grlist_delref(perm_stack[0].grlist);
 
     debug_return;
 }
@@ -157,7 +157,7 @@ set_perms(int perm)
 	state->sgid = state->egid; /* in case we are setgid */
 #endif
 	state->grlist = user_group_list;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_INITIAL: "
 	    "ruid: %d, euid: %d, suid: %d, rgid: %d, egid: %d, sgid: %d",
 	    __func__, (int)state->ruid, (int)state->euid, (int)state->suid,
@@ -182,7 +182,7 @@ set_perms(int perm)
 	state->egid = ostate->egid;
 	state->sgid = ostate->sgid;
 	state->grlist = ostate->grlist;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	break;
 
     case PERM_USER:
@@ -199,7 +199,7 @@ set_perms(int perm)
 	    goto bad;
 	}
 	state->grlist = user_group_list;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
 		strlcpy(errbuf, "PERM_USER: setgroups", sizeof(errbuf));
@@ -236,7 +236,7 @@ set_perms(int perm)
 	    goto bad;
 	}
 	state->grlist = user_group_list;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
 		strlcpy(errbuf, "PERM_FULL_USER: setgroups", sizeof(errbuf));
@@ -286,7 +286,7 @@ set_perms(int perm)
 
     case PERM_SUDOERS:
 	state->grlist = ostate->grlist;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 
 	/* assumes euid == ROOT_UID, ruid == user */
 	state->rgid = ostate->rgid;
@@ -326,7 +326,7 @@ set_perms(int perm)
 
     case PERM_TIMESTAMP:
 	state->grlist = ostate->grlist;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	state->rgid = ostate->rgid;
 	state->egid = ostate->egid;
 	state->sgid = ostate->sgid;
@@ -403,7 +403,7 @@ restore_perms(void)
 	    goto bad;
 	}
     }
-    grlist_delref(state->grlist);
+    sudo_grlist_delref(state->grlist);
     debug_return;
 
 bad:
@@ -458,7 +458,7 @@ set_perms(int perm)
 	state->egid = getgidx(ID_EFFECTIVE);
 	state->sgid = getgidx(ID_SAVED);
 	state->grlist = user_group_list;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_INITIAL: "
 	    "ruid: %d, euid: %d, suid: %d, rgid: %d, egid: %d, sgid: %d",
 	    __func__, (unsigned int)state->ruid, (unsigned int)state->euid,
@@ -484,7 +484,7 @@ set_perms(int perm)
 	state->egid = ostate->egid;
 	state->sgid = ostate->sgid;
 	state->grlist = ostate->grlist;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	break;
 
     case PERM_USER:
@@ -501,7 +501,7 @@ set_perms(int perm)
 	    goto bad;
 	}
 	state->grlist = user_group_list;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
 		strlcpy(errbuf, "PERM_USER: setgroups", sizeof(errbuf));
@@ -546,7 +546,7 @@ set_perms(int perm)
 	    goto bad;
 	}
 	state->grlist = user_group_list;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
 		strlcpy(errbuf, "PERM_FULL_USER: setgroups", sizeof(errbuf));
@@ -596,7 +596,7 @@ set_perms(int perm)
 
     case PERM_SUDOERS:
 	state->grlist = ostate->grlist;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 
 	/* assume euid == ROOT_UID, ruid == user */
 	state->rgid = ostate->rgid;
@@ -645,7 +645,7 @@ set_perms(int perm)
 
     case PERM_TIMESTAMP:
 	state->grlist = ostate->grlist;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	state->rgid = ostate->rgid;
 	state->egid = ostate->egid;
 	state->sgid = ostate->sgid;
@@ -795,7 +795,7 @@ restore_perms(void)
 	    goto bad;
 	}
     }
-    grlist_delref(state->grlist);
+    sudo_grlist_delref(state->grlist);
     debug_return;
 
 bad:
@@ -848,7 +848,7 @@ set_perms(int perm)
 	state->rgid = getgid();
 	state->egid = getegid();
 	state->grlist = user_group_list;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_INITIAL: "
 	    "ruid: %d, euid: %d, rgid: %d, egid: %d", __func__,
 	    (int)state->ruid, (int)state->euid,
@@ -881,7 +881,7 @@ set_perms(int perm)
 	state->rgid = ostate->rgid;
 	state->egid = ostate->rgid;
 	state->grlist = ostate->grlist;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	break;
 
     case PERM_USER:
@@ -896,7 +896,7 @@ set_perms(int perm)
 	    goto bad;
 	}
 	state->grlist = user_group_list;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
 		strlcpy(errbuf, "PERM_USER: setgroups", sizeof(errbuf));
@@ -928,7 +928,7 @@ set_perms(int perm)
 	    goto bad;
 	}
 	state->grlist = user_group_list;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
 		strlcpy(errbuf, "PERM_FULL_USER: setgroups", sizeof(errbuf));
@@ -971,7 +971,7 @@ set_perms(int perm)
 
     case PERM_SUDOERS:
 	state->grlist = ostate->grlist;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 
 	/* assume euid == ROOT_UID, ruid == user */
 	state->rgid = ostate->rgid;
@@ -1006,7 +1006,7 @@ set_perms(int perm)
 
     case PERM_TIMESTAMP:
 	state->grlist = ostate->grlist;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	state->rgid = ostate->rgid;
 	state->egid = ostate->egid;
 	state->ruid = ROOT_UID;
@@ -1082,7 +1082,7 @@ restore_perms(void)
 	    goto bad;
 	}
     }
-    grlist_delref(state->grlist);
+    sudo_grlist_delref(state->grlist);
     debug_return;
 
 bad:
@@ -1150,7 +1150,7 @@ set_perms(int perm)
 	state->rgid = getgid();
 	state->egid = getegid();
 	state->grlist = user_group_list;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_INITIAL: "
 	    "ruid: %d, euid: %d, rgid: %d, egid: %d", __func__,
 	    (int)state->ruid, (int)state->euid,
@@ -1167,7 +1167,7 @@ set_perms(int perm)
 	state->rgid = ostate->rgid;
 	state->egid = ostate->egid;
 	state->grlist = ostate->grlist;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	break;
 
     case PERM_USER:
@@ -1182,7 +1182,7 @@ set_perms(int perm)
 	    goto bad;
 	}
 	state->grlist = user_group_list;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
 		strlcpy(errbuf, "PERM_USER: setgroups", sizeof(errbuf));
@@ -1214,7 +1214,7 @@ set_perms(int perm)
 	    goto bad;
 	}
 	state->grlist = user_group_list;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
 		strlcpy(errbuf, "PERM_FULL_USER: setgroups", sizeof(errbuf));
@@ -1257,7 +1257,7 @@ set_perms(int perm)
 
     case PERM_SUDOERS:
 	state->grlist = ostate->grlist;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 
 	/* assume euid == ROOT_UID, ruid == user */
 	state->rgid = ostate->rgid;
@@ -1292,7 +1292,7 @@ set_perms(int perm)
 
     case PERM_TIMESTAMP:
 	state->grlist = ostate->grlist;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	state->rgid = ostate->rgid;
 	state->egid = ostate->egid;
 	state->ruid = ROOT_UID;
@@ -1367,7 +1367,7 @@ restore_perms(void)
 	warning("seteuid(%d)", ostate->euid);
 	goto bad;
     }
-    grlist_delref(state->grlist);
+    sudo_grlist_delref(state->grlist);
     debug_return;
 
 bad:
@@ -1414,7 +1414,7 @@ set_perms(int perm)
 	state->ruid = geteuid() == ROOT_UID ? ROOT_UID : getuid();
 	state->rgid = getgid();
 	state->grlist = user_group_list;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_INITIAL: "
 	    "ruid: %d, rgid: %d", __func__, (int)state->ruid, (int)state->rgid);
 	break;
@@ -1423,7 +1423,7 @@ set_perms(int perm)
 	state->ruid = ROOT_UID;
 	state->rgid = ostate->rgid;
 	state->grlist = ostate->grlist;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_ROOT: uid: "
 	    "[%d] -> [%d]", __func__, (int)ostate->ruid, (int)state->ruid);
 	if (setuid(ROOT_UID)) {
@@ -1438,7 +1438,7 @@ set_perms(int perm)
 	    "[%d] -> [%d]", __func__, (int)ostate->rgid, (int)state->rgid);
 	(void) setgid(user_gid);
 	state->grlist = user_group_list;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
 		strlcpy(errbuf, "PERM_FULL_USER: setgroups", sizeof(errbuf));
@@ -1463,7 +1463,7 @@ set_perms(int perm)
 	state->ruid = ostate->ruid;
 	state->rgid = ostate->rgid;
 	state->grlist = ostate->grlist;
-	grlist_addref(state->grlist);
+	sudo_grlist_addref(state->grlist);
 	break;
     }
 
@@ -1505,7 +1505,7 @@ restore_perms(void)
 	    goto bad;
 	}
     }
-    grlist_delref(state->grlist);
+    sudo_grlist_delref(state->grlist);
     if (OID(ruid) != -1 && setuid(ostate->ruid)) {
 	warning("setuid(%d)", (int)ostate->ruid);
 	goto bad;
@@ -1526,7 +1526,7 @@ runas_setgroups(void)
     debug_decl(runas_setgroups, SUDO_DEBUG_PERMS)
 
     if (def_preserve_groups) {
-	grlist_addref(user_group_list);
+	sudo_grlist_addref(user_group_list);
 	debug_return_ptr(user_group_list);
     }
 
@@ -1534,7 +1534,7 @@ runas_setgroups(void)
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb(pw->pw_name);
 #endif
-    grlist = get_group_list(pw);
+    grlist = sudo_get_grlist(pw);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif

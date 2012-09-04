@@ -85,6 +85,10 @@
 extern int ldapssl_set_strength(LDAP *ldap, int strength);
 #endif
 
+#if !defined(LDAP_OPT_NETWORK_TIMEOUT) && defined(LDAP_OPT_CONNECT_TIMEOUT)
+# define LDAP_OPT_NETWORK_TIMEOUT LDAP_OPT_CONNECT_TIMEOUT
+#endif
+
 #ifndef LDAP_OPT_SUCCESS
 # define LDAP_OPT_SUCCESS LDAP_SUCCESS
 #endif
@@ -128,14 +132,12 @@ extern int ldapssl_set_strength(LDAP *ldap, int strength);
 #define SUDO_LDAP_SSL		1
 #define SUDO_LDAP_STARTTLS	2
 
-/* The TIMEFILTER_LENGTH includes the filter itself plus the global AND
-   wrapped around the user filter and the time filter when timed entries
+/* The TIMEFILTER_LENGTH is the length of the filter when timed entries
    are used. The length is computed as follows:
-       85       for the filter
-       + 2 * 13 for the now timestamp
-       +      3 for the global AND
+       81       for the filter itself
+       + 2 * 17 for the now timestamp
 */
-#define TIMEFILTER_LENGTH	114    
+#define TIMEFILTER_LENGTH	115
 
 /*
  * The ldap_search structure implements a linked list of ldap and
@@ -216,6 +218,7 @@ static struct ldap_config {
     char *tls_cipher_suite;
     char *tls_certfile;
     char *tls_keyfile;
+    char *tls_keypw;
     char *sasl_auth_id;
     char *rootsasl_auth_id;
     char *sasl_secprops;
@@ -255,6 +258,9 @@ static struct ldap_config_table ldap_conf_global[] = {
 #ifdef LDAP_OPT_X_TLS_CIPHER_SUITE
     { "tls_ciphers", CONF_STR, LDAP_OPT_X_TLS_CIPHER_SUITE,
 	&ldap_conf.tls_cipher_suite },
+#elif defined(LDAP_OPT_SSL_CIPHER)
+    { "tls_ciphers", CONF_STR, LDAP_OPT_SSL_CIPHER,
+	&ldap_conf.tls_cipher_suite },
 #endif
 #ifdef LDAP_OPT_X_TLS_CERTFILE
     { "tls_cert", CONF_STR, LDAP_OPT_X_TLS_CERTFILE,
@@ -267,6 +273,9 @@ static struct ldap_config_table ldap_conf_global[] = {
 	&ldap_conf.tls_keyfile },
 #else
     { "tls_key", CONF_STR, -1, &ldap_conf.tls_keyfile },
+#endif
+#ifdef HAVE_LDAP_SSL_CLIENT_INIT
+    { "tls_keypw", CONF_STR, -1, &ldap_conf.tls_keypw },
 #endif
     { "binddn", CONF_STR, -1, &ldap_conf.binddn },
     { "bindpw", CONF_STR, -1, &ldap_conf.bindpw },
@@ -572,6 +581,16 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 	if ((ld = ldapssl_init(host, port, defsecure)) != NULL)
 	    rc = LDAP_SUCCESS;
     } else
+#elif defined(HAVE_LDAP_SSL_INIT) && defined(HAVE_LDAP_SSL_CLIENT_INIT)
+    if (ldap_conf.ssl_mode == SUDO_LDAP_SSL) {
+	if (ldap_ssl_client_init(ldap_conf.tls_keyfile, ldap_conf.tls_keypw, 0, &rc) != LDAP_SUCCESS) {
+	    warningx("ldap_ssl_client_init(): %s", ldap_err2string(rc));
+	    debug_return_int(-1);
+	}
+	DPRINTF(("ldap_ssl_init(%s, %d, NULL)", host, port), 2);
+	if ((ld = ldap_ssl_init((char *)host, port, NULL)) != NULL)
+	    rc = LDAP_SUCCESS;
+    } else
 #endif
     {
 #ifdef HAVE_LDAP_CREATE
@@ -582,7 +601,7 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 	rc = ldap_set_option(ld, LDAP_OPT_HOST_NAME, host);
 #else
 	DPRINTF(("ldap_init(%s, %d)", host, port), 2);
-	if ((ld = ldap_init(host, port)) != NULL)
+	if ((ld = ldap_init((char *)host, port)) != NULL)
 	    rc = LDAP_SUCCESS;
 #endif
     }
@@ -963,7 +982,7 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
 {
     struct tm *tp;
     time_t now;
-    char timebuffer[16];
+    char timebuffer[sizeof("20120727121554.0Z")];
     int bytes = 0;
     debug_decl(sudo_ldap_timefilter, SUDO_DEBUG_LDAP)
 
@@ -975,8 +994,8 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
     }
 
     /* Format the timestamp according to the RFC. */
-    if (strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%M%SZ", tp) == 0) {
-	warning(_("unable to format timestamp"));
+    if (strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%M%S.0Z", tp) == 0) {
+	warningx(_("unable to format timestamp"));
 	goto done;
     }
 
@@ -1108,15 +1127,19 @@ static char *
 sudo_ldap_build_pass1(struct passwd *pw)
 {
     struct group *grp;
-    char *buf, timebuffer[TIMEFILTER_LENGTH], gidbuf[MAX_UID_T_LEN];
+    char *buf, timebuffer[TIMEFILTER_LENGTH + 1], gidbuf[MAX_UID_T_LEN + 1];
     struct group_list *grlist;
     size_t sz = 0;
     int i;
     debug_decl(sudo_ldap_build_pass1, SUDO_DEBUG_LDAP)
 
-    /* Start with LDAP search filter length + 3 */
+    /* If there is a filter, allocate space for the global AND. */
+    if (ldap_conf.timed || ldap_conf.search_filter)
+	sz += 3;
+
+    /* Add LDAP search filter if present. */
     if (ldap_conf.search_filter)
-	sz += strlen(ldap_conf.search_filter) + 3;
+	sz += strlen(ldap_conf.search_filter);
 
     /* Then add (|(sudoUser=USERNAME)(sudoUser=ALL)) + NUL */
     sz += 29 + sudo_ldap_value_len(pw->pw_name);
@@ -1126,7 +1149,7 @@ sudo_ldap_build_pass1(struct passwd *pw)
 	sz += 12 + sudo_ldap_value_len(grp->gr_name);
     }
     sz += 13 + MAX_UID_T_LEN;
-    if ((grlist = get_group_list(pw)) != NULL) {
+    if ((grlist = sudo_get_grlist(pw)) != NULL) {
 	for (i = 0; i < grlist->ngroups; i++) {
 	    if (grp != NULL && strcasecmp(grlist->groups[i], grp->gr_name) == 0)
 		continue;
@@ -1193,9 +1216,9 @@ sudo_ldap_build_pass1(struct passwd *pw)
 
     /* Done with groups. */
     if (grlist != NULL)
-	grlist_delref(grlist);
+	sudo_grlist_delref(grlist);
     if (grp != NULL)
-	gr_delref(grp);
+	sudo_gr_delref(grp);
 
     /* Add ALL to list and end the global OR */
     if (strlcat(buf, "(sudoUser=ALL)", sz) >= sz)
@@ -1220,7 +1243,7 @@ sudo_ldap_build_pass1(struct passwd *pw)
 static char *
 sudo_ldap_build_pass2(void)
 {
-    char *filt, timebuffer[TIMEFILTER_LENGTH];
+    char *filt, timebuffer[TIMEFILTER_LENGTH + 1];
     debug_decl(sudo_ldap_build_pass2, SUDO_DEBUG_LDAP)
 
     if (ldap_conf.timed)
@@ -1911,7 +1934,7 @@ static int
 sudo_ldap_set_options_table(LDAP *ld, struct ldap_config_table *table)
 {
     struct ldap_config_table *cur;
-    int ival, rc;
+    int ival, rc, errors = 0;
     char *sval;
     debug_decl(sudo_ldap_set_options_table, SUDO_DEBUG_LDAP)
 
@@ -1924,30 +1947,30 @@ sudo_ldap_set_options_table(LDAP *ld, struct ldap_config_table *table)
 	case CONF_INT:
 	    ival = *(int *)(cur->valp);
 	    if (ival >= 0) {
+		DPRINTF(("ldap_set_option: %s -> %d", cur->conf_str, ival), 1);
 		rc = ldap_set_option(ld, cur->opt_val, &ival);
 		if (rc != LDAP_OPT_SUCCESS) {
 		    warningx("ldap_set_option: %s -> %d: %s",
 			cur->conf_str, ival, ldap_err2string(rc));
-		    debug_return_int(-1);
+		    errors++;
 		}
-		DPRINTF(("ldap_set_option: %s -> %d", cur->conf_str, ival), 1);
 	    }
 	    break;
 	case CONF_STR:
 	    sval = *(char **)(cur->valp);
 	    if (sval != NULL) {
+		DPRINTF(("ldap_set_option: %s -> %s", cur->conf_str, sval), 1);
 		rc = ldap_set_option(ld, cur->opt_val, sval);
 		if (rc != LDAP_OPT_SUCCESS) {
 		    warningx("ldap_set_option: %s -> %s: %s",
 			cur->conf_str, sval, ldap_err2string(rc));
-		    debug_return_int(-1);
+		    errors++;
 		}
-		DPRINTF(("ldap_set_option: %s -> %s", cur->conf_str, sval), 1);
 	    }
 	    break;
 	}
     }
-    debug_return_int(0);
+    debug_return_int(errors ? -1 : 0);
 }
 
 /*
@@ -1992,14 +2015,13 @@ sudo_ldap_set_options_conn(LDAP *ld)
 	struct timeval tv;
 	tv.tv_sec = ldap_conf.timeout;
 	tv.tv_usec = 0;
+	DPRINTF(("ldap_set_option(LDAP_OPT_TIMEOUT, %ld)",
+	    (long)tv.tv_sec), 1);
 	rc = ldap_set_option(ld, LDAP_OPT_TIMEOUT, &tv);
 	if (rc != LDAP_OPT_SUCCESS) {
 	    warningx("ldap_set_option(TIMEOUT, %ld): %s",
 		(long)tv.tv_sec, ldap_err2string(rc));
-	    debug_return_int(-1);
 	}
-	DPRINTF(("ldap_set_option(LDAP_OPT_TIMEOUT, %ld)",
-	    (long)tv.tv_sec), 1);
     }
 #endif
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
@@ -2008,27 +2030,29 @@ sudo_ldap_set_options_conn(LDAP *ld)
 	struct timeval tv;
 	tv.tv_sec = ldap_conf.bind_timelimit / 1000;
 	tv.tv_usec = 0;
+	DPRINTF(("ldap_set_option(LDAP_OPT_NETWORK_TIMEOUT, %ld)",
+	    (long)tv.tv_sec), 1);
 	rc = ldap_set_option(ld, LDAP_OPT_NETWORK_TIMEOUT, &tv);
+# if !defined(LDAP_OPT_CONNECT_TIMEOUT) || LDAP_VENDOR_VERSION != 510
+	/* Tivoli Directory Server 6.3 libs always return a (bogus) error. */
 	if (rc != LDAP_OPT_SUCCESS) {
 	    warningx("ldap_set_option(NETWORK_TIMEOUT, %ld): %s",
 		(long)tv.tv_sec, ldap_err2string(rc));
-	    debug_return_int(-1);
 	}
-	DPRINTF(("ldap_set_option(LDAP_OPT_NETWORK_TIMEOUT, %ld)",
-	    (long)tv.tv_sec), 1);
+# endif
     }
 #endif
 
 #if defined(LDAP_OPT_X_TLS) && !defined(HAVE_LDAPSSL_INIT)
     if (ldap_conf.ssl_mode == SUDO_LDAP_SSL) {
 	int val = LDAP_OPT_X_TLS_HARD;
+	DPRINTF(("ldap_set_option(LDAP_OPT_X_TLS, LDAP_OPT_X_TLS_HARD)"), 1);
 	rc = ldap_set_option(ld, LDAP_OPT_X_TLS, &val);
 	if (rc != LDAP_SUCCESS) {
 	    warningx("ldap_set_option(LDAP_OPT_X_TLS, LDAP_OPT_X_TLS_HARD): %s",
 		ldap_err2string(rc));
 	    debug_return_int(-1);
 	}
-	DPRINTF(("ldap_set_option(LDAP_OPT_X_TLS, LDAP_OPT_X_TLS_HARD)"), 1);
     }
 #endif
     debug_return_int(0);
@@ -2236,7 +2260,7 @@ sudo_ldap_open(struct sudo_nss *nss)
 	}
 	DPRINTF(("ldap_start_tls_s() ok"), 1);
 #elif defined(HAVE_LDAP_SSL_CLIENT_INIT) && defined(HAVE_LDAP_START_TLS_S_NP)
-	if (ldap_ssl_client_init(NULL, NULL, 0, &rc) != LDAP_SUCCESS) {
+	if (ldap_ssl_client_init(ldap_conf.tls_keyfile, ldap_conf.tls_keypw, 0, &rc) != LDAP_SUCCESS) {
 	    warningx("ldap_ssl_client_init(): %s", ldap_err2string(rc));
 	    debug_return_int(-1);
 	}

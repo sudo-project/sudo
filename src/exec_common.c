@@ -40,6 +40,7 @@
 # include <priv.h>
 #endif
 #include <errno.h>
+#include <signal.h>
 
 #include "sudo.h"
 #include "sudo_exec.h"

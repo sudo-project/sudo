@@ -57,7 +57,17 @@ struct selinux_info {
 };
 
 /*
- * The parses sudoers file is stored as a collection of linked lists,
+ * Solaris privileges container struct
+ * Currently just contains permitted and limit privileges.
+ * It could have PFEXEC and PRIV_AWARE flags added in the future.
+ */
+struct solaris_privs_info {
+    char *privs;
+    char *limitprivs;
+};
+
+/*
+ * The parsed sudoers file is stored as a collection of linked lists,
  * modelled after the yacc grammar.
  *
  * Other than the alias struct, which is stored in a red-black tree,
@@ -110,6 +120,9 @@ struct cmndspec {
     struct cmndtag tags;		/* tag specificaion */
 #ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
+#endif
+#ifdef HAVE_PRIV_SET
+    char *privs, *limitprivs;		/* Solaris privilege sets */
 #endif
 };
 
@@ -174,7 +187,7 @@ int hostlist_matches(struct member_list *);
 bool hostname_matches(char *, char *, char *);
 bool netgr_matches(char *, char *, char *, char *);
 bool no_aliases(void);
-int runaslist_matches(struct member_list *, struct member_list *);
+int runaslist_matches(struct member_list *, struct member_list *, struct member **, struct member **);
 int userlist_matches(struct passwd *, struct member_list *);
 bool usergr_matches(char *, char *, struct passwd *);
 bool userpw_matches(char *, char *, struct passwd *);
@@ -185,7 +198,7 @@ void alias_free(void *);
 void alias_apply(int (*)(void *, void *), void *);
 void init_aliases(void);
 void init_lexer(void);
-void init_parser(const char *, int);
+void init_parser(const char *, bool);
 int alias_compare(const void *, const void *);
 
 #endif /* _SUDO_PARSE_H */

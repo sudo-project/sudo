@@ -93,7 +93,7 @@ struct sudo_defs_types {
 #define T_PATH		0x200
 
 /*
- * Argument to update_defaults()
+ * Argument to update_defaults() and check_defaults()
  */
 #define SETDEF_GENERIC	0x01
 #define	SETDEF_HOST	0x02
@@ -107,8 +107,9 @@ struct sudo_defs_types {
  */
 void dump_default(void);
 void init_defaults(void);
-bool set_default(char *, char *, int);
-int  update_defaults(int);
+bool set_default(char *var, char *val, int op);
+bool update_defaults(int what);
+bool check_defaults(int what, bool quiet);
 
 extern struct sudo_defs_types sudo_defs_table[];
 

@@ -87,17 +87,33 @@
    don't. */
 #undef HAVE_DECL_H_ERRNO
 
+/* Define to 1 if you have the declaration of `sys_sigabbrev', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SYS_SIGABBREV
+
 /* Define to 1 if you have the declaration of `sys_siglist', and to 0 if you
    don't. */
 #undef HAVE_DECL_SYS_SIGLIST
+
+/* Define to 1 if you have the declaration of `sys_signame', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SYS_SIGNAME
 
 /* Define to 1 if you have the declaration of `_sys_siglist', and to 0 if you
    don't. */
 #undef HAVE_DECL__SYS_SIGLIST
 
+/* Define to 1 if you have the declaration of `_sys_signame', and to 0 if you
+   don't. */
+#undef HAVE_DECL__SYS_SIGNAME
+
 /* Define to 1 if you have the declaration of `__sys_siglist', and to 0 if you
    don't. */
 #undef HAVE_DECL___SYS_SIGLIST
+
+/* Define to 1 if you have the declaration of `__sys_signame', and to 0 if you
+   don't. */
+#undef HAVE_DECL___SYS_SIGNAME
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
@@ -115,6 +131,9 @@
 /* Define to 1 if you have the `dlopen' function. */
 #undef HAVE_DLOPEN
 
+/* Define to 1 if the compiler supports the __visibility__ attribute. */
+#undef HAVE_DSO_VISIBILITY
+
 /* Define to 1 if your system has the F_CLOSEM fcntl. */
 #undef HAVE_FCNTL_CLOSEM
 
@@ -129,6 +148,9 @@
 
 /* Define to 1 if you have the `freeifaddrs' function. */
 #undef HAVE_FREEIFADDRS
+
+/* Define to 1 if you have the `fseeko' function. */
+#undef HAVE_FSEEKO
 
 /* Define to 1 if you have the `futime' function. */
 #undef HAVE_FUTIME
@@ -294,6 +316,9 @@
 /* Define to 1 if you have the <ldap_ssl.h> header file. */
 #undef HAVE_LDAP_SSL_H
 
+/* Define to 1 if you have the `ldap_ssl_init' function. */
+#undef HAVE_LDAP_SSL_INIT
+
 /* Define to 1 if you have the `ldap_start_tls_s' function. */
 #undef HAVE_LDAP_START_TLS_S
 
@@ -359,6 +384,9 @@
 
 /* Define to 1 if you have the <netgroup.h> header file. */
 #undef HAVE_NETGROUP_H
+
+/* Define to 1 if you have the `ngettext' function. */
+#undef HAVE_NGETTEXT
 
 /* Define to 1 if you have the `nl_langinfo' function. */
 #undef HAVE_NL_LANGINFO
@@ -463,6 +491,9 @@
 /* Define to 1 if you have the `sia_ses_init' function. */
 #undef HAVE_SIA_SES_INIT
 
+/* Define to 1 if you have the `sig2str' function. */
+#undef HAVE_SIG2STR
+
 /* Define to 1 if the system has the type `sigaction_t'. */
 #undef HAVE_SIGACTION_T
 
@@ -477,6 +508,9 @@
 
 /* Define to 1 if you have the <spawn.h> header file. */
 #undef HAVE_SPAWN_H
+
+/* Define to 1 to enable SSSD support. */
+#undef HAVE_SSSD
 
 /* Define to 1 if stdbool.h conforms to C99. */
 #undef HAVE_STDBOOL_H
@@ -611,6 +645,9 @@
 
 /* Define to 1 if you have the <sys/select.h> header file. */
 #undef HAVE_SYS_SELECT_H
+
+/* Define to 1 if your libc has the `sys_sigabbrev' symbol. */
+#undef HAVE_SYS_SIGABBREV
 
 /* Define to 1 if you have the <sys/sockio.h> header file. */
 #undef HAVE_SYS_SOCKIO_H
@@ -942,13 +979,6 @@
 } while(0)
 #else
 # define ignore_result(x)	(void)(x)
-#endif
-
-/* GNU stow needs /etc/sudoers to be a symlink. */
-#ifdef USE_STOW
-# define stat_sudoers	stat
-#else
-# define stat_sudoers	lstat
 #endif
 
 /* Macros to set/clear/test flags. */

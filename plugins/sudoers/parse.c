@@ -96,7 +96,7 @@ sudo_file_close(struct sudo_nss *nss)
     debug_decl(sudo_file_close, SUDO_DEBUG_NSS)
 
     /* Free parser data structures and close sudoers file. */
-    init_parser(NULL, 0);
+    init_parser(NULL, false);
     if (nss->handle != NULL) {
 	fclose(nss->handle);
 	nss->handle = NULL;
@@ -116,7 +116,7 @@ sudo_file_parse(struct sudo_nss *nss)
     if (nss->handle == NULL)
 	debug_return_int(-1);
 
-    init_parser(sudoers_file, 0);
+    init_parser(sudoers_file, false);
     yyin = nss->handle;
     if (yyparse() != 0 || parse_error) {
 	if (errorlineno != -1) {
@@ -158,6 +158,7 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
     struct cmndtag *tags = NULL;
     struct privilege *priv;
     struct userspec *us;
+    struct member *matching_user;
     debug_decl(sudo_file_lookup, SUDO_DEBUG_NSS)
 
     if (nss->handle == NULL)
@@ -225,8 +226,9 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 	    else
 		continue;
 	    tq_foreach_rev(&priv->cmndlist, cs) {
+		matching_user = NULL;
 		runas_match = runaslist_matches(&cs->runasuserlist,
-		    &cs->runasgrouplist);
+		    &cs->runasgrouplist, &matching_user, NULL);
 		if (runas_match == ALLOW) {
 		    cmnd_match = cmnd_matches(cs->cmnd);
 		    if (cmnd_match != UNSPEC) {
@@ -239,6 +241,23 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 			if (user_type == NULL)
 			    user_type = cs->type ? estrdup(cs->type) : def_type;
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+			/* Set Solaris privilege sets */
+			if (runas_privs == NULL)
+			    runas_privs = cs->privs ? estrdup(cs->privs) : def_privs;
+			if (runas_limitprivs == NULL)
+			    runas_limitprivs = cs->limitprivs ? estrdup(cs->limitprivs) : def_limitprivs;
+#endif /* HAVE_PRIV_SET */
+			/*
+			 * If user is running command as himself,
+			 * set runas_pw = sudo_user.pw.
+			 * XXX - hack, want more general solution
+			 */
+			if (matching_user && matching_user->type == MYSELF) {
+			    sudo_pw_delref(runas_pw);
+			    sudo_pw_addref(sudo_user.pw);
+			    runas_pw = sudo_user.pw;
+			}
 			goto matched2;
 		    }
 		}
@@ -281,6 +300,12 @@ sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
     struct member *m;
     debug_decl(sudo_file_append_cmnd, SUDO_DEBUG_NSS)
 
+#ifdef HAVE_PRIV_SET
+    if (cs->privs)
+	lbuf_append(lbuf, "PRIVS=\"%s\" ", cs->privs);
+    if (cs->limitprivs)
+	lbuf_append(lbuf, "LIMITPRIVS=\"%s\" ", cs->limitprivs);
+#endif /* HAVE_PRIV_SET */
 #ifdef HAVE_SELINUX
     if (cs->role)
 	lbuf_append(lbuf, "ROLE=%s ", cs->role);
@@ -600,7 +625,7 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 		continue;
 	    tq_foreach_rev(&priv->cmndlist, cs) {
 		runas_match = runaslist_matches(&cs->runasuserlist,
-		    &cs->runasgrouplist);
+		    &cs->runasgrouplist, NULL, NULL);
 		if (runas_match == ALLOW) {
 		    cmnd_match = cmnd_matches(cs->cmnd);
 		    if (cmnd_match != UNSPEC) {
@@ -636,6 +661,9 @@ _print_member(struct lbuf *lbuf, char *name, int type, int negated,
     switch (type) {
 	case ALL:
 	    lbuf_append(lbuf, "%sALL", negated ? "!" : "");
+	    break;
+	case MYSELF:
+	    lbuf_append(lbuf, "%s%s", negated ? "!" : "", user_name);
 	    break;
 	case COMMAND:
 	    c = (struct sudo_command *) name;

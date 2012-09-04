@@ -18,6 +18,7 @@
 
 #include <sys/types.h>
 #include <sys/param.h>
+#include <sys/uio.h>
 #ifdef HAVE_SYS_SYSMACROS_H
 # include <sys/sysmacros.h>
 #endif
@@ -215,6 +216,7 @@ static int open_io_fd(char *pathbuf, int len, const char *suffix, union io_fd *f
 static int parse_timing(const char *buf, const char *decimal, int *idx, double *seconds, size_t *nbytes);
 static struct log_info *parse_logfile(char *logfile);
 static void free_log_info(struct log_info *li);
+static size_t atomic_writev(int fd, struct iovec *iov, int iovcnt);
 
 #ifdef HAVE_REGCOMP
 # define REGEX_T	regex_t
@@ -239,16 +241,16 @@ static void free_log_info(struct log_info *li);
 int
 main(int argc, char *argv[])
 {
-    int ch, idx, plen, nready, exitcode = 0, rows = 0, cols = 0;
-    bool interactive = false, listonly = false;
+    int ch, idx, plen, exitcode = 0, rows = 0, cols = 0;
+    bool interactive = false, listonly = false, need_nlcr = false;
     const char *id, *user = NULL, *pattern = NULL, *tty = NULL, *decimal = ".";
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
     double seconds, to_wait, speed = 1.0, max_wait = 0;
-    fd_set *fdsw;
     sigaction_t sa;
-    size_t len, nbytes, nread, off;
-    ssize_t nwritten;
+    size_t len, nbytes, nread;
     struct log_info *li;
+    struct iovec *iov = NULL;
+    int iovcnt = 0, iovmax = 0;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -397,8 +399,10 @@ main(int argc, char *argv[])
 	    (void) fcntl(STDIN_FILENO, F_SETFL, ch | O_NONBLOCK);
 	if (!term_raw(STDIN_FILENO, 1))
 	    error(1, _("unable to set tty to raw mode"));
+	iovcnt = 0;
+	iovmax = 32;
+	iov = ecalloc(iovmax, sizeof(*iov));
     }
-    fdsw = ecalloc(howmany(STDOUT_FILENO + 1, NFDBITS), sizeof(fd_mask));
 
     /*
      * Timing file consists of line of the format: "%f %d\n"
@@ -408,6 +412,8 @@ main(int argc, char *argv[])
 #else
     while (fgets(buf, sizeof(buf), io_fds[IOFD_TIMING].f) != NULL) {
 #endif
+	char last_char = '\0';
+
 	if (!parse_timing(buf, decimal, &idx, &seconds, &nbytes))
 	    errorx(1, _("invalid timing file line: %s"), buf);
 
@@ -424,6 +430,10 @@ main(int argc, char *argv[])
 	if (io_fds[idx].v == NULL)
 	    continue;
 
+	/* Check whether we need to convert newline to CR LF pairs. */
+	if (interactive) 
+	    need_nlcr = (idx == IOFD_STDOUT || idx == IOFD_STDERR);
+
 	/* All output is sent to stdout. */
 	while (nbytes != 0) {
 	    if (nbytes > sizeof(buf))
@@ -436,25 +446,59 @@ main(int argc, char *argv[])
 	    nread = fread(buf, 1, len, io_fds[idx].f);
 #endif
 	    nbytes -= nread;
-	    off = 0;
-	    do {
-		/* no stdio, must be unbuffered */
-		nwritten = write(STDOUT_FILENO, buf + off, nread - off);
-		if (nwritten == -1) {
-		    if (errno == EINTR)
-			continue;
-		    if (errno == EAGAIN) {
-			FD_SET(STDOUT_FILENO, fdsw);
-			do {
-			    nready = select(STDOUT_FILENO + 1, NULL, fdsw, NULL, NULL);
-			} while (nready == -1 && errno == EINTR);
-			if (nready == 1)
-			    continue;
-		    }
-		    error(1, _("writing to standard output"));
+
+	    /* Convert newline to carriage return + linefeed if needed. */
+	    if (need_nlcr) {
+		size_t remainder = nread;
+		size_t linelen;
+		iovcnt = 0;
+		cp = buf;
+		ep = cp - 1;
+		/* Handle a "\r\n" pair that spans a buffer. */
+		if (last_char == '\r' && buf[0] == '\n') {
+		    ep++;
+		    remainder--;
 		}
-		off += nwritten;
-	    } while (nread > off);
+		while ((ep = memchr(ep + 1, '\n', remainder)) != NULL) {
+		    /* Is there already a carriage return? */
+		    if (cp != ep && ep[-1] == '\r') {
+			remainder = (size_t)(&buf[nread - 1] - ep);
+		    	continue;
+		    }
+
+		    /* Store the line in iov followed by \r\n pair. */
+		    if (iovcnt + 3 > iovmax) {
+			iovmax <<= 1;
+			iov = erealloc3(iov, iovmax, sizeof(*iov));
+		    }
+		    linelen = (size_t)(ep - cp) + 1;
+		    iov[iovcnt].iov_base = cp;
+		    iov[iovcnt].iov_len = linelen - 1; /* not including \n */
+		    iovcnt++;
+		    iov[iovcnt].iov_base = "\r\n";
+		    iov[iovcnt].iov_len = 2;
+		    iovcnt++;
+		    cp = ep + 1;
+		    remainder -= linelen;
+		}
+		if (cp - buf != nread) {
+		    /*
+		     * Partial line without a linefeed or multiple lines
+		     * with \r\n pairs.
+		     */
+		    iov[iovcnt].iov_base = cp;
+		    iov[iovcnt].iov_len = nread - (cp - buf);
+		    iovcnt++;
+		}
+		last_char = buf[nread - 1]; /* stash last char of old buffer */
+	    } else {
+		/* No conversion needed. */
+		iov[0].iov_base = buf;
+		iov[0].iov_len = nread;
+		iovcnt = 1;
+	    }
+	    if (atomic_writev(STDOUT_FILENO, iov, iovcnt) == -1)
+		error(1, _("writing to standard output"));
 	}
     }
     term_restore(STDIN_FILENO, 1);
@@ -491,9 +535,10 @@ delay(double secs)
 static int
 open_io_fd(char *path, int len, const char *suffix, union io_fd *fdp)
 {
+    debug_decl(open_io_fd, SUDO_DEBUG_UTIL)
+
     path[len] = '\0';
     strlcat(path, suffix, PATH_MAX);
-    debug_decl(open_io_fd, SUDO_DEBUG_UTIL)
 
 #ifdef HAVE_ZLIB_H
     fdp->g = gzopen(path, "r");
@@ -501,6 +546,69 @@ open_io_fd(char *path, int len, const char *suffix, union io_fd *fdp)
     fdp->f = fopen(path, "r");
 #endif
     debug_return_int(fdp->v ? 0 : -1);
+}
+
+/*
+ * Call writev(), restarting as needed and handling EAGAIN since
+ * fd may be in non-blocking mode.
+ */
+static size_t
+atomic_writev(int fd, struct iovec *iov, int iovcnt)
+{
+    ssize_t n, nwritten = 0;
+    size_t count, remainder, nbytes = 0;
+    int i;
+    debug_decl(atomic_writev, SUDO_DEBUG_UTIL)
+
+    for (i = 0; i < iovcnt; i++)
+	nbytes += iov[i].iov_len;
+
+    for (;;) {
+	n = writev(STDOUT_FILENO, iov, iovcnt);
+	if (n > 0) {
+	    nwritten += n;
+	    remainder = nbytes - nwritten;
+	    if (remainder == 0)
+		break;
+	    /* short writev, adjust iov and do the rest. */
+	    count = 0;
+	    i = iovcnt;
+	    while (i--) {
+		count += iov[i].iov_len;
+		if (count == remainder) {
+		    iov += i;
+		    iovcnt -= i;
+		    break;
+		}
+		if (count > remainder) {
+		    size_t off = (count - remainder);
+		    /* XXX - side effect prevents iov from being const */
+		    iov[i].iov_base = (char *)iov[i].iov_base + off;
+		    iov[i].iov_len -= off;
+		    iov += i;
+		    iovcnt -= i;
+		    break;
+		}
+	    }
+	    continue;
+	}
+	if (n == 0 || errno == EAGAIN) {
+	    int nready;
+	    fd_set fdsw;
+	    FD_ZERO(&fdsw);
+	    FD_SET(STDOUT_FILENO, &fdsw);
+	    do {
+		nready = select(STDOUT_FILENO + 1, NULL, &fdsw, NULL, NULL);
+	    } while (nready == -1 && errno == EINTR);
+	    if (nready == 1)
+		continue;
+	}
+	if (errno == EINTR)
+	    continue;
+	nwritten = -1;
+	break;
+    }
+    debug_return_size_t(nwritten);
 }
 
 /*

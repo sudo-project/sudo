@@ -378,17 +378,12 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
      * For shell mode we need to rewrite argv
      */
     if (ISSET(mode, MODE_RUN) && ISSET(flags, MODE_SHELL)) {
-	char **av;
-	int ac;
+	char **av, *cmnd = NULL;
+	int ac = 1;
 
-	if (argc == 0) {
-	    /* just the shell */
-	    ac = argc + 1;
-	    av = emalloc2(ac + 1, sizeof(char *));
-	    memcpy(av + 1, argv, argc * sizeof(char *));
-	} else {
+	if (argc != 0) {
 	    /* shell -c "command" */
-	    char *cmnd, *src, *dst;
+	    char *src, *dst;
 	    size_t cmnd_size = (size_t) (argv[argc - 1] - argv[0]) +
 		strlen(argv[argc - 1]) + 1;
 
@@ -406,12 +401,15 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		dst--;  /* replace last space with a NUL */
 	    *dst = '\0';
 
-	    ac = 3;
-	    av = emalloc2(ac + 1, sizeof(char *));
+	    ac += 2; /* -c cmnd */
+	}
+
+	av = emalloc2(ac + 1, sizeof(char *));
+	av[0] = (char *)user_details.shell; /* plugin may override shell */
+	if (cmnd != NULL) {
 	    av[1] = "-c";
 	    av[2] = cmnd;
 	}
-	av[0] = (char *)user_details.shell; /* plugin may override shell */
 	av[ac] = NULL;
 
 	argv = av;

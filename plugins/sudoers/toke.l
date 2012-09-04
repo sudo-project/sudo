@@ -94,7 +94,6 @@ static bool _push_include(char *, bool);
 static bool pop_include(void);
 static char *parse_include(char *);
 
-static int sudoers_trace_print(const char *msg);
 int (*trace_print)(const char *msg) = sudoers_trace_print;
 
 #define LEXRETURN(n)	do {	\
@@ -504,11 +503,26 @@ ALL {
 			    goto got_alias;
 #endif
 			}
+<INITIAL>PRIVS {
+#ifdef HAVE_PRIV_SET
+			    LEXTRACE("PRIVS ");
+			    LEXRETURN(PRIVS);
+#else
+			    goto got_alias;
+#endif
+			}
+
+<INITIAL>LIMITPRIVS {
+#ifdef HAVE_PRIV_SET
+			    LEXTRACE("LIMITPRIVS ");
+			    LEXRETURN(LIMITPRIVS);
+#else
+			    goto got_alias;
+#endif
+			}
 
 [[:upper:]][[:upper:][:digit:]_]* {
-#ifndef HAVE_SELINUX
 			got_alias:
-#endif
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("ALIAS ");
@@ -864,13 +878,8 @@ _push_include(char *path, bool isdir)
 	}
     } else {
 	if ((fp = open_sudoers(path, true, &keepopen)) == NULL) {
-	    char *errbuf;
-	    if (asprintf(&errbuf, _("%s: %s"), path, strerror(errno)) != -1) {
-		yyerror(errbuf);
-		free(errbuf);
-	    } else {
-		yyerror(_("unable to allocate memory"));
-	    }
+	    /* The error was already printed by open_sudoers() */
+	    yyerror(NULL);
 	    debug_return_bool(false);
 	}
 	istack[idepth].more = NULL;
@@ -997,13 +1006,13 @@ parse_include(char *base)
 }
 
 #ifdef TRACELEXER
-static int
+int
 sudoers_trace_print(const char *msg)
 {
     return fputs(msg, stderr);
 }
 #else
-static int
+int
 sudoers_trace_print(const char *msg)
 {
     static bool initialized;

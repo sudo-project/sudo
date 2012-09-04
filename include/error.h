@@ -25,10 +25,10 @@
  */
 #if defined(SUDO_ERROR_WRAP) && SUDO_ERROR_WRAP == 0
 # if defined(__GNUC__) && __GNUC__ == 2
-#  define error(rval, fmt...) error2((rval), (fmt))
-#  define errorx(rval, fmt...) errorx2((rval), (fmt))
-#  define warning(fmt...) warning2((fmt))
-#  define warningx(fmt...) warningx2((fmt))
+#  define error(rval, fmt...) error2((rval), fmt)
+#  define errorx(rval, fmt...) errorx2((rval), fmt)
+#  define warning(fmt...) warning2(fmt)
+#  define warningx(fmt...) warningx2(fmt)
 # else
 #  define error(rval, ...) error2((rval), __VA_ARGS__)
 #  define errorx(rval, ...) errorx2((rval), __VA_ARGS__)
@@ -40,24 +40,24 @@
 #  define error(rval, fmt...) do {					       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys, \
-	(fmt));								       \
-    error2((rval), (fmt));						       \
+	fmt);								       \
+    error2((rval), fmt);						       \
 } while (0)
 #  define errorx(rval, fmt...) do {					       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
-	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt));	       \
-    errorx2((rval), (fmt));						       \
+	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, fmt);	       \
+    errorx2((rval), fmt);						       \
 } while (0)
 #  define warning(fmt...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys, \
-	(fmt));								       \
-    warning2((fmt));							       \
+	fmt);								       \
+    warning2(fmt);							       \
 } while (0)
 #  define warningx(fmt...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
-	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt));	       \
-    warningx2((fmt));							       \
+	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, fmt);	       \
+    warningx2(fmt);							       \
 } while (0)
 # else
 #  define error(rval, ...) do {						       \

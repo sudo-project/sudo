@@ -71,6 +71,7 @@
 #define SUDO_DEBUG_PERMS	(23<<6)	/* uid/gid swapping functions */
 #define SUDO_DEBUG_PLUGIN	(24<<6)	/* main plugin functions */
 #define SUDO_DEBUG_HOOKS	(25<<6)	/* hook functions */
+#define SUDO_DEBUG_SSSD		(26<<6) /* sudoers SSSD */
 #define SUDO_DEBUG_ALL		0xfff0	/* all subsystems */
 
 /* Flag to include string version of errno in debug info. */
@@ -172,7 +173,7 @@
 #if defined(__GNUC__) && __GNUC__ == 2
 # define sudo_debug_printf(pri, fmt...) \
     sudo_debug_printf2(__func__, __FILE__, __LINE__, (pri)|sudo_debug_subsys, \
-    (fmt))
+    fmt)
 #else
 # define sudo_debug_printf(pri, ...) \
     sudo_debug_printf2(__func__, __FILE__, __LINE__, (pri)|sudo_debug_subsys, \

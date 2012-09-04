@@ -35,6 +35,7 @@
 #define USE_ERRNO		0x02
 #define NO_MAIL			0x04
 #define NO_STDERR		0x08
+#define NO_LOG			0x10
 
 /*
  * Maximum number of characters to log per entry.  The syslogger
@@ -51,13 +52,13 @@
  */
 #define LOG_INDENT	"    "
 
-void audit_success(char *[]);
-void audit_failure(char *[], char const * const, ...);
-void log_allowed(int);
-void log_denial(int, int);
+void audit_success(char *exec_args[]);
+void audit_failure(char *exec_args[], char const *const fmt, ...);
+void log_allowed(int status);
+void log_auth_failure(int status, int tries);
+void log_failure(int status, int flags);
 void log_error(int flags, const char *fmt, ...) __printflike(2, 3);
 void log_fatal(int flags, const char *fmt, ...) __printflike(2, 3) __attribute__((__noreturn__));
-void reapchild(int);
 void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
 
 #endif /* _LOGGING_H */

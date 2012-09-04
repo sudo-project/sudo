@@ -3,7 +3,7 @@ dnl Process this file with GNU autoconf to produce a configure script.
 dnl
 dnl Copyright (c) 1994-1996,1998-2012 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
-AC_INIT([sudo], [1.8.5p3], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.8.6], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 dnl
 dnl Note: this must come after AC_INIT
@@ -20,7 +20,11 @@ AC_SUBST([PROGS])
 AC_SUBST([CPPFLAGS])
 AC_SUBST([LDFLAGS])
 AC_SUBST([SUDOERS_LDFLAGS])
-AC_SUBST([LTLDFLAGS])
+AC_SUBST([LT_LDFLAGS])
+AC_SUBST([LT_LDMAP])
+AC_SUBST([LT_LDOPT])
+AC_SUBST([LT_LDDEP])
+AC_SUBST([LT_LDEXPORTS])
 AC_SUBST([COMMON_OBJS])
 AC_SUBST([SUDOERS_OBJS])
 AC_SUBST([SUDO_OBJS])
@@ -34,13 +38,17 @@ AC_SUBST([GETGROUPS_LIB])
 AC_SUBST([OSDEFS])
 AC_SUBST([AUTH_OBJS])
 AC_SUBST([MANTYPE])
-AC_SUBST([MAN_POSTINSTALL])
+AC_SUBST([MANDIRTYPE])
+AC_SUBST([MANCOMPRESS])
+AC_SUBST([MANCOMPRESSEXT])
+AC_SUBST([SHLIB_MODE])
 AC_SUBST([SUDOERS_MODE])
 AC_SUBST([SUDOERS_UID])
 AC_SUBST([SUDOERS_GID])
 AC_SUBST([DEVEL])
 AC_SUBST([BAMAN])
 AC_SUBST([LCMAN])
+AC_SUBST([PSMAN])
 AC_SUBST([SEMAN])
 AC_SUBST([devdir])
 AC_SUBST([mansectsu])
@@ -67,6 +75,10 @@ AC_SUBST([LT_STATIC])
 AC_SUBST([LIBINTL])
 AC_SUBST([SUDO_NLS])
 AC_SUBST([COMPAT_TEST_PROGS])
+AC_SUBST([CROSS_COMPILING])
+AC_SUBST([PIE_LDFLAGS])
+AC_SUBST([PIE_CFLAGS])
+AC_SUBST([NO_VIZ])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -101,6 +113,7 @@ AC_SUBST([root_sudo])
 AC_SUBST([path_info])
 AC_SUBST([ldap_conf])
 AC_SUBST([ldap_secret])
+AC_SUBST([sssd_lib])
 AC_SUBST([nsswitch_conf])
 AC_SUBST([netsvc_conf])
 AC_SUBST([secure_path])
@@ -154,8 +167,9 @@ dnl
 INSTALL_NOEXEC=
 devdir='$(srcdir)'
 PROGS="sudo"
-: ${MANTYPE='man'}
+: ${MANDIRTYPE='man'}
 : ${mansrcdir='.'}
+: ${SHLIB_MODE='0644'}
 : ${SUDOERS_MODE='0440'}
 : ${SUDOERS_UID='0'}
 : ${SUDOERS_GID='0'}
@@ -163,6 +177,7 @@ DEVEL=
 LDAP="#"
 BAMAN=0
 LCMAN=0
+PSMAN=0
 SEMAN=0
 LIBINTL=
 ZLIB=
@@ -173,6 +188,9 @@ AUTH_EXCL=
 AUTH_EXCL_DEF=
 AUTH_DEF=passwd
 SUDO_NLS=disabled
+LT_LDEXPORTS="-export-symbols \$(shlib_exp)"
+LT_LDDEP="\$(shlib_exp)"
+NO_VIZ=
 
 dnl
 dnl Other vaiables
@@ -283,6 +301,24 @@ AC_ARG_WITH(linux-audit, [AS_HELP_STRING([--with-linux-audit], [enable Linux aud
     *)		AC_MSG_ERROR(["--with-linux-audit does not take an argument."])
 		;;
 esac])
+
+dnl
+dnl Handle SSSD support.
+dnl
+AC_ARG_WITH(sssd, [AS_HELP_STRING([--with-sssd], [enable SSSD support])],
+[case $with_sssd in
+    yes)	SUDOERS_OBJS="${SUDOERS_OBJS} sssd.lo"
+		AC_DEFINE(HAVE_SSSD)
+		;;
+    no)		;;
+    *)		AC_MSG_ERROR(["--with-sssd does not take an argument."])
+		;;
+esac])
+
+AC_ARG_WITH(sssd-lib, [AS_HELP_STRING([--with-sssd-lib], [path to the SSSD library])])
+sssd_lib="\"LIBDIR\""
+test -n "$with_sssd_lib" && sssd_lib="$with_sssd_lib"
+SUDO_DEFINE_UNQUOTED(_PATH_SSSD_LIB, "$sssd_lib", [Path to the SSSD library])
 
 AC_ARG_WITH(incpath, [AS_HELP_STRING([--with-incpath], [additional places to look for include files])],
 [case $with_incpath in
@@ -1075,17 +1111,11 @@ AC_ARG_WITH(interfaces, [AS_HELP_STRING([--without-interfaces], [don't try to re
 		;;
 esac], AC_MSG_RESULT(yes))
 
-AC_MSG_CHECKING(whether stow should be used)
-AC_ARG_WITH(stow, [AS_HELP_STRING([--with-stow], [properly handle GNU stow packaging])],
+AC_ARG_WITH(stow, [AS_HELP_STRING([--with-stow], [deprecated])],
 [case $with_stow in
-    yes)	AC_MSG_RESULT(yes)
-		AC_DEFINE(USE_STOW)
+    *)		AC_MSG_NOTICE([--with-stow option deprecated, now is defalt behavior])
 		;;
-    no)		AC_MSG_RESULT(no)
-		;;
-    *)		AC_MSG_ERROR(["--with-stow does not take an argument."])
-		;;
-esac], AC_MSG_RESULT(no))
+esac])
 
 AC_MSG_CHECKING(whether to use an askpass helper)
 AC_ARG_WITH(askpass, [AS_HELP_STRING([--with-askpass=PATH], [Fully qualified pathname of askpass helper])],
@@ -1103,6 +1133,26 @@ AC_ARG_WITH(plugindir, [AS_HELP_STRING([--with-plugindir], [set directory to loa
 		;;
     *)		;;
 esac], [with_plugindir="$libexecdir"])
+
+AC_ARG_WITH(man, [AS_HELP_STRING([--with-man], [manual pages use man macros])],
+[case $with_man in
+    yes)	MANTYPE=man
+		;;
+    no)		AC_MSG_ERROR(["--without-man not supported."])
+		;;
+    *)		AC_MSG_ERROR(["ignoring unknown argument to --with-man: $with_man."])
+		;;
+esac])
+
+AC_ARG_WITH(mdoc, [AS_HELP_STRING([--with-mdoc], [manual pages use mdoc macros])],
+[case $with_mdoc in
+    yes)	MANTYPE=mdoc
+		;;
+    no)		AC_MSG_ERROR(["--without-mdoc not supported."])
+		;;
+    *)		AC_MSG_ERROR(["ignoring unknown argument to --with-mdoc: $with_mdoc."])
+		;;
+esac])
 
 dnl
 dnl Options for --enable
@@ -1307,6 +1357,14 @@ AC_ARG_ENABLE(werror,
   esac
 ])
 
+AC_ARG_ENABLE(hardening,
+[AS_HELP_STRING([--disable-hardening], [Do not use compiler/linker exploit mitigation options])],
+[], [enable_hardening=yes])
+
+AC_ARG_ENABLE(pie,
+[AS_HELP_STRING([--disable-pie], [Do not build position independent executables, even if the compiler/linker supports them])],
+[], [enable_pie=yes])
+
 AC_ARG_ENABLE(admin-flag,
 [AS_HELP_STRING([--enable-admin-flag], [Whether to create a Ubuntu-style admin flag file])],
 [ case "$enableval" in
@@ -1405,40 +1463,41 @@ AC_ARG_WITH(noexec, [AS_HELP_STRING([--with-noexec[=PATH]], [fully qualified pat
 esac], [with_noexec="$libexecdir/sudo_noexec$_shrext"])
 AC_MSG_RESULT($with_noexec)
 NOEXECFILE="sudo_noexec$_shrext"
-NOEXECDIR="`echo $with_noexec|sed 's:^\(.*\)/[[^/]]*:\1:'`"
+NOEXECDIR="`echo $with_noexec|sed -e 's:^${\([[^}]]*\)}:$(\1):' -e 's:^\(.*\)/[[^/]]*:\1:'`"
 
 dnl
 dnl Find programs we use
 dnl
-AC_CHECK_PROG(UNAMEPROG, [uname], [uname])
-AC_CHECK_PROG(TRPROG, [tr], [tr])
-AC_CHECK_PROGS(NROFFPROG, [nroff mandoc])
-if test -n "$NROFFPROG"; then
-    AC_CACHE_CHECK([whether $NROFFPROG supports the -c option],
-	[sudo_cv_var_nroff_opt_c],
-	[if $NROFFPROG -c </dev/null >/dev/null 2>&1; then
-	    sudo_cv_var_nroff_opt_c=yes
-	else
-	    sudo_cv_var_nroff_opt_c=no
-	fi]
-    )
-    if test "$sudo_cv_var_nroff_opt_c" = "yes"; then
-	NROFFPROG="$NROFFPROG -c"
-    fi
-    AC_CACHE_CHECK([whether $NROFFPROG supports the -Tascii option],
-	[sudo_cv_var_nroff_opt_Tascii],
-	[if $NROFFPROG -Tascii </dev/null >/dev/null 2>&1; then
-	    sudo_cv_var_nroff_opt_Tascii=yes
-	else
-	    sudo_cv_var_nroff_opt_Tascii=no
-	fi]
-    if test "$sudo_cv_var_nroff_opt_Tascii" = "yes"; then
-	NROFFPROG="$NROFFPROG -Tascii"
-    fi
-    )
+AC_PATH_PROG(UNAMEPROG, [uname], [uname])
+AC_PATH_PROG(TRPROG, [tr], [tr])
+AC_PATH_PROG(MANDOCPROG, [mandoc], [mandoc])
+if test "$MANDOCPROG" != "mandoc"; then
+    : ${MANTYPE='mdoc'}
 else
-    MANTYPE="cat"
-    mansrcdir='$(srcdir)'
+    AC_PATH_PROG(NROFFPROG, [nroff])
+    if test -n "$NROFFPROG"; then
+	test -n "$MANTYPE" && sudo_cv_var_mantype="$MANTYPE"
+	AC_CACHE_CHECK([which macro set to use for manual pages],
+	    [sudo_cv_var_mantype],
+	    [
+		sudo_cv_var_mantype="man"
+		echo ".Sh NAME" > conftest
+		echo ".Nm sudo" >> conftest
+		echo ".Nd sudo" >> conftest
+		echo ".Sh DESCRIPTION" >> conftest
+		echo "sudo" >> conftest
+		if $NROFFPROG -mdoc conftest >/dev/null 2>&1; then
+		    sudo_cv_var_mantype="mdoc"
+		fi
+		rm -f conftest
+	    ]
+	)
+	MANTYPE="$sudo_cv_var_mantype"
+    else
+	MANTYPE=cat
+	MANDIRTYPE=cat
+	mansrcdir='$(srcdir)'
+    fi
 fi
 
 dnl
@@ -1500,7 +1559,7 @@ case "$host" in
 		: ${mansectform='4'}
 		: ${with_rpath='yes'}
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
-		AC_CHECK_FUNCS(priv_set)
+		AC_CHECK_FUNCS(priv_set, [PSMAN=1])
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
@@ -1563,6 +1622,9 @@ case "$host" in
     *-*-hiuxmpp*)
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+
+		# HP-UX shared libs must be executable
+		SHLIB_MODE=0755
 		;;
     *-*-hpux*)
 		# AFS support needs -lBSD
@@ -1571,6 +1633,9 @@ case "$host" in
 		fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+
+		# HP-UX shared libs must be executable
+		SHLIB_MODE=0755
 
 		# The HP bundled compiler cannot generate shared libs
 		if test -z "$GCC"; then
@@ -1644,6 +1709,7 @@ case "$host" in
 		;;
     *-dec-osf*)
 		# ignore envariables wrt dynamic lib path
+		# XXX - sudo LDFLAGS instead?
 		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-no_library_replacement"
 
 		: ${CHECKSIA='true'}
@@ -1696,7 +1762,6 @@ case "$host" in
     *-*-irix*)
 		OSDEFS="${OSDEFS} -D_BSD_TYPES"
 		if test -z "$NROFFPROG"; then
-		    MAN_POSTINSTALL='	/bin/rm -f $(mandirsu)/sudo.$(mansectsu).z $(mandirsu)/visudo.$(mansectsu).z $(mandirform)/sudoers.$(mansectform).z ; /usr/bin/pack $(mandirsu)/sudo.$(mansectsu) $(mandirsu)/visudo.$(mansectsu) $(mandirform)/sudoers.$(mansectform)'
 		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
 			if test -d /usr/share/catman/local; then
 			    mandir="/usr/share/catman/local"
@@ -1704,6 +1769,9 @@ case "$host" in
 			    mandir="/usr/catman/local"
 			fi
 		    fi
+		    # Compress cat pages with pack
+		    MANCOMPRESS='pack'
+		    MANCOMPRESSEXT='.z'
 		else
 		    if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
 			if test -d "/usr/share/man/local"; then
@@ -1962,23 +2030,7 @@ AC_INCLUDES_DEFAULT
 # define sudo_fprintf(fp, ...) fprintf((fp), __VA_ARGS__)
 #endif
 ], [sudo_fprintf(stderr, "a %s", "test");])], [], [AC_MSG_ERROR([Your C compiler doesn't support variadic macros, try building with gcc instead])])
-if test X"$with_gnu_ld" != "yes" -a -n "$GCC"; then
-    _CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -static-libgcc"
-    AC_CACHE_CHECK([whether $CC understands -static-libgcc],
-	[sudo_cv_var_gcc_static_libgcc],
-	[AC_LINK_IFELSE(
-	    [AC_LANG_PROGRAM([[]], [[]])],
-		[sudo_cv_var_gcc_static_libgcc=yes],
-		[sudo_cv_var_gcc_static_libgcc=no]
-	    )
-	]
-    )
-    CFLAGS="$_CFLAGS"
-    if test "$sudo_cv_var_gcc_static_libgcc" = "yes"; then
-	LTLDFLAGS="$LTLDFLAGS -Wc,-static-libgcc"
-    fi
-fi
+
 dnl
 dnl Program checks
 dnl
@@ -2148,17 +2200,20 @@ AC_CHECK_FUNCS(getline, [], [
 dnl
 dnl If libc supports _FORTIFY_SOURCE check functions, use it.
 dnl
-O_CPPFLAGS="$CPPFLAGS"
-CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
-AC_CHECK_FUNC(__sprintf_chk, [
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[char buf[4]; (void)sprintf(buf, "%s", "foo");]])], [OSDEFS="${OSDEFS} -D_FORTIFY_SOURCE=2"], [])
-], [])
-CPPFLAGS="$O_CPPFLAGS"
+if test "$enable_hardening" != "no"; then
+    O_CPPFLAGS="$CPPFLAGS"
+    CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
+    AC_CHECK_FUNC(__sprintf_chk, [
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[char buf[4]; (void)sprintf(buf, "%s", "foo");]])], [OSDEFS="${OSDEFS} -D_FORTIFY_SOURCE=2"], [])
+    ], [])
+    CPPFLAGS="$O_CPPFLAGS"
+fi
 
 utmp_style=LEGACY
 AC_CHECK_FUNCS(getutxid getutid, [utmp_style=POSIX; break])
 if test "$utmp_style" = "LEGACY"; then
     AC_CHECK_FUNCS(getttyent ttyslot, [break])
+    AC_CHECK_FUNCS(fseeko)
 fi
 
 AC_CHECK_FUNCS(sysctl, [AC_CHECK_MEMBERS([struct kinfo_proc.ki_tdev], [],
@@ -2422,7 +2477,10 @@ if test "$enable_nls" != "no"; then
 	])
 	eval gettext_result="\$$gettext_name"
 	AC_MSG_RESULT($gettext_result)
-	test "$gettext_result" = "yes" && break
+	if test "$gettext_result" = "yes"; then
+	    AC_CHECK_FUNCS(ngettext)
+	    break
+	fi
     done
     LIBS="$OLIBS"
 
@@ -2508,6 +2566,37 @@ AC_INCLUDES_DEFAULT
     ])
     if test "$HAVE_SIGLIST" != "true"; then
 	AC_LIBOBJ(siglist)
+    fi
+])
+
+dnl
+dnl Check for sig2str(), sys_signame or sys_sigabbrev
+dnl
+AC_CHECK_FUNCS(sig2str, [], [
+    AC_LIBOBJ(sig2str)
+    HAVE_SIGNAME="false"
+    AC_CHECK_DECLS([sys_signame, _sys_signame, __sys_signame, sys_sigabbrev], [
+	HAVE_SIGNAME="true"
+	break
+    ], [ ], [
+AC_INCLUDES_DEFAULT
+#include <signal.h>
+    ])
+    if test "$HAVE_SIGNAME" != "true"; then
+	AC_CACHE_CHECK([for undeclared sys_sigabbrev],
+	    [sudo_cv_var_sys_sigabbrev],
+	    [AC_LINK_IFELSE(
+		[AC_LANG_PROGRAM([[extern char **sys_sigabbrev;]], [[return sys_sigabbrev[1];]])],
+		    [sudo_cv_var_sys_sigabbrev=yes],
+		    [sudo_cv_var_sys_sigabbrev=no]
+		)
+	    ]
+	)
+	if test "$sudo_cv_var_sys_sigabbrev" = yes; then
+	    AC_DEFINE(HAVE_SYS_SIGABBREV)
+	else
+	    AC_LIBOBJ(signame)
+	fi
     fi
 ])
 
@@ -2870,7 +2959,7 @@ if test "${with_skey-'no'}" = "yes"; then
 	for dir in "" "/usr/local" "/usr/contrib"; do
 	    test -n "$dir" && CPPFLAGS="$O_CPPFLAGS -I${dir}/include"
 	    AC_CHECK_HEADER([skey.h], [found=yes; break], [],
-		[#include <stdio.h>]) 
+		[#include <stdio.h>])
 	done
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
@@ -3047,7 +3136,7 @@ if test ${with_ldap-'no'} != "no"; then
 
     AC_CHECK_HEADERS([sasl/sasl.h] [sasl.h], [AC_CHECK_FUNCS(ldap_sasl_interactive_bind_s)], [break])
     AC_CHECK_HEADERS([ldap_ssl.h] [mps/ldap_ssl.h], [break], [], [#include <ldap.h>])
-    AC_CHECK_FUNCS(ldap_initialize ldap_start_tls_s ldapssl_init ldapssl_set_strength ldap_unbind_ext_s ldap_str2dn ldap_create ldap_sasl_bind_s ldap_ssl_client_init ldap_start_tls_s_np)
+    AC_CHECK_FUNCS(ldap_initialize ldap_start_tls_s ldapssl_init ldapssl_set_strength ldap_unbind_ext_s ldap_str2dn ldap_create ldap_sasl_bind_s ldap_ssl_init ldap_ssl_client_init ldap_start_tls_s_np)
     AC_CHECK_FUNCS(ldap_search_ext_s ldap_search_st, [break])
 
     if test X"$check_gss_krb5_ccache_name" = X"yes"; then
@@ -3119,10 +3208,10 @@ if test X"$LIBDL" != X""; then
     SUDOERS_LIBS="${SUDOERS_LIBS} $LIBDL"
 fi
 
-# On HP-UX, you cannot dlopen() a shared object that uses pthreads
-# unless the main program is linked against -lpthread.  Since we
-# have no knowledge what libraries a plugin may depend on, we always
-# link against -lpthread on HP-UX if it is available.
+# On HP-UX, you cannot dlopen() a shared object that uses pthreads unless
+# the main program is linked against -lpthread.  We have no knowledge of
+# what libraries a plugin may depend on (e.g. HP-UX LDAP which uses pthreads)
+# so always link against -lpthread on HP-UX if it is available.
 # This check should go after all other libraries tests.
 case "$host" in
     *-*-hpux*)
@@ -3151,6 +3240,170 @@ fi
 SUDO_LOGFILE
 SUDO_TIMEDIR
 SUDO_IO_LOGDIR
+
+dnl
+dnl Turn warnings into errors.
+dnl All compiler/loader tests after this point will fail if
+dnl a warning is displayed (nornally, warnings are not fata).
+dnl
+AC_LANG_WERROR
+
+dnl
+dnl If compiler supports the -static-libgcc flag use it unless we have
+dnl GNU ld (which can avoid linking in libgcc when it is not needed).
+dnl This test relies on AC_LANG_WERROR
+dnl
+if test -n "$GCC" -a "$lt_cv_prog_gnu_ld" != "yes" -a -n "$GCC"; then
+    AX_CHECK_COMPILE_FLAG([-static-libgcc], [LT_LDFLAGS="$LT_LDFLAGS -Wc,-static-libgcc"])
+fi
+
+dnl
+dnl Check for symbol visibility support.
+dnl This test relies on AC_LANG_WERROR
+dnl
+AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [
+    AC_DEFINE(HAVE_DSO_VISIBILITY)
+    CFLAGS="${CFLAGS} -fvisibility=hidden"
+    LT_LDEXPORTS=
+    LT_LDDEP=
+], [
+    NO_VIZ="-DNO_VIZ"
+    if test -z "$GCC"; then
+	case "$host" in
+	    *-*-hpux*)
+		AX_CHECK_COMPILE_FLAG([-Bhidden_def], [
+		    AC_DEFINE(HAVE_DSO_VISIBILITY)
+		    CFLAGS="${CFLAGS} -Bhidden_def"
+		    LT_LDEXPORTS=
+		    LT_LDDEP=
+		])
+		;;
+	    *-*-solaris2*)
+		AX_CHECK_COMPILE_FLAG([-xldscope=hidden], [
+		    AC_DEFINE(HAVE_DSO_VISIBILITY)
+		    CFLAGS="${CFLAGS} -xldscope=hidden"
+		    LT_LDEXPORTS=
+		    LT_LDDEP=
+		])
+		;;
+	esac
+    fi
+])
+
+dnl
+dnl If the compiler doesn't have symbol visibility support, it may
+dnl support version scripts (only GNU and Solaris ld).
+dnl This test relies on AC_LANG_WERROR
+dnl
+if test -n "$LT_LDEXPORTS"; then
+    if test "$lt_cv_prog_gnu_ld" = "yes"; then
+	AC_CACHE_CHECK([whether ld supports anonymous map files],
+	    [sudo_cv_var_gnu_ld_anon_map],
+	    [
+		cat > conftest.map <<-EOF
+		{
+		    global: foo;
+		    local:  *;
+		};
+EOF
+		_CFLAGS="$CFLAGS"
+		CFLAGS="$CFLAGS $lt_prog_compiler_pic"
+		_LDFLAGS="$LDFLAGS"
+		LDFLAGS="$LDFLAGS -fpic -shared -Wl,--version-script,./conftest.map"
+		AC_TRY_LINK([int foo;], [], [
+		    sudo_cv_var_gnu_ld_anon_map=yes
+		])
+		CFLAGS="$_CFLAGS"
+		LDFLAGS="$_LDFLAGS"
+	    ]
+	)
+	if test "$sudo_cv_var_gnu_ld_anon_map" = "yes"; then
+	    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_map)"; LT_LDMAP="-Wl,--version-script,\$(shlib_map)"
+	fi
+    else
+	case "$host" in
+	    *-*-solaris2*)
+		AC_CACHE_CHECK([whether ld supports anonymous map files],
+		    [sudo_cv_var_solaris_ld_anon_map],
+		    [
+			cat > conftest.map <<-EOF
+			{
+			    global: foo;
+			    local:  *;
+			};
+EOF
+			_CFLAGS="$CFLAGS"
+			CFLAGS="$CFLAGS $lt_prog_compiler_pic"
+			_LDFLAGS="$LDFLAGS"
+			LDFLAGS="$LDFLAGS -shared -Wl,-M,./conftest.map"
+			AC_TRY_LINK([int foo;], [], [
+			    sudo_cv_var_solaris_ld_anon_map=yes
+			])
+			CFLAGS="$_CFLAGS"
+			LDFLAGS="$_LDFLAGS"
+		    ]
+		)
+		if test "$sudo_cv_var_solaris_ld_anon_map" = "yes"; then
+		    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_map)"; LT_LDMAP="-Wl,-M,\$(shlib_map)"
+		fi
+		;;
+	    *-*-hpux*)
+		AC_CACHE_CHECK([whether ld supports controlling exported symbols],
+		    [sudo_cv_var_hpux_ld_symbol_export],
+		    [
+			echo "+e foo" > conftest.opt
+			_CFLAGS="$CFLAGS"
+			CFLAGS="$CFLAGS $lt_prog_compiler_pic"
+			_LDFLAGS="$LDFLAGS"
+			if test -n "$GCC"; then
+			    LDFLAGS="$LDFLAGS -shared -Wl,-c,./conftest.opt"
+			else
+			    LDFLAGS="$LDFLAGS -Wl,-b -Wl,-c,./conftest.opt"
+			fi
+			AC_TRY_LINK([int foo;], [], [
+			    sudo_cv_var_hpux_ld_symbol_export=yes
+			])
+			CFLAGS="$_CFLAGS"
+			LDFLAGS="$_LDFLAGS"
+		    ]
+		)
+		if test "$sudo_cv_var_hpux_ld_symbol_export" = "yes"; then
+		    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_opt)"; LT_LDOPT="-Wl,-c,\$(shlib_opt)"
+		fi
+		;;
+	esac
+    fi
+fi
+
+dnl
+dnl Check for PIE executable support if using gcc.
+dnl This test relies on AC_LANG_WERROR
+dnl
+if test "$enable_pie" != "no" -a -n "$GCC"; then
+    AX_CHECK_COMPILE_FLAG([-fPIE], [
+	_CFLAGS="$CFLAGS"
+	CFLAGS="$CFLAGS -fPIE"
+	AX_CHECK_LINK_FLAG([-pie], [
+	    PIE_CFLAGS="-fPIE"
+	    PIE_LDFLAGS="-pie"
+	])
+	CFLAGS="$_CFLAGS"
+    ])
+fi
+
+dnl
+dnl Check for -fstack-protector and -z relro support
+dnl This test relies on AC_LANG_WERROR
+dnl
+if test "$enable_hardening" != "no"; then
+    AX_CHECK_COMPILE_FLAG([-fstack-protector], [
+	AX_CHECK_LINK_FLAG([-fstack-protector], [
+	    CFLAGS="${CFLAGS} -fstack-protector"
+	    LT_LDFLAGS="${LT_LDFLAGS} -Wc,-fstack-protector"
+	])
+    ])
+    AX_CHECK_LINK_FLAG([-Wl,-z,relro], [LDFLAGS="${LDFLAGS} -Wl,-z,relro"])
+fi
 
 dnl
 dnl Use passwd auth module?
@@ -3196,6 +3449,11 @@ if test -n "$GCC"; then
 	CFLAGS="${CFLAGS} -Werror"
     fi
 fi
+
+dnl
+dnl Skip regress tests and sudoers sanity check if cross compiling.
+dnl
+CROSS_COMPILING="$cross_compiling"
 
 dnl
 dnl Set exec_prefix
@@ -3261,12 +3519,13 @@ test "$libexecdir" = '${exec_prefix}/libexec' && libexecdir='$(exec_prefix)/libe
 test "$includedir" = '${prefix}/include' && includedir='$(prefix)/include'
 test "$datarootdir" = '${prefix}/share' && datarootdir='$(prefix)/share'
 test "$docdir" = '${datarootdir}/doc/${PACKAGE_TARNAME}' && docdir='$(datarootdir)/doc/$(PACKAGE_TARNAME)'
+test "$localedir" = '${datarootdir}/locale' && localedir='$(datarootdir)/locale'
+test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
 test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
 
 dnl
 dnl Substitute into the Makefile and man pages
 dnl
-dnl AC_CONFIG_FILES([doc/sudo.man doc/visudo.man doc/sudoers.man doc/sudoers.ldap.man doc/sudoreplay.man src/Makefile src/sudo_usage.h])
 AC_CONFIG_FILES([Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/sample_group/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 AC_OUTPUT
 
@@ -3331,6 +3590,7 @@ AH_TEMPLATE(HAVE_LBER_H, [Define to 1 if your LDAP needs <lber.h>. (OpenLDAP doe
 AH_TEMPLATE(HAVE_LDAP, [Define to 1 if you use LDAP for sudoers.])
 AH_TEMPLATE(HAVE_LIBINTL_H, [Define to 1 if you have the <libintl.h> header file.])
 AH_TEMPLATE(HAVE_LINUX_AUDIT, [Define to 1 to enable Linux audit support.])
+AH_TEMPLATE(HAVE_SSSD, [Define to 1 to enable SSSD support.])
 AH_TEMPLATE(HAVE_OPIE, [Define to 1 if you use NRL OPIE.])
 AH_TEMPLATE(HAVE_PAM, [Define to 1 if you use PAM authentication.])
 AH_TEMPLATE(HAVE_PAM_LOGIN, [Define to 1 if you use a specific PAM session for sudo -i.])
@@ -3380,6 +3640,8 @@ AH_TEMPLATE(RTLD_PRELOAD_VAR, [The environment variable that controls preloading
 AH_TEMPLATE(RTLD_PRELOAD_ENABLE_VAR, [An extra environment variable that is required to enable preloading (if any).])
 AH_TEMPLATE(RTLD_PRELOAD_DELIM, [The delimiter to use when defining multiple preloaded objects.])
 AH_TEMPLATE(RTLD_PRELOAD_DEFAULT, [The default value of preloaded objects (if any).])
+AH_TEMPLATE(HAVE_DSO_VISIBILITY, [Define to 1 if the compiler supports the __visibility__ attribute.])
+AH_TEMPLATE(HAVE_SYS_SIGABBREV, [Define to 1 if your libc has the `sys_sigabbrev' symbol.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in
@@ -3420,13 +3682,6 @@ AH_BOTTOM([/*
 } while(0)
 #else
 # define ignore_result(x)	(void)(x)
-#endif
-
-/* GNU stow needs /etc/sudoers to be a symlink. */
-#ifdef USE_STOW
-# define stat_sudoers	stat
-#else
-# define stat_sudoers	lstat
 #endif
 
 /* Macros to set/clear/test flags. */
