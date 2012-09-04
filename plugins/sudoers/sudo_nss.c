@@ -99,6 +99,10 @@ sudo_read_nss(void)
 		/* NOTFOUND affects the most recent entry */
 		tq_last(&snl)->ret_if_notfound = true;
 		got_match = false;
+	    } else if (strcasecmp(cp, "[SUCCESS=return]") == 0 && got_match) {
+		/* SUCCESS affects the most recent entry */
+		tq_last(&snl)->ret_if_found = true;
+		got_match = false;
 	    } else
 		got_match = false;
 	}
