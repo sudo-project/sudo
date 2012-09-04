@@ -247,8 +247,12 @@ lbuf_print(struct lbuf *lbuf)
     /* For very small widths just give up... */
     len = lbuf->continuation ? strlen(lbuf->continuation) : 0;
     if (lbuf->cols <= lbuf->indent + len + 20) {
-	lbuf->buf[lbuf->len] = '\0';
-	lbuf->output(lbuf->buf);
+	if (lbuf->len > 0) {
+	    lbuf->buf[lbuf->len] = '\0';
+	    lbuf->output(lbuf->buf);
+	    if (lbuf->buf[lbuf->len - 1] != '\n')
+		lbuf->output("\n");
+	}
 	goto done;
     }
 
