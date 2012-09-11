@@ -360,6 +360,8 @@ sudo_putenv(char *str, bool dupcheck, bool overwrite)
     int rval;
     debug_decl(sudo_putenv, SUDO_DEBUG_ENV)
 
+    sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_putenv: %s", str);
+
     rval = sudo_putenv_nodebug(str, dupcheck, overwrite);
     if (rval == -1) {
 #ifdef ENV_DEBUG
@@ -489,6 +491,8 @@ sudo_unsetenv(const char *name)
     int rval;
     debug_decl(sudo_unsetenv, SUDO_DEBUG_ENV)
 
+    sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_unsetenv: %s", name);
+
     rval = sudo_unsetenv_nodebug(name);
 
     debug_return_int(rval);
@@ -526,6 +530,8 @@ sudo_getenv(const char *name)
 {
     char *val;
     debug_decl(sudo_getenv, SUDO_DEBUG_ENV)
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_getenv: %s", name);
 
     val = sudo_getenv_nodebug(name);
 
@@ -658,6 +664,9 @@ env_should_delete(const char *var)
     delete_it = matches_env_delete(var);
     if (!delete_it)
 	delete_it = matches_env_check(var) == false;
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "delete %s: %s",
+	var, delete_it ? "YES" : "NO");
     debug_return_bool(delete_it);
 }
 
@@ -675,6 +684,8 @@ env_should_keep(const char *var)
     if (keepit == -1)
 	keepit = matches_env_keep(var);
 
+    sudo_debug_printf(SUDO_DEBUG_INFO, "keep %s: %s",
+	var, keepit ? "YES" : "NO");
     debug_return_bool(keepit == true);
 }
 
