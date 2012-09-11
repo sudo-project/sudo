@@ -324,15 +324,14 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 		break;
 	    }
 	}
-	/* Prune out duplicate variables. */
+	/* Prune out extra instances of the variable we just overwrote. */
 	if (found && overwrite) {
-	    while (*ep != NULL) {
+	    while (*++ep != NULL) {
 		if (strncmp(str, *ep, len) == 0) {
 		    char **cur = ep;
 		    while ((*cur = *(cur + 1)) != NULL)
 			cur++;
-		} else {
-		    ep++;
+		    ep--;
 		}
 	    }
 	    env.env_len = ep - env.envp;
