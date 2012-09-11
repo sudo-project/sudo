@@ -775,12 +775,15 @@ rebuild_env(noexec)
 	} else {
 	    if (!ISSET(didvar, DID_SHELL))
 		sudo_setenv("SHELL", sudo_user.pw->pw_shell, FALSE);
-	    if (!ISSET(didvar, DID_LOGNAME))
-		sudo_setenv("LOGNAME", user_name, FALSE);
-	    if (!ISSET(didvar, DID_USER))
-		sudo_setenv("USER", user_name, FALSE);
-	    if (!ISSET(didvar, DID_USERNAME))
-		sudo_setenv("USERNAME", user_name, FALSE);
+	    /* We will set LOGNAME later in the !def_set_logname case. */
+	    if (!def_set_logname) {
+		if (!ISSET(didvar, DID_LOGNAME))
+		    sudo_setenv("LOGNAME", user_name, FALSE);
+		if (!ISSET(didvar, DID_USER))
+		    sudo_setenv("USER", user_name, FALSE);
+		if (!ISSET(didvar, DID_USERNAME))
+		    sudo_setenv("USERNAME", user_name, FALSE);
+	    }
 	}
 
 	/* If we didn't keep HOME, reset it based on target user. */
@@ -841,8 +844,8 @@ rebuild_env(noexec)
     /*
      * Set $USER, $LOGNAME and $USERNAME to target if "set_logname" is not
      * disabled.  We skip this if we are running a login shell (because
-     * they have already been set them) or sudoedit (because we want the
-     * editor to find the user's startup files).
+     * they have already been set) or sudoedit (because we want the editor
+     * to find the invoking user's startup files).
      */
     if (def_set_logname && !ISSET(sudo_mode, MODE_LOGIN_SHELL|MODE_EDIT)) {
 	if (!ISSET(didvar, KEPT_LOGNAME))
