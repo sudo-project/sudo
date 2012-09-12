@@ -393,7 +393,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	validated = nss->lookup(nss, validated, pwflag);
 
 	if (ISSET(validated, VALIDATE_OK)) {
-	    /* Handle "= auth" in netsvc.conf */
+	    /* Handle [SUCCESS=return] */
 	    if (nss->ret_if_found)
 		break;
 	} else {

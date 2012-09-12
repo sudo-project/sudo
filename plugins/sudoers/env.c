@@ -324,15 +324,14 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 		break;
 	    }
 	}
-	/* Prune out duplicate variables. */
+	/* Prune out extra instances of the variable we just overwrote. */
 	if (found && overwrite) {
-	    while (*ep != NULL) {
+	    while (*++ep != NULL) {
 		if (strncmp(str, *ep, len) == 0) {
 		    char **cur = ep;
 		    while ((*cur = *(cur + 1)) != NULL)
 			cur++;
-		} else {
-		    ep++;
+		    ep--;
 		}
 	    }
 	    env.env_len = ep - env.envp;
@@ -359,6 +358,8 @@ sudo_putenv(char *str, bool dupcheck, bool overwrite)
 {
     int rval;
     debug_decl(sudo_putenv, SUDO_DEBUG_ENV)
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_putenv: %s", str);
 
     rval = sudo_putenv_nodebug(str, dupcheck, overwrite);
     if (rval == -1) {
@@ -489,6 +490,8 @@ sudo_unsetenv(const char *name)
     int rval;
     debug_decl(sudo_unsetenv, SUDO_DEBUG_ENV)
 
+    sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_unsetenv: %s", name);
+
     rval = sudo_unsetenv_nodebug(name);
 
     debug_return_int(rval);
@@ -526,6 +529,8 @@ sudo_getenv(const char *name)
 {
     char *val;
     debug_decl(sudo_getenv, SUDO_DEBUG_ENV)
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "sudo_getenv: %s", name);
 
     val = sudo_getenv_nodebug(name);
 
@@ -658,6 +663,9 @@ env_should_delete(const char *var)
     delete_it = matches_env_delete(var);
     if (!delete_it)
 	delete_it = matches_env_check(var) == false;
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "delete %s: %s",
+	var, delete_it ? "YES" : "NO");
     debug_return_bool(delete_it);
 }
 
@@ -675,6 +683,8 @@ env_should_keep(const char *var)
     if (keepit == -1)
 	keepit = matches_env_keep(var);
 
+    sudo_debug_printf(SUDO_DEBUG_INFO, "keep %s: %s",
+	var, keepit ? "YES" : "NO");
     debug_return_bool(keepit == true);
 }
 
@@ -825,12 +835,15 @@ rebuild_env(void)
 	} else {
 	    if (!ISSET(didvar, DID_SHELL))
 		sudo_setenv2("SHELL", sudo_user.pw->pw_shell, false, true);
-	    if (!ISSET(didvar, DID_LOGNAME))
-		sudo_setenv2("LOGNAME", user_name, false, true);
-	    if (!ISSET(didvar, DID_USER))
-		sudo_setenv2("USER", user_name, false, true);
-	    if (!ISSET(didvar, DID_USERNAME))
-		sudo_setenv2("USERNAME", user_name, false, true);
+	    /* We will set LOGNAME later in the !def_set_logname case. */
+	    if (!def_set_logname) {
+		if (!ISSET(didvar, DID_LOGNAME))
+		    sudo_setenv2("LOGNAME", user_name, false, true);
+		if (!ISSET(didvar, DID_USER))
+		    sudo_setenv2("USER", user_name, false, true);
+		if (!ISSET(didvar, DID_USERNAME))
+		    sudo_setenv2("USERNAME", user_name, false, true);
+	    }
 	}
 
 	/* If we didn't keep HOME, reset it based on target user. */
@@ -882,8 +895,8 @@ rebuild_env(void)
     /*
      * Set $USER, $LOGNAME and $USERNAME to target if "set_logname" is not
      * disabled.  We skip this if we are running a login shell (because
-     * they have already been set them) or sudoedit (because we want the
-     * editor to find the user's startup files).
+     * they have already been set) or sudoedit (because we want the editor
+     * to find the invoking user's startup files).
      */
     if (def_set_logname && !ISSET(sudo_mode, MODE_LOGIN_SHELL|MODE_EDIT)) {
 	if (!ISSET(didvar, KEPT_LOGNAME))

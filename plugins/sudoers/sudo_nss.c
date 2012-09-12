@@ -18,6 +18,8 @@
 
 #include <sys/types.h>
 #include <sys/param.h>
+#include <sys/stat.h>
+
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -98,6 +100,10 @@ sudo_read_nss(void)
 	    } else if (strcasecmp(cp, "[NOTFOUND=return]") == 0 && got_match) {
 		/* NOTFOUND affects the most recent entry */
 		tq_last(&snl)->ret_if_notfound = true;
+		got_match = false;
+	    } else if (strcasecmp(cp, "[SUCCESS=return]") == 0 && got_match) {
+		/* SUCCESS affects the most recent entry */
+		tq_last(&snl)->ret_if_found = true;
 		got_match = false;
 	    } else
 		got_match = false;
@@ -257,11 +263,15 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 {
     struct sudo_nss *nss;
     struct lbuf defs, privs;
-    int count, olen;
+    struct stat sb;
+    int cols, count, olen;
     debug_decl(display_privs, SUDO_DEBUG_NSS)
 
-    lbuf_init(&defs, output, 4, NULL, sudo_user.cols);
-    lbuf_init(&privs, output, 4, NULL, sudo_user.cols);
+    cols = sudo_user.cols;
+    if (fstat(STDOUT_FILENO, &sb) == 0 && S_ISFIFO(sb.st_mode))
+	cols = 0;
+    lbuf_init(&defs, output, 4, NULL, cols);
+    lbuf_init(&privs, output, 4, NULL, cols);
 
     /* Display defaults from all sources. */
     lbuf_append(&defs, _("Matching Defaults entries for %s on this host:\n"),
