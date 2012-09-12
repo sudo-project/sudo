@@ -1,3 +1,9 @@
+What's new in Sudo 1.8.6p1?
+
+ * Fixed the setting of LOGNAME, USER and USERNAME variables in the
+   command's environment when env_reset is enabled (the default).
+   This was a regression introduced in version 1.8.6.
+
 What's new in Sudo 1.8.6?
 
  * Sudo is now built with the -fstack-protector flag if the the
