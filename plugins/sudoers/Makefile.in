@@ -218,7 +218,7 @@ $(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y
 	    else \
 		gram_y="$(srcdir)/gram.y"; \
 	    fi; \
-	    cmd='$(YACC) -d '"$$gram_y"'; echo "#include <config.h>" > $(devdir)/gram.c; sed "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"gram.c\"/" y.tab.c >> $(devdir)/gram.c; rm -f y.tab.c; mv -f y.tab.h $(devdir)/gram.h'; \
+	    cmd='$(YACC) -d -p sudoers '"$$gram_y"'; echo "#include <config.h>" > $(devdir)/gram.c; sed "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"gram.c\"/" y.tab.c >> $(devdir)/gram.c; rm -f y.tab.c; mv -f y.tab.h $(devdir)/gram.h'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
@@ -229,7 +229,7 @@ $(devdir)/toke.c: $(srcdir)/toke.l
 	    else \
 		toke_l="$(srcdir)/toke.l"; \
 	    fi; \
-	    cmd='$(FLEX) '"$$toke_l"'; echo "#include <config.h>" > $(devdir)/toke.c; cat lex.yy.c >> $(devdir)/toke.c; rm -f lex.yy.c'; \
+	    cmd='$(FLEX) '"$$toke_l"'; echo "#include <config.h>" > $(devdir)/toke.c; cat lex.sudoers.c >> $(devdir)/toke.c; rm -f lex.sudoers.c'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 

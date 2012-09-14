@@ -118,14 +118,14 @@ static void usage(int);
 
 void cleanup(int);
 
-extern void yyerror(const char *);
-extern void yyrestart(FILE *);
+extern void sudoerserror(const char *);
+extern void sudoersrestart(FILE *);
 
 /*
  * External globals exported by the parser
  */
 extern struct rbtree *aliases;
-extern FILE *yyin;
+extern FILE *sudoersin;
 extern char *sudoers, *errorfile;
 extern int errorlineno;
 extern bool parse_error;
@@ -232,11 +232,11 @@ main(int argc, char *argv[])
      * Parse the existing sudoers file(s) in quiet mode to highlight any
      * existing errors and to pull in editor and env_editor conf values.
      */
-    if ((yyin = open_sudoers(sudoers_path, true, NULL)) == NULL) {
+    if ((sudoersin = open_sudoers(sudoers_path, true, NULL)) == NULL) {
 	error(1, "%s", sudoers_path);
     }
     init_parser(sudoers_path, false);
-    yyparse();
+    sudoersparse();
     (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER);
 
     editor = get_editor(&args);
@@ -491,14 +491,14 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 	init_parser(sp->path, quiet);
 
 	/* Parse the sudoers temp file */
-	yyrestart(fp);
-	if (yyparse() && !parse_error) {
+	sudoersrestart(fp);
+	if (sudoersparse() && !parse_error) {
 	    warningx(_("unabled to parse temporary file (%s), unknown error"),
 		sp->tpath);
 	    parse_error = true;
 	    errorfile = sp->path;
 	}
-	fclose(yyin);
+	fclose(sudoersin);
 	if (!parse_error) {
 	    if (!check_defaults(SETDEF_ALL, quiet) ||
 		check_aliases(strict, quiet) != 0) {
@@ -812,15 +812,15 @@ check_syntax(char *sudoers_path, bool quiet, bool strict, bool oldperms)
     debug_decl(check_syntax, SUDO_DEBUG_UTIL)
 
     if (strcmp(sudoers_path, "-") == 0) {
-	yyin = stdin;
+	sudoersin = stdin;
 	sudoers_path = "stdin";
-    } else if ((yyin = fopen(sudoers_path, "r")) == NULL) {
+    } else if ((sudoersin = fopen(sudoers_path, "r")) == NULL) {
 	if (!quiet)
 	    warning(_("unable to open %s"), sudoers_path);
 	goto done;
     }
     init_parser(sudoers_path, quiet);
-    if (yyparse() && !parse_error) {
+    if (sudoersparse() && !parse_error) {
 	if (!quiet)
 	    warningx(_("failed to parse %s file, unknown error"), sudoers_path);
 	parse_error = true;

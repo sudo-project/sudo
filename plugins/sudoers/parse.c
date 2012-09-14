@@ -68,7 +68,7 @@ struct sudo_nss sudo_nss_file = {
 /*
  * Parser externs.
  */
-extern FILE *yyin;
+extern FILE *sudoersin;
 extern char *errorfile;
 extern int errorlineno;
 extern bool parse_error;
@@ -100,7 +100,7 @@ sudo_file_close(struct sudo_nss *nss)
     if (nss->handle != NULL) {
 	fclose(nss->handle);
 	nss->handle = NULL;
-	yyin = NULL;
+	sudoersin = NULL;
     }
     debug_return_int(0);
 }
@@ -117,8 +117,8 @@ sudo_file_parse(struct sudo_nss *nss)
 	debug_return_int(-1);
 
     init_parser(sudoers_file, false);
-    yyin = nss->handle;
-    if (yyparse() != 0 || parse_error) {
+    sudoersin = nss->handle;
+    if (sudoersparse() != 0 || parse_error) {
 	if (errorlineno != -1) {
 	    log_error(0, _("parse error in %s near line %d"),
 		errorfile, errorlineno);

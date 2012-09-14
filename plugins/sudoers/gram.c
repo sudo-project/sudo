@@ -9,7 +9,33 @@
 #define yyclearin (yychar=(YYEMPTY))
 #define yyerrok (yyerrflag=0)
 #define YYRECOVERING() (yyerrflag!=0)
-#define YYPREFIX "yy"
+#define yyparse sudoersparse
+#define yylex sudoerslex
+#define yyerror sudoerserror
+#define yychar sudoerschar
+#define yyval sudoersval
+#define yylval sudoerslval
+#define yydebug sudoersdebug
+#define yynerrs sudoersnerrs
+#define yyerrflag sudoerserrflag
+#define yyss sudoersss
+#define yysslim sudoerssslim
+#define yyssp sudoersssp
+#define yyvs sudoersvs
+#define yyvsp sudoersvsp
+#define yystacksize sudoersstacksize
+#define yylhs sudoerslhs
+#define yylen sudoerslen
+#define yydefred sudoersdefred
+#define yydgoto sudoersdgoto
+#define yysindex sudoerssindex
+#define yyrindex sudoersrindex
+#define yygindex sudoersgindex
+#define yytable sudoerstable
+#define yycheck sudoerscheck
+#define yyname sudoersname
+#define yyrule sudoersrule
+#define YYPREFIX "sudoers"
 #line 2 "gram.y"
 /*
  * Copyright (c) 1996, 1998-2005, 2007-2012
@@ -146,7 +172,7 @@ typedef union {
     int tok;
 } YYSTYPE;
 #endif /* YYSTYPE_DEFINED */
-#line 149 "gram.c"
+#line 175 "gram.c"
 #define COMMAND 257
 #define ALIAS 258
 #define DEFVAR 259
@@ -183,9 +209,9 @@ typedef union {
 #define MYSELF 290
 #define YYERRCODE 256
 #if defined(__cplusplus) || defined(__STDC__)
-const short yylhs[] =
+const short sudoerslhs[] =
 #else
-short yylhs[] =
+short sudoerslhs[] =
 #endif
 	{                                        -1,
     0,    0,   28,   28,   29,   29,   29,   29,   29,   29,
@@ -201,9 +227,9 @@ short yylhs[] =
    14,   14,   15,   15,   15,
 };
 #if defined(__cplusplus) || defined(__STDC__)
-const short yylen[] =
+const short sudoerslen[] =
 #else
-short yylen[] =
+short sudoerslen[] =
 #endif
 	{                                         2,
     0,    1,    1,    2,    1,    2,    2,    2,    2,    2,
@@ -219,9 +245,9 @@ short yylen[] =
     1,    2,    1,    1,    1,
 };
 #if defined(__cplusplus) || defined(__STDC__)
-const short yydefred[] =
+const short sudoersdefred[] =
 #else
-short yydefred[] =
+short sudoersdefred[] =
 #endif
 	{                                      0,
     0,   94,   96,   97,   98,    0,    0,    0,    0,    0,
@@ -242,9 +268,9 @@ short yydefred[] =
    63,   64,   65,   66,   67,   68,   69,   70,   36,
 };
 #if defined(__cplusplus) || defined(__STDC__)
-const short yydgoto[] =
+const short sudoersdgoto[] =
 #else
-short yydgoto[] =
+short sudoersdgoto[] =
 #endif
 	{                                      18,
   104,  105,   27,   28,   44,   45,   46,   35,   61,   37,
@@ -253,9 +279,9 @@ short yydgoto[] =
    48,   51,   57,   49,   52,   58,   55,
 };
 #if defined(__cplusplus) || defined(__STDC__)
-const short yysindex[] =
+const short sudoerssindex[] =
 #else
-short yysindex[] =
+short sudoerssindex[] =
 #endif
 	{                                    541,
  -270,    0,    0,    0,    0,  -21,   -5,  553,  553,   20,
@@ -275,9 +301,9 @@ short yysindex[] =
  -169, -168,  569,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,};
 #if defined(__cplusplus) || defined(__STDC__)
-const short yyrindex[] =
+const short sudoersrindex[] =
 #else
-short yyrindex[] =
+short sudoersrindex[] =
 #endif
 	{                                     96,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -297,9 +323,9 @@ short yyrindex[] =
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,};
 #if defined(__cplusplus) || defined(__STDC__)
-const short yygindex[] =
+const short sudoersgindex[] =
 #else
-short yygindex[] =
+short sudoersgindex[] =
 #endif
 	{                                      0,
   -11,    0,   39,   12,   66,  -72,   27,   76,   -4,   40,
@@ -309,9 +335,9 @@ short yygindex[] =
 };
 #define YYTABLESIZE 932
 #if defined(__cplusplus) || defined(__STDC__)
-const short yytable[] =
+const short sudoerstable[] =
 #else
-short yytable[] =
+short sudoerstable[] =
 #endif
 	{                                      26,
    19,   26,   36,   94,   41,   34,   38,   39,   26,   24,
@@ -410,9 +436,9 @@ short yytable[] =
    50,   50,
 };
 #if defined(__cplusplus) || defined(__STDC__)
-const short yycheck[] =
+const short sudoerscheck[] =
 #else
-short yycheck[] =
+short sudoerscheck[] =
 #endif
 	{                                      33,
     0,   33,    7,   76,   33,   33,    8,    9,   33,  280,
@@ -517,9 +543,9 @@ short yycheck[] =
 #define YYMAXTOKEN 290
 #if YYDEBUG
 #if defined(__cplusplus) || defined(__STDC__)
-const char * const yyname[] =
+const char * const sudoersname[] =
 #else
-char *yyname[] =
+char *sudoersname[] =
 #endif
 	{
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -536,9 +562,9 @@ char *yyname[] =
 "RUNASALIAS","ERROR","TYPE","ROLE","PRIVS","LIMITPRIVS","MYSELF",
 };
 #if defined(__cplusplus) || defined(__STDC__)
-const char * const yyrule[] =
+const char * const sudoersrule[] =
 #else
-char *yyrule[] =
+char *sudoersrule[] =
 #endif
 	{"$accept : file",
 "file :",
@@ -876,7 +902,7 @@ init_parser(const char *path, bool quiet)
 
     debug_return;
 }
-#line 827 "gram.c"
+#line 853 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1716,7 +1742,7 @@ case 105:
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
-#line 1667 "gram.c"
+#line 1693 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

@@ -221,7 +221,7 @@ struct timeval;
 /*
  * Function prototypes
  */
-#define YY_DECL int yylex(void)
+#define YY_DECL int sudoerslex(void)
 
 /* goodpath.c */
 bool sudo_goodpath(const char *, struct stat *);
@@ -259,7 +259,7 @@ void restore_perms(void);
 int pam_prep_user(struct passwd *);
 
 /* gram.y */
-int yyparse(void);
+int sudoersparse(void);
 
 /* toke.l */
 YY_DECL;

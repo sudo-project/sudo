@@ -23,7 +23,7 @@ bool fill_cmnd(const char *, int);
 bool fill_txt(const char *, int, int);
 bool ipv6_valid(const char *s);
 int sudoers_trace_print(const char *msg);
-void yyerror(const char *);
+void sudoerserror(const char *);
 
 #ifndef FLEX_SCANNER
 extern int (*trace_print)(const char *msg);

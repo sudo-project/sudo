@@ -54,7 +54,7 @@
 
 sudo_conv_t sudo_conv;		/* NULL in non-plugin */
 
-YYSTYPE yylval;
+YYSTYPE sudoerslval;
 
 struct fill_test {
     const char *input;
@@ -106,8 +106,8 @@ check_fill(const char *input, int len, int addspace, const char *expect, char **
 {
     if (!fill(input, len))
 	return -1;
-    *resultp = yylval.string;
-    return !strcmp(yylval.string, expect);
+    *resultp = sudoerslval.string;
+    return !strcmp(sudoerslval.string, expect);
 }
 
 static int
@@ -115,8 +115,8 @@ check_fill_cmnd(const char *input, int len, int addspace, const char *expect, ch
 {
     if (!fill_cmnd(input, len))
 	return -1;
-    *resultp = yylval.command.cmnd;
-    return !strcmp(yylval.command.cmnd, expect);
+    *resultp = sudoerslval.command.cmnd;
+    return !strcmp(sudoerslval.command.cmnd, expect);
 }
 
 static int
@@ -124,8 +124,8 @@ check_fill_args(const char *input, int len, int addspace, const char *expect, ch
 {
     if (!fill_args(input, len, addspace))
 	return -1;
-    *resultp = yylval.command.args;
-    return !strcmp(yylval.command.args, expect);
+    *resultp = sudoerslval.command.args;
+    return !strcmp(sudoerslval.command.args, expect);
 }
 
 static int
@@ -191,7 +191,7 @@ cleanup(int gotsig)
 
 /* STUB */
 void
-yyerror(const char *s)
+sudoerserror(const char *s)
 {
     return;
 }

@@ -74,7 +74,7 @@
 #include "lbuf.h"
 #include "secure_path.h"
 
-extern YYSTYPE yylval;
+extern YYSTYPE sudoerslval;
 extern bool parse_error;
 extern bool sudoers_warnings;
 int sudolineno;
@@ -101,7 +101,7 @@ int (*trace_print)(const char *msg) = sudoers_trace_print;
 	return (n);		\
 } while (0)
 
-#define ECHO	ignore_result(fwrite(yytext, yyleng, 1, yyout))
+#define ECHO	ignore_result(fwrite(sudoerstext, sudoersleng, 1, sudoersout))
 
 #define	push_include(_p)	(_push_include((_p), false))
 #define	push_includedir(_p)	(_push_include((_p), true))
@@ -122,6 +122,7 @@ DEFVAR			[a-z_]+
 %option noinput
 %option nounput
 %option noyywrap
+%option prefix="sudoers"
 
 %s	GOTDEFS
 %x	GOTCMND
@@ -140,7 +141,7 @@ DEFVAR			[a-z_]+
 <STARTDEFS>{DEFVAR}	{
 			    BEGIN INDEFS;
 			    LEXTRACE("DEFVAR ");
-			    if (!fill(yytext, yyleng))
+			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
 			    LEXRETURN(DEFVAR);
 			}
@@ -169,14 +170,14 @@ DEFVAR			[a-z_]+
 
     \"			{
 			    LEXTRACE("BEGINSTR ");
-			    yylval.string = NULL;
+			    sudoerslval.string = NULL;
 			    prev_state = YY_START;
 			    BEGIN INSTR;
 			}
 
     {ENVAR}		{
 			    LEXTRACE("WORD(2) ");
-			    if (!fill(yytext, yyleng))
+			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
 			    LEXRETURN(WORD);
 			}
@@ -193,23 +194,23 @@ DEFVAR			[a-z_]+
 			    LEXTRACE("ENDSTR ");
 			    BEGIN prev_state;
 
-			    if (yylval.string == NULL) {
+			    if (sudoerslval.string == NULL) {
 				LEXTRACE("ERROR "); /* empty string */
 				LEXRETURN(ERROR);
 			    }
 			    if (prev_state == INITIAL) {
-				switch (yylval.string[0]) {
+				switch (sudoerslval.string[0]) {
 				case '%':
-				    if (yylval.string[1] == '\0' ||
-					(yylval.string[1] == ':' &&
-					yylval.string[2] == '\0')) {
+				    if (sudoerslval.string[1] == '\0' ||
+					(sudoerslval.string[1] == ':' &&
+					sudoerslval.string[2] == '\0')) {
 					LEXTRACE("ERROR "); /* empty group */
 					LEXRETURN(ERROR);
 				    }
 				    LEXTRACE("USERGROUP ");
 				    LEXRETURN(USERGROUP);
 				case '+':
-				    if (yylval.string[1] == '\0') {
+				    if (sudoerslval.string[1] == '\0') {
 					LEXTRACE("ERROR "); /* empty netgroup */
 					LEXRETURN(ERROR);
 				    }
@@ -223,13 +224,13 @@ DEFVAR			[a-z_]+
 
     \\			{
 			    LEXTRACE("BACKSLASH ");
-			    if (!append(yytext, yyleng))
+			    if (!append(sudoerstext, sudoersleng))
 				yyterminate();
 			}
 
     ([^\"\n\\]|\\\")+	{
 			    LEXTRACE("STRBODY ");
-			    if (!append(yytext, yyleng))
+			    if (!append(sudoerstext, sudoersleng))
 				yyterminate();
 			}
 }
@@ -238,7 +239,7 @@ DEFVAR			[a-z_]+
     \\[\*\?\[\]\!]	{
 			    /* quoted fnmatch glob char, pass verbatim */
 			    LEXTRACE("QUOTEDCHAR ");
-			    if (!fill_args(yytext, 2, sawspace))
+			    if (!fill_args(sudoerstext, 2, sawspace))
 				yyterminate();
 			    sawspace = false;
 			}
@@ -246,7 +247,7 @@ DEFVAR			[a-z_]+
     \\[:\\,= \t#]	{
 			    /* quoted sudoers special char, strip backslash */
 			    LEXTRACE("QUOTEDCHAR ");
-			    if (!fill_args(yytext + 1, 1, sawspace))
+			    if (!fill_args(sudoerstext + 1, 1, sawspace))
 				yyterminate();
 			    sawspace = false;
 			}
@@ -259,7 +260,7 @@ DEFVAR			[a-z_]+
 
     [^#\\:, \t\n]+ 	{
 			    LEXTRACE("ARG ");
-			    if (!fill_args(yytext, yyleng, sawspace))
+			    if (!fill_args(sudoerstext, sudoersleng, sawspace))
 				yyterminate();
 			    sawspace = false;
 			}			/* a command line arg */
@@ -273,7 +274,7 @@ DEFVAR			[a-z_]+
 				LEXRETURN(ERROR);
 			    }
 
-			    if ((path = parse_include(yytext)) == NULL)
+			    if ((path = parse_include(sudoerstext)) == NULL)
 				yyterminate();
 
 			    LEXTRACE("INCLUDE\n");
@@ -291,7 +292,7 @@ DEFVAR			[a-z_]+
 				LEXRETURN(ERROR);
 			    }
 
-			    if ((path = parse_include(yytext)) == NULL)
+			    if ((path = parse_include(sudoerstext)) == NULL)
 				yyterminate();
 
 			    LEXTRACE("INCLUDEDIR\n");
@@ -313,11 +314,11 @@ DEFVAR			[a-z_]+
 				LEXRETURN(ERROR);
 			    }
 
-			    for (n = 0; isblank((unsigned char)yytext[n]); n++)
+			    for (n = 0; isblank((unsigned char)sudoerstext[n]); n++)
 				continue;
 			    n += sizeof("Defaults") - 1;
-			    if ((deftype = yytext[n++]) != '\0') {
-				while (isblank((unsigned char)yytext[n]))
+			    if ((deftype = sudoerstext[n++]) != '\0') {
+				while (isblank((unsigned char)sudoerstext[n]))
 				    n++;
 			    }
 			    BEGIN GOTDEFS;
@@ -352,9 +353,9 @@ DEFVAR			[a-z_]+
 				LEXRETURN(ERROR);
 			    }
 
-			    for (n = 0; isblank((unsigned char)yytext[n]); n++)
+			    for (n = 0; isblank((unsigned char)sudoerstext[n]); n++)
 				continue;
-			    switch (yytext[n]) {
+			    switch (sudoerstext[n]) {
 				case 'H':
 				    LEXTRACE("HOSTALIAS ");
 				    LEXRETURN(HOSTALIAS);
@@ -430,7 +431,7 @@ NOLOG_INPUT[[:blank:]]*:	{
 
 \+{WORD}		{
 			    /* netgroup */
-			    if (!fill(yytext, yyleng))
+			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
 			    LEXTRACE("NETGROUP ");
 			    LEXRETURN(NETGROUP);
@@ -438,43 +439,43 @@ NOLOG_INPUT[[:blank:]]*:	{
 
 \%:?({WORD}|{ID})	{
 			    /* group */
-			    if (!fill(yytext, yyleng))
+			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
 			    LEXTRACE("USERGROUP ");
 			    LEXRETURN(USERGROUP);
 			}
 
 {IPV4ADDR}(\/{IPV4ADDR})? {
-			    if (!fill(yytext, yyleng))
+			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
 			    LEXRETURN(NTWKADDR);
 			}
 
 {IPV4ADDR}\/([12]?[0-9]|3[0-2]) {
-			    if (!fill(yytext, yyleng))
+			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
 			    LEXRETURN(NTWKADDR);
 			}
 
 {IPV6ADDR}(\/{IPV6ADDR})? {
-			    if (!ipv6_valid(yytext)) {
+			    if (!ipv6_valid(sudoerstext)) {
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);
 			    }
-			    if (!fill(yytext, yyleng))
+			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
 			    LEXRETURN(NTWKADDR);
 			}
 
 {IPV6ADDR}\/([0-9]|[1-9][0-9]|1[01][0-9]|12[0-8]) {
-			    if (!ipv6_valid(yytext)) {
+			    if (!ipv6_valid(sudoerstext)) {
 				LEXTRACE("ERROR ");
 				LEXRETURN(ERROR);
 			    }
-			    if (!fill(yytext, yyleng))
+			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
 			    LEXRETURN(NTWKADDR);
@@ -523,7 +524,7 @@ ALL {
 
 [[:upper:]][[:upper:][:digit:]_]* {
 			got_alias:
-			    if (!fill(yytext, yyleng))
+			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
 			    LEXTRACE("ALIAS ");
 			    LEXRETURN(ALIAS);
@@ -531,7 +532,7 @@ ALL {
 
 <GOTDEFS>({PATH}|sudoedit) {
 			    /* no command args allowed for Defaults!/path */
-			    if (!fill_cmnd(yytext, yyleng))
+			    if (!fill_cmnd(sudoerstext, sudoersleng))
 				yyterminate();
 			    LEXTRACE("COMMAND ");
 			    LEXRETURN(COMMAND);
@@ -540,35 +541,35 @@ ALL {
 sudoedit		{
 			    BEGIN GOTCMND;
 			    LEXTRACE("COMMAND ");
-			    if (!fill_cmnd(yytext, yyleng))
+			    if (!fill_cmnd(sudoerstext, sudoersleng))
 				yyterminate();
 			}			/* sudo -e */
 
 {PATH}			{
 			    /* directories can't have args... */
-			    if (yytext[yyleng - 1] == '/') {
+			    if (sudoerstext[sudoersleng - 1] == '/') {
 				LEXTRACE("COMMAND ");
-				if (!fill_cmnd(yytext, yyleng))
+				if (!fill_cmnd(sudoerstext, sudoersleng))
 				    yyterminate();
 				LEXRETURN(COMMAND);
 			    } else {
 				BEGIN GOTCMND;
 				LEXTRACE("COMMAND ");
-				if (!fill_cmnd(yytext, yyleng))
+				if (!fill_cmnd(sudoerstext, sudoersleng))
 				    yyterminate();
 			    }
 			}			/* a pathname */
 
 <INITIAL,GOTDEFS>\" {
 			    LEXTRACE("BEGINSTR ");
-			    yylval.string = NULL;
+			    sudoerslval.string = NULL;
 			    prev_state = YY_START;
 			    BEGIN INSTR;
 			}
 
 <INITIAL,GOTDEFS>({ID}|{WORD}) {
 			    /* a word */
-			    if (!fill(yytext, yyleng))
+			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
 			    LEXTRACE("WORD(5) ");
 			    LEXRETURN(WORD);
@@ -600,7 +601,7 @@ sudoedit		{
 			}			/* return ':' */
 
 <*>!+			{
-			    if (yyleng & 1) {
+			    if (sudoersleng & 1) {
 				LEXTRACE("!");
 				LEXRETURN('!');	/* return '!' */
 			    }
@@ -690,10 +691,10 @@ switch_dir(struct include_stack *stack, char *dirpath)
 	if (errno != ENOENT) {
 	    char *errbuf;
 	    if (asprintf(&errbuf, _("%s: %s"), dirpath, strerror(errno)) != -1) {
-		yyerror(errbuf);
+		sudoerserror(errbuf);
 		free(errbuf);
 	    } else {
-		yyerror(_("unable to allocate memory"));
+		sudoerserror(_("unable to allocate memory"));
 	    }
 	}
 	goto done;
@@ -792,7 +793,7 @@ init_lexer(void)
 	efree(istack[idepth].path);
 	if (idepth && !istack[idepth].keepopen)
 	    fclose(istack[idepth].bs->yy_input_file);
-	yy_delete_buffer(istack[idepth].bs);
+	sudoers_delete_buffer(istack[idepth].bs);
     }
     efree(istack);
     istack = NULL;
@@ -816,14 +817,14 @@ _push_include(char *path, bool isdir)
     /* push current state onto stack */
     if (idepth >= istacksize) {
 	if (idepth > MAX_SUDOERS_DEPTH) {
-	    yyerror(_("too many levels of includes"));
+	    sudoerserror(_("too many levels of includes"));
 	    debug_return_bool(false);
 	}
 	istacksize += SUDOERS_STACK_INCREMENT;
 	istack = (struct include_stack *) realloc(istack,
 	    sizeof(*istack) * istacksize);
 	if (istack == NULL) {
-	    yyerror(_("unable to allocate memory"));
+	    sudoerserror(_("unable to allocate memory"));
 	    debug_return_bool(false);
 	}
     }
@@ -864,7 +865,7 @@ _push_include(char *path, bool isdir)
 		debug_return_bool(false);
 	}
 	if (!(path = switch_dir(&istack[idepth], path))) {
-	    /* switch_dir() called yyerror() for us */
+	    /* switch_dir() called sudoerserror() for us */
 	    debug_return_bool(false);
 	}
 	while ((fp = open_sudoers(path, false, &keepopen)) == NULL) {
@@ -879,7 +880,7 @@ _push_include(char *path, bool isdir)
     } else {
 	if ((fp = open_sudoers(path, true, &keepopen)) == NULL) {
 	    /* The error was already printed by open_sudoers() */
-	    yyerror(NULL);
+	    sudoerserror(NULL);
 	    debug_return_bool(false);
 	}
 	istack[idepth].more = NULL;
@@ -892,7 +893,7 @@ _push_include(char *path, bool isdir)
     idepth++;
     sudolineno = 1;
     sudoers = path;
-    yy_switch_to_buffer(yy_create_buffer(fp, YY_BUF_SIZE));
+    sudoers_switch_to_buffer(sudoers_create_buffer(fp, YY_BUF_SIZE));
 
     debug_return_bool(true);
 }
@@ -909,7 +910,7 @@ pop_include(void)
 
     if (!keepopen)
 	fclose(YY_CURRENT_BUFFER->yy_input_file);
-    yy_delete_buffer(YY_CURRENT_BUFFER);
+    sudoers_delete_buffer(YY_CURRENT_BUFFER);
     /* If we are in an include dir, move to the next file. */
     while ((pl = istack[idepth - 1].more) != NULL) {
 	fp = open_sudoers(pl->path, false, &keepopen);
@@ -918,7 +919,7 @@ pop_include(void)
 	    efree(sudoers);
 	    sudoers = pl->path;
 	    sudolineno = 1;
-	    yy_switch_to_buffer(yy_create_buffer(fp, YY_BUF_SIZE));
+	    sudoers_switch_to_buffer(sudoers_create_buffer(fp, YY_BUF_SIZE));
 	    efree(pl);
 	    break;
 	}
@@ -930,7 +931,7 @@ pop_include(void)
     /* If no path list, just pop the last dir on the stack. */
     if (pl == NULL) {
 	idepth--;
-	yy_switch_to_buffer(istack[idepth].bs);
+	sudoers_switch_to_buffer(istack[idepth].bs);
 	efree(sudoers);
 	sudoers = istack[idepth].path;
 	sudolineno = istack[idepth].lineno;
@@ -974,7 +975,7 @@ parse_include(char *base)
     len += (int)(ep - cp);
     path = pp = malloc(len + dirlen + 1);
     if (path == NULL) {
-	yyerror(_("unable to allocate memory"));
+	sudoerserror(_("unable to allocate memory"));
 	debug_return_str(NULL);
     }
     if (dirlen) {

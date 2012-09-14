@@ -48,4 +48,4 @@ typedef union {
     int tok;
 } YYSTYPE;
 #endif /* YYSTYPE_DEFINED */
-extern YYSTYPE yylval;
+extern YYSTYPE sudoerslval;

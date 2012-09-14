@@ -108,12 +108,12 @@ fill_txt(const char *src, int len, int olen)
     char *dst;
     debug_decl(fill_txt, SUDO_DEBUG_PARSER)
 
-    dst = olen ? realloc(yylval.string, olen + len + 1) : malloc(len + 1);
+    dst = olen ? realloc(sudoerslval.string, olen + len + 1) : malloc(len + 1);
     if (dst == NULL) {
-	yyerror(_("unable to allocate memory"));
+	sudoerserror(_("unable to allocate memory"));
 	debug_return_bool(false);
     }
-    yylval.string = dst;
+    sudoerslval.string = dst;
 
     /* Copy the string and collapse any escaped characters. */
     dst += olen;
@@ -144,8 +144,8 @@ append(const char *src, int len)
     int olen = 0;
     debug_decl(append, SUDO_DEBUG_PARSER)
 
-    if (yylval.string != NULL)
-	olen = strlen(yylval.string);
+    if (sudoerslval.string != NULL)
+	olen = strlen(sudoerslval.string);
 
     debug_return_bool(fill_txt(src, len, olen));
 }
@@ -162,9 +162,9 @@ fill_cmnd(const char *src, int len)
 
     arg_len = arg_size = 0;
 
-    dst = yylval.command.cmnd = (char *) malloc(len + 1);
-    if (yylval.command.cmnd == NULL) {
-	yyerror(_("unable to allocate memory"));
+    dst = sudoerslval.command.cmnd = (char *) malloc(len + 1);
+    if (sudoerslval.command.cmnd == NULL) {
+	sudoerserror(_("unable to allocate memory"));
 	debug_return_bool(false);
     }
 
@@ -177,7 +177,7 @@ fill_cmnd(const char *src, int len)
     }
     *dst = '\0';
 
-    yylval.command.args = NULL;
+    sudoerslval.command.args = NULL;
     debug_return_bool(true);
 }
 
@@ -188,7 +188,7 @@ fill_args(const char *s, int len, int addspace)
     char *p;
     debug_decl(fill_args, SUDO_DEBUG_PARSER)
 
-    if (yylval.command.args == NULL) {
+    if (sudoerslval.command.args == NULL) {
 	addspace = 0;
 	new_len = len;
     } else
@@ -199,23 +199,23 @@ fill_args(const char *s, int len, int addspace)
 	while (new_len >= (arg_size += COMMANDARGINC))
 	    ;
 
-	p = yylval.command.args ?
-	    (char *) realloc(yylval.command.args, arg_size) :
+	p = sudoerslval.command.args ?
+	    (char *) realloc(sudoerslval.command.args, arg_size) :
 	    (char *) malloc(arg_size);
 	if (p == NULL) {
-	    efree(yylval.command.args);
-	    yyerror(_("unable to allocate memory"));
+	    efree(sudoerslval.command.args);
+	    sudoerserror(_("unable to allocate memory"));
 	    debug_return_bool(false);
 	} else
-	    yylval.command.args = p;
+	    sudoerslval.command.args = p;
     }
 
     /* Efficiently append the arg (with a leading space if needed). */
-    p = yylval.command.args + arg_len;
+    p = sudoerslval.command.args + arg_len;
     if (addspace)
 	*p++ = ' ';
-    if (strlcpy(p, s, arg_size - (p - yylval.command.args)) != len) {
-	yyerror(_("fill_args: buffer overflow"));	/* paranoia */
+    if (strlcpy(p, s, arg_size - (p - sudoerslval.command.args)) != len) {
+	sudoerserror(_("fill_args: buffer overflow"));	/* paranoia */
 	debug_return_bool(false);
     }
     arg_len = new_len;

@@ -124,7 +124,7 @@ extern int optind;
 extern char *malloc_options;
 #endif
 #ifdef YYDEBUG
-extern int yydebug;
+extern int sudoersdebug;
 #endif
 
 int
@@ -143,7 +143,7 @@ main(int argc, char *argv[])
     malloc_options = "AFGJPR";
 #endif
 #ifdef YYDEBUG
-    yydebug = 1;
+    sudoersdebug = 1;
 #endif
 
 #if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
@@ -270,7 +270,7 @@ main(int argc, char *argv[])
     /* Allocate space for data structures in the parser. */
     init_parser("sudoers", false);
 
-    if (yyparse() != 0 || parse_error) {
+    if (sudoersparse() != 0 || parse_error) {
 	parse_error = true;
 	if (errorlineno != -1)
 	    (void) printf("Parse error in %s near line %d",
