@@ -613,15 +613,15 @@ done:
 
 /*
  * Walk through search results and return true if we have a matching
- * netgroup, else false.
+ * non-Unix group (including netgroups), else false.
  */
 static bool
-sudo_ldap_check_user_netgroup(LDAP *ld, LDAPMessage *entry, char *user)
+sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 {
     struct berval **bv, **p;
     char *val;
     int ret = false;
-    debug_decl(sudo_ldap_check_user_netgroup, SUDO_DEBUG_LDAP)
+    debug_decl(sudo_ldap_check_non_unix_group, SUDO_DEBUG_LDAP)
 
     if (!entry)
 	debug_return_bool(ret);
@@ -634,11 +634,17 @@ sudo_ldap_check_user_netgroup(LDAP *ld, LDAPMessage *entry, char *user)
     /* walk through values */
     for (p = bv; *p != NULL && !ret; p++) {
 	val = (*p)->bv_val;
-	/* match any */
-	if (netgr_matches(val, NULL, NULL, user))
-	    ret = true;
-	DPRINTF(("ldap sudoUser netgroup '%s' ... %s", val,
-	    ret ? "MATCH!" : "not"), 2 + ((ret) ? 0 : 1));
+	if (*val == '+') {
+	    if (netgr_matches(val, NULL, NULL, pw->pw_name))
+		ret = true;
+	    DPRINTF(("ldap sudoUser netgroup '%s' ... %s", val,
+		ret ? "MATCH!" : "not"), 2 + ((ret) ? 0 : 1));
+	} else {
+	    if (group_plugin_query(pw->pw_name, val + 2, pw))
+		ret = true;
+	    DPRINTF(("ldap sudoUser non-Unix group '%s' ... %s", val,
+		ret ? "MATCH!" : "not"), 2 + ((ret) ? 0 : 1));
+	}
     }
 
     ldap_value_free_len(bv);	/* cleanup */
@@ -1238,7 +1244,8 @@ sudo_ldap_build_pass1(struct passwd *pw)
 }
 
 /*
- * Builds up a filter to check against netgroup entries in LDAP.
+ * Builds up a filter to check against non-Unix group
+ * entries in LDAP, including netgroups.
  */
 static char *
 sudo_ldap_build_pass2(void)
@@ -1250,15 +1257,23 @@ sudo_ldap_build_pass2(void)
 	sudo_ldap_timefilter(timebuffer, sizeof(timebuffer));
 
     /*
-     * Match all sudoUsers beginning with a '+'.
+     * Match all sudoUsers beginning with '+' or '%:'.
      * If a search filter or time restriction is specified, 
      * those get ANDed in to the expression.
      */
-    easprintf(&filt, "%s%s(sudoUser=+*)%s%s",
-	(ldap_conf.timed || ldap_conf.search_filter) ? "(&" : "",
-	ldap_conf.search_filter ? ldap_conf.search_filter : "",
-	ldap_conf.timed ? timebuffer : "",
-	(ldap_conf.timed || ldap_conf.search_filter) ? ")" : "");
+    if (def_group_plugin) {
+	easprintf(&filt, "%s%s(|(sudoUser=+*)(sudoUser=%%:*))%s%s",
+	    (ldap_conf.timed || ldap_conf.search_filter) ? "(&" : "",
+	    ldap_conf.search_filter ? ldap_conf.search_filter : "",
+	    ldap_conf.timed ? timebuffer : "",
+	    (ldap_conf.timed || ldap_conf.search_filter) ? ")" : "");
+    } else {
+	easprintf(&filt, "%s%s(sudoUser=+*)%s%s",
+	    (ldap_conf.timed || ldap_conf.search_filter) ? "(&" : "",
+	    ldap_conf.search_filter ? ldap_conf.search_filter : "",
+	    ldap_conf.timed ? timebuffer : "",
+	    (ldap_conf.timed || ldap_conf.search_filter) ? ")" : "");
+    }
 
     debug_return_str(filt);
 }
@@ -2567,7 +2582,7 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
     struct timeval tv, *tvp = NULL;
     LDAPMessage *entry, *result;
     LDAP *ld = handle->ld;
-    int do_netgr, rc;
+    int pass, rc;
     char *filt;
     debug_decl(sudo_ldap_result_get, SUDO_DEBUG_LDAP)
 
@@ -2598,17 +2613,17 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
      * sudoUser in this pass since the LDAP server already scanned
      * it for us.
      *
-     * The second pass will return all the entries that contain
-     * user netgroups.  Then we take the netgroups returned and
-     * try to match them against the username.
+     * The second pass will return all the entries that contain non-
+     * Unix groups, including netgroups.  Then we take the non-Unix
+     * groups returned and try to match them against the username.
      *
      * Since we have to sort the possible entries before we make a
      * decision, we perform the queries and store all of the results in
      * an ldap_result object.  The results are then sorted by sudoOrder.
      */
     lres = sudo_ldap_result_alloc();
-    for (do_netgr = 0; do_netgr < 2; do_netgr++) {
-	filt = do_netgr ? sudo_ldap_build_pass2() : sudo_ldap_build_pass1(pw);
+    for (pass = 0; pass < 2; pass++) {
+	filt = pass ? sudo_ldap_build_pass2() : sudo_ldap_build_pass1(pw);
 	DPRINTF(("ldap search '%s'", filt), 1);
 	for (base = ldap_conf.base; base != NULL; base = base->next) {
 	    DPRINTF(("searching from base '%s'", base->val), 1);
@@ -2630,8 +2645,8 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 	    DPRINTF(("adding search result"), 1);
 	    sudo_ldap_result_add_search(lres, ld, result);
 	    LDAP_FOREACH(entry, ld, result) {
-		if ((!do_netgr ||
-		    sudo_ldap_check_user_netgroup(ld, entry, pw->pw_name)) &&
+		if ((!pass ||
+		    sudo_ldap_check_non_unix_group(ld, entry, pw)) &&
 		    sudo_ldap_check_host(ld, entry)) {
 		    lres->host_matches = true;
 		    sudo_ldap_result_add_entry(lres, entry);
