@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd July 16, 2012
+.Dd September 15, 2012
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -437,10 +437,10 @@ User ::= '!'* user name |
 .Pp
 A
 .Li User_List
-is made up of one or more user names, user ids
+is made up of one or more user names, user IDs
 (prefixed with
 .Ql # ) ,
-system group names and ids (prefixed with
+system group names and IDs (prefixed with
 .Ql %
 and
 .Ql %#

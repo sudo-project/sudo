@@ -37,10 +37,10 @@ DDEESSCCRRIIPPTTIIOONN
      LDAP, ssuuddoo-specific Aliases are not supported.
 
      For the most part, there is really no need for ssuuddoo-specific Aliases.
-     Unix groups or user netgroups can be used in place of User_Aliases and
-     Runas_Aliases.  Host netgroups can be used in place of Host_Aliases.
-     Since Unix groups and netgroups can also be stored in LDAP there is no
-     real need for ssuuddoo-specific aliases.
+     Unix groups, non-Unix groups (via the _g_r_o_u_p___p_l_u_g_i_n) or user netgroups can
+     be used in place of User_Aliases and Runas_Aliases.  Host netgroups can
+     be used in place of Host_Aliases.  Since groups and netgroups can also be
+     stored in LDAP there is no real need for ssuuddoo-specific aliases.
 
      Cmnd_Aliases are not really required either since it is possible to have
      multiple users listed in a sudoRole.  Instead of defining a Cmnd_Alias
@@ -67,9 +67,12 @@ DDEESSCCRRIIPPTTIIOONN
      following attributes:
 
      ssuuddooUUsseerr
-           A user name, user ID (prefixed with `#'), Unix group (prefixed with
-           `%'), Unix group ID (prefixed with `%#'), or user netgroup
-           (prefixed with `+').
+           A user name, user ID (prefixed with `#'), Unix group name or ID
+           (prefixed with `%' or `%#' respectively), user netgroup (prefixed
+           with `+'), or non-Unix group name or ID (prefixed with `%:' or
+           `%:#' respectively).  Non-Unix group support is only available when
+           an appropriate _g_r_o_u_p___p_l_u_g_i_n is defined in the global _d_e_f_a_u_l_t_s
+           sudoRole object.
 
      ssuuddooHHoosstt
            A host name, IP address, IP network, or host netgroup (prefixed

@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "@mansectsu@" "July 16, 2012" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
+.TH "SUDOERS" "@mansectsu@" "September 15, 2012" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -451,10 +451,10 @@ User ::= '!'* user name |
 .PP
 A
 \fRUser_List\fR
-is made up of one or more user names, user ids
+is made up of one or more user names, user IDs
 (prefixed with
 `#'),
-system group names and ids (prefixed with
+system group names and IDs (prefixed with
 `%'
 and
 `%#'

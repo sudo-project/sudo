@@ -82,11 +82,11 @@ Aliases are not supported.
 For the most part, there is really no need for
 .Nm sudo Ns No -specific
 Aliases.
-Unix groups or user netgroups can be used in place of User_Aliases and
-Runas_Aliases.
+Unix groups, non-Unix groups (via the
+.Em group_plugin )
+or user netgroups can be used in place of User_Aliases and Runas_Aliases.
 Host netgroups can be used in place of Host_Aliases.
-Since Unix groups and netgroups can also be stored in LDAP there is no
-real need for
+Since groups and netgroups can also be stored in LDAP there is no real need for
 .Nm sudo Ns No -specific
 aliases.
 .Pp
@@ -132,12 +132,23 @@ It consists of the following attributes:
 .It Sy sudoUser
 A user name, user ID (prefixed with
 .Ql # ) ,
-Unix group (prefixed with
-.Ql % ) ,
-Unix group ID (prefixed with
-.Ql %# ) ,
-or user netgroup (prefixed with
-.Ql + ) .
+Unix group name or ID (prefixed with
+.Ql %
+or
+.Ql %#
+respectively), user netgroup (prefixed with
+.Ql + ) ,
+or non-Unix group name or ID (prefixed with
+.Ql %:
+or
+.Ql %:#
+respectively).
+Non-Unix group support is only available when an appropriate
+.Em group_plugin
+is defined in the global
+.Em defaults
+.Li sudoRole
+object.
 .It Sy sudoHost
 A host name, IP address, IP network, or host netgroup (prefixed with a
 .Ql + ) .

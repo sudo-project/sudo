@@ -86,11 +86,11 @@ Aliases are not supported.
 For the most part, there is really no need for
 \fBsudo\fR-specific
 Aliases.
-Unix groups or user netgroups can be used in place of User_Aliases and
-Runas_Aliases.
+Unix groups, non-Unix groups (via the
+\fIgroup_plugin\fR)
+or user netgroups can be used in place of User_Aliases and Runas_Aliases.
 Host netgroups can be used in place of Host_Aliases.
-Since Unix groups and netgroups can also be stored in LDAP there is no
-real need for
+Since groups and netgroups can also be stored in LDAP there is no real need for
 \fBsudo\fR-specific
 aliases.
 .PP
@@ -139,12 +139,23 @@ It consists of the following attributes:
 \fBsudoUser\fR
 A user name, user ID (prefixed with
 `#'),
-Unix group (prefixed with
-`%'),
-Unix group ID (prefixed with
-`%#'),
-or user netgroup (prefixed with
-`+').
+Unix group name or ID (prefixed with
+`%'
+or
+`%#'
+respectively), user netgroup (prefixed with
+`+'),
+or non-Unix group name or ID (prefixed with
+`%:'
+or
+`%:#'
+respectively).
+Non-Unix group support is only available when an appropriate
+\fIgroup_plugin\fR
+is defined in the global
+\fIdefaults\fR
+\fRsudoRole\fR
+object.
 .TP 6n
 \fBsudoHost\fR
 A host name, IP address, IP network, or host netgroup (prefixed with a
