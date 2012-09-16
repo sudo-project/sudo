@@ -576,7 +576,7 @@ handle_signals(int sv[2], pid_t child, int log_io, struct command_status *cstat)
 			    zero_bytes(&sa, sizeof(sa));
 			    sigemptyset(&sa.sa_mask);
 			    sa.sa_handler = SIG_DFL;
-			    sigaction(SIGTSTP, &sa, NULL);
+			    sigaction(SIGTSTP, &sa, &osa);
 			}
 			if (kill(getpid(), signo) != 0)
 			    warning("kill(%d, SIG%s)", (int)getpid(), signame);
