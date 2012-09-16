@@ -403,52 +403,60 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
 
 /*
  * Similar to setenv(3) but operates on a private copy of the environment.
+ */
+int
+sudo_setenv(const char *var, const char *val, int overwrite)
+{
+    return sudo_setenv2(var, val, true, (bool)overwrite);
+}
+
+/*
+ * Similar to setenv(3) but operates on a private copy of the environment.
  * Does not include warnings or debugging to avoid recursive calls.
  */
 static int
 sudo_setenv_nodebug(const char *var, const char *val, int overwrite)
 {
-    char *estring;
+    char *ep, *estring = NULL;
+    const char *cp;
     size_t esize;
     int rval = -1;
 
-    esize = strlen(var) + 1 + strlen(val) + 1;
-    if ((estring = malloc(esize)) == NULL) {
-	errno = ENOMEM;
-	goto done;
-    }
-
-    /* Build environment string and insert it. */
-    if (strlcpy(estring, var, esize) >= esize ||
-	strlcat(estring, "=", esize) >= esize ||
-	strlcat(estring, val, esize) >= esize) {
-
+    if (var == NULL || *var == '\0') {
 	errno = EINVAL;
 	goto done;
     }
+
+    /*
+     * POSIX says a var name with '=' is an error but BSD
+     * just ignores the '=' and anything after it.
+     */
+    for (cp = var; *cp && *cp != '='; cp++)
+	;
+    esize = (size_t)(cp - var) + 2;
+    if (val) {
+	esize += strlen(val);	/* glibc treats a NULL val as "" */
+    }
+
+    /* Allocate and fill in estring. */
+    if ((estring = ep = malloc(esize)) == NULL) {
+	errno = ENOMEM;
+	goto done;
+    }
+    for (cp = var; *cp && *cp != '='; cp++)
+	*ep++ = *cp;
+    *ep++ = '=';
+    if (val) {
+	for (cp = val; *cp; cp++)
+	    *ep++ = *cp;
+    }
+    *ep = '\0';
+
     rval = sudo_putenv_nodebug(estring, true, overwrite);
 done:
     if (rval == -1)
-	efree(estring);
+	free(estring);
     return rval;
-}
-
-/*
- * Similar to setenv(3) but operates on a private copy of the environment.
- */
-int
-sudo_setenv(const char *var, const char *val, int overwrite)
-{
-    int rval;
-    debug_decl(sudo_setenv, SUDO_DEBUG_ENV)
-
-    rval = sudo_setenv_nodebug(var, val, overwrite);
-    if (rval == -1) {
-	if (errno == EINVAL)
-	    errorx(1, _("internal error, %s overflow"), "sudo_setenv()");
-	errorx(1, _("unable to allocate memory"));
-    }
-    debug_return_int(rval);
 }
 
 /*
