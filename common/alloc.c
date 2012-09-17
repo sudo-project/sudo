@@ -51,6 +51,7 @@
 #include "missing.h"
 #include "alloc.h"
 #include "error.h"
+#include "errno.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "gettext.h"
@@ -82,7 +83,7 @@ emalloc(size_t size)
 	errorx2(1, _("internal error, tried to emalloc(0)"));
 
     if ((ptr = malloc(size)) == NULL)
-	errorx2(1, _("unable to allocate memory"));
+	errorx2(1, NULL);
     return ptr;
 }
 
@@ -102,7 +103,7 @@ emalloc2(size_t nmemb, size_t size)
 
     size *= nmemb;
     if ((ptr = malloc(size)) == NULL)
-	errorx2(1, _("unable to allocate memory"));
+	errorx2(1, NULL);
     return ptr;
 }
 
@@ -124,7 +125,7 @@ ecalloc(size_t nmemb, size_t size)
 	size *= nmemb;
     }
     if ((ptr = malloc(size)) == NULL)
-	errorx2(1, _("unable to allocate memory"));
+	errorx2(1, NULL);
     memset(ptr, 0, size);
     return ptr;
 }
@@ -143,7 +144,7 @@ erealloc(void *ptr, size_t size)
 
     ptr = ptr ? realloc(ptr, size) : malloc(size);
     if (ptr == NULL)
-	errorx2(1, _("unable to allocate memory"));
+	errorx2(1, NULL);
     return ptr;
 }
 
@@ -165,7 +166,7 @@ erealloc3(void *ptr, size_t nmemb, size_t size)
     size *= nmemb;
     ptr = ptr ? realloc(ptr, size) : malloc(size);
     if (ptr == NULL)
-	errorx2(1, _("unable to allocate memory"));
+	errorx2(1, NULL);
     return ptr;
 }
 
@@ -189,7 +190,7 @@ erecalloc(void *ptr, size_t onmemb, size_t nmemb, size_t msize)
     size = nmemb * msize;
     ptr = ptr ? realloc(ptr, size) : malloc(size);
     if (ptr == NULL)
-	errorx2(1, _("unable to allocate memory"));
+	errorx2(1, NULL);
     if (nmemb > onmemb) {
 	size = (nmemb - onmemb) * msize;
 	memset((char *)ptr + (onmemb * msize), 0, size);
@@ -253,7 +254,7 @@ easprintf(char **ret, const char *fmt, ...)
     va_end(ap);
 
     if (len == -1)
-	errorx2(1, _("unable to allocate memory"));
+	errorx2(1, strerror(ENOMEM));
     return len;
 }
 
@@ -267,7 +268,7 @@ evasprintf(char **ret, const char *format, va_list args)
     int len;
 
     if ((len = vasprintf(ret, format, args)) == -1)
-	errorx2(1, _("unable to allocate memory"));
+	errorx2(1, NULL);
     return len;
 }
 

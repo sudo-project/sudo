@@ -367,7 +367,7 @@ sudo_putenv(char *str, bool dupcheck, bool overwrite)
 	if (env.envp[env.env_len] != NULL)
 	    errorx(1, _("sudo_putenv: corrupted envp, length mismatch"));
 #endif
-	errorx(1, _("unable to allocate memory"));
+	errorx(1, NULL);
     }
     debug_return_int(rval);
 }

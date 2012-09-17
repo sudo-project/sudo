@@ -48,6 +48,7 @@
 # include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <ctype.h>
+#include <errno.h>
 
 #include "sudoers.h"
 #include "parse.h"
@@ -110,7 +111,7 @@ fill_txt(const char *src, int len, int olen)
 
     dst = olen ? realloc(sudoerslval.string, olen + len + 1) : malloc(len + 1);
     if (dst == NULL) {
-	sudoerserror(_("unable to allocate memory"));
+	sudoerserror(strerror(errno));
 	debug_return_bool(false);
     }
     sudoerslval.string = dst;
@@ -164,7 +165,7 @@ fill_cmnd(const char *src, int len)
 
     dst = sudoerslval.command.cmnd = (char *) malloc(len + 1);
     if (sudoerslval.command.cmnd == NULL) {
-	sudoerserror(_("unable to allocate memory"));
+	sudoerserror(strerror(errno));
 	debug_return_bool(false);
     }
 
@@ -204,7 +205,7 @@ fill_args(const char *s, int len, int addspace)
 	    (char *) malloc(arg_size);
 	if (p == NULL) {
 	    efree(sudoerslval.command.args);
-	    sudoerserror(_("unable to allocate memory"));
+	    sudoerserror(strerror(errno));
 	    debug_return_bool(false);
 	} else
 	    sudoerslval.command.args = p;

@@ -453,7 +453,7 @@ get_user_info(struct user_details *ud)
 
     user_info[i] = fmt_string("user", pw->pw_name);
     if (user_info[i] == NULL)
-	errorx(1, _("unable to allocate memory"));
+	errorx(1, NULL);
     ud->username = user_info[i] + sizeof("user=") - 1;
 
     /* Stash user's shell for use with the -s flag; don't pass to plugin. */
@@ -479,14 +479,14 @@ get_user_info(struct user_details *ud)
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
 	user_info[++i] = fmt_string("cwd", cwd);
 	if (user_info[i] == NULL)
-	    errorx(1, _("unable to allocate memory"));
+	    errorx(1, NULL);
 	ud->cwd = user_info[i] + sizeof("cwd=") - 1;
     }
 
     if ((cp = get_process_ttyname()) != NULL) {
 	user_info[++i] = fmt_string("tty", cp);
 	if (user_info[i] == NULL)
-	    errorx(1, _("unable to allocate memory"));
+	    errorx(1, NULL);
 	ud->tty = user_info[i] + sizeof("tty=") - 1;
 	efree(cp);
     }
@@ -497,7 +497,7 @@ get_user_info(struct user_details *ud)
 	strlcpy(host, "localhost", sizeof(host));
     user_info[++i] = fmt_string("host", host);
     if (user_info[i] == NULL)
-	errorx(1, _("unable to allocate memory"));
+	errorx(1, NULL);
     ud->host = user_info[i] + sizeof("host=") - 1;
 
     get_ttysize(&ud->ts_lines, &ud->ts_cols);
@@ -756,7 +756,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 #endif
     details->pw = getpwuid(details->euid);
     if (details->pw != NULL && (details->pw = pw_dup(details->pw)) == NULL)
-	errorx(1, _("unable to allocate memory"));
+	errorx(1, NULL);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif

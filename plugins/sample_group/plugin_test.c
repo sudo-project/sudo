@@ -126,7 +126,7 @@ group_plugin_load(char *plugin_info)
 	if (ac != 0) 	{
 	    argv = malloc(ac * sizeof(char *));
 	    if (argv == NULL) {
-		fprintf(stderr, "unable to allocate memory\n");
+		perror(NULL);
 		return -1;
 	    }
 	    ac = 0;

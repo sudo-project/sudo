@@ -694,7 +694,7 @@ switch_dir(struct include_stack *stack, char *dirpath)
 		sudoerserror(errbuf);
 		free(errbuf);
 	    } else {
-		sudoerserror(_("unable to allocate memory"));
+		sudoerserror(strerror(errno));
 	    }
 	}
 	goto done;
@@ -824,7 +824,7 @@ _push_include(char *path, bool isdir)
 	istack = (struct include_stack *) realloc(istack,
 	    sizeof(*istack) * istacksize);
 	if (istack == NULL) {
-	    sudoerserror(_("unable to allocate memory"));
+	    sudoerserror(strerror(errno));
 	    debug_return_bool(false);
 	}
     }
@@ -975,7 +975,7 @@ parse_include(char *base)
     len += (int)(ep - cp);
     path = pp = malloc(len + dirlen + 1);
     if (path == NULL) {
-	sudoerserror(_("unable to allocate memory"));
+	sudoerserror(strerror(errno));
 	debug_return_str(NULL);
     }
     if (dirlen) {
