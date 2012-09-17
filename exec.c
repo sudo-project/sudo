@@ -607,7 +607,7 @@ handle_signals(sv, child, cstat)
 			    zero_bytes(&sa, sizeof(sa));
 			    sigemptyset(&sa.sa_mask);
 			    sa.sa_handler = SIG_DFL;
-			    sigaction(SIGTSTP, &sa, NULL);
+			    sigaction(SIGTSTP, &sa, &osa);
 			}
 			if (kill(getpid(), signo) != 0)
 			    warning("kill(%d, %d)", getpid(), signo);
