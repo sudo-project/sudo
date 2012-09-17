@@ -91,12 +91,11 @@ static void  add_defaults(int, struct member *, struct defaults *);
 static void  add_userspec(struct member *, struct privilege *);
 static struct defaults *new_default(char *, char *, int);
 static struct member *new_member(char *, int);
-       void  yyerror(const char *);
 
 void
-yyerror(const char *s)
+sudoerserror(const char *s)
 {
-    debug_decl(yyerror, SUDO_DEBUG_PARSER)
+    debug_decl(sudoerserror, SUDO_DEBUG_PARSER)
 
     /* If we last saw a newline the error is on the preceding line. */
     if (last_token == COMMENT)
@@ -549,7 +548,7 @@ hostaliases	:	hostalias
 hostalias	:	ALIAS '=' hostlist {
 			    char *s;
 			    if ((s = alias_add($1, HOSTALIAS, $3)) != NULL) {
-				yyerror(s);
+				sudoerserror(s);
 				YYERROR;
 			    }
 			}
@@ -569,7 +568,7 @@ cmndaliases	:	cmndalias
 cmndalias	:	ALIAS '=' cmndlist {
 			    char *s;
 			    if ((s = alias_add($1, CMNDALIAS, $3)) != NULL) {
-				yyerror(s);
+				sudoerserror(s);
 				YYERROR;
 			    }
 			}
@@ -589,7 +588,7 @@ runasaliases	:	runasalias
 runasalias	:	ALIAS '=' userlist {
 			    char *s;
 			    if ((s = alias_add($1, RUNASALIAS, $3)) != NULL) {
-				yyerror(s);
+				sudoerserror(s);
 				YYERROR;
 			    }
 			}
@@ -602,7 +601,7 @@ useraliases	:	useralias
 useralias	:	ALIAS '=' userlist {
 			    char *s;
 			    if ((s = alias_add($1, USERALIAS, $3)) != NULL) {
-				yyerror(s);
+				sudoerserror(s);
 				YYERROR;
 			    }
 			}
