@@ -968,6 +968,11 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
     size_t sdlen, sessions_len = 0, sessions_size = 36*36;
     int i, len;
     char pathbuf[PATH_MAX], **sessions = NULL;
+#ifdef HAVE_STRUCT_DIRENT_D_TYPE
+    bool checked_type = true;
+#else
+    const bool checked_type = false;
+#endif
     debug_decl(find_sessions, SUDO_DEBUG_UTIL)
 
     d = opendir(dir);
@@ -991,8 +996,14 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
 	    (dp->d_name[1] == '.' && dp->d_name[2] == '\0')))
 	    continue;
 #ifdef HAVE_STRUCT_DIRENT_D_TYPE
-	if (dp->d_type != DT_DIR)
-	    continue;
+	if (checked_type) {
+	    if (dp->d_type != DT_DIR) {
+		/* Not all file systems support d_type. */
+		if (dp->d_type != DT_UNKNOWN)
+		    continue;
+		checked_type = false;
+	    }
+	}
 #endif
 
 	/* Add name to session list. */
@@ -1021,9 +1032,7 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
 	} else {
 	    /* Strip off "/log" and recurse if a dir. */
 	    pathbuf[sdlen + len - 4] = '\0';
-#ifndef HAVE_STRUCT_DIRENT_D_TYPE
-	    if (lstat(pathbuf, &sb) == 0 && S_ISDIR(sb.st_mode))
-#endif
+	    if (checked_type || (lstat(pathbuf, &sb) == 0 && S_ISDIR(sb.st_mode)))
 		find_sessions(pathbuf, re, user, tty);
 	}
     }
