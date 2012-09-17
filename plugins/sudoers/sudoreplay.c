@@ -884,7 +884,8 @@ parse_logfile(char *logfile)
     debug_return_ptr(li);
 
 bad:
-    fclose(fp);
+    if (fp != NULL)
+	fclose(fp);
     efree(buf);
     free_log_info(li);
     debug_return_ptr(NULL);
