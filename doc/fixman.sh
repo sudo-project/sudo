@@ -20,8 +20,7 @@ case "$OUTFILE" in
 	cat >>"$OUTFILE" <<-'EOF'
 		/^\\fR0\\fR$/ {
 			N
-			s/^\\fR0\\fR\
-			minutes\.$/unlimited./
+			s/^\\fR0\\fR\nminutes\.$/unlimited./
 		}
 	EOF
 
