@@ -867,7 +867,8 @@ parse_logfile(logfile)
     return li;
 
 bad:
-    fclose(fp);
+    if (fp != NULL)
+	fclose(fp);
     efree(buf);
     free_log_info(li);
     return NULL;
