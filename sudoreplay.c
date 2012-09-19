@@ -960,9 +960,9 @@ find_sessions(dir, re, user, tty)
     size_t sdlen, sessions_len = 0, sessions_size = 36*36;
     int i, len;
 #ifdef HAVE_STRUCT_DIRENT_D_TYPE
-    int checked_type = TRUE;
+    int checked_type = 1;
 #else
-    const int checked_type = FALSE;
+    const int checked_type = 0;
 #endif
     char pathbuf[PATH_MAX], **sessions = NULL;
 
@@ -992,7 +992,7 @@ find_sessions(dir, re, user, tty)
 		/* Not all file systems support d_type. */
 		if (dp->d_type != DT_UNKNOWN)
 		    continue;
-		checked_type = FALSE;
+		checked_type = 0;
 	    }
 	}
 #endif
