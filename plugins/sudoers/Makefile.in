@@ -124,8 +124,8 @@ TEST_PROGS = check_iolog_path check_fill check_wrap check_addr check_symbols
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
 LIBPARSESUDOERS_OBJS = alias.lo audit.lo defaults.lo gram.lo match.lo \
-		       match_addr.lo pwutil.lo timestr.lo toke.lo \
-		       toke_util.lo redblack.lo
+		       match_addr.lo pwutil.lo pwutil_impl.lo timestr.lo \
+		       toke.lo toke_util.lo redblack.lo
 
 SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo env.lo goodpath.lo \
 	       group_plugin.lo find_path.lo interfaces.lo logging.lo \
@@ -144,7 +144,7 @@ CHECK_ADDR_OBJS = check_addr.o match_addr.o interfaces.o error.o
 CHECK_FILL_OBJS = check_fill.o toke_util.o error.o
 
 CHECK_IOLOG_PATH_OBJS = check_iolog_path.o error.o iolog_path.o pwutil.o \
-			redblack.o
+			pwutil_impl.o redblack.o
 
 CHECK_SYMBOLS_OBJS = check_symbols.o error.o
 
@@ -676,9 +676,19 @@ pwutil.lo: $(srcdir)/pwutil.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
            $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
            $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
-           $(srcdir)/redblack.h
+           $(srcdir)/redblack.h $(srcdir)/pwutil.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/pwutil.c
 pwutil.o: pwutil.lo
+pwutil_impl.lo: $(srcdir)/pwutil_impl.c $(top_builddir)/config.h \
+                $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
+                $(top_builddir)/pathnames.h $(incdir)/missing.h \
+                $(incdir)/error.h $(incdir)/alloc.h $(incdir)/list.h \
+                $(incdir)/fileops.h $(srcdir)/defaults.h $(devdir)/def_data.h \
+                $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
+                $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
+                $(incdir)/gettext.h $(srcdir)/pwutil.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/pwutil_impl.c
+pwutil_impl.o: pwutil_impl.lo
 redblack.lo: $(srcdir)/redblack.c $(top_builddir)/config.h $(incdir)/missing.h \
              $(incdir)/alloc.h $(incdir)/sudo_debug.h $(srcdir)/redblack.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/redblack.c
