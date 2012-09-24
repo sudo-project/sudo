@@ -97,7 +97,7 @@ static int io_fds[6] = { -1, -1, -1, -1, -1, -1};
 static int pipeline = FALSE;
 static int tty_initialized;
 static int ttymode = TERM_COOKED;
-static pid_t ppgrp, cmnd_pgrp;
+static pid_t ppgrp, cmnd_pgrp, mon_pgrp;;
 static struct io_buffer *iobufs;
 
 static void flush_output __P((void));
@@ -676,7 +676,7 @@ deliver_signal(pid, signo)
     case SIGCONT_BG:
 	/* Continue in background, I take controlling tty. */
 	do {
-	    status = tcsetpgrp(io_fds[SFD_SLAVE], getpid());
+	    status = tcsetpgrp(io_fds[SFD_SLAVE], mon_pgrp);
 	} while (status == -1 && errno == EINTR);
 	killpg(pid, SIGCONT);
 	break;
@@ -737,9 +737,12 @@ handle_sigchld(backchannel, cstat)
 	    cstat->type = CMD_WSTATUS;
 	    cstat->val = status;
 	    if (WIFSTOPPED(status)) {
+		/* Save the foreground pgid so we can restore it later. */
 		do {
-		    cmnd_pgrp = tcgetpgrp(io_fds[SFD_SLAVE]);
-		} while (cmnd_pgrp == -1 && errno == EINTR);
+		    pid = tcgetpgrp(io_fds[SFD_SLAVE]);
+		} while (pid == -1 && errno == EINTR);
+		if (pid != mon_pgrp)
+		    cmnd_pgrp = pid;
 		if (send_status(backchannel, cstat) == -1)
 		    return alive; /* XXX */
 	    }
@@ -769,7 +772,7 @@ exec_monitor(path, argv, envp, backchannel, rbac)
     struct timeval tv;
     fd_set *fdsr;
     sigaction_t sa;
-    int errpipe[2], maxfd, n, status;
+    int errpipe[2], maxfd, n;
     int alive = TRUE;
     unsigned char signo;
 
@@ -844,6 +847,8 @@ exec_monitor(path, argv, envp, backchannel, rbac)
 #endif
     }
 
+    mon_pgrp = getpgrp();	/* save a copy of our process group */
+
     /*
      * If stdin/stdout is not a tty, start command in the background
      * since it might be part of a pipeline that reads from /dev/tty.
@@ -900,8 +905,8 @@ exec_monitor(path, argv, envp, backchannel, rbac)
     setpgid(cmnd_pid, cmnd_pgrp);
     if (foreground) {
 	do {
-	    status = tcsetpgrp(io_fds[SFD_SLAVE], cmnd_pgrp);
-	} while (status == -1 && errno == EINTR);
+	    n = tcsetpgrp(io_fds[SFD_SLAVE], cmnd_pgrp);
+	} while (n == -1 && errno == EINTR);
     }
 
     /* Wait for errno on pipe, signal on backchannel or for SIGCHLD */
