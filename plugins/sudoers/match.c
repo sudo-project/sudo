@@ -88,7 +88,9 @@
 static struct member_list empty;
 
 static bool command_matches_dir(char *, size_t);
+#ifndef NAME_MATCH
 static bool command_matches_glob(char *, char *);
+#endif
 static bool command_matches_fnmatch(char *, char *);
 static bool command_matches_normal(char *, char *);
 
@@ -435,9 +437,13 @@ command_matches(char *sudoers_cmnd, char *sudoers_args)
 	 * If sudoers_cmnd has meta characters in it, we need to
 	 * use glob(3) and/or fnmatch(3) to do the matching.
 	 */
+#ifdef NAME_MATCH
+	debug_return_bool(command_matches_fnmatch(sudoers_cmnd, sudoers_args));
+#else
 	if (def_fast_glob)
 	    debug_return_bool(command_matches_fnmatch(sudoers_cmnd, sudoers_args));
 	debug_return_bool(command_matches_glob(sudoers_cmnd, sudoers_args));
+#endif
     }
     debug_return_bool(command_matches_normal(sudoers_cmnd, sudoers_args));
 }
@@ -465,6 +471,7 @@ command_matches_fnmatch(char *sudoers_cmnd, char *sudoers_args)
     debug_return_bool(false);
 }
 
+#ifndef NAME_MATCH
 static bool
 command_matches_glob(char *sudoers_cmnd, char *sudoers_args)
 {
@@ -535,7 +542,30 @@ command_matches_glob(char *sudoers_cmnd, char *sudoers_args)
     }
     debug_return_bool(false);
 }
+#endif /* NAME_MATCH */
 
+#ifdef NAME_MATCH
+static int
+command_matches_normal(char *sudoers_cmnd, char *sudoers_args)
+{
+    size_t dlen;
+
+    dlen = strlen(sudoers_cmnd);
+
+    /* If it ends in '/' it is a directory spec. */
+    if (sudoers_cmnd[dlen - 1] == '/')
+	return command_matches_dir(sudoers_cmnd, dlen);
+
+    if (strcmp(user_cmnd, sudoers_cmnd) == 0) {
+	if (command_args_match(sudoers_cmnd, sudoers_args)) {
+	    efree(safe_cmnd);
+	    safe_cmnd = estrdup(sudoers_cmnd);
+	    return true;
+	}
+    }
+    return false;
+}
+#else /* !NAME_MATCH */
 static bool
 command_matches_normal(char *sudoers_cmnd, char *sudoers_args)
 {
@@ -575,7 +605,19 @@ command_matches_normal(char *sudoers_cmnd, char *sudoers_args)
     }
     debug_return_bool(false);
 }
+#endif /* NAME_MATCH */
 
+#ifdef NAME_MATCH
+/*
+ * Return true if user_cmnd begins with sudoers_dir, else false.
+ * Note that sudoers_dir include the trailing '/'
+ */
+static int
+command_matches_dir(char *sudoers_dir, size_t dlen)
+{
+    return strncmp(user_cmnd, sudoers_dir, dlen) == 0;
+}
+#else /* !NAME_MATCH */
 /*
  * Return true if user_cmnd names one of the inodes in dir, else false.
  */
@@ -621,6 +663,7 @@ command_matches_dir(char *sudoers_dir, size_t dlen)
     closedir(dirp);
     debug_return_bool(dent != NULL);
 }
+#endif /* NAME_MATCH */
 
 /*
  * Returns true if the hostname matches the pattern, else false
