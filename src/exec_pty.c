@@ -93,7 +93,7 @@ static char slavename[PATH_MAX];
 static bool foreground, pipeline, tty_initialized;
 static int io_fds[6] = { -1, -1, -1, -1, -1, -1};
 static int ttymode = TERM_COOKED;
-static pid_t ppgrp, cmnd_pgrp;
+static pid_t ppgrp, cmnd_pgrp, mon_pgrp;
 static sigset_t ttyblock;
 static struct io_buffer *iobufs;
 
@@ -850,7 +850,7 @@ deliver_signal(pid_t pid, int signo, bool from_parent)
     case SIGCONT_BG:
 	/* Continue in background, I take controlling tty. */
 	do {
-	    status = tcsetpgrp(io_fds[SFD_SLAVE], getpid());
+	    status = tcsetpgrp(io_fds[SFD_SLAVE], mon_pgrp);
 	} while (status == -1 && errno == EINTR);
 	killpg(pid, SIGCONT);
 	break;
@@ -920,9 +920,12 @@ handle_sigchld(int backchannel, struct command_status *cstat)
 		    snprintf(signame, sizeof(signame), "%d", WSTOPSIG(status));
 		sudo_debug_printf(SUDO_DEBUG_INFO,
 		    "command stopped, SIG%s", signame);
+		/* Saved the foreground pgid so we can restore it later. */
 		do {
-		    cmnd_pgrp = tcgetpgrp(io_fds[SFD_SLAVE]);
-		} while (cmnd_pgrp == -1 && errno == EINTR);
+		    pid = tcgetpgrp(io_fds[SFD_SLAVE]);
+		} while (pid == -1 && errno == EINTR);
+		if (pid != mon_pgrp)
+		    cmnd_pgrp = pid;
 		if (send_status(backchannel, cstat) == -1)
 		    return alive; /* XXX */
 	    } else if (WIFSIGNALED(status)) {
@@ -955,7 +958,7 @@ exec_monitor(struct command_details *details, int backchannel)
     struct timeval tv;
     fd_set *fdsr;
     sigaction_t sa;
-    int errpipe[2], maxfd, n, status;
+    int errpipe[2], maxfd, n;
     bool alive = true;
     unsigned char signo;
     debug_decl(exec_monitor, SUDO_DEBUG_EXEC);
@@ -1032,6 +1035,8 @@ exec_monitor(struct command_details *details, int backchannel)
 #endif
     }
 
+    mon_pgrp = getpgrp();	/* save a copy of our process group */
+
     /*
      * If stdin/stdout is not a tty, start command in the background
      * since it might be part of a pipeline that reads from /dev/tty.
@@ -1088,8 +1093,8 @@ exec_monitor(struct command_details *details, int backchannel)
     setpgid(cmnd_pid, cmnd_pgrp);
     if (foreground) {
 	do {
-	    status = tcsetpgrp(io_fds[SFD_SLAVE], cmnd_pgrp);
-	} while (status == -1 && errno == EINTR);
+	    n = tcsetpgrp(io_fds[SFD_SLAVE], cmnd_pgrp);
+	} while (n == -1 && errno == EINTR);
     }
 
     /* Wait for errno on pipe, signal on backchannel or for SIGCHLD */
