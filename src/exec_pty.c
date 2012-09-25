@@ -830,7 +830,11 @@ deliver_signal(pid_t pid, int signo, bool from_parent)
     int status;
     debug_decl(deliver_signal, SUDO_DEBUG_EXEC);
 
-    if (sig2str(signo, signame) == -1)
+    if (signo == SIGCONT_FG)
+	strlcpy(signame, "CONT_FG", sizeof(signame));
+    else if (signo == SIGCONT_BG)
+	strlcpy(signame, "CONT_BG", sizeof(signame));
+    else if (sig2str(signo, signame) == -1)
 	snprintf(signame, sizeof(signame), "%d", signo);
 
     /* Handle signal from parent. */
