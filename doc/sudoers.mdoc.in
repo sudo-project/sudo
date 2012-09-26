@@ -1393,11 +1393,31 @@ An exclamation point
 .Pq Ql \&!
 can be used as a logical
 .Em not
-operator both in an
+operator in a list or
 .Em alias
-and in front of a
+as well as in front of a
 .Li Cmnd .
 This allows one to exclude certain values.
+For the
+.Ql \&!
+operator to be effective, there must be something for it to exclude.
+For example, to match all users except for root one would use:
+.Bd -literal -offset 4n
+ALL,!root
+.Ed
+.Pp
+If the
+.Sy ALL ,
+is omitted, as in:
+.Bd -literal -offset 4n
+!root
+.Ed
+.Pp
+it would explicitly deny root but not match any other users.
+This is different from a true
+.Dq negation
+operator.
+.Pp
 Note, however, that using a
 .Ql \&!
 in conjunction with the built-in

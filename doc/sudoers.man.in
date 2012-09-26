@@ -1490,11 +1490,37 @@ An exclamation point
 (`\&!')
 can be used as a logical
 \fInot\fR
-operator both in an
+operator in a list or
 \fIalias\fR
-and in front of a
+as well as in front of a
 \fRCmnd\fR.
 This allows one to exclude certain values.
+For the
+`\&!'
+operator to be effective, there must be something for it to exclude.
+For example, to match all users except for root one would use:
+.nf
+.sp
+.RS 4n
+ALL,!root
+.RE
+.fi
+.PP
+If the
+\fBALL\fR,
+is omitted, as in:
+.nf
+.sp
+.RS 4n
+!root
+.RE
+.fi
+.PP
+it would explicitly deny root but not match any other users.
+This is different from a true
+``negation''
+operator.
+.PP
 Note, however, that using a
 `\&!'
 in conjunction with the built-in
