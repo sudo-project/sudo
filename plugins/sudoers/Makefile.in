@@ -130,7 +130,7 @@ LIBPARSESUDOERS_OBJS = alias.lo audit.lo defaults.lo gram.lo match.lo \
 SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo env.lo goodpath.lo \
 	       group_plugin.lo find_path.lo interfaces.lo logging.lo \
 	       logwrap.lo parse.lo set_perms.lo sudoers.lo sudo_nss.lo \
-	       iolog.lo iolog_path.lo @SUDOERS_OBJS@
+	       timestamp.lo iolog.lo iolog_path.lo @SUDOERS_OBJS@
 
 VISUDO_OBJS = visudo.o goodpath.o find_path.o error.o
 
@@ -447,7 +447,8 @@ check.lo: $(srcdir)/check.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
           $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
           $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
-          $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
+          $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
+          $(srcdir)/timestamp.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/check.c
 check_addr.o: $(srcdir)/regress/parser/check_addr.c $(top_builddir)/config.h \
               $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
@@ -789,6 +790,14 @@ testsudoers.o: $(srcdir)/testsudoers.c $(top_builddir)/config.h \
                $(incdir)/sudo_conf.h $(incdir)/list.h $(incdir)/secure_path.h \
                $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/testsudoers.c
+timestamp.lo: $(srcdir)/timestamp.c $(top_builddir)/config.h \
+              $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
+              $(top_builddir)/pathnames.h $(incdir)/missing.h \
+              $(incdir)/error.h $(incdir)/alloc.h $(incdir)/list.h \
+              $(incdir)/fileops.h $(srcdir)/defaults.h $(devdir)/def_data.h \
+              $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
+              $(incdir)/sudo_debug.h $(incdir)/gettext.h $(srcdir)/timestamp.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/timestamp.c
 timestr.lo: $(srcdir)/timestr.c $(top_builddir)/config.h $(incdir)/missing.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/timestr.c
 toke.lo: $(devdir)/toke.c $(top_builddir)/config.h $(top_builddir)/config.h \

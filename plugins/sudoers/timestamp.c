@@ -1,0 +1,448 @@
+/*
+ * Copyright (c) 1993-1996,1998-2005, 2007-2012
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ * Sponsored in part by the Defense Advanced Research Projects
+ * Agency (DARPA) and Air Force Research Laboratory, Air Force
+ * Materiel Command, USAF, under agreement number F39502-99-1-0512.
+ */
+
+#include <config.h>
+
+#include <sys/types.h>
+#include <sys/param.h>
+#include <sys/time.h>
+#include <sys/stat.h>
+#ifdef __linux__
+# include <sys/vfs.h>
+#endif
+#if defined(__sun) && defined(__SVR4)
+# include <sys/statvfs.h>
+#endif
+#ifndef __TANDEM
+# include <sys/file.h>
+#endif
+#include <stdio.h>
+#ifdef STDC_HEADERS
+# include <stdlib.h>
+# include <stddef.h>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif /* STDC_HEADERS */
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif /* HAVE_STRINGS_H */
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+#if TIME_WITH_SYS_TIME
+# include <time.h>
+#endif
+#include <errno.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <pwd.h>
+#include <grp.h>
+
+#include "sudoers.h"
+#include "timestamp.h"
+
+static bool  tty_is_devpts(const char *);
+
+static struct sudo_tty_info tty_info;
+static char timestampdir[PATH_MAX];
+static char timestampfile[PATH_MAX];
+
+/*
+ * Fills in timestampdir as well as timestampfile if using tty tickets.
+ */
+int
+build_timestamp(void)
+{
+    char *dirparent;
+    struct stat sb;
+    int len;
+    debug_decl(build_timestamp, SUDO_DEBUG_AUTH)
+
+    /* Stash the tty's ctime for tty ticket comparison. */
+    if (def_tty_tickets && user_ttypath && stat(user_ttypath, &sb) == 0) {
+	tty_info.dev = sb.st_dev;
+	tty_info.ino = sb.st_ino;
+	tty_info.rdev = sb.st_rdev;
+	if (tty_is_devpts(user_ttypath))
+	    ctim_get(&sb, &tty_info.ctime);
+    }
+
+    dirparent = def_timestampdir;
+    timestampfile[0] = '\0';
+    len = snprintf(timestampdir, sizeof(timestampdir), "%s/%s", dirparent,
+	user_name);
+    if (len <= 0 || len >= sizeof(timestampdir))
+	goto bad;
+
+    /*
+     * Timestamp file may be a file in the directory or NUL to use
+     * the directory as the timestamp.
+     */
+    if (def_tty_tickets) {
+	char *p;
+
+	if ((p = strrchr(user_tty, '/')))
+	    p++;
+	else
+	    p = user_tty;
+	if (def_targetpw)
+	    len = snprintf(timestampfile, sizeof(timestampfile), "%s/%s/%s:%s",
+		dirparent, user_name, p, runas_pw->pw_name);
+	else
+	    len = snprintf(timestampfile, sizeof(timestampfile), "%s/%s/%s",
+		dirparent, user_name, p);
+	if (len <= 0 || len >= sizeof(timestampfile))
+	    goto bad;
+    } else if (def_targetpw) {
+	len = snprintf(timestampfile, sizeof(timestampfile), "%s/%s/%s",
+	    dirparent, user_name, runas_pw->pw_name);
+	if (len <= 0 || len >= sizeof(timestampfile))
+	    goto bad;
+    }
+
+    debug_return_int(len);
+bad:
+    log_fatal(0, _("timestamp path too long: %s"),
+	*timestampfile ? timestampfile : timestampdir);
+    /* NOTREACHED */
+    debug_return_int(-1);
+}
+
+/*
+ * Update the time on the timestamp file/dir or create it if necessary.
+ */
+bool
+update_timestamp(void)
+{
+    debug_decl(update_timestamp, SUDO_DEBUG_AUTH)
+
+    /* If using tty timestamps but we have no tty there is nothing to do. */
+    if (def_tty_tickets && !user_ttypath)
+	debug_return_bool(false);
+
+    if (timestamp_uid != 0)
+	set_perms(PERM_TIMESTAMP);
+    if (*timestampfile) {
+	/*
+	 * Store tty info in timestamp file
+	 */
+	int fd = open(timestampfile, O_WRONLY|O_CREAT, 0600);
+	if (fd == -1)
+	    log_error(USE_ERRNO, _("unable to open %s"), timestampfile);
+	else {
+	    lock_file(fd, SUDO_LOCK);
+	    if (write(fd, &tty_info, sizeof(tty_info)) != sizeof(tty_info))
+		log_error(USE_ERRNO, _("unable to write to %s"), timestampfile);
+	    close(fd);
+	}
+    } else {
+	if (touch(-1, timestampdir, NULL) == -1) {
+	    if (mkdir(timestampdir, 0700) == -1) {
+		log_error(USE_ERRNO, _("unable to mkdir %s"),
+		    timestampdir);
+	    }
+	}
+    }
+    if (timestamp_uid != 0)
+	restore_perms();
+    debug_return_bool(true);
+}
+
+/*
+ * Check the timestamp file and directory and return their status.
+ */
+int
+timestamp_status(int flags)
+{
+    struct stat sb;
+    struct timeval boottime, mtime;
+    time_t now;
+    char *dirparent = def_timestampdir;
+    int status = TS_ERROR;		/* assume the worst */
+    debug_decl(timestamp_status, SUDO_DEBUG_AUTH)
+
+    if (timestamp_uid != 0)
+	set_perms(PERM_TIMESTAMP);
+
+    /*
+     * Sanity check dirparent and make it if it doesn't already exist.
+     * We start out assuming the worst (that the dir is not sane) and
+     * if it is ok upgrade the status to ``no timestamp file''.
+     * Note that we don't check the parent(s) of dirparent for
+     * sanity since the sudo dir is often just located in /tmp.
+     */
+    if (lstat(dirparent, &sb) == 0) {
+	if (!S_ISDIR(sb.st_mode))
+	    log_error(0, _("%s exists but is not a directory (0%o)"),
+		dirparent, (unsigned int) sb.st_mode);
+	else if (sb.st_uid != timestamp_uid)
+	    log_error(0, _("%s owned by uid %u, should be uid %u"),
+		dirparent, (unsigned int) sb.st_uid,
+		(unsigned int) timestamp_uid);
+	else if ((sb.st_mode & 0000022))
+	    log_error(0,
+		_("%s writable by non-owner (0%o), should be mode 0700"),
+		dirparent, (unsigned int) sb.st_mode);
+	else {
+	    if ((sb.st_mode & 0000777) != 0700)
+		(void) chmod(dirparent, 0700);
+	    status = TS_MISSING;
+	}
+    } else if (errno != ENOENT) {
+	log_error(USE_ERRNO, _("unable to stat %s"), dirparent);
+    } else {
+	/* No dirparent, try to make one. */
+	if (ISSET(flags, TS_MAKE_DIRS)) {
+	    if (mkdir(dirparent, S_IRWXU))
+		log_error(USE_ERRNO, _("unable to mkdir %s"),
+		    dirparent);
+	    else
+		status = TS_MISSING;
+	}
+    }
+    if (status == TS_ERROR)
+	goto done;
+
+    /*
+     * Sanity check the user's ticket dir.  We start by downgrading
+     * the status to TS_ERROR.  If the ticket dir exists and is sane
+     * this will be upgraded to TS_OLD.  If the dir does not exist,
+     * it will be upgraded to TS_MISSING.
+     */
+    status = TS_ERROR;			/* downgrade status again */
+    if (lstat(timestampdir, &sb) == 0) {
+	if (!S_ISDIR(sb.st_mode)) {
+	    if (S_ISREG(sb.st_mode)) {
+		/* convert from old style */
+		if (unlink(timestampdir) == 0)
+		    status = TS_MISSING;
+	    } else
+		log_error(0, _("%s exists but is not a directory (0%o)"),
+		    timestampdir, (unsigned int) sb.st_mode);
+	} else if (sb.st_uid != timestamp_uid)
+	    log_error(0, _("%s owned by uid %u, should be uid %u"),
+		timestampdir, (unsigned int) sb.st_uid,
+		(unsigned int) timestamp_uid);
+	else if ((sb.st_mode & 0000022))
+	    log_error(0,
+		_("%s writable by non-owner (0%o), should be mode 0700"),
+		timestampdir, (unsigned int) sb.st_mode);
+	else {
+	    if ((sb.st_mode & 0000777) != 0700)
+		(void) chmod(timestampdir, 0700);
+	    status = TS_OLD;		/* do date check later */
+	}
+    } else if (errno != ENOENT) {
+	log_error(USE_ERRNO, _("unable to stat %s"), timestampdir);
+    } else
+	status = TS_MISSING;
+
+    /*
+     * If there is no user ticket dir, AND we are in tty ticket mode,
+     * AND the TS_MAKE_DIRS flag is set, create the user ticket dir.
+     */
+    if (status == TS_MISSING && *timestampfile && ISSET(flags, TS_MAKE_DIRS)) {
+	if (mkdir(timestampdir, S_IRWXU) == -1) {
+	    status = TS_ERROR;
+	    log_error(USE_ERRNO, _("unable to mkdir %s"), timestampdir);
+	}
+    }
+
+    /*
+     * Sanity check the tty ticket file if it exists.
+     */
+    if (*timestampfile && status != TS_ERROR) {
+	if (status != TS_MISSING)
+	    status = TS_NOFILE;			/* dir there, file missing */
+	if (def_tty_tickets && !user_ttypath)
+	    goto done;				/* no tty, always prompt */
+	if (lstat(timestampfile, &sb) == 0) {
+	    if (!S_ISREG(sb.st_mode)) {
+		status = TS_ERROR;
+		log_error(0, _("%s exists but is not a regular file (0%o)"),
+		    timestampfile, (unsigned int) sb.st_mode);
+	    } else {
+		/* If bad uid or file mode, complain and kill the bogus file. */
+		if (sb.st_uid != timestamp_uid) {
+		    log_error(0,
+			_("%s owned by uid %u, should be uid %u"),
+			timestampfile, (unsigned int) sb.st_uid,
+			(unsigned int) timestamp_uid);
+		    (void) unlink(timestampfile);
+		} else if ((sb.st_mode & 0000022)) {
+		    log_error(0,
+			_("%s writable by non-owner (0%o), should be mode 0600"),
+			timestampfile, (unsigned int) sb.st_mode);
+		    (void) unlink(timestampfile);
+		} else {
+		    /* If not mode 0600, fix it. */
+		    if ((sb.st_mode & 0000777) != 0600)
+			(void) chmod(timestampfile, 0600);
+
+		    /*
+		     * Check for stored tty info.  If the file is zero-sized
+		     * it is an old-style timestamp with no tty info in it.
+		     * If removing, we don't care about the contents.
+		     * The actual mtime check is done later.
+		     */
+		    if (ISSET(flags, TS_REMOVE)) {
+			status = TS_OLD;
+		    } else if (sb.st_size != 0) {
+			struct sudo_tty_info info;
+			int fd = open(timestampfile, O_RDONLY, 0644);
+			if (fd != -1) {
+			    if (read(fd, &info, sizeof(info)) == sizeof(info) &&
+				memcmp(&info, &tty_info, sizeof(info)) == 0) {
+				status = TS_OLD;
+			    }
+			    close(fd);
+			}
+		    }
+		}
+	    }
+	} else if (errno != ENOENT) {
+	    log_error(USE_ERRNO, _("unable to stat %s"), timestampfile);
+	    status = TS_ERROR;
+	}
+    }
+
+    /*
+     * If the file/dir exists and we are not removing it, check its mtime.
+     */
+    if (status == TS_OLD && !ISSET(flags, TS_REMOVE)) {
+	mtim_get(&sb, &mtime);
+	/* Negative timeouts only expire manually (sudo -k). */
+	if (def_timestamp_timeout < 0 && mtime.tv_sec != 0)
+	    status = TS_CURRENT;
+	else {
+	    now = time(NULL);
+	    if (def_timestamp_timeout &&
+		now - mtime.tv_sec < 60 * def_timestamp_timeout) {
+		/*
+		 * Check for bogus time on the stampfile.  The clock may
+		 * have been set back or someone could be trying to spoof us.
+		 */
+		if (mtime.tv_sec > now + 60 * def_timestamp_timeout * 2) {
+		    time_t tv_sec = (time_t)mtime.tv_sec;
+		    log_error(0,
+			_("timestamp too far in the future: %20.20s"),
+			4 + ctime(&tv_sec));
+		    if (*timestampfile)
+			(void) unlink(timestampfile);
+		    else
+			(void) rmdir(timestampdir);
+		    status = TS_MISSING;
+		} else if (get_boottime(&boottime) && timevalcmp(&mtime, &boottime, <)) {
+		    status = TS_OLD;
+		} else {
+		    status = TS_CURRENT;
+		}
+	    }
+	}
+    }
+
+done:
+    if (timestamp_uid != 0)
+	restore_perms();
+    debug_return_int(status);
+}
+
+/*
+ * Remove the timestamp ticket file/dir.
+ */
+void
+remove_timestamp(bool remove)
+{
+    struct timeval tv;
+    char *path;
+    int status;
+    debug_decl(remove_timestamp, SUDO_DEBUG_AUTH)
+
+    if (build_timestamp() == -1)
+	debug_return;
+
+    status = timestamp_status(TS_REMOVE);
+    if (status != TS_MISSING && status != TS_ERROR) {
+	path = *timestampfile ? timestampfile : timestampdir;
+	if (remove) {
+	    if (*timestampfile)
+		status = unlink(timestampfile);
+	    else
+		status = rmdir(timestampdir);
+	    if (status == -1 && errno != ENOENT) {
+		log_error(0,
+		    _("unable to remove %s (%s), will reset to the epoch"),
+		    path, strerror(errno));
+		remove = false;
+	    }
+	}
+	if (!remove) {
+	    timevalclear(&tv);
+	    if (touch(-1, path, &tv) == -1 && errno != ENOENT)
+		error(1, _("unable to reset %s to the epoch"), path);
+	}
+    }
+
+    debug_return;
+}
+
+/*
+ * Returns true if tty lives on a devpts, /dev or /devices filesystem, else
+ * false.  Unlike most filesystems, the ctime of devpts nodes is not updated
+ * when the device node is written to, only when the inode's status changes,
+ * typically via the chmod, chown, link, rename, or utimes system calls.
+ * Since the ctime is "stable" in this case, we can stash it the tty ticket
+ * file and use it to determine whether the tty ticket file is stale.
+ */
+static bool
+tty_is_devpts(const char *tty)
+{
+    bool retval = false;
+#ifdef __linux__
+    struct statfs sfs;
+    debug_decl(tty_is_devpts, SUDO_DEBUG_PTY)
+
+#ifndef DEVPTS_SUPER_MAGIC
+# define DEVPTS_SUPER_MAGIC 0x1cd1
+#endif
+
+    if (statfs(tty, &sfs) == 0) {
+	if (sfs.f_type == DEVPTS_SUPER_MAGIC)
+	    retval = true;
+    }
+#elif defined(__sun) && defined(__SVR4)
+    struct statvfs sfs;
+    debug_decl(tty_is_devpts, SUDO_DEBUG_PTY)
+
+    if (statvfs(tty, &sfs) == 0) {
+	if (strcmp(sfs.f_fstr, "dev") == 0 || strcmp(sfs.f_fstr, "devices") == 0)
+	    retval = true;
+    }
+#else
+    debug_decl(tty_is_devpts, SUDO_DEBUG_PTY)
+#endif /* __linux__ */
+    debug_return_bool(retval);
+}

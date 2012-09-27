@@ -500,10 +500,21 @@ update_defaults(int what)
 		    rc = false;
 		break;
 	    case DEFAULTS_USER:
+#if 1
+		if (ISSET(what, SETDEF_USER)) {
+		    int m;
+		    m = userlist_matches(sudo_user.pw, &def->binding);
+		    if (m == ALLOW) {
+			if (!set_default(def->var, def->val, def->op))
+			    rc = false;
+		    }
+		}
+#else
 		if (ISSET(what, SETDEF_USER) &&
 		    userlist_matches(sudo_user.pw, &def->binding) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
 		    rc = false;
+#endif
 		break;
 	    case DEFAULTS_RUNAS:
 		if (ISSET(what, SETDEF_RUNAS) &&
