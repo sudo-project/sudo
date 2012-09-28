@@ -243,6 +243,18 @@ A) On systems that use a Mozilla-derived LDAP SDK there must be a
     Enter new password: <return>
     Re-enter password: <return>
 
+Q) On HP-UX, when I run command via sudo it displays information
+   about the last successful login and last authentication failure
+   for every command.  How can I fix this?
+A) This output comes from /usr/lib/security/libpam_hpsec.so.1.
+   To suppress it, add a line like the following to /etc/pam.conf:
+   sudo session required libpam_hpsec.so.1 bypass_umask bypass_last_login
+
+Q) On HP-UX, the umask setting in sudoers has no effect.
+A) If your /etc/pam.conf file has the libpam_hpsec.so.1 session module
+   enabled, you may need to a add line like the following to pam.conf:
+   sudo session required libpam_hpsec.so.1 bypass_umask
+
 Q) When I run sudo on AIX I get the following error:
     sudo: unable to change to sudoers gid: Operation not permitted.
 A) AIX's Enhanced RBAC is preventing sudo from running.  To fix
