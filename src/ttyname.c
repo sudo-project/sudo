@@ -155,7 +155,7 @@ sudo_ttyname_dev(dev_t tdev)
 
     debug_return_str(estrdup(tty));
 }
-#else
+#elif defined(__linux__)
 /*
  * Devices to search before doing a breadth-first scan.
  */
