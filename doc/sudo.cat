@@ -617,8 +617,8 @@ EEXXAAMMPPLLEESS
            $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 
 SSEEEE AALLSSOO
-     grep(1), su(1), stat(2), login_cap(3), passwd(4), sudoers(4),
-     sudo_plugin(1m), sudoreplay(1m), visudo(1m)
+     su(1), stat(2), login_cap(3), passwd(4), sudoers(4), sudo_plugin(1m),
+     sudoreplay(1m), visudo(1m)
 
 HHIISSTTOORRYY
      See the HISTORY file in the ssuuddoo distribution

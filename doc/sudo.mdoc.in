@@ -1251,7 +1251,6 @@ and file redirection work.
 $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 .Ed
 .Sh SEE ALSO
-.Xr grep 1 ,
 .Xr su 1 ,
 .Xr stat 2 ,
 .Xr login_cap 3 ,

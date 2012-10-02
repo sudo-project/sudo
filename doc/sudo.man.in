@@ -1323,7 +1323,6 @@ $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 .RE
 .fi
 .SH "SEE ALSO"
-grep(1),
 su(1),
 stat(2),
 login_cap(3),
