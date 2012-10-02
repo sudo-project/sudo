@@ -249,12 +249,13 @@ easprintf(char **ret, const char *fmt, ...)
 {
     int len;
     va_list ap;
+
     va_start(ap, fmt);
     len = vasprintf(ret, fmt, ap);
     va_end(ap);
 
     if (len == -1)
-	errorx2(1, strerror(ENOMEM));
+	errorx2(1, NULL);
     return len;
 }
 
