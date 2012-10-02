@@ -45,6 +45,8 @@
 
 sudo_conv_t sudo_conv;  /* NULL in non-plugin */
 
+__dso_public int main(int argc, char *argv[], char *envp[]);
+
 /*
  * Cleanup hook for error()/errorx()
  */

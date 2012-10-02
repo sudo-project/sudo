@@ -48,6 +48,8 @@
 #include "sudo_plugin.h"
 #include <gram.h>
 
+__dso_public int main(int argc, char *argv[]);
+
 /*
  * TODO: test realloc
  */

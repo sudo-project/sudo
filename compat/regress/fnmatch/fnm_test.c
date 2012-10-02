@@ -20,6 +20,8 @@
 # include "compat/fnmatch.h"
 #endif
 
+__dso_public int main(int argc, char *argv[]);
+
 int
 main(int argc, char *argv[])
 {

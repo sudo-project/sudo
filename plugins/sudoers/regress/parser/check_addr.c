@@ -50,6 +50,7 @@
 #include "interfaces.h"
 
 static int check_addr_printf(int msg_type, const char *fmt, ...);
+__dso_public int main(int argc, char *argv[]);
 
 /* for match_addr.c */
 struct interface *interfaces;

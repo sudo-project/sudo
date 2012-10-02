@@ -50,6 +50,8 @@
 # define LINE_MAX 2048
 #endif
 
+__dso_public int main(int argc, char *argv[]);
+
 static void
 usage(void)
 {

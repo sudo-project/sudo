@@ -31,6 +31,8 @@
 
 #include "sudo_plugin.h"
 
+__dso_public int main(int argc, char *argv[]);
+
 /*
  * Simple driver to test sudoer group plugins.
  * usage: plugin_test [-p "plugin.so plugin_args ..."] user:group ...

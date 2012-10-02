@@ -54,6 +54,8 @@ sudo_conv_t sudo_conv;		/* NULL in non-plugin */
 
 static char sessid[7];
 
+__dso_public int main(int argc, char *argv[]);
+
 static void
 usage(void)
 {

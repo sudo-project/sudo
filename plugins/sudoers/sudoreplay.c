@@ -238,6 +238,8 @@ static size_t atomic_writev(int fd, struct iovec *iov, int iovcnt);
     (s)[8] == '/' && (s)[9] == 'l' && (s)[10] == 'o' && (s)[11] == 'g' && \
     (s)[12] == '\0')
 
+__dso_public int main(int argc, char *argv[]);
+
 int
 main(int argc, char *argv[])
 {

@@ -127,6 +127,8 @@ extern char *malloc_options;
 extern int sudoersdebug;
 #endif
 
+__dso_public int main(int argc, char *argv[]);
+
 int
 main(int argc, char *argv[])
 {

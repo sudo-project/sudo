@@ -147,6 +147,8 @@ static struct rlimit corelimit;
 static struct rlimit nproclimit;
 #endif
 
+__dso_public int main(int argc, char *argv[], char *envp[]);
+
 int
 main(int argc, char *argv[], char *envp[])
 {

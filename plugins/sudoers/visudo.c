@@ -144,6 +144,8 @@ static struct sudoersfile_list sudoerslist;
 static struct rbtree *alias_freelist;
 static bool checkonly;
 
+__dso_public int main(int argc, char *argv[]);
+
 int
 main(int argc, char *argv[])
 {
