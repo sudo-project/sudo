@@ -127,10 +127,10 @@ LIBPARSESUDOERS_OBJS = alias.lo audit.lo defaults.lo gram.lo match.lo \
 		       match_addr.lo pwutil.lo pwutil_impl.lo timestr.lo \
 		       toke.lo toke_util.lo redblack.lo
 
-SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo env.lo goodpath.lo \
-	       group_plugin.lo find_path.lo interfaces.lo logging.lo \
-	       logwrap.lo parse.lo set_perms.lo sudoers.lo sudo_nss.lo \
-	       timestamp.lo iolog.lo iolog_path.lo @SUDOERS_OBJS@
+SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo env.lo find_path.lo \
+	       goodpath.lo group_plugin.lo interfaces.lo iolog.lo \
+	       iolog_path.lo logging.lo logwrap.lo parse.lo prompt.lo \
+	       set_perms.lo sudo_nss.lo sudoers.lo timestamp.lo @SUDOERS_OBJS@
 
 VISUDO_OBJS = visudo.o goodpath.o find_path.o error.o
 
@@ -671,6 +671,13 @@ plugin_error.lo: $(srcdir)/plugin_error.c $(top_builddir)/config.h \
                  $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
                  $(incdir)/sudo_plugin.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/plugin_error.c
+prompt.lo: $(srcdir)/prompt.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
+           $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
+           $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
+           $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+           $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
+           $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/prompt.c
 pwutil.lo: $(srcdir)/pwutil.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
            $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
            $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \

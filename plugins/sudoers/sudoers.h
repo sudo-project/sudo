@@ -230,11 +230,13 @@ bool sudo_goodpath(const char *, struct stat *);
 int find_path(char *, char **, struct stat *, char *, int);
 
 /* check.c */
-int check_user(int, int);
+int check_user(int validate, int mode);
 bool user_is_exempt(void);
+char *expand_prompt(char *old_prompt, char *user, char *host);
 
 /* timestamp.c */
 void remove_timestamp(bool);
+bool set_lectured(void);
 
 /* sudo_auth.c */
 int verify_user(struct passwd *pw, char *prompt, int validated);

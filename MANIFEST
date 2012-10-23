@@ -223,6 +223,7 @@ plugins/sudoers/po/vi.mo
 plugins/sudoers/po/vi.po
 plugins/sudoers/po/zh_CN.mo
 plugins/sudoers/po/zh_CN.po
+plugins/sudoers/prompt.c
 plugins/sudoers/pwutil.c
 plugins/sudoers/pwutil.h
 plugins/sudoers/pwutil_impl.c
