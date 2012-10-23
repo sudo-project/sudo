@@ -48,6 +48,7 @@
 
 #include "sudoers.h"
 #include "timestamp.h"
+#include "check.h"
 
 static char *expand_prompt(char *, char *, char *);
 static bool  display_lecture(int);
@@ -101,9 +102,11 @@ check_user(int validated, int mode)
 	goto done;
     }
 
-    status = timestamp_status(TS_MAKE_DIRS);
+    status = timestamp_status();
 
     if (status != TS_CURRENT || ISSET(validated, FLAG_CHECK_USER)) {
+	bool lectured;
+
 	/* Bail out if we are non-interactive and a password is required */
 	if (ISSET(mode, MODE_NONINTERACTIVE)) {
 	    validated |= FLAG_NON_INTERACTIVE;
@@ -113,13 +116,15 @@ check_user(int validated, int mode)
 	}
 
 	/* XXX - should not lecture if askpass helper is being used. */
-	display_lecture(status);
+	lectured = display_lecture(status);
 
 	/* Expand any escapes in the prompt. */
 	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
 	    user_name, user_shost);
 
 	rval = verify_user(auth_pw, prompt, validated);
+	if (rval == true && lectured)
+	    set_lectured();
     }
     /* Only update timestamp if user was validated. */
     if (rval == true && ISSET(validated, VALIDATE_OK) &&
@@ -155,7 +160,7 @@ display_lecture(int status)
     debug_decl(lecture, SUDO_DEBUG_AUTH)
 
     if (def_lecture == never ||
-	(def_lecture == once && status != TS_MISSING && status != TS_ERROR))
+	(def_lecture == once && already_lectured(status)))
 	debug_return_int(false);
 
     memset(&msg, 0, sizeof(msg));

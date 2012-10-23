@@ -156,6 +156,7 @@ plugins/sudoers/boottime.c
 plugins/sudoers/bsm_audit.c
 plugins/sudoers/bsm_audit.h
 plugins/sudoers/check.c
+plugins/sudoers/check.h
 plugins/sudoers/def_data.c
 plugins/sudoers/def_data.h
 plugins/sudoers/def_data.in

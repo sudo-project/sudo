@@ -231,8 +231,10 @@ int find_path(char *, char **, struct stat *, char *, int);
 
 /* check.c */
 int check_user(int, int);
-void remove_timestamp(bool);
 bool user_is_exempt(void);
+
+/* timestamp.c */
+void remove_timestamp(bool);
 
 /* sudo_auth.c */
 int verify_user(struct passwd *pw, char *prompt, int validated);

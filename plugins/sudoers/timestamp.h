@@ -29,10 +29,6 @@
 #define TS_NOFILE		3
 #define TS_ERROR		4
 
-/* Flags for timestamp_status() */
-#define TS_MAKE_DIRS		1
-#define TS_REMOVE		2
-
 /*
  * Info stored in tty ticket from stat(2) to help with tty matching.
  */
@@ -45,6 +41,6 @@ struct sudo_tty_info {
 
 bool  update_timestamp(void);
 int   build_timestamp(void);
-int   timestamp_status(int);
+int   timestamp_status(void);
 
 #endif /* _SUDO_TIMESTAMP_H */

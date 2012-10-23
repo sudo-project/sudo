@@ -174,15 +174,15 @@ update_timestamp(void)
 /*
  * Check the timestamp file and directory and return their status.
  */
-int
-timestamp_status(int flags)
+static int
+timestamp_status_internal(bool removing)
 {
     struct stat sb;
     struct timeval boottime, mtime;
     time_t now;
     char *dirparent = def_timestampdir;
     int status = TS_ERROR;		/* assume the worst */
-    debug_decl(timestamp_status, SUDO_DEBUG_AUTH)
+    debug_decl(timestamp_status_internal, SUDO_DEBUG_AUTH)
 
     if (timestamp_uid != 0)
 	set_perms(PERM_TIMESTAMP);
@@ -215,7 +215,7 @@ timestamp_status(int flags)
 	log_error(USE_ERRNO, _("unable to stat %s"), dirparent);
     } else {
 	/* No dirparent, try to make one. */
-	if (ISSET(flags, TS_MAKE_DIRS)) {
+	if (!removing) {
 	    if (mkdir(dirparent, S_IRWXU))
 		log_error(USE_ERRNO, _("unable to mkdir %s"),
 		    dirparent);
@@ -262,9 +262,9 @@ timestamp_status(int flags)
 
     /*
      * If there is no user ticket dir, AND we are in tty ticket mode,
-     * AND the TS_MAKE_DIRS flag is set, create the user ticket dir.
+     * AND we are not just going to remove it, create the user ticket dir.
      */
-    if (status == TS_MISSING && *timestampfile && ISSET(flags, TS_MAKE_DIRS)) {
+    if (status == TS_MISSING && *timestampfile && !removing) {
 	if (mkdir(timestampdir, S_IRWXU) == -1) {
 	    status = TS_ERROR;
 	    log_error(USE_ERRNO, _("unable to mkdir %s"), timestampdir);
@@ -308,7 +308,7 @@ timestamp_status(int flags)
 		     * If removing, we don't care about the contents.
 		     * The actual mtime check is done later.
 		     */
-		    if (ISSET(flags, TS_REMOVE)) {
+		    if (removing) {
 			status = TS_OLD;
 		    } else if (sb.st_size != 0) {
 			struct sudo_tty_info info;
@@ -332,7 +332,7 @@ timestamp_status(int flags)
     /*
      * If the file/dir exists and we are not removing it, check its mtime.
      */
-    if (status == TS_OLD && !ISSET(flags, TS_REMOVE)) {
+    if (status == TS_OLD && !removing) {
 	mtim_get(&sb, &mtime);
 	/* Negative timeouts only expire manually (sudo -k). */
 	if (def_timestamp_timeout < 0 && mtime.tv_sec != 0)
@@ -370,6 +370,12 @@ done:
     debug_return_int(status);
 }
 
+int
+timestamp_status(void)
+{
+    return timestamp_status_internal(false);
+}
+
 /*
  * Remove the timestamp ticket file/dir.
  */
@@ -384,7 +390,7 @@ remove_timestamp(bool remove)
     if (build_timestamp() == -1)
 	debug_return;
 
-    status = timestamp_status(TS_REMOVE);
+    status = timestamp_status_internal(true);
     if (status != TS_MISSING && status != TS_ERROR) {
 	path = *timestampfile ? timestampfile : timestampdir;
 	if (remove) {
@@ -445,4 +451,14 @@ tty_is_devpts(const char *tty)
     debug_decl(tty_is_devpts, SUDO_DEBUG_PTY)
 #endif /* __linux__ */
     debug_return_bool(retval);
+}
+
+/*
+ * Lecture status is currently implied by the timestamp status but
+ * may be stored separately in a future release.
+ */
+bool
+set_lectured(void)
+{
+    return true;
 }
