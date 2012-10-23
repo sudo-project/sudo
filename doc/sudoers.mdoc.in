@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd September 15, 2012
+.Dd October 23, 2012
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -970,9 +970,9 @@ and
 .Li NOEXEC
 overrides
 .Li EXEC ) .
-.Pp
-.Em NOPASSWD and PASSWD
-.Pp
+.Bl -hang -width 0n
+.It Em NOPASSWD No and Em PASSWD
+.sp
 By default,
 .Nm sudo
 requires that a user authenticate him or herself
@@ -1037,9 +1037,8 @@ This behavior may be overridden via the
 and
 .Em listpw
 options.
-.Pp
-.Em NOEXEC and EXEC
-.Pp
+.It Em NOEXEC No and Em EXEC
+.sp
 If
 .Nm sudo
 has been compiled with
@@ -1065,9 +1064,8 @@ See the
 section below for more details on how
 .Li NOEXEC
 works and whether or not it will work on your system.
-.Pp
-.Em SETENV and NOSETENV
-.Pp
+.It Em SETENV No and Em NOSETENV
+.sp
 These tags override the value of the
 .Em setenv
 option on a per-command basis.
@@ -1092,9 +1090,8 @@ the
 tag is implied for that command; this default may be overridden by use of the
 .Li NOSETENV
 tag.
-.Pp
-.Em LOG_INPUT and NOLOG_INPUT
-.Pp
+.It Em LOG_INPUT No and Em NOLOG_INPUT
+.sp
 These tags override the value of the
 .Em log_input
 option on a per-command basis.
@@ -1103,9 +1100,8 @@ For more information, see the description of
 in the
 .Sx SUDOERS OPTIONS
 section below.
-.Pp
-.Em LOG_OUTPUT and NOLOG_OUTPUT
-.Pp
+.It Em LOG_OUTPUT No and Em NOLOG_OUTPUT
+.sp
 These tags override the value of the
 .Em log_output
 option on a per-command basis.
@@ -1114,6 +1110,7 @@ For more information, see the description of
 in the
 .Sx SUDOERS OPTIONS
 section below.
+.El
 .Ss Wildcards
 .Nm sudo
 allows shell-style
@@ -1123,11 +1120,11 @@ to be used in host names, path names and command line arguments in the
 .Em sudoers
 file.
 Wildcard matching is done via the
-.Sy POSIX
 .Xr glob 3
 and
 .Xr fnmatch 3
-routines.
+functions as specified by
+.St -p1003.1 .
 Note that these are
 .Em not
 regular expressions.
@@ -1155,7 +1152,7 @@ and
 .Ql ]\& .
 .El
 .Pp
-POSIX character classes may also be used if your system's
+Character classes may also be used if your system's
 .Xr glob 3
 and
 .Xr fnmatch 3

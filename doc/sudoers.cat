@@ -469,76 +469,77 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      it is overridden by the opposite tag (in other words, PASSWD overrides
      NOPASSWD and NOEXEC overrides EXEC).
 
-     _N_O_P_A_S_S_W_D _a_n_d _P_A_S_S_W_D
+     _N_O_P_A_S_S_W_D and _P_A_S_S_W_D
 
-     By default, ssuuddoo requires that a user authenticate him or herself before
-     running a command.  This behavior can be modified via the NOPASSWD tag.
-     Like a Runas_Spec, the NOPASSWD tag sets a default for the commands that
-     follow it in the Cmnd_Spec_List.  Conversely, the PASSWD tag can be used
-     to reverse things.  For example:
+       By default, ssuuddoo requires that a user authenticate him or herself
+       before running a command.  This behavior can be modified via the
+       NOPASSWD tag.  Like a Runas_Spec, the NOPASSWD tag sets a default for
+       the commands that follow it in the Cmnd_Spec_List.  Conversely, the
+       PASSWD tag can be used to reverse things.  For example:
 
-     ray     rushmore = NOPASSWD: /bin/kill, /bin/ls, /usr/bin/lprm
+       ray     rushmore = NOPASSWD: /bin/kill, /bin/ls, /usr/bin/lprm
 
-     would allow the user rraayy to run _/_b_i_n_/_k_i_l_l, _/_b_i_n_/_l_s, and _/_u_s_r_/_b_i_n_/_l_p_r_m as
-     rroooott on the machine rushmore without authenticating himself.  If we only
-     want rraayy to be able to run _/_b_i_n_/_k_i_l_l without a password the entry would
-     be:
+       would allow the user rraayy to run _/_b_i_n_/_k_i_l_l, _/_b_i_n_/_l_s, and _/_u_s_r_/_b_i_n_/_l_p_r_m
+       as rroooott on the machine rushmore without authenticating himself.  If we
+       only want rraayy to be able to run _/_b_i_n_/_k_i_l_l without a password the entry
+       would be:
 
-     ray     rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
+       ray     rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
 
-     Note, however, that the PASSWD tag has no effect on users who are in the
-     group specified by the _e_x_e_m_p_t___g_r_o_u_p option.
+       Note, however, that the PASSWD tag has no effect on users who are in
+       the group specified by the _e_x_e_m_p_t___g_r_o_u_p option.
 
-     By default, if the NOPASSWD tag is applied to any of the entries for a
-     user on the current host, he or she will be able to run ``sudo -l''
-     without a password.  Additionally, a user may only run ``sudo -v''
-     without a password if the NOPASSWD tag is present for all a user's
-     entries that pertain to the current host.  This behavior may be
-     overridden via the _v_e_r_i_f_y_p_w and _l_i_s_t_p_w options.
+       By default, if the NOPASSWD tag is applied to any of the entries for a
+       user on the current host, he or she will be able to run ``sudo -l''
+       without a password.  Additionally, a user may only run ``sudo -v''
+       without a password if the NOPASSWD tag is present for all a user's
+       entries that pertain to the current host.  This behavior may be
+       overridden via the _v_e_r_i_f_y_p_w and _l_i_s_t_p_w options.
 
-     _N_O_E_X_E_C _a_n_d _E_X_E_C
+     _N_O_E_X_E_C and _E_X_E_C
 
-     If ssuuddoo has been compiled with _n_o_e_x_e_c support and the underlying
-     operating system supports it, the NOEXEC tag can be used to prevent a
-     dynamically-linked executable from running further commands itself.
+       If ssuuddoo has been compiled with _n_o_e_x_e_c support and the underlying
+       operating system supports it, the NOEXEC tag can be used to prevent a
+       dynamically-linked executable from running further commands itself.
 
-     In the following example, user aaaarroonn may run _/_u_s_r_/_b_i_n_/_m_o_r_e and
-     _/_u_s_r_/_b_i_n_/_v_i but shell escapes will be disabled.
+       In the following example, user aaaarroonn may run _/_u_s_r_/_b_i_n_/_m_o_r_e and
+       _/_u_s_r_/_b_i_n_/_v_i but shell escapes will be disabled.
 
-     aaron   shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
+       aaron   shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 
-     See the _P_r_e_v_e_n_t_i_n_g _s_h_e_l_l _e_s_c_a_p_e_s section below for more details on how
-     NOEXEC works and whether or not it will work on your system.
+       See the _P_r_e_v_e_n_t_i_n_g _s_h_e_l_l _e_s_c_a_p_e_s section below for more details on how
+       NOEXEC works and whether or not it will work on your system.
 
-     _S_E_T_E_N_V _a_n_d _N_O_S_E_T_E_N_V
+     _S_E_T_E_N_V and _N_O_S_E_T_E_N_V
 
-     These tags override the value of the _s_e_t_e_n_v option on a per-command
-     basis.  Note that if SETENV has been set for a command, the user may
-     disable the _e_n_v___r_e_s_e_t option from the command line via the --EE option.
-     Additionally, environment variables set on the command line are not
-     subject to the restrictions imposed by _e_n_v___c_h_e_c_k, _e_n_v___d_e_l_e_t_e, or
-     _e_n_v___k_e_e_p.  As such, only trusted users should be allowed to set variables
-     in this manner.  If the command matched is AALLLL, the SETENV tag is implied
-     for that command; this default may be overridden by use of the NOSETENV
-     tag.
+       These tags override the value of the _s_e_t_e_n_v option on a per-command
+       basis.  Note that if SETENV has been set for a command, the user may
+       disable the _e_n_v___r_e_s_e_t option from the command line via the --EE option.
+       Additionally, environment variables set on the command line are not
+       subject to the restrictions imposed by _e_n_v___c_h_e_c_k, _e_n_v___d_e_l_e_t_e, or
+       _e_n_v___k_e_e_p.  As such, only trusted users should be allowed to set
+       variables in this manner.  If the command matched is AALLLL, the SETENV
+       tag is implied for that command; this default may be overridden by use
+       of the NOSETENV tag.
 
-     _L_O_G___I_N_P_U_T _a_n_d _N_O_L_O_G___I_N_P_U_T
+     _L_O_G___I_N_P_U_T and _N_O_L_O_G___I_N_P_U_T
 
-     These tags override the value of the _l_o_g___i_n_p_u_t option on a per-command
-     basis.  For more information, see the description of _l_o_g___i_n_p_u_t in the
-     _S_U_D_O_E_R_S _O_P_T_I_O_N_S section below.
+       These tags override the value of the _l_o_g___i_n_p_u_t option on a per-command
+       basis.  For more information, see the description of _l_o_g___i_n_p_u_t in the
+       _S_U_D_O_E_R_S _O_P_T_I_O_N_S section below.
 
-     _L_O_G___O_U_T_P_U_T _a_n_d _N_O_L_O_G___O_U_T_P_U_T
+     _L_O_G___O_U_T_P_U_T and _N_O_L_O_G___O_U_T_P_U_T
 
-     These tags override the value of the _l_o_g___o_u_t_p_u_t option on a per-command
-     basis.  For more information, see the description of _l_o_g___o_u_t_p_u_t in the
-     _S_U_D_O_E_R_S _O_P_T_I_O_N_S section below.
+       These tags override the value of the _l_o_g___o_u_t_p_u_t option on a per-command
+       basis.  For more information, see the description of _l_o_g___o_u_t_p_u_t in the
+       _S_U_D_O_E_R_S _O_P_T_I_O_N_S section below.
 
    WWiillddccaarrddss
      ssuuddoo allows shell-style _w_i_l_d_c_a_r_d_s (aka meta or glob characters) to be
      used in host names, path names and command line arguments in the _s_u_d_o_e_r_s
-     file.  Wildcard matching is done via the PPOOSSIIXX glob(3) and fnmatch(3)
-     routines.  Note that these are _n_o_t regular expressions.
+     file.  Wildcard matching is done via the glob(3) and fnmatch(3) functions
+     as specified by IEEE Std 1003.1 (``POSIX.1'').  Note that these are _n_o_t
+     regular expressions.
 
      *         Matches any set of zero or more characters.
 
@@ -551,7 +552,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      \x        For any character `x', evaluates to `x'.  This is used to
                escape special characters such as: `*', `?', `[', and `]'.
 
-     POSIX character classes may also be used if your system's glob(3) and
+     Character classes may also be used if your system's glob(3) and
      fnmatch(3) functions support them.  However, because the `:' character
      has special meaning in _s_u_d_o_e_r_s, it must be escaped.  For example:
 
@@ -2091,4 +2092,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.6                    September 15, 2012                    Sudo 1.8.6
+Sudo 1.8.6                     October 23, 2012                     Sudo 1.8.6

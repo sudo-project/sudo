@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "@mansectsu@" "September 15, 2012" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
+.TH "SUDOERS" "@mansectsu@" "October 23, 2012" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1028,9 +1028,9 @@ and
 \fRNOEXEC\fR
 overrides
 \fREXEC\fR).
-.PP
-\fINOPASSWD and PASSWD\fR
-.PP
+.TP 2n
+\fINOPASSWD\fR and \fIPASSWD\fR
+.sp
 By default,
 \fBsudo\fR
 requires that a user authenticate him or herself
@@ -1049,13 +1049,14 @@ Conversely, the
 \fRPASSWD\fR
 tag can be used to reverse things.
 For example:
+.RS
 .nf
 .sp
 .RS 0n
 ray	rushmore = NOPASSWD: /bin/kill, /bin/ls, /usr/bin/lprm
 .RE
 .fi
-.PP
+.sp
 would allow the user
 \fBray\fR
 to run
@@ -1078,13 +1079,13 @@ without a password the entry would be:
 ray	rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
 .RE
 .fi
-.PP
+.sp
 Note, however, that the
 \fRPASSWD\fR
 tag has no effect on users who are in the group specified by the
 \fIexempt_group\fR
 option.
-.PP
+.sp
 By default, if the
 \fRNOPASSWD\fR
 tag is applied to any of the entries for a user on the current host,
@@ -1102,8 +1103,11 @@ and
 \fIlistpw\fR
 options.
 .PP
-\fINOEXEC and EXEC\fR
-.PP
+.RE
+.PD 0
+.TP 2n
+\fINOEXEC\fR and \fIEXEC\fR
+.sp
 If
 \fBsudo\fR
 has been compiled with
@@ -1112,7 +1116,7 @@ support and the underlying operating system supports it, the
 \fRNOEXEC\fR
 tag can be used to prevent a dynamically-linked executable from
 running further commands itself.
-.PP
+.sp
 In the following example, user
 \fBaaron\fR
 may run
@@ -1120,21 +1124,26 @@ may run
 and
 \fI/usr/bin/vi\fR
 but shell escapes will be disabled.
+.RS
 .nf
 .sp
 .RS 0n
 aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 .RE
 .fi
-.PP
+.sp
 See the
 \fIPreventing shell escapes\fR
 section below for more details on how
 \fRNOEXEC\fR
 works and whether or not it will work on your system.
+.PD
 .PP
-\fISETENV and NOSETENV\fR
-.PP
+.RE
+.PD 0
+.TP 2n
+\fISETENV\fR and \fINOSETENV\fR
+.sp
 These tags override the value of the
 \fIsetenv\fR
 option on a per-command basis.
@@ -1159,9 +1168,10 @@ the
 tag is implied for that command; this default may be overridden by use of the
 \fRNOSETENV\fR
 tag.
-.PP
-\fILOG_INPUT and NOLOG_INPUT\fR
-.PP
+.PD
+.TP 2n
+\fILOG_INPUT\fR and \fINOLOG_INPUT\fR
+.sp
 These tags override the value of the
 \fIlog_input\fR
 option on a per-command basis.
@@ -1170,9 +1180,9 @@ For more information, see the description of
 in the
 \fISUDOERS OPTIONS\fR
 section below.
-.PP
-\fILOG_OUTPUT and NOLOG_OUTPUT\fR
-.PP
+.TP 2n
+\fILOG_OUTPUT\fR and \fINOLOG_OUTPUT\fR
+.sp
 These tags override the value of the
 \fIlog_output\fR
 option on a per-command basis.
@@ -1190,11 +1200,11 @@ to be used in host names, path names and command line arguments in the
 \fIsudoers\fR
 file.
 Wildcard matching is done via the
-\fBPOSIX\fR
 glob(3)
 and
 fnmatch(3)
-routines.
+functions as specified by
+IEEE Std 1003.1 (\(lqPOSIX.1\(rq).
 Note that these are
 \fInot\fR
 regular expressions.
@@ -1225,7 +1235,7 @@ This is used to escape special characters such as:
 and
 `]\&'.
 .PP
-POSIX character classes may also be used if your system's
+Character classes may also be used if your system's
 glob(3)
 and
 fnmatch(3)
