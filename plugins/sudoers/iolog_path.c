@@ -49,26 +49,7 @@ struct path_escape {
     size_t (*copy_fn)(char *, size_t, char *);
 };
 
-static size_t fill_seq(char *, size_t, char *);
-static size_t fill_user(char *, size_t, char *);
-static size_t fill_group(char *, size_t, char *);
-static size_t fill_runas_user(char *, size_t, char *);
-static size_t fill_runas_group(char *, size_t, char *);
-static size_t fill_hostname(char *, size_t, char *);
-static size_t fill_command(char *, size_t, char *);
-
-/* Note: "seq" must be first in the list. */
-static struct path_escape io_path_escapes[] = {
-    { "seq", fill_seq },
-    { "user", fill_user },
-    { "group", fill_group },
-    { "runas_user", fill_runas_user },
-    { "runas_group", fill_runas_group },
-    { "hostname", fill_hostname },
-    { "command", fill_command },
-    { NULL, NULL }
-};
-
+#ifndef SUDOERS_NO_SEQ
 static size_t
 fill_seq(char *str, size_t strsize, char *logdir)
 {
@@ -86,6 +67,7 @@ fill_seq(char *str, size_t strsize, char *logdir)
 	debug_return_size_t(strsize); /* handle non-standard snprintf() */
     debug_return_size_t(len);
 }
+#endif /* SUDOERS_NO_SEQ */
 
 static size_t
 fill_user(char *str, size_t strsize, char *unused)
@@ -154,6 +136,20 @@ fill_command(char *str, size_t strsize, char *unused)
     debug_decl(fill_command, SUDO_DEBUG_UTIL)
     debug_return_size_t(strlcpy(str, user_base, strsize));
 }
+
+/* Note: "seq" must be first in the list. */
+static struct path_escape io_path_escapes[] = {
+#ifndef SUDOERS_NO_SEQ
+    { "seq", fill_seq },
+#endif
+    { "user", fill_user },
+    { "group", fill_group },
+    { "runas_user", fill_runas_user },
+    { "runas_group", fill_runas_group },
+    { "hostname", fill_hostname },
+    { "command", fill_command },
+    { NULL, NULL }
+};
 
 /*
  * Concatenate dir + file, expanding any escape sequences.
