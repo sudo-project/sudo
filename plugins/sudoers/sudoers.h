@@ -85,8 +85,8 @@ struct sudo_user {
     char *privs;
     char *limitprivs;
 #endif
-    char *cwd;
-    char *iolog_file;
+    const char *cwd;
+    const char *iolog_file;
     GETGROUPS_T *gids;
     int   ngids;
     int   closefrom;
@@ -323,7 +323,7 @@ void io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7]);
 
 /* iolog_path.c */
 char *expand_iolog_path(const char *prefix, const char *dir, const char *file,
-    char **slashp);
+    char const **slashp);
 
 /* env.c */
 char **env_get(void);

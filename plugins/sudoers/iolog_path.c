@@ -158,7 +158,7 @@ static struct path_escape io_path_escapes[] = {
  */
 char *
 expand_iolog_path(const char *prefix, const char *dir, const char *file,
-    char **slashp)
+    char const **slashp)
 {
     size_t len, prelen = 0;
     char *dst, *dst0, *path, *pathend, tmpbuf[PATH_MAX];

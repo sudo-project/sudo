@@ -742,7 +742,8 @@ new_logline(const char *message, int serrno)
     size_t len = 0;
     char *errstr = NULL;
     char *evstr = NULL;
-    char *line, sessid[7], *tsid = NULL;
+    char *line, sessid[7];
+    const char *tsid = NULL;
     debug_decl(new_logline, SUDO_DEBUG_LOGGING)
 
     /* A TSID may be a sudoers-style session ID or a free-form string. */
