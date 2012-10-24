@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2012 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1460,14 +1460,17 @@ deserialize_info(char * const args[], char * const settings[], char * const user
 }
 
 static char *
-resolve_editor(char *editor, int nfiles, char **files, char ***argv_out)
+resolve_editor(const char *ed, size_t edlen, int nfiles, char **files, char ***argv_out)
 {
-    char *cp, **nargv, *editor_path = NULL;
+    char *cp, **nargv, *editor, *editor_path = NULL;
     int ac, i, nargc;
     bool wasblank;
     debug_decl(resolve_editor, SUDO_DEBUG_PLUGIN)
 
-    editor = estrdup(editor); /* becomes part of argv_out */
+    /* Note: editor becomes part of argv_out and is not freed. */
+    editor = emalloc(edlen + 1);
+    memcpy(editor, ed, edlen);
+    editor[edlen] = '\0';
 
     /*
      * Split editor into an argument vector; editor is reused (do not free).
@@ -1512,7 +1515,9 @@ resolve_editor(char *editor, int nfiles, char **files, char ***argv_out)
 static char *
 find_editor(int nfiles, char **files, char ***argv_out)
 {
-    char *cp, *editor, *editor_path = NULL, **ev, *ev0[4];
+    const char *cp, *ep, *editor;
+    char *editor_path = NULL, **ev, *ev0[4];
+    size_t len;
     debug_decl(find_editor, SUDO_DEBUG_PLUGIN)
 
     /*
@@ -1522,23 +1527,23 @@ find_editor(int nfiles, char **files, char ***argv_out)
     ev0[1] = "VISUAL";
     ev0[2] = "EDITOR";
     ev0[3] = NULL;
-    for (ev = ev0; *ev != NULL; ev++) {
+    for (ev = ev0; editor_path == NULL && *ev != NULL; ev++) {
 	if ((editor = getenv(*ev)) != NULL && *editor != '\0') {
-	    editor_path = resolve_editor(editor, nfiles, files, argv_out);
-	    if (editor_path != NULL)
-		break;
+	    editor_path = resolve_editor(editor, strlen(editor), nfiles,
+		files, argv_out);
 	}
     }
     if (editor_path == NULL) {
-	/* def_editor could be a path, split it up */
-	editor = estrdup(def_editor);
-	cp = strtok(editor, ":");
-	while (cp != NULL && editor_path == NULL) {
-	    editor_path = resolve_editor(cp, nfiles, files, argv_out);
-	    cp = strtok(NULL, ":");
-	}
-	if (editor_path)
-	    efree(editor);
+	/* def_editor could be a path, split it up, avoiding strtok() */
+	cp = editor = def_editor;
+	do {
+	    if ((ep = strchr(cp, ':')) != NULL)
+		len = ep - cp;
+	    else
+		len = strlen(cp);
+	    editor_path = resolve_editor(cp, len, nfiles, files, argv_out);
+	    cp = ep + 1;
+	} while (ep != NULL && editor_path == NULL);
     }
     if (!editor_path) {
 	audit_failure(NewArgv, _("%s: command not found"), editor);
