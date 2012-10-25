@@ -492,7 +492,7 @@ log_fatal(int flags, const char *fmt, ...)
     va_end(ap);
 
     /* Exit the plugin. */
-    plugin_cleanup(0);
+    sudoers_plugin_cleanup(0);
     sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
     siglongjmp(error_jmp, 1);
 }

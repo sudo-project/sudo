@@ -651,13 +651,6 @@ done:
 
 /* STUB */
 void
-set_fqdn(void)
-{
-    return;
-}
-
-/* STUB */
-void
 init_envtables(void)
 {
     return;

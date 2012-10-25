@@ -33,7 +33,7 @@
 #include "gettext.h"
 
 static void _warning(int, const char *, va_list);
-       void plugin_cleanup(int);
+       void sudoers_plugin_cleanup(int);
 
 extern sigjmp_buf error_jmp;
 
@@ -47,7 +47,7 @@ error2(int eval, const char *fmt, ...)
     va_start(ap, fmt);
     _warning(1, fmt, ap);
     va_end(ap);
-    plugin_cleanup(0);
+    sudoers_plugin_cleanup(0);
     siglongjmp(error_jmp, eval);
 }
 
@@ -59,7 +59,7 @@ errorx2(int eval, const char *fmt, ...)
     va_start(ap, fmt);
     _warning(0, fmt, ap);
     va_end(ap);
-    plugin_cleanup(0);
+    sudoers_plugin_cleanup(0);
     siglongjmp(error_jmp, eval);
 }
 

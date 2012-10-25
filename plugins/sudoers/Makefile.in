@@ -129,8 +129,9 @@ LIBPARSESUDOERS_OBJS = alias.lo audit.lo defaults.lo gram.lo match.lo \
 
 SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo env.lo find_path.lo \
 	       goodpath.lo group_plugin.lo interfaces.lo iolog.lo \
-	       iolog_path.lo logging.lo logwrap.lo parse.lo prompt.lo \
-	       set_perms.lo sudo_nss.lo sudoers.lo timestamp.lo @SUDOERS_OBJS@
+	       iolog_path.lo logging.lo logwrap.lo parse.lo policy.lo \
+	       prompt.lo set_perms.lo sudo_nss.lo sudoers.lo \
+	       timestamp.lo @SUDOERS_OBJS@
 
 VISUDO_OBJS = visudo.o goodpath.o find_path.o error.o
 
@@ -671,6 +672,14 @@ plugin_error.lo: $(srcdir)/plugin_error.c $(top_builddir)/config.h \
                  $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
                  $(incdir)/sudo_plugin.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/plugin_error.c
+policy.lo: $(srcdir)/policy.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
+           $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
+           $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
+           $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+           $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
+           $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
+           $(srcdir)/sudoers_version.h $(srcdir)/interfaces.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/policy.c
 prompt.lo: $(srcdir)/prompt.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
            $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
            $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
@@ -774,7 +783,7 @@ sudoers.lo: $(srcdir)/sudoers.c $(top_builddir)/config.h \
             $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
             $(srcdir)/defaults.h $(devdir)/def_data.h $(srcdir)/logging.h \
             $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
-            $(incdir)/sudo_debug.h $(incdir)/gettext.h $(srcdir)/interfaces.h \
+            $(incdir)/sudo_debug.h $(incdir)/gettext.h \
             $(srcdir)/sudoers_version.h $(srcdir)/auth/sudo_auth.h \
             $(incdir)/secure_path.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/sudoers.c
@@ -841,7 +850,7 @@ visudo.o: $(srcdir)/visudo.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
           $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
           $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
-          $(srcdir)/interfaces.h $(srcdir)/parse.h $(srcdir)/redblack.h \
-          $(incdir)/gettext.h $(srcdir)/sudoers_version.h \
-          $(incdir)/sudo_conf.h $(incdir)/list.h $(devdir)/gram.h
+          $(srcdir)/parse.h $(srcdir)/redblack.h $(incdir)/gettext.h \
+          $(srcdir)/sudoers_version.h $(incdir)/sudo_conf.h $(incdir)/list.h \
+          $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/visudo.c

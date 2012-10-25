@@ -415,12 +415,6 @@ sudo_endspent(void)
     return;
 }
 
-void
-set_fqdn(void)
-{
-    return;
-}
-
 FILE *
 open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 {

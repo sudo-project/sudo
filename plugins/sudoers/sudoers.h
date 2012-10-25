@@ -86,7 +86,7 @@ struct sudo_user {
     char *limitprivs;
 #endif
     const char *cwd;
-    const char *iolog_file;
+    char *iolog_file;
     GETGROUPS_T *gids;
     int   ngids;
     int   closefrom;
@@ -323,7 +323,7 @@ void io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7]);
 
 /* iolog_path.c */
 char *expand_iolog_path(const char *prefix, const char *dir, const char *file,
-    char const **slashp);
+    char **slashp);
 
 /* env.c */
 char **env_get(void);
@@ -346,9 +346,14 @@ int sudoers_hook_unsetenv(const char *name, void *closure);
 char *fmt_string(const char *, const char *);
 
 /* sudoers.c */
-void plugin_cleanup(int);
-void set_fqdn(void);
 FILE *open_sudoers(const char *, bool, bool *);
+int sudoers_policy_init(void *info, char * const envp[]);
+int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], void *closure);
+void sudoers_plugin_cleanup(int);
+
+/* policy.c */
+int sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group);
+int sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
 
 /* aix.c */
 void aix_restoreauthdb(void);
