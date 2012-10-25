@@ -106,7 +106,6 @@ extern int (*trace_print)(const char *msg);
 /*
  * Globals
  */
-struct interface *interfaces;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
 static char *runas_group, *runas_user;

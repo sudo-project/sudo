@@ -48,12 +48,6 @@ struct interface {
 int get_net_ifs(char **addrinfo);
 void dump_interfaces(const char *);
 void set_interfaces(const char *);
-
-/*
- * Definitions for external variables.
- */
-#ifndef _SUDO_MAIN
-extern struct interface *interfaces;
-#endif
+struct interface *get_interfaces(void);
 
 #endif /* _SUDO_INTERFACES_H */

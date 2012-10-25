@@ -76,7 +76,6 @@
 #endif
 
 #include "sudoers.h"
-#include "interfaces.h"
 #include "parse.h"
 #include "redblack.h"
 #include "gettext.h"
@@ -136,7 +135,6 @@ extern int optind;
 /*
  * Globals
  */
-struct interface *interfaces;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
 sudo_printf_t sudo_printf = visudo_printf;
@@ -691,6 +689,12 @@ int
 group_plugin_query(const char *user, const char *group, const struct passwd *pw)
 {
     return false;
+}
+
+/* STUB */
+struct interface *get_interfaces(void)
+{
+    return NULL;
 }
 
 /*

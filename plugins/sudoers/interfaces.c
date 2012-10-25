@@ -52,6 +52,8 @@
 # define INADDR_NONE ((unsigned int)-1)
 #endif
 
+static struct interface *interfaces;
+
 /*
  * Parse a space-delimited list of IP address/netmask pairs and
  * store in a list of interface structures.
@@ -99,6 +101,12 @@ set_interfaces(const char *ai)
     }
     efree(addrinfo);
     debug_return;
+}
+
+struct interface *
+get_interfaces(void)
+{
+    return interfaces;
 }
 
 void

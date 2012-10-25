@@ -109,7 +109,6 @@ static void create_admin_success_flag(void);
  */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-struct interface *interfaces;
 int long_list;
 uid_t timestamp_uid;
 extern int errorlineno;
