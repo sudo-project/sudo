@@ -311,15 +311,136 @@ sudoers_policy_init_session(struct passwd *pwd, char **user_env[])
     debug_return_bool(sudo_auth_begin_session(pwd, user_env));
 }
 
+/*
+ * Build up command_info list.
+ * XXX - convert into setter function that takes care
+ *       of command_info, argv_out and user_env_out
+ */
+static char **
+build_command_info(mode_t cmnd_umask, char *iolog_path)
+{
+    char **command_info;
+    int info_len = 0;
+    debug_decl(build_command_info, SUDO_DEBUG_PLUGIN)
+
+    /* Increase the length of command_info as needed, it is *not* checked. */
+    command_info = ecalloc(32, sizeof(char **));
+
+    command_info[info_len++] = fmt_string("command", safe_cmnd);
+    if (def_log_input || def_log_output) {
+	if (iolog_path)
+	    command_info[info_len++] = iolog_path;
+	if (def_log_input) {
+	    command_info[info_len++] = estrdup("iolog_stdin=true");
+	    command_info[info_len++] = estrdup("iolog_ttyin=true");
+	}
+	if (def_log_output) {
+	    command_info[info_len++] = estrdup("iolog_stdout=true");
+	    command_info[info_len++] = estrdup("iolog_stderr=true");
+	    command_info[info_len++] = estrdup("iolog_ttyout=true");
+	}
+	if (def_compress_io) {
+	    command_info[info_len++] = estrdup("iolog_compress=true");
+	}
+    }
+    if (ISSET(sudo_mode, MODE_EDIT))
+	command_info[info_len++] = estrdup("sudoedit=true");
+    if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+	/* Set cwd to run user's homedir. */
+	command_info[info_len++] = fmt_string("cwd", runas_pw->pw_dir);
+    }
+    if (def_stay_setuid) {
+	easprintf(&command_info[info_len++], "runas_uid=%u",
+	    (unsigned int)user_uid);
+	easprintf(&command_info[info_len++], "runas_gid=%u",
+	    (unsigned int)user_gid);
+	easprintf(&command_info[info_len++], "runas_euid=%u",
+	    (unsigned int)runas_pw->pw_uid);
+	easprintf(&command_info[info_len++], "runas_egid=%u",
+	    runas_gr ? (unsigned int)runas_gr->gr_gid :
+	    (unsigned int)runas_pw->pw_gid);
+    } else {
+	easprintf(&command_info[info_len++], "runas_uid=%u",
+	    (unsigned int)runas_pw->pw_uid);
+	easprintf(&command_info[info_len++], "runas_gid=%u",
+	    runas_gr ? (unsigned int)runas_gr->gr_gid :
+	    (unsigned int)runas_pw->pw_gid);
+    }
+    if (def_preserve_groups) {
+	command_info[info_len++] = "preserve_groups=true";
+    } else {
+	int i, len;
+	gid_t egid;
+	size_t glsize;
+	char *cp, *gid_list;
+	struct group_list *grlist = sudo_get_grlist(runas_pw);
+
+	/* We reserve an extra spot in the list for the effective gid. */
+	glsize = sizeof("runas_groups=") - 1 +
+	    ((grlist->ngids + 1) * (MAX_UID_T_LEN + 1));
+	gid_list = emalloc(glsize);
+	memcpy(gid_list, "runas_groups=", sizeof("runas_groups=") - 1);
+	cp = gid_list + sizeof("runas_groups=") - 1;
+
+	/* On BSD systems the effective gid is the first group in the list. */
+	egid = runas_gr ? (unsigned int)runas_gr->gr_gid :
+	    (unsigned int)runas_pw->pw_gid;
+	len = snprintf(cp, glsize - (cp - gid_list), "%u", egid);
+	if (len < 0 || len >= glsize - (cp - gid_list))
+	    errorx(1, _("internal error, %s overflow"), "runas_groups");
+	cp += len;
+	for (i = 0; i < grlist->ngids; i++) {
+	    if (grlist->gids[i] != egid) {
+		len = snprintf(cp, glsize - (cp - gid_list), ",%u",
+		     (unsigned int) grlist->gids[i]);
+		if (len < 0 || len >= glsize - (cp - gid_list))
+		    errorx(1, _("internal error, %s overflow"), "runas_groups");
+		cp += len;
+	    }
+	}
+	command_info[info_len++] = gid_list;
+	sudo_grlist_delref(grlist);
+    }
+    if (def_closefrom >= 0)
+	easprintf(&command_info[info_len++], "closefrom=%d", def_closefrom);
+    if (def_noexec)
+	command_info[info_len++] = estrdup("noexec=true");
+    if (def_set_utmp)
+	command_info[info_len++] = estrdup("set_utmp=true");
+    if (def_use_pty)
+	command_info[info_len++] = estrdup("use_pty=true");
+    if (def_utmp_runas)
+	command_info[info_len++] = fmt_string("utmp_user", runas_pw->pw_name);
+    if (cmnd_umask != 0777)
+	easprintf(&command_info[info_len++], "umask=0%o", (unsigned int)cmnd_umask);
+#ifdef HAVE_LOGIN_CAP_H
+    if (def_use_loginclass)
+	command_info[info_len++] = fmt_string("login_class", login_class);
+#endif /* HAVE_LOGIN_CAP_H */
+#ifdef HAVE_SELINUX
+    if (user_role != NULL)
+	command_info[info_len++] = fmt_string("selinux_role", user_role);
+    if (user_type != NULL)
+	command_info[info_len++] = fmt_string("selinux_type", user_type);
+#endif /* HAVE_SELINUX */
+#ifdef HAVE_PRIV_SET
+    if (runas_privs != NULL)
+	command_info[info_len++] = fmt_string("runas_privs", runas_privs);
+    if (runas_limitprivs != NULL)
+	command_info[info_len++] = fmt_string("runas_limitprivs", runas_limitprivs);
+#endif /* HAVE_SELINUX */
+    debug_return_ptr(command_info);
+}
+
 static int
 sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     char **command_infop[], char **argv_out[], char **user_env_out[])
 {
-    static char *command_info[32]; /* XXX */
     char **edit_argv = NULL;
+    char *iolog_path = NULL;
+    mode_t cmnd_umask = 0777;
     struct sudo_nss *nss;
     int cmnd_status = -1, validated;
-    volatile int info_len = 0;
     volatile int rval = true;
     debug_decl(sudoers_policy_main, SUDO_DEBUG_PLUGIN)
 
@@ -512,23 +633,12 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    validate_env_vars(sudo_user.env_vars);
     }
 
-    if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)) && (def_log_input || def_log_output)) {
-	if (def_iolog_file && def_iolog_dir) {
-	    command_info[info_len++] = expand_iolog_path("iolog_path=",
-		def_iolog_dir, def_iolog_file, &sudo_user.iolog_file);
+    if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT))) {
+	if ((def_log_input || def_log_output) && def_iolog_file && def_iolog_dir) {
+	    iolog_path = expand_iolog_path("iolog_path=", def_iolog_dir,
+		def_iolog_file, &sudo_user.iolog_file);
 	    sudo_user.iolog_file++;
 	}
-	if (def_log_input) {
-	    command_info[info_len++] = estrdup("iolog_stdin=true");
-	    command_info[info_len++] = estrdup("iolog_ttyin=true");
-	}
-	if (def_log_output) {
-	    command_info[info_len++] = estrdup("iolog_stdout=true");
-	    command_info[info_len++] = estrdup("iolog_stderr=true");
-	    command_info[info_len++] = estrdup("iolog_ttyout=true");
-	}
-	if (def_compress_io)
-	    command_info[info_len++] = estrdup("iolog_compress=true");
     }
 
     log_allowed(validated);
@@ -555,13 +665,12 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      * unless umask_override is set.
      */
     if (def_umask != 0777) {
-	mode_t mask = def_umask;
+	cmnd_umask = def_umask;
 	if (!def_umask_override) {
-	    mode_t omask = umask(mask);
-	    mask |= omask;
+	    mode_t omask = umask(cmnd_umask);
+	    cmnd_umask |= omask;
 	    umask(omask);
 	}
-	easprintf(&command_info[info_len++], "umask=0%o", (unsigned int)mask);
     }
 
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
@@ -572,9 +681,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    p = NewArgv[0];
 	*p = '-';
 	NewArgv[0] = p;
-
-	/* Set cwd to run user's homedir. */
-	command_info[info_len++] = fmt_string("cwd", runas_pw->pw_dir);
 
 	/*
 	 * Newer versions of bash require the --login option to be used
@@ -620,97 +726,18 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     (void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
 
     if (ISSET(sudo_mode, MODE_EDIT)) {
-	char *editor = find_editor(NewArgc - 1, NewArgv + 1, &edit_argv);
-	if (editor == NULL)
+	efree(safe_cmnd);
+	safe_cmnd = find_editor(NewArgc - 1, NewArgv + 1, &edit_argv);
+	if (safe_cmnd == NULL)
 	    goto bad;
-	command_info[info_len++] = fmt_string("command", editor);
-	command_info[info_len++] = estrdup("sudoedit=true");
-    } else {
-	command_info[info_len++] = fmt_string("command", safe_cmnd);
     }
-    if (def_stay_setuid) {
-	easprintf(&command_info[info_len++], "runas_uid=%u",
-	    (unsigned int)user_uid);
-	easprintf(&command_info[info_len++], "runas_gid=%u",
-	    (unsigned int)user_gid);
-	easprintf(&command_info[info_len++], "runas_euid=%u",
-	    (unsigned int)runas_pw->pw_uid);
-	easprintf(&command_info[info_len++], "runas_egid=%u",
-	    runas_gr ? (unsigned int)runas_gr->gr_gid :
-	    (unsigned int)runas_pw->pw_gid);
-    } else {
-	easprintf(&command_info[info_len++], "runas_uid=%u",
-	    (unsigned int)runas_pw->pw_uid);
-	easprintf(&command_info[info_len++], "runas_gid=%u",
-	    runas_gr ? (unsigned int)runas_gr->gr_gid :
-	    (unsigned int)runas_pw->pw_gid);
-    }
-    if (def_preserve_groups) {
-	command_info[info_len++] = "preserve_groups=true";
-    } else {
-	int i, len;
-	gid_t egid;
-	size_t glsize;
-	char *cp, *gid_list;
-	struct group_list *grlist = sudo_get_grlist(runas_pw);
-
-	/* We reserve an extra spot in the list for the effective gid. */
-	glsize = sizeof("runas_groups=") - 1 +
-	    ((grlist->ngids + 1) * (MAX_UID_T_LEN + 1));
-	gid_list = emalloc(glsize);
-	memcpy(gid_list, "runas_groups=", sizeof("runas_groups=") - 1);
-	cp = gid_list + sizeof("runas_groups=") - 1;
-
-	/* On BSD systems the effective gid is the first group in the list. */
-	egid = runas_gr ? (unsigned int)runas_gr->gr_gid :
-	    (unsigned int)runas_pw->pw_gid;
-	len = snprintf(cp, glsize - (cp - gid_list), "%u", egid);
-	if (len < 0 || len >= glsize - (cp - gid_list))
-	    errorx(1, _("internal error, %s overflow"), "runas_groups");
-	cp += len;
-	for (i = 0; i < grlist->ngids; i++) {
-	    if (grlist->gids[i] != egid) {
-		len = snprintf(cp, glsize - (cp - gid_list), ",%u",
-		     (unsigned int) grlist->gids[i]);
-		if (len < 0 || len >= glsize - (cp - gid_list))
-		    errorx(1, _("internal error, %s overflow"), "runas_groups");
-		cp += len;
-	    }
-	}
-	command_info[info_len++] = gid_list;
-	sudo_grlist_delref(grlist);
-    }
-    if (def_closefrom >= 0)
-	easprintf(&command_info[info_len++], "closefrom=%d", def_closefrom);
-    if (def_noexec)
-	command_info[info_len++] = estrdup("noexec=true");
-    if (def_set_utmp)
-	command_info[info_len++] = estrdup("set_utmp=true");
-    if (def_use_pty)
-	command_info[info_len++] = estrdup("use_pty=true");
-    if (def_utmp_runas)
-	command_info[info_len++] = fmt_string("utmp_user", runas_pw->pw_name);
-#ifdef HAVE_LOGIN_CAP_H
-    if (def_use_loginclass)
-	command_info[info_len++] = fmt_string("login_class", login_class);
-#endif /* HAVE_LOGIN_CAP_H */
-#ifdef HAVE_SELINUX
-    if (user_role != NULL)
-	command_info[info_len++] = fmt_string("selinux_role", user_role);
-    if (user_type != NULL)
-	command_info[info_len++] = fmt_string("selinux_type", user_type);
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_PRIV_SET
-    if (runas_privs != NULL)
-	command_info[info_len++] = fmt_string("runas_privs", runas_privs);
-    if (runas_limitprivs != NULL)
-	command_info[info_len++] = fmt_string("runas_limitprivs", runas_limitprivs);
-#endif /* HAVE_SELINUX */
 
     /* Must audit before uid change. */
     audit_success(NewArgv);
 
-    *command_infop = command_info;
+    /* XXX - use a setter that is passed instead of setting
+	     command_infop, argv_out and user_env_out directly */
+    *command_infop = build_command_info(cmnd_umask, iolog_path);
 
     *argv_out = edit_argv ? edit_argv : NewArgv;
 

@@ -53,7 +53,6 @@
 
 #include "sudoers.h"
 
-/* plugin_error.c */
 extern sigjmp_buf error_jmp;
 
 union io_fd {
