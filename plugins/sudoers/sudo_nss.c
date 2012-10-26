@@ -89,9 +89,11 @@ sudo_read_nss(void)
 	    if (strcasecmp(cp, "files") == 0 && !saw_files) {
 		tq_append(&snl, &sudo_nss_file);
 		got_match = true;
+#ifdef HAVE_LDAP
 	    } else if (strcasecmp(cp, "ldap") == 0 && !saw_ldap) {
 		tq_append(&snl, &sudo_nss_ldap);
 		got_match = true;
+#endif
 #ifdef HAVE_SSSD
 	    } else if (strcasecmp(cp, "sss") == 0 && !saw_sss) {
 		tq_append(&snl, &sudo_nss_sss);
@@ -171,11 +173,13 @@ sudo_read_nss(void)
 		tq_append(&snl, &sudo_nss_file);
 		got_match = true;
 		ep = &cp[5];
+#ifdef HAVE_LDAP
 	    } else if (!saw_ldap && strncasecmp(cp, "ldap", 4) == 0 &&
 		(isspace((unsigned char)cp[4]) || cp[4] == '\0')) {
 		tq_append(&snl, &sudo_nss_ldap);
 		got_match = true;
 		ep = &cp[4];
+#endif
 #ifdef HAVE_SSSD
 	    } else if (!saw_sss && strncasecmp(cp, "sss", 3) == 0 &&
 		(isspace((unsigned char)cp[3]) || cp[3] == '\0')) {
