@@ -1436,6 +1436,21 @@ LT_PREREQ([2.2.6b])
 LT_INIT([dlopen])
 
 dnl
+dnl Allow the user to specify an alternate libtool.
+dnl XXX - should be able to skip LT_INIT if we are using a different libtool
+dnl
+AC_ARG_WITH(libtool, [AS_HELP_STRING([--with-libtool=PATH], [specify path to libtool])],
+[case $with_libtool in
+    yes|builtin) ;;
+    no)		AC_MSG_ERROR(["--without-libtool not supported."])
+		;;
+    system)	LIBTOOL=libtool
+		;;
+    *)		LIBTOOL="$with_libtool"
+		;;
+esac])
+
+dnl
 dnl Defer with_noexec until after libtool magic runs
 dnl
 if test "$enable_shared" = "no"; then

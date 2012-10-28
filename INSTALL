@@ -584,6 +584,15 @@ The following options are also configurable at runtime:
         specified, I/O logs will be stored in the indicated directory
         instead.
 
+  --with-libtool=PATH
+        By default, sudo will use the included version of libtool
+        to build shared libraries.  The --with-libtool option can
+        be used to specify a different version of libtool to use.
+        The special values "system" and "builtin" can be used in
+        place of a path to denote the default system libtool (obtained
+        via the user's PATH) and the default libtool that comes
+        with sudo.
+
   --disable-authentication
 	By default, sudo requires the user to authenticate via a
 	password or similar means.  This options causes sudo to

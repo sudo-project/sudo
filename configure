@@ -907,6 +907,7 @@ enable_fast_install
 with_gnu_ld
 with_sysroot
 enable_libtool_lock
+with_libtool
 with_noexec
 with_netsvc
 enable_sia
@@ -1673,6 +1674,7 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-sysroot=DIR Search for dependent libraries within DIR
                         (or the compiler's sysroot if not specified).
+  --with-libtool=PATH     specify path to libtool
   --with-noexec=PATH      fully qualified pathname of sudo_noexec.so
   --with-netsvc[=PATH]    path to netsvc.conf
   --with-pam-login        enable specific PAM session for sudo -i
@@ -13610,6 +13612,21 @@ CC="$lt_save_CC"
 
 # Only expand once:
 
+
+
+
+# Check whether --with-libtool was given.
+if test "${with_libtool+set}" = set; then :
+  withval=$with_libtool; case $with_libtool in
+    yes|builtin) ;;
+    no)		as_fn_error $? "\"--without-libtool not supported.\"" "$LINENO" 5
+		;;
+    system)	LIBTOOL=libtool
+		;;
+    *)		LIBTOOL="$with_libtool"
+		;;
+esac
+fi
 
 
 if test "$enable_shared" = "no"; then
