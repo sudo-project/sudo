@@ -379,7 +379,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     rval = check_user(validated, sudo_mode);
     if (rval != true) {
 	if (!ISSET(validated, VALIDATE_OK))
-	    log_failure(validated, cmnd_status);
+	    log_denial(validated, false);
 	goto done;
     }
 

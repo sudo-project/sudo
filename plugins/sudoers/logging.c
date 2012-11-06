@@ -247,13 +247,19 @@ do_logfile(char *msg)
 }
 
 /*
- * Log and mail the denial message, optionally informing the user.
+ * Log, audit and mail the denial message, optionally informing the user.
  */
-static void
+void
 log_denial(int status, bool inform_user)
 {
     char *logline, *message;
     debug_decl(log_denial, SUDO_DEBUG_LOGGING)
+
+    /* Handle auditing first. */
+    if (ISSET(status, FLAG_NO_USER | FLAG_NO_HOST))
+	audit_failure(NewArgv, _("No user or host"));
+    else
+	audit_failure(NewArgv, _("validation failure"));
 
     /* Set error message. */
     if (ISSET(status, FLAG_NO_USER))
@@ -311,12 +317,6 @@ log_failure(int status, int flags)
 {
     debug_decl(log_failure, SUDO_DEBUG_LOGGING)
     bool inform_user = true;
-
-    /* Handle auditing first. */
-    if (ISSET(status, FLAG_NO_USER | FLAG_NO_HOST))
-	audit_failure(NewArgv, _("No user or host"));
-    else
-	audit_failure(NewArgv, _("validation failure"));
 
     /* The user doesn't always get to see the log message (path info). */
     if (!ISSET(status, FLAG_NO_USER | FLAG_NO_HOST) && def_path_info &&
