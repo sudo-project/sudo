@@ -535,12 +535,12 @@ help(void)
     usage(0);
 
     lbuf_append(&lbuf, _("\nOptions:\n"));
-#ifdef HAVE_BSD_AUTH_H
     lbuf_append(&lbuf, "  -A            %s",
 	_("use helper program for password prompting\n"));
-#endif
+#ifdef HAVE_BSD_AUTH_H
     lbuf_append(&lbuf, "  -a type       %s",
 	_("use specified BSD authentication type\n"));
+#endif
     lbuf_append(&lbuf, "  -b            %s",
 	_("run command in the background\n"));
     lbuf_append(&lbuf, "  -C fd         %s",
