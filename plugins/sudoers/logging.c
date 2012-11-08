@@ -47,9 +47,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_SETLOCALE
-# include <locale.h>
-#endif /* HAVE_SETLOCALE */
 #ifdef HAVE_NL_LANGINFO
 # include <langinfo.h>
 #endif /* HAVE_NL_LANGINFO */
@@ -132,15 +129,10 @@ do_syslog(int pri, char *msg)
     size_t len, maxlen;
     char *p, *tmp, save;
     const char *fmt;
-#ifdef HAVE_SETLOCALE
-    const char *old_locale = estrdup(setlocale(LC_ALL, NULL));
-#endif
+    int oldlocale;
     debug_decl(do_syslog, SUDO_DEBUG_LOGGING)
 
-#ifdef HAVE_SETLOCALE
-    if (!setlocale(LC_ALL, def_sudoers_locale))
-	setlocale(LC_ALL, "C");
-#endif /* HAVE_SETLOCALE */
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
     /*
      * Log the full line, breaking into multiple syslog(3) calls if necessary
@@ -177,10 +169,7 @@ do_syslog(int pri, char *msg)
 	maxlen = MAXSYSLOGLEN - (strlen(fmt) - 5 + strlen(user_name));
     }
 
-#ifdef HAVE_SETLOCALE
-    setlocale(LC_ALL, old_locale);
-    efree((void *)old_locale);
-#endif /* HAVE_SETLOCALE */
+    sudoers_setlocale(oldlocale, NULL);
 
     debug_return;
 }
@@ -192,8 +181,11 @@ do_logfile(char *msg)
     size_t len;
     mode_t oldmask;
     time_t now;
+    int oldlocale;
     FILE *fp;
     debug_decl(do_logfile, SUDO_DEBUG_LOGGING)
+
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
     oldmask = umask(077);
     fp = fopen(def_logfile, "a");
@@ -205,12 +197,6 @@ do_logfile(char *msg)
 	send_mail(_("unable to lock log file: %s: %s"),
 	    def_logfile, strerror(errno));
     } else {
-#ifdef HAVE_SETLOCALE
-	const char *old_locale = estrdup(setlocale(LC_ALL, NULL));
-	if (!setlocale(LC_ALL, def_sudoers_locale))
-	    setlocale(LC_ALL, "C");
-#endif /* HAVE_SETLOCALE */
-
 	now = time(NULL);
 	if (def_loglinelen < sizeof(LOG_INDENT)) {
 	    /* Don't pretty-print long log file lines (hard to grep) */
@@ -237,12 +223,9 @@ do_logfile(char *msg)
 	(void) fflush(fp);
 	(void) lock_file(fileno(fp), SUDO_UNLOCK);
 	(void) fclose(fp);
-
-#ifdef HAVE_SETLOCALE
-	setlocale(LC_ALL, old_locale);
-	efree((void *)old_locale);
-#endif /* HAVE_SETLOCALE */
     }
+    sudoers_setlocale(oldlocale, NULL);
+
     debug_return;
 }
 
@@ -569,13 +552,7 @@ send_mail(const char *fmt, ...)
 	(void) dup2(fd, STDERR_FILENO);
     }
 
-#ifdef HAVE_SETLOCALE
-    if (!setlocale(LC_ALL, def_sudoers_locale)) {
-	setlocale(LC_ALL, "C");
-	efree(def_sudoers_locale);
-	def_sudoers_locale = estrdup("C");
-    }
-#endif /* HAVE_SETLOCALE */
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, NULL);
 
     /* Close password, group and other fds so we don't leak. */
     sudo_endpwent();

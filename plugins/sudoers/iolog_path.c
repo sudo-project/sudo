@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2012 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -165,7 +165,7 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
     char *slash = NULL;
     const char *endbrace, *src = dir;
     static struct path_escape *escapes;
-    int pass;
+    int pass, oldlocale;
     bool strfit;
     debug_decl(expand_iolog_path, SUDO_DEBUG_UTIL)
 
@@ -254,20 +254,16 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 	    time(&now);
 	    timeptr = localtime(&now);
 
-#ifdef HAVE_SETLOCALE
-	    if (!setlocale(LC_ALL, def_sudoers_locale)) {
-		warningx(_("unable to set locale to \"%s\", using \"C\""),
-		    def_sudoers_locale);
-		setlocale(LC_ALL, "C");
-	    }
-#endif
+	    /* Use sudoers locale for strftime() */
+	    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
+
 	    /* We only calls strftime() on the current part of the buffer. */
 	    tmpbuf[sizeof(tmpbuf) - 1] = '\0';
 	    len = strftime(tmpbuf, sizeof(tmpbuf), dst0, timeptr);
 
-#ifdef HAVE_SETLOCALE
-	    setlocale(LC_ALL, "");
-#endif
+	    /* Restore old locale. */
+	    sudoers_setlocale(oldlocale, NULL);
+
 	    if (len == 0 || tmpbuf[sizeof(tmpbuf) - 1] != '\0')
 		goto bad;		/* strftime() failed, buf too small? */
 

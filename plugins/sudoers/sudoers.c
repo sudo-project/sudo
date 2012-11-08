@@ -217,7 +217,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     char *iolog_path = NULL;
     mode_t cmnd_umask = 0777;
     struct sudo_nss *nss;
-    int cmnd_status = -1, validated;
+    int cmnd_status = -1, oldlocale, validated;
     volatile int rval = true;
     sigaction_t sa, saved_sa_int, saved_sa_quit, saved_sa_tstp;
     debug_decl(sudoers_policy_main, SUDO_DEBUG_PLUGIN)
@@ -290,17 +290,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Find command in path */
     cmnd_status = set_cmnd();
 
-#ifdef HAVE_SETLOCALE
-    if (!setlocale(LC_ALL, def_sudoers_locale)) {
-	warningx(_("unable to set locale to \"%s\", using \"C\""),
-	    def_sudoers_locale);
-	setlocale(LC_ALL, "C");
-    }
-#endif
-
     /*
-     * Check sudoers sources.
+     * Check sudoers sources, using the locale specified in sudoers.
      */
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     validated = FLAG_NO_USER | FLAG_NO_HOST;
     tq_foreach_fwd(snl, nss) {
 	validated = nss->lookup(nss, validated, pwflag);
@@ -316,12 +309,11 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	}
     }
 
+    /* Restore user's locale. */
+    sudoers_setlocale(oldlocale, NULL);
+
     if (safe_cmnd == NULL)
 	safe_cmnd = estrdup(user_cmnd);
-
-#ifdef HAVE_SETLOCALE
-    setlocale(LC_ALL, "");
-#endif
 
     /* If only a group was specified, set runas_pw based on invoking user. */
     if (runas_pw == NULL)
