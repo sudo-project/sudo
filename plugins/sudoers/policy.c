@@ -528,7 +528,7 @@ sudoers_policy_close(int exit_status, int error_code)
 static int
 sudoers_policy_init_session(struct passwd *pwd, char **user_env[])
 {
-    debug_decl(sudoers_policy_init, SUDO_DEBUG_PLUGIN)
+    debug_decl(sudoers_policy_init_session, SUDO_DEBUG_PLUGIN)
 
     /* user_env is only specified for API version 1.2 and higher. */
     if (sudo_version < SUDO_API_MKVERSION(1, 2))
