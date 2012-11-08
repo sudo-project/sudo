@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2005, 2010-2012 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -64,6 +64,22 @@ errorx2(int eval, const char *fmt, ...)
 }
 
 void
+verror2(int eval, const char *fmt, va_list ap)
+{
+    _warning(1, fmt, ap);
+    sudoers_plugin_cleanup(0);
+    siglongjmp(error_jmp, eval);
+}
+
+void
+verrorx2(int eval, const char *fmt, va_list ap)
+{
+    _warning(0, fmt, ap);
+    sudoers_plugin_cleanup(0);
+    siglongjmp(error_jmp, eval);
+}
+
+void
 warning2(const char *fmt, ...)
 {
     va_list ap;
@@ -80,6 +96,18 @@ warningx2(const char *fmt, ...)
     va_start(ap, fmt);
     _warning(0, fmt, ap);
     va_end(ap);
+}
+
+void
+vwarning2(const char *fmt, va_list ap)
+{
+    _warning(1, fmt, ap);
+}
+
+void
+vwarningx2(const char *fmt, va_list ap)
+{
+    _warning(0, fmt, ap);
 }
 
 static void

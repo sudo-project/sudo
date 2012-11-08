@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004, 2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004, 2010-2012 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -35,6 +35,10 @@
 #  define warning(...) warning2(__VA_ARGS__)
 #  define warningx(...) warningx2(__VA_ARGS__)
 # endif /* __GNUC__ == 2 */
+# define verror(rval, fmt, ap) error2((rval), (fmt), (ap))
+# define verrorx(rval, fmt, ap) errorx2((rval), (fmt), (ap))
+# define vwarning(fmt, ap) warning2((fmt), (ap))
+# define vwarningx(fmt, ap) warningx2((fmt), (ap))
 #else /* SUDO_ERROR_WRAP */
 # if defined(__GNUC__) && __GNUC__ == 2
 #  define error(rval, fmt...) do {					       \
@@ -83,11 +87,37 @@
     warningx2(__VA_ARGS__);						       \
 } while (0)
 # endif /* __GNUC__ == 2 */
+# define verror(rval, fmt, ap) do {						       \
+    sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
+	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys, \
+	(fmt), (ap));							       \
+    verror2((rval), (fmt), (ap));					       \
+} while (0)
+# define verrorx(rval, fmt, ap) do {					       \
+    sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
+	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), (ap));    \
+    verrorx2((rval), (fmt), (ap));					       \
+} while (0)
+# define vwarning(fmt, ap) do {						       \
+    sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
+	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys,  \
+	(fmt), (ap));							       \
+    vwarning2((fmt), (ap));						       \
+} while (0)
+# define vwarningx(fmt, ap) do {						       \
+    sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
+	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), (ap));     \
+    vwarningx2((fmt), (ap));						       \
+} while (0)
 #endif /* SUDO_ERROR_WRAP */
 
-void	error2(int, const char *, ...)  __printflike(2, 3) __attribute__((__noreturn__));
-void	errorx2(int, const char *, ...)  __printflike(2, 3) __attribute__((__noreturn__));
+void	error2(int, const char *, ...) __printflike(2, 3) __attribute__((__noreturn__));
+void	errorx2(int, const char *, ...) __printflike(2, 3) __attribute__((__noreturn__));
+void	verror2(int, const char *, va_list ap) __attribute__((__noreturn__));
+void	verrorx2(int, const char *, va_list ap) __attribute__((__noreturn__));
 void	warning2(const char *, ...) __printflike(1, 2);
 void	warningx2(const char *, ...) __printflike(1, 2);
+void	vwarning2(const char *, va_list ap);
+void	vwarningx2(const char *, va_list ap);
 
 #endif /* _SUDO_ERROR_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2012 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -422,11 +422,10 @@ sudo_debug_write(const char *str, int len, int errno_val)
 }
 
 void
-sudo_debug_printf2(const char *func, const char *file, int lineno, int level,
-    const char *fmt, ...)
+sudo_debug_vprintf2(const char *func, const char *file, int lineno, int level,
+    const char *fmt, va_list ap)
 {
     int buflen, pri, subsys, saved_errno = errno;
-    va_list ap;
     char *buf;
 
     if (!sudo_debug_mode)
@@ -438,7 +437,6 @@ sudo_debug_printf2(const char *func, const char *file, int lineno, int level,
 
     /* Make sure we want debug info at this level. */
     if (subsys < NUM_SUBSYSTEMS && sudo_debug_settings[subsys] >= pri) {
-	va_start(ap, fmt);
 	buflen = vasprintf(&buf, fmt, ap);
 	va_end(ap);
 	if (buflen != -1) {
@@ -452,6 +450,17 @@ sudo_debug_printf2(const char *func, const char *file, int lineno, int level,
     }
 
     errno = saved_errno;
+}
+
+void
+sudo_debug_printf2(const char *func, const char *file, int lineno, int level,
+    const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    sudo_debug_vprintf2(func, file, lineno, level, fmt, ap);
+    va_end(ap);
 }
 
 void
