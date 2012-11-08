@@ -452,7 +452,7 @@ init_defaults(void)
 
     /* Now do the strings */
     def_mailto = estrdup(MAILTO);
-    def_mailsub = estrdup(_(MAILSUBJECT));
+    def_mailsub = estrdup(N_(MAILSUBJECT));
     def_badpass_message = estrdup(_(INCORRECT_PASSWORD));
     def_timestampdir = estrdup(_PATH_SUDO_TIMEDIR);
     def_passprompt = estrdup(_(PASSPROMPT));

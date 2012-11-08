@@ -681,7 +681,7 @@ send_mail(const char *fmt, ...)
     /* Pipes are all setup, send message. */
     (void) fprintf(mail, "To: %s\nFrom: %s\nAuto-Submitted: %s\nSubject: ",
 	def_mailto, def_mailfrom ? def_mailfrom : user_name, "auto-generated");
-    for (p = def_mailsub; *p; p++) {
+    for (p = _(def_mailsub); *p; p++) {
 	/* Expand escapes in the subject */
 	if (*p == '%' && *(p+1) != '%') {
 	    switch (*(++p)) {
