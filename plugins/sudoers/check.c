@@ -61,7 +61,6 @@ int
 check_user(int validated, int mode)
 {
     struct passwd *auth_pw;
-    char *prompt;
     int status, rval = true;
     debug_decl(check_user, SUDO_DEBUG_AUTH)
 
@@ -104,6 +103,7 @@ check_user(int validated, int mode)
     status = timestamp_status();
 
     if (status != TS_CURRENT || ISSET(validated, FLAG_CHECK_USER)) {
+	char *prompt;
 	bool lectured;
 
 	/* Bail out if we are non-interactive and a password is required */
@@ -124,6 +124,7 @@ check_user(int validated, int mode)
 	rval = verify_user(auth_pw, prompt, validated);
 	if (rval == true && lectured)
 	    set_lectured();
+	efree(prompt);
     }
     /* Only update timestamp if user was validated. */
     if (rval == true && ISSET(validated, VALIDATE_OK) &&

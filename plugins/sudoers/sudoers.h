@@ -234,7 +234,7 @@ int find_path(char *, char **, struct stat *, char *, int);
 /* check.c */
 int check_user(int validate, int mode);
 bool user_is_exempt(void);
-char *expand_prompt(char *old_prompt, char *user, char *host);
+char *expand_prompt(const char *old_prompt, const char *user, const char *host);
 
 /* timestamp.c */
 void remove_timestamp(bool);

@@ -48,11 +48,12 @@
  * allocated result.  Returns the same string if there are no escapes.
  */
 char *
-expand_prompt(char *old_prompt, char *user, char *host)
+expand_prompt(const char *old_prompt, const char *user, const char *host)
 {
     size_t len, n;
     int subst;
-    char *p, *np, *new_prompt, *endp;
+    const char *p;
+    char *np, *new_prompt, *endp;
     debug_decl(expand_prompt, SUDO_DEBUG_AUTH)
 
     /* How much space do we need to malloc for the prompt? */
@@ -162,7 +163,7 @@ expand_prompt(char *old_prompt, char *user, char *host)
 	}
 	*np = '\0';
     } else
-	new_prompt = old_prompt;
+	new_prompt = estrdup(old_prompt);
 
     debug_return_str(new_prompt);
 
