@@ -738,14 +738,16 @@ Linux:
     fixed.  There is a workaround on the sudo ftp site, linux_nfs.patch,
     if you need to NFS-mount sudoers on older Linux kernels.
 
-Solaris 2.x:
+Solaris:
     You need to have a C compiler in order to build sudo.  Since
-    Solaris 2.x does not come with one by default this means that
-    you either need to install the Sun Studio compiler suite,
-    available for free from www.sun.com, or have a copy of the GNU
-    C compiler (gcc) which is distributed on the Solaris Companion
-    CD.  You can also get them from various places on the net,
-    including http://www.sunfreeware.com/
+    Solaris does not come with one by default this means that you
+    either need to either install the Solaris Studio compiler suite,
+    available for free from www.oracle.com, or have a copy of the
+    GNU C compiler (gcc) which is can be installed via the pkg
+    utility on Solaris 11 and higher and is distributed on the
+    Solaris Companion CD for older Solaris releases.  You can also
+    get them from various places on the net, including
+    http://www.sunfreeware.com/
     NOTE: sudo will *not* build with the sun C compiler in BSD
           compatibility mode (/usr/ucb/cc).  Sudo is designed to
           compile with the standard C compiler (or gcc) and will
@@ -760,6 +762,9 @@ Solaris 2.x:
 	  If you have having problems with sudo logging you should
 	  make sure you have the latest syslogd patch installed.
 	  This is a problem for Solaris 2.4 and 2.5 at least.
+    Sudo NLS support may not work properly with Solaris 11 due to
+    how the runpath is specified in the locale-specific shared
+    objects.  See the TROUBLESHOOTING file for a workaround.
 
 Mac OS X:
     The pseudo-tty support in the Mac OS X kernel has bugs related
