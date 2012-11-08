@@ -349,7 +349,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (def_requiretty) {
 	int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY);
 	if (fd == -1) {
-	    audit_failure(NewArgv, _("no tty"));
+	    audit_failure(NewArgv, N_("no tty"));
 	    warningx(_("sorry, you must have a tty to run sudo"));
 	    goto bad;
 	} else
@@ -400,11 +400,11 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Finally tell the user if the command did not exist. */
     if (cmnd_status == NOT_FOUND_DOT) {
-	audit_failure(NewArgv, _("command in current directory"));
+	audit_failure(NewArgv, N_("command in current directory"));
 	warningx(_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
 	goto bad;
     } else if (cmnd_status == NOT_FOUND) {
-	audit_failure(NewArgv, _("%s: command not found"), user_cmnd);
+	audit_failure(NewArgv, N_("%s: command not found"), user_cmnd);
 	warningx(_("%s: command not found"), user_cmnd);
 	goto bad;
     }
@@ -1013,7 +1013,7 @@ find_editor(int nfiles, char **files, char ***argv_out)
 	} while (ep != NULL && editor_path == NULL);
     }
     if (!editor_path) {
-	audit_failure(NewArgv, _("%s: command not found"), editor);
+	audit_failure(NewArgv, N_("%s: command not found"), editor);
 	warningx(_("%s: command not found"), editor);
     }
     debug_return_str(editor_path);

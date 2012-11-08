@@ -117,7 +117,7 @@ sudo_auth_init(struct passwd *pw)
     /* Make sure we haven't mixed standalone and shared auth methods. */
     standalone = IS_STANDALONE(&auth_switch[0]);
     if (standalone && auth_switch[1].name != NULL) {
-	audit_failure(NewArgv, "invalid authentication methods");
+	audit_failure(NewArgv, N_("invalid authentication methods"));
     	log_fatal(0, _("Invalid authentication methods compiled into sudo!  "
 	    "You may mix standalone and non-standalone authentication."));
 	debug_return_int(-1);
@@ -201,7 +201,7 @@ verify_user(struct passwd *pw, char *prompt, int validated)
     /* Make sure we have at least one auth method. */
     /* XXX - check FLAG_DISABLED too */
     if (auth_switch[0].name == NULL) {
-	audit_failure(NewArgv, "no authentication methods");
+	audit_failure(NewArgv, N_("no authentication methods"));
     	log_error(0,
 	    _("There are no authentication methods compiled into sudo!  "
 	    "If you want to turn off authentication, use the "

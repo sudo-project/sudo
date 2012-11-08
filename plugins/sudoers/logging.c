@@ -240,9 +240,9 @@ log_denial(int status, bool inform_user)
 
     /* Handle auditing first. */
     if (ISSET(status, FLAG_NO_USER | FLAG_NO_HOST))
-	audit_failure(NewArgv, _("No user or host"));
+	audit_failure(NewArgv, N_("No user or host"));
     else
-	audit_failure(NewArgv, _("validation failure"));
+	audit_failure(NewArgv, N_("validation failure"));
 
     /* Set error message. */
     if (ISSET(status, FLAG_NO_USER))
@@ -334,7 +334,7 @@ log_auth_failure(int status, int tries)
     debug_decl(log_auth_failure, SUDO_DEBUG_LOGGING)
 
     /* Handle auditing first. */
-    audit_failure(NewArgv, _("authentication failure"));
+    audit_failure(NewArgv, N_("authentication failure"));
 
     /*
      * Do we need to send mail?
