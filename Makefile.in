@@ -65,6 +65,7 @@ ECHO_C = @ECHO_C@
 # Message catalog support
 NLS = @SUDO_NLS@
 POTFILES = src/po/sudo.pot plugins/sudoers/po/sudoers.pot
+LOCALEDIR_SUFFIX = @LOCALEDIR_SUFFIX@
 MSGFMT = msgfmt
 MSGMERGE = msgmerge
 XGETTEXT = xgettext
@@ -237,6 +238,11 @@ install-nls:
 		    test -s $$podir/$$lang.mo || continue; \
 		    echo $(ECHO_N) " $$lang$(ECHO_C)"; \
 		    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES; \
+		    if test -n "$(LOCALEDIR_SUFFIX)"; then \
+			if test ! -d $(DESTDIR)$(localedir)/$$lang$(LOCALEDIR_SUFFIX); then \
+			    ln -s $$lang $(DESTDIR)$(localedir)/$$lang$(LOCALEDIR_SUFFIX); \
+			fi; \
+		    fi; \
 		    $(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 $$podir/$$lang.mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$$domain.mo; \
 		done; \
 		echo ""; \

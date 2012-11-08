@@ -699,6 +699,7 @@ PIE_CFLAGS
 PIE_LDFLAGS
 CROSS_COMPILING
 COMPAT_TEST_PROGS
+LOCALEDIR_SUFFIX
 SUDO_NLS
 LIBINTL
 LT_STATIC
@@ -2918,6 +2919,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -2984,6 +2986,7 @@ AUTH_EXCL=
 AUTH_EXCL_DEF=
 AUTH_DEF=passwd
 SUDO_NLS=disabled
+LOCALEDIR_SUFFIX=
 LT_LDEXPORTS="-export-symbols \$(shlib_exp)"
 LT_LDDEP="\$(shlib_exp)"
 NO_VIZ=
@@ -18099,6 +18102,10 @@ done
 	$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
 
 	SUDO_NLS=enabled
+	# For Solaris we need links from lang to lang.UTF-8 in localedir
+	case "$host" in
+	    *-*-solaris2*) LOCALEDIR_SUFFIX=".UTF-8";;
+	esac
     elif test "$sudo_cv_gettext_lintl" = "yes"; then
 	$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
 

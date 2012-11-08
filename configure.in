@@ -74,6 +74,7 @@ AC_SUBST([LIBDL])
 AC_SUBST([LT_STATIC])
 AC_SUBST([LIBINTL])
 AC_SUBST([SUDO_NLS])
+AC_SUBST([LOCALEDIR_SUFFIX])
 AC_SUBST([COMPAT_TEST_PROGS])
 AC_SUBST([CROSS_COMPILING])
 AC_SUBST([PIE_LDFLAGS])
@@ -188,6 +189,7 @@ AUTH_EXCL=
 AUTH_EXCL_DEF=
 AUTH_DEF=passwd
 SUDO_NLS=disabled
+LOCALEDIR_SUFFIX=
 LT_LDEXPORTS="-export-symbols \$(shlib_exp)"
 LT_LDDEP="\$(shlib_exp)"
 NO_VIZ=
@@ -2502,6 +2504,10 @@ if test "$enable_nls" != "no"; then
     if test "$sudo_cv_gettext" = "yes"; then
 	AC_DEFINE(HAVE_LIBINTL_H)
 	SUDO_NLS=enabled
+	# For Solaris we need links from lang to lang.UTF-8 in localedir
+	case "$host" in
+	    *-*-solaris2*) LOCALEDIR_SUFFIX=".UTF-8";;
+	esac
     elif test "$sudo_cv_gettext_lintl" = "yes"; then
 	AC_DEFINE(HAVE_LIBINTL_H)
 	SUDO_NLS=enabled
