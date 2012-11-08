@@ -30,6 +30,12 @@
 #define SLOG_FILE		0x02
 #define SLOG_BOTH		0x03
 
+/*
+ * Values for sudoers_setlocale()
+ */
+#define SUDOERS_LOCALE_USER     0
+#define SUDOERS_LOCALE_SUDOERS  1
+
 /* Flags for log_error()/log_fatal() */
 #define MSG_ONLY		0x01
 #define USE_ERRNO		0x02
@@ -61,5 +67,6 @@ void log_failure(int status, int flags);
 void log_error(int flags, const char *fmt, ...) __printflike(2, 3);
 void log_fatal(int flags, const char *fmt, ...) __printflike(2, 3) __attribute__((__noreturn__));
 void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
+int sudoers_setlocale(int newlocale, int *prevlocale);
 
 #endif /* _LOGGING_H */

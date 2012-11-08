@@ -1113,7 +1113,21 @@ sudoers_hook_getenv(const char *name, char **value, void *closure)
 	return SUDO_HOOK_RET_NEXT;
 
     in_progress = true;
+
+    /* Hack to make GNU gettext() find the sudoers locale when needed. */
+    if (*name == 'L' && sudoers_getlocale() == SUDOERS_LOCALE_SUDOERS) {
+	if (strcmp(name, "LANGUAGE") == 0 || strcmp(name, "LANG") == 0) {
+	    *value = NULL;
+	    goto done;
+	}
+	if (strcmp(name, "LC_ALL") == 0 || strcmp(name, "LC_MESSAGES") == 0) {
+	    *value = def_sudoers_locale;
+	    goto done;
+	}
+    }
+
     *value = sudo_getenv_nodebug(name);
+done:
     in_progress = false;
     return SUDO_HOOK_RET_STOP;
 }

@@ -563,6 +563,10 @@ init_vars(char * const envp[])
     (void) tzset();		/* set the timezone if applicable */
 #endif /* HAVE_TZSET */
 
+#ifdef HAVE_SETLOCALE
+    user_locale = estrdup(setlocale(LC_ALL, NULL));
+#endif
+
     for (ep = envp; *ep; ep++) {
 	/* XXX - don't fill in if empty string */
 	switch (**ep) {
