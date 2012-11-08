@@ -816,7 +816,7 @@ parse_logfile(char *logfile)
 
     fp = fopen(logfile, "r");
     if (fp == NULL) {
-	warning(_("unable to open %s"), logfile);
+	warning(N_("unable to open %s"), logfile);
 	goto bad;
     }
 

@@ -101,7 +101,7 @@ sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
      */
     if (rfc1938challenge(&rfc1938, pw->pw_name, challenge, sizeof(challenge))) {
 	if (IS_ONEANDONLY(auth)) {
-	    warningx(_("you do not exist in the %s database"), auth->name);
+	    warningx(N_("you do not exist in the %s database"), auth->name);
 	    debug_return_int(AUTH_FATAL);
 	} else {
 	    debug_return_int(AUTH_FAILURE);

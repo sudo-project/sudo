@@ -109,8 +109,9 @@ sudoerserror(const char *s)
     if (sudoers_warnings && s != NULL) {
 	LEXTRACE("<*> ");
 #ifndef TRACELEXER
+	/* XXX 's' will be in sudoers locale, not user's */
 	if (trace_print == NULL || trace_print == sudoers_trace_print)
-	    warningx(_(">>> %s: %s near line %d <<<"), sudoers, s, sudolineno);
+	    warningx(N_(">>> %s: %s near line %d <<<"), sudoers, s, sudolineno);
 #endif
     }
     parse_error = true;

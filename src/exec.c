@@ -382,7 +382,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 		/* One of the ttys must have gone away. */
 		goto do_tty_io;
 	    }
-	    warning(_("select failed"));
+	    warning(N_("select failed"));
 	    sudo_debug_printf(SUDO_DEBUG_ERROR,
 		"select failure, terminating child");
 	    schedule_signal(SIGKILL);
@@ -484,7 +484,7 @@ do_tty_io:
     if (ISSET(details->flags, CD_RBAC_ENABLED)) {
 	/* This is probably not needed in log_io mode. */
 	if (selinux_restore_tty() != 0)
-	    warningx(_("unable to restore tty label"));
+	    warningx(N_("unable to restore tty label"));
     }
 #endif
 

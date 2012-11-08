@@ -1069,7 +1069,7 @@ exec_monitor(struct command_details *details, int backchannel)
 	error(1, _("unable to create pipe"));
     cmnd_pid = sudo_debug_fork();
     if (cmnd_pid == -1) {
-	warning(_("unable to fork"));
+	warning(N_("unable to fork"));
 	goto bad;
     }
     if (cmnd_pid == 0) {
@@ -1145,7 +1145,7 @@ exec_monitor(struct command_details *details, int backchannel)
 	    if (n == -1) {
 		if (errno == EINTR || errno == EAGAIN)
 		    continue;
-		warning(_("error reading from signal pipe"));
+		warning(N_("error reading from signal pipe"));
 		goto done;
 	    }
 	    /*
@@ -1166,7 +1166,7 @@ exec_monitor(struct command_details *details, int backchannel)
 	    if (n == -1) {
 		if (errno == EINTR)
 		    continue;
-		warning(_("error reading from pipe"));
+		warning(N_("error reading from pipe"));
 		goto done;
 	    }
 	    /* Got errno or EOF, either way we are done with errpipe. */
@@ -1182,11 +1182,11 @@ exec_monitor(struct command_details *details, int backchannel)
 	    if (n == -1) {
 		if (errno == EINTR)
 		    continue;
-		warning(_("error reading from socketpair"));
+		warning(N_("error reading from socketpair"));
 		goto done;
 	    }
 	    if (cstmp.type != CMD_SIGNO) {
-		warningx(_("unexpected reply type on backchannel: %d"),
+		warningx(N_("unexpected reply type on backchannel: %d"),
 		    cstmp.type);
 		continue;
 	    }
@@ -1274,7 +1274,7 @@ flush_output(void)
 		break; /* all I/O flushed */
 	    if (errno == EINTR || errno == ENOMEM)
 		continue;
-	    warning(_("select failed"));
+	    warning(N_("select failed"));
 	}
 	if (perform_io(fdsr, fdsw, NULL) != 0 || nready == -1)
 	    break;

@@ -494,7 +494,7 @@ sudoers_policy_close(int exit_status, int error_code)
 
     /* We do not currently log the exit status. */
     if (error_code)
-	warningx(_("unable to execute %s: %s"), safe_cmnd, strerror(error_code));
+	warningx(N_("unable to execute %s: %s"), safe_cmnd, strerror(error_code));
 
     /* Close the session we opened in sudoers_policy_init_session(). */
     if (ISSET(sudo_mode, MODE_RUN|MODE_EDIT))
@@ -601,7 +601,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
     if (list_user) {
 	list_pw = sudo_getpwnam(list_user);
 	if (list_pw == NULL) {
-	    warningx(_("unknown user: %s"), list_user);
+	    warningx(N_("unknown user: %s"), list_user);
 	    debug_return_bool(-1);
 	}
     }

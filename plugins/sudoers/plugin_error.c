@@ -23,10 +23,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <setjmp.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 
 #include "missing.h"
 #include "alloc.h"
 #include "error.h"
+#include "logging.h"
 #include "sudo_plugin.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudoers"
@@ -116,9 +122,12 @@ _warning(int use_errno, const char *fmt, va_list ap)
     struct sudo_conv_message msg[6];
     struct sudo_conv_reply repl[6];
     char *str;
-    int nmsgs = 4;
+    int oldlocale, nmsgs = 4;
 
-    evasprintf(&str, fmt, ap);
+    /* Warnings are displayed in the user's locale. */
+    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
+
+    evasprintf(&str, _(fmt), ap);
 
     /* Call conversation function */
     memset(&msg, 0, sizeof(msg));
@@ -140,4 +149,6 @@ _warning(int use_errno, const char *fmt, va_list ap)
     memset(&repl, 0, sizeof(repl));
     sudo_conv(nmsgs, msg, repl);
     efree(str);
+
+    sudoers_setlocale(oldlocale, NULL);
 }

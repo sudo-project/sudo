@@ -90,7 +90,7 @@ linux_audit_command(char *argv[], int result)
     /* Log command, ignoring ECONNREFUSED on error. */
     rc = audit_log_user_command(au_fd, AUDIT_USER_CMD, command, NULL, result);
     if (rc <= 0 && errno != ECONNREFUSED)
-	warning(_("unable to send audit message"));
+	warning(N_("unable to send audit message"));
 
     efree(command);
 

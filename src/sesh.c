@@ -91,7 +91,7 @@ main(int argc, char *argv[], char *envp[])
 	*cp = '-';
     }
     sudo_execve(cmnd, argv, envp, noexec);
-    warning(_("unable to execute %s"), argv[0]);
+    warning(N_("unable to execute %s"), argv[0]);
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, EXIT_FAILURE);                
     _exit(EXIT_FAILURE);
 }
