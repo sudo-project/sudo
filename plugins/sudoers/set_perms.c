@@ -1539,7 +1539,7 @@ runas_setgroups(void)
     aix_restoreauthdb();
 #endif
     if (sudo_setgroups(grlist->ngids, grlist->gids) < 0)
-	log_fatal(USE_ERRNO|MSG_ONLY, _("unable to set runas group vector"));
+	log_fatal(USE_ERRNO|MSG_ONLY, N_("unable to set runas group vector"));
     debug_return_ptr(grlist);
 }
 #endif /* HAVE_SETRESUID || HAVE_SETREUID || HAVE_SETEUID */

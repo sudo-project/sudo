@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996, 1998-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1994-1996, 1998-2012 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -60,6 +60,13 @@
 #include <setjmp.h>
 
 #include "sudoers.h"
+
+#ifndef va_copy
+# define va_copy(d, s) memcpy(&(d), &(s), sizeof(d));
+#endif
+
+/* Special message for log_error() so we know to use ngettext() */
+#define INCORRECT_PASSWORD_ATTEMPT	((char *)0x01)
 
 static void do_syslog(int, char *);
 static void do_logfile(char *);
@@ -235,14 +242,19 @@ do_logfile(char *msg)
 void
 log_denial(int status, bool inform_user)
 {
-    char *logline, *message;
+    const char *message;
+    char *logline;
+    int oldlocale;
     debug_decl(log_denial, SUDO_DEBUG_LOGGING)
 
-    /* Handle auditing first. */
+    /* Handle auditing first (audit_failure() handles the locale itself). */
     if (ISSET(status, FLAG_NO_USER | FLAG_NO_HOST))
 	audit_failure(NewArgv, N_("No user or host"));
     else
 	audit_failure(NewArgv, N_("validation failure"));
+
+    /* Log and mail messages should be in the sudoers locale. */
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
     /* Set error message. */
     if (ISSET(status, FLAG_NO_USER))
@@ -257,8 +269,23 @@ log_denial(int status, bool inform_user)
     if (should_mail(status))
 	send_mail("%s", logline);	/* send mail based on status */
 
-    /* Inform the user if they failed to authenticate.  */
+    /*
+     * Log via syslog and/or a file.
+     */
+    if (def_syslog)
+	do_syslog(def_syslog_badpri, logline);
+    if (def_logfile)
+	do_logfile(logline);
+
+    efree(logline);
+
+    /* Restore locale. */
+    sudoers_setlocale(oldlocale, NULL);
+
+    /* Inform the user if they failed to authenticate (in their locale).  */
     if (inform_user) {
+	sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
+
 	if (ISSET(status, FLAG_NO_USER)) {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s is not in the sudoers "
 		"file.  This incident will be reported.\n"), user_name);
@@ -278,17 +305,8 @@ log_denial(int status, bool inform_user)
 		runas_pw->pw_name : user_name, runas_gr ? ":" : "",
 		runas_gr ? runas_gr->gr_name : "", user_host);
 	}
+	sudoers_setlocale(oldlocale, NULL);
     }
-
-    /*
-     * Log via syslog and/or a file.
-     */
-    if (def_syslog)
-	do_syslog(def_syslog_badpri, logline);
-    if (def_logfile)
-	do_logfile(logline);
-
-    efree(logline);
     debug_return;
 }
 
@@ -357,12 +375,10 @@ log_auth_failure(int status, int tries)
     /*
      * If sudoers denied the command we'll log that separately.
      */
-    if (ISSET(status, FLAG_BAD_PASSWORD)) {
-	log_error(flags, ngettext("%d incorrect password attempt",
-	    "%d incorrect password attempts", tries), tries);
-    } else if (ISSET(status, FLAG_NON_INTERACTIVE)) {
-	log_error(flags, _("a password is required"));
-    }
+    if (ISSET(status, FLAG_BAD_PASSWORD))
+	log_error(flags, INCORRECT_PASSWORD_ATTEMPT, tries);
+    else if (ISSET(status, FLAG_NON_INTERACTIVE))
+	log_error(flags, N_("a password is required"));
 
     debug_return;
 }
@@ -399,32 +415,36 @@ log_allowed(int status)
 static void
 vlog_error(int flags, const char *fmt, va_list ap)
 {
-    int serrno = errno;
+    int oldlocale, serrno = errno;
     char *logline, *message;
+    va_list ap2;
     debug_decl(vlog_error, SUDO_DEBUG_LOGGING)
-
-    /* Expand printf-style format + args. */
-    evasprintf(&message, fmt, ap);
 
     /* Become root if we are not already to avoid user interference */
     set_perms(PERM_ROOT|PERM_NOEXIT);
 
-    if (ISSET(flags, MSG_ONLY))
-	logline = message;
-    else
-	logline = new_logline(message, ISSET(flags, USE_ERRNO) ? serrno : 0);
+    /* Need extra copy of ap for warning() below. */
+    if (!ISSET(flags, NO_STDERR))
+	va_copy(ap2, ap);
 
-    /*
-     * Tell the user.
-     */
-    if (!ISSET(flags, NO_STDERR)) {
-	if (ISSET(flags, USE_ERRNO))
-	    warning("%s", message);
-	else
-	    warningx("%s", message);
+    /* Log messages should be in the sudoers locale. */
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
+
+    /* Expand printf-style format + args (with a special case). */
+    if (fmt == INCORRECT_PASSWORD_ATTEMPT) {
+	int tries = va_arg(ap, int);
+	easprintf(&message, ngettext("%d incorrect password attempt",
+	    "%d incorrect password attempts", tries), tries);
+    } else {
+	evasprintf(&message, _(fmt), ap);
     }
-    if (logline != message)
+
+    if (ISSET(flags, MSG_ONLY)) {
+	logline = message;
+    } else {
+	logline = new_logline(message, ISSET(flags, USE_ERRNO) ? serrno : 0);
         efree(message);
+    }
 
     /*
      * Send a copy of the error via mail.
@@ -444,7 +464,26 @@ vlog_error(int flags, const char *fmt, va_list ap)
 
     efree(logline);
 
+    sudoers_setlocale(oldlocale, NULL);
+
     restore_perms();
+
+    /*
+     * Tell the user (in their locale).
+     */
+    if (!ISSET(flags, NO_STDERR)) {
+	if (fmt == INCORRECT_PASSWORD_ATTEMPT) {
+	    int tries = va_arg(ap2, int);
+	    warningx(ngettext("%d incorrect password attempt",
+		"%d incorrect password attempts", tries), tries);
+	} else {
+	    if (ISSET(flags, USE_ERRNO))
+		vwarning(fmt, ap2);
+	    else
+		vwarningx(fmt, ap2);
+	}
+	va_end(ap2);
+    }
 
     debug_return;
 }

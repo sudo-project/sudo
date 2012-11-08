@@ -208,13 +208,13 @@ get_authpw(void)
 
     if (def_rootpw) {
 	if ((pw = sudo_getpwuid(ROOT_UID)) == NULL)
-	    log_fatal(0, _("unknown uid: %u"), ROOT_UID);
+	    log_fatal(0, N_("unknown uid: %u"), ROOT_UID);
     } else if (def_runaspw) {
 	if ((pw = sudo_getpwnam(def_runas_default)) == NULL)
-	    log_fatal(0, _("unknown user: %s"), def_runas_default);
+	    log_fatal(0, N_("unknown user: %s"), def_runas_default);
     } else if (def_targetpw) {
 	if (runas_pw->pw_name == NULL)
-	    log_fatal(NO_MAIL|MSG_ONLY, _("unknown uid: %u"),
+	    log_fatal(NO_MAIL|MSG_ONLY, N_("unknown uid: %u"),
 		(unsigned int) runas_pw->pw_uid);
 	sudo_pw_addref(runas_pw);
 	pw = runas_pw;

@@ -120,10 +120,10 @@ sudo_file_parse(struct sudo_nss *nss)
     sudoersin = nss->handle;
     if (sudoersparse() != 0 || parse_error) {
 	if (errorlineno != -1) {
-	    log_error(0, _("parse error in %s near line %d"),
+	    log_error(0, N_("parse error in %s near line %d"),
 		errorfile, errorlineno);
 	} else {
-	    log_error(0, _("parse error in %s"), errorfile);
+	    log_error(0, N_("parse error in %s"), errorfile);
 	}
 	debug_return_int(-1);
     }

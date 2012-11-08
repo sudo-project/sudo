@@ -68,5 +68,6 @@ void log_error(int flags, const char *fmt, ...) __printflike(2, 3);
 void log_fatal(int flags, const char *fmt, ...) __printflike(2, 3) __attribute__((__noreturn__));
 void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
 int sudoers_setlocale(int newlocale, int *prevlocale);
+int sudoers_getlocale(void);
 
 #endif /* _LOGGING_H */

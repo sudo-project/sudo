@@ -1010,7 +1010,7 @@ validate_env_vars(char * const env_vars[])
     if (bad != NULL) {
 	bad[blen - 2] = '\0';		/* remove trailing ", " */
 	log_fatal(NO_MAIL,
-	    _("sorry, you are not allowed to set the following environment variables: %s"), bad);
+	    N_("sorry, you are not allowed to set the following environment variables: %s"), bad);
 	/* NOTREACHED */
 	efree(bad);
     }

@@ -43,6 +43,12 @@
 static int current_locale = SUDOERS_LOCALE_USER;
 
 int
+sudoers_getlocale(void)
+{
+    return current_locale;
+}
+
+int
 sudoers_setlocale(int newlocale, int *prevlocale)
 {
     char *res = NULL;
