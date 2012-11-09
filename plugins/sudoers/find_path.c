@@ -65,8 +65,10 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
     int len;			/* length parameter */
     debug_decl(find_path, SUDO_DEBUG_UTIL)
 
-    if (strlen(infile) >= PATH_MAX)
-	errorx(1, _("%s: %s"), infile, strerror(ENAMETOOLONG));
+    if (strlen(infile) >= PATH_MAX) {
+	errno = ENAMETOOLONG;
+	error(1, "%s", infile);
+    }
 
     /*
      * If we were given a fully qualified or relative path
@@ -104,8 +106,10 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
 	 * Resolve the path and exit the loop if found.
 	 */
 	len = snprintf(command, sizeof(command), "%s/%s", path, infile);
-	if (len <= 0 || len >= sizeof(command))
-	    errorx(1, _("%s: %s"), infile, strerror(ENAMETOOLONG));
+	if (len <= 0 || len >= sizeof(command)) {
+	    errno = ENAMETOOLONG;
+	    error(1, "%s", infile);
+	}
 	if ((found = sudo_goodpath(command, sbp)))
 	    break;
 
@@ -119,8 +123,10 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
      */
     if (!found && checkdot) {
 	len = snprintf(command, sizeof(command), "./%s", infile);
-	if (len <= 0 || len >= sizeof(command))
-	    errorx(1, _("%s: %s"), infile, strerror(ENAMETOOLONG));
+	if (len <= 0 || len >= sizeof(command)) {
+	    errno = ENAMETOOLONG;
+	    error(1, "%s", infile);
+	}
 	found = sudo_goodpath(command, sbp);
 	if (found && ignore_dot)
 	    debug_return_int(NOT_FOUND_DOT);

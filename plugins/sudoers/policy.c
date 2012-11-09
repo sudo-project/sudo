@@ -40,6 +40,7 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#include <errno.h>
 #include <grp.h>
 #include <pwd.h>
 #include <setjmp.h>
@@ -493,8 +494,10 @@ sudoers_policy_close(int exit_status, int error_code)
     }
 
     /* We do not currently log the exit status. */
-    if (error_code)
-	warningx(N_("unable to execute %s: %s"), safe_cmnd, strerror(error_code));
+    if (error_code) {
+	errno = error_code;
+	warning(N_("unable to execute %s"), safe_cmnd);
+    }
 
     /* Close the session we opened in sudoers_policy_init_session(). */
     if (ISSET(sudo_mode, MODE_RUN|MODE_EDIT))

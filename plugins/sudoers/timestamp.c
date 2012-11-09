@@ -400,8 +400,7 @@ remove_timestamp(bool remove)
 		status = rmdir(timestampdir);
 	    if (status == -1 && errno != ENOENT) {
 		log_error(0,
-		    N_("unable to remove %s (%s), will reset to the epoch"),
-		    path, strerror(errno));
+		    N_("unable to remove %s, will reset to the epoch"), path);
 		remove = false;
 	    }
 	}

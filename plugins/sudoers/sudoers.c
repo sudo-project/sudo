@@ -685,8 +685,10 @@ set_cmnd(void)
 	    }
 	}
     }
-    if (strlen(user_cmnd) >= PATH_MAX)
-	errorx(1, _("%s: %s"), user_cmnd, strerror(ENAMETOOLONG));
+    if (strlen(user_cmnd) >= PATH_MAX) {
+	errno = ENAMETOOLONG;
+	error(1, "%s", user_cmnd);
+    }
 
     if ((user_base = strrchr(user_cmnd, '/')) != NULL)
 	user_base++;

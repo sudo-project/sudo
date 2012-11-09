@@ -88,9 +88,9 @@ group_plugin_load(char *plugin_info)
 	    (*plugin_info != '/') ? _PATH_SUDO_PLUGIN_DIR : "", plugin_info);
     }
     if (len <= 0 || len >= sizeof(path)) {
-	warningx(N_("%s%s: %s"),
-	    (*plugin_info != '/') ? _PATH_SUDO_PLUGIN_DIR : "", plugin_info,
-	    strerror(ENAMETOOLONG));
+	errno = ENAMETOOLONG;
+	warning("%s%s",
+	    (*plugin_info != '/') ? _PATH_SUDO_PLUGIN_DIR : "", plugin_info);
 	goto done;
     }
 

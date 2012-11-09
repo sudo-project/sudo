@@ -121,7 +121,8 @@ mkdir_parents(char *path)
 	    if (mkdir(path, S_IRWXU) != 0)
 		log_fatal(USE_ERRNO, N_("unable to mkdir %s"), path);
 	} else if (!S_ISDIR(sb.st_mode)) {
-	    log_fatal(0, N_("%s: %s"), path, strerror(ENOTDIR));
+	    errno = ENOTDIR;
+	    log_fatal(USE_ERRNO, "%s", path);
 	}
 	*slash = '/';
     }
