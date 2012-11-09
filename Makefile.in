@@ -178,11 +178,18 @@ update-pot:
 		echo "Updating $$pot"; \
 		domain=`basename $$pot .pot`; \
 		case "$$domain" in \
-		    sudo) cfiles="src/*c common/*c compat/*c";; \
-		    sudoers) cfiles="plugins/sudoers/*.c plugins/sudoers/auth/*.c";; \
+		    sudo) tmpfiles=; cfiles="src/*c common/*c compat/*c";; \
+		    sudoers) \
+			sed -n -e 's/^badpass_message="/gettext "/p' \
+			    -e 's/^passprompt="/gettext "/p' \
+			    -e 's/^mailsub="/gettext "/p' configure.in \
+			    > confstr.sh; \
+			tmpfiles=confstr.sh; \
+			cfiles="plugins/sudoers/*.c plugins/sudoers/auth/*.c";; \
 		    *) echo unknown domain $$domain; continue;; \
 		esac; \
-		$(XGETTEXT) $(XGETTEXT_OPTS) -d$$domain $$cfiles -o $$pot.tmp; \
+		$(XGETTEXT) $(XGETTEXT_OPTS) -d$$domain $$cfiles $$tmpfiles -o $$pot.tmp; \
+		test -n "$$tmpfiles" && rm -f $$tmpfiles; \
 		if diff -I'^.POT-Creation-Date' -I'^.Project-Id-Version' -I'^#' $$pot.tmp $$pot >/dev/null; then \
 		    rm -f $$pot.tmp; \
 		else \
