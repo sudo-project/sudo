@@ -387,7 +387,11 @@ void
 log_allowed(int status)
 {
     char *logline;
+    int oldlocale;
     debug_decl(log_allowed, SUDO_DEBUG_LOGGING)
+
+    /* Log and mail messages should be in the sudoers locale. */
+    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
     logline = new_logline(NULL, 0);
 
@@ -403,6 +407,9 @@ log_allowed(int status)
 	do_logfile(logline);
 
     efree(logline);
+
+    sudoers_setlocale(oldlocale, NULL);
+
     debug_return;
 }
 
