@@ -123,9 +123,6 @@ mysyslog(int pri, const char *fmt, ...)
     debug_return;
 }
 
-#define FMT_FIRST "%8s : %s"
-#define FMT_CONTD "%8s : (command continued) %s"
-
 /*
  * Log a message to syslog, pre-pending the username and splitting the
  * message into parts if it is longer than MAXSYSLOGLEN.
@@ -144,7 +141,7 @@ do_syslog(int pri, char *msg)
     /*
      * Log the full line, breaking into multiple syslog(3) calls if necessary
      */
-    fmt = _(FMT_FIRST);
+    fmt = _("%8s : %s");
     maxlen = MAXSYSLOGLEN - (strlen(fmt) - 5 + strlen(user_name));
     for (p = msg; *p != '\0'; ) {
 	len = strlen(p);
@@ -172,7 +169,7 @@ do_syslog(int pri, char *msg)
 	    mysyslog(pri, fmt, user_name, p);
 	    p += len;
 	}
-	fmt = _(FMT_CONTD);
+	fmt = _("%8s : (command continued) %s");
 	maxlen = MAXSYSLOGLEN - (strlen(fmt) - 5 + strlen(user_name));
     }
 
