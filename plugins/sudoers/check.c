@@ -176,7 +176,12 @@ display_lecture(int status)
 	fclose(fp);
     } else {
 	msg.msg_type = SUDO_CONV_ERROR_MSG;
-	msg.msg = _(DEFAULT_LECTURE);
+	msg.msg = _("\n"
+	    "We trust you have received the usual lecture from the local System\n"
+	    "Administrator. It usually boils down to these three things:\n\n"
+	    "    #1) Respect the privacy of others.\n"
+	    "    #2) Think before you type.\n"
+	    "    #3) With great power comes great responsibility.\n\n");
 	sudo_conv(1, &msg, &repl);
     }
     debug_return_int(true);
