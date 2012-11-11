@@ -86,12 +86,6 @@
 # endif /* __hpux */
 # include <prot.h>
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
-#if defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined (HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV)
-# include <sys/sysctl.h>
-#elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
-# include <sys/sysctl.h>
-# include <sys/user.h>
-#endif
 
 #include "sudo.h"
 #include "sudo_plugin.h"
@@ -160,17 +154,7 @@ main(int argc, char *argv[], char *envp[])
     sigset_t mask;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
-#if defined(SUDO_DEVEL) && defined(__OpenBSD__)
-    {
-	extern char *malloc_options;
-	malloc_options = "AFGJPR";
-    }
-#endif
-
-#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
-    if (argc > 0)
-	setprogname(argv[0]);
-#endif
+    os_init(argc, argv, envp);
 
 #ifdef HAVE_SETLOCALE
     setlocale(LC_ALL, "");
@@ -309,6 +293,16 @@ main(int argc, char *argv[], char *envp[])
     }
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);                
     exit(exitcode);
+}
+
+int
+os_init_common(int argc, char *argv[], char *envp[])
+{
+#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
+    if (argc > 0)
+	setprogname(argv[0]);
+#endif
+    return 0;
 }
 
 /*
@@ -838,70 +832,6 @@ disable_coredumps(void)
     debug_return;
 }
 
-#ifdef HAVE_PROJECT_H
-static void
-set_project(struct passwd *pw)
-{
-    struct project proj;
-    char buf[PROJECT_BUFSZ];
-    int errval;
-    debug_decl(set_project, SUDO_DEBUG_UTIL)
-
-    /*
-     * Collect the default project for the user and settaskid
-     */
-    setprojent();
-    if (getdefaultproj(pw->pw_name, &proj, buf, sizeof(buf)) != NULL) {
-	errval = setproject(proj.pj_name, pw->pw_name, TASK_NORMAL);
-	switch(errval) {
-	case 0:
-	    break;
-	case SETPROJ_ERR_TASK:
-	    switch (errno) {
-	    case EAGAIN:
-		warningx(N_("resource control limit has been reached"));
-		break;
-	    case ESRCH:
-		warningx(N_("user \"%s\" is not a member of project \"%s\""),
-		    pw->pw_name, proj.pj_name);
-		break;
-	    case EACCES:
-		warningx(N_("the invoking task is final"));
-		break;
-	    default:
-		warningx(N_("could not join project \"%s\""), proj.pj_name);
-	    }
-	case SETPROJ_ERR_POOL:
-	    switch (errno) {
-	    case EACCES:
-		warningx(N_("no resource pool accepting default bindings "
-		    "exists for project \"%s\""), proj.pj_name);
-		break;
-	    case ESRCH:
-		warningx(N_("specified resource pool does not exist for "
-		    "project \"%s\""), proj.pj_name);
-		break;
-	    default:
-		warningx(N_("could not bind to default resource pool for "
-		    "project \"%s\""), proj.pj_name);
-	    }
-	    break;
-	default:
-	    if (errval <= 0) {
-		warningx(N_("setproject failed for project \"%s\""), proj.pj_name);
-	    } else {
-		warningx(N_("warning, resource control assignment failed for "
-		    "project \"%s\""), proj.pj_name);
-	    }
-	}
-    } else {
-	warning("getdefaultproj");
-    }
-    endprojent();
-    debug_return;
-}
-#endif /* HAVE_PROJECT_H */
-
 /*
  * Setup the execution environment immediately prior to the call to execve()
  * Returns true on success and false on failure.
@@ -925,23 +855,23 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	set_project(details->pw);
 #endif
 #ifdef HAVE_PRIV_SET
-    if (details->privs != NULL) {
-	if (setppriv(PRIV_SET, PRIV_INHERITABLE, details->privs) != 0) {
-	    warning("unable to set privileges");
-	    goto done;
+	if (details->privs != NULL) {
+	    if (setppriv(PRIV_SET, PRIV_INHERITABLE, details->privs) != 0) {
+		warning("unable to set privileges");
+		goto done;
+	    }
 	}
-    }
-    if (details->limitprivs != NULL) {
-        if (setppriv(PRIV_SET, PRIV_LIMIT, details->limitprivs) != 0) {
-	    warning("unable to set limit privileges");
-	    goto done;
+	if (details->limitprivs != NULL) {
+	    if (setppriv(PRIV_SET, PRIV_LIMIT, details->limitprivs) != 0) {
+		warning("unable to set limit privileges");
+		goto done;
+	    }
+	} else if (details->privs != NULL) {
+	    if (setppriv(PRIV_SET, PRIV_LIMIT, details->privs) != 0) {
+		warning("unable to set limit privileges");
+		goto done;
+	    }
 	}
-    } else if (details->privs != NULL) {
-	if (setppriv(PRIV_SET, PRIV_LIMIT, details->privs) != 0) {
-	    warning("unable to set limit privileges");
-	    goto done;
-	}
-    }
 #endif /* HAVE_PRIV_SET */
 
 #ifdef HAVE_GETUSERATTR

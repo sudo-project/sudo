@@ -2990,6 +2990,7 @@ LOCALEDIR_SUFFIX=
 LT_LDEXPORTS="-export-symbols \$(shlib_exp)"
 LT_LDDEP="\$(shlib_exp)"
 NO_VIZ=
+OS_INIT=os_init_common
 
 CHECKSHADOW=true
 shadow_defs=
@@ -13918,6 +13919,10 @@ case "$host" in
 		# LD_PRELOAD is space-delimited
 		RTLD_PRELOAD_DELIM=" "
 
+		# Solaris-specific initialization
+		OS_INIT=os_init_solaris
+		SUDO_OBJS="${SUDO_OBJS} solaris.o"
+
 		# To get the crypt(3) prototype (so we pass -Wall)
 		OSDEFS="${OSDEFS} -D__EXTENSIONS__"
 		# AFS support needs -lucb
@@ -14465,6 +14470,10 @@ done
 		: ${with_logincap='maybe'}
 		;;
     *-*-*openbsd*)
+		# OpenBSD-specific initialization
+		OS_INIT=os_init_openbsd
+		SUDO_OBJS="${SUDO_OBJS} openbsd.o"
+
 		# OpenBSD has a real setreuid(2) starting with 3.3 but
 		# we will use setresuid(2) instead.
 		SKIP_SETREUID=yes
@@ -20917,6 +20926,12 @@ if test -n "$LIBS"; then
 	test $dupe = 0 && LIBS="${LIBS} $l"
     done
 fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define os_init $OS_INIT
+_ACEOF
+
 
 if test -n "$GCC"; then
     if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"; then

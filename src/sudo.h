@@ -215,6 +215,7 @@ void get_ttysize(int *rowp, int *colp);
 bool exec_setup(struct command_details *details, const char *ptyname, int ptyfd);
 int policy_init_session(struct command_details *details);
 int run_command(struct command_details *details);
+int os_init_common(int argc, char *argv[], char *envp[]);
 extern const char *list_user, *runas_user, *runas_group;
 extern struct user_details user_details;
 
@@ -224,12 +225,19 @@ int sudo_edit(struct command_details *details);
 /* parse_args.c */
 void usage(int);
 
+/* openbsd.c */
+int os_init_openbsd(int argc, char *argv[], char *envp[]);
+
 /* selinux.c */
 int selinux_restore_tty(void);
 int selinux_setup(const char *role, const char *type, const char *ttyn,
     int ttyfd);
 void selinux_execve(const char *path, char *const argv[], char *const envp[],
     int noexec);
+
+/* solaris.c */
+void set_project(struct passwd *);
+int os_init_solaris(int argc, char *argv[], char *envp[]);
 
 /* aix.c */
 void aix_prep_user(char *user, const char *tty);

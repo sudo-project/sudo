@@ -303,6 +303,7 @@ src/get_pty.c
 src/hooks.c
 src/load_plugins.c
 src/net_ifs.c
+src/openbsd.c
 src/parse_args.c
 src/po/README
 src/po/da.mo
@@ -345,6 +346,7 @@ src/po/zh_CN.po
 src/preload.c
 src/selinux.c
 src/sesh.c
+src/solaris.c
 src/sudo.c
 src/sudo.h
 src/sudo_edit.c

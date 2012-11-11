@@ -927,6 +927,9 @@
 /* Define to `int' if <sys/types.h> does not define. */
 #undef mode_t
 
+/* Define to an OS-specific initialization function or `os_init_common'. */
+#undef os_init
+
 /* Define to `int' if <signal.h> does not define. */
 #undef sig_atomic_t
 
