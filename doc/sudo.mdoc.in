@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd July 10, 2012
+.Dd November 12, 2012
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -877,6 +877,12 @@ Lines that don't begin with
 or
 .Li Set
 are silently ignored.
+.Pp
+The
+.Pa @sysconfdir@/sudo.conf
+file is always parsed in the
+.Dq Li C
+locale.
 .Pp
 For more information, see the
 .Xr sudo_plugin @mansectsu@

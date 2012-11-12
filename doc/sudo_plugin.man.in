@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "July 16, 2012" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO_PLUGIN" "5" "November 12, 2012" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -54,6 +54,9 @@ file contains plugin configuration directives.
 The primary keyword is the
 \fRPlugin\fR
 directive, which causes a plugin to be loaded.
+It is always parsed in the
+``\fRC\fR''
+locale.
 .PP
 A
 \fRPlugin\fR

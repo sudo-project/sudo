@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd July 16, 2012
+.Dd November 12, 2012
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -52,6 +52,9 @@ file contains plugin configuration directives.
 The primary keyword is the
 .Li Plugin
 directive, which causes a plugin to be loaded.
+It is always parsed in the
+.Dq Li C
+locale.
 .Pp
 A
 .Li Plugin
