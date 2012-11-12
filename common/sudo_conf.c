@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2012 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -295,6 +295,13 @@ sudo_conf_read(void)
     struct stat sb;
     FILE *fp;
     char *cp;
+#ifdef HAVE_SETLOCALE
+    char *prev_locale = estrdup(setlocale(LC_ALL, NULL));
+
+    /* Parse sudo.conf in the "C" locale. */
+    if (prev_locale[0] != 'C' || prev_locale[1] != '\0')
+        setlocale(LC_ALL, "C");
+#endif
 
     switch (sudo_secure_file(_PATH_SUDO_CONF, ROOT_UID, -1, &sb)) {
 	case SUDO_PATH_SECURE:
@@ -346,5 +353,11 @@ sudo_conf_read(void)
     }
     fclose(fp);
 done:
+#ifdef HAVE_SETLOCALE
+    /* Restore locale if needed. */
+    if (prev_locale[0] != 'C' || prev_locale[1] != '\0')
+        setlocale(LC_ALL, prev_locale);
+    efree(prev_locale);
+#endif
     return;
 }
