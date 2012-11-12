@@ -263,6 +263,9 @@ log_denial(int status, bool inform_user)
 
     logline = new_logline(message, 0);
 
+    /* Become root if we are not already. */
+    set_perms(PERM_ROOT|PERM_NOEXIT);
+
     if (should_mail(status))
 	send_mail("%s", logline);	/* send mail based on status */
 
@@ -273,6 +276,8 @@ log_denial(int status, bool inform_user)
 	do_syslog(def_syslog_badpri, logline);
     if (def_logfile)
 	do_logfile(logline);
+
+    restore_perms();
 
     efree(logline);
 
@@ -395,6 +400,9 @@ log_allowed(int status)
 
     logline = new_logline(NULL, 0);
 
+    /* Become root if we are not already. */
+    set_perms(PERM_ROOT|PERM_NOEXIT);
+
     if (should_mail(status))
 	send_mail("%s", logline);	/* send mail based on status */
 
@@ -405,6 +413,8 @@ log_allowed(int status)
 	do_syslog(def_syslog_goodpri, logline);
     if (def_logfile)
 	do_logfile(logline);
+
+    restore_perms();
 
     efree(logline);
 
@@ -423,9 +433,6 @@ vlog_error(int flags, const char *fmt, va_list ap)
     char *logline, *message;
     va_list ap2;
     debug_decl(vlog_error, SUDO_DEBUG_LOGGING)
-
-    /* Become root if we are not already to avoid user interference */
-    set_perms(PERM_ROOT|PERM_NOEXIT);
 
     /* Need extra copy of ap for warning() below. */
     if (!ISSET(flags, NO_STDERR))
@@ -450,6 +457,9 @@ vlog_error(int flags, const char *fmt, va_list ap)
         efree(message);
     }
 
+    /* Become root if we are not already. */
+    set_perms(PERM_ROOT|PERM_NOEXIT);
+
     /*
      * Send a copy of the error via mail.
      */
@@ -466,11 +476,11 @@ vlog_error(int flags, const char *fmt, va_list ap)
 	    do_logfile(logline);
     }
 
+    restore_perms();
+
     efree(logline);
 
     sudoers_setlocale(oldlocale, NULL);
-
-    restore_perms();
 
     /*
      * Tell the user (in their locale).
