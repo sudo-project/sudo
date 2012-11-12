@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2009-2010
+ * Copyright (c) 1999-2005, 2009-2012
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -58,6 +58,8 @@
  */
 #define LOG_INDENT	"    "
 
+bool sudoers_setlocale(int newlocale, int *prevlocale);
+int sudoers_getlocale(void);
 void audit_success(char *exec_args[]);
 void audit_failure(char *exec_args[], char const *const fmt, ...);
 void log_allowed(int status);
@@ -67,7 +69,5 @@ void log_failure(int status, int flags);
 void log_error(int flags, const char *fmt, ...) __printflike(2, 3);
 void log_fatal(int flags, const char *fmt, ...) __printflike(2, 3) __attribute__((__noreturn__));
 void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
-int sudoers_setlocale(int newlocale, int *prevlocale);
-int sudoers_getlocale(void);
 
 #endif /* _LOGGING_H */

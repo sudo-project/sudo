@@ -35,8 +35,6 @@
 
 #include "sudoers.h"
 
-#ifdef HAVE_SETLOCALE
-
 static int current_locale = SUDOERS_LOCALE_USER;
 
 int
@@ -45,7 +43,14 @@ sudoers_getlocale(void)
     return current_locale;
 }
 
-int
+/*
+ * Set locale to user or sudoers value.
+ * Returns true on success and false on failure,
+ * If prevlocale is non-NULL it will be filled in with the
+ * old SUDOERS_LOCALE_* value.
+ */
+#ifdef HAVE_SETLOCALE
+bool
 sudoers_setlocale(int newlocale, int *prevlocale)
 {
     char *res = NULL;
@@ -75,12 +80,21 @@ sudoers_setlocale(int newlocale, int *prevlocale)
 	    }
 	    break;
     }
-    return res ? 1 : 0;
+    return res ? true : false;
 }
 #else
-int
+bool
 sudoers_setlocale(int newlocale, int *prevlocale)
 {
-    return 1;
+    switch (newlocale) {
+	case SUDOERS_LOCALE_USER:
+	case SUDOERS_LOCALE_SUDOERS:
+	    if (prevlocale)
+		*prevlocale = current_locale;
+	    current_locale = newlocale;
+	    return true;
+	default:
+	    return false;
+    }
 }
 #endif /* HAVE_SETLOCALE */
