@@ -202,10 +202,11 @@ struct sudo_user {
 #define	runas_limitprivs	(sudo_user.limitprivs)
 
 #ifdef __TANDEM
-# define ROOT_UID       65535
+# define ROOT_UID	65535
 #else
-# define ROOT_UID       0
+# define ROOT_UID	0
 #endif
+#define ROOT_GID	0
 
 /*
  * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
