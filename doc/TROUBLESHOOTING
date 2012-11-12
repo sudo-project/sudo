@@ -283,26 +283,6 @@ A) Libtool doesn't know how to support dynamic linking on the operating
    instead of just:
 	--host powerpc
 
-Q) Sudo on Solaris 11 doesn't seem to be honoring my LANG, LC_ALL or
-   LC_MESSAGES environment variables.  I always get English messages,
-   not the ones for my locale.
-A) Due to security features of the Solaris dynamic linker and the
-   way the runpath is specified in the locale-specific shared
-   objects, the dynamic linker will be unable to locale the
-   methods_unicode.so.3 file.  This prevents the shared object
-   that provides locale from loading.  There are two possible
-   workarounds (you only need to do one of these).  The simplest is
-   to add a link to methods_unicode.so.3 in /usr/lib, e.g.
-
-	ln -s locale/common/methods_unicode.so.3 /usr/lib/methods_unicode.so.3 
-
-    Alternately, you can modify the runpath on the locale-specific
-    shared objects using elfedit.  For example:
-
-	for obj in /usr/lib/locale/*.UTF-8/*.UTF-8.so.*
-	    elfedit -e 'dyn:runpath /usr/lib/locale/common' $obj
-	done
-
 Q) How do you pronounce `sudo'?
 A) The official pronunciation is soo-doo (for su "do").  However, an
    alternate pronunciation, a homophone of "pseudo", is also common.
