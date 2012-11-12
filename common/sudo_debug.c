@@ -138,10 +138,17 @@ int sudo_debug_init(const char *debugfile, const char *settings)
     if (debugfile != NULL) {
 	if (sudo_debug_fd != -1)
 	    close(sudo_debug_fd);
-	sudo_debug_fd = open(debugfile, O_WRONLY|O_APPEND|O_CREAT,
-	    S_IRUSR|S_IWUSR);
-	if (sudo_debug_fd == -1)
-	    return 0;
+	sudo_debug_fd = open(debugfile, O_WRONLY|O_APPEND, S_IRUSR|S_IWUSR);
+	if (sudo_debug_fd == -1) {
+	    /* Create debug file as needed and set group ownership. */
+	    if (errno == ENOENT) {
+		sudo_debug_fd = open(debugfile, O_WRONLY|O_APPEND|O_CREAT,
+		    S_IRUSR|S_IWUSR);
+	    }
+	    if (sudo_debug_fd == -1)
+		return 0;
+	    fchown(sudo_debug_fd, (uid_t)-1, 0);
+	}
 	(void)fcntl(sudo_debug_fd, F_SETFD, FD_CLOEXEC);
 	sudo_debug_mode = SUDO_DEBUG_MODE_FILE;
     } else {
