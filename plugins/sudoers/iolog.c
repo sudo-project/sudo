@@ -104,27 +104,52 @@ static union io_fd io_fds[IOFD_MAX];
 extern struct io_plugin sudoers_io;
 
 /*
- * Create parent directories for path as needed, but not path itself.
+ * Create path and any parent directories as needed.
+ * If is_temp is set, use mkdtemp() for the final directory.
  */
 static void
-mkdir_parents(char *path)
+io_mkdirs(char *path, mode_t mode, bool is_temp)
 {
     struct stat sb;
+    gid_t parent_gid = 0;
     char *slash = path;
-    debug_decl(mkdir_parents, SUDO_DEBUG_UTIL)
+    debug_decl(io_mkdirs, SUDO_DEBUG_UTIL)
+
+    /* Fast path: not a temporary and already exists. */
+    if (!is_temp && stat(path, &sb) == 0) {
+	if (!S_ISDIR(sb.st_mode)) {
+	    log_fatal(0, N_("%s exists but is not a directory (0%o)"),
+		path, (unsigned int) sb.st_mode);
+	}
+	debug_return;
+    }
 
     for (;;) {
 	if ((slash = strchr(slash + 1, '/')) == NULL)
 	    break;
 	*slash = '\0';
 	if (stat(path, &sb) != 0) {
-	    if (mkdir(path, S_IRWXU) != 0)
+	    if (mkdir(path, mode) != 0)
 		log_fatal(USE_ERRNO, N_("unable to mkdir %s"), path);
+	    (void) chown(path, (uid_t)-1, parent_gid);
 	} else if (!S_ISDIR(sb.st_mode)) {
-	    errno = ENOTDIR;
-	    log_fatal(USE_ERRNO, "%s", path);
+	    log_fatal(0, N_("%s exists but is not a directory (0%o)"),
+		path, (unsigned int) sb.st_mode);
+	} else {
+	    /* Inherit gid of parent dir for ownership. */
+	    parent_gid = sb.st_gid;
 	}
 	*slash = '/';
+    }
+    /* Create final path component. */
+    if (is_temp) {
+	if (mkdtemp(path) == NULL)
+	    log_fatal(USE_ERRNO, N_("unable to mkdir %s"), path);
+	(void) chown(path, (uid_t)-1, parent_gid);
+    } else {
+	if (mkdir(path, mode) != 0 && errno != EEXIST)
+	    log_fatal(USE_ERRNO, N_("unable to mkdir %s"), path);
+	(void) chown(path, (uid_t)-1, parent_gid);
     }
     debug_return;
 }
@@ -150,14 +175,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     /*
      * Create I/O log directory if it doesn't already exist.
      */
-    mkdir_parents(iolog_dir);
-    if (stat(iolog_dir, &sb) != 0) {
-	if (mkdir(iolog_dir, S_IRWXU) != 0)
-	    log_fatal(USE_ERRNO, N_("unable to mkdir %s"), iolog_dir);
-    } else if (!S_ISDIR(sb.st_mode)) {
-	log_fatal(0, N_("%s exists but is not a directory (0%o)"),
-	    iolog_dir, (unsigned int) sb.st_mode);
-    }
+    io_mkdirs(iolog_dir, S_IRWXU, false);
 
     /*
      * Open sequence file
@@ -240,6 +258,7 @@ static size_t
 mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
 {
     size_t len;
+    bool is_temp = false;
     debug_decl(mkdir_iopath, SUDO_DEBUG_UTIL)
 
     len = strlcpy(pathbuf, iolog_path, pathsize);
@@ -252,14 +271,9 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
      * Create path and intermediate subdirs as needed.
      * If path ends in at least 6 Xs (ala POSIX mktemp), use mkdtemp().
      */
-    mkdir_parents(pathbuf);
-    if (len >= 6 && strcmp(&pathbuf[len - 6], "XXXXXX") == 0) {
-	if (mkdtemp(pathbuf) == NULL)
-	    log_fatal(USE_ERRNO, N_("unable to create %s"), pathbuf);
-    } else {
-	if (mkdir(pathbuf, S_IRWXU) != 0)
-	    log_fatal(USE_ERRNO, N_("unable to create %s"), pathbuf);
-    }
+    if (len >= 6 && strcmp(&pathbuf[len - 6], "XXXXXX") == 0)
+	is_temp = true;
+    io_mkdirs(pathbuf, S_IRWXU, is_temp);
 
     debug_return_size_t(len);
 }
