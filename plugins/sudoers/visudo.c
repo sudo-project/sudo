@@ -161,9 +161,7 @@ main(int argc, char *argv[])
     setprogname(argc > 0 ? argv[0] : "visudo");
 #endif
 
-#ifdef HAVE_SETLOCALE 
     setlocale(LC_ALL, "");
-#endif
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have visudo domain */
     textdomain("sudoers");
 

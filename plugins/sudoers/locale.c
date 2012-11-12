@@ -49,7 +49,6 @@ sudoers_getlocale(void)
  * If prevlocale is non-NULL it will be filled in with the
  * old SUDOERS_LOCALE_* value.
  */
-#ifdef HAVE_SETLOCALE
 bool
 sudoers_setlocale(int newlocale, int *prevlocale)
 {
@@ -82,19 +81,3 @@ sudoers_setlocale(int newlocale, int *prevlocale)
     }
     return res ? true : false;
 }
-#else
-bool
-sudoers_setlocale(int newlocale, int *prevlocale)
-{
-    switch (newlocale) {
-	case SUDOERS_LOCALE_USER:
-	case SUDOERS_LOCALE_SUDOERS:
-	    if (prevlocale)
-		*prevlocale = current_locale;
-	    current_locale = newlocale;
-	    return true;
-	default:
-	    return false;
-    }
-}
-#endif /* HAVE_SETLOCALE */

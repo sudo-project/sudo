@@ -153,9 +153,7 @@ main(int argc, char *argv[], char *envp[])
 
     os_init(argc, argv, envp);
 
-#ifdef HAVE_SETLOCALE
     setlocale(LC_ALL, "");
-#endif
     bindtextdomain(PACKAGE_NAME, LOCALEDIR);
     textdomain(PACKAGE_NAME);
 

@@ -242,7 +242,7 @@ main(int argc, char *argv[])
 {
     int ch, idx, plen, exitcode = 0, rows = 0, cols = 0;
     bool interactive = false, listonly = false, need_nlcr = false;
-    const char *id, *user = NULL, *pattern = NULL, *tty = NULL, *decimal = ".";
+    const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
     double seconds, to_wait, speed = 1.0, max_wait = 0;
     sigaction_t sa;
@@ -263,10 +263,8 @@ main(int argc, char *argv[])
     setprogname(argc > 0 ? argv[0] : "sudoreplay");
 #endif
 
-#ifdef HAVE_SETLOCALE
     setlocale(LC_ALL, "");
     decimal = localeconv()->decimal_point;
-#endif
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have sudoreplay domain */
     textdomain("sudoers");
 

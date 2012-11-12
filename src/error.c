@@ -105,13 +105,11 @@ static void
 _warning(int use_errno, const char *fmt, va_list ap)
 {
     int serrno = errno;
-#ifdef HAVE_SETLOCALE
     char *prev_locale = estrdup(setlocale(LC_ALL, NULL));
 
     /* Set locale to user's if different. */
     if (*prev_locale != '\0')
 	setlocale(LC_ALL, "");
-#endif
 
     fputs(getprogname(), stderr);
     if (fmt != NULL) {
@@ -124,10 +122,8 @@ _warning(int use_errno, const char *fmt, va_list ap)
     }
     putc('\n', stderr);
 
-#ifdef HAVE_SETLOCALE
     /* Restore locale if needed. */
     if (*prev_locale != '\0')
 	setlocale(LC_ALL, prev_locale);
     efree(prev_locale);
-#endif
 }

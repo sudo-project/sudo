@@ -470,9 +470,6 @@
 /* Define to 1 if you have the `setkeycreatecon' function. */
 #undef HAVE_SETKEYCREATECON
 
-/* Define to 1 if you have the `setlocale' function. */
-#undef HAVE_SETLOCALE
-
 /* Define to 1 if you have the `setresuid' function. */
 #undef HAVE_SETRESUID
 

@@ -346,13 +346,11 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     if (ISSET(details->flags, CD_SET_TIMEOUT))
 	alarm(details->timeout);
 
-#ifdef HAVE_SETLOCALE
     /*
      * I/O logging must be in the C locale for floating point numbers
      * to be logged consistently.
      */
     setlocale(LC_ALL, "C");
-#endif
 
     /*
      * In the event loop we pass input from user tty to master

@@ -60,9 +60,7 @@ main(int argc, char *argv[], char *envp[])
     int noexec = 0;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
-#ifdef HAVE_SETLOCALE 
     setlocale(LC_ALL, "");
-#endif
     bindtextdomain(PACKAGE_NAME, LOCALEDIR);
     textdomain(PACKAGE_NAME);
 

@@ -148,9 +148,7 @@ main(int argc, char *argv[])
     setprogname(argc > 0 ? argv[0] : "testsudoers");
 #endif
 
-#ifdef HAVE_SETLOCALE 
     setlocale(LC_ALL, "");
-#endif
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have own domain */
     textdomain("sudoers");
 

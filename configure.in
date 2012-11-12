@@ -2216,7 +2216,7 @@ dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS(glob strrchr sysconf tzset strftime setenv \
-	       regcomp setlocale nl_langinfo mbr_check_membership \
+	       regcomp nl_langinfo mbr_check_membership \
 	       setrlimit64)
 AC_REPLACE_FUNCS(getgrouplist)
 AC_CHECK_FUNCS(getline, [], [
