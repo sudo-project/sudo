@@ -17,8 +17,6 @@
  * Sponsored in part by the Defense Advanced Research Projects
  * Agency (DARPA) and Air Force Research Laboratory, Air Force
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
- *
- * $Sudo: sudo.h,v 1.290 2009/12/12 16:12:26 millert Exp $
  */
 
 #ifndef _SUDO_SUDO_H

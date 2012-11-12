@@ -32,9 +32,6 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_SETLOCALE
-# include <locale.h>
-#endif
 
 #include "sudoers.h"
 

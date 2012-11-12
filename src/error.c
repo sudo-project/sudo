@@ -22,9 +22,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef HAVE_SETLOCALE
-# include <locale.h>
-#endif
 
 #include "missing.h"
 #include "alloc.h"

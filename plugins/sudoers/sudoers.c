@@ -57,9 +57,6 @@
 #include <signal.h>
 #include <grp.h>
 #include <time.h>
-#ifdef HAVE_SETLOCALE
-# include <locale.h>
-#endif
 #include <netdb.h>
 #ifdef HAVE_LOGIN_CAP_H
 # include <login_cap.h>

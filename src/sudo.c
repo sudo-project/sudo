@@ -58,9 +58,6 @@
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#ifdef HAVE_SETLOCALE
-# include <locale.h>
-#endif
 #ifdef HAVE_LOGIN_CAP_H
 # include <login_cap.h>
 # ifndef LOGIN_SETENV

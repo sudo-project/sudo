@@ -50,9 +50,6 @@
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#ifdef HAVE_SETLOCALE
-# include <locale.h>
-#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>

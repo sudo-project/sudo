@@ -71,9 +71,6 @@
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#ifdef HAVE_SETLOCALE
-# include <locale.h>
-#endif
 
 #include "sudoers.h"
 #include "parse.h"

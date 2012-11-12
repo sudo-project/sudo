@@ -21,7 +21,7 @@
  * Solaris locale.h includes libintl.h which causes problems when we
  * redefine the gettext functions.  We include it first to avoid this.
  */
-#if defined(HAVE_SETLOCALE) && defined(__sun__) && defined(__svr4__)
+#if defined(HAVE_SETLOCALE)
 # include <locale.h>
 #endif
 

@@ -25,9 +25,6 @@
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
-#ifdef HAVE_SETLOCALE
-# include <locale.h>
-#endif
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else

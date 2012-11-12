@@ -82,9 +82,6 @@
 #ifdef HAVE_ZLIB_H
 # include <zlib.h>
 #endif
-#ifdef HAVE_SETLOCALE
-# include <locale.h>
-#endif
 #include <signal.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
