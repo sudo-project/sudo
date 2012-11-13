@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996,1998-2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1994-1996,1998-2012 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -89,7 +89,7 @@ set_perms(perm)
 				    errstr = "setresuid(ROOT_UID, ROOT_UID, ROOT_UID)";
 				    goto bad;
 				}
-				(void) setresgid(-1, user_gid, -1);
+				(void) setresgid(-1, ROOT_GID, -1);
 				if (current_perm == PERM_RUNAS)
 				    restore_groups();
 			      	break;
@@ -209,7 +209,7 @@ set_perms(perm)
 				    errstr = "setuid(ROOT_UID)";
 				    goto bad;
 				}
-				(void) setregid(-1, user_gid);
+				(void) setregid(-1, ROOT_GID);
 				if (current_perm == PERM_RUNAS)
 				    restore_groups();
 			      	break;
@@ -333,7 +333,7 @@ set_perms(perm)
     switch (perm) {
 	case PERM_ROOT:
 				/* uid set above */
-				(void) setegid(user_gid);
+				(void) setegid(ROOT_GID);
 				if (current_perm == PERM_RUNAS)
 				    restore_groups();
 			      	break;
@@ -443,6 +443,7 @@ set_perms(perm)
 				    errstr = "setuid(ROOT_UID)";
 				    goto bad;
 				}
+    	    	    	        (void) setgid(ROOT_GID);
 				if (current_perm == PERM_RUNAS)
 				    restore_groups();
 				break;
