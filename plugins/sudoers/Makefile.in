@@ -279,13 +279,10 @@ install-includes:
 install-doc: install-dirs
 	@LDAP@$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0755 $(srcdir)/sudoers2ldif $(DESTDIR)$(docdir)
 
-preinstall:
-	if [ X"$$SUDO_PREINSTALL_CMD" != X"" ]; then \
-	    exec $$SUDO_PREINSTALL_CMD; \
-	fi
-
-install-plugin: sudoers.la install-dirs preinstall
+install-plugin: sudoers.la install-dirs
 	if [ X"$(soext)" != X"" ]; then \
+	    test X"$$SUDO_PREINSTALL_CMD" != X"" && \
+		$$SUDO_PREINSTALL_CMD .libs/sudoers$(soext); \
 	    $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m $(shlib_mode) .libs/sudoers$(soext) $(DESTDIR)$(plugindir); \
 	fi
 
