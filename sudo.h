@@ -187,6 +187,13 @@ struct command_status {
 #define user_role		(sudo_user.role)
 #define user_type		(sudo_user.type)
 
+#ifdef __TANDEM
+# define ROOT_UID	65535
+#else
+# define ROOT_UID	0
+#endif
+#define ROOT_GID	0
+
 /*
  * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
  * but that caused problems with various alternate authentication

@@ -119,12 +119,6 @@
 # define CMND_WAIT	FALSE
 #endif
 
-#ifdef __TANDEM
-# define ROOT_UID	65535
-#else
-# define ROOT_UID	0
-#endif
-
 /*
  * Prototypes
  */

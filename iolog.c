@@ -102,6 +102,7 @@ io_nextid()
     if (stat(def_iolog_dir, &sb) != 0) {
 	if (mkdir(def_iolog_dir, S_IRWXU) != 0)
 	    log_fatal(USE_ERRNO, "Can't mkdir %s", def_iolog_dir);
+	(void) chown(def_iolog_dir, (uid_t)-1, ROOT_GID);
     } else if (!S_ISDIR(sb.st_mode)) {
 	log_fatal(0, "%s exists but is not a directory (0%o)",
 	    def_iolog_dir, (unsigned int) sb.st_mode);
@@ -181,6 +182,7 @@ build_idpath(pathbuf, pathsize)
 	if (stat(pathbuf, &sb) != 0) {
 	    if (mkdir(pathbuf, S_IRWXU) != 0)
 		log_fatal(USE_ERRNO, "Can't mkdir %s", pathbuf);
+	    (void) chown(pathbuf, (uid_t)-1, ROOT_GID);
 	} else if (!S_ISDIR(sb.st_mode)) {
 	    log_fatal(0, "%s: %s", pathbuf, strerror(ENOTDIR));
 	}
@@ -235,6 +237,7 @@ io_log_open()
 
     if (mkdir(pathbuf, S_IRUSR|S_IWUSR|S_IXUSR) != 0)
 	log_fatal(USE_ERRNO, "Can't mkdir %s", pathbuf);
+    (void) chown(pathbuf, (uid_t)-1, ROOT_GID);
 
     /*
      * We create 7 files: a log file, a timing file and 5 for input/output.
