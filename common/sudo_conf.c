@@ -56,6 +56,8 @@
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "secure_path.h"
+
+#define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "gettext.h"
 
 #ifdef __TANDEM

@@ -51,9 +51,11 @@
 #include "missing.h"
 #include "alloc.h"
 #include "error.h"
-#include "gettext.h"
 #include "sudo_plugin.h"
 #include "sudo_debug.h"
+
+#define DEFAULT_TEXT_DOMAIN	"sudo"
+#include "gettext.h"
 
 /*
  * The debug priorities and subsystems are currently hard-coded.
