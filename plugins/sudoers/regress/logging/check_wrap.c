@@ -42,8 +42,6 @@
 #include "error.h"
 #include "sudo_plugin.h"
 
-sudo_conv_t sudo_conv;		/* NULL in non-plugin */
-
 extern void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
 
 __dso_public int main(int argc, char *argv[]);
@@ -108,7 +106,7 @@ main(int argc, char *argv[])
 }
 
 void
-cleanup(int gotsig)
+sudoers_cleanup(int gotsig)
 {
     return;
 }

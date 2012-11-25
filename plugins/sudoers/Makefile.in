@@ -615,6 +615,7 @@ locale.lo: $(srcdir)/locale.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
            $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/locale.c
+locale.o: locale.lo
 logging.lo: $(srcdir)/logging.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
             $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
@@ -800,8 +801,8 @@ sudoreplay.o: $(srcdir)/sudoreplay.c $(top_builddir)/config.h \
               $(top_srcdir)/compat/timespec.h $(top_srcdir)/compat/stdbool.h \
               $(top_builddir)/pathnames.h $(incdir)/missing.h \
               $(incdir)/alloc.h $(incdir)/error.h $(incdir)/gettext.h \
-              $(incdir)/sudo_plugin.h $(incdir)/sudo_conf.h $(incdir)/list.h \
-              $(incdir)/sudo_debug.h
+              $(srcdir)/logging.h $(incdir)/sudo_plugin.h \
+              $(incdir)/sudo_conf.h $(incdir)/list.h $(incdir)/sudo_debug.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/sudoreplay.c
 testsudoers.o: $(srcdir)/testsudoers.c $(top_builddir)/config.h \
                $(top_srcdir)/compat/fnmatch.h $(srcdir)/tsgetgrpw.h \

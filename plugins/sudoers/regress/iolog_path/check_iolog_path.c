@@ -47,7 +47,6 @@
 
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-sudo_conv_t sudo_conv;		/* NULL in non-plugin */
 
 static char sessid[7];
 
@@ -205,7 +204,7 @@ void io_nextid(char *iolog_dir, char *fallback, char id[7])
 }
 
 void
-cleanup(int gotsig)
+sudoers_cleanup(int gotsig)
 {
     return;
 }

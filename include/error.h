@@ -18,6 +18,7 @@
 #define	_SUDO_ERROR_H_
 
 #include <stdarg.h>
+#include <sudo_plugin.h>
 
 /*
  * We wrap error/errorx and warn/warnx so that the same output can
@@ -169,6 +170,8 @@
     vwarningx2((fmt), (ap));						       \
     warning_restore_locale();						       \
 } while (0)
+
+extern sudo_printf_t sudo_printf;
 
 void	error2(int, const char *, ...) __printflike(2, 3) __attribute__((__noreturn__));
 void	errorx2(int, const char *, ...) __printflike(2, 3) __attribute__((__noreturn__));

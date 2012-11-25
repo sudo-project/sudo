@@ -19,6 +19,7 @@ common/secure_path.c
 common/setgroups.c
 common/sudo_conf.c
 common/sudo_debug.c
+common/sudo_printf.c
 common/term.c
 common/ttysize.c
 common/zero_bytes.c

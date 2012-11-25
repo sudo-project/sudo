@@ -179,8 +179,6 @@ struct search_node {
     } u;
 } *search_expr;
 
-sudo_conv_t sudo_conv;	/* NULL in non-plugin */
-
 #define STACK_NODE_SIZE	32
 static struct search_node *node_stack[32];
 static int stack_top;

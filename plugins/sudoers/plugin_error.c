@@ -44,8 +44,6 @@ static void _warning(int, const char *, va_list);
 static sigjmp_buf error_jmp;
 static bool setjmp_enabled = false;
 
-extern sudo_conv_t sudo_conv;
-
 void
 error2(int eval, const char *fmt, ...)
 {
@@ -133,47 +131,23 @@ static void
 _warning(int use_errno, const char *fmt, va_list ap)
 {
     int serrno = errno;
+    char *str;
 
-    if (sudo_conv != NULL) {
-	struct sudo_conv_message msg[6];
-	struct sudo_conv_reply repl[6];
-	int nmsgs = 4;
-	char *str;
-
-	evasprintf(&str, _(fmt), ap);
-
-	/* Call conversation function */
-	memset(&msg, 0, sizeof(msg));
-	msg[0].msg_type = SUDO_CONV_ERROR_MSG;
-	msg[0].msg = getprogname();
-	msg[1].msg_type = SUDO_CONV_ERROR_MSG;
-	msg[1].msg = _(": ");
-	msg[2].msg_type = SUDO_CONV_ERROR_MSG;
-	msg[2].msg = str;
-	if (use_errno) {
-	    msg[3].msg_type = SUDO_CONV_ERROR_MSG;
-	    msg[3].msg = _(": ");
-	    msg[4].msg_type = SUDO_CONV_ERROR_MSG;
-	    msg[4].msg = strerror(errno);
-	    nmsgs = 6;
-	}
-	msg[nmsgs - 1].msg_type = SUDO_CONV_ERROR_MSG;
-	msg[nmsgs - 1].msg = "\n";
-	memset(&repl, 0, sizeof(repl));
-	sudo_conv(nmsgs, msg, repl);
-	efree(str);
-    } else {
-	fputs(getprogname(), stderr);
+    evasprintf(&str, fmt, ap);
+    if (use_errno) {
 	if (fmt != NULL) {
-	    fputs(_(": "), stderr);
-	    vfprintf(stderr, _(fmt), ap);
+	    sudo_printf(SUDO_CONV_ERROR_MSG,
+		_("%s: %s: %s\n"), getprogname(), str, strerror(serrno));
+	} else {
+	    sudo_printf(SUDO_CONV_ERROR_MSG,
+		_("%s: %s\n"), getprogname(), strerror(serrno));
 	}
-	if (use_errno) {
-	    fputs(_(": "), stderr);
-	    fputs(strerror(serrno), stderr);
-	}
-	putc('\n', stderr);
+    } else {
+	sudo_printf(SUDO_CONV_ERROR_MSG,
+	    _("%s: %s\n"), getprogname(), str ? str : "(null)");
     }
+    efree(str);
+    errno = serrno;
 }
 
 static int oldlocale;

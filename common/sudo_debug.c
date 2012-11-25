@@ -120,8 +120,6 @@ static int sudo_debug_mode;
 static char sudo_debug_pidstr[(((sizeof(int) * 8) + 2) / 3) + 3];
 static size_t sudo_debug_pidlen;
 
-extern sudo_conv_t sudo_conv;
-
 /*
  * Parse settings string from sudo.conf and open debugfile.
  * Returns 1 on success, 0 if cannot open debugfile.
@@ -285,36 +283,21 @@ static void
 sudo_debug_write_conv(const char *func, const char *file, int lineno,
     const char *str, int len, int errno_val)
 {
-    struct sudo_conv_message msg;
-    struct sudo_conv_reply repl;
-    char *buf = NULL;
+    /* Remove the newline at the end if appending extra info. */
+    if (str[len - 1] == '\n')
+	len--;
 
-    /* Call conversation function */
-    if (sudo_conv != NULL) {
-	/* Remove the newline at the end if appending extra info. */
-	if (str[len - 1] == '\n')
-	    len--;
-
-	if (func != NULL && file != NULL && lineno != 0) {
-	    if (errno_val) {
-		easprintf(&buf, "%.*s: %s @ %s() %s:%d", len, str,
-		    strerror(errno_val), func, file, lineno);
-	    } else {
-		easprintf(&buf, "%.*s @ %s() %s:%d", len, str,
-		    func, file, lineno);
-	    }
-	    str = buf;
-	} else if (errno_val) {
-	    easprintf(&buf, "%.*s: %s", len, str, strerror(errno_val));
-	    str = buf;
+    if (func != NULL && file != NULL && lineno != 0) {
+	if (errno_val) {
+	    sudo_printf(SUDO_CONV_DEBUG_MSG, "%.*s: %s @ %s() %s:%d",
+		len, str, strerror(errno_val), func, file, lineno);
+	} else {
+	    sudo_printf(SUDO_CONV_DEBUG_MSG, "%.*s @ %s() %s:%d",
+		len, str, func, file, lineno);
 	}
-	memset(&msg, 0, sizeof(msg));
-	memset(&repl, 0, sizeof(repl));
-	msg.msg_type = SUDO_CONV_DEBUG_MSG;
-	msg.msg = str;
-	sudo_conv(1, &msg, &repl);
-	if (buf != NULL)
-	    efree(buf);
+    } else if (errno_val) {
+	sudo_printf(SUDO_CONV_DEBUG_MSG, "%.*s: %s",
+	    len, str, strerror(errno_val));
     }
 }
 

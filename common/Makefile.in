@@ -58,8 +58,8 @@ DEFS = @OSDEFS@ -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\"
 SHELL = @SHELL@
 
 LTOBJS = alloc.lo atobool.lo fileops.lo fmt_string.lo lbuf.lo list.lo \
-	 secure_path.lo setgroups.lo sudo_conf.lo sudo_debug.lo term.lo \
-	 ttysize.lo zero_bytes.lo @COMMON_OBJS@
+	 secure_path.lo setgroups.lo sudo_conf.lo sudo_debug.lo sudo_printf.lo \
+	 term.lo ttysize.lo zero_bytes.lo @COMMON_OBJS@
 
 all: libcommon.la
 
@@ -151,6 +151,9 @@ sudo_debug.lo: $(srcdir)/sudo_debug.c $(top_builddir)/config.h \
                $(incdir)/alloc.h $(incdir)/error.h $(incdir)/gettext.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/sudo_debug.c
+sudo_printf.lo: $(srcdir)/sudo_printf.c $(top_builddir)/config.h \
+                $(incdir)/sudo_plugin.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/sudo_printf.c
 term.lo: $(srcdir)/term.c $(top_builddir)/config.h $(incdir)/missing.h \
          $(incdir)/sudo_debug.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/term.c

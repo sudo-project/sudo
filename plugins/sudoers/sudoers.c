@@ -108,7 +108,6 @@ extern char *errorfile;
 char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
 sudo_conv_t sudo_conv;
-sudo_printf_t sudo_printf;
 int sudo_mode;
 
 static char *prev_user;

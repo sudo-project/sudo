@@ -82,7 +82,6 @@ void sudoers_cleanup(int);
 static void set_runaspw(const char *);
 static void set_runasgr(const char *);
 static int cb_runas_default(const char *);
-static int testsudoers_printf(int msg_type, const char *fmt, ...);
 static int testsudoers_print(const char *msg);
 
 extern void setgrfile(const char *);
@@ -109,8 +108,6 @@ static char *runas_group, *runas_user;
 extern int errorlineno;
 extern bool parse_error;
 extern char *errorfile;
-sudo_printf_t sudo_printf = testsudoers_printf;
-sudo_conv_t sudo_conv;	/* NULL in non-plugin */
 
 /* For getopt(3) */
 extern char *optarg;
@@ -661,32 +658,6 @@ print_userspecs(void)
 	putchar('\n');
     }
     debug_return;
-}
-
-static int
-testsudoers_printf(int msg_type, const char *fmt, ...)
-{
-    va_list ap;
-    FILE *fp;
-    debug_decl(testsudoers_printf, SUDO_DEBUG_UTIL)
-            
-    switch (msg_type) {
-    case SUDO_CONV_INFO_MSG:
-	fp = stdout;
-	break;
-    case SUDO_CONV_ERROR_MSG:
-	fp = stderr;
-	break;
-    default:
-	errno = EINVAL;
-	debug_return_int(-1);
-    }
-   
-    va_start(ap, fmt);
-    vfprintf(fp, fmt, ap);
-    va_end(ap);
-   
-    debug_return_int(0);
 }
 
 void

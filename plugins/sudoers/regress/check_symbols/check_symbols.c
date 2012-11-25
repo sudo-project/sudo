@@ -116,7 +116,7 @@ main(int argc, char *argv[])
 }
 
 void
-cleanup(int gotsig)
+sudoers_cleanup(int gotsig)
 {
     return;
 }

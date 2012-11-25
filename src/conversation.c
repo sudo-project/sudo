@@ -51,10 +51,6 @@
 
 extern int tgetpass_flags; /* XXX */
 
-#if defined(HAVE_DLOPEN) || defined(HAVE_SHL_LOAD)
-sudo_conv_t sudo_conv;	/* NULL in sudo front-end */
-#endif
-
 /*
  * Sudo conversation function.
  */
@@ -119,30 +115,4 @@ err:
     } while (n--);
 
     return -1;
-}
-
-int
-_sudo_printf(int msg_type, const char *fmt, ...)
-{
-    va_list ap;
-    FILE *fp;
-    int len;
-
-    switch (msg_type) {
-    case SUDO_CONV_INFO_MSG:
-	fp = stdout;
-	break;
-    case SUDO_CONV_ERROR_MSG:
-	fp = stderr;
-	break;
-    default:
-	errno = EINVAL;
-	return -1;
-    }
-
-    va_start(ap, fmt);
-    len = vfprintf(fp, fmt, ap);
-    va_end(ap);
-
-    return len;
 }

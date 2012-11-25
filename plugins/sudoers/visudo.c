@@ -90,8 +90,6 @@ struct sudoersfile {
 };
 TQ_DECLARE(sudoersfile)
 
-sudo_conv_t sudo_conv;	/* NULL in non-plugin */
-
 /*
  * Function prototypes
  */
@@ -107,7 +105,6 @@ static bool install_sudoers(struct sudoersfile *, bool);
 static int print_unused(void *, void *);
 static void reparse_sudoers(char *, char *, bool, bool);
 static int run_command(char *, char **);
-static int visudo_printf(int msg_type, const char *fmt, ...);
 static void setup_signals(void);
 static void help(void) __attribute__((__noreturn__));
 static void usage(int);
@@ -134,7 +131,6 @@ extern int optind;
  */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-sudo_printf_t sudo_printf = visudo_printf;
 static struct sudoersfile_list sudoerslist;
 static struct rbtree *alias_freelist;
 static bool checkonly;
@@ -1309,29 +1305,4 @@ help(void)
 	"  -s          strict syntax checking\n"
 	"  -V          display version information and exit"));
     exit(0);
-}
-
-static int
-visudo_printf(int msg_type, const char *fmt, ...)
-{
-    va_list ap;
-    FILE *fp;
-            
-    switch (msg_type) {
-    case SUDO_CONV_INFO_MSG:
-	fp = stdout;
-	break;
-    case SUDO_CONV_ERROR_MSG:
-	fp = stderr;
-	break;
-    default:
-	errno = EINVAL;
-	return -1;
-    }
-   
-    va_start(ap, fmt);
-    vfprintf(fp, fmt, ap);
-    va_end(ap);
-   
-    return 0;
 }

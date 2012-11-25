@@ -56,8 +56,6 @@ __dso_public int main(int argc, char *argv[]);
 struct interface *interfaces;
 sudo_printf_t sudo_printf = check_addr_printf;
 
-sudo_conv_t sudo_conv;		/* NULL in non-plugin */
-
 static int
 check_addr(char *input)
 {
@@ -156,7 +154,7 @@ main(int argc, char *argv[])
 
 /* STUB */
 void
-cleanup(int gotsig)
+sudoers_cleanup(int gotsig)
 {
     return;
 }

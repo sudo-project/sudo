@@ -110,27 +110,12 @@ sudoerserror(const char *s)
 	LEXTRACE("<*> ");
 #ifndef TRACELEXER
 	if (trace_print == NULL || trace_print == sudoers_trace_print) {
-	    int oldlocale;
 	    const char fmt[] = ">>> %s: %s near line %d <<<\n";
+	    int oldlocale;
 
 	    /* Warnings are displayed in the user's locale. */
 	    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
-	    if (sudo_conv != NULL) {
-		struct sudo_conv_message msg;
-		struct sudo_conv_reply repl;
-		char *str;
-
-		easprintf(&str, _(fmt), sudoers, _(s), sudolineno);
-
-		memset(&msg, 0, sizeof(repl));
-		memset(&repl, 0, sizeof(repl));
-		msg.msg_type = SUDO_CONV_ERROR_MSG;
-		msg.msg = str;
-		sudo_conv(1, &msg, &repl);
-		efree(str);
-	    } else {
-		fprintf(stderr, _(fmt), sudoers, _(s), sudolineno);
-	    }
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _(fmt), sudoers, _(s), sudolineno);
 	    sudoers_setlocale(oldlocale, NULL);
 	}
 #endif

@@ -42,6 +42,7 @@
 
 #define SUDO_ERROR_WRAP 0
 
+#include "missing.h"
 #include "list.h"
 #include "parse.h"
 #include "toke.h"
@@ -53,8 +54,6 @@ __dso_public int main(int argc, char *argv[]);
 /*
  * TODO: test realloc
  */
-
-sudo_conv_t sudo_conv;		/* NULL in non-plugin */
 
 YYSTYPE sudoerslval;
 
@@ -186,7 +185,7 @@ main(int argc, char *argv[])
 
 /* STUB */
 void
-cleanup(int gotsig)
+sudoers_cleanup(int gotsig)
 {
     return;
 }
