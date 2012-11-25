@@ -68,6 +68,7 @@ void log_denial(int status, bool inform_user);
 void log_failure(int status, int flags);
 void log_error(int flags, const char *fmt, ...) __printflike(2, 3);
 void log_fatal(int flags, const char *fmt, ...) __printflike(2, 3) __attribute__((__noreturn__));
+void sudoers_initlocale(const char *ulocale, const char *slocale);
 void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
 
 #endif /* _LOGGING_H */

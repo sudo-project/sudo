@@ -36,11 +36,26 @@
 #include "sudoers.h"
 
 static int current_locale = SUDOERS_LOCALE_USER;
+static char *user_locale;
+static char *sudoers_locale;
 
 int
 sudoers_getlocale(void)
 {
     return current_locale;
+}
+
+void
+sudoers_initlocale(const char *ulocale, const char *slocale)
+{
+    if (ulocale != NULL) {
+	efree(user_locale);
+	user_locale = estrdup(ulocale);
+    }
+    if (slocale != NULL) {
+	efree(sudoers_locale);
+	sudoers_locale = estrdup(slocale);
+    }
 }
 
 /*
@@ -61,6 +76,8 @@ sudoers_setlocale(int newlocale, int *prevlocale)
 	    if (current_locale != SUDOERS_LOCALE_USER) {
 		current_locale = SUDOERS_LOCALE_USER;
 		res = setlocale(LC_ALL, user_locale ? user_locale : "");
+		if (res != NULL && user_locale == NULL)
+		    user_locale = estrdup(setlocale(LC_ALL, NULL));
 	    }
 	    break;
 	case SUDOERS_LOCALE_SUDOERS:
@@ -68,11 +85,11 @@ sudoers_setlocale(int newlocale, int *prevlocale)
 		*prevlocale = current_locale;
 	    if (current_locale != SUDOERS_LOCALE_SUDOERS) {
 		current_locale = SUDOERS_LOCALE_SUDOERS;
-		res = setlocale(LC_ALL, def_sudoers_locale);
-		if (res == NULL) {
-		    if (strcmp(def_sudoers_locale, "C") != 0) {
-			efree(def_sudoers_locale);
-			def_sudoers_locale = estrdup("C");
+		res = setlocale(LC_ALL, sudoers_locale ? sudoers_locale : "C");
+		if (res == NULL && sudoers_locale != NULL) {
+		    if (strcmp(sudoers_locale, "C") != 0) {
+			efree(sudoers_locale);
+			sudoers_locale = estrdup("C");
 			res = setlocale(LC_ALL, "C");
 		    }
 		}

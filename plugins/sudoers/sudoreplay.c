@@ -95,6 +95,7 @@
 #include "alloc.h"
 #include "error.h"
 #include "gettext.h"
+#include "logging.h"
 #include "sudo_plugin.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
@@ -201,7 +202,7 @@ extern char *get_timestr(time_t, int);
 extern int term_raw(int, int);
 extern int term_restore(int, int);
 extern void get_ttysize(int *rowp, int *colp);
-void cleanup(int);
+void sudoers_cleanup(int);
 
 static int list_sessions(int, char **, const char *, const char *, const char *);
 static int parse_expr(struct search_node **, char **);
@@ -263,7 +264,7 @@ main(int argc, char *argv[])
     setprogname(argc > 0 ? argv[0] : "sudoreplay");
 #endif
 
-    setlocale(LC_ALL, "");
+    sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
     decimal = localeconv()->decimal_point;
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have sudoreplay domain */
     textdomain("sudoers");
@@ -377,7 +378,7 @@ main(int argc, char *argv[])
     memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESETHAND;
-    sa.sa_handler = cleanup;
+    sa.sa_handler = sudoers_cleanup;
     (void) sigaction(SIGINT, &sa, NULL);
     (void) sigaction(SIGKILL, &sa, NULL);
     (void) sigaction(SIGTERM, &sa, NULL);
@@ -1207,7 +1208,7 @@ help(void)
  * Cleanup hook for error()/errorx()
   */
 void
-cleanup(int signo)
+sudoers_cleanup(int signo)
 {
     term_restore(STDIN_FILENO, 0);
     if (signo)

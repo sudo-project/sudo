@@ -133,23 +133,23 @@ SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo env.lo find_path.lo \
 	       policy.lo prompt.lo set_perms.lo sudo_nss.lo sudoers.lo \
 	       timestamp.lo @SUDOERS_OBJS@
 
-VISUDO_OBJS = visudo.o goodpath.o find_path.o error.o
+VISUDO_OBJS = find_path.o goodpath.o locale.o plugin_error.o visudo.o
 
-REPLAY_OBJS = getdate.o sudoreplay.o error.o
+REPLAY_OBJS = getdate.o locale.o plugin_error.o sudoreplay.o
 
-TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o error.o group_plugin.o \
-	    net_ifs.o
+TEST_OBJS = group_plugin.o interfaces.o locale.o net_ifs.o plugin_error.o \
+	    testsudoers.o tsgetgrpw.o
 
-CHECK_ADDR_OBJS = check_addr.o match_addr.o interfaces.o error.o
+CHECK_ADDR_OBJS = check_addr.o interfaces.o locale.o match_addr.o plugin_error.o
 
-CHECK_FILL_OBJS = check_fill.o toke_util.o error.o
+CHECK_FILL_OBJS = check_fill.o locale.o plugin_error.o toke_util.o
 
-CHECK_IOLOG_PATH_OBJS = check_iolog_path.o error.o iolog_path.o pwutil.o \
-			pwutil_impl.o redblack.o
+CHECK_IOLOG_PATH_OBJS = check_iolog_path.o iolog_path.o locale.o \
+			plugin_error.o pwutil.o pwutil_impl.o redblack.o
 
-CHECK_SYMBOLS_OBJS = check_symbols.o error.o
+CHECK_SYMBOLS_OBJS = check_symbols.o locale.o plugin_error.o
 
-CHECK_WRAP_OBJS = check_wrap.o logwrap.o error.o
+CHECK_WRAP_OBJS = check_wrap.o locale.o logwrap.o plugin_error.o
 
 LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
 
@@ -508,10 +508,6 @@ env.lo: $(srcdir)/env.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
         $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/env.c
-error.o: $(top_srcdir)/src/error.c $(top_builddir)/config.h \
-         $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
-         $(incdir)/gettext.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(top_srcdir)/src/error.c
 find_path.lo: $(srcdir)/find_path.c $(top_builddir)/config.h \
               $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
               $(top_builddir)/pathnames.h $(incdir)/missing.h \
@@ -684,6 +680,7 @@ plugin_error.lo: $(srcdir)/plugin_error.c $(top_builddir)/config.h \
                  $(incdir)/alloc.h $(incdir)/error.h $(srcdir)/logging.h \
                  $(incdir)/sudo_plugin.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/plugin_error.c
+plugin_error.o: plugin_error.lo
 policy.lo: $(srcdir)/policy.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
            $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
            $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \

@@ -112,7 +112,7 @@ static void setup_signals(void);
 static void help(void) __attribute__((__noreturn__));
 static void usage(int);
 
-void cleanup(int);
+void sudoers_cleanup(int);
 
 extern void sudoerserror(const char *);
 extern void sudoersrestart(FILE *);
@@ -161,7 +161,7 @@ main(int argc, char *argv[])
     setprogname(argc > 0 ? argv[0] : "visudo");
 #endif
 
-    setlocale(LC_ALL, "");
+    sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have visudo domain */
     textdomain("sudoers");
 
@@ -510,7 +510,7 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 		case 'Q' :	parse_error = false;	/* ignore parse error */
 				break;
 		case 'x' :	/* XXX - should return instead of exiting */
-				cleanup(0);
+				sudoers_cleanup(0);
 				sudo_debug_exit_int(__func__, __FILE__,
 				    __LINE__, sudo_debug_subsys, 0);
 				exit(0);
@@ -1254,7 +1254,7 @@ print_unused(void *v1, void *v2)
  * Unlink any sudoers temp files that remain.
  */
 void
-cleanup(int gotsignal)
+sudoers_cleanup(int gotsignal)
 {
     struct sudoersfile *sp;
 
@@ -1276,7 +1276,7 @@ quit(int signo)
 {
     const char *signame, *myname;
 
-    cleanup(signo);
+    sudoers_cleanup(signo);
 #define	emsg	 " exiting due to signal: "
     myname = getprogname();
     signame = strsignal(signo);

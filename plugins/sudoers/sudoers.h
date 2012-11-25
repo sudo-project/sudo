@@ -88,7 +88,6 @@ struct sudo_user {
 #endif
     const char *cwd;
     char *iolog_file;
-    char *locale;
     GETGROUPS_T *gids;
     int   ngids;
     int   closefrom;
@@ -182,7 +181,6 @@ struct sudo_user {
 #define user_tty		(sudo_user.tty)
 #define user_ttypath		(sudo_user.ttypath)
 #define user_cwd		(sudo_user.cwd)
-#define user_locale		(sudo_user.locale)
 #define user_cmnd		(sudo_user.cmnd)
 #define user_args		(sudo_user.cmnd_args)
 #define user_base		(sudo_user.cmnd_base)

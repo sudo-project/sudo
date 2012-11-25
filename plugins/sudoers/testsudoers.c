@@ -78,7 +78,7 @@ void print_defaults(void);
 void print_privilege(struct privilege *);
 void print_userspecs(void);
 void usage(void) __attribute__((__noreturn__));
-void cleanup(int);
+void sudoers_cleanup(int);
 static void set_runaspw(const char *);
 static void set_runasgr(const char *);
 static int cb_runas_default(const char *);
@@ -148,7 +148,7 @@ main(int argc, char *argv[])
     setprogname(argc > 0 ? argv[0] : "testsudoers");
 #endif
 
-    setlocale(LC_ALL, "");
+    sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have own domain */
     textdomain("sudoers");
 
@@ -469,7 +469,7 @@ restore_perms(void)
 }
 
 void
-cleanup(int gotsignal)
+sudoers_cleanup(int gotsignal)
 {
     if (!gotsignal) {
 	sudo_endpwent();

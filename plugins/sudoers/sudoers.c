@@ -85,6 +85,7 @@
  */
 static char *find_editor(int nfiles, char **files, char ***argv_out);
 static int cb_runas_default(const char *);
+static int cb_sudoers_locale(const char *);
 static int set_cmnd(void);
 static void create_admin_success_flag(void);
 static void init_vars(char * const *);
@@ -548,7 +549,7 @@ init_vars(char * const envp[])
     (void) tzset();		/* set the timezone if applicable */
 #endif /* HAVE_TZSET */
 
-    user_locale = estrdup(setlocale(LC_ALL, NULL));
+    sudoers_initlocale(setlocale(LC_ALL, NULL), def_sudoers_locale);
 
     for (ep = envp; *ep; ep++) {
 	/* XXX - don't fill in if empty string */
@@ -599,6 +600,9 @@ init_vars(char * const envp[])
 
     /* Set runas callback. */
     sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
+
+    /* Set locale callback. */
+    sudo_defs_table[I_SUDOERS_LOCALE].callback = cb_sudoers_locale;
 
     /* It is now safe to use log_fatal() and set_perms() */
     debug_return;
@@ -894,6 +898,17 @@ cb_runas_default(const char *user)
     /* Only reset runaspw if user didn't specify one. */
     if (!runas_user && !runas_group)
 	set_runaspw(user);
+    return true;
+}
+
+/*
+/*
+ * Callback for sudoers_locale sudoers setting.
+ */
+static int
+cb_sudoers_locale(const char *locale)
+{
+    sudoers_initlocale(NULL, locale);
     return true;
 }
 
