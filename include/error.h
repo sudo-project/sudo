@@ -25,99 +25,99 @@
  */
 #if defined(SUDO_ERROR_WRAP) && SUDO_ERROR_WRAP == 0
 # if defined(__GNUC__) && __GNUC__ == 2
-#  define error(rval, fmt...) error2((rval), fmt)
-#  define errorx(rval, fmt...) errorx2((rval), fmt)
-#  define warning(fmt...) warning2(fmt)
-#  define warningx(fmt...) warningx2(fmt)
+#  define error(rval, fmt...) error_nodebug((rval), fmt)
+#  define errorx(rval, fmt...) errorx_nodebug((rval), fmt)
+#  define warning(fmt...) warning_nodebug(fmt)
+#  define warningx(fmt...) warningx_nodebug(fmt)
 # else
-#  define error(rval, ...) error2((rval), __VA_ARGS__)
-#  define errorx(rval, ...) errorx2((rval), __VA_ARGS__)
-#  define warning(...) warning2(__VA_ARGS__)
-#  define warningx(...) warningx2(__VA_ARGS__)
+#  define error(rval, ...) error_nodebug((rval), __VA_ARGS__)
+#  define errorx(rval, ...) errorx_nodebug((rval), __VA_ARGS__)
+#  define warning(...) warning_nodebug(__VA_ARGS__)
+#  define warningx(...) warningx_nodebug(__VA_ARGS__)
 # endif /* __GNUC__ == 2 */
-# define verror(rval, fmt, ap) error2((rval), (fmt), (ap))
-# define verrorx(rval, fmt, ap) errorx2((rval), (fmt), (ap))
-# define vwarning(fmt, ap) warning2((fmt), (ap))
-# define vwarningx(fmt, ap) warningx2((fmt), (ap))
+# define verror(rval, fmt, ap) error_nodebug((rval), (fmt), (ap))
+# define verrorx(rval, fmt, ap) errorx_nodebug((rval), (fmt), (ap))
+# define vwarning(fmt, ap) warning_nodebug((fmt), (ap))
+# define vwarningx(fmt, ap) warningx_nodebug((fmt), (ap))
 #else /* SUDO_ERROR_WRAP */
 # if defined(__GNUC__) && __GNUC__ == 2
 #  define error(rval, fmt...) do {					       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys, \
 	fmt);								       \
-    error2((rval), fmt);						       \
+    error_nodebug((rval), fmt);						       \
 } while (0)
 #  define errorx(rval, fmt...) do {					       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, fmt);	       \
-    errorx2((rval), fmt);						       \
+    errorx_nodebug((rval), fmt);						       \
 } while (0)
 #  define warning(fmt...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys, \
 	fmt);								       \
-    warning2(fmt);							       \
+    warning_nodebug(fmt);							       \
 } while (0)
 #  define warningx(fmt...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, fmt);	       \
-    warningx2(fmt);							       \
+    warningx_nodebug(fmt);							       \
 } while (0)
 # else
 #  define error(rval, ...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys, \
 	__VA_ARGS__);							       \
-    error2((rval), __VA_ARGS__);					       \
+    error_nodebug((rval), __VA_ARGS__);					       \
 } while (0)
 #  define errorx(rval, ...) do {					       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, __VA_ARGS__);    \
-    errorx2((rval), __VA_ARGS__);					       \
+    errorx_nodebug((rval), __VA_ARGS__);					       \
 } while (0)
 #  define warning(...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys,  \
 	__VA_ARGS__);							       \
-    warning2(__VA_ARGS__);						       \
+    warning_nodebug(__VA_ARGS__);						       \
 } while (0)
 #  define warningx(...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|sudo_debug_subsys, __VA_ARGS__);     \
-    warningx2(__VA_ARGS__);						       \
+    warningx_nodebug(__VA_ARGS__);						       \
 } while (0)
 # endif /* __GNUC__ == 2 */
 # define verror(rval, fmt, ap) do {						       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys, \
 	(fmt), (ap));							       \
-    verror2((rval), (fmt), (ap));					       \
+    verror_nodebug((rval), (fmt), (ap));					       \
 } while (0)
 # define verrorx(rval, fmt, ap) do {					       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), (ap));    \
-    verrorx2((rval), (fmt), (ap));					       \
+    verrorx_nodebug((rval), (fmt), (ap));					       \
 } while (0)
 # define vwarning(fmt, ap) do {						       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys,  \
 	(fmt), (ap));							       \
-    vwarning2((fmt), (ap));						       \
+    vwarning_nodebug((fmt), (ap));						       \
 } while (0)
 # define vwarningx(fmt, ap) do {						       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), (ap));     \
-    vwarningx2((fmt), (ap));						       \
+    vwarningx_nodebug((fmt), (ap));						       \
 } while (0)
 #endif /* SUDO_ERROR_WRAP */
 
-void	error2(int, const char *, ...) __printflike(2, 3) __attribute__((__noreturn__));
-void	errorx2(int, const char *, ...) __printflike(2, 3) __attribute__((__noreturn__));
-void	verror2(int, const char *, va_list ap) __attribute__((__noreturn__));
-void	verrorx2(int, const char *, va_list ap) __attribute__((__noreturn__));
-void	warning2(const char *, ...) __printflike(1, 2);
-void	warningx2(const char *, ...) __printflike(1, 2);
-void	vwarning2(const char *, va_list ap);
-void	vwarningx2(const char *, va_list ap);
+void	error_nodebug(int, const char *, ...) __printflike(2, 3) __attribute__((__noreturn__));
+void	errorx_nodebug(int, const char *, ...) __printflike(2, 3) __attribute__((__noreturn__));
+void	verror_nodebug(int, const char *, va_list ap) __attribute__((__noreturn__));
+void	verrorx_nodebug(int, const char *, va_list ap) __attribute__((__noreturn__));
+void	warning_nodebug(const char *, ...) __printflike(1, 2);
+void	warningx_nodebug(const char *, ...) __printflike(1, 2);
+void	vwarning_nodebug(const char *, va_list ap);
+void	vwarningx_nodebug(const char *, va_list ap);
 
 #endif /* _SUDO_ERROR_H_ */

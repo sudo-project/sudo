@@ -1243,7 +1243,7 @@ print_unused(void *v1, void *v2)
     struct alias *a = (struct alias *)v1;
     char *prefix = (char *)v2;
 
-    warningx2(_("%s: unused %s_Alias %s"), prefix,
+    warningx_nodebug(_("%s: unused %s_Alias %s"), prefix,
 	a->type == HOSTALIAS ? "Host" : a->type == CMNDALIAS ? "Cmnd" :
 	a->type == USERALIAS ? "User" : a->type == RUNASALIAS ? "Runas" :
 	"Unknown", a->name);

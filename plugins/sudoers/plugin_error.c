@@ -40,7 +40,7 @@ sigjmp_buf error_jmp;
 extern sudo_conv_t sudo_conv;
 
 void
-error2(int eval, const char *fmt, ...)
+error_nodebug(int eval, const char *fmt, ...)
 {
     va_list ap;
 
@@ -55,7 +55,7 @@ error2(int eval, const char *fmt, ...)
 }
 
 void
-errorx2(int eval, const char *fmt, ...)
+errorx_nodebug(int eval, const char *fmt, ...)
 {
     va_list ap;
 
@@ -70,7 +70,7 @@ errorx2(int eval, const char *fmt, ...)
 }
 
 void
-verror2(int eval, const char *fmt, va_list ap)
+verror_nodebug(int eval, const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
     sudoers_cleanup(0);
@@ -81,7 +81,7 @@ verror2(int eval, const char *fmt, va_list ap)
 }
 
 void
-verrorx2(int eval, const char *fmt, va_list ap)
+verrorx_nodebug(int eval, const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
     sudoers_cleanup(0);
@@ -92,7 +92,7 @@ verrorx2(int eval, const char *fmt, va_list ap)
 }
 
 void
-warning2(const char *fmt, ...)
+warning_nodebug(const char *fmt, ...)
 {
     va_list ap;
 
@@ -102,7 +102,7 @@ warning2(const char *fmt, ...)
 }
 
 void
-warningx2(const char *fmt, ...)
+warningx_nodebug(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -111,13 +111,13 @@ warningx2(const char *fmt, ...)
 }
 
 void
-vwarning2(const char *fmt, va_list ap)
+vwarning_nodebug(const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
 }
 
 void
-vwarningx2(const char *fmt, va_list ap)
+vwarningx_nodebug(const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
 }

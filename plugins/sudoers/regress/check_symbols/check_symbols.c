@@ -80,11 +80,11 @@ main(int argc, char *argv[])
 
     handle = dlopen(plugin_path, RTLD_LAZY|RTLD_GLOBAL);
     if (handle == NULL)
-	errorx2(1, "unable to dlopen %s: %s", plugin_path, dlerror());
+	errorx_nodebug(1, "unable to dlopen %s: %s", plugin_path, dlerror());
 
     fp = fopen(symbols_file, "r");
     if (fp == NULL)
-	error2(1, "unable to open %s", symbols_file);
+	error_nodebug(1, "unable to open %s", symbols_file);
 
     while (fgets(line, sizeof(line), fp) != NULL) {
 	ntests++;
@@ -92,7 +92,7 @@ main(int argc, char *argv[])
 	    *cp = '\0';
 	sym = dlsym(handle, line);
 	if (sym == NULL) {
-	    warningx2("unable to resolve symbol %s: %s", line, dlerror());
+	    warningx_nodebug("unable to resolve symbol %s: %s", line, dlerror());
 	    errors++;
 	}
     }
@@ -102,7 +102,7 @@ main(int argc, char *argv[])
      */
     sym = dlsym(handle, "user_in_group");
     if (sym != NULL) {
-	warningx2("able to resolve local symbol user_in_group");
+	warningx_nodebug("able to resolve local symbol user_in_group");
 	errors++;
     }
     ntests++;

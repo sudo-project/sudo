@@ -286,12 +286,12 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 	size_t nsize;
 
 	if (env.env_size > SIZE_MAX - 128) {
-	    errorx2(1, _("internal error, %s overflow"),
+	    errorx_nodebug(1, _("internal error, %s overflow"),
 		"sudo_putenv_nodebug()");
 	}
 	nsize = env.env_size + 128;
 	if (nsize > SIZE_MAX / sizeof(char *)) {
-	    errorx2(1, _("internal error, %s overflow"),
+	    errorx_nodebug(1, _("internal error, %s overflow"),
 		"sudo_putenv_nodebug()");
 	}
 	nenvp = realloc(env.envp, nsize * sizeof(char *));

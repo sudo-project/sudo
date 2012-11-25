@@ -33,7 +33,7 @@ static void _warning(int, const char *, va_list);
        void cleanup(int);
 
 void
-error2(int eval, const char *fmt, ...)
+error_nodebug(int eval, const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -44,58 +44,58 @@ error2(int eval, const char *fmt, ...)
 }
 
 void
-errorx2(int eval, const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    _warning(0, fmt, ap);
-    va_end(ap);
-    cleanup(0);
-    exit(eval);
-}
-
-void
-verror2(int eval, const char *fmt, va_list ap)
-{
-    _warning(1, fmt, ap);
-    cleanup(0);
-    exit(eval);
-}
-
-void
-verrorx2(int eval, const char *fmt, va_list ap)
-{
-    _warning(0, fmt, ap);
-    cleanup(0);
-    exit(eval);
-}
-
-void
-warning2(const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    _warning(1, fmt, ap);
-    va_end(ap);
-}
-
-void
-warningx2(const char *fmt, ...)
+errorx_nodebug(int eval, const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
     _warning(0, fmt, ap);
     va_end(ap);
+    cleanup(0);
+    exit(eval);
 }
 
 void
-vwarning2(const char *fmt, va_list ap)
+verror_nodebug(int eval, const char *fmt, va_list ap)
+{
+    _warning(1, fmt, ap);
+    cleanup(0);
+    exit(eval);
+}
+
+void
+verrorx_nodebug(int eval, const char *fmt, va_list ap)
+{
+    _warning(0, fmt, ap);
+    cleanup(0);
+    exit(eval);
+}
+
+void
+warning_nodebug(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    _warning(1, fmt, ap);
+    va_end(ap);
+}
+
+void
+warningx_nodebug(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    _warning(0, fmt, ap);
+    va_end(ap);
+}
+
+void
+vwarning_nodebug(const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
 }
 
 void
-vwarningx2(const char *fmt, va_list ap)
+vwarningx_nodebug(const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
 }
