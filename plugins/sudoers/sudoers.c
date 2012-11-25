@@ -71,7 +71,6 @@
 # include <selinux/selinux.h>
 #endif
 #include <ctype.h>
-#include <setjmp.h>
 #ifndef HAVE_GETADDRINFO
 # include "compat/getaddrinfo.h"
 #endif
@@ -119,9 +118,6 @@ static struct sudo_nss_list *snl;
 /* XXX - must be extern for audit bits of sudo_auth.c */
 int NewArgc;
 char **NewArgv;
-
-/* Declared here instead of plugin_error.c for static sudo builds. */
-sigjmp_buf error_jmp;
 
 int
 sudoers_policy_init(void *info, char * const envp[])
@@ -905,12 +901,12 @@ cb_runas_default(const char *user)
  * Cleanup hook for error()/errorx()
  */
 void
-sudoers_plugin_cleanup(int gotsignal)
+sudoers_cleanup(int gotsignal)
 {
     struct sudo_nss *nss;
 
     if (!gotsignal) {
-	debug_decl(sudoers_plugin_cleanup, SUDO_DEBUG_PLUGIN)
+	debug_decl(sudoers_cleanup, SUDO_DEBUG_PLUGIN)
 	if (snl != NULL) {
 	    tq_foreach_fwd(snl, nss)
 		nss->close(nss);

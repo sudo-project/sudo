@@ -44,7 +44,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <setjmp.h>
 #include <pwd.h>
 #include <grp.h>
 #ifdef HAVE_ZLIB_H

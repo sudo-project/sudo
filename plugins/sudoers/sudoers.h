@@ -23,6 +23,7 @@
 #define _SUDO_SUDOERS_H
 
 #include <limits.h>
+#include <setjmp.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
@@ -352,7 +353,7 @@ char *fmt_string(const char *, const char *);
 FILE *open_sudoers(const char *, bool, bool *);
 int sudoers_policy_init(void *info, char * const envp[]);
 int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], void *closure);
-void sudoers_plugin_cleanup(int);
+void sudoers_cleanup(int);
 
 /* policy.c */
 int sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group);
@@ -370,6 +371,9 @@ int group_plugin_query(const char *user, const char *group,
 
 /* setgroups.c */
 int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
+
+/* plugin_error.c */
+extern sigjmp_buf error_jmp;
 
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;

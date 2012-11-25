@@ -39,9 +39,9 @@
 #include "gettext.h"
 
 static void _warning(int, const char *, va_list);
-       void sudoers_plugin_cleanup(int);
+       void sudoers_cleanup(int);
 
-extern sigjmp_buf error_jmp;
+sigjmp_buf error_jmp;
 
 extern sudo_conv_t sudo_conv;
 
@@ -53,8 +53,11 @@ error2(int eval, const char *fmt, ...)
     va_start(ap, fmt);
     _warning(1, fmt, ap);
     va_end(ap);
-    sudoers_plugin_cleanup(0);
-    siglongjmp(error_jmp, eval);
+    sudoers_cleanup(0);
+    if (sudo_conv != NULL)
+	siglongjmp(error_jmp, eval);
+    else
+	exit(eval);
 }
 
 void
@@ -65,24 +68,33 @@ errorx2(int eval, const char *fmt, ...)
     va_start(ap, fmt);
     _warning(0, fmt, ap);
     va_end(ap);
-    sudoers_plugin_cleanup(0);
-    siglongjmp(error_jmp, eval);
+    sudoers_cleanup(0);
+    if (sudo_conv != NULL)
+	siglongjmp(error_jmp, eval);
+    else
+	exit(eval);
 }
 
 void
 verror2(int eval, const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
-    sudoers_plugin_cleanup(0);
-    siglongjmp(error_jmp, eval);
+    sudoers_cleanup(0);
+    if (sudo_conv != NULL)
+	siglongjmp(error_jmp, eval);
+    else
+	exit(eval);
 }
 
 void
 verrorx2(int eval, const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
-    sudoers_plugin_cleanup(0);
-    siglongjmp(error_jmp, eval);
+    sudoers_cleanup(0);
+    if (sudo_conv != NULL)
+	siglongjmp(error_jmp, eval);
+    else
+	exit(eval);
 }
 
 void
@@ -119,36 +131,51 @@ vwarningx2(const char *fmt, va_list ap)
 static void
 _warning(int use_errno, const char *fmt, va_list ap)
 {
-    struct sudo_conv_message msg[6];
-    struct sudo_conv_reply repl[6];
-    char *str;
-    int oldlocale, nmsgs = 4;
+    int oldlocale, serrno = errno;
 
     /* Warnings are displayed in the user's locale. */
     sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
 
-    evasprintf(&str, _(fmt), ap);
+    if (sudo_conv != NULL) {
+	struct sudo_conv_message msg[6];
+	struct sudo_conv_reply repl[6];
+	int nmsgs = 4;
+	char *str;
 
-    /* Call conversation function */
-    memset(&msg, 0, sizeof(msg));
-    msg[0].msg_type = SUDO_CONV_ERROR_MSG;
-    msg[0].msg = getprogname();
-    msg[1].msg_type = SUDO_CONV_ERROR_MSG;
-    msg[1].msg = _(": ");
-    msg[2].msg_type = SUDO_CONV_ERROR_MSG;
-    msg[2].msg = str;
-    if (use_errno) {
-	msg[3].msg_type = SUDO_CONV_ERROR_MSG;
-	msg[3].msg = _(": ");
-	msg[4].msg_type = SUDO_CONV_ERROR_MSG;
-	msg[4].msg = strerror(errno);
-	nmsgs = 6;
+	evasprintf(&str, _(fmt), ap);
+
+	/* Call conversation function */
+	memset(&msg, 0, sizeof(msg));
+	msg[0].msg_type = SUDO_CONV_ERROR_MSG;
+	msg[0].msg = getprogname();
+	msg[1].msg_type = SUDO_CONV_ERROR_MSG;
+	msg[1].msg = _(": ");
+	msg[2].msg_type = SUDO_CONV_ERROR_MSG;
+	msg[2].msg = str;
+	if (use_errno) {
+	    msg[3].msg_type = SUDO_CONV_ERROR_MSG;
+	    msg[3].msg = _(": ");
+	    msg[4].msg_type = SUDO_CONV_ERROR_MSG;
+	    msg[4].msg = strerror(errno);
+	    nmsgs = 6;
+	}
+	msg[nmsgs - 1].msg_type = SUDO_CONV_ERROR_MSG;
+	msg[nmsgs - 1].msg = "\n";
+	memset(&repl, 0, sizeof(repl));
+	sudo_conv(nmsgs, msg, repl);
+	efree(str);
+    } else {
+	fputs(getprogname(), stderr);
+	if (fmt != NULL) {
+	    fputs(_(": "), stderr);
+	    vfprintf(stderr, _(fmt), ap);
+	}
+	if (use_errno) {
+	    fputs(_(": "), stderr);
+	    fputs(strerror(serrno), stderr);
+	}
+	putc('\n', stderr);
     }
-    msg[nmsgs - 1].msg_type = SUDO_CONV_ERROR_MSG;
-    msg[nmsgs - 1].msg = "\n";
-    memset(&repl, 0, sizeof(repl));
-    sudo_conv(nmsgs, msg, repl);
-    efree(str);
 
     sudoers_setlocale(oldlocale, NULL);
 }

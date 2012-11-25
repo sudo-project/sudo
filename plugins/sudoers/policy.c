@@ -43,7 +43,6 @@
 #include <errno.h>
 #include <grp.h>
 #include <pwd.h>
-#include <setjmp.h>
 
 #include "sudoers.h"
 #include "sudoers_version.h"
@@ -581,7 +580,7 @@ sudoers_policy_invalidate(int remove)
     user_cmnd = "kill";
     if (sigsetjmp(error_jmp, 1) == 0) {
 	remove_timestamp(remove);
-	sudoers_plugin_cleanup(0);
+	sudoers_cleanup(0);
     }
 
     debug_return;
