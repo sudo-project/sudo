@@ -3208,12 +3208,12 @@ fi
 case "$lt_cv_dlopen" in
     dlopen)
 	AC_DEFINE(HAVE_DLOPEN)
-	SUDO_OBJS="$SUDO_OBJS locale_stub.lo"
+	SUDO_OBJS="$SUDO_OBJS locale_stub.o"
 	LT_STATIC="--tag=disable-static"
 	;;
     shl_load)
 	AC_DEFINE(HAVE_SHL_LOAD)
-	SUDO_OBJS="$SUDO_OBJS locale_stub.lo"
+	SUDO_OBJS="$SUDO_OBJS locale_stub.o"
 	LT_STATIC="--tag=disable-static"
 	AC_LIBOBJ(dlopen)
 	;;

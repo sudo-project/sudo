@@ -20191,13 +20191,13 @@ case "$lt_cv_dlopen" in
     dlopen)
 	$as_echo "#define HAVE_DLOPEN 1" >>confdefs.h
 
-	SUDO_OBJS="$SUDO_OBJS locale_stub.lo"
+	SUDO_OBJS="$SUDO_OBJS locale_stub.o"
 	LT_STATIC="--tag=disable-static"
 	;;
     shl_load)
 	$as_echo "#define HAVE_SHL_LOAD 1" >>confdefs.h
 
-	SUDO_OBJS="$SUDO_OBJS locale_stub.lo"
+	SUDO_OBJS="$SUDO_OBJS locale_stub.o"
 	LT_STATIC="--tag=disable-static"
 	case " $LIBOBJS " in
   *" dlopen.$ac_objext "* ) ;;
