@@ -3411,13 +3411,8 @@ switch_dir(struct include_stack *stack, char *dirpath)
 
     if (!(dir = opendir(dirpath))) {
 	if (errno != ENOENT) {
-	    char *errbuf;
-	    if (asprintf(&errbuf, _("%s: %s"), dirpath, strerror(errno)) != -1) {
-		sudoerserror(errbuf);
-		free(errbuf);
-	    } else {
-		sudoerserror(strerror(errno));
-	    }
+	    warning("%s", dirpath);
+	    sudoerserror(NULL);
 	}
 	goto done;
     }
@@ -3539,14 +3534,15 @@ _push_include(char *path, bool isdir)
     /* push current state onto stack */
     if (idepth >= istacksize) {
 	if (idepth > MAX_SUDOERS_DEPTH) {
-	    sudoerserror(_("too many levels of includes"));
+	    sudoerserror(N_("too many levels of includes"));
 	    debug_return_bool(false);
 	}
 	istacksize += SUDOERS_STACK_INCREMENT;
 	istack = (struct include_stack *) realloc(istack,
 	    sizeof(*istack) * istacksize);
 	if (istack == NULL) {
-	    sudoerserror(strerror(errno));
+	    warning(NULL);
+	    sudoerserror(NULL);
 	    debug_return_bool(false);
 	}
     }
@@ -3697,7 +3693,8 @@ parse_include(char *base)
     len += (int)(ep - cp);
     path = pp = malloc(len + dirlen + 1);
     if (path == NULL) {
-	sudoerserror(strerror(errno));
+	warning(NULL);
+	sudoerserror(NULL);
 	debug_return_str(NULL);
     }
     if (dirlen) {

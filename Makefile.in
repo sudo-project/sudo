@@ -180,10 +180,11 @@ update-pot:
 		case "$$domain" in \
 		    sudo) tmpfiles=; cfiles="src/*c common/*c compat/*c";; \
 		    sudoers) \
+			echo "syntax error" > confstr.sh; \
 			sed -n -e 's/^badpass_message="/gettext "/p' \
 			    -e 's/^passprompt="/gettext "/p' \
 			    -e 's/^mailsub="/gettext "/p' configure.in \
-			    > confstr.sh; \
+			    >> confstr.sh; \
 			tmpfiles=confstr.sh; \
 			cfiles="plugins/sudoers/*.c plugins/sudoers/auth/*.c";; \
 		    *) echo unknown domain $$domain; continue;; \

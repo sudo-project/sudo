@@ -111,7 +111,8 @@ fill_txt(const char *src, int len, int olen)
 
     dst = olen ? realloc(sudoerslval.string, olen + len + 1) : malloc(len + 1);
     if (dst == NULL) {
-	sudoerserror(strerror(errno));
+	warning(NULL);
+	sudoerserror(NULL);
 	debug_return_bool(false);
     }
     sudoerslval.string = dst;
@@ -165,7 +166,8 @@ fill_cmnd(const char *src, int len)
 
     dst = sudoerslval.command.cmnd = (char *) malloc(len + 1);
     if (sudoerslval.command.cmnd == NULL) {
-	sudoerserror(strerror(errno));
+	warning(NULL);
+	sudoerserror(NULL);
 	debug_return_bool(false);
     }
 
@@ -205,7 +207,8 @@ fill_args(const char *s, int len, int addspace)
 	    (char *) malloc(arg_size);
 	if (p == NULL) {
 	    efree(sudoerslval.command.args);
-	    sudoerserror(strerror(errno));
+	    warning(NULL);
+	    sudoerserror(NULL);
 	    debug_return_bool(false);
 	} else
 	    sudoerslval.command.args = p;
@@ -216,7 +219,8 @@ fill_args(const char *s, int len, int addspace)
     if (addspace)
 	*p++ = ' ';
     if (strlcpy(p, s, arg_size - (p - sudoerslval.command.args)) != len) {
-	sudoerserror(_("fill_args: buffer overflow"));	/* paranoia */
+	warningx(N_("fill_args: buffer overflow"));	/* paranoia */
+	sudoerserror(NULL);
 	debug_return_bool(false);
     }
     arg_len = new_len;
