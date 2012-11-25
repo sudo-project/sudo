@@ -112,6 +112,7 @@ set_perms(int perm)
 {
     struct perm_state *state, *ostate = NULL;
     char errbuf[1024];
+    const char *errstr = errbuf;
     int noexit;
     debug_decl(set_perms, SUDO_DEBUG_PERMS)
 
@@ -119,7 +120,7 @@ set_perms(int perm)
     CLR(perm, PERM_MASK);
 
     if (perm_stack_depth == PERM_STACK_MAX) {
-	strlcpy(errbuf, _("perm stack overflow"), sizeof(errbuf));
+	errstr = N_("perm stack overflow");
 	errno = EINVAL;
 	goto bad;
     }
@@ -127,7 +128,7 @@ set_perms(int perm)
     state = &perm_stack[perm_stack_depth];
     if (perm != PERM_INITIAL) {
 	if (perm_stack_depth == 0) {
-	    strlcpy(errbuf, _("perm stack underflow"), sizeof(errbuf));
+	    errstr = N_("perm stack underflow");
 	    errno = EINVAL;
 	    goto bad;
 	}
@@ -139,12 +140,12 @@ set_perms(int perm)
 	/* Stash initial state */
 #ifdef HAVE_GETRESUID
 	if (getresuid(&state->ruid, &state->euid, &state->suid)) {
-	    strlcpy(errbuf, "PERM_INITIAL: getresuid", sizeof(errbuf));
+	    errstr = "PERM_INITIAL: getresuid";
 	    goto bad;
 
 	}
 	if (getresgid(&state->rgid, &state->egid, &state->sgid)) {
-	    strlcpy(errbuf, "PERM_INITIAL: getresgid", sizeof(errbuf));
+	    errstr = "PERM_INITIAL: getresgid";
 	    goto bad;
 	}
 #else
@@ -186,7 +187,7 @@ set_perms(int perm)
 	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
 	    (int)state->rgid, (int)state->egid, (int)state->sgid);
 	if (GID_CHANGED && setresgid(ID(rgid), ID(egid), ID(sgid))) {
-	    strlcpy(errbuf, _("unable to change to root gid"), sizeof(errbuf));
+	    errstr = N_("unable to change to root gid");
 	    goto bad;
 	}
 	state->grlist = ostate->grlist;
@@ -210,7 +211,7 @@ set_perms(int perm)
 	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
-		strlcpy(errbuf, "PERM_USER: setgroups", sizeof(errbuf));
+		errstr = "PERM_USER: setgroups";
 		goto bad;
 	    }
 	}
@@ -247,7 +248,7 @@ set_perms(int perm)
 	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
-		strlcpy(errbuf, "PERM_FULL_USER: setgroups", sizeof(errbuf));
+		errstr = "PERM_FULL_USER: setgroups";
 		goto bad;
 	    }
 	}
@@ -275,7 +276,7 @@ set_perms(int perm)
 	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
 	    (int)state->rgid, (int)state->egid, (int)state->sgid);
 	if (GID_CHANGED && setresgid(ID(rgid), ID(egid), ID(sgid))) {
-	    strlcpy(errbuf, _("unable to change to runas gid"), sizeof(errbuf));
+	    errstr = N_("unable to change to runas gid");
 	    goto bad;
 	}
 	state->grlist = runas_setgroups();
@@ -287,7 +288,7 @@ set_perms(int perm)
 	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
 	    (int)state->ruid, (int)state->euid, (int)state->suid);
 	if (UID_CHANGED && setresuid(ID(ruid), ID(euid), ID(suid))) {
-	    strlcpy(errbuf, _("unable to change to runas uid"), sizeof(errbuf));
+	    errstr = N_("unable to change to runas uid");
 	    goto bad;
 	}
 	break;
@@ -305,7 +306,7 @@ set_perms(int perm)
 	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
 	    (int)state->rgid, (int)state->egid, (int)state->sgid);
 	if (GID_CHANGED && setresgid(ID(rgid), ID(egid), ID(sgid))) {
-	    strlcpy(errbuf, _("unable to change to sudoers gid"), sizeof(errbuf));
+	    errstr = N_("unable to change to sudoers gid");
 	    goto bad;
 	}
 
@@ -357,7 +358,7 @@ set_perms(int perm)
     perm_stack_depth++;
     debug_return_bool(1);
 bad:
-    warningx("%s: %s", errbuf,
+    warningx("%s: %s", _(errstr),
 	errno == EAGAIN ? _("too many processes") : strerror(errno));
     if (noexit)
 	debug_return_bool(0);
@@ -434,6 +435,7 @@ set_perms(int perm)
 {
     struct perm_state *state, *ostate = NULL;
     char errbuf[1024];
+    const char *errstr = errbuf;
     int noexit;
     debug_decl(set_perms, SUDO_DEBUG_PERMS)
 
@@ -441,7 +443,7 @@ set_perms(int perm)
     CLR(perm, PERM_MASK);
 
     if (perm_stack_depth == PERM_STACK_MAX) {
-	strlcpy(errbuf, _("perm stack overflow"), sizeof(errbuf));
+	errstr = N_("perm stack overflow");
 	errno = EINVAL;
 	goto bad;
     }
@@ -449,7 +451,7 @@ set_perms(int perm)
     state = &perm_stack[perm_stack_depth];
     if (perm != PERM_INITIAL) {
 	if (perm_stack_depth == 0) {
-	    strlcpy(errbuf, _("perm stack underflow"), sizeof(errbuf));
+	    errstr = N_("perm stack underflow");
 	    errno = EINVAL;
 	    goto bad;
 	}
@@ -496,7 +498,7 @@ set_perms(int perm)
 	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
 	    (int)state->rgid, (int)state->egid, (int)state->sgid);
 	if (GID_CHANGED && setgidx(ID_EFFECTIVE, ROOT_GID)) {
-	    strlcpy(errbuf, _("unable to change to root gid"), sizeof(errbuf));
+	    errstr = N_("unable to change to root gid");
 	    goto bad;
 	}
 	state->grlist = ostate->grlist;
@@ -520,7 +522,7 @@ set_perms(int perm)
 	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
-		strlcpy(errbuf, "PERM_USER: setgroups", sizeof(errbuf));
+		errstr = "PERM_USER: setgroups";
 		goto bad;
 	    }
 	}
@@ -565,7 +567,7 @@ set_perms(int perm)
 	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
-		strlcpy(errbuf, "PERM_FULL_USER: setgroups", sizeof(errbuf));
+		errstr = "PERM_FULL_USER: setgroups";
 		goto bad;
 	    }
 	}
@@ -593,7 +595,7 @@ set_perms(int perm)
 	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
 	    (int)state->rgid, (int)state->egid, (int)state->sgid);
 	if (GID_CHANGED && setgidx(ID_EFFECTIVE, state->egid)) {
-	    strlcpy(errbuf, _("unable to change to runas gid"), sizeof(errbuf));
+	    errstr = N_("unable to change to runas gid");
 	    goto bad;
 	}
 	state->grlist = runas_setgroups();
@@ -605,7 +607,7 @@ set_perms(int perm)
 	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
 	    (int)state->ruid, (int)state->euid, (int)state->suid);
 	if (UID_CHANGED && setuidx(ID_EFFECTIVE, state->euid)) {
-	    strlcpy(errbuf, _("unable to change to runas uid"), sizeof(errbuf));
+	    errstr = N_("unable to change to runas uid");
 	    goto bad;
 	}
 	break;
@@ -623,7 +625,7 @@ set_perms(int perm)
 	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
 	    (int)state->rgid, (int)state->egid, (int)state->sgid);
 	if (GID_CHANGED && setgidx(ID_EFFECTIVE, sudoers_gid)) {
-	    strlcpy(errbuf, _("unable to change to sudoers gid"), sizeof(errbuf));
+	    errstr = N_("unable to change to sudoers gid");
 	    goto bad;
 	}
 
@@ -693,7 +695,7 @@ set_perms(int perm)
     perm_stack_depth++;
     debug_return_bool(1);
 bad:
-    warningx("%s: %s", errbuf,
+    warningx("%s: %s", _(errstr),
 	errno == EAGAIN ? _("too many processes") : strerror(errno));
     if (noexit)
 	debug_return_bool(0);
@@ -834,6 +836,7 @@ set_perms(int perm)
 {
     struct perm_state *state, *ostate = NULL;
     char errbuf[1024];
+    const char *errstr = errbuf;
     int noexit;
     debug_decl(set_perms, SUDO_DEBUG_PERMS)
 
@@ -841,7 +844,7 @@ set_perms(int perm)
     CLR(perm, PERM_MASK);
 
     if (perm_stack_depth == PERM_STACK_MAX) {
-	strlcpy(errbuf, _("perm stack overflow"), sizeof(errbuf));
+	errstr = N_("perm stack overflow");
 	errno = EINVAL;
 	goto bad;
     }
@@ -849,7 +852,7 @@ set_perms(int perm)
     state = &perm_stack[perm_stack_depth];
     if (perm != PERM_INITIAL) {
 	if (perm_stack_depth == 0) {
-	    strlcpy(errbuf, _("perm stack underflow"), sizeof(errbuf));
+	    errstr = N_("perm stack underflow");
 	    errno = EINVAL;
 	    goto bad;
 	}
@@ -923,7 +926,7 @@ set_perms(int perm)
 	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
-		strlcpy(errbuf, "PERM_USER: setgroups", sizeof(errbuf));
+		errstr = "PERM_USER: setgroups";
 		goto bad;
 	    }
 	}
@@ -955,7 +958,7 @@ set_perms(int perm)
 	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
-		strlcpy(errbuf, "PERM_FULL_USER: setgroups", sizeof(errbuf));
+		errstr = "PERM_FULL_USER: setgroups";
 		goto bad;
 	    }
 	}
@@ -978,7 +981,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
 	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
 	if (GID_CHANGED && setregid(ID(rgid), ID(egid))) {
-	    strlcpy(errbuf, _("unable to change to runas gid"), sizeof(errbuf));
+	    errstr = N_("unable to change to runas gid");
 	    goto bad;
 	}
 	state->grlist = runas_setgroups();
@@ -988,7 +991,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
 	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
 	if (UID_CHANGED && setreuid(ID(ruid), ID(euid))) {
-	    strlcpy(errbuf, _("unable to change to runas uid"), sizeof(errbuf));
+	    errstr = N_("unable to change to runas uid");
 	    goto bad;
 	}
 	break;
@@ -1004,7 +1007,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
 	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
 	if (GID_CHANGED && setregid(ID(rgid), ID(egid))) {
-	    strlcpy(errbuf, _("unable to change to sudoers gid"), sizeof(errbuf));
+	    errstr = N_("unable to change to sudoers gid");
 	    goto bad;
 	}
 
@@ -1049,7 +1052,7 @@ set_perms(int perm)
     perm_stack_depth++;
     debug_return_bool(1);
 bad:
-    warningx("%s: %s", errbuf,
+    warningx("%s: %s", _(errstr),
 	errno == EAGAIN ? _("too many processes") : strerror(errno));
     if (noexit)
 	debug_return_bool(0);
@@ -1128,6 +1131,7 @@ set_perms(int perm)
 {
     struct perm_state *state, *ostate = NULL;
     char errbuf[1024];
+    const char *errstr = errbuf;
     int noexit;
     debug_decl(set_perms, SUDO_DEBUG_PERMS)
 
@@ -1135,7 +1139,7 @@ set_perms(int perm)
     CLR(perm, PERM_MASK);
 
     if (perm_stack_depth == PERM_STACK_MAX) {
-	strlcpy(errbuf, _("perm stack overflow"), sizeof(errbuf));
+	errstr = N_("perm stack overflow");
 	errno = EINVAL;
 	goto bad;
     }
@@ -1143,7 +1147,7 @@ set_perms(int perm)
     state = &perm_stack[perm_stack_depth];
     if (perm != PERM_INITIAL) {
 	if (perm_stack_depth == 0) {
-	    strlcpy(errbuf, _("perm stack underflow"), sizeof(errbuf));
+	    errstr = N_("perm stack underflow");
 	    errno = EINVAL;
 	    goto bad;
 	}
@@ -1194,7 +1198,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
 	    (int)ostate->egid, ROOT_GID, ROOT_GID);
 	if (GID_CHANGED && setegid(ROOT_GID)) {
-	    strlcpy(errbuf, _("unable to change to root gid"), sizeof(errbuf));
+	    errstr = N_("unable to change to root gid");
 	    goto bad;
 	}
 	state->grlist = ostate->grlist;
@@ -1216,7 +1220,7 @@ set_perms(int perm)
 	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
-		strlcpy(errbuf, "PERM_USER: setgroups", sizeof(errbuf));
+		errstr = "PERM_USER: setgroups";
 		goto bad;
 	    }
 	}
@@ -1248,7 +1252,7 @@ set_perms(int perm)
 	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
-		strlcpy(errbuf, "PERM_FULL_USER: setgroups", sizeof(errbuf));
+		errstr = "PERM_FULL_USER: setgroups";
 		goto bad;
 	    }
 	}
@@ -1271,7 +1275,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
 	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
 	if (GID_CHANGED && setegid(state->egid)) {
-	    strlcpy(errbuf, _("unable to change to runas gid"), sizeof(errbuf));
+	    errstr = N_("unable to change to runas gid");
 	    goto bad;
 	}
 	state->grlist = runas_setgroups();
@@ -1281,7 +1285,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
 	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
 	if (seteuid(state->euid)) {
-	    strlcpy(errbuf, _("unable to change to runas uid"), sizeof(errbuf));
+	    errstr = N_("unable to change to runas uid");
 	    goto bad;
 	}
 	break;
@@ -1297,7 +1301,7 @@ set_perms(int perm)
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
 	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
 	if (GID_CHANGED && setegid(sudoers_gid)) {
-	    strlcpy(errbuf, _("unable to change to sudoers gid"), sizeof(errbuf));
+	    errstr = N_("unable to change to sudoers gid");
 	    goto bad;
 	}
 
@@ -1342,7 +1346,7 @@ set_perms(int perm)
     perm_stack_depth++;
     debug_return_bool(1);
 bad:
-    warningx("%s: %s", errbuf,
+    warningx("%s: %s", _(errstr),
 	errno == EAGAIN ? _("too many processes") : strerror(errno));
     if (noexit)
 	debug_return_bool(0);
@@ -1417,6 +1421,7 @@ set_perms(int perm)
 {
     struct perm_state *state, *ostate = NULL;
     char errbuf[1024];
+    const char *errstr = errbuf;
     int noexit;
     debug_decl(set_perms, SUDO_DEBUG_PERMS)
 
@@ -1424,7 +1429,7 @@ set_perms(int perm)
     CLR(perm, PERM_MASK);
 
     if (perm_stack_depth == PERM_STACK_MAX) {
-	strlcpy(errbuf, _("perm stack overflow"), sizeof(errbuf));
+	errstr = N_("perm stack overflow");
 	errno = EINVAL;
 	goto bad;
     }
@@ -1432,7 +1437,7 @@ set_perms(int perm)
     state = &perm_stack[perm_stack_depth];
     if (perm != PERM_INITIAL) {
 	if (perm_stack_depth == 0) {
-	    strlcpy(errbuf, _("perm stack underflow"), sizeof(errbuf));
+	    errstr = N_("perm stack underflow");
 	    errno = EINVAL;
 	    goto bad;
 	}
@@ -1464,7 +1469,7 @@ set_perms(int perm)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_ROOT: gid: "
 	    "[%d] -> [%d]", __func__, (int)ostate->rgid, (int)state->rgid);
 	if (setgid(ROOT_GID)) {
-	    strlcpy(errbuf, _("unable to change to root gid"), sizeof(errbuf));
+	    errstr = N_("unable to change to root gid");
 	    goto bad;
 	}
 	break;
@@ -1478,7 +1483,7 @@ set_perms(int perm)
 	sudo_grlist_addref(state->grlist);
 	if (state->grlist != ostate->grlist) {
 	    if (sudo_setgroups(state->grlist->ngids, state->grlist->gids)) {
-		strlcpy(errbuf, "PERM_FULL_USER: setgroups", sizeof(errbuf));
+		errstr = "PERM_FULL_USER: setgroups";
 		goto bad;
 	    }
 	}
@@ -1507,7 +1512,7 @@ set_perms(int perm)
     perm_stack_depth++;
     debug_return_bool(1);
 bad:
-    warningx("%s: %s", errbuf,
+    warningx("%s: %s", _(errstr),
 	errno == EAGAIN ? _("too many processes") : strerror(errno));
     if (noexit)
 	debug_return_bool(0);
