@@ -71,13 +71,13 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 
     if (info->path[0] == '/') {
 	if (strlcpy(path, info->path, sizeof(path)) >= sizeof(path)) {
-	    warningx(N_("%s: %s"), info->path, strerror(ENAMETOOLONG));
+	    warningx(_("%s: %s"), info->path, strerror(ENAMETOOLONG));
 	    goto done;
 	}
     } else {
 	if (snprintf(path, sizeof(path), "%s%s", _PATH_SUDO_PLUGIN_DIR,
 	    info->path) >= sizeof(path)) {
-	    warningx(N_("%s%s: %s"), _PATH_SUDO_PLUGIN_DIR, info->path,
+	    warningx(_("%s%s: %s"), _PATH_SUDO_PLUGIN_DIR, info->path,
 		strerror(ENAMETOOLONG));
 	    goto done;
 	}
@@ -87,40 +87,40 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	goto done;
     }
     if (sb.st_uid != ROOT_UID) {
-	warningx(N_("%s must be owned by uid %d"), path, ROOT_UID);
+	warningx(_("%s must be owned by uid %d"), path, ROOT_UID);
 	goto done;
     }
     if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
-	warningx(N_("%s must be only be writable by owner"), path);
+	warningx(_("%s must be only be writable by owner"), path);
 	goto done;
     }
 
     /* Open plugin and map in symbol */
     handle = dlopen(path, RTLD_LAZY|RTLD_GLOBAL);
     if (!handle) {
-	warningx(N_("unable to dlopen %s: %s"), path, dlerror());
+	warningx(_("unable to dlopen %s: %s"), path, dlerror());
 	goto done;
     }
     plugin = dlsym(handle, info->symbol_name);
     if (!plugin) {
-	warningx(N_("%s: unable to find symbol %s"), path,
+	warningx(_("%s: unable to find symbol %s"), path,
 	    info->symbol_name);
 	goto done;
     }
 
     if (plugin->type != SUDO_POLICY_PLUGIN && plugin->type != SUDO_IO_PLUGIN) {
-	warningx(N_("%s: unknown policy type %d"), path, plugin->type);
+	warningx(_("%s: unknown policy type %d"), path, plugin->type);
 	goto done;
     }
     if (SUDO_API_VERSION_GET_MAJOR(plugin->version) != SUDO_API_VERSION_MAJOR) {
-	warningx(N_("%s: incompatible policy major version %d, expected %d"),
+	warningx(_("%s: incompatible policy major version %d, expected %d"),
 	    path, SUDO_API_VERSION_GET_MAJOR(plugin->version),
 	    SUDO_API_VERSION_MAJOR);
 	goto done;
     }
     if (plugin->type == SUDO_POLICY_PLUGIN) {
 	if (policy_plugin->handle) {
-	    warningx(N_("%s: only a single policy plugin may be loaded"),
+	    warningx(_("%s: only a single policy plugin may be loaded"),
 		_PATH_SUDO_CONF);
 	    goto done;
 	}
@@ -197,7 +197,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	}
     }
     if (policy_plugin->u.policy->check_policy == NULL) {
-	warningx(N_("policy plugin %s does not include a check_policy method"),
+	warningx(_("policy plugin %s does not include a check_policy method"),
 	    policy_plugin->name);
 	rval = false;
 	goto done;

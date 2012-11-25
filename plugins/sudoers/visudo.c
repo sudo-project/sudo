@@ -415,18 +415,18 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 	 * Sanity checks.
 	 */
 	if (stat(sp->tpath, &sb) < 0) {
-	    warningx(N_("unable to stat temporary file (%s), %s unchanged"),
+	    warningx(_("unable to stat temporary file (%s), %s unchanged"),
 		sp->tpath, sp->path);
 	    goto done;
 	}
 	if (sb.st_size == 0 && orig_size != 0) {
-	    warningx(N_("zero length temporary file (%s), %s unchanged"),
+	    warningx(_("zero length temporary file (%s), %s unchanged"),
 		sp->tpath, sp->path);
 	    sp->modified = true;
 	    goto done;
 	}
     } else {
-	warningx(N_("editor (%s) failed, %s unchanged"), editor, sp->path);
+	warningx(_("editor (%s) failed, %s unchanged"), editor, sp->path);
 	goto done;
     }
 
@@ -449,7 +449,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
     if (modified)
 	sp->modified = modified;
     else
-	warningx(N_("%s unchanged"), sp->tpath);
+	warningx(_("%s unchanged"), sp->tpath);
 
     rval = true;
 done:
@@ -488,7 +488,7 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 	/* Parse the sudoers temp file */
 	sudoersrestart(fp);
 	if (sudoersparse() && !parse_error) {
-	    warningx(N_("unabled to parse temporary file (%s), unknown error"),
+	    warningx(_("unabled to parse temporary file (%s), unknown error"),
 		sp->tpath);
 	    parse_error = true;
 	    errorfile = sp->path;
@@ -579,21 +579,21 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 	if (fstat(sp->fd, &sb) == -1)
 	    error(1, _("unable to stat %s"), sp->path);
 	if (chown(sp->tpath, sb.st_uid, sb.st_gid) != 0) {
-	    warning(N_("unable to set (uid, gid) of %s to (%u, %u)"),
+	    warning(_("unable to set (uid, gid) of %s to (%u, %u)"),
 		sp->tpath, (unsigned int)sb.st_uid, (unsigned int)sb.st_gid);
 	}
 	if (chmod(sp->tpath, sb.st_mode & 0777) != 0) {
-	    warning(N_("unable to change mode of %s to 0%o"), sp->tpath,
+	    warning(_("unable to change mode of %s to 0%o"), sp->tpath,
 		(unsigned int)(sb.st_mode & 0777));
 	}
     } else {
 	if (chown(sp->tpath, SUDOERS_UID, SUDOERS_GID) != 0) {
-	    warning(N_("unable to set (uid, gid) of %s to (%u, %u)"),
+	    warning(_("unable to set (uid, gid) of %s to (%u, %u)"),
 		sp->tpath, SUDOERS_UID, SUDOERS_GID);
 	    goto done;
 	}
 	if (chmod(sp->tpath, SUDOERS_MODE) != 0) {
-	    warning(N_("unable to change mode of %s to 0%o"), sp->tpath,
+	    warning(_("unable to change mode of %s to 0%o"), sp->tpath,
 		SUDOERS_MODE);
 	    goto done;
 	}
@@ -610,7 +610,7 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
     } else {
 	if (errno == EXDEV) {
 	    char *av[4];
-	    warningx(N_("%s and %s not on the same file system, using mv to rename"),
+	    warningx(_("%s and %s not on the same file system, using mv to rename"),
 	      sp->tpath, sp->path);
 
 	    /* Build up argument vector for the command */
@@ -624,7 +624,7 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 
 	    /* And run it... */
 	    if (run_command(_PATH_MV, av)) {
-		warningx(N_("command failed: '%s %s %s', %s unchanged"),
+		warningx(_("command failed: '%s %s %s', %s unchanged"),
 		    _PATH_MV, sp->tpath, sp->path, sp->path);
 		(void) unlink(sp->tpath);
 		efree(sp->tpath);
@@ -634,7 +634,7 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
 	    efree(sp->tpath);
 	    sp->tpath = NULL;
 	} else {
-	    warning(N_("error renaming %s, %s unchanged"), sp->tpath, sp->path);
+	    warning(_("error renaming %s, %s unchanged"), sp->tpath, sp->path);
 	    (void) unlink(sp->tpath);
 	    goto done;
 	}
@@ -758,7 +758,7 @@ run_command(char *path, char **argv)
 	    sudo_endgrent();
 	    closefrom(STDERR_FILENO + 1);
 	    execv(path, argv);
-	    warning(N_("unable to run %s"), path);
+	    warning(_("unable to run %s"), path);
 	    _exit(127);
 	    break;	/* NOTREACHED */
     }
@@ -810,13 +810,13 @@ check_syntax(char *sudoers_path, bool quiet, bool strict, bool oldperms)
 	sudoers_path = "stdin";
     } else if ((sudoersin = fopen(sudoers_path, "r")) == NULL) {
 	if (!quiet)
-	    warning(N_("unable to open %s"), sudoers_path);
+	    warning(_("unable to open %s"), sudoers_path);
 	goto done;
     }
     init_parser(sudoers_path, quiet);
     if (sudoersparse() && !parse_error) {
 	if (!quiet)
-	    warningx(N_("failed to parse %s file, unknown error"), sudoers_path);
+	    warningx(_("failed to parse %s file, unknown error"), sudoers_path);
 	parse_error = true;
 	errorfile = sudoers_path;
     }

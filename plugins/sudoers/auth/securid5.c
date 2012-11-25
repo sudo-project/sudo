@@ -78,7 +78,7 @@ sudo_securid_init(struct passwd *pw, sudo_auth *auth)
     if (AceInitialize() != SD_FALSE)
 	debug_return_int(AUTH_SUCCESS);
 
-    warningx(N_("failed to initialise the ACE API library"));
+    warningx(_("failed to initialise the ACE API library"));
     debug_return_int(AUTH_FATAL);
 }
 
@@ -104,7 +104,7 @@ sudo_securid_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 
     /* Re-initialize SecurID every time. */
     if (SD_Init(sd) != ACM_OK) {
-	warningx(N_("unable to contact the SecurID server"));
+	warningx(_("unable to contact the SecurID server"));
 	debug_return_int(AUTH_FATAL);
     }
 
@@ -113,23 +113,23 @@ sudo_securid_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 
     switch (retval) {
 	case ACM_OK:
-		warningx(N_("User ID locked for SecurID Authentication"));
+		warningx(_("User ID locked for SecurID Authentication"));
 		debug_return_int(AUTH_SUCCESS);
 
         case ACE_UNDEFINED_USERNAME:
-		warningx(N_("invalid username length for SecurID"));
+		warningx(_("invalid username length for SecurID"));
 		debug_return_int(AUTH_FATAL);
 
 	case ACE_ERR_INVALID_HANDLE:
-		warningx(N_("invalid Authentication Handle for SecurID"));
+		warningx(_("invalid Authentication Handle for SecurID"));
 		debug_return_int(AUTH_FATAL);
 
 	case ACM_ACCESS_DENIED:
-		warningx(N_("SecurID communication failed"));
+		warningx(_("SecurID communication failed"));
 		debug_return_int(AUTH_FATAL);
 
 	default:
-		warningx(N_("unknown SecurID error"));
+		warningx(_("unknown SecurID error"));
 		debug_return_int(AUTH_FATAL);
 	}
 }
@@ -163,17 +163,17 @@ sudo_securid_verify(struct passwd *pw, char *pass, sudo_auth *auth)
 		break;
 
 	case ACE_UNDEFINED_PASSCODE:
-		warningx(N_("invalid passcode length for SecurID"));
+		warningx(_("invalid passcode length for SecurID"));
 		rval = AUTH_FATAL;
 		break;
 
 	case ACE_UNDEFINED_USERNAME:
-		warningx(N_("invalid username length for SecurID"));
+		warningx(_("invalid username length for SecurID"));
 		rval = AUTH_FATAL;
 		break;
 
 	case ACE_ERR_INVALID_HANDLE:
-		warningx(N_("invalid Authentication Handle for SecurID"));
+		warningx(_("invalid Authentication Handle for SecurID"));
 		rval = AUTH_FATAL;
 		break;
 
@@ -212,7 +212,7 @@ then enter the new token code.\n", \
 		break;
 
 	default:
-		warningx(N_("unknown SecurID error"));
+		warningx(_("unknown SecurID error"));
 		rval = AUTH_FATAL;
 		break;
     }

@@ -437,7 +437,7 @@ sudo_ldap_parse_uri(const struct ldap_config_list_str *uri_list)
 		nldaps++;
 		host = uri + 8;
 	    } else {
-		warningx(N_("unsupported LDAP uri type: %s"), uri);
+		warningx(_("unsupported LDAP uri type: %s"), uri);
 		goto done;
 	    }
 
@@ -466,17 +466,17 @@ sudo_ldap_parse_uri(const struct ldap_config_list_str *uri_list)
 	    }
 	}
 	if (hostbuf[0] == '\0') {
-	    warningx(N_("invalid uri: %s"), uri_list->val);
+	    warningx(_("invalid uri: %s"), uri_list->val);
 	    goto done;
 	}
 
 	if (nldaps != 0) {
 	    if (nldap != 0) {
-		warningx(N_("unable to mix ldap and ldaps URIs"));
+		warningx(_("unable to mix ldap and ldaps URIs"));
 		goto done;
 	    }
 	    if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS) {
-		warningx(N_("unable to mix ldaps and starttls"));
+		warningx(_("unable to mix ldaps and starttls"));
 		goto done;
 	    }
 	    ldap_conf.ssl_mode = SUDO_LDAP_SSL;
@@ -569,10 +569,10 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 	    }
 	}
 	if (rc != LDAP_SUCCESS) {
-	    warningx(N_("unable to initialize SSL cert and key db: %s"),
+	    warningx(_("unable to initialize SSL cert and key db: %s"),
 		ldapssl_err2string(rc));
 	    if (ldap_conf.tls_certfile == NULL)
-		warningx(N_("you must set TLS_CERT in %s to use SSL"),
+		warningx(_("you must set TLS_CERT in %s to use SSL"),
 		    _PATH_LDAP_CONF);
 	    goto done;
 	}
@@ -995,13 +995,13 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
     /* Make sure we have a formatted timestamp for __now__. */
     time(&now);
     if ((tp = gmtime(&now)) == NULL) {
-	warning(N_("unable to get GMT time"));
+	warning(_("unable to get GMT time"));
 	goto done;
     }
 
     /* Format the timestamp according to the RFC. */
     if (strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%M%S.0Z", tp) == 0) {
-	warningx(N_("unable to format timestamp"));
+	warningx(_("unable to format timestamp"));
 	goto done;
     }
 
@@ -1009,7 +1009,7 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
     bytes = snprintf(buffer, buffersize, "(&(|(!(sudoNotAfter=*))(sudoNotAfter>=%s))(|(!(sudoNotBefore=*))(sudoNotBefore<=%s)))",
 	timebuffer, timebuffer);
     if (bytes < 0 || bytes >= buffersize) {
-	warning(N_("unable to build time filter"));
+	warning(_("unable to build time filter"));
 	bytes = 0;
     }
 
@@ -2252,7 +2252,7 @@ sudo_ldap_open(struct sudo_nss *nss)
 	rc = ldap_initialize(&ld, buf);
 	efree(buf);
 	if (rc != LDAP_SUCCESS)
-	    warningx(N_("unable to initialize LDAP: %s"), ldap_err2string(rc));
+	    warningx(_("unable to initialize LDAP: %s"), ldap_err2string(rc));
     } else
 #endif
 	rc = sudo_ldap_init(&ld, ldap_conf.host, ldap_conf.port);
@@ -2286,7 +2286,7 @@ sudo_ldap_open(struct sudo_nss *nss)
 	}
 	DPRINTF(("ldap_start_tls_s_np() ok"), 1);
 #else
-	warningx(N_("start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"));
+	warningx(_("start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"));
 #endif /* !HAVE_LDAP_START_TLS_S && !HAVE_LDAP_START_TLS_S_NP */
     }
 
@@ -2522,7 +2522,7 @@ sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
 	    DPRINTF(("order attribute raw: %s", (*bv)->bv_val), 1);
 	    order = strtod((*bv)->bv_val, &ep);
 	    if (ep == (*bv)->bv_val || *ep != '\0') {
-		warningx(N_("invalid sudoOrder attribute: %s"), (*bv)->bv_val);
+		warningx(_("invalid sudoOrder attribute: %s"), (*bv)->bv_val);
 		order = 0.0;
 	    }
 	    DPRINTF(("order attribute: %f", order), 1);

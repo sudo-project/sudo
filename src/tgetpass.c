@@ -87,7 +87,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     if (!ISSET(flags, TGP_STDIN|TGP_ECHO|TGP_ASKPASS|TGP_NOECHO_TRY) &&
 	!tty_present()) {
 	if (askpass == NULL || getenv_unhooked("DISPLAY") == NULL) {
-	    warningx(N_("no tty present and no askpass program specified"));
+	    warningx(_("no tty present and no askpass program specified"));
 	    debug_return_str(NULL);
 	}
 	SET(flags, TGP_ASKPASS);
@@ -228,16 +228,16 @@ sudo_askpass(const char *askpass, const char *prompt)
 	}
 	(void) setuid(ROOT_UID);
 	if (setgid(user_details.gid)) {
-	    warning(N_("unable to set gid to %u"), (unsigned int)user_details.gid);
+	    warning(_("unable to set gid to %u"), (unsigned int)user_details.gid);
 	    _exit(255);
 	}
 	if (setuid(user_details.uid)) {
-	    warning(N_("unable to set uid to %u"), (unsigned int)user_details.uid);
+	    warning(_("unable to set uid to %u"), (unsigned int)user_details.uid);
 	    _exit(255);
 	}
 	closefrom(STDERR_FILENO + 1);
 	execl(askpass, askpass, prompt, (char *)NULL);
-	warning(N_("unable to run %s"), askpass);
+	warning(_("unable to run %s"), askpass);
 	_exit(255);
     }
 

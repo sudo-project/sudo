@@ -162,7 +162,7 @@ sudoers_policy_init(void *info, char * const envp[])
         }
     }
     if (sources == 0) {
-	warningx(N_("no valid sudoers sources found, quitting"));
+	warningx(_("no valid sudoers sources found, quitting"));
 	debug_return_bool(-1);
     }
 
@@ -239,14 +239,14 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
-        warningx(N_("sudoers specifies that root is not allowed to sudo"));
+        warningx(_("sudoers specifies that root is not allowed to sudo"));
         goto bad;
     }    
 
     /* Check for -C overriding def_closefrom. */
     if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
 	if (!def_closefrom_override) {
-	    warningx(N_("you are not permitted to use the -C option"));
+	    warningx(_("you are not permitted to use the -C option"));
 	    goto bad;
 	}
 	def_closefrom = user_closefrom;
@@ -344,7 +344,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY);
 	if (fd == -1) {
 	    audit_failure(NewArgv, N_("no tty"));
-	    warningx(N_("sorry, you must have a tty to run sudo"));
+	    warningx(_("sorry, you must have a tty to run sudo"));
 	    goto bad;
 	} else
 	    (void) close(fd);
@@ -395,18 +395,18 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Finally tell the user if the command did not exist. */
     if (cmnd_status == NOT_FOUND_DOT) {
 	audit_failure(NewArgv, N_("command in current directory"));
-	warningx(N_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
+	warningx(_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
 	goto bad;
     } else if (cmnd_status == NOT_FOUND) {
 	audit_failure(NewArgv, N_("%s: command not found"), user_cmnd);
-	warningx(N_("%s: command not found"), user_cmnd);
+	warningx(_("%s: command not found"), user_cmnd);
 	goto bad;
     }
 
     /* If user specified env vars make sure sudoers allows it. */
     if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
 	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
-	    warningx(N_("sorry, you are not allowed to preserve the environment"));
+	    warningx(_("sorry, you are not allowed to preserve the environment"));
 	    goto bad;
 	} else
 	    validate_env_vars(sudo_user.env_vars);
@@ -1022,7 +1022,7 @@ find_editor(int nfiles, char **files, char ***argv_out)
     }
     if (!editor_path) {
 	audit_failure(NewArgv, N_("%s: command not found"), editor);
-	warningx(N_("%s: command not found"), editor);
+	warningx(_("%s: command not found"), editor);
     }
     debug_return_str(editor_path);
 }

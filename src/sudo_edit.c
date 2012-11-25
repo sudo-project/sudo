@@ -108,7 +108,7 @@ sudo_edit(struct command_details *command_details)
      * We will change the euid as needed below.
      */
     if (setuid(ROOT_UID) != 0) {
-	warning(N_("unable to change uid to root (%u)"), ROOT_UID);
+	warning(_("unable to change uid to root (%u)"), ROOT_UID);
 	goto cleanup;
     }
 
@@ -140,7 +140,7 @@ sudo_edit(struct command_details *command_details)
 	    editor_argc++;
     }
     if (nfiles == 0) {
-	warningx(N_("plugin error: missing file list for sudoedit"));
+	warningx(_("plugin error: missing file list for sudoedit"));
 	goto cleanup;
     }
 
@@ -168,7 +168,7 @@ sudo_edit(struct command_details *command_details)
 	    if (rc)
 		warning("%s", files[i]);
 	    else
-		warningx(N_("%s: not a regular file"), files[i]);
+		warningx(_("%s: not a regular file"), files[i]);
 	    if (ofd != -1)
 		close(ofd);
 	    continue;
@@ -202,7 +202,7 @@ sudo_edit(struct command_details *command_details)
 		    if (nwritten == -1)
 			warning("%s", tf[j].tfile);
 		    else
-			warningx(N_("%s: short write"), tf[j].tfile);
+			warningx(_("%s: short write"), tf[j].tfile);
 		    goto cleanup;
 		}
 	    }
@@ -268,8 +268,8 @@ sudo_edit(struct command_details *command_details)
 	    if (rc)
 		warning("%s", tf[i].tfile);
 	    else
-		warningx(N_("%s: not a regular file"), tf[i].tfile);
-	    warningx(N_("%s left unmodified"), tf[i].ofile);
+		warningx(_("%s: not a regular file"), tf[i].tfile);
+	    warningx(_("%s left unmodified"), tf[i].ofile);
 	    if (tfd != -1)
 		close(tfd);
 	    continue;
@@ -282,7 +282,7 @@ sudo_edit(struct command_details *command_details)
 	     */
 	    timevalsub(&tv1, &tv2);
 	    if (timevalisset(&tv2)) {
-		warningx(N_("%s unchanged"), tf[i].ofile);
+		warningx(_("%s unchanged"), tf[i].ofile);
 		unlink(tf[i].tfile);
 		close(tfd);
 		continue;
@@ -294,8 +294,8 @@ sudo_edit(struct command_details *command_details)
 	switch_user(ROOT_UID, user_details.egid,
 	    user_details.ngroups, user_details.groups);
 	if (ofd == -1) {
-	    warning(N_("unable to write to %s"), tf[i].ofile);
-	    warningx(N_("contents of edit session left in %s"), tf[i].tfile);
+	    warning(_("unable to write to %s"), tf[i].ofile);
+	    warningx(_("contents of edit session left in %s"), tf[i].tfile);
 	    close(tfd);
 	    continue;
 	}
@@ -304,7 +304,7 @@ sudo_edit(struct command_details *command_details)
 		if (nwritten == -1)
 		    warning("%s", tf[i].ofile);
 		else
-		    warningx(N_("%s: short write"), tf[i].ofile);
+		    warningx(_("%s: short write"), tf[i].ofile);
 		break;
 	    }
 	}
@@ -312,11 +312,11 @@ sudo_edit(struct command_details *command_details)
 	    /* success, got EOF */
 	    unlink(tf[i].tfile);
 	} else if (nread < 0) {
-	    warning(N_("unable to read temporary file"));
-	    warningx(N_("contents of edit session left in %s"), tf[i].tfile);
+	    warning(_("unable to read temporary file"));
+	    warningx(_("contents of edit session left in %s"), tf[i].tfile);
 	} else {
-	    warning(N_("unable to write to %s"), tf[i].ofile);
-	    warningx(N_("contents of edit session left in %s"), tf[i].tfile);
+	    warning(_("unable to write to %s"), tf[i].ofile);
+	    warningx(_("contents of edit session left in %s"), tf[i].tfile);
 	}
 	close(ofd);
     }

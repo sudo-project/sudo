@@ -812,7 +812,7 @@ parse_logfile(char *logfile)
 
     fp = fopen(logfile, "r");
     if (fp == NULL) {
-	warning(N_("unable to open %s"), logfile);
+	warning(_("unable to open %s"), logfile);
 	goto bad;
     }
 

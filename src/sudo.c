@@ -883,7 +883,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	     */
 	    lc = login_getclass((char *)details->login_class);
 	    if (!lc) {
-		warningx(N_("unknown login class %s"), details->login_class);
+		warningx(_("unknown login class %s"), details->login_class);
 		errno = ENOENT;
 		goto done;
 	    }
@@ -897,10 +897,10 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	    }
 	    if (setusercontext(lc, details->pw, details->pw->pw_uid, flags)) {
 		if (details->pw->pw_uid != ROOT_UID) {
-		    warning(N_("unable to set user context"));
+		    warning(_("unable to set user context"));
 		    goto done;
 		} else
-		    warning(N_("unable to set user context"));
+		    warning(_("unable to set user context"));
 	    }
 	}
 #endif /* HAVE_LOGIN_CAP_H */
@@ -912,27 +912,27 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
 	if (details->ngroups >= 0) {
 	    if (sudo_setgroups(details->ngroups, details->groups) < 0) {
-		warning(N_("unable to set supplementary group IDs"));
+		warning(_("unable to set supplementary group IDs"));
 		goto done;
 	    }
 	}
     }
 #ifdef HAVE_SETEUID
     if (ISSET(details->flags, CD_SET_EGID) && setegid(details->egid)) {
-	warning(N_("unable to set effective gid to runas gid %u"),
+	warning(_("unable to set effective gid to runas gid %u"),
 	    (unsigned int)details->egid);
 	goto done;
     }
 #endif
     if (ISSET(details->flags, CD_SET_GID) && setgid(details->gid)) {
-	warning(N_("unable to set gid to runas gid %u"),
+	warning(_("unable to set gid to runas gid %u"),
 	    (unsigned int)details->gid);
 	goto done;
     }
 
     if (ISSET(details->flags, CD_SET_PRIORITY)) {
 	if (setpriority(PRIO_PROCESS, 0, details->priority) != 0) {
-	    warning(N_("unable to set process priority"));
+	    warning(_("unable to set process priority"));
 	    goto done;
 	}
     }
@@ -940,26 +940,26 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	(void) umask(details->umask);
     if (details->chroot) {
 	if (chroot(details->chroot) != 0 || chdir("/") != 0) {
-	    warning(N_("unable to change root to %s"), details->chroot);
+	    warning(_("unable to change root to %s"), details->chroot);
 	    goto done;
 	}
     }
 
 #ifdef HAVE_SETRESUID
     if (setresuid(details->uid, details->euid, details->euid) != 0) {
-	warning(N_("unable to change to runas uid (%u, %u)"), details->uid,
+	warning(_("unable to change to runas uid (%u, %u)"), details->uid,
 	    details->euid);
 	goto done;
     }
 #elif HAVE_SETREUID
     if (setreuid(details->uid, details->euid) != 0) {
-	warning(N_("unable to change to runas uid (%u, %u)"),
+	warning(_("unable to change to runas uid (%u, %u)"),
 	    (unsigned int)details->uid, (unsigned int)details->euid);
 	goto done;
     }
 #else
     if (seteuid(details->euid) != 0 || setuid(details->euid) != 0) {
-	warning(N_("unable to change to runas uid (%u, %u)"), details->uid,
+	warning(_("unable to change to runas uid (%u, %u)"), details->uid,
 	    details->euid);
 	goto done;
     }
@@ -973,7 +973,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	if (details->chroot || strcmp(details->cwd, user_details.cwd) != 0) {
 	    /* Note: cwd is relative to the new root, if any. */
 	    if (chdir(details->cwd) != 0) {
-		warning(N_("unable to change directory to %s"), details->cwd);
+		warning(_("unable to change directory to %s"), details->cwd);
 		goto done;
 	    }
 	}
@@ -1057,7 +1057,7 @@ run_command(struct command_details *details)
 	    exitcode = WTERMSIG(cstat.val) | 128;
 	break;
     default:
-	warningx(N_("unexpected child termination condition: %d"), cstat.type);
+	warningx(_("unexpected child termination condition: %d"), cstat.type);
 	break;
     }
     debug_return_int(exitcode);
@@ -1118,7 +1118,7 @@ policy_list(struct plugin_container *plugin, int argc, char * const argv[],
 {
     debug_decl(policy_list, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->list == NULL) {
-	warningx(N_("policy plugin %s does not support listing privileges"),
+	warningx(_("policy plugin %s does not support listing privileges"),
 	    plugin->name);
 	debug_return_bool(false);
     }
@@ -1130,7 +1130,7 @@ policy_validate(struct plugin_container *plugin)
 {
     debug_decl(policy_validate, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->validate == NULL) {
-	warningx(N_("policy plugin %s does not support the -v option"),
+	warningx(_("policy plugin %s does not support the -v option"),
 	    plugin->name);
 	debug_return_bool(false);
     }
