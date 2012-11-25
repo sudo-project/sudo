@@ -121,9 +121,7 @@ io_mkdirs(char *path, mode_t mode, bool is_temp)
 	debug_return;
     }
 
-    for (;;) {
-	if ((slash = strchr(slash + 1, '/')) == NULL)
-	    break;
+    while ((slash = strchr(slash + 1, '/')) != NULL) {
 	*slash = '\0';
 	if (stat(path, &sb) != 0) {
 	    if (mkdir(path, mode) != 0)
