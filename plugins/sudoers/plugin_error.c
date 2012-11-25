@@ -41,7 +41,8 @@
 static void _warning(int, const char *, va_list);
        void sudoers_cleanup(int);
 
-sigjmp_buf error_jmp;
+static sigjmp_buf error_jmp;
+static bool setjmp_enabled = false;
 
 extern sudo_conv_t sudo_conv;
 
@@ -54,7 +55,7 @@ error2(int eval, const char *fmt, ...)
     _warning(1, fmt, ap);
     va_end(ap);
     sudoers_cleanup(0);
-    if (sudo_conv != NULL)
+    if (setjmp_enabled)
 	siglongjmp(error_jmp, eval);
     else
 	exit(eval);
@@ -69,7 +70,7 @@ errorx2(int eval, const char *fmt, ...)
     _warning(0, fmt, ap);
     va_end(ap);
     sudoers_cleanup(0);
-    if (sudo_conv != NULL)
+    if (setjmp_enabled)
 	siglongjmp(error_jmp, eval);
     else
 	exit(eval);
@@ -80,7 +81,7 @@ verror2(int eval, const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
     sudoers_cleanup(0);
-    if (sudo_conv != NULL)
+    if (setjmp_enabled)
 	siglongjmp(error_jmp, eval);
     else
 	exit(eval);
@@ -91,7 +92,7 @@ verrorx2(int eval, const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
     sudoers_cleanup(0);
-    if (sudo_conv != NULL)
+    if (setjmp_enabled)
 	siglongjmp(error_jmp, eval);
     else
 	exit(eval);
@@ -187,4 +188,23 @@ void
 warning_restore_locale(void)
 {
     sudoers_setlocale(oldlocale, NULL);
+}
+
+int
+plugin_setjmp(void)
+{
+    setjmp_enabled = true;
+    return sigsetjmp(error_jmp, 1);
+}
+
+void
+plugin_longjmp(int val)
+{
+    siglongjmp(error_jmp, val);
+}
+
+void
+plugin_clearjmp(void)
+{
+    setjmp_enabled = false;
 }

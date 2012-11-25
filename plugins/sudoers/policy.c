@@ -73,8 +73,6 @@ static const char *interfaces_string;
 extern char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
 
-extern sigjmp_buf error_jmp;
-
 /*
  * Deserialize args, settings and user_info arrays.
  * Fills in struct sudo_user and other common sudoers state.
@@ -469,9 +467,10 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     if (sudo_version < SUDO_API_MKVERSION(1, 2))
 	args = NULL;
 
-    if (sigsetjmp(error_jmp, 1)) {
+    if (plugin_setjmp() != 0) {
 	/* called via error(), errorx() or log_fatal() */
 	rewind_perms();
+	plugin_clearjmp();
 	debug_return_bool(-1);
     }
 
@@ -487,8 +486,9 @@ sudoers_policy_close(int exit_status, int error_code)
 {
     debug_decl(sudoers_policy_close, SUDO_DEBUG_PLUGIN)
 
-    if (sigsetjmp(error_jmp, 1)) {
+    if (plugin_setjmp() != 0) {
 	/* called via error(), errorx() or log_fatal() */
+	plugin_clearjmp();
 	debug_return;
     }
 
@@ -536,8 +536,9 @@ sudoers_policy_init_session(struct passwd *pwd, char **user_env[])
     if (sudo_version < SUDO_API_MKVERSION(1, 2))
 	user_env = NULL;
 
-    if (sigsetjmp(error_jmp, 1)) {
+    if (plugin_setjmp() != 0) {
 	/* called via error(), errorx() or log_fatal() */
+	plugin_clearjmp();
 	debug_return_bool(-1);
     }
 
@@ -578,10 +579,11 @@ sudoers_policy_invalidate(int remove)
     debug_decl(sudoers_policy_invalidate, SUDO_DEBUG_PLUGIN)
 
     user_cmnd = "kill";
-    if (sigsetjmp(error_jmp, 1) == 0) {
+    if (plugin_setjmp() == 0) {
 	remove_timestamp(remove);
 	sudoers_cleanup(0);
     }
+    plugin_clearjmp();
 
     debug_return;
 }
@@ -621,8 +623,9 @@ sudoers_policy_version(int verbose)
 {
     debug_decl(sudoers_policy_version, SUDO_DEBUG_PLUGIN)
 
-    if (sigsetjmp(error_jmp, 1)) {
+    if (plugin_setjmp() != 0) {
 	/* error recovery via error(), errorx() or log_fatal() */
+	plugin_clearjmp();
 	debug_return_bool(-1);
     }
 

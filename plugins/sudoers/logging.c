@@ -74,8 +74,6 @@ static int should_mail(int);
 static void mysyslog(int, const char *, ...);
 static char *new_logline(const char *, int);
 
-extern sigjmp_buf error_jmp;
-
 extern char **NewArgv; /* XXX - for auditing */
 
 #define MAXSYSLOGTRIES	16	/* num of retries for broken syslogs */
@@ -529,7 +527,7 @@ log_fatal(int flags, const char *fmt, ...)
     /* Exit the plugin. */
     sudoers_cleanup(0);
     sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-    siglongjmp(error_jmp, 1);
+    plugin_longjmp(1);
 }
 
 #define MAX_MAILFLAGS	63

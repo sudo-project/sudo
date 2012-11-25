@@ -52,8 +52,6 @@
 
 #include "sudoers.h"
 
-extern sigjmp_buf error_jmp;
-
 union io_fd {
     FILE *f;
 #ifdef HAVE_ZLIB_H
@@ -478,7 +476,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (argc == 0)
 	debug_return_bool(true);
 
-    if (sigsetjmp(error_jmp, 1)) {
+    if (plugin_setjmp() != 0) {
 	/* called via error(), errorx() or log_fatal() */
 	rval = -1;
 	goto done;
@@ -603,6 +601,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     rval = true;
 
 done:
+    plugin_clearjmp();
     efree(tofree);
     if (details.runas_pw)
 	sudo_pw_delref(details.runas_pw);
@@ -620,8 +619,9 @@ sudoers_io_close(int exit_status, int error)
     int i;
     debug_decl(sudoers_io_close, SUDO_DEBUG_PLUGIN)
 
-    if (sigsetjmp(error_jmp, 1)) {
+    if (plugin_setjmp() != 0) {
 	/* called via error(), errorx() or log_fatal() */
+	plugin_clearjmp();
 	debug_return;
     }
 
@@ -643,8 +643,9 @@ sudoers_io_version(int verbose)
 {
     debug_decl(sudoers_io_version, SUDO_DEBUG_PLUGIN)
 
-    if (sigsetjmp(error_jmp, 1)) {
+    if (plugin_setjmp() != 0) {
 	/* called via error(), errorx() or log_fatal() */
+	plugin_clearjmp();
 	debug_return_bool(-1);
     }
 
@@ -665,8 +666,9 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 
     gettimeofday(&now, NULL);
 
-    if (sigsetjmp(error_jmp, 1)) {
+    if (plugin_setjmp() != 0) {
 	/* called via error(), errorx() or log_fatal() */
+	plugin_clearjmp();
 	debug_return_bool(-1);
     }
 

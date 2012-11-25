@@ -23,7 +23,6 @@
 #define _SUDO_SUDOERS_H
 
 #include <limits.h>
-#include <setjmp.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
@@ -371,7 +370,9 @@ int group_plugin_query(const char *user, const char *group,
 int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
 
 /* plugin_error.c */
-extern sigjmp_buf error_jmp;
+int plugin_setjmp(void);
+void plugin_clearjmp(void);
+void plugin_longjmp(int val) __attribute__((__noreturn__));
 
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;
