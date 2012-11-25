@@ -33,7 +33,7 @@ static void _warning(int, const char *, va_list);
        void cleanup(int);
 
 void
-error_nodebug(int eval, const char *fmt, ...)
+error2(int eval, const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -44,58 +44,58 @@ error_nodebug(int eval, const char *fmt, ...)
 }
 
 void
-errorx_nodebug(int eval, const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    _warning(0, fmt, ap);
-    va_end(ap);
-    cleanup(0);
-    exit(eval);
-}
-
-void
-verror_nodebug(int eval, const char *fmt, va_list ap)
-{
-    _warning(1, fmt, ap);
-    cleanup(0);
-    exit(eval);
-}
-
-void
-verrorx_nodebug(int eval, const char *fmt, va_list ap)
-{
-    _warning(0, fmt, ap);
-    cleanup(0);
-    exit(eval);
-}
-
-void
-warning_nodebug(const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    _warning(1, fmt, ap);
-    va_end(ap);
-}
-
-void
-warningx_nodebug(const char *fmt, ...)
+errorx2(int eval, const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
     _warning(0, fmt, ap);
     va_end(ap);
+    cleanup(0);
+    exit(eval);
 }
 
 void
-vwarning_nodebug(const char *fmt, va_list ap)
+verror2(int eval, const char *fmt, va_list ap)
+{
+    _warning(1, fmt, ap);
+    cleanup(0);
+    exit(eval);
+}
+
+void
+verrorx2(int eval, const char *fmt, va_list ap)
+{
+    _warning(0, fmt, ap);
+    cleanup(0);
+    exit(eval);
+}
+
+void
+warning2(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    _warning(1, fmt, ap);
+    va_end(ap);
+}
+
+void
+warningx2(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    _warning(0, fmt, ap);
+    va_end(ap);
+}
+
+void
+vwarning2(const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
 }
 
 void
-vwarningx_nodebug(const char *fmt, va_list ap)
+vwarningx2(const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
 }
@@ -115,4 +115,17 @@ _warning(int use_errno, const char *fmt, va_list ap)
 	fputs(strerror(serrno), stderr);
     }
     putc('\n', stderr);
+}
+
+/* No need to swap locales in the front end. */
+void
+warning_set_locale(void)
+{
+    return;
+}
+
+void
+warning_restore_locale(void)
+{
+    return;
 }

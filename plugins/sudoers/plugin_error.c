@@ -23,10 +23,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <setjmp.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 
 #include "missing.h"
 #include "alloc.h"
 #include "error.h"
+#include "logging.h"
 #include "sudo_plugin.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudoers"
@@ -40,7 +46,7 @@ sigjmp_buf error_jmp;
 extern sudo_conv_t sudo_conv;
 
 void
-error_nodebug(int eval, const char *fmt, ...)
+error2(int eval, const char *fmt, ...)
 {
     va_list ap;
 
@@ -55,7 +61,7 @@ error_nodebug(int eval, const char *fmt, ...)
 }
 
 void
-errorx_nodebug(int eval, const char *fmt, ...)
+errorx2(int eval, const char *fmt, ...)
 {
     va_list ap;
 
@@ -70,7 +76,7 @@ errorx_nodebug(int eval, const char *fmt, ...)
 }
 
 void
-verror_nodebug(int eval, const char *fmt, va_list ap)
+verror2(int eval, const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
     sudoers_cleanup(0);
@@ -81,7 +87,7 @@ verror_nodebug(int eval, const char *fmt, va_list ap)
 }
 
 void
-verrorx_nodebug(int eval, const char *fmt, va_list ap)
+verrorx2(int eval, const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
     sudoers_cleanup(0);
@@ -92,7 +98,7 @@ verrorx_nodebug(int eval, const char *fmt, va_list ap)
 }
 
 void
-warning_nodebug(const char *fmt, ...)
+warning2(const char *fmt, ...)
 {
     va_list ap;
 
@@ -102,7 +108,7 @@ warning_nodebug(const char *fmt, ...)
 }
 
 void
-warningx_nodebug(const char *fmt, ...)
+warningx2(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -111,13 +117,13 @@ warningx_nodebug(const char *fmt, ...)
 }
 
 void
-vwarning_nodebug(const char *fmt, va_list ap)
+vwarning2(const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
 }
 
 void
-vwarningx_nodebug(const char *fmt, va_list ap)
+vwarningx2(const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
 }
@@ -167,4 +173,18 @@ _warning(int use_errno, const char *fmt, va_list ap)
 	}
 	putc('\n', stderr);
     }
+}
+
+static int oldlocale;
+
+void
+warning_set_locale(void)
+{
+    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
+}
+
+void
+warning_restore_locale(void)
+{
+    sudoers_setlocale(oldlocale, NULL);
 }

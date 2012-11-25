@@ -50,18 +50,18 @@
 #  define errorx(rval, fmt...) do {					       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, fmt);	       \
-    errorx_nodebug((rval), fmt);						       \
+    errorx_nodebug((rval), fmt);					       \
 } while (0)
 #  define warning(fmt...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys, \
 	fmt);								       \
-    warning_nodebug(fmt);							       \
+    warning_nodebug(fmt);						       \
 } while (0)
 #  define warningx(fmt...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, fmt);	       \
-    warningx_nodebug(fmt);							       \
+    warningx_nodebug(fmt);						       \
 } while (0)
 # else
 #  define error(rval, ...) do {						       \
@@ -73,51 +73,112 @@
 #  define errorx(rval, ...) do {					       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, __VA_ARGS__);    \
-    errorx_nodebug((rval), __VA_ARGS__);					       \
+    errorx_nodebug((rval), __VA_ARGS__);				       \
 } while (0)
 #  define warning(...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys,  \
 	__VA_ARGS__);							       \
-    warning_nodebug(__VA_ARGS__);						       \
+    warning_nodebug(__VA_ARGS__);					       \
 } while (0)
 #  define warningx(...) do {						       \
     sudo_debug_printf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|sudo_debug_subsys, __VA_ARGS__);     \
-    warningx_nodebug(__VA_ARGS__);						       \
+    warningx_nodebug(__VA_ARGS__);					       \
 } while (0)
 # endif /* __GNUC__ == 2 */
-# define verror(rval, fmt, ap) do {						       \
+# define verror(rval, fmt, ap) do {					       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys, \
 	(fmt), (ap));							       \
-    verror_nodebug((rval), (fmt), (ap));					       \
+    verror_nodebug((rval), (fmt), (ap));				       \
 } while (0)
 # define verrorx(rval, fmt, ap) do {					       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), (ap));    \
-    verrorx_nodebug((rval), (fmt), (ap));					       \
+    verrorx_nodebug((rval), (fmt), (ap));				       \
 } while (0)
 # define vwarning(fmt, ap) do {						       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys,  \
 	(fmt), (ap));							       \
-    vwarning_nodebug((fmt), (ap));						       \
+    vwarning_nodebug((fmt), (ap));					       \
+    warning_restore_locale();						       \
 } while (0)
-# define vwarningx(fmt, ap) do {						       \
+# define vwarningx(fmt, ap) do {					       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), (ap));     \
-    vwarningx_nodebug((fmt), (ap));						       \
+    vwarningx_nodebug((fmt), (ap));					       \
 } while (0)
 #endif /* SUDO_ERROR_WRAP */
 
-void	error_nodebug(int, const char *, ...) __printflike(2, 3) __attribute__((__noreturn__));
-void	errorx_nodebug(int, const char *, ...) __printflike(2, 3) __attribute__((__noreturn__));
-void	verror_nodebug(int, const char *, va_list ap) __attribute__((__noreturn__));
-void	verrorx_nodebug(int, const char *, va_list ap) __attribute__((__noreturn__));
-void	warning_nodebug(const char *, ...) __printflike(1, 2);
-void	warningx_nodebug(const char *, ...) __printflike(1, 2);
-void	vwarning_nodebug(const char *, va_list ap);
-void	vwarningx_nodebug(const char *, va_list ap);
+#if defined(__GNUC__) && __GNUC__ == 2
+# define error_nodebug(rval, fmt...) do {				       \
+    warning_set_locale();						       \
+    error2((rval), fmt);						       \
+} while (0)
+# define errorx_nodebug(rval, fmt...) do {				       \
+    warning_set_locale();						       \
+    errorx2((rval), fmt);						       \
+} while (0)
+# define warning_nodebug(fmt...) do {					       \
+    warning_set_locale();						       \
+    warning2(fmt);							       \
+    warning_restore_locale();						       \
+} while (0)
+# define warningx_nodebug(fmt...) do {					       \
+    warning_set_locale();						       \
+    warningx2(fmt);							       \
+    warning_restore_locale();						       \
+} while (0)
+#else
+# define error_nodebug(rval, ...) do {					       \
+    warning_set_locale();						       \
+    error2((rval), __VA_ARGS__);					       \
+} while (0)
+# define errorx_nodebug(rval, ...) do {					       \
+    warning_set_locale();						       \
+    errorx2((rval), __VA_ARGS__);					       \
+} while (0)
+# define warning_nodebug(...) do {					       \
+    warning_set_locale();						       \
+    warning2(__VA_ARGS__);						       \
+    warning_restore_locale();						       \
+} while (0)
+# define warningx_nodebug(...) do {					       \
+    warning_set_locale();						       \
+    warningx2(__VA_ARGS__);						       \
+    warning_restore_locale();						       \
+} while (0)
+#endif /* __GNUC__ == 2 */
+#define verror_nodebug(rval, fmt, ap) do {				       \
+    warning_set_locale();						       \
+    verror2((rval), (fmt), (ap));					       \
+} while (0)
+#define verrorx_nodebug(rval, fmt, ap) do {				       \
+    warning_set_locale();						       \
+    verrorx2((rval), (fmt), (ap));					       \
+} while (0)
+#define vwarning_nodebug(fmt, ap) do {					       \
+    warning_set_locale();						       \
+    vwarning2((fmt), (ap));						       \
+    warning_restore_locale();						       \
+} while (0)
+#define vwarningx_nodebug(fmt, ap) do {					       \
+    warning_set_locale();						       \
+    vwarningx2((fmt), (ap));						       \
+    warning_restore_locale();						       \
+} while (0)
+
+void	error2(int, const char *, ...) __printflike(2, 3) __attribute__((__noreturn__));
+void	errorx2(int, const char *, ...) __printflike(2, 3) __attribute__((__noreturn__));
+void	verror2(int, const char *, va_list ap) __attribute__((__noreturn__));
+void	verrorx2(int, const char *, va_list ap) __attribute__((__noreturn__));
+void	warning2(const char *, ...) __printflike(1, 2);
+void	warningx2(const char *, ...) __printflike(1, 2);
+void	vwarning2(const char *, va_list ap);
+void	vwarningx2(const char *, va_list ap);
+void    warning_set_locale(void);
+void    warning_restore_locale(void);
 
 #endif /* _SUDO_ERROR_H_ */
