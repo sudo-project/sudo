@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2005, 2008, 2010-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2005, 2008, 2010-2012
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -116,32 +117,33 @@ getpwent(void)
     size_t len;
     char *cp, *colon;
 
+next_entry:
     if ((colon = fgets(pwbuf, sizeof(pwbuf), pwf)) == NULL)
 	return NULL;
 
     zero_bytes(&pw, sizeof(pw));
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return NULL;
+	goto next_entry;
     *colon++ = '\0';
     pw.pw_name = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return NULL;
+	goto next_entry;
     *colon++ = '\0';
     pw.pw_passwd = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return NULL;
+	goto next_entry;
     *colon++ = '\0';
     pw.pw_uid = atoi(cp);
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return NULL;
+	goto next_entry;
     *colon++ = '\0';
     pw.pw_gid = atoi(cp);
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return NULL;
+	goto next_entry;
     *colon++ = '\0';
     pw.pw_gecos = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return NULL;
+	goto next_entry;
     *colon++ = '\0';
     pw.pw_dir = cp;
     pw.pw_shell = colon;
@@ -237,20 +239,21 @@ getgrent(void)
     char *cp, *colon;
     int n;
 
+next_entry:
     if ((colon = fgets(grbuf, sizeof(grbuf), grf)) == NULL)
 	return NULL;
 
     zero_bytes(&gr, sizeof(gr));
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return NULL;
+	goto next_entry;
     *colon++ = '\0';
     gr.gr_name = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return NULL;
+	goto next_entry;
     *colon++ = '\0';
     gr.gr_passwd = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return NULL;
+	goto next_entry;
     *colon++ = '\0';
     gr.gr_gid = atoi(cp);
     len = strlen(colon);
