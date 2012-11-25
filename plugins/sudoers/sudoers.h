@@ -350,7 +350,7 @@ char *fmt_string(const char *, const char *);
 FILE *open_sudoers(const char *, bool, bool *);
 int sudoers_policy_init(void *info, char * const envp[]);
 int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], void *closure);
-void sudoers_cleanup(int);
+void sudoers_cleanup(void);
 
 /* policy.c */
 int sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group);

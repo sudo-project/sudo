@@ -36,6 +36,7 @@
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/time.h>
+#include <sys/uio.h>
 #ifndef __TANDEM
 # include <sys/file.h>
 #endif
@@ -108,8 +109,7 @@ static int run_command(char *, char **);
 static void setup_signals(void);
 static void help(void) __attribute__((__noreturn__));
 static void usage(int);
-
-void sudoers_cleanup(int);
+static void visudo_cleanup(void);
 
 extern void sudoerserror(const char *);
 extern void sudoersrestart(FILE *);
@@ -163,6 +163,9 @@ main(int argc, char *argv[])
 
     if (argc < 1)
 	usage(1);
+
+    /* Register error/errorx callback. */
+    error_callback_register(visudo_cleanup);
 
     /* Read sudo.conf. */
     sudo_conf_read();
@@ -506,7 +509,7 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 		case 'Q' :	parse_error = false;	/* ignore parse error */
 				break;
 		case 'x' :	/* XXX - should return instead of exiting */
-				sudoers_cleanup(0);
+				visudo_cleanup();
 				sudo_debug_exit_int(__func__, __FILE__,
 				    __LINE__, sudo_debug_subsys, 0);
 				exit(0);
@@ -1249,8 +1252,8 @@ print_unused(void *v1, void *v2)
 /*
  * Unlink any sudoers temp files that remain.
  */
-void
-sudoers_cleanup(int gotsignal)
+static void
+visudo_cleanup(void)
 {
     struct sudoersfile *sp;
 
@@ -1258,10 +1261,8 @@ sudoers_cleanup(int gotsignal)
 	if (sp->tpath != NULL)
 	    (void) unlink(sp->tpath);
     }
-    if (!gotsignal) {
-	sudo_endpwent();
-	sudo_endgrent();
-    }
+    sudo_endpwent();
+    sudo_endgrent();
 }
 
 /*
@@ -1270,16 +1271,24 @@ sudoers_cleanup(int gotsignal)
 static void
 quit(int signo)
 {
-    const char *signame, *myname;
+    struct sudoersfile *sp;
+    struct iovec iov[4];
 
-    sudoers_cleanup(signo);
+    tq_foreach_fwd(&sudoerslist, sp) {
+	if (sp->tpath != NULL)
+	    (void) unlink(sp->tpath);
+    }
+
 #define	emsg	 " exiting due to signal: "
-    myname = getprogname();
-    signame = strsignal(signo);
-    ignore_result(write(STDERR_FILENO, myname, strlen(myname)));
-    ignore_result(write(STDERR_FILENO, emsg, sizeof(emsg) - 1));
-    ignore_result(write(STDERR_FILENO, signame, strlen(signame)));
-    ignore_result(write(STDERR_FILENO, "\n", 1));
+    iov[0].iov_base = (char *)getprogname();
+    iov[0].iov_len = strlen(iov[0].iov_base);
+    iov[1].iov_base = emsg;
+    iov[1].iov_len = sizeof(emsg) - 1;
+    iov[2].iov_base = strsignal(signo);
+    iov[2].iov_len = strlen(iov[2].iov_base);
+    iov[3].iov_base = "\n";
+    iov[3].iov_len = 1;
+    ignore_result(writev(STDERR_FILENO, iov, 4));
     _exit(signo);
 }
 

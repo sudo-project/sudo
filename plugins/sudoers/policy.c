@@ -579,7 +579,7 @@ sudoers_policy_invalidate(int remove)
     user_cmnd = "kill";
     if (plugin_setjmp() == 0) {
 	remove_timestamp(remove);
-	sudoers_cleanup(0);
+	sudoers_cleanup();
     }
     plugin_clearjmp();
 

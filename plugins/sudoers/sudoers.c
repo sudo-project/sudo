@@ -131,6 +131,9 @@ sudoers_policy_init(void *info, char * const envp[])
     sudo_setpwent();
     sudo_setgrent();
 
+    /* Register error/errorx callback. */
+    error_callback_register(sudoers_cleanup);
+
     /* Initialize environment functions (including replacements). */
     env_init(envp);
 
@@ -902,7 +905,6 @@ cb_runas_default(const char *user)
 }
 
 /*
-/*
  * Callback for sudoers_locale sudoers setting.
  */
 static int
@@ -916,22 +918,21 @@ cb_sudoers_locale(const char *locale)
  * Cleanup hook for error()/errorx()
  */
 void
-sudoers_cleanup(int gotsignal)
+sudoers_cleanup(void)
 {
     struct sudo_nss *nss;
+    debug_decl(sudoers_cleanup, SUDO_DEBUG_PLUGIN)
 
-    if (!gotsignal) {
-	debug_decl(sudoers_cleanup, SUDO_DEBUG_PLUGIN)
-	if (snl != NULL) {
-	    tq_foreach_fwd(snl, nss)
-		nss->close(nss);
-	}
-	if (def_group_plugin)
-	    group_plugin_unload();
-	sudo_endpwent();
-	sudo_endgrent();
-	debug_return;
+    if (snl != NULL) {
+	tq_foreach_fwd(snl, nss)
+	    nss->close(nss);
     }
+    if (def_group_plugin)
+	group_plugin_unload();
+    sudo_endpwent();
+    sudo_endgrent();
+
+    debug_return;
 }
 
 static char *

@@ -121,8 +121,8 @@ static void check_foreground(void);
 /*
  * Cleanup hook for error()/errorx()
  */
-void
-cleanup(int gotsignal)
+static void
+pty_cleanup(void)
 {
     debug_decl(cleanup, SUDO_DEBUG_EXEC);
 
@@ -1293,6 +1293,9 @@ exec_pty(struct command_details *details, int *errfd)
 {
     pid_t self = getpid();
     debug_decl(exec_pty, SUDO_DEBUG_EXEC);
+
+    /* Register cleanup function */
+    error_callback_register(pty_cleanup);
 
     /* Set command process group here too to avoid a race. */
     setpgid(0, self);

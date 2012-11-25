@@ -98,3 +98,17 @@ sudoers_setlocale(int newlocale, int *prevlocale)
     }
     return res ? true : false;
 }
+
+static int warning_locale;
+
+void
+warning_set_locale(void)
+{
+    sudoers_setlocale(SUDOERS_LOCALE_USER, &warning_locale);
+}
+
+void
+warning_restore_locale(void)
+{
+    sudoers_setlocale(warning_locale, NULL);
+}

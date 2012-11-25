@@ -200,7 +200,6 @@ extern char *get_timestr(time_t, int);
 extern int term_raw(int, int);
 extern int term_restore(int, int);
 extern void get_ttysize(int *rowp, int *colp);
-void sudoers_cleanup(int);
 
 static int list_sessions(int, char **, const char *, const char *, const char *);
 static int parse_expr(struct search_node **, char **);
@@ -213,6 +212,8 @@ static int parse_timing(const char *buf, const char *decimal, int *idx, double *
 static struct log_info *parse_logfile(char *logfile);
 static void free_log_info(struct log_info *li);
 static size_t atomic_writev(int fd, struct iovec *iov, int iovcnt);
+static void sudoreplay_handler(int);
+static void sudoreplay_cleanup(void);
 
 #ifdef HAVE_REGCOMP
 # define REGEX_T	regex_t
@@ -266,6 +267,9 @@ main(int argc, char *argv[])
     decimal = localeconv()->decimal_point;
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have sudoreplay domain */
     textdomain("sudoers");
+
+    /* Register error/errorx callback. */
+    error_callback_register(sudoreplay_cleanup);
 
     /* Read sudo.conf. */
     sudo_conf_read();
@@ -376,7 +380,7 @@ main(int argc, char *argv[])
     memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESETHAND;
-    sa.sa_handler = sudoers_cleanup;
+    sa.sa_handler = sudoreplay_handler;
     (void) sigaction(SIGINT, &sa, NULL);
     (void) sigaction(SIGKILL, &sa, NULL);
     (void) sigaction(SIGTERM, &sa, NULL);
@@ -1205,10 +1209,19 @@ help(void)
 /*
  * Cleanup hook for error()/errorx()
   */
-void
-sudoers_cleanup(int signo)
+static void
+sudoreplay_cleanup(void)
 {
     term_restore(STDIN_FILENO, 0);
-    if (signo)
-	kill(getpid(), signo);
+}
+
+/*
+ * Signal handler for SIGINT, SIGKILL, SIGTERM, SIGHUP
+ * Must be installed with SA_RESETHAND enabled.
+ */
+static void
+sudoreplay_handler(int signo)
+{
+    term_restore(STDIN_FILENO, 0);
+    kill(getpid(), signo);
 }

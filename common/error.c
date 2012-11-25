@@ -32,17 +32,32 @@
 #include "missing.h"
 #include "alloc.h"
 #include "error.h"
-#include "logging.h"
 #include "sudo_plugin.h"
 
-#define DEFAULT_TEXT_DOMAIN	"sudoers"
+#define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "gettext.h"
-
-static void _warning(int, const char *, va_list);
-       void sudoers_cleanup(int);
 
 static sigjmp_buf error_jmp;
 static bool setjmp_enabled = false;
+static struct sudo_error_callback {
+    void (*func)(void);
+    struct sudo_error_callback *next;
+} *callbacks;
+
+static void _warning(int, const char *, va_list);
+
+static void
+do_cleanup(void)
+{
+    struct sudo_error_callback *cb;
+
+    /* Run callbacks, removing them from the list as we go. */
+    while ((cb = callbacks) != NULL) {
+	callbacks = cb->next;
+	cb->func();
+	free(cb);
+    }
+}
 
 void
 error2(int eval, const char *fmt, ...)
@@ -52,7 +67,7 @@ error2(int eval, const char *fmt, ...)
     va_start(ap, fmt);
     _warning(1, fmt, ap);
     va_end(ap);
-    sudoers_cleanup(0);
+    do_cleanup();
     if (setjmp_enabled)
 	siglongjmp(error_jmp, eval);
     else
@@ -67,7 +82,7 @@ errorx2(int eval, const char *fmt, ...)
     va_start(ap, fmt);
     _warning(0, fmt, ap);
     va_end(ap);
-    sudoers_cleanup(0);
+    do_cleanup();
     if (setjmp_enabled)
 	siglongjmp(error_jmp, eval);
     else
@@ -78,7 +93,7 @@ void
 verror2(int eval, const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
-    sudoers_cleanup(0);
+    do_cleanup();
     if (setjmp_enabled)
 	siglongjmp(error_jmp, eval);
     else
@@ -89,7 +104,7 @@ void
 verrorx2(int eval, const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
-    sudoers_cleanup(0);
+    do_cleanup();
     if (setjmp_enabled)
 	siglongjmp(error_jmp, eval);
     else
@@ -150,18 +165,19 @@ _warning(int use_errno, const char *fmt, va_list ap)
     errno = serrno;
 }
 
-static int oldlocale;
-
-void
-warning_set_locale(void)
+int
+error_callback_register(void (*func)(void))
 {
-    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
-}
+    struct sudo_error_callback *cb;
 
-void
-warning_restore_locale(void)
-{
-    sudoers_setlocale(oldlocale, NULL);
+    cb = malloc(sizeof(*cb));
+    if (cb == NULL)
+	return -1;
+    cb->func = func;
+    cb->next = callbacks;
+    callbacks = cb;
+
+    return 0;
 }
 
 int

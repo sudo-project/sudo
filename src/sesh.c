@@ -42,15 +42,6 @@
 
 __dso_public int main(int argc, char *argv[], char *envp[]);
 
-/*
- * Cleanup hook for error()/errorx()
- */
-void
-cleanup(int gotsignal)
-{
-    return;
-}
-
 int
 main(int argc, char *argv[], char *envp[])
 {

@@ -133,23 +133,23 @@ SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo env.lo find_path.lo \
 	       policy.lo prompt.lo set_perms.lo sudo_nss.lo sudoers.lo \
 	       timestamp.lo @SUDOERS_OBJS@
 
-VISUDO_OBJS = find_path.o goodpath.o locale.o plugin_error.o visudo.o
+VISUDO_OBJS = find_path.o goodpath.o locale.o visudo.o
 
-REPLAY_OBJS = getdate.o locale.o plugin_error.o sudoreplay.o
+REPLAY_OBJS = getdate.o locale.o sudoreplay.o
 
-TEST_OBJS = group_plugin.o interfaces.o locale.o net_ifs.o plugin_error.o \
+TEST_OBJS = group_plugin.o interfaces.o locale.o net_ifs.o \
 	    testsudoers.o tsgetgrpw.o
 
-CHECK_ADDR_OBJS = check_addr.o interfaces.o locale.o match_addr.o plugin_error.o
+CHECK_ADDR_OBJS = check_addr.o interfaces.o locale.o match_addr.o
 
-CHECK_FILL_OBJS = check_fill.o locale.o plugin_error.o toke_util.o
+CHECK_FILL_OBJS = check_fill.o locale.o toke_util.o
 
 CHECK_IOLOG_PATH_OBJS = check_iolog_path.o iolog_path.o locale.o \
-			plugin_error.o pwutil.o pwutil_impl.o redblack.o
+			pwutil.o pwutil_impl.o redblack.o
 
-CHECK_SYMBOLS_OBJS = check_symbols.o locale.o plugin_error.o
+CHECK_SYMBOLS_OBJS = check_symbols.o locale.o
 
-CHECK_WRAP_OBJS = check_wrap.o locale.o logwrap.o plugin_error.o
+CHECK_WRAP_OBJS = check_wrap.o locale.o logwrap.o
 
 LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
 
@@ -464,9 +464,9 @@ check_addr.o: $(srcdir)/regress/parser/check_addr.c $(top_builddir)/config.h \
               $(srcdir)/interfaces.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_addr.c
 check_fill.o: $(srcdir)/regress/parser/check_fill.c $(top_builddir)/config.h \
-              $(top_srcdir)/compat/stdbool.h $(incdir)/list.h \
-              $(srcdir)/parse.h $(srcdir)/toke.h $(incdir)/sudo_plugin.h \
-              $(devdir)/gram.h
+              $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h \
+              $(incdir)/list.h $(srcdir)/parse.h $(srcdir)/toke.h \
+              $(incdir)/sudo_plugin.h $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_fill.c
 check_iolog_path.o: $(srcdir)/regress/iolog_path/check_iolog_path.c \
                     $(top_builddir)/config.h $(srcdir)/sudoers.h \
@@ -676,12 +676,6 @@ passwd.lo: $(authdir)/passwd.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
            $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(authdir)/passwd.c
-plugin_error.lo: $(srcdir)/plugin_error.c $(top_builddir)/config.h \
-                 $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h \
-                 $(incdir)/alloc.h $(incdir)/error.h $(srcdir)/logging.h \
-                 $(incdir)/sudo_plugin.h $(incdir)/gettext.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/plugin_error.c
-plugin_error.o: plugin_error.lo
 policy.lo: $(srcdir)/policy.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
            $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
            $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \

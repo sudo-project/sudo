@@ -11,6 +11,7 @@ common/Makefile.in
 common/aix.c
 common/alloc.c
 common/atobool.c
+common/error.c
 common/fileops.c
 common/fmt_string.c
 common/lbuf.c
@@ -194,7 +195,6 @@ plugins/sudoers/match_addr.c
 plugins/sudoers/mkdefaults
 plugins/sudoers/parse.c
 plugins/sudoers/parse.h
-plugins/sudoers/plugin_error.c
 plugins/sudoers/po/README
 plugins/sudoers/po/da.mo
 plugins/sudoers/po/da.po
@@ -296,13 +296,13 @@ pp
 src/Makefile.in
 src/conversation.c
 src/env_hooks.c
-src/error.c
 src/exec.c
 src/exec_common.c
 src/exec_pty.c
 src/get_pty.c
 src/hooks.c
 src/load_plugins.c
+src/locale_stub.c
 src/net_ifs.c
 src/openbsd.c
 src/parse_args.c

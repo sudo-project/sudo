@@ -78,7 +78,6 @@ void print_defaults(void);
 void print_privilege(struct privilege *);
 void print_userspecs(void);
 void usage(void) __attribute__((__noreturn__));
-void sudoers_cleanup(int);
 static void set_runaspw(const char *);
 static void set_runasgr(const char *);
 static int cb_runas_default(const char *);
@@ -463,15 +462,6 @@ set_perms(int perm)
 void
 restore_perms(void)
 {
-}
-
-void
-sudoers_cleanup(int gotsignal)
-{
-    if (!gotsignal) {
-	sudo_endpwent();
-	sudo_endgrent();
-    }
 }
 
 void
