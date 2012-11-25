@@ -24,7 +24,6 @@
 #include <string.h>
 
 #include "missing.h"
-#include "alloc.h"
 #include "error.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
@@ -105,11 +104,6 @@ static void
 _warning(int use_errno, const char *fmt, va_list ap)
 {
     int serrno = errno;
-    char *prev_locale = estrdup(setlocale(LC_ALL, NULL));
-
-    /* Set locale to user's if different. */
-    if (*prev_locale != '\0')
-	setlocale(LC_ALL, "");
 
     fputs(getprogname(), stderr);
     if (fmt != NULL) {
@@ -121,9 +115,4 @@ _warning(int use_errno, const char *fmt, va_list ap)
 	fputs(strerror(serrno), stderr);
     }
     putc('\n', stderr);
-
-    /* Restore locale if needed. */
-    if (*prev_locale != '\0')
-	setlocale(LC_ALL, prev_locale);
-    efree(prev_locale);
 }
