@@ -834,7 +834,7 @@ check_syntax(char *sudoers_path, bool quiet, bool strict, bool oldperms)
 	    if (errorlineno != -1)
 		(void) printf(_("parse error in %s near line %d\n"),
 		    errorfile, errorlineno);
-	    else
+	    else if (errorfile != NULL)
 		(void) printf(_("parse error in %s\n"), errorfile);
 	}
     } else {
