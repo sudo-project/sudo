@@ -688,6 +688,15 @@ The following options are also configurable at runtime:
         implement messages in the invoking user's native language.
 	Note that translations do not exist for all languages.
 
+  --disable-shared
+        Disable dynamic shared object support.  By default, sudo
+        is built with a plugin API capable of loading arbitrary
+        policy and I/O logging plugins.  If the --disable-shared
+        option is specifed, this support is disabled and the default
+        sudoers policy and I/O plugins are embedded in the sudo
+        binary itself.  This will also disable the noexec option
+        as it too relies on dynamic shared object support.
+
 Shadow password and C2 support
 ==============================
 
