@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "November 12, 2012" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO_PLUGIN" "5" "November 26, 2012" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1398,10 +1398,11 @@ struct io_plugin {
 #define SUDO_IO_PLUGIN 2
     unsigned int type; /* always SUDO_IO_PLUGIN */
     unsigned int version; /* always SUDO_API_VERSION */
-    int (*open)(unsigned int version, sudo_conv_t conversation
+    int (*open)(unsigned int version, sudo_conv_t conversation,
                 sudo_printf_t plugin_printf, char * const settings[],
-                char * const user_info[], int argc, char * const argv[],
-                char * const user_env[], char * const plugin_options[]);
+                char * const user_info[], char * const command_info[],
+                int argc, char * const argv[], char * const user_env[],
+                char * const plugin_options[]);
     void (*close)(int exit_status, int error); /* wait status or error */
     int (*show_version)(int verbose);
     int (*log_ttyin)(const char *buf, unsigned int len);
@@ -1470,7 +1471,7 @@ open
 .RS
 .nf
 .RS 0n
-int (*open)(unsigned int version, sudo_conv_t conversation
+int (*open)(unsigned int version, sudo_conv_t conversation,
             sudo_printf_t plugin_printf, char * const settings[],
             char * const user_info[], int argc, char * const argv[],
             char * const user_env[], char * const plugin_options[]);
