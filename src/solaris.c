@@ -54,10 +54,12 @@ os_init(int argc, char *argv[], char *envp[])
 {
     /*
      * Solaris 11 is unable to load the per-locale shared objects
-     * without this.  This bug was fixed in Solaris 11 Update 1.
+     * without this.  We must keep the handle open for it to work.
+     * This bug was fixed in Solaris 11 Update 1.
      */
     void *handle = dlopen("/usr/lib/locale/common/methods_unicode.so.3",
 	RTLD_LAZY|RTLD_GLOBAL);
+    (void)&handle;
 
     return os_init_common(argc, argv, envp);
 }
