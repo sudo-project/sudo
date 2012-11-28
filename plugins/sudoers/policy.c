@@ -476,7 +476,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     info.settings = settings;
     info.user_info = user_info;
     info.plugin_args = args;
-    return sudoers_policy_init(&info, envp);
+    debug_return_bool(sudoers_policy_init(&info, envp));
 }
 
 static void
