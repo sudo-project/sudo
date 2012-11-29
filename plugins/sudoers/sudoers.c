@@ -233,7 +233,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     (void) sigaction(SIGTSTP, &sa, &saved_sa_tstp);
 
     /* XXX - would like to move this to policy.c but need the cleanup. */
-    if (plugin_setjmp() != 0) {
+    if (error_setjmp() != 0) {
 	/* error recovery via error(), errorx() or log_fatal() */
 	rval = -1;
 	goto done;
@@ -524,7 +524,7 @@ bad:
     rval = false;
 
 done:
-    plugin_clearjmp();
+    error_disable_setjmp();
     rewind_perms();
 
     /* Restore signal handlers before we exec. */

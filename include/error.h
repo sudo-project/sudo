@@ -18,6 +18,7 @@
 #define	_SUDO_ERROR_H_
 
 #include <stdarg.h>
+#include <setjmp.h>
 
 /*
  * We wrap error/errorx and warn/warnx so that the same output can
@@ -170,9 +171,15 @@
     warning_restore_locale();						       \
 } while (0)
 
+#define error_setjmp()		(error_enable_setjmp(), sigsetjmp(error_jmp, 1))
+#define error_longjmp(val)	siglongjmp(error_jmp, val)
+
 extern int (*sudo_printf)(int msg_type, const char *fmt, ...);
+extern sigjmp_buf error_jmp;
 
 int     error_callback_register(void (*func)(void));
+void	error_disable_setjmp(void);
+void	error_enable_setjmp(void);
 void	error2(int, const char *, ...) __printflike(2, 3) __attribute__((__noreturn__));
 void	errorx2(int, const char *, ...) __printflike(2, 3) __attribute__((__noreturn__));
 void	verror2(int, const char *, va_list ap) __attribute__((__noreturn__));

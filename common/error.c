@@ -37,7 +37,7 @@
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "gettext.h"
 
-static sigjmp_buf error_jmp;
+sigjmp_buf error_jmp;
 static bool setjmp_enabled = false;
 static struct sudo_error_callback {
     void (*func)(void);
@@ -180,21 +180,14 @@ error_callback_register(void (*func)(void))
     return 0;
 }
 
-int
-plugin_setjmp(void)
-{
-    setjmp_enabled = true;
-    return sigsetjmp(error_jmp, 1);
-}
-
 void
-plugin_longjmp(int val)
-{
-    siglongjmp(error_jmp, val);
-}
-
-void
-plugin_clearjmp(void)
+error_disable_setjmp(void)
 {
     setjmp_enabled = false;
+}
+
+void
+error_enable_setjmp(void)
+{
+    setjmp_enabled = true;
 }

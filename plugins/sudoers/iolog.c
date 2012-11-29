@@ -472,7 +472,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (argc == 0)
 	debug_return_bool(true);
 
-    if (plugin_setjmp() != 0) {
+    if (error_setjmp() != 0) {
 	/* called via error(), errorx() or log_fatal() */
 	rval = -1;
 	goto done;
@@ -597,7 +597,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     rval = true;
 
 done:
-    plugin_clearjmp();
+    error_disable_setjmp();
     efree(tofree);
     if (details.runas_pw)
 	sudo_pw_delref(details.runas_pw);
@@ -615,9 +615,9 @@ sudoers_io_close(int exit_status, int error)
     int i;
     debug_decl(sudoers_io_close, SUDO_DEBUG_PLUGIN)
 
-    if (plugin_setjmp() != 0) {
+    if (error_setjmp() != 0) {
 	/* called via error(), errorx() or log_fatal() */
-	plugin_clearjmp();
+	error_disable_setjmp();
 	debug_return;
     }
 
@@ -639,9 +639,9 @@ sudoers_io_version(int verbose)
 {
     debug_decl(sudoers_io_version, SUDO_DEBUG_PLUGIN)
 
-    if (plugin_setjmp() != 0) {
+    if (error_setjmp() != 0) {
 	/* called via error(), errorx() or log_fatal() */
-	plugin_clearjmp();
+	error_disable_setjmp();
 	debug_return_bool(-1);
     }
 
@@ -662,9 +662,9 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 
     gettimeofday(&now, NULL);
 
-    if (plugin_setjmp() != 0) {
+    if (error_setjmp() != 0) {
 	/* called via error(), errorx() or log_fatal() */
-	plugin_clearjmp();
+	error_disable_setjmp();
 	debug_return_bool(-1);
     }
 

@@ -527,7 +527,7 @@ log_fatal(int flags, const char *fmt, ...)
     /* Exit the plugin. */
     sudoers_cleanup();
     sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-    plugin_longjmp(1);
+    error_longjmp(1);
 }
 
 #define MAX_MAILFLAGS	63
