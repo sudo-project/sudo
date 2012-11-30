@@ -315,8 +315,8 @@ log_denial(int status, bool inform_user)
 void
 log_failure(int status, int flags)
 {
-    debug_decl(log_failure, SUDO_DEBUG_LOGGING)
     bool inform_user = true;
+    debug_decl(log_failure, SUDO_DEBUG_LOGGING)
 
     /* The user doesn't always get to see the log message (path info). */
     if (!ISSET(status, FLAG_NO_USER | FLAG_NO_HOST) && def_path_info &&
