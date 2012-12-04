@@ -93,8 +93,16 @@
 # endif
 #endif
 
-#ifndef MAXHOSTNAMELEN
-# define MAXHOSTNAMELEN		64
+#ifndef HOST_NAME_MAX
+# ifdef MAXHOSTNAMELEN
+#  define HOST_NAME_MAX		MAXHOSTNAMELEN
+# else
+#  ifdef _POSIX_HOST_NAME_MAX
+#   define HOST_NAME_MAX	_POSIX_HOST_NAME_MAX
+#  else
+#   define HOST_NAME_MAX	64
+#  endif
+# endif
 #endif
 
 /*

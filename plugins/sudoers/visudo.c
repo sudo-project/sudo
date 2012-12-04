@@ -1040,7 +1040,7 @@ get_args(char *cmnd)
 static void
 get_hostname(void)
 {
-    char *p, thost[MAXHOSTNAMELEN + 1];
+    char *p, thost[HOST_NAME_MAX + 1];
     debug_decl(get_hostname, SUDO_DEBUG_UTIL)
 
     if (gethostname(thost, sizeof(thost)) != -1) {

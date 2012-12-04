@@ -128,7 +128,7 @@ main(int argc, char *argv[])
     struct privilege *priv;
     struct userspec *us;
     char *p, *grfile, *pwfile;
-    char hbuf[MAXHOSTNAMELEN + 1];
+    char hbuf[HOST_NAME_MAX + 1];
     int match, host_match, runas_match, cmnd_match;
     int ch, dflag, exitcode = 0;
     debug_decl(main, SUDO_DEBUG_MAIN)

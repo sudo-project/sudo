@@ -414,7 +414,7 @@ get_user_groups(struct user_details *ud)
 static char **
 get_user_info(struct user_details *ud)
 {
-    char *cp, **user_info, cwd[PATH_MAX], host[MAXHOSTNAMELEN];
+    char *cp, **user_info, cwd[PATH_MAX], host[HOST_NAME_MAX + 1];
     struct passwd *pw;
     int fd, i = 0;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL)
