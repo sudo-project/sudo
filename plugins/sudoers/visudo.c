@@ -32,7 +32,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/time.h>
@@ -68,7 +67,6 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <netdb.h>
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif

@@ -15,7 +15,6 @@
  */
 
 #include <sys/types.h>
-#include <sys/param.h>
 
 #include <stdio.h>
 #include <stdlib.h>

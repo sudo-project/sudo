@@ -20,7 +20,6 @@
 
 #include <sys/types.h>
 #include <sys/time.h>
-#include <sys/param.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -48,7 +47,6 @@
 #include <grp.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <netdb.h>
 #ifdef HAVE_LBER_H
 # include <lber.h>
 #endif

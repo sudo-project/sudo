@@ -25,7 +25,6 @@
 
 #include <config.h>
 
-#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
@@ -59,7 +58,6 @@
 #include <errno.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <netdb.h>
 
 #include "tsgetgrpw.h"
 #include "sudoers.h"

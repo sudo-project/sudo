@@ -22,7 +22,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/param.h>
 #include <sys/time.h>
 #ifdef HAVE_FLOCK
 # include <sys/file.h>

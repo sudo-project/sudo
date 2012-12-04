@@ -23,7 +23,6 @@
 #endif
 
 #include <sys/types.h>
-#include <sys/param.h>
 #include <sys/stat.h>
 #if defined(MAJOR_IN_MKDEV)
 # include <sys/mkdev.h>
@@ -71,8 +70,10 @@
 # endif
 #endif
 #if defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined (HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV) || defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV)
+# include <sys/param.h>
 # include <sys/sysctl.h>
 #elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
+# include <sys/param.h>
 # include <sys/sysctl.h>
 # include <sys/user.h>
 #endif

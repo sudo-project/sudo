@@ -45,7 +45,6 @@
 #endif /* HAVE_UNISTD_H */
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <netdb.h>
 
 #include "sudoers.h"
 #include "interfaces.h"

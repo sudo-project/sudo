@@ -82,26 +82,18 @@
 #endif
 
 #ifndef PATH_MAX
-# ifdef MAXPATHLEN
-#  define PATH_MAX		MAXPATHLEN
+# ifdef _POSIX_PATH_MAX
+#  define PATH_MAX		_POSIX_PATH_MAX
 # else
-#  ifdef _POSIX_PATH_MAX
-#   define PATH_MAX		_POSIX_PATH_MAX
-#  else
-#   define PATH_MAX		1024
-#  endif
+#  define PATH_MAX		256
 # endif
 #endif
 
 #ifndef HOST_NAME_MAX
-# ifdef MAXHOSTNAMELEN
-#  define HOST_NAME_MAX		MAXHOSTNAMELEN
+# ifdef _POSIX_HOST_NAME_MAX
+#  define HOST_NAME_MAX		_POSIX_HOST_NAME_MAX
 # else
-#  ifdef _POSIX_HOST_NAME_MAX
-#   define HOST_NAME_MAX	_POSIX_HOST_NAME_MAX
-#  else
-#   define HOST_NAME_MAX	64
-#  endif
+#  define HOST_NAME_MAX		255
 # endif
 #endif
 
@@ -148,7 +140,7 @@
 #endif
 
 /*
- * BSD defines these in <sys/param.h> but others may not.
+ * BSD defines these in <sys/param.h> but we don't include that anymore.
  */
 #ifndef MIN
 # define MIN(a,b) (((a)<(b))?(a):(b))
