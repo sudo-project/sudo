@@ -202,9 +202,3 @@ void io_nextid(char *iolog_dir, char *fallback, char id[7])
 {
     memcpy(id, sessid, sizeof(sessid));
 }
-
-void
-sudoers_cleanup(int gotsig)
-{
-    return;
-}

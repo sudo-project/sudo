@@ -151,13 +151,6 @@ main(int argc, char *argv[])
     exit(errors);
 }
 
-/* STUB */
-void
-sudoers_cleanup(int gotsig)
-{
-    return;
-}
-
 static int
 check_addr_printf(int msg_type, const char *fmt, ...)
 {

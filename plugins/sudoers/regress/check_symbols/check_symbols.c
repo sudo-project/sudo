@@ -114,9 +114,3 @@ main(int argc, char *argv[])
 
     exit(errors);
 }
-
-void
-sudoers_cleanup(int gotsig)
-{
-    return;
-}

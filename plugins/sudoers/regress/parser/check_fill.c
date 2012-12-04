@@ -185,13 +185,6 @@ main(int argc, char *argv[])
 
 /* STUB */
 void
-sudoers_cleanup(int gotsig)
-{
-    return;
-}
-
-/* STUB */
-void
 sudoerserror(const char *s)
 {
     return;
