@@ -150,6 +150,13 @@
 #endif
 
 /*
+ * Some systems define this in <sys/param.h> but we don't include that anymore.
+ */
+#ifndef howmany
+# define howmany(x, y)	(((x) + ((y) - 1)) / (y))
+#endif
+
+/*
  * Older systems may be missing stddef.h and/or offsetof macro
  */
 #ifndef offsetof
