@@ -14468,6 +14468,11 @@ done
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='maybe'}
+		# PIE is broken on FreeBSD/ia64
+		case "$host_cpu" in
+		ia64*)
+			enable_pie=no;;
+		esac
 		;;
     *-*-*openbsd*)
 		# OpenBSD-specific initialization
