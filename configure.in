@@ -1884,6 +1884,11 @@ case "$host" in
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='maybe'}
+		# PIE is broken on FreeBSD/ia64
+		case "$host_cpu" in
+		ia64*)
+			enable_pie=no;;
+		esac
 		;;
     *-*-*openbsd*)
 		# OpenBSD has a real setreuid(2) starting with 3.3 but
