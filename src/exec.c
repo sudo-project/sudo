@@ -623,7 +623,11 @@ forward_signals(int sock)
 
     while (!tq_empty(&sigfwd_list)) {
 	sigfwd = tq_first(&sigfwd_list);
-	if (sig2str(sigfwd->signo, signame) == -1)
+	if (sigfwd->signo == SIGCONT_FG)
+	    strlcpy(signame, "CONT_FG", sizeof(signame));
+	else if (sigfwd->signo == SIGCONT_BG)
+	    strlcpy(signame, "CONT_BG", sizeof(signame));
+	else if (sig2str(sigfwd->signo, signame) == -1)
 	    snprintf(signame, sizeof(signame), "%d", sigfwd->signo);
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "sending SIG%s to child over backchannel", signame);
@@ -662,9 +666,13 @@ schedule_signal(int signo)
     char signame[SIG2STR_MAX];
     debug_decl(schedule_signal, SUDO_DEBUG_EXEC)
 
-    if (sig2str(signo, signame) == -1)
+    if (signo == SIGCONT_FG)
+	strlcpy(signame, "CONT_FG", sizeof(signame));
+    else if (signo == SIGCONT_BG)
+	strlcpy(signame, "CONT_BG", sizeof(signame));
+    else if (sig2str(signo, signame) == -1)
 	snprintf(signame, sizeof(signame), "%d", signo);
-    sudo_debug_printf(SUDO_DEBUG_DIAG, "forwarding SIG%s to child", signame);
+    sudo_debug_printf(SUDO_DEBUG_DIAG, "scheduled SIG%s for child", signame);
 
     sigfwd = ecalloc(1, sizeof(*sigfwd));
     sigfwd->prev = sigfwd;
