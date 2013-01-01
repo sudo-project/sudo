@@ -412,7 +412,7 @@ rbrepair(struct rbtree *tree, struct rbnode *node)
     struct rbnode *sibling;
     debug_decl(rbrepair, SUDO_DEBUG_RBTREE)
 
-    while (node->color == black && node != rbroot(tree)) {
+    while (node->color == black && node != rbfirst(tree)) {
 	if (node == node->parent->left) {
 	    sibling = node->parent->right;
 	    if (sibling->color == red) {
@@ -435,7 +435,7 @@ rbrepair(struct rbtree *tree, struct rbnode *node)
 		node->parent->color = black;
 		sibling->right->color = black;
 		rotate_left(tree, node->parent);
-		node = rbroot(tree); /* exit loop */
+		node = rbfirst(tree); /* exit loop */
 	    }
 	} else { /* if (node == node->parent->right) */
 	    sibling = node->parent->left;
@@ -459,7 +459,7 @@ rbrepair(struct rbtree *tree, struct rbnode *node)
 		node->parent->color = black;
 		sibling->left->color = black;
 		rotate_right(tree, node->parent);
-		node = rbroot(tree); /* exit loop */
+		node = rbfirst(tree); /* exit loop */
 	    }
 	}
     }
