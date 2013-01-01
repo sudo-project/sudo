@@ -235,11 +235,13 @@ suspend_parent(signo)
 	}
 
 	/* Suspend self and continue command when we resume. */
-	zero_bytes(&sa, sizeof(sa));
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
-	sa.sa_handler = SIG_DFL;
-	sigaction(signo, &sa, &osa);
+	if (signo != SIGSTOP) {
+	    zero_bytes(&sa, sizeof(sa));
+	    sigemptyset(&sa.sa_mask);
+	    sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
+	    sa.sa_handler = SIG_DFL;
+	    sigaction(signo, &sa, &osa);
+	}
 	if (killpg(ppgrp, signo) != 0)
 	    warning("killpg(%d, %d)", ppgrp, signo);
 
@@ -262,7 +264,8 @@ suspend_parent(signo)
 	    }
 	}
 
-	sigaction(signo, &osa, NULL);
+	if (signo != SIGSTOP)
+	    sigaction(signo, &osa, NULL);
 	rval = ttymode == TERM_RAW ? SIGCONT_FG : SIGCONT_BG;
 	break;
     }
