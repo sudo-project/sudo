@@ -79,6 +79,8 @@ AC_SUBST([COMPAT_TEST_PROGS])
 AC_SUBST([CROSS_COMPILING])
 AC_SUBST([PIE_LDFLAGS])
 AC_SUBST([PIE_CFLAGS])
+AC_SUBST([SSP_LDFLAGS])
+AC_SUBST([SSP_CFLAGS])
 AC_SUBST([NO_VIZ])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
@@ -3433,8 +3435,8 @@ dnl
 if test "$enable_hardening" != "no"; then
     AX_CHECK_COMPILE_FLAG([-fstack-protector], [
 	AX_CHECK_LINK_FLAG([-fstack-protector], [
-	    CFLAGS="${CFLAGS} -fstack-protector"
-	    LT_LDFLAGS="${LT_LDFLAGS} -Wc,-fstack-protector"
+	    SSP_CFLAGS="-fstack-protector"
+	    SSP_LDFLAGS="-Wc,-fstack-protector"
 	])
     ])
     AX_CHECK_LINK_FLAG([-Wl,-z,relro], [LDFLAGS="${LDFLAGS} -Wl,-z,relro"])
