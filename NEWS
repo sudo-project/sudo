@@ -1,3 +1,25 @@
+What's new in Sudo 1.8.6p4?
+
+ * The -fstack-protector is now used when linking visudo, sudoreplay
+   and testsudoers.
+
+ * Avoid building PIE binaries on FreeBSD/ia64 as they don't run
+   properly.
+
+ * Fixed a crash in visudo strict mode when an unknown Defaults
+   setting is encountered.
+
+ * Do not inform the user that the command was not permitted by the
+   policy if they do not successfully authenticate. This is a
+   regression introduced in sudo 1.8.6.
+
+ * Allow sudo to be build with sss support without also including
+   ldap support.
+
+ * Fix running commands that need the terminal in the background
+   when I/O logging is enabled. E.g. "sudo vi &". When the command
+   is foregrounded, it will now resume properly.
+
 What's new in Sudo 1.8.6p3?
 
  * Fixed post-processing of the man pages on systems with legacy
