@@ -51,6 +51,10 @@ LT_LDFLAGS = @LT_LDFLAGS@ @LT_LDMAP@ @LT_LDOPT@ @LT_LDEXPORTS@
 PIE_CFLAGS = @PIE_CFLAGS@
 PIE_LDFLAGS = @PIE_LDFLAGS@
 
+# Stack smashing protection flags
+SSP_CFLAGS = @SSP_CFLAGS@
+SSP_LDFLAGS = @SSP_LDFLAGS@
+
 # Where to install things...
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -90,7 +94,7 @@ Makefile: $(srcdir)/Makefile.in
 .SUFFIXES: .o .c .h .lo
 
 .c.lo:
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $<
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $<
 
 $(shlib_map): $(shlib_exp)
 	@awk 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
@@ -141,4 +145,4 @@ cleandir: realclean
 system_group.lo: $(srcdir)/system_group.c $(top_builddir)/config.h \
                  $(top_srcdir)/compat/stdbool.h $(top_srcdir)/compat/dlfcn.h \
                  $(incdir)/sudo_plugin.h $(incdir)/missing.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(srcdir)/system_group.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/system_group.c
