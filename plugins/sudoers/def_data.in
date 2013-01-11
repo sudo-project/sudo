@@ -259,3 +259,6 @@ privs
 limitprivs
 	T_STR
 	"Set of limit privileges"
+exec_background
+	T_FLAG
+	"Run commands on a pty in the background"

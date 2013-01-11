@@ -351,6 +351,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Set of limit privileges"),
 	NULL,
     }, {
+	"exec_background", T_FLAG,
+	N_("Run commands on a pty in the background"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

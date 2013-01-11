@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2005, 2007-2012
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -128,6 +128,7 @@ struct user_details {
 #define CD_RBAC_ENABLED		0x0800
 #define CD_USE_PTY		0x1000
 #define CD_SET_UTMP		0x2000
+#define CD_EXEC_BG		0x4000
 
 struct command_details {
     uid_t uid;

@@ -162,6 +162,8 @@
 #define I_PRIVS                 80
 #define def_limitprivs          (sudo_defs_table[81].sd_un.str)
 #define I_LIMITPRIVS            81
+#define def_exec_background     (sudo_defs_table[82].sd_un.flag)
+#define I_EXEC_BACKGROUND       82
 
 enum def_tuple {
 	never,

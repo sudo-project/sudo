@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2009-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd November 26, 2012
+.Dd Janurary 11, 2013
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -900,6 +900,66 @@ If not set,
 .Nm sudo
 will base the new entry on
 the invoking user's existing entry.
+.It exec_background=bool
+By default,
+.Nm sudo
+runs a command as the foreground process as long as
+.Nm sudo
+itself is running in the foreground.
+When
+.Em exec_background
+is enabled and the command is being run in a pty (due to I/O logging
+or the
+.Em use_pty
+setting), the command will be run as a background process.
+Attempts to read from the controlling terminal (or to change terminal
+settings) will result in the command being suspended with the
+.Dv SIGTTIN
+signal (or
+.Dv SIGTTOU
+in the case of terminal settings).
+If this happens when
+.Nm sudo
+is a foreground process, the command will be granted the controlling terminal   
+and resumed in the foreground with no user intervention required.
+The advantage of initially running the command in the background is that
+.Nm sudo
+need not read from the terminal unless the command explicitly requests it.
+Otherwise, any terminal input must be passed to the command, whether it
+has required it or not (the kernel buffers terminals so it is not possible
+to tell whether the command really wants the input).
+This is different from historic
+.Em sudo
+behavior or when the command is not being run in a pty.
+.Pp
+For this to work seamlessly, the operating system must support the
+automatic restarting of system calls.
+Unfortunately, not all operating systems do this by default,
+and even those that do may have bugs.
+For example, Mac OS X fails to restart the
+.Fn tcgetattr
+and
+.Fn tcsetattr
+system calls (this is a bug in Mac OS X).
+Furthermore, because this behavior depends on the command stopping with the
+.Dv SIGTTIN
+or 
+.Dv SIGTTOU
+signals, programs that catch these signals and suspend themselves
+with a different signal (usually
+.Dv SIGTOP )
+will not be automatically foregrounded.
+Some versions of the linux
+.Xr su 1
+command behave this way.
+Because of this, a plugin should not set
+.Em exec_background
+unless it is explicitly enabled by the administrator and there should
+be a way to enabled or disable it on a per-command basis.
+.Pp
+This setting has no effect unless I/O logging is enabled or
+.Em use_pty
+is enabled.
 .El
 .Pp
 Unsupported values will be ignored.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -540,6 +540,13 @@ command_info_to_details(char * const info[], struct command_details *details)
 			lval < INT_MAX && lval > INT_MIN) {
 			details->closefrom = (int)lval;
 		    }
+		    break;
+		}
+		break;
+	    case 'e':
+		if (strncmp("exec_background=", info[i], sizeof("exec_background=") - 1) == 0) {
+		    if (atobool(info[i] + sizeof("exec_background=") - 1) == true)
+			SET(details->flags, CD_EXEC_BG);
 		    break;
 		}
 		break;

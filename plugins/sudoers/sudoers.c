@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -526,7 +526,7 @@ done:
     error_disable_setjmp();
     rewind_perms();
 
-    /* Restore signal handlers before we exec. */
+    /* Restore signal handlers before we return. */
     (void) sigaction(SIGINT, &saved_sa_int, NULL);
     (void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
     (void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);

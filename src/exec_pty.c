@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -76,18 +76,6 @@
 # define TIOCGWINSZ	TIOCGSIZE
 # define TIOCSWINSZ	TIOCSSIZE
 # define winsize	ttysize
-#endif
-
-/*
- * Mac OS X has a bug wrt tc[gs]etpgrp where it returns EINTR if interrupted
- * by a signal (usually SIGTTOU or SIGTTIN) instead of being restarted
- * automatically (via ERESTART in the kernel).  On other systems we can start
- * the command in the background which prevents sudo from stealing /dev/tty
- * input when it doesn't need to.  When the command receives SIGTTOU or SIGTTIN,
- * sudo will continue it in the foreground (assuming sudo is in the foreground).
- */
-#ifdef __APPLE__
-# define TCSETATTR_NO_RESTART
 #endif
 
 struct io_buffer {
@@ -676,9 +664,8 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 	    sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
 	}
 
-#ifdef TCSETATTR_NO_RESTART
-	/* Start out in raw mode if we are not part of a pipeline. */
-	if (!pipeline) {
+	/* Start out in raw mode unless part of a pipeline or backgrounded. */
+	if (!pipeline && !ISSET(details->flags, CD_EXEC_BG)) {
 	    ttymode = TERM_RAW;
 	    do {
 		n = term_raw(io_fds[SFD_USERTTY], 0);
@@ -686,7 +673,6 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 	    if (!n)
 		error(1, _("unable to set terminal to raw mode"));
 	}
-#endif
     }
 
     /*
@@ -1111,14 +1097,13 @@ exec_monitor(struct command_details *details, int backchannel)
     /* Put command in its own process group. */
     cmnd_pgrp = cmnd_pid;
     setpgid(cmnd_pid, cmnd_pgrp);
-#ifdef TCSETATTR_NO_RESTART
+
     /* Make the command the foreground process for the pty slave. */
-    if (foreground) {
+    if (foreground && !ISSET(details->flags, CD_EXEC_BG)) {
 	do {
 	    n = tcsetpgrp(io_fds[SFD_SLAVE], cmnd_pgrp);
 	} while (n == -1 && errno == EINTR);
     }
-#endif
 
     /* Wait for errno on pipe, signal on backchannel or for SIGCHLD */
     maxfd = MAX(MAX(errpipe[0], signal_pipe[0]), backchannel);
@@ -1311,13 +1296,11 @@ exec_pty(struct command_details *details, int *errfd)
 	dup2(io_fds[SFD_STDERR], STDERR_FILENO) == -1)
 	error(1, "dup2");
 
-#ifdef TCSETATTR_NO_RESTART
     /* Wait for parent to grant us the tty if we are foreground. */
-    if (foreground) {
+    if (foreground && !ISSET(details->flags, CD_EXEC_BG)) {
 	while (tcgetpgrp(io_fds[SFD_SLAVE]) != self)
 	    ; /* spin */
     }
-#endif
 
     /* We have guaranteed that the slave fd is > 2 */
     if (io_fds[SFD_SLAVE] != -1)
