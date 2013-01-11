@@ -2993,7 +2993,7 @@ SUDO_NLS=disabled
 LOCALEDIR_SUFFIX=
 LT_LDEXPORTS="-export-symbols \$(shlib_exp)"
 LT_LDDEP="\$(shlib_exp)"
-NO_VIZ=
+NO_VIZ="-DNO_VIZ"
 OS_INIT=os_init_common
 
 CHECKSHADOW=true
@@ -20431,7 +20431,8 @@ fi
 
 fi
 
-as_CACHEVAR=`$as_echo "ax_cv_check_cflags__-fvisibility=hidden" | $as_tr_sh`
+if test -n "$GCC"; then
+    as_CACHEVAR=`$as_echo "ax_cv_check_cflags__-fvisibility=hidden" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fvisibility=hidden" >&5
 $as_echo_n "checking whether C compiler accepts -fvisibility=hidden... " >&6; }
 if eval \${$as_CACHEVAR+:} false; then :
@@ -20464,19 +20465,21 @@ eval ac_res=\$$as_CACHEVAR
 $as_echo "$ac_res" >&6; }
 if test x"`eval 'as_val=${'$as_CACHEVAR'};$as_echo "$as_val"'`" = xyes; then :
 
-    $as_echo "#define HAVE_DSO_VISIBILITY 1" >>confdefs.h
+	$as_echo "#define HAVE_DSO_VISIBILITY 1" >>confdefs.h
 
-    CFLAGS="${CFLAGS} -fvisibility=hidden"
-    LT_LDEXPORTS=
-    LT_LDDEP=
+	CFLAGS="${CFLAGS} -fvisibility=hidden"
+	LT_LDEXPORTS=
+	LT_LDDEP=
+	NO_VIZ=
 
 else
+  :
+fi
 
-    NO_VIZ="-DNO_VIZ"
-    if test -z "$GCC"; then
-	case "$host" in
-	    *-*-hpux*)
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Bhidden_def" >&5
+else
+    case "$host" in
+	*-*-hpux*)
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Bhidden_def" >&5
 $as_echo_n "checking whether C compiler accepts -Bhidden_def... " >&6; }
 if ${ax_cv_check_cflags___Bhidden_def+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -20507,19 +20510,19 @@ fi
 $as_echo "$ax_cv_check_cflags___Bhidden_def" >&6; }
 if test x"$ax_cv_check_cflags___Bhidden_def" = xyes; then :
 
-		    $as_echo "#define HAVE_DSO_VISIBILITY 1" >>confdefs.h
+		$as_echo "#define HAVE_DSO_VISIBILITY 1" >>confdefs.h
 
-		    CFLAGS="${CFLAGS} -Bhidden_def"
-		    LT_LDEXPORTS=
-		    LT_LDDEP=
+		CFLAGS="${CFLAGS} -Bhidden_def"
+		LT_LDEXPORTS=
+		LT_LDDEP=
 
 else
   :
 fi
 
-		;;
-	    *-*-solaris2*)
-		as_CACHEVAR=`$as_echo "ax_cv_check_cflags__-xldscope=hidden" | $as_tr_sh`
+	    ;;
+	*-*-solaris2*)
+	    as_CACHEVAR=`$as_echo "ax_cv_check_cflags__-xldscope=hidden" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -xldscope=hidden" >&5
 $as_echo_n "checking whether C compiler accepts -xldscope=hidden... " >&6; }
 if eval \${$as_CACHEVAR+:} false; then :
@@ -20552,22 +20555,19 @@ eval ac_res=\$$as_CACHEVAR
 $as_echo "$ac_res" >&6; }
 if test x"`eval 'as_val=${'$as_CACHEVAR'};$as_echo "$as_val"'`" = xyes; then :
 
-		    $as_echo "#define HAVE_DSO_VISIBILITY 1" >>confdefs.h
+		$as_echo "#define HAVE_DSO_VISIBILITY 1" >>confdefs.h
 
-		    CFLAGS="${CFLAGS} -xldscope=hidden"
-		    LT_LDEXPORTS=
-		    LT_LDDEP=
+		CFLAGS="${CFLAGS} -xldscope=hidden"
+		LT_LDEXPORTS=
+		LT_LDDEP=
 
 else
   :
 fi
 
-		;;
-	esac
-    fi
-
+	    ;;
+    esac
 fi
-
 
 if test -n "$LT_LDEXPORTS"; then
     if test "$lt_cv_prog_gnu_ld" = "yes"; then
@@ -20794,7 +20794,8 @@ fi
 fi
 
 if test "$enable_hardening" != "no"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fstack-protector" >&5
+    if test -n "$GCC"; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fstack-protector" >&5
 $as_echo_n "checking whether C compiler accepts -fstack-protector... " >&6; }
 if ${ax_cv_check_cflags___fstack_protector+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -20825,7 +20826,7 @@ fi
 $as_echo "$ax_cv_check_cflags___fstack_protector" >&6; }
 if test x"$ax_cv_check_cflags___fstack_protector" = xyes; then :
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fstack-protector" >&5
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fstack-protector" >&5
 $as_echo_n "checking whether the linker accepts -fstack-protector... " >&6; }
 if ${ax_cv_check_ldflags___fstack_protector+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -20857,8 +20858,8 @@ fi
 $as_echo "$ax_cv_check_ldflags___fstack_protector" >&6; }
 if test x"$ax_cv_check_ldflags___fstack_protector" = xyes; then :
 
-	    SSP_CFLAGS="-fstack-protector"
-	    SSP_LDFLAGS="-Wc,-fstack-protector"
+		SSP_CFLAGS="-fstack-protector"
+		SSP_LDFLAGS="-Wc,-fstack-protector"
 
 else
   :
@@ -20869,6 +20870,7 @@ else
   :
 fi
 
+    fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-z,relro" >&5
 $as_echo_n "checking whether the linker accepts -Wl,-z,relro... " >&6; }
 if ${ax_cv_check_ldflags___Wl__z_relro+:} false; then :

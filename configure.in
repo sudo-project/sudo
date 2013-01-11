@@ -194,7 +194,7 @@ SUDO_NLS=disabled
 LOCALEDIR_SUFFIX=
 LT_LDEXPORTS="-export-symbols \$(shlib_exp)"
 LT_LDDEP="\$(shlib_exp)"
-NO_VIZ=
+NO_VIZ="-DNO_VIZ"
 OS_INIT=os_init_common
 
 dnl
@@ -3298,34 +3298,34 @@ dnl
 dnl Check for symbol visibility support.
 dnl This test relies on AC_LANG_WERROR
 dnl
-AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [
-    AC_DEFINE(HAVE_DSO_VISIBILITY)
-    CFLAGS="${CFLAGS} -fvisibility=hidden"
-    LT_LDEXPORTS=
-    LT_LDDEP=
-], [
-    NO_VIZ="-DNO_VIZ"
-    if test -z "$GCC"; then
-	case "$host" in
-	    *-*-hpux*)
-		AX_CHECK_COMPILE_FLAG([-Bhidden_def], [
-		    AC_DEFINE(HAVE_DSO_VISIBILITY)
-		    CFLAGS="${CFLAGS} -Bhidden_def"
-		    LT_LDEXPORTS=
-		    LT_LDDEP=
-		])
-		;;
-	    *-*-solaris2*)
-		AX_CHECK_COMPILE_FLAG([-xldscope=hidden], [
-		    AC_DEFINE(HAVE_DSO_VISIBILITY)
-		    CFLAGS="${CFLAGS} -xldscope=hidden"
-		    LT_LDEXPORTS=
-		    LT_LDDEP=
-		])
-		;;
-	esac
-    fi
-])
+if test -n "$GCC"; then
+    AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [
+	AC_DEFINE(HAVE_DSO_VISIBILITY)
+	CFLAGS="${CFLAGS} -fvisibility=hidden"
+	LT_LDEXPORTS=
+	LT_LDDEP=
+	NO_VIZ=
+    ])
+else
+    case "$host" in
+	*-*-hpux*)
+	    AX_CHECK_COMPILE_FLAG([-Bhidden_def], [
+		AC_DEFINE(HAVE_DSO_VISIBILITY)
+		CFLAGS="${CFLAGS} -Bhidden_def"
+		LT_LDEXPORTS=
+		LT_LDDEP=
+	    ])
+	    ;;
+	*-*-solaris2*)
+	    AX_CHECK_COMPILE_FLAG([-xldscope=hidden], [
+		AC_DEFINE(HAVE_DSO_VISIBILITY)
+		CFLAGS="${CFLAGS} -xldscope=hidden"
+		LT_LDEXPORTS=
+		LT_LDDEP=
+	    ])
+	    ;;
+    esac
+fi
 
 dnl
 dnl If the compiler doesn't have symbol visibility support, it may
@@ -3433,12 +3433,14 @@ dnl Check for -fstack-protector and -z relro support
 dnl This test relies on AC_LANG_WERROR
 dnl
 if test "$enable_hardening" != "no"; then
-    AX_CHECK_COMPILE_FLAG([-fstack-protector], [
-	AX_CHECK_LINK_FLAG([-fstack-protector], [
-	    SSP_CFLAGS="-fstack-protector"
-	    SSP_LDFLAGS="-Wc,-fstack-protector"
+    if test -n "$GCC"; then
+	AX_CHECK_COMPILE_FLAG([-fstack-protector], [
+	    AX_CHECK_LINK_FLAG([-fstack-protector], [
+		SSP_CFLAGS="-fstack-protector"
+		SSP_LDFLAGS="-Wc,-fstack-protector"
+	    ])
 	])
-    ])
+    fi
     AX_CHECK_LINK_FLAG([-Wl,-z,relro], [LDFLAGS="${LDFLAGS} -Wl,-z,relro"])
 fi
 
