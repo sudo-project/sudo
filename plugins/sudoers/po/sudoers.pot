@@ -1,6 +1,6 @@
-# SOME DESCRIPTIVE TITLE.
+# Portable object template file for the sudoers plugin
 # This file is put in the public domain.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Todd C. Miller <Todd.Miller@courtesan.com>, 2011-2013
 #
 #, fuzzy
 msgid ""
