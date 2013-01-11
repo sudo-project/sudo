@@ -348,15 +348,15 @@ suspend_parent(int signo)
 {
     char signame[SIG2STR_MAX];
     sigaction_t sa, osa;
-    int n, oldmode = ttymode, rval = 0;
+    int n, rval = 0;
     debug_decl(suspend_parent, SUDO_DEBUG_EXEC);
 
     switch (signo) {
     case SIGTTOU:
     case SIGTTIN:
 	/*
-	 * If we are the foreground process, just resume the command.
-	 * Otherwise, re-send the signal with the handler disabled.
+	 * If sudo is already the foreground process, just resume the command
+	 * in the foreground.  If not, we'll suspend sudo and resume later.
 	 */
 	if (!foreground)
 	    check_foreground();
@@ -370,7 +370,6 @@ suspend_parent(int signo)
 	    rval = SIGCONT_FG; /* resume command in foreground */
 	    break;
 	}
-	ttymode = TERM_RAW;
 	/* FALLTHROUGH */
     case SIGSTOP:
     case SIGTSTP:
@@ -378,7 +377,7 @@ suspend_parent(int signo)
 	flush_output();
 
 	/* Restore original tty mode before suspending. */
-	if (oldmode != TERM_COOKED) {
+	if (ttymode != TERM_COOKED) {
 	    do {
 		n = term_restore(io_fds[SFD_USERTTY], 0);
 	    } while (!n && errno == EINTR);
@@ -403,22 +402,26 @@ suspend_parent(int signo)
 	check_foreground();
 
 	/*
-	 * Only modify term if we are foreground process and either
-	 * the old tty mode was not cooked or command got SIGTT{IN,OU}
+	 * We always resume the command in the foreground if sudo itself
+	 * is the foreground process.  This helps work around poorly behaved
+	 * programs that catch SIGTTOU/SIGTTIN but suspend themselves with
+	 * SIGSTOP.  At worst, sudo will go into the background but upon
+	 * resume the command will be runnable.  Otherwise, we can get into
+	 * a situation where the command will immediately suspend itself.
 	 */
 	sudo_debug_printf(SUDO_DEBUG_INFO, "parent is in %s, ttymode %d -> %d",
-	    foreground ? "foreground" : "background", oldmode, ttymode);
+	    foreground ? "foreground" : "background", ttymode,
+	    foreground ? TERM_RAW : TERM_COOKED);
 
-	if (ttymode != TERM_COOKED) {
-	    if (foreground) {
-		/* Set raw mode. */
-		do {
-		    n = term_raw(io_fds[SFD_USERTTY], 0);
-		} while (!n && errno == EINTR);
-	    } else {
-		/* Background process, no access to tty. */
-		ttymode = TERM_COOKED;
-	    }
+	if (foreground) {
+	    /* Foreground process, set tty to raw mode. */
+	    do {
+		n = term_raw(io_fds[SFD_USERTTY], 0);
+	    } while (!n && errno == EINTR);
+	    ttymode = TERM_RAW;
+	} else {
+	    /* Background process, no access to tty. */
+	    ttymode = TERM_COOKED;
 	}
 
 	if (signo != SIGSTOP)
