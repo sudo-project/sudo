@@ -1107,9 +1107,10 @@ initial_setup()
     struct rlimit rl;
 #endif
 
-    /* Reset signal mask. */
+    /* Reset signal mask and save signal state. */
     (void) sigemptyset(&mask);
     (void) sigprocmask(SIG_SETMASK, &mask, NULL);
+    save_signals();
 
 #if defined(__linux__)
     /*
