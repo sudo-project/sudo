@@ -167,9 +167,10 @@ main(int argc, char *argv[], char *envp[])
     /* Make sure we are setuid root. */
     sudo_check_suid(argv[0]);
 
-    /* Reset signal mask and make sure fds 0-2 are open. */
+    /* Reset signal mask, save signal state and make sure fds 0-2 are open. */
     (void) sigemptyset(&mask);
     (void) sigprocmask(SIG_SETMASK, &mask, NULL);
+    save_signals();
     fix_fds();
 
     /* Read sudo.conf. */
