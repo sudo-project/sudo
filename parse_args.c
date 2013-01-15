@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2012 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -391,12 +391,12 @@ help()
     usage(0);
 
     lbuf_append(&lbuf, "\nOptions:\n");
-#ifdef HAVE_BSD_AUTH_H
     lbuf_append(&lbuf,
 	"  -A            use helper program for password prompting\n");
-#endif
+#ifdef HAVE_BSD_AUTH_H
     lbuf_append(&lbuf,
 	"  -a type       use specified BSD authentication type\n");
+#endif
     lbuf_append(&lbuf,
 	"  -b            run command in the background\n");
     lbuf_append(&lbuf,
