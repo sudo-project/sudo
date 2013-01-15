@@ -3045,12 +3045,22 @@ dnl into fatal errors (and there is no way to undo that)
 dnl
 if test "$enable_hardening" != "no"; then
     AC_LANG_WERROR
-    AX_CHECK_COMPILE_FLAG([-fstack-protector], [
-	AX_CHECK_LINK_FLAG([-fstack-protector], [
-	    SSP_CFLAGS="-fstack-protector"
-	    SSP_LDFLAGS="-fstack-protector"
+    if test -n "$GCC"; then
+	AX_CHECK_COMPILE_FLAG([-fstack-protector-all], [
+	    AX_CHECK_LINK_FLAG([-fstack-protector-all], [
+		SSP_CFLAGS="-fstack-protector-all"
+		SSP_LDFLAGS="-fstack-protector-all"
+	    ])
 	])
-    ])
+	if test -z "$SSP_CFLAGS"; then
+	    AX_CHECK_COMPILE_FLAG([-fstack-protector], [
+		AX_CHECK_LINK_FLAG([-fstack-protector], [
+		    SSP_CFLAGS="-fstack-protector"
+		    SSP_LDFLAGS="-fstack-protector"
+		])
+	    ])
+	fi
+    fi
     AX_CHECK_LINK_FLAG([-Wl,-z,relro], [LDFLAGS="${LDFLAGS} -Wl,-z,relro"])
 fi
 
