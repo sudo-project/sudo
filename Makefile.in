@@ -64,6 +64,10 @@ SUDO_LDFLAGS = @SUDO_LDFLAGS@ $(LDFLAGS)
 PIE_CFLAGS = @PIE_CFLAGS@
 PIE_LDFLAGS = @PIE_LDFLAGS@
 
+# Stack smashing protection flags
+SSP_CFLAGS = @SSP_CFLAGS@
+SSP_LDFLAGS = @SSP_LDFLAGS@
+
 # Where to install things...
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -217,10 +221,10 @@ all: $(PROGS) $(DEVDOCS) $(DOCS)
 .SUFFIXES: .o .c .h .l .y .lo
 
 .c.o:
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $<
 
 .c.lo:
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $<
 
 libsudo.a: $(LIB_OBJS) $(COMMON_OBJS)
 	$(AR) rv $@ $(LIB_OBJS) $(COMMON_OBJS)
@@ -231,16 +235,16 @@ libz.a: $(ZLIB_OBJS)
 	$(RANLIB) $@
 
 sudo: libsudo.a @ZLIB_DEP@ $(SUDO_OBJS)
-	$(CC) -o $@ $(SUDO_OBJS) $(SUDO_LDFLAGS) $(PIE_LDFLAGS) -lsudo $(SUDO_LIBS) @ZLIB@
+	$(CC) -o $@ $(SUDO_OBJS) $(SUDO_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) -lsudo $(SUDO_LIBS) @ZLIB@
 
 visudo: libsudo.a $(VISUDO_OBJS)
-	$(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) -lsudo $(LIBS) $(NET_LIBS)
+	$(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) -lsudo $(LIBS) $(NET_LIBS)
 
 sudoreplay: libsudo.a @ZLIB_DEP@ $(REPLAY_OBJS)
-	$(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) -lsudo $(LIBS) @ZLIB@
+	$(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) -lsudo $(LIBS) @ZLIB@
 
 testsudoers: $(TEST_OBJS)
-	$(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) -lsudo $(LIBS) $(NET_LIBS)
+	$(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) -lsudo $(LIBS) $(NET_LIBS)
 
 sudo_noexec.lo: $(srcdir)/sudo_noexec.c
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_noexec.c
@@ -303,213 +307,213 @@ $(srcdir)/mksiglist.h: $(srcdir)/siglist.in
 
 # Dependencies (not counting auth functions)
 aix.o: $(srcdir)/aix.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/aix.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/aix.c
 alias.o: $(srcdir)/alias.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(srcdir)/redblack.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alias.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alias.c
 alloc.o: $(srcdir)/alloc.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alloc.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alloc.c
 audit.o: $(srcdir)/audit.c $(SUDODEP) $(srcdir)/bsm_audit.h $(srcdir)/linux_audit.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/audit.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/audit.c
 boottime.o: $(srcdir)/boottime.c config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/boottime.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/boottime.c
 bsm_audit.o: $(srcdir)/bsm_audit.c $(SUDODEP) $(srcdir)/bsm_audit.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/bsm_audit.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/bsm_audit.c
 check.o: $(srcdir)/check.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/check.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/check.c
 closefrom.o: $(srcdir)/closefrom.c config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/closefrom.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/closefrom.c
 defaults.o: $(srcdir)/defaults.c $(SUDODEP) $(srcdir)/def_data.c $(authdir)/sudo_auth.h $(devdir)/gram.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/defaults.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/defaults.c
 env.o: $(srcdir)/env.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/env.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/env.c
 error.o: $(srcdir)/error.c $(srcdir)/missing.h $(srcdir)/error.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/error.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/error.c
 exec.o: $(srcdir)/exec.c $(SUDODEP) $(srcdir)/sudo_exec.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/exec.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/exec.c
 exec_pty.o: $(srcdir)/exec.c $(SUDODEP) $(srcdir)/sudo_exec.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/exec_pty.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/exec_pty.c
 fileops.o: $(srcdir)/fileops.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fileops.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fileops.c
 find_path.o: $(srcdir)/find_path.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/find_path.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/find_path.c
 fnmatch.o: $(srcdir)/fnmatch.c $(srcdir)/emul/fnmatch.h $(srcdir)/missing.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fnmatch.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fnmatch.c
 get_pty.o: $(srcdir)/get_pty.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/get_pty.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/get_pty.c
 getcwd.o: $(srcdir)/getcwd.c $(srcdir)/missing.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getcwd.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getcwd.c
 getdate.o: $(srcdir)/getdate.c $(srcdir)/missing.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getdate.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getdate.c
 getline.o: $(srcdir)/getline.c config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getline.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getline.c
 getprogname.o: $(srcdir)/getprogname.c config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getprogname.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getprogname.c
 getspwuid.o: $(srcdir)/getspwuid.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getspwuid.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getspwuid.c
 gettime.o: $(srcdir)/gettime.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/gettime.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/gettime.c
 glob.o: $(srcdir)/glob.c $(srcdir)/emul/glob.h $(srcdir)/missing.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/glob.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/glob.c
 goodpath.o: $(srcdir)/goodpath.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/goodpath.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/goodpath.c
 gram.o: $(devdir)/gram.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(devdir)/gram.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(devdir)/gram.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(devdir)/gram.c
 interfaces.o: $(srcdir)/interfaces.c $(SUDODEP) $(srcdir)/interfaces.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/interfaces.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/interfaces.c
 iolog.o: $(srcdir)/iolog.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/iolog.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/iolog.c
 isblank.o: $(srcdir)/isblank.c $(srcdir)/missing.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/isblank.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/isblank.c
 lbuf.o: $(srcdir)/lbuf.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/lbuf.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/lbuf.c
 ldap.o: $(srcdir)/ldap.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/ldap.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/ldap.c
 linux_audit.o: $(srcdir)/linux_audit.c $(SUDODEP) $(srcdir)/linux_audit.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/linux_audit.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/linux_audit.c
 list.o: $(srcdir)/list.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/list.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/list.c
 logging.o: $(srcdir)/logging.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/logging.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/logging.c
 logwrap.o: $(srcdir)/logwrap.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/logwrap.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/logwrap.c
 match.o: $(srcdir)/match.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(srcdir)/interfaces.h $(devdir)/gram.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/match.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/match.c
 memrchr.o: $(srcdir)/memrchr.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/memrchr.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/memrchr.c
 mkstemps.o: $(srcdir)/mkstemps.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/mkstemps.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/mkstemps.c
 nanosleep.o: $(srcdir)/nanosleep.c $(srcdir)/missing.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/nanosleep.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/nanosleep.c
 parse.o: $(srcdir)/parse.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(devdir)/gram.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/parse.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/parse.c
 parse_args.o: $(srcdir)/parse_args.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/parse_args.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/parse_args.c
 pwutil.o: $(srcdir)/pwutil.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/pwutil.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/pwutil.c
 redblack.o: $(srcdir)/redblack.c $(SUDODEP) $(srcdir)/redblack.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/redblack.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/redblack.c
 secure_path.o: $(srcdir)/secure_path.c $(SUDODEP) $(srcdir)/secure_path.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/secure_path.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/secure_path.c
 set_perms.o: $(srcdir)/set_perms.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/set_perms.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/set_perms.c
 setsid.o: $(srcdir)/setsid.c $(srcdir)/missing.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/setsid.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/setsid.c
 sigaction.o: $(srcdir)/sigaction.c $(srcdir)/missing.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sigaction.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sigaction.c
 siglist.o: siglist.c $(srcdir)/missing.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/siglist.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/siglist.c
 snprintf.o: $(srcdir)/snprintf.c $(srcdir)/missing.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/snprintf.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/snprintf.c
 strcasecmp.o: $(srcdir)/strcasecmp.c $(srcdir)/missing.h  config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strcasecmp.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strcasecmp.c
 strerror.o: $(srcdir)/strerror.c $(srcdir)/missing.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strerror.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strerror.c
 strlcat.o: $(srcdir)/strlcat.c $(srcdir)/missing.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strlcat.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strlcat.c
 strlcpy.o: $(srcdir)/strlcpy.c $(srcdir)/missing.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strlcpy.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strlcpy.c
 strsignal.o: $(srcdir)/strsignal.c $(srcdir)/missing.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strsignal.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strsignal.c
 selinux.o: $(srcdir)/selinux.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/selinux.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/selinux.c
 sudo.o: $(srcdir)/sudo.c $(SUDODEP) sudo_usage.h $(srcdir)/interfaces.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo.c
 sudoreplay.o: $(srcdir)/sudoreplay.c $(srcdir)/alloc.h $(srcdir)/missing.h $(srcdir)/error.h $(srcdir)/missing.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudoreplay.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudoreplay.c
 sudo_edit.o: $(srcdir)/sudo_edit.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_edit.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_edit.c
 sudo_noexec.o: $(srcdir)/sudo_noexec.c $(srcdir)/missing.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_noexec.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_noexec.c
 sudo_nss.o: $(srcdir)/sudo_nss.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_nss.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_nss.c
 term.o: $(srcdir)/term.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/term.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/term.c
 testsudoers.o: $(srcdir)/testsudoers.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(srcdir)/interfaces.h $(devdir)/gram.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/testsudoers.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/testsudoers.c
 tgetpass.o: $(srcdir)/tgetpass.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tgetpass.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tgetpass.c
 ttyname.o: $(srcdir)/ttyname.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/ttyname.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/ttyname.c
 ttysize.o: $(srcdir)/ttysize.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/ttysize.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/ttysize.c
 timestr.o: $(srcdir)/timestr.c $(srcdir)/missing.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/timestr.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/timestr.c
 toke.o: $(devdir)/toke.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(srcdir)/toke.h $(devdir)/gram.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(devdir)/toke.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(devdir)/toke.c
 toke_util.o: $(srcdir)/toke_util.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(srcdir)/toke.h $(devdir)/gram.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/toke_util.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/toke_util.c
 tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tsgetgrpw.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tsgetgrpw.c
 utimes.o: $(srcdir)/utimes.c $(srcdir)/missing.h $(srcdir)/emul/utime.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/utimes.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/utimes.c
 vasgroups.o: $(srcdir)/vasgroups.c $(srcdir)/nonunix.h $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/vasgroups.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/vasgroups.c
 visudo.o: $(srcdir)/visudo.c $(SUDODEP) $(devdir)/gram.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/visudo.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/visudo.c
 zero_bytes.o: $(srcdir)/zero_bytes.c $(srcdir)/missing.h config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/zero_bytes.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/zero_bytes.c
 sudo_auth.o: $(authdir)/sudo_auth.c $(AUTHDEP) $(INSDEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/sudo_auth.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/sudo_auth.c
 afs.o: $(authdir)/afs.c $(AUTHDEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/afs.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/afs.c
 aix_auth.o: $(authdir)/aix_auth.c $(AUTHDEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/aix_auth.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/aix_auth.c
 bsdauth.o: $(authdir)/bsdauth.c $(AUTHDEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/bsdauth.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/bsdauth.c
 dce.o: $(authdir)/dce.c $(AUTHDEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/dce.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/dce.c
 fwtk.o: $(authdir)/fwtk.c $(AUTHDEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/fwtk.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/fwtk.c
 kerb4.o: $(authdir)/kerb4.c $(AUTHDEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/kerb4.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/kerb4.c
 kerb5.o: $(authdir)/kerb5.c $(AUTHDEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/kerb5.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/kerb5.c
 pam.o: $(authdir)/pam.c $(AUTHDEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/pam.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/pam.c
 passwd.o: $(authdir)/passwd.c $(AUTHDEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/passwd.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/passwd.c
 rfc1938.o: $(authdir)/rfc1938.c $(AUTHDEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/rfc1938.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/rfc1938.c
 secureware.o: $(authdir)/secureware.c $(AUTHDEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/secureware.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/secureware.c
 securid.o: $(authdir)/securid.c $(AUTHDEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/securid.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/securid.c
 securid5.o: $(authdir)/securid5.c $(AUTHDEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/securid5.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/securid5.c
 sia.o: $(authdir)/sia.c $(AUTHDEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/sia.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/sia.c
 
 # Zlib dependencies
 adler32.o: $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h
-	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(srcdir)/zlib/adler32.c
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/zlib/adler32.c
 compress.o: $(srcdir)/zlib/zlib.h zlib/zconf.h
-	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(srcdir)/zlib/compress.c
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/zlib/compress.c
 crc32.o: $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/crc32.h
-	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(srcdir)/zlib/crc32.c
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/zlib/crc32.c
 deflate.o: $(srcdir)/zlib/deflate.h $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h
-	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(srcdir)/zlib/deflate.c
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/zlib/deflate.c
 gzclose.o: $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/gzguts.h
-	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(srcdir)/zlib/gzclose.c
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/zlib/gzclose.c
 gzlib.o: $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/gzguts.h
-	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(srcdir)/zlib/gzlib.c
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/zlib/gzlib.c
 gzread.o: $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/gzguts.h
-	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(srcdir)/zlib/gzread.c
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/zlib/gzread.c
 gzwrite.o: $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/gzguts.h
-	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(srcdir)/zlib/gzwrite.c
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/zlib/gzwrite.c
 infback.o: $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/inftrees.h $(srcdir)/zlib/inflate.h $(srcdir)/zlib/inffast.h $(srcdir)/zlib/inffixed.h
-	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(srcdir)/zlib/infback.c
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/zlib/infback.c
 inffast.o: $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/inftrees.h $(srcdir)/zlib/inflate.h $(srcdir)/zlib/inffast.h
-	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(srcdir)/zlib/inffast.c
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/zlib/inffast.c
 inflate.o: $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/inftrees.h $(srcdir)/zlib/inflate.h $(srcdir)/zlib/inffast.h $(srcdir)/zlib/inffixed.h
-	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(srcdir)/zlib/inflate.c
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/zlib/inflate.c
 inftrees.o: $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/inftrees.h
-	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(srcdir)/zlib/inftrees.c
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/zlib/inftrees.c
 trees.o: $(srcdir)/zlib/deflate.h $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h $(srcdir)/zlib/trees.h
-	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(srcdir)/zlib/trees.c
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/zlib/trees.c
 uncompr.o: $(srcdir)/zlib/zlib.h zlib/zconf.h
-	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(srcdir)/zlib/uncompr.c
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/zlib/uncompr.c
 zutil.o: $(srcdir)/zlib/zutil.h $(srcdir)/zlib/zlib.h zlib/zconf.h
-	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(srcdir)/zlib/zutil.c
+	$(CC) -c -I. -I$(srcdir)/zlib $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/zlib/zutil.c
 
 varsub: $(srcdir)/configure.in
 	@if [ -n "$(DEVEL)" ]; then \

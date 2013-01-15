@@ -60,6 +60,8 @@ AC_SUBST([ZLIB_DEP])
 AC_SUBST([CONFIGURE_ARGS])
 AC_SUBST([PIE_LDFLAGS])
 AC_SUBST([PIE_CFLAGS])
+AC_SUBST([SSP_LDFLAGS])
+AC_SUBST([SSP_CFLAGS])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -3045,8 +3047,8 @@ if test "$enable_hardening" != "no"; then
     AC_LANG_WERROR
     AX_CHECK_COMPILE_FLAG([-fstack-protector], [
 	AX_CHECK_LINK_FLAG([-fstack-protector], [
-	    CFLAGS="${CFLAGS} -fstack-protector"
-	    LDFLAGS="${LDFLAGS} -fstack-protector"
+	    SSP_CFLAGS="-fstack-protector"
+	    SSP_LDFLAGS="-fstack-protector"
 	])
     ])
     AX_CHECK_LINK_FLAG([-Wl,-z,relro], [LDFLAGS="${LDFLAGS} -Wl,-z,relro"])
