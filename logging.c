@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996, 1998-2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1994-1996, 1998-2012 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -246,15 +246,21 @@ do_logfile(msg)
 }
 
 /*
- * Log and mail the denial message, optionally informing the user.
+ * Log, audit and mail the denial message, optionally informing the user.
  */
-static void
+void
 log_denial(status, inform_user)
     int status;
     int inform_user;
 {
     char *message;
     char *logline;
+
+    /* Handle auditing first. */
+    if (ISSET(status, FLAG_NO_USER | FLAG_NO_HOST))
+	audit_failure(NewArgv, "No user or host");
+    else
+	audit_failure(NewArgv, "validation failure");
 
     /* Set error message. */
     if (ISSET(status, FLAG_NO_USER))
@@ -310,12 +316,6 @@ log_failure(status, flags)
     int flags;
 {
     int inform_user = TRUE;
-
-    /* Handle auditing first. */
-    if (ISSET(status, FLAG_NO_USER | FLAG_NO_HOST))
-	audit_failure(NewArgv, "No user or host");
-    else
-	audit_failure(NewArgv, "validation failure");
 
     /* The user doesn't always get to see the log message (path info). */
     if (!ISSET(status, FLAG_NO_USER | FLAG_NO_HOST) && def_path_info &&

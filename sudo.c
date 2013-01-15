@@ -443,7 +443,7 @@ main(argc, argv, envp)
     rval = check_user(validated, sudo_mode);
     if (rval != TRUE) {
 	if (!ISSET(validated, VALIDATE_OK))
-	    log_failure(validated, cmnd_status);
+	    log_denial(validated, FALSE);
 	goto done;
     }
 

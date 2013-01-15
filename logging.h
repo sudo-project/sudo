@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2009
+ * Copyright (c) 1999-2005, 2009-2012
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -56,6 +56,7 @@ void audit_success		__P((char *[]));
 void audit_failure		__P((char *[], char const * const, ...));
 void log_allowed		__P((int));
 void log_auth_failure		__P((int, int));
+void log_denial			__P((int, int));
 void log_failure		__P((int, int));
 void log_error			__P((int flags, const char *fmt, ...))
 				    __printflike(2, 3);
