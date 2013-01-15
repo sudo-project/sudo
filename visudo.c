@@ -791,7 +791,7 @@ check_syntax(sudoers_path, quiet, strict)
 	    if (errorlineno != -1)
 		(void) printf("parse error in %s near line %d\n", errorfile,
 		    errorlineno);
-	    else
+	    else if (errorfile != NULL)
 		(void) printf("parse error in %s\n", errorfile);
 	} else {
 	    struct sudoersfile *sp;
