@@ -56,7 +56,7 @@
 
 static volatile sig_atomic_t signo[NSIG];
 
-static void handler(int);
+static void tgetpass_handler(int);
 static char *getln(int, char *, size_t, int);
 static char *sudo_askpass(const char *, const char *);
 
@@ -130,7 +130,7 @@ restart:
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_INTERRUPT;	/* don't restart system calls */
-    sa.sa_handler = handler;
+    sa.sa_handler = tgetpass_handler;
     (void) sigaction(SIGALRM, &sa, &savealrm);
     (void) sigaction(SIGINT, &sa, &saveint);
     (void) sigaction(SIGHUP, &sa, &savehup);
@@ -315,7 +315,7 @@ getln(int fd, char *buf, size_t bufsiz, int feedback)
 }
 
 static void
-handler(int s)
+tgetpass_handler(int s)
 {
     if (s != SIGALRM)
 	signo[s] = 1;
