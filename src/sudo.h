@@ -184,8 +184,6 @@ void zero_bytes(volatile void *, size_t);
 /* exec.c */
 int pipe_nonblock(int fds[2]);
 int sudo_execute(struct command_details *details, struct command_status *cstat);
-void restore_signals(void);
-void save_signals(void);
 
 /* term.c */
 int term_cbreak(int);
@@ -218,7 +216,6 @@ int run_command(struct command_details *details);
 int os_init_common(int argc, char *argv[], char *envp[]);
 extern const char *list_user, *runas_user, *runas_group;
 extern struct user_details user_details;
-extern int signal_pipe[2];
 
 /* sudo_edit.c */
 int sudo_edit(struct command_details *details);
@@ -266,5 +263,13 @@ int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
 
 /* ttyname.c */
 char *get_process_ttyname(void);
+
+/* signal.c */
+struct sigaction;
+extern int signal_pipe[2];
+int sudo_sigaction(int signo, struct sigaction *sa, struct sigaction *osa, bool update_only);
+void init_signals(void);
+void restore_signals(void);
+void save_signals(void);
 
 #endif /* _SUDO_SUDO_H */

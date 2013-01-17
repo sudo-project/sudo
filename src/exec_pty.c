@@ -376,11 +376,11 @@ suspend_parent(int signo)
 
 	/* Suspend self and continue command when we resume. */
 	if (signo != SIGSTOP) {
-	    zero_bytes(&sa, sizeof(sa));
+	    memset(&sa, 0, sizeof(sa));
 	    sigemptyset(&sa.sa_mask);
-	    sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
+	    sa.sa_flags = SA_RESTART;
 	    sa.sa_handler = SIG_DFL;
-	    sigaction(signo, &sa, &osa);
+	    sudo_sigaction(signo, &sa, &osa, false);
 	}
 	sudo_debug_printf(SUDO_DEBUG_INFO, "kill parent SIG%s", signame);
 	if (killpg(ppgrp, signo) != 0)
@@ -413,7 +413,7 @@ suspend_parent(int signo)
 	}
 
 	if (signo != SIGSTOP)
-	    sigaction(signo, &osa, NULL);
+	    sudo_sigaction(signo, &osa, NULL, false);
 	rval = ttymode == TERM_RAW ? SIGCONT_FG : SIGCONT_BG;
 	break;
     }
@@ -569,13 +569,13 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 
     ppgrp = getpgrp(); /* parent's pgrp, so child can signal us */
 
-    zero_bytes(&sa, sizeof(sa));
+    memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
 
     if (io_fds[SFD_USERTTY] != -1) {
 	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = sigwinch;
-	sigaction(SIGWINCH, &sa, NULL);
+	sudo_sigaction(SIGWINCH, &sa, NULL, false);
     }
 
     /* So we can block tty-generated signals */
@@ -644,8 +644,8 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 
     /* We don't want to receive SIGTTIN/SIGTTOU, getting EIO is preferable. */
     sa.sa_handler = SIG_IGN;
-    sigaction(SIGTTIN, &sa, NULL);
-    sigaction(SIGTTOU, &sa, NULL);
+    sudo_sigaction(SIGTTIN, &sa, NULL, true);
+    sudo_sigaction(SIGTTOU, &sa, NULL, true);
 
     /* Job control signals to relay from parent to child. */
     sigfillset(&sa.sa_mask);
@@ -656,7 +656,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 #else
     sa.sa_handler = handler;
 #endif
-    sigaction(SIGTSTP, &sa, NULL);
+    sudo_sigaction(SIGTSTP, &sa, NULL, true);
 
     if (foreground) {
 	/* Copy terminal attrs from user tty -> pty slave. */
@@ -987,17 +987,17 @@ exec_monitor(struct command_details *details, int backchannel)
 	error(1, _("unable to create pipe"));
 
     /* Reset SIGWINCH and SIGALRM. */
-    zero_bytes(&sa, sizeof(sa));
+    memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = SIG_DFL;
-    sigaction(SIGWINCH, &sa, NULL);
-    sigaction(SIGALRM, &sa, NULL);
+    sudo_sigaction(SIGWINCH, &sa, NULL, false);
+    sudo_sigaction(SIGALRM, &sa, NULL, false); /* XXX - saved value */
 
     /* Ignore any SIGTTIN or SIGTTOU we get. */
     sa.sa_handler = SIG_IGN;
-    sigaction(SIGTTIN, &sa, NULL);
-    sigaction(SIGTTOU, &sa, NULL);
+    sudo_sigaction(SIGTTIN, &sa, NULL, true);
+    sudo_sigaction(SIGTTOU, &sa, NULL, true);
 
     /* Block all signals in mon_handler(). */
     sigfillset(&sa.sa_mask);
@@ -1010,7 +1010,7 @@ exec_monitor(struct command_details *details, int backchannel)
 #else
     sa.sa_handler = mon_handler;
 #endif
-    sigaction(SIGCHLD, &sa, NULL);
+    sudo_sigaction(SIGCHLD, &sa, NULL, false);
 
     /* Catch common signals so we can cleanup properly. */
     sa.sa_flags = SA_RESTART;
@@ -1020,13 +1020,13 @@ exec_monitor(struct command_details *details, int backchannel)
 #else
     sa.sa_handler = mon_handler;
 #endif
-    sigaction(SIGHUP, &sa, NULL);
-    sigaction(SIGINT, &sa, NULL);
-    sigaction(SIGQUIT, &sa, NULL);
-    sigaction(SIGTERM, &sa, NULL);
-    sigaction(SIGTSTP, &sa, NULL);
-    sigaction(SIGUSR1, &sa, NULL);
-    sigaction(SIGUSR2, &sa, NULL);
+    sudo_sigaction(SIGHUP, &sa, NULL, true);
+    sudo_sigaction(SIGINT, &sa, NULL, true);
+    sudo_sigaction(SIGQUIT, &sa, NULL, true);
+    sudo_sigaction(SIGTERM, &sa, NULL, true);
+    sudo_sigaction(SIGTSTP, &sa, NULL, true);
+    sudo_sigaction(SIGUSR1, &sa, NULL, true);
+    sudo_sigaction(SIGUSR2, &sa, NULL, true);
 
     /*
      * Start a new session with the parent as the session leader

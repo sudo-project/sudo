@@ -104,7 +104,7 @@ static int fork_cmnd(struct command_details *details, int sv[2])
      * XXX - currently we send SIGCONT upon resume in some cases where
      * we don't need to (e.g. command pgrp == parent pgrp).
      */
-    zero_bytes(&sa, sizeof(sa));
+    memset(&sa, 0, sizeof(sa));
     sigfillset(&sa.sa_mask);
     sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
 #ifdef SA_SIGINFO
@@ -113,11 +113,11 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 #else
     sa.sa_handler = handler;
 #endif
-    sigaction(SIGCONT, &sa, NULL);
+    sudo_sigaction(SIGCONT, &sa, NULL, false);
 #ifdef SA_SIGINFO
     sa.sa_sigaction = handler_user_only;
 #endif
-    sigaction(SIGTSTP, &sa, NULL);
+    sudo_sigaction(SIGTSTP, &sa, NULL, true);
 
     /*
      * The policy plugin's session init must be run before we fork
@@ -173,56 +173,6 @@ static int fork_cmnd(struct command_details *details, int sv[2])
     sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d", details->command,
 	(int)cmnd_pid);
     debug_return_int(cmnd_pid);
-}
-
-static struct signal_state {
-    int signo;
-    sigaction_t sa;
-} saved_signals[] = {
-    { SIGALRM },	/* SAVED_SIGALRM */
-    { SIGCHLD },	/* SAVED_SIGCHLD */
-    { SIGCONT },	/* SAVED_SIGCONT */
-    { SIGHUP },		/* SAVED_SIGHUP */
-    { SIGINT },		/* SAVED_SIGINT */
-    { SIGPIPE },	/* SAVED_SIGPIPE */
-    { SIGQUIT },	/* SAVED_SIGQUIT */
-    { SIGTERM },	/* SAVED_SIGTERM */
-    { SIGTSTP },	/* SAVED_SIGTSTP */
-    { SIGTTIN },	/* SAVED_SIGTTIN */
-    { SIGTTOU },	/* SAVED_SIGTTOU */
-    { SIGUSR1 },	/* SAVED_SIGUSR1 */
-    { SIGUSR2 },	/* SAVED_SIGUSR2 */
-    { -1 }
-};
-
-/*
- * Save signal handler state so it can be restored before exec.
- */
-void
-save_signals(void)
-{
-    struct signal_state *ss;
-    debug_decl(save_signals, SUDO_DEBUG_EXEC)
-
-    for (ss = saved_signals; ss->signo != -1; ss++)
-	sigaction(ss->signo, NULL, &ss->sa);
-
-    debug_return;
-}
-
-/*
- * Restore signal handlers to initial state.
- */
-void
-restore_signals(void)
-{
-    struct signal_state *ss;
-    debug_decl(restore_signals, SUDO_DEBUG_EXEC)
-
-    for (ss = saved_signals; ss->signo != -1; ss++)
-	sigaction(ss->signo, &ss->sa, NULL);
-
-    debug_return;
 }
 
 /*
@@ -288,7 +238,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
      * We block all other signals while running the signal handler.
      * Note: HP-UX select() will not be interrupted if SA_RESTART set.
      */
-    zero_bytes(&sa, sizeof(sa));
+    memset(&sa, 0, sizeof(sa));
     sigfillset(&sa.sa_mask);
     sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
 #ifdef SA_SIGINFO
@@ -297,12 +247,12 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 #else
     sa.sa_handler = handler;
 #endif
-    sigaction(SIGALRM, &sa, NULL);
-    sigaction(SIGCHLD, &sa, NULL);
-    sigaction(SIGPIPE, &sa, NULL);
-    sigaction(SIGTERM, &sa, NULL);
-    sigaction(SIGUSR1, &sa, NULL);
-    sigaction(SIGUSR2, &sa, NULL);
+    sudo_sigaction(SIGTERM, &sa, NULL, true);
+    sudo_sigaction(SIGALRM, &sa, NULL, false); /* XXX - only if there is a timeout */
+    sudo_sigaction(SIGCHLD, &sa, NULL, false);
+    sudo_sigaction(SIGPIPE, &sa, NULL, false);
+    sudo_sigaction(SIGUSR1, &sa, NULL, true);
+    sudo_sigaction(SIGUSR2, &sa, NULL, true);
 
     /*
      * When not running the command in a pty, we do not want to
@@ -317,9 +267,9 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 	sa.sa_sigaction = handler_user_only;
     }
 #endif
-    sigaction(SIGHUP, &sa, NULL);
-    sigaction(SIGINT, &sa, NULL);
-    sigaction(SIGQUIT, &sa, NULL);
+    sudo_sigaction(SIGHUP, &sa, NULL, true);
+    sudo_sigaction(SIGINT, &sa, NULL, true);
+    sudo_sigaction(SIGQUIT, &sa, NULL, true);
 
     /* Max fd we will be selecting on. */
     maxfd = MAX(sv[0], signal_pipe[0]);
@@ -560,15 +510,16 @@ dispatch_signals(int sv[2], pid_t child, int log_io, struct command_status *csta
 				saved_pgrp = -1;
 			}
 			if (signo == SIGTSTP) {
-			    zero_bytes(&sa, sizeof(sa));
+			    memset(&sa, 0, sizeof(sa));
 			    sigemptyset(&sa.sa_mask);
+			    sa.sa_flags = SA_RESTART;
 			    sa.sa_handler = SIG_DFL;
-			    sigaction(SIGTSTP, &sa, &osa);
+			    sudo_sigaction(SIGTSTP, &sa, &osa, false);
 			}
 			if (kill(getpid(), signo) != 0)
 			    warning("kill(%d, SIG%s)", (int)getpid(), signame);
 			if (signo == SIGTSTP)
-			    sigaction(SIGTSTP, &osa, NULL);
+			    sudo_sigaction(SIGTSTP, &osa, NULL, false);
 			if (fd != -1) {
 			    /*
 			     * Restore command's process group if different.
@@ -603,7 +554,7 @@ dispatch_signals(int sv[2], pid_t child, int log_io, struct command_status *csta
 }
 
 /*
- * Read pending signals on signale_pipe written by sudo_handler().
+ * Drain pending signals from signale_pipe written by sudo_handler().
  * Handles the case where the signal was sent to us before
  * we have executed the command.
  * Returns 1 if we should terminate, else 0.
@@ -647,10 +598,11 @@ dispatch_pending_signals(struct command_status *cstat)
     /* Only stop if we haven't already been terminated. */
     if (signo == SIGTSTP)
     {
-	zero_bytes(&sa, sizeof(sa));
+	memset(&sa, 0, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = SIG_DFL;
-	sigaction(SIGTSTP, &sa, NULL);
+	sudo_sigaction(SIGTSTP, &sa, NULL, false);
 	if (kill(getpid(), SIGTSTP) != 0)
 	    warning("kill(%d, SIGTSTP)", (int)getpid());
 	/* No need to reinstall SIGTSTP handler. */

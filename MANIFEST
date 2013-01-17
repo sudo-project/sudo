@@ -347,6 +347,7 @@ src/po/zh_CN.po
 src/preload.c
 src/selinux.c
 src/sesh.c
+src/signal.c
 src/solaris.c
 src/sudo.c
 src/sudo.h
