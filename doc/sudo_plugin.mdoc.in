@@ -1718,6 +1718,46 @@ section for a description of
 .Pp
 Same as for the
 .Sx Policy plugin API .
+.Ss Signal handlers
+The
+.Nm sudo
+front end installs default signal handlers to trap common signals
+while the plugin functions are run.
+The following signals are trapped by default before the command is
+executed:
+.Pp
+.Bl -bullet -compact
+.It
+.Dv SIGALRM
+.It
+.Dv SIGHUP
+.It
+.Dv SIGINT
+.It
+.Dv SIGQUIT
+.It
+.Dv SIGTERM
+.It
+.Dv SIGTSTP
+.It
+.Dv SIGUSR1
+.It
+.Dv SIGUSR2
+.El
+.Pp
+If a fatal signal is received before the command is executed,
+.Nm sudo
+will call the plugin's
+.Fn close
+function with an exit status of 128 plus the value of the signal
+that was received.
+This allows for consistent logging of commands killed by a signal
+for plugins that log such information in their
+.Fn close
+function.
+.Pp
+A plugin may temporarily install its own signal handlers but must
+restore the original handler before the plugin function returns.
 .Ss Hook function API
 Beginning with plugin API version 1.2, it is possible to install
 hooks for certain functions called by the
@@ -2195,6 +2235,17 @@ Policy plugin function is now passed a pointer
 to the user environment which can be updated as needed.
 This can be used to merge in environment variables stored in the PAM
 handle before a command is run.
+.It Version 1.3
+Support for the
+.Em exec_background
+entry has been added to the
+.Li command_info
+list.
+.Pp
+The
+.Nm sudo
+front end now installs default signal handlers to trap common signals
+while the plugin functions are run.
 .El
 .Sh SEE ALSO
 .Xr sudoers @mansectform@ ,

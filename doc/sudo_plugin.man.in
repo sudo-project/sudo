@@ -1971,6 +1971,53 @@ section for a description of
 .PP
 Same as for the
 \fIPolicy plugin API\fR.
+.SS "Signal handlers"
+The
+\fBsudo\fR
+front end installs default signal handlers to trap common signals
+while the plugin functions are run.
+The following signals are trapped by default before the command is
+executed:
+.TP 4n
+\fBo\fR
+\fRSIGALRM\fR
+.PD 0
+.TP 4n
+\fBo\fR
+\fRSIGHUP\fR
+.TP 4n
+\fBo\fR
+\fRSIGINT\fR
+.TP 4n
+\fBo\fR
+\fRSIGQUIT\fR
+.TP 4n
+\fBo\fR
+\fRSIGTERM\fR
+.TP 4n
+\fBo\fR
+\fRSIGTSTP\fR
+.TP 4n
+\fBo\fR
+\fRSIGUSR1\fR
+.TP 4n
+\fBo\fR
+\fRSIGUSR2\fR
+.PD
+.PP
+If a fatal signal is received before the command is executed,
+\fBsudo\fR
+will call the plugin's
+\fBclose\fR()
+function with an exit status of 128 plus the value of the signal
+that was received.
+This allows for consistent logging of commands killed by a signal
+for plugins that log such information in their
+\fBclose\fR()
+function.
+.PP
+A plugin may temporarily install its own signal handlers but must
+restore the original handler before the plugin function returns.
 .SS "Hook function API"
 Beginning with plugin API version 1.2, it is possible to install
 hooks for certain functions called by the
@@ -2532,6 +2579,18 @@ Policy plugin function is now passed a pointer
 to the user environment which can be updated as needed.
 This can be used to merge in environment variables stored in the PAM
 handle before a command is run.
+.TP 6n
+Version 1.3
+Support for the
+\fIexec_background\fR
+entry has been added to the
+\fRcommand_info\fR
+list.
+.sp
+The
+\fBsudo\fR
+front end now installs default signal handlers to trap common signals
+while the plugin functions are run.
 .SH "SEE ALSO"
 sudoers(@mansectform@),
 sudo(@mansectsu@)

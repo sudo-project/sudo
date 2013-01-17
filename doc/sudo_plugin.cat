@@ -1069,6 +1069,29 @@ DDEESSCCRRIIPPTTIIOONN
 
      Same as for the _P_o_l_i_c_y _p_l_u_g_i_n _A_P_I.
 
+   SSiiggnnaall hhaannddlleerrss
+     The ssuuddoo front end installs default signal handlers to trap common
+     signals while the plugin functions are run.  The following signals are
+     trapped by default before the command is executed:
+
+     oo   SIGALRM
+     oo   SIGHUP
+     oo   SIGINT
+     oo   SIGQUIT
+     oo   SIGTERM
+     oo   SIGTSTP
+     oo   SIGUSR1
+     oo   SIGUSR2
+
+     If a fatal signal is received before the command is executed, ssuuddoo will
+     call the plugin's cclloossee() function with an exit status of 128 plus the
+     value of the signal that was received.  This allows for consistent
+     logging of commands killed by a signal for plugins that log such
+     information in their cclloossee() function.
+
+     A plugin may temporarily install its own signal handlers but must restore
+     the original handler before the plugin function returns.
+
    HHooookk ffuunnccttiioonn AAPPII
      Beginning with plugin API version 1.2, it is possible to install hooks
      for certain functions called by the ssuuddoo front end.
@@ -1387,6 +1410,13 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
            the user environment which can be updated as needed.  This can be
            used to merge in environment variables stored in the PAM handle
            before a command is run.
+
+     Version 1.3
+           Support for the _e_x_e_c___b_a_c_k_g_r_o_u_n_d entry has been added to the
+           command_info list.
+
+           The ssuuddoo front end now installs default signal handlers to trap
+           common signals while the plugin functions are run.
 
 SSEEEE AALLSSOO
      sudoers(4), sudo(1m)
