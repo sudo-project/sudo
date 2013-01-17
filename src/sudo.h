@@ -182,9 +182,10 @@ int tty_present(void);
 void zero_bytes(volatile void *, size_t);
 
 /* exec.c */
+int pipe_nonblock(int fds[2]);
 int sudo_execute(struct command_details *details, struct command_status *cstat);
-void save_signals(void);
 void restore_signals(void);
+void save_signals(void);
 
 /* term.c */
 int term_cbreak(int);
@@ -217,6 +218,7 @@ int run_command(struct command_details *details);
 int os_init_common(int argc, char *argv[], char *envp[]);
 extern const char *list_user, *runas_user, *runas_group;
 extern struct user_details user_details;
+extern int signal_pipe[2];
 
 /* sudo_edit.c */
 int sudo_edit(struct command_details *details);

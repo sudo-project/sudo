@@ -95,6 +95,7 @@ struct plugin_container policy_plugin;
 struct plugin_container_list io_plugins;
 struct user_details user_details;
 const char *list_user, *runas_user, *runas_group; /* extern for parse_args.c */
+int signal_pipe[2];
 static int sudo_mode;
 
 /*
@@ -106,6 +107,7 @@ static void sudo_check_suid(const char *path);
 static char **get_user_info(struct user_details *);
 static void command_info_to_details(char * const info[],
     struct command_details *details);
+static void setup_signals(void);
 
 /* Policy plugin convenience functions. */
 static int policy_open(struct plugin_container *plugin, char * const settings[],
@@ -206,6 +208,8 @@ main(int argc, char *argv[], char *envp[])
 	else
 	    errorx(1, _("unable to initialize policy plugin"));
     }
+
+    setup_signals();
 
     switch (sudo_mode & MODE_MASK) {
 	case MODE_VERSION:
@@ -1242,6 +1246,46 @@ iolog_unlink(struct plugin_container *plugin)
     /* Remove from io_plugins list and free. */
     tq_remove(&io_plugins, plugin);
     efree(plugin);
+
+    debug_return;
+}
+
+static void
+sudo_handler(int signo)
+{
+    /*
+     * The pipe is non-blocking, if we overflow the kernel's pipe
+     * buffer we drop the signal.  This is not a problem in practice.
+     */
+    ignore_result(write(signal_pipe[1], &signo, sizeof(signo)));
+}
+
+/*
+ * Trap tty-generated signals so we can't be killed before calling
+ * the policy close function.  The signal pipe will be checked
+ * in sudo_execute().
+ */
+static void
+setup_signals(void)
+{
+    struct sigaction sa;
+    debug_decl(setup_signals, SUDO_DEBUG_MAIN)
+
+    /*
+     * We use a pipe to atomically handle signal notification within
+     * the select() loop without races (we may not have pselect()).
+     */
+    if (pipe_nonblock(signal_pipe) != 0)
+	error(1, _("unable to create pipe"));
+
+    /* XXX - should not install handler if ignored by default. */
+    memset(&sa, 0, sizeof(sa));
+    sigfillset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    sa.sa_handler = sudo_handler;
+    sigaction(SIGINT, &sa, NULL);
+    sigaction(SIGQUIT, &sa, NULL);
+    sigaction(SIGTSTP, &sa, NULL);
 
     debug_return;
 }

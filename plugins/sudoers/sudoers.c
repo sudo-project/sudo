@@ -214,22 +214,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     struct sudo_nss *nss;
     int cmnd_status = -1, oldlocale, validated;
     volatile int rval = true;
-    sigaction_t sa, saved_sa_int, saved_sa_quit, saved_sa_tstp;
     debug_decl(sudoers_policy_main, SUDO_DEBUG_PLUGIN)
-
-    /*
-     * Signal setup:
-     *	Ignore keyboard-generated signals so the user cannot interrupt
-     *  us at some point and avoid the logging.
-     *  XXX - just block signals for critical sections (logging/auditing)
-     */
-    zero_bytes(&sa, sizeof(sa));
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-    sa.sa_handler = SIG_IGN;
-    (void) sigaction(SIGINT, &sa, &saved_sa_int);
-    (void) sigaction(SIGQUIT, &sa, &saved_sa_quit);
-    (void) sigaction(SIGTSTP, &sa, &saved_sa_tstp);
 
     /* XXX - would like to move this to policy.c but need the cleanup. */
     if (error_setjmp() != 0) {
@@ -525,11 +510,6 @@ bad:
 done:
     error_disable_setjmp();
     rewind_perms();
-
-    /* Restore signal handlers before we return. */
-    (void) sigaction(SIGINT, &saved_sa_int, NULL);
-    (void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
-    (void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
 
     /* Close the password and group files and free up memory. */
     sudo_endpwent();

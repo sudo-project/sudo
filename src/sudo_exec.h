@@ -24,12 +24,28 @@
 #define SIGCONT_BG	-3
 
 /*
+ * Positions in saved_signals[]
+ */
+#define SAVED_SIGALRM	 0
+#define SAVED_SIGCHLD	 1
+#define SAVED_SIGCONT	 2
+#define SAVED_SIGHUP	 3
+#define SAVED_SIGINT	 4
+#define SAVED_SIGPIPE	 5
+#define SAVED_SIGQUIT	 6
+#define SAVED_SIGTERM	 7
+#define SAVED_SIGTSTP	 8
+#define SAVED_SIGTTIN	 9
+#define SAVED_SIGTTOU	10
+#define SAVED_SIGUSR1	11
+#define SAVED_SIGUSR2	12
+
+/*
  * Symbols shared between exec.c and exec_pty.c
  */
 
 /* exec.c */
 int sudo_execve(const char *path, char *const argv[], char *const envp[], int noexec);
-int pipe_nonblock(int fds[2]);
 extern volatile pid_t cmnd_pid;
 
 /* exec_pty.c */
@@ -47,7 +63,6 @@ void handler(int s);
 void pty_close(struct command_status *cstat);
 void pty_setup(uid_t uid, const char *tty, const char *utmp_user);
 void terminate_command(pid_t pid, bool use_pgrp);
-extern int signal_pipe[2];
 
 /* utmp.c */
 bool utmp_login(const char *from_line, const char *to_line, int ttyfd,

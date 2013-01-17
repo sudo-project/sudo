@@ -59,9 +59,6 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
-/* Shared with exec_pty.c for use with handler(). */
-int signal_pipe[2];
-
 /* We keep a tailq of signals to forward to child. */
 struct sigforward {
     struct sigforward *prev, *next;
@@ -75,6 +72,7 @@ volatile pid_t cmnd_pid = -1;
 
 static int dispatch_signals(int sv[2], pid_t child, int log_io,
     struct command_status *cstat);
+static int dispatch_pending_signals(struct command_status *cstat);
 static void forward_signals(int fd);
 static void schedule_signal(int signo);
 #ifdef SA_SIGINFO
@@ -181,19 +179,19 @@ static struct signal_state {
     int signo;
     sigaction_t sa;
 } saved_signals[] = {
-    { SIGALRM },
-    { SIGCHLD },
-    { SIGCONT },
-    { SIGHUP },
-    { SIGINT },
-    { SIGPIPE },
-    { SIGQUIT },
-    { SIGTERM },
-    { SIGTSTP },
-    { SIGTTIN },
-    { SIGTTOU },
-    { SIGUSR1 },
-    { SIGUSR2 },
+    { SIGALRM },	/* SAVED_SIGALRM */
+    { SIGCHLD },	/* SAVED_SIGCHLD */
+    { SIGCONT },	/* SAVED_SIGCONT */
+    { SIGHUP },		/* SAVED_SIGHUP */
+    { SIGINT },		/* SAVED_SIGINT */
+    { SIGPIPE },	/* SAVED_SIGPIPE */
+    { SIGQUIT },	/* SAVED_SIGQUIT */
+    { SIGTERM },	/* SAVED_SIGTERM */
+    { SIGTSTP },	/* SAVED_SIGTSTP */
+    { SIGTTIN },	/* SAVED_SIGTTIN */
+    { SIGTTOU },	/* SAVED_SIGTTOU */
+    { SIGUSR1 },	/* SAVED_SIGUSR1 */
+    { SIGUSR2 },	/* SAVED_SIGUSR2 */
     { -1 }
 };
 
@@ -244,6 +242,8 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     pid_t child;
     debug_decl(sudo_execute, SUDO_DEBUG_EXEC)
 
+    dispatch_pending_signals(cstat);
+
     /* If running in background mode, fork and exit. */
     if (ISSET(details->flags, CD_BACKGROUND)) {
 	switch (sudo_debug_fork()) {
@@ -282,13 +282,6 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
      */
     if (socketpair(PF_UNIX, SOCK_DGRAM, 0, sv) == -1)
 	error(1, _("unable to create sockets"));
-
-    /*
-     * We use a pipe to atomically handle signal notification within
-     * the select() loop.
-     */
-    if (pipe_nonblock(signal_pipe) != 0)
-	error(1, _("unable to create pipe"));
 
     /*
      * Signals to forward to the child process (excluding SIGALRM and SIGCHLD).
@@ -494,7 +487,7 @@ do_tty_io:
 }
 
 /*
- * Read signals on fd written to by handler().
+ * Read signals on signal_pipe written by handler().
  * Returns -1 on error, 0 on child exit, else 1.
  */
 static int
@@ -607,6 +600,62 @@ dispatch_signals(int sv[2], pid_t child, int log_io, struct command_status *csta
 	}
     }
     debug_return_int(1);
+}
+
+/*
+ * Read pending signals on signale_pipe written by sudo_handler().
+ * Handles the case where the signal was sent to us before
+ * we have executed the command.
+ * Returns 1 if we should terminate, else 0.
+ */
+static int
+dispatch_pending_signals(struct command_status *cstat)
+{
+    ssize_t nread;
+    struct sigaction sa;
+    unsigned char signo = 0;
+    int rval = 0;
+    debug_decl(dispatch_pending_signals, SUDO_DEBUG_EXEC)
+
+    for (;;) {
+	nread = read(signal_pipe[0], &signo, sizeof(signo));
+	if (nread <= 0) {
+	    /* It should not be possible to get EOF but just in case. */
+	    if (nread == 0)
+		errno = ECONNRESET;
+	    /* Restart if interrupted by signal so the pipe doesn't fill. */
+	    if (errno == EINTR)
+		continue;
+	    /* If pipe is empty, we are done. */
+	    if (errno == EAGAIN)
+		break;
+	    sudo_debug_printf(SUDO_DEBUG_ERROR, "error reading signal pipe %s",
+		strerror(errno));
+	    cstat->type = CMD_ERRNO;
+	    cstat->val = errno;
+	    rval = 1;
+	    break;
+	}
+	/* Take the first terminal signal. */
+	if (signo == SIGINT || signo == SIGQUIT) {
+	    cstat->type = CMD_WSTATUS;
+	    cstat->val = signo + 128;
+	    rval = 1;
+	    break;
+	}
+    }
+    /* Only stop if we haven't already been terminated. */
+    if (signo == SIGTSTP)
+    {
+	zero_bytes(&sa, sizeof(sa));
+	sigemptyset(&sa.sa_mask);
+	sa.sa_handler = SIG_DFL;
+	sigaction(SIGTSTP, &sa, NULL);
+	if (kill(getpid(), SIGTSTP) != 0)
+	    warning("kill(%d, SIGTSTP)", (int)getpid());
+	/* No need to reinstall SIGTSTP handler. */
+    }
+    debug_return_int(rval);
 }
 
 /*
