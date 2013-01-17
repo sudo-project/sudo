@@ -566,12 +566,12 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
     sigset_t mask;
     pid_t child;
     debug_decl(fork_pty, SUDO_DEBUG_EXEC);
-        
+
     ppgrp = getpgrp(); /* parent's pgrp, so child can signal us */
-     
+
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
- 
+
     if (io_fds[SFD_USERTTY] != -1) {
 	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = sigwinch;
@@ -642,7 +642,13 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 	io_fds[SFD_STDERR] = io_pipe[STDERR_FILENO][1];
     }
 
+    /* We don't want to receive SIGTTIN/SIGTTOU, getting EIO is preferable. */
+    sa.sa_handler = SIG_IGN;
+    sigaction(SIGTTIN, &sa, NULL);
+    sigaction(SIGTTOU, &sa, NULL);
+
     /* Job control signals to relay from parent to child. */
+    sigfillset(&sa.sa_mask);
     sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
 #ifdef SA_SIGINFO
     sa.sa_flags |= SA_SIGINFO;
@@ -651,11 +657,6 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
     sa.sa_handler = handler;
 #endif
     sigaction(SIGTSTP, &sa, NULL);
-
-    /* We don't want to receive SIGTTIN/SIGTTOU, getting EIO is preferable. */
-    sa.sa_handler = SIG_IGN;
-    sigaction(SIGTTIN, &sa, NULL);
-    sigaction(SIGTTOU, &sa, NULL);
 
     if (foreground) {
 	/* Copy terminal attrs from user tty -> pty slave. */
@@ -726,7 +727,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 	close(io_pipe[STDIN_FILENO][0]);
     if (io_pipe[STDOUT_FILENO][1])
 	close(io_pipe[STDOUT_FILENO][1]);
-    if (io_pipe[STDERR_FILENO][1]) 
+    if (io_pipe[STDERR_FILENO][1])
 	close(io_pipe[STDERR_FILENO][1]);
 
     for (iob = iobufs; iob; iob = iob->next) {
@@ -997,6 +998,9 @@ exec_monitor(struct command_details *details, int backchannel)
     sa.sa_handler = SIG_IGN;
     sigaction(SIGTTIN, &sa, NULL);
     sigaction(SIGTTOU, &sa, NULL);
+
+    /* Block all signals in mon_handler(). */
+    sigfillset(&sa.sa_mask);
 
     /* Note: HP-UX select() will not be interrupted if SA_RESTART set */
     sa.sa_flags = SA_INTERRUPT;

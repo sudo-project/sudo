@@ -73,7 +73,7 @@ static pid_t ppgrp = -1;
 
 volatile pid_t cmnd_pid = -1;
 
-static int handle_signals(int sv[2], pid_t child, int log_io,
+static int dispatch_signals(int sv[2], pid_t child, int log_io,
     struct command_status *cstat);
 static void forward_signals(int fd);
 static void schedule_signal(int signo);
@@ -107,7 +107,7 @@ static int fork_cmnd(struct command_details *details, int sv[2])
      * we don't need to (e.g. command pgrp == parent pgrp).
      */
     zero_bytes(&sa, sizeof(sa));
-    sigemptyset(&sa.sa_mask);
+    sigfillset(&sa.sa_mask);
     sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
 #ifdef SA_SIGINFO
     sa.sa_flags |= SA_SIGINFO;
@@ -290,13 +290,13 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     if (pipe_nonblock(signal_pipe) != 0)
 	error(1, _("unable to create pipe"));
 
-    zero_bytes(&sa, sizeof(sa));
-    sigemptyset(&sa.sa_mask);
-
     /*
      * Signals to forward to the child process (excluding SIGALRM and SIGCHLD).
+     * We block all other signals while running the signal handler.
      * Note: HP-UX select() will not be interrupted if SA_RESTART set.
      */
+    zero_bytes(&sa, sizeof(sa));
+    sigfillset(&sa.sa_mask);
     sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
 #ifdef SA_SIGINFO
     sa.sa_flags |= SA_SIGINFO;
@@ -387,7 +387,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 	    forward_signals(sv[0]);
 	}
 	if (FD_ISSET(signal_pipe[0], fdsr)) {
-	    n = handle_signals(sv, child, log_io, cstat);
+	    n = dispatch_signals(sv, child, log_io, cstat);
 	    if (n == 0) {
 		/* Child has exited, cstat is set, we are done. */
 		break;
@@ -498,14 +498,14 @@ do_tty_io:
  * Returns -1 on error, 0 on child exit, else 1.
  */
 static int
-handle_signals(int sv[2], pid_t child, int log_io, struct command_status *cstat)
+dispatch_signals(int sv[2], pid_t child, int log_io, struct command_status *cstat)
 {
     char signame[SIG2STR_MAX];
     unsigned char signo;
     ssize_t nread;
     int status;
     pid_t pid;
-    debug_decl(handle_signals, SUDO_DEBUG_EXEC)
+    debug_decl(dispatch_signals, SUDO_DEBUG_EXEC)
 
     for (;;) {
 	/* read signal pipe */
