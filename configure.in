@@ -1551,6 +1551,9 @@ case "$host" in
 		# LD_PRELOAD is space-delimited
 		RTLD_PRELOAD_DELIM=" "
 
+		# For implementing getgrouplist()
+		AC_CHECK_FUNCS(_getgroupsbymember)
+
 		# To get the crypt(3) prototype (so we pass -Wall)
 		OSDEFS="${OSDEFS} -D__EXTENSIONS__"
 		# AFS support needs -lucb

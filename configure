@@ -13902,6 +13902,19 @@ case "$host" in
 		# LD_PRELOAD is space-delimited
 		RTLD_PRELOAD_DELIM=" "
 
+		# For implementing getgrouplist()
+		for ac_func in _getgroupsbymember
+do :
+  ac_fn_c_check_func "$LINENO" "_getgroupsbymember" "ac_cv_func__getgroupsbymember"
+if test "x$ac_cv_func__getgroupsbymember" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE__GETGROUPSBYMEMBER 1
+_ACEOF
+
+fi
+done
+
+
 		# To get the crypt(3) prototype (so we pass -Wall)
 		OSDEFS="${OSDEFS} -D__EXTENSIONS__"
 		# AFS support needs -lucb
