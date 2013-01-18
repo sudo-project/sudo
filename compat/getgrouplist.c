@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010, 2011, 2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -36,7 +36,7 @@
 
 #include "missing.h"
 
-#ifdef HAVE_GETGRSET
+#if defined(HAVE_GETGRSET)
 /*
  * BSD-compatible getgrouplist(3) using getgrset(3)
  */
@@ -79,7 +79,32 @@ done:
     return rval;
 }
 
-#else /* HAVE_GETGRSET */
+#elif defined(HAVE__GETGROUPSBYMEMBER)
+
+/*
+ * BSD-compatible getgrouplist(3) using _getgroupsbymember(3)
+ */
+int
+getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
+{
+    int ngroups, grpsize = *ngroupsp;
+    int rval = -1;
+
+    if (grpsize > 0) {
+	/* We support BSD semantics where the first element is the base gid */
+	groups[0] = basegid;
+
+	/* The last arg is 1 because we already filled in the base gid. */
+	ngroups = _getgroupsbymember(name, groups, grpsize, 1);
+	if (ngroups != -1) {
+	    rval = 0;
+	    *ngroupsp = ngroups;
+	}
+    }
+    return rval;
+}
+
+#else /* !HAVE_GETGRSET && !HAVE__GETGROUPSBYMEMBER */
 
 /*
  * BSD-compatible getgrouplist(3) using getgrent(3)
@@ -128,4 +153,4 @@ done:
 
     return rval;
 }
-#endif /* HAVE_GETGRSET */
+#endif /* !HAVE_GETGRSET && !HAVE__GETGROUPSBYMEMBER */

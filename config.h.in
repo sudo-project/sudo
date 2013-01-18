@@ -697,6 +697,9 @@
 /* Define to 1 if the system has the type `_Bool'. */
 #undef HAVE__BOOL
 
+/* Define to 1 if you have the `_getgroupsbymember' function. */
+#undef HAVE__GETGROUPSBYMEMBER
+
 /* Define to 1 if you have the `_getpty' function. */
 #undef HAVE__GETPTY
 

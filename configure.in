@@ -1573,6 +1573,9 @@ case "$host" in
 		OS_INIT=os_init_solaris
 		SUDO_OBJS="${SUDO_OBJS} solaris.o"
 
+		# For implementing getgrouplist()
+		AC_CHECK_FUNCS(_getgroupsbymember)
+
 		# To get the crypt(3) prototype (so we pass -Wall)
 		OSDEFS="${OSDEFS} -D__EXTENSIONS__"
 		# AFS support needs -lucb

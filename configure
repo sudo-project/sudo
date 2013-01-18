@@ -13927,6 +13927,19 @@ case "$host" in
 		OS_INIT=os_init_solaris
 		SUDO_OBJS="${SUDO_OBJS} solaris.o"
 
+		# For implementing getgrouplist()
+		for ac_func in _getgroupsbymember
+do :
+  ac_fn_c_check_func "$LINENO" "_getgroupsbymember" "ac_cv_func__getgroupsbymember"
+if test "x$ac_cv_func__getgroupsbymember" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE__GETGROUPSBYMEMBER 1
+_ACEOF
+
+fi
+done
+
+
 		# To get the crypt(3) prototype (so we pass -Wall)
 		OSDEFS="${OSDEFS} -D__EXTENSIONS__"
 		# AFS support needs -lucb
