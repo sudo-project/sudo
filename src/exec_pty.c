@@ -380,7 +380,7 @@ suspend_parent(int signo)
 	    sigemptyset(&sa.sa_mask);
 	    sa.sa_flags = SA_RESTART;
 	    sa.sa_handler = SIG_DFL;
-	    sudo_sigaction(signo, &sa, &osa, false);
+	    sudo_sigaction(signo, &sa, &osa);
 	}
 	sudo_debug_printf(SUDO_DEBUG_INFO, "kill parent SIG%s", signame);
 	if (killpg(ppgrp, signo) != 0)
@@ -413,7 +413,7 @@ suspend_parent(int signo)
 	}
 
 	if (signo != SIGSTOP)
-	    sudo_sigaction(signo, &osa, NULL, false);
+	    sudo_sigaction(signo, &osa, NULL);
 	rval = ttymode == TERM_RAW ? SIGCONT_FG : SIGCONT_BG;
 	break;
     }
@@ -575,7 +575,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
     if (io_fds[SFD_USERTTY] != -1) {
 	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = sigwinch;
-	sudo_sigaction(SIGWINCH, &sa, NULL, false);
+	sudo_sigaction(SIGWINCH, &sa, NULL);
     }
 
     /* So we can block tty-generated signals */
@@ -644,8 +644,8 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 
     /* We don't want to receive SIGTTIN/SIGTTOU, getting EIO is preferable. */
     sa.sa_handler = SIG_IGN;
-    sudo_sigaction(SIGTTIN, &sa, NULL, true);
-    sudo_sigaction(SIGTTOU, &sa, NULL, true);
+    sudo_sigaction(SIGTTIN, &sa, NULL);
+    sudo_sigaction(SIGTTOU, &sa, NULL);
 
     /* Job control signals to relay from parent to child. */
     sigfillset(&sa.sa_mask);
@@ -656,7 +656,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 #else
     sa.sa_handler = handler;
 #endif
-    sudo_sigaction(SIGTSTP, &sa, NULL, true);
+    sudo_sigaction(SIGTSTP, &sa, NULL);
 
     if (foreground) {
 	/* Copy terminal attrs from user tty -> pty slave. */
@@ -991,13 +991,13 @@ exec_monitor(struct command_details *details, int backchannel)
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = SIG_DFL;
-    sudo_sigaction(SIGWINCH, &sa, NULL, false);
-    sudo_sigaction(SIGALRM, &sa, NULL, false); /* XXX - saved value */
+    sudo_sigaction(SIGWINCH, &sa, NULL);
+    sudo_sigaction(SIGALRM, &sa, NULL);
 
     /* Ignore any SIGTTIN or SIGTTOU we get. */
     sa.sa_handler = SIG_IGN;
-    sudo_sigaction(SIGTTIN, &sa, NULL, true);
-    sudo_sigaction(SIGTTOU, &sa, NULL, true);
+    sudo_sigaction(SIGTTIN, &sa, NULL);
+    sudo_sigaction(SIGTTOU, &sa, NULL);
 
     /* Block all signals in mon_handler(). */
     sigfillset(&sa.sa_mask);
@@ -1010,7 +1010,7 @@ exec_monitor(struct command_details *details, int backchannel)
 #else
     sa.sa_handler = mon_handler;
 #endif
-    sudo_sigaction(SIGCHLD, &sa, NULL, false);
+    sudo_sigaction(SIGCHLD, &sa, NULL);
 
     /* Catch common signals so we can cleanup properly. */
     sa.sa_flags = SA_RESTART;
@@ -1020,13 +1020,13 @@ exec_monitor(struct command_details *details, int backchannel)
 #else
     sa.sa_handler = mon_handler;
 #endif
-    sudo_sigaction(SIGHUP, &sa, NULL, true);
-    sudo_sigaction(SIGINT, &sa, NULL, true);
-    sudo_sigaction(SIGQUIT, &sa, NULL, true);
-    sudo_sigaction(SIGTERM, &sa, NULL, true);
-    sudo_sigaction(SIGTSTP, &sa, NULL, true);
-    sudo_sigaction(SIGUSR1, &sa, NULL, true);
-    sudo_sigaction(SIGUSR2, &sa, NULL, true);
+    sudo_sigaction(SIGHUP, &sa, NULL);
+    sudo_sigaction(SIGINT, &sa, NULL);
+    sudo_sigaction(SIGQUIT, &sa, NULL);
+    sudo_sigaction(SIGTERM, &sa, NULL);
+    sudo_sigaction(SIGTSTP, &sa, NULL);
+    sudo_sigaction(SIGUSR1, &sa, NULL);
+    sudo_sigaction(SIGUSR2, &sa, NULL);
 
     /*
      * Start a new session with the parent as the session leader

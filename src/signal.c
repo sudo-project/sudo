@@ -44,6 +44,7 @@ int signal_pipe[2];
 
 static struct signal_state {
     int signo;
+    int restore;
     sigaction_t sa;
 } saved_signals[] = {
     { SIGALRM },	/* SAVED_SIGALRM */
@@ -86,8 +87,10 @@ restore_signals(void)
     struct signal_state *ss;
     debug_decl(restore_signals, SUDO_DEBUG_MAIN)
 
-    for (ss = saved_signals; ss->signo != -1; ss++)
-	sigaction(ss->signo, &ss->sa, NULL);
+    for (ss = saved_signals; ss->signo != -1; ss++) {
+	if (ss->restore)
+	    sigaction(ss->signo, &ss->sa, NULL);
+    }
 
     debug_return;
 }
@@ -146,22 +149,28 @@ init_signals(void)
 }
 
 /*
- * Like sigaction() but includes an udpate_only flag.
- * In update-only mode, don't override SIG_IGN.
+ * Like sigaction() but sets restore flag in saved_signals[]
+ * if needed.
  */
 int
-sudo_sigaction(int signo, struct sigaction *sa, struct sigaction *osa, bool update_only)
+sudo_sigaction(int signo, struct sigaction *sa, struct sigaction *osa)
 {
-    /* Don't override SIG_IGN if the update_only flag is set. */
-    if (update_only) {
-	struct signal_state *ss;
-	for (ss = saved_signals; ss->signo > 0; ss++) {
-	    if (ss->signo == signo) {
-		if (ss->sa.sa_handler == SIG_IGN)
-		    return 0;
-		break;
+    struct signal_state *ss;
+    int rval;
+    debug_decl(sudo_sigaction, SUDO_DEBUG_MAIN)
+
+    for (ss = saved_signals; ss->signo > 0; ss++) {
+	if (ss->signo == signo) {
+	    /* If signal was or now is ignored, restore old handler on exec. */
+	    if (ss->sa.sa_handler == SIG_IGN || sa->sa_handler == SIG_IGN) {
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "will restore signal %d on exec", signo);
+		ss->restore = true;
 	    }
+	    break;
 	}
     }
-    return sigaction(signo, sa, osa);
+    rval = sigaction(signo, sa, osa);
+
+    debug_return_int(rval);
 }

@@ -113,11 +113,11 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 #else
     sa.sa_handler = handler;
 #endif
-    sudo_sigaction(SIGCONT, &sa, NULL, false);
+    sudo_sigaction(SIGCONT, &sa, NULL);
 #ifdef SA_SIGINFO
     sa.sa_sigaction = handler_user_only;
 #endif
-    sudo_sigaction(SIGTSTP, &sa, NULL, true);
+    sudo_sigaction(SIGTSTP, &sa, NULL);
 
     /*
      * The policy plugin's session init must be run before we fork
@@ -247,12 +247,12 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 #else
     sa.sa_handler = handler;
 #endif
-    sudo_sigaction(SIGTERM, &sa, NULL, true);
-    sudo_sigaction(SIGALRM, &sa, NULL, false); /* XXX - only if there is a timeout */
-    sudo_sigaction(SIGCHLD, &sa, NULL, false);
-    sudo_sigaction(SIGPIPE, &sa, NULL, false);
-    sudo_sigaction(SIGUSR1, &sa, NULL, true);
-    sudo_sigaction(SIGUSR2, &sa, NULL, true);
+    sudo_sigaction(SIGTERM, &sa, NULL);
+    sudo_sigaction(SIGALRM, &sa, NULL); /* XXX - only if there is a timeout */
+    sudo_sigaction(SIGCHLD, &sa, NULL);
+    sudo_sigaction(SIGPIPE, &sa, NULL);
+    sudo_sigaction(SIGUSR1, &sa, NULL);
+    sudo_sigaction(SIGUSR2, &sa, NULL);
 
     /*
      * When not running the command in a pty, we do not want to
@@ -267,9 +267,9 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 	sa.sa_sigaction = handler_user_only;
     }
 #endif
-    sudo_sigaction(SIGHUP, &sa, NULL, true);
-    sudo_sigaction(SIGINT, &sa, NULL, true);
-    sudo_sigaction(SIGQUIT, &sa, NULL, true);
+    sudo_sigaction(SIGHUP, &sa, NULL);
+    sudo_sigaction(SIGINT, &sa, NULL);
+    sudo_sigaction(SIGQUIT, &sa, NULL);
 
     /* Max fd we will be selecting on. */
     maxfd = MAX(sv[0], signal_pipe[0]);
@@ -514,12 +514,12 @@ dispatch_signals(int sv[2], pid_t child, int log_io, struct command_status *csta
 			    sigemptyset(&sa.sa_mask);
 			    sa.sa_flags = SA_RESTART;
 			    sa.sa_handler = SIG_DFL;
-			    sudo_sigaction(SIGTSTP, &sa, &osa, false);
+			    sudo_sigaction(SIGTSTP, &sa, &osa);
 			}
 			if (kill(getpid(), signo) != 0)
 			    warning("kill(%d, SIG%s)", (int)getpid(), signame);
 			if (signo == SIGTSTP)
-			    sudo_sigaction(SIGTSTP, &osa, NULL, false);
+			    sudo_sigaction(SIGTSTP, &osa, NULL);
 			if (fd != -1) {
 			    /*
 			     * Restore command's process group if different.
@@ -602,7 +602,7 @@ dispatch_pending_signals(struct command_status *cstat)
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = SIG_DFL;
-	sudo_sigaction(SIGTSTP, &sa, NULL, false);
+	sudo_sigaction(SIGTSTP, &sa, NULL);
 	if (kill(getpid(), SIGTSTP) != 0)
 	    warning("kill(%d, SIGTSTP)", (int)getpid());
 	/* No need to reinstall SIGTSTP handler. */

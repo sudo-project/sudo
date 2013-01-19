@@ -267,7 +267,7 @@ char *get_process_ttyname(void);
 /* signal.c */
 struct sigaction;
 extern int signal_pipe[2];
-int sudo_sigaction(int signo, struct sigaction *sa, struct sigaction *osa, bool update_only);
+int sudo_sigaction(int signo, struct sigaction *sa, struct sigaction *osa);
 void init_signals(void);
 void restore_signals(void);
 void save_signals(void);
