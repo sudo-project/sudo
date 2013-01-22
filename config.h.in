@@ -391,6 +391,12 @@
 /* Define to 1 if you have the `nl_langinfo' function. */
 #undef HAVE_NL_LANGINFO
 
+/* Define to 1 if you have the <nss_dbdefs.h> header file. */
+#undef HAVE_NSS_DBDEFS_H
+
+/* Define to 1 if you have the `nss_search' function. */
+#undef HAVE_NSS_SEARCH
+
 /* Define to 1 if you have the `openpty' function. */
 #undef HAVE_OPENPTY
 
@@ -697,20 +703,29 @@
 /* Define to 1 if the system has the type `_Bool'. */
 #undef HAVE__BOOL
 
-/* Define to 1 if you have the `_getgroupsbymember' function. */
-#undef HAVE__GETGROUPSBYMEMBER
-
 /* Define to 1 if you have the `_getpty' function. */
 #undef HAVE__GETPTY
 
 /* Define to 1 if you have the `_innetgr' function. */
 #undef HAVE__INNETGR
 
+/* Define to 1 if you have the `_nss_initf_group' function. */
+#undef HAVE__NSS_INITF_GROUP
+
+/* Define to 1 if you have the `_nss_XbyY_buf_alloc' function. */
+#undef HAVE__NSS_XBYY_BUF_ALLOC
+
 /* Define to 1 if you have the `_ttyname_dev' function. */
 #undef HAVE__TTYNAME_DEV
 
 /* Define to 1 if the compiler supports the C99 __func__ variable. */
 #undef HAVE___FUNC__
+
+/* Define to 1 if you have the `__nss_initf_group' function. */
+#undef HAVE___NSS_INITF_GROUP
+
+/* Define to 1 if you have the `__nss_XbyY_buf_alloc' function. */
+#undef HAVE___NSS_XBYY_BUF_ALLOC
 
 /* Define to 1 if your crt0.o defines the __progname symbol for you. */
 #undef HAVE___PROGNAME

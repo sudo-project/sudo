@@ -1573,9 +1573,6 @@ case "$host" in
 		OS_INIT=os_init_solaris
 		SUDO_OBJS="${SUDO_OBJS} solaris.o"
 
-		# For implementing getgrouplist()
-		AC_CHECK_FUNCS(_getgroupsbymember)
-
 		# To get the crypt(3) prototype (so we pass -Wall)
 		OSDEFS="${OSDEFS} -D__EXTENSIONS__"
 		# AFS support needs -lucb
@@ -1631,9 +1628,6 @@ case "$host" in
 		if test -z "$with_nsswitch" -a -z "$with_netsvc"; then
 		    with_netsvc="/etc/netsvc.conf"
 		fi
-
-		# For implementing getgrouplist()
-		AC_CHECK_FUNCS(getgrset)
 
 		# LDR_PRELOAD is only supported in AIX 5.3 and later
 		if test $OSMAJOR -lt 5; then
@@ -2228,7 +2222,39 @@ AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS(glob strrchr sysconf tzset strftime setenv \
 	       regcomp nl_langinfo mbr_check_membership \
 	       setrlimit64)
-AC_REPLACE_FUNCS(getgrouplist)
+dnl AC_REPLACE_FUNCS(getgrouplist)
+AC_CHECK_FUNCS(getgrouplist, [], [
+    case "$host" in
+    *-*-aix*)
+	AC_CHECK_FUNCS(getgrset, [AC_LIBOBJ(getgrouplist)])
+	;;
+    *)
+	AC_CHECK_FUNC(nss_search, [
+	    AC_CHECK_FUNC(_nss_XbyY_buf_alloc, [
+		# Solaris
+		AC_CHECK_FUNC(_nss_initf_group, [
+		    AC_CHECK_HEADERS(nss_dbdefs.h)
+		    AC_DEFINE([HAVE_NSS_SEARCH])
+		    AC_DEFINE([HAVE__NSS_XBYY_BUF_ALLOC])
+		    AC_DEFINE([HAVE__NSS_INITF_GROUP])
+		    AC_LIBOBJ(getgrouplist)
+		])
+	    ], [
+		# HP-UX
+		AC_CHECK_FUNC(__nss_XbyY_buf_alloc, [
+		    AC_CHECK_FUNC(__nss_initf_group, [
+			AC_CHECK_HEADERS(nss_dbdefs.h)
+			AC_DEFINE([HAVE_NSS_SEARCH])
+			AC_DEFINE([HAVE___NSS_XBYY_BUF_ALLOC])
+			AC_DEFINE([HAVE___NSS_INITF_GROUP])
+			AC_LIBOBJ(getgrouplist)
+		    ])
+		])
+	    ])
+	])
+	;;
+    esac
+])
 AC_CHECK_FUNCS(getline, [], [
     AC_LIBOBJ(getline)
     AC_CHECK_FUNCS(fgetln)
@@ -2304,11 +2330,9 @@ if test -z "$SKIP_SETRESUID"; then
     ])
 fi
 if test -z "$SKIP_SETREUID"; then
-    AC_CHECK_FUNCS(setreuid, [SKIP_SETEUID=yes])
+    AC_CHECK_FUNCS(setreuid)
 fi
-if test -z "$SKIP_SETEUID"; then
-    AC_CHECK_FUNCS(seteuid)
-fi
+AC_CHECK_FUNCS(seteuid)
 if test X"$with_interfaces" != X"no"; then
     AC_CHECK_FUNCS(getifaddrs, [AC_CHECK_FUNCS(freeifaddrs)])
 fi
@@ -3697,6 +3721,11 @@ AH_TEMPLATE(RTLD_PRELOAD_DELIM, [The delimiter to use when defining multiple pre
 AH_TEMPLATE(RTLD_PRELOAD_DEFAULT, [The default value of preloaded objects (if any).])
 AH_TEMPLATE(HAVE_DSO_VISIBILITY, [Define to 1 if the compiler supports the __visibility__ attribute.])
 AH_TEMPLATE(HAVE_SYS_SIGABBREV, [Define to 1 if your libc has the `sys_sigabbrev' symbol.])
+AH_TEMPLATE(HAVE_NSS_SEARCH, [Define to 1 if you have the `nss_search' function.])
+AH_TEMPLATE(HAVE__NSS_INITF_GROUP, [Define to 1 if you have the `_nss_initf_group' function.])
+AH_TEMPLATE(HAVE___NSS_INITF_GROUP, [Define to 1 if you have the `__nss_initf_group' function.])
+AH_TEMPLATE(HAVE__NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `_nss_XbyY_buf_alloc' function.])
+AH_TEMPLATE(HAVE___NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `__nss_XbyY_buf_alloc' function.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in

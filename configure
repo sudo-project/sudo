@@ -13927,19 +13927,6 @@ case "$host" in
 		OS_INIT=os_init_solaris
 		SUDO_OBJS="${SUDO_OBJS} solaris.o"
 
-		# For implementing getgrouplist()
-		for ac_func in _getgroupsbymember
-do :
-  ac_fn_c_check_func "$LINENO" "_getgroupsbymember" "ac_cv_func__getgroupsbymember"
-if test "x$ac_cv_func__getgroupsbymember" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE__GETGROUPSBYMEMBER 1
-_ACEOF
-
-fi
-done
-
-
 		# To get the crypt(3) prototype (so we pass -Wall)
 		OSDEFS="${OSDEFS} -D__EXTENSIONS__"
 		# AFS support needs -lucb
@@ -14039,19 +14026,6 @@ fi
 		if test -z "$with_nsswitch" -a -z "$with_netsvc"; then
 		    with_netsvc="/etc/netsvc.conf"
 		fi
-
-		# For implementing getgrouplist()
-		for ac_func in getgrset
-do :
-  ac_fn_c_check_func "$LINENO" "getgrset" "ac_cv_func_getgrset"
-if test "x$ac_cv_func_getgrset" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_GETGRSET 1
-_ACEOF
-
-fi
-done
-
 
 		# LDR_PRELOAD is only supported in AIX 5.3 and later
 		if test $OSMAJOR -lt 5; then
@@ -16665,19 +16639,124 @@ _ACEOF
 fi
 done
 
-ac_fn_c_check_func "$LINENO" "getgrouplist" "ac_cv_func_getgrouplist"
+for ac_func in getgrouplist
+do :
+  ac_fn_c_check_func "$LINENO" "getgrouplist" "ac_cv_func_getgrouplist"
 if test "x$ac_cv_func_getgrouplist" = xyes; then :
-  $as_echo "#define HAVE_GETGROUPLIST 1" >>confdefs.h
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GETGROUPLIST 1
+_ACEOF
 
 else
-  case " $LIBOBJS " in
+
+    case "$host" in
+    *-*-aix*)
+	for ac_func in getgrset
+do :
+  ac_fn_c_check_func "$LINENO" "getgrset" "ac_cv_func_getgrset"
+if test "x$ac_cv_func_getgrset" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GETGRSET 1
+_ACEOF
+ case " $LIBOBJS " in
   *" getgrouplist.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS getgrouplist.$ac_objext"
  ;;
 esac
 
 fi
+done
 
+	;;
+    *)
+	ac_fn_c_check_func "$LINENO" "nss_search" "ac_cv_func_nss_search"
+if test "x$ac_cv_func_nss_search" = xyes; then :
+
+	    ac_fn_c_check_func "$LINENO" "_nss_XbyY_buf_alloc" "ac_cv_func__nss_XbyY_buf_alloc"
+if test "x$ac_cv_func__nss_XbyY_buf_alloc" = xyes; then :
+
+		# Solaris
+		ac_fn_c_check_func "$LINENO" "_nss_initf_group" "ac_cv_func__nss_initf_group"
+if test "x$ac_cv_func__nss_initf_group" = xyes; then :
+
+		    for ac_header in nss_dbdefs.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "nss_dbdefs.h" "ac_cv_header_nss_dbdefs_h" "$ac_includes_default"
+if test "x$ac_cv_header_nss_dbdefs_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NSS_DBDEFS_H 1
+_ACEOF
+
+fi
+
+done
+
+		    $as_echo "#define HAVE_NSS_SEARCH 1" >>confdefs.h
+
+		    $as_echo "#define HAVE__NSS_XBYY_BUF_ALLOC 1" >>confdefs.h
+
+		    $as_echo "#define HAVE__NSS_INITF_GROUP 1" >>confdefs.h
+
+		    case " $LIBOBJS " in
+  *" getgrouplist.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS getgrouplist.$ac_objext"
+ ;;
+esac
+
+
+fi
+
+
+else
+
+		# HP-UX
+		ac_fn_c_check_func "$LINENO" "__nss_XbyY_buf_alloc" "ac_cv_func___nss_XbyY_buf_alloc"
+if test "x$ac_cv_func___nss_XbyY_buf_alloc" = xyes; then :
+
+		    ac_fn_c_check_func "$LINENO" "__nss_initf_group" "ac_cv_func___nss_initf_group"
+if test "x$ac_cv_func___nss_initf_group" = xyes; then :
+
+			for ac_header in nss_dbdefs.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "nss_dbdefs.h" "ac_cv_header_nss_dbdefs_h" "$ac_includes_default"
+if test "x$ac_cv_header_nss_dbdefs_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NSS_DBDEFS_H 1
+_ACEOF
+
+fi
+
+done
+
+			$as_echo "#define HAVE_NSS_SEARCH 1" >>confdefs.h
+
+			$as_echo "#define HAVE___NSS_XBYY_BUF_ALLOC 1" >>confdefs.h
+
+			$as_echo "#define HAVE___NSS_INITF_GROUP 1" >>confdefs.h
+
+			case " $LIBOBJS " in
+  *" getgrouplist.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS getgrouplist.$ac_objext"
+ ;;
+esac
+
+
+fi
+
+
+fi
+
+
+fi
+
+
+fi
+
+	;;
+    esac
+
+fi
+done
 
 for ac_func in getline
 do :
@@ -17117,13 +17196,12 @@ if test "x$ac_cv_func_setreuid" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_SETREUID 1
 _ACEOF
- SKIP_SETEUID=yes
+
 fi
 done
 
 fi
-if test -z "$SKIP_SETEUID"; then
-    for ac_func in seteuid
+for ac_func in seteuid
 do :
   ac_fn_c_check_func "$LINENO" "seteuid" "ac_cv_func_seteuid"
 if test "x$ac_cv_func_seteuid" = xyes; then :
@@ -17134,7 +17212,6 @@ _ACEOF
 fi
 done
 
-fi
 if test X"$with_interfaces" != X"no"; then
     for ac_func in getifaddrs
 do :
@@ -23356,6 +23433,11 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+
+
+
+
+
 
 
 

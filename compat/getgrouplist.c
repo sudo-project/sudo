@@ -33,6 +33,15 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <grp.h>
+#ifdef HAVE_NSS_SEARCH
+# include <limits.h>
+# include <nsswitch.h>
+# ifdef HAVE_NSS_DBDEFS_H
+#  include <nss_dbdefs.h>
+# else
+#  include "compat/nss_dbdefs.h"
+# endif
+#endif
 
 #include "missing.h"
 
@@ -79,29 +88,167 @@ done:
     return rval;
 }
 
-#elif defined(HAVE__GETGROUPSBYMEMBER)
+#elif defined(HAVE_NSS_SEARCH)
+
+#ifndef GID_MAX
+# define GID_MAX	UID_MAX
+#endif
+
+#ifndef ALIGNBYTES
+# define ALIGNBYTES	(sizeof(long) - 1L)
+#endif
+#ifndef ALIGN
+# define ALIGN(p)	(((unsigned long)(p) + ALIGNBYTES) & ~ALIGNBYTES)
+#endif
+
+extern void _nss_initf_group(nss_db_params_t *);
 
 /*
- * BSD-compatible getgrouplist(3) using _getgroupsbymember(3)
+ * Convert a groups file string (instr) to a struct group (ent) using
+ * buf for storage.  
+ */
+static int
+str2grp(const char *instr, int inlen, void *ent, char *buf, int buflen)
+{
+    struct group *grp = ent;
+    char *cp, *ep, *fieldsep = buf;
+    char **gr_mem, **gr_end;
+    int yp = 0;
+    unsigned long gid;
+
+    /* Must at least have space to copy instr -> buf. */
+    if (inlen >= buflen)
+	return NSS_STR_PARSE_ERANGE;
+
+    /* Paranoia: buf and instr should be distinct. */
+    if (buf != instr) {
+	memmove(buf, instr, inlen);
+	buf[inlen] = '\0';
+    }
+
+    if ((fieldsep = strchr(cp = fieldsep, ':')) == NULL)
+	return NSS_STR_PARSE_PARSE;
+    *fieldsep++ = '\0';
+    grp->gr_name = cp;
+
+    /* Check for YP inclusion/exclusion entries. */
+    if (*cp == '+' || *cp == '-') {
+	/* Only the name is required for YP inclusion/exclusion entries. */
+	grp->gr_passwd = "";
+	grp->gr_gid = 0;
+	grp->gr_mem = NULL;
+	yp = 1;
+    }
+
+    if ((fieldsep = strchr(cp = fieldsep, ':')) == NULL)
+	return yp ? NSS_STR_PARSE_SUCCESS : NSS_STR_PARSE_PARSE;
+    *fieldsep++ = '\0';
+    grp->gr_passwd = cp;
+
+    if ((fieldsep = strchr(cp = fieldsep, ':')) == NULL)
+	return yp ? NSS_STR_PARSE_SUCCESS : NSS_STR_PARSE_PARSE;
+    *fieldsep++ = '\0';
+    gid = strtoul(cp, &ep, 10);
+    if (*cp == '\0' || *ep != '\0')
+	return yp ? NSS_STR_PARSE_SUCCESS : NSS_STR_PARSE_PARSE;
+    if (gid > GID_MAX || (gid == ULONG_MAX && errno == ERANGE))
+	return NSS_STR_PARSE_ERANGE;
+    grp->gr_gid = (gid_t)gid;
+
+    /* Store group members, taking care to use proper alignment. */
+    grp->gr_mem = NULL;
+    if (*fieldsep != '\0') {
+	grp->gr_mem = gr_mem = (char **)ALIGN(buf + inlen + 1);
+	gr_end = (char **)((unsigned long)(buf + buflen) & ~ALIGNBYTES);
+	for (;;) {
+	    if (gr_mem == gr_end)
+		return NSS_STR_PARSE_ERANGE;	/* out of space! */
+	    *gr_mem++ = cp;
+	    if (fieldsep == NULL)
+		break;
+	    if ((fieldsep = strchr(cp = fieldsep, ',')) != NULL)
+		*fieldsep++ = '\0';
+	}
+	*gr_mem = NULL;
+    }
+    return NSS_STR_PARSE_SUCCESS;
+}
+
+static nss_status_t
+process_cstr(const char *instr, int inlen, struct nss_groupsbymem *gbm)
+{
+    const char *user = gbm->username;
+    nss_status_t rval = NSS_NOTFOUND;
+    nss_XbyY_buf_t *buf;
+    struct group *grp;
+    char **gr_mem;
+    int	error, i;
+
+    buf = _nss_XbyY_buf_alloc(sizeof(struct group), NSS_BUFLEN_GROUP);
+    if (buf == NULL)
+	return NSS_UNAVAIL;
+
+    /* Parse groups file string -> struct group. */
+    grp = buf->result;
+    error = (*gbm->str2ent)(instr, inlen, grp, buf->buffer, buf->buflen);
+    if (error || grp->gr_mem == NULL)
+	goto done;
+
+    for (gr_mem = grp->gr_mem; *gr_mem != NULL; gr_mem++) {
+	if (strcmp(*gr_mem, user) == 0) {
+	    /* Append to gid_array unless gr_gid is a dupe. */
+	    for (i = 0; i < gbm->numgids; i++) {
+		if (gbm->gid_array[i] == grp->gr_gid)
+		    goto done;			/* already present */
+	    }
+	    /* Store gid if there is space. */
+	    if (i < gbm->maxgids)
+		gbm->gid_array[i] = grp->gr_gid;
+	    /* Always increment numgids so we can detect when out of space. */
+	    gbm->numgids++;
+	    goto done;
+	}
+    }
+done:
+    _nss_XbyY_buf_free(buf);
+    return rval;
+}
+
+/*
+ * BSD-compatible getgrouplist(3) using nss_search(3)
  */
 int
 getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
 {
-    int ngroups, grpsize = *ngroupsp;
-    int rval = -1;
+    struct nss_groupsbymem gbm;
+    static DEFINE_NSS_DB_ROOT(db_root);
 
-    if (grpsize > 0) {
-	/* We support BSD semantics where the first element is the base gid */
-	groups[0] = basegid;
+    /* We support BSD semantics where the first element is the base gid */
+    if (*ngroupsp <= 0)
+	return -1;
+    groups[0] = basegid;
 
-	/* The last arg is 1 because we already filled in the base gid. */
-	ngroups = _getgroupsbymember(name, groups, grpsize, 1);
-	if (ngroups != -1) {
-	    rval = 0;
-	    *ngroupsp = ngroups;
-	}
+    memset(&gbm, 0, sizeof(gbm));
+    gbm.username = name;
+    gbm.gid_array = groups;
+    gbm.maxgids = *ngroupsp;
+    gbm.numgids = 1; /* for basegid */
+    gbm.force_slow_way = 1;
+    gbm.str2ent = str2grp;
+    gbm.process_cstr = process_cstr;
+
+    /*
+     * Can't use nss_search return value since it may return NSS_UNAVAIL
+     * when no nsswitch.conf entry (e.g. compat mode).
+     */
+    (void)nss_search(&db_root, _nss_initf_group, NSS_DBOP_GROUP_BYMEMBER, &gbm);
+
+    if (gbm.numgids <= gbm.maxgids) {
+        *ngroupsp = gbm.numgids;
+        return 0;
     }
-    return rval;
+    *ngroupsp = gbm.maxgids;
+    return -1;
 }
 
 #else /* !HAVE_GETGRSET && !HAVE__GETGROUPSBYMEMBER */
