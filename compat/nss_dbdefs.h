@@ -93,7 +93,7 @@ typedef struct {
 #ifdef HAVE___NSS_INITF_GROUP
 # define _nss_initf_group       __nss_initf_group
 #endif
-#ifdef HAVE__NSS_XBYY_BUF_ALLOC
+#ifdef HAVE___NSS_XBYY_BUF_ALLOC
 # define _nss_XbyY_buf_alloc    __nss_XbyY_buf_alloc
 # define _nss_XbyY_buf_free     __nss_XbyY_buf_free
 #endif
