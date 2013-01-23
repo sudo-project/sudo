@@ -42,6 +42,7 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
 
@@ -54,6 +55,14 @@
 
 #undef GRMEM_MAX
 #define GRMEM_MAX 200
+
+#ifndef UID_MAX
+# define UID_MAX 0xffffffffU
+#endif
+
+#ifndef GID_MAX
+# define GID_MAX UID_MAX
+#endif
 
 static FILE *pwf;
 static const char *pwfile = "/etc/passwd";
@@ -114,7 +123,8 @@ getpwent(void)
     static struct passwd pw;
     static char pwbuf[LINE_MAX];
     size_t len;
-    char *cp, *colon;
+    unsigned long id;
+    char *cp, *colon, *ep;
 
 next_entry:
     if ((colon = fgets(pwbuf, sizeof(pwbuf), pwf)) == NULL)
@@ -132,11 +142,21 @@ next_entry:
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	goto next_entry;
     *colon++ = '\0';
-    pw.pw_uid = atoi(cp);
+    id = strtoul(cp, &ep, 10);
+    if (*cp == '\0' || *ep != '\0')
+	goto next_entry;
+    if (id > UID_MAX || (id == ULONG_MAX && errno == ERANGE))
+	goto next_entry;
+    pw.pw_uid = (uid_t)id;
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	goto next_entry;
     *colon++ = '\0';
-    pw.pw_gid = atoi(cp);
+    id = strtoul(cp, &ep, 10);
+    if (*cp == '\0' || *ep != '\0')
+	goto next_entry;
+    if (id > GID_MAX || (id == ULONG_MAX && errno == ERANGE))
+	goto next_entry;
+    pw.pw_gid = (gid_t)id;
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	goto next_entry;
     *colon++ = '\0';
@@ -235,7 +255,8 @@ getgrent(void)
     static struct group gr;
     static char grbuf[LINE_MAX], *gr_mem[GRMEM_MAX+1];
     size_t len;
-    char *cp, *colon;
+    unsigned long id;
+    char *cp, *colon, *ep;
     int n;
 
 next_entry:
@@ -254,7 +275,12 @@ next_entry:
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	goto next_entry;
     *colon++ = '\0';
-    gr.gr_gid = atoi(cp);
+    id = strtoul(cp, &ep, 10);
+    if (*cp == '\0' || *ep != '\0')
+	goto next_entry;
+    if (id > GID_MAX || (id == ULONG_MAX && errno == ERANGE))
+	goto next_entry;
+    gr.gr_gid = (gid_t)id;
     len = strlen(colon);
     if (len > 0 && colon[len - 1] == '\n')
 	colon[len - 1] = '\0';
