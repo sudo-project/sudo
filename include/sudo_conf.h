@@ -25,6 +25,7 @@ struct plugin_info {
     const char *path;
     const char *symbol_name;
     char * const * options;
+    int lineno;
 };
 TQ_DECLARE(plugin_info)
 

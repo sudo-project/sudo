@@ -88,6 +88,8 @@ static bool set_path(const char *entry);
 static bool set_plugin(const char *entry);
 static bool set_variable(const char *entry);
 
+static unsigned int lineno;
+
 static struct sudo_conf_table sudo_conf_table[] = {
     { "Debug", sizeof("Debug") - 1, set_debug },
     { "Path", sizeof("Path") - 1, set_path },
@@ -249,6 +251,7 @@ set_plugin(const char *entry)
     info->options = options;
     info->prev = info;
     /* info->next = NULL; */
+    info->lineno = lineno;
     tq_append(&sudo_conf_data.plugins, info);
 
     return true;
@@ -333,10 +336,11 @@ sudo_conf_read(void)
 	goto done;
     }
 
+    lineno = 0;
     while ((cp = sudo_parseln(fp)) != NULL) {
-	/* Skip blank or comment lines */
+	lineno++;
 	if (*cp == '\0')
-	    continue;
+	    continue;		/* empty line or comment */
 
 	for (cur = sudo_conf_table; cur->name != NULL; cur++) {
 	    if (strncasecmp(cp, cur->name, cur->namelen) == 0 &&

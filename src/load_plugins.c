@@ -70,26 +70,36 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 
     if (info->path[0] == '/') {
 	if (strlcpy(path, info->path, sizeof(path)) >= sizeof(path)) {
+	    warningx(_("error in %s, line %d while loading plugin `%s'"),
+		_PATH_SUDO_CONF, info->lineno, info->symbol_name);
 	    warningx(_("%s: %s"), info->path, strerror(ENAMETOOLONG));
 	    goto done;
 	}
     } else {
 	if (snprintf(path, sizeof(path), "%s%s", _PATH_SUDO_PLUGIN_DIR,
 	    info->path) >= sizeof(path)) {
+	    warningx(_("error in %s, line %d while loading plugin `%s'"),
+		_PATH_SUDO_CONF, info->lineno, info->symbol_name);
 	    warningx(_("%s%s: %s"), _PATH_SUDO_PLUGIN_DIR, info->path,
 		strerror(ENAMETOOLONG));
 	    goto done;
 	}
     }
     if (stat(path, &sb) != 0) {
+	warningx(_("error in %s, line %d while loading plugin `%s'"),
+	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
 	warning("%s", path);
 	goto done;
     }
     if (sb.st_uid != ROOT_UID) {
+	warningx(_("error in %s, line %d while loading plugin `%s'"),
+	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
 	warningx(_("%s must be owned by uid %d"), path, ROOT_UID);
 	goto done;
     }
     if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
+	warningx(_("error in %s, line %d while loading plugin `%s'"),
+	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
 	warningx(_("%s must be only be writable by owner"), path);
 	goto done;
     }
@@ -97,45 +107,74 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
     /* Open plugin and map in symbol */
     handle = dlopen(path, RTLD_LAZY|RTLD_GLOBAL);
     if (!handle) {
+	warningx(_("error in %s, line %d while loading plugin `%s'"),
+	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
 	warningx(_("unable to dlopen %s: %s"), path, dlerror());
 	goto done;
     }
     plugin = dlsym(handle, info->symbol_name);
     if (!plugin) {
-	warningx(_("%s: unable to find symbol %s"), path,
-	    info->symbol_name);
+	warningx(_("error in %s, line %d while loading plugin `%s'"),
+	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
+	warningx(_("unable to find symbol `%s' in %s"), info->symbol_name, path);
 	goto done;
     }
 
     if (plugin->type != SUDO_POLICY_PLUGIN && plugin->type != SUDO_IO_PLUGIN) {
-	warningx(_("%s: unknown policy type %d"), path, plugin->type);
+	warningx(_("error in %s, line %d while loading plugin `%s'"),
+	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
+	warningx(_("unknown policy type %d found in %s"), plugin->type, path);
 	goto done;
     }
     if (SUDO_API_VERSION_GET_MAJOR(plugin->version) != SUDO_API_VERSION_MAJOR) {
-	warningx(_("%s: incompatible policy major version %d, expected %d"),
-	    path, SUDO_API_VERSION_GET_MAJOR(plugin->version),
-	    SUDO_API_VERSION_MAJOR);
+	warningx(_("error in %s, line %d while loading plugin `%s'"),
+	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
+	warningx(_("incompatible plugin major version %d (expected %d) found in %s"),
+	    SUDO_API_VERSION_GET_MAJOR(plugin->version),
+	    SUDO_API_VERSION_MAJOR, path);
 	goto done;
     }
     if (plugin->type == SUDO_POLICY_PLUGIN) {
 	if (policy_plugin->handle) {
-	    warningx(_("%s: only a single policy plugin may be loaded"),
-		_PATH_SUDO_CONF);
-	    goto done;
+	    /* Ignore duplicate entries. */
+	    if (strcmp(policy_plugin->name, info->symbol_name) != 0) {
+		warningx(_("ignoring policy plugin `%s' in %s, line %d"),
+		    info->symbol_name, _PATH_SUDO_CONF, info->lineno);
+		warningx(_("only a single policy plugin may be specified"));
+		goto done;
+	    }
+	    warningx(_("ignoring duplicate policy plugin `%s' in %s, line %d"),
+		info->symbol_name, _PATH_SUDO_CONF, info->lineno);
+	    dlclose(handle);
+	    handle = NULL;
 	}
-	policy_plugin->handle = handle;
-	policy_plugin->name = info->symbol_name;
-	policy_plugin->options = info->options;
-	policy_plugin->u.generic = plugin;
+	if (handle != NULL) {
+	    policy_plugin->handle = handle;
+	    policy_plugin->name = info->symbol_name;
+	    policy_plugin->options = info->options;
+	    policy_plugin->u.generic = plugin;
+	}
     } else if (plugin->type == SUDO_IO_PLUGIN) {
-	container = ecalloc(1, sizeof(*container));
-	container->prev = container;
-	/* container->next = NULL; */
-	container->handle = handle;
-	container->name = info->symbol_name;
-	container->options = info->options;
-	container->u.generic = plugin;
-	tq_append(io_plugins, container);
+	/* Check for duplicate entries. */
+	tq_foreach_fwd(io_plugins, container) {
+	    if (strcmp(container->name, info->symbol_name) == 0) {
+		warningx(_("ignoring duplicate I/O plugin `%s' in %s, line %d"),
+		    info->symbol_name, _PATH_SUDO_CONF, info->lineno);
+		dlclose(handle);
+		handle = NULL;
+		break;
+	    }
+	}
+	if (handle != NULL) {
+	    container = ecalloc(1, sizeof(*container));
+	    container->prev = container;
+	    /* container->next = NULL; */
+	    container->handle = handle;
+	    container->name = info->symbol_name;
+	    container->options = info->options;
+	    container->u.generic = plugin;
+	    tq_append(io_plugins, container);
+	}
     }
 
     rval = true;
