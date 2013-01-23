@@ -1066,18 +1066,16 @@ alias_remove_recursive(char *name, int type)
     bool rval = true;
     debug_decl(alias_remove_recursive, SUDO_DEBUG_ALIAS)
 
-    if ((a = alias_find(name, type)) != NULL) {
+    if ((a = alias_remove(name, type)) != NULL) {
 	tq_foreach_fwd(&a->members, m) {
 	    if (m->type == ALIAS) {
 		if (!alias_remove_recursive(m->name, type))
 		    rval = false;
 	    }
 	}
+	rbinsert(alias_freelist, a);
     }
     alias_seqno++;
-    a = alias_remove(name, type);
-    if (a)
-	rbinsert(alias_freelist, a);
     debug_return_bool(rval);
 }
 
