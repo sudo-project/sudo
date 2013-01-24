@@ -97,7 +97,7 @@ struct iolog_details {
 static int iolog_compress;
 static struct timeval last_time;
 static union io_fd io_fds[IOFD_MAX];
-extern struct io_plugin sudoers_io;
+extern __dso_public struct io_plugin sudoers_io;
 
 /*
  * Create path and any parent directories as needed.
