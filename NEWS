@@ -1,3 +1,12 @@
+What's new in Sudo 1.8.6p5?
+
+ * Fixed a potential crash in visudo's alias cycle detection.
+
+ * Improved performance on Solaris when retrieving the group list
+   for the target user.  On systems with a large number of groups
+   where the group database is not local (NIS, LDAP, AD), fetching
+   the group list could take a minute or more.
+
 What's new in Sudo 1.8.6p4?
 
  * The -fstack-protector is now used when linking visudo, sudoreplay
