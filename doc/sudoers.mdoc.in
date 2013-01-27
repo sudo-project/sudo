@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 11, 2013
+.Dd January 27, 2013
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1574,9 +1574,12 @@ Some versions of the linux
 .Xr su 1
 command behave this way.
 .Pp
-This setting has no effect unless I/O logging is enabled or
+This setting is only supported by
+.Nm sudoers
+plugin version 1.8.7 or higher.
+It has no effect unless I/O logging is enabled or the
 .Em use_pty
-is enabled.
+flag is enabled.
 .It env_editor
 If set,
 .Nm visudo
@@ -3293,7 +3296,7 @@ It should be specified as an octal value.
 .Ss Debug flags
 Versions 1.8.4 and higher of the
 .Em sudoers
-plugin supports a debugging framework that can help track down what the
+plugin support a debugging framework that can help track down what the
 plugin is doing internally if there is a problem.
 This can be configured in the
 .Pa @sysconfdir@/sudo.conf

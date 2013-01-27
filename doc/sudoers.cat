@@ -767,8 +767,9 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        will not be automatically foregrounded.  Some versions
                        of the linux su(1) command behave this way.
 
-                       This setting has no effect unless I/O logging is
-                       enabled or _u_s_e___p_t_y is enabled.
+                       This setting is only supported by ssuuddooeerrss plugin
+                       version 1.8.7 or higher.  It has no effect unless I/O
+                       logging is enabled or the _u_s_e___p_t_y flag is enabled.
 
      env_editor        If set, vviissuuddoo will use the value of the EDITOR or
                        VISUAL environment variables before falling back on the
@@ -1721,7 +1722,7 @@ SSUUDDOO..CCOONNFF
                octal value.
 
    DDeebbuugg ffllaaggss
-     Versions 1.8.4 and higher of the _s_u_d_o_e_r_s plugin supports a debugging
+     Versions 1.8.4 and higher of the _s_u_d_o_e_r_s plugin support a debugging
      framework that can help track down what the plugin is doing internally if
      there is a problem.  This can be configured in the _/_e_t_c_/_s_u_d_o_._c_o_n_f file as
      described in sudo(1m).
@@ -2130,4 +2131,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.7                     October 23, 2012                     Sudo 1.8.7
+Sudo 1.8.7                     January 27, 2013                     Sudo 1.8.7

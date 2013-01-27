@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "@mansectsu@" "October 23, 2012" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
+.TH "SUDOERS" "@mansectsu@" "January 27, 2013" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1692,9 +1692,12 @@ Some versions of the linux
 su(1)
 command behave this way.
 .sp
-This setting has no effect unless I/O logging is enabled or
+This setting is only supported by
+\fBsudoers\fR
+plugin version 1.8.7 or higher.
+It has no effect unless I/O logging is enabled or the
 \fIuse_pty\fR
-is enabled.
+flag is enabled.
 .TP 18n
 env_editor
 If set,
@@ -3555,7 +3558,7 @@ It should be specified as an octal value.
 .SS "Debug flags"
 Versions 1.8.4 and higher of the
 \fIsudoers\fR
-plugin supports a debugging framework that can help track down what the
+plugin support a debugging framework that can help track down what the
 plugin is doing internally if there is a problem.
 This can be configured in the
 \fI@sysconfdir@/sudo.conf\fR
