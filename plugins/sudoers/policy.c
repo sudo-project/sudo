@@ -415,6 +415,8 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	easprintf(&command_info[info_len++], "closefrom=%d", def_closefrom);
     if (def_noexec)
 	command_info[info_len++] = estrdup("noexec=true");
+    if (def_exec_background)
+	command_info[info_len++] = estrdup("exec_background=true");
     if (def_set_utmp)
 	command_info[info_len++] = estrdup("set_utmp=true");
     if (def_use_pty)
