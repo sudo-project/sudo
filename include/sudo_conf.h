@@ -19,6 +19,10 @@
 
 #include "list.h"
 
+#define GROUP_SOURCE_ADAPTIVE	0
+#define GROUP_SOURCE_STATIC	1
+#define GROUP_SOURCE_DYNAMIC	2
+
 struct plugin_info {
     struct plugin_info *prev; /* required */
     struct plugin_info *next; /* required */
@@ -38,5 +42,6 @@ const char *sudo_conf_noexec_path(void);
 const char *sudo_conf_debug_flags(void);
 struct plugin_info_list *sudo_conf_plugins(void);
 bool sudo_conf_disable_coredump(void);
+int sudo_conf_group_source(void);
 
 #endif /* _SUDO_CONF_H */

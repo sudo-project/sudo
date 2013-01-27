@@ -100,11 +100,13 @@ static struct sudo_conf_table sudo_conf_table[] = {
 
 static struct sudo_conf_data {
     bool disable_coredump;
+    int group_source;
     const char *debug_flags;
     struct sudo_conf_paths paths[3];
     struct plugin_info_list plugins;
 } sudo_conf_data = {
     true,
+    GROUP_SOURCE_ADAPTIVE,
     NULL,
     {
 #define SUDO_CONF_ASKPASS_IDX	0
@@ -125,7 +127,6 @@ set_variable(const char *entry)
 {
 #undef DC_LEN
 #define DC_LEN (sizeof("disable_coredump") - 1)
-    /* Currently the only variable supported is "disable_coredump". */
     if (strncmp(entry, "disable_coredump", DC_LEN) == 0 &&
 	isblank((unsigned char)entry[DC_LEN])) {
 	entry += DC_LEN + 1;
@@ -134,6 +135,24 @@ set_variable(const char *entry)
 	sudo_conf_data.disable_coredump = atobool(entry);
     }
 #undef DC_LEN
+#undef GS_LEN
+#define GS_LEN (sizeof("group_source") - 1)
+    if (strncmp(entry, "group_source", GS_LEN) == 0 &&
+	isblank((unsigned char)entry[GS_LEN])) {
+	entry += GS_LEN + 1;
+	while (isblank((unsigned char)*entry))
+	    entry++;
+	if (strcasecmp(entry, "adaptive") == 0) {
+	    sudo_conf_data.group_source = GROUP_SOURCE_ADAPTIVE;
+	} else if (strcasecmp(entry, "static") == 0) {
+	    sudo_conf_data.group_source = GROUP_SOURCE_STATIC;
+	} else if (strcasecmp(entry, "dynamic") == 0) {
+	    sudo_conf_data.group_source = GROUP_SOURCE_DYNAMIC;
+	} else {
+	    warningx(_("unsupported group source `%s' in %s, line %d"), entry,
+		_PATH_SUDO_CONF, lineno);
+	}
+    }
     return true;
 }
 
@@ -275,6 +294,12 @@ const char *
 sudo_conf_debug_flags(void)
 {
     return sudo_conf_data.debug_flags;
+}
+
+int
+sudo_conf_group_source(void)
+{
+    return sudo_conf_data.group_source;
 }
 
 struct plugin_info_list *

@@ -336,29 +336,23 @@ fix_fds(void)
 
 /*
  * Allocate space for groups and fill in using getgrouplist()
- * for when we cannot use getgroups().
+ * for when we cannot (or don't want to) use getgroups().
  */
 static int
-fill_group_list(struct user_details *ud)
+fill_group_list(struct user_details *ud, int maxgroups)
 {
-    int maxgroups, tries, rval = -1;
+    int tries, rval = -1;
     debug_decl(fill_group_list, SUDO_DEBUG_UTIL)
-
-#if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
-    maxgroups = (int)sysconf(_SC_NGROUPS_MAX);
-    if (maxgroups < 0)
-#endif
-	maxgroups = NGROUPS_MAX;
 
     /*
      * It is possible to belong to more groups in the group database
-     * than NGROUPS_MAX.  We start off with NGROUPS_MAX * 2 entries
+     * than NGROUPS_MAX.  We start off with NGROUPS_MAX * 4 entries
      * and double this as needed.
      */
     ud->groups = NULL;
-    ud->ngroups = maxgroups;
+    ud->ngroups = maxgroups << 1;
     for (tries = 0; tries < 10 && rval == -1; tries++) {
-	ud->ngroups *= 2;
+	ud->ngroups <<= 1;
 	efree(ud->groups);
 	ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
 	rval = getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
@@ -371,25 +365,35 @@ get_user_groups(struct user_details *ud)
 {
     char *cp, *gid_list = NULL;
     size_t glsize;
-    int i, len;
+    int i, len, maxgroups, group_source;
     debug_decl(get_user_groups, SUDO_DEBUG_UTIL)
 
-    /*
-     * Systems with mbr_check_membership() support more than NGROUPS_MAX
-     * groups so we cannot use getgroups().
-     */
+#if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
+    maxgroups = (int)sysconf(_SC_NGROUPS_MAX);
+    if (maxgroups < 0)
+#endif
+	maxgroups = NGROUPS_MAX;
+
     ud->groups = NULL;
-#ifndef HAVE_MBR_CHECK_MEMBERSHIP
-    if ((ud->ngroups = getgroups(0, NULL)) > 0) {
-	ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
-	if (getgroups(ud->ngroups, ud->groups) < 0) {
-	    efree(ud->groups);
-	    ud->groups = NULL;
+    group_source = sudo_conf_group_source();
+    if (group_source != GROUP_SOURCE_DYNAMIC) {
+	if ((ud->ngroups = getgroups(0, NULL)) > 0) {
+	    /* Use groups from kernel if not too many or source is static. */
+	    if (ud->ngroups < maxgroups || group_source == GROUP_SOURCE_STATIC) {
+		ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
+		if (getgroups(ud->ngroups, ud->groups) < 0) {
+		    efree(ud->groups);
+		    ud->groups = NULL;
+		}
+	    }
 	}
     }
-#endif /* HAVE_MBR_CHECK_MEMBERSHIP */
     if (ud->groups == NULL) {
-	if (fill_group_list(ud) == -1)
+	/*
+	 * Query group database if kernel list is too small or disabled.
+	 * Typically, this is because NFS can only support up to 16 groups.
+	 */
+	if (fill_group_list(ud, maxgroups) == -1)
 	    error(1, _("unable to get group vector"));
     }
 
