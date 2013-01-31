@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2012-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -368,14 +368,6 @@ get_process_ttyname()
     }
     efree(ki_proc);
 
-    /* If all else fails, fall back on ttyname(). */
-    if (tty == NULL) {
-	if ((tty = ttyname(STDIN_FILENO)) != NULL ||
-	    (tty = ttyname(STDOUT_FILENO)) != NULL ||
-	    (tty = ttyname(STDERR_FILENO)) != NULL)
-	    tty = estrdup(tty);
-    }
-
     return tty;
 }
 #elif defined(HAVE_STRUCT_PSINFO_PR_TTYDEV)
@@ -407,14 +399,6 @@ get_process_ttyname()
 	}
     }
 
-    /* If all else fails, fall back on ttyname(). */
-    if (tty == NULL) {
-	if ((tty = ttyname(STDIN_FILENO)) != NULL ||
-	    (tty = ttyname(STDOUT_FILENO)) != NULL ||
-	    (tty = ttyname(STDERR_FILENO)) != NULL)
-	    tty = estrdup(tty);
-    }
-
     return tty;
 }
 #elif defined(__linux__)
@@ -432,7 +416,7 @@ get_process_ttyname()
     ssize_t len;
     int i;
 
-    /* Try to determine the tty from pr_ttydev in /proc/pid/psinfo. */
+    /* Try to determine the tty from tty_nr in /proc/pid/stat. */
     for (i = 0; tty == NULL && i < 2; i++) {
 	FILE *fp;
 	char path[PATH_MAX];
@@ -459,14 +443,6 @@ get_process_ttyname()
 	}
     }
     efree(line);
-
-    /* If all else fails, fall back on ttyname(). */
-    if (tty == NULL) {
-	if ((tty = ttyname(STDIN_FILENO)) != NULL ||
-	    (tty = ttyname(STDOUT_FILENO)) != NULL ||
-	    (tty = ttyname(STDERR_FILENO)) != NULL)
-	    tty = estrdup(tty);
-    }
 
     return tty;
 }
