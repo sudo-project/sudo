@@ -1040,18 +1040,16 @@ alias_remove_recursive(name, type)
     struct alias *a;
     int rval = TRUE;
 
-    if ((a = alias_find(name, type)) != NULL) {
+    if ((a = alias_remove(name, type)) != NULL) {
 	tq_foreach_fwd(&a->members, m) {
 	    if (m->type == ALIAS) {
 		if (!alias_remove_recursive(m->name, type))
 		    rval = FALSE;
 	    }
 	}
+	rbinsert(alias_freelist, a);
     }
     alias_seqno++;
-    a = alias_remove(name, type);
-    if (a)
-	rbinsert(alias_freelist, a);
     return rval;
 }
 
