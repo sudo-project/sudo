@@ -1,3 +1,9 @@
+What's new in Sudo 1.8.6p6?
+
+ * On systems where the controlling tty can be determined via /proc
+   or sysctl(), do not fall back to using ttyname() if there is no
+   controlling tty.
+
 What's new in Sudo 1.8.6p5?
 
  * Fixed a potential crash in visudo's alias cycle detection.
