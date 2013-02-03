@@ -1,15 +1,14 @@
 # Finnish messages for sudoers.
 # This file is put in the public domain.
-# Copyright © 2011, 2012 Free Software Foundation, Inc.
 # This file is distributed under the same license as the sudo package.
-# Jorma Karvonen <karvonen.jorma@gmail.com>, 2011-2012.
+# Jorma Karvonen <karvonen.jorma@gmail.com>, 2011-2013.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: sudoers 1.8.6b4\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2012-08-10 13:08-0400\n"
-"PO-Revision-Date: 2012-08-14 09:15+0200\n"
+"PO-Revision-Date: 2013-01-03 13:36+0200\n"
 "Last-Translator: Jorma Karvonen <karvonen.jorma@gmail.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
 "Language: fi\n"
@@ -31,11 +30,11 @@ msgstr "Alias ”%s” on jo määritelty"
 #: plugins/sudoers/auth/bsdauth.c:78
 #, c-format
 msgid "unable to get login class for user %s"
-msgstr "ei kyetä saamaan kirjautumisluokkaa käyttäjälle %s"
+msgstr "kirjautumisluokan saaminen käyttäjälle %s epäonnistui"
 
 #: plugins/sudoers/auth/bsdauth.c:84
 msgid "unable to begin bsd authentication"
-msgstr "ei kyetä aloittamaan bsd-todentamista"
+msgstr "bsd-todentamisen aloittaminen epäonnistui"
 
 #: plugins/sudoers/auth/bsdauth.c:92
 msgid "invalid authentication type"
@@ -43,17 +42,17 @@ msgstr "virheellinen todennustyyppi"
 
 #: plugins/sudoers/auth/bsdauth.c:101
 msgid "unable to setup authentication"
-msgstr "ei kyetä asettamaan todentamista"
+msgstr "asetustodentaminen epäonnistui"
 
 #: plugins/sudoers/auth/fwtk.c:60
 #, c-format
 msgid "unable to read fwtk config"
-msgstr "ei kyetä lukemaan fwtk config -asetusta"
+msgstr "fwtk config -asetuksen lukeminen epäonnistui"
 
 #: plugins/sudoers/auth/fwtk.c:65
 #, c-format
 msgid "unable to connect to authentication server"
-msgstr "ei kyetä yhdistämään todentamispalvelimelle"
+msgstr "todentamispalvelimelle yhdistäminen epäonnistui"
 
 #: plugins/sudoers/auth/fwtk.c:71 plugins/sudoers/auth/fwtk.c:95
 #: plugins/sudoers/auth/fwtk.c:128
@@ -74,52 +73,52 @@ msgstr ""
 #: plugins/sudoers/auth/kerb5.c:117
 #, c-format
 msgid "%s: unable to unparse princ ('%s'): %s"
-msgstr "%s: ei kyetä poistamaan valtuutetun (’%s’) jäsentämistä: %s"
+msgstr "%s: valtuutetun (’%s’) jäsentämisen poistaminen epäonnistui: %s"
 
 #  Ensimmäinen parametri on auth name
 #: plugins/sudoers/auth/kerb5.c:160
 #, c-format
 msgid "%s: unable to parse '%s': %s"
-msgstr "%s: ei kyetä jäsentämään todentamisnimeä ’%s’: %s"
+msgstr "%s: todentamisnimen ’%s’ jäsentäminen epäonnistui: %s"
 
 #: plugins/sudoers/auth/kerb5.c:170
 #, c-format
 msgid "%s: unable to resolve ccache: %s"
-msgstr "%s:  ei kyetä ratkaisemaan ccache-välimuistia: %s"
+msgstr "%s: ccache-välimuistin ratkaiseminen epäonnistui: %s"
 
 #: plugins/sudoers/auth/kerb5.c:218
 #, c-format
 msgid "%s: unable to allocate options: %s"
-msgstr "%s: ei kyetä varaamaan valitsimia: %s"
+msgstr "%s: muistin varaaminen valitsimille epäonnistui: %s"
 
 #: plugins/sudoers/auth/kerb5.c:234
 #, c-format
 msgid "%s: unable to get credentials: %s"
-msgstr "%s: ei kyetä hakemaan valtuustietoja: %s"
+msgstr "%s: valtuustietojen hakeminen epäonnistui: %s"
 
 #: plugins/sudoers/auth/kerb5.c:247
 #, c-format
 msgid "%s: unable to initialize ccache: %s"
-msgstr "%s: ei kyetä alustamaan ccache-välimuistia: %s"
+msgstr "%s: ccache-välimuistin alustaminen epäonnistui: %s"
 
 #: plugins/sudoers/auth/kerb5.c:251
 #, c-format
 msgid "%s: unable to store cred in ccache: %s"
-msgstr "%s: ei kyetä tallentamaan valtuustietoja ccache-välimuistiin: %s"
+msgstr "%s: valtuustietojen tallentaminen ccache-välimuistiin epäonnistui: %s"
 
 #: plugins/sudoers/auth/kerb5.c:316
 #, c-format
 msgid "%s: unable to get host principal: %s"
-msgstr "%s: ei kyetä hakemaan tietokoneen valtuutettua: %s"
+msgstr "%s: tietokoneen valtuutetun hakeminen epäonnistui: %s"
 
 #: plugins/sudoers/auth/kerb5.c:331
 #, c-format
 msgid "%s: Cannot verify TGT! Possible attack!: %s"
-msgstr "%s: Ei voida todentaa TGT-lippua! Mahdollinen hyökkäys!: %s"
+msgstr "%s: TGT-lipun todentaminen epäonnistui! Mahdollinen hyökkäys!: %s"
 
 #: plugins/sudoers/auth/pam.c:100
 msgid "unable to initialize PAM"
-msgstr "ei kyetä alustamaan PAM:ia"
+msgstr "PAM:in alustaminen epäonnistui"
 
 #: plugins/sudoers/auth/pam.c:144
 msgid "account validation failure, is your account locked?"
@@ -163,12 +162,12 @@ msgstr "ei ole olemassa %s-tietokannassa"
 #: plugins/sudoers/auth/securid5.c:81
 #, c-format
 msgid "failed to initialise the ACE API library"
-msgstr "epäonnistui ACE API -kirjaston alustamisessa"
+msgstr "ACE API -kirjaston alustaminen epäonnistui"
 
 #: plugins/sudoers/auth/securid5.c:107
 #, c-format
 msgid "unable to contact the SecurID server"
-msgstr "ei kyetä ottamaan yhteyttä SecurID-palvelimeen"
+msgstr "yhteyden ottaminen SecurID-palvelimeen epäonnistui"
 
 #: plugins/sudoers/auth/securid5.c:116
 #, c-format
@@ -202,7 +201,7 @@ msgstr "virheellinen salasanakoodipituus kohteelle SecurID"
 
 #: plugins/sudoers/auth/sia.c:109
 msgid "unable to initialize SIA session"
-msgstr "ei kyetä alustamaan SIA-istuntoa"
+msgstr "SIA-istunnon alustaminen epäonnistui"
 
 #: plugins/sudoers/auth/sudo_auth.c:121
 msgid "Invalid authentication methods compiled into sudo!  You may mix standalone and non-standalone authentication."
@@ -226,7 +225,7 @@ msgstr "getaudit: epäonnistui"
 #: plugins/sudoers/bsm_audit.c:90 plugins/sudoers/bsm_audit.c:153
 #, c-format
 msgid "Could not determine audit condition"
-msgstr "Ei voitu määritellä audit-ehtoa"
+msgstr "Audit-ehdon määrittely epäonnistui"
 
 #: plugins/sudoers/bsm_audit.c:101
 #, c-format
@@ -256,7 +255,7 @@ msgstr "au_to_return32: epäonnistui"
 #: plugins/sudoers/bsm_audit.c:129 plugins/sudoers/bsm_audit.c:190
 #, c-format
 msgid "unable to commit audit record"
-msgstr "ei kyetä suorittamaan commit-toimintoa audit-tietueelle"
+msgstr "commit-toiminnon suorittaminen audit-tietueelle epäonnistui"
 
 #: plugins/sudoers/bsm_audit.c:160
 #, c-format
@@ -275,20 +274,20 @@ msgstr "au_to_text: epäonnistui"
 #: plugins/sudoers/visudo.c:818
 #, c-format
 msgid "unable to open %s"
-msgstr "ei kyetä avaamaan kohdetta %s"
+msgstr "kohteen %s avaaminen epäonnistui"
 
 #  Kirjoittamisen kohde voi olla timestamp file tai pathbuf
 #: plugins/sudoers/check.c:256 plugins/sudoers/iolog.c:229
 #, c-format
 msgid "unable to write to %s"
-msgstr "ei kyetä kirjoittamaan kohteeseen %s"
+msgstr "kohteeseen %s kirjoittaminen epäonnistui"
 
 #: plugins/sudoers/check.c:264 plugins/sudoers/check.c:512
 #: plugins/sudoers/check.c:562 plugins/sudoers/iolog.c:123
 #: plugins/sudoers/iolog.c:156
 #, c-format
 msgid "unable to mkdir %s"
-msgstr "ei kyetä suorittamaan käskyä mkdir %s"
+msgstr "käskyn mkdir %s suorittaminen epäonnistui"
 
 #: plugins/sudoers/check.c:399 plugins/sudoers/env.c:289
 #: plugins/sudoers/env.c:294 plugins/sudoers/env.c:395
@@ -326,7 +325,7 @@ msgstr "%s on kirjoitettava ei-omistajalle (0%o), pitäisi olla tila 0700"
 #: plugins/sudoers/visudo.c:319 plugins/sudoers/visudo.c:584
 #, c-format
 msgid "unable to stat %s"
-msgstr "ei kyetä kutsumaan funktiota stat %s"
+msgstr "funktion stat %s kutsuminen epäonnistui"
 
 #: plugins/sudoers/check.c:577
 #, c-format
@@ -346,12 +345,12 @@ msgstr "aikaleima liian kaukana tulevaisuudessa: %20.20s"
 #: plugins/sudoers/check.c:690
 #, c-format
 msgid "unable to remove %s (%s), will reset to the epoch"
-msgstr "ei kyetä poistamaan %s (%s), nollataan aika"
+msgstr "kohteen %s (%s) poistaminen epäonnistui, nollataan aika"
 
 #: plugins/sudoers/check.c:698
 #, c-format
 msgid "unable to reset %s to the epoch"
-msgstr "ei kyetä nollaamaan %s ajaksi"
+msgstr "kohteen %s nollaaminen ajaksi epäonnistui"
 
 #: plugins/sudoers/check.c:758 plugins/sudoers/check.c:764
 #: plugins/sudoers/sudoers.c:851 plugins/sudoers/sudoers.c:855
@@ -580,7 +579,7 @@ msgstr "Oletussalasanakehote: %s"
 
 #: plugins/sudoers/def_data.c:219
 msgid "If set, passprompt will override system prompt in all cases."
-msgstr "Jos asetettu, salasankehote korvaa järjestelmäkehotteen kaikissa tapauksissa."
+msgstr "Jos asetettu, salasanakehote korvaa järjestelmäkehotteen kaikissa tapauksissa."
 
 #  Tämä on tekemisessä runas_default -määrittelyn kanssa
 #: plugins/sudoers/def_data.c:223
@@ -773,7 +772,7 @@ msgstr "sudo_putenv: rikkoutunut envp, pituus ei täsmää"
 #: plugins/sudoers/toke_util.c:207 toke.l:697 toke.l:827 toke.l:887 toke.l:983
 #, c-format
 msgid "unable to allocate memory"
-msgstr "ei kyetä varaamaan muistia"
+msgstr "muistin varaaminen epäonnistui"
 
 #: plugins/sudoers/env.c:992
 #, c-format
@@ -805,13 +804,13 @@ msgstr "%s on vain omistajan kirjoitettava"
 #: plugins/sudoers/group_plugin.c:114
 #, c-format
 msgid "unable to dlopen %s: %s"
-msgstr "ei kyetä kutsumaan funktiota dlopen %s: %s"
+msgstr "funktion dlopen %s kutsuminen epäonnistui: %s"
 
 #  parametrina on path
 #: plugins/sudoers/group_plugin.c:119
 #, c-format
 msgid "unable to find symbol \"group_plugin\" in %s"
-msgstr "ei kyetä löytämään symbolia ”group_plugin” polusta %s"
+msgstr "symbolin ”group_plugin” löytäminen polusta %s epäonnistui"
 
 #: plugins/sudoers/group_plugin.c:124
 #, c-format
@@ -826,7 +825,7 @@ msgstr "Paikallinen ip-osoite ja verkkopeiteparit:\n"
 #: plugins/sudoers/iolog.c:205 plugins/sudoers/sudoers.c:991
 #, c-format
 msgid "unable to read %s"
-msgstr "ei kyetä lukemaan kohdetta %s"
+msgstr "kohteen %s lukeminen epäonnistui"
 
 #: plugins/sudoers/iolog.c:208
 #, c-format
@@ -841,12 +840,12 @@ msgstr "virheellinen sarjanumero %s"
 #: plugins/sudoers/iolog.c:569
 #, c-format
 msgid "unable to create %s"
-msgstr "ei kyetä luomaan hakemistopolkua %s"
+msgstr "hakemistopolun %s luominen epäonnistui"
 
 #: plugins/sudoers/iolog_path.c:263 plugins/sudoers/sudoers.c:382
 #, c-format
 msgid "unable to set locale to \"%s\", using \"C\""
-msgstr "ei kyetä asettamaan locale-asetukseksi ”%s”, käytetään ”C”"
+msgstr "locale-asetuksen ”%s” asettaminen epäonnistui, käytetään ”C”"
 
 #: plugins/sudoers/ldap.c:387
 #, c-format
@@ -872,12 +871,12 @@ msgstr "virheellinen verkkoresurssin tunnus: %s"
 #: plugins/sudoers/ldap.c:475
 #, c-format
 msgid "unable to mix ldap and ldaps URIs"
-msgstr "ei kyetä sekottamaan ldap:n ja ldap-kohteiden verkkoresurssitunnuksia"
+msgstr "ldap:n ja ldap-verkkoresurssitunnuksien sekoittaminen epäonnistui"
 
 #: plugins/sudoers/ldap.c:479
 #, c-format
 msgid "unable to mix ldaps and starttls"
-msgstr "ei kyetä sekoittamaan ldap- ja starttl-kohteita"
+msgstr "ldap- ja starttl-kohteiden sekoittaminen epäonnistui"
 
 #: plugins/sudoers/ldap.c:498
 #, c-format
@@ -887,7 +886,7 @@ msgstr "sudo_ldap_parse_uri: hostbuf-puskuritila loppui"
 #: plugins/sudoers/ldap.c:572
 #, c-format
 msgid "unable to initialize SSL cert and key db: %s"
-msgstr "ei kyetä alustamaan SSL-varmenne- ja -avaintietokantaa: %s"
+msgstr "SSL-varmenne- ja -avaintietokannan alustaminen epäonnistui: %s"
 
 #: plugins/sudoers/ldap.c:575
 #, c-format
@@ -897,17 +896,17 @@ msgstr "kohteessa %s TLS_CERT on asetettava käyttämään SSL:ää"
 #: plugins/sudoers/ldap.c:992
 #, c-format
 msgid "unable to get GMT time"
-msgstr "ei kyetä saamaan GMT-aikaa"
+msgstr "GMT-ajan saaminen epäonnistui"
 
 #: plugins/sudoers/ldap.c:998
 #, c-format
 msgid "unable to format timestamp"
-msgstr "ei kyetä muotoilemaan aikaleimaa"
+msgstr "aikaleiman muotoileminen epäonnistui"
 
 #: plugins/sudoers/ldap.c:1006
 #, c-format
 msgid "unable to build time filter"
-msgstr "ei kyetä rakentamaan aikasuodatinta"
+msgstr "aikasuodattimen rakentaminen epäonnistui"
 
 #: plugins/sudoers/ldap.c:1225
 #, c-format
@@ -945,12 +944,12 @@ msgstr "    Komennot:\n"
 #: plugins/sudoers/ldap.c:2240
 #, c-format
 msgid "unable to initialize LDAP: %s"
-msgstr "ei kyetä alustamaan kohdetta LDAP: %s"
+msgstr "kohteen LDAP alustaminen epäonnistui: %s"
 
 #: plugins/sudoers/ldap.c:2274
 #, c-format
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
-msgstr "start_tls määritelty mutta LDAP-kirjastot ei tue funktiota ldap_start_tls_s() tai funktiota ldap_start_tls_s_np()"
+msgstr "start_tls määritelty, mutta LDAP-kirjastot ei tue funktiota ldap_start_tls_s() tai funktiota ldap_start_tls_s_np()"
 
 #: plugins/sudoers/ldap.c:2510
 #, c-format
@@ -960,22 +959,22 @@ msgstr "virheellinen sudoOrder-attribuutti: %s"
 #: plugins/sudoers/linux_audit.c:57
 #, c-format
 msgid "unable to open audit system"
-msgstr "ei kyetä avaamaan audit-järjestelmää"
+msgstr "audit-järjestelmän avaaminen epäonnistui"
 
 #: plugins/sudoers/linux_audit.c:93
 #, c-format
 msgid "unable to send audit message"
-msgstr "ei kyetä lähettämään audit-viestiä"
+msgstr "audit-viestin lähettäminen epäonnistui"
 
 #: plugins/sudoers/logging.c:202
 #, c-format
 msgid "unable to open log file: %s: %s"
-msgstr "ei kyetä avaamaan lokitiedostoa: %s: %s"
+msgstr "lokitiedoston avaaminen epäonnistui: %s: %s"
 
 #: plugins/sudoers/logging.c:205
 #, c-format
 msgid "unable to lock log file: %s: %s"
-msgstr "ei kyetä lukitsemaan lokitiedostoa: %s: %s"
+msgstr "lokitiedoston lukitseminen epäonnistui: %s: %s"
 
 #: plugins/sudoers/logging.c:260
 msgid "user NOT in sudoers"
@@ -1051,27 +1050,27 @@ msgstr "vaaditaan salasana"
 #: plugins/sudoers/logging.c:530
 #, c-format
 msgid "unable to fork"
-msgstr "ei kyetä kutsumaan fork-funktiota"
+msgstr "fork-funktion kutsuminen epäonnistui"
 
 #: plugins/sudoers/logging.c:537 plugins/sudoers/logging.c:599
 #, c-format
 msgid "unable to fork: %m"
-msgstr "ei kyetä kutsumaan fork-funktiota: %m"
+msgstr "fork-funktion kutsuminen epäonnistui: %m"
 
 #: plugins/sudoers/logging.c:589
 #, c-format
 msgid "unable to open pipe: %m"
-msgstr "ei kyetä avaamaan putkea: %m"
+msgstr "putken avaaminen epäonnistui: %m"
 
 #: plugins/sudoers/logging.c:614
 #, c-format
 msgid "unable to dup stdin: %m"
-msgstr "ei kyetä kutsumaan funktiota dup vakiosyötteellä: %m"
+msgstr "funktion dup kutsuminen vakiosyötteellä epäonnistui: %m"
 
 #: plugins/sudoers/logging.c:650
 #, c-format
 msgid "unable to execute %s: %m"
-msgstr "ei kyetä suorittamaan %s: %m"
+msgstr "käskyn %s suorittaminen epäonnistui: %m"
 
 #: plugins/sudoers/logging.c:865
 #, c-format
@@ -1123,32 +1122,32 @@ msgstr ": "
 #: plugins/sudoers/pwutil.c:278
 #, c-format
 msgid "unable to cache uid %u (%s), already exists"
-msgstr "ei kyetä laittamaan välimuistiin uid %u (%s) -käyttäjää, on jo siellä"
+msgstr "käyttäjän uid %u (%s) laittaminen välimuistiin epäonnistui, käyttäjä on jo siellä"
 
 #: plugins/sudoers/pwutil.c:286
 #, c-format
 msgid "unable to cache uid %u, already exists"
-msgstr "ei kyetä laittamaan välimuistiin uid %u -käyttäjää, on jo siellä"
+msgstr "käyttäjän uid %u laittaminen välimuistiin epäonnistui, käyttäjä on jo siellä"
 
 #: plugins/sudoers/pwutil.c:322 plugins/sudoers/pwutil.c:331
 #, c-format
 msgid "unable to cache user %s, already exists"
-msgstr "ei kyetä laittamaan välimuistiin käyttäjää %s, on jo siellä"
+msgstr "käyttäjän %s laittaminen välimuistiin epäonnistui, käyttäjä on jo siellä"
 
 #: plugins/sudoers/pwutil.c:668
 #, c-format
 msgid "unable to cache gid %u (%s), already exists"
-msgstr "ei kyetä laittamaan välimuistiin gid %u (%s) -ryhmää, on jo siellä"
+msgstr "ryhmän gid %u (%s) laittaminen välimuistiin epäonnistui, ryhmä on jo siellä"
 
 #: plugins/sudoers/pwutil.c:676
 #, c-format
 msgid "unable to cache gid %u, already exists"
-msgstr "ei kyetä laittamaan välimuistiin gid %u -ryhmää, on jo siellä"
+msgstr "ryhmän gid %u laittaminen välimuistiin epäonnistui, ryhmä on jo siellä"
 
 #: plugins/sudoers/pwutil.c:706 plugins/sudoers/pwutil.c:715
 #, c-format
 msgid "unable to cache group %s, already exists"
-msgstr "ei kyetä laittamaan välimuistiin ryhmää %s, on jo siellä"
+msgstr "ryhmän %s laittaminen välimuistiin epäonnistui, ryhmä on jo siellä"
 
 #: plugins/sudoers/set_perms.c:122 plugins/sudoers/set_perms.c:436
 #: plugins/sudoers/set_perms.c:828 plugins/sudoers/set_perms.c:1114
@@ -1165,17 +1164,17 @@ msgstr "käyttöoikeuspinovajaus"
 #: plugins/sudoers/set_perms.c:270 plugins/sudoers/set_perms.c:580
 #: plugins/sudoers/set_perms.c:957 plugins/sudoers/set_perms.c:1243
 msgid "unable to change to runas gid"
-msgstr "ei kyetä vaihtamaan runas gid -tunnisteeksi"
+msgstr "vaihtaminen runas gid -tunnisteeksi epäonnistui"
 
 #: plugins/sudoers/set_perms.c:282 plugins/sudoers/set_perms.c:592
 #: plugins/sudoers/set_perms.c:967 plugins/sudoers/set_perms.c:1253
 msgid "unable to change to runas uid"
-msgstr "ei kyetä vaihtamaan runas gid -tunnisteeksi"
+msgstr "vaihtaminen runas gid -tunnisteeksi epäonnistui"
 
 #: plugins/sudoers/set_perms.c:300 plugins/sudoers/set_perms.c:610
 #: plugins/sudoers/set_perms.c:983 plugins/sudoers/set_perms.c:1269
 msgid "unable to change to sudoers gid"
-msgstr "ei kyetä vaihtamaan sudoers gid-tunnisteeksi"
+msgstr "vaihtaminen sudoers gid-tunnisteeksi epäonnistui"
 
 #: plugins/sudoers/set_perms.c:353 plugins/sudoers/set_perms.c:681
 #: plugins/sudoers/set_perms.c:1029 plugins/sudoers/set_perms.c:1315
@@ -1185,17 +1184,17 @@ msgstr "liian monta prosessia"
 
 #: plugins/sudoers/set_perms.c:1542
 msgid "unable to set runas group vector"
-msgstr "ei kyetä asettaan runas-ryhmävektoria"
+msgstr "runas-ryhmävektorin asettaminen epäonnistui"
 
 #: plugins/sudoers/sssd.c:251
 #, c-format
 msgid "Unable to dlopen %s: %s"
-msgstr "Ei kyetä kutsumaan funktiota dlopen %s: %s"
+msgstr "Funktion dlopen %s kutsuminen epäonnistui: %s"
 
 #: plugins/sudoers/sssd.c:252
 #, c-format
 msgid "Unable to initialize SSS source. Is SSSD installed on your machine?"
-msgstr "Ei kyetä alustamaan SSS-lähdettä. Onko SSSD asennettu tietokoneeseesi?"
+msgstr "Lähteen SSS alustaminen epäonnistui. Onko SSSD asennettu tietokoneeseesi?"
 
 #  parametrina on path
 #: plugins/sudoers/sssd.c:258 plugins/sudoers/sssd.c:266
@@ -1203,7 +1202,7 @@ msgstr "Ei kyetä alustamaan SSS-lähdettä. Onko SSSD asennettu tietokoneeseesi
 #: plugins/sudoers/sssd.c:287
 #, c-format
 msgid "unable to find symbol \"%s\" in %s"
-msgstr "ei kyetä löytämään symbolia ”%s” polusta %s"
+msgstr "symbolin ”%s” löytäminen polusta %s epäonnistui"
 
 #: plugins/sudoers/sudo_nss.c:267
 #, c-format
@@ -1238,7 +1237,7 @@ msgstr "ei löytynyt kelvollisia sudoers-lähteitä, poistutaan"
 #: plugins/sudoers/sudoers.c:268
 #, c-format
 msgid "unable to execute %s: %s"
-msgstr "ei kyetä suorittamaan komentoa %s: %s"
+msgstr "komennon %s suorittaminen epäonnistui: %s"
 
 #: plugins/sudoers/sudoers.c:335
 #, c-format
@@ -1306,7 +1305,7 @@ msgstr "tuntematon kirjautumisluokka: %s"
 #: plugins/sudoers/sudoers.c:1089
 #, c-format
 msgid "unable to resolve host %s"
-msgstr "ei kyetä ratkaisemaan tietokonetta %s"
+msgstr "tietokoneen %s ratkaiseminen epäonnistui"
 
 #: plugins/sudoers/sudoers.c:1141 plugins/sudoers/testsudoers.c:387
 #, c-format
@@ -1395,7 +1394,7 @@ msgstr "Lokigeometria on %d x %d, pääteikkunasi geometria on %d x %d."
 #: plugins/sudoers/sudoreplay.c:401
 #, c-format
 msgid "unable to set tty to raw mode"
-msgstr "ei kyetä asettamaa tty:ta raakatilaan"
+msgstr "tty:n asettaminen raakatilaan epäonnistui"
 
 #: plugins/sudoers/sudoreplay.c:418
 #, c-format
@@ -1445,7 +1444,7 @@ msgstr "virheellinen säännöllinen lauseke: %s"
 #: plugins/sudoers/sudoreplay.c:726
 #, c-format
 msgid "could not parse date \"%s\""
-msgstr "ei voitu jäsentää päivämäärää ”%s”"
+msgstr "päivämäärän ”%s” jäsentäminen epäonnistui"
 
 #: plugins/sudoers/sudoreplay.c:739
 #, c-format
@@ -1558,7 +1557,7 @@ msgstr "kirjoitusvirhe"
 #: plugins/sudoers/visudo.c:423
 #, c-format
 msgid "unable to stat temporary file (%s), %s unchanged"
-msgstr "ei kyetä kutsumaan stat-funktiota tilapäiselle tiedostolle (%s), %s ennallaan"
+msgstr "funktion stat kutsuminen tilapäiselle tiedostolle (%s) epäonnistui, %s ennallaan"
 
 #: plugins/sudoers/visudo.c:428
 #, c-format
@@ -1578,27 +1577,27 @@ msgstr "%s ennallaan"
 #: plugins/sudoers/visudo.c:486
 #, c-format
 msgid "unable to re-open temporary file (%s), %s unchanged."
-msgstr "ei kyetä avaamaan uudelleen tilapäistä tiedostoa (%s), %s ennallaan."
+msgstr "tilapäisen tiedoston (%s) avaaminen uudelleen epäonnistui, %s ennallaan."
 
 #: plugins/sudoers/visudo.c:496
 #, c-format
 msgid "unabled to parse temporary file (%s), unknown error"
-msgstr "ei kyetä jäsentämään tilapäistä tiedostoa (%s), tuntematon virhe"
+msgstr "tilapäisen tiedoston (%s) jäsentäminen epäonnistui, tuntematon virhe"
 
 #: plugins/sudoers/visudo.c:534
 #, c-format
 msgid "internal error, unable to find %s in list!"
-msgstr "sisäinen virhe, ei kyetä löytämään %s luettelosta!"
+msgstr "sisäinen virhe, kohteen %s löytäminen luettelosta epäonnistui!"
 
 #: plugins/sudoers/visudo.c:586 plugins/sudoers/visudo.c:595
 #, c-format
 msgid "unable to set (uid, gid) of %s to (%u, %u)"
-msgstr "ei kyetä asettamaan kohdetta %s (uid, gid) arvoihin (%u, %u)"
+msgstr "kohteen %s (uid, gid) asettaminen arvoihin (%u, %u) epäonnistui"
 
 #: plugins/sudoers/visudo.c:590 plugins/sudoers/visudo.c:600
 #, c-format
 msgid "unable to change mode of %s to 0%o"
-msgstr "ei kyetä muuttamaan %s-tilaa arvoon 0%o"
+msgstr "tilan %s vaihtaminen arvoon 0%o epäonnistui"
 
 #: plugins/sudoers/visudo.c:617
 #, c-format
@@ -1635,13 +1634,13 @@ msgstr ""
 #: plugins/sudoers/visudo.c:759
 #, c-format
 msgid "unable to execute %s"
-msgstr "ei kyetä suorittamaan kohdetta %s"
+msgstr "kohteen %s suorittaminen epäonnistui"
 
 #  Parametri on path, mutta saattaa sisältää suoritettavan ohjelman
 #: plugins/sudoers/visudo.c:766
 #, c-format
 msgid "unable to run %s"
-msgstr "ei kyetä suorittamaan kohdetta %s"
+msgstr "kohteen %s suorittaminen epäonnistui"
 
 #: plugins/sudoers/visudo.c:792
 #, c-format
@@ -1686,7 +1685,7 @@ msgstr "määritelty editori (%s) ei ole olemassa"
 #: plugins/sudoers/visudo.c:966
 #, c-format
 msgid "unable to stat editor (%s)"
-msgstr "ei kyetä kutsumaan funktiota stat editori (%s)"
+msgstr "funktion stat editor (%s) kutsuminen epäonnistui"
 
 #: plugins/sudoers/visudo.c:1014
 #, c-format
@@ -1782,10 +1781,10 @@ msgstr "liian monta include-tasoa"
 
 #  Parametri on sudoers file
 #~ msgid "unable to set group on %s"
-#~ msgstr "ei kyetä asettamaan ryhmää tiedostossa %s"
+#~ msgstr "ryhmän asettaminen tiedostossa %s epäonnistui"
 
 #~ msgid "unable to fix mode on %s"
-#~ msgstr "ei kyetä korjaamaan tilaa tiedostossa %s"
+#~ msgstr "tilan korjaaminen tiedostossa %s epäonnistui"
 
 #~ msgid "%s is mode 0%o, should be 0%o"
 #~ msgstr "%s on tila 0%o, pitäisi olla 0%o"
@@ -1807,16 +1806,16 @@ msgstr "liian monta include-tasoa"
 #~ msgstr "%s: %.*s\n"
 
 #~ msgid "unable to get runas group vector"
-#~ msgstr "ei kyetä hakemaan runas-ryhmävektoria"
+#~ msgstr "runas-ryhmävektorin hakeminen epäonnistui"
 
 #~ msgid "unable to reset group vector"
-#~ msgstr "ei kyetä nollaamaan ryhmävektoria"
+#~ msgstr "ryhmävektorin nollaaminen epäonnistui"
 
 #~ msgid "unable to get group vector"
-#~ msgstr "ei kyetä hakemaan ryhmävektoria"
+#~ msgstr "ryhmävektorin hakeminen epäonnistui"
 
 #~ msgid "%s: %s_Alias `%s' references self"
 #~ msgstr "%s: %s_Alias ”%s” viittaa itseensä"
 
 #~ msgid "unable to parse temporary file (%s), unknown error"
-#~ msgstr "ei kyetä jäsentämään tilapäistä tiedostoa (%s), tuntematon virhe"
+#~ msgstr "tilapäisen tiedoston (%s) jäsentäminen epäonnistui, tuntematon virhe"

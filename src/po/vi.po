@@ -1,24 +1,22 @@
 # Vietnamese translation for sudo.
-# Copyright © 2012 Free Software Foundation, Inc.
-# This file is distributed under the same license as the sudo package.
-# Trần Ngọc Quân <vnwildman@gmail.com>, 2012.
+# This file is put in the public domain.
+# Trần Ngọc Quân <vnwildman@gmail.com>, 2012-2013.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: sudo-1.8.6b4\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2012-08-10 13:08-0400\n"
-"PO-Revision-Date: 2012-08-14 13:34+0700\n"
+"PO-Revision-Date: 2013-02-03 07:55+0700\n"
 "Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
 "Language-Team: Vietnamese <translation-team-vi@lists.sourceforge.net>\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language-Team-Website: <http://translationproject.org/team/vi.html>\n"
 "Plural-Forms: nplurals=2; plural=1;\n"
 "X-Generator: LocFactoryEditor 1.8\n"
-"X-Poedit-Language: Vietnamese\n"
-"X-Poedit-Country: VIET NAM\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
 #: common/aix.c:150
@@ -155,7 +153,7 @@ msgstr "không thể phân bổ pty"
 #: src/exec_pty.c:665
 #, c-format
 msgid "unable to set terminal to raw mode"
-msgstr "không thể đặt thiết bị cuối sang chế độ raw"
+msgstr "không thể đặt thiết bị cuối sang chế độ thô"
 
 #: src/exec_pty.c:1013
 #, c-format
@@ -220,7 +218,7 @@ msgstr "%s: không hiểu kiểu chính sách %d"
 #: src/load_plugins.c:116
 #, c-format
 msgid "%s: incompatible policy major version %d, expected %d"
-msgstr "%s: chính sách không tương thích với phiên bản %d, mong chờ %d"
+msgstr "%s: chính sách không tương thích với phiên bản %d, cần %d"
 
 #: src/load_plugins.c:123
 #, c-format
@@ -236,7 +234,7 @@ msgstr "phần bổ xung chính sách %s không bao gồm phương thức kiểm
 #: src/net_ifs.c:298 src/net_ifs.c:322
 #, c-format
 msgid "load_interfaces: overflow detected"
-msgstr "load_interfaces: bị tràn"
+msgstr "load_interfaces: đã có chỗ bị tràn"
 
 #: src/net_ifs.c:227
 #, c-format
@@ -256,7 +254,7 @@ msgstr "không hiểu người dùng: %s"
 #: src/parse_args.c:335
 #, c-format
 msgid "you may not specify both the `-i' and `-s' options"
-msgstr "bạn không thể chỉ định cả hai tùy chọn `-i' và `-s'"
+msgstr "bạn không thể chỉ định đồng thời cả hai tùy chọn `-i' và `-s'"
 
 #: src/parse_args.c:339
 #, c-format
@@ -370,27 +368,27 @@ msgstr "gỡ bỏ timestamp tập tin\n"
 
 #: src/parse_args.c:567
 msgid "invalidate timestamp file\n"
-msgstr "làm mất hiệu lực timestamp của tập tin\n"
+msgstr "làm mất hiệu lực dấu vết thời gian (timestamp) của tập tin\n"
 
 #: src/parse_args.c:569
 msgid "list user's available commands\n"
-msgstr "danh sách các câu lệnh người dùng có thể sử dụng\n"
+msgstr "Danh sách các biến câu lệnh người dùng có thể sử dụng\n"
 
 #: src/parse_args.c:571
 msgid "non-interactive mode, will not prompt user\n"
-msgstr "chế độ không tương tác, không hỏi tên tài khoản người dùng\n"
+msgstr "chế độ không-tương-tác, sẽ không hỏi tên người dùng\n"
 
 #: src/parse_args.c:573
 msgid "preserve group vector instead of setting to target's\n"
-msgstr "ngăn ngừa véc tơ nhóm thay vì các cài đặt cho đích\n"
+msgstr "dành riêng véc-tơ nhóm thay vì các cài đặt cho đích\n"
 
 #: src/parse_args.c:575
 msgid "use specified password prompt\n"
-msgstr "sử dụng nhắc nhập mật khẩu.\n"
+msgstr "sử dụng nhắc nhập mật khẩu đã cho.\n"
 
 #: src/parse_args.c:578 src/parse_args.c:586
 msgid "create SELinux security context with specified role\n"
-msgstr "tạo ngữ cảnh an ninh SELinux với vai trò đã được chỉ định\n"
+msgstr "tạo ngữ cảnh an ninh SELinux với vai trò đã đưa ra\n"
 
 #: src/parse_args.c:581
 msgid "read password from standard input\n"
@@ -414,7 +412,7 @@ msgstr "hiển thị thông tin phiên bản rồi thoát\n"
 
 #: src/parse_args.c:595
 msgid "update user's timestamp without running a command\n"
-msgstr "cập nhật dấu thời gian (timestamp) của người dùng mà không chạy một lệnh\n"
+msgstr "cập nhật dấu vết thời gian (timestamp) của người dùng mà không chạy một lệnh\n"
 
 #: src/parse_args.c:597
 msgid "stop processing command line arguments\n"
@@ -558,7 +556,7 @@ msgstr "không mong đợi chế độ sudo 0x%x"
 #: src/sudo.c:400
 #, c-format
 msgid "unable to get group vector"
-msgstr "không thể lấy véc tơ nhóm"
+msgstr "không thể lấy véc-tơ nhóm"
 
 #: src/sudo.c:452
 #, c-format

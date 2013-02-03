@@ -1,20 +1,20 @@
 # Vietnamese translation for sudo.
-# Copyright © 2012 Free Software Foundation, Inc.
-# This file is distributed under the same license as the sudo package.
-# Trần Ngọc Quân <vnwildman@gmail.com>, 2012.
+# This file is put in the public domain.
+# Trần Ngọc Quân <vnwildman@gmail.com>, 2012-2013.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: sudoers-1.8.6b4\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2012-08-10 13:08-0400\n"
-"PO-Revision-Date: 2012-09-01 15:08+0700\n"
+"PO-Revision-Date: 2013-02-03 07:55+0700\n"
 "Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
 "Language-Team: Vietnamese <translation-team-vi@lists.sourceforge.net>\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language-Team-Website: <http://translationproject.org/team/vi.html>\n"
 "Plural-Forms: nplurals=2; plural=1;\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
@@ -125,7 +125,7 @@ msgstr "xác thực tài khoản gặp lỗi nghiêm trọng, có phải tài kh
 
 #: plugins/sudoers/auth/pam.c:148
 msgid "Account or password is expired, reset your password and try again"
-msgstr "Mật khẩu hay tài khoản đã hết hạn sử dụng, đặt lại mật khẩu của bạn và thử lại"
+msgstr "Mật khẩu hay tài khoản đã hết hạn sử dụng, hãy đặt lại mật khẩu của bạn và thử lại"
 
 #: plugins/sudoers/auth/pam.c:155
 #, c-format
@@ -576,7 +576,7 @@ msgstr "Lời nhắc nhập mật khẩu mặc định: %s"
 
 #: plugins/sudoers/def_data.c:219
 msgid "If set, passprompt will override system prompt in all cases."
-msgstr "Nếu được đặt, lời nhắc mật khẩu sẽ dè lên dấu nhắc hệ thống trong mọi trường hợp."
+msgstr "Nếu được đặt, lời nhắc mật khẩu sẽ đè lên dấu nhắc hệ thống trong mọi trường hợp."
 
 #: plugins/sudoers/def_data.c:223
 #, c-format
@@ -766,7 +766,7 @@ msgstr "sudo_putenv: envp sai hỏng, chiều dài không khớp"
 #: plugins/sudoers/toke_util.c:207 toke.l:697 toke.l:827 toke.l:887 toke.l:983
 #, c-format
 msgid "unable to allocate memory"
-msgstr "không thể cấp phát vùng nhớ"
+msgstr "không thể cấp phát bộ nhớ"
 
 #: plugins/sudoers/env.c:992
 #, c-format
@@ -910,7 +910,7 @@ msgid ""
 "LDAP Role: %s\n"
 msgstr ""
 "\n"
-"LDAP Role: %s\n"
+"Vai trò LDAP: %s\n"
 
 #: plugins/sudoers/ldap.c:1763
 #, c-format
@@ -919,7 +919,7 @@ msgid ""
 "LDAP Role: UNKNOWN\n"
 msgstr ""
 "\n"
-"LDAP Role: KHÔNG HIỂU\n"
+"Vai trò LDAP: KHÔNG HIỂU\n"
 
 #: plugins/sudoers/ldap.c:1810
 #, c-format
@@ -1024,7 +1024,7 @@ msgstr ""
 
 #: plugins/sudoers/logging.c:352
 msgid "authentication failure"
-msgstr "lỗi xác thực"
+msgstr "xác thực gặp lỗi nghiêm trọng"
 
 #: plugins/sudoers/logging.c:376
 #, c-format
@@ -1050,12 +1050,12 @@ msgstr "không thể tạo tiến trình con: %m"
 #: plugins/sudoers/logging.c:589
 #, c-format
 msgid "unable to open pipe: %m"
-msgstr "không thể mở ống: %m"
+msgstr "không thể mở ống dẫn lệnh: %m"
 
 #: plugins/sudoers/logging.c:614
 #, c-format
 msgid "unable to dup stdin: %m"
-msgstr "không thể dup stdin: %m"
+msgstr "không thể dup (nhân bản) stdin: %m"
 
 #: plugins/sudoers/logging.c:650
 #, c-format
@@ -1488,10 +1488,10 @@ msgid ""
 msgstr ""
 "\n"
 "Tùy chọn:\n"
-"  -d thư-mục     chỉ định thư mục cho nhật ký phiên\n"
+"  -d thư-mục       chỉ định thư mục cho nhật ký phiên\n"
 "  -f filter        chỉ định kiểu V/R để hiển thị\n"
 "  -h               hiển thị thông tin trợ giúp rồi thoát\n"
-"  -l [biểu thức]  liệt kê ID phiên mà nó khớp với biểu thức\n"
+"  -l [biểu thức]   liệt kê ID phiên mà nó khớp với biểu thức\n"
 "  -m max_wait      số giây tối đa sẽ chờ giữa hai sự kiện\n"
 "  -s speed_factor  tăng hoặc giảm tốc kết xuất\n"
 "  -V               hiển thị thông tin về phiên bản rồi thoát"
@@ -1546,17 +1546,17 @@ msgstr "lỗi ghi"
 #: plugins/sudoers/visudo.c:423
 #, c-format
 msgid "unable to stat temporary file (%s), %s unchanged"
-msgstr "không thể lấy thống kê tập tin tạm (%s), %s không thay đổi."
+msgstr "không thể lấy thống kê tập tin tạm (%s), %s không thay đổi gì."
 
 #: plugins/sudoers/visudo.c:428
 #, c-format
 msgid "zero length temporary file (%s), %s unchanged"
-msgstr "tệp tin (%s) có chiều dài bằng không, %s không thay đổi"
+msgstr "tệp tin (%s) có chiều dài bằng không, %s không thay đổi gì"
 
 #: plugins/sudoers/visudo.c:434
 #, c-format
 msgid "editor (%s) failed, %s unchanged"
-msgstr "trình biên soạn (%s) gặp lỗi, %s không thay đổi"
+msgstr "trình biên soạn (%s) gặp lỗi, %s không thay đổi gì"
 
 #: plugins/sudoers/visudo.c:457
 #, c-format
@@ -1566,7 +1566,7 @@ msgstr "%s không thay đổi"
 #: plugins/sudoers/visudo.c:486
 #, c-format
 msgid "unable to re-open temporary file (%s), %s unchanged."
-msgstr "không thể mở lại tập tin tạm (%s), %s không thay đổi."
+msgstr "không thể mở lại tập tin tạm (%s), %s không thay đổi gì."
 
 #: plugins/sudoers/visudo.c:496
 #, c-format
@@ -1605,7 +1605,7 @@ msgstr "gặp lỗi khi đổi tên %s, %s không thay đổi"
 
 #: plugins/sudoers/visudo.c:704
 msgid "What now? "
-msgstr "Vậy làm gì?"
+msgstr "Vậy làm gì bây giờ? "
 
 #: plugins/sudoers/visudo.c:718
 msgid ""

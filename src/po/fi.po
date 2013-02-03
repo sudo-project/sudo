@@ -1,15 +1,14 @@
 # Finnish messages for sudo.
 # This file is put in the public domain.
-# Copyright © 2011, 2012 Free Software Foundation, Inc.
 # This file is distributed under the same license as the sudo package.
-# Jorma Karvonen <karvonen.jorma@gmail.com>, 2011-2012.
+# Jorma Karvonen <karvonen.jorma@gmail.com>, 2011-2013.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.6b4\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2012-08-10 13:08-0400\n"
-"PO-Revision-Date: 2012-08-14 09:07+0200\n"
+"PO-Revision-Date: 2013-02-03 12:38+0200\n"
 "Last-Translator: Jorma Karvonen <karvonen.jorma@gmail.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
 "Language: fi\n"
