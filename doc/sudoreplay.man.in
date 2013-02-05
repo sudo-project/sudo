@@ -141,7 +141,7 @@ Evaluates to true if the command run matches
 \fIpattern\fR.
 On systems with POSIX regular expression support, the pattern may
 be an extended regular expression.
-On systems without POSIX regular expression support, a simple substring
+On systems without POSIX regular expression support, a simple sub-string
 match is performed instead.
 .TP 8n
 cwd \fIdirectory\fR
