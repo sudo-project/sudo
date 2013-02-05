@@ -56,7 +56,6 @@ AC_SUBST([mansectform])
 AC_SUBST([mansrcdir])
 AC_SUBST([NOEXECFILE])
 AC_SUBST([NOEXECDIR])
-AC_SUBST([PLUGINDIR])
 AC_SUBST([SOEXT])
 AC_SUBST([noexec_file])
 AC_SUBST([INSTALL_NOEXEC])
@@ -121,6 +120,7 @@ AC_SUBST([nsswitch_conf])
 AC_SUBST([netsvc_conf])
 AC_SUBST([secure_path])
 AC_SUBST([editor])
+AC_SUBST([PLUGINDIR])
 #
 # Begin initial values for man page substitution
 #
@@ -160,6 +160,7 @@ netsvc_conf=/etc/netsvc.conf
 noexec_file=/usr/local/libexec/sudo_noexec.so
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
+PLUGINDIR=/usr/local/libexec
 #
 # End initial values for man page substitution
 #

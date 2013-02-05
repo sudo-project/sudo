@@ -658,6 +658,7 @@ OBJEXT
 EXEEXT
 ac_ct_CC
 CC
+PLUGINDIR
 editor
 secure_path
 netsvc_conf
@@ -719,7 +720,6 @@ DONT_LEAK_PATH_INFO
 INSTALL_NOEXEC
 noexec_file
 SOEXT
-PLUGINDIR
 NOEXECDIR
 NOEXECFILE
 mansrcdir
@@ -2963,6 +2963,7 @@ netsvc_conf=/etc/netsvc.conf
 noexec_file=/usr/local/libexec/sudo_noexec.so
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
+PLUGINDIR=/usr/local/libexec
 #
 # End initial values for man page substitution
 #
