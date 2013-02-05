@@ -1,0 +1,333 @@
+SUDO(4)                       Programmer's Manual                      SUDO(4)
+
+NNAAMMEE
+     ssuuddoo..ccoonnff - configuration for sudo front end
+
+DDEESSCCRRIIPPTTIIOONN
+     The ssuuddoo..ccoonnff file is used to configure the ssuuddoo front end.  It specifies
+     the security policy and I/O logging plugins, debug flags as well as
+     plugin-agnostic path names and settings.
+
+     The ssuuddoo..ccoonnff file supports the following directives, described in detail
+     below.
+
+     Plugin    a security policy or I/O logging plugin
+
+     Path      a plugin-agnostic path
+
+     Set       a front end setting, such as _d_i_s_a_b_l_e___c_o_r_e_d_u_m_p or _g_r_o_u_p___s_o_u_r_c_e
+
+     Debug     debug flags to aid in debugging ssuuddoo, ssuuddoorreeppllaayy, vviissuuddoo, and
+               the ssuuddooeerrss plugin.
+
+     The pound sign (`#') is used to indicate a comment.  Both the comment
+     character and any text after it, up to the end of the line, are ignored.
+
+     Non-comment lines that don't begin with Plugin, Path, Debug, or Set are
+     silently ignored.
+
+     The ssuuddoo..ccoonnff file is always parsed in the ``C'' locale.
+
+   PPlluuggiinn ccoonnffiigguurraattiioonn
+     ssuuddoo supports a plugin architecture for security policies and
+     input/output logging.  Third parties can develop and distribute their own
+     policy and I/O logging plugins to work seamlessly with the ssuuddoo front
+     end.  Plugins are dynamically loaded based on the contents of ssuuddoo..ccoonnff.
+
+     A Plugin line consists of the Plugin keyword, followed by the _s_y_m_b_o_l___n_a_m_e
+     and the _p_a_t_h to the shared object containing the plugin.  The _s_y_m_b_o_l___n_a_m_e
+     is the name of the struct policy_plugin or struct io_plugin in the plugin
+     shared object.  The _p_a_t_h may be fully qualified or relative.  If not
+     fully qualified, it is relative to the _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c directory.  In
+     other words:
+
+           Plugin sudoers_policy sudoers.so
+
+     is equivalent to:
+
+           Plugin sudoers_policy /usr/local/libexec/sudoers.so
+
+     Any additional parameters after the _p_a_t_h are passed as arguments to the
+     plugin's _o_p_e_n function.  For example, to override the compile-time
+     default sudoers file mode:
+
+           Plugin sudoers_policy sudoers.so sudoers_mode=0440
+
+     If no ssuuddoo..ccoonnff file is present, or if it contains no Plugin lines, the
+     ssuuddooeerrss plugin will be used as the default security policy and for I/O
+     logging (if enabled by the policy).  This is equivalent to the following:
+
+           Plugin policy_plugin sudoers.so
+           Plugin io_plugin sudoers.so
+
+     For more information on the ssuuddoo plugin architecture, see the
+     sudo_plugin(1m) manual.
+
+   PPaatthh sseettttiinnggss
+     A Path line consists of the Path keyword, followed by the name of the
+     path to set and its value.  For example:
+
+           Path noexec /usr/local/libexec/sudo_noexec.so
+           Path askpass /usr/X11R6/bin/ssh-askpass
+
+     The following plugin-agnostic paths may be set in the _/_e_t_c_/_s_u_d_o_._c_o_n_f
+     file:
+
+     askpass   The fully qualified path to a helper program used to read the
+               user's password when no terminal is available.  This may be the
+               case when ssuuddoo is executed from a graphical (as opposed to
+               text-based) application.  The program specified by _a_s_k_p_a_s_s
+               should display the argument passed to it as the prompt and
+               write the user's password to the standard output.  The value of
+               _a_s_k_p_a_s_s may be overridden by the SUDO_ASKPASS environment
+               variable.
+
+     noexec    The fully-qualified path to a shared library containing dummy
+               versions of the eexxeeccvv(), eexxeeccvvee() and ffeexxeeccvvee() library
+               functions that just return an error.  This is used to implement
+               the _n_o_e_x_e_c functionality on systems that support LD_PRELOAD or
+               its equivalent.  The default value is:
+               _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c_/_s_u_d_o___n_o_e_x_e_c_._s_o.
+
+   OOtthheerr sseettttiinnggss
+     The ssuuddoo..ccoonnff file also supports the following front end settings:
+
+     disable_coredump
+               Core dumps of ssuuddoo itself are disabled by default.  To aid in
+               debugging ssuuddoo crashes, you may wish to re-enable core dumps by
+               setting ``disable_coredump'' to false in ssuuddoo..ccoonnff as follows:
+
+                     Set disable_coredump false
+
+               Note that most operating systems disable core dumps from setuid
+               programs, including ssuuddoo.  To actually get a ssuuddoo core file you
+               will likely need to enable core dumps for setuid processes.  On
+               BSD and Linux systems this is accomplished via the sysctl
+               command.  On Solaris, the coreadm command is used to configure
+               core dump behavior.
+
+               This setting is only available in ssuuddoo version 1.8.4 and
+               higher.
+
+     group_source
+               ssuuddoo passes the invoking user's group list to the policy and
+               I/O plugins.  On most systems, there is an upper limit to the
+               number of groups that a user may belong to simultaneously
+               (typically 16 for compatibility with NFS).  On systems with the
+               getconf(1) utility, running:
+                     getconf NGROUPS_MAX
+               will return the maximum number of groups.
+
+               However, it is still possible to be a member of a larger number
+               of groups--they simply won't be included in the group list
+               returned by the kernel for the user.  Starting with ssuuddoo
+               version 1.8.7, if the user's kernel group list has the maximum
+               number of entries, ssuuddoo will consult the group database
+               directly to determine the group list.  This makes it possible
+               for the security policy to perform matching by group name even
+               when the user is a member of more than the maximum number of
+               groups.
+
+               The _g_r_o_u_p___s_o_u_r_c_e setting allows the administrator to change
+               this default behavior.  Supported values for _g_r_o_u_p___s_o_u_r_c_e are:
+
+               static    Use the static group list that the kernel returns.
+                         Retrieving the group list this way is very fast but
+                         it is subject to an upper limit as described above.
+                         It is ``static'' in that it does not reflect changes
+                         to the group database made after the user logs in.
+                         This was the default behavior prior to ssuuddoo 1.8.7.
+
+               dynamic   Always query the group database directly.  It is
+                         ``dynamic'' in that changes made to the group
+                         database after the user logs in will be reflected in
+                         the group list.  On some systems, querying the group
+                         database for all of a user's groups can be time
+                         consuming when querying a network-based group
+                         database.  Most operating systems provide an
+                         efficient method of performing such queries.
+                         Currently, ssuuddoo supports efficient group queries on
+                         AIX, BSD, HP-UX, Linux and Solaris.
+
+               adaptive  Only query the group database if the static group
+                         list returned by the kernel has the maximum number of
+                         entries.  This is the default behavior in ssuuddoo 1.8.7
+                         and higher.
+
+               For example, to cause ssuuddoo to only use the kernel's static list
+               of groups for the user:
+
+                     Set group_source static
+
+               This setting is only available in ssuuddoo version 1.8.7 and
+               higher.
+
+   DDeebbuugg ffllaaggss
+     ssuuddoo versions 1.8.4 and higher support a flexible debugging framework
+     that can help track down what ssuuddoo is doing internally if there is a
+     problem.
+
+     A Debug line consists of the Debug keyword, followed by the name of the
+     program (or plugin) to debug (ssuuddoo, vviissuuddoo, ssuuddoorreeppllaayy, ssuuddooeerrss), the
+     debug file name and a comma-separated list of debug flags.  The debug
+     flag syntax used by ssuuddoo and the ssuuddooeerrss plugin is _s_u_b_s_y_s_t_e_m@_p_r_i_o_r_i_t_y but
+     a plugin is free to use a different format so long as it does not include
+     a comma (`,').
+
+     For example:
+
+           Debug sudo /var/log/sudo_debug all@warn,plugin@info
+
+     would log all debugging statements at the _w_a_r_n level and higher in
+     addition to those at the _i_n_f_o level for the plugin subsystem.
+
+     Currently, only one Debug entry per program is supported.  The ssuuddoo Debug
+     entry is shared by the ssuuddoo front end, ssuuddooeeddiitt and the plugins.  A
+     future release may add support for per-plugin Debug lines and/or support
+     for multiple debugging files for a single program.
+
+     The priorities used by the ssuuddoo front end, in order of decreasing
+     severity, are: _c_r_i_t, _e_r_r, _w_a_r_n, _n_o_t_i_c_e, _d_i_a_g, _i_n_f_o, _t_r_a_c_e and _d_e_b_u_g.
+     Each priority, when specified, also includes all priorities higher than
+     it.  For example, a priority of _n_o_t_i_c_e would include debug messages
+     logged at _n_o_t_i_c_e and higher.
+
+     The following subsystems are used by the ssuuddoo front-end:
+
+     _a_l_l         matches every subsystem
+
+     _a_r_g_s        command line argument processing
+
+     _c_o_n_v        user conversation
+
+     _e_d_i_t        sudoedit
+
+     _e_x_e_c        command execution
+
+     _m_a_i_n        ssuuddoo main function
+
+     _n_e_t_i_f       network interface handling
+
+     _p_c_o_m_m       communication with the plugin
+
+     _p_l_u_g_i_n      plugin configuration
+
+     _p_t_y         pseudo-tty related code
+
+     _s_e_l_i_n_u_x     SELinux-specific handling
+
+     _u_t_i_l        utility functions
+
+     _u_t_m_p        utmp handling
+
+FFIILLEESS
+     _/_e_t_c_/_s_u_d_o_._c_o_n_f            ssuuddoo front end configuration
+
+EEXXAAMMPPLLEESS
+     #
+     # Default /etc/sudo.conf file
+     #
+     # Format:
+     #   Plugin plugin_name plugin_path plugin_options ...
+     #   Path askpass /path/to/askpass
+     #   Path noexec /path/to/sudo_noexec.so
+     #   Debug sudo /var/log/sudo_debug all@warn
+     #   Set disable_coredump true
+     #
+     # The plugin_path is relative to /usr/local/libexec unless
+     #   fully qualified.
+     # The plugin_name corresponds to a global symbol in the plugin
+     #   that contains the plugin interface structure.
+     # The plugin_options are optional.
+     #
+     # The sudoers plugin is used by default if no Plugin lines are
+     # present.
+     Plugin policy_plugin sudoers.so
+     Plugin io_plugin sudoers.so
+
+     #
+     # Sudo askpass:
+     #
+     # An askpass helper program may be specified to provide a graphical
+     # password prompt for "sudo -A" support.  Sudo does not ship with
+     # its own askpass program but can use the OpenSSH askpass.
+     #
+     # Use the OpenSSH askpass
+     #Path askpass /usr/X11R6/bin/ssh-askpass
+     #
+     # Use the Gnome OpenSSH askpass
+     #Path askpass /usr/libexec/openssh/gnome-ssh-askpass
+
+     #
+     # Sudo noexec:
+     #
+     # Path to a shared library containing dummy versions of the execv(),
+     # execve() and fexecve() library functions that just return an error.
+     # This is used to implement the "noexec" functionality on systems that
+     # support C<LD_PRELOAD> or its equivalent.
+     # The compiled-in value is usually sufficient and should only be
+     # changed if you rename or move the sudo_noexec.so file.
+     #
+     #Path noexec /usr/local/libexec/sudo_noexec.so
+
+     #
+     # Core dumps:
+     #
+     # By default, sudo disables core dumps while it is executing
+     # (they are re-enabled for the command that is run).
+     # To aid in debugging sudo problems, you may wish to enable core
+     # dumps by setting "disable_coredump" to false.
+     #
+     #Set disable_coredump false
+
+     #
+     # User groups:
+     #
+     # Sudo passes the user's group list to the policy plugin.
+     # If the user is a member of the maximum number of groups (usually 16),
+     # sudo will query the group database directly to be sure to include
+     # the full list of groups.
+     #
+     # On some systems, this can be expensive so the behavior is configurable.
+     # The "group_source" setting has three possible values:
+     #   static   - use the user's list of groups returned by the kernel.
+     #   dynamic  - query the group database to find the list of groups.
+     #   adaptive - if user is in less than the maximum number of groups.
+     #              use the kernel list, else query the group database.
+     #
+     #Set group_source static
+
+SSEEEE AALLSSOO
+     sudoers(4), sudo(1m), sudo_plugin(1m),
+
+HHIISSTTOORRYY
+     See the HISTORY file in the ssuuddoo distribution
+     (http://www.sudo.ws/sudo/history.html) for a brief history of sudo.
+
+AAUUTTHHOORRSS
+     Many people have worked on ssuuddoo over the years; this version consists of
+     code written primarily by:
+
+           Todd C. Miller
+
+     See the CONTRIBUTORS file in the ssuuddoo distribution
+     (http://www.sudo.ws/sudo/contributors.html) for an exhaustive list of
+     people who have contributed to ssuuddoo.
+
+BBUUGGSS
+     If you feel you have found a bug in ssuuddoo, please submit a bug report at
+     http://www.sudo.ws/sudo/bugs/
+
+SSUUPPPPOORRTT
+     Limited free support is available via the sudo-users mailing list, see
+     http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or search the
+     archives.
+
+DDIISSCCLLAAIIMMEERR
+     ssuuddoo is provided ``AS IS'' and any express or implied warranties,
+     including, but not limited to, the implied warranties of merchantability
+     and fitness for a particular purpose are disclaimed.  See the LICENSE
+     file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
+     complete details.
+
+Sudo 1.8.7                     February 1, 2013                     Sudo 1.8.7

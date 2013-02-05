@@ -397,6 +397,9 @@ src/tgetpass.c
 src/ttyname.c
 src/utmp.c
 sudo.pp
+sudo/sudo.conf.cat
+sudo/sudo.conf.man.in
+sudo/sudo.conf.mdoc.in
 zlib/Makefile.in
 zlib/adler32.c
 zlib/compress.c
