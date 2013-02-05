@@ -137,7 +137,7 @@ DDEESSCCRRIIPPTTIIOONN
            inherent order.  The sudoOrder attribute is an integer (or floating
            point value for LDAP servers that support it) that is used to sort
            the matching entries.  This allows LDAP-based sudoers entries to
-           more closely mimic the behaviour of the sudoers file, where the of
+           more closely mimic the behavior of the sudoers file, where the of
            the entries influences the result.  If multiple entries match, the
            entry with the highest sudoOrder attribute is chosen.  This
            corresponds to the ``last match'' behavior of the sudoers file.  If
@@ -171,7 +171,7 @@ DDEESSCCRRIIPPTTIIOONN
      user belongs to any of them.
 
      If timed entries are enabled with the SSUUDDOOEERRSS__TTIIMMEEDD configuration
-     directive, the LDAP queries include a subfilter that limits retrieval to
+     directive, the LDAP queries include a sub-filter that limits retrieval to
      entries that satisfy the time constraints, if any.
 
    DDiiffffeerreenncceess bbeettwweeeenn LLDDAAPP aanndd nnoonn--LLDDAAPP ssuuddooeerrss
@@ -249,7 +249,7 @@ DDEESSCCRRIIPPTTIIOONN
 
    CCoonnffiigguurriinngg llddaapp..ccoonnff
      Sudo reads the _/_e_t_c_/_l_d_a_p_._c_o_n_f file for LDAP-specific configuration.
-     Typically, this file is shared amongst different LDAP-aware clients.  As
+     Typically, this file is shared between different LDAP-aware clients.  As
      such, most of the settings are not ssuuddoo-specific. Note that ssuuddoo parses
      _/_e_t_c_/_l_d_a_p_._c_o_n_f itself and may support options that differ from those
      described in the system's ldap.conf(1m) manual.
@@ -263,7 +263,7 @@ DDEESSCCRRIIPPTTIIOONN
      case but are parsed in a case-independent manner.
 
      UURRII _l_d_a_p_[_s_]_:_/_/_[_h_o_s_t_n_a_m_e_[_:_p_o_r_t_]_] _._._.
-           Specifies a whitespace-delimited list of one or more URIs
+           Specifies a white space-delimited list of one or more URIs
            describing the LDAP server(s) to connect to.  The _p_r_o_t_o_c_o_l may be
            either _l_d_a_p _l_d_a_p_s, the latter being for servers that support TLS
            (SSL) encryption.  If no _p_o_r_t is specified, the default is port 389
@@ -276,7 +276,7 @@ DDEESSCCRRIIPPTTIIOONN
            of supporting one or the other.
 
      HHOOSSTT _n_a_m_e_[_:_p_o_r_t_] _._._.
-           If no UURRII is specified, the HHOOSSTT parameter specifies a whitespace-
+           If no UURRII is specified, the HHOOSSTT parameter specifies a white space-
            delimited list of LDAP servers to connect to.  Each host may
            include an optional _p_o_r_t separated by a colon (`:').  The HHOOSSTT
            parameter is deprecated in favor of the UURRII specification and is
@@ -533,12 +533,12 @@ DDEESSCCRRIIPPTTIIOONN
 
          sudoers = ldap
 
-     To treat LDAP as authoratative and only use the local sudoers file if the
+     To treat LDAP as authoritative and only use the local sudoers file if the
      user is not present in LDAP, use:
 
          sudoers = ldap = auth, files
 
-     Note that in the above example, the auth qualfier only affects user
+     Note that in the above example, the auth qualifier only affects user
      lookups; both LDAP and _s_u_d_o_e_r_s will be queried for Defaults entries.
 
      If the _/_e_t_c_/_n_e_t_s_v_c_._c_o_n_f file is not present or there is no sudoers line,
@@ -765,4 +765,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.6                       July 12, 2012                      Sudo 1.8.6
+Sudo 1.8.7                     February 5, 2013                     Sudo 1.8.7

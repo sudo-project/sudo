@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2003-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 2003-2013 Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd July 12, 2012
+.Dd February 5, 2013
 .Dt SUDOERS.LDAP @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -259,7 +259,7 @@ The
 .Li sudoOrder
 attribute is an integer (or floating point value for LDAP servers
 that support it) that is used to sort the matching entries.
-This allows LDAP-based sudoers entries to more closely mimic the behaviour
+This allows LDAP-based sudoers entries to more closely mimic the behavior
 of the sudoers file, where the of the entries influences the result.
 If multiple entries match, the entry with the highest
 .Li sudoOrder
@@ -315,7 +315,7 @@ to see if the user belongs to any of them.
 .Pp
 If timed entries are enabled with the
 .Sy SUDOERS_TIMED
-configuration directive, the LDAP queries include a subfilter that
+configuration directive, the LDAP queries include a sub-filter that
 limits retrieval to entries that satisfy the time constraints, if any.
 .Ss Differences between LDAP and non-LDAP sudoers
 There are some subtle differences in the way sudoers is handled
@@ -414,7 +414,7 @@ section.
 Sudo reads the
 .Pa @ldap_conf@
 file for LDAP-specific configuration.
-Typically, this file is shared amongst different LDAP-aware clients.
+Typically, this file is shared between different LDAP-aware clients.
 As such, most of the settings are not
 .Nm sudo Ns No -specific.
 Note that
@@ -442,7 +442,7 @@ Configuration options are listed below in upper case but are parsed
 in a case-independent manner.
 .Bl -tag -width 4n
 .It Sy URI Ar ldap[s]://[hostname[:port]] ...
-Specifies a whitespace-delimited list of one or more URIs describing
+Specifies a white space-delimited list of one or more URIs describing
 the LDAP server(s) to connect to.
 The
 .Em protocol
@@ -479,7 +479,7 @@ If no
 .Sy URI
 is specified, the
 .Sy HOST
-parameter specifies a whitespace-delimited list of LDAP servers to connect to.
+parameter specifies a white space-delimited list of LDAP servers to connect to.
 Each host may include an optional
 .Em port
 separated by a colon
@@ -855,7 +855,7 @@ file can be ignored completely by using:
 sudoers = ldap
 .Ed
 .Pp
-To treat LDAP as authoratative and only use the local sudoers file
+To treat LDAP as authoritative and only use the local sudoers file
 if the user is not present in LDAP, use:
 .Bd -literal -offset 4n
 sudoers = ldap = auth, files
@@ -863,7 +863,7 @@ sudoers = ldap = auth, files
 .Pp
 Note that in the above example, the
 .Li auth
-qualfier only affects user lookups; both LDAP and
+qualifier only affects user lookups; both LDAP and
 .Em sudoers
 will be queried for
 .Li Defaults
