@@ -1,15 +1,13 @@
 # Italian translations for sudoers package
-# Copyright (C) 2011, 2012 The Free Software Foundation
-# This file is distributed under the same license as the sudo package.
-#
-# Milo Casagrande <milo@casagrande.name>, 2011, 2012.
+# This file is put in the public domain.
+# Milo Casagrande <milo@casagrande.name>, 2011, 2012, 2013.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: sudoers-1.8.6b4\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
 "POT-Creation-Date: 2012-08-10 13:08-0400\n"
-"PO-Revision-Date: 2012-08-15 18:27+0200\n"
+"PO-Revision-Date: 2013-02-04 11:33+0100\n"
 "Last-Translator: Milo Casagrande <milo@casagrande.name>\n"
 "Language-Team: Italian <tp@lists.linux.it>\n"
 "Language: it\n"
