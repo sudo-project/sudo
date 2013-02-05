@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd Janurary 11, 2013
+.Dd February 5, 2013
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -26,14 +26,14 @@ Starting with version 1.8,
 supports a plugin API
 for policy and session logging.
 By default, the
-.Em sudoers
+.Nm sudoers
 policy plugin and an associated I/O logging plugin are used.
 Via the plugin API,
 .Nm sudo
 can be configured to use alternate policy and/or I/O logging plugins
 provided by third parties.
-The plugins to be used are specified via the
-.Pa @sysconfdir@/sudo.conf
+The plugins to be used are specified in the
+.Xr sudo.conf @mansectform@
 file.
 .Pp
 The API is versioned with a major and minor number.
@@ -45,78 +45,6 @@ major version matches.
 The plugin API is defined by the
 .Li sudo_plugin.h
 header file.
-.Ss The sudo.conf file
-The
-.Pa @sysconfdir@/sudo.conf
-file contains plugin configuration directives.
-The primary keyword is the
-.Li Plugin
-directive, which causes a plugin to be loaded.
-It is always parsed in the
-.Dq Li C
-locale.
-.Pp
-A
-.Li Plugin
-line consists of the
-.Li Plugin
-keyword, followed by the
-.Em symbol_name
-and the
-.Em path
-to the shared object containing the plugin.
-The
-.Em symbol_name
-is the name of the
-.Li struct policy_plugin
-or
-.Li struct io_plugin
-in the plugin shared object.
-The
-.Em path
-may be fully qualified or relative.
-If not fully qualified it is relative to the
-.Pa @PLUGINDIR@
-directory.
-Any additional parameters after the
-.Em path
-are passed as options to the plugin's
-.Fn open
-function.
-Lines that don't begin with
-.Li Plugin ,
-.Li Path ,
-.Li Debug
-or
-.Li Set
-are silently ignored.
-.Pp
-The same shared object may contain multiple plugins, each with a
-different symbol name.
-The shared object file must be owned by uid 0 and only writable by its owner.
-Because of ambiguities that arise from composite policies, only a single
-policy plugin may be specified.
-This limitation does not apply to I/O plugins.
-.Bd -literal
-#
-# Default @sysconfdir@/sudo.conf file
-#
-# Format:
-#   Plugin plugin_name plugin_path plugin_options ...
-#   Path askpass /path/to/askpass
-#   Path noexec /path/to/sudo_noexec.so
-#   Debug sudo /var/log/sudo_debug all@warn
-#   Set disable_coredump true
-#
-# The plugin_path is relative to @PLUGINDIR@ unless
-#   fully qualified.
-# The plugin_name corresponds to a global symbol in the plugin
-#   that contains the plugin interface structure.
-# The plugin_options are optional.
-#
-Plugin sudoers_policy sudoers.so
-Plugin sudoers_io sudoers.so
-.Ed
 .Ss Policy plugin API
 A policy plugin must declare and populate a
 .Li policy_plugin
@@ -125,7 +53,7 @@ This structure contains pointers to the functions that implement the
 .Nm sudo
 policy checks.
 The name of the symbol should be specified in
-.Pa @sysconfdir@/sudo.conf
+.Xr sudo.conf @mansectform@
 along with a path to the plugin so that
 .Nm sudo
 can load it.
@@ -243,66 +171,19 @@ A comma-separated list of debug flags that correspond to
 .Nm sudo Ns No 's
 .Li Debug
 entry in
-.Pa @sysconfdir@/sudo.conf ,
+.Xr sudo.conf @mansectform@ ,
 if there is one.
 The flags are passed to the plugin as they appear in
-.Pa @sysconfdir@/sudo.conf .
+.Xr sudo.conf @mansectform@ .
 The syntax used by
 .Nm sudo
 and the
-.Em sudoers
+.Nm sudoers
 plugin is
 .Em subsystem Ns No @ Ns Em priority
 but the plugin is free to use a different
 format so long as it does not include a comma
 .Pq Ql ,\& .
-.Pp
-For reference, the priorities supported by the
-.Nm sudo
-front end and
-.Em sudoers
-are:
-.Em crit ,
-.Em err ,
-.Em warn ,
-.Em notice ,
-.Em diag ,
-.Em info ,
-.Em trace
-and
-.Em debug .
-.Pp
-The following subsystems are defined:
-.Em main ,
-.Em memory ,
-.Em args ,
-.Em exec ,
-.Em pty ,
-.Em utmp ,
-.Em conv ,
-.Em pcomm ,
-.Em util ,
-.Em list ,
-.Em netif ,
-.Em audit ,
-.Em edit ,
-.Em selinux ,
-.Em ldap ,
-.Em match ,
-.Em parser ,
-.Em alias ,
-.Em defaults ,
-.Em auth ,
-.Em env ,
-.Em logging ,
-.Em nss ,
-.Em rbtree ,
-.Em perms ,
-.Em plugin .
-The subsystem
-.Em all
-includes every subsystem.
-.Pp
 There is not currently a way to specify a set of debug flags specific
 to the plugin--the flags are shared by
 .Nm sudo
@@ -496,8 +377,8 @@ process belongs
 to.
 Only available starting with API version 1.2
 .It tcpgid=int
-The ID of the forground process group associated with the terminal
-device associcated with the
+The ID of the foreground process group associated with the terminal
+device associated with the
 .Nm sudo
 process or \-1 if there is no
 terminal present.
@@ -1038,7 +919,7 @@ is run with the
 .Fl v
 flag.
 For policy plugins such as
-.Em sudoers
+.Nm sudoers
 that cache
 authentication credentials, this function will validate and cache
 the credentials.
@@ -1074,7 +955,7 @@ or
 .Fl K
 flag.
 For policy plugins such as
-.Em sudoers
+.Nm sudoers
 that
 cache authentication credentials, this function will invalidate the
 credentials.
@@ -2047,8 +1928,7 @@ user-visible.
 Instead, they are logged to the file specified in the
 .Li Debug
 statement (if any) in the
-.Pa @sysconfdir@/sudo.conf
-.Pp
+.Xr sudo.conf @mansectform@ .
 file.
 This allows a plugin to log debugging information and is intended
 to be used in conjunction with the
@@ -2060,8 +1940,8 @@ See the sample plugin for an example of the
 function usage.
 .Ss Sudoers group plugin API
 The
-.Em sudoers
-module supports a plugin interface to allow non-Unix
+.Nm sudoers
+plugin supports its own plugin interface to allow non-Unix
 group lookups.
 This can be used to query a group source other than the standard Unix
 group database.
@@ -2096,7 +1976,7 @@ The
 field should be set to GROUP_API_VERSION.
 .Pp
 This allows
-.Em sudoers
+.Nm sudoers
 to determine the API version the group plugin
 was built against.
 .It init
@@ -2124,10 +2004,10 @@ The function arguments are as follows:
 .Bl -tag -width 4n
 .It version
 The version passed in by
-.Em sudoers
+.Nm sudoers
 allows the plugin to determine the
 major and minor version number of the group plugin API supported by
-.Em sudoers .
+.Nm sudoers .
 .It plugin_printf
 A pointer to a
 .Fn printf Ns No -style
@@ -2153,7 +2033,7 @@ void (*cleanup)();
 The
 .Fn cleanup
 function is called when
-.Em sudoers
+.Nm sudoers
 has finished its
 group checks.
 The plugin should free any memory it has allocated and close open file handles.
@@ -2223,8 +2103,8 @@ list as an argument.
 The Policy and I/O logging plugins'
 .Fn open
 functions are now passed
-a list of plugin options if any are specified in
-.Pa @sysconfdir@/sudo.conf .
+a list of plugin parameters if any are specified in
+.Xr sudo.conf @mansectform@ .
 .Pp
 A simple hooks API has been introduced to allow plugins to hook in to the
 system's environment handling functions.
@@ -2248,6 +2128,7 @@ front end now installs default signal handlers to trap common signals
 while the plugin functions are run.
 .El
 .Sh SEE ALSO
+.Xr sudo.conf @mansectform@ ,
 .Xr sudoers @mansectform@ ,
 .Xr sudo @mansectsu@
 .Sh BUGS

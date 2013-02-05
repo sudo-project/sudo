@@ -114,7 +114,9 @@ is equivalent to:
 Plugin sudoers_policy @PLUGINDIR@/sudoers.so
 .Ed
 .Pp
-Any additional parameters after the
+Starting with
+.Nm sudo
+1.8.5, any additional parameters after the
 .Em path
 are passed as arguments to the plugin's
 .Em open
@@ -123,6 +125,13 @@ For example, to override the compile-time default sudoers file mode:
 .Bd -literal -offset indent
 Plugin sudoers_policy sudoers.so sudoers_mode=0440
 .Ed
+.Pp
+The same shared object may contain multiple plugins, each with a
+different symbol name.
+The shared object file must be owned by uid 0 and only writable by its owner.
+Because of ambiguities that arise from composite policies, only a single
+policy plugin may be specified.
+This limitation does not apply to I/O plugins.
 .Pp
 If no
 .Nm sudo.conf
@@ -216,7 +225,7 @@ including
 To actually get a
 .Nm sudo
 core file you will likely need to enable core dumps for setuid processes.
-On BSD and Linux systems this is accomplished via the
+On BSD and Linux systems this is accomplished in the
 .Xr sysctl
 command.
 On Solaris, the

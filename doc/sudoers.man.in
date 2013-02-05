@@ -2,7 +2,7 @@
 .\" IT IS GENERATED AUTOMATICALLY FROM sudoers.mdoc.in
 .\"
 .\" Copyright (c) 1994-1996, 1998-2005, 2007-2013
-.\" Todd C. Miller <Todd.Miller@courtesan.com>
+.\"	Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -21,16 +21,16 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "@mansectsu@" "January 27, 2013" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
+.TH "SUDOERS" "@mansectsu@" "February 5, 2013" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
 \fBsudoers\fR
-\- default sudo security policy module
+\- default sudo security policy plugin
 .SH "DESCRIPTION"
 The
 \fIsudoers\fR
-policy module determines a user's
+policy plugin determines a user's
 \fBsudo\fR
 privileges.
 It is the default
@@ -48,6 +48,81 @@ For information on storing
 policy information
 in LDAP, please see
 sudoers.ldap(@mansectform@).
+.SS "Configuring sudo.conf for sudoers"
+\fBsudo\fR
+consults the
+sudo.conf(@mansectform@)
+file to determine which policy and and I/O logging plugins to load.
+If no
+sudo.conf(@mansectform@)
+file is present, or if it contains no
+\fRPlugin\fR
+lines,
+\fBsudoers\fR
+will be used for policy decisions and I/O logging.
+To explicitly configure
+sudo.conf(@mansectform@)
+to use the
+\fBsudoers\fR
+plugin, the following configuration can be used.
+.nf
+.sp
+.RS 6n
+Plugin policy_plugin sudoers.so
+Plugin io_plugin sudoers.so
+.RE
+.fi
+.PP
+Starting with
+\fBsudo\fR
+1.8.5, it is possible to specify optional arguments to the
+\fBsudoers\fR
+plugin in the
+sudo.conf(@mansectform@)
+file.
+These arguments, if present, should be listed after the path to the plugin
+(i.e.\& after
+\fIsudoers.so\fR).
+Multiple arguments may be specified, separated by white space.
+For example:
+.nf
+.sp
+.RS 6n
+Plugin sudoers_policy sudoers.so sudoers_mode=0400
+.RE
+.fi
+.PP
+The following plugin arguments are supported:
+.TP 10n
+sudoers_file=pathname
+The
+\fIsudoers_file\fR
+arguments can be used to override the default path
+to the
+\fIsudoers\fR
+file.
+.TP 10n
+sudoers_uid=uid
+The
+\fIsudoers_uid\fR
+arguments can be used to override the default owner of the sudoers file.
+It should be specified as a numeric user ID.
+.TP 10n
+sudoers_gid=gid
+The
+\fIsudoers_gid\fR
+arguments can be used to override the default group of the sudoers file.
+It must be specified as a numeric group ID (not a group name).
+.TP 10n
+sudoers_mode=mode
+The
+\fIsudoers_mode\fR
+arguments can be used to override the default file mode for the sudoers file.
+It should be specified as an octal value.
+.PP
+For more information on configuring
+sudo.conf(@mansectform@),
+please refer to its manual.
 .SS "Authentication and logging"
 The
 \fIsudoers\fR
@@ -2652,9 +2727,11 @@ Default is
 ``\fR@mailsub@\fR''.
 .TP 18n
 noexec_file
-This option is no longer supported.
+As of
+\fBsudo\fR
+version 1.8.1 this option is no longer supported.
 The path to the noexec file should now be set in the
-\fI@sysconfdir@/sudo.conf\fR
+sudo.conf(@mansectform@)
 file.
 .TP 18n
 passprompt
@@ -3317,18 +3394,19 @@ Normally,
 tries to open
 \fIsudoers\fR
 using group permissions to avoid this problem.
-Consider changing the ownership of
+Consider either changing the ownership of
 \fI@sysconfdir@/sudoers\fR
-by adding an option like
+or adding an argument like
 ``sudoers_uid=N''
 (where
 `N'
 is the user ID that owns the
 \fIsudoers\fR
-file) to the
+file) to the end of the
 \fBsudoers\fR
-plugin line in the
-\fI@sysconfdir@/sudo.conf\fR
+\fRPlugin\fR
+line in the
+sudo.conf(@mansectform@)
 file.
 .TP 3n
 unable to stat @sysconfdir@/sudoers
@@ -3355,8 +3433,9 @@ is the user ID that owns the
 \fIsudoers\fR
 file) to the
 \fBsudoers\fR
-plugin line in the
-\fI@sysconfdir@/sudo.conf\fR
+\fRPlugin\fR
+line in the
+sudo.conf(@mansectform@)
 file.
 .TP 3n
 @sysconfdir@/sudoers is world writable
@@ -3371,8 +3450,9 @@ The default mode may be changed via the
 ``sudoers_mode''
 option to the
 \fBsudoers\fR
-plugin line in the
-\fI@sysconfdir@/sudo.conf\fR
+\fRPlugin\fR
+line in the
+sudo.conf(@mansectform@)
 file.
 .TP 3n
 @sysconfdir@/sudoers is owned by gid N, should be 1
@@ -3389,8 +3469,9 @@ is the group ID that owns the
 \fIsudoers\fR
 file) to the
 \fBsudoers\fR
-plugin line in the
-\fI@sysconfdir@/sudo.conf\fR
+\fRPlugin\fR
+line in the
+sudo.conf(@mansectform@)
 file.
 .TP 3n
 unable to open @timedir@/username/ttyname
@@ -3470,193 +3551,6 @@ If the
 option is set to 0 (or negated with a
 `\&!'),
 word wrap will be disabled.
-.SH "SUDO.CONF"
-The
-\fI@sysconfdir@/sudo.conf\fR
-file determines which plugins the
-\fBsudo\fR
-front end will load.
-If no
-\fI@sysconfdir@/sudo.conf\fR
-file
-is present, or it contains no
-\fRPlugin\fR
-lines,
-\fBsudo\fR
-will use the
-\fIsudoers\fR
-security policy and I/O logging, which corresponds to the following
-\fI@sysconfdir@/sudo.conf\fR
-file.
-.nf
-.sp
-.RS 0n
-#
-# Default @sysconfdir@/sudo.conf file
-#
-# Format:
-#   Plugin plugin_name plugin_path plugin_options ...
-#   Path askpass /path/to/askpass
-#   Path noexec /path/to/sudo_noexec.so
-#   Debug sudo /var/log/sudo_debug all@warn
-#   Set disable_coredump true
-#
-# The plugin_path is relative to @PLUGINDIR@ unless
-#   fully qualified.
-# The plugin_name corresponds to a global symbol in the plugin
-#   that contains the plugin interface structure.
-# The plugin_options are optional.
-#
-Plugin policy_plugin sudoers.so
-Plugin io_plugin sudoers.so
-.RE
-.fi
-.SS "Plugin options"
-Starting with
-\fBsudo\fR
-1.8.5, it is possible to pass options to the
-\fIsudoers\fR
-plugin.
-Options may be listed after the path to the plugin (i.e.\& after
-\fIsudoers.so\fR);
-multiple options should be space-separated.
-For example:
-.nf
-.sp
-.RS 0n
-Plugin sudoers_policy sudoers.so sudoers_file=/etc/sudoers sudoers_uid=0 sudoers_gid=0 sudoers_mode=0440
-.RE
-.fi
-.PP
-The following plugin options are supported:
-.TP 10n
-sudoers_file=pathname
-The
-\fIsudoers_file\fR
-option can be used to override the default path
-to the
-\fIsudoers\fR
-file.
-.TP 10n
-sudoers_uid=uid
-The
-\fIsudoers_uid\fR
-option can be used to override the default owner of the sudoers file.
-It should be specified as a numeric user ID.
-.TP 10n
-sudoers_gid=gid
-The
-\fIsudoers_gid\fR
-option can be used to override the default group of the sudoers file.
-It should be specified as a numeric group ID.
-.TP 10n
-sudoers_mode=mode
-The
-\fIsudoers_mode\fR
-option can be used to override the default file mode for the sudoers file.
-It should be specified as an octal value.
-.SS "Debug flags"
-Versions 1.8.4 and higher of the
-\fIsudoers\fR
-plugin support a debugging framework that can help track down what the
-plugin is doing internally if there is a problem.
-This can be configured in the
-\fI@sysconfdir@/sudo.conf\fR
-file as described in
-sudo(@mansectsu@).
-.PP
-The
-\fIsudoers\fR
-plugin uses the same debug flag format as the
-\fBsudo\fR
-front-end:
-\fIsubsystem\fR@\fIpriority\fR.
-.PP
-The priorities used by
-\fIsudoers\fR,
-in order of decreasing severity,
-are:
-\fIcrit\fR,
-\fIerr\fR,
-\fIwarn\fR,
-\fInotice\fR,
-\fIdiag\fR,
-\fIinfo\fR,
-\fItrace\fR
-and
-\fIdebug\fR.
-Each priority, when specified, also includes all priorities higher than it.
-For example, a priority of
-\fInotice\fR
-would include debug messages logged at
-\fInotice\fR
-and higher.
-.PP
-The following subsystems are used by
-\fIsudoers\fR:
-.TP 10n
-\fIalias\fR
-\fRUser_Alias\fR,
-\fRRunas_Alias\fR,
-\fRHost_Alias\fR
-and
-\fRCmnd_Alias\fR
-processing
-.TP 10n
-\fIall\fR
-matches every subsystem
-.TP 10n
-\fIaudit\fR
-BSM and Linux audit code
-.TP 10n
-\fIauth\fR
-user authentication
-.TP 10n
-\fIdefaults\fR
-\fIsudoers\fR
-\fIDefaults\fR
-settings
-.TP 10n
-\fIenv\fR
-environment handling
-.TP 10n
-\fIldap\fR
-LDAP-based sudoers
-.TP 10n
-\fIlogging\fR
-logging support
-.TP 10n
-\fImatch\fR
-matching of users, groups, hosts and netgroups in
-\fIsudoers\fR
-.TP 10n
-\fInetif\fR
-network interface handling
-.TP 10n
-\fInss\fR
-network service switch handling in
-\fIsudoers\fR
-.TP 10n
-\fIparser\fR
-\fIsudoers\fR
-file parsing
-.TP 10n
-\fIperms\fR
-permission setting
-.TP 10n
-\fIplugin\fR
-The equivalent of
-\fImain\fR
-for the plugin.
-.TP 10n
-\fIpty\fR
-pseudo-tty related code
-.TP 10n
-\fIrbtree\fR
-redblack tree internals
-.TP 10n
-\fIutil\fR
-utility functions
 .SH "FILES"
 .TP 26n
 \fI@sysconfdir@/sudo.conf\fR
@@ -4309,6 +4203,117 @@ is able to determine when a tty-based time stamp file is stale and will
 ignore it.
 Administrators should not rely on this feature as it is not universally
 available.
+.SH "DEBUGGING"
+Versions 1.8.4 and higher of the
+\fBsudoers\fR
+plugin support a flexible debugging framework that can help track
+down what the plugin is doing internally if there is a problem.
+This can be configured in the
+sudo.conf(@mansectform@)
+file.
+.PP
+The
+\fBsudoers\fR
+plugin uses the same debug flag format as the
+\fBsudo\fR
+front-end:
+\fIsubsystem\fR@\fIpriority\fR.
+.PP
+The priorities used by
+\fBsudoers\fR,
+in order of decreasing severity,
+are:
+\fIcrit\fR, \fIerr\fR, \fIwarn\fR, \fInotice\fR, \fIdiag\fR, \fIinfo\fR, \fItrace\fR
+and
+\fIdebug\fR.
+Each priority, when specified, also includes all priorities higher
+than it.
+For example, a priority of
+\fInotice\fR
+would include debug messages logged at
+\fInotice\fR
+and higher.
+.PP
+The following subsystems are used by the
+\fBsudoers\fR
+plugin:
+.TP 10n
+\fIalias\fR
+\fRUser_Alias\fR,
+\fRRunas_Alias\fR,
+\fRHost_Alias\fR
+and
+\fRCmnd_Alias\fR
+processing
+.TP 10n
+\fIall\fR
+matches every subsystem
+.TP 10n
+\fIaudit\fR
+BSM and Linux audit code
+.TP 10n
+\fIauth\fR
+user authentication
+.TP 10n
+\fIdefaults\fR
+\fIsudoers\fR
+\fIDefaults\fR
+settings
+.TP 10n
+\fIenv\fR
+environment handling
+.TP 10n
+\fIldap\fR
+LDAP-based sudoers
+.TP 10n
+\fIlogging\fR
+logging support
+.TP 10n
+\fImatch\fR
+matching of users, groups, hosts and netgroups in
+\fIsudoers\fR
+.TP 10n
+\fInetif\fR
+network interface handling
+.TP 10n
+\fInss\fR
+network service switch handling in
+\fIsudoers\fR
+.TP 10n
+\fIparser\fR
+\fIsudoers\fR
+file parsing
+.TP 10n
+\fIperms\fR
+permission setting
+.TP 10n
+\fIplugin\fR
+The equivalent of
+\fImain\fR
+for the plugin.
+.TP 10n
+\fIpty\fR
+pseudo-tty related code
+.TP 10n
+\fIrbtree\fR
+redblack tree internals
+.TP 10n
+\fIutil\fR
+utility functions
+.PD 0
+.PP
+.PD
+For example:
+.nf
+.sp
+.RS 0n
+Debug sudo /var/log/sudo_debug match@info,nss@info
+.RE
+.fi
+.PP
+For more information, see the
+sudo.conf(@mansectform@)
+manual.
 .SH "SEE ALSO"
 ssh(1),
 su(1),
@@ -4316,6 +4321,7 @@ fnmatch(3),
 glob(3),
 mktemp(3),
 strftime(3),
+sudo.conf(@mansectform@),
 sudoers.ldap(@mansectform@),
 sudo_plugin(@mansectsu@),
 sudo(@mansectsu@),

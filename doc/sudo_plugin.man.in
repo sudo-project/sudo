@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "Janurary 11, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO_PLUGIN" "5" "February 5, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -28,14 +28,14 @@ Starting with version 1.8,
 supports a plugin API
 for policy and session logging.
 By default, the
-\fIsudoers\fR
+\fBsudoers\fR
 policy plugin and an associated I/O logging plugin are used.
 Via the plugin API,
 \fBsudo\fR
 can be configured to use alternate policy and/or I/O logging plugins
 provided by third parties.
-The plugins to be used are specified via the
-\fI@sysconfdir@/sudo.conf\fR
+The plugins to be used are specified in the
+sudo.conf(@mansectform@)
 file.
 .PP
 The API is versioned with a major and minor number.
@@ -47,81 +47,6 @@ major version matches.
 The plugin API is defined by the
 \fRsudo_plugin.h\fR
 header file.
-.SS "The sudo.conf file"
-The
-\fI@sysconfdir@/sudo.conf\fR
-file contains plugin configuration directives.
-The primary keyword is the
-\fRPlugin\fR
-directive, which causes a plugin to be loaded.
-It is always parsed in the
-``\fRC\fR''
-locale.
-.PP
-A
-\fRPlugin\fR
-line consists of the
-\fRPlugin\fR
-keyword, followed by the
-\fIsymbol_name\fR
-and the
-\fIpath\fR
-to the shared object containing the plugin.
-The
-\fIsymbol_name\fR
-is the name of the
-\fRstruct policy_plugin\fR
-or
-\fRstruct io_plugin\fR
-in the plugin shared object.
-The
-\fIpath\fR
-may be fully qualified or relative.
-If not fully qualified it is relative to the
-\fI@PLUGINDIR@\fR
-directory.
-Any additional parameters after the
-\fIpath\fR
-are passed as options to the plugin's
-\fBopen\fR()
-function.
-Lines that don't begin with
-\fRPlugin\fR,
-\fRPath\fR,
-\fRDebug\fR
-or
-\fRSet\fR
-are silently ignored.
-.PP
-The same shared object may contain multiple plugins, each with a
-different symbol name.
-The shared object file must be owned by uid 0 and only writable by its owner.
-Because of ambiguities that arise from composite policies, only a single
-policy plugin may be specified.
-This limitation does not apply to I/O plugins.
-.nf
-.sp
-.RS 0n
-#
-# Default @sysconfdir@/sudo.conf file
-#
-# Format:
-#   Plugin plugin_name plugin_path plugin_options ...
-#   Path askpass /path/to/askpass
-#   Path noexec /path/to/sudo_noexec.so
-#   Debug sudo /var/log/sudo_debug all@warn
-#   Set disable_coredump true
-#
-# The plugin_path is relative to @PLUGINDIR@ unless
-#   fully qualified.
-# The plugin_name corresponds to a global symbol in the plugin
-#   that contains the plugin interface structure.
-# The plugin_options are optional.
-#
-Plugin sudoers_policy sudoers.so
-Plugin sudoers_io sudoers.so
-.RE
-.fi
 .SS "Policy plugin API"
 A policy plugin must declare and populate a
 \fRpolicy_plugin\fR
@@ -130,7 +55,7 @@ This structure contains pointers to the functions that implement the
 \fBsudo\fR
 policy checks.
 The name of the symbol should be specified in
-\fI@sysconfdir@/sudo.conf\fR
+sudo.conf(@mansectform@)
 along with a path to the plugin so that
 \fBsudo\fR
 can load it.
@@ -260,66 +185,19 @@ A comma-separated list of debug flags that correspond to
 \fBsudo\fR's
 \fRDebug\fR
 entry in
-\fI@sysconfdir@/sudo.conf\fR,
+sudo.conf(@mansectform@),
 if there is one.
 The flags are passed to the plugin as they appear in
-\fI@sysconfdir@/sudo.conf\fR.
+sudo.conf(@mansectform@).
 The syntax used by
 \fBsudo\fR
 and the
-\fIsudoers\fR
+\fBsudoers\fR
 plugin is
 \fIsubsystem\fR@\fIpriority\fR
 but the plugin is free to use a different
 format so long as it does not include a comma
 (`,\&').
-.sp
-For reference, the priorities supported by the
-\fBsudo\fR
-front end and
-\fIsudoers\fR
-are:
-\fIcrit\fR,
-\fIerr\fR,
-\fIwarn\fR,
-\fInotice\fR,
-\fIdiag\fR,
-\fIinfo\fR,
-\fItrace\fR
-and
-\fIdebug\fR.
-.sp
-The following subsystems are defined:
-\fImain\fR,
-\fImemory\fR,
-\fIargs\fR,
-\fIexec\fR,
-\fIpty\fR,
-\fIutmp\fR,
-\fIconv\fR,
-\fIpcomm\fR,
-\fIutil\fR,
-\fIlist\fR,
-\fInetif\fR,
-\fIaudit\fR,
-\fIedit\fR,
-\fIselinux\fR,
-\fIldap\fR,
-\fImatch\fR,
-\fIparser\fR,
-\fIalias\fR,
-\fIdefaults\fR,
-\fIauth\fR,
-\fIenv\fR,
-\fIlogging\fR,
-\fInss\fR,
-\fIrbtree\fR,
-\fIperms\fR,
-\fIplugin\fR.
-The subsystem
-\fIall\fR
-includes every subsystem.
-.sp
 There is not currently a way to specify a set of debug flags specific
 to the plugin--the flags are shared by
 \fBsudo\fR
@@ -542,8 +420,8 @@ to.
 Only available starting with API version 1.2
 .TP 6n
 tcpgid=int
-The ID of the forground process group associated with the terminal
-device associcated with the
+The ID of the foreground process group associated with the terminal
+device associated with the
 \fBsudo\fR
 process or \-1 if there is no
 terminal present.
@@ -1178,7 +1056,7 @@ is run with the
 \fB\-v\fR
 flag.
 For policy plugins such as
-\fIsudoers\fR
+\fBsudoers\fR
 that cache
 authentication credentials, this function will validate and cache
 the credentials.
@@ -1222,7 +1100,7 @@ or
 \fB\-K\fR
 flag.
 For policy plugins such as
-\fIsudoers\fR
+\fBsudoers\fR
 that
 cache authentication credentials, this function will invalidate the
 credentials.
@@ -2359,8 +2237,7 @@ user-visible.
 Instead, they are logged to the file specified in the
 \fRDebug\fR
 statement (if any) in the
-\fI@sysconfdir@/sudo.conf\fR
-.PP
+sudo.conf(@mansectform@).
 file.
 This allows a plugin to log debugging information and is intended
 to be used in conjunction with the
@@ -2372,8 +2249,8 @@ See the sample plugin for an example of the
 function usage.
 .SS "Sudoers group plugin API"
 The
-\fIsudoers\fR
-module supports a plugin interface to allow non-Unix
+\fBsudoers\fR
+plugin supports its own plugin interface to allow non-Unix
 group lookups.
 This can be used to query a group source other than the standard Unix
 group database.
@@ -2411,7 +2288,7 @@ The
 field should be set to GROUP_API_VERSION.
 .sp
 This allows
-\fIsudoers\fR
+\fBsudoers\fR
 to determine the API version the group plugin
 was built against.
 .TP 6n
@@ -2443,10 +2320,10 @@ The function arguments are as follows:
 .TP 6n
 version
 The version passed in by
-\fIsudoers\fR
+\fBsudoers\fR
 allows the plugin to determine the
 major and minor version number of the group plugin API supported by
-\fIsudoers\fR.
+\fBsudoers\fR.
 .TP 6n
 plugin_printf
 A pointer to a
@@ -2480,7 +2357,7 @@ void (*cleanup)();
 The
 \fBcleanup\fR()
 function is called when
-\fIsudoers\fR
+\fBsudoers\fR
 has finished its
 group checks.
 The plugin should free any memory it has allocated and close open file handles.
@@ -2567,8 +2444,8 @@ Version 1.2
 The Policy and I/O logging plugins'
 \fBopen\fR()
 functions are now passed
-a list of plugin options if any are specified in
-\fI@sysconfdir@/sudo.conf\fR.
+a list of plugin parameters if any are specified in
+sudo.conf(@mansectform@).
 .sp
 A simple hooks API has been introduced to allow plugins to hook in to the
 system's environment handling functions.
@@ -2592,6 +2469,7 @@ The
 front end now installs default signal handlers to trap common signals
 while the plugin functions are run.
 .SH "SEE ALSO"
+sudo.conf(@mansectform@),
 sudoers(@mansectform@),
 sudo(@mansectsu@)
 .SH "BUGS"

@@ -1,14 +1,56 @@
 SUDOERS(4)                    Programmer's Manual                   SUDOERS(4)
 
 NNAAMMEE
-     ssuuddooeerrss - default sudo security policy module
+     ssuuddooeerrss - default sudo security policy plugin
 
 DDEESSCCRRIIPPTTIIOONN
-     The _s_u_d_o_e_r_s policy module determines a user's ssuuddoo privileges.  It is the
+     The _s_u_d_o_e_r_s policy plugin determines a user's ssuuddoo privileges.  It is the
      default ssuuddoo policy plugin.  The policy is driven by the _/_e_t_c_/_s_u_d_o_e_r_s
      file or, optionally in LDAP.  The policy format is described in detail in
      the _S_U_D_O_E_R_S _F_I_L_E _F_O_R_M_A_T section.  For information on storing _s_u_d_o_e_r_s
      policy information in LDAP, please see sudoers.ldap(4).
+
+   CCoonnffiigguurriinngg ssuuddoo..ccoonnff ffoorr ssuuddooeerrss
+     ssuuddoo consults the sudo.conf(4) file to determine which policy and and I/O
+     logging plugins to load.  If no sudo.conf(4) file is present, or if it
+     contains no Plugin lines, ssuuddooeerrss will be used for policy decisions and
+     I/O logging.  To explicitly configure sudo.conf(4) to use the ssuuddooeerrss
+     plugin, the following configuration can be used.
+
+           Plugin policy_plugin sudoers.so
+           Plugin io_plugin sudoers.so
+
+     Starting with ssuuddoo 1.8.5, it is possible to specify optional arguments to
+     the ssuuddooeerrss plugin in the sudo.conf(4) file.  These arguments, if
+     present, should be listed after the path to the plugin (i.e. after
+     _s_u_d_o_e_r_s_._s_o).  Multiple arguments may be specified, separated by white
+     space.  For example:
+
+           Plugin sudoers_policy sudoers.so sudoers_mode=0400
+
+     The following plugin arguments are supported:
+
+     sudoers_file=pathname
+               The _s_u_d_o_e_r_s___f_i_l_e arguments can be used to override the default
+               path to the _s_u_d_o_e_r_s file.
+
+     sudoers_uid=uid
+               The _s_u_d_o_e_r_s___u_i_d arguments can be used to override the default
+               owner of the sudoers file.  It should be specified as a numeric
+               user ID.
+
+     sudoers_gid=gid
+               The _s_u_d_o_e_r_s___g_i_d arguments can be used to override the default
+               group of the sudoers file.  It must be specified as a numeric
+               group ID (not a group name).
+
+     sudoers_mode=mode
+               The _s_u_d_o_e_r_s___m_o_d_e arguments can be used to override the default
+               file mode for the sudoers file.  It should be specified as an
+               octal value.
+
+     For more information on configuring sudo.conf(4), please refer to its
+     manual.
 
    AAuutthheennttiiccaattiioonn aanndd llooggggiinngg
      The _s_u_d_o_e_r_s security policy requires that most users authenticate
@@ -1253,9 +1295,9 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        escape %h will expand to the host name of the machine.
                        Default is ``*** SECURITY information for %h ***''.
 
-     noexec_file       This option is no longer supported.  The path to the
-                       noexec file should now be set in the _/_e_t_c_/_s_u_d_o_._c_o_n_f
-                       file.
+     noexec_file       As of ssuuddoo version 1.8.1 this option is no longer
+                       supported.  The path to the noexec file should now be
+                       set in the sudo.conf(4) file.
 
      passprompt        The default prompt to use when asking for a password;
                        can be overridden via the --pp option or the SUDO_PROMPT
@@ -1600,9 +1642,9 @@ LLOOGG FFOORRMMAATT
         when the _s_u_d_o_e_r_s file is located on a remote file system that maps
         user ID 0 to a different value.  Normally, ssuuddooeerrss tries to open
         _s_u_d_o_e_r_s using group permissions to avoid this problem.  Consider
-        changing the ownership of _/_e_t_c_/_s_u_d_o_e_r_s by adding an option like
-        ``sudoers_uid=N'' (where `N' is the user ID that owns the _s_u_d_o_e_r_s
-        file) to the ssuuddooeerrss plugin line in the _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
+        either changing the ownership of _/_e_t_c_/_s_u_d_o_e_r_s or adding an argument
+        like ``sudoers_uid=N'' (where `N' is the user ID that owns the _s_u_d_o_e_r_s
+        file) to the end of the ssuuddooeerrss Plugin line in the sudo.conf(4) file.
 
      unable to stat /etc/sudoers
         The _/_e_t_c_/_s_u_d_o_e_r_s file is missing.
@@ -1614,21 +1656,21 @@ LLOOGG FFOORRMMAATT
      /etc/sudoers is owned by uid N, should be 0
         The _s_u_d_o_e_r_s file has the wrong owner.  If you wish to change the
         _s_u_d_o_e_r_s file owner, please add ``sudoers_uid=N'' (where `N' is the
-        user ID that owns the _s_u_d_o_e_r_s file) to the ssuuddooeerrss plugin line in the
-        _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
+        user ID that owns the _s_u_d_o_e_r_s file) to the ssuuddooeerrss Plugin line in the
+        sudo.conf(4) file.
 
      /etc/sudoers is world writable
         The permissions on the _s_u_d_o_e_r_s file allow all users to write to it.
         The _s_u_d_o_e_r_s file must not be world-writable, the default file mode is
         0440 (readable by owner and group, writable by none).  The default
         mode may be changed via the ``sudoers_mode'' option to the ssuuddooeerrss
-        plugin line in the _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
+        Plugin line in the sudo.conf(4) file.
 
      /etc/sudoers is owned by gid N, should be 1
         The _s_u_d_o_e_r_s file has the wrong group ownership.  If you wish to change
         the _s_u_d_o_e_r_s file group ownership, please add ``sudoers_gid=N'' (where
-        `N' is the group ID that owns the _s_u_d_o_e_r_s file) to the ssuuddooeerrss plugin
-        line in the _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
+        `N' is the group ID that owns the _s_u_d_o_e_r_s file) to the ssuuddooeerrss Plugin
+        line in the sudo.conf(4) file.
 
      unable to open /var/adm/sudo/username/ttyname
         _s_u_d_o_e_r_s was unable to read or create the user's time stamp file.
@@ -1667,110 +1709,6 @@ LLOOGG FFOORRMMAATT
           makes it more difficult to use grep(1) on the log files.  If the
           _l_o_g_l_i_n_e_l_e_n option is set to 0 (or negated with a `!'), word wrap
           will be disabled.
-
-SSUUDDOO..CCOONNFF
-     The _/_e_t_c_/_s_u_d_o_._c_o_n_f file determines which plugins the ssuuddoo front end will
-     load.  If no _/_e_t_c_/_s_u_d_o_._c_o_n_f file is present, or it contains no Plugin
-     lines, ssuuddoo will use the _s_u_d_o_e_r_s security policy and I/O logging, which
-     corresponds to the following _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
-
-     #
-     # Default /etc/sudo.conf file
-     #
-     # Format:
-     #   Plugin plugin_name plugin_path plugin_options ...
-     #   Path askpass /path/to/askpass
-     #   Path noexec /path/to/sudo_noexec.so
-     #   Debug sudo /var/log/sudo_debug all@warn
-     #   Set disable_coredump true
-     #
-     # The plugin_path is relative to /usr/local/libexec unless
-     #   fully qualified.
-     # The plugin_name corresponds to a global symbol in the plugin
-     #   that contains the plugin interface structure.
-     # The plugin_options are optional.
-     #
-     Plugin policy_plugin sudoers.so
-     Plugin io_plugin sudoers.so
-
-   PPlluuggiinn ooppttiioonnss
-     Starting with ssuuddoo 1.8.5, it is possible to pass options to the _s_u_d_o_e_r_s
-     plugin.  Options may be listed after the path to the plugin (i.e. after
-     _s_u_d_o_e_r_s_._s_o); multiple options should be space-separated.  For example:
-
-     Plugin sudoers_policy sudoers.so sudoers_file=/etc/sudoers sudoers_uid=0 sudoers_gid=0 sudoers_mode=0440
-
-     The following plugin options are supported:
-
-     sudoers_file=pathname
-               The _s_u_d_o_e_r_s___f_i_l_e option can be used to override the default
-               path to the _s_u_d_o_e_r_s file.
-
-     sudoers_uid=uid
-               The _s_u_d_o_e_r_s___u_i_d option can be used to override the default
-               owner of the sudoers file.  It should be specified as a numeric
-               user ID.
-
-     sudoers_gid=gid
-               The _s_u_d_o_e_r_s___g_i_d option can be used to override the default
-               group of the sudoers file.  It should be specified as a numeric
-               group ID.
-
-     sudoers_mode=mode
-               The _s_u_d_o_e_r_s___m_o_d_e option can be used to override the default
-               file mode for the sudoers file.  It should be specified as an
-               octal value.
-
-   DDeebbuugg ffllaaggss
-     Versions 1.8.4 and higher of the _s_u_d_o_e_r_s plugin support a debugging
-     framework that can help track down what the plugin is doing internally if
-     there is a problem.  This can be configured in the _/_e_t_c_/_s_u_d_o_._c_o_n_f file as
-     described in sudo(1m).
-
-     The _s_u_d_o_e_r_s plugin uses the same debug flag format as the ssuuddoo front-end:
-     _s_u_b_s_y_s_t_e_m@_p_r_i_o_r_i_t_y.
-
-     The priorities used by _s_u_d_o_e_r_s, in order of decreasing severity, are:
-     _c_r_i_t, _e_r_r, _w_a_r_n, _n_o_t_i_c_e, _d_i_a_g, _i_n_f_o, _t_r_a_c_e and _d_e_b_u_g.  Each priority,
-     when specified, also includes all priorities higher than it.  For
-     example, a priority of _n_o_t_i_c_e would include debug messages logged at
-     _n_o_t_i_c_e and higher.
-
-     The following subsystems are used by _s_u_d_o_e_r_s:
-
-     _a_l_i_a_s     User_Alias, Runas_Alias, Host_Alias and Cmnd_Alias processing
-
-     _a_l_l       matches every subsystem
-
-     _a_u_d_i_t     BSM and Linux audit code
-
-     _a_u_t_h      user authentication
-
-     _d_e_f_a_u_l_t_s  _s_u_d_o_e_r_s _D_e_f_a_u_l_t_s settings
-
-     _e_n_v       environment handling
-
-     _l_d_a_p      LDAP-based sudoers
-
-     _l_o_g_g_i_n_g   logging support
-
-     _m_a_t_c_h     matching of users, groups, hosts and netgroups in _s_u_d_o_e_r_s
-
-     _n_e_t_i_f     network interface handling
-
-     _n_s_s       network service switch handling in _s_u_d_o_e_r_s
-
-     _p_a_r_s_e_r    _s_u_d_o_e_r_s file parsing
-
-     _p_e_r_m_s     permission setting
-
-     _p_l_u_g_i_n    The equivalent of _m_a_i_n for the plugin.
-
-     _p_t_y       pseudo-tty related code
-
-     _r_b_t_r_e_e    redblack tree internals
-
-     _u_t_i_l      utility functions
 
 FFIILLEESS
      _/_e_t_c_/_s_u_d_o_._c_o_n_f            Sudo front end configuration
@@ -2100,8 +2038,64 @@ SSEECCUURRIITTYY NNOOTTEESS
      stamp file is stale and will ignore it.  Administrators should not rely
      on this feature as it is not universally available.
 
+DDEEBBUUGGGGIINNGG
+     Versions 1.8.4 and higher of the ssuuddooeerrss plugin support a flexible
+     debugging framework that can help track down what the plugin is doing
+     internally if there is a problem.  This can be configured in the
+     sudo.conf(4) file.
+
+     The ssuuddooeerrss plugin uses the same debug flag format as the ssuuddoo front-end:
+     _s_u_b_s_y_s_t_e_m@_p_r_i_o_r_i_t_y.
+
+     The priorities used by ssuuddooeerrss, in order of decreasing severity, are:
+     _c_r_i_t, _e_r_r, _w_a_r_n, _n_o_t_i_c_e, _d_i_a_g, _i_n_f_o, _t_r_a_c_e and _d_e_b_u_g.  Each priority,
+     when specified, also includes all priorities higher than it.  For
+     example, a priority of _n_o_t_i_c_e would include debug messages logged at
+     _n_o_t_i_c_e and higher.
+
+     The following subsystems are used by the ssuuddooeerrss plugin:
+
+     _a_l_i_a_s     User_Alias, Runas_Alias, Host_Alias and Cmnd_Alias processing
+
+     _a_l_l       matches every subsystem
+
+     _a_u_d_i_t     BSM and Linux audit code
+
+     _a_u_t_h      user authentication
+
+     _d_e_f_a_u_l_t_s  _s_u_d_o_e_r_s _D_e_f_a_u_l_t_s settings
+
+     _e_n_v       environment handling
+
+     _l_d_a_p      LDAP-based sudoers
+
+     _l_o_g_g_i_n_g   logging support
+
+     _m_a_t_c_h     matching of users, groups, hosts and netgroups in _s_u_d_o_e_r_s
+
+     _n_e_t_i_f     network interface handling
+
+     _n_s_s       network service switch handling in _s_u_d_o_e_r_s
+
+     _p_a_r_s_e_r    _s_u_d_o_e_r_s file parsing
+
+     _p_e_r_m_s     permission setting
+
+     _p_l_u_g_i_n    The equivalent of _m_a_i_n for the plugin.
+
+     _p_t_y       pseudo-tty related code
+
+     _r_b_t_r_e_e    redblack tree internals
+
+     _u_t_i_l      utility functions
+     For example:
+
+     Debug sudo /var/log/sudo_debug match@info,nss@info
+
+     For more information, see the sudo.conf(4) manual.
+
 SSEEEE AALLSSOO
-     ssh(1), su(1), fnmatch(3), glob(3), mktemp(3), strftime(3),
+     ssh(1), su(1), fnmatch(3), glob(3), mktemp(3), strftime(3), sudo.conf(4),
      sudoers.ldap(4), sudo_plugin(1m), sudo(1m), visudo(1m)
 
 CCAAVVEEAATTSS
@@ -2131,4 +2125,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.7                     January 27, 2013                     Sudo 1.8.7
+Sudo 1.8.7                     February 5, 2013                     Sudo 1.8.7

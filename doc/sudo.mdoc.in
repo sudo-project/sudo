@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2012
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2013
 .\"	Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd November 12, 2012
+.Dd February 5, 2013
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -139,7 +139,7 @@ which is configured via the file
 .Pa @sysconfdir@/sudoers ,
 or via LDAP.
 See the
-.Sx PLUGINS
+.Sx Plugins
 section for more information.
 .Pp
 The security policy determines what privileges, if any, a user has
@@ -202,7 +202,7 @@ If the
 environment variable is set, it specifies the path to the helper
 program.
 Otherwise, if
-.Pa @sysconfdir@/sudo.conf
+.Xr sudo.conf @mansectform@
 contains a line specifying the askpass program, that value will be
 used.
 For example:
@@ -687,7 +687,7 @@ for more information.
 When
 .Nm sudo
 executes a command, the security policy specifies the execution
-envionment for the command.
+environment for the command.
 Typically, the real and effective uid and gid are set to
 match those of the target user, as specified in the password database,
 and the group vector is initialized based on the group database
@@ -780,7 +780,7 @@ On some systems, the
 command sends
 .Dv SIGTERM
 to all non-system processes other than itself before rebooting
-the systyem.
+the system.
 This prevents
 .Nm sudo
 from relaying the
@@ -807,230 +807,28 @@ are run using the
 family of functions instead of
 .Fn system
 (which interposes a shell between the command and the calling process).
-.Sh PLUGINS
+.Ss Plugins
 Plugins are dynamically loaded based on the contents of the
-.Pa @sysconfdir@/sudo.conf
+.Xr sudo.conf @mansectform@
 file.
 If no
-.Pa @sysconfdir@/sudo.conf
+.Xr sudo.conf @mansectform@
 file is present, or it contains no
 .Li Plugin
 lines,
 .Nm sudo
 will use the traditional
 .Em sudoers
-security policy and I/O logging, which corresponds to the following
+security policy and I/O logging.
+See the
+.Xr sudo.conf @mansectform@
+manual for details of the
 .Pa @sysconfdir@/sudo.conf
-file.
-.Bd -literal
-#
-# Default @sysconfdir@/sudo.conf file
-#
-# Format:
-#   Plugin plugin_name plugin_path plugin_options ...
-#   Path askpass /path/to/askpass
-#   Path noexec /path/to/sudo_noexec.so
-#   Debug sudo /var/log/sudo_debug all@warn
-#   Set disable_coredump true
-#
-# The plugin_path is relative to @PLUGINDIR@ unless
-#   fully qualified.
-# The plugin_name corresponds to a global symbol in the plugin
-#   that contains the plugin interface structure.
-# The plugin_options are optional.
-#
-Plugin policy_plugin sudoers.so
-Plugin io_plugin sudoers.so
-.Ed
-.Pp
-A
-.Li Plugin
-line consists of the
-.Li Plugin
-keyword, followed by the
-.Em symbol_name
-and the
-.Em path
-to the shared object containing the plugin.
-The
-.Em symbol_name
-is the name of the
-.Li struct policy_plugin
-or
-.Li struct io_plugin
-in the plugin shared object.
-The
-.Em path
-may be fully qualified or relative.
-If not fully qualified it is relative to the
-.Pa @PLUGINDIR@
-directory.
-Any additional parameters after the
-.Em path
-are passed as arguments to the plugin's
-.Em open
-function.
-Lines that don't begin with
-.Li Plugin ,
-.Li Path ,
-.Li Debug ,
-or
-.Li Set
-are silently ignored.
-.Pp
-The
-.Pa @sysconfdir@/sudo.conf
-file is always parsed in the
-.Dq Li C
-locale.
-.Pp
-For more information, see the
+file and the
 .Xr sudo_plugin @mansectsu@
-manual.
-.Sh PATHS
-A
-.Li Path
-line consists of the
-.Li Path
-keyword, followed by the name of the path to set and its value.
-E.g.
-.Bd -literal -offset indent
-Path noexec @noexec_file@
-Path askpass /usr/X11R6/bin/ssh-askpass
-.Ed
-.Pp
-The following plugin-agnostic paths may be set in the
-.Pa @sysconfdir@/sudo.conf
-file:
-.Bl -tag -width 8n
-.It askpass
-The fully qualified path to a helper program used to read the user's
-password when no terminal is available.
-This may be the case when
+manual for more information about the
 .Nm sudo
-is executed from a graphical (as opposed to text-based) application.
-The program specified by
-.Em askpass
-should display the argument passed to it as the prompt and write
-the user's password to the standard output.
-The value of
-.Em askpass
-may be overridden by the
-.Ev SUDO_ASKPASS
-environment variable.
-.It noexec
-The fully-qualified path to a shared library containing dummy
-versions of the
-.Fn execv ,
-.Fn execve
-and
-.Fn fexecve
-library functions that just return an error.
-This is used to implement the
-.Em noexec
-functionality on systems that support
-.Ev LD_PRELOAD
-or its equivalent.
-Defaults to
-.Pa @noexec_file@ .
-.El
-.Sh DEBUG FLAGS
-.Nm sudo
-versions 1.8.4 and higher support a flexible debugging framework
-that can help track down what
-.Nm sudo
-is doing internally if there is a problem.
-.Pp
-A
-.Li Debug
-line consists of the
-.Li Debug
-keyword, followed by the name of the program to debug
-.Pq Nm sudo , Nm visudo , Nm sudoreplay ,
-the debug file name and a comma-separated list of debug flags.
-The debug flag syntax used by
-.Nm sudo
-and the
-.Em sudoers
-plugin is
-.Em subsystem Ns No @ Ns Em priority
-but the plugin is free to use a different format so long as it does
-not include a comma
-.Pq Ql \&, .
-.Pp
-For instance:
-.Bd -literal -offset indent
-Debug sudo /var/log/sudo_debug all@warn,plugin@info
-.Ed
-.Pp
-would log all debugging statements at the
-.Em warn
-level and higher in addition to those at the
-.Em info
-level for the plugin subsystem.
-.Pp
-Currently, only one
-.Li Debug
-entry per program is supported.
-The
-.Nm sudo
-.Li Debug
-entry is shared by the
-.Nm sudo
-front end,
-.Nm sudoedit
-and the plugins.
-A future release may add support for per-plugin
-.Li Debug
-lines and/or support for multiple debugging files for a single
-program.
-.Pp
-The priorities used by the
-.Nm sudo
-front end, in order of decreasing severity, are:
-.Em crit , err , warn , notice , diag , info , trace
-and
-.Em debug .
-Each priority, when specified, also includes all priorities higher
-than it.
-For example, a priority of
-.Em notice
-would include debug messages logged at
-.Em notice
-and higher.
-.Pp
-The following subsystems are used by the
-.Nm sudo
-front-end:
-.Bl -tag -width Fl
-.It Em all
-matches every subsystem
-.It Em args
-command line argument processing
-.It Em conv
-user conversation
-.It Em edit
-sudoedit
-.It Em exec
-command execution
-.It Em main
-.Nm sudo
-main function
-.It Em netif
-network interface handling
-.It Em pcomm
-communication with the plugin
-.It Em plugin
-plugin configuration
-.It Em pty
-pseudo-tty related code
-.It Em selinux
-SELinux-specific handling
-.It Em util
-utility functions
-.It Em utmp
-utmp handling
-.El
+plugin architecture.
 .Sh EXIT VALUE
 Upon successful execution of a program, the exit status from
 .Em sudo
@@ -1112,20 +910,15 @@ To aid in debugging
 crashes, you may wish to re-enable core dumps by setting
 .Dq disable_coredump
 to false in the
-.Pa @sysconfdir@/sudo.conf
+.Xr sudo.conf @mansectform@
 file as follows:
 .Bd -literal -offset indent
 Set disable_coredump false
 .Ed
 .Pp
-Note that by default, most operating systems disable core dumps
-from setuid programs, which includes
-.Nm sudo .
-To actually get a
-.Nm sudo
-core file you may need to enable core dumps for setuid processes.
-On BSD and Linux systems this is accomplished via the sysctl command,
-on Solaris the coreadm command can be used.
+See the
+.Xr sudo.conf @mansectform@
+manual for more information.
 .Sh ENVIRONMENT
 .Nm sudo
 utilizes the following environment variables.
@@ -1261,6 +1054,7 @@ $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 .Xr stat 2 ,
 .Xr login_cap 3 ,
 .Xr passwd @mansectform@ ,
+.Xr sudo.conf @mansectform@ ,
 .Xr sudoers @mansectform@ ,
 .Xr sudo_plugin @mansectsu@ ,
 .Xr sudoreplay @mansectsu@ ,

@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO" "5" "February 1, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO" "5" "February 5, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -124,7 +124,9 @@ Plugin sudoers_policy @PLUGINDIR@/sudoers.so
 .RE
 .fi
 .PP
-Any additional parameters after the
+Starting with
+\fBsudo\fR
+1.8.5, any additional parameters after the
 \fIpath\fR
 are passed as arguments to the plugin's
 \fIopen\fR
@@ -136,6 +138,13 @@ For example, to override the compile-time default sudoers file mode:
 Plugin sudoers_policy sudoers.so sudoers_mode=0440
 .RE
 .fi
+.PP
+The same shared object may contain multiple plugins, each with a
+different symbol name.
+The shared object file must be owned by uid 0 and only writable by its owner.
+Because of ambiguities that arise from composite policies, only a single
+policy plugin may be specified.
+This limitation does not apply to I/O plugins.
 .PP
 If no
 \fBsudo.conf\fR
@@ -239,7 +248,7 @@ including
 To actually get a
 \fBsudo\fR
 core file you will likely need to enable core dumps for setuid processes.
-On BSD and Linux systems this is accomplished via the
+On BSD and Linux systems this is accomplished in the
 sysctl
 command.
 On Solaris, the
@@ -533,7 +542,7 @@ Plugin io_plugin sudoers.so
 .SH "SEE ALSO"
 sudoers(@mansectform@),
 sudo(@mansectsu@),
-sudo_plugin(@mansectsu@),
+sudo_plugin(@mansectsu@)
 .SH "HISTORY"
 See the HISTORY file in the
 \fBsudo\fR

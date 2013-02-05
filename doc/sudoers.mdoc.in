@@ -1,6 +1,6 @@
 .\"
 .\" Copyright (c) 1994-1996, 1998-2005, 2007-2013
-.\" Todd C. Miller <Todd.Miller@courtesan.com>
+.\"	Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -19,16 +19,16 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 27, 2013
+.Dd February 5, 2013
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
 .Nm sudoers
-.Nd default sudo security policy module
+.Nd default sudo security policy plugin
 .Sh DESCRIPTION
 The
 .Em sudoers
-policy module determines a user's
+policy plugin determines a user's
 .Nm sudo
 privileges.
 It is the default
@@ -46,6 +46,73 @@ For information on storing
 policy information
 in LDAP, please see
 .Xr sudoers.ldap @mansectform@ .
+.Ss Configuring sudo.conf for sudoers
+.Nm sudo
+consults the
+.Xr sudo.conf @mansectform@
+file to determine which policy and and I/O logging plugins to load.
+If no
+.Xr sudo.conf @mansectform@
+file is present, or if it contains no
+.Li Plugin
+lines,
+.Nm sudoers
+will be used for policy decisions and I/O logging.
+To explicitly configure
+.Xr sudo.conf @mansectform@
+to use the
+.Nm sudoers
+plugin, the following configuration can be used.
+.Bd -literal -offset indent
+Plugin policy_plugin sudoers.so
+Plugin io_plugin sudoers.so
+.Ed
+.Pp
+Starting with
+.Nm sudo
+1.8.5, it is possible to specify optional arguments to the
+.Nm sudoers
+plugin in the
+.Xr sudo.conf @mansectform@
+file.
+These arguments, if present, should be listed after the path to the plugin
+(i.e.\& after
+.Pa sudoers.so ) .
+Multiple arguments may be specified, separated by white space.
+For example:
+.Bd -literal -offset indent
+Plugin sudoers_policy sudoers.so sudoers_mode=0400
+.Ed
+.Pp
+The following plugin arguments are supported:
+.Bl -tag -width 8n
+.It sudoers_file=pathname
+The
+.Em sudoers_file
+arguments can be used to override the default path
+to the
+.Em sudoers
+file.
+.It sudoers_uid=uid
+The
+.Em sudoers_uid
+arguments can be used to override the default owner of the sudoers file.
+It should be specified as a numeric user ID.
+.It sudoers_gid=gid
+The
+.Em sudoers_gid
+arguments can be used to override the default group of the sudoers file.
+It must be specified as a numeric group ID (not a group name).
+.It sudoers_mode=mode
+The
+.Em sudoers_mode
+arguments can be used to override the default file mode for the sudoers file.
+It should be specified as an octal value.
+.El
+.Pp
+For more information on configuring
+.Xr sudo.conf @mansectform@ ,
+please refer to its manual.
 .Ss Authentication and logging
 The
 .Em sudoers
@@ -2481,9 +2548,11 @@ will expand to the host name of the machine.
 Default is
 .Dq Li @mailsub@ .
 .It noexec_file
-This option is no longer supported.
+As of
+.Nm sudo
+version 1.8.1 this option is no longer supported.
 The path to the noexec file should now be set in the
-.Pa @sysconfdir@/sudo.conf
+.Xr sudo.conf @mansectform@
 file.
 .It passprompt
 The default prompt to use when asking for a password; can be overridden via the
@@ -3071,18 +3140,19 @@ Normally,
 tries to open
 .Em sudoers
 using group permissions to avoid this problem.
-Consider changing the ownership of
+Consider either changing the ownership of
 .Pa @sysconfdir@/sudoers
-by adding an option like
+or adding an argument like
 .Dq sudoers_uid=N
 (where
 .Sq N
 is the user ID that owns the
 .Em sudoers
-file) to the
+file) to the end of the
 .Nm sudoers
-plugin line in the
-.Pa @sysconfdir@/sudo.conf
+.Li Plugin
+line in the
+.Xr sudo.conf @mansectform@
 file.
 .It unable to stat @sysconfdir@/sudoers
 The
@@ -3106,8 +3176,9 @@ is the user ID that owns the
 .Em sudoers
 file) to the
 .Nm sudoers
-plugin line in the
-.Pa @sysconfdir@/sudo.conf
+.Li Plugin
+line in the
+.Xr sudo.conf @mansectform@
 file.
 .It @sysconfdir@/sudoers is world writable
 The permissions on the
@@ -3121,8 +3192,9 @@ The default mode may be changed via the
 .Dq sudoers_mode
 option to the
 .Nm sudoers
-plugin line in the
-.Pa @sysconfdir@/sudo.conf
+.Li Plugin
+line in the
+.Xr sudo.conf @mansectform@
 file.
 .It @sysconfdir@/sudoers is owned by gid N, should be 1
 The
@@ -3138,8 +3210,9 @@ is the group ID that owns the
 .Em sudoers
 file) to the
 .Nm sudoers
-plugin line in the
-.Pa @sysconfdir@/sudo.conf
+.Li Plugin
+line in the
+.Xr sudo.conf @mansectform@
 file.
 .It unable to open @timedir@/username/ttyname
 .Em sudoers
@@ -3215,170 +3288,6 @@ If the
 option is set to 0 (or negated with a
 .Ql \&! ) ,
 word wrap will be disabled.
-.El
-.Sh SUDO.CONF
-The
-.Pa @sysconfdir@/sudo.conf
-file determines which plugins the
-.Nm sudo
-front end will load.
-If no
-.Pa @sysconfdir@/sudo.conf
-file
-is present, or it contains no
-.Li Plugin
-lines,
-.Nm sudo
-will use the
-.Em sudoers
-security policy and I/O logging, which corresponds to the following
-.Pa @sysconfdir@/sudo.conf
-file.
-.Bd -literal
-#
-# Default @sysconfdir@/sudo.conf file
-#
-# Format:
-#   Plugin plugin_name plugin_path plugin_options ...
-#   Path askpass /path/to/askpass
-#   Path noexec /path/to/sudo_noexec.so
-#   Debug sudo /var/log/sudo_debug all@warn
-#   Set disable_coredump true
-#
-# The plugin_path is relative to @PLUGINDIR@ unless
-#   fully qualified.
-# The plugin_name corresponds to a global symbol in the plugin
-#   that contains the plugin interface structure.
-# The plugin_options are optional.
-#
-Plugin policy_plugin sudoers.so
-Plugin io_plugin sudoers.so
-.Ed
-.Ss Plugin options
-Starting with
-.Nm sudo
-1.8.5, it is possible to pass options to the
-.Em sudoers
-plugin.
-Options may be listed after the path to the plugin (i.e.\& after
-.Pa sudoers.so ) ;
-multiple options should be space-separated.
-For example:
-.Bd -literal
-Plugin sudoers_policy sudoers.so sudoers_file=/etc/sudoers sudoers_uid=0 sudoers_gid=0 sudoers_mode=0440
-.Ed
-.Pp
-The following plugin options are supported:
-.Bl -tag -width 8n
-.It sudoers_file=pathname
-The
-.Em sudoers_file
-option can be used to override the default path
-to the
-.Em sudoers
-file.
-.It sudoers_uid=uid
-The
-.Em sudoers_uid
-option can be used to override the default owner of the sudoers file.
-It should be specified as a numeric user ID.
-.It sudoers_gid=gid
-The
-.Em sudoers_gid
-option can be used to override the default group of the sudoers file.
-It should be specified as a numeric group ID.
-.It sudoers_mode=mode
-The
-.Em sudoers_mode
-option can be used to override the default file mode for the sudoers file.
-It should be specified as an octal value.
-.El
-.Ss Debug flags
-Versions 1.8.4 and higher of the
-.Em sudoers
-plugin support a debugging framework that can help track down what the
-plugin is doing internally if there is a problem.
-This can be configured in the
-.Pa @sysconfdir@/sudo.conf
-file as described in
-.Xr sudo @mansectsu@ .
-.Pp
-The
-.Em sudoers
-plugin uses the same debug flag format as the
-.Nm sudo
-front-end:
-.Em subsystem Ns No @ Ns Em priority .
-.Pp
-The priorities used by
-.Em sudoers ,
-in order of decreasing severity,
-are:
-.Em crit ,
-.Em err ,
-.Em warn ,
-.Em notice ,
-.Em diag ,
-.Em info ,
-.Em trace
-and
-.Em debug .
-Each priority, when specified, also includes all priorities higher than it.
-For example, a priority of
-.Em notice
-would include debug messages logged at
-.Em notice
-and higher.
-.Pp
-The following subsystems are used by
-.Em sudoers :
-.Bl -tag -width 8n
-.It Em alias
-.Li User_Alias ,
-.Li Runas_Alias ,
-.Li Host_Alias
-and
-.Li Cmnd_Alias
-processing
-.It Em all
-matches every subsystem
-.It Em audit
-BSM and Linux audit code
-.It Em auth
-user authentication
-.It Em defaults
-.Em sudoers
-.Em Defaults
-settings
-.It Em env
-environment handling
-.It Em ldap
-LDAP-based sudoers
-.It Em logging
-logging support
-.It Em match
-matching of users, groups, hosts and netgroups in
-.Em sudoers
-.It Em netif
-network interface handling
-.It Em nss
-network service switch handling in
-.Em sudoers
-.It Em parser
-.Em sudoers
-file parsing
-.It Em perms
-permission setting
-.It Em plugin
-The equivalent of
-.Em main
-for the plugin.
-.It Em pty
-pseudo-tty related code
-.It Em rbtree
-redblack tree internals
-.It Em util
-utility functions
 .El
 .Sh FILES
 .Bl -tag -width 24n
@@ -3962,6 +3871,96 @@ is able to determine when a tty-based time stamp file is stale and will
 ignore it.
 Administrators should not rely on this feature as it is not universally
 available.
+.Sh DEBUGGING
+Versions 1.8.4 and higher of the
+.Nm sudoers
+plugin support a flexible debugging framework that can help track
+down what the plugin is doing internally if there is a problem.
+This can be configured in the
+.Xr sudo.conf @mansectform@
+file.
+.Pp
+The
+.Nm sudoers
+plugin uses the same debug flag format as the
+.Nm sudo
+front-end:
+.Em subsystem Ns No @ Ns Em priority .
+.Pp
+The priorities used by
+.Nm sudoers ,
+in order of decreasing severity,
+are:
+.Em crit , err , warn , notice , diag , info , trace
+and
+.Em debug .
+Each priority, when specified, also includes all priorities higher
+than it.
+For example, a priority of
+.Em notice
+would include debug messages logged at
+.Em notice
+and higher.
+.Pp
+The following subsystems are used by the
+.Nm sudoers
+plugin:
+.Bl -tag -width 8n
+.It Em alias
+.Li User_Alias ,
+.Li Runas_Alias ,
+.Li Host_Alias
+and
+.Li Cmnd_Alias
+processing
+.It Em all
+matches every subsystem
+.It Em audit
+BSM and Linux audit code
+.It Em auth
+user authentication
+.It Em defaults
+.Em sudoers
+.Em Defaults
+settings
+.It Em env
+environment handling
+.It Em ldap
+LDAP-based sudoers
+.It Em logging
+logging support
+.It Em match
+matching of users, groups, hosts and netgroups in
+.Em sudoers
+.It Em netif
+network interface handling
+.It Em nss
+network service switch handling in
+.Em sudoers
+.It Em parser
+.Em sudoers
+file parsing
+.It Em perms
+permission setting
+.It Em plugin
+The equivalent of
+.Em main
+for the plugin.
+.It Em pty
+pseudo-tty related code
+.It Em rbtree
+redblack tree internals
+.It Em util
+utility functions
+.El
+For example:
+.Bd -literal
+Debug sudo /var/log/sudo_debug match@info,nss@info
+.Ed
+.Pp
+For more information, see the
+.Xr sudo.conf @mansectform@
+manual.
 .Sh SEE ALSO
 .Xr ssh 1 ,
 .Xr su 1 ,
@@ -3969,6 +3968,7 @@ available.
 .Xr glob 3 ,
 .Xr mktemp 3 ,
 .Xr strftime 3 ,
+.Xr sudo.conf @mansectform@ ,
 .Xr sudoers.ldap @mansectform@ ,
 .Xr sudo_plugin @mansectsu@ ,
 .Xr sudo @mansectsu@ ,
