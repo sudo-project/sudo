@@ -305,6 +305,7 @@ find_editor(int nfiles, char * const files[], char **argv_out[])
     cp = strtok(editor, " \t");
     if (cp == NULL ||
 	(editor_path = find_in_path(editor, plugin_state.envp)) == NULL) {
+	free(editor);
 	return NULL;
     }
     if (editor_path != editor)
