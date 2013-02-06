@@ -398,7 +398,6 @@ main(int argc, char *argv[])
 	    (void) fcntl(STDIN_FILENO, F_SETFL, ch | O_NONBLOCK);
 	if (!term_raw(STDIN_FILENO, 1))
 	    error(1, _("unable to set tty to raw mode"));
-	iovcnt = 0;
 	iovmax = 32;
 	iov = ecalloc(iovmax, sizeof(*iov));
     }
