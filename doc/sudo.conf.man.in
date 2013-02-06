@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO" "5" "February 5, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO" "5" "February 6, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -457,6 +457,10 @@ utility functions
 .TP 12n
 \fIutmp\fR
 utmp handling
+.PP
+The
+sudoers(@mansectform@)
+plugin includes support for additional subsystems.
 .SH "FILES"
 .TP 26n
 \fI@sysconfdir@/sudo.conf\fR
