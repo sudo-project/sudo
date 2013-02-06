@@ -157,10 +157,10 @@ path_info=on
 ldap_conf=/etc/ldap.conf
 ldap_secret=/etc/ldap.secret
 netsvc_conf=/etc/netsvc.conf
-noexec_file=/usr/local/libexec/sudo_noexec.so
+noexec_file=/usr/local/libexec/sudo/sudo_noexec.so
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
-PLUGINDIR=/usr/local/libexec
+PLUGINDIR=/usr/local/libexec/sudo
 #
 # End initial values for man page substitution
 #
@@ -220,6 +220,18 @@ dnl
 dnl libc replacement functions live in compat
 dnl
 AC_CONFIG_LIBOBJ_DIR(compat)
+
+#
+# Prior to sudo 1.8.7, sudo stored libexec files in $libexecdir.
+# Starting with sudo 1.8.7, $libexecdir/sudo is used so strip
+# off an extraneous "/sudo" from libexecdir.
+#
+case "$libexecdir" in
+    */sudo)
+	AC_MSG_WARN([libexecdir should not include the "sudo" subdirectory])
+	libexecdir=`expr "$libexecdir" : '\\(.*\\)/sudo$'`
+	;;
+esac
 
 dnl
 dnl Deprecated --with options (these all warn or generate an error)
@@ -1138,7 +1150,7 @@ AC_ARG_WITH(plugindir, [AS_HELP_STRING([--with-plugindir], [set directory to loa
     no)		AC_MSG_ERROR(["illegal argument: --without-plugindir."])
 		;;
     *)		;;
-esac], [with_plugindir="$libexecdir"])
+esac], [with_plugindir="$libexecdir/sudo"])
 
 AC_ARG_WITH(man, [AS_HELP_STRING([--with-man], [manual pages use man macros])],
 [case $with_man in
@@ -1477,11 +1489,11 @@ fi
 AC_MSG_CHECKING(path to sudo_noexec.so)
 AC_ARG_WITH(noexec, [AS_HELP_STRING([--with-noexec[=PATH]], [fully qualified pathname of sudo_noexec.so])],
 [case $with_noexec in
-    yes)	with_noexec="$libexecdir/sudo_noexec$_shrext"
+    yes)	with_noexec="$libexecdir/sudo/sudo_noexec$_shrext"
 		;;
     no)		;;
     *)		;;
-esac], [with_noexec="$libexecdir/sudo_noexec$_shrext"])
+esac], [with_noexec="$libexecdir/sudo/sudo_noexec$_shrext"])
 AC_MSG_RESULT($with_noexec)
 NOEXECFILE="sudo_noexec$_shrext"
 NOEXECDIR="`echo $with_noexec|sed -e 's:^${\([[^}]]*\)}:$(\1):' -e 's:^\(.*\)/[[^/]]*:\1:'`"
@@ -3566,7 +3578,7 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no"; then
 	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$noexec_file", [The fully qualified pathname of sudo_noexec.so])
     fi
     if test X"$with_selinux" != X"no"; then
-	sesh_file="$libexecdir/sesh"
+	sesh_file="$libexecdir/sudo/sesh"
 	_sesh_file=
 	while test X"$sesh_file" != X"$_sesh_file"; do
 	    _sesh_file="$sesh_file"

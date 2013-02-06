@@ -122,13 +122,13 @@ install: install-binaries @INSTALL_NOEXEC@
 
 install-dirs:
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(bindir) \
-	    $(DESTDIR)$(noexecdir)
+	    $(DESTDIR)$(libexecdir)/sudo $(DESTDIR)$(noexecdir)
 
 install-binaries: install-dirs $(PROGS)
 	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m 04755 sudo $(DESTDIR)$(bindir)/sudo
 	rm -f $(DESTDIR)$(bindir)/sudoedit
 	ln -s sudo $(DESTDIR)$(bindir)/sudoedit
-	if [ -f sesh ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0755 sesh $(DESTDIR)$(libexecdir)/sesh; fi
+	if [ -f sesh ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -M 0755 sesh $(DESTDIR)$(libexecdir)/sudo/sesh; fi
 
 install-doc:
 
@@ -143,7 +143,7 @@ install-plugin:
 
 uninstall:
 	-rm -f	$(DESTDIR)$(bindir)/sudo $(DESTDIR)$(bindir)/sudoedit \
-		$(DESTDIR)$(libexecdir)/sesh \
+		$(DESTDIR)$(libexecdir)/sudo/sesh \
 		$(DESTDIR)$(noexecdir)/$(noexecfile)
 
 check:

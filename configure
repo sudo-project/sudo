@@ -2960,10 +2960,10 @@ path_info=on
 ldap_conf=/etc/ldap.conf
 ldap_secret=/etc/ldap.secret
 netsvc_conf=/etc/netsvc.conf
-noexec_file=/usr/local/libexec/sudo_noexec.so
+noexec_file=/usr/local/libexec/sudo/sudo_noexec.so
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
-PLUGINDIR=/usr/local/libexec
+PLUGINDIR=/usr/local/libexec/sudo
 #
 # End initial values for man page substitution
 #
@@ -3010,6 +3010,19 @@ RTLD_PRELOAD_DELIM=":"
 RTLD_PRELOAD_DEFAULT=
 
 
+
+#
+# Prior to sudo 1.8.7, sudo stored libexec files in $libexecdir.
+# Starting with sudo 1.8.7, $libexecdir/sudo is used so strip
+# off an extraneous "/sudo" from libexecdir.
+#
+case "$libexecdir" in
+    */sudo)
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: libexecdir should not include the \"sudo\" subdirectory" >&5
+$as_echo "$as_me: WARNING: libexecdir should not include the \"sudo\" subdirectory" >&2;}
+	libexecdir=`expr "$libexecdir" : '\\(.*\\)/sudo$'`
+	;;
+esac
 
 
 
@@ -5258,7 +5271,7 @@ if test "${with_plugindir+set}" = set; then :
     *)		;;
 esac
 else
-  with_plugindir="$libexecdir"
+  with_plugindir="$libexecdir/sudo"
 fi
 
 
@@ -13659,13 +13672,13 @@ $as_echo_n "checking path to sudo_noexec.so... " >&6; }
 # Check whether --with-noexec was given.
 if test "${with_noexec+set}" = set; then :
   withval=$with_noexec; case $with_noexec in
-    yes)	with_noexec="$libexecdir/sudo_noexec$_shrext"
+    yes)	with_noexec="$libexecdir/sudo/sudo_noexec$_shrext"
 		;;
     no)		;;
     *)		;;
 esac
 else
-  with_noexec="$libexecdir/sudo_noexec$_shrext"
+  with_noexec="$libexecdir/sudo/sudo_noexec$_shrext"
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_noexec" >&5
@@ -21150,7 +21163,7 @@ EOF
 
     fi
     if test X"$with_selinux" != X"no"; then
-	sesh_file="$libexecdir/sesh"
+	sesh_file="$libexecdir/sudo/sesh"
 	_sesh_file=
 	while test X"$sesh_file" != X"$_sesh_file"; do
 	    _sesh_file="$sesh_file"

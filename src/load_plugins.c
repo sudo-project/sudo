@@ -66,6 +66,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
     void *handle;
     char path[PATH_MAX];
     bool rval = false;
+    int status;
     debug_decl(sudo_load_plugin, SUDO_DEBUG_PLUGIN)
 
     if (info->path[0] == '/') {
@@ -75,6 +76,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    warningx(_("%s: %s"), info->path, strerror(ENAMETOOLONG));
 	    goto done;
 	}
+	status = stat(path, &sb);
     } else {
 	if (snprintf(path, sizeof(path), "%s%s", _PATH_SUDO_PLUGIN_DIR,
 	    info->path) >= sizeof(path)) {
@@ -84,11 +86,22 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 		strerror(ENAMETOOLONG));
 	    goto done;
 	}
+	/* Try parent dir for compatibility with old plugindir default. */
+	if ((status = stat(path, &sb)) != 0) {
+	    char *cp = strrchr(path, '/');
+	    if (cp > path + 4 && cp[-5] == '/' && cp[-4] == 's' &&
+		cp[-3] == 'u' && cp[-2] == 'd' && cp[-1] == 'o') {
+		int serrno = errno;
+		strlcpy(cp - 4, info->path, sizeof(path) - (cp - 4 - path));
+		if ((status = stat(path, &sb)) != 0)
+		    errno = serrno;
+	    }
+	}
     }
-    if (stat(path, &sb) != 0) {
+    if (status != 0) {
 	warningx(_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	warning("%s", path);
+	warning("%s%s", _PATH_SUDO_PLUGIN_DIR, info->path);
 	goto done;
     }
     if (sb.st_uid != ROOT_UID) {

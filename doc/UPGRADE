@@ -1,6 +1,13 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.8.7:
+
+    Sudo now stores its libexec files in a "sudo" subdirectory
+    instead of in libexec itself.  For backwards compatibility, if
+    the plugin is not found in the default plugin directory, sudo
+    will check the parent directory default directory ends in "/sudo".
+
 o Upgrading from a version prior to 1.8.2:
 
     When matching Unix groups in the sudoers file, sudo will now

@@ -262,7 +262,9 @@ still allow people to get their work done."
 	$sbindir/visudo     	0755
 	$bindir/sudoreplay  	0755
 	$includedir/sudo_plugin.h 0644
-	$libexecdir/*		$shlib_mode optional
+	$libexecdir/sudo/	0755
+	$libexecdir/sudo/sesh	0755 optional,ignore-others
+	$libexecdir/sudo/*	$shlib_mode optional
 	$sudoersdir/sudoers.d/	0750 $sudoers_uid:$sudoers_gid
 	$timedir/		0700 root:
 	$docdir/		0755

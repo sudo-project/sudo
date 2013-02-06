@@ -147,7 +147,7 @@ case "$osversion" in
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	# XXX - SuSE uses secure path but only for env_reset
 	configure_opts="--prefix=/usr
-		--libexecdir=/usr/$libexec/sudo
+		--libexecdir=/usr/$libexec
 		--with-logging=syslog
 		--with-logfac=auth
 		--with-all-insults
@@ -197,7 +197,7 @@ case "$osversion" in
 		--disable-setresuid
 		--with-sendmail=/usr/sbin/sendmail
 		--mandir=/usr/share/man
-		--libexecdir=/usr/lib/sudo
+		--libexecdir=/usr/lib
 		--with-secure-path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/X11R6/bin
 		$configure_opts"
 	;;
