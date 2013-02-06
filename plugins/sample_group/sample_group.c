@@ -131,7 +131,7 @@ sample_query(const char *user, const char *group, const struct passwd *pwd)
     return false;
 }
 
-struct sudoers_group_plugin group_plugin = {
+__dso_public struct sudoers_group_plugin group_plugin = {
     GROUP_API_VERSION,
     sample_init,
     sample_cleanup,

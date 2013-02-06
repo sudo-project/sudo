@@ -502,7 +502,7 @@ struct policy_plugin sample_policy = {
  * Note: This plugin does not differentiate between tty and pipe I/O.
  *       It all gets logged to the same file.
  */
-struct io_plugin sample_io = {
+__dso_public struct io_plugin sample_io = {
     SUDO_IO_PLUGIN,
     SUDO_API_VERSION,
     io_open,
