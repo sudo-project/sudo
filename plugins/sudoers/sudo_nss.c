@@ -61,7 +61,8 @@ struct sudo_nss_list *
 sudo_read_nss(void)
 {
     FILE *fp;
-    char *cp;
+    char *cp, *line = NULL;
+    size_t linesize = 0;
 #ifdef HAVE_SSSD
     bool saw_sss = false;
 #endif
@@ -74,17 +75,17 @@ sudo_read_nss(void)
     if ((fp = fopen(_PATH_NSSWITCH_CONF, "r")) == NULL)
 	goto nomatch;
 
-    while ((cp = sudo_parseln(fp)) != NULL) {
+    while (sudo_parseln(&line, &linesize, NULL, fp) != -1) {
 	/* Skip blank or comment lines */
-	if (*cp == '\0')
+	if (*line == '\0')
 	    continue;
 
 	/* Look for a line starting with "sudoers:" */
-	if (strncasecmp(cp, "sudoers:", 8) != 0)
+	if (strncasecmp(line, "sudoers:", 8) != 0)
 	    continue;
 
 	/* Parse line */
-	for ((cp = strtok(cp + 8, " \t")); cp != NULL; (cp = strtok(NULL, " \t"))) {
+	for ((cp = strtok(line + 8, " \t")); cp != NULL; (cp = strtok(NULL, " \t"))) {
 	    if (strcasecmp(cp, "files") == 0 && !saw_files) {
 		tq_append(&snl, &sudo_nss_file);
 		got_match = true;
@@ -112,6 +113,7 @@ sudo_read_nss(void)
 	/* Only parse the first "sudoers:" line */
 	break;
     }
+    free(line);
     fclose(fp);
 
 nomatch:
@@ -134,7 +136,8 @@ struct sudo_nss_list *
 sudo_read_nss(void)
 {
     FILE *fp;
-    char *cp, *ep;
+    char *cp, *ep, *line = NULL;
+    ssize_t linesize = 0;
 #ifdef HAVE_SSSD
     bool saw_sss = false;
 #endif
@@ -147,9 +150,9 @@ sudo_read_nss(void)
     if ((fp = fopen(_PATH_NETSVC_CONF, "r")) == NULL)
 	goto nomatch;
 
-    while ((cp = sudo_parseln(fp)) != NULL) {
+    while (sudo_parseln(&line, &linesize, NULL, fp) != -1) {
 	/* Skip blank or comment lines */
-	if (*cp == '\0')
+	if (*(cp = line) == '\0')
 	    continue;
 
 	/* Look for a line starting with "sudoers = " */

@@ -323,7 +323,9 @@ sudo_conf_read(void)
     struct sudo_conf_table *cur;
     struct stat sb;
     FILE *fp;
-    char *cp, *prev_locale = estrdup(setlocale(LC_ALL, NULL));
+    char *cp, *line = NULL;
+    char *prev_locale = estrdup(setlocale(LC_ALL, NULL));
+    size_t linesize = 0;
 
     /* Parse sudo.conf in the "C" locale. */
     if (prev_locale[0] != 'C' || prev_locale[1] != '\0')
@@ -362,9 +364,8 @@ sudo_conf_read(void)
     }
 
     lineno = 0;
-    while ((cp = sudo_parseln(fp)) != NULL) {
-	lineno++;
-	if (*cp == '\0')
+    while (sudo_parseln(&line, &linesize, &lineno, fp) != -1) {
+	if (*(cp = line) == '\0')
 	    continue;		/* empty line or comment */
 
 	for (cur = sudo_conf_table; cur->name != NULL; cur++) {
@@ -379,6 +380,7 @@ sudo_conf_read(void)
 	}
     }
     fclose(fp);
+    free(line);
 done:
     /* Restore locale if needed. */
     if (prev_locale[0] != 'C' || prev_locale[1] != '\0')

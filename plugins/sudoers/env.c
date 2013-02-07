@@ -1029,15 +1029,15 @@ void
 read_env_file(const char *path, int overwrite)
 {
     FILE *fp;
-    char *cp, *var, *val;
-    size_t var_len, val_len;
+    char *cp, *var, *val, *line = NULL;
+    size_t var_len, val_len, linesize = 0;
 
     if ((fp = fopen(path, "r")) == NULL)
 	return;
 
-    while ((var = sudo_parseln(fp)) != NULL) {
+    while (sudo_parseln(&line, &linesize, NULL, fp) != -1) {
 	/* Skip blank or comment lines */
-	if (*var == '\0')
+	if (*(var = line) == '\0')
 	    continue;
 
 	/* Skip optional "export " */
@@ -1069,6 +1069,7 @@ read_env_file(const char *path, int overwrite)
 
 	sudo_putenv(cp, true, overwrite);
     }
+    free(line);
     fclose(fp);
 }
 

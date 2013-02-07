@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007, 2009-2011
+ * Copyright (c) 1999-2005, 2007, 2009-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -26,24 +26,36 @@
 #ifdef HAVE_FLOCK
 # include <sys/file.h>
 #endif /* HAVE_FLOCK */
-#include <stdio.h>
+#ifdef STDC_HEADERS
+# include <stdlib.h>
+# include <stddef.h>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif /* STDC_HEADERS */
+#ifdef HAVE_STRING_H
+# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
+#  include <memory.h>
+# endif
+# include <string.h>
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif /* HAVE_STRING_H */
+#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
+# include <malloc.h>
+#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
+#include <ctype.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+#include <fcntl.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
 # include "compat/stdbool.h"
 #endif
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif /* HAVE_STRINGS_H */
-#include <ctype.h>
-#include <limits.h>
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-#include <fcntl.h>
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
@@ -54,10 +66,6 @@
 #include "missing.h"
 #include "fileops.h"
 #include "sudo_debug.h"
-
-#ifndef LINE_MAX
-# define LINE_MAX 2048
-#endif
 
 /*
  * Update the access and modify times on an fd or file.
@@ -151,28 +159,75 @@ lock_file(int fd, int lockit)
 #endif
 
 /*
- * Read a line of input, remove comments and strip off leading
- * and trailing spaces.  Returns static storage that is reused.
+ * Read a line of input, honoring line continuation chars.
+ * Remove comments and strips off leading and trailing spaces.
+ * Returns the line length and updates the buf and bufsize pointers.
+ * XXX - just use a struct w/ state, including getline buffer?
+ *       could also make comment char and line continuation configurable
  */
-char *
-sudo_parseln(FILE *fp)
+ssize_t
+sudo_parseln(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp)
 {
-    size_t len;
-    char *cp = NULL;
-    static char buf[LINE_MAX];
+    size_t len, linesize = 0, total = 0;
+    char *cp, *line = NULL;
+    bool continued;
     debug_decl(sudo_parseln, SUDO_DEBUG_UTIL)
 
-    if (fgets(buf, sizeof(buf), fp) != NULL) {
-	/* Remove comments */
-	if ((cp = strchr(buf, '#')) != NULL)
-	    *cp = '\0';
+    do {
+	continued = false;
+	len = getline(&line, &linesize, fp);
+	if (len == -1)
+	    break;
+	if (lineno != NULL)
+	    (*lineno)++;
 
-	/* Trim leading and trailing whitespace/newline */
-	len = strlen(buf);
-	while (len > 0 && isspace((unsigned char)buf[len - 1]))
-	    buf[--len] = '\0';
-	for (cp = buf; isblank((unsigned char)*cp); cp++)
-	    continue;
-    }
-    debug_return_str(cp);
+	/* Remove trailing newline(s) if present. */
+	while (len > 0 && (line[len - 1] == '\n' || line[len - 1] == '\r'))
+	    line[--len] = '\0';
+
+	/* Remove comments or check for line continuation (but not both) */
+	if ((cp = strchr(line, '#')) != NULL) {
+	    *cp = '\0';
+	    len = (size_t)(cp - line);
+	} else if (len > 0 && line[len - 1] == '\\' && (len == 1 || line[len - 2] != '\\')) {
+	    line[--len] = '\0';
+	    continued = true;
+	}
+
+	/* Trim leading and trailing whitespace */
+	if (!continued) {
+	    while (len > 0 && isblank((unsigned char)line[len - 1]))
+		line[--len] = '\0';
+	}
+	for (cp = line; isblank((unsigned char)*cp); cp++)
+	    len--;
+
+	if (*bufp == NULL || total + len >= *bufsizep) {
+	    void *tmp;
+	    unsigned int size = total + len + 1;
+
+	    if (size < 64) {
+		size = 64;
+	    } else {
+		/* Round up to next highest power of two. */
+		size--;
+		size |= size >> 1;
+		size |= size >> 2;
+		size |= size >> 4;
+		size |= size >> 8;
+		size |= size >> 16;
+		size++;
+	    }
+	    if ((tmp = realloc(*bufp, size)) == NULL)
+		break;
+	    *bufp = tmp;
+	    *bufsizep = size;
+	}
+	memcpy(*bufp + total, cp, len + 1);
+	total += len;
+    } while (continued);
+    free(line);
+    if (len == -1 && total == 0)
+	debug_return_size_t((size_t)-1);
+    debug_return_size_t(total);
 }

@@ -1360,7 +1360,8 @@ static bool
 sudo_ldap_read_config(void)
 {
     FILE *fp;
-    char *cp, *keyword, *value;
+    char *cp, *keyword, *value, *line = NULL;
+    size_t linesize = 0;
     debug_decl(sudo_ldap_read_config, SUDO_DEBUG_LDAP)
 
     /* defaults */
@@ -1377,12 +1378,12 @@ sudo_ldap_read_config(void)
     if ((fp = fopen(_PATH_LDAP_CONF, "r")) == NULL)
 	debug_return_bool(false);
 
-    while ((cp = sudo_parseln(fp)) != NULL) {
-	if (*cp == '\0')
+    while (sudo_parseln(&line, &linesize, NULL, fp) != -1) {
+	if (*line == '\0')
 	    continue;		/* skip empty line */
 
 	/* split into keyword and value */
-	keyword = cp;
+	keyword = cp = line;
 	while (*cp && !isblank((unsigned char) *cp))
 	    cp++;
 	if (*cp)
@@ -1397,6 +1398,7 @@ sudo_ldap_read_config(void)
 	if (!sudo_ldap_parse_keyword(keyword, value, ldap_conf_global))
 	    sudo_ldap_parse_keyword(keyword, value, ldap_conf_conn);
     }
+    free(line);
     fclose(fp);
 
     if (!ldap_conf.host)
