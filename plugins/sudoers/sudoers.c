@@ -527,10 +527,6 @@ init_vars(char * const envp[])
     char * const * ep;
     debug_decl(init_vars, SUDO_DEBUG_PLUGIN)
 
-#ifdef HAVE_TZSET
-    (void) tzset();		/* set the timezone if applicable */
-#endif /* HAVE_TZSET */
-
     sudoers_initlocale(setlocale(LC_ALL, NULL), def_sudoers_locale);
 
     for (ep = envp; *ep; ep++) {

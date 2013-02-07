@@ -156,6 +156,10 @@ main(int argc, char *argv[], char *envp[])
     bindtextdomain(PACKAGE_NAME, LOCALEDIR);
     textdomain(PACKAGE_NAME);
 
+#ifdef HAVE_TZSET
+    (void) tzset();
+#endif /* HAVE_TZSET */
+
     /* Must be done before we do any password lookups */
 #if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
     (void) set_auth_parameters(argc, argv);
