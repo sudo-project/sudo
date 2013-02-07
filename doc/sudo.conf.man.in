@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO" "5" "February 6, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO" "5" "February 7, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -61,6 +61,12 @@ The pound sign
 is used to indicate a comment.
 Both the comment character and any text after it, up to the end of
 the line, are ignored.
+.PP
+Long lines can be continued with a backslash
+(`\e')
+as the last character on the line.
+Note that leading white space is removed from the beginning of lines
+even when the continuation character is used.
 .PP
 Non-comment lines that don't begin with
 \fRPlugin\fR,

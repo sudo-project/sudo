@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd February 5, 2013
+.Dd February 7, 2013
 .Dt SUDOERS.LDAP @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -440,6 +440,12 @@ as being supported by
 are honored.
 Configuration options are listed below in upper case but are parsed
 in a case-independent manner.
+.Pp
+Long lines can be continued with a backslash
+.Pq Ql \e
+as the last character on the line.
+Note that leading white space is removed from the beginning of lines
+even when the continuation character is used.
 .Bl -tag -width 4n
 .It Sy URI Ar ldap[s]://[hostname[:port]] ...
 Specifies a white space-delimited list of one or more URIs describing

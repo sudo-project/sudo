@@ -1393,8 +1393,8 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                    arguments.  This can be used to implement support for the
                    nonunix_group syntax described earlier.  The string should
                    consist of the plugin path, either fully-qualified or
-                   relative to the _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c directory, followed by
-                   any configuration arguments the plugin requires.  These
+                   relative to the _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c_/_s_u_d_o directory, followed
+                   by any configuration arguments the plugin requires.  These
                    arguments (if any) will be passed to the plugin's
                    initialization function.  If arguments are present, the
                    string must be enclosed in double quotes ("").

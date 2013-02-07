@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOERS.LDAP" "8" "February 5, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD System Manager's Manual"
+.TH "SUDOERS.LDAP" "8" "February 7, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -463,6 +463,12 @@ as being supported by
 are honored.
 Configuration options are listed below in upper case but are parsed
 in a case-independent manner.
+.PP
+Long lines can be continued with a backslash
+(`\e')
+as the last character on the line.
+Note that leading white space is removed from the beginning of lines
+even when the continuation character is used.
 .TP 6n
 \fBURI\fR \fIldap[s]://[hostname[:port]] ...\fR
 Specifies a white space-delimited list of one or more URIs describing
