@@ -692,6 +692,9 @@ init_vars(envp)
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
     mbr_uid_to_uuid(user_uid, user_uuid);
 #endif
+#ifdef HAVE_GETSID
+    user_sid = getsid(0);
+#endif
     if (user_shell == NULL || *user_shell == '\0')
 	user_shell = estrdup(sudo_user.pw->pw_shell);
 

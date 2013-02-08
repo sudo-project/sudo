@@ -60,6 +60,7 @@ struct sudo_user {
     char *krb5_ccname;
     char *display;
     char *askpass;
+    pid_t sid;
     int   ngroups;
     GETGROUPS_T *groups;
     struct list_member *env_vars;
@@ -166,6 +167,7 @@ struct command_status {
 #define user_shell		(sudo_user.shell)
 #define user_ngroups		(sudo_user.ngroups)
 #define user_groups		(sudo_user.groups)
+#define user_sid		(sudo_user.sid)
 #define user_tty		(sudo_user.tty)
 #define user_ttypath		(sudo_user.ttypath)
 #define user_cwd		(sudo_user.cwd)
