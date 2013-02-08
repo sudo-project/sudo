@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd February 5, 2013
+.Dd February 7, 2013
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -166,6 +166,22 @@ itself but the
 .Em value
 might.
 .Bl -tag -width 4n
+.It bsdauth_type=string
+Authentication type, if specified by the
+.Fl a
+flag, to use on
+systems where BSD authentication is supported.
+.It closefrom=number
+If specified, the user has requested via the
+.Fl C
+flag that
+.Nm sudo
+close all files descriptors with a value of
+.Em number
+or higher.
+The plugin may optionally pass this, or another value, back in the
+.Em command_info
+list.
 .It debug_flags=string
 A comma-separated list of debug flags that correspond to
 .Nm sudo Ns No 's
@@ -191,46 +207,12 @@ and the plugin.
 .It debug_level=number
 This setting has been deprecated in favor of
 .Em debug_flags .
-.It runas_user=string
-The user name or uid to to run the command as, if specified via the
-.Fl u
-flag.
-.It runas_group=string
-The group name or gid to to run the command as, if specified via
-the
-.Fl g
-flag.
-.It prompt=string
-The prompt to use when requesting a password, if specified via
-the
-.Fl p
-flag.
-.It set_home=bool
+.It ignore_ticket=bool
 Set to true if the user specified the
-.Fl H
-flag.
-If true, set the
-.Li HOME
-environment variable to the target user's home directory.
-.It preserve_environment=bool
-Set to true if the user specified the
-.Fl E
-flag, indicating that
-the user wishes to preserve the environment.
-.It run_shell=bool
-Set to true if the user specified the
-.Fl s
-flag, indicating that
-the user wishes to run a shell.
-.It login_shell=bool
-Set to true if the user specified the
-.Fl i
-flag, indicating that
-the user wishes to run a login shell.
-.It implied_shell=bool
-If the user does not specify a program on the command line,
-.Nm sudo
-will pass the plugin the path to the user's shell and set
+.Fl k
+flag along with a
+command, indicating that the user wishes to ignore any cached
+authentication credentials.
 .Em implied_shell
 to true.
 This allows
@@ -245,46 +227,20 @@ function, which will cause
 .Nm sudo
 to print a usage message and
 exit.
-.It preserve_groups=bool
-Set to true if the user specified the
-.Fl P
-flag, indicating that
-the user wishes to preserve the group vector instead of setting it
-based on the runas user.
-.It ignore_ticket=bool
-Set to true if the user specified the
-.Fl k
-flag along with a
-command, indicating that the user wishes to ignore any cached
-authentication credentials.
-.It noninteractive=bool
-Set to true if the user specified the
-.Fl n
-flag, indicating that
+.It implied_shell=bool
+If the user does not specify a program on the command line,
 .Nm sudo
-should operate in non-interactive mode.
-The plugin may reject a command run in non-interactive mode if user
-interaction is required.
+will pass the plugin the path to the user's shell and set
 .It login_class=string
 BSD login class to use when setting resource limits and nice value,
 if specified by the
 .Fl c
 flag.
-.It selinux_role=string
-SELinux role to use when executing the command, if specified by
-the
-.Fl r
-flag.
-.It selinux_type=string
-SELinux type to use when executing the command, if specified by
-the
-.Fl t
-flag.
-.It bsdauth_type=string
-Authentication type, if specified by the
-.Fl a
-flag, to use on
-systems where BSD authentication is supported.
+.It login_shell=bool
+Set to true if the user specified the
+.Fl i
+flag, indicating that
+the user wishes to run a login shell.
 .It network_addrs=list
 A space-separated list of IP network addresses and netmasks in the
 form
@@ -296,11 +252,66 @@ what the operating system supports.
 If the address contains a colon
 .Pq Ql :\& ,
 it is an IPv6 address, else it is IPv4.
+.It noninteractive=bool
+Set to true if the user specified the
+.Fl n
+flag, indicating that
+.Nm sudo
+should operate in non-interactive mode.
+The plugin may reject a command run in non-interactive mode if user
+interaction is required.
+.It preserve_environment=bool
+Set to true if the user specified the
+.Fl E
+flag, indicating that
+the user wishes to preserve the environment.
+.It preserve_groups=bool
+Set to true if the user specified the
+.Fl P
+flag, indicating that
+the user wishes to preserve the group vector instead of setting it
+based on the runas user.
 .It progname=string
 The command name that sudo was run as, typically
 .Dq sudo
 or
 .Dq sudoedit .
+.It prompt=string
+The prompt to use when requesting a password, if specified via
+the
+.Fl p
+flag.
+.It run_shell=bool
+Set to true if the user specified the
+.Fl s
+flag, indicating that
+the user wishes to run a shell.
+.It runas_group=string
+The group name or gid to to run the command as, if specified via
+the
+.Fl g
+flag.
+.It runas_user=string
+The user name or uid to to run the command as, if specified via the
+.Fl u
+flag.
+.It selinux_role=string
+SELinux role to use when executing the command, if specified by
+the
+.Fl r
+flag.
+.It selinux_type=string
+SELinux type to use when executing the command, if specified by
+the
+.Fl t
+flag.
+.It set_home=bool
+Set to true if the user specified the
+.Fl H
+flag.
+If true, set the
+.Li HOME
+environment variable to the target user's home directory.
 .It sudoedit=bool
 Set to true when the
 .Fl e
@@ -316,17 +327,6 @@ if the plugin does not support
 For more information, see the
 .Em check_policy
 section.
-.It closefrom=number
-If specified, the user has requested via the
-.Fl C
-flag that
-.Nm sudo
-close all files descriptors with a value of
-.Em number
-or higher.
-The plugin may optionally pass this, or another value, back in the
-.Em command_info
-list.
 .El
 .Pp
 Additional settings may be added in the future so the plugin should
@@ -352,48 +352,16 @@ itself but the
 .Em value
 might.
 .Bl -tag -width 4n
-.It pid=int
-The process ID of the running
-.Nm sudo
-process.
-Only available starting with API version 1.2
-.It ppid=int
-The parent process ID of the running
-.Nm sudo
-process.
-Only available starting with API version 1.2
-.It sid=int
-The session ID of the running
-.Nm sudo
-process or 0 if
-.Nm sudo
-is
-not part of a POSIX job control session.
-Only available starting with API version 1.2
-.It pgid=int
-The ID of the process group that the running
-.Nm sudo
-process belongs
-to.
-Only available starting with API version 1.2
-.It tcpgid=int
-The ID of the foreground process group associated with the terminal
-device associated with the
-.Nm sudo
-process or \-1 if there is no
-terminal present.
-Only available starting with API version 1.2
-.It user=string
-The name of the user invoking
+.It cols=int
+The number of columns the user's terminal supports.
+If there is no terminal device available, a default value of 80 is used.
+.It cwd=string
+The user's current working directory.
+.It egid=gid_t
+The effective group ID of the user invoking
 .Nm sudo .
 .It euid=uid_t
 The effective user ID of the user invoking
-.Nm sudo .
-.It uid=uid_t
-The real user ID of the user invoking
-.Nm sudo .
-.It egid=gid_t
-The effective group ID of the user invoking
 .Nm sudo .
 .It gid=gid_t
 The real group ID of the user invoking
@@ -401,13 +369,6 @@ The real group ID of the user invoking
 .It groups=list
 The user's supplementary group list formatted as a string of
 comma-separated group IDs.
-.It cwd=string
-The user's current working directory.
-.It tty=string
-The path to the user's terminal device.
-If the user has no terminal device associated with the session,
-the value will be empty, as in
-.Dq Li tty= .
 .It host=string
 The local machine's hostname as returned by the
 .Xr gethostname 2
@@ -416,31 +377,19 @@ system call.
 The number of lines the user's terminal supports.
 If there is
 no terminal device available, a default value of 24 is used.
-.It cols=int
-The number of columns the user's terminal supports.
-If there is no terminal device available, a default value of 80 is used.
-.El
-.It user_env
-The user's environment in the form of a
-.Dv NULL Ns No -terminated vector of
-.Dq name=value
-strings.
-.Pp
-When parsing
-.Em user_env ,
-the plugin should split on the
-.Sy first
-equal sign
-.Pq Ql =
-since the
-.Em name
-field will never include one
-itself but the
-.Em value
-might.
+.It pgid=int
+The ID of the process group that the running
+.Nm sudo
+process is a member of.
+Only available starting with API version 1.2
+.It pid=int
+The process ID of the running
+.Nm sudo
+process.
+Only available starting with API version 1.2
 .It plugin_options
 Any (non-comment) strings immediately after the plugin path are
-treated as arguments to the plugin.
+passed as arguments to the plugin.
 These arguments are split on a white space boundary and are passed to
 the plugin in the form of a
 .Dv NULL Ns No -terminated
@@ -464,6 +413,55 @@ by the
 front end before using
 .Em plugin_options .
 Failure to do so may result in a crash.
+.It ppid=int
+The parent process ID of the running
+.Nm sudo
+process.
+Only available starting with API version 1.2
+.It sid=int
+The session ID of the running
+.Nm sudo
+process or 0 if
+.Nm sudo
+is not part of a POSIX job control session.
+Only available starting with API version 1.2
+.It tcpgid=int
+The ID of the foreground process group associated with the terminal
+device associated with the
+.Nm sudo
+process or \-1 if there is no
+terminal present.
+Only available starting with API version 1.2
+.It tty=string
+The path to the user's terminal device.
+If the user has no terminal device associated with the session,
+the value will be empty, as in
+.Dq Li tty= .
+.It uid=uid_t
+The real user ID of the user invoking
+.Nm sudo .
+.It user=string
+The name of the user invoking
+.Nm sudo .
+.El
+.It user_env
+The user's environment in the form of a
+.Dv NULL Ns No -terminated vector of
+.Dq name=value
+strings.
+.Pp
+When parsing
+.Em user_env ,
+the plugin should split on the
+.Sy first
+equal sign
+.Pq Ql =
+since the
+.Em name
+field will never include one
+itself but the
+.Em value
+might.
 .El
 .It close
 .Bd -literal -compact
@@ -655,72 +653,8 @@ pointer.
 The following values are recognized by
 .Nm sudo :
 .Bl -tag -width 4n
-.It command=string
-Fully qualified path to the command to be executed.
-.It runas_uid=uid
-User ID to run the command as.
-.It runas_euid=uid
-Effective user ID to run the command as.
-If not specified, the value of
-.Em runas_uid
-is used.
-.It runas_gid=gid
-Group ID to run the command as.
-.It runas_egid=gid
-Effective group ID to run the command as.
-If not specified, the value of
-.Em runas_gid
-is used.
-.It runas_groups=list
-The supplementary group vector to use for the command in the form
-of a comma-separated list of group IDs.
-If
-.Em preserve_groups
-is set, this option is ignored.
-.It login_class=string
-BSD login class to use when setting resource limits and nice value
-(optional).
-This option is only set on systems that support login classes.
-.It preserve_groups=bool
-If set,
-.Nm sudo
-will preserve the user's group vector instead of
-initializing the group vector based on
-.Li runas_user .
-.It cwd=string
-The current working directory to change to when executing the command.
-.It noexec=bool
-If set, prevent the command from executing other programs.
 .It chroot=string
 The root directory to use when running the command.
-.It nice=int
-Nice value (priority) to use when executing the command.
-The nice value, if specified, overrides the priority associated with the
-.Em login_class
-on BSD systems.
-.It umask=octal
-The file creation mask to use when executing the command.
-.It selinux_role=string
-SELinux role to use when executing the command.
-.It selinux_type=string
-SELinux type to use when executing the command.
-.It timeout=int
-Command timeout.
-If non-zero then when the timeout expires the command will be killed.
-.It sudoedit=bool
-Set to true when in
-.Em sudoedit
-mode.
-The plugin may enable
-.Em sudoedit
-mode even if
-.Nm sudo
-was not invoked as
-.Nm sudoedit .
-This allows the plugin to perform command substitution and transparently
-enable
-.Em sudoedit
-when the user attempts to run an editor.
 .It closefrom=number
 If specified,
 .Nm sudo
@@ -728,6 +662,70 @@ will close all files descriptors with a value
 of
 .Em number
 or higher.
+.It command=string
+Fully qualified path to the command to be executed.
+.It cwd=string
+The current working directory to change to when executing the command.
+.It exec_background=bool
+By default,
+.Nm sudo
+runs a command as the foreground process as long as
+.Nm sudo
+itself is running in the foreground.
+When
+.Em exec_background
+is enabled and the command is being run in a pty (due to I/O logging
+or the
+.Em use_pty
+setting), the command will be run as a background process.
+Attempts to read from the controlling terminal (or to change terminal
+settings) will result in the command being suspended with the
+.Dv SIGTTIN
+signal (or
+.Dv SIGTTOU
+in the case of terminal settings).
+If this happens when
+.Nm sudo
+is a foreground process, the command will be granted the controlling terminal
+and resumed in the foreground with no user intervention required.
+The advantage of initially running the command in the background is that
+.Nm sudo
+need not read from the terminal unless the command explicitly requests it.
+Otherwise, any terminal input must be passed to the command, whether it
+has required it or not (the kernel buffers terminals so it is not possible
+to tell whether the command really wants the input).
+This is different from historic
+.Em sudo
+behavior or when the command is not being run in a pty.
+.Pp
+For this to work seamlessly, the operating system must support the
+automatic restarting of system calls.
+Unfortunately, not all operating systems do this by default,
+and even those that do may have bugs.
+For example, Mac OS X fails to restart the
+.Fn tcgetattr
+and
+.Fn tcsetattr
+system calls (this is a bug in Mac OS X).
+Furthermore, because this behavior depends on the command stopping with the
+.Dv SIGTTIN
+or
+.Dv SIGTTOU
+signals, programs that catch these signals and suspend themselves
+with a different signal (usually
+.Dv SIGTOP )
+will not be automatically foregrounded.
+Some versions of the linux
+.Xr su 1
+command behave this way.
+Because of this, a plugin should not set
+.Em exec_background
+unless it is explicitly enabled by the administrator and there should
+be a way to enabled or disable it on a per-command basis.
+.Pp
+This setting has no effect unless I/O logging is enabled or
+.Em use_pty
+is enabled.
 .It iolog_compress=bool
 Set to true if the I/O logging plugins, if any, should compress the
 log data.
@@ -760,6 +758,70 @@ Set to true if the I/O logging plugins, if any, should log all
 terminal output.
 This only includes output to the screen, not output to a pipe or file.
 This is a hint to the I/O logging plugin which may choose to ignore it.
+.It login_class=string
+BSD login class to use when setting resource limits and nice value
+(optional).
+This option is only set on systems that support login classes.
+.It nice=int
+Nice value (priority) to use when executing the command.
+The nice value, if specified, overrides the priority associated with the
+.Em login_class
+on BSD systems.
+.It noexec=bool
+If set, prevent the command from executing other programs.
+.It preserve_groups=bool
+If set,
+.Nm sudo
+will preserve the user's group vector instead of
+initializing the group vector based on
+.Li runas_user .
+.It runas_egid=gid
+Effective group ID to run the command as.
+If not specified, the value of
+.Em runas_gid
+is used.
+.It runas_euid=uid
+Effective user ID to run the command as.
+If not specified, the value of
+.Em runas_uid
+is used.
+.It runas_gid=gid
+Group ID to run the command as.
+.It runas_groups=list
+The supplementary group vector to use for the command in the form
+of a comma-separated list of group IDs.
+If
+.Em preserve_groups
+is set, this option is ignored.
+.It runas_uid=uid
+User ID to run the command as.
+.It selinux_role=string
+SELinux role to use when executing the command.
+.It selinux_type=string
+SELinux type to use when executing the command.
+.It set_utmp=bool
+Create a utmp (or utmpx) entry when a pseudo-tty is allocated.
+By default, the new entry will be a copy of the user's existing utmp
+entry (if any), with the tty, time, type and pid fields updated.
+.It sudoedit=bool
+Set to true when in
+.Em sudoedit
+mode.
+The plugin may enable
+.Em sudoedit
+mode even if
+.Nm sudo
+was not invoked as
+.Nm sudoedit .
+This allows the plugin to perform command substitution and transparently
+enable
+.Em sudoedit
+when the user attempts to run an editor.
+.It timeout=int
+Command timeout.
+If non-zero then when the timeout expires the command will be killed.
+.It umask=octal
+The file creation mask to use when executing the command.
 .It use_pty=bool
 Allocate a pseudo-tty to run the command in, regardless of whether
 or not I/O logging is in use.
@@ -767,10 +829,6 @@ By default,
 .Nm sudo
 will only run
 the command in a pty when an I/O log plugin is loaded.
-.It set_utmp=bool
-Create a utmp (or utmpx) entry when a pseudo-tty is allocated.
-By default, the new entry will be a copy of the user's existing utmp
-entry (if any), with the tty, time, type and pid fields updated.
 .It utmp_user=string
 User name to use when constructing a new utmp (or utmpx) entry when
 .Em set_utmp
@@ -781,66 +839,6 @@ If not set,
 .Nm sudo
 will base the new entry on
 the invoking user's existing entry.
-.It exec_background=bool
-By default,
-.Nm sudo
-runs a command as the foreground process as long as
-.Nm sudo
-itself is running in the foreground.
-When
-.Em exec_background
-is enabled and the command is being run in a pty (due to I/O logging
-or the
-.Em use_pty
-setting), the command will be run as a background process.
-Attempts to read from the controlling terminal (or to change terminal
-settings) will result in the command being suspended with the
-.Dv SIGTTIN
-signal (or
-.Dv SIGTTOU
-in the case of terminal settings).
-If this happens when
-.Nm sudo
-is a foreground process, the command will be granted the controlling terminal   
-and resumed in the foreground with no user intervention required.
-The advantage of initially running the command in the background is that
-.Nm sudo
-need not read from the terminal unless the command explicitly requests it.
-Otherwise, any terminal input must be passed to the command, whether it
-has required it or not (the kernel buffers terminals so it is not possible
-to tell whether the command really wants the input).
-This is different from historic
-.Em sudo
-behavior or when the command is not being run in a pty.
-.Pp
-For this to work seamlessly, the operating system must support the
-automatic restarting of system calls.
-Unfortunately, not all operating systems do this by default,
-and even those that do may have bugs.
-For example, Mac OS X fails to restart the
-.Fn tcgetattr
-and
-.Fn tcsetattr
-system calls (this is a bug in Mac OS X).
-Furthermore, because this behavior depends on the command stopping with the
-.Dv SIGTTIN
-or 
-.Dv SIGTTOU
-signals, programs that catch these signals and suspend themselves
-with a different signal (usually
-.Dv SIGTOP )
-will not be automatically foregrounded.
-Some versions of the linux
-.Xr su 1
-command behave this way.
-Because of this, a plugin should not set
-.Em exec_background
-unless it is explicitly enabled by the administrator and there should
-be a way to enabled or disable it on a per-command basis.
-.Pp
-This setting has no effect unless I/O logging is enabled or
-.Em use_pty
-is enabled.
 .El
 .Pp
 Unsupported values will be ignored.

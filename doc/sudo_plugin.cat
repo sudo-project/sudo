@@ -101,6 +101,16 @@ DDEESSCCRRIIPPTTIIOONN
                  equal sign (`=') since the _n_a_m_e field will never include one
                  itself but the _v_a_l_u_e might.
 
+                 bsdauth_type=string
+                       Authentication type, if specified by the --aa flag, to
+                       use on systems where BSD authentication is supported.
+
+                 closefrom=number
+                       If specified, the user has requested via the --CC flag
+                       that ssuuddoo close all files descriptors with a value of
+                       _n_u_m_b_e_r or higher.  The plugin may optionally pass this,
+                       or another value, back in the _c_o_m_m_a_n_d___i_n_f_o list.
+
                  debug_flags=string
                        A comma-separated list of debug flags that correspond
                        to ssuuddoo's Debug entry in sudo.conf(4), if there is one.
@@ -116,77 +126,28 @@ DDEESSCCRRIIPPTTIIOONN
                        This setting has been deprecated in favor of
                        _d_e_b_u_g___f_l_a_g_s.
 
-                 runas_user=string
-                       The user name or uid to to run the command as, if
-                       specified via the --uu flag.
-
-                 runas_group=string
-                       The group name or gid to to run the command as, if
-                       specified via the --gg flag.
-
-                 prompt=string
-                       The prompt to use when requesting a password, if
-                       specified via the --pp flag.
-
-                 set_home=bool
-                       Set to true if the user specified the --HH flag.  If
-                       true, set the HOME environment variable to the target
-                       user's home directory.
-
-                 preserve_environment=bool
-                       Set to true if the user specified the --EE flag,
-                       indicating that the user wishes to preserve the
-                       environment.
-
-                 run_shell=bool
-                       Set to true if the user specified the --ss flag,
-                       indicating that the user wishes to run a shell.
-
-                 login_shell=bool
-                       Set to true if the user specified the --ii flag,
-                       indicating that the user wishes to run a login shell.
-
-                 implied_shell=bool
-                       If the user does not specify a program on the command
-                       line, ssuuddoo will pass the plugin the path to the user's
-                       shell and set _i_m_p_l_i_e_d___s_h_e_l_l to true.  This allows ssuuddoo
-                       with no arguments to be used similarly to su(1).  If
-                       the plugin does not to support this usage, it may
-                       return a value of -2 from the cchheecckk__ppoolliiccyy() function,
-                       which will cause ssuuddoo to print a usage message and
-                       exit.
-
-                 preserve_groups=bool
-                       Set to true if the user specified the --PP flag,
-                       indicating that the user wishes to preserve the group
-                       vector instead of setting it based on the runas user.
-
                  ignore_ticket=bool
                        Set to true if the user specified the --kk flag along
                        with a command, indicating that the user wishes to
                        ignore any cached authentication credentials.
+                       _i_m_p_l_i_e_d___s_h_e_l_l to true.  This allows ssuuddoo with no
+                       arguments to be used similarly to su(1).  If the plugin
+                       does not to support this usage, it may return a value
+                       of -2 from the cchheecckk__ppoolliiccyy() function, which will
+                       cause ssuuddoo to print a usage message and exit.
 
-                 noninteractive=bool
-                       Set to true if the user specified the --nn flag,
-                       indicating that ssuuddoo should operate in non-interactive
-                       mode.  The plugin may reject a command run in non-
-                       interactive mode if user interaction is required.
+                 implied_shell=bool
+                       If the user does not specify a program on the command
+                       line, ssuuddoo will pass the plugin the path to the user's
+                       shell and set
 
                  login_class=string
                        BSD login class to use when setting resource limits and
                        nice value, if specified by the --cc flag.
 
-                 selinux_role=string
-                       SELinux role to use when executing the command, if
-                       specified by the --rr flag.
-
-                 selinux_type=string
-                       SELinux type to use when executing the command, if
-                       specified by the --tt flag.
-
-                 bsdauth_type=string
-                       Authentication type, if specified by the --aa flag, to
-                       use on systems where BSD authentication is supported.
+                 login_shell=bool
+                       Set to true if the user specified the --ii flag,
+                       indicating that the user wishes to run a login shell.
 
                  network_addrs=list
                        A space-separated list of IP network addresses and
@@ -196,9 +157,54 @@ DDEESSCCRRIIPPTTIIOONN
                        operating system supports.  If the address contains a
                        colon (`:'), it is an IPv6 address, else it is IPv4.
 
+                 noninteractive=bool
+                       Set to true if the user specified the --nn flag,
+                       indicating that ssuuddoo should operate in non-interactive
+                       mode.  The plugin may reject a command run in non-
+                       interactive mode if user interaction is required.
+
+                 preserve_environment=bool
+                       Set to true if the user specified the --EE flag,
+                       indicating that the user wishes to preserve the
+                       environment.
+
+                 preserve_groups=bool
+                       Set to true if the user specified the --PP flag,
+                       indicating that the user wishes to preserve the group
+                       vector instead of setting it based on the runas user.
+
                  progname=string
                        The command name that sudo was run as, typically
                        ``sudo'' or ``sudoedit''.
+
+                 prompt=string
+                       The prompt to use when requesting a password, if
+                       specified via the --pp flag.
+
+                 run_shell=bool
+                       Set to true if the user specified the --ss flag,
+                       indicating that the user wishes to run a shell.
+
+                 runas_group=string
+                       The group name or gid to to run the command as, if
+                       specified via the --gg flag.
+
+                 runas_user=string
+                       The user name or uid to to run the command as, if
+                       specified via the --uu flag.
+
+                 selinux_role=string
+                       SELinux role to use when executing the command, if
+                       specified by the --rr flag.
+
+                 selinux_type=string
+                       SELinux type to use when executing the command, if
+                       specified by the --tt flag.
+
+                 set_home=bool
+                       Set to true if the user specified the --HH flag.  If
+                       true, set the HOME environment variable to the target
+                       user's home directory.
 
                  sudoedit=bool
                        Set to true when the --ee flag is is specified or if
@@ -207,12 +213,6 @@ DDEESSCCRRIIPPTTIIOONN
                        return -2 with a usage error if the plugin does not
                        support _s_u_d_o_e_d_i_t.  For more information, see the
                        _c_h_e_c_k___p_o_l_i_c_y section.
-
-                 closefrom=number
-                       If specified, the user has requested via the --CC flag
-                       that ssuuddoo close all files descriptors with a value of
-                       _n_u_m_b_e_r or higher.  The plugin may optionally pass this,
-                       or another value, back in the _c_o_m_m_a_n_d___i_n_f_o list.
 
                  Additional settings may be added in the future so the plugin
                  should silently ignore settings that it does not recognize.
@@ -226,41 +226,19 @@ DDEESSCCRRIIPPTTIIOONN
                  equal sign (`=') since the _n_a_m_e field will never include one
                  itself but the _v_a_l_u_e might.
 
-                 pid=int
-                       The process ID of the running ssuuddoo process.  Only
-                       available starting with API version 1.2
+                 cols=int
+                       The number of columns the user's terminal supports.  If
+                       there is no terminal device available, a default value
+                       of 80 is used.
 
-                 ppid=int
-                       The parent process ID of the running ssuuddoo process.
-                       Only available starting with API version 1.2
-
-                 sid=int
-                       The session ID of the running ssuuddoo process or 0 if ssuuddoo
-                       is not part of a POSIX job control session.  Only
-                       available starting with API version 1.2
-
-                 pgid=int
-                       The ID of the process group that the running ssuuddoo
-                       process belongs to.  Only available starting with API
-                       version 1.2
-
-                 tcpgid=int
-                       The ID of the foreground process group associated with
-                       the terminal device associated with the ssuuddoo process or
-                       -1 if there is no terminal present.  Only available
-                       starting with API version 1.2
-
-                 user=string
-                       The name of the user invoking ssuuddoo.
-
-                 euid=uid_t
-                       The effective user ID of the user invoking ssuuddoo.
-
-                 uid=uid_t
-                       The real user ID of the user invoking ssuuddoo.
+                 cwd=string
+                       The user's current working directory.
 
                  egid=gid_t
                        The effective group ID of the user invoking ssuuddoo.
+
+                 euid=uid_t
+                       The effective user ID of the user invoking ssuuddoo.
 
                  gid=gid_t
                        The real group ID of the user invoking ssuuddoo.
@@ -268,14 +246,6 @@ DDEESSCCRRIIPPTTIIOONN
                  groups=list
                        The user's supplementary group list formatted as a
                        string of comma-separated group IDs.
-
-                 cwd=string
-                       The user's current working directory.
-
-                 tty=string
-                       The path to the user's terminal device.  If the user
-                       has no terminal device associated with the session, the
-                       value will be empty, as in ``tty=''.
 
                  host=string
                        The local machine's hostname as returned by the
@@ -286,10 +256,54 @@ DDEESSCCRRIIPPTTIIOONN
                        there is no terminal device available, a default value
                        of 24 is used.
 
-                 cols=int
-                       The number of columns the user's terminal supports.  If
-                       there is no terminal device available, a default value
-                       of 80 is used.
+                 pgid=int
+                       The ID of the process group that the running ssuuddoo
+                       process is a member of.  Only available starting with
+                       API version 1.2
+
+                 pid=int
+                       The process ID of the running ssuuddoo process.  Only
+                       available starting with API version 1.2
+
+                 plugin_options
+                       Any (non-comment) strings immediately after the plugin
+                       path are passed as arguments to the plugin.  These
+                       arguments are split on a white space boundary and are
+                       passed to the plugin in the form of a NULL-terminated
+                       array of strings.  If no arguments were specified,
+                       _p_l_u_g_i_n___o_p_t_i_o_n_s will be the NULL pointer.
+
+                       NOTE: the _p_l_u_g_i_n___o_p_t_i_o_n_s parameter is only available
+                       starting with API version 1.2.  A plugin mmuusstt check the
+                       API version specified by the ssuuddoo front end before
+                       using _p_l_u_g_i_n___o_p_t_i_o_n_s.  Failure to do so may result in a
+                       crash.
+
+                 ppid=int
+                       The parent process ID of the running ssuuddoo process.
+                       Only available starting with API version 1.2
+
+                 sid=int
+                       The session ID of the running ssuuddoo process or 0 if ssuuddoo
+                       is not part of a POSIX job control session.  Only
+                       available starting with API version 1.2
+
+                 tcpgid=int
+                       The ID of the foreground process group associated with
+                       the terminal device associated with the ssuuddoo process or
+                       -1 if there is no terminal present.  Only available
+                       starting with API version 1.2
+
+                 tty=string
+                       The path to the user's terminal device.  If the user
+                       has no terminal device associated with the session, the
+                       value will be empty, as in ``tty=''.
+
+                 uid=uid_t
+                       The real user ID of the user invoking ssuuddoo.
+
+                 user=string
+                       The name of the user invoking ssuuddoo.
 
            user_env
                  The user's environment in the form of a NULL-terminated
@@ -298,19 +312,6 @@ DDEESSCCRRIIPPTTIIOONN
                  When parsing _u_s_e_r___e_n_v, the plugin should split on the ffiirrsstt
                  equal sign (`=') since the _n_a_m_e field will never include one
                  itself but the _v_a_l_u_e might.
-
-           plugin_options
-                 Any (non-comment) strings immediately after the plugin path
-                 are treated as arguments to the plugin.  These arguments are
-                 split on a white space boundary and are passed to the plugin
-                 in the form of a NULL-terminated array of strings.  If no
-                 arguments were specified, _p_l_u_g_i_n___o_p_t_i_o_n_s will be the NULL
-                 pointer.
-
-                 NOTE: the _p_l_u_g_i_n___o_p_t_i_o_n_s parameter is only available starting
-                 with API version 1.2.  A plugin mmuusstt check the API version
-                 specified by the ssuuddoo front end before using _p_l_u_g_i_n___o_p_t_i_o_n_s.
-                 Failure to do so may result in a crash.
 
      close
            void (*close)(int exit_status, int error);
@@ -402,79 +403,62 @@ DDEESSCCRRIIPPTTIIOONN
                  must be terminated with a NULL pointer.  The following values
                  are recognized by ssuuddoo:
 
+                 chroot=string
+                       The root directory to use when running the command.
+
+                 closefrom=number
+                       If specified, ssuuddoo will close all files descriptors
+                       with a value of _n_u_m_b_e_r or higher.
+
                  command=string
                        Fully qualified path to the command to be executed.
-
-                 runas_uid=uid
-                       User ID to run the command as.
-
-                 runas_euid=uid
-                       Effective user ID to run the command as.  If not
-                       specified, the value of _r_u_n_a_s___u_i_d is used.
-
-                 runas_gid=gid
-                       Group ID to run the command as.
-
-                 runas_egid=gid
-                       Effective group ID to run the command as.  If not
-                       specified, the value of _r_u_n_a_s___g_i_d is used.
-
-                 runas_groups=list
-                       The supplementary group vector to use for the command
-                       in the form of a comma-separated list of group IDs.  If
-                       _p_r_e_s_e_r_v_e___g_r_o_u_p_s is set, this option is ignored.
-
-                 login_class=string
-                       BSD login class to use when setting resource limits and
-                       nice value (optional).  This option is only set on
-                       systems that support login classes.
-
-                 preserve_groups=bool
-                       If set, ssuuddoo will preserve the user's group vector
-                       instead of initializing the group vector based on
-                       runas_user.
 
                  cwd=string
                        The current working directory to change to when
                        executing the command.
 
-                 noexec=bool
-                       If set, prevent the command from executing other
-                       programs.
+                 exec_background=bool
+                       By default, ssuuddoo runs a command as the foreground
+                       process as long as ssuuddoo itself is running in the
+                       foreground.  When _e_x_e_c___b_a_c_k_g_r_o_u_n_d is enabled and the
+                       command is being run in a pty (due to I/O logging or
+                       the _u_s_e___p_t_y setting), the command will be run as a
+                       background process.  Attempts to read from the
+                       controlling terminal (or to change terminal settings)
+                       will result in the command being suspended with the
+                       SIGTTIN signal (or SIGTTOU in the case of terminal
+                       settings).  If this happens when ssuuddoo is a foreground
+                       process, the command will be granted the controlling
+                       terminal and resumed in the foreground with no user
+                       intervention required.  The advantage of initially
+                       running the command in the background is that ssuuddoo need
+                       not read from the terminal unless the command
+                       explicitly requests it.  Otherwise, any terminal input
+                       must be passed to the command, whether it has required
+                       it or not (the kernel buffers terminals so it is not
+                       possible to tell whether the command really wants the
+                       input).  This is different from historic _s_u_d_o behavior
+                       or when the command is not being run in a pty.
 
-                 chroot=string
-                       The root directory to use when running the command.
+                       For this to work seamlessly, the operating system must
+                       support the automatic restarting of system calls.
+                       Unfortunately, not all operating systems do this by
+                       default, and even those that do may have bugs.  For
+                       example, Mac OS X fails to restart the ttccggeettaattttrr() and
+                       ttccsseettaattttrr() system calls (this is a bug in Mac OS X).
+                       Furthermore, because this behavior depends on the
+                       command stopping with the SIGTTIN or SIGTTOU signals,
+                       programs that catch these signals and suspend
+                       themselves with a different signal (usually SIGTOP)
+                       will not be automatically foregrounded.  Some versions
+                       of the linux su(1) command behave this way.  Because of
+                       this, a plugin should not set _e_x_e_c___b_a_c_k_g_r_o_u_n_d unless it
+                       is explicitly enabled by the administrator and there
+                       should be a way to enabled or disable it on a per-
+                       command basis.
 
-                 nice=int
-                       Nice value (priority) to use when executing the
-                       command.  The nice value, if specified, overrides the
-                       priority associated with the _l_o_g_i_n___c_l_a_s_s on BSD
-                       systems.
-
-                 umask=octal
-                       The file creation mask to use when executing the
-                       command.
-
-                 selinux_role=string
-                       SELinux role to use when executing the command.
-
-                 selinux_type=string
-                       SELinux type to use when executing the command.
-
-                 timeout=int
-                       Command timeout.  If non-zero then when the timeout
-                       expires the command will be killed.
-
-                 sudoedit=bool
-                       Set to true when in _s_u_d_o_e_d_i_t mode.  The plugin may
-                       enable _s_u_d_o_e_d_i_t mode even if ssuuddoo was not invoked as
-                       ssuuddooeeddiitt.  This allows the plugin to perform command
-                       substitution and transparently enable _s_u_d_o_e_d_i_t when the
-                       user attempts to run an editor.
-
-                 closefrom=number
-                       If specified, ssuuddoo will close all files descriptors
-                       with a value of _n_u_m_b_e_r or higher.
+                       This setting has no effect unless I/O logging is
+                       enabled or _u_s_e___p_t_y is enabled.
 
                  iolog_compress=bool
                        Set to true if the I/O logging plugins, if any, should
@@ -520,17 +504,77 @@ DDEESSCCRRIIPPTTIIOONN
                        hint to the I/O logging plugin which may choose to
                        ignore it.
 
-                 use_pty=bool
-                       Allocate a pseudo-tty to run the command in, regardless
-                       of whether or not I/O logging is in use.  By default,
-                       ssuuddoo will only run the command in a pty when an I/O log
-                       plugin is loaded.
+                 login_class=string
+                       BSD login class to use when setting resource limits and
+                       nice value (optional).  This option is only set on
+                       systems that support login classes.
+
+                 nice=int
+                       Nice value (priority) to use when executing the
+                       command.  The nice value, if specified, overrides the
+                       priority associated with the _l_o_g_i_n___c_l_a_s_s on BSD
+                       systems.
+
+                 noexec=bool
+                       If set, prevent the command from executing other
+                       programs.
+
+                 preserve_groups=bool
+                       If set, ssuuddoo will preserve the user's group vector
+                       instead of initializing the group vector based on
+                       runas_user.
+
+                 runas_egid=gid
+                       Effective group ID to run the command as.  If not
+                       specified, the value of _r_u_n_a_s___g_i_d is used.
+
+                 runas_euid=uid
+                       Effective user ID to run the command as.  If not
+                       specified, the value of _r_u_n_a_s___u_i_d is used.
+
+                 runas_gid=gid
+                       Group ID to run the command as.
+
+                 runas_groups=list
+                       The supplementary group vector to use for the command
+                       in the form of a comma-separated list of group IDs.  If
+                       _p_r_e_s_e_r_v_e___g_r_o_u_p_s is set, this option is ignored.
+
+                 runas_uid=uid
+                       User ID to run the command as.
+
+                 selinux_role=string
+                       SELinux role to use when executing the command.
+
+                 selinux_type=string
+                       SELinux type to use when executing the command.
 
                  set_utmp=bool
                        Create a utmp (or utmpx) entry when a pseudo-tty is
                        allocated.  By default, the new entry will be a copy of
                        the user's existing utmp entry (if any), with the tty,
                        time, type and pid fields updated.
+
+                 sudoedit=bool
+                       Set to true when in _s_u_d_o_e_d_i_t mode.  The plugin may
+                       enable _s_u_d_o_e_d_i_t mode even if ssuuddoo was not invoked as
+                       ssuuddooeeddiitt.  This allows the plugin to perform command
+                       substitution and transparently enable _s_u_d_o_e_d_i_t when the
+                       user attempts to run an editor.
+
+                 timeout=int
+                       Command timeout.  If non-zero then when the timeout
+                       expires the command will be killed.
+
+                 umask=octal
+                       The file creation mask to use when executing the
+                       command.
+
+                 use_pty=bool
+                       Allocate a pseudo-tty to run the command in, regardless
+                       of whether or not I/O logging is in use.  By default,
+                       ssuuddoo will only run the command in a pty when an I/O log
+                       plugin is loaded.
 
                  utmp_user=string
                        User name to use when constructing a new utmp (or
@@ -539,49 +583,6 @@ DDEESSCCRRIIPPTTIIOONN
                        user the command runs as rather than the invoking user.
                        If not set, ssuuddoo will base the new entry on the
                        invoking user's existing entry.
-
-                 exec_background=bool
-                       By default, ssuuddoo runs a command as the foreground
-                       process as long as ssuuddoo itself is running in the
-                       foreground.  When _e_x_e_c___b_a_c_k_g_r_o_u_n_d is enabled and the
-                       command is being run in a pty (due to I/O logging or
-                       the _u_s_e___p_t_y setting), the command will be run as a
-                       background process.  Attempts to read from the
-                       controlling terminal (or to change terminal settings)
-                       will result in the command being suspended with the
-                       SIGTTIN signal (or SIGTTOU in the case of terminal
-                       settings).  If this happens when ssuuddoo is a foreground
-                       process, the command will be granted the controlling
-                       terminal and resumed in the foreground with no user
-                       intervention required.  The advantage of initially
-                       running the command in the background is that ssuuddoo need
-                       not read from the terminal unless the command
-                       explicitly requests it.  Otherwise, any terminal input
-                       must be passed to the command, whether it has required
-                       it or not (the kernel buffers terminals so it is not
-                       possible to tell whether the command really wants the
-                       input).  This is different from historic _s_u_d_o behavior
-                       or when the command is not being run in a pty.
-
-                       For this to work seamlessly, the operating system must
-                       support the automatic restarting of system calls.
-                       Unfortunately, not all operating systems do this by
-                       default, and even those that do may have bugs.  For
-                       example, Mac OS X fails to restart the ttccggeettaattttrr() and
-                       ttccsseettaattttrr() system calls (this is a bug in Mac OS X).
-                       Furthermore, because this behavior depends on the
-                       command stopping with the SIGTTIN or SIGTTOU signals,
-                       programs that catch these signals and suspend
-                       themselves with a different signal (usually SIGTOP)
-                       will not be automatically foregrounded.  Some versions
-                       of the linux su(1) command behave this way.  Because of
-                       this, a plugin should not set _e_x_e_c___b_a_c_k_g_r_o_u_n_d unless it
-                       is explicitly enabled by the administrator and there
-                       should be a way to enabled or disable it on a per-
-                       command basis.
-
-                       This setting has no effect unless I/O logging is
-                       enabled or _u_s_e___p_t_y is enabled.
 
                  Unsupported values will be ignored.
 
@@ -1384,4 +1385,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.7                     February 5, 2013                     Sudo 1.8.7
+Sudo 1.8.7                     February 7, 2013                     Sudo 1.8.7

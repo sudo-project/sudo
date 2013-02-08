@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "February 5, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO_PLUGIN" "5" "February 7, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -180,6 +180,24 @@ itself but the
 might.
 .RS
 .TP 6n
+bsdauth_type=string
+Authentication type, if specified by the
+\fB\-a\fR
+flag, to use on
+systems where BSD authentication is supported.
+.TP 6n
+closefrom=number
+If specified, the user has requested via the
+\fB\-C\fR
+flag that
+\fBsudo\fR
+close all files descriptors with a value of
+\fInumber\fR
+or higher.
+The plugin may optionally pass this, or another value, back in the
+\fIcommand_info\fR
+list.
+.TP 6n
 debug_flags=string
 A comma-separated list of debug flags that correspond to
 \fBsudo\fR's
@@ -207,53 +225,12 @@ debug_level=number
 This setting has been deprecated in favor of
 \fIdebug_flags\fR.
 .TP 6n
-runas_user=string
-The user name or uid to to run the command as, if specified via the
-\fB\-u\fR
-flag.
-.TP 6n
-runas_group=string
-The group name or gid to to run the command as, if specified via
-the
-\fB\-g\fR
-flag.
-.TP 6n
-prompt=string
-The prompt to use when requesting a password, if specified via
-the
-\fB\-p\fR
-flag.
-.TP 6n
-set_home=bool
+ignore_ticket=bool
 Set to true if the user specified the
-\fB\-H\fR
-flag.
-If true, set the
-\fRHOME\fR
-environment variable to the target user's home directory.
-.TP 6n
-preserve_environment=bool
-Set to true if the user specified the
-\fB\-E\fR
-flag, indicating that
-the user wishes to preserve the environment.
-.TP 6n
-run_shell=bool
-Set to true if the user specified the
-\fB\-s\fR
-flag, indicating that
-the user wishes to run a shell.
-.TP 6n
-login_shell=bool
-Set to true if the user specified the
-\fB\-i\fR
-flag, indicating that
-the user wishes to run a login shell.
-.TP 6n
-implied_shell=bool
-If the user does not specify a program on the command line,
-\fBsudo\fR
-will pass the plugin the path to the user's shell and set
+\fB\-k\fR
+flag along with a
+command, indicating that the user wishes to ignore any cached
+authentication credentials.
 \fIimplied_shell\fR
 to true.
 This allows
@@ -269,19 +246,34 @@ function, which will cause
 to print a usage message and
 exit.
 .TP 6n
-preserve_groups=bool
-Set to true if the user specified the
-\fB\-P\fR
-flag, indicating that
-the user wishes to preserve the group vector instead of setting it
-based on the runas user.
+implied_shell=bool
+If the user does not specify a program on the command line,
+\fBsudo\fR
+will pass the plugin the path to the user's shell and set
 .TP 6n
-ignore_ticket=bool
+login_class=string
+BSD login class to use when setting resource limits and nice value,
+if specified by the
+\fB\-c\fR
+flag.
+.TP 6n
+login_shell=bool
 Set to true if the user specified the
-\fB\-k\fR
-flag along with a
-command, indicating that the user wishes to ignore any cached
-authentication credentials.
+\fB\-i\fR
+flag, indicating that
+the user wishes to run a login shell.
+.TP 6n
+network_addrs=list
+A space-separated list of IP network addresses and netmasks in the
+form
+``addr/netmask'',
+e.g.\&
+``192.168.1.2/255.255.255.0''.
+The address and netmask pairs may be either IPv4 or IPv6, depending on
+what the operating system supports.
+If the address contains a colon
+(`:\&'),
+it is an IPv6 address, else it is IPv4.
 .TP 6n
 noninteractive=bool
 Set to true if the user specified the
@@ -292,10 +284,46 @@ should operate in non-interactive mode.
 The plugin may reject a command run in non-interactive mode if user
 interaction is required.
 .TP 6n
-login_class=string
-BSD login class to use when setting resource limits and nice value,
-if specified by the
-\fB\-c\fR
+preserve_environment=bool
+Set to true if the user specified the
+\fB\-E\fR
+flag, indicating that
+the user wishes to preserve the environment.
+.TP 6n
+preserve_groups=bool
+Set to true if the user specified the
+\fB\-P\fR
+flag, indicating that
+the user wishes to preserve the group vector instead of setting it
+based on the runas user.
+.TP 6n
+progname=string
+The command name that sudo was run as, typically
+``sudo''
+or
+``sudoedit''.
+.TP 6n
+prompt=string
+The prompt to use when requesting a password, if specified via
+the
+\fB\-p\fR
+flag.
+.TP 6n
+run_shell=bool
+Set to true if the user specified the
+\fB\-s\fR
+flag, indicating that
+the user wishes to run a shell.
+.TP 6n
+runas_group=string
+The group name or gid to to run the command as, if specified via
+the
+\fB\-g\fR
+flag.
+.TP 6n
+runas_user=string
+The user name or uid to to run the command as, if specified via the
+\fB\-u\fR
 flag.
 .TP 6n
 selinux_role=string
@@ -310,29 +338,13 @@ the
 \fB\-t\fR
 flag.
 .TP 6n
-bsdauth_type=string
-Authentication type, if specified by the
-\fB\-a\fR
-flag, to use on
-systems where BSD authentication is supported.
-.TP 6n
-network_addrs=list
-A space-separated list of IP network addresses and netmasks in the
-form
-``addr/netmask'',
-e.g.\&
-``192.168.1.2/255.255.255.0''.
-The address and netmask pairs may be either IPv4 or IPv6, depending on
-what the operating system supports.
-If the address contains a colon
-(`:\&'),
-it is an IPv6 address, else it is IPv4.
-.TP 6n
-progname=string
-The command name that sudo was run as, typically
-``sudo''
-or
-``sudoedit''.
+set_home=bool
+Set to true if the user specified the
+\fB\-H\fR
+flag.
+If true, set the
+\fRHOME\fR
+environment variable to the target user's home directory.
 .TP 6n
 sudoedit=bool
 Set to true when the
@@ -349,18 +361,6 @@ if the plugin does not support
 For more information, see the
 \fIcheck_policy\fR
 section.
-.TP 6n
-closefrom=number
-If specified, the user has requested via the
-\fB\-C\fR
-flag that
-\fBsudo\fR
-close all files descriptors with a value of
-\fInumber\fR
-or higher.
-The plugin may optionally pass this, or another value, back in the
-\fIcommand_info\fR
-list.
 .PP
 Additional settings may be added in the future so the plugin should
 silently ignore settings that it does not recognize.
@@ -391,56 +391,19 @@ might.
 .RS
 .PD
 .TP 6n
-pid=int
-The process ID of the running
-\fBsudo\fR
-process.
-Only available starting with API version 1.2
+cols=int
+The number of columns the user's terminal supports.
+If there is no terminal device available, a default value of 80 is used.
 .TP 6n
-ppid=int
-The parent process ID of the running
-\fBsudo\fR
-process.
-Only available starting with API version 1.2
+cwd=string
+The user's current working directory.
 .TP 6n
-sid=int
-The session ID of the running
-\fBsudo\fR
-process or 0 if
-\fBsudo\fR
-is
-not part of a POSIX job control session.
-Only available starting with API version 1.2
-.TP 6n
-pgid=int
-The ID of the process group that the running
-\fBsudo\fR
-process belongs
-to.
-Only available starting with API version 1.2
-.TP 6n
-tcpgid=int
-The ID of the foreground process group associated with the terminal
-device associated with the
-\fBsudo\fR
-process or \-1 if there is no
-terminal present.
-Only available starting with API version 1.2
-.TP 6n
-user=string
-The name of the user invoking
+egid=gid_t
+The effective group ID of the user invoking
 \fBsudo\fR.
 .TP 6n
 euid=uid_t
 The effective user ID of the user invoking
-\fBsudo\fR.
-.TP 6n
-uid=uid_t
-The real user ID of the user invoking
-\fBsudo\fR.
-.TP 6n
-egid=gid_t
-The effective group ID of the user invoking
 \fBsudo\fR.
 .TP 6n
 gid=gid_t
@@ -450,15 +413,6 @@ The real group ID of the user invoking
 groups=list
 The user's supplementary group list formatted as a string of
 comma-separated group IDs.
-.TP 6n
-cwd=string
-The user's current working directory.
-.TP 6n
-tty=string
-The path to the user's terminal device.
-If the user has no terminal device associated with the session,
-the value will be empty, as in
-``\fRtty=\fR''.
 .TP 6n
 host=string
 The local machine's hostname as returned by the
@@ -470,36 +424,21 @@ The number of lines the user's terminal supports.
 If there is
 no terminal device available, a default value of 24 is used.
 .TP 6n
-cols=int
-The number of columns the user's terminal supports.
-If there is no terminal device available, a default value of 80 is used.
-.PP
-.RE
-.PD 0
+pgid=int
+The ID of the process group that the running
+\fBsudo\fR
+process is a member of.
+Only available starting with API version 1.2
 .TP 6n
-user_env
-The user's environment in the form of a
-\fRNULL\fR-terminated vector of
-``name=value''
-strings.
-.sp
-When parsing
-\fIuser_env\fR,
-the plugin should split on the
-\fBfirst\fR
-equal sign
-(`=')
-since the
-\fIname\fR
-field will never include one
-itself but the
-\fIvalue\fR
-might.
-.PD
+pid=int
+The process ID of the running
+\fBsudo\fR
+process.
+Only available starting with API version 1.2
 .TP 6n
 plugin_options
 Any (non-comment) strings immediately after the plugin path are
-treated as arguments to the plugin.
+passed as arguments to the plugin.
 These arguments are split on a white space boundary and are passed to
 the plugin in the form of a
 \fRNULL\fR-terminated
@@ -523,6 +462,65 @@ by the
 front end before using
 \fIplugin_options\fR.
 Failure to do so may result in a crash.
+.TP 6n
+ppid=int
+The parent process ID of the running
+\fBsudo\fR
+process.
+Only available starting with API version 1.2
+.TP 6n
+sid=int
+The session ID of the running
+\fBsudo\fR
+process or 0 if
+\fBsudo\fR
+is not part of a POSIX job control session.
+Only available starting with API version 1.2
+.TP 6n
+tcpgid=int
+The ID of the foreground process group associated with the terminal
+device associated with the
+\fBsudo\fR
+process or \-1 if there is no
+terminal present.
+Only available starting with API version 1.2
+.TP 6n
+tty=string
+The path to the user's terminal device.
+If the user has no terminal device associated with the session,
+the value will be empty, as in
+``\fRtty=\fR''.
+.TP 6n
+uid=uid_t
+The real user ID of the user invoking
+\fBsudo\fR.
+.TP 6n
+user=string
+The name of the user invoking
+\fBsudo\fR.
+.PP
+.RE
+.PD 0
+.TP 6n
+user_env
+The user's environment in the form of a
+\fRNULL\fR-terminated vector of
+``name=value''
+strings.
+.sp
+When parsing
+\fIuser_env\fR,
+the plugin should split on the
+\fBfirst\fR
+equal sign
+(`=')
+since the
+\fIname\fR
+field will never include one
+itself but the
+\fIvalue\fR
+might.
+.PD
 .PP
 .RE
 .PD 0
@@ -743,88 +741,8 @@ The following values are recognized by
 \fBsudo\fR:
 .RS
 .TP 6n
-command=string
-Fully qualified path to the command to be executed.
-.TP 6n
-runas_uid=uid
-User ID to run the command as.
-.TP 6n
-runas_euid=uid
-Effective user ID to run the command as.
-If not specified, the value of
-\fIrunas_uid\fR
-is used.
-.TP 6n
-runas_gid=gid
-Group ID to run the command as.
-.TP 6n
-runas_egid=gid
-Effective group ID to run the command as.
-If not specified, the value of
-\fIrunas_gid\fR
-is used.
-.TP 6n
-runas_groups=list
-The supplementary group vector to use for the command in the form
-of a comma-separated list of group IDs.
-If
-\fIpreserve_groups\fR
-is set, this option is ignored.
-.TP 6n
-login_class=string
-BSD login class to use when setting resource limits and nice value
-(optional).
-This option is only set on systems that support login classes.
-.TP 6n
-preserve_groups=bool
-If set,
-\fBsudo\fR
-will preserve the user's group vector instead of
-initializing the group vector based on
-\fRrunas_user\fR.
-.TP 6n
-cwd=string
-The current working directory to change to when executing the command.
-.TP 6n
-noexec=bool
-If set, prevent the command from executing other programs.
-.TP 6n
 chroot=string
 The root directory to use when running the command.
-.TP 6n
-nice=int
-Nice value (priority) to use when executing the command.
-The nice value, if specified, overrides the priority associated with the
-\fIlogin_class\fR
-on BSD systems.
-.TP 6n
-umask=octal
-The file creation mask to use when executing the command.
-.TP 6n
-selinux_role=string
-SELinux role to use when executing the command.
-.TP 6n
-selinux_type=string
-SELinux type to use when executing the command.
-.TP 6n
-timeout=int
-Command timeout.
-If non-zero then when the timeout expires the command will be killed.
-.TP 6n
-sudoedit=bool
-Set to true when in
-\fIsudoedit\fR
-mode.
-The plugin may enable
-\fIsudoedit\fR
-mode even if
-\fBsudo\fR
-was not invoked as
-\fBsudoedit\fR.
-This allows the plugin to perform command substitution and transparently
-enable
-\fIsudoedit\fR
-when the user attempts to run an editor.
 .TP 6n
 closefrom=number
 If specified,
@@ -834,68 +752,11 @@ of
 \fInumber\fR
 or higher.
 .TP 6n
-iolog_compress=bool
-Set to true if the I/O logging plugins, if any, should compress the
-log data.
-This is a hint to the I/O logging plugin which may choose to ignore it.
+command=string
+Fully qualified path to the command to be executed.
 .TP 6n
-iolog_path=string
-Fully qualified path to the file or directory in which I/O log is
-to be stored.
-This is a hint to the I/O logging plugin which may choose to ignore it.
-If no I/O logging plugin is loaded, this setting has no effect.
-.TP 6n
-iolog_stdin=bool
-Set to true if the I/O logging plugins, if any, should log the
-standard input if it is not connected to a terminal device.
-This is a hint to the I/O logging plugin which may choose to ignore it.
-.TP 6n
-iolog_stdout=bool
-Set to true if the I/O logging plugins, if any, should log the
-standard output if it is not connected to a terminal device.
-This is a hint to the I/O logging plugin which may choose to ignore it.
-.TP 6n
-iolog_stderr=bool
-Set to true if the I/O logging plugins, if any, should log the
-standard error if it is not connected to a terminal device.
-This is a hint to the I/O logging plugin which may choose to ignore it.
-.TP 6n
-iolog_ttyin=bool
-Set to true if the I/O logging plugins, if any, should log all
-terminal input.
-This only includes input typed by the user and not from a pipe or
-redirected from a file.
-This is a hint to the I/O logging plugin which may choose to ignore it.
-.TP 6n
-iolog_ttyout=bool
-Set to true if the I/O logging plugins, if any, should log all
-terminal output.
-This only includes output to the screen, not output to a pipe or file.
-This is a hint to the I/O logging plugin which may choose to ignore it.
-.TP 6n
-use_pty=bool
-Allocate a pseudo-tty to run the command in, regardless of whether
-or not I/O logging is in use.
-By default,
-\fBsudo\fR
-will only run
-the command in a pty when an I/O log plugin is loaded.
-.TP 6n
-set_utmp=bool
-Create a utmp (or utmpx) entry when a pseudo-tty is allocated.
-By default, the new entry will be a copy of the user's existing utmp
-entry (if any), with the tty, time, type and pid fields updated.
-.TP 6n
-utmp_user=string
-User name to use when constructing a new utmp (or utmpx) entry when
-\fIset_utmp\fR
-is enabled.
-This option can be used to set the user field in the utmp entry to
-the user the command runs as rather than the invoking user.
-If not set,
-\fBsudo\fR
-will base the new entry on
-the invoking user's existing entry.
+cwd=string
+The current working directory to change to when executing the command.
 .TP 6n
 exec_background=bool
 By default,
@@ -957,6 +818,143 @@ be a way to enabled or disable it on a per-command basis.
 This setting has no effect unless I/O logging is enabled or
 \fIuse_pty\fR
 is enabled.
+.TP 6n
+iolog_compress=bool
+Set to true if the I/O logging plugins, if any, should compress the
+log data.
+This is a hint to the I/O logging plugin which may choose to ignore it.
+.TP 6n
+iolog_path=string
+Fully qualified path to the file or directory in which I/O log is
+to be stored.
+This is a hint to the I/O logging plugin which may choose to ignore it.
+If no I/O logging plugin is loaded, this setting has no effect.
+.TP 6n
+iolog_stdin=bool
+Set to true if the I/O logging plugins, if any, should log the
+standard input if it is not connected to a terminal device.
+This is a hint to the I/O logging plugin which may choose to ignore it.
+.TP 6n
+iolog_stdout=bool
+Set to true if the I/O logging plugins, if any, should log the
+standard output if it is not connected to a terminal device.
+This is a hint to the I/O logging plugin which may choose to ignore it.
+.TP 6n
+iolog_stderr=bool
+Set to true if the I/O logging plugins, if any, should log the
+standard error if it is not connected to a terminal device.
+This is a hint to the I/O logging plugin which may choose to ignore it.
+.TP 6n
+iolog_ttyin=bool
+Set to true if the I/O logging plugins, if any, should log all
+terminal input.
+This only includes input typed by the user and not from a pipe or
+redirected from a file.
+This is a hint to the I/O logging plugin which may choose to ignore it.
+.TP 6n
+iolog_ttyout=bool
+Set to true if the I/O logging plugins, if any, should log all
+terminal output.
+This only includes output to the screen, not output to a pipe or file.
+This is a hint to the I/O logging plugin which may choose to ignore it.
+.TP 6n
+login_class=string
+BSD login class to use when setting resource limits and nice value
+(optional).
+This option is only set on systems that support login classes.
+.TP 6n
+nice=int
+Nice value (priority) to use when executing the command.
+The nice value, if specified, overrides the priority associated with the
+\fIlogin_class\fR
+on BSD systems.
+.TP 6n
+noexec=bool
+If set, prevent the command from executing other programs.
+.TP 6n
+preserve_groups=bool
+If set,
+\fBsudo\fR
+will preserve the user's group vector instead of
+initializing the group vector based on
+\fRrunas_user\fR.
+.TP 6n
+runas_egid=gid
+Effective group ID to run the command as.
+If not specified, the value of
+\fIrunas_gid\fR
+is used.
+.TP 6n
+runas_euid=uid
+Effective user ID to run the command as.
+If not specified, the value of
+\fIrunas_uid\fR
+is used.
+.TP 6n
+runas_gid=gid
+Group ID to run the command as.
+.TP 6n
+runas_groups=list
+The supplementary group vector to use for the command in the form
+of a comma-separated list of group IDs.
+If
+\fIpreserve_groups\fR
+is set, this option is ignored.
+.TP 6n
+runas_uid=uid
+User ID to run the command as.
+.TP 6n
+selinux_role=string
+SELinux role to use when executing the command.
+.TP 6n
+selinux_type=string
+SELinux type to use when executing the command.
+.TP 6n
+set_utmp=bool
+Create a utmp (or utmpx) entry when a pseudo-tty is allocated.
+By default, the new entry will be a copy of the user's existing utmp
+entry (if any), with the tty, time, type and pid fields updated.
+.TP 6n
+sudoedit=bool
+Set to true when in
+\fIsudoedit\fR
+mode.
+The plugin may enable
+\fIsudoedit\fR
+mode even if
+\fBsudo\fR
+was not invoked as
+\fBsudoedit\fR.
+This allows the plugin to perform command substitution and transparently
+enable
+\fIsudoedit\fR
+when the user attempts to run an editor.
+.TP 6n
+timeout=int
+Command timeout.
+If non-zero then when the timeout expires the command will be killed.
+.TP 6n
+umask=octal
+The file creation mask to use when executing the command.
+.TP 6n
+use_pty=bool
+Allocate a pseudo-tty to run the command in, regardless of whether
+or not I/O logging is in use.
+By default,
+\fBsudo\fR
+will only run
+the command in a pty when an I/O log plugin is loaded.
+.TP 6n
+utmp_user=string
+User name to use when constructing a new utmp (or utmpx) entry when
+\fIset_utmp\fR
+is enabled.
+This option can be used to set the user field in the utmp entry to
+the user the command runs as rather than the invoking user.
+If not set,
+\fBsudo\fR
+will base the new entry on
+the invoking user's existing entry.
 .PP
 Unsupported values will be ignored.
 .PP
