@@ -80,13 +80,14 @@ build_timestamp(void)
     int len;
     debug_decl(build_timestamp, SUDO_DEBUG_AUTH)
 
-    /* Stash the tty's ctime for tty ticket comparison. */
+    /* Stash the tty's device, session ID and ctime for ticket comparison. */
     if (def_tty_tickets && user_ttypath && stat(user_ttypath, &sb) == 0) {
 	tty_info.dev = sb.st_dev;
 	tty_info.ino = sb.st_ino;
 	tty_info.rdev = sb.st_rdev;
 	if (tty_is_devpts(user_ttypath))
 	    ctim_get(&sb, &tty_info.ctime);
+	tty_info.sid = user_sid;
     }
 
     dirparent = def_timestampdir;

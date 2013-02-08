@@ -270,6 +270,10 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    sudo_user.cols = atoi(*cur + sizeof("cols=") - 1);
 	    continue;
 	}
+	if (MATCHES(*cur, "sid=")) {
+	    sudo_user.sid = atoi(*cur + sizeof("sid=") - 1);
+	    continue;
+	}
     }
     if (user_cwd == NULL)
 	user_cwd = "unknown";

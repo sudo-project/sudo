@@ -37,6 +37,7 @@ struct sudo_tty_info {
     dev_t rdev;			/* tty device ID */
     ino_t ino;			/* tty inode number */
     struct timeval ctime;	/* tty inode change time */
+    pid_t sid;			/* ID of session with controlling tty */
 };
 
 bool  update_timestamp(void);
