@@ -211,6 +211,7 @@ main(argc, argv, envp)
      *  us at some point and avoid the logging.
      *  Install handler to wait for children when they exit.
      */
+    save_signals();
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
@@ -1113,7 +1114,6 @@ initial_setup()
     /* Reset signal mask and save signal state. */
     (void) sigemptyset(&mask);
     (void) sigprocmask(SIG_SETMASK, &mask, NULL);
-    save_signals();
 
 #if defined(__linux__)
     /*
