@@ -1,3 +1,14 @@
+What's new in Sudo 1.7.10p6?
+
+ * Fixed the restoration of SIGINT, SIGQUIT and SIGTSTP.  This
+   is a regression introduced in version 1.7.10p4.
+
+ * The tty-specific time stamp file now includes the session ID
+   of the sudo process that created it.  If a process with the same
+   tty but a different session ID runs sudo, the user will now be
+   prompted for a password (assuming authentication is required for
+   the command).
+
 What's new in Sudo 1.7.10p5?
 
  * On systems where the controlling tty can be determined via /proc
