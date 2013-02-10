@@ -29,26 +29,10 @@ the UPGRADE file in the doc directory.
 For a history of sudo please see the HISTORY file in the doc directory.
 You can find a list of contributors to sudo in the doc/CONTRIBUTORS file.
 
-System requirements
-===================
-To build sudo from the source distribution you need a POSIX-compliant
-operating system (any modern version of BSD, Linux or Unix should
-work), an ANSI/ISO C compiler that supports variadic marcos (a C99
-feature) and the ar, make and ranlib utilities.
-
-If you wish to modify the parser then you will need flex version
-2.5.2 or later and either bison or byacc (sudo comes with a pre-flex'd
-tokenizer and pre-yacc'd grammar parser).  You'll also have to
-uncomment a few lines from the Makefile or run configure with the
---with-devel option.  You can get flex from http://flex.sourceforge.net/.
-You can get GNU bison from ftp://ftp.gnu.org/pub/gnu/bison/ or any
-GNU mirror.
-
 Building the release
 ====================
-Please read the installation guide in the `INSTALL' file before
-trying to build sudo.  Pay special attention to the "OS dependent notes"
-section.
+Please read the installation guide in the `INSTALL' file before trying to
+build sudo.  Pay special attention to the "OS dependent notes" section.
 
 Copyright
 =========
@@ -81,9 +65,9 @@ for the appropriate links.
 
 Web page
 ========
-There is a sudo web page at http://www.sudo.ws/ that contains
-an overview of sudo, documentation, downloads, information about
-beta versions and other useful info.
+There is a sudo web page at http://www.sudo.ws/ that contains an
+overview of sudo, documentation, downloads, a bug tracker, information
+about beta versions and other useful info.
 
 Bug reports
 ===========
