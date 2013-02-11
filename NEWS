@@ -1,3 +1,11 @@
+What's new in Sudo 1.8.6p7?
+
+ * The tty-specific time stamp file now includes the session ID
+   of the sudo process that created it.  If a process with the same
+   tty but a different session ID runs sudo, the user will now be
+   prompted for a password (assuming authentication is required for
+   the command).
+
 What's new in Sudo 1.8.6p6?
 
  * On systems where the controlling tty can be determined via /proc
@@ -91,7 +99,7 @@ What's new in Sudo 1.8.6?
    ldap.conf options.  A new ldap.conf option, TLS_KEYPW can be
    used to specify a password to decrypt the key database.
 
- * When constructing a time filter for use with LDAP sudoNotBefore    
+ * When constructing a time filter for use with LDAP sudoNotBefore
    and sudoNotAfter attributes, the current time now includes tenths
    of a second.  This fixes a problem with timed entries on Active
    Directory.
@@ -357,7 +365,7 @@ What's new in Sudo 1.8.3p1?
 
  * Fixed a crash in the monitor process on Solaris when NOPASSWD
    was specified or when authentication was disabled.
- 
+
  * Fixed matching of a Runas_Alias in the group section of a
    Runas_Spec.
 
