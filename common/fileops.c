@@ -204,11 +204,11 @@ sudo_parseln(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp)
 
 	if (*bufp == NULL || total + len >= *bufsizep) {
 	    void *tmp;
-	    unsigned int size = total + len + 1;
+	    size_t size = total + len + 1;
 
 	    if (size < 64) {
 		size = 64;
-	    } else {
+	    } else if (size <= 0x80000000) {
 		/* Round up to next highest power of two. */
 		size--;
 		size |= size >> 1;
