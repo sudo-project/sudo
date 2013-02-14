@@ -343,23 +343,35 @@ fix_fds(void)
  * for when we cannot (or don't want to) use getgroups().
  */
 static int
-fill_group_list(struct user_details *ud, int maxgroups)
+fill_group_list(struct user_details *ud, int system_maxgroups)
 {
     int tries, rval = -1;
     debug_decl(fill_group_list, SUDO_DEBUG_UTIL)
 
     /*
-     * It is possible to belong to more groups in the group database
-     * than NGROUPS_MAX.  We start off with NGROUPS_MAX * 4 entries
-     * and double this as needed.
+     * If user specified a max number of groups, use it, otherwise keep
+     * trying getgrouplist() until we have enough room in the array.
      */
-    ud->groups = NULL;
-    ud->ngroups = maxgroups << 1;
-    for (tries = 0; tries < 10 && rval == -1; tries++) {
-	ud->ngroups <<= 1;
-	efree(ud->groups);
+    ud->ngroups = sudo_conf_max_groups();
+    if (ud->ngroups != -1) {
 	ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
-	rval = getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
+	/* No error on insufficient space if user specified max_groups. */
+	(void)getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
+	rval = 0;
+    } else {
+	/*
+	 * It is possible to belong to more groups in the group database
+	 * than NGROUPS_MAX.  We start off with NGROUPS_MAX * 4 entries
+	 * and double this as needed.
+	 */
+	ud->groups = NULL;
+	ud->ngroups = system_maxgroups << 1;
+	for (tries = 0; tries < 10 && rval == -1; tries++) {
+	    ud->ngroups <<= 1;
+	    efree(ud->groups);
+	    ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
+	    rval = getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
+	}
     }
     debug_return_int(rval);
 }

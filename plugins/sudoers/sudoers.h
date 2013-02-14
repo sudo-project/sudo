@@ -93,6 +93,7 @@ struct sudo_user {
     int   lines;
     int   cols;
     int   flags;
+    int   max_groups;
     uid_t uid;
     uid_t gid;
     pid_t sid;

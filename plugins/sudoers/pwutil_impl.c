@@ -250,23 +250,29 @@ sudo_make_grlist_item(struct passwd *pw)
 	user_gids = NULL;
 	user_ngids = 0;
     } else {
+	if (sudo_user.max_groups != -1) {
+	    ngids = sudo_user.max_groups;
+	    gids = emalloc2(ngids, sizeof(GETGROUPS_T));
+	    (void)getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids);
+	} else {
 #if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
-        ngids = (int)sysconf(_SC_NGROUPS_MAX) * 2;
-        if (ngids < 0)
+	    ngids = (int)sysconf(_SC_NGROUPS_MAX) * 2;
+	    if (ngids < 0)
 #endif
-            ngids = NGROUPS_MAX * 2;
-	gids = emalloc2(ngids, sizeof(GETGROUPS_T));
-	if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1) {
-	    efree(gids);
+		ngids = NGROUPS_MAX * 2;
 	    gids = emalloc2(ngids, sizeof(GETGROUPS_T));
 	    if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1) {
 		efree(gids);
-		debug_return_ptr(NULL);
+		gids = emalloc2(ngids, sizeof(GETGROUPS_T));
+		if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1)
+		    ngids = -1;
 	    }
 	}
     }
-    if (ngids <= 0)
+    if (ngids <= 0) {
+	efree(gids);
 	debug_return_ptr(NULL);
+    }
 
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb((char *) pw->pw_name);
@@ -328,6 +334,7 @@ again:
 	}
     }
     grlist->ngroups = ngroups;
+    efree(gids);
 
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();

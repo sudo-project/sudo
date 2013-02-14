@@ -113,6 +113,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 
     /* Parse command line settings. */
     user_closefrom = -1;
+    sudo_user.max_groups = -1;
     for (cur = info->settings; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "closefrom=")) {
 	    user_closefrom = atoi(*cur + sizeof("closefrom=") - 1);
@@ -224,6 +225,10 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	if (MATCHES(*cur, "network_addrs=")) {
 	    interfaces_string = *cur + sizeof("network_addrs=") - 1;
 	    set_interfaces(interfaces_string);
+	    continue;
+	}
+	if (MATCHES(*cur, "max_groups=")) {
+	    sudo_user.max_groups = atoi(*cur + sizeof("max_groups=") - 1);
 	    continue;
 	}
     }
