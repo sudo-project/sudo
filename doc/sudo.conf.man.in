@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO" "5" "February 7, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO" "5" "February 14, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -351,7 +351,26 @@ Set group_source static
 This setting is only available in
 \fBsudo\fR
 version 1.8.7 and higher.
+.PP
 .RE
+.PD 0
+.TP 10n
+max_groups
+The maximum number of user groups to retrieve from the group database.
+This setting is only used when querying the group database directly.
+It is intended to be used on systems where it is not possible to detect
+when the array to be populated with group entries is not sufficiently large.
+By default,
+\fBsudo\fR
+will allocate four times the system's maximum number of groups (see above)
+and retry with double that number if the group database query fails.
+However, some systems just return as many entries as will fit and
+do not indicate an error when there is a lack of space.
+.sp
+This setting is only available in
+\fBsudo\fR
+version 1.8.7 and higher.
+.PD
 .SS "Debug flags"
 \fBsudo\fR
 versions 1.8.4 and higher support a flexible debugging framework
@@ -365,8 +384,8 @@ line consists of the
 \fRDebug\fR
 keyword, followed by the name of the program (or plugin) to debug
 (\fBsudo\fR, \fBvisudo\fR, \fBsudoreplay\fR, \fBsudoers\fR),
-the debug file name and a comma-separated list of debug flags.
-The debug flag syntax used by
+the debug file name and a comma-separated list of debug flags.  The
+debug flag syntax used by
 \fBsudo\fR
 and the
 \fBsudoers\fR
@@ -392,16 +411,14 @@ level for the plugin subsystem.
 .PP
 Currently, only one
 \fRDebug\fR
-entry per program is supported.
-The
+entry per program is supported.  The
 \fBsudo\fR
 \fRDebug\fR
 entry is shared by the
 \fBsudo\fR
 front end,
 \fBsudoedit\fR
-and the plugins.
-A future release may add support for per-plugin
+and the plugins.  A future release may add support for per-plugin
 \fRDebug\fR
 lines and/or support for multiple debugging files for a single
 program.
@@ -413,8 +430,7 @@ front end, in order of decreasing severity, are:
 and
 \fIdebug\fR.
 Each priority, when specified, also includes all priorities higher
-than it.
-For example, a priority of
+than it.  For example, a priority of
 \fInotice\fR
 would include debug messages logged at
 \fInotice\fR
@@ -475,26 +491,16 @@ front end configuration
 .SH "EXAMPLES"
 .nf
 .RS 0n
-#
-# Default @sysconfdir@/sudo.conf file
-#
-# Format:
-#   Plugin plugin_name plugin_path plugin_options ...
-#   Path askpass /path/to/askpass
-#   Path noexec /path/to/sudo_noexec.so
-#   Debug sudo /var/log/sudo_debug all@warn
-#   Set disable_coredump true
-#
-# The plugin_path is relative to @PLUGINDIR@ unless
-#   fully qualified.
-# The plugin_name corresponds to a global symbol in the plugin
-#   that contains the plugin interface structure.
-# The plugin_options are optional.
-#
-# The sudoers plugin is used by default if no Plugin lines are
-# present.
-Plugin policy_plugin sudoers.so
-Plugin io_plugin sudoers.so
+# # Default @sysconfdir@/sudo.conf file # # Format: #   Plugin
+plugin_name plugin_path plugin_options ...  #   Path askpass
+/path/to/askpass #   Path noexec /path/to/sudo_noexec.so #   Debug
+sudo /var/log/sudo_debug all@warn #   Set disable_coredump true #
+# The plugin_path is relative to @PLUGINDIR@ unless #   fully
+qualified.  # The plugin_name corresponds to a global symbol in the
+plugin #   that contains the plugin interface structure.  # The
+plugin_options are optional.  # # The sudoers plugin is used by
+default if no Plugin lines are # present.  Plugin policy_plugin
+sudoers.so Plugin io_plugin sudoers.so
 
 #
 # Sudo askpass:

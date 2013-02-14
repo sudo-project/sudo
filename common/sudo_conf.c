@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -43,6 +43,7 @@
 #endif /* HAVE_UNISTD_H */
 #include <ctype.h>
 #include <errno.h>
+#include <limits.h>
 
 #define SUDO_ERROR_WRAP	0
 
@@ -74,7 +75,7 @@ extern bool atobool(const char *str); /* atobool.c */
 struct sudo_conf_table {
     const char *name;
     unsigned int namelen;
-    bool (*setter)(const char *entry);
+    void (*setter)(const char *entry);
 };
 
 struct sudo_conf_paths {
@@ -83,10 +84,13 @@ struct sudo_conf_paths {
     const char *pval;
 };
 
-static bool set_debug(const char *entry);
-static bool set_path(const char *entry);
-static bool set_plugin(const char *entry);
-static bool set_variable(const char *entry);
+static void set_debug(const char *entry);
+static void set_path(const char *entry);
+static void set_plugin(const char *entry);
+static void set_variable(const char *entry);
+static void set_var_disable_coredump(const char *entry);
+static void set_var_group_source(const char *entry);
+static void set_var_max_groups(const char *entry);
 
 static unsigned int lineno;
 
@@ -98,15 +102,24 @@ static struct sudo_conf_table sudo_conf_table[] = {
     { NULL }
 };
 
+static struct sudo_conf_table sudo_conf_table_vars[] = {
+    { "disable_coredump", sizeof("disable_coredump") - 1, set_var_disable_coredump },
+    { "group_source", sizeof("group_source") - 1, set_var_group_source },
+    { "max_groups", sizeof("max_groups") - 1, set_var_max_groups },
+    { NULL }
+};
+
 static struct sudo_conf_data {
     bool disable_coredump;
     int group_source;
+    int max_groups;
     const char *debug_flags;
     struct sudo_conf_paths paths[3];
     struct plugin_info_list plugins;
 } sudo_conf_data = {
     true,
     GROUP_SOURCE_ADAPTIVE,
+    -1,
     NULL,
     {
 #define SUDO_CONF_ASKPASS_IDX	0
@@ -122,44 +135,64 @@ static struct sudo_conf_data {
 /*
  * "Set variable_name value"
  */
-static bool
+static void
 set_variable(const char *entry)
 {
-#undef DC_LEN
-#define DC_LEN (sizeof("disable_coredump") - 1)
-    if (strncmp(entry, "disable_coredump", DC_LEN) == 0 &&
-	isblank((unsigned char)entry[DC_LEN])) {
-	entry += DC_LEN + 1;
-	while (isblank((unsigned char)*entry))
-	    entry++;
-	sudo_conf_data.disable_coredump = atobool(entry);
-    }
-#undef DC_LEN
-#undef GS_LEN
-#define GS_LEN (sizeof("group_source") - 1)
-    if (strncmp(entry, "group_source", GS_LEN) == 0 &&
-	isblank((unsigned char)entry[GS_LEN])) {
-	entry += GS_LEN + 1;
-	while (isblank((unsigned char)*entry))
-	    entry++;
-	if (strcasecmp(entry, "adaptive") == 0) {
-	    sudo_conf_data.group_source = GROUP_SOURCE_ADAPTIVE;
-	} else if (strcasecmp(entry, "static") == 0) {
-	    sudo_conf_data.group_source = GROUP_SOURCE_STATIC;
-	} else if (strcasecmp(entry, "dynamic") == 0) {
-	    sudo_conf_data.group_source = GROUP_SOURCE_DYNAMIC;
-	} else {
-	    warningx(_("unsupported group source `%s' in %s, line %d"), entry,
-		_PATH_SUDO_CONF, lineno);
+    struct sudo_conf_table *var;
+
+    for (var = sudo_conf_table_vars; var->name != NULL; var++) {
+	if (strncmp(entry, var->name, var->namelen) == 0 &&
+	    isblank((unsigned char)entry[var->namelen])) {
+	    entry += var->namelen + 1;
+	    while (isblank((unsigned char)*entry))
+		entry++;
+	    var->setter(entry);
+	    break;
 	}
     }
-    return true;
+}
+
+static void
+set_var_disable_coredump(const char *entry)
+{
+    sudo_conf_data.disable_coredump = atobool(entry);
+}
+
+static void
+set_var_group_source(const char *entry)
+{
+    if (strcasecmp(entry, "adaptive") == 0) {
+	sudo_conf_data.group_source = GROUP_SOURCE_ADAPTIVE;
+    } else if (strcasecmp(entry, "static") == 0) {
+	sudo_conf_data.group_source = GROUP_SOURCE_STATIC;
+    } else if (strcasecmp(entry, "dynamic") == 0) {
+	sudo_conf_data.group_source = GROUP_SOURCE_DYNAMIC;
+    } else {
+	warningx(_("unsupported group source `%s' in %s, line %d"), entry,
+	    _PATH_SUDO_CONF, lineno);
+    }
+}
+
+static void
+set_var_max_groups(const char *entry)
+{
+    long lval;
+    char *ep;
+
+    lval = strtol(entry, &ep, 10);
+    if (*entry == '\0' || *ep != '\0' || lval < 0 || lval > INT_MAX ||
+	(errno == ERANGE && lval == LONG_MAX)) {
+	warningx(_("invalid max groups `%s' in %s, line %d"), entry,
+		    _PATH_SUDO_CONF, lineno);
+    } else {
+	sudo_conf_data.max_groups = (int)lval;
+    }
 }
 
 /*
  * "Debug progname debug_file debug_flags"
  */
-static bool
+static void
 set_debug(const char *entry)
 {
     size_t filelen, proglen;
@@ -173,14 +206,14 @@ set_debug(const char *entry)
     proglen = strlen(progname);
     if (strncmp(entry, progname, proglen) != 0 ||
 	!isblank((unsigned char)entry[proglen]))
-    	return false;
+    	return;
     entry += proglen + 1;
     while (isblank((unsigned char)*entry))
 	entry++;
 
     debug_flags = strpbrk(entry, " \t");
     if (debug_flags == NULL)
-    	return false;
+    	return;
     filelen = (size_t)(debug_flags - entry);
     while (isblank((unsigned char)*debug_flags))
 	debug_flags++;
@@ -192,11 +225,9 @@ set_debug(const char *entry)
     efree(debug_file);
 
     sudo_conf_data.debug_flags = debug_flags;
-
-    return true;
 }
 
-static bool
+static void
 set_path(const char *entry)
 {
     const char *name, *path;
@@ -206,7 +237,7 @@ set_path(const char *entry)
     name = entry;
     path = strpbrk(entry, " \t");
     if (path == NULL)
-    	return false;
+    	return;
     while (isblank((unsigned char)*path))
 	path++;
 
@@ -218,11 +249,9 @@ set_path(const char *entry)
 	    break;
 	}
     }
-
-    return true;
 }
 
-static bool
+static void
 set_plugin(const char *entry)
 {
     struct plugin_info *info;
@@ -235,7 +264,7 @@ set_plugin(const char *entry)
     name = entry;
     path = strpbrk(entry, " \t");
     if (path == NULL)
-    	return false;
+    	return;
     namelen = (size_t)(path - name);
     while (isblank((unsigned char)*path))
 	path++;
@@ -272,8 +301,6 @@ set_plugin(const char *entry)
     /* info->next = NULL; */
     info->lineno = lineno;
     tq_append(&sudo_conf_data.plugins, info);
-
-    return true;
 }
 
 const char *
@@ -300,6 +327,12 @@ int
 sudo_conf_group_source(void)
 {
     return sudo_conf_data.group_source;
+}
+
+int
+sudo_conf_max_groups(void)
+{
+    return sudo_conf_data.max_groups;
 }
 
 struct plugin_info_list *
@@ -374,8 +407,8 @@ sudo_conf_read(void)
 		cp += cur->namelen;
 		while (isblank((unsigned char)*cp))
 		    cp++;
-		if (cur->setter(cp))
-		    break;
+		cur->setter(cp);
+		break;
 	    }
 	}
     }
@@ -386,5 +419,4 @@ done:
     if (prev_locale[0] != 'C' || prev_locale[1] != '\0')
         setlocale(LC_ALL, prev_locale);
     efree(prev_locale);
-    return;
 }

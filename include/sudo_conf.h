@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -43,5 +43,6 @@ const char *sudo_conf_debug_flags(void);
 struct plugin_info_list *sudo_conf_plugins(void);
 bool sudo_conf_disable_coredump(void);
 int sudo_conf_group_source(void);
+int sudo_conf_max_groups(void);
 
 #endif /* _SUDO_CONF_H */
