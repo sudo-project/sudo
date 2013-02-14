@@ -107,7 +107,9 @@ static struct sudo_settings {
     { "closefrom" },
 #define ARG_NET_ADDRS 19
     { "network_addrs" },
-#define NUM_SETTINGS 20
+#define ARG_MAX_GROUPS 20
+    { "max_groups" },
+#define NUM_SETTINGS 21
     { NULL }
 };
 
@@ -149,6 +151,13 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     debug_flags = sudo_conf_debug_flags();
     if (debug_flags != NULL)
 	sudo_settings[ARG_DEBUG_FLAGS].value = debug_flags;
+
+    /* Set max_groups from sudo.conf. */
+    i = sudo_conf_max_groups();
+    if (i != -1) {
+	easprintf(&cp, "%d", i);
+	sudo_settings[ARG_MAX_GROUPS].value = cp;
+    }
 
     /* Returns true if the last option string was "--" */
 #define got_end_of_args	(optind > 1 && argv[optind - 1][0] == '-' && \

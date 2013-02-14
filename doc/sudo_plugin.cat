@@ -149,6 +149,11 @@ DDEESSCCRRIIPPTTIIOONN
                        Set to true if the user specified the --ii flag,
                        indicating that the user wishes to run a login shell.
 
+                 max_groups=int
+                       The maximum number of groups a user may belong to.
+                       This will only be present if there is a corresponding
+                       setting in sudo.conf(4).
+
                  network_addrs=list
                        A space-separated list of IP network addresses and
                        netmasks in the form ``addr/netmask'', e.g.
@@ -1362,6 +1367,8 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
      Version 1.3
            Support for the _e_x_e_c___b_a_c_k_g_r_o_u_n_d entry has been added to the
            command_info list.
+
+           The _m_a_x___g_r_o_u_p_s entry was added to the settings list.
 
            The ssuuddoo front end now installs default signal handlers to trap
            common signals while the plugin functions are run.

@@ -241,6 +241,10 @@ Set to true if the user specified the
 .Fl i
 flag, indicating that
 the user wishes to run a login shell.
+.It max_groups=int
+The maximum number of groups a user may belong to.
+This will only be present if there is a corresponding setting in
+.Xr sudo.conf @mansectform@ .
 .It network_addrs=list
 A space-separated list of IP network addresses and netmasks in the
 form
@@ -2118,6 +2122,12 @@ Support for the
 .Em exec_background
 entry has been added to the
 .Li command_info
+list.
+.Pp
+The
+.Em max_groups
+entry was added to the
+.Li settings
 list.
 .Pp
 The

@@ -263,6 +263,11 @@ Set to true if the user specified the
 flag, indicating that
 the user wishes to run a login shell.
 .TP 6n
+max_groups=int
+The maximum number of groups a user may belong to.
+This will only be present if there is a corresponding setting in
+sudo.conf(@mansectform@).
+.TP 6n
 network_addrs=list
 A space-separated list of IP network addresses and netmasks in the
 form
@@ -2460,6 +2465,12 @@ Support for the
 \fIexec_background\fR
 entry has been added to the
 \fRcommand_info\fR
+list.
+.sp
+The
+\fImax_groups\fR
+entry was added to the
+\fRsettings\fR
 list.
 .sp
 The
