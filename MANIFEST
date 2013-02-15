@@ -16,6 +16,13 @@ common/fileops.c
 common/fmt_string.c
 common/lbuf.c
 common/list.c
+common/regress/sudo_conf/conf_test.c
+common/regress/sudo_conf/test1.in
+common/regress/sudo_conf/test1.out.ok
+common/regress/sudo_conf/test2.in
+common/regress/sudo_conf/test2.out.ok
+common/regress/sudo_conf/test3.in
+common/regress/sudo_conf/test3.out.ok
 common/regress/sudo_parseln/parseln_test.c
 common/regress/sudo_parseln/test1.in
 common/regress/sudo_parseln/test1.out.ok

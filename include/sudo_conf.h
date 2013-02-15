@@ -34,7 +34,7 @@ struct plugin_info {
 TQ_DECLARE(plugin_info)
 
 /* Read main sudo.conf file. */
-void sudo_conf_read(void);
+void sudo_conf_read(const char *);
 
 /* Accessor functions. */
 const char *sudo_conf_askpass_path(void);

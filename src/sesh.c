@@ -57,7 +57,7 @@ main(int argc, char *argv[], char *envp[])
 	errorx(EXIT_FAILURE, _("requires at least one argument"));
 
     /* Read sudo.conf. */
-    sudo_conf_read();
+    sudo_conf_read(NULL);
 
     /* If argv[0] ends in -noexec, pass the flag to sudo_execve() */
     if ((cp = strrchr(argv[0], '-')) != NULL && cp != argv[0])

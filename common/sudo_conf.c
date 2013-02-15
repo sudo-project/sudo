@@ -75,7 +75,7 @@ extern bool atobool(const char *str); /* atobool.c */
 struct sudo_conf_table {
     const char *name;
     unsigned int namelen;
-    void (*setter)(const char *entry);
+    void (*setter)(const char *entry, const char *conf_file);
 };
 
 struct sudo_conf_paths {
@@ -84,15 +84,15 @@ struct sudo_conf_paths {
     const char *pval;
 };
 
-static void set_debug(const char *entry);
-static void set_path(const char *entry);
-static void set_plugin(const char *entry);
-static void set_variable(const char *entry);
-static void set_var_disable_coredump(const char *entry);
-static void set_var_group_source(const char *entry);
-static void set_var_max_groups(const char *entry);
+static void set_debug(const char *entry, const char *conf_file);
+static void set_path(const char *entry, const char *conf_file);
+static void set_plugin(const char *entry, const char *conf_file);
+static void set_variable(const char *entry, const char *conf_file);
+static void set_var_disable_coredump(const char *entry, const char *conf_file);
+static void set_var_group_source(const char *entry, const char *conf_file);
+static void set_var_max_groups(const char *entry, const char *conf_file);
 
-static unsigned int lineno;
+static unsigned int conf_lineno;
 
 static struct sudo_conf_table sudo_conf_table[] = {
     { "Debug", sizeof("Debug") - 1, set_debug },
@@ -136,7 +136,7 @@ static struct sudo_conf_data {
  * "Set variable_name value"
  */
 static void
-set_variable(const char *entry)
+set_variable(const char *entry, const char *conf_file)
 {
     struct sudo_conf_table *var;
 
@@ -146,20 +146,20 @@ set_variable(const char *entry)
 	    entry += var->namelen + 1;
 	    while (isblank((unsigned char)*entry))
 		entry++;
-	    var->setter(entry);
+	    var->setter(entry, conf_file);
 	    break;
 	}
     }
 }
 
 static void
-set_var_disable_coredump(const char *entry)
+set_var_disable_coredump(const char *entry, const char *conf_file)
 {
     sudo_conf_data.disable_coredump = atobool(entry);
 }
 
 static void
-set_var_group_source(const char *entry)
+set_var_group_source(const char *entry, const char *conf_file)
 {
     if (strcasecmp(entry, "adaptive") == 0) {
 	sudo_conf_data.group_source = GROUP_SOURCE_ADAPTIVE;
@@ -169,12 +169,12 @@ set_var_group_source(const char *entry)
 	sudo_conf_data.group_source = GROUP_SOURCE_DYNAMIC;
     } else {
 	warningx(_("unsupported group source `%s' in %s, line %d"), entry,
-	    _PATH_SUDO_CONF, lineno);
+	    conf_file, conf_lineno);
     }
 }
 
 static void
-set_var_max_groups(const char *entry)
+set_var_max_groups(const char *entry, const char *conf_file)
 {
     long lval;
     char *ep;
@@ -183,7 +183,7 @@ set_var_max_groups(const char *entry)
     if (*entry == '\0' || *ep != '\0' || lval < 0 || lval > INT_MAX ||
 	(errno == ERANGE && lval == LONG_MAX)) {
 	warningx(_("invalid max groups `%s' in %s, line %d"), entry,
-		    _PATH_SUDO_CONF, lineno);
+		    conf_file, conf_lineno);
     } else {
 	sudo_conf_data.max_groups = (int)lval;
     }
@@ -193,7 +193,7 @@ set_var_max_groups(const char *entry)
  * "Debug progname debug_file debug_flags"
  */
 static void
-set_debug(const char *entry)
+set_debug(const char *entry, const char *conf_file)
 {
     size_t filelen, proglen;
     const char *progname;
@@ -228,7 +228,7 @@ set_debug(const char *entry)
 }
 
 static void
-set_path(const char *entry)
+set_path(const char *entry, const char *conf_file)
 {
     const char *name, *path;
     struct sudo_conf_paths *cur;
@@ -252,7 +252,7 @@ set_path(const char *entry)
 }
 
 static void
-set_plugin(const char *entry)
+set_plugin(const char *entry, const char *conf_file)
 {
     struct plugin_info *info;
     const char *name, *path, *cp, *ep;
@@ -299,7 +299,7 @@ set_plugin(const char *entry)
     info->options = options;
     info->prev = info;
     /* info->next = NULL; */
-    info->lineno = lineno;
+    info->lineno = conf_lineno;
     tq_append(&sudo_conf_data.plugins, info);
 }
 
@@ -351,7 +351,7 @@ sudo_conf_disable_coredump(void)
  * Reads in /etc/sudo.conf and populates sudo_conf_data.
  */
 void
-sudo_conf_read(void)
+sudo_conf_read(const char *conf_file)
 {
     struct sudo_conf_table *cur;
     struct stat sb;
@@ -364,40 +364,43 @@ sudo_conf_read(void)
     if (prev_locale[0] != 'C' || prev_locale[1] != '\0')
         setlocale(LC_ALL, "C");
 
-    switch (sudo_secure_file(_PATH_SUDO_CONF, ROOT_UID, -1, &sb)) {
-	case SUDO_PATH_SECURE:
-	    break;
-	case SUDO_PATH_MISSING:
-	    /* Root should always be able to read sudo.conf. */
-	    if (errno != ENOENT && geteuid() == ROOT_UID)
-		warning(_("unable to stat %s"), _PATH_SUDO_CONF);
-	    goto done;
-	case SUDO_PATH_BAD_TYPE:
-	    warningx(_("%s is not a regular file"), _PATH_SUDO_CONF);
-	    goto done;
-	case SUDO_PATH_WRONG_OWNER:
-	    warningx(_("%s is owned by uid %u, should be %u"),
-		_PATH_SUDO_CONF, (unsigned int) sb.st_uid, ROOT_UID);
-	    goto done;
-	case SUDO_PATH_WORLD_WRITABLE:
-	    warningx(_("%s is world writable"), _PATH_SUDO_CONF);
-	    goto done;
-	case SUDO_PATH_GROUP_WRITABLE:
-	    warningx(_("%s is group writable"), _PATH_SUDO_CONF);
-	    goto done;
-	default:
-	    /* NOTREACHED */
-	    goto done;
+    if (conf_file == NULL) {
+	conf_file = _PATH_SUDO_CONF;
+	switch (sudo_secure_file(conf_file, ROOT_UID, -1, &sb)) {
+	    case SUDO_PATH_SECURE:
+		break;
+	    case SUDO_PATH_MISSING:
+		/* Root should always be able to read sudo.conf. */
+		if (errno != ENOENT && geteuid() == ROOT_UID)
+		    warning(_("unable to stat %s"), conf_file);
+		goto done;
+	    case SUDO_PATH_BAD_TYPE:
+		warningx(_("%s is not a regular file"), conf_file);
+		goto done;
+	    case SUDO_PATH_WRONG_OWNER:
+		warningx(_("%s is owned by uid %u, should be %u"),
+		    conf_file, (unsigned int) sb.st_uid, ROOT_UID);
+		goto done;
+	    case SUDO_PATH_WORLD_WRITABLE:
+		warningx(_("%s is world writable"), conf_file);
+		goto done;
+	    case SUDO_PATH_GROUP_WRITABLE:
+		warningx(_("%s is group writable"), conf_file);
+		goto done;
+	    default:
+		/* NOTREACHED */
+		goto done;
+	}
     }
 
-    if ((fp = fopen(_PATH_SUDO_CONF, "r")) == NULL) {
+    if ((fp = fopen(conf_file, "r")) == NULL) {
 	if (errno != ENOENT && geteuid() == ROOT_UID)
-	    warning(_("unable to open %s"), _PATH_SUDO_CONF);
+	    warning(_("unable to open %s"), conf_file);
 	goto done;
     }
 
-    lineno = 0;
-    while (sudo_parseln(&line, &linesize, &lineno, fp) != -1) {
+    conf_lineno = 0;
+    while (sudo_parseln(&line, &linesize, &conf_lineno, fp) != -1) {
 	if (*(cp = line) == '\0')
 	    continue;		/* empty line or comment */
 
@@ -407,7 +410,7 @@ sudo_conf_read(void)
 		cp += cur->namelen;
 		while (isblank((unsigned char)*cp))
 		    cp++;
-		cur->setter(cp);
+		cur->setter(cp, conf_file);
 		break;
 	    }
 	}

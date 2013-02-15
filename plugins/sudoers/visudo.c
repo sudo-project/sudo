@@ -166,7 +166,7 @@ main(int argc, char *argv[])
     error_callback_register(visudo_cleanup);
 
     /* Read sudo.conf. */
-    sudo_conf_read();
+    sudo_conf_read(NULL);
 
     /*
      * Arg handling.

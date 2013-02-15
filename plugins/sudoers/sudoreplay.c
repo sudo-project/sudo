@@ -271,7 +271,7 @@ main(int argc, char *argv[])
     error_callback_register(sudoreplay_cleanup);
 
     /* Read sudo.conf. */
-    sudo_conf_read();
+    sudo_conf_read(NULL);
 
     while ((ch = getopt(argc, argv, "d:f:hlm:s:V")) != -1) {
 	switch(ch) {

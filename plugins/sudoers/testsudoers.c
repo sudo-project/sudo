@@ -147,7 +147,7 @@ main(int argc, char *argv[])
     textdomain("sudoers");
 
     /* Read sudo.conf. */
-    sudo_conf_read();
+    sudo_conf_read(NULL);
 
     dflag = 0;
     grfile = pwfile = NULL;
