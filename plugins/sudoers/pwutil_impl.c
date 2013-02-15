@@ -229,8 +229,7 @@ sudo_make_gritem(gid_t gid, const char *name)
 
 /*
  * Dynamically allocate space for a struct item plus the key and data
- * elements.  Fills in datum from the gids arrays or from getgrouplist(3).
- * Consumes (frees) the gids array on success.
+ * elements.  Fills in datum from user_gids or from getgrouplist(3).
  */
 struct cache_item *
 sudo_make_grlist_item(struct passwd *pw)

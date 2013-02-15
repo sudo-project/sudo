@@ -86,7 +86,7 @@
 #include "sudo.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
-#include <sudo_usage.h>
+#include "sudo_usage.h"
 
 /*
  * Local variables

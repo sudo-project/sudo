@@ -44,7 +44,7 @@
 #include <grp.h>
 #include <pwd.h>
 
-#include <sudo_usage.h>
+#include "sudo_usage.h"
 #include "sudo.h"
 #include "lbuf.h"
 
