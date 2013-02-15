@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2012
+ * Copyright (c) 1996, 1998-2005, 2007-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -43,17 +43,20 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_UTMPX_H
-# include <utmpx.h>
-#else
-# include <utmp.h>
-#endif /* HAVE_UTMPX_H */
 #include <limits.h>
 #include <pwd.h>
 #include <grp.h>
 
 #include "sudoers.h"
 #include "pwutil.h"
+
+#ifndef LOGIN_NAME_MAX
+# ifdef _POSIX_LOGIN_NAME_MAX
+#  define LOGIN_NAME_MAX _POSIX_LOGIN_NAME_MAX
+# else
+#  define LOGIN_NAME_MAX 9
+# endif
+#endif /* LOGIN_NAME_MAX */
 
 #define FIELD_SIZE(src, name, size)			\
 do {							\
@@ -217,16 +220,6 @@ sudo_make_gritem(gid_t gid, const char *name)
     debug_return_ptr(&gritem->cache);
 }
 
-#ifdef HAVE_UTMPX_H
-# define GROUPNAME_LEN	(sizeof((struct utmpx *)0)->ut_user + 1)
-#else
-# ifdef HAVE_STRUCT_UTMP_UT_USER
-#  define GROUPNAME_LEN	(sizeof((struct utmp *)0)->ut_user + 1)
-# else
-#  define GROUPNAME_LEN	(sizeof((struct utmp *)0)->ut_name + 1)
-# endif
-#endif /* HAVE_UTMPX_H */
-
 /*
  * Dynamically allocate space for a struct item plus the key and data
  * elements.  Fills in datum from user_gids or from getgrouplist(3).
@@ -240,7 +233,7 @@ sudo_make_grlist_item(struct passwd *pw)
     struct group_list *grlist;
     GETGROUPS_T *gids;
     struct group *grp;
-    int ngids;
+    int ngids, groupname_len;
     debug_decl(make_grlist_item, SUDO_DEBUG_NSS)
 
     if (pw == sudo_user.pw && sudo_user.gids != NULL) {
@@ -277,12 +270,18 @@ sudo_make_grlist_item(struct passwd *pw)
     aix_setauthdb((char *) pw->pw_name);
 #endif
 
+#if defined(HAVE_SYSCONF) && defined(_SC_LOGIN_NAME_MAX)
+    groupname_len = (int)sysconf(_SC_LOGIN_NAME_MAX);
+    if (groupname_len < 0)
+#endif
+	groupname_len = LOGIN_NAME_MAX;
+
     /* Allocate in one big chunk for easy freeing. */
     nsize = strlen(pw->pw_name) + 1;
     total = sizeof(*grlitem) + nsize;
     total += sizeof(char *) * ngids;
     total += sizeof(gid_t *) * ngids;
-    total += GROUPNAME_LEN * ngids;
+    total += groupname_len * ngids;
 
 again:
     grlitem = ecalloc(1, total);
@@ -321,7 +320,7 @@ again:
 	if ((grp = sudo_getgrgid(gids[i])) != NULL) {
 	    len = strlen(grp->gr_name) + 1;
 	    if (cp - (char *)grlitem + len > total) {
-		total += len + GROUPNAME_LEN;
+		total += len + groupname_len;
 		efree(grlitem);
 		sudo_gr_delref(grp);
 		goto again;
