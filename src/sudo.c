@@ -219,7 +219,7 @@ main(int argc, char *argv[], char *envp[])
 	    tq_foreach_fwd(&io_plugins, plugin) {
 		ok = iolog_open(plugin, settings, user_info, NULL,
 		    nargc, nargv, envp);
-		if (ok == 1)
+		if (ok != -1)
 		    iolog_show_version(plugin, !user_details.uid);
 	    }
 	    break;
