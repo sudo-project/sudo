@@ -107,7 +107,7 @@
 #include "lbuf.h"
 #include "interfaces.h"
 #include "secure_path.h"
-#include <sudo_usage.h>
+#include "sudo_usage.h"
 
 #ifdef USING_NONUNIX_GROUPS
 # include "nonunix.h"
