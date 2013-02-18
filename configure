@@ -21206,7 +21206,7 @@ test "$localedir" = '${datarootdir}/locale' && localedir='$(datarootdir)/locale'
 test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
 test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
 
-ac_config_files="$ac_config_files Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/sample_group/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
+ac_config_files="$ac_config_files Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -22208,7 +22208,7 @@ do
     "src/sudo_usage.h") CONFIG_FILES="$CONFIG_FILES src/sudo_usage.h" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "plugins/sample/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/sample/Makefile" ;;
-    "plugins/sample_group/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/sample_group/Makefile" ;;
+    "plugins/group_file/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/group_file/Makefile" ;;
     "plugins/system_group/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/system_group/Makefile" ;;
     "plugins/sudoers/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/sudoers/Makefile" ;;
     "plugins/sudoers/sudoers") CONFIG_FILES="$CONFIG_FILES plugins/sudoers/sudoers" ;;

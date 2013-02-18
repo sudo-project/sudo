@@ -2941,7 +2941,7 @@ a group file in Unix group format, the sample group plugin can be used:
 .nf
 .sp
 .RS 0n
-Defaults group_plugin="sample_group.so /etc/sudo-group"
+Defaults group_plugin="group_file.so /etc/sudo-group"
 .RE
 .fi
 .sp

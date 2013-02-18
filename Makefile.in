@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -46,9 +46,8 @@ sudoers_gid = @SUDOERS_GID@
 sudoers_mode = @SUDOERS_MODE@
 shlib_mode = @SHLIB_MODE@
 
-SUBDIRS = compat common @ZLIB_SRC@ plugins/sudoers src include doc
-
-SAMPLES = plugins/sample plugins/sample_group plugins/system_group
+SUBDIRS = compat common @ZLIB_SRC@ plugins/group_file plugins/sudoers \
+	  plugins/system_group src include doc
 
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
@@ -77,13 +76,7 @@ XGETTEXT_OPTS = -F -k_ -kN_ --copyright-holder="Todd C. Miller" \
 		--flag easprintf:3:c-format --flag lbuf_append:2:c-format \
 		--flag lbuf_append_quoted:3:c-format --foreign-user
 
-all: config.status
-	for d in $(SUBDIRS) $(SAMPLES); \
-	    do (cd $$d && exec $(MAKE) $@) && continue; \
-	    exit $$?; \
-	done
-
-check pre-install: config.status
+all check pre-install: config.status
 	for d in $(SUBDIRS); \
 	    do (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
@@ -132,14 +125,14 @@ depend: siglist.c signame.c
 	fi; \
 	$(srcdir)/mkdep.pl $(srcdir)/common/Makefile.in \
 	    $(srcdir)/compat/Makefile.in $(srcdir)/plugins/sample/Makefile.in \
-	    $(srcdir)/plugins/sample_group/Makefile.in \
+	    $(srcdir)/plugins/group_file/Makefile.in \
 	    $(srcdir)/plugins/sudoers/Makefile.in \
 	    $(srcdir)/plugins/system_group/Makefile.in \
 	    $(srcdir)/src/Makefile.in $(srcdir)/zlib/Makefile.in; \
 	./config.status --file $(srcdir)/common/Makefile \
 	    --file $(srcdir)/compat/Makefile \
 	    --file $(srcdir)/plugins/sample/Makefile \
-	    --file $(srcdir)/plugins/sample_group/Makefile \
+	    --file $(srcdir)/plugins/group_file/Makefile \
 	    --file $(srcdir)/plugins/sudoers/Makefile \
 	    --file $(srcdir)/plugins/system_group/Makefile \
 	    --file $(srcdir)/src/Makefile --file $(srcdir)/zlib/Makefile
@@ -297,14 +290,14 @@ package: sudo.pp
 	    version=$(VERSION) $(PPVARS)
 
 clean: config.status
-	for d in $(SUBDIRS) $(SAMPLES); do \
+	for d in $(SUBDIRS); do \
 	    (cd $$d && exec $(MAKE) $@); \
 	done
 
 mostlyclean: clean
 
 distclean: config.status
-	for d in $(SUBDIRS) $(SAMPLES); do \
+	for d in $(SUBDIRS); do \
 	    (cd $$d && exec $(MAKE) $@); \
 	done
 	-rm -rf Makefile pathnames.h config.h config.status config.cache \

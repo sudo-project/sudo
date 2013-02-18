@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -170,7 +170,7 @@ int
 main(int argc, char *argv[])
 {
     int ch, i, found;
-    char *plugin = "sample_group.so";
+    char *plugin = "group_file.so";
     char *user, *group;
     struct passwd *pwd;
 

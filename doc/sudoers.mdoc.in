@@ -2738,7 +2738,7 @@ For example, given
 .Pa /etc/sudo-group ,
 a group file in Unix group format, the sample group plugin can be used:
 .Bd -literal
-Defaults group_plugin="sample_group.so /etc/sudo-group"
+Defaults group_plugin="group_file.so /etc/sudo-group"
 .Ed
 .Pp
 For more information see
