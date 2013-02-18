@@ -322,6 +322,7 @@ int atobool(const char *str);
 int get_boottime(struct timeval *);
 
 /* iolog.c */
+int io_set_max_sessid(const char *sessid);
 void io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7]);
 
 /* iolog_path.c */

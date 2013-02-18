@@ -361,6 +361,9 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	if (def_compress_io) {
 	    command_info[info_len++] = estrdup("iolog_compress=true");
 	}
+	if (def_maxseq) {
+	    easprintf(&command_info[info_len++], "maxseq=%u", def_maxseq);
+	}
     }
     if (ISSET(sudo_mode, MODE_EDIT))
 	command_info[info_len++] = estrdup("sudoedit=true");

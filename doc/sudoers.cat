@@ -1295,6 +1295,19 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        escape %h will expand to the host name of the machine.
                        Default is ``*** SECURITY information for %h ***''.
 
+     maxseq            The maximum sequence number that will be substituted
+                       for the ``%{seq}'' escape in the I/O log file (see the
+                       _i_o_l_o_g___d_i_r description above for more information).
+                       While the value substituted for ``%{seq}'' is in base
+                       36, _m_a_x_s_e_q itself should be expressed in decimal.
+                       Values larger than 2176782336 (which corresponds to the
+                       base 36 sequence number ``ZZZZZZ'') will be silently
+                       truncated to 2176782336.  The default value is
+                       2176782336.
+
+                       This setting is only supported by ssuuddooeerrss plugin
+                       version 1.8.7 or higher.
+
      noexec_file       As of ssuuddoo version 1.8.1 this option is no longer
                        supported.  The path to the noexec file should now be
                        set in the sudo.conf(4) file.
@@ -2125,4 +2138,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.7                     February 5, 2013                     Sudo 1.8.7
+Sudo 1.8.7                     February 18, 2013                    Sudo 1.8.7

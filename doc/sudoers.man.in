@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "@mansectsu@" "February 5, 2013" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
+.TH "SUDOERS" "@mansectsu@" "February 18, 2013" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2725,6 +2725,27 @@ The escape
 will expand to the host name of the machine.
 Default is
 ``\fR@mailsub@\fR''.
+.TP 18n
+maxseq
+The maximum sequence number that will be substituted for the
+``\fR%{seq}\fR''
+escape in the I/O log file (see the
+\fIiolog_dir\fR
+description above for more information).
+While the value substituted for
+``\fR%{seq}\fR''
+is in base 36,
+\fImaxseq\fR
+itself should be expressed in decimal.
+Values larger than 2176782336 (which corresponds to the
+base 36 sequence number
+``ZZZZZZ'')
+will be silently truncated to 2176782336.
+The default value is 2176782336.
+.sp
+This setting is only supported by
+\fBsudoers\fR
+plugin version 1.8.7 or higher.
 .TP 18n
 noexec_file
 As of

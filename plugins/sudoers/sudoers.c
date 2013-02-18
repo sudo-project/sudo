@@ -582,6 +582,9 @@ init_vars(char * const envp[])
     /* Set locale callback. */
     sudo_defs_table[I_SUDOERS_LOCALE].callback = cb_sudoers_locale;
 
+    /* Set maxseq callback. */
+    sudo_defs_table[I_MAXSEQ].callback = io_set_max_sessid;
+
     /* It is now safe to use log_fatal() and set_perms() */
     debug_return;
 }

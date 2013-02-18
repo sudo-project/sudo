@@ -262,3 +262,6 @@ limitprivs
 exec_background
 	T_FLAG
 	"Run commands on a pty in the background"
+maxseq
+	T_UINT
+	"Maximum I/O log sequence number"

@@ -355,6 +355,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Run commands on a pty in the background"),
 	NULL,
     }, {
+	"maxseq", T_UINT,
+	N_("Maximum I/O log sequence number"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };
