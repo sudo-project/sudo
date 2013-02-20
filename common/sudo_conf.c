@@ -155,7 +155,10 @@ set_variable(const char *entry, const char *conf_file)
 static void
 set_var_disable_coredump(const char *entry, const char *conf_file)
 {
-    sudo_conf_data.disable_coredump = atobool(entry);
+    int val = atobool(entry);
+
+    if (val != -1)
+	sudo_conf_data.disable_coredump = val;
 }
 
 static void
