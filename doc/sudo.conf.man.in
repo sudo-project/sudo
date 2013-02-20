@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO" "5" "February 14, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO" "5" "February 20, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -164,8 +164,8 @@ This is equivalent to the following:
 .nf
 .sp
 .RS 6n
-Plugin policy_plugin sudoers.so
-Plugin io_plugin sudoers.so
+Plugin sudoers_policy sudoers.so
+Plugin sudoers_io sudoers.so
 .RE
 .fi
 .PP
@@ -491,16 +491,26 @@ front end configuration
 .SH "EXAMPLES"
 .nf
 .RS 0n
-# # Default @sysconfdir@/sudo.conf file # # Format: #   Plugin
-plugin_name plugin_path plugin_options ...  #   Path askpass
-/path/to/askpass #   Path noexec /path/to/sudo_noexec.so #   Debug
-sudo /var/log/sudo_debug all@warn #   Set disable_coredump true #
-# The plugin_path is relative to @PLUGINDIR@ unless #   fully
-qualified.  # The plugin_name corresponds to a global symbol in the
-plugin #   that contains the plugin interface structure.  # The
-plugin_options are optional.  # # The sudoers plugin is used by
-default if no Plugin lines are # present.  Plugin policy_plugin
-sudoers.so Plugin io_plugin sudoers.so
+#
+# Default @sysconfdir@/sudo.conf file
+#
+# Format:
+#   Plugin plugin_name plugin_path plugin_options ...
+#   Path askpass /path/to/askpass
+#   Path noexec /path/to/sudo_noexec.so
+#   Debug sudo /var/log/sudo_debug all@warn
+#   Set disable_coredump true
+#
+# The plugin_path is relative to @PLUGINDIR@ unless
+#   fully qualified.
+# The plugin_name corresponds to a global symbol in the plugin
+#   that contains the plugin interface structure.
+# The plugin_options are optional.
+#
+# The sudoers plugin is used by default if no Plugin lines are
+# present.
+Plugin sudoers_policy sudoers.so
+Plugin sudoers_io sudoers.so
 
 #
 # Sudo askpass:

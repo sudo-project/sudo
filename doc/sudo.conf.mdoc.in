@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd February 14, 2013
+.Dd February 20, 2013
 .Dt SUDO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -149,8 +149,8 @@ plugin will be used as the default security policy and for I/O logging
 (if enabled by the policy).
 This is equivalent to the following:
 .Bd -literal -offset indent
-Plugin policy_plugin sudoers.so
-Plugin io_plugin sudoers.so
+Plugin sudoers_policy sudoers.so
+Plugin sudoers_io sudoers.so
 .Ed
 .Pp
 For more information on the
@@ -438,16 +438,26 @@ front end configuration
 .El
 .Sh EXAMPLES
 .Bd -literal
-# # Default @sysconfdir@/sudo.conf file # # Format: #   Plugin
-plugin_name plugin_path plugin_options ...  #   Path askpass
-/path/to/askpass #   Path noexec /path/to/sudo_noexec.so #   Debug
-sudo /var/log/sudo_debug all@warn #   Set disable_coredump true #
-# The plugin_path is relative to @PLUGINDIR@ unless #   fully
-qualified.  # The plugin_name corresponds to a global symbol in the
-plugin #   that contains the plugin interface structure.  # The
-plugin_options are optional.  # # The sudoers plugin is used by
-default if no Plugin lines are # present.  Plugin policy_plugin
-sudoers.so Plugin io_plugin sudoers.so
+#
+# Default @sysconfdir@/sudo.conf file
+#
+# Format:
+#   Plugin plugin_name plugin_path plugin_options ...
+#   Path askpass /path/to/askpass
+#   Path noexec /path/to/sudo_noexec.so
+#   Debug sudo /var/log/sudo_debug all@warn
+#   Set disable_coredump true
+#
+# The plugin_path is relative to @PLUGINDIR@ unless
+#   fully qualified.
+# The plugin_name corresponds to a global symbol in the plugin
+#   that contains the plugin interface structure.
+# The plugin_options are optional.
+#
+# The sudoers plugin is used by default if no Plugin lines are
+# present.
+Plugin sudoers_policy sudoers.so
+Plugin sudoers_io sudoers.so
 
 #
 # Sudo askpass:
