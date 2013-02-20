@@ -359,12 +359,11 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
 	if (hostlist_matches(&priv->hostlist) != ALLOW)
 	    continue;
 	prev_cs = NULL;
-	lbuf_append(lbuf, "    ");
 	tq_foreach_fwd(&priv->cmndlist, cs) {
-	    if (cs != tq_first(&priv->cmndlist))
-		lbuf_append(lbuf, ", ");
 	    if (RUNAS_CHANGED(cs, prev_cs)) {
-		lbuf_append(lbuf, "(");
+		if (cs != tq_first(&priv->cmndlist))
+		    lbuf_append(lbuf, "\n");
+		lbuf_append(lbuf, "    (");
 		if (!tq_empty(&cs->runasuserlist)) {
 		    tq_foreach_fwd(&cs->runasuserlist, m) {
 			if (m != tq_first(&cs->runasuserlist))
@@ -392,6 +391,8 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
 		tags.nopasswd = UNSPEC;
 		tags.log_input = UNSPEC;
 		tags.log_output = UNSPEC;
+	    } else if (cs != tq_first(&priv->cmndlist)) {
+		lbuf_append(lbuf, ", ");
 	    }
 	    sudo_file_append_cmnd(cs, &tags, lbuf);
 	    prev_cs = cs;

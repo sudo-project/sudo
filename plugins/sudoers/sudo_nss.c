@@ -277,7 +277,7 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
     if (fstat(STDOUT_FILENO, &sb) == 0 && S_ISFIFO(sb.st_mode))
 	cols = 0;
     lbuf_init(&defs, output, 4, NULL, cols);
-    lbuf_init(&privs, output, long_list ? 8 : 4, NULL, cols);
+    lbuf_init(&privs, output, 8, NULL, cols);
 
     /* Display defaults from all sources. */
     lbuf_append(&defs, _("Matching Defaults entries for %s on this host:\n"),
