@@ -384,8 +384,13 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	warningx(_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
 	goto bad;
     } else if (cmnd_status == NOT_FOUND) {
-	audit_failure(NewArgv, N_("%s: command not found"), user_cmnd);
-	warningx(_("%s: command not found"), user_cmnd);
+	if (ISSET(sudo_mode, MODE_CHECK)) {
+	    audit_failure(NewArgv, N_("%s: command not found"), NewArgv[0]);
+	    warningx(_("%s: command not found"), NewArgv[0]);
+	} else {
+	    audit_failure(NewArgv, N_("%s: command not found"), user_cmnd);
+	    warningx(_("%s: command not found"), user_cmnd);
+	}
 	goto bad;
     }
 
