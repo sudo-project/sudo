@@ -68,7 +68,6 @@ static void
 sudo_conf_dump(void)
 {
     struct plugin_info_list *plugins = sudo_conf_plugins();
-    struct sudo_conf_paths *scp;
     struct plugin_info *info;
 
     printf("Set disable_coredump %s\n",
