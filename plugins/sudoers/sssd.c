@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2003-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 2011 Daniel Kopecek <dkopecek@redhat.com>
  *
  * This code is derived from software contributed by Aaron Spangler.
@@ -211,7 +211,13 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
 	    "reallocating result: %p (count: %u -> %u)", out_res->rules,
 	    in_res->num_rules, l);
-	out_res->rules = erealloc3(out_res->rules, l, sizeof(struct sss_sudo_rule));
+	if (l > 0) {
+	    out_res->rules =
+		erealloc3(out_res->rules, l, sizeof(struct sss_sudo_rule));
+	} else {
+	    efree(out_res->rules);
+	    out_res->rules = NULL;
+	}
     }
 
     out_res->num_rules = l;
