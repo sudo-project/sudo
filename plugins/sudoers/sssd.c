@@ -344,7 +344,7 @@ static int sudo_sss_setdefs(struct sudo_nss *nss)
 
     if (sss_error == ENOENT) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "The user was not found in SSSD.");
-	debug_return_int(-1);
+	debug_return_int(0);
     } else if(sss_error != 0) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sss_error=%u\n", sss_error);
 	debug_return_int(-1);
