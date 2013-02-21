@@ -334,31 +334,34 @@ timestamp_status_internal(bool removing)
      */
     if (status == TS_OLD && !removing) {
 	mtim_get(&sb, &mtime);
-	/* Negative timeouts only expire manually (sudo -k). */
-	if (def_timestamp_timeout < 0 && mtime.tv_sec != 0)
-	    status = TS_CURRENT;
-	else {
-	    now = time(NULL);
-	    if (def_timestamp_timeout &&
-		now - mtime.tv_sec < 60 * def_timestamp_timeout) {
-		/*
-		 * Check for bogus time on the stampfile.  The clock may
-		 * have been set back or someone could be trying to spoof us.
-		 */
-		if (mtime.tv_sec > now + 60 * def_timestamp_timeout * 2) {
-		    time_t tv_sec = (time_t)mtime.tv_sec;
-		    log_error(0,
-			N_("timestamp too far in the future: %20.20s"),
-			4 + ctime(&tv_sec));
-		    if (*timestampfile)
-			(void) unlink(timestampfile);
-		    else
-			(void) rmdir(timestampdir);
-		    status = TS_MISSING;
-		} else if (get_boottime(&boottime) && timevalcmp(&mtime, &boottime, <)) {
-		    status = TS_OLD;
-		} else {
-		    status = TS_CURRENT;
+	if (timevalisset(&mtime)) {
+	    /* Negative timeouts only expire manually (sudo -k). */
+	    if (def_timestamp_timeout < 0) {
+		status = TS_CURRENT;
+	    } else {
+		now = time(NULL);
+		if (def_timestamp_timeout &&
+		    now - mtime.tv_sec < 60 * def_timestamp_timeout) {
+		    /*
+		     * Check for bogus time on the stampfile.  The clock may
+		     * have been set back or user could be trying to spoof us.
+		     */
+		    if (mtime.tv_sec > now + 60 * def_timestamp_timeout * 2) {
+			time_t tv_sec = (time_t)mtime.tv_sec;
+			log_error(0,
+			    N_("timestamp too far in the future: %20.20s"),
+			    4 + ctime(&tv_sec));
+			if (*timestampfile)
+			    (void) unlink(timestampfile);
+			else
+			    (void) rmdir(timestampdir);
+			status = TS_MISSING;
+		    } else if (get_boottime(&boottime) &&
+			timevalcmp(&mtime, &boottime, <)) {
+			status = TS_OLD;
+		    } else {
+			status = TS_CURRENT;
+		    }
 		}
 	    }
 	}
