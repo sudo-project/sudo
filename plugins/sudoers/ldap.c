@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2003-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -746,7 +746,7 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
 	    }
 	    /* FALLTHROUGH */
 	default:
-	    if (strcasecmp(val, runas_pw->pw_name) == 0)
+	    if (userpw_matches(val, runas_pw->pw_name, runas_pw))
 		ret = true;
 	    break;
 	}

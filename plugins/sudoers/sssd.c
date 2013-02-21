@@ -471,7 +471,7 @@ sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *
 	    /* FALLTHROUGH */
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG, "FALLTHROUGH");
 	default:
-	    if (strcasecmp(val, runas_pw->pw_name) == 0) {
+	    if (userpw_matches(val, runas_pw->pw_name, runas_pw)) {
 		sudo_debug_printf(SUDO_DEBUG_DEBUG,
 		    "%s == %s (pw_name) => match", val, runas_pw->pw_name);
 		ret = true;
