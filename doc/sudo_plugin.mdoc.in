@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd February 7, 2013
+.Dd February 21, 2013
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -264,6 +264,13 @@ flag, indicating that
 should operate in non-interactive mode.
 The plugin may reject a command run in non-interactive mode if user
 interaction is required.
+.It plugin_dir=string
+The default plugin directory used by the
+.Nm sudo
+front end.
+This is the default directory set at compile time and may not
+correspond to the directory the running plugin was loaded from.
+It may be used by a plugin to locate support files.
 .It preserve_environment=bool
 Set to true if the user specified the
 .Fl E
@@ -2126,7 +2133,9 @@ list.
 .Pp
 The
 .Em max_groups
-entry was added to the
+and
+.Em plugin_dir
+entries were added to the
 .Li settings
 list.
 .Pp

@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "February 7, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO_PLUGIN" "5" "February 21, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -288,6 +288,14 @@ flag, indicating that
 should operate in non-interactive mode.
 The plugin may reject a command run in non-interactive mode if user
 interaction is required.
+.TP 6n
+plugin_dir=string
+The default plugin directory used by the
+\fBsudo\fR
+front end.
+This is the default directory set at compile time and may not
+correspond to the directory the running plugin was loaded from.
+It may be used by a plugin to locate support files.
 .TP 6n
 preserve_environment=bool
 Set to true if the user specified the
@@ -2469,7 +2477,9 @@ list.
 .sp
 The
 \fImax_groups\fR
-entry was added to the
+and
+\fIplugin_dir\fR
+entries were added to the
 \fRsettings\fR
 list.
 .sp

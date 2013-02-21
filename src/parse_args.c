@@ -109,7 +109,9 @@ static struct sudo_settings {
     { "network_addrs" },
 #define ARG_MAX_GROUPS 20
     { "max_groups" },
-#define NUM_SETTINGS 21
+#define ARG_PLUGIN_DIR 21
+    { "plugin_dir" },
+#define NUM_SETTINGS 22
     { NULL }
 };
 
@@ -427,6 +429,9 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     /*
      * Format setting_pairs into settings array.
      */
+#ifdef _PATH_SUDO_PLUGIN_DIR
+    sudo_settings[ARG_PLUGIN_DIR].value = _PATH_SUDO_PLUGIN_DIR;
+#endif
     settings = emalloc2(NUM_SETTINGS + 1, sizeof(char *));
     for (i = 0, j = 0; i < NUM_SETTINGS; i++) {
 	if (sudo_settings[i].value) {

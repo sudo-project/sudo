@@ -168,6 +168,13 @@ DDEESSCCRRIIPPTTIIOONN
                        mode.  The plugin may reject a command run in non-
                        interactive mode if user interaction is required.
 
+                 plugin_dir=string
+                       The default plugin directory used by the ssuuddoo front
+                       end.  This is the default directory set at compile time
+                       and may not correspond to the directory the running
+                       plugin was loaded from.  It may be used by a plugin to
+                       locate support files.
+
                  preserve_environment=bool
                        Set to true if the user specified the --EE flag,
                        indicating that the user wishes to preserve the
@@ -1368,7 +1375,8 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
            Support for the _e_x_e_c___b_a_c_k_g_r_o_u_n_d entry has been added to the
            command_info list.
 
-           The _m_a_x___g_r_o_u_p_s entry was added to the settings list.
+           The _m_a_x___g_r_o_u_p_s and _p_l_u_g_i_n___d_i_r entries were added to the settings
+           list.
 
            The ssuuddoo front end now installs default signal handlers to trap
            common signals while the plugin functions are run.
@@ -1392,4 +1400,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.7                     February 7, 2013                     Sudo 1.8.7
+Sudo 1.8.7                     February 21, 2013                    Sudo 1.8.7
