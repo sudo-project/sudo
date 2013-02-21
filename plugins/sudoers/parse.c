@@ -423,15 +423,15 @@ new_long_entry(struct cmndspec *cs, struct cmndspec *prev_cs)
     if (RUNAS_CHANGED(cs, prev_cs) || TAGS_CHANGED(cs->tags, prev_cs->tags))
 	return true;
 #ifdef HAVE_PRIV_SET
-    if (cs->privs && (!prev_cs->privs || strcmp(cs->privs, prev_cs->privs) != 0)
+    if (cs->privs && (!prev_cs->privs || strcmp(cs->privs, prev_cs->privs) != 0))
 	return true;
-    if (cs->limitprivs && (!prev_cs->limitprivs || strcmp(cs->limitprivs, prev_cs->limitprivs) != 0)
+    if (cs->limitprivs && (!prev_cs->limitprivs || strcmp(cs->limitprivs, prev_cs->limitprivs) != 0))
 	return true;
 #endif /* HAVE_PRIV_SET */
 #ifdef HAVE_SELINUX
-    if (cs->role && (!prev_cs->role || strcmp(cs->role, prev_cs->role) != 0)
+    if (cs->role && (!prev_cs->role || strcmp(cs->role, prev_cs->role) != 0))
 	return true;
-    if (cs->type && (!prev_cs->type || strcmp(cs->type, prev_cs->type) != 0)
+    if (cs->type && (!prev_cs->type || strcmp(cs->type, prev_cs->type) != 0))
 	return true;
 #endif /* HAVE_SELINUX */
     return false;
