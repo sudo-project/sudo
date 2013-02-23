@@ -112,9 +112,6 @@ uninstall-nls:
 	    rm -f $(DESTDIR)$(localedir)/*/LC_MESSAGES/$$domain.mo; \
 	done
 
-autoconf:
-	autoconf -I m4
-
 siglist.c signame.c:
 	(cd compat && exec $(MAKE) $@)
 
