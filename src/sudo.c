@@ -95,6 +95,7 @@ struct plugin_container policy_plugin;
 struct plugin_container_list io_plugins;
 struct user_details user_details;
 const char *list_user, *runas_user, *runas_group; /* extern for parse_args.c */
+static struct command_details command_details;
 static int sudo_mode;
 
 /*
@@ -146,7 +147,6 @@ main(int argc, char *argv[], char *envp[])
     char **nargv, **settings, **env_add;
     char **user_info, **command_info, **argv_out, **user_env_out;
     struct plugin_container *plugin, *next;
-    struct command_details command_details;
     sigset_t mask;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
@@ -1120,7 +1120,10 @@ static void
 policy_close(struct plugin_container *plugin, int exit_status, int error)
 {
     debug_decl(policy_close, SUDO_DEBUG_PCOMM)
-    plugin->u.policy->close(exit_status, error);
+    if (plugin->u.policy->close != NULL)
+	plugin->u.policy->close(exit_status, error);
+    else
+	warning(_("unable to execute %s"), command_details.command);
     debug_return;
 }
 
@@ -1128,6 +1131,8 @@ static int
 policy_show_version(struct plugin_container *plugin, int verbose)
 {
     debug_decl(policy_show_version, SUDO_DEBUG_PCOMM)
+    if (plugin->u.policy->show_version == NULL)
+	debug_return_bool(true);
     debug_return_bool(plugin->u.policy->show_version(verbose));
 }
 
@@ -1137,6 +1142,10 @@ policy_check(struct plugin_container *plugin, int argc, char * const argv[],
     char **user_env_out[])
 {
     debug_decl(policy_check, SUDO_DEBUG_PCOMM)
+    if (plugin->u.policy->check_policy == NULL) {
+	errorx(1, _("policy plugin %s is missing the `check_policy' method"),
+	    plugin->name);
+    }
     debug_return_bool(plugin->u.policy->check_policy(argc, argv, env_add,
 	command_info, argv_out, user_env_out));
 }
@@ -1235,7 +1244,8 @@ static void
 iolog_close(struct plugin_container *plugin, int exit_status, int error)
 {
     debug_decl(iolog_close, SUDO_DEBUG_PCOMM)
-    plugin->u.io->close(exit_status, error);
+    if (plugin->u.io->close != NULL)
+	plugin->u.io->close(exit_status, error);
     debug_return;
 }
 
@@ -1243,6 +1253,8 @@ static int
 iolog_show_version(struct plugin_container *plugin, int verbose)
 {
     debug_decl(iolog_show_version, SUDO_DEBUG_PCOMM)
+    if (plugin->u.io->show_version == NULL)
+	debug_return_bool(true);
     debug_return_bool(plugin->u.io->show_version(verbose));
 }
 
