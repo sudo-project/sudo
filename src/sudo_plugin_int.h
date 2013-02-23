@@ -97,7 +97,7 @@ struct plugin_container {
 };
 TQ_DECLARE(plugin_container)
 
-extern struct plugin_container_list policy_plugins;
+extern struct plugin_container policy_plugin;
 extern struct plugin_container_list io_plugins;
 
 int sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],

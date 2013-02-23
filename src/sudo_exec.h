@@ -54,6 +54,8 @@ struct command_status;
 int fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask);
 int perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat);
 int suspend_parent(int signo);
+void exec_cmnd(struct command_details *details, struct command_status *cstat,
+    int *errfd);
 void fd_set_iobs(fd_set *fdsr, fd_set *fdsw);
 #ifdef SA_SIGINFO
 void handler(int s, siginfo_t *info, void *context);

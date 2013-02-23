@@ -98,7 +98,8 @@ static struct io_buffer *iobufs;
 
 static void flush_output(void);
 static int exec_monitor(struct command_details *details, int backchannel);
-static void exec_pty(struct command_details *detail, int *errfd);
+static void exec_pty(struct command_details *details,
+    struct command_status *cstat, int *errfd);
 static void sigwinch(int s);
 static void sync_ttysize(int src, int dst);
 static void deliver_signal(pid_t pid, int signo, bool from_parent);
@@ -1077,9 +1078,7 @@ exec_monitor(struct command_details *details, int backchannel)
 	restore_signals();
 
 	/* setup tty and exec command */
-	exec_pty(details, &errpipe[1]);
-	cstat.type = CMD_ERRNO;
-	cstat.val = errno;
+	exec_pty(details, &cstat, &errpipe[1]);
 	ignore_result(write(errpipe[1], &cstat, sizeof(cstat)));
 	_exit(1);
     }
@@ -1283,7 +1282,8 @@ flush_output(void)
  * Returns only if execve() fails.
  */
 static void
-exec_pty(struct command_details *details, int *errfd)
+exec_pty(struct command_details *details,
+    struct command_status *cstat, int *errfd)
 {
     pid_t self = getpid();
     debug_decl(exec_pty, SUDO_DEBUG_EXEC);
@@ -1316,30 +1316,9 @@ exec_pty(struct command_details *details, int *errfd)
     if (io_fds[SFD_STDERR] != io_fds[SFD_SLAVE])
 	close(io_fds[SFD_STDERR]);
 
-    sudo_debug_execve(SUDO_DEBUG_INFO, details->command,
-	details->argv, details->envp);
+    /* Execute command; only returns on error. */
+    exec_cmnd(details, cstat, errfd);
 
-    if (details->closefrom >= 0) {
-	int maxfd = details->closefrom;
-	dup2(*errfd, maxfd);
-	(void)fcntl(maxfd, F_SETFD, FD_CLOEXEC);
-	*errfd = maxfd++;
-	if (sudo_debug_fd_set(maxfd) != -1)
-	    maxfd++;
-	closefrom(maxfd);
-    }
-#ifdef HAVE_SELINUX
-    if (ISSET(details->flags, CD_RBAC_ENABLED)) {
-	selinux_execve(details->command, details->argv, details->envp,
-	    ISSET(details->flags, CD_NOEXEC));
-    } else
-#endif
-    {
-	sudo_execve(details->command, details->argv, details->envp,
-	    ISSET(details->flags, CD_NOEXEC));
-    }
-    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to exec %s: %s",
-	details->command, strerror(errno));
     debug_return;
 }
 

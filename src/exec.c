@@ -137,35 +137,7 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 	close(signal_pipe[0]);
 	close(signal_pipe[1]);
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
-	restore_signals();
-	if (exec_setup(details, NULL, -1) == true) {
-	    /* headed for execve() */
-	    sudo_debug_execve(SUDO_DEBUG_INFO, details->command,
-		details->argv, details->envp);
-	    if (details->closefrom >= 0) {
-		int maxfd = details->closefrom;
-		dup2(sv[1], maxfd);
-		(void)fcntl(maxfd, F_SETFD, FD_CLOEXEC);
-		sv[1] = maxfd++;
-		if (sudo_debug_fd_set(maxfd) != -1)
-		    maxfd++;
-		closefrom(maxfd);
-	    }
-#ifdef HAVE_SELINUX
-	    if (ISSET(details->flags, CD_RBAC_ENABLED)) {
-		selinux_execve(details->command, details->argv, details->envp,
-		    ISSET(details->flags, CD_NOEXEC));
-	    } else
-#endif
-	    {
-		sudo_execve(details->command, details->argv, details->envp,
-		    ISSET(details->flags, CD_NOEXEC));
-	    }
-	    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to exec %s: %s",
-		details->command, strerror(errno));
-	}
-	cstat.type = CMD_ERRNO;
-	cstat.val = errno;
+	exec_cmnd(details, &cstat, &sv[1]);
 	send(sv[1], &cstat, sizeof(cstat), 0);
 	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);
 	_exit(1);
@@ -224,6 +196,11 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 	    utmp_user = details->utmp_user ? details->utmp_user : user_details.username;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "allocate pty for I/O logging");
 	pty_setup(details->euid, user_details.tty, utmp_user);
+    } else if (!ISSET(details->flags, CD_SET_TIMEOUT) &&
+	policy_plugin.u.policy->close == NULL) {
+	/* If no I/O logging, timeout or policy close we can exec directly. */
+	exec_cmnd(details, cstat, NULL);
+	goto done;
     }
 
     /*
@@ -432,7 +409,7 @@ do_tty_io:
 	tq_remove(&sigfwd_list, sigfwd);
 	efree(sigfwd);
     }
-
+done:
     debug_return_int(cstat->type == CMD_ERRNO ? -1 : 0);
 }
 

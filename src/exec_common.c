@@ -39,6 +39,7 @@
 # include <priv.h>
 #endif
 #include <errno.h>
+#include <fcntl.h>
 #include <signal.h>
 
 #include "sudo.h"
@@ -155,4 +156,45 @@ sudo_execve(const char *path, char *const argv[], char *const envp[], int noexec
 	efree(nargv);
     }
     return -1;
+}
+
+void
+exec_cmnd(struct command_details *details, struct command_status *cstat,
+    int *errfd)
+{
+    debug_decl(exec_cmnd, SUDO_DEBUG_EXEC)
+
+    restore_signals();
+    if (exec_setup(details, NULL, -1) == true) {
+	/* headed for execve() */
+	sudo_debug_execve(SUDO_DEBUG_INFO, details->command,
+	    details->argv, details->envp);
+	if (details->closefrom >= 0) {
+	    int maxfd = details->closefrom;
+	    /* Preserve back channel if present. */
+	    if (errfd != NULL) {
+		dup2(*errfd, maxfd);
+		(void)fcntl(maxfd, F_SETFD, FD_CLOEXEC);
+		*errfd = maxfd++;
+	    }
+	    if (sudo_debug_fd_set(maxfd) != -1)
+		maxfd++;
+	    closefrom(maxfd);
+	}
+#ifdef HAVE_SELINUX
+	if (ISSET(details->flags, CD_RBAC_ENABLED)) {
+	    selinux_execve(details->command, details->argv, details->envp,
+		ISSET(details->flags, CD_NOEXEC));
+	} else
+#endif
+	{
+	    sudo_execve(details->command, details->argv, details->envp,
+		ISSET(details->flags, CD_NOEXEC));
+	}
+	cstat->type = CMD_ERRNO;
+	cstat->val = errno;
+	sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to exec %s: %s",
+	    details->command, strerror(errno));
+    }
+    debug_return;
 }
