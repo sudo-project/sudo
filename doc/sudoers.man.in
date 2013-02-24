@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "@mansectsu@" "February 20, 2013" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
+.TH "SUDOERS" "@mansectsu@" "February 24, 2013" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1767,9 +1767,7 @@ Some versions of the linux
 su(1)
 command behave this way.
 .sp
-This setting is only supported by
-\fBsudoers\fR
-plugin version 1.8.7 or higher.
+This setting is only supported by version 1.8.7 or higher.
 It has no effect unless I/O logging is enabled or the
 \fIuse_pty\fR
 flag is enabled.
@@ -2156,6 +2154,37 @@ This flag is
 \fIoff\fR
 by default.
 .TP 18n
+pam_session
+On systems that use PAM for authentication,
+\fBsudo\fR
+will create a new PAM session for the command to be run in.
+Disabling
+\fIpam_session\fR
+may be needed on older PAM implementations or on operating systems where
+opening a PAM session changes the utmp or wtmp files.
+If PAM session support is disabled, resource limits may not be updated
+for the command being run.
+This flag is
+\fI@pam_session@\fR
+by default.
+.sp
+This setting is only supported by version 1.8.7 or higher.
+.TP 18n
+passprompt_override
+The password prompt specified by
+\fIpassprompt\fR
+will normally only be used if the password prompt provided by systems
+such as PAM matches the string
+``Password:''.
+If
+\fIpassprompt_override\fR
+is set,
+\fIpassprompt\fR
+will always be used.
+This flag is
+\fIoff\fR
+by default.
+.TP 18n
 path_info
 Normally,
 \fBsudo\fR
@@ -2172,21 +2201,6 @@ The disadvantage is that if the executable is simply not in the user's
 will tell the user that they are not allowed to run it, which can be confusing.
 This flag is
 \fI@path_info@\fR
-by default.
-.TP 18n
-passprompt_override
-The password prompt specified by
-\fIpassprompt\fR
-will normally only be used if the password prompt provided by systems
-such as PAM matches the string
-``Password:''.
-If
-\fIpassprompt_override\fR
-is set,
-\fIpassprompt\fR
-will always be used.
-This flag is
-\fIoff\fR
 by default.
 .TP 18n
 preserve_groups
@@ -2743,9 +2757,7 @@ base 36 sequence number
 will be silently truncated to 2176782336.
 The default value is 2176782336.
 .sp
-This setting is only supported by
-\fBsudoers\fR
-plugin version 1.8.7 or higher.
+This setting is only supported by version 1.8.7 or higher.
 .TP 18n
 noexec_file
 As of

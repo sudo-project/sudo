@@ -262,6 +262,9 @@ limitprivs
 exec_background
 	T_FLAG
 	"Run commands on a pty in the background"
+pam_session
+	T_FLAG
+	"Create a new PAM session for the command to run in"
 maxseq
 	T_UINT
 	"Maximum I/O log sequence number"

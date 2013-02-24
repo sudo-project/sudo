@@ -809,9 +809,9 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        will not be automatically foregrounded.  Some versions
                        of the linux su(1) command behave this way.
 
-                       This setting is only supported by ssuuddooeerrss plugin
-                       version 1.8.7 or higher.  It has no effect unless I/O
-                       logging is enabled or the _u_s_e___p_t_y flag is enabled.
+                       This setting is only supported by version 1.8.7 or
+                       higher.  It has no effect unless I/O logging is enabled
+                       or the _u_s_e___p_t_y flag is enabled.
 
      env_editor        If set, vviissuuddoo will use the value of the EDITOR or
                        VISUAL environment variables before falling back on the
@@ -1001,6 +1001,26 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        well as the _P_r_e_v_e_n_t_i_n_g _s_h_e_l_l _e_s_c_a_p_e_s section at the end
                        of this manual.  This flag is _o_f_f by default.
 
+     pam_session       On systems that use PAM for authentication, ssuuddoo will
+                       create a new PAM session for the command to be run in.
+                       Disabling _p_a_m___s_e_s_s_i_o_n may be needed on older PAM
+                       implementations or on operating systems where opening a
+                       PAM session changes the utmp or wtmp files.  If PAM
+                       session support is disabled, resource limits may not be
+                       updated for the command being run.  This flag is _o_n by
+                       default.
+
+                       This setting is only supported by version 1.8.7 or
+                       higher.
+
+     passprompt_override
+                       The password prompt specified by _p_a_s_s_p_r_o_m_p_t will
+                       normally only be used if the password prompt provided
+                       by systems such as PAM matches the string
+                       ``Password:''.  If _p_a_s_s_p_r_o_m_p_t___o_v_e_r_r_i_d_e is set,
+                       _p_a_s_s_p_r_o_m_p_t will always be used.  This flag is _o_f_f by
+                       default.
+
      path_info         Normally, ssuuddoo will tell the user when a command could
                        not be found in their PATH environment variable.  Some
                        sites may wish to disable this as it could be used to
@@ -1010,14 +1030,6 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        the user's PATH, ssuuddoo will tell the user that they are
                        not allowed to run it, which can be confusing.  This
                        flag is _o_n by default.
-
-     passprompt_override
-                       The password prompt specified by _p_a_s_s_p_r_o_m_p_t will
-                       normally only be used if the password prompt provided
-                       by systems such as PAM matches the string
-                       ``Password:''.  If _p_a_s_s_p_r_o_m_p_t___o_v_e_r_r_i_d_e is set,
-                       _p_a_s_s_p_r_o_m_p_t will always be used.  This flag is _o_f_f by
-                       default.
 
      preserve_groups   By default, ssuuddoo will initialize the group vector to
                        the list of groups the target user is in.  When
@@ -1305,8 +1317,8 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        truncated to 2176782336.  The default value is
                        2176782336.
 
-                       This setting is only supported by ssuuddooeerrss plugin
-                       version 1.8.7 or higher.
+                       This setting is only supported by version 1.8.7 or
+                       higher.
 
      noexec_file       As of ssuuddoo version 1.8.1 this option is no longer
                        supported.  The path to the noexec file should now be
@@ -2138,4 +2150,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.7                     February 20, 2013                    Sudo 1.8.7
+Sudo 1.8.7                     February 24, 2013                    Sudo 1.8.7

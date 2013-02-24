@@ -120,6 +120,7 @@ AC_SUBST([nsswitch_conf])
 AC_SUBST([netsvc_conf])
 AC_SUBST([secure_path])
 AC_SUBST([editor])
+AC_SUBST([pam_session])
 AC_SUBST([PLUGINDIR])
 #
 # Begin initial values for man page substitution
@@ -160,6 +161,7 @@ netsvc_conf=/etc/netsvc.conf
 noexec_file=/usr/local/libexec/sudo/sudo_noexec.so
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
+pam_session=on
 PLUGINDIR=/usr/local/libexec/sudo
 #
 # End initial values for man page substitution
@@ -2773,12 +2775,13 @@ if test ${with_pam-"no"} != "no"; then
 	    [ case "$enableval" in
 		yes)	AC_MSG_RESULT(yes)
 			;;
-		no)		AC_MSG_RESULT(no)
-			    AC_DEFINE(NO_PAM_SESSION)
-			    ;;
-		*)		AC_MSG_RESULT(no)
-			    AC_MSG_WARN([Ignoring unknown argument to --enable-pam-session: $enableval])
-			    ;;
+		no)	AC_MSG_RESULT(no)
+			AC_DEFINE(NO_PAM_SESSION)
+			pam_session=off
+			;;
+		*)	AC_MSG_RESULT(no)
+			AC_MSG_WARN([Ignoring unknown argument to --enable-pam-session: $enableval])
+			;;
 	    esac], AC_MSG_RESULT(yes))
     fi
 fi

@@ -251,13 +251,13 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
     }
 #endif /* HAVE_PAM_GETENVLIST */
 
-#ifndef NO_PAM_SESSION
-    status = pam_open_session(pamh, 0);
-    if (status != PAM_SUCCESS) {
-	(void) pam_end(pamh, status | PAM_DATA_SILENT);
-	pamh = NULL;
+    if (pam_session) {
+	status = pam_open_session(pamh, 0);
+	if (status != PAM_SUCCESS) {
+	    (void) pam_end(pamh, status | PAM_DATA_SILENT);
+	    pamh = NULL;
+	}
     }
-#endif
 
 done:
     debug_return_int(status == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
@@ -276,9 +276,8 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 	 * XXX - still needed now that session init is in parent?
 	 */
 	(void) pam_set_item(pamh, PAM_USER, pw->pw_name);
-#ifndef NO_PAM_SESSION
-	(void) pam_close_session(pamh, PAM_SILENT);
-#endif
+	if (pam_session)
+	    (void) pam_close_session(pamh, PAM_SILENT);
 	(void) pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
 	status = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
 	pamh = NULL;

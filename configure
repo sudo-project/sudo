@@ -659,6 +659,7 @@ EXEEXT
 ac_ct_CC
 CC
 PLUGINDIR
+pam_session
 editor
 secure_path
 netsvc_conf
@@ -2924,6 +2925,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -2963,6 +2965,7 @@ netsvc_conf=/etc/netsvc.conf
 noexec_file=/usr/local/libexec/sudo/sudo_noexec.so
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
+pam_session=on
 PLUGINDIR=/usr/local/libexec/sudo
 #
 # End initial values for man page substitution
@@ -18771,16 +18774,17 @@ if test "${enable_pam_session+set}" = set; then :
 		yes)	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 			;;
-		no)		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+		no)	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-			    $as_echo "#define NO_PAM_SESSION 1" >>confdefs.h
+			$as_echo "#define NO_PAM_SESSION 1" >>confdefs.h
 
-			    ;;
-		*)		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+			pam_session=off
+			;;
+		*)	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-			    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-pam-session: $enableval" >&5
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Ignoring unknown argument to --enable-pam-session: $enableval" >&5
 $as_echo "$as_me: WARNING: Ignoring unknown argument to --enable-pam-session: $enableval" >&2;}
-			    ;;
+			;;
 	    esac
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5

@@ -421,6 +421,11 @@ init_defaults(void)
     def_env_reset = ENV_RESET;
     def_set_logname = true;
     def_closefrom = STDERR_FILENO + 1;
+#ifdef NO_PAM_SESSION
+    def_pam_session = false;
+#else
+    def_pam_session = true;
+#endif
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)
