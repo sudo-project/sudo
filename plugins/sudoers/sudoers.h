@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2005, 2007-2012
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -242,6 +242,7 @@ void remove_timestamp(bool);
 bool set_lectured(void);
 
 /* sudo_auth.c */
+bool sudo_auth_needs_end_session(void);
 int verify_user(struct passwd *pw, char *prompt, int validated);
 int sudo_auth_begin_session(struct passwd *pw, char **user_env[]);
 int sudo_auth_end_session(struct passwd *pw);

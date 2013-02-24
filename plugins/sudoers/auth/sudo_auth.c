@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2008-2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2008-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -300,6 +300,22 @@ sudo_auth_begin_session(struct passwd *pw, char **user_env[])
 	}
     }
     debug_return_int(status == AUTH_FATAL ? -1 : 1);
+}
+
+bool
+sudo_auth_needs_end_session(void)
+{
+    sudo_auth *auth;
+    bool needed = false;
+    debug_decl(sudo_auth_needs_end_session, SUDO_DEBUG_AUTH)
+
+    for (auth = auth_switch; auth->name; auth++) {
+	if (auth->end_session && !IS_DISABLED(auth)) {
+	    needed = true;
+	    break;
+	}
+    }
+    debug_return_bool(needed);
 }
 
 /*

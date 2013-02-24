@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -67,6 +67,8 @@ struct sudoers_exec_args {
 
 static int sudo_version;
 static const char *interfaces_string;
+
+extern __dso_public struct policy_plugin sudoers_policy;
 
 #ifdef HAVE_BSD_AUTH_H
 extern char *login_style;
@@ -561,6 +563,7 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     char **command_infop[], char **argv_out[], char **user_env_out[])
 {
     struct sudoers_exec_args exec_args;
+    int rval;
     debug_decl(sudoers_policy_check, SUDO_DEBUG_PLUGIN)
 
     if (!ISSET(sudo_mode, MODE_EDIT))
@@ -570,7 +573,14 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     exec_args.envp = user_env_out;
     exec_args.info = command_infop;
 
-    debug_return_bool(sudoers_policy_main(argc, argv, 0, env_add, &exec_args));
+    rval = sudoers_policy_main(argc, argv, 0, env_add, &exec_args);
+    if (rval == true && sudo_version >= SUDO_API_MKVERSION(1, 3)) {
+	/* Unset close function if we don't need it to avoid extra process. */
+	if (!def_log_input && !def_log_output && !def_use_pty &&
+	    !sudo_auth_needs_end_session())
+	    sudoers_policy.close = NULL;
+    }
+    debug_return_bool(rval);
 }
 
 static int
