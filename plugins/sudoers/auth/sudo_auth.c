@@ -290,7 +290,7 @@ sudo_auth_begin_session(struct passwd *pw, char **user_env[])
 {
     sudo_auth *auth;
     int status = AUTH_SUCCESS;
-    debug_decl(auth_begin_session, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_auth_begin_session, SUDO_DEBUG_AUTH)
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->begin_session && !IS_DISABLED(auth)) {
@@ -327,7 +327,7 @@ sudo_auth_end_session(struct passwd *pw)
 {
     sudo_auth *auth;
     int status = AUTH_SUCCESS;
-    debug_decl(auth_end_session, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_auth_end_session, SUDO_DEBUG_AUTH)
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->end_session && !IS_DISABLED(auth)) {
