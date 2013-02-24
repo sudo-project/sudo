@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "@mansectsu@" "February 8, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "February 24, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -823,6 +823,14 @@ are run using the
 family of functions instead of
 \fBsystem\fR()
 (which interposes a shell between the command and the calling process).
+.PP
+If no I/O logging plugins are loaded and the policy plugin has not
+defined a
+\fBclose\fR()
+function, set a command timeout or required that the command be
+run in a new pty,
+\fBsudo\fR
+may execute the command directly instead of running it as a child process.
 .SS "Plugins"
 Plugins are dynamically loaded based on the contents of the
 sudo.conf(@mansectform@)

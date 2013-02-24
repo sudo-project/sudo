@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 8, 2013
+.Dd February 24, 2013
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -807,6 +807,14 @@ are run using the
 family of functions instead of
 .Fn system
 (which interposes a shell between the command and the calling process).
+.Pp
+If no I/O logging plugins are loaded and the policy plugin has not
+defined a
+.Fn close
+function, set a command timeout or required that the command be
+run in a new pty,
+.Nm sudo
+may execute the command directly instead of running it as a child process.
 .Ss Plugins
 Plugins are dynamically loaded based on the contents of the
 .Xr sudo.conf @mansectform@
