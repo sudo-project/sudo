@@ -345,6 +345,11 @@ DDEESSCCRRIIPPTTIIOONN
                  ccoonnvveerrssaattiioonn() or pplluuggiinn__pprriinnttff() function.  If the command
                  was successfully executed, the value of error is 0.
 
+           If no cclloossee() function is defined, no I/O logging plugins are
+           loaded, and neither the _t_i_m_e_o_u_t not _u_s_e___p_t_y options are set in the
+           command_info list, the ssuuddoo front end may execute the command
+           directly instead of running it as a child process.
+
      show_version
            int (*show_version)(int verbose);
 
@@ -1355,11 +1360,11 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
      Version 1.0
            Initial API version.
 
-     Version 1.1
+     Version 1.1 (sudo 1.8.0)
            The I/O logging plugin's ooppeenn() function was modified to take the
            command_info list as an argument.
 
-     Version 1.2
+     Version 1.2 (sudo 1.8.5)
            The Policy and I/O logging plugins' ooppeenn() functions are now passed
            a list of plugin parameters if any are specified in sudo.conf(4).
 
@@ -1371,12 +1376,18 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
            used to merge in environment variables stored in the PAM handle
            before a command is run.
 
-     Version 1.3
+     Version 1.3 (sudo 1.8.7)
            Support for the _e_x_e_c___b_a_c_k_g_r_o_u_n_d entry has been added to the
            command_info list.
 
            The _m_a_x___g_r_o_u_p_s and _p_l_u_g_i_n___d_i_r entries were added to the settings
            list.
+
+           The vveerrssiioonn() and cclloossee() functions are now optional.  Previously,
+           a missing vveerrssiioonn() or cclloossee() function would result in a crash.
+           If no policy plugin cclloossee() function is defined, a default cclloossee()
+           function will be provided by the ssuuddoo front end that displays a
+           warning if the command could not be executed.
 
            The ssuuddoo front end now installs default signal handlers to trap
            common signals while the plugin functions are run.
@@ -1400,4 +1411,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.7                     February 21, 2013                    Sudo 1.8.7
+Sudo 1.8.7                     February 24, 2013                    Sudo 1.8.7
