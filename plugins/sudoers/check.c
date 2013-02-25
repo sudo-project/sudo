@@ -82,6 +82,7 @@ static struct tty_info {
     dev_t rdev;			/* tty device ID */
     ino_t ino;			/* tty inode number */
     struct timeval ctime;	/* tty inode change time */
+    pid_t sid;			/* ID of session with controlling tty */
 } tty_info;
 
 static int   build_timestamp(char **, char **);
@@ -138,13 +139,14 @@ check_user(int validated, int mode)
     if (ISSET(mode, MODE_IGNORE_TICKET))
 	SET(validated, FLAG_CHECK_USER);
 
-    /* Stash the tty's ctime for tty ticket comparison. */
+    /* Stash the tty's device, session ID and ctime for ticket comparison. */
     if (def_tty_tickets && user_ttypath && stat(user_ttypath, &sb) == 0) {
 	tty_info.dev = sb.st_dev;
 	tty_info.ino = sb.st_ino;
 	tty_info.rdev = sb.st_rdev;
 	if (tty_is_devpts(user_ttypath))
 	    ctim_get(&sb, &tty_info.ctime);
+	tty_info.sid = user_sid;
     }
 
     if (build_timestamp(&timestampdir, &timestampfile) == -1) {

@@ -1410,6 +1410,10 @@ deserialize_info(char * const args[], char * const settings[], char * const user
 	    sudo_user.cols = atoi(*cur + sizeof("cols=") - 1);
 	    continue;
 	}
+	if (MATCHES(*cur, "sid=")) {
+	    sudo_user.sid = atoi(*cur + sizeof("sid=") - 1);
+	    continue;
+	}
     }
     if (user_cwd == NULL)
 	user_cwd = "unknown";

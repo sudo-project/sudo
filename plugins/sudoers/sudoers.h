@@ -95,6 +95,7 @@ struct sudo_user {
     int   flags;
     uid_t uid;
     uid_t gid;
+    pid_t sid;
 };
 
 /*
@@ -171,8 +172,8 @@ struct sudo_user {
 #define user_name		(sudo_user.name)
 #define user_uid		(sudo_user.uid)
 #define user_gid		(sudo_user.gid)
+#define user_sid		(sudo_user.sid)
 #define user_passwd		(sudo_user.pw->pw_passwd)
-#define user_uuid		(sudo_user.uuid)
 #define user_dir		(sudo_user.pw->pw_dir)
 #define user_gids		(sudo_user.gids)
 #define user_ngids		(sudo_user.ngids)
