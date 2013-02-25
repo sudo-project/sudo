@@ -1,5 +1,11 @@
 What's new in Sudo 1.8.6p7?
 
+ * A time stamp file with the date set to the epoch by "sudo -k"
+   is now completely ignored regardless of what the local clock is
+   set to.  Previously, if the local clock was set to a value between
+   the epoch and the time stamp timeout value, a time stamp reset
+   by "sudo -k" would be considered current.
+
  * The tty-specific time stamp file now includes the session ID
    of the sudo process that created it.  If a process with the same
    tty but a different session ID runs sudo, the user will now be
