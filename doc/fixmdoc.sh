@@ -47,7 +47,7 @@ case "$OUTFILE" in
 	if [ X"$SEMAN" != X"1" ]; then
 		SE_FLAG='/^.*\n\.Op Fl r Ar role/{;N;/^.*\n\.Ek$/d;};/^.*\n\.Op Fl t Ar type/{;N;/^.*\n\.Ek$/d;};'
 		cat >>"$OUTFILE" <<-'EOF'
-			/^\.It Fl r Ar role/,/newline character\.$/ {
+			/^\.It Fl r Ar role/,/^\.Ar role \.$/ {
 				d
 			}
 			/^\.It Fl t Ar type/,/specified role\.$/ {
