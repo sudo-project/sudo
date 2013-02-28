@@ -14181,6 +14181,17 @@ $as_echo "$sudo_cv_var_daportable" >&6; }
 			    test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 			;;
 		esac
+		for ac_func in pstat_getproc
+do :
+  ac_fn_c_check_func "$LINENO" "pstat_getproc" "ac_cv_func_pstat_getproc"
+if test "x$ac_cv_func_pstat_getproc" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PSTAT_GETPROC 1
+_ACEOF
+
+fi
+done
+
 		;;
     *-dec-osf*)
 		# ignore envariables wrt dynamic lib path
