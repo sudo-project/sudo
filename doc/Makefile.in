@@ -361,7 +361,7 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	-rm -rf Makefile config.log *.man
+	-rm -rf Makefile config.log *.man *.mdoc
 
 clobber: distclean
 

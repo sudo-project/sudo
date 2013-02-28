@@ -49,6 +49,8 @@ shlib_mode = @SHLIB_MODE@
 SUBDIRS = compat common @ZLIB_SRC@ plugins/group_file plugins/sudoers \
 	  plugins/system_group src include doc
 
+SAMPLES = plugins/sample
+
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
@@ -287,14 +289,14 @@ package: sudo.pp
 	    version=$(VERSION) $(PPVARS)
 
 clean: config.status
-	for d in $(SUBDIRS); do \
+	for d in $(SUBDIRS) $(SAMPLES); do \
 	    (cd $$d && exec $(MAKE) $@); \
 	done
 
 mostlyclean: clean
 
 distclean: config.status
-	for d in $(SUBDIRS); do \
+	for d in $(SUBDIRS) $(SAMPLES); do \
 	    (cd $$d && exec $(MAKE) $@); \
 	done
 	-rm -rf Makefile pathnames.h config.h config.status config.cache \

@@ -318,8 +318,9 @@ check: $(TEST_PROGS) visudo testsudoers
 		./check_symbols .libs/sudoers$(soext) $(shlib_exp); \
 		rval=`expr $$rval + $$?`; \
 	    fi; \
-	    ./check_wrap $(srcdir)/regress/logging/check_wrap.in > check_wrap.out; \
-	    diff check_wrap.out $(srcdir)/regress/logging/check_wrap.out.ok; \
+	    mkdir -p regress/logging; \
+	    ./check_wrap $(srcdir)/regress/logging/check_wrap.in > regress/logging/check_wrap.out; \
+	    diff regress/logging/check_wrap.out $(srcdir)/regress/logging/check_wrap.out.ok; \
 	    rval=`expr $$rval + $$?`; \
 	    passed=0; failed=0; total=0; \
 	    mkdir -p regress/sudoers; \
@@ -389,7 +390,9 @@ check: $(TEST_PROGS) visudo testsudoers
 	fi
 
 clean:
-	-$(LIBTOOL) --mode=clean rm -f $(PROGS) $(TEST_PROGS) *.lo *.o *.la *.a stamp-* core *.core core.* *.out *.toke *.err *.inc
+	-$(LIBTOOL) --mode=clean rm -f $(PROGS) $(TEST_PROGS) *.lo *.o *.la \
+	    *.a stamp-* core *.core core.* regress/*/*.out regress/*/*.toke \
+	    regress/*/*.err
 
 mostlyclean: clean
 

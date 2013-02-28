@@ -138,7 +138,7 @@ check: $(TEST_PROGS)
 	fi
 
 clean:
-	-$(LIBTOOL) --mode=clean rm -f *.lo *.o *.la *.a stamp-* core *.core core.*
+	-$(LIBTOOL) --mode=clean rm -f $(TEST_PROGS) *.lo *.o *.la *.a stamp-* core *.core core.* regress/*/*.out
 
 mostlyclean: clean
 
