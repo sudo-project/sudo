@@ -590,6 +590,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	open_io_fd(pathbuf, len, &io_log_files[i], i ? iolog_compress : false);
     }
 
+    gettimeofday(&last_time, NULL);
     fprintf(io_log_files[IOFD_LOG].fd.f, "%ld:%s:%s:%s:%s:%d:%d\n%s\n%s",
 	(long)last_time.tv_sec,
 	details.user ? details.user : "unknown", details.runas_pw->pw_name,
