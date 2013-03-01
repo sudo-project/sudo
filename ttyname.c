@@ -81,6 +81,10 @@
 #elif defined(HAVE_SYS_PROCFS_H)
 # include <sys/procfs.h>
 #endif
+#ifdef HAVE_PSTAT_GETPROC
+# include <sys/param.h>
+# include <sys/pstat.h>
+#endif
 
 #include "sudo.h"
 
@@ -334,7 +338,6 @@ sudo_ttyname_dev(rdev)
  * Return a string from ttyname() containing the tty to which the process is
  * attached or NULL if there is no tty associated with the process (or its
  * parent).  First tries sysctl using the current pid, then the parent's pid.
- * Falls back on ttyname of std{in,out,err} if that fails.
  */
 char *
 get_process_ttyname()
@@ -375,7 +378,6 @@ get_process_ttyname()
  * Return a string from ttyname() containing the tty to which the process is
  * attached or NULL if there is no tty associated with the process (or its
  * parent).  First tries /proc/pid/psinfo, then /proc/ppid/psinfo.
- * Falls back on ttyname of std{in,out,err} if that fails.
  */
 char *
 get_process_ttyname()
@@ -406,7 +408,6 @@ get_process_ttyname()
  * Return a string from ttyname() containing the tty to which the process is
  * attached or NULL if there is no tty associated with the process (or its
  * parent).  First tries field 7 in /proc/pid/stat, then /proc/ppid/stat.
- * Falls back on ttyname of std{in,out,err} if that fails.
  */
 char *
 get_process_ttyname()
@@ -444,6 +445,31 @@ get_process_ttyname()
     }
     efree(line);
 
+    return tty;
+}
+#elif HAVE_PSTAT_GETPROC
+/*
+ * Return a string from ttyname() containing the tty to which the process is
+ * attached or NULL if there is no tty associated with the process (or its
+ * parent).
+ */
+char *
+get_process_ttyname(void)
+{
+    struct pst_status pstat;
+    char *tty = NULL;
+    int i;
+
+    /* Try to determine the tty from psdev in struct pst_status. */
+    for (i = 0; tty == NULL && i < 2; i++) {
+	const int pid = i ? (int)getppid() : (int)getpid();
+	if (pstat_getproc(&pstat, sizeof(pstat), 0, pid) != -1) {
+	    if (pstat.pst_term.psd_major != -1 && pstat.pst_term.psd_minor != -1) {
+		tty = sudo_ttyname_dev(makedev(pstat.pst_term.psd_major,
+		    pstat.pst_term.psd_minor));
+	    }
+	}
+    }
     return tty;
 }
 #else

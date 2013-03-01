@@ -401,6 +401,9 @@
 /* Define to 1 if you have the <project.h> header file. */
 #undef HAVE_PROJECT_H
 
+/* Define to 1 if you have the `pstat_getproc' function. */
+#undef HAVE_PSTAT_GETPROC
+
 /* Define to 1 if you have the <pty.h> header file. */
 #undef HAVE_PTY_H
 
