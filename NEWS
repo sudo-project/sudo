@@ -1,3 +1,14 @@
+What's new in Sudo 1.7.10p7?
+
+ * A time stamp file with the date set to the epoch by "sudo -k" 
+   is now completely ignored regardless of what the local clock is
+   set to.  Previously, if the local clock was set to a value between 
+   the epoch and the time stamp timeout value, a time stamp reset
+   by "sudo -k" would be considered current.
+
+ * Fixed the sudo exit status when "sudo -l command" is run.
+   This is a regression introduced in version 1.7.10.
+
 What's new in Sudo 1.7.10p6?
 
  * Fixed the restoration of SIGINT, SIGQUIT and SIGTSTP.  This
