@@ -29,20 +29,25 @@
 # endif
 #endif /* STDC_HEADERS */
 #include <fcntl.h>
-#ifdef HAVE_DIRENT_H
-# include <dirent.h>
-# define NAMLEN(dirent) strlen((dirent)->d_name)
+#ifdef HAVE_PSTAT_GETPROC
+# include <sys/param.h>
+# include <sys/pstat.h>
 #else
-# define dirent direct
-# define NAMLEN(dirent) (dirent)->d_namlen
-# ifdef HAVE_SYS_NDIR_H
-#  include <sys/ndir.h>
-# endif
-# ifdef HAVE_SYS_DIR_H
-#  include <sys/dir.h>
-# endif
-# ifdef HAVE_NDIR_H
-#  include <ndir.h>
+# ifdef HAVE_DIRENT_H
+#  include <dirent.h>
+#  define NAMLEN(dirent) strlen((dirent)->d_name)
+# else
+#  define dirent direct
+#  define NAMLEN(dirent) (dirent)->d_namlen
+#  ifdef HAVE_SYS_NDIR_H
+#   include <sys/ndir.h>
+#  endif
+#  ifdef HAVE_SYS_DIR_H
+#   include <sys/dir.h>
+#  endif
+#  ifdef HAVE_NDIR_H
+#   include <ndir.h>
+#  endif
 # endif
 #endif
 
@@ -84,15 +89,28 @@ closefrom_fallback(int lowfd)
  * Close all file descriptors greater than or equal to lowfd.
  * We try the fast way first, falling back on the slow method.
  */
-#ifdef HAVE_FCNTL_CLOSEM
+#if defined(HAVE_FCNTL_CLOSEM)
 void
 closefrom(int lowfd)
 {
     if (fcntl(lowfd, F_CLOSEM, 0) == -1)
 	closefrom_fallback(lowfd);
 }
-#else
-# ifdef HAVE_DIRFD
+#elif defined(HAVE_PSTAT_GETPROC)
+void
+closefrom(int lowfd)
+{
+    struct pst_status pstat;
+    int fd;
+
+    if (pstat_getproc(&pstat, sizeof(pstat), 0, getpid()) != -1) {
+	for (fd = lowfd; fd <= pstat.pst_highestfd; fd++)
+	    (void) close(fd);
+    } else {
+	closefrom_fallback(lowfd);
+    }
+}
+#elif defined(HAVE_DIRFD)
 void
 closefrom(int lowfd)
 {
@@ -113,5 +131,4 @@ closefrom(int lowfd)
     } else
 	closefrom_fallback(lowfd);
 }
-#endif /* HAVE_DIRFD */
 #endif /* HAVE_FCNTL_CLOSEM */
