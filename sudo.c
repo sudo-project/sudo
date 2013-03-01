@@ -445,7 +445,7 @@ main(argc, argv, envp)
     if (rval != TRUE) {
 	if (!ISSET(validated, VALIDATE_OK))
 	    log_denial(validated, FALSE);
-	goto done;
+	goto bad;
     }
 
     /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
