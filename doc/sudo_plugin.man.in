@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "February 24, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO_PLUGIN" "5" "March 5, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2279,9 +2279,13 @@ plugin supports its own plugin interface to allow non-Unix
 group lookups.
 This can be used to query a group source other than the standard Unix
 group database.
-A sample group plugin is bundled with
-\fBsudo\fR
-that implements file-based lookups.
+Two sample group plugins are bundled with
+\fBsudo\fR,
+\fIgroup_file\fR
+and
+\fIsystem_group\fR,
+are detailed in
+sudoers(@mansectform@).
 Third party group plugins include a QAS AD plugin available from Quest Software.
 .PP
 A group plugin must declare and populate a

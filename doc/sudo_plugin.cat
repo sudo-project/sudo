@@ -1258,9 +1258,10 @@ DDEESSCCRRIIPPTTIIOONN
    SSuuddooeerrss ggrroouupp pplluuggiinn AAPPII
      The ssuuddooeerrss plugin supports its own plugin interface to allow non-Unix
      group lookups.  This can be used to query a group source other than the
-     standard Unix group database.  A sample group plugin is bundled with ssuuddoo
-     that implements file-based lookups.  Third party group plugins include a
-     QAS AD plugin available from Quest Software.
+     standard Unix group database.  Two sample group plugins are bundled with
+     ssuuddoo, _g_r_o_u_p___f_i_l_e and _s_y_s_t_e_m___g_r_o_u_p, are detailed in sudoers(4).  Third
+     party group plugins include a QAS AD plugin available from Quest
+     Software.
 
      A group plugin must declare and populate a sudoers_group_plugin struct in
      the global scope.  This structure contains pointers to the functions that
@@ -1411,4 +1412,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.7                     February 24, 2013                    Sudo 1.8.7
+Sudo 1.8.7                       March 5, 2013                      Sudo 1.8.7

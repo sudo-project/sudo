@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd February 24, 2013
+.Dd March 5, 2013
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1968,9 +1968,13 @@ plugin supports its own plugin interface to allow non-Unix
 group lookups.
 This can be used to query a group source other than the standard Unix
 group database.
-A sample group plugin is bundled with
-.Nm sudo
-that implements file-based lookups.
+Two sample group plugins are bundled with
+.Nm sudo ,
+.Em group_file
+and
+.Em system_group ,
+are detailed in
+.Xr sudoers @mansectform@ .
 Third party group plugins include a QAS AD plugin available from Quest Software.
 .Pp
 A group plugin must declare and populate a

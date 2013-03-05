@@ -571,9 +571,7 @@ The actual
 and
 \fRnonunix_gid\fR
 syntax depends on
-the underlying group provider plugin (see the
-\fIgroup_plugin\fR
-description below).
+the underlying group provider plugin.
 For instance, the QAS AD plugin supports the following formats:
 .TP 6n
 \fBo\fR
@@ -584,6 +582,10 @@ Group in any domain: "%:Group Name@FULLY.QUALIFIED.DOMAIN"
 .TP 6n
 \fBo\fR
 Group SID: "%:S-1-2-34-5678901234-5678901234-5678901234-567"
+.PP
+See
+\fIGROUP PROVIDER PLUGINS\fR
+for more information.
 .PP
 Note that quotes around group names are optional.
 Unquoted strings must use a backslash
@@ -741,7 +743,7 @@ option (or as
 It may take command line arguments just as a normal command does.
 Note that
 ``\fRsudoedit\fR''
-is a command built-in to
+is a command built into
 \fBsudo\fR
 itself and must be specified in
 \fIsudoers\fR
@@ -2942,9 +2944,6 @@ group_plugin
 A string containing a
 \fIsudoers\fR
 group plugin with optional arguments.
-This can be used to implement support for the
-\fRnonunix_group\fR
-syntax described earlier.
 The string should consist of the plugin
 path, either fully-qualified or relative to the
 \fI@PLUGINDIR@\fR
@@ -2953,29 +2952,14 @@ These arguments (if any) will be passed to the plugin's initialization function.
 If arguments are present, the string must be enclosed in double quotes
 (\&"").
 .sp
-For example, given
-\fI/etc/sudo-group\fR,
-a group file in Unix group format, the sample group plugin can be used:
-.RS
-.nf
-.sp
-.RS 0n
-Defaults group_plugin="group_file.so /etc/sudo-group"
-.RE
-.fi
-.sp
 For more information see
-sudo_plugin(@mansectform@).
-.PP
-.RE
-.PD 0
+GROUP PROVIDER PLUGINS.
 .TP 14n
 lecture
 This option controls when a short lecture will be printed along with
 the password prompt.
 It has the following possible values:
 .RS
-.PD
 .TP 8n
 always
 Always lecture the user.
@@ -3263,6 +3247,74 @@ is displayed when
 is run by root with the
 \fB\-V\fR
 option.
+.SH "GROUP PROVIDER PLUGINS"
+The
+\fBsudoers\fR
+plugin supports its own plugin interface to allow non-Unix
+group lookups which can query a group source other
+than the standard Unix group database.
+This can be used to implement support for the
+\fRnonunix_group\fR
+syntax described earlier.
+.PP
+Group provider plugins are specified via the
+\fIgroup_plugin\fR
+Defaults setting.
+The argument to
+\fIgroup_plugin\fR
+should consist of the plugin path, either fully-qualified or relative to the
+\fI@PLUGINDIR@\fR
+directory, followed by any configuration options the plugin requires.
+These options (if specified) will be passed to the plugin's initialization
+function.
+If options are present, the string must be enclosed in double quotes
+(\&"").
+.PP
+The following group provider plugins are installed by default:
+.TP 10n
+group_file
+The
+\fIgroup_file\fR
+plugin supports an alternate group file that uses the same syntax as the
+\fI/etc/group\fR
+file.
+The path to the group file should be specified as an option
+to the plugin.
+For example, if the group file to be used is
+\fI/etc/sudo-group\fR:
+.RS
+.nf
+.sp
+.RS 0n
+Defaults group_plugin="group_file.so /etc/sudo-group"
+.RE
+.fi
+.PP
+.RE
+.PD 0
+.TP 10n
+system_group
+The
+\fIsystem_group\fR
+plugin supports group lookups via the standard C library functions
+\fBgetgrnam\fR()
+and
+\fBgetgrid\fR().
+This plugin can be used in instances where the user belongs to
+groups not present in the user's supplemental group vector.
+This plugin takes no options:
+.RS
+.nf
+.sp
+.RS 0n
+Defaults group_plugin=system_group.so
+.RE
+.fi
+.RE
+.PD
+.PP
+The group provider plugin API is described in detail in
+sudo_plugin(@mansectsu@).
 .SH "LOG FORMAT"
 \fBsudoers\fR
 can log events using either

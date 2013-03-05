@@ -549,9 +549,7 @@ The actual
 and
 .Li nonunix_gid
 syntax depends on
-the underlying group provider plugin (see the
-.Em group_plugin
-description below).
+the underlying group provider plugin.
 For instance, the QAS AD plugin supports the following formats:
 .Bl -bullet -width 4n
 .It
@@ -561,6 +559,10 @@ Group in any domain: "%:Group Name@FULLY.QUALIFIED.DOMAIN"
 .It
 Group SID: "%:S-1-2-34-5678901234-5678901234-5678901234-567"
 .El
+.Pp
+See
+.Sx "GROUP PROVIDER PLUGINS"
+for more information.
 .Pp
 Note that quotes around group names are optional.
 Unquoted strings must use a backslash
@@ -709,7 +711,7 @@ option (or as
 It may take command line arguments just as a normal command does.
 Note that
 .Dq Li sudoedit
-is a command built-in to
+is a command built into
 .Nm sudo
 itself and must be specified in
 .Em sudoers
@@ -2741,9 +2743,6 @@ This is not set by default.
 A string containing a
 .Em sudoers
 group plugin with optional arguments.
-This can be used to implement support for the
-.Li nonunix_group
-syntax described earlier.
 The string should consist of the plugin
 path, either fully-qualified or relative to the
 .Pa @PLUGINDIR@
@@ -2752,15 +2751,8 @@ These arguments (if any) will be passed to the plugin's initialization function.
 If arguments are present, the string must be enclosed in double quotes
 .Pq \&"" .
 .Pp
-For example, given
-.Pa /etc/sudo-group ,
-a group file in Unix group format, the sample group plugin can be used:
-.Bd -literal
-Defaults group_plugin="group_file.so /etc/sudo-group"
-.Ed
-.Pp
 For more information see
-.Xr sudo_plugin @mansectform@ .
+.Xr "GROUP PROVIDER PLUGINS" .
 .It lecture
 This option controls when a short lecture will be printed along with
 the password prompt.
@@ -3026,6 +3018,61 @@ is run by root with the
 .Fl V
 option.
 .El
+.Sh GROUP PROVIDER PLUGINS
+The
+.Nm sudoers
+plugin supports its own plugin interface to allow non-Unix
+group lookups which can query a group source other
+than the standard Unix group database.
+This can be used to implement support for the
+.Li nonunix_group
+syntax described earlier.
+.Pp
+Group provider plugins are specified via the
+.Em group_plugin
+Defaults setting.
+The argument to
+.Em group_plugin
+should consist of the plugin path, either fully-qualified or relative to the
+.Pa @PLUGINDIR@
+directory, followed by any configuration options the plugin requires.
+These options (if specified) will be passed to the plugin's initialization
+function.
+If options are present, the string must be enclosed in double quotes
+.Pq \&"" .
+.Pp
+The following group provider plugins are installed by default:
+.Bl -tag -width 8n
+.It group_file
+The
+.Em group_file
+plugin supports an alternate group file that uses the same syntax as the
+.Pa /etc/group
+file.
+The path to the group file should be specified as an option
+to the plugin.
+For example, if the group file to be used is
+.Pa /etc/sudo-group :
+.Bd -literal
+Defaults group_plugin="group_file.so /etc/sudo-group"
+.Ed
+.It system_group
+The
+.Em system_group
+plugin supports group lookups via the standard C library functions
+.Fn getgrnam
+and
+.Fn getgrid .
+This plugin can be used in instances where the user belongs to
+groups not present in the user's supplemental group vector.
+This plugin takes no options:
+.Bd -literal
+Defaults group_plugin=system_group.so
+.Ed
+.El
+.Pp
+The group provider plugin API is described in detail in
+.Xr sudo_plugin @mansectsu@ .
 .Sh LOG FORMAT
 .Nm sudoers
 can log events using either
