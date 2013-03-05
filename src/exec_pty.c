@@ -707,16 +707,14 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 	close(signal_pipe[1]);
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
 	sigprocmask(SIG_SETMASK, omask, NULL);
-	if (exec_setup(details, slavename, io_fds[SFD_SLAVE]) == true) {
-	    /* Close the other end of the stdin/stdout/stderr pipes and exec. */
-	    if (io_pipe[STDIN_FILENO][1])
-		close(io_pipe[STDIN_FILENO][1]);
-	    if (io_pipe[STDOUT_FILENO][0])
-		close(io_pipe[STDOUT_FILENO][0]);
-	    if (io_pipe[STDERR_FILENO][0])
-		close(io_pipe[STDERR_FILENO][0]);
-	    exec_monitor(details, sv[1]);
-	}
+	/* Close the other end of the stdin/stdout/stderr pipes and exec. */
+	if (io_pipe[STDIN_FILENO][1])
+	    close(io_pipe[STDIN_FILENO][1]);
+	if (io_pipe[STDOUT_FILENO][0])
+	    close(io_pipe[STDOUT_FILENO][0]);
+	if (io_pipe[STDERR_FILENO][0])
+	    close(io_pipe[STDERR_FILENO][0]);
+	exec_monitor(details, sv[1]);
 	cstat.type = CMD_ERRNO;
 	cstat.val = errno;
 	ignore_result(send(sv[1], &cstat, sizeof(cstat), 0));
