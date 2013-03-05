@@ -1,3 +1,82 @@
+What's new in Sudo 1.8.7?
+
+ * The non-Unix group plugin is now supported when sudoers data
+   is stored in LDAP.
+
+ * Sudo now uses a workaround for a locale bug on Solaris 11.0
+   that prevents setuid programs like sudo from fully using locales.
+
+ * User messages are now always displayed in the user's locale,
+   even when the same message is being logged or mailed in a
+   different locale.
+
+ * Log files created by sudo now explicitly have the group set
+   to group ID 0 rather than relying on BSD group semantics (which
+   may not be the default).
+
+ * A new "exec_background" sudoers option can be used to initially
+   run the command without read access to the terminal when running
+   a command in a pseudo-tty.  If the command tries to read from
+   the terminal it will be stopped by the kernel (via SIGTTIN or
+   SIGTTOU) and sudo will immediately restart it as the forground
+   process (if possible).  This allows sudo to only pass terminal
+   input to the program if the program actually is expecting it.
+   Unfortunately, a few poorly-behaved programs (like "su" on most
+   Linux systems) do not handle SIGTTIN and SIGTTOU properly.
+
+ * Sudo now uses an efficient group query to get all the groups
+   for a user instead of iterating over every record in the group
+   database on HP-UX and Solaris.
+
+ * Sudo now produces better error messages when there is an error
+   in the sudo.conf file.
+
+ * Two new settings have been added to sudo.conf to give the admin
+   better control of how group database queries are performed.  The
+   "group_source" specifies how the group list for a user will be
+   determined.  Legal values are "static" (use the kernel groups
+   list), "dynamic" (perform a group database query) and "adaptive"
+   (only perform a group database query if the kernel list is full).
+   The "max_groups" specifies the maximum number of groups a user may
+   belong to when performing a group database query.
+
+ * The sudo.conf file now supports line continuation by using a
+   backslash as the last character on the line.
+
+ * There is now a standalone sudo.conf manual page.
+
+ * Sudo now stores its libexec files in a "sudo" subdirectory instead
+   of in libexec itself. For backwards compatibility, if the plugin
+   is not found in the default plugin directory, sudo will check
+   the parent directory if the default directory ends in "/sudo".
+
+ * The sudoers I/O logging plugin now logs the terminal size.
+
+ * A new sudoers option "maxseq" can be used to limit the number of
+   I/O log entries that are stored.
+
+ * The "system_group" and "group_file" sudoers group provider plugins
+   are now installed by default.
+
+ * The list output (sudo -l) output from the sudoers plugin is now
+   less ambiguous when an entry includes different runas users.
+   The long list output (sudo -ll) for file-based sudoers is now
+   more consistent with the format of LDAP-based sudoers.
+
+ * A uid may now be used in the sudoRunAsUser attributes for LDAP
+   sudoers.
+
+ * Minor plugin API change: the close and version functions are now
+   optional.  If the policy plugin does not provide a close function
+   and the command is not being run in a new pseudo-tty, sudo may
+   now execute the command directly instead of in a child process.
+
+ * A new sudoers option "pam_session" can be used to disable sudo's
+   PAM session support.
+
+ * On HP-UX systems, sudo will now use the pstat() function to
+   determine the tty instead of ttyname().
+
 What's new in Sudo 1.8.6p7?
 
  * A time stamp file with the date set to the epoch by "sudo -k"
