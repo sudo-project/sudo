@@ -3414,6 +3414,7 @@ switch_dir(stack, dirpath)
 	pl->path = path;
 	pl->next = first;
 	first = pl;
+	path = NULL;
 	count++;
     }
     closedir(dir);
@@ -3455,8 +3456,8 @@ bad:
     while (first != NULL) {
 	pl = first;
 	first = pl->next;
-	free(pl->path);
-	free(pl);
+	efree(pl->path);
+	efree(pl);
     }
     efree(sorted);
     efree(dirpath);
