@@ -271,10 +271,10 @@ sudo_make_grlist_item(struct passwd *pw)
 #endif
 
 #if defined(HAVE_SYSCONF) && defined(_SC_LOGIN_NAME_MAX)
-    groupname_len = (int)sysconf(_SC_LOGIN_NAME_MAX);
-    if (groupname_len < 0)
+    groupname_len = MAX((int)sysconf(_SC_LOGIN_NAME_MAX), 32);
+#else
+    groupname_len = MAX(LOGIN_NAME_MAX, 32);
 #endif
-	groupname_len = LOGIN_NAME_MAX;
 
     /* Allocate in one big chunk for easy freeing. */
     nsize = strlen(pw->pw_name) + 1;
