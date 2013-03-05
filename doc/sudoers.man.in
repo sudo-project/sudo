@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "@mansectsu@" "February 24, 2013" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
+.TH "SUDOERS" "@mansectsu@" "March 5, 2013" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -730,7 +730,7 @@ if they are used in command arguments:
 `:\&',
 `=\&',
 `\e'.
-The special command
+The built-in command
 ``\fRsudoedit\fR''
 is used to permit a user to run
 \fBsudo\fR
@@ -739,6 +739,13 @@ with the
 option (or as
 \fBsudoedit\fR).
 It may take command line arguments just as a normal command does.
+Note that
+``\fRsudoedit\fR''
+is a command built-in to
+\fBsudo\fR
+itself and must be specified in
+\fIsudoers\fR
+without a leading path.
 .SS "Defaults"
 Certain configuration options may be changed from their default
 values at run-time via one or more

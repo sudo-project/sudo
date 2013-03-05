@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 24, 2013
+.Dd March 5, 2013
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -698,7 +698,7 @@ if they are used in command arguments:
 .Ql :\& ,
 .Ql =\& ,
 .Ql \e .
-The special command
+The built-in command
 .Dq Li sudoedit
 is used to permit a user to run
 .Nm sudo
@@ -707,6 +707,13 @@ with the
 option (or as
 .Nm sudoedit ) .
 It may take command line arguments just as a normal command does.
+Note that
+.Dq Li sudoedit
+is a command built-in to
+.Nm sudo
+itself and must be specified in
+.Em sudoers
+without a leading path.
 .Ss Defaults
 Certain configuration options may be changed from their default
 values at run-time via one or more
