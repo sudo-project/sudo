@@ -52,6 +52,15 @@
 # endif
 #endif
 
+/* Hint to compiler that returned pointer is unique (malloc but not realloc). */
+#ifndef __malloc_like
+# if __GNUC_PREREQ__(2, 96)
+#  define __malloc_like 	__attribute__((__malloc__))
+# else
+#  define __malloc_like
+# endif
+#endif
+
 #ifndef __dso_public
 # ifdef HAVE_DSO_VISIBILITY
 #  if defined(__GNUC__)
