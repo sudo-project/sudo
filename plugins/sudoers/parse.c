@@ -357,6 +357,12 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
     int nfound = 0;
     debug_decl(sudo_file_display_priv_short, SUDO_DEBUG_NSS)
 
+    /* gcc -Wuninitialized false positive */
+    tags.noexec = UNSPEC;
+    tags.setenv = UNSPEC;
+    tags.nopasswd = UNSPEC;
+    tags.log_input = UNSPEC;
+    tags.log_output = UNSPEC;
     tq_foreach_fwd(&us->privileges, priv) {
 	if (hostlist_matches(&priv->hostlist) != ALLOW)
 	    continue;
