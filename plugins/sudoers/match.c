@@ -51,6 +51,8 @@
 #endif /* HAVE_GLOB */
 #ifdef HAVE_NETGROUP_H
 # include <netgroup.h>
+#else
+# include <netdb.h>
 #endif /* HAVE_NETGROUP_H */
 #include <ctype.h>
 #include <pwd.h>
