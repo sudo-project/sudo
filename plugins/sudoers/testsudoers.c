@@ -578,7 +578,8 @@ print_privilege(struct privilege *priv)
 	    print_member(m);
 	}
 	fputs(" = ", stdout);
-	tags.nopasswd = tags.noexec = UNSPEC;
+	tags.nopasswd = UNSPEC;
+	tags.noexec = UNSPEC;
 	tq_foreach_fwd(&p->cmndlist, cs) {
 	    if (cs != tq_first(&p->cmndlist))
 		fputs(", ", stdout);
