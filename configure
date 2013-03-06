@@ -13675,18 +13675,18 @@ $as_echo_n "checking path to sudo_noexec.so... " >&6; }
 # Check whether --with-noexec was given.
 if test "${with_noexec+set}" = set; then :
   withval=$with_noexec; case $with_noexec in
-    yes)	with_noexec="$libexecdir/sudo/sudo_noexec$_shrext"
+    yes)	with_noexec="$libexecdir/sudo/sudo_noexec.so"
 		;;
     no)		;;
     *)		;;
 esac
 else
-  with_noexec="$libexecdir/sudo/sudo_noexec$_shrext"
+  with_noexec="$libexecdir/sudo/sudo_noexec.so"
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_noexec" >&5
 $as_echo "$with_noexec" >&6; }
-NOEXECFILE="sudo_noexec$_shrext"
+NOEXECFILE="sudo_noexec.so"
 NOEXECDIR="`echo $with_noexec|sed -e 's:^${\([^}]*\)}:$(\1):' -e 's:^\(.*\)/[^/]*:\1:'`"
 
 # Extract the first word of "uname", so it can be a program name with args.
@@ -21200,7 +21200,7 @@ EOF
 EOF
 
     cat >>confdefs.h <<EOF
-#define SUDOERS_PLUGIN "sudoers${SOEXT}"
+#define SUDOERS_PLUGIN "sudoers.so"
 EOF
 
     exec_prefix="$oexec_prefix"

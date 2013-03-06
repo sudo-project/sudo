@@ -118,10 +118,10 @@ install-includes:
 install-doc:
 
 install-plugin: install-dirs sample_plugin.la
-	$(INSTALL) -b~ -m $(shlib_mode) .libs/sample_plugin$(soext) $(DESTDIR)$(plugindir)
+	$(INSTALL) -b~ -m $(shlib_mode) .libs/sample_plugin$(soext) $(DESTDIR)$(plugindir)/sample_plugin.so
 
 uninstall:
-	-rm -f $(DESTDIR)$(plugindir)/sample_plugin$(soext)
+	-rm -f $(DESTDIR)$(plugindir)/sample_plugin.so
 
 check:
 

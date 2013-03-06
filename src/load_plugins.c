@@ -53,6 +53,69 @@
 # define RTLD_GLOBAL	0
 #endif
 
+static int
+sudo_stat_plugin(struct plugin_info *info, char *fullpath,
+    size_t pathsize, struct stat *sb)
+{
+    int status = -1;
+    debug_decl(sudo_stat_plugin, SUDO_DEBUG_PLUGIN)
+
+    if (info->path[0] == '/') {
+	if (strlcpy(fullpath, info->path, pathsize) >= pathsize) {
+	    warningx(_("error in %s, line %d while loading plugin `%s'"),
+		_PATH_SUDO_CONF, info->lineno, info->symbol_name);
+	    warningx(_("%s: %s"), info->path, strerror(ENAMETOOLONG));
+	    goto done;
+	}
+	status = stat(fullpath, sb);
+    } else {
+	if (snprintf(fullpath, pathsize, "%s%s", _PATH_SUDO_PLUGIN_DIR,
+	    info->path) >= pathsize) {
+	    warningx(_("error in %s, line %d while loading plugin `%s'"),
+		_PATH_SUDO_CONF, info->lineno, info->symbol_name);
+	    warningx(_("%s%s: %s"), _PATH_SUDO_PLUGIN_DIR, info->path,
+		strerror(ENAMETOOLONG));
+	    goto done;
+	}
+	/* Try parent dir for compatibility with old plugindir default. */
+	if ((status = stat(fullpath, sb)) != 0) {
+	    char *cp = strrchr(fullpath, '/');
+	    if (cp > fullpath + 4 && cp[-5] == '/' && cp[-4] == 's' &&
+		cp[-3] == 'u' && cp[-2] == 'd' && cp[-1] == 'o') {
+		int serrno = errno;
+		strlcpy(cp - 4, info->path, pathsize - (cp - 4 - fullpath));
+		if ((status = stat(fullpath, sb)) != 0)
+		    errno = serrno;
+	    }
+	}
+#ifdef __hpux__
+	/* Try .sl instead of .so on HP-UX for backwards compatibility. */
+	if (status != 0) {
+	    size_t len = strlen(info->path);
+	    if (len >= 3 && info->path[len - 3] == '.' &&
+		info->path[len - 2] == 's' && info->path[len - 1] == 'o') {
+		const char *sopath = info->path;
+		char *slpath = estrdup(info->path);
+		int serrno = errno;
+
+		slpath[len - 1] = 'l';
+		info->path = slpath;
+		status = sudo_stat_plugin(info, fullpath, pathsize, sb);
+		if (status == 0) {
+		    efree((void *)sopath);
+		} else {
+		    efree(slpath);
+		    info->path = sopath;
+		    errno = serrno;
+		}
+	    }
+	}
+#endif
+    }
+done:
+    debug_return_int(status);
+}
+
 /*
  * Load the plugin specified by "info".
  */
@@ -69,35 +132,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
     int status;
     debug_decl(sudo_load_plugin, SUDO_DEBUG_PLUGIN)
 
-    if (info->path[0] == '/') {
-	if (strlcpy(path, info->path, sizeof(path)) >= sizeof(path)) {
-	    warningx(_("error in %s, line %d while loading plugin `%s'"),
-		_PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	    warningx(_("%s: %s"), info->path, strerror(ENAMETOOLONG));
-	    goto done;
-	}
-	status = stat(path, &sb);
-    } else {
-	if (snprintf(path, sizeof(path), "%s%s", _PATH_SUDO_PLUGIN_DIR,
-	    info->path) >= sizeof(path)) {
-	    warningx(_("error in %s, line %d while loading plugin `%s'"),
-		_PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	    warningx(_("%s%s: %s"), _PATH_SUDO_PLUGIN_DIR, info->path,
-		strerror(ENAMETOOLONG));
-	    goto done;
-	}
-	/* Try parent dir for compatibility with old plugindir default. */
-	if ((status = stat(path, &sb)) != 0) {
-	    char *cp = strrchr(path, '/');
-	    if (cp > path + 4 && cp[-5] == '/' && cp[-4] == 's' &&
-		cp[-3] == 'u' && cp[-2] == 'd' && cp[-1] == 'o') {
-		int serrno = errno;
-		strlcpy(cp - 4, info->path, sizeof(path) - (cp - 4 - path));
-		if ((status = stat(path, &sb)) != 0)
-		    errno = serrno;
-	    }
-	}
-    }
+    status = sudo_stat_plugin(info, path, sizeof(path), &sb);
     if (status != 0) {
 	warningx(_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);

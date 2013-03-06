@@ -287,7 +287,7 @@ install-plugin: sudoers.la install-dirs
 	if [ X"$(soext)" != X"" ]; then \
 	    test X"$$SUDO_PREINSTALL_CMD" != X"" && \
 		$$SUDO_PREINSTALL_CMD .libs/sudoers$(soext); \
-	    $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m $(shlib_mode) .libs/sudoers$(soext) $(DESTDIR)$(plugindir); \
+	    $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m $(shlib_mode) .libs/sudoers$(soext) $(DESTDIR)$(plugindir)/sudoers.so; \
 	fi
 
 install-sudoers: install-dirs
@@ -298,7 +298,7 @@ install-sudoers: install-dirs
 		sudoers $(DESTDIR)$(sudoersdir)/sudoers
 
 uninstall:
-	-rm -f $(DESTDIR)$(plugindir)/sudoers$(soext)
+	-rm -f $(DESTDIR)$(plugindir)/sudoers.so
 	-rm -f $(DESTDIR)$(replaydir)/sudoreplay
 	-rm -f $(DESTDIR)$(visudodir)/visudo
 	-cmp $(DESTDIR)$(sudoersdir)/sudoers $(srcdir)/sudoers >/dev/null && \

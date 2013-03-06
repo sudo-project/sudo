@@ -119,10 +119,10 @@ install-includes:
 install-doc:
 
 install-plugin: install-dirs system_group.la
-	$(INSTALL) -b~ -m $(shlib_mode) .libs/system_group$(soext) $(DESTDIR)$(plugindir)
+	$(INSTALL) -b~ -m $(shlib_mode) .libs/system_group$(soext) $(DESTDIR)$(plugindir)/system_group.so
 
 uninstall:
-	-rm -f $(DESTDIR)$(plugindir)/system_group$(soext)
+	-rm -f $(DESTDIR)$(plugindir)/system_group.so
 
 check:
 
