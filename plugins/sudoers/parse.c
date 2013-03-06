@@ -757,7 +757,7 @@ _print_member(struct lbuf *lbuf, char *name, int type, int negated,
 	    if ((a = alias_find(name, alias_type)) != NULL) {
 		tq_foreach_fwd(&a->members, m) {
 		    if (m != tq_first(&a->members))
-			lbuf_append(lbuf, separator);
+			lbuf_append(lbuf, "%s", separator);
 		    _print_member(lbuf, m->name, m->type,
 			negated ? !m->negated : m->negated, separator,
 			alias_type);
