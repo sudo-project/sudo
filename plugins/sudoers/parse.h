@@ -37,7 +37,7 @@ struct sudo_command {
 
 /*
  * Tags associated with a command.
- * Possible values: true, false, UNSPEC.
+ * Possible values: true, false, IMPLIED, UNSPEC.
  */
 struct cmndtag {
     __signed int nopasswd: 3;
