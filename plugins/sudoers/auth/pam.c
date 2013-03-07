@@ -67,15 +67,16 @@
 # define PAM_CONST
 #endif
 
-static int converse(int, PAM_CONST struct pam_message **,
-		    struct pam_response **, void *);
-static char *def_prompt = "Password:";
-static int getpass_error;
-
 #ifndef PAM_DATA_SILENT
 #define PAM_DATA_SILENT	0
 #endif
 
+static int converse(int, PAM_CONST struct pam_message **,
+		    struct pam_response **, void *);
+static char *def_prompt = "Password:";
+static bool sudo_pam_cred_established;
+static bool sudo_pam_authenticated;
+static int getpass_error;
 static pam_handle_t *pamh;
 
 int
@@ -138,6 +139,7 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	    *pam_status = pam_acct_mgmt(pamh, PAM_SILENT);
 	    switch (*pam_status) {
 		case PAM_SUCCESS:
+		    sudo_pam_authenticated = true;
 		    debug_return_int(AUTH_SUCCESS);
 		case PAM_AUTH_ERR:
 		    log_error(NO_MAIL, N_("account validation failure, "
@@ -229,7 +231,13 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
      * this is not set and so pam_setcred() returns PAM_PERM_DENIED.
      * We can't call pam_acct_mgmt() with Linux-PAM for a similar reason.
      */
-    (void) pam_setcred(pamh, PAM_ESTABLISH_CRED);
+    status = pam_setcred(pamh, PAM_ESTABLISH_CRED);
+    if (status == PAM_SUCCESS) {
+	sudo_pam_cred_established = true;
+    } else if (sudo_pam_authenticated) {
+	warningx("pam_setcred: %s", pam_strerror(pamh, status));
+	goto done;
+    }
 
 #ifdef HAVE_PAM_GETENVLIST
     /*
@@ -278,7 +286,8 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 	(void) pam_set_item(pamh, PAM_USER, pw->pw_name);
 	if (def_pam_session)
 	    (void) pam_close_session(pamh, PAM_SILENT);
-	(void) pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
+	if (sudo_pam_cred_established)
+	    (void) pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
 	status = pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT);
 	pamh = NULL;
     }
