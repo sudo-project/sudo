@@ -286,7 +286,7 @@ sudo_debug_write_conv(const char *func, const char *file, int lineno,
     if (str[len - 1] == '\n')
 	len--;
 
-    if (func != NULL && file != NULL && lineno != 0) {
+    if (func != NULL && file != NULL) {
 	if (errno_val) {
 	    sudo_printf(SUDO_CONV_DEBUG_MSG, "%.*s: %s @ %s() %s:%d",
 		len, str, strerror(errno_val), func, file, lineno);
@@ -294,9 +294,13 @@ sudo_debug_write_conv(const char *func, const char *file, int lineno,
 	    sudo_printf(SUDO_CONV_DEBUG_MSG, "%.*s @ %s() %s:%d",
 		len, str, func, file, lineno);
 	}
-    } else if (errno_val) {
-	sudo_printf(SUDO_CONV_DEBUG_MSG, "%.*s: %s",
-	    len, str, strerror(errno_val));
+    } else {
+	if (errno_val) {
+	    sudo_printf(SUDO_CONV_DEBUG_MSG, "%.*s: %s",
+		len, str, strerror(errno_val));
+	} else {
+	    sudo_printf(SUDO_CONV_DEBUG_MSG, "%.*s", len, str);
+	}
     }
 }
 
