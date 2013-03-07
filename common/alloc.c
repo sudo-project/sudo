@@ -271,13 +271,3 @@ evasprintf(char **ret, const char *format, va_list args)
 	errorx_nodebug(1, NULL);
     return len;
 }
-
-/*
- * Wrapper for free(3) so we can depend on C89 semantics.
- */
-void
-efree(void *ptr)
-{
-    if (ptr != NULL)
-	free(ptr);
-}
