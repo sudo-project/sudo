@@ -747,8 +747,9 @@ system call in the child process.
 The main
 \fBsudo\fR
 process waits until the command has completed, then passes the
-command's exit status to the security policy's close method and exits.
-If an I/O logging plugin is configured, a new  pseudo-terminal
+command's exit status to the security policy's close function and exits.
+If an I/O logging plugin is configured or if the security policy
+explicitly requests it, a new  pseudo-terminal
 (``pty'')
 is created and a second
 \fBsudo\fR
@@ -759,6 +760,12 @@ and resume the command.
 Without it, the command would be in what POSIX terms an
 ``orphaned process group''
 and it would not receive any job control signals.
+As a special case, if the policy plugin does not define a close
+function and no pty is required,
+\fBsudo\fR
+will execute the command directly instead of calling
+fork(2)
+first.
 .SS "Signal handling"
 Because the command is run as a child of the
 \fBsudo\fR
