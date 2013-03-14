@@ -20832,8 +20832,88 @@ $as_echo "$sudo_cv_var_hpux_ld_symbol_export" >&6; }
     fi
 fi
 
-if test "$enable_pie" != "no" -a -n "$GCC"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fPIE" >&5
+if test -n "$GCC"; then
+    if test "$enable_pie" = "no"; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-pie" >&5
+$as_echo_n "checking whether C compiler accepts -fno-pie... " >&6; }
+if ${ax_cv_check_cflags___fno_pie+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -fno-pie"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ax_cv_check_cflags___fno_pie=yes
+else
+  ax_cv_check_cflags___fno_pie=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fno_pie" >&5
+$as_echo "$ax_cv_check_cflags___fno_pie" >&6; }
+if test x"$ax_cv_check_cflags___fno_pie" = xyes; then :
+
+	    _CFLAGS="$CFLAGS"
+	    CFLAGS="$CFLAGS -fno-pie"
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -nopie" >&5
+$as_echo_n "checking whether the linker accepts -nopie... " >&6; }
+if ${ax_cv_check_ldflags___nopie+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -nopie"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ax_cv_check_ldflags___nopie=yes
+else
+  ax_cv_check_ldflags___nopie=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___nopie" >&5
+$as_echo "$ax_cv_check_ldflags___nopie" >&6; }
+if test x"$ax_cv_check_ldflags___nopie" = xyes; then :
+
+		PIE_CFLAGS="-fno-pie"
+		PIE_LDFLAGS="-nopie"
+
+else
+  :
+fi
+
+	    CFLAGS="$_CFLAGS"
+
+else
+  :
+fi
+
+    else
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fPIE" >&5
 $as_echo_n "checking whether C compiler accepts -fPIE... " >&6; }
 if ${ax_cv_check_cflags___fPIE+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -20864,9 +20944,9 @@ fi
 $as_echo "$ax_cv_check_cflags___fPIE" >&6; }
 if test x"$ax_cv_check_cflags___fPIE" = xyes; then :
 
-	_CFLAGS="$CFLAGS"
-	CFLAGS="$CFLAGS -fPIE"
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -pie" >&5
+	    _CFLAGS="$CFLAGS"
+	    CFLAGS="$CFLAGS -fPIE"
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -pie" >&5
 $as_echo_n "checking whether the linker accepts -pie... " >&6; }
 if ${ax_cv_check_ldflags___pie+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -20898,19 +20978,20 @@ fi
 $as_echo "$ax_cv_check_ldflags___pie" >&6; }
 if test x"$ax_cv_check_ldflags___pie" = xyes; then :
 
-	    PIE_CFLAGS="-fPIE"
-	    PIE_LDFLAGS="-pie"
+		PIE_CFLAGS="-fPIE"
+		PIE_LDFLAGS="-pie"
 
 else
   :
 fi
 
-	CFLAGS="$_CFLAGS"
+	    CFLAGS="$_CFLAGS"
 
 else
   :
 fi
 
+    fi
 fi
 
 if test "$enable_hardening" != "no"; then

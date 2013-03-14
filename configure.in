@@ -3461,16 +3461,28 @@ dnl
 dnl Check for PIE executable support if using gcc.
 dnl This test relies on AC_LANG_WERROR
 dnl
-if test "$enable_pie" != "no" -a -n "$GCC"; then
-    AX_CHECK_COMPILE_FLAG([-fPIE], [
-	_CFLAGS="$CFLAGS"
-	CFLAGS="$CFLAGS -fPIE"
-	AX_CHECK_LINK_FLAG([-pie], [
-	    PIE_CFLAGS="-fPIE"
-	    PIE_LDFLAGS="-pie"
+if test -n "$GCC"; then
+    if test "$enable_pie" = "no"; then
+	AX_CHECK_COMPILE_FLAG([-fno-pie], [
+	    _CFLAGS="$CFLAGS"
+	    CFLAGS="$CFLAGS -fno-pie"
+	    AX_CHECK_LINK_FLAG([-nopie], [
+		PIE_CFLAGS="-fno-pie"
+		PIE_LDFLAGS="-nopie"
+	    ])
+	    CFLAGS="$_CFLAGS"
 	])
-	CFLAGS="$_CFLAGS"
-    ])
+    else
+	AX_CHECK_COMPILE_FLAG([-fPIE], [
+	    _CFLAGS="$CFLAGS"
+	    CFLAGS="$CFLAGS -fPIE"
+	    AX_CHECK_LINK_FLAG([-pie], [
+		PIE_CFLAGS="-fPIE"
+		PIE_LDFLAGS="-pie"
+	    ])
+	    CFLAGS="$_CFLAGS"
+	])
+    fi
 fi
 
 dnl
