@@ -66,10 +66,6 @@
 # define ROOT_UID	0
 #endif
 
-#ifndef _PATH_SUDO_ASKPASS
-# define _PATH_SUDO_ASKPASS	NULL
-#endif
-
 extern bool atobool(const char *str); /* atobool.c */
 
 struct sudo_conf_table {
@@ -114,7 +110,7 @@ static struct sudo_conf_data {
     int group_source;
     int max_groups;
     const char *debug_flags;
-    struct sudo_conf_paths paths[3];
+    struct sudo_conf_paths paths[4];
     struct plugin_info_list plugins;
 } sudo_conf_data = {
     true,
@@ -124,8 +120,10 @@ static struct sudo_conf_data {
     {
 #define SUDO_CONF_ASKPASS_IDX	0
 	{ "askpass", sizeof("askpass") - 1, _PATH_SUDO_ASKPASS },
+#define SUDO_CONF_SESH_IDX	1
+	{ "sesh", sizeof("sesh") - 1, _PATH_SUDO_SESH },
 #ifdef _PATH_SUDO_NOEXEC
-#define SUDO_CONF_NOEXEC_IDX	1
+#define SUDO_CONF_NOEXEC_IDX	2
 	{ "noexec", sizeof("noexec") - 1, _PATH_SUDO_NOEXEC },
 #endif
 	{ NULL }
@@ -310,6 +308,12 @@ const char *
 sudo_conf_askpass_path(void)
 {
     return sudo_conf_data.paths[SUDO_CONF_ASKPASS_IDX].pval;
+}
+
+const char *
+sudo_conf_sesh_path(void)
+{
+    return sudo_conf_data.paths[SUDO_CONF_SESH_IDX].pval;
 }
 
 #ifdef _PATH_SUDO_NOEXEC

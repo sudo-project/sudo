@@ -1143,9 +1143,16 @@ AC_ARG_WITH(askpass, [AS_HELP_STRING([--with-askpass=PATH], [Fully qualified pat
     yes)	AC_MSG_ERROR(["--with-askpass takes a path as an argument."])
 		;;
     no)		;;
-    *)		SUDO_DEFINE_UNQUOTED(_PATH_SUDO_ASKPASS, "$with_askpass", [The fully qualified pathname of askpass])
-		;;
-esac], AC_MSG_RESULT(no))
+    *)		;;
+esac], [
+    with_askpass=no
+    AC_MSG_RESULT(no)
+])
+if test X"$with_askpass" != X"no"; then
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_ASKPASS, "$with_askpass")
+else
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_ASKPASS, NULL)
+fi
 
 AC_ARG_WITH(plugindir, [AS_HELP_STRING([--with-plugindir], [set directory to load plugins from])],
 [case $with_plugindir in
@@ -1414,7 +1421,7 @@ AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])
     no)		;;
     *)		AC_MSG_ERROR(["--with-selinux does not take an argument."])
 		;;
-esac])
+esac], [with_selinux=no])
 
 dnl
 dnl gss_krb5_ccache_name() may not work on Heimdal so we don't use it by default
@@ -3601,7 +3608,7 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no"; then
 	    _sesh_file="$sesh_file"
 	    eval sesh_file="$_sesh_file"
 	done
-	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, "$sesh_file", [The fully qualified pathname of sesh])
+	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, "$sesh_file")
     fi
     PLUGINDIR="$with_plugindir"
     _PLUGINDIR=
@@ -3612,6 +3619,9 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no"; then
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR/")
     SUDO_DEFINE_UNQUOTED(SUDOERS_PLUGIN, "sudoers.so")
     exec_prefix="$oexec_prefix"
+fi
+if test X"$with_selinux" = X"no"; then
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, NULL)
 fi
 
 dnl
@@ -3756,6 +3766,8 @@ AH_TEMPLATE(HAVE__NSS_INITF_GROUP, [Define to 1 if you have the `_nss_initf_grou
 AH_TEMPLATE(HAVE___NSS_INITF_GROUP, [Define to 1 if you have the `__nss_initf_group' function.])
 AH_TEMPLATE(HAVE__NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `_nss_XbyY_buf_alloc' function.])
 AH_TEMPLATE(HAVE___NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `__nss_XbyY_buf_alloc' function.])
+AH_TEMPLATE(_PATH_SUDO_ASKPASS, [The fully qualified pathname of askpass])
+AH_TEMPLATE(_PATH_SUDO_SESH, [The fully qualified pathname of sesh])
 
 dnl
 dnl Bits to copy verbatim into config.h.in

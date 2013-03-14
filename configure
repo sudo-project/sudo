@@ -5253,17 +5253,27 @@ if test "${with_askpass+set}" = set; then :
     yes)	as_fn_error $? "\"--with-askpass takes a path as an argument.\"" "$LINENO" 5
 		;;
     no)		;;
-    *)		cat >>confdefs.h <<EOF
+    *)		;;
+esac
+else
+
+    with_askpass=no
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+fi
+
+if test X"$with_askpass" != X"no"; then
+    cat >>confdefs.h <<EOF
 #define _PATH_SUDO_ASKPASS "$with_askpass"
 EOF
 
-		;;
-esac
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
+    cat >>confdefs.h <<EOF
+#define _PATH_SUDO_ASKPASS NULL
+EOF
 
+fi
 
 
 # Check whether --with-plugindir was given.
@@ -5720,6 +5730,8 @@ fi
     *)		as_fn_error $? "\"--with-selinux does not take an argument.\"" "$LINENO" 5
 		;;
 esac
+else
+  with_selinux=no
 fi
 
 
@@ -21287,6 +21299,12 @@ EOF
 
     exec_prefix="$oexec_prefix"
 fi
+if test X"$with_selinux" = X"no"; then
+    cat >>confdefs.h <<EOF
+#define _PATH_SUDO_SESH NULL
+EOF
+
+fi
 
 if test X"$prefix" = X"NONE"; then
     test "$mandir" = '${datarootdir}/man' && mandir='$(prefix)/man'
@@ -23544,6 +23562,8 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+
+
 
 
 
