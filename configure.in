@@ -58,6 +58,7 @@ AC_SUBST([NOEXECFILE])
 AC_SUBST([NOEXECDIR])
 AC_SUBST([SOEXT])
 AC_SUBST([noexec_file])
+AC_SUBST([sesh_file])
 AC_SUBST([INSTALL_NOEXEC])
 AC_SUBST([DONT_LEAK_PATH_INFO])
 AC_SUBST([BSDAUTH_USAGE])
@@ -159,6 +160,7 @@ ldap_conf=/etc/ldap.conf
 ldap_secret=/etc/ldap.secret
 netsvc_conf=/etc/netsvc.conf
 noexec_file=/usr/local/libexec/sudo/sudo_noexec.so
+sesh_file=/usr/local/libexec/sudo/sesh
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
 pam_session=on

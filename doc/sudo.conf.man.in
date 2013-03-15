@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO" "5" "February 20, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO" "5" "March 14, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -224,6 +224,16 @@ functionality on systems that support
 or its equivalent.
 The default value is:
 \fI@noexec_file@\fR.
+.TP 10n
+sesh
+The fully-qualified path to the
+\fBsesh\fR
+binary.
+This setting is only used when
+\fBsudo\fR
+is built with SELinux support.
+The default value is
+\fI@sesh_file@\fR.
 .SS "Other settings"
 The
 \fBsudo.conf\fR

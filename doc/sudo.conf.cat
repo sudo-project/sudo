@@ -99,6 +99,10 @@ DDEESSCCRRIIPPTTIIOONN
                its equivalent.  The default value is:
                _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c_/_s_u_d_o_/_s_u_d_o___n_o_e_x_e_c_._s_o.
 
+     sesh      The fully-qualified path to the sseesshh binary.  This setting is
+               only used when ssuuddoo is built with SELinux support.  The default
+               value is _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c_/_s_u_d_o_/_s_e_s_h.
+
    OOtthheerr sseettttiinnggss
      The ssuuddoo..ccoonnff file also supports the following front end settings:
 
@@ -357,4 +361,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.7                     February 20, 2013                    Sudo 1.8.7
+Sudo 1.8.7                      March 14, 2013                      Sudo 1.8.7

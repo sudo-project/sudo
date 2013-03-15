@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd February 20, 2013
+.Dd March 14, 2013
 .Dt SUDO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -204,6 +204,15 @@ functionality on systems that support
 or its equivalent.
 The default value is:
 .Pa @noexec_file@ .
+.It sesh
+The fully-qualified path to the
+.Nm sesh
+binary.
+This setting is only used when
+.Nm sudo
+is built with SELinux support.
+The default value is
+.Pa @sesh_file@ .
 .El
 .Ss Other settings
 The

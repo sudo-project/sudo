@@ -719,6 +719,7 @@ SELINUX_USAGE
 BSDAUTH_USAGE
 DONT_LEAK_PATH_INFO
 INSTALL_NOEXEC
+sesh_file
 noexec_file
 SOEXT
 NOEXECDIR
@@ -2926,6 +2927,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -2963,6 +2965,7 @@ ldap_conf=/etc/ldap.conf
 ldap_secret=/etc/ldap.secret
 netsvc_conf=/etc/netsvc.conf
 noexec_file=/usr/local/libexec/sudo/sudo_noexec.so
+sesh_file=/usr/local/libexec/sudo/sesh
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
 pam_session=on
