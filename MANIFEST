@@ -107,6 +107,9 @@ doc/schema.ActiveDirectory
 doc/schema.OpenLDAP
 doc/schema.iPlanet
 doc/sudo.cat
+doc/sudo.conf.cat
+doc/sudo.conf.man.in
+doc/sudo.conf.mdoc.in
 doc/sudo.man.in
 doc/sudo.mdoc.in
 doc/sudo_plugin.cat
@@ -307,7 +310,6 @@ plugins/sudoers/regress/sudoers/test9.toke.ok
 plugins/sudoers/regress/sudoers/test9.toke.out.ok
 plugins/sudoers/regress/testsudoers/test1.out.ok
 plugins/sudoers/regress/testsudoers/test1.sh
-plugins/sudoers/regress/testsudoers/test2.err.ok
 plugins/sudoers/regress/testsudoers/test2.inc
 plugins/sudoers/regress/testsudoers/test2.out.ok
 plugins/sudoers/regress/testsudoers/test2.sh
@@ -419,9 +421,6 @@ src/tgetpass.c
 src/ttyname.c
 src/utmp.c
 sudo.pp
-sudo/sudo.conf.cat
-sudo/sudo.conf.man.in
-sudo/sudo.conf.mdoc.in
 zlib/Makefile.in
 zlib/adler32.c
 zlib/compress.c
