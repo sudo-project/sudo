@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -53,6 +53,11 @@
 # define RTLD_GLOBAL	0
 #endif
 
+#ifndef SUDOERS_PLUGIN
+# define SUDOERS_PLUGIN	"sudoers.la"
+#endif
+
+#ifdef _PATH_SUDO_PLUGIN_DIR
 static int
 sudo_stat_plugin(struct plugin_info *info, char *fullpath,
     size_t pathsize, struct stat *sb)
@@ -88,7 +93,7 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 		    errno = serrno;
 	    }
 	}
-#ifdef __hpux__
+# ifdef __hpux
 	/* Try .sl instead of .so on HP-UX for backwards compatibility. */
 	if (status != 0) {
 	    size_t len = strlen(info->path);
@@ -110,30 +115,20 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 		}
 	    }
 	}
-#endif
+# endif /* __hpux */
     }
 done:
     debug_return_int(status);
 }
 
-/*
- * Load the plugin specified by "info".
- */
 static bool
-sudo_load_plugin(struct plugin_container *policy_plugin,
-    struct plugin_container_list *io_plugins, struct plugin_info *info)
+sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
 {
-    struct plugin_container *container;
-    struct generic_plugin *plugin;
     struct stat sb;
-    void *handle;
-    char path[PATH_MAX];
-    bool rval = false;
-    int status;
-    debug_decl(sudo_load_plugin, SUDO_DEBUG_PLUGIN)
+    int rval = false
+    debug_decl(sudo_check_plugin, SUDO_DEBUG_PLUGIN)
 
-    status = sudo_stat_plugin(info, path, sizeof(path), &sb);
-    if (status != 0) {
+    if (sudo_check_plugin(info, path, sizeof(path), &sb) != 0) {
 	warningx(_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
 	warning("%s%s", _PATH_SUDO_PLUGIN_DIR, info->path);
@@ -151,6 +146,38 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	warningx(_("%s must be only be writable by owner"), path);
 	goto done;
     }
+    rval = true;
+
+done:
+    debug_return_bool(rval);
+}
+#else
+static bool
+sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
+{
+    debug_decl(sudo_check_plugin, SUDO_DEBUG_PLUGIN)
+    (void)strlcpy(fullpath, info->path, pathsize);
+    debug_return_bool(true);
+}
+#endif /* _PATH_SUDO_PLUGIN_DIR */
+
+/*
+ * Load the plugin specified by "info".
+ */
+static bool
+sudo_load_plugin(struct plugin_container *policy_plugin,
+    struct plugin_container_list *io_plugins, struct plugin_info *info)
+{
+    struct plugin_container *container;
+    struct generic_plugin *plugin;
+    char path[PATH_MAX];
+    bool rval = false;
+    void *handle;
+    debug_decl(sudo_load_plugin, SUDO_DEBUG_PLUGIN)
+
+    /* Sanity check plugin and fill in path */
+    if (!sudo_check_plugin(info, path, sizeof(path)))
+	goto done;
 
     /* Open plugin and map in symbol */
     handle = dlopen(path, RTLD_LAZY|RTLD_GLOBAL);
