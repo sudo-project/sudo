@@ -51,7 +51,7 @@
 void *
 sudo_dlopen(const char *path, int mode)
 {
-    int flags = DYNAMIC_PATH;
+    int flags = DYNAMIC_PATH | BIND_VERBOSE;
 
     if (mode == 0)
 	mode = RTLD_LAZY;	/* default behavior */
