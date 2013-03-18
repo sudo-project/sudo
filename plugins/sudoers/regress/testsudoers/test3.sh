@@ -9,3 +9,5 @@ exec 2>&1
 ./testsudoers -U $MYUID root id <<EOF
 #includedir $TESTDIR/test3.d
 EOF
+
+exit 0

@@ -31,3 +31,5 @@ M	ALL=(ALL) ALL
 K	ALL=(ALL) ALL
 I	ALL=(ALL) ALL
 EOF
+
+exit 0

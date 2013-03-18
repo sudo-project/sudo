@@ -11,3 +11,5 @@ User_Alias XXX = nobody
 User_Alias FOO = XXX, YYY
 FOO ALL = ALL
 EOF
+
+exit 0

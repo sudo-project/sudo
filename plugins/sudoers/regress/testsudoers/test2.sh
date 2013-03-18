@@ -9,3 +9,5 @@ exec 2>&1
 ./testsudoers -U $MYUID root id <<EOF
 #include $TESTDIR/test2.inc
 EOF
+
+exit 0

@@ -8,3 +8,5 @@
 User_Alias FOO = nobody
 FOO ALL=(ALL) NOPASSWD: ALL
 EOF
+
+exit 0

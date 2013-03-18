@@ -26,3 +26,4 @@ chmod 664 $TESTFILE
 EOF
 
 rm -f $TESTFILE
+exit 0
