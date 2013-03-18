@@ -305,23 +305,18 @@ uninstall:
 	    rm -f $(DESTDIR)$(sudoersdir)/sudoers
 
 check: $(TEST_PROGS) visudo testsudoers
-	@-if test X"$(cross_compiling)" != X"yes"; then \
+	@if test X"$(cross_compiling)" != X"yes"; then \
 	    rval=0; \
 	    PWD=`pwd`; \
-	    ./check_addr $(srcdir)/regress/parser/check_addr.in; \
-	    rval=`expr $$rval + $$?`; \
-	    ./check_fill; \
-	    rval=`expr $$rval + $$?`; \
-	    ./check_iolog_path $(srcdir)/regress/iolog_path/data; \
-	    rval=`expr $$rval + $$?`; \
+	    ./check_addr $(srcdir)/regress/parser/check_addr.in || rval=`expr $$rval + $$?`; \
+	    ./check_fill || rval=`expr $$rval + $$?`; \
+	    ./check_iolog_path $(srcdir)/regress/iolog_path/data || rval=`expr $$rval + $$?`; \
 	    if [ X"$(soext)" != X"" ]; then \
-		./check_symbols .libs/sudoers$(soext) $(shlib_exp); \
-		rval=`expr $$rval + $$?`; \
+		./check_symbols .libs/sudoers$(soext) $(shlib_exp) || rval=`expr $$rval + $$?`; \
 	    fi; \
 	    mkdir -p regress/logging; \
 	    ./check_wrap $(srcdir)/regress/logging/check_wrap.in > regress/logging/check_wrap.out; \
-	    diff regress/logging/check_wrap.out $(srcdir)/regress/logging/check_wrap.out.ok; \
-	    rval=`expr $$rval + $$?`; \
+	    diff regress/logging/check_wrap.out $(srcdir)/regress/logging/check_wrap.out.ok || rval=`expr $$rval + $$?`; \
 	    passed=0; failed=0; total=0; \
 	    mkdir -p regress/sudoers; \
 	    dir=sudoers; \
@@ -329,14 +324,14 @@ check: $(TEST_PROGS) visudo testsudoers
 		base=`basename $$t .in`; \
 		out="regress/sudoers/$${base}.out"; \
 		toke="regress/sudoers/$${base}.toke"; \
-		./testsudoers -dt <$$t >$$out 2>$$toke; \
+		./testsudoers -dt <$$t >$$out 2>$$toke || true; \
 		if cmp $$out $(srcdir)/$$out.ok >/dev/null; then \
 		    passed=`expr $$passed + 1`; \
 		    echo "$$dir/$$base (parse): OK"; \
 		else \
 		    failed=`expr $$failed + 1`; \
 		    echo "$$dir/$$base: FAIL"; \
-		    diff $$out $(srcdir)/$$out.ok; \
+		    diff $$out $(srcdir)/$$out.ok || true; \
 		fi; \
 		total=`expr $$total + 1`; \
 		if cmp $$toke $(srcdir)/$$toke.ok >/dev/null; then \
@@ -345,12 +340,14 @@ check: $(TEST_PROGS) visudo testsudoers
 		else \
 		    failed=`expr $$failed + 1`; \
 		    echo "$$dir/$$base (toke):  FAIL"; \
-		    diff $$out $(srcdir)/$$out.ok; \
+		    diff $$out $(srcdir)/$$out.ok || true; \
 		fi; \
 		total=`expr $$total + 1`; \
 	    done; \
 	    echo "$$dir: $$passed/$$total tests passed; $$failed/$$total tests failed"; \
-	    rval=`expr $$rval + $$failed`; \
+	    if test $$failed -ne 0; then \
+		rval=`expr $$rval + $$failed`; \
+	    fi; \
 	    for dir in testsudoers visudo; do \
 		mkdir -p regress/$$dir; \
 		passed=0; failed=0; total=0; \
@@ -366,7 +363,7 @@ check: $(TEST_PROGS) visudo testsudoers
 		    else \
 			failed=`expr $$failed + 1`; \
 			echo "$$dir/$$base: FAIL"; \
-			diff $$out $(srcdir)/$$out.ok; \
+			diff $$out $(srcdir)/$$out.ok || true; \
 		    fi; \
 		    total=`expr $$total + 1`; \
 		    if test -s $(srcdir)/$$err.ok; then \
@@ -376,7 +373,7 @@ check: $(TEST_PROGS) visudo testsudoers
 			else \
 			    failed=`expr $$failed + 1`; \
 			    echo "$$dir/$$base (stderr): FAIL"; \
-			    diff $$out $(srcdir)/$$out.ok; \
+			    diff $$out $(srcdir)/$$out.ok || true; \
 			fi; \
 			total=`expr $$total + 1`; \
 		    elif test -s $$err; then \
@@ -386,7 +383,9 @@ check: $(TEST_PROGS) visudo testsudoers
 		    fi; \
 		done; \
 		echo "$$dir: $$passed/$$total tests passed; $$failed/$$total tests failed"; \
-		rval=`expr $$rval + $$failed`; \
+		if test $$failed -ne 0; then \
+		    rval=`expr $$rval + $$failed`; \
+		fi; \
 	    done; \
 	    exit $$rval; \
 	fi
