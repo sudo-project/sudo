@@ -277,19 +277,11 @@ AC_ARG_WITH(CC, [AS_HELP_STRING([--with-CC], [C compiler to use])],
 		;;
 esac])
 
-AC_ARG_WITH(rpath, [AS_HELP_STRING([--with-rpath], [pass -R flag in addition to -L for lib paths])],
-[case $with_rpath in
-    yes|no)	;;
-    *)		AC_MSG_ERROR(["--with-rpath does not take an argument."])
-		;;
-esac])
+AC_ARG_WITH(rpath, [AS_HELP_STRING([--with-rpath], [deprecated, use --disable-rpath])],
+[AC_MSG_WARN([--with-rpath deprecated, rpath is now the default])])
 
-AC_ARG_WITH(blibpath, [AS_HELP_STRING([--with-blibpath[=PATH]], [pass -blibpath flag to ld for additional lib paths])],
-[case $with_blibpath in
-    yes|no)	;;
-    *)		AC_MSG_NOTICE([will pass -blibpath:${with_blibpath} to the loader.])
-		;;
-esac])
+AC_ARG_WITH(blibpath, [AS_HELP_STRING([--with-blibpath[=PATH]], [deprecated])],
+[AC_MSG_WARN([--with-blibpath deprecated, use --with-libpath])])
 
 dnl
 dnl Handle BSM auditing support.
@@ -1409,6 +1401,10 @@ AC_ARG_ENABLE(nls,
 [AS_HELP_STRING([--disable-nls], [Disable natural language support using gettext])],
 [], [enable_nls=yes])
 
+AC_ARG_ENABLE(rpath,
+[AS_HELP_STRING([--disable-rpath], [Disable passing of -Rpath to the linker])],
+[], [enable_rpath=yes])
+
 AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])],
 [case $with_selinux in
     yes)	SELINUX_USAGE="[[-r role]] [[-t type]] "
@@ -1605,7 +1601,6 @@ case "$host" in
 		fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
-		: ${with_rpath='yes'}
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		AC_CHECK_FUNCS(priv_set, [PSMAN=1])
 		;;
@@ -1613,22 +1608,6 @@ case "$host" in
 		# To get all prototypes (so we pass -Wall)
 		OSDEFS="${OSDEFS} -D_ALL_SOURCE -D_LINUX_SOURCE_COMPAT"
 		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
-		if test X"$with_blibpath" != X"no"; then
-		    AC_MSG_CHECKING([if linker accepts -Wl,-blibpath])
-		    O_LDFLAGS="$LDFLAGS"
-		    LDFLAGS="$O_LDFLAGS -Wl,-blibpath:/usr/lib:/lib"
-		    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[]])], [
-			if test -n "$with_blibpath" -a "$with_blibpath" != "yes"; then
-			    blibpath="$with_blibpath"
-			elif test -n "$GCC"; then
-			    blibpath="/usr/lib:/lib:/usr/local/lib"
-			else
-			    blibpath="/usr/lib:/lib"
-			fi
-			AC_MSG_RESULT(yes)
-		    ], [AC_MSG_RESULT(no)])
-		fi
-		LDFLAGS="$O_LDFLAGS"
 
 		# On AIX 6 and higher default to PAM, else default to LAM
 		if test $OSMAJOR -ge 6; then
@@ -1894,19 +1873,16 @@ case "$host" in
 		shadow_libs="-lsec"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
-		: ${with_rpath='yes'}
 		;;
     *-ncr-sysv4*|*-ncr-sysvr4*)
 		AC_CHECK_LIB(c89, strcasecmp, [LIBS="${LIBS} -lc89"])
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
-		: ${with_rpath='yes'}
 		;;
     *-ccur-sysv4*|*-ccur-sysvr4*)
 		LIBS="${LIBS} -lgen"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
-		: ${with_rpath='yes'}
 		;;
     *-*-bsdi*)
 		SKIP_SETREUID=yes
@@ -1998,7 +1974,6 @@ case "$host" in
     *-*-*sysv4*)
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
-		: ${with_rpath='yes'}
 		;;
     *-*-sysv*)
 		: ${mansectsu='1m'}
@@ -3040,7 +3015,6 @@ if test "${with_skey-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_skey" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_skey}/include"
-	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_skey}/lib])
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_skey}/lib])
 	AC_CHECK_HEADER([skey.h], [found=yes], [found=no], [#include <stdio.h>])
     else
@@ -3054,7 +3028,6 @@ if test "${with_skey-'no'}" = "yes"; then
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
 	else
-	    SUDO_APPEND_LIBPATH(LDFLAGS, [${dir}/lib])
 	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${dir}/lib])
 	fi
 	if test "$found" = "no"; then
@@ -3090,7 +3063,6 @@ if test "${with_opie-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_opie" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_opie}/include"
-	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_opie}/lib])
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_opie}/lib])
 	AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <opie.h>]])], [found=yes], [found=no])
     else
@@ -3103,7 +3075,6 @@ if test "${with_opie-'no'}" = "yes"; then
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
 	else
-	    SUDO_APPEND_LIBPATH(LDFLAGS, [${dir}/lib])
 	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${dir}/lib])
 	fi
 	if test "$found" = "no"; then
@@ -3174,7 +3145,6 @@ if test ${with_ldap-'no'} != "no"; then
     _LDFLAGS="$LDFLAGS"
     if test "$with_ldap" != "yes"; then
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_ldap}/lib])
-	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_ldap}/lib])
 	CPPFLAGS="${CPPFLAGS} -I${with_ldap}/include"
 	with_ldap=yes
     fi
@@ -3309,18 +3279,6 @@ case "$host" in
 	OSDEFS="${OSDEFS} -D_REENTRANT"
 	;;
 esac
-
-dnl
-dnl Add $blibpath to SUDOERS_LDFLAGS if specified by the user or if we
-dnl added -L dirpaths to SUDOERS_LDFLAGS.
-dnl
-if test -n "$blibpath"; then
-    if test -n "$blibpath_add"; then
-    	SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS -Wl,-blibpath:${blibpath}${blibpath_add}"
-    elif test -n "$with_blibpath" -a "$with_blibpath" != "yes"; then
-    	SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS -Wl,-blibpath:${blibpath}"
-    fi
-fi
 
 dnl
 dnl Check for log file, timestamp and iolog locations

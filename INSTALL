@@ -138,6 +138,11 @@ Compilation options:
 	_FORTIFY_SOURCE defined to 2, building with -fstack-protector
 	and linking with -zrelro, where supported.
 
+  --disable-rpath
+        By default, configure will use -Rpath in addition to -Lpath
+        when passing library paths to the loader.  This option will
+        disable the use of -Rpath.
+
   --disable-pie
 	Disable the creation of position independent executables (PIE)
         even when the compiler and linker support them.
@@ -189,11 +194,6 @@ Compilation options:
         place of a path to denote the default system libtool (obtained
         via the user's PATH) and the default libtool that comes
         with sudo.
-
-  --with-rpath
-	Tells configure to use -Rpath in addition to -Lpath when
-	passing library paths to the loader.  This option is on
-	by default for Solaris and SVR4.
 
 Optional features:
   --disable-root-mailer
@@ -282,14 +282,6 @@ Operating system-specific options:
   --enable-admin-flag
 	Enable the creation of an Ubuntu-style admin flag file
 	the first time sudo is run.
-
-  --with-blibpath[=PATH]
-	Tells configure to construct a -blibpath argument to the
-	loader.  If a PATH is specified, it will be used as the
-	base.  Otherwise, "/usr/lib:/lib:/usr/local/lib" will be
-	used for gcc and "/usr/lib:/lib" for non-gcc.  Additional
-	library paths will be appended as needed by configure.
-	This option is only valid for AIX where it is on by default.
 
   --with-bsm-audit
         Enable support for sudo BSM audit logs on systems that support it.

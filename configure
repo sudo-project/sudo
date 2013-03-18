@@ -903,6 +903,7 @@ enable_hardening
 enable_pie
 enable_admin_flag
 enable_nls
+enable_rpath
 with_selinux
 enable_gss_krb5_ccache_name
 enable_shared
@@ -1570,6 +1571,7 @@ Optional Features:
                           if the compiler/linker supports them
   --enable-admin-flag     Whether to create a Ubuntu-style admin flag file
   --disable-nls           Disable natural language support using gettext
+  --disable-rpath         Disable passing of -Rpath to the linker
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -1590,8 +1592,8 @@ Optional Packages:
   --with-alertmail        deprecated
   --with-devel            add development options
   --with-CC               C compiler to use
-  --with-rpath            pass -R flag in addition to -L for lib paths
-  --with-blibpath=PATH    pass -blibpath flag to ld for additional lib paths
+  --with-rpath            deprecated, use --disable-rpath
+  --with-blibpath=PATH    deprecated
   --with-bsm-audit        enable BSM audit support
   --with-linux-audit      enable Linux audit support
   --with-sssd             enable SSSD support
@@ -3087,23 +3089,16 @@ fi
 
 # Check whether --with-rpath was given.
 if test "${with_rpath+set}" = set; then :
-  withval=$with_rpath; case $with_rpath in
-    yes|no)	;;
-    *)		as_fn_error $? "\"--with-rpath does not take an argument.\"" "$LINENO" 5
-		;;
-esac
+  withval=$with_rpath; { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: --with-rpath deprecated, rpath is now the default" >&5
+$as_echo "$as_me: WARNING: --with-rpath deprecated, rpath is now the default" >&2;}
 fi
 
 
 
 # Check whether --with-blibpath was given.
 if test "${with_blibpath+set}" = set; then :
-  withval=$with_blibpath; case $with_blibpath in
-    yes|no)	;;
-    *)		{ $as_echo "$as_me:${as_lineno-$LINENO}: will pass -blibpath:${with_blibpath} to the loader." >&5
-$as_echo "$as_me: will pass -blibpath:${with_blibpath} to the loader." >&6;}
-		;;
-esac
+  withval=$with_blibpath; { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: --with-blibpath deprecated, use --with-libpath" >&5
+$as_echo "$as_me: WARNING: --with-blibpath deprecated, use --with-libpath" >&2;}
 fi
 
 
@@ -5673,6 +5668,14 @@ if test "${enable_nls+set}" = set; then :
   enableval=$enable_nls;
 else
   enable_nls=yes
+fi
+
+
+# Check whether --enable-rpath was given.
+if test "${enable_rpath+set}" = set; then :
+  enableval=$enable_rpath;
+else
+  enable_rpath=yes
 fi
 
 
@@ -13967,7 +13970,6 @@ case "$host" in
 		fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
-		: ${with_rpath='yes'}
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		for ac_func in priv_set
 do :
@@ -13985,42 +13987,6 @@ done
 		# To get all prototypes (so we pass -Wall)
 		OSDEFS="${OSDEFS} -D_ALL_SOURCE -D_LINUX_SOURCE_COMPAT"
 		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
-		if test X"$with_blibpath" != X"no"; then
-		    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if linker accepts -Wl,-blibpath" >&5
-$as_echo_n "checking if linker accepts -Wl,-blibpath... " >&6; }
-		    O_LDFLAGS="$LDFLAGS"
-		    LDFLAGS="$O_LDFLAGS -Wl,-blibpath:/usr/lib:/lib"
-		    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-
-			if test -n "$with_blibpath" -a "$with_blibpath" != "yes"; then
-			    blibpath="$with_blibpath"
-			elif test -n "$GCC"; then
-			    blibpath="/usr/lib:/lib:/usr/local/lib"
-			else
-			    blibpath="/usr/lib:/lib"
-			fi
-			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-		fi
-		LDFLAGS="$O_LDFLAGS"
 
 		# On AIX 6 and higher default to PAM, else default to LAM
 		if test $OSMAJOR -ge 6; then
@@ -14417,7 +14383,6 @@ fi
 		shadow_libs="-lsec"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
-		: ${with_rpath='yes'}
 		;;
     *-ncr-sysv4*|*-ncr-sysvr4*)
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for strcasecmp in -lc89" >&5
@@ -14462,13 +14427,11 @@ fi
 
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
-		: ${with_rpath='yes'}
 		;;
     *-ccur-sysv4*|*-ccur-sysvr4*)
 		LIBS="${LIBS} -lgen"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
-		: ${with_rpath='yes'}
 		;;
     *-*-bsdi*)
 		SKIP_SETREUID=yes
@@ -14570,7 +14533,6 @@ done
     *-*-*sysv4*)
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
-		: ${with_rpath='yes'}
 		;;
     *-*-sysv*)
 		: ${mansectsu='1m'}
@@ -14625,18 +14587,10 @@ fi
 if test -n "$with_libpath"; then
     for i in ${with_libpath}; do
 
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	LDFLAGS="${LDFLAGS} -L$i -Wl,+b,$i"
-			;;
-	    *)		LDFLAGS="${LDFLAGS} -L$i -Wl,-R$i"
-			;;
-	esac
+    if test X"$enable_rpath" = X"yes"; then
+	LDFLAGS="${LDFLAGS} -L$i -R$i"
     else
 	LDFLAGS="${LDFLAGS} -L$i"
-    fi
-    if test X"$blibpath" != X"" -a "LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:$i"
     fi
 
     done
@@ -18170,18 +18124,10 @@ if test "$enable_nls" != "no"; then
     if test "$enable_nls" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${enable_nls}/include"
 
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	LDFLAGS="${LDFLAGS} -L$enable_nls/lib -Wl,+b,$enable_nls/lib"
-			;;
-	    *)		LDFLAGS="${LDFLAGS} -L$enable_nls/lib -Wl,-R$enable_nls/lib"
-			;;
-	esac
+    if test X"$enable_rpath" = X"yes"; then
+	LDFLAGS="${LDFLAGS} -L$enable_nls/lib -R$enable_nls/lib"
     else
 	LDFLAGS="${LDFLAGS} -L$enable_nls/lib"
-    fi
-    if test X"$blibpath" != X"" -a "LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:$enable_nls/lib"
     fi
 
     fi
@@ -18343,18 +18289,10 @@ fi
 
 	CPPFLAGS="-I${enable_zlib}/include ${CPPFLAGS}"
 
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	ZLIB="${ZLIB} -L$enable_zlib/lib -Wl,+b,$enable_zlib/lib"
-			;;
-	    *)		ZLIB="${ZLIB} -L$enable_zlib/lib -Wl,-R$enable_zlib/lib"
-			;;
-	esac
+    if test X"$enable_rpath" = X"yes"; then
+	ZLIB="${ZLIB} -L$enable_zlib/lib -R$enable_zlib/lib"
     else
 	ZLIB="${ZLIB} -L$enable_zlib/lib"
-    fi
-    if test X"$blibpath" != X"" -a "ZLIB" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:$enable_zlib/lib"
     fi
 
 	ZLIB="${ZLIB} -lz"
@@ -18870,18 +18808,10 @@ fi
 if test ${with_fwtk-'no'} != "no"; then
     if test "$with_fwtk" != "yes"; then
 
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_fwtk} -Wl,+b,${with_fwtk}"
-			;;
-	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_fwtk} -Wl,-R${with_fwtk}"
-			;;
-	esac
+    if test X"$enable_rpath" = X"yes"; then
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_fwtk} -R${with_fwtk}"
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_fwtk}"
-    fi
-    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:${with_fwtk}"
     fi
 
 	CPPFLAGS="${CPPFLAGS} -I${with_fwtk}"
@@ -18901,18 +18831,10 @@ if test ${with_SecurID-'no'} != "no"; then
     fi
     CPPFLAGS="${CPPFLAGS} -I${with_SecurID}"
 
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	LDFLAGS="${LDFLAGS} -L${with_SecurID} -Wl,+b,${with_SecurID}"
-			;;
-	    *)		LDFLAGS="${LDFLAGS} -L${with_SecurID} -Wl,-R${with_SecurID}"
-			;;
-	esac
+    if test X"$enable_rpath" = X"yes"; then
+	LDFLAGS="${LDFLAGS} -L${with_SecurID} -R${with_SecurID}"
     else
 	LDFLAGS="${LDFLAGS} -L${with_SecurID}"
-    fi
-    if test X"$blibpath" != X"" -a "LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:${with_SecurID}"
     fi
 
     SUDOERS_LIBS="${SUDOERS_LIBS} -laceclnt -lpthread"
@@ -19032,18 +18954,10 @@ $as_echo "$as_me: WARNING: Unable to locate Kerberos V include files, you will h
 	    fi
 	else
 
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb5}/lib -Wl,+b,${with_kerb5}/lib"
-			;;
-	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb5}/lib -Wl,-R${with_kerb5}/lib"
-			;;
-	esac
+    if test X"$enable_rpath" = X"yes"; then
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb5}/lib -R${with_kerb5}/lib"
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb5}/lib"
-    fi
-    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:${with_kerb5}/lib"
     fi
 
 	    CPPFLAGS="$CPPFLAGS -I${with_kerb5}/include"
@@ -19242,18 +19156,10 @@ if test ${with_AFS-'no'} = "yes"; then
     for i in $AFSLIBDIRS; do
 	if test -d ${i}; then
 
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i -Wl,+b,$i"
-			;;
-	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i -Wl,-R$i"
-			;;
-	esac
+    if test X"$enable_rpath" = X"yes"; then
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i -R$i"
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i"
-    fi
-    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:$i"
     fi
 
 	    FOUND_AFSLIBDIR=true
@@ -19306,33 +19212,10 @@ if test "${with_skey-'no'}" = "yes"; then
     if test "$with_skey" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_skey}/include"
 
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	LDFLAGS="${LDFLAGS} -L${with_skey}/lib -Wl,+b,${with_skey}/lib"
-			;;
-	    *)		LDFLAGS="${LDFLAGS} -L${with_skey}/lib -Wl,-R${with_skey}/lib"
-			;;
-	esac
-    else
-	LDFLAGS="${LDFLAGS} -L${with_skey}/lib"
-    fi
-    if test X"$blibpath" != X"" -a "LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:${with_skey}/lib"
-    fi
-
-
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib -Wl,+b,${with_skey}/lib"
-			;;
-	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib -Wl,-R${with_skey}/lib"
-			;;
-	esac
+    if test X"$enable_rpath" = X"yes"; then
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib -R${with_skey}/lib"
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib"
-    fi
-    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:${with_skey}/lib"
     fi
 
 	ac_fn_c_check_header_compile "$LINENO" "skey.h" "ac_cv_header_skey_h" "#include <stdio.h>
@@ -19361,33 +19244,10 @@ fi
 	    CPPFLAGS="$O_CPPFLAGS"
 	else
 
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	LDFLAGS="${LDFLAGS} -L${dir}/lib -Wl,+b,${dir}/lib"
-			;;
-	    *)		LDFLAGS="${LDFLAGS} -L${dir}/lib -Wl,-R${dir}/lib"
-			;;
-	esac
-    else
-	LDFLAGS="${LDFLAGS} -L${dir}/lib"
-    fi
-    if test X"$blibpath" != X"" -a "LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:${dir}/lib"
-    fi
-
-
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -Wl,+b,${dir}/lib"
-			;;
-	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -Wl,-R${dir}/lib"
-			;;
-	esac
+    if test X"$enable_rpath" = X"yes"; then
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -R${dir}/lib"
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib"
-    fi
-    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:${dir}/lib"
     fi
 
 	fi
@@ -19516,33 +19376,10 @@ if test "${with_opie-'no'}" = "yes"; then
     if test "$with_opie" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_opie}/include"
 
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	LDFLAGS="${LDFLAGS} -L${with_opie}/lib -Wl,+b,${with_opie}/lib"
-			;;
-	    *)		LDFLAGS="${LDFLAGS} -L${with_opie}/lib -Wl,-R${with_opie}/lib"
-			;;
-	esac
-    else
-	LDFLAGS="${LDFLAGS} -L${with_opie}/lib"
-    fi
-    if test X"$blibpath" != X"" -a "LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:${with_opie}/lib"
-    fi
-
-
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib -Wl,+b,${with_opie}/lib"
-			;;
-	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib -Wl,-R${with_opie}/lib"
-			;;
-	esac
+    if test X"$enable_rpath" = X"yes"; then
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib -R${with_opie}/lib"
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib"
-    fi
-    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:${with_opie}/lib"
     fi
 
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -19587,33 +19424,10 @@ rm -f conftest.err conftest.i conftest.$ac_ext
 	    CPPFLAGS="$O_CPPFLAGS"
 	else
 
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	LDFLAGS="${LDFLAGS} -L${dir}/lib -Wl,+b,${dir}/lib"
-			;;
-	    *)		LDFLAGS="${LDFLAGS} -L${dir}/lib -Wl,-R${dir}/lib"
-			;;
-	esac
-    else
-	LDFLAGS="${LDFLAGS} -L${dir}/lib"
-    fi
-    if test X"$blibpath" != X"" -a "LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:${dir}/lib"
-    fi
-
-
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -Wl,+b,${dir}/lib"
-			;;
-	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -Wl,-R${dir}/lib"
-			;;
-	esac
+    if test X"$enable_rpath" = X"yes"; then
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -R${dir}/lib"
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib"
-    fi
-    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:${dir}/lib"
     fi
 
 	fi
@@ -19911,33 +19725,10 @@ if test ${with_ldap-'no'} != "no"; then
     _LDFLAGS="$LDFLAGS"
     if test "$with_ldap" != "yes"; then
 
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib -Wl,+b,${with_ldap}/lib"
-			;;
-	    *)		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib -Wl,-R${with_ldap}/lib"
-			;;
-	esac
+    if test X"$enable_rpath" = X"yes"; then
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib -R${with_ldap}/lib"
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib"
-    fi
-    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:${with_ldap}/lib"
-    fi
-
-
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	LDFLAGS="${LDFLAGS} -L${with_ldap}/lib -Wl,+b,${with_ldap}/lib"
-			;;
-	    *)		LDFLAGS="${LDFLAGS} -L${with_ldap}/lib -Wl,-R${with_ldap}/lib"
-			;;
-	esac
-    else
-	LDFLAGS="${LDFLAGS} -L${with_ldap}/lib"
-    fi
-    if test X"$blibpath" != X"" -a "LDFLAGS" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:${with_ldap}/lib"
     fi
 
 	CPPFLAGS="${CPPFLAGS} -I${with_ldap}/include"
@@ -20419,14 +20210,6 @@ fi
 	OSDEFS="${OSDEFS} -D_REENTRANT"
 	;;
 esac
-
-if test -n "$blibpath"; then
-    if test -n "$blibpath_add"; then
-    	SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS -Wl,-blibpath:${blibpath}${blibpath_add}"
-    elif test -n "$with_blibpath" -a "$with_blibpath" != "yes"; then
-    	SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS -Wl,-blibpath:${blibpath}"
-    fi
-fi
 
 if test "$utmp_style" = "LEGACY"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for utmp file path" >&5

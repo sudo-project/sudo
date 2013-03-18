@@ -296,18 +296,10 @@ dnl
 dnl append a libpath to an LDFLAGS style variable
 dnl
 AC_DEFUN([SUDO_APPEND_LIBPATH], [
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	$1="${$1} -L$2 -Wl,+b,$2"
-			;;
-	    *)		$1="${$1} -L$2 -Wl,-R$2"
-			;;
-	esac
+    if test X"$enable_rpath" = X"yes"; then
+	$1="${$1} -L$2 -R$2"
     else
 	$1="${$1} -L$2"
-    fi
-    if test X"$blibpath" != X"" -a "$1" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:$2"
     fi
 ])
 
