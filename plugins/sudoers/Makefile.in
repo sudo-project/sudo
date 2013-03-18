@@ -380,6 +380,8 @@ check: $(TEST_PROGS) visudo testsudoers
 			fi; \
 			total=`expr $$total + 1`; \
 		    elif test -s $$err; then \
+			failed=`expr $$failed + 1`; \
+			echo "$$dir/$$base (stderr): FAIL"; \
 			cat $$err 1>&2; \
 		    fi; \
 		done; \
