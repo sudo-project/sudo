@@ -125,10 +125,10 @@ static bool
 sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
 {
     struct stat sb;
-    int rval = false
+    int rval = false;
     debug_decl(sudo_check_plugin, SUDO_DEBUG_PLUGIN)
 
-    if (sudo_check_plugin(info, path, sizeof(path), &sb) != 0) {
+    if (sudo_stat_plugin(info, fullpath, pathsize, &sb) != 0) {
 	warningx(_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
 	warning("%s%s", _PATH_SUDO_PLUGIN_DIR, info->path);
@@ -137,13 +137,13 @@ sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
     if (sb.st_uid != ROOT_UID) {
 	warningx(_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	warningx(_("%s must be owned by uid %d"), path, ROOT_UID);
+	warningx(_("%s must be owned by uid %d"), fullpath, ROOT_UID);
 	goto done;
     }
     if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
 	warningx(_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	warningx(_("%s must be only be writable by owner"), path);
+	warningx(_("%s must be only be writable by owner"), fullpath);
 	goto done;
     }
     rval = true;
