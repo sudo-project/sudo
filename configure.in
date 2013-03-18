@@ -3173,6 +3173,14 @@ if test ${with_ldap-'no'} != "no"; then
 	    #include <lber.h>
 	    #include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [found=yes; break])
 	done
+	# On HP-UX, libibmldap has a hidden dependency on libCsup
+	case "$found-$host_os" in
+	    yes-hpux*)
+		AC_CHECK_LIB(Csup, main, [
+		    LIBS="${LIBS} -lCsup"
+		    LDAP_LIBS="${LDAP_LIBS} -lCsup"
+		])
+	esac
     fi
     dnl if nothing linked just try with -lldap
     if test "$found" = "no"; then
