@@ -19214,6 +19214,13 @@ if test "${with_skey-'no'}" = "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_skey}/include"
 
     if test X"$enable_rpath" = X"yes"; then
+	LDFLAGS="${LDFLAGS} -L${with_skey}/lib -R${with_skey}/lib"
+    else
+	LDFLAGS="${LDFLAGS} -L${with_skey}/lib"
+    fi
+
+
+    if test X"$enable_rpath" = X"yes"; then
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib -R${with_skey}/lib"
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib"
@@ -19244,6 +19251,13 @@ fi
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
 	else
+
+    if test X"$enable_rpath" = X"yes"; then
+	LDFLAGS="${LDFLAGS} -L${dir}/lib -R${dir}/lib"
+    else
+	LDFLAGS="${LDFLAGS} -L${dir}/lib"
+    fi
+
 
     if test X"$enable_rpath" = X"yes"; then
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -R${dir}/lib"
@@ -19378,6 +19392,13 @@ if test "${with_opie-'no'}" = "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_opie}/include"
 
     if test X"$enable_rpath" = X"yes"; then
+	LDFLAGS="${LDFLAGS} -L${with_opie}/lib -R${with_opie}/lib"
+    else
+	LDFLAGS="${LDFLAGS} -L${with_opie}/lib"
+    fi
+
+
+    if test X"$enable_rpath" = X"yes"; then
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib -R${with_opie}/lib"
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib"
@@ -19424,6 +19445,13 @@ rm -f conftest.err conftest.i conftest.$ac_ext
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
 	else
+
+    if test X"$enable_rpath" = X"yes"; then
+	LDFLAGS="${LDFLAGS} -L${dir}/lib -R${dir}/lib"
+    else
+	LDFLAGS="${LDFLAGS} -L${dir}/lib"
+    fi
+
 
     if test X"$enable_rpath" = X"yes"; then
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -R${dir}/lib"
@@ -19723,13 +19751,20 @@ done
 fi
 
 if test ${with_ldap-'no'} != "no"; then
-    _LDFLAGS="$LDFLAGS"
+    O_LDFLAGS="$LDFLAGS"
     if test "$with_ldap" != "yes"; then
 
     if test X"$enable_rpath" = X"yes"; then
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib -R${with_ldap}/lib"
     else
 	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib"
+    fi
+
+
+    if test X"$enable_rpath" = X"yes"; then
+	LDFLAGS="${LDFLAGS} -L${with_ldap}/lib -R${with_ldap}/lib"
+    else
+	LDFLAGS="${LDFLAGS} -L${with_ldap}/lib"
     fi
 
 	CPPFLAGS="${CPPFLAGS} -I${with_ldap}/include"
@@ -20156,7 +20191,7 @@ $as_echo "$as_me: WARNING: Unable to locate gssapi.h, you will have to edit the 
 
     SUDOERS_LIBS="${SUDOERS_LIBS} ${LDAP_LIBS}"
     LIBS="$_LIBS"
-    LDFLAGS="$_LDFLAGS"
+    LDFLAGS="$O_LDFLAGS"
 fi
 
 #

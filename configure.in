@@ -3016,6 +3016,7 @@ if test "${with_skey-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_skey" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_skey}/include"
+	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_skey}/lib])
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_skey}/lib])
 	AC_CHECK_HEADER([skey.h], [found=yes], [found=no], [#include <stdio.h>])
     else
@@ -3029,6 +3030,7 @@ if test "${with_skey-'no'}" = "yes"; then
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
 	else
+	    SUDO_APPEND_LIBPATH(LDFLAGS, [${dir}/lib])
 	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${dir}/lib])
 	fi
 	if test "$found" = "no"; then
@@ -3064,6 +3066,7 @@ if test "${with_opie-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_opie" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_opie}/include"
+	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_opie}/lib])
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_opie}/lib])
 	AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <opie.h>]])], [found=yes], [found=no])
     else
@@ -3076,6 +3079,7 @@ if test "${with_opie-'no'}" = "yes"; then
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
 	else
+	    SUDO_APPEND_LIBPATH(LDFLAGS, [${dir}/lib])
 	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${dir}/lib])
 	fi
 	if test "$found" = "no"; then
@@ -3143,9 +3147,10 @@ dnl
 dnl extra lib and .o file for LDAP support
 dnl
 if test ${with_ldap-'no'} != "no"; then
-    _LDFLAGS="$LDFLAGS"
+    O_LDFLAGS="$LDFLAGS"
     if test "$with_ldap" != "yes"; then
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_ldap}/lib])
+	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_ldap}/lib])
 	CPPFLAGS="${CPPFLAGS} -I${with_ldap}/include"
 	with_ldap=yes
     fi
@@ -3237,7 +3242,7 @@ if test ${with_ldap-'no'} != "no"; then
 
     SUDOERS_LIBS="${SUDOERS_LIBS} ${LDAP_LIBS}"
     LIBS="$_LIBS"
-    LDFLAGS="$_LDFLAGS"
+    LDFLAGS="$O_LDFLAGS"
 fi
 
 #
