@@ -14144,12 +14144,12 @@ $as_echo "$sudo_cv_var_daportable" >&6; }
 			;;
 		esac
 
-		case "$host" in
-			*-*-hpux[1-8].*)
+		case "$host_os" in
+			hpux[1-8].*)
 			    $as_echo "#define BROKEN_SYSLOG 1" >>confdefs.h
 
 			;;
-			*-*-hpux9.*)
+			hpux9.*)
 			    $as_echo "#define BROKEN_SYSLOG 1" >>confdefs.h
 
 
@@ -14188,7 +14188,7 @@ $as_echo "$sudo_cv_var_daportable" >&6; }
 
 			    fi
 			;;
-			*-*-hpux10.*)
+			hpux10.*)
 			    shadow_funcs="getprpwnam iscomsec"
 			    shadow_libs="-lsec"
 			    # HP-UX 10.20 libc has an incompatible getline
@@ -15748,8 +15748,8 @@ rm -rf conftest*
   fi
 fi
 
-case "$host" in
-    *-*-hpux11.*)
+case "$host_os" in
+    hpux11.*)
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether sys/types.h needs _XOPEN_SOURCE_EXTENDED" >&5
 $as_echo_n "checking whether sys/types.h needs _XOPEN_SOURCE_EXTENDED... " >&6; }
 if ${sudo_cv_xopen_source_extended+:} false; then :
@@ -16714,8 +16714,8 @@ _ACEOF
 
 else
 
-    case "$host" in
-    *-*-aix*)
+    case "$host_os" in
+    aix*)
 	for ac_func in getgrset
 do :
   ac_fn_c_check_func "$LINENO" "getgrset" "ac_cv_func_getgrset"
@@ -18285,8 +18285,8 @@ done
 
 	SUDO_NLS=enabled
 	# For Solaris we need links from lang to lang.UTF-8 in localedir
-	case "$host" in
-	    *-*-solaris2*) LOCALEDIR_SUFFIX=".UTF-8";;
+	case "$host_os" in
+	    solaris2*) LOCALEDIR_SUFFIX=".UTF-8";;
 	esac
     elif test "$sudo_cv_gettext_lintl" = "yes"; then
 	$as_echo "#define HAVE_LIBINTL_H 1" >>confdefs.h
@@ -20451,8 +20451,8 @@ fi
 # what libraries a plugin may depend on (e.g. HP-UX LDAP which uses pthreads)
 # so always link against -lpthread on HP-UX if it is available.
 # This check should go after all other libraries tests.
-case "$host" in
-    *-*-hpux*)
+case "$host_os" in
+    hpux*)
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lpthread" >&5
 $as_echo_n "checking for main in -lpthread... " >&6; }
 if ${ac_cv_lib_pthread_main+:} false; then :
@@ -20675,8 +20675,8 @@ else
 fi
 
 else
-    case "$host" in
-	*-*-hpux*)
+    case "$host_os" in
+	hpux*)
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Bhidden_def" >&5
 $as_echo_n "checking whether C compiler accepts -Bhidden_def... " >&6; }
 if ${ax_cv_check_cflags___Bhidden_def+:} false; then :
@@ -20719,7 +20719,7 @@ else
 fi
 
 	    ;;
-	*-*-solaris2*)
+	solaris2*)
 	    as_CACHEVAR=`$as_echo "ax_cv_check_cflags__-xldscope=hidden" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -xldscope=hidden" >&5
 $as_echo_n "checking whether C compiler accepts -xldscope=hidden... " >&6; }
@@ -20814,8 +20814,8 @@ $as_echo "$sudo_cv_var_gnu_ld_anon_map" >&6; }
 	    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_map)"; LT_LDMAP="-Wl,--version-script,\$(shlib_map)"
 	fi
     else
-	case "$host" in
-	    *-*-solaris2*)
+	case "$host_os" in
+	    solaris2*)
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ld supports anonymous map files" >&5
 $as_echo_n "checking whether ld supports anonymous map files... " >&6; }
 if ${sudo_cv_var_solaris_ld_anon_map+:} false; then :
@@ -20861,7 +20861,7 @@ $as_echo "$sudo_cv_var_solaris_ld_anon_map" >&6; }
 		    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_map)"; LT_LDMAP="-Wl,-M,\$(shlib_map)"
 		fi
 		;;
-	    *-*-hpux*)
+	    hpux*)
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ld supports controlling exported symbols" >&5
 $as_echo_n "checking whether ld supports controlling exported symbols... " >&6; }
 if ${sudo_cv_var_hpux_ld_symbol_export+:} false; then :
@@ -23623,8 +23623,8 @@ fi
 
 
 if test "$with_pam" = "yes"; then
-    case $host in
-	*-*-hpux*)
+    case $host_os in
+	hpux*)
 	    if test -f /usr/lib/security/libpam_hpsec.so.1; then
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: You may wish to add the following line to /etc/pam.conf" >&5
 $as_echo "$as_me: You may wish to add the following line to /etc/pam.conf" >&6;}
@@ -23632,7 +23632,7 @@ $as_echo "$as_me: You may wish to add the following line to /etc/pam.conf" >&6;}
 $as_echo "$as_me: sudo session required libpam_hpsec.so.1 bypass_umask bypass_last_login" >&6;}
 	    fi
 	    ;;
-	*-*-linux*)
+	linux*)
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: You will need to customize sample.pam and install it as /etc/pam.d/sudo" >&5
 $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/pam.d/sudo" >&6;}
 	    ;;

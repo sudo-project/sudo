@@ -1702,11 +1702,11 @@ case "$host" in
 			;;
 		esac
 
-		case "$host" in
-			*-*-hpux[[1-8]].*)
+		case "$host_os" in
+			hpux[[1-8]].*)
 			    AC_DEFINE(BROKEN_SYSLOG)
 			;;
-			*-*-hpux9.*)
+			hpux9.*)
 			    AC_DEFINE(BROKEN_SYSLOG)
 
 			    shadow_funcs="getspwuid"
@@ -1720,7 +1720,7 @@ case "$host" in
 				SUDO_APPEND_CPPFLAGS(-I/usr/include/reentrant)
 			    fi
 			;;
-			*-*-hpux10.*)
+			hpux10.*)
 			    shadow_funcs="getprpwnam iscomsec"
 			    shadow_libs="-lsec"
 			    # HP-UX 10.20 libc has an incompatible getline
@@ -2107,8 +2107,8 @@ dnl Check for large file support.  HP-UX 11.23 has a broken sys/type.h
 dnl when large files support is enabled so work around it.
 dnl
 AC_SYS_LARGEFILE
-case "$host" in
-    *-*-hpux11.*)
+case "$host_os" in
+    hpux11.*)
 	AC_CACHE_CHECK([whether sys/types.h needs _XOPEN_SOURCE_EXTENDED], [sudo_cv_xopen_source_extended],
 	[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
 	#include <sys/socket.h>], [])], [sudo_cv_xopen_source_extended=no], [
@@ -2227,8 +2227,8 @@ AC_CHECK_FUNCS(glob strrchr sysconf tzset strftime setenv \
 	       setrlimit64)
 dnl AC_REPLACE_FUNCS(getgrouplist)
 AC_CHECK_FUNCS(getgrouplist, [], [
-    case "$host" in
-    *-*-aix*)
+    case "$host_os" in
+    aix*)
 	AC_CHECK_FUNCS(getgrset, [AC_LIBOBJ(getgrouplist)])
 	;;
     *)
@@ -2551,8 +2551,8 @@ if test "$enable_nls" != "no"; then
 	AC_DEFINE(HAVE_LIBINTL_H)
 	SUDO_NLS=enabled
 	# For Solaris we need links from lang to lang.UTF-8 in localedir
-	case "$host" in
-	    *-*-solaris2*) LOCALEDIR_SUFFIX=".UTF-8";;
+	case "$host_os" in
+	    solaris2*) LOCALEDIR_SUFFIX=".UTF-8";;
 	esac
     elif test "$sudo_cv_gettext_lintl" = "yes"; then
 	AC_DEFINE(HAVE_LIBINTL_H)
@@ -3271,8 +3271,8 @@ fi
 # what libraries a plugin may depend on (e.g. HP-UX LDAP which uses pthreads)
 # so always link against -lpthread on HP-UX if it is available.
 # This check should go after all other libraries tests.
-case "$host" in
-    *-*-hpux*)
+case "$host_os" in
+    hpux*)
 	AC_CHECK_LIB(pthread, main, [SUDO_LIBS="${SUDO_LIBS} -lpthread"])
 	OSDEFS="${OSDEFS} -D_REENTRANT"
 	;;
@@ -3317,8 +3317,8 @@ if test -n "$GCC"; then
 	NO_VIZ=
     ])
 else
-    case "$host" in
-	*-*-hpux*)
+    case "$host_os" in
+	hpux*)
 	    AX_CHECK_COMPILE_FLAG([-Bhidden_def], [
 		AC_DEFINE(HAVE_DSO_VISIBILITY)
 		CFLAGS="${CFLAGS} -Bhidden_def"
@@ -3326,7 +3326,7 @@ else
 		LT_LDDEP=
 	    ])
 	    ;;
-	*-*-solaris2*)
+	solaris2*)
 	    AX_CHECK_COMPILE_FLAG([-xldscope=hidden], [
 		AC_DEFINE(HAVE_DSO_VISIBILITY)
 		CFLAGS="${CFLAGS} -xldscope=hidden"
@@ -3368,8 +3368,8 @@ EOF
 	    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_map)"; LT_LDMAP="-Wl,--version-script,\$(shlib_map)"
 	fi
     else
-	case "$host" in
-	    *-*-solaris2*)
+	case "$host_os" in
+	    solaris2*)
 		AC_CACHE_CHECK([whether ld supports anonymous map files],
 		    [sudo_cv_var_solaris_ld_anon_map],
 		    [
@@ -3394,7 +3394,7 @@ EOF
 		    LT_LDEXPORTS=; LT_LDDEP="\$(shlib_map)"; LT_LDMAP="-Wl,-M,\$(shlib_map)"
 		fi
 		;;
-	    *-*-hpux*)
+	    hpux*)
 		AC_CACHE_CHECK([whether ld supports controlling exported symbols],
 		    [sudo_cv_var_hpux_ld_symbol_export],
 		    [
@@ -3623,14 +3623,14 @@ dnl
 dnl Spew any text the user needs to know about
 dnl
 if test "$with_pam" = "yes"; then
-    case $host in
-	*-*-hpux*)
+    case $host_os in
+	hpux*)
 	    if test -f /usr/lib/security/libpam_hpsec.so.1; then
 		AC_MSG_NOTICE([You may wish to add the following line to /etc/pam.conf])
 		AC_MSG_NOTICE([sudo session required libpam_hpsec.so.1 bypass_umask bypass_last_login])
 	    fi
 	    ;;
-	*-*-linux*)
+	linux*)
 	    AC_MSG_NOTICE([You will need to customize sample.pam and install it as /etc/pam.d/sudo])
 	    ;;
     esac
