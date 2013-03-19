@@ -56,7 +56,7 @@ SSP_LDFLAGS = @SSP_LDFLAGS@
 
 # Regression tests
 TEST_PROGS = conf_test parseln_test
-TEST_LIBS = @LIBS@ @LIBINTL@
+TEST_LIBS = @LIBS@ @LIBINTL@ ../compat/libreplace.la
 TEST_LDFLAGS = @LDFLAGS@
 
 # OS dependent defines

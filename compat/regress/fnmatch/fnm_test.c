@@ -20,6 +20,8 @@
 # include "compat/fnmatch.h"
 #endif
 
+#include "missing.h"
+
 __dso_public int main(int argc, char *argv[]);
 
 int
