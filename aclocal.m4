@@ -294,12 +294,12 @@ AC_DEFINE_UNQUOTED(MAX_UID_T_LEN, $sudo_cv_uid_t_len, [Define to the max length 
 
 dnl
 dnl append a libpath to an LDFLAGS style variable
+dnl and append to the _R version unless rpath is disabled
 dnl
 AC_DEFUN([SUDO_APPEND_LIBPATH], [
+    $1="${$1} -L$2"
     if test X"$enable_rpath" = X"yes"; then
-	$1="${$1} -L$2 -R$2"
-    else
-	$1="${$1} -L$2"
+	$1_R="${$1_R} -R$2"
     fi
 ])
 

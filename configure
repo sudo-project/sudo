@@ -14588,10 +14588,9 @@ fi
 if test -n "$with_libpath"; then
     for i in ${with_libpath}; do
 
+    LDFLAGS="${LDFLAGS} -L$i"
     if test X"$enable_rpath" = X"yes"; then
-	LDFLAGS="${LDFLAGS} -L$i -R$i"
-    else
-	LDFLAGS="${LDFLAGS} -L$i"
+	LDFLAGS_R="${LDFLAGS_R} -R$i"
     fi
 
     done
@@ -18125,10 +18124,9 @@ if test "$enable_nls" != "no"; then
     if test "$enable_nls" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${enable_nls}/include"
 
+    LDFLAGS="${LDFLAGS} -L$enable_nls/lib"
     if test X"$enable_rpath" = X"yes"; then
-	LDFLAGS="${LDFLAGS} -L$enable_nls/lib -R$enable_nls/lib"
-    else
-	LDFLAGS="${LDFLAGS} -L$enable_nls/lib"
+	LDFLAGS_R="${LDFLAGS_R} -R$enable_nls/lib"
     fi
 
     fi
@@ -18290,10 +18288,9 @@ fi
 
 	CPPFLAGS="-I${enable_zlib}/include ${CPPFLAGS}"
 
+    ZLIB="${ZLIB} -L$enable_zlib/lib"
     if test X"$enable_rpath" = X"yes"; then
-	ZLIB="${ZLIB} -L$enable_zlib/lib -R$enable_zlib/lib"
-    else
-	ZLIB="${ZLIB} -L$enable_zlib/lib"
+	ZLIB_R="${ZLIB_R} -R$enable_zlib/lib"
     fi
 
 	ZLIB="${ZLIB} -lz"
@@ -18809,10 +18806,9 @@ fi
 if test ${with_fwtk-'no'} != "no"; then
     if test "$with_fwtk" != "yes"; then
 
+    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_fwtk}"
     if test X"$enable_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_fwtk} -R${with_fwtk}"
-    else
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_fwtk}"
+	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_fwtk}"
     fi
 
 	CPPFLAGS="${CPPFLAGS} -I${with_fwtk}"
@@ -18832,10 +18828,9 @@ if test ${with_SecurID-'no'} != "no"; then
     fi
     CPPFLAGS="${CPPFLAGS} -I${with_SecurID}"
 
+    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_SecurID}"
     if test X"$enable_rpath" = X"yes"; then
-	LDFLAGS="${LDFLAGS} -L${with_SecurID} -R${with_SecurID}"
-    else
-	LDFLAGS="${LDFLAGS} -L${with_SecurID}"
+	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_SecurID}"
     fi
 
     SUDOERS_LIBS="${SUDOERS_LIBS} -laceclnt -lpthread"
@@ -18955,10 +18950,9 @@ $as_echo "$as_me: WARNING: Unable to locate Kerberos V include files, you will h
 	    fi
 	else
 
+    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb5}/lib"
     if test X"$enable_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb5}/lib -R${with_kerb5}/lib"
-    else
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb5}/lib"
+	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_kerb5}/lib"
     fi
 
 	    CPPFLAGS="$CPPFLAGS -I${with_kerb5}/include"
@@ -19157,10 +19151,9 @@ if test ${with_AFS-'no'} = "yes"; then
     for i in $AFSLIBDIRS; do
 	if test -d ${i}; then
 
+    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i"
     if test X"$enable_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i -R$i"
-    else
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i"
+	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R$i"
     fi
 
 	    FOUND_AFSLIBDIR=true
@@ -19212,18 +19205,11 @@ if test "${with_skey-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_skey" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_skey}/include"
+	LDFLAGS="$LDFLAGS -L${with_skey}/lib"
 
+    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib"
     if test X"$enable_rpath" = X"yes"; then
-	LDFLAGS="${LDFLAGS} -L${with_skey}/lib -R${with_skey}/lib"
-    else
-	LDFLAGS="${LDFLAGS} -L${with_skey}/lib"
-    fi
-
-
-    if test X"$enable_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib -R${with_skey}/lib"
-    else
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib"
+	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_skey}/lib"
     fi
 
 	ac_fn_c_check_header_compile "$LINENO" "skey.h" "ac_cv_header_skey_h" "#include <stdio.h>
@@ -19251,18 +19237,11 @@ fi
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
 	else
+	    LDFLAGS="$LDFLAGS -L${dir}/lib"
 
+    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib"
     if test X"$enable_rpath" = X"yes"; then
-	LDFLAGS="${LDFLAGS} -L${dir}/lib -R${dir}/lib"
-    else
-	LDFLAGS="${LDFLAGS} -L${dir}/lib"
-    fi
-
-
-    if test X"$enable_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -R${dir}/lib"
-    else
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib"
+	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${dir}/lib"
     fi
 
 	fi
@@ -19390,18 +19369,11 @@ if test "${with_opie-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_opie" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_opie}/include"
+	LDFLAGS="$LDFLAGS -L${with_opie}/lib"
 
+    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib"
     if test X"$enable_rpath" = X"yes"; then
-	LDFLAGS="${LDFLAGS} -L${with_opie}/lib -R${with_opie}/lib"
-    else
-	LDFLAGS="${LDFLAGS} -L${with_opie}/lib"
-    fi
-
-
-    if test X"$enable_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib -R${with_opie}/lib"
-    else
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib"
+	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_opie}/lib"
     fi
 
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -19445,18 +19417,11 @@ rm -f conftest.err conftest.i conftest.$ac_ext
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
 	else
+	    LDFLAGS="$LDFLAGS -L${dir}/lib"
 
+    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib"
     if test X"$enable_rpath" = X"yes"; then
-	LDFLAGS="${LDFLAGS} -L${dir}/lib -R${dir}/lib"
-    else
-	LDFLAGS="${LDFLAGS} -L${dir}/lib"
-    fi
-
-
-    if test X"$enable_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -R${dir}/lib"
-    else
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib"
+	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${dir}/lib"
     fi
 
 	fi
@@ -19754,81 +19719,25 @@ if test ${with_ldap-'no'} != "no"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_ldap" != "yes"; then
 
+    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib"
     if test X"$enable_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib -R${with_ldap}/lib"
-    else
-	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib"
+	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_ldap}/lib"
     fi
 
-
-    if test X"$enable_rpath" = X"yes"; then
-	LDFLAGS="${LDFLAGS} -L${with_ldap}/lib -R${with_ldap}/lib"
-    else
-	LDFLAGS="${LDFLAGS} -L${with_ldap}/lib"
-    fi
-
+	LDFLAGS="$LDFLAGS -L${with_ldap}/lib"
 	CPPFLAGS="${CPPFLAGS} -I${with_ldap}/include"
 	with_ldap=yes
     fi
     SUDOERS_OBJS="${SUDOERS_OBJS} ldap.lo"
     LDAP=""
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for LDAP libraries" >&5
-$as_echo_n "checking for LDAP libraries... " >&6; }
-    LDAP_LIBS=""
     _LIBS="$LIBS"
+    LDAP_LIBS=""
+    IBMLDAP_EXTRA=""
     found=no
-    for l in -lldap -llber '-lssl -lcrypto'; do
-	LIBS="${LIBS} $l"
-	LDAP_LIBS="${LDAP_LIBS} $l"
-	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/types.h>
-	#include <lber.h>
-	#include <ldap.h>
-int
-main ()
-{
-(void)ldap_init(0, 0)
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  found=yes; break
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-    done
-    if test "$found" = "no"; then
-	LDAP_LIBS=""
-	LIBS="$_LIBS"
-	for l in -libmldap -lidsldif; do
-	    LIBS="${LIBS} $l"
-	    LDAP_LIBS="${LDAP_LIBS} $l"
-	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/types.h>
-	    #include <lber.h>
-	    #include <ldap.h>
-int
-main ()
-{
-(void)ldap_init(0, 0)
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  found=yes; break
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-	done
-	# On HP-UX, libibmldap has a hidden dependency on libCsup
-	case "$found-$host_os" in
-	    yes-hpux*)
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lCsup" >&5
+    # On HP-UX, libibmldap has a hidden dependency on libCsup
+    case "$host_os" in
+	hpux*) { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lCsup" >&5
 $as_echo_n "checking for main in -lCsup... " >&6; }
 if ${ac_cv_lib_Csup_main+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -19859,23 +19768,74 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_Csup_main" >&5
 $as_echo "$ac_cv_lib_Csup_main" >&6; }
 if test "x$ac_cv_lib_Csup_main" = xyes; then :
+  IBMLDAP_EXTRA=" -lCsup"
+fi
+;;
+    esac
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing ldap_init" >&5
+$as_echo_n "checking for library containing ldap_init... " >&6; }
+if ${ac_cv_search_ldap_init+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
 
-		    LIBS="${LIBS} -lCsup"
-		    LDAP_LIBS="${LDAP_LIBS} -lCsup"
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char ldap_init ();
+int
+main ()
+{
+return ldap_init ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' "ldap" "ldap -llber" "ldap -llber -lssl -lcrypto" "ibmldap${IBMLDAP_EXTRA}" "ibmldap -lidsldif${IBMLDAP_EXTRA}"; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_ldap_init=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_ldap_init+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_ldap_init+:} false; then :
+
+else
+  ac_cv_search_ldap_init=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_ldap_init" >&5
+$as_echo "$ac_cv_search_ldap_init" >&6; }
+ac_res=$ac_cv_search_ldap_init
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+	test "$ac_res" != "none required" && LDAP_LIBS="$ac_res"
+	found=yes
 
 fi
 
-	esac
-    fi
-        if test "$found" = "no"; then
-	LIBS="${_LIBS} -lldap"
+    # If nothing linked, try -lldap and hope for the best
+    if test "$found" = "no"; then
 	LDAP_LIBS="-lldap"
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: not found, using -lldap" >&5
-$as_echo "not found, using -lldap" >&6; }
-    else
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $LDAP_LIBS" >&5
-$as_echo "$LDAP_LIBS" >&6; }
     fi
+    LIBS="${_LIBS} ${LDAP_LIBS}"
         OLIBS="$LIBS"
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing ber_set_option" >&5
 $as_echo_n "checking for library containing ber_set_option... " >&6; }
@@ -21167,6 +21127,16 @@ if test X"$with_selinux" = X"no"; then
 #define _PATH_SUDO_SESH NULL
 EOF
 
+fi
+
+if test X"$LDFLAGS_R" != X""; then
+    LDFLAGS="$LDFLAGS $LDFLAGS_R"
+fi
+if test X"$SUDOERS_LDFLAGS_R" != X""; then
+    SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS $SUDOERS_LDFLAGS_R"
+fi
+if test X"$ZLIB_R" != X""; then
+    ZLIB="$ZLIB_R $ZLIB"
 fi
 
 if test X"$prefix" = X"NONE"; then

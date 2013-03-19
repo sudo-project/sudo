@@ -2834,7 +2834,7 @@ if test ${with_SecurID-'no'} != "no"; then
 	with_SecurID=/usr/ace
     fi
     CPPFLAGS="${CPPFLAGS} -I${with_SecurID}"
-    SUDO_APPEND_LIBPATH(LDFLAGS, [${with_SecurID}])
+    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_SecurID}])
     SUDOERS_LIBS="${SUDOERS_LIBS} -laceclnt -lpthread"
     AUTH_OBJS="$AUTH_OBJS securid5.lo";
 fi
@@ -3016,7 +3016,7 @@ if test "${with_skey-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_skey" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_skey}/include"
-	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_skey}/lib])
+	LDFLAGS="$LDFLAGS -L${with_skey}/lib"
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_skey}/lib])
 	AC_CHECK_HEADER([skey.h], [found=yes], [found=no], [#include <stdio.h>])
     else
@@ -3030,7 +3030,7 @@ if test "${with_skey-'no'}" = "yes"; then
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
 	else
-	    SUDO_APPEND_LIBPATH(LDFLAGS, [${dir}/lib])
+	    LDFLAGS="$LDFLAGS -L${dir}/lib"
 	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${dir}/lib])
 	fi
 	if test "$found" = "no"; then
@@ -3066,7 +3066,7 @@ if test "${with_opie-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_opie" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_opie}/include"
-	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_opie}/lib])
+	LDFLAGS="$LDFLAGS -L${with_opie}/lib"
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_opie}/lib])
 	AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <opie.h>]])], [found=yes], [found=no])
     else
@@ -3079,7 +3079,7 @@ if test "${with_opie-'no'}" = "yes"; then
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
 	else
-	    SUDO_APPEND_LIBPATH(LDFLAGS, [${dir}/lib])
+	    LDFLAGS="$LDFLAGS -L${dir}/lib"
 	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${dir}/lib])
 	fi
 	if test "$found" = "no"; then
@@ -3150,51 +3150,30 @@ if test ${with_ldap-'no'} != "no"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_ldap" != "yes"; then
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_ldap}/lib])
-	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_ldap}/lib])
+	LDFLAGS="$LDFLAGS -L${with_ldap}/lib"
 	CPPFLAGS="${CPPFLAGS} -I${with_ldap}/include"
 	with_ldap=yes
     fi
     SUDOERS_OBJS="${SUDOERS_OBJS} ldap.lo"
     LDAP=""
 
-    AC_MSG_CHECKING([for LDAP libraries])
-    LDAP_LIBS=""
     _LIBS="$LIBS"
+    LDAP_LIBS=""
+    IBMLDAP_EXTRA=""
     found=no
-    for l in -lldap -llber '-lssl -lcrypto'; do
-	LIBS="${LIBS} $l"
-	LDAP_LIBS="${LDAP_LIBS} $l"
-	AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-	#include <lber.h>
-	#include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [found=yes; break])
-    done
+    # On HP-UX, libibmldap has a hidden dependency on libCsup
+    case "$host_os" in
+	hpux*) AC_CHECK_LIB(Csup, main, [IBMLDAP_EXTRA=" -lCsup"]);;
+    esac
+    AC_SEARCH_LIBS(ldap_init, "ldap" "ldap -llber" "ldap -llber -lssl -lcrypto" "ibmldap${IBMLDAP_EXTRA}" "ibmldap -lidsldif${IBMLDAP_EXTRA}", [
+	test "$ac_res" != "none required" && LDAP_LIBS="$ac_res"
+	found=yes
+    ])
+    # If nothing linked, try -lldap and hope for the best
     if test "$found" = "no"; then
-	LDAP_LIBS=""
-	LIBS="$_LIBS"
-	for l in -libmldap -lidsldif; do
-	    LIBS="${LIBS} $l"
-	    LDAP_LIBS="${LDAP_LIBS} $l"
-	    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-	    #include <lber.h>
-	    #include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [found=yes; break])
-	done
-	# On HP-UX, libibmldap has a hidden dependency on libCsup
-	case "$found-$host_os" in
-	    yes-hpux*)
-		AC_CHECK_LIB(Csup, main, [
-		    LIBS="${LIBS} -lCsup"
-		    LDAP_LIBS="${LDAP_LIBS} -lCsup"
-		])
-	esac
-    fi
-    dnl if nothing linked just try with -lldap
-    if test "$found" = "no"; then
-	LIBS="${_LIBS} -lldap"
 	LDAP_LIBS="-lldap"
-	AC_MSG_RESULT([not found, using -lldap])
-    else
-	AC_MSG_RESULT([$LDAP_LIBS])
     fi
+    LIBS="${_LIBS} ${LDAP_LIBS}"
     dnl check if we need to link with -llber for ber_set_option
     OLIBS="$LIBS"
     AC_SEARCH_LIBS([ber_set_option], [lber], [found=yes], [found=no])
@@ -3596,6 +3575,19 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no"; then
 fi
 if test X"$with_selinux" = X"no"; then
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, NULL)
+fi
+
+dnl
+dnl Add -R options to LDFLAGS, etc.
+dnl
+if test X"$LDFLAGS_R" != X""; then
+    LDFLAGS="$LDFLAGS $LDFLAGS_R"
+fi
+if test X"$SUDOERS_LDFLAGS_R" != X""; then
+    SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS $SUDOERS_LDFLAGS_R"
+fi
+if test X"$ZLIB_R" != X""; then
+    ZLIB="$ZLIB_R $ZLIB"
 fi
 
 dnl
