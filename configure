@@ -19933,7 +19933,8 @@ if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
- for ac_func in ldap_sasl_interactive_bind_s
+
+	for ac_func in ldap_sasl_interactive_bind_s
 do :
   ac_fn_c_check_func "$LINENO" "ldap_sasl_interactive_bind_s" "ac_cv_func_ldap_sasl_interactive_bind_s"
 if test "x$ac_cv_func_ldap_sasl_interactive_bind_s" = xyes; then :
@@ -19944,8 +19945,8 @@ _ACEOF
 fi
 done
 
-else
-  break
+	break
+
 fi
 
 done
