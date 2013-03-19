@@ -293,14 +293,37 @@ AC_DEFINE_UNQUOTED(MAX_UID_T_LEN, $sudo_cv_uid_t_len, [Define to the max length 
 ])
 
 dnl
-dnl append a libpath to an LDFLAGS style variable
-dnl and append to the _R version unless rpath is disabled
+dnl Append a libpath to an LDFLAGS style variable if not already present.
+dnl Also appends to the _R version unless rpath is disabled.
 dnl
 AC_DEFUN([SUDO_APPEND_LIBPATH], [
-    $1="${$1} -L$2"
-    if test X"$enable_rpath" = X"yes"; then
-	$1_R="${$1_R} -R$2"
-    fi
+    case "${$1}" in
+	*"-L$2"|*"-L$2 ")
+	    ;;
+	*)
+	    $1="${$1} -L$2"
+	    if test X"$enable_rpath" = X"yes"; then
+		$1_R="${$1_R} -R$2"
+	    fi
+	    ;;
+    esac
+])
+
+dnl
+dnl Append a directory to CPPFLAGS if not already present.
+dnl
+AC_DEFUN([SUDO_APPEND_CPPFLAGS], [
+    case "${CPPFLAGS}" in
+	*"$1"|*"$1 ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="$1"
+	    else
+		CPPFLAGS="${CPPFLAGS} $1"
+	    fi
+	    ;;
+    esac
 ])
 
 dnl

@@ -3985,7 +3985,19 @@ if test "${with_incpath+set}" = set; then :
     *)		{ $as_echo "$as_me:${as_lineno-$LINENO}: Adding ${with_incpath} to CPPFLAGS" >&5
 $as_echo "$as_me: Adding ${with_incpath} to CPPFLAGS" >&6;}
 		for i in ${with_incpath}; do
-		    CPPFLAGS="${CPPFLAGS} -I${i}"
+
+    case "${CPPFLAGS}" in
+	*"-I${i}"|*"-I${i} ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-I${i}"
+	    else
+		CPPFLAGS="${CPPFLAGS} -I${i}"
+	    fi
+	    ;;
+    esac
+
 		done
 		;;
 esac
@@ -14148,7 +14160,32 @@ $as_echo "$sudo_cv_var_daportable" >&6; }
 				# order of libs in 9.X is important. -lc_r must be last
 				SUDOERS_LIBS="${SUDOERS_LIBS} -ldce -lM -lc_r"
 				LIBS="${LIBS} -ldce -lM -lc_r"
-				CPPFLAGS="${CPPFLAGS} -D_REENTRANT -I/usr/include/reentrant"
+
+    case "${CPPFLAGS}" in
+	*"-D_REENTRANT"|*"-D_REENTRANT ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-D_REENTRANT"
+	    else
+		CPPFLAGS="${CPPFLAGS} -D_REENTRANT"
+	    fi
+	    ;;
+    esac
+
+
+    case "${CPPFLAGS}" in
+	*"-I/usr/include/reentrant"|*"-I/usr/include/reentrant ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-I/usr/include/reentrant"
+	    else
+		CPPFLAGS="${CPPFLAGS} -I/usr/include/reentrant"
+	    fi
+	    ;;
+    esac
+
 			    fi
 			;;
 			*-*-hpux10.*)
@@ -14351,7 +14388,32 @@ fi
 		;;
     *-*-riscos*)
 		LIBS="${LIBS} -lsun -lbsd"
-		CPPFLAGS="${CPPFLAGS} -I/usr/include -I/usr/include/bsd"
+
+    case "${CPPFLAGS}" in
+	*"-I/usr/include"|*"-I/usr/include ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-I/usr/include"
+	    else
+		CPPFLAGS="${CPPFLAGS} -I/usr/include"
+	    fi
+	    ;;
+    esac
+
+
+    case "${CPPFLAGS}" in
+	*"-I/usr/include/bsd"|*"-I/usr/include/bsd ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-I/usr/include/bsd"
+	    else
+		CPPFLAGS="${CPPFLAGS} -I/usr/include/bsd"
+	    fi
+	    ;;
+    esac
+
 		OSDEFS="${OSDEFS} -D_MIPS"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
@@ -14588,10 +14650,16 @@ fi
 if test -n "$with_libpath"; then
     for i in ${with_libpath}; do
 
-    LDFLAGS="${LDFLAGS} -L$i"
-    if test X"$enable_rpath" = X"yes"; then
-	LDFLAGS_R="${LDFLAGS_R} -R$i"
-    fi
+    case "${LDFLAGS}" in
+	*"-L$i"|*"-L$i ")
+	    ;;
+	*)
+	    LDFLAGS="${LDFLAGS} -L$i"
+	    if test X"$enable_rpath" = X"yes"; then
+		LDFLAGS_R="${LDFLAGS_R} -R$i"
+	    fi
+	    ;;
+    esac
 
     done
 fi
@@ -18122,12 +18190,30 @@ fi
 # make sure we use the gettext() that matches the include file.
 if test "$enable_nls" != "no"; then
     if test "$enable_nls" != "yes"; then
-	CPPFLAGS="${CPPFLAGS} -I${enable_nls}/include"
 
-    LDFLAGS="${LDFLAGS} -L$enable_nls/lib"
-    if test X"$enable_rpath" = X"yes"; then
-	LDFLAGS_R="${LDFLAGS_R} -R$enable_nls/lib"
-    fi
+    case "${CPPFLAGS}" in
+	*"-I${enable_nls}/include"|*"-I${enable_nls}/include ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-I${enable_nls}/include"
+	    else
+		CPPFLAGS="${CPPFLAGS} -I${enable_nls}/include"
+	    fi
+	    ;;
+    esac
+
+
+    case "${LDFLAGS}" in
+	*"-L$enable_nls/lib"|*"-L$enable_nls/lib ")
+	    ;;
+	*)
+	    LDFLAGS="${LDFLAGS} -L$enable_nls/lib"
+	    if test X"$enable_rpath" = X"yes"; then
+		LDFLAGS_R="${LDFLAGS_R} -R$enable_nls/lib"
+	    fi
+	    ;;
+    esac
 
     fi
     OLIBS="$LIBS"
@@ -18286,12 +18372,30 @@ fi
     *)
 	$as_echo "#define HAVE_ZLIB_H 1" >>confdefs.h
 
-	CPPFLAGS="-I${enable_zlib}/include ${CPPFLAGS}"
 
-    ZLIB="${ZLIB} -L$enable_zlib/lib"
-    if test X"$enable_rpath" = X"yes"; then
-	ZLIB_R="${ZLIB_R} -R$enable_zlib/lib"
-    fi
+    case "${CPPFLAGS}" in
+	*"-I${enable_zlib}/include"|*"-I${enable_zlib}/include ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-I${enable_zlib}/include"
+	    else
+		CPPFLAGS="${CPPFLAGS} -I${enable_zlib}/include"
+	    fi
+	    ;;
+    esac
+
+
+    case "${ZLIB}" in
+	*"-L$enable_zlib/lib"|*"-L$enable_zlib/lib ")
+	    ;;
+	*)
+	    ZLIB="${ZLIB} -L$enable_zlib/lib"
+	    if test X"$enable_rpath" = X"yes"; then
+		ZLIB_R="${ZLIB_R} -R$enable_zlib/lib"
+	    fi
+	    ;;
+    esac
 
 	ZLIB="${ZLIB} -lz"
 	;;
@@ -18806,12 +18910,30 @@ fi
 if test ${with_fwtk-'no'} != "no"; then
     if test "$with_fwtk" != "yes"; then
 
-    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_fwtk}"
-    if test X"$enable_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_fwtk}"
-    fi
+    case "${SUDOERS_LDFLAGS}" in
+	*"-L${with_fwtk}"|*"-L${with_fwtk} ")
+	    ;;
+	*)
+	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_fwtk}"
+	    if test X"$enable_rpath" = X"yes"; then
+		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_fwtk}"
+	    fi
+	    ;;
+    esac
 
-	CPPFLAGS="${CPPFLAGS} -I${with_fwtk}"
+
+    case "${CPPFLAGS}" in
+	*"-I${with_fwtk}"|*"-I${with_fwtk} ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-I${with_fwtk}"
+	    else
+		CPPFLAGS="${CPPFLAGS} -I${with_fwtk}"
+	    fi
+	    ;;
+    esac
+
 	with_fwtk=yes
     fi
     SUDOERS_LIBS="${SUDOERS_LIBS} -lauth -lfwall"
@@ -18826,12 +18948,30 @@ if test ${with_SecurID-'no'} != "no"; then
     else
 	with_SecurID=/usr/ace
     fi
-    CPPFLAGS="${CPPFLAGS} -I${with_SecurID}"
 
-    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_SecurID}"
-    if test X"$enable_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_SecurID}"
-    fi
+    case "${CPPFLAGS}" in
+	*"-I${with_SecurID}"|*"-I${with_SecurID} ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-I${with_SecurID}"
+	    else
+		CPPFLAGS="${CPPFLAGS} -I${with_SecurID}"
+	    fi
+	    ;;
+    esac
+
+
+    case "${SUDOERS_LDFLAGS}" in
+	*"-L${with_SecurID}"|*"-L${with_SecurID} ")
+	    ;;
+	*)
+	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_SecurID}"
+	    if test X"$enable_rpath" = X"yes"; then
+		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_SecurID}"
+	    fi
+	    ;;
+    esac
 
     SUDOERS_LIBS="${SUDOERS_LIBS} -laceclnt -lpthread"
     AUTH_OBJS="$AUTH_OBJS securid5.lo";
@@ -18950,12 +19090,30 @@ $as_echo "$as_me: WARNING: Unable to locate Kerberos V include files, you will h
 	    fi
 	else
 
-    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb5}/lib"
-    if test X"$enable_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_kerb5}/lib"
-    fi
+    case "${SUDOERS_LDFLAGS}" in
+	*"-L${with_kerb5}/lib"|*"-L${with_kerb5}/lib ")
+	    ;;
+	*)
+	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb5}/lib"
+	    if test X"$enable_rpath" = X"yes"; then
+		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_kerb5}/lib"
+	    fi
+	    ;;
+    esac
 
-	    CPPFLAGS="$CPPFLAGS -I${with_kerb5}/include"
+
+    case "${CPPFLAGS}" in
+	*"-I${with_kerb5}/include"|*"-I${with_kerb5}/include ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-I${with_kerb5}/include"
+	    else
+		CPPFLAGS="${CPPFLAGS} -I${with_kerb5}/include"
+	    fi
+	    ;;
+    esac
+
 	fi
 
 				{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we are using Heimdal" >&5
@@ -19151,10 +19309,16 @@ if test ${with_AFS-'no'} = "yes"; then
     for i in $AFSLIBDIRS; do
 	if test -d ${i}; then
 
-    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i"
-    if test X"$enable_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R$i"
-    fi
+    case "${SUDOERS_LDFLAGS}" in
+	*"-L$i"|*"-L$i ")
+	    ;;
+	*)
+	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i"
+	    if test X"$enable_rpath" = X"yes"; then
+		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R$i"
+	    fi
+	    ;;
+    esac
 
 	    FOUND_AFSLIBDIR=true
 	fi
@@ -19182,7 +19346,19 @@ $as_echo "$as_me: WARNING: Unable to locate AFS libraries, you will have to edit
     # AFS includes may live in /usr/include on some machines...
     for i in /usr/afsws/include; do
 	if test -d ${i}; then
-	    CPPFLAGS="${CPPFLAGS} -I${i}"
+
+    case "${CPPFLAGS}" in
+	*"-I${i}"|*"-I${i} ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-I${i}"
+	    else
+		CPPFLAGS="${CPPFLAGS} -I${i}"
+	    fi
+	    ;;
+    esac
+
 	    FOUND_AFSINCDIR=true
 	fi
     done
@@ -19204,13 +19380,31 @@ fi
 if test "${with_skey-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_skey" != "yes"; then
-	CPPFLAGS="${CPPFLAGS} -I${with_skey}/include"
+
+    case "${CPPFLAGS}" in
+	*"-I${with_skey}/include"|*"-I${with_skey}/include ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-I${with_skey}/include"
+	    else
+		CPPFLAGS="${CPPFLAGS} -I${with_skey}/include"
+	    fi
+	    ;;
+    esac
+
 	LDFLAGS="$LDFLAGS -L${with_skey}/lib"
 
-    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib"
-    if test X"$enable_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_skey}/lib"
-    fi
+    case "${SUDOERS_LDFLAGS}" in
+	*"-L${with_skey}/lib"|*"-L${with_skey}/lib ")
+	    ;;
+	*)
+	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib"
+	    if test X"$enable_rpath" = X"yes"; then
+		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_skey}/lib"
+	    fi
+	    ;;
+    esac
 
 	ac_fn_c_check_header_compile "$LINENO" "skey.h" "ac_cv_header_skey_h" "#include <stdio.h>
 "
@@ -19239,10 +19433,16 @@ fi
 	else
 	    LDFLAGS="$LDFLAGS -L${dir}/lib"
 
-    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib"
-    if test X"$enable_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${dir}/lib"
-    fi
+    case "${SUDOERS_LDFLAGS}" in
+	*"-L${dir}/lib"|*"-L${dir}/lib ")
+	    ;;
+	*)
+	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib"
+	    if test X"$enable_rpath" = X"yes"; then
+		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${dir}/lib"
+	    fi
+	    ;;
+    esac
 
 	fi
 	if test "$found" = "no"; then
@@ -19368,13 +19568,31 @@ fi
 if test "${with_opie-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_opie" != "yes"; then
-	CPPFLAGS="${CPPFLAGS} -I${with_opie}/include"
+
+    case "${CPPFLAGS}" in
+	*"-I${with_opie}/include"|*"-I${with_opie}/include ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-I${with_opie}/include"
+	    else
+		CPPFLAGS="${CPPFLAGS} -I${with_opie}/include"
+	    fi
+	    ;;
+    esac
+
 	LDFLAGS="$LDFLAGS -L${with_opie}/lib"
 
-    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib"
-    if test X"$enable_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_opie}/lib"
-    fi
+    case "${SUDOERS_LDFLAGS}" in
+	*"-L${with_opie}/lib"|*"-L${with_opie}/lib ")
+	    ;;
+	*)
+	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib"
+	    if test X"$enable_rpath" = X"yes"; then
+		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_opie}/lib"
+	    fi
+	    ;;
+    esac
 
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -19419,10 +19637,16 @@ rm -f conftest.err conftest.i conftest.$ac_ext
 	else
 	    LDFLAGS="$LDFLAGS -L${dir}/lib"
 
-    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib"
-    if test X"$enable_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${dir}/lib"
-    fi
+    case "${SUDOERS_LDFLAGS}" in
+	*"-L${dir}/lib"|*"-L${dir}/lib ")
+	    ;;
+	*)
+	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib"
+	    if test X"$enable_rpath" = X"yes"; then
+		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${dir}/lib"
+	    fi
+	    ;;
+    esac
 
 	fi
 	if test "$found" = "no"; then
@@ -19719,13 +19943,31 @@ if test ${with_ldap-'no'} != "no"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_ldap" != "yes"; then
 
-    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib"
-    if test X"$enable_rpath" = X"yes"; then
-	SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_ldap}/lib"
-    fi
+    case "${SUDOERS_LDFLAGS}" in
+	*"-L${with_ldap}/lib"|*"-L${with_ldap}/lib ")
+	    ;;
+	*)
+	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib"
+	    if test X"$enable_rpath" = X"yes"; then
+		SUDOERS_LDFLAGS_R="${SUDOERS_LDFLAGS_R} -R${with_ldap}/lib"
+	    fi
+	    ;;
+    esac
 
 	LDFLAGS="$LDFLAGS -L${with_ldap}/lib"
-	CPPFLAGS="${CPPFLAGS} -I${with_ldap}/include"
+
+    case "${CPPFLAGS}" in
+	*"-I${with_ldap}/include"|*"-I${with_ldap}/include ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-I${with_ldap}/include"
+	    else
+		CPPFLAGS="${CPPFLAGS} -I${with_ldap}/include"
+	    fi
+	    ;;
+    esac
+
 	with_ldap=yes
     fi
     SUDOERS_OBJS="${SUDOERS_OBJS} ldap.lo"

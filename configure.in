@@ -342,7 +342,7 @@ AC_ARG_WITH(incpath, [AS_HELP_STRING([--with-incpath], [additional places to loo
 		;;
     *)		AC_MSG_NOTICE([Adding ${with_incpath} to CPPFLAGS])
 		for i in ${with_incpath}; do
-		    CPPFLAGS="${CPPFLAGS} -I${i}"
+		    SUDO_APPEND_CPPFLAGS(-I${i})
 		done
 		;;
 esac])
@@ -1716,7 +1716,8 @@ case "$host" in
 				# order of libs in 9.X is important. -lc_r must be last
 				SUDOERS_LIBS="${SUDOERS_LIBS} -ldce -lM -lc_r"
 				LIBS="${LIBS} -ldce -lM -lc_r"
-				CPPFLAGS="${CPPFLAGS} -D_REENTRANT -I/usr/include/reentrant"
+				SUDO_APPEND_CPPFLAGS(-D_REENTRANT)
+				SUDO_APPEND_CPPFLAGS(-I/usr/include/reentrant)
 			    fi
 			;;
 			*-*-hpux10.*)
@@ -1841,7 +1842,8 @@ case "$host" in
 		;;
     *-*-riscos*)
 		LIBS="${LIBS} -lsun -lbsd"
-		CPPFLAGS="${CPPFLAGS} -I/usr/include -I/usr/include/bsd"
+		SUDO_APPEND_CPPFLAGS(-I/usr/include)
+		SUDO_APPEND_CPPFLAGS(-I/usr/include/bsd)
 		OSDEFS="${OSDEFS} -D_MIPS"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
@@ -2512,7 +2514,7 @@ fi
 # make sure we use the gettext() that matches the include file.
 if test "$enable_nls" != "no"; then
     if test "$enable_nls" != "yes"; then
-	CPPFLAGS="${CPPFLAGS} -I${enable_nls}/include"
+	SUDO_APPEND_CPPFLAGS(-I${enable_nls}/include)
 	SUDO_APPEND_LIBPATH(LDFLAGS, [$enable_nls/lib])
     fi
     OLIBS="$LIBS"
@@ -2586,7 +2588,7 @@ case "$enable_zlib" in
 	;;
     *)
 	AC_DEFINE(HAVE_ZLIB_H)
-	CPPFLAGS="-I${enable_zlib}/include ${CPPFLAGS}"
+	SUDO_APPEND_CPPFLAGS(-I${enable_zlib}/include)
 	SUDO_APPEND_LIBPATH(ZLIB, [$enable_zlib/lib])
 	ZLIB="${ZLIB} -lz"
 	;;
@@ -2815,7 +2817,7 @@ dnl
 if test ${with_fwtk-'no'} != "no"; then
     if test "$with_fwtk" != "yes"; then
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_fwtk}])
-	CPPFLAGS="${CPPFLAGS} -I${with_fwtk}"
+	SUDO_APPEND_CPPFLAGS(-I${with_fwtk})
 	with_fwtk=yes
     fi
     SUDOERS_LIBS="${SUDOERS_LIBS} -lauth -lfwall"
@@ -2833,7 +2835,7 @@ if test ${with_SecurID-'no'} != "no"; then
     else
 	with_SecurID=/usr/ace
     fi
-    CPPFLAGS="${CPPFLAGS} -I${with_SecurID}"
+    SUDO_APPEND_CPPFLAGS(-I${with_SecurID})
     SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_SecurID}])
     SUDOERS_LIBS="${SUDOERS_LIBS} -laceclnt -lpthread"
     AUTH_OBJS="$AUTH_OBJS securid5.lo";
@@ -2897,7 +2899,7 @@ if test ${with_kerb5-'no'} != "no"; then
 	else
 	    dnl XXX - try to include krb5.h here too
 	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_kerb5}/lib])
-	    CPPFLAGS="$CPPFLAGS -I${with_kerb5}/include"
+	    SUDO_APPEND_CPPFLAGS(-I${with_kerb5}/include)
 	fi
 
 	dnl
@@ -2987,7 +2989,7 @@ if test ${with_AFS-'no'} = "yes"; then
     # AFS includes may live in /usr/include on some machines...
     for i in /usr/afsws/include; do
 	if test -d ${i}; then
-	    CPPFLAGS="${CPPFLAGS} -I${i}"
+	    SUDO_APPEND_CPPFLAGS(-I${i})
 	    FOUND_AFSINCDIR=true
 	fi
     done
@@ -3015,7 +3017,7 @@ dnl
 if test "${with_skey-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_skey" != "yes"; then
-	CPPFLAGS="${CPPFLAGS} -I${with_skey}/include"
+	SUDO_APPEND_CPPFLAGS(-I${with_skey}/include)
 	LDFLAGS="$LDFLAGS -L${with_skey}/lib"
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_skey}/lib])
 	AC_CHECK_HEADER([skey.h], [found=yes], [found=no], [#include <stdio.h>])
@@ -3065,7 +3067,7 @@ dnl
 if test "${with_opie-'no'}" = "yes"; then
     O_LDFLAGS="$LDFLAGS"
     if test "$with_opie" != "yes"; then
-	CPPFLAGS="${CPPFLAGS} -I${with_opie}/include"
+	SUDO_APPEND_CPPFLAGS(-I${with_opie}/include)
 	LDFLAGS="$LDFLAGS -L${with_opie}/lib"
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_opie}/lib])
 	AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <opie.h>]])], [found=yes], [found=no])
@@ -3151,7 +3153,7 @@ if test ${with_ldap-'no'} != "no"; then
     if test "$with_ldap" != "yes"; then
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_ldap}/lib])
 	LDFLAGS="$LDFLAGS -L${with_ldap}/lib"
-	CPPFLAGS="${CPPFLAGS} -I${with_ldap}/include"
+	SUDO_APPEND_CPPFLAGS(-I${with_ldap}/include)
 	with_ldap=yes
     fi
     SUDOERS_OBJS="${SUDOERS_OBJS} ldap.lo"
