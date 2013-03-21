@@ -2502,7 +2502,7 @@ elif test -n "$GCC"; then
     AC_MSG_RESULT($sudo_cv___FUNCTION__)
     if test "$sudo_cv___FUNCTION__" = "yes"; then
 	AC_DEFINE(HAVE___FUNC__)
-	AC_DEFINE(__func__, __FUNCTION__, [Define to __FUNCTION__ if your compiler support __FUNCTION__ but not __func__])
+	AC_DEFINE(__func__, __FUNCTION__, [Define to __FUNCTION__ if your compiler supports __FUNCTION__ but not __func__])
     fi
 fi
 
@@ -3737,8 +3737,6 @@ AH_TEMPLATE(HAVE__NSS_INITF_GROUP, [Define to 1 if you have the `_nss_initf_grou
 AH_TEMPLATE(HAVE___NSS_INITF_GROUP, [Define to 1 if you have the `__nss_initf_group' function.])
 AH_TEMPLATE(HAVE__NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `_nss_XbyY_buf_alloc' function.])
 AH_TEMPLATE(HAVE___NSS_XBYY_BUF_ALLOC, [Define to 1 if you have the `__nss_XbyY_buf_alloc' function.])
-AH_TEMPLATE(_PATH_SUDO_ASKPASS, [The fully qualified pathname of askpass])
-AH_TEMPLATE(_PATH_SUDO_SESH, [The fully qualified pathname of sesh])
 
 dnl
 dnl Bits to copy verbatim into config.h.in

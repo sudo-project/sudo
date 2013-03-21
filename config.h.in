@@ -922,7 +922,7 @@
 /* Define for large files, on AIX-style hosts. */
 #undef _LARGE_FILES
 
-/* Define to __FUNCTION__ if your compiler support __FUNCTION__ but not
+/* Define to __FUNCTION__ if your compiler supports __FUNCTION__ but not
    __func__ */
 #undef __func__
 
