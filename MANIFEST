@@ -238,6 +238,8 @@ plugins/sudoers/po/ja.mo
 plugins/sudoers/po/ja.po
 plugins/sudoers/po/lt.mo
 plugins/sudoers/po/lt.po
+plugins/sudoers/po/nl.mo
+plugins/sudoers/po/nl.po
 plugins/sudoers/po/pl.mo
 plugins/sudoers/po/pl.po
 plugins/sudoers/po/sl.mo  
@@ -388,6 +390,8 @@ src/po/it.mo
 src/po/it.po
 src/po/ja.mo
 src/po/ja.po
+src/po/nl.mo
+src/po/nl.po
 src/po/pl.mo
 src/po/pl.po
 src/po/ru.mo
@@ -399,6 +403,8 @@ src/po/sr.po
 src/po/sudo.pot
 src/po/sv.mo
 src/po/sv.po
+src/po/tr.mo
+src/po/tr.po
 src/po/uk.mo
 src/po/uk.po
 src/po/vi.mo

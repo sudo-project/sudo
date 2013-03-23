@@ -1,0 +1,772 @@
+# This file is put in the public domain.
+# This file is distributed under the same license as the sudo package.
+#
+# Volkan Gezer <vlkngzr@gmail.com>, 2013.
+msgid ""
+msgstr ""
+"Project-Id-Version: sudo 1.8.6b4\n"
+"Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
+"POT-Creation-Date: 2012-08-10 13:08-0400\n"
+"PO-Revision-Date: 2013-03-03 19:11+0100\n"
+"Last-Translator: Volkan Gezer <vlkngzr@gmail.com>\n"
+"Language-Team: Turkish <gnu-tr-u12a@lists.sourceforge.net>\n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Lokalize 1.5\n"
+
+#: common/aix.c:150
+#, c-format
+msgid "unable to open userdb"
+msgstr "userdb açılamıyor"
+
+#: common/aix.c:153
+#, c-format
+msgid "unable to switch to registry \"%s\" for %s"
+msgstr "\"%s\" kaydına %s için geçiş yapılamıyor"
+
+#: common/aix.c:170
+#, c-format
+msgid "unable to restore registry"
+msgstr "kayıt geri yüklenemiyor"
+
+#: common/alloc.c:82
+msgid "internal error, tried to emalloc(0)"
+msgstr "dahili hata, emalloc(0) denendi"
+
+#: common/alloc.c:85 common/alloc.c:105 common/alloc.c:127 common/alloc.c:146
+#: common/alloc.c:168 common/alloc.c:192 common/alloc.c:256 common/alloc.c:270
+#: src/exec_common.c:111 src/parse_args.c:430 src/sudo.c:456 src/sudo.c:482
+#: src/sudo.c:489 src/sudo.c:500 src/sudo.c:759
+#, c-format
+msgid "unable to allocate memory"
+msgstr "bellek ayırma başarısız"
+
+#: common/alloc.c:99
+msgid "internal error, tried to emalloc2(0)"
+msgstr "dahili hata, emalloc2(0) denendi"
+
+#: common/alloc.c:101 common/alloc.c:123 common/alloc.c:163 common/alloc.c:187
+#, c-format
+msgid "internal error, %s overflow"
+msgstr "dahili hata, %s taşması"
+
+#: common/alloc.c:120
+msgid "internal error, tried to ecalloc(0)"
+msgstr "dahili hata, ecalloc() denendi"
+
+#: common/alloc.c:142
+msgid "internal error, tried to erealloc(0)"
+msgstr "dahili hata, erealloc() denendi"
+
+#: common/alloc.c:161
+msgid "internal error, tried to erealloc3(0)"
+msgstr "dahili hata, erealloc3() denendi"
+
+#: common/alloc.c:185
+msgid "internal error, tried to erecalloc(0)"
+msgstr "dahili hata, erecalloc() denendi"
+
+#: common/sudo_conf.c:305
+#, c-format
+msgid "unable to stat %s"
+msgstr "%s durumlanamıyor"
+
+#: common/sudo_conf.c:308
+#, c-format
+msgid "%s is not a regular file"
+msgstr "%s düzenli bir dosya değil"
+
+#: common/sudo_conf.c:311
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s, %u kullanıcı kimliği tarafından sahiplenmiş, %u olmalı"
+
+#: common/sudo_conf.c:315
+#, c-format
+msgid "%s is world writable"
+msgstr "%s genel yazılabilir"
+
+#: common/sudo_conf.c:318
+#, c-format
+msgid "%s is group writable"
+msgstr "%s grup yazılabilir"
+
+#: common/sudo_conf.c:327 src/selinux.c:196 src/selinux.c:209 src/sudo.c:331
+#, c-format
+msgid "unable to open %s"
+msgstr "%s açılamıyor"
+
+#: compat/strsignal.c:47
+msgid "Unknown signal"
+msgstr "Bilinmeyen sinyal"
+
+#: src/error.c:82 src/error.c:86
+msgid ": "
+msgstr ": "
+
+#: src/exec.c:113 src/exec_pty.c:674
+#, c-format
+msgid "policy plugin failed session initialization"
+msgstr "oturum başlatma için ilke eklentisi başarısız"
+
+#: src/exec.c:118 src/exec_pty.c:690 src/exec_pty.c:1035 src/tgetpass.c:221
+#, c-format
+msgid "unable to fork"
+msgstr "çatallanamıyor"
+
+#: src/exec.c:268
+#, c-format
+msgid "unable to create sockets"
+msgstr "soket oluşturulamıyor"
+
+#: src/exec.c:275 src/exec_pty.c:613 src/exec_pty.c:622 src/exec_pty.c:630
+#: src/exec_pty.c:960 src/exec_pty.c:1032 src/tgetpass.c:218
+#, c-format
+msgid "unable to create pipe"
+msgstr "iletişim tüneli oluşturulamıyor"
+
+#: src/exec.c:365 src/exec_pty.c:1102 src/exec_pty.c:1240
+#, c-format
+msgid "select failed"
+msgstr "seçim başarısız"
+
+#: src/exec.c:467
+#, c-format
+msgid "unable to restore tty label"
+msgstr "tty etiketi geri yüklenemiyor"
+
+#: src/exec_common.c:69
+#, c-format
+msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
+msgstr "PRIV_LIMIT'ten PRIV_PROC_EXEC kaldırılamıyor"
+
+#: src/exec_pty.c:183
+#, c-format
+msgid "unable to allocate pty"
+msgstr "pty ayırma başarısız"
+
+#: src/exec_pty.c:665
+#, c-format
+msgid "unable to set terminal to raw mode"
+msgstr "uçbirim ham kipine ayarlanamıyor"
+
+#: src/exec_pty.c:1013
+#, c-format
+msgid "unable to set controlling tty"
+msgstr "tty denetleme ayarlaması başarısız"
+
+#: src/exec_pty.c:1111
+#, c-format
+msgid "error reading from signal pipe"
+msgstr "sinyal tünelinden okuma hatası"
+
+#: src/exec_pty.c:1132
+#, c-format
+msgid "error reading from pipe"
+msgstr "tünelden okuma hatası"
+
+#: src/exec_pty.c:1148
+#, c-format
+msgid "error reading from socketpair"
+msgstr "sockerpair'den okuma hatası"
+
+#: src/exec_pty.c:1152
+#, c-format
+msgid "unexpected reply type on backchannel: %d"
+msgstr "backchannel'da beklenmeyen yanıt türü: %d"
+
+#: src/load_plugins.c:74
+#, c-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: src/load_plugins.c:80
+#, c-format
+msgid "%s%s: %s"
+msgstr "%s%s: %s"
+
+#: src/load_plugins.c:90
+#, c-format
+msgid "%s must be owned by uid %d"
+msgstr "%s, %d kullanıcı kimliği tarafından sahiplenmeli"
+
+#: src/load_plugins.c:94
+#, c-format
+msgid "%s must be only be writable by owner"
+msgstr "%s sadece sahibi tarafından yazılabilir olmalı"
+
+#: src/load_plugins.c:101
+#, c-format
+msgid "unable to dlopen %s: %s"
+msgstr "dlopen %s yapılamıyor: %s"
+
+#: src/load_plugins.c:106
+#, c-format
+msgid "%s: unable to find symbol %s"
+msgstr "%s: %s sembolü bulunamıyor"
+
+#: src/load_plugins.c:112
+#, c-format
+msgid "%s: unknown policy type %d"
+msgstr "%s bilinmeyen ilke türü %d"
+
+#: src/load_plugins.c:116
+#, c-format
+msgid "%s: incompatible policy major version %d, expected %d"
+msgstr "%s: uyumsuz temel ilke sürümü %d, beklenen %d"
+
+#: src/load_plugins.c:123
+#, c-format
+msgid "%s: only a single policy plugin may be loaded"
+msgstr "%s: sadece tek ilke eklentisi yüklenebilir"
+
+#: src/load_plugins.c:200
+#, c-format
+msgid "policy plugin %s does not include a check_policy method"
+msgstr "%s ilke eklentisi, bir check_policy yöntemi içermiyor"
+
+#: src/net_ifs.c:157 src/net_ifs.c:166 src/net_ifs.c:178 src/net_ifs.c:187
+#: src/net_ifs.c:298 src/net_ifs.c:322
+#, c-format
+msgid "load_interfaces: overflow detected"
+msgstr "load_interfaces: taşma tespit edildi"
+
+#: src/net_ifs.c:227
+#, c-format
+msgid "unable to open socket"
+msgstr "soket açılamıyor"
+
+#: src/parse_args.c:187
+#, c-format
+msgid "the argument to -C must be a number greater than or equal to 3"
+msgstr "-C argümanı 3 veya daha büyük bir sayı olmalıdır"
+
+#: src/parse_args.c:276
+#, c-format
+msgid "unknown user: %s"
+msgstr "bilinmeyen kullanıcı: %s"
+
+#: src/parse_args.c:335
+#, c-format
+msgid "you may not specify both the `-i' and `-s' options"
+msgstr "`-i' ve `-s' seçeneklerini aynı anda belirtemezsiniz"
+
+#: src/parse_args.c:339
+#, c-format
+msgid "you may not specify both the `-i' and `-E' options"
+msgstr "`-i' ve `-E' seçeneklerini aynı anda belirtemezsiniz"
+
+#: src/parse_args.c:349
+#, c-format
+msgid "the `-E' option is not valid in edit mode"
+msgstr "düzenleme kipinde `-E' seçeneği geçerli değil"
+
+#: src/parse_args.c:351
+#, c-format
+msgid "you may not specify environment variables in edit mode"
+msgstr "düzenleme kipinde ortam değişkenlerini belirtemezsiniz"
+
+#: src/parse_args.c:359
+#, c-format
+msgid "the `-U' option may only be used with the `-l' option"
+msgstr "`-U' seçeneği sadece `-l' seçeneği ile kullanılabilir"
+
+#: src/parse_args.c:363
+#, c-format
+msgid "the `-A' and `-S' options may not be used together"
+msgstr "`-A' ve `-S' seçenekleri birlikte kullanılamaz"
+
+#: src/parse_args.c:443
+#, c-format
+msgid "sudoedit is not supported on this platform"
+msgstr "sudoedit bu platformda desteklenmiyor"
+
+#: src/parse_args.c:516
+#, c-format
+msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
+msgstr "-e, -h, -i, -K, -l, -s, -v veya -V seçeneklerinden sadece biri belirtilebilir"
+
+#: src/parse_args.c:530
+#, c-format
+msgid ""
+"%s - edit files as another user\n"
+"\n"
+msgstr ""
+"%s - dosyaları farklı kullanıcı olarak düzenle\n"
+"\n"
+
+#: src/parse_args.c:532
+#, c-format
+msgid ""
+"%s - execute a command as another user\n"
+"\n"
+msgstr ""
+"%s - bir komutu farklı kullanıcı olarak çalıştır\n"
+"\n"
+
+#: src/parse_args.c:537
+#, c-format
+msgid ""
+"\n"
+"Options:\n"
+msgstr ""
+"\n"
+"Seçenekler:\n"
+
+#: src/parse_args.c:540
+msgid "use helper program for password prompting\n"
+msgstr "parola istemi için yardımcı programı kullan\n"
+
+#: src/parse_args.c:543
+msgid "use specified BSD authentication type\n"
+msgstr "belirtilen BSD yetkilendirme türü kullan\n"
+
+#: src/parse_args.c:545
+msgid "run command in the background\n"
+msgstr "komutu arkaplanda çalıştır\n"
+
+#: src/parse_args.c:547
+msgid "close all file descriptors >= fd\n"
+msgstr "tüm dosya tanımlayıcılarını kapat >= fd\n"
+
+#: src/parse_args.c:550
+msgid "run command with specified login class\n"
+msgstr "komutu belirtilen oturum sınıfında çalıştır\n"
+
+#: src/parse_args.c:553
+msgid "preserve user environment when executing command\n"
+msgstr "komutu çalıştırırken kullanıcı ortamını koru\n"
+
+#: src/parse_args.c:555
+msgid "edit files instead of running a command\n"
+msgstr "komut çalıştırmak yerine dosyaları düzenle\n"
+
+#: src/parse_args.c:557
+msgid "execute command as the specified group\n"
+msgstr "komutu belirtilen grup olarak çalıştır\n"
+
+#: src/parse_args.c:559
+msgid "set HOME variable to target user's home dir.\n"
+msgstr "hedef kullanıcının ev dizinine HOME değişkeni ata.\n"
+
+#: src/parse_args.c:561
+msgid "display help message and exit\n"
+msgstr "yardım iletisini göster ve çık\n"
+
+#: src/parse_args.c:563
+msgid "run a login shell as target user\n"
+msgstr "hedef kullanıcı olarak bir oturum kabuğu çalıştır\n"
+
+#: src/parse_args.c:565
+msgid "remove timestamp file completely\n"
+msgstr "dosyadan zaman damgasını tamamen kaldır\n"
+
+#: src/parse_args.c:567
+msgid "invalidate timestamp file\n"
+msgstr "zaman damgası dosyasını geçersiz kıl\n"
+
+#: src/parse_args.c:569
+msgid "list user's available commands\n"
+msgstr "kullanıcının kullanılabilir komutlarını listele\n"
+
+#: src/parse_args.c:571
+msgid "non-interactive mode, will not prompt user\n"
+msgstr "etkileşimsiz kip, kullanıcı istemi yapılmayacak\n"
+
+#: src/parse_args.c:573
+msgid "preserve group vector instead of setting to target's\n"
+msgstr "hedefe ayarlamak yerine grup vektörünü koru\n"
+
+#: src/parse_args.c:575
+msgid "use specified password prompt\n"
+msgstr "belirtilen parola istemini kullan\n"
+
+#: src/parse_args.c:578 src/parse_args.c:586
+msgid "create SELinux security context with specified role\n"
+msgstr "belirtilen görev ile SELinux güvenlik bağlamı oluştur\n"
+
+#: src/parse_args.c:581
+msgid "read password from standard input\n"
+msgstr "parolayı standart girdiden oku\n"
+
+#: src/parse_args.c:583
+msgid "run a shell as target user\n"
+msgstr "hedef kullanıcı olarak bir kabuk çalıştır\n"
+
+#: src/parse_args.c:589
+msgid "when listing, list specified user's privileges\n"
+msgstr "listelerken, belirtilen kullanıcının haklarını listele\n"
+
+#: src/parse_args.c:591
+msgid "run command (or edit file) as specified user\n"
+msgstr "belirtilen kullanıcı olarak komut çalıştır (veya dosya düzenle)\n"
+
+#: src/parse_args.c:593
+msgid "display version information and exit\n"
+msgstr "sürüm bilgisini görüntüle ve çık\n"
+
+#: src/parse_args.c:595
+msgid "update user's timestamp without running a command\n"
+msgstr "bir komut çalıştırmadan kullanıcının zaman damgasını güncelle\n"
+
+#: src/parse_args.c:597
+msgid "stop processing command line arguments\n"
+msgstr "komut satırı argümanlarını işlemeyi durdur\n"
+
+#: src/selinux.c:77
+#, c-format
+msgid "unable to open audit system"
+msgstr "denetim sistemi açılamıyor"
+
+#: src/selinux.c:85
+#, c-format
+msgid "unable to send audit message"
+msgstr "denetim iletisi gönderilemiyor"
+
+#: src/selinux.c:113
+#, c-format
+msgid "unable to fgetfilecon %s"
+msgstr "fgetfilecon %s yapılamıyor"
+
+#: src/selinux.c:118
+#, c-format
+msgid "%s changed labels"
+msgstr "%s değişmiş etiket"
+
+#: src/selinux.c:123
+#, c-format
+msgid "unable to restore context for %s"
+msgstr "%s için bağlam geri yüklenemiyor"
+
+#: src/selinux.c:163
+#, c-format
+msgid "unable to open %s, not relabeling tty"
+msgstr "%s açılamadı, tty yeniden etiketlenemiyor"
+
+#: src/selinux.c:172
+#, c-format
+msgid "unable to get current tty context, not relabeling tty"
+msgstr "geçerli tty bağlamı alınamadı, tty yeniden etiketlenemiyor"
+
+#: src/selinux.c:179
+#, c-format
+msgid "unable to get new tty context, not relabeling tty"
+msgstr "yeni tty bağlamı alınamadı, tty yeniden etiketlenemiyor"
+
+#: src/selinux.c:186
+#, c-format
+msgid "unable to set new tty context"
+msgstr "yeni tty bağlamı alınamıyor"
+
+#: src/selinux.c:252
+#, c-format
+msgid "you must specify a role for type %s"
+msgstr "%s türü için bir görev belirtmelisiniz"
+
+#: src/selinux.c:258
+#, c-format
+msgid "unable to get default type for role %s"
+msgstr "%s görevi için öntanımlı tür alınamıyor"
+
+#: src/selinux.c:276
+#, c-format
+msgid "failed to set new role %s"
+msgstr "%s yeni görevi atanamadı"
+
+#: src/selinux.c:280
+#, c-format
+msgid "failed to set new type %s"
+msgstr "yeni tür %s atanamadı"
+
+#: src/selinux.c:289
+#, c-format
+msgid "%s is not a valid context"
+msgstr "%s geçerli bir bağlam değil"
+
+#: src/selinux.c:324
+#, c-format
+msgid "failed to get old_context"
+msgstr "old_context alınamadı"
+
+#: src/selinux.c:330
+#, c-format
+msgid "unable to determine enforcing mode."
+msgstr "zorlama kipini belirleme başarısız."
+
+#: src/selinux.c:342
+#, c-format
+msgid "unable to setup tty context for %s"
+msgstr "%s için tty bağlamı ayarlanamıyor"
+
+#: src/selinux.c:373
+#, c-format
+msgid "unable to set exec context to %s"
+msgstr "%s için exec bağlamı ayarlanamıyor"
+
+#: src/selinux.c:380
+#, c-format
+msgid "unable to set key creation context to %s"
+msgstr "%s için anahtar oluşturma bağlamı ayarlanamıyor"
+
+#: src/sesh.c:70
+#, c-format
+msgid "requires at least one argument"
+msgstr "en az bir argüman gerektirir"
+
+#: src/sesh.c:91
+#, c-format
+msgid "unable to execute %s"
+msgstr "%s çalıştırılamıyor"
+
+#: src/sudo.c:211
+#, c-format
+msgid "Sudo version %s\n"
+msgstr "Sudo sürüm %s\n"
+
+#: src/sudo.c:213
+#, c-format
+msgid "Configure options: %s\n"
+msgstr "Yapılandırma seçenekleri: %s\n"
+
+#: src/sudo.c:218
+#, c-format
+msgid "fatal error, unable to load plugins"
+msgstr "ölümcül hata, eklentiler yüklenemiyor"
+
+#: src/sudo.c:226
+#, c-format
+msgid "unable to initialize policy plugin"
+msgstr "ilke eklentisi başlatılamıyor"
+
+#: src/sudo.c:281
+#, c-format
+msgid "error initializing I/O plugin %s"
+msgstr "G/Ç eklentisi %s başlatılırken hata"
+
+#: src/sudo.c:306
+#, c-format
+msgid "unexpected sudo mode 0x%x"
+msgstr "beklenmeyen 0x%x sudo kipi"
+
+#: src/sudo.c:400
+#, c-format
+msgid "unable to get group vector"
+msgstr "grup vektörü alınamıyor"
+
+#: src/sudo.c:452
+#, c-format
+msgid "unknown uid %u: who are you?"
+msgstr "bilinmeyen kullanıcı kimliği %u: kimsiniz?"
+
+#: src/sudo.c:782
+#, c-format
+msgid "%s must be owned by uid %d and have the setuid bit set"
+msgstr "%s, %d kullanıcı kimliği tarafından sahiplenmeli ve setuid biti ayarlanmış olmalı"
+
+#: src/sudo.c:785
+#, c-format
+msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
+msgstr "etkin kullanıcı kimliği %d değil, %s 'nosuid' seçeneği ayarlanmış bir dosya sisteminde veya yetkisiz haklara sahip bir NFS dosya sisteminde mi?"
+
+#: src/sudo.c:791
+#, c-format
+msgid "effective uid is not %d, is sudo installed setuid root?"
+msgstr "etkin kullanıcı kimliği %d değil, sudo setuid root ile mi yüklendi?"
+
+#: src/sudo.c:860
+#, c-format
+msgid "resource control limit has been reached"
+msgstr "kaynak denetim sınırına ulaşıldı"
+
+#: src/sudo.c:863
+#, c-format
+msgid "user \"%s\" is not a member of project \"%s\""
+msgstr "\"%s\", bir \"%s\" projesi üyesi değil"
+
+#: src/sudo.c:867
+#, c-format
+msgid "the invoking task is final"
+msgstr "çağırılan görev son"
+
+#: src/sudo.c:870
+#, c-format
+msgid "could not join project \"%s\""
+msgstr "\"%s\" projesine katılamadı"
+
+#: src/sudo.c:875
+#, c-format
+msgid "no resource pool accepting default bindings exists for project \"%s\""
+msgstr "\"%s\" projesi için hiçbir kaynak havuzu varsayılan atamaları kabul etmiyor"
+
+#: src/sudo.c:879
+#, c-format
+msgid "specified resource pool does not exist for project \"%s\""
+msgstr "belirtilen kaynak havuzu \"%s\" projesi için mevcut değil"
+
+#: src/sudo.c:883
+#, c-format
+msgid "could not bind to default resource pool for project \"%s\""
+msgstr "\"%s\" projesi için öntanımlı kaynak havuzu atanamadı"
+
+#: src/sudo.c:889
+#, c-format
+msgid "setproject failed for project \"%s\""
+msgstr "\"%s\" projesi için setproject başarısız"
+
+#: src/sudo.c:891
+#, c-format
+msgid "warning, resource control assignment failed for project \"%s\""
+msgstr "uyarı, \"%s\" projesi için kaynak denetim ataması başarısız"
+
+#: src/sudo.c:959
+#, c-format
+msgid "unknown login class %s"
+msgstr "bilinmeyen \"%s\" oturum sınıfı"
+
+#: src/sudo.c:973 src/sudo.c:976
+#, c-format
+msgid "unable to set user context"
+msgstr "kullanıcı bağlamı ayarlama başarısız"
+
+#: src/sudo.c:988
+#, c-format
+msgid "unable to set supplementary group IDs"
+msgstr "ek grup kimlikleri ayarlanamıyor"
+
+#: src/sudo.c:995
+#, c-format
+msgid "unable to set effective gid to runas gid %u"
+msgstr "etkin grup kimliği, runas gid %u olarak ayarlanamıyor"
+
+#: src/sudo.c:1001
+#, c-format
+msgid "unable to set gid to runas gid %u"
+msgstr "grup kimliği, runas gid %u olarak ayarlanamıyor"
+
+#: src/sudo.c:1008
+#, c-format
+msgid "unable to set process priority"
+msgstr "süreç önceliği ayarlanamıyor"
+
+#: src/sudo.c:1016
+#, c-format
+msgid "unable to change root to %s"
+msgstr "kök %s olarak değiştirilemiyor"
+
+#: src/sudo.c:1023 src/sudo.c:1029 src/sudo.c:1035
+#, c-format
+msgid "unable to change to runas uid (%u, %u)"
+msgstr "runas uid (%u, %u) olarak değiştirilemiyor"
+
+#: src/sudo.c:1049
+#, c-format
+msgid "unable to change directory to %s"
+msgstr "%s dizinine değiştirilemiyor"
+
+#: src/sudo.c:1133
+#, c-format
+msgid "unexpected child termination condition: %d"
+msgstr "beklenmeyen alt sonlandırma şartı: %d"
+
+#: src/sudo.c:1194
+#, c-format
+msgid "policy plugin %s does not support listing privileges"
+msgstr "%s ilke eklentisi listeleme yetkilerini desteklemiyor"
+
+#: src/sudo.c:1206
+#, c-format
+msgid "policy plugin %s does not support the -v option"
+msgstr "%s ilke eklentisi -v seçeneğini desteklemiyor"
+
+#: src/sudo.c:1218
+#, c-format
+msgid "policy plugin %s does not support the -k/-K options"
+msgstr "%s ilke eklentisi -k/-K seçeneklerini desteklemiyor"
+
+#: src/sudo_edit.c:111
+#, c-format
+msgid "unable to change uid to root (%u)"
+msgstr "kullanıcı kimliği yetkili (%u) olarak değiştirilemiyor"
+
+#: src/sudo_edit.c:143
+#, c-format
+msgid "plugin error: missing file list for sudoedit"
+msgstr "eklenti hatası: sudoedit için eksik dosya listesi"
+
+#: src/sudo_edit.c:171 src/sudo_edit.c:271
+#, c-format
+msgid "%s: not a regular file"
+msgstr "%s: düzenli bir dosya değil"
+
+#: src/sudo_edit.c:205 src/sudo_edit.c:307
+#, c-format
+msgid "%s: short write"
+msgstr "%s: kısa yazım"
+
+#: src/sudo_edit.c:272
+#, c-format
+msgid "%s left unmodified"
+msgstr "%s düzenlenmemiş olarak bırakıldı"
+
+#: src/sudo_edit.c:285
+#, c-format
+msgid "%s unchanged"
+msgstr "%s değiştirilmemiş"
+
+#: src/sudo_edit.c:297 src/sudo_edit.c:318
+#, c-format
+msgid "unable to write to %s"
+msgstr "%s dosyasına yazılamıyor"
+
+#: src/sudo_edit.c:298 src/sudo_edit.c:316 src/sudo_edit.c:319
+#, c-format
+msgid "contents of edit session left in %s"
+msgstr "düzenleme oturumu içerikleri %s içinde bırakıldı"
+
+#: src/sudo_edit.c:315
+#, c-format
+msgid "unable to read temporary file"
+msgstr "geçici dosya okunamıyor"
+
+#: src/tgetpass.c:90
+#, c-format
+msgid "no tty present and no askpass program specified"
+msgstr "tty bulunmuyor ve askpass programı belirtilmemiş"
+
+#: src/tgetpass.c:99
+#, c-format
+msgid "no askpass program specified, try setting SUDO_ASKPASS"
+msgstr "askpass programı belirtilmemiş, SUDO_ASKPASS ayarlamayı deneyin"
+
+#: src/tgetpass.c:231
+#, c-format
+msgid "unable to set gid to %u"
+msgstr "grup kimliği %u olarak ayarlanamıyor"
+
+#: src/tgetpass.c:235
+#, c-format
+msgid "unable to set uid to %u"
+msgstr "kullanıcı kimliği %u olarak ayarlanamıyor"
+
+#: src/tgetpass.c:240
+#, c-format
+msgid "unable to run %s"
+msgstr "%s çalıştırılamıyor"
+
+#: src/utmp.c:278
+#, c-format
+msgid "unable to save stdin"
+msgstr "stdin kaydedilemiyor"
+
+#: src/utmp.c:280
+#, c-format
+msgid "unable to dup2 stdin"
+msgstr "dup2 stdin yapılamıyor"
+
+#: src/utmp.c:283
+#, c-format
+msgid "unable to restore stdin"
+msgstr "stdin geri yüklenemiyor"
