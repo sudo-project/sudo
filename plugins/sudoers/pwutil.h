@@ -15,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _PWUTIL_H
-#define _PWUTIL_H
+#ifndef _SUDOERS_PWUTIL_H
+#define _SUDOERS_PWUTIL_H
 
 #define ptr_to_item(p) ((struct cache_item *)((char *)p - offsetof(struct cache_item_##p, p)))
 
@@ -63,4 +63,4 @@ struct cache_item *sudo_make_gritem(gid_t gid, const char *group);
 struct cache_item *sudo_make_grlist_item(struct passwd *pw);
 struct cache_item *sudo_make_pwitem(uid_t uid, const char *user);
 
-#endif /* _PWUTIL_H */
+#endif /* _SUDOERS_PWUTIL_H */

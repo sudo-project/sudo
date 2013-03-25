@@ -15,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_PARSE_H
-#define _SUDO_PARSE_H
+#ifndef _SUDOERS_PARSE_H
+#define _SUDOERS_PARSE_H
 
 #undef UNSPEC
 #define UNSPEC	-1
@@ -201,4 +201,4 @@ void init_lexer(void);
 void init_parser(const char *, bool);
 int alias_compare(const void *, const void *);
 
-#endif /* _SUDO_PARSE_H */
+#endif /* _SUDOERS_PARSE_H */

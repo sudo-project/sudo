@@ -19,8 +19,8 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#ifndef _SUDO_INTERFACES_H
-#define _SUDO_INTERFACES_H
+#ifndef _SUDOERS_INTERFACES_H
+#define _SUDOERS_INTERFACES_H
 
 /*
  * Union to hold either strucr in_addr or in6_add
@@ -50,4 +50,4 @@ void dump_interfaces(const char *);
 void set_interfaces(const char *);
 struct interface *get_interfaces(void);
 
-#endif /* _SUDO_INTERFACES_H */
+#endif /* _SUDOERS_INTERFACES_H */

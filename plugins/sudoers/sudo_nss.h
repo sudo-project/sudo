@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_NSS_H
-#define _SUDO_NSS_H
+#ifndef _SUDOERS_NSS_H
+#define _SUDOERS_NSS_H
 
 struct lbuf;
 struct passwd;
@@ -41,4 +41,4 @@ TQ_DECLARE(sudo_nss)
 
 struct sudo_nss_list *sudo_read_nss(void);
 
-#endif /* _SUDO_NSS_H */
+#endif /* _SUDOERS_NSS_H */

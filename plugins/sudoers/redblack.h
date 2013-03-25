@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_REDBLACK_H
-#define _SUDO_REDBLACK_H
+#ifndef _SUDOERS_REDBLACK_H
+#define _SUDOERS_REDBLACK_H
 
 enum rbcolor {
     red,
@@ -54,4 +54,4 @@ struct rbnode *rbinsert(struct rbtree *, void *);
 struct rbtree *rbcreate(int (*)(const void *, const void *));
 void rbdestroy(struct rbtree *, void (*)(void *));
 
-#endif /* _SUDO_REDBLACK_H */
+#endif /* _SUDOERS_REDBLACK_H */

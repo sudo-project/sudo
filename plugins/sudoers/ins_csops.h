@@ -15,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_INS_CSOPS_H
-#define _SUDO_INS_CSOPS_H
+#ifndef _SUDOERS_INS_CSOPS_H
+#define _SUDOERS_INS_CSOPS_H
 
     /*
      * CSOps insults (may be site dependent).
@@ -36,4 +36,4 @@
     "Have you considered trying to match wits with a rutabaga?",
     "You speak an infinite deal of nothing",
 
-#endif /* _SUDO_INS_CSOPS_H */
+#endif /* _SUDOERS_INS_CSOPS_H */

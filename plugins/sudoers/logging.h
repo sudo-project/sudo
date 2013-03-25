@@ -15,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _LOGGING_H
-#define _LOGGING_H
+#ifndef _SUDOERS_LOGGING_H
+#define _SUDOERS_LOGGING_H
 
 #include <syslog.h>
 #ifdef __STDC__
@@ -71,4 +71,4 @@ void log_fatal(int flags, const char *fmt, ...) __printflike(2, 3) __attribute__
 void sudoers_initlocale(const char *ulocale, const char *slocale);
 void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
 
-#endif /* _LOGGING_H */
+#endif /* _SUDOERS_LOGGING_H */

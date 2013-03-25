@@ -15,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_INSULTS_H
-#define _SUDO_INSULTS_H
+#ifndef _SUDOERS_INSULTS_H
+#define _SUDOERS_INSULTS_H
 
 #if defined(HAL_INSULTS) || defined(GOONS_INSULTS) || defined(CLASSIC_INSULTS) || defined(CSOPS_INSULTS)
 
@@ -58,4 +58,4 @@ char *insults[] = {
 
 #endif /* HAL_INSULTS || GOONS_INSULTS || CLASSIC_INSULTS || CSOPS_INSULTS */
 
-#endif /* _SUDO_INSULTS_H */
+#endif /* _SUDOERS_INSULTS_H */

@@ -19,8 +19,8 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#ifndef _SUDO_SUDOERS_H
-#define _SUDO_SUDOERS_H
+#ifndef _SUDOERS_SUDOERS_H
+#define _SUDOERS_SUDOERS_H
 
 #include <limits.h>
 #ifdef HAVE_STDBOOL_H
@@ -383,4 +383,4 @@ extern sudo_conv_t sudo_conv;
 extern sudo_printf_t sudo_printf;
 #endif
 
-#endif /* _SUDO_SUDOERS_H */
+#endif /* _SUDOERS_SUDOERS_H */
