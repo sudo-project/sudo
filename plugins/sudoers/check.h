@@ -19,8 +19,8 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#ifndef _SUDOERS_TIMESTAMP_H
-#define _SUDOERS_TIMESTAMP_H
+#ifndef _SUDOERS_CHECK_H
+#define _SUDOERS_CHECK_H
 
 /* Status codes for timestamp_status() */
 #define TS_CURRENT		0
@@ -47,4 +47,4 @@ bool  update_timestamp(void);
 int   build_timestamp(void);
 int   timestamp_status(void);
 
-#endif /* _SUDOERS_TIMESTAMP_H */
+#endif /* _SUDOERS_CHECK_H */
