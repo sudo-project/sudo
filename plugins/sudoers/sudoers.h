@@ -235,6 +235,8 @@ int find_path(char *, char **, struct stat *, char *, int);
 /* check.c */
 int check_user(int validate, int mode);
 bool user_is_exempt(void);
+
+/* prompt.c */
 char *expand_prompt(const char *old_prompt, const char *user, const char *host);
 
 /* timestamp.c */
@@ -380,7 +382,6 @@ extern int long_list;
 extern int sudo_mode;
 extern uid_t timestamp_uid;
 extern sudo_conv_t sudo_conv;
-extern sudo_printf_t sudo_printf;
 #endif
 
 #endif /* _SUDOERS_SUDOERS_H */
