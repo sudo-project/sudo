@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996,1998-2005, 2007-2012
+ * Copyright (c) 1993-1996,1998-2005, 2007-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -46,7 +46,6 @@
 #include <grp.h>
 
 #include "sudoers.h"
-#include "timestamp.h"
 #include "check.h"
 
 static bool  display_lecture(int);
