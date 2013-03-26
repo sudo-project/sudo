@@ -311,6 +311,8 @@ void sudo_grlist_addref(struct group_list *);
 void sudo_grlist_delref(struct group_list *);
 void sudo_pw_addref(struct passwd *);
 void sudo_pw_delref(struct passwd *);
+void sudo_set_grlist(struct passwd *pw, char * const *groups,
+    char * const *gids);
 void sudo_setgrent(void);
 void sudo_setpwent(void);
 void sudo_setspent(void);

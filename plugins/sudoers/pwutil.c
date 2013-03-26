@@ -550,8 +550,8 @@ sudo_get_grlist(struct passwd *pw)
     /*
      * Cache group db entry if it exists or a negative response if not.
      */
-    item = sudo_make_grlist_item(pw);
-    if (item  == NULL) {
+    item = sudo_make_grlist_item(pw, NULL, NULL);
+    if (item == NULL) {
 	/* Should not happen. */
 	len = strlen(pw->pw_name) + 1;
 	item = ecalloc(1, sizeof(*item) + len);
@@ -566,6 +566,27 @@ sudo_get_grlist(struct passwd *pw)
 done:
     item->refcnt++;
     debug_return_ptr(item->d.grlist);
+}
+
+void
+sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids)
+{
+    struct cache_item key, *item;
+    struct rbnode *node;
+    debug_decl(sudo_set_grlist, SUDO_DEBUG_NSS)
+
+    /*
+     * Cache group db entry if it doesn't already exist
+     */
+    key.k.name = pw->pw_name;
+    if ((node = rbfind(grlist_cache, &key)) == NULL) {
+        if ((item = sudo_make_grlist_item(pw, groups, gids)) == NULL)
+            errorx(1, _("unable to parse groups for %s"), pw->pw_name);
+        if (rbinsert(grlist_cache, item) != NULL)
+            errorx(1, _("unable to cache group list for %s, already exists"),
+                pw->pw_name);
+    }
+    debug_return;
 }
 
 bool
