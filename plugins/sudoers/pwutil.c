@@ -88,23 +88,6 @@ cmp_pwnam(const void *v1, const void *v2)
     return strcmp(ci1->k.name, ci2->k.name);
 }
 
-#define FIELD_SIZE(src, name, size)			\
-do {							\
-	if (src->name) {				\
-		size = strlen(src->name) + 1;		\
-		total += size;				\
-	}                                               \
-} while (0)
-
-#define FIELD_COPY(src, dst, name, size)		\
-do {							\
-	if (src->name) {				\
-		memcpy(cp, src->name, size);		\
-		dst->name = cp;				\
-		cp += size;				\
-	}						\
-} while (0)
-
 void
 sudo_pw_addref(struct passwd *pw)
 {
@@ -224,7 +207,7 @@ sudo_fakepwnamid(const char *user, uid_t uid, gid_t gid)
     struct rbnode *node;
     size_t len, namelen;
     int i;
-    debug_decl(sudo_fakepwnam, SUDO_DEBUG_NSS)
+    debug_decl(sudo_fakepwnamid, SUDO_DEBUG_NSS)
 
     namelen = strlen(user);
     len = sizeof(*pwitem) + namelen + 1 /* pw_name */ +
