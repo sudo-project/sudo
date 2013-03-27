@@ -789,7 +789,8 @@ netgr_matches(char *netgr, char *lhost, char *shost, char *user)
     /* get the domain name (if any) */
     if (!initialized) {
 	domain = (char *) emalloc(HOST_NAME_MAX + 1);
-	if (getdomainname(domain, HOST_NAME_MAX + 1) == -1 || *domain == '\0') {
+	if (getdomainname(domain, HOST_NAME_MAX + 1) == -1 || *domain == '\0' ||
+	    strcmp(domain, "(none)") == 0) {
 	    efree(domain);
 	    domain = NULL;
 	}
