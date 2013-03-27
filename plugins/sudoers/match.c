@@ -545,7 +545,7 @@ command_matches_glob(char *sudoers_cmnd, char *sudoers_args)
 #endif /* NAME_MATCH */
 
 #ifdef NAME_MATCH
-static int
+static bool
 command_matches_normal(char *sudoers_cmnd, char *sudoers_args)
 {
     size_t dlen;
@@ -612,7 +612,7 @@ command_matches_normal(char *sudoers_cmnd, char *sudoers_args)
  * Return true if user_cmnd begins with sudoers_dir, else false.
  * Note that sudoers_dir include the trailing '/'
  */
-static int
+static bool
 command_matches_dir(char *sudoers_dir, size_t dlen)
 {
     return strncmp(user_cmnd, sudoers_dir, dlen) == 0;
