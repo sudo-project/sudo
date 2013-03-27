@@ -67,6 +67,7 @@ struct sudoers_exec_args {
 
 static int sudo_version;
 static const char *interfaces_string;
+sudo_conv_t sudo_conv;
 
 extern __dso_public struct policy_plugin sudoers_policy;
 
