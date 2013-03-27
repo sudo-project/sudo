@@ -561,7 +561,7 @@ sudo_get_grlist(struct passwd *pw)
 	/* item->d.grlist = NULL; */
     }
     if (rbinsert(grlist_cache, item) != NULL)
-	errorx(1, "unable to cache group list for %s, already exists",
+	errorx(1, _("unable to cache group list for %s, already exists"),
 	    pw->pw_name);
 done:
     item->refcnt++;
@@ -580,11 +580,11 @@ sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids)
      */
     key.k.name = pw->pw_name;
     if ((node = rbfind(grlist_cache, &key)) == NULL) {
-        if ((item = sudo_make_grlist_item(pw, groups, gids)) == NULL)
-            errorx(1, _("unable to parse groups for %s"), pw->pw_name);
-        if (rbinsert(grlist_cache, item) != NULL)
-            errorx(1, _("unable to cache group list for %s, already exists"),
-                pw->pw_name);
+	if ((item = sudo_make_grlist_item(pw, groups, gids)) == NULL)
+	    errorx(1, _("unable to parse groups for %s"), pw->pw_name);
+	if (rbinsert(grlist_cache, item) != NULL)
+	    errorx(1, _("unable to cache group list for %s, already exists"),
+		pw->pw_name);
     }
     debug_return;
 }
