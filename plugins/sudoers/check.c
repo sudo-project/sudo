@@ -48,7 +48,7 @@
 #include "sudoers.h"
 #include "check.h"
 
-static bool  display_lecture(int);
+static bool display_lecture(int);
 static struct passwd *get_authpw(void);
 
 /*
@@ -135,13 +135,6 @@ done:
 
     debug_return_bool(rval);
 }
-
-#define DEFAULT_LECTURE "\n" \
-    "We trust you have received the usual lecture from the local System\n" \
-    "Administrator. It usually boils down to these three things:\n\n" \
-    "    #1) Respect the privacy of others.\n" \
-    "    #2) Think before you type.\n" \
-    "    #3) With great power comes great responsibility.\n\n"
 
 /*
  * Display sudo lecture (standard or custom).
