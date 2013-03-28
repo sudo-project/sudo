@@ -75,7 +75,6 @@
 #endif
 
 #include "sudoers.h"
-#include "sudoers_version.h"
 #include "auth/sudo_auth.h"
 #include "secure_path.h"
 
