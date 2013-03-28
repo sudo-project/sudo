@@ -435,11 +435,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      */
     if (def_umask != 0777) {
 	cmnd_umask = def_umask;
-	if (!def_umask_override) {
-	    mode_t omask = umask(cmnd_umask);
-	    cmnd_umask |= omask;
-	    umask(omask);
-	}
+	if (!def_umask_override)
+	    cmnd_umask |= user_umask;
     }
 
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {

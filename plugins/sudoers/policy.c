@@ -17,6 +17,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -317,6 +318,10 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	user_gids = gids;
 	user_ngids = ngids;
     }
+
+    /* Stash initial umask for later use. */
+    user_umask = umask(SUDO_UMASK);
+    umask(user_umask);
 
     /* Setup debugging if indicated. */
     if (debug_flags != NULL) {
