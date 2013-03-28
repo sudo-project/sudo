@@ -48,12 +48,10 @@
 #include "parse.h"
 #include "interfaces.h"
 
-static int check_addr_printf(int msg_type, const char *fmt, ...);
 __dso_public int main(int argc, char *argv[]);
 
 /* for match_addr.c */
 struct interface *interfaces;
-sudo_printf_t sudo_printf = check_addr_printf;
 
 static int
 check_addr(char *input)
@@ -149,29 +147,4 @@ main(int argc, char *argv[])
 	ntests, errors, (ntests - errors) * 100 / ntests);
 
     exit(errors);
-}
-
-static int
-check_addr_printf(int msg_type, const char *fmt, ...)
-{
-    va_list ap;
-    FILE *fp;
-            
-    switch (msg_type) {
-    case SUDO_CONV_INFO_MSG:
-        fp = stdout;
-        break;
-    case SUDO_CONV_ERROR_MSG:
-        fp = stderr;
-        break;
-    default:
-        errno = EINVAL;
-        return -1;
-    }
-   
-    va_start(ap, fmt);
-    vfprintf(fp, fmt, ap);
-    va_end(ap);
-   
-    return 0;
 }
