@@ -50,9 +50,6 @@
 
 __dso_public int main(int argc, char *argv[]);
 
-/* for match_addr.c */
-struct interface *interfaces;
-
 static int
 check_addr(char *input)
 {
