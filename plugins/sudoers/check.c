@@ -93,12 +93,12 @@ check_user(int validated, int mode)
     if (ISSET(mode, MODE_IGNORE_TICKET))
 	SET(validated, FLAG_CHECK_USER);
 
-    if (build_timestamp() == -1) {
+    if (build_timestamp(auth_pw) == -1) {
 	rval = -1;
 	goto done;
     }
 
-    status = timestamp_status();
+    status = timestamp_status(auth_pw);
 
     if (status != TS_CURRENT || ISSET(validated, FLAG_CHECK_USER)) {
 	char *prompt;
@@ -127,7 +127,7 @@ check_user(int validated, int mode)
     /* Only update timestamp if user was validated. */
     if (rval == true && ISSET(validated, VALIDATE_OK) &&
 	!ISSET(mode, MODE_IGNORE_TICKET) && status != TS_ERROR)
-	update_timestamp();
+	update_timestamp(auth_pw);
 
 done:
     sudo_auth_cleanup(auth_pw);
@@ -152,7 +152,7 @@ display_lecture(int status)
 
     if (def_lecture == never ||
 	(def_lecture == once && already_lectured(status)))
-	debug_return_int(false);
+	debug_return_bool(false);
 
     memset(&msg, 0, sizeof(msg));
     memset(&repl, 0, sizeof(repl));
@@ -175,7 +175,7 @@ display_lecture(int status)
 	    "    #3) With great power comes great responsibility.\n\n");
 	sudo_conv(1, &msg, &repl);
     }
-    debug_return_int(true);
+    debug_return_bool(true);
 }
 
 /*

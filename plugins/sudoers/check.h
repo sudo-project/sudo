@@ -43,8 +43,8 @@ struct sudo_tty_info {
     pid_t sid;			/* ID of session with controlling tty */
 };
 
-bool  update_timestamp(void);
-int   build_timestamp(void);
-int   timestamp_status(void);
+bool  update_timestamp(struct passwd *pw);
+int   build_timestamp(struct passwd *pw);
+int   timestamp_status(struct passwd *pw);
 
 #endif /* _SUDOERS_CHECK_H */

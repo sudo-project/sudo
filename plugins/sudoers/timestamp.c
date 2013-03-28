@@ -73,7 +73,7 @@ static char timestampfile[PATH_MAX];
  * Fills in timestampdir as well as timestampfile if using tty tickets.
  */
 int
-build_timestamp(void)
+build_timestamp(struct passwd *pw)
 {
     char *dirparent;
     struct stat sb;
@@ -135,7 +135,7 @@ bad:
  * Update the time on the timestamp file/dir or create it if necessary.
  */
 bool
-update_timestamp(void)
+update_timestamp(struct passwd *pw)
 {
     debug_decl(update_timestamp, SUDO_DEBUG_AUTH)
 
@@ -374,7 +374,7 @@ done:
 }
 
 int
-timestamp_status(void)
+timestamp_status(struct passwd *pw)
 {
     return timestamp_status_internal(false);
 }
@@ -390,7 +390,7 @@ remove_timestamp(bool remove)
     int status;
     debug_decl(remove_timestamp, SUDO_DEBUG_AUTH)
 
-    if (build_timestamp() == -1)
+    if (build_timestamp(NULL) == -1)
 	debug_return;
 
     status = timestamp_status_internal(true);
