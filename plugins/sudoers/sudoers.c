@@ -403,7 +403,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT))) {
 	if ((def_log_input || def_log_output) && def_iolog_file && def_iolog_dir) {
-	    iolog_path = expand_iolog_path("iolog_path=", def_iolog_dir,
+	    const char prefix[] = "iolog_path=";
+	    iolog_path = expand_iolog_path(prefix, def_iolog_dir,
 		def_iolog_file, &sudo_user.iolog_file);
 	    sudo_user.iolog_file++;
 	}
