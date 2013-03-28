@@ -32,8 +32,17 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 
-#include "sudoers.h"
+#include "missing.h"
+#include "error.h"
+#include "alloc.h"
+#include "logging.h"
+#include "gettext.h"
 
 static int current_locale = SUDOERS_LOCALE_USER;
 static char *user_locale;
