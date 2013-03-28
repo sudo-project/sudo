@@ -189,7 +189,10 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 	switch (pass) {
 	case 0:
 	    src = dir;
-	    escapes = io_path_escapes + 1; /* skip "${seq}" */
+	    escapes = io_path_escapes;
+#ifndef SUDOERS_NO_SEQ
+	    escapes++;	/* skip "${seq}" */
+#endif
 	    break;
 	case 1:
 	    /* Trim trailing slashes from dir component. */
