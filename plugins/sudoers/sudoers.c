@@ -324,14 +324,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     /* Bail if a tty is required and we don't have one.  */
-    if (def_requiretty) {
-	int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY);
-	if (fd == -1) {
-	    audit_failure(NewArgv, N_("no tty"));
-	    warningx(_("sorry, you must have a tty to run sudo"));
-	    goto bad;
-	} else
-	    (void) close(fd);
+    if (def_requiretty && user_ttypath == NULL) {
+	audit_failure(NewArgv, N_("no tty"));
+	warningx(_("sorry, you must have a tty to run sudo"));
+	goto bad;
     }
 
     /*
