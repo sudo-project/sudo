@@ -765,13 +765,15 @@ should_mail(int status)
 static char *
 new_logline(const char *message, int serrno)
 {
-    size_t len = 0;
-    char *errstr = NULL;
-    char *evstr = NULL;
-    char *line, sessid[7];
+    char *line, *errstr = NULL, *evstr = NULL;
+#ifndef SUDOERS_NO_SEQ
+    char sessid[7];
+#endif
     const char *tsid = NULL;
+    size_t len = 0;
     debug_decl(new_logline, SUDO_DEBUG_LOGGING)
 
+#ifndef SUDOERS_NO_SEQ
     /* A TSID may be a sudoers-style session ID or a free-form string. */
     if (sudo_user.iolog_file != NULL) {
 	if (IS_SESSID(sudo_user.iolog_file)) {
@@ -787,6 +789,7 @@ new_logline(const char *message, int serrno)
 	    tsid = sudo_user.iolog_file;
 	}
     }
+#endif
 
     /*
      * Compute line length
