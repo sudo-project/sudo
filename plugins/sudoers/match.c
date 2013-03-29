@@ -45,10 +45,16 @@
 #endif /* HAVE_UNISTD_H */
 #ifdef HAVE_FNMATCH
 # include <fnmatch.h>
+#else
+# include "compat/fnmatch.h"
 #endif /* HAVE_FNMATCH */
-#ifdef HAVE_GLOB
-# include <glob.h>
-#endif /* HAVE_GLOB */
+#ifndef SUDOERS_NAME_MATCH
+# ifdef HAVE_GLOB
+#  include <glob.h>
+# else
+#  include "compat/glob.h"
+# endif /* HAVE_GLOB */
+#endif /* SUDOERS_NAME_MATCH */
 #ifdef HAVE_NETGROUP_H
 # include <netgroup.h>
 #else
@@ -78,17 +84,10 @@
 #include "parse.h"
 #include <gram.h>
 
-#ifndef HAVE_FNMATCH
-# include "compat/fnmatch.h"
-#endif /* HAVE_FNMATCH */
-#ifndef HAVE_GLOB
-# include "compat/glob.h"
-#endif /* HAVE_GLOB */
-
 static struct member_list empty;
 
 static bool command_matches_dir(char *, size_t);
-#ifndef NAME_MATCH
+#ifndef SUDOERS_NAME_MATCH
 static bool command_matches_glob(char *, char *);
 #endif
 static bool command_matches_fnmatch(char *, char *);
@@ -437,7 +436,7 @@ command_matches(char *sudoers_cmnd, char *sudoers_args)
 	 * If sudoers_cmnd has meta characters in it, we need to
 	 * use glob(3) and/or fnmatch(3) to do the matching.
 	 */
-#ifdef NAME_MATCH
+#ifdef SUDOERS_NAME_MATCH
 	debug_return_bool(command_matches_fnmatch(sudoers_cmnd, sudoers_args));
 #else
 	if (def_fast_glob)
@@ -471,7 +470,7 @@ command_matches_fnmatch(char *sudoers_cmnd, char *sudoers_args)
     debug_return_bool(false);
 }
 
-#ifndef NAME_MATCH
+#ifndef SUDOERS_NAME_MATCH
 static bool
 command_matches_glob(char *sudoers_cmnd, char *sudoers_args)
 {
@@ -542,9 +541,9 @@ command_matches_glob(char *sudoers_cmnd, char *sudoers_args)
     }
     debug_return_bool(false);
 }
-#endif /* NAME_MATCH */
+#endif /* SUDOERS_NAME_MATCH */
 
-#ifdef NAME_MATCH
+#ifdef SUDOERS_NAME_MATCH
 static bool
 command_matches_normal(char *sudoers_cmnd, char *sudoers_args)
 {
@@ -565,7 +564,7 @@ command_matches_normal(char *sudoers_cmnd, char *sudoers_args)
     }
     return false;
 }
-#else /* !NAME_MATCH */
+#else /* !SUDOERS_NAME_MATCH */
 static bool
 command_matches_normal(char *sudoers_cmnd, char *sudoers_args)
 {
@@ -605,9 +604,9 @@ command_matches_normal(char *sudoers_cmnd, char *sudoers_args)
     }
     debug_return_bool(false);
 }
-#endif /* NAME_MATCH */
+#endif /* SUDOERS_NAME_MATCH */
 
-#ifdef NAME_MATCH
+#ifdef SUDOERS_NAME_MATCH
 /*
  * Return true if user_cmnd begins with sudoers_dir, else false.
  * Note that sudoers_dir include the trailing '/'
@@ -617,7 +616,7 @@ command_matches_dir(char *sudoers_dir, size_t dlen)
 {
     return strncmp(user_cmnd, sudoers_dir, dlen) == 0;
 }
-#else /* !NAME_MATCH */
+#else /* !SUDOERS_NAME_MATCH */
 /*
  * Return true if user_cmnd names one of the inodes in dir, else false.
  */
@@ -663,7 +662,7 @@ command_matches_dir(char *sudoers_dir, size_t dlen)
     closedir(dirp);
     debug_return_bool(dent != NULL);
 }
-#endif /* NAME_MATCH */
+#endif /* SUDOERS_NAME_MATCH */
 
 /*
  * Returns true if the hostname matches the pattern, else false
