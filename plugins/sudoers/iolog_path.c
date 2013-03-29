@@ -46,13 +46,16 @@ struct path_escape {
     size_t (*copy_fn)(char *, size_t, char *);
 };
 
-#ifndef SUDOERS_NO_SEQ
 static size_t
 fill_seq(char *str, size_t strsize, char *logdir)
 {
+#ifdef SUDOERS_NO_SEQ
+    debug_decl(fill_seq, SUDO_DEBUG_UTIL)
+    debug_return_size_t(strlcpy(str, "%{seq}", strsize));
+#else
     static char sessid[7];
     int len;
-    debug_decl(sudoers_io_version, SUDO_DEBUG_UTIL)
+    debug_decl(fill_seq, SUDO_DEBUG_UTIL)
 
     if (sessid[0] == '\0')
 	io_nextid(logdir, def_iolog_dir, sessid);
@@ -63,8 +66,8 @@ fill_seq(char *str, size_t strsize, char *logdir)
     if (len < 0)
 	debug_return_size_t(strsize); /* handle non-standard snprintf() */
     debug_return_size_t(len);
-}
 #endif /* SUDOERS_NO_SEQ */
+}
 
 static size_t
 fill_user(char *str, size_t strsize, char *unused)
@@ -136,9 +139,7 @@ fill_command(char *str, size_t strsize, char *unused)
 
 /* Note: "seq" must be first in the list. */
 static struct path_escape io_path_escapes[] = {
-#ifndef SUDOERS_NO_SEQ
     { "seq", fill_seq },
-#endif
     { "user", fill_user },
     { "group", fill_group },
     { "runas_user", fill_runas_user },
@@ -161,7 +162,7 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
     char *dst, *dst0, *path, *pathend, tmpbuf[PATH_MAX];
     char *slash = NULL;
     const char *endbrace, *src = dir;
-    static struct path_escape *escapes;
+    struct path_escape *escapes = NULL;
     int pass, oldlocale;
     bool strfit;
     debug_decl(expand_iolog_path, SUDO_DEBUG_UTIL)
@@ -189,10 +190,7 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 	switch (pass) {
 	case 0:
 	    src = dir;
-	    escapes = io_path_escapes;
-#ifndef SUDOERS_NO_SEQ
-	    escapes++;	/* skip "${seq}" */
-#endif
+	    escapes = io_path_escapes + 1; /* skip "%{seq}" */
 	    break;
 	case 1:
 	    /* Trim trailing slashes from dir component. */
