@@ -448,19 +448,20 @@ solarisprivs	:	/* empty */ {
 		|	privsspec {
 			    $$.privs = $1;
 			    $$.limitprivs = NULL;
-			}	
+			}
 		|	limitprivsspec {
 			    $$.privs = NULL;
 			    $$.limitprivs = $1;
-			}	
+			}
 		|	privsspec limitprivsspec {
 			    $$.privs = $1;
 			    $$.limitprivs = $2;
-			}	
+			}
 		|	limitprivsspec privsspec {
 			    $$.limitprivs = $1;
 			    $$.privs = $2;
-			}	
+			}
+		;
 
 runasspec	:	/* empty */ {
 			    $$ = NULL;
