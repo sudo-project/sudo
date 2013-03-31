@@ -54,7 +54,6 @@
 #include "sudoers.h" /* XXX */
 #include "parse.h"
 #include "toke.h"
-#include "gram.h"
 
 /*
  * We must define SIZE_MAX for yacc's skeleton.c.
@@ -90,38 +89,6 @@ static void  add_defaults(int, struct member *, struct defaults *);
 static void  add_userspec(struct member *, struct privilege *);
 static struct defaults *new_default(char *, char *, int);
 static struct member *new_member(char *, int);
-
-void
-sudoerserror(const char *s)
-{
-    debug_decl(sudoerserror, SUDO_DEBUG_PARSER)
-
-    /* If we last saw a newline the error is on the preceding line. */
-    if (last_token == COMMENT)
-	sudolineno--;
-
-    /* Save the line the first error occurred on. */
-    if (errorlineno == -1) {
-	errorlineno = sudolineno;
-	errorfile = estrdup(sudoers);
-    }
-    if (sudoers_warnings && s != NULL) {
-	LEXTRACE("<*> ");
-#ifndef TRACELEXER
-	if (trace_print == NULL || trace_print == sudoers_trace_print) {
-	    const char fmt[] = ">>> %s: %s near line %d <<<\n";
-	    int oldlocale;
-
-	    /* Warnings are displayed in the user's locale. */
-	    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
-	    sudo_printf(SUDO_CONV_ERROR_MSG, _(fmt), sudoers, _(s), sudolineno);
-	    sudoers_setlocale(oldlocale, NULL);
-	}
-#endif
-    }
-    parse_error = true;
-    debug_return;
-}
 %}
 
 %union {
@@ -677,6 +644,39 @@ group		:	ALIAS {
 		;
 
 %%
+void
+sudoerserror(const char *s)
+{
+    debug_decl(sudoerserror, SUDO_DEBUG_PARSER)
+
+    /* If we last saw a newline the error is on the preceding line. */
+    /* XXX - COMMENT not yet defined - XXX */
+    if (last_token == COMMENT)
+	sudolineno--;
+
+    /* Save the line the first error occurred on. */
+    if (errorlineno == -1) {
+	errorlineno = sudolineno;
+	errorfile = estrdup(sudoers);
+    }
+    if (sudoers_warnings && s != NULL) {
+	LEXTRACE("<*> ");
+#ifndef TRACELEXER
+	if (trace_print == NULL || trace_print == sudoers_trace_print) {
+	    const char fmt[] = ">>> %s: %s near line %d <<<\n";
+	    int oldlocale;
+
+	    /* Warnings are displayed in the user's locale. */
+	    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _(fmt), sudoers, _(s), sudolineno);
+	    sudoers_setlocale(oldlocale, NULL);
+	}
+#endif
+    }
+    parse_error = true;
+    debug_return;
+}
+
 static struct defaults *
 new_default(char *var, char *val, int op)
 {
