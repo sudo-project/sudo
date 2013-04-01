@@ -81,6 +81,10 @@ What's new in Sudo 1.8.7?
 
  * Dutch translation for sudo and sudoers from translationproject.org.
 
+ * The sudoers plugin will now ignore invalid domain names when
+   checking netgroup membership.  Some Linux systems use the string
+   "(none)" for the NIS-style domain name instead of an empty string.
+
 What's new in Sudo 1.8.6p7?
 
  * A time stamp file with the date set to the epoch by "sudo -k"

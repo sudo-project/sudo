@@ -764,6 +764,34 @@ done:
     debug_return_bool(matched);
 }
 
+#ifdef HAVE_INNETGR
+/*
+ * Get NIS-style domain name and return a malloc()ed copy or NULL if none.
+ */
+static char *
+sudo_getdomainname(void)
+{
+#ifdef HAVE_GETDOMAINNAME
+    char *buf, *cp, *domain = NULL;
+
+    buf = emalloc(HOST_NAME_MAX + 1);
+    if (getdomainname(buf, HOST_NAME_MAX + 1) == 0 && *buf != '\0') {
+	domain = buf;
+	for (cp = buf; *cp != '\0'; cp++) {
+	    /* Check for illegal characters, Linux may use "(none)". */
+	    if (*cp == '(' || *cp == ')' || *cp == ',' || *cp == ' ') {
+		domain = NULL;
+		break;
+	    }
+	}
+    }
+    if (domain == NULL)
+	efree(buf);
+#endif /* HAVE_GETDOMAINNAME */
+    return domain;
+}
+#endif /* HAVE_INNETGR */
+
 /*
  * Returns true if "host" and "user" belong to the netgroup "netgr",
  * else return false.  Either of "host", "shost" or "user" may be NULL
@@ -774,30 +802,23 @@ done:
 bool
 netgr_matches(char *netgr, char *lhost, char *shost, char *user)
 {
+#ifdef HAVE_INNETGR
     static char *domain;
-#ifdef HAVE_GETDOMAINNAME
     static int initialized;
 #endif
     debug_decl(netgr_matches, SUDO_DEBUG_MATCH)
 
+#ifdef HAVE_INNETGR
     /* make sure we have a valid netgroup, sudo style */
     if (*netgr++ != '+')
 	debug_return_bool(false);
 
-#ifdef HAVE_GETDOMAINNAME
     /* get the domain name (if any) */
     if (!initialized) {
-	domain = (char *) emalloc(HOST_NAME_MAX + 1);
-	if (getdomainname(domain, HOST_NAME_MAX + 1) == -1 || *domain == '\0' ||
-	    strcmp(domain, "(none)") == 0) {
-	    efree(domain);
-	    domain = NULL;
-	}
+	domain = sudo_getdomainname();
 	initialized = 1;
     }
-#endif /* HAVE_GETDOMAINNAME */
 
-#ifdef HAVE_INNETGR
     if (innetgr(netgr, lhost, user, domain))
 	debug_return_bool(true);
     else if (lhost != shost && innetgr(netgr, shost, user, domain))
