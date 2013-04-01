@@ -158,6 +158,14 @@
 # define MAX(a,b) (((a)>(b))?(a):(b))
 #endif
 
+/* Macros to set/clear/test flags. */
+#undef SET
+#define SET(t, f)	((t) |= (f))
+#undef CLR
+#define CLR(t, f)	((t) &= ~(f))
+#undef ISSET
+#define ISSET(t, f)     ((t) & (f))
+
 /*
  * Some systems define this in <sys/param.h> but we don't include that anymore.
  */

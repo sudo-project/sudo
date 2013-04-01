@@ -3778,14 +3778,6 @@ AH_BOTTOM([/*
 # define ignore_result(x)	(void)(x)
 #endif
 
-/* Macros to set/clear/test flags. */
-#undef SET
-#define SET(t, f)	((t) |= (f))
-#undef CLR
-#define CLR(t, f)	((t) &= ~(f))
-#undef ISSET
-#define ISSET(t, f)     ((t) & (f))
-
 /* BSD compatibility on some SVR4 systems. */
 #ifdef __svr4__
 # define BSD_COMP
