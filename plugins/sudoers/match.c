@@ -771,8 +771,9 @@ done:
 static char *
 sudo_getdomainname(void)
 {
+    char *domain = NULL;
 #ifdef HAVE_GETDOMAINNAME
-    char *buf, *cp, *domain = NULL;
+    char *buf, *cp;
 
     buf = emalloc(HOST_NAME_MAX + 1);
     if (getdomainname(buf, HOST_NAME_MAX + 1) == 0 && *buf != '\0') {
