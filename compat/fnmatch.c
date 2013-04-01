@@ -71,6 +71,8 @@
 
 #include <config.h>
 
+#ifndef HAVE_FNMATCH
+
 #include <sys/types.h>
 
 #include <stdio.h>
@@ -472,3 +474,4 @@ firstsegment:
     /* pattern didn't match to the end of string */
     return FNM_NOMATCH;
 }
+#endif /* HAVE_FNMATCH */

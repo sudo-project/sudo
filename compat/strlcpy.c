@@ -19,6 +19,8 @@
 
 #include <config.h>
 
+#ifndef HAVE_STRLCPY
+
 #include <sys/types.h>
 
 #include "missing.h"
@@ -53,3 +55,4 @@ strlcpy(char *dst, const char *src, size_t siz)
 
 	return s - src - 1;	/* count does not include NUL */
 }
+#endif /* HAVE_STRLCPY */

@@ -17,6 +17,8 @@
 
 #include <config.h>
 
+#if !defined(HAVE_MKSTEMPS) || !defined(HAVE_MKDTEMP)
+
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -157,3 +159,4 @@ mkdtemp(char *path)
 	return path;
 }
 #endif /* HAVE_MKDTEMP */
+#endif /* !HAVE_MKSTEMPS || !HAVE_MKDTEMP */

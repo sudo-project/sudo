@@ -19,6 +19,8 @@
 
 #include <config.h>
 
+#ifndef HAVE_STRLCAT
+
 #include <sys/types.h>
 #include <string.h>
 
@@ -58,3 +60,4 @@ strlcat(char *dst, const char *src, size_t siz)
 
 	return dlen + (s - src);	/* count does not include NUL */
 }
+#endif /* HAVE_STRLCAT */

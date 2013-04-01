@@ -41,6 +41,8 @@
 
 #include <config.h>
 
+#if !defined(HAVE_VSNPRINTF) || !defined(HAVE_SNPRINTF) || !defined(HAVE_VASPRINTF) || !defined(HAVE_ASPRINTF)
+
 #include <sys/types.h>
 
 #include <stdio.h>
@@ -704,3 +706,5 @@ asprintf(char **str, char const *fmt, ...)
 	return ret;
 }
 #endif /* HAVE_ASPRINTF */
+
+#endif /* !HAVE_VSNPRINTF || !HAVE_SNPRINTF || !HAVE_VASPRINTF || !HAVE_ASPRINTF */

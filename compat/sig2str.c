@@ -16,6 +16,8 @@
 
 #include <config.h>
 
+#ifndef HAVE_SIG2STR
+
 #include <sys/types.h>
 
 #include <errno.h>
@@ -74,3 +76,4 @@ sig2str(int signo, char *signame)
     errno = EINVAL;
     return -1;
 }
+#endif /* HAVE_SIG2STR */

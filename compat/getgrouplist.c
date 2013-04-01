@@ -16,6 +16,8 @@
 
 #include <config.h>
 
+#ifndef HAVE_GETGROUPLIST
+
 #include <sys/types.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -301,3 +303,4 @@ done:
     return rval;
 }
 #endif /* !HAVE_GETGRSET && !HAVE__GETGROUPSBYMEMBER */
+#endif /* HAVE_GETGROUPLIST */

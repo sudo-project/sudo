@@ -16,6 +16,8 @@
 
 #include <config.h>
 
+#ifndef HAVE_GETPROGNAME
+
 #include <sys/types.h>
 
 #include <stdio.h>
@@ -44,3 +46,4 @@ getprogname(void)
 {
     return progname;
 }
+#endif /* HAVE_GETPROGNAME */

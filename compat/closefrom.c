@@ -17,6 +17,8 @@
 
 #include <config.h>
 
+#ifndef HAVE_CLOSEFROM
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -132,3 +134,4 @@ closefrom(int lowfd)
 	closefrom_fallback(lowfd);
 }
 #endif /* HAVE_FCNTL_CLOSEM */
+#endif /* HAVE_CLOSEFROM */

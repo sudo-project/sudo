@@ -16,6 +16,8 @@
 
 #include <config.h>
 
+#ifndef HAVE_DLOPEN
+
 #include <sys/types.h>
 
 #include <stdio.h>
@@ -150,5 +152,5 @@ sudo_dlerror(void)
 {
     return strerror(errno);
 }
-
 #endif /* HAVE_SHL_LOAD */
+#endif /* HAVE_DLOPEN */

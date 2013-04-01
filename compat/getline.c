@@ -16,6 +16,8 @@
 
 #include <config.h>
 
+#ifndef HAVE_GETLINE
+
 #include <sys/types.h>
 
 #include <stdio.h>
@@ -101,4 +103,5 @@ getline(char **bufp, size_t *bufsizep, FILE *fp)
     *bufsizep = bufsize;
     return len;
 }
-#endif
+#endif /* HAVE_FGETLN */
+#endif /* HAVE_GETLINE */

@@ -16,6 +16,8 @@
 
 #include <config.h>
 
+#ifndef HAVE_ISBLANK
+
 #include <sys/types.h>
 
 #include "missing.h"
@@ -26,3 +28,4 @@ isblank(int ch)
 {
     return ch == ' ' || ch == '\t';
 }
+#endif /* HAVE_ISBLANK */

@@ -16,6 +16,8 @@
 
 #include <config.h>
 
+#ifndef HAVE_MEMRCHR
+
 #include <sys/types.h>
 
 #include "missing.h"
@@ -38,3 +40,4 @@ memrchr(const void *s, int c, size_t n)
     }
     return (void *)0;
 }
+#endif /* HAVE_MEMRCHR */

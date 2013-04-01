@@ -20,6 +20,8 @@
 
 #include <config.h>
 
+#ifndef HAVE_PW_DUP
+
 #include <sys/types.h>
 
 #include <stdio.h>
@@ -102,3 +104,4 @@ pw_dup(const struct passwd *pw)
 
 	return newpw;
 }
+#endif /* HAVE_PW_DUP */

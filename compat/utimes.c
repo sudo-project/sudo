@@ -17,6 +17,8 @@
 
 #include <config.h>
 
+#if !defined(HAVE_UTIMES) || (!defined(HAVE_FUTIMES) && !defined(HAVE_FUTIMESAT))
+
 #include <sys/types.h>
 #include <sys/time.h>
 #include <stdio.h>
@@ -67,3 +69,5 @@ futimes(int fd, const struct timeval *times)
 	return futime(fd, NULL);
 }
 #endif /* HAVE_FUTIME */
+
+#endif /* !HAVE_UTIMES || (!HAVE_FUTIMES && !HAVE_FUTIMESAT) */

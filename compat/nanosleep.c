@@ -16,6 +16,8 @@
 
 #include <config.h>
 
+#ifndef HAVE_NANOSLEEP
+
 #include <sys/types.h>
 #include <sys/time.h>
 #ifdef HAVE_SYS_SELECT_H
@@ -52,3 +54,4 @@ nanosleep(const struct timespec *ts, struct timespec *rts)
     }
     return rval;
 }
+#endif /* HAVE_NANOSLEEP */

@@ -16,6 +16,8 @@
 
 #include <config.h>
 
+#ifndef HAVE_STRSIGNAL
+
 #include <sys/types.h>
 
 #include <stdio.h>
@@ -47,3 +49,4 @@ strsignal(int signo)
     /* XXX - should be "Unknown signal: %d" */
     return _("Unknown signal");
 }
+#endif /* HAVE_STRSIGNAL */
