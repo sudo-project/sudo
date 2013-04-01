@@ -221,12 +221,11 @@ main(int argc, char *argv[])
     }
 
     /*
-     * Parse the existing sudoers file(s) in quiet mode to highlight any
-     * existing errors and to pull in editor and env_editor conf values.
+     * Parse the existing sudoers file(s) to highlight any existing
+     * errors and to pull in editor and env_editor conf values.
      */
-    if ((sudoersin = open_sudoers(sudoers_path, true, NULL)) == NULL) {
-	error(1, "%s", sudoers_path);
-    }
+    if ((sudoersin = open_sudoers(sudoers_path, true, NULL)) == NULL)
+	exit(1);
     init_parser(sudoers_path, false);
     sudoersparse();
     (void) update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER);
