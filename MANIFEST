@@ -343,7 +343,6 @@ plugins/sudoers/sudoers_version.h
 plugins/sudoers/sudoreplay.c
 plugins/sudoers/testsudoers.c
 plugins/sudoers/timestamp.c
-plugins/sudoers/timestamp.h
 plugins/sudoers/timestr.c
 plugins/sudoers/toke.c
 plugins/sudoers/toke.h
