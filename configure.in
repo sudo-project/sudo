@@ -2229,7 +2229,7 @@ dnl AC_REPLACE_FUNCS(getgrouplist)
 AC_CHECK_FUNCS(getgrouplist, [], [
     case "$host_os" in
     aix*)
-	AC_CHECK_FUNCS(getgrset, [AC_LIBOBJ(getgrouplist)])
+	AC_CHECK_FUNCS(getgrset)
 	;;
     *)
 	AC_CHECK_FUNC(nss_search, [
@@ -2240,7 +2240,6 @@ AC_CHECK_FUNCS(getgrouplist, [], [
 		    AC_DEFINE([HAVE_NSS_SEARCH])
 		    AC_DEFINE([HAVE__NSS_XBYY_BUF_ALLOC])
 		    AC_DEFINE([HAVE__NSS_INITF_GROUP])
-		    AC_LIBOBJ(getgrouplist)
 		])
 	    ], [
 		# HP-UX
@@ -2250,13 +2249,13 @@ AC_CHECK_FUNCS(getgrouplist, [], [
 			AC_DEFINE([HAVE_NSS_SEARCH])
 			AC_DEFINE([HAVE___NSS_XBYY_BUF_ALLOC])
 			AC_DEFINE([HAVE___NSS_INITF_GROUP])
-			AC_LIBOBJ(getgrouplist)
 		    ])
 		])
 	    ])
 	])
 	;;
     esac
+    AC_LIBOBJ(getgrouplist)
 ])
 AC_CHECK_FUNCS(getline, [], [
     AC_LIBOBJ(getline)

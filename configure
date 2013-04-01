@@ -16723,11 +16723,6 @@ if test "x$ac_cv_func_getgrset" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_GETGRSET 1
 _ACEOF
- case " $LIBOBJS " in
-  *" getgrouplist.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS getgrouplist.$ac_objext"
- ;;
-esac
 
 fi
 done
@@ -16762,12 +16757,6 @@ done
 
 		    $as_echo "#define HAVE__NSS_INITF_GROUP 1" >>confdefs.h
 
-		    case " $LIBOBJS " in
-  *" getgrouplist.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS getgrouplist.$ac_objext"
- ;;
-esac
-
 
 fi
 
@@ -16799,12 +16788,6 @@ done
 
 			$as_echo "#define HAVE___NSS_INITF_GROUP 1" >>confdefs.h
 
-			case " $LIBOBJS " in
-  *" getgrouplist.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS getgrouplist.$ac_objext"
- ;;
-esac
-
 
 fi
 
@@ -16819,6 +16802,12 @@ fi
 
 	;;
     esac
+    case " $LIBOBJS " in
+  *" getgrouplist.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS getgrouplist.$ac_objext"
+ ;;
+esac
+
 
 fi
 done
