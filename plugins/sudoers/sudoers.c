@@ -91,6 +91,7 @@ static void set_fqdn(void);
 static void set_loginclass(struct passwd *);
 static void set_runasgr(const char *);
 static void set_runaspw(const char *);
+static bool tty_present(void);
 
 /*
  * Globals
@@ -324,7 +325,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     /* Bail if a tty is required and we don't have one.  */
-    if (def_requiretty && user_ttypath == NULL) {
+    if (def_requiretty && !tty_present()) {
 	audit_failure(NewArgv, N_("no tty"));
 	warningx(_("sorry, you must have a tty to run sudo"));
 	goto bad;
@@ -1038,3 +1039,16 @@ create_admin_success_flag(void)
     /* STUB */
 }
 #endif /* USE_ADMIN_FLAG */
+
+static bool
+tty_present(void)
+{
+#if defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV) || defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV) || defined(HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV) || defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || defined(HAVE_PSTAT_GETPROC) || defined(__linux__)
+    return user_ttypath != NULL;
+#else
+    int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY);
+    if (fd != -1)
+	close(fd);
+    return fd != -1;
+#endif
+}
