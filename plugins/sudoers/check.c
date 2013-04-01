@@ -22,6 +22,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/time.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -40,6 +41,9 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#if TIME_WITH_SYS_TIME
+# include <time.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <pwd.h>
