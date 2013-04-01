@@ -16,7 +16,7 @@
 
 #include <config.h>
 
-#ifndef HAVE_GETPROGNAME
+#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
 
 #include <sys/types.h>
 
@@ -46,4 +46,4 @@ getprogname(void)
 {
     return progname;
 }
-#endif /* HAVE_GETPROGNAME */
+#endif /* !HAVE_GETPROGNAME !HAVE___PROGNAME */
