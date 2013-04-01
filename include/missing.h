@@ -330,13 +330,13 @@ extern int errno;
 #endif /* HAVE_SETEUID */
 
 /*
- * HP-UX and Tru64 do not declare innetgr() or getdomainname().
+ * HP-UX does not declare innetgr() or getdomainname().
  * Solaris does not declare getdomainname().
  */
-#if defined(__hpux) || defined(__osf__)
+#if defined(__hpux)
 int innetgr(const char *, const char *, const char *, const char *);
 #endif
-#if defined(__hpux) || defined(__osf__) || defined(__sun)
+#if defined(__hpux) || defined(__sun)
 int getdomainname(char *, size_t);
 #endif
 
