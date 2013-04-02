@@ -1641,7 +1641,7 @@ case "$host" in
 		fi
 
 		# AIX-specific functions
-		AC_CHECK_FUNCS(getuserattr setauthdb)
+		AC_CHECK_FUNCS(getuserattr setauthdb setrlimit64)
 		COMMON_OBJS="$COMMON_OBJS aix.lo"
 		;;
     *-*-hiuxmpp*)
@@ -2223,8 +2223,7 @@ dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS(glob strrchr sysconf tzset strftime setenv \
-	       regcomp nl_langinfo mbr_check_membership \
-	       setrlimit64)
+	       regcomp nl_langinfo)
 dnl AC_REPLACE_FUNCS(getgrouplist)
 AC_CHECK_FUNCS(getgrouplist, [], [
     case "$host_os" in
