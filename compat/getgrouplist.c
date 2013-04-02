@@ -81,7 +81,7 @@ getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
     rval = 0;
 
 done:
-    efree(grset);
+    free(grset);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
