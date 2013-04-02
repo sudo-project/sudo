@@ -358,9 +358,6 @@
 /* Define to 1 if you have the <malloc.h> header file. */
 #undef HAVE_MALLOC_H
 
-/* Define to 1 if you have the `mbr_check_membership' function. */
-#undef HAVE_MBR_CHECK_MEMBERSHIP
-
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
