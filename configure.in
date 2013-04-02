@@ -3345,6 +3345,7 @@ if test -n "$LT_LDEXPORTS"; then
 	AC_CACHE_CHECK([whether ld supports anonymous map files],
 	    [sudo_cv_var_gnu_ld_anon_map],
 	    [
+		sudo_cv_var_gnu_ld_anon_map=no
 		cat > conftest.map <<-EOF
 		{
 		    global: foo;
@@ -3355,9 +3356,8 @@ EOF
 		CFLAGS="$CFLAGS $lt_prog_compiler_pic"
 		_LDFLAGS="$LDFLAGS"
 		LDFLAGS="$LDFLAGS -fpic -shared -Wl,--version-script,./conftest.map"
-		AC_TRY_LINK([int foo;], [], [
-		    sudo_cv_var_gnu_ld_anon_map=yes
-		])
+		AC_LINK_IFELSE([AC_LANG_PROGRAM([[int foo;]], [[]])],
+		    [sudo_cv_var_gnu_ld_anon_map=yes])
 		CFLAGS="$_CFLAGS"
 		LDFLAGS="$_LDFLAGS"
 	    ]
@@ -3371,6 +3371,7 @@ EOF
 		AC_CACHE_CHECK([whether ld supports anonymous map files],
 		    [sudo_cv_var_solaris_ld_anon_map],
 		    [
+			sudo_cv_var_solaris_ld_anon_map=no
 			cat > conftest.map <<-EOF
 			{
 			    global: foo;
@@ -3381,9 +3382,8 @@ EOF
 			CFLAGS="$CFLAGS $lt_prog_compiler_pic"
 			_LDFLAGS="$LDFLAGS"
 			LDFLAGS="$LDFLAGS -shared -Wl,-M,./conftest.map"
-			AC_TRY_LINK([int foo;], [], [
-			    sudo_cv_var_solaris_ld_anon_map=yes
-			])
+			AC_LINK_IFELSE([AC_LANG_PROGRAM([[int foo;]], [[]])],
+			    [sudo_cv_var_solaris_ld_anon_map=yes])
 			CFLAGS="$_CFLAGS"
 			LDFLAGS="$_LDFLAGS"
 		    ]
@@ -3396,6 +3396,7 @@ EOF
 		AC_CACHE_CHECK([whether ld supports controlling exported symbols],
 		    [sudo_cv_var_hpux_ld_symbol_export],
 		    [
+			sudo_cv_var_hpux_ld_symbol_export=no
 			echo "+e foo" > conftest.opt
 			_CFLAGS="$CFLAGS"
 			CFLAGS="$CFLAGS $lt_prog_compiler_pic"
@@ -3405,11 +3406,11 @@ EOF
 			else
 			    LDFLAGS="$LDFLAGS -Wl,-b -Wl,-c,./conftest.opt"
 			fi
-			AC_TRY_LINK([int foo;], [], [
-			    sudo_cv_var_hpux_ld_symbol_export=yes
-			])
+			AC_LINK_IFELSE([AC_LANG_PROGRAM([[int foo;]], [[]])],
+			    [sudo_cv_var_hpux_ld_symbol_export=yes])
 			CFLAGS="$_CFLAGS"
 			LDFLAGS="$_LDFLAGS"
+			rm -f conftest.opt
 		    ]
 		)
 		if test "$sudo_cv_var_hpux_ld_symbol_export" = "yes"; then

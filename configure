@@ -20763,6 +20763,7 @@ if ${sudo_cv_var_gnu_ld_anon_map+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
+		sudo_cv_var_gnu_ld_anon_map=no
 		cat > conftest.map <<-EOF
 		{
 		    global: foo;
@@ -20785,9 +20786,7 @@ main ()
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-
-		    sudo_cv_var_gnu_ld_anon_map=yes
-
+  sudo_cv_var_gnu_ld_anon_map=yes
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
@@ -20810,6 +20809,7 @@ if ${sudo_cv_var_solaris_ld_anon_map+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
+			sudo_cv_var_solaris_ld_anon_map=no
 			cat > conftest.map <<-EOF
 			{
 			    global: foo;
@@ -20832,9 +20832,7 @@ main ()
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-
-			    sudo_cv_var_solaris_ld_anon_map=yes
-
+  sudo_cv_var_solaris_ld_anon_map=yes
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
@@ -20856,6 +20854,7 @@ if ${sudo_cv_var_hpux_ld_symbol_export+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
+			sudo_cv_var_hpux_ld_symbol_export=no
 			echo "+e foo" > conftest.opt
 			_CFLAGS="$CFLAGS"
 			CFLAGS="$CFLAGS $lt_prog_compiler_pic"
@@ -20877,14 +20876,13 @@ main ()
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-
-			    sudo_cv_var_hpux_ld_symbol_export=yes
-
+  sudo_cv_var_hpux_ld_symbol_export=yes
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 			CFLAGS="$_CFLAGS"
 			LDFLAGS="$_LDFLAGS"
+			rm -f conftest.opt
 
 
 fi
