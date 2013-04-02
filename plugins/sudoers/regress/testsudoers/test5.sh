@@ -9,13 +9,13 @@ cat >$TESTFILE <<EOF
 root ALL = ALL
 EOF
 
-USER=`\ls -l $TESTFILE | awk '{print $3}'`
-MYUID=`id -u $USER`
+MYUID=`\ls -ln $TESTFILE | awk '{print $3}'`
+MYGID=`\ls -ln $TESTFILE | awk '{print $4}'`
 exec 2>&1
 
 # Test world writable
 chmod 666 $TESTFILE
-./testsudoers -U $MYUID root id <<EOF
+./testsudoers -U $MYUID -G $MYGID root id <<EOF
 #include $TESTFILE
 EOF
 
