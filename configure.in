@@ -3537,7 +3537,7 @@ dnl
 dnl Defer setting _PATH_SUDO_NOEXEC until after exec_prefix is set
 dnl XXX - this is gross!
 dnl
-if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no"; then
+if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no" -o "$enabled_shared" != X"no"; then
     oexec_prefix="$exec_prefix"
     if test "$exec_prefix" = '$(prefix)'; then
 	if test "$prefix" = "NONE"; then
@@ -3567,14 +3567,16 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no"; then
 	done
 	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, "$sesh_file")
     fi
-    PLUGINDIR="$with_plugindir"
-    _PLUGINDIR=
-    while test X"$PLUGINDIR" != X"$_PLUGINDIR"; do
-	_PLUGINDIR="$PLUGINDIR"
-	eval PLUGINDIR="$_PLUGINDIR"
-    done
-    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR/")
-    SUDO_DEFINE_UNQUOTED(SUDOERS_PLUGIN, "sudoers.so")
+    if test X"$enable_shared" != X"no"; then
+	PLUGINDIR="$with_plugindir"
+	_PLUGINDIR=
+	while test X"$PLUGINDIR" != X"$_PLUGINDIR"; do
+	    _PLUGINDIR="$PLUGINDIR"
+	    eval PLUGINDIR="$_PLUGINDIR"
+	done
+	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR/")
+	SUDO_DEFINE_UNQUOTED(SUDOERS_PLUGIN, "sudoers.so")
+    fi
     exec_prefix="$oexec_prefix"
 fi
 if test X"$with_selinux" = X"no"; then
