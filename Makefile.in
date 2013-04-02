@@ -78,7 +78,13 @@ XGETTEXT_OPTS = -F -k_ -kN_ --copyright-holder="Todd C. Miller" \
 		--flag easprintf:3:c-format --flag lbuf_append:2:c-format \
 		--flag lbuf_append_quoted:3:c-format --foreign-user
 
-all check pre-install: config.status
+all: config.status
+	for d in $(SUBDIRS); \
+	    do (cd $$d && exec $(MAKE) $@) && continue; \
+	    exit $$?; \
+	done
+
+check pre-install: config.status
 	for d in $(SUBDIRS); \
 	    do (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
