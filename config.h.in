@@ -168,7 +168,7 @@
 #undef HAVE_GETADDRINFO
 
 /* Define to 1 if you have the `getauthuid' function. (ULTRIX 4.x shadow
-   passwords) */
+   passwords). */
 #undef HAVE_GETAUTHUID
 
 /* Define to 1 if you have the `getcwd' function. */
@@ -196,22 +196,22 @@
 #undef HAVE_GETPROGNAME
 
 /* Define to 1 if you have the `getprpwnam' function. (SecureWare-style shadow
-   passwords) */
+   passwords). */
 #undef HAVE_GETPRPWNAM
 
 /* Define to 1 if you have the `getpwanam' function. (SunOS 4.x shadow
-   passwords) */
+   passwords). */
 #undef HAVE_GETPWANAM
 
 /* Define to 1 if you have the `getresuid' function. */
 #undef HAVE_GETRESUID
 
 /* Define to 1 if you have the `getspnam' function (SVR4-style shadow
-   passwords) */
+   passwords). */
 #undef HAVE_GETSPNAM
 
 /* Define to 1 if you have the `getspwuid' function. (HP-UX <= 9.X shadow
-   passwords) */
+   passwords). */
 #undef HAVE_GETSPWUID
 
 /* Define to 1 if you have the `getttyent' function. */
@@ -254,11 +254,11 @@
 #undef HAVE_ISBLANK
 
 /* Define to 1 if you have the `iscomsec' function. (HP-UX >= 10.x check for
-   shadow enabled) */
+   shadow enabled). */
 #undef HAVE_ISCOMSEC
 
 /* Define to 1 if you have the `issecure' function. (SunOS 4.x check for
-   shadow enabled) */
+   shadow enabled). */
 #undef HAVE_ISSECURE
 
 /* Define to 1 if you use Kerberos V. */
@@ -280,7 +280,7 @@
 /* Define to 1 if you have the `krb5_verify_user' function. */
 #undef HAVE_KRB5_VERIFY_USER
 
-/* Define to 1 if your LDAP needs <lber.h>. (OpenLDAP does not) */
+/* Define to 1 if your LDAP needs <lber.h>. (OpenLDAP does not). */
 #undef HAVE_LBER_H
 
 /* Define to 1 if you use LDAP for sudoers. */
@@ -446,7 +446,7 @@
 #undef HAVE_REVOKE
 
 /* Define to 1 if the skeychallenge() function is RFC1938-compliant and takes
-   4 arguments */
+   4 arguments. */
 #undef HAVE_RFC1938_SKEYCHALLENGE
 
 /* Define to 1 if you have the <sasl.h> header file. */
@@ -617,13 +617,13 @@
 /* Define to 1 if `ut_user' is a member of `struct utmp'. */
 #undef HAVE_STRUCT_UTMP_UT_USER
 
-/* Define to 1 if your struct stat has an st_mtim member */
+/* Define to 1 if your struct stat has an st_mtim member. */
 #undef HAVE_ST_MTIM
 
-/* Define to 1 if your struct stat has an st_mtimespec member */
+/* Define to 1 if your struct stat has an st_mtimespec member. */
 #undef HAVE_ST_MTIMESPEC
 
-/* Define to 1 if your struct stat uses an st__tim union */
+/* Define to 1 if your struct stat uses an st__tim union. */
 #undef HAVE_ST__TIM
 
 /* Define to 1 if you have the `sysconf' function. */
@@ -733,7 +733,7 @@
 /* Define to 1 if you want the hostname to be entered into the log file. */
 #undef HOST_IN_LOG
 
-/* Define to 1 if you want to ignore '.' and empty PATH elements */
+/* Define to 1 if you want to ignore '.' and empty PATH elements. */
 #undef IGNORE_DOT_PATH
 
 /* The message given when a bad password is entered. */
@@ -780,7 +780,7 @@
    sudo. */
 #undef NO_LECTURE
 
-/* Define to 1 if you don't want to use sudo's PAM session support */
+/* Define to 1 if you don't want to use sudo's PAM session support. */
 #undef NO_PAM_SESSION
 
 /* Define to avoid runing the mailer as root. */
@@ -877,7 +877,7 @@
 #undef SUDOERS_PLUGIN
 
 /* An instance string to append to the username (separated by a slash) for
-   Kerberos V authentication */
+   Kerberos V authentication. */
 #undef SUDO_KRB5_INSTANCE
 
 /* The umask that the sudo-run prog should use. */
