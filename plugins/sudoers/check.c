@@ -59,39 +59,11 @@ static struct passwd *get_authpw(void);
  * Returns true if the user successfully authenticates, false if not
  * or -1 on error.
  */
-int
-check_user(int validated, int mode)
+static int
+check_user_interactive(int validated, int mode, struct passwd *auth_pw)
 {
-    struct passwd *auth_pw;
     int status, rval = true;
-    debug_decl(check_user, SUDO_DEBUG_AUTH)
-
-    /*
-     * Init authentication system regardless of whether we need a password.
-     * Required for proper PAM session support.
-     */
-    auth_pw = get_authpw();
-    if (sudo_auth_init(auth_pw) == -1) {
-	rval = -1;
-	goto done;
-    }
-
-    /*
-     * Don't prompt for the root passwd or if the user is exempt.
-     * If the user is not changing uid/gid, no need for a password.
-     */
-    if (!def_authenticate || user_uid == 0 || user_is_exempt())
-	goto done;
-    if (user_uid == runas_pw->pw_uid &&
-	(!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name))) {
-#ifdef HAVE_SELINUX
-	if (user_role == NULL && user_type == NULL)
-#endif
-#ifdef HAVE_PRIV_SET
-	if (runas_privs == NULL && runas_limitprivs == NULL)
-#endif
-	    goto done;
-    }
+    debug_decl(check_user_interactive, SUDO_DEBUG_AUTH)
 
     /* Always need a password when -k was specified with the command. */
     if (ISSET(mode, MODE_IGNORE_TICKET))
@@ -132,6 +104,49 @@ check_user(int validated, int mode)
     if (rval == true && ISSET(validated, VALIDATE_OK) &&
 	!ISSET(mode, MODE_IGNORE_TICKET) && status != TS_ERROR)
 	update_timestamp(auth_pw);
+done:
+    debug_return_bool(rval);
+}
+
+/*
+ * Returns true if the user successfully authenticates, false if not
+ * or -1 on error.
+ */
+int
+check_user(int validated, int mode)
+{
+    struct passwd *auth_pw;
+    int rval = true;
+    debug_decl(check_user, SUDO_DEBUG_AUTH)
+
+    /*
+     * Init authentication system regardless of whether we need a password.
+     * Required for proper PAM session support.
+     */
+    auth_pw = get_authpw();
+    if (sudo_auth_init(auth_pw) == -1) {
+	rval = -1;
+	goto done;
+    }
+
+    /*
+     * Don't prompt for the root passwd or if the user is exempt.
+     * If the user is not changing uid/gid, no need for a password.
+     */
+    if (!def_authenticate || user_uid == 0 || user_is_exempt())
+	goto done;
+    if (user_uid == runas_pw->pw_uid &&
+	(!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name))) {
+#ifdef HAVE_SELINUX
+	if (user_role == NULL && user_type == NULL)
+#endif
+#ifdef HAVE_PRIV_SET
+	if (runas_privs == NULL && runas_limitprivs == NULL)
+#endif
+	    goto done;
+    }
+
+    rval = check_user_interactive(validated, mode, auth_pw);
 
 done:
     sudo_auth_cleanup(auth_pw);
