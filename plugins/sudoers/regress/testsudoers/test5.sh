@@ -21,7 +21,7 @@ EOF
 
 # Test group writable
 chmod 664 $TESTFILE
-./testsudoers -U $MYUID -G 1 root id <<EOF
+./testsudoers -U $MYUID -G -1 root id <<EOF
 #include $TESTFILE
 EOF
 
