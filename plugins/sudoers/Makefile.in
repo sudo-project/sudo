@@ -309,7 +309,7 @@ uninstall:
 check: $(TEST_PROGS) visudo testsudoers
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    rval=0; \
-	    PWD=`pwd`; \
+	    CWD=`pwd`; \
 	    ./check_addr $(srcdir)/regress/parser/check_addr.in || rval=`expr $$rval + $$?`; \
 	    ./check_fill || rval=`expr $$rval + $$?`; \
 	    ./check_iolog_path $(srcdir)/regress/iolog_path/data || rval=`expr $$rval + $$?`; \
@@ -357,7 +357,7 @@ check: $(TEST_PROGS) visudo testsudoers
 		    base=`basename $$t .sh`; \
 		    out="regress/$$dir/$${base}.out"; \
 		    err="regress/$$dir/$${base}.err"; \
-		    TESTDIR=$$PWD/$(srcdir)/regress/$$dir \
+		    TESTDIR=$$CWD/$(srcdir)/regress/$$dir \
 			$(SHELL) $$t >$$out 2>$$err; \
 		    if cmp $$out $(srcdir)/$$out.ok >/dev/null; then \
 			passed=`expr $$passed + 1`; \
