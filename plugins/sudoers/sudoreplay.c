@@ -1055,7 +1055,7 @@ list_sessions(int argc, char **argv, const char *pattern, const char *user,
     if (pattern) {
 	re = &rebuf;
 	if (regcomp(re, pattern, REG_EXTENDED|REG_NOSUB) != 0)
-	    errorx(1, _("invalid regex: %s"), pattern);
+	    errorx(1, _("invalid regular expression: %s"), pattern);
     }
 #else
     re = (char *) pattern;
