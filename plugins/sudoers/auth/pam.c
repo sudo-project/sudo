@@ -56,6 +56,11 @@
 # endif
 #endif
 
+/* We don't want to translate the strings in the calls to dgt(). */
+#ifdef PAM_TEXT_DOMAIN
+# define dgt(d, t)	dgettext(d, t)
+#endif
+
 #include "sudoers.h"
 #include "sudo_auth.h"
 
@@ -328,7 +333,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		if (getpass_error)
 		    goto done;
 
-		/* Is the sudo prompt standard? (If so, we'l just use PAM's) */
+		/* Is the sudo prompt standard? (If so, we'll just use PAM's) */
 		std_prompt =  strncmp(def_prompt, "Password:", 9) == 0 &&
 		    (def_prompt[9] == '\0' ||
 		    (def_prompt[9] == ' ' && def_prompt[10] == '\0'));
@@ -336,8 +341,8 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		/* Only override PAM prompt if it matches /^Password: ?/ */
 #if defined(PAM_TEXT_DOMAIN) && defined(HAVE_LIBINTL_H)
 		if (!def_passprompt_override && (std_prompt ||
-		    (strcmp(pm->msg, dgettext(PAM_TEXT_DOMAIN, "Password: ")) &&
-		    strcmp(pm->msg, dgettext(PAM_TEXT_DOMAIN, "Password:")))))
+		    (strcmp(pm->msg, dgt(PAM_TEXT_DOMAIN, "Password: ")) &&
+		    strcmp(pm->msg, dgt(PAM_TEXT_DOMAIN, "Password:")))))
 		    prompt = pm->msg;
 #else
 		if (!def_passprompt_override && (std_prompt ||

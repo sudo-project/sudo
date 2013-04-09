@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.7\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-04-08 15:41-0400\n"
+"POT-Creation-Date: 2013-04-09 09:38-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: confstr.sh:2 plugins/sudoers/auth/pam.c:340
+#: confstr.sh:2
 msgid "Password:"
 msgstr ""
 
@@ -119,40 +119,36 @@ msgstr ""
 msgid "%s: Cannot verify TGT! Possible attack!: %s"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:100
+#: plugins/sudoers/auth/pam.c:105
 msgid "unable to initialize PAM"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:145
+#: plugins/sudoers/auth/pam.c:150
 msgid "account validation failure, is your account locked?"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:149
+#: plugins/sudoers/auth/pam.c:154
 msgid "Account or password is expired, reset your password and try again"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:156
+#: plugins/sudoers/auth/pam.c:161
 #, c-format
 msgid "pam_chauthtok: %s"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:160
+#: plugins/sudoers/auth/pam.c:165
 msgid "Password expired, contact your system administrator"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:164
+#: plugins/sudoers/auth/pam.c:169
 msgid ""
 "Account expired or PAM config lacks an \"account\" section for sudo, contact "
 "your system administrator"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:181
+#: plugins/sudoers/auth/pam.c:186
 #, c-format
 msgid "pam_authenticate: %s"
-msgstr ""
-
-#: plugins/sudoers/auth/pam.c:339
-msgid "Password: "
 msgstr ""
 
 #: plugins/sudoers/auth/rfc1938.c:103 plugins/sudoers/visudo.c:212
