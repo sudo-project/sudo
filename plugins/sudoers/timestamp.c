@@ -122,6 +122,7 @@ build_timestamp(struct passwd *pw)
 	if (len <= 0 || len >= sizeof(timestampfile))
 	    goto bad;
     }
+    sudo_debug_printf(SUDO_DEBUG_INFO, "using timestamp file %s", timestampfile);
 
     debug_return_int(len);
 bad:
