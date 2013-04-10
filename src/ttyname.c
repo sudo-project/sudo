@@ -403,8 +403,14 @@ get_process_ttyname(void)
 	    continue;
 	nread = read(fd, &psinfo, sizeof(psinfo));
 	close(fd);
-	if (nread == (ssize_t)sizeof(psinfo) && psinfo.pr_ttydev != (dev_t)-1) {
-	    tty = sudo_ttyname_dev(psinfo.pr_ttydev);
+	if (nread == (ssize_t)sizeof(psinfo)) {
+	    dev_t rdev = (dev_t)psinfo.pr_ttydev;
+#ifdef DEVNO64
+	    if (psinfo.pr_ttydev & DEVNO64)
+		rdev = makedev(major64(psinfo.pr_ttydev), minor64(psinfo.pr_ttydev));
+#endif
+	    if (rdev != (dev_t)-1)
+		tty = sudo_ttyname_dev(rdev);
 	}
     }
 
