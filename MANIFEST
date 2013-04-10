@@ -242,7 +242,7 @@ plugins/sudoers/po/nl.mo
 plugins/sudoers/po/nl.po
 plugins/sudoers/po/pl.mo
 plugins/sudoers/po/pl.po
-plugins/sudoers/po/sl.mo  
+plugins/sudoers/po/sl.mo
 plugins/sudoers/po/sl.po
 plugins/sudoers/po/sudoers.pot
 plugins/sudoers/po/sv.mo
@@ -411,6 +411,7 @@ src/po/vi.po
 src/po/zh_CN.mo
 src/po/zh_CN.po
 src/preload.c
+src/regress/ttyname/check_ttyname.c
 src/selinux.c
 src/sesh.c
 src/signal.c

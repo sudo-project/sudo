@@ -25,6 +25,7 @@ Makefile$
 ^pathnames\.h$
 ^src/sudo$
 ^src/sesh$
+^src/check_ttyname$
 ^src/sudo_usage\.h$
 
 ^compat/mksiglist$
