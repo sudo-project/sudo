@@ -185,10 +185,10 @@ static char *ignore_devs[] = {
 /*
  * Do a breadth-first scan of dir looking for the specified device.
  */
-static
-char *sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
+static char *
+sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 {
-    DIR *d;
+    DIR *d = NULL;
     char pathbuf[PATH_MAX], **subdirs = NULL, *devname = NULL;
     size_t sdlen, d_len, len, num_subdirs = 0, max_subdirs = 0;
     struct dirent *dp;
@@ -265,16 +265,17 @@ char *sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 	}
 	if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
 	    devname = estrdup(pathbuf);
-	    break;
+	    goto done;
 	}
     }
-    closedir(d);
 
     /* Search subdirs if we didn't find it in the root level. */
     for (i = 0; devname == NULL && i < num_subdirs; i++)
 	devname = sudo_ttyname_scan(subdirs[i], rdev, false);
 
 done:
+    if (d != NULL)
+	closedir(d);
     for (i = 0; i < num_subdirs; i++)
 	efree(subdirs[i]);
     efree(subdirs);
@@ -295,31 +296,27 @@ sudo_ttyname_dev(dev_t rdev)
     debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL)
 
     /*
-     * First check search_devs.
+     * First check search_devs for common tty devices.
      */
-    for (sd = search_devs; (devname = *sd) != NULL; sd++) {
+    for (sd = search_devs; tty == NULL && (devname = *sd) != NULL; sd++) {
 	len = strlen(devname);
 	if (devname[len - 1] == '/') {
-	    /* Special case /dev/pts */
 	    if (strcmp(devname, "/dev/pts/") == 0) {
+		/* Special case /dev/pts */
 		(void)snprintf(buf, sizeof(buf), "%spts/%u", _PATH_DEV,
 		    (unsigned int)minor(rdev));
 		if (stat(buf, &sb) == 0) {
-		    if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
+		    if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev)
 			tty = estrdup(buf);
-			break;
-		    }
 		}
-		continue;
+	    } else {
+		/* Traverse directory */
+		tty = sudo_ttyname_scan(devname, rdev, true);
 	    }
-	    /* Traverse directory */
-	    tty = sudo_ttyname_scan(devname, rdev, true);
 	} else {
 	    if (stat(devname, &sb) == 0) {
-		if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
+		if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev)
 		    tty = estrdup(devname);
-		    break;
-		}
 	    }
 	}
     }
