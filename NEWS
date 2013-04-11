@@ -88,6 +88,16 @@ What's new in Sudo 1.8.7?
    checking netgroup membership.  Some Linux systems use the string
    "(none)" for the NIS-style domain name instead of an empty string.
 
+What's new in Sudo 1.8.6p8?
+
+ * Terminal detection now works properly on 64-bit AIX kernels.
+   This was broken by the removal of the ttyname() fallback in Sudo
+   1.8.6p6.  Sudo is now able to map an AIX 64-bit device number
+   to the corresponding device file in /dev.
+
+ * Sudo now checks for crypt() returning NULL when performing
+   passwd-based authentication.
+
 What's new in Sudo 1.8.6p7?
 
  * A time stamp file with the date set to the epoch by "sudo -k"
