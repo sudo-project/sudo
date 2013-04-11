@@ -118,7 +118,7 @@ sudo_auth_init(struct passwd *pw)
     if (standalone && auth_switch[1].name != NULL) {
 	audit_failure(NewArgv, N_("invalid authentication methods"));
     	log_fatal(0, N_("Invalid authentication methods compiled into sudo!  "
-	    "You may mix standalone and non-standalone authentication."));
+	    "You may not mix standalone and non-standalone authentication."));
 	debug_return_int(-1);
     }
 

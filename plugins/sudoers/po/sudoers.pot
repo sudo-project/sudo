@@ -206,8 +206,8 @@ msgstr ""
 
 #: plugins/sudoers/auth/sudo_auth.c:120
 msgid ""
-"Invalid authentication methods compiled into sudo!  You may mix standalone "
-"and non-standalone authentication."
+"Invalid authentication methods compiled into sudo!  You not may mix "
+"standalone and non-standalone authentication."
 msgstr ""
 
 #: plugins/sudoers/auth/sudo_auth.c:203
