@@ -98,7 +98,7 @@ bsm_audit_success(char **exec_args)
 	if (!audit_sudo_selected(0))
 		debug_return;
 	if (getauid(&auid) < 0)
-		error(1, _("getauid failed"));
+		error(1, _("getauid: failed"));
 	if ((aufd = au_open()) == -1)
 		error(1, _("au_open: failed"));
 	if (getaudit_addr(&ainfo_addr, sizeof(ainfo_addr)) == 0) {
