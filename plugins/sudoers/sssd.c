@@ -253,8 +253,8 @@ static int sudo_sss_open(struct sudo_nss *nss)
     /* Load symbols */
     handle->ssslib = dlopen(path, RTLD_LAZY);
     if (handle->ssslib == NULL) {
-	warningx(_("Unable to dlopen %s: %s"), path, dlerror());
-	warningx(_("Unable to initialize SSS source. Is SSSD installed on your machine?"));
+	warningx(_("unable to dlopen %s: %s"), path, dlerror());
+	warningx(_("unable to initialize SSS source. Is SSSD installed on your machine?"));
 	debug_return_int(EFAULT);
     }
 
