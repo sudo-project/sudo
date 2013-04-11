@@ -113,8 +113,8 @@ sudo_krb5_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 	 */
 	if ((error = krb5_unparse_name(sudo_context, princ, &pname))) {
 	    log_error(NO_MAIL,
-		      N_("%s: unable to unparse princ ('%s'): %s"), auth->name,
-		      pw->pw_name, error_message(error));
+		      N_("%s: unable to convert principal to string ('%s'): %s"),
+		      auth->name, pw->pw_name, error_message(error));
 	    debug_return_int(AUTH_FAILURE);
 	}
 
@@ -166,7 +166,7 @@ sudo_krb5_init(struct passwd *pw, sudo_auth *auth)
     if ((error = krb5_cc_resolve(sudo_context, cache_name,
 	&(sudo_krb5_data.ccache)))) {
 	log_error(NO_MAIL,
-		  N_("%s: unable to resolve ccache: %s"), auth->name,
+		  N_("%s: unable to resolve credential cache: %s"), auth->name,
 		  error_message(error));
 	goto done;
     }
@@ -240,15 +240,15 @@ sudo_krb5_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     if ((error = verify_krb_v5_tgt(sudo_context, creds, auth->name)))
 	goto done;
 
-    /* Store cred in cred cache. */
+    /* Store credential in cache. */
     if ((error = krb5_cc_initialize(sudo_context, ccache, princ))) {
 	log_error(NO_MAIL,
-		  N_("%s: unable to initialize ccache: %s"), auth->name,
-		  error_message(error));
+		  N_("%s: unable to initialize credential cache: %s"),
+		  auth->name, error_message(error));
     } else if ((error = krb5_cc_store_cred(sudo_context, ccache, creds))) {
 	log_error(NO_MAIL,
-		  N_("%s: unable to store cred in ccache: %s"), auth->name,
-		  error_message(error));
+		  N_("%s: unable to store credential in cache: %s"),
+		  auth->name, error_message(error));
     }
 
 done:
