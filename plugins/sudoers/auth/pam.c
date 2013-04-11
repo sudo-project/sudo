@@ -157,8 +157,10 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 			PAM_CHANGE_EXPIRED_AUTHTOK);
 		    if (*pam_status == PAM_SUCCESS)
 			debug_return_int(AUTH_SUCCESS);
-		    if ((s = pam_strerror(pamh, *pam_status)))
-			log_error(NO_MAIL, N_("pam_chauthtok: %s"), s);
+		    if ((s = pam_strerror(pamh, *pam_status)) != NULL) {
+			log_error(NO_MAIL,
+			    N_("unable to change expired password: %s"), s);
+		    }
 		    debug_return_int(AUTH_FAILURE);
 		case PAM_AUTHTOK_EXPIRED:
 		    log_error(NO_MAIL,
@@ -182,8 +184,8 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	case PAM_PERM_DENIED:
 	    debug_return_int(AUTH_FAILURE);
 	default:
-	    if ((s = pam_strerror(pamh, *pam_status)))
-		log_error(NO_MAIL, N_("pam_authenticate: %s"), s);
+	    if ((s = pam_strerror(pamh, *pam_status)) != NULL)
+		log_error(NO_MAIL, N_("PAM authentication error: %s"), s);
 	    debug_return_int(AUTH_FATAL);
     }
 }
@@ -240,7 +242,9 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
     if (status == PAM_SUCCESS) {
 	sudo_pam_cred_established = true;
     } else if (sudo_pam_authenticated) {
-	warningx("pam_setcred: %s", pam_strerror(pamh, status));
+	const char *s = pam_strerror(pamh, status);
+	if (s != NULL)
+	    log_error(NO_MAIL, N_("unable to establish credentials: %s"), s);
 	goto done;
     }
 
