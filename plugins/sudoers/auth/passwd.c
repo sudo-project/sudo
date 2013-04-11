@@ -68,15 +68,15 @@ sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth)
     char sav, *epass;
     char *pw_epasswd = auth->data;
     size_t pw_len;
-    int error;
+    int matched = 0;
     debug_decl(sudo_passwd_verify, SUDO_DEBUG_AUTH)
 
     pw_len = strlen(pw_epasswd);
 
 #ifdef HAVE_GETAUTHUID
     /* Ultrix shadow passwords may use crypt16() */
-    error = strcmp(pw_epasswd, (char *) crypt16(pass, pw_epasswd));
-    if (!error)
+    epass = (char *) crypt16(pass, pw_epasswd);
+    if (epass != NULL && strcmp(pw_epasswd, epass) == 0)
 	debug_return_int(AUTH_SUCCESS);
 #endif /* HAVE_GETAUTHUID */
 
@@ -95,12 +95,14 @@ sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth)
      */
     epass = (char *) crypt(pass, pw_epasswd);
     pass[8] = sav;
-    if (HAS_AGEINFO(pw_epasswd, pw_len) && strlen(epass) == DESLEN)
-	error = strncmp(pw_epasswd, epass, DESLEN);
-    else
-	error = strcmp(pw_epasswd, epass);
+    if (epass != NULL) {
+	if (HAS_AGEINFO(pw_epasswd, pw_len) && strlen(epass) == DESLEN)
+	    matched = !strncmp(pw_epasswd, epass, DESLEN);
+	else
+	    matched = !strcmp(pw_epasswd, epass);
+    }
 
-    debug_return_int(error ? AUTH_FAILURE : AUTH_SUCCESS);
+    debug_return_int(matched ? AUTH_SUCCESS : AUTH_FAILURE);
 }
 
 int
