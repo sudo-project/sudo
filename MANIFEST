@@ -200,6 +200,7 @@ plugins/sudoers/gram.c
 plugins/sudoers/gram.h
 plugins/sudoers/gram.y
 plugins/sudoers/group_plugin.c
+plugins/sudoers/hexchar.c
 plugins/sudoers/ins_2001.h
 plugins/sudoers/ins_classic.h
 plugins/sudoers/ins_csops.h
@@ -268,6 +269,8 @@ plugins/sudoers/regress/logging/check_wrap.in
 plugins/sudoers/regress/logging/check_wrap.out.ok
 plugins/sudoers/regress/parser/check_addr.c
 plugins/sudoers/regress/parser/check_addr.in
+plugins/sudoers/regress/parser/check_digest.c
+plugins/sudoers/regress/parser/check_digest.out.ok
 plugins/sudoers/regress/parser/check_fill.c
 plugins/sudoers/regress/sudoers/test1.in
 plugins/sudoers/regress/sudoers/test1.out.ok
@@ -331,6 +334,8 @@ plugins/sudoers/regress/visudo/test3.err.ok
 plugins/sudoers/regress/visudo/test3.out.ok
 plugins/sudoers/regress/visudo/test3.sh
 plugins/sudoers/set_perms.c
+plugins/sudoers/sha2.c
+plugins/sudoers/sha2.h
 plugins/sudoers/sssd.c
 plugins/sudoers/sudo_nss.c
 plugins/sudoers/sudo_nss.h

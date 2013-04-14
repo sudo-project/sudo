@@ -49,13 +49,9 @@ typedef struct {
 
 void SHA224Init(SHA2_CTX *ctx);
 void SHA224Pad(SHA2_CTX *ctx);
-void SHA224Transform(uint32_t state[8], const uint8_t buffer[SHA224_BLOCK_LENGTH])
-	__attribute__((__bounded__(__minbytes__,1,32)))
-	__attribute__((__bounded__(__minbytes__,2,SHA224_BLOCK_LENGTH)));
-void SHA224Update(SHA2_CTX *ctx, const uint8_t *data, size_t len)
-	__attribute__((__bounded__(__string__,2,3)));
-void SHA224Final(uint8_t digest[SHA224_DIGEST_LENGTH], SHA2_CTX *ctx)
-	__attribute__((__bounded__(__minbytes__,1,SHA224_DIGEST_LENGTH)));
+void SHA224Transform(uint32_t state[8], const uint8_t buffer[SHA224_BLOCK_LENGTH]);
+void SHA224Update(SHA2_CTX *ctx, const uint8_t *data, size_t len);
+void SHA224Final(uint8_t digest[SHA224_DIGEST_LENGTH], SHA2_CTX *ctx);
 
 void SHA256Init(SHA2_CTX *ctx);
 void SHA256Pad(SHA2_CTX *ctx);

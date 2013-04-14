@@ -32,6 +32,10 @@
 #define PRIVS 288
 #define LIMITPRIVS 289
 #define MYSELF 290
+#define SHA224 291
+#define SHA256 292
+#define SHA384 293
+#define SHA512 294
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {
@@ -40,6 +44,7 @@ typedef union {
     struct member *member;
     struct runascontainer *runas;
     struct privilege *privilege;
+    struct sudo_digest *digest;
     struct sudo_command command;
     struct cmndtag tag;
     struct selinux_info seinfo;

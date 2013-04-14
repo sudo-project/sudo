@@ -57,51 +57,6 @@
 static int arg_len = 0;
 static int arg_size = 0;
 
-static int
-hexchar(const char *s)
-{
-    int i, result = 0;
-    debug_decl(hexchar, SUDO_DEBUG_PARSER)
-
-    s += 2; /* skip \\x */
-    for (i = 0; i < 2; i++) {
-	switch (*s) {
-	case 'A':
-	case 'a':
-	    result += 10;
-	    break;
-	case 'B':
-	case 'b':
-	    result += 11;
-	    break;
-	case 'C':
-	case 'c':
-	    result += 12;
-	    break;
-	case 'D':
-	case 'd':
-	    result += 13;
-	    break;
-	case 'E':
-	case 'e':
-	    result += 14;
-	    break;
-	case 'F':
-	case 'f':
-	    result += 15;
-	    break;
-	default:
-	    result += *s - '0';
-	    break;
-	}
-	if (i == 0) {
-	    result *= 16;
-	    s++;
-	}
-    }
-    debug_return_int(result);
-}
-
 bool
 fill_txt(const char *src, int len, int olen)
 {
@@ -123,7 +78,7 @@ fill_txt(const char *src, int len, int olen)
 	    if (src[1] == 'x' && len >= 3 && 
 		isxdigit((unsigned char) src[2]) &&
 		isxdigit((unsigned char) src[3])) {
-		*dst++ = hexchar(src);
+		*dst++ = hexchar(src + 2);
 		src += 4;
 		len -= 3;
 	    } else {

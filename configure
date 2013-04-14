@@ -16247,6 +16247,39 @@ _ACEOF
 
 fi
 
+ac_fn_c_check_type "$LINENO" "uint8_t" "ac_cv_type_uint8_t" "$ac_includes_default"
+if test "x$ac_cv_type_uint8_t" = xyes; then :
+
+else
+
+cat >>confdefs.h <<_ACEOF
+#define uint8_t unsigned char
+_ACEOF
+
+fi
+
+ac_fn_c_check_type "$LINENO" "uint32_t" "ac_cv_type_uint32_t" "$ac_includes_default"
+if test "x$ac_cv_type_uint32_t" = xyes; then :
+
+else
+
+cat >>confdefs.h <<_ACEOF
+#define uint32_t unsigned int
+_ACEOF
+
+fi
+
+ac_fn_c_check_type "$LINENO" "uint64_t" "ac_cv_type_uint64_t" "$ac_includes_default"
+if test "x$ac_cv_type_uint64_t" = xyes; then :
+
+else
+
+cat >>confdefs.h <<_ACEOF
+#define uint64_t unsigned long long
+_ACEOF
+
+fi
+
 ac_fn_c_check_type "$LINENO" "socklen_t" "ac_cv_type_socklen_t" "
 $ac_includes_default
 #include <sys/socket.h>

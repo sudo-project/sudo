@@ -960,6 +960,15 @@
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef uid_t
 
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+#undef uint32_t
+
+/* Define to `unsigned long long' if <sys/types.h> does not define. */
+#undef uint64_t
+
+/* Define to `unsigned char' if <sys/types.h> does not define. */
+#undef uint8_t
+
 /* Define to empty if the keyword `volatile' does not work. Warning: valid
    code using `volatile' can become incorrect without. Disable with care. */
 #undef volatile

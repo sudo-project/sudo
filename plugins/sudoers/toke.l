@@ -530,11 +530,32 @@ ALL {
 			}
 
 <GOTDEFS>({PATH}|sudoedit) {
+			    /* XXX - no way to specify digest for command */
 			    /* no command args allowed for Defaults!/path */
 			    if (!fill_cmnd(sudoerstext, sudoersleng))
 				yyterminate();
 			    LEXTRACE("COMMAND ");
 			    LEXRETURN(COMMAND);
+			}
+
+sha224			{
+			    LEXTRACE("SHA224 ");
+			    LEXRETURN(SHA224);
+			}
+
+sha256			{
+			    LEXTRACE("SHA256 ");
+			    LEXRETURN(SHA256);
+			}
+
+sha384			{
+			    LEXTRACE("SHA384 ");
+			    LEXRETURN(SHA384);
+			}
+
+sha512			{
+			    LEXTRACE("SHA512 ");
+			    LEXRETURN(SHA512);
 			}
 
 sudoedit		{

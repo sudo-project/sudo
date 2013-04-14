@@ -27,12 +27,24 @@
 #undef IMPLIED
 #define IMPLIED	 2
 
+#define SUDO_DIGEST_SHA224	0
+#define SUDO_DIGEST_SHA256	1
+#define SUDO_DIGEST_SHA384	2
+#define SUDO_DIGEST_SHA512	3
+
+struct sudo_digest {
+    int digest_type;
+    char *digest_str;
+};
+
 /*
- * A command with args. XXX - merge into struct member.
+ * A command with option args and digest.
+ * XXX - merge into struct member
  */
 struct sudo_command {
     char *cmnd;
     char *args;
+    struct sudo_digest *digest;
 };
 
 /*
@@ -117,6 +129,7 @@ struct cmndspec {
     struct member_list runasuserlist;	/* list of runas users */
     struct member_list runasgrouplist;	/* list of runas groups */
     struct member *cmnd;		/* command to allow/deny */
+    char *digest;			/* optional command digest */
     struct cmndtag tags;		/* tag specificaion */
 #ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
@@ -182,7 +195,7 @@ char *alias_add(char *, int, struct member *);
 bool addr_matches(char *);
 int cmnd_matches(struct member *);
 int cmndlist_matches(struct member_list *);
-bool command_matches(char *, char *);
+bool command_matches(char *, char *, struct sudo_digest *);
 int hostlist_matches(struct member_list *);
 bool hostname_matches(char *, char *, char *);
 bool netgr_matches(char *, char *, char *, char *);
@@ -200,5 +213,6 @@ void init_aliases(void);
 void init_lexer(void);
 void init_parser(const char *, bool);
 int alias_compare(const void *, const void *);
+int hexchar(const char *s);
 
 #endif /* _SUDOERS_PARSE_H */

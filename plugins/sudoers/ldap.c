@@ -855,7 +855,7 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
 	    *allowed_args++ = '\0';
 
 	/* check the command like normal */
-	if (command_matches(allowed_cmnd, allowed_args)) {
+	if (command_matches(allowed_cmnd, allowed_args, NULL)) {
 	    /*
 	     * If allowed (no bang) set ret but keep on checking.
 	     * If disallowed (bang), exit loop.

@@ -89,6 +89,7 @@ static void  add_defaults(int, struct member *, struct defaults *);
 static void  add_userspec(struct member *, struct privilege *);
 static struct defaults *new_default(char *, char *, int);
 static struct member *new_member(char *, int);
+static struct sudo_digest *new_digest(int, const char *);
 %}
 
 %union {
@@ -97,6 +98,7 @@ static struct member *new_member(char *, int);
     struct member *member;
     struct runascontainer *runas;
     struct privilege *privilege;
+    struct sudo_digest *digest;
     struct sudo_command command;
     struct cmndtag tag;
     struct selinux_info seinfo;
@@ -142,6 +144,10 @@ static struct member *new_member(char *, int);
 %token <tok>	 PRIVS			/* Solaris privileges */
 %token <tok>	 LIMITPRIVS		/* Solaris limit privileges */
 %token <tok>	 MYSELF			/* run as myself, not another user */
+%token <tok>	 SHA224			/* sha224 digest */
+%token <tok>	 SHA256			/* sha256 digest */
+%token <tok>	 SHA384			/* sha384 digest */
+%token <tok>	 SHA512			/* sha512 digest */
 
 %type <cmndspec>  cmndspec
 %type <cmndspec>  cmndspeclist
@@ -149,6 +155,7 @@ static struct member *new_member(char *, int);
 %type <defaults>  defaults_list
 %type <member>	  cmnd
 %type <member>	  opcmnd
+%type <member>	  digcmnd
 %type <member>	  cmndlist
 %type <member>	  host
 %type <member>	  hostlist
@@ -170,6 +177,7 @@ static struct member *new_member(char *, int);
 %type <privinfo>  solarisprivs
 %type <string>	  privsspec
 %type <string>	  limitprivsspec
+%type <digest>	  digest
 
 %%
 
@@ -327,7 +335,7 @@ cmndspeclist	:	cmndspec
 			}
 		;
 
-cmndspec	:	runasspec selinux solarisprivs cmndtag opcmnd {
+cmndspec	:	runasspec selinux solarisprivs cmndtag digcmnd {
 			    struct cmndspec *cs = ecalloc(1, sizeof(*cs));
 			    if ($1 != NULL) {
 				list2tq(&cs->runasuserlist, $1->runasusers);
@@ -354,6 +362,31 @@ cmndspec	:	runasspec selinux solarisprivs cmndtag opcmnd {
 				cs->tags.setenv == UNSPEC)
 				cs->tags.setenv = IMPLIED;
 			    $$ = cs;
+			}
+		;
+
+digest		:	SHA224 ':' WORD {
+			    $$ = new_digest(SUDO_DIGEST_SHA224, $3);
+			}
+		|	SHA256 ':' WORD {
+			    $$ = new_digest(SUDO_DIGEST_SHA256, $3);
+			}
+		|	SHA384 ':' WORD {
+			    $$ = new_digest(SUDO_DIGEST_SHA384, $3);
+			}
+		|	SHA512 ':' WORD {
+			    $$ = new_digest(SUDO_DIGEST_SHA512, $3);
+			}
+		;
+
+digcmnd		:	opcmnd {
+			    $$ = $1;
+			}
+		|	digest opcmnd {
+			    /* XXX - yuck */
+			    struct sudo_command *c = (struct sudo_command *)($2->name);
+			    c->digest = $1;
+			    $$ = $2;
 			}
 		;
 
@@ -548,8 +581,8 @@ cmndalias	:	ALIAS '=' cmndlist {
 			}
 		;
 
-cmndlist	:	opcmnd
-		|	cmndlist ',' opcmnd {
+cmndlist	:	digcmnd
+		|	cmndlist ',' digcmnd {
 			    list_append($1, $3);
 			    $$ = $1;
 			}
@@ -650,7 +683,6 @@ sudoerserror(const char *s)
     debug_decl(sudoerserror, SUDO_DEBUG_PARSER)
 
     /* If we last saw a newline the error is on the preceding line. */
-    /* XXX - COMMENT not yet defined - XXX */
     if (last_token == COMMENT)
 	sudolineno--;
 
@@ -708,6 +740,19 @@ new_member(char *name, int type)
     /* m->next = NULL; */
 
     debug_return_ptr(m);
+}
+
+struct sudo_digest *
+new_digest(int digest_type, const char *digest_str)
+{
+    struct sudo_digest *dig;
+    debug_decl(new_digest, SUDO_DEBUG_PARSER)
+
+    dig = emalloc(sizeof(*dig));
+    dig->digest_type = digest_type;
+    dig->digest_str = estrdup(digest_str);
+
+    debug_return_ptr(dig);
 }
 
 /*

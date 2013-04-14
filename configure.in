@@ -2169,6 +2169,9 @@ AC_CHECK_TYPE(size_t, unsigned int)
 AC_CHECK_TYPE(ssize_t, int)
 AC_CHECK_TYPE(dev_t, int)
 AC_CHECK_TYPE(ino_t, unsigned int)
+AC_CHECK_TYPE(uint8_t, unsigned char)
+AC_CHECK_TYPE(uint32_t, unsigned int)
+AC_CHECK_TYPE(uint64_t, unsigned long long)
 AC_CHECK_TYPE(socklen_t, [], [AC_DEFINE(socklen_t, unsigned int)], [
 AC_INCLUDES_DEFAULT
 #include <sys/socket.h>])
