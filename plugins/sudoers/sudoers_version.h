@@ -45,11 +45,12 @@
  * 40	sudo 1.7.6/1.8.1, A group ID is now allowed in a User_List or Runas_List.
  * 41	sudo 1.7.6/1.8.4, Support for relative paths in #include and #includedir
  * 42	sudo 1.8.6, Support for empty Runas_List (with or without a colon) to mean the invoking user.  Support for Solaris Privilege Sets (PRIVS= and LIMITPRIVS=).
+ * 43	sudo 1.8.7, Support for specifying a digest along with the command.
 */
 
 #ifndef _SUDOERS_VERSION_H
 #define	_SUDOERS_VERSION_H
 
-#define SUDOERS_GRAMMAR_VERSION	42
+#define SUDOERS_GRAMMAR_VERSION	43
 
 #endif /* _SUDOERS_VERSION_H */
