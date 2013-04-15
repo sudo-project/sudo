@@ -569,7 +569,7 @@ command_matches_normal(char *sudoers_cmnd, char *sudoers_args, struct sudo_diges
 
 static struct digest_function {
     const char *digest_name;
-    const int digest_len;
+    const unsigned int digest_len;
     void (*init)(SHA2_CTX *);
     void (*update)(SHA2_CTX *, const unsigned char *, size_t);
     void (*final)(unsigned char *, SHA2_CTX *);
@@ -603,17 +603,62 @@ static struct digest_function {
     }
 };
 
+static size_t
+base64_decode(const char *src, unsigned char *dst)
+{
+    static const char b64[] =
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    const unsigned char *dst0 = dst;
+    unsigned char ch[4];
+    char *pos;
+    int i;
+    debug_decl(base64_decode, SUDO_DEBUG_MATCH)
+
+    /*
+     * Convert from base64 to binary.  Each base64 char holds 6 bits of data
+     * so 4 base64 chars equals 3 chars of data.
+     * Padding (with the '=' char) may or may not be present.
+     */
+    while (*src != '\0') {
+	for (i = 0; i < 4; i++) {
+	    switch (*src) {
+	    case '=':
+		src++;
+		/* FALLTHROUGH */
+	    case '\0':
+		ch[i] = '=';
+		break;
+	    default:
+		if ((pos = strchr(b64, *src++)) == NULL)
+		    debug_return_size_t((size_t)-1);
+		ch[i] = (unsigned char)(pos - b64);
+		break;
+	    }
+	}
+	if (ch[0] == '=' || ch[1] == '=')
+	    break;
+	*dst++ = (ch[0] << 2) | ((ch[1] & 0x30) >> 4);
+	if (ch[2] == '=')
+	    break;
+	*dst++ = ((ch[1] & 0x0f) << 4) | ((ch[2] & 0x3c) >> 2);
+	if (ch[3] == '=')
+	    break;
+	*dst++ = ((ch[2] & 0x03) << 6) | ch[3];
+    }
+    debug_return_size_t((size_t)(dst - dst0));
+}
+
 static bool
 digest_matches(char *file, struct sudo_digest *sd)
 {
-    char file_digest[SHA512_DIGEST_LENGTH];
-    char sudoers_digest[SHA512_DIGEST_LENGTH];
+    unsigned char file_digest[SHA512_DIGEST_LENGTH];
+    unsigned char sudoers_digest[SHA512_DIGEST_LENGTH];
     unsigned char buf[32 * 1024];
     struct digest_function *func = NULL;
     size_t nread;
     SHA2_CTX ctx;
     FILE *fp;
-    int i;
+    unsigned int i;
     debug_decl(digest_matches, SUDO_DEBUG_MATCH)
 
     for (i = 0; digest_functions[i].digest_name != NULL; i++) {
@@ -626,23 +671,18 @@ digest_matches(char *file, struct sudo_digest *sd)
 	warningx(_("unsupported digest type %d for %s"), sd->digest_type, file);
 	debug_return_bool(false);
     }
-    /* XXX - support base64 type too */
-    if (strlen(sd->digest_str) != func->digest_len * 2) {
-	warningx(_("digest for %s (%s) is not in %s form"), file,
-	    sd->digest_str, func->digest_name);
-	debug_return_bool(false);
-    }
-
-    /* First convert the digest from sudoers from ascii to binary. */
-    /* XXX - parse base64 type too */
-    for (i = 0; i < func->digest_len; i++) {
-	if (!isxdigit((unsigned char)sd->digest_str[i + i]) ||
-	    !isxdigit((unsigned char)sd->digest_str[i + i + 1])) {
-	    warningx(_("digest for %s (%s) is not in %s form"), file,
-		sd->digest_str, func->digest_name);
-	    debug_return_bool(false);
+    if (strlen(sd->digest_str) == func->digest_len * 2) {
+	/* Convert the command digest from ascii hex to binary. */
+	for (i = 0; i < func->digest_len; i++) {
+	    if (!isxdigit((unsigned char)sd->digest_str[i + i]) ||
+		!isxdigit((unsigned char)sd->digest_str[i + i + 1])) {
+		goto bad_format;
+	    }
+	    sudoers_digest[i] = hexchar(&sd->digest_str[i + i]);
 	}
-	sudoers_digest[i] = hexchar(&sd->digest_str[i + i]);
+    } else {
+	if (base64_decode(sd->digest_str, sudoers_digest) != func->digest_len)
+	    goto bad_format;
     }
 
     if ((fp = fopen(file, "r")) == NULL) {
@@ -664,6 +704,10 @@ digest_matches(char *file, struct sudo_digest *sd)
     func->final(file_digest, &ctx);
 
     debug_return_bool(memcmp(file_digest, sudoers_digest, func->digest_len) == 0);
+bad_format:
+    warningx(_("digest for %s (%s) is not in %s form"), file,
+	sd->digest_str, func->digest_name);
+    debug_return_bool(false);
 }
 
 static bool

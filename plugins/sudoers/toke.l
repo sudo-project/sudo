@@ -71,6 +71,7 @@
 #include "toke.h"
 #include <gram.h>
 #include "lbuf.h"
+#include "sha2.h"
 #include "secure_path.h"
 
 extern YYSTYPE sudoerslval;
@@ -88,6 +89,7 @@ gid_t sudoers_gid = SUDOERS_GID;
 
 static bool continued, sawspace;
 static int prev_state;
+static int digest_len;
 
 static bool _push_include(char *, bool);
 static bool pop_include(void);
@@ -128,6 +130,7 @@ DEFVAR			[a-z_]+
 %x	STARTDEFS
 %x	INDEFS
 %x	INSTR
+%s	WANTDIGEST
 
 %%
 <GOTDEFS>[[:blank:]]*,[[:blank:]]* {
@@ -264,6 +267,40 @@ DEFVAR			[a-z_]+
 			    sawspace = false;
 			}			/* a command line arg */
 }
+
+<WANTDIGEST>[[:xdigit:]]+ {
+			    /* Only return DIGEST if the length is correct. */
+			    if (sudoersleng == digest_len * 2) {
+				if (!fill(sudoerstext, sudoersleng))
+				    yyterminate();
+				BEGIN INITIAL;
+				LEXTRACE("DIGEST ");
+				LEXRETURN(DIGEST);
+			    }
+			    BEGIN INITIAL;
+			    yyless(sudoersleng);
+			} /* hex digest */
+
+<WANTDIGEST>[A-Za-z0-9\+/=]+ {
+			    /* Only return DIGEST if the length is correct. */
+			    size_t len;
+			    if (sudoerstext[sudoersleng - 1] == '=') {
+				/* use padding */
+				len = 4 * ((digest_len + 2) / 3);
+			    } else {
+				/* no padding */
+				len = (4 * digest_len + 2) / 3;
+			    }
+			    if (sudoersleng == len) {
+				if (!fill(sudoerstext, sudoersleng))
+				    yyterminate();
+				BEGIN INITIAL;
+				LEXTRACE("DIGEST ");
+				LEXRETURN(DIGEST);
+			    }
+			    BEGIN INITIAL;
+			    yyless(sudoersleng);
+			} /* base64 digest */
 
 <INITIAL>^#include[[:blank:]]+.*\n {
 			    char *path;
@@ -539,21 +576,29 @@ ALL {
 			}
 
 sha224			{
+			    digest_len = SHA224_DIGEST_LENGTH;
+			    BEGIN WANTDIGEST;
 			    LEXTRACE("SHA224 ");
 			    LEXRETURN(SHA224);
 			}
 
 sha256			{
+			    digest_len = SHA256_DIGEST_LENGTH;
+			    BEGIN WANTDIGEST;
 			    LEXTRACE("SHA256 ");
 			    LEXRETURN(SHA256);
 			}
 
 sha384			{
+			    digest_len = SHA384_DIGEST_LENGTH;
+			    BEGIN WANTDIGEST;
 			    LEXTRACE("SHA384 ");
 			    LEXRETURN(SHA384);
 			}
 
 sha512			{
+			    digest_len = SHA512_DIGEST_LENGTH;
+			    BEGIN WANTDIGEST;
 			    LEXTRACE("SHA512 ");
 			    LEXRETURN(SHA512);
 			}

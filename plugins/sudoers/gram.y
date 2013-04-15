@@ -115,6 +115,7 @@ static struct sudo_digest *new_digest(int, const char *);
 %token <string>  NETGROUP		/* a netgroup (+NAME) */
 %token <string>  USERGROUP		/* a usergroup (%NAME) */
 %token <string>  WORD			/* a word */
+%token <string>  DIGEST			/* a SHA-2 digest */
 %token <tok>	 DEFAULTS		/* Defaults entry */
 %token <tok>	 DEFAULTS_HOST		/* Host-specific defaults entry */
 %token <tok>	 DEFAULTS_USER		/* User-specific defaults entry */
@@ -365,16 +366,16 @@ cmndspec	:	runasspec selinux solarisprivs cmndtag digcmnd {
 			}
 		;
 
-digest		:	SHA224 ':' WORD {
+digest		:	SHA224 ':' DIGEST {
 			    $$ = new_digest(SUDO_DIGEST_SHA224, $3);
 			}
-		|	SHA256 ':' WORD {
+		|	SHA256 ':' DIGEST {
 			    $$ = new_digest(SUDO_DIGEST_SHA256, $3);
 			}
-		|	SHA384 ':' WORD {
+		|	SHA384 ':' DIGEST {
 			    $$ = new_digest(SUDO_DIGEST_SHA384, $3);
 			}
-		|	SHA512 ':' WORD {
+		|	SHA512 ':' DIGEST {
 			    $$ = new_digest(SUDO_DIGEST_SHA512, $3);
 			}
 		;
