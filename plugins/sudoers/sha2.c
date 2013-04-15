@@ -48,6 +48,15 @@
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
+#if defined(HAVE_ENDIAN_H)
+# include <endian.h>
+#elif defined(HAVE_SYS_ENDIAN_H)
+# include <sys/endian.h>
+#elif defined(HAVE_MACHINE_ENDIAN_H)
+# include <machine/endian.h>
+#else
+# include "compat/endian.h"
+#endif
 
 #include "sha2.h"
 
@@ -147,10 +156,14 @@ SHA224Final(uint8_t digest[SHA224_DIGEST_LENGTH], SHA2_CTX *ctx)
 {
 	SHA256Pad(ctx);
 	if (digest != NULL) {
+#if BYTE_ORDER == BIG_ENDIAN
+		memcpy(digest, ctx->state.st32, SHA224_DIGEST_LENGTH);
+#else
 		unsigned int i;
 
 		for (i = 0; i < 7; i++)
 			BE32TO8(digest + (i * 4), ctx->state.st32[i]);
+#endif
 		memset(ctx, 0, sizeof(*ctx));
 	}
 }
@@ -210,10 +223,14 @@ SHA256Transform(uint32_t state[8], const uint8_t data[SHA256_BLOCK_LENGTH])
 	/* Copy context state to working vars. */
 	memcpy(T, state, sizeof(T));
 	/* Copy data to W in big endian format. */
+#if BYTE_ORDER == BIG_ENDIAN
+	memcpy(W, data, sizeof(W));
+#else
 	for (j = 0; j < 16; j++) {
 	    BE8TO32(W[j], data);
 	    data += 4;
 	}
+#endif
 	/* 64 operations, partially loop unrolled. */
 	for (j = 0; j < 64; j += 16)
 	{
@@ -283,10 +300,14 @@ SHA256Final(uint8_t digest[SHA256_DIGEST_LENGTH], SHA2_CTX *ctx)
 {
 	SHA256Pad(ctx);
 	if (digest != NULL) {
+#if BYTE_ORDER == BIG_ENDIAN
+		memcpy(digest, ctx->state.st32, SHA256_DIGEST_LENGTH);
+#else
 		unsigned int i;
 
 		for (i = 0; i < 8; i++)
 			BE32TO8(digest + (i * 4), ctx->state.st32[i]);
+#endif
 		memset(ctx, 0, sizeof(*ctx));
 	}
 }
@@ -328,10 +349,14 @@ SHA384Final(uint8_t digest[SHA384_DIGEST_LENGTH], SHA2_CTX *ctx)
 {
 	SHA384Pad(ctx);
 	if (digest != NULL) {
+#if BYTE_ORDER == BIG_ENDIAN
+		memcpy(digest, ctx->state.st64, SHA384_DIGEST_LENGTH);
+#else
 		unsigned int i;
 
 		for (i = 0; i < 6; i++)
 			BE64TO8(digest + (i * 8), ctx->state.st64[i]);
+#endif
 		memset(ctx, 0, sizeof(*ctx));
 	}
 }
@@ -415,10 +440,14 @@ SHA512Transform(uint64_t state[8], const uint8_t data[SHA512_BLOCK_LENGTH])
 	/* Copy context state to working vars. */
 	memcpy(T, state, sizeof(T));
 	/* Copy data to W in big endian format. */
+#if BYTE_ORDER == BIG_ENDIAN
+	memcpy(W, data, sizeof(W));
+#else
 	for (j = 0; j < 16; j++) {
 	    BE8TO64(W[j], data);
 	    data += 8;
 	}
+#endif
 	/* 80 operations, partially loop unrolled. */
 	for (j = 0; j < 80; j += 16)
 	{
@@ -485,10 +514,14 @@ SHA512Final(uint8_t digest[SHA512_DIGEST_LENGTH], SHA2_CTX *ctx)
 {
 	SHA512Pad(ctx);
 	if (digest != NULL) {
+#if BYTE_ORDER == BIG_ENDIAN
+		memcpy(digest, ctx->state.st64, SHA512_DIGEST_LENGTH);
+#else
 		unsigned int i;
 
 		for (i = 0; i < 8; i++)
 			BE64TO8(digest + (i * 8), ctx->state.st64[i]);
+#endif
 		memset(ctx, 0, sizeof(*ctx));
 	}
 }

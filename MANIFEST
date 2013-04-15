@@ -51,6 +51,7 @@ compat/charclass.h
 compat/closefrom.c
 compat/dlfcn.h
 compat/dlopen.c
+compat/endian.h
 compat/fnmatch.c
 compat/fnmatch.h
 compat/getaddrinfo.c

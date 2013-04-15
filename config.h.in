@@ -134,6 +134,9 @@
 /* Define to 1 if the compiler supports the __visibility__ attribute. */
 #undef HAVE_DSO_VISIBILITY
 
+/* Define to 1 if you have the <endian.h> header file. */
+#undef HAVE_ENDIAN_H
+
 /* Define to 1 if your system has the F_CLOSEM fcntl. */
 #undef HAVE_FCNTL_CLOSEM
 
@@ -351,6 +354,9 @@
 
 /* Define to 1 if you have the `lrand48' function. */
 #undef HAVE_LRAND48
+
+/* Define to 1 if you have the <machine/endian.h> header file. */
+#undef HAVE_MACHINE_ENDIAN_H
 
 /* Define to 1 if you have the <maillock.h> header file. */
 #undef HAVE_MAILLOCK_H
@@ -638,6 +644,9 @@
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */
 #undef HAVE_SYS_DIR_H
+
+/* Define to 1 if you have the <sys/endian.h> header file. */
+#undef HAVE_SYS_ENDIAN_H
 
 /* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
    */
