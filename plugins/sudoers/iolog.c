@@ -361,7 +361,6 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     gid_t runas_gid = 0;
     debug_decl(iolog_deserialize_info, SUDO_DEBUG_UTIL)
 
-    memset(details, 0, sizeof(*details));
     details->lines = 24;
     details->cols = 80;
 
@@ -533,6 +532,8 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     /* If we have no command (because -V was specified) just return. */
     if (argc == 0)
 	debug_return_bool(true);
+
+    memset(&details, 0, sizeof(details));
 
     if (error_setjmp() != 0) {
 	/* called via error(), errorx() or log_fatal() */
