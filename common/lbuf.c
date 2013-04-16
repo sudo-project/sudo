@@ -76,6 +76,17 @@ lbuf_destroy(struct lbuf *lbuf)
     debug_return;
 }
 
+static void
+lbuf_expand(struct lbuf *lbuf, size_t extra)
+{
+    if (lbuf->len + extra + 1 >= lbuf->size) {
+	do {
+	    lbuf->size += 256;
+	} while (lbuf->len + extra + 1 >= lbuf->size);
+	lbuf->buf = erealloc(lbuf->buf, lbuf->size);
+    }
+}
+
 /*
  * Parse the format and append strings, only %s and %% escapes are supported.
  * Any characters in set are quoted with a backslash.
@@ -85,47 +96,40 @@ lbuf_append_quoted(struct lbuf *lbuf, const char *set, const char *fmt, ...)
 {
     va_list ap;
     int len;
-    char *cp, *s = NULL;
+    char *cp, *s;
     debug_decl(lbuf_append_quoted, SUDO_DEBUG_UTIL)
 
     va_start(ap, fmt);
     while (*fmt != '\0') {
-	len = 1;
 	if (fmt[0] == '%' && fmt[1] == 's') {
-	    s = va_arg(ap, char *);
-	    len = strlen(s);
-	}
-	/* Assume worst case that all chars must be escaped. */
-	if (lbuf->len + (len * 2) + 1 >= lbuf->size) {
-	    do {
-		lbuf->size += 256;
-	    } while (lbuf->len + len + 1 >= lbuf->size);
-	    lbuf->buf = erealloc(lbuf->buf, lbuf->size);
-	}
-	if (*fmt == '%') {
-	    if (*(++fmt) == 's') {
-		while ((cp = strpbrk(s, set)) != NULL) {
-		    len = (int)(cp - s);
-		    memcpy(lbuf->buf + lbuf->len, s, len);
-		    lbuf->len += len;
-		    lbuf->buf[lbuf->len++] = '\\';
-		    lbuf->buf[lbuf->len++] = *cp;
-		    s = cp + 1;
-		}
-		if (*s != '\0') {
-		    len = strlen(s);
-		    memcpy(lbuf->buf + lbuf->len, s, len);
-		    lbuf->len += len;
-		}
-		fmt++;
-		continue;
+	    if ((s = va_arg(ap, char *)) == NULL)
+		goto done;
+	    while ((cp = strpbrk(s, set)) != NULL) {
+		len = (int)(cp - s);
+		lbuf_expand(lbuf, len + 2);
+		memcpy(lbuf->buf + lbuf->len, s, len);
+		lbuf->len += len;
+		lbuf->buf[lbuf->len++] = '\\';
+		lbuf->buf[lbuf->len++] = *cp;
+		s = cp + 1;
 	    }
+	    if (*s != '\0') {
+		len = strlen(s);
+		lbuf_expand(lbuf, len);
+		memcpy(lbuf->buf + lbuf->len, s, len);
+		lbuf->len += len;
+	    }
+	    fmt += 2;
+	    continue;
 	}
+	lbuf_expand(lbuf, 2);
 	if (strchr(set, *fmt) != NULL)
 	    lbuf->buf[lbuf->len++] = '\\';
 	lbuf->buf[lbuf->len++] = *fmt++;
     }
-    lbuf->buf[lbuf->len] = '\0';
+done:
+    if (lbuf->size != 0)
+	lbuf->buf[lbuf->len] = '\0';
     va_end(ap);
 
     debug_return;
@@ -139,33 +143,27 @@ lbuf_append(struct lbuf *lbuf, const char *fmt, ...)
 {
     va_list ap;
     int len;
-    char *s = NULL;
+    char *s;
     debug_decl(lbuf_append, SUDO_DEBUG_UTIL)
 
     va_start(ap, fmt);
     while (*fmt != '\0') {
-	len = 1;
 	if (fmt[0] == '%' && fmt[1] == 's') {
-	    s = va_arg(ap, char *);
+	    if ((s = va_arg(ap, char *)) == NULL)
+		goto done;
 	    len = strlen(s);
+	    lbuf_expand(lbuf, len);
+	    memcpy(lbuf->buf + lbuf->len, s, len);
+	    lbuf->len += len;
+	    fmt += 2;
+	    continue;
 	}
-	if (lbuf->len + len + 1 >= lbuf->size) {
-	    do {
-		lbuf->size += 256;
-	    } while (lbuf->len + len + 1 >= lbuf->size);
-	    lbuf->buf = erealloc(lbuf->buf, lbuf->size);
-	}
-	if (*fmt == '%') {
-	    if (*(++fmt) == 's') {
-		memcpy(lbuf->buf + lbuf->len, s, len);
-		lbuf->len += len;
-		fmt++;
-		continue;
-	    }
-	}
+	lbuf_expand(lbuf, 1);
 	lbuf->buf[lbuf->len++] = *fmt++;
     }
-    lbuf->buf[lbuf->len] = '\0';
+done:
+    if (lbuf->size != 0)
+	lbuf->buf[lbuf->len] = '\0';
     va_end(ap);
 
     debug_return;
