@@ -16183,6 +16183,9 @@ $as_echo "#define HAVE_LONG_LONG_INT 1" >>confdefs.h
 
   fi
 
+if test X"$ac_cv_type_long_long_int" != X"yes"; then
+    as_fn_error $? "\"C compiler does not appear have required long long support\"" "$LINENO" 5
+fi
 # The cast to long int works around a bug in the HP C Compiler
 # version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
 # declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
