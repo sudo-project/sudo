@@ -31,6 +31,7 @@
 #define SUDO_DIGEST_SHA256	1
 #define SUDO_DIGEST_SHA384	2
 #define SUDO_DIGEST_SHA512	3
+#define SUDO_DIGEST_INVALID	4
 
 struct sudo_digest {
     int digest_type;

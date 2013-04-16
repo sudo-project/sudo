@@ -809,6 +809,66 @@ sudo_ldap_check_runas(LDAP *ld, LDAPMessage *entry)
     debug_return_bool(ret);
 }
 
+static struct sudo_digest *
+sudo_ldap_extract_digest(char **cmnd, struct sudo_digest *digest)
+{
+    char *ep, *cp = *cmnd;
+    int digest_type = SUDO_DIGEST_INVALID;
+    debug_decl(sudo_ldap_check_command, SUDO_DEBUG_LDAP)
+
+    /*
+     * Check for and extract a digest prefix, e.g.
+     * sha224:d06a2617c98d377c250edd470fd5e576327748d82915d6e33b5f8db1 /bin/ls
+     */
+    if (cp[0] == 's' && cp[1] == 'h' && cp[2] == 'a') {
+	switch (cp[3]) {
+	case '2':
+	    if (cp[4] == '2' && cp[5] == '4')
+		digest_type = SUDO_DIGEST_SHA224;
+	    else if (cp[4] == '5' && cp[5] == '6')
+		digest_type = SUDO_DIGEST_SHA256;
+	    break;
+	case '3':
+	    if (cp[4] == '8' && cp[5] == '4')
+		digest_type = SUDO_DIGEST_SHA384;
+	    break;
+	case '5':
+	    if (cp[4] == '1' && cp[5] == '2')
+		digest_type = SUDO_DIGEST_SHA512;
+	    break;
+	}
+	if (digest_type != SUDO_DIGEST_INVALID) {
+	    cp += 6;
+	    while (isblank((unsigned char)*cp))
+		cp++;
+	    if (*cp == ':') {
+		cp++;
+		while (isblank((unsigned char)*cp))
+		    cp++;
+		ep = cp;
+		while (*ep != '\0' && !isblank((unsigned char)*ep))
+		    ep++;
+		if (*ep != '\0') {
+		    digest->digest_type = digest_type;
+		    digest->digest_str = estrndup(cp, (size_t)(ep - cp));
+		    cp = ep + 1;
+		    while (isblank((unsigned char)*cp))
+			cp++;
+		    *cmnd = cp;
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"%s digest %s for %s",
+			digest_type == SUDO_DIGEST_SHA224 ? "sha224" :
+			digest_type == SUDO_DIGEST_SHA256 ? "sha256" :
+			digest_type == SUDO_DIGEST_SHA384 ? "sha384" :
+			"sha512", digest->digest_str, cp);
+		    debug_return_ptr(digest);
+		}
+	    }
+	}
+    }
+    debug_return_ptr(NULL);
+}
+
 /*
  * Walk through search results and return true if we have a command match,
  * false if disallowed and UNSPEC if not matched.
@@ -816,6 +876,7 @@ sudo_ldap_check_runas(LDAP *ld, LDAPMessage *entry)
 static int
 sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
 {
+    struct sudo_digest digest, *allowed_digest = NULL;
     struct berval **bv, **p;
     char *allowed_cmnd, *allowed_args, *val;
     bool foundbang;
@@ -840,6 +901,9 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
 	    continue;
 	}
 
+	/* check for sha-2 digest */
+	allowed_digest = sudo_ldap_extract_digest(&val, &digest);
+
 	/* check for !command */
 	if (*val == '!') {
 	    foundbang = true;
@@ -855,7 +919,7 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
 	    *allowed_args++ = '\0';
 
 	/* check the command like normal */
-	if (command_matches(allowed_cmnd, allowed_args, NULL)) {
+	if (command_matches(allowed_cmnd, allowed_args, allowed_digest)) {
 	    /*
 	     * If allowed (no bang) set ret but keep on checking.
 	     * If disallowed (bang), exit loop.
@@ -866,6 +930,8 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
 	    ret == true ? "MATCH!" : "not"), 2);
 
 	efree(allowed_cmnd);	/* cleanup */
+	if (allowed_digest != NULL)
+	    efree(allowed_digest->digest_str);
     }
 
     ldap_value_free_len(bv);	/* more cleanup */
