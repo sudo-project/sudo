@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd March 5, 2013
+.Dd April 17, 2013
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -648,6 +648,14 @@ Also, the host name
 will only match if that is the actual host name, which is usually
 only the case for non-networked systems.
 .Bd -literal
+digest ::= [A-Fa-f0-9]+ |
+	   [[A-Za-z0-9\+/=]+
+
+Digest_Spec ::= "sha224" ':' digest |
+		"sha256" ':' digest |
+		"sha384" ':' digest |
+		"sha512" ':' digest
+
 Cmnd_List ::= Cmnd |
               Cmnd ',' Cmnd_List
 
@@ -655,7 +663,7 @@ command name ::= file name |
                  file name args |
                  file name '""'
 
-Cmnd ::= '!'* command name |
+Cmnd ::= Digest_Spec? '!'* command name |
          '!'* directory |
          '!'* "sudoedit" |
          '!'* Cmnd_Alias
@@ -716,6 +724,34 @@ is a command built into
 itself and must be specified in
 .Em sudoers
 without a leading path.
+.Pp
+If a
+.Li command name
+is prefixed with a
+.Li Digest_Spec ,
+the command will only match successfully if it can be verified
+using the specified SHA-2 digest.
+This may be useful in situations where the user invoking
+.Nm sudo
+has write access to the command or its parent directory.
+The digest string may be specified in either hex or base64 format
+(base64 is more compact).
+There are many utilities capable of generating SHA-2 digests in hex
+format such as openssl, shasum, sha224sum, sha256sum, sha384sum, sha512sum.
+.Pp
+For example, using openssl:
+.Bd -literal
+$ openssl dgst -sha224 /bin/ls
+SHA224(/bin/ls)= 118187da8364d490b4a7debbf483004e8f3e053ec954309de2c41a25
+.Ed
+.Pp
+It is also possible to use openssl to generate base64 output:
+.Bd -literal
+$ openssl dgst -binary -sha224 /bin/ls | openssl base64
+EYGH2oNk1JC0p9679IMATo8+BT7JVDCd4sQaJQ==
+.Ed
+.Pp
+Command digests are only supported by version 1.8.7 or higher.
 .Ss Defaults
 Certain configuration options may be changed from their default
 values at run-time via one or more
@@ -3430,7 +3466,9 @@ Host_Alias	CDROM = orion, perseus, hercules
 
 # Cmnd alias specification
 Cmnd_Alias	DUMPS = /usr/bin/mt, /usr/sbin/dump, /usr/sbin/rdump,\e
-			/usr/sbin/restore, /usr/sbin/rrestore
+			/usr/sbin/restore, /usr/sbin/rrestore,\e
+			sha224:0GomF8mNN3wlDt1HD9XldjJ3SNgpFdbjO1+NsQ== \e
+			/home/operator/bin/start_backups
 Cmnd_Alias	KILL = /usr/bin/kill
 Cmnd_Alias	PRINTING = /usr/sbin/lpc, /usr/bin/lprm
 Cmnd_Alias	SHUTDOWN = /usr/sbin/shutdown
@@ -3563,6 +3601,15 @@ Here, those are commands related to backups, killing processes, the
 printing system, shutting down the system, and any commands in the
 directory
 .Pa /usr/oper/bin/ .
+Note that one command in the
+.Li DUMPS
+Cmnd_Alias includes a sha224 digest,
+.Pa /home/operator/bin/start_backups .
+This is because the directory containing the script is writable by the
+operator user.
+If the script is modified (resulting in a digest mismatch) it will no longer
+be possible to run it via
+.Nm sudo .
 .Bd -literal
 joe		ALL = /usr/bin/su operator
 .Ed

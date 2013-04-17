@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOERS.LDAP" "8" "February 7, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD System Manager's Manual"
+.TH "SUDOERS.LDAP" "8" "April 17, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -165,20 +165,63 @@ The special value
 will match any host.
 .TP 6n
 \fBsudoCommand\fR
-A Unix command with optional command line arguments, potentially
-including globbing characters (aka wild cards).
+A fully-qualified Unix command name with optional command line arguments,
+potentially including globbing characters (aka wild cards).
+If a command name is preceded by an exclamation point,
+`\&!',
+the user will be prohibited from running that command.
+.sp
+The built-in command
+``\fRsudoedit\fR''
+is used to permit a user to run
+\fBsudo\fR
+with the
+\fB\-e\fR
+option (or as
+\fBsudoedit\fR).
+It may take command line arguments just as a normal command does.
+Note that
+``\fRsudoedit\fR''
+is a command built into
+\fBsudo\fR
+itself and must be specified in without a leading path.
+.sp
 The special value
 \fRALL\fR
 will match any command.
-If a command is prefixed with an exclamation point
-`\&!',
-the user will be prohibited from running that command.
+.sp
+If a command name is prefixed with a SHA-2 digest, it will
+only be allowed if the digest matches.
+This may be useful in situations where the user invoking
+\fBsudo\fR
+has write access to the command or its parent directory.
+The following digest formats are supported: sha224, sha256, sha384 and sha512.
+The digest name must be followed by a colon
+(`:\&')
+and then the actual digest, in either hex or base64 format.
+For example, given the following value for sudoCommand:
+.RS
+.nf
+.sp
+.RS 4n
+sha224:0GomF8mNN3wlDt1HD9XldjJ3SNgpFdbjO1+NsQ /bin/ls
+.RE
+.fi
+.sp
+The user may only run
+\fI/bin/ls\fR
+if its sha224 digest matches the specified value.
+Command digests are only supported by version 1.8.7 or higher.
+.PP
+.RE
+.PD 0
 .TP 6n
 \fBsudoOption\fR
 Identical in function to the global options described above, but
 specific to the
 \fRsudoRole\fR
 in which it resides.
+.PD
 .TP 6n
 \fBsudoRunAsUser\fR
 A user name or uid (prefixed with

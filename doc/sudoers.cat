@@ -304,6 +304,14 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      ``localhost'' will only match if that is the actual host name, which is
      usually only the case for non-networked systems.
 
+     digest ::= [A-Fa-f0-9]+ |
+                [[A-Za-z0-9+/=]+
+
+     Digest_Spec ::= "sha224" ':' digest |
+                     "sha256" ':' digest |
+                     "sha384" ':' digest |
+                     "sha512" ':' digest
+
      Cmnd_List ::= Cmnd |
                    Cmnd ',' Cmnd_List
 
@@ -311,7 +319,7 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
                       file name args |
                       file name '""'
 
-     Cmnd ::= '!'* command name |
+     Cmnd ::= Digest_Spec? '!'* command name |
               '!'* directory |
               '!'* "sudoedit" |
               '!'* Cmnd_Alias
@@ -336,6 +344,27 @@ SSUUDDOOEERRSS FFIILLEE FFOORRMMAATT
      take command line arguments just as a normal command does.  Note that
      ``sudoedit'' is a command built into ssuuddoo itself and must be specified in
      _s_u_d_o_e_r_s without a leading path.
+
+     If a command name is prefixed with a Digest_Spec, the command will only
+     match successfully if it can be verified using the specified SHA-2
+     digest.  This may be useful in situations where the user invoking ssuuddoo
+     has write access to the command or its parent directory.  The digest
+     string may be specified in either hex or base64 format (base64 is more
+     compact).  There are many utilities capable of generating SHA-2 digests
+     in hex format such as openssl, shasum, sha224sum, sha256sum, sha384sum,
+     sha512sum.
+
+     For example, using openssl:
+
+     $ openssl dgst -sha224 /bin/ls
+     SHA224(/bin/ls)= 118187da8364d490b4a7debbf483004e8f3e053ec954309de2c41a25
+
+     It is also possible to use openssl to generate base64 output:
+
+     $ openssl dgst -binary -sha224 /bin/ls | openssl base64
+     EYGH2oNk1JC0p9679IMATo8+BT7JVDCd4sQaJQ==
+
+     Command digests are only supported by version 1.8.7 or higher.
 
    DDeeffaauullttss
      Certain configuration options may be changed from their default values at
@@ -1817,7 +1846,9 @@ EEXXAAMMPPLLEESS
 
      # Cmnd alias specification
      Cmnd_Alias      DUMPS = /usr/bin/mt, /usr/sbin/dump, /usr/sbin/rdump,\
-                             /usr/sbin/restore, /usr/sbin/rrestore
+                             /usr/sbin/restore, /usr/sbin/rrestore,\
+                             sha224:0GomF8mNN3wlDt1HD9XldjJ3SNgpFdbjO1+NsQ== \
+                             /home/operator/bin/start_backups
      Cmnd_Alias      KILL = /usr/bin/kill
      Cmnd_Alias      PRINTING = /usr/sbin/lpc, /usr/bin/lprm
      Cmnd_Alias      SHUTDOWN = /usr/sbin/shutdown
@@ -1887,7 +1918,11 @@ EEXXAAMMPPLLEESS
      The ooppeerraattoorr user may run commands limited to simple maintenance.  Here,
      those are commands related to backups, killing processes, the printing
      system, shutting down the system, and any commands in the directory
-     _/_u_s_r_/_o_p_e_r_/_b_i_n_/.
+     _/_u_s_r_/_o_p_e_r_/_b_i_n_/.  Note that one command in the DUMPS Cmnd_Alias includes a
+     sha224 digest, _/_h_o_m_e_/_o_p_e_r_a_t_o_r_/_b_i_n_/_s_t_a_r_t___b_a_c_k_u_p_s.  This is because the
+     directory containing the script is writable by the operator user.  If the
+     script is modified (resulting in a digest mismatch) it will no longer be
+     possible to run it via ssuuddoo.
 
      joe             ALL = /usr/bin/su operator
 
@@ -2183,4 +2218,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.7                       March 5, 2013                      Sudo 1.8.7
+Sudo 1.8.7                      April 17, 2013                      Sudo 1.8.7

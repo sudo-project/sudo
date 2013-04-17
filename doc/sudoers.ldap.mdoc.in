@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd February 7, 2013
+.Dd April 17, 2013
 .Dt SUDOERS.LDAP @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -156,14 +156,49 @@ The special value
 .Li ALL
 will match any host.
 .It Sy sudoCommand
-A Unix command with optional command line arguments, potentially
-including globbing characters (aka wild cards).
+A fully-qualified Unix command name with optional command line arguments,
+potentially including globbing characters (aka wild cards).
+If a command name is preceded by an exclamation point,
+.Ql \&! ,
+the user will be prohibited from running that command.
+.Pp
+The built-in command
+.Dq Li sudoedit
+is used to permit a user to run
+.Nm sudo
+with the
+.Fl e
+option (or as
+.Nm sudoedit ) .
+It may take command line arguments just as a normal command does.
+Note that
+.Dq Li sudoedit
+is a command built into
+.Nm sudo
+itself and must be specified in without a leading path.
+.Pp
 The special value
 .Li ALL
 will match any command.
-If a command is prefixed with an exclamation point
-.Ql \&! ,
-the user will be prohibited from running that command.
+.Pp
+If a command name is prefixed with a SHA-2 digest, it will
+only be allowed if the digest matches.
+This may be useful in situations where the user invoking
+.Nm sudo
+has write access to the command or its parent directory.
+The following digest formats are supported: sha224, sha256, sha384 and sha512.
+The digest name must be followed by a colon
+.Pq Ql :\&
+and then the actual digest, in either hex or base64 format.
+For example, given the following value for sudoCommand:
+.Bd -literal -offset 4n
+sha224:0GomF8mNN3wlDt1HD9XldjJ3SNgpFdbjO1+NsQ /bin/ls
+.Ed
+.Pp
+The user may only run
+.Pa /bin/ls
+if its sha224 digest matches the specified value.
+Command digests are only supported by version 1.8.7 or higher.
 .It Sy sudoOption
 Identical in function to the global options described above, but
 specific to the
