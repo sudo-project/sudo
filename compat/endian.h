@@ -19,12 +19,13 @@
  * We just check for the most common uses.
  */
 
-/* Solaris defines _LITTLE_ENDIAN and _BIG_ENDIAN to 1 */
-# if (defined(_LITTLE_ENDIAN) && _LITTLE_ENDIAN == 1) || \
-     (defined(__LITTLE_ENDIAN__) && __LITTLE_ENDIAN__ == 1)
+# if defined(__BYTE_ORDER)
+#  define BYTE_ORDER	__BYTE_ORDER
+# elif defined(_BYTE_ORDER)
+#  define BYTE_ORDER	_BYTE_ORDER
+# elif defined(_LITTLE_ENDIAN) || defined(__LITTLE_ENDIAN__)
 #  define BYTE_ORDER	LITTLE_ENDIAN
-# elif (defined(_BIG_ENDIAN) && _BIG_ENDIAN == 1) || \
-       (defined(__BIG_ENDIAN__) && __BIG_ENDIAN__ == 1)
+# elif defined(_BIG_ENDIAN) || defined(__BIG_ENDIAN__)
 #  define BYTE_ORDER	BIG_ENDIAN
 # elif defined(__alpha__) || defined(__alpha) || defined(__amd64) || \
        defined(BIT_ZERO_ON_RIGHT) || defined(i386) || defined(__i386) || \
