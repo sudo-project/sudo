@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.7\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-04-09 09:38-0400\n"
+"POT-Creation-Date: 2013-04-17 15:52-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -76,7 +76,7 @@ msgstr ""
 
 #: plugins/sudoers/auth/kerb5.c:116
 #, c-format
-msgid "%s: unable to unparse princ ('%s'): %s"
+msgid "%s: unable to convert principal to string ('%s'): %s"
 msgstr ""
 
 #: plugins/sudoers/auth/kerb5.c:159
@@ -86,7 +86,7 @@ msgstr ""
 
 #: plugins/sudoers/auth/kerb5.c:169
 #, c-format
-msgid "%s: unable to resolve ccache: %s"
+msgid "%s: unable to resolve credential cache: %s"
 msgstr ""
 
 #: plugins/sudoers/auth/kerb5.c:217
@@ -101,12 +101,12 @@ msgstr ""
 
 #: plugins/sudoers/auth/kerb5.c:246
 #, c-format
-msgid "%s: unable to initialize ccache: %s"
+msgid "%s: unable to initialize credential cache: %s"
 msgstr ""
 
 #: plugins/sudoers/auth/kerb5.c:250
 #, c-format
-msgid "%s: unable to store cred in ccache: %s"
+msgid "%s: unable to store credential in cache: %s"
 msgstr ""
 
 #: plugins/sudoers/auth/kerb5.c:315
@@ -131,24 +131,29 @@ msgstr ""
 msgid "Account or password is expired, reset your password and try again"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:161
+#: plugins/sudoers/auth/pam.c:162
 #, c-format
-msgid "pam_chauthtok: %s"
+msgid "unable to change expired password: %s"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:165
+#: plugins/sudoers/auth/pam.c:167
 msgid "Password expired, contact your system administrator"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:169
+#: plugins/sudoers/auth/pam.c:171
 msgid ""
 "Account expired or PAM config lacks an \"account\" section for sudo, contact "
 "your system administrator"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:186
+#: plugins/sudoers/auth/pam.c:188
 #, c-format
-msgid "pam_authenticate: %s"
+msgid "PAM authentication error: %s"
+msgstr ""
+
+#: plugins/sudoers/auth/pam.c:247
+#, c-format
+msgid "unable to establish credentials: %s"
 msgstr ""
 
 #: plugins/sudoers/auth/rfc1938.c:103 plugins/sudoers/visudo.c:212
@@ -206,7 +211,7 @@ msgstr ""
 
 #: plugins/sudoers/auth/sudo_auth.c:120
 msgid ""
-"Invalid authentication methods compiled into sudo!  You not may mix "
+"Invalid authentication methods compiled into sudo!  You may not mix "
 "standalone and non-standalone authentication."
 msgstr ""
 
@@ -236,9 +241,9 @@ msgstr ""
 msgid "Could not determine audit condition"
 msgstr ""
 
-#: plugins/sudoers/bsm_audit.c:101
+#: plugins/sudoers/bsm_audit.c:101 plugins/sudoers/bsm_audit.c:160
 #, c-format
-msgid "getauid failed"
+msgid "getauid: failed"
 msgstr ""
 
 #: plugins/sudoers/bsm_audit.c:103 plugins/sudoers/bsm_audit.c:162
@@ -264,11 +269,6 @@ msgstr ""
 #: plugins/sudoers/bsm_audit.c:129 plugins/sudoers/bsm_audit.c:190
 #, c-format
 msgid "unable to commit audit record"
-msgstr ""
-
-#: plugins/sudoers/bsm_audit.c:160
-#, c-format
-msgid "getauid: failed"
 msgstr ""
 
 #: plugins/sudoers/bsm_audit.c:183
@@ -740,7 +740,7 @@ msgstr ""
 msgid "%s must only be writable by owner"
 msgstr ""
 
-#: plugins/sudoers/group_plugin.c:113
+#: plugins/sudoers/group_plugin.c:113 plugins/sudoers/sssd.c:256
 #, c-format
 msgid "unable to dlopen %s: %s"
 msgstr ""
@@ -760,21 +760,21 @@ msgid "Local IP address and netmask pairs:\n"
 msgstr ""
 
 #: plugins/sudoers/iolog.c:131 plugins/sudoers/iolog.c:144
-#: plugins/sudoers/timestamp.c:199 plugins/sudoers/timestamp.c:243
+#: plugins/sudoers/timestamp.c:200 plugins/sudoers/timestamp.c:244
 #, c-format
 msgid "%s exists but is not a directory (0%o)"
 msgstr ""
 
 #: plugins/sudoers/iolog.c:141 plugins/sudoers/iolog.c:155
-#: plugins/sudoers/iolog.c:159 plugins/sudoers/timestamp.c:164
-#: plugins/sudoers/timestamp.c:220 plugins/sudoers/timestamp.c:270
+#: plugins/sudoers/iolog.c:159 plugins/sudoers/timestamp.c:165
+#: plugins/sudoers/timestamp.c:221 plugins/sudoers/timestamp.c:271
 #, c-format
 msgid "unable to mkdir %s"
 msgstr ""
 
 #: plugins/sudoers/iolog.c:217 plugins/sudoers/sudoers.c:708
 #: plugins/sudoers/sudoreplay.c:354 plugins/sudoers/sudoreplay.c:815
-#: plugins/sudoers/sudoreplay.c:978 plugins/sudoers/timestamp.c:154
+#: plugins/sudoers/sudoreplay.c:978 plugins/sudoers/timestamp.c:155
 #: plugins/sudoers/visudo.c:809
 #, c-format
 msgid "unable to open %s"
@@ -785,7 +785,7 @@ msgstr ""
 msgid "unable to read %s"
 msgstr ""
 
-#: plugins/sudoers/iolog.c:274 plugins/sudoers/timestamp.c:158
+#: plugins/sudoers/iolog.c:274 plugins/sudoers/timestamp.c:159
 #, c-format
 msgid "unable to write to %s"
 msgstr ""
@@ -840,64 +840,64 @@ msgstr ""
 msgid "you must set TLS_CERT in %s to use SSL"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:996
+#: plugins/sudoers/ldap.c:1062
 #, c-format
 msgid "unable to get GMT time"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1002
+#: plugins/sudoers/ldap.c:1068
 #, c-format
 msgid "unable to format timestamp"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1010
+#: plugins/sudoers/ldap.c:1076
 #, c-format
 msgid "unable to build time filter"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1229
+#: plugins/sudoers/ldap.c:1295
 #, c-format
 msgid "sudo_ldap_build_pass1 allocation mismatch"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1776
+#: plugins/sudoers/ldap.c:1842
 #, c-format
 msgid ""
 "\n"
 "LDAP Role: %s\n"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1778
+#: plugins/sudoers/ldap.c:1844
 #, c-format
 msgid ""
 "\n"
 "LDAP Role: UNKNOWN\n"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1825
+#: plugins/sudoers/ldap.c:1891
 #, c-format
 msgid "    Order: %s\n"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1833 plugins/sudoers/parse.c:515
-#: plugins/sudoers/sssd.c:1173
+#: plugins/sudoers/ldap.c:1899 plugins/sudoers/parse.c:515
+#: plugins/sudoers/sssd.c:1242
 #, c-format
 msgid "    Commands:\n"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:2255
+#: plugins/sudoers/ldap.c:2321
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:2289
+#: plugins/sudoers/ldap.c:2355
 #, c-format
 msgid ""
 "start_tls specified but LDAP libs do not support ldap_start_tls_s() or "
 "ldap_start_tls_s_np()"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:2525
+#: plugins/sudoers/ldap.c:2591
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr ""
@@ -1030,6 +1030,21 @@ msgstr ""
 #: plugins/sudoers/logging.c:899
 #, c-format
 msgid "internal error: insufficient space for log line"
+msgstr ""
+
+#: plugins/sudoers/match.c:631
+#, c-format
+msgid "unsupported digest type %d for %s"
+msgstr ""
+
+#: plugins/sudoers/match.c:661
+#, c-format
+msgid "%s: read error"
+msgstr ""
+
+#: plugins/sudoers/match.c:670
+#, c-format
+msgid "digest for %s (%s) is not in %s form"
 msgstr ""
 
 #: plugins/sudoers/parse.c:124
@@ -1173,14 +1188,9 @@ msgstr ""
 msgid "unable to set runas group vector"
 msgstr ""
 
-#: plugins/sudoers/sssd.c:256
-#, c-format
-msgid "Unable to dlopen %s: %s"
-msgstr ""
-
 #: plugins/sudoers/sssd.c:257
 #, c-format
-msgid "Unable to initialize SSS source. Is SSSD installed on your machine?"
+msgid "unable to initialize SSS source. Is SSSD installed on your machine?"
 msgstr ""
 
 #: plugins/sudoers/sssd.c:263 plugins/sudoers/sssd.c:271
@@ -1253,8 +1263,8 @@ msgstr ""
 msgid "sorry, you are not allowed to preserve the environment"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:723 plugins/sudoers/timestamp.c:215
-#: plugins/sudoers/timestamp.c:259 plugins/sudoers/timestamp.c:327
+#: plugins/sudoers/sudoers.c:723 plugins/sudoers/timestamp.c:216
+#: plugins/sudoers/timestamp.c:260 plugins/sudoers/timestamp.c:328
 #: plugins/sudoers/visudo.c:310 plugins/sudoers/visudo.c:576
 #, c-format
 msgid "unable to stat %s"
@@ -1265,17 +1275,17 @@ msgstr ""
 msgid "%s is not a regular file"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:729 toke.l:842
+#: plugins/sudoers/sudoers.c:729 toke.l:913
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:733 toke.l:849
+#: plugins/sudoers/sudoers.c:733 toke.l:920
 #, c-format
 msgid "%s is world writable"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:736 toke.l:854
+#: plugins/sudoers/sudoers.c:736 toke.l:925
 #, c-format
 msgid "%s is owned by gid %u, should be %u"
 msgstr ""
@@ -1467,48 +1477,48 @@ msgid ""
 "Command unmatched"
 msgstr ""
 
-#: plugins/sudoers/timestamp.c:128
+#: plugins/sudoers/timestamp.c:129
 #, c-format
 msgid "timestamp path too long: %s"
 msgstr ""
 
-#: plugins/sudoers/timestamp.c:202 plugins/sudoers/timestamp.c:246
-#: plugins/sudoers/timestamp.c:291
+#: plugins/sudoers/timestamp.c:203 plugins/sudoers/timestamp.c:247
+#: plugins/sudoers/timestamp.c:292
 #, c-format
 msgid "%s owned by uid %u, should be uid %u"
 msgstr ""
 
-#: plugins/sudoers/timestamp.c:207 plugins/sudoers/timestamp.c:251
+#: plugins/sudoers/timestamp.c:208 plugins/sudoers/timestamp.c:252
 #, c-format
 msgid "%s writable by non-owner (0%o), should be mode 0700"
 msgstr ""
 
-#: plugins/sudoers/timestamp.c:285
+#: plugins/sudoers/timestamp.c:286
 #, c-format
 msgid "%s exists but is not a regular file (0%o)"
 msgstr ""
 
-#: plugins/sudoers/timestamp.c:297
+#: plugins/sudoers/timestamp.c:298
 #, c-format
 msgid "%s writable by non-owner (0%o), should be mode 0600"
 msgstr ""
 
-#: plugins/sudoers/timestamp.c:352
+#: plugins/sudoers/timestamp.c:353
 #, c-format
 msgid "timestamp too far in the future: %20.20s"
 msgstr ""
 
-#: plugins/sudoers/timestamp.c:406
+#: plugins/sudoers/timestamp.c:407
 #, c-format
 msgid "unable to remove %s, will reset to the epoch"
 msgstr ""
 
-#: plugins/sudoers/timestamp.c:413
+#: plugins/sudoers/timestamp.c:414
 #, c-format
 msgid "unable to reset %s to the epoch"
 msgstr ""
 
-#: plugins/sudoers/toke_util.c:221
+#: plugins/sudoers/toke_util.c:176
 #, c-format
 msgid "fill_args: buffer overflow"
 msgstr ""
@@ -1699,6 +1709,6 @@ msgid ""
 "  -V          display version information and exit"
 msgstr ""
 
-#: toke.l:815
+#: toke.l:886
 msgid "too many levels of includes"
 msgstr ""
