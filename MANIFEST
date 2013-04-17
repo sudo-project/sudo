@@ -271,6 +271,7 @@ plugins/sudoers/regress/logging/check_wrap.in
 plugins/sudoers/regress/logging/check_wrap.out.ok
 plugins/sudoers/regress/parser/check_addr.c
 plugins/sudoers/regress/parser/check_addr.in
+plugins/sudoers/regress/parser/check_base64.c
 plugins/sudoers/regress/parser/check_digest.c
 plugins/sudoers/regress/parser/check_digest.out.ok
 plugins/sudoers/regress/parser/check_fill.c

@@ -124,7 +124,7 @@ SHELL = @SHELL@
 PROGS = sudoers.la visudo sudoreplay testsudoers
 
 TEST_PROGS = check_iolog_path check_fill check_wrap check_addr check_symbols \
-	     check_digest
+	     check_digest check_base64
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
@@ -146,6 +146,8 @@ TEST_OBJS = group_plugin.o interfaces.o locale.o net_ifs.o \
 	    testsudoers.o tsgetgrpw.o
 
 CHECK_ADDR_OBJS = check_addr.o interfaces.o locale.o match_addr.o
+
+CHECK_BASE64_OBJS = check_base64.o base64.o locale.o
 
 CHECK_DIGEST_OBJS = check_digest.o sha2.o
 
@@ -204,6 +206,9 @@ testsudoers: libparsesudoers.la $(TEST_OBJS) $(LT_LIBS)
 
 check_addr: $(CHECK_ADDR_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_ADDR_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) $(NET_LIBS)
+
+check_base64: $(CHECK_BASE64_OBJS) $(LT_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_BASE64_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
 
 check_digest: $(CHECK_DIGEST_OBJS) $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_DIGEST_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
@@ -318,6 +323,7 @@ check: $(TEST_PROGS) visudo testsudoers
 	    CWD=`pwd`; \
 	    mkdir -p regress/parser; \
 	    ./check_addr $(srcdir)/regress/parser/check_addr.in || rval=`expr $$rval + $$?`; \
+	    ./check_base64 || rval=`expr $$rval + $$?`; \
 	    ./check_digest > regress/parser/check_digest.out; \
 	    diff regress/parser/check_digest.out $(srcdir)/regress/parser/check_digest.out.ok || rval=`expr $$rval + $$?`; \
 	    ./check_fill || rval=`expr $$rval + $$?`; \
@@ -454,6 +460,7 @@ audit.lo: $(srcdir)/audit.c $(top_builddir)/config.h \
 base64.lo: $(srcdir)/base64.c $(top_builddir)/config.h $(incdir)/missing.h \
            $(incdir)/sudo_debug.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/base64.c
+base64.o: base64.lo
 boottime.lo: $(srcdir)/boottime.c $(top_builddir)/config.h $(incdir)/missing.h \
              $(incdir)/sudo_debug.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/boottime.c
@@ -485,6 +492,9 @@ check_addr.o: $(srcdir)/regress/parser/check_addr.c $(top_builddir)/config.h \
               $(incdir)/sudo_debug.h $(incdir)/gettext.h $(srcdir)/parse.h \
               $(srcdir)/interfaces.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_addr.c
+check_base64.o: $(srcdir)/regress/parser/check_base64.c \
+                $(top_builddir)/config.h $(incdir)/missing.h $(srcdir)/sha2.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_base64.c
 check_digest.o: $(srcdir)/regress/parser/check_digest.c \
                 $(top_builddir)/config.h $(incdir)/missing.h $(srcdir)/sha2.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_digest.c
