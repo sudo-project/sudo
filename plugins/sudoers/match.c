@@ -608,51 +608,6 @@ static struct digest_function {
     }
 };
 
-static size_t
-base64_decode(const char *src, unsigned char *dst)
-{
-    static const char b64[] =
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    const unsigned char *dst0 = dst;
-    unsigned char ch[4];
-    char *pos;
-    int i;
-    debug_decl(base64_decode, SUDO_DEBUG_MATCH)
-
-    /*
-     * Convert from base64 to binary.  Each base64 char holds 6 bits of data
-     * so 4 base64 chars equals 3 chars of data.
-     * Padding (with the '=' char) may or may not be present.
-     */
-    while (*src != '\0') {
-	for (i = 0; i < 4; i++) {
-	    switch (*src) {
-	    case '=':
-		src++;
-		/* FALLTHROUGH */
-	    case '\0':
-		ch[i] = '=';
-		break;
-	    default:
-		if ((pos = strchr(b64, *src++)) == NULL)
-		    debug_return_size_t((size_t)-1);
-		ch[i] = (unsigned char)(pos - b64);
-		break;
-	    }
-	}
-	if (ch[0] == '=' || ch[1] == '=')
-	    break;
-	*dst++ = (ch[0] << 2) | ((ch[1] & 0x30) >> 4);
-	if (ch[2] == '=')
-	    break;
-	*dst++ = ((ch[1] & 0x0f) << 4) | ((ch[2] & 0x3c) >> 2);
-	if (ch[3] == '=')
-	    break;
-	*dst++ = ((ch[2] & 0x03) << 6) | ch[3];
-    }
-    debug_return_size_t((size_t)(dst - dst0));
-}
-
 static bool
 digest_matches(char *file, struct sudo_digest *sd)
 {
@@ -686,7 +641,9 @@ digest_matches(char *file, struct sudo_digest *sd)
 	    sudoers_digest[i] = hexchar(&sd->digest_str[i + i]);
 	}
     } else {
-	if (base64_decode(sd->digest_str, sudoers_digest) != func->digest_len)
+	size_t len = base64_decode(sd->digest_str, sudoers_digest,
+	    sizeof(sudoers_digest));
+	if (len != func->digest_len)
 	    goto bad_format;
     }
 

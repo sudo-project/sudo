@@ -181,6 +181,7 @@ plugins/sudoers/auth/securid5.c
 plugins/sudoers/auth/sia.c
 plugins/sudoers/auth/sudo_auth.c
 plugins/sudoers/auth/sudo_auth.h
+plugins/sudoers/base64.c
 plugins/sudoers/boottime.c
 plugins/sudoers/bsm_audit.c
 plugins/sudoers/bsm_audit.h

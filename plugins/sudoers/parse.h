@@ -215,5 +215,6 @@ void init_lexer(void);
 void init_parser(const char *, bool);
 int alias_compare(const void *, const void *);
 int hexchar(const char *s);
+size_t base64_decode(const char *str, unsigned char *dst, size_t dsize);
 
 #endif /* _SUDOERS_PARSE_H */
