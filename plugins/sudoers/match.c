@@ -725,7 +725,7 @@ command_matches_normal(char *sudoers_cmnd, char *sudoers_args, struct sudo_diges
 static bool
 command_matches_dir(char *sudoers_dir, size_t dlen)
 {
-    debug_decl(command_matches_normal, SUDO_DEBUG_MATCH)
+    debug_decl(command_matches_dir, SUDO_DEBUG_MATCH)
     debug_return_bool(strncmp(user_cmnd, sudoers_dir, dlen) == 0);
 }
 #else /* !SUDOERS_NAME_MATCH */
