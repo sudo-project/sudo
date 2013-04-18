@@ -36,7 +36,7 @@
 #define SUDOERS_LOCALE_USER     0
 #define SUDOERS_LOCALE_SUDOERS  1
 
-/* Flags for log_error()/log_fatal() */
+/* Flags for log_warning()/log_fatal() */
 #define MSG_ONLY		0x01
 #define USE_ERRNO		0x02
 #define NO_MAIL			0x04
@@ -66,7 +66,7 @@ void log_allowed(int status);
 void log_auth_failure(int status, int tries);
 void log_denial(int status, bool inform_user);
 void log_failure(int status, int flags);
-void log_error(int flags, const char *fmt, ...) __printflike(2, 3);
+void log_warning(int flags, const char *fmt, ...) __printflike(2, 3);
 void log_fatal(int flags, const char *fmt, ...) __printflike(2, 3) __attribute__((__noreturn__));
 void sudoers_initlocale(const char *ulocale, const char *slocale);
 void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);

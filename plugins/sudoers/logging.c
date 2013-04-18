@@ -63,7 +63,7 @@
 # define va_copy(d, s) memcpy(&(d), &(s), sizeof(d));
 #endif
 
-/* Special message for log_error() so we know to use ngettext() */
+/* Special message for log_warning() so we know to use ngettext() */
 #define INCORRECT_PASSWORD_ATTEMPT	((char *)0x01)
 
 static void do_syslog(int, char *);
@@ -374,9 +374,9 @@ log_auth_failure(int status, int tries)
      * If sudoers denied the command we'll log that separately.
      */
     if (ISSET(status, FLAG_BAD_PASSWORD))
-	log_error(flags, INCORRECT_PASSWORD_ATTEMPT, tries);
+	log_warning(flags, INCORRECT_PASSWORD_ATTEMPT, tries);
     else if (ISSET(status, FLAG_NON_INTERACTIVE))
-	log_error(flags, N_("a password is required"));
+	log_warning(flags, N_("a password is required"));
 
     debug_return;
 }
@@ -420,10 +420,10 @@ log_allowed(int status)
 }
 
 /*
- * Perform logging for log_error()/log_fatal()
+ * Perform logging for log_warning()/log_fatal()
  */
 static void
-vlog_error(int flags, const char *fmt, va_list ap)
+vlog_warning(int flags, const char *fmt, va_list ap)
 {
     int oldlocale, serrno = errno;
     char *logline, *message;
@@ -499,14 +499,14 @@ vlog_error(int flags, const char *fmt, va_list ap)
 }
 
 void
-log_error(int flags, const char *fmt, ...)
+log_warning(int flags, const char *fmt, ...)
 {
     va_list ap;
     debug_decl(log_error, SUDO_DEBUG_LOGGING)
 
     /* Log the error. */
     va_start(ap, fmt);
-    vlog_error(flags, fmt, ap);
+    vlog_warning(flags, fmt, ap);
     va_end(ap);
 
     debug_return;
@@ -520,7 +520,7 @@ log_fatal(int flags, const char *fmt, ...)
 
     /* Log the error. */
     va_start(ap, fmt);
-    vlog_error(flags, fmt, ap);
+    vlog_warning(flags, fmt, ap);
     va_end(ap);
 
     /* Exit the plugin. */

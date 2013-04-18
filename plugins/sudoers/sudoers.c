@@ -156,7 +156,7 @@ sudoers_policy_init(void *info, char * const envp[])
         if (nss->open(nss) == 0 && nss->parse(nss) == 0) {
             sources++;
             if (nss->setdefs(nss) != 0)
-                log_error(NO_STDERR, N_("problem with defaults entries"));
+                log_warning(NO_STDERR, N_("problem with defaults entries"));
         } else {
             tq_remove(snl, nss);
         }
@@ -190,7 +190,7 @@ sudoers_policy_init(void *info, char * const envp[])
 	set_runaspw(runas_user ? runas_user : def_runas_default);
 
     if (!update_defaults(SETDEF_RUNAS))
-	log_error(NO_STDERR, N_("problem with defaults entries"));
+	log_warning(NO_STDERR, N_("problem with defaults entries"));
 
     if (def_fqdn)
 	set_fqdn();	/* deferred until after sudoers is parsed */
@@ -312,7 +312,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    timestamp_uid = pw->pw_uid;
 	    sudo_pw_delref(pw);
 	} else {
-	    log_error(0, N_("timestamp owner (%s): No such user"),
+	    log_warning(0, N_("timestamp owner (%s): No such user"),
 		def_timestampowner);
 	    timestamp_uid = ROOT_UID;
 	}
@@ -670,7 +670,7 @@ set_cmnd(void)
 	user_base = user_cmnd;
 
     if (!update_defaults(SETDEF_CMND))
-	log_error(NO_STDERR, N_("problem with defaults entries"));
+	log_warning(NO_STDERR, N_("problem with defaults entries"));
 
     debug_return_int(rval);
 }
@@ -705,10 +705,10 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 	     * the user with a reasonable error message (unlike the lexer).
 	     */
 	    if ((fp = fopen(sudoers, "r")) == NULL) {
-		log_error(USE_ERRNO, N_("unable to open %s"), sudoers);
+		log_warning(USE_ERRNO, N_("unable to open %s"), sudoers);
 	    } else {
 		if (sb.st_size != 0 && fgetc(fp) == EOF) {
-		    log_error(USE_ERRNO, N_("unable to read %s"),
+		    log_warning(USE_ERRNO, N_("unable to read %s"),
 			sudoers);
 		    fclose(fp);
 		    fp = NULL;
@@ -720,20 +720,20 @@ open_sudoers(const char *sudoers, bool doedit, bool *keepopen)
 	    }
 	    break;
 	case SUDO_PATH_MISSING:
-	    log_error(USE_ERRNO, N_("unable to stat %s"), sudoers);
+	    log_warning(USE_ERRNO, N_("unable to stat %s"), sudoers);
 	    break;
 	case SUDO_PATH_BAD_TYPE:
-	    log_error(0, N_("%s is not a regular file"), sudoers);
+	    log_warning(0, N_("%s is not a regular file"), sudoers);
 	    break;
 	case SUDO_PATH_WRONG_OWNER:
-	    log_error(0, N_("%s is owned by uid %u, should be %u"),
+	    log_warning(0, N_("%s is owned by uid %u, should be %u"),
 		sudoers, (unsigned int) sb.st_uid, (unsigned int) sudoers_uid);
 	    break;
 	case SUDO_PATH_WORLD_WRITABLE:
-	    log_error(0, N_("%s is world writable"), sudoers);
+	    log_warning(0, N_("%s is world writable"), sudoers);
 	    break;
 	case SUDO_PATH_GROUP_WRITABLE:
-	    log_error(0, N_("%s is owned by gid %u, should be %u"),
+	    log_warning(0, N_("%s is owned by gid %u, should be %u"),
 		sudoers, (unsigned int) sb.st_gid, (unsigned int) sudoers_gid);
 	    break;
 	default:
@@ -779,7 +779,7 @@ set_loginclass(struct passwd *pw)
 	if (login_class)
 	    log_fatal(errflags, N_("unknown login class: %s"), login_class);
 	else
-	    log_error(errflags, N_("unknown login class: %s"), login_class);
+	    log_warning(errflags, N_("unknown login class: %s"), login_class);
 	def_use_loginclass = false;
     }
     login_close(lc);
@@ -811,7 +811,7 @@ set_fqdn(void)
     hint.ai_family = PF_UNSPEC;
     hint.ai_flags = AI_FQDN;
     if (getaddrinfo(user_host, NULL, &hint, &res0) != 0) {
-	log_error(MSG_ONLY, N_("unable to resolve host %s"), user_host);
+	log_warning(MSG_ONLY, N_("unable to resolve host %s"), user_host);
     } else {
 	if (user_shost != user_host)
 	    efree(user_shost);

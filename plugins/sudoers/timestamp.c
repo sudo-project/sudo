@@ -152,17 +152,17 @@ update_timestamp(struct passwd *pw)
 	 */
 	int fd = open(timestampfile, O_WRONLY|O_CREAT, 0600);
 	if (fd == -1)
-	    log_error(USE_ERRNO, N_("unable to open %s"), timestampfile);
+	    log_warning(USE_ERRNO, N_("unable to open %s"), timestampfile);
 	else {
 	    lock_file(fd, SUDO_LOCK);
 	    if (write(fd, &tty_info, sizeof(tty_info)) != sizeof(tty_info))
-		log_error(USE_ERRNO, N_("unable to write to %s"), timestampfile);
+		log_warning(USE_ERRNO, N_("unable to write to %s"), timestampfile);
 	    close(fd);
 	}
     } else {
 	if (touch(-1, timestampdir, NULL) == -1) {
 	    if (mkdir(timestampdir, 0700) == -1) {
-		log_error(USE_ERRNO, N_("unable to mkdir %s"),
+		log_warning(USE_ERRNO, N_("unable to mkdir %s"),
 		    timestampdir);
 	    }
 	}
@@ -197,14 +197,14 @@ timestamp_status_internal(bool removing)
      */
     if (lstat(dirparent, &sb) == 0) {
 	if (!S_ISDIR(sb.st_mode))
-	    log_error(0, N_("%s exists but is not a directory (0%o)"),
+	    log_warning(0, N_("%s exists but is not a directory (0%o)"),
 		dirparent, (unsigned int) sb.st_mode);
 	else if (sb.st_uid != timestamp_uid)
-	    log_error(0, N_("%s owned by uid %u, should be uid %u"),
+	    log_warning(0, N_("%s owned by uid %u, should be uid %u"),
 		dirparent, (unsigned int) sb.st_uid,
 		(unsigned int) timestamp_uid);
 	else if ((sb.st_mode & 0000022))
-	    log_error(0,
+	    log_warning(0,
 		N_("%s writable by non-owner (0%o), should be mode 0700"),
 		dirparent, (unsigned int) sb.st_mode);
 	else {
@@ -213,12 +213,12 @@ timestamp_status_internal(bool removing)
 	    status = TS_MISSING;
 	}
     } else if (errno != ENOENT) {
-	log_error(USE_ERRNO, N_("unable to stat %s"), dirparent);
+	log_warning(USE_ERRNO, N_("unable to stat %s"), dirparent);
     } else {
 	/* No dirparent, try to make one. */
 	if (!removing) {
 	    if (mkdir(dirparent, S_IRWXU))
-		log_error(USE_ERRNO, N_("unable to mkdir %s"),
+		log_warning(USE_ERRNO, N_("unable to mkdir %s"),
 		    dirparent);
 	    else
 		status = TS_MISSING;
@@ -241,14 +241,14 @@ timestamp_status_internal(bool removing)
 		if (unlink(timestampdir) == 0)
 		    status = TS_MISSING;
 	    } else
-		log_error(0, N_("%s exists but is not a directory (0%o)"),
+		log_warning(0, N_("%s exists but is not a directory (0%o)"),
 		    timestampdir, (unsigned int) sb.st_mode);
 	} else if (sb.st_uid != timestamp_uid)
-	    log_error(0, N_("%s owned by uid %u, should be uid %u"),
+	    log_warning(0, N_("%s owned by uid %u, should be uid %u"),
 		timestampdir, (unsigned int) sb.st_uid,
 		(unsigned int) timestamp_uid);
 	else if ((sb.st_mode & 0000022))
-	    log_error(0,
+	    log_warning(0,
 		N_("%s writable by non-owner (0%o), should be mode 0700"),
 		timestampdir, (unsigned int) sb.st_mode);
 	else {
@@ -257,7 +257,7 @@ timestamp_status_internal(bool removing)
 	    status = TS_OLD;		/* do date check later */
 	}
     } else if (errno != ENOENT) {
-	log_error(USE_ERRNO, N_("unable to stat %s"), timestampdir);
+	log_warning(USE_ERRNO, N_("unable to stat %s"), timestampdir);
     } else
 	status = TS_MISSING;
 
@@ -268,7 +268,7 @@ timestamp_status_internal(bool removing)
     if (status == TS_MISSING && *timestampfile && !removing) {
 	if (mkdir(timestampdir, S_IRWXU) == -1) {
 	    status = TS_ERROR;
-	    log_error(USE_ERRNO, N_("unable to mkdir %s"), timestampdir);
+	    log_warning(USE_ERRNO, N_("unable to mkdir %s"), timestampdir);
 	}
     }
 
@@ -283,18 +283,18 @@ timestamp_status_internal(bool removing)
 	if (lstat(timestampfile, &sb) == 0) {
 	    if (!S_ISREG(sb.st_mode)) {
 		status = TS_ERROR;
-		log_error(0, N_("%s exists but is not a regular file (0%o)"),
+		log_warning(0, N_("%s exists but is not a regular file (0%o)"),
 		    timestampfile, (unsigned int) sb.st_mode);
 	    } else {
 		/* If bad uid or file mode, complain and kill the bogus file. */
 		if (sb.st_uid != timestamp_uid) {
-		    log_error(0,
+		    log_warning(0,
 			N_("%s owned by uid %u, should be uid %u"),
 			timestampfile, (unsigned int) sb.st_uid,
 			(unsigned int) timestamp_uid);
 		    (void) unlink(timestampfile);
 		} else if ((sb.st_mode & 0000022)) {
-		    log_error(0,
+		    log_warning(0,
 			N_("%s writable by non-owner (0%o), should be mode 0600"),
 			timestampfile, (unsigned int) sb.st_mode);
 		    (void) unlink(timestampfile);
@@ -325,7 +325,7 @@ timestamp_status_internal(bool removing)
 		}
 	    }
 	} else if (errno != ENOENT) {
-	    log_error(USE_ERRNO, N_("unable to stat %s"), timestampfile);
+	    log_warning(USE_ERRNO, N_("unable to stat %s"), timestampfile);
 	    status = TS_ERROR;
 	}
     }
@@ -349,7 +349,7 @@ timestamp_status_internal(bool removing)
 		     */
 		    if (mtime.tv_sec > now + 60 * def_timestamp_timeout * 2) {
 			time_t tv_sec = (time_t)mtime.tv_sec;
-			log_error(0,
+			log_warning(0,
 			    N_("timestamp too far in the future: %20.20s"),
 			    4 + ctime(&tv_sec));
 			if (*timestampfile)
@@ -403,7 +403,7 @@ remove_timestamp(bool remove)
 	    else
 		status = rmdir(timestampdir);
 	    if (status == -1 && errno != ENOENT) {
-		log_error(0,
+		log_warning(0,
 		    N_("unable to remove %s, will reset to the epoch"), path);
 		remove = false;
 	    }

@@ -102,7 +102,7 @@ sudo_pam_init(struct passwd *pw, sudo_auth *auth)
 #endif
 	pam_status = pam_start("sudo", pw->pw_name, &pam_conv, &pamh);
     if (pam_status != PAM_SUCCESS) {
-	log_error(USE_ERRNO|NO_MAIL, N_("unable to initialize PAM"));
+	log_warning(USE_ERRNO|NO_MAIL, N_("unable to initialize PAM"));
 	debug_return_int(AUTH_FATAL);
     }
 
@@ -147,27 +147,27 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 		    sudo_pam_authenticated = true;
 		    debug_return_int(AUTH_SUCCESS);
 		case PAM_AUTH_ERR:
-		    log_error(NO_MAIL, N_("account validation failure, "
+		    log_warning(NO_MAIL, N_("account validation failure, "
 			"is your account locked?"));
 		    debug_return_int(AUTH_FATAL);
 		case PAM_NEW_AUTHTOK_REQD:
-		    log_error(NO_MAIL, N_("Account or password is "
+		    log_warning(NO_MAIL, N_("Account or password is "
 			"expired, reset your password and try again"));
 		    *pam_status = pam_chauthtok(pamh,
 			PAM_CHANGE_EXPIRED_AUTHTOK);
 		    if (*pam_status == PAM_SUCCESS)
 			debug_return_int(AUTH_SUCCESS);
 		    if ((s = pam_strerror(pamh, *pam_status)) != NULL) {
-			log_error(NO_MAIL,
+			log_warning(NO_MAIL,
 			    N_("unable to change expired password: %s"), s);
 		    }
 		    debug_return_int(AUTH_FAILURE);
 		case PAM_AUTHTOK_EXPIRED:
-		    log_error(NO_MAIL,
+		    log_warning(NO_MAIL,
 			N_("Password expired, contact your system administrator"));
 		    debug_return_int(AUTH_FATAL);
 		case PAM_ACCT_EXPIRED:
-		    log_error(NO_MAIL,
+		    log_warning(NO_MAIL,
 			N_("Account expired or PAM config lacks an \"account\" "
 			"section for sudo, contact your system administrator"));
 		    debug_return_int(AUTH_FATAL);
@@ -185,7 +185,7 @@ sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 	    debug_return_int(AUTH_FAILURE);
 	default:
 	    if ((s = pam_strerror(pamh, *pam_status)) != NULL)
-		log_error(NO_MAIL, N_("PAM authentication error: %s"), s);
+		log_warning(NO_MAIL, N_("PAM authentication error: %s"), s);
 	    debug_return_int(AUTH_FATAL);
     }
 }
@@ -244,7 +244,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
     } else if (sudo_pam_authenticated) {
 	const char *s = pam_strerror(pamh, status);
 	if (s != NULL)
-	    log_error(NO_MAIL, N_("unable to establish credentials: %s"), s);
+	    log_warning(NO_MAIL, N_("unable to establish credentials: %s"), s);
 	goto done;
     }
 

@@ -104,7 +104,7 @@ sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 
     if (sia_ses_init(&siah, sudo_argc, sudo_argv, NULL, pw->pw_name, user_ttypath, 1, NULL) != SIASUCCESS) {
 
-	log_error(USE_ERRNO|NO_MAIL,
+	log_warning(USE_ERRNO|NO_MAIL,
 	    N_("unable to initialize SIA session"));
 	debug_return_int(AUTH_FATAL);
     }
