@@ -88,7 +88,7 @@ hexchar(const char *s)
 	    break;
 	default:
 	    /* Should not happen. */
-	    errorx(1, "internal error, \\x%s not in proper hex format", s);
+	    fatalx("internal error, \\x%s not in proper hex format", s);
 	}
     }
     debug_return_int((result[0] << 4) | result[1]);

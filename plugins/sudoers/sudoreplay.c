@@ -268,7 +268,7 @@ main(int argc, char *argv[])
     textdomain("sudoers");
 
     /* Register error/errorx callback. */
-    error_callback_register(sudoreplay_cleanup);
+    fatal_callback_register(sudoreplay_cleanup);
 
     /* Read sudo.conf. */
     sudo_conf_read(NULL);
@@ -289,7 +289,7 @@ main(int argc, char *argv[])
 		else if (strcmp(cp, "ttyout") == 0)
 		    SET(replay_filter, 1 << IOFD_TTYOUT);
 		else
-		    errorx(1, _("invalid filter option: %s"), optarg);
+		    fatalx(_("invalid filter option: %s"), optarg);
 	    }
 	    break;
 	case 'h':
@@ -302,13 +302,13 @@ main(int argc, char *argv[])
 	    errno = 0;
 	    max_wait = strtod(optarg, &ep);
 	    if (*ep != '\0' || errno != 0)
-		errorx(1, _("invalid max wait: %s"), optarg);
+		fatalx(_("invalid max wait: %s"), optarg);
 	    break;
 	case 's':
 	    errno = 0;
 	    speed = strtod(optarg, &ep);
 	    if (*ep != '\0' || errno != 0)
-		errorx(1, _("invalid speed factor: %s"), optarg);
+		fatalx(_("invalid speed factor: %s"), optarg);
 	    break;
 	case 'V':
 	    (void) printf(_("%s version %s\n"), getprogname(), PACKAGE_VERSION);
@@ -336,13 +336,13 @@ main(int argc, char *argv[])
 	plen = snprintf(path, sizeof(path), "%s/%.2s/%.2s/%.2s/timing",
 	    session_dir, id, &id[2], &id[4]);
 	if (plen <= 0 || plen >= sizeof(path))
-	    errorx(1, _("%s/%.2s/%.2s/%.2s/timing: %s"), session_dir,
+	    fatalx(_("%s/%.2s/%.2s/%.2s/timing: %s"), session_dir,
 		id, &id[2], &id[4], strerror(ENAMETOOLONG));
     } else {
 	plen = snprintf(path, sizeof(path), "%s/%s/timing",
 	    session_dir, id);
 	if (plen <= 0 || plen >= sizeof(path))
-	    errorx(1, _("%s/%s/timing: %s"), session_dir,
+	    fatalx(_("%s/%s/timing: %s"), session_dir,
 		id, strerror(ENAMETOOLONG));
     }
     plen -= 7;
@@ -351,7 +351,7 @@ main(int argc, char *argv[])
     for (idx = 0; idx < IOFD_MAX; idx++) {
 	if (ISSET(replay_filter, 1 << idx) || idx == IOFD_TIMING) {
 	    if (open_io_fd(path, plen, io_fnames[idx], &io_fds[idx]) == -1)
-		error(1, _("unable to open %s"), path);
+		fatal(_("unable to open %s"), path);
 	}
     }
 
@@ -397,7 +397,7 @@ main(int argc, char *argv[])
 	if (ch != -1)
 	    (void) fcntl(STDIN_FILENO, F_SETFL, ch | O_NONBLOCK);
 	if (!term_raw(STDIN_FILENO, 1))
-	    error(1, _("unable to set tty to raw mode"));
+	    fatal(_("unable to set tty to raw mode"));
 	iovmax = 32;
 	iov = ecalloc(iovmax, sizeof(*iov));
     }
@@ -413,7 +413,7 @@ main(int argc, char *argv[])
 	char last_char = '\0';
 
 	if (!parse_timing(buf, decimal, &idx, &seconds, &nbytes))
-	    errorx(1, _("invalid timing file line: %s"), buf);
+	    fatalx(_("invalid timing file line: %s"), buf);
 
 	if (interactive)
 	    check_input(STDIN_FILENO, &speed);
@@ -496,7 +496,7 @@ main(int argc, char *argv[])
 		iovcnt = 1;
 	    }
 	    if (atomic_writev(STDOUT_FILENO, iov, iovcnt) == -1)
-		error(1, _("writing to standard output"));
+		fatal(_("writing to standard output"));
 	}
     }
     term_restore(STDIN_FILENO, 1);
@@ -525,7 +525,7 @@ delay(double secs)
       rval = nanosleep(&ts, &rts);
     } while (rval == -1 && errno == EINTR);
     if (rval == -1) {
-	error_nodebug(1, _("nanosleep: tv_sec %ld, tv_nsec %ld"),
+	fatal_nodebug(_("nanosleep: tv_sec %ld, tv_nsec %ld"),
 	    (long)ts.tv_sec, (long)ts.tv_nsec);
     }
 }
@@ -638,7 +638,7 @@ parse_expr(struct search_node **headp, char *argv[])
 	    continue;
 	case 'c': /* command */
 	    if (av[0][1] == '\0')
-		errorx(1, _("ambiguous expression \"%s\""), *av);
+		fatalx(_("ambiguous expression \"%s\""), *av);
 	    if (strncmp(*av, "cwd", strlen(*av)) == 0)
 		type = ST_CWD;
 	    else if (strncmp(*av, "command", strlen(*av)) == 0)
@@ -663,7 +663,7 @@ parse_expr(struct search_node **headp, char *argv[])
 	    break;
 	case 't': /* tty or to date */
 	    if (av[0][1] == '\0')
-		errorx(1, _("ambiguous expression \"%s\""), *av);
+		fatalx(_("ambiguous expression \"%s\""), *av);
 	    if (strncmp(*av, "todate", strlen(*av)) == 0)
 		type = ST_TODATE;
 	    else if (strncmp(*av, "tty", strlen(*av)) == 0)
@@ -680,7 +680,7 @@ parse_expr(struct search_node **headp, char *argv[])
 	    if (av[0][1] != '\0')
 		goto bad;
 	    if (stack_top + 1 == STACK_NODE_SIZE) {
-		errorx(1, _("too many parenthesized expressions, max %d"),
+		fatalx(_("too many parenthesized expressions, max %d"),
 		    STACK_NODE_SIZE);
 	    }
 	    node_stack[stack_top++] = sn;
@@ -691,13 +691,13 @@ parse_expr(struct search_node **headp, char *argv[])
 		goto bad;
 	    /* pop */
 	    if (--stack_top < 0)
-		errorx(1, _("unmatched ')' in expression"));
+		fatalx(_("unmatched ')' in expression"));
 	    if (node_stack[stack_top])
 		sn->next = node_stack[stack_top]->next;
 	    debug_return_int(av - argv + 1);
 	bad:
 	default:
-	    errorx(1, _("unknown search term \"%s\""), *av);
+	    fatalx(_("unknown search term \"%s\""), *av);
 	    /* NOTREACHED */
 	}
 
@@ -711,17 +711,17 @@ parse_expr(struct search_node **headp, char *argv[])
 	    av += parse_expr(&newsn->u.expr, av + 1);
 	} else {
 	    if (*(++av) == NULL)
-		errorx(1, _("%s requires an argument"), av[-1]);
+		fatalx(_("%s requires an argument"), av[-1]);
 #ifdef HAVE_REGCOMP
 	    if (type == ST_PATTERN) {
 		if (regcomp(&newsn->u.cmdre, *av, REG_EXTENDED|REG_NOSUB) != 0)
-		    errorx(1, _("invalid regular expression: %s"), *av);
+		    fatalx(_("invalid regular expression: %s"), *av);
 	    } else
 #endif
 	    if (type == ST_TODATE || type == ST_FROMDATE) {
 		newsn->u.tstamp = get_date(*av);
 		if (newsn->u.tstamp == -1)
-		    errorx(1, _("could not parse date \"%s\""), *av);
+		    fatalx(_("could not parse date \"%s\""), *av);
 	    } else {
 		newsn->u.ptr = *av;
 	    }
@@ -734,11 +734,11 @@ parse_expr(struct search_node **headp, char *argv[])
 	sn = newsn;
     }
     if (stack_top)
-	errorx(1, _("unmatched '(' in expression"));
+	fatalx(_("unmatched '(' in expression"));
     if (or)
-	errorx(1, _("illegal trailing \"or\""));
+	fatalx(_("illegal trailing \"or\""));
     if (not)
-	errorx(1, _("illegal trailing \"!\""));
+	fatalx(_("illegal trailing \"!\""));
 
     debug_return_int(av - argv);
 }
@@ -781,7 +781,7 @@ match_expr(struct search_node *head, struct log_info *log)
 	    if (rc && rc != REG_NOMATCH) {
 		char buf[BUFSIZ];
 		regerror(rc, &sn->u.cmdre, buf, sizeof(buf));
-		errorx(1, "%s", buf);
+		fatalx("%s", buf);
 	    }
 	    matched = rc == REG_NOMATCH ? 0 : 1;
 #else
@@ -975,13 +975,13 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
 
     d = opendir(dir);
     if (d == NULL)
-	error(1, _("unable to open %s"), dir);
+	fatal(_("unable to open %s"), dir);
 
     /* XXX - would be faster to chdir and use relative names */
     sdlen = strlcpy(pathbuf, dir, sizeof(pathbuf));
     if (sdlen + 1 >= sizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
-	error(1, "%s/", dir);
+	fatal("%s/", dir);
     }
     pathbuf[sdlen++] = '/';
     pathbuf[sdlen] = '\0';
@@ -1020,7 +1020,7 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
 	    "%s/log", sessions[i]);
 	if (len <= 0 || len >= sizeof(pathbuf) - sdlen) {
 	    errno = ENAMETOOLONG;
-	    error(1, "%s/%s/log", dir, sessions[i]);
+	    fatal("%s/%s/log", dir, sessions[i]);
 	}
 	efree(sessions[i]);
 
@@ -1055,7 +1055,7 @@ list_sessions(int argc, char **argv, const char *pattern, const char *user,
     if (pattern) {
 	re = &rebuf;
 	if (regcomp(re, pattern, REG_EXTENDED|REG_NOSUB) != 0)
-	    errorx(1, _("invalid regular expression: %s"), pattern);
+	    fatalx(_("invalid regular expression: %s"), pattern);
     }
 #else
     re = (char *) pattern;

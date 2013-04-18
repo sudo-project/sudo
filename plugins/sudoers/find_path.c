@@ -66,7 +66,7 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
 
     if (strlen(infile) >= PATH_MAX) {
 	errno = ENAMETOOLONG;
-	error(1, "%s", infile);
+	fatal("%s", infile);
     }
 
     /*
@@ -107,7 +107,7 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
 	len = snprintf(command, sizeof(command), "%s/%s", path, infile);
 	if (len <= 0 || len >= sizeof(command)) {
 	    errno = ENAMETOOLONG;
-	    error(1, "%s", infile);
+	    fatal("%s", infile);
 	}
 	if ((found = sudo_goodpath(command, sbp)))
 	    break;
@@ -124,7 +124,7 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
 	len = snprintf(command, sizeof(command), "./%s", infile);
 	if (len <= 0 || len >= sizeof(command)) {
 	    errno = ENAMETOOLONG;
-	    error(1, "%s", infile);
+	    fatal("%s", infile);
 	}
 	found = sudo_goodpath(command, sbp);
 	if (found && ignore_dot)

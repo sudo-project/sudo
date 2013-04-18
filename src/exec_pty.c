@@ -180,7 +180,7 @@ pty_setup(uid_t uid, const char *tty, const char *utmp_user)
     if (io_fds[SFD_USERTTY] != -1) {
 	if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
 	    slavename, sizeof(slavename), uid))
-	    error(1, _("unable to allocate pty"));
+	    fatal(_("unable to allocate pty"));
 	/* Add entry to utmp/utmpx? */
 	if (utmp_user != NULL)
 	    utmp_login(tty, slavename, io_fds[SFD_SLAVE], utmp_user);
@@ -620,7 +620,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "stdin not a tty, creating a pipe");
 	pipeline = true;
 	if (pipe(io_pipe[STDIN_FILENO]) != 0)
-	    error(1, _("unable to create pipe"));
+	    fatal(_("unable to create pipe"));
 	iobufs = io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
 	    log_stdin, iobufs);
 	io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
@@ -629,7 +629,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "stdout not a tty, creating a pipe");
 	pipeline = true;
 	if (pipe(io_pipe[STDOUT_FILENO]) != 0)
-	    error(1, _("unable to create pipe"));
+	    fatal(_("unable to create pipe"));
 	iobufs = io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
 	    log_stdout, iobufs);
 	io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
@@ -637,7 +637,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
     if (io_fds[SFD_STDERR] == -1 || !isatty(STDERR_FILENO)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "stderr not a tty, creating a pipe");
 	if (pipe(io_pipe[STDERR_FILENO]) != 0)
-	    error(1, _("unable to create pipe"));
+	    fatal(_("unable to create pipe"));
 	iobufs = io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
 	    log_stderr, iobufs);
 	io_fds[SFD_STDERR] = io_pipe[STDERR_FILENO][1];
@@ -673,7 +673,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 		n = term_raw(io_fds[SFD_USERTTY], 0);
 	    } while (!n && errno == EINTR);
 	    if (!n)
-		error(1, _("unable to set terminal to raw mode"));
+		fatal(_("unable to set terminal to raw mode"));
 	}
     }
 
@@ -682,7 +682,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
      * or certain pam modules won't be able to track their state.
      */
     if (policy_init_session(details) != true)
-	errorx(1, _("policy plugin failed session initialization"));
+	fatalx(_("policy plugin failed session initialization"));
 
     /*
      * Block some signals until cmnd_pid is set in the parent to avoid a
@@ -698,7 +698,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
     child = sudo_debug_fork();
     switch (child) {
     case -1:
-	error(1, _("unable to fork"));
+	fatal(_("unable to fork"));
 	break;
     case 0:
 	/* child */
@@ -983,7 +983,7 @@ exec_monitor(struct command_details *details, int backchannel)
      * the select() loop.
      */
     if (pipe_nonblock(signal_pipe) != 0)
-	error(1, _("unable to create pipe"));
+	fatal(_("unable to create pipe"));
 
     /* Reset SIGWINCH and SIGALRM. */
     memset(&sa, 0, sizeof(sa));
@@ -1039,7 +1039,7 @@ exec_monitor(struct command_details *details, int backchannel)
     if (io_fds[SFD_SLAVE] != -1) {
 #ifdef TIOCSCTTY
 	if (ioctl(io_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0)
-	    error(1, _("unable to set controlling tty"));
+	    fatal(_("unable to set controlling tty"));
 #else
 	/* Set controlling tty by reopening slave. */
 	if ((n = open(slavename, O_RDWR)) >= 0)
@@ -1060,7 +1060,7 @@ exec_monitor(struct command_details *details, int backchannel)
 
     /* Start command and wait for it to stop or exit */
     if (pipe(errpipe) == -1)
-	error(1, _("unable to create pipe"));
+	fatal(_("unable to create pipe"));
     cmnd_pid = sudo_debug_fork();
     if (cmnd_pid == -1) {
 	warning(_("unable to fork"));
@@ -1287,7 +1287,7 @@ exec_pty(struct command_details *details,
     debug_decl(exec_pty, SUDO_DEBUG_EXEC);
 
     /* Register cleanup function */
-    error_callback_register(pty_cleanup);
+    fatal_callback_register(pty_cleanup);
 
     /* Set command process group here too to avoid a race. */
     setpgid(0, self);
@@ -1296,7 +1296,7 @@ exec_pty(struct command_details *details,
     if (dup2(io_fds[SFD_STDIN], STDIN_FILENO) == -1 ||
 	dup2(io_fds[SFD_STDOUT], STDOUT_FILENO) == -1 ||
 	dup2(io_fds[SFD_STDERR], STDERR_FILENO) == -1)
-	error(1, "dup2");
+	fatal("dup2");
 
     /* Wait for parent to grant us the tty if we are foreground. */
     if (foreground && !ISSET(details->flags, CD_EXEC_BG)) {

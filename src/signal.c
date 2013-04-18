@@ -123,7 +123,7 @@ init_signals(void)
      * the select() loop without races (we may not have pselect()).
      */
     if (pipe_nonblock(signal_pipe) != 0)
-	error(1, _("unable to create pipe"));
+	fatal(_("unable to create pipe"));
 
     memset(&sa, 0, sizeof(sa));
     sigfillset(&sa.sa_mask);

@@ -200,7 +200,7 @@ main(int argc, char *argv[], char *envp[])
 
     /* Load plugins. */
     if (!sudo_load_plugins(&policy_plugin, &io_plugins))
-	errorx(1, _("fatal error, unable to load plugins"));
+	fatalx(_("fatal error, unable to load plugins"));
 
     /* Open policy plugin. */
     ok = policy_open(&policy_plugin, settings, user_info, envp);
@@ -208,7 +208,7 @@ main(int argc, char *argv[], char *envp[])
 	if (ok == -2)
 	    usage(1);
 	else
-	    errorx(1, _("unable to initialize policy plugin"));
+	    fatalx(_("unable to initialize policy plugin"));
     }
 
     init_signals();
@@ -265,7 +265,7 @@ main(int argc, char *argv[], char *envp[])
 		    usage(1);
 		    break;
 		default:
-		    errorx(1, _("error initializing I/O plugin %s"),
+		    fatalx(_("error initializing I/O plugin %s"),
 			plugin->name);
 		}
 	    }
@@ -290,7 +290,7 @@ main(int argc, char *argv[], char *envp[])
 	    /* The close method was called by sudo_edit/run_command. */
 	    break;
 	default:
-	    errorx(1, _("unexpected sudo mode 0x%x"), sudo_mode);
+	    fatalx(_("unexpected sudo mode 0x%x"), sudo_mode);
     }
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);                
     exit(exitcode);
@@ -325,13 +325,13 @@ fix_fds(void)
     miss[STDERR_FILENO] = fcntl(STDERR_FILENO, F_GETFL, 0) == -1;
     if (miss[STDIN_FILENO] || miss[STDOUT_FILENO] || miss[STDERR_FILENO]) {
 	if ((devnull = open(_PATH_DEVNULL, O_RDWR, 0644)) == -1)
-	    error(1, _("unable to open %s"), _PATH_DEVNULL);
+	    fatal(_("unable to open %s"), _PATH_DEVNULL);
 	if (miss[STDIN_FILENO] && dup2(devnull, STDIN_FILENO) == -1)
-	    error(1, "dup2");
+	    fatal("dup2");
 	if (miss[STDOUT_FILENO] && dup2(devnull, STDOUT_FILENO) == -1)
-	    error(1, "dup2");
+	    fatal("dup2");
 	if (miss[STDERR_FILENO] && dup2(devnull, STDERR_FILENO) == -1)
-	    error(1, "dup2");
+	    fatal("dup2");
 	if (devnull > STDERR_FILENO)
 	    close(devnull);
     }
@@ -410,7 +410,7 @@ get_user_groups(struct user_details *ud)
 	 * Typically, this is because NFS can only support up to 16 groups.
 	 */
 	if (fill_group_list(ud, maxgroups) == -1)
-	    error(1, _("unable to get group vector"));
+	    fatal(_("unable to get group vector"));
     }
 
     /*
@@ -462,11 +462,11 @@ get_user_info(struct user_details *ud)
 
     pw = getpwuid(ud->uid);
     if (pw == NULL)
-	errorx(1, _("unknown uid %u: who are you?"), (unsigned int)ud->uid);
+	fatalx(_("unknown uid %u: who are you?"), (unsigned int)ud->uid);
 
     user_info[i] = fmt_string("user", pw->pw_name);
     if (user_info[i] == NULL)
-	errorx(1, NULL);
+	fatalx(NULL);
     ud->username = user_info[i] + sizeof("user=") - 1;
 
     /* Stash user's shell for use with the -s flag; don't pass to plugin. */
@@ -492,14 +492,14 @@ get_user_info(struct user_details *ud)
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
 	user_info[++i] = fmt_string("cwd", cwd);
 	if (user_info[i] == NULL)
-	    errorx(1, NULL);
+	    fatalx(NULL);
 	ud->cwd = user_info[i] + sizeof("cwd=") - 1;
     }
 
     if ((cp = get_process_ttyname()) != NULL) {
 	user_info[++i] = fmt_string("tty", cp);
 	if (user_info[i] == NULL)
-	    errorx(1, NULL);
+	    fatalx(NULL);
 	ud->tty = user_info[i] + sizeof("tty=") - 1;
 	efree(cp);
     }
@@ -510,7 +510,7 @@ get_user_info(struct user_details *ud)
 	strlcpy(host, "localhost", sizeof(host));
     user_info[++i] = fmt_string("host", host);
     if (user_info[i] == NULL)
-	errorx(1, NULL);
+	fatalx(NULL);
     ud->host = user_info[i] + sizeof("host=") - 1;
 
     get_ttysize(&ud->ts_lines, &ud->ts_cols);
@@ -776,7 +776,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 #endif
     details->pw = getpwuid(details->euid);
     if (details->pw != NULL && (details->pw = pw_dup(details->pw)) == NULL)
-	errorx(1, NULL);
+	fatalx(NULL);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -798,16 +798,16 @@ sudo_check_suid(const char *path)
 	if (strchr(path, '/') != NULL && stat(path, &sb) == 0) {
 	    /* Try to determine why sudo was not running as root. */
 	    if (sb.st_uid != ROOT_UID || !ISSET(sb.st_mode, S_ISUID)) {
-		errorx(1,
+		fatalx(
 		    _("%s must be owned by uid %d and have the setuid bit set"),
 		    path, ROOT_UID);
 	    } else {
-		errorx(1, _("effective uid is not %d, is %s on a file system "
+		fatalx(_("effective uid is not %d, is %s on a file system "
 		    "with the 'nosuid' option set or an NFS file system without"
 		    " root privileges?"), ROOT_UID, path);
 	    }
 	} else {
-	    errorx(1,
+	    fatalx(
 		_("effective uid is not %d, is sudo installed setuid root?"),
 		ROOT_UID);
 	}
@@ -1143,7 +1143,7 @@ policy_check(struct plugin_container *plugin, int argc, char * const argv[],
 {
     debug_decl(policy_check, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->check_policy == NULL) {
-	errorx(1, _("policy plugin %s is missing the `check_policy' method"),
+	fatalx(_("policy plugin %s is missing the `check_policy' method"),
 	    plugin->name);
     }
     debug_return_bool(plugin->u.policy->check_policy(argc, argv, env_add,
@@ -1180,7 +1180,7 @@ policy_invalidate(struct plugin_container *plugin, int remove)
 {
     debug_decl(policy_invalidate, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->invalidate == NULL) {
-	errorx(1, _("policy plugin %s does not support the -k/-K options"),
+	fatalx(_("policy plugin %s does not support the -k/-K options"),
 	    plugin->name);
     }
     plugin->u.policy->invalidate(remove);

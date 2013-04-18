@@ -417,14 +417,14 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	    (unsigned int)runas_pw->pw_gid;
 	len = snprintf(cp, glsize - (cp - gid_list), "%u", egid);
 	if (len < 0 || len >= glsize - (cp - gid_list))
-	    errorx(1, _("internal error, %s overflow"), "runas_groups");
+	    fatalx(_("internal error, %s overflow"), "runas_groups");
 	cp += len;
 	for (i = 0; i < grlist->ngids; i++) {
 	    if (grlist->gids[i] != egid) {
 		len = snprintf(cp, glsize - (cp - gid_list), ",%u",
 		     (unsigned int) grlist->gids[i]);
 		if (len < 0 || len >= glsize - (cp - gid_list))
-		    errorx(1, _("internal error, %s overflow"), "runas_groups");
+		    fatalx(_("internal error, %s overflow"), "runas_groups");
 		cp += len;
 	    }
 	}
@@ -486,10 +486,10 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     if (sudo_version < SUDO_API_MKVERSION(1, 2))
 	args = NULL;
 
-    if (error_setjmp() != 0) {
+    if (fatal_setjmp() != 0) {
 	/* called via error(), errorx() or log_fatal() */
 	rewind_perms();
-	error_disable_setjmp();
+	fatal_disable_setjmp();
 	debug_return_bool(-1);
     }
 
@@ -505,9 +505,9 @@ sudoers_policy_close(int exit_status, int error_code)
 {
     debug_decl(sudoers_policy_close, SUDO_DEBUG_PLUGIN)
 
-    if (error_setjmp() != 0) {
+    if (fatal_setjmp() != 0) {
 	/* called via error(), errorx() or log_fatal() */
-	error_disable_setjmp();
+	fatal_disable_setjmp();
 	debug_return;
     }
 
@@ -555,9 +555,9 @@ sudoers_policy_init_session(struct passwd *pwd, char **user_env[])
     if (sudo_version < SUDO_API_MKVERSION(1, 2))
 	user_env = NULL;
 
-    if (error_setjmp() != 0) {
+    if (fatal_setjmp() != 0) {
 	/* called via error(), errorx() or log_fatal() */
-	error_disable_setjmp();
+	fatal_disable_setjmp();
 	debug_return_bool(-1);
     }
 
@@ -606,11 +606,11 @@ sudoers_policy_invalidate(int remove)
     debug_decl(sudoers_policy_invalidate, SUDO_DEBUG_PLUGIN)
 
     user_cmnd = "kill";
-    if (error_setjmp() == 0) {
+    if (fatal_setjmp() == 0) {
 	remove_timestamp(remove);
 	sudoers_cleanup();
     }
-    error_disable_setjmp();
+    fatal_disable_setjmp();
 
     debug_return;
 }
@@ -650,9 +650,9 @@ sudoers_policy_version(int verbose)
 {
     debug_decl(sudoers_policy_version, SUDO_DEBUG_PLUGIN)
 
-    if (error_setjmp() != 0) {
+    if (fatal_setjmp() != 0) {
 	/* error recovery via error(), errorx() or log_fatal() */
-	error_disable_setjmp();
+	fatal_disable_setjmp();
 	debug_return_bool(-1);
     }
 

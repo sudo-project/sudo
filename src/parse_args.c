@@ -283,7 +283,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    break;
 		case 'U':
 		    if ((getpwnam(optarg)) == NULL)
-			errorx(1, _("unknown user: %s"), optarg);
+			fatalx(_("unknown user: %s"), optarg);
 		    list_user = optarg;
 		    break;
 		case 'u':
@@ -440,7 +440,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	    settings[j] = fmt_string(sudo_settings[i].name,
 		sudo_settings[i].value);
 	    if (settings[j] == NULL)
-		errorx(1, NULL);
+		fatalx(NULL);
 	    j++;
 	}
     }
@@ -453,7 +453,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	argv--;
 	argv[0] = "sudoedit";
 #else
-	errorx(1, _("sudoedit is not supported on this platform"));
+	fatalx(_("sudoedit is not supported on this platform"));
 #endif
     }
 

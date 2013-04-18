@@ -526,7 +526,7 @@ log_fatal(int flags, const char *fmt, ...)
     /* Exit the plugin. */
     sudoers_cleanup();
     sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-    error_longjmp(1);
+    fatal_longjmp(1);
 }
 
 #define MAX_MAILFLAGS	63
@@ -563,7 +563,7 @@ send_mail(const char *fmt, ...)
     switch (pid = sudo_debug_fork()) {
 	case -1:
 	    /* Error. */
-	    error(1, _("unable to fork"));
+	    fatal(_("unable to fork"));
 	    break;
 	case 0:
 	    /* Child. */
@@ -896,5 +896,5 @@ new_logline(const char *message, int serrno)
 
     debug_return_str(line);
 toobig:
-    errorx(1, _("internal error: insufficient space for log line"));
+    fatalx(_("internal error: insufficient space for log line"));
 }

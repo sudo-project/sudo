@@ -109,7 +109,7 @@ disable_execute(char *const envp[])
 	preload = fmt_string(RTLD_PRELOAD_VAR, sudo_conf_noexec_path());
 # endif
 	if (preload == NULL)
-	    errorx(1, NULL);
+	    fatalx(NULL);
 	nenvp[env_len++] = preload;
 	nenvp[env_len] = NULL;
     } else {

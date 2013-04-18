@@ -223,7 +223,7 @@ get_net_ifs(char **addrinfo)
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0)
-	error(1, _("unable to open socket"));
+	fatal(_("unable to open socket"));
 
     /*
      * Get interface configuration or return.

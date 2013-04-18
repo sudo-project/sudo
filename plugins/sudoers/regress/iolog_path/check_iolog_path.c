@@ -115,7 +115,7 @@ main(int argc, char *argv[])
 
     fp = fopen(argv[1], "r");
     if (fp == NULL)
-	errorx(1, "unable to open %s", argv[1]);
+	fatalx("unable to open %s", argv[1]);
 
     memset(&pw, 0, sizeof(pw));
     memset(&rpw, 0, sizeof(rpw));
@@ -184,7 +184,7 @@ main(int argc, char *argv[])
 	    tests++;
 	    break;
 	default:
-	    errorx(1, "internal error, invalid state %d", state);
+	    fatalx("internal error, invalid state %d", state);
 	}
 	state = (state + 1) % MAX_STATE;
     }

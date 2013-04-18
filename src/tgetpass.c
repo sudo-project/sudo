@@ -95,7 +95,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     /* If using a helper program to get the password, run it instead. */
     if (ISSET(flags, TGP_ASKPASS)) {
 	if (askpass == NULL || *askpass == '\0')
-	    errorx(1, _("no askpass program specified, try setting SUDO_ASKPASS"));
+	    fatalx(_("no askpass program specified, try setting SUDO_ASKPASS"));
 	debug_return_str_masked(sudo_askpass(askpass, prompt));
     }
 
@@ -214,10 +214,10 @@ sudo_askpass(const char *askpass, const char *prompt)
     debug_decl(sudo_askpass, SUDO_DEBUG_CONV)
 
     if (pipe(pfd) == -1)
-	error(1, _("unable to create pipe"));
+	fatal(_("unable to create pipe"));
 
     if ((pid = fork()) == -1)
-	error(1, _("unable to fork"));
+	fatal(_("unable to fork"));
 
     if (pid == 0) {
 	/* child, point stdout to output side of the pipe and exec askpass */

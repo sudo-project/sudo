@@ -80,11 +80,11 @@ main(int argc, char *argv[])
 
     handle = dlopen(plugin_path, RTLD_LAZY|RTLD_GLOBAL);
     if (handle == NULL)
-	errorx_nodebug(1, "unable to dlopen %s: %s", plugin_path, dlerror());
+	fatalx_nodebug("unable to dlopen %s: %s", plugin_path, dlerror());
 
     fp = fopen(symbols_file, "r");
     if (fp == NULL)
-	error_nodebug(1, "unable to open %s", symbols_file);
+	fatal_nodebug("unable to open %s", symbols_file);
 
     while (fgets(line, sizeof(line), fp) != NULL) {
 	ntests++;

@@ -163,7 +163,7 @@ main(int argc, char *argv[])
 	usage(1);
 
     /* Register error/errorx callback. */
-    error_callback_register(visudo_cleanup);
+    fatal_callback_register(visudo_cleanup);
 
     /* Read sudo.conf. */
     sudo_conf_read(NULL);
@@ -209,7 +209,7 @@ main(int argc, char *argv[])
     /* Mock up a fake sudo_user struct. */
     user_cmnd = "";
     if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL)
-	errorx(1, _("you do not exist in the %s database"), "passwd");
+	fatalx(_("you do not exist in the %s database"), "passwd");
     get_hostname();
 
     /* Setup defaults data structures. */
@@ -307,7 +307,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
     debug_decl(edit_sudoers, SUDO_DEBUG_UTIL)
 
     if (fstat(sp->fd, &sb) == -1)
-	error(1, _("unable to stat %s"), sp->path);
+	fatal(_("unable to stat %s"), sp->path);
     orig_size = sb.st_size;
     mtim_get(&sb, &orig_mtim);
 
@@ -316,20 +316,20 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 	easprintf(&sp->tpath, "%s.tmp", sp->path);
 	tfd = open(sp->tpath, O_WRONLY | O_CREAT | O_TRUNC, 0600);
 	if (tfd < 0)
-	    error(1, "%s", sp->tpath);
+	    fatal("%s", sp->tpath);
 
 	/* Copy sp->path -> sp->tpath and reset the mtime. */
 	if (orig_size != 0) {
 	    (void) lseek(sp->fd, (off_t)0, SEEK_SET);
 	    while ((nread = read(sp->fd, buf, sizeof(buf))) > 0)
 		if (write(tfd, buf, nread) != nread)
-		    error(1, _("write error"));
+		    fatal(_("write error"));
 
 	    /* Add missing newline at EOF if needed. */
 	    if (nread > 0 && buf[nread - 1] != '\n') {
 		buf[0] = '\n';
 		if (write(tfd, buf, 1) != 1)
-		    error(1, _("write error"));
+		    fatal(_("write error"));
 	    }
 	}
 	(void) close(tfd);
@@ -474,7 +474,7 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 	last = tq_last(&sudoerslist);
 	fp = fopen(sp->tpath, "r+");
 	if (fp == NULL)
-	    errorx(1, _("unable to re-open temporary file (%s), %s unchanged."),
+	    fatalx(_("unable to re-open temporary file (%s), %s unchanged."),
 		sp->tpath, sp->path);
 
 	/* Clean slate for each parse */
@@ -523,7 +523,7 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 		}
 	    }
 	    if (errorfile != NULL && sp == NULL) {
-		errorx(1, _("internal error, unable to find %s in list!"),
+		fatalx(_("internal error, unable to find %s in list!"),
 		    sudoers);
 	    }
 	}
@@ -573,7 +573,7 @@ install_sudoers(struct sudoersfile *sp, bool oldperms)
     if (oldperms) {
 	/* Use perms of the existing file.  */
 	if (fstat(sp->fd, &sb) == -1)
-	    error(1, _("unable to stat %s"), sp->path);
+	    fatal(_("unable to stat %s"), sp->path);
 	if (chown(sp->tpath, sb.st_uid, sb.st_gid) != 0) {
 	    warning(_("unable to set (uid, gid) of %s to (%u, %u)"),
 		sp->tpath, (unsigned int)sb.st_uid, (unsigned int)sb.st_gid);
@@ -747,7 +747,7 @@ run_command(char *path, char **argv)
 
     switch (pid = sudo_debug_fork()) {
 	case -1:
-	    error(1, _("unable to execute %s"), path);
+	    fatal(_("unable to execute %s"), path);
 	    break;	/* NOTREACHED */
 	case 0:
 	    sudo_endpwent();
@@ -890,18 +890,18 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	    debug_return_ptr(NULL);
 	}
 	if (!checkonly && !lock_file(entry->fd, SUDO_TLOCK))
-	    errorx(1, _("%s busy, try again later"), entry->path);
+	    fatalx(_("%s busy, try again later"), entry->path);
 	if ((fp = fdopen(entry->fd, "r")) == NULL)
-	    error(1, "%s", entry->path);
+	    fatal("%s", entry->path);
 	tq_append(&sudoerslist, entry);
     } else {
 	/* Already exists, open .tmp version if there is one. */
 	if (entry->tpath != NULL) {
 	    if ((fp = fopen(entry->tpath, "r")) == NULL)
-		error(1, "%s", entry->tpath);
+		fatal("%s", entry->tpath);
 	} else {
 	    if ((fp = fdopen(entry->fd, "r")) == NULL)
-		error(1, "%s", entry->path);
+		fatal("%s", entry->path);
 	    rewind(fp);
 	}
     }
@@ -934,7 +934,7 @@ get_editor(char **args)
 	} else {
 	    if (def_env_editor) {
 		/* If we are honoring $EDITOR this is a fatal error. */
-		errorx(1, _("specified editor (%s) doesn't exist"), UserEditor);
+		fatalx(_("specified editor (%s) doesn't exist"), UserEditor);
 	    } else {
 		/* Otherwise, just ignore $EDITOR. */
 		UserEditor = NULL;
@@ -957,7 +957,7 @@ get_editor(char **args)
 
 	if (stat(UserEditor, &user_editor_sb) != 0) {
 	    /* Should never happen since we already checked above. */
-	    error(1, _("unable to stat editor (%s)"), UserEditor);
+	    fatal(_("unable to stat editor (%s)"), UserEditor);
 	}
 	EditorPath = estrdup(def_editor);
 	Editor = strtok(EditorPath, ":");
@@ -1005,7 +1005,7 @@ get_editor(char **args)
 
 	/* Bleah, none of the editors existed! */
 	if (Editor == NULL || *Editor == '\0')
-	    errorx(1, _("no editor found (editor path = %s)"), def_editor);
+	    fatalx(_("no editor found (editor path = %s)"), def_editor);
     }
     *args = EditorArgs;
     debug_return_str(Editor);

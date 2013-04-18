@@ -382,7 +382,7 @@ sudo_ldap_conf_add_ports(void)
 
     hostbuf[0] = '\0';
     if (snprintf(defport, sizeof(defport), ":%d", ldap_conf.port) >= sizeof(defport))
-	errorx(1, _("sudo_ldap_conf_add_ports: port too large"));
+	fatalx(_("sudo_ldap_conf_add_ports: port too large"));
 
     for ((host = strtok(ldap_conf.host, " \t")); host; (host = strtok(NULL, " \t"))) {
 	if (hostbuf[0] != '\0') {
@@ -405,7 +405,7 @@ sudo_ldap_conf_add_ports(void)
     debug_return;
 
 toobig:
-    errorx(1, _("sudo_ldap_conf_add_ports: out of space expanding hostbuf"));
+    fatalx(_("sudo_ldap_conf_add_ports: out of space expanding hostbuf"));
 }
 #endif
 
@@ -493,7 +493,7 @@ done:
     debug_return_int(rc);
 
 toobig:
-    errorx(1, _("sudo_ldap_parse_uri: out of space building hostbuf"));
+    fatalx(_("sudo_ldap_parse_uri: out of space building hostbuf"));
 }
 #else
 static char *
@@ -1292,7 +1292,7 @@ sudo_ldap_build_pass1(struct passwd *pw)
 
     /* Add ALL to list and end the global OR */
     if (strlcat(buf, "(sudoUser=ALL)", sz) >= sz)
-	errorx(1, _("sudo_ldap_build_pass1 allocation mismatch"));
+	fatalx(_("sudo_ldap_build_pass1 allocation mismatch"));
 
     /* Add the time restriction, or simply end the global OR. */
     if (ldap_conf.timed) {

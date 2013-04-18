@@ -124,12 +124,12 @@ static int fork_cmnd(struct command_details *details, int sv[2])
      * or certain pam modules won't be able to track their state.
      */
     if (policy_init_session(details) != true)
-	errorx(1, _("policy plugin failed session initialization"));
+	fatalx(_("policy plugin failed session initialization"));
 
     cmnd_pid = sudo_debug_fork();
     switch (cmnd_pid) {
     case -1:
-	error(1, _("unable to fork"));
+	fatal(_("unable to fork"));
 	break;
     case 0:
 	/* child */
@@ -256,7 +256,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
      * Parent sends signal info to child and child sends back wait status.
      */
     if (socketpair(PF_UNIX, SOCK_DGRAM, 0, sv) == -1)
-	error(1, _("unable to create sockets"));
+	fatal(_("unable to create sockets"));
 
     /*
      * Signals to forward to the child process (excluding SIGALRM and SIGCHLD).

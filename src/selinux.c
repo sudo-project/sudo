@@ -74,7 +74,7 @@ audit_role_change(const security_context_t old_context,
         /* Kernel may not have audit support. */
         if (errno != EINVAL && errno != EPROTONOSUPPORT && errno != EAFNOSUPPORT
 )
-            error(1, _("unable to open audit system"));
+            fatal(_("unable to open audit system"));
     } else {
 	/* audit role change using the same format as newrole(1) */
 	easprintf(&message, "newrole: old-context=%s new-context=%s",

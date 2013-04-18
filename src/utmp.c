@@ -275,12 +275,12 @@ utmp_slot(const char *line, int ttyfd)
      * doesn't take an argument.
      */
     if ((sfd = dup(STDIN_FILENO)) == -1)
-	error(1, _("unable to save stdin"));
+	fatal(_("unable to save stdin"));
     if (dup2(ttyfd, STDIN_FILENO) == -1)
-	error(1, _("unable to dup2 stdin"));
+	fatal(_("unable to dup2 stdin"));
     slot = ttyslot();
     if (dup2(sfd, STDIN_FILENO) == -1)
-	error(1, _("unable to restore stdin"));
+	fatal(_("unable to restore stdin"));
     close(sfd);
 
     debug_return_int(slot);

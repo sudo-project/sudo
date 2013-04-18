@@ -168,5 +168,5 @@ expand_prompt(const char *old_prompt, const char *user, const char *host)
 
 oflow:
     /* We pre-allocate enough space, so this should never happen. */
-    errorx(1, _("internal error, %s overflow"), "expand_prompt()");
+    fatalx(_("internal error, %s overflow"), "expand_prompt()");
 }

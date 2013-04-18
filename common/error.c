@@ -36,11 +36,11 @@
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "gettext.h"
 
-sigjmp_buf error_jmp;
+sigjmp_buf fatal_jmp;
 static bool setjmp_enabled = false;
-static struct sudo_error_callback {
+static struct sudo_fatal_callback {
     void (*func)(void);
-    struct sudo_error_callback *next;
+    struct sudo_fatal_callback *next;
 } *callbacks;
 
 static void _warning(int, const char *, va_list);
@@ -48,7 +48,7 @@ static void _warning(int, const char *, va_list);
 static void
 do_cleanup(void)
 {
-    struct sudo_error_callback *cb;
+    struct sudo_fatal_callback *cb;
 
     /* Run callbacks, removing them from the list as we go. */
     while ((cb = callbacks) != NULL) {
@@ -59,7 +59,7 @@ do_cleanup(void)
 }
 
 void
-error2(int eval, const char *fmt, ...)
+fatal2(const char *fmt, ...)
 {
     va_list ap;
 
@@ -68,13 +68,13 @@ error2(int eval, const char *fmt, ...)
     va_end(ap);
     do_cleanup();
     if (setjmp_enabled)
-	siglongjmp(error_jmp, eval);
+	siglongjmp(fatal_jmp, 1);
     else
-	exit(eval);
+	exit(1);
 }
 
 void
-errorx2(int eval, const char *fmt, ...)
+fatalx2(const char *fmt, ...)
 {
     va_list ap;
 
@@ -83,31 +83,31 @@ errorx2(int eval, const char *fmt, ...)
     va_end(ap);
     do_cleanup();
     if (setjmp_enabled)
-	siglongjmp(error_jmp, eval);
+	siglongjmp(fatal_jmp, 1);
     else
-	exit(eval);
+	exit(1);
 }
 
 void
-verror2(int eval, const char *fmt, va_list ap)
+vfatal2(const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
     do_cleanup();
     if (setjmp_enabled)
-	siglongjmp(error_jmp, eval);
+	siglongjmp(fatal_jmp, 1);
     else
-	exit(eval);
+	exit(1);
 }
 
 void
-verrorx2(int eval, const char *fmt, va_list ap)
+vfatalx2(const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
     do_cleanup();
     if (setjmp_enabled)
-	siglongjmp(error_jmp, eval);
+	siglongjmp(fatal_jmp, 1);
     else
-	exit(eval);
+	exit(1);
 }
 
 void
@@ -165,9 +165,9 @@ _warning(int use_errno, const char *fmt, va_list ap)
 }
 
 int
-error_callback_register(void (*func)(void))
+fatal_callback_register(void (*func)(void))
 {
-    struct sudo_error_callback *cb;
+    struct sudo_fatal_callback *cb;
 
     cb = malloc(sizeof(*cb));
     if (cb == NULL)
@@ -180,13 +180,13 @@ error_callback_register(void (*func)(void))
 }
 
 void
-error_disable_setjmp(void)
+fatal_disable_setjmp(void)
 {
     setjmp_enabled = false;
 }
 
 void
-error_enable_setjmp(void)
+fatal_enable_setjmp(void)
 {
     setjmp_enabled = true;
 }

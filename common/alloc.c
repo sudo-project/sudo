@@ -79,10 +79,10 @@ emalloc(size_t size)
     void *ptr;
 
     if (size == 0)
-	errorx_nodebug(1, _("internal error, tried to emalloc(0)"));
+	fatalx_nodebug(_("internal error, tried to emalloc(0)"));
 
     if ((ptr = malloc(size)) == NULL)
-	errorx_nodebug(1, NULL);
+	fatalx_nodebug(NULL);
     return ptr;
 }
 
@@ -96,13 +96,13 @@ emalloc2(size_t nmemb, size_t size)
     void *ptr;
 
     if (nmemb == 0 || size == 0)
-	errorx_nodebug(1, _("internal error, tried to emalloc2(0)"));
+	fatalx_nodebug(_("internal error, tried to emalloc2(0)"));
     if (nmemb > SIZE_MAX / size)
-	errorx_nodebug(1, _("internal error, %s overflow"), "emalloc2()");
+	fatalx_nodebug(_("internal error, %s overflow"), "emalloc2()");
 
     size *= nmemb;
     if ((ptr = malloc(size)) == NULL)
-	errorx_nodebug(1, NULL);
+	fatalx_nodebug(NULL);
     return ptr;
 }
 
@@ -117,14 +117,14 @@ ecalloc(size_t nmemb, size_t size)
     void *ptr;
 
     if (nmemb == 0 || size == 0)
-	errorx_nodebug(1, _("internal error, tried to ecalloc(0)"));
+	fatalx_nodebug(_("internal error, tried to ecalloc(0)"));
     if (nmemb != 1) {
 	if (nmemb > SIZE_MAX / size)
-	    errorx_nodebug(1, _("internal error, %s overflow"), "ecalloc()");
+	    fatalx_nodebug(_("internal error, %s overflow"), "ecalloc()");
 	size *= nmemb;
     }
     if ((ptr = malloc(size)) == NULL)
-	errorx_nodebug(1, NULL);
+	fatalx_nodebug(NULL);
     memset(ptr, 0, size);
     return ptr;
 }
@@ -139,11 +139,11 @@ erealloc(void *ptr, size_t size)
 {
 
     if (size == 0)
-	errorx_nodebug(1, _("internal error, tried to erealloc(0)"));
+	fatalx_nodebug(_("internal error, tried to erealloc(0)"));
 
     ptr = ptr ? realloc(ptr, size) : malloc(size);
     if (ptr == NULL)
-	errorx_nodebug(1, NULL);
+	fatalx_nodebug(NULL);
     return ptr;
 }
 
@@ -158,14 +158,14 @@ erealloc3(void *ptr, size_t nmemb, size_t size)
 {
 
     if (nmemb == 0 || size == 0)
-	errorx_nodebug(1, _("internal error, tried to erealloc3(0)"));
+	fatalx_nodebug(_("internal error, tried to erealloc3(0)"));
     if (nmemb > SIZE_MAX / size)
-	errorx_nodebug(1, _("internal error, %s overflow"), "erealloc3()");
+	fatalx_nodebug(_("internal error, %s overflow"), "erealloc3()");
 
     size *= nmemb;
     ptr = ptr ? realloc(ptr, size) : malloc(size);
     if (ptr == NULL)
-	errorx_nodebug(1, NULL);
+	fatalx_nodebug(NULL);
     return ptr;
 }
 
@@ -182,14 +182,14 @@ erecalloc(void *ptr, size_t onmemb, size_t nmemb, size_t msize)
     size_t size;
 
     if (nmemb == 0 || msize == 0)
-	errorx_nodebug(1, _("internal error, tried to erecalloc(0)"));
+	fatalx_nodebug(_("internal error, tried to erecalloc(0)"));
     if (nmemb > SIZE_MAX / msize)
-	errorx_nodebug(1, _("internal error, %s overflow"), "erecalloc()");
+	fatalx_nodebug(_("internal error, %s overflow"), "erecalloc()");
 
     size = nmemb * msize;
     ptr = ptr ? realloc(ptr, size) : malloc(size);
     if (ptr == NULL)
-	errorx_nodebug(1, NULL);
+	fatalx_nodebug(NULL);
     if (nmemb > onmemb) {
 	size = (nmemb - onmemb) * msize;
 	memset((char *)ptr + (onmemb * msize), 0, size);
@@ -254,7 +254,7 @@ easprintf(char **ret, const char *fmt, ...)
     va_end(ap);
 
     if (len == -1)
-	errorx_nodebug(1, NULL);
+	fatalx_nodebug(NULL);
     return len;
 }
 
@@ -268,6 +268,6 @@ evasprintf(char **ret, const char *format, va_list args)
     int len;
 
     if ((len = vasprintf(ret, format, args)) == -1)
-	errorx_nodebug(1, NULL);
+	fatalx_nodebug(NULL);
     return len;
 }

@@ -54,7 +54,7 @@ static linux_audit_open(void)
     if (au_fd == -1) {
 	/* Kernel may not have audit support. */
 	if (errno != EINVAL && errno != EPROTONOSUPPORT && errno != EAFNOSUPPORT)
-	    error(1, _("unable to open audit system"));
+	    fatal(_("unable to open audit system"));
     } else {
 	(void)fcntl(au_fd, F_SETFD, FD_CLOEXEC);
     }
@@ -79,7 +79,7 @@ linux_audit_command(char *argv[], int result)
     for (av = argv; *av != NULL; av++) {
 	n = strlcpy(cp, *av, size - (cp - command));
 	if (n >= size - (cp - command)) {
-	    errorx(1, _("internal error, %s overflow"),
+	    fatalx(_("internal error, %s overflow"),
 		"linux_audit_command()");
 	}
 	cp += n;

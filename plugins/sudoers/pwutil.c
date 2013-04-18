@@ -145,7 +145,7 @@ sudo_getpwuid(uid_t uid)
 	/* item->d.pw = NULL; */
     }
     if (rbinsert(pwcache_byuid, item) != NULL)
-	errorx(1, _("unable to cache uid %u, already exists"),
+	fatalx(_("unable to cache uid %u, already exists"),
 	    (unsigned int) uid);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
@@ -187,7 +187,7 @@ sudo_getpwnam(const char *name)
 	/* item->d.pw = NULL; */
     }
     if (rbinsert(pwcache_byname, item) != NULL)
-	errorx(1, _("unable to cache user %s, already exists"), name);
+	fatalx(_("unable to cache user %s, already exists"), name);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -371,7 +371,7 @@ sudo_getgrgid(gid_t gid)
 	/* item->d.gr = NULL; */
     }
     if (rbinsert(grcache_bygid, item) != NULL)
-	errorx(1, _("unable to cache gid %u, already exists"),
+	fatalx(_("unable to cache gid %u, already exists"),
 	    (unsigned int) gid);
 done:
     item->refcnt++;
@@ -407,7 +407,7 @@ sudo_getgrnam(const char *name)
 	/* item->d.gr = NULL; */
     }
     if (rbinsert(grcache_byname, item) != NULL)
-	errorx(1, _("unable to cache group %s, already exists"), name);
+	fatalx(_("unable to cache group %s, already exists"), name);
 done:
     item->refcnt++;
     debug_return_ptr(item->d.gr);
@@ -561,7 +561,7 @@ sudo_get_grlist(struct passwd *pw)
 	/* item->d.grlist = NULL; */
     }
     if (rbinsert(grlist_cache, item) != NULL)
-	errorx(1, _("unable to cache group list for %s, already exists"),
+	fatalx(_("unable to cache group list for %s, already exists"),
 	    pw->pw_name);
 done:
     item->refcnt++;
@@ -581,9 +581,9 @@ sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids)
     key.k.name = pw->pw_name;
     if ((node = rbfind(grlist_cache, &key)) == NULL) {
 	if ((item = sudo_make_grlist_item(pw, groups, gids)) == NULL)
-	    errorx(1, _("unable to parse groups for %s"), pw->pw_name);
+	    fatalx(_("unable to parse groups for %s"), pw->pw_name);
 	if (rbinsert(grlist_cache, item) != NULL)
-	    errorx(1, _("unable to cache group list for %s, already exists"),
+	    fatalx(_("unable to cache group list for %s, already exists"),
 		pw->pw_name);
     }
     debug_return;

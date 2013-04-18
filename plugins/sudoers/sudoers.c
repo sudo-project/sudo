@@ -130,7 +130,7 @@ sudoers_policy_init(void *info, char * const envp[])
     sudo_setgrent();
 
     /* Register error/errorx callback. */
-    error_callback_register(sudoers_cleanup);
+    fatal_callback_register(sudoers_cleanup);
 
     /* Initialize environment functions (including replacements). */
     env_init(envp);
@@ -216,7 +216,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     debug_decl(sudoers_policy_main, SUDO_DEBUG_PLUGIN)
 
     /* XXX - would like to move this to policy.c but need the cleanup. */
-    if (error_setjmp() != 0) {
+    if (fatal_setjmp() != 0) {
 	/* error recovery via error(), errorx() or log_fatal() */
 	rval = -1;
 	goto done;
@@ -506,7 +506,7 @@ bad:
     rval = false;
 
 done:
-    error_disable_setjmp();
+    fatal_disable_setjmp();
     rewind_perms();
 
     /* Close the password and group files and free up memory. */
@@ -559,7 +559,7 @@ init_vars(char * const envp[])
 	     * YP/NIS/NIS+/LDAP/etc daemon has died.
 	     */
 	    if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE)
-		errorx(1, _("unknown uid: %u"), (unsigned int) user_uid);
+		fatalx(_("unknown uid: %u"), (unsigned int) user_uid);
 
 	    /* Need to make a fake struct passwd for the call to log_fatal(). */
 	    sudo_user.pw = sudo_fakepwnamid(user_name, user_uid, user_gid);
@@ -651,7 +651,7 @@ set_cmnd(void)
 		for (to = user_args, av = NewArgv + 1; *av; av++) {
 		    n = strlcpy(to, *av, size - (to - user_args));
 		    if (n >= size - (to - user_args))
-			errorx(1, _("internal error, %s overflow"), "set_cmnd()");
+			fatalx(_("internal error, %s overflow"), "set_cmnd()");
 		    to += n;
 		    *to++ = ' ';
 		}
@@ -661,7 +661,7 @@ set_cmnd(void)
     }
     if (strlen(user_cmnd) >= PATH_MAX) {
 	errno = ENAMETOOLONG;
-	error(1, "%s", user_cmnd);
+	fatal("%s", user_cmnd);
     }
 
     if ((user_base = strrchr(user_cmnd, '/')) != NULL)
@@ -760,7 +760,7 @@ set_loginclass(struct passwd *pw)
     if (login_class && strcmp(login_class, "-") != 0) {
 	if (user_uid != 0 &&
 	    strcmp(runas_user ? runas_user : def_runas_default, "root") != 0)
-	    errorx(1, _("only root can use `-c %s'"), login_class);
+	    fatalx(_("only root can use `-c %s'"), login_class);
     } else {
 	login_class = pw->pw_class;
 	if (!login_class || !*login_class)
