@@ -57,8 +57,7 @@ The member functions can return the following values:
 
     AUTH_FATAL		A fatal error occurred.  The routine should have
 			written an error message to stderr and optionally
-			sent mail to the administrator.  (If log_error()
-			is called to do this, the NO_EXIT flag must be used.)
+			sent mail to the administrator.
 			When verify_user() gets AUTH_FATAL from an auth
 			function it does an exit(1).
 
