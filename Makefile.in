@@ -259,13 +259,16 @@ install-nls:
 
 check-dist: update-pot compile-po
 	@if [ -d .hg ]; then \
-	    if hg stat -am | grep '\.[mp]ot*$$'; then \
-		echo "Uncommitted message catalog changes" 1>&2; \
-		false; \
+	    if test `hg stat -am | wc -l` -ne 0; then \
+		echo "Uncommitted changes" 1>&2; \
+		hg stat -am 1>&2; \
+		exit 1; \
 	    fi; \
 	fi
 
-dist: check-dist ChangeLog $(srcdir)/MANIFEST
+dist: check-dist force-dist
+
+force-dist: ChangeLog $(srcdir)/MANIFEST
 	pax -w -x ustar -s '/^/$(PACKAGE_TARNAME)-$(VERSION)\//' \
 	    -f ../$(PACKAGE_TARNAME)-$(VERSION).tar \
 	    `sed 's/[ 	].*//' $(srcdir)/MANIFEST`
