@@ -57,8 +57,8 @@ main(int argc, char *argv[])
 #endif
 
     /* Lookup tty name via libc. */
-    if ((tty_libc = ttyname(STDIN_FILENO)) == NULL ||
-	(tty_libc = ttyname(STDOUT_FILENO)) == NULL ||
+    if ((tty_libc = ttyname(STDIN_FILENO)) == NULL &&
+	(tty_libc = ttyname(STDOUT_FILENO)) == NULL &&
 	(tty_libc = ttyname(STDERR_FILENO)) == NULL)
 	tty_libc = "none";
     tty_libc = estrdup(tty_libc);
