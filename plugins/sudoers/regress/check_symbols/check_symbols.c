@@ -92,7 +92,8 @@ main(int argc, char *argv[])
 	    *cp = '\0';
 	sym = dlsym(handle, line);
 	if (sym == NULL) {
-	    warningx_nodebug("unable to resolve symbol %s: %s", line, dlerror());
+	    printf("%s: test %d: unable to resolve symbol %s: %s\n",
+		getprogname(), ntests, line, dlerror());
 	    errors++;
 	}
     }
@@ -100,16 +101,17 @@ main(int argc, char *argv[])
     /*
      * Make sure unexported symbols are not available.
      */
+    ntests++;
     sym = dlsym(handle, "user_in_group");
     if (sym != NULL) {
-	warningx_nodebug("able to resolve local symbol user_in_group");
+	printf("%s: test %d: able to resolve local symbol user_in_group\n",
+	    getprogname(), ntests);
 	errors++;
     }
-    ntests++;
 
     dlclose(handle);
 
-    printf("check_symbols: %d tests run, %d errors, %d%% success rate\n",
+    printf("%s: %d tests run, %d errors, %d%% success rate\n", getprogname(),
 	ntests, errors, (ntests - errors) * 100 / ntests);
 
     exit(errors);
