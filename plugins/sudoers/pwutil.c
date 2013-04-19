@@ -197,22 +197,32 @@ done:
 }
 
 /*
- * Take a user, uid and gid and return a faked up passwd struct.
+ * Take a user, uid, gid, home and shell and return a faked up passwd struct.
+ * If home or shell are NULL default values will be used.
  */
 struct passwd *
-sudo_fakepwnamid(const char *user, uid_t uid, gid_t gid)
+sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
+    const char *shell)
 {
     struct cache_item_pw *pwitem;
     struct passwd *pw;
     struct rbnode *node;
-    size_t len, namelen;
+    size_t len, name_len, home_len, shell_len;
     int i;
-    debug_decl(sudo_fakepwnamid, SUDO_DEBUG_NSS)
+    debug_decl(sudo_mkpwent, SUDO_DEBUG_NSS)
 
-    namelen = strlen(user);
-    len = sizeof(*pwitem) + namelen + 1 /* pw_name */ +
+    /* Optional arguments. */
+    if (home == NULL)
+	home = "/";
+    if (shell == NULL)
+	shell = _PATH_BSHELL;
+
+    name_len = strlen(user);
+    home_len = strlen(home);
+    shell_len = strlen(shell);
+    len = sizeof(*pwitem) + name_len + 1 /* pw_name */ +
 	sizeof("*") /* pw_passwd */ + sizeof("") /* pw_gecos */ +
-	sizeof("/") /* pw_dir */ + sizeof(_PATH_BSHELL);
+	home_len + 1 /* pw_dir */ + shell_len + 1 /* pw_shell */;
 
     for (i = 0; i < 2; i++) {
 	pwitem = ecalloc(1, len);
@@ -220,36 +230,38 @@ sudo_fakepwnamid(const char *user, uid_t uid, gid_t gid)
 	pw->pw_uid = uid;
 	pw->pw_gid = gid;
 	pw->pw_name = (char *)(pwitem + 1);
-	memcpy(pw->pw_name, user, namelen + 1);
-	pw->pw_passwd = pw->pw_name + namelen + 1;
+	memcpy(pw->pw_name, user, name_len + 1);
+	pw->pw_passwd = pw->pw_name + name_len + 1;
 	memcpy(pw->pw_passwd, "*", 2);
 	pw->pw_gecos = pw->pw_passwd + 2;
 	pw->pw_gecos[0] = '\0';
 	pw->pw_dir = pw->pw_gecos + 1;
-	memcpy(pw->pw_dir, "/", 2);
-	pw->pw_shell = pw->pw_dir + 2;
-	memcpy(pw->pw_shell, _PATH_BSHELL, sizeof(_PATH_BSHELL));
+	memcpy(pw->pw_dir, home, home_len + 1);
+	pw->pw_shell = pw->pw_dir + home_len + 1;
+	memcpy(pw->pw_shell, shell, shell_len + 1);
 
 	pwitem->cache.refcnt = 1;
 	pwitem->cache.d.pw = pw;
 	if (i == 0) {
-	    /* Store by uid, overwriting cached version. */
+	    /* Store by uid if it doesn't already exist. */
 	    pwitem->cache.k.uid = pw->pw_uid;
 	    if ((node = rbinsert(pwcache_byuid, &pwitem->cache)) != NULL) {
-		sudo_pw_delref_item(node->data);
-		node->data = &pwitem->cache;
+		/* Already exists, free the item we created. */
+		efree(pwitem);
+		pwitem = (struct cache_item_pw *) node->data;
 	    }
 	} else {
-	    /* Store by name, overwriting cached version. */
+	    /* Store by name if it doesn't already exist. */
 	    pwitem->cache.k.name = pw->pw_name;
 	    if ((node = rbinsert(pwcache_byname, &pwitem->cache)) != NULL) {
-		sudo_pw_delref_item(node->data);
-		node->data = &pwitem->cache;
+		/* Already exists, free the item we created. */
+		efree(pwitem);
+		pwitem = (struct cache_item_pw *) node->data;
 	    }
 	}
     }
     pwitem->cache.refcnt++;
-    debug_return_ptr(pw);
+    debug_return_ptr(&pwitem->pw);
 }
 
 /*
@@ -261,7 +273,7 @@ sudo_fakepwnam(const char *user, gid_t gid)
     uid_t uid;
 
     uid = (uid_t) atoi(user + 1);
-    return sudo_fakepwnamid(user, uid, gid);
+    return sudo_mkpwent(user, uid, gid, NULL, NULL);
 }
 
 void
@@ -422,40 +434,42 @@ sudo_fakegrnam(const char *group)
     struct cache_item_gr *gritem;
     struct group *gr;
     struct rbnode *node;
-    size_t len, namelen;
+    size_t len, name_len;
     int i;
     debug_decl(sudo_fakegrnam, SUDO_DEBUG_NSS)
 
-    namelen = strlen(group);
-    len = sizeof(*gritem) + namelen + 1;
+    name_len = strlen(group);
+    len = sizeof(*gritem) + name_len + 1;
 
     for (i = 0; i < 2; i++) {
 	gritem = ecalloc(1, len);
 	gr = &gritem->gr;
 	gr->gr_gid = (gid_t) atoi(group + 1);
 	gr->gr_name = (char *)(gritem + 1);
-	memcpy(gr->gr_name, group, namelen + 1);
+	memcpy(gr->gr_name, group, name_len + 1);
 
 	gritem->cache.refcnt = 1;
 	gritem->cache.d.gr = gr;
 	if (i == 0) {
-	    /* Store by gid, overwriting cached version. */
+	    /* Store by gid if it doesn't already exist. */
 	    gritem->cache.k.gid = gr->gr_gid;
 	    if ((node = rbinsert(grcache_bygid, &gritem->cache)) != NULL) {
-		sudo_gr_delref_item(node->data);
-		node->data = &gritem->cache;
+		/* Already exists, free the item we created. */
+		efree(gritem);
+		gritem = (struct cache_item_gr *) node->data;
 	    }
 	} else {
 	    /* Store by name, overwriting cached version. */
 	    gritem->cache.k.name = gr->gr_name;
 	    if ((node = rbinsert(grcache_byname, &gritem->cache)) != NULL) {
-		sudo_gr_delref_item(node->data);
-		node->data = &gritem->cache;
+		/* Already exists, free the item we created. */
+		efree(gritem);
+		gritem = (struct cache_item_gr *) node->data;
 	    }
 	}
     }
     gritem->cache.refcnt++;
-    debug_return_ptr(gr);
+    debug_return_ptr(&gritem->gr);
 }
 
 void

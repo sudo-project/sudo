@@ -303,7 +303,7 @@ bool user_in_group(struct passwd *, const char *);
 struct group *sudo_fakegrnam(const char *);
 struct group_list *sudo_get_grlist(struct passwd *pw);
 struct passwd *sudo_fakepwnam(const char *, gid_t);
-struct passwd *sudo_fakepwnamid(const char *user, uid_t uid, gid_t gid);
+struct passwd *sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home, const char *shell);
 struct passwd *sudo_getpwnam(const char *);
 struct passwd *sudo_getpwuid(uid_t);
 void sudo_endgrent(void);

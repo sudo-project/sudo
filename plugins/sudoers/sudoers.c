@@ -562,7 +562,7 @@ init_vars(char * const envp[])
 		fatalx(_("unknown uid: %u"), (unsigned int) user_uid);
 
 	    /* Need to make a fake struct passwd for the call to log_fatal(). */
-	    sudo_user.pw = sudo_fakepwnamid(user_name, user_uid, user_gid);
+	    sudo_user.pw = sudo_mkpwent(user_name, user_uid, user_gid, NULL, NULL);
 	    log_fatal(0, N_("unknown uid: %u"), (unsigned int) user_uid);
 	    /* NOTREACHED */
 	}
