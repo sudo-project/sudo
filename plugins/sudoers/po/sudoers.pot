@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.7\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-04-17 15:52-0400\n"
+"POT-Creation-Date: 2013-04-19 09:53-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -229,51 +229,12 @@ msgstr ""
 msgid "Authentication methods:"
 msgstr ""
 
-#: plugins/sudoers/bsm_audit.c:60 plugins/sudoers/bsm_audit.c:63
-#: plugins/sudoers/bsm_audit.c:112 plugins/sudoers/bsm_audit.c:116
-#: plugins/sudoers/bsm_audit.c:168 plugins/sudoers/bsm_audit.c:172
-#, c-format
-msgid "getaudit: failed"
-msgstr ""
-
 #: plugins/sudoers/bsm_audit.c:90 plugins/sudoers/bsm_audit.c:153
-#, c-format
 msgid "Could not determine audit condition"
 msgstr ""
 
-#: plugins/sudoers/bsm_audit.c:101 plugins/sudoers/bsm_audit.c:160
-#, c-format
-msgid "getauid: failed"
-msgstr ""
-
-#: plugins/sudoers/bsm_audit.c:103 plugins/sudoers/bsm_audit.c:162
-#, c-format
-msgid "au_open: failed"
-msgstr ""
-
-#: plugins/sudoers/bsm_audit.c:118 plugins/sudoers/bsm_audit.c:174
-#, c-format
-msgid "au_to_subject: failed"
-msgstr ""
-
-#: plugins/sudoers/bsm_audit.c:122 plugins/sudoers/bsm_audit.c:178
-#, c-format
-msgid "au_to_exec_args: failed"
-msgstr ""
-
-#: plugins/sudoers/bsm_audit.c:126 plugins/sudoers/bsm_audit.c:187
-#, c-format
-msgid "au_to_return32: failed"
-msgstr ""
-
 #: plugins/sudoers/bsm_audit.c:129 plugins/sudoers/bsm_audit.c:190
-#, c-format
 msgid "unable to commit audit record"
-msgstr ""
-
-#: plugins/sudoers/bsm_audit.c:183
-#, c-format
-msgid "au_to_text: failed"
 msgstr ""
 
 #: plugins/sudoers/check.c:189
@@ -720,7 +681,6 @@ msgid "internal error, %s overflow"
 msgstr ""
 
 #: plugins/sudoers/env.c:367
-#, c-format
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr ""
 
@@ -796,12 +756,10 @@ msgid "unable to create %s"
 msgstr ""
 
 #: plugins/sudoers/ldap.c:385
-#, c-format
 msgid "sudo_ldap_conf_add_ports: port too large"
 msgstr ""
 
 #: plugins/sudoers/ldap.c:408
-#, c-format
 msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
 msgstr ""
 
@@ -826,7 +784,6 @@ msgid "unable to mix ldaps and starttls"
 msgstr ""
 
 #: plugins/sudoers/ldap.c:496
-#, c-format
 msgid "sudo_ldap_parse_uri: out of space building hostbuf"
 msgstr ""
 
@@ -856,7 +813,6 @@ msgid "unable to build time filter"
 msgstr ""
 
 #: plugins/sudoers/ldap.c:1295
-#, c-format
 msgid "sudo_ldap_build_pass1 allocation mismatch"
 msgstr ""
 
@@ -903,7 +859,6 @@ msgid "invalid sudoOrder attribute: %s"
 msgstr ""
 
 #: plugins/sudoers/linux_audit.c:57
-#, c-format
 msgid "unable to open audit system"
 msgstr ""
 
@@ -1003,7 +958,6 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: plugins/sudoers/logging.c:566
-#, c-format
 msgid "unable to fork"
 msgstr ""
 
@@ -1028,7 +982,6 @@ msgid "unable to execute %s: %m"
 msgstr ""
 
 #: plugins/sudoers/logging.c:899
-#, c-format
 msgid "internal error: insufficient space for log line"
 msgstr ""
 
@@ -1356,7 +1309,6 @@ msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
 msgstr ""
 
 #: plugins/sudoers/sudoreplay.c:400
-#, c-format
 msgid "unable to set tty to raw mode"
 msgstr ""
 
@@ -1366,7 +1318,6 @@ msgid "invalid timing file line: %s"
 msgstr ""
 
 #: plugins/sudoers/sudoreplay.c:499
-#, c-format
 msgid "writing to standard output"
 msgstr ""
 
@@ -1386,7 +1337,6 @@ msgid "too many parenthesized expressions, max %d"
 msgstr ""
 
 #: plugins/sudoers/sudoreplay.c:694
-#, c-format
 msgid "unmatched ')' in expression"
 msgstr ""
 
@@ -1411,17 +1361,14 @@ msgid "could not parse date \"%s\""
 msgstr ""
 
 #: plugins/sudoers/sudoreplay.c:737
-#, c-format
 msgid "unmatched '(' in expression"
 msgstr ""
 
 #: plugins/sudoers/sudoreplay.c:739
-#, c-format
 msgid "illegal trailing \"or\""
 msgstr ""
 
 #: plugins/sudoers/sudoreplay.c:741
-#, c-format
 msgid "illegal trailing \"!\""
 msgstr ""
 
@@ -1534,7 +1481,6 @@ msgid "press return to edit %s: "
 msgstr ""
 
 #: plugins/sudoers/visudo.c:326 plugins/sudoers/visudo.c:332
-#, c-format
 msgid "write error"
 msgstr ""
 

@@ -57,10 +57,10 @@ audit_sudo_selected(int sf)
 	if (getaudit_addr(&ainfo_addr, sizeof(ainfo_addr)) < 0) {
 		if (errno == ENOSYS) {
 			if (getaudit(&ainfo) < 0)
-				fatal(_("getaudit: failed"));
+				fatal("getaudit");
 			mask = &ainfo.ai_mask;
 		} else
-			fatal(_("getaudit: failed"));
+			fatal("getaudit");
         } else
 		mask = &ainfo_addr.ai_mask;
 	sorf = (sf == 0) ? AU_PRS_SUCCESS : AU_PRS_FAILURE;
@@ -98,9 +98,9 @@ bsm_audit_success(char **exec_args)
 	if (!audit_sudo_selected(0))
 		debug_return;
 	if (getauid(&auid) < 0)
-		fatal(_("getauid: failed"));
+		fatal("getauid");
 	if ((aufd = au_open()) == -1)
-		fatal(_("au_open: failed"));
+		fatal("au_open");
 	if (getaudit_addr(&ainfo_addr, sizeof(ainfo_addr)) == 0) {
 		tok = au_to_subject_ex(auid, geteuid(), getegid(), getuid(),
 		    getuid(), pid, pid, &ainfo_addr.ai_termid);
@@ -109,21 +109,21 @@ bsm_audit_success(char **exec_args)
 		 * NB: We should probably watch out for ERANGE here.
 		 */
 		if (getaudit(&ainfo) < 0)
-			fatal(_("getaudit: failed"));
+			fatal("getaudit");
 		tok = au_to_subject(auid, geteuid(), getegid(), getuid(),
 		    getuid(), pid, pid, &ainfo.ai_termid);
 	} else
-		fatal(_("getaudit: failed"));
+		fatal("getaudit");
 	if (tok == NULL)
-		fatal(_("au_to_subject: failed"));
+		fatal("au_to_subject");
 	au_write(aufd, tok);
 	tok = au_to_exec_args(exec_args);
 	if (tok == NULL)
-		fatal(_("au_to_exec_args: failed"));
+		fatal("au_to_exec_args");
 	au_write(aufd, tok);
 	tok = au_to_return32(0, 0);
 	if (tok == NULL)
-		fatal(_("au_to_return32: failed"));
+		fatal("au_to_return32");
 	au_write(aufd, tok);
 	if (au_close(aufd, 1, AUE_sudo) == -1)
 		fatal(_("unable to commit audit record"));
@@ -157,34 +157,34 @@ bsm_audit_failure(char **exec_args, char const *const fmt, va_list ap)
 	if (!audit_sudo_selected(1))
 		debug_return;
 	if (getauid(&auid) < 0)
-		fatal(_("getauid: failed"));
+		fatal("getauid");
 	if ((aufd = au_open()) == -1)
-		fatal(_("au_open: failed"));
+		fatal("au_open");
 	if (getaudit_addr(&ainfo_addr, sizeof(ainfo_addr)) == 0) { 
 		tok = au_to_subject_ex(auid, geteuid(), getegid(), getuid(),
 		    getuid(), pid, pid, &ainfo_addr.ai_termid);
 	} else if (errno == ENOSYS) {
 		if (getaudit(&ainfo) < 0) 
-			fatal(_("getaudit: failed"));
+			fatal("getaudit");
 		tok = au_to_subject(auid, geteuid(), getegid(), getuid(),
 		    getuid(), pid, pid, &ainfo.ai_termid);
 	} else
-		fatal(_("getaudit: failed"));
+		fatal("getaudit");
 	if (tok == NULL)
-		fatal(_("au_to_subject: failed"));
+		fatal("au_to_subject");
 	au_write(aufd, tok);
 	tok = au_to_exec_args(exec_args);
 	if (tok == NULL)
-		fatal(_("au_to_exec_args: failed"));
+		fatal("au_to_exec_args");
 	au_write(aufd, tok);
 	(void) vsnprintf(text, sizeof(text), fmt, ap);
 	tok = au_to_text(text);
 	if (tok == NULL)
-		fatal(_("au_to_text: failed"));
+		fatal("au_to_text");
 	au_write(aufd, tok);
 	tok = au_to_return32(EPERM, 1);
 	if (tok == NULL)
-		fatal(_("au_to_return32: failed"));
+		fatal("au_to_return32");
 	au_write(aufd, tok);
 	if (au_close(aufd, 1, AUE_sudo) == -1)
 		fatal(_("unable to commit audit record"));
