@@ -70,7 +70,7 @@ fatal2(const char *fmt, ...)
     if (setjmp_enabled)
 	siglongjmp(fatal_jmp, 1);
     else
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 void
@@ -85,7 +85,7 @@ fatalx2(const char *fmt, ...)
     if (setjmp_enabled)
 	siglongjmp(fatal_jmp, 1);
     else
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 void
@@ -96,7 +96,7 @@ vfatal2(const char *fmt, va_list ap)
     if (setjmp_enabled)
 	siglongjmp(fatal_jmp, 1);
     else
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 void
@@ -107,7 +107,7 @@ vfatalx2(const char *fmt, va_list ap)
     if (setjmp_enabled)
 	siglongjmp(fatal_jmp, 1);
     else
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 void
