@@ -54,7 +54,7 @@ main(int argc, char *argv[], char *envp[])
     textdomain(PACKAGE_NAME);
 
     if (argc < 2)
-	errorx(EXIT_FAILURE, _("requires at least one argument"));
+	fatalx(_("requires at least one argument"));
 
     /* Read sudo.conf. */
     sudo_conf_read(NULL);
