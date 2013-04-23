@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -381,7 +381,7 @@ sudo_debug_write_file(const char *func, const char *file, int lineno,
     }
 
     /* Do timestamp last due to ctime's static buffer. */
-    now = time(NULL);
+    time(&now);
     timestr = ctime(&now) + 4;
     timestr[15] = ' ';	/* replace year with a space */
     timestr[16] = '\0';

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -63,7 +63,7 @@
 int
 get_boottime(struct timeval *tv)
 {
-    char *line = NULL;
+    char *ep, *line = NULL;
     size_t linesize = 0;
     ssize_t len;
     FILE * fp;
@@ -74,9 +74,21 @@ get_boottime(struct timeval *tv)
     if (fp != NULL) {
 	while ((len = getline(&line, &linesize, fp)) != -1) {
 	    if (strncmp(line, "btime ", 6) == 0) {
-		tv->tv_sec = atoi(line + 6);
-		tv->tv_usec = 0;
-		debug_return_bool(1);
+#ifdef HAVE_STRTOLL
+		long long llval = strtoll(line + 6, &ep, 10);
+		if (line[6] != '\0' && *ep == '\0' && (time_t)llval == llval) {
+		    tv->tv_sec = (time_t)llval;
+		    tv->tv_usec = 0;
+		    debug_return_bool(1);
+		}
+#else
+		long lval = strtol(line + 6, &ep, 10);
+		if (line[6] != '\0' && *ep == '\0' && (time_t)lval == lval) {
+		    tv->tv_sec = (time_t)llval;
+		    tv->tv_usec = 0;
+		    debug_return_bool(1);
+		}
+#endif
 	    }
 	}
 	fclose(fp);

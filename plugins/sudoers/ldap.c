@@ -2096,12 +2096,12 @@ sudo_ldap_set_options_conn(LDAP *ld)
 	struct timeval tv;
 	tv.tv_sec = ldap_conf.timeout;
 	tv.tv_usec = 0;
-	DPRINTF(("ldap_set_option(LDAP_OPT_TIMEOUT, %ld)",
-	    (long)tv.tv_sec), 1);
+	DPRINTF(("ldap_set_option(LDAP_OPT_TIMEOUT, %d)",
+	    ldap_conf.timeout), 1);
 	rc = ldap_set_option(ld, LDAP_OPT_TIMEOUT, &tv);
 	if (rc != LDAP_OPT_SUCCESS) {
-	    warningx("ldap_set_option(TIMEOUT, %ld): %s",
-		(long)tv.tv_sec, ldap_err2string(rc));
+	    warningx("ldap_set_option(TIMEOUT, %d): %s",
+		ldap_conf.timeout, ldap_err2string(rc));
 	}
     }
 #endif
@@ -2111,14 +2111,14 @@ sudo_ldap_set_options_conn(LDAP *ld)
 	struct timeval tv;
 	tv.tv_sec = ldap_conf.bind_timelimit / 1000;
 	tv.tv_usec = 0;
-	DPRINTF(("ldap_set_option(LDAP_OPT_NETWORK_TIMEOUT, %ld)",
-	    (long)tv.tv_sec), 1);
+	DPRINTF(("ldap_set_option(LDAP_OPT_NETWORK_TIMEOUT, %d)",
+	    ldap_conf.bind_timelimit / 1000), 1);
 	rc = ldap_set_option(ld, LDAP_OPT_NETWORK_TIMEOUT, &tv);
 # if !defined(LDAP_OPT_CONNECT_TIMEOUT) || LDAP_VENDOR_VERSION != 510
 	/* Tivoli Directory Server 6.3 libs always return a (bogus) error. */
 	if (rc != LDAP_OPT_SUCCESS) {
-	    warningx("ldap_set_option(NETWORK_TIMEOUT, %ld): %s",
-		(long)tv.tv_sec, ldap_err2string(rc));
+	    warningx("ldap_set_option(NETWORK_TIMEOUT, %d): %s",
+		ldap_conf.bind_timelimit / 1000, ldap_err2string(rc));
 	}
 # endif
     }

@@ -340,7 +340,7 @@ timestamp_status_internal(bool removing)
 	    if (def_timestamp_timeout < 0) {
 		status = TS_CURRENT;
 	    } else {
-		now = time(NULL);
+		time(&now);
 		if (def_timestamp_timeout &&
 		    now - mtime.tv_sec < 60 * def_timestamp_timeout) {
 		    /*

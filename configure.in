@@ -2229,9 +2229,8 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS(glob strrchr sysconf tzset strftime setenv \
-	       regcomp nl_langinfo)
-dnl AC_REPLACE_FUNCS(getgrouplist)
+AC_CHECK_FUNCS(glob nl_langinfo regcomp setenv strftime strrchr strtoll \
+	       sysconf tzset)
 AC_CHECK_FUNCS(getgrouplist, [], [
     case "$host_os" in
     aix*)

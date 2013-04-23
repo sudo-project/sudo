@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996, 1998-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1994-1996, 1998-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -197,7 +197,7 @@ do_logfile(char *msg)
 	send_mail(_("unable to lock log file: %s: %s"),
 	    def_logfile, strerror(errno));
     } else {
-	now = time(NULL);
+	time(&now);
 	if (def_loglinelen < sizeof(LOG_INDENT)) {
 	    /* Don't pretty-print long log file lines (hard to grep) */
 	    if (def_log_host)

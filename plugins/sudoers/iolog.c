@@ -592,8 +592,8 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     }
 
     gettimeofday(&last_time, NULL);
-    fprintf(io_log_files[IOFD_LOG].fd.f, "%ld:%s:%s:%s:%s:%d:%d\n%s\n%s",
-	(long)last_time.tv_sec,
+    fprintf(io_log_files[IOFD_LOG].fd.f, "%lld:%s:%s:%s:%s:%d:%d\n%s\n%s",
+	(long long)last_time.tv_sec,
 	details.user ? details.user : "unknown", details.runas_pw->pw_name,
 	details.runas_gr ? details.runas_gr->gr_name : "",
 	details.tty ? details.tty : "unknown", details.lines, details.cols,

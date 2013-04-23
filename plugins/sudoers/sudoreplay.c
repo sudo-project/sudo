@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -525,8 +525,8 @@ delay(double secs)
       rval = nanosleep(&ts, &rts);
     } while (rval == -1 && errno == EINTR);
     if (rval == -1) {
-	fatal_nodebug(_("nanosleep: tv_sec %ld, tv_nsec %ld"),
-	    (long)ts.tv_sec, (long)ts.tv_nsec);
+	fatal_nodebug(_("nanosleep: tv_sec %lld, tv_nsec %ld"),
+	    (long long)ts.tv_sec, (long)ts.tv_nsec);
     }
 }
 
