@@ -281,7 +281,6 @@ plugins/sudoers/regress/sudoers/test1.toke.ok
 plugins/sudoers/regress/sudoers/test10.in
 plugins/sudoers/regress/sudoers/test10.out.ok
 plugins/sudoers/regress/sudoers/test10.toke.ok
-plugins/sudoers/regress/sudoers/test10.toke.out.ok
 plugins/sudoers/regress/sudoers/test11.in
 plugins/sudoers/regress/sudoers/test11.out.ok
 plugins/sudoers/regress/sudoers/test11.toke.ok
@@ -315,7 +314,6 @@ plugins/sudoers/regress/sudoers/test8.toke.ok
 plugins/sudoers/regress/sudoers/test9.in
 plugins/sudoers/regress/sudoers/test9.out.ok
 plugins/sudoers/regress/sudoers/test9.toke.ok
-plugins/sudoers/regress/sudoers/test9.toke.out.ok
 plugins/sudoers/regress/testsudoers/test1.out.ok
 plugins/sudoers/regress/testsudoers/test1.sh
 plugins/sudoers/regress/testsudoers/test2.inc
