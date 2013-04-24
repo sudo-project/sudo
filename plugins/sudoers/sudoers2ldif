@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #
-# Copyright (c) 2007, 2010-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2007, 2010-2011, 2013 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -62,7 +62,7 @@ while (<>){
     my $opt=$';
     $opt=~s/\s+$//; # remove trailing whitespace
     push @options,$opt;
-  } elsif (/^(\S+)\s+(.+)=\s*(.*)/) {
+  } elsif (/^(\S+)\s+([^=]+)=\s*(.*)/) {
 
     # Aliases or Definitions
     my ($p1,$p2,$p3)=($1,$2,$3);
@@ -143,7 +143,7 @@ sub expand{
     s/NOLOG_INPUT:\s*// && push @options,"!log_input";
     s/LOG_OUTPUT:\s*// && push @options,"log_output";
     s/NOLOG_OUTPUT:\s*// && push @options,"!log_output";
-    s/\w+://; # silently remove other directives
+    s/[[:upper:]]+://; # silently remove other tags
     s/\s+$//; # right trim
   }
 
