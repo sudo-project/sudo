@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.7\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-04-19 09:53-0400\n"
+"POT-Creation-Date: 2013-04-24 11:10-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1079,22 +1079,22 @@ msgstr ""
 msgid "unable to cache user %s, already exists"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:374
+#: plugins/sudoers/pwutil.c:386
 #, c-format
 msgid "unable to cache gid %u, already exists"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:410
+#: plugins/sudoers/pwutil.c:422
 #, c-format
 msgid "unable to cache group %s, already exists"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:564 plugins/sudoers/pwutil.c:586
+#: plugins/sudoers/pwutil.c:578 plugins/sudoers/pwutil.c:600
 #, c-format
 msgid "unable to cache group list for %s, already exists"
 msgstr ""
 
-#: plugins/sudoers/pwutil.c:584
+#: plugins/sudoers/pwutil.c:598
 #, c-format
 msgid "unable to parse groups for %s"
 msgstr ""
@@ -1319,11 +1319,6 @@ msgstr ""
 
 #: plugins/sudoers/sudoreplay.c:499
 msgid "writing to standard output"
-msgstr ""
-
-#: plugins/sudoers/sudoreplay.c:528
-#, c-format
-msgid "nanosleep: tv_sec %ld, tv_nsec %ld"
 msgstr ""
 
 #: plugins/sudoers/sudoreplay.c:641 plugins/sudoers/sudoreplay.c:666

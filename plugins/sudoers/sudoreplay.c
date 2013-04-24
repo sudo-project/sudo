@@ -525,7 +525,7 @@ delay(double secs)
       rval = nanosleep(&ts, &rts);
     } while (rval == -1 && errno == EINTR);
     if (rval == -1) {
-	fatal_nodebug(_("nanosleep: tv_sec %lld, tv_nsec %ld"),
+	fatal_nodebug("nanosleep: tv_sec %lld, tv_nsec %ld",
 	    (long long)ts.tv_sec, (long)ts.tv_nsec);
     }
 }
