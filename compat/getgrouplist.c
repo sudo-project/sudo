@@ -153,9 +153,18 @@ str2grp(const char *instr, int inlen, void *ent, char *buf, int buflen)
     gid = strtoul(cp, &ep, 10);
     if (*cp == '\0' || *ep != '\0')
 	return yp ? NSS_STR_PARSE_SUCCESS : NSS_STR_PARSE_PARSE;
-    if (gid > GID_MAX || (gid == ULONG_MAX && errno == ERANGE))
+#ifdef GID_NOBODY
+    if (*cp == '-' && gid != 0) {
+	/* Negative gids get mapped to nobody on Solaris. */
+	grp->gr_gid = GID_NOBODY;
+    } else
+#endif
+    if ((errno == ERANGE && gid == ULONG_MAX) ||
+	gid > GID_MAX || gid != (gid_t)gid) {
 	return NSS_STR_PARSE_ERANGE;
-    grp->gr_gid = (gid_t)gid;
+    } else {
+	grp->gr_gid = (gid_t)gid;
+    }
 
     /* Store group members, taking care to use proper alignment. */
     grp->gr_mem = NULL;
