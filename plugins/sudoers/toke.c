@@ -1928,7 +1928,7 @@ char *yytext;
 #define INITIAL 0
 #line 2 "toke.l"
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2012
+ * Copyright (c) 1996, 1998-2005, 2007-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any

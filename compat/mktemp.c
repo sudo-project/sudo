@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2003, 2004, 2008-2011
+ * Copyright (c) 2001, 2003, 2004, 2008-2011, 2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
