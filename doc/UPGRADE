@@ -3,10 +3,23 @@ Notes on upgrading from an older release
 
 o Upgrading from a version prior to 1.8.7:
 
-    Sudo now stores its libexec files in a "sudo" subdirectory
+    Sudo now stores its libexec files in a "sudo" sub-directory
     instead of in libexec itself.  For backwards compatibility, if
     the plugin is not found in the default plugin directory, sudo
     will check the parent directory default directory ends in "/sudo".
+
+    The default sudo plugins now all use the .so extension, regardless
+    of the extension used by native shared libraries.  For backwards
+    compatibility, sudo on HP-UX will also search for a plugin with
+    an .sl extension if the .so version is not found.
+
+    Handling of users belonging to a large number of groups has
+    changed.  Previously, sudo would only use the group list from
+    the kernel unless the system_group plugin was enabled in sudoers.
+    Now, sudo will query the groups database if the user belongs
+    to the maximum number of groups supported by the kernel.  See
+    the group_source and max_groups settings in the sudo.conf manual
+    for details.
 
 o Upgrading from a version prior to 1.8.2:
 
@@ -14,10 +27,10 @@ o Upgrading from a version prior to 1.8.2:
     match based on the name of the group as it appears in sudoers
     instead of the group ID.  This can substantially reduce the
     number of group lookups for sudoers files that contain a large
-    nummber of groups.  There are a few side effects of this change.
+    number of groups.  There are a few side effects of this change.
 
     1) Unix groups with different names but the same group ID are
-       can no longer be used interchangably.  Sudo will look up all
+       can no longer be used interchangeably.  Sudo will look up all
        of a user's groups by group ID and use the resulting group
        names when matching sudoers entries.  If there are multiple
        groups with the same ID, the group name returned by the
@@ -163,7 +176,7 @@ o Upgrading from a version prior to 1.7.0:
     group ID.
 
     When sudo is build with LDAP support the /etc/nsswitch.conf file is
-    now used to determine the sudoers seach order.  sudo will default to
+    now used to determine the sudoers sea ch order.  sudo will default to
     only using /etc/sudoers unless /etc/nsswitch.conf says otherwise.
     This can be changed with an nsswitch.conf line, e.g.:
         sudoers:        ldap files
@@ -190,7 +203,7 @@ o Upgrading from a version prior to 1.6.9:
     Environment variable handling has changed significantly in sudo
     1.6.9.  Prior to version 1.6.9, sudo would preserve the user's
     environment, pruning out potentially dangerous variables.
-    Beginning with sudo 1.6.9, the envionment is reset to a default
+    Beginning with sudo 1.6.9, the environment is reset to a default
     set of values with only a small number of "safe" variables
     preserved.  To preserve specific environment variables, add
     them to the "env_keep" list in sudoers.  E.g.
@@ -219,7 +232,7 @@ o Upgrading from a version prior to 1.6.9:
     also preserved in the env_reset case, provided that they do not
     contain a '/' or '%' character.  Note that it is not necessary
     to also list a variable in env_keep--having it in env_check is
-    sufficent.
+    sufficient.
 
     The default lists of variables to be preserved and/or checked
     are displayed when sudo is run by root with the -V flag.
@@ -236,7 +249,7 @@ o Upgrading from a version prior to 1.6.8:
     a command as a certain user did not override a previous entry
     allowing the same command.  This has been fixed in sudo 1.6.8
     such that the last match is now used (as it is documented).
-    Hopefully no one was depending on the previous (buggy) beghavior.
+    Hopefully no one was depending on the previous (buggy) behavior.
 
 o Upgrading from a version prior to 1.6:
 
@@ -266,7 +279,7 @@ o Upgrading from a version prior to 1.6:
     command.  In other words, the "(root)" sets the default runas
     user to root for the rest of the list.  If we wanted to require
     a password for /bin/ls and /sbin/dump the line could be written
-    thusly:
+    as:
 
 	millert ALL=(daemon) NOPASSWD:/usr/bin/whoami, \
 	    (root) PASSWD:/bin/ls, /sbin/dump
