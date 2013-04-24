@@ -290,6 +290,9 @@ plugins/sudoers/regress/sudoers/test12.toke.ok
 plugins/sudoers/regress/sudoers/test13.in
 plugins/sudoers/regress/sudoers/test13.out.ok
 plugins/sudoers/regress/sudoers/test13.toke.ok
+plugins/sudoers/regress/sudoers/test14.in 
+plugins/sudoers/regress/sudoers/test14.out.ok 
+plugins/sudoers/regress/sudoers/test14.toke.ok 
 plugins/sudoers/regress/sudoers/test2.in
 plugins/sudoers/regress/sudoers/test2.out.ok
 plugins/sudoers/regress/sudoers/test2.toke.ok

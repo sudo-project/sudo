@@ -1,0 +1,7 @@
+Parses OK.
+
+
+Cmnd_Alias	LS = /bin/ls
+Cmnd_Alias	SH = /bin/sh
+
+millert	ALL = LS, SH, /bin/kill
