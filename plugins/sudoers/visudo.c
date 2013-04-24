@@ -102,7 +102,7 @@ static bool check_syntax(char *, bool, bool, bool);
 static bool edit_sudoers(struct sudoersfile *, char *, char *, int);
 static bool install_sudoers(struct sudoersfile *, bool);
 static int print_unused(void *, void *);
-static void reparse_sudoers(char *, char *, bool, bool);
+static bool reparse_sudoers(char *, char *, bool, bool);
 static int run_command(char *, char **);
 static void setup_signals(void);
 static void help(void) __attribute__((__noreturn__));
@@ -247,12 +247,14 @@ main(int argc, char *argv[])
 	edit_sudoers(sp, editor, args, -1);
     }
 
-    /* Check edited files for a parse error and re-edit any that fail. */
-    reparse_sudoers(editor, args, strict, quiet);
-
-    /* Install the sudoers temp files as needed. */
-    tq_foreach_fwd(&sudoerslist, sp) {
-	(void) install_sudoers(sp, oldperms);
+    /*
+     * Check edited files for a parse error, re-edit any that fail
+     * and install the edited files as needed.
+     */
+    if (reparse_sudoers(editor, args, strict, quiet)) {
+	tq_foreach_fwd(&sudoerslist, sp) {
+	    (void) install_sudoers(sp, oldperms);
+	}
     }
 
 done:
@@ -455,7 +457,7 @@ done:
 /*
  * Parse sudoers after editing and re-edit any ones that caused a parse error.
  */
-static void
+static bool
 reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 {
     struct sudoersfile *sp, *last;
@@ -463,14 +465,10 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
     int ch;
     debug_decl(reparse_sudoers, SUDO_DEBUG_UTIL)
 
-    if (tq_empty(&sudoerslist))
-	debug_return;
-
     /*
      * Parse the edited sudoers files and do sanity checking
      */
-    do {
-	sp = tq_first(&sudoerslist);
+    while ((sp = tq_first(&sudoerslist)) != NULL) {
 	last = tq_last(&sudoerslist);
 	fp = fopen(sp->tpath, "r+");
 	if (fp == NULL)
@@ -481,7 +479,7 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 	init_defaults();
 	init_parser(sp->path, quiet);
 
-	/* Parse the sudoers temp file */
+	/* Parse the sudoers temp file(s) */
 	sudoersrestart(fp);
 	if (sudoersparse() && !parse_error) {
 	    warningx(_("unabled to parse temporary file (%s), unknown error"),
@@ -499,32 +497,31 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 	}
 
 	/*
-	 * Got an error, prompt the user for what to do now
+	 * Got an error, prompt the user for what to do now.
 	 */
 	if (parse_error) {
 	    switch (whatnow()) {
-		case 'Q' :	parse_error = false;	/* ignore parse error */
-				break;
-		case 'x' :	/* XXX - should return instead of exiting */
-				visudo_cleanup();
-				sudo_debug_exit_int(__func__, __FILE__,
-				    __LINE__, sudo_debug_subsys, 0);
-				exit(0);
-				break;
-	    }
-	}
-	if (parse_error) {
-	    /* Edit file with the parse error */
-	    tq_foreach_fwd(&sudoerslist, sp) {
-		if (errorfile == NULL || strcmp(sp->path, errorfile) == 0) {
-		    edit_sudoers(sp, editor, args, errorlineno);
-		    if (errorfile != NULL)
-			break;
+	    case 'Q':
+		parse_error = false;	/* ignore parse error */
+		break;
+	    case 'x':
+		visudo_cleanup();	/* discard changes */
+		debug_return_bool(false);
+	    case 'e':
+	    default:
+		/* Edit file with the parse error */
+		tq_foreach_fwd(&sudoerslist, sp) {
+		    if (errorfile == NULL || strcmp(sp->path, errorfile) == 0) {
+			edit_sudoers(sp, editor, args, errorlineno);
+			if (errorfile != NULL)
+			    break;
+		    }
 		}
-	    }
-	    if (errorfile != NULL && sp == NULL) {
-		fatalx(_("internal error, unable to find %s in list!"),
-		    sudoers);
+		if (errorfile != NULL && sp == NULL) {
+		    fatalx(_("internal error, unable to find %s in list!"),
+			sudoers);
+		}
+		break;
 	    }
 	}
 
@@ -535,9 +532,13 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 		    continue;
 	    edit_sudoers(sp, editor, args, errorlineno);
 	}
-    } while (parse_error);
 
-    debug_return;
+	/* If all sudoers files parsed OK we are done. */
+	if (!parse_error)
+	    break;
+    }
+
+    debug_return_bool(true);
 }
 
 /*
