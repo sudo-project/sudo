@@ -69,6 +69,8 @@ struct sudoers_exec_args {
 static int sudo_version;
 static const char *interfaces_string;
 sudo_conv_t sudo_conv;
+const char *path_ldap_conf = _PATH_LDAP_CONF;
+const char *path_ldap_secret = _PATH_LDAP_SECRET;
 
 extern __dso_public struct policy_plugin sudoers_policy;
 
@@ -110,6 +112,14 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    if (MATCHES(*cur, "sudoers_mode=")) {
 		sudoers_mode = (mode_t) strtol(*cur + sizeof("sudoers_mode=") - 1,
 		    NULL, 8);
+		continue;
+	    }
+	    if (MATCHES(*cur, "ldap_conf=")) {
+		path_ldap_conf = *cur + sizeof("ldap_conf=") - 1;
+		continue;
+	    }
+	    if (MATCHES(*cur, "ldap_secret=")) {
+		path_ldap_secret = *cur + sizeof("ldap_secret=") - 1;
 		continue;
 	    }
 	}
@@ -667,8 +677,8 @@ sudoers_policy_version(int verbose)
 # ifdef _PATH_NSSWITCH_CONF
 	sudo_printf(SUDO_CONV_INFO_MSG, _("nsswitch path: %s\n"), _PATH_NSSWITCH_CONF);
 # endif
-	sudo_printf(SUDO_CONV_INFO_MSG, _("ldap.conf path: %s\n"), _PATH_LDAP_CONF);
-	sudo_printf(SUDO_CONV_INFO_MSG, _("ldap.secret path: %s\n"), _PATH_LDAP_SECRET);
+	sudo_printf(SUDO_CONV_INFO_MSG, _("ldap.conf path: %s\n"), path_ldap_conf);
+	sudo_printf(SUDO_CONV_INFO_MSG, _("ldap.secret path: %s\n"), path_ldap_secret);
 #endif
 	dump_auth_methods();
 	dump_defaults();

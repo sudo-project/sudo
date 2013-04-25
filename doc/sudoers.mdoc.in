@@ -86,27 +86,38 @@ Plugin sudoers_policy sudoers.so sudoers_mode=0400
 .Pp
 The following plugin arguments are supported:
 .Bl -tag -width 8n
+.It ldap_conf=pathname
+The
+.Em ldap_conf
+argument can be used to override the default path to the
+.Pa ldap.conf
+file.
+.It ldap_secret=pathname
+The
+.Em ldap_secret
+argument can be used to override the default path to the
+.Pa ldap.secret
+file.
 .It sudoers_file=pathname
 The
 .Em sudoers_file
-arguments can be used to override the default path
-to the
+argument can be used to override the default path to the
 .Em sudoers
 file.
 .It sudoers_uid=uid
 The
 .Em sudoers_uid
-arguments can be used to override the default owner of the sudoers file.
+argument can be used to override the default owner of the sudoers file.
 It should be specified as a numeric user ID.
 .It sudoers_gid=gid
 The
 .Em sudoers_gid
-arguments can be used to override the default group of the sudoers file.
+argument can be used to override the default group of the sudoers file.
 It must be specified as a numeric group ID (not a group name).
 .It sudoers_mode=mode
 The
 .Em sudoers_mode
-arguments can be used to override the default file mode for the sudoers file.
+argument can be used to override the default file mode for the sudoers file.
 It should be specified as an octal value.
 .El
 .Pp

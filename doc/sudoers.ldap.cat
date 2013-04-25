@@ -274,7 +274,8 @@ DDEESSCCRRIIPPTTIIOONN
      Typically, this file is shared between different LDAP-aware clients.  As
      such, most of the settings are not ssuuddoo-specific. Note that ssuuddoo parses
      _/_e_t_c_/_l_d_a_p_._c_o_n_f itself and may support options that differ from those
-     described in the system's ldap.conf(1m) manual.
+     described in the system's ldap.conf(1m) manual.  The path to _l_d_a_p_._c_o_n_f may
+     be overridden via the _l_d_a_p___c_o_n_f plugin argument in sudo.conf(4).
 
      Also note that on systems using the OpenLDAP libraries, default values
      specified in _/_e_t_c_/_o_p_e_n_l_d_a_p_/_l_d_a_p_._c_o_n_f or the user's _._l_d_a_p_r_c files are not
@@ -379,8 +380,10 @@ DDEESSCCRRIIPPTTIIOONN
            The RROOOOTTBBIINNDDDDNN parameter specifies the identity, in the form of a
            Distinguished Name (DN), to use when performing privileged LDAP
            operations, such as _s_u_d_o_e_r_s queries.  The password corresponding to
-           the identity should be stored in _/_e_t_c_/_l_d_a_p_._s_e_c_r_e_t.  If not
-           specified, the BBIINNDDDDNN identity is used (if any).
+           the identity should be stored in the or the path specified by the
+           _l_d_a_p___s_e_c_r_e_t plugin argument in sudo.conf(4), which defaults to
+           _/_e_t_c_/_l_d_a_p_._s_e_c_r_e_t.  If no RROOOOTTBBIINNDDDDNN is specified, the BBIINNDDDDNN
+           identity is used (if any).
 
      LLDDAAPP__VVEERRSSIIOONN _n_u_m_b_e_r
            The version of the LDAP protocol to use when connecting to the

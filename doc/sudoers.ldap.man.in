@@ -491,6 +491,12 @@ itself and may support options that differ from those described in the
 system's
 ldap.conf(@mansectsu@)
 manual.
+The path to
+\fIldap.conf\fR
+may be overridden via the
+\fIldap_conf\fR
+plugin argument in
+sudo.conf(@mansectform@).
 .PP
 Also note that on systems using the OpenLDAP libraries, default
 values specified in
@@ -693,10 +699,16 @@ parameter specifies the identity, in the form of a Distinguished Name (DN),
 to use when performing privileged LDAP operations, such as
 \fIsudoers\fR
 queries.
-The password corresponding
-to the identity should be stored in
+The password corresponding to the identity should be stored in the
+or the path specified by the
+\fIldap_secret\fR
+plugin argument in
+sudo.conf(@mansectform@),
+which defaults to
 \fI@ldap_secret@\fR.
-If not specified, the
+If no
+\fBROOTBINDDN\fR
+is specified, the
 \fBBINDDN\fR
 identity is used (if any).
 .TP 6n

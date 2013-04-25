@@ -94,30 +94,43 @@ Plugin sudoers_policy sudoers.so sudoers_mode=0400
 .PP
 The following plugin arguments are supported:
 .TP 10n
+ldap_conf=pathname
+The
+\fIldap_conf\fR
+argument can be used to override the default path to the
+\fIldap.conf\fR
+file.
+.TP 10n
+ldap_secret=pathname
+The
+\fIldap_secret\fR
+argument can be used to override the default path to the
+\fIldap.secret\fR
+file.
+.TP 10n
 sudoers_file=pathname
 The
 \fIsudoers_file\fR
-arguments can be used to override the default path
-to the
+argument can be used to override the default path to the
 \fIsudoers\fR
 file.
 .TP 10n
 sudoers_uid=uid
 The
 \fIsudoers_uid\fR
-arguments can be used to override the default owner of the sudoers file.
+argument can be used to override the default owner of the sudoers file.
 It should be specified as a numeric user ID.
 .TP 10n
 sudoers_gid=gid
 The
 \fIsudoers_gid\fR
-arguments can be used to override the default group of the sudoers file.
+argument can be used to override the default group of the sudoers file.
 It must be specified as a numeric group ID (not a group name).
 .TP 10n
 sudoers_mode=mode
 The
 \fIsudoers_mode\fR
-arguments can be used to override the default file mode for the sudoers file.
+argument can be used to override the default file mode for the sudoers file.
 It should be specified as an octal value.
 .PP
 For more information on configuring

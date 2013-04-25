@@ -365,6 +365,8 @@ void sudoers_cleanup(void);
 /* policy.c */
 int sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group);
 int sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
+extern const char *path_ldap_conf;
+extern const char *path_ldap_secret;
 
 /* aix.c */
 void aix_restoreauthdb(void);

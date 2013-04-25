@@ -30,22 +30,30 @@ DDEESSCCRRIIPPTTIIOONN
 
      The following plugin arguments are supported:
 
+     ldap_conf=pathname
+               The _l_d_a_p___c_o_n_f argument can be used to override the default path
+               to the _l_d_a_p_._c_o_n_f file.
+
+     ldap_secret=pathname
+               The _l_d_a_p___s_e_c_r_e_t argument can be used to override the default
+               path to the _l_d_a_p_._s_e_c_r_e_t file.
+
      sudoers_file=pathname
-               The _s_u_d_o_e_r_s___f_i_l_e arguments can be used to override the default
+               The _s_u_d_o_e_r_s___f_i_l_e argument can be used to override the default
                path to the _s_u_d_o_e_r_s file.
 
      sudoers_uid=uid
-               The _s_u_d_o_e_r_s___u_i_d arguments can be used to override the default
+               The _s_u_d_o_e_r_s___u_i_d argument can be used to override the default
                owner of the sudoers file.  It should be specified as a numeric
                user ID.
 
      sudoers_gid=gid
-               The _s_u_d_o_e_r_s___g_i_d arguments can be used to override the default
+               The _s_u_d_o_e_r_s___g_i_d argument can be used to override the default
                group of the sudoers file.  It must be specified as a numeric
                group ID (not a group name).
 
      sudoers_mode=mode
-               The _s_u_d_o_e_r_s___m_o_d_e arguments can be used to override the default
+               The _s_u_d_o_e_r_s___m_o_d_e argument can be used to override the default
                file mode for the sudoers file.  It should be specified as an
                octal value.
 

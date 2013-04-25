@@ -460,6 +460,12 @@ itself and may support options that differ from those described in the
 system's
 .Xr ldap.conf @mansectsu@
 manual.
+The path to
+.Pa ldap.conf
+may be overridden via the
+.Em ldap_conf
+plugin argument in
+.Xr sudo.conf @mansectform@ .
 .Pp
 Also note that on systems using the OpenLDAP libraries, default
 values specified in
@@ -649,10 +655,16 @@ parameter specifies the identity, in the form of a Distinguished Name (DN),
 to use when performing privileged LDAP operations, such as
 .Em sudoers
 queries.
-The password corresponding
-to the identity should be stored in
+The password corresponding to the identity should be stored in the
+or the path specified by the
+.Em ldap_secret
+plugin argument in
+.Xr sudo.conf @mansectform@ ,
+which defaults to
 .Pa @ldap_secret@ .
-If not specified, the
+If no
+.Sy ROOTBINDDN
+is specified, the
 .Sy BINDDN
 identity is used (if any).
 .It Sy LDAP_VERSION Ar number

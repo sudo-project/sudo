@@ -593,7 +593,7 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 		ldapssl_err2string(rc));
 	    if (ldap_conf.tls_certfile == NULL)
 		warningx(_("you must set TLS_CERT in %s to use SSL"),
-		    _PATH_LDAP_CONF);
+		    path_ldap_conf);
 	    goto done;
 	}
 
@@ -1368,7 +1368,7 @@ sudo_ldap_read_secret(const char *path)
     char buf[LINE_MAX], *cp;
     debug_decl(sudo_ldap_read_secret, SUDO_DEBUG_LDAP)
 
-    if ((fp = fopen(_PATH_LDAP_SECRET, "r")) != NULL) {
+    if ((fp = fopen(path_ldap_secret, "r")) != NULL) {
 	if (fgets(buf, sizeof(buf), fp) != NULL) {
 	    if ((cp = strchr(buf, '\n')) != NULL)
 		*cp = '\0';
@@ -1460,7 +1460,7 @@ sudo_ldap_read_config(void)
     ldap_conf.rootuse_sasl = -1;
     ldap_conf.deref = -1;
 
-    if ((fp = fopen(_PATH_LDAP_CONF, "r")) == NULL)
+    if ((fp = fopen(path_ldap_conf, "r")) == NULL)
 	debug_return_bool(false);
 
     while (sudo_parseln(&line, &linesize, NULL, fp) != -1) {
@@ -1635,7 +1635,7 @@ sudo_ldap_read_config(void)
 
     /* If rootbinddn set, read in /etc/ldap.secret if it exists. */
     if (ldap_conf.rootbinddn)
-	sudo_ldap_read_secret(_PATH_LDAP_SECRET);
+	sudo_ldap_read_secret(path_ldap_secret);
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     /*
