@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd April 17, 2013
+.Dd April 25, 2013
 .Dt SUDOERS.LDAP @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -608,6 +608,26 @@ A value of 1 results in a moderate amount of debugging information.
 A value of 2 shows the results of the matches themselves.
 This parameter should not be set in a production environment as the
 extra information is likely to confuse users.
+.Pp
+The
+.Sy SUDOERS_DEBUG
+parameter is deprecated and will be removed in a future release.
+The same information is now logged via the
+.Nm sudo
+debugging framework using the
+.Dq ldap
+subsystem at priorities
+.Em diag
+and
+.Em info
+for
+.Em debug_level
+values 1 and 2 respectively.
+See the
+.Xr sudo.conf @mansectform@
+manual for details on how to configure
+.Nm sudo
+debugging.
 .It Sy BINDDN Ar DN
 The
 .Sy BINDDN
@@ -1125,7 +1145,8 @@ objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL
    )
 .Ed
 .Sh SEE ALSO
-.Xr ldap.conf @mansectsu@ ,
+.Xr ldap.conf @mansectform@ ,
+.Xr sudo.conf @mansectform@ ,
 .Xr sudoers @mansectsu@
 .Sh CAVEATS
 Note that there are differences in the way that LDAP-based

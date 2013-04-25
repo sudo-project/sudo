@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOERS.LDAP" "8" "April 17, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD System Manager's Manual"
+.TH "SUDOERS.LDAP" "8" "April 25, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -649,6 +649,26 @@ A value of 1 results in a moderate amount of debugging information.
 A value of 2 shows the results of the matches themselves.
 This parameter should not be set in a production environment as the
 extra information is likely to confuse users.
+.sp
+The
+\fBSUDOERS_DEBUG\fR
+parameter is deprecated and will be removed in a future release.
+The same information is now logged via the
+\fBsudo\fR
+debugging framework using the
+``ldap''
+subsystem at priorities
+\fIdiag\fR
+and
+\fIinfo\fR
+for
+\fIdebug_level\fR
+values 1 and 2 respectively.
+See the
+sudo.conf(@mansectform@)
+manual for details on how to configure
+\fBsudo\fR
+debugging.
 .TP 6n
 \fBBINDDN\fR \fIDN\fR
 The
@@ -1230,7 +1250,8 @@ objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL
 .RE
 .fi
 .SH "SEE ALSO"
-ldap.conf(@mansectsu@),
+ldap.conf(@mansectform@),
+sudo.conf(@mansectform@),
 sudoers(@mansectsu@)
 .SH "CAVEATS"
 Note that there are differences in the way that LDAP-based
