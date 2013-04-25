@@ -118,7 +118,29 @@ extern int ldapssl_set_strength(LDAP *ldap, int strength);
 	(var) != NULL;							\
 	(var) = ldap_next_entry((ld), (var)))
 
-#define	DPRINTF(args, level)	if (ldap_conf.debug >= level) warningx args
+#if defined(__GNUC__) && __GNUC__ == 2
+# define DPRINTF1(fmt...) do {						\
+    if (ldap_conf.debug >= 1)						\
+	warningx(__VA_ARGS__);						\
+    sudo_debug_printf(SUDO_DEBUG_DIAG, fmt);				\
+} while (0)
+# define DPRINTF2(fmt...) do {						\
+    if (ldap_conf.debug >= 2)						\
+	warningx(__VA_ARGS__);						\
+    sudo_debug_printf(SUDO_DEBUG_INFO, fmt);				\
+} while (0)
+#else
+# define DPRINTF1(...) do {						\
+    if (ldap_conf.debug >= 1)						\
+	warningx(__VA_ARGS__);						\
+    sudo_debug_printf(SUDO_DEBUG_DIAG, __VA_ARGS__);			\
+} while (0)
+# define DPRINTF2(...) do {						\
+    if (ldap_conf.debug >= 2)						\
+	warningx(__VA_ARGS__);						\
+    sudo_debug_printf(SUDO_DEBUG_INFO, __VA_ARGS__);			\
+} while (0)
+#endif
 
 #define CONF_BOOL	0
 #define CONF_INT	1
@@ -532,9 +554,9 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 #ifdef HAVE_LDAPSSL_INIT
     if (ldap_conf.ssl_mode != SUDO_LDAP_CLEAR) {
 	const int defsecure = ldap_conf.ssl_mode == SUDO_LDAP_SSL;
-	DPRINTF(("ldapssl_clientauth_init(%s, %s)",
+	DPRINTF2("ldapssl_clientauth_init(%s, %s)",
 	    ldap_conf.tls_certfile ? ldap_conf.tls_certfile : "NULL",
-	    ldap_conf.tls_keyfile ? ldap_conf.tls_keyfile : "NULL"), 2);
+	    ldap_conf.tls_keyfile ? ldap_conf.tls_keyfile : "NULL");
 	rc = ldapssl_clientauth_init(ldap_conf.tls_certfile, NULL,
 	    ldap_conf.tls_keyfile != NULL, ldap_conf.tls_keyfile, NULL);
 	/*
@@ -559,9 +581,9 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 		}
 	    }
 	    if (retry) {
-		DPRINTF(("ldapssl_clientauth_init(%s, %s)",
+		DPRINTF2("ldapssl_clientauth_init(%s, %s)",
 		    ldap_conf.tls_certfile ? ldap_conf.tls_certfile : "NULL",
-		    ldap_conf.tls_keyfile ? ldap_conf.tls_keyfile : "NULL"), 2);
+		    ldap_conf.tls_keyfile ? ldap_conf.tls_keyfile : "NULL");
 		rc = ldapssl_clientauth_init(ldap_conf.tls_certfile, NULL,
 		    ldap_conf.tls_keyfile != NULL, ldap_conf.tls_keyfile, NULL);
 	    }
@@ -575,7 +597,7 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 	    goto done;
 	}
 
-	DPRINTF(("ldapssl_init(%s, %d, %d)", host, port, defsecure), 2);
+	DPRINTF2("ldapssl_init(%s, %d, %d)", host, port, defsecure);
 	if ((ld = ldapssl_init(host, port, defsecure)) != NULL)
 	    rc = LDAP_SUCCESS;
     } else
@@ -585,20 +607,20 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 	    warningx("ldap_ssl_client_init(): %s", ldap_err2string(rc));
 	    debug_return_int(-1);
 	}
-	DPRINTF(("ldap_ssl_init(%s, %d, NULL)", host, port), 2);
+	DPRINTF2("ldap_ssl_init(%s, %d, NULL)", host, port);
 	if ((ld = ldap_ssl_init((char *)host, port, NULL)) != NULL)
 	    rc = LDAP_SUCCESS;
     } else
 #endif
     {
 #ifdef HAVE_LDAP_CREATE
-	DPRINTF(("ldap_create()"), 2);
+	DPRINTF2("ldap_create()");
 	if ((rc = ldap_create(&ld)) != LDAP_SUCCESS)
 	    goto done;
-	DPRINTF(("ldap_set_option(LDAP_OPT_HOST_NAME, %s)", host), 2);
+	DPRINTF2("ldap_set_option(LDAP_OPT_HOST_NAME, %s)", host);
 	rc = ldap_set_option(ld, LDAP_OPT_HOST_NAME, host);
 #else
-	DPRINTF(("ldap_init(%s, %d)", host, port), 2);
+	DPRINTF2("ldap_init(%s, %d)", host, port);
 	if ((ld = ldap_init((char *)host, port)) != NULL)
 	    rc = LDAP_SUCCESS;
 #endif
@@ -635,13 +657,13 @@ sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 	if (*val == '+') {
 	    if (netgr_matches(val, NULL, NULL, pw->pw_name))
 		ret = true;
-	    DPRINTF(("ldap sudoUser netgroup '%s' ... %s", val,
-		ret ? "MATCH!" : "not"), 2 + ((ret) ? 0 : 1));
+	    DPRINTF2("ldap sudoUser netgroup '%s' ... %s", val,
+		ret ? "MATCH!" : "not");
 	} else {
 	    if (group_plugin_query(pw->pw_name, val + 2, pw))
 		ret = true;
-	    DPRINTF(("ldap sudoUser non-Unix group '%s' ... %s", val,
-		ret ? "MATCH!" : "not"), 2 + ((ret) ? 0 : 1));
+	    DPRINTF2("ldap sudoUser non-Unix group '%s' ... %s", val,
+		ret ? "MATCH!" : "not");
 	}
     }
 
@@ -678,8 +700,7 @@ sudo_ldap_check_host(LDAP *ld, LDAPMessage *entry)
 	    netgr_matches(val, user_host, user_shost, NULL) ||
 	    hostname_matches(user_shost, user_host, val))
 	    ret = true;
-	DPRINTF(("ldap sudoHost '%s' ... %s", val,
-	    ret ? "MATCH!" : "not"), 2);
+	DPRINTF2("ldap sudoHost '%s' ... %s", val, ret ? "MATCH!" : "not");
     }
 
     ldap_value_free_len(bv);	/* cleanup */
@@ -750,8 +771,7 @@ sudo_ldap_check_runas_user(LDAP *ld, LDAPMessage *entry)
 		ret = true;
 	    break;
 	}
-	DPRINTF(("ldap sudoRunAsUser '%s' ... %s", val,
-	    ret ? "MATCH!" : "not"), 2);
+	DPRINTF2("ldap sudoRunAsUser '%s' ... %s", val, ret ? "MATCH!" : "not");
     }
 
     ldap_value_free_len(bv);	/* cleanup */
@@ -781,8 +801,8 @@ sudo_ldap_check_runas_group(LDAP *ld, LDAPMessage *entry)
 	val = (*p)->bv_val;
 	if (strcmp(val, "ALL") == 0 || group_matches(val, runas_gr))
 	    ret = true;
-	DPRINTF(("ldap sudoRunAsGroup '%s' ... %s", val,
-	    ret ? "MATCH!" : "not"), 2);
+	DPRINTF2("ldap sudoRunAsGroup '%s' ... %s",
+	    val, ret ? "MATCH!" : "not");
     }
 
     ldap_value_free_len(bv);	/* cleanup */
@@ -855,8 +875,7 @@ sudo_ldap_extract_digest(char **cmnd, struct sudo_digest *digest)
 		    while (isblank((unsigned char)*cp))
 			cp++;
 		    *cmnd = cp;
-		    sudo_debug_printf(SUDO_DEBUG_INFO,
-			"%s digest %s for %s",
+		    DPRINTF1("%s digest %s for %s",
 			digest_type == SUDO_DIGEST_SHA224 ? "sha224" :
 			digest_type == SUDO_DIGEST_SHA256 ? "sha256" :
 			digest_type == SUDO_DIGEST_SHA384 ? "sha384" :
@@ -897,7 +916,7 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
 	    ret = true;
 	    if (setenv_implied != NULL)
 		*setenv_implied = true;
-	    DPRINTF(("ldap sudoCommand '%s' ... MATCH!", val), 2);
+	    DPRINTF2("ldap sudoCommand '%s' ... MATCH!", val);
 	    continue;
 	}
 
@@ -926,8 +945,8 @@ sudo_ldap_check_command(LDAP *ld, LDAPMessage *entry, int *setenv_implied)
 	     */
 	    ret = foundbang ? false : true;
 	}
-	DPRINTF(("ldap sudoCommand '%s' ... %s", val,
-	    ret == true ? "MATCH!" : "not"), 2);
+	DPRINTF2("ldap sudoCommand '%s' ... %s",
+	    val, ret == true ? "MATCH!" : "not");
 
 	efree(allowed_cmnd);	/* cleanup */
 	if (allowed_digest != NULL)
@@ -961,7 +980,7 @@ sudo_ldap_check_bool(LDAP *ld, LDAPMessage *entry, char *option)
     /* walk through options */
     for (p = bv; *p != NULL; p++) {
 	var = (*p)->bv_val;;
-	DPRINTF(("ldap sudoOption: '%s'", var), 2);
+	DPRINTF2("ldap sudoOption: '%s'", var);
 
 	if ((ch = *var) == '!')
 	    var++;
@@ -995,7 +1014,7 @@ sudo_ldap_parse_options(LDAP *ld, LDAPMessage *entry)
     /* walk through options */
     for (p = bv; *p != NULL; p++) {
 	var = estrdup((*p)->bv_val);
-	DPRINTF(("ldap sudoOption: '%s'", var), 2);
+	DPRINTF2("ldap sudoOption: '%s'", var);
 
 	/* check for equals sign past first char */
 	val = strchr(var, '=');
@@ -1470,103 +1489,85 @@ sudo_ldap_read_config(void)
     if (!ldap_conf.host)
 	ldap_conf.host = estrdup("localhost");
 
-    if (ldap_conf.debug > 1) {
-	sudo_printf(SUDO_CONV_ERROR_MSG, "LDAP Config Summary\n");
-	sudo_printf(SUDO_CONV_ERROR_MSG, "===================\n");
-	if (ldap_conf.uri) {
-	    struct ldap_config_list_str *uri = ldap_conf.uri;
+    DPRINTF1("LDAP Config Summary");
+    DPRINTF1("===================");
+    if (ldap_conf.uri) {
+	struct ldap_config_list_str *uri = ldap_conf.uri;
 
-	    do {
-		sudo_printf(SUDO_CONV_ERROR_MSG, "uri              %s\n",
-		    uri->val);
-	    } while ((uri = uri->next) != NULL);
-	} else {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "host             %s\n",
-		ldap_conf.host ?  ldap_conf.host : "(NONE)");
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "port             %d\n",
-		ldap_conf.port);
-	}
-	sudo_printf(SUDO_CONV_ERROR_MSG, "ldap_version     %d\n",
-	    ldap_conf.version);
-
-	if (ldap_conf.base) {
-	    struct ldap_config_list_str *base = ldap_conf.base;
-	    do {
-		sudo_printf(SUDO_CONV_ERROR_MSG, "sudoers_base     %s\n",
-		    base->val);
-	    } while ((base = base->next) != NULL);
-	} else {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "sudoers_base     %s\n",
-		"(NONE: LDAP disabled)");
-	}
-	if (ldap_conf.search_filter) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "search_filter    %s\n",
-		ldap_conf.search_filter);
-	}
-	sudo_printf(SUDO_CONV_ERROR_MSG, "binddn           %s\n",
-	    ldap_conf.binddn ?  ldap_conf.binddn : "(anonymous)");
-	sudo_printf(SUDO_CONV_ERROR_MSG, "bindpw           %s\n",
-	    ldap_conf.bindpw ?  ldap_conf.bindpw : "(anonymous)");
-	if (ldap_conf.bind_timelimit > 0) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "bind_timelimit   %d\n",
-		ldap_conf.bind_timelimit);
-	}
-	if (ldap_conf.timelimit > 0) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "timelimit        %d\n",
-		ldap_conf.timelimit);
-	}
-	if (ldap_conf.deref != -1) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "deref            %d\n",
-		ldap_conf.deref);
-	}
-	sudo_printf(SUDO_CONV_ERROR_MSG, "ssl              %s\n",
-	    ldap_conf.ssl ?  ldap_conf.ssl : "(no)");
-	if (ldap_conf.tls_checkpeer != -1) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "tls_checkpeer    %s\n",
-		ldap_conf.tls_checkpeer ?  "(yes)" : "(no)");
-	}
-	if (ldap_conf.tls_cacertfile != NULL) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "tls_cacertfile   %s\n",
-		ldap_conf.tls_cacertfile);
-	}
-	if (ldap_conf.tls_cacertdir != NULL) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "tls_cacertdir    %s\n",
-		ldap_conf.tls_cacertdir);
-	}
-	if (ldap_conf.tls_random_file != NULL) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "tls_random_file  %s\n",
-		ldap_conf.tls_random_file);
-	}
-	if (ldap_conf.tls_cipher_suite != NULL) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "tls_cipher_suite %s\n",
-		ldap_conf.tls_cipher_suite);
-	}
-	if (ldap_conf.tls_certfile != NULL) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "tls_certfile     %s\n",
-		ldap_conf.tls_certfile);
-	}
-	if (ldap_conf.tls_keyfile != NULL) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "tls_keyfile      %s\n",
-		ldap_conf.tls_keyfile);
-	}
-#ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
-	if (ldap_conf.use_sasl != -1) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "use_sasl         %s\n",
-		ldap_conf.use_sasl ? "yes" : "no");
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "sasl_auth_id     %s\n",
-		ldap_conf.sasl_auth_id ?  ldap_conf.sasl_auth_id : "(NONE)");
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "rootuse_sasl     %d\n",
-		ldap_conf.rootuse_sasl);
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "rootsasl_auth_id %s\n",
-		ldap_conf.rootsasl_auth_id ?  ldap_conf.rootsasl_auth_id : "(NONE)");
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "sasl_secprops    %s\n",
-		ldap_conf.sasl_secprops ?  ldap_conf.sasl_secprops : "(NONE)");
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "krb5_ccname      %s\n",
-		ldap_conf.krb5_ccname ?  ldap_conf.krb5_ccname : "(NONE)");
-	}
-#endif
-	sudo_printf(SUDO_CONV_ERROR_MSG, "===================\n");
+	do {
+	    DPRINTF1("uri              %s", uri->val);
+	} while ((uri = uri->next) != NULL);
+    } else {
+	DPRINTF1("host             %s",
+	    ldap_conf.host ? ldap_conf.host : "(NONE)");
+	DPRINTF1("port             %d", ldap_conf.port);
     }
+    DPRINTF1("ldap_version     %d", ldap_conf.version);
+
+    if (ldap_conf.base) {
+	struct ldap_config_list_str *base = ldap_conf.base;
+	do {
+	    DPRINTF1("sudoers_base     %s", base->val);
+	} while ((base = base->next) != NULL);
+    } else {
+	DPRINTF1("sudoers_base     %s", "(NONE: LDAP disabled)");
+    }
+    if (ldap_conf.search_filter) {
+	DPRINTF1("search_filter    %s", ldap_conf.search_filter);
+    }
+    DPRINTF1("binddn           %s",
+	ldap_conf.binddn ? ldap_conf.binddn : "(anonymous)");
+    DPRINTF1("bindpw           %s",
+	ldap_conf.bindpw ? ldap_conf.bindpw : "(anonymous)");
+    if (ldap_conf.bind_timelimit > 0) {
+	DPRINTF1("bind_timelimit   %d", ldap_conf.bind_timelimit);
+    }
+    if (ldap_conf.timelimit > 0) {
+	DPRINTF1("timelimit        %d", ldap_conf.timelimit);
+    }
+    if (ldap_conf.deref != -1) {
+	DPRINTF1("deref            %d", ldap_conf.deref);
+    }
+    DPRINTF1("ssl              %s", ldap_conf.ssl ? ldap_conf.ssl : "(no)");
+    if (ldap_conf.tls_checkpeer != -1) {
+	DPRINTF1("tls_checkpeer    %s",
+	    ldap_conf.tls_checkpeer ? "(yes)" : "(no)");
+    }
+    if (ldap_conf.tls_cacertfile != NULL) {
+	DPRINTF1("tls_cacertfile   %s", ldap_conf.tls_cacertfile);
+    }
+    if (ldap_conf.tls_cacertdir != NULL) {
+	DPRINTF1("tls_cacertdir    %s", ldap_conf.tls_cacertdir);
+    }
+    if (ldap_conf.tls_random_file != NULL) {
+	DPRINTF1("tls_random_file  %s", ldap_conf.tls_random_file);
+    }
+    if (ldap_conf.tls_cipher_suite != NULL) {
+	DPRINTF1("tls_cipher_suite %s", ldap_conf.tls_cipher_suite);
+    }
+    if (ldap_conf.tls_certfile != NULL) {
+	DPRINTF1("tls_certfile     %s", ldap_conf.tls_certfile);
+    }
+    if (ldap_conf.tls_keyfile != NULL) {
+	DPRINTF1("tls_keyfile      %s", ldap_conf.tls_keyfile);
+    }
+#ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
+    if (ldap_conf.use_sasl != -1) {
+	DPRINTF1("use_sasl         %s", ldap_conf.use_sasl ? "yes" : "no");
+	DPRINTF1("sasl_auth_id     %s",
+	    ldap_conf.sasl_auth_id ? ldap_conf.sasl_auth_id : "(NONE)");
+	DPRINTF1("rootuse_sasl     %d",
+	    ldap_conf.rootuse_sasl);
+	DPRINTF1("rootsasl_auth_id %s",
+	    ldap_conf.rootsasl_auth_id ? ldap_conf.rootsasl_auth_id : "(NONE)");
+	DPRINTF1("sasl_secprops    %s",
+	    ldap_conf.sasl_secprops ? ldap_conf.sasl_secprops : "(NONE)");
+	DPRINTF1("krb5_ccname      %s",
+	    ldap_conf.krb5_ccname ? ldap_conf.krb5_ccname : "(NONE)");
+    }
+#endif
+    DPRINTF1("===================");
+
     if (!ldap_conf.base)
 	debug_return_bool(false);	/* if no base is defined, ignore LDAP */
 
@@ -1646,11 +1647,13 @@ sudo_ldap_read_config(void)
 	    value = ldap_conf.krb5_ccname +
 		(ldap_conf.krb5_ccname[4] == ':' ? 5 : 7);
 	    if ((fp = fopen(value, "r")) != NULL) {
-		DPRINTF(("using krb5 credential cache: %s", value), 1);
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "using krb5 credential cache: %s", value);
 		fclose(fp);
 	    } else {
 		/* Can't open it, just ignore the entry. */
-		DPRINTF(("unable to open krb5 credential cache: %s", value), 1);
+		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+		    "unable to open krb5 credential cache: %s", value);
 		efree(ldap_conf.krb5_ccname);
 		ldap_conf.krb5_ccname = NULL;
 	    }
@@ -1925,7 +1928,7 @@ sudo_ldap_display_privs(struct sudo_nss *nss, struct passwd *pw,
 	goto done;
     ld = handle->ld;
 
-    DPRINTF(("ldap search for command list"), 1);
+    DPRINTF1("ldap search for command list");
     lres = sudo_ldap_result_get(nss, pw);
 
     /* Display all matching entries. */
@@ -1960,7 +1963,7 @@ sudo_ldap_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
      * The sudo_ldap_result_get() function returns all nodes that match
      * the user and the host.
      */
-    DPRINTF(("ldap search for command list"), 1);
+    DPRINTF1("ldap search for command list");
     lres = sudo_ldap_result_get(nss, pw);
     for (i = 0; i < lres->nentries; i++) {
 	entry = lres->entries[i].entry;
@@ -2028,7 +2031,7 @@ sudo_ldap_set_options_table(LDAP *ld, struct ldap_config_table *table)
 	case CONF_INT:
 	    ival = *(int *)(cur->valp);
 	    if (ival >= 0) {
-		DPRINTF(("ldap_set_option: %s -> %d", cur->conf_str, ival), 1);
+		DPRINTF1("ldap_set_option: %s -> %d", cur->conf_str, ival);
 		rc = ldap_set_option(ld, cur->opt_val, &ival);
 		if (rc != LDAP_OPT_SUCCESS) {
 		    warningx("ldap_set_option: %s -> %d: %s",
@@ -2040,7 +2043,7 @@ sudo_ldap_set_options_table(LDAP *ld, struct ldap_config_table *table)
 	case CONF_STR:
 	    sval = *(char **)(cur->valp);
 	    if (sval != NULL) {
-		DPRINTF(("ldap_set_option: %s -> %s", cur->conf_str, sval), 1);
+		DPRINTF1("ldap_set_option: %s -> %s", cur->conf_str, sval);
 		rc = ldap_set_option(ld, cur->opt_val, sval);
 		if (rc != LDAP_OPT_SUCCESS) {
 		    warningx("ldap_set_option: %s -> %s: %s",
@@ -2096,8 +2099,7 @@ sudo_ldap_set_options_conn(LDAP *ld)
 	struct timeval tv;
 	tv.tv_sec = ldap_conf.timeout;
 	tv.tv_usec = 0;
-	DPRINTF(("ldap_set_option(LDAP_OPT_TIMEOUT, %d)",
-	    ldap_conf.timeout), 1);
+	DPRINTF1("ldap_set_option(LDAP_OPT_TIMEOUT, %d)", ldap_conf.timeout);
 	rc = ldap_set_option(ld, LDAP_OPT_TIMEOUT, &tv);
 	if (rc != LDAP_OPT_SUCCESS) {
 	    warningx("ldap_set_option(TIMEOUT, %d): %s",
@@ -2111,8 +2113,8 @@ sudo_ldap_set_options_conn(LDAP *ld)
 	struct timeval tv;
 	tv.tv_sec = ldap_conf.bind_timelimit / 1000;
 	tv.tv_usec = 0;
-	DPRINTF(("ldap_set_option(LDAP_OPT_NETWORK_TIMEOUT, %d)",
-	    ldap_conf.bind_timelimit / 1000), 1);
+	DPRINTF1("ldap_set_option(LDAP_OPT_NETWORK_TIMEOUT, %d)",
+	    ldap_conf.bind_timelimit / 1000);
 	rc = ldap_set_option(ld, LDAP_OPT_NETWORK_TIMEOUT, &tv);
 # if !defined(LDAP_OPT_CONNECT_TIMEOUT) || LDAP_VENDOR_VERSION != 510
 	/* Tivoli Directory Server 6.3 libs always return a (bogus) error. */
@@ -2127,7 +2129,7 @@ sudo_ldap_set_options_conn(LDAP *ld)
 #if defined(LDAP_OPT_X_TLS) && !defined(HAVE_LDAPSSL_INIT)
     if (ldap_conf.ssl_mode == SUDO_LDAP_SSL) {
 	int val = LDAP_OPT_X_TLS_HARD;
-	DPRINTF(("ldap_set_option(LDAP_OPT_X_TLS, LDAP_OPT_X_TLS_HARD)"), 1);
+	DPRINTF1("ldap_set_option(LDAP_OPT_X_TLS, LDAP_OPT_X_TLS_HARD)");
 	rc = ldap_set_option(ld, LDAP_OPT_X_TLS, &val);
 	if (rc != LDAP_SUCCESS) {
 	    warningx("ldap_set_option(LDAP_OPT_X_TLS, LDAP_OPT_X_TLS_HARD): %s",
@@ -2229,7 +2231,8 @@ sudo_ldap_bind_s(LDAP *ld)
 	    if (gss_krb5_ccache_name(&status, ldap_conf.krb5_ccname, &old_ccname)
 		!= GSS_S_COMPLETE) {
 		old_ccname = NULL;
-		DPRINTF(("gss_krb5_ccache_name() failed: %d", status), 1);
+		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+		    "gss_krb5_ccache_name() failed: %d", status);
 	    }
 # else
 	    sudo_setenv("KRB5CCNAME", ldap_conf.krb5_ccname, true);
@@ -2240,7 +2243,8 @@ sudo_ldap_bind_s(LDAP *ld)
 	if (ldap_conf.krb5_ccname != NULL) {
 # ifdef HAVE_GSS_KRB5_CCACHE_NAME
 	    if (gss_krb5_ccache_name(&status, old_ccname, NULL) != GSS_S_COMPLETE)
-		    DPRINTF(("gss_krb5_ccache_name() failed: %d", status), 1);
+		    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+			"gss_krb5_ccache_name() failed: %d", status);
 # else
 	    if (old_ccname != NULL)
 		sudo_setenv("KRB5CCNAME", old_ccname, true);
@@ -2253,7 +2257,7 @@ sudo_ldap_bind_s(LDAP *ld)
 		ldap_err2string(rc));
 	    debug_return_int(-1);
 	}
-	DPRINTF(("ldap_sasl_interactive_bind_s() ok"), 1);
+	DPRINTF1("ldap_sasl_interactive_bind_s() ok");
     } else
 #endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
 #ifdef HAVE_LDAP_SASL_BIND_S
@@ -2269,7 +2273,7 @@ sudo_ldap_bind_s(LDAP *ld)
 	    warningx("ldap_sasl_bind_s(): %s", ldap_err2string(rc));
 	    debug_return_int(-1);
 	}
-	DPRINTF(("ldap_sasl_bind_s() ok"), 1);
+	DPRINTF1("ldap_sasl_bind_s() ok");
     }
 #else
     {
@@ -2278,7 +2282,7 @@ sudo_ldap_bind_s(LDAP *ld)
 	    warningx("ldap_simple_bind_s(): %s", ldap_err2string(rc));
 	    debug_return_int(-1);
 	}
-	DPRINTF(("ldap_simple_bind_s() ok"), 1);
+	DPRINTF1("ldap_simple_bind_s() ok");
     }
 #endif
     debug_return_int(0);
@@ -2314,7 +2318,7 @@ sudo_ldap_open(struct sudo_nss *nss)
 #ifdef HAVE_LDAP_INITIALIZE
     if (ldap_conf.uri != NULL) {
 	char *buf = sudo_ldap_join_uri(ldap_conf.uri);
-	DPRINTF(("ldap_initialize(ld, %s)", buf), 2);
+	DPRINTF2("ldap_initialize(ld, %s)", buf);
 	rc = ldap_initialize(&ld, buf);
 	efree(buf);
 	if (rc != LDAP_SUCCESS)
@@ -2339,7 +2343,7 @@ sudo_ldap_open(struct sudo_nss *nss)
 	    warningx("ldap_start_tls_s(): %s", ldap_err2string(rc));
 	    debug_return_int(-1);
 	}
-	DPRINTF(("ldap_start_tls_s() ok"), 1);
+	DPRINTF1("ldap_start_tls_s() ok");
 #elif defined(HAVE_LDAP_SSL_CLIENT_INIT) && defined(HAVE_LDAP_START_TLS_S_NP)
 	if (ldap_ssl_client_init(ldap_conf.tls_keyfile, ldap_conf.tls_keypw, 0, &rc) != LDAP_SUCCESS) {
 	    warningx("ldap_ssl_client_init(): %s", ldap_err2string(rc));
@@ -2350,7 +2354,7 @@ sudo_ldap_open(struct sudo_nss *nss)
 	    warningx("ldap_start_tls_s_np(): %s", ldap_err2string(rc));
 	    debug_return_int(-1);
 	}
-	DPRINTF(("ldap_start_tls_s_np() ok"), 1);
+	DPRINTF1("ldap_start_tls_s_np() ok");
 #else
 	warningx(_("start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"));
 #endif /* !HAVE_LDAP_START_TLS_S && !HAVE_LDAP_START_TLS_S_NP */
@@ -2388,7 +2392,7 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
     ld = handle->ld;
 
     filt = sudo_ldap_build_default_filter();
-    DPRINTF(("Looking for cn=defaults: %s", filt), 1);
+    DPRINTF1("Looking for cn=defaults: %s", filt);
 
     for (base = ldap_conf.base; base != NULL; base = base->next) {
 	if (ldap_conf.timeout > 0) {
@@ -2400,11 +2404,11 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
 	rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE,
 	    filt, NULL, 0, NULL, NULL, tvp, 0, &result);
 	if (rc == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
-	    DPRINTF(("found:%s", ldap_get_dn(ld, entry)), 1);
+	    DPRINTF1("found:%s", ldap_get_dn(ld, entry));
 	    sudo_ldap_parse_options(ld, entry);
-	} else
-	    DPRINTF(("no default options found in %s", base->val), 1);
-
+	} else {
+	    DPRINTF1("no default options found in %s", base->val);
+	}
 	if (result)
 	    ldap_msgfree(result);
     }
@@ -2443,7 +2447,7 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	enum def_tuple pwcheck = 
 	    (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
 
-	DPRINTF(("perform search for pwflag %d", pwflag), 1);
+	DPRINTF1("perform search for pwflag %d", pwflag);
 	for (i = 0; i < lres->nentries; i++) {
 	    entry = lres->entries[i].entry;
 	    if ((pwcheck == any && doauth != false) ||
@@ -2482,7 +2486,7 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	goto done;
     }
 
-    DPRINTF(("searching LDAP for sudoers entries"), 1);
+    DPRINTF1("searching LDAP for sudoers entries");
 
     setenv_implied = false;
     for (i = 0; i < lres->nentries; i++) {
@@ -2492,9 +2496,9 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
 	rc = sudo_ldap_check_command(ld, entry, &setenv_implied);
 	if (rc != UNSPEC) {
 	    /* We have a match. */
-	    DPRINTF(("Command %sallowed", rc == true ? "" : "NOT "), 1);
+	    DPRINTF1("Command %sallowed", rc == true ? "" : "NOT ");
 	    if (rc == true) {
-		DPRINTF(("LDAP entry: %p", entry), 1);
+		DPRINTF1("LDAP entry: %p", entry);
 		/* Apply entry-specific options. */
 		if (setenv_implied)
 		    def_setenv = true;
@@ -2517,9 +2521,9 @@ sudo_ldap_lookup(struct sudo_nss *nss, int ret, int pwflag)
     }
 
 done:
-    DPRINTF(("done with LDAP searches"), 1);
-    DPRINTF(("user_matches=%d", lres->user_matches), 1);
-    DPRINTF(("host_matches=%d", lres->host_matches), 1);
+    DPRINTF1("done with LDAP searches");
+    DPRINTF1("user_matches=%d", lres->user_matches);
+    DPRINTF1("host_matches=%d", lres->host_matches);
 
     if (!ISSET(ret, VALIDATE_OK)) {
 	/* No matching entries. */
@@ -2530,7 +2534,7 @@ done:
 	CLR(ret, FLAG_NO_USER);
     if (lres->host_matches)
 	CLR(ret, FLAG_NO_HOST);
-    DPRINTF(("sudo_ldap_lookup(%d)=0x%02x", pwflag, ret), 1);
+    DPRINTF1("sudo_ldap_lookup(%d)=0x%02x", pwflag, ret);
 
     debug_return_int(ret);
 }
@@ -2585,13 +2589,13 @@ sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
     if (bv != NULL) {
 	if (ldap_count_values_len(bv) > 0) {
 	    /* Get the value of this attribute, 0 if not present. */
-	    DPRINTF(("order attribute raw: %s", (*bv)->bv_val), 1);
+	    DPRINTF2("order attribute raw: %s", (*bv)->bv_val);
 	    order = strtod((*bv)->bv_val, &ep);
 	    if (ep == (*bv)->bv_val || *ep != '\0') {
 		warningx(_("invalid sudoOrder attribute: %s"), (*bv)->bv_val);
 		order = 0.0;
 	    }
-	    DPRINTF(("order attribute: %f", order), 1);
+	    DPRINTF2("order attribute: %f", order);
 	}
 	ldap_value_free_len(bv);
     }
@@ -2623,7 +2627,7 @@ sudo_ldap_result_free_nss(struct sudo_nss *nss)
     debug_decl(sudo_ldap_result_free_nss, SUDO_DEBUG_LDAP)
 
     if (handle->result != NULL) {
-	DPRINTF(("removing reusable search result"), 1);
+	DPRINTF1("removing reusable search result");
 	sudo_ldap_result_free(handle->result);
 	if (handle->username) {
 	    efree(handle->username);
@@ -2659,13 +2663,13 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
     if (handle->result) {
 	if (handle->grlist == user_group_list &&
 	    strcmp(pw->pw_name, handle->username) == 0) {
-	    DPRINTF(("reusing previous result (user %s) with %d entries",
-		handle->username, handle->result->nentries), 1);
+	    DPRINTF1("reusing previous result (user %s) with %d entries",
+		handle->username, handle->result->nentries);
 	    debug_return_ptr(handle->result);
 	}
 	/* User mismatch, cached result cannot be used. */
-	DPRINTF(("removing result (user %s), new search (user %s)",
-	    handle->username, pw->pw_name), 1);
+	DPRINTF1("removing result (user %s), new search (user %s)",
+	    handle->username, pw->pw_name);
 	sudo_ldap_result_free_nss(nss);
     }
 
@@ -2690,9 +2694,10 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
     lres = sudo_ldap_result_alloc();
     for (pass = 0; pass < 2; pass++) {
 	filt = pass ? sudo_ldap_build_pass2() : sudo_ldap_build_pass1(pw);
-	DPRINTF(("ldap search '%s'", filt), 1);
+	DPRINTF1("ldap search '%s'", filt);
 	for (base = ldap_conf.base; base != NULL; base = base->next) {
-	    DPRINTF(("searching from base '%s'", base->val), 1);
+	    DPRINTF1("searching from base '%s'",
+		base->val);
 	    if (ldap_conf.timeout > 0) {
 		tv.tv_sec = ldap_conf.timeout;
 		tv.tv_usec = 0;
@@ -2702,13 +2707,13 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 	    rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE, filt,
 		NULL, 0, NULL, NULL, tvp, 0, &result);
 	    if (rc != LDAP_SUCCESS) {
-		DPRINTF(("nothing found for '%s'", filt), 1);
+		DPRINTF1("nothing found for '%s'", filt);
 		continue;
 	    }
 	    lres->user_matches = true;
 
 	    /* Add the seach result to list of search results. */
-	    DPRINTF(("adding search result"), 1);
+	    DPRINTF1("adding search result");
 	    sudo_ldap_result_add_search(lres, ld, result);
 	    LDAP_FOREACH(entry, ld, result) {
 		if ((!pass ||
@@ -2718,13 +2723,13 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 		    sudo_ldap_result_add_entry(lres, entry);
 		}
 	    }
-	    DPRINTF(("result now has %d entries", lres->nentries), 1);
+	    DPRINTF1("result now has %d entries", lres->nentries);
 	}
 	efree(filt);
     }
 
     /* Sort the entries by the sudoOrder attribute. */
-    DPRINTF(("sorting remaining %d entries", lres->nentries), 1);
+    DPRINTF1("sorting remaining %d entries", lres->nentries);
     qsort(lres->entries, lres->nentries, sizeof(lres->entries[0]),
 	ldap_entry_compare);
 
@@ -2804,8 +2809,7 @@ sudo_ldap_result_from_search(LDAP *ldap, LDAPMessage *searchresult)
     LDAP_FOREACH(entry, last->ldap, last->searchresult) {
 	sudo_ldap_result_add_entry(result, entry);
     }
-    DPRINTF(("sudo_ldap_result_from_search: %d entries found",
-	result->nentries), 2);
+    DPRINTF1("sudo_ldap_result_from_search: %d entries found", result->nentries);
     return result;
 }
 #endif
