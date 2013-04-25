@@ -2598,6 +2598,17 @@ will have the
 replaced with a unique combination of digits and letters, similar to the
 .Xr mktemp 3
 function.
+.Pp
+If the path created by concatenating
+.Em iolog_dir
+and
+.Em iolog_file
+already exists, the existing I/O log file will be truncated and
+overwritten unless
+.Em iolog_file
+ends in six or
+more
+.Li X Ns No s .
 .It limitprivs
 The default Solaris limit privileges to use when constructing a new
 privilege set for a command.
@@ -2632,6 +2643,14 @@ base 36 sequence number
 .Dq ZZZZZZ )
 will be silently truncated to 2176782336.
 The default value is 2176782336.
+.Pp
+Once the local sequence number reaches the value of
+.Em maxseq ,
+it will
+.Dq roll over
+to zero, after which
+.Nm sudoers
+will truncate and re-use any existing I/O log pathnames.
 .Pp
 This setting is only supported by version 1.8.7 or higher.
 .It noexec_file

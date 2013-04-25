@@ -2782,6 +2782,17 @@ will have the
 replaced with a unique combination of digits and letters, similar to the
 mktemp(3)
 function.
+.sp
+If the path created by concatenating
+\fIiolog_dir\fR
+and
+\fIiolog_file\fR
+already exists, the existing I/O log file will be truncated and
+overwritten unless
+\fIiolog_file\fR
+ends in six or
+more
+\fRX\fRs.
 .PD
 .TP 18n
 limitprivs
@@ -2820,6 +2831,14 @@ base 36 sequence number
 ``ZZZZZZ'')
 will be silently truncated to 2176782336.
 The default value is 2176782336.
+.sp
+Once the local sequence number reaches the value of
+\fImaxseq\fR,
+it will
+``roll over''
+to zero, after which
+\fBsudoers\fR
+will truncate and re-use any existing I/O log pathnames.
 .sp
 This setting is only supported by version 1.8.7 or higher.
 .TP 18n

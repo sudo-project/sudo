@@ -1337,6 +1337,11 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        unique combination of digits and letters, similar to
                        the mktemp(3) function.
 
+                       If the path created by concatenating _i_o_l_o_g___d_i_r and
+                       _i_o_l_o_g___f_i_l_e already exists, the existing I/O log file
+                       will be truncated and overwritten unless _i_o_l_o_g___f_i_l_e
+                       ends in six or more Xs.
+
      limitprivs        The default Solaris limit privileges to use when
                        constructing a new privilege set for a command.  This
                        bounds all privileges of the executing process.  The
@@ -1357,6 +1362,11 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        base 36 sequence number ``ZZZZZZ'') will be silently
                        truncated to 2176782336.  The default value is
                        2176782336.
+
+                       Once the local sequence number reaches the value of
+                       _m_a_x_s_e_q, it will ``roll over'' to zero, after which
+                       ssuuddooeerrss will truncate and re-use any existing I/O log
+                       pathnames.
 
                        This setting is only supported by version 1.8.7 or
                        higher.
