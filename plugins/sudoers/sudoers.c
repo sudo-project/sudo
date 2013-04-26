@@ -129,7 +129,7 @@ sudoers_policy_init(void *info, char * const envp[])
     sudo_setpwent();
     sudo_setgrent();
 
-    /* Register error/errorx callback. */
+    /* Register fatal/fatalx callback. */
     fatal_callback_register(sudoers_cleanup);
 
     /* Initialize environment functions (including replacements). */
@@ -217,7 +217,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* XXX - would like to move this to policy.c but need the cleanup. */
     if (fatal_setjmp() != 0) {
-	/* error recovery via error(), errorx() or log_fatal() */
+	/* error recovery via fatal(), fatalx() or log_fatal() */
 	rval = -1;
 	goto done;
     }
@@ -891,7 +891,7 @@ cb_sudoers_locale(const char *locale)
 }
 
 /*
- * Cleanup hook for error()/errorx()
+ * Cleanup hook for fatal()/fatalx()
  */
 void
 sudoers_cleanup(void)

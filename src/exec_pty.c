@@ -107,7 +107,7 @@ static int safe_close(int fd);
 static void check_foreground(void);
 
 /*
- * Cleanup hook for error()/errorx()
+ * Cleanup hook for fatal()/fatalx()
  */
 static void
 pty_cleanup(void)

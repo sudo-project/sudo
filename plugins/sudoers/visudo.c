@@ -162,7 +162,7 @@ main(int argc, char *argv[])
     if (argc < 1)
 	usage(1);
 
-    /* Register error/errorx callback. */
+    /* Register fatal/fatalx callback. */
     fatal_callback_register(visudo_cleanup);
 
     /* Read sudo.conf. */

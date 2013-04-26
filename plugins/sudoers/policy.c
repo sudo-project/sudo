@@ -497,7 +497,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 	args = NULL;
 
     if (fatal_setjmp() != 0) {
-	/* called via error(), errorx() or log_fatal() */
+	/* called via fatal(), fatalx() or log_fatal() */
 	rewind_perms();
 	fatal_disable_setjmp();
 	debug_return_bool(-1);
@@ -516,7 +516,7 @@ sudoers_policy_close(int exit_status, int error_code)
     debug_decl(sudoers_policy_close, SUDO_DEBUG_PLUGIN)
 
     if (fatal_setjmp() != 0) {
-	/* called via error(), errorx() or log_fatal() */
+	/* called via fatal(), fatalx() or log_fatal() */
 	fatal_disable_setjmp();
 	debug_return;
     }
@@ -566,7 +566,7 @@ sudoers_policy_init_session(struct passwd *pwd, char **user_env[])
 	user_env = NULL;
 
     if (fatal_setjmp() != 0) {
-	/* called via error(), errorx() or log_fatal() */
+	/* called via fatal(), fatalx() or log_fatal() */
 	fatal_disable_setjmp();
 	debug_return_bool(-1);
     }
@@ -661,7 +661,7 @@ sudoers_policy_version(int verbose)
     debug_decl(sudoers_policy_version, SUDO_DEBUG_PLUGIN)
 
     if (fatal_setjmp() != 0) {
-	/* error recovery via error(), errorx() or log_fatal() */
+	/* error recovery via fatal(), fatalx() or log_fatal() */
 	fatal_disable_setjmp();
 	debug_return_bool(-1);
     }

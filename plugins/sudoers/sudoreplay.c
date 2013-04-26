@@ -267,7 +267,7 @@ main(int argc, char *argv[])
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have sudoreplay domain */
     textdomain("sudoers");
 
-    /* Register error/errorx callback. */
+    /* Register fatal/fatalx callback. */
     fatal_callback_register(sudoreplay_cleanup);
 
     /* Read sudo.conf. */
@@ -956,7 +956,7 @@ session_compare(const void *v1, const void *v2)
     return strcmp(s1, s2);
 }
 
-/* XXX - always returns 0, calls error() on failure */
+/* XXX - always returns 0, calls fatal() on failure */
 static int
 find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
 {
@@ -1039,7 +1039,7 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
     debug_return_int(0);
 }
 
-/* XXX - always returns 0, calls error() on failure */
+/* XXX - always returns 0, calls fatal() on failure */
 static int
 list_sessions(int argc, char **argv, const char *pattern, const char *user,
     const char *tty)
@@ -1205,7 +1205,7 @@ help(void)
 }
 
 /*
- * Cleanup hook for error()/errorx()
+ * Cleanup hook for fatal()/fatalx()
   */
 static void
 sudoreplay_cleanup(void)

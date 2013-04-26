@@ -171,7 +171,7 @@ struct command_status {
 
 struct timeval;
 
-/* For error() and errorx() (XXX - needed?) */
+/* For fatal() and fatalx() (XXX - needed?) */
 void cleanup(int);
 
 /* tgetpass.c */
