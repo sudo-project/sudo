@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.8.7b1\n"
+"Project-Id-Version: sudoers 1.8.7b2\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-04-02 10:40-0400\n"
-"PO-Revision-Date: 2013-04-06 09:44+0800\n"
+"POT-Creation-Date: 2013-04-17 15:52-0400\n"
+"PO-Revision-Date: 2013-04-20 20:22+0800\n"
 "Last-Translator: Wylmer Wang <wantinghard@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: confstr.sh:2 plugins/sudoers/auth/pam.c:340
+#: confstr.sh:2
 msgid "Password:"
 msgstr "密码："
 
@@ -77,8 +77,8 @@ msgstr ""
 
 #: plugins/sudoers/auth/kerb5.c:116
 #, c-format
-msgid "%s: unable to unparse princ ('%s'): %s"
-msgstr "%s：无法解析 princ(“%s”)：%s"
+msgid "%s: unable to convert principal to string ('%s'): %s"
+msgstr "%s：无法将主体(principal)转换为字符串(“%s”)：%s"
 
 #: plugins/sudoers/auth/kerb5.c:159
 #, c-format
@@ -87,8 +87,8 @@ msgstr "%s：无法解析“%s”：%s"
 
 #: plugins/sudoers/auth/kerb5.c:169
 #, c-format
-msgid "%s: unable to resolve ccache: %s"
-msgstr "%s：无法解析 ccache：%s"
+msgid "%s: unable to resolve credential cache: %s"
+msgstr "%s：无法解析凭据缓存：%s"
 
 #: plugins/sudoers/auth/kerb5.c:217
 #, c-format
@@ -102,13 +102,13 @@ msgstr "%s：无法获取凭据：%s"
 
 #: plugins/sudoers/auth/kerb5.c:246
 #, c-format
-msgid "%s: unable to initialize ccache: %s"
-msgstr "%s：无法初始化 ccache：%s"
+msgid "%s: unable to initialize credential cache: %s"
+msgstr "%s：无法初始化凭据缓存：%s"
 
 #: plugins/sudoers/auth/kerb5.c:250
 #, c-format
-msgid "%s: unable to store cred in ccache: %s"
-msgstr "%s：无法在 ccache 中储存凭据：%s"
+msgid "%s: unable to store credential in cache: %s"
+msgstr "%s：无法在缓存中储存凭据：%s"
 
 #: plugins/sudoers/auth/kerb5.c:315
 #, c-format
@@ -120,39 +120,40 @@ msgstr "%s：无法获取主机主体(principal)：%s"
 msgid "%s: Cannot verify TGT! Possible attack!: %s"
 msgstr "%s：无法验证目标！可能遭到了攻击！：%s"
 
-#: plugins/sudoers/auth/pam.c:100
+#: plugins/sudoers/auth/pam.c:105
 msgid "unable to initialize PAM"
 msgstr "无法初始化 PAM"
 
-#: plugins/sudoers/auth/pam.c:145
+#: plugins/sudoers/auth/pam.c:150
 msgid "account validation failure, is your account locked?"
 msgstr "账户验证失败，您的账户是不是上锁了？"
 
-#: plugins/sudoers/auth/pam.c:149
+#: plugins/sudoers/auth/pam.c:154
 msgid "Account or password is expired, reset your password and try again"
 msgstr "账户或密码过期，重置您的密码并重试"
 
-#: plugins/sudoers/auth/pam.c:156
+#: plugins/sudoers/auth/pam.c:162
 #, c-format
-msgid "pam_chauthtok: %s"
-msgstr "pam_chauthtok：%s"
+msgid "unable to change expired password: %s"
+msgstr "无法更改过期的密码：%s"
 
-#: plugins/sudoers/auth/pam.c:160
+#: plugins/sudoers/auth/pam.c:167
 msgid "Password expired, contact your system administrator"
 msgstr "密码过期，联系您的系统管理员"
 
-#: plugins/sudoers/auth/pam.c:164
+#: plugins/sudoers/auth/pam.c:171
 msgid "Account expired or PAM config lacks an \"account\" section for sudo, contact your system administrator"
 msgstr "账户过期，或 PAM 配置缺少 sudo 使用的“account”节，联系您的系统管理员"
 
-#: plugins/sudoers/auth/pam.c:181
+#: plugins/sudoers/auth/pam.c:188
 #, c-format
-msgid "pam_authenticate: %s"
-msgstr "pam_authenticate：%s"
+msgid "PAM authentication error: %s"
+msgstr "PAM 认证出错：%s"
 
-#: plugins/sudoers/auth/pam.c:339
-msgid "Password: "
-msgstr "密码："
+#: plugins/sudoers/auth/pam.c:247
+#, c-format
+msgid "unable to establish credentials: %s"
+msgstr "无法建立凭据：%s"
 
 #: plugins/sudoers/auth/rfc1938.c:103 plugins/sudoers/visudo.c:212
 #, c-format
@@ -208,8 +209,8 @@ msgid "invalid authentication methods"
 msgstr "无效的认证方法"
 
 #: plugins/sudoers/auth/sudo_auth.c:120
-msgid "Invalid authentication methods compiled into sudo!  You may mix standalone and non-standalone authentication."
-msgstr "编译进 sudo 的认证方法无效！您可能混用了独立和非独立认证。"
+msgid "Invalid authentication methods compiled into sudo!  You may not mix standalone and non-standalone authentication."
+msgstr "编译进 sudo 的认证方法无效！您不能混用独立和非独立认证。"
 
 #: plugins/sudoers/auth/sudo_auth.c:203
 msgid "no authentication methods"
@@ -235,10 +236,10 @@ msgstr "getaudit：失败"
 msgid "Could not determine audit condition"
 msgstr "无法确定审核条件"
 
-#: plugins/sudoers/bsm_audit.c:101
+#: plugins/sudoers/bsm_audit.c:101 plugins/sudoers/bsm_audit.c:160
 #, c-format
-msgid "getauid failed"
-msgstr "getauid 失败"
+msgid "getauid: failed"
+msgstr "getauid：失败"
 
 #: plugins/sudoers/bsm_audit.c:103 plugins/sudoers/bsm_audit.c:162
 #, c-format
@@ -265,17 +266,12 @@ msgstr "au_to_return32：失败"
 msgid "unable to commit audit record"
 msgstr "无法提交审核记录"
 
-#: plugins/sudoers/bsm_audit.c:160
-#, c-format
-msgid "getauid: failed"
-msgstr "getauid：失败"
-
 #: plugins/sudoers/bsm_audit.c:183
 #, c-format
 msgid "au_to_text: failed"
 msgstr "au_to_text：失败"
 
-#: plugins/sudoers/check.c:174
+#: plugins/sudoers/check.c:189
 msgid ""
 "\n"
 "We trust you have received the usual lecture from the local System\n"
@@ -295,13 +291,13 @@ msgstr ""
 "    #3) 权力越大，风险越大。\n"
 "\n"
 
-#: plugins/sudoers/check.c:212 plugins/sudoers/check.c:218
+#: plugins/sudoers/check.c:227 plugins/sudoers/check.c:233
 #: plugins/sudoers/sudoers.c:562 plugins/sudoers/sudoers.c:566
 #, c-format
 msgid "unknown uid: %u"
 msgstr "未知的用户 ID：%u"
 
-#: plugins/sudoers/check.c:215 plugins/sudoers/policy.c:635
+#: plugins/sudoers/check.c:230 plugins/sudoers/policy.c:635
 #: plugins/sudoers/sudoers.c:845 plugins/sudoers/testsudoers.c:215
 #: plugins/sudoers/testsudoers.c:359
 #, c-format
@@ -743,7 +739,7 @@ msgstr "%s 必须属于用户 ID %d"
 msgid "%s must only be writable by owner"
 msgstr "%s 必须只对所有者可写"
 
-#: plugins/sudoers/group_plugin.c:113
+#: plugins/sudoers/group_plugin.c:113 plugins/sudoers/sssd.c:256
 #, c-format
 msgid "unable to dlopen %s: %s"
 msgstr "无法执行 dlopen %s：%s"
@@ -763,21 +759,21 @@ msgid "Local IP address and netmask pairs:\n"
 msgstr "本地 IP 地址和网络掩码对：\n"
 
 #: plugins/sudoers/iolog.c:131 plugins/sudoers/iolog.c:144
-#: plugins/sudoers/timestamp.c:199 plugins/sudoers/timestamp.c:243
+#: plugins/sudoers/timestamp.c:200 plugins/sudoers/timestamp.c:244
 #, c-format
 msgid "%s exists but is not a directory (0%o)"
 msgstr "%s 存在，但不是目录(0%o)"
 
 #: plugins/sudoers/iolog.c:141 plugins/sudoers/iolog.c:155
-#: plugins/sudoers/iolog.c:159 plugins/sudoers/timestamp.c:164
-#: plugins/sudoers/timestamp.c:220 plugins/sudoers/timestamp.c:270
+#: plugins/sudoers/iolog.c:159 plugins/sudoers/timestamp.c:165
+#: plugins/sudoers/timestamp.c:221 plugins/sudoers/timestamp.c:271
 #, c-format
 msgid "unable to mkdir %s"
 msgstr "无法创建目录 %s"
 
 #: plugins/sudoers/iolog.c:217 plugins/sudoers/sudoers.c:708
 #: plugins/sudoers/sudoreplay.c:354 plugins/sudoers/sudoreplay.c:815
-#: plugins/sudoers/sudoreplay.c:978 plugins/sudoers/timestamp.c:154
+#: plugins/sudoers/sudoreplay.c:978 plugins/sudoers/timestamp.c:155
 #: plugins/sudoers/visudo.c:809
 #, c-format
 msgid "unable to open %s"
@@ -788,7 +784,7 @@ msgstr "无法打开 %s"
 msgid "unable to read %s"
 msgstr "无法读取 %s"
 
-#: plugins/sudoers/iolog.c:274 plugins/sudoers/timestamp.c:158
+#: plugins/sudoers/iolog.c:274 plugins/sudoers/timestamp.c:159
 #, c-format
 msgid "unable to write to %s"
 msgstr "无法写入 %s"
@@ -843,27 +839,27 @@ msgstr "无法初始化 SSL 证书和密钥数据库：%s"
 msgid "you must set TLS_CERT in %s to use SSL"
 msgstr "要使用 SSL，您必须在 %s 中设置 TLS_CERT"
 
-#: plugins/sudoers/ldap.c:996
+#: plugins/sudoers/ldap.c:1062
 #, c-format
 msgid "unable to get GMT time"
 msgstr "无法获取 GMT 时间"
 
-#: plugins/sudoers/ldap.c:1002
+#: plugins/sudoers/ldap.c:1068
 #, c-format
 msgid "unable to format timestamp"
 msgstr "无法格式化时间戳"
 
-#: plugins/sudoers/ldap.c:1010
+#: plugins/sudoers/ldap.c:1076
 #, c-format
 msgid "unable to build time filter"
 msgstr "无法构建时间过滤器"
 
-#: plugins/sudoers/ldap.c:1229
+#: plugins/sudoers/ldap.c:1295
 #, c-format
 msgid "sudo_ldap_build_pass1 allocation mismatch"
 msgstr "sudo_ldap_build_pass1 分配不匹配"
 
-#: plugins/sudoers/ldap.c:1776
+#: plugins/sudoers/ldap.c:1842
 #, c-format
 msgid ""
 "\n"
@@ -872,7 +868,7 @@ msgstr ""
 "\n"
 "LDAP 角色：%s\n"
 
-#: plugins/sudoers/ldap.c:1778
+#: plugins/sudoers/ldap.c:1844
 #, c-format
 msgid ""
 "\n"
@@ -881,28 +877,28 @@ msgstr ""
 "\n"
 "LDAP 角色：未知\n"
 
-#: plugins/sudoers/ldap.c:1825
+#: plugins/sudoers/ldap.c:1891
 #, c-format
 msgid "    Order: %s\n"
 msgstr "    顺序：%s\n"
 
-#: plugins/sudoers/ldap.c:1833 plugins/sudoers/parse.c:515
-#: plugins/sudoers/sssd.c:1173
+#: plugins/sudoers/ldap.c:1899 plugins/sudoers/parse.c:515
+#: plugins/sudoers/sssd.c:1242
 #, c-format
 msgid "    Commands:\n"
 msgstr "    命令：\n"
 
-#: plugins/sudoers/ldap.c:2255
+#: plugins/sudoers/ldap.c:2321
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr "无法初始化 LDAP：%s"
 
-#: plugins/sudoers/ldap.c:2289
+#: plugins/sudoers/ldap.c:2355
 #, c-format
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
 msgstr "指定了 start_tls，但 LDAP 库不支持 ldap_start_tls_s() 或 ldap_start_tls_s_np()"
 
-#: plugins/sudoers/ldap.c:2525
+#: plugins/sudoers/ldap.c:2591
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr "无效的 sudoOrder 属性：%s"
@@ -1037,6 +1033,21 @@ msgstr "无法执行 %s：%m"
 #, c-format
 msgid "internal error: insufficient space for log line"
 msgstr "内部错误：没有足够的空间存放日志行"
+
+#: plugins/sudoers/match.c:631
+#, c-format
+msgid "unsupported digest type %d for %s"
+msgstr "%2$s 的摘要类型 %1$d 不支持"
+
+#: plugins/sudoers/match.c:661
+#, c-format
+msgid "%s: read error"
+msgstr "%s：写错误"
+
+#: plugins/sudoers/match.c:670
+#, c-format
+msgid "digest for %s (%s) is not in %s form"
+msgstr "%s(%s) 的摘要不是 %s 形式"
 
 #: plugins/sudoers/parse.c:124
 #, c-format
@@ -1183,14 +1194,9 @@ msgstr "进程过多"
 msgid "unable to set runas group vector"
 msgstr "无法设置 runas 组向量"
 
-#: plugins/sudoers/sssd.c:256
-#, c-format
-msgid "Unable to dlopen %s: %s"
-msgstr "无法执行 dlopen %s：%s"
-
 #: plugins/sudoers/sssd.c:257
 #, c-format
-msgid "Unable to initialize SSS source. Is SSSD installed on your machine?"
+msgid "unable to initialize SSS source. Is SSSD installed on your machine?"
 msgstr "无法初始化 SSS 资源。您的计算机上安装 SSSD 了吗？"
 
 #: plugins/sudoers/sssd.c:263 plugins/sudoers/sssd.c:271
@@ -1263,8 +1269,8 @@ msgstr "当前目录中的命令"
 msgid "sorry, you are not allowed to preserve the environment"
 msgstr "抱歉，您无权保留环境"
 
-#: plugins/sudoers/sudoers.c:723 plugins/sudoers/timestamp.c:215
-#: plugins/sudoers/timestamp.c:259 plugins/sudoers/timestamp.c:327
+#: plugins/sudoers/sudoers.c:723 plugins/sudoers/timestamp.c:216
+#: plugins/sudoers/timestamp.c:260 plugins/sudoers/timestamp.c:328
 #: plugins/sudoers/visudo.c:310 plugins/sudoers/visudo.c:576
 #, c-format
 msgid "unable to stat %s"
@@ -1275,17 +1281,17 @@ msgstr "无法 stat %s"
 msgid "%s is not a regular file"
 msgstr "%s 不是常规文件"
 
-#: plugins/sudoers/sudoers.c:729 toke.l:842
+#: plugins/sudoers/sudoers.c:729 toke.l:913
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s 属于用户 ID %u，应为 %u"
 
-#: plugins/sudoers/sudoers.c:733 toke.l:849
+#: plugins/sudoers/sudoers.c:733 toke.l:920
 #, c-format
 msgid "%s is world writable"
 msgstr "%s 可被任何人写"
 
-#: plugins/sudoers/sudoers.c:736 toke.l:854
+#: plugins/sudoers/sudoers.c:736 toke.l:925
 #, c-format
 msgid "%s is owned by gid %u, should be %u"
 msgstr "%s 属于组 ID %u，应为 %u"
@@ -1400,7 +1406,7 @@ msgstr "未知的搜索词“%s”"
 msgid "%s requires an argument"
 msgstr "%s 需要参数"
 
-#: plugins/sudoers/sudoreplay.c:718
+#: plugins/sudoers/sudoreplay.c:718 plugins/sudoers/sudoreplay.c:1058
 #, c-format
 msgid "invalid regular expression: %s"
 msgstr "无效的正则表达式：%s"
@@ -1424,11 +1430,6 @@ msgstr "非法的结尾字符“or”"
 #, c-format
 msgid "illegal trailing \"!\""
 msgstr "非法的结尾字符“!”"
-
-#: plugins/sudoers/sudoreplay.c:1058
-#, c-format
-msgid "invalid regex: %s"
-msgstr "无效的正则表达式：%s"
 
 #: plugins/sudoers/sudoreplay.c:1182
 #, c-format
@@ -1499,48 +1500,48 @@ msgstr ""
 "\n"
 "命令不匹配"
 
-#: plugins/sudoers/timestamp.c:128
+#: plugins/sudoers/timestamp.c:129
 #, c-format
 msgid "timestamp path too long: %s"
 msgstr "时间戳路径过长：%s"
 
-#: plugins/sudoers/timestamp.c:202 plugins/sudoers/timestamp.c:246
-#: plugins/sudoers/timestamp.c:291
+#: plugins/sudoers/timestamp.c:203 plugins/sudoers/timestamp.c:247
+#: plugins/sudoers/timestamp.c:292
 #, c-format
 msgid "%s owned by uid %u, should be uid %u"
 msgstr "%s 属于用户 ID %u，应为用户 ID %u"
 
-#: plugins/sudoers/timestamp.c:207 plugins/sudoers/timestamp.c:251
+#: plugins/sudoers/timestamp.c:208 plugins/sudoers/timestamp.c:252
 #, c-format
 msgid "%s writable by non-owner (0%o), should be mode 0700"
 msgstr "%s 对非所有者可写(0%o)，模式应该为 0700"
 
-#: plugins/sudoers/timestamp.c:285
+#: plugins/sudoers/timestamp.c:286
 #, c-format
 msgid "%s exists but is not a regular file (0%o)"
 msgstr "%s 存在，但不是常规文件(0%o)"
 
-#: plugins/sudoers/timestamp.c:297
+#: plugins/sudoers/timestamp.c:298
 #, c-format
 msgid "%s writable by non-owner (0%o), should be mode 0600"
 msgstr "%s 对非所有者可写(0%o)，模式应该为 0600"
 
-#: plugins/sudoers/timestamp.c:352
+#: plugins/sudoers/timestamp.c:353
 #, c-format
 msgid "timestamp too far in the future: %20.20s"
 msgstr "时间戳太超前：%20.20s"
 
-#: plugins/sudoers/timestamp.c:406
+#: plugins/sudoers/timestamp.c:407
 #, c-format
 msgid "unable to remove %s, will reset to the epoch"
 msgstr "无法移除 %s ，将重设为戳记"
 
-#: plugins/sudoers/timestamp.c:413
+#: plugins/sudoers/timestamp.c:414
 #, c-format
 msgid "unable to reset %s to the epoch"
 msgstr "无法将 %s 重设为戳记"
 
-#: plugins/sudoers/toke_util.c:221
+#: plugins/sudoers/toke_util.c:176
 #, c-format
 msgid "fill_args: buffer overflow"
 msgstr "fill_args：缓存溢出"
@@ -1745,9 +1746,27 @@ msgstr ""
 "  -s          严格语法检查\n"
 "  -V          显示版本信息并退出"
 
-#: toke.l:815
+#: toke.l:886
 msgid "too many levels of includes"
 msgstr "include 嵌套层数过多"
+
+#~ msgid "pam_chauthtok: %s"
+#~ msgstr "pam_chauthtok：%s"
+
+#~ msgid "pam_authenticate: %s"
+#~ msgstr "pam_authenticate：%s"
+
+#~ msgid "Password: "
+#~ msgstr "密码："
+
+#~ msgid "getauid failed"
+#~ msgstr "getauid 失败"
+
+#~ msgid "Unable to dlopen %s: %s"
+#~ msgstr "无法执行 dlopen %s：%s"
+
+#~ msgid "invalid regex: %s"
+#~ msgstr "无效的正则表达式：%s"
 
 #~ msgid ">>> %s: %s near line %d <<<"
 #~ msgstr ">>> %s：%s 在行 %d 附近<<<"

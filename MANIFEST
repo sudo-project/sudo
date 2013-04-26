@@ -250,6 +250,8 @@ plugins/sudoers/po/sl.po
 plugins/sudoers/po/sudoers.pot
 plugins/sudoers/po/sv.mo
 plugins/sudoers/po/sv.po
+plugins/sudoers/po/tr.mo
+plugins/sudoers/po/tr.po
 plugins/sudoers/po/uk.mo
 plugins/sudoers/po/uk.po
 plugins/sudoers/po/vi.mo
