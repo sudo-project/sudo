@@ -77,7 +77,7 @@ What's new in Sudo 1.8.7?
  * On HP-UX systems, sudo will now use the pstat() function to
    determine the tty instead of ttyname().
 
- * Turkish translation for sudo from translationproject.org.
+ * Turkish translation for sudo and sudoers from translationproject.org.
 
  * Dutch translation for sudo and sudoers from translationproject.org.
 
