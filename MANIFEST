@@ -227,6 +227,8 @@ plugins/sudoers/parse.h
 plugins/sudoers/po/README
 plugins/sudoers/po/da.mo
 plugins/sudoers/po/da.po
+plugins/sudoers/po/de.mo
+plugins/sudoers/po/de.po
 plugins/sudoers/po/eo.mo
 plugins/sudoers/po/eo.po
 plugins/sudoers/po/eu.mo

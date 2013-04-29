@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers-1.8.7b2\n"
+"Project-Id-Version: sudoers-1.8.7b3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-04-17 15:52-0400\n"
-"PO-Revision-Date: 2013-04-20 13:39+0700\n"
+"POT-Creation-Date: 2013-04-24 11:10-0400\n"
+"PO-Revision-Date: 2013-04-28 07:08+0700\n"
 "Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
 "Language-Team: Vietnamese <translation-team-vi@lists.sourceforge.net>\n"
 "Language: vi\n"
@@ -227,52 +227,13 @@ msgstr "Ở đây không có phương thức xác thực nào được dịch v�
 msgid "Authentication methods:"
 msgstr "Phương thức xác thực:"
 
-#: plugins/sudoers/bsm_audit.c:60 plugins/sudoers/bsm_audit.c:63
-#: plugins/sudoers/bsm_audit.c:112 plugins/sudoers/bsm_audit.c:116
-#: plugins/sudoers/bsm_audit.c:168 plugins/sudoers/bsm_audit.c:172
-#, c-format
-msgid "getaudit: failed"
-msgstr "getaudit: gặp lỗi"
-
 #: plugins/sudoers/bsm_audit.c:90 plugins/sudoers/bsm_audit.c:153
-#, c-format
 msgid "Could not determine audit condition"
 msgstr "Không thể xác định điều kiện audit"
 
-#: plugins/sudoers/bsm_audit.c:101 plugins/sudoers/bsm_audit.c:160
-#, c-format
-msgid "getauid: failed"
-msgstr "getauid: gặp lỗi"
-
-#: plugins/sudoers/bsm_audit.c:103 plugins/sudoers/bsm_audit.c:162
-#, c-format
-msgid "au_open: failed"
-msgstr "au_open: gặp lỗi"
-
-#: plugins/sudoers/bsm_audit.c:118 plugins/sudoers/bsm_audit.c:174
-#, c-format
-msgid "au_to_subject: failed"
-msgstr "au_to_subject: gặp lỗi"
-
-#: plugins/sudoers/bsm_audit.c:122 plugins/sudoers/bsm_audit.c:178
-#, c-format
-msgid "au_to_exec_args: failed"
-msgstr "au_to_exec_args: gặp lỗi"
-
-#: plugins/sudoers/bsm_audit.c:126 plugins/sudoers/bsm_audit.c:187
-#, c-format
-msgid "au_to_return32: failed"
-msgstr "au_to_return32: gặp lỗi"
-
 #: plugins/sudoers/bsm_audit.c:129 plugins/sudoers/bsm_audit.c:190
-#, c-format
 msgid "unable to commit audit record"
 msgstr "không thể chuyển giao bản ghi audit"
-
-#: plugins/sudoers/bsm_audit.c:183
-#, c-format
-msgid "au_to_text: failed"
-msgstr "au_to_text: gặp lỗi"
 
 #: plugins/sudoers/check.c:189
 msgid ""
@@ -711,7 +672,7 @@ msgstr "giá trị cho “%s” phải bắt đầu bằng một “/”"
 #: plugins/sudoers/defaults.c:303
 #, c-format
 msgid "option `%s' does not take a value"
-msgstr "tùy chọn “%s” không chấp nhận giá trị"
+msgstr "tùy chọn “%s” không nhận giá trị"
 
 #: plugins/sudoers/env.c:288 plugins/sudoers/env.c:293
 #: plugins/sudoers/env.c:395 plugins/sudoers/linux_audit.c:82
@@ -723,7 +684,6 @@ msgid "internal error, %s overflow"
 msgstr "lỗi nội bộ, %s bị tràn"
 
 #: plugins/sudoers/env.c:367
-#, c-format
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr "sudo_putenv: envp sai hỏng, chiều dài không khớp"
 
@@ -798,12 +758,10 @@ msgid "unable to create %s"
 msgstr "không thể tạo “%s”"
 
 #: plugins/sudoers/ldap.c:385
-#, c-format
 msgid "sudo_ldap_conf_add_ports: port too large"
 msgstr "sudo_ldap_conf_add_ports: cổng quá lớn"
 
 #: plugins/sudoers/ldap.c:408
-#, c-format
 msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
 msgstr "sudo_ldap_conf_add_ports: hết bộ nhớ để mở rộng hostbuf"
 
@@ -828,7 +786,6 @@ msgid "unable to mix ldaps and starttls"
 msgstr "không thể trộn ldaps và starttls"
 
 #: plugins/sudoers/ldap.c:496
-#, c-format
 msgid "sudo_ldap_parse_uri: out of space building hostbuf"
 msgstr "sudo_ldap_parse_uri: hết bộ nhớ để xây dựng hostbuf"
 
@@ -858,7 +815,6 @@ msgid "unable to build time filter"
 msgstr "không thể xây dựng bộ lọc thời gian"
 
 #: plugins/sudoers/ldap.c:1295
-#, c-format
 msgid "sudo_ldap_build_pass1 allocation mismatch"
 msgstr "sudo_ldap_build_pass1 phân bổ không khớp"
 
@@ -907,7 +863,6 @@ msgid "invalid sudoOrder attribute: %s"
 msgstr "thuộc tính sudoOrder không hợp lệ: %s"
 
 #: plugins/sudoers/linux_audit.c:57
-#, c-format
 msgid "unable to open audit system"
 msgstr "không thể mở hệ thống audit"
 
@@ -1009,7 +964,6 @@ msgstr[0] "đã sai mật khẩu %d lần"
 msgstr[1] "đã sai mật khẩu %d lần"
 
 #: plugins/sudoers/logging.c:566
-#, c-format
 msgid "unable to fork"
 msgstr "không thể tạo tiến trình con"
 
@@ -1034,7 +988,6 @@ msgid "unable to execute %s: %m"
 msgstr "không thể thực thi %s: %m"
 
 #: plugins/sudoers/logging.c:899
-#, c-format
 msgid "internal error: insufficient space for log line"
 msgstr "lỗi nội bộ: thiếu khoảng trống cho dòng ghi nhật ký"
 
@@ -1080,7 +1033,7 @@ msgstr "    ChạyVớiTưCách: "
 #: plugins/sudoers/parse.c:477
 #, c-format
 msgid "    RunAsGroups: "
-msgstr "    ChạyNhưMìnhỞNhóm: "
+msgstr "    ChạyNhưỞNhóm: "
 
 #: plugins/sudoers/parse.c:486
 #, c-format
@@ -1136,22 +1089,22 @@ msgstr "không thể lưu nhớ tạm uid %u, đã có sẵn rồi"
 msgid "unable to cache user %s, already exists"
 msgstr "không thể lưu nhớ tạm tài khoản %s, đã có sẵn rồi"
 
-#: plugins/sudoers/pwutil.c:374
+#: plugins/sudoers/pwutil.c:386
 #, c-format
 msgid "unable to cache gid %u, already exists"
 msgstr "không thể lưu nhớ tạm gid %u, đã có sẵn rồi"
 
-#: plugins/sudoers/pwutil.c:410
+#: plugins/sudoers/pwutil.c:422
 #, c-format
 msgid "unable to cache group %s, already exists"
 msgstr "không thể lưu nhớ tạm nhóm %s, đã có sẵn rồi"
 
-#: plugins/sudoers/pwutil.c:564 plugins/sudoers/pwutil.c:586
+#: plugins/sudoers/pwutil.c:578 plugins/sudoers/pwutil.c:600
 #, c-format
 msgid "unable to cache group list for %s, already exists"
 msgstr "không thể lưu nhớ tạm danh sách nhóm cho %s, đã có sẵn rồi"
 
-#: plugins/sudoers/pwutil.c:584
+#: plugins/sudoers/pwutil.c:598
 #, c-format
 msgid "unable to parse groups for %s"
 msgstr "không thể phân tích nhóm cho %s"
@@ -1366,7 +1319,6 @@ msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
 msgstr "Định dạng của nhật ký là %d x %d, định dạng của thiết bị cuối là %d x %d."
 
 #: plugins/sudoers/sudoreplay.c:400
-#, c-format
 msgid "unable to set tty to raw mode"
 msgstr "không thể đặt thiết bị tty chế độ raw (thô)"
 
@@ -1376,14 +1328,8 @@ msgid "invalid timing file line: %s"
 msgstr "sai dòng ghi thời gian trong tập tin: %s"
 
 #: plugins/sudoers/sudoreplay.c:499
-#, c-format
 msgid "writing to standard output"
 msgstr "ghi vào đầu ra tiêu chuẩn"
-
-#: plugins/sudoers/sudoreplay.c:528
-#, c-format
-msgid "nanosleep: tv_sec %ld, tv_nsec %ld"
-msgstr "nanosleep: tv_sec %ld, tv_nsec %ld"
 
 #: plugins/sudoers/sudoreplay.c:641 plugins/sudoers/sudoreplay.c:666
 #, c-format
@@ -1396,7 +1342,6 @@ msgid "too many parenthesized expressions, max %d"
 msgstr "có quá nhiều biểu thức trong dấu ngoặc đơn, tối đa là %d"
 
 #: plugins/sudoers/sudoreplay.c:694
-#, c-format
 msgid "unmatched ')' in expression"
 msgstr "thiếu “)” trong biểu thức"
 
@@ -1421,17 +1366,14 @@ msgid "could not parse date \"%s\""
 msgstr "không thể phân tích ngày tháng  “%s”"
 
 #: plugins/sudoers/sudoreplay.c:737
-#, c-format
 msgid "unmatched '(' in expression"
 msgstr "thiếu “(” trong biểu thức"
 
 #: plugins/sudoers/sudoreplay.c:739
-#, c-format
 msgid "illegal trailing \"or\""
 msgstr "sai đuôi “or”"
 
 #: plugins/sudoers/sudoreplay.c:741
-#, c-format
 msgid "illegal trailing \"!\""
 msgstr "sai đuôi “!”"
 
@@ -1561,7 +1503,6 @@ msgid "press return to edit %s: "
 msgstr "bấm phím <Enter> để trở về chỉnh sửa %s:"
 
 #: plugins/sudoers/visudo.c:326 plugins/sudoers/visudo.c:332
-#, c-format
 msgid "write error"
 msgstr "lỗi ghi"
 
@@ -1753,6 +1694,30 @@ msgstr ""
 #: toke.l:886
 msgid "too many levels of includes"
 msgstr "quá nhiều cấp bao gồm (include)"
+
+#~ msgid "getaudit: failed"
+#~ msgstr "getaudit: gặp lỗi"
+
+#~ msgid "getauid: failed"
+#~ msgstr "getauid: gặp lỗi"
+
+#~ msgid "au_open: failed"
+#~ msgstr "au_open: gặp lỗi"
+
+#~ msgid "au_to_subject: failed"
+#~ msgstr "au_to_subject: gặp lỗi"
+
+#~ msgid "au_to_exec_args: failed"
+#~ msgstr "au_to_exec_args: gặp lỗi"
+
+#~ msgid "au_to_return32: failed"
+#~ msgstr "au_to_return32: gặp lỗi"
+
+#~ msgid "au_to_text: failed"
+#~ msgstr "au_to_text: gặp lỗi"
+
+#~ msgid "nanosleep: tv_sec %ld, tv_nsec %ld"
+#~ msgstr "nanosleep: tv_sec %ld, tv_nsec %ld"
 
 #~ msgid "pam_chauthtok: %s"
 #~ msgstr "pam_chauthtok: %s"
