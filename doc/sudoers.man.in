@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "@mansectsu@" "April 17, 2013" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
+.TH "SUDOERS" "@mansectsu@" "April 30, 2013" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -779,9 +779,10 @@ using the specified SHA-2 digest.
 This may be useful in situations where the user invoking
 \fBsudo\fR
 has write access to the command or its parent directory.
-The digest string may be specified in either hex or base64 format
+The following digest formats are supported: sha224, sha256, sha384 and sha512.
+The string may be specified in either hex or base64 format
 (base64 is more compact).
-There are many utilities capable of generating SHA-2 digests in hex
+There are several utilities capable of generating SHA-2 digests in hex
 format such as openssl, shasum, sha224sum, sha256sum, sha384sum, sha512sum.
 .PP
 For example, using openssl:
