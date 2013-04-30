@@ -15,7 +15,6 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Elias Benali
     Jamie Beverly
     Spider Boardman
-    Jakub Bogusz
     P.J. Bostley
     Keith Bowes
     Keith Garry Boyce
@@ -28,15 +27,12 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Andreas Bussjaeger
     Gary Calvin
     Aaron Campbell
-    Milo Casagrande
-    Yuri Chornoivan
     Vitezslav Cizek
     Chris Coleman
     Deven T. Corzine
     Frank Cusack
     Wei Dai
     Theo de Raadt
-    Francisco Dieguez
     David Dill
     Theo Van Dinter
     Jeff Earickson
@@ -52,7 +48,6 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Jean-loup Gailly
     Simon J. Gerraty
     B. Guillory
-    Joe Hansen
     Randy M. Hayman
     Joachim Henke
     YOSHIFUJI Hideaki
@@ -69,7 +64,6 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Timo Juhani
     Ayamura KIKUCHI
     Kevin Kadow
-    Jorma Karvonen
     Stepan Kasal
     Mike Kienenberger
     Dale King
@@ -79,11 +73,8 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Alek O. Komarnitsky
     Nikolai Kondrashov
     Daniel Kopecek
-    Yuri Kozlov
-    Jakob Kramer
     Paul Kranenburg
     David Krause
-    Tomislav Krznar
     Eric Lakin
     Case Larsen
     Dmitry V. Levin
@@ -94,10 +85,8 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Tom McLaughlin
     Jeff Makey
     Michael D. Marchionna
-    Algimantas Margevicius
     Paul Markham
     Emin Martinian
-    Pavel Maryanov
     Michael Meskes
     Todd C. Miller
     Loic Minier
@@ -108,9 +97,7 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Dworkin Muller
     Jeff Nieusma
     Peter A. Nikitser
-    Miroslav Nikolic
     Ludwig Nussel
-    Daniel Nylander
     Eric Paquet
     Chantal Paradis
     Ted Percival
@@ -120,7 +107,6 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Diego Elio Petteno
     Joel Pickett
     Alex Plotnick
-    Tran Ngoc Quan
     Gudleik Rasch
     Steve Reid
     Matt Richards
@@ -136,7 +122,6 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Patrick Schoenfeld
     Arno Schuring
     Dougal Scott
-    Abel Sendón
     Nick Sieger
     Thor Lancelot Simon
     Marc Slemko
@@ -149,7 +134,6 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Russell Street
     Tilo Stritzky
     Michael Stroucken
-    Yasuaki Taniguchi
     Robert Tarrall
     Matthew Thomas
     Giles Todd
@@ -157,13 +141,11 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Chris Torek
     Darren Tucker
     Robert Uhl
-    Mikel Olasagasti Uranga
     Petr Uzel
     Reznic Valery
     Martynas Venckus
     Klaus Wagner
     Dan Walsh
-    Wylmer Wang
     John Warburton
     Kirk Webb
     Timm Wetzel
@@ -171,3 +153,34 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     David Wood
     Gustavo Zacarias
     John Zolnowsky
+
+The following people have worked to translate sudo into other
+languages:
+
+    Jakub Bogusz
+    Milo Casagrande
+    Felipe Castro
+    Yuri Chornoivan
+    Francisco Dieguez
+    Volkan Gezer
+    Takeshi Hamasaki
+    P. Hamming
+    Joe Hansen
+    Jochen Hein
+    Damir Jerovsek
+    Jorma Karvonen
+    Klemen Kosir
+    Yuri Kozlov
+    Jakob Kramer
+    Tomislav Krznar
+    Algimantas Margevicius
+    Pavel Maryanov
+    Miroslav Nikolic
+    Daniel Nylander
+    Tran Ngoc Quan
+    Leandro Regueiro
+    Ozgur Sarier
+    Abel Sendón
+    Yasuaki Taniguchi
+    Mikel Olasagasti Uranga
+    Wylmer Wang
