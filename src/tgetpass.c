@@ -225,7 +225,8 @@ sudo_askpass(const char *askpass, const char *prompt)
 	    warning("dup2");
 	    _exit(255);
 	}
-	(void) setuid(ROOT_UID);
+	if (setuid(ROOT_UID) == -1)
+	    warning("setuid(%d)", ROOT_UID);
 	if (setgid(user_details.gid)) {
 	    warning(_("unable to set gid to %u"), (unsigned int)user_details.gid);
 	    _exit(255);

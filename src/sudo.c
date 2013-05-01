@@ -276,7 +276,8 @@ main(int argc, char *argv[], char *envp[])
 	    if (ISSET(sudo_mode, MODE_BACKGROUND))
 		SET(command_details.flags, CD_BACKGROUND);
 	    /* Become full root (not just setuid) so user cannot kill us. */
-	    (void) setuid(ROOT_UID);
+	    if (setuid(ROOT_UID) == -1)
+		warning("setuid(%d)", ROOT_UID);
 	    /* Restore coredumpsize resource limit before running. */
 #ifdef RLIMIT_CORE
 	    if (sudo_conf_disable_coredump())

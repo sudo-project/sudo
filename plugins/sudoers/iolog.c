@@ -139,7 +139,7 @@ io_mkdirs(char *path, mode_t mode, bool is_temp)
 	if (stat(path, &sb) != 0) {
 	    if (mkdir(path, mode) != 0)
 		log_fatal(USE_ERRNO, N_("unable to mkdir %s"), path);
-	    (void) chown(path, (uid_t)-1, parent_gid);
+	    ignore_result(chown(path, (uid_t)-1, parent_gid));
 	} else if (!S_ISDIR(sb.st_mode)) {
 	    log_fatal(0, N_("%s exists but is not a directory (0%o)"),
 		path, (unsigned int) sb.st_mode);
@@ -153,11 +153,11 @@ io_mkdirs(char *path, mode_t mode, bool is_temp)
     if (is_temp) {
 	if (mkdtemp(path) == NULL)
 	    log_fatal(USE_ERRNO, N_("unable to mkdir %s"), path);
-	(void) chown(path, (uid_t)-1, parent_gid);
+	ignore_result(chown(path, (uid_t)-1, parent_gid));
     } else {
 	if (mkdir(path, mode) != 0 && errno != EEXIST)
 	    log_fatal(USE_ERRNO, N_("unable to mkdir %s"), path);
-	(void) chown(path, (uid_t)-1, parent_gid);
+	ignore_result(chown(path, (uid_t)-1, parent_gid));
     }
     debug_return;
 }

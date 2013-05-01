@@ -1085,7 +1085,7 @@ restore_perms(void)
     if (OID(euid) == ROOT_UID) {
 	/* setuid() may not set the saved ID unless the euid is ROOT_UID */
 	if (ID(euid) != ROOT_UID)
-	    (void)setreuid(-1, ROOT_UID);
+	    ignore_result(setreuid(-1, ROOT_UID));
 	if (setuid(ROOT_UID)) {
 	    warning("setuid() [%d, %d] -> %d)", (int)state->ruid,
 		(int)state->euid, ROOT_UID);
