@@ -274,6 +274,15 @@ A) AIX's Enhanced RBAC is preventing sudo from running.  To fix
 	    innateprivs = PV_DAC_GID,PV_DAC_O,PV_DAC_R,PV_DAC_UID,PV_DAC_W,PV_DAC_X,PV_FS_CHOWN,PV_PROC_ENV,PV_PROC_PRIO,PV_PROC_RAC
 	    secflags = FSF_EPS
 
+Q) Sudo configures and builds without error but when I run it I get
+   a Segmentation fault.
+A) The first thing to try is to run configure with the --disable-pie
+   option, then "make clean" and "make".  If that fixes the problem
+   then your operating system does not support position independent
+   executables, even though the compiler appears to support them.
+   If the problem persists, please send a message to sudo-users@sudo.ws
+   for assistance.
+
 Q) When I run configure I get the following error:
     dlopen present but libtool doesn't appear to support your platform.
 A) Libtool doesn't know how to support dynamic linking on the operating
