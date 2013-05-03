@@ -24,12 +24,6 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#ifdef __linux__
-# include <sys/vfs.h>
-#endif
-#if defined(__sun) && defined(__SVR4)
-# include <sys/statvfs.h>
-#endif
 #ifndef __TANDEM
 # include <sys/file.h>
 #endif
@@ -63,8 +57,6 @@
 #include "sudoers.h"
 #include "check.h"
 
-static bool  tty_is_devpts(const char *);
-
 static struct sudo_tty_info tty_info;
 static char timestampdir[PATH_MAX];
 static char timestampfile[PATH_MAX];
@@ -85,8 +77,8 @@ build_timestamp(struct passwd *pw)
 	tty_info.dev = sb.st_dev;
 	tty_info.ino = sb.st_ino;
 	tty_info.rdev = sb.st_rdev;
-	if (tty_is_devpts(user_ttypath))
-	    ctim_get(&sb, &tty_info.ctime);
+	tty_info.uid = sb.st_uid;
+	tty_info.gid = sb.st_gid;
 	tty_info.sid = user_sid;
     }
 
@@ -416,44 +408,6 @@ remove_timestamp(bool remove)
     }
 
     debug_return;
-}
-
-/*
- * Returns true if tty lives on a devpts, /dev or /devices filesystem, else
- * false.  Unlike most filesystems, the ctime of devpts nodes is not updated
- * when the device node is written to, only when the inode's status changes,
- * typically via the chmod, chown, link, rename, or utimes system calls.
- * Since the ctime is "stable" in this case, we can stash it the tty ticket
- * file and use it to determine whether the tty ticket file is stale.
- */
-static bool
-tty_is_devpts(const char *tty)
-{
-    bool retval = false;
-#ifdef __linux__
-    struct statfs sfs;
-    debug_decl(tty_is_devpts, SUDO_DEBUG_PTY)
-
-#ifndef DEVPTS_SUPER_MAGIC
-# define DEVPTS_SUPER_MAGIC 0x1cd1
-#endif
-
-    if (statfs(tty, &sfs) == 0) {
-	if (sfs.f_type == DEVPTS_SUPER_MAGIC)
-	    retval = true;
-    }
-#elif defined(__sun) && defined(__SVR4)
-    struct statvfs sfs;
-    debug_decl(tty_is_devpts, SUDO_DEBUG_PTY)
-
-    if (statvfs(tty, &sfs) == 0) {
-	if (strcmp(sfs.f_fstr, "dev") == 0 || strcmp(sfs.f_fstr, "devices") == 0)
-	    retval = true;
-    }
-#else
-    debug_decl(tty_is_devpts, SUDO_DEBUG_PTY)
-#endif /* __linux__ */
-    debug_return_bool(retval);
 }
 
 /*
