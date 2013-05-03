@@ -143,6 +143,7 @@ case "$osversion" in
 		--with-tty-tickets
 		--with-ldap
 		--with-passprompt=[sudo] password for %p: 
+		--with-sendmail=/usr/sbin/sendmail
 		$configure_opts"
 	;;
     sles*)
@@ -174,6 +175,7 @@ case "$osversion" in
 		--with-ldap
 		--with-env-editor
 		--with-passprompt=%p\'s password: 
+		--with-sendmail=/usr/sbin/sendmail
 		$configure_opts"
 
 	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
@@ -254,6 +256,7 @@ case "$osversion" in
 		--with-env-editor
 		--enable-zlib=builtin
 		--disable-nls
+		--with-sendmail=/usr/sbin/sendmail
 		$configure_opts"
 	PPVARS="${PPVARS}${PPVARS+$space}aix_freeware=true"
 	;;
