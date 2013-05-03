@@ -14530,7 +14530,7 @@ done
 		: ${with_logincap='maybe'}
 		# PIE is broken on FreeBSD/ia64
 		case "$host_cpu" in
-		ia64*)
+		arm*|ia64*)
 			enable_pie=no;;
 		esac
 		;;
