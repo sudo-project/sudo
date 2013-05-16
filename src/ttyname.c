@@ -199,6 +199,9 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
     if (dir[0] == '\0' || (d = opendir(dir)) == NULL)
 	goto done;
 
+    sudo_debug_printf(SUDO_DEBUG_INFO, "scanning for dev %u in %s",
+	(unsigned int)rdev, dir);
+
     sdlen = strlen(dir);
     if (dir[sdlen - 1] == '/')
 	sdlen--;
@@ -246,7 +249,7 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 # if defined(HAVE_STRUCT_DIRENT_D_TYPE) && defined(DTTOIF)
 	/* Use d_type to avoid a stat() if possible. */
 	/* Convert d_type to stat-style type bits but follow links. */
-	if (dp->d_type != DT_LNK && dp->d_type != DT_CHR)
+	if (dp->d_type != DT_LNK && dp->d_type != DT_CHR && dp->d_type != DT_UNKNOWN)
 	    sb.st_mode = DTTOIF(dp->d_type);
 	else
 # endif
@@ -265,6 +268,8 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 	}
 	if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
 	    devname = estrdup(pathbuf);
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "resolved dev %u as %s",
+		(unsigned int)rdev, pathbuf);
 	    goto done;
 	}
     }
@@ -309,6 +314,8 @@ sudo_ttyname_dev(dev_t rdev)
 		    if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev)
 			tty = estrdup(buf);
 		}
+		sudo_debug_printf(SUDO_DEBUG_INFO, "comparing dev %u to %s: %s",
+		    (unsigned int)rdev, buf, tty ? "yes" : "no");
 	    } else {
 		/* Traverse directory */
 		tty = sudo_ttyname_scan(devname, rdev, true);
