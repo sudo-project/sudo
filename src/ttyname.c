@@ -247,9 +247,12 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 		continue;
 	}
 # if defined(HAVE_STRUCT_DIRENT_D_TYPE) && defined(DTTOIF)
-	/* Use d_type to avoid a stat() if possible. */
-	/* Convert d_type to stat-style type bits but follow links. */
-	if (dp->d_type != DT_LNK && dp->d_type != DT_CHR && dp->d_type != DT_UNKNOWN)
+	/*
+	 * Convert dp->d_type to sb.st_mode to avoid a stat(2) if possible.
+	 * We can't use it for links (since we want to follow them) or
+	 * char devs (since we need st_rdev to compare the device number).
+	 */
+	if (dp->d_type != DT_UNKNOWN && dp->d_type != DT_LNK && dp->d_type != DT_CHR)
 	    sb.st_mode = DTTOIF(dp->d_type);
 	else
 # endif
