@@ -81,30 +81,27 @@ union io_fd {
     void *v;
 };
 
-extern __dso_public struct io_plugin sudoers_io;
-
-struct io_log_file {
+static struct io_log_file {
     bool enabled;
     const char *suffix;
-    int (**fn_ptr)(const char *buf, unsigned int len);
     union io_fd fd;
 } io_log_files[] = {
 #define IOFD_LOG	0
-    { true,  "/log",    NULL },
+    { true,  "/log" },
 #define IOFD_TIMING	1
-    { true,  "/timing", NULL },
+    { true,  "/timing" },
 #define IOFD_STDIN	2
-    { false, "/stdin",  &sudoers_io.log_stdin },
+    { false, "/stdin" },
 #define IOFD_STDOUT	3
-    { false, "/stdout", &sudoers_io.log_stdout },
+    { false, "/stdout" },
 #define IOFD_STDERR	4
-    { false, "/stderr", &sudoers_io.log_stderr },
+    { false, "/stderr" },
 #define IOFD_TTYIN	5
-    { false, "/ttyin",  &sudoers_io.log_ttyin },
+    { false, "/ttyin" },
 #define IOFD_TTYOUT	6
-    { false, "/ttyout", &sudoers_io.log_ttyout },
+    { false, "/ttyout" },
 #define IOFD_MAX	7
-    { false, NULL,      NULL }
+    { false, NULL }
 };
 
 #define SESSID_MAX	2176782336U
@@ -112,6 +109,9 @@ struct io_log_file {
 static int iolog_compress;
 static struct timeval last_time;
 static unsigned int sessid_max = SESSID_MAX;
+
+/* sudoers_io is declared at the end of this file. */
+extern __dso_public struct io_plugin sudoers_io;
 
 /*
  * Create path and any parent directories as needed.
@@ -338,8 +338,6 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
     } else {
 	/* Remove old log file if we recycled sequence numbers. */
 	unlink(pathbuf);
-	if (iol->fn_ptr != NULL)
-	    *(iol->fn_ptr) = NULL;
     }
     debug_return;
 }
@@ -606,6 +604,20 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     fputc('\n', io_log_files[IOFD_LOG].fd.f);
     fclose(io_log_files[IOFD_LOG].fd.f);
     io_log_files[IOFD_LOG].fd.f = NULL;
+
+    /*
+     * Clear I/O log function pointers for disabled log functions.
+     */
+    if (!io_log_files[IOFD_STDIN].enabled)
+	sudoers_io.log_stdin = NULL;
+    if (!io_log_files[IOFD_STDOUT].enabled)
+	sudoers_io.log_stdout = NULL;
+    if (!io_log_files[IOFD_STDERR].enabled)
+	sudoers_io.log_stderr = NULL;
+    if (!io_log_files[IOFD_TTYIN].enabled)
+	sudoers_io.log_ttyin = NULL;
+    if (!io_log_files[IOFD_TTYOUT].enabled)
+	sudoers_io.log_ttyout = NULL;
 
     rval = true;
 
