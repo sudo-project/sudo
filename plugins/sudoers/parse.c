@@ -754,7 +754,7 @@ _print_member(struct lbuf *lbuf, char *name, int type, int negated,
 	    }
 	    break;
 	case ALIAS:
-	    if ((a = alias_find(name, alias_type)) != NULL) {
+	    if ((a = alias_get(name, alias_type)) != NULL) {
 		tq_foreach_fwd(&a->members, m) {
 		    if (m != tq_first(&a->members))
 			lbuf_append(lbuf, "%s", separator);
@@ -762,6 +762,7 @@ _print_member(struct lbuf *lbuf, char *name, int type, int negated,
 			negated ? !m->negated : m->negated, separator,
 			alias_type);
 		}
+		alias_put(a);
 		break;
 	    }
 	    /* FALLTHROUGH */
@@ -775,7 +776,6 @@ _print_member(struct lbuf *lbuf, char *name, int type, int negated,
 static void
 print_member(struct lbuf *lbuf, struct member *m, int alias_type)
 {
-    alias_seqno++;
     _print_member(lbuf, m->name, m->type, m->negated, ", ", alias_type);
 }
 
@@ -783,6 +783,5 @@ static void
 print_member2(struct lbuf *lbuf, struct member *m, const char *separator,
     int alias_type)
 {
-    alias_seqno++;
     _print_member(lbuf, m->name, m->type, m->negated, separator, alias_type);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007-2012
+ * Copyright (c) 2004-2005, 2007-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -49,7 +49,6 @@
  * Globals
  */
 struct rbtree *aliases;
-unsigned int alias_seqno;
 
 /*
  * Comparison function for the red-black tree.
@@ -75,33 +74,46 @@ alias_compare(const void *v1, const void *v2)
 /*
  * Search the tree for an alias with the specified name and type.
  * Returns a pointer to the alias structure or NULL if not found.
+ * Caller is responsible for calling alias_put() on the returned
+ * alias to mark it as unused.
  */
 struct alias *
-alias_find(char *name, int type)
+alias_get(char *name, int type)
 {
     struct alias key;
     struct rbnode *node;
     struct alias *a = NULL;
-    debug_decl(alias_find, SUDO_DEBUG_ALIAS)
+    debug_decl(alias_get, SUDO_DEBUG_ALIAS)
 
     key.name = name;
     key.type = type;
     if ((node = rbfind(aliases, &key)) != NULL) {
 	/*
-	 * Compare the global sequence number with the one stored
-	 * in the alias.  If they match then we've seen this alias
-	 * before and found a loop.
+	 * Check whether this alias is already in use.
+	 * If so, we've detected a loop.  If not, set the flag,
+	 * which the caller should clear with a call to alias_put().
 	 */
 	a = node->data;
-	if (a->seqno == alias_seqno) {
+	if (a->used) {
 	    errno = ELOOP;
 	    debug_return_ptr(NULL);
 	}
-	a->seqno = alias_seqno;
+	a->used = true;
     } else {
 	errno = ENOENT;
     }
     debug_return_ptr(a);
+}
+
+/*
+ * Clear the "used" flag in an alias once the caller is done with it.
+ */
+void
+alias_put(struct alias *a)
+{
+    debug_decl(alias_put, SUDO_DEBUG_ALIAS)
+    a->used = false;
+    debug_return;
 }
 
 /*
@@ -118,7 +130,7 @@ alias_add(char *name, int type, struct member *members)
     a = ecalloc(1, sizeof(*a));
     a->name = name;
     a->type = type;
-    /* a->seqno = 0; */
+    /* a->used = false; */
     list2tq(&a->members, members);
     if (rbinsert(aliases, a)) {
 	snprintf(errbuf, sizeof(errbuf), N_("Alias `%s' already defined"), name);

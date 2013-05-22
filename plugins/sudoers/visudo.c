@@ -1075,7 +1075,6 @@ alias_remove_recursive(char *name, int type)
 	}
 	rbinsert(alias_freelist, a);
     }
-    alias_seqno++;
     debug_return_bool(rval);
 }
 
@@ -1087,12 +1086,13 @@ check_alias(char *name, int type, int strict, int quiet)
     int errors = 0;
     debug_decl(check_alias, SUDO_DEBUG_ALIAS)
 
-    if ((a = alias_find(name, type)) != NULL) {
+    if ((a = alias_get(name, type)) != NULL) {
 	/* check alias contents */
 	tq_foreach_fwd(&a->members, m) {
 	    if (m->type == ALIAS)
 		errors += check_alias(m->name, type, strict, quiet);
 	}
+	alias_put(a);
     } else {
 	if (!quiet) {
 	    char *fmt;
@@ -1137,26 +1137,22 @@ check_aliases(bool strict, bool quiet)
     tq_foreach_fwd(&userspecs, us) {
 	tq_foreach_fwd(&us->users, m) {
 	    if (m->type == ALIAS) {
-		alias_seqno++;
 		errors += check_alias(m->name, USERALIAS, strict, quiet);
 	    }
 	}
 	tq_foreach_fwd(&us->privileges, priv) {
 	    tq_foreach_fwd(&priv->hostlist, m) {
 		if (m->type == ALIAS) {
-		    alias_seqno++;
 		    errors += check_alias(m->name, HOSTALIAS, strict, quiet);
 		}
 	    }
 	    tq_foreach_fwd(&priv->cmndlist, cs) {
 		tq_foreach_fwd(&cs->runasuserlist, m) {
 		    if (m->type == ALIAS) {
-			alias_seqno++;
 			errors += check_alias(m->name, RUNASALIAS, strict, quiet);
 		    }
 		}
 		if ((m = cs->cmnd)->type == ALIAS) {
-		    alias_seqno++;
 		    errors += check_alias(m->name, CMNDALIAS, strict, quiet);
 		}
 	    }
@@ -1167,7 +1163,6 @@ check_aliases(bool strict, bool quiet)
     tq_foreach_fwd(&userspecs, us) {
 	tq_foreach_fwd(&us->users, m) {
 	    if (m->type == ALIAS) {
-		alias_seqno++;
 		if (!alias_remove_recursive(m->name, USERALIAS))
 		    errors++;
 	    }
@@ -1175,7 +1170,6 @@ check_aliases(bool strict, bool quiet)
 	tq_foreach_fwd(&us->privileges, priv) {
 	    tq_foreach_fwd(&priv->hostlist, m) {
 		if (m->type == ALIAS) {
-		    alias_seqno++;
 		    if (!alias_remove_recursive(m->name, HOSTALIAS))
 			errors++;
 		}
@@ -1183,13 +1177,11 @@ check_aliases(bool strict, bool quiet)
 	    tq_foreach_fwd(&priv->cmndlist, cs) {
 		tq_foreach_fwd(&cs->runasuserlist, m) {
 		    if (m->type == ALIAS) {
-			alias_seqno++;
 			if (!alias_remove_recursive(m->name, RUNASALIAS))
 			    errors++;
 		    }
 		}
 		if ((m = cs->cmnd)->type == ALIAS) {
-		    alias_seqno++;
 		    if (!alias_remove_recursive(m->name, CMNDALIAS))
 			errors++;
 		}
@@ -1216,7 +1208,6 @@ check_aliases(bool strict, bool quiet)
 	tq_foreach_fwd(&d->binding, binding) {
 	    for (m = binding; m != NULL; m = m->next) {
 		if (m->type == ALIAS) {
-		    alias_seqno++;
 		    if (!alias_remove_recursive(m->name, atype))
 			errors++;
 		}

@@ -162,7 +162,7 @@ struct runascontainer {
 struct alias {
     char *name;				/* alias name */
     unsigned short type;		/* {USER,HOST,RUNAS,CMND}ALIAS */
-    unsigned short seqno;		/* sequence number */
+    bool used;				/* "used" flag for cycle detection */
     struct member_list members;		/* list of alias members */
 };
 
@@ -184,37 +184,43 @@ struct defaults {
 extern struct userspec_list userspecs;
 extern struct defaults_list defaults;
 
-/*
- * Alias sequence number to avoid loops.
- */
-extern unsigned int alias_seqno;
-
-/*
- * Prototypes
- */
-char *alias_add(char *, int, struct member *);
-bool addr_matches(char *);
-int cmnd_matches(struct member *);
-int cmndlist_matches(struct member_list *);
-bool command_matches(char *, char *, struct sudo_digest *);
-int hostlist_matches(struct member_list *);
-bool hostname_matches(char *, char *, char *);
-bool netgr_matches(char *, char *, char *, char *);
+/* alias.c */
 bool no_aliases(void);
-int runaslist_matches(struct member_list *, struct member_list *, struct member **, struct member **);
-int userlist_matches(struct passwd *, struct member_list *);
-bool usergr_matches(char *, char *, struct passwd *);
-bool userpw_matches(char *, char *, struct passwd *);
-bool group_matches(char *, struct group *);
-struct alias *alias_find(char *, int);
-struct alias *alias_remove(char *, int);
-void alias_free(void *);
-void alias_apply(int (*)(void *, void *), void *);
+char *alias_add(char *name, int type, struct member *members);
+int alias_compare(const void *a1, const void *a2);
+struct alias *alias_get(char *name, int type);
+struct alias *alias_remove(char *name, int type);
+void alias_apply(int (*func)(void *, void *), void *cookie);
+void alias_free(void *a);
+void alias_put(struct alias *a);
 void init_aliases(void);
-void init_lexer(void);
+
+/* gram.c */
 void init_parser(const char *, bool);
-int alias_compare(const void *, const void *);
+
+/* match_addr.c */
+bool addr_matches(char *n);
+
+/* match.c */
+bool command_matches(char *sudoers_cmnd, char *sudoers_args, struct sudo_digest *digest);
+bool group_matches(char *sudoers_group, struct group *gr);
+bool hostname_matches(char *shost, char *lhost, char *pattern);
+bool netgr_matches(char *netgr, char *lhost, char *shost, char *user);
+bool usergr_matches(char *group, char *user, struct passwd *pw);
+bool userpw_matches(char *sudoers_user, char *user, struct passwd *pw);
+int cmnd_matches(struct member *m);
+int cmndlist_matches(struct member_list *list);
+int hostlist_matches(struct member_list *list);
+int runaslist_matches(struct member_list *user_list, struct member_list *group_list, struct member **matching_user, struct member **matching_group);
+int userlist_matches(struct passwd *pw, struct member_list *list);
+
+/* toke.c */
+void init_lexer(void);
+
+/* hexchar.c */
 int hexchar(const char *s);
+
+/* base64.c */
 size_t base64_decode(const char *str, unsigned char *dst, size_t dsize);
 
 #endif /* _SUDOERS_PARSE_H */

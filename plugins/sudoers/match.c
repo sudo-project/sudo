@@ -109,13 +109,13 @@ static bool command_matches_normal(char *, char *, struct sudo_digest *);
  * Check for user described by pw in a list of members.
  * Returns ALLOW, DENY or UNSPEC.
  */
-static int
-_userlist_matches(struct passwd *pw, struct member_list *list)
+int
+userlist_matches(struct passwd *pw, struct member_list *list)
 {
     struct member *m;
     struct alias *a;
     int rval, matched = UNSPEC;
-    debug_decl(_userlist_matches, SUDO_DEBUG_MATCH)
+    debug_decl(userlist_matches, SUDO_DEBUG_MATCH)
 
     tq_foreach_rev(list, m) {
 	switch (m->type) {
@@ -131,10 +131,11 @@ _userlist_matches(struct passwd *pw, struct member_list *list)
 		    matched = !m->negated;
 		break;
 	    case ALIAS:
-		if ((a = alias_find(m->name, USERALIAS)) != NULL) {
-		    rval = _userlist_matches(pw, &a->members);
+		if ((a = alias_get(m->name, USERALIAS)) != NULL) {
+		    rval = userlist_matches(pw, &a->members);
 		    if (rval != UNSPEC)
 			matched = m->negated ? !rval : rval;
+		    alias_put(a);
 		    break;
 		}
 		/* FALLTHROUGH */
@@ -149,20 +150,13 @@ _userlist_matches(struct passwd *pw, struct member_list *list)
     debug_return_bool(matched);
 }
 
-int
-userlist_matches(struct passwd *pw, struct member_list *list)
-{
-    alias_seqno++;
-    return _userlist_matches(pw, list);
-}
-
 /*
  * Check for user described by pw in a list of members.
  * If both lists are empty compare against def_runas_default.
  * Returns ALLOW, DENY or UNSPEC.
  */
-static int
-_runaslist_matches(struct member_list *user_list,
+int
+runaslist_matches(struct member_list *user_list,
     struct member_list *group_list, struct member **matching_user,
     struct member **matching_group)
 {
@@ -171,7 +165,7 @@ _runaslist_matches(struct member_list *user_list,
     int rval;
     int user_matched = UNSPEC;
     int group_matched = UNSPEC;
-    debug_decl(_runaslist_matches, SUDO_DEBUG_MATCH)
+    debug_decl(runaslist_matches, SUDO_DEBUG_MATCH)
 
     if (runas_pw != NULL) {
 	/* If no runas user or runas group listed in sudoers, use default. */
@@ -192,11 +186,12 @@ _runaslist_matches(struct member_list *user_list,
 			user_matched = !m->negated;
 		    break;
 		case ALIAS:
-		    if ((a = alias_find(m->name, RUNASALIAS)) != NULL) {
-			rval = _runaslist_matches(&a->members, &empty,
+		    if ((a = alias_get(m->name, RUNASALIAS)) != NULL) {
+			rval = runaslist_matches(&a->members, &empty,
 			    matching_user, NULL);
 			if (rval != UNSPEC)
 			    user_matched = m->negated ? !rval : rval;
+			alias_put(a);
 			break;
 		    }
 		    /* FALLTHROUGH */
@@ -229,11 +224,12 @@ _runaslist_matches(struct member_list *user_list,
 		    group_matched = !m->negated;
 		    break;
 		case ALIAS:
-		    if ((a = alias_find(m->name, RUNASALIAS)) != NULL) {
-			rval = _runaslist_matches(&empty, &a->members,
+		    if ((a = alias_get(m->name, RUNASALIAS)) != NULL) {
+			rval = runaslist_matches(&empty, &a->members,
 			    NULL, matching_group);
 			if (rval != UNSPEC)
 			    group_matched = m->negated ? !rval : rval;
+			alias_put(a);
 			break;
 		    }
 		    /* FALLTHROUGH */
@@ -261,27 +257,17 @@ _runaslist_matches(struct member_list *user_list,
     debug_return_int(UNSPEC);
 }
 
-int
-runaslist_matches(struct member_list *user_list,
-    struct member_list *group_list, struct member **matching_user,
-    struct member **matching_group)
-{
-    alias_seqno++;
-    return _runaslist_matches(user_list ? user_list : &empty,
-	group_list ? group_list : &empty, matching_user, matching_group);
-}
-
 /*
  * Check for host and shost in a list of members.
  * Returns ALLOW, DENY or UNSPEC.
  */
-static int
-_hostlist_matches(struct member_list *list)
+int
+hostlist_matches(struct member_list *list)
 {
     struct member *m;
     struct alias *a;
     int rval, matched = UNSPEC;
-    debug_decl(_hostlist_matches, SUDO_DEBUG_MATCH)
+    debug_decl(hostlist_matches, SUDO_DEBUG_MATCH)
 
     tq_foreach_rev(list, m) {
 	switch (m->type) {
@@ -297,10 +283,11 @@ _hostlist_matches(struct member_list *list)
 		    matched = !m->negated;
 		break;
 	    case ALIAS:
-		if ((a = alias_find(m->name, HOSTALIAS)) != NULL) {
-		    rval = _hostlist_matches(&a->members);
+		if ((a = alias_get(m->name, HOSTALIAS)) != NULL) {
+		    rval = hostlist_matches(&a->members);
 		    if (rval != UNSPEC)
 			matched = m->negated ? !rval : rval;
+		    alias_put(a);
 		    break;
 		}
 		/* FALLTHROUGH */
@@ -315,23 +302,16 @@ _hostlist_matches(struct member_list *list)
     debug_return_bool(matched);
 }
 
-int
-hostlist_matches(struct member_list *list)
-{
-    alias_seqno++;
-    return _hostlist_matches(list);
-}
-
 /*
  * Check for cmnd and args in a list of members.
  * Returns ALLOW, DENY or UNSPEC.
  */
-static int
-_cmndlist_matches(struct member_list *list)
+int
+cmndlist_matches(struct member_list *list)
 {
     struct member *m;
     int matched = UNSPEC;
-    debug_decl(_cmndlist_matches, SUDO_DEBUG_MATCH)
+    debug_decl(cmndlist_matches, SUDO_DEBUG_MATCH)
 
     tq_foreach_rev(list, m) {
 	matched = cmnd_matches(m);
@@ -339,13 +319,6 @@ _cmndlist_matches(struct member_list *list)
 	    break;
     }
     debug_return_bool(matched);
-}
-
-int
-cmndlist_matches(struct member_list *list)
-{
-    alias_seqno++;
-    return _cmndlist_matches(list);
 }
 
 /*
@@ -365,11 +338,11 @@ cmnd_matches(struct member *m)
 	    matched = !m->negated;
 	    break;
 	case ALIAS:
-	    alias_seqno++;
-	    if ((a = alias_find(m->name, CMNDALIAS)) != NULL) {
-		rval = _cmndlist_matches(&a->members);
+	    if ((a = alias_get(m->name, CMNDALIAS)) != NULL) {
+		rval = cmndlist_matches(&a->members);
 		if (rval != UNSPEC)
 		    matched = m->negated ? !rval : rval;
+		alias_put(a);
 	    }
 	    break;
 	case COMMAND:
