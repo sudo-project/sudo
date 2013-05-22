@@ -88,10 +88,10 @@ libcommon.la: $(LTOBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LTOBJS) -no-install
 
 conf_test: $(CONF_TEST_OBJS) libcommon.la
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CONF_TEST_OBJS) libcommon.la $(TEST_LDFLAGS) $(TEST_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CONF_TEST_OBJS) libcommon.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 parseln_test: $(PARSELN_TEST_OBJS) libcommon.la
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(PARSELN_TEST_OBJS) libcommon.la $(TEST_LDFLAGS) $(TEST_LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(PARSELN_TEST_OBJS) libcommon.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 pre-install:
 

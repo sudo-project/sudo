@@ -99,10 +99,10 @@ mksigname: $(srcdir)/mksigname.c $(srcdir)/mksigname.h $(incdir)/missing.h $(top
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/mksigname.c -o $@
 
 fnm_test: fnm_test.o libreplace.la
-	$(LIBTOOL) --mode=link $(CC) -o $@ fnm_test.o libreplace.la
+	$(LIBTOOL) --mode=link $(CC) -o $@ fnm_test.o libreplace.la $(PIE_LDFLAGS) $(SSP_LDFLAGS)
 
 globtest: globtest.o libreplace.la
-	$(LIBTOOL) --mode=link $(CC) -o $@ globtest.o libreplace.la
+	$(LIBTOOL) --mode=link $(CC) -o $@ globtest.o libreplace.la $(PIE_LDFLAGS) $(SSP_LDFLAGS)
 
 $(srcdir)/mksiglist.h: $(srcdir)/siglist.in
 	@if [ -n "$(DEVEL)" ]; then \
