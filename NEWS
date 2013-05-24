@@ -97,6 +97,12 @@ What's new in Sudo 1.8.7?
  * The paths to ldap.conf and ldap.secret may now be specified as
    arguments to the sudoers plugin in the sudo.conf file.
 
+ * Fixed potential false positives in visudo's alias cycle detection.
+
+ * Fixed a problem where the time stamp file was being treated
+   as out of date on Linux systems where the change time on the
+   pseudo-tty device node can change after it is allocated.
+
 What's new in Sudo 1.8.6p8?
 
  * Terminal detection now works properly on 64-bit AIX kernels.
