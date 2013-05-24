@@ -171,6 +171,23 @@ AC_MSG_RESULT($sudo_cv_func_fnmatch)
 AS_IF([test $sudo_cv_func_fnmatch = yes], [$1], [$2])])
 
 dnl
+dnl Attempt to check for working PIE support.
+dnl This is a bit of a hack but on Solaris 10 with GNU ld and GNU as
+dnl we can end up with strange values from malloc().
+dnl A better check would be to verify that ASLR works with PIE.
+dnl
+AC_DEFUN([SUDO_WORKING_PIE],
+[AC_MSG_CHECKING([for working PIE support])
+AC_CACHE_VAL(sudo_cv_working_pie,
+[rm -f conftestdata; > conftestdata
+AC_TRY_RUN(AC_INCLUDES_DEFAULT([])
+[main() { char *p = malloc(1024); if (p == NULL) return 1; memset(p, 0, 1024); return 0; }], [sudo_cv_working_pie=yes], [sudo_cv_working_pie=no],
+  [sudo_cv_working_pie=no])
+rm -f core core.* *.core])
+AC_MSG_RESULT($sudo_cv_working_pie)
+AS_IF([test $sudo_cv_working_pie = yes], [$1], [$2])])
+
+dnl
 dnl check for isblank(3)
 dnl
 AC_DEFUN([SUDO_FUNC_ISBLANK],

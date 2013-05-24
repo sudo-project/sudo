@@ -21091,8 +21091,40 @@ fi
 $as_echo "$ax_cv_check_ldflags___pie" >&6; }
 if test x"$ax_cv_check_ldflags___pie" = xyes; then :
 
-		PIE_CFLAGS="-fPIE"
-		PIE_LDFLAGS="-Wc,-fPIE -pie"
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for working PIE support" >&5
+$as_echo_n "checking for working PIE support... " >&6; }
+if ${sudo_cv_working_pie+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  rm -f conftestdata; > conftestdata
+if test "$cross_compiling" = yes; then :
+  sudo_cv_working_pie=no
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+main() { char *p = malloc(1024); if (p == NULL) return 1; memset(p, 0, 1024); return 0; }
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  sudo_cv_working_pie=yes
+else
+  sudo_cv_working_pie=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+rm -f core core.* *.core
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_working_pie" >&5
+$as_echo "$sudo_cv_working_pie" >&6; }
+if test $sudo_cv_working_pie = yes; then :
+
+		    PIE_CFLAGS="-fPIE"
+		    PIE_LDFLAGS="-Wc,-fPIE -pie"
+
+fi
 
 else
   :
