@@ -21092,7 +21092,7 @@ $as_echo "$ax_cv_check_ldflags___pie" >&6; }
 if test x"$ax_cv_check_ldflags___pie" = xyes; then :
 
 		PIE_CFLAGS="-fPIE"
-		PIE_LDFLAGS="-pie"
+		PIE_LDFLAGS="-Wc,-fPIE -pie"
 
 else
   :

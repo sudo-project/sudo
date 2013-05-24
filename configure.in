@@ -3448,7 +3448,7 @@ if test -n "$GCC"; then
 	    CFLAGS="$CFLAGS -fPIE"
 	    AX_CHECK_LINK_FLAG([-pie], [
 		PIE_CFLAGS="-fPIE"
-		PIE_LDFLAGS="-pie"
+		PIE_LDFLAGS="-Wc,-fPIE -pie"
 	    ])
 	    CFLAGS="$_CFLAGS"
 	])
