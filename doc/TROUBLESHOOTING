@@ -276,12 +276,12 @@ A) AIX's Enhanced RBAC is preventing sudo from running.  To fix
 
 Q) Sudo configures and builds without error but when I run it I get
    a Segmentation fault.
-A) The first thing to try is to run configure with the --disable-pie
-   option, then "make clean" and "make".  If that fixes the problem
-   then your operating system does not support position independent
-   executables, even though the compiler appears to support them.
-   If the problem persists, please send a message to sudo-users@sudo.ws
-   for assistance.
+A) If you are on a Linux system, the first thing to try is to run
+   configure with the --disable-pie option, then "make clean" and
+   "make".  If that fixes the problem then your operating system
+   does not properly support position independent executables.
+   Please send a message to sudo@sudo.ws with system details such
+   as the Linux distro, kernel version and CPU architecture.
 
 Q) When I run configure I get the following error:
     dlopen present but libtool doesn't appear to support your platform.

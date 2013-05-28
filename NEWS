@@ -103,6 +103,10 @@ What's new in Sudo 1.8.7?
    as out of date on Linux systems where the change time on the
    pseudo-tty device node can change after it is allocated.
 
+ * Sudo now only builds Position Independent Executables (PIE)
+   by default on Linux systems and verifies that a trivial test
+   program builds and runs.
+
 What's new in Sudo 1.8.6p8?
 
  * Terminal detection now works properly on 64-bit AIX kernels.

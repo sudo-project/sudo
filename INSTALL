@@ -138,15 +138,22 @@ Compilation options:
 	_FORTIFY_SOURCE defined to 2, building with -fstack-protector
 	and linking with -zrelro, where supported.
 
+  --enable-pie
+        Build sudo and related programs as as a position independent
+        executables (PIE).  This improves the effectiveness of address
+	space layout randomization (ASLR) on systems that support it.
+	Sudo will create PIE binaries by default on Linux systems.
+
+  --disable-pie
+        Disable the creation of position independent executables (PIE),
+        even if the compiler creates PIE binaries by default.  This
+        option may be needed on some Linux systems where PIE binaries
+        are not fully supported.
+
   --disable-rpath
         By default, configure will use -Rpath in addition to -Lpath
         when passing library paths to the loader.  This option will
         disable the use of -Rpath.
-
-  --disable-pie
-	Disable the creation of position independent executables (PIE)
-        even when the compiler and linker support them.
-	By default, sudo will be built as a PIE where possible.
 
   --disable-shared
         Disable dynamic shared object support.  By default, sudo
