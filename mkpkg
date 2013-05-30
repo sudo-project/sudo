@@ -264,7 +264,7 @@ case "$osversion" in
 	# For Solaris, add project support and use let configure choose zlib.
 	# For all others, use the builtin zlib and disable NLS support.
 	case "$osversion" in
-	    sol*) configure_opts="${configure_opts}${configure_opts+$tab}--with-project${tab}--disable-pie";;
+	    sol*) configure_opts="${configure_opts}${configure_opts+$tab}--with-project";;
 	    *) configure_opts="${configure_opts}${configure_opts+$tab}--enable-zlib=builtin${tab}--disable-nls";;
 	esac
 	if test "$flavor" = "ldap"; then
