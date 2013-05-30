@@ -1567,8 +1567,7 @@ Optional Features:
   --enable-werror         Whether to enable the -Werror compiler option
   --disable-hardening     Do not use compiler/linker exploit mitigation
                           options
-  --disable-pie           Do not build position independent executables, even
-                          if the compiler/linker supports them
+  --enable-pie            Build sudo as a position independent executable.
   --enable-admin-flag     Whether to create a Ubuntu-style admin flag file
   --disable-nls           Disable natural language support using gettext
   --disable-rpath         Disable passing of -Rpath to the linker
@@ -21143,6 +21142,49 @@ fi
 
 	fi
     fi
+fi
+if test "$enable_pie" != "yes"; then
+    # Solaris 11.1 and higher supports tagging binaries to use ASLR
+    case "$host_os" in
+	solaris2.1[1-9]|solaris2.[2-9][0-9])
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-z,aslr" >&5
+$as_echo_n "checking whether the linker accepts -Wl,-z,aslr... " >&6; }
+if ${ax_cv_check_ldflags___Wl__z_aslr+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -Wl,-z,aslr"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ax_cv_check_ldflags___Wl__z_aslr=yes
+else
+  ax_cv_check_ldflags___Wl__z_aslr=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__z_aslr" >&5
+$as_echo "$ax_cv_check_ldflags___Wl__z_aslr" >&6; }
+if test x"$ax_cv_check_ldflags___Wl__z_aslr" = xyes; then :
+  PIE_LDFLAGS="${PIE_LDFLAGS}${PIE_LDFLAGS+ }-Wl,-z,aslr"
+else
+  :
+fi
+
+	    ;;
+    esac
 fi
 
 if test "$enable_hardening" != "no"; then

@@ -3463,6 +3463,14 @@ if test -n "$GCC"; then
 	fi
     fi
 fi
+if test "$enable_pie" != "yes"; then
+    # Solaris 11.1 and higher supports tagging binaries to use ASLR
+    case "$host_os" in
+	solaris2.1[[1-9]]|solaris2.[[2-9]][[0-9]])
+	    AX_CHECK_LINK_FLAG([-Wl,-z,aslr], [PIE_LDFLAGS="${PIE_LDFLAGS}${PIE_LDFLAGS+ }-Wl,-z,aslr"])
+	    ;;
+    esac
+fi
 
 dnl
 dnl Check for -fstack-protector and -z relro support
