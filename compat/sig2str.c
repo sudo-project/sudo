@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2012-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,6 +15,8 @@
  */
 
 #include <config.h>
+
+#ifndef HAVE_SIG2STR
 
 #include <sys/types.h>
 
@@ -74,3 +76,4 @@ sig2str(int signo, char *signame)
     errno = EINVAL;
     return -1;
 }
+#endif /* HAVE_SIG2STR */

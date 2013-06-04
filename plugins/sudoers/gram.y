@@ -1,6 +1,6 @@
 %{
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2012
+ * Copyright (c) 1996, 1998-2005, 2007-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/param.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -55,7 +54,6 @@
 #include "sudoers.h" /* XXX */
 #include "parse.h"
 #include "toke.h"
-#include "gram.h"
 
 /*
  * We must define SIZE_MAX for yacc's skeleton.c.
@@ -91,32 +89,7 @@ static void  add_defaults(int, struct member *, struct defaults *);
 static void  add_userspec(struct member *, struct privilege *);
 static struct defaults *new_default(char *, char *, int);
 static struct member *new_member(char *, int);
-       void  yyerror(const char *);
-
-void
-yyerror(const char *s)
-{
-    debug_decl(yyerror, SUDO_DEBUG_PARSER)
-
-    /* If we last saw a newline the error is on the preceding line. */
-    if (last_token == COMMENT)
-	sudolineno--;
-
-    /* Save the line the first error occurred on. */
-    if (errorlineno == -1) {
-	errorlineno = sudolineno;
-	errorfile = estrdup(sudoers);
-    }
-    if (sudoers_warnings && s != NULL) {
-	LEXTRACE("<*> ");
-#ifndef TRACELEXER
-	if (trace_print == NULL || trace_print == sudoers_trace_print)
-	    warningx(_(">>> %s: %s near line %d <<<"), sudoers, s, sudolineno);
-#endif
-    }
-    parse_error = true;
-    debug_return;
-}
+static struct sudo_digest *new_digest(int, const char *);
 %}
 
 %union {
@@ -125,6 +98,7 @@ yyerror(const char *s)
     struct member *member;
     struct runascontainer *runas;
     struct privilege *privilege;
+    struct sudo_digest *digest;
     struct sudo_command command;
     struct cmndtag tag;
     struct selinux_info seinfo;
@@ -141,6 +115,7 @@ yyerror(const char *s)
 %token <string>  NETGROUP		/* a netgroup (+NAME) */
 %token <string>  USERGROUP		/* a usergroup (%NAME) */
 %token <string>  WORD			/* a word */
+%token <string>  DIGEST			/* a SHA-2 digest */
 %token <tok>	 DEFAULTS		/* Defaults entry */
 %token <tok>	 DEFAULTS_HOST		/* Host-specific defaults entry */
 %token <tok>	 DEFAULTS_USER		/* User-specific defaults entry */
@@ -170,6 +145,10 @@ yyerror(const char *s)
 %token <tok>	 PRIVS			/* Solaris privileges */
 %token <tok>	 LIMITPRIVS		/* Solaris limit privileges */
 %token <tok>	 MYSELF			/* run as myself, not another user */
+%token <tok>	 SHA224			/* sha224 digest */
+%token <tok>	 SHA256			/* sha256 digest */
+%token <tok>	 SHA384			/* sha384 digest */
+%token <tok>	 SHA512			/* sha512 digest */
 
 %type <cmndspec>  cmndspec
 %type <cmndspec>  cmndspeclist
@@ -177,6 +156,7 @@ yyerror(const char *s)
 %type <defaults>  defaults_list
 %type <member>	  cmnd
 %type <member>	  opcmnd
+%type <member>	  digcmnd
 %type <member>	  cmndlist
 %type <member>	  host
 %type <member>	  hostlist
@@ -198,6 +178,7 @@ yyerror(const char *s)
 %type <privinfo>  solarisprivs
 %type <string>	  privsspec
 %type <string>	  limitprivsspec
+%type <digest>	  digest
 
 %%
 
@@ -355,7 +336,7 @@ cmndspeclist	:	cmndspec
 			}
 		;
 
-cmndspec	:	runasspec selinux solarisprivs cmndtag opcmnd {
+cmndspec	:	runasspec selinux solarisprivs cmndtag digcmnd {
 			    struct cmndspec *cs = ecalloc(1, sizeof(*cs));
 			    if ($1 != NULL) {
 				list2tq(&cs->runasuserlist, $1->runasusers);
@@ -382,6 +363,31 @@ cmndspec	:	runasspec selinux solarisprivs cmndtag opcmnd {
 				cs->tags.setenv == UNSPEC)
 				cs->tags.setenv = IMPLIED;
 			    $$ = cs;
+			}
+		;
+
+digest		:	SHA224 ':' DIGEST {
+			    $$ = new_digest(SUDO_DIGEST_SHA224, $3);
+			}
+		|	SHA256 ':' DIGEST {
+			    $$ = new_digest(SUDO_DIGEST_SHA256, $3);
+			}
+		|	SHA384 ':' DIGEST {
+			    $$ = new_digest(SUDO_DIGEST_SHA384, $3);
+			}
+		|	SHA512 ':' DIGEST {
+			    $$ = new_digest(SUDO_DIGEST_SHA512, $3);
+			}
+		;
+
+digcmnd		:	opcmnd {
+			    $$ = $1;
+			}
+		|	digest opcmnd {
+			    /* XXX - yuck */
+			    struct sudo_command *c = (struct sudo_command *)($2->name);
+			    c->digest = $1;
+			    $$ = $2;
 			}
 		;
 
@@ -443,19 +449,20 @@ solarisprivs	:	/* empty */ {
 		|	privsspec {
 			    $$.privs = $1;
 			    $$.limitprivs = NULL;
-			}	
+			}
 		|	limitprivsspec {
 			    $$.privs = NULL;
 			    $$.limitprivs = $1;
-			}	
+			}
 		|	privsspec limitprivsspec {
 			    $$.privs = $1;
 			    $$.limitprivs = $2;
-			}	
+			}
 		|	limitprivsspec privsspec {
 			    $$.limitprivs = $1;
 			    $$.privs = $2;
-			}	
+			}
+		;
 
 runasspec	:	/* empty */ {
 			    $$ = NULL;
@@ -549,7 +556,7 @@ hostaliases	:	hostalias
 hostalias	:	ALIAS '=' hostlist {
 			    char *s;
 			    if ((s = alias_add($1, HOSTALIAS, $3)) != NULL) {
-				yyerror(s);
+				sudoerserror(s);
 				YYERROR;
 			    }
 			}
@@ -569,14 +576,14 @@ cmndaliases	:	cmndalias
 cmndalias	:	ALIAS '=' cmndlist {
 			    char *s;
 			    if ((s = alias_add($1, CMNDALIAS, $3)) != NULL) {
-				yyerror(s);
+				sudoerserror(s);
 				YYERROR;
 			    }
 			}
 		;
 
-cmndlist	:	opcmnd
-		|	cmndlist ',' opcmnd {
+cmndlist	:	digcmnd
+		|	cmndlist ',' digcmnd {
 			    list_append($1, $3);
 			    $$ = $1;
 			}
@@ -589,7 +596,7 @@ runasaliases	:	runasalias
 runasalias	:	ALIAS '=' userlist {
 			    char *s;
 			    if ((s = alias_add($1, RUNASALIAS, $3)) != NULL) {
-				yyerror(s);
+				sudoerserror(s);
 				YYERROR;
 			    }
 			}
@@ -602,7 +609,7 @@ useraliases	:	useralias
 useralias	:	ALIAS '=' userlist {
 			    char *s;
 			    if ((s = alias_add($1, USERALIAS, $3)) != NULL) {
-				yyerror(s);
+				sudoerserror(s);
 				YYERROR;
 			    }
 			}
@@ -671,6 +678,38 @@ group		:	ALIAS {
 		;
 
 %%
+void
+sudoerserror(const char *s)
+{
+    debug_decl(sudoerserror, SUDO_DEBUG_PARSER)
+
+    /* If we last saw a newline the error is on the preceding line. */
+    if (last_token == COMMENT)
+	sudolineno--;
+
+    /* Save the line the first error occurred on. */
+    if (errorlineno == -1) {
+	errorlineno = sudolineno;
+	errorfile = estrdup(sudoers);
+    }
+    if (sudoers_warnings && s != NULL) {
+	LEXTRACE("<*> ");
+#ifndef TRACELEXER
+	if (trace_print == NULL || trace_print == sudoers_trace_print) {
+	    const char fmt[] = ">>> %s: %s near line %d <<<\n";
+	    int oldlocale;
+
+	    /* Warnings are displayed in the user's locale. */
+	    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _(fmt), sudoers, _(s), sudolineno);
+	    sudoers_setlocale(oldlocale, NULL);
+	}
+#endif
+    }
+    parse_error = true;
+    debug_return;
+}
+
 static struct defaults *
 new_default(char *var, char *val, int op)
 {
@@ -702,6 +741,19 @@ new_member(char *name, int type)
     /* m->next = NULL; */
 
     debug_return_ptr(m);
+}
+
+struct sudo_digest *
+new_digest(int digest_type, const char *digest_str)
+{
+    struct sudo_digest *dig;
+    debug_decl(new_digest, SUDO_DEBUG_PARSER)
+
+    dig = emalloc(sizeof(*dig));
+    dig->digest_type = digest_type;
+    dig->digest_str = estrdup(digest_str);
+
+    debug_return_ptr(dig);
 }
 
 /*

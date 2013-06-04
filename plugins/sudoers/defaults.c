@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2011
+ * Copyright (c) 1999-2005, 2007-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -22,7 +22,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/param.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -422,6 +421,11 @@ init_defaults(void)
     def_env_reset = ENV_RESET;
     def_set_logname = true;
     def_closefrom = STDERR_FILENO + 1;
+#ifdef NO_PAM_SESSION
+    def_pam_session = false;
+#else
+    def_pam_session = true;
+#endif
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)
@@ -452,7 +456,7 @@ init_defaults(void)
 
     /* Now do the strings */
     def_mailto = estrdup(MAILTO);
-    def_mailsub = estrdup(_(MAILSUBJECT));
+    def_mailsub = estrdup(N_(MAILSUBJECT));
     def_badpass_message = estrdup(_(INCORRECT_PASSWORD));
     def_timestampdir = estrdup(_PATH_SUDO_TIMEDIR);
     def_passprompt = estrdup(_(PASSPROMPT));
@@ -500,10 +504,21 @@ update_defaults(int what)
 		    rc = false;
 		break;
 	    case DEFAULTS_USER:
+#if 1
+		if (ISSET(what, SETDEF_USER)) {
+		    int m;
+		    m = userlist_matches(sudo_user.pw, &def->binding);
+		    if (m == ALLOW) {
+			if (!set_default(def->var, def->val, def->op))
+			    rc = false;
+		    }
+		}
+#else
 		if (ISSET(what, SETDEF_USER) &&
 		    userlist_matches(sudo_user.pw, &def->binding) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
 		    rc = false;
+#endif
 		break;
 	    case DEFAULTS_RUNAS:
 		if (ISSET(what, SETDEF_RUNAS) &&

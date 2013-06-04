@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007, 2010
+ * Copyright (c) 1996, 1998-2005, 2007, 2010-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -19,8 +19,8 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#ifndef _SUDO_INTERFACES_H
-#define _SUDO_INTERFACES_H
+#ifndef _SUDOERS_INTERFACES_H
+#define _SUDOERS_INTERFACES_H
 
 /*
  * Union to hold either strucr in_addr or in6_add
@@ -48,12 +48,6 @@ struct interface {
 int get_net_ifs(char **addrinfo);
 void dump_interfaces(const char *);
 void set_interfaces(const char *);
+struct interface *get_interfaces(void);
 
-/*
- * Definitions for external variables.
- */
-#ifndef _SUDO_MAIN
-extern struct interface *interfaces;
-#endif
-
-#endif /* _SUDO_INTERFACES_H */
+#endif /* _SUDOERS_INTERFACES_H */

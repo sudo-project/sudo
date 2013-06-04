@@ -29,7 +29,9 @@
 
 #include <config.h>
 
-#include <sys/param.h>
+#ifndef HAVE_GETCWD
+
+#include <sys/types.h>
 #include <sys/stat.h>
 
 #include <errno.h>
@@ -262,3 +264,4 @@ err:
 		(void)closedir(dir);
 	return NULL;
 }
+#endif /* HAVE_GETCWD */

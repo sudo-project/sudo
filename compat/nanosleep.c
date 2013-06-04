@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2011, 2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,6 +15,8 @@
  */
 
 #include <config.h>
+
+#ifndef HAVE_NANOSLEEP
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -52,3 +54,4 @@ nanosleep(const struct timespec *ts, struct timespec *rts)
     }
     return rval;
 }
+#endif /* HAVE_NANOSLEEP */

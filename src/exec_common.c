@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/param.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -40,6 +39,7 @@
 # include <priv.h>
 #endif
 #include <errno.h>
+#include <fcntl.h>
 #include <signal.h>
 
 #include "sudo.h"
@@ -109,7 +109,7 @@ disable_execute(char *const envp[])
 	preload = fmt_string(RTLD_PRELOAD_VAR, sudo_conf_noexec_path());
 # endif
 	if (preload == NULL)
-	    errorx(1, _("unable to allocate memory"));
+	    fatalx(NULL);
 	nenvp[env_len++] = preload;
 	nenvp[env_len] = NULL;
     } else {

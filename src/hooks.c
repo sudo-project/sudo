@@ -77,7 +77,7 @@ process_hooks_setenv(const char *name, const char *value, int overwrite)
 	    case SUDO_HOOK_RET_STOP:
 		goto done;
 	    default:
-		warningx2("invalid setenv hook return value: %d", rc);
+		warningx_nodebug("invalid setenv hook return value: %d", rc);
 		break;
 	}
     }
@@ -102,7 +102,7 @@ process_hooks_putenv(char *string)
 	    case SUDO_HOOK_RET_STOP:
 		goto done;
 	    default:
-		warningx2("invalid putenv hook return value: %d", rc);
+		warningx_nodebug("invalid putenv hook return value: %d", rc);
 		break;
 	}
     }
@@ -128,7 +128,7 @@ process_hooks_getenv(const char *name, char **value)
 	    case SUDO_HOOK_RET_STOP:
 		goto done;
 	    default:
-		warningx2("invalid getenv hook return value: %d", rc);
+		warningx_nodebug("invalid getenv hook return value: %d", rc);
 		break;
 	}
     }
@@ -155,7 +155,7 @@ process_hooks_unsetenv(const char *name)
 	    case SUDO_HOOK_RET_STOP:
 		goto done;
 	    default:
-		warningx2("invalid unsetenv hook return value: %d", rc);
+		warningx_nodebug("invalid unsetenv hook return value: %d", rc);
 		break;
 	}
     }

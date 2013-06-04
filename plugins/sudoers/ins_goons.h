@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_INS_GOONS_H
-#define _SUDO_INS_GOONS_H
+#ifndef _SUDOERS_INS_GOONS_H
+#define _SUDOERS_INS_GOONS_H
 
     /*
      * Insults from the "Goon Show."
@@ -45,4 +45,4 @@
     "It's only your word against mine.",
     "I think ... err ... I think ... I think I'll go home",
 
-#endif /* _SUDO_INS_GOONS_H */
+#endif /* _SUDOERS_INS_GOONS_H */

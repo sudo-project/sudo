@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,7 +21,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
@@ -58,9 +57,6 @@
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#ifdef HAVE_SETLOCALE
-# include <locale.h>
-#endif
 #ifdef HAVE_LOGIN_CAP_H
 # include <login_cap.h>
 # ifndef LOGIN_SETENV
@@ -86,17 +82,11 @@
 # endif /* __hpux */
 # include <prot.h>
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
-#if defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined (HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV)
-# include <sys/sysctl.h>
-#elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
-# include <sys/sysctl.h>
-# include <sys/user.h>
-#endif
 
 #include "sudo.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
-#include <sudo_usage.h>
+#include "sudo_usage.h"
 
 /*
  * Local variables
@@ -105,6 +95,7 @@ struct plugin_container policy_plugin;
 struct plugin_container_list io_plugins;
 struct user_details user_details;
 const char *list_user, *runas_user, *runas_group; /* extern for parse_args.c */
+static struct command_details command_details;
 static int sudo_mode;
 
 /*
@@ -147,6 +138,8 @@ static struct rlimit corelimit;
 static struct rlimit nproclimit;
 #endif
 
+__dso_public int main(int argc, char *argv[], char *envp[]);
+
 int
 main(int argc, char *argv[], char *envp[])
 {
@@ -154,27 +147,18 @@ main(int argc, char *argv[], char *envp[])
     char **nargv, **settings, **env_add;
     char **user_info, **command_info, **argv_out, **user_env_out;
     struct plugin_container *plugin, *next;
-    struct command_details command_details;
     sigset_t mask;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
-#if defined(SUDO_DEVEL) && defined(__OpenBSD__)
-    {
-	extern char *malloc_options;
-	malloc_options = "AFGJPR";
-    }
-#endif
+    os_init(argc, argv, envp);
 
-#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
-    if (argc > 0)
-	setprogname(argv[0]);
-#endif
-
-#ifdef HAVE_SETLOCALE
     setlocale(LC_ALL, "");
-#endif
     bindtextdomain(PACKAGE_NAME, LOCALEDIR);
     textdomain(PACKAGE_NAME);
+
+#ifdef HAVE_TZSET
+    (void) tzset();
+#endif /* HAVE_TZSET */
 
     /* Must be done before we do any password lookups */
 #if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
@@ -194,7 +178,7 @@ main(int argc, char *argv[], char *envp[])
     fix_fds();
 
     /* Read sudo.conf. */
-    sudo_conf_read();
+    sudo_conf_read(NULL);
 
     /* Fill in user_info with user name, uid, cwd, etc. */
     memset(&user_details, 0, sizeof(user_details));
@@ -216,7 +200,7 @@ main(int argc, char *argv[], char *envp[])
 
     /* Load plugins. */
     if (!sudo_load_plugins(&policy_plugin, &io_plugins))
-	errorx(1, _("fatal error, unable to load plugins"));
+	fatalx(_("fatal error, unable to load plugins"));
 
     /* Open policy plugin. */
     ok = policy_open(&policy_plugin, settings, user_info, envp);
@@ -224,8 +208,10 @@ main(int argc, char *argv[], char *envp[])
 	if (ok == -2)
 	    usage(1);
 	else
-	    errorx(1, _("unable to initialize policy plugin"));
+	    fatalx(_("unable to initialize policy plugin"));
     }
+
+    init_signals();
 
     switch (sudo_mode & MODE_MASK) {
 	case MODE_VERSION:
@@ -233,7 +219,7 @@ main(int argc, char *argv[], char *envp[])
 	    tq_foreach_fwd(&io_plugins, plugin) {
 		ok = iolog_open(plugin, settings, user_info, NULL,
 		    nargc, nargv, envp);
-		if (ok == 1)
+		if (ok != -1)
 		    iolog_show_version(plugin, !user_details.uid);
 	    }
 	    break;
@@ -279,7 +265,7 @@ main(int argc, char *argv[], char *envp[])
 		    usage(1);
 		    break;
 		default:
-		    errorx(1, _("error initializing I/O plugin %s"),
+		    fatalx(_("error initializing I/O plugin %s"),
 			plugin->name);
 		}
 	    }
@@ -290,7 +276,8 @@ main(int argc, char *argv[], char *envp[])
 	    if (ISSET(sudo_mode, MODE_BACKGROUND))
 		SET(command_details.flags, CD_BACKGROUND);
 	    /* Become full root (not just setuid) so user cannot kill us. */
-	    (void) setuid(ROOT_UID);
+	    if (setuid(ROOT_UID) == -1)
+		warning("setuid(%d)", ROOT_UID);
 	    /* Restore coredumpsize resource limit before running. */
 #ifdef RLIMIT_CORE
 	    if (sudo_conf_disable_coredump())
@@ -304,10 +291,20 @@ main(int argc, char *argv[], char *envp[])
 	    /* The close method was called by sudo_edit/run_command. */
 	    break;
 	default:
-	    errorx(1, _("unexpected sudo mode 0x%x"), sudo_mode);
+	    fatalx(_("unexpected sudo mode 0x%x"), sudo_mode);
     }
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);                
     exit(exitcode);
+}
+
+int
+os_init_common(int argc, char *argv[], char *envp[])
+{
+#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
+    if (argc > 0)
+	setprogname(argv[0]);
+#endif
+    return 0;
 }
 
 /*
@@ -329,13 +326,13 @@ fix_fds(void)
     miss[STDERR_FILENO] = fcntl(STDERR_FILENO, F_GETFL, 0) == -1;
     if (miss[STDIN_FILENO] || miss[STDOUT_FILENO] || miss[STDERR_FILENO]) {
 	if ((devnull = open(_PATH_DEVNULL, O_RDWR, 0644)) == -1)
-	    error(1, _("unable to open %s"), _PATH_DEVNULL);
+	    fatal(_("unable to open %s"), _PATH_DEVNULL);
 	if (miss[STDIN_FILENO] && dup2(devnull, STDIN_FILENO) == -1)
-	    error(1, "dup2");
+	    fatal("dup2");
 	if (miss[STDOUT_FILENO] && dup2(devnull, STDOUT_FILENO) == -1)
-	    error(1, "dup2");
+	    fatal("dup2");
 	if (miss[STDERR_FILENO] && dup2(devnull, STDERR_FILENO) == -1)
-	    error(1, "dup2");
+	    fatal("dup2");
 	if (devnull > STDERR_FILENO)
 	    close(devnull);
     }
@@ -344,32 +341,38 @@ fix_fds(void)
 
 /*
  * Allocate space for groups and fill in using getgrouplist()
- * for when we cannot use getgroups().
+ * for when we cannot (or don't want to) use getgroups().
  */
 static int
-fill_group_list(struct user_details *ud)
+fill_group_list(struct user_details *ud, int system_maxgroups)
 {
-    int maxgroups, tries, rval = -1;
+    int tries, rval = -1;
     debug_decl(fill_group_list, SUDO_DEBUG_UTIL)
 
-#if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
-    maxgroups = (int)sysconf(_SC_NGROUPS_MAX);
-    if (maxgroups < 0)
-#endif
-	maxgroups = NGROUPS_MAX;
-
     /*
-     * It is possible to belong to more groups in the group database
-     * than NGROUPS_MAX.  We start off with NGROUPS_MAX * 2 entries
-     * and double this as needed.
+     * If user specified a max number of groups, use it, otherwise keep
+     * trying getgrouplist() until we have enough room in the array.
      */
-    ud->groups = NULL;
-    ud->ngroups = maxgroups;
-    for (tries = 0; tries < 10 && rval == -1; tries++) {
-	ud->ngroups *= 2;
-	efree(ud->groups);
+    ud->ngroups = sudo_conf_max_groups();
+    if (ud->ngroups != -1) {
 	ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
-	rval = getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
+	/* No error on insufficient space if user specified max_groups. */
+	(void)getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
+	rval = 0;
+    } else {
+	/*
+	 * It is possible to belong to more groups in the group database
+	 * than NGROUPS_MAX.  We start off with NGROUPS_MAX * 4 entries
+	 * and double this as needed.
+	 */
+	ud->groups = NULL;
+	ud->ngroups = system_maxgroups << 1;
+	for (tries = 0; tries < 10 && rval == -1; tries++) {
+	    ud->ngroups <<= 1;
+	    efree(ud->groups);
+	    ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
+	    rval = getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
+	}
     }
     debug_return_int(rval);
 }
@@ -379,26 +382,36 @@ get_user_groups(struct user_details *ud)
 {
     char *cp, *gid_list = NULL;
     size_t glsize;
-    int i, len;
+    int i, len, maxgroups, group_source;
     debug_decl(get_user_groups, SUDO_DEBUG_UTIL)
 
-    /*
-     * Systems with mbr_check_membership() support more than NGROUPS_MAX
-     * groups so we cannot use getgroups().
-     */
+#if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
+    maxgroups = (int)sysconf(_SC_NGROUPS_MAX);
+    if (maxgroups < 0)
+#endif
+	maxgroups = NGROUPS_MAX;
+
     ud->groups = NULL;
-#ifndef HAVE_MBR_CHECK_MEMBERSHIP
-    if ((ud->ngroups = getgroups(0, NULL)) > 0) {
-	ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
-	if (getgroups(ud->ngroups, ud->groups) < 0) {
-	    efree(ud->groups);
-	    ud->groups = NULL;
+    group_source = sudo_conf_group_source();
+    if (group_source != GROUP_SOURCE_DYNAMIC) {
+	if ((ud->ngroups = getgroups(0, NULL)) > 0) {
+	    /* Use groups from kernel if not too many or source is static. */
+	    if (ud->ngroups < maxgroups || group_source == GROUP_SOURCE_STATIC) {
+		ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
+		if (getgroups(ud->ngroups, ud->groups) < 0) {
+		    efree(ud->groups);
+		    ud->groups = NULL;
+		}
+	    }
 	}
     }
-#endif /* HAVE_MBR_CHECK_MEMBERSHIP */
     if (ud->groups == NULL) {
-	if (fill_group_list(ud) == -1)
-	    error(1, _("unable to get group vector"));
+	/*
+	 * Query group database if kernel list is too small or disabled.
+	 * Typically, this is because NFS can only support up to 16 groups.
+	 */
+	if (fill_group_list(ud, maxgroups) == -1)
+	    fatal(_("unable to get group vector"));
     }
 
     /*
@@ -424,7 +437,7 @@ get_user_groups(struct user_details *ud)
 static char **
 get_user_info(struct user_details *ud)
 {
-    char *cp, **user_info, cwd[PATH_MAX], host[MAXHOSTNAMELEN];
+    char *cp, **user_info, cwd[PATH_MAX], host[HOST_NAME_MAX + 1];
     struct passwd *pw;
     int fd, i = 0;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL)
@@ -450,11 +463,11 @@ get_user_info(struct user_details *ud)
 
     pw = getpwuid(ud->uid);
     if (pw == NULL)
-	errorx(1, _("unknown uid %u: who are you?"), (unsigned int)ud->uid);
+	fatalx(_("unknown uid %u: who are you?"), (unsigned int)ud->uid);
 
     user_info[i] = fmt_string("user", pw->pw_name);
     if (user_info[i] == NULL)
-	errorx(1, _("unable to allocate memory"));
+	fatalx(NULL);
     ud->username = user_info[i] + sizeof("user=") - 1;
 
     /* Stash user's shell for use with the -s flag; don't pass to plugin. */
@@ -480,14 +493,14 @@ get_user_info(struct user_details *ud)
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
 	user_info[++i] = fmt_string("cwd", cwd);
 	if (user_info[i] == NULL)
-	    errorx(1, _("unable to allocate memory"));
+	    fatalx(NULL);
 	ud->cwd = user_info[i] + sizeof("cwd=") - 1;
     }
 
     if ((cp = get_process_ttyname()) != NULL) {
 	user_info[++i] = fmt_string("tty", cp);
 	if (user_info[i] == NULL)
-	    errorx(1, _("unable to allocate memory"));
+	    fatalx(NULL);
 	ud->tty = user_info[i] + sizeof("tty=") - 1;
 	efree(cp);
     }
@@ -498,7 +511,7 @@ get_user_info(struct user_details *ud)
 	strlcpy(host, "localhost", sizeof(host));
     user_info[++i] = fmt_string("host", host);
     if (user_info[i] == NULL)
-	errorx(1, _("unable to allocate memory"));
+	fatalx(NULL);
     ud->host = user_info[i] + sizeof("host=") - 1;
 
     get_ttysize(&ud->ts_lines, &ud->ts_cols);
@@ -551,6 +564,13 @@ command_info_to_details(char * const info[], struct command_details *details)
 			lval < INT_MAX && lval > INT_MIN) {
 			details->closefrom = (int)lval;
 		    }
+		    break;
+		}
+		break;
+	    case 'e':
+		if (strncmp("exec_background=", info[i], sizeof("exec_background=") - 1) == 0) {
+		    if (atobool(info[i] + sizeof("exec_background=") - 1) == true)
+			SET(details->flags, CD_EXEC_BG);
 		    break;
 		}
 		break;
@@ -757,7 +777,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 #endif
     details->pw = getpwuid(details->euid);
     if (details->pw != NULL && (details->pw = pw_dup(details->pw)) == NULL)
-	errorx(1, _("unable to allocate memory"));
+	fatalx(NULL);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -779,16 +799,16 @@ sudo_check_suid(const char *path)
 	if (strchr(path, '/') != NULL && stat(path, &sb) == 0) {
 	    /* Try to determine why sudo was not running as root. */
 	    if (sb.st_uid != ROOT_UID || !ISSET(sb.st_mode, S_ISUID)) {
-		errorx(1,
+		fatalx(
 		    _("%s must be owned by uid %d and have the setuid bit set"),
 		    path, ROOT_UID);
 	    } else {
-		errorx(1, _("effective uid is not %d, is %s on a file system "
+		fatalx(_("effective uid is not %d, is %s on a file system "
 		    "with the 'nosuid' option set or an NFS file system without"
 		    " root privileges?"), ROOT_UID, path);
 	    }
 	} else {
-	    errorx(1,
+	    fatalx(
 		_("effective uid is not %d, is sudo installed setuid root?"),
 		ROOT_UID);
 	}
@@ -837,70 +857,6 @@ disable_coredumps(void)
     debug_return;
 }
 
-#ifdef HAVE_PROJECT_H
-static void
-set_project(struct passwd *pw)
-{
-    struct project proj;
-    char buf[PROJECT_BUFSZ];
-    int errval;
-    debug_decl(set_project, SUDO_DEBUG_UTIL)
-
-    /*
-     * Collect the default project for the user and settaskid
-     */
-    setprojent();
-    if (getdefaultproj(pw->pw_name, &proj, buf, sizeof(buf)) != NULL) {
-	errval = setproject(proj.pj_name, pw->pw_name, TASK_NORMAL);
-	switch(errval) {
-	case 0:
-	    break;
-	case SETPROJ_ERR_TASK:
-	    switch (errno) {
-	    case EAGAIN:
-		warningx(_("resource control limit has been reached"));
-		break;
-	    case ESRCH:
-		warningx(_("user \"%s\" is not a member of project \"%s\""),
-		    pw->pw_name, proj.pj_name);
-		break;
-	    case EACCES:
-		warningx(_("the invoking task is final"));
-		break;
-	    default:
-		warningx(_("could not join project \"%s\""), proj.pj_name);
-	    }
-	case SETPROJ_ERR_POOL:
-	    switch (errno) {
-	    case EACCES:
-		warningx(_("no resource pool accepting default bindings "
-		    "exists for project \"%s\""), proj.pj_name);
-		break;
-	    case ESRCH:
-		warningx(_("specified resource pool does not exist for "
-		    "project \"%s\""), proj.pj_name);
-		break;
-	    default:
-		warningx(_("could not bind to default resource pool for "
-		    "project \"%s\""), proj.pj_name);
-	    }
-	    break;
-	default:
-	    if (errval <= 0) {
-		warningx(_("setproject failed for project \"%s\""), proj.pj_name);
-	    } else {
-		warningx(_("warning, resource control assignment failed for "
-		    "project \"%s\""), proj.pj_name);
-	    }
-	}
-    } else {
-	warning("getdefaultproj");
-    }
-    endprojent();
-    debug_return;
-}
-#endif /* HAVE_PROJECT_H */
-
 /*
  * Setup the execution environment immediately prior to the call to execve()
  * Returns true on success and false on failure.
@@ -924,23 +880,23 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	set_project(details->pw);
 #endif
 #ifdef HAVE_PRIV_SET
-    if (details->privs != NULL) {
-	if (setppriv(PRIV_SET, PRIV_INHERITABLE, details->privs) != 0) {
-	    warning("unable to set privileges");
-	    goto done;
+	if (details->privs != NULL) {
+	    if (setppriv(PRIV_SET, PRIV_INHERITABLE, details->privs) != 0) {
+		warning("unable to set privileges");
+		goto done;
+	    }
 	}
-    }
-    if (details->limitprivs != NULL) {
-        if (setppriv(PRIV_SET, PRIV_LIMIT, details->limitprivs) != 0) {
-	    warning("unable to set limit privileges");
-	    goto done;
+	if (details->limitprivs != NULL) {
+	    if (setppriv(PRIV_SET, PRIV_LIMIT, details->limitprivs) != 0) {
+		warning("unable to set limit privileges");
+		goto done;
+	    }
+	} else if (details->privs != NULL) {
+	    if (setppriv(PRIV_SET, PRIV_LIMIT, details->privs) != 0) {
+		warning("unable to set limit privileges");
+		goto done;
+	    }
 	}
-    } else if (details->privs != NULL) {
-	if (setppriv(PRIV_SET, PRIV_LIMIT, details->privs) != 0) {
-	    warning("unable to set limit privileges");
-	    goto done;
-	}
-    }
 #endif /* HAVE_PRIV_SET */
 
 #ifdef HAVE_GETUSERATTR
@@ -1165,7 +1121,10 @@ static void
 policy_close(struct plugin_container *plugin, int exit_status, int error)
 {
     debug_decl(policy_close, SUDO_DEBUG_PCOMM)
-    plugin->u.policy->close(exit_status, error);
+    if (plugin->u.policy->close != NULL)
+	plugin->u.policy->close(exit_status, error);
+    else
+	warning(_("unable to execute %s"), command_details.command);
     debug_return;
 }
 
@@ -1173,6 +1132,8 @@ static int
 policy_show_version(struct plugin_container *plugin, int verbose)
 {
     debug_decl(policy_show_version, SUDO_DEBUG_PCOMM)
+    if (plugin->u.policy->show_version == NULL)
+	debug_return_bool(true);
     debug_return_bool(plugin->u.policy->show_version(verbose));
 }
 
@@ -1182,6 +1143,10 @@ policy_check(struct plugin_container *plugin, int argc, char * const argv[],
     char **user_env_out[])
 {
     debug_decl(policy_check, SUDO_DEBUG_PCOMM)
+    if (plugin->u.policy->check_policy == NULL) {
+	fatalx(_("policy plugin %s is missing the `check_policy' method"),
+	    plugin->name);
+    }
     debug_return_bool(plugin->u.policy->check_policy(argc, argv, env_add,
 	command_info, argv_out, user_env_out));
 }
@@ -1216,7 +1181,7 @@ policy_invalidate(struct plugin_container *plugin, int remove)
 {
     debug_decl(policy_invalidate, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->invalidate == NULL) {
-	errorx(1, _("policy plugin %s does not support the -k/-K options"),
+	fatalx(_("policy plugin %s does not support the -k/-K options"),
 	    plugin->name);
     }
     plugin->u.policy->invalidate(remove);
@@ -1280,7 +1245,8 @@ static void
 iolog_close(struct plugin_container *plugin, int exit_status, int error)
 {
     debug_decl(iolog_close, SUDO_DEBUG_PCOMM)
-    plugin->u.io->close(exit_status, error);
+    if (plugin->u.io->close != NULL)
+	plugin->u.io->close(exit_status, error);
     debug_return;
 }
 
@@ -1288,6 +1254,8 @@ static int
 iolog_show_version(struct plugin_container *plugin, int verbose)
 {
     debug_decl(iolog_show_version, SUDO_DEBUG_PCOMM)
+    if (plugin->u.io->show_version == NULL)
+	debug_return_bool(true);
     debug_return_bool(plugin->u.io->show_version(verbose));
 }
 

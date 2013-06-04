@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 2011-2013 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -118,10 +118,10 @@ install-includes:
 install-doc:
 
 install-plugin: install-dirs sample_plugin.la
-	$(INSTALL) -b~ -m $(shlib_mode) .libs/sample_plugin$(soext) $(DESTDIR)$(plugindir)
+	$(INSTALL) -b~ -m $(shlib_mode) .libs/sample_plugin$(soext) $(DESTDIR)$(plugindir)/sample_plugin.so
 
 uninstall:
-	-rm -f $(DESTDIR)$(plugindir)/sample_plugin$(soext)
+	-rm -f $(DESTDIR)$(plugindir)/sample_plugin.so
 
 check:
 

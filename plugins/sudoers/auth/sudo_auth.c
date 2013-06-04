@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2008-2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2008-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,7 +21,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/param.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -117,9 +116,9 @@ sudo_auth_init(struct passwd *pw)
     /* Make sure we haven't mixed standalone and shared auth methods. */
     standalone = IS_STANDALONE(&auth_switch[0]);
     if (standalone && auth_switch[1].name != NULL) {
-	audit_failure(NewArgv, "invalid authentication methods");
-    	log_fatal(0, _("Invalid authentication methods compiled into sudo!  "
-	    "You may mix standalone and non-standalone authentication."));
+	audit_failure(NewArgv, N_("invalid authentication methods"));
+    	log_fatal(0, N_("Invalid authentication methods compiled into sudo!  "
+	    "You may not mix standalone and non-standalone authentication."));
 	debug_return_int(-1);
     }
 
@@ -201,9 +200,9 @@ verify_user(struct passwd *pw, char *prompt, int validated)
     /* Make sure we have at least one auth method. */
     /* XXX - check FLAG_DISABLED too */
     if (auth_switch[0].name == NULL) {
-	audit_failure(NewArgv, "no authentication methods");
-    	log_error(0,
-	    _("There are no authentication methods compiled into sudo!  "
+	audit_failure(NewArgv, N_("no authentication methods"));
+    	log_warning(0,
+	    N_("There are no authentication methods compiled into sudo!  "
 	    "If you want to turn off authentication, use the "
 	    "--disable-authentication configure option."));
 	debug_return_int(-1);
@@ -291,7 +290,7 @@ sudo_auth_begin_session(struct passwd *pw, char **user_env[])
 {
     sudo_auth *auth;
     int status = AUTH_SUCCESS;
-    debug_decl(auth_begin_session, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_auth_begin_session, SUDO_DEBUG_AUTH)
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->begin_session && !IS_DISABLED(auth)) {
@@ -303,6 +302,22 @@ sudo_auth_begin_session(struct passwd *pw, char **user_env[])
     debug_return_int(status == AUTH_FATAL ? -1 : 1);
 }
 
+bool
+sudo_auth_needs_end_session(void)
+{
+    sudo_auth *auth;
+    bool needed = false;
+    debug_decl(sudo_auth_needs_end_session, SUDO_DEBUG_AUTH)
+
+    for (auth = auth_switch; auth->name; auth++) {
+	if (auth->end_session && !IS_DISABLED(auth)) {
+	    needed = true;
+	    break;
+	}
+    }
+    debug_return_bool(needed);
+}
+
 /*
  * Call authentication method end session hooks.
  * Returns 1 on success and -1 on error.
@@ -312,7 +327,7 @@ sudo_auth_end_session(struct passwd *pw)
 {
     sudo_auth *auth;
     int status = AUTH_SUCCESS;
-    debug_decl(auth_end_session, SUDO_DEBUG_AUTH)
+    debug_decl(sudo_auth_end_session, SUDO_DEBUG_AUTH)
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->end_session && !IS_DISABLED(auth)) {

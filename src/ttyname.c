@@ -23,7 +23,6 @@
 #endif
 
 #include <sys/types.h>
-#include <sys/param.h>
 #include <sys/stat.h>
 #if defined(MAJOR_IN_MKDEV)
 # include <sys/mkdev.h>
@@ -71,8 +70,10 @@
 # endif
 #endif
 #if defined(HAVE_STRUCT_KINFO_PROC_P_TDEV) || defined (HAVE_STRUCT_KINFO_PROC_KP_EPROC_E_TDEV) || defined(HAVE_STRUCT_KINFO_PROC2_P_TDEV)
+# include <sys/param.h>
 # include <sys/sysctl.h>
 #elif defined(HAVE_STRUCT_KINFO_PROC_KI_TDEV)
+# include <sys/param.h>
 # include <sys/sysctl.h>
 # include <sys/user.h>
 #endif
@@ -80,6 +81,10 @@
 # include <procfs.h>
 #elif defined(HAVE_SYS_PROCFS_H)
 # include <sys/procfs.h>
+#endif
+#ifdef HAVE_PSTAT_GETPROC
+# include <sys/param.h>
+# include <sys/pstat.h>
 #endif
 
 #include "sudo.h"
@@ -155,7 +160,7 @@ sudo_ttyname_dev(dev_t tdev)
 
     debug_return_str(estrdup(tty));
 }
-#else
+#elif defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || defined(HAVE_PSTAT_GETPROC) || defined(__linux__)
 /*
  * Devices to search before doing a breadth-first scan.
  */
@@ -193,6 +198,9 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 
     if (dir[0] == '\0' || (d = opendir(dir)) == NULL)
 	goto done;
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "scanning for dev %u in %s",
+	(unsigned int)rdev, dir);
 
     sdlen = strlen(dir);
     if (dir[sdlen - 1] == '/')
@@ -239,9 +247,12 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 		continue;
 	}
 # if defined(HAVE_STRUCT_DIRENT_D_TYPE) && defined(DTTOIF)
-	/* Use d_type to avoid a stat() if possible. */
-	/* Convert d_type to stat-style type bits but follow links. */
-	if (dp->d_type != DT_LNK && dp->d_type != DT_CHR)
+	/*
+	 * Convert dp->d_type to sb.st_mode to avoid a stat(2) if possible.
+	 * We can't use it for links (since we want to follow them) or
+	 * char devs (since we need st_rdev to compare the device number).
+	 */
+	if (dp->d_type != DT_UNKNOWN && dp->d_type != DT_LNK && dp->d_type != DT_CHR)
 	    sb.st_mode = DTTOIF(dp->d_type);
 	else
 # endif
@@ -260,6 +271,8 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
 	}
 	if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev) {
 	    devname = estrdup(pathbuf);
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "resolved dev %u as %s",
+		(unsigned int)rdev, pathbuf);
 	    goto done;
 	}
     }
@@ -304,6 +317,8 @@ sudo_ttyname_dev(dev_t rdev)
 		    if (S_ISCHR(sb.st_mode) && sb.st_rdev == rdev)
 			tty = estrdup(buf);
 		}
+		sudo_debug_printf(SUDO_DEBUG_INFO, "comparing dev %u to %s: %s",
+		    (unsigned int)rdev, buf, tty ? "yes" : "no");
 	    } else {
 		/* Traverse directory */
 		tty = sudo_ttyname_scan(devname, rdev, true);
@@ -329,9 +344,7 @@ sudo_ttyname_dev(dev_t rdev)
 #if defined(sudo_kp_tdev)
 /*
  * Return a string from ttyname() containing the tty to which the process is
- * attached or NULL if there is no tty associated with the process (or its
- * parent).  First tries sysctl using the current pid, then the parent's pid.
- * Falls back on ttyname of std{in,out,err} if that fails.
+ * attached or NULL if the process has no controlling tty.
  */
 char *
 get_process_ttyname(void)
@@ -339,38 +352,36 @@ get_process_ttyname(void)
     char *tty = NULL;
     struct sudo_kinfo_proc *ki_proc = NULL;
     size_t size = sizeof(*ki_proc);
-    int i, mib[6], rc;
+    int mib[6], rc;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
 
     /*
-     * Lookup tty for this process and, failing that, our parent.
-     * Even if we redirect std{in,out,err} the kernel should still know.
+     * Lookup controlling tty for this process via sysctl.
+     * This will work even if std{in,out,err} are redirected.
      */
-    for (i = 0; tty == NULL && i < 2; i++) {
-	mib[0] = CTL_KERN;
-	mib[1] = SUDO_KERN_PROC;
-	mib[2] = KERN_PROC_PID;
-	mib[3] = i ? (int)getppid() : (int)getpid();
-	mib[4] = sizeof(*ki_proc);
-	mib[5] = 1;
-	do {
-	    size += size / 10;
-	    ki_proc = erealloc(ki_proc, size);
-	    rc = sysctl(mib, sudo_kp_namelen, ki_proc, &size, NULL, 0);
-	} while (rc == -1 && errno == ENOMEM);
-	if (rc != -1) {
-	    if (ki_proc->sudo_kp_tdev != (dev_t)-1) {
-		tty = sudo_ttyname_dev(ki_proc->sudo_kp_tdev);
-		if (tty == NULL) {
-		    sudo_debug_printf(SUDO_DEBUG_WARN,
-			"unable to map device number %u to name",
-			ki_proc->sudo_kp_tdev);
-		}
+    mib[0] = CTL_KERN;
+    mib[1] = SUDO_KERN_PROC;
+    mib[2] = KERN_PROC_PID;
+    mib[3] = (int)getpid();
+    mib[4] = sizeof(*ki_proc);
+    mib[5] = 1;
+    do {
+	size += size / 10;
+	ki_proc = erealloc(ki_proc, size);
+	rc = sysctl(mib, sudo_kp_namelen, ki_proc, &size, NULL, 0);
+    } while (rc == -1 && errno == ENOMEM);
+    if (rc != -1) {
+	if (ki_proc->sudo_kp_tdev != (dev_t)-1) {
+	    tty = sudo_ttyname_dev(ki_proc->sudo_kp_tdev);
+	    if (tty == NULL) {
+		sudo_debug_printf(SUDO_DEBUG_WARN,
+		    "unable to map device number %u to name",
+		    ki_proc->sudo_kp_tdev);
 	    }
-	} else {
-	    sudo_debug_printf(SUDO_DEBUG_WARN,
-		"unable to resolve tty via KERN_PROC: %s", strerror(errno));
 	}
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_WARN,
+	    "unable to resolve tty via KERN_PROC: %s", strerror(errno));
     }
     efree(ki_proc);
 
@@ -379,9 +390,7 @@ get_process_ttyname(void)
 #elif defined(HAVE_STRUCT_PSINFO_PR_TTYDEV)
 /*
  * Return a string from ttyname() containing the tty to which the process is
- * attached or NULL if there is no tty associated with the process (or its
- * parent).  First tries /proc/pid/psinfo, then /proc/ppid/psinfo.
- * Falls back on ttyname of std{in,out,err} if that fails.
+ * attached or NULL if the process has no controlling tty.
  */
 char *
 get_process_ttyname(void)
@@ -389,20 +398,17 @@ get_process_ttyname(void)
     char path[PATH_MAX], *tty = NULL;
     struct psinfo psinfo;
     ssize_t nread;
-    int i, fd;
+    int fd;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
 
     /* Try to determine the tty from pr_ttydev in /proc/pid/psinfo. */
-    for (i = 0; tty == NULL && i < 2; i++) {
-	(void)snprintf(path, sizeof(path), "/proc/%u/psinfo",
-	    i ? (unsigned int)getppid() : (unsigned int)getpid());
-	if ((fd = open(path, O_RDONLY, 0)) == -1)
-	    continue;
+    snprintf(path, sizeof(path), "/proc/%u/psinfo", (unsigned int)getpid());
+    if ((fd = open(path, O_RDONLY, 0)) != -1) {
 	nread = read(fd, &psinfo, sizeof(psinfo));
 	close(fd);
 	if (nread == (ssize_t)sizeof(psinfo)) {
 	    dev_t rdev = (dev_t)psinfo.pr_ttydev;
-#ifdef DEVNO64
+#if defined(_AIX) && defined(DEVNO64)
 	    if (psinfo.pr_ttydev & DEVNO64)
 		rdev = makedev(major64(psinfo.pr_ttydev), minor64(psinfo.pr_ttydev));
 #endif
@@ -416,27 +422,20 @@ get_process_ttyname(void)
 #elif defined(__linux__)
 /*
  * Return a string from ttyname() containing the tty to which the process is
- * attached or NULL if there is no tty associated with the process (or its
- * parent).  First tries field 7 in /proc/pid/stat, then /proc/ppid/stat.
- * Falls back on ttyname of std{in,out,err} if that fails.
+ * attached or NULL if the process has no controlling tty.
  */
 char *
 get_process_ttyname(void)
 {
-    char *line = NULL, *tty = NULL;
+    char path[PATH_MAX], *line = NULL, *tty = NULL;
     size_t linesize = 0;
     ssize_t len;
-    int i;
+    FILE *fp;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
 
     /* Try to determine the tty from tty_nr in /proc/pid/stat. */
-    for (i = 0; tty == NULL && i < 2; i++) {
-	FILE *fp;
-	char path[PATH_MAX];
-	(void)snprintf(path, sizeof(path), "/proc/%u/stat",
-	    i ? (unsigned int)getppid() : (unsigned int)getpid());
-	if ((fp = fopen(path, "r")) == NULL)
-	    continue;
+    snprintf(path, sizeof(path), "/proc/%u/stat", (unsigned int)getpid());
+    if ((fp = fopen(path, "r")) != NULL) {
 	len = getline(&line, &linesize, fp);
 	fclose(fp);
 	if (len != -1) {
@@ -454,16 +453,36 @@ get_process_ttyname(void)
 		}
 	    }
 	}
+	efree(line);
     }
-    efree(line);
 
+    debug_return_str(tty);
+}
+#elif HAVE_PSTAT_GETPROC
+/*
+ * Return a string from ttyname() containing the tty to which the process is
+ * attached or NULL if the process has no controlling tty.
+ */
+char *
+get_process_ttyname(void)
+{
+    struct pst_status pstat;
+    char *tty = NULL;
+    debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
+
+    /* Try to determine the tty from psdev in struct pst_status. */
+    if (pstat_getproc(&pstat, sizeof(pstat), 0, (int)getpid()) != -1) {
+	if (pstat.pst_term.psd_major != -1 && pstat.pst_term.psd_minor != -1) {
+	    tty = sudo_ttyname_dev(makedev(pstat.pst_term.psd_major,
+		pstat.pst_term.psd_minor));
+	}
+    }
     debug_return_str(tty);
 }
 #else
 /*
  * Return a string from ttyname() containing the tty to which the process is
- * attached or NULL if there is no tty associated with the process.
- * parent).
+ * attached or NULL if the process has no controlling tty.
  */
 char *
 get_process_ttyname(void)

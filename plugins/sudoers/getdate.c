@@ -654,9 +654,8 @@ Convert(Month, Day, Year, Hours, Minutes, Seconds, Meridian, DSTmode)
     }
     DaysInMonth[1] = Year % 4 == 0 && (Year % 100 != 0 || Year % 400 == 0)
 		    ? 29 : 28;
-    /* Checking for 2038 bogusly assumes that time_t is 32 bits.  But
-       I'm too lazy to try to check for time_t overflow in another way.  */
-    if (Year < EPOCH || Year > 2038
+    /* 32-bit time_t cannot represent years past 2038 */
+    if (Year < EPOCH || (sizeof(time_t) == sizeof(int) && Year > 2038)
      || Month < 1 || Month > 12
      /* Lint fluff:  "conversion from long may lose accuracy" */
      || Day < 1 || Day > DaysInMonth[(int)--Month])
@@ -1028,7 +1027,7 @@ main(ac, av)
     /* NOTREACHED */
 }
 #endif	/* defined(TEST) */
-#line 979 "getdate.c"
+#line 978 "getdate.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1040,28 +1039,25 @@ static int yygrowstack()
     short *newss;
     YYSTYPE *newvs;
 
-    if ((newsize = yystacksize) == 0)
-        newsize = YYINITSTACKSIZE;
-    else if (newsize >= YYMAXDEPTH)
+    newsize = yystacksize ? yystacksize : YYINITSTACKSIZE;
+    if (newsize >= YYMAXDEPTH)
         return -1;
     else if ((newsize *= 2) > YYMAXDEPTH)
         newsize = YYMAXDEPTH;
-    i = yyssp - yyss;
 #ifdef SIZE_MAX
 #define YY_SIZE_MAX SIZE_MAX
 #else
 #define YY_SIZE_MAX 0x7fffffff
 #endif
-    if (!newsize || YY_SIZE_MAX / newsize < sizeof *newss)
+    if (YY_SIZE_MAX / newsize < sizeof *newss)
         goto bail;
+    i = yyssp - yyss;
     newss = yyss ? (short *)realloc(yyss, newsize * sizeof *newss) :
       (short *)malloc(newsize * sizeof *newss); /* overflow check above */
     if (newss == NULL)
         goto bail;
     yyss = newss;
     yyssp = newss + i;
-    if (!newsize || YY_SIZE_MAX / newsize < sizeof *newvs)
-        goto bail;
     newvs = yyvs ? (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs) :
       (YYSTYPE *)malloc(newsize * sizeof *newvs); /* overflow check above */
     if (newvs == NULL)
@@ -1523,7 +1519,7 @@ case 41:
 	    yyval.Meridian = yyvsp[0].Meridian;
 	}
 break;
-#line 1474 "getdate.c"
+#line 1470 "getdate.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

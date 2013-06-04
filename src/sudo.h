@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2005, 2007-2012
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -17,8 +17,6 @@
  * Sponsored in part by the Defense Advanced Research Projects
  * Agency (DARPA) and Air Force Research Laboratory, Air Force
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
- *
- * $Sudo: sudo.h,v 1.290 2009/12/12 16:12:26 millert Exp $
  */
 
 #ifndef _SUDO_SUDO_H
@@ -46,9 +44,9 @@
 #endif
 
 #ifdef __TANDEM
-# define ROOT_UID       65535
+# define ROOT_UID	65535
 #else
-# define ROOT_UID       0
+# define ROOT_UID	0
 #endif
 
 /*
@@ -130,6 +128,7 @@ struct user_details {
 #define CD_RBAC_ENABLED		0x0800
 #define CD_USE_PTY		0x1000
 #define CD_SET_UTMP		0x2000
+#define CD_EXEC_BG		0x4000
 
 struct command_details {
     uid_t uid;
@@ -172,7 +171,7 @@ struct command_status {
 
 struct timeval;
 
-/* For error() and errorx() (XXX - needed?) */
+/* For fatal() and fatalx() (XXX - needed?) */
 void cleanup(int);
 
 /* tgetpass.c */
@@ -183,9 +182,8 @@ int tty_present(void);
 void zero_bytes(volatile void *, size_t);
 
 /* exec.c */
+int pipe_nonblock(int fds[2]);
 int sudo_execute(struct command_details *details, struct command_status *cstat);
-void save_signals(void);
-void restore_signals(void);
 
 /* term.c */
 int term_cbreak(int);
@@ -215,6 +213,7 @@ void get_ttysize(int *rowp, int *colp);
 bool exec_setup(struct command_details *details, const char *ptyname, int ptyfd);
 int policy_init_session(struct command_details *details);
 int run_command(struct command_details *details);
+int os_init_common(int argc, char *argv[], char *envp[]);
 extern const char *list_user, *runas_user, *runas_group;
 extern struct user_details user_details;
 
@@ -224,12 +223,19 @@ int sudo_edit(struct command_details *details);
 /* parse_args.c */
 void usage(int);
 
+/* openbsd.c */
+int os_init_openbsd(int argc, char *argv[], char *envp[]);
+
 /* selinux.c */
 int selinux_restore_tty(void);
 int selinux_setup(const char *role, const char *type, const char *ttyn,
     int ttyfd);
 void selinux_execve(const char *path, char *const argv[], char *const envp[],
     int noexec);
+
+/* solaris.c */
+void set_project(struct passwd *);
+int os_init_solaris(int argc, char *argv[], char *envp[]);
 
 /* aix.c */
 void aix_prep_user(char *user, const char *tty);
@@ -257,5 +263,13 @@ int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
 
 /* ttyname.c */
 char *get_process_ttyname(void);
+
+/* signal.c */
+struct sigaction;
+extern int signal_pipe[2];
+int sudo_sigaction(int signo, struct sigaction *sa, struct sigaction *osa);
+void init_signals(void);
+void restore_signals(void);
+void save_signals(void);
 
 #endif /* _SUDO_SUDO_H */

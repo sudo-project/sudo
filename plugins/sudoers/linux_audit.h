@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010, 2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,9 +14,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_LINUX_AUDIT_H
-#define	_SUDO_LINUX_AUDIT_H
+#ifndef _SUDOERS_LINUX_AUDIT_H
+#define	_SUDOERS_LINUX_AUDIT_H
 
 int	linux_audit_command(char *argv[], int result);
 
-#endif /* _SUDO_LINUX_AUDIT_H */
+#endif /* _SUDOERS_LINUX_AUDIT_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -42,9 +42,9 @@
 #include "error.h"
 #include "sudo_plugin.h"
 
-sudo_conv_t sudo_conv;		/* NULL in non-plugin */
-
 extern void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
+
+__dso_public int main(int argc, char *argv[]);
 
 static void
 usage(void)
@@ -70,7 +70,7 @@ main(int argc, char *argv[])
 
     fp = fopen(argv[1], "r");
     if (fp == NULL)
-	errorx(1, "unable to open %s", argv[1]);
+	fatalx("unable to open %s", argv[1]);
 
     /*
      * Each test record consists of a log entry on one line and a list of
@@ -103,10 +103,4 @@ main(int argc, char *argv[])
     }
 
     exit(0);
-}
-
-void
-cleanup(int gotsig)
-{
-    return;
 }

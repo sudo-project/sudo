@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2000, 2002, 2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2000, 2002, 2012-2013
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +20,8 @@
  */
 
 #include <config.h>
+
+#ifndef HAVE_PW_DUP
 
 #include <sys/types.h>
 
@@ -102,3 +105,4 @@ pw_dup(const struct passwd *pw)
 
 	return newpw;
 }
+#endif /* HAVE_PW_DUP */

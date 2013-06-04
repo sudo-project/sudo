@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,7 +21,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/param.h>
 
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -45,7 +44,7 @@
 #include <grp.h>
 #include <pwd.h>
 
-#include <sudo_usage.h>
+#include "sudo_usage.h"
 #include "sudo.h"
 #include "lbuf.h"
 
@@ -108,7 +107,11 @@ static struct sudo_settings {
     { "closefrom" },
 #define ARG_NET_ADDRS 19
     { "network_addrs" },
-#define NUM_SETTINGS 20
+#define ARG_MAX_GROUPS 20
+    { "max_groups" },
+#define ARG_PLUGIN_DIR 21
+    { "plugin_dir" },
+#define NUM_SETTINGS 22
     { NULL }
 };
 
@@ -150,6 +153,13 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     debug_flags = sudo_conf_debug_flags();
     if (debug_flags != NULL)
 	sudo_settings[ARG_DEBUG_FLAGS].value = debug_flags;
+
+    /* Set max_groups from sudo.conf. */
+    i = sudo_conf_max_groups();
+    if (i != -1) {
+	easprintf(&cp, "%d", i);
+	sudo_settings[ARG_MAX_GROUPS].value = cp;
+    }
 
     /* Returns true if the last option string was "--" */
 #define got_end_of_args	(optind > 1 && argv[optind - 1][0] == '-' && \
@@ -273,7 +283,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    break;
 		case 'U':
 		    if ((getpwnam(optarg)) == NULL)
-			errorx(1, _("unknown user: %s"), optarg);
+			fatalx(_("unknown user: %s"), optarg);
 		    list_user = optarg;
 		    break;
 		case 'u':
@@ -419,6 +429,9 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     /*
      * Format setting_pairs into settings array.
      */
+#ifdef _PATH_SUDO_PLUGIN_DIR
+    sudo_settings[ARG_PLUGIN_DIR].value = _PATH_SUDO_PLUGIN_DIR;
+#endif
     settings = emalloc2(NUM_SETTINGS + 1, sizeof(char *));
     for (i = 0, j = 0; i < NUM_SETTINGS; i++) {
 	if (sudo_settings[i].value) {
@@ -427,7 +440,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	    settings[j] = fmt_string(sudo_settings[i].name,
 		sudo_settings[i].value);
 	    if (settings[j] == NULL)
-		errorx(1, _("unable to allocate memory"));
+		fatalx(NULL);
 	    j++;
 	}
     }
@@ -440,7 +453,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	argv--;
 	argv[0] = "sudoedit";
 #else
-	errorx(1, _("sudoedit is not supported on this platform"));
+	fatalx(_("sudoedit is not supported on this platform"));
 #endif
     }
 

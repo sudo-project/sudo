@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2005, 2007-2011
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -19,8 +19,8 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#ifndef _SUDO_SUDOERS_H
-#define _SUDO_SUDOERS_H
+#ifndef _SUDOERS_SUDOERS_H
+#define _SUDOERS_SUDOERS_H
 
 #include <limits.h>
 #ifdef HAVE_STDBOOL_H
@@ -85,7 +85,7 @@ struct sudo_user {
     char *privs;
     char *limitprivs;
 #endif
-    char *cwd;
+    const char *cwd;
     char *iolog_file;
     GETGROUPS_T *gids;
     int   ngids;
@@ -93,6 +93,8 @@ struct sudo_user {
     int   lines;
     int   cols;
     int   flags;
+    int   max_groups;
+    mode_t umask;
     uid_t uid;
     uid_t gid;
     pid_t sid;
@@ -173,6 +175,7 @@ struct sudo_user {
 #define user_uid		(sudo_user.uid)
 #define user_gid		(sudo_user.gid)
 #define user_sid		(sudo_user.sid)
+#define user_umask		(sudo_user.umask)
 #define user_passwd		(sudo_user.pw->pw_passwd)
 #define user_dir		(sudo_user.pw->pw_dir)
 #define user_gids		(sudo_user.gids)
@@ -201,10 +204,11 @@ struct sudo_user {
 #define	runas_limitprivs	(sudo_user.limitprivs)
 
 #ifdef __TANDEM
-# define ROOT_UID       65535
+# define ROOT_UID	65535
 #else
-# define ROOT_UID       0
+# define ROOT_UID	0
 #endif
+#define ROOT_GID	0
 
 /*
  * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
@@ -222,7 +226,7 @@ struct timeval;
 /*
  * Function prototypes
  */
-#define YY_DECL int yylex(void)
+#define YY_DECL int sudoerslex(void)
 
 /* goodpath.c */
 bool sudo_goodpath(const char *, struct stat *);
@@ -231,11 +235,18 @@ bool sudo_goodpath(const char *, struct stat *);
 int find_path(char *, char **, struct stat *, char *, int);
 
 /* check.c */
-int check_user(int, int);
-void remove_timestamp(bool);
+int check_user(int validate, int mode);
 bool user_is_exempt(void);
 
+/* prompt.c */
+char *expand_prompt(const char *old_prompt, const char *user, const char *host);
+
+/* timestamp.c */
+void remove_timestamp(bool);
+bool set_lectured(void);
+
 /* sudo_auth.c */
+bool sudo_auth_needs_end_session(void);
 int verify_user(struct passwd *pw, char *prompt, int validated);
 int sudo_auth_begin_session(struct passwd *pw, char **user_env[]);
 int sudo_auth_end_session(struct passwd *pw);
@@ -260,7 +271,7 @@ void restore_perms(void);
 int pam_prep_user(struct passwd *);
 
 /* gram.y */
-int yyparse(void);
+int sudoersparse(void);
 
 /* toke.l */
 YY_DECL;
@@ -292,7 +303,7 @@ bool user_in_group(struct passwd *, const char *);
 struct group *sudo_fakegrnam(const char *);
 struct group_list *sudo_get_grlist(struct passwd *pw);
 struct passwd *sudo_fakepwnam(const char *, gid_t);
-struct passwd *sudo_fakepwnamid(const char *user, uid_t uid, gid_t gid);
+struct passwd *sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home, const char *shell);
 struct passwd *sudo_getpwnam(const char *);
 struct passwd *sudo_getpwuid(uid_t);
 void sudo_endgrent(void);
@@ -302,6 +313,8 @@ void sudo_grlist_addref(struct group_list *);
 void sudo_grlist_delref(struct group_list *);
 void sudo_pw_addref(struct passwd *);
 void sudo_pw_delref(struct passwd *);
+void sudo_set_grlist(struct passwd *pw, char * const *groups,
+    char * const *gids);
 void sudo_setgrent(void);
 void sudo_setpwent(void);
 void sudo_setspent(void);
@@ -316,6 +329,7 @@ int atobool(const char *str);
 int get_boottime(struct timeval *);
 
 /* iolog.c */
+int io_set_max_sessid(const char *sessid);
 void io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7]);
 
 /* iolog_path.c */
@@ -343,9 +357,16 @@ int sudoers_hook_unsetenv(const char *name, void *closure);
 char *fmt_string(const char *, const char *);
 
 /* sudoers.c */
-void plugin_cleanup(int);
-void set_fqdn(void);
 FILE *open_sudoers(const char *, bool, bool *);
+int sudoers_policy_init(void *info, char * const envp[]);
+int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], void *closure);
+void sudoers_cleanup(void);
+
+/* policy.c */
+int sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group);
+int sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
+extern const char *path_ldap_conf;
+extern const char *path_ldap_secret;
 
 /* aix.c */
 void aix_restoreauthdb(void);
@@ -367,7 +388,6 @@ extern int long_list;
 extern int sudo_mode;
 extern uid_t timestamp_uid;
 extern sudo_conv_t sudo_conv;
-extern sudo_printf_t sudo_printf;
 #endif
 
-#endif /* _SUDO_SUDOERS_H */
+#endif /* _SUDOERS_SUDOERS_H */

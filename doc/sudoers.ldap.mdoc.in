@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2003-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 2003-2013 Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd July 12, 2012
+.Dd April 25, 2013
 .Dt SUDOERS.LDAP @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -82,11 +82,11 @@ Aliases are not supported.
 For the most part, there is really no need for
 .Nm sudo Ns No -specific
 Aliases.
-Unix groups or user netgroups can be used in place of User_Aliases and
-Runas_Aliases.
+Unix groups, non-Unix groups (via the
+.Em group_plugin )
+or user netgroups can be used in place of User_Aliases and Runas_Aliases.
 Host netgroups can be used in place of Host_Aliases.
-Since Unix groups and netgroups can also be stored in LDAP there is no
-real need for
+Since groups and netgroups can also be stored in LDAP there is no real need for
 .Nm sudo Ns No -specific
 aliases.
 .Pp
@@ -132,12 +132,23 @@ It consists of the following attributes:
 .It Sy sudoUser
 A user name, user ID (prefixed with
 .Ql # ) ,
-Unix group (prefixed with
-.Ql % ) ,
-Unix group ID (prefixed with
-.Ql %# ) ,
-or user netgroup (prefixed with
-.Ql + ) .
+Unix group name or ID (prefixed with
+.Ql %
+or
+.Ql %#
+respectively), user netgroup (prefixed with
+.Ql + ) ,
+or non-Unix group name or ID (prefixed with
+.Ql %:
+or
+.Ql %:#
+respectively).
+Non-Unix group support is only available when an appropriate
+.Em group_plugin
+is defined in the global
+.Em defaults
+.Li sudoRole
+object.
 .It Sy sudoHost
 A host name, IP address, IP network, or host netgroup (prefixed with a
 .Ql + ) .
@@ -145,14 +156,49 @@ The special value
 .Li ALL
 will match any host.
 .It Sy sudoCommand
-A Unix command with optional command line arguments, potentially
-including globbing characters (aka wild cards).
+A fully-qualified Unix command name with optional command line arguments,
+potentially including globbing characters (aka wild cards).
+If a command name is preceded by an exclamation point,
+.Ql \&! ,
+the user will be prohibited from running that command.
+.Pp
+The built-in command
+.Dq Li sudoedit
+is used to permit a user to run
+.Nm sudo
+with the
+.Fl e
+option (or as
+.Nm sudoedit ) .
+It may take command line arguments just as a normal command does.
+Note that
+.Dq Li sudoedit
+is a command built into
+.Nm sudo
+itself and must be specified in without a leading path.
+.Pp
 The special value
 .Li ALL
 will match any command.
-If a command is prefixed with an exclamation point
-.Ql \&! ,
-the user will be prohibited from running that command.
+.Pp
+If a command name is prefixed with a SHA-2 digest, it will
+only be allowed if the digest matches.
+This may be useful in situations where the user invoking
+.Nm sudo
+has write access to the command or its parent directory.
+The following digest formats are supported: sha224, sha256, sha384 and sha512.
+The digest name must be followed by a colon
+.Pq Ql :\&
+and then the actual digest, in either hex or base64 format.
+For example, given the following value for sudoCommand:
+.Bd -literal -offset 4n
+sha224:0GomF8mNN3wlDt1HD9XldjJ3SNgpFdbjO1+NsQ /bin/ls
+.Ed
+.Pp
+The user may only run
+.Pa /bin/ls
+if its sha224 digest matches the specified value.
+Command digests are only supported by version 1.8.7 or higher.
 .It Sy sudoOption
 Identical in function to the global options described above, but
 specific to the
@@ -248,7 +294,7 @@ The
 .Li sudoOrder
 attribute is an integer (or floating point value for LDAP servers
 that support it) that is used to sort the matching entries.
-This allows LDAP-based sudoers entries to more closely mimic the behaviour
+This allows LDAP-based sudoers entries to more closely mimic the behavior
 of the sudoers file, where the of the entries influences the result.
 If multiple entries match, the entry with the highest
 .Li sudoOrder
@@ -304,7 +350,7 @@ to see if the user belongs to any of them.
 .Pp
 If timed entries are enabled with the
 .Sy SUDOERS_TIMED
-configuration directive, the LDAP queries include a subfilter that
+configuration directive, the LDAP queries include a sub-filter that
 limits retrieval to entries that satisfy the time constraints, if any.
 .Ss Differences between LDAP and non-LDAP sudoers
 There are some subtle differences in the way sudoers is handled
@@ -403,7 +449,7 @@ section.
 Sudo reads the
 .Pa @ldap_conf@
 file for LDAP-specific configuration.
-Typically, this file is shared amongst different LDAP-aware clients.
+Typically, this file is shared between different LDAP-aware clients.
 As such, most of the settings are not
 .Nm sudo Ns No -specific.
 Note that
@@ -414,6 +460,12 @@ itself and may support options that differ from those described in the
 system's
 .Xr ldap.conf @mansectsu@
 manual.
+The path to
+.Pa ldap.conf
+may be overridden via the
+.Em ldap_conf
+plugin argument in
+.Xr sudo.conf @mansectform@ .
 .Pp
 Also note that on systems using the OpenLDAP libraries, default
 values specified in
@@ -429,9 +481,15 @@ as being supported by
 are honored.
 Configuration options are listed below in upper case but are parsed
 in a case-independent manner.
+.Pp
+Long lines can be continued with a backslash
+.Pq Ql \e
+as the last character on the line.
+Note that leading white space is removed from the beginning of lines
+even when the continuation character is used.
 .Bl -tag -width 4n
 .It Sy URI Ar ldap[s]://[hostname[:port]] ...
-Specifies a whitespace-delimited list of one or more URIs describing
+Specifies a white space-delimited list of one or more URIs describing
 the LDAP server(s) to connect to.
 The
 .Em protocol
@@ -468,7 +526,7 @@ If no
 .Sy URI
 is specified, the
 .Sy HOST
-parameter specifies a whitespace-delimited list of LDAP servers to connect to.
+parameter specifies a white space-delimited list of LDAP servers to connect to.
 Each host may include an optional
 .Em port
 separated by a colon
@@ -556,6 +614,26 @@ A value of 1 results in a moderate amount of debugging information.
 A value of 2 shows the results of the matches themselves.
 This parameter should not be set in a production environment as the
 extra information is likely to confuse users.
+.Pp
+The
+.Sy SUDOERS_DEBUG
+parameter is deprecated and will be removed in a future release.
+The same information is now logged via the
+.Nm sudo
+debugging framework using the
+.Dq ldap
+subsystem at priorities
+.Em diag
+and
+.Em info
+for
+.Em debug_level
+values 1 and 2 respectively.
+See the
+.Xr sudo.conf @mansectform@
+manual for details on how to configure
+.Nm sudo
+debugging.
 .It Sy BINDDN Ar DN
 The
 .Sy BINDDN
@@ -577,10 +655,16 @@ parameter specifies the identity, in the form of a Distinguished Name (DN),
 to use when performing privileged LDAP operations, such as
 .Em sudoers
 queries.
-The password corresponding
-to the identity should be stored in
+The password corresponding to the identity should be stored in the
+or the path specified by the
+.Em ldap_secret
+plugin argument in
+.Xr sudo.conf @mansectform@ ,
+which defaults to
 .Pa @ldap_secret@ .
-If not specified, the
+If no
+.Sy ROOTBINDDN
+is specified, the
 .Sy BINDDN
 identity is used (if any).
 .It Sy LDAP_VERSION Ar number
@@ -844,7 +928,7 @@ file can be ignored completely by using:
 sudoers = ldap
 .Ed
 .Pp
-To treat LDAP as authoratative and only use the local sudoers file
+To treat LDAP as authoritative and only use the local sudoers file
 if the user is not present in LDAP, use:
 .Bd -literal -offset 4n
 sudoers = ldap = auth, files
@@ -852,7 +936,7 @@ sudoers = ldap = auth, files
 .Pp
 Note that in the above example, the
 .Li auth
-qualfier only affects user lookups; both LDAP and
+qualifier only affects user lookups; both LDAP and
 .Em sudoers
 will be queried for
 .Li Defaults
@@ -1073,7 +1157,8 @@ objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL
    )
 .Ed
 .Sh SEE ALSO
-.Xr ldap.conf @mansectsu@ ,
+.Xr ldap.conf @mansectform@ ,
+.Xr sudo.conf @mansectform@ ,
 .Xr sudoers @mansectsu@
 .Sh CAVEATS
 Note that there are differences in the way that LDAP-based

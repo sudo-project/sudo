@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -35,9 +35,6 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_SETLOCALE
-# include <locale.h>
-#endif
 #include <pwd.h>
 #include <grp.h>
 #include <time.h>
@@ -49,32 +46,16 @@ struct path_escape {
     size_t (*copy_fn)(char *, size_t, char *);
 };
 
-static size_t fill_seq(char *, size_t, char *);
-static size_t fill_user(char *, size_t, char *);
-static size_t fill_group(char *, size_t, char *);
-static size_t fill_runas_user(char *, size_t, char *);
-static size_t fill_runas_group(char *, size_t, char *);
-static size_t fill_hostname(char *, size_t, char *);
-static size_t fill_command(char *, size_t, char *);
-
-/* Note: "seq" must be first in the list. */
-static struct path_escape io_path_escapes[] = {
-    { "seq", fill_seq },
-    { "user", fill_user },
-    { "group", fill_group },
-    { "runas_user", fill_runas_user },
-    { "runas_group", fill_runas_group },
-    { "hostname", fill_hostname },
-    { "command", fill_command },
-    { NULL, NULL }
-};
-
 static size_t
 fill_seq(char *str, size_t strsize, char *logdir)
 {
+#ifdef SUDOERS_NO_SEQ
+    debug_decl(fill_seq, SUDO_DEBUG_UTIL)
+    debug_return_size_t(strlcpy(str, "%{seq}", strsize));
+#else
     static char sessid[7];
     int len;
-    debug_decl(sudoers_io_version, SUDO_DEBUG_UTIL)
+    debug_decl(fill_seq, SUDO_DEBUG_UTIL)
 
     if (sessid[0] == '\0')
 	io_nextid(logdir, def_iolog_dir, sessid);
@@ -85,6 +66,7 @@ fill_seq(char *str, size_t strsize, char *logdir)
     if (len < 0)
 	debug_return_size_t(strsize); /* handle non-standard snprintf() */
     debug_return_size_t(len);
+#endif /* SUDOERS_NO_SEQ */
 }
 
 static size_t
@@ -155,6 +137,18 @@ fill_command(char *str, size_t strsize, char *unused)
     debug_return_size_t(strlcpy(str, user_base, strsize));
 }
 
+/* Note: "seq" must be first in the list. */
+static struct path_escape io_path_escapes[] = {
+    { "seq", fill_seq },
+    { "user", fill_user },
+    { "group", fill_group },
+    { "runas_user", fill_runas_user },
+    { "runas_group", fill_runas_group },
+    { "hostname", fill_hostname },
+    { "command", fill_command },
+    { NULL, NULL }
+};
+
 /*
  * Concatenate dir + file, expanding any escape sequences.
  * Returns the concatenated path and sets slashp point to
@@ -168,8 +162,8 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
     char *dst, *dst0, *path, *pathend, tmpbuf[PATH_MAX];
     char *slash = NULL;
     const char *endbrace, *src = dir;
-    static struct path_escape *escapes;
-    int pass;
+    struct path_escape *escapes = NULL;
+    int pass, oldlocale;
     bool strfit;
     debug_decl(expand_iolog_path, SUDO_DEBUG_UTIL)
 
@@ -196,7 +190,7 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 	switch (pass) {
 	case 0:
 	    src = dir;
-	    escapes = io_path_escapes + 1; /* skip "${seq}" */
+	    escapes = io_path_escapes + 1; /* skip "%{seq}" */
 	    break;
 	case 1:
 	    /* Trim trailing slashes from dir component. */
@@ -258,20 +252,16 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 	    time(&now);
 	    timeptr = localtime(&now);
 
-#ifdef HAVE_SETLOCALE
-	    if (!setlocale(LC_ALL, def_sudoers_locale)) {
-		warningx(_("unable to set locale to \"%s\", using \"C\""),
-		    def_sudoers_locale);
-		setlocale(LC_ALL, "C");
-	    }
-#endif
+	    /* Use sudoers locale for strftime() */
+	    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
+
 	    /* We only calls strftime() on the current part of the buffer. */
 	    tmpbuf[sizeof(tmpbuf) - 1] = '\0';
 	    len = strftime(tmpbuf, sizeof(tmpbuf), dst0, timeptr);
 
-#ifdef HAVE_SETLOCALE
-	    setlocale(LC_ALL, "");
-#endif
+	    /* Restore old locale. */
+	    sudoers_setlocale(oldlocale, NULL);
+
 	    if (len == 0 || tmpbuf[sizeof(tmpbuf) - 1] != '\0')
 		goto bad;		/* strftime() failed, buf too small? */
 

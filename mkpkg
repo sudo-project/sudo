@@ -1,5 +1,19 @@
 #!/bin/sh
 #
+# Copyright (c) 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
 # Build a binary package using polypkg
 # Usage: mkpkg [--debug] [--flavor flavor] [--platform platform] [--osversion ver]
 #
@@ -129,6 +143,7 @@ case "$osversion" in
 		--with-tty-tickets
 		--with-ldap
 		--with-passprompt=[sudo] password for %p: 
+		--with-sendmail=/usr/sbin/sendmail
 		$configure_opts"
 	;;
     sles*)
@@ -147,7 +162,7 @@ case "$osversion" in
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	# XXX - SuSE uses secure path but only for env_reset
 	configure_opts="--prefix=/usr
-		--libexecdir=/usr/$libexec/sudo
+		--libexecdir=/usr/$libexec
 		--with-logging=syslog
 		--with-logfac=auth
 		--with-all-insults
@@ -160,6 +175,7 @@ case "$osversion" in
 		--with-ldap
 		--with-env-editor
 		--with-passprompt=%p\'s password: 
+		--with-sendmail=/usr/sbin/sendmail
 		$configure_opts"
 
 	make_opts='docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
@@ -197,7 +213,7 @@ case "$osversion" in
 		--disable-setresuid
 		--with-sendmail=/usr/sbin/sendmail
 		--mandir=/usr/share/man
-		--libexecdir=/usr/lib/sudo
+		--libexecdir=/usr/lib
 		--with-secure-path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/X11R6/bin
 		$configure_opts"
 	;;
@@ -240,6 +256,7 @@ case "$osversion" in
 		--with-env-editor
 		--enable-zlib=builtin
 		--disable-nls
+		--with-sendmail=/usr/sbin/sendmail
 		$configure_opts"
 	PPVARS="${PPVARS}${PPVARS+$space}aix_freeware=true"
 	;;
@@ -247,7 +264,7 @@ case "$osversion" in
 	# For Solaris, add project support and use let configure choose zlib.
 	# For all others, use the builtin zlib and disable NLS support.
 	case "$osversion" in
-	    sol*) configure_opts="${configure_opts}${configure_opts+$tab}--with-project${tab}--disable-pie";;
+	    sol*) configure_opts="${configure_opts}${configure_opts+$tab}--with-project";;
 	    *) configure_opts="${configure_opts}${configure_opts+$tab}--enable-zlib=builtin${tab}--disable-nls";;
 	esac
 	if test "$flavor" = "ldap"; then

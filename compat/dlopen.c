@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010, 2012-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,6 +15,8 @@
  */
 
 #include <config.h>
+
+#ifndef HAVE_DLOPEN
 
 #include <sys/types.h>
 
@@ -51,7 +53,7 @@
 void *
 sudo_dlopen(const char *path, int mode)
 {
-    int flags = DYNAMIC_PATH;
+    int flags = DYNAMIC_PATH | BIND_VERBOSE;
 
     if (mode == 0)
 	mode = RTLD_LAZY;	/* default behavior */
@@ -150,5 +152,5 @@ sudo_dlerror(void)
 {
     return strerror(errno);
 }
-
 #endif /* HAVE_SHL_LOAD */
+#endif /* HAVE_DLOPEN */

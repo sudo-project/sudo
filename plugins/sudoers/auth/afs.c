@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2001-2005, 2007, 2010-2011
+ * Copyright (c) 1999, 2001-2005, 2007, 2010-2012
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -21,7 +21,6 @@
 
 #include <config.h>
 
-#include <sys/param.h>
 #include <sys/types.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS

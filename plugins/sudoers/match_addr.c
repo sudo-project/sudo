@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2011
+ * Copyright (c) 1996, 1998-2005, 2007-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -45,7 +45,6 @@
 #endif /* HAVE_UNISTD_H */
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <netdb.h>
 
 #include "sudoers.h"
 #include "interfaces.h"
@@ -71,7 +70,7 @@ addr_matches_if(char *n)
 	addr.ip4.s_addr = inet_addr(n);
     }
 
-    for (ifp = interfaces; ifp != NULL; ifp = ifp->next) {
+    for (ifp = get_interfaces(); ifp != NULL; ifp = ifp->next) {
 	if (ifp->family != family)
 	    continue;
 	switch (family) {
@@ -154,7 +153,7 @@ addr_matches_if_netmask(char *n, char *m)
     }
 #endif /* HAVE_STRUCT_IN6_ADDR */
 
-    for (ifp = interfaces; ifp != NULL; ifp = ifp->next) {
+    for (ifp = get_interfaces(); ifp != NULL; ifp = ifp->next) {
 	if (ifp->family != family)
 	    continue;
 	switch (family) {

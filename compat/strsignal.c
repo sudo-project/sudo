@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,6 +15,8 @@
  */
 
 #include <config.h>
+
+#ifndef HAVE_STRSIGNAL
 
 #include <sys/types.h>
 
@@ -47,3 +49,4 @@ strsignal(int signo)
     /* XXX - should be "Unknown signal: %d" */
     return _("Unknown signal");
 }
+#endif /* HAVE_STRSIGNAL */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2009-2010
+ * Copyright (c) 1999-2005, 2009-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -15,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _LOGGING_H
-#define _LOGGING_H
+#ifndef _SUDOERS_LOGGING_H
+#define _SUDOERS_LOGGING_H
 
 #include <syslog.h>
 #ifdef __STDC__
@@ -30,7 +30,13 @@
 #define SLOG_FILE		0x02
 #define SLOG_BOTH		0x03
 
-/* Flags for log_error()/log_fatal() */
+/*
+ * Values for sudoers_setlocale()
+ */
+#define SUDOERS_LOCALE_USER     0
+#define SUDOERS_LOCALE_SUDOERS  1
+
+/* Flags for log_warning()/log_fatal() */
 #define MSG_ONLY		0x01
 #define USE_ERRNO		0x02
 #define NO_MAIL			0x04
@@ -52,14 +58,17 @@
  */
 #define LOG_INDENT	"    "
 
+bool sudoers_setlocale(int newlocale, int *prevlocale);
+int sudoers_getlocale(void);
 void audit_success(char *exec_args[]);
 void audit_failure(char *exec_args[], char const *const fmt, ...);
 void log_allowed(int status);
 void log_auth_failure(int status, int tries);
 void log_denial(int status, bool inform_user);
 void log_failure(int status, int flags);
-void log_error(int flags, const char *fmt, ...) __printflike(2, 3);
+void log_warning(int flags, const char *fmt, ...) __printflike(2, 3);
 void log_fatal(int flags, const char *fmt, ...) __printflike(2, 3) __attribute__((__noreturn__));
+void sudoers_initlocale(const char *ulocale, const char *slocale);
 void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
 
-#endif /* _LOGGING_H */
+#endif /* _SUDOERS_LOGGING_H */

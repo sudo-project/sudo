@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2008, 2009-2010
+ * Copyright (c) 1996, 1998-2005, 2008, 2009-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -52,6 +52,15 @@
 # endif
 #endif
 
+/* Hint to compiler that returned pointer is unique (malloc but not realloc). */
+#ifndef __malloc_like
+# if __GNUC_PREREQ__(2, 96)
+#  define __malloc_like 	__attribute__((__malloc__))
+# else
+#  define __malloc_like
+# endif
+#endif
+
 #ifndef __dso_public
 # ifdef HAVE_DSO_VISIBILITY
 #  if defined(__GNUC__)
@@ -82,19 +91,19 @@
 #endif
 
 #ifndef PATH_MAX
-# ifdef MAXPATHLEN
-#  define PATH_MAX		MAXPATHLEN
+# ifdef _POSIX_PATH_MAX
+#  define PATH_MAX		_POSIX_PATH_MAX
 # else
-#  ifdef _POSIX_PATH_MAX
-#   define PATH_MAX		_POSIX_PATH_MAX
-#  else
-#   define PATH_MAX		1024
-#  endif
+#  define PATH_MAX		256
 # endif
 #endif
 
-#ifndef MAXHOSTNAMELEN
-# define MAXHOSTNAMELEN		64
+#ifndef HOST_NAME_MAX
+# ifdef _POSIX_HOST_NAME_MAX
+#  define HOST_NAME_MAX		_POSIX_HOST_NAME_MAX
+# else
+#  define HOST_NAME_MAX		255
+# endif
 #endif
 
 /*
@@ -140,13 +149,28 @@
 #endif
 
 /*
- * BSD defines these in <sys/param.h> but others may not.
+ * BSD defines these in <sys/param.h> but we don't include that anymore.
  */
 #ifndef MIN
 # define MIN(a,b) (((a)<(b))?(a):(b))
 #endif
 #ifndef MAX
 # define MAX(a,b) (((a)>(b))?(a):(b))
+#endif
+
+/* Macros to set/clear/test flags. */
+#undef SET
+#define SET(t, f)	((t) |= (f))
+#undef CLR
+#define CLR(t, f)	((t) &= ~(f))
+#undef ISSET
+#define ISSET(t, f)     ((t) & (f))
+
+/*
+ * Some systems define this in <sys/param.h> but we don't include that anymore.
+ */
+#ifndef howmany
+# define howmany(x, y)	(((x) + ((y) - 1)) / (y))
 #endif
 
 /*
@@ -224,11 +248,11 @@ typedef struct sigaction sigaction_t;
 #ifndef HAVE_GETPROGNAME
 # ifdef HAVE___PROGNAME
 extern const char *__progname;
-#  define getprogname()          (__progname)
+#  define getprogname()		(__progname)
 # else
 const char *getprogname(void);
 void setprogname(const char *);
-#endif /* HAVE___PROGNAME */
+# endif /* HAVE___PROGNAME */
 #endif /* !HAVE_GETPROGNAME */
 
 /*

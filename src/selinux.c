@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 2008 Dan Walsh <dwalsh@redhat.com>
  *
  * Borrowed heavily from newrole source code
@@ -74,7 +74,7 @@ audit_role_change(const security_context_t old_context,
         /* Kernel may not have audit support. */
         if (errno != EINVAL && errno != EPROTONOSUPPORT && errno != EAFNOSUPPORT
 )
-            error(1, _("unable to open audit system"));
+            fatal(_("unable to open audit system"));
     } else {
 	/* audit role change using the same format as newrole(1) */
 	easprintf(&message, "newrole: old-context=%s new-context=%s",
@@ -366,8 +366,16 @@ selinux_execve(const char *path, char *const argv[], char *const envp[],
     int noexec)
 {
     char **nargv;
+    const char *sesh;
     int argc, serrno;
     debug_decl(selinux_execve, SUDO_DEBUG_SELINUX)
+
+    sesh = sudo_conf_sesh_path();
+    if (sesh == NULL) {
+	warningx("internal error: sesh path not set");
+	errno = EINVAL;
+	debug_return;
+    }
 
     if (setexeccon(se_state.new_context)) {
 	warning(_("unable to set exec context to %s"), se_state.new_context);
@@ -399,7 +407,7 @@ selinux_execve(const char *path, char *const argv[], char *const envp[],
     memcpy(&nargv[2], &argv[1], argc * sizeof(char *)); /* copies NULL */
 
     /* sesh will handle noexec for us. */
-    sudo_execve(_PATH_SUDO_SESH, nargv, envp, 0);
+    sudo_execve(sesh, nargv, envp, 0);
     serrno = errno;
     free(nargv);
     errno = serrno;

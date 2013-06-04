@@ -32,6 +32,8 @@
 
 #include <config.h>
 
+#ifndef HAVE_GETADDRINFO
+
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -436,3 +438,4 @@ getaddrinfo(const char *nodename, const char *servname,
         return 0;
     }
 }
+#endif /* HAVE_GETADDRINFO */

@@ -1,6 +1,6 @@
 dnl Local m4 macros for autoconf (used by sudo)
 dnl
-dnl Copyright (c) 1994-1996, 1998-2005, 2007-2011
+dnl Copyright (c) 1994-1996, 1998-2005, 2007-2013
 dnl	Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 dnl XXX - should cache values in all cases!!!
@@ -171,6 +171,23 @@ AC_MSG_RESULT($sudo_cv_func_fnmatch)
 AS_IF([test $sudo_cv_func_fnmatch = yes], [$1], [$2])])
 
 dnl
+dnl Attempt to check for working PIE support.
+dnl This is a bit of a hack but on Solaris 10 with GNU ld and GNU as
+dnl we can end up with strange values from malloc().
+dnl A better check would be to verify that ASLR works with PIE.
+dnl
+AC_DEFUN([SUDO_WORKING_PIE],
+[AC_MSG_CHECKING([for working PIE support])
+AC_CACHE_VAL(sudo_cv_working_pie,
+[rm -f conftestdata; > conftestdata
+AC_TRY_RUN(AC_INCLUDES_DEFAULT([])
+[main() { char *p = malloc(1024); if (p == NULL) return 1; memset(p, 0, 1024); return 0; }], [sudo_cv_working_pie=yes], [sudo_cv_working_pie=no],
+  [sudo_cv_working_pie=no])
+rm -f core core.* *.core])
+AC_MSG_RESULT($sudo_cv_working_pie)
+AS_IF([test $sudo_cv_working_pie = yes], [$1], [$2])])
+
+dnl
 dnl check for isblank(3)
 dnl
 AC_DEFUN([SUDO_FUNC_ISBLANK],
@@ -293,22 +310,37 @@ AC_DEFINE_UNQUOTED(MAX_UID_T_LEN, $sudo_cv_uid_t_len, [Define to the max length 
 ])
 
 dnl
-dnl append a libpath to an LDFLAGS style variable
+dnl Append a libpath to an LDFLAGS style variable if not already present.
+dnl Also appends to the _R version unless rpath is disabled.
 dnl
 AC_DEFUN([SUDO_APPEND_LIBPATH], [
-    if test X"$with_rpath" = X"yes"; then
-	case "$host" in
-	    *-*-hpux*)	$1="${$1} -L$2 -Wl,+b,$2"
-			;;
-	    *)		$1="${$1} -L$2 -Wl,-R$2"
-			;;
-	esac
-    else
-	$1="${$1} -L$2"
-    fi
-    if test X"$blibpath" != X"" -a "$1" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:$2"
-    fi
+    case "${$1}" in
+	*"-L$2"|*"-L$2 ")
+	    ;;
+	*)
+	    $1="${$1} -L$2"
+	    if test X"$enable_rpath" = X"yes"; then
+		$1_R="${$1_R} -R$2"
+	    fi
+	    ;;
+    esac
+])
+
+dnl
+dnl Append a directory to CPPFLAGS if not already present.
+dnl
+AC_DEFUN([SUDO_APPEND_CPPFLAGS], [
+    case "${CPPFLAGS}" in
+	*"$1"|*"$1 ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="$1"
+	    else
+		CPPFLAGS="${CPPFLAGS} $1"
+	    fi
+	    ;;
+    esac
 ])
 
 dnl
@@ -364,13 +396,13 @@ EOF
 dnl
 dnl Pull in libtool macros
 dnl
-m4_include([libtool.m4])
-m4_include([ltoptions.m4])
-m4_include([ltsugar.m4])
-m4_include([ltversion.m4])
-m4_include([lt~obsolete.m4])
+m4_include([m4/libtool.m4])
+m4_include([m4/ltoptions.m4])
+m4_include([m4/ltsugar.m4])
+m4_include([m4/ltversion.m4])
+m4_include([m4/lt~obsolete.m4])
 dnl
 dnl Pull in other non-standard macros
 dnl
-m4_include([ax_check_compile_flag.m4])
-m4_include([ax_check_link_flag.m4])
+m4_include([m4/ax_check_compile_flag.m4])
+m4_include([m4/ax_check_link_flag.m4])

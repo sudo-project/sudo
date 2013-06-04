@@ -1,7 +1,7 @@
 /*	$OpenBSD: strlcpy.c,v 1.5 2001/05/13 15:40:16 deraadt Exp $	*/
 
 /*
- * Copyright (c) 1998, 2003-2005, 2010-2011
+ * Copyright (c) 1998, 2003-2005, 2010-2011, 2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -18,6 +18,8 @@
  */
 
 #include <config.h>
+
+#ifndef HAVE_STRLCPY
 
 #include <sys/types.h>
 
@@ -53,3 +55,4 @@ strlcpy(char *dst, const char *src, size_t siz)
 
 	return s - src - 1;	/* count does not include NUL */
 }
+#endif /* HAVE_STRLCPY */

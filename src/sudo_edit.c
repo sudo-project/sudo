@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2008, 2010-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2008, 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/wait.h>
@@ -63,17 +62,17 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
     /* When restoring root, change euid first; otherwise change it last. */
     if (euid == ROOT_UID) {
 	if (seteuid(ROOT_UID) != 0)
-	    error(1, "seteuid(ROOT_UID)");
+	    fatal("seteuid(ROOT_UID)");
     }
     if (setegid(egid) != 0)
-	error(1, "setegid(%d)", (int)egid);
+	fatal("setegid(%d)", (int)egid);
     if (ngroups != -1) {
 	if (sudo_setgroups(ngroups, groups) != 0)
-	    error(1, "setgroups");
+	    fatal("setgroups");
     }
     if (euid != ROOT_UID) {
 	if (seteuid(euid) != 0)
-	    error(1, "seteuid(%d)", (int)euid);
+	    fatal("seteuid(%d)", (int)euid);
     }
     errno = serrno;
 
@@ -188,10 +187,10 @@ sudo_edit(struct command_details *command_details)
 	    easprintf(&tf[j].tfile, "%.*s/%s.XXXXXXXX", tmplen, tmpdir, cp);
 	}
 	if (seteuid(user_details.uid) != 0)
-	    error(1, "seteuid(%d)", (int)user_details.uid);
+	    fatal("seteuid(%d)", (int)user_details.uid);
 	tfd = mkstemps(tf[j].tfile, suff ? strlen(suff) : 0);
 	if (seteuid(ROOT_UID) != 0)
-	    error(1, "seteuid(ROOT_UID)");
+	    fatal("seteuid(ROOT_UID)");
 	if (tfd == -1) {
 	    warning("mkstemps");
 	    goto cleanup;
@@ -258,12 +257,12 @@ sudo_edit(struct command_details *command_details)
     for (i = 0; i < nfiles; i++) {
 	rc = -1;
 	if (seteuid(user_details.uid) != 0)
-	    error(1, "seteuid(%d)", (int)user_details.uid);
+	    fatal("seteuid(%d)", (int)user_details.uid);
 	if ((tfd = open(tf[i].tfile, O_RDONLY, 0644)) != -1) {
 	    rc = fstat(tfd, &sb);
 	}
 	if (seteuid(ROOT_UID) != 0)
-	    error(1, "seteuid(ROOT_UID)");
+	    fatal("seteuid(ROOT_UID)");
 	if (rc || !S_ISREG(sb.st_mode)) {
 	    if (rc)
 		warning("%s", tf[i].tfile);

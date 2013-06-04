@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2003-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 2011 Daniel Kopecek <dkopecek@redhat.com>
  *
  * This code is derived from software contributed by Aaron Spangler.
@@ -21,7 +21,6 @@
 
 #include <sys/types.h>
 #include <sys/time.h>
-#include <sys/param.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -212,7 +211,13 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
 	    "reallocating result: %p (count: %u -> %u)", out_res->rules,
 	    in_res->num_rules, l);
-	out_res->rules = erealloc3(out_res->rules, l, sizeof(struct sss_sudo_rule));
+	if (l > 0) {
+	    out_res->rules =
+		erealloc3(out_res->rules, l, sizeof(struct sss_sudo_rule));
+	} else {
+	    efree(out_res->rules);
+	    out_res->rules = NULL;
+	}
     }
 
     out_res->num_rules = l;
@@ -248,8 +253,8 @@ static int sudo_sss_open(struct sudo_nss *nss)
     /* Load symbols */
     handle->ssslib = dlopen(path, RTLD_LAZY);
     if (handle->ssslib == NULL) {
-	warningx(_("Unable to dlopen %s: %s"), path, dlerror());
-	warningx(_("Unable to initialize SSS source. Is SSSD installed on your machine?"));
+	warningx(_("unable to dlopen %s: %s"), path, dlerror());
+	warningx(_("unable to initialize SSS source. Is SSSD installed on your machine?"));
 	debug_return_int(EFAULT);
     }
 
@@ -345,7 +350,7 @@ static int sudo_sss_setdefs(struct sudo_nss *nss)
 
     if (sss_error == ENOENT) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "The user was not found in SSSD.");
-	debug_return_int(-1);
+	debug_return_int(0);
     } else if(sss_error != 0) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sss_error=%u\n", sss_error);
 	debug_return_int(-1);
@@ -466,7 +471,7 @@ sudo_sss_check_runas_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *
 	    /* FALLTHROUGH */
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG, "FALLTHROUGH");
 	default:
-	    if (strcasecmp(val, runas_pw->pw_name) == 0) {
+	    if (userpw_matches(val, runas_pw->pw_name, runas_pw)) {
 		sudo_debug_printf(SUDO_DEBUG_DEBUG,
 		    "%s == %s (pw_name) => match", val, runas_pw->pw_name);
 		ret = true;
@@ -713,6 +718,71 @@ sudo_sss_check_bool(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule,
 }
 
 /*
+ * If a digest prefix is present, fills in struct sudo_digest
+ * and returns a pointer to it, updating cmnd to point to the
+ * command after the digest.
+ */
+static struct sudo_digest *
+sudo_sss_extract_digest(char **cmnd, struct sudo_digest *digest)
+{
+    char *ep, *cp = *cmnd;
+    int digest_type = SUDO_DIGEST_INVALID;
+    debug_decl(sudo_sss_check_command, SUDO_DEBUG_LDAP)
+
+    /*
+     * Check for and extract a digest prefix, e.g.
+     * sha224:d06a2617c98d377c250edd470fd5e576327748d82915d6e33b5f8db1 /bin/ls
+     */
+    if (cp[0] == 's' && cp[1] == 'h' && cp[2] == 'a') {
+	switch (cp[3]) {
+	case '2':
+	    if (cp[4] == '2' && cp[5] == '4')
+		digest_type = SUDO_DIGEST_SHA224;
+	    else if (cp[4] == '5' && cp[5] == '6')
+		digest_type = SUDO_DIGEST_SHA256;
+	    break;
+	case '3':
+	    if (cp[4] == '8' && cp[5] == '4')
+		digest_type = SUDO_DIGEST_SHA384;
+	    break;
+	case '5':
+	    if (cp[4] == '1' && cp[5] == '2')
+		digest_type = SUDO_DIGEST_SHA512;
+	    break;
+	}
+	if (digest_type != SUDO_DIGEST_INVALID) {
+	    cp += 6;
+	    while (isblank((unsigned char)*cp))
+		cp++;
+	    if (*cp == ':') {
+		cp++;
+		while (isblank((unsigned char)*cp))
+		    cp++;
+		ep = cp;
+		while (*ep != '\0' && !isblank((unsigned char)*ep))
+		    ep++;
+		if (*ep != '\0') {
+		    digest->digest_type = digest_type;
+		    digest->digest_str = estrndup(cp, (size_t)(ep - cp));
+		    cp = ep + 1;
+		    while (isblank((unsigned char)*cp))
+			cp++;
+		    *cmnd = cp;
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"%s digest %s for %s",
+			digest_type == SUDO_DIGEST_SHA224 ? "sha224" :
+			digest_type == SUDO_DIGEST_SHA256 ? "sha256" :
+			digest_type == SUDO_DIGEST_SHA384 ? "sha384" :
+			"sha512", digest->digest_str, cp);
+		    debug_return_ptr(digest);
+		}
+	    }
+	}
+    }
+    debug_return_ptr(NULL);
+}
+
+/*
  * Walk through search results and return true if we have a command match,
  * false if disallowed and UNSPEC if not matched.
  */
@@ -723,6 +793,7 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
     char **val_array = NULL, *val;
     char *allowed_cmnd, *allowed_args;
     int i, foundbang, ret = UNSPEC;
+    struct sudo_digest digest, *allowed_digest = NULL;
     debug_decl(sudo_sss_check_command, SUDO_DEBUG_SSSD);
 
     if (rule == NULL)
@@ -754,6 +825,9 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
 	    continue;
 	}
 
+        /* check for sha-2 digest */
+	allowed_digest = sudo_ldap_extract_digest(&val, &digest);
+
 	/* check for !command */
 	if (*val == '!') {
 	    foundbang = true;
@@ -769,7 +843,7 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
 	    *allowed_args++ = '\0';
 
 	/* check the command like normal */
-	if (command_matches(allowed_cmnd, allowed_args)) {
+	if (command_matches(allowed_cmnd, allowed_args, NULL)) {
 	    /*
 	     * If allowed (no bang) set ret but keep on checking.
 	     * If disallowed (bang), exit loop.

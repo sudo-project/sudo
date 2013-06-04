@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2008, 2010-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2007-2008, 2010-2012 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -81,7 +81,7 @@ list2tq(void *vh, void *vl)
     if (l != NULL) {
 #ifdef DEBUG
 	if (l->prev == NULL) {
-	    warningx2("list2tq called with non-semicircular list");
+	    warningx_nodebug("list2tq called with non-semicircular list");
 	    abort();
 	}
 #endif

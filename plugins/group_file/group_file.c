@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/param.h>
 #include <sys/stat.h>
 
 #include <stdio.h>
@@ -77,7 +76,7 @@ sample_init(int version, sudo_printf_t sudo_printf, char *const argv[])
 
     if (GROUP_API_VERSION_GET_MAJOR(version) != GROUP_API_VERSION_MAJOR) {
 	sudo_log(SUDO_CONV_ERROR_MSG,
-	    "sample_group: incompatible major version %d, expected %d\n",
+	    "group_file: incompatible major version %d, expected %d\n",
 	    GROUP_API_VERSION_GET_MAJOR(version),
 	    GROUP_API_VERSION_MAJOR);
 	return -1;
@@ -86,12 +85,12 @@ sample_init(int version, sudo_printf_t sudo_printf, char *const argv[])
     /* Sanity check the specified group file. */
     if (argv == NULL || argv[0] == NULL) {
 	sudo_log(SUDO_CONV_ERROR_MSG,
-	    "sample_group: path to group file not specified\n");
+	    "group_file: path to group file not specified\n");
 	return -1;
     }
     if (stat(argv[0], &sb) != 0) {
 	sudo_log(SUDO_CONV_ERROR_MSG,
-	    "sample_group: %s: %s\n", argv[0], strerror(errno));
+	    "group_file: %s: %s\n", argv[0], strerror(errno));
 	return -1;
     }
     if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
@@ -132,7 +131,7 @@ sample_query(const char *user, const char *group, const struct passwd *pwd)
     return false;
 }
 
-struct sudoers_group_plugin group_plugin = {
+__dso_public struct sudoers_group_plugin group_plugin = {
     GROUP_API_VERSION,
     sample_init,
     sample_cleanup,

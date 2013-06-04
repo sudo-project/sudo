@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -97,7 +97,7 @@ struct plugin_container {
 };
 TQ_DECLARE(plugin_container)
 
-extern struct plugin_container_list policy_plugins;
+extern struct plugin_container policy_plugin;
 extern struct plugin_container_list io_plugins;
 
 int sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],

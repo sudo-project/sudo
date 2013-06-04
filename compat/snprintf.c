@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2008, 2010-2011
+ * Copyright (c) 1999-2005, 2008, 2010-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 1990, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -41,8 +41,9 @@
 
 #include <config.h>
 
+#if !defined(HAVE_VSNPRINTF) || !defined(HAVE_SNPRINTF) || !defined(HAVE_VASPRINTF) || !defined(HAVE_ASPRINTF)
+
 #include <sys/types.h>
-#include <sys/param.h>
 
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -53,8 +54,10 @@
 #  include <stdlib.h>
 # endif
 #endif /* STDC_HEADERS */
-#ifdef HAVE_STDINT_H
+#if defined(HAVE_STDINT_H)
 # include <stdint.h>
+#elif defined(HAVE_INTTYPES_H)
+# include <inttypes.h>
 #endif
 #ifdef HAVE_STRING_H
 # if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
@@ -116,7 +119,7 @@ static int xxxprintf(char **, size_t, int, const char *, va_list);
 #define	LADJUST		0x004		/* left adjustment */
 #define	LONGDBL		0x008		/* long double; unimplemented */
 #define	LONGINT		0x010		/* long integer */
-#define	QUADINT		0x020		/* quad integer */
+#define	LLONGINT		0x020		/* quad integer */
 #define	SHORTINT	0x040		/* short integer */
 #define	ZEROPAD		0x080		/* zero (as opposed to blank) pad */
 
@@ -430,11 +433,16 @@ reswitch:	switch (ch) {
 			flags |= SHORTINT;
 			goto rflag;
 		case 'l':
-			flags |= LONGINT;
+			if (*fmt == 'l') {
+				fmt++;
+				flags |= LLONGINT;
+			} else {
+				flags |= LONGINT;
+			}
 			goto rflag;
 #ifdef HAVE_LONG_LONG_INT
 		case 'q':
-			flags |= QUADINT;
+			flags |= LLONGINT;
 			goto rflag;
 #endif /* HAVE_LONG_LONG_INT */
 		case 'c':
@@ -448,7 +456,7 @@ reswitch:	switch (ch) {
 		case 'd':
 		case 'i':
 #ifdef HAVE_LONG_LONG_INT
-			if (flags & QUADINT) {
+			if (flags & LLONGINT) {
 				uqval = va_arg(ap, long long);
 				if ((long long)uqval < 0) {
 					uqval = -uqval;
@@ -468,7 +476,7 @@ reswitch:	switch (ch) {
 			goto number;
 		case 'n':
 #ifdef HAVE_LONG_LONG_INT
-			if (flags & QUADINT)
+			if (flags & LLONGINT)
 				*va_arg(ap, long long *) = ret;
 			else
 #endif /* HAVE_LONG_LONG_INT */
@@ -484,7 +492,7 @@ reswitch:	switch (ch) {
 			/*FALLTHROUGH*/
 		case 'o':
 #ifdef HAVE_LONG_LONG_INT
-			if (flags & QUADINT)
+			if (flags & LLONGINT)
 				uqval = va_arg(ap, unsigned long long);
 			else
 #endif /* HAVE_LONG_LONG_INT */
@@ -502,7 +510,7 @@ reswitch:	switch (ch) {
 			ulval = (unsigned long)va_arg(ap, void *);
 			base = 16;
 			xdigs = "0123456789abcdef";
-			flags = (flags & ~QUADINT) | HEXPREFIX;
+			flags = (flags & ~LLONGINT) | HEXPREFIX;
 			ch = 'x';
 			goto nosign;
 		case 's':
@@ -531,7 +539,7 @@ reswitch:	switch (ch) {
 			/*FALLTHROUGH*/
 		case 'u':
 #ifdef HAVE_LONG_LONG_INT
-			if (flags & QUADINT)
+			if (flags & LLONGINT)
 				uqval = va_arg(ap, unsigned long long);
 			else
 #endif /* HAVE_LONG_LONG_INT */
@@ -545,7 +553,7 @@ reswitch:	switch (ch) {
 			xdigs = "0123456789abcdef";
 hex:
 #ifdef HAVE_LONG_LONG_INT
-			if (flags & QUADINT)
+			if (flags & LLONGINT)
 				uqval = va_arg(ap, unsigned long long);
 			else
 #endif /* HAVE_LONG_LONG_INT */
@@ -554,7 +562,7 @@ hex:
 			/* leading 0x/X only if non-zero */
 			if (flags & ALT &&
 #ifdef HAVE_LONG_LONG_INT
-			    (flags & QUADINT ? uqval != 0 : ulval != 0))
+			    (flags & LLONGINT ? uqval != 0 : ulval != 0))
 #else
 			    ulval != 0)
 #endif /* HAVE_LONG_LONG_INT */
@@ -577,7 +585,7 @@ number:			if ((dprec = prec) >= 0)
 			 */
 			cp = buf + BUF;
 #ifdef HAVE_LONG_LONG_INT
-			if (flags & QUADINT) {
+			if (flags & LLONGINT) {
 				if (uqval != 0 || prec != 0)
 					cp = __uqtoa(uqval, cp, base,
 					    flags & ALT, xdigs);
@@ -705,3 +713,5 @@ asprintf(char **str, char const *fmt, ...)
 	return ret;
 }
 #endif /* HAVE_ASPRINTF */
+
+#endif /* !HAVE_VSNPRINTF || !HAVE_SNPRINTF || !HAVE_VASPRINTF || !HAVE_ASPRINTF */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2003, 2004, 2008-2011
+ * Copyright (c) 2001, 2003, 2004, 2008-2011, 2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -16,6 +16,8 @@
  */
 
 #include <config.h>
+
+#if !defined(HAVE_MKSTEMPS) || !defined(HAVE_MKDTEMP)
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -157,3 +159,4 @@ mkdtemp(char *path)
 	return path;
 }
 #endif /* HAVE_MKDTEMP */
+#endif /* !HAVE_MKSTEMPS || !HAVE_MKDTEMP */

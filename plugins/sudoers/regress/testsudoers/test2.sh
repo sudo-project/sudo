@@ -3,9 +3,11 @@
 # Test #include facility
 #
 
-USER=`\ls -l $TESTDIR/test2.inc | awk '{print $3}'`
-UID=`id -u $USER`
+MYUID=`\ls -ln $TESTDIR/test2.inc | awk '{print $3}'`
+MYGID=`\ls -ln $TESTDIR/test2.inc | awk '{print $4}'`
 exec 2>&1
-./testsudoers -U $UID root id <<EOF
+./testsudoers -U $MYUID -G $MYGID root id <<EOF
 #include $TESTDIR/test2.inc
 EOF
+
+exit 0

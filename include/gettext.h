@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2012 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,9 +21,7 @@
  * Solaris locale.h includes libintl.h which causes problems when we
  * redefine the gettext functions.  We include it first to avoid this.
  */
-#if defined(HAVE_SETLOCALE) && defined(__sun__) && defined(__svr4__)
-# include <locale.h>
-#endif
+#include <locale.h>
 
 #ifdef HAVE_LIBINTL_H
 

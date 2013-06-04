@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010, 2011, 2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -28,6 +28,6 @@ struct timeval;
 
 bool lock_file(int, int);
 int touch(int, char *, struct timeval *);
-char *sudo_parseln(FILE *);
+ssize_t  sudo_parseln(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp);
 
 #endif /* _SUDO_FILEOPS_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2012
+ * Copyright (c) 1996, 1998-2005, 2007-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,6 @@
 
 #include <config.h>
 
-#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
@@ -59,10 +58,6 @@
 #include <errno.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <netdb.h>
-#ifdef HAVE_SETLOCALE
-# include <locale.h>
-#endif
 
 #include "tsgetgrpw.h"
 #include "sudoers.h"
@@ -81,11 +76,9 @@ void print_defaults(void);
 void print_privilege(struct privilege *);
 void print_userspecs(void);
 void usage(void) __attribute__((__noreturn__));
-void cleanup(int);
 static void set_runaspw(const char *);
 static void set_runasgr(const char *);
 static int cb_runas_default(const char *);
-static int testsudoers_printf(int msg_type, const char *fmt, ...);
 static int testsudoers_print(const char *msg);
 
 extern void setgrfile(const char *);
@@ -106,15 +99,12 @@ extern int (*trace_print)(const char *msg);
 /*
  * Globals
  */
-struct interface *interfaces;
 struct sudo_user sudo_user;
 struct passwd *list_pw;
 static char *runas_group, *runas_user;
 extern int errorlineno;
 extern bool parse_error;
 extern char *errorfile;
-sudo_printf_t sudo_printf = testsudoers_printf;
-sudo_conv_t sudo_conv;	/* NULL in non-plugin */
 
 /* For getopt(3) */
 extern char *optarg;
@@ -124,8 +114,10 @@ extern int optind;
 extern char *malloc_options;
 #endif
 #ifdef YYDEBUG
-extern int yydebug;
+extern int sudoersdebug;
 #endif
+
+__dso_public int main(int argc, char *argv[]);
 
 int
 main(int argc, char *argv[])
@@ -134,7 +126,7 @@ main(int argc, char *argv[])
     struct privilege *priv;
     struct userspec *us;
     char *p, *grfile, *pwfile;
-    char hbuf[MAXHOSTNAMELEN + 1];
+    char hbuf[HOST_NAME_MAX + 1];
     int match, host_match, runas_match, cmnd_match;
     int ch, dflag, exitcode = 0;
     debug_decl(main, SUDO_DEBUG_MAIN)
@@ -143,21 +135,19 @@ main(int argc, char *argv[])
     malloc_options = "AFGJPR";
 #endif
 #ifdef YYDEBUG
-    yydebug = 1;
+    sudoersdebug = 1;
 #endif
 
 #if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
     setprogname(argc > 0 ? argv[0] : "testsudoers");
 #endif
 
-#ifdef HAVE_SETLOCALE 
-    setlocale(LC_ALL, "");
-#endif
+    sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have own domain */
     textdomain("sudoers");
 
     /* Read sudo.conf. */
-    sudo_conf_read();
+    sudo_conf_read(NULL);
 
     dflag = 0;
     grfile = pwfile = NULL;
@@ -222,11 +212,11 @@ main(int argc, char *argv[])
 	argc -= 2;
     }
     if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL)
-	errorx(1, _("unknown user: %s"), user_name);
+	fatalx(_("unknown user: %s"), user_name);
 
     if (user_host == NULL) {
 	if (gethostname(hbuf, sizeof(hbuf)) != 0)
-	    error(1, "gethostname");
+	    fatal("gethostname");
 	hbuf[sizeof(hbuf) - 1] = '\0';
 	user_host = hbuf;
     }
@@ -250,7 +240,7 @@ main(int argc, char *argv[])
 	for (to = user_args, from = argv; *from; from++) {
 	    n = strlcpy(to, *from, size - (to - user_args));
 	    if (n >= size - (to - user_args))
-		errorx(1, _("internal error, %s overflow"), "init_vars()");
+		fatalx(_("internal error, %s overflow"), "init_vars()");
 	    to += n;
 	    *to++ = ' ';
 	}
@@ -270,7 +260,7 @@ main(int argc, char *argv[])
     /* Allocate space for data structures in the parser. */
     init_parser("sudoers", false);
 
-    if (yyparse() != 0 || parse_error) {
+    if (sudoersparse() != 0 || parse_error) {
 	parse_error = true;
 	if (errorlineno != -1)
 	    (void) printf("Parse error in %s near line %d",
@@ -366,7 +356,7 @@ set_runaspw(const char *user)
 	    runas_pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
     } else {
 	if ((runas_pw = sudo_getpwnam(user)) == NULL)
-	    errorx(1, _("unknown user: %s"), user);
+	    fatalx(_("unknown user: %s"), user);
     }
 
     debug_return;
@@ -384,7 +374,7 @@ set_runasgr(const char *group)
 	    runas_gr = sudo_fakegrnam(group);
     } else {
 	if ((runas_gr = sudo_getgrnam(group)) == NULL)
-	    errorx(1, _("unknown group: %s"), group);
+	    fatalx(_("unknown group: %s"), group);
     }
 
     debug_return;
@@ -410,12 +400,6 @@ sudo_setspent(void)
 
 void
 sudo_endspent(void)
-{
-    return;
-}
-
-void
-set_fqdn(void)
 {
     return;
 }
@@ -476,15 +460,6 @@ set_perms(int perm)
 void
 restore_perms(void)
 {
-}
-
-void
-cleanup(int gotsignal)
-{
-    if (!gotsignal) {
-	sudo_endpwent();
-	sudo_endgrent();
-    }
 }
 
 void
@@ -603,7 +578,8 @@ print_privilege(struct privilege *priv)
 	    print_member(m);
 	}
 	fputs(" = ", stdout);
-	tags.nopasswd = tags.noexec = UNSPEC;
+	tags.nopasswd = UNSPEC;
+	tags.noexec = UNSPEC;
 	tq_foreach_fwd(&p->cmndlist, cs) {
 	    if (cs != tq_first(&p->cmndlist))
 		fputs(", ", stdout);
@@ -671,32 +647,6 @@ print_userspecs(void)
 	putchar('\n');
     }
     debug_return;
-}
-
-static int
-testsudoers_printf(int msg_type, const char *fmt, ...)
-{
-    va_list ap;
-    FILE *fp;
-    debug_decl(testsudoers_printf, SUDO_DEBUG_UTIL)
-            
-    switch (msg_type) {
-    case SUDO_CONV_INFO_MSG:
-	fp = stdout;
-	break;
-    case SUDO_CONV_ERROR_MSG:
-	fp = stderr;
-	break;
-    default:
-	errno = EINVAL;
-	debug_return_int(-1);
-    }
-   
-    va_start(ap, fmt);
-    vfprintf(fp, fmt, ap);
-    va_end(ap);
-   
-    debug_return_int(0);
 }
 
 void

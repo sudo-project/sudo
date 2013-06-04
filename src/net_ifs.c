@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2010
+ * Copyright (c) 1996, 1998-2005, 2007-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -32,7 +32,6 @@ struct rtentry;
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/param.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
 #if defined(HAVE_SYS_SOCKIO_H) && !defined(SIOCGIFCONF)
@@ -224,7 +223,7 @@ get_net_ifs(char **addrinfo)
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0)
-	error(1, _("unable to open socket"));
+	fatal(_("unable to open socket"));
 
     /*
      * Get interface configuration or return.

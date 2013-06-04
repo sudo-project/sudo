@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007, 2010-2011
+ * Copyright (c) 1999-2005, 2007, 2010-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -24,7 +24,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/param.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -105,8 +104,8 @@ sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 
     if (sia_ses_init(&siah, sudo_argc, sudo_argv, NULL, pw->pw_name, user_ttypath, 1, NULL) != SIASUCCESS) {
 
-	log_error(USE_ERRNO|NO_MAIL,
-	    _("unable to initialize SIA session"));
+	log_warning(USE_ERRNO|NO_MAIL,
+	    N_("unable to initialize SIA session"));
 	debug_return_int(AUTH_FATAL);
     }
 

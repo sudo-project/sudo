@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -35,9 +35,6 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_SETLOCALE
-# include <locale.h>
-#endif
 #include <pwd.h>
 #include <grp.h>
 #include <time.h>
@@ -50,9 +47,10 @@
 
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-sudo_conv_t sudo_conv;		/* NULL in non-plugin */
 
 static char sessid[7];
+
+__dso_public int main(int argc, char *argv[]);
 
 static void
 usage(void)
@@ -117,7 +115,7 @@ main(int argc, char *argv[])
 
     fp = fopen(argv[1], "r");
     if (fp == NULL)
-	errorx(1, "unable to open %s", argv[1]);
+	fatalx("unable to open %s", argv[1]);
 
     memset(&pw, 0, sizeof(pw));
     memset(&rpw, 0, sizeof(rpw));
@@ -186,7 +184,7 @@ main(int argc, char *argv[])
 	    tests++;
 	    break;
 	default:
-	    errorx(1, "internal error, invalid state %d", state);
+	    fatalx("internal error, invalid state %d", state);
 	}
 	state = (state + 1) % MAX_STATE;
     }
@@ -203,10 +201,4 @@ main(int argc, char *argv[])
 void io_nextid(char *iolog_dir, char *fallback, char id[7])
 {
     memcpy(id, sessid, sizeof(sessid));
-}
-
-void
-cleanup(int gotsig)
-{
-    return;
 }

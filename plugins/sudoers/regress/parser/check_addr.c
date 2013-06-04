@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -41,7 +41,6 @@
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <netdb.h>
 
 #define SUDO_ERROR_WRAP 0
 
@@ -49,13 +48,7 @@
 #include "parse.h"
 #include "interfaces.h"
 
-static int check_addr_printf(int msg_type, const char *fmt, ...);
-
-/* for match_addr.c */
-struct interface *interfaces;
-sudo_printf_t sudo_printf = check_addr_printf;
-
-sudo_conv_t sudo_conv;		/* NULL in non-plugin */
+__dso_public int main(int argc, char *argv[]);
 
 static int
 check_addr(char *input)
@@ -107,7 +100,7 @@ main(int argc, char *argv[])
 
     fp = fopen(argv[1], "r");
     if (fp == NULL)
-	errorx(1, "unable to open %s", argv[1]);
+	fatalx("unable to open %s", argv[1]);
 
     /*
      * Input is in the following format.  There are two types of
@@ -151,36 +144,4 @@ main(int argc, char *argv[])
 	ntests, errors, (ntests - errors) * 100 / ntests);
 
     exit(errors);
-}
-
-/* STUB */
-void
-cleanup(int gotsig)
-{
-    return;
-}
-
-static int
-check_addr_printf(int msg_type, const char *fmt, ...)
-{
-    va_list ap;
-    FILE *fp;
-            
-    switch (msg_type) {
-    case SUDO_CONV_INFO_MSG:
-        fp = stdout;
-        break;
-    case SUDO_CONV_ERROR_MSG:
-        fp = stderr;
-        break;
-    default:
-        errno = EINVAL;
-        return -1;
-    }
-   
-    va_start(ap, fmt);
-    vfprintf(fp, fmt, ap);
-    va_end(ap);
-   
-    return 0;
 }

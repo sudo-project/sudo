@@ -33,6 +33,7 @@ struct gl_entry {
 };
 
 int test_glob(struct gl_entry *);
+__dso_public int main(int argc, char *argv[]);
 
 int
 main(int argc, char **argv)

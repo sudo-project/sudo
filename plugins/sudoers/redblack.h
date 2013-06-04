@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2004, 2007, 2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004, 2007, 2010, 2013
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,8 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_REDBLACK_H
-#define _SUDO_REDBLACK_H
+#ifndef _SUDOERS_REDBLACK_H
+#define _SUDOERS_REDBLACK_H
 
 enum rbcolor {
     red,
@@ -54,4 +55,4 @@ struct rbnode *rbinsert(struct rbtree *, void *);
 struct rbtree *rbcreate(int (*)(const void *, const void *));
 void rbdestroy(struct rbtree *, void (*)(void *));
 
-#endif /* _SUDO_REDBLACK_H */
+#endif /* _SUDOERS_REDBLACK_H */

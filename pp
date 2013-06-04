@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2012 Quest Software, Inc. ALL RIGHTS RESERVED
-pp_revision="368"
+pp_revision="371"
  # Copyright 2012 Quest Software, Inc.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -4493,19 +4493,13 @@ do_start()
     then
         group_opt="--group $GROUP"
     fi
-    if [ "$VERBOSE" = no ]
-    then
-        quiet_opt="--quiet"
-    else
-        quiet_opt="--verbose"
-    fi
 
-	start-stop-daemon --start $quiet_opt $pidfile_opt $user_opt --exec $DAEMON --test > /dev/null \
+	start-stop-daemon --start --quiet $pidfile_opt $user_opt --exec $DAEMON --test > /dev/null \
 	    || return 1
 
     # Note: there seems to be no way to tell whether the daemon will fork itself or not, so pass
     # --background for now
-    start-stop-daemon --start $quiet_opt $pidfile_opt $user_opt --exec $DAEMON -- \
+    start-stop-daemon --start --quiet $pidfile_opt $user_opt --exec $DAEMON -- \
     	$DAEMON_ARGS \
     	|| return 2
 }
@@ -4531,13 +4525,7 @@ do_stop()
     then
         signal_opt="--signal $STOP_SIGNAL"
     fi
-    if [ "$VERBOSE" = "no" ]
-    then
-        quiet_opt="--quiet"
-    else
-        quiet_opt="--verbose"
-    fi
-	start-stop-daemon --stop $quiet_opt $signal_opt --retry=TERM/30/KILL/5 $pidfile_opt --name $NAME
+	start-stop-daemon --stop --quiet $signal_opt --retry=TERM/30/KILL/5 $pidfile_opt --name $NAME
 	RETVAL="$?"
 	[ "$RETVAL" = 2 ] && return 2
 	# Wait for children to finish too if this is a daemon that forks
@@ -4546,7 +4534,7 @@ do_stop()
 	# that waits for the process to drop all resources that could be
 	# needed by services started subsequently.  A last resort is to
 	# sleep for some time.
-	start-stop-daemon --stop $quiet_opt --oknodo --retry=0/30/KILL/5 --exec $DAEMON
+	start-stop-daemon --stop --quiet --oknodo --retry=0/30/KILL/5 --exec $DAEMON
 	[ "$?" = 2 ] && return 2
 	# Many daemons don't delete their pidfiles when they exit.
 	test -z $PIDFILE || rm -f $PIDFILE
@@ -4567,7 +4555,7 @@ do_reload() {
     fi
     if [ -n "$RELOAD_SIGNAL" ]
     then
-	    start-stop-daemon --stop --signal $RELOAD_SIGNAL $quiet_opt $pidfile_opt --name $NAME
+	    start-stop-daemon --stop --signal $RELOAD_SIGNAL --quiet $pidfile_opt --name $NAME
     fi
 	return 0
 }
@@ -6612,6 +6600,7 @@ pp_backend_macos_init () {
     pp_macos_pkg_readme=
     pp_macos_pkg_welcome=
     pp_macos_sudo=sudo
+    pp_macos_installer_plugin=
     # OS X puts the library version *before* the .dylib extension
     pp_shlib_suffix='*.dylib'
 }
@@ -6835,8 +6824,7 @@ pp_macos_bom_fix_parents () {
 		    # Make sure we do not override system directories
 		    if ($d =~ m:^\./(etc|var)$:) {
 		      my $tgt = "private/$1";
-		      my $_ = `/usr/bin/printf "$tgt" | /usr/bin/cksum /dev/stdin`;
-		      my ($sum, $len) = split;
+		      my ($sum, $len) = split(/\s+/, `/usr/bin/printf "$tgt" | /usr/bin/cksum /dev/stdin`);
 		      print "$d\t120755\t0/0\t$len\t$sum\t$tgt\n";
 		    } elsif ($d eq "." || $d eq "./Library") {
 		      print "$d\t41775\t0/80\n";
@@ -7130,6 +7118,15 @@ CompressedSize 0
     awk '{ print "." $6 }' $filelists | sed 's:/$::' | sort | /usr/bin/cpio -o | pp_macos_rewrite_cpio $filelists | gzip -9f -c > $Contents/Archive.pax.gz
     )
 
+    # Copy installer plugins if any
+    if test -n "$pp_macos_installer_plugin"; then
+	if test ! -f "$pp_macos_installer_plugin/InstallerSections.plist"; then
+	    pp_error "Missing InstallerSections.plist file in $pp_macos_installer_plugin"
+	fi
+	mkdir -p $pkgdir/Plugins
+	cp -R "$pp_macos_installer_plugin"/* $pkgdir/Plugins
+    fi
+
     test -d $pp_wrkdir/bom_stage && $pp_macos_sudo rm -rf $pp_wrkdir/bom_stage
 
     rm -f ${name}-${version}.dmg
@@ -7298,6 +7295,15 @@ pp_backend_macos_flat () {
     cd $pp_destdir || pp_error "Can't cd to $pp_destdir"
     awk '{ print "." $6 }' $filelists | sed 's:/$::' | sort | /usr/bin/cpio -o | pp_macos_rewrite_cpio $filelists | gzip -9f -c > $bundledir/Payload
     )
+
+    # Copy installer plugins if any
+    if test -n "$pp_macos_installer_plugin"; then
+	if test ! -f "$pp_macos_installer_plugin/InstallerSections.plist"; then
+	    pp_error "Missing InstallerSections.plist file in $pp_macos_installer_plugin"
+	fi
+	mkdir -p $pkgdir/Plugins
+	cp -R "$pp_macos_installer_plugin"/* $pkgdir/Plugins
+    fi
 
     test -d $pp_wrkdir/bom_stage && $pp_macos_sudo rm -rf $pp_wrkdir/bom_stage
 

@@ -351,6 +351,18 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Set of limit privileges"),
 	NULL,
     }, {
+	"exec_background", T_FLAG,
+	N_("Run commands on a pty in the background"),
+	NULL,
+    }, {
+	"pam_session", T_FLAG,
+	N_("Create a new PAM session for the command to run in"),
+	NULL,
+    }, {
+	"maxseq", T_UINT,
+	N_("Maximum I/O log sequence number"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

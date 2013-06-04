@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_INS_CLASSIC_H
-#define _SUDO_INS_CLASSIC_H
+#ifndef _SUDOERS_INS_CLASSIC_H
+#define _SUDOERS_INS_CLASSIC_H
 
     /*
      * Insults from the original sudo(8).
@@ -34,4 +34,4 @@
     "Do you think like you type?",
     "Your mind just hasn't been the same since the electro-shock, has it?",
 
-#endif /* _SUDO_INS_CLASSIC_H */
+#endif /* _SUDOERS_INS_CLASSIC_H */

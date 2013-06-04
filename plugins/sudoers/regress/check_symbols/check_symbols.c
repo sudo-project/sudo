@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2012-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -50,6 +50,8 @@
 # define LINE_MAX 2048
 #endif
 
+__dso_public int main(int argc, char *argv[]);
+
 static void
 usage(void)
 {
@@ -78,11 +80,11 @@ main(int argc, char *argv[])
 
     handle = dlopen(plugin_path, RTLD_LAZY|RTLD_GLOBAL);
     if (handle == NULL)
-	errorx2(1, "unable to dlopen %s: %s", plugin_path, dlerror());
+	fatalx_nodebug("unable to dlopen %s: %s", plugin_path, dlerror());
 
     fp = fopen(symbols_file, "r");
     if (fp == NULL)
-	error2(1, "unable to open %s", symbols_file);
+	fatal_nodebug("unable to open %s", symbols_file);
 
     while (fgets(line, sizeof(line), fp) != NULL) {
 	ntests++;
@@ -90,7 +92,8 @@ main(int argc, char *argv[])
 	    *cp = '\0';
 	sym = dlsym(handle, line);
 	if (sym == NULL) {
-	    warningx2("unable to resolve symbol %s: %s", line, dlerror());
+	    printf("%s: test %d: unable to resolve symbol %s: %s\n",
+		getprogname(), ntests, line, dlerror());
 	    errors++;
 	}
     }
@@ -98,23 +101,18 @@ main(int argc, char *argv[])
     /*
      * Make sure unexported symbols are not available.
      */
+    ntests++;
     sym = dlsym(handle, "user_in_group");
     if (sym != NULL) {
-	warningx2("able to resolve local symbol user_in_group");
+	printf("%s: test %d: able to resolve local symbol user_in_group\n",
+	    getprogname(), ntests);
 	errors++;
     }
-    ntests++;
 
     dlclose(handle);
 
-    printf("check_symbols: %d tests run, %d errors, %d%% success rate\n",
+    printf("%s: %d tests run, %d errors, %d%% success rate\n", getprogname(),
 	ntests, errors, (ntests - errors) * 100 / ntests);
 
     exit(errors);
-}
-
-void
-cleanup(int gotsig)
-{
-    return;
 }

@@ -52,7 +52,9 @@
 
 #include <config.h>
 
-#include <sys/param.h>
+#ifndef HAVE_GLOB
+
+#include <sys/types.h>
 #include <sys/stat.h>
 
 #include <stdio.h>
@@ -898,4 +900,5 @@ qprintf(const char *str, Char *s)
 		(void)printf("%c", ismeta(*p) ? '_' : ' ');
 	(void)printf("\n");
 }
-#endif
+#endif /* DEBUG */
+#endif /* HAVE_GLOB */

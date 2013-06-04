@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2010, 2013 Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 2009 Christian S.J. Peron
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -15,10 +15,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_BSM_AUDIT_H
-#define	_SUDO_BSM_AUDIT_H
+#ifndef _SUDOERS_BSM_AUDIT_H
+#define	_SUDOERS_BSM_AUDIT_H
 
 void	bsm_audit_success(char **);
 void	bsm_audit_failure(char **, char const * const, va_list);
 
-#endif /* _SUDO_BSM_AUDIT_H */
+#endif /* _SUDOERS_BSM_AUDIT_H */

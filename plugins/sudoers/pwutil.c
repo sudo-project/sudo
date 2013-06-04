@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2012
+ * Copyright (c) 1996, 1998-2005, 2007-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -22,8 +22,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/param.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -48,17 +46,12 @@
 #ifdef HAVE_SETAUTHDB
 # include <usersec.h>
 #endif /* HAVE_SETAUTHDB */
-#ifdef HAVE_UTMPX_H
-# include <utmpx.h>
-#else
-# include <utmp.h>
-#endif /* HAVE_UTMPX_H */
-#include <limits.h>
 #include <pwd.h>
 #include <grp.h>
 
 #include "sudoers.h"
 #include "redblack.h"
+#include "pwutil.h"
 
 /*
  * The passwd and group caches.
@@ -72,47 +65,6 @@ static int  cmp_pwnam(const void *, const void *);
 static int  cmp_grgid(const void *, const void *);
 
 #define cmp_grnam	cmp_pwnam
-
-#define ptr_to_item(p) ((struct cache_item *)((char *)p - offsetof(struct cache_item_##p, p)))
-
-/*
- * Generic cache element.
- */
-struct cache_item {
-    unsigned int refcnt;
-    /* key */
-    union {
-	uid_t uid;
-	gid_t gid;
-	char *name;
-    } k;
-    /* datum */
-    union {
-	struct passwd *pw;
-	struct group *gr;
-	struct group_list *grlist;
-    } d;
-};
-
-/*
- * Container structs to simpify size and offset calculations and guarantee
- * proper aligment of struct passwd, group and group_list.
- */
-struct cache_item_pw {
-    struct cache_item cache;
-    struct passwd pw;
-};
-
-struct cache_item_gr {
-    struct cache_item cache;
-    struct group gr;
-};
-
-struct cache_item_grlist {
-    struct cache_item cache;
-    struct group_list grlist;
-    /* actually bigger */
-};
 
 /*
  * Compare by uid.
@@ -134,93 +86,6 @@ cmp_pwnam(const void *v1, const void *v2)
     const struct cache_item *ci1 = (const struct cache_item *) v1;
     const struct cache_item *ci2 = (const struct cache_item *) v2;
     return strcmp(ci1->k.name, ci2->k.name);
-}
-
-#define FIELD_SIZE(src, name, size)			\
-do {							\
-	if (src->name) {				\
-		size = strlen(src->name) + 1;		\
-		total += size;				\
-	}                                               \
-} while (0)
-
-#define FIELD_COPY(src, dst, name, size)		\
-do {							\
-	if (src->name) {				\
-		memcpy(cp, src->name, size);		\
-		dst->name = cp;				\
-		cp += size;				\
-	}						\
-} while (0)
-
-/*
- * Dynamically allocate space for a struct item plus the key and data
- * elements.  If name is non-NULL it is used as the key, else the
- * uid is the key.  Fills in datum from struct password.
- */
-static struct cache_item *
-make_pwitem(const struct passwd *pw, const char *name)
-{
-    char *cp;
-    const char *pw_shell;
-    size_t nsize, psize, csize, gsize, dsize, ssize, total;
-    struct cache_item_pw *pwitem;
-    struct passwd *newpw;
-    debug_decl(make_pwitem, SUDO_DEBUG_NSS)
-
-    /* If shell field is empty, expand to _PATH_BSHELL. */
-    pw_shell = (pw->pw_shell == NULL || pw->pw_shell[0] == '\0')
-	? _PATH_BSHELL : pw->pw_shell;
-
-    /* Allocate in one big chunk for easy freeing. */
-    nsize = psize = csize = gsize = dsize = ssize = 0;
-    total = sizeof(*pwitem);
-    FIELD_SIZE(pw, pw_name, nsize);
-    FIELD_SIZE(pw, pw_passwd, psize);
-#ifdef HAVE_LOGIN_CAP_H
-    FIELD_SIZE(pw, pw_class, csize);
-#endif
-    FIELD_SIZE(pw, pw_gecos, gsize);
-    FIELD_SIZE(pw, pw_dir, dsize);
-    /* Treat shell specially since we expand "" -> _PATH_BSHELL */
-    ssize = strlen(pw_shell) + 1;
-    total += ssize;
-    if (name != NULL)
-	total += strlen(name) + 1;
-
-    /* Allocate space for struct item, struct passwd and the strings. */
-    pwitem = ecalloc(1, total);
-    newpw = &pwitem->pw;
-
-    /*
-     * Copy in passwd contents and make strings relative to space
-     * at the end of the struct.
-     */
-    memcpy(newpw, pw, sizeof(*pw));
-    cp = (char *)(pwitem + 1);
-    FIELD_COPY(pw, newpw, pw_name, nsize);
-    FIELD_COPY(pw, newpw, pw_passwd, psize);
-#ifdef HAVE_LOGIN_CAP_H
-    FIELD_COPY(pw, newpw, pw_class, csize);
-#endif
-    FIELD_COPY(pw, newpw, pw_gecos, gsize);
-    FIELD_COPY(pw, newpw, pw_dir, dsize);
-    /* Treat shell specially since we expand "" -> _PATH_BSHELL */
-    memcpy(cp, pw_shell, ssize);
-    newpw->pw_shell = cp;
-    cp += ssize;
-
-    /* Set key and datum. */
-    if (name != NULL) {
-	memcpy(cp, name, strlen(name) + 1);
-	pwitem->cache.k.name = cp;
-    } else {
-	pwitem->cache.k.uid = pw->pw_uid;
-    }
-    pwitem->cache.d.pw = newpw;
-    pwitem->cache.refcnt = 1;
-
-    debug_return_ptr(&pwitem->cache);
 }
 
 void
@@ -272,20 +137,16 @@ sudo_getpwuid(uid_t uid)
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb(IDtouser(uid));
 #endif
-    if ((key.d.pw = getpwuid(uid)) != NULL) {
-	item = make_pwitem(key.d.pw, NULL);
-	if (rbinsert(pwcache_byuid, item) != NULL)
-	    errorx(1, _("unable to cache uid %u (%s), already exists"),
-		(unsigned int) uid, item->d.pw->pw_name);
-    } else {
+    item = sudo_make_pwitem(uid, NULL);
+    if (item == NULL) {
 	item = ecalloc(1, sizeof(*item));
 	item->refcnt = 1;
 	item->k.uid = uid;
 	/* item->d.pw = NULL; */
-	if (rbinsert(pwcache_byuid, item) != NULL)
-	    errorx(1, _("unable to cache uid %u, already exists"),
-		(unsigned int) uid);
     }
+    if (rbinsert(pwcache_byuid, item) != NULL)
+	fatalx(_("unable to cache uid %u, already exists"),
+	    (unsigned int) uid);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -316,20 +177,17 @@ sudo_getpwnam(const char *name)
 #ifdef HAVE_SETAUTHDB
     aix_setauthdb((char *) name);
 #endif
-    if ((key.d.pw = getpwnam(name)) != NULL) {
-	item = make_pwitem(key.d.pw, name);
-	if (rbinsert(pwcache_byname, item) != NULL)
-	    errorx(1, _("unable to cache user %s, already exists"), name);
-    } else {
+    item = sudo_make_pwitem((uid_t)-1, name);
+    if (item == NULL) {
 	len = strlen(name) + 1;
 	item = ecalloc(1, sizeof(*item) + len);
 	item->refcnt = 1;
 	item->k.name = (char *) item + sizeof(*item);
 	memcpy(item->k.name, name, len);
 	/* item->d.pw = NULL; */
-	if (rbinsert(pwcache_byname, item) != NULL)
-	    errorx(1, _("unable to cache user %s, already exists"), name);
     }
+    if (rbinsert(pwcache_byname, item) != NULL)
+	fatalx(_("unable to cache user %s, already exists"), name);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -339,22 +197,32 @@ done:
 }
 
 /*
- * Take a user, uid and gid and return a faked up passwd struct.
+ * Take a user, uid, gid, home and shell and return a faked up passwd struct.
+ * If home or shell are NULL default values will be used.
  */
 struct passwd *
-sudo_fakepwnamid(const char *user, uid_t uid, gid_t gid)
+sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
+    const char *shell)
 {
     struct cache_item_pw *pwitem;
     struct passwd *pw;
     struct rbnode *node;
-    size_t len, namelen;
+    size_t len, name_len, home_len, shell_len;
     int i;
-    debug_decl(sudo_fakepwnam, SUDO_DEBUG_NSS)
+    debug_decl(sudo_mkpwent, SUDO_DEBUG_NSS)
 
-    namelen = strlen(user);
-    len = sizeof(*pwitem) + namelen + 1 /* pw_name */ +
+    /* Optional arguments. */
+    if (home == NULL)
+	home = "/";
+    if (shell == NULL)
+	shell = _PATH_BSHELL;
+
+    name_len = strlen(user);
+    home_len = strlen(home);
+    shell_len = strlen(shell);
+    len = sizeof(*pwitem) + name_len + 1 /* pw_name */ +
 	sizeof("*") /* pw_passwd */ + sizeof("") /* pw_gecos */ +
-	sizeof("/") /* pw_dir */ + sizeof(_PATH_BSHELL);
+	home_len + 1 /* pw_dir */ + shell_len + 1 /* pw_shell */;
 
     for (i = 0; i < 2; i++) {
 	pwitem = ecalloc(1, len);
@@ -362,36 +230,38 @@ sudo_fakepwnamid(const char *user, uid_t uid, gid_t gid)
 	pw->pw_uid = uid;
 	pw->pw_gid = gid;
 	pw->pw_name = (char *)(pwitem + 1);
-	memcpy(pw->pw_name, user, namelen + 1);
-	pw->pw_passwd = pw->pw_name + namelen + 1;
+	memcpy(pw->pw_name, user, name_len + 1);
+	pw->pw_passwd = pw->pw_name + name_len + 1;
 	memcpy(pw->pw_passwd, "*", 2);
 	pw->pw_gecos = pw->pw_passwd + 2;
 	pw->pw_gecos[0] = '\0';
 	pw->pw_dir = pw->pw_gecos + 1;
-	memcpy(pw->pw_dir, "/", 2);
-	pw->pw_shell = pw->pw_dir + 2;
-	memcpy(pw->pw_shell, _PATH_BSHELL, sizeof(_PATH_BSHELL));
+	memcpy(pw->pw_dir, home, home_len + 1);
+	pw->pw_shell = pw->pw_dir + home_len + 1;
+	memcpy(pw->pw_shell, shell, shell_len + 1);
 
 	pwitem->cache.refcnt = 1;
 	pwitem->cache.d.pw = pw;
 	if (i == 0) {
-	    /* Store by uid, overwriting cached version. */
+	    /* Store by uid if it doesn't already exist. */
 	    pwitem->cache.k.uid = pw->pw_uid;
 	    if ((node = rbinsert(pwcache_byuid, &pwitem->cache)) != NULL) {
-		sudo_pw_delref_item(node->data);
-		node->data = &pwitem->cache;
+		/* Already exists, free the item we created. */
+		efree(pwitem);
+		pwitem = (struct cache_item_pw *) node->data;
 	    }
 	} else {
-	    /* Store by name, overwriting cached version. */
+	    /* Store by name if it doesn't already exist. */
 	    pwitem->cache.k.name = pw->pw_name;
 	    if ((node = rbinsert(pwcache_byname, &pwitem->cache)) != NULL) {
-		sudo_pw_delref_item(node->data);
-		node->data = &pwitem->cache;
+		/* Already exists, free the item we created. */
+		efree(pwitem);
+		pwitem = (struct cache_item_pw *) node->data;
 	    }
 	}
     }
     pwitem->cache.refcnt++;
-    debug_return_ptr(pw);
+    debug_return_ptr(&pwitem->pw);
 }
 
 /*
@@ -403,7 +273,7 @@ sudo_fakepwnam(const char *user, gid_t gid)
     uid_t uid;
 
     uid = (uid_t) atoi(user + 1);
-    return sudo_fakepwnamid(user, uid, gid);
+    return sudo_mkpwent(user, uid, gid, NULL, NULL);
 }
 
 void
@@ -459,163 +329,6 @@ cmp_grgid(const void *v1, const void *v2)
     return ci1->k.gid - ci2->k.gid;
 }
 
-/*
- * Dynamically allocate space for a struct item plus the key and data
- * elements.  If name is non-NULL it is used as the key, else the
- * gid is the key.  Fills in datum from struct group.
- */
-static struct cache_item *
-make_gritem(const struct group *gr, const char *name)
-{
-    char *cp;
-    size_t nsize, psize, nmem, total, len;
-    struct cache_item_gr *gritem;
-    struct group *newgr;
-    debug_decl(make_gritem, SUDO_DEBUG_NSS)
-
-    /* Allocate in one big chunk for easy freeing. */
-    nsize = psize = nmem = 0;
-    total = sizeof(*gritem);
-    FIELD_SIZE(gr, gr_name, nsize);
-    FIELD_SIZE(gr, gr_passwd, psize);
-    if (gr->gr_mem) {
-	for (nmem = 0; gr->gr_mem[nmem] != NULL; nmem++)
-	    total += strlen(gr->gr_mem[nmem]) + 1;
-	nmem++;
-	total += sizeof(char *) * nmem;
-    }
-    if (name != NULL)
-	total += strlen(name) + 1;
-
-    gritem = ecalloc(1, total);
-
-    /*
-     * Copy in group contents and make strings relative to space
-     * at the end of the buffer.  Note that gr_mem must come
-     * immediately after struct group to guarantee proper alignment.
-     */
-    newgr = &gritem->gr;
-    memcpy(newgr, gr, sizeof(*gr));
-    cp = (char *)(gritem + 1);
-    if (gr->gr_mem) {
-	newgr->gr_mem = (char **)cp;
-	cp += sizeof(char *) * nmem;
-	for (nmem = 0; gr->gr_mem[nmem] != NULL; nmem++) {
-	    len = strlen(gr->gr_mem[nmem]) + 1;
-	    memcpy(cp, gr->gr_mem[nmem], len);
-	    newgr->gr_mem[nmem] = cp;
-	    cp += len;
-	}
-	newgr->gr_mem[nmem] = NULL;
-    }
-    FIELD_COPY(gr, newgr, gr_passwd, psize);
-    FIELD_COPY(gr, newgr, gr_name, nsize);
-
-    /* Set key and datum. */
-    if (name != NULL) {
-	memcpy(cp, name, strlen(name) + 1);
-	gritem->cache.k.name = cp;
-    } else {
-	gritem->cache.k.gid = gr->gr_gid;
-    }
-    gritem->cache.d.gr = newgr;
-    gritem->cache.refcnt = 1;
-
-    debug_return_ptr(&gritem->cache);
-}
-
-#ifdef HAVE_UTMPX_H
-# define GROUPNAME_LEN	(sizeof((struct utmpx *)0)->ut_user + 1)
-#else
-# ifdef HAVE_STRUCT_UTMP_UT_USER
-#  define GROUPNAME_LEN	(sizeof((struct utmp *)0)->ut_user + 1)
-# else
-#  define GROUPNAME_LEN	(sizeof((struct utmp *)0)->ut_name + 1)
-# endif
-#endif /* HAVE_UTMPX_H */
-
-/*
- * Dynamically allocate space for a struct item plus the key and data
- * elements.  Fills in datum from the groups and gids arrays.
- */
-static struct cache_item *
-make_grlist_item(const char *user, GETGROUPS_T *gids, int ngids)
-{
-    char *cp;
-    size_t i, nsize, ngroups, total, len;
-    struct cache_item_grlist *grlitem;
-    struct group_list *grlist;
-    struct group *grp;
-    debug_decl(make_grlist_item, SUDO_DEBUG_NSS)
-
-#ifdef HAVE_SETAUTHDB
-    aix_setauthdb((char *) user);
-#endif
-
-    /* Allocate in one big chunk for easy freeing. */
-    nsize = strlen(user) + 1;
-    total = sizeof(*grlitem) + nsize;
-    total += sizeof(char *) * ngids;
-    total += sizeof(gid_t *) * ngids;
-    total += GROUPNAME_LEN * ngids;
-
-again:
-    grlitem = ecalloc(1, total);
-
-    /*
-     * Copy in group list and make pointers relative to space
-     * at the end of the buffer.  Note that the groups array must come
-     * immediately after struct group to guarantee proper alignment.
-     */
-    grlist = &grlitem->grlist;
-    cp = (char *)(grlitem + 1);
-    grlist->groups = (char **)cp;
-    cp += sizeof(char *) * ngids;
-    grlist->gids = (gid_t *)cp;
-    cp += sizeof(gid_t) * ngids;
-
-    /* Set key and datum. */
-    memcpy(cp, user, nsize);
-    grlitem->cache.k.name = cp;
-    grlitem->cache.d.grlist = grlist;
-    grlitem->cache.refcnt = 1;
-    cp += nsize;
-
-    /*
-     * Store group IDs.
-     */
-    for (i = 0; i < ngids; i++)
-	grlist->gids[i] = gids[i];
-    grlist->ngids = ngids;
-
-    /*
-     * Resolve and store group names by ID.
-     */
-    ngroups = 0;
-    for (i = 0; i < ngids; i++) {
-	if ((grp = sudo_getgrgid(gids[i])) != NULL) {
-	    len = strlen(grp->gr_name) + 1;
-	    if (cp - (char *)grlitem + len > total) {
-		total += len + GROUPNAME_LEN;
-		efree(grlitem);
-		sudo_gr_delref(grp);
-		goto again;
-	    }
-	    memcpy(cp, grp->gr_name, len);
-	    grlist->groups[ngroups++] = cp;
-	    cp += len;
-	    sudo_gr_delref(grp);
-	}
-    }
-    grlist->ngroups = ngroups;
-
-#ifdef HAVE_SETAUTHDB
-    aix_restoreauthdb();
-#endif
-
-    debug_return_ptr(&grlitem->cache);
-}
-
 void
 sudo_gr_addref(struct group *gr)
 {
@@ -662,20 +375,16 @@ sudo_getgrgid(gid_t gid)
     /*
      * Cache group db entry if it exists or a negative response if not.
      */
-    if ((key.d.gr = getgrgid(gid)) != NULL) {
-	item = make_gritem(key.d.gr, NULL);
-	if (rbinsert(grcache_bygid, item) != NULL)
-	    errorx(1, _("unable to cache gid %u (%s), already exists"),
-		(unsigned int) gid, key.d.gr->gr_name);
-    } else {
+    item = sudo_make_gritem(gid, NULL);
+    if (item == NULL) {
 	item = ecalloc(1, sizeof(*item));
 	item->refcnt = 1;
 	item->k.gid = gid;
 	/* item->d.gr = NULL; */
-	if (rbinsert(grcache_bygid, item) != NULL)
-	    errorx(1, _("unable to cache gid %u, already exists"),
-		(unsigned int) gid);
     }
+    if (rbinsert(grcache_bygid, item) != NULL)
+	fatalx(_("unable to cache gid %u, already exists"),
+	    (unsigned int) gid);
 done:
     item->refcnt++;
     debug_return_ptr(item->d.gr);
@@ -700,20 +409,17 @@ sudo_getgrnam(const char *name)
     /*
      * Cache group db entry if it exists or a negative response if not.
      */
-    if ((key.d.gr = getgrnam(name)) != NULL) {
-	item = make_gritem(key.d.gr, name);
-	if (rbinsert(grcache_byname, item) != NULL)
-	    errorx(1, _("unable to cache group %s, already exists"), name);
-    } else {
+    item = sudo_make_gritem((gid_t)-1, name);
+    if (item == NULL) {
 	len = strlen(name) + 1;
 	item = ecalloc(1, sizeof(*item) + len);
 	item->refcnt = 1;
 	item->k.name = (char *) item + sizeof(*item);
 	memcpy(item->k.name, name, len);
 	/* item->d.gr = NULL; */
-	if (rbinsert(grcache_byname, item) != NULL)
-	    errorx(1, _("unable to cache group %s, already exists"), name);
     }
+    if (rbinsert(grcache_byname, item) != NULL)
+	fatalx(_("unable to cache group %s, already exists"), name);
 done:
     item->refcnt++;
     debug_return_ptr(item->d.gr);
@@ -728,40 +434,42 @@ sudo_fakegrnam(const char *group)
     struct cache_item_gr *gritem;
     struct group *gr;
     struct rbnode *node;
-    size_t len, namelen;
+    size_t len, name_len;
     int i;
     debug_decl(sudo_fakegrnam, SUDO_DEBUG_NSS)
 
-    namelen = strlen(group);
-    len = sizeof(*gritem) + namelen + 1;
+    name_len = strlen(group);
+    len = sizeof(*gritem) + name_len + 1;
 
     for (i = 0; i < 2; i++) {
 	gritem = ecalloc(1, len);
 	gr = &gritem->gr;
 	gr->gr_gid = (gid_t) atoi(group + 1);
 	gr->gr_name = (char *)(gritem + 1);
-	memcpy(gr->gr_name, group, namelen + 1);
+	memcpy(gr->gr_name, group, name_len + 1);
 
 	gritem->cache.refcnt = 1;
 	gritem->cache.d.gr = gr;
 	if (i == 0) {
-	    /* Store by gid, overwriting cached version. */
+	    /* Store by gid if it doesn't already exist. */
 	    gritem->cache.k.gid = gr->gr_gid;
 	    if ((node = rbinsert(grcache_bygid, &gritem->cache)) != NULL) {
-		sudo_gr_delref_item(node->data);
-		node->data = &gritem->cache;
+		/* Already exists, free the item we created. */
+		efree(gritem);
+		gritem = (struct cache_item_gr *) node->data;
 	    }
 	} else {
 	    /* Store by name, overwriting cached version. */
 	    gritem->cache.k.name = gr->gr_name;
 	    if ((node = rbinsert(grcache_byname, &gritem->cache)) != NULL) {
-		sudo_gr_delref_item(node->data);
-		node->data = &gritem->cache;
+		/* Already exists, free the item we created. */
+		efree(gritem);
+		gritem = (struct cache_item_gr *) node->data;
 	    }
 	}
     }
     gritem->cache.refcnt++;
-    debug_return_ptr(gr);
+    debug_return_ptr(&gritem->gr);
 }
 
 void
@@ -846,8 +554,6 @@ sudo_get_grlist(struct passwd *pw)
     struct cache_item key, *item;
     struct rbnode *node;
     size_t len;
-    GETGROUPS_T *gids;
-    int ngids;
     debug_decl(sudo_get_grlist, SUDO_DEBUG_NSS)
 
     key.k.name = pw->pw_name;
@@ -857,37 +563,9 @@ sudo_get_grlist(struct passwd *pw)
     }
     /*
      * Cache group db entry if it exists or a negative response if not.
-     * Use gids list from front-end if possible, otherwise getgrouplist().
      */
-    if (pw == sudo_user.pw && sudo_user.gids != NULL) {
-	gids = user_gids;
-	ngids = user_ngids;
-	user_gids = NULL;
-	user_ngids = 0;
-    } else {
-#if defined(HAVE_SYSCONF) && defined(_SC_NGROUPS_MAX)
-	ngids = (int)sysconf(_SC_NGROUPS_MAX) * 2;
-	if (ngids < 0)
-#endif
-	    ngids = NGROUPS_MAX * 2;
-	gids = emalloc2(ngids, sizeof(GETGROUPS_T));
-	if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1) {
-	    efree(gids);
-	    gids = emalloc2(ngids, sizeof(GETGROUPS_T));
-	    if (getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids) == -1) {
-		efree(gids);
-		debug_return_ptr(NULL);
-	    }
-	}
-    }
-    if (ngids > 0) {
-	if ((item = make_grlist_item(pw->pw_name, gids, ngids)) == NULL)
-	    errorx(1, "unable to parse group list for %s", pw->pw_name);
-	efree(gids);
-	if (rbinsert(grlist_cache, item) != NULL)
-	    errorx(1, "unable to cache group list for %s, already exists",
-		pw->pw_name);
-    } else {
+    item = sudo_make_grlist_item(pw, NULL, NULL);
+    if (item == NULL) {
 	/* Should not happen. */
 	len = strlen(pw->pw_name) + 1;
 	item = ecalloc(1, sizeof(*item) + len);
@@ -895,13 +573,34 @@ sudo_get_grlist(struct passwd *pw)
 	item->k.name = (char *) item + sizeof(*item);
 	memcpy(item->k.name, pw->pw_name, len);
 	/* item->d.grlist = NULL; */
-	if (rbinsert(grlist_cache, item) != NULL)
-	    errorx(1, "unable to cache group list for %s, already exists",
-		pw->pw_name);
     }
+    if (rbinsert(grlist_cache, item) != NULL)
+	fatalx(_("unable to cache group list for %s, already exists"),
+	    pw->pw_name);
 done:
     item->refcnt++;
     debug_return_ptr(item->d.grlist);
+}
+
+void
+sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids)
+{
+    struct cache_item key, *item;
+    struct rbnode *node;
+    debug_decl(sudo_set_grlist, SUDO_DEBUG_NSS)
+
+    /*
+     * Cache group db entry if it doesn't already exist
+     */
+    key.k.name = pw->pw_name;
+    if ((node = rbfind(grlist_cache, &key)) == NULL) {
+	if ((item = sudo_make_grlist_item(pw, groups, gids)) == NULL)
+	    fatalx(_("unable to parse groups for %s"), pw->pw_name);
+	if (rbinsert(grlist_cache, item) != NULL)
+	    fatalx(_("unable to cache group list for %s, already exists"),
+		pw->pw_name);
+    }
+    debug_return;
 }
 
 bool

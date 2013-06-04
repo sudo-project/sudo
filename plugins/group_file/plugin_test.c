@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,6 @@
  */
 
 #include <sys/types.h>
-#include <sys/param.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,6 +29,8 @@
 #include <pwd.h>
 
 #include "sudo_plugin.h"
+
+__dso_public int main(int argc, char *argv[]);
 
 /*
  * Simple driver to test sudoer group plugins.
@@ -126,7 +127,7 @@ group_plugin_load(char *plugin_info)
 	if (ac != 0) 	{
 	    argv = malloc(ac * sizeof(char *));
 	    if (argv == NULL) {
-		fprintf(stderr, "unable to allocate memory\n");
+		perror(NULL);
 		return -1;
 	    }
 	    ac = 0;
@@ -169,7 +170,7 @@ int
 main(int argc, char *argv[])
 {
     int ch, i, found;
-    char *plugin = "sample_group.so";
+    char *plugin = "group_file.so";
     char *user, *group;
     struct passwd *pwd;
 

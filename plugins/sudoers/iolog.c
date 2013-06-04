@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <stdio.h>
@@ -44,7 +43,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <setjmp.h>
 #include <pwd.h>
 #include <grp.h>
 #ifdef HAVE_ZLIB_H
@@ -52,17 +50,6 @@
 #endif
 
 #include "sudoers.h"
-
-/* plugin_error.c */
-extern sigjmp_buf error_jmp;
-
-union io_fd {
-    FILE *f;
-#ifdef HAVE_ZLIB_H
-    gzFile g;
-#endif
-    void *v;
-};
 
 struct script_buf {
     int len; /* buffer length (how much read in) */
@@ -82,51 +69,116 @@ struct iolog_details {
     const char *iolog_path;
     struct passwd *runas_pw;
     struct group *runas_gr;
-    int iolog_stdin;
-    int iolog_stdout;
-    int iolog_stderr;
-    int iolog_ttyin;
-    int iolog_ttyout;
+    int lines;
+    int cols;
 };
 
-#define IOFD_STDIN	0
-#define IOFD_STDOUT	1
-#define IOFD_STDERR	2
-#define IOFD_TTYIN	3
-#define IOFD_TTYOUT	4
-#define IOFD_TIMING	5
-#define IOFD_MAX	6
+union io_fd {
+    FILE *f;
+#ifdef HAVE_ZLIB_H
+    gzFile g;
+#endif
+    void *v;
+};
+
+static struct io_log_file {
+    bool enabled;
+    const char *suffix;
+    union io_fd fd;
+} io_log_files[] = {
+#define IOFD_LOG	0
+    { true,  "/log" },
+#define IOFD_TIMING	1
+    { true,  "/timing" },
+#define IOFD_STDIN	2
+    { false, "/stdin" },
+#define IOFD_STDOUT	3
+    { false, "/stdout" },
+#define IOFD_STDERR	4
+    { false, "/stderr" },
+#define IOFD_TTYIN	5
+    { false, "/ttyin" },
+#define IOFD_TTYOUT	6
+    { false, "/ttyout" },
+#define IOFD_MAX	7
+    { false, NULL }
+};
 
 #define SESSID_MAX	2176782336U
 
 static int iolog_compress;
 static struct timeval last_time;
-static union io_fd io_fds[IOFD_MAX];
+static unsigned int sessid_max = SESSID_MAX;
+
+/* sudoers_io is declared at the end of this file. */
 extern __dso_public struct io_plugin sudoers_io;
 
 /*
- * Create parent directories for path as needed, but not path itself.
+ * Create path and any parent directories as needed.
+ * If is_temp is set, use mkdtemp() for the final directory.
  */
 static void
-mkdir_parents(char *path)
+io_mkdirs(char *path, mode_t mode, bool is_temp)
 {
     struct stat sb;
+    gid_t parent_gid = 0;
     char *slash = path;
-    debug_decl(mkdir_parents, SUDO_DEBUG_UTIL)
+    debug_decl(io_mkdirs, SUDO_DEBUG_UTIL)
 
-    for (;;) {
-	if ((slash = strchr(slash + 1, '/')) == NULL)
-	    break;
+    /* Fast path: not a temporary and already exists. */
+    if (!is_temp && stat(path, &sb) == 0) {
+	if (!S_ISDIR(sb.st_mode)) {
+	    log_fatal(0, N_("%s exists but is not a directory (0%o)"),
+		path, (unsigned int) sb.st_mode);
+	}
+	debug_return;
+    }
+
+    while ((slash = strchr(slash + 1, '/')) != NULL) {
 	*slash = '\0';
 	if (stat(path, &sb) != 0) {
-	    if (mkdir(path, S_IRWXU) != 0)
-		log_fatal(USE_ERRNO, _("unable to mkdir %s"), path);
+	    if (mkdir(path, mode) != 0)
+		log_fatal(USE_ERRNO, N_("unable to mkdir %s"), path);
+	    ignore_result(chown(path, (uid_t)-1, parent_gid));
 	} else if (!S_ISDIR(sb.st_mode)) {
-	    log_fatal(0, _("%s: %s"), path, strerror(ENOTDIR));
+	    log_fatal(0, N_("%s exists but is not a directory (0%o)"),
+		path, (unsigned int) sb.st_mode);
+	} else {
+	    /* Inherit gid of parent dir for ownership. */
+	    parent_gid = sb.st_gid;
 	}
 	*slash = '/';
     }
+    /* Create final path component. */
+    if (is_temp) {
+	if (mkdtemp(path) == NULL)
+	    log_fatal(USE_ERRNO, N_("unable to mkdir %s"), path);
+	ignore_result(chown(path, (uid_t)-1, parent_gid));
+    } else {
+	if (mkdir(path, mode) != 0 && errno != EEXIST)
+	    log_fatal(USE_ERRNO, N_("unable to mkdir %s"), path);
+	ignore_result(chown(path, (uid_t)-1, parent_gid));
+    }
     debug_return;
+}
+
+/*
+ * Set max session ID (aka sequence number)
+ */
+int
+io_set_max_sessid(const char *maxval)
+{
+    unsigned long ulval;
+    char *ep;
+
+    errno = 0;
+    ulval = strtoul(maxval, &ep, 0);
+    if (*maxval != '\0' && *ep == '\0' &&
+	(errno != ERANGE || ulval != ULONG_MAX)) {
+	sessid_max = MIN((unsigned int)ulval, SESSID_MAX);
+	return true;
+    }
+    return false;
 }
 
 /*
@@ -150,14 +202,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     /*
      * Create I/O log directory if it doesn't already exist.
      */
-    mkdir_parents(iolog_dir);
-    if (stat(iolog_dir, &sb) != 0) {
-	if (mkdir(iolog_dir, S_IRWXU) != 0)
-	    log_fatal(USE_ERRNO, _("unable to mkdir %s"), iolog_dir);
-    } else if (!S_ISDIR(sb.st_mode)) {
-	log_fatal(0, _("%s exists but is not a directory (0%o)"),
-	    iolog_dir, (unsigned int) sb.st_mode);
-    }
+    io_mkdirs(iolog_dir, S_IRWXU, false);
 
     /*
      * Open sequence file
@@ -169,7 +214,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     }
     fd = open(pathbuf, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
     if (fd == -1)
-	log_fatal(USE_ERRNO, _("unable to open %s"), pathbuf);
+	log_fatal(USE_ERRNO, N_("unable to open %s"), pathbuf);
     lock_file(fd, SUDO_LOCK);
 
     /*
@@ -189,7 +234,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 		nread = read(fd2, buf, sizeof(buf));
 		if (nread > 0) {
 		    id = strtoul(buf, &ep, 36);
-		    if (buf == ep || id >= SESSID_MAX)
+		    if (buf == ep || id >= sessid_max)
 			id = 0;
 		}
 		close(fd2);
@@ -202,10 +247,10 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	nread = read(fd, buf, sizeof(buf));
 	if (nread != 0) {
 	    if (nread == -1)
-		log_fatal(USE_ERRNO, _("unable to read %s"), pathbuf);
+		log_fatal(USE_ERRNO, N_("unable to read %s"), pathbuf);
 	    id = strtoul(buf, &ep, 36);
-	    if (buf == ep || id >= SESSID_MAX)
-		log_fatal(0, _("invalid sequence number %s"), pathbuf);
+	    if (buf == ep || id >= sessid_max)
+		id = 0;
 	}
     }
     id++;
@@ -226,7 +271,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 
     /* Rewind and overwrite old seq file. */
     if (lseek(fd, (off_t)0, SEEK_SET) == (off_t)-1 || write(fd, buf, 7) != 7)
-	log_fatal(USE_ERRNO, _("unable to write to %s"), pathbuf);
+	log_fatal(USE_ERRNO, N_("unable to write to %s"), pathbuf);
     close(fd);
 
     debug_return;
@@ -240,6 +285,7 @@ static size_t
 mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
 {
     size_t len;
+    bool is_temp = false;
     debug_decl(mkdir_iopath, SUDO_DEBUG_UTIL)
 
     len = strlcpy(pathbuf, iolog_path, pathsize);
@@ -252,14 +298,9 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
      * Create path and intermediate subdirs as needed.
      * If path ends in at least 6 Xs (ala POSIX mktemp), use mkdtemp().
      */
-    mkdir_parents(pathbuf);
-    if (len >= 6 && strcmp(&pathbuf[len - 6], "XXXXXX") == 0) {
-	if (mkdtemp(pathbuf) == NULL)
-	    log_fatal(USE_ERRNO, _("unable to create %s"), pathbuf);
-    } else {
-	if (mkdir(pathbuf, S_IRWXU) != 0)
-	    log_fatal(USE_ERRNO, _("unable to create %s"), pathbuf);
-    }
+    if (len >= 6 && strcmp(&pathbuf[len - 6], "XXXXXX") == 0)
+	is_temp = true;
+    io_mkdirs(pathbuf, S_IRWXU, is_temp);
 
     debug_return_size_t(len);
 }
@@ -268,34 +309,44 @@ mkdir_iopath(const char *iolog_path, char *pathbuf, size_t pathsize)
  * Append suffix to pathbuf after len chars and open the resulting file.
  * Note that the size of pathbuf is assumed to be PATH_MAX.
  * Uses zlib if docompress is true.
- * Returns the open file handle which has the close-on-exec flag set.
+ * Stores the open file handle which has the close-on-exec flag set.
  */
-static void *
-open_io_fd(char *pathbuf, size_t len, const char *suffix, bool docompress)
+static void
+open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
 {
-    void *vfd = NULL;
     int fd;
     debug_decl(open_io_fd, SUDO_DEBUG_UTIL)
 
     pathbuf[len] = '\0';
-    strlcat(pathbuf, suffix, PATH_MAX);
-    fd = open(pathbuf, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR);
-    if (fd != -1) {
-	fcntl(fd, F_SETFD, FD_CLOEXEC);
+    strlcat(pathbuf, iol->suffix, PATH_MAX);
+    if (iol->enabled) {
+	fd = open(pathbuf, O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR);
+	if (fd != -1) {
+	    fcntl(fd, F_SETFD, FD_CLOEXEC);
 #ifdef HAVE_ZLIB_H
-	if (docompress)
-	    vfd = gzdopen(fd, "w");
-	else
+	    if (docompress)
+		iol->fd.g = gzdopen(fd, "w");
+	    else
 #endif
-	    vfd = fdopen(fd, "w");
+		iol->fd.f = fdopen(fd, "w");
+	}
+	if (fd == -1 || iol->fd.v == NULL) {
+	    log_fatal(USE_ERRNO, N_("unable to create %s"), pathbuf);
+	    if (fd != -1)
+		close(fd);
+	}
+    } else {
+	/* Remove old log file if we recycled sequence numbers. */
+	unlink(pathbuf);
     }
-    debug_return_ptr(vfd);
+    debug_return;
 }
 
 /*
  * Pull out I/O log related data from user_info and command_info arrays.
+ * Returns true if I/O logging is enabled, else false.
  */
-static void
+static bool
 iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     char * const command_info[])
 {
@@ -308,13 +359,24 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     gid_t runas_gid = 0;
     debug_decl(iolog_deserialize_info, SUDO_DEBUG_UTIL)
 
-    memset(details, 0, sizeof(*details));
+    details->lines = 24;
+    details->cols = 80;
 
     for (cur = user_info; *cur != NULL; cur++) {
 	switch (**cur) {
 	case 'c':
+	    if (strncmp(*cur, "cols=", sizeof("cols=") - 1) == 0) {
+		details->cols = atoi(*cur + sizeof("cols=") - 1);
+		continue;
+	    }
 	    if (strncmp(*cur, "cwd=", sizeof("cwd=") - 1) == 0) {
 		details->cwd = *cur + sizeof("cwd=") - 1;
+		continue;
+	    }
+	    break;
+	case 'l':
+	    if (strncmp(*cur, "lines=", sizeof("lines=") - 1) == 0) {
+		details->lines = atoi(*cur + sizeof("lines=") - 1);
 		continue;
 	    }
 	    break;
@@ -348,27 +410,27 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	    }
 	    if (strncmp(*cur, "iolog_stdin=", sizeof("iolog_stdin=") - 1) == 0) {
 		if (atobool(*cur + sizeof("iolog_stdin=") - 1) == true)
-		    details->iolog_stdin = true;
+		    io_log_files[IOFD_STDIN].enabled = true;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_stdout=", sizeof("iolog_stdout=") - 1) == 0) {
 		if (atobool(*cur + sizeof("iolog_stdout=") - 1) == true)
-		    details->iolog_stdout = true;
+		    io_log_files[IOFD_STDOUT].enabled = true;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_stderr=", sizeof("iolog_stderr=") - 1) == 0) {
 		if (atobool(*cur + sizeof("iolog_stderr=") - 1) == true)
-		    details->iolog_stderr = true;
+		    io_log_files[IOFD_STDERR].enabled = true;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_ttyin=", sizeof("iolog_ttyin=") - 1) == 0) {
 		if (atobool(*cur + sizeof("iolog_ttyin=") - 1) == true)
-		    details->iolog_ttyin = true;
+		    io_log_files[IOFD_TTYIN].enabled = true;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_ttyout=", sizeof("iolog_ttyout=") - 1) == 0) {
 		if (atobool(*cur + sizeof("iolog_ttyout=") - 1) == true)
-		    details->iolog_ttyout = true;
+		    io_log_files[IOFD_TTYOUT].enabled = true;
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_compress=", sizeof("iolog_compress=") - 1) == 0) {
@@ -376,6 +438,10 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 		    iolog_compress = true; /* must be global */
 		continue;
 	    }
+	    break;
+	case 'm':
+	    if (strncmp(*cur, "maxseq=", sizeof("maxseq=") - 1) == 0)
+		io_set_max_sessid(*cur + sizeof("maxseq=") - 1);
 	    break;
 	case 'r':
 	    if (strncmp(*cur, "runas_gid=", sizeof("runas_gid=") - 1) == 0) {
@@ -437,7 +503,10 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	    details->runas_gr = sudo_fakegrnam(id);
 	}
     }
-    debug_return;
+    debug_return_bool(
+	io_log_files[IOFD_STDIN].enabled || io_log_files[IOFD_STDOUT].enabled ||
+	io_log_files[IOFD_STDERR].enabled || io_log_files[IOFD_TTYIN].enabled ||
+	io_log_files[IOFD_TTYOUT].enabled);
 }
 
 static int
@@ -451,22 +520,21 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     char *tofree = NULL;
     char * const *cur;
     const char *debug_flags = NULL;
-    FILE *io_logfile;
     size_t len;
-    int rval = -1;
+    int i, rval = -1;
     debug_decl(sudoers_io_open, SUDO_DEBUG_PLUGIN)
 
-    if (!sudo_conv)
-	sudo_conv = conversation;
-    if (!sudo_printf)
-	sudo_printf = plugin_printf;
+    sudo_conv = conversation;
+    sudo_printf = plugin_printf;
 
     /* If we have no command (because -V was specified) just return. */
     if (argc == 0)
 	debug_return_bool(true);
 
-    if (sigsetjmp(error_jmp, 1)) {
-	/* called via error(), errorx() or log_fatal() */
+    memset(&details, 0, sizeof(details));
+
+    if (fatal_setjmp() != 0) {
+	/* called via fatal(), fatalx() or log_fatal() */
 	rval = -1;
 	goto done;
     }
@@ -487,13 +555,9 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	sudo_debug_init(NULL, debug_flags);
 
     /*
-     * Pull iolog settings out of command_info, if any.
+     * Pull iolog settings out of command_info.
      */
-    iolog_deserialize_info(&details, user_info, command_info);
-    /* Did policy module disable I/O logging? */
-    if (!details.iolog_stdin && !details.iolog_ttyin &&
-	!details.iolog_stdout && !details.iolog_stderr &&
-	!details.iolog_ttyout) {
+    if (!iolog_deserialize_info(&details, user_info, command_info)) {
 	rval = false;
 	goto done;
     }
@@ -521,75 +585,44 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     /*
      * We create 7 files: a log file, a timing file and 5 for input/output.
      */
-    io_logfile = open_io_fd(pathbuf, len, "/log", false);
-    if (io_logfile == NULL)
-	log_fatal(USE_ERRNO, _("unable to create %s"), pathbuf);
-
-    io_fds[IOFD_TIMING].v = open_io_fd(pathbuf, len, "/timing",
-	iolog_compress);
-    if (io_fds[IOFD_TIMING].v == NULL)
-	log_fatal(USE_ERRNO, _("unable to create %s"), pathbuf);
-
-    if (details.iolog_ttyin) {
-	io_fds[IOFD_TTYIN].v = open_io_fd(pathbuf, len, "/ttyin",
-	    iolog_compress);
-	if (io_fds[IOFD_TTYIN].v == NULL)
-	    log_fatal(USE_ERRNO, _("unable to create %s"), pathbuf);
-    } else {
-	sudoers_io.log_ttyin = NULL;
-    }
-    if (details.iolog_stdin) {
-	io_fds[IOFD_STDIN].v = open_io_fd(pathbuf, len, "/stdin",
-	    iolog_compress);
-	if (io_fds[IOFD_STDIN].v == NULL)
-	    log_fatal(USE_ERRNO, _("unable to create %s"), pathbuf);
-    } else {
-	sudoers_io.log_stdin = NULL;
-    }
-    if (details.iolog_ttyout) {
-	io_fds[IOFD_TTYOUT].v = open_io_fd(pathbuf, len, "/ttyout",
-	    iolog_compress);
-	if (io_fds[IOFD_TTYOUT].v == NULL)
-	    log_fatal(USE_ERRNO, _("unable to create %s"), pathbuf);
-    } else {
-	sudoers_io.log_ttyout = NULL;
-    }
-    if (details.iolog_stdout) {
-	io_fds[IOFD_STDOUT].v = open_io_fd(pathbuf, len, "/stdout",
-	    iolog_compress);
-	if (io_fds[IOFD_STDOUT].v == NULL)
-	    log_fatal(USE_ERRNO, _("unable to create %s"), pathbuf);
-    } else {
-	sudoers_io.log_stdout = NULL;
-    }
-    if (details.iolog_stderr) {
-	io_fds[IOFD_STDERR].v = open_io_fd(pathbuf, len, "/stderr",
-	    iolog_compress);
-	if (io_fds[IOFD_STDERR].v == NULL)
-	    log_fatal(USE_ERRNO, _("unable to create %s"), pathbuf);
-    } else {
-	sudoers_io.log_stderr = NULL;
+    for (i = 0; i < IOFD_MAX; i++) {
+	open_io_fd(pathbuf, len, &io_log_files[i], i ? iolog_compress : false);
     }
 
     gettimeofday(&last_time, NULL);
-
-    fprintf(io_logfile, "%ld:%s:%s:%s:%s\n", (long)last_time.tv_sec,
+    fprintf(io_log_files[IOFD_LOG].fd.f, "%lld:%s:%s:%s:%s:%d:%d\n%s\n%s",
+	(long long)last_time.tv_sec,
 	details.user ? details.user : "unknown", details.runas_pw->pw_name,
 	details.runas_gr ? details.runas_gr->gr_name : "",
-	details.tty ? details.tty : "unknown");
-    fputs(details.cwd ? details.cwd : "unknown", io_logfile);
-    fputc('\n', io_logfile);
-    fputs(details.command ? details.command : "unknown", io_logfile);
+	details.tty ? details.tty : "unknown", details.lines, details.cols,
+	details.cwd ? details.cwd : "unknown",
+	details.command ? details.command : "unknown");
     for (cur = &argv[1]; *cur != NULL; cur++) {
-	fputc(' ', io_logfile);
-	fputs(*cur, io_logfile);
+	fputc(' ', io_log_files[IOFD_LOG].fd.f);
+	fputs(*cur, io_log_files[IOFD_LOG].fd.f);
     }
-    fputc('\n', io_logfile);
-    fclose(io_logfile);
+    fputc('\n', io_log_files[IOFD_LOG].fd.f);
+    fclose(io_log_files[IOFD_LOG].fd.f);
+    io_log_files[IOFD_LOG].fd.f = NULL;
+
+    /*
+     * Clear I/O log function pointers for disabled log functions.
+     */
+    if (!io_log_files[IOFD_STDIN].enabled)
+	sudoers_io.log_stdin = NULL;
+    if (!io_log_files[IOFD_STDOUT].enabled)
+	sudoers_io.log_stdout = NULL;
+    if (!io_log_files[IOFD_STDERR].enabled)
+	sudoers_io.log_stderr = NULL;
+    if (!io_log_files[IOFD_TTYIN].enabled)
+	sudoers_io.log_ttyin = NULL;
+    if (!io_log_files[IOFD_TTYOUT].enabled)
+	sudoers_io.log_ttyout = NULL;
 
     rval = true;
 
 done:
+    fatal_disable_setjmp();
     efree(tofree);
     if (details.runas_pw)
 	sudo_pw_delref(details.runas_pw);
@@ -607,20 +640,21 @@ sudoers_io_close(int exit_status, int error)
     int i;
     debug_decl(sudoers_io_close, SUDO_DEBUG_PLUGIN)
 
-    if (sigsetjmp(error_jmp, 1)) {
-	/* called via error(), errorx() or log_fatal() */
+    if (fatal_setjmp() != 0) {
+	/* called via fatal(), fatalx() or log_fatal() */
+	fatal_disable_setjmp();
 	debug_return;
     }
 
     for (i = 0; i < IOFD_MAX; i++) {
-	if (io_fds[i].v == NULL)
+	if (io_log_files[i].fd.v == NULL)
 	    continue;
 #ifdef HAVE_ZLIB_H
 	if (iolog_compress)
-	    gzclose(io_fds[i].g);
+	    gzclose(io_log_files[i].fd.g);
 	else
 #endif
-	    fclose(io_fds[i].f);
+	    fclose(io_log_files[i].fd.f);
     }
     debug_return;
 }
@@ -630,8 +664,9 @@ sudoers_io_version(int verbose)
 {
     debug_decl(sudoers_io_version, SUDO_DEBUG_PLUGIN)
 
-    if (sigsetjmp(error_jmp, 1)) {
-	/* called via error(), errorx() or log_fatal() */
+    if (fatal_setjmp() != 0) {
+	/* called via fatal(), fatalx() or log_fatal() */
+	fatal_disable_setjmp();
 	debug_return_bool(-1);
     }
 
@@ -652,27 +687,28 @@ sudoers_io_log(const char *buf, unsigned int len, int idx)
 
     gettimeofday(&now, NULL);
 
-    if (sigsetjmp(error_jmp, 1)) {
-	/* called via error(), errorx() or log_fatal() */
+    if (fatal_setjmp() != 0) {
+	/* called via fatal(), fatalx() or log_fatal() */
+	fatal_disable_setjmp();
 	debug_return_bool(-1);
     }
 
 #ifdef HAVE_ZLIB_H
     if (iolog_compress)
-	ignore_result(gzwrite(io_fds[idx].g, (const voidp)buf, len));
+	ignore_result(gzwrite(io_log_files[idx].fd.g, (const voidp)buf, len));
     else
 #endif
-	ignore_result(fwrite(buf, 1, len, io_fds[idx].f));
+	ignore_result(fwrite(buf, 1, len, io_log_files[idx].fd.f));
     delay.tv_sec = now.tv_sec;
     delay.tv_usec = now.tv_usec;
     timevalsub(&delay, &last_time);
 #ifdef HAVE_ZLIB_H
     if (iolog_compress)
-	gzprintf(io_fds[IOFD_TIMING].g, "%d %f %d\n", idx,
+	gzprintf(io_log_files[IOFD_TIMING].fd.g, "%d %f %d\n", idx,
 	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len);
     else
 #endif
-	fprintf(io_fds[IOFD_TIMING].f, "%d %f %d\n", idx,
+	fprintf(io_log_files[IOFD_TIMING].fd.f, "%d %f %d\n", idx,
 	    delay.tv_sec + ((double)delay.tv_usec / 1000000), len);
     last_time.tv_sec = now.tv_sec;
     last_time.tv_usec = now.tv_usec;

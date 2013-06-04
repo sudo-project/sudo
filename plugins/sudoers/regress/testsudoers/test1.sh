@@ -9,3 +9,5 @@ exec 2>&1
 ./testsudoers -g bin root id <<EOF
 root ALL = ALL
 EOF
+
+exit 0

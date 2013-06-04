@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/param.h>
 #include <sys/stat.h>
 
 #include <stdio.h>
@@ -163,7 +162,7 @@ sysgroup_query(const char *user, const char *group, const struct passwd *pwd)
     return false;
 }
 
-struct sudoers_group_plugin group_plugin = {
+__dso_public struct sudoers_group_plugin group_plugin = {
     GROUP_API_VERSION,
     sysgroup_init,
     sysgroup_cleanup,

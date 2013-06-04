@@ -44,7 +44,9 @@ Host_Alias	CDROM = orion, perseus, hercules
 # Cmnd alias specification
 ##
 Cmnd_Alias	DUMPS = /usr/sbin/dump, /usr/sbin/rdump, /usr/sbin/restore, \
-			/usr/sbin/rrestore, /usr/bin/mt
+			/usr/sbin/rrestore, /usr/bin/mt, \
+			sha224:0GomF8mNN3wlDt1HD9XldjJ3SNgpFdbjO1+NsQ== \
+			/home/operator/bin/start_backups
 Cmnd_Alias	KILL = /usr/bin/kill
 Cmnd_Alias	PRINTING = /usr/sbin/lpc, /usr/bin/lprm
 Cmnd_Alias	SHUTDOWN = /usr/sbin/shutdown

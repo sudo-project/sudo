@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/param.h>
 #ifdef HAVE_SYS_SYSMACROS_H
 # include <sys/sysmacros.h>
 #endif
@@ -86,7 +85,7 @@ struct io_buffer {
     int rfd;  /* reader (producer) */
     int wfd; /* writer (consumer) */
     bool (*action)(const char *buf, unsigned int len);
-    char buf[16 * 1024];
+    char buf[32 * 1024];
 };
 
 static char slavename[PATH_MAX];
@@ -99,7 +98,8 @@ static struct io_buffer *iobufs;
 
 static void flush_output(void);
 static int exec_monitor(struct command_details *details, int backchannel);
-static void exec_pty(struct command_details *detail, int *errfd);
+static void exec_pty(struct command_details *details,
+    struct command_status *cstat, int *errfd);
 static void sigwinch(int s);
 static void sync_ttysize(int src, int dst);
 static void deliver_signal(pid_t pid, int signo, bool from_parent);
@@ -107,10 +107,10 @@ static int safe_close(int fd);
 static void check_foreground(void);
 
 /*
- * Cleanup hook for error()/errorx()
+ * Cleanup hook for fatal()/fatalx()
  */
-void
-cleanup(int gotsignal)
+static void
+pty_cleanup(void)
 {
     debug_decl(cleanup, SUDO_DEBUG_EXEC);
 
@@ -180,7 +180,7 @@ pty_setup(uid_t uid, const char *tty, const char *utmp_user)
     if (io_fds[SFD_USERTTY] != -1) {
 	if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
 	    slavename, sizeof(slavename), uid))
-	    error(1, _("unable to allocate pty"));
+	    fatal(_("unable to allocate pty"));
 	/* Add entry to utmp/utmpx? */
 	if (utmp_user != NULL)
 	    utmp_login(tty, slavename, io_fds[SFD_SLAVE], utmp_user);
@@ -337,15 +337,15 @@ suspend_parent(int signo)
 {
     char signame[SIG2STR_MAX];
     sigaction_t sa, osa;
-    int n, oldmode = ttymode, rval = 0;
+    int n, rval = 0;
     debug_decl(suspend_parent, SUDO_DEBUG_EXEC);
 
     switch (signo) {
     case SIGTTOU:
     case SIGTTIN:
 	/*
-	 * If we are the foreground process, just resume the command.
-	 * Otherwise, re-send the signal with the handler disabled.
+	 * If sudo is already the foreground process, just resume the command
+	 * in the foreground.  If not, we'll suspend sudo and resume later.
 	 */
 	if (!foreground)
 	    check_foreground();
@@ -359,7 +359,6 @@ suspend_parent(int signo)
 	    rval = SIGCONT_FG; /* resume command in foreground */
 	    break;
 	}
-	ttymode = TERM_RAW;
 	/* FALLTHROUGH */
     case SIGSTOP:
     case SIGTSTP:
@@ -367,7 +366,7 @@ suspend_parent(int signo)
 	flush_output();
 
 	/* Restore original tty mode before suspending. */
-	if (oldmode != TERM_COOKED) {
+	if (ttymode != TERM_COOKED) {
 	    do {
 		n = term_restore(io_fds[SFD_USERTTY], 0);
 	    } while (!n && errno == EINTR);
@@ -377,11 +376,13 @@ suspend_parent(int signo)
 	    snprintf(signame, sizeof(signame), "%d", signo);
 
 	/* Suspend self and continue command when we resume. */
-	zero_bytes(&sa, sizeof(sa));
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
-	sa.sa_handler = SIG_DFL;
-	sigaction(signo, &sa, &osa);
+	if (signo != SIGSTOP) {
+	    memset(&sa, 0, sizeof(sa));
+	    sigemptyset(&sa.sa_mask);
+	    sa.sa_flags = SA_RESTART;
+	    sa.sa_handler = SIG_DFL;
+	    sudo_sigaction(signo, &sa, &osa);
+	}
 	sudo_debug_printf(SUDO_DEBUG_INFO, "kill parent SIG%s", signame);
 	if (killpg(ppgrp, signo) != 0)
 	    warning("killpg(%d, SIG%s)", (int)ppgrp, signame);
@@ -390,25 +391,30 @@ suspend_parent(int signo)
 	check_foreground();
 
 	/*
-	 * Only modify term if we are foreground process and either
-	 * the old tty mode was not cooked or command got SIGTT{IN,OU}
+	 * We always resume the command in the foreground if sudo itself
+	 * is the foreground process.  This helps work around poorly behaved
+	 * programs that catch SIGTTOU/SIGTTIN but suspend themselves with
+	 * SIGSTOP.  At worst, sudo will go into the background but upon
+	 * resume the command will be runnable.  Otherwise, we can get into
+	 * a situation where the command will immediately suspend itself.
 	 */
 	sudo_debug_printf(SUDO_DEBUG_INFO, "parent is in %s, ttymode %d -> %d",
-	    foreground ? "foreground" : "background", oldmode, ttymode);
+	    foreground ? "foreground" : "background", ttymode,
+	    foreground ? TERM_RAW : TERM_COOKED);
 
-	if (ttymode != TERM_COOKED) {
-	    if (foreground) {
-		/* Set raw mode. */
-		do {
-		    n = term_raw(io_fds[SFD_USERTTY], 0);
-		} while (!n && errno == EINTR);
-	    } else {
-		/* Background process, no access to tty. */
-		ttymode = TERM_COOKED;
-	    }
+	if (foreground) {
+	    /* Foreground process, set tty to raw mode. */
+	    do {
+		n = term_raw(io_fds[SFD_USERTTY], 0);
+	    } while (!n && errno == EINTR);
+	    ttymode = TERM_RAW;
+	} else {
+	    /* Background process, no access to tty. */
+	    ttymode = TERM_COOKED;
 	}
 
-	sigaction(signo, &osa, NULL);
+	if (signo != SIGSTOP)
+	    sudo_sigaction(signo, &osa, NULL);
 	rval = ttymode == TERM_RAW ? SIGCONT_FG : SIGCONT_BG;
 	break;
     }
@@ -561,16 +567,16 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
     sigset_t mask;
     pid_t child;
     debug_decl(fork_pty, SUDO_DEBUG_EXEC);
-        
+
     ppgrp = getpgrp(); /* parent's pgrp, so child can signal us */
-     
-    zero_bytes(&sa, sizeof(sa));
+
+    memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
- 
+
     if (io_fds[SFD_USERTTY] != -1) {
 	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = sigwinch;
-	sigaction(SIGWINCH, &sa, NULL);
+	sudo_sigaction(SIGWINCH, &sa, NULL);
     }
 
     /* So we can block tty-generated signals */
@@ -614,7 +620,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "stdin not a tty, creating a pipe");
 	pipeline = true;
 	if (pipe(io_pipe[STDIN_FILENO]) != 0)
-	    error(1, _("unable to create pipe"));
+	    fatal(_("unable to create pipe"));
 	iobufs = io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
 	    log_stdin, iobufs);
 	io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
@@ -623,7 +629,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "stdout not a tty, creating a pipe");
 	pipeline = true;
 	if (pipe(io_pipe[STDOUT_FILENO]) != 0)
-	    error(1, _("unable to create pipe"));
+	    fatal(_("unable to create pipe"));
 	iobufs = io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
 	    log_stdout, iobufs);
 	io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
@@ -631,13 +637,19 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
     if (io_fds[SFD_STDERR] == -1 || !isatty(STDERR_FILENO)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "stderr not a tty, creating a pipe");
 	if (pipe(io_pipe[STDERR_FILENO]) != 0)
-	    error(1, _("unable to create pipe"));
+	    fatal(_("unable to create pipe"));
 	iobufs = io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
 	    log_stderr, iobufs);
 	io_fds[SFD_STDERR] = io_pipe[STDERR_FILENO][1];
     }
 
+    /* We don't want to receive SIGTTIN/SIGTTOU, getting EIO is preferable. */
+    sa.sa_handler = SIG_IGN;
+    sudo_sigaction(SIGTTIN, &sa, NULL);
+    sudo_sigaction(SIGTTOU, &sa, NULL);
+
     /* Job control signals to relay from parent to child. */
+    sigfillset(&sa.sa_mask);
     sa.sa_flags = SA_INTERRUPT; /* do not restart syscalls */
 #ifdef SA_SIGINFO
     sa.sa_flags |= SA_SIGINFO;
@@ -645,12 +657,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 #else
     sa.sa_handler = handler;
 #endif
-    sigaction(SIGTSTP, &sa, NULL);
-
-    /* We don't want to receive SIGTTIN/SIGTTOU, getting EIO is preferable. */
-    sa.sa_handler = SIG_IGN;
-    sigaction(SIGTTIN, &sa, NULL);
-    sigaction(SIGTTOU, &sa, NULL);
+    sudo_sigaction(SIGTSTP, &sa, NULL);
 
     if (foreground) {
 	/* Copy terminal attrs from user tty -> pty slave. */
@@ -659,14 +666,14 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 	    sync_ttysize(io_fds[SFD_USERTTY], io_fds[SFD_SLAVE]);
 	}
 
-	/* Start out in raw mode if we are not part of a pipeline. */
-	if (!pipeline) {
+	/* Start out in raw mode unless part of a pipeline or backgrounded. */
+	if (!pipeline && !ISSET(details->flags, CD_EXEC_BG)) {
 	    ttymode = TERM_RAW;
 	    do {
 		n = term_raw(io_fds[SFD_USERTTY], 0);
 	    } while (!n && errno == EINTR);
 	    if (!n)
-		error(1, _("unable to set terminal to raw mode"));
+		fatal(_("unable to set terminal to raw mode"));
 	}
     }
 
@@ -675,7 +682,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
      * or certain pam modules won't be able to track their state.
      */
     if (policy_init_session(details) != true)
-	errorx(1, _("policy plugin failed session initialization"));
+	fatalx(_("policy plugin failed session initialization"));
 
     /*
      * Block some signals until cmnd_pid is set in the parent to avoid a
@@ -691,7 +698,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
     child = sudo_debug_fork();
     switch (child) {
     case -1:
-	error(1, _("unable to fork"));
+	fatal(_("unable to fork"));
 	break;
     case 0:
 	/* child */
@@ -700,16 +707,14 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 	close(signal_pipe[1]);
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
 	sigprocmask(SIG_SETMASK, omask, NULL);
-	if (exec_setup(details, slavename, io_fds[SFD_SLAVE]) == true) {
-	    /* Close the other end of the stdin/stdout/stderr pipes and exec. */
-	    if (io_pipe[STDIN_FILENO][1])
-		close(io_pipe[STDIN_FILENO][1]);
-	    if (io_pipe[STDOUT_FILENO][0])
-		close(io_pipe[STDOUT_FILENO][0]);
-	    if (io_pipe[STDERR_FILENO][0])
-		close(io_pipe[STDERR_FILENO][0]);
-	    exec_monitor(details, sv[1]);
-	}
+	/* Close the other end of the stdin/stdout/stderr pipes and exec. */
+	if (io_pipe[STDIN_FILENO][1])
+	    close(io_pipe[STDIN_FILENO][1]);
+	if (io_pipe[STDOUT_FILENO][0])
+	    close(io_pipe[STDOUT_FILENO][0]);
+	if (io_pipe[STDERR_FILENO][0])
+	    close(io_pipe[STDERR_FILENO][0]);
+	exec_monitor(details, sv[1]);
 	cstat.type = CMD_ERRNO;
 	cstat.val = errno;
 	ignore_result(send(sv[1], &cstat, sizeof(cstat), 0));
@@ -721,7 +726,7 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 	close(io_pipe[STDIN_FILENO][0]);
     if (io_pipe[STDOUT_FILENO][1])
 	close(io_pipe[STDOUT_FILENO][1]);
-    if (io_pipe[STDERR_FILENO][1]) 
+    if (io_pipe[STDERR_FILENO][1])
 	close(io_pipe[STDERR_FILENO][1]);
 
     for (iob = iobufs; iob; iob = iob->next) {
@@ -830,7 +835,11 @@ deliver_signal(pid_t pid, int signo, bool from_parent)
     int status;
     debug_decl(deliver_signal, SUDO_DEBUG_EXEC);
 
-    if (sig2str(signo, signame) == -1)
+    if (signo == SIGCONT_FG)
+	strlcpy(signame, "CONT_FG", sizeof(signame));
+    else if (signo == SIGCONT_BG)
+	strlcpy(signame, "CONT_BG", sizeof(signame));
+    else if (sig2str(signo, signame) == -1)
 	snprintf(signame, sizeof(signame), "%d", signo);
 
     /* Handle signal from parent. */
@@ -974,20 +983,23 @@ exec_monitor(struct command_details *details, int backchannel)
      * the select() loop.
      */
     if (pipe_nonblock(signal_pipe) != 0)
-	error(1, _("unable to create pipe"));
+	fatal(_("unable to create pipe"));
 
     /* Reset SIGWINCH and SIGALRM. */
-    zero_bytes(&sa, sizeof(sa));
+    memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = SIG_DFL;
-    sigaction(SIGWINCH, &sa, NULL);
-    sigaction(SIGALRM, &sa, NULL);
+    sudo_sigaction(SIGWINCH, &sa, NULL);
+    sudo_sigaction(SIGALRM, &sa, NULL);
 
     /* Ignore any SIGTTIN or SIGTTOU we get. */
     sa.sa_handler = SIG_IGN;
-    sigaction(SIGTTIN, &sa, NULL);
-    sigaction(SIGTTOU, &sa, NULL);
+    sudo_sigaction(SIGTTIN, &sa, NULL);
+    sudo_sigaction(SIGTTOU, &sa, NULL);
+
+    /* Block all signals in mon_handler(). */
+    sigfillset(&sa.sa_mask);
 
     /* Note: HP-UX select() will not be interrupted if SA_RESTART set */
     sa.sa_flags = SA_INTERRUPT;
@@ -997,7 +1009,7 @@ exec_monitor(struct command_details *details, int backchannel)
 #else
     sa.sa_handler = mon_handler;
 #endif
-    sigaction(SIGCHLD, &sa, NULL);
+    sudo_sigaction(SIGCHLD, &sa, NULL);
 
     /* Catch common signals so we can cleanup properly. */
     sa.sa_flags = SA_RESTART;
@@ -1007,13 +1019,13 @@ exec_monitor(struct command_details *details, int backchannel)
 #else
     sa.sa_handler = mon_handler;
 #endif
-    sigaction(SIGHUP, &sa, NULL);
-    sigaction(SIGINT, &sa, NULL);
-    sigaction(SIGQUIT, &sa, NULL);
-    sigaction(SIGTERM, &sa, NULL);
-    sigaction(SIGTSTP, &sa, NULL);
-    sigaction(SIGUSR1, &sa, NULL);
-    sigaction(SIGUSR2, &sa, NULL);
+    sudo_sigaction(SIGHUP, &sa, NULL);
+    sudo_sigaction(SIGINT, &sa, NULL);
+    sudo_sigaction(SIGQUIT, &sa, NULL);
+    sudo_sigaction(SIGTERM, &sa, NULL);
+    sudo_sigaction(SIGTSTP, &sa, NULL);
+    sudo_sigaction(SIGUSR1, &sa, NULL);
+    sudo_sigaction(SIGUSR2, &sa, NULL);
 
     /*
      * Start a new session with the parent as the session leader
@@ -1027,7 +1039,7 @@ exec_monitor(struct command_details *details, int backchannel)
     if (io_fds[SFD_SLAVE] != -1) {
 #ifdef TIOCSCTTY
 	if (ioctl(io_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0)
-	    error(1, _("unable to set controlling tty"));
+	    fatal(_("unable to set controlling tty"));
 #else
 	/* Set controlling tty by reopening slave. */
 	if ((n = open(slavename, O_RDWR)) >= 0)
@@ -1048,7 +1060,7 @@ exec_monitor(struct command_details *details, int backchannel)
 
     /* Start command and wait for it to stop or exit */
     if (pipe(errpipe) == -1)
-	error(1, _("unable to create pipe"));
+	fatal(_("unable to create pipe"));
     cmnd_pid = sudo_debug_fork();
     if (cmnd_pid == -1) {
 	warning(_("unable to fork"));
@@ -1064,9 +1076,7 @@ exec_monitor(struct command_details *details, int backchannel)
 	restore_signals();
 
 	/* setup tty and exec command */
-	exec_pty(details, &errpipe[1]);
-	cstat.type = CMD_ERRNO;
-	cstat.val = errno;
+	exec_pty(details, &cstat, &errpipe[1]);
 	ignore_result(write(errpipe[1], &cstat, sizeof(cstat)));
 	_exit(1);
     }
@@ -1085,13 +1095,12 @@ exec_monitor(struct command_details *details, int backchannel)
     if (io_fds[SFD_STDERR] != io_fds[SFD_SLAVE])
 	close(io_fds[SFD_STDERR]);
 
-    /*
-     * Put command in its own process group.  If we are starting the command
-     * in the foreground, assign its pgrp to the tty.
-     */
+    /* Put command in its own process group. */
     cmnd_pgrp = cmnd_pid;
     setpgid(cmnd_pid, cmnd_pgrp);
-    if (foreground) {
+
+    /* Make the command the foreground process for the pty slave. */
+    if (foreground && !ISSET(details->flags, CD_EXEC_BG)) {
 	do {
 	    n = tcsetpgrp(io_fds[SFD_SLAVE], cmnd_pgrp);
 	} while (n == -1 && errno == EINTR);
@@ -1271,10 +1280,14 @@ flush_output(void)
  * Returns only if execve() fails.
  */
 static void
-exec_pty(struct command_details *details, int *errfd)
+exec_pty(struct command_details *details,
+    struct command_status *cstat, int *errfd)
 {
     pid_t self = getpid();
     debug_decl(exec_pty, SUDO_DEBUG_EXEC);
+
+    /* Register cleanup function */
+    fatal_callback_register(pty_cleanup);
 
     /* Set command process group here too to avoid a race. */
     setpgid(0, self);
@@ -1283,10 +1296,10 @@ exec_pty(struct command_details *details, int *errfd)
     if (dup2(io_fds[SFD_STDIN], STDIN_FILENO) == -1 ||
 	dup2(io_fds[SFD_STDOUT], STDOUT_FILENO) == -1 ||
 	dup2(io_fds[SFD_STDERR], STDERR_FILENO) == -1)
-	error(1, "dup2");
+	fatal("dup2");
 
     /* Wait for parent to grant us the tty if we are foreground. */
-    if (foreground) {
+    if (foreground && !ISSET(details->flags, CD_EXEC_BG)) {
 	while (tcgetpgrp(io_fds[SFD_SLAVE]) != self)
 	    ; /* spin */
     }
@@ -1301,30 +1314,9 @@ exec_pty(struct command_details *details, int *errfd)
     if (io_fds[SFD_STDERR] != io_fds[SFD_SLAVE])
 	close(io_fds[SFD_STDERR]);
 
-    sudo_debug_execve(SUDO_DEBUG_INFO, details->command,
-	details->argv, details->envp);
+    /* Execute command; only returns on error. */
+    exec_cmnd(details, cstat, errfd);
 
-    if (details->closefrom >= 0) {
-	int maxfd = details->closefrom;
-	dup2(*errfd, maxfd);
-	(void)fcntl(maxfd, F_SETFD, FD_CLOEXEC);
-	*errfd = maxfd++;
-	if (sudo_debug_fd_set(maxfd) != -1)
-	    maxfd++;
-	closefrom(maxfd);
-    }
-#ifdef HAVE_SELINUX
-    if (ISSET(details->flags, CD_RBAC_ENABLED)) {
-	selinux_execve(details->command, details->argv, details->envp,
-	    ISSET(details->flags, CD_NOEXEC));
-    } else
-#endif
-    {
-	sudo_execve(details->command, details->argv, details->envp,
-	    ISSET(details->flags, CD_NOEXEC));
-    }
-    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to exec %s: %s",
-	details->command, strerror(errno));
     debug_return;
 }
 
