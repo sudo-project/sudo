@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd April 30, 2013
+.Dd June 18, 2013
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2753,7 +2753,7 @@ Defaults to
 .Li @goodpri@ .
 .Pp
 See
-.Sx syslog_badpri
+.Em syslog_badpri
 for the list of supported syslog priorities.
 .It sudoers_locale
 Locale to use when parsing the sudoers file, logging commands, and
