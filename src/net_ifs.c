@@ -111,7 +111,7 @@ get_net_ifs(char **addrinfo)
     struct sockaddr_in6 *sin6;
     char addrbuf[INET6_ADDRSTRLEN];
 #endif
-    int ailen, i, len, num_interfaces = 0;
+    int ailen, len, num_interfaces = 0;
     char *cp;
     debug_decl(get_net_ifs, SUDO_DEBUG_NETIF)
 
@@ -140,7 +140,7 @@ get_net_ifs(char **addrinfo)
     *addrinfo = cp = emalloc(ailen);
 
     /* Store the IP addr/netmask pairs. */
-    for (ifa = ifaddrs, i = 0; ifa != NULL; ifa = ifa -> ifa_next) {
+    for (ifa = ifaddrs; ifa != NULL; ifa = ifa -> ifa_next) {
 	/* Skip interfaces marked "down" and "loopback". */
 	if (ifa->ifa_addr == NULL || ifa->ifa_netmask == NULL ||
 	    !ISSET(ifa->ifa_flags, IFF_UP) || ISSET(ifa->ifa_flags, IFF_LOOPBACK))
