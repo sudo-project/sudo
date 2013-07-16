@@ -129,6 +129,8 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     int valid_flags, ch;
     int i, j;
     char *cp, **env_add, **settings;
+    const char *runas_user = NULL;
+    const char *runas_group = NULL;
     const char *debug_flags;
     int nenv = 0;
     int env_size = 32;
@@ -282,8 +284,6 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    SET(flags, MODE_SHELL);
 		    break;
 		case 'U':
-		    if ((getpwnam(optarg)) == NULL)
-			fatalx(_("unknown user: %s"), optarg);
 		    list_user = optarg;
 		    break;
 		case 'u':

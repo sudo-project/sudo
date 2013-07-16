@@ -94,7 +94,7 @@
 struct plugin_container policy_plugin;
 struct plugin_container_list io_plugins;
 struct user_details user_details;
-const char *list_user, *runas_user, *runas_group; /* extern for parse_args.c */
+const char *list_user; /* extern for parse_args.c */
 static struct command_details command_details;
 static int sudo_mode;
 

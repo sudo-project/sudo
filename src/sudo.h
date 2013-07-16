@@ -214,7 +214,7 @@ bool exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 int policy_init_session(struct command_details *details);
 int run_command(struct command_details *details);
 int os_init_common(int argc, char *argv[], char *envp[]);
-extern const char *list_user, *runas_user, *runas_group;
+extern const char *list_user;
 extern struct user_details user_details;
 
 /* sudo_edit.c */
