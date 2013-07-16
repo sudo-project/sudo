@@ -193,16 +193,25 @@ DDEESSCCRRIIPPTTIIOONN
                        The prompt to use when requesting a password, if
                        specified via the --pp flag.
 
+                 remote_host=string
+                       The name of the remote host to run the command on, if
+                       specified via the --hh option.  Support for running the
+                       command on a remote host is meant to be implemented via
+                       a helper program that is executed in place of the user-
+                       specified command.  The ssuuddoo front end is only capable
+                       of executing commands on the local host.  Only
+                       available starting with API version 1.4.
+
                  run_shell=bool
                        Set to true if the user specified the --ss flag,
                        indicating that the user wishes to run a shell.
 
                  runas_group=string
-                       The group name or gid to to run the command as, if
+                       The group name or gid to run the command as, if
                        specified via the --gg flag.
 
                  runas_user=string
-                       The user name or uid to to run the command as, if
+                       The user name or uid to run the command as, if
                        specified via the --uu flag.
 
                  selinux_role=string
@@ -271,11 +280,11 @@ DDEESSCCRRIIPPTTIIOONN
                  pgid=int
                        The ID of the process group that the running ssuuddoo
                        process is a member of.  Only available starting with
-                       API version 1.2
+                       API version 1.2.
 
                  pid=int
                        The process ID of the running ssuuddoo process.  Only
-                       available starting with API version 1.2
+                       available starting with API version 1.2.
 
                  plugin_options
                        Any (non-comment) strings immediately after the plugin
@@ -293,18 +302,18 @@ DDEESSCCRRIIPPTTIIOONN
 
                  ppid=int
                        The parent process ID of the running ssuuddoo process.
-                       Only available starting with API version 1.2
+                       Only available starting with API version 1.2.
 
                  sid=int
                        The session ID of the running ssuuddoo process or 0 if ssuuddoo
                        is not part of a POSIX job control session.  Only
-                       available starting with API version 1.2
+                       available starting with API version 1.2.
 
                  tcpgid=int
                        The ID of the foreground process group associated with
                        the terminal device associated with the ssuuddoo process or
                        -1 if there is no terminal present.  Only available
-                       starting with API version 1.2
+                       starting with API version 1.2.
 
                  tty=string
                        The path to the user's terminal device.  If the user
@@ -1393,6 +1402,9 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
            The ssuuddoo front end now installs default signal handlers to trap
            common signals while the plugin functions are run.
 
+     Version 1.4 (sudo 1.8.8)
+           The _r_e_m_o_t_e___h_o_s_t entry was added to the settings list.
+
 SSEEEE AALLSSOO
      sudo.conf(4), sudoers(4), sudo(1m)
 
@@ -1412,4 +1424,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.7                       March 5, 2013                      Sudo 1.8.7
+Sudo 1.8.8                       July 16, 2013                      Sudo 1.8.8

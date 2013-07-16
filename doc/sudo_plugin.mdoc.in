@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd March 5, 2013
+.Dd July 16, 2013
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -292,18 +292,28 @@ The prompt to use when requesting a password, if specified via
 the
 .Fl p
 flag.
+.It remote_host=string
+The name of the remote host to run the command on, if specified via
+the
+.Fl h
+option.
+Support for running the command on a remote host is meant to be implemented
+via a helper program that is executed in place of the user-specified command.
+The
+.Nm sudo
+front end is only capable of executing commands on the local host.
+Only available starting with API version 1.4.
 .It run_shell=bool
 Set to true if the user specified the
 .Fl s
-flag, indicating that
-the user wishes to run a shell.
+flag, indicating that the user wishes to run a shell.
 .It runas_group=string
-The group name or gid to to run the command as, if specified via
+The group name or gid to run the command as, if specified via
 the
 .Fl g
 flag.
 .It runas_user=string
-The user name or uid to to run the command as, if specified via the
+The user name or uid to run the command as, if specified via the
 .Fl u
 flag.
 .It selinux_role=string
@@ -392,12 +402,12 @@ no terminal device available, a default value of 24 is used.
 The ID of the process group that the running
 .Nm sudo
 process is a member of.
-Only available starting with API version 1.2
+Only available starting with API version 1.2.
 .It pid=int
 The process ID of the running
 .Nm sudo
 process.
-Only available starting with API version 1.2
+Only available starting with API version 1.2.
 .It plugin_options
 Any (non-comment) strings immediately after the plugin path are
 passed as arguments to the plugin.
@@ -428,21 +438,21 @@ Failure to do so may result in a crash.
 The parent process ID of the running
 .Nm sudo
 process.
-Only available starting with API version 1.2
+Only available starting with API version 1.2.
 .It sid=int
 The session ID of the running
 .Nm sudo
 process or 0 if
 .Nm sudo
 is not part of a POSIX job control session.
-Only available starting with API version 1.2
+Only available starting with API version 1.2.
 .It tcpgid=int
 The ID of the foreground process group associated with the terminal
 device associated with the
 .Nm sudo
 process or \-1 if there is no
 terminal present.
-Only available starting with API version 1.2
+Only available starting with API version 1.2.
 .It tty=string
 The path to the user's terminal device.
 If the user has no terminal device associated with the session,
@@ -2180,6 +2190,12 @@ The
 .Nm sudo
 front end now installs default signal handlers to trap common signals
 while the plugin functions are run.
+.It Version 1.4 (sudo 1.8.8)
+The
+.Em remote_host
+entry was added to the
+.Li settings
+list.
 .El
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,
