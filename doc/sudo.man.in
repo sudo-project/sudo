@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "@mansectsu@" "March 13, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "July 16, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -31,7 +31,7 @@
 .SH "SYNOPSIS"
 .HP 5n
 \fBsudo\fR
-\fB\-h\fR | \fB\-K\fR | \fB\-k\fR | \fB\-V\fR
+\fB\-h\fR\ |\ \fB\-K\fR\ |\ \fB\-k\fR\ |\ \fB\-V\fR
 .PD 0
 .HP 5n
 \fBsudo\fR
@@ -48,6 +48,7 @@
 [\fB\-AknS\fR]
 [\fB\-a\fR\ \fIauth_type\fR]
 [\fB\-g\fR\ \fIgroup\ name\fR\ |\ \fI#gid\fR]
+[\fB\-h\fR\ \fIhost\ name\fR]
 [\fB\-p\fR\ \fIprompt\fR]
 [\fB\-U\fR\ \fIuser\ name\fR]
 [\fB\-u\fR\ \fIuser\ name\fR\ |\ \fI#uid\fR]
@@ -60,6 +61,7 @@
 [\fB\-C\fR\ \fIfd\fR]
 [\fB\-c\fR\ \fIclass\fR\ |\ \fI-\fR]
 [\fB\-g\fR\ \fIgroup\ name\fR\ |\ \fI#gid\fR]
+[\fB\-h\fR\ \fIhost\ name\fR]
 [\fB\-p\fR\ \fIprompt\fR]
 [\fB\-r\fR\ \fIrole\fR]
 [\fB\-t\fR\ \fItype\fR]
@@ -75,6 +77,7 @@
 [\fB\-C\fR\ \fIfd\fR]
 [\fB\-c\fR\ \fIclass\fR\ |\ \fI-\fR]
 [\fB\-g\fR\ \fIgroup\ name\fR\ |\ \fI#gid\fR]
+[\fB\-h\fR\ \fIhost\ name\fR]
 [\fB\-p\fR\ \fIprompt\fR]
 [\fB\-u\fR\ \fIuser\ name\fR\ |\ \fI#uid\fR]
 file ...
@@ -166,21 +169,19 @@ sudo.conf(@mansectform@)
 contains a line specifying the askpass program, that value will be
 used.
 For example:
-.RS
 .nf
 .sp
-.RS 4n
+.RS 16n
 # Path to askpass helper program
 Path askpass /usr/X11R6/bin/ssh-askpass
 .RE
 .fi
+.RS 12n
 .sp
 If no askpass program is available,
 \fBsudo\fR
 will exit with an error.
-.PP
 .RE
-.PD 0
 .TP 12n
 \fB\-a\fR \fItype\fR
 The
@@ -192,11 +193,10 @@ as allowed by
 \fI/etc/login.conf\fR.
 The system administrator may specify a list of sudo-specific
 authentication methods by adding an
-``auth-sudo''
+\(lqauth-sudo\(rq
 entry in
 \fI/etc/login.conf\fR.
 This option is only available on systems that support BSD authentication.
-.PD
 .TP 12n
 \fB\-b\fR
 The
@@ -243,7 +243,7 @@ The
 argument can be either a class name as defined in
 \fI/etc/login.conf\fR,
 or a single
-`\-'
+\(oq\-\(cq
 character.
 Specifying a
 \fIclass\fR
@@ -278,7 +278,7 @@ In lieu of a command, the string "sudoedit" is used when consulting
 the security policy.
 If the user is authorized by the policy, the following steps are
 taken:
-.RS
+.RS 13n
 .TP 5n
 1.
 Temporary copies are made of the files to be edited with the owner
@@ -308,7 +308,9 @@ option is used.
 3.
 If they have been modified, the temporary files are copied back to
 their original location and the temporary versions are removed.
-.PP
+.RE
+.RS 12n
+.sp
 If the specified file does not exist, it will be created.
 Note that unlike most commands run by
 \fIsudo\fR,
@@ -318,9 +320,7 @@ If, for some reason,
 is unable to update a file with its edited version, the user will
 receive a warning and the edited copy will remain in a temporary
 file.
-.PP
 .RE
-.PD 0
 .TP 12n
 \fB\-g\fR \fIgroup\fR
 Normally,
@@ -344,16 +344,15 @@ use
 When running commands as a
 \fIgid\fR,
 many shells require that the
-`#'
+\(oq#\(cq
 be escaped with a backslash
-(`\e').
+(\(oq\e\(cq).
 If no
 \fB\-u\fR
 option is specified, the command will be run as the invoking user
 (not root).
 In either case, the primary group will be set to
 \fIgroup\fR.
-.PD
 .TP 12n
 \fB\-H\fR
 The
@@ -364,12 +363,19 @@ environment variable to the home directory of the target user (root
 by default) as specified by the password database.
 Depending on the policy, this may be the default behavior.
 .TP 12n
-\fB\-h\fR
-The
-\fB\-h\fR (\fIhelp\fR)
-option causes
+\fB\-h\fR [\fIhost name\fR]
+If a
+\fIhost name\fR
+is specified and the policy plugin supports it, the command will be run
+on the specified remote host.
+Note that the
+\fIsudoers\fR
+plugin does not currently support running remote commands.
+If no
+\fIhost name\fR
+is specified,
 \fBsudo\fR
-to print a short help message to the standard output and exit.
+will print a short help message to the standard output and exit.
 .TP 12n
 \fB\-i\fR [\fIcommand\fR]
 The
@@ -497,11 +503,13 @@ The
 option allows you to override the default password prompt and use
 a custom one.
 The following percent
-(`%')
+(\(oq%\(cq)
 escapes are supported by the
 \fIsudoers\fR
 policy:
-.RS
+.PP
+.RS 12n
+.PD 0
 .TP 4n
 \fR%H\fR
 expanded to the host name including the domain name (on if the
@@ -509,6 +517,7 @@ machine's host name is fully qualified or the
 \fIfqdn\fR
 option is set in
 sudoers(@mansectform@))
+.PD
 .TP 4n
 \fR%h\fR
 expanded to the local host name without the domain name
@@ -534,9 +543,9 @@ expanded to the invoking user's login name
 .TP 4n
 \fR%%\fR
 two consecutive
-`%'
+\(oq%\(cq
 characters are collapsed into a single
-`%'
+\(oq%\(cq
 character
 .PP
 The prompt specified by the
@@ -546,9 +555,7 @@ support PAM unless the
 \fIpassprompt_override\fR
 flag is disabled in
 \fIsudoers\fR.
-.PP
 .RE
-.PD 0
 .TP 12n
 \fB\-r\fR \fIrole\fR
 The
@@ -556,7 +563,6 @@ The
 option causes the new (SELinux) security context to have the role
 specified by
 \fIrole\fR.
-.PD
 .TP 12n
 \fB\-S\fR
 The
@@ -617,9 +623,9 @@ instead of a
 When running commands as a
 \fIuid\fR,
 many shells require that the
-`#'
+\(oq#\(cq
 be escaped with a backslash
-(`\e').
+(\(oq\e\(cq).
 Security policies may restrict
 \fIuid\fRs
 to those listed in the password database.
@@ -750,7 +756,7 @@ process waits until the command has completed, then passes the
 command's exit status to the security policy's close function and exits.
 If an I/O logging plugin is configured or if the security policy
 explicitly requests it, a new  pseudo-terminal
-(``pty'')
+(\(lqpty\(rq)
 is created and a second
 \fBsudo\fR
 process is used to relay job control signals between the user's
@@ -758,7 +764,7 @@ existing pty and the new pty the command is being run in.
 This extra process makes it possible to, for example, suspend
 and resume the command.
 Without it, the command would be in what POSIX terms an
-``orphaned process group''
+\(lqorphaned process group\(rq
 and it would not receive any job control signals.
 As a special case, if the policy plugin does not define a close
 function and no pty is required,
@@ -885,7 +891,7 @@ This should not happen under normal circumstances.
 The most common reason for
 stat(2)
 to return
-``permission denied''
+\(lqpermission denied\(rq
 is if you are running an automounter and one of the directories in
 your
 \fRPATH\fR
@@ -939,7 +945,7 @@ re-enabled for the command that is run).
 To aid in debugging
 \fBsudo\fR
 crashes, you may wish to re-enable core dumps by setting
-``disable_coredump''
+\(lqdisable_coredump\(rq
 to false in the
 sudo.conf(@mansectform@)
 file as follows:
@@ -1191,7 +1197,7 @@ search the archives.
 .SH "DISCLAIMER"
 \fBsudo\fR
 is provided
-``AS IS''
+\(lqAS IS\(rq
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.

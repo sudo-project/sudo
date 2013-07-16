@@ -7,14 +7,14 @@ SSYYNNOOPPSSIISS
      ssuuddoo --hh | --KK | --kk | --VV
      ssuuddoo --vv [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--gg _g_r_o_u_p _n_a_m_e | _#_g_i_d] [--pp _p_r_o_m_p_t]
           [--uu _u_s_e_r _n_a_m_e | _#_u_i_d]
-     ssuuddoo --ll[_l] [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--gg _g_r_o_u_p _n_a_m_e | _#_g_i_d] [--pp _p_r_o_m_p_t]
-          [--UU _u_s_e_r _n_a_m_e] [--uu _u_s_e_r _n_a_m_e | _#_u_i_d] [_c_o_m_m_a_n_d]
+     ssuuddoo --ll[_l] [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--gg _g_r_o_u_p _n_a_m_e | _#_g_i_d] [--hh _h_o_s_t _n_a_m_e]
+          [--pp _p_r_o_m_p_t] [--UU _u_s_e_r _n_a_m_e] [--uu _u_s_e_r _n_a_m_e | _#_u_i_d] [_c_o_m_m_a_n_d]
      ssuuddoo [--AAbbEEHHnnPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s | _-]
-          [--gg _g_r_o_u_p _n_a_m_e | _#_g_i_d] [--pp _p_r_o_m_p_t] [--rr _r_o_l_e] [--tt _t_y_p_e]
-          [--uu _u_s_e_r _n_a_m_e | _#_u_i_d] [VVAARR=_v_a_l_u_e] --ii | --ss [_c_o_m_m_a_n_d]
+          [--gg _g_r_o_u_p _n_a_m_e | _#_g_i_d] [--hh _h_o_s_t _n_a_m_e] [--pp _p_r_o_m_p_t] [--rr _r_o_l_e]
+          [--tt _t_y_p_e] [--uu _u_s_e_r _n_a_m_e | _#_u_i_d] [VVAARR=_v_a_l_u_e] --ii | --ss [_c_o_m_m_a_n_d]
      ssuuddooeeddiitt [--AAnnSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s | _-]
-              [--gg _g_r_o_u_p _n_a_m_e | _#_g_i_d] [--pp _p_r_o_m_p_t] [--uu _u_s_e_r _n_a_m_e | _#_u_i_d] file
-              ...
+              [--gg _g_r_o_u_p _n_a_m_e | _#_g_i_d] [--hh _h_o_s_t _n_a_m_e] [--pp _p_r_o_m_p_t]
+              [--uu _u_s_e_r _n_a_m_e | _#_u_i_d] file ...
 
 DDEESSCCRRIIPPTTIIOONN
      ssuuddoo allows a permitted user to execute a _c_o_m_m_a_n_d as the superuser or
@@ -148,8 +148,13 @@ DDEESSCCRRIIPPTTIIOONN
                  database.  Depending on the policy, this may be the default
                  behavior.
 
-     --hh          The --hh (_h_e_l_p) option causes ssuuddoo to print a short help
-                 message to the standard output and exit.
+     --hh [_h_o_s_t _n_a_m_e]
+                 If a _h_o_s_t _n_a_m_e is specified and the policy plugin supports
+                 it, the command will be run on the specified remote host.
+                 Note that the _s_u_d_o_e_r_s plugin does not currently support
+                 running remote commands.  If no _h_o_s_t _n_a_m_e is specified, ssuuddoo
+                 will print a short help message to the standard output and
+                 exit.
 
      --ii [_c_o_m_m_a_n_d]
                  The --ii (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs the shell
@@ -561,4 +566,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.7                      March 13, 2013                      Sudo 1.8.7
+Sudo 1.8.8                       July 16, 2013                      Sudo 1.8.8

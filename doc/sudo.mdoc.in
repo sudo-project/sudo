@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd March 13, 2013
+.Dd July 16, 2013
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -54,6 +54,9 @@
 .Op Fl g Ar group name No | Ar #gid
 .Ek
 .Bk -words
+.Op Fl h Ar host name
+.Ek
+.Bk -words
 .Op Fl p Ar prompt
 .Ek
 .Bk -words
@@ -76,6 +79,9 @@
 .Ek
 .Bk -words
 .Op Fl g Ar group name No | Ar #gid
+.Ek
+.Bk -words
+.Op Fl h Ar host name
 .Ek
 .Bk -words
 .Op Fl p Ar prompt
@@ -109,6 +115,9 @@
 .Ek
 .Bk -words
 .Op Fl g Ar group name No | Ar #gid
+.Ek
+.Bk -words
+.Op Fl h Ar host name
 .Ek
 .Bk -words
 .Op Fl p Ar prompt
@@ -381,12 +390,19 @@ option requests that the security policy set the
 environment variable to the home directory of the target user (root
 by default) as specified by the password database.
 Depending on the policy, this may be the default behavior.
-.It Fl h
-The
-.Fl h No ( Em help Ns No )
-option causes
+.It Fl h Op Ar host name
+If a
+.Ar host name
+is specified and the policy plugin supports it, the command will be run
+on the specified remote host.
+Note that the
+.Em sudoers
+plugin does not currently support running remote commands.
+If no
+.Ar host name
+is specified,
 .Nm sudo
-to print a short help message to the standard output and exit.
+will print a short help message to the standard output and exit.
 .It Fl i Op Ar command
 The
 .Fl i No ( Em simulate initial login Ns No )
