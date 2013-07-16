@@ -111,7 +111,9 @@ static struct sudo_settings {
     { "max_groups" },
 #define ARG_PLUGIN_DIR 21
     { "plugin_dir" },
-#define NUM_SETTINGS 22
+#define ARG_REMOTE_HOST 22
+    { "remote_host" },
+#define NUM_SETTINGS 23
     { NULL }
 };
 
@@ -181,7 +183,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	 * Some trickiness is required to allow environment variables
 	 * to be interspersed with command line options.
 	 */
-	if ((ch = getopt(argc, argv, "+Aa:bC:c:D:Eeg:HhiKklnPp:r:Sst:U:u:Vv")) != -1) {
+	if ((ch = getopt(argc, argv, "+Aa:bC:c:D:Eeg:Hh::iKklnPp:r:Sst:U:u:Vv")) != -1) {
 	    switch (ch) {
 		case 'A':
 		    SET(tgetpass_flags, TGP_ASKPASS);
@@ -227,12 +229,16 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    sudo_settings[ARG_SET_HOME].value = "true";
 		    break;
 		case 'h':
-		    if (mode && mode != MODE_HELP) {
-			if (strcmp(getprogname(), "sudoedit") != 0)
-			    usage_excl(1);
+		    if (optarg != NULL) {
+			sudo_settings[ARG_REMOTE_HOST].value = optarg;
+		    } else {
+			if (mode && mode != MODE_HELP) {
+			    if (strcmp(getprogname(), "sudoedit") != 0)
+				usage_excl(1);
+			}
+			mode = MODE_HELP;
+			valid_flags = 0;
 		    }
-		    mode = MODE_HELP;
-		    valid_flags = 0;
 		    break;
 		case 'i':
 		    sudo_settings[ARG_LOGIN_SHELL].value = "true";
