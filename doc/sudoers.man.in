@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "@mansectsu@" "June 18, 2013" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
+.TH "SUDOERS" "@mansectsu@" "July 16, 2013" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1721,7 +1721,7 @@ This effectively means that the
 option is always implied.
 Note that
 \fRHOME\fR
-is already set when the the
+is already set when the
 \fIenv_reset\fR
 option is enabled, so
 \fIalways_set_home\fR
@@ -2366,7 +2366,7 @@ option imply
 \fB\-H\fR.
 Note that
 \fRHOME\fR
-is already set when the the
+is already set when the
 \fIenv_reset\fR
 option is enabled, so
 \fIset_home\fR

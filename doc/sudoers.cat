@@ -793,11 +793,10 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        to the home directory of the target user (which is root
                        unless the --uu option is used).  This effectively means
                        that the --HH option is always implied.  Note that HOME
-                       is already set when the the _e_n_v___r_e_s_e_t option is
-                       enabled, so _a_l_w_a_y_s___s_e_t___h_o_m_e is only effective for
-                       configurations where either _e_n_v___r_e_s_e_t is disabled or
-                       HOME is present in the _e_n_v___k_e_e_p list.  This flag is _o_f_f
-                       by default.
+                       is already set when the _e_n_v___r_e_s_e_t option is enabled, so
+                       _a_l_w_a_y_s___s_e_t___h_o_m_e is only effective for configurations
+                       where either _e_n_v___r_e_s_e_t is disabled or HOME is present
+                       in the _e_n_v___k_e_e_p list.  This flag is _o_f_f by default.
 
      authenticate      If set, users must authenticate themselves via a
                        password (or other means of authentication) before they
@@ -1119,10 +1118,10 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        directory of the target user (which is root unless the
                        --uu option is used).  This effectively makes the --ss
                        option imply --HH.  Note that HOME is already set when
-                       the the _e_n_v___r_e_s_e_t option is enabled, so _s_e_t___h_o_m_e is
-                       only effective for configurations where either
-                       _e_n_v___r_e_s_e_t is disabled or HOME is present in the
-                       _e_n_v___k_e_e_p list.  This flag is _o_f_f by default.
+                       the _e_n_v___r_e_s_e_t option is enabled, so _s_e_t___h_o_m_e is only
+                       effective for configurations where either _e_n_v___r_e_s_e_t is
+                       disabled or HOME is present in the _e_n_v___k_e_e_p list.  This
+                       flag is _o_f_f by default.
 
      set_logname       Normally, ssuuddoo will set the LOGNAME, USER and USERNAME
                        environment variables to the name of the target user
@@ -2237,4 +2236,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.7                       June 18, 2013                      Sudo 1.8.7
+Sudo 1.8.8                       July 16, 2013                      Sudo 1.8.8

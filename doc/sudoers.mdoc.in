@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd June 18, 2013
+.Dd July 16, 2013
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1597,7 +1597,7 @@ This effectively means that the
 option is always implied.
 Note that
 .Ev HOME
-is already set when the the
+is already set when the
 .Em env_reset
 option is enabled, so
 .Em always_set_home
@@ -2212,7 +2212,7 @@ option imply
 .Fl H .
 Note that
 .Ev HOME
-is already set when the the
+is already set when the
 .Em env_reset
 option is enabled, so
 .Em set_home
