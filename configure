@@ -17517,6 +17517,19 @@ esac
 
   fi
 
+ac_fn_c_check_func "$LINENO" "getopt_long" "ac_cv_func_getopt_long"
+if test "x$ac_cv_func_getopt_long" = xyes; then :
+  $as_echo "#define HAVE_GETOPT_LONG 1" >>confdefs.h
+
+else
+  case " $LIBOBJS " in
+  *" getopt_long.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS getopt_long.$ac_objext"
+ ;;
+esac
+
+fi
+
 ac_fn_c_check_func "$LINENO" "memrchr" "ac_cv_func_memrchr"
 if test "x$ac_cv_func_memrchr" = xyes; then :
   $as_echo "#define HAVE_MEMRCHR 1" >>confdefs.h

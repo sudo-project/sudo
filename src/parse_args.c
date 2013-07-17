@@ -40,6 +40,11 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
 #include <ctype.h>
 #include <grp.h>
 #include <pwd.h>
@@ -47,10 +52,6 @@
 #include "sudo_usage.h"
 #include "sudo.h"
 #include "lbuf.h"
-
-/* For getopt(3) */
-extern char *optarg;
-extern int optind;
 
 int tgetpass_flags;
 
@@ -183,7 +184,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	 * Some trickiness is required to allow environment variables
 	 * to be interspersed with command line options.
 	 */
-	if ((ch = getopt(argc, argv, "+Aa:bC:c:D:Eeg:Hh::iKklnPp:r:Sst:U:u:Vv")) != -1) {
+	if ((ch = getopt_long(argc, argv, "+Aa:bC:c:D:Eeg:Hh::iKklnPp:r:Sst:U:u:Vv", NULL, NULL)) != -1) {
 	    switch (ch) {
 		case 'A':
 		    SET(tgetpass_flags, TGP_ASKPASS);

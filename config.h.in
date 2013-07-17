@@ -195,6 +195,9 @@
 /* Define to 1 if you have the `getline' function. */
 #undef HAVE_GETLINE
 
+/* Define to 1 if you have the `getopt_long' function. */
+#undef HAVE_GETOPT_LONG
+
 /* Define to 1 if you have the `getprogname' function. */
 #undef HAVE_GETPROGNAME
 
