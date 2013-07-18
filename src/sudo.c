@@ -83,10 +83,10 @@
 # include <prot.h>
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
+#include <sudo_usage.h>
 #include "sudo.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
-#include "sudo_usage.h"
 
 /*
  * Local variables

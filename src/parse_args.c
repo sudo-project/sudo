@@ -49,7 +49,7 @@
 #include <grp.h>
 #include <pwd.h>
 
-#include "sudo_usage.h"
+#include <sudo_usage.h>
 #include "sudo.h"
 #include "lbuf.h"
 
@@ -123,6 +123,45 @@ static struct sudo_settings {
  */
 #define DEFAULT_VALID_FLAGS	(MODE_BACKGROUND|MODE_PRESERVE_ENV|MODE_RESET_HOME|MODE_LOGIN_SHELL|MODE_NONINTERACTIVE|MODE_SHELL)
 
+/* Option number for the --host long option due to ambiguity of the -h flag. */
+#define OPT_HOSTNAME	256
+
+/*
+ * Available command line options, both short and long.
+ * Note that we must disable arg permutation to support setting environment
+ * variables and to better support the optional arg of the -h flag.
+ */
+static const char short_opts[] =  "+Aa:bC:c:D:Eeg:Hh::iKklnPp:r:Sst:U:u:Vv";
+static struct option long_opts[] = {
+    { "askpass",	no_argument,		NULL,	'A' },
+    { "auth-type",	required_argument,	NULL,	'a' },
+    { "background",	no_argument,		NULL,	'b' },
+    { "close-from",	required_argument,	NULL,	'C' },
+    { "login-class",	required_argument,	NULL,	'c' },
+    { "preserve-env",	no_argument,		NULL,	'E' },
+    { "edit",		no_argument,		NULL,	'e' },
+    { "group",		required_argument,	NULL,	'g' },
+    { "set-home",	no_argument,		NULL,	'H' },
+    { "help",		no_argument,		NULL,	'h' },
+    { "host",		required_argument,	NULL,	OPT_HOSTNAME },
+    { "login",		no_argument,		NULL,	'i' },
+    { "remove-timestamp", no_argument,		NULL,	'K' },
+    { "reset-timestamp", no_argument,		NULL,	'k' },
+    { "list",		no_argument,		NULL,	'l' },
+    { "non-interactive", no_argument,		NULL,	'n' },
+    { "preserve-groups", no_argument,		NULL,	'P' },
+    { "prompt",		required_argument,	NULL,	'p' },
+    { "role",		required_argument,	NULL,	'r' },
+    { "stdin",		no_argument,		NULL,	'S' },
+    { "shell",		no_argument,		NULL,	's' },
+    { "type",		required_argument,	NULL,	't' },
+    { "other-user",	required_argument,	NULL,	'U' },
+    { "user",		required_argument,	NULL,	'u' },
+    { "version",	no_argument,		NULL,	'V' },
+    { "validate",	no_argument,		NULL,	'v' },
+    { NULL,		no_argument,		NULL,	'\0' },
+};
+
 /*
  * Command line argument parsing.
  * Sets nargc and nargv which corresponds to the argc/argv we'll use
@@ -186,11 +225,10 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     /* XXX - should fill in settings at the end to avoid dupes */
     for (;;) {
 	/*
-	 * We disable arg permutation for GNU getopt().
 	 * Some trickiness is required to allow environment variables
 	 * to be interspersed with command line options.
 	 */
-	if ((ch = getopt_long(argc, argv, "+Aa:bC:c:D:Eeg:Hh::iKklnPp:r:Sst:U:u:Vv", NULL, NULL)) != -1) {
+	if ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	    switch (ch) {
 		case 'A':
 		    SET(tgetpass_flags, TGP_ASKPASS);
@@ -236,16 +274,18 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    sudo_settings[ARG_SET_HOME].value = "true";
 		    break;
 		case 'h':
-		    if (optarg != NULL) {
-			sudo_settings[ARG_REMOTE_HOST].value = optarg;
-		    } else {
+		    if (optarg == NULL) {
 			if (mode && mode != MODE_HELP) {
 			    if (strcmp(getprogname(), "sudoedit") != 0)
 				usage_excl(1);
 			}
 			mode = MODE_HELP;
 			valid_flags = 0;
+			break;
 		    }
+		    /* FALLTHROUGH */
+		case OPT_HOSTNAME:
+		    sudo_settings[ARG_REMOTE_HOST].value = optarg;
 		    break;
 		case 'i':
 		    sudo_settings[ARG_LOGIN_SHELL].value = "true";
@@ -318,7 +358,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		default:
 		    usage(1);
 	    }
-	} else if (got_host_flag) {
+	} else if (got_host_flag && optind < argc) {
 	    /*
 	     * Optional args only support -hhostname, not -h hostname.
 	     * If we see a non-option after the -h flag, treat as
@@ -559,7 +599,7 @@ static void
 help(void)
 {
     struct lbuf lbuf;
-    int indent = 16;
+    const int indent = 30;
     const char *pname = getprogname();
     debug_decl(help, SUDO_DEBUG_ARGS)
 
@@ -573,67 +613,67 @@ help(void)
     usage(0);
 
     lbuf_append(&lbuf, _("\nOptions:\n"));
-    lbuf_append(&lbuf, "  -A            %s",
+    lbuf_append(&lbuf, "  -A, --askpass               %s",
 	_("use helper program for password prompting\n"));
 #ifdef HAVE_BSD_AUTH_H
-    lbuf_append(&lbuf, "  -a type       %s",
+    lbuf_append(&lbuf, "  -a, --auth-type auth_type   %s",
 	_("use specified BSD authentication type\n"));
 #endif
-    lbuf_append(&lbuf, "  -b            %s",
+    lbuf_append(&lbuf, "  -b, --background            %s",
 	_("run command in the background\n"));
-    lbuf_append(&lbuf, "  -C fd         %s",
+    lbuf_append(&lbuf, "  -C, --close-from fd         %s",
 	_("close all file descriptors >= fd\n"));
 #ifdef HAVE_LOGIN_CAP_H
-    lbuf_append(&lbuf, "  -c class      %s",
+    lbuf_append(&lbuf, "  -c, --login-class class     %s",
 	_("run command with specified login class\n"));
 #endif
-    lbuf_append(&lbuf, "  -E            %s",
+    lbuf_append(&lbuf, "  -E, --preserve-env          %s",
 	_("preserve user environment when executing command\n"));
-    lbuf_append(&lbuf, "  -e            %s",
+    lbuf_append(&lbuf, "  -e, --edit                  %s",
 	_("edit files instead of running a command\n"));
-    lbuf_append(&lbuf, "  -g group      %s",
+    lbuf_append(&lbuf, "  -g, --group group name|#gid %s",
 	_("execute command as the specified group\n"));
-    lbuf_append(&lbuf, "  -H            %s",
+    lbuf_append(&lbuf, "  -H, --set-home              %s",
 	_("set HOME variable to target user's home dir.\n"));
-    lbuf_append(&lbuf, "  -h            %s",
+    lbuf_append(&lbuf, "  -h, --help                  %s",
 	_("display help message and exit\n"));
-    lbuf_append(&lbuf, "  -h host name  %s",
-	_("run command on specified host if supported\n"));
-    lbuf_append(&lbuf, "  -i [command]  %s",
+    lbuf_append(&lbuf, "  -h, --host remote host      %s",
+	_("run command on specified host (if supported)\n"));
+    lbuf_append(&lbuf, "  -i, --login [command]       %s",
 	_("run a login shell as target user\n"));
-    lbuf_append(&lbuf, "  -K            %s",
+    lbuf_append(&lbuf, "  -K, --remove-timestamp      %s",
 	_("remove timestamp file completely\n"));
-    lbuf_append(&lbuf, "  -k            %s",
+    lbuf_append(&lbuf, "  -k, --reset-timestamp       %s",
 	_("invalidate timestamp file\n"));
-    lbuf_append(&lbuf, "  -l[l] command %s",
+    lbuf_append(&lbuf, "  -l[l], --list [command]     %s",
 	_("list user's available commands\n"));
-    lbuf_append(&lbuf, "  -n            %s",
+    lbuf_append(&lbuf, "  -n, --non-interactive       %s",
 	_("non-interactive mode, will not prompt user\n"));
-    lbuf_append(&lbuf, "  -P            %s",
+    lbuf_append(&lbuf, "  -P, --preserve-groups       %s",
 	_("preserve group vector instead of setting to target's\n"));
-    lbuf_append(&lbuf, "  -p prompt     %s",
+    lbuf_append(&lbuf, "  -p, --prompt prompt         %s",
 	_("use specified password prompt\n"));
 #ifdef HAVE_SELINUX
-    lbuf_append(&lbuf, "  -r role       %s",
+    lbuf_append(&lbuf, "  -r, --role role             %s",
 	_("create SELinux security context with specified role\n"));
 #endif
-    lbuf_append(&lbuf, "  -S            %s",
+    lbuf_append(&lbuf, "  -S, --stdin                 %s",
 	_("read password from standard input\n"));
-    lbuf_append(&lbuf,
-	"  -s [command]  %s", _("run a shell as target user\n"));
+    lbuf_append(&lbuf, "  -s, --shell [command]       %s",
+	_("run a shell as target user\n"));
 #ifdef HAVE_SELINUX
-    lbuf_append(&lbuf, "  -t type       %s",
+    lbuf_append(&lbuf, "  -t, --type type             %s",
 	_("create SELinux security context with specified role\n"));
 #endif
-    lbuf_append(&lbuf, "  -U user       %s",
+    lbuf_append(&lbuf, "  -U, --other-user user name  %s",
 	_("when listing, list specified user's privileges\n"));
-    lbuf_append(&lbuf, "  -u user       %s",
+    lbuf_append(&lbuf, "  -u, --user user name|#uid   %s",
 	_("run command (or edit file) as specified user\n"));
-    lbuf_append(&lbuf, "  -V            %s",
+    lbuf_append(&lbuf, "  -V, --version               %s",
 	_("display version information and exit\n"));
-    lbuf_append(&lbuf, "  -v            %s",
+    lbuf_append(&lbuf, "  -v, --validate              %s",
 	_("update user's timestamp without running a command\n"));
-    lbuf_append(&lbuf, "  --            %s",
+    lbuf_append(&lbuf, "  --                          %s",
 	_("stop processing command line arguments\n"));
     lbuf_print(&lbuf);
     lbuf_destroy(&lbuf);

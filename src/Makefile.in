@@ -38,7 +38,7 @@ LT_LIBS = $(top_builddir)/common/libcommon.la $(LIBOBJDIR)libreplace.la
 LIBS = @LIBS@ @SUDO_LIBS@ @GETGROUPS_LIB@ @NET_LIBS@ @LIBINTL@ $(LT_LIBS)
 
 # C preprocessor flags
-CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) -I$(top_srcdir) -I. @CPPFLAGS@
+CPPFLAGS = -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) -I$(top_srcdir) @CPPFLAGS@
 
 # Usually -O and/or -g
 CFLAGS = @CFLAGS@
@@ -106,7 +106,7 @@ Makefile: $(srcdir)/Makefile.in
 	(cd $(top_builddir) && ./config.status --file src/Makefile)
 
 ./sudo_usage.h: $(srcdir)/sudo_usage.h.in
-        (cd $(top_builddir) && ./config.status --file src/sudo_usage.h)
+	(cd $(top_builddir) && ./config.status --file src/sudo_usage.h)
 
 .SUFFIXES: .c .h .lo .o
 

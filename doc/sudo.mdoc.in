@@ -39,6 +39,9 @@
 .Op Fl g Ar group name No | Ar #gid
 .Ek
 .Bk -words
+.Op Fl h Ar remote host
+.Ek
+.Bk -words
 .Op Fl p Ar prompt
 .Ek
 .Bk -words
@@ -54,7 +57,7 @@
 .Op Fl g Ar group name No | Ar #gid
 .Ek
 .Bk -words
-.Op Fl h Ar host name
+.Op Fl h Ar remote host
 .Ek
 .Bk -words
 .Op Fl p Ar prompt
@@ -81,7 +84,7 @@
 .Op Fl g Ar group name No | Ar #gid
 .Ek
 .Bk -words
-.Op Fl h Ar host name
+.Op Fl h Ar remote host
 .Ek
 .Bk -words
 .Op Fl p Ar prompt
@@ -117,7 +120,7 @@
 .Op Fl g Ar group name No | Ar #gid
 .Ek
 .Bk -words
-.Op Fl h Ar host name
+.Op Fl h Ar remote host
 .Ek
 .Bk -words
 .Op Fl p Ar prompt
@@ -197,7 +200,7 @@ output may be logged as well.
 .Pp
 The options are as follows:
 .Bl -tag -width Fl
-.It Fl A
+.It Fl A , -askpass
 Normally, if
 .Nm sudo
 requires a password, it will read it from the user's terminal.
@@ -223,7 +226,7 @@ Path askpass /usr/X11R6/bin/ssh-askpass
 If no askpass program is available,
 .Nm sudo
 will exit with an error.
-.It Fl a Ar type
+.It Fl a , -auth-type Ar auth_type
 The
 .Fl a No ( Em "authentication type" Ns No )
 option causes
@@ -237,7 +240,7 @@ authentication methods by adding an
 entry in
 .Pa /etc/login.conf .
 This option is only available on systems that support BSD authentication.
-.It Fl b
+.It Fl b , -background
 The
 .Fl b No ( Em background Ns No )
 option tells
@@ -248,7 +251,7 @@ Note that if you use the
 option you cannot use shell job control to manipulate the process.
 Most interactive commands will fail to work properly in background
 mode.
-.It Fl C Ar fd
+.It Fl C , -close-from Ar fd
 Normally,
 .Nm sudo
 will close all open file descriptors other than standard input,
@@ -268,7 +271,7 @@ policy only permits use of the
 option when the administrator has enabled the
 .Em closefrom_override
 option.
-.It Fl c Ar class
+.It Fl c , -login-class Ar class
 The
 .Fl c No ( Em class Ns No )
 option causes
@@ -295,7 +298,7 @@ as root, or the
 .Nm sudo
 command must be run from a shell that is already root.
 This option is only available on systems with BSD login classes.
-.It Fl E
+.It Fl E , -preserve-env
 The
 .Fl E No ( Em preserve environment Ns No )
 option indicates to the security policy that the user wishes to
@@ -304,7 +307,7 @@ The security policy may return an error if the
 .Fl E
 option is specified and the user does not have permission to preserve
 the environment.
-.It Fl e
+.It Fl e , -edit
 The
 .Fl e No ( Em edit Ns No )
 option indicates that, instead of running a command, the user wishes
@@ -351,7 +354,7 @@ If, for some reason,
 is unable to update a file with its edited version, the user will
 receive a warning and the edited copy will remain in a temporary
 file.
-.It Fl g Ar group
+.It Fl g , -group Ar group
 Normally,
 .Nm sudo
 runs a command with the primary group set to the one specified by
@@ -364,15 +367,11 @@ option causes
 to run the command with the primary group set to
 .Ar group
 instead.
-To specify a
-.Em gid
-instead of a
-.Em "group name" ,
-use
-.Em #gid .
-When running commands as a
-.Em gid ,
-many shells require that the
+To specify a numeric group ID
+.Pq gid
+instead of a group name, use
+.Ar #gid .
+When running commands as a gid, many shells require that the
 .Ql #
 be escaped with a backslash
 .Pq Ql \e .
@@ -381,8 +380,8 @@ If no
 option is specified, the command will be run as the invoking user
 (not root).
 In either case, the primary group will be set to
-.Em group .
-.It Fl H
+.Ar group .
+.It Fl H , -set-home
 The
 .Fl H No ( Em HOME Ns No )
 option requests that the security policy set the
@@ -390,20 +389,21 @@ option requests that the security policy set the
 environment variable to the home directory of the target user (root
 by default) as specified by the password database.
 Depending on the policy, this may be the default behavior.
-.It Fl h Op Ar host name
+.It Fl h , -help
+The
+.Fl h No ( Em help Ns No )
+option causes
+.Nm sudo
+will print a short help message to the standard output and exit.
+.It Fl h , -host Ar remote host
 If a
-.Ar host name
+.Ar remote host
 is specified and the policy plugin supports it, the command will be run
 on the specified remote host.
 Note that the
 .Em sudoers
 plugin does not currently support running remote commands.
-If no
-.Ar host name
-is specified,
-.Nm sudo
-will print a short help message to the standard output and exit.
-.It Fl i Op Ar command
+.It Fl i , -login Op Ar command
 The
 .Fl i No ( Em simulate initial login Ns No )
 option runs the shell specified by the password database entry of
@@ -432,7 +432,7 @@ manual documents how the
 option affects the environment in which a command is run when the
 .Em sudoers
 policy is in use.
-.It Fl K
+.It Fl K , -remove-timestamp
 The
 .Fl K No ( sure Em kill Ns No )
 option is like
@@ -441,7 +441,7 @@ except that it removes the user's cached credentials entirely and
 may not be used in conjunction with a command or other option.
 This option does not require a password.
 Not all security policies support credential caching.
-.It Fl k Op Ar command
+.It Fl k , -reset-timestamp Op Ar command
 When used alone, the
 .Fl k No ( Em kill Ns No )
 option to
@@ -468,7 +468,7 @@ As a result,
 .Nm sudo
 will prompt for a password (if one is required by the security
 policy) and will not update the user's cached credentials.
-.It Fl l Ns Oo Sy l Oc Op Ar command
+.It Fl l Ns Oo Sy l Oc , Fl -list Op Ar command
 If no
 .Ar command
 is specified, the
@@ -496,7 +496,7 @@ argument
 or if
 .Fl l
 is specified multiple times, a longer list format is used.
-.It Fl n
+.It Fl n , -non-interactive
 The
 .Fl n No ( Em non-interactive Ns No )
 option prevents
@@ -505,7 +505,7 @@ from prompting the user for a password.
 If a password is required for the command to run,
 .Nm sudo
 will display an error message and exit.
-.It Fl P
+.It Fl P , -preserve-groups
 The
 .Fl P No ( Em preserve group vector Ns No )
 option causes
@@ -517,7 +517,7 @@ policy will initialize the group vector to the list of groups the
 target user is in.
 The real and effective group IDs, however, are still set to match
 the target user.
-.It Fl p Ar prompt
+.It Fl p , -prompt Ar prompt
 The
 .Fl p No ( Em prompt Ns No )
 option allows you to override the default password prompt and use
@@ -567,13 +567,13 @@ support PAM unless the
 .Em passprompt_override
 flag is disabled in
 .Em sudoers .
-.It Fl r Ar role
+.It Fl r , -role Ar role
 The
 .Fl r No ( Em role Ns No )
-option causes the new (SELinux) security context to have the role
+option causes the new SELinux security context to have the role
 specified by
 .Ar role .
-.It Fl S
+.It Fl S , -stdin
 The
 .Fl S ( Em stdin Ns No )
 option causes
@@ -581,7 +581,7 @@ option causes
 to read the password from the standard input instead of the terminal
 device.
 The password must be followed by a newline character.
-.It Fl s Op Ar command
+.It Fl s , -shell Op Ar command
 The
 .Fl s ( Em shell Ns No )
 option runs the shell specified by the
@@ -593,15 +593,15 @@ via the shell's
 .Fl c
 option.
 If no command is specified, an interactive shell is executed.
-.It Fl t Ar type
+.It Fl t , -type Ar type
 The
 .Fl t ( Em type Ns No )
-option causes the new (SELinux) security context to have the type
+option causes the new SELinux security context to have the type
 specified by
 .Ar type .
 If no type is specified, the default type is derived from the
 specified role.
-.It Fl U Ar user
+.It Fl U , -other-user Ar user
 The
 .Fl U ( Em other user Ns No )
 option is used in conjunction with the
@@ -613,36 +613,30 @@ The
 policy only allows root or a user with the
 .Li ALL
 privilege on the current host to use this option.
-.It Fl u Ar user
+.It Fl u , -user Ar user
 The
 .Fl u ( Em user Ns No )
 option causes
 .Nm sudo
 to run the specified command as a user other than
 .Em root .
-To specify a
-.Em uid
-instead of a
-.Em user name ,
-.Em #uid .
-When running commands as a
-.Em uid ,
-many shells require that the
+To specify a numeric user ID
+.Pq uid
+instead of a user name, use
+.Ar #uid .
+When running commands as a uid, many shells require that the
 .Ql #
 be escaped with a backslash
 .Pq Ql \e .
-Security policies may restrict
-.Em uid Ns No s
+Some security policies may restrict uids
 to those listed in the password database.
 The
 .Em sudoers
-policy allows
-.Em uid Ns No s
-that are not in the password database as long as the
+policy allows uids that are not in the password database as long as the
 .Em targetpw
 option is not set.
 Other security policies may not support this.
-.It Fl V
+.It Fl V , -version
 The
 .Fl V ( Em version Ns No )
 option causes
@@ -655,7 +649,7 @@ option will display the arguments passed to configure when
 .Nm sudo
 was built and plugins may display more verbose information such as
 default options.
-.It Fl v
+.It Fl v , -validate
 When given the
 .Fl v ( Em validate Ns No )
 option,
@@ -704,7 +698,7 @@ When
 .Nm sudo
 executes a command, the security policy specifies the execution
 environment for the command.
-Typically, the real and effective uid and gid are set to
+Typically, the real and effective user and group and IDs are set to
 match those of the target user, as specified in the password database,
 and the group vector is initialized based on the group database
 (unless the

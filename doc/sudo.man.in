@@ -39,6 +39,7 @@
 [\fB\-AknS\fR]
 [\fB\-a\fR\ \fIauth_type\fR]
 [\fB\-g\fR\ \fIgroup\ name\fR\ |\ \fI#gid\fR]
+[\fB\-h\fR\ \fIremote\ host\fR]
 [\fB\-p\fR\ \fIprompt\fR]
 [\fB\-u\fR\ \fIuser\ name\fR\ |\ \fI#uid\fR]
 .br
@@ -48,7 +49,7 @@
 [\fB\-AknS\fR]
 [\fB\-a\fR\ \fIauth_type\fR]
 [\fB\-g\fR\ \fIgroup\ name\fR\ |\ \fI#gid\fR]
-[\fB\-h\fR\ \fIhost\ name\fR]
+[\fB\-h\fR\ \fIremote\ host\fR]
 [\fB\-p\fR\ \fIprompt\fR]
 [\fB\-U\fR\ \fIuser\ name\fR]
 [\fB\-u\fR\ \fIuser\ name\fR\ |\ \fI#uid\fR]
@@ -61,7 +62,7 @@
 [\fB\-C\fR\ \fIfd\fR]
 [\fB\-c\fR\ \fIclass\fR\ |\ \fI-\fR]
 [\fB\-g\fR\ \fIgroup\ name\fR\ |\ \fI#gid\fR]
-[\fB\-h\fR\ \fIhost\ name\fR]
+[\fB\-h\fR\ \fIremote\ host\fR]
 [\fB\-p\fR\ \fIprompt\fR]
 [\fB\-r\fR\ \fIrole\fR]
 [\fB\-t\fR\ \fItype\fR]
@@ -77,7 +78,7 @@
 [\fB\-C\fR\ \fIfd\fR]
 [\fB\-c\fR\ \fIclass\fR\ |\ \fI-\fR]
 [\fB\-g\fR\ \fIgroup\ name\fR\ |\ \fI#gid\fR]
-[\fB\-h\fR\ \fIhost\ name\fR]
+[\fB\-h\fR\ \fIremote\ host\fR]
 [\fB\-p\fR\ \fIprompt\fR]
 [\fB\-u\fR\ \fIuser\ name\fR\ |\ \fI#uid\fR]
 file ...
@@ -151,7 +152,7 @@ output may be logged as well.
 .PP
 The options are as follows:
 .TP 12n
-\fB\-A\fR
+\fB\-A\fR, \fB\--askpass\fR
 Normally, if
 \fBsudo\fR
 requires a password, it will read it from the user's terminal.
@@ -183,7 +184,7 @@ If no askpass program is available,
 will exit with an error.
 .RE
 .TP 12n
-\fB\-a\fR \fItype\fR
+\fB\-a\fR, \fB\--auth-type\fR \fIauth_type\fR
 The
 \fB\-a\fR (\fIauthentication type\fR)
 option causes
@@ -198,7 +199,7 @@ entry in
 \fI/etc/login.conf\fR.
 This option is only available on systems that support BSD authentication.
 .TP 12n
-\fB\-b\fR
+\fB\-b\fR, \fB\--background\fR
 The
 \fB\-b\fR (\fIbackground\fR)
 option tells
@@ -210,7 +211,7 @@ option you cannot use shell job control to manipulate the process.
 Most interactive commands will fail to work properly in background
 mode.
 .TP 12n
-\fB\-C\fR \fIfd\fR
+\fB\-C\fR, \fB\--close-from\fR \fIfd\fR
 Normally,
 \fBsudo\fR
 will close all open file descriptors other than standard input,
@@ -231,7 +232,7 @@ option when the administrator has enabled the
 \fIclosefrom_override\fR
 option.
 .TP 12n
-\fB\-c\fR \fIclass\fR
+\fB\-c\fR, \fB\--login-class\fR \fIclass\fR
 The
 \fB\-c\fR (\fIclass\fR)
 option causes
@@ -259,7 +260,7 @@ as root, or the
 command must be run from a shell that is already root.
 This option is only available on systems with BSD login classes.
 .TP 12n
-\fB\-E\fR
+\fB\-E\fR, \fB\--preserve-env\fR
 The
 \fB\-E\fR (\fIpreserve environment\fR)
 option indicates to the security policy that the user wishes to
@@ -269,7 +270,7 @@ The security policy may return an error if the
 option is specified and the user does not have permission to preserve
 the environment.
 .TP 12n
-\fB\-e\fR
+\fB\-e\fR, \fB\--edit\fR
 The
 \fB\-e\fR (\fIedit\fR)
 option indicates that, instead of running a command, the user wishes
@@ -322,7 +323,7 @@ receive a warning and the edited copy will remain in a temporary
 file.
 .RE
 .TP 12n
-\fB\-g\fR \fIgroup\fR
+\fB\-g\fR, \fB\--group\fR \fIgroup\fR
 Normally,
 \fBsudo\fR
 runs a command with the primary group set to the one specified by
@@ -335,15 +336,11 @@ option causes
 to run the command with the primary group set to
 \fIgroup\fR
 instead.
-To specify a
-\fIgid\fR
-instead of a
-\fIgroup name\fR,
-use
+To specify a numeric group ID
+(gid)
+instead of a group name, use
 \fI#gid\fR.
-When running commands as a
-\fIgid\fR,
-many shells require that the
+When running commands as a gid, many shells require that the
 \(oq#\(cq
 be escaped with a backslash
 (\(oq\e\(cq).
@@ -354,7 +351,7 @@ option is specified, the command will be run as the invoking user
 In either case, the primary group will be set to
 \fIgroup\fR.
 .TP 12n
-\fB\-H\fR
+\fB\-H\fR, \fB\--set-home\fR
 The
 \fB\-H\fR (\fIHOME\fR)
 option requests that the security policy set the
@@ -363,21 +360,23 @@ environment variable to the home directory of the target user (root
 by default) as specified by the password database.
 Depending on the policy, this may be the default behavior.
 .TP 12n
-\fB\-h\fR [\fIhost name\fR]
+\fB\-h\fR, \fB\--help\fR
+The
+\fB\-h\fR (\fIhelp\fR)
+option causes
+\fBsudo\fR
+will print a short help message to the standard output and exit.
+.TP 12n
+\fB\-h\fR, \fB\--host\fR \fIremote host\fR
 If a
-\fIhost name\fR
+\fIremote host\fR
 is specified and the policy plugin supports it, the command will be run
 on the specified remote host.
 Note that the
 \fIsudoers\fR
 plugin does not currently support running remote commands.
-If no
-\fIhost name\fR
-is specified,
-\fBsudo\fR
-will print a short help message to the standard output and exit.
 .TP 12n
-\fB\-i\fR [\fIcommand\fR]
+\fB\-i\fR, \fB\--login\fR [\fIcommand\fR]
 The
 \fB\-i\fR (\fIsimulate initial login\fR)
 option runs the shell specified by the password database entry of
@@ -407,7 +406,7 @@ option affects the environment in which a command is run when the
 \fIsudoers\fR
 policy is in use.
 .TP 12n
-\fB\-K\fR
+\fB\-K\fR, \fB\--remove-timestamp\fR
 The
 \fB\-K\fR (sure \fIkill\fR)
 option is like
@@ -417,7 +416,7 @@ may not be used in conjunction with a command or other option.
 This option does not require a password.
 Not all security policies support credential caching.
 .TP 12n
-\fB\-k\fR [\fIcommand\fR]
+\fB\-k\fR, \fB\--reset-timestamp\fR [\fIcommand\fR]
 When used alone, the
 \fB\-k\fR (\fIkill\fR)
 option to
@@ -445,7 +444,7 @@ As a result,
 will prompt for a password (if one is required by the security
 policy) and will not update the user's cached credentials.
 .TP 12n
-\fB\-l\fR[\fBl\fR] [\fIcommand\fR]
+\fB\-l\fR[\fBl\fR], \fB\--list\fR [\fIcommand\fR]
 If no
 \fIcommand\fR
 is specified, the
@@ -474,7 +473,7 @@ or if
 \fB\-l\fR
 is specified multiple times, a longer list format is used.
 .TP 12n
-\fB\-n\fR
+\fB\-n\fR, \fB\--non-interactive\fR
 The
 \fB\-n\fR (\fInon-interactive\fR)
 option prevents
@@ -484,7 +483,7 @@ If a password is required for the command to run,
 \fBsudo\fR
 will display an error message and exit.
 .TP 12n
-\fB\-P\fR
+\fB\-P\fR, \fB\--preserve-groups\fR
 The
 \fB\-P\fR (\fIpreserve group vector\fR)
 option causes
@@ -497,7 +496,7 @@ target user is in.
 The real and effective group IDs, however, are still set to match
 the target user.
 .TP 12n
-\fB\-p\fR \fIprompt\fR
+\fB\-p\fR, \fB\--prompt\fR \fIprompt\fR
 The
 \fB\-p\fR (\fIprompt\fR)
 option allows you to override the default password prompt and use
@@ -557,14 +556,14 @@ flag is disabled in
 \fIsudoers\fR.
 .RE
 .TP 12n
-\fB\-r\fR \fIrole\fR
+\fB\-r\fR, \fB\--role\fR \fIrole\fR
 The
 \fB\-r\fR (\fIrole\fR)
-option causes the new (SELinux) security context to have the role
+option causes the new SELinux security context to have the role
 specified by
 \fIrole\fR.
 .TP 12n
-\fB\-S\fR
+\fB\-S\fR, \fB\--stdin\fR
 The
 \fB\-S\fR (\fIstdin\fR)
 option causes
@@ -573,7 +572,7 @@ to read the password from the standard input instead of the terminal
 device.
 The password must be followed by a newline character.
 .TP 12n
-\fB\-s\fR [\fIcommand\fR]
+\fB\-s\fR, \fB\--shell\fR [\fIcommand\fR]
 The
 \fB\-s\fR (\fIshell\fR)
 option runs the shell specified by the
@@ -586,16 +585,16 @@ via the shell's
 option.
 If no command is specified, an interactive shell is executed.
 .TP 12n
-\fB\-t\fR \fItype\fR
+\fB\-t\fR, \fB\--type\fR \fItype\fR
 The
 \fB\-t\fR (\fItype\fR)
-option causes the new (SELinux) security context to have the type
+option causes the new SELinux security context to have the type
 specified by
 \fItype\fR.
 If no type is specified, the default type is derived from the
 specified role.
 .TP 12n
-\fB\-U\fR \fIuser\fR
+\fB\-U\fR, \fB\--other-user\fR \fIuser\fR
 The
 \fB\-U\fR (\fIother user\fR)
 option is used in conjunction with the
@@ -608,37 +607,31 @@ policy only allows root or a user with the
 \fRALL\fR
 privilege on the current host to use this option.
 .TP 12n
-\fB\-u\fR \fIuser\fR
+\fB\-u\fR, \fB\--user\fR \fIuser\fR
 The
 \fB\-u\fR (\fIuser\fR)
 option causes
 \fBsudo\fR
 to run the specified command as a user other than
 \fIroot\fR.
-To specify a
-\fIuid\fR
-instead of a
-\fIuser name\fR,
+To specify a numeric user ID
+(uid)
+instead of a user name, use
 \fI#uid\fR.
-When running commands as a
-\fIuid\fR,
-many shells require that the
+When running commands as a uid, many shells require that the
 \(oq#\(cq
 be escaped with a backslash
 (\(oq\e\(cq).
-Security policies may restrict
-\fIuid\fRs
+Some security policies may restrict uids
 to those listed in the password database.
 The
 \fIsudoers\fR
-policy allows
-\fIuid\fRs
-that are not in the password database as long as the
+policy allows uids that are not in the password database as long as the
 \fItargetpw\fR
 option is not set.
 Other security policies may not support this.
 .TP 12n
-\fB\-V\fR
+\fB\-V\fR, \fB\--version\fR
 The
 \fB\-V\fR (\fIversion\fR)
 option causes
@@ -652,7 +645,7 @@ option will display the arguments passed to configure when
 was built and plugins may display more verbose information such as
 default options.
 .TP 12n
-\fB\-v\fR
+\fB\-v\fR, \fB\--validate\fR
 When given the
 \fB\-v\fR (\fIvalidate\fR)
 option,
@@ -701,7 +694,7 @@ When
 \fBsudo\fR
 executes a command, the security policy specifies the execution
 environment for the command.
-Typically, the real and effective uid and gid are set to
+Typically, the real and effective user and group and IDs are set to
 match those of the target user, as specified in the password database,
 and the group vector is initialized based on the group database
 (unless the
