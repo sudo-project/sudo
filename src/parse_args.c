@@ -119,6 +119,11 @@ static struct sudo_settings {
 };
 
 /*
+ * Default flags allowed when running a command.
+ */
+#define DEFAULT_VALID_FLAGS	(MODE_BACKGROUND|MODE_PRESERVE_ENV|MODE_RESET_HOME|MODE_LOGIN_SHELL|MODE_NONINTERACTIVE|MODE_SHELL)
+
+/*
  * Command line argument parsing.
  * Sets nargc and nargv which corresponds to the argc/argv we'll use
  * for the command to be run (if we are running one).
@@ -129,8 +134,8 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 {
     int mode = 0;		/* what mode is sudo to be run in? */
     int flags = 0;		/* mode flags */
-    int valid_flags, ch;
-    int i, j;
+    int valid_flags = DEFAULT_VALID_FLAGS;
+    int ch, i, j;
     char *cp, **env_add, **settings;
     const char *runas_user = NULL;
     const char *runas_group = NULL;
@@ -167,6 +172,10 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     }
 
     /* Returns true if the last option string was "--" */
+#define got_host_flag	(optind > 1 && argv[optind - 1][0] == '-' && \
+	    argv[optind - 1][1] == 'h' && argv[optind - 1][2] == '\0')
+
+    /* Returns true if the last option string was "--" */
 #define got_end_of_args	(optind > 1 && argv[optind - 1][0] == '-' && \
 	    argv[optind - 1][1] == '-' && argv[optind - 1][2] == '\0')
 
@@ -174,9 +183,6 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 #define is_envar (optind < argc && argv[optind][0] != '/' && \
 	    strchr(argv[optind], '=') != NULL)
 
-    /* Flags allowed when running a command */
-    valid_flags = MODE_BACKGROUND|MODE_PRESERVE_ENV|MODE_RESET_HOME|
-		  MODE_LOGIN_SHELL|MODE_NONINTERACTIVE|MODE_SHELL;
     /* XXX - should fill in settings at the end to avoid dupes */
     for (;;) {
 	/*
@@ -312,6 +318,18 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		default:
 		    usage(1);
 	    }
+	} else if (got_host_flag) {
+	    /*
+	     * Optional args only support -hhostname, not -h hostname.
+	     * If we see a non-option after the -h flag, treat as
+	     * remote host, clear help mode and reset valid_flags.
+	     */
+	    mode = 0;
+	    valid_flags = DEFAULT_VALID_FLAGS;
+	    sudo_settings[ARG_REMOTE_HOST].value = argv[optind];
+
+	    /* Crank optind and resume getopt. */
+	    optind++;
 	} else if (!got_end_of_args && is_envar) {
 	    if (nenv == env_size - 2) {
 		env_size *= 2;
@@ -579,6 +597,8 @@ help(void)
 	_("set HOME variable to target user's home dir.\n"));
     lbuf_append(&lbuf, "  -h            %s",
 	_("display help message and exit\n"));
+    lbuf_append(&lbuf, "  -h host name  %s",
+	_("run command on specified host if supported\n"));
     lbuf_append(&lbuf, "  -i [command]  %s",
 	_("run a login shell as target user\n"));
     lbuf_append(&lbuf, "  -K            %s",
