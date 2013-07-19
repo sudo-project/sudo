@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 1996,1998-2005, 2007-2012
+.\" Copyright (c) 1996,1998-2005, 2007-2013
 .\"	Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd June 12, 2013
+.Dd July 17, 2013
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -122,7 +122,7 @@ the line where the error occurred (if the editor supports this feature).
 .Pp
 The options are as follows:
 .Bl -tag -width Fl
-.It Fl c
+.It Fl c , -check
 Enable
 .Em check-only
 mode.
@@ -141,7 +141,7 @@ will exit with a value of 0.
 If an error is encountered,
 .Nm visudo
 will exit with a value of 1.
-.It Fl f Ar sudoers
+.It Fl f , -file Ar sudoers
 Specify an alternate
 .Em sudoers
 file location.
@@ -166,14 +166,14 @@ may be
 indicating that
 .Em sudoers
 will be read from the standard input.
-.It Fl h
+.It Fl h , -help
 The
 .Fl h No ( Em help Ns No )
 option causes
 .Nm visudo
 to print a short help message
 to the standard output and exit.
-.It Fl q
+.It Fl q , -quiet
 Enable
 .Em quiet
 mode.
@@ -182,7 +182,7 @@ This option is only useful when combined with
 the
 .Fl c
 option.
-.It Fl s
+.It Fl s , -strict
 Enable
 .Em strict
 checking of the
@@ -196,7 +196,7 @@ alias and a host name or user name that consists solely of uppercase
 letters, digits, and the underscore
 .Pq Ql _
 character.
-.It Fl V
+.It Fl V , -version
 The
 .Fl V ( Em version Ns No )
 option causes

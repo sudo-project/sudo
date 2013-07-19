@@ -70,6 +70,11 @@
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
 
 #include "sudoers.h"
 #include "parse.h"
@@ -120,9 +125,6 @@ extern FILE *sudoersin;
 extern char *sudoers, *errorfile;
 extern int errorlineno;
 extern bool parse_error;
-/* For getopt(3) */
-extern char *optarg;
-extern int optind;
 
 /*
  * Globals
@@ -132,6 +134,16 @@ struct passwd *list_pw;
 static struct sudoersfile_list sudoerslist;
 static struct rbtree *alias_freelist;
 static bool checkonly;
+static const char short_opts[] =  "cf:hqsV";
+static struct option long_opts[] = {
+    { "check",		no_argument,		NULL,	'c' },
+    { "file",		required_argument,	NULL,	'f' },
+    { "help",		no_argument,		NULL,	'h' },
+    { "quiet",		no_argument,		NULL,	'q' },
+    { "strict",		no_argument,		NULL,	's' },
+    { "version",	no_argument,		NULL,	'V' },
+    { NULL,		no_argument,		NULL,	'\0' },
+};
 
 __dso_public int main(int argc, char *argv[]);
 
@@ -173,11 +185,13 @@ main(int argc, char *argv[])
      */
     checkonly = oldperms = quiet = strict = false;
     sudoers_path = _PATH_SUDOERS;
-    while ((ch = getopt(argc, argv, "Vcf:sq")) != -1) {
+    while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
 	    case 'V':
-		(void) printf(_("%s version %s\n"), getprogname(), PACKAGE_VERSION);
-		(void) printf(_("%s grammar version %d\n"), getprogname(), SUDOERS_GRAMMAR_VERSION);
+		(void) printf(_("%s version %s\n"), getprogname(),
+		    PACKAGE_VERSION);
+		(void) printf(_("%s grammar version %d\n"), getprogname(),
+		    SUDOERS_GRAMMAR_VERSION);
 		goto done;
 	    case 'c':
 		checkonly = true;	/* check mode */
@@ -1294,11 +1308,11 @@ help(void)
     (void) printf(_("%s - safely edit the sudoers file\n\n"), getprogname());
     usage(0);
     (void) puts(_("\nOptions:\n"
-	"  -c          check-only mode\n"
-	"  -f sudoers  specify sudoers file location\n"
-	"  -h          display help message and exit\n"
-	"  -q          less verbose (quiet) syntax error messages\n"
-	"  -s          strict syntax checking\n"
-	"  -V          display version information and exit"));
+	"  -c, --check         check-only mode\n"
+	"  -f, --file sudoers  specify sudoers file location\n"
+	"  -h, --help          display help message and exit\n"
+	"  -q, --quiet         less verbose (quiet) syntax error messages\n"
+	"  -s, --strict        strict syntax checking\n"
+	"  -V, --version       display version information and exit"));
     exit(0);
 }

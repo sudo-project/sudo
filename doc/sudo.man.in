@@ -31,7 +31,7 @@
 .SH "SYNOPSIS"
 .HP 5n
 \fBsudo\fR
-\fB\-h\fR\ |\ \fB\-K\fR\ |\ \fB\-k\fR\ |\ \fB\-V\fR
+\fB\-h\fR | \fB\-K\fR | \fB\-k\fR | \fB\-V\fR
 .PD 0
 .HP 5n
 \fBsudo\fR
@@ -170,19 +170,21 @@ sudo.conf(@mansectform@)
 contains a line specifying the askpass program, that value will be
 used.
 For example:
+.RS
 .nf
 .sp
-.RS 16n
+.RS 4n
 # Path to askpass helper program
 Path askpass /usr/X11R6/bin/ssh-askpass
 .RE
 .fi
-.RS 12n
 .sp
 If no askpass program is available,
 \fBsudo\fR
 will exit with an error.
+.PP
 .RE
+.PD 0
 .TP 12n
 \fB\-a\fR, \fB\--auth-type\fR \fIauth_type\fR
 The
@@ -194,10 +196,11 @@ as allowed by
 \fI/etc/login.conf\fR.
 The system administrator may specify a list of sudo-specific
 authentication methods by adding an
-\(lqauth-sudo\(rq
+``auth-sudo''
 entry in
 \fI/etc/login.conf\fR.
 This option is only available on systems that support BSD authentication.
+.PD
 .TP 12n
 \fB\-b\fR, \fB\--background\fR
 The
@@ -244,7 +247,7 @@ The
 argument can be either a class name as defined in
 \fI/etc/login.conf\fR,
 or a single
-\(oq\-\(cq
+`\-'
 character.
 Specifying a
 \fIclass\fR
@@ -279,7 +282,7 @@ In lieu of a command, the string "sudoedit" is used when consulting
 the security policy.
 If the user is authorized by the policy, the following steps are
 taken:
-.RS 13n
+.RS
 .TP 5n
 1.
 Temporary copies are made of the files to be edited with the owner
@@ -309,9 +312,7 @@ option is used.
 3.
 If they have been modified, the temporary files are copied back to
 their original location and the temporary versions are removed.
-.RE
-.RS 12n
-.sp
+.PP
 If the specified file does not exist, it will be created.
 Note that unlike most commands run by
 \fIsudo\fR,
@@ -321,7 +322,9 @@ If, for some reason,
 is unable to update a file with its edited version, the user will
 receive a warning and the edited copy will remain in a temporary
 file.
+.PP
 .RE
+.PD 0
 .TP 12n
 \fB\-g\fR, \fB\--group\fR \fIgroup\fR
 Normally,
@@ -341,15 +344,16 @@ To specify a numeric group ID
 instead of a group name, use
 \fI#gid\fR.
 When running commands as a gid, many shells require that the
-\(oq#\(cq
+`#'
 be escaped with a backslash
-(\(oq\e\(cq).
+(`\e').
 If no
 \fB\-u\fR
 option is specified, the command will be run as the invoking user
 (not root).
 In either case, the primary group will be set to
 \fIgroup\fR.
+.PD
 .TP 12n
 \fB\-H\fR, \fB\--set-home\fR
 The
@@ -502,13 +506,11 @@ The
 option allows you to override the default password prompt and use
 a custom one.
 The following percent
-(\(oq%\(cq)
+(`%')
 escapes are supported by the
 \fIsudoers\fR
 policy:
-.PP
-.RS 12n
-.PD 0
+.RS
 .TP 4n
 \fR%H\fR
 expanded to the host name including the domain name (on if the
@@ -516,7 +518,6 @@ machine's host name is fully qualified or the
 \fIfqdn\fR
 option is set in
 sudoers(@mansectform@))
-.PD
 .TP 4n
 \fR%h\fR
 expanded to the local host name without the domain name
@@ -542,9 +543,9 @@ expanded to the invoking user's login name
 .TP 4n
 \fR%%\fR
 two consecutive
-\(oq%\(cq
+`%'
 characters are collapsed into a single
-\(oq%\(cq
+`%'
 character
 .PP
 The prompt specified by the
@@ -554,7 +555,9 @@ support PAM unless the
 \fIpassprompt_override\fR
 flag is disabled in
 \fIsudoers\fR.
+.PP
 .RE
+.PD 0
 .TP 12n
 \fB\-r\fR, \fB\--role\fR \fIrole\fR
 The
@@ -562,6 +565,7 @@ The
 option causes the new SELinux security context to have the role
 specified by
 \fIrole\fR.
+.PD
 .TP 12n
 \fB\-S\fR, \fB\--stdin\fR
 The
@@ -619,9 +623,9 @@ To specify a numeric user ID
 instead of a user name, use
 \fI#uid\fR.
 When running commands as a uid, many shells require that the
-\(oq#\(cq
+`#'
 be escaped with a backslash
-(\(oq\e\(cq).
+(`\e').
 Some security policies may restrict uids
 to those listed in the password database.
 The
@@ -749,7 +753,7 @@ process waits until the command has completed, then passes the
 command's exit status to the security policy's close function and exits.
 If an I/O logging plugin is configured or if the security policy
 explicitly requests it, a new  pseudo-terminal
-(\(lqpty\(rq)
+(``pty'')
 is created and a second
 \fBsudo\fR
 process is used to relay job control signals between the user's
@@ -757,7 +761,7 @@ existing pty and the new pty the command is being run in.
 This extra process makes it possible to, for example, suspend
 and resume the command.
 Without it, the command would be in what POSIX terms an
-\(lqorphaned process group\(rq
+``orphaned process group''
 and it would not receive any job control signals.
 As a special case, if the policy plugin does not define a close
 function and no pty is required,
@@ -884,7 +888,7 @@ This should not happen under normal circumstances.
 The most common reason for
 stat(2)
 to return
-\(lqpermission denied\(rq
+``permission denied''
 is if you are running an automounter and one of the directories in
 your
 \fRPATH\fR
@@ -938,7 +942,7 @@ re-enabled for the command that is run).
 To aid in debugging
 \fBsudo\fR
 crashes, you may wish to re-enable core dumps by setting
-\(lqdisable_coredump\(rq
+``disable_coredump''
 to false in the
 sudo.conf(@mansectform@)
 file as follows:
@@ -1190,7 +1194,7 @@ search the archives.
 .SH "DISCLAIMER"
 \fBsudo\fR
 is provided
-\(lqAS IS\(rq
+``AS IS''
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.

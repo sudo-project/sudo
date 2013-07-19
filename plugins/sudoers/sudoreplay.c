@@ -87,6 +87,11 @@
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
 
 #include <pathnames.h>
 
@@ -116,10 +121,6 @@
 unsigned int replay_filter = (1 << IOFD_STDOUT) | (1 << IOFD_STDERR) |
 			     (1 << IOFD_TTYOUT);
 
-/* For getopt(3) */
-extern char *optarg;
-extern int optind;
-
 union io_fd {
     FILE *f;
 #ifdef HAVE_ZLIB_H
@@ -147,7 +148,7 @@ struct log_info {
  * Handle expressions like:
  * ( user millert or user root ) and tty console and command /bin/sh
  */
-struct search_node {
+static struct search_node {
     struct search_node *next;
 #define ST_EXPR		1
 #define ST_TTY		2
@@ -192,6 +193,18 @@ static const char *io_fnames[IOFD_MAX] = {
     "/ttyin",
     "/ttyout",
     "/timing"
+};
+
+static const char short_opts[] =  "d:f:hlm:s:V";
+static struct option long_opts[] = {
+    { "directory",	required_argument,	NULL,	'd' },
+    { "filter",		required_argument,	NULL,	'f' },
+    { "help",		no_argument,		NULL,	'h' },
+    { "list",		no_argument,		NULL,	'l' },
+    { "max-wait",	required_argument,	NULL,	'm' },
+    { "speed",		required_argument,	NULL,	's' },
+    { "version",	no_argument,		NULL,	'V' },
+    { NULL,		no_argument,		NULL,	'\0' },
 };
 
 extern time_t get_date(char *);
@@ -273,8 +286,8 @@ main(int argc, char *argv[])
     /* Read sudo.conf. */
     sudo_conf_read(NULL);
 
-    while ((ch = getopt(argc, argv, "d:f:hlm:s:V")) != -1) {
-	switch(ch) {
+    while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
+	switch (ch) {
 	case 'd':
 	    session_dir = optarg;
 	    break;
@@ -1194,13 +1207,13 @@ help(void)
     (void) printf(_("%s - replay sudo session logs\n\n"), getprogname());
     usage(0);
     (void) puts(_("\nOptions:\n"
-	"  -d directory     specify directory for session logs\n"
-	"  -f filter        specify which I/O type to display\n"
-	"  -h               display help message and exit\n"
-	"  -l [expression]  list available session IDs that match expression\n"
-	"  -m max_wait      max number of seconds to wait between events\n"
-	"  -s speed_factor  speed up or slow down output\n"
-	"  -V               display version information and exit"));
+	"  -d, --directory directory  specify directory for session logs\n"
+	"  -f, --filter filter        specify which I/O type to display\n"
+	"  -h, --help                 display help message and exit\n"
+	"  -l, --list [expression]    list available session IDs that match expression\n"
+	"  -m, --max-wait max_wait    max number of seconds to wait between events\n"
+	"  -s, --speed speed_factor   speed up or slow down output\n"
+	"  -V, --version              display version information and exit"));
     exit(0);
 }
 

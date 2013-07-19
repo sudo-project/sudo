@@ -37,7 +37,8 @@ DDEESSCCRRIIPPTTIIOONN
 
      The options are as follows:
 
-     --cc          Enable _c_h_e_c_k_-_o_n_l_y mode.  The existing _s_u_d_o_e_r_s file will be
+     --cc, ----cchheecckk
+                 Enable _c_h_e_c_k_-_o_n_l_y mode.  The existing _s_u_d_o_e_r_s file will be
                  checked for syntax errors, owner and mode.  A message will be
                  printed to the standard output describing the status of
                  _s_u_d_o_e_r_s unless the --qq option was specified.  If the check
@@ -45,28 +46,32 @@ DDEESSCCRRIIPPTTIIOONN
                  If an error is encountered, vviissuuddoo will exit with a value of
                  1.
 
-     --ff _s_u_d_o_e_r_s  Specify an alternate _s_u_d_o_e_r_s file location.  With this option
+     --ff, ----ffiillee _s_u_d_o_e_r_s
+                 Specify an alternate _s_u_d_o_e_r_s file location.  With this option
                  vviissuuddoo will edit (or check) the _s_u_d_o_e_r_s file of your choice,
                  instead of the default, _/_e_t_c_/_s_u_d_o_e_r_s.  The lock file used is
                  the specified _s_u_d_o_e_r_s file with ``.tmp'' appended to it.  In
                  _c_h_e_c_k_-_o_n_l_y mode only, the argument to --ff may be `-',
                  indicating that _s_u_d_o_e_r_s will be read from the standard input.
 
-     --hh          The --hh (_h_e_l_p) option causes vviissuuddoo to print a short help
+     --hh, ----hheellpp  The --hh (_h_e_l_p) option causes vviissuuddoo to print a short help
                  message to the standard output and exit.
 
-     --qq          Enable _q_u_i_e_t mode.  In this mode details about syntax errors
+     --qq, ----qquuiieett
+                 Enable _q_u_i_e_t mode.  In this mode details about syntax errors
                  are not printed.  This option is only useful when combined
                  with the --cc option.
 
-     --ss          Enable _s_t_r_i_c_t checking of the _s_u_d_o_e_r_s file.  If an alias is
+     --ss, ----ssttrriicctt
+                 Enable _s_t_r_i_c_t checking of the _s_u_d_o_e_r_s file.  If an alias is
                  used before it is defined, vviissuuddoo will consider this a parse
                  error.  Note that it is not possible to differentiate between
                  an alias and a host name or user name that consists solely of
                  uppercase letters, digits, and the underscore (`_')
                  character.
 
-     --VV          The --VV (_v_e_r_s_i_o_n) option causes vviissuuddoo to print its version
+     --VV, ----vveerrssiioonn
+                 The --VV (_v_e_r_s_i_o_n) option causes vviissuuddoo to print its version
                  number and exit.
 
 EENNVVIIRROONNMMEENNTT
@@ -144,4 +149,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.7                       June 12, 2013                      Sudo 1.8.7
+Sudo 1.8.8                       July 17, 2013                      Sudo 1.8.8
