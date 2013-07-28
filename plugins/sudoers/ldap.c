@@ -43,6 +43,7 @@
 # include <time.h>
 #endif
 #include <ctype.h>
+#include <fcntl.h>
 #include <pwd.h>
 #include <grp.h>
 #include <netinet/in.h>
@@ -62,17 +63,12 @@
 # else
 #  include <sasl.h>
 # endif
-# if HAVE_GSS_KRB5_CCACHE_NAME
-#  if defined(HAVE_GSSAPI_GSSAPI_KRB5_H)
-#   include <gssapi/gssapi.h>
-#   include <gssapi/gssapi_krb5.h>
-#  elif defined(HAVE_GSSAPI_GSSAPI_H)
-#   include <gssapi/gssapi.h>
-#  else
-#   include <gssapi.h>
-#  endif
+# ifdef HAVE_DLOPEN
+#  include <dlfcn.h>
+# else
+#  include "compat/dlfcn.h"
 # endif
-#endif
+#endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
 
 #include "sudoers.h"
 #include "parse.h"
@@ -1441,6 +1437,42 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
     debug_return_bool(false);
 }
 
+#ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
+static bool
+sudo_check_krb5_ccname(const char *ccname)
+{
+    int fd = -1;
+    debug_decl(sudo_check_krb5_ccname, SUDO_DEBUG_LDAP)
+
+    /* Strip off leading FILE: or WRFILE: prefix. */
+    switch (ccname[0]) {
+	case 'F':
+	case 'f':
+	    if (strncasecmp(ccname, "FILE:", 5) == 0)
+		ccname += 5;
+	    break;
+	case 'W':
+	case 'w':
+	    if (strncasecmp(ccname, "WRFILE:", 7) == 0)
+		ccname += 7;
+	    break;
+    }
+
+    /* Make sure credential cache is fully-qualified and exists. */
+    if (ccname[0] == '/')
+	fd = open(ccname, O_RDONLY|O_NONBLOCK, 0);
+    if (fd == -1) {
+	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+	    "unable to open krb5 credential cache: %s", ccname);
+	debug_return_bool(false);
+    }
+    close(fd);
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"using krb5 credential cache: %s", ccname);
+    debug_return_bool(true);
+}
+#endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
+
 static bool
 sudo_ldap_read_config(void)
 {
@@ -1642,24 +1674,11 @@ sudo_ldap_read_config(void)
      * Make sure we can open the file specified by krb5_ccname.
      */
     if (ldap_conf.krb5_ccname != NULL) {
-	if (strncasecmp(ldap_conf.krb5_ccname, "FILE:", 5) == 0 ||
-	    strncasecmp(ldap_conf.krb5_ccname, "WRFILE:", 7) == 0) {
-	    value = ldap_conf.krb5_ccname +
-		(ldap_conf.krb5_ccname[4] == ':' ? 5 : 7);
-	    if ((fp = fopen(value, "r")) != NULL) {
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "using krb5 credential cache: %s", value);
-		fclose(fp);
-	    } else {
-		/* Can't open it, just ignore the entry. */
-		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		    "unable to open krb5 credential cache: %s", value);
-		efree(ldap_conf.krb5_ccname);
-		ldap_conf.krb5_ccname = NULL;
-	    }
-	}
+	if (!sudo_check_krb5_ccname(ldap_conf.krb5_ccname))
+	    ldap_conf.krb5_ccname = NULL;
     }
 #endif
+
     debug_return_bool(true);
 }
 
@@ -1982,17 +2001,104 @@ done:
 }
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
+static unsigned int (*sudo_gss_krb5_ccache_name)(unsigned int *minor_status, const char *name, const char **old_name);
+
+static int
+sudo_set_krb5_ccache_name(const char *name, const char **old_name)
+{
+    int rc = 0;
+    unsigned int junk;
+    static bool initialized;
+    debug_decl(sudo_set_krb5_ccache_name, SUDO_DEBUG_LDAP)
+
+    if (!initialized) {
+	sudo_gss_krb5_ccache_name = dlsym(RTLD_DEFAULT, "gss_krb5_ccache_name");
+	initialized = true;
+    }
+
+    /*
+     * Try to use gss_krb5_ccache_name() if possible.
+     * We also need to set KRB5CCNAME since some LDAP libs may not use
+     * gss_krb5_ccache_name().
+     */
+    if (sudo_gss_krb5_ccache_name != NULL) {
+	rc = sudo_gss_krb5_ccache_name(&junk, name, old_name);
+    } else {
+	/* No gss_krb5_ccache_name(), fall back on KRB5CCNAME. */
+	if (old_name != NULL)
+	    *old_name = sudo_getenv("KRB5CCNAME");
+    }
+    if (name != NULL && *name != '\0')
+	sudo_setenv("KRB5CCNAME", name, true);
+    else
+	sudo_unsetenv("KRB5CCNAME");
+
+    debug_return_int(rc);
+}
+
+/*
+ * Make a copy of the credential cache file specified by KRB5CCNAME
+ * which must be readable by the user.  The resulting cache file
+ * is root-owned and will be removed after authenticating via SASL.
+ */
+static char *
+sudo_krb5_copy_cc_file(const char *old_ccname)
+{
+    int ofd, nfd;
+    ssize_t off, nread, nwritten = -1;
+    static char new_ccname[sizeof(_PATH_TMP) + sizeof("sudocc_XXXXXXXX") - 1];
+    char buf[10240], *ret = NULL;
+    debug_decl(sudo_krb5_copy_cc_file, SUDO_DEBUG_LDAP)
+
+    /* Open credential cache as user to prevent stolen creds. */
+    set_perms(PERM_USER);
+    ofd = open(old_ccname, O_RDONLY|O_NONBLOCK);
+    restore_perms();
+
+    if (ofd != -1) {
+	(void) fcntl(ofd, F_SETFL, 0);
+	if (lock_file(ofd, SUDO_LOCK)) {
+	    snprintf(new_ccname, sizeof(new_ccname), "%s%s",
+		_PATH_TMP, "sudocc_XXXXXXXX");
+	    nfd = mkstemp(new_ccname);
+	    if (nfd != -1) {
+		while ((nread = read(ofd, buf, sizeof(buf))) > 0) {
+		    off = 0;
+		    while ((nwritten = write(nfd, buf + off, nread - off)) != -1) {
+			off += nwritten;
+		    }
+		    if (nwritten == -1)
+			break;
+		}
+		close(nfd);
+		if (nread != -1 && nwritten != -1) {
+		    ret = new_ccname;	/* success! */
+		} else {
+		    unlink(new_ccname);	/* failed */
+		}
+	    }
+	}
+	close(ofd);
+    }
+    debug_return_str(ret);
+}
+
 static int
 sudo_ldap_sasl_interact(LDAP *ld, unsigned int flags, void *_auth_id,
     void *_interact)
 {
     char *auth_id = (char *)_auth_id;
     sasl_interact_t *interact = (sasl_interact_t *)_interact;
+    int rc = LDAP_SUCCESS;
     debug_decl(sudo_ldap_sasl_interact, SUDO_DEBUG_LDAP)
 
     for (; interact->id != SASL_CB_LIST_END; interact++) {
-	if (interact->id != SASL_CB_USER)
-	    debug_return_int(LDAP_PARAM_ERROR);
+	if (interact->id != SASL_CB_USER) {
+	    warningx("sudo_ldap_sasl_interact: unexpected interact id %lu",
+		interact->id);
+	    rc = LDAP_PARAM_ERROR;
+	    break;
+	}
 
 	if (auth_id != NULL)
 	    interact->result = auth_id;
@@ -2003,13 +2109,18 @@ sudo_ldap_sasl_interact(LDAP *ld, unsigned int flags, void *_auth_id,
 
 	interact->len = strlen(interact->result);
 #if SASL_VERSION_MAJOR < 2
-	interact->result = estrdup(interact->result);
+	interact->result = strdup(interact->result);
+	if (interact->result == NULL) {
+	    rc = LDAP_NO_MEMORY;
+	    break;
+	}
 #endif /* SASL_VERSION_MAJOR < 2 */
+	DPRINTF2("sudo_ldap_sasl_interact: SASL_CB_USER %s",
+	    (const char *)interact->result);
     }
-    debug_return_int(LDAP_SUCCESS);
+    debug_return_int(rc);
 }
 #endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
-
 
 /*
  * Set LDAP options from the specified options table
@@ -2212,45 +2323,46 @@ static int
 sudo_ldap_bind_s(LDAP *ld)
 {
     int rc;
-#ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
-    const char *old_ccname = user_ccname;
-# ifdef HAVE_GSS_KRB5_CCACHE_NAME
-    unsigned int status;
-# endif
-#endif
     debug_decl(sudo_ldap_bind_s, SUDO_DEBUG_LDAP)
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     if (ldap_conf.rootuse_sasl == true ||
 	(ldap_conf.rootuse_sasl != false && ldap_conf.use_sasl == true)) {
+	const char *old_ccname = NULL;
+	const char *new_ccname = ldap_conf.krb5_ccname;
+	const char *tmp_ccname = NULL;
 	void *auth_id = ldap_conf.rootsasl_auth_id ?
 	    ldap_conf.rootsasl_auth_id : ldap_conf.sasl_auth_id;
 
-	if (ldap_conf.krb5_ccname != NULL) {
-# ifdef HAVE_GSS_KRB5_CCACHE_NAME
-	    if (gss_krb5_ccache_name(&status, ldap_conf.krb5_ccname, &old_ccname)
-		!= GSS_S_COMPLETE) {
-		old_ccname = NULL;
+	/* Make temp copy of the user's credential cache as needed. */
+	if (ldap_conf.krb5_ccname == NULL && user_ccname != NULL)
+	    new_ccname = tmp_ccname = sudo_krb5_copy_cc_file(user_ccname);
+
+	if (new_ccname != NULL) {
+	    rc = sudo_set_krb5_ccache_name(new_ccname, &old_ccname);
+	    if (rc == 0) {
+		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		    "set ccache name %s -> %s",
+		    old_ccname ? old_ccname : "(none)", new_ccname);
+	    } else {
 		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		    "gss_krb5_ccache_name() failed: %d", status);
+		    "gss_krb5_ccache_name() failed: %d", rc);
 	    }
-# else
-	    sudo_setenv("KRB5CCNAME", ldap_conf.krb5_ccname, true);
-# endif
 	}
 	rc = ldap_sasl_interactive_bind_s(ld, ldap_conf.binddn, "GSSAPI",
 	    NULL, NULL, LDAP_SASL_QUIET, sudo_ldap_sasl_interact, auth_id);
-	if (ldap_conf.krb5_ccname != NULL) {
-# ifdef HAVE_GSS_KRB5_CCACHE_NAME
-	    if (gss_krb5_ccache_name(&status, old_ccname, NULL) != GSS_S_COMPLETE)
-		    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-			"gss_krb5_ccache_name() failed: %d", status);
-# else
-	    if (old_ccname != NULL)
-		sudo_setenv("KRB5CCNAME", old_ccname, true);
-	    else
-		sudo_unsetenv("KRB5CCNAME");
-# endif
+	if (new_ccname != NULL) {
+	    rc = sudo_set_krb5_ccache_name(old_ccname, NULL);
+	    if (rc == 0) {
+		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		    "restore ccache name %s -> %s", new_ccname, old_ccname);
+	    } else {
+		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+		    "gss_krb5_ccache_name() failed: %d", rc);
+	    }
+	    /* Remove temporary copy of user's credential cache. */
+	    if (tmp_ccname != NULL)
+		unlink(tmp_ccname);
 	}
 	if (rc != LDAP_SUCCESS) {
 	    warningx("ldap_sasl_interactive_bind_s(): %s",
