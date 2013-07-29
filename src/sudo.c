@@ -133,8 +133,8 @@ static void iolog_unlink(struct plugin_container *plugin);
 
 #ifdef RLIMIT_CORE
 static struct rlimit corelimit;
-#endif /* RLIMIT_CORE */
-#if defined(__linux__)
+#endif
+#ifdef __linux__
 static struct rlimit nproclimit;
 #endif
 
@@ -824,26 +824,10 @@ sudo_check_suid(const char *path)
 static void
 disable_coredumps(void)
 {
-#if defined(__linux__) || defined(RLIMIT_CORE)
+#if defined(RLIMIT_CORE)
     struct rlimit rl;
-#endif
     debug_decl(disable_coredumps, SUDO_DEBUG_UTIL)
 
-#if defined(__linux__)
-    /*
-     * Unlimit the number of processes since Linux's setuid() will
-     * apply resource limits when changing uid and return EAGAIN if
-     * nproc would be violated by the uid switch.
-     */
-    (void) getrlimit(RLIMIT_NPROC, &nproclimit);
-    rl.rlim_cur = rl.rlim_max = RLIM_INFINITY;
-    if (setrlimit(RLIMIT_NPROC, &rl)) {
-	memcpy(&rl, &nproclimit, sizeof(struct rlimit));
-	rl.rlim_cur = rl.rlim_max;
-	(void)setrlimit(RLIMIT_NPROC, &rl);
-    }
-#endif /* __linux__ */
-#ifdef RLIMIT_CORE
     /*
      * Turn off core dumps?
      */
@@ -853,8 +837,46 @@ disable_coredumps(void)
 	rl.rlim_cur = 0;
 	(void) setrlimit(RLIMIT_CORE, &rl);
     }
-#endif /* RLIMIT_CORE */
     debug_return;
+#endif /* RLIMIT_CORE */
+}
+
+/*
+ * Unlimit the number of processes since Linux's setuid() will
+ * apply resource limits when changing uid and return EAGAIN if
+ * nproc would be exceeded by the uid switch.
+ */
+static void
+unlimit_nproc(void)
+{
+#ifdef __linux__
+    struct rlimit rl;
+    debug_decl(unlimit_nproc, SUDO_DEBUG_UTIL)
+
+    (void) getrlimit(RLIMIT_NPROC, &nproclimit);
+    rl.rlim_cur = rl.rlim_max = RLIM_INFINITY;
+    if (setrlimit(RLIMIT_NPROC, &rl) != 0) {
+	memcpy(&rl, &nproclimit, sizeof(struct rlimit));
+	rl.rlim_cur = rl.rlim_max;
+	(void)setrlimit(RLIMIT_NPROC, &rl);
+    }
+    debug_return;
+#endif /* __linux__ */
+}
+
+/*
+ * Restore saved value of RLIMIT_NPROC.
+ */
+static void
+restore_nproc(void)
+{
+#ifdef __linux__
+    debug_decl(restore_nproc, SUDO_DEBUG_UTIL)
+
+    (void) setrlimit(RLIMIT_NPROC, &nproclimit);
+
+    debug_return;
+#endif /* __linux__ */
 }
 
 /*
@@ -975,6 +997,12 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	}
     }
 
+    /* 
+     * Unlimit the number of processes since Linux's setuid() will
+     * return EAGAIN if RLIMIT_NPROC would be exceeded by the uid switch.
+     */
+    unlimit_nproc();
+
 #ifdef HAVE_SETRESUID
     if (setresuid(details->uid, details->euid, details->euid) != 0) {
 	warning(_("unable to change to runas uid (%u, %u)"), details->uid,
@@ -995,6 +1023,9 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     }
 #endif /* !HAVE_SETRESUID && !HAVE_SETREUID */
 
+    /* Restore previous value of RLIMIT_NPROC. */
+    restore_nproc();
+
     /*
      * Only change cwd if we have chroot()ed or the policy modules
      * specifies a different cwd.  Must be done after uid change.
@@ -1008,33 +1039,6 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	    }
 	}
     }
-
-    /*
-     * SuSE Enterprise Linux uses RLIMIT_NPROC and _SC_CHILD_MAX
-     * interchangably.  This causes problems when setting RLIMIT_NPROC
-     * to RLIM_INFINITY due to a bug in bash where bash tries to honor
-     * the value of _SC_CHILD_MAX but treats a value of -1 as an error,
-     * and uses a default value of 32 instead.
-     *
-     * To work around this problem, we restore the nproc resource limit
-     * if sysconf(_SC_CHILD_MAX) is negative.  In most cases, pam_limits
-     * will set RLIMIT_NPROC for us.
-     *
-     * We must do this *after* the uid change to avoid potential EAGAIN
-     * from setuid().
-     */
-#if defined(__linux__) && defined(_SC_CHILD_MAX)
-    {
-	struct rlimit rl;
-	long l;
-	errno = 0;
-	l = sysconf(_SC_CHILD_MAX);
-	if (l == -1 && errno == 0 && getrlimit(RLIMIT_NPROC, &rl) == 0) {
-	    if (rl.rlim_cur == RLIM_INFINITY && rl.rlim_max == RLIM_INFINITY)
-		(void) setrlimit(RLIMIT_NPROC, &nproclimit);
-	}
-    }
-#endif
 
     rval = true;
 
