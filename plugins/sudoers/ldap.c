@@ -1438,11 +1438,10 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 }
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
-static bool
-sudo_check_krb5_ccname(const char *ccname)
+static const char *
+sudo_krb5_ccname_path(const char *ccname)
 {
-    int fd = -1;
-    debug_decl(sudo_check_krb5_ccname, SUDO_DEBUG_LDAP)
+    debug_decl(sudo_krb5_ccname_path, SUDO_DEBUG_LDAP)
 
     /* Strip off leading FILE: or WRFILE: prefix. */
     switch (ccname[0]) {
@@ -1458,17 +1457,34 @@ sudo_check_krb5_ccname(const char *ccname)
 	    break;
     }
 
+    /* Credential cache must be a fully-qualified path name. */
+    debug_return_str(*ccname == '/' ? ccname : NULL);
+}
+
+static bool
+sudo_check_krb5_ccname(const char *ccname)
+{
+    int fd = -1;
+    const char *ccname_path;
+    debug_decl(sudo_check_krb5_ccname, SUDO_DEBUG_LDAP)
+
+    /* Strip off prefix to get path name. */
+    ccname_path = sudo_krb5_ccname_path(ccname);
+    if (ccname_path == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+	    "unsupported krb5 credential cache path: %s", ccname);
+	debug_return_bool(false);
+    }
     /* Make sure credential cache is fully-qualified and exists. */
-    if (ccname[0] == '/')
-	fd = open(ccname, O_RDONLY|O_NONBLOCK, 0);
+    fd = open(ccname_path, O_RDONLY|O_NONBLOCK, 0);
     if (fd == -1) {
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-	    "unable to open krb5 credential cache: %s", ccname);
+	    "unable to open krb5 credential cache: %s", ccname_path);
 	debug_return_bool(false);
     }
     close(fd);
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"using krb5 credential cache: %s", ccname);
+	"using krb5 credential cache: %s", ccname_path);
     debug_return_bool(true);
 }
 #endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
@@ -2050,35 +2066,38 @@ sudo_krb5_copy_cc_file(const char *old_ccname)
     char buf[10240], *ret = NULL;
     debug_decl(sudo_krb5_copy_cc_file, SUDO_DEBUG_LDAP)
 
-    /* Open credential cache as user to prevent stolen creds. */
-    set_perms(PERM_USER);
-    ofd = open(old_ccname, O_RDONLY|O_NONBLOCK);
-    restore_perms();
+    old_ccname = sudo_krb5_ccname_path(old_ccname);
+    if (old_ccname != NULL) {
+	/* Open credential cache as user to prevent stolen creds. */
+	set_perms(PERM_USER);
+	ofd = open(old_ccname, O_RDONLY|O_NONBLOCK);
+	restore_perms();
 
-    if (ofd != -1) {
-	(void) fcntl(ofd, F_SETFL, 0);
-	if (lock_file(ofd, SUDO_LOCK)) {
-	    snprintf(new_ccname, sizeof(new_ccname), "%s%s",
-		_PATH_TMP, "sudocc_XXXXXXXX");
-	    nfd = mkstemp(new_ccname);
-	    if (nfd != -1) {
-		while ((nread = read(ofd, buf, sizeof(buf))) > 0) {
-		    off = 0;
-		    while ((nwritten = write(nfd, buf + off, nread - off)) != -1) {
-			off += nwritten;
+	if (ofd != -1) {
+	    (void) fcntl(ofd, F_SETFL, 0);
+	    if (lock_file(ofd, SUDO_LOCK)) {
+		snprintf(new_ccname, sizeof(new_ccname), "%s%s",
+		    _PATH_TMP, "sudocc_XXXXXXXX");
+		nfd = mkstemp(new_ccname);
+		if (nfd != -1) {
+		    while ((nread = read(ofd, buf, sizeof(buf))) > 0) {
+			off = 0;
+			while ((nwritten = write(nfd, buf + off, nread - off)) != -1) {
+			    off += nwritten;
+			}
+			if (nwritten == -1)
+			    break;
 		    }
-		    if (nwritten == -1)
-			break;
-		}
-		close(nfd);
-		if (nread != -1 && nwritten != -1) {
-		    ret = new_ccname;	/* success! */
-		} else {
-		    unlink(new_ccname);	/* failed */
+		    close(nfd);
+		    if (nread != -1 && nwritten != -1) {
+			ret = new_ccname;	/* success! */
+		    } else {
+			unlink(new_ccname);	/* failed */
+		    }
 		}
 	    }
+	    close(ofd);
 	}
-	close(ofd);
     }
     debug_return_str(ret);
 }
