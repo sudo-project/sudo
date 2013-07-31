@@ -1439,8 +1439,9 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
 static const char *
-sudo_krb5_ccname_path(const char *ccname)
+sudo_krb5_ccname_path(const char *old_ccname)
 {
+    const char *ccname = old_ccname;
     debug_decl(sudo_krb5_ccname_path, SUDO_DEBUG_LDAP)
 
     /* Strip off leading FILE: or WRFILE: prefix. */
@@ -1456,6 +1457,8 @@ sudo_krb5_ccname_path(const char *ccname)
 		ccname += 7;
 	    break;
     }
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	"ccache %s -> %s", old_ccname, ccname);
 
     /* Credential cache must be a fully-qualified path name. */
     debug_return_str(*ccname == '/' ? ccname : NULL);
@@ -2080,15 +2083,21 @@ sudo_krb5_copy_cc_file(const char *old_ccname)
 		    _PATH_TMP, "sudocc_XXXXXXXX");
 		nfd = mkstemp(new_ccname);
 		if (nfd != -1) {
+		    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+			"copy ccache %s -> %s", old_ccname, new_ccname);
 		    while ((nread = read(ofd, buf, sizeof(buf))) > 0) {
 			ssize_t off = 0;
 			do {
 			    nwritten = write(nfd, buf + off, nread - off);
-			    if (nwritten == -1)
+			    if (nwritten == -1) {
+				warning("error writing to %s", new_ccname);
 				goto write_error;
+			    }
 			    off += nwritten;
 			} while (off < nread);
 		    }
+		    if (nread == -1)
+			warning("unable to read %s", new_ccname);
 write_error:
 		    close(nfd);
 		    if (nread != -1 && nwritten != -1) {
@@ -2096,9 +2105,14 @@ write_error:
 		    } else {
 			unlink(new_ccname);	/* failed */
 		    }
+		} else {
+		    warning("unable to create temp file %s", new_ccname);
 		}
 	    }
 	    close(ofd);
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"unable to open %s", old_ccname);
 	}
     }
     debug_return_str(ret);
@@ -2356,8 +2370,13 @@ sudo_ldap_bind_s(LDAP *ld)
 	    ldap_conf.rootsasl_auth_id : ldap_conf.sasl_auth_id;
 
 	/* Make temp copy of the user's credential cache as needed. */
-	if (ldap_conf.krb5_ccname == NULL && user_ccname != NULL)
+	if (ldap_conf.krb5_ccname == NULL && user_ccname != NULL) {
 	    new_ccname = tmp_ccname = sudo_krb5_copy_cc_file(user_ccname);
+	    if (tmp_ccname == NULL) {
+		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		    "unable to copy user ccache %s", user_ccname);
+	    }
+	}
 
 	if (new_ccname != NULL) {
 	    rc = sudo_set_krb5_ccache_name(new_ccname, &old_ccname);
