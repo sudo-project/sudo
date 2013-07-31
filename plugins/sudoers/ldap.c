@@ -2061,7 +2061,7 @@ static char *
 sudo_krb5_copy_cc_file(const char *old_ccname)
 {
     int ofd, nfd;
-    ssize_t off, nread, nwritten = -1;
+    ssize_t nread, nwritten = -1;
     static char new_ccname[sizeof(_PATH_TMP) + sizeof("sudocc_XXXXXXXX") - 1];
     char buf[10240], *ret = NULL;
     debug_decl(sudo_krb5_copy_cc_file, SUDO_DEBUG_LDAP)
@@ -2081,13 +2081,15 @@ sudo_krb5_copy_cc_file(const char *old_ccname)
 		nfd = mkstemp(new_ccname);
 		if (nfd != -1) {
 		    while ((nread = read(ofd, buf, sizeof(buf))) > 0) {
-			off = 0;
-			while ((nwritten = write(nfd, buf + off, nread - off)) != -1) {
+			ssize_t off = 0;
+			do {
+			    nwritten = write(nfd, buf + off, nread - off);
+			    if (nwritten == -1)
+				goto write_error;
 			    off += nwritten;
-			}
-			if (nwritten == -1)
-			    break;
+			} while (off < nread);
 		    }
+write_error:
 		    close(nfd);
 		    if (nread != -1 && nwritten != -1) {
 			ret = new_ccname;	/* success! */
