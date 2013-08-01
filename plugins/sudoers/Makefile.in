@@ -634,7 +634,8 @@ kerb5.lo: $(authdir)/kerb5.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
           $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/kerb5.c
-ldap.lo: $(srcdir)/ldap.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
+ldap.lo: $(srcdir)/ldap.c $(top_builddir)/config.h \
+         $(top_srcdir)/compat/dlfcn.h $(srcdir)/sudoers.h \
          $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
          $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
          $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
@@ -834,9 +835,9 @@ sudoers.lo: $(srcdir)/sudoers.c $(top_builddir)/config.h \
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudoers.c
 sudoreplay.o: $(srcdir)/sudoreplay.c $(top_builddir)/config.h \
               $(top_srcdir)/compat/timespec.h $(top_srcdir)/compat/stdbool.h \
-              $(top_builddir)/pathnames.h $(incdir)/missing.h \
-              $(incdir)/alloc.h $(incdir)/error.h $(incdir)/gettext.h \
-              $(srcdir)/logging.h $(incdir)/sudo_plugin.h \
+              $(top_srcdir)/compat/getopt.h $(top_builddir)/pathnames.h \
+              $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
+              $(incdir)/gettext.h $(srcdir)/logging.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_conf.h $(incdir)/list.h $(incdir)/sudo_debug.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudoreplay.c
 testsudoers.o: $(srcdir)/testsudoers.c $(top_builddir)/config.h \
@@ -890,7 +891,8 @@ tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(top_builddir)/config.h \
              $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/tsgetgrpw.c
-visudo.o: $(srcdir)/visudo.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
+visudo.o: $(srcdir)/visudo.c $(top_builddir)/config.h \
+          $(top_srcdir)/compat/getopt.h $(srcdir)/sudoers.h \
           $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
           $(incdir)/missing.h $(incdir)/error.h $(incdir)/alloc.h \
           $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
