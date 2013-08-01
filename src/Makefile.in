@@ -291,12 +291,12 @@ solaris.o: $(srcdir)/solaris.c $(top_builddir)/config.h $(srcdir)/sudo.h \
            $(incdir)/fileops.h $(incdir)/list.h $(incdir)/sudo_conf.h \
            $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/solaris.c
-sudo.o: $(srcdir)/sudo.c $(top_builddir)/config.h $(srcdir)/sudo.h \
-        $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
-        $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
-        $(incdir)/fileops.h $(incdir)/list.h $(incdir)/sudo_conf.h \
-        $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
-        $(incdir)/sudo_plugin.h $(srcdir)/sudo_plugin_int.h ./sudo_usage.h
+sudo.o: $(srcdir)/sudo.c $(top_builddir)/config.h ./sudo_usage.h \
+        $(srcdir)/sudo.h $(top_builddir)/pathnames.h \
+        $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h $(incdir)/alloc.h \
+        $(incdir)/error.h $(incdir)/fileops.h $(incdir)/list.h \
+        $(incdir)/sudo_conf.h $(incdir)/list.h $(incdir)/sudo_debug.h \
+        $(incdir)/gettext.h $(incdir)/sudo_plugin.h $(srcdir)/sudo_plugin_int.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudo.c
 sudo_edit.o: $(srcdir)/sudo_edit.c $(top_builddir)/config.h $(srcdir)/sudo.h \
              $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
