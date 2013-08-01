@@ -119,7 +119,9 @@ install-includes:
 install-doc:
 
 install-plugin: install-dirs group_file.la
-	$(INSTALL) -b~ -m $(shlib_mode) .libs/group_file$(soext) $(DESTDIR)$(plugindir)/group_file.so
+	if [ X"$(soext)" != X"" ]; then \
+	    $(INSTALL) -b~ -m $(shlib_mode) .libs/group_file$(soext) $(DESTDIR)$(plugindir)/group_file.so; \
+	fi
 
 uninstall:
 	-rm -f $(DESTDIR)$(plugindir)/group_file.so
