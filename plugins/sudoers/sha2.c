@@ -58,6 +58,7 @@
 # include "compat/endian.h"
 #endif
 
+#include "missing.h"
 #include "sha2.h"
 
 /*
@@ -116,8 +117,6 @@
 #define f(i) T[(5-i)&7]
 #define g(i) T[(6-i)&7]
 #define h(i) T[(7-i)&7]
-
-extern void zero_bytes(volatile void *, size_t);
 
 void
 SHA224Init(SHA2_CTX *ctx)
@@ -249,8 +248,8 @@ SHA256Transform(uint32_t state[8], const uint8_t data[SHA256_BLOCK_LENGTH])
 	state[6] += g(0);
 	state[7] += h(0);
 	/* Cleanup */
-	zero_bytes(T, sizeof(T));
-	zero_bytes(W, sizeof(W));
+	memset_s(T, sizeof(T), 0, sizeof(T));
+	memset_s(W, sizeof(W), 0, sizeof(W));
 }
 
 #undef S0
@@ -466,8 +465,8 @@ SHA512Transform(uint64_t state[8], const uint8_t data[SHA512_BLOCK_LENGTH])
 	state[6] += g(0);
 	state[7] += h(0);
 	/* Cleanup. */
-	zero_bytes(T, sizeof(T));
-	zero_bytes(W, sizeof(W));
+	memset_s(T, sizeof(T), 0, sizeof(T));
+	memset_s(W, sizeof(W), 0, sizeof(W));
 }
 
 void

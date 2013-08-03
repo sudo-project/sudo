@@ -609,7 +609,7 @@ send_mail(const char *fmt, ...)
     closefrom(STDERR_FILENO + 1);
 
     /* Ignore SIGPIPE in case mailer exits prematurely (or is missing). */
-    zero_bytes(&sa, sizeof(sa));
+    memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_INTERRUPT;
     sa.sa_handler = SIG_IGN;

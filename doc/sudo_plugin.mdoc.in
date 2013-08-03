@@ -1893,6 +1893,8 @@ struct sudo_conv_message {
     const char *msg;
 };
 
+#define SUDO_CONV_REPL_MAX      255
+
 struct sudo_conv_reply {
     char *reply;
 };
@@ -1926,9 +1928,19 @@ and
 .Li struct sudo_conv_reply
 for
 each message in the conversation.
-The plugin is responsible for freeing the reply buffer filled in to the
+The plugin is responsible for freeing the reply buffer located in each
 .Li struct sudo_conv_reply ,
-if any.
+if it is not
+.Dv NULL .
+.Dv SUDO_CONV_REPL_MAX
+represents the maximum length of the reply buffer (not including
+the trailing NUL character).
+In practical terms, this is the longest password
+.Nm sudo
+will support.
+It is also useful as a maximum value for the
+.Fn memset_s
+function when clearing passwords filled in by the conversation function.
 .Pp
 The
 .Fn printf Ns No -style

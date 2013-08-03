@@ -1229,6 +1229,8 @@ DDEESSCCRRIIPPTTIIOONN
          const char *msg;
      };
 
+     #define SUDO_CONV_REPL_MAX      255
+
      struct sudo_conv_reply {
          char *reply;
      };
@@ -1246,7 +1248,12 @@ DDEESSCCRRIIPPTTIIOONN
      sudo_conv_message and sudo_conv_reply structures.  There must be a struct
      sudo_conv_message and struct sudo_conv_reply for each message in the
      conversation.  The plugin is responsible for freeing the reply buffer
-     filled in to the struct sudo_conv_reply, if any.
+     located in each struct sudo_conv_reply, if it is not NULL.
+     SUDO_CONV_REPL_MAX represents the maximum length of the reply buffer (not
+     including the trailing NUL character).  In practical terms, this is the
+     longest password ssuuddoo will support.  It is also useful as a maximum value
+     for the mmeemmsseett__ss() function when clearing passwords filled in by the
+     conversation function.
 
      The pprriinnttff()-style function uses the same underlying mechanism as the
      ccoonnvveerrssaattiioonn() function but only supports SUDO_CONV_INFO_MSG,

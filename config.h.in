@@ -373,6 +373,9 @@
 /* Define to 1 if you have the `memrchr' function. */
 #undef HAVE_MEMRCHR
 
+/* Define to 1 if you have the `memset_s' function. */
+#undef HAVE_MEMSET_S
+
 /* Define to 1 if you have the `mkdtemp' function. */
 #undef HAVE_MKDTEMP
 
@@ -948,6 +951,9 @@
 /* Define to `int' if <sys/types.h> does not define. */
 #undef dev_t
 
+/* Define to `int' if <sys/types.h> does not define. */
+#undef errno_t
+
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef gid_t
 
@@ -959,6 +965,9 @@
 
 /* Define to an OS-specific initialization function or `os_init_common'. */
 #undef os_init
+
+/* Define to `size_t' if <sys/types.h> does not define. */
+#undef rsize_t
 
 /* Define to `int' if <signal.h> does not define. */
 #undef sig_atomic_t

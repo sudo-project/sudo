@@ -15979,6 +15979,19 @@ fi
 
 
 fi
+
+    case "${CPPFLAGS}" in
+	*"-D__STDC_WANT_LIB_EXT1__=1"|*"-D__STDC_WANT_LIB_EXT1__=1 ")
+	    ;;
+	*)
+	    if test X"${CPPFLAGS}" = X""; then
+		CPPFLAGS="-D__STDC_WANT_LIB_EXT1__=1"
+	    else
+		CPPFLAGS="${CPPFLAGS} -D__STDC_WANT_LIB_EXT1__=1"
+	    fi
+	    ;;
+    esac
+
 ac_fn_c_check_type "$LINENO" "mode_t" "ac_cv_type_mode_t" "$ac_includes_default"
 if test "x$ac_cv_type_mode_t" = xyes; then :
 
@@ -16296,6 +16309,28 @@ if test "x$ac_cv_type_socklen_t" = xyes; then :
 
 else
   $as_echo "#define socklen_t unsigned int" >>confdefs.h
+
+fi
+
+ac_fn_c_check_type "$LINENO" "rsize_t" "ac_cv_type_rsize_t" "$ac_includes_default"
+if test "x$ac_cv_type_rsize_t" = xyes; then :
+
+else
+
+cat >>confdefs.h <<_ACEOF
+#define rsize_t size_t
+_ACEOF
+
+fi
+
+ac_fn_c_check_type "$LINENO" "errno_t" "ac_cv_type_errno_t" "$ac_includes_default"
+if test "x$ac_cv_type_errno_t" = xyes; then :
+
+else
+
+cat >>confdefs.h <<_ACEOF
+#define errno_t int
+_ACEOF
 
 fi
 
@@ -17538,6 +17573,19 @@ else
   case " $LIBOBJS " in
   *" memrchr.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS memrchr.$ac_objext"
+ ;;
+esac
+
+fi
+
+ac_fn_c_check_func "$LINENO" "memset_s" "ac_cv_func_memset_s"
+if test "x$ac_cv_func_memset_s" = xyes; then :
+  $as_echo "#define HAVE_MEMSET_S 1" >>confdefs.h
+
+else
+  case " $LIBOBJS " in
+  *" memset_s.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS memset_s.$ac_objext"
  ;;
 esac
 

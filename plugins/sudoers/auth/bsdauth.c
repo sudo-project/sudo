@@ -156,7 +156,7 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 
     if (pass) {
 	authok = auth_userresponse(as, pass, 1);
-	zero_bytes(pass, strlen(pass));
+	memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
     }
 
     /* restore old signal handler */

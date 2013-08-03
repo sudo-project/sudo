@@ -130,7 +130,7 @@ next_entry:
     if ((colon = fgets(pwbuf, sizeof(pwbuf), pwf)) == NULL)
 	return NULL;
 
-    zero_bytes(&pw, sizeof(pw));
+    memset(&pw, 0, sizeof(pw));
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	goto next_entry;
     *colon++ = '\0';
@@ -263,7 +263,7 @@ next_entry:
     if ((colon = fgets(grbuf, sizeof(grbuf), grf)) == NULL)
 	return NULL;
 
-    zero_bytes(&gr, sizeof(gr));
+    memset(&gr, 0, sizeof(gr));
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	goto next_entry;
     *colon++ = '\0';

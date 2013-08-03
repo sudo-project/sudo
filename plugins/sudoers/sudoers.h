@@ -210,14 +210,6 @@ struct sudo_user {
 #endif
 #define ROOT_GID	0
 
-/*
- * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
- * but that caused problems with various alternate authentication
- * methods.  So, we just define our own and assume that it is >= the
- * system max.
- */
-#define SUDO_PASS_MAX	256
-
 struct lbuf;
 struct passwd;
 struct stat;
@@ -286,9 +278,6 @@ void dump_auth_methods(void);
 
 /* getspwuid.c */
 char *sudo_getepw(const struct passwd *);
-
-/* zero_bytes.c */
-void zero_bytes(volatile void *, size_t);
 
 /* sudo_nss.c */
 void display_privs(struct sudo_nss_list *, struct passwd *);

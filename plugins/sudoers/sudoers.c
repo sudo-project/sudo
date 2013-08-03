@@ -807,7 +807,7 @@ set_fqdn(void)
     char *p;
     debug_decl(set_fqdn, SUDO_DEBUG_PLUGIN)
 
-    zero_bytes(&hint, sizeof(hint));
+    memset(&hint, 0, sizeof(hint));
     hint.ai_family = PF_UNSPEC;
     hint.ai_flags = AI_FQDN;
     if (getaddrinfo(user_host, NULL, &hint, &res0) != 0) {

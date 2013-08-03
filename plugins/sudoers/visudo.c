@@ -741,7 +741,7 @@ setup_signals(void)
     /*
      * Setup signal handlers to cleanup nicely.
      */
-    zero_bytes(&sa, sizeof(sa));
+    memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = quit;

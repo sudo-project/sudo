@@ -311,7 +311,8 @@ tgetpass.o: $(srcdir)/tgetpass.c $(top_builddir)/config.h $(srcdir)/sudo.h \
             $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
             $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/error.h \
             $(incdir)/fileops.h $(incdir)/list.h $(incdir)/sudo_conf.h \
-            $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
+            $(incdir)/list.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
+            $(incdir)/sudo_plugin.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/tgetpass.c
 ttyname.o: $(srcdir)/ttyname.c $(top_builddir)/config.h $(srcdir)/sudo.h \
            $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \

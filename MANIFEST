@@ -45,7 +45,6 @@ common/sudo_debug.c
 common/sudo_printf.c
 common/term.c
 common/ttysize.c
-common/zero_bytes.c
 compat/Makefile.in
 compat/charclass.h
 compat/closefrom.c
@@ -66,6 +65,7 @@ compat/glob.c
 compat/glob.h
 compat/isblank.c
 compat/memrchr.c
+compat/memset_s.c
 compat/mksiglist.c
 compat/mksiglist.h
 compat/mksigname.c

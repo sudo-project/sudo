@@ -312,7 +312,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 
     if ((*response = malloc(num_msg * sizeof(struct pam_response))) == NULL)
 	debug_return_int(PAM_SYSTEM_ERR);
-    zero_bytes(*response, num_msg * sizeof(struct pam_response));
+    memset(*response, 0, num_msg * sizeof(struct pam_response));
 
     for (pr = *response, pm = *msg, n = num_msg; n--; pr++, pm++) {
 	type = SUDO_CONV_PROMPT_ECHO_OFF;
@@ -356,7 +356,7 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 #endif
 		}
 		pr->resp = estrdup(pass);
-		zero_bytes(pass, strlen(pass));
+		memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
 		break;
 	    case PAM_TEXT_INFO:
 		if (pm->msg)
@@ -380,12 +380,11 @@ done:
 	/* Zero and free allocated memory and return an error. */
 	for (pr = *response, n = num_msg; n--; pr++) {
 	    if (pr->resp != NULL) {
-		zero_bytes(pr->resp, strlen(pr->resp));
+		memset_s(pr->resp, SUDO_CONV_REPL_MAX, 0, strlen(pr->resp));
 		free(pr->resp);
 		pr->resp = NULL;
 	    }
 	}
-	zero_bytes(*response, num_msg * sizeof(struct pam_response));
 	free(*response);
 	*response = NULL;
     }

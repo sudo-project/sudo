@@ -76,14 +76,6 @@
 #define MODE_LONG_LIST		0x01000000
 
 /*
- * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
- * but that caused problems with various alternate authentication
- * methods.  So, we just define our own and assume that it is >= the
- * system max.
- */
-#define SUDO_PASS_MAX	256
-
-/*
  * Flags for tgetpass()
  */
 #define TGP_NOECHO	0x00		/* turn echo off reading pw (default) */
@@ -177,9 +169,6 @@ void cleanup(int);
 /* tgetpass.c */
 char *tgetpass(const char *, int, int);
 int tty_present(void);
-
-/* zero_bytes.c */
-void zero_bytes(volatile void *, size_t);
 
 /* exec.c */
 int pipe_nonblock(int fds[2]);

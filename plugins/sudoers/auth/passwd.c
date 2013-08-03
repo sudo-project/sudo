@@ -114,7 +114,7 @@ sudo_passwd_cleanup(pw, auth)
     debug_decl(sudo_passwd_cleanup, SUDO_DEBUG_AUTH)
 
     if (pw_epasswd != NULL) {
-	zero_bytes(pw_epasswd, strlen(pw_epasswd));
+	memset_s(pw_epasswd, SUDO_CONV_REPL_MAX, 0, strlen(pw_epasswd));
 	efree(pw_epasswd);
     }
     debug_return_int(AUTH_SUCCESS);

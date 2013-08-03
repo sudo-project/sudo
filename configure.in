@@ -2143,7 +2143,9 @@ if test ${with_project-'no'} != "no"; then
 fi
 dnl
 dnl typedef checks
+dnl We need to define __STDC_WANT_LIB_EXT1__ for errno_t and rsize_t
 dnl
+SUDO_APPEND_CPPFLAGS(-D__STDC_WANT_LIB_EXT1__=1)
 AC_TYPE_MODE_T
 AC_TYPE_UID_T
 AC_CHECK_TYPE([__signed char], [], [AC_CHECK_TYPE([signed char], [AC_DEFINE(__signed, signed)], [AC_DEFINE(__signed, [])])])
@@ -2173,6 +2175,8 @@ AC_CHECK_TYPE(uint64_t, unsigned long long)
 AC_CHECK_TYPE(socklen_t, [], [AC_DEFINE(socklen_t, unsigned int)], [
 AC_INCLUDES_DEFAULT
 #include <sys/socket.h>])
+AC_CHECK_TYPE(rsize_t, size_t)
+AC_CHECK_TYPE(errno_t, int)
 SUDO_UID_T_LEN
 SUDO_SOCK_SA_LEN
 dnl
@@ -2348,7 +2352,7 @@ SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }fnm_test"
 ])
 SUDO_FUNC_ISBLANK
-AC_REPLACE_FUNCS(getopt_long memrchr pw_dup strlcpy strlcat)
+AC_REPLACE_FUNCS(getopt_long memrchr memset_s pw_dup strlcpy strlcat)
 AC_CHECK_FUNCS(nanosleep, [], [
     # On Solaris, nanosleep is in librt
     AC_CHECK_LIB(rt, nanosleep, [REPLAY_LIBS="${REPLAY_LIBS} -lrt"], [AC_LIBOBJ(nanosleep)])

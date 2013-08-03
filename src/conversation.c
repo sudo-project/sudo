@@ -81,7 +81,7 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		if (pass == NULL)
 		    goto err;
 		repl->reply = estrdup(pass);
-		zero_bytes(pass, strlen(pass));
+		memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
 		break;
 	    case SUDO_CONV_INFO_MSG:
 		if (msg->msg)
@@ -107,7 +107,7 @@ err:
     do {
 	repl = &replies[n];
 	if (repl->reply != NULL) {
-	    zero_bytes(repl->reply, strlen(repl->reply));
+	    memset_s(repl->reply, SUDO_CONV_REPL_MAX, 0, strlen(repl->reply));
 	    free(repl->reply);
 	    repl->reply = NULL;
 	}

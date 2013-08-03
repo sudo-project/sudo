@@ -384,6 +384,9 @@ size_t strlcpy(char *, const char *, size_t);
 #ifndef HAVE_MEMRCHR
 void *memrchr(const void *, int, size_t);
 #endif
+#ifndef HAVE_MEMSET_S
+errno_t memset_s(void *, rsize_t, int, rsize_t);
+#endif
 #ifndef HAVE_MKDTEMP
 char *mkdtemp(char *);
 #endif
