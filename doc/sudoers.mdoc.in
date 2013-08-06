@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd July 16, 2013
+.Dd August 6, 2013
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2661,6 +2661,26 @@ version 1.8.1 this option is no longer supported.
 The path to the noexec file should now be set in the
 .Xr sudo.conf @mansectform@
 file.
+.It pam_login_service
+On systems that use PAM for authentication, this is the service
+name used when the
+.Fl i
+option is specified.
+The default value is
+.Dq Li @pam_login_service@ .
+See the description of
+.Em pam_service
+for more information.
+.It pam_service
+On systems that use PAM for authentication, the service name
+specifies the PAM policy to apply.
+This usually corresponds to an entry in the
+.Pa pam.conf
+file or a file in the
+.Pa /etc/pam.d
+directory.
+The default value is
+.Dq Li sudo .
 .It passprompt
 The default prompt to use when asking for a password; can be overridden via the
 .Fl p

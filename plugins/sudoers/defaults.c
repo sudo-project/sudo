@@ -421,6 +421,12 @@ init_defaults(void)
     def_env_reset = ENV_RESET;
     def_set_logname = true;
     def_closefrom = STDERR_FILENO + 1;
+    def_pam_service = estrdup("sudo");
+#ifdef HAVE_PAM_LOGIN
+    def_pam_login_service = estrdup("sudo-i");
+#else
+    def_pam_login_service = estrdup("sudo");
+#endif
 #ifdef NO_PAM_SESSION
     def_pam_session = false;
 #else

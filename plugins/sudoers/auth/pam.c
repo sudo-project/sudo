@@ -93,12 +93,8 @@ sudo_pam_init(struct passwd *pw, sudo_auth *auth)
     if (auth != NULL)
 	auth->data = (void *) &pam_status;
     pam_conv.conv = converse;
-#ifdef HAVE_PAM_LOGIN
-    if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
-	pam_status = pam_start("sudo-i", pw->pw_name, &pam_conv, &pamh);
-    else
-#endif
-	pam_status = pam_start("sudo", pw->pw_name, &pam_conv, &pamh);
+    pam_status = pam_start(ISSET(sudo_mode, MODE_LOGIN_SHELL) ?
+	def_pam_login_service : def_pam_service, pw->pw_name, &pam_conv, &pamh);
     if (pam_status != PAM_SUCCESS) {
 	log_warning(USE_ERRNO|NO_MAIL, N_("unable to initialize PAM"));
 	debug_return_int(AUTH_FATAL);

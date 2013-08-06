@@ -659,6 +659,7 @@ EXEEXT
 ac_ct_CC
 CC
 PLUGINDIR
+pam_login_service
 pam_session
 editor
 secure_path
@@ -2929,6 +2930,7 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -2970,6 +2972,7 @@ sesh_file=/usr/local/libexec/sudo/sesh
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
 pam_session=on
+pam_login_service=sudo
 PLUGINDIR=/usr/local/libexec/sudo
 #
 # End initial values for man page substitution
@@ -18914,6 +18917,7 @@ if test "${with_pam_login+set}" = set; then :
 $as_echo_n "checking whether to use PAM login... " >&6; }
 			{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
+			pam_login_service="sudo-i"
 			;;
 	    no)		;;
 	    *)		as_fn_error $? "\"--with-pam-login does not take an argument.\"" "$LINENO" 5

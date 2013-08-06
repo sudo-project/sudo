@@ -122,6 +122,7 @@ AC_SUBST([netsvc_conf])
 AC_SUBST([secure_path])
 AC_SUBST([editor])
 AC_SUBST([pam_session])
+AC_SUBST([pam_login_service])
 AC_SUBST([PLUGINDIR])
 #
 # Begin initial values for man page substitution
@@ -164,6 +165,7 @@ sesh_file=/usr/local/libexec/sudo/sesh
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
 pam_session=on
+pam_login_service=sudo
 PLUGINDIR=/usr/local/libexec/sudo
 #
 # End initial values for man page substitution
@@ -2753,6 +2755,7 @@ if test ${with_pam-"no"} != "no"; then
 	    yes)	AC_DEFINE([HAVE_PAM_LOGIN])
 			AC_MSG_CHECKING(whether to use PAM login)
 			AC_MSG_RESULT(yes)
+			pam_login_service="sudo-i"
 			;;
 	    no)		;;
 	    *)		AC_MSG_ERROR(["--with-pam-login does not take an argument."])

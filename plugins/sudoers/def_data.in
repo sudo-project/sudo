@@ -262,6 +262,12 @@ limitprivs
 exec_background
 	T_FLAG
 	"Run commands on a pty in the background"
+pam_service
+	T_STR
+	"PAM service name to use"
+pam_login_service
+	T_STR
+	"PAM service name to use for login shells"
 pam_session
 	T_FLAG
 	"Create a new PAM session for the command to run in"

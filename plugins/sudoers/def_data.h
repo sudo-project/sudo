@@ -164,10 +164,14 @@
 #define I_LIMITPRIVS            81
 #define def_exec_background     (sudo_defs_table[82].sd_un.flag)
 #define I_EXEC_BACKGROUND       82
-#define def_pam_session         (sudo_defs_table[83].sd_un.flag)
-#define I_PAM_SESSION           83
-#define def_maxseq              (sudo_defs_table[84].sd_un.ival)
-#define I_MAXSEQ                84
+#define def_pam_service         (sudo_defs_table[83].sd_un.str)
+#define I_PAM_SERVICE           83
+#define def_pam_login_service   (sudo_defs_table[84].sd_un.str)
+#define I_PAM_LOGIN_SERVICE     84
+#define def_pam_session         (sudo_defs_table[85].sd_un.flag)
+#define I_PAM_SESSION           85
+#define def_maxseq              (sudo_defs_table[86].sd_un.ival)
+#define I_MAXSEQ                86
 
 enum def_tuple {
 	never,
