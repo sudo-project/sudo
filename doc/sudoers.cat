@@ -1048,10 +1048,25 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        implementations or on operating systems where opening a
                        PAM session changes the utmp or wtmp files.  If PAM
                        session support is disabled, resource limits may not be
-                       updated for the command being run.  This flag is _o_n by
-                       default.
+                       updated for the command being run.  If _p_a_m___s_e_s_s_i_o_n,
+                       _p_a_m___s_e_t_c_r_e_d, and _u_s_e___p_t_y are disabled and I/O logging
+                       has not been configured, ssuuddoo will execute the command
+                       directly instead of running it as a child process.
+                       This flag is _o_n by default.
 
                        This setting is only supported by version 1.8.7 or
+                       higher.
+
+     pam_setcred       On systems that use PAM for authentication, ssuuddoo will
+                       attempt to establish credentials for the target user by
+                       default, if supported by the underlying authentication
+                       system.  One example of a credential is a Kerberos
+                       ticket.  If _p_a_m___s_e_s_s_i_o_n, _p_a_m___s_e_t_c_r_e_d, and _u_s_e___p_t_y are
+                       disabled and I/O logging has not been configured, ssuuddoo
+                       will execute the command directly instead of running it
+                       as a child process.  This flag is _o_n by default.
+
+                       This setting is only supported by version 1.8.8 or
                        higher.
 
      passprompt_override
@@ -1381,11 +1396,17 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        default value is ``sudo''.  See the description of
                        _p_a_m___s_e_r_v_i_c_e for more information.
 
+                       This setting is only supported by version 1.8.8 or
+                       higher.
+
      pam_service       On systems that use PAM for authentication, the service
                        name specifies the PAM policy to apply.  This usually
                        corresponds to an entry in the _p_a_m_._c_o_n_f file or a file
                        in the _/_e_t_c_/_p_a_m_._d directory.  The default value is
                        ``sudo''.
+
+                       This setting is only supported by version 1.8.8 or
+                       higher.
 
      passprompt        The default prompt to use when asking for a password;
                        can be overridden via the --pp option or the SUDO_PROMPT

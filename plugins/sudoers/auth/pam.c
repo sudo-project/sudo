@@ -119,6 +119,13 @@ sudo_pam_init(struct passwd *pw, sudo_auth *auth)
     else
 	(void) pam_set_item(pamh, PAM_TTY, user_ttypath);
 
+    /*
+     * If PAM session and setcred support is disabled we don't
+     * need to keep a sudo process around to close the session.
+     */
+    if (!def_pam_session && !def_pam_setcred)
+	auth->end_session = NULL;
+
     debug_return_int(AUTH_SUCCESS);
 }
 
@@ -189,8 +196,8 @@ sudo_pam_cleanup(struct passwd *pw, sudo_auth *auth)
     int *pam_status = (int *) auth->data;
     debug_decl(sudo_pam_cleanup, SUDO_DEBUG_AUTH)
 
-    /* If successful, we can't close the session until pam_end_session() */
-    if (*pam_status != PAM_SUCCESS) {
+    /* If successful, we can't close the session until sudo_pam_end_session() */
+    if (*pam_status != PAM_SUCCESS || auth->end_session == NULL) {
 	*pam_status = pam_end(pamh, *pam_status | PAM_DATA_SILENT);
 	pamh = NULL;
     }
@@ -231,7 +238,8 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
      * pam_unix will fail but pam_ldap or pam_sss may succeed, but if
      * pam_unix is first in the stack, pam_setcred() will fail.
      */
-    (void) pam_setcred(pamh, PAM_ESTABLISH_CRED);
+    if (def_pam_setcred)
+	(void) pam_setcred(pamh, PAM_ESTABLISH_CRED);
 
 #ifdef HAVE_PAM_GETENVLIST
     /*
@@ -281,7 +289,8 @@ sudo_pam_end_session(struct passwd *pw, sudo_auth *auth)
 	(void) pam_set_item(pamh, PAM_USER, pw->pw_name);
 	if (def_pam_session)
 	    (void) pam_close_session(pamh, PAM_SILENT);
-	(void) pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
+	if (def_pam_setcred)
+	    (void) pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
 	if (pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT) != PAM_SUCCESS)
 	    status = AUTH_FAILURE;
 	pamh = NULL;

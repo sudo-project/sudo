@@ -2229,11 +2229,41 @@ may be needed on older PAM implementations or on operating systems where
 opening a PAM session changes the utmp or wtmp files.
 If PAM session support is disabled, resource limits may not be updated
 for the command being run.
+If
+\fIpam_session\fR,
+\fIpam_setcred\fR,
+and
+\fIuse_pty\fR
+are disabled and I/O logging has not been configured,
+\fBsudo\fR
+will execute the command directly instead of running it as a child
+process.
 This flag is
 \fI@pam_session@\fR
 by default.
 .sp
 This setting is only supported by version 1.8.7 or higher.
+.TP 18n
+pam_setcred
+On systems that use PAM for authentication,
+\fBsudo\fR
+will attempt to establish credentials for the target user by default,
+if supported by the underlying authentication system.
+One example of a credential is a Kerberos ticket.
+If
+\fIpam_session\fR,
+\fIpam_setcred\fR,
+and
+\fIuse_pty\fR
+are disabled and I/O logging has not been configured,
+\fBsudo\fR
+will execute the command directly instead of running it as a child
+process.
+This flag is
+\fIon\fR
+by default.
+.sp
+This setting is only supported by version 1.8.8 or higher.
 .TP 18n
 passprompt_override
 The password prompt specified by
@@ -2862,6 +2892,8 @@ The default value is
 See the description of
 \fIpam_service\fR
 for more information.
+.sp
+This setting is only supported by version 1.8.8 or higher.
 .TP 18n
 pam_service
 On systems that use PAM for authentication, the service name
@@ -2873,6 +2905,8 @@ file or a file in the
 directory.
 The default value is
 ``\fRsudo\fR''.
+.sp
+This setting is only supported by version 1.8.8 or higher.
 .TP 18n
 passprompt
 The default prompt to use when asking for a password; can be overridden via the

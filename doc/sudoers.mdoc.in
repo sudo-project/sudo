@@ -2080,11 +2080,40 @@ may be needed on older PAM implementations or on operating systems where
 opening a PAM session changes the utmp or wtmp files.
 If PAM session support is disabled, resource limits may not be updated
 for the command being run.
+If
+.Em pam_session ,
+.Em pam_setcred ,
+and
+.Em use_pty
+are disabled and I/O logging has not been configured,
+.Nm sudo
+will execute the command directly instead of running it as a child
+process.
 This flag is
 .Em @pam_session@
 by default.
 .Pp
 This setting is only supported by version 1.8.7 or higher.
+.It pam_setcred
+On systems that use PAM for authentication,
+.Nm sudo
+will attempt to establish credentials for the target user by default,
+if supported by the underlying authentication system.
+One example of a credential is a Kerberos ticket.
+If
+.Em pam_session ,
+.Em pam_setcred ,
+and
+.Em use_pty
+are disabled and I/O logging has not been configured,
+.Nm sudo
+will execute the command directly instead of running it as a child
+process.
+This flag is
+.Em on
+by default.
+.Pp
+This setting is only supported by version 1.8.8 or higher.
 .It passprompt_override
 The password prompt specified by
 .Em passprompt
@@ -2671,6 +2700,8 @@ The default value is
 See the description of
 .Em pam_service
 for more information.
+.Pp
+This setting is only supported by version 1.8.8 or higher.
 .It pam_service
 On systems that use PAM for authentication, the service name
 specifies the PAM policy to apply.
@@ -2681,6 +2712,8 @@ file or a file in the
 directory.
 The default value is
 .Dq Li sudo .
+.Pp
+This setting is only supported by version 1.8.8 or higher.
 .It passprompt
 The default prompt to use when asking for a password; can be overridden via the
 .Fl p
