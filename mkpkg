@@ -226,7 +226,14 @@ case "$osversion" in
 	esac
 	if test "${osversion}" != "`$top_srcdir/pp --probe`"; then
 	    sdkvers=`echo "${osversion}" | sed 's/^macos\([0-9][0-9]\)\([0-9]*\)-.*$/\1.\2/'`
-	    SDK_FLAGS="-isysroot /Developer/SDKs/MacOSX${sdkvers}.sdk -mmacosx-version-min=${sdkvers}"
+	    # Newer Xcode puts /Developer under the app Contents dir.
+	    SDK_DIR="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs"
+	    if test -d "${SDK_DIR}/MacOSX${sdkvers}.sdk"; then
+		SDK_DIR="${SDK_DIR}/MacOSX${sdkvers}.sdk"
+	    elif test -d "/Developer/SDKs/MacOSX${sdkvers}.sdk"; then
+		SDK_DIR="/Developer/SDKs/MacOSX${sdkvers}.sdk"
+	    fi
+	    SDK_FLAGS="-isysroot ${SDK_DIR} -mmacosx-version-min=${sdkvers}"
 	fi
 	export CFLAGS="-O2 -g $ARCH_FLAGS $SDK_FLAGS"
 	export LDFLAGS="$ARCH_FLAGS $SDK_FLAGS"
