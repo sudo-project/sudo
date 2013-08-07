@@ -83,8 +83,14 @@ closefrom_fallback(int lowfd)
     if (maxfd < 0)
 	maxfd = OPEN_MAX;
 
-    for (fd = lowfd; fd < maxfd; fd++)
+    for (fd = lowfd; fd < maxfd; fd++) {
+#ifdef __APPLE__
+	/* Avoid potential crash with libdispatch when we close its fds. */
+	(void) fcntl(fd, F_SETFD, FD_CLOEXEC);
+#else
 	(void) close((int) fd);
+#endif
+    }
 }
 
 /*
