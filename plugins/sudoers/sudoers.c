@@ -147,7 +147,6 @@ sudoers_policy_init(void *info, char * const envp[])
     snl = sudo_read_nss();
 
     /* LDAP or NSS may modify the euid so we need to be root for the open. */
-    set_perms(PERM_INITIAL);
     set_perms(PERM_ROOT);
 
     /* Open and parse sudoers, set global defaults */
@@ -523,6 +522,7 @@ static void
 init_vars(char * const envp[])
 {
     char * const * ep;
+    bool unknown_user = false;
     debug_decl(init_vars, SUDO_DEBUG_PLUGIN)
 
     sudoers_initlocale(setlocale(LC_ALL, NULL), def_sudoers_locale);
@@ -563,16 +563,16 @@ init_vars(char * const envp[])
 
 	    /* Need to make a fake struct passwd for the call to log_fatal(). */
 	    sudo_user.pw = sudo_mkpwent(user_name, user_uid, user_gid, NULL, NULL);
-	    log_fatal(0, N_("unknown uid: %u"), (unsigned int) user_uid);
-	    /* NOTREACHED */
+	    unknown_user = true;
 	}
     }
 
     /*
-     * Get group list.
+     * Get group list and store initialize permissions.
      */
     if (user_group_list == NULL)
 	user_group_list = sudo_get_grlist(sudo_user.pw);
+    set_perms(PERM_INITIAL);
 
     /* Set runas callback. */
     sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
@@ -584,6 +584,8 @@ init_vars(char * const envp[])
     sudo_defs_table[I_MAXSEQ].callback = io_set_max_sessid;
 
     /* It is now safe to use log_fatal() and set_perms() */
+    if (unknown_user)
+	log_fatal(0, N_("unknown uid: %u"), (unsigned int) user_uid);
     debug_return;
 }
 
