@@ -1,4 +1,4 @@
-The following list of people, sorted by last name, have contributed
+﻿The following list of people, sorted by last name, have contributed
 code or patches to this implementation of sudo since I began
 maintaining it in 1993.  This list is known to be incomplete--if
 you believe you should be listed, please send a note to sudo@sudo.ws.
@@ -20,14 +20,14 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Boyce, Keith Garry
     Brantley, Michael
     Braun, Rob
-    Brezina, Pavel
+    Březina, Pavel
     Brooks, Piete
     Brown, Jerry
     Burr, Michael E
     Bussjaeger, Andreas
     Calvin, Gary
     Campbell, Aaron
-    Cizek, Vitezslav
+    Čížek, Vítězslav
     Coleman, Chris
     Corzine, Deven T.
     Cusack, Frank
@@ -70,7 +70,7 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Knox, Tim
     Komarnitsky, Alek O.
     Kondrashov, Nikolai
-    Kopecek, Daniel
+    Kopeček, Daniel
     Kranenburg, Paul
     Krause, David
     Lakin, Eric
@@ -102,7 +102,7 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Peron, Christian S.J.
     Peslyak, Alexander
     Peterson, Toby
-    Petteno, Diego Elio
+    Pettenò, Diego Elio
     Pickett, Joel
     Plotnick, Alex
     de Raadt, Theo
@@ -116,7 +116,7 @@ you believe you should be listed, please send a note to sudo@sudo.ws.
     Ruusamae, Elan
     Ryabinkin, Eygene
     SATO, Yuichi
-    Sanchez, Wilfredo
+    Sánchez, Wilfredo
     Saucier, Jean-Francois
     Schoenfeld, Patrick
     Schuring, Arno
@@ -177,7 +177,7 @@ languages:
     Krznar, Tomislav
     Margevičius, Algimantas
     Maryanov, Pavel
-    Nikolic, Miroslav
+    Nikolić, Miroslav
     Nylander, Daniel
     Quân, Trần Ngọc
     Regueiro, Leandro
