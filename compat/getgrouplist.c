@@ -92,10 +92,6 @@ done:
 
 #elif defined(HAVE_NSS_SEARCH)
 
-#ifndef GID_MAX
-# define GID_MAX	UID_MAX
-#endif
-
 #ifndef ALIGNBYTES
 # define ALIGNBYTES	(sizeof(long) - 1L)
 #endif
@@ -104,6 +100,7 @@ done:
 #endif
 
 extern void _nss_initf_group(nss_db_params_t *);
+extern id_t atoid(const char *str, const char **errstr);
 
 /*
  * Convert a groups file string (instr) to a struct group (ent) using
@@ -115,8 +112,9 @@ str2grp(const char *instr, int inlen, void *ent, char *buf, int buflen)
     struct group *grp = ent;
     char *cp, *ep, *fieldsep = buf;
     char **gr_mem, **gr_end;
+    const char *errstr;
     int yp = 0;
-    unsigned long gid;
+    id_t id;
 
     /* Must at least have space to copy instr -> buf. */
     if (inlen >= buflen)
@@ -150,21 +148,24 @@ str2grp(const char *instr, int inlen, void *ent, char *buf, int buflen)
     if ((fieldsep = strchr(cp = fieldsep, ':')) == NULL)
 	return yp ? NSS_STR_PARSE_SUCCESS : NSS_STR_PARSE_PARSE;
     *fieldsep++ = '\0';
-    gid = strtoul(cp, &ep, 10);
-    if (*cp == '\0' || *ep != '\0')
+    errno = 0;
+    id = atoid(cp, &errstr);
+    if (errstr == NULL) {
+	/*
+	 * A range error is always a fatal error, but ignore garbage
+	 * at the end of YP entries since it has no meaning.
+	 */
+	if (errno == ERANGE)
+	    return NSS_STR_PARSE_ERANGE;
 	return yp ? NSS_STR_PARSE_SUCCESS : NSS_STR_PARSE_PARSE;
-#ifdef GID_NOBODY
-    if (*cp == '-' && gid != 0) {
-	/* Negative gids get mapped to nobody on Solaris. */
-	grp->gr_gid = GID_NOBODY;
-    } else
-#endif
-    if ((errno == ERANGE && gid == ULONG_MAX) ||
-	gid > GID_MAX || gid != (gid_t)gid) {
-	return NSS_STR_PARSE_ERANGE;
-    } else {
-	grp->gr_gid = (gid_t)gid;
     }
+#ifdef GID_NOBODY
+    /* Negative gids get mapped to nobody on Solaris. */
+    if (*cp == '-' && gid != 0)
+	grp->gr_gid = GID_NOBODY;
+    else
+#endif
+	grp->gr_gid = (gid_t)id;
 
     /* Store group members, taking care to use proper alignment. */
     grp->gr_mem = NULL;

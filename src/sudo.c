@@ -530,9 +530,10 @@ static void
 command_info_to_details(char * const info[], struct command_details *details)
 {
     int i;
+    id_t id;
     long lval;
-    unsigned long ulval;
     char *cp, *ep;
+    const char *errstr;
     debug_decl(command_info_to_details, SUDO_DEBUG_PCOMM)
 
     memset(details, 0, sizeof(*details));
@@ -610,39 +611,33 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 'r':
 		if (strncmp("runas_egid=", info[i], sizeof("runas_egid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_egid=") - 1;
-		    if (*cp == '\0')
-			break;
-		    errno = 0;
-		    ulval = strtoul(cp, &ep, 0);
-		    if (*cp != '\0' && *ep == '\0' &&
-			(errno != ERANGE || ulval != ULONG_MAX)) {
-			details->egid = (gid_t)ulval;
+		    id = atoid(cp, &errstr);
+		    if (errstr != NULL) {
+			warningx(_("%s: %s"), info[i], _(errstr));
+		    } else {
+			details->egid = (gid_t)id;
 			SET(details->flags, CD_SET_EGID);
 		    }
 		    break;
 		}
 		if (strncmp("runas_euid=", info[i], sizeof("runas_euid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_euid=") - 1;
-		    if (*cp == '\0')
-			break;
-		    errno = 0;
-		    ulval = strtoul(cp, &ep, 0);
-		    if (*cp != '\0' && *ep == '\0' &&
-			(errno != ERANGE || ulval != ULONG_MAX)) {
-			details->euid = (uid_t)ulval;
+		    id = atoid(cp, &errstr);
+		    if (errstr != NULL) {
+			warningx(_("%s: %s"), info[i], _(errstr));
+		    } else {
+			details->euid = (uid_t)id;
 			SET(details->flags, CD_SET_EUID);
 		    }
 		    break;
 		}
 		if (strncmp("runas_gid=", info[i], sizeof("runas_gid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_gid=") - 1;
-		    if (*cp == '\0')
-			break;
-		    errno = 0;
-		    ulval = strtoul(cp, &ep, 0);
-		    if (*cp != '\0' && *ep == '\0' &&
-			(errno != ERANGE || ulval != ULONG_MAX)) {
-			details->gid = (gid_t)ulval;
+		    id = atoid(cp, &errstr);
+		    if (errstr != NULL) {
+			warningx(_("%s: %s"), info[i], _(errstr));
+		    } else {
+			details->gid = (gid_t)id;
 			SET(details->flags, CD_SET_GID);
 		    }
 		    break;
@@ -665,13 +660,12 @@ command_info_to_details(char * const info[], struct command_details *details)
 			    emalloc2(details->ngroups, sizeof(GETGROUPS_T));
 			cp = info[i] + sizeof("runas_groups=") - 1;
 			for (j = 0; j < details->ngroups;) {
-			    errno = 0;
-			    ulval = strtoul(cp, &ep, 0);
-			    if (*cp == '\0' || (*ep != ',' && *ep != '\0') ||
-				(ulval == ULONG_MAX && errno == ERANGE)) {
+			    id = atoid(cp, &errstr);
+			    if (errstr != NULL) {
+				warningx(_("%s: %s"), cp, _(errstr));
 				break;
 			    }
-			    details->groups[j++] = (gid_t)ulval;
+			    details->groups[j++] = (gid_t)id;
 			    cp = ep + 1;
 			}
 			details->ngroups = j;
@@ -680,13 +674,11 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		if (strncmp("runas_uid=", info[i], sizeof("runas_uid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_uid=") - 1;
-		    if (*cp == '\0')
-			break;
-		    errno = 0;
-		    ulval = strtoul(cp, &ep, 0);
-		    if (*cp != '\0' && *ep == '\0' &&
-			(errno != ERANGE || ulval != ULONG_MAX)) {
-			details->uid = (uid_t)ulval;
+		    id = atoid(cp, &errstr);
+		    if (errstr != NULL) {
+			warningx(_("%s: %s"), info[i], _(errstr));
+		    } else {
+			details->uid = (uid_t)id;
 			SET(details->flags, CD_SET_UID);
 		    }
 		    break;
@@ -751,10 +743,12 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    if (*cp == '\0')
 			break;
 		    errno = 0;
-		    ulval = strtoul(cp, &ep, 8);
+		    lval = strtol(cp, &ep, 8);
 		    if (*cp != '\0' && *ep == '\0' &&
-			(errno != ERANGE || ulval != ULONG_MAX)) {
-			details->umask = (uid_t)ulval;
+			!(errno == ERANGE &&
+			(lval == LONG_MAX || lval == LONG_MIN)) &&
+			lval <= 0777 && lval >= 0) {
+			details->umask = (mode_t)lval;
 			SET(details->flags, CD_SET_UMASK);
 		    }
 		    break;

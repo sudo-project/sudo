@@ -352,9 +352,10 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 {
     const char *runas_uid_str = "0", *runas_euid_str = NULL;
     const char *runas_gid_str = "0", *runas_egid_str = NULL;
-    char id[MAX_UID_T_LEN + 2], *ep;
+    const char *errstr;
+    char idbuf[MAX_UID_T_LEN + 2];
     char * const *cur;
-    unsigned long ulval;
+    id_t id;
     uid_t runas_uid = 0;
     gid_t runas_gid = 0;
     debug_decl(iolog_deserialize_info, SUDO_DEBUG_UTIL)
@@ -470,37 +471,35 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     if (runas_euid_str != NULL)
 	runas_uid_str = runas_euid_str;
     if (runas_uid_str != NULL) {
-	errno = 0;
-	ulval = strtoul(runas_uid_str, &ep, 0);
-	if (*runas_uid_str != '\0' && *ep == '\0' &&
-	    (errno != ERANGE || ulval != ULONG_MAX)) {
-	    runas_uid = (uid_t)ulval;
-	}
+	id = atoid(runas_uid_str, &errstr);
+	if (errstr != NULL)
+	    warningx("runas uid %s: %s", runas_uid_str, _(errstr));
+	else
+	    runas_uid = (uid_t)id;
     }
     if (runas_egid_str != NULL)
 	runas_gid_str = runas_egid_str;
     if (runas_gid_str != NULL) {
-	errno = 0;
-	ulval = strtoul(runas_gid_str, &ep, 0);
-	if (*runas_gid_str != '\0' && *ep == '\0' &&
-	    (errno != ERANGE || ulval != ULONG_MAX)) {
-	    runas_gid = (gid_t)ulval;
-	}
+	id = atoid(runas_gid_str, &errstr);
+	if (errstr != NULL)
+	    warningx("runas gid %s: %s", runas_gid_str, _(errstr));
+	else
+	    runas_gid = (gid_t)id;
     }
 
     details->runas_pw = sudo_getpwuid(runas_uid);
     if (details->runas_pw == NULL) {
-	id[0] = '#';
-	strlcpy(&id[1], runas_uid_str, sizeof(id) - 1);
-	details->runas_pw = sudo_fakepwnam(id, runas_gid);
+	idbuf[0] = '#';
+	strlcpy(&idbuf[1], runas_uid_str, sizeof(idbuf) - 1);
+	details->runas_pw = sudo_fakepwnam(idbuf, runas_gid);
     }
 
     if (runas_gid != details->runas_pw->pw_gid) {
 	details->runas_gr = sudo_getgrgid(runas_gid);
 	if (details->runas_gr == NULL) {
-	    id[0] = '#';
-	    strlcpy(&id[1], runas_gid_str, sizeof(id) - 1);
-	    details->runas_gr = sudo_fakegrnam(id);
+	    idbuf[0] = '#';
+	    strlcpy(&idbuf[1], runas_gid_str, sizeof(idbuf) - 1);
+	    details->runas_gr = sudo_fakegrnam(idbuf);
 	}
     }
     debug_return_bool(
