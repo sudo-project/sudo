@@ -314,6 +314,9 @@ char *get_timestr(time_t, int);
 /* atobool.c */
 int atobool(const char *str);
 
+/* atoid.c */
+int atoid(const char *str, const char **errstr);
+
 /* boottime.c */
 int get_boottime(struct timeval *);
 

@@ -16227,6 +16227,17 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+ac_fn_c_check_type "$LINENO" "id_t" "ac_cv_type_id_t" "$ac_includes_default"
+if test "x$ac_cv_type_id_t" = xyes; then :
+
+else
+
+cat >>confdefs.h <<_ACEOF
+#define id_t unsigned int
+_ACEOF
+
+fi
+
 ac_fn_c_check_type "$LINENO" "size_t" "ac_cv_type_size_t" "$ac_includes_default"
 if test "x$ac_cv_type_size_t" = xyes; then :
 

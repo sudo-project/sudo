@@ -87,7 +87,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 {
     struct sudoers_policy_open_info *info = v;
     char * const *cur;
-    const char *p, *groups = NULL;
+    const char *p, *errstr, *groups = NULL;
     const char *debug_flags = NULL;
     int flags = 0;
     debug_decl(sudoers_policy_deserialize_info, SUDO_DEBUG_PLUGIN)
@@ -102,16 +102,23 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 		continue;
 	    }
 	    if (MATCHES(*cur, "sudoers_uid=")) {
-		sudoers_uid = (uid_t) atoi(*cur + sizeof("sudoers_uid=") - 1);
+		p = *cur + sizeof("sudoers_uid=") - 1;
+		sudoers_uid = (uid_t) atoid(p, &errstr);
+		if (errstr != NULL)
+		    fatalx("%s: %s", *cur, _(errstr));
 		continue;
 	    }
 	    if (MATCHES(*cur, "sudoers_gid=")) {
-		sudoers_gid = (gid_t) atoi(*cur + sizeof("sudoers_gid=") - 1);
+		p = *cur + sizeof("sudoers_gid=") - 1;
+		sudoers_gid = (gid_t) atoid(p, &errstr);
+		if (errstr != NULL)
+		    fatalx("%s: %s", *cur, _(errstr));
 		continue;
 	    }
 	    if (MATCHES(*cur, "sudoers_mode=")) {
 		sudoers_mode = (mode_t) strtol(*cur + sizeof("sudoers_mode=") - 1,
 		    NULL, 8);
+		/* XXX - error checking */
 		continue;
 	    }
 	    if (MATCHES(*cur, "ldap_conf=")) {
@@ -253,12 +260,17 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
 	if (MATCHES(*cur, "uid=")) {
-	    user_uid = (uid_t) atoi(*cur + sizeof("uid=") - 1);
+	    p = *cur + sizeof("uid=") - 1;
+	    user_uid = (uid_t) atoid(p, &errstr);
+	    if (errstr != NULL)
+		fatalx("%s: %s", *cur, _(errstr));
 	    continue;
 	}
 	if (MATCHES(*cur, "gid=")) {
 	    p = *cur + sizeof("gid=") - 1;
-	    user_gid = (gid_t) atoi(p);
+	    user_gid = (gid_t) atoid(p, &errstr);
+	    if (errstr != NULL)
+		fatalx("%s: %s", *cur, _(errstr));
 	    continue;
 	}
 	if (MATCHES(*cur, "groups=")) {
@@ -290,7 +302,10 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
 	if (MATCHES(*cur, "sid=")) {
-	    sudo_user.sid = atoi(*cur + sizeof("sid=") - 1);
+	    p = *cur + sizeof("sid=") - 1;
+	    sudo_user.sid = (pid_t) atoid(p, &errstr);
+	    if (errstr != NULL)
+		fatalx("%s: %s", *cur, _(errstr));
 	    continue;
 	}
     }
