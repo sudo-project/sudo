@@ -88,9 +88,11 @@ rewind_perms(void)
 {
     debug_decl(rewind_perms, SUDO_DEBUG_PERMS)
 
-    while (perm_stack_depth > 1)
-	restore_perms();
-    sudo_grlist_delref(perm_stack[0].grlist);
+    if (perm_stack_depth != 0) {
+	while (perm_stack_depth > 1)
+	    restore_perms();
+	sudo_grlist_delref(perm_stack[0].grlist);
+    }
 
     debug_return;
 }
