@@ -11,6 +11,7 @@ common/Makefile.in
 common/aix.c
 common/alloc.c
 common/atobool.c
+common/atoid.c
 common/error.c
 common/fileops.c
 common/fmt_string.c
@@ -167,7 +168,6 @@ plugins/sample/sample_plugin.exp
 plugins/sudoers/Makefile.in
 plugins/sudoers/aixcrypt.exp
 plugins/sudoers/alias.c
-plugins/sudoers/atoid.c
 plugins/sudoers/audit.c
 plugins/sudoers/auth/API
 plugins/sudoers/auth/afs.c
