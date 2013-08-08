@@ -264,4 +264,7 @@ void init_signals(void);
 void restore_signals(void);
 void save_signals(void);
 
+/* gidlist.c */
+int parse_gid_list(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
+
 #endif /* _SUDO_SUDO_H */

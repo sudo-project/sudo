@@ -612,75 +612,43 @@ command_info_to_details(char * const info[], struct command_details *details)
 		if (strncmp("runas_egid=", info[i], sizeof("runas_egid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_egid=") - 1;
 		    id = atoid(cp, NULL, NULL, &errstr);
-		    if (errstr != NULL) {
-			warningx(_("%s: %s"), info[i], _(errstr));
-		    } else {
-			details->egid = (gid_t)id;
-			SET(details->flags, CD_SET_EGID);
-		    }
+		    if (errstr != NULL)
+			fatalx(_("%s: %s"), info[i], _(errstr));
+		    details->egid = (gid_t)id;
+		    SET(details->flags, CD_SET_EGID);
 		    break;
 		}
 		if (strncmp("runas_euid=", info[i], sizeof("runas_euid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_euid=") - 1;
 		    id = atoid(cp, NULL, NULL, &errstr);
-		    if (errstr != NULL) {
-			warningx(_("%s: %s"), info[i], _(errstr));
-		    } else {
-			details->euid = (uid_t)id;
-			SET(details->flags, CD_SET_EUID);
-		    }
+		    if (errstr != NULL)
+			fatalx(_("%s: %s"), info[i], _(errstr));
+		    details->euid = (uid_t)id;
+		    SET(details->flags, CD_SET_EUID);
 		    break;
 		}
 		if (strncmp("runas_gid=", info[i], sizeof("runas_gid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_gid=") - 1;
 		    id = atoid(cp, NULL, NULL, &errstr);
-		    if (errstr != NULL) {
-			warningx(_("%s: %s"), info[i], _(errstr));
-		    } else {
-			details->gid = (gid_t)id;
-			SET(details->flags, CD_SET_GID);
-		    }
+		    if (errstr != NULL)
+			fatalx(_("%s: %s"), info[i], _(errstr));
+		    details->gid = (gid_t)id;
+		    SET(details->flags, CD_SET_GID);
 		    break;
 		}
 		if (strncmp("runas_groups=", info[i], sizeof("runas_groups=") - 1) == 0) {
-		    int j;
-
-		    /* count groups, alloc and fill in */
+		    /* parse_gid_list() will call fatalx() on error. */
 		    cp = info[i] + sizeof("runas_groups=") - 1;
-		    if (*cp == '\0')
-			break;
-		    for (;;) {
-			details->ngroups++;
-			if ((cp = strchr(cp, ',')) == NULL)
-			    break;
-			cp++;
-		    }
-		    if (details->ngroups != 0) {
-			details->groups =
-			    emalloc2(details->ngroups, sizeof(GETGROUPS_T));
-			cp = info[i] + sizeof("runas_groups=") - 1;
-			for (j = 0; j < details->ngroups;) {
-			    id = atoid(cp, ",", &ep, &errstr);
-			    if (errstr != NULL) {
-				warningx(_("%s: %s"), cp, _(errstr));
-				break;
-			    }
-			    details->groups[j++] = (gid_t)id;
-			    cp = ep + 1;
-			}
-			details->ngroups = j;
-		    }
+		    details->ngroups = parse_gid_list(cp, NULL, &details->groups);
 		    break;
 		}
 		if (strncmp("runas_uid=", info[i], sizeof("runas_uid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_uid=") - 1;
 		    id = atoid(cp, NULL, NULL, &errstr);
-		    if (errstr != NULL) {
-			warningx(_("%s: %s"), info[i], _(errstr));
-		    } else {
-			details->uid = (uid_t)id;
-			SET(details->flags, CD_SET_UID);
-		    }
+		    if (errstr != NULL)
+			fatalx(_("%s: %s"), info[i], _(errstr));
+		    details->uid = (uid_t)id;
+		    SET(details->flags, CD_SET_UID);
 		    break;
 		}
 #ifdef HAVE_PRIV_SET

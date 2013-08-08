@@ -105,14 +105,14 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 		p = *cur + sizeof("sudoers_uid=") - 1;
 		sudoers_uid = (uid_t) atoid(p, NULL, NULL, &errstr);
 		if (errstr != NULL)
-		    fatalx("%s: %s", *cur, _(errstr));
+		    fatalx(_("%s: %s"), *cur, _(errstr));
 		continue;
 	    }
 	    if (MATCHES(*cur, "sudoers_gid=")) {
 		p = *cur + sizeof("sudoers_gid=") - 1;
 		sudoers_gid = (gid_t) atoid(p, NULL, NULL, &errstr);
 		if (errstr != NULL)
-		    fatalx("%s: %s", *cur, _(errstr));
+		    fatalx(_("%s: %s"), *cur, _(errstr));
 		continue;
 	    }
 	    if (MATCHES(*cur, "sudoers_mode=")) {
@@ -263,14 +263,14 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    p = *cur + sizeof("uid=") - 1;
 	    user_uid = (uid_t) atoid(p, NULL, NULL, &errstr);
 	    if (errstr != NULL)
-		fatalx("%s: %s", *cur, _(errstr));
+		fatalx(_("%s: %s"), *cur, _(errstr));
 	    continue;
 	}
 	if (MATCHES(*cur, "gid=")) {
 	    p = *cur + sizeof("gid=") - 1;
 	    user_gid = (gid_t) atoid(p, NULL, NULL, &errstr);
 	    if (errstr != NULL)
-		fatalx("%s: %s", *cur, _(errstr));
+		fatalx(_("%s: %s"), *cur, _(errstr));
 	    continue;
 	}
 	if (MATCHES(*cur, "groups=")) {
@@ -305,7 +305,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    p = *cur + sizeof("sid=") - 1;
 	    sudo_user.sid = (pid_t) atoid(p, NULL, NULL, &errstr);
 	    if (errstr != NULL)
-		fatalx("%s: %s", *cur, _(errstr));
+		fatalx(_("%s: %s"), *cur, _(errstr));
 	    continue;
 	}
     }
@@ -315,33 +315,8 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	user_tty = "unknown"; /* user_ttypath remains NULL */
 
     if (groups != NULL && groups[0] != '\0') {
-	const char *cp;
-	GETGROUPS_T *gids;
-	int ngids;
-
-	/* Count number of groups, including passwd gid. */
-	ngids = 2;
-	for (cp = groups; *cp != '\0'; cp++) {
-	    if (*cp == ',')
-		ngids++;
-	}
-
-	/* The first gid in the list is the passwd group gid. */
-	gids = emalloc2(ngids, sizeof(GETGROUPS_T));
-	gids[0] = user_gid;
-	ngids = 1;
-	cp = groups;
-	for (;;) {
-	    gids[ngids] = atoi(cp);
-	    if (gids[0] != gids[ngids])
-		ngids++;
-	    cp = strchr(cp, ',');
-	    if (cp == NULL)
-		break;
-	    cp++; /* skip over comma */
-	}
-	user_gids = gids;
-	user_ngids = ngids;
+	/* parse_gid_list() will call fatalx() on error. */
+	user_ngids = parse_gid_list(groups, &user_gid, &user_gids);
     }
 
     /* Stash initial umask for later use. */

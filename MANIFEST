@@ -15,6 +15,7 @@ common/atoid.c
 common/error.c
 common/fileops.c
 common/fmt_string.c
+common/gidlist.c
 common/lbuf.c
 common/list.c
 common/regress/sudo_conf/conf_test.c

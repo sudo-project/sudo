@@ -373,6 +373,9 @@ int group_plugin_query(const char *user, const char *group,
 /* setgroups.c */
 int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
 
+/* gidlist.c */
+int parse_gid_list(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
+
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;
 extern struct passwd *list_pw;
