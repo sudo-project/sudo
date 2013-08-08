@@ -40,7 +40,7 @@
 #include <errno.h>
 #include <limits.h>
 
-#define DEFAULT_TEXT_DOMAIN	"sudoers"
+#define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "gettext.h"
 
 #include "missing.h"
