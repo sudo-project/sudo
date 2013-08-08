@@ -611,7 +611,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 'r':
 		if (strncmp("runas_egid=", info[i], sizeof("runas_egid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_egid=") - 1;
-		    id = atoid(cp, &errstr);
+		    id = atoid(cp, NULL, NULL, &errstr);
 		    if (errstr != NULL) {
 			warningx(_("%s: %s"), info[i], _(errstr));
 		    } else {
@@ -622,7 +622,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		if (strncmp("runas_euid=", info[i], sizeof("runas_euid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_euid=") - 1;
-		    id = atoid(cp, &errstr);
+		    id = atoid(cp, NULL, NULL, &errstr);
 		    if (errstr != NULL) {
 			warningx(_("%s: %s"), info[i], _(errstr));
 		    } else {
@@ -633,7 +633,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		if (strncmp("runas_gid=", info[i], sizeof("runas_gid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_gid=") - 1;
-		    id = atoid(cp, &errstr);
+		    id = atoid(cp, NULL, NULL, &errstr);
 		    if (errstr != NULL) {
 			warningx(_("%s: %s"), info[i], _(errstr));
 		    } else {
@@ -660,7 +660,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 			    emalloc2(details->ngroups, sizeof(GETGROUPS_T));
 			cp = info[i] + sizeof("runas_groups=") - 1;
 			for (j = 0; j < details->ngroups;) {
-			    id = atoid(cp, &errstr);
+			    id = atoid(cp, ",", &ep, &errstr);
 			    if (errstr != NULL) {
 				warningx(_("%s: %s"), cp, _(errstr));
 				break;
@@ -674,7 +674,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		if (strncmp("runas_uid=", info[i], sizeof("runas_uid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_uid=") - 1;
-		    id = atoid(cp, &errstr);
+		    id = atoid(cp, NULL, NULL, &errstr);
 		    if (errstr != NULL) {
 			warningx(_("%s: %s"), info[i], _(errstr));
 		    } else {

@@ -103,14 +103,14 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    }
 	    if (MATCHES(*cur, "sudoers_uid=")) {
 		p = *cur + sizeof("sudoers_uid=") - 1;
-		sudoers_uid = (uid_t) atoid(p, &errstr);
+		sudoers_uid = (uid_t) atoid(p, NULL, NULL, &errstr);
 		if (errstr != NULL)
 		    fatalx("%s: %s", *cur, _(errstr));
 		continue;
 	    }
 	    if (MATCHES(*cur, "sudoers_gid=")) {
 		p = *cur + sizeof("sudoers_gid=") - 1;
-		sudoers_gid = (gid_t) atoid(p, &errstr);
+		sudoers_gid = (gid_t) atoid(p, NULL, NULL, &errstr);
 		if (errstr != NULL)
 		    fatalx("%s: %s", *cur, _(errstr));
 		continue;
@@ -261,14 +261,14 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	}
 	if (MATCHES(*cur, "uid=")) {
 	    p = *cur + sizeof("uid=") - 1;
-	    user_uid = (uid_t) atoid(p, &errstr);
+	    user_uid = (uid_t) atoid(p, NULL, NULL, &errstr);
 	    if (errstr != NULL)
 		fatalx("%s: %s", *cur, _(errstr));
 	    continue;
 	}
 	if (MATCHES(*cur, "gid=")) {
 	    p = *cur + sizeof("gid=") - 1;
-	    user_gid = (gid_t) atoid(p, &errstr);
+	    user_gid = (gid_t) atoid(p, NULL, NULL, &errstr);
 	    if (errstr != NULL)
 		fatalx("%s: %s", *cur, _(errstr));
 	    continue;
@@ -303,7 +303,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	}
 	if (MATCHES(*cur, "sid=")) {
 	    p = *cur + sizeof("sid=") - 1;
-	    sudo_user.sid = (pid_t) atoid(p, &errstr);
+	    sudo_user.sid = (pid_t) atoid(p, NULL, NULL, &errstr);
 	    if (errstr != NULL)
 		fatalx("%s: %s", *cur, _(errstr));
 	    continue;

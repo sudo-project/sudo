@@ -32,6 +32,11 @@
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif
 #include <errno.h>
 #include <limits.h>
 
@@ -42,16 +47,26 @@
 #include "sudo_debug.h"
 
 id_t
-atoid(const char *p, const char **errstr)
+atoid(const char *p, const char *sep, char **endp, const char **errstr)
 {
     char *ep;
     id_t rval = 0;
+    bool valid = false;
     debug_decl(atoid, SUDO_DEBUG_UTIL)
 
+    if (sep == NULL)
+	sep = "";
     errno = 0;
     if (*p == '-') {
 	long lval = strtol(p, &ep, 10);
-	if (ep == p || *ep != '\0') {
+	if (ep != p) {
+	    /* check for valid separator (including '\0') */
+	    do {
+		if (*ep == *sep)
+		    valid = true;
+	    } while (*sep++ != '\0');
+	}
+	if (!valid) {
 	    *errstr = N_("invalid value");
 	    errno = EINVAL;
 	    goto done;
@@ -66,7 +81,14 @@ atoid(const char *p, const char **errstr)
 	*errstr = NULL;
     } else {
 	unsigned long ulval = strtoul(p, &ep, 10);
-	if (ep == p || *ep != '\0') {
+	if (ep != p) {
+	    /* check for valid separator (including '\0') */
+	    do {
+		if (*ep == *sep)
+		    valid = true;
+	    } while (*sep++ != '\0');
+	}
+	if (!valid) {
 	    *errstr = N_("invalid value");
 	    errno = EINVAL;
 	    goto done;
@@ -79,6 +101,8 @@ atoid(const char *p, const char **errstr)
 	rval = (id_t)ulval;
 	*errstr = NULL;
     }
+    if (endp != NULL)
+	*endp = ep;
 done:
     debug_return_int(rval);
 }

@@ -188,7 +188,7 @@ char *fmt_string(const char *var, const char *value);
 bool atobool(const char *str);
 
 /* atoid.c */
-id_t atoid(const char *str, const char **errstr);
+id_t atoid(const char *str, const char *sep, char **endp, const char **errstr);
 
 /* parse_args.c */
 int parse_args(int argc, char **argv, int *nargc, char ***nargv,
