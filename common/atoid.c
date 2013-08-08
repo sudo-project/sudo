@@ -46,6 +46,13 @@
 #include "missing.h"
 #include "sudo_debug.h"
 
+/*
+ * Parse a uid/gid in string form.
+ * If sep is non-NULL, it contains valid separator characters (e.g. comma, space)
+ * If endp is non-NULL it is set to the next char after the ID.
+ * On success, returns the parsed ID and clears errstr.
+ * On error, returns 0 and sets errstr.
+ */
 id_t
 atoid(const char *p, const char *sep, char **endp, const char **errstr)
 {
