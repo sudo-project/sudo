@@ -137,7 +137,7 @@ lbuf_append_quoted(lbuf, set, fmt, va_alist)
 	if (lbuf->len + (len * 2) + 1 >= lbuf->size) {
 	    do {
 		lbuf->size += 256;
-	    } while (lbuf->len + len + 1 >= lbuf->size);
+	    } while (lbuf->len + (len * 2) + 1 >= lbuf->size);
 	    lbuf->buf = erealloc(lbuf->buf, lbuf->size);
 	}
 	if (*fmt == '%') {
