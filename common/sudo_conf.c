@@ -181,7 +181,7 @@ set_var_max_groups(const char *entry, const char *conf_file)
     char *ep;
 
     lval = strtol(entry, &ep, 10);
-    if (*entry == '\0' || *ep != '\0' || lval < 0 || lval > INT_MAX ||
+    if (*entry == '\0' || *ep != '\0' || lval <= 0 || lval > INT_MAX ||
 	(errno == ERANGE && lval == LONG_MAX)) {
 	warningx(_("invalid max groups `%s' in %s, line %d"), entry,
 		    conf_file, conf_lineno);

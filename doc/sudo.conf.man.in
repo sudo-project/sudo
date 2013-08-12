@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO" "5" "March 14, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO" "5" "August 12, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -367,6 +367,7 @@ version 1.8.7 and higher.
 .TP 10n
 max_groups
 The maximum number of user groups to retrieve from the group database.
+Values less than one will be ignored.
 This setting is only used when querying the group database directly.
 It is intended to be used on systems where it is not possible to detect
 when the array to be populated with group entries is not sufficiently large.

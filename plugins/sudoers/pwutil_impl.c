@@ -243,7 +243,7 @@ sudo_make_grlist_item(struct passwd *pw, char * const *unused1,
 	user_gids = NULL;
 	user_ngids = 0;
     } else {
-	if (sudo_user.max_groups != -1) {
+	if (sudo_user.max_groups > 0) {
 	    ngids = sudo_user.max_groups;
 	    gids = emalloc2(ngids, sizeof(GETGROUPS_T));
 	    (void)getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids);

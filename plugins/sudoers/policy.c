@@ -134,7 +134,6 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 
     /* Parse command line settings. */
     user_closefrom = -1;
-    sudo_user.max_groups = -1;
     for (cur = info->settings; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "closefrom=")) {
 	    user_closefrom = atoi(*cur + sizeof("closefrom=") - 1);

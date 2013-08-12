@@ -354,7 +354,7 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
      * trying getgrouplist() until we have enough room in the array.
      */
     ud->ngroups = sudo_conf_max_groups();
-    if (ud->ngroups != -1) {
+    if (ud->ngroups > 0) {
 	ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
 	/* No error on insufficient space if user specified max_groups. */
 	(void)getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);

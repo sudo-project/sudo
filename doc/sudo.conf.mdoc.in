@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd March 14, 2013
+.Dd August 12, 2013
 .Dt SUDO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -327,6 +327,7 @@ This setting is only available in
 version 1.8.7 and higher.
 .It max_groups
 The maximum number of user groups to retrieve from the group database.
+Values less than one will be ignored.
 This setting is only used when querying the group database directly.
 It is intended to be used on systems where it is not possible to detect
 when the array to be populated with group entries is not sufficiently large.
