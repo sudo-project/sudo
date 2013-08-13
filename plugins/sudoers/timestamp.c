@@ -73,12 +73,14 @@ build_timestamp(struct passwd *pw)
     debug_decl(build_timestamp, SUDO_DEBUG_AUTH)
 
     /* Stash the tty's device, session ID and ctime for ticket comparison. */
-    if (def_tty_tickets && user_ttypath && stat(user_ttypath, &sb) == 0) {
-	tty_info.dev = sb.st_dev;
-	tty_info.ino = sb.st_ino;
-	tty_info.rdev = sb.st_rdev;
-	tty_info.uid = sb.st_uid;
-	tty_info.gid = sb.st_gid;
+    if (def_tty_tickets) {
+	if (user_ttypath && stat(user_ttypath, &sb) == 0) {
+	    tty_info.dev = sb.st_dev;
+	    tty_info.ino = sb.st_ino;
+	    tty_info.rdev = sb.st_rdev;
+	    tty_info.uid = sb.st_uid;
+	    tty_info.gid = sb.st_gid;
+	}
 	tty_info.sid = user_sid;
     }
 
@@ -94,18 +96,28 @@ build_timestamp(struct passwd *pw)
      * the directory as the timestamp.
      */
     if (def_tty_tickets) {
+	char pidbuf[sizeof("pid") + (((sizeof(pid_t) * 8) + 2) / 3)];
 	char *p;
 
-	if ((p = strrchr(user_tty, '/')))
+	if (user_ttypath == NULL) {
+	    /* No tty, use parent pid. */
+	    len = snprintf(pidbuf, sizeof(pidbuf), "pid%u",
+		(unsigned int)getppid());
+	    if (len <= 0 || len >= sizeof(pidbuf))
+		goto bad;
+	    p = pidbuf;
+	} else if ((p = strrchr(user_tty, '/'))) {
 	    p++;
-	else
+	} else {
 	    p = user_tty;
-	if (def_targetpw)
+	}
+	if (def_targetpw) {
 	    len = snprintf(timestampfile, sizeof(timestampfile), "%s/%s/%s:%s",
 		dirparent, user_name, p, runas_pw->pw_name);
-	else
+	} else {
 	    len = snprintf(timestampfile, sizeof(timestampfile), "%s/%s/%s",
 		dirparent, user_name, p);
+	}
 	if (len <= 0 || len >= sizeof(timestampfile))
 	    goto bad;
     } else if (def_targetpw) {
@@ -131,10 +143,6 @@ bool
 update_timestamp(struct passwd *pw)
 {
     debug_decl(update_timestamp, SUDO_DEBUG_AUTH)
-
-    /* If using tty timestamps but we have no tty there is nothing to do. */
-    if (def_tty_tickets && !user_ttypath)
-	debug_return_bool(false);
 
     if (timestamp_uid != 0)
 	set_perms(PERM_TIMESTAMP);
@@ -270,8 +278,6 @@ timestamp_status_internal(bool removing)
     if (*timestampfile && status != TS_ERROR) {
 	if (status != TS_MISSING)
 	    status = TS_NOFILE;			/* dir there, file missing */
-	if (def_tty_tickets && !user_ttypath)
-	    goto done;				/* no tty, always prompt */
 	if (lstat(timestampfile, &sb) == 0) {
 	    if (!S_ISREG(sb.st_mode)) {
 		status = TS_ERROR;
