@@ -640,7 +640,7 @@ send_mail(const char *fmt, ...)
 	case 0:
 	    {
 		char *argv[MAX_MAILFLAGS + 1];
-		char *mpath, *mflags;
+		char *mflags, *mpath = def_mailerpath;
 		int i;
 
 		/* Child, set stdin to output side of the pipe */
@@ -657,8 +657,7 @@ send_mail(const char *fmt, ...)
 
 		/* Build up an argv based on the mailer path and flags */
 		mflags = estrdup(def_mailerflags);
-		mpath = estrdup(def_mailerpath);
-		if ((argv[0] = strrchr(mpath, ' ')))
+		if ((argv[0] = strrchr(mpath, '/')))
 		    argv[0]++;
 		else
 		    argv[0] = mpath;
