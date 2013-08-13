@@ -542,6 +542,7 @@ send_mail(const char *fmt, ...)
     int fd, pfd[2], status;
     pid_t pid, rv;
     sigaction_t sa;
+    struct stat sb;
     va_list ap;
 #ifndef NO_ROOT_MAILER
     static char *root_envp[] = {
@@ -557,6 +558,10 @@ send_mail(const char *fmt, ...)
 
     /* Just return if mailer is disabled. */
     if (!def_mailerpath || !def_mailto)
+	debug_return;
+
+    /* Make sure the mailer exists and is a regular file. */
+    if (stat(def_mailerpath, &sb) != 0 || !S_ISREG(sb.st_mode))
 	debug_return;
 
     /* Fork and return, child will daemonize. */
