@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO" "5" "August 12, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO" "5" "August 13, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -111,9 +111,12 @@ in the plugin shared object.
 The
 \fIpath\fR
 may be fully qualified or relative.
-If not fully qualified, it is relative to the
-\fI@PLUGINDIR@\fR
-directory.
+If not fully qualified, it is relative to the directory
+specified by the
+\fIplugin_dir\fR
+\fRPath\fR
+setting, which defaults to
+\fI@PLUGINDIR@\fR.
 In other words:
 .nf
 .sp
@@ -224,6 +227,12 @@ functionality on systems that support
 or its equivalent.
 The default value is:
 \fI@noexec_file@\fR.
+.TP 10n
+plugin_dir
+The default directory to use when searching for plugins
+that are specified without a fully qualified path name.
+The default value is
+\fI@PLUGINDIR@\fR.
 .TP 10n
 sesh
 The fully-qualified path to the

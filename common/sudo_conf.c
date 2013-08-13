@@ -110,7 +110,7 @@ static struct sudo_conf_data {
     int group_source;
     int max_groups;
     const char *debug_flags;
-    struct sudo_conf_paths paths[4];
+    struct sudo_conf_paths paths[5];
     struct plugin_info_list plugins;
 } sudo_conf_data = {
     true,
@@ -125,6 +125,10 @@ static struct sudo_conf_data {
 #ifdef _PATH_SUDO_NOEXEC
 #define SUDO_CONF_NOEXEC_IDX	2
 	{ "noexec", sizeof("noexec") - 1, _PATH_SUDO_NOEXEC },
+#endif
+#ifdef _PATH_SUDO_PLUGIN_DIR
+#define SUDO_CONF_PLUGIN_IDX	3
+	{ "plugin", sizeof("plugin") - 1, _PATH_SUDO_PLUGIN_DIR },
 #endif
 	{ NULL }
     }
@@ -321,6 +325,14 @@ const char *
 sudo_conf_noexec_path(void)
 {
     return sudo_conf_data.paths[SUDO_CONF_NOEXEC_IDX].pval;
+}
+#endif
+
+#ifdef _PATH_SUDO_PLUGIN_DIR
+const char *
+sudo_conf_plugin_dir_path(void)
+{
+    return sudo_conf_data.paths[SUDO_CONF_PLUGIN_IDX].pval;
 }
 #endif
 

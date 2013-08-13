@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd August 12, 2013
+.Dd August 13, 2013
 .Dt SUDO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -107,9 +107,12 @@ in the plugin shared object.
 The
 .Em path
 may be fully qualified or relative.
-If not fully qualified, it is relative to the
-.Pa @PLUGINDIR@
-directory.
+If not fully qualified, it is relative to the directory
+specified by the
+.Em plugin_dir
+.Li Path
+setting, which defaults to
+.Pa @PLUGINDIR@ .
 In other words:
 .Bd -literal -offset indent
 Plugin sudoers_policy sudoers.so
@@ -204,6 +207,11 @@ functionality on systems that support
 or its equivalent.
 The default value is:
 .Pa @noexec_file@ .
+.It plugin_dir
+The default directory to use when searching for plugins
+that are specified without a fully qualified path name.
+The default value is
+.Pa @PLUGINDIR@ .
 .It sesh
 The fully-qualified path to the
 .Nm sesh

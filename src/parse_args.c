@@ -495,7 +495,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
      * Format setting_pairs into settings array.
      */
 #ifdef _PATH_SUDO_PLUGIN_DIR
-    sudo_settings[ARG_PLUGIN_DIR].value = _PATH_SUDO_PLUGIN_DIR;
+    sudo_settings[ARG_PLUGIN_DIR].value = sudo_conf_plugin_dir_path();
 #endif
     settings = emalloc2(NUM_SETTINGS + 1, sizeof(char *));
     for (i = 0, j = 0; i < NUM_SETTINGS; i++) {
