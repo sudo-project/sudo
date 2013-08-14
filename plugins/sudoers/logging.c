@@ -200,19 +200,23 @@ do_logfile(char *msg)
 	time(&now);
 	if (def_loglinelen < sizeof(LOG_INDENT)) {
 	    /* Don't pretty-print long log file lines (hard to grep) */
-	    if (def_log_host)
+	    if (def_log_host) {
 		(void) fprintf(fp, "%s : %s : HOST=%s : %s\n",
-		    get_timestr(now, def_log_year), user_name, user_shost, msg);
-	    else
+		    get_timestr(now, def_log_year), user_name, user_srunhost,
+		    msg);
+	    } else {
 		(void) fprintf(fp, "%s : %s : %s\n",
 		    get_timestr(now, def_log_year), user_name, msg);
+	    }
 	} else {
-	    if (def_log_host)
+	    if (def_log_host) {
 		len = easprintf(&full_line, "%s : %s : HOST=%s : %s",
-		    get_timestr(now, def_log_year), user_name, user_shost, msg);
-	    else
+		    get_timestr(now, def_log_year), user_name, user_srunhost,
+		    msg);
+	    } else {
 		len = easprintf(&full_line, "%s : %s : %s",
 		    get_timestr(now, def_log_year), user_name, msg);
+	    }
 
 	    /*
 	     * Print out full_line with word wrap around def_loglinelen chars.
@@ -290,10 +294,10 @@ log_denial(int status, bool inform_user)
 	} else if (ISSET(status, FLAG_NO_HOST)) {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s is not allowed to run sudo "
 		"on %s.  This incident will be reported.\n"),
-		user_name, user_shost);
+		user_name, user_srunhost);
 	} else if (ISSET(status, FLAG_NO_CHECK)) {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("Sorry, user %s may not run "
-		"sudo on %s.\n"), user_name, user_shost);
+		"sudo on %s.\n"), user_name, user_srunhost);
 	} else {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("Sorry, user %s is not allowed "
 		"to execute '%s%s%s' as %s%s%s on %s.\n"),

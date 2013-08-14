@@ -348,6 +348,9 @@ if the security policy plugin supports remote commands.
 Note that the
 \fIsudoers\fR
 plugin does not currently support running remote commands.
+This may also be used in conjunction with the
+\fB\-l\fR
+option to list a user's privileges for the remote host.
 .TP 12n
 \fB\-i\fR, \fB\--login\fR
 Run the shell specified by the target user's password database entry

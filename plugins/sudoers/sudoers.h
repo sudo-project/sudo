@@ -68,6 +68,8 @@ struct sudo_user {
     char *ttypath;
     char *host;
     char *shost;
+    char *runhost;
+    char *srunhost;
     char *prompt;
     char *cmnd;
     char *cmnd_args;
@@ -192,6 +194,8 @@ struct sudo_user {
 #define user_prompt		(sudo_user.prompt)
 #define user_host		(sudo_user.host)
 #define user_shost		(sudo_user.shost)
+#define user_runhost		(sudo_user.runhost)
+#define user_srunhost		(sudo_user.srunhost)
 #define user_ccname		(sudo_user.krb5_ccname)
 #define safe_cmnd		(sudo_user.cmnd_safe)
 #define login_class		(sudo_user.class_name)

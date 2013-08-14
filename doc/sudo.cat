@@ -153,6 +153,8 @@ DDEESSCCRRIIPPTTIIOONN
                  Run the command on the specified _h_o_s_t if the security policy
                  plugin supports remote commands.  Note that the _s_u_d_o_e_r_s
                  plugin does not currently support running remote commands.
+                 This may also be used in conjunction with the --ll option to
+                 list a user's privileges for the remote host.
 
      --ii, ----llooggiinn
                  Run the shell specified by the target user's password

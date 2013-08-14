@@ -89,6 +89,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     char * const *cur;
     const char *p, *errstr, *groups = NULL;
     const char *debug_flags = NULL;
+    const char *remhost = NULL;
     int flags = 0;
     debug_decl(sudoers_policy_deserialize_info, SUDO_DEBUG_PLUGIN)
 
@@ -251,6 +252,10 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    sudo_user.max_groups = atoi(*cur + sizeof("max_groups=") - 1);
 	    continue;
 	}
+	if (MATCHES(*cur, "remote_host=")) {
+	    remhost = *cur + sizeof("remote_host=") - 1;
+	    continue;
+	}
     }
 
     for (cur = info->user_info; *cur != NULL; cur++) {
@@ -308,6 +313,9 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
     }
+    user_runhost = user_srunhost = estrdup(remhost ? remhost : user_host);
+    if ((p = strchr(user_runhost, '.')))
+	user_srunhost = estrndup(user_runhost, (size_t)(p - user_runhost));
     if (user_cwd == NULL)
 	user_cwd = "unknown";
     if (user_tty == NULL)

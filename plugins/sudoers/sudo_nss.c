@@ -262,7 +262,7 @@ output(const char *buf)
 
 /*
  * Print out privileges for the specified user.
- * We only get here if the user is allowed to run something on this host.
+ * We only get here if the user is allowed to run something.
  */
 void
 display_privs(struct sudo_nss_list *snl, struct passwd *pw)
@@ -280,8 +280,8 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
     lbuf_init(&privs, output, 8, NULL, cols);
 
     /* Display defaults from all sources. */
-    lbuf_append(&defs, _("Matching Defaults entries for %s on this host:\n"),
-	pw->pw_name);
+    lbuf_append(&defs, _("Matching Defaults entries for %s on %s:\n"),
+	pw->pw_name, user_srunhost);
     count = 0;
     tq_foreach_fwd(snl, nss) {
 	count += nss->display_defaults(nss, pw, &defs);
@@ -306,8 +306,8 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 
     /* Display privileges from all sources. */
     lbuf_append(&privs,
-	_("User %s may run the following commands on this host:\n"),
-	pw->pw_name);
+	_("User %s may run the following commands on %s:\n"),
+	pw->pw_name, user_srunhost);
     count = 0;
     tq_foreach_fwd(snl, nss) {
 	count += nss->display_privs(nss, pw, &privs);
