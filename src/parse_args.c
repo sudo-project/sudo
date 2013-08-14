@@ -210,7 +210,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	sudo_settings[ARG_MAX_GROUPS].value = cp;
     }
 
-    /* Returns true if the last option string was "--" */
+    /* Returns true if the last option string was "-h" */
 #define got_host_flag	(optind > 1 && argv[optind - 1][0] == '-' && \
 	    argv[optind - 1][1] == 'h' && argv[optind - 1][2] == '\0')
 
@@ -275,6 +275,16 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    break;
 		case 'h':
 		    if (optarg == NULL) {
+			/*
+			 * Optional args support -hhostname, not -h hostname.
+			 * If we see a non-option after the -h flag, treat as
+			 * remote host and bump optind to skip over it.
+			 */
+			if (got_host_flag && !is_envar &&
+			    argv[optind] != NULL && argv[optind][0] != '-') {
+			    sudo_settings[ARG_REMOTE_HOST].value = argv[optind++];
+			    continue;
+			}
 			if (mode && mode != MODE_HELP) {
 			    if (strcmp(getprogname(), "sudoedit") != 0)
 				usage_excl(1);
@@ -358,18 +368,6 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		default:
 		    usage(1);
 	    }
-	} else if (got_host_flag && optind < argc) {
-	    /*
-	     * Optional args only support -hhostname, not -h hostname.
-	     * If we see a non-option after the -h flag, treat as
-	     * remote host, clear help mode and reset valid_flags.
-	     */
-	    mode = 0;
-	    valid_flags = DEFAULT_VALID_FLAGS;
-	    sudo_settings[ARG_REMOTE_HOST].value = argv[optind];
-
-	    /* Crank optind and resume getopt. */
-	    optind++;
 	} else if (!got_end_of_args && is_envar) {
 	    if (nenv == env_size - 2) {
 		env_size *= 2;
