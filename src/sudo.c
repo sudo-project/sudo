@@ -752,22 +752,50 @@ command_info_to_details(char * const info[], struct command_details *details)
 }
 
 static void
-sudo_check_suid(const char *path)
+sudo_check_suid(const char *sudo)
 {
+    char pathbuf[PATH_MAX];
     struct stat sb;
+    bool qualified;
     debug_decl(sudo_check_suid, SUDO_DEBUG_PCOMM)
 
     if (geteuid() != 0) {
-	if (strchr(path, '/') != NULL && stat(path, &sb) == 0) {
+	/* Search for sudo binary in PATH if not fully qualified. */
+	qualified = strchr(sudo, '/') != NULL;
+	if (!qualified) {
+	    char *path = getenv_unhooked("PATH");
+	    if (path != NULL) {
+		int len;
+		char *cp, *colon;
+
+		cp = path = estrdup(path);
+		do {
+		    if ((colon = strchr(cp, ':')))
+			*colon = '\0';
+		    len = snprintf(pathbuf, sizeof(pathbuf), "%s/%s", cp, sudo);
+		    if (len <= 0 || len >= sizeof(pathbuf))
+			continue;
+		    if (access(pathbuf, X_OK) == 0) {
+			sudo = pathbuf;
+			qualified = true;
+			break;
+		    }
+		    cp = colon + 1;
+		} while (colon);
+		efree(path);
+	    }
+	}
+
+	if (qualified && stat(sudo, &sb) == 0) {
 	    /* Try to determine why sudo was not running as root. */
 	    if (sb.st_uid != ROOT_UID || !ISSET(sb.st_mode, S_ISUID)) {
 		fatalx(
 		    _("%s must be owned by uid %d and have the setuid bit set"),
-		    path, ROOT_UID);
+		    sudo, ROOT_UID);
 	    } else {
 		fatalx(_("effective uid is not %d, is %s on a file system "
 		    "with the 'nosuid' option set or an NFS file system without"
-		    " root privileges?"), ROOT_UID, path);
+		    " root privileges?"), ROOT_UID, sudo);
 	    }
 	} else {
 	    fatalx(
