@@ -1192,10 +1192,10 @@ static void
 usage(int fatal)
 {
     fprintf(fatal ? stderr : stdout,
-	_("usage: %s [-h] [-d directory] [-m max_wait] [-s speed_factor] ID\n"),
+	_("usage: %s [-h] [-d dir] [-m num] [-s num] ID\n"),
 	getprogname());
     fprintf(fatal ? stderr : stdout,
-	_("usage: %s [-h] [-d directory] -l [search expression]\n"),
+	_("usage: %s [-h] [-d dir] -l [search expression]\n"),
 	getprogname());
     if (fatal)
 	exit(1);
@@ -1207,13 +1207,13 @@ help(void)
     (void) printf(_("%s - replay sudo session logs\n\n"), getprogname());
     usage(0);
     (void) puts(_("\nOptions:\n"
-	"  -d, --directory directory  specify directory for session logs\n"
-	"  -f, --filter filter        specify which I/O type to display\n"
-	"  -h, --help                 display help message and exit\n"
-	"  -l, --list [expression]    list available session IDs that match expression\n"
-	"  -m, --max-wait max_wait    max number of seconds to wait between events\n"
-	"  -s, --speed speed_factor   speed up or slow down output\n"
-	"  -V, --version              display version information and exit"));
+	"  -d, --directory=DIR  specify directory for session logs\n"
+	"  -f, --filter=FILTER  specify which I/O type(s) to display\n"
+	"  -h, --help           display help message and exit\n"
+	"  -l, --list           list available session IDs, with optional expression\n"
+	"  -m, --max-wait=NUM   max number of seconds to wait between events\n"
+	"  -s, --speed=NUM      speed up or slow down output\n"
+	"  -V, --version        display version information and exit"));
     exit(0);
 }
 

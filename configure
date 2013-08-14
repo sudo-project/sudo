@@ -15916,7 +15916,7 @@ if test "x$ac_cv_header_login_cap_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_LOGIN_CAP_H 1
 _ACEOF
- LOGINCAP_USAGE='[-c class|-] '; LCMAN=1
+ LOGINCAP_USAGE='[-c class] '; LCMAN=1
 	case "$OS" in
 	    freebsd|netbsd)
 		SUDO_LIBS="${SUDO_LIBS} -lutil"
@@ -18983,7 +18983,7 @@ if test "x$ac_cv_header_bsd_auth_h" = xyes; then :
   $as_echo "#define HAVE_BSD_AUTH_H 1" >>confdefs.h
 
 	AUTH_OBJS="$AUTH_OBJS bsdauth.lo"
-	BSDAUTH_USAGE='[-a auth_type] '
+	BSDAUTH_USAGE='[-a type] '
 	AUTH_EXCL=BSD_AUTH; BAMAN=1
 else
   as_fn_error $? "BSD authentication was specified but bsd_auth.h could not be found" "$LINENO" 5

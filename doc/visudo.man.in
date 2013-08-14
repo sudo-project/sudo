@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "July 17, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "August 14, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -143,11 +143,11 @@ If an error is encountered,
 \fBvisudo\fR
 will exit with a value of 1.
 .TP 12n
-\fB\-f\fR, \fB\--file\fR \fIsudoers\fR
+\fB\-f\fR \fIsudoers\fR, \fB\--file\fR=\fIsudoers\fR
 Specify an alternate
 \fIsudoers\fR
 file location.
-With this option
+With this option,
 \fBvisudo\fR
 will edit (or check) the
 \fIsudoers\fR
@@ -170,12 +170,7 @@ indicating that
 will be read from the standard input.
 .TP 12n
 \fB\-h\fR, \fB\--help\fR
-The
-\fB\-h\fR (\fIhelp\fR)
-option causes
-\fBvisudo\fR
-to print a short help message
-to the standard output and exit.
+Display a short help message to the standard output and exit.
 .TP 12n
 \fB\-q\fR, \fB\--quiet\fR
 Enable
@@ -203,12 +198,11 @@ letters, digits, and the underscore
 character.
 .TP 12n
 \fB\-V\fR, \fB\--version\fR
-The
-\fB\-V\fR (\fIversion\fR)
-option causes
+Print the
 \fBvisudo\fR
-to print its version number
-and exit.
+and
+\fIsudoers\fR
+grammar versions and exit.
 .SH "ENVIRONMENT"
 The following environment variables may be consulted depending on
 the value of the

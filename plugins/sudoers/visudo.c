@@ -1308,11 +1308,11 @@ help(void)
     (void) printf(_("%s - safely edit the sudoers file\n\n"), getprogname());
     usage(0);
     (void) puts(_("\nOptions:\n"
-	"  -c, --check         check-only mode\n"
-	"  -f, --file sudoers  specify sudoers file location\n"
-	"  -h, --help          display help message and exit\n"
-	"  -q, --quiet         less verbose (quiet) syntax error messages\n"
-	"  -s, --strict        strict syntax checking\n"
-	"  -V, --version       display version information and exit"));
+	"  -c, --check      check-only mode\n"
+	"  -f, --file=FILE  specify sudoers file location\n"
+	"  -h, --help       display help message and exit\n"
+	"  -q, --quiet      less verbose (quiet) syntax error messages\n"
+	"  -s, --strict     strict syntax checking\n"
+	"  -V, --version    display version information and exit"));
     exit(0);
 }

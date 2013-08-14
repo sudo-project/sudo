@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd July 17, 2013
+.Dd August 14, 2013
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -141,11 +141,11 @@ will exit with a value of 0.
 If an error is encountered,
 .Nm visudo
 will exit with a value of 1.
-.It Fl f , -file Ar sudoers
+.It Fl f Ar sudoers , Fl -file Ns No = Ns Ar sudoers
 Specify an alternate
 .Em sudoers
 file location.
-With this option
+With this option,
 .Nm visudo
 will edit (or check) the
 .Em sudoers
@@ -167,12 +167,7 @@ indicating that
 .Em sudoers
 will be read from the standard input.
 .It Fl h , -help
-The
-.Fl h No ( Em help Ns No )
-option causes
-.Nm visudo
-to print a short help message
-to the standard output and exit.
+Display a short help message to the standard output and exit.
 .It Fl q , -quiet
 Enable
 .Em quiet
@@ -197,12 +192,11 @@ letters, digits, and the underscore
 .Pq Ql _
 character.
 .It Fl V , -version
-The
-.Fl V ( Em version Ns No )
-option causes
+Print the
 .Nm visudo
-to print its version number
-and exit.
+and
+.Em sudoers
+grammar versions and exit.
 .El
 .Sh ENVIRONMENT
 The following environment variables may be consulted depending on

@@ -33,7 +33,7 @@ case "$OUTFILE" in
 	# BSD auth
 	BA_FLAG=
 	if [ X"$BAMAN" != X"1" ]; then
-		BA_FLAG='/^.*\n\.Op Fl a Ar auth_type/{;N;/^.*\n\.Ek$/d;};'
+		BA_FLAG='/^.*\n\.Op Fl a Ar type/{;N;/^.*\n\.Ek$/d;};'
 		cat >>"$OUTFILE" <<-'EOF'
 			/^\.It Fl a Ar type/,/BSD authentication\.$/ {
 				d
@@ -65,7 +65,7 @@ case "$OUTFILE" in
 			/^\.It Fl r Ar role/,/^\.Ar role \.$/ {
 				d
 			}
-			/^\.It Fl t Ar type/,/specified role\.$/ {
+			/^\.It Fl t Ar type/,/derived from the role\.$/ {
 				d
 			}
 			/^SELinux role and type$/ {

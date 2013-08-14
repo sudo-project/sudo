@@ -910,11 +910,9 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 		flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
 	    }
 	    if (setusercontext(lc, details->pw, details->pw->pw_uid, flags)) {
-		if (details->pw->pw_uid != ROOT_UID) {
-		    warning(_("unable to set user context"));
+		warning(_("unable to set user context"));
+		if (details->pw->pw_uid != ROOT_UID)
 		    goto done;
-		} else
-		    warning(_("unable to set user context"));
 	    }
 	}
 #endif /* HAVE_LOGIN_CAP_H */

@@ -613,68 +613,68 @@ help(void)
     usage(0);
 
     lbuf_append(&lbuf, _("\nOptions:\n"));
-    lbuf_append(&lbuf, "  -A, --askpass               %s",
-	_("use helper program for password prompting\n"));
+    lbuf_append(&lbuf, "  -A, --askpass               %s\n",
+	_("use a helper program for password prompting"));
 #ifdef HAVE_BSD_AUTH_H
-    lbuf_append(&lbuf, "  -a, --auth-type auth_type   %s",
-	_("use specified BSD authentication type\n"));
+    lbuf_append(&lbuf, "  -a, --auth-type=TYPE   %s\n",
+	_("use specified BSD authentication type"));
 #endif
-    lbuf_append(&lbuf, "  -b, --background            %s",
-	_("run command in the background\n"));
-    lbuf_append(&lbuf, "  -C, --close-from fd         %s",
-	_("close all file descriptors >= fd\n"));
+    lbuf_append(&lbuf, "  -b, --background            %s\n",
+	_("run command in the background"));
+    lbuf_append(&lbuf, "  -C, --close-from=NUM        %s\n",
+	_("close all file descriptors >= NUM"));
 #ifdef HAVE_LOGIN_CAP_H
-    lbuf_append(&lbuf, "  -c, --login-class class     %s",
-	_("run command with specified login class\n"));
+    lbuf_append(&lbuf, "  -c, --login-class=CLASS     %s\n",
+	_("run command with the specified BSD login class"));
 #endif
-    lbuf_append(&lbuf, "  -E, --preserve-env          %s",
-	_("preserve user environment when executing command\n"));
-    lbuf_append(&lbuf, "  -e, --edit                  %s",
-	_("edit files instead of running a command\n"));
-    lbuf_append(&lbuf, "  -g, --group group name|#gid %s",
-	_("execute command as the specified group\n"));
-    lbuf_append(&lbuf, "  -H, --set-home              %s",
-	_("set HOME variable to target user's home dir.\n"));
-    lbuf_append(&lbuf, "  -h, --help                  %s",
-	_("display help message and exit\n"));
-    lbuf_append(&lbuf, "  -h, --host remote host      %s",
-	_("run command on specified host (if supported)\n"));
-    lbuf_append(&lbuf, "  -i, --login [command]       %s",
-	_("run a login shell as target user\n"));
-    lbuf_append(&lbuf, "  -K, --remove-timestamp      %s",
-	_("remove timestamp file completely\n"));
-    lbuf_append(&lbuf, "  -k, --reset-timestamp       %s",
-	_("invalidate timestamp file\n"));
-    lbuf_append(&lbuf, "  -l[l], --list [command]     %s",
-	_("list user's available commands\n"));
-    lbuf_append(&lbuf, "  -n, --non-interactive       %s",
-	_("non-interactive mode, will not prompt user\n"));
-    lbuf_append(&lbuf, "  -P, --preserve-groups       %s",
-	_("preserve group vector instead of setting to target's\n"));
-    lbuf_append(&lbuf, "  -p, --prompt prompt         %s",
-	_("use specified password prompt\n"));
+    lbuf_append(&lbuf, "  -E, --preserve-env          %s\n",
+	_("preserve user environment when running command"));
+    lbuf_append(&lbuf, "  -e, --edit                  %s\n",
+	_("edit files instead of running a command"));
+    lbuf_append(&lbuf, "  -g, --group=GROUP           %s\n",
+	_("run command as the specified group name or ID"));
+    lbuf_append(&lbuf, "  -H, --set-home              %s\n",
+	_("set HOME variable to target user's home dir"));
+    lbuf_append(&lbuf, "  -h, --help                  %s\n",
+	_("display help message and exit"));
+    lbuf_append(&lbuf, "  -h, --host=HOST             %s\n",
+	_("run command on HOST (if supported by plugin)"));
+    lbuf_append(&lbuf, "  -i, --login                 %s\n",
+	_("run login shell as the target user; a command may also be specified"));
+    lbuf_append(&lbuf, "  -K, --remove-timestamp      %s\n",
+	_("remove timestamp file completely"));
+    lbuf_append(&lbuf, "  -k, --reset-timestamp       %s\n",
+	_("invalidate timestamp file"));
+    lbuf_append(&lbuf, "  -l, --list                  %s\n",
+	_("list user's privileges or check a specific command; use twice for longer format"));
+    lbuf_append(&lbuf, "  -n, --non-interactive       %s\n",
+	_("non-interactive mode, no prompts are used"));
+    lbuf_append(&lbuf, "  -P, --preserve-groups       %s\n",
+	_("preserve group vector instead of setting to target's"));
+    lbuf_append(&lbuf, "  -p, --prompt=PROMPT         %s\n",
+	_("use the specified password prompt"));
 #ifdef HAVE_SELINUX
-    lbuf_append(&lbuf, "  -r, --role role             %s",
-	_("create SELinux security context with specified role\n"));
+    lbuf_append(&lbuf, "  -r, --role=ROLE             %s\n",
+	_("create SELinux security context with specified role"));
 #endif
-    lbuf_append(&lbuf, "  -S, --stdin                 %s",
-	_("read password from standard input\n"));
-    lbuf_append(&lbuf, "  -s, --shell [command]       %s",
-	_("run a shell as target user\n"));
+    lbuf_append(&lbuf, "  -S, --stdin                 %s\n",
+	_("read password from standard input"));
+    lbuf_append(&lbuf, "  -s, --shell                 %s\n",
+	_("run shell as the target user; a command may also be specified"));
 #ifdef HAVE_SELINUX
-    lbuf_append(&lbuf, "  -t, --type type             %s",
-	_("create SELinux security context with specified role\n"));
+    lbuf_append(&lbuf, "  -t, --type=TYPE             %s\n",
+	_("create SELinux security context with specified type"));
 #endif
-    lbuf_append(&lbuf, "  -U, --other-user user name  %s",
-	_("when listing, list specified user's privileges\n"));
-    lbuf_append(&lbuf, "  -u, --user user name|#uid   %s",
-	_("run command (or edit file) as specified user\n"));
-    lbuf_append(&lbuf, "  -V, --version               %s",
-	_("display version information and exit\n"));
-    lbuf_append(&lbuf, "  -v, --validate              %s",
-	_("update user's timestamp without running a command\n"));
-    lbuf_append(&lbuf, "  --                          %s",
-	_("stop processing command line arguments\n"));
+    lbuf_append(&lbuf, "  -U, --other-user=USER       %s\n",
+	_("in list mode, display privileges for USER"));
+    lbuf_append(&lbuf, "  -u, --user=USER             %s\n",
+	_("run command (or edit file) as specified user name or ID"));
+    lbuf_append(&lbuf, "  -V, --version               %s\n",
+	_("display version information and exit"));
+    lbuf_append(&lbuf, "  -v, --validate              %s\n",
+	_("update user's timestamp without running a command"));
+    lbuf_append(&lbuf, "  --                          %s\n",
+	_("stop processing command line arguments"));
     lbuf_print(&lbuf);
     lbuf_destroy(&lbuf);
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 0);

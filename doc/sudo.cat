@@ -5,16 +5,14 @@ NNAAMMEE
 
 SSYYNNOOPPSSIISS
      ssuuddoo --hh | --KK | --kk | --VV
-     ssuuddoo --vv [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--gg _g_r_o_u_p _n_a_m_e | _#_g_i_d] [--hh _r_e_m_o_t_e _h_o_s_t]
-          [--pp _p_r_o_m_p_t] [--uu _u_s_e_r _n_a_m_e | _#_u_i_d]
-     ssuuddoo --ll[_l] [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--gg _g_r_o_u_p _n_a_m_e | _#_g_i_d] [--hh _r_e_m_o_t_e _h_o_s_t]
-          [--pp _p_r_o_m_p_t] [--UU _u_s_e_r _n_a_m_e] [--uu _u_s_e_r _n_a_m_e | _#_u_i_d] [_c_o_m_m_a_n_d]
-     ssuuddoo [--AAbbEEHHnnPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s | _-]
-          [--gg _g_r_o_u_p _n_a_m_e | _#_g_i_d] [--hh _r_e_m_o_t_e _h_o_s_t] [--pp _p_r_o_m_p_t] [--rr _r_o_l_e]
-          [--tt _t_y_p_e] [--uu _u_s_e_r _n_a_m_e | _#_u_i_d] [VVAARR=_v_a_l_u_e] --ii | --ss [_c_o_m_m_a_n_d]
-     ssuuddooeeddiitt [--AAnnSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s | _-]
-              [--gg _g_r_o_u_p _n_a_m_e | _#_g_i_d] [--hh _r_e_m_o_t_e _h_o_s_t] [--pp _p_r_o_m_p_t]
-              [--uu _u_s_e_r _n_a_m_e | _#_u_i_d] file ...
+     ssuuddoo --vv [--AAkknnSS] [--aa _t_y_p_e] [--gg _g_r_o_u_p] [--hh _h_o_s_t] [--pp _p_r_o_m_p_t] [--uu _u_s_e_r]
+     ssuuddoo --ll [--AAkknnSS] [--aa _t_y_p_e] [--gg _g_r_o_u_p] [--hh _h_o_s_t] [--pp _p_r_o_m_p_t] [--UU _u_s_e_r]
+          [--uu _u_s_e_r] [_c_o_m_m_a_n_d]
+     ssuuddoo [--AAbbEEHHnnPPSS] [--aa _t_y_p_e] [--CC _n_u_m] [--cc _c_l_a_s_s] [--gg _g_r_o_u_p] [--hh _h_o_s_t]
+          [--pp _p_r_o_m_p_t] [--rr _r_o_l_e] [--tt _t_y_p_e] [--uu _u_s_e_r] [VVAARR=_v_a_l_u_e] [--ii | --ss]
+          [_c_o_m_m_a_n_d]
+     ssuuddooeeddiitt [--AAkknnSS] [--aa _t_y_p_e] [--CC _n_u_m] [--cc _c_l_a_s_s] [--gg _g_r_o_u_p] [--hh _h_o_s_t]
+              [--pp _p_r_o_m_p_t] [--uu _u_s_e_r] file ...
 
 DDEESSCCRRIIPPTTIIOONN
      ssuuddoo allows a permitted user to execute a _c_o_m_m_a_n_d as the superuser or
@@ -64,55 +62,50 @@ DDEESSCCRRIIPPTTIIOONN
                  If no askpass program is available, ssuuddoo will exit with an
                  error.
 
-     --aa, ----aauutthh--ttyyppee _a_u_t_h___t_y_p_e
-                 The --aa (_a_u_t_h_e_n_t_i_c_a_t_i_o_n _t_y_p_e) option causes ssuuddoo to use the
-                 specified authentication type when validating the user, as
-                 allowed by _/_e_t_c_/_l_o_g_i_n_._c_o_n_f.  The system administrator may
-                 specify a list of sudo-specific authentication methods by
-                 adding an ``auth-sudo'' entry in _/_e_t_c_/_l_o_g_i_n_._c_o_n_f.  This
-                 option is only available on systems that support BSD
-                 authentication.
+     --aa _t_y_p_e, ----aauutthh--ttyyppee=_t_y_p_e
+                 Use the specified BSD authentication _t_y_p_e when validating the
+                 user, if allowed by _/_e_t_c_/_l_o_g_i_n_._c_o_n_f.  The system
+                 administrator may specify a list of sudo-specific
+                 authentication methods by adding an ``auth-sudo'' entry in
+                 _/_e_t_c_/_l_o_g_i_n_._c_o_n_f.  This option is only available on systems
+                 that support BSD authentication.
 
      --bb, ----bbaacckkggrroouunndd
-                 The --bb (_b_a_c_k_g_r_o_u_n_d) option tells ssuuddoo to run the given
-                 command in the background.  Note that if you use the --bb
-                 option you cannot use shell job control to manipulate the
-                 process.  Most interactive commands will fail to work
-                 properly in background mode.
+                 Run the given command in the background.  Note that it is not
+                 possible to use shell job control to manipulate background
+                 processes started by ssuuddoo.  Most interactive commands will
+                 fail to work properly in background mode.
 
-     --CC, ----cclloossee--ffrroomm _f_d
-                 Normally, ssuuddoo will close all open file descriptors other
-                 than standard input, standard output and standard error.  The
-                 --CC (_c_l_o_s_e _f_r_o_m) option allows the user to specify a starting
-                 point above the standard error (file descriptor three).
-                 Values less than three are not permitted.  The security
-                 policy may restrict the user's ability to use the --CC option.
-                 The _s_u_d_o_e_r_s policy only permits use of the --CC option when the
+     --CC _n_u_m, ----cclloossee--ffrroomm=_n_u_m
+                 Close all file descriptors greater than or equal to _n_u_m
+                 before executing a command.  Values less than three are not
+                 permitted.  By default, ssuuddoo will close all open file
+                 descriptors other than standard input, standard output and
+                 standard error when executing a command.  The security policy
+                 may restrict the user's ability to use this option.  The
+                 _s_u_d_o_e_r_s policy only permits use of the --CC option when the
                  administrator has enabled the _c_l_o_s_e_f_r_o_m___o_v_e_r_r_i_d_e option.
 
-     --cc, ----llooggiinn--ccllaassss _c_l_a_s_s
-                 The --cc (_c_l_a_s_s) option causes ssuuddoo to run the specified
-                 command with resources limited by the specified login class.
-                 The _c_l_a_s_s argument can be either a class name as defined in
-                 _/_e_t_c_/_l_o_g_i_n_._c_o_n_f, or a single `-' character.  Specifying a
-                 _c_l_a_s_s of - indicates that the command should be run
-                 restricted by the default login capabilities for the user the
-                 command is run as.  If the _c_l_a_s_s argument specifies an
-                 existing user class, the command must be run as root, or the
-                 ssuuddoo command must be run from a shell that is already root.
-                 This option is only available on systems with BSD login
-                 classes.
+     --cc _c_l_a_s_s, ----llooggiinn--ccllaassss=_c_l_a_s_s
+                 Run the command with resource limits and scheduling priority
+                 of the specified login _c_l_a_s_s.  The _c_l_a_s_s argument can be
+                 either a class name as defined in _/_e_t_c_/_l_o_g_i_n_._c_o_n_f, or a
+                 single `-' character.  If _c_l_a_s_s is -, the default login class
+                 of the target user will be used.  Otherwise, the command must
+                 be run as root, or ssuuddoo must be run from a shell that is
+                 already root.  If the command is being run as a login shell,
+                 additional _/_e_t_c_/_l_o_g_i_n_._c_o_n_f settings, such as the umask and
+                 environment variables, will be applied if present.  This
+                 option is only available on systems with BSD login classes.
 
      --EE, ----pprreesseerrvvee--eennvv
-                 The --EE (_p_r_e_s_e_r_v_e _e_n_v_i_r_o_n_m_e_n_t) option indicates to the
-                 security policy that the user wishes to preserve their
-                 existing environment variables.  The security policy may
-                 return an error if the --EE option is specified and the user
-                 does not have permission to preserve the environment.
+                 Indicates to the security policy that the user wishes to
+                 preserve their existing environment variables.  The security
+                 policy may return an error if the user does not have
+                 permission to preserve the environment.
 
-     --ee, ----eeddiitt  The --ee (_e_d_i_t) option indicates that, instead of running a
-                 command, the user wishes to edit one or more files.  In lieu
-                 of a command, the string "sudoedit" is used when consulting
+     --ee, ----eeddiitt  Edit one or more files instead of running a command.  In lieu
+                 of a path name, the string "sudoedit" is used when consulting
                  the security policy.  If the user is authorized by the
                  policy, the following steps are taken:
 
@@ -137,99 +130,94 @@ DDEESSCCRRIIPPTTIIOONN
                  version, the user will receive a warning and the edited copy
                  will remain in a temporary file.
 
-     --gg, ----ggrroouupp _g_r_o_u_p
-                 Normally, ssuuddoo runs a command with the primary group set to
-                 the one specified by the password database for the user the
-                 command is being run as (by default, root).  The --gg (_g_r_o_u_p)
-                 option causes ssuuddoo to run the command with the primary group
-                 set to _g_r_o_u_p instead.  To specify a numeric group ID (gid)
-                 instead of a group name, use _#_g_i_d.  When running commands as
-                 a gid, many shells require that the `#' be escaped with a
-                 backslash (`\').  If no --uu option is specified, the command
-                 will be run as the invoking user (not root).  In either case,
-                 the primary group will be set to _g_r_o_u_p.
+     --gg _g_r_o_u_p, ----ggrroouupp=_g_r_o_u_p
+                 Run the command with the primary group set to _g_r_o_u_p instead
+                 of the primary group specified by the target user's password
+                 database entry.  The _g_r_o_u_p may be either a group name or a
+                 numeric group ID (GID) prefixed with the `#' character (e.g.
+                 #0 for GID 0).  When running a command as a GID, many shells
+                 require that the `#' be escaped with a backslash (`\').  If
+                 no --uu option is specified, the command will be run as the
+                 invoking user.  In either case, the primary group will be set
+                 to _g_r_o_u_p.
 
      --HH, ----sseett--hhoommee
-                 The --HH (_H_O_M_E) option requests that the security policy set
-                 the HOME environment variable to the home directory of the
-                 target user (root by default) as specified by the password
-                 database.  Depending on the policy, this may be the default
-                 behavior.
+                 Request that the security policy set the HOME environment
+                 variable to the home directory specified by the target user's
+                 password database entry.  Depending on the policy, this may
+                 be the default behavior.
 
-     --hh, ----hheellpp  The --hh (_h_e_l_p) option causes ssuuddoo will print a short help
-                 message to the standard output and exit.
+     --hh, ----hheellpp  Display a short help message to the standard output and exit.
 
-     --hh, ----hhoosstt _r_e_m_o_t_e _h_o_s_t
-                 If a _r_e_m_o_t_e _h_o_s_t is specified and the policy plugin supports
-                 it, the command will be run on the specified remote host.
-                 Note that the _s_u_d_o_e_r_s plugin does not currently support
-                 running remote commands.
+     --hh _h_o_s_t, ----hhoosstt=_h_o_s_t
+                 Run the command on the specified _h_o_s_t if the security policy
+                 plugin supports remote commands.  Note that the _s_u_d_o_e_r_s
+                 plugin does not currently support running remote commands.
 
-     --ii, ----llooggiinn [_c_o_m_m_a_n_d]
-                 The --ii (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs the shell
-                 specified by the password database entry of the target user
-                 as a login shell.  This means that login-specific resource
-                 files such as _._p_r_o_f_i_l_e or _._l_o_g_i_n will be read by the shell.
-                 If a command is specified, it is passed to the shell for
-                 execution via the shell's --cc option.  If no command is
-                 specified, an interactive shell is executed.  ssuuddoo attempts
-                 to change to that user's home directory before running the
-                 shell.  The security policy shall initialize the environment
-                 to a minimal set of variables, similar to what is present
-                 when a user logs in.  The _C_o_m_m_a_n_d _E_n_v_i_r_o_n_m_e_n_t section in the
-                 sudoers(4) manual documents how the --ii option affects the
-                 environment in which a command is run when the _s_u_d_o_e_r_s policy
-                 is in use.
+     --ii, ----llooggiinn
+                 Run the shell specified by the target user's password
+                 database entry as a login shell.  This means that login-
+                 specific resource files such as _._p_r_o_f_i_l_e or _._l_o_g_i_n will be
+                 read by the shell.  If a command is specified, it is passed
+                 to the shell for execution via the shell's --cc option.  If no
+                 command is specified, an interactive shell is executed.  ssuuddoo
+                 attempts to change to that user's home directory before
+                 running the shell.  The command is run with an environment
+                 similar to the one a user would receive at log in.  The
+                 _C_o_m_m_a_n_d _E_n_v_i_r_o_n_m_e_n_t section in the sudoers(4) manual
+                 documents how the --ii option affects the environment in which
+                 a command is run when the _s_u_d_o_e_r_s policy is in use.
 
      --KK, ----rreemmoovvee--ttiimmeessttaammpp
-                 The --KK (sure _k_i_l_l) option is like --kk except that it removes
-                 the user's cached credentials entirely and may not be used in
+                 Similar to the --kk option, except that it removes the user's
+                 cached credentials entirely and may not be used in
                  conjunction with a command or other option.  This option does
                  not require a password.  Not all security policies support
                  credential caching.
 
-     --kk, ----rreesseett--ttiimmeessttaammpp [_c_o_m_m_a_n_d]
-                 When used alone, the --kk (_k_i_l_l) option to ssuuddoo invalidates the
-                 user's cached credentials.  The next time ssuuddoo is run a
+     --kk, ----rreesseett--ttiimmeessttaammpp
+                 When used without a command, invalidates the user's cached
+                 credentials.  In other words, the next time ssuuddoo is run a
                  password will be required.  This option does not require a
                  password and was added to allow a user to revoke ssuuddoo
-                 permissions from a _._l_o_g_o_u_t file.  Not all security policies
-                 support credential caching.
+                 permissions from a _._l_o_g_o_u_t file.
 
                  When used in conjunction with a command or an option that may
-                 require a password, the --kk option will cause ssuuddoo to ignore
-                 the user's cached credentials.  As a result, ssuuddoo will prompt
-                 for a password (if one is required by the security policy)
-                 and will not update the user's cached credentials.
+                 require a password, this option will cause ssuuddoo to ignore the
+                 user's cached credentials.  As a result, ssuuddoo will prompt for
+                 a password (if one is required by the security policy) and
+                 will not update the user's cached credentials.
 
-     --ll[ll], ----lliisstt [_c_o_m_m_a_n_d]
-                 If no _c_o_m_m_a_n_d is specified, the --ll (_l_i_s_t) option will list
-                 the allowed (and forbidden) commands for the invoking user
-                 (or the user specified by the --UU option) on the current host.
+                 Not all security policies support credential caching.
+
+     --ll, ----lliisstt  If no _c_o_m_m_a_n_d is specified, list the allowed (and forbidden)
+                 commands for the invoking user (or the user specified by the
+                 --UU option) on the current host.  A longer list format is used
+                 if this option is specified multiple times and the security
+                 policy supports a verbose output format.
+
                  If a _c_o_m_m_a_n_d is specified and is permitted by the security
                  policy, the fully-qualified path to the command is displayed
                  along with any command line arguments.  If _c_o_m_m_a_n_d is
                  specified but not allowed, ssuuddoo will exit with a status value
-                 of 1.  If the --ll option is specified with an _l argument (i.e.
-                 --llll), or if --ll is specified multiple times, a longer list
-                 format is used.
+                 of 1.
 
      --nn, ----nnoonn--iinntteerraaccttiivvee
-                 The --nn (_n_o_n_-_i_n_t_e_r_a_c_t_i_v_e) option prevents ssuuddoo from prompting
-                 the user for a password.  If a password is required for the
-                 command to run, ssuuddoo will display an error message and exit.
+                 Avoid prompting the user for input of any kind.  If a
+                 password is required for the command to run, ssuuddoo will
+                 display an error message and exit.
 
      --PP, ----pprreesseerrvvee--ggrroouuppss
-                 The --PP (_p_r_e_s_e_r_v_e _g_r_o_u_p _v_e_c_t_o_r) option causes ssuuddoo to preserve
-                 the invoking user's group vector unaltered.  By default, the
-                 _s_u_d_o_e_r_s policy will initialize the group vector to the list
-                 of groups the target user is in.  The real and effective
-                 group IDs, however, are still set to match the target user.
+                 Preserve the invoking user's group vector unaltered.  By
+                 default, the _s_u_d_o_e_r_s policy will initialize the group vector
+                 to the list of groups the target user is a member of.  The
+                 real and effective group IDs, however, are still set to match
+                 the target user.
 
-     --pp, ----pprroommpptt _p_r_o_m_p_t
-                 The --pp (_p_r_o_m_p_t) option allows you to override the default
-                 password prompt and use a custom one.  The following percent
-                 (`%') escapes are supported by the _s_u_d_o_e_r_s policy:
+     --pp _p_r_o_m_p_t, ----pprroommpptt=_p_r_o_m_p_t
+                 Use a custom password prompt with optional escape sequences.
+                 The following percent (`%') escape sequences are supported by
+                 the _s_u_d_o_e_r_s policy:
 
                  %H  expanded to the host name including the domain name (on
                      if the machine's host name is fully qualified or the _f_q_d_n
@@ -250,65 +238,62 @@ DDEESSCCRRIIPPTTIIOONN
                  %%  two consecutive `%' characters are collapsed into a
                      single `%' character
 
-                 The prompt specified by the --pp option will override the
-                 system password prompt on systems that support PAM unless the
-                 _p_a_s_s_p_r_o_m_p_t___o_v_e_r_r_i_d_e flag is disabled in _s_u_d_o_e_r_s.
+                 The custom prompt will override the system password prompt on
+                 systems that support PAM unless the _p_a_s_s_p_r_o_m_p_t___o_v_e_r_r_i_d_e flag
+                 is disabled in _s_u_d_o_e_r_s.
 
-     --rr, ----rroollee _r_o_l_e
-                 The --rr (_r_o_l_e) option causes the new SELinux security context
-                 to have the role specified by _r_o_l_e.
+     --rr _r_o_l_e, ----rroollee=_r_o_l_e
+                 Run the command with an SELinux security context that
+                 includes the specified _r_o_l_e.
 
      --SS, ----ssttddiinn
-                 The --SS (_s_t_d_i_n) option causes ssuuddoo to read the password from
-                 the standard input instead of the terminal device.  The
-                 password must be followed by a newline character.
+                 Write the prompt to the standard error and read the password
+                 from the standard input instead of using the terminal device.
+                 The password must be followed by a newline character.
 
-     --ss, ----sshheellll [_c_o_m_m_a_n_d]
-                 The --ss (_s_h_e_l_l) option runs the shell specified by the SHELL
-                 environment variable if it is set or the shell as specified
-                 in the password database.  If a command is specified, it is
+     --ss, ----sshheellll
+                 Run the shell specified by the SHELL environment variable if
+                 it is set or the shell specified by the invoking user's
+                 password database entry.  If a command is specified, it is
                  passed to the shell for execution via the shell's --cc option.
                  If no command is specified, an interactive shell is executed.
 
-     --tt, ----ttyyppee _t_y_p_e
-                 The --tt (_t_y_p_e) option causes the new SELinux security context
-                 to have the type specified by _t_y_p_e.  If no type is specified,
-                 the default type is derived from the specified role.
+     --tt _t_y_p_e, ----ttyyppee=_t_y_p_e
+                 Run the command with an SELinux security context that
+                 includes the specified _t_y_p_e.  If no _t_y_p_e is specified, the
+                 default type is derived from the role.
 
-     --UU, ----ootthheerr--uusseerr _u_s_e_r
-                 The --UU (_o_t_h_e_r _u_s_e_r) option is used in conjunction with the --ll
-                 option to specify the user whose privileges should be listed.
-                 The security policy may restrict listing other users'
-                 privileges.  The _s_u_d_o_e_r_s policy only allows root or a user
-                 with the ALL privilege on the current host to use this
-                 option.
+     --UU _u_s_e_r, ----ootthheerr--uusseerr=_u_s_e_r
+                 Used in conjunction with the --ll option to list the privileges
+                 for _u_s_e_r instead of for the invoking user.  The security
+                 policy may restrict listing other users' privileges.  The
+                 _s_u_d_o_e_r_s policy only allows root or a user with the ALL
+                 privilege on the current host to use this option.
 
-     --uu, ----uusseerr _u_s_e_r
-                 The --uu (_u_s_e_r) option causes ssuuddoo to run the specified command
-                 as a user other than _r_o_o_t.  To specify a numeric user ID
-                 (uid) instead of a user name, use _#_u_i_d.  When running
-                 commands as a uid, many shells require that the `#' be
-                 escaped with a backslash (`\').  Some security policies may
-                 restrict uids to those listed in the password database.  The
-                 _s_u_d_o_e_r_s policy allows uids that are not in the password
-                 database as long as the _t_a_r_g_e_t_p_w option is not set.  Other
-                 security policies may not support this.
+     --uu _u_s_e_r, ----uusseerr=_u_s_e_r
+                 Run the command as a user other than the default target user
+                 (usually _r_o_o_t _)_. The _u_s_e_r may be either a user name or a
+                 numeric user ID (UID) prefixed with the `#' character (e.g.
+                 #0 for UID 0).  When running commands as a UID, many shells
+                 require that the `#' be escaped with a backslash (`\').  Some
+                 security policies may restrict UIDs to those listed in the
+                 password database.  The _s_u_d_o_e_r_s policy allows UIDs that are
+                 not in the password database as long as the _t_a_r_g_e_t_p_w option
+                 is not set.  Other security policies may not support this.
 
      --VV, ----vveerrssiioonn
-                 The --VV (_v_e_r_s_i_o_n) option causes ssuuddoo to print its version
-                 string and the version string of the security policy plugin
-                 and any I/O plugins.  If the invoking user is already root
-                 the --VV option will display the arguments passed to configure
-                 when ssuuddoo was built and plugins may display more verbose
-                 information such as default options.
+                 Print the ssuuddoo version string as well as the version string
+                 of the security policy plugin and any I/O plugins.  If the
+                 invoking user is already root the --VV option will display the
+                 arguments passed to configure when ssuuddoo was built and plugins
+                 may display more verbose information such as default options.
 
      --vv, ----vvaalliiddaattee
-                 When given the --vv (_v_a_l_i_d_a_t_e) option, ssuuddoo will update the
-                 user's cached credentials, authenticating the user's password
+                 Update the user's cached credentials, authenticating the user
                  if necessary.  For the _s_u_d_o_e_r_s plugin, this extends the ssuuddoo
-                 timeout for another 5 minutes (or whatever the timeout is set
-                 to by the security policy) but does not run a command.  Not
-                 all security policies support cached credentials.
+                 timeout for another 5 minutes by default, but does not run a
+                 command.  Not all security policies support cached
+                 credentials.
 
      ----          The ---- option indicates that ssuuddoo should stop processing
                  command line arguments.
@@ -316,11 +301,13 @@ DDEESSCCRRIIPPTTIIOONN
      Environment variables to be set for the command may also be passed on the
      command line in the form of VVAARR=_v_a_l_u_e, e.g.
      LLDD__LLIIBBRRAARRYY__PPAATTHH=_/_u_s_r_/_l_o_c_a_l_/_p_k_g_/_l_i_b.  Variables passed on the command line
-     are subject to the same restrictions as normal environment variables with
-     one important exception.  If the _s_e_t_e_n_v option is set in _s_u_d_o_e_r_s, the
-     command to be run has the SETENV tag set or the command matched is ALL,
-     the user may set variables that would otherwise be forbidden.  See
-     sudoers(4) for more information.
+     are subject to restrictions imposed by the security policy plugin.  The
+     _s_u_d_o_e_r_s policy subjects variables passed on the command line to the same
+     restrictions as normal environment variables with one important
+     exception.  If the _s_e_t_e_n_v option is set in _s_u_d_o_e_r_s, the command to be run
+     has the SETENV tag set or the command matched is ALL, the user may set
+     variables that would otherwise be forbidden.  See sudoers(4) for more
+     information.
 
 CCOOMMMMAANNDD EEXXEECCUUTTIIOONN
      When ssuuddoo executes a command, the security policy specifies the execution
@@ -367,16 +354,20 @@ CCOOMMMMAANNDD EEXXEECCUUTTIIOONN
      be in what POSIX terms an ``orphaned process group'' and it would not
      receive any job control signals.  As a special case, if the policy plugin
      does not define a close function and no pty is required, ssuuddoo will
-     execute the command directly instead of calling fork(2) first.
+     execute the command directly instead of calling fork(2) first.  The
+     _s_u_d_o_e_r_s policy plugin will only define a close function when I/O logging
+     is enabled, a pty is required, or the _p_a_m___s_e_s_s_i_o_n or _p_a_m___s_e_t_c_r_e_d options
+     are enabled.  Note that _p_a_m___s_e_s_s_i_o_n and _p_a_m___s_e_t_c_r_e_d are enabled by
+     default on systems using PAM.
 
    SSiiggnnaall hhaannddlliinngg
-     Because the command is run as a child of the ssuuddoo process, ssuuddoo will
-     relay signals it receives to the command.  Unless the command is being
-     run in a new pty, the SIGHUP, SIGINT and SIGQUIT signals are not relayed
-     unless they are sent by a user process, not the kernel.  Otherwise, the
-     command would receive SIGINT twice every time the user entered control-C.
-     Some signals, such as SIGSTOP and SIGKILL, cannot be caught and thus will
-     not be relayed to the command.  As a general rule, SIGTSTP should be used
+     When the command is run as a child of the ssuuddoo process, ssuuddoo will relay
+     signals it receives to the command.  Unless the command is being run in a
+     new pty, the SIGHUP, SIGINT and SIGQUIT signals are not relayed unless
+     they are sent by a user process, not the kernel.  Otherwise, the command
+     would receive SIGINT twice every time the user entered control-C.  Some
+     signals, such as SIGSTOP and SIGKILL, cannot be caught and thus will not
+     be relayed to the command.  As a general rule, SIGTSTP should be used
      instead of SIGSTOP when you wish to suspend a command being run by ssuuddoo.
 
      As a special case, ssuuddoo will not relay signals that were sent by the
@@ -586,4 +577,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.8                       July 16, 2013                      Sudo 1.8.8
+Sudo 1.8.8                      August 14, 2013                     Sudo 1.8.8

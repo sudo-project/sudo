@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd July 16, 2013
+.Dd August 14, 2013
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -33,58 +33,58 @@
 .Fl v
 .Op Fl AknS
 .Bk -words
-.Op Fl a Ar auth_type
+.Op Fl a Ar type
 .Ek
 .Bk -words
-.Op Fl g Ar group name No | Ar #gid
+.Op Fl g Ar group
 .Ek
 .Bk -words
-.Op Fl h Ar remote host
+.Op Fl h Ar host
 .Ek
 .Bk -words
 .Op Fl p Ar prompt
 .Ek
 .Bk -words
-.Op Fl u Ar user name No | Ar #uid
+.Op Fl u Ar user
 .Ek
 .Nm sudo
-.Fl l Ns Op Ar l
+.Fl l
 .Op Fl AknS
 .Bk -words
-.Op Fl a Ar auth_type
+.Op Fl a Ar type
 .Ek
 .Bk -words
-.Op Fl g Ar group name No | Ar #gid
+.Op Fl g Ar group
 .Ek
 .Bk -words
-.Op Fl h Ar remote host
+.Op Fl h Ar host
 .Ek
 .Bk -words
 .Op Fl p Ar prompt
 .Ek
 .Bk -words
-.Op Fl U Ar user name
+.Op Fl U Ar user
 .Ek
 .Bk -words
-.Op Fl u Ar user name No | Ar #uid
+.Op Fl u Ar user
 .Ek
 .Op Ar command
 .Nm sudo
 .Op Fl AbEHnPS
 .Bk -words
-.Op Fl a Ar auth_type
+.Op Fl a Ar type
 .Ek
 .Bk -words
-.Op Fl C Ar fd
+.Op Fl C Ar num
 .Ek
 .Bk -words
-.Op Fl c Ar class No | Ar -
+.Op Fl c Ar class
 .Ek
 .Bk -words
-.Op Fl g Ar group name No | Ar #gid
+.Op Fl g Ar group
 .Ek
 .Bk -words
-.Op Fl h Ar remote host
+.Op Fl h Ar host
 .Ek
 .Bk -words
 .Op Fl p Ar prompt
@@ -96,37 +96,37 @@
 .Op Fl t Ar type
 .Ek
 .Bk -words
-.Op Fl u Ar user name No | Ar #uid
+.Op Fl u Ar user
 .Ek
 .Bk -words
 .Op Sy VAR Ns = Ns Ar value
 .Ek
 .Bk -words
-.Fl i No | Fl s
+.Op Fl i No | Fl s
 .Ek
 .Op Ar command
 .Nm sudoedit
-.Op Fl AnS
+.Op Fl AknS
 .Bk -words
-.Op Fl a Ar auth_type
+.Op Fl a Ar type
 .Ek
 .Bk -words
-.Op Fl C Ar fd
+.Op Fl C Ar num
 .Ek
 .Bk -words
-.Op Fl c Ar class No | Ar -
+.Op Fl c Ar class
 .Ek
 .Bk -words
-.Op Fl g Ar group name No | Ar #gid
+.Op Fl g Ar group
 .Ek
 .Bk -words
-.Op Fl h Ar remote host
+.Op Fl h Ar host
 .Ek
 .Bk -words
 .Op Fl p Ar prompt
 .Ek
 .Bk -words
-.Op Fl u Ar user name No | Ar #uid
+.Op Fl u Ar user
 .Ek
 .Bk -words
 file ...
@@ -226,13 +226,10 @@ Path askpass /usr/X11R6/bin/ssh-askpass
 If no askpass program is available,
 .Nm sudo
 will exit with an error.
-.It Fl a , -auth-type Ar auth_type
-The
-.Fl a No ( Em "authentication type" Ns No )
-option causes
-.Nm sudo
-to use the specified authentication type when validating the user,
-as allowed by
+.It Fl a Ar type , Fl -auth-type Ns No = Ns Ar type
+Use the specified BSD authentication
+.Ar type
+when validating the user, if allowed by
 .Pa /etc/login.conf .
 The system administrator may specify a list of sudo-specific
 authentication methods by adding an
@@ -241,29 +238,22 @@ entry in
 .Pa /etc/login.conf .
 This option is only available on systems that support BSD authentication.
 .It Fl b , -background
-The
-.Fl b No ( Em background Ns No )
-option tells
-.Nm sudo
-to run the given command in the background.
-Note that if you use the
-.Fl b
-option you cannot use shell job control to manipulate the process.
+Run the given command in the background.
+Note that it is not possible to use shell job control to manipulate
+background processes started by
+.Nm sudo .
 Most interactive commands will fail to work properly in background
 mode.
-.It Fl C , -close-from Ar fd
-Normally,
+.It Fl C Ar num , Fl -close-from Ns No = Ns Ar num
+Close all file descriptors greater than or equal to
+.Ar num
+before executing a command.
+Values less than three are not permitted.
+By default,
 .Nm sudo
 will close all open file descriptors other than standard input,
-standard output and standard error.
-The
-.Fl C No ( Em close from Ns No )
-option allows the user to specify a starting point above the standard
-error (file descriptor three).
-Values less than three are not permitted.
-The security policy may restrict the user's ability to use the
-.Fl C
-option.
+standard output and standard error when executing a command.
+The security policy may restrict the user's ability to use this option.
 The
 .Em sudoers
 policy only permits use of the
@@ -271,48 +261,38 @@ policy only permits use of the
 option when the administrator has enabled the
 .Em closefrom_override
 option.
-.It Fl c , -login-class Ar class
+.It Fl c Ar class , Fl -login-class Ns No = Ns Ar class
+Run the command with resource limits and scheduling priority of
+the specified login
+.Ar class .
 The
-.Fl c No ( Em class Ns No )
-option causes
-.Nm sudo
-to run the specified command with resources limited by the specified
-login class.
-The
-.Em class
+.Ar class
 argument can be either a class name as defined in
 .Pa /etc/login.conf ,
 or a single
 .Ql \-
 character.
-Specifying a
+If
 .Ar class
-of
-.Li -
-indicates that the command should be run restricted by the default
-login capabilities for the user the command is run as.
-If the
-.Ar class
-argument specifies an existing user class, the command must be run
-as root, or the
+is
+.Li - ,
+the default login class of the target user will be used.
+Otherwise, the command must be run as root, or
 .Nm sudo
-command must be run from a shell that is already root.
+must be run from a shell that is already root.
+If the command is being run as a login shell, additional
+.Pa /etc/login.conf
+settings, such as the umask and environment variables, will
+be applied if present.
 This option is only available on systems with BSD login classes.
 .It Fl E , -preserve-env
-The
-.Fl E No ( Em preserve environment Ns No )
-option indicates to the security policy that the user wishes to
+Indicates to the security policy that the user wishes to
 preserve their existing environment variables.
-The security policy may return an error if the
-.Fl E
-option is specified and the user does not have permission to preserve
-the environment.
+The security policy may return an error if the user does not have
+permission to preserve the environment.
 .It Fl e , -edit
-The
-.Fl e No ( Em edit Ns No )
-option indicates that, instead of running a command, the user wishes
-to edit one or more files.
-In lieu of a command, the string "sudoedit" is used when consulting
+Edit one or more files instead of running a command.
+In lieu of a path name, the string "sudoedit" is used when consulting
 the security policy.
 If the user is authorized by the policy, the following steps are
 taken:
@@ -354,60 +334,47 @@ If, for some reason,
 is unable to update a file with its edited version, the user will
 receive a warning and the edited copy will remain in a temporary
 file.
-.It Fl g , -group Ar group
-Normally,
-.Nm sudo
-runs a command with the primary group set to the one specified by
-the password database for the user the command is being run as (by
-default, root).
-The
-.Fl g No ( Em group Ns No )
-option causes
-.Nm sudo
-to run the command with the primary group set to
+.It Fl g Ar group , Fl -group Ns No = Ns Ar group
+Run the command with the primary group set to
 .Ar group
-instead.
-To specify a numeric group ID
-.Pq gid
-instead of a group name, use
-.Ar #gid .
-When running commands as a gid, many shells require that the
+instead of the primary group specified by the target
+user's password database entry.
+The
+.Ar group
+may be either a group name or a numeric group ID
+.Pq GID
+prefixed with the
+.Ql #
+character (e.g.
+.Li #0
+for GID 0).
+When running a command as a GID, many shells require that the
 .Ql #
 be escaped with a backslash
 .Pq Ql \e .
 If no
 .Fl u
-option is specified, the command will be run as the invoking user
-(not root).
+option is specified, the command will be run as the invoking user.
 In either case, the primary group will be set to
 .Ar group .
 .It Fl H , -set-home
-The
-.Fl H No ( Em HOME Ns No )
-option requests that the security policy set the
+Request that the security policy set the
 .Ev HOME
-environment variable to the home directory of the target user (root
-by default) as specified by the password database.
+environment variable to the home directory specified by the target
+user's password database entry.
 Depending on the policy, this may be the default behavior.
 .It Fl h , -help
-The
-.Fl h No ( Em help Ns No )
-option causes
-.Nm sudo
-will print a short help message to the standard output and exit.
-.It Fl h , -host Ar remote host
-If a
-.Ar remote host
-is specified and the policy plugin supports it, the command will be run
-on the specified remote host.
+Display a short help message to the standard output and exit.
+.It Fl h Ar host , Fl -host Ns No = Ns Ar host
+Run the command on the specified
+.Ar host
+if the security policy plugin supports remote commands.
 Note that the
 .Em sudoers
 plugin does not currently support running remote commands.
-.It Fl i , -login Op Ar command
-The
-.Fl i No ( Em simulate initial login Ns No )
-option runs the shell specified by the password database entry of
-the target user as a login shell.
+.It Fl i , -login
+Run the shell specified by the target user's password database entry
+as a login shell.
 This means that login-specific resource files such as
 .Pa .profile
 or
@@ -421,8 +388,8 @@ If no command is specified, an interactive shell is executed.
 .Nm sudo
 attempts to change to that user's home directory before running the
 shell.
-The security policy shall initialize the environment to a minimal
-set of variables, similar to what is present when a user logs in.
+The command is run with an environment similar to the one
+a user would receive at log in.
 The
 .Em Command Environment
 section in the
@@ -433,21 +400,15 @@ option affects the environment in which a command is run when the
 .Em sudoers
 policy is in use.
 .It Fl K , -remove-timestamp
-The
-.Fl K No ( sure Em kill Ns No )
-option is like
+Similar to the
 .Fl k
-except that it removes the user's cached credentials entirely and
-may not be used in conjunction with a command or other option.
+option, except that it removes the user's cached credentials entirely
+and may not be used in conjunction with a command or other option.
 This option does not require a password.
 Not all security policies support credential caching.
-.It Fl k , -reset-timestamp Op Ar command
-When used alone, the
-.Fl k No ( Em kill Ns No )
-option to
-.Nm sudo
-invalidates the user's cached credentials.
-The next time
+.It Fl k , -reset-timestamp
+When used without a command, invalidates the user's cached credentials.
+In other words, the next time
 .Nm sudo
 is run a password will be required.
 This option does not require a password and was added to allow a
@@ -456,27 +417,28 @@ user to revoke
 permissions from a
 .Pa .logout
 file.
-Not all security policies support credential caching.
 .Pp
 When used in conjunction with a command or an option that may require
-a password, the
-.Fl k
-option will cause
+a password, this option will cause
 .Nm sudo
 to ignore the user's cached credentials.
 As a result,
 .Nm sudo
 will prompt for a password (if one is required by the security
 policy) and will not update the user's cached credentials.
-.It Fl l Ns Oo Sy l Oc , Fl -list Op Ar command
+.Pp
+Not all security policies support credential caching.
+.It Fl l , Fl -list
 If no
 .Ar command
-is specified, the
-.Fl l No ( Em list Ns No )
-option will list the allowed (and forbidden) commands for the
+is specified,
+list the allowed (and forbidden) commands for the
 invoking user (or the user specified by the
 .Fl U
 option) on the current host.
+A longer list format is used if this option is specified multiple times
+and the security policy supports a verbose output format.
+.Pp
 If a
 .Ar command
 is specified and is permitted by the security policy, the fully-qualified
@@ -487,44 +449,24 @@ If
 is specified but not allowed,
 .Nm sudo
 will exit with a status value of 1.
-If the
-.Fl l
-option is specified with an
-.Ar l
-argument
-.Pq i.e.\& Fl ll ,
-or if
-.Fl l
-is specified multiple times, a longer list format is used.
 .It Fl n , -non-interactive
-The
-.Fl n No ( Em non-interactive Ns No )
-option prevents
-.Nm sudo
-from prompting the user for a password.
+Avoid prompting the user for input of any kind.
 If a password is required for the command to run,
 .Nm sudo
 will display an error message and exit.
 .It Fl P , -preserve-groups
-The
-.Fl P No ( Em preserve group vector Ns No )
-option causes
-.Nm sudo
-to preserve the invoking user's group vector unaltered.
+Preserve the invoking user's group vector unaltered.
 By default, the
 .Em sudoers
 policy will initialize the group vector to the list of groups the
-target user is in.
+target user is a member of.
 The real and effective group IDs, however, are still set to match
 the target user.
-.It Fl p , -prompt Ar prompt
-The
-.Fl p No ( Em prompt Ns No )
-option allows you to override the default password prompt and use
-a custom one.
+.It Fl p Ar prompt , Fl -prompt Ns No = Ns Ar prompt
+Use a custom password prompt with optional escape sequences.
 The following percent
 .Pq Ql %
-escapes are supported by the
+escape sequences are supported by the
 .Em sudoers
 policy:
 .Bl -tag -width 2n
@@ -560,88 +502,77 @@ characters are collapsed into a single
 character
 .El
 .Pp
-The prompt specified by the
-.Fl p
-option will override the system password prompt on systems that
+The custom prompt will override the system password prompt on systems that
 support PAM unless the
 .Em passprompt_override
 flag is disabled in
 .Em sudoers .
-.It Fl r , -role Ar role
-The
-.Fl r No ( Em role Ns No )
-option causes the new SELinux security context to have the role
-specified by
+.It Fl r Ar role , Fl -role Ns No = Ns Ar role
+Run the command with an SELinux security context that includes
+the specified
 .Ar role .
 .It Fl S , -stdin
-The
-.Fl S ( Em stdin Ns No )
-option causes
-.Nm sudo
-to read the password from the standard input instead of the terminal
-device.
+Write the prompt to the standard error and read the password from the
+standard input instead of using the terminal device.
 The password must be followed by a newline character.
-.It Fl s , -shell Op Ar command
-The
-.Fl s ( Em shell Ns No )
-option runs the shell specified by the
+.It Fl s , -shell
+Run the shell specified by the
 .Ev SHELL
-environment variable if it is set or the shell as specified in the
-password database.
+environment variable if it is set or the shell specified by the
+invoking user's password database entry.
 If a command is specified, it is passed to the shell for execution
 via the shell's
 .Fl c
 option.
 If no command is specified, an interactive shell is executed.
-.It Fl t , -type Ar type
-The
-.Fl t ( Em type Ns No )
-option causes the new SELinux security context to have the type
-specified by
+.It Fl t Ar type , Fl -type Ns No = Ns Ar type
+Run the command with an SELinux security context that includes
+the specified
 .Ar type .
-If no type is specified, the default type is derived from the
-specified role.
-.It Fl U , -other-user Ar user
-The
-.Fl U ( Em other user Ns No )
-option is used in conjunction with the
+If no
+.Ar type
+is specified, the default type is derived from the role.
+.It Fl U Ar user , Fl -other-user Ns No = Ns Ar user
+Used in conjunction with the
 .Fl l
-option to specify the user whose privileges should be listed.
+option to list the privileges for
+.Ar user
+instead of for the invoking user.
 The security policy may restrict listing other users' privileges.
 The
 .Em sudoers
 policy only allows root or a user with the
 .Li ALL
 privilege on the current host to use this option.
-.It Fl u , -user Ar user
+.It Fl u Ar user , Fl -user Ns No = Ns Ar user
+Run the command as a user other than the default target user
+(usually
+.Em root ).
 The
-.Fl u ( Em user Ns No )
-option causes
-.Nm sudo
-to run the specified command as a user other than
-.Em root .
-To specify a numeric user ID
-.Pq uid
-instead of a user name, use
-.Ar #uid .
-When running commands as a uid, many shells require that the
+.Ar user
+may be either a user name or a numeric user ID
+.Pq UID
+prefixed with the
+.Ql #
+character (e.g.
+.Li #0
+for UID 0).
+When running commands as a UID, many shells require that the
 .Ql #
 be escaped with a backslash
 .Pq Ql \e .
-Some security policies may restrict uids
+Some security policies may restrict UIDs
 to those listed in the password database.
 The
 .Em sudoers
-policy allows uids that are not in the password database as long as the
+policy allows UIDs that are not in the password database as long as the
 .Em targetpw
 option is not set.
 Other security policies may not support this.
 .It Fl V , -version
-The
-.Fl V ( Em version Ns No )
-option causes
+Print the
 .Nm sudo
-to print its version string and the version string of the security
+version string as well as the version string of the security
 policy plugin and any I/O plugins.
 If the invoking user is already root the
 .Fl V
@@ -650,20 +581,15 @@ option will display the arguments passed to configure when
 was built and plugins may display more verbose information such as
 default options.
 .It Fl v , -validate
-When given the
-.Fl v ( Em validate Ns No )
-option,
-.Nm sudo
-will update the user's cached credentials, authenticating the user's
-password if necessary.
+Update the user's cached credentials, authenticating the user
+if necessary.
 For the
 .Em sudoers
 plugin, this extends the
 .Nm sudo
 timeout for another
 .Li @timeout@
-minutes (or whatever the timeout is set to by the security policy)
-but does not run a command.
+minutes by default, but does not run a command.
 Not all security policies support cached credentials.
 .It Fl -
 The
@@ -678,7 +604,11 @@ on the command line in the form of
 .Sy VAR Ns No = Ns Em value ,
 e.g.\&
 .Sy LD_LIBRARY_PATH Ns No = Ns Em /usr/local/pkg/lib .
-Variables passed on the command line are subject to the same
+Variables passed on the command line are subject to restrictions
+imposed by the security policy plugin.
+The
+.Em sudoers
+policy subjects variables passed on the command line to the same
 restrictions as normal environment variables with one important
 exception.
 If the
@@ -760,8 +690,21 @@ function and no pty is required,
 will execute the command directly instead of calling
 .Xr fork 2
 first.
+The
+.Em sudoers
+policy plugin will only define a close function when I/O logging
+is enabled, a pty is required, or the
+.Em pam_session
+or
+.Em pam_setcred
+options are enabled.
+Note that
+.Em pam_session
+and
+.Em pam_setcred
+are enabled by default on systems using PAM.
 .Ss Signal handling
-Because the command is run as a child of the
+When the command is run as a child of the
 .Nm sudo
 process,
 .Nm sudo

@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "@mansectsu@" "July 16, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "August 14, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -37,50 +37,50 @@
 \fBsudo\fR
 \fB\-v\fR
 [\fB\-AknS\fR]
-[\fB\-a\fR\ \fIauth_type\fR]
-[\fB\-g\fR\ \fIgroup\ name\fR\ |\ \fI#gid\fR]
-[\fB\-h\fR\ \fIremote\ host\fR]
+[\fB\-a\fR\ \fItype\fR]
+[\fB\-g\fR\ \fIgroup\fR]
+[\fB\-h\fR\ \fIhost\fR]
 [\fB\-p\fR\ \fIprompt\fR]
-[\fB\-u\fR\ \fIuser\ name\fR\ |\ \fI#uid\fR]
+[\fB\-u\fR\ \fIuser\fR]
 .br
 .HP 5n
 \fBsudo\fR
-\fB\-l\fR[\fIl\fR]
+\fB\-l\fR
 [\fB\-AknS\fR]
-[\fB\-a\fR\ \fIauth_type\fR]
-[\fB\-g\fR\ \fIgroup\ name\fR\ |\ \fI#gid\fR]
-[\fB\-h\fR\ \fIremote\ host\fR]
+[\fB\-a\fR\ \fItype\fR]
+[\fB\-g\fR\ \fIgroup\fR]
+[\fB\-h\fR\ \fIhost\fR]
 [\fB\-p\fR\ \fIprompt\fR]
-[\fB\-U\fR\ \fIuser\ name\fR]
-[\fB\-u\fR\ \fIuser\ name\fR\ |\ \fI#uid\fR]
+[\fB\-U\fR\ \fIuser\fR]
+[\fB\-u\fR\ \fIuser\fR]
 [\fIcommand\fR]
 .br
 .HP 5n
 \fBsudo\fR
 [\fB\-AbEHnPS\fR]
-[\fB\-a\fR\ \fIauth_type\fR]
-[\fB\-C\fR\ \fIfd\fR]
-[\fB\-c\fR\ \fIclass\fR\ |\ \fI-\fR]
-[\fB\-g\fR\ \fIgroup\ name\fR\ |\ \fI#gid\fR]
-[\fB\-h\fR\ \fIremote\ host\fR]
+[\fB\-a\fR\ \fItype\fR]
+[\fB\-C\fR\ \fInum\fR]
+[\fB\-c\fR\ \fIclass\fR]
+[\fB\-g\fR\ \fIgroup\fR]
+[\fB\-h\fR\ \fIhost\fR]
 [\fB\-p\fR\ \fIprompt\fR]
 [\fB\-r\fR\ \fIrole\fR]
 [\fB\-t\fR\ \fItype\fR]
-[\fB\-u\fR\ \fIuser\ name\fR\ |\ \fI#uid\fR]
+[\fB\-u\fR\ \fIuser\fR]
 [\fBVAR\fR=\fIvalue\fR]
-\fB\-i\fR\ |\ \fB\-s\fR
+[\fB\-i\fR\ |\ \fB\-s\fR]
 [\fIcommand\fR]
 .br
 .HP 9n
 \fBsudoedit\fR
-[\fB\-AnS\fR]
-[\fB\-a\fR\ \fIauth_type\fR]
-[\fB\-C\fR\ \fIfd\fR]
-[\fB\-c\fR\ \fIclass\fR\ |\ \fI-\fR]
-[\fB\-g\fR\ \fIgroup\ name\fR\ |\ \fI#gid\fR]
-[\fB\-h\fR\ \fIremote\ host\fR]
+[\fB\-AknS\fR]
+[\fB\-a\fR\ \fItype\fR]
+[\fB\-C\fR\ \fInum\fR]
+[\fB\-c\fR\ \fIclass\fR]
+[\fB\-g\fR\ \fIgroup\fR]
+[\fB\-h\fR\ \fIhost\fR]
 [\fB\-p\fR\ \fIprompt\fR]
-[\fB\-u\fR\ \fIuser\ name\fR\ |\ \fI#uid\fR]
+[\fB\-u\fR\ \fIuser\fR]
 file ...
 .PD
 .SH "DESCRIPTION"
@@ -186,13 +186,10 @@ will exit with an error.
 .RE
 .PD 0
 .TP 12n
-\fB\-a\fR, \fB\--auth-type\fR \fIauth_type\fR
-The
-\fB\-a\fR (\fIauthentication type\fR)
-option causes
-\fBsudo\fR
-to use the specified authentication type when validating the user,
-as allowed by
+\fB\-a\fR \fItype\fR, \fB\--auth-type\fR=\fItype\fR
+Use the specified BSD authentication
+\fItype\fR
+when validating the user, if allowed by
 \fI/etc/login.conf\fR.
 The system administrator may specify a list of sudo-specific
 authentication methods by adding an
@@ -203,30 +200,23 @@ This option is only available on systems that support BSD authentication.
 .PD
 .TP 12n
 \fB\-b\fR, \fB\--background\fR
-The
-\fB\-b\fR (\fIbackground\fR)
-option tells
-\fBsudo\fR
-to run the given command in the background.
-Note that if you use the
-\fB\-b\fR
-option you cannot use shell job control to manipulate the process.
+Run the given command in the background.
+Note that it is not possible to use shell job control to manipulate
+background processes started by
+\fBsudo\fR.
 Most interactive commands will fail to work properly in background
 mode.
 .TP 12n
-\fB\-C\fR, \fB\--close-from\fR \fIfd\fR
-Normally,
+\fB\-C\fR \fInum\fR, \fB\--close-from\fR=\fInum\fR
+Close all file descriptors greater than or equal to
+\fInum\fR
+before executing a command.
+Values less than three are not permitted.
+By default,
 \fBsudo\fR
 will close all open file descriptors other than standard input,
-standard output and standard error.
-The
-\fB\-C\fR (\fIclose from\fR)
-option allows the user to specify a starting point above the standard
-error (file descriptor three).
-Values less than three are not permitted.
-The security policy may restrict the user's ability to use the
-\fB\-C\fR
-option.
+standard output and standard error when executing a command.
+The security policy may restrict the user's ability to use this option.
 The
 \fIsudoers\fR
 policy only permits use of the
@@ -235,13 +225,10 @@ option when the administrator has enabled the
 \fIclosefrom_override\fR
 option.
 .TP 12n
-\fB\-c\fR, \fB\--login-class\fR \fIclass\fR
-The
-\fB\-c\fR (\fIclass\fR)
-option causes
-\fBsudo\fR
-to run the specified command with resources limited by the specified
-login class.
+\fB\-c\fR \fIclass\fR, \fB\--login-class\fR=\fIclass\fR
+Run the command with resource limits and scheduling priority of
+the specified login
+\fIclass\fR.
 The
 \fIclass\fR
 argument can be either a class name as defined in
@@ -249,36 +236,29 @@ argument can be either a class name as defined in
 or a single
 `\-'
 character.
-Specifying a
+If
 \fIclass\fR
-of
-\fR-\fR
-indicates that the command should be run restricted by the default
-login capabilities for the user the command is run as.
-If the
-\fIclass\fR
-argument specifies an existing user class, the command must be run
-as root, or the
+is
+\fR-\fR,
+the default login class of the target user will be used.
+Otherwise, the command must be run as root, or
 \fBsudo\fR
-command must be run from a shell that is already root.
+must be run from a shell that is already root.
+If the command is being run as a login shell, additional
+\fI/etc/login.conf\fR
+settings, such as the umask and environment variables, will
+be applied if present.
 This option is only available on systems with BSD login classes.
 .TP 12n
 \fB\-E\fR, \fB\--preserve-env\fR
-The
-\fB\-E\fR (\fIpreserve environment\fR)
-option indicates to the security policy that the user wishes to
+Indicates to the security policy that the user wishes to
 preserve their existing environment variables.
-The security policy may return an error if the
-\fB\-E\fR
-option is specified and the user does not have permission to preserve
-the environment.
+The security policy may return an error if the user does not have
+permission to preserve the environment.
 .TP 12n
 \fB\-e\fR, \fB\--edit\fR
-The
-\fB\-e\fR (\fIedit\fR)
-option indicates that, instead of running a command, the user wishes
-to edit one or more files.
-In lieu of a command, the string "sudoedit" is used when consulting
+Edit one or more files instead of running a command.
+In lieu of a path name, the string "sudoedit" is used when consulting
 the security policy.
 If the user is authorized by the policy, the following steps are
 taken:
@@ -326,65 +306,52 @@ file.
 .RE
 .PD 0
 .TP 12n
-\fB\-g\fR, \fB\--group\fR \fIgroup\fR
-Normally,
-\fBsudo\fR
-runs a command with the primary group set to the one specified by
-the password database for the user the command is being run as (by
-default, root).
-The
-\fB\-g\fR (\fIgroup\fR)
-option causes
-\fBsudo\fR
-to run the command with the primary group set to
+\fB\-g\fR \fIgroup\fR, \fB\--group\fR=\fIgroup\fR
+Run the command with the primary group set to
 \fIgroup\fR
-instead.
-To specify a numeric group ID
-(gid)
-instead of a group name, use
-\fI#gid\fR.
-When running commands as a gid, many shells require that the
+instead of the primary group specified by the target
+user's password database entry.
+The
+\fIgroup\fR
+may be either a group name or a numeric group ID
+(GID)
+prefixed with the
+`#'
+character (e.g.
+\fR#0\fR
+for GID 0).
+When running a command as a GID, many shells require that the
 `#'
 be escaped with a backslash
 (`\e').
 If no
 \fB\-u\fR
-option is specified, the command will be run as the invoking user
-(not root).
+option is specified, the command will be run as the invoking user.
 In either case, the primary group will be set to
 \fIgroup\fR.
 .PD
 .TP 12n
 \fB\-H\fR, \fB\--set-home\fR
-The
-\fB\-H\fR (\fIHOME\fR)
-option requests that the security policy set the
+Request that the security policy set the
 \fRHOME\fR
-environment variable to the home directory of the target user (root
-by default) as specified by the password database.
+environment variable to the home directory specified by the target
+user's password database entry.
 Depending on the policy, this may be the default behavior.
 .TP 12n
 \fB\-h\fR, \fB\--help\fR
-The
-\fB\-h\fR (\fIhelp\fR)
-option causes
-\fBsudo\fR
-will print a short help message to the standard output and exit.
+Display a short help message to the standard output and exit.
 .TP 12n
-\fB\-h\fR, \fB\--host\fR \fIremote host\fR
-If a
-\fIremote host\fR
-is specified and the policy plugin supports it, the command will be run
-on the specified remote host.
+\fB\-h\fR \fIhost\fR, \fB\--host\fR=\fIhost\fR
+Run the command on the specified
+\fIhost\fR
+if the security policy plugin supports remote commands.
 Note that the
 \fIsudoers\fR
 plugin does not currently support running remote commands.
 .TP 12n
-\fB\-i\fR, \fB\--login\fR [\fIcommand\fR]
-The
-\fB\-i\fR (\fIsimulate initial login\fR)
-option runs the shell specified by the password database entry of
-the target user as a login shell.
+\fB\-i\fR, \fB\--login\fR
+Run the shell specified by the target user's password database entry
+as a login shell.
 This means that login-specific resource files such as
 \fI.profile\fR
 or
@@ -398,8 +365,8 @@ If no command is specified, an interactive shell is executed.
 \fBsudo\fR
 attempts to change to that user's home directory before running the
 shell.
-The security policy shall initialize the environment to a minimal
-set of variables, similar to what is present when a user logs in.
+The command is run with an environment similar to the one
+a user would receive at log in.
 The
 \fICommand Environment\fR
 section in the
@@ -411,22 +378,16 @@ option affects the environment in which a command is run when the
 policy is in use.
 .TP 12n
 \fB\-K\fR, \fB\--remove-timestamp\fR
-The
-\fB\-K\fR (sure \fIkill\fR)
-option is like
+Similar to the
 \fB\-k\fR
-except that it removes the user's cached credentials entirely and
-may not be used in conjunction with a command or other option.
+option, except that it removes the user's cached credentials entirely
+and may not be used in conjunction with a command or other option.
 This option does not require a password.
 Not all security policies support credential caching.
 .TP 12n
-\fB\-k\fR, \fB\--reset-timestamp\fR [\fIcommand\fR]
-When used alone, the
-\fB\-k\fR (\fIkill\fR)
-option to
-\fBsudo\fR
-invalidates the user's cached credentials.
-The next time
+\fB\-k\fR, \fB\--reset-timestamp\fR
+When used without a command, invalidates the user's cached credentials.
+In other words, the next time
 \fBsudo\fR
 is run a password will be required.
 This option does not require a password and was added to allow a
@@ -435,28 +396,29 @@ user to revoke
 permissions from a
 \fI.logout\fR
 file.
-Not all security policies support credential caching.
 .sp
 When used in conjunction with a command or an option that may require
-a password, the
-\fB\-k\fR
-option will cause
+a password, this option will cause
 \fBsudo\fR
 to ignore the user's cached credentials.
 As a result,
 \fBsudo\fR
 will prompt for a password (if one is required by the security
 policy) and will not update the user's cached credentials.
+.sp
+Not all security policies support credential caching.
 .TP 12n
-\fB\-l\fR[\fBl\fR], \fB\--list\fR [\fIcommand\fR]
+\fB\-l\fR, \fB\--list\fR
 If no
 \fIcommand\fR
-is specified, the
-\fB\-l\fR (\fIlist\fR)
-option will list the allowed (and forbidden) commands for the
+is specified,
+list the allowed (and forbidden) commands for the
 invoking user (or the user specified by the
 \fB\-U\fR
 option) on the current host.
+A longer list format is used if this option is specified multiple times
+and the security policy supports a verbose output format.
+.sp
 If a
 \fIcommand\fR
 is specified and is permitted by the security policy, the fully-qualified
@@ -467,47 +429,27 @@ If
 is specified but not allowed,
 \fBsudo\fR
 will exit with a status value of 1.
-If the
-\fB\-l\fR
-option is specified with an
-\fIl\fR
-argument
-(i.e.\& \fB\-ll\fR),
-or if
-\fB\-l\fR
-is specified multiple times, a longer list format is used.
 .TP 12n
 \fB\-n\fR, \fB\--non-interactive\fR
-The
-\fB\-n\fR (\fInon-interactive\fR)
-option prevents
-\fBsudo\fR
-from prompting the user for a password.
+Avoid prompting the user for input of any kind.
 If a password is required for the command to run,
 \fBsudo\fR
 will display an error message and exit.
 .TP 12n
 \fB\-P\fR, \fB\--preserve-groups\fR
-The
-\fB\-P\fR (\fIpreserve group vector\fR)
-option causes
-\fBsudo\fR
-to preserve the invoking user's group vector unaltered.
+Preserve the invoking user's group vector unaltered.
 By default, the
 \fIsudoers\fR
 policy will initialize the group vector to the list of groups the
-target user is in.
+target user is a member of.
 The real and effective group IDs, however, are still set to match
 the target user.
 .TP 12n
-\fB\-p\fR, \fB\--prompt\fR \fIprompt\fR
-The
-\fB\-p\fR (\fIprompt\fR)
-option allows you to override the default password prompt and use
-a custom one.
+\fB\-p\fR \fIprompt\fR, \fB\--prompt\fR=\fIprompt\fR
+Use a custom password prompt with optional escape sequences.
 The following percent
 (`%')
-escapes are supported by the
+escape sequences are supported by the
 \fIsudoers\fR
 policy:
 .RS
@@ -548,9 +490,7 @@ characters are collapsed into a single
 `%'
 character
 .PP
-The prompt specified by the
-\fB\-p\fR
-option will override the system password prompt on systems that
+The custom prompt will override the system password prompt on systems that
 support PAM unless the
 \fIpassprompt_override\fR
 flag is disabled in
@@ -559,51 +499,42 @@ flag is disabled in
 .RE
 .PD 0
 .TP 12n
-\fB\-r\fR, \fB\--role\fR \fIrole\fR
-The
-\fB\-r\fR (\fIrole\fR)
-option causes the new SELinux security context to have the role
-specified by
+\fB\-r\fR \fIrole\fR, \fB\--role\fR=\fIrole\fR
+Run the command with an SELinux security context that includes
+the specified
 \fIrole\fR.
 .PD
 .TP 12n
 \fB\-S\fR, \fB\--stdin\fR
-The
-\fB\-S\fR (\fIstdin\fR)
-option causes
-\fBsudo\fR
-to read the password from the standard input instead of the terminal
-device.
+Write the prompt to the standard error and read the password from the
+standard input instead of using the terminal device.
 The password must be followed by a newline character.
 .TP 12n
-\fB\-s\fR, \fB\--shell\fR [\fIcommand\fR]
-The
-\fB\-s\fR (\fIshell\fR)
-option runs the shell specified by the
+\fB\-s\fR, \fB\--shell\fR
+Run the shell specified by the
 \fRSHELL\fR
-environment variable if it is set or the shell as specified in the
-password database.
+environment variable if it is set or the shell specified by the
+invoking user's password database entry.
 If a command is specified, it is passed to the shell for execution
 via the shell's
 \fB\-c\fR
 option.
 If no command is specified, an interactive shell is executed.
 .TP 12n
-\fB\-t\fR, \fB\--type\fR \fItype\fR
-The
-\fB\-t\fR (\fItype\fR)
-option causes the new SELinux security context to have the type
-specified by
+\fB\-t\fR \fItype\fR, \fB\--type\fR=\fItype\fR
+Run the command with an SELinux security context that includes
+the specified
 \fItype\fR.
-If no type is specified, the default type is derived from the
-specified role.
+If no
+\fItype\fR
+is specified, the default type is derived from the role.
 .TP 12n
-\fB\-U\fR, \fB\--other-user\fR \fIuser\fR
-The
-\fB\-U\fR (\fIother user\fR)
-option is used in conjunction with the
+\fB\-U\fR \fIuser\fR, \fB\--other-user\fR=\fIuser\fR
+Used in conjunction with the
 \fB\-l\fR
-option to specify the user whose privileges should be listed.
+option to list the privileges for
+\fIuser\fR
+instead of for the invoking user.
 The security policy may restrict listing other users' privileges.
 The
 \fIsudoers\fR
@@ -611,36 +542,36 @@ policy only allows root or a user with the
 \fRALL\fR
 privilege on the current host to use this option.
 .TP 12n
-\fB\-u\fR, \fB\--user\fR \fIuser\fR
+\fB\-u\fR \fIuser\fR, \fB\--user\fR=\fIuser\fR
+Run the command as a user other than the default target user
+(usually
+\fIroot ).\fR
 The
-\fB\-u\fR (\fIuser\fR)
-option causes
-\fBsudo\fR
-to run the specified command as a user other than
-\fIroot\fR.
-To specify a numeric user ID
-(uid)
-instead of a user name, use
-\fI#uid\fR.
-When running commands as a uid, many shells require that the
+\fIuser\fR
+may be either a user name or a numeric user ID
+(UID)
+prefixed with the
+`#'
+character (e.g.
+\fR#0\fR
+for UID 0).
+When running commands as a UID, many shells require that the
 `#'
 be escaped with a backslash
 (`\e').
-Some security policies may restrict uids
+Some security policies may restrict UIDs
 to those listed in the password database.
 The
 \fIsudoers\fR
-policy allows uids that are not in the password database as long as the
+policy allows UIDs that are not in the password database as long as the
 \fItargetpw\fR
 option is not set.
 Other security policies may not support this.
 .TP 12n
 \fB\-V\fR, \fB\--version\fR
-The
-\fB\-V\fR (\fIversion\fR)
-option causes
+Print the
 \fBsudo\fR
-to print its version string and the version string of the security
+version string as well as the version string of the security
 policy plugin and any I/O plugins.
 If the invoking user is already root the
 \fB\-V\fR
@@ -650,20 +581,15 @@ was built and plugins may display more verbose information such as
 default options.
 .TP 12n
 \fB\-v\fR, \fB\--validate\fR
-When given the
-\fB\-v\fR (\fIvalidate\fR)
-option,
-\fBsudo\fR
-will update the user's cached credentials, authenticating the user's
-password if necessary.
+Update the user's cached credentials, authenticating the user
+if necessary.
 For the
 \fIsudoers\fR
 plugin, this extends the
 \fBsudo\fR
 timeout for another
 \fR@timeout@\fR
-minutes (or whatever the timeout is set to by the security policy)
-but does not run a command.
+minutes by default, but does not run a command.
 Not all security policies support cached credentials.
 .TP 12n
 \fB\--\fR
@@ -678,7 +604,11 @@ on the command line in the form of
 \fBVAR\fR=\fIvalue\fR,
 e.g.\&
 \fBLD_LIBRARY_PATH\fR=\fI/usr/local/pkg/lib\fR.
-Variables passed on the command line are subject to the same
+Variables passed on the command line are subject to restrictions
+imposed by the security policy plugin.
+The
+\fIsudoers\fR
+policy subjects variables passed on the command line to the same
 restrictions as normal environment variables with one important
 exception.
 If the
@@ -769,8 +699,21 @@ function and no pty is required,
 will execute the command directly instead of calling
 fork(2)
 first.
+The
+\fIsudoers\fR
+policy plugin will only define a close function when I/O logging
+is enabled, a pty is required, or the
+\fIpam_session\fR
+or
+\fIpam_setcred\fR
+options are enabled.
+Note that
+\fIpam_session\fR
+and
+\fIpam_setcred\fR
+are enabled by default on systems using PAM.
 .SS "Signal handling"
-Because the command is run as a child of the
+When the command is run as a child of the
 \fBsudo\fR
 process,
 \fBsudo\fR
