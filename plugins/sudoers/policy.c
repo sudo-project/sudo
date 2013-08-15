@@ -91,6 +91,8 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     const char *debug_flags = NULL;
     const char *remhost = NULL;
     int flags = 0;
+    long lval;
+    char *ep;
     debug_decl(sudoers_policy_deserialize_info, SUDO_DEBUG_PLUGIN)
 
 #define MATCHES(s, v) (strncmp(s, v, sizeof(v) - 1) == 0)
@@ -117,9 +119,15 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 		continue;
 	    }
 	    if (MATCHES(*cur, "sudoers_mode=")) {
-		sudoers_mode = (mode_t) strtol(*cur + sizeof("sudoers_mode=") - 1,
-		    NULL, 8);
-		/* XXX - error checking */
+		errno = 0;
+		p = *cur + sizeof("sudoers_mode=") - 1;
+		lval = strtol(p, &ep, 8);
+		if (*p == '\0' || *ep != '\0')
+		    fatalx(_("%s: %s"), *cur, _("invalid value"));
+		if ((errno == ERANGE && (lval == LONG_MAX || lval == LONG_MIN))
+		    || (lval > 0777 || lval < 0))
+		    fatalx(_("%s: %s"), *cur, _("value out of range"));
+		sudoers_mode = (mode_t) lval;
 		continue;
 	    }
 	    if (MATCHES(*cur, "ldap_conf=")) {
@@ -137,7 +145,15 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     user_closefrom = -1;
     for (cur = info->settings; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "closefrom=")) {
-	    user_closefrom = atoi(*cur + sizeof("closefrom=") - 1);
+	    errno = 0;
+	    p = *cur + sizeof("closefrom=") - 1;
+	    lval = strtol(p, &ep, 10);
+	    if (*p == '\0' || *ep != '\0')
+		fatalx(_("%s: %s"), *cur, _("invalid value"));
+	    if ((errno == ERANGE && (lval == LONG_MAX || lval == LONG_MIN))
+		|| (lval > INT_MAX || lval < 3))
+		fatalx(_("%s: %s"), *cur, _("value out of range"));
+	    user_closefrom = (int) lval;
 	    continue;
 	}
 	if (MATCHES(*cur, "debug_flags=")) {
@@ -249,7 +265,15 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
 	if (MATCHES(*cur, "max_groups=")) {
-	    sudo_user.max_groups = atoi(*cur + sizeof("max_groups=") - 1);
+	    errno = 0;
+	    p = *cur + sizeof("max_groups=") - 1;
+	    lval = strtol(p, &ep, 10);
+	    if (*p == '\0' || *ep != '\0')
+		fatalx(_("%s: %s"), *cur, _("invalid value"));
+	    if ((errno == ERANGE && (lval == LONG_MAX || lval == LONG_MIN))
+		|| (lval > INT_MAX || lval <= 0))
+		fatalx(_("%s: %s"), *cur, _("value out of range"));
+	    sudo_user.max_groups = (int) lval;
 	    continue;
 	}
 	if (MATCHES(*cur, "remote_host=")) {
@@ -298,11 +322,27 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    continue;
 	}
 	if (MATCHES(*cur, "lines=")) {
-	    sudo_user.lines = atoi(*cur + sizeof("lines=") - 1);
+	    errno = 0;
+	    p = *cur + sizeof("lines=") - 1;
+	    lval = strtol(p, &ep, 10);
+	    if (*p == '\0' || *ep != '\0')
+		fatalx(_("%s: %s"), *cur, _("invalid value"));
+	    if ((errno == ERANGE && (lval == LONG_MAX || lval == LONG_MIN))
+		|| (lval > INT_MAX || lval <= 0))
+		fatalx(_("%s: %s"), *cur, _("value out of range"));
+	    sudo_user.lines = (int) lval;
 	    continue;
 	}
 	if (MATCHES(*cur, "cols=")) {
-	    sudo_user.cols = atoi(*cur + sizeof("cols=") - 1);
+	    errno = 0;
+	    p = *cur + sizeof("cols=") - 1;
+	    lval = strtol(p, &ep, 10);
+	    if (*p == '\0' || *ep != '\0')
+		fatalx(_("%s: %s"), *cur, _("invalid value"));
+	    if ((errno == ERANGE && (lval == LONG_MAX || lval == LONG_MIN))
+		|| (lval > INT_MAX || lval <= 0))
+		fatalx(_("%s: %s"), *cur, _("value out of range"));
+	    sudo_user.cols = (int) lval;
 	    continue;
 	}
 	if (MATCHES(*cur, "sid=")) {
