@@ -71,7 +71,7 @@
 #define SUDO_ERROR_WRAP 0
 
 #include "missing.h"
-#include "error.h"
+#include "fatal.h"
 #include "compat/getopt.h"
 
 #define GNU_COMPATIBLE		/* Be more compatible with GNU getopt. */

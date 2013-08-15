@@ -49,8 +49,7 @@
 
 #include "missing.h"
 #include "alloc.h"
-#include "error.h"
-#include "errno.h"
+#include "fatal.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "gettext.h"

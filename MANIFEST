@@ -12,7 +12,7 @@ common/aix.c
 common/alloc.c
 common/atobool.c
 common/atoid.c
-common/error.c
+common/fatal.c
 common/fileops.c
 common/fmt_string.c
 common/gidlist.c
@@ -138,7 +138,7 @@ doc/visudo.man.in
 doc/visudo.mdoc.in
 include/Makefile.in
 include/alloc.h
-include/error.h
+include/fatal.h
 include/fileops.h
 include/gettext.h
 include/lbuf.h

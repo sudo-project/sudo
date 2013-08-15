@@ -21,7 +21,7 @@
 
 #include "missing.h"
 #include "sudo_debug.h"
-#include "error.h"
+#include "fatal.h"
 
 int
 hexchar(const char *s)

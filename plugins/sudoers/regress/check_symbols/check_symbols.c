@@ -44,7 +44,7 @@
 #include <limits.h>
 
 #include "missing.h"
-#include "error.h"
+#include "fatal.h"
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048

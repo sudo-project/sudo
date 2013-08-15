@@ -39,7 +39,7 @@
 #endif /* HAVE_STDBOOL_H */
 
 #include "missing.h"
-#include "error.h"
+#include "fatal.h"
 #include "alloc.h"
 #include "logging.h"
 #include "gettext.h"

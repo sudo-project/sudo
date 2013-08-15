@@ -22,7 +22,7 @@
 #include <stdlib.h>
 
 #include "missing.h"
-#include "error.h"
+#include "fatal.h"
 
 /* No need to swap locales in the front end. */
 void

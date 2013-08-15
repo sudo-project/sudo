@@ -32,7 +32,7 @@
 #include <libaudit.h>
 
 #include "missing.h"
-#include "error.h"
+#include "fatal.h"
 #include "alloc.h"
 #include "gettext.h"
 #include "sudo_debug.h"

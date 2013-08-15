@@ -30,7 +30,7 @@
 
 #include "missing.h"
 #include "alloc.h"
-#include "error.h"
+#include "fatal.h"
 #include "sudo_plugin.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"

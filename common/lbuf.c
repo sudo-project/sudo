@@ -44,7 +44,7 @@
 
 #include "missing.h"
 #include "alloc.h"
-#include "error.h"
+#include "fatal.h"
 #include "lbuf.h"
 #include "sudo_debug.h"
 

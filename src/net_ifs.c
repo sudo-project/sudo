@@ -81,7 +81,7 @@ struct rtentry;
 
 #include "missing.h"
 #include "alloc.h"
-#include "error.h"
+#include "fatal.h"
 #include "sudo_debug.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"

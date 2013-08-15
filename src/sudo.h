@@ -32,7 +32,7 @@
 
 #include "missing.h"
 #include "alloc.h"
-#include "error.h"
+#include "fatal.h"
 #include "fileops.h"
 #include "list.h"
 #include "sudo_conf.h"

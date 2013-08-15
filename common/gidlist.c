@@ -34,7 +34,7 @@
 
 #include "missing.h"
 #include "alloc.h"
-#include "error.h"
+#include "fatal.h"
 #include "sudo_debug.h"
 
 extern id_t atoid(const char *p, const char *sep, char **endp, const char **errstr);

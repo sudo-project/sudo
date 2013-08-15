@@ -39,7 +39,7 @@
 #define SUDO_ERROR_WRAP 0
 
 #include "missing.h"
-#include "error.h"
+#include "fatal.h"
 #include "sudo_plugin.h"
 
 extern void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);

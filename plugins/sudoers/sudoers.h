@@ -31,7 +31,7 @@
 
 #include <pathnames.h>
 #include "missing.h"
-#include "error.h"
+#include "fatal.h"
 #include "alloc.h"
 #include "list.h"
 #include "fileops.h"

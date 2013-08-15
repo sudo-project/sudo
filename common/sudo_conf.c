@@ -49,7 +49,7 @@
 
 #include "missing.h"
 #include "alloc.h"
-#include "error.h"
+#include "fatal.h"
 #include "fileops.h"
 #include "pathnames.h"
 #include "sudo_plugin.h"

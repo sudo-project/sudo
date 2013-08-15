@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_ERROR_H_
-#define	_SUDO_ERROR_H_
+#ifndef _SUDO_FATAL_H_
+#define	_SUDO_FATAL_H_
 
 #include <stdarg.h>
 #include <setjmp.h>
@@ -191,4 +191,4 @@ void	vwarningx2(const char *, va_list ap) __printflike(1, 0);
 void    warning_set_locale(void);
 void    warning_restore_locale(void);
 
-#endif /* _SUDO_ERROR_H_ */
+#endif /* _SUDO_FATAL_H_ */

@@ -40,7 +40,7 @@
 
 #include "missing.h"
 #include "alloc.h"
-#include "error.h"
+#include "fatal.h"
 
 __dso_public int main(int argc, char *argv[]);
 
