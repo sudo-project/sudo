@@ -554,17 +554,16 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_STRING("command=", command)
 		SET_STRING("cwd=", cwd)
 		if (strncmp("closefrom=", info[i], sizeof("closefrom=") - 1) == 0) {
-		    cp = info[i] + sizeof("closefrom=") - 1;
-		    if (*cp == '\0')
-			break;
 		    errno = 0;
-		    lval = strtol(cp, &ep, 0);
-		    if (*cp != '\0' && *ep == '\0' &&
-			!(errno == ERANGE &&
-			(lval == LONG_MAX || lval == LONG_MIN)) &&
-			lval < INT_MAX && lval > INT_MIN) {
-			details->closefrom = (int)lval;
-		    }
+		    cp = info[i] + sizeof("closefrom=") - 1;
+		    lval = strtol(cp, &ep, 10);
+		    if (*cp == '\0' || *ep != '\0')
+			fatalx(_("%s: %s"), info[i], _("invalid value"));
+		    if ((errno == ERANGE &&
+			(lval == LONG_MAX || lval == LONG_MIN)) ||
+			(lval > INT_MAX || lval < 0))
+			fatalx(_("%s: %s"), info[i], _("value out of range"));
+		    details->closefrom = (int)lval;
 		    break;
 		}
 		break;
@@ -579,20 +578,18 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_STRING("login_class=", login_class)
 		break;
 	    case 'n':
-		/* XXX - bounds check  -NZERO to NZERO (inclusive). */
 		if (strncmp("nice=", info[i], sizeof("nice=") - 1) == 0) {
-		    cp = info[i] + sizeof("nice=") - 1;
-		    if (*cp == '\0')
-			break;
 		    errno = 0;
-		    lval = strtol(cp, &ep, 0);
-		    if (*cp != '\0' && *ep == '\0' &&
-			!(errno == ERANGE &&
-			(lval == LONG_MAX || lval == LONG_MIN)) &&
-			lval < INT_MAX && lval > INT_MIN) {
-			details->priority = (int)lval;
-			SET(details->flags, CD_SET_PRIORITY);
-		    }
+		    cp = info[i] + sizeof("nice=") - 1;
+		    lval = strtol(cp, &ep, 10);
+		    if (*cp == '\0' || *ep != '\0')
+			fatalx(_("%s: %s"), info[i], _("invalid value"));
+		    if ((errno == ERANGE &&
+			(lval == LONG_MAX || lval == LONG_MIN)) ||
+			(lval > INT_MAX || lval < INT_MIN))
+			fatalx(_("%s: %s"), info[i], _("value out of range"));
+		    details->priority = (int)lval;
+		    SET(details->flags, CD_SET_PRIORITY);
 		    break;
 		}
 		if (strncmp("noexec=", info[i], sizeof("noexec=") - 1) == 0) {
@@ -655,22 +652,22 @@ command_info_to_details(char * const info[], struct command_details *details)
 		if (strncmp("runas_privs=", info[i], sizeof("runas_privs=") - 1) == 0) {
                     const char *endp;
 		    cp = info[i] + sizeof("runas_privs=") - 1;
-	            if (*cp == '\0')
-		        break;
-	            errno = 0;
-	            details->privs = priv_str_to_set(cp, ",", &endp);
-		    if (details->privs == NULL)
+	            if (*cp != '\0') {
+			details->privs = priv_str_to_set(cp, ",", &endp);
+			if (details->privs == NULL)
 			    warning("invalid runas_privs %s", endp);
+		    }
+		    break;
 		}
 		if (strncmp("runas_limitprivs=", info[i], sizeof("runas_limitprivs=") - 1) == 0) {
                     const char *endp;
 		    cp = info[i] + sizeof("runas_limitprivs=") - 1;
-	            if (*cp == '\0')
-		        break;
-	            errno = 0;
-	            details->limitprivs = priv_str_to_set(cp, ",", &endp);
-		    if (details->limitprivs == NULL)
+	            if (*cp != '\0') {
+			details->limitprivs = priv_str_to_set(cp, ",", &endp);
+			if (details->limitprivs == NULL)
 			    warning("invalid runas_limitprivs %s", endp);
+		    }
+		    break;
 		}
 #endif /* HAVE_PRIV_SET */
 		break;
@@ -690,35 +687,33 @@ command_info_to_details(char * const info[], struct command_details *details)
 		break;
 	    case 't':
 		if (strncmp("timeout=", info[i], sizeof("timeout=") - 1) == 0) {
-		    cp = info[i] + sizeof("timeout=") - 1;
-		    if (*cp == '\0')
-			break;
 		    errno = 0;
-		    lval = strtol(cp, &ep, 0);
-		    if (*cp != '\0' && *ep == '\0' &&
-			!(errno == ERANGE &&
-			(lval == LONG_MAX || lval == LONG_MIN)) &&
-			lval <= INT_MAX && lval >= 0) {
-			details->timeout = (int)lval;
-			SET(details->flags, CD_SET_TIMEOUT);
-		    }
+		    cp = info[i] + sizeof("timeout=") - 1;
+		    lval = strtol(cp, &ep, 10);
+		    if (*cp == '\0' || *ep != '\0')
+			fatalx(_("%s: %s"), info[i], _("invalid value"));
+		    if ((errno == ERANGE &&
+			(lval == LONG_MAX || lval == LONG_MIN)) ||
+			(lval > INT_MAX || lval < 0))
+			fatalx(_("%s: %s"), info[i], _("value out of range"));
+		    details->timeout = (int)lval;
+		    SET(details->flags, CD_SET_TIMEOUT);
 		    break;
 		}
 		break;
 	    case 'u':
 		if (strncmp("umask=", info[i], sizeof("umask=") - 1) == 0) {
-		    cp = info[i] + sizeof("umask=") - 1;
-		    if (*cp == '\0')
-			break;
 		    errno = 0;
+		    cp = info[i] + sizeof("umask=") - 1;
 		    lval = strtol(cp, &ep, 8);
-		    if (*cp != '\0' && *ep == '\0' &&
-			!(errno == ERANGE &&
-			(lval == LONG_MAX || lval == LONG_MIN)) &&
-			lval <= 0777 && lval >= 0) {
-			details->umask = (mode_t)lval;
-			SET(details->flags, CD_SET_UMASK);
-		    }
+		    if (*cp == '\0' || *ep != '\0')
+			fatalx(_("%s: %s"), info[i], _("invalid value"));
+		    if ((errno == ERANGE &&
+			(lval == LONG_MAX || lval == LONG_MIN)) ||
+			(lval > 0777 || lval < 0))
+			fatalx(_("%s: %s"), info[i], _("value out of range"));
+		    details->umask = (mode_t)lval;
+		    SET(details->flags, CD_SET_UMASK);
 		    break;
 		}
 		if (strncmp("use_pty=", info[i], sizeof("use_pty=") - 1) == 0) {
