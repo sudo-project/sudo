@@ -44,6 +44,9 @@
 # include "linux_audit.h"
 #endif
 
+#define DEFAULT_TEXT_DOMAIN	"sudoers"
+#include "gettext.h"
+
 void
 audit_success(char *exec_args[])
 {
