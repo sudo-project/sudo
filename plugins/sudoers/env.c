@@ -366,7 +366,7 @@ sudo_putenv(char *str, bool dupcheck, bool overwrite)
 	if (env.envp[env.env_len] != NULL)
 	    fatalx(_("sudo_putenv: corrupted envp, length mismatch"));
 #endif
-	fatalx(NULL);
+	fatal(NULL);
     }
     debug_return_int(rval);
 }

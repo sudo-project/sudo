@@ -503,7 +503,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	    settings[j] = fmt_string(sudo_settings[i].name,
 		sudo_settings[i].value);
 	    if (settings[j] == NULL)
-		fatalx(NULL);
+		fatal(NULL);
 	    j++;
 	}
     }
