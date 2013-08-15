@@ -90,8 +90,7 @@ sudo_pam_init(struct passwd *pw, sudo_auth *auth)
     debug_decl(sudo_pam_init, SUDO_DEBUG_AUTH)
 
     /* Initial PAM setup */
-    if (auth != NULL)
-	auth->data = (void *) &pam_status;
+    auth->data = (void *) &pam_status;
     pam_conv.conv = converse;
     pam_status = pam_start(ISSET(sudo_mode, MODE_LOGIN_SHELL) ?
 	def_pam_login_service : def_pam_service, pw->pw_name, &pam_conv, &pamh);
