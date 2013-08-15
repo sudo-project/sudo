@@ -1069,6 +1069,8 @@ get_hostname(void)
     } else {
 	user_host = user_shost = "localhost";
     }
+    user_runhost = user_host;
+    user_srunhost = user_shost;
     debug_return;
 }
 
