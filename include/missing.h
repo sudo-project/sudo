@@ -51,6 +51,9 @@
 #  define __printflike(f, v)
 # endif
 #endif
+#ifndef __printf0like
+# define __printf0like	__printflike
+#endif
 
 /* Hint to compiler that returned pointer is unique (malloc but not realloc). */
 #ifndef __malloc_like
