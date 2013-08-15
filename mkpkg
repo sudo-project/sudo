@@ -239,6 +239,7 @@ case "$osversion" in
 	export LDFLAGS="$ARCH_FLAGS $SDK_FLAGS"
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	configure_opts="--with-pam
+		--with-bsm-audit
 		--without-tty-tickets
 		--enable-zlib=system
 		--with-ldap
@@ -275,8 +276,16 @@ case "$osversion" in
 	# For Solaris, add project support and use let configure choose zlib.
 	# For all others, use the builtin zlib and disable NLS support.
 	case "$osversion" in
-	    sol*) configure_opts="${configure_opts}${configure_opts+$tab}--with-project";;
-	    *) configure_opts="${configure_opts}${configure_opts+$tab}--enable-zlib=builtin${tab}--disable-nls";;
+	    sol*)
+		configure_opts="${configure_opts}${configure_opts+$tab}--with-project"
+
+		if [ $osrelease -ge 11 ]; then
+		    configure_opts="${configure_opts}${configure_opts+$tab}--with-bsm-audit"
+		fi
+		;;
+	    *)
+		configure_opts="${configure_opts}${configure_opts+$tab}--enable-zlib=builtin${tab}--disable-nls"
+		;;
 	esac
 	if test "$flavor" = "ldap"; then
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap"
