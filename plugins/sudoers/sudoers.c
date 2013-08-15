@@ -227,15 +227,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
         goto bad;
     }    
 
-    /* Check for -C overriding def_closefrom. */
-    if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
-	if (!def_closefrom_override) {
-	    warningx(_("you are not permitted to use the -C option"));
-	    goto bad;
-	}
-	def_closefrom = user_closefrom;
-    }
-
     set_perms(PERM_INITIAL);
 
     /* Environment variables specified on the command line. */
@@ -265,8 +256,17 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (ISSET(sudo_mode, MODE_PRESERVE_GROUPS))
 	def_preserve_groups = true;
 
-    /* Find command in path */
+    /* Find command in path and apply per-command Defaults. */
     cmnd_status = set_cmnd();
+
+    /* Check for -C overriding def_closefrom. */
+    if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
+	if (!def_closefrom_override) {
+	    warningx(_("you are not permitted to use the -C option"));
+	    goto bad;
+	}
+	def_closefrom = user_closefrom;
+    }
 
     /*
      * Check sudoers sources, using the locale specified in sudoers.
