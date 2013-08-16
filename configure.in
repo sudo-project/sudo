@@ -2355,10 +2355,19 @@ SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }fnm_test"
 ])
 SUDO_FUNC_ISBLANK
-AC_REPLACE_FUNCS(getopt_long memrchr memset_s pw_dup strlcpy strlcat)
+AC_REPLACE_FUNCS(memrchr memset_s pw_dup strlcpy strlcat)
 AC_CHECK_FUNCS(nanosleep, [], [
     # On Solaris, nanosleep is in librt
     AC_CHECK_LIB(rt, nanosleep, [REPLAY_LIBS="${REPLAY_LIBS} -lrt"], [AC_LIBOBJ(nanosleep)])
+])
+AC_CHECK_FUNCS(getopt_long, [], [AC_LIBOBJ(getopt_long)
+    AC_MSG_CHECKING([for optreset])
+    AC_CACHE_VAL(sudo_cv_optreset, [
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern int optreset; optreset = 1; return optreset;]])], [sudo_cv_optreset=yes], [sudo_cv_optreset=no])])
+    if test "$sudo_cv_optreset" = "yes"; then
+	AC_DEFINE(HAVE_OPTRESET)
+    fi
+    AC_MSG_RESULT($sudo_cv_optreset)
 ])
 AC_CHECK_FUNCS(closefrom, [], [AC_LIBOBJ(closefrom)
     AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [],
@@ -3714,6 +3723,7 @@ AH_TEMPLATE(HAVE_LIBINTL_H, [Define to 1 if you have the <libintl.h> header file
 AH_TEMPLATE(HAVE_LINUX_AUDIT, [Define to 1 to enable Linux audit support.])
 AH_TEMPLATE(HAVE_SSSD, [Define to 1 to enable SSSD support.])
 AH_TEMPLATE(HAVE_OPIE, [Define to 1 if you use NRL OPIE.])
+AH_TEMPLATE(HAVE_OPTRESET, [Define to 1 if you have the `optreset' symbol.])
 AH_TEMPLATE(HAVE_PAM, [Define to 1 if you use PAM authentication.])
 AH_TEMPLATE(HAVE_PAM_LOGIN, [Define to 1 if you use a specific PAM session for sudo -i.])
 AH_TEMPLATE(HAVE_PROJECT_H, [Define to 1 if you have the <project.h> header file.])

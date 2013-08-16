@@ -76,11 +76,20 @@
 
 #define GNU_COMPATIBLE		/* Be more compatible with GNU getopt. */
 
+#ifdef REPLACE_GETOPT
 int	opterr = 1;		/* if error message should be printed */
 int	optind = 1;		/* index into parent argv vector */
 int	optopt = '?';		/* character checked for validity */
-int	optreset;		/* reset getopt */
 char    *optarg;		/* argument associated with option */
+#else
+extern int	opterr;		/* if error message should be printed */
+extern int	optind;		/* index into parent argv vector */
+extern int	optopt;		/* character checked for validity */
+extern char    *optarg;		/* argument associated with option */
+#endif
+#if !defined(REPLACE_GETOPT) && !defined(HAVE_OPTRESET)
+int	optreset;		/* reset getopt */
+#endif
 
 #define PRINT_ERROR	((opterr) && (*options != ':'))
 

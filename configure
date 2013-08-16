@@ -17566,19 +17566,6 @@ esac
 
   fi
 
-ac_fn_c_check_func "$LINENO" "getopt_long" "ac_cv_func_getopt_long"
-if test "x$ac_cv_func_getopt_long" = xyes; then :
-  $as_echo "#define HAVE_GETOPT_LONG 1" >>confdefs.h
-
-else
-  case " $LIBOBJS " in
-  *" getopt_long.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS getopt_long.$ac_objext"
- ;;
-esac
-
-fi
-
 ac_fn_c_check_func "$LINENO" "memrchr" "ac_cv_func_memrchr"
 if test "x$ac_cv_func_memrchr" = xyes; then :
   $as_echo "#define HAVE_MEMRCHR 1" >>confdefs.h
@@ -17703,6 +17690,57 @@ esac
 
 fi
 
+
+fi
+done
+
+for ac_func in getopt_long
+do :
+  ac_fn_c_check_func "$LINENO" "getopt_long" "ac_cv_func_getopt_long"
+if test "x$ac_cv_func_getopt_long" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GETOPT_LONG 1
+_ACEOF
+
+else
+  case " $LIBOBJS " in
+  *" getopt_long.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS getopt_long.$ac_objext"
+ ;;
+esac
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for optreset" >&5
+$as_echo_n "checking for optreset... " >&6; }
+    if ${sudo_cv_optreset+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+extern int optreset; optreset = 1; return optreset;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  sudo_cv_optreset=yes
+else
+  sudo_cv_optreset=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+
+    if test "$sudo_cv_optreset" = "yes"; then
+	$as_echo "#define HAVE_OPTRESET 1" >>confdefs.h
+
+    fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_optreset" >&5
+$as_echo "$sudo_cv_optreset" >&6; }
 
 fi
 done
@@ -23831,6 +23869,7 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+
 
 
 
