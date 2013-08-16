@@ -1,3 +1,56 @@
+What's new in Sudo 1.8.8?
+
+ * Removed a warning on PAM systems with stacked auth modules
+   where the first module on the stack does not succeed.
+
+ * Sudo, sudoreplay and visudo now support GNU-style long options.
+
+ * The -h (--host) option may now be used to specify a host name.
+   This is currently only used by the sudoers plugin in conjunction
+   with the -l (--list) flag.
+
+ * Program usage messages and manual SYNOPSIS sections have been
+   simplified.
+
+ * Sudo's LDAP SASL support now works properly with Kerberos.
+   Previously, the SASL library was unable to locate the user's
+   credential cache.
+
+ * It is now possible to set the nproc resource limit to unlimited
+   via pam_limits on Linux (bug #565).
+
+ * New "pam_service" and "pam_login_service" sudoers options
+   that can be used to specify the PAM service name to use.
+
+ * New "pam_session" and "pam_setcred" sudoers options that
+   can be used to disable PAM session and credential support.
+
+ * The sudoers plugin now properly supports UIDs and GIDs
+   that are larger than 0x7fffffff on 32-bit platforms.
+
+ * Fixed a visudo bug introduced in sudo 1.8.7 where per-group
+   Defaults entries would cause an internal error.
+
+ * If the "tty_tickets" sudoers option is enabled (the default),
+   but there is no tty present, sudo will now use a ticket file
+   based on the parent process ID.  This makes it possible to support
+   the normal timeout behavior for the session.
+
+ * Fixed a problem running commands that change their process
+   group and then attempt to change the terminal settings when not
+   running the command in a pseudo-terminal.  Previously, the process
+   would receive SIGTTOU since it was effectively a background
+   process.  Sudo will now grant the child the controlling tty and
+   continue it when this happens.
+
+ * The "closefrom_override" sudoers option may now be used in
+   a command-specified Defaults entry (bug #610).
+
+ * Sudo's BSM audit support now works on Solaris 11.
+
+ * Brazilian Portuguese translation for sudo and sudoers from
+   translationproject.org.
+
 What's new in Sudo 1.8.7?
 
  * The non-Unix group plugin is now supported when sudoers data
@@ -18,7 +71,7 @@ What's new in Sudo 1.8.7?
    run the command without read access to the terminal when running
    a command in a pseudo-tty.  If the command tries to read from
    the terminal it will be stopped by the kernel (via SIGTTIN or
-   SIGTTOU) and sudo will immediately restart it as the forground
+   SIGTTOU) and sudo will immediately restart it as the foreground
    process (if possible).  This allows sudo to only pass terminal
    input to the program if the program actually is expecting it.
    Unfortunately, a few poorly-behaved programs (like "su" on most
