@@ -1207,12 +1207,12 @@ help(void)
     (void) printf(_("%s - replay sudo session logs\n\n"), getprogname());
     usage(0);
     (void) puts(_("\nOptions:\n"
-	"  -d, --directory=DIR  specify directory for session logs\n"
-	"  -f, --filter=FILTER  specify which I/O type(s) to display\n"
+	"  -d, --directory=dir  specify directory for session logs\n"
+	"  -f, --filter=filter  specify which I/O type(s) to display\n"
 	"  -h, --help           display help message and exit\n"
 	"  -l, --list           list available session IDs, with optional expression\n"
-	"  -m, --max-wait=NUM   max number of seconds to wait between events\n"
-	"  -s, --speed=NUM      speed up or slow down output\n"
+	"  -m, --max-wait=num   max number of seconds to wait between events\n"
+	"  -s, --speed=num      speed up or slow down output\n"
 	"  -V, --version        display version information and exit"));
     exit(0);
 }

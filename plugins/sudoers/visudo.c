@@ -1311,7 +1311,7 @@ help(void)
     usage(0);
     (void) puts(_("\nOptions:\n"
 	"  -c, --check      check-only mode\n"
-	"  -f, --file=FILE  specify sudoers file location\n"
+	"  -f, --file=file  specify sudoers file location\n"
 	"  -h, --help       display help message and exit\n"
 	"  -q, --quiet      less verbose (quiet) syntax error messages\n"
 	"  -s, --strict     strict syntax checking\n"
