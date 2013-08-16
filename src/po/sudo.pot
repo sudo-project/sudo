@@ -5,9 +5,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.7\n"
+"Project-Id-Version: sudo 1.8.8\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-04-02 10:40-0400\n"
+"POT-Creation-Date: 2013-08-16 10:14-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,81 +31,102 @@ msgstr ""
 msgid "unable to restore registry"
 msgstr ""
 
-#: common/alloc.c:82
+#: common/alloc.c:81
 msgid "internal error, tried to emalloc(0)"
 msgstr ""
 
-#: common/alloc.c:99
+#: common/alloc.c:98
 msgid "internal error, tried to emalloc2(0)"
 msgstr ""
 
-#: common/alloc.c:101 common/alloc.c:123 common/alloc.c:163 common/alloc.c:187
+#: common/alloc.c:100 common/alloc.c:122 common/alloc.c:162 common/alloc.c:186
 #, c-format
 msgid "internal error, %s overflow"
 msgstr ""
 
-#: common/alloc.c:120
+#: common/alloc.c:119
 msgid "internal error, tried to ecalloc(0)"
 msgstr ""
 
-#: common/alloc.c:142
+#: common/alloc.c:141
 msgid "internal error, tried to erealloc(0)"
 msgstr ""
 
-#: common/alloc.c:161
+#: common/alloc.c:160
 msgid "internal error, tried to erealloc3(0)"
 msgstr ""
 
-#: common/alloc.c:185
+#: common/alloc.c:184
 msgid "internal error, tried to erecalloc(0)"
 msgstr ""
 
-#: common/error.c:154
+#: common/atoid.c:77 common/atoid.c:99 src/sudo.c:561 src/sudo.c:586
+#: src/sudo.c:694 src/sudo.c:710
+msgid "invalid value"
+msgstr ""
+
+#: common/atoid.c:84 src/sudo.c:565 src/sudo.c:590 src/sudo.c:698
+#: src/sudo.c:714
+msgid "value out of range"
+msgstr ""
+
+#: common/atoid.c:105
+msgid "value too large"
+msgstr ""
+
+#: common/fatal.c:154
 #, c-format
 msgid "%s: %s: %s\n"
 msgstr ""
 
-#: common/error.c:157 common/error.c:161
+#: common/fatal.c:157 common/fatal.c:161
 #, c-format
 msgid "%s: %s\n"
 msgstr ""
 
-#: common/sudo_conf.c:172
+#: common/gidlist.c:80 src/load_plugins.c:72 src/sudo.c:561 src/sudo.c:565
+#: src/sudo.c:586 src/sudo.c:590 src/sudo.c:613 src/sudo.c:622 src/sudo.c:631
+#: src/sudo.c:646 src/sudo.c:694 src/sudo.c:698 src/sudo.c:710 src/sudo.c:714
+#, c-format
+msgid "%s: %s"
+msgstr ""
+
+#: common/sudo_conf.c:176
 #, c-format
 msgid "unsupported group source `%s' in %s, line %d"
 msgstr ""
 
-#: common/sudo_conf.c:186
+#: common/sudo_conf.c:190
 #, c-format
 msgid "invalid max groups `%s' in %s, line %d"
 msgstr ""
 
-#: common/sudo_conf.c:382
+#: common/sudo_conf.c:394
 #, c-format
 msgid "unable to stat %s"
 msgstr ""
 
-#: common/sudo_conf.c:385
+#: common/sudo_conf.c:397
 #, c-format
 msgid "%s is not a regular file"
 msgstr ""
 
-#: common/sudo_conf.c:388
+#: common/sudo_conf.c:400
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr ""
 
-#: common/sudo_conf.c:392
+#: common/sudo_conf.c:404
 #, c-format
 msgid "%s is world writable"
 msgstr ""
 
-#: common/sudo_conf.c:395
+#: common/sudo_conf.c:407
 #, c-format
 msgid "%s is group writable"
 msgstr ""
 
-#: common/sudo_conf.c:405 src/selinux.c:196 src/selinux.c:209 src/sudo.c:328
+#: common/sudo_conf.c:417 src/selinux.c:196 src/selinux.c:209 src/sudo.c:329
 #, c-format
 msgid "unable to open %s"
 msgstr ""
@@ -119,7 +140,7 @@ msgstr ""
 msgid "policy plugin failed session initialization"
 msgstr ""
 
-#: src/exec.c:132 src/exec_pty.c:701 src/exec_pty.c:1066 src/tgetpass.c:220
+#: src/exec.c:132 src/exec_pty.c:701 src/exec_pty.c:1066 src/tgetpass.c:221
 #, c-format
 msgid "unable to fork"
 msgstr ""
@@ -150,7 +171,7 @@ msgid "unable to allocate pty"
 msgstr ""
 
 #: src/exec_pty.c:623 src/exec_pty.c:632 src/exec_pty.c:640 src/exec_pty.c:986
-#: src/exec_pty.c:1063 src/signal.c:126 src/tgetpass.c:217
+#: src/exec_pty.c:1063 src/signal.c:126 src/tgetpass.c:218
 #, c-format
 msgid "unable to create pipe"
 msgstr ""
@@ -190,11 +211,6 @@ msgstr ""
 #: src/load_plugins.c:192 src/load_plugins.c:199 src/load_plugins.c:205
 #, c-format
 msgid "error in %s, line %d while loading plugin `%s'"
-msgstr ""
-
-#: src/load_plugins.c:72
-#, c-format
-msgid "%s: %s"
 msgstr ""
 
 #: src/load_plugins.c:81
@@ -268,176 +284,181 @@ msgstr ""
 msgid "unable to open socket"
 msgstr ""
 
-#: src/parse_args.c:197
+#: src/parse_args.c:246
 #, c-format
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr ""
 
-#: src/parse_args.c:286
-#, c-format
-msgid "unknown user: %s"
-msgstr ""
-
-#: src/parse_args.c:345
+#: src/parse_args.c:408
 #, c-format
 msgid "you may not specify both the `-i' and `-s' options"
 msgstr ""
 
-#: src/parse_args.c:349
+#: src/parse_args.c:412
 #, c-format
 msgid "you may not specify both the `-i' and `-E' options"
 msgstr ""
 
-#: src/parse_args.c:359
+#: src/parse_args.c:422
 #, c-format
 msgid "the `-E' option is not valid in edit mode"
 msgstr ""
 
-#: src/parse_args.c:361
+#: src/parse_args.c:424
 #, c-format
 msgid "you may not specify environment variables in edit mode"
 msgstr ""
 
-#: src/parse_args.c:369
+#: src/parse_args.c:432
 #, c-format
 msgid "the `-U' option may only be used with the `-l' option"
 msgstr ""
 
-#: src/parse_args.c:373
+#: src/parse_args.c:436
 #, c-format
 msgid "the `-A' and `-S' options may not be used together"
 msgstr ""
 
-#: src/parse_args.c:456
+#: src/parse_args.c:519
 #, c-format
 msgid "sudoedit is not supported on this platform"
 msgstr ""
 
-#: src/parse_args.c:529
+#: src/parse_args.c:592
 #, c-format
 msgid ""
 "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr ""
 
-#: src/parse_args.c:543
+#: src/parse_args.c:606
 #, c-format
 msgid ""
 "%s - edit files as another user\n"
 "\n"
 msgstr ""
 
-#: src/parse_args.c:545
+#: src/parse_args.c:608
 #, c-format
 msgid ""
 "%s - execute a command as another user\n"
 "\n"
 msgstr ""
 
-#: src/parse_args.c:550
+#: src/parse_args.c:613
 #, c-format
 msgid ""
 "\n"
 "Options:\n"
 msgstr ""
 
-#: src/parse_args.c:552
-msgid "use helper program for password prompting\n"
+#: src/parse_args.c:615
+msgid "use a helper program for password prompting"
 msgstr ""
 
-#: src/parse_args.c:555
-msgid "use specified BSD authentication type\n"
+#: src/parse_args.c:618
+msgid "use specified BSD authentication type"
 msgstr ""
 
-#: src/parse_args.c:558
-msgid "run command in the background\n"
+#: src/parse_args.c:621
+msgid "run command in the background"
 msgstr ""
 
-#: src/parse_args.c:560
-msgid "close all file descriptors >= fd\n"
+#: src/parse_args.c:623
+msgid "close all file descriptors >= num"
 msgstr ""
 
-#: src/parse_args.c:563
-msgid "run command with specified login class\n"
+#: src/parse_args.c:626
+msgid "run command with the specified BSD login class"
 msgstr ""
 
-#: src/parse_args.c:566
-msgid "preserve user environment when executing command\n"
+#: src/parse_args.c:629
+msgid "preserve user environment when running command"
 msgstr ""
 
-#: src/parse_args.c:568
-msgid "edit files instead of running a command\n"
+#: src/parse_args.c:631
+msgid "edit files instead of running a command"
 msgstr ""
 
-#: src/parse_args.c:570
-msgid "execute command as the specified group\n"
+#: src/parse_args.c:633
+msgid "run command as the specified group name or ID"
 msgstr ""
 
-#: src/parse_args.c:572
-msgid "set HOME variable to target user's home dir.\n"
+#: src/parse_args.c:635
+msgid "set HOME variable to target user's home dir"
 msgstr ""
 
-#: src/parse_args.c:574
-msgid "display help message and exit\n"
+#: src/parse_args.c:637
+msgid "display help message and exit"
 msgstr ""
 
-#: src/parse_args.c:576
-msgid "run a login shell as target user\n"
+#: src/parse_args.c:639
+msgid "run command on host (if supported by plugin)"
 msgstr ""
 
-#: src/parse_args.c:578
-msgid "remove timestamp file completely\n"
+#: src/parse_args.c:641
+msgid "run login shell as the target user; a command may also be specified"
 msgstr ""
 
-#: src/parse_args.c:580
-msgid "invalidate timestamp file\n"
+#: src/parse_args.c:643
+msgid "remove timestamp file completely"
 msgstr ""
 
-#: src/parse_args.c:582
-msgid "list user's available commands\n"
+#: src/parse_args.c:645
+msgid "invalidate timestamp file"
 msgstr ""
 
-#: src/parse_args.c:584
-msgid "non-interactive mode, will not prompt user\n"
+#: src/parse_args.c:647
+msgid ""
+"list user's privileges or check a specific command; use twice for longer "
+"format"
 msgstr ""
 
-#: src/parse_args.c:586
-msgid "preserve group vector instead of setting to target's\n"
+#: src/parse_args.c:649
+msgid "non-interactive mode, no prompts are used"
 msgstr ""
 
-#: src/parse_args.c:588
-msgid "use specified password prompt\n"
+#: src/parse_args.c:651
+msgid "preserve group vector instead of setting to target's"
 msgstr ""
 
-#: src/parse_args.c:591 src/parse_args.c:599
-msgid "create SELinux security context with specified role\n"
+#: src/parse_args.c:653
+msgid "use the specified password prompt"
 msgstr ""
 
-#: src/parse_args.c:594
-msgid "read password from standard input\n"
+#: src/parse_args.c:656
+msgid "create SELinux security context with specified role"
 msgstr ""
 
-#: src/parse_args.c:596
-msgid "run a shell as target user\n"
+#: src/parse_args.c:659
+msgid "read password from standard input"
 msgstr ""
 
-#: src/parse_args.c:602
-msgid "when listing, list specified user's privileges\n"
+#: src/parse_args.c:661
+msgid "run shell as the target user; a command may also be specified"
 msgstr ""
 
-#: src/parse_args.c:604
-msgid "run command (or edit file) as specified user\n"
+#: src/parse_args.c:664
+msgid "create SELinux security context with specified type"
 msgstr ""
 
-#: src/parse_args.c:606
-msgid "display version information and exit\n"
+#: src/parse_args.c:667
+msgid "in list mode, display privileges for user"
 msgstr ""
 
-#: src/parse_args.c:608
-msgid "update user's timestamp without running a command\n"
+#: src/parse_args.c:669
+msgid "run command (or edit file) as specified user name or ID"
 msgstr ""
 
-#: src/parse_args.c:610
-msgid "stop processing command line arguments\n"
+#: src/parse_args.c:671
+msgid "display version information and exit"
+msgstr ""
+
+#: src/parse_args.c:673
+msgid "update user's timestamp without running a command"
+msgstr ""
+
+#: src/parse_args.c:675
+msgid "stop processing command line arguments"
 msgstr ""
 
 #: src/selinux.c:77
@@ -540,7 +561,7 @@ msgstr ""
 msgid "requires at least one argument"
 msgstr ""
 
-#: src/sesh.c:78 src/sudo.c:1126
+#: src/sesh.c:78 src/sudo.c:1114
 #, c-format
 msgid "unable to execute %s"
 msgstr ""
@@ -615,104 +636,104 @@ msgstr ""
 msgid "error initializing I/O plugin %s"
 msgstr ""
 
-#: src/sudo.c:293
+#: src/sudo.c:294
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr ""
 
-#: src/sudo.c:413
+#: src/sudo.c:414
 #, c-format
 msgid "unable to get group vector"
 msgstr ""
 
-#: src/sudo.c:465
+#: src/sudo.c:466
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr ""
 
-#: src/sudo.c:802
+#: src/sudo.c:788
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr ""
 
-#: src/sudo.c:805
+#: src/sudo.c:791
 #, c-format
 msgid ""
 "effective uid is not %d, is %s on a file system with the 'nosuid' option set "
 "or an NFS file system without root privileges?"
 msgstr ""
 
-#: src/sudo.c:811
+#: src/sudo.c:797
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr ""
 
-#: src/sudo.c:915
+#: src/sudo.c:923
 #, c-format
 msgid "unknown login class %s"
 msgstr ""
 
-#: src/sudo.c:929 src/sudo.c:932
+#: src/sudo.c:936
 #, c-format
 msgid "unable to set user context"
 msgstr ""
 
-#: src/sudo.c:944
+#: src/sudo.c:950
 #, c-format
 msgid "unable to set supplementary group IDs"
 msgstr ""
 
-#: src/sudo.c:951
+#: src/sudo.c:957
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:957
+#: src/sudo.c:963
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:964
+#: src/sudo.c:970
 #, c-format
 msgid "unable to set process priority"
 msgstr ""
 
-#: src/sudo.c:972
+#: src/sudo.c:978
 #, c-format
 msgid "unable to change root to %s"
 msgstr ""
 
-#: src/sudo.c:979 src/sudo.c:985 src/sudo.c:991
+#: src/sudo.c:991 src/sudo.c:997 src/sudo.c:1003
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr ""
 
-#: src/sudo.c:1005
+#: src/sudo.c:1020
 #, c-format
 msgid "unable to change directory to %s"
 msgstr ""
 
-#: src/sudo.c:1089
+#: src/sudo.c:1077
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr ""
 
-#: src/sudo.c:1146
+#: src/sudo.c:1134
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr ""
 
-#: src/sudo.c:1159
+#: src/sudo.c:1147
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr ""
 
-#: src/sudo.c:1171
+#: src/sudo.c:1159
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr ""
 
-#: src/sudo.c:1183
+#: src/sudo.c:1171
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr ""
@@ -762,27 +783,27 @@ msgstr ""
 msgid "unable to read temporary file"
 msgstr ""
 
-#: src/tgetpass.c:89
+#: src/tgetpass.c:90
 #, c-format
 msgid "no tty present and no askpass program specified"
 msgstr ""
 
-#: src/tgetpass.c:98
+#: src/tgetpass.c:99
 #, c-format
 msgid "no askpass program specified, try setting SUDO_ASKPASS"
 msgstr ""
 
-#: src/tgetpass.c:230
+#: src/tgetpass.c:232
 #, c-format
 msgid "unable to set gid to %u"
 msgstr ""
 
-#: src/tgetpass.c:234
+#: src/tgetpass.c:236
 #, c-format
 msgid "unable to set uid to %u"
 msgstr ""
 
-#: src/tgetpass.c:239
+#: src/tgetpass.c:241
 #, c-format
 msgid "unable to run %s"
 msgstr ""
