@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "July 16, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO_PLUGIN" "5" "August 16, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2173,6 +2173,47 @@ return SUDO_HOOK_RET_STOP;
 } while(0)
 .RE
 .fi
+.SS "Remote command execution"
+The
+\fBsudo\fR
+front end does not have native support for running remote commands.
+However, starting with
+\fBsudo\fR
+1.8.8, the
+\fB\-h\fR
+option may be used to specify a remote host that is passed
+to the policy plugin.
+A plugin may also accept a
+\fIrunas_user\fR
+in the form of
+``user@hostname''
+which will work with older versions of
+\fBsudo\fR.
+It is anticipated that remote commands will be supported by executing a
+``helper''
+program.
+The policy plugin should setup the execution environment such that the
+\fBsudo\fR
+front end will run the helper which, in turn, will connect to the
+remote host and run the command.
+.PP
+For example, the policy plugin could utilize
+\fBssh\fR
+to perform remote command execution.
+The helper program would be responsible for running
+\fBssh\fR
+with the proper options to use a private key or certificate
+that the remote host will accept and run a program
+on the remote host that would setup the execution environment
+accordingly.
+.PP
+Note that remote
+\fBsudoedit\fR
+functionality must be handled by the policy plugin, not
+\fBsudo\fR
+itself as the front end has no knowledge that a remote command is
+being executed.
+This may be addressed in a future revision of the plugin API.
 .SS "Conversation API"
 If the plugin needs to interact with the user, it may do so via the
 \fBconversation\fR()

@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd July 16, 2013
+.Dd August 16, 2013
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1864,6 +1864,47 @@ return SUDO_HOOK_RET_STOP;
     *(vp) = (*(vp) & 0xffff0000) | (n); \e
 } while(0)
 .Ed
+.Ss Remote command execution
+The
+.Nm sudo
+front end does not have native support for running remote commands.
+However, starting with
+.Nm sudo
+1.8.8, the
+.Fl h
+option may be used to specify a remote host that is passed
+to the policy plugin.
+A plugin may also accept a
+.Em runas_user
+in the form of
+.Dq user@hostname
+which will work with older versions of
+.Nm sudo .
+It is anticipated that remote commands will be supported by executing a
+.Dq helper
+program.
+The policy plugin should setup the execution environment such that the
+.Nm sudo
+front end will run the helper which, in turn, will connect to the
+remote host and run the command.
+.Pp
+For example, the policy plugin could utilize
+.Nm ssh
+to perform remote command execution.
+The helper program would be responsible for running
+.Nm ssh
+with the proper options to use a private key or certificate
+that the remote host will accept and run a program
+on the remote host that would setup the execution environment
+accordingly.
+.Pp
+Note that remote
+.Nm sudoedit
+functionality must be handled by the policy plugin, not
+.Nm sudo
+itself as the front end has no knowledge that a remote command is
+being executed.
+This may be addressed in a future revision of the plugin API.
 .Ss Conversation API
 If the plugin needs to interact with the user, it may do so via the
 .Fn conversation

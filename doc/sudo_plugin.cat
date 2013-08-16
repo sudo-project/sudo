@@ -1205,6 +1205,28 @@ DDEESSCCRRIIPPTTIIOONN
          *(vp) = (*(vp) & 0xffff0000) | (n); \
      } while(0)
 
+   RReemmoottee ccoommmmaanndd eexxeeccuuttiioonn
+     The ssuuddoo front end does not have native support for running remote
+     commands.  However, starting with ssuuddoo 1.8.8, the --hh option may be used
+     to specify a remote host that is passed to the policy plugin.  A plugin
+     may also accept a _r_u_n_a_s___u_s_e_r in the form of ``user@hostname'' which will
+     work with older versions of ssuuddoo.  It is anticipated that remote commands
+     will be supported by executing a ``helper'' program.  The policy plugin
+     should setup the execution environment such that the ssuuddoo front end will
+     run the helper which, in turn, will connect to the remote host and run
+     the command.
+
+     For example, the policy plugin could utilize sssshh to perform remote
+     command execution.  The helper program would be responsible for running
+     sssshh with the proper options to use a private key or certificate that the
+     remote host will accept and run a program on the remote host that would
+     setup the execution environment accordingly.
+
+     Note that remote ssuuddooeeddiitt functionality must be handled by the policy
+     plugin, not ssuuddoo itself as the front end has no knowledge that a remote
+     command is being executed.  This may be addressed in a future revision of
+     the plugin API.
+
    CCoonnvveerrssaattiioonn AAPPII
      If the plugin needs to interact with the user, it may do so via the
      ccoonnvveerrssaattiioonn() function.  A plugin should not attempt to read directly
@@ -1431,4 +1453,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.8                       July 16, 2013                      Sudo 1.8.8
+Sudo 1.8.8                      August 16, 2013                     Sudo 1.8.8
