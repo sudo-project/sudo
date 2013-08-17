@@ -545,21 +545,6 @@ sudo_getenv(const char *name)
 }
 
 /*
- * Merge another environment with our private copy.
- */
-void
-env_merge(char * const envp[], bool overwrite)
-{
-    char * const *ep;
-    debug_decl(env_merge, SUDO_DEBUG_ENV)
-
-    for (ep = envp; *ep != NULL; ep++)
-	sudo_putenv(*ep, true, overwrite);
-
-    debug_return;
-}
-
-/*
  * Check the env_delete blacklist.
  * Returns true if the variable was found, else false.
  */
@@ -693,6 +678,23 @@ env_should_keep(const char *var)
     sudo_debug_printf(SUDO_DEBUG_INFO, "keep %s: %s",
 	var, keepit ? "YES" : "NO");
     debug_return_bool(keepit == true);
+}
+
+/*
+ * Merge another environment with our private copy.
+ * Only overwrite an existing variable if it is not
+ * being preserved from the user's environment.
+ */
+void
+env_merge(char * const envp[])
+{
+    char * const *ep;
+    debug_decl(env_merge, SUDO_DEBUG_ENV)
+
+    for (ep = envp; *ep != NULL; ep++)
+	sudo_putenv(*ep, true, !env_should_keep(*ep));
+
+    debug_return;
 }
 
 static void
