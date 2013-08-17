@@ -240,6 +240,15 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
     if (def_pam_setcred)
 	(void) pam_setcred(pamh, PAM_ESTABLISH_CRED);
 
+    if (def_pam_session) {
+	*pam_status = pam_open_session(pamh, 0);
+	if (*pam_status != PAM_SUCCESS) {
+	    (void) pam_end(pamh, *pam_status | PAM_DATA_SILENT);
+	    pamh = NULL;
+	    status = AUTH_FAILURE;
+	}
+    }
+
 #ifdef HAVE_PAM_GETENVLIST
     /*
      * Update environment based on what is stored in pamh.
@@ -259,15 +268,6 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 	}
     }
 #endif /* HAVE_PAM_GETENVLIST */
-
-    if (def_pam_session) {
-	*pam_status = pam_open_session(pamh, 0);
-	if (*pam_status != PAM_SUCCESS) {
-	    (void) pam_end(pamh, *pam_status | PAM_DATA_SILENT);
-	    pamh = NULL;
-	    status = AUTH_FAILURE;
-	}
-    }
 
 done:
     debug_return_int(status);
