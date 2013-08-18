@@ -260,7 +260,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 	if (pam_envp != NULL) {
 	    /* Merge pam env with user env but do not overwrite. */
 	    env_init(*user_envp);
-	    env_merge(pam_envp, false);
+	    env_merge(pam_envp);
 	    *user_envp = env_get();
 	    env_init(NULL);
 	    efree(pam_envp);
