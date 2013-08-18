@@ -45,14 +45,20 @@
 
 /* For catching format string mismatches */
 #ifndef __printflike
-# if __GNUC_PREREQ__(2, 7)
+# if __GNUC_PREREQ__(3, 3)
+#  define __printflike(f, v) 	__attribute__((__format__ (__printf__, f, v))) __attribute__((__nonnull__ (f)))
+# elif __GNUC_PREREQ__(2, 7)
 #  define __printflike(f, v) 	__attribute__((__format__ (__printf__, f, v)))
 # else
 #  define __printflike(f, v)
 # endif
 #endif
 #ifndef __printf0like
-# define __printf0like	__printflike
+# if __GNUC_PREREQ__(2, 7)
+#  define __printf0like(f, v) 	__attribute__((__format__ (__printf__, f, v)))
+# else
+#  define __printf0like(f, v)
+# endif
 #endif
 
 /* Hint to compiler that returned pointer is unique (malloc but not realloc). */
