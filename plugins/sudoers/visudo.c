@@ -1111,20 +1111,21 @@ check_alias(char *name, int type, int strict, int quiet)
 	alias_put(a);
     } else {
 	if (!quiet) {
-	    char *fmt;
 	    if (errno == ELOOP) {
-		fmt = strict ?
+		warningx(strict ?
 		    _("Error: cycle in %s_Alias `%s'") :
-		    _("Warning: cycle in %s_Alias `%s'");
+		    _("Warning: cycle in %s_Alias `%s'"),
+		    type == HOSTALIAS ? "Host" : type == CMNDALIAS ? "Cmnd" :
+		    type == USERALIAS ? "User" : type == RUNASALIAS ? "Runas" :
+		    "Unknown", name);
 	    } else {
-		fmt = strict ?
+		warningx(strict ?
 		    _("Error: %s_Alias `%s' referenced but not defined") :
-		    _("Warning: %s_Alias `%s' referenced but not defined");
+		    _("Warning: %s_Alias `%s' referenced but not defined"),
+		    type == HOSTALIAS ? "Host" : type == CMNDALIAS ? "Cmnd" :
+		    type == USERALIAS ? "User" : type == RUNASALIAS ? "Runas" :
+		    "Unknown", name);
 	    }
-	    warningx(fmt,
-		type == HOSTALIAS ? "Host" : type == CMNDALIAS ? "Cmnd" :
-		type == USERALIAS ? "User" : type == RUNASALIAS ? "Runas" :
-		"Unknown", name);
 	}
 	errors++;
     }
