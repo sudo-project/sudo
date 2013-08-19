@@ -464,7 +464,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	    for (av = argv; *av != NULL; av++) {
 		for (src = *av; *src != '\0'; src++) {
 		    /* quote potential meta characters */
-		    if (!isalnum((unsigned char)*src) && *src != '_' && *src != '-')
+		    if (!isalnum((unsigned char)*src) && *src != '_' && *src != '-' && *src != '$')
 			*dst++ = '\\';
 		    *dst++ = *src;
 		}
