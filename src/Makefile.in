@@ -72,7 +72,8 @@ noexecdir = @NOEXECDIR@
 install_uid = 0
 install_gid = 0
 
-# File mode to use for shared libraries/objects
+# File extension and mode to use for shared libraries
+shlib_ext = @SHLIB_EXT@
 shlib_mode = @SHLIB_MODE@
 
 TEST_PROGS = check_ttyname
@@ -149,7 +150,7 @@ install-includes:
 # We install sudo_noexec by hand so we can avoid a "lib" prefix
 # and a version number.  Since we use LD_PRELOAD, neither is needed.
 install-noexec: install-dirs libsudo_noexec.la
-	if [ -f .libs/lib$(noexecfile) ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m $(shlib_mode) .libs/lib$(noexecfile) $(DESTDIR)$(noexecdir)/$(noexecfile); fi
+	if [ -f .libs/libsudo_noexec$(shlib_ext) ]; then $(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m $(shlib_mode) .libs/libsudo_noexec$(shlib_ext) $(DESTDIR)$(noexecdir)/$(noexecfile); fi
 
 install-plugin:
 

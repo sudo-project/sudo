@@ -737,6 +737,7 @@ DEVEL
 SUDOERS_GID
 SUDOERS_UID
 SUDOERS_MODE
+SHLIB_EXT
 SHLIB_MODE
 MANCOMPRESSEXT
 MANCOMPRESS
@@ -2824,6 +2825,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -13696,8 +13698,10 @@ else
     # Darwin uses .dylib for libraries but .so for modules
     if test X"$_shrext" = X".dylib"; then
 	SOEXT=".so"
+	SHLIB_EXT=".dylib"
     else
 	SOEXT="$_shrext"
+	SHLIB_EXT="$_shrext"
     fi
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking path to sudo_noexec.so" >&5
@@ -14578,8 +14582,14 @@ done
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
+		# Darwin 8 and above can interpose library symbols cleanly
+		if test $OSMAJOR -ge 8; then
+		    $as_echo "#define HAVE___INTERPOSE 1" >>confdefs.h
+
+		else
+		    RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
+		fi
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
-		RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
 		;;
     *-*-nextstep*)
 		# lockf() on is broken on the NeXT -- use flock instead
@@ -23869,6 +23879,7 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+
 
 
 

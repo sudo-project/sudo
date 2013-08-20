@@ -742,6 +742,9 @@
 /* Define to 1 if the compiler supports the C99 __func__ variable. */
 #undef HAVE___FUNC__
 
+/* Define to 1 if you have dyld with __interpose attribute support. */
+#undef HAVE___INTERPOSE
+
 /* Define to 1 if you have the `__nss_initf_group' function. */
 #undef HAVE___NSS_INITF_GROUP
 

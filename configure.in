@@ -42,6 +42,7 @@ AC_SUBST([MANDIRTYPE])
 AC_SUBST([MANCOMPRESS])
 AC_SUBST([MANCOMPRESSEXT])
 AC_SUBST([SHLIB_MODE])
+AC_SUBST([SHLIB_EXT])
 AC_SUBST([SUDOERS_MODE])
 AC_SUBST([SUDOERS_UID])
 AC_SUBST([SUDOERS_GID])
@@ -1491,8 +1492,10 @@ else
     # Darwin uses .dylib for libraries but .so for modules
     if test X"$_shrext" = X".dylib"; then
 	SOEXT=".so"
+	SHLIB_EXT=".dylib"
     else
 	SOEXT="$_shrext"
+	SHLIB_EXT="$_shrext"
     fi
 fi
 AC_MSG_CHECKING(path to sudo_noexec.so)
@@ -1960,8 +1963,13 @@ case "$host" in
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
+		# Darwin 8 and above can interpose library symbols cleanly
+		if test $OSMAJOR -ge 8; then
+		    AC_DEFINE(HAVE___INTERPOSE)
+		else
+		    RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
+		fi
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
-		RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
 		;;
     *-*-nextstep*)
 		# lockf() on is broken on the NeXT -- use flock instead
@@ -3767,6 +3775,7 @@ AH_TEMPLATE(socklen_t, [Define to `unsigned int' if <sys/socket.h> doesn't defin
 AH_TEMPLATE(HAVE_STRUCT_UTMP_UT_EXIT, [Define to 1 if `ut_exit' is a member of `struct utmp'.])
 AH_TEMPLATE(HAVE_STRUCT_UTMPX_UT_EXIT, [Define to 1 if `ut_exit' is a member of `struct utmpx'.])
 AH_TEMPLATE(HAVE___FUNC__, [Define to 1 if the compiler supports the C99 __func__ variable.])
+AH_TEMPLATE(HAVE___INTERPOSE, [Define to 1 if you have dyld with __interpose attribute support.])
 AH_TEMPLATE(SUDO_KRB5_INSTANCE, [An instance string to append to the username (separated by a slash) for Kerberos V authentication.])
 AH_TEMPLATE(RTLD_PRELOAD_VAR, [The environment variable that controls preloading of dynamic objects.])
 AH_TEMPLATE(RTLD_PRELOAD_ENABLE_VAR, [An extra environment variable that is required to enable preloading (if any).])

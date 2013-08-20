@@ -20,11 +20,34 @@
 
 #include <errno.h>
 #include <stdarg.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif /* HAVE_UNISTD_H */
 #ifdef HAVE_SPAWN_H
 #include <spawn.h>
 #endif
 
 #include "missing.h"
+
+#ifdef HAVE___INTERPOSE
+/*
+ * Mac OS X 10.4 and above has support for library symbol interposition.
+ * There is a good explanation of this in the Mac OS X Internals book.
+ */
+typedef struct interpose_s {
+    void *new_func;
+    void *orig_func;
+} interpose_t;
+
+# define FN_NAME(fn)	my_ ## fn
+# define INTERPOSE(fn) \
+    __attribute__((used)) static const interpose_t _interpose_ ## fn \
+    __attribute__((section("__DATA,__interpose"))) = \
+	{ (void *)my_ ## fn, (void *)fn };
+#else
+# define FN_NAME(fn)	fn
+# define INTERPOSE(fn)
+#endif
 
 /*
  * Dummy versions of the execve() family of syscalls.  We don't need
@@ -42,59 +65,73 @@
 
 #define DUMMY2(fn, t1, t2)			\
 __dso_public int				\
-fn(t1 a1, t2 a2)				\
-DUMMY_BODY
+FN_NAME(fn)(t1 a1, t2 a2)			\
+DUMMY_BODY					\
+INTERPOSE(fn)
 
 #define DUMMY3(fn, t1, t2, t3)			\
 __dso_public int				\
-fn(t1 a1, t2 a2, t3 a3)				\
-DUMMY_BODY
+FN_NAME(fn)(t1 a1, t2 a2, t3 a3)		\
+DUMMY_BODY					\
+INTERPOSE(fn)
 
 #define DUMMY6(fn, t1, t2, t3, t4, t5, t6)	\
 __dso_public int				\
-fn(t1 a1, t2 a2, t3 a3, t4 a4, t5 a5, t6 a6)	\
-DUMMY_BODY
+FN_NAME(fn)(t1 a1, t2 a2, t3 a3, t4 a4, t5 a5, t6 a6)	\
+DUMMY_BODY					\
+INTERPOSE(fn)
 
 #define DUMMY_VA(fn, t1, t2)			\
 __dso_public int				\
-fn(t1 a1, t2 a2, ...)				\
-DUMMY_BODY
+FN_NAME(fn)(t1 a1, t2 a2, ...)			\
+DUMMY_BODY					\
+INTERPOSE(fn)
 
 DUMMY_VA(execl, const char *, const char *)
-DUMMY_VA(_execl, const char *, const char *)
-DUMMY_VA(__execl, const char *, const char *)
 DUMMY_VA(execle, const char *, const char *)
-DUMMY_VA(_execle, const char *, const char *)
-DUMMY_VA(__execle, const char *, const char *)
 DUMMY_VA(execlp, const char *, const char *)
-DUMMY_VA(_execlp, const char *, const char *)
-DUMMY_VA(__execlp, const char *, const char *)
-DUMMY3(exect, const char *, char * const *, char * const *)
-DUMMY3(_exect, const char *, char * const *, char * const *)
-DUMMY3(__exect, const char *, char * const *, char * const *)
 DUMMY2(execv, const char *, char * const *)
-DUMMY2(_execv, const char *, char * const *)
-DUMMY2(__execv, const char *, char * const *)
 DUMMY2(execvp, const char *, char * const *)
-DUMMY2(_execvp, const char *, char * const *)
-DUMMY2(__execvp, const char *, char * const *)
 DUMMY3(execvP, const char *, const char *, char * const *)
-DUMMY3(_execvP, const char *, const char *, char * const *)
-DUMMY3(__execvP, const char *, const char *, char * const *)
 DUMMY3(execve, const char *, char * const *, char * const *)
-DUMMY3(_execve, const char *, char * const *, char * const *)
-DUMMY3(__execve, const char *, char * const *, char * const *)
+
+#ifndef __APPLE__
+/*
+ * On Mac OS X we can only define functions that actually
+ * exist on the system due to how interposition is done.
+ */
+DUMMY3(exect, const char *, char * const *, char * const *)
 DUMMY3(execvpe, const char *, char * const *, char * const *)
-DUMMY3(_execvpe, const char *, char * const *, char * const *)
-DUMMY3(__execvpe, const char *, char * const *, char * const *)
 DUMMY3(fexecve, int , char * const *, char * const *)
+DUMMY_VA(_execl, const char *, const char *)
+DUMMY_VA(_execle, const char *, const char *)
+DUMMY_VA(_execlp, const char *, const char *)
+DUMMY3(_exect, const char *, char * const *, char * const *)
+DUMMY2(_execv, const char *, char * const *)
+DUMMY2(_execvp, const char *, char * const *)
+DUMMY3(_execvP, const char *, const char *, char * const *)
+DUMMY3(_execve, const char *, char * const *, char * const *)
+DUMMY3(_execvpe, const char *, char * const *, char * const *)
 DUMMY3(_fexecve, int , char * const *, char * const *)
+DUMMY_VA(__execl, const char *, const char *)
+DUMMY_VA(__execle, const char *, const char *)
+DUMMY_VA(__execlp, const char *, const char *)
+DUMMY3(__exect, const char *, char * const *, char * const *)
+DUMMY2(__execv, const char *, char * const *)
+DUMMY2(__execvp, const char *, char * const *)
+DUMMY3(__execvP, const char *, const char *, char * const *)
+DUMMY3(__execve, const char *, char * const *, char * const *)
+DUMMY3(__execvpe, const char *, char * const *, char * const *)
 DUMMY3(__fexecve, int , char * const *, char * const *)
+#endif /* __APPLE__ */
+
 #ifdef HAVE_SPAWN_H
 DUMMY6(posix_spawn, pid_t *, const char *, const posix_spawn_file_actions_t *, const posix_spawnattr_t *, char * const *, char * const *)
-DUMMY6(_posix_spawn, pid_t *, const char *, const posix_spawn_file_actions_t *, const posix_spawnattr_t *, char * const *, char * const *)
-DUMMY6(__posix_spawn, pid_t *, const char *, const posix_spawn_file_actions_t *, const posix_spawnattr_t *, char * const *, char * const *)
 DUMMY6(posix_spawnp, pid_t *, const char *, const posix_spawn_file_actions_t *, const posix_spawnattr_t *, char * const *, char * const *)
+# ifndef __APPLE__
+DUMMY6(_posix_spawn, pid_t *, const char *, const posix_spawn_file_actions_t *, const posix_spawnattr_t *, char * const *, char * const *)
 DUMMY6(_posix_spawnp, pid_t *, const char *, const posix_spawn_file_actions_t *, const posix_spawnattr_t *, char * const *, char * const *)
+DUMMY6(__posix_spawn, pid_t *, const char *, const posix_spawn_file_actions_t *, const posix_spawnattr_t *, char * const *, char * const *)
 DUMMY6(__posix_spawnp, pid_t *, const char *, const posix_spawn_file_actions_t *, const posix_spawnattr_t *, char * const *, char * const *)
+# endif /* __APPLE__ */
 #endif /* HAVE_SPAWN_H */
