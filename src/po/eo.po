@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.7b1\n"
+"Project-Id-Version: sudo 1.8.8b1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-04-02 10:40-0400\n"
-"PO-Revision-Date: 2013-04-10 22:25-0400\n"
+"POT-Creation-Date: 2013-08-16 10:14-0600\n"
+"PO-Revision-Date: 2013-08-20 00:07-0400\n"
 "Last-Translator: Felipe Castro <fefcas@gmail.com>\n"
 "Language-Team: Esperanto <translation-team-eo@lists.sourceforge.net>\n"
 "Language: eo\n"
@@ -31,81 +31,102 @@ msgstr "ne eblas ŝanĝiĝi al registrejo \"%s\" por %s"
 msgid "unable to restore registry"
 msgstr "ne eblas restarigi registrejon"
 
-#: common/alloc.c:82
+#: common/alloc.c:81
 msgid "internal error, tried to emalloc(0)"
 msgstr "interna eraro, provis je emalloc(0)"
 
-#: common/alloc.c:99
+#: common/alloc.c:98
 msgid "internal error, tried to emalloc2(0)"
 msgstr "interna eraro, provis je emalloc2(0)"
 
-#: common/alloc.c:101 common/alloc.c:123 common/alloc.c:163 common/alloc.c:187
+#: common/alloc.c:100 common/alloc.c:122 common/alloc.c:162 common/alloc.c:186
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "interna eraro, superfluo en %s"
 
-#: common/alloc.c:120
+#: common/alloc.c:119
 msgid "internal error, tried to ecalloc(0)"
 msgstr "interna eraro, provis je ecalloc(0)"
 
-#: common/alloc.c:142
+#: common/alloc.c:141
 msgid "internal error, tried to erealloc(0)"
 msgstr "interna eraro, provis je erealloc(0)"
 
-#: common/alloc.c:161
+#: common/alloc.c:160
 msgid "internal error, tried to erealloc3(0)"
 msgstr "interna eraro, provis je erealloc3(0)"
 
-#: common/alloc.c:185
+#: common/alloc.c:184
 msgid "internal error, tried to erecalloc(0)"
 msgstr "interna eraro, provis je erealloc(0)"
 
-#: common/error.c:154
+#: common/atoid.c:77 common/atoid.c:99 src/sudo.c:561 src/sudo.c:586
+#: src/sudo.c:694 src/sudo.c:710
+msgid "invalid value"
+msgstr "nevalida valoro"
+
+#: common/atoid.c:84 src/sudo.c:565 src/sudo.c:590 src/sudo.c:698
+#: src/sudo.c:714
+msgid "value out of range"
+msgstr "valoro ne en permesata skalo"
+
+#: common/atoid.c:105
+msgid "value too large"
+msgstr "valoro tro granda"
+
+#: common/fatal.c:154
 #, c-format
 msgid "%s: %s: %s\n"
 msgstr "%s: %s: %s\n"
 
-#: common/error.c:157 common/error.c:161
+#: common/fatal.c:157 common/fatal.c:161
 #, c-format
 msgid "%s: %s\n"
 msgstr "%s: %s\n"
 
-#: common/sudo_conf.c:172
+#: common/gidlist.c:80 src/load_plugins.c:72 src/sudo.c:561 src/sudo.c:565
+#: src/sudo.c:586 src/sudo.c:590 src/sudo.c:613 src/sudo.c:622 src/sudo.c:631
+#: src/sudo.c:646 src/sudo.c:694 src/sudo.c:698 src/sudo.c:710 src/sudo.c:714
+#, c-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: common/sudo_conf.c:176
 #, c-format
 msgid "unsupported group source `%s' in %s, line %d"
 msgstr "nekomprenata grupa fonto `%s' en %s, linio %d"
 
-#: common/sudo_conf.c:186
+#: common/sudo_conf.c:190
 #, c-format
 msgid "invalid max groups `%s' in %s, line %d"
 msgstr "nevalidaj maksimumaj grupoj `%s' en %s, linio %d"
 
-#: common/sudo_conf.c:382
+#: common/sudo_conf.c:394
 #, c-format
 msgid "unable to stat %s"
 msgstr "ne eblas trovi je %s"
 
-#: common/sudo_conf.c:385
+#: common/sudo_conf.c:397
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s estas ne regula dosiero"
 
-#: common/sudo_conf.c:388
+#: common/sudo_conf.c:400
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s estas estrata de uid %u, devas esti %u"
 
-#: common/sudo_conf.c:392
+#: common/sudo_conf.c:404
 #, c-format
 msgid "%s is world writable"
 msgstr "%s estas skribebla de ĉiuj"
 
-#: common/sudo_conf.c:395
+#: common/sudo_conf.c:407
 #, c-format
 msgid "%s is group writable"
 msgstr "%s estas skribebla de la tuta grupo"
 
-#: common/sudo_conf.c:405 src/selinux.c:196 src/selinux.c:209 src/sudo.c:328
+#: common/sudo_conf.c:417 src/selinux.c:196 src/selinux.c:209 src/sudo.c:329
 #, c-format
 msgid "unable to open %s"
 msgstr "ne eblas malfermi %s"
@@ -119,7 +140,7 @@ msgstr "Nekonata signalo"
 msgid "policy plugin failed session initialization"
 msgstr "konduta kromprogramo fiaskis dum seanca komenciĝo"
 
-#: src/exec.c:132 src/exec_pty.c:701 src/exec_pty.c:1066 src/tgetpass.c:220
+#: src/exec.c:132 src/exec_pty.c:701 src/exec_pty.c:1066 src/tgetpass.c:221
 #, c-format
 msgid "unable to fork"
 msgstr "ne eblas forki"
@@ -150,7 +171,7 @@ msgid "unable to allocate pty"
 msgstr "ne eblis generi pty-on"
 
 #: src/exec_pty.c:623 src/exec_pty.c:632 src/exec_pty.c:640 src/exec_pty.c:986
-#: src/exec_pty.c:1063 src/signal.c:126 src/tgetpass.c:217
+#: src/exec_pty.c:1063 src/signal.c:126 src/tgetpass.c:218
 #, c-format
 msgid "unable to create pipe"
 msgstr "ne eblas krei tubon"
@@ -191,11 +212,6 @@ msgstr "neatendita respondotipo ĉe la postkanalo: %d"
 #, c-format
 msgid "error in %s, line %d while loading plugin `%s'"
 msgstr "eraro en %s, linio %d dum ŝargi kromprogramon `%s'"
-
-#: src/load_plugins.c:72
-#, c-format
-msgid "%s: %s"
-msgstr "%s: %s"
 
 #: src/load_plugins.c:81
 #, c-format
@@ -268,57 +284,52 @@ msgstr "load_interfaces: superfluo malkovrita"
 msgid "unable to open socket"
 msgstr "ne eblas malfermi konektingon"
 
-#: src/parse_args.c:197
+#: src/parse_args.c:246
 #, c-format
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "la parametro de -C devas esti nombron almenaŭ 3"
 
-#: src/parse_args.c:286
-#, c-format
-msgid "unknown user: %s"
-msgstr "nekonata uzanto: %s"
-
-#: src/parse_args.c:345
+#: src/parse_args.c:408
 #, c-format
 msgid "you may not specify both the `-i' and `-s' options"
 msgstr "vi ne rajtas specifi kaj '-i' kaj '-s'"
 
-#: src/parse_args.c:349
+#: src/parse_args.c:412
 #, c-format
 msgid "you may not specify both the `-i' and `-E' options"
 msgstr "vi ne rajtas specifi kaj '-i' kaj '-E'"
 
-#: src/parse_args.c:359
+#: src/parse_args.c:422
 #, c-format
 msgid "the `-E' option is not valid in edit mode"
 msgstr "la parametro '-E' ne validas en redakta reĝimo"
 
-#: src/parse_args.c:361
+#: src/parse_args.c:424
 #, c-format
 msgid "you may not specify environment variables in edit mode"
 msgstr "vi ne rajtas specifi medivariablojn en redakta reĝimo"
 
-#: src/parse_args.c:369
+#: src/parse_args.c:432
 #, c-format
 msgid "the `-U' option may only be used with the `-l' option"
 msgstr "la parametro '-U' ne validas kun '-l'"
 
-#: src/parse_args.c:373
+#: src/parse_args.c:436
 #, c-format
 msgid "the `-A' and `-S' options may not be used together"
 msgstr "'-A' kaj '-S' ne eblas uziĝi kune"
 
-#: src/parse_args.c:456
+#: src/parse_args.c:519
 #, c-format
 msgid "sudoedit is not supported on this platform"
 msgstr "sudoedit ne estas havebla en ĉi tiu platformon"
 
-#: src/parse_args.c:529
+#: src/parse_args.c:592
 #, c-format
 msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr "Vi rajtas specifi nur unu el -e, -h, -i, -K, -l, -s, -v aŭ -V"
 
-#: src/parse_args.c:543
+#: src/parse_args.c:606
 #, c-format
 msgid ""
 "%s - edit files as another user\n"
@@ -327,7 +338,7 @@ msgstr ""
 "%s - redakti dosierojn kiel alia uzanto\n"
 "\n"
 
-#: src/parse_args.c:545
+#: src/parse_args.c:608
 #, c-format
 msgid ""
 "%s - execute a command as another user\n"
@@ -336,7 +347,7 @@ msgstr ""
 "%s - plenumigi komandon kiel alia uzanto\n"
 "\n"
 
-#: src/parse_args.c:550
+#: src/parse_args.c:613
 #, c-format
 msgid ""
 "\n"
@@ -345,105 +356,113 @@ msgstr ""
 "\n"
 "Parametroj:\n"
 
-#: src/parse_args.c:552
-msgid "use helper program for password prompting\n"
-msgstr "uzi helpoprogrogramon por pasvortilo\n"
+#: src/parse_args.c:615
+msgid "use a helper program for password prompting"
+msgstr "uzi helpoprogrogramon por pasvortilo"
 
-#: src/parse_args.c:555
-msgid "use specified BSD authentication type\n"
-msgstr "uzi specifitan BSD-konstatan tipon\n"
+#: src/parse_args.c:618
+msgid "use specified BSD authentication type"
+msgstr "uzi specifitan BSD-konstatan tipon"
 
-#: src/parse_args.c:558
-msgid "run command in the background\n"
-msgstr "plenumigi komandon fone\n"
+#: src/parse_args.c:621
+msgid "run command in the background"
+msgstr "plenumigi komandon fone"
 
-#: src/parse_args.c:560
-msgid "close all file descriptors >= fd\n"
-msgstr "fermi ĉiujn dosierpriskribilojn >= fd\n"
+#: src/parse_args.c:623
+msgid "close all file descriptors >= num"
+msgstr "fermi ĉiujn dosierpriskribilojn >= numeron"
 
-#: src/parse_args.c:563
-msgid "run command with specified login class\n"
-msgstr "plenumigi komandon per specifitan ensalutan klason\n"
+#: src/parse_args.c:626
+msgid "run command with the specified BSD login class"
+msgstr "plenumigi komandon per specifita BSD-ensaluta klaso"
 
-#: src/parse_args.c:566
-msgid "preserve user environment when executing command\n"
-msgstr "konservi uzanto-medivariablojn dum plenumigi komandon\n"
+#: src/parse_args.c:629
+msgid "preserve user environment when running command"
+msgstr "konservi uzanto-medivariablojn dum plenumigi komandon"
 
-#: src/parse_args.c:568
-msgid "edit files instead of running a command\n"
-msgstr "redakti dosierojn anstataŭ plenumigi komandon\n"
+#: src/parse_args.c:631
+msgid "edit files instead of running a command"
+msgstr "redakti dosierojn anstataŭ plenumigi komandon"
 
-#: src/parse_args.c:570
-msgid "execute command as the specified group\n"
-msgstr "plenumigi komandon kiel la specifitan grupon\n"
+#: src/parse_args.c:633
+msgid "run command as the specified group name or ID"
+msgstr "plenumigi komandon kiel la specifitan grupnomon aŭ identigilon"
 
-#: src/parse_args.c:572
-msgid "set HOME variable to target user's home dir.\n"
-msgstr "valorizi medivariablon HOME je la hejma dosierujo de la cela uzanto.\n"
+#: src/parse_args.c:635
+msgid "set HOME variable to target user's home dir"
+msgstr "valorizi medivariablon HOME je la hejma dosierujo de la cela uzanto"
 
-#: src/parse_args.c:574
-msgid "display help message and exit\n"
-msgstr "elmontri helpan mesaĝon kaj eliri\n"
+#: src/parse_args.c:637
+msgid "display help message and exit"
+msgstr "elmontri helpan mesaĝon kaj eliri"
 
-#: src/parse_args.c:576
-msgid "run a login shell as target user\n"
-msgstr "plenumigi ensalutan ŝelon kiel celan uzanton\n"
+#: src/parse_args.c:639
+msgid "run command on host (if supported by plugin)"
+msgstr "plenumigi komandon en gastiganto (se permesata de kromprogramo)"
 
-#: src/parse_args.c:578
-msgid "remove timestamp file completely\n"
-msgstr "tute forigi tempo-indikilan dosieron\n"
+#: src/parse_args.c:641
+msgid "run login shell as the target user; a command may also be specified"
+msgstr "plenumigi ensalutan ŝelon kiel celan uzanton; komando ankaŭ enmeteblas"
 
-#: src/parse_args.c:580
-msgid "invalidate timestamp file\n"
-msgstr "eksvalidigi tempo-indikilan dosieron\n"
+#: src/parse_args.c:643
+msgid "remove timestamp file completely"
+msgstr "tute forigi tempo-indikilan dosieron"
 
-#: src/parse_args.c:582
-msgid "list user's available commands\n"
-msgstr "listigi disponeblajn komandojn de uzanto\n"
+#: src/parse_args.c:645
+msgid "invalidate timestamp file"
+msgstr "eksvalidigi tempo-indikilan dosieron"
 
-#: src/parse_args.c:584
-msgid "non-interactive mode, will not prompt user\n"
-msgstr "neinteraga reĝimo, ne demandos uzanton\n"
+#: src/parse_args.c:647
+msgid "list user's privileges or check a specific command; use twice for longer format"
+msgstr "listigi privilegiojn de la uzanto aŭ kontroli specifan komandon; uzu dufoje por pli longa formato"
 
-#: src/parse_args.c:586
-msgid "preserve group vector instead of setting to target's\n"
-msgstr "konservi grupan vektoron anstataŭ elekti celan vektoron\n"
+#: src/parse_args.c:649
+msgid "non-interactive mode, no prompts are used"
+msgstr "neinteraga reĝimo, ne demandos al uzanto"
 
-#: src/parse_args.c:588
-msgid "use specified password prompt\n"
-msgstr "uzi specifitan pasvortilon\n"
+#: src/parse_args.c:651
+msgid "preserve group vector instead of setting to target's"
+msgstr "konservi grupan vektoron anstataŭ elekti celan"
 
-#: src/parse_args.c:591 src/parse_args.c:599
-msgid "create SELinux security context with specified role\n"
-msgstr "krei SELinux-sekurecan kuntekstan kun specifita rolo\n"
+#: src/parse_args.c:653
+msgid "use the specified password prompt"
+msgstr "uzi specifitan pasvortilon"
 
-#: src/parse_args.c:594
-msgid "read password from standard input\n"
-msgstr "legi pasvorton el norma enigo\n"
+#: src/parse_args.c:656
+msgid "create SELinux security context with specified role"
+msgstr "krei SELinux-sekurecan kuntekston kun specifita rolo"
 
-#: src/parse_args.c:596
-msgid "run a shell as target user\n"
-msgstr "plenumigi ŝelon kiel cela uzanto\n"
+#: src/parse_args.c:659
+msgid "read password from standard input"
+msgstr "legi pasvorton el norma enigo"
 
-#: src/parse_args.c:602
-msgid "when listing, list specified user's privileges\n"
-msgstr "dum listigo, listigi privilegiojn de specifita uzanto\n"
+#: src/parse_args.c:661
+msgid "run shell as the target user; a command may also be specified"
+msgstr "plenumigi ŝelon kiel cela uzanto; komando ankaŭ specifebla"
 
-#: src/parse_args.c:604
-msgid "run command (or edit file) as specified user\n"
-msgstr "plenumigi komandon (aŭ redakti dosieron) kiel specifita uzanto\n"
+#: src/parse_args.c:664
+msgid "create SELinux security context with specified type"
+msgstr "krei SELinux-sekurecan kuntekston kun specifita rolo"
 
-#: src/parse_args.c:606
-msgid "display version information and exit\n"
-msgstr "elmontri eldonan informon kaj eliri\n"
+#: src/parse_args.c:667
+msgid "in list mode, display privileges for user"
+msgstr "en lista reĝimo elmontri privilegiojn por uzanto"
 
-#: src/parse_args.c:608
-msgid "update user's timestamp without running a command\n"
-msgstr "ĝisdatigi la tempo-indikilon de la uzanto, sed ne plenumigi komandon\n"
+#: src/parse_args.c:669
+msgid "run command (or edit file) as specified user name or ID"
+msgstr "plenumigi komandon (aŭ redakti dosieron) kiel specifita uzanto"
 
-#: src/parse_args.c:610
-msgid "stop processing command line arguments\n"
-msgstr "ĉesigi procedi komandliniajn parametrojn\n"
+#: src/parse_args.c:671
+msgid "display version information and exit"
+msgstr "elmontri eldonan informon kaj eliri"
+
+#: src/parse_args.c:673
+msgid "update user's timestamp without running a command"
+msgstr "ĝisdatigi la tempo-indikilon de la uzanto, sed ne plenumigi komandon"
+
+#: src/parse_args.c:675
+msgid "stop processing command line arguments"
+msgstr "ĉesigi procedi komandliniajn parametrojn"
 
 #: src/selinux.c:77
 #, c-format
@@ -545,7 +564,7 @@ msgstr "ne eblas elekti ŝlosilkrean kuntekston al %s"
 msgid "requires at least one argument"
 msgstr "postulas almenaŭ unu parametron"
 
-#: src/sesh.c:78 src/sudo.c:1126
+#: src/sesh.c:78 src/sudo.c:1114
 #, c-format
 msgid "unable to execute %s"
 msgstr "ne eblas plenumigi: %s"
@@ -620,102 +639,102 @@ msgstr "ne eblas komenci konduktan kromprogramon"
 msgid "error initializing I/O plugin %s"
 msgstr "eraro dum komenci eneligan kromprogramon %s"
 
-#: src/sudo.c:293
+#: src/sudo.c:294
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "neatendita sudo-reĝimon 0x%x"
 
-#: src/sudo.c:413
+#: src/sudo.c:414
 #, c-format
 msgid "unable to get group vector"
 msgstr "ne eblas elekti grupan vektoron"
 
-#: src/sudo.c:465
+#: src/sudo.c:466
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "nekonata uid %u: kiu vi estas?"
 
-#: src/sudo.c:802
+#: src/sudo.c:788
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s devas esti estrita de uid %d kaj la setuid-bito devas esti elektita"
 
-#: src/sudo.c:805
+#: src/sudo.c:791
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "efektiva uid ne estas %d; ĉu %s estas en dosiersistemo kun la elekto 'nosuid' aŭ reta dosiersistemo sen ĉefuzanto-privilegioj?"
 
-#: src/sudo.c:811
+#: src/sudo.c:797
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "efektiva uid ne estas %d; ĉu sudo estas instalita kiel setuid-radiko?"
 
-#: src/sudo.c:915
+#: src/sudo.c:923
 #, c-format
 msgid "unknown login class %s"
 msgstr "nekonata ensaluta klaso %s"
 
-#: src/sudo.c:929 src/sudo.c:932
+#: src/sudo.c:936
 #, c-format
 msgid "unable to set user context"
 msgstr "ne eblas elekti uzanto-kuntekston"
 
-#: src/sudo.c:944
+#: src/sudo.c:950
 #, c-format
 msgid "unable to set supplementary group IDs"
 msgstr "ne eblas elekti suplementajn grupajn identigilojn"
 
-#: src/sudo.c:951
+#: src/sudo.c:957
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "ne eblas elekti efikan gid-on al plenumigkiela gid %u"
 
-#: src/sudo.c:957
+#: src/sudo.c:963
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "ne eblas elekti gid-on kiel plenumigkielan gid-on %u"
 
-#: src/sudo.c:964
+#: src/sudo.c:970
 #, c-format
 msgid "unable to set process priority"
 msgstr "ne eblas elekti procezan prioritaton"
 
-#: src/sudo.c:972
+#: src/sudo.c:978
 #, c-format
 msgid "unable to change root to %s"
 msgstr "ne eblas ŝanĝi ĉefuzanton al %s"
 
-#: src/sudo.c:979 src/sudo.c:985 src/sudo.c:991
+#: src/sudo.c:991 src/sudo.c:997 src/sudo.c:1003
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "ne eblas ŝanĝi al plenumigkiela uid (%u, %u)"
 
-#: src/sudo.c:1005
+#: src/sudo.c:1020
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "ne eblas ŝanĝi dosierujon al %s"
 
-#: src/sudo.c:1089
+#: src/sudo.c:1077
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "neatendita ido ekzekutiĝis laŭ la kondiĉo: %d"
 
-#: src/sudo.c:1146
+#: src/sudo.c:1134
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr "konduta kromprogramo %s ne inkluzivas la metodon `check_policy'"
 
-#: src/sudo.c:1159
+#: src/sudo.c:1147
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "konduta kromprogramo %s ne komprenas listigon de privilegioj"
 
-#: src/sudo.c:1171
+#: src/sudo.c:1159
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "konduta kromprogramo %s ne komprenas la parametron -v"
 
-#: src/sudo.c:1183
+#: src/sudo.c:1171
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "konduta kromprogramo %s ne komprenas la parametrojn -k kaj -K"
@@ -765,27 +784,27 @@ msgstr "enhavo de redakta seanco restas en %s"
 msgid "unable to read temporary file"
 msgstr "ne eblas legi provizoran dosieron"
 
-#: src/tgetpass.c:89
+#: src/tgetpass.c:90
 #, c-format
 msgid "no tty present and no askpass program specified"
 msgstr "neniu tty ĉeestas kaj neniu pasvorto-programo specifita"
 
-#: src/tgetpass.c:98
+#: src/tgetpass.c:99
 #, c-format
 msgid "no askpass program specified, try setting SUDO_ASKPASS"
 msgstr "neniu pasvorto-programo specifita, provi valorizi SUDO_ASKPASS-on"
 
-#: src/tgetpass.c:230
+#: src/tgetpass.c:232
 #, c-format
 msgid "unable to set gid to %u"
 msgstr "ne eblas elekti gid-on al %u"
 
-#: src/tgetpass.c:234
+#: src/tgetpass.c:236
 #, c-format
 msgid "unable to set uid to %u"
 msgstr "ne eblas elekti uid-on al %u"
 
-#: src/tgetpass.c:239
+#: src/tgetpass.c:241
 #, c-format
 msgid "unable to run %s"
 msgstr "ne eblas plenumigi: %s"
@@ -804,6 +823,18 @@ msgstr "ne eblas kopii al enigo"
 #, c-format
 msgid "unable to restore stdin"
 msgstr "ne eblas restarigi enigon"
+
+#~ msgid "unknown user: %s"
+#~ msgstr "nekonata uzanto: %s"
+
+#~ msgid "list user's available commands\n"
+#~ msgstr "listigi disponeblajn komandojn de uzanto\n"
+
+#~ msgid "run a shell as target user\n"
+#~ msgstr "plenumigi ŝelon kiel cela uzanto\n"
+
+#~ msgid "when listing, list specified user's privileges\n"
+#~ msgstr "dum listigo, listigi privilegiojn de specifita uzanto\n"
 
 #~ msgid "unable to allocate memory"
 #~ msgstr "ne eblas generi memoron"
