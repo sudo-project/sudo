@@ -207,7 +207,7 @@ main(int argc, char *argv[])
 		strict = true;		/* strict mode */
 		break;
 	    case 'q':
-		quiet = false;		/* quiet mode */
+		quiet = true;		/* quiet mode */
 		break;
 	    default:
 		usage(1);
@@ -852,15 +852,19 @@ check_syntax(char *sudoers_path, bool quiet, bool strict, bool oldperms)
 	struct sudoersfile *sp;
 
 	/* Parsed OK, check mode and owner. */
-	if (oldperms || check_owner(sudoers_path, quiet))
-	    (void) printf(_("%s: parsed OK\n"), sudoers_path);
-	else
+	if (oldperms || check_owner(sudoers_path, quiet)) {
+	    if (!quiet)
+		(void) printf(_("%s: parsed OK\n"), sudoers_path);
+	} else {
 	    ok = false;
+	}
 	tq_foreach_fwd(&sudoerslist, sp) {
-	    if (oldperms || check_owner(sp->path, quiet))
-		(void) printf(_("%s: parsed OK\n"), sp->path);
-	    else
+	    if (oldperms || check_owner(sp->path, quiet)) {
+		if (!quiet)
+		    (void) printf(_("%s: parsed OK\n"), sp->path);
+	    } else {
 		ok = false;
+	    }
 	}
     }
 
