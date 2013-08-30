@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd August 19, 2013
+.Dd August 30, 2013
 .Dt SUDOERS.LDAP @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -482,6 +482,11 @@ are honored.
 Configuration options are listed below in upper case but are parsed
 in a case-independent manner.
 .Pp
+The pound sign
+.Pq Ql #
+is used to indicate a comment.
+Both the comment character and any text after it, up to the end of
+the line, are ignored.
 Long lines can be continued with a backslash
 .Pq Ql \e
 as the last character on the line.
@@ -769,6 +774,19 @@ The
 .Sy TLS_KEYPW
 contains the password used to decrypt the key database on clients
 using the Tivoli Directory Server LDAP library.
+This should be a simple string without quotes.
+The password may not include the comment character
+.Pq Ql #
+and escaping of special characters with a backslash
+.Pq Ql \e
+is not supported.
+If this option is used,
+.Pa @ldap_conf@
+must not be world-readable to avoid exposing the password.
+Alternately, a
+.Em stash file
+can be used to store the password in encrypted form (see below).
+.Pp
 If no
 .Sy TLS_KEYPW
 is specified, a
@@ -788,6 +806,10 @@ The default
 .Li ldapkey.kdb
 that ships with Tivoli Directory Server is encrypted with the password
 .Li ssl_password .
+The
+.Em gsk8capicmd
+utility can be used to manage the key database and create a
+.Em stash file .
 This option is only supported by the Tivoli LDAP libraries.
 .It Sy TLS_RANDFILE Ar file name
 The

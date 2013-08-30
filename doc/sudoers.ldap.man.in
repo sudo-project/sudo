@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOERS.LDAP" "8" "August 19, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD System Manager's Manual"
+.TH "SUDOERS.LDAP" "8" "August 30, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -513,6 +513,11 @@ are honored.
 Configuration options are listed below in upper case but are parsed
 in a case-independent manner.
 .PP
+The pound sign
+(`#')
+is used to indicate a comment.
+Both the comment character and any text after it, up to the end of
+the line, are ignored.
 Long lines can be continued with a backslash
 (`\e')
 as the last character on the line.
@@ -837,6 +842,19 @@ The
 \fBTLS_KEYPW\fR
 contains the password used to decrypt the key database on clients
 using the Tivoli Directory Server LDAP library.
+This should be a simple string without quotes.
+The password may not include the comment character
+(`#')
+and escaping of special characters with a backslash
+(`\e')
+is not supported.
+If this option is used,
+\fI@ldap_conf@\fR
+must not be world-readable to avoid exposing the password.
+Alternately, a
+\fIstash file\fR
+can be used to store the password in encrypted form (see below).
+.sp
 If no
 \fBTLS_KEYPW\fR
 is specified, a
@@ -856,6 +874,10 @@ The default
 \fRldapkey.kdb\fR
 that ships with Tivoli Directory Server is encrypted with the password
 \fRssl_password\fR.
+The
+\fIgsk8capicmd\fR
+utility can be used to manage the key database and create a
+\fIstash file\fR.
 This option is only supported by the Tivoli LDAP libraries.
 .PD
 .TP 6n

@@ -285,6 +285,8 @@ DDEESSCCRRIIPPTTIIOONN
      by ssuuddoo are honored.  Configuration options are listed below in upper
      case but are parsed in a case-independent manner.
 
+     The pound sign (`#') is used to indicate a comment.  Both the comment
+     character and any text after it, up to the end of the line, are ignored.
      Long lines can be continued with a backslash (`\') as the last character
      on the line.  Note that leading white space is removed from the beginning
      of lines even when the continuation character is used.
@@ -472,13 +474,21 @@ DDEESSCCRRIIPPTTIIOONN
      TTLLSS__KKEEYYPPWW _s_e_c_r_e_t
            The TTLLSS__KKEEYYPPWW contains the password used to decrypt the key
            database on clients using the Tivoli Directory Server LDAP library.
+           This should be a simple string without quotes.  The password may
+           not include the comment character (`#') and escaping of special
+           characters with a backslash (`\') is not supported.  If this option
+           is used, _/_e_t_c_/_l_d_a_p_._c_o_n_f must not be world-readable to avoid
+           exposing the password.  Alternately, a _s_t_a_s_h _f_i_l_e can be used to
+           store the password in encrypted form (see below).
+
            If no TTLLSS__KKEEYYPPWW is specified, a _s_t_a_s_h _f_i_l_e will be used if it
            exists.  The _s_t_a_s_h _f_i_l_e must have the same path as the file
            specified by TTLLSS__KKEEYY, but use a .sth file extension instead of
            .kdb, e.g. ldapkey.sth.  The default ldapkey.kdb that ships with
            Tivoli Directory Server is encrypted with the password
-           ssl_password.  This option is only supported by the Tivoli LDAP
-           libraries.
+           ssl_password.  The _g_s_k_8_c_a_p_i_c_m_d utility can be used to manage the
+           key database and create a _s_t_a_s_h _f_i_l_e.  This option is only
+           supported by the Tivoli LDAP libraries.
 
      TTLLSS__RRAANNDDFFIILLEE _f_i_l_e _n_a_m_e
            The TTLLSS__RRAANNDDFFIILLEE parameter specifies the path to an entropy source
@@ -800,4 +810,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.8                      August 19, 2013                     Sudo 1.8.8
+Sudo 1.8.8                      August 30, 2013                     Sudo 1.8.8
