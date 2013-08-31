@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd August 6, 2013
+.Dd August 31, 2013
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3596,6 +3596,10 @@ Lastly, we disable shell escapes for the commands in the PAGERS
 and
 .Pa /usr/bin/less
 .Pc .
+Note that this will not effectively constrain users with
+.Nm sudo
+.Sy ALL
+privileges.
 .Bd -literal
 # Override built-in defaults
 Defaults		syslog=auth
@@ -3827,6 +3831,14 @@ belonging to the
 and
 .Em SHELLS
 .Li Cmnd_Aliases .
+While not specifically mentioned in the rule, the commands in the
+.Em PAGERS
+.Li Cmnd_Alias
+all reside in
+.Pa /usr/bin
+and have the
+.Em noexec
+option set.
 .Bd -literal
 steve		CSNETS = (operator) /usr/local/op_commands/
 .Ed

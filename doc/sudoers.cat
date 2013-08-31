@@ -1920,7 +1920,8 @@ EEXXAAMMPPLLEESS
      file and make sure we log the year in each log line since the log entries
      will be kept around for several years.  Lastly, we disable shell escapes
      for the commands in the PAGERS Cmnd_Alias (_/_u_s_r_/_b_i_n_/_m_o_r_e, _/_u_s_r_/_b_i_n_/_p_g and
-     _/_u_s_r_/_b_i_n_/_l_e_s_s).
+     _/_u_s_r_/_b_i_n_/_l_e_s_s).  Note that this will not effectively constrain users with
+     ssuuddoo AALLLL privileges.
 
      # Override built-in defaults
      Defaults                syslog=auth
@@ -2025,7 +2026,9 @@ EEXXAAMMPPLLEESS
 
      For any machine in the _S_E_R_V_E_R_S Host_Alias, jjiillll may run any commands in
      the directory _/_u_s_r_/_b_i_n_/ except for those commands belonging to the _S_U and
-     _S_H_E_L_L_S Cmnd_Aliases.
+     _S_H_E_L_L_S Cmnd_Aliases.  While not specifically mentioned in the rule, the
+     commands in the _P_A_G_E_R_S Cmnd_Alias all reside in _/_u_s_r_/_b_i_n and have the
+     _n_o_e_x_e_c option set.
 
      steve           CSNETS = (operator) /usr/local/op_commands/
 
@@ -2269,4 +2272,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.8                      August 6, 2013                      Sudo 1.8.8
+Sudo 1.8.8                      August 31, 2013                     Sudo 1.8.8
