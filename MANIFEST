@@ -219,6 +219,7 @@ plugins/sudoers/insults.h
 plugins/sudoers/interfaces.c
 plugins/sudoers/interfaces.h
 plugins/sudoers/iolog.c
+plugins/sudoers/iolog.h
 plugins/sudoers/iolog_path.c
 plugins/sudoers/ldap.c
 plugins/sudoers/linux_audit.c

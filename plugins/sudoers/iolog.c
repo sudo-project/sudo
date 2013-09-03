@@ -50,6 +50,7 @@
 #endif
 
 #include "sudoers.h"
+#include "iolog.h"
 
 struct script_buf {
     int len; /* buffer length (how much read in) */
@@ -72,39 +73,6 @@ struct iolog_details {
     int lines;
     int cols;
 };
-
-union io_fd {
-    FILE *f;
-#ifdef HAVE_ZLIB_H
-    gzFile g;
-#endif
-    void *v;
-};
-
-static struct io_log_file {
-    bool enabled;
-    const char *suffix;
-    union io_fd fd;
-} io_log_files[] = {
-#define IOFD_LOG	0
-    { true,  "/log" },
-#define IOFD_TIMING	1
-    { true,  "/timing" },
-#define IOFD_STDIN	2
-    { false, "/stdin" },
-#define IOFD_STDOUT	3
-    { false, "/stdout" },
-#define IOFD_STDERR	4
-    { false, "/stderr" },
-#define IOFD_TTYIN	5
-    { false, "/ttyin" },
-#define IOFD_TTYOUT	6
-    { false, "/ttyout" },
-#define IOFD_MAX	7
-    { false, NULL }
-};
-
-#define SESSID_MAX	2176782336U
 
 static int iolog_compress;
 static struct timeval last_time;
@@ -330,11 +298,8 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
 #endif
 		iol->fd.f = fdopen(fd, "w");
 	}
-	if (fd == -1 || iol->fd.v == NULL) {
+	if (fd == -1 || iol->fd.v == NULL)
 	    log_fatal(USE_ERRNO, N_("unable to create %s"), pathbuf);
-	    if (fd != -1)
-		close(fd);
-	}
     } else {
 	/* Remove old log file if we recycled sequence numbers. */
 	unlink(pathbuf);
@@ -508,6 +473,37 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	io_log_files[IOFD_TTYOUT].enabled);
 }
 
+/*
+ * Write the "/log" file that contains the user and command info.
+ */
+void
+write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
+    char * const argv[], struct timeval *now)
+{
+    char * const *av;
+    FILE *fp;
+    int fd;
+
+    pathbuf[len] = '\0';
+    strlcat(pathbuf, "/log", PATH_MAX);
+    fd = open(pathbuf, O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR);
+    if (fd != -1 || (fp = fdopen(fd, "w")) == NULL)
+	log_fatal(USE_ERRNO, N_("unable to create %s"), pathbuf);
+
+    fprintf(fp, "%lld:%s:%s:%s:%s:%d:%d\n%s\n%s", (long long)now->tv_sec,
+	details->user ? details->user : "unknown", details->runas_pw->pw_name,
+	details->runas_gr ? details->runas_gr->gr_name : "",
+	details->tty ? details->tty : "unknown", details->lines, details->cols,
+	details->cwd ? details->cwd : "unknown",
+	details->command ? details->command : "unknown");
+    for (av = argv + 1; *av != NULL; av++) {
+	fputc(' ', fp);
+	fputs(*av, fp);
+    }
+    fputc('\n', fp);
+    fclose(fp);
+}
+
 static int
 sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t plugin_printf, char * const settings[],
@@ -581,28 +577,13 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     if (len >= sizeof(pathbuf))
 	goto done;
 
-    /*
-     * We create 7 files: a log file, a timing file and 5 for input/output.
-     */
-    for (i = 0; i < IOFD_MAX; i++) {
-	open_io_fd(pathbuf, len, &io_log_files[i], i ? iolog_compress : false);
-    }
-
+    /* Write log file with user and command details. */
     gettimeofday(&last_time, NULL);
-    fprintf(io_log_files[IOFD_LOG].fd.f, "%lld:%s:%s:%s:%s:%d:%d\n%s\n%s",
-	(long long)last_time.tv_sec,
-	details.user ? details.user : "unknown", details.runas_pw->pw_name,
-	details.runas_gr ? details.runas_gr->gr_name : "",
-	details.tty ? details.tty : "unknown", details.lines, details.cols,
-	details.cwd ? details.cwd : "unknown",
-	details.command ? details.command : "unknown");
-    for (cur = &argv[1]; *cur != NULL; cur++) {
-	fputc(' ', io_log_files[IOFD_LOG].fd.f);
-	fputs(*cur, io_log_files[IOFD_LOG].fd.f);
-    }
-    fputc('\n', io_log_files[IOFD_LOG].fd.f);
-    fclose(io_log_files[IOFD_LOG].fd.f);
-    io_log_files[IOFD_LOG].fd.f = NULL;
+    write_info_log(pathbuf, len, &details, argv, &last_time);
+
+    /* Create the timing I/O log files. */
+    for (i = 0; i < IOFD_MAX; i++)
+	open_io_fd(pathbuf, len, &io_log_files[i], iolog_compress);
 
     /*
      * Clear I/O log function pointers for disabled log functions.

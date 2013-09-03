@@ -100,6 +100,7 @@
 #include "fatal.h"
 #include "gettext.h"
 #include "logging.h"
+#include "iolog.h"
 #include "sudo_plugin.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
@@ -107,27 +108,6 @@
 #ifndef LINE_MAX
 # define LINE_MAX 2048
 #endif
-
-/* Must match the defines in iolog.c */
-#define IOFD_STDIN      0
-#define IOFD_STDOUT     1
-#define IOFD_STDERR     2
-#define IOFD_TTYIN      3
-#define IOFD_TTYOUT     4
-#define IOFD_TIMING     5
-#define IOFD_MAX        6
-
-/* Bitmap of iofds to be replayed */
-unsigned int replay_filter = (1 << IOFD_STDOUT) | (1 << IOFD_STDERR) |
-			     (1 << IOFD_TTYOUT);
-
-union io_fd {
-    FILE *f;
-#ifdef HAVE_ZLIB_H
-    gzFile g;
-#endif
-    void *v;
-};
 
 /*
  * Info present in the I/O log file
@@ -185,16 +165,6 @@ static int stack_top;
 
 static const char *session_dir = _PATH_SUDO_IO_LOGDIR;
 
-static union io_fd io_fds[IOFD_MAX];
-static const char *io_fnames[IOFD_MAX] = {
-    "/stdin",
-    "/stdout",
-    "/stderr",
-    "/ttyin",
-    "/ttyout",
-    "/timing"
-};
-
 static const char short_opts[] =  "d:f:hlm:s:V";
 static struct option long_opts[] = {
     { "directory",	required_argument,	NULL,	'd' },
@@ -219,7 +189,7 @@ static void check_input(int, double *);
 static void delay(double);
 static void help(void) __attribute__((__noreturn__));
 static void usage(int);
-static int open_io_fd(char *pathbuf, int len, const char *suffix, union io_fd *fdp);
+static int open_io_fd(char *path, int len, struct io_log_file *iol);
 static int parse_timing(const char *buf, const char *decimal, int *idx, double *seconds, size_t *nbytes);
 static struct log_info *parse_logfile(char *logfile);
 static void free_log_info(struct log_info *li);
@@ -254,6 +224,7 @@ main(int argc, char *argv[])
 {
     int ch, idx, plen, exitcode = 0, rows = 0, cols = 0;
     bool interactive = false, listonly = false, need_nlcr = false;
+    bool def_filter = true;
     const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
     double seconds, to_wait, speed = 1.0, max_wait = 0;
@@ -293,14 +264,14 @@ main(int argc, char *argv[])
 	    break;
 	case 'f':
 	    /* Set the replay filter. */
-	    replay_filter = 0;
+	    def_filter = false;
 	    for (cp = strtok(optarg, ","); cp; cp = strtok(NULL, ",")) {
 		if (strcmp(cp, "stdout") == 0)
-		    SET(replay_filter, 1 << IOFD_STDOUT);
+		    io_log_files[IOFD_STDOUT].enabled = true;
 		else if (strcmp(cp, "stderr") == 0)
-		    SET(replay_filter, 1 << IOFD_STDERR);
+		    io_log_files[IOFD_STDERR].enabled = true;
 		else if (strcmp(cp, "ttyout") == 0)
-		    SET(replay_filter, 1 << IOFD_TTYOUT);
+		    io_log_files[IOFD_TTYOUT].enabled = true;
 		else
 		    fatalx(_("invalid filter option: %s"), optarg);
 	    }
@@ -343,6 +314,13 @@ main(int argc, char *argv[])
     if (argc != 1)
 	usage(1);
 
+    /* By default we replay stdout, stderr and ttyout. */
+    if (def_filter) {
+	io_log_files[IOFD_STDOUT].enabled = true;
+	io_log_files[IOFD_STDERR].enabled = true;
+	io_log_files[IOFD_TTYOUT].enabled = true;
+    }
+
     /* 6 digit ID in base 36, e.g. 01G712AB or free-form name */
     id = argv[0];
     if (VALID_ID(id)) {
@@ -362,10 +340,8 @@ main(int argc, char *argv[])
 
     /* Open files for replay, applying replay filter for the -f flag. */
     for (idx = 0; idx < IOFD_MAX; idx++) {
-	if (ISSET(replay_filter, 1 << idx) || idx == IOFD_TIMING) {
-	    if (open_io_fd(path, plen, io_fnames[idx], &io_fds[idx]) == -1)
-		fatal(_("unable to open %s"), path);
-	}
+	if (open_io_fd(path, plen, &io_log_files[idx]) == -1) 
+	    fatal(_("unable to open %s"), path);
     }
 
     /* Parse log file. */
@@ -419,9 +395,9 @@ main(int argc, char *argv[])
      * Timing file consists of line of the format: "%f %d\n"
      */
 #ifdef HAVE_ZLIB_H
-    while (gzgets(io_fds[IOFD_TIMING].g, buf, sizeof(buf)) != NULL) {
+    while (gzgets(io_log_files[IOFD_TIMING].fd.g, buf, sizeof(buf)) != NULL) {
 #else
-    while (fgets(buf, sizeof(buf), io_fds[IOFD_TIMING].f) != NULL) {
+    while (fgets(buf, sizeof(buf), io_log_files[IOFD_TIMING].fd.f) != NULL) {
 #endif
 	char last_char = '\0';
 
@@ -437,8 +413,8 @@ main(int argc, char *argv[])
 	    to_wait = max_wait;
 	delay(to_wait);
 
-	/* Even if we are not relaying, we still have to delay. */
-	if (io_fds[idx].v == NULL)
+	/* Even if we are not replaying, we still have to delay. */
+	if (io_log_files[idx].fd.v == NULL)
 	    continue;
 
 	/* Check whether we need to convert newline to CR LF pairs. */
@@ -452,9 +428,9 @@ main(int argc, char *argv[])
 	    else
 		len = nbytes;
 #ifdef HAVE_ZLIB_H
-	    nread = gzread(io_fds[idx].g, buf, len);
+	    nread = gzread(io_log_files[idx].fd.g, buf, len);
 #else
-	    nread = fread(buf, 1, len, io_fds[idx].f);
+	    nread = fread(buf, 1, len, io_log_files[idx].fd.f);
 #endif
 	    nbytes -= nread;
 
@@ -544,19 +520,21 @@ delay(double secs)
 }
 
 static int
-open_io_fd(char *path, int len, const char *suffix, union io_fd *fdp)
+open_io_fd(char *path, int len, struct io_log_file *iol)
 {
     debug_decl(open_io_fd, SUDO_DEBUG_UTIL)
 
-    path[len] = '\0';
-    strlcat(path, suffix, PATH_MAX);
+    if (!iol->enabled)
+	debug_return_int(0);
 
+    path[len] = '\0';
+    strlcat(path, iol->suffix, PATH_MAX);
 #ifdef HAVE_ZLIB_H
-    fdp->g = gzopen(path, "r");
+    iol->fd.g = gzopen(path, "r");
 #else
-    fdp->f = fopen(path, "r");
+    iol->fd.f = fopen(path, "r");
 #endif
-    debug_return_int(fdp->v ? 0 : -1);
+    debug_return_int(iol->fd.v ? 0 : -1);
 }
 
 /*
