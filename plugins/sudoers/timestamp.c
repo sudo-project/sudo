@@ -402,14 +402,15 @@ remove_timestamp(bool remove)
 		status = rmdir(timestampdir);
 	    if (status == -1 && errno != ENOENT) {
 		log_warning(0,
-		    N_("unable to remove %s, will reset to the epoch"), path);
+		    N_("unable to remove %s, will reset to the Unix epoch"),
+		    path);
 		remove = false;
 	    }
 	}
 	if (!remove) {
 	    timevalclear(&tv);
 	    if (touch(-1, path, &tv) == -1 && errno != ENOENT)
-		fatal(_("unable to reset %s to the epoch"), path);
+		fatal(_("unable to reset %s to the Unix epoch"), path);
 	}
     }
 

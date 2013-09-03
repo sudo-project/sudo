@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.8\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-09-03 14:44-0600\n"
+"POT-Creation-Date: 2013-09-03 14:48-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1499,12 +1499,12 @@ msgstr ""
 
 #: plugins/sudoers/timestamp.c:405
 #, c-format
-msgid "unable to remove %s, will reset to the epoch"
+msgid "unable to remove %s, will reset to the Unix epoch"
 msgstr ""
 
-#: plugins/sudoers/timestamp.c:412
+#: plugins/sudoers/timestamp.c:413
 #, c-format
-msgid "unable to reset %s to the epoch"
+msgid "unable to reset %s to the Unix epoch"
 msgstr ""
 
 #: plugins/sudoers/toke_util.c:176
