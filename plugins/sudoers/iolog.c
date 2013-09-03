@@ -487,7 +487,7 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
     pathbuf[len] = '\0';
     strlcat(pathbuf, "/log", PATH_MAX);
     fd = open(pathbuf, O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR);
-    if (fd != -1 || (fp = fdopen(fd, "w")) == NULL)
+    if (fd == -1 || (fp = fdopen(fd, "w")) == NULL)
 	log_fatal(USE_ERRNO, N_("unable to create %s"), pathbuf);
 
     fprintf(fp, "%lld:%s:%s:%s:%s:%d:%d\n%s\n%s", (long long)now->tv_sec,
