@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.8\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-08-16 10:14-0600\n"
+"POT-Creation-Date: 2013-09-03 14:44-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -543,7 +543,7 @@ msgstr ""
 
 #: src/selinux.c:342
 #, c-format
-msgid "unable to setup tty context for %s"
+msgid "unable to set tty context to %s"
 msgstr ""
 
 #: src/selinux.c:381

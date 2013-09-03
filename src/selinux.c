@@ -339,7 +339,7 @@ selinux_setup(const char *role, const char *type, const char *ttyn,
 	goto done;
     
     if (relabel_tty(ttyn, ptyfd) < 0) {
-	warning(_("unable to setup tty context for %s"), se_state.new_context);
+	warning(_("unable to set tty context to %s"), se_state.new_context);
 	goto done;
     }
 
