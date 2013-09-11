@@ -372,7 +372,7 @@ check: $(TEST_PROGS) visudo testsudoers
 		    base=`basename $$t .sh`; \
 		    out="regress/$$dir/$${base}.out"; \
 		    err="regress/$$dir/$${base}.err"; \
-		    TESTDIR=$$CWD/$(srcdir)/regress/$$dir \
+		    TESTDIR=$(srcdir)/regress/$$dir \
 			$(SHELL) $$t >$$out 2>$$err; \
 		    if cmp $$out $(srcdir)/$$out.ok >/dev/null; then \
 			passed=`expr $$passed + 1`; \
