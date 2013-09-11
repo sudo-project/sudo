@@ -67,7 +67,9 @@ main(int argc, char *argv[])
     if ((tty_sudo = get_process_ttyname()) == NULL)
 	tty_sudo = estrdup("none");
 
-    if (strcmp(tty_libc, tty_sudo) == 0) {
+    if (strcmp(tty_libc, "none") == 0) {
+	printf("%s: SKIP (%s)\n", getprogname(), tty_sudo);
+    } else if (strcmp(tty_libc, tty_sudo) == 0) {
 	printf("%s: OK (%s)\n", getprogname(), tty_sudo);
     } else {
 	printf("%s: FAIL %s (sudo) vs. %s (libc)\n", getprogname(),
