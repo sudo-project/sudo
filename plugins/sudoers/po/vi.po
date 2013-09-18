@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers-1.8.8b1\n"
+"Project-Id-Version: sudoers-1.8.8b3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-08-16 10:18-0600\n"
-"PO-Revision-Date: 2013-08-18 08:05+0700\n"
+"POT-Creation-Date: 2013-09-03 14:48-0600\n"
+"PO-Revision-Date: 2013-09-05 07:21+0700\n"
 "Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
 "Language-Team: Vietnamese <translation-team-vi@lists.sourceforge.net>\n"
 "Language: vi\n"
@@ -52,8 +52,8 @@ msgid "invalid authentication type"
 msgstr "kiểu xác thực sai"
 
 #: plugins/sudoers/auth/bsdauth.c:100
-msgid "unable to setup authentication"
-msgstr "không thể cài đặt xác thực"
+msgid "unable to initialize BSD authentication"
+msgstr "không thể khởi tạo xác thực kiểu BSD"
 
 #: plugins/sudoers/auth/fwtk.c:59
 #, c-format
@@ -699,7 +699,7 @@ msgstr "lỗi nội bộ, %s bị tràn"
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr "sudo_putenv: envp sai hỏng, chiều dài không khớp"
 
-#: plugins/sudoers/env.c:1012
+#: plugins/sudoers/env.c:1014
 #, c-format
 msgid "sorry, you are not allowed to set the following environment variables: %s"
 msgstr "rất tiếc, bạn không được phép đặt các biến môi trường sau đây: %1s"
@@ -733,38 +733,38 @@ msgstr "%s: phiên bản số lớn phần bổ xung nhóm không tương thích
 msgid "Local IP address and netmask pairs:\n"
 msgstr "Cặp địa chỉ IP và mặt nạ cục bộ:\n"
 
-#: plugins/sudoers/iolog.c:131 plugins/sudoers/iolog.c:144
+#: plugins/sudoers/iolog.c:99 plugins/sudoers/iolog.c:112
 #: plugins/sudoers/timestamp.c:200 plugins/sudoers/timestamp.c:244
 #, c-format
 msgid "%s exists but is not a directory (0%o)"
 msgstr "%s tồn tại nhưng không phải là một thư mục (0%o)"
 
-#: plugins/sudoers/iolog.c:141 plugins/sudoers/iolog.c:155
-#: plugins/sudoers/iolog.c:159 plugins/sudoers/timestamp.c:165
+#: plugins/sudoers/iolog.c:109 plugins/sudoers/iolog.c:123
+#: plugins/sudoers/iolog.c:127 plugins/sudoers/timestamp.c:165
 #: plugins/sudoers/timestamp.c:221 plugins/sudoers/timestamp.c:271
 #, c-format
 msgid "unable to mkdir %s"
 msgstr "không thể tạo thư mục “%s”"
 
-#: plugins/sudoers/iolog.c:217 plugins/sudoers/sudoers.c:710
-#: plugins/sudoers/sudoreplay.c:367 plugins/sudoers/sudoreplay.c:828
-#: plugins/sudoers/sudoreplay.c:991 plugins/sudoers/timestamp.c:155
+#: plugins/sudoers/iolog.c:185 plugins/sudoers/sudoers.c:710
+#: plugins/sudoers/sudoreplay.c:346 plugins/sudoers/sudoreplay.c:808
+#: plugins/sudoers/sudoreplay.c:971 plugins/sudoers/timestamp.c:155
 #: plugins/sudoers/visudo.c:824
 #, c-format
 msgid "unable to open %s"
 msgstr "không mở được %s"
 
-#: plugins/sudoers/iolog.c:250 plugins/sudoers/sudoers.c:713
+#: plugins/sudoers/iolog.c:218 plugins/sudoers/sudoers.c:713
 #, c-format
 msgid "unable to read %s"
 msgstr "không thể đọc %s"
 
-#: plugins/sudoers/iolog.c:274 plugins/sudoers/timestamp.c:159
+#: plugins/sudoers/iolog.c:242 plugins/sudoers/timestamp.c:159
 #, c-format
 msgid "unable to write to %s"
 msgstr "không thể ghi vào %s"
 
-#: plugins/sudoers/iolog.c:334
+#: plugins/sudoers/iolog.c:302 plugins/sudoers/iolog.c:491
 #, c-format
 msgid "unable to create %s"
 msgstr "không thể tạo “%s”"
@@ -814,27 +814,27 @@ msgstr "không thể khởi tạo chứng nhận SSL và csdl khóa: %s"
 msgid "you must set TLS_CERT in %s to use SSL"
 msgstr "bạn phải đặt TLS_CERT trong %s để sử dụng SSL"
 
-#: plugins/sudoers/ldap.c:1077
+#: plugins/sudoers/ldap.c:1081
 #, c-format
 msgid "unable to get GMT time"
 msgstr "không thể lấy giờ quốc tế (GMT)"
 
-#: plugins/sudoers/ldap.c:1083
+#: plugins/sudoers/ldap.c:1087
 #, c-format
 msgid "unable to format timestamp"
 msgstr "không thể định dạng dấu-vết-thời-gian"
 
-#: plugins/sudoers/ldap.c:1091
+#: plugins/sudoers/ldap.c:1095
 #, c-format
 msgid "unable to build time filter"
 msgstr "không thể xây dựng bộ lọc thời gian"
 
-#: plugins/sudoers/ldap.c:1310
+#: plugins/sudoers/ldap.c:1314
 #, c-format
 msgid "sudo_ldap_build_pass1 allocation mismatch"
 msgstr "sudo_ldap_build_pass1 phân bổ không khớp"
 
-#: plugins/sudoers/ldap.c:1883
+#: plugins/sudoers/ldap.c:1887
 #, c-format
 msgid ""
 "\n"
@@ -843,7 +843,7 @@ msgstr ""
 "\n"
 "Vai trò LDAP: %s\n"
 
-#: plugins/sudoers/ldap.c:1885
+#: plugins/sudoers/ldap.c:1889
 #, c-format
 msgid ""
 "\n"
@@ -852,28 +852,28 @@ msgstr ""
 "\n"
 "Vai trò LDAP: KHÔNG HIỂU\n"
 
-#: plugins/sudoers/ldap.c:1932
+#: plugins/sudoers/ldap.c:1936
 #, c-format
 msgid "    Order: %s\n"
 msgstr "    Thứ tự: %s\n"
 
-#: plugins/sudoers/ldap.c:1940 plugins/sudoers/parse.c:515
+#: plugins/sudoers/ldap.c:1944 plugins/sudoers/parse.c:515
 #: plugins/sudoers/sssd.c:1242
 #, c-format
 msgid "    Commands:\n"
 msgstr "    Lệnh:\n"
 
-#: plugins/sudoers/ldap.c:2477
+#: plugins/sudoers/ldap.c:2481
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr "không thể khởi tạo LDAP: %s"
 
-#: plugins/sudoers/ldap.c:2511
+#: plugins/sudoers/ldap.c:2519
 #, c-format
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
 msgstr "start_tls được chỉ ra nhưng thư viện LDAP không hỗ trợ ldap_start_tls_s() hoặc ldap_start_tls_s_np()"
 
-#: plugins/sudoers/ldap.c:2747
+#: plugins/sudoers/ldap.c:2755
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr "thuộc tính sudoOrder không hợp lệ: %s"
@@ -1316,127 +1316,127 @@ msgstr "không thể phân giải địa chỉ của máy %s"
 msgid "unknown group: %s"
 msgstr "không nhận ra nhóm: %s"
 
-#: plugins/sudoers/sudoreplay.c:305
+#: plugins/sudoers/sudoreplay.c:278
 #, c-format
 msgid "invalid filter option: %s"
 msgstr "tùy chọn lọc không hợp lệ: %s"
 
-#: plugins/sudoers/sudoreplay.c:318
+#: plugins/sudoers/sudoreplay.c:291
 #, c-format
 msgid "invalid max wait: %s"
 msgstr "thời gian chờ tối đa không hợp lệ: %s"
 
-#: plugins/sudoers/sudoreplay.c:324
+#: plugins/sudoers/sudoreplay.c:297
 #, c-format
 msgid "invalid speed factor: %s"
 msgstr "sai hệ số nhân tốc độ: %s"
 
-#: plugins/sudoers/sudoreplay.c:327 plugins/sudoers/visudo.c:191
+#: plugins/sudoers/sudoreplay.c:300 plugins/sudoers/visudo.c:191
 #, c-format
 msgid "%s version %s\n"
 msgstr "%s phiên bản %s\n"
 
-#: plugins/sudoers/sudoreplay.c:352
+#: plugins/sudoers/sudoreplay.c:332
 #, c-format
 msgid "%s/%.2s/%.2s/%.2s/timing: %s"
 msgstr "%s/%.2s/%.2s/%.2s/thời-gian: %s"
 
-#: plugins/sudoers/sudoreplay.c:358
+#: plugins/sudoers/sudoreplay.c:338
 #, c-format
 msgid "%s/%s/timing: %s"
 msgstr "%s/%s/thời-gian: %s"
 
-#: plugins/sudoers/sudoreplay.c:376
+#: plugins/sudoers/sudoreplay.c:354
 #, c-format
 msgid "Replaying sudo session: %s\n"
 msgstr "Đang chạy lại phiên sudo: %s\n"
 
-#: plugins/sudoers/sudoreplay.c:382
+#: plugins/sudoers/sudoreplay.c:360
 #, c-format
 msgid "Warning: your terminal is too small to properly replay the log.\n"
 msgstr "Cảnh báo: thiết bị cuối quá nhỏ để có thể chạy nhật ký một cách đúng đắn.\n"
 
-#: plugins/sudoers/sudoreplay.c:383
+#: plugins/sudoers/sudoreplay.c:361
 #, c-format
 msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
 msgstr "Định dạng của nhật ký là %d x %d, định dạng của thiết bị cuối là %d x %d."
 
-#: plugins/sudoers/sudoreplay.c:413
+#: plugins/sudoers/sudoreplay.c:391
 #, c-format
 msgid "unable to set tty to raw mode"
 msgstr "không thể đặt thiết bị tty chế độ raw (thô)"
 
-#: plugins/sudoers/sudoreplay.c:429
+#: plugins/sudoers/sudoreplay.c:407
 #, c-format
 msgid "invalid timing file line: %s"
 msgstr "sai dòng ghi thời gian trong tập tin: %s"
 
-#: plugins/sudoers/sudoreplay.c:512
+#: plugins/sudoers/sudoreplay.c:490
 #, c-format
 msgid "writing to standard output"
 msgstr "ghi vào đầu ra tiêu chuẩn"
 
-#: plugins/sudoers/sudoreplay.c:654 plugins/sudoers/sudoreplay.c:679
+#: plugins/sudoers/sudoreplay.c:634 plugins/sudoers/sudoreplay.c:659
 #, c-format
 msgid "ambiguous expression \"%s\""
 msgstr "biểu thức không rõ ràng “%s”"
 
-#: plugins/sudoers/sudoreplay.c:696
+#: plugins/sudoers/sudoreplay.c:676
 #, c-format
 msgid "too many parenthesized expressions, max %d"
 msgstr "có quá nhiều biểu thức trong dấu ngoặc đơn, tối đa là %d"
 
-#: plugins/sudoers/sudoreplay.c:707
+#: plugins/sudoers/sudoreplay.c:687
 #, c-format
 msgid "unmatched ')' in expression"
 msgstr "thiếu “)” trong biểu thức"
 
-#: plugins/sudoers/sudoreplay.c:713
+#: plugins/sudoers/sudoreplay.c:693
 #, c-format
 msgid "unknown search term \"%s\""
 msgstr "không hiểu giới hạn tìm kiếm “%s”"
 
-#: plugins/sudoers/sudoreplay.c:727
+#: plugins/sudoers/sudoreplay.c:707
 #, c-format
 msgid "%s requires an argument"
 msgstr "%s yêu cầu một đối số"
 
-#: plugins/sudoers/sudoreplay.c:731 plugins/sudoers/sudoreplay.c:1071
+#: plugins/sudoers/sudoreplay.c:711 plugins/sudoers/sudoreplay.c:1051
 #, c-format
 msgid "invalid regular expression: %s"
 msgstr "biểu thức chính quy không hợp lệ: %s"
 
-#: plugins/sudoers/sudoreplay.c:737
+#: plugins/sudoers/sudoreplay.c:717
 #, c-format
 msgid "could not parse date \"%s\""
 msgstr "không thể phân tích ngày tháng  “%s”"
 
-#: plugins/sudoers/sudoreplay.c:750
+#: plugins/sudoers/sudoreplay.c:730
 #, c-format
 msgid "unmatched '(' in expression"
 msgstr "thiếu “(” trong biểu thức"
 
-#: plugins/sudoers/sudoreplay.c:752
+#: plugins/sudoers/sudoreplay.c:732
 #, c-format
 msgid "illegal trailing \"or\""
 msgstr "sai đuôi “or”"
 
-#: plugins/sudoers/sudoreplay.c:754
+#: plugins/sudoers/sudoreplay.c:734
 #, c-format
 msgid "illegal trailing \"!\""
 msgstr "sai đuôi “!”"
 
-#: plugins/sudoers/sudoreplay.c:1195
+#: plugins/sudoers/sudoreplay.c:1179
 #, c-format
 msgid "usage: %s [-h] [-d dir] [-m num] [-s num] ID\n"
 msgstr "cách dùng: %s [-h] [-d thư-mục] [-m số] [-s số] ID\n"
 
-#: plugins/sudoers/sudoreplay.c:1198
+#: plugins/sudoers/sudoreplay.c:1182
 #, c-format
 msgid "usage: %s [-h] [-d dir] -l [search expression]\n"
 msgstr "cách dùng: %s [-h] [-d th.mục] -l [biểu thức tìm kiếm]\n"
 
-#: plugins/sudoers/sudoreplay.c:1207
+#: plugins/sudoers/sudoreplay.c:1191
 #, c-format
 msgid ""
 "%s - replay sudo session logs\n"
@@ -1445,7 +1445,7 @@ msgstr ""
 "%s - chạy lại nhật ký phiên sudo\n"
 "\n"
 
-#: plugins/sudoers/sudoreplay.c:1209
+#: plugins/sudoers/sudoreplay.c:1193
 msgid ""
 "\n"
 "Options:\n"
@@ -1528,13 +1528,13 @@ msgstr "timestamp nằm quá xa ở tương lai: %20.20s"
 
 #: plugins/sudoers/timestamp.c:405
 #, c-format
-msgid "unable to remove %s, will reset to the epoch"
-msgstr "không thể gỡ bỏ %s, sẽ đặt lại thành epoch"
+msgid "unable to remove %s, will reset to the Unix epoch"
+msgstr "không thể gỡ bỏ %s, sẽ đặt lại thành thời điểm bắt đầu kiểu Unix"
 
-#: plugins/sudoers/timestamp.c:412
+#: plugins/sudoers/timestamp.c:413
 #, c-format
-msgid "unable to reset %s to the epoch"
-msgstr "không thể đặt lại %s thành epoch"
+msgid "unable to reset %s to the Unix epoch"
+msgstr "không thể đặt lại %s thành thời điểm bắt đầu kiểu Unix"
 
 #: plugins/sudoers/toke_util.c:176
 #, c-format
@@ -1662,57 +1662,57 @@ msgstr "lỗi phân tích trong %s gần dòng %d\n"
 msgid "parse error in %s\n"
 msgstr "gặp lỗi phân tích trong %s\n"
 
-#: plugins/sudoers/visudo.c:856 plugins/sudoers/visudo.c:861
+#: plugins/sudoers/visudo.c:857 plugins/sudoers/visudo.c:864
 #, c-format
 msgid "%s: parsed OK\n"
 msgstr "%s: kiểm duyệt OK\n"
 
-#: plugins/sudoers/visudo.c:908
+#: plugins/sudoers/visudo.c:912
 #, c-format
 msgid "%s busy, try again later"
 msgstr "%s đang bận, hãy thử lại sau"
 
-#: plugins/sudoers/visudo.c:952
+#: plugins/sudoers/visudo.c:956
 #, c-format
 msgid "specified editor (%s) doesn't exist"
 msgstr "trình biên soạn đã chỉ ra (%s) không tồn tại"
 
-#: plugins/sudoers/visudo.c:975
+#: plugins/sudoers/visudo.c:979
 #, c-format
 msgid "unable to stat editor (%s)"
 msgstr "không thể lấy thống kê trình biên soạn (%s)"
 
-#: plugins/sudoers/visudo.c:1023
+#: plugins/sudoers/visudo.c:1027
 #, c-format
 msgid "no editor found (editor path = %s)"
 msgstr "không tìm thấy trình biên soạn (đường dẫn của nó = %s)"
 
-#: plugins/sudoers/visudo.c:1117
+#: plugins/sudoers/visudo.c:1120
 #, c-format
 msgid "Error: cycle in %s_Alias `%s'"
 msgstr "Lỗi: bí danh bị quẩn trong %s_Alias “%s”"
 
-#: plugins/sudoers/visudo.c:1118
+#: plugins/sudoers/visudo.c:1121
 #, c-format
 msgid "Warning: cycle in %s_Alias `%s'"
 msgstr "Cảnh báo: cycle (vòng tròn) trong %s_Alias “%s”"
 
-#: plugins/sudoers/visudo.c:1121
+#: plugins/sudoers/visudo.c:1127
 #, c-format
 msgid "Error: %s_Alias `%s' referenced but not defined"
 msgstr "Lỗi: %s_Bí_danh “%s” được tham chiếu nhưng chưa được định nghĩa"
 
-#: plugins/sudoers/visudo.c:1122
+#: plugins/sudoers/visudo.c:1128
 #, c-format
 msgid "Warning: %s_Alias `%s' referenced but not defined"
 msgstr "Cảnh báo: %s_Bí_danh “%s” được tham chiếu nhưng chưa được định nghĩa"
 
-#: plugins/sudoers/visudo.c:1248
+#: plugins/sudoers/visudo.c:1253
 #, c-format
 msgid "%s: unused %s_Alias %s"
 msgstr "%s: không dùng %s_Bí_danh %s"
 
-#: plugins/sudoers/visudo.c:1310
+#: plugins/sudoers/visudo.c:1315
 #, c-format
 msgid ""
 "%s - safely edit the sudoers file\n"
@@ -1721,7 +1721,7 @@ msgstr ""
 "%s - sửa tập tin sudoers một cách an toàn\n"
 "\n"
 
-#: plugins/sudoers/visudo.c:1312
+#: plugins/sudoers/visudo.c:1317
 msgid ""
 "\n"
 "Options:\n"
@@ -1744,6 +1744,9 @@ msgstr ""
 #: toke.l:886
 msgid "too many levels of includes"
 msgstr "quá nhiều cấp bao gồm (include)"
+
+#~ msgid "unable to setup authentication"
+#~ msgstr "không thể cài đặt xác thực"
 
 #~ msgid "getaudit: failed"
 #~ msgstr "getaudit: gặp lỗi"

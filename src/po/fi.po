@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.8b1\n"
+"Project-Id-Version: sudo 1.8.8b3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-08-16 10:14-0600\n"
-"PO-Revision-Date: 2013-08-23 20:48+0300\n"
+"POT-Creation-Date: 2013-09-03 14:44-0600\n"
+"PO-Revision-Date: 2013-09-08 11:13+0300\n"
 "Last-Translator: Jorma Karvonen <karvonen.jorma@gmail.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
 "Language: fi\n"
@@ -553,7 +553,7 @@ msgstr "vahvistustilan määritteleminen epäonnistui."
 
 #: src/selinux.c:342
 #, c-format
-msgid "unable to setup tty context for %s"
+msgid "unable to set tty context to %s"
 msgstr "ei kyetä asettamaan tty-asiayhteydeksi %s"
 
 #: src/selinux.c:381

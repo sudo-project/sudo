@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.8b1\n"
+"Project-Id-Version: sudo 1.8.8b3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-08-16 10:14-0600\n"
-"PO-Revision-Date: 2013-08-17 19:37-0300\n"
+"POT-Creation-Date: 2013-09-03 14:44-0600\n"
+"PO-Revision-Date: 2013-09-04 17:34-0300\n"
 "Last-Translator: Rafael Ferreira <rafael.f.f1@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <ldpbr-translation@lists.sourceforge.net>\n"
 "Language: pt_BR\n"
@@ -549,8 +549,8 @@ msgstr "não foi possível determinar modo de aplicação."
 
 #: src/selinux.c:342
 #, c-format
-msgid "unable to setup tty context for %s"
-msgstr "não foi possível configurar contexto de tty de %s"
+msgid "unable to set tty context to %s"
+msgstr "não foi possível definir contexto de tty de %s"
 
 #: src/selinux.c:381
 #, c-format

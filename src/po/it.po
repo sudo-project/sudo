@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo-1.8.8b1\n"
+"Project-Id-Version: sudo-1.8.8b3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-08-16 10:14-0600\n"
-"PO-Revision-Date: 2013-08-23 19:37+0200\n"
+"POT-Creation-Date: 2013-09-03 14:44-0600\n"
+"PO-Revision-Date: 2013-09-05 11:08+0200\n"
 "Last-Translator: Milo Casagrande <milo@milo.name>\n"
 "Language-Team: Italian <tp@lists.linux.it>\n"
 "Language: it\n"
@@ -547,8 +547,8 @@ msgstr "impossibile determinare la modalità di rispetto."
 
 #: src/selinux.c:342
 #, c-format
-msgid "unable to setup tty context for %s"
-msgstr "impossibile impostare il contesto tty per %s"
+msgid "unable to set tty context to %s"
+msgstr "impossibile impostare il contesto tty a %s"
 
 #: src/selinux.c:381
 #, c-format

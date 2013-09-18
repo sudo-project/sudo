@@ -4,10 +4,10 @@
 # Yuri Chornoivan <yurchor@ukr.net>, 2011, 2012, 2013.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.8b1\n"
+"Project-Id-Version: sudo 1.8.8b3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-08-16 10:14-0600\n"
-"PO-Revision-Date: 2013-08-18 07:56+0300\n"
+"POT-Creation-Date: 2013-09-03 14:44-0600\n"
+"PO-Revision-Date: 2013-09-04 23:29+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
 "Language: uk\n"
@@ -547,8 +547,8 @@ msgstr "не вдалося визначити режим примушення."
 
 #: src/selinux.c:342
 #, c-format
-msgid "unable to setup tty context for %s"
-msgstr "не вдалося налаштувати контекст tty для %s"
+msgid "unable to set tty context to %s"
+msgstr "не вдалося встановити контекст tty у значення %s"
 
 #: src/selinux.c:381
 #, c-format

@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo-1.8.8b1\n"
+"Project-Id-Version: sudo-1.8.8b3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-08-16 10:14-0600\n"
-"PO-Revision-Date: 2013-08-18 09:28+0800\n"
+"POT-Creation-Date: 2013-09-03 14:44-0600\n"
+"PO-Revision-Date: 2013-09-05 10:15+0800\n"
 "Last-Translator: Wylmer Wang <wantinghard@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -546,8 +546,8 @@ msgstr "无法确定强制模式。"
 
 #: src/selinux.c:342
 #, c-format
-msgid "unable to setup tty context for %s"
-msgstr "无法设置 %s 的终端环境"
+msgid "unable to set tty context to %s"
+msgstr "无法将终端环境设置为 %s"
 
 #: src/selinux.c:381
 #, c-format

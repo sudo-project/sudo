@@ -6,10 +6,10 @@
 # Yuri Kozlov <yuray@komyakino.ru>, 2011, 2012, 2013.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.8b1\n"
+"Project-Id-Version: sudo 1.8.8b3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-08-16 10:14-0600\n"
-"PO-Revision-Date: 2013-08-28 11:12+0400\n"
+"POT-Creation-Date: 2013-09-03 14:44-0600\n"
+"PO-Revision-Date: 2013-09-05 11:12+0400\n"
 "Last-Translator: Yuri Kozlov <yuray@komyakino.ru>\n"
 "Language-Team: Russian <gnu@mx.ru>\n"
 "Language: ru\n"
@@ -549,8 +549,8 @@ msgstr "не удаётся определить принудительный р
 
 #: src/selinux.c:342
 #, c-format
-msgid "unable to setup tty context for %s"
-msgstr "не удаётся настроить контекст tty для %s"
+msgid "unable to set tty context to %s"
+msgstr "не удаётся задать контекст tty для %s"
 
 #: src/selinux.c:381
 #, c-format

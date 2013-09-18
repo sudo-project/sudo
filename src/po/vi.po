@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo-1.8.8b1\n"
+"Project-Id-Version: sudo-1.8.8b3\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-08-16 10:14-0600\n"
-"PO-Revision-Date: 2013-08-18 08:05+0700\n"
+"POT-Creation-Date: 2013-09-03 14:44-0600\n"
+"PO-Revision-Date: 2013-09-05 07:25+0700\n"
 "Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
 "Language-Team: Vietnamese <translation-team-vi@lists.sourceforge.net>\n"
 "Language: vi\n"
@@ -109,7 +109,7 @@ msgstr "nhóm tối đa không hợp lệ “%s” trong %s, dòng %d"
 #: common/sudo_conf.c:394
 #, c-format
 msgid "unable to stat %s"
-msgstr "không thể lấy trạng thái về %s"
+msgstr "không thể lấy thống kê về %s"
 
 #: common/sudo_conf.c:397
 #, c-format
@@ -551,7 +551,7 @@ msgstr "không thể xác định rõ chế độ ép buộc."
 
 #: src/selinux.c:342
 #, c-format
-msgid "unable to setup tty context for %s"
+msgid "unable to set tty context to %s"
 msgstr "không thể cài đặt ngữ cảnh tty mới cho %s"
 
 #: src/selinux.c:381
