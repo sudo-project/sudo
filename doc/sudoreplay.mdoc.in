@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd August 14, 2013
+.Dd September 11, 2013
 .Dt SUDOREPLAY @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -270,9 +270,14 @@ Exactly one day from now.
 .It 2 hours ago
 2 hours ago.
 .It next Friday
-The first second of the next Friday.
-.It this week
-The current time but the first day of the coming week.
+The first second of the Friday in the next (upcoming) week.
+Not to be confused with
+.Dq this friday
+which would match the friday of the current week.
+.It last week
+The current time but 7 days ago.
+This is equivalent to
+.Dq a week ago .
 .It a fortnight ago
 The current time but 14 days ago.
 .It 10:01 am 9/17/2009
@@ -286,6 +291,20 @@ The current time but 14 days ago.
 .It 10:01 am Sep 17, 2009
 10:01 am, September 17, 2009.
 .El
+.Pp
+Note that relative time specifications do not always work as expected.
+For example, the
+.Dq next
+qualifier is intended to be used in conjunction with a day such as
+.Dq next Monday .
+When used with units of weeks, months, years, etc
+the result will be one more than expected.
+For example,
+.Dq next week
+will result in a time exactly two weeks from now, which is probably
+not what was intended.
+This will be addressed in a future version of
+.Nm sudoreplay .
 .Sh FILES
 .Bl -tag -width 24n
 .It Pa @iolog_dir@

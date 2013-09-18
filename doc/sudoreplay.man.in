@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOREPLAY" "@mansectsu@" "August 14, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDOREPLAY" "@mansectsu@" "September 11, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -286,10 +286,15 @@ yesterday
 2 hours ago.
 .TP 8n
 next Friday
-The first second of the next Friday.
+The first second of the Friday in the next (upcoming) week.
+Not to be confused with
+``this friday''
+which would match the friday of the current week.
 .TP 8n
-this week
-The current time but the first day of the coming week.
+last week
+The current time but 7 days ago.
+This is equivalent to
+``a week ago''.
 .TP 8n
 a fortnight ago
 The current time but 14 days ago.
@@ -308,6 +313,20 @@ The current time but 14 days ago.
 .TP 8n
 10:01 am Sep 17, 2009
 10:01 am, September 17, 2009.
+.PP
+Note that relative time specifications do not always work as expected.
+For example, the
+``next''
+qualifier is intended to be used in conjunction with a day such as
+``next Monday''.
+When used with units of weeks, months, years, etc
+the result will be one more than expected.
+For example,
+``next week''
+will result in a time exactly two weeks from now, which is probably
+not what was intended.
+This will be addressed in a future version of
+\fBsudoreplay\fR.
 .SH "FILES"
 .TP 26n
 \fI@iolog_dir@\fR
