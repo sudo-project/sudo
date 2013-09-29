@@ -51,6 +51,8 @@ What's new in Sudo 1.8.8?
  * Brazilian Portuguese translation for sudo and sudoers from
    translationproject.org.
 
+ * Czech translation for sudo from translationproject.org.
+
  * French translation for sudo from translationproject.org.
 
  * Sudo's noexec support on Mac OS X 10.4 and above now uses dynamic
