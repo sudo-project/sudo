@@ -395,6 +395,8 @@ src/net_ifs.c
 src/openbsd.c
 src/parse_args.c
 src/po/README
+src/po/cs.mo
+src/po/cs.po
 src/po/da.mo
 src/po/da.po
 src/po/de.mo
@@ -421,8 +423,6 @@ src/po/nl.mo
 src/po/nl.po
 src/po/pl.mo
 src/po/pl.po
-src/po/po.mo
-src/po/po.po
 src/po/pt_BR.mo
 src/po/pt_BR.po
 src/po/ru.mo
