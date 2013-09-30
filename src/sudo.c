@@ -83,10 +83,10 @@
 # include <prot.h>
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
+#include <sudo_usage.h>
 #include "sudo.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
-#include "sudo_usage.h"
 
 /*
  * Local variables
@@ -94,7 +94,7 @@
 struct plugin_container policy_plugin;
 struct plugin_container_list io_plugins;
 struct user_details user_details;
-const char *list_user, *runas_user, *runas_group; /* extern for parse_args.c */
+const char *list_user; /* extern for parse_args.c */
 static struct command_details command_details;
 static int sudo_mode;
 
@@ -133,8 +133,8 @@ static void iolog_unlink(struct plugin_container *plugin);
 
 #ifdef RLIMIT_CORE
 static struct rlimit corelimit;
-#endif /* RLIMIT_CORE */
-#if defined(__linux__)
+#endif
+#ifdef __linux__
 static struct rlimit nproclimit;
 #endif
 
@@ -354,7 +354,7 @@ fill_group_list(struct user_details *ud, int system_maxgroups)
      * trying getgrouplist() until we have enough room in the array.
      */
     ud->ngroups = sudo_conf_max_groups();
-    if (ud->ngroups != -1) {
+    if (ud->ngroups > 0) {
 	ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
 	/* No error on insufficient space if user specified max_groups. */
 	(void)getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
@@ -467,7 +467,7 @@ get_user_info(struct user_details *ud)
 
     user_info[i] = fmt_string("user", pw->pw_name);
     if (user_info[i] == NULL)
-	fatalx(NULL);
+	fatal(NULL);
     ud->username = user_info[i] + sizeof("user=") - 1;
 
     /* Stash user's shell for use with the -s flag; don't pass to plugin. */
@@ -493,14 +493,14 @@ get_user_info(struct user_details *ud)
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
 	user_info[++i] = fmt_string("cwd", cwd);
 	if (user_info[i] == NULL)
-	    fatalx(NULL);
+	    fatal(NULL);
 	ud->cwd = user_info[i] + sizeof("cwd=") - 1;
     }
 
     if ((cp = get_process_ttyname()) != NULL) {
 	user_info[++i] = fmt_string("tty", cp);
 	if (user_info[i] == NULL)
-	    fatalx(NULL);
+	    fatal(NULL);
 	ud->tty = user_info[i] + sizeof("tty=") - 1;
 	efree(cp);
     }
@@ -511,7 +511,7 @@ get_user_info(struct user_details *ud)
 	strlcpy(host, "localhost", sizeof(host));
     user_info[++i] = fmt_string("host", host);
     if (user_info[i] == NULL)
-	fatalx(NULL);
+	fatal(NULL);
     ud->host = user_info[i] + sizeof("host=") - 1;
 
     get_ttysize(&ud->ts_lines, &ud->ts_cols);
@@ -530,9 +530,10 @@ static void
 command_info_to_details(char * const info[], struct command_details *details)
 {
     int i;
+    id_t id;
     long lval;
-    unsigned long ulval;
     char *cp, *ep;
+    const char *errstr;
     debug_decl(command_info_to_details, SUDO_DEBUG_PCOMM)
 
     memset(details, 0, sizeof(*details));
@@ -553,17 +554,16 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_STRING("command=", command)
 		SET_STRING("cwd=", cwd)
 		if (strncmp("closefrom=", info[i], sizeof("closefrom=") - 1) == 0) {
-		    cp = info[i] + sizeof("closefrom=") - 1;
-		    if (*cp == '\0')
-			break;
 		    errno = 0;
-		    lval = strtol(cp, &ep, 0);
-		    if (*cp != '\0' && *ep == '\0' &&
-			!(errno == ERANGE &&
-			(lval == LONG_MAX || lval == LONG_MIN)) &&
-			lval < INT_MAX && lval > INT_MIN) {
-			details->closefrom = (int)lval;
-		    }
+		    cp = info[i] + sizeof("closefrom=") - 1;
+		    lval = strtol(cp, &ep, 10);
+		    if (*cp == '\0' || *ep != '\0')
+			fatalx(_("%s: %s"), info[i], _("invalid value"));
+		    if ((errno == ERANGE &&
+			(lval == LONG_MAX || lval == LONG_MIN)) ||
+			(lval > INT_MAX || lval < 0))
+			fatalx(_("%s: %s"), info[i], _("value out of range"));
+		    details->closefrom = (int)lval;
 		    break;
 		}
 		break;
@@ -578,20 +578,18 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_STRING("login_class=", login_class)
 		break;
 	    case 'n':
-		/* XXX - bounds check  -NZERO to NZERO (inclusive). */
 		if (strncmp("nice=", info[i], sizeof("nice=") - 1) == 0) {
-		    cp = info[i] + sizeof("nice=") - 1;
-		    if (*cp == '\0')
-			break;
 		    errno = 0;
-		    lval = strtol(cp, &ep, 0);
-		    if (*cp != '\0' && *ep == '\0' &&
-			!(errno == ERANGE &&
-			(lval == LONG_MAX || lval == LONG_MIN)) &&
-			lval < INT_MAX && lval > INT_MIN) {
-			details->priority = (int)lval;
-			SET(details->flags, CD_SET_PRIORITY);
-		    }
+		    cp = info[i] + sizeof("nice=") - 1;
+		    lval = strtol(cp, &ep, 10);
+		    if (*cp == '\0' || *ep != '\0')
+			fatalx(_("%s: %s"), info[i], _("invalid value"));
+		    if ((errno == ERANGE &&
+			(lval == LONG_MAX || lval == LONG_MIN)) ||
+			(lval > INT_MAX || lval < INT_MIN))
+			fatalx(_("%s: %s"), info[i], _("value out of range"));
+		    details->priority = (int)lval;
+		    SET(details->flags, CD_SET_PRIORITY);
 		    break;
 		}
 		if (strncmp("noexec=", info[i], sizeof("noexec=") - 1) == 0) {
@@ -610,107 +608,66 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 'r':
 		if (strncmp("runas_egid=", info[i], sizeof("runas_egid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_egid=") - 1;
-		    if (*cp == '\0')
-			break;
-		    errno = 0;
-		    ulval = strtoul(cp, &ep, 0);
-		    if (*cp != '\0' && *ep == '\0' &&
-			(errno != ERANGE || ulval != ULONG_MAX)) {
-			details->egid = (gid_t)ulval;
-			SET(details->flags, CD_SET_EGID);
-		    }
+		    id = atoid(cp, NULL, NULL, &errstr);
+		    if (errstr != NULL)
+			fatalx(_("%s: %s"), info[i], _(errstr));
+		    details->egid = (gid_t)id;
+		    SET(details->flags, CD_SET_EGID);
 		    break;
 		}
 		if (strncmp("runas_euid=", info[i], sizeof("runas_euid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_euid=") - 1;
-		    if (*cp == '\0')
-			break;
-		    errno = 0;
-		    ulval = strtoul(cp, &ep, 0);
-		    if (*cp != '\0' && *ep == '\0' &&
-			(errno != ERANGE || ulval != ULONG_MAX)) {
-			details->euid = (uid_t)ulval;
-			SET(details->flags, CD_SET_EUID);
-		    }
+		    id = atoid(cp, NULL, NULL, &errstr);
+		    if (errstr != NULL)
+			fatalx(_("%s: %s"), info[i], _(errstr));
+		    details->euid = (uid_t)id;
+		    SET(details->flags, CD_SET_EUID);
 		    break;
 		}
 		if (strncmp("runas_gid=", info[i], sizeof("runas_gid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_gid=") - 1;
-		    if (*cp == '\0')
-			break;
-		    errno = 0;
-		    ulval = strtoul(cp, &ep, 0);
-		    if (*cp != '\0' && *ep == '\0' &&
-			(errno != ERANGE || ulval != ULONG_MAX)) {
-			details->gid = (gid_t)ulval;
-			SET(details->flags, CD_SET_GID);
-		    }
+		    id = atoid(cp, NULL, NULL, &errstr);
+		    if (errstr != NULL)
+			fatalx(_("%s: %s"), info[i], _(errstr));
+		    details->gid = (gid_t)id;
+		    SET(details->flags, CD_SET_GID);
 		    break;
 		}
 		if (strncmp("runas_groups=", info[i], sizeof("runas_groups=") - 1) == 0) {
-		    int j;
-
-		    /* count groups, alloc and fill in */
+		    /* parse_gid_list() will call fatalx() on error. */
 		    cp = info[i] + sizeof("runas_groups=") - 1;
-		    if (*cp == '\0')
-			break;
-		    for (;;) {
-			details->ngroups++;
-			if ((cp = strchr(cp, ',')) == NULL)
-			    break;
-			cp++;
-		    }
-		    if (details->ngroups != 0) {
-			details->groups =
-			    emalloc2(details->ngroups, sizeof(GETGROUPS_T));
-			cp = info[i] + sizeof("runas_groups=") - 1;
-			for (j = 0; j < details->ngroups;) {
-			    errno = 0;
-			    ulval = strtoul(cp, &ep, 0);
-			    if (*cp == '\0' || (*ep != ',' && *ep != '\0') ||
-				(ulval == ULONG_MAX && errno == ERANGE)) {
-				break;
-			    }
-			    details->groups[j++] = (gid_t)ulval;
-			    cp = ep + 1;
-			}
-			details->ngroups = j;
-		    }
+		    details->ngroups = parse_gid_list(cp, NULL, &details->groups);
 		    break;
 		}
 		if (strncmp("runas_uid=", info[i], sizeof("runas_uid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_uid=") - 1;
-		    if (*cp == '\0')
-			break;
-		    errno = 0;
-		    ulval = strtoul(cp, &ep, 0);
-		    if (*cp != '\0' && *ep == '\0' &&
-			(errno != ERANGE || ulval != ULONG_MAX)) {
-			details->uid = (uid_t)ulval;
-			SET(details->flags, CD_SET_UID);
-		    }
+		    id = atoid(cp, NULL, NULL, &errstr);
+		    if (errstr != NULL)
+			fatalx(_("%s: %s"), info[i], _(errstr));
+		    details->uid = (uid_t)id;
+		    SET(details->flags, CD_SET_UID);
 		    break;
 		}
 #ifdef HAVE_PRIV_SET
 		if (strncmp("runas_privs=", info[i], sizeof("runas_privs=") - 1) == 0) {
                     const char *endp;
 		    cp = info[i] + sizeof("runas_privs=") - 1;
-	            if (*cp == '\0')
-		        break;
-	            errno = 0;
-	            details->privs = priv_str_to_set(cp, ",", &endp);
-		    if (details->privs == NULL)
+	            if (*cp != '\0') {
+			details->privs = priv_str_to_set(cp, ",", &endp);
+			if (details->privs == NULL)
 			    warning("invalid runas_privs %s", endp);
+		    }
+		    break;
 		}
 		if (strncmp("runas_limitprivs=", info[i], sizeof("runas_limitprivs=") - 1) == 0) {
                     const char *endp;
 		    cp = info[i] + sizeof("runas_limitprivs=") - 1;
-	            if (*cp == '\0')
-		        break;
-	            errno = 0;
-	            details->limitprivs = priv_str_to_set(cp, ",", &endp);
-		    if (details->limitprivs == NULL)
+	            if (*cp != '\0') {
+			details->limitprivs = priv_str_to_set(cp, ",", &endp);
+			if (details->limitprivs == NULL)
 			    warning("invalid runas_limitprivs %s", endp);
+		    }
+		    break;
 		}
 #endif /* HAVE_PRIV_SET */
 		break;
@@ -730,33 +687,33 @@ command_info_to_details(char * const info[], struct command_details *details)
 		break;
 	    case 't':
 		if (strncmp("timeout=", info[i], sizeof("timeout=") - 1) == 0) {
-		    cp = info[i] + sizeof("timeout=") - 1;
-		    if (*cp == '\0')
-			break;
 		    errno = 0;
-		    lval = strtol(cp, &ep, 0);
-		    if (*cp != '\0' && *ep == '\0' &&
-			!(errno == ERANGE &&
-			(lval == LONG_MAX || lval == LONG_MIN)) &&
-			lval <= INT_MAX && lval >= 0) {
-			details->timeout = (int)lval;
-			SET(details->flags, CD_SET_TIMEOUT);
-		    }
+		    cp = info[i] + sizeof("timeout=") - 1;
+		    lval = strtol(cp, &ep, 10);
+		    if (*cp == '\0' || *ep != '\0')
+			fatalx(_("%s: %s"), info[i], _("invalid value"));
+		    if ((errno == ERANGE &&
+			(lval == LONG_MAX || lval == LONG_MIN)) ||
+			(lval > INT_MAX || lval < 0))
+			fatalx(_("%s: %s"), info[i], _("value out of range"));
+		    details->timeout = (int)lval;
+		    SET(details->flags, CD_SET_TIMEOUT);
 		    break;
 		}
 		break;
 	    case 'u':
 		if (strncmp("umask=", info[i], sizeof("umask=") - 1) == 0) {
-		    cp = info[i] + sizeof("umask=") - 1;
-		    if (*cp == '\0')
-			break;
 		    errno = 0;
-		    ulval = strtoul(cp, &ep, 8);
-		    if (*cp != '\0' && *ep == '\0' &&
-			(errno != ERANGE || ulval != ULONG_MAX)) {
-			details->umask = (uid_t)ulval;
-			SET(details->flags, CD_SET_UMASK);
-		    }
+		    cp = info[i] + sizeof("umask=") - 1;
+		    lval = strtol(cp, &ep, 8);
+		    if (*cp == '\0' || *ep != '\0')
+			fatalx(_("%s: %s"), info[i], _("invalid value"));
+		    if ((errno == ERANGE &&
+			(lval == LONG_MAX || lval == LONG_MIN)) ||
+			(lval > 0777 || lval < 0))
+			fatalx(_("%s: %s"), info[i], _("value out of range"));
+		    details->umask = (mode_t)lval;
+		    SET(details->flags, CD_SET_UMASK);
 		    break;
 		}
 		if (strncmp("use_pty=", info[i], sizeof("use_pty=") - 1) == 0) {
@@ -777,7 +734,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 #endif
     details->pw = getpwuid(details->euid);
     if (details->pw != NULL && (details->pw = pw_dup(details->pw)) == NULL)
-	fatalx(NULL);
+	fatal(NULL);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -790,22 +747,50 @@ command_info_to_details(char * const info[], struct command_details *details)
 }
 
 static void
-sudo_check_suid(const char *path)
+sudo_check_suid(const char *sudo)
 {
+    char pathbuf[PATH_MAX];
     struct stat sb;
+    bool qualified;
     debug_decl(sudo_check_suid, SUDO_DEBUG_PCOMM)
 
     if (geteuid() != 0) {
-	if (strchr(path, '/') != NULL && stat(path, &sb) == 0) {
+	/* Search for sudo binary in PATH if not fully qualified. */
+	qualified = strchr(sudo, '/') != NULL;
+	if (!qualified) {
+	    char *path = getenv_unhooked("PATH");
+	    if (path != NULL) {
+		int len;
+		char *cp, *colon;
+
+		cp = path = estrdup(path);
+		do {
+		    if ((colon = strchr(cp, ':')))
+			*colon = '\0';
+		    len = snprintf(pathbuf, sizeof(pathbuf), "%s/%s", cp, sudo);
+		    if (len <= 0 || len >= sizeof(pathbuf))
+			continue;
+		    if (access(pathbuf, X_OK) == 0) {
+			sudo = pathbuf;
+			qualified = true;
+			break;
+		    }
+		    cp = colon + 1;
+		} while (colon);
+		efree(path);
+	    }
+	}
+
+	if (qualified && stat(sudo, &sb) == 0) {
 	    /* Try to determine why sudo was not running as root. */
 	    if (sb.st_uid != ROOT_UID || !ISSET(sb.st_mode, S_ISUID)) {
 		fatalx(
 		    _("%s must be owned by uid %d and have the setuid bit set"),
-		    path, ROOT_UID);
+		    sudo, ROOT_UID);
 	    } else {
 		fatalx(_("effective uid is not %d, is %s on a file system "
 		    "with the 'nosuid' option set or an NFS file system without"
-		    " root privileges?"), ROOT_UID, path);
+		    " root privileges?"), ROOT_UID, sudo);
 	    }
 	} else {
 	    fatalx(
@@ -824,26 +809,10 @@ sudo_check_suid(const char *path)
 static void
 disable_coredumps(void)
 {
-#if defined(__linux__) || defined(RLIMIT_CORE)
+#if defined(RLIMIT_CORE)
     struct rlimit rl;
-#endif
     debug_decl(disable_coredumps, SUDO_DEBUG_UTIL)
 
-#if defined(__linux__)
-    /*
-     * Unlimit the number of processes since Linux's setuid() will
-     * apply resource limits when changing uid and return EAGAIN if
-     * nproc would be violated by the uid switch.
-     */
-    (void) getrlimit(RLIMIT_NPROC, &nproclimit);
-    rl.rlim_cur = rl.rlim_max = RLIM_INFINITY;
-    if (setrlimit(RLIMIT_NPROC, &rl)) {
-	memcpy(&rl, &nproclimit, sizeof(struct rlimit));
-	rl.rlim_cur = rl.rlim_max;
-	(void)setrlimit(RLIMIT_NPROC, &rl);
-    }
-#endif /* __linux__ */
-#ifdef RLIMIT_CORE
     /*
      * Turn off core dumps?
      */
@@ -853,8 +822,46 @@ disable_coredumps(void)
 	rl.rlim_cur = 0;
 	(void) setrlimit(RLIMIT_CORE, &rl);
     }
-#endif /* RLIMIT_CORE */
     debug_return;
+#endif /* RLIMIT_CORE */
+}
+
+/*
+ * Unlimit the number of processes since Linux's setuid() will
+ * apply resource limits when changing uid and return EAGAIN if
+ * nproc would be exceeded by the uid switch.
+ */
+static void
+unlimit_nproc(void)
+{
+#ifdef __linux__
+    struct rlimit rl;
+    debug_decl(unlimit_nproc, SUDO_DEBUG_UTIL)
+
+    (void) getrlimit(RLIMIT_NPROC, &nproclimit);
+    rl.rlim_cur = rl.rlim_max = RLIM_INFINITY;
+    if (setrlimit(RLIMIT_NPROC, &rl) != 0) {
+	memcpy(&rl, &nproclimit, sizeof(struct rlimit));
+	rl.rlim_cur = rl.rlim_max;
+	(void)setrlimit(RLIMIT_NPROC, &rl);
+    }
+    debug_return;
+#endif /* __linux__ */
+}
+
+/*
+ * Restore saved value of RLIMIT_NPROC.
+ */
+static void
+restore_nproc(void)
+{
+#ifdef __linux__
+    debug_decl(restore_nproc, SUDO_DEBUG_UTIL)
+
+    (void) setrlimit(RLIMIT_NPROC, &nproclimit);
+
+    debug_return;
+#endif /* __linux__ */
 }
 
 /*
@@ -926,11 +933,9 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 		flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
 	    }
 	    if (setusercontext(lc, details->pw, details->pw->pw_uid, flags)) {
-		if (details->pw->pw_uid != ROOT_UID) {
-		    warning(_("unable to set user context"));
+		warning(_("unable to set user context"));
+		if (details->pw->pw_uid != ROOT_UID)
 		    goto done;
-		} else
-		    warning(_("unable to set user context"));
 	    }
 	}
 #endif /* HAVE_LOGIN_CAP_H */
@@ -975,6 +980,12 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	}
     }
 
+    /* 
+     * Unlimit the number of processes since Linux's setuid() will
+     * return EAGAIN if RLIMIT_NPROC would be exceeded by the uid switch.
+     */
+    unlimit_nproc();
+
 #ifdef HAVE_SETRESUID
     if (setresuid(details->uid, details->euid, details->euid) != 0) {
 	warning(_("unable to change to runas uid (%u, %u)"), details->uid,
@@ -995,6 +1006,9 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     }
 #endif /* !HAVE_SETRESUID && !HAVE_SETREUID */
 
+    /* Restore previous value of RLIMIT_NPROC. */
+    restore_nproc();
+
     /*
      * Only change cwd if we have chroot()ed or the policy modules
      * specifies a different cwd.  Must be done after uid change.
@@ -1008,33 +1022,6 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	    }
 	}
     }
-
-    /*
-     * SuSE Enterprise Linux uses RLIMIT_NPROC and _SC_CHILD_MAX
-     * interchangably.  This causes problems when setting RLIMIT_NPROC
-     * to RLIM_INFINITY due to a bug in bash where bash tries to honor
-     * the value of _SC_CHILD_MAX but treats a value of -1 as an error,
-     * and uses a default value of 32 instead.
-     *
-     * To work around this problem, we restore the nproc resource limit
-     * if sysconf(_SC_CHILD_MAX) is negative.  In most cases, pam_limits
-     * will set RLIMIT_NPROC for us.
-     *
-     * We must do this *after* the uid change to avoid potential EAGAIN
-     * from setuid().
-     */
-#if defined(__linux__) && defined(_SC_CHILD_MAX)
-    {
-	struct rlimit rl;
-	long l;
-	errno = 0;
-	l = sysconf(_SC_CHILD_MAX);
-	if (l == -1 && errno == 0 && getrlimit(RLIMIT_NPROC, &rl) == 0) {
-	    if (rl.rlim_cur == RLIM_INFINITY && rl.rlim_max == RLIM_INFINITY)
-		(void) setrlimit(RLIMIT_NPROC, &nproclimit);
-	}
-    }
-#endif
 
     rval = true;
 

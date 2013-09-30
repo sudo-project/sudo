@@ -123,14 +123,15 @@ getpwent(void)
     static struct passwd pw;
     static char pwbuf[LINE_MAX];
     size_t len;
-    unsigned long id;
-    char *cp, *colon, *ep;
+    id_t id;
+    char *cp, *colon;
+    const char *errstr;
 
 next_entry:
     if ((colon = fgets(pwbuf, sizeof(pwbuf), pwf)) == NULL)
 	return NULL;
 
-    zero_bytes(&pw, sizeof(pw));
+    memset(&pw, 0, sizeof(pw));
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	goto next_entry;
     *colon++ = '\0';
@@ -142,19 +143,15 @@ next_entry:
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	goto next_entry;
     *colon++ = '\0';
-    id = strtoul(cp, &ep, 10);
-    if (*cp == '\0' || *ep != '\0')
-	goto next_entry;
-    if (id > UID_MAX || (id == ULONG_MAX && errno == ERANGE))
+    id = atoid(cp, NULL, NULL, &errstr);
+    if (errstr != NULL)
 	goto next_entry;
     pw.pw_uid = (uid_t)id;
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	goto next_entry;
     *colon++ = '\0';
-    id = strtoul(cp, &ep, 10);
-    if (*cp == '\0' || *ep != '\0')
-	goto next_entry;
-    if (id > GID_MAX || (id == ULONG_MAX && errno == ERANGE))
+    id = atoid(cp, NULL, NULL, &errstr);
+    if (errstr != NULL)
 	goto next_entry;
     pw.pw_gid = (gid_t)id;
     if ((colon = strchr(cp = colon, ':')) == NULL)
@@ -255,15 +252,16 @@ getgrent(void)
     static struct group gr;
     static char grbuf[LINE_MAX], *gr_mem[GRMEM_MAX+1];
     size_t len;
-    unsigned long id;
-    char *cp, *colon, *ep;
+    id_t id;
+    char *cp, *colon;
+    const char *errstr;
     int n;
 
 next_entry:
     if ((colon = fgets(grbuf, sizeof(grbuf), grf)) == NULL)
 	return NULL;
 
-    zero_bytes(&gr, sizeof(gr));
+    memset(&gr, 0, sizeof(gr));
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	goto next_entry;
     *colon++ = '\0';
@@ -275,10 +273,8 @@ next_entry:
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	goto next_entry;
     *colon++ = '\0';
-    id = strtoul(cp, &ep, 10);
-    if (*cp == '\0' || *ep != '\0')
-	goto next_entry;
-    if (id > GID_MAX || (id == ULONG_MAX && errno == ERANGE))
+    id = atoid(cp, NULL, NULL, &errstr);
+    if (errstr != NULL)
 	goto next_entry;
     gr.gr_gid = (gid_t)id;
     len = strlen(colon);

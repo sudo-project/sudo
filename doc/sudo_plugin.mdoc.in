@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd March 5, 2013
+.Dd August 16, 2013
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -292,18 +292,28 @@ The prompt to use when requesting a password, if specified via
 the
 .Fl p
 flag.
+.It remote_host=string
+The name of the remote host to run the command on, if specified via
+the
+.Fl h
+option.
+Support for running the command on a remote host is meant to be implemented
+via a helper program that is executed in place of the user-specified command.
+The
+.Nm sudo
+front end is only capable of executing commands on the local host.
+Only available starting with API version 1.4.
 .It run_shell=bool
 Set to true if the user specified the
 .Fl s
-flag, indicating that
-the user wishes to run a shell.
+flag, indicating that the user wishes to run a shell.
 .It runas_group=string
-The group name or gid to to run the command as, if specified via
+The group name or gid to run the command as, if specified via
 the
 .Fl g
 flag.
 .It runas_user=string
-The user name or uid to to run the command as, if specified via the
+The user name or uid to run the command as, if specified via the
 .Fl u
 flag.
 .It selinux_role=string
@@ -392,12 +402,12 @@ no terminal device available, a default value of 24 is used.
 The ID of the process group that the running
 .Nm sudo
 process is a member of.
-Only available starting with API version 1.2
+Only available starting with API version 1.2.
 .It pid=int
 The process ID of the running
 .Nm sudo
 process.
-Only available starting with API version 1.2
+Only available starting with API version 1.2.
 .It plugin_options
 Any (non-comment) strings immediately after the plugin path are
 passed as arguments to the plugin.
@@ -428,21 +438,21 @@ Failure to do so may result in a crash.
 The parent process ID of the running
 .Nm sudo
 process.
-Only available starting with API version 1.2
+Only available starting with API version 1.2.
 .It sid=int
 The session ID of the running
 .Nm sudo
 process or 0 if
 .Nm sudo
 is not part of a POSIX job control session.
-Only available starting with API version 1.2
+Only available starting with API version 1.2.
 .It tcpgid=int
 The ID of the foreground process group associated with the terminal
 device associated with the
 .Nm sudo
 process or \-1 if there is no
 terminal present.
-Only available starting with API version 1.2
+Only available starting with API version 1.2.
 .It tty=string
 The path to the user's terminal device.
 If the user has no terminal device associated with the session,
@@ -1854,6 +1864,47 @@ return SUDO_HOOK_RET_STOP;
     *(vp) = (*(vp) & 0xffff0000) | (n); \e
 } while(0)
 .Ed
+.Ss Remote command execution
+The
+.Nm sudo
+front end does not have native support for running remote commands.
+However, starting with
+.Nm sudo
+1.8.8, the
+.Fl h
+option may be used to specify a remote host that is passed
+to the policy plugin.
+A plugin may also accept a
+.Em runas_user
+in the form of
+.Dq user@hostname
+which will work with older versions of
+.Nm sudo .
+It is anticipated that remote commands will be supported by executing a
+.Dq helper
+program.
+The policy plugin should setup the execution environment such that the
+.Nm sudo
+front end will run the helper which, in turn, will connect to the
+remote host and run the command.
+.Pp
+For example, the policy plugin could utilize
+.Nm ssh
+to perform remote command execution.
+The helper program would be responsible for running
+.Nm ssh
+with the proper options to use a private key or certificate
+that the remote host will accept and run a program
+on the remote host that would setup the execution environment
+accordingly.
+.Pp
+Note that remote
+.Nm sudoedit
+functionality must be handled by the policy plugin, not
+.Nm sudo
+itself as the front end has no knowledge that a remote command is
+being executed.
+This may be addressed in a future revision of the plugin API.
 .Ss Conversation API
 If the plugin needs to interact with the user, it may do so via the
 .Fn conversation
@@ -1882,6 +1933,8 @@ struct sudo_conv_message {
     int timeout;
     const char *msg;
 };
+
+#define SUDO_CONV_REPL_MAX      255
 
 struct sudo_conv_reply {
     char *reply;
@@ -1916,9 +1969,19 @@ and
 .Li struct sudo_conv_reply
 for
 each message in the conversation.
-The plugin is responsible for freeing the reply buffer filled in to the
+The plugin is responsible for freeing the reply buffer located in each
 .Li struct sudo_conv_reply ,
-if any.
+if it is not
+.Dv NULL .
+.Dv SUDO_CONV_REPL_MAX
+represents the maximum length of the reply buffer (not including
+the trailing NUL character).
+In practical terms, this is the longest password
+.Nm sudo
+will support.
+It is also useful as a maximum value for the
+.Fn memset_s
+function when clearing passwords filled in by the conversation function.
 .Pp
 The
 .Fn printf Ns No -style
@@ -2180,6 +2243,12 @@ The
 .Nm sudo
 front end now installs default signal handlers to trap common signals
 while the plugin functions are run.
+.It Version 1.4 (sudo 1.8.8)
+The
+.Em remote_host
+entry was added to the
+.Li settings
+list.
 .El
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,

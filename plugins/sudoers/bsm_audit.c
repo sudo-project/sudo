@@ -30,8 +30,9 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include "missing.h"
+#include "fatal.h"
 #include "gettext.h"
-#include "error.h"
 #include "sudo_debug.h"
 #include "bsm_audit.h"
 
@@ -125,7 +126,11 @@ bsm_audit_success(char **exec_args)
 	if (tok == NULL)
 		fatal("au_to_return32");
 	au_write(aufd, tok);
+#ifdef __sun
+	if (au_close(aufd, 1, AUE_sudo, 0) == -1)
+#else
 	if (au_close(aufd, 1, AUE_sudo) == -1)
+#endif
 		fatal(_("unable to commit audit record"));
 	debug_return;
 }
@@ -147,7 +152,7 @@ bsm_audit_failure(char **exec_args, char const *const fmt, va_list ap)
 	/*
 	 * If we are not auditing, don't cut an audit record; just return.
 	 */
-	if (auditon(A_GETCOND, &au_cond, sizeof(long)) < 0) {
+	if (auditon(A_GETCOND, (caddr_t)&au_cond, sizeof(long)) < 0) {
 		if (errno == AUDIT_NOT_CONFIGURED)
 			debug_return;
 		fatal(_("Could not determine audit condition"));
@@ -186,7 +191,11 @@ bsm_audit_failure(char **exec_args, char const *const fmt, va_list ap)
 	if (tok == NULL)
 		fatal("au_to_return32");
 	au_write(aufd, tok);
+#ifdef __sun
+	if (au_close(aufd, 1, AUE_sudo, PAD_FAILURE) == -1)
+#else
 	if (au_close(aufd, 1, AUE_sudo) == -1)
+#endif
 		fatal(_("unable to commit audit record"));
 	debug_return;
 }

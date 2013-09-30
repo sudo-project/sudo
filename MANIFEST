@@ -11,9 +11,11 @@ common/Makefile.in
 common/aix.c
 common/alloc.c
 common/atobool.c
-common/error.c
+common/atoid.c
+common/fatal.c
 common/fileops.c
 common/fmt_string.c
+common/gidlist.c
 common/lbuf.c
 common/list.c
 common/regress/sudo_conf/conf_test.c
@@ -25,6 +27,10 @@ common/regress/sudo_conf/test3.in
 common/regress/sudo_conf/test3.out.ok
 common/regress/sudo_conf/test4.in
 common/regress/sudo_conf/test4.out.ok
+common/regress/sudo_conf/test5.in
+common/regress/sudo_conf/test5.out.ok
+common/regress/sudo_conf/test6.in
+common/regress/sudo_conf/test6.out.ok
 common/regress/sudo_parseln/parseln_test.c
 common/regress/sudo_parseln/test1.in
 common/regress/sudo_parseln/test1.out.ok
@@ -45,7 +51,6 @@ common/sudo_debug.c
 common/sudo_printf.c
 common/term.c
 common/ttysize.c
-common/zero_bytes.c
 compat/Makefile.in
 compat/charclass.h
 compat/closefrom.c
@@ -59,11 +64,14 @@ compat/getaddrinfo.h
 compat/getcwd.c
 compat/getgrouplist.c
 compat/getline.c
+compat/getopt.h
+compat/getopt_long.c
 compat/getprogname.c
 compat/glob.c
 compat/glob.h
 compat/isblank.c
 compat/memrchr.c
+compat/memset_s.c
 compat/mksiglist.c
 compat/mksiglist.h
 compat/mksigname.c
@@ -130,7 +138,7 @@ doc/visudo.man.in
 doc/visudo.mdoc.in
 include/Makefile.in
 include/alloc.h
-include/error.h
+include/fatal.h
 include/fileops.h
 include/gettext.h
 include/lbuf.h
@@ -211,6 +219,7 @@ plugins/sudoers/insults.h
 plugins/sudoers/interfaces.c
 plugins/sudoers/interfaces.h
 plugins/sudoers/iolog.c
+plugins/sudoers/iolog.h
 plugins/sudoers/iolog_path.c
 plugins/sudoers/ldap.c
 plugins/sudoers/linux_audit.c
@@ -247,6 +256,8 @@ plugins/sudoers/po/nl.mo
 plugins/sudoers/po/nl.po
 plugins/sudoers/po/pl.mo
 plugins/sudoers/po/pl.po
+plugins/sudoers/po/pt_BR.mo
+plugins/sudoers/po/pt_BR.po
 plugins/sudoers/po/sl.mo
 plugins/sudoers/po/sl.po
 plugins/sudoers/po/sudoers.pot
@@ -384,6 +395,8 @@ src/net_ifs.c
 src/openbsd.c
 src/parse_args.c
 src/po/README
+src/po/cs.mo
+src/po/cs.po
 src/po/da.mo
 src/po/da.po
 src/po/de.mo
@@ -396,6 +409,8 @@ src/po/eu.mo
 src/po/eu.po
 src/po/fi.mo
 src/po/fi.po
+src/po/fr.mo
+src/po/fr.po
 src/po/gl.mo
 src/po/gl.po
 src/po/hr.mo
@@ -408,6 +423,8 @@ src/po/nl.mo
 src/po/nl.po
 src/po/pl.mo
 src/po/pl.po
+src/po/pt_BR.mo
+src/po/pt_BR.po
 src/po/ru.mo
 src/po/ru.po
 src/po/sl.mo

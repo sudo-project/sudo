@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SUDO_ERROR_H_
-#define	_SUDO_ERROR_H_
+#ifndef _SUDO_FATAL_H_
+#define	_SUDO_FATAL_H_
 
 #include <stdarg.h>
 #include <setjmp.h>
@@ -180,15 +180,15 @@ extern sigjmp_buf fatal_jmp;
 int     fatal_callback_register(void (*func)(void));
 void	fatal_disable_setjmp(void);
 void	fatal_enable_setjmp(void);
-void	fatal2(const char *, ...) __printflike(1, 2) __attribute__((__noreturn__));
+void	fatal2(const char *, ...) __printf0like(1, 2) __attribute__((__noreturn__));
 void	fatalx2(const char *, ...) __printflike(1, 2) __attribute__((__noreturn__));
-void	vfatal2(const char *, va_list ap) __attribute__((__noreturn__));
-void	vfatalx2(const char *, va_list ap) __attribute__((__noreturn__));
-void	warning2(const char *, ...) __printflike(1, 2);
+void	vfatal2(const char *, va_list ap) __printf0like(1, 0) __attribute__((__noreturn__));
+void	vfatalx2(const char *, va_list ap) __printflike(1, 0) __attribute__((__noreturn__));
+void	warning2(const char *, ...) __printf0like(1, 2);
 void	warningx2(const char *, ...) __printflike(1, 2);
-void	vwarning2(const char *, va_list ap);
-void	vwarningx2(const char *, va_list ap);
+void	vwarning2(const char *, va_list ap) __printf0like(1, 0);
+void	vwarningx2(const char *, va_list ap) __printflike(1, 0);
 void    warning_set_locale(void);
 void    warning_restore_locale(void);
 
-#endif /* _SUDO_ERROR_H_ */
+#endif /* _SUDO_FATAL_H_ */

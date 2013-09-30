@@ -32,7 +32,7 @@
 
 #include "missing.h"
 #include "alloc.h"
-#include "error.h"
+#include "fatal.h"
 #include "fileops.h"
 #include "list.h"
 #include "sudo_conf.h"
@@ -74,14 +74,6 @@
 #define MODE_PRESERVE_ENV	0x00400000
 #define MODE_NONINTERACTIVE	0x00800000
 #define MODE_LONG_LIST		0x01000000
-
-/*
- * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
- * but that caused problems with various alternate authentication
- * methods.  So, we just define our own and assume that it is >= the
- * system max.
- */
-#define SUDO_PASS_MAX	256
 
 /*
  * Flags for tgetpass()
@@ -178,9 +170,6 @@ void cleanup(int);
 char *tgetpass(const char *, int, int);
 int tty_present(void);
 
-/* zero_bytes.c */
-void zero_bytes(volatile void *, size_t);
-
 /* exec.c */
 int pipe_nonblock(int fds[2]);
 int sudo_execute(struct command_details *details, struct command_status *cstat);
@@ -198,6 +187,9 @@ char *fmt_string(const char *var, const char *value);
 /* atobool.c */
 bool atobool(const char *str);
 
+/* atoid.c */
+id_t atoid(const char *str, const char *sep, char **endp, const char **errstr);
+
 /* parse_args.c */
 int parse_args(int argc, char **argv, int *nargc, char ***nargv,
     char ***settingsp, char ***env_addp);
@@ -214,7 +206,7 @@ bool exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 int policy_init_session(struct command_details *details);
 int run_command(struct command_details *details);
 int os_init_common(int argc, char *argv[], char *envp[]);
-extern const char *list_user, *runas_user, *runas_group;
+extern const char *list_user;
 extern struct user_details user_details;
 
 /* sudo_edit.c */
@@ -271,5 +263,8 @@ int sudo_sigaction(int signo, struct sigaction *sa, struct sigaction *osa);
 void init_signals(void);
 void restore_signals(void);
 void save_signals(void);
+
+/* gidlist.c */
+int parse_gid_list(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
 
 #endif /* _SUDO_SUDO_H */

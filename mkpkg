@@ -226,12 +226,20 @@ case "$osversion" in
 	esac
 	if test "${osversion}" != "`$top_srcdir/pp --probe`"; then
 	    sdkvers=`echo "${osversion}" | sed 's/^macos\([0-9][0-9]\)\([0-9]*\)-.*$/\1.\2/'`
-	    SDK_FLAGS="-isysroot /Developer/SDKs/MacOSX${sdkvers}.sdk -mmacosx-version-min=${sdkvers}"
+	    # Newer Xcode puts /Developer under the app Contents dir.
+	    SDK_DIR="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs"
+	    if test -d "${SDK_DIR}/MacOSX${sdkvers}.sdk"; then
+		SDK_DIR="${SDK_DIR}/MacOSX${sdkvers}.sdk"
+	    elif test -d "/Developer/SDKs/MacOSX${sdkvers}.sdk"; then
+		SDK_DIR="/Developer/SDKs/MacOSX${sdkvers}.sdk"
+	    fi
+	    SDK_FLAGS="-isysroot ${SDK_DIR} -mmacosx-version-min=${sdkvers}"
 	fi
 	export CFLAGS="-O2 -g $ARCH_FLAGS $SDK_FLAGS"
 	export LDFLAGS="$ARCH_FLAGS $SDK_FLAGS"
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	configure_opts="--with-pam
+		--with-bsm-audit
 		--without-tty-tickets
 		--enable-zlib=system
 		--with-ldap
@@ -243,6 +251,10 @@ case "$osversion" in
 		$configure_opts"
 	;;
     aix*)
+	# Use -gxcoff with gcc instead of -g for dbx-style debugging symbols.
+	if test -z "$CC" && gcc -v >/dev/null 2>&1; then
+	    CFLAGS=-gxcoff; export CFLAGS
+	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	# Note: we include our own zlib instead of relying on the
 	#       AIX freeware version being installed.
@@ -264,8 +276,16 @@ case "$osversion" in
 	# For Solaris, add project support and use let configure choose zlib.
 	# For all others, use the builtin zlib and disable NLS support.
 	case "$osversion" in
-	    sol*) configure_opts="${configure_opts}${configure_opts+$tab}--with-project";;
-	    *) configure_opts="${configure_opts}${configure_opts+$tab}--enable-zlib=builtin${tab}--disable-nls";;
+	    sol*)
+		configure_opts="${configure_opts}${configure_opts+$tab}--with-project"
+
+		if [ $osrelease -ge 11 ]; then
+		    configure_opts="${configure_opts}${configure_opts+$tab}--with-bsm-audit"
+		fi
+		;;
+	    *)
+		configure_opts="${configure_opts}${configure_opts+$tab}--enable-zlib=builtin${tab}--disable-nls"
+		;;
 	esac
 	if test "$flavor" = "ldap"; then
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap"

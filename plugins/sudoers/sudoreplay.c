@@ -87,14 +87,20 @@
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
 
 #include <pathnames.h>
 
 #include "missing.h"
 #include "alloc.h"
-#include "error.h"
+#include "fatal.h"
 #include "gettext.h"
 #include "logging.h"
+#include "iolog.h"
 #include "sudo_plugin.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
@@ -102,31 +108,6 @@
 #ifndef LINE_MAX
 # define LINE_MAX 2048
 #endif
-
-/* Must match the defines in iolog.c */
-#define IOFD_STDIN      0
-#define IOFD_STDOUT     1
-#define IOFD_STDERR     2
-#define IOFD_TTYIN      3
-#define IOFD_TTYOUT     4
-#define IOFD_TIMING     5
-#define IOFD_MAX        6
-
-/* Bitmap of iofds to be replayed */
-unsigned int replay_filter = (1 << IOFD_STDOUT) | (1 << IOFD_STDERR) |
-			     (1 << IOFD_TTYOUT);
-
-/* For getopt(3) */
-extern char *optarg;
-extern int optind;
-
-union io_fd {
-    FILE *f;
-#ifdef HAVE_ZLIB_H
-    gzFile g;
-#endif
-    void *v;
-};
 
 /*
  * Info present in the I/O log file
@@ -147,7 +128,7 @@ struct log_info {
  * Handle expressions like:
  * ( user millert or user root ) and tty console and command /bin/sh
  */
-struct search_node {
+static struct search_node {
     struct search_node *next;
 #define ST_EXPR		1
 #define ST_TTY		2
@@ -182,16 +163,20 @@ struct search_node {
 static struct search_node *node_stack[32];
 static int stack_top;
 
+static int timing_idx_adj = 0;
+
 static const char *session_dir = _PATH_SUDO_IO_LOGDIR;
 
-static union io_fd io_fds[IOFD_MAX];
-static const char *io_fnames[IOFD_MAX] = {
-    "/stdin",
-    "/stdout",
-    "/stderr",
-    "/ttyin",
-    "/ttyout",
-    "/timing"
+static const char short_opts[] =  "d:f:hlm:s:V";
+static struct option long_opts[] = {
+    { "directory",	required_argument,	NULL,	'd' },
+    { "filter",		required_argument,	NULL,	'f' },
+    { "help",		no_argument,		NULL,	'h' },
+    { "list",		no_argument,		NULL,	'l' },
+    { "max-wait",	required_argument,	NULL,	'm' },
+    { "speed",		required_argument,	NULL,	's' },
+    { "version",	no_argument,		NULL,	'V' },
+    { NULL,		no_argument,		NULL,	'\0' },
 };
 
 extern time_t get_date(char *);
@@ -206,7 +191,7 @@ static void check_input(int, double *);
 static void delay(double);
 static void help(void) __attribute__((__noreturn__));
 static void usage(int);
-static int open_io_fd(char *pathbuf, int len, const char *suffix, union io_fd *fdp);
+static int open_io_fd(char *path, int len, struct io_log_file *iol);
 static int parse_timing(const char *buf, const char *decimal, int *idx, double *seconds, size_t *nbytes);
 static struct log_info *parse_logfile(char *logfile);
 static void free_log_info(struct log_info *li);
@@ -241,6 +226,7 @@ main(int argc, char *argv[])
 {
     int ch, idx, plen, exitcode = 0, rows = 0, cols = 0;
     bool interactive = false, listonly = false, need_nlcr = false;
+    bool def_filter = true;
     const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
     double seconds, to_wait, speed = 1.0, max_wait = 0;
@@ -273,21 +259,21 @@ main(int argc, char *argv[])
     /* Read sudo.conf. */
     sudo_conf_read(NULL);
 
-    while ((ch = getopt(argc, argv, "d:f:hlm:s:V")) != -1) {
-	switch(ch) {
+    while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
+	switch (ch) {
 	case 'd':
 	    session_dir = optarg;
 	    break;
 	case 'f':
 	    /* Set the replay filter. */
-	    replay_filter = 0;
+	    def_filter = false;
 	    for (cp = strtok(optarg, ","); cp; cp = strtok(NULL, ",")) {
 		if (strcmp(cp, "stdout") == 0)
-		    SET(replay_filter, 1 << IOFD_STDOUT);
+		    io_log_files[IOFD_STDOUT].enabled = true;
 		else if (strcmp(cp, "stderr") == 0)
-		    SET(replay_filter, 1 << IOFD_STDERR);
+		    io_log_files[IOFD_STDERR].enabled = true;
 		else if (strcmp(cp, "ttyout") == 0)
-		    SET(replay_filter, 1 << IOFD_TTYOUT);
+		    io_log_files[IOFD_TTYOUT].enabled = true;
 		else
 		    fatalx(_("invalid filter option: %s"), optarg);
 	    }
@@ -330,6 +316,13 @@ main(int argc, char *argv[])
     if (argc != 1)
 	usage(1);
 
+    /* By default we replay stdout, stderr and ttyout. */
+    if (def_filter) {
+	io_log_files[IOFD_STDOUT].enabled = true;
+	io_log_files[IOFD_STDERR].enabled = true;
+	io_log_files[IOFD_TTYOUT].enabled = true;
+    }
+
     /* 6 digit ID in base 36, e.g. 01G712AB or free-form name */
     id = argv[0];
     if (VALID_ID(id)) {
@@ -349,10 +342,8 @@ main(int argc, char *argv[])
 
     /* Open files for replay, applying replay filter for the -f flag. */
     for (idx = 0; idx < IOFD_MAX; idx++) {
-	if (ISSET(replay_filter, 1 << idx) || idx == IOFD_TIMING) {
-	    if (open_io_fd(path, plen, io_fnames[idx], &io_fds[idx]) == -1)
-		fatal(_("unable to open %s"), path);
-	}
+	if (open_io_fd(path, plen, &io_log_files[idx]) == -1) 
+	    fatal(_("unable to open %s"), path);
     }
 
     /* Parse log file. */
@@ -406,9 +397,9 @@ main(int argc, char *argv[])
      * Timing file consists of line of the format: "%f %d\n"
      */
 #ifdef HAVE_ZLIB_H
-    while (gzgets(io_fds[IOFD_TIMING].g, buf, sizeof(buf)) != NULL) {
+    while (gzgets(io_log_files[IOFD_TIMING].fd.g, buf, sizeof(buf)) != NULL) {
 #else
-    while (fgets(buf, sizeof(buf), io_fds[IOFD_TIMING].f) != NULL) {
+    while (fgets(buf, sizeof(buf), io_log_files[IOFD_TIMING].fd.f) != NULL) {
 #endif
 	char last_char = '\0';
 
@@ -424,8 +415,8 @@ main(int argc, char *argv[])
 	    to_wait = max_wait;
 	delay(to_wait);
 
-	/* Even if we are not relaying, we still have to delay. */
-	if (io_fds[idx].v == NULL)
+	/* Even if we are not replaying, we still have to delay. */
+	if (io_log_files[idx].fd.v == NULL)
 	    continue;
 
 	/* Check whether we need to convert newline to CR LF pairs. */
@@ -439,9 +430,9 @@ main(int argc, char *argv[])
 	    else
 		len = nbytes;
 #ifdef HAVE_ZLIB_H
-	    nread = gzread(io_fds[idx].g, buf, len);
+	    nread = gzread(io_log_files[idx].fd.g, buf, len);
 #else
-	    nread = fread(buf, 1, len, io_fds[idx].f);
+	    nread = fread(buf, 1, len, io_log_files[idx].fd.f);
 #endif
 	    nbytes -= nread;
 
@@ -531,19 +522,21 @@ delay(double secs)
 }
 
 static int
-open_io_fd(char *path, int len, const char *suffix, union io_fd *fdp)
+open_io_fd(char *path, int len, struct io_log_file *iol)
 {
     debug_decl(open_io_fd, SUDO_DEBUG_UTIL)
 
-    path[len] = '\0';
-    strlcat(path, suffix, PATH_MAX);
+    if (!iol->enabled)
+	debug_return_int(0);
 
+    path[len] = '\0';
+    strlcat(path, iol->suffix, PATH_MAX);
 #ifdef HAVE_ZLIB_H
-    fdp->g = gzopen(path, "r");
+    iol->fd.g = gzopen(path, "r");
 #else
-    fdp->f = fopen(path, "r");
+    iol->fd.f = fopen(path, "r");
 #endif
-    debug_return_int(fdp->v ? 0 : -1);
+    debug_return_int(iol->fd.v ? 0 : -1);
 }
 
 /*
@@ -1133,9 +1126,13 @@ parse_timing(buf, decimal, idx, seconds, nbytes)
 
     /* Parse index */
     ul = strtoul(buf, &ep, 10);
-    if (ul > IOFD_MAX)
-	goto bad;
-    *idx = (int)ul;
+    if (ul >= IOFD_TIMING) {
+	if (ul != 6)
+	    goto bad;
+	/* work around a bug in timing files generated by sudo 1.8.7 */
+	timing_idx_adj = 2;
+    }
+    *idx = (int)ul - timing_idx_adj;
     for (cp = ep + 1; isspace((unsigned char) *cp); cp++)
 	continue;
 
@@ -1179,10 +1176,10 @@ static void
 usage(int fatal)
 {
     fprintf(fatal ? stderr : stdout,
-	_("usage: %s [-h] [-d directory] [-m max_wait] [-s speed_factor] ID\n"),
+	_("usage: %s [-h] [-d dir] [-m num] [-s num] ID\n"),
 	getprogname());
     fprintf(fatal ? stderr : stdout,
-	_("usage: %s [-h] [-d directory] -l [search expression]\n"),
+	_("usage: %s [-h] [-d dir] -l [search expression]\n"),
 	getprogname());
     if (fatal)
 	exit(1);
@@ -1194,13 +1191,13 @@ help(void)
     (void) printf(_("%s - replay sudo session logs\n\n"), getprogname());
     usage(0);
     (void) puts(_("\nOptions:\n"
-	"  -d directory     specify directory for session logs\n"
-	"  -f filter        specify which I/O type to display\n"
-	"  -h               display help message and exit\n"
-	"  -l [expression]  list available session IDs that match expression\n"
-	"  -m max_wait      max number of seconds to wait between events\n"
-	"  -s speed_factor  speed up or slow down output\n"
-	"  -V               display version information and exit"));
+	"  -d, --directory=dir  specify directory for session logs\n"
+	"  -f, --filter=filter  specify which I/O type(s) to display\n"
+	"  -h, --help           display help message and exit\n"
+	"  -l, --list           list available session IDs, with optional expression\n"
+	"  -m, --max-wait=num   max number of seconds to wait between events\n"
+	"  -s, --speed=num      speed up or slow down output\n"
+	"  -V, --version        display version information and exit"));
     exit(0);
 }
 

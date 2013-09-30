@@ -254,7 +254,7 @@ verify_user(struct passwd *pw, char *prompt, int validated)
 		goto done;
 	}
 	if (!standalone)
-	    zero_bytes(p, strlen(p));
+	    memset_s(p, SUDO_CONV_REPL_MAX, 0, strlen(p));
 	pass_warn();
     }
 

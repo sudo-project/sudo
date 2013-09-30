@@ -33,7 +33,7 @@
 
 #include "missing.h"
 #include "alloc.h"
-#include "error.h"
+#include "fatal.h"
 #include "gettext.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"

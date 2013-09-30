@@ -42,7 +42,7 @@ case "$OUTFILE" in
 	# BSD auth
 	if [ X"$BAMAN" != X"1" ]; then
 	cat >>"$OUTFILE" <<-'EOF'
-		/^\[\\fB\\-a\\fR\\ \\fIauth_type\\fR/d
+		/^\[\\fB\\-a\\fR\\ \\fItype\\fR/d
 		/^\\fB\\-a\\fR \\fItype\\fR$/,/^\.TP 12n$/ {
 			/^\.PD$/!d
 		}

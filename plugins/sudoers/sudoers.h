@@ -31,7 +31,7 @@
 
 #include <pathnames.h>
 #include "missing.h"
-#include "error.h"
+#include "fatal.h"
 #include "alloc.h"
 #include "list.h"
 #include "fileops.h"
@@ -68,6 +68,8 @@ struct sudo_user {
     char *ttypath;
     char *host;
     char *shost;
+    char *runhost;
+    char *srunhost;
     char *prompt;
     char *cmnd;
     char *cmnd_args;
@@ -192,6 +194,8 @@ struct sudo_user {
 #define user_prompt		(sudo_user.prompt)
 #define user_host		(sudo_user.host)
 #define user_shost		(sudo_user.shost)
+#define user_runhost		(sudo_user.runhost)
+#define user_srunhost		(sudo_user.srunhost)
 #define user_ccname		(sudo_user.krb5_ccname)
 #define safe_cmnd		(sudo_user.cmnd_safe)
 #define login_class		(sudo_user.class_name)
@@ -209,14 +213,6 @@ struct sudo_user {
 # define ROOT_UID	0
 #endif
 #define ROOT_GID	0
-
-/*
- * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
- * but that caused problems with various alternate authentication
- * methods.  So, we just define our own and assume that it is >= the
- * system max.
- */
-#define SUDO_PASS_MAX	256
 
 struct lbuf;
 struct passwd;
@@ -287,9 +283,6 @@ void dump_auth_methods(void);
 /* getspwuid.c */
 char *sudo_getepw(const struct passwd *);
 
-/* zero_bytes.c */
-void zero_bytes(volatile void *, size_t);
-
 /* sudo_nss.c */
 void display_privs(struct sudo_nss_list *, struct passwd *);
 bool display_cmnd(struct sudo_nss_list *, struct passwd *);
@@ -325,6 +318,9 @@ char *get_timestr(time_t, int);
 /* atobool.c */
 int atobool(const char *str);
 
+/* atoid.c */
+int atoid(const char *str, const char *sep, char **endp, const char **errstr);
+
 /* boottime.c */
 int get_boottime(struct timeval *);
 
@@ -338,7 +334,7 @@ char *expand_iolog_path(const char *prefix, const char *dir, const char *file,
 
 /* env.c */
 char **env_get(void);
-void env_merge(char * const envp[], bool overwrite);
+void env_merge(char * const envp[]);
 void env_init(char * const envp[]);
 void init_envtables(void);
 void insert_env_vars(char * const envp[]);
@@ -380,6 +376,9 @@ int group_plugin_query(const char *user, const char *group,
 
 /* setgroups.c */
 int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
+
+/* gidlist.c */
+int parse_gid_list(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
 
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;

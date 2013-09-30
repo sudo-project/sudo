@@ -53,6 +53,7 @@
 #include <fcntl.h>
 
 #include "sudo.h"
+#include "sudo_plugin.h"
 
 static volatile sig_atomic_t signo[NSIG];
 
@@ -70,7 +71,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     sigaction_t savetstp, savettin, savettou, savepipe;
     char *pass;
     static const char *askpass;
-    static char buf[SUDO_PASS_MAX + 1];
+    static char buf[SUDO_CONV_REPL_MAX + 1];
     int i, input, output, save_errno, neednl = 0, need_restart;
     debug_decl(tgetpass, SUDO_DEBUG_CONV)
 
@@ -127,7 +128,7 @@ restart:
      * Catch signals that would otherwise cause the user to end
      * up with echo turned off in the shell.
      */
-    zero_bytes(&sa, sizeof(sa));
+    memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_INTERRUPT;	/* don't restart system calls */
     sa.sa_handler = tgetpass_handler;
@@ -207,7 +208,7 @@ restore:
 static char *
 sudo_askpass(const char *askpass, const char *prompt)
 {
-    static char buf[SUDO_PASS_MAX + 1], *pass;
+    static char buf[SUDO_CONV_REPL_MAX + 1], *pass;
     sigaction_t sa, saved_sa_pipe;
     int pfd[2];
     pid_t pid;
@@ -242,7 +243,7 @@ sudo_askpass(const char *askpass, const char *prompt)
     }
 
     /* Ignore SIGPIPE in case child exits prematurely */
-    zero_bytes(&sa, sizeof(sa));
+    memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_INTERRUPT;
     sa.sa_handler = SIG_IGN;

@@ -826,7 +826,7 @@ sudo_sss_check_command(struct sudo_sss_handle *handle,
 	}
 
         /* check for sha-2 digest */
-	allowed_digest = sudo_ldap_extract_digest(&val, &digest);
+	allowed_digest = sudo_sss_extract_digest(&val, &digest);
 
 	/* check for !command */
 	if (*val == '!') {

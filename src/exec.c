@@ -515,51 +515,69 @@ dispatch_signals(int sv[2], pid_t child, int log_io, struct command_status *csta
 		     * select() notification.
 		     */
 		    (void) shutdown(sv[0], SHUT_WR);
-		} else {
-		    if (WIFSTOPPED(status)) {
+		} else if (WIFSTOPPED(status)) {
+		    /*
+		     * Save the controlling terminal's process group
+		     * so we can restore it after we resume, if needed.
+		     * Most well-behaved shells change the pgrp back to
+		     * its original value before suspending so we must
+		     * not try to restore in that case, lest we race with
+		     * the child upon resume, potentially stopping sudo
+		     * with SIGTTOU while the command continues to run.
+		     */
+		    sigaction_t sa, osa;
+		    pid_t saved_pgrp = (pid_t)-1;
+		    int signo = WSTOPSIG(status);
+		    int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
+		    if (fd != -1) {
+			saved_pgrp = tcgetpgrp(fd);
 			/*
-			 * Save the controlling terminal's process group
-			 * so we can restore it after we resume, if needed.
-			 * Most well-behaved shells change the pgrp back to
-			 * its original value before suspending so we must
-			 * not try to restore in that case, lest we race with
-			 * the child upon resume, potentially stopping sudo
-			 * with SIGTTOU while the command continues to run.
+			 * Child was stopped trying to access controlling
+			 * terminal.  If the child has a different pgrp
+			 * and we own the controlling terminal, give it
+			 * to the child's pgrp and let it continue.
 			 */
-			sigaction_t sa, osa;
-			pid_t saved_pgrp = (pid_t)-1;
-			int signo = WSTOPSIG(status);
-			int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
-			if (fd != -1) {
-			    if ((saved_pgrp = tcgetpgrp(fd)) == ppgrp)
-				saved_pgrp = -1;
+			if (signo == SIGTTOU || signo == SIGTTIN) {
+			    if (saved_pgrp == ppgrp) {
+				pid_t child_pgrp = getpgid(child);
+				if (child_pgrp != ppgrp) {
+				    if (tcsetpgrp(fd, child_pgrp) == 0) {
+					if (killpg(child_pgrp, SIGCONT) != 0) {
+					    warning("kill(%d, SIGCONT)",
+						(int)child_pgrp);
+					}
+					close(fd);
+					debug_return_int(1);
+				    }
+				}
+			    }
 			}
-			if (signo == SIGTSTP) {
-			    memset(&sa, 0, sizeof(sa));
-			    sigemptyset(&sa.sa_mask);
-			    sa.sa_flags = SA_RESTART;
-			    sa.sa_handler = SIG_DFL;
-			    sudo_sigaction(SIGTSTP, &sa, &osa);
-			}
-			if (kill(getpid(), signo) != 0)
-			    warning("kill(%d, SIG%s)", (int)getpid(), signame);
-			if (signo == SIGTSTP)
-			    sudo_sigaction(SIGTSTP, &osa, NULL);
-			if (fd != -1) {
-			    /*
-			     * Restore command's process group if different.
-			     * Otherwise, we cannot resume some shells.
-			     */
-			    if (saved_pgrp != (pid_t)-1)
-				(void)tcsetpgrp(fd, saved_pgrp);
-			    close(fd);
-			}
-		    } else {
-			/* Child has exited, we are done. */
-			cstat->type = CMD_WSTATUS;
-			cstat->val = status;
-			debug_return_int(0);
 		    }
+		    if (signo == SIGTSTP) {
+			memset(&sa, 0, sizeof(sa));
+			sigemptyset(&sa.sa_mask);
+			sa.sa_flags = SA_RESTART;
+			sa.sa_handler = SIG_DFL;
+			sudo_sigaction(SIGTSTP, &sa, &osa);
+		    }
+		    if (kill(getpid(), signo) != 0)
+			warning("kill(%d, SIG%s)", (int)getpid(), signame);
+		    if (signo == SIGTSTP)
+			sudo_sigaction(SIGTSTP, &osa, NULL);
+		    if (fd != -1) {
+			/*
+			 * Restore command's process group if different.
+			 * Otherwise, we cannot resume some shells.
+			 */
+			if (saved_pgrp != ppgrp)
+			    (void)tcsetpgrp(fd, saved_pgrp);
+			close(fd);
+		    }
+		} else {
+		    /* Child has exited or been killed, we are done. */
+		    cstat->type = CMD_WSTATUS;
+		    cstat->val = status;
+		    debug_return_int(0);
 		}
 	    }
 	} else {

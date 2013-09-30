@@ -46,6 +46,8 @@
 
 static void sudo_conf_dump(void);
 
+__dso_public int main(int argc, char *argv[]);
+
 /*
  * Simple test driver for sudo_conf().
  * Parses the given configuration file and dumps the resulting

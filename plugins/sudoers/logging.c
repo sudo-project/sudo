@@ -200,19 +200,23 @@ do_logfile(char *msg)
 	time(&now);
 	if (def_loglinelen < sizeof(LOG_INDENT)) {
 	    /* Don't pretty-print long log file lines (hard to grep) */
-	    if (def_log_host)
+	    if (def_log_host) {
 		(void) fprintf(fp, "%s : %s : HOST=%s : %s\n",
-		    get_timestr(now, def_log_year), user_name, user_shost, msg);
-	    else
+		    get_timestr(now, def_log_year), user_name, user_srunhost,
+		    msg);
+	    } else {
 		(void) fprintf(fp, "%s : %s : %s\n",
 		    get_timestr(now, def_log_year), user_name, msg);
+	    }
 	} else {
-	    if (def_log_host)
+	    if (def_log_host) {
 		len = easprintf(&full_line, "%s : %s : HOST=%s : %s",
-		    get_timestr(now, def_log_year), user_name, user_shost, msg);
-	    else
+		    get_timestr(now, def_log_year), user_name, user_srunhost,
+		    msg);
+	    } else {
 		len = easprintf(&full_line, "%s : %s : %s",
 		    get_timestr(now, def_log_year), user_name, msg);
+	    }
 
 	    /*
 	     * Print out full_line with word wrap around def_loglinelen chars.
@@ -290,10 +294,10 @@ log_denial(int status, bool inform_user)
 	} else if (ISSET(status, FLAG_NO_HOST)) {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s is not allowed to run sudo "
 		"on %s.  This incident will be reported.\n"),
-		user_name, user_shost);
+		user_name, user_srunhost);
 	} else if (ISSET(status, FLAG_NO_CHECK)) {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("Sorry, user %s may not run "
-		"sudo on %s.\n"), user_name, user_shost);
+		"sudo on %s.\n"), user_name, user_srunhost);
 	} else {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("Sorry, user %s is not allowed "
 		"to execute '%s%s%s' as %s%s%s on %s.\n"),
@@ -542,6 +546,7 @@ send_mail(const char *fmt, ...)
     int fd, pfd[2], status;
     pid_t pid, rv;
     sigaction_t sa;
+    struct stat sb;
     va_list ap;
 #ifndef NO_ROOT_MAILER
     static char *root_envp[] = {
@@ -557,6 +562,10 @@ send_mail(const char *fmt, ...)
 
     /* Just return if mailer is disabled. */
     if (!def_mailerpath || !def_mailto)
+	debug_return;
+
+    /* Make sure the mailer exists and is a regular file. */
+    if (stat(def_mailerpath, &sb) != 0 || !S_ISREG(sb.st_mode))
 	debug_return;
 
     /* Fork and return, child will daemonize. */
@@ -609,7 +618,7 @@ send_mail(const char *fmt, ...)
     closefrom(STDERR_FILENO + 1);
 
     /* Ignore SIGPIPE in case mailer exits prematurely (or is missing). */
-    zero_bytes(&sa, sizeof(sa));
+    memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_INTERRUPT;
     sa.sa_handler = SIG_IGN;
@@ -635,7 +644,7 @@ send_mail(const char *fmt, ...)
 	case 0:
 	    {
 		char *argv[MAX_MAILFLAGS + 1];
-		char *mpath, *mflags;
+		char *mflags, *mpath = def_mailerpath;
 		int i;
 
 		/* Child, set stdin to output side of the pipe */
@@ -652,8 +661,7 @@ send_mail(const char *fmt, ...)
 
 		/* Build up an argv based on the mailer path and flags */
 		mflags = estrdup(def_mailerflags);
-		mpath = estrdup(def_mailerpath);
-		if ((argv[0] = strrchr(mpath, ' ')))
+		if ((argv[0] = strrchr(mpath, '/')))
 		    argv[0]++;
 		else
 		    argv[0] = mpath;

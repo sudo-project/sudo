@@ -97,7 +97,7 @@ bsdauth_init(struct passwd *pw, sudo_auth *auth)
      if (auth_setitem(state.as, AUTHV_STYLE, login_style) < 0 ||
 	auth_setitem(state.as, AUTHV_NAME, pw->pw_name) < 0 ||
 	auth_setitem(state.as, AUTHV_CLASS, login_class) < 0) {
-	log_warning(NO_MAIL, N_("unable to setup authentication"));
+	log_warning(NO_MAIL, N_("unable to initialize BSD authentication"));
 	auth_close(state.as);
 	login_close(state.lc);
 	debug_return_int(AUTH_FATAL);
@@ -156,7 +156,7 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth)
 
     if (pass) {
 	authok = auth_userresponse(as, pass, 1);
-	zero_bytes(pass, strlen(pass));
+	memset_s(pass, SUDO_CONV_REPL_MAX, 0, strlen(pass));
     }
 
     /* restore old signal handler */

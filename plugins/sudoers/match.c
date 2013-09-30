@@ -275,7 +275,7 @@ hostlist_matches(struct member_list *list)
 		matched = !m->negated;
 		break;
 	    case NETGROUP:
-		if (netgr_matches(m->name, user_host, user_shost, NULL))
+		if (netgr_matches(m->name, user_runhost, user_srunhost, NULL))
 		    matched = !m->negated;
 		break;
 	    case NTWKADDR:
@@ -292,7 +292,7 @@ hostlist_matches(struct member_list *list)
 		}
 		/* FALLTHROUGH */
 	    case WORD:
-		if (hostname_matches(user_shost, user_host, m->name))
+		if (hostname_matches(user_srunhost, user_runhost, m->name))
 		    matched = !m->negated;
 		break;
 	}

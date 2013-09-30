@@ -70,6 +70,11 @@
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
 
 #include "sudoers.h"
 #include "parse.h"
@@ -120,9 +125,6 @@ extern FILE *sudoersin;
 extern char *sudoers, *errorfile;
 extern int errorlineno;
 extern bool parse_error;
-/* For getopt(3) */
-extern char *optarg;
-extern int optind;
 
 /*
  * Globals
@@ -132,6 +134,16 @@ struct passwd *list_pw;
 static struct sudoersfile_list sudoerslist;
 static struct rbtree *alias_freelist;
 static bool checkonly;
+static const char short_opts[] =  "cf:hqsV";
+static struct option long_opts[] = {
+    { "check",		no_argument,		NULL,	'c' },
+    { "file",		required_argument,	NULL,	'f' },
+    { "help",		no_argument,		NULL,	'h' },
+    { "quiet",		no_argument,		NULL,	'q' },
+    { "strict",		no_argument,		NULL,	's' },
+    { "version",	no_argument,		NULL,	'V' },
+    { NULL,		no_argument,		NULL,	'\0' },
+};
 
 __dso_public int main(int argc, char *argv[]);
 
@@ -173,11 +185,13 @@ main(int argc, char *argv[])
      */
     checkonly = oldperms = quiet = strict = false;
     sudoers_path = _PATH_SUDOERS;
-    while ((ch = getopt(argc, argv, "Vcf:sq")) != -1) {
+    while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
 	    case 'V':
-		(void) printf(_("%s version %s\n"), getprogname(), PACKAGE_VERSION);
-		(void) printf(_("%s grammar version %d\n"), getprogname(), SUDOERS_GRAMMAR_VERSION);
+		(void) printf(_("%s version %s\n"), getprogname(),
+		    PACKAGE_VERSION);
+		(void) printf(_("%s grammar version %d\n"), getprogname(),
+		    SUDOERS_GRAMMAR_VERSION);
 		goto done;
 	    case 'c':
 		checkonly = true;	/* check mode */
@@ -193,7 +207,7 @@ main(int argc, char *argv[])
 		strict = true;		/* strict mode */
 		break;
 	    case 'q':
-		quiet = false;		/* quiet mode */
+		quiet = true;		/* quiet mode */
 		break;
 	    default:
 		usage(1);
@@ -727,7 +741,7 @@ setup_signals(void)
     /*
      * Setup signal handlers to cleanup nicely.
      */
-    zero_bytes(&sa, sizeof(sa));
+    memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = quit;
@@ -838,15 +852,19 @@ check_syntax(char *sudoers_path, bool quiet, bool strict, bool oldperms)
 	struct sudoersfile *sp;
 
 	/* Parsed OK, check mode and owner. */
-	if (oldperms || check_owner(sudoers_path, quiet))
-	    (void) printf(_("%s: parsed OK\n"), sudoers_path);
-	else
+	if (oldperms || check_owner(sudoers_path, quiet)) {
+	    if (!quiet)
+		(void) printf(_("%s: parsed OK\n"), sudoers_path);
+	} else {
 	    ok = false;
+	}
 	tq_foreach_fwd(&sudoerslist, sp) {
-	    if (oldperms || check_owner(sp->path, quiet))
-		(void) printf(_("%s: parsed OK\n"), sp->path);
-	    else
+	    if (oldperms || check_owner(sp->path, quiet)) {
+		if (!quiet)
+		    (void) printf(_("%s: parsed OK\n"), sp->path);
+	    } else {
 		ok = false;
+	    }
 	}
     }
 
@@ -1055,6 +1073,8 @@ get_hostname(void)
     } else {
 	user_host = user_shost = "localhost";
     }
+    user_runhost = user_host;
+    user_srunhost = user_shost;
     debug_return;
 }
 
@@ -1095,20 +1115,21 @@ check_alias(char *name, int type, int strict, int quiet)
 	alias_put(a);
     } else {
 	if (!quiet) {
-	    char *fmt;
 	    if (errno == ELOOP) {
-		fmt = strict ?
+		warningx(strict ?
 		    _("Error: cycle in %s_Alias `%s'") :
-		    _("Warning: cycle in %s_Alias `%s'");
+		    _("Warning: cycle in %s_Alias `%s'"),
+		    type == HOSTALIAS ? "Host" : type == CMNDALIAS ? "Cmnd" :
+		    type == USERALIAS ? "User" : type == RUNASALIAS ? "Runas" :
+		    "Unknown", name);
 	    } else {
-		fmt = strict ?
+		warningx(strict ?
 		    _("Error: %s_Alias `%s' referenced but not defined") :
-		    _("Warning: %s_Alias `%s' referenced but not defined");
+		    _("Warning: %s_Alias `%s' referenced but not defined"),
+		    type == HOSTALIAS ? "Host" : type == CMNDALIAS ? "Cmnd" :
+		    type == USERALIAS ? "User" : type == RUNASALIAS ? "Runas" :
+		    "Unknown", name);
 	    }
-	    warningx(fmt,
-		type == HOSTALIAS ? "Host" : type == CMNDALIAS ? "Cmnd" :
-		type == USERALIAS ? "User" : type == RUNASALIAS ? "Runas" :
-		"Unknown", name);
 	}
 	errors++;
     }
@@ -1294,11 +1315,11 @@ help(void)
     (void) printf(_("%s - safely edit the sudoers file\n\n"), getprogname());
     usage(0);
     (void) puts(_("\nOptions:\n"
-	"  -c          check-only mode\n"
-	"  -f sudoers  specify sudoers file location\n"
-	"  -h          display help message and exit\n"
-	"  -q          less verbose (quiet) syntax error messages\n"
-	"  -s          strict syntax checking\n"
-	"  -V          display version information and exit"));
+	"  -c, --check      check-only mode\n"
+	"  -f, --file=file  specify sudoers file location\n"
+	"  -h, --help       display help message and exit\n"
+	"  -q, --quiet      less verbose (quiet) syntax error messages\n"
+	"  -s, --strict     strict syntax checking\n"
+	"  -V, --version    display version information and exit"));
     exit(0);
 }

@@ -193,16 +193,25 @@ DDEESSCCRRIIPPTTIIOONN
                        The prompt to use when requesting a password, if
                        specified via the --pp flag.
 
+                 remote_host=string
+                       The name of the remote host to run the command on, if
+                       specified via the --hh option.  Support for running the
+                       command on a remote host is meant to be implemented via
+                       a helper program that is executed in place of the user-
+                       specified command.  The ssuuddoo front end is only capable
+                       of executing commands on the local host.  Only
+                       available starting with API version 1.4.
+
                  run_shell=bool
                        Set to true if the user specified the --ss flag,
                        indicating that the user wishes to run a shell.
 
                  runas_group=string
-                       The group name or gid to to run the command as, if
+                       The group name or gid to run the command as, if
                        specified via the --gg flag.
 
                  runas_user=string
-                       The user name or uid to to run the command as, if
+                       The user name or uid to run the command as, if
                        specified via the --uu flag.
 
                  selinux_role=string
@@ -271,11 +280,11 @@ DDEESSCCRRIIPPTTIIOONN
                  pgid=int
                        The ID of the process group that the running ssuuddoo
                        process is a member of.  Only available starting with
-                       API version 1.2
+                       API version 1.2.
 
                  pid=int
                        The process ID of the running ssuuddoo process.  Only
-                       available starting with API version 1.2
+                       available starting with API version 1.2.
 
                  plugin_options
                        Any (non-comment) strings immediately after the plugin
@@ -293,18 +302,18 @@ DDEESSCCRRIIPPTTIIOONN
 
                  ppid=int
                        The parent process ID of the running ssuuddoo process.
-                       Only available starting with API version 1.2
+                       Only available starting with API version 1.2.
 
                  sid=int
                        The session ID of the running ssuuddoo process or 0 if ssuuddoo
                        is not part of a POSIX job control session.  Only
-                       available starting with API version 1.2
+                       available starting with API version 1.2.
 
                  tcpgid=int
                        The ID of the foreground process group associated with
                        the terminal device associated with the ssuuddoo process or
                        -1 if there is no terminal present.  Only available
-                       starting with API version 1.2
+                       starting with API version 1.2.
 
                  tty=string
                        The path to the user's terminal device.  If the user
@@ -1196,6 +1205,28 @@ DDEESSCCRRIIPPTTIIOONN
          *(vp) = (*(vp) & 0xffff0000) | (n); \
      } while(0)
 
+   RReemmoottee ccoommmmaanndd eexxeeccuuttiioonn
+     The ssuuddoo front end does not have native support for running remote
+     commands.  However, starting with ssuuddoo 1.8.8, the --hh option may be used
+     to specify a remote host that is passed to the policy plugin.  A plugin
+     may also accept a _r_u_n_a_s___u_s_e_r in the form of ``user@hostname'' which will
+     work with older versions of ssuuddoo.  It is anticipated that remote commands
+     will be supported by executing a ``helper'' program.  The policy plugin
+     should setup the execution environment such that the ssuuddoo front end will
+     run the helper which, in turn, will connect to the remote host and run
+     the command.
+
+     For example, the policy plugin could utilize sssshh to perform remote
+     command execution.  The helper program would be responsible for running
+     sssshh with the proper options to use a private key or certificate that the
+     remote host will accept and run a program on the remote host that would
+     setup the execution environment accordingly.
+
+     Note that remote ssuuddooeeddiitt functionality must be handled by the policy
+     plugin, not ssuuddoo itself as the front end has no knowledge that a remote
+     command is being executed.  This may be addressed in a future revision of
+     the plugin API.
+
    CCoonnvveerrssaattiioonn AAPPII
      If the plugin needs to interact with the user, it may do so via the
      ccoonnvveerrssaattiioonn() function.  A plugin should not attempt to read directly
@@ -1220,6 +1251,8 @@ DDEESSCCRRIIPPTTIIOONN
          const char *msg;
      };
 
+     #define SUDO_CONV_REPL_MAX      255
+
      struct sudo_conv_reply {
          char *reply;
      };
@@ -1237,7 +1270,12 @@ DDEESSCCRRIIPPTTIIOONN
      sudo_conv_message and sudo_conv_reply structures.  There must be a struct
      sudo_conv_message and struct sudo_conv_reply for each message in the
      conversation.  The plugin is responsible for freeing the reply buffer
-     filled in to the struct sudo_conv_reply, if any.
+     located in each struct sudo_conv_reply, if it is not NULL.
+     SUDO_CONV_REPL_MAX represents the maximum length of the reply buffer (not
+     including the trailing NUL character).  In practical terms, this is the
+     longest password ssuuddoo will support.  It is also useful as a maximum value
+     for the mmeemmsseett__ss() function when clearing passwords filled in by the
+     conversation function.
 
      The pprriinnttff()-style function uses the same underlying mechanism as the
      ccoonnvveerrssaattiioonn() function but only supports SUDO_CONV_INFO_MSG,
@@ -1393,6 +1431,9 @@ PPLLUUGGIINN AAPPII CCHHAANNGGEELLOOGG
            The ssuuddoo front end now installs default signal handlers to trap
            common signals while the plugin functions are run.
 
+     Version 1.4 (sudo 1.8.8)
+           The _r_e_m_o_t_e___h_o_s_t entry was added to the settings list.
+
 SSEEEE AALLSSOO
      sudo.conf(4), sudoers(4), sudo(1m)
 
@@ -1412,4 +1453,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.7                       March 5, 2013                      Sudo 1.8.7
+Sudo 1.8.8                      August 16, 2013                     Sudo 1.8.8

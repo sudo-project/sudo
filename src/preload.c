@@ -16,6 +16,17 @@
 
 #include <config.h>
 
+#if HAVE_GSS_KRB5_CCACHE_NAME
+# if defined(HAVE_GSSAPI_GSSAPI_KRB5_H)
+#  include <gssapi/gssapi.h>
+#  include <gssapi/gssapi_krb5.h>
+# elif defined(HAVE_GSSAPI_GSSAPI_H)
+#  include <gssapi/gssapi.h>
+# else
+#  include <gssapi.h>
+# endif
+#endif
+
 #include "sudo_plugin.h"
 
 extern struct policy_plugin sudoers_policy;
@@ -27,5 +38,8 @@ struct sudo_preload_table {
 } sudo_preload_table[] = {
     { "sudoers_policy", (void *) &sudoers_policy},
     { "sudoers_io", (void *) &sudoers_io},
+#ifdef HAVE_GSS_KRB5_CCACHE_NAME
+    { "gss_krb5_ccache_name", (void *) &gss_krb5_ccache_name},
+#endif
     { (const char *)0, (void *)0 }
 };

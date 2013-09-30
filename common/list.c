@@ -32,7 +32,7 @@
 #include "missing.h"
 #include "list.h"
 #ifdef DEBUG
-# include "error.h"
+# include "fatal.h"
 #endif
 
 struct list_proto {

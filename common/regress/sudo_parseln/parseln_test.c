@@ -44,6 +44,8 @@
 #include "missing.h"
 #include "fileops.h"
 
+__dso_public int main(int argc, char *argv[]);
+
 /*
  * Simple test driver for sudo_parseln().
  * Behaves similarly to "cat -n" but with comment removal

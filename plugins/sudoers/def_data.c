@@ -355,6 +355,18 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Run commands on a pty in the background"),
 	NULL,
     }, {
+	"pam_service", T_STR,
+	N_("PAM service name to use"),
+	NULL,
+    }, {
+	"pam_login_service", T_STR,
+	N_("PAM service name to use for login shells"),
+	NULL,
+    }, {
+	"pam_setcred", T_FLAG,
+	N_("Attempt to establish PAM credentials for the target user"),
+	NULL,
+    }, {
 	"pam_session", T_FLAG,
 	N_("Create a new PAM session for the command to run in"),
 	NULL,

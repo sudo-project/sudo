@@ -227,6 +227,8 @@ main(int argc, char *argv[])
     } else {
 	user_shost = user_host;
     }
+    user_runhost = user_host;
+    user_srunhost = user_shost;
 
     /* Fill in user_args from argv. */
     if (argc > 0) {

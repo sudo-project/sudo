@@ -49,7 +49,7 @@
 
 #include "missing.h"
 #include "alloc.h"
-#include "error.h"
+#include "fatal.h"
 #include "fileops.h"
 #include "pathnames.h"
 #include "sudo_plugin.h"
@@ -110,7 +110,7 @@ static struct sudo_conf_data {
     int group_source;
     int max_groups;
     const char *debug_flags;
-    struct sudo_conf_paths paths[4];
+    struct sudo_conf_paths paths[5];
     struct plugin_info_list plugins;
 } sudo_conf_data = {
     true,
@@ -125,6 +125,10 @@ static struct sudo_conf_data {
 #ifdef _PATH_SUDO_NOEXEC
 #define SUDO_CONF_NOEXEC_IDX	2
 	{ "noexec", sizeof("noexec") - 1, _PATH_SUDO_NOEXEC },
+#endif
+#ifdef _PATH_SUDO_PLUGIN_DIR
+#define SUDO_CONF_PLUGIN_IDX	3
+	{ "plugin", sizeof("plugin") - 1, _PATH_SUDO_PLUGIN_DIR },
 #endif
 	{ NULL }
     }
@@ -181,7 +185,7 @@ set_var_max_groups(const char *entry, const char *conf_file)
     char *ep;
 
     lval = strtol(entry, &ep, 10);
-    if (*entry == '\0' || *ep != '\0' || lval < 0 || lval > INT_MAX ||
+    if (*entry == '\0' || *ep != '\0' || lval <= 0 || lval > INT_MAX ||
 	(errno == ERANGE && lval == LONG_MAX)) {
 	warningx(_("invalid max groups `%s' in %s, line %d"), entry,
 		    conf_file, conf_lineno);
@@ -321,6 +325,14 @@ const char *
 sudo_conf_noexec_path(void)
 {
     return sudo_conf_data.paths[SUDO_CONF_NOEXEC_IDX].pval;
+}
+#endif
+
+#ifdef _PATH_SUDO_PLUGIN_DIR
+const char *
+sudo_conf_plugin_dir_path(void)
+{
+    return sudo_conf_data.paths[SUDO_CONF_PLUGIN_IDX].pval;
 }
 #endif
 

@@ -118,7 +118,9 @@ install-includes:
 install-doc:
 
 install-plugin: install-dirs sample_plugin.la
-	$(INSTALL) -b~ -m $(shlib_mode) .libs/sample_plugin$(soext) $(DESTDIR)$(plugindir)/sample_plugin.so
+	if [ X"$(soext)" != X"" ]; then \
+	    $(INSTALL) -b~ -m $(shlib_mode) .libs/sample_plugin$(soext) $(DESTDIR)$(plugindir)/sample_plugin.so; \
+	fi
 
 uninstall:
 	-rm -f $(DESTDIR)$(plugindir)/sample_plugin.so

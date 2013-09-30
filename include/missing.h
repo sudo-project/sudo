@@ -23,6 +23,9 @@
 #define _SUDO_MISSING_H
 
 #include <stdio.h>
+#ifdef STDC_HEADERS
+# include <stddef.h>
+#endif
 #include <stdarg.h>
 
 /*
@@ -45,10 +48,19 @@
 
 /* For catching format string mismatches */
 #ifndef __printflike
-# if __GNUC_PREREQ__(2, 7)
+# if __GNUC_PREREQ__(3, 3)
+#  define __printflike(f, v) 	__attribute__((__format__ (__printf__, f, v))) __attribute__((__nonnull__ (f)))
+# elif __GNUC_PREREQ__(2, 7)
 #  define __printflike(f, v) 	__attribute__((__format__ (__printf__, f, v)))
 # else
 #  define __printflike(f, v)
+# endif
+#endif
+#ifndef __printf0like
+# if __GNUC_PREREQ__(2, 7)
+#  define __printf0like(f, v) 	__attribute__((__format__ (__printf__, f, v)))
+# else
+#  define __printf0like(f, v)
 # endif
 #endif
 
@@ -383,6 +395,9 @@ size_t strlcpy(char *, const char *, size_t);
 #endif
 #ifndef HAVE_MEMRCHR
 void *memrchr(const void *, int, size_t);
+#endif
+#ifndef HAVE_MEMSET_S
+errno_t memset_s(void *, rsize_t, int, rsize_t);
 #endif
 #ifndef HAVE_MKDTEMP
 char *mkdtemp(char *);

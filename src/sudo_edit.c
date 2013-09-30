@@ -148,14 +148,14 @@ sudo_edit(struct command_details *command_details)
      * and copy the contents of the original to it.
      */
     tf = emalloc2(nfiles, sizeof(*tf));
-    zero_bytes(tf, nfiles * sizeof(*tf));
+    memset(tf, 0, nfiles * sizeof(*tf));
     for (i = 0, j = 0; i < nfiles; i++) {
 	rc = -1;
 	switch_user(command_details->euid, command_details->egid,
 	    command_details->ngroups, command_details->groups);
 	if ((ofd = open(files[i], O_RDONLY, 0644)) != -1 || errno == ENOENT) {
 	    if (ofd == -1) {
-		zero_bytes(&sb, sizeof(sb));		/* new file */
+		memset(&sb, 0, sizeof(sb));		/* new file */
 		rc = 0;
 	    } else {
 		rc = fstat(ofd, &sb);

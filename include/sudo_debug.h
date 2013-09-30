@@ -201,8 +201,8 @@ void sudo_debug_exit_str_masked(const char *func, const char *file, int line, in
 void sudo_debug_exit_ptr(const char *func, const char *file, int line, int subsys, const void *rval);
 int sudo_debug_fd_set(int fd);
 int sudo_debug_init(const char *debugfile, const char *settings);
-void sudo_debug_printf2(const char *func, const char *file, int line, int level, const char *fmt, ...) __printflike(5, 6);
-void sudo_debug_vprintf2(const char *func, const char *file, int line, int level, const char *fmt, va_list ap);
+void sudo_debug_printf2(const char *func, const char *file, int line, int level, const char *fmt, ...) __printf0like(5, 6);
+void sudo_debug_vprintf2(const char *func, const char *file, int line, int level, const char *fmt, va_list ap) __printf0like(5, 0);
 void sudo_debug_write(const char *str, int len, int errno_val);
 void sudo_debug_write2(const char *func, const char *file, int line, const char *str, int len, int errno_val);
 pid_t sudo_debug_fork(void);
