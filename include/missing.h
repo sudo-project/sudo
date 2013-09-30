@@ -23,6 +23,9 @@
 #define _SUDO_MISSING_H
 
 #include <stdio.h>
+#ifdef STDC_HEADERS
+# include <stddef.h>
+#endif
 #include <stdarg.h>
 
 /*
