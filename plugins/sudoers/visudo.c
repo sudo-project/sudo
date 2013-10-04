@@ -1202,6 +1202,12 @@ check_aliases(bool strict, bool quiet)
 			    errors++;
 		    }
 		}
+		tq_foreach_fwd(&cs->runasgrouplist, m) {
+		    if (m->type == ALIAS) {
+			if (!alias_remove_recursive(m->name, RUNASALIAS))
+			    errors++;
+		    }
+		}
 		if ((m = cs->cmnd)->type == ALIAS) {
 		    if (!alias_remove_recursive(m->name, CMNDALIAS))
 			errors++;
