@@ -339,12 +339,12 @@ sudo_debug_write_file(const char *func, const char *file, int lineno,
     iov[2].iov_base = sudo_debug_pidstr;
     iov[2].iov_len = sudo_debug_pidlen;
 
-    /* Add string along with newline if it doesn't have one. */
+    /* Add string, trimming any trailing newlines. */
+    while (len > 0 && str[len - 1] == '\n')
+	len--;
     if (len > 0) {
 	iov[iovcnt].iov_base = (char *)str;
 	iov[iovcnt].iov_len = len;
-	while (len > 0 && str[len - 1] == '\n')
-	    iov[iovcnt].iov_len--;
 	iovcnt++;
     }
 
