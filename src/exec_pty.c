@@ -57,6 +57,7 @@
 #include <termios.h>
 
 #include "sudo.h"
+#include "sudo_event.h"
 #include "sudo_exec.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
@@ -67,6 +68,9 @@
 #define SFD_MASTER	3
 #define SFD_SLAVE	4
 #define SFD_USERTTY	5
+
+/* Evaluates to true if the event has /dev/tty as its fd. */
+#define USERTTY_EVENT(_ev)	(sudo_ev_get_fd((_ev)) == io_fds[SFD_USERTTY])
 
 #define TERM_COOKED	0
 #define TERM_RAW	1
@@ -80,12 +84,17 @@
 
 struct io_buffer {
     struct io_buffer *next;
+    struct sudo_event *revent;
+    struct sudo_event *wevent;
+    bool (*action)(const char *buf, unsigned int len);
     int len; /* buffer length (how much produced) */
     int off; /* write position (how much already consumed) */
-    int rfd;  /* reader (producer) */
-    int wfd; /* writer (consumer) */
-    bool (*action)(const char *buf, unsigned int len);
     char buf[32 * 1024];
+};
+
+struct io_buffer_list {
+    struct io_buffer *first;
+    /* XXX - stash cstat too? */
 };
 
 static char slavename[PATH_MAX];
@@ -94,9 +103,9 @@ static int io_fds[6] = { -1, -1, -1, -1, -1, -1};
 static int ttymode = TERM_COOKED;
 static pid_t ppgrp, cmnd_pgrp, mon_pgrp;
 static sigset_t ttyblock;
-static struct io_buffer *iobufs;
+static struct io_buffer_list iobufs;
 
-static void flush_output(void);
+static void del_io_events(void);
 static int exec_monitor(struct command_details *details, int backchannel);
 static void exec_pty(struct command_details *details,
     struct command_status *cstat, int *errfd);
@@ -362,8 +371,8 @@ suspend_parent(int signo)
 	/* FALLTHROUGH */
     case SIGSTOP:
     case SIGTSTP:
-	/* Flush any remaining output before suspending. */
-	flush_output();
+	/* Flush any remaining output and deschedule I/O events. */
+	del_io_events();
 
 	/* Restore original tty mode before suspending. */
 	if (ttymode != TERM_COOKED) {
@@ -454,102 +463,172 @@ terminate_command(pid_t pid, bool use_pgrp)
     debug_return;
 }
 
-static struct io_buffer *
-io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int),
-    struct io_buffer *head)
+/*
+ * Read/write an iobuf that is ready.
+ */
+static void
+io_callback(int fd, int what, void *v)
 {
+    struct io_buffer *iob = v;
+    struct sudo_event_base *evbase;
+    int n;
+    debug_decl(io_callback, SUDO_DEBUG_EXEC);
+
+    if (ISSET(what, SUDO_EV_READ)) {
+	evbase = sudo_ev_get_base(iob->revent);
+	do {
+	    n = read(fd, iob->buf + iob->len, sizeof(iob->buf) - iob->len);
+	} while (n == -1 && errno == EINTR);
+	switch (n) {
+	    case -1:
+		if (errno == EAGAIN)
+		    break;
+		/* treat read error as fatal and close the fd */
+		sudo_debug_printf(SUDO_DEBUG_ERROR,
+		    "error reading fd %d: %s", fd, strerror(errno));
+		/* FALLTHROUGH */
+	    case 0:
+		/* got EOF or pty has gone away */
+		if (n == 0) {
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"read EOF from fd %d", fd);
+		}
+		(void) sudo_ev_del(evbase, iob->revent);
+		safe_close(fd);
+		sudo_ev_free(iob->revent);
+		iob->revent = NULL;
+		/* If writer already consumed the buffer, close it too. */
+		if (iob->wevent != NULL && iob->off == iob->len) {
+		    (void) sudo_ev_del(evbase, iob->wevent);
+		    safe_close(sudo_ev_get_fd(iob->wevent));
+		    sudo_ev_free(iob->wevent);
+		    iob->wevent = NULL;
+		    iob->off = iob->len = 0;
+		}
+		break;
+	    default:
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "read %d bytes from fd %d", n, fd);
+		if (!iob->action(iob->buf + iob->len, n))
+		    terminate_command(cmnd_pid, true);
+		iob->len += n;
+		/* Enable writer if not /dev/tty or we are foreground pgrp. */
+		if (iob->wevent != NULL &&
+		    (foreground || !USERTTY_EVENT(iob->wevent))) {
+		    if (sudo_ev_add(evbase, iob->wevent, false) == -1)
+			fatal(_("unable to add event to queue"));
+		}
+		/* Re-enable reader if buffer is not full. */
+		if (iob->len != sizeof(iob->buf)) {
+		    if (sudo_ev_add(evbase, iob->revent, false) == -1)
+			fatal(_("unable to add event to queue"));
+		}
+		break;
+	}
+    }
+    if (ISSET(what, SUDO_EV_WRITE)) {
+	evbase = sudo_ev_get_base(iob->wevent);
+	do {
+	    n = write(fd, iob->buf + iob->off, iob->len - iob->off);
+	} while (n == -1 && errno == EINTR);
+	if (n == -1) {
+	    switch (errno) {
+	    case EPIPE:
+	    case ENXIO:
+	    case EIO:
+	    case EBADF:
+		/* other end of pipe closed or pty revoked */
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "unable to write %d bytes to fd %d",
+		    iob->len - iob->off, fd);
+		if (iob->revent != NULL) {
+		    (void) sudo_ev_del(evbase, iob->revent);
+		    safe_close(sudo_ev_get_fd(iob->revent));
+		    sudo_ev_free(iob->revent);
+		    iob->revent = NULL;
+		}
+		(void) sudo_ev_del(evbase, iob->wevent);
+		safe_close(fd);
+		sudo_ev_free(iob->wevent);
+		iob->wevent = NULL;
+		break;
+	    case EAGAIN:
+		/* not an error */
+		break;
+	    default:
+#if 0 /* XXX -- how to set cstat? stash in iobufs instead? */
+		if (cstat != NULL) {
+		    cstat->type = CMD_ERRNO;
+		    cstat->val = errno;
+		}
+#endif /* XXX */
+		sudo_debug_printf(SUDO_DEBUG_ERROR,
+		    "error writing fd %d: %s", fd, strerror(errno));
+		sudo_ev_loopbreak(evbase);
+		break;
+	    }
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"wrote %d bytes to fd %d", n, fd);
+	    iob->off += n;
+	    /* Reset buffer if fully consumed. */
+	    if (iob->off == iob->len) {
+		iob->off = iob->len = 0;
+		/* Forward the EOF from reader to writer. */
+		if (iob->revent == NULL) {
+		    (void) sudo_ev_del(evbase, iob->wevent);
+		    safe_close(fd);
+		    sudo_ev_free(iob->wevent);
+		    iob->wevent = NULL;
+		}
+	    }
+	    /* Re-enable writer if buffer is not empty. */
+	    if (iob->len > iob->off) {
+		if (sudo_ev_add(evbase, iob->wevent, false) == -1)
+		    fatal(_("unable to add event to queue"));
+	    }
+	    /* Enable reader if buffer is not full. */
+	    if (iob->revent != NULL &&
+		(ttymode == TERM_RAW || !USERTTY_EVENT(iob->revent))) {
+		if (iob->len != sizeof(iob->buf)) {
+		    if (sudo_ev_add(evbase, iob->revent, false) == -1)
+			fatal(_("unable to add event to queue"));
+		}
+	    }
+	}
+    }
+}
+
+static void
+io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int),
+    struct io_buffer_list *head)
+{
+    int n;
     struct io_buffer *iob;
     debug_decl(io_buf_new, SUDO_DEBUG_EXEC);
 
-    iob = ecalloc(1, sizeof(*iob));
-    iob->rfd = rfd;
-    iob->wfd = wfd;
+    /* Set non-blocking mode. */
+    n = fcntl(rfd, F_GETFL, 0);
+    if (n != -1 && !ISSET(n, O_NONBLOCK))
+	(void) fcntl(rfd, F_SETFL, n | O_NONBLOCK);
+    n = fcntl(wfd, F_GETFL, 0);
+    if (n != -1 && !ISSET(n, O_NONBLOCK))
+	(void) fcntl(wfd, F_SETFL, n | O_NONBLOCK);
+
+    /* Add to head of list. */
+    iob = emalloc(sizeof(*iob));
+    iob->next = head->first;
+    iob->revent = sudo_ev_alloc(rfd, SUDO_EV_READ, io_callback, iob);
+    iob->wevent = sudo_ev_alloc(wfd, SUDO_EV_WRITE, io_callback, iob);
+    iob->len = 0;
+    iob->off = 0;
     iob->action = action;
-    iob->next = head;
+    iob->buf[0] = '\0';
+    if (iob->revent == NULL || iob->wevent == NULL)
+	fatal(NULL);
+    head->first = iob;
 
-    debug_return_ptr(iob);
-}
-
-/*
- * Read/write iobufs depending on fdsr and fdsw.
- * Returns the number of errors.
- */
-int
-perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
-{
-    struct io_buffer *iob;
-    int n, errors = 0;
-    debug_decl(perform_io, SUDO_DEBUG_EXEC);
-
-    for (iob = iobufs; iob; iob = iob->next) {
-	if (iob->rfd != -1 && FD_ISSET(iob->rfd, fdsr)) {
-	    do {
-		n = read(iob->rfd, iob->buf + iob->len,
-		    sizeof(iob->buf) - iob->len);
-	    } while (n == -1 && errno == EINTR);
-	    switch (n) {
-		case -1:
-		    if (errno != EAGAIN) {
-			/* treat read error as fatal and close the fd */
-			sudo_debug_printf(SUDO_DEBUG_ERROR,
-			    "error reading fd %d: %s", iob->rfd,
-			    strerror(errno));
-			safe_close(iob->rfd);
-			iob->rfd = -1;
-		    }
-		    break;
-		case 0:
-		    /* got EOF or pty has gone away */
-		    sudo_debug_printf(SUDO_DEBUG_INFO,
-			"read EOF from fd %d", iob->rfd);
-		    safe_close(iob->rfd);
-		    iob->rfd = -1;
-		    break;
-		default:
-		    sudo_debug_printf(SUDO_DEBUG_INFO,
-			"read %d bytes from fd %d", n, iob->rfd);
-		    if (!iob->action(iob->buf + iob->len, n))
-			terminate_command(cmnd_pid, true);
-		    iob->len += n;
-		    break;
-	    }
-	}
-	if (iob->wfd != -1 && FD_ISSET(iob->wfd, fdsw)) {
-	    do {
-		n = write(iob->wfd, iob->buf + iob->off,
-		    iob->len - iob->off);
-	    } while (n == -1 && errno == EINTR);
-	    if (n == -1) {
-		if (errno == EPIPE || errno == ENXIO || errno == EIO || errno == EBADF) {
-		    sudo_debug_printf(SUDO_DEBUG_INFO,
-			"unable to write %d bytes to fd %d",
-			    iob->len - iob->off, iob->wfd);
-		    /* other end of pipe closed or pty revoked */
-		    if (iob->rfd != -1) {
-			safe_close(iob->rfd);
-			iob->rfd = -1;
-		    }
-		    safe_close(iob->wfd);
-		    iob->wfd = -1;
-		    continue;
-		}
-		if (errno != EAGAIN) {
-		    errors++;
-		    sudo_debug_printf(SUDO_DEBUG_ERROR,
-			"error writing fd %d: %s", iob->wfd, strerror(errno));
-		}
-	    } else {
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "wrote %d bytes to fd %d", n, iob->wfd);
-		iob->off += n;
-	    }
-	}
-    }
-    if (errors && cstat != NULL) {
-	cstat->type = CMD_ERRNO;
-	cstat->val = errno;
-    }
-    debug_return_int(errors);
+    debug_return;
 }
 
 /*
@@ -558,10 +637,9 @@ perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat)
  * Returns the child pid.
  */
 int
-fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
+fork_pty(struct command_details *details, int sv[], sigset_t *omask)
 {
     struct command_status cstat;
-    struct io_buffer *iob;
     int io_pipe[3][2], n;
     sigaction_t sa;
     sigset_t mask;
@@ -599,13 +677,13 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
     if (io_fds[SFD_USERTTY] != -1) {
 	/* Read from /dev/tty, write to pty master */
 	if (!ISSET(details->flags, CD_BACKGROUND)) {
-	    iobufs = io_buf_new(io_fds[SFD_USERTTY], io_fds[SFD_MASTER],
-		log_ttyin, iobufs);
+	    io_buf_new(io_fds[SFD_USERTTY], io_fds[SFD_MASTER],
+		log_ttyin, &iobufs);
 	}
 
 	/* Read from pty master, write to /dev/tty */
-	iobufs = io_buf_new(io_fds[SFD_MASTER], io_fds[SFD_USERTTY],
-	    log_ttyout, iobufs);
+	io_buf_new(io_fds[SFD_MASTER], io_fds[SFD_USERTTY],
+	    log_ttyout, &iobufs);
 
 	/* Are we the foreground process? */
 	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
@@ -621,8 +699,8 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 	pipeline = true;
 	if (pipe(io_pipe[STDIN_FILENO]) != 0)
 	    fatal(_("unable to create pipe"));
-	iobufs = io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
-	    log_stdin, iobufs);
+	io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
+	    log_stdin, &iobufs);
 	io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
     }
     if (io_fds[SFD_STDOUT] == -1 || !isatty(STDOUT_FILENO)) {
@@ -630,16 +708,16 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
 	pipeline = true;
 	if (pipe(io_pipe[STDOUT_FILENO]) != 0)
 	    fatal(_("unable to create pipe"));
-	iobufs = io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
-	    log_stdout, iobufs);
+	io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
+	    log_stdout, &iobufs);
 	io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
     }
     if (io_fds[SFD_STDERR] == -1 || !isatty(STDERR_FILENO)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "stderr not a tty, creating a pipe");
 	if (pipe(io_pipe[STDERR_FILENO]) != 0)
 	    fatal(_("unable to create pipe"));
-	iobufs = io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
-	    log_stderr, iobufs);
+	io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
+	    log_stderr, &iobufs);
 	io_fds[SFD_STDERR] = io_pipe[STDERR_FILENO][1];
     }
 
@@ -729,28 +807,13 @@ fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask)
     if (io_pipe[STDERR_FILENO][1])
 	close(io_pipe[STDERR_FILENO][1]);
 
-    for (iob = iobufs; iob; iob = iob->next) {
-	/* Determine maxfd */
-	if (iob->rfd > *maxfd)
-	    *maxfd = iob->rfd;
-	if (iob->wfd > *maxfd)
-	    *maxfd = iob->wfd;
-
-	/* Set non-blocking mode. */
-	n = fcntl(iob->rfd, F_GETFL, 0);
-	if (n != -1 && !ISSET(n, O_NONBLOCK))
-	    (void) fcntl(iob->rfd, F_SETFL, n | O_NONBLOCK);
-	n = fcntl(iob->wfd, F_GETFL, 0);
-	if (n != -1 && !ISSET(n, O_NONBLOCK))
-	    (void) fcntl(iob->wfd, F_SETFL, n | O_NONBLOCK);
-    }
-
     debug_return_int(child);
 }
 
 void
 pty_close(struct command_status *cstat)
 {
+    struct io_buffer *iob;
     int n;
     debug_decl(pty_close, SUDO_DEBUG_EXEC);
 
@@ -762,8 +825,15 @@ pty_close(struct command_status *cstat)
 	    (void) fcntl(io_fds[SFD_USERTTY], F_SETFL, n);
 	}
     }
-    flush_output();
+    del_io_events();
 
+    /* Free I/O buffers. */
+    while ((iob = iobufs.first) != NULL) {
+	iobufs.first = iob->next;
+	efree(iob);
+    }
+
+    /* Restore terminal settings. */
     if (io_fds[SFD_USERTTY] != -1) {
 	check_foreground();
 	if (foreground) {
@@ -793,38 +863,108 @@ pty_close(struct command_status *cstat)
 }
 
 /*
- * Fill in fdsr and fdsw based on the io buffers list.
- * Called prior to select().
+ * Schedule I/O events before starting the main event loop or
+ * resuming from suspend.
  */
 void
-fd_set_iobs(fd_set *fdsr, fd_set *fdsw)
+add_io_events(struct sudo_event_base *evbase)
 {
     struct io_buffer *iob;
-    debug_decl(fd_set_iobs, SUDO_DEBUG_EXEC);
+    debug_decl(add_io_events, SUDO_DEBUG_EXEC);
 
-    for (iob = iobufs; iob; iob = iob->next) {
-	if (iob->rfd == -1 && iob->wfd == -1)
-	    continue;
-	if (iob->off == iob->len) {
-	    iob->off = iob->len = 0;
-	    /* Forward the EOF from reader to writer. */
-	    if (iob->rfd == -1) {
-		safe_close(iob->wfd);
-		iob->wfd = -1;
+    /*
+     * Schedule all readers as long as the buffer is not full.
+     * Schedule writers that contain buffered data.
+     * Normally, write buffers are added on demand when data is read.
+     */
+    for (iob = iobufs.first; iob != NULL; iob = iob->next) {
+	/* Don't read/write from /dev/tty if we are not in the foreground. */
+	if (iob->revent != NULL &&
+	    (ttymode == TERM_RAW || !USERTTY_EVENT(iob->revent))) {
+	    if (iob->len != sizeof(iob->buf)) {
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "added I/O revent %p, fd %d, events %d",
+		    iob->revent, iob->revent->fd, iob->revent->events);
+		if (sudo_ev_add(evbase, iob->revent, false) == -1)
+		    fatal(_("unable to add event to queue"));
 	    }
 	}
-	/* Don't read/write /dev/tty if we are not in the foreground. */
-	if (iob->rfd != -1 &&
-	    (ttymode == TERM_RAW || iob->rfd != io_fds[SFD_USERTTY])) {
-	    if (iob->len != sizeof(iob->buf))
-		FD_SET(iob->rfd, fdsr);
-	}
-	if (iob->wfd != -1 &&
-	    (foreground || iob->wfd != io_fds[SFD_USERTTY])) {
-	    if (iob->len > iob->off)
-		FD_SET(iob->wfd, fdsw);
+	if (iob->wevent != NULL &&
+	    (foreground || !USERTTY_EVENT(iob->wevent))) {
+	    if (iob->len > iob->off) {
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "added I/O wevent %p, fd %d, events %d",
+		    iob->wevent, iob->wevent->fd, iob->wevent->events);
+		if (sudo_ev_add(evbase, iob->wevent, false) == -1)
+		    fatal(_("unable to add event to queue"));
+	    }
 	}
     }
+    debug_return;
+}
+
+/*
+ * Flush any output buffered in iobufs or readable from fds other
+ * than /dev/tty.  Removes I/O events from the event base when done.
+ */
+static void
+del_io_events(void)
+{
+    struct io_buffer *iob;
+    struct sudo_event_base *evbase;
+    debug_decl(del_io_events, SUDO_DEBUG_EXEC);
+
+    /* Remove iobufs from existing event base. */
+    for (iob = iobufs.first; iob != NULL; iob = iob->next) {
+	if (iob->revent != NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"deleted I/O revent %p, fd %d, events %d",
+		iob->revent, iob->revent->fd, iob->revent->events);
+	    sudo_ev_del(NULL, iob->revent);
+	}
+	if (iob->wevent != NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"deleted I/O wevent %p, fd %d, events %d",
+		iob->wevent, iob->wevent->fd, iob->wevent->events);
+	    sudo_ev_del(NULL, iob->wevent);
+	}
+    }
+
+    /* Create temporary event base for flushing. */
+    evbase = sudo_ev_base_alloc();
+    if (evbase == NULL)
+	fatal(NULL);
+
+    /* Avoid reading from /dev/tty, just flush existing data. */
+    for (iob = iobufs.first; iob != NULL; iob = iob->next) {
+	/* Don't read from /dev/tty while flushing. */
+	if (iob->revent != NULL && !USERTTY_EVENT(iob->revent)) {
+	    if (iob->len != sizeof(iob->buf)) {
+		if (sudo_ev_add(evbase, iob->revent, false) == -1)
+		    fatal(_("unable to add event to queue"));
+	    }
+	}
+	/* Flush any write buffers with data in them. */
+	if (iob->wevent != NULL &&
+	    (foreground || !USERTTY_EVENT(iob->wevent))) {
+	    if (iob->len > iob->off) {
+		if (sudo_ev_add(evbase, iob->wevent, false) == -1)
+		    fatal(_("unable to add event to queue"));
+	    }
+	}
+    }
+
+    (void) sudo_ev_loop(evbase, SUDO_EVLOOP_NONBLOCK);
+
+    /* Free temporary event base. */
+    for (iob = iobufs.first; iob != NULL; iob = iob->next) {
+	if (iob->revent != NULL)
+	    sudo_ev_del(evbase, iob->revent);
+	if (iob->wevent != NULL)
+	    sudo_ev_del(evbase, iob->wevent);
+    }
+    sudo_ev_base_free(evbase);
+
     debug_return;
 }
 
@@ -1206,81 +1346,6 @@ bad:
 }
 
 /*
- * Flush any output buffered in iobufs or readable from the fds.
- * Does not read from /dev/tty.
- */
-static void
-flush_output(void)
-{
-    struct io_buffer *iob;
-    struct timeval tv;
-    fd_set *fdsr, *fdsw;
-    int nready, nwriters, maxfd = -1;
-    debug_decl(flush_output, SUDO_DEBUG_EXEC);
-
-    /* Determine maxfd */
-    for (iob = iobufs; iob; iob = iob->next) {
-	if (iob->rfd > maxfd)
-	    maxfd = iob->rfd;
-	if (iob->wfd > maxfd)
-	    maxfd = iob->wfd;
-    }
-    if (maxfd == -1)
-	debug_return;
-
-    fdsr = emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
-    fdsw = emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
-    for (;;) {
-	memset(fdsw, 0, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
-	memset(fdsr, 0, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
-
-	nwriters = 0;
-	for (iob = iobufs; iob; iob = iob->next) {
-	    /* Don't read from /dev/tty while flushing. */
-	    if (io_fds[SFD_USERTTY] != -1 && iob->rfd == io_fds[SFD_USERTTY])
-		continue;
-	    if (iob->rfd == -1 && iob->wfd == -1)
-	    	continue;
-	    if (iob->off == iob->len) {
-		iob->off = iob->len = 0;
-		/* Forward the EOF from reader to writer. */
-		if (iob->rfd == -1) {
-		    safe_close(iob->wfd);
-		    iob->wfd = -1;
-		}
-	    }
-	    if (iob->rfd != -1) {
-		if (iob->len != sizeof(iob->buf))
-		    FD_SET(iob->rfd, fdsr);
-	    }
-	    if (iob->wfd != -1) {
-		if (iob->len > iob->off) {
-		    nwriters++;
-		    FD_SET(iob->wfd, fdsw);
-		}
-	    }
-	}
-
-	/* Don't sleep in select if there are no buffers that need writing. */
-	tv.tv_sec = 0;
-	tv.tv_usec = 0;
-	nready = select(maxfd + 1, fdsr, fdsw, NULL, nwriters ? NULL : &tv);
-	if (nready <= 0) {
-	    if (nready == 0)
-		break; /* all I/O flushed */
-	    if (errno == EINTR || errno == ENOMEM)
-		continue;
-	    warning(_("select failed"));
-	}
-	if (perform_io(fdsr, fdsw, NULL) != 0 || nready == -1)
-	    break;
-    }
-    efree(fdsr);
-    efree(fdsw);
-    debug_return;
-}
-
-/*
  * Sets up std{in,out,err} and executes the actual command.
  * Returns only if execve() fails.
  */
@@ -1360,17 +1425,40 @@ sigwinch(int s)
 
 /*
  * Only close the fd if it is not /dev/tty or std{in,out,err}.
- * Return value is the same as send(2).
+ * Return value is the same as close(2).
  */
 static int
 safe_close(int fd)
 {
+    struct io_buffer *iob;
     debug_decl(safe_close, SUDO_DEBUG_EXEC);
 
     /* Avoid closing /dev/tty or std{in,out,err}. */
     if (fd < 3 || fd == io_fds[SFD_USERTTY]) {
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: not closing fd %d (/dev/tty)", __func__, fd);
 	errno = EINVAL;
 	debug_return_int(-1);
     }
+    /* Deschedule any other users of the fd. */
+    for (iob = iobufs.first; iob != NULL; iob = iob->next) {
+	if (iob->revent != NULL) {
+	    if (sudo_ev_get_fd(iob->revent) == fd) {
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "%s: deleting revent %p due to shared fd %d",
+		    __func__, iob->revent, fd);
+		sudo_ev_del(NULL, iob->revent);
+	    }
+	}
+	if (iob->wevent != NULL) {
+	    if (sudo_ev_get_fd(iob->wevent) == fd) {
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "%s: deleting wevent %p due to shared fd %d",
+		    __func__, iob->wevent, fd);
+		sudo_ev_del(NULL, iob->wevent);
+	    }
+	}
+    }
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: closing fd %d", __func__, fd);
     debug_return_int(close(fd));
 }
