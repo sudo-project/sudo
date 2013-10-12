@@ -255,7 +255,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
      * We communicate with the child over a bi-directional pair of sockets.
      * Parent sends signal info to child and child sends back wait status.
      */
-    if (socketpair(PF_UNIX, SOCK_DGRAM, 0, sv) == -1)
+    if (socketpair(PF_UNIX, SOCK_STREAM, 0, sv) == -1)
 	fatal(_("unable to create sockets"));
 
     /*
@@ -374,12 +374,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 		if (n == -1) {
 		    if (errno == EINTR)
 			continue;
-		    /*
-		     * If not logging I/O we may receive ECONNRESET when
-		     * the command is executed and sv is closed.
-		     * It is safe to ignore this.
-		     */
-		    if (log_io && errno != EAGAIN) {
+		    if (errno != EAGAIN) {
 			cstat->type = CMD_ERRNO;
 			cstat->val = errno;
 			break;
@@ -391,8 +386,16 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 		    sudo_debug_printf(SUDO_DEBUG_ERROR,
 			"failed to read child status: %s",
 			n ? "short read" : "EOF");
-		    /* XXX - should set cstat */
-		    break;
+		    /*
+		     * If not logging I/O we may get EOF when the command is
+		     * executed and sv is closed.  It is safe to ignore this.
+		     */
+		    if (log_io || n != 0) {
+			/* XXX - need new CMD_ type for monitor errors. */
+			cstat->type = CMD_ERRNO;
+			cstat->val = n ? EIO : ECONNRESET;
+			break;
+		    }
 		}
 	    }
 	    if (cstat->type == CMD_PID) {
@@ -505,17 +508,8 @@ dispatch_signals(int sv[2], pid_t child, int log_io, struct command_status *csta
 	    do {
 		pid = waitpid(child, &status, WUNTRACED|WNOHANG);
 	    } while (pid == -1 && errno == EINTR);
-	    if (pid == child) {
-		if (log_io) {
-		    /*
-		     * On BSD we get ECONNRESET on sv[0] if monitor dies
-		     * and select() will return with sv[0] readable.
-		     * On Linux that doesn't appear to happen so if the
-		     * monitor dies, shut down the socketpair to force a
-		     * select() notification.
-		     */
-		    (void) shutdown(sv[0], SHUT_WR);
-		} else if (WIFSTOPPED(status)) {
+	    if (pid == child && !log_io) {
+		if (WIFSTOPPED(status)) {
 		    /*
 		     * Save the controlling terminal's process group
 		     * so we can restore it after we resume, if needed.

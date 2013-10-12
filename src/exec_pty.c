@@ -1170,11 +1170,16 @@ exec_monitor(struct command_details *details, int backchannel)
 
 	    /* read command from backchannel, should be a signal */
 	    n = recv(backchannel, &cstmp, sizeof(cstmp), 0);
-	    if (n == -1) {
-		if (errno == EINTR)
-		    continue;
-		warning(_("error reading from socketpair"));
-		goto done;
+	    if (n != sizeof(cstmp)) {
+		if (n == -1) {
+		    if (errno == EINTR)
+			continue;
+		    warning(_("error reading from socketpair"));
+		    goto done;
+		} else {
+		    /* /* short read or EOF, parent process died? */
+		    goto done;
+		}
 	    }
 	    if (cstmp.type != CMD_SIGNO) {
 		warningx(_("unexpected reply type on backchannel: %d"),
