@@ -903,6 +903,7 @@ enable_warnings
 enable_werror
 enable_hardening
 enable_pie
+enable_poll
 enable_admin_flag
 enable_nls
 enable_rpath
@@ -1570,6 +1571,7 @@ Optional Features:
   --disable-hardening     Do not use compiler/linker exploit mitigation
                           options
   --enable-pie            Build sudo as a position independent executable.
+  --disable-poll          Use select() instead of poll().
   --enable-admin-flag     Whether to create a Ubuntu-style admin flag file
   --disable-nls           Disable natural language support using gettext
   --disable-rpath         Disable passing of -Rpath to the linker
@@ -5659,6 +5661,12 @@ fi
 # Check whether --enable-pie was given.
 if test "${enable_pie+set}" = set; then :
   enableval=$enable_pie;
+fi
+
+
+# Check whether --enable-poll was given.
+if test "${enable_poll+set}" = set; then :
+  enableval=$enable_poll;
 fi
 
 
@@ -14062,7 +14070,7 @@ _ACEOF
 fi
 done
 
-		COMMON_OBJS="$COMMON_OBJS aix.lo"
+		COMMON_OBJS="${COMMON_OBJS} aix.lo"
 		;;
     *-*-hiuxmpp*)
 		: ${mansectsu='1m'}
@@ -14582,6 +14590,8 @@ done
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
+		# Darwin has a broken poll()
+		: ${enable_poll='no'}
 		# Darwin 8 and above can interpose library symbols cleanly
 		if test $OSMAJOR -ge 8; then
 		    $as_echo "#define HAVE___INTERPOSE 1" >>confdefs.h
@@ -20328,6 +20338,30 @@ done
 
 	AUTH_OBJS="$AUTH_OBJS secureware.lo"
     fi
+fi
+
+if test X"$enable_poll" = X""; then
+    for ac_func in poll
+do :
+  ac_fn_c_check_func "$LINENO" "poll" "ac_cv_func_poll"
+if test "x$ac_cv_func_poll" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_POLL 1
+_ACEOF
+ enable_poll=yes
+else
+  enable_poll=no
+fi
+done
+
+elif test X"$enable_poll" = X"yes"; then
+    $as_echo "#define HAVE_POLL 1" >>confdefs.h
+
+fi
+if test "$enable_poll" = "yes"; then
+    COMMON_OBJS="${COMMON_OBJS} event_poll.lo"
+else
+    COMMON_OBJS="${COMMON_OBJS} event_select.lo"
 fi
 
 if test ${with_ldap-'no'} != "no"; then

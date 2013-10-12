@@ -1388,6 +1388,9 @@ AC_ARG_ENABLE(hardening,
 AC_ARG_ENABLE(pie,
 [AS_HELP_STRING([--enable-pie], [Build sudo as a position independent executable.])])
 
+AC_ARG_ENABLE(poll,
+[AS_HELP_STRING([--disable-poll], [Use select() instead of poll().])])
+
 AC_ARG_ENABLE(admin-flag,
 [AS_HELP_STRING([--enable-admin-flag], [Whether to create a Ubuntu-style admin flag file])],
 [ case "$enableval" in
@@ -1646,7 +1649,7 @@ case "$host" in
 
 		# AIX-specific functions
 		AC_CHECK_FUNCS(getuserattr setauthdb setrlimit64)
-		COMMON_OBJS="$COMMON_OBJS aix.lo"
+		COMMON_OBJS="${COMMON_OBJS} aix.lo"
 		;;
     *-*-hiuxmpp*)
 		: ${mansectsu='1m'}
@@ -1963,6 +1966,8 @@ case "$host" in
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
+		# Darwin has a broken poll()
+		: ${enable_poll='no'}
 		# Darwin 8 and above can interpose library symbols cleanly
 		if test $OSMAJOR -ge 8; then
 		    AC_DEFINE(HAVE___INTERPOSE)
@@ -3215,6 +3220,20 @@ if test ${with_passwd-'no'} != "no"; then
 	AC_CHECK_FUNCS(bigcrypt set_auth_parameters initprivs)
 	AUTH_OBJS="$AUTH_OBJS secureware.lo"
     fi
+fi
+
+dnl
+dnl Choose event subsystem backend: poll or select
+dnl
+if test X"$enable_poll" = X""; then
+    AC_CHECK_FUNCS(poll, [enable_poll=yes], [enable_poll=no])
+elif test X"$enable_poll" = X"yes"; then
+    AC_DEFINE(HAVE_POLL)
+fi
+if test "$enable_poll" = "yes"; then
+    COMMON_OBJS="${COMMON_OBJS} event_poll.lo"
+else
+    COMMON_OBJS="${COMMON_OBJS} event_select.lo"
 fi
 
 dnl

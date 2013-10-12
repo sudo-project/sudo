@@ -1177,7 +1177,7 @@ exec_monitor(struct command_details *details, int backchannel)
 		    warning(_("error reading from socketpair"));
 		    goto done;
 		} else {
-		    /* /* short read or EOF, parent process died? */
+		    /* short read or EOF, parent process died? */
 		    goto done;
 		}
 	    }

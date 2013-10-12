@@ -65,7 +65,7 @@ sub mkdep {
 
     # Expand some configure bits
     $makefile =~ s:\@DEV\@::g;
-    $makefile =~ s:\@COMMON_OBJS\@:aix.lo:;
+    $makefile =~ s:\@COMMON_OBJS\@:aix.lo event_poll.lo event_select.lo:;
     $makefile =~ s:\@SUDO_OBJS\@:openbsd.o preload.o selinux.o sesh.o solaris.o sudo_noexec.lo:;
     $makefile =~ s:\@SUDOERS_OBJS\@:bsm_audit.lo linux_audit.lo ldap.lo sssd.lo:;
     # XXX - fill in AUTH_OBJS from contents of the auth dir instead

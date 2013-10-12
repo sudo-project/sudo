@@ -12,6 +12,9 @@ common/aix.c
 common/alloc.c
 common/atobool.c
 common/atoid.c
+common/event.c
+common/event_poll.c
+common/event_select.c
 common/fatal.c
 common/fileops.c
 common/fmt_string.c
@@ -147,6 +150,7 @@ include/missing.h
 include/secure_path.h
 include/sudo_conf.h
 include/sudo_debug.h
+include/sudo_event.h
 include/sudo_plugin.h
 indent.pro
 install-sh

@@ -150,6 +150,13 @@ Compilation options:
         option may be needed on some Linux systems where PIE binaries
         are not fully supported.
 
+  --disable-poll
+        Use select() instead of poll() in the event loop.  By default,
+	sudo will use poll() on systems that support it.  Some systems
+	have a broken poll() implementation and need to use select instead.
+	On Mac OS X, select() is always used since its poll() doesn't
+	support devices.
+
   --disable-rpath
         By default, configure will use -Rpath in addition to -Lpath
         when passing library paths to the loader.  This option will

@@ -112,7 +112,7 @@ list_append(void *vl1, void *vl2)
 
 /*
  * Append the list of entries to the head node and convert 
- * e from a semi-circle queue to normal doubly-linked list. 
+ * from a semi-circle queue to normal doubly-linked list. 
  */
 void
 tq_append(void *vh, void *vl)
@@ -127,6 +127,42 @@ tq_append(void *vh, void *vl)
 	h->last->next = l;
     l->prev = h->last;
     h->last = tail;
+}
+
+/*
+ * Insert a single item at the head of the queue.
+ */
+void
+tq_insert_head(void *vh, void *vl)
+{
+    struct list_head_proto *h = (struct list_head_proto *)vh;
+    struct list_proto *l = (struct list_proto *)vl;
+
+    l->prev = NULL;
+    l->next = h->first;
+    if (tq_empty(h))
+	h->last = l;
+    else
+	h->first->prev = l;
+    h->first = l;
+}
+
+/*
+ * Insert a single item at the tail of the queue.
+ */
+void
+tq_insert_tail(void *vh, void *vl)
+{
+    struct list_head_proto *h = (struct list_head_proto *)vh;
+    struct list_proto *l = (struct list_proto *)vl;
+
+    l->prev = h->last;
+    l->next = NULL;
+    if (tq_empty(h))
+	h->first = l;
+    else
+	h->last->next = l;
+    h->last = l;
 }
 
 /*
@@ -146,7 +182,7 @@ tq_remove(void *vh, void *vl)
 	/* At least two elements in the list. */
 	if (h->first == l) {
 	    h->first = l->next;
-	    h->first->prev = h->first;
+	    h->first->prev = h->first; /* XXX - do we rely on this behavior? */
 	} else if (h->last == l) {
 	    h->last = l->prev;
 	    h->last->next = NULL;

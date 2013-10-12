@@ -103,6 +103,7 @@ const char *const sudo_debug_subsystems[] = {
     "plugin",
     "hooks",
     "sssd",
+    "event",
     NULL
 };
 

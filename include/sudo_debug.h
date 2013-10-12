@@ -72,6 +72,7 @@
 #define SUDO_DEBUG_PLUGIN	(24<<6)	/* main plugin functions */
 #define SUDO_DEBUG_HOOKS	(25<<6)	/* hook functions */
 #define SUDO_DEBUG_SSSD		(26<<6) /* sudoers SSSD */
+#define SUDO_DEBUG_EVENT	(27<<6) /* event handling */
 #define SUDO_DEBUG_ALL		0xfff0	/* all subsystems */
 
 /* Flag to include string version of errno in debug info. */
