@@ -17,16 +17,10 @@
 #include <config.h>
 
 #include <sys/types.h>
-#ifdef HAVE_SYS_SYSMACROS_H
-# include <sys/sysmacros.h>
-#endif
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/wait.h>
 #include <sys/ioctl.h>
-#ifdef HAVE_SYS_SELECT_H
-# include <sys/select.h>
-#endif /* HAVE_SYS_SELECT_H */
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -1093,6 +1087,99 @@ handle_sigchld(int backchannel, struct command_status *cstat)
     debug_return_bool(alive);
 }
 
+struct monitor_closure {
+    struct sudo_event_base *evbase;
+    struct sudo_event *errpipe_event;
+    struct sudo_event *backchannel_event;
+    struct sudo_event *signal_pipe_event;
+    struct command_status *cstat;
+    int backchannel;
+    bool alive;
+};
+
+static void
+mon_signal_pipe_cb(int fd, int what, void *v)
+{
+    struct monitor_closure *mc = v;
+    unsigned char signo;
+    ssize_t n;
+    debug_decl(mon_signal_pipe_cb, SUDO_DEBUG_EXEC);
+
+    n = read(fd, &signo, sizeof(signo));
+    if (n == -1) {
+	if (errno != EINTR && errno != EAGAIN) {
+	    warning(_("error reading from signal pipe"));
+	    sudo_ev_loopbreak(mc->evbase);
+	}
+    } else {
+	/*
+	 * Handle SIGCHLD specially and deliver other signals
+	 * directly to the command.
+	 */
+	if (signo == SIGCHLD) {
+	    mc->alive = handle_sigchld(mc->backchannel, mc->cstat);
+	    if (!mc->alive) {
+		/* Remove all but the errpipe event. */
+		sudo_ev_del(mc->evbase, mc->backchannel_event);
+		sudo_ev_del(mc->evbase, mc->signal_pipe_event);
+	    }
+	} else {
+	    deliver_signal(cmnd_pid, signo, false);
+	}
+    }
+    debug_return;
+}
+
+static void
+mon_errpipe_cb(int fd, int what, void *v)
+{
+    struct monitor_closure *mc = v;
+    ssize_t n;
+    debug_decl(mon_errpipe_cb, SUDO_DEBUG_EXEC);
+
+    /* read errno or EOF from command pipe */
+    n = read(fd, mc->cstat, sizeof(struct command_status));
+    if (n == -1) {
+	if (errno != EINTR && errno != EAGAIN) {
+	    warning(_("error reading from pipe"));
+	    sudo_ev_loopbreak(mc->evbase);
+	}
+    } else {
+	/* Got errno or EOF, either way we are done with errpipe. */
+	sudo_ev_del(mc->evbase, mc->errpipe_event);
+	close(fd);
+    }
+    debug_return;
+}
+
+static void
+mon_backchannel_cb(int fd, int what, void *v)
+{
+    struct monitor_closure *mc = v;
+    struct command_status cstmp;
+    ssize_t n;
+    debug_decl(mon_backchannel_cb, SUDO_DEBUG_EXEC);
+
+    /* read command from backchannel, should be a signal */
+    n = recv(fd, &cstmp, sizeof(cstmp), 0);
+    if (n != sizeof(cstmp)) {
+	if (n == -1) {
+	    if (errno == EINTR || errno == EAGAIN)
+		debug_return;
+	    warning(_("error reading from socketpair"));
+	} else {
+	    /* short read or EOF, parent process died? */
+	}
+	sudo_ev_loopbreak(mc->evbase);
+    }
+    if (cstmp.type == CMD_SIGNO) {
+	deliver_signal(cmnd_pid, cstmp.val, true);
+    } else {
+	warningx(_("unexpected reply type on backchannel: %d"), cstmp.type);
+    }
+    debug_return;
+}
+
 /*
  * Monitor process that creates a new session with the controlling tty,
  * resets signal handlers and forks a child to call exec_pty().
@@ -1104,12 +1191,10 @@ static int
 exec_monitor(struct command_details *details, int backchannel)
 {
     struct command_status cstat;
-    struct timeval tv;
-    fd_set *fdsr;
+    struct sudo_event_base *evbase;
+    struct monitor_closure mc;
     sigaction_t sa;
-    int errpipe[2], maxfd, n;
-    bool alive = true;
-    unsigned char signo;
+    int errpipe[2], n;
     debug_decl(exec_monitor, SUDO_DEBUG_EXEC);
 
     /* Close unused fds. */
@@ -1120,7 +1205,7 @@ exec_monitor(struct command_details *details, int backchannel)
 
     /*
      * We use a pipe to atomically handle signal notification within
-     * the select() loop.
+     * the event loop.
      */
     if (pipe_nonblock(signal_pipe) != 0)
 	fatal(_("unable to create pipe"));
@@ -1141,7 +1226,7 @@ exec_monitor(struct command_details *details, int backchannel)
     /* Block all signals in mon_handler(). */
     sigfillset(&sa.sa_mask);
 
-    /* Note: HP-UX select() will not be interrupted if SA_RESTART set */
+    /* Note: HP-UX poll() will not be interrupted if SA_RESTART is set. */
     sa.sa_flags = SA_INTERRUPT;
 #ifdef SA_SIGINFO
     sa.sa_flags |= SA_SIGINFO;
@@ -1246,93 +1331,51 @@ exec_monitor(struct command_details *details, int backchannel)
 	} while (n == -1 && errno == EINTR);
     }
 
-    /* Wait for errno on pipe, signal on backchannel or for SIGCHLD */
-    maxfd = MAX(MAX(errpipe[0], signal_pipe[0]), backchannel);
-    fdsr = ecalloc(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
+    /*
+     * Create new event base and register read events for the
+     * signal pipe, error pipe, and backchannel.
+     */
+    evbase = sudo_ev_base_alloc();
+    if (evbase == NULL)
+	fatal(NULL);
+
     memset(&cstat, 0, sizeof(cstat));
-    tv.tv_sec = 0;
-    tv.tv_usec = 0;
-    for (;;) {
-	/* Check for signal on backchannel or errno on errpipe. */
-	FD_SET(backchannel, fdsr);
-	FD_SET(signal_pipe[0], fdsr);
-	if (errpipe[0] != -1)
-	    FD_SET(errpipe[0], fdsr);
-	maxfd = MAX(MAX(errpipe[0], signal_pipe[0]), backchannel);
+    mc.cstat = &cstat;
+    mc.evbase = evbase;
+    mc.backchannel = backchannel;
+    mc.alive = true;
 
-	/* If command exited we just poll, there may be data on errpipe. */
-	n = select(maxfd + 1, fdsr, NULL, NULL, alive ? NULL : &tv);
-	if (n <= 0) {
-	    if (n == 0)
-		goto done;
-	    if (errno == EINTR || errno == ENOMEM)
-		continue;
-	    warning("monitor: %s", _("select failed"));
-	    break;
-	}
+    mc.signal_pipe_event = sudo_ev_alloc(signal_pipe[0],
+	SUDO_EV_READ|SUDO_EV_PERSIST, mon_signal_pipe_cb, &mc);
+    if (mc.signal_pipe_event == NULL)
+	fatal(NULL);
+    if (sudo_ev_add(evbase, mc.signal_pipe_event, false) == -1)
+	fatal(_("unable to add event to queue"));
 
-	if (FD_ISSET(signal_pipe[0], fdsr)) {
-	    n = read(signal_pipe[0], &signo, sizeof(signo));
-	    if (n == -1) {
-		if (errno == EINTR || errno == EAGAIN)
-		    continue;
-		warning(_("error reading from signal pipe"));
-		goto done;
-	    }
-	    /*
-	     * Handle SIGCHLD specially and deliver other signals
-	     * directly to the command.
-	     */
-	    if (signo == SIGCHLD) {
-		if (!handle_sigchld(backchannel, &cstat))
-		    alive = false;
-	    } else {
-		deliver_signal(cmnd_pid, signo, false);
-	    }
-	    continue;
-	}
-	if (errpipe[0] != -1 && FD_ISSET(errpipe[0], fdsr)) {
-	    /* read errno or EOF from command pipe */
-	    n = read(errpipe[0], &cstat, sizeof(cstat));
-	    if (n == -1) {
-		if (errno == EINTR)
-		    continue;
-		warning(_("error reading from pipe"));
-		goto done;
-	    }
-	    /* Got errno or EOF, either way we are done with errpipe. */
-	    FD_CLR(errpipe[0], fdsr);
-	    close(errpipe[0]);
-	    errpipe[0] = -1;
-	}
-	if (FD_ISSET(backchannel, fdsr)) {
-	    struct command_status cstmp;
+    mc.errpipe_event = sudo_ev_alloc(errpipe[0],
+	SUDO_EV_READ|SUDO_EV_PERSIST, mon_errpipe_cb, &mc);
+    if (mc.errpipe_event == NULL)
+	fatal(NULL);
+    if (sudo_ev_add(evbase, mc.errpipe_event, false) == -1)
+	fatal(_("unable to add event to queue"));
 
-	    /* read command from backchannel, should be a signal */
-	    n = recv(backchannel, &cstmp, sizeof(cstmp), 0);
-	    if (n != sizeof(cstmp)) {
-		if (n == -1) {
-		    if (errno == EINTR)
-			continue;
-		    warning(_("error reading from socketpair"));
-		    goto done;
-		} else {
-		    /* short read or EOF, parent process died? */
-		    goto done;
-		}
-	    }
-	    if (cstmp.type != CMD_SIGNO) {
-		warningx(_("unexpected reply type on backchannel: %d"),
-		    cstmp.type);
-		continue;
-	    }
-	    deliver_signal(cmnd_pid, cstmp.val, true);
-	}
-    }
+    mc.backchannel_event = sudo_ev_alloc(backchannel,
+	SUDO_EV_READ|SUDO_EV_PERSIST, mon_backchannel_cb, &mc);
+    if (mc.backchannel_event == NULL)
+	fatal(NULL);
+    if (sudo_ev_add(evbase, mc.backchannel_event, false) == -1)
+	fatal(_("unable to add event to queue"));
 
-done:
-    if (alive) {
-	/* XXX An error occurred, should send an error back. */
+    /*
+     * Wait for errno on pipe, signal on backchannel or for SIGCHLD.
+     * The event loop ends when the child is no longer running and
+     * the error pipe is closed.
+     */
+    (void) sudo_ev_loop(evbase, 0);
+    if (mc.alive) {
+	/* XXX An error occurred, should send a message back. */
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "Command still running after event loop exit, sending SIGKILL");
 	kill(cmnd_pid, SIGKILL);
     } else {
 	/* Send parent status. */
