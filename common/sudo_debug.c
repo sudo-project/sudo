@@ -130,6 +130,10 @@ int sudo_debug_init(const char *debugfile, const char *settings)
     char *buf, *cp, *subsys, *pri;
     int i, j;
 
+    /* Make sure we are not already initialized. */
+    if (sudo_debug_mode != SUDO_DEBUG_MODE_DISABLED)
+	return 1;
+
     /* Init per-subsystems settings to -1 since 0 is a valid priority. */
     for (i = 0; i < NUM_SUBSYSTEMS; i++)
 	sudo_debug_settings[i] = -1;
