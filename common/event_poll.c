@@ -156,7 +156,7 @@ rescan:
 	    /* Service each event that fired. */
 	    for (ev = tq_first(base); ev != NULL; ev = base->pending) {
 		base->pending = list_next(ev);
-		if (base->pfds[ev->pfd_idx].revents) {
+		if (ev->pfd_idx != -1 && base->pfds[ev->pfd_idx].revents) {
 		    int what = 0;
 		    if (base->pfds[ev->pfd_idx].revents & (POLLIN|POLLHUP|POLLNVAL|POLLERR))
 			what |= (ev->events & SUDO_EV_READ);
