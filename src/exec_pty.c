@@ -1491,6 +1491,7 @@ safe_close(int fd)
 		    "%s: deleting revent %p due to shared fd %d",
 		    __func__, iob->revent, fd);
 		sudo_ev_del(NULL, iob->revent);
+		sudo_ev_free(iob->revent);
 	    }
 	}
 	if (iob->wevent != NULL) {
@@ -1499,6 +1500,7 @@ safe_close(int fd)
 		    "%s: deleting wevent %p due to shared fd %d",
 		    __func__, iob->wevent, fd);
 		sudo_ev_del(NULL, iob->wevent);
+		sudo_ev_free(iob->wevent);
 	    }
 	}
     }
