@@ -737,36 +737,32 @@ parse_expr(struct search_node **headp, char *argv[])
 }
 
 static bool
-match_expr(struct search_node *head, struct log_info *log)
+match_expr(struct search_node *head, struct log_info *log, bool last_match)
 {
     struct search_node *sn;
-    bool matched = true;
+    bool res, matched = last_match;
     int rc;
     debug_decl(match_expr, SUDO_DEBUG_UTIL)
 
     for (sn = head; sn; sn = sn->next) {
-	/* If we have no match, skip ahead to the next OR entry. */
-	if (!matched && !sn->or)
-	    continue;
-
 	switch (sn->type) {
 	case ST_EXPR:
-	    matched = match_expr(sn->u.expr, log);
+	    res = match_expr(sn->u.expr, log, matched);
 	    break;
 	case ST_CWD:
-	    matched = strcmp(sn->u.cwd, log->cwd) == 0;
+	    res = strcmp(sn->u.cwd, log->cwd) == 0;
 	    break;
 	case ST_TTY:
-	    matched = strcmp(sn->u.tty, log->tty) == 0;
+	    res = strcmp(sn->u.tty, log->tty) == 0;
 	    break;
 	case ST_RUNASGROUP:
-	    matched = strcmp(sn->u.runas_group, log->runas_group) == 0;
+	    res = strcmp(sn->u.runas_group, log->runas_group) == 0;
 	    break;
 	case ST_RUNASUSER:
-	    matched = strcmp(sn->u.runas_user, log->runas_user) == 0;
+	    res = strcmp(sn->u.runas_user, log->runas_user) == 0;
 	    break;
 	case ST_USER:
-	    matched = strcmp(sn->u.user, log->user) == 0;
+	    res = strcmp(sn->u.user, log->user) == 0;
 	    break;
 	case ST_PATTERN:
 #ifdef HAVE_REGCOMP
@@ -776,20 +772,22 @@ match_expr(struct search_node *head, struct log_info *log)
 		regerror(rc, &sn->u.cmdre, buf, sizeof(buf));
 		fatalx("%s", buf);
 	    }
-	    matched = rc == REG_NOMATCH ? 0 : 1;
+	    res = rc == REG_NOMATCH ? 0 : 1;
 #else
-	    matched = strstr(log.cmd, sn->u.pattern) != NULL;
+	    res = strstr(log.cmd, sn->u.pattern) != NULL;
 #endif
 	    break;
 	case ST_FROMDATE:
-	    matched = log->tstamp >= sn->u.tstamp;
+	    res = log->tstamp >= sn->u.tstamp;
 	    break;
 	case ST_TODATE:
-	    matched = log->tstamp <= sn->u.tstamp;
+	    res = log->tstamp <= sn->u.tstamp;
 	    break;
 	}
 	if (sn->negated)
-	    matched = !matched;
+	    res = !res;
+	matched = sn->or ? (res || last_match) : res;
+	last_match = matched;
     }
     debug_return_bool(matched);
 }
@@ -908,7 +906,7 @@ list_session(char *logfile, REGEX_T *re, const char *user, const char *tty)
 	goto done;
 
     /* Match on search expression if there is one. */
-    if (search_expr && !match_expr(search_expr, li))
+    if (search_expr && !match_expr(search_expr, li, false))
 	goto done;
 
     /* Convert from /var/log/sudo-sessions/00/00/01/log to 000001 */
