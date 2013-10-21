@@ -783,10 +783,13 @@ match_expr(struct search_node *head, struct log_info *log, bool last_match)
 	case ST_TODATE:
 	    res = log->tstamp <= sn->u.tstamp;
 	    break;
+	default:
+	    fatalx(_("unknown search type %d"), sn->type);
+	    /* NOTREACHED */
 	}
 	if (sn->negated)
 	    res = !res;
-	matched = sn->or ? (res || last_match) : res;
+	matched = sn->or ? (res || last_match) : (res && last_match);
 	last_match = matched;
     }
     debug_return_bool(matched);
@@ -799,7 +802,7 @@ parse_logfile(char *logfile)
     char *buf = NULL, *cp, *ep;
     size_t bufsize = 0, cwdsize = 0, cmdsize = 0;
     struct log_info *li = NULL;
-    debug_decl(list_session, SUDO_DEBUG_UTIL)
+    debug_decl(parse_logfile, SUDO_DEBUG_UTIL)
 
     fp = fopen(logfile, "r");
     if (fp == NULL) {
@@ -906,7 +909,7 @@ list_session(char *logfile, REGEX_T *re, const char *user, const char *tty)
 	goto done;
 
     /* Match on search expression if there is one. */
-    if (search_expr && !match_expr(search_expr, li, false))
+    if (search_expr && !match_expr(search_expr, li, true))
 	goto done;
 
     /* Convert from /var/log/sudo-sessions/00/00/01/log to 000001 */
