@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2012-2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -40,10 +40,11 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 #include "sudo_debug.h"
+#include "queue.h"
 
 /* Singly linked hook list. */
-struct sudo_hook_list {
-    struct sudo_hook_list *next;
+struct sudo_hook_entry {
+    SLIST_ENTRY(sudo_hook_entry) entries;
     union {
 	sudo_hook_fn_t generic_fn;
 	sudo_hook_fn_setenv_t setenv_fn;
@@ -53,22 +54,27 @@ struct sudo_hook_list {
     } u;
     void *closure;
 };
+SLIST_HEAD(sudo_hook_list, sudo_hook_entry);
 
 /* Each hook type gets own hook list. */
-static struct sudo_hook_list *sudo_hook_setenv_list;
-static struct sudo_hook_list *sudo_hook_unsetenv_list;
-static struct sudo_hook_list *sudo_hook_getenv_list;
-static struct sudo_hook_list *sudo_hook_putenv_list;
+static struct sudo_hook_list sudo_hook_setenv_list =
+    SLIST_HEAD_INITIALIZER(sudo_hook_setenv_list);
+static struct sudo_hook_list sudo_hook_unsetenv_list =
+    SLIST_HEAD_INITIALIZER(sudo_hook_unsetenv_list);
+static struct sudo_hook_list sudo_hook_getenv_list =
+    SLIST_HEAD_INITIALIZER(sudo_hook_getenv_list);
+static struct sudo_hook_list sudo_hook_putenv_list =
+    SLIST_HEAD_INITIALIZER(sudo_hook_putenv_list);
 
 /* NOTE: must not anything that might call setenv() */
 int
 process_hooks_setenv(const char *name, const char *value, int overwrite)
 {
-    struct sudo_hook_list *hook;
+    struct sudo_hook_entry *hook;
     int rc = SUDO_HOOK_RET_NEXT;
 
     /* First process the hooks. */
-    for (hook = sudo_hook_setenv_list; hook != NULL; hook = hook->next) {
+    SLIST_FOREACH(hook, &sudo_hook_setenv_list, entries) {
 	rc = hook->u.setenv_fn(name, value, overwrite, hook->closure);
 	switch (rc) {
 	    case SUDO_HOOK_RET_NEXT:
@@ -89,11 +95,11 @@ done:
 int
 process_hooks_putenv(char *string)
 {
-    struct sudo_hook_list *hook;
+    struct sudo_hook_entry *hook;
     int rc = SUDO_HOOK_RET_NEXT;
 
     /* First process the hooks. */
-    for (hook = sudo_hook_putenv_list; hook != NULL; hook = hook->next) {
+    SLIST_FOREACH(hook, &sudo_hook_putenv_list, entries) {
 	rc = hook->u.putenv_fn(string, hook->closure);
 	switch (rc) {
 	    case SUDO_HOOK_RET_NEXT:
@@ -114,12 +120,12 @@ done:
 int
 process_hooks_getenv(const char *name, char **value)
 {
-    struct sudo_hook_list *hook;
+    struct sudo_hook_entry *hook;
     char *val = NULL;
     int rc = SUDO_HOOK_RET_NEXT;
 
     /* First process the hooks. */
-    for (hook = sudo_hook_getenv_list; hook != NULL; hook = hook->next) {
+    SLIST_FOREACH(hook, &sudo_hook_getenv_list, entries) {
 	rc = hook->u.getenv_fn(name, &val, hook->closure);
 	switch (rc) {
 	    case SUDO_HOOK_RET_NEXT:
@@ -142,11 +148,11 @@ done:
 int
 process_hooks_unsetenv(const char *name)
 {
-    struct sudo_hook_list *hook;
+    struct sudo_hook_entry *hook;
     int rc = SUDO_HOOK_RET_NEXT;
 
     /* First process the hooks. */
-    for (hook = sudo_hook_unsetenv_list; hook != NULL; hook = hook->next) {
+    SLIST_FOREACH(hook, &sudo_hook_unsetenv_list, entries) {
 	rc = hook->u.unsetenv_fn(name, hook->closure);
 	switch (rc) {
 	    case SUDO_HOOK_RET_NEXT:
@@ -165,17 +171,16 @@ done:
 
 /* Hook registration internals. */
 static void
-register_hook_internal(struct sudo_hook_list **head,
+register_hook_internal(struct sudo_hook_list *head,
     int (*hook_fn)(), void *closure)
 {
-    struct sudo_hook_list *hook;
+    struct sudo_hook_entry *hook;
     debug_decl(register_hook_internal, SUDO_DEBUG_HOOKS)
 
     hook = ecalloc(1, sizeof(*hook));
     hook->u.generic_fn = hook_fn;
     hook->closure = closure;
-    hook->next = *head;
-    *head = hook;
+    SLIST_INSERT_HEAD(head, hook, entries);
 
     debug_return;
 }
@@ -220,22 +225,23 @@ register_hook(struct sudo_hook *hook)
 
 /* Hook deregistration internals. */
 static void
-deregister_hook_internal(struct sudo_hook_list **head,
+deregister_hook_internal(struct sudo_hook_list *head,
     int (*hook_fn)(), void *closure)
 {
-    struct sudo_hook_list *hook, *prev = NULL;
+    struct sudo_hook_entry *hook, *prev = NULL;
     debug_decl(deregister_hook_internal, SUDO_DEBUG_HOOKS)
 
-    for (hook = *head, prev = NULL; hook != NULL; prev = hook, hook = hook->next) {
+    SLIST_FOREACH(hook, head, entries) {
 	if (hook->u.generic_fn == hook_fn && hook->closure == closure) {
 	    /* Remove from list and free. */
 	    if (prev == NULL)
-		*head = hook->next;
+		SLIST_REMOVE_HEAD(head, entries);
 	    else
-		prev->next = hook->next;
+		SLIST_REMOVE_AFTER(prev, entries);
 	    efree(hook);
 	    break;
 	}
+	prev = hook;
     }
 
     debug_return;

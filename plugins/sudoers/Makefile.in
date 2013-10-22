@@ -841,8 +841,8 @@ sudoreplay.o: $(srcdir)/sudoreplay.c $(top_builddir)/config.h \
               $(top_srcdir)/compat/getopt.h $(top_builddir)/pathnames.h \
               $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/fatal.h \
               $(incdir)/gettext.h $(srcdir)/logging.h $(srcdir)/iolog.h \
-              $(incdir)/sudo_plugin.h $(incdir)/sudo_conf.h $(incdir)/queue.h \
-              $(incdir)/sudo_debug.h
+              $(incdir)/queue.h $(incdir)/sudo_plugin.h $(incdir)/sudo_conf.h \
+              $(incdir)/queue.h $(incdir)/sudo_debug.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudoreplay.c
 testsudoers.o: $(srcdir)/testsudoers.c $(top_builddir)/config.h \
                $(top_srcdir)/compat/fnmatch.h $(srcdir)/tsgetgrpw.h \
@@ -903,6 +903,6 @@ visudo.o: $(srcdir)/visudo.c $(top_builddir)/config.h \
           $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
           $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
           $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/redblack.h \
-          $(incdir)/queue.h $(incdir)/gettext.h $(srcdir)/sudoers_version.h \
+          $(incdir)/gettext.h $(srcdir)/sudoers_version.h \
           $(incdir)/sudo_conf.h $(incdir)/queue.h $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/visudo.c

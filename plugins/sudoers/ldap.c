@@ -159,13 +159,13 @@ extern int ldapssl_set_strength(LDAP *ldap, int strength);
  * The ldap_search structure implements a linked list of ldap and
  * search result pointers, which allows us to remove them after
  * all search results have been combined in memory.
- * XXX - should probably be a tailq since we do appends
  */
-struct ldap_search_list {
+struct ldap_search_result {
+    STAILQ_ENTRY(ldap_search_result) entries;
     LDAP *ldap;
     LDAPMessage *searchresult;
-    struct ldap_search_list *next;
 };
+STAILQ_HEAD(ldap_search_list, ldap_search_result);
 
 /*
  * The ldap_entry_wrapper structure is used to implement sorted result entries.
@@ -184,7 +184,7 @@ struct ldap_entry_wrapper {
  * well as an array of all result entries sorted by the sudoOrder attribute.
  */
 struct ldap_result {
-    struct ldap_search_list *searches;
+    struct ldap_search_list searches;
     struct ldap_entry_wrapper *entries;
     int allocated_entries;
     int nentries;
@@ -200,10 +200,12 @@ struct ldap_config_table {
     void *valp;			/* pointer into ldap_conf */
 };
 
-struct ldap_config_list_str {
-    struct ldap_config_list_str *next;
+struct ldap_config_str {
+    STAILQ_ENTRY(ldap_config_str) entries;
     char val[1];
 };
+
+STAILQ_HEAD(ldap_config_str_list, ldap_config_str);
 
 /* LDAP configuration structure */
 static struct ldap_config {
@@ -221,11 +223,11 @@ static struct ldap_config {
     int timed;
     int deref;
     char *host;
-    struct ldap_config_list_str *uri;
+    struct ldap_config_str_list uri;
     char *binddn;
     char *bindpw;
     char *rootbinddn;
-    struct ldap_config_list_str *base;
+    struct ldap_config_str_list base;
     char *search_filter;
     char *ssl;
     char *tls_cacertfile;
@@ -433,16 +435,17 @@ toobig:
  * where the trailing slash is optional.
  */
 static int
-sudo_ldap_parse_uri(const struct ldap_config_list_str *uri_list)
+sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
 {
+    const struct ldap_config_str *entry;
     char *buf, *uri, *host, *cp, *port;
     char hostbuf[LINE_MAX];
     int nldap = 0, nldaps = 0;
     int rc = -1;
     debug_decl(sudo_ldap_parse_uri, SUDO_DEBUG_LDAP)
 
-    do {
-	buf = estrdup(uri_list->val);
+    STAILQ_FOREACH(entry, uri_list, entries) {
+	buf = estrdup(entry->val);
 	hostbuf[0] = '\0';
 	for ((uri = strtok(buf, " \t")); uri != NULL; (uri = strtok(NULL, " \t"))) {
 	    if (strncasecmp(uri, "ldap://", 7) == 0) {
@@ -481,7 +484,7 @@ sudo_ldap_parse_uri(const struct ldap_config_list_str *uri_list)
 	    }
 	}
 	if (hostbuf[0] == '\0') {
-	    warningx(_("invalid uri: %s"), uri_list->val);
+	    warningx(_("invalid uri: %s"), entry->val);
 	    goto done;
 	}
 
@@ -500,7 +503,7 @@ sudo_ldap_parse_uri(const struct ldap_config_list_str *uri_list)
 	efree(ldap_conf.host);
 	ldap_conf.host = estrdup(hostbuf);
 	efree(buf);
-    } while ((uri_list = uri_list->next));
+    }
 
     buf = NULL;
     rc = 0;
@@ -514,23 +517,24 @@ toobig:
 }
 #else
 static char *
-sudo_ldap_join_uri(struct ldap_config_list_str *uri_list)
+sudo_ldap_join_uri(struct ldap_config_str_list *uri_list)
 {
-    struct ldap_config_list_str *uri;
+    struct ldap_config_str *uri;
     size_t len = 0;
     char *buf, *cp;
     debug_decl(sudo_ldap_join_uri, SUDO_DEBUG_LDAP)
 
     /* Usually just a single entry. */
-    if (uri_list->next == NULL)
-	debug_return_str(estrdup(uri_list->val));
+    if (STAILQ_NEXT(STAILQ_FIRST(uri_list), entries) == NULL)
+	debug_return_str(estrdup(STAILQ_FIRST(uri_list)->val));
 
-    for (uri = uri_list; uri != NULL; uri = uri->next) {
+    /* Multiple entries. */
+    STAILQ_FOREACH(uri, uri_list, entries) {
 	len += strlen(uri->val) + 1;
     }
     buf = cp = emalloc(len);
     buf[0] = '\0';
-    for (uri = uri_list; uri != NULL; uri = uri->next) {
+    STAILQ_FOREACH(uri, uri_list, entries) {
 	cp += strlcpy(cp, uri->val, len - (cp - buf));
 	*cp++ = ' ';
     }
@@ -1420,16 +1424,15 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 		break;
 	    case CONF_LIST_STR:
 		{
-		    struct ldap_config_list_str **p;
+		    struct ldap_config_str_list *head;
+		    struct ldap_config_str *str;
 		    size_t len = strlen(value);
 
 		    if (len > 0) {
-			p = (struct ldap_config_list_str **)cur->valp;
-			while (*p != NULL)
-			    p = &(*p)->next;
-			*p = emalloc(sizeof(struct ldap_config_list_str) + len);
-			memcpy((*p)->val, value, len + 1);
-			(*p)->next = NULL;
+			head = (struct ldap_config_str_list *)cur->valp;
+			str = emalloc(sizeof(*str) + len);
+			memcpy(str->val, value, len + 1);
+			STAILQ_INSERT_TAIL(head, str, entries);
 		    }
 		}
 		break;
@@ -1513,6 +1516,8 @@ sudo_ldap_read_config(void)
     ldap_conf.use_sasl = -1;
     ldap_conf.rootuse_sasl = -1;
     ldap_conf.deref = -1;
+    STAILQ_INIT(&ldap_conf.uri);
+    STAILQ_INIT(&ldap_conf.base);
 
     if ((fp = fopen(path_ldap_conf, "r")) == NULL)
 	debug_return_bool(false);
@@ -1545,12 +1550,12 @@ sudo_ldap_read_config(void)
 
     DPRINTF1("LDAP Config Summary");
     DPRINTF1("===================");
-    if (ldap_conf.uri) {
-	struct ldap_config_list_str *uri = ldap_conf.uri;
+    if (!STAILQ_EMPTY(&ldap_conf.uri)) {
+	struct ldap_config_str *uri;
 
-	do {
+	STAILQ_FOREACH(uri, &ldap_conf.uri, entries) {
 	    DPRINTF1("uri              %s", uri->val);
-	} while ((uri = uri->next) != NULL);
+	}
     } else {
 	DPRINTF1("host             %s",
 	    ldap_conf.host ? ldap_conf.host : "(NONE)");
@@ -1558,11 +1563,11 @@ sudo_ldap_read_config(void)
     }
     DPRINTF1("ldap_version     %d", ldap_conf.version);
 
-    if (ldap_conf.base) {
-	struct ldap_config_list_str *base = ldap_conf.base;
-	do {
+    if (!STAILQ_EMPTY(&ldap_conf.base)) {
+	struct ldap_config_str *base;
+	STAILQ_FOREACH(base, &ldap_conf.base, entries) {
 	    DPRINTF1("sudoers_base     %s", base->val);
-	} while ((base = base->next) != NULL);
+	}
     } else {
 	DPRINTF1("sudoers_base     %s", "(NONE: LDAP disabled)");
     }
@@ -1622,7 +1627,7 @@ sudo_ldap_read_config(void)
 #endif
     DPRINTF1("===================");
 
-    if (!ldap_conf.base)
+    if (STAILQ_EMPTY(&ldap_conf.base))
 	debug_return_bool(false);	/* if no base is defined, ignore LDAP */
 
     if (ldap_conf.bind_timelimit > 0)
@@ -1647,19 +1652,20 @@ sudo_ldap_read_config(void)
 
 #ifndef HAVE_LDAP_INITIALIZE
     /* Convert uri list to host list if no ldap_initialize(). */
-    if (ldap_conf.uri) {
-	struct ldap_config_list_str *uri = ldap_conf.uri;
-	if (sudo_ldap_parse_uri(uri) != 0)
+    if (!STAILQ_EMPTY(&ldap_conf.uri)) {
+	struct ldap_config_str *uri;
+
+	if (sudo_ldap_parse_uri(&ldap_conf.uri) != 0)
 	    debug_return_bool(false);
-	do {
-	    ldap_conf.uri = uri->next;
+	while ((uri = STAILQ_FIRST(&ldap_conf.uri)) != NULL) {
+	    STAILQ_REMOVE_HEAD(&ldap_conf.uri, entries);
 	    efree(uri);
-	} while ((uri = ldap_conf.uri));
+	}
 	ldap_conf.port = LDAP_PORT;
     }
 #endif
 
-    if (!ldap_conf.uri) {
+    if (STAILQ_EMPTY(&ldap_conf.uri)) {
 	/* Use port 389 for plaintext LDAP and port 636 for SSL LDAP */
 	if (ldap_conf.port < 0)
 	    ldap_conf.port =
@@ -1744,7 +1750,7 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
 {
     struct berval **bv, **p;
     struct timeval tv, *tvp = NULL;
-    struct ldap_config_list_str *base;
+    struct ldap_config_str *base;
     struct sudo_ldap_handle *handle = nss->handle;
     LDAP *ld;
     LDAPMessage *entry, *result;
@@ -1757,7 +1763,7 @@ sudo_ldap_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     ld = handle->ld;
 
     filt = sudo_ldap_build_default_filter();
-    for (base = ldap_conf.base; base != NULL; base = base->next) {
+    STAILQ_FOREACH(base, &ldap_conf.base, entries) {
 	if (ldap_conf.timeout > 0) {
 	    tv.tv_sec = ldap_conf.timeout;
 	    tv.tv_usec = 0;
@@ -2299,7 +2305,10 @@ sudo_ldap_result_alloc(void)
     struct ldap_result *result;
     debug_decl(sudo_ldap_result_alloc, SUDO_DEBUG_LDAP)
 
-    debug_return_ptr(ecalloc(1, sizeof(*result)));
+    result = ecalloc(1, sizeof(*result));
+    STAILQ_INIT(&result->searches);
+
+    debug_return_ptr(result);
 }
 
 /*
@@ -2308,7 +2317,7 @@ sudo_ldap_result_alloc(void)
 static void
 sudo_ldap_result_free(struct ldap_result *lres)
 {
-    struct ldap_search_list *s;
+    struct ldap_search_result *s;
     debug_decl(sudo_ldap_result_free, SUDO_DEBUG_LDAP)
 
     if (lres != NULL) {
@@ -2316,12 +2325,10 @@ sudo_ldap_result_free(struct ldap_result *lres)
 	    efree(lres->entries);
 	    lres->entries = NULL;
 	}
-	if (lres->searches) {
-	    while ((s = lres->searches) != NULL) {
-		ldap_msgfree(s->searchresult);
-		lres->searches = s->next;
-		efree(s);
-	    }
+	while ((s = STAILQ_FIRST(&lres->searches)) != NULL) {
+	    STAILQ_REMOVE_HEAD(&lres->searches, entries);
+	    ldap_msgfree(s->searchresult);
+	    efree(s);
 	}
 	efree(lres);
     }
@@ -2331,26 +2338,19 @@ sudo_ldap_result_free(struct ldap_result *lres)
 /*
  * Add a search result to the ldap_result structure.
  */
-static struct ldap_search_list *
+static struct ldap_search_result *
 sudo_ldap_result_add_search(struct ldap_result *lres, LDAP *ldap,
     LDAPMessage *searchresult)
 {
-    struct ldap_search_list *s, *news;
+    struct ldap_search_result *news;
     debug_decl(sudo_ldap_result_add_search, SUDO_DEBUG_LDAP)
 
-    news = ecalloc(1, sizeof(struct ldap_search_list));
+    /* Create new entry and add it to the end of the chain. */
+    news = ecalloc(1, sizeof(*news));
     news->ldap = ldap;
     news->searchresult = searchresult;
-    /* news->next = NULL; */
+    STAILQ_INSERT_TAIL(&lres->searches, news, entries);
 
-    /* Add entry to the end of the chain (XXX - tailq instead?). */
-    if (lres->searches) {
-	for (s = lres->searches; s->next != NULL; s = s->next)
-	    continue;
-	s->next = news;
-    } else {
-	lres->searches = news;
-    }
     debug_return_ptr(news);
 }
 
@@ -2471,8 +2471,8 @@ sudo_ldap_open(struct sudo_nss *nss)
 
     /* Connect to LDAP server */
 #ifdef HAVE_LDAP_INITIALIZE
-    if (ldap_conf.uri != NULL) {
-	char *buf = sudo_ldap_join_uri(ldap_conf.uri);
+    if (!STAILQ_EMPTY(&ldap_conf.uri)) {
+	char *buf = sudo_ldap_join_uri(&ldap_conf.uri);
 	DPRINTF2("ldap_initialize(ld, %s)", buf);
 	rc = ldap_initialize(&ld, buf);
 	efree(buf);
@@ -2537,7 +2537,7 @@ sudo_ldap_open(struct sudo_nss *nss)
 static int
 sudo_ldap_setdefs(struct sudo_nss *nss)
 {
-    struct ldap_config_list_str *base;
+    struct ldap_config_str *base;
     struct sudo_ldap_handle *handle = nss->handle;
     struct timeval tv, *tvp = NULL;
     LDAP *ld;
@@ -2553,7 +2553,7 @@ sudo_ldap_setdefs(struct sudo_nss *nss)
     filt = sudo_ldap_build_default_filter();
     DPRINTF1("Looking for cn=defaults: %s", filt);
 
-    for (base = ldap_conf.base; base != NULL; base = base->next) {
+    STAILQ_FOREACH(base, &ldap_conf.base, entries) {
 	if (ldap_conf.timeout > 0) {
 	    tv.tv_sec = ldap_conf.timeout;
 	    tv.tv_usec = 0;
@@ -2713,21 +2713,15 @@ ldap_entry_compare(const void *a, const void *b)
 }
 
 /*
- * Find the last entry in the list of searches, usually the
+ * Return the last entry in the list of searches, usually the
  * one currently being used to add entries.
- * XXX - use a tailq instead?
  */
-static struct ldap_search_list *
+static struct ldap_search_result *
 sudo_ldap_result_last_search(struct ldap_result *lres)
 {
-    struct ldap_search_list *result = lres->searches;
     debug_decl(sudo_ldap_result_last_search, SUDO_DEBUG_LDAP)
 
-    if (result) {
-	while (result->next)
-	    result = result->next;
-    }
-    debug_return_ptr(result);
+    debug_return_ptr(STAILQ_LAST(&lres->searches, ldap_search_result, entries));
 }
 
 /*
@@ -2736,7 +2730,7 @@ sudo_ldap_result_last_search(struct ldap_result *lres)
 static struct ldap_entry_wrapper *
 sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
 {
-    struct ldap_search_list *last;
+    struct ldap_search_result *last;
     struct berval **bv;
     double order = 0.0;
     char *ep;
@@ -2806,7 +2800,7 @@ static struct ldap_result *
 sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_ldap_handle *handle = nss->handle;
-    struct ldap_config_list_str *base;
+    struct ldap_config_str *base;
     struct ldap_result *lres;
     struct timeval tv, *tvp = NULL;
     LDAPMessage *entry, *result;
@@ -2854,7 +2848,7 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
     for (pass = 0; pass < 2; pass++) {
 	filt = pass ? sudo_ldap_build_pass2() : sudo_ldap_build_pass1(pw);
 	DPRINTF1("ldap search '%s'", filt);
-	for (base = ldap_conf.base; base != NULL; base = base->next) {
+	STAILQ_FOREACH(base, &ldap_conf.base, entries) {
 	    DPRINTF1("searching from base '%s'",
 		base->val);
 	    if (ldap_conf.timeout > 0) {
@@ -2957,7 +2951,7 @@ sudo_ldap_result_from_search(LDAP *ldap, LDAPMessage *searchresult)
      * Build a new list node for the search result, this creates the
      * list node.
      */
-    struct ldap_search_list *last = sudo_ldap_result_add_search(result,
+    struct ldap_search_result *last = sudo_ldap_result_add_search(result,
 	ldap, searchresult);
 
     /*

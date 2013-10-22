@@ -231,7 +231,7 @@ hooks.o: $(srcdir)/hooks.c $(top_builddir)/config.h $(srcdir)/sudo.h \
          $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/fatal.h \
          $(incdir)/fileops.h $(incdir)/sudo_conf.h $(incdir)/queue.h \
          $(incdir)/sudo_debug.h $(incdir)/gettext.h $(incdir)/sudo_plugin.h \
-         $(srcdir)/sudo_plugin_int.h $(incdir)/sudo_debug.h
+         $(srcdir)/sudo_plugin_int.h $(incdir)/sudo_debug.h $(incdir)/queue.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/hooks.c
 load_plugins.o: $(srcdir)/load_plugins.c $(top_builddir)/config.h \
                 $(top_srcdir)/compat/dlfcn.h $(srcdir)/sudo.h \

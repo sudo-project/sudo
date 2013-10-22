@@ -558,7 +558,7 @@ matches_env_delete(const char *var)
     debug_decl(matches_env_delete, SUDO_DEBUG_ENV)
 
     /* Skip anything listed in env_delete. */
-    for (cur = def_env_delete; cur; cur = cur->next) {
+    SLIST_FOREACH(cur, &def_env_delete, entries) {
 	len = strlen(cur->value);
 	/* Deal with '*' wildcard */
 	if (cur->value[len - 1] == '*') {
@@ -589,7 +589,7 @@ matches_env_check(const char *var)
     int keepit = -1;
     debug_decl(matches_env_check, SUDO_DEBUG_ENV)
 
-    for (cur = def_env_check; cur; cur = cur->next) {
+    SLIST_FOREACH(cur, &def_env_check, entries) {
 	len = strlen(cur->value);
 	/* Deal with '*' wildcard */
 	if (cur->value[len - 1] == '*') {
@@ -624,7 +624,7 @@ matches_env_keep(const char *var)
 	goto done;
     }
 
-    for (cur = def_env_keep; cur; cur = cur->next) {
+    SLIST_FOREACH(cur, &def_env_keep, entries) {
 	len = strlen(cur->value);
 	/* Deal with '*' wildcard */
 	if (cur->value[len - 1] == '*') {
@@ -1085,24 +1085,21 @@ init_envtables(void)
     for (p = initial_badenv_table; *p; p++) {
 	cur = ecalloc(1, sizeof(struct list_member));
 	cur->value = estrdup(*p);
-	cur->next = def_env_delete;
-	def_env_delete = cur;
+	SLIST_INSERT_HEAD(&def_env_delete, cur, entries);
     }
 
     /* Fill in the "env_check" list. */
     for (p = initial_checkenv_table; *p; p++) {
 	cur = ecalloc(1, sizeof(struct list_member));
 	cur->value = estrdup(*p);
-	cur->next = def_env_check;
-	def_env_check = cur;
+	SLIST_INSERT_HEAD(&def_env_check, cur, entries);
     }
 
     /* Fill in the "env_keep" list. */
     for (p = initial_keepenv_table; *p; p++) {
 	cur = ecalloc(1, sizeof(struct list_member));
 	cur->value = estrdup(*p);
-	cur->next = def_env_keep;
-	def_env_keep = cur;
+	SLIST_INSERT_HEAD(&def_env_keep, cur, entries);
     }
 }
 

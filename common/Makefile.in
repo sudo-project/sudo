@@ -189,7 +189,8 @@ event_select.lo: $(srcdir)/event_select.c $(top_builddir)/config.h \
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/event_select.c
 fatal.lo: $(srcdir)/fatal.c $(top_builddir)/config.h \
           $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h $(incdir)/alloc.h \
-          $(incdir)/fatal.h $(incdir)/sudo_plugin.h $(incdir)/gettext.h
+          $(incdir)/fatal.h $(incdir)/queue.h $(incdir)/sudo_plugin.h \
+          $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/fatal.c
 fileops.lo: $(srcdir)/fileops.c $(top_builddir)/config.h \
             $(top_srcdir)/compat/stdbool.h $(top_srcdir)/compat/timespec.h \

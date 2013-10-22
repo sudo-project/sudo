@@ -31,17 +31,21 @@
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
+#include "queue.h"
 #include "sudo_plugin.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "gettext.h"
 
+struct sudo_fatal_callback {
+    SLIST_ENTRY(sudo_fatal_callback) entries;
+    void (*func)(void);
+};
+SLIST_HEAD(sudo_fatal_callback_list, sudo_fatal_callback);
+
 sigjmp_buf fatal_jmp;
 static bool setjmp_enabled = false;
-static struct sudo_fatal_callback {
-    void (*func)(void);
-    struct sudo_fatal_callback *next;
-} *callbacks;
+static struct sudo_fatal_callback_list callbacks;
 
 static void _warning(int, const char *, va_list);
 
@@ -51,8 +55,8 @@ do_cleanup(void)
     struct sudo_fatal_callback *cb;
 
     /* Run callbacks, removing them from the list as we go. */
-    while ((cb = callbacks) != NULL) {
-	callbacks = cb->next;
+    while ((cb = SLIST_FIRST(&callbacks)) != NULL) {
+	SLIST_REMOVE_HEAD(&callbacks, entries);
 	cb->func();
 	free(cb);
     }
@@ -173,8 +177,7 @@ fatal_callback_register(void (*func)(void))
     if (cb == NULL)
 	return -1;
     cb->func = func;
-    cb->next = callbacks;
-    callbacks = cb;
+    SLIST_INSERT_HEAD(&callbacks, cb, entries);
 
     return 0;
 }

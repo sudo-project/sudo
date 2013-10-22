@@ -77,7 +77,7 @@
 #endif
 
 struct io_buffer {
-    struct io_buffer *next;
+    SLIST_ENTRY(io_buffer) entries;
     struct sudo_event *revent;
     struct sudo_event *wevent;
     bool (*action)(const char *buf, unsigned int len);
@@ -86,10 +86,7 @@ struct io_buffer {
     char buf[32 * 1024];
 };
 
-struct io_buffer_list {
-    struct io_buffer *first;
-    /* XXX - stash cstat too? */
-};
+SLIST_HEAD(io_buffer_list, io_buffer);
 
 static char slavename[PATH_MAX];
 static bool foreground, pipeline, tty_initialized;
@@ -609,9 +606,8 @@ io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int),
     if (n != -1 && !ISSET(n, O_NONBLOCK))
 	(void) fcntl(wfd, F_SETFL, n | O_NONBLOCK);
 
-    /* Add to head of list. */
+    /* Allocate and add to head of list. */
     iob = emalloc(sizeof(*iob));
-    iob->next = head->first;
     iob->revent = sudo_ev_alloc(rfd, SUDO_EV_READ, io_callback, iob);
     iob->wevent = sudo_ev_alloc(wfd, SUDO_EV_WRITE, io_callback, iob);
     iob->len = 0;
@@ -620,7 +616,7 @@ io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int),
     iob->buf[0] = '\0';
     if (iob->revent == NULL || iob->wevent == NULL)
 	fatal(NULL);
-    head->first = iob;
+    SLIST_INSERT_HEAD(head, iob, entries);
 
     debug_return;
 }
@@ -822,8 +818,8 @@ pty_close(struct command_status *cstat)
     del_io_events();
 
     /* Free I/O buffers. */
-    while ((iob = iobufs.first) != NULL) {
-	iobufs.first = iob->next;
+    while ((iob = SLIST_FIRST(&iobufs)) != NULL) {
+	SLIST_REMOVE_HEAD(&iobufs, entries);
 	efree(iob);
     }
 
@@ -871,7 +867,7 @@ add_io_events(struct sudo_event_base *evbase)
      * Schedule writers that contain buffered data.
      * Normally, write buffers are added on demand when data is read.
      */
-    for (iob = iobufs.first; iob != NULL; iob = iob->next) {
+    SLIST_FOREACH(iob, &iobufs, entries) {
 	/* Don't read/write from /dev/tty if we are not in the foreground. */
 	if (iob->revent != NULL &&
 	    (ttymode == TERM_RAW || !USERTTY_EVENT(iob->revent))) {
@@ -909,7 +905,7 @@ del_io_events(void)
     debug_decl(del_io_events, SUDO_DEBUG_EXEC);
 
     /* Remove iobufs from existing event base. */
-    for (iob = iobufs.first; iob != NULL; iob = iob->next) {
+    SLIST_FOREACH(iob, &iobufs, entries) {
 	if (iob->revent != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"deleted I/O revent %p, fd %d, events %d",
@@ -930,7 +926,7 @@ del_io_events(void)
 	fatal(NULL);
 
     /* Avoid reading from /dev/tty, just flush existing data. */
-    for (iob = iobufs.first; iob != NULL; iob = iob->next) {
+    SLIST_FOREACH(iob, &iobufs, entries) {
 	/* Don't read from /dev/tty while flushing. */
 	if (iob->revent != NULL && !USERTTY_EVENT(iob->revent)) {
 	    if (iob->len != sizeof(iob->buf)) {
@@ -951,7 +947,7 @@ del_io_events(void)
     (void) sudo_ev_loop(evbase, SUDO_EVLOOP_NONBLOCK);
 
     /* Free temporary event base. */
-    for (iob = iobufs.first; iob != NULL; iob = iob->next) {
+    SLIST_FOREACH(iob, &iobufs, entries) {
 	if (iob->revent != NULL)
 	    sudo_ev_del(evbase, iob->revent);
 	if (iob->wevent != NULL)
@@ -1484,7 +1480,7 @@ safe_close(int fd)
 	debug_return_int(-1);
     }
     /* Deschedule any other users of the fd. */
-    for (iob = iobufs.first; iob != NULL; iob = iob->next) {
+    SLIST_FOREACH(iob, &iobufs, entries) {
 	if (iob->revent != NULL) {
 	    if (sudo_ev_get_fd(iob->revent) == fd) {
 		sudo_debug_printf(SUDO_DEBUG_INFO,

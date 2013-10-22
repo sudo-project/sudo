@@ -79,7 +79,6 @@
 #include "sudoers.h"
 #include "parse.h"
 #include "redblack.h"
-#include "queue.h"
 #include "gettext.h"
 #include "sudoers_version.h"
 #include "sudo_conf.h"

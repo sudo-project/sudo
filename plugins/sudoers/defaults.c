@@ -162,9 +162,9 @@ dump_defaults(void)
 		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    break;
 		case T_LIST:
-		    if (cur->sd_un.list) {
+		    if (!SLIST_EMPTY(&cur->sd_un.list)) {
 			sudo_printf(SUDO_CONV_INFO_MSG, "%s\n", desc);
-			for (item = cur->sd_un.list; item; item = item->next) {
+			SLIST_FOREACH(item, &cur->sd_un.list, entries) {
 			    sudo_printf(SUDO_CONV_INFO_MSG,
 				"\t%s\n", item->value);
 			}
@@ -826,43 +826,41 @@ store_mode(char *val, struct sudo_defs_types *def, int op)
 static void
 list_op(char *val, size_t len, struct sudo_defs_types *def, enum list_ops op)
 {
-    struct list_member *cur, *prev, *tmp;
+    struct list_member *tmp, *cur, *prev = NULL;
     debug_decl(list_op, SUDO_DEBUG_DEFAULTS)
 
     if (op == freeall) {
-	for (cur = def->sd_un.list; cur; ) {
-	    tmp = cur;
-	    cur = tmp->next;
+	SLIST_FOREACH_SAFE(cur, &def->sd_un.list, entries, tmp) {
 	    efree(tmp->value);
 	    efree(tmp);
 	}
-	def->sd_un.list = NULL;
+	SLIST_INIT(&def->sd_un.list);
 	debug_return;
     }
 
-    for (cur = def->sd_un.list, prev = NULL; cur; prev = cur, cur = cur->next) {
+    SLIST_FOREACH(cur, &def->sd_un.list, entries) {
 	if ((strncmp(cur->value, val, len) == 0 && cur->value[len] == '\0')) {
 
 	    if (op == add)
 		debug_return;		/* already exists */
 
 	    /* Delete node */
-	    if (prev != NULL)
-		prev->next = cur->next;
+	    if (prev == NULL)
+		SLIST_REMOVE_HEAD(&def->sd_un.list, entries);
 	    else
-		def->sd_un.list = cur->next;
+		SLIST_REMOVE_AFTER(prev, entries);
 	    efree(cur->value);
 	    efree(cur);
 	    break;
 	}
+	prev = cur;
     }
 
     /* Add new node to the head of the list. */
     if (op == add) {
 	cur = ecalloc(1, sizeof(struct list_member));
 	cur->value = estrndup(val, len);
-	cur->next = def->sd_un.list;
-	def->sd_un.list = cur;
+	SLIST_INSERT_HEAD(&def->sd_un.list, cur, entries);
     }
     debug_return;
 }

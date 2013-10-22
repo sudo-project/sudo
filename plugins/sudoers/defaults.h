@@ -25,9 +25,11 @@
 #include <def_data.h>
 
 struct list_member {
+    SLIST_ENTRY(list_member) entries;
     char *value;
-    struct list_member *next;
 };
+
+SLIST_HEAD(list_members, list_member);
 
 struct def_values {
     char *sval;		/* string value */
@@ -56,7 +58,7 @@ struct sudo_defs_types {
 	enum def_tuple tuple;
 	char *str;
 	mode_t mode;
-	struct list_member *list;
+	struct list_members list;
     } sd_un;
 };
 

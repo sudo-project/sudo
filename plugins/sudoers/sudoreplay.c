@@ -101,6 +101,7 @@
 #include "gettext.h"
 #include "logging.h"
 #include "iolog.h"
+#include "queue.h"
 #include "sudo_plugin.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
@@ -128,8 +129,9 @@ struct log_info {
  * Handle expressions like:
  * ( user millert or user root ) and tty console and command /bin/sh
  */
-static struct search_node {
-    struct search_node *next;
+STAILQ_HEAD(search_node_list, search_node);
+struct search_node {
+    STAILQ_ENTRY(search_node) entries;
 #define ST_EXPR		1
 #define ST_TTY		2
 #define ST_USER		3
@@ -140,9 +142,8 @@ static struct search_node {
 #define ST_TODATE	8
 #define ST_CWD		9
     char type;
-    char negated;
-    char or;
-    char pad;
+    bool negated;
+    bool or;
     union {
 #ifdef HAVE_REGCOMP
 	regex_t cmdre;
@@ -154,14 +155,12 @@ static struct search_node {
 	char *pattern;
 	char *runas_group;
 	char *runas_user;
-	struct search_node *expr;
+	struct search_node_list expr;
 	void *ptr;
     } u;
-} *search_expr;
+};
 
-#define STACK_NODE_SIZE	32
-static struct search_node *node_stack[32];
-static int stack_top;
+static struct search_node_list search_expr = STAILQ_HEAD_INITIALIZER(search_expr);
 
 static int timing_idx_adj = 0;
 
@@ -186,7 +185,7 @@ extern int term_restore(int, int);
 extern void get_ttysize(int *rowp, int *colp);
 
 static int list_sessions(int, char **, const char *, const char *, const char *);
-static int parse_expr(struct search_node **, char **);
+static int parse_expr(struct search_node_list *, char **, bool);
 static void check_input(int, double *);
 static void delay(double);
 static void help(void) __attribute__((__noreturn__));
@@ -606,14 +605,14 @@ atomic_writev(int fd, struct iovec *iov, int iovcnt)
  * Build expression list from search args
  */
 static int
-parse_expr(struct search_node **headp, char *argv[])
+parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 {
-    struct search_node *sn, *newsn;
-    char or = 0, not = 0, type, **av;
+    bool or = false, not = false;
+    struct search_node *sn;
+    char type, **av;
     debug_decl(parse_expr, SUDO_DEBUG_UTIL)
 
-    sn = *headp;
-    for (av = argv; *av; av++) {
+    for (av = argv; *av != NULL; av++) {
 	switch (av[0][0]) {
 	case 'a': /* and (ignore) */
 	    if (strncmp(*av, "and", strlen(*av)) != 0)
@@ -622,12 +621,12 @@ parse_expr(struct search_node **headp, char *argv[])
 	case 'o': /* or */
 	    if (strncmp(*av, "or", strlen(*av)) != 0)
 		goto bad;
-	    or = 1;
+	    or = true;
 	    continue;
 	case '!': /* negate */
 	    if (av[0][1] != '\0')
 		goto bad;
-	    not = 1;
+	    not = true;
 	    continue;
 	case 'c': /* command */
 	    if (av[0][1] == '\0')
@@ -672,21 +671,13 @@ parse_expr(struct search_node **headp, char *argv[])
 	case '(': /* start sub-expression */
 	    if (av[0][1] != '\0')
 		goto bad;
-	    if (stack_top + 1 == STACK_NODE_SIZE) {
-		fatalx(_("too many parenthesized expressions, max %d"),
-		    STACK_NODE_SIZE);
-	    }
-	    node_stack[stack_top++] = sn;
 	    type = ST_EXPR;
 	    break;
 	case ')': /* end sub-expression */
 	    if (av[0][1] != '\0')
 		goto bad;
-	    /* pop */
-	    if (--stack_top < 0)
+	    if (!sub_expr)
 		fatalx(_("unmatched ')' in expression"));
-	    if (node_stack[stack_top])
-		sn->next = node_stack[stack_top]->next;
 	    debug_return_int(av - argv + 1);
 	bad:
 	default:
@@ -695,38 +686,34 @@ parse_expr(struct search_node **headp, char *argv[])
 	}
 
 	/* Allocate new search node */
-	newsn = ecalloc(1, sizeof(*newsn));
-	newsn->type = type;
-	newsn->or = or;
-	newsn->negated = not;
-	/* newsn->next = NULL; */
+	sn = ecalloc(1, sizeof(*sn));
+	sn->type = type;
+	sn->or = or;
+	sn->negated = not;
 	if (type == ST_EXPR) {
-	    av += parse_expr(&newsn->u.expr, av + 1);
+	    STAILQ_INIT(&sn->u.expr);
+	    av += parse_expr(&sn->u.expr, av + 1, true);
 	} else {
 	    if (*(++av) == NULL)
 		fatalx(_("%s requires an argument"), av[-1]);
 #ifdef HAVE_REGCOMP
 	    if (type == ST_PATTERN) {
-		if (regcomp(&newsn->u.cmdre, *av, REG_EXTENDED|REG_NOSUB) != 0)
+		if (regcomp(&sn->u.cmdre, *av, REG_EXTENDED|REG_NOSUB) != 0)
 		    fatalx(_("invalid regular expression: %s"), *av);
 	    } else
 #endif
 	    if (type == ST_TODATE || type == ST_FROMDATE) {
-		newsn->u.tstamp = get_date(*av);
-		if (newsn->u.tstamp == -1)
+		sn->u.tstamp = get_date(*av);
+		if (sn->u.tstamp == -1)
 		    fatalx(_("could not parse date \"%s\""), *av);
 	    } else {
-		newsn->u.ptr = *av;
+		sn->u.ptr = *av;
 	    }
 	}
-	not = or = 0; /* reset state */
-	if (sn)
-	    sn->next = newsn;
-	else
-	    *headp = newsn;
-	sn = newsn;
+	not = or = false; /* reset state */
+	STAILQ_INSERT_TAIL(head, sn, entries);
     }
-    if (stack_top)
+    if (sub_expr)
 	fatalx(_("unmatched '(' in expression"));
     if (or)
 	fatalx(_("illegal trailing \"or\""));
@@ -737,17 +724,17 @@ parse_expr(struct search_node **headp, char *argv[])
 }
 
 static bool
-match_expr(struct search_node *head, struct log_info *log, bool last_match)
+match_expr(struct search_node_list *head, struct log_info *log, bool last_match)
 {
     struct search_node *sn;
     bool res, matched = last_match;
     int rc;
     debug_decl(match_expr, SUDO_DEBUG_UTIL)
 
-    for (sn = head; sn; sn = sn->next) {
+    STAILQ_FOREACH(sn, head, entries) {
 	switch (sn->type) {
 	case ST_EXPR:
-	    res = match_expr(sn->u.expr, log, matched);
+	    res = match_expr(&sn->u.expr, log, matched);
 	    break;
 	case ST_CWD:
 	    res = strcmp(sn->u.cwd, log->cwd) == 0;
@@ -909,7 +896,7 @@ list_session(char *logfile, REGEX_T *re, const char *user, const char *tty)
 	goto done;
 
     /* Match on search expression if there is one. */
-    if (search_expr && !match_expr(search_expr, li, true))
+    if (!STAILQ_EMPTY(&search_expr) && !match_expr(&search_expr, li, true))
 	goto done;
 
     /* Convert from /var/log/sudo-sessions/00/00/01/log to 000001 */
@@ -1042,7 +1029,7 @@ list_sessions(int argc, char **argv, const char *pattern, const char *user,
     debug_decl(list_sessions, SUDO_DEBUG_UTIL)
 
     /* Parse search expression if present */
-    parse_expr(&search_expr, argv);
+    parse_expr(&search_expr, argv, false);
 
 #ifdef HAVE_REGCOMP
     /* optional regex */

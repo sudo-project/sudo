@@ -36,11 +36,13 @@ union sudo_in_addr_un {
  * IP address and netmask pairs for checking against local interfaces.
  */
 struct interface {
+    SLIST_ENTRY(interface) entries;
     int family;	/* AF_INET or AF_INET6 */
     union sudo_in_addr_un addr;
     union sudo_in_addr_un netmask;
-    struct interface *next;
 };
+
+SLIST_HEAD(interface_list, interface);
 
 /*
  * Prototypes for external functions.
@@ -48,6 +50,6 @@ struct interface {
 int get_net_ifs(char **addrinfo);
 void dump_interfaces(const char *);
 void set_interfaces(const char *);
-struct interface *get_interfaces(void);
+struct interface_list *get_interfaces(void);
 
 #endif /* _SUDOERS_INTERFACES_H */
