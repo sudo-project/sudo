@@ -826,15 +826,15 @@ store_mode(char *val, struct sudo_defs_types *def, int op)
 static void
 list_op(char *val, size_t len, struct sudo_defs_types *def, enum list_ops op)
 {
-    struct list_member *tmp, *cur, *prev = NULL;
+    struct list_member *cur, *prev = NULL;
     debug_decl(list_op, SUDO_DEBUG_DEFAULTS)
 
     if (op == freeall) {
-	SLIST_FOREACH_SAFE(cur, &def->sd_un.list, entries, tmp) {
-	    efree(tmp->value);
-	    efree(tmp);
+	while ((cur = SLIST_FIRST(&def->sd_un.list)) != NULL) {
+	    SLIST_REMOVE_HEAD(&def->sd_un.list, entries);
+	    efree(cur->value);
+	    efree(cur);
 	}
-	SLIST_INIT(&def->sd_un.list);
 	debug_return;
     }
 
