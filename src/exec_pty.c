@@ -104,6 +104,7 @@ static void sigwinch(int s);
 static void sync_ttysize(int src, int dst);
 static void deliver_signal(pid_t pid, int signo, bool from_parent);
 static int safe_close(int fd);
+static void ev_free_by_fd(struct sudo_event_base *evbase, int fd);
 static void check_foreground(void);
 
 /*
@@ -484,16 +485,12 @@ io_callback(int fd, int what, void *v)
 		    sudo_debug_printf(SUDO_DEBUG_INFO,
 			"read EOF from fd %d", fd);
 		}
-		(void) sudo_ev_del(evbase, iob->revent);
 		safe_close(fd);
-		sudo_ev_free(iob->revent);
-		iob->revent = NULL;
+		ev_free_by_fd(evbase, fd);
 		/* If writer already consumed the buffer, close it too. */
 		if (iob->wevent != NULL && iob->off == iob->len) {
-		    (void) sudo_ev_del(evbase, iob->wevent);
 		    safe_close(sudo_ev_get_fd(iob->wevent));
-		    sudo_ev_free(iob->wevent);
-		    iob->wevent = NULL;
+		    ev_free_by_fd(evbase, sudo_ev_get_fd(iob->wevent));
 		    iob->off = iob->len = 0;
 		}
 		break;
@@ -533,15 +530,11 @@ io_callback(int fd, int what, void *v)
 		    "unable to write %d bytes to fd %d",
 		    iob->len - iob->off, fd);
 		if (iob->revent != NULL) {
-		    (void) sudo_ev_del(evbase, iob->revent);
 		    safe_close(sudo_ev_get_fd(iob->revent));
-		    sudo_ev_free(iob->revent);
-		    iob->revent = NULL;
+		    ev_free_by_fd(evbase, sudo_ev_get_fd(iob->revent));
 		}
-		(void) sudo_ev_del(evbase, iob->wevent);
 		safe_close(fd);
-		sudo_ev_free(iob->wevent);
-		iob->wevent = NULL;
+		ev_free_by_fd(evbase, fd);
 		break;
 	    case EAGAIN:
 		/* not an error */
@@ -567,10 +560,8 @@ io_callback(int fd, int what, void *v)
 		iob->off = iob->len = 0;
 		/* Forward the EOF from reader to writer. */
 		if (iob->revent == NULL) {
-		    (void) sudo_ev_del(evbase, iob->wevent);
 		    safe_close(fd);
-		    sudo_ev_free(iob->wevent);
-		    iob->wevent = NULL;
+		    ev_free_by_fd(evbase, fd);
 		}
 	    }
 	    /* Re-enable writer if buffer is not empty. */
@@ -1463,13 +1454,48 @@ sigwinch(int s)
 }
 
 /*
+ * Remove and free any events associated with the specified
+ * file descriptor present in the I/O buffers list.
+ */
+static void
+ev_free_by_fd(struct sudo_event_base *evbase, int fd)
+{
+    struct io_buffer *iob;
+    debug_decl(ev_free_by_fd, SUDO_DEBUG_EXEC);
+
+    /* Deschedule any users of the fd and free up the events. */
+    SLIST_FOREACH(iob, &iobufs, entries) {
+	if (iob->revent != NULL) {
+	    if (sudo_ev_get_fd(iob->revent) == fd) {
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "%s: deleting and freeing revent %p with fd %d",
+		    __func__, iob->revent, fd);
+		sudo_ev_del(evbase, iob->revent);
+		sudo_ev_free(iob->revent);
+		iob->revent = NULL;
+	    }
+	}
+	if (iob->wevent != NULL) {
+	    if (sudo_ev_get_fd(iob->wevent) == fd) {
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "%s: deleting and freeing wevent %p with fd %d",
+		    __func__, iob->wevent, fd);
+		sudo_ev_del(evbase, iob->wevent);
+		sudo_ev_free(iob->wevent);
+		iob->wevent = NULL;
+	    }
+	}
+    }
+    debug_return;
+}
+
+/*
  * Only close the fd if it is not /dev/tty or std{in,out,err}.
  * Return value is the same as close(2).
  */
 static int
 safe_close(int fd)
 {
-    struct io_buffer *iob;
     debug_decl(safe_close, SUDO_DEBUG_EXEC);
 
     /* Avoid closing /dev/tty or std{in,out,err}. */
@@ -1478,27 +1504,6 @@ safe_close(int fd)
 	    "%s: not closing fd %d (/dev/tty)", __func__, fd);
 	errno = EINVAL;
 	debug_return_int(-1);
-    }
-    /* Deschedule any other users of the fd. */
-    SLIST_FOREACH(iob, &iobufs, entries) {
-	if (iob->revent != NULL) {
-	    if (sudo_ev_get_fd(iob->revent) == fd) {
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "%s: deleting revent %p due to shared fd %d",
-		    __func__, iob->revent, fd);
-		sudo_ev_del(NULL, iob->revent);
-		sudo_ev_free(iob->revent);
-	    }
-	}
-	if (iob->wevent != NULL) {
-	    if (sudo_ev_get_fd(iob->wevent) == fd) {
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "%s: deleting wevent %p due to shared fd %d",
-		    __func__, iob->wevent, fd);
-		sudo_ev_del(NULL, iob->wevent);
-		sudo_ev_free(iob->wevent);
-	    }
-	}
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: closing fd %d", __func__, fd);
     debug_return_int(close(fd));
