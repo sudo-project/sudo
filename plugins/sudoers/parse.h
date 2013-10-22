@@ -18,8 +18,6 @@
 #ifndef _SUDOERS_PARSE_H
 #define _SUDOERS_PARSE_H
 
-#include "list.h"	/* XXX */
-
 #undef UNSPEC
 #define UNSPEC	-1
 #undef DENY
@@ -86,31 +84,30 @@ struct solaris_privs_info {
  * modelled after the yacc grammar.
  *
  * Other than the alias struct, which is stored in a red-black tree,
- * the data structure used is basically a doubly-linked tail queue without
- * a separate head struct--the first entry acts as the head where the prev
- * pointer does double duty as the tail pointer.  This makes it possible
- * to trivally append sub-lists.  In addition, the prev pointer is always
- * valid (even if it points to itself).  Unlike a circle queue, the next
- * pointer of the last entry is NULL and does not point back to the head.
- *
- * Note that each list struct must contain a "prev" and "next" pointer as
- * the first two members of the struct (in that order).
+ * the data structure used is a doubly-linked tail queue.  While sudoers
+ * is being parsed, a headless tail queue is used where the first entry
+ * acts as the head and the prev pointer does double duty as the tail pointer.
+ * This makes it possible to trivally append sub-lists.  In addition, the prev
+ * pointer is always valid (even if it points to itself).  Unlike a circle
+ * queue, the next pointer of the last entry is NULL and does not point back
+ * to the head.  When the tail queue is finalized, it is converted to a
+ * normal BSD tail queue.
  */
 
 /*
  * Tail queue list head structure.
  */
-TQ_DECLARE(defaults)
-TQ_DECLARE(userspec)
-TQ_DECLARE(member)
-TQ_DECLARE(privilege)
-TQ_DECLARE(cmndspec)
+TAILQ_HEAD(defaults_list, defaults);
+TAILQ_HEAD(userspec_list, userspec);
+TAILQ_HEAD(member_list, member);
+TAILQ_HEAD(privilege_list, privilege);
+TAILQ_HEAD(cmndspec_list, cmndspec);
 
 /*
  * Structure describing a user specification and list thereof.
  */
 struct userspec {
-    struct userspec *prev, *next;
+    TAILQ_ENTRY(userspec) entries;
     struct member_list users;		/* list of users */
     struct privilege_list privileges;	/* list of privileges */
 };
@@ -119,7 +116,7 @@ struct userspec {
  * Structure describing a privilege specification.
  */
 struct privilege {
-    struct privilege *prev, *next;
+    TAILQ_ENTRY(privilege) entries;
     struct member_list hostlist;	/* list of hosts */
     struct cmndspec_list cmndlist;	/* list of Cmnd_Specs */
 };
@@ -128,9 +125,9 @@ struct privilege {
  * Structure describing a linked list of Cmnd_Specs.
  */
 struct cmndspec {
-    struct cmndspec *prev, *next;
-    struct member_list runasuserlist;	/* list of runas users */
-    struct member_list runasgrouplist;	/* list of runas groups */
+    TAILQ_ENTRY(cmndspec) entries;
+    struct member_list *runasuserlist;	/* list of runas users */
+    struct member_list *runasgrouplist;	/* list of runas groups */
     struct member *cmnd;		/* command to allow/deny */
     char *digest;			/* optional command digest */
     struct cmndtag tags;		/* tag specificaion */
@@ -146,7 +143,7 @@ struct cmndspec {
  * Generic structure to hold users, hosts, commands.
  */
 struct member {
-    struct member *prev, *next;
+    TAILQ_ENTRY(member) entries;
     char *name;				/* member name */
     short type;				/* type (see gram.h) */
     short negated;			/* negated via '!'? */
@@ -172,10 +169,10 @@ struct alias {
  * Structure describing a Defaults entry and a list thereof.
  */
 struct defaults {
-    struct defaults *prev, *next;
+    TAILQ_ENTRY(defaults) entries;
     char *var;				/* variable name */
     char *val;				/* variable value */
-    struct member_list binding;		/* user/host/runas binding */
+    struct member_list *binding;	/* user/host/runas binding */
     int type;				/* DEFAULTS{,_USER,_RUNAS,_HOST} */
     int op;				/* true, false, '+', '-' */
 };

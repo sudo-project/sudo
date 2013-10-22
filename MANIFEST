@@ -20,7 +20,6 @@ common/fileops.c
 common/fmt_string.c
 common/gidlist.c
 common/lbuf.c
-common/list.c
 common/regress/sudo_conf/conf_test.c
 common/regress/sudo_conf/test1.in
 common/regress/sudo_conf/test1.out.ok
@@ -47,6 +46,7 @@ common/regress/sudo_parseln/test5.in
 common/regress/sudo_parseln/test5.out.ok
 common/regress/sudo_parseln/test6.in
 common/regress/sudo_parseln/test6.out.ok
+common/regress/tailq/hltq_test.c
 common/secure_path.c
 common/setgroups.c
 common/sudo_conf.c
@@ -145,7 +145,6 @@ include/fatal.h
 include/fileops.h
 include/gettext.h
 include/lbuf.h
-include/list.h
 include/missing.h
 include/queue.h
 include/secure_path.h

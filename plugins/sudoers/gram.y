@@ -79,8 +79,8 @@ bool parse_error = false;
 int errorlineno = -1;
 char *errorfile = NULL;
 
-struct defaults_list defaults;
-struct userspec_list userspecs;
+struct defaults_list defaults = TAILQ_HEAD_INITIALIZER(defaults);
+struct userspec_list userspecs = TAILQ_HEAD_INITIALIZER(userspecs);
 
 /*
  * Local protoypes
@@ -230,7 +230,7 @@ entry		:	COMMENT {
 
 defaults_list	:	defaults_entry
 		|	defaults_list ',' defaults_entry {
-			    list_append($1, $3);
+			    HLTQ_CONCAT($1, $3, entries);
 			    $$ = $1;
 			}
 		;
@@ -254,17 +254,16 @@ defaults_entry	:	DEFVAR {
 
 privileges	:	privilege
 		|	privileges ':' privilege {
-			    list_append($1, $3);
+			    HLTQ_CONCAT($1, $3, entries);
 			    $$ = $1;
 			}
 		;
 
 privilege	:	hostlist '=' cmndspeclist {
 			    struct privilege *p = ecalloc(1, sizeof(*p));
-			    list2tq(&p->hostlist, $1);
-			    list2tq(&p->cmndlist, $3);
-			    p->prev = p;
-			    /* p->next = NULL; */
+			    HLTQ_TO_TAILQ(&p->hostlist, $1, entries);
+			    HLTQ_TO_TAILQ(&p->cmndlist, $3, entries);
+			    HLTQ_INIT(p, entries);
 			    $$ = p;
 			}
 		;
@@ -298,39 +297,41 @@ host		:	ALIAS {
 
 cmndspeclist	:	cmndspec
 		|	cmndspeclist ',' cmndspec {
-			    list_append($1, $3);
+			    struct cmndspec *prev;
+			    prev = HLTQ_LAST($1, cmndspec, entries);
+			    HLTQ_CONCAT($1, $3, entries);
 #ifdef HAVE_SELINUX
 			    /* propagate role and type */
 			    if ($3->role == NULL)
-				$3->role = $3->prev->role;
+				$3->role = prev->role;
 			    if ($3->type == NULL)
-				$3->type = $3->prev->type;
+				$3->type = prev->type;
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
 			    /* propagate privs & limitprivs */
 			    if ($3->privs == NULL)
-			        $3->privs = $3->prev->privs;
+			        $3->privs = prev->privs;
 			    if ($3->limitprivs == NULL)
-			        $3->limitprivs = $3->prev->limitprivs;
+			        $3->limitprivs = prev->limitprivs;
 #endif /* HAVE_PRIV_SET */
 			    /* propagate tags and runas list */
 			    if ($3->tags.nopasswd == UNSPEC)
-				$3->tags.nopasswd = $3->prev->tags.nopasswd;
+				$3->tags.nopasswd = prev->tags.nopasswd;
 			    if ($3->tags.noexec == UNSPEC)
-				$3->tags.noexec = $3->prev->tags.noexec;
+				$3->tags.noexec = prev->tags.noexec;
 			    if ($3->tags.setenv == UNSPEC &&
-				$3->prev->tags.setenv != IMPLIED)
-				$3->tags.setenv = $3->prev->tags.setenv;
+				prev->tags.setenv != IMPLIED)
+				$3->tags.setenv = prev->tags.setenv;
 			    if ($3->tags.log_input == UNSPEC)
-				$3->tags.log_input = $3->prev->tags.log_input;
+				$3->tags.log_input = prev->tags.log_input;
 			    if ($3->tags.log_output == UNSPEC)
-				$3->tags.log_output = $3->prev->tags.log_output;
-			    if ((tq_empty(&$3->runasuserlist) &&
-				 tq_empty(&$3->runasgrouplist)) &&
-				(!tq_empty(&$3->prev->runasuserlist) ||
-				 !tq_empty(&$3->prev->runasgrouplist))) {
-				$3->runasuserlist = $3->prev->runasuserlist;
-				$3->runasgrouplist = $3->prev->runasgrouplist;
+				$3->tags.log_output = prev->tags.log_output;
+			    if (($3->runasuserlist == NULL &&
+				 $3->runasgrouplist == NULL) &&
+				(prev->runasuserlist != NULL ||
+				 prev->runasgrouplist != NULL)) {
+				$3->runasuserlist = prev->runasuserlist;
+				$3->runasgrouplist = prev->runasgrouplist;
 			    }
 			    $$ = $1;
 			}
@@ -339,12 +340,19 @@ cmndspeclist	:	cmndspec
 cmndspec	:	runasspec selinux solarisprivs cmndtag digcmnd {
 			    struct cmndspec *cs = ecalloc(1, sizeof(*cs));
 			    if ($1 != NULL) {
-				list2tq(&cs->runasuserlist, $1->runasusers);
-				list2tq(&cs->runasgrouplist, $1->runasgroups);
+				if ($1->runasusers != NULL) {
+				    cs->runasuserlist =
+					emalloc(sizeof(*cs->runasuserlist));
+				    HLTQ_TO_TAILQ(cs->runasuserlist,
+					$1->runasusers, entries);
+				}
+				if ($1->runasgroups != NULL) {
+				    cs->runasgrouplist =
+					emalloc(sizeof(*cs->runasgrouplist));
+				    HLTQ_TO_TAILQ(cs->runasgrouplist,
+					$1->runasgroups, entries);
+				}
 				efree($1);
-			    } else {
-				tq_init(&cs->runasuserlist);
-				tq_init(&cs->runasgrouplist);
 			    }
 #ifdef HAVE_SELINUX
 			    cs->role = $2.role;
@@ -356,8 +364,7 @@ cmndspec	:	runasspec selinux solarisprivs cmndtag digcmnd {
 #endif
 			    cs->tags = $4;
 			    cs->cmnd = $5;
-			    cs->prev = cs;
-			    cs->next = NULL;
+			    HLTQ_INIT(cs, entries);
 			    /* sudo "ALL" implies the SETENV tag */
 			    if (cs->cmnd->type == ALL && !cs->cmnd->negated &&
 				cs->tags.setenv == UNSPEC)
@@ -564,7 +571,7 @@ hostalias	:	ALIAS '=' hostlist {
 
 hostlist	:	ophost
 		|	hostlist ',' ophost {
-			    list_append($1, $3);
+			    HLTQ_CONCAT($1, $3, entries);
 			    $$ = $1;
 			}
 		;
@@ -584,7 +591,7 @@ cmndalias	:	ALIAS '=' cmndlist {
 
 cmndlist	:	digcmnd
 		|	cmndlist ',' digcmnd {
-			    list_append($1, $3);
+			    HLTQ_CONCAT($1, $3, entries);
 			    $$ = $1;
 			}
 		;
@@ -617,7 +624,7 @@ useralias	:	ALIAS '=' userlist {
 
 userlist	:	opuser
 		|	userlist ',' opuser {
-			    list_append($1, $3);
+			    HLTQ_CONCAT($1, $3, entries);
 			    $$ = $1;
 			}
 		;
@@ -651,7 +658,7 @@ user		:	ALIAS {
 
 grouplist	:	opgroup
 		|	grouplist ',' opgroup {
-			    list_append($1, $3);
+			    HLTQ_CONCAT($1, $3, entries);
 			    $$ = $1;
 			}
 		;
@@ -719,11 +726,10 @@ new_default(char *var, char *val, int op)
     d = ecalloc(1, sizeof(struct defaults));
     d->var = var;
     d->val = val;
-    tq_init(&d->binding);
     /* d->type = 0; */
     d->op = op;
-    d->prev = d;
-    /* d->next = NULL; */
+    /* d->binding = NULL */
+    HLTQ_INIT(d, entries);
 
     debug_return_ptr(d);
 }
@@ -737,8 +743,7 @@ new_member(char *name, int type)
     m = ecalloc(1, sizeof(struct member));
     m->name = name;
     m->type = type;
-    m->prev = m;
-    /* m->next = NULL; */
+    HLTQ_INIT(m, entries);
 
     debug_return_ptr(m);
 }
@@ -765,30 +770,34 @@ static void
 add_defaults(int type, struct member *bmem, struct defaults *defs)
 {
     struct defaults *d;
-    struct member_list binding;
+    struct member_list *binding;
     debug_decl(add_defaults, SUDO_DEBUG_PARSER)
 
     /*
-     * We can only call list2tq once on bmem as it will zero
-     * out the prev pointer when it consumes bmem.
+     * We use a single binding for each entry in defs.
      */
-    list2tq(&binding, bmem);
+    binding = emalloc(sizeof(*binding));
+    if (bmem != NULL)
+	HLTQ_TO_TAILQ(binding, bmem, entries);
+    else
+	TAILQ_INIT(binding);
 
     /*
      * Set type and binding (who it applies to) for new entries.
+     * Then add to the global defaults list.
      */
-    for (d = defs; d != NULL; d = d->next) {
+    HLTQ_FOREACH(d, defs, entries) {
 	d->type = type;
 	d->binding = binding;
     }
-    tq_append(&defaults, defs);
+    TAILQ_CONCAT_HLTQ(&defaults, defs, entries);
 
     debug_return;
 }
 
 /*
  * Allocate a new struct userspec, populate it, and insert it at the
- * and of the userspecs list.
+ * end of the userspecs list.
  */
 static void
 add_userspec(struct member *members, struct privilege *privs)
@@ -797,11 +806,9 @@ add_userspec(struct member *members, struct privilege *privs)
     debug_decl(add_userspec, SUDO_DEBUG_PARSER)
 
     u = ecalloc(1, sizeof(*u));
-    list2tq(&u->users, members);
-    list2tq(&u->privileges, privs);
-    u->prev = u;
-    /* u->next = NULL; */
-    tq_append(&userspecs, u);
+    HLTQ_TO_TAILQ(&u->users, members, entries);
+    HLTQ_TO_TAILQ(&u->privileges, privs, entries);
+    TAILQ_INSERT_TAIL(&userspecs, u, entries);
 
     debug_return;
 }
@@ -813,21 +820,24 @@ add_userspec(struct member *members, struct privilege *privs)
 void
 init_parser(const char *path, bool quiet)
 {
+    struct member_list *binding;
+    struct member *m;
     struct defaults *d;
-    struct member *m, *binding;
     struct userspec *us;
     struct privilege *priv;
     struct cmndspec *cs;
     struct sudo_command *c;
     debug_decl(init_parser, SUDO_DEBUG_PARSER)
 
-    while ((us = tq_pop(&userspecs)) != NULL) {
-	while ((m = tq_pop(&us->users)) != NULL) {
+    while ((us = TAILQ_FIRST(&userspecs)) != NULL) {
+	TAILQ_REMOVE(&userspecs, us, entries);
+	while ((m = TAILQ_FIRST(&us->users)) != NULL) {
+	    TAILQ_REMOVE(&us->users, m, entries);
 	    efree(m->name);
 	    efree(m);
 	}
-	while ((priv = tq_pop(&us->privileges)) != NULL) {
-	    struct member *runasuser = NULL, *runasgroup = NULL;
+	while ((priv = TAILQ_FIRST(&us->privileges)) != NULL) {
+	    struct member_list *runasuserlist = NULL, *runasgrouplist = NULL;
 #ifdef HAVE_SELINUX
 	    char *role = NULL, *type = NULL;
 #endif /* HAVE_SELINUX */
@@ -835,11 +845,14 @@ init_parser(const char *path, bool quiet)
 	    char *privs = NULL, *limitprivs = NULL;
 #endif /* HAVE_PRIV_SET */
 
-	    while ((m = tq_pop(&priv->hostlist)) != NULL) {
+	    TAILQ_REMOVE(&us->privileges, priv, entries);
+	    while ((m = TAILQ_FIRST(&priv->hostlist)) != NULL) {
+		TAILQ_REMOVE(&priv->hostlist, m, entries);
 		efree(m->name);
 		efree(m);
 	    }
-	    while ((cs = tq_pop(&priv->cmndlist)) != NULL) {
+	    while ((cs = TAILQ_FIRST(&priv->cmndlist)) != NULL) {
+		TAILQ_REMOVE(&priv->cmndlist, cs, entries);
 #ifdef HAVE_SELINUX
 		/* Only free the first instance of a role/type. */
 		if (cs->role != role) {
@@ -862,19 +875,24 @@ init_parser(const char *path, bool quiet)
 		    efree(cs->limitprivs);
 		}
 #endif /* HAVE_PRIV_SET */
-		if (tq_last(&cs->runasuserlist) != runasuser) {
-		    runasuser = tq_last(&cs->runasuserlist);
-		    while ((m = tq_pop(&cs->runasuserlist)) != NULL) {
+		/* Only free the first instance of runas user/group lists. */
+		if (cs->runasuserlist && cs->runasuserlist != runasuserlist) {
+		    runasuserlist = cs->runasuserlist;
+		    while ((m = TAILQ_FIRST(runasuserlist)) != NULL) {
+			TAILQ_REMOVE(runasuserlist, m, entries);
 			efree(m->name);
 			efree(m);
 		    }
+		    efree(runasuserlist);
 		}
-		if (tq_last(&cs->runasgrouplist) != runasgroup) {
-		    runasgroup = tq_last(&cs->runasgrouplist);
-		    while ((m = tq_pop(&cs->runasgrouplist)) != NULL) {
+		if (cs->runasgrouplist && cs->runasgrouplist != runasgrouplist) {
+		    runasgrouplist = cs->runasgrouplist;
+		    while ((m = TAILQ_FIRST(runasgrouplist)) != NULL) {
+			TAILQ_REMOVE(runasgrouplist, m, entries);
 			efree(m->name);
 			efree(m);
 		    }
+		    efree(runasgrouplist);
 		}
 		if (cs->cmnd->type == COMMAND) {
 			c = (struct sudo_command *) cs->cmnd->name;
@@ -889,13 +907,15 @@ init_parser(const char *path, bool quiet)
 	}
 	efree(us);
     }
-    tq_init(&userspecs);
+    TAILQ_INIT(&userspecs);
 
     binding = NULL;
-    while ((d = tq_pop(&defaults)) != NULL) {
-	if (tq_last(&d->binding) != binding) {
-	    binding = tq_last(&d->binding);
-	    while ((m = tq_pop(&d->binding)) != NULL) {
+    while ((d = TAILQ_FIRST(&defaults)) != NULL) {
+	TAILQ_REMOVE(&defaults, d, entries);
+	if (d->binding != binding) {
+	    binding = d->binding;
+	    while ((m = TAILQ_FIRST(d->binding)) != NULL) {
+		TAILQ_REMOVE(d->binding, m, entries);
 		if (m->type == COMMAND) {
 			c = (struct sudo_command *) m->name;
 			efree(c->cmnd);
@@ -904,12 +924,13 @@ init_parser(const char *path, bool quiet)
 		efree(m->name);
 		efree(m);
 	    }
+	    efree(d->binding);
 	}
 	efree(d->var);
 	efree(d->val);
 	efree(d);
     }
-    tq_init(&defaults);
+    TAILQ_INIT(&defaults);
 
     init_aliases();
 

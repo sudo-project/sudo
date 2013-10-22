@@ -304,19 +304,19 @@ main(int argc, char *argv[])
     /* This loop must match the one in sudo_file_lookup() */
     printf("\nEntries for user %s:\n", user_name);
     match = UNSPEC;
-    tq_foreach_rev(&userspecs, us) {
+    TAILQ_FOREACH_REVERSE(us, &userspecs, userspec_list, entries) {
 	if (userlist_matches(sudo_user.pw, &us->users) != ALLOW)
 	    continue;
-	tq_foreach_rev(&us->privileges, priv) {
+	TAILQ_FOREACH_REVERSE(priv, &us->privileges, privilege_list, entries) {
 	    putchar('\n');
-	    print_privilege(priv); /* XXX */
+	    print_privilege(priv);
 	    putchar('\n');
 	    host_match = hostlist_matches(&priv->hostlist);
 	    if (host_match == ALLOW) {
 		puts("\thost  matched");
-		tq_foreach_rev(&priv->cmndlist, cs) {
-		    runas_match = runaslist_matches(&cs->runasuserlist,
-			&cs->runasgrouplist, NULL, NULL);
+		TAILQ_FOREACH_REVERSE(cs, &priv->cmndlist, cmndspec_list, entries) {
+		    runas_match = runaslist_matches(cs->runasuserlist,
+			cs->runasgrouplist, NULL, NULL);
 		    if (runas_match == ALLOW) {
 			puts("\trunas matched");
 			cmnd_match = cmnd_matches(cs->cmnd);
@@ -342,6 +342,8 @@ main(int argc, char *argv[])
      */
     exitcode = parse_error ? 1 : (match == ALLOW ? 0 : match + 3);
 done:
+    sudo_endpwent();
+    sudo_endgrent();
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
     exit(exitcode);
 }
@@ -492,7 +494,7 @@ print_defaults(void)
     struct member *m;
     debug_decl(print_member, SUDO_DEBUG_UTIL)
 
-    tq_foreach_fwd(&defaults, d) {
+    TAILQ_FOREACH(d, &defaults, entries) {
 	(void) fputs("Defaults", stdout);
 	switch (d->type) {
 	    case DEFAULTS_HOST:
@@ -508,8 +510,8 @@ print_defaults(void)
 		putchar('!');
 		break;
 	}
-	tq_foreach_fwd(&d->binding, m) {
-	    if (m != tq_first(&d->binding))
+	TAILQ_FOREACH(m, d->binding, entries) {
+	    if (m != TAILQ_FIRST(d->binding))
 		putchar(',');
 	    print_member(m);
 	}
@@ -545,8 +547,8 @@ print_alias(void *v1, void *v2)
 	    (void) printf("Runas_Alias\t%s = ", a->name);
 	    break;
     }
-    tq_foreach_fwd(&a->members, m) {
-	if (m != tq_first(&a->members))
+    TAILQ_FOREACH(m, &a->members, entries) {
+	if (m != TAILQ_FIRST(&a->members))
 	    fputs(", ", stdout);
 	if (m->type == COMMAND) {
 	    c = (struct sudo_command *) m->name;
@@ -567,66 +569,61 @@ print_privilege(struct privilege *priv)
 {
     struct cmndspec *cs;
     struct member *m;
-    struct privilege *p;
     struct cmndtag tags;
     debug_decl(print_privilege, SUDO_DEBUG_UTIL)
 
-    for (p = priv; p != NULL; p = p->next) {
-	if (p != priv)
-	    fputs(" : ", stdout);
-	tq_foreach_fwd(&p->hostlist, m) {
-	    if (m != tq_first(&p->hostlist))
-		fputs(", ", stdout);
-	    print_member(m);
-	}
-	fputs(" = ", stdout);
-	tags.nopasswd = UNSPEC;
-	tags.noexec = UNSPEC;
-	tq_foreach_fwd(&p->cmndlist, cs) {
-	    if (cs != tq_first(&p->cmndlist))
-		fputs(", ", stdout);
-	    if (!tq_empty(&cs->runasuserlist) || !tq_empty(&cs->runasgrouplist)) {
-		fputs("(", stdout);
-		if (!tq_empty(&cs->runasuserlist)) {
-		    tq_foreach_fwd(&cs->runasuserlist, m) {
-			if (m != tq_first(&cs->runasuserlist))
-			    fputs(", ", stdout);
-			print_member(m);
-		    }  
-		} else if (tq_empty(&cs->runasgrouplist)) {
-		    fputs(def_runas_default, stdout);
-		} else {
-		    fputs(sudo_user.pw->pw_name, stdout);
-		}
-		if (!tq_empty(&cs->runasgrouplist)) {
-		    fputs(" : ", stdout);
-		    tq_foreach_fwd(&cs->runasgrouplist, m) {
-			if (m != tq_first(&cs->runasgrouplist))
-			    fputs(", ", stdout);
-			print_member(m);
-		    }
-		}
-		fputs(") ", stdout);
+    TAILQ_FOREACH(m, &priv->hostlist, entries) {
+	if (m != TAILQ_FIRST(&priv->hostlist))
+	    fputs(", ", stdout);
+	print_member(m);
+    }
+    fputs(" = ", stdout);
+    tags.nopasswd = UNSPEC;
+    tags.noexec = UNSPEC;
+    TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
+	if (cs != TAILQ_FIRST(&priv->cmndlist))
+	    fputs(", ", stdout);
+	if (cs->runasuserlist != NULL || cs->runasgrouplist != NULL) {
+	    fputs("(", stdout);
+	    if (cs->runasuserlist != NULL) {
+		TAILQ_FOREACH(m, cs->runasuserlist, entries) {
+		    if (m != TAILQ_FIRST(cs->runasuserlist))
+			fputs(", ", stdout);
+		    print_member(m);
+		}  
+	    } else if (cs->runasgrouplist == NULL) {
+		fputs(def_runas_default, stdout);
+	    } else {
+		fputs(sudo_user.pw->pw_name, stdout);
 	    }
+	    if (cs->runasgrouplist != NULL) {
+		fputs(" : ", stdout);
+		TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
+		    if (m != TAILQ_FIRST(cs->runasgrouplist))
+			fputs(", ", stdout);
+		    print_member(m);
+		}
+	    }
+	    fputs(") ", stdout);
+	}
 #ifdef HAVE_SELINUX
-	    if (cs->role)
-		printf("ROLE=%s ", cs->role);
-	    if (cs->type)
-		printf("TYPE=%s ", cs->type);
+	if (cs->role)
+	    printf("ROLE=%s ", cs->role);
+	if (cs->type)
+	    printf("TYPE=%s ", cs->type);
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
-	    if (cs->privs)
-		printf("PRIVS=%s ", cs->privs);
-	    if (cs->limitprivs)
-		printf("LIMITPRIVS=%s ", cs->limitprivs);
+	if (cs->privs)
+	    printf("PRIVS=%s ", cs->privs);
+	if (cs->limitprivs)
+	    printf("LIMITPRIVS=%s ", cs->limitprivs);
 #endif /* HAVE_PRIV_SET */
-	    if (cs->tags.nopasswd != UNSPEC && cs->tags.nopasswd != tags.nopasswd)
-		printf("%sPASSWD: ", cs->tags.nopasswd ? "NO" : "");
-	    if (cs->tags.noexec != UNSPEC && cs->tags.noexec != tags.noexec)
-		printf("%sEXEC: ", cs->tags.noexec ? "NO" : "");
-	    print_member(cs->cmnd);
-	    memcpy(&tags, &cs->tags, sizeof(tags));
-	}
+	if (cs->tags.nopasswd != UNSPEC && cs->tags.nopasswd != tags.nopasswd)
+	    printf("%sPASSWD: ", cs->tags.nopasswd ? "NO" : "");
+	if (cs->tags.noexec != UNSPEC && cs->tags.noexec != tags.noexec)
+	    printf("%sEXEC: ", cs->tags.noexec ? "NO" : "");
+	print_member(cs->cmnd);
+	memcpy(&tags, &cs->tags, sizeof(tags));
     }
     debug_return;
 }
@@ -636,16 +633,21 @@ print_userspecs(void)
 {
     struct member *m;
     struct userspec *us;
+    struct privilege *priv;
     debug_decl(print_userspecs, SUDO_DEBUG_UTIL)
 
-    tq_foreach_fwd(&userspecs, us) {
-	tq_foreach_fwd(&us->users, m) {
-	    if (m != tq_first(&us->users))
+    TAILQ_FOREACH(us, &userspecs, entries) {
+	TAILQ_FOREACH(m, &us->users, entries) {
+	    if (m != TAILQ_FIRST(&us->users))
 		fputs(", ", stdout);
 	    print_member(m);
 	}
 	putchar('\t');
-	print_privilege(us->privileges.first); /* XXX */
+	TAILQ_FOREACH(priv, &us->privileges, entries) {
+	    if (priv != TAILQ_FIRST(&us->privileges))
+		fputs(" : ", stdout);
+	    print_privilege(priv);
+	}
 	putchar('\n');
     }
     debug_return;

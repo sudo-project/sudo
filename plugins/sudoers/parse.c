@@ -181,13 +181,13 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 	CLR(validated, FLAG_NO_USER);
 	CLR(validated, FLAG_NO_HOST);
 	match = DENY;
-	tq_foreach_fwd(&userspecs, us) {
+	TAILQ_FOREACH(us, &userspecs, entries) {
 	    if (userlist_matches(sudo_user.pw, &us->users) != ALLOW)
 		continue;
-	    tq_foreach_fwd(&us->privileges, priv) {
+	    TAILQ_FOREACH(priv, &us->privileges, entries) {
 		if (hostlist_matches(&priv->hostlist) != ALLOW)
 		    continue;
-		tq_foreach_fwd(&priv->cmndlist, cs) {
+		TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
 		    /* Only check the command when listing another user. */
 		    if (user_uid == 0 || list_pw == NULL ||
 			user_uid == list_pw->pw_uid ||
@@ -215,20 +215,20 @@ sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
     set_perms(PERM_RUNAS);
 
     match = UNSPEC;
-    tq_foreach_rev(&userspecs, us) {
+    TAILQ_FOREACH_REVERSE(us, &userspecs, userspec_list, entries) {
 	if (userlist_matches(sudo_user.pw, &us->users) != ALLOW)
 	    continue;
 	CLR(validated, FLAG_NO_USER);
-	tq_foreach_rev(&us->privileges, priv) {
+	TAILQ_FOREACH_REVERSE(priv, &us->privileges, privilege_list, entries) {
 	    host_match = hostlist_matches(&priv->hostlist);
 	    if (host_match == ALLOW)
 		CLR(validated, FLAG_NO_HOST);
 	    else
 		continue;
-	    tq_foreach_rev(&priv->cmndlist, cs) {
+	    TAILQ_FOREACH_REVERSE(cs, &priv->cmndlist, cmndspec_list, entries) {
 		matching_user = NULL;
-		runas_match = runaslist_matches(&cs->runasuserlist,
-		    &cs->runasgrouplist, &matching_user, NULL);
+		runas_match = runaslist_matches(cs->runasuserlist,
+		    cs->runasgrouplist, &matching_user, NULL);
 		if (runas_match == ALLOW) {
 		    cmnd_match = cmnd_matches(cs->cmnd);
 		    if (cmnd_match != UNSPEC) {
@@ -340,10 +340,8 @@ sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
 
 #define	RUNAS_CHANGED(cs1, cs2) \
 	(cs1 == NULL || cs2 == NULL || \
-	 cs1->runasuserlist.first != cs2->runasuserlist.first || \
-	 cs1->runasuserlist.last != cs2->runasuserlist.last || \
-	 cs1->runasgrouplist.first != cs2->runasgrouplist.first || \
-	 cs1->runasgrouplist.last != cs2->runasgrouplist.last)
+	 cs1->runasuserlist != cs2->runasuserlist || \
+	 cs1->runasgrouplist != cs2->runasgrouplist)
 
 static int
 sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
@@ -362,30 +360,30 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
     tags.nopasswd = UNSPEC;
     tags.log_input = UNSPEC;
     tags.log_output = UNSPEC;
-    tq_foreach_fwd(&us->privileges, priv) {
+    TAILQ_FOREACH(priv, &us->privileges, entries) {
 	if (hostlist_matches(&priv->hostlist) != ALLOW)
 	    continue;
 	prev_cs = NULL;
-	tq_foreach_fwd(&priv->cmndlist, cs) {
+	TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
 	    if (RUNAS_CHANGED(cs, prev_cs)) {
-		if (cs != tq_first(&priv->cmndlist))
+		if (cs != TAILQ_FIRST(&priv->cmndlist))
 		    lbuf_append(lbuf, "\n");
 		lbuf_append(lbuf, "    (");
-		if (!tq_empty(&cs->runasuserlist)) {
-		    tq_foreach_fwd(&cs->runasuserlist, m) {
-			if (m != tq_first(&cs->runasuserlist))
+		if (cs->runasuserlist != NULL) {
+		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
+			if (m != TAILQ_FIRST(cs->runasuserlist))
 			    lbuf_append(lbuf, ", ");
 			print_member(lbuf, m, RUNASALIAS);
 		    }
-		} else if (tq_empty(&cs->runasgrouplist)) {
+		} else if (cs->runasgrouplist == NULL) {
 		    lbuf_append(lbuf, "%s", def_runas_default);
 		} else {
 		    lbuf_append(lbuf, "%s", pw->pw_name);
 		}
-		if (!tq_empty(&cs->runasgrouplist)) {
+		if (cs->runasgrouplist != NULL) {
 		    lbuf_append(lbuf, " : ");
-		    tq_foreach_fwd(&cs->runasgrouplist, m) {
-			if (m != tq_first(&cs->runasgrouplist))
+		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
+			if (m != TAILQ_FIRST(cs->runasgrouplist))
 			    lbuf_append(lbuf, ", ");
 			print_member(lbuf, m, RUNASALIAS);
 		    }
@@ -396,7 +394,7 @@ sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
 		tags.nopasswd = UNSPEC;
 		tags.log_input = UNSPEC;
 		tags.log_output = UNSPEC;
-	    } else if (cs != tq_first(&priv->cmndlist)) {
+	    } else if (cs != TAILQ_FIRST(&priv->cmndlist)) {
 		lbuf_append(lbuf, ", ");
 	    }
 	    sudo_file_append_cmnd(cs, &tags, lbuf);
@@ -452,30 +450,30 @@ sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
     int nfound = 0, olen;
     debug_decl(sudo_file_display_priv_long, SUDO_DEBUG_NSS)
 
-    tq_foreach_fwd(&us->privileges, priv) {
+    TAILQ_FOREACH(priv, &us->privileges, entries) {
 	if (hostlist_matches(&priv->hostlist) != ALLOW)
 	    continue;
 	prev_cs = NULL;
-	tq_foreach_fwd(&priv->cmndlist, cs) {
+	TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
 	    if (new_long_entry(cs, prev_cs)) {
 		lbuf_append(lbuf, _("\nSudoers entry:\n"));
 		lbuf_append(lbuf, _("    RunAsUsers: "));
-		if (!tq_empty(&cs->runasuserlist)) {
-		    tq_foreach_fwd(&cs->runasuserlist, m) {
-			if (m != tq_first(&cs->runasuserlist))
+		if (cs->runasuserlist != NULL) {
+		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
+			if (m != TAILQ_FIRST(cs->runasuserlist))
 			    lbuf_append(lbuf, ", ");
 			print_member(lbuf, m, RUNASALIAS);
 		    }
-		} else if (tq_empty(&cs->runasgrouplist)) {
+		} else if (cs->runasgrouplist == NULL) {
 		    lbuf_append(lbuf, "%s", def_runas_default);
 		} else {
 		    lbuf_append(lbuf, "%s", pw->pw_name);
 		}
 		lbuf_append(lbuf, "\n");
-		if (!tq_empty(&cs->runasgrouplist)) {
+		if (cs->runasgrouplist != NULL) {
 		    lbuf_append(lbuf, _("    RunAsGroups: "));
-		    tq_foreach_fwd(&cs->runasgrouplist, m) {
-			if (m != tq_first(&cs->runasgrouplist))
+		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
+			if (m != TAILQ_FIRST(cs->runasgrouplist))
 			    lbuf_append(lbuf, ", ");
 			print_member(lbuf, m, RUNASALIAS);
 		    }
@@ -534,7 +532,7 @@ sudo_file_display_privs(struct sudo_nss *nss, struct passwd *pw,
     if (nss->handle == NULL)
 	goto done;
 
-    tq_foreach_fwd(&userspecs, us) {
+    TAILQ_FOREACH(us, &userspecs, entries) {
 	if (userlist_matches(pw, &us->users) != ALLOW)
 	    continue;
 
@@ -567,14 +565,14 @@ sudo_file_display_defaults(struct sudo_nss *nss, struct passwd *pw,
     else
 	prefix = ", ";
 
-    tq_foreach_fwd(&defaults, d) {
+    TAILQ_FOREACH(d, &defaults, entries) {
 	switch (d->type) {
 	    case DEFAULTS_HOST:
-		if (hostlist_matches(&d->binding) != ALLOW)
+		if (hostlist_matches(d->binding) != ALLOW)
 		    continue;
 		break;
 	    case DEFAULTS_USER:
-		if (userlist_matches(pw, &d->binding) != ALLOW)
+		if (userlist_matches(pw, d->binding) != ALLOW)
 		    continue;
 		break;
 	    case DEFAULTS_RUNAS:
@@ -624,7 +622,8 @@ static int
 display_bound_defaults(int dtype, struct lbuf *lbuf)
 {
     struct defaults *d;
-    struct member *m, *binding = NULL;
+    struct member_list *binding = NULL;
+    struct member *m;
     char *dsep;
     int atype, nfound = 0;
     debug_decl(display_bound_defaults, SUDO_DEBUG_NSS)
@@ -649,18 +648,18 @@ display_bound_defaults(int dtype, struct lbuf *lbuf)
 	default:
 	    debug_return_int(-1);
     }
-    tq_foreach_fwd(&defaults, d) {
+    TAILQ_FOREACH(d, &defaults, entries) {
 	if (d->type != dtype)
 	    continue;
 
 	nfound++;
-	if (binding != tq_first(&d->binding)) {
-	    binding = tq_first(&d->binding);
+	if (binding != d->binding) {
+	    binding = d->binding;
 	    if (nfound != 1)
 		lbuf_append(lbuf, "\n");
 	    lbuf_append(lbuf, "    Defaults%s", dsep);
-	    for (m = binding; m != NULL; m = m->next) {
-		if (m != binding)
+	    TAILQ_FOREACH(m, binding, entries) {
+		if (m != TAILQ_FIRST(binding))
 		    lbuf_append(lbuf, ",");
 		print_member(lbuf, m, atype);
 		lbuf_append(lbuf, " ");
@@ -692,17 +691,17 @@ sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 	goto done;
 
     match = NULL;
-    tq_foreach_rev(&userspecs, us) {
+    TAILQ_FOREACH_REVERSE(us, &userspecs, userspec_list, entries) {
 	if (userlist_matches(pw, &us->users) != ALLOW)
 	    continue;
 
-	tq_foreach_rev(&us->privileges, priv) {
+	TAILQ_FOREACH_REVERSE(priv, &us->privileges, privilege_list, entries) {
 	    host_match = hostlist_matches(&priv->hostlist);
 	    if (host_match != ALLOW)
 		continue;
-	    tq_foreach_rev(&priv->cmndlist, cs) {
-		runas_match = runaslist_matches(&cs->runasuserlist,
-		    &cs->runasgrouplist, NULL, NULL);
+	    TAILQ_FOREACH_REVERSE(cs, &priv->cmndlist, cmndspec_list, entries) {
+		runas_match = runaslist_matches(cs->runasuserlist,
+		    cs->runasgrouplist, NULL, NULL);
 		if (runas_match == ALLOW) {
 		    cmnd_match = cmnd_matches(cs->cmnd);
 		    if (cmnd_match != UNSPEC) {
@@ -754,8 +753,8 @@ _print_member(struct lbuf *lbuf, char *name, int type, int negated,
 	    break;
 	case ALIAS:
 	    if ((a = alias_get(name, alias_type)) != NULL) {
-		tq_foreach_fwd(&a->members, m) {
-		    if (m != tq_first(&a->members))
+		TAILQ_FOREACH(m, &a->members, entries) {
+		    if (m != TAILQ_FIRST(&a->members))
 			lbuf_append(lbuf, "%s", separator);
 		    _print_member(lbuf, m->name, m->type,
 			negated ? !m->negated : m->negated, separator,

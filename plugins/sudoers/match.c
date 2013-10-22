@@ -91,7 +91,7 @@
 #include "sha2.h"
 #include <gram.h>
 
-static struct member_list empty;
+static struct member_list empty = TAILQ_HEAD_INITIALIZER(empty);
 
 static bool command_matches_dir(char *, size_t);
 #ifndef SUDOERS_NAME_MATCH
@@ -117,7 +117,7 @@ userlist_matches(struct passwd *pw, struct member_list *list)
     int rval, matched = UNSPEC;
     debug_decl(userlist_matches, SUDO_DEBUG_MATCH)
 
-    tq_foreach_rev(list, m) {
+    TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
 	switch (m->type) {
 	    case ALL:
 		matched = !m->negated;
@@ -169,46 +169,48 @@ runaslist_matches(struct member_list *user_list,
 
     if (runas_pw != NULL) {
 	/* If no runas user or runas group listed in sudoers, use default. */
-	if (tq_empty(user_list) && tq_empty(group_list))
+	if (user_list == NULL && group_list == NULL)
 	    debug_return_int(userpw_matches(def_runas_default, runas_pw->pw_name, runas_pw));
 
-	tq_foreach_rev(user_list, m) {
-	    switch (m->type) {
-		case ALL:
-		    user_matched = !m->negated;
-		    break;
-		case NETGROUP:
-		    if (netgr_matches(m->name, NULL, NULL, runas_pw->pw_name))
+	if (user_list != NULL) {
+	    TAILQ_FOREACH_REVERSE(m, user_list, member_list, entries) {
+		switch (m->type) {
+		    case ALL:
 			user_matched = !m->negated;
-		    break;
-		case USERGROUP:
-		    if (usergr_matches(m->name, runas_pw->pw_name, runas_pw))
-			user_matched = !m->negated;
-		    break;
-		case ALIAS:
-		    if ((a = alias_get(m->name, RUNASALIAS)) != NULL) {
-			rval = runaslist_matches(&a->members, &empty,
-			    matching_user, NULL);
-			if (rval != UNSPEC)
-			    user_matched = m->negated ? !rval : rval;
-			alias_put(a);
 			break;
-		    }
-		    /* FALLTHROUGH */
-		case WORD:
-		    if (userpw_matches(m->name, runas_pw->pw_name, runas_pw))
-			user_matched = !m->negated;
+		    case NETGROUP:
+			if (netgr_matches(m->name, NULL, NULL, runas_pw->pw_name))
+			    user_matched = !m->negated;
+			break;
+		    case USERGROUP:
+			if (usergr_matches(m->name, runas_pw->pw_name, runas_pw))
+			    user_matched = !m->negated;
+			break;
+		    case ALIAS:
+			if ((a = alias_get(m->name, RUNASALIAS)) != NULL) {
+			    rval = runaslist_matches(&a->members, &empty,
+				matching_user, NULL);
+			    if (rval != UNSPEC)
+				user_matched = m->negated ? !rval : rval;
+			    alias_put(a);
+			    break;
+			}
+			/* FALLTHROUGH */
+		    case WORD:
+			if (userpw_matches(m->name, runas_pw->pw_name, runas_pw))
+			    user_matched = !m->negated;
+			break;
+		    case MYSELF:
+			if (!ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) ||
+			    strcmp(user_name, runas_pw->pw_name) == 0)
+			    user_matched = !m->negated;
+			break;
+		}
+		if (user_matched != UNSPEC) {
+		    if (matching_user != NULL && m->type != ALIAS)
+			*matching_user = m;
 		    break;
-		case MYSELF:
-		    if (!ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) ||
-			strcmp(user_name, runas_pw->pw_name) == 0)
-			user_matched = !m->negated;
-		    break;
-	    }
-	    if (user_matched != UNSPEC) {
-		if (matching_user != NULL && m->type != ALIAS)
-		    *matching_user = m;
-		break;
+		}
 	    }
 	}
     }
@@ -218,30 +220,32 @@ runaslist_matches(struct member_list *user_list,
 	    if (runas_pw == NULL || strcmp(runas_pw->pw_name, user_name) == 0)
 		user_matched = ALLOW;	/* only changing group */
 	}
-	tq_foreach_rev(group_list, m) {
-	    switch (m->type) {
-		case ALL:
-		    group_matched = !m->negated;
-		    break;
-		case ALIAS:
-		    if ((a = alias_get(m->name, RUNASALIAS)) != NULL) {
-			rval = runaslist_matches(&empty, &a->members,
-			    NULL, matching_group);
-			if (rval != UNSPEC)
-			    group_matched = m->negated ? !rval : rval;
-			alias_put(a);
-			break;
-		    }
-		    /* FALLTHROUGH */
-		case WORD:
-		    if (group_matches(m->name, runas_gr))
+	if (group_list != NULL) {
+	    TAILQ_FOREACH_REVERSE(m, group_list, member_list, entries) {
+		switch (m->type) {
+		    case ALL:
 			group_matched = !m->negated;
+			break;
+		    case ALIAS:
+			if ((a = alias_get(m->name, RUNASALIAS)) != NULL) {
+			    rval = runaslist_matches(&empty, &a->members,
+				NULL, matching_group);
+			    if (rval != UNSPEC)
+				group_matched = m->negated ? !rval : rval;
+			    alias_put(a);
+			    break;
+			}
+			/* FALLTHROUGH */
+		    case WORD:
+			if (group_matches(m->name, runas_gr))
+			    group_matched = !m->negated;
+			break;
+		}
+		if (group_matched != UNSPEC) {
+		    if (matching_group != NULL && m->type != ALIAS)
+			*matching_group = m;
 		    break;
-	    }
-	    if (group_matched != UNSPEC) {
-		if (matching_group != NULL && m->type != ALIAS)
-		    *matching_group = m;
-		break;
+		}
 	    }
 	}
 	if (group_matched == UNSPEC) {
@@ -269,7 +273,7 @@ hostlist_matches(struct member_list *list)
     int rval, matched = UNSPEC;
     debug_decl(hostlist_matches, SUDO_DEBUG_MATCH)
 
-    tq_foreach_rev(list, m) {
+    TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
 	switch (m->type) {
 	    case ALL:
 		matched = !m->negated;
@@ -313,7 +317,7 @@ cmndlist_matches(struct member_list *list)
     int matched = UNSPEC;
     debug_decl(cmndlist_matches, SUDO_DEBUG_MATCH)
 
-    tq_foreach_rev(list, m) {
+    TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
 	matched = cmnd_matches(m);
 	if (matched != UNSPEC)
 	    break;

@@ -72,6 +72,13 @@
  * after an existing element, at the head of the list, or at the end of
  * the list. A tail queue may be traversed in either direction.
  *
+ * A headless tail queue lacks a head structure, The first element acts
+ * as a de facto list head.  It uses the same entry struct as a regular
+ * tail queue for easy conversion from headless to headful.
+ * It is capable of concatenating queues as well as individual elements.
+ * Traversing in reverse is more expensive due to lack of a list head.
+ * Note: elements must be initialized before use.
+ *
  * For details on the use of these macros, see the queue(3) manual page.
  *
  *
@@ -710,6 +717,90 @@ struct {								\
 		swap_first->field.tqe_prev = &(head2)->tqh_first;	\
 	else								\
 		(head2)->tqh_last = &(head2)->tqh_first;		\
+} while (0)
+
+/*
+ * Headless Tail queue definitions.
+ */
+#undef HLTQ_ENTRY
+#define HLTQ_ENTRY(type)		TAILQ_ENTRY(type)
+
+#undef	HLTQ_INIT
+#define	HLTQ_INIT(entry, field) do {					\
+	(entry)->field.tqe_next = NULL;					\
+	(entry)->field.tqe_prev = &(entry)->field.tqe_next;		\
+} while (0)
+
+#undef HLTQ_INITIALIZER
+#define HLTQ_INITIALIZER(entry, field)				\
+	{ NULL, &(entry)->field.tqe_next }
+
+#undef	HLTQ_FIRST
+#define	HLTQ_FIRST(elm)		(elm)
+
+#undef	HLTQ_END
+#define	HLTQ_END(elm)		NULL
+
+#undef	HLTQ_NEXT
+#define	HLTQ_NEXT(elm, field)	((elm)->field.tqe_next)
+
+#undef HLTQ_LAST
+#define HLTQ_LAST(elm, type, field)					\
+	((elm)->field.tqe_next == NULL ? (elm) :			\
+	    __containerof((elm)->field.tqe_prev, struct type, field.tqe_next))
+
+#undef HLTQ_PREV
+#define HLTQ_PREV(elm, type, field)					\
+	(*(elm)->field.tqe_prev == NULL ? NULL :			\
+	    __containerof((elm)->field.tqe_prev, struct type, field.tqe_next))
+
+#undef HLTQ_FOREACH
+#define HLTQ_FOREACH(var, head, field)					\
+	for ((var) = HLTQ_FIRST(head);					\
+	    (var) != HLTQ_END(head);					\
+	    (var) = HLTQ_NEXT(var, field))
+
+#undef	HLTQ_FOREACH_SAFE
+#define	HLTQ_FOREACH_SAFE(var, head, field, tvar)			\
+	for ((var) = HLTQ_FIRST(head);					\
+	    (var) != HLTQ_END(head) &&					\
+	    ((tvar) = HLTQ_NEXT(var, field), 1);			\
+	    (var) = (tvar))
+
+#undef	HLTQ_FOREACH_REVERSE
+#define HLTQ_FOREACH_REVERSE(var, head, headname, field)		\
+	for ((var) = HLTQ_LAST(head, headname);				\
+	    (var) != HLTQ_END(head);					\
+	    (var) = HLTQ_PREV(var, headname, field))
+
+#undef	HLTQ_FOREACH_REVERSE_SAFE
+#define	HLTQ_FOREACH_REVERSE_SAFE(var, head, headname, field, tvar)	\
+	for ((var) = HLTQ_LAST(head, headname);				\
+	    (var) != HLTQ_END(head) &&					\
+	    ((tvar) = HLTQ_PREV(var, headname, field), 1);		\
+	    (var) = (tvar))
+
+/* Concatenate queue2 to the end of queue1. */
+#undef HLTQ_CONCAT
+#define HLTQ_CONCAT(queue1, queue2, field) do {				\
+	(queue2)->field.tqe_prev = (queue1)->field.tqe_prev;		\
+	*(queue1)->field.tqe_prev = (queue2);				\
+	(queue1)->field.tqe_prev = &(queue2)->field.tqe_next;		\
+} while (0)
+
+/* Convert a headless tailq to a headful one. */
+#define HLTQ_TO_TAILQ(head, hl, field) do {				\
+	(head)->tqh_first = (hl);					\
+	(head)->tqh_last = (hl)->field.tqe_prev;			\
+	(hl)->field.tqe_prev = &(head)->tqh_first;			\
+} while (0)
+
+/* Concatenate a headless tail queue to the end of a regular tail queue. */
+#define TAILQ_CONCAT_HLTQ(head, hl, field) do {				\
+	void *last = (hl)->field.tqe_prev;				\
+	(hl)->field.tqe_prev = (head)->tqh_last;			\
+	*(head)->tqh_last = (hl);					\
+	(head)->tqh_last = last;					\
 } while (0)
 
 #endif /* !_SUDO_QUEUE_H_ */

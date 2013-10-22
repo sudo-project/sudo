@@ -55,7 +55,7 @@ SSP_CFLAGS = @SSP_CFLAGS@
 SSP_LDFLAGS = @SSP_LDFLAGS@
 
 # Regression tests
-TEST_PROGS = conf_test parseln_test
+TEST_PROGS = conf_test parseln_test hltq_test
 TEST_LIBS = @LIBS@ @LIBINTL@ ../compat/libreplace.la
 TEST_LDFLAGS = @LDFLAGS@
 
@@ -67,13 +67,15 @@ DEFS = @OSDEFS@ -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\"
 SHELL = @SHELL@
 
 LTOBJS = alloc.lo atobool.lo atoid.lo event.lo fatal.lo fileops.lo \
-	 fmt_string.lo gidlist.lo lbuf.lo list.lo secure_path.lo \
+	 fmt_string.lo gidlist.lo lbuf.lo secure_path.lo \
 	 setgroups.lo sudo_conf.lo sudo_debug.lo sudo_printf.lo term.lo \
 	 ttysize.lo @COMMON_OBJS@
 
 PARSELN_TEST_OBJS = parseln_test.lo
 
 CONF_TEST_OBJS = conf_test.lo
+
+HLTQ_TEST_OBJS = hltq_test.lo
 
 all: libcommon.la
 
@@ -94,6 +96,9 @@ conf_test: $(CONF_TEST_OBJS) libcommon.la
 parseln_test: $(PARSELN_TEST_OBJS) libcommon.la
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(PARSELN_TEST_OBJS) libcommon.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
+hltq_test: $(HLTQ_TEST_OBJS) libcommon.la
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(HLTQ_TEST_OBJS) libcommon.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
 pre-install:
 
 install:
@@ -113,6 +118,12 @@ uninstall:
 check: $(TEST_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    passed=0; failed=0; total=0; \
+	    total=1; \
+	    if ./hltq_test; then \
+		passed=`expr $$passed + 1`; \
+	    else \
+		failed=`expr $$failed + 1`; \
+	    fi; \
 	    for dir in sudo_conf sudo_parseln; do \
 		mkdir -p regress/$$dir; \
 		for t in $(srcdir)/regress/$$dir/*.in; do \
@@ -203,13 +214,14 @@ gidlist.lo: $(srcdir)/gidlist.c $(top_builddir)/config.h $(incdir)/gettext.h \
             $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/fatal.h \
             $(incdir)/sudo_debug.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/gidlist.c
+hltq_test.lo: $(srcdir)/regress/tailq/hltq_test.c $(top_builddir)/config.h \
+              $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h \
+              $(incdir)/fatal.h $(incdir)/queue.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/tailq/hltq_test.c
 lbuf.lo: $(srcdir)/lbuf.c $(top_builddir)/config.h $(incdir)/missing.h \
          $(incdir)/alloc.h $(incdir)/fatal.h $(incdir)/lbuf.h \
          $(incdir)/sudo_debug.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/lbuf.c
-list.lo: $(srcdir)/list.c $(top_builddir)/config.h $(incdir)/missing.h \
-         $(incdir)/list.h $(incdir)/fatal.h
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/list.c
 parseln_test.lo: $(srcdir)/regress/sudo_parseln/parseln_test.c \
                  $(top_builddir)/config.h $(top_srcdir)/compat/stdbool.h \
                  $(incdir)/missing.h $(incdir)/fileops.h

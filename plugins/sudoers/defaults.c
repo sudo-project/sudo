@@ -502,7 +502,7 @@ update_defaults(int what)
     bool rc = true;
     debug_decl(update_defaults, SUDO_DEBUG_DEFAULTS)
 
-    tq_foreach_fwd(&defaults, def) {
+    TAILQ_FOREACH(def, &defaults, entries) {
 	switch (def->type) {
 	    case DEFAULTS:
 		if (ISSET(what, SETDEF_GENERIC) &&
@@ -513,7 +513,7 @@ update_defaults(int what)
 #if 1
 		if (ISSET(what, SETDEF_USER)) {
 		    int m;
-		    m = userlist_matches(sudo_user.pw, &def->binding);
+		    m = userlist_matches(sudo_user.pw, def->binding);
 		    if (m == ALLOW) {
 			if (!set_default(def->var, def->val, def->op))
 			    rc = false;
@@ -521,26 +521,26 @@ update_defaults(int what)
 		}
 #else
 		if (ISSET(what, SETDEF_USER) &&
-		    userlist_matches(sudo_user.pw, &def->binding) == ALLOW &&
+		    userlist_matches(sudo_user.pw, def->binding) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
 		    rc = false;
 #endif
 		break;
 	    case DEFAULTS_RUNAS:
 		if (ISSET(what, SETDEF_RUNAS) &&
-		    runaslist_matches(&def->binding, NULL, NULL, NULL) == ALLOW &&
+		    runaslist_matches(def->binding, NULL, NULL, NULL) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
 		    rc = false;
 		break;
 	    case DEFAULTS_HOST:
 		if (ISSET(what, SETDEF_HOST) &&
-		    hostlist_matches(&def->binding) == ALLOW &&
+		    hostlist_matches(def->binding) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
 		    rc = false;
 		break;
 	    case DEFAULTS_CMND:
 		if (ISSET(what, SETDEF_CMND) &&
-		    cmndlist_matches(&def->binding) == ALLOW &&
+		    cmndlist_matches(def->binding) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
 		    rc = false;
 		break;
@@ -561,7 +561,7 @@ check_defaults(int what, bool quiet)
     bool rc = true;
     debug_decl(check_defaults, SUDO_DEBUG_DEFAULTS)
 
-    tq_foreach_fwd(&defaults, def) {
+    TAILQ_FOREACH(def, &defaults, entries) {
 	switch (def->type) {
 	    case DEFAULTS:
 		if (!ISSET(what, SETDEF_GENERIC))

@@ -117,8 +117,8 @@ bool parse_error = false;
 int errorlineno = -1;
 char *errorfile = NULL;
 
-struct defaults_list defaults;
-struct userspec_list userspecs;
+struct defaults_list defaults = TAILQ_HEAD_INITIALIZER(defaults);
+struct userspec_list userspecs = TAILQ_HEAD_INITIALIZER(userspecs);
 
 /*
  * Local protoypes
@@ -699,7 +699,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 681 "gram.y"
+#line 688 "gram.y"
 void
 sudoerserror(const char *s)
 {
@@ -741,11 +741,10 @@ new_default(char *var, char *val, int op)
     d = ecalloc(1, sizeof(struct defaults));
     d->var = var;
     d->val = val;
-    tq_init(&d->binding);
     /* d->type = 0; */
     d->op = op;
-    d->prev = d;
-    /* d->next = NULL; */
+    /* d->binding = NULL */
+    HLTQ_INIT(d, entries);
 
     debug_return_ptr(d);
 }
@@ -759,8 +758,7 @@ new_member(char *name, int type)
     m = ecalloc(1, sizeof(struct member));
     m->name = name;
     m->type = type;
-    m->prev = m;
-    /* m->next = NULL; */
+    HLTQ_INIT(m, entries);
 
     debug_return_ptr(m);
 }
@@ -787,30 +785,34 @@ static void
 add_defaults(int type, struct member *bmem, struct defaults *defs)
 {
     struct defaults *d;
-    struct member_list binding;
+    struct member_list *binding;
     debug_decl(add_defaults, SUDO_DEBUG_PARSER)
 
     /*
-     * We can only call list2tq once on bmem as it will zero
-     * out the prev pointer when it consumes bmem.
+     * We use a single binding for each entry in defs.
      */
-    list2tq(&binding, bmem);
+    binding = emalloc(sizeof(*binding));
+    if (bmem != NULL)
+	HLTQ_TO_TAILQ(binding, bmem, entries);
+    else
+	TAILQ_INIT(binding);
 
     /*
      * Set type and binding (who it applies to) for new entries.
+     * Then add to the global defaults list.
      */
-    for (d = defs; d != NULL; d = d->next) {
+    HLTQ_FOREACH(d, defs, entries) {
 	d->type = type;
 	d->binding = binding;
     }
-    tq_append(&defaults, defs);
+    TAILQ_CONCAT_HLTQ(&defaults, defs, entries);
 
     debug_return;
 }
 
 /*
  * Allocate a new struct userspec, populate it, and insert it at the
- * and of the userspecs list.
+ * end of the userspecs list.
  */
 static void
 add_userspec(struct member *members, struct privilege *privs)
@@ -819,11 +821,9 @@ add_userspec(struct member *members, struct privilege *privs)
     debug_decl(add_userspec, SUDO_DEBUG_PARSER)
 
     u = ecalloc(1, sizeof(*u));
-    list2tq(&u->users, members);
-    list2tq(&u->privileges, privs);
-    u->prev = u;
-    /* u->next = NULL; */
-    tq_append(&userspecs, u);
+    HLTQ_TO_TAILQ(&u->users, members, entries);
+    HLTQ_TO_TAILQ(&u->privileges, privs, entries);
+    TAILQ_INSERT_TAIL(&userspecs, u, entries);
 
     debug_return;
 }
@@ -835,21 +835,24 @@ add_userspec(struct member *members, struct privilege *privs)
 void
 init_parser(const char *path, bool quiet)
 {
+    struct member_list *binding;
+    struct member *m;
     struct defaults *d;
-    struct member *m, *binding;
     struct userspec *us;
     struct privilege *priv;
     struct cmndspec *cs;
     struct sudo_command *c;
     debug_decl(init_parser, SUDO_DEBUG_PARSER)
 
-    while ((us = tq_pop(&userspecs)) != NULL) {
-	while ((m = tq_pop(&us->users)) != NULL) {
+    while ((us = TAILQ_FIRST(&userspecs)) != NULL) {
+	TAILQ_REMOVE(&userspecs, us, entries);
+	while ((m = TAILQ_FIRST(&us->users)) != NULL) {
+	    TAILQ_REMOVE(&us->users, m, entries);
 	    efree(m->name);
 	    efree(m);
 	}
-	while ((priv = tq_pop(&us->privileges)) != NULL) {
-	    struct member *runasuser = NULL, *runasgroup = NULL;
+	while ((priv = TAILQ_FIRST(&us->privileges)) != NULL) {
+	    struct member_list *runasuserlist = NULL, *runasgrouplist = NULL;
 #ifdef HAVE_SELINUX
 	    char *role = NULL, *type = NULL;
 #endif /* HAVE_SELINUX */
@@ -857,11 +860,14 @@ init_parser(const char *path, bool quiet)
 	    char *privs = NULL, *limitprivs = NULL;
 #endif /* HAVE_PRIV_SET */
 
-	    while ((m = tq_pop(&priv->hostlist)) != NULL) {
+	    TAILQ_REMOVE(&us->privileges, priv, entries);
+	    while ((m = TAILQ_FIRST(&priv->hostlist)) != NULL) {
+		TAILQ_REMOVE(&priv->hostlist, m, entries);
 		efree(m->name);
 		efree(m);
 	    }
-	    while ((cs = tq_pop(&priv->cmndlist)) != NULL) {
+	    while ((cs = TAILQ_FIRST(&priv->cmndlist)) != NULL) {
+		TAILQ_REMOVE(&priv->cmndlist, cs, entries);
 #ifdef HAVE_SELINUX
 		/* Only free the first instance of a role/type. */
 		if (cs->role != role) {
@@ -884,19 +890,24 @@ init_parser(const char *path, bool quiet)
 		    efree(cs->limitprivs);
 		}
 #endif /* HAVE_PRIV_SET */
-		if (tq_last(&cs->runasuserlist) != runasuser) {
-		    runasuser = tq_last(&cs->runasuserlist);
-		    while ((m = tq_pop(&cs->runasuserlist)) != NULL) {
+		/* Only free the first instance of runas user/group lists. */
+		if (cs->runasuserlist && cs->runasuserlist != runasuserlist) {
+		    runasuserlist = cs->runasuserlist;
+		    while ((m = TAILQ_FIRST(runasuserlist)) != NULL) {
+			TAILQ_REMOVE(runasuserlist, m, entries);
 			efree(m->name);
 			efree(m);
 		    }
+		    efree(runasuserlist);
 		}
-		if (tq_last(&cs->runasgrouplist) != runasgroup) {
-		    runasgroup = tq_last(&cs->runasgrouplist);
-		    while ((m = tq_pop(&cs->runasgrouplist)) != NULL) {
+		if (cs->runasgrouplist && cs->runasgrouplist != runasgrouplist) {
+		    runasgrouplist = cs->runasgrouplist;
+		    while ((m = TAILQ_FIRST(runasgrouplist)) != NULL) {
+			TAILQ_REMOVE(runasgrouplist, m, entries);
 			efree(m->name);
 			efree(m);
 		    }
+		    efree(runasgrouplist);
 		}
 		if (cs->cmnd->type == COMMAND) {
 			c = (struct sudo_command *) cs->cmnd->name;
@@ -911,13 +922,15 @@ init_parser(const char *path, bool quiet)
 	}
 	efree(us);
     }
-    tq_init(&userspecs);
+    TAILQ_INIT(&userspecs);
 
     binding = NULL;
-    while ((d = tq_pop(&defaults)) != NULL) {
-	if (tq_last(&d->binding) != binding) {
-	    binding = tq_last(&d->binding);
-	    while ((m = tq_pop(&d->binding)) != NULL) {
+    while ((d = TAILQ_FIRST(&defaults)) != NULL) {
+	TAILQ_REMOVE(&defaults, d, entries);
+	if (d->binding != binding) {
+	    binding = d->binding;
+	    while ((m = TAILQ_FIRST(d->binding)) != NULL) {
+		TAILQ_REMOVE(d->binding, m, entries);
 		if (m->type == COMMAND) {
 			c = (struct sudo_command *) m->name;
 			efree(c->cmnd);
@@ -926,12 +939,13 @@ init_parser(const char *path, bool quiet)
 		efree(m->name);
 		efree(m);
 	    }
+	    efree(d->binding);
 	}
 	efree(d->var);
 	efree(d->val);
 	efree(d);
     }
-    tq_init(&defaults);
+    TAILQ_INIT(&defaults);
 
     init_aliases();
 
@@ -947,7 +961,7 @@ init_parser(const char *path, bool quiet)
 
     debug_return;
 }
-#line 898 "gram.c"
+#line 912 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1228,7 +1242,7 @@ break;
 case 18:
 #line 232 "gram.y"
 {
-			    list_append(yyvsp[-2].defaults, yyvsp[0].defaults);
+			    HLTQ_CONCAT(yyvsp[-2].defaults, yyvsp[0].defaults, entries);
 			    yyval.defaults = yyvsp[-2].defaults;
 			}
 break;
@@ -1265,7 +1279,7 @@ break;
 case 25:
 #line 256 "gram.y"
 {
-			    list_append(yyvsp[-2].privilege, yyvsp[0].privilege);
+			    HLTQ_CONCAT(yyvsp[-2].privilege, yyvsp[0].privilege, entries);
 			    yyval.privilege = yyvsp[-2].privilege;
 			}
 break;
@@ -1273,108 +1287,116 @@ case 26:
 #line 262 "gram.y"
 {
 			    struct privilege *p = ecalloc(1, sizeof(*p));
-			    list2tq(&p->hostlist, yyvsp[-2].member);
-			    list2tq(&p->cmndlist, yyvsp[0].cmndspec);
-			    p->prev = p;
-			    /* p->next = NULL; */
+			    HLTQ_TO_TAILQ(&p->hostlist, yyvsp[-2].member, entries);
+			    HLTQ_TO_TAILQ(&p->cmndlist, yyvsp[0].cmndspec, entries);
+			    HLTQ_INIT(p, entries);
 			    yyval.privilege = p;
 			}
 break;
 case 27:
-#line 272 "gram.y"
+#line 271 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = false;
 			}
 break;
 case 28:
-#line 276 "gram.y"
+#line 275 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = true;
 			}
 break;
 case 29:
-#line 282 "gram.y"
+#line 281 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			}
 break;
 case 30:
-#line 285 "gram.y"
+#line 284 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			}
 break;
 case 31:
-#line 288 "gram.y"
+#line 287 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NETGROUP);
 			}
 break;
 case 32:
-#line 291 "gram.y"
+#line 290 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NTWKADDR);
 			}
 break;
 case 33:
-#line 294 "gram.y"
+#line 293 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
 case 35:
-#line 300 "gram.y"
+#line 299 "gram.y"
 {
-			    list_append(yyvsp[-2].cmndspec, yyvsp[0].cmndspec);
+			    struct cmndspec *prev;
+			    prev = HLTQ_LAST(yyvsp[-2].cmndspec, cmndspec, entries);
+			    HLTQ_CONCAT(yyvsp[-2].cmndspec, yyvsp[0].cmndspec, entries);
 #ifdef HAVE_SELINUX
 			    /* propagate role and type */
 			    if (yyvsp[0].cmndspec->role == NULL)
-				yyvsp[0].cmndspec->role = yyvsp[0].cmndspec->prev->role;
+				yyvsp[0].cmndspec->role = prev->role;
 			    if (yyvsp[0].cmndspec->type == NULL)
-				yyvsp[0].cmndspec->type = yyvsp[0].cmndspec->prev->type;
+				yyvsp[0].cmndspec->type = prev->type;
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
 			    /* propagate privs & limitprivs */
 			    if (yyvsp[0].cmndspec->privs == NULL)
-			        yyvsp[0].cmndspec->privs = yyvsp[0].cmndspec->prev->privs;
+			        yyvsp[0].cmndspec->privs = prev->privs;
 			    if (yyvsp[0].cmndspec->limitprivs == NULL)
-			        yyvsp[0].cmndspec->limitprivs = yyvsp[0].cmndspec->prev->limitprivs;
+			        yyvsp[0].cmndspec->limitprivs = prev->limitprivs;
 #endif /* HAVE_PRIV_SET */
 			    /* propagate tags and runas list */
 			    if (yyvsp[0].cmndspec->tags.nopasswd == UNSPEC)
-				yyvsp[0].cmndspec->tags.nopasswd = yyvsp[0].cmndspec->prev->tags.nopasswd;
+				yyvsp[0].cmndspec->tags.nopasswd = prev->tags.nopasswd;
 			    if (yyvsp[0].cmndspec->tags.noexec == UNSPEC)
-				yyvsp[0].cmndspec->tags.noexec = yyvsp[0].cmndspec->prev->tags.noexec;
+				yyvsp[0].cmndspec->tags.noexec = prev->tags.noexec;
 			    if (yyvsp[0].cmndspec->tags.setenv == UNSPEC &&
-				yyvsp[0].cmndspec->prev->tags.setenv != IMPLIED)
-				yyvsp[0].cmndspec->tags.setenv = yyvsp[0].cmndspec->prev->tags.setenv;
+				prev->tags.setenv != IMPLIED)
+				yyvsp[0].cmndspec->tags.setenv = prev->tags.setenv;
 			    if (yyvsp[0].cmndspec->tags.log_input == UNSPEC)
-				yyvsp[0].cmndspec->tags.log_input = yyvsp[0].cmndspec->prev->tags.log_input;
+				yyvsp[0].cmndspec->tags.log_input = prev->tags.log_input;
 			    if (yyvsp[0].cmndspec->tags.log_output == UNSPEC)
-				yyvsp[0].cmndspec->tags.log_output = yyvsp[0].cmndspec->prev->tags.log_output;
-			    if ((tq_empty(&yyvsp[0].cmndspec->runasuserlist) &&
-				 tq_empty(&yyvsp[0].cmndspec->runasgrouplist)) &&
-				(!tq_empty(&yyvsp[0].cmndspec->prev->runasuserlist) ||
-				 !tq_empty(&yyvsp[0].cmndspec->prev->runasgrouplist))) {
-				yyvsp[0].cmndspec->runasuserlist = yyvsp[0].cmndspec->prev->runasuserlist;
-				yyvsp[0].cmndspec->runasgrouplist = yyvsp[0].cmndspec->prev->runasgrouplist;
+				yyvsp[0].cmndspec->tags.log_output = prev->tags.log_output;
+			    if ((yyvsp[0].cmndspec->runasuserlist == NULL &&
+				 yyvsp[0].cmndspec->runasgrouplist == NULL) &&
+				(prev->runasuserlist != NULL ||
+				 prev->runasgrouplist != NULL)) {
+				yyvsp[0].cmndspec->runasuserlist = prev->runasuserlist;
+				yyvsp[0].cmndspec->runasgrouplist = prev->runasgrouplist;
 			    }
 			    yyval.cmndspec = yyvsp[-2].cmndspec;
 			}
 break;
 case 36:
-#line 339 "gram.y"
+#line 340 "gram.y"
 {
 			    struct cmndspec *cs = ecalloc(1, sizeof(*cs));
 			    if (yyvsp[-4].runas != NULL) {
-				list2tq(&cs->runasuserlist, yyvsp[-4].runas->runasusers);
-				list2tq(&cs->runasgrouplist, yyvsp[-4].runas->runasgroups);
+				if (yyvsp[-4].runas->runasusers != NULL) {
+				    cs->runasuserlist =
+					emalloc(sizeof(*cs->runasuserlist));
+				    HLTQ_TO_TAILQ(cs->runasuserlist,
+					yyvsp[-4].runas->runasusers, entries);
+				}
+				if (yyvsp[-4].runas->runasgroups != NULL) {
+				    cs->runasgrouplist =
+					emalloc(sizeof(*cs->runasgrouplist));
+				    HLTQ_TO_TAILQ(cs->runasgrouplist,
+					yyvsp[-4].runas->runasgroups, entries);
+				}
 				efree(yyvsp[-4].runas);
-			    } else {
-				tq_init(&cs->runasuserlist);
-				tq_init(&cs->runasgrouplist);
 			    }
 #ifdef HAVE_SELINUX
 			    cs->role = yyvsp[-3].seinfo.role;
@@ -1386,8 +1408,7 @@ case 36:
 #endif
 			    cs->tags = yyvsp[-1].tag;
 			    cs->cmnd = yyvsp[0].member;
-			    cs->prev = cs;
-			    cs->next = NULL;
+			    HLTQ_INIT(cs, entries);
 			    /* sudo "ALL" implies the SETENV tag */
 			    if (cs->cmnd->type == ALL && !cs->cmnd->negated &&
 				cs->tags.setenv == UNSPEC)
@@ -1396,37 +1417,37 @@ case 36:
 			}
 break;
 case 37:
-#line 369 "gram.y"
+#line 376 "gram.y"
 {
 			    yyval.digest = new_digest(SUDO_DIGEST_SHA224, yyvsp[0].string);
 			}
 break;
 case 38:
-#line 372 "gram.y"
+#line 379 "gram.y"
 {
 			    yyval.digest = new_digest(SUDO_DIGEST_SHA256, yyvsp[0].string);
 			}
 break;
 case 39:
-#line 375 "gram.y"
+#line 382 "gram.y"
 {
 			    yyval.digest = new_digest(SUDO_DIGEST_SHA384, yyvsp[0].string);
 			}
 break;
 case 40:
-#line 378 "gram.y"
+#line 385 "gram.y"
 {
 			    yyval.digest = new_digest(SUDO_DIGEST_SHA512, yyvsp[0].string);
 			}
 break;
 case 41:
-#line 383 "gram.y"
+#line 390 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			}
 break;
 case 42:
-#line 386 "gram.y"
+#line 393 "gram.y"
 {
 			    /* XXX - yuck */
 			    struct sudo_command *c = (struct sudo_command *)(yyvsp[0].member->name);
@@ -1435,127 +1456,127 @@ case 42:
 			}
 break;
 case 43:
-#line 394 "gram.y"
+#line 401 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = false;
 			}
 break;
 case 44:
-#line 398 "gram.y"
+#line 405 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = true;
 			}
 break;
 case 45:
-#line 404 "gram.y"
+#line 411 "gram.y"
 {
 			    yyval.string = yyvsp[0].string;
 			}
 break;
 case 46:
-#line 409 "gram.y"
+#line 416 "gram.y"
 {
 			    yyval.string = yyvsp[0].string;
 			}
 break;
 case 47:
-#line 414 "gram.y"
+#line 421 "gram.y"
 {
 			    yyval.seinfo.role = NULL;
 			    yyval.seinfo.type = NULL;
 			}
 break;
 case 48:
-#line 418 "gram.y"
+#line 425 "gram.y"
 {
 			    yyval.seinfo.role = yyvsp[0].string;
 			    yyval.seinfo.type = NULL;
 			}
 break;
 case 49:
-#line 422 "gram.y"
+#line 429 "gram.y"
 {
 			    yyval.seinfo.type = yyvsp[0].string;
 			    yyval.seinfo.role = NULL;
 			}
 break;
 case 50:
-#line 426 "gram.y"
+#line 433 "gram.y"
 {
 			    yyval.seinfo.role = yyvsp[-1].string;
 			    yyval.seinfo.type = yyvsp[0].string;
 			}
 break;
 case 51:
-#line 430 "gram.y"
+#line 437 "gram.y"
 {
 			    yyval.seinfo.type = yyvsp[-1].string;
 			    yyval.seinfo.role = yyvsp[0].string;
 			}
 break;
 case 52:
-#line 436 "gram.y"
+#line 443 "gram.y"
 {
 			    yyval.string = yyvsp[0].string;
 			}
 break;
 case 53:
-#line 440 "gram.y"
+#line 447 "gram.y"
 {
 			    yyval.string = yyvsp[0].string;
 			}
 break;
 case 54:
-#line 445 "gram.y"
+#line 452 "gram.y"
 {
 			    yyval.privinfo.privs = NULL;
 			    yyval.privinfo.limitprivs = NULL;
 			}
 break;
 case 55:
-#line 449 "gram.y"
+#line 456 "gram.y"
 {
 			    yyval.privinfo.privs = yyvsp[0].string;
 			    yyval.privinfo.limitprivs = NULL;
 			}
 break;
 case 56:
-#line 453 "gram.y"
+#line 460 "gram.y"
 {
 			    yyval.privinfo.privs = NULL;
 			    yyval.privinfo.limitprivs = yyvsp[0].string;
 			}
 break;
 case 57:
-#line 457 "gram.y"
+#line 464 "gram.y"
 {
 			    yyval.privinfo.privs = yyvsp[-1].string;
 			    yyval.privinfo.limitprivs = yyvsp[0].string;
 			}
 break;
 case 58:
-#line 461 "gram.y"
+#line 468 "gram.y"
 {
 			    yyval.privinfo.limitprivs = yyvsp[-1].string;
 			    yyval.privinfo.privs = yyvsp[0].string;
 			}
 break;
 case 59:
-#line 467 "gram.y"
+#line 474 "gram.y"
 {
 			    yyval.runas = NULL;
 			}
 break;
 case 60:
-#line 470 "gram.y"
+#line 477 "gram.y"
 {
 			    yyval.runas = yyvsp[-1].runas;
 			}
 break;
 case 61:
-#line 475 "gram.y"
+#line 482 "gram.y"
 {
 			    yyval.runas = ecalloc(1, sizeof(struct runascontainer));
 			    yyval.runas->runasusers = new_member(NULL, MYSELF);
@@ -1563,7 +1584,7 @@ case 61:
 			}
 break;
 case 62:
-#line 480 "gram.y"
+#line 487 "gram.y"
 {
 			    yyval.runas = ecalloc(1, sizeof(struct runascontainer));
 			    yyval.runas->runasusers = yyvsp[0].member;
@@ -1571,7 +1592,7 @@ case 62:
 			}
 break;
 case 63:
-#line 485 "gram.y"
+#line 492 "gram.y"
 {
 			    yyval.runas = ecalloc(1, sizeof(struct runascontainer));
 			    yyval.runas->runasusers = yyvsp[-2].member;
@@ -1579,7 +1600,7 @@ case 63:
 			}
 break;
 case 64:
-#line 490 "gram.y"
+#line 497 "gram.y"
 {
 			    yyval.runas = ecalloc(1, sizeof(struct runascontainer));
 			    /* $$->runasusers = NULL; */
@@ -1587,7 +1608,7 @@ case 64:
 			}
 break;
 case 65:
-#line 495 "gram.y"
+#line 502 "gram.y"
 {
 			    yyval.runas = ecalloc(1, sizeof(struct runascontainer));
 			    yyval.runas->runasusers = new_member(NULL, MYSELF);
@@ -1595,86 +1616,86 @@ case 65:
 			}
 break;
 case 66:
-#line 502 "gram.y"
+#line 509 "gram.y"
 {
 			    yyval.tag.nopasswd = yyval.tag.noexec = yyval.tag.setenv =
 				yyval.tag.log_input = yyval.tag.log_output = UNSPEC;
 			}
 break;
 case 67:
-#line 506 "gram.y"
+#line 513 "gram.y"
 {
 			    yyval.tag.nopasswd = true;
 			}
 break;
 case 68:
-#line 509 "gram.y"
+#line 516 "gram.y"
 {
 			    yyval.tag.nopasswd = false;
 			}
 break;
 case 69:
-#line 512 "gram.y"
+#line 519 "gram.y"
 {
 			    yyval.tag.noexec = true;
 			}
 break;
 case 70:
-#line 515 "gram.y"
+#line 522 "gram.y"
 {
 			    yyval.tag.noexec = false;
 			}
 break;
 case 71:
-#line 518 "gram.y"
+#line 525 "gram.y"
 {
 			    yyval.tag.setenv = true;
 			}
 break;
 case 72:
-#line 521 "gram.y"
+#line 528 "gram.y"
 {
 			    yyval.tag.setenv = false;
 			}
 break;
 case 73:
-#line 524 "gram.y"
+#line 531 "gram.y"
 {
 			    yyval.tag.log_input = true;
 			}
 break;
 case 74:
-#line 527 "gram.y"
+#line 534 "gram.y"
 {
 			    yyval.tag.log_input = false;
 			}
 break;
 case 75:
-#line 530 "gram.y"
+#line 537 "gram.y"
 {
 			    yyval.tag.log_output = true;
 			}
 break;
 case 76:
-#line 533 "gram.y"
+#line 540 "gram.y"
 {
 			    yyval.tag.log_output = false;
 			}
 break;
 case 77:
-#line 538 "gram.y"
+#line 545 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			}
 break;
 case 78:
-#line 541 "gram.y"
+#line 548 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			}
 break;
 case 79:
-#line 544 "gram.y"
+#line 551 "gram.y"
 {
 			    struct sudo_command *c = ecalloc(1, sizeof(*c));
 			    c->cmnd = yyvsp[0].command.cmnd;
@@ -1683,7 +1704,7 @@ case 79:
 			}
 break;
 case 82:
-#line 556 "gram.y"
+#line 563 "gram.y"
 {
 			    char *s;
 			    if ((s = alias_add(yyvsp[-2].string, HOSTALIAS, yyvsp[0].member)) != NULL) {
@@ -1693,14 +1714,14 @@ case 82:
 			}
 break;
 case 84:
-#line 566 "gram.y"
+#line 573 "gram.y"
 {
-			    list_append(yyvsp[-2].member, yyvsp[0].member);
+			    HLTQ_CONCAT(yyvsp[-2].member, yyvsp[0].member, entries);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
 case 87:
-#line 576 "gram.y"
+#line 583 "gram.y"
 {
 			    char *s;
 			    if ((s = alias_add(yyvsp[-2].string, CMNDALIAS, yyvsp[0].member)) != NULL) {
@@ -1710,14 +1731,14 @@ case 87:
 			}
 break;
 case 89:
-#line 586 "gram.y"
+#line 593 "gram.y"
 {
-			    list_append(yyvsp[-2].member, yyvsp[0].member);
+			    HLTQ_CONCAT(yyvsp[-2].member, yyvsp[0].member, entries);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
 case 92:
-#line 596 "gram.y"
+#line 603 "gram.y"
 {
 			    char *s;
 			    if ((s = alias_add(yyvsp[-2].string, RUNASALIAS, yyvsp[0].member)) != NULL) {
@@ -1727,7 +1748,7 @@ case 92:
 			}
 break;
 case 95:
-#line 609 "gram.y"
+#line 616 "gram.y"
 {
 			    char *s;
 			    if ((s = alias_add(yyvsp[-2].string, USERALIAS, yyvsp[0].member)) != NULL) {
@@ -1737,96 +1758,96 @@ case 95:
 			}
 break;
 case 97:
-#line 619 "gram.y"
+#line 626 "gram.y"
 {
-			    list_append(yyvsp[-2].member, yyvsp[0].member);
+			    HLTQ_CONCAT(yyvsp[-2].member, yyvsp[0].member, entries);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
 case 98:
-#line 625 "gram.y"
+#line 632 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = false;
 			}
 break;
 case 99:
-#line 629 "gram.y"
+#line 636 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = true;
 			}
 break;
 case 100:
-#line 635 "gram.y"
+#line 642 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			}
 break;
 case 101:
-#line 638 "gram.y"
+#line 645 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			}
 break;
 case 102:
-#line 641 "gram.y"
+#line 648 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NETGROUP);
 			}
 break;
 case 103:
-#line 644 "gram.y"
+#line 651 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, USERGROUP);
 			}
 break;
 case 104:
-#line 647 "gram.y"
+#line 654 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
 case 106:
-#line 653 "gram.y"
+#line 660 "gram.y"
 {
-			    list_append(yyvsp[-2].member, yyvsp[0].member);
+			    HLTQ_CONCAT(yyvsp[-2].member, yyvsp[0].member, entries);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
 case 107:
-#line 659 "gram.y"
+#line 666 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = false;
 			}
 break;
 case 108:
-#line 663 "gram.y"
+#line 670 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = true;
 			}
 break;
 case 109:
-#line 669 "gram.y"
+#line 676 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			}
 break;
 case 110:
-#line 672 "gram.y"
+#line 679 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			}
 break;
 case 111:
-#line 675 "gram.y"
+#line 682 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
-#line 1777 "gram.c"
+#line 1798 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

@@ -1085,7 +1085,7 @@ alias_remove_recursive(char *name, int type)
     debug_decl(alias_remove_recursive, SUDO_DEBUG_ALIAS)
 
     if ((a = alias_remove(name, type)) != NULL) {
-	tq_foreach_fwd(&a->members, m) {
+	TAILQ_FOREACH(m, &a->members, entries) {
 	    if (m->type == ALIAS) {
 		if (!alias_remove_recursive(m->name, type))
 		    rval = false;
@@ -1106,7 +1106,7 @@ check_alias(char *name, int type, int strict, int quiet)
 
     if ((a = alias_get(name, type)) != NULL) {
 	/* check alias contents */
-	tq_foreach_fwd(&a->members, m) {
+	TAILQ_FOREACH(m, &a->members, entries) {
 	    if (m->type == ALIAS)
 		errors += check_alias(m->name, type, strict, quiet);
 	}
@@ -1143,7 +1143,7 @@ static int
 check_aliases(bool strict, bool quiet)
 {
     struct cmndspec *cs;
-    struct member *m, *binding;
+    struct member *m;
     struct privilege *priv;
     struct userspec *us;
     struct defaults *d;
@@ -1153,22 +1153,31 @@ check_aliases(bool strict, bool quiet)
     alias_freelist = rbcreate(alias_compare);
 
     /* Forward check. */
-    tq_foreach_fwd(&userspecs, us) {
-	tq_foreach_fwd(&us->users, m) {
+    TAILQ_FOREACH(us, &userspecs, entries) {
+	TAILQ_FOREACH(m, &us->users, entries) {
 	    if (m->type == ALIAS) {
 		errors += check_alias(m->name, USERALIAS, strict, quiet);
 	    }
 	}
-	tq_foreach_fwd(&us->privileges, priv) {
-	    tq_foreach_fwd(&priv->hostlist, m) {
+	TAILQ_FOREACH(priv, &us->privileges, entries) {
+	    TAILQ_FOREACH(m, &priv->hostlist, entries) {
 		if (m->type == ALIAS) {
 		    errors += check_alias(m->name, HOSTALIAS, strict, quiet);
 		}
 	    }
-	    tq_foreach_fwd(&priv->cmndlist, cs) {
-		tq_foreach_fwd(&cs->runasuserlist, m) {
-		    if (m->type == ALIAS) {
-			errors += check_alias(m->name, RUNASALIAS, strict, quiet);
+	    TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
+		if (cs->runasuserlist != NULL) {
+		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
+			if (m->type == ALIAS) {
+			    errors += check_alias(m->name, RUNASALIAS, strict, quiet);
+			}
+		    }
+		}
+		if (cs->runasgrouplist != NULL) {
+		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
+			if (m->type == ALIAS) {
+			    errors += check_alias(m->name, RUNASALIAS, strict, quiet);
+			}
 		    }
 		}
 		if ((m = cs->cmnd)->type == ALIAS) {
@@ -1179,31 +1188,35 @@ check_aliases(bool strict, bool quiet)
     }
 
     /* Reverse check (destructive) */
-    tq_foreach_fwd(&userspecs, us) {
-	tq_foreach_fwd(&us->users, m) {
+    TAILQ_FOREACH(us, &userspecs, entries) {
+	TAILQ_FOREACH(m, &us->users, entries) {
 	    if (m->type == ALIAS) {
 		if (!alias_remove_recursive(m->name, USERALIAS))
 		    errors++;
 	    }
 	}
-	tq_foreach_fwd(&us->privileges, priv) {
-	    tq_foreach_fwd(&priv->hostlist, m) {
+	TAILQ_FOREACH(priv, &us->privileges, entries) {
+	    TAILQ_FOREACH(m, &priv->hostlist, entries) {
 		if (m->type == ALIAS) {
 		    if (!alias_remove_recursive(m->name, HOSTALIAS))
 			errors++;
 		}
 	    }
-	    tq_foreach_fwd(&priv->cmndlist, cs) {
-		tq_foreach_fwd(&cs->runasuserlist, m) {
-		    if (m->type == ALIAS) {
-			if (!alias_remove_recursive(m->name, RUNASALIAS))
-			    errors++;
+	    TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
+		if (cs->runasuserlist != NULL) {
+		    TAILQ_FOREACH(m, cs->runasuserlist, entries) {
+			if (m->type == ALIAS) {
+			    if (!alias_remove_recursive(m->name, RUNASALIAS))
+				errors++;
+			}
 		    }
 		}
-		tq_foreach_fwd(&cs->runasgrouplist, m) {
-		    if (m->type == ALIAS) {
-			if (!alias_remove_recursive(m->name, RUNASALIAS))
-			    errors++;
+		if (cs->runasgrouplist != NULL) {
+		    TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
+			if (m->type == ALIAS) {
+			    if (!alias_remove_recursive(m->name, RUNASALIAS))
+				errors++;
+			}
 		    }
 		}
 		if ((m = cs->cmnd)->type == ALIAS) {
@@ -1213,7 +1226,7 @@ check_aliases(bool strict, bool quiet)
 	    }
 	}
     }
-    tq_foreach_fwd(&defaults, d) {
+    TAILQ_FOREACH(d, &defaults, entries) {
 	switch (d->type) {
 	    case DEFAULTS_HOST:
 		atype = HOSTALIAS;
@@ -1230,12 +1243,10 @@ check_aliases(bool strict, bool quiet)
 	    default:
 		continue; /* not an alias */
 	}
-	tq_foreach_fwd(&d->binding, binding) {
-	    for (m = binding; m != NULL; m = m->next) {
-		if (m->type == ALIAS) {
-		    if (!alias_remove_recursive(m->name, atype))
-			errors++;
-		}
+	TAILQ_FOREACH(m, d->binding, entries) {
+	    if (m->type == ALIAS) {
+		if (!alias_remove_recursive(m->name, atype))
+		    errors++;
 	    }
 	}
     }

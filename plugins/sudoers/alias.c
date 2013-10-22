@@ -131,7 +131,7 @@ alias_add(char *name, int type, struct member *members)
     a->name = name;
     a->type = type;
     /* a->used = false; */
-    list2tq(&a->members, members);
+    HLTQ_TO_TAILQ(&a->members, members, entries);
     if (rbinsert(aliases, a)) {
 	snprintf(errbuf, sizeof(errbuf), N_("Alias `%s' already defined"), name);
 	alias_free(a);
@@ -176,8 +176,7 @@ alias_free(void *v)
     debug_decl(alias_free, SUDO_DEBUG_ALIAS)
 
     efree(a->name);
-    for (m = a->members.first; m != NULL; m = next) {
-	next = m->next;
+    TAILQ_FOREACH_SAFE(m, &a->members, entries, next) {
 	if (m->type == COMMAND) {
 		c = (struct sudo_command *) m->name;
 		efree(c->cmnd);
