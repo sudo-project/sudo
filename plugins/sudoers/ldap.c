@@ -444,9 +444,9 @@ sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
     int rc = -1;
     debug_decl(sudo_ldap_parse_uri, SUDO_DEBUG_LDAP)
 
+    hostbuf[0] = '\0';
     STAILQ_FOREACH(entry, uri_list, entries) {
 	buf = estrdup(entry->val);
-	hostbuf[0] = '\0';
 	for ((uri = strtok(buf, " \t")); uri != NULL; (uri = strtok(NULL, " \t"))) {
 	    if (strncasecmp(uri, "ldap://", 7) == 0) {
 		nldap++;
@@ -483,10 +483,6 @@ sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
 			goto toobig;
 	    }
 	}
-	if (hostbuf[0] == '\0') {
-	    warningx(_("invalid uri: %s"), entry->val);
-	    goto done;
-	}
 
 	if (nldaps != 0) {
 	    if (nldap != 0) {
@@ -499,13 +495,14 @@ sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
 	    }
 	    ldap_conf.ssl_mode = SUDO_LDAP_SSL;
 	}
-
-	efree(ldap_conf.host);
-	ldap_conf.host = estrdup(hostbuf);
 	efree(buf);
     }
-
     buf = NULL;
+
+    /* Store parsed URI(s) in host for ldap_create() or ldap_init(). */
+    efree(ldap_conf.host);
+    ldap_conf.host = estrdup(hostbuf);
+
     rc = 0;
 
 done:
@@ -624,8 +621,9 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 	rc = ldap_set_option(ld, LDAP_OPT_HOST_NAME, host);
 #else
 	DPRINTF2("ldap_init(%s, %d)", host, port);
-	if ((ld = ldap_init((char *)host, port)) != NULL)
-	    rc = LDAP_SUCCESS;
+	if ((ld = ldap_init((char *)host, port)) == NULL)
+	    goto done;
+	rc = LDAP_SUCCESS;
 #endif
     }
 
