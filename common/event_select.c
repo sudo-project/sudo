@@ -165,7 +165,6 @@ rescan:
 	    /* Service each event that fired. */
 	    TAILQ_FOREACH_SAFE(ev, &base->events, entries, base->pending) {
 		int what = 0;
-		base->pending = list_next(ev);
 		if (FD_ISSET(ev->fd, base->readfds))
 		    what |= (ev->events & SUDO_EV_READ);
 		if (FD_ISSET(ev->fd, base->writefds))
