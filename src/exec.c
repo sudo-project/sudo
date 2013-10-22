@@ -337,13 +337,14 @@ exec_event_setup(int backchannel, struct exec_closure *ec)
 int
 sudo_execute(struct command_details *details, struct command_status *cstat)
 {
-    int sv[2];
+    struct sigforward *sigfwd, *sigfwd_next;
     const char *utmp_user = NULL;
     struct sudo_event_base *evbase;
     struct exec_closure ec;
     bool log_io = false;
     sigaction_t sa;
     pid_t child;
+    int sv[2];
     debug_decl(sudo_execute, SUDO_DEBUG_EXEC)
 
     dispatch_pending_signals(cstat);
@@ -493,15 +494,14 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 #endif
 
     /* Free things up. */
-    while (!TAILQ_EMPTY(&sigfwd_list)) {
-	struct sigforward *sigfwd = TAILQ_FIRST(&sigfwd_list);
-	TAILQ_REMOVE(&sigfwd_list, sigfwd, entries);
-	efree(sigfwd);
-    }
     sudo_ev_free(sigfwd_event);
     sudo_ev_free(signal_event);
     sudo_ev_free(backchannel_event);
     sudo_ev_base_free(evbase);
+    TAILQ_FOREACH_SAFE(sigfwd, &sigfwd_list, entries, sigfwd_next) {
+	efree(sigfwd);
+    }
+    TAILQ_INIT(&sigfwd_list);
 done:
     debug_return_int(cstat->type == CMD_ERRNO ? -1 : 0);
 }
@@ -800,14 +800,14 @@ forward_signals(int sock, int what, void *v)
 	efree(sigfwd);
 	if (nsent != sizeof(cstat)) {
 	    if (errno == EPIPE) {
+		struct sigforward *sigfwd_next;
 		sudo_debug_printf(SUDO_DEBUG_ERROR,
 		    "broken pipe writing to child over backchannel");
 		/* Other end of socket gone, empty out sigfwd_list. */
-		while (!TAILQ_EMPTY(&sigfwd_list)) {
-		    sigfwd = TAILQ_FIRST(&sigfwd_list);
-		    TAILQ_REMOVE(&sigfwd_list, sigfwd, entries);
+		TAILQ_FOREACH_SAFE(sigfwd, &sigfwd_list, entries, sigfwd_next) {
 		    efree(sigfwd);
 		}
+		TAILQ_INIT(&sigfwd_list);
 		/* XXX - child (monitor) is dead, we should exit too? */
 	    }
 	    break;

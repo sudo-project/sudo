@@ -788,24 +788,26 @@ add_defaults(int type, struct member *bmem, struct defaults *defs)
     struct member_list *binding;
     debug_decl(add_defaults, SUDO_DEBUG_PARSER)
 
-    /*
-     * We use a single binding for each entry in defs.
-     */
-    binding = emalloc(sizeof(*binding));
-    if (bmem != NULL)
-	HLTQ_TO_TAILQ(binding, bmem, entries);
-    else
-	TAILQ_INIT(binding);
+    if (defs != NULL) {
+	/*
+	 * We use a single binding for each entry in defs.
+	 */
+	binding = emalloc(sizeof(*binding));
+	if (bmem != NULL)
+	    HLTQ_TO_TAILQ(binding, bmem, entries);
+	else
+	    TAILQ_INIT(binding);
 
-    /*
-     * Set type and binding (who it applies to) for new entries.
-     * Then add to the global defaults list.
-     */
-    HLTQ_FOREACH(d, defs, entries) {
-	d->type = type;
-	d->binding = binding;
+	/*
+	 * Set type and binding (who it applies to) for new entries.
+	 * Then add to the global defaults list.
+	 */
+	HLTQ_FOREACH(d, defs, entries) {
+	    d->type = type;
+	    d->binding = binding;
+	}
+	TAILQ_CONCAT_HLTQ(&defaults, defs, entries);
     }
-    TAILQ_CONCAT_HLTQ(&defaults, defs, entries);
 
     debug_return;
 }
@@ -836,23 +838,21 @@ void
 init_parser(const char *path, bool quiet)
 {
     struct member_list *binding;
-    struct member *m;
-    struct defaults *d;
-    struct userspec *us;
-    struct privilege *priv;
-    struct cmndspec *cs;
-    struct sudo_command *c;
+    struct defaults *d, *d_next;
+    struct userspec *us, *us_next;
     debug_decl(init_parser, SUDO_DEBUG_PARSER)
 
-    while ((us = TAILQ_FIRST(&userspecs)) != NULL) {
-	TAILQ_REMOVE(&userspecs, us, entries);
-	while ((m = TAILQ_FIRST(&us->users)) != NULL) {
-	    TAILQ_REMOVE(&us->users, m, entries);
+    TAILQ_FOREACH_SAFE(us, &userspecs, entries, us_next) {
+	struct member *m, *m_next;
+	struct privilege *priv, *priv_next;
+
+	TAILQ_FOREACH_SAFE(m, &us->users, entries, m_next) {
 	    efree(m->name);
 	    efree(m);
 	}
-	while ((priv = TAILQ_FIRST(&us->privileges)) != NULL) {
+	TAILQ_FOREACH_SAFE(priv, &us->privileges, entries, priv_next) {
 	    struct member_list *runasuserlist = NULL, *runasgrouplist = NULL;
+	    struct cmndspec *cs, *cs_next;
 #ifdef HAVE_SELINUX
 	    char *role = NULL, *type = NULL;
 #endif /* HAVE_SELINUX */
@@ -860,14 +860,11 @@ init_parser(const char *path, bool quiet)
 	    char *privs = NULL, *limitprivs = NULL;
 #endif /* HAVE_PRIV_SET */
 
-	    TAILQ_REMOVE(&us->privileges, priv, entries);
-	    while ((m = TAILQ_FIRST(&priv->hostlist)) != NULL) {
-		TAILQ_REMOVE(&priv->hostlist, m, entries);
+	    TAILQ_FOREACH_SAFE(m, &priv->hostlist, entries, m_next) {
 		efree(m->name);
 		efree(m);
 	    }
-	    while ((cs = TAILQ_FIRST(&priv->cmndlist)) != NULL) {
-		TAILQ_REMOVE(&priv->cmndlist, cs, entries);
+	    TAILQ_FOREACH_SAFE(cs, &priv->cmndlist, entries, cs_next) {
 #ifdef HAVE_SELINUX
 		/* Only free the first instance of a role/type. */
 		if (cs->role != role) {
@@ -893,8 +890,7 @@ init_parser(const char *path, bool quiet)
 		/* Only free the first instance of runas user/group lists. */
 		if (cs->runasuserlist && cs->runasuserlist != runasuserlist) {
 		    runasuserlist = cs->runasuserlist;
-		    while ((m = TAILQ_FIRST(runasuserlist)) != NULL) {
-			TAILQ_REMOVE(runasuserlist, m, entries);
+		    TAILQ_FOREACH_SAFE(m, runasuserlist, entries, m_next) {
 			efree(m->name);
 			efree(m);
 		    }
@@ -902,15 +898,15 @@ init_parser(const char *path, bool quiet)
 		}
 		if (cs->runasgrouplist && cs->runasgrouplist != runasgrouplist) {
 		    runasgrouplist = cs->runasgrouplist;
-		    while ((m = TAILQ_FIRST(runasgrouplist)) != NULL) {
-			TAILQ_REMOVE(runasgrouplist, m, entries);
+		    TAILQ_FOREACH_SAFE(m, runasgrouplist, entries, m_next) {
 			efree(m->name);
 			efree(m);
 		    }
 		    efree(runasgrouplist);
 		}
 		if (cs->cmnd->type == COMMAND) {
-			c = (struct sudo_command *) cs->cmnd->name;
+			struct sudo_command *c =
+			    (struct sudo_command *) cs->cmnd->name;
 			efree(c->cmnd);
 			efree(c->args);
 		}
@@ -925,14 +921,15 @@ init_parser(const char *path, bool quiet)
     TAILQ_INIT(&userspecs);
 
     binding = NULL;
-    while ((d = TAILQ_FIRST(&defaults)) != NULL) {
-	TAILQ_REMOVE(&defaults, d, entries);
+    TAILQ_FOREACH_SAFE(d, &defaults, entries, d_next) {
 	if (d->binding != binding) {
+	    struct member *m, *m_next;
+
 	    binding = d->binding;
-	    while ((m = TAILQ_FIRST(d->binding)) != NULL) {
-		TAILQ_REMOVE(d->binding, m, entries);
+	    TAILQ_FOREACH_SAFE(m, d->binding, entries, m_next) {
 		if (m->type == COMMAND) {
-			c = (struct sudo_command *) m->name;
+			struct sudo_command *c =
+			    (struct sudo_command *) m->name;
 			efree(c->cmnd);
 			efree(c->args);
 		}
@@ -961,7 +958,7 @@ init_parser(const char *path, bool quiet)
 
     debug_return;
 }
-#line 912 "gram.c"
+#line 909 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1847,7 +1844,7 @@ case 111:
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
-#line 1798 "gram.c"
+#line 1795 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
