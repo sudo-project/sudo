@@ -51,7 +51,6 @@
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
-#include "list.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
 
@@ -133,7 +132,7 @@ rescan:
 	/* For select we need to redo readfds and writefds each time. */
 	memset(base->readfds, 0, howmany(base->maxfd + 1, NFDBITS) * sizeof(fd_mask));
 	memset(base->writefds, 0, howmany(base->maxfd + 1, NFDBITS) * sizeof(fd_mask));
-	tq_foreach_fwd(base, ev) {
+	TAILQ_FOREACH(ev, &base->events, entries) {
 	    if (ISSET(ev->events, SUDO_EV_READ)) {
 		sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: added fd %d to readfs",
 		    __func__, ev->fd);
@@ -164,7 +163,7 @@ rescan:
 	    break;
 	default:
 	    /* Service each event that fired. */
-	    for (ev = tq_first(base); ev != NULL; ev = base->pending) {
+	    TAILQ_FOREACH_SAFE(ev, &base->events, entries, base->pending) {
 		int what = 0;
 		base->pending = list_next(ev);
 		if (FD_ISSET(ev->fd, base->readfds))

@@ -65,14 +65,13 @@ struct exec_closure {
 
 /* We keep a tailq of signals to forward to child. */
 struct sigforward {
-    struct sigforward *prev, *next;
+    TAILQ_ENTRY(sigforward) entries;
     int signo;
 };
-static struct {
-    struct sigforward *first, *last;
-    struct sudo_event *event;
-} sigfwd_list;
+TAILQ_HEAD(sigfwd_list, sigforward);
+static struct sigfwd_list sigfwd_list = TAILQ_HEAD_INITIALIZER(sigfwd_list);
 static struct sudo_event *signal_event;
+static struct sudo_event *sigfwd_event;
 static struct sudo_event *backchannel_event;
 static pid_t ppgrp = -1;
 
@@ -318,9 +317,9 @@ exec_event_setup(int backchannel, struct exec_closure *ec)
 	fatal(_("unable to add event to queue"));
 
     /* The signal forwarding event gets added on demand. */
-    sigfwd_list.event = sudo_ev_alloc(backchannel,
+    sigfwd_event = sudo_ev_alloc(backchannel,
 	SUDO_EV_WRITE, forward_signals, NULL);
-    if (sigfwd_list.event == NULL)
+    if (sigfwd_event == NULL)
 	fatal(NULL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "signal pipe fd %d\n", signal_pipe[0]);
@@ -373,7 +372,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
      * need to allocate a pty.  It is OK to set log_io in the pty-only case
      * as the io plugin tailqueue will be empty and no I/O logging will occur.
      */
-    if (!tq_empty(&io_plugins) || ISSET(details->flags, CD_USE_PTY)) {
+    if (!TAILQ_EMPTY(&io_plugins) || ISSET(details->flags, CD_USE_PTY)) {
 	log_io = true;
 	if (ISSET(details->flags, CD_SET_UTMP))
 	    utmp_user = details->utmp_user ? details->utmp_user : user_details.username;
@@ -494,12 +493,12 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 #endif
 
     /* Free things up. */
-    while (!tq_empty(&sigfwd_list)) {
-	struct sigforward *sigfwd = tq_first(&sigfwd_list);
-	tq_remove(&sigfwd_list, sigfwd);
+    while (!TAILQ_EMPTY(&sigfwd_list)) {
+	struct sigforward *sigfwd = TAILQ_FIRST(&sigfwd_list);
+	TAILQ_REMOVE(&sigfwd_list, sigfwd, entries);
 	efree(sigfwd);
     }
-    sudo_ev_free(sigfwd_list.event);
+    sudo_ev_free(sigfwd_event);
     sudo_ev_free(signal_event);
     sudo_ev_free(backchannel_event);
     sudo_ev_base_free(evbase);
@@ -782,8 +781,8 @@ forward_signals(int sock, int what, void *v)
     ssize_t nsent;
     debug_decl(forward_signals, SUDO_DEBUG_EXEC)
 
-    while (!tq_empty(&sigfwd_list)) {
-	sigfwd = tq_first(&sigfwd_list);
+    while (!TAILQ_EMPTY(&sigfwd_list)) {
+	sigfwd = TAILQ_FIRST(&sigfwd_list);
 	if (sigfwd->signo == SIGCONT_FG)
 	    strlcpy(signame, "CONT_FG", sizeof(signame));
 	else if (sigfwd->signo == SIGCONT_BG)
@@ -797,16 +796,16 @@ forward_signals(int sock, int what, void *v)
 	do {
 	    nsent = send(sock, &cstat, sizeof(cstat), 0);
 	} while (nsent == -1 && errno == EINTR);
-	tq_remove(&sigfwd_list, sigfwd);
+	TAILQ_REMOVE(&sigfwd_list, sigfwd, entries);
 	efree(sigfwd);
 	if (nsent != sizeof(cstat)) {
 	    if (errno == EPIPE) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR,
 		    "broken pipe writing to child over backchannel");
 		/* Other end of socket gone, empty out sigfwd_list. */
-		while (!tq_empty(&sigfwd_list)) {
-		    sigfwd = tq_first(&sigfwd_list);
-		    tq_remove(&sigfwd_list, sigfwd);
+		while (!TAILQ_EMPTY(&sigfwd_list)) {
+		    sigfwd = TAILQ_FIRST(&sigfwd_list);
+		    TAILQ_REMOVE(&sigfwd_list, sigfwd, entries);
 		    efree(sigfwd);
 		}
 		/* XXX - child (monitor) is dead, we should exit too? */
@@ -835,12 +834,10 @@ schedule_signal(struct sudo_event_base *evbase, int signo)
     sudo_debug_printf(SUDO_DEBUG_DIAG, "scheduled SIG%s for child", signame);
 
     sigfwd = ecalloc(1, sizeof(*sigfwd));
-    sigfwd->prev = sigfwd;
-    /* sigfwd->next = NULL; */
     sigfwd->signo = signo;
-    tq_append(&sigfwd_list, sigfwd);
+    TAILQ_INSERT_TAIL(&sigfwd_list, sigfwd, entries);
 
-    if (sudo_ev_add(evbase, sigfwd_list.event, true) == -1)
+    if (sudo_ev_add(evbase, sigfwd_event, true) == -1)
 	fatal(_("unable to add event to queue"));
 
     debug_return;

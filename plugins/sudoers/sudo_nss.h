@@ -21,8 +21,7 @@ struct lbuf;
 struct passwd;
 
 struct sudo_nss {
-    struct sudo_nss *prev;
-    struct sudo_nss *next;
+    TAILQ_ENTRY(sudo_nss) entries;
     int (*open)(struct sudo_nss *nss);
     int (*close)(struct sudo_nss *nss);
     int (*parse)(struct sudo_nss *nss);
@@ -37,7 +36,7 @@ struct sudo_nss {
     short ret_if_notfound;
 };
 
-TQ_DECLARE(sudo_nss)
+TAILQ_HEAD(sudo_nss_list, sudo_nss);
 
 struct sudo_nss_list *sudo_read_nss(void);
 

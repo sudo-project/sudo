@@ -33,7 +33,7 @@
 #include "missing.h"
 #include "fatal.h"
 #include "alloc.h"
-#include "list.h"
+#include "queue.h"
 #include "fileops.h"
 #include "defaults.h"
 #include "logging.h"

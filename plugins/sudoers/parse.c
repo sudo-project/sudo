@@ -51,8 +51,7 @@
 
 /* sudoers nsswitch routines */
 struct sudo_nss sudo_nss_file = {
-    &sudo_nss_file,
-    NULL,
+    { NULL, NULL },
     sudo_file_open,
     sudo_file_close,
     sudo_file_parse,

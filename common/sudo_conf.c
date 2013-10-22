@@ -110,13 +110,14 @@ static struct sudo_conf_data {
     int group_source;
     int max_groups;
     const char *debug_flags;
-    struct sudo_conf_paths paths[5];
     struct plugin_info_list plugins;
+    struct sudo_conf_paths paths[5];
 } sudo_conf_data = {
     true,
     GROUP_SOURCE_ADAPTIVE,
     -1,
     NULL,
+    TAILQ_HEAD_INITIALIZER(sudo_conf_data.plugins),
     {
 #define SUDO_CONF_ASKPASS_IDX	0
 	{ "askpass", sizeof("askpass") - 1, _PATH_SUDO_ASKPASS },
@@ -302,10 +303,8 @@ set_plugin(const char *entry, const char *conf_file)
     info->symbol_name = estrndup(name, namelen);
     info->path = estrndup(path, pathlen);
     info->options = options;
-    info->prev = info;
-    /* info->next = NULL; */
     info->lineno = conf_lineno;
-    tq_append(&sudo_conf_data.plugins, info);
+    TAILQ_INSERT_TAIL(&sudo_conf_data.plugins, info, entries);
 }
 
 const char *

@@ -147,6 +147,7 @@ include/gettext.h
 include/lbuf.h
 include/list.h
 include/missing.h
+include/queue.h
 include/secure_path.h
 include/sudo_conf.h
 include/sudo_debug.h

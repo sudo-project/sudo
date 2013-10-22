@@ -226,8 +226,7 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
 }
 
 struct sudo_nss sudo_nss_sss = {
-    &sudo_nss_sss,
-    NULL,
+    { NULL, NULL },
     sudo_sss_open,
     sudo_sss_close,
     sudo_sss_parse,

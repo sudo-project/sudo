@@ -231,7 +231,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	}
     } else if (plugin->type == SUDO_IO_PLUGIN) {
 	/* Check for duplicate entries. */
-	tq_foreach_fwd(io_plugins, container) {
+	TAILQ_FOREACH(container, io_plugins, entries) {
 	    if (strcmp(container->name, info->symbol_name) == 0) {
 		warningx(_("ignoring duplicate I/O plugin `%s' in %s, line %d"),
 		    info->symbol_name, _PATH_SUDO_CONF, info->lineno);
@@ -242,13 +242,11 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	}
 	if (handle != NULL) {
 	    container = ecalloc(1, sizeof(*container));
-	    container->prev = container;
-	    /* container->next = NULL; */
 	    container->handle = handle;
 	    container->name = info->symbol_name;
 	    container->options = info->options;
 	    container->u.generic = plugin;
-	    tq_append(io_plugins, container);
+	    TAILQ_INSERT_TAIL(io_plugins, container, entries);
 	}
     }
 
@@ -272,7 +270,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 
     /* Walk the plugin list from sudo.conf, if any. */
     plugins = sudo_conf_plugins();
-    tq_foreach_fwd(plugins, info) {
+    TAILQ_FOREACH(info, plugins, entries) {
 	rval = sudo_load_plugin(policy_plugin, io_plugins, info);
 	if (!rval)
 	    goto done;
@@ -288,21 +286,17 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	info->symbol_name = "sudoers_policy";
 	info->path = SUDOERS_PLUGIN;
 	/* info->options = NULL; */
-	info->prev = info;
-	/* info->next = NULL; */
 	rval = sudo_load_plugin(policy_plugin, io_plugins, info);
 	efree(info);
 	if (!rval)
 	    goto done;
 
 	/* Default I/O plugin */
-	if (tq_empty(io_plugins)) {
+	if (TAILQ_EMPTY(io_plugins)) {
 	    info = ecalloc(1, sizeof(*info));
 	    info->symbol_name = "sudoers_io";
 	    info->path = SUDOERS_PLUGIN;
 	    /* info->options = NULL; */
-	    info->prev = info;
-	    /* info->next = NULL; */
 	    rval = sudo_load_plugin(policy_plugin, io_plugins, info);
 	    efree(info);
 	    if (!rval)
@@ -321,7 +315,7 @@ sudo_load_plugins(struct plugin_container *policy_plugin,
 	if (policy_plugin->u.policy->register_hooks != NULL)
 	    policy_plugin->u.policy->register_hooks(SUDO_HOOK_VERSION, register_hook);
     }
-    tq_foreach_fwd(io_plugins, container) {
+    TAILQ_FOREACH(container, io_plugins, entries) {
 	if (container->u.io->version >= SUDO_API_MKVERSION(1, 2)) {
 	    if (container->u.io->register_hooks != NULL)
 		container->u.io->register_hooks(SUDO_HOOK_VERSION, register_hook);

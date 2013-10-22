@@ -432,14 +432,14 @@ cleandir: realclean
 afs.lo: $(authdir)/afs.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
         $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
         $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-        $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+        $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
         $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/afs.c
 aix_auth.lo: $(authdir)/aix_auth.c $(top_builddir)/config.h \
              $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
              $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/fatal.h \
-             $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
+             $(incdir)/alloc.h $(incdir)/queue.h $(incdir)/fileops.h \
              $(srcdir)/defaults.h $(devdir)/def_data.h $(srcdir)/logging.h \
              $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_debug.h $(incdir)/gettext.h
@@ -447,10 +447,11 @@ aix_auth.lo: $(authdir)/aix_auth.c $(top_builddir)/config.h \
 alias.lo: $(srcdir)/alias.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
           $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-          $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+          $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
           $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
           $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
-          $(srcdir)/parse.h $(srcdir)/redblack.h $(devdir)/gram.h
+          $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/redblack.h \
+          $(devdir)/gram.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/alias.c
 audit.lo: $(srcdir)/audit.c $(top_builddir)/config.h \
           $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h \
@@ -467,7 +468,7 @@ boottime.lo: $(srcdir)/boottime.c $(top_builddir)/config.h $(incdir)/missing.h \
 bsdauth.lo: $(authdir)/bsdauth.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
             $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-            $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+            $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
             $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
             $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/bsdauth.c
@@ -478,7 +479,7 @@ bsm_audit.lo: $(srcdir)/bsm_audit.c $(top_builddir)/config.h \
 check.lo: $(srcdir)/check.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
           $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-          $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+          $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
           $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
           $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
           $(srcdir)/check.h
@@ -486,11 +487,11 @@ check.lo: $(srcdir)/check.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
 check_addr.o: $(srcdir)/regress/parser/check_addr.c $(top_builddir)/config.h \
               $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
               $(top_builddir)/pathnames.h $(incdir)/missing.h \
-              $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/list.h \
+              $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/queue.h \
               $(incdir)/fileops.h $(srcdir)/defaults.h $(devdir)/def_data.h \
               $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_debug.h $(incdir)/gettext.h $(srcdir)/parse.h \
-              $(srcdir)/interfaces.h
+              $(incdir)/list.h $(srcdir)/interfaces.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_addr.c
 check_base64.o: $(srcdir)/regress/parser/check_base64.c \
                 $(top_builddir)/config.h $(incdir)/missing.h
@@ -500,14 +501,14 @@ check_digest.o: $(srcdir)/regress/parser/check_digest.c \
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_digest.c
 check_fill.o: $(srcdir)/regress/parser/check_fill.c $(top_builddir)/config.h \
               $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h \
-              $(incdir)/list.h $(srcdir)/parse.h $(srcdir)/toke.h \
-              $(incdir)/sudo_plugin.h $(devdir)/gram.h
+              $(incdir)/list.h $(srcdir)/parse.h $(incdir)/list.h \
+              $(srcdir)/toke.h $(incdir)/sudo_plugin.h $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/parser/check_fill.c
 check_iolog_path.o: $(srcdir)/regress/iolog_path/check_iolog_path.c \
                     $(top_builddir)/config.h $(srcdir)/sudoers.h \
                     $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
                     $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-                    $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+                    $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
                     $(devdir)/def_data.h $(srcdir)/logging.h \
                     $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
                     $(incdir)/sudo_debug.h $(incdir)/gettext.h \
@@ -523,30 +524,30 @@ check_wrap.o: $(srcdir)/regress/logging/check_wrap.c $(top_builddir)/config.h \
 dce.lo: $(authdir)/dce.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
         $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
         $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-        $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+        $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
         $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/dce.c
 defaults.lo: $(srcdir)/defaults.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
              $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
              $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-             $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+             $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
              $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
              $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
-             $(incdir)/gettext.h $(srcdir)/parse.h $(devdir)/gram.h \
-             $(devdir)/def_data.c
+             $(incdir)/gettext.h $(srcdir)/parse.h $(incdir)/list.h \
+             $(devdir)/gram.h $(devdir)/def_data.c
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/defaults.c
 env.lo: $(srcdir)/env.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
         $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
         $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-        $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+        $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
         $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/env.c
 find_path.lo: $(srcdir)/find_path.c $(top_builddir)/config.h \
               $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
               $(top_builddir)/pathnames.h $(incdir)/missing.h \
-              $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/list.h \
+              $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/queue.h \
               $(incdir)/fileops.h $(srcdir)/defaults.h $(devdir)/def_data.h \
               $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_debug.h $(incdir)/gettext.h
@@ -555,7 +556,7 @@ find_path.o: find_path.lo
 fwtk.lo: $(authdir)/fwtk.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
          $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
          $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-         $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+         $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
          $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
          $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/fwtk.c
@@ -565,7 +566,7 @@ getdate.o: $(devdir)/getdate.c $(top_builddir)/config.h \
 getspwuid.lo: $(srcdir)/getspwuid.c $(top_builddir)/config.h \
               $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
               $(top_builddir)/pathnames.h $(incdir)/missing.h \
-              $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/list.h \
+              $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/queue.h \
               $(incdir)/fileops.h $(srcdir)/defaults.h $(devdir)/def_data.h \
               $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_debug.h $(incdir)/gettext.h
@@ -573,7 +574,7 @@ getspwuid.lo: $(srcdir)/getspwuid.c $(top_builddir)/config.h \
 goodpath.lo: $(srcdir)/goodpath.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
              $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
              $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-             $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+             $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
              $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
              $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/goodpath.c
@@ -581,16 +582,16 @@ goodpath.o: goodpath.lo
 gram.lo: $(devdir)/gram.c $(top_builddir)/config.h $(top_builddir)/config.h \
          $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
          $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/fatal.h \
-         $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
+         $(incdir)/alloc.h $(incdir)/queue.h $(incdir)/fileops.h \
          $(srcdir)/defaults.h $(devdir)/def_data.h $(srcdir)/logging.h \
          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
-         $(incdir)/gettext.h $(srcdir)/parse.h $(srcdir)/toke.h
+         $(incdir)/gettext.h $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/toke.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(devdir)/gram.c
 group_plugin.lo: $(srcdir)/group_plugin.c $(top_builddir)/config.h \
                  $(top_srcdir)/compat/dlfcn.h $(srcdir)/sudoers.h \
                  $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
                  $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-                 $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+                 $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
                  $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
                  $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
                  $(incdir)/gettext.h
@@ -603,7 +604,7 @@ hexchar.o: hexchar.lo
 interfaces.lo: $(srcdir)/interfaces.c $(top_builddir)/config.h \
                $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
                $(top_builddir)/pathnames.h $(incdir)/missing.h \
-               $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/list.h \
+               $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/queue.h \
                $(incdir)/fileops.h $(srcdir)/defaults.h $(devdir)/def_data.h \
                $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
@@ -613,7 +614,7 @@ interfaces.o: interfaces.lo
 iolog.lo: $(srcdir)/iolog.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
           $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-          $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+          $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
           $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
           $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
           $(srcdir)/iolog.h
@@ -621,7 +622,7 @@ iolog.lo: $(srcdir)/iolog.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
 iolog_path.lo: $(srcdir)/iolog_path.c $(top_builddir)/config.h \
                $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
                $(top_builddir)/pathnames.h $(incdir)/missing.h \
-               $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/list.h \
+               $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/queue.h \
                $(incdir)/fileops.h $(srcdir)/defaults.h $(devdir)/def_data.h \
                $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
@@ -631,7 +632,7 @@ iolog_path.o: iolog_path.lo
 kerb5.lo: $(authdir)/kerb5.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
           $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-          $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+          $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
           $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
           $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/kerb5.c
@@ -639,10 +640,10 @@ ldap.lo: $(srcdir)/ldap.c $(top_builddir)/config.h \
          $(top_srcdir)/compat/dlfcn.h $(srcdir)/sudoers.h \
          $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
          $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-         $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+         $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
          $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
          $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
-         $(srcdir)/parse.h $(incdir)/lbuf.h
+         $(srcdir)/parse.h $(incdir)/list.h $(incdir)/lbuf.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/ldap.c
 linux_audit.lo: $(srcdir)/linux_audit.c $(top_builddir)/config.h \
                 $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
@@ -658,14 +659,14 @@ locale.o: locale.lo
 logging.lo: $(srcdir)/logging.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
             $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-            $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+            $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
             $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
             $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/logging.c
 logwrap.lo: $(srcdir)/logwrap.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
             $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-            $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+            $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
             $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
             $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/logwrap.c
@@ -674,16 +675,16 @@ match.lo: $(srcdir)/match.c $(top_builddir)/config.h \
           $(top_srcdir)/compat/fnmatch.h $(top_srcdir)/compat/glob.h \
           $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
           $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/fatal.h \
-          $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
+          $(incdir)/alloc.h $(incdir)/queue.h $(incdir)/fileops.h \
           $(srcdir)/defaults.h $(devdir)/def_data.h $(srcdir)/logging.h \
           $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
-          $(incdir)/gettext.h $(srcdir)/parse.h $(srcdir)/sha2.h \
-          $(devdir)/gram.h
+          $(incdir)/gettext.h $(srcdir)/parse.h $(incdir)/list.h \
+          $(srcdir)/sha2.h $(devdir)/gram.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/match.c
 match_addr.lo: $(srcdir)/match_addr.c $(top_builddir)/config.h \
                $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
                $(top_builddir)/pathnames.h $(incdir)/missing.h \
-               $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/list.h \
+               $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/queue.h \
                $(incdir)/fileops.h $(srcdir)/defaults.h $(devdir)/def_data.h \
                $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
@@ -697,29 +698,29 @@ net_ifs.o: $(top_srcdir)/src/net_ifs.c $(top_builddir)/config.h \
 pam.lo: $(authdir)/pam.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
         $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
         $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-        $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+        $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
         $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/pam.c
 parse.lo: $(srcdir)/parse.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
           $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
           $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-          $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+          $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
           $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
           $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
-          $(srcdir)/parse.h $(incdir)/lbuf.h $(devdir)/gram.h
+          $(srcdir)/parse.h $(incdir)/list.h $(incdir)/lbuf.h $(devdir)/gram.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/parse.c
 passwd.lo: $(authdir)/passwd.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
            $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
            $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-           $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+           $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
            $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/passwd.c
 policy.lo: $(srcdir)/policy.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
            $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
            $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-           $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+           $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
            $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
            $(srcdir)/sudoers_version.h $(srcdir)/interfaces.h
@@ -727,14 +728,14 @@ policy.lo: $(srcdir)/policy.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
 prompt.lo: $(srcdir)/prompt.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
            $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
            $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-           $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+           $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
            $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/prompt.c
 pwutil.lo: $(srcdir)/pwutil.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
            $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
            $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-           $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+           $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
            $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
            $(srcdir)/redblack.h $(srcdir)/pwutil.h
@@ -743,7 +744,7 @@ pwutil.o: pwutil.lo
 pwutil_impl.lo: $(srcdir)/pwutil_impl.c $(top_builddir)/config.h \
                 $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
                 $(top_builddir)/pathnames.h $(incdir)/missing.h \
-                $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/list.h \
+                $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/queue.h \
                 $(incdir)/fileops.h $(srcdir)/defaults.h $(devdir)/def_data.h \
                 $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
                 $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
@@ -757,14 +758,14 @@ redblack.o: redblack.lo
 rfc1938.lo: $(authdir)/rfc1938.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
             $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
             $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-            $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+            $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
             $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
             $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/rfc1938.c
 secureware.lo: $(authdir)/secureware.c $(top_builddir)/config.h \
                $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
                $(top_builddir)/pathnames.h $(incdir)/missing.h \
-               $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/list.h \
+               $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/queue.h \
                $(incdir)/fileops.h $(srcdir)/defaults.h $(devdir)/def_data.h \
                $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
@@ -773,7 +774,7 @@ secureware.lo: $(authdir)/secureware.c $(top_builddir)/config.h \
 securid5.lo: $(authdir)/securid5.c $(top_builddir)/config.h \
              $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
              $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/fatal.h \
-             $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
+             $(incdir)/alloc.h $(incdir)/queue.h $(incdir)/fileops.h \
              $(srcdir)/defaults.h $(devdir)/def_data.h $(srcdir)/logging.h \
              $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_debug.h $(incdir)/gettext.h
@@ -781,7 +782,7 @@ securid5.lo: $(authdir)/securid5.c $(top_builddir)/config.h \
 set_perms.lo: $(srcdir)/set_perms.c $(top_builddir)/config.h \
               $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
               $(top_builddir)/pathnames.h $(incdir)/missing.h \
-              $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/list.h \
+              $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/queue.h \
               $(incdir)/fileops.h $(srcdir)/defaults.h $(devdir)/def_data.h \
               $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_debug.h $(incdir)/gettext.h
@@ -793,7 +794,7 @@ sha2.o: sha2.lo
 sia.lo: $(authdir)/sia.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
         $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
         $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-        $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+        $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
         $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(authdir)/sia.c
@@ -801,15 +802,16 @@ sssd.lo: $(srcdir)/sssd.c $(top_builddir)/config.h \
          $(top_srcdir)/compat/dlfcn.h $(srcdir)/sudoers.h \
          $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
          $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-         $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+         $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
          $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
          $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
-         $(srcdir)/parse.h $(incdir)/lbuf.h $(incdir)/sudo_debug.h
+         $(srcdir)/parse.h $(incdir)/list.h $(incdir)/lbuf.h \
+         $(incdir)/sudo_debug.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sssd.c
 sudo_auth.lo: $(authdir)/sudo_auth.c $(top_builddir)/config.h \
               $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
               $(top_builddir)/pathnames.h $(incdir)/missing.h \
-              $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/list.h \
+              $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/queue.h \
               $(incdir)/fileops.h $(srcdir)/defaults.h $(devdir)/def_data.h \
               $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_debug.h $(incdir)/gettext.h $(srcdir)/insults.h \
@@ -819,7 +821,7 @@ sudo_auth.lo: $(authdir)/sudo_auth.c $(top_builddir)/config.h \
 sudo_nss.lo: $(srcdir)/sudo_nss.c $(top_builddir)/config.h $(srcdir)/sudoers.h \
              $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
              $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-             $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+             $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
              $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
              $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
              $(incdir)/gettext.h $(incdir)/lbuf.h
@@ -828,7 +830,7 @@ sudoers.lo: $(srcdir)/sudoers.c $(top_builddir)/config.h \
             $(top_srcdir)/compat/getaddrinfo.h $(top_builddir)/config.h \
             $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
             $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/fatal.h \
-            $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
+            $(incdir)/alloc.h $(incdir)/queue.h $(incdir)/fileops.h \
             $(srcdir)/defaults.h $(devdir)/def_data.h $(srcdir)/logging.h \
             $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
             $(incdir)/sudo_debug.h $(incdir)/gettext.h \
@@ -839,7 +841,7 @@ sudoreplay.o: $(srcdir)/sudoreplay.c $(top_builddir)/config.h \
               $(top_srcdir)/compat/getopt.h $(top_builddir)/pathnames.h \
               $(incdir)/missing.h $(incdir)/alloc.h $(incdir)/fatal.h \
               $(incdir)/gettext.h $(srcdir)/logging.h $(srcdir)/iolog.h \
-              $(incdir)/sudo_plugin.h $(incdir)/sudo_conf.h $(incdir)/list.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_conf.h $(incdir)/queue.h \
               $(incdir)/sudo_debug.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudoreplay.c
 testsudoers.o: $(srcdir)/testsudoers.c $(top_builddir)/config.h \
@@ -847,17 +849,17 @@ testsudoers.o: $(srcdir)/testsudoers.c $(top_builddir)/config.h \
                $(top_builddir)/config.h $(srcdir)/sudoers.h \
                $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
                $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-               $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+               $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
                $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
                $(incdir)/gettext.h $(srcdir)/interfaces.h $(srcdir)/parse.h \
-               $(incdir)/sudo_conf.h $(incdir)/list.h $(incdir)/secure_path.h \
-               $(devdir)/gram.h
+               $(incdir)/list.h $(incdir)/sudo_conf.h $(incdir)/queue.h \
+               $(incdir)/secure_path.h $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/testsudoers.c
 timestamp.lo: $(srcdir)/timestamp.c $(top_builddir)/config.h \
               $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
               $(top_builddir)/pathnames.h $(incdir)/missing.h \
-              $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/list.h \
+              $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/queue.h \
               $(incdir)/fileops.h $(srcdir)/defaults.h $(devdir)/def_data.h \
               $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_debug.h $(incdir)/gettext.h $(srcdir)/check.h
@@ -867,28 +869,28 @@ timestr.lo: $(srcdir)/timestr.c $(top_builddir)/config.h $(incdir)/missing.h
 toke.lo: $(devdir)/toke.c $(top_builddir)/config.h $(top_builddir)/config.h \
          $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
          $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/fatal.h \
-         $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
+         $(incdir)/alloc.h $(incdir)/queue.h $(incdir)/fileops.h \
          $(srcdir)/defaults.h $(devdir)/def_data.h $(srcdir)/logging.h \
          $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h \
-         $(incdir)/gettext.h $(srcdir)/parse.h $(srcdir)/toke.h \
-         $(devdir)/gram.h $(incdir)/lbuf.h $(srcdir)/sha2.h \
+         $(incdir)/gettext.h $(srcdir)/parse.h $(incdir)/list.h \
+         $(srcdir)/toke.h $(devdir)/gram.h $(incdir)/lbuf.h $(srcdir)/sha2.h \
          $(incdir)/secure_path.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(devdir)/toke.c
 toke_util.lo: $(srcdir)/toke_util.c $(top_builddir)/config.h \
               $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
               $(top_builddir)/pathnames.h $(incdir)/missing.h \
-              $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/list.h \
+              $(incdir)/fatal.h $(incdir)/alloc.h $(incdir)/queue.h \
               $(incdir)/fileops.h $(srcdir)/defaults.h $(devdir)/def_data.h \
               $(srcdir)/logging.h $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_debug.h $(incdir)/gettext.h $(srcdir)/parse.h \
-              $(srcdir)/toke.h $(devdir)/gram.h
+              $(incdir)/list.h $(srcdir)/toke.h $(devdir)/gram.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/toke_util.c
 toke_util.o: toke_util.lo
 tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(top_builddir)/config.h \
              $(srcdir)/tsgetgrpw.h $(top_builddir)/config.h \
              $(srcdir)/sudoers.h $(top_srcdir)/compat/stdbool.h \
              $(top_builddir)/pathnames.h $(incdir)/missing.h $(incdir)/fatal.h \
-             $(incdir)/alloc.h $(incdir)/list.h $(incdir)/fileops.h \
+             $(incdir)/alloc.h $(incdir)/queue.h $(incdir)/fileops.h \
              $(srcdir)/defaults.h $(devdir)/def_data.h $(srcdir)/logging.h \
              $(srcdir)/sudo_nss.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_debug.h $(incdir)/gettext.h
@@ -897,10 +899,10 @@ visudo.o: $(srcdir)/visudo.c $(top_builddir)/config.h \
           $(top_srcdir)/compat/getopt.h $(srcdir)/sudoers.h \
           $(top_srcdir)/compat/stdbool.h $(top_builddir)/pathnames.h \
           $(incdir)/missing.h $(incdir)/fatal.h $(incdir)/alloc.h \
-          $(incdir)/list.h $(incdir)/fileops.h $(srcdir)/defaults.h \
+          $(incdir)/queue.h $(incdir)/fileops.h $(srcdir)/defaults.h \
           $(devdir)/def_data.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
           $(incdir)/sudo_plugin.h $(incdir)/sudo_debug.h $(incdir)/gettext.h \
-          $(srcdir)/parse.h $(srcdir)/redblack.h $(incdir)/gettext.h \
-          $(srcdir)/sudoers_version.h $(incdir)/sudo_conf.h $(incdir)/list.h \
-          $(devdir)/gram.h
+          $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/redblack.h \
+          $(incdir)/queue.h $(incdir)/gettext.h $(srcdir)/sudoers_version.h \
+          $(incdir)/sudo_conf.h $(incdir)/queue.h $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/visudo.c

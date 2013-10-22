@@ -18,6 +18,8 @@
 #ifndef _SUDOERS_PARSE_H
 #define _SUDOERS_PARSE_H
 
+#include "list.h"	/* XXX */
+
 #undef UNSPEC
 #define UNSPEC	-1
 #undef DENY

@@ -45,7 +45,6 @@
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
-#include "list.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
 
@@ -58,6 +57,7 @@ sudo_ev_base_alloc(void)
     debug_decl(sudo_ev_base_alloc, SUDO_DEBUG_EVENT)
 
     base = ecalloc(1, sizeof(*base));
+    TAILQ_INIT(&base->events);
     if (sudo_ev_base_alloc_impl(base) != 0) {
 	efree(base);
 	base = NULL;
@@ -110,9 +110,9 @@ sudo_ev_add(struct sudo_event_base *base, struct sudo_event *ev, bool tohead)
 	    debug_return_int(-1);
 	ev->base = base;
 	if (tohead) {
-	    tq_insert_head(base, ev);
+	    TAILQ_INSERT_HEAD(&base->events, ev, entries);
 	} else {
-	    tq_insert_tail(base, ev);
+	    TAILQ_INSERT_TAIL(&base->events, ev, entries);
 	}
     }
     /* Clear pending delete so adding from callback works properly. */
@@ -149,17 +149,15 @@ sudo_ev_del(struct sudo_event_base *base, struct sudo_event *ev)
 	debug_return_int(-1);
 
     /* Unlink from list. */
-    tq_remove(base, ev);
+    TAILQ_REMOVE(&base->events, ev, entries);
 
     /* If we removed the pending event, replace it with the next one. */
     if (base->pending == ev)
-	base->pending = ev->next;
+	base->pending = TAILQ_NEXT(ev, entries);
 
     /* Mark event unused. */
     ev->pfd_idx = -1;
     ev->base = NULL;
-    ev->prev = NULL;
-    ev->next = NULL;
 
     debug_return_int(0);
 }

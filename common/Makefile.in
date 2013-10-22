@@ -170,22 +170,22 @@ atoid.lo: $(srcdir)/atoid.c $(top_builddir)/config.h \
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/atoid.c
 conf_test.lo: $(srcdir)/regress/sudo_conf/conf_test.c $(top_builddir)/config.h \
               $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h \
-              $(incdir)/sudo_conf.h $(incdir)/list.h
+              $(incdir)/sudo_conf.h $(incdir)/queue.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/sudo_conf/conf_test.c
 event.lo: $(srcdir)/event.c $(top_builddir)/config.h \
           $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h $(incdir)/alloc.h \
-          $(incdir)/fatal.h $(incdir)/list.h $(incdir)/sudo_debug.h \
-          $(incdir)/sudo_event.h
+          $(incdir)/fatal.h $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+          $(incdir)/queue.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/event.c
 event_poll.lo: $(srcdir)/event_poll.c $(top_builddir)/config.h \
                $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h \
-               $(incdir)/alloc.h $(incdir)/fatal.h $(incdir)/list.h \
-               $(incdir)/sudo_debug.h $(incdir)/sudo_event.h
+               $(incdir)/alloc.h $(incdir)/fatal.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_event.h $(incdir)/queue.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/event_poll.c
 event_select.lo: $(srcdir)/event_select.c $(top_builddir)/config.h \
                  $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h \
-                 $(incdir)/alloc.h $(incdir)/fatal.h $(incdir)/list.h \
-                 $(incdir)/sudo_debug.h $(incdir)/sudo_event.h
+                 $(incdir)/alloc.h $(incdir)/fatal.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_event.h $(incdir)/queue.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/event_select.c
 fatal.lo: $(srcdir)/fatal.c $(top_builddir)/config.h \
           $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h $(incdir)/alloc.h \
@@ -224,7 +224,7 @@ sudo_conf.lo: $(srcdir)/sudo_conf.c $(top_builddir)/config.h \
               $(top_srcdir)/compat/stdbool.h $(incdir)/missing.h \
               $(incdir)/alloc.h $(incdir)/fatal.h $(incdir)/fileops.h \
               $(top_builddir)/pathnames.h $(incdir)/sudo_plugin.h \
-              $(incdir)/sudo_conf.h $(incdir)/list.h $(incdir)/sudo_debug.h \
+              $(incdir)/sudo_conf.h $(incdir)/queue.h $(incdir)/sudo_debug.h \
               $(incdir)/secure_path.h $(incdir)/gettext.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudo_conf.c
 sudo_debug.lo: $(srcdir)/sudo_debug.c $(top_builddir)/config.h \

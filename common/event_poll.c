@@ -46,7 +46,6 @@
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
-#include "list.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
 
@@ -154,8 +153,7 @@ rescan:
 	    break;
 	default:
 	    /* Service each event that fired. */
-	    for (ev = tq_first(base); ev != NULL; ev = base->pending) {
-		base->pending = list_next(ev);
+	    TAILQ_FOREACH_SAFE(ev, &base->events, entries, base->pending) {
 		if (ev->pfd_idx != -1 && base->pfds[ev->pfd_idx].revents) {
 		    int what = 0;
 		    if (base->pfds[ev->pfd_idx].revents & (POLLIN|POLLHUP|POLLNVAL|POLLERR))

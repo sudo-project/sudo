@@ -371,8 +371,7 @@ struct sudo_ldap_handle {
 };
 
 struct sudo_nss sudo_nss_ldap = {
-    &sudo_nss_ldap,
-    NULL,
+    { NULL, NULL },
     sudo_ldap_open,
     sudo_ldap_close,
     sudo_ldap_parse,

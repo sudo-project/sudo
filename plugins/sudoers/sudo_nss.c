@@ -69,7 +69,7 @@ sudo_read_nss(void)
     bool saw_files = false;
     bool saw_ldap = false;
     bool got_match = false;
-    static struct sudo_nss_list snl;
+    static struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
     debug_decl(sudo_read_nss, SUDO_DEBUG_NSS)
 
     if ((fp = fopen(_PATH_NSSWITCH_CONF, "r")) == NULL)
@@ -87,25 +87,25 @@ sudo_read_nss(void)
 	/* Parse line */
 	for ((cp = strtok(line + 8, " \t")); cp != NULL; (cp = strtok(NULL, " \t"))) {
 	    if (strcasecmp(cp, "files") == 0 && !saw_files) {
-		tq_append(&snl, &sudo_nss_file);
+		TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
 		got_match = true;
 #ifdef HAVE_LDAP
 	    } else if (strcasecmp(cp, "ldap") == 0 && !saw_ldap) {
-		tq_append(&snl, &sudo_nss_ldap);
+		TAILQ_INSERT_TAIL(&snl, &sudo_nss_ldap, entries);
 		got_match = true;
 #endif
 #ifdef HAVE_SSSD
 	    } else if (strcasecmp(cp, "sss") == 0 && !saw_sss) {
-		tq_append(&snl, &sudo_nss_sss);
+		TAILQ_INSERT_TAIL(&snl, &sudo_nss_sss, entries);
 		got_match = true;
 #endif
 	    } else if (strcasecmp(cp, "[NOTFOUND=return]") == 0 && got_match) {
 		/* NOTFOUND affects the most recent entry */
-		tq_last(&snl)->ret_if_notfound = true;
+		TAILQ_LAST(&snl, sudo_nss_list)->ret_if_notfound = true;
 		got_match = false;
 	    } else if (strcasecmp(cp, "[SUCCESS=return]") == 0 && got_match) {
 		/* SUCCESS affects the most recent entry */
-		tq_last(&snl)->ret_if_found = true;
+		TAILQ_LAST(&snl, sudo_nss_list)->ret_if_found = true;
 		got_match = false;
 	    } else
 		got_match = false;
@@ -118,8 +118,8 @@ sudo_read_nss(void)
 
 nomatch:
     /* Default to files only if no matches */
-    if (tq_empty(&snl))
-	tq_append(&snl, &sudo_nss_file);
+    if (TAILQ_EMPTY(&snl))
+	TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
 
     debug_return_ptr(&snl);
 }
@@ -144,7 +144,7 @@ sudo_read_nss(void)
     bool saw_files = false;
     bool saw_ldap = false;
     bool got_match = false;
-    static struct sudo_nss_list snl;
+    static struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
     debug_decl(sudo_read_nss, SUDO_DEBUG_NSS)
 
     if ((fp = fopen(_PATH_NETSVC_CONF, "r")) == NULL)
@@ -172,20 +172,20 @@ sudo_read_nss(void)
 
 	    if (!saw_files && strncasecmp(cp, "files", 5) == 0 &&
 		(isspace((unsigned char)cp[5]) || cp[5] == '\0')) {
-		tq_append(&snl, &sudo_nss_file);
+		TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
 		got_match = true;
 		ep = &cp[5];
 #ifdef HAVE_LDAP
 	    } else if (!saw_ldap && strncasecmp(cp, "ldap", 4) == 0 &&
 		(isspace((unsigned char)cp[4]) || cp[4] == '\0')) {
-		tq_append(&snl, &sudo_nss_ldap);
+		TAILQ_INSERT_TAIL(&snl, &sudo_nss_ldap, entries);
 		got_match = true;
 		ep = &cp[4];
 #endif
 #ifdef HAVE_SSSD
 	    } else if (!saw_sss && strncasecmp(cp, "sss", 3) == 0 &&
 		(isspace((unsigned char)cp[3]) || cp[3] == '\0')) {
-		tq_append(&snl, &sudo_nss_sss);
+		TAILQ_INSERT_TAIL(&snl, &sudo_nss_sss, entries);
 		got_match = true;
 		ep = &cp[3];
 #endif
@@ -200,7 +200,7 @@ sudo_read_nss(void)
 		    cp++;
 		if (strncasecmp(cp, "auth", 4) == 0 &&
 		    (isspace((unsigned char)cp[4]) || cp[4] == '\0')) {
-		    tq_last(&snl)->ret_if_found = true;
+		    TAILQ_LAST(&snl, sudo_nss_list)->ret_if_found = true;
 		}
 	    }
 	}
@@ -211,8 +211,8 @@ sudo_read_nss(void)
 
 nomatch:
     /* Default to files only if no matches */
-    if (tq_empty(&snl))
-	tq_append(&snl, &sudo_nss_file);
+    if (TAILQ_EMPTY(&snl))
+	TAILQ_INSERT_TAIL(&snl, &sudo_nss_files, entries);
 
     debug_return_ptr(&snl);
 }
@@ -225,16 +225,16 @@ nomatch:
 struct sudo_nss_list *
 sudo_read_nss(void)
 {
-    static struct sudo_nss_list snl;
+    static struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
     debug_decl(sudo_read_nss, SUDO_DEBUG_NSS)
 
 #  ifdef HAVE_SSSD
-    tq_append(&snl, &sudo_nss_sss);
+    TAILQ_INSERT_TAIL(&snl, &sudo_nss_sss, entries);
 #  endif
 #  ifdef HAVE_LDAP
-    tq_append(&snl, &sudo_nss_ldap);
+    TAILQ_INSERT_TAIL(&snl, &sudo_nss_ldap, entries);
 #  endif
-    tq_append(&snl, &sudo_nss_file);
+    TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
 
     debug_return_ptr(&snl);
 }
@@ -283,7 +283,7 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
     lbuf_append(&defs, _("Matching Defaults entries for %s on %s:\n"),
 	pw->pw_name, user_srunhost);
     count = 0;
-    tq_foreach_fwd(snl, nss) {
+    TAILQ_FOREACH(nss, snl, entries) {
 	count += nss->display_defaults(nss, pw, &defs);
     }
     if (count)
@@ -296,7 +296,7 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
     lbuf_append(&defs, _("Runas and Command-specific defaults for %s:\n"),
 	pw->pw_name);
     count = 0;
-    tq_foreach_fwd(snl, nss) {
+    TAILQ_FOREACH(nss, snl, entries) {
 	count += nss->display_bound_defaults(nss, pw, &defs);
     }
     if (count)
@@ -309,7 +309,7 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 	_("User %s may run the following commands on %s:\n"),
 	pw->pw_name, user_srunhost);
     count = 0;
-    tq_foreach_fwd(snl, nss) {
+    TAILQ_FOREACH(nss, snl, entries) {
 	count += nss->display_privs(nss, pw, &privs);
     }
     if (count == 0) {
@@ -338,7 +338,7 @@ display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
     struct sudo_nss *nss;
     debug_decl(display_cmnd, SUDO_DEBUG_NSS)
 
-    tq_foreach_fwd(snl, nss) {
+    TAILQ_FOREACH(nss, snl, entries) {
 	if (nss->display_cmnd(nss, pw) == 0)
 	    debug_return_bool(true);
     }

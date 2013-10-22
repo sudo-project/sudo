@@ -79,20 +79,21 @@
 #include "sudoers.h"
 #include "parse.h"
 #include "redblack.h"
+#include "queue.h"
 #include "gettext.h"
 #include "sudoers_version.h"
 #include "sudo_conf.h"
 #include <gram.h>
 
 struct sudoersfile {
-    struct sudoersfile *prev, *next;
+    TAILQ_ENTRY(sudoersfile) entries;
     char *path;
     char *tpath;
     int fd;
     int modified;
     int doedit;
 };
-TQ_DECLARE(sudoersfile)
+TAILQ_HEAD(sudoersfile_list, sudoersfile);
 
 /*
  * Function prototypes
@@ -131,7 +132,7 @@ extern bool parse_error;
  */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-static struct sudoersfile_list sudoerslist;
+static struct sudoersfile_list sudoerslist = TAILQ_HEAD_INITIALIZER(sudoerslist);
 static struct rbtree *alias_freelist;
 static bool checkonly;
 static const char short_opts[] =  "cf:hqsV";
@@ -250,10 +251,10 @@ main(int argc, char *argv[])
     setup_signals();
 
     /* Edit the sudoers file(s) */
-    tq_foreach_fwd(&sudoerslist, sp) {
+    TAILQ_FOREACH(sp, &sudoerslist, entries) {
 	if (!sp->doedit)
 	    continue;
-	if (sp != tq_first(&sudoerslist)) {
+	if (sp != TAILQ_FIRST(&sudoerslist)) {
 	    printf(_("press return to edit %s: "), sp->path);
 	    while ((ch = getchar()) != EOF && ch != '\n')
 		    continue;
@@ -266,7 +267,7 @@ main(int argc, char *argv[])
      * and install the edited files as needed.
      */
     if (reparse_sudoers(editor, args, strict, quiet)) {
-	tq_foreach_fwd(&sudoerslist, sp) {
+	TAILQ_FOREACH(sp, &sudoerslist, entries) {
 	    (void) install_sudoers(sp, oldperms);
 	}
     }
@@ -482,8 +483,8 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
     /*
      * Parse the edited sudoers files and do sanity checking
      */
-    while ((sp = tq_first(&sudoerslist)) != NULL) {
-	last = tq_last(&sudoerslist);
+    while ((sp = TAILQ_FIRST(&sudoerslist)) != NULL) {
+	last = TAILQ_LAST(&sudoerslist, sudoersfile_list);
 	fp = fopen(sp->tpath, "r+");
 	if (fp == NULL)
 	    fatalx(_("unable to re-open temporary file (%s), %s unchanged."),
@@ -524,7 +525,7 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 	    case 'e':
 	    default:
 		/* Edit file with the parse error */
-		tq_foreach_fwd(&sudoerslist, sp) {
+		TAILQ_FOREACH(sp, &sudoerslist, entries) {
 		    if (errorfile == NULL || strcmp(sp->path, errorfile) == 0) {
 			edit_sudoers(sp, editor, args, errorlineno);
 			if (errorfile != NULL)
@@ -540,7 +541,7 @@ reparse_sudoers(char *editor, char *args, bool strict, bool quiet)
 	}
 
 	/* If any new #include directives were added, edit them too. */
-	for (sp = last->next; sp != NULL; sp = sp->next) {
+	for (sp = TAILQ_NEXT(last, entries); sp != NULL; sp = TAILQ_NEXT(sp, entries)) {
 	    printf(_("press return to edit %s: "), sp->path);
 	    while ((ch = getchar()) != EOF && ch != '\n')
 		    continue;
@@ -858,7 +859,7 @@ check_syntax(char *sudoers_path, bool quiet, bool strict, bool oldperms)
 	} else {
 	    ok = false;
 	}
-	tq_foreach_fwd(&sudoerslist, sp) {
+	TAILQ_FOREACH(sp, &sudoerslist, entries) {
 	    if (oldperms || check_owner(sp->path, quiet)) {
 		if (!quiet)
 		    (void) printf(_("%s: parsed OK\n"), sp->path);
@@ -890,7 +891,7 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	open_flags = O_RDWR | O_CREAT;
 
     /* Check for existing entry */
-    tq_foreach_fwd(&sudoerslist, entry) {
+    TAILQ_FOREACH(entry, &sudoerslist, entries) {
 	if (strcmp(path, entry->path) == 0)
 	    break;
     }
@@ -898,8 +899,6 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	entry = ecalloc(1, sizeof(*entry));
 	entry->path = estrdup(path);
 	/* entry->modified = 0; */
-	entry->prev = entry;
-	/* entry->next = NULL; */
 	entry->fd = open(entry->path, open_flags, SUDOERS_MODE);
 	/* entry->tpath = NULL; */
 	entry->doedit = doedit;
@@ -912,7 +911,7 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	    fatalx(_("%s busy, try again later"), entry->path);
 	if ((fp = fdopen(entry->fd, "r")) == NULL)
 	    fatal("%s", entry->path);
-	tq_append(&sudoerslist, entry);
+	TAILQ_INSERT_TAIL(&sudoerslist, entry, entries);
     } else {
 	/* Already exists, open .tmp version if there is one. */
 	if (entry->tpath != NULL) {
@@ -1271,7 +1270,7 @@ visudo_cleanup(void)
 {
     struct sudoersfile *sp;
 
-    tq_foreach_fwd(&sudoerslist, sp) {
+    TAILQ_FOREACH(sp, &sudoerslist, entries) {
 	if (sp->tpath != NULL)
 	    (void) unlink(sp->tpath);
     }
@@ -1288,7 +1287,7 @@ quit(int signo)
     struct sudoersfile *sp;
     struct iovec iov[4];
 
-    tq_foreach_fwd(&sudoerslist, sp) {
+    TAILQ_FOREACH(sp, &sudoerslist, entries) {
 	if (sp->tpath != NULL)
 	    (void) unlink(sp->tpath);
     }

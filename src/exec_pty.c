@@ -117,7 +117,7 @@ pty_cleanup(void)
 {
     debug_decl(cleanup, SUDO_DEBUG_EXEC);
 
-    if (!tq_empty(&io_plugins) && io_fds[SFD_USERTTY] != -1) {
+    if (!TAILQ_EMPTY(&io_plugins) && io_fds[SFD_USERTTY] != -1) {
 	check_foreground();
 	if (foreground)
 	    term_restore(io_fds[SFD_USERTTY], 0);
@@ -202,7 +202,7 @@ log_ttyin(const char *buf, unsigned int n)
     debug_decl(log_ttyin, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
-    tq_foreach_fwd(&io_plugins, plugin) {
+    TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_ttyin) {
 	    if (!plugin->u.io->log_ttyin(buf, n)) {
 	    	rval = false;
@@ -225,7 +225,7 @@ log_stdin(const char *buf, unsigned int n)
     debug_decl(log_stdin, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
-    tq_foreach_fwd(&io_plugins, plugin) {
+    TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_stdin) {
 	    if (!plugin->u.io->log_stdin(buf, n)) {
 	    	rval = false;
@@ -248,7 +248,7 @@ log_ttyout(const char *buf, unsigned int n)
     debug_decl(log_ttyout, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
-    tq_foreach_fwd(&io_plugins, plugin) {
+    TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_ttyout) {
 	    if (!plugin->u.io->log_ttyout(buf, n)) {
 	    	rval = false;
@@ -271,7 +271,7 @@ log_stdout(const char *buf, unsigned int n)
     debug_decl(log_stdout, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
-    tq_foreach_fwd(&io_plugins, plugin) {
+    TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_stdout) {
 	    if (!plugin->u.io->log_stdout(buf, n)) {
 	    	rval = false;
@@ -294,7 +294,7 @@ log_stderr(const char *buf, unsigned int n)
     debug_decl(log_stderr, SUDO_DEBUG_EXEC);
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
-    tq_foreach_fwd(&io_plugins, plugin) {
+    TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_stderr) {
 	    if (!plugin->u.io->log_stderr(buf, n)) {
 	    	rval = false;

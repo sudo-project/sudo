@@ -17,6 +17,8 @@
 #ifndef _SUDO_EVENT_H
 #define _SUDO_EVENT_H
 
+#include "queue.h"
+
 /* Event types */
 #define SUDO_EV_READ	0x01		/* fire when readable */
 #define SUDO_EV_WRITE	0x02		/* fire when writable */
@@ -39,8 +41,7 @@ typedef void (*sudo_ev_callback_t)(int fd, int what, void *closure);
 
 /* Member of struct sudo_event_base. */
 struct sudo_event {
-    struct sudo_event *prev;	/* must be first element in struct */
-    struct sudo_event *next;	/* must be second element in struct */
+    TAILQ_ENTRY(sudo_event) entries;
     struct sudo_event_base *base; /* base this event belongs to */
     int fd;			/* fd we are interested in */
     short events;		/* SUDO_EV_* flags */
@@ -49,11 +50,12 @@ struct sudo_event {
     void *closure;		/* user-provided data pointer */
 };
 
-/* Tail queue of events. */
+TAILQ_HEAD(sudo_event_list, sudo_event);
+
 struct sudo_event_base {
-    struct sudo_event *first;	/* must be first element in struct */
-    struct sudo_event *last;	/* must be second element in struct */
-    struct sudo_event *pending;	/* next event to be run in the event loop */
+    struct sudo_event_list events; /* tail queue of events */
+    /* XXX - also list of active events and timed events */
+    struct sudo_event *pending;	/* next event to be run in the event loop XXX */
 #ifdef HAVE_POLL
     struct pollfd *pfds;	/* array of struct pollfd */
     int pfd_max;		/* size of the pfds array */

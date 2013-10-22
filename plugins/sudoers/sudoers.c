@@ -150,14 +150,13 @@ sudoers_policy_init(void *info, char * const envp[])
     set_perms(PERM_ROOT);
 
     /* Open and parse sudoers, set global defaults */
-    for (nss = snl->first; nss != NULL; nss = nss_next) {
-        nss_next = nss->next;
+    TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
         if (nss->open(nss) == 0 && nss->parse(nss) == 0) {
             sources++;
             if (nss->setdefs(nss) != 0)
                 log_warning(NO_STDERR, N_("problem with defaults entries"));
         } else {
-            tq_remove(snl, nss);
+	    TAILQ_REMOVE(snl, nss, entries);
         }
     }
     if (sources == 0) {
@@ -273,7 +272,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     validated = FLAG_NO_USER | FLAG_NO_HOST;
-    tq_foreach_fwd(snl, nss) {
+    TAILQ_FOREACH(nss, snl, entries) {
 	validated = nss->lookup(nss, validated, pwflag);
 
 	if (ISSET(validated, VALIDATE_OK)) {
@@ -413,7 +412,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	display_privs(snl, list_pw ? list_pw : sudo_user.pw); /* XXX - return val */
 
     /* Cleanup sudoers sources */
-    tq_foreach_fwd(snl, nss) {
+    TAILQ_FOREACH(nss, snl, entries) {
 	nss->close(nss);
     }
     if (def_group_plugin)
@@ -902,8 +901,9 @@ sudoers_cleanup(void)
     debug_decl(sudoers_cleanup, SUDO_DEBUG_PLUGIN)
 
     if (snl != NULL) {
-	tq_foreach_fwd(snl, nss)
+	TAILQ_FOREACH(nss, snl, entries) {
 	    nss->close(nss);
+	}
     }
     if (def_group_plugin)
 	group_plugin_unload();

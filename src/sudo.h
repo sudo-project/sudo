@@ -34,7 +34,6 @@
 #include "alloc.h"
 #include "fatal.h"
 #include "fileops.h"
-#include "list.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "gettext.h"

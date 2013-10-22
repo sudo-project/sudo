@@ -73,6 +73,14 @@
 # endif
 #endif
 
+/*
+ * Given the pointer x to the member m of the struct s, return
+ * a pointer to the containing structure.
+ */
+#ifndef __containerof
+# define __containerof(x, s, m)	((s *)((char *)(x) - offsetof(s, m)))
+#endif
+
 #ifndef __dso_public
 # ifdef HAVE_DSO_VISIBILITY
 #  if defined(__GNUC__)

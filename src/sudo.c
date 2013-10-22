@@ -92,7 +92,7 @@
  * Local variables
  */
 struct plugin_container policy_plugin;
-struct plugin_container_list io_plugins;
+struct plugin_container_list io_plugins = TAILQ_HEAD_INITIALIZER(io_plugins);
 struct user_details user_details;
 const char *list_user; /* extern for parse_args.c */
 static struct command_details command_details;
@@ -216,7 +216,7 @@ main(int argc, char *argv[], char *envp[])
     switch (sudo_mode & MODE_MASK) {
 	case MODE_VERSION:
 	    policy_show_version(&policy_plugin, !user_details.uid);
-	    tq_foreach_fwd(&io_plugins, plugin) {
+	    TAILQ_FOREACH(plugin, &io_plugins, entries) {
 		ok = iolog_open(plugin, settings, user_info, NULL,
 		    nargc, nargv, envp);
 		if (ok != -1)
@@ -250,8 +250,7 @@ main(int argc, char *argv[], char *envp[])
 		exit(1); /* plugin printed error message */
 	    }
 	    /* Open I/O plugins once policy plugin succeeds. */
-	    for (plugin = io_plugins.first; plugin != NULL; plugin = next) {
-		next = plugin->next;
+	    TAILQ_FOREACH_SAFE(plugin, &io_plugins, entries, next) {
 		ok = iolog_open(plugin, settings, user_info,
 		    command_info, nargc, nargv, envp);
 		switch (ok) {
@@ -1051,7 +1050,7 @@ run_command(struct command_details *details)
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
 	    "calling policy close with errno %d", cstat.val);
 	policy_close(&policy_plugin, 0, cstat.val);
-	tq_foreach_fwd(&io_plugins, plugin) {
+	TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
 		"calling I/O close with errno %d", cstat.val);
 	    iolog_close(plugin, 0, cstat.val);
@@ -1063,7 +1062,7 @@ run_command(struct command_details *details)
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
 	    "calling policy close with wait status %d", cstat.val);
 	policy_close(&policy_plugin, cstat.val, 0);
-	tq_foreach_fwd(&io_plugins, plugin) {
+	TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
 		"calling I/O close with wait status %d", cstat.val);
 	    iolog_close(plugin, cstat.val, 0);
@@ -1262,7 +1261,7 @@ iolog_unlink(struct plugin_container *plugin)
 		deregister_hook);
     }
     /* Remove from io_plugins list and free. */
-    tq_remove(&io_plugins, plugin);
+    TAILQ_REMOVE(&io_plugins, plugin, entries);
     efree(plugin);
 
     debug_return;
