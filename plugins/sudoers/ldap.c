@@ -46,6 +46,7 @@
 #include <fcntl.h>
 #include <pwd.h>
 #include <grp.h>
+#include <signal.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #ifdef HAVE_LBER_H
@@ -433,6 +434,7 @@ toobig:
  * For each uri, convert to host:port pairs.  For ldaps:// enable SSL
  * Accepts: uris of the form ldap:/// or ldap://hostname:portnum/
  * where the trailing slash is optional.
+ * Returns LDAP_SUCCESS on success, else non-zero.
  */
 static int
 sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
@@ -503,7 +505,7 @@ sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
     efree(ldap_conf.host);
     ldap_conf.host = estrdup(hostbuf);
 
-    rc = 0;
+    rc = LDAP_SUCCESS;
 
 done:
     efree(buf);
@@ -540,10 +542,15 @@ sudo_ldap_join_uri(struct ldap_config_str_list *uri_list)
 }
 #endif /* HAVE_LDAP_INITIALIZE */
 
+/*
+ * Wrapper for ldap_create() or ldap_init() that handles
+ * SSL/TLS initialization as well.
+ * Returns LDAP_SUCCESS on success, else non-zero.
+ */
 static int
 sudo_ldap_init(LDAP **ldp, const char *host, int port)
 {
-    LDAP *ld = NULL;
+    LDAP *ld;
     int rc = LDAP_CONNECT_ERROR;
     debug_decl(sudo_ldap_init, SUDO_DEBUG_LDAP)
 
@@ -605,7 +612,7 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 	if (rc != LDAP_SUCCESS) {
 	    warningx("ldap_ssl_client_init(): %s (SSL reason code %d)",
 		ldap_err2string(rc), sslrc);
-	    debug_return_int(-1);
+	    goto done;
 	}
 	DPRINTF2("ldap_ssl_init(%s, %d, NULL)", host, port);
 	if ((ld = ldap_ssl_init((char *)host, port, NULL)) != NULL)
@@ -627,8 +634,8 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 #endif
     }
 
-done:
     *ldp = ld;
+done:
     debug_return_int(rc);
 }
 
@@ -1653,7 +1660,7 @@ sudo_ldap_read_config(void)
     if (!STAILQ_EMPTY(&ldap_conf.uri)) {
 	struct ldap_config_str *uri;
 
-	if (sudo_ldap_parse_uri(&ldap_conf.uri) != 0)
+	if (sudo_ldap_parse_uri(&ldap_conf.uri) != LDAP_SUCCESS)
 	    debug_return_bool(false);
 	while ((uri = STAILQ_FIRST(&ldap_conf.uri)) != NULL) {
 	    STAILQ_REMOVE_HEAD(&ldap_conf.uri, entries);
@@ -2166,6 +2173,7 @@ sudo_ldap_sasl_interact(LDAP *ld, unsigned int flags, void *_auth_id,
 
 /*
  * Set LDAP options from the specified options table
+ * Returns LDAP_SUCCESS on success, else non-zero.
  */
 static int
 sudo_ldap_set_options_table(LDAP *ld, struct ldap_config_table *table)
@@ -2207,11 +2215,12 @@ sudo_ldap_set_options_table(LDAP *ld, struct ldap_config_table *table)
 	    break;
 	}
     }
-    debug_return_int(errors ? -1 : 0);
+    debug_return_int(errors ? -1 : LDAP_SUCCESS);
 }
 
 /*
  * Set LDAP options based on the global config table.
+ * Returns LDAP_SUCCESS on success, else non-zero.
  */
 static int
 sudo_ldap_set_options_global(void)
@@ -2227,13 +2236,12 @@ sudo_ldap_set_options_global(void)
 
     /* Parse global LDAP options table. */
     rc = sudo_ldap_set_options_table(NULL, ldap_conf_global);
-    if (rc == -1)
-	debug_return_int(-1);
-    debug_return_int(0);
+    debug_return_int(rc);
 }
 
 /*
  * Set LDAP options based on the per-connection config table.
+ * Returns LDAP_SUCCESS on success, else non-zero.
  */
 static int
 sudo_ldap_set_options_conn(LDAP *ld)
@@ -2291,7 +2299,7 @@ sudo_ldap_set_options_conn(LDAP *ld)
 	}
     }
 #endif
-    debug_return_int(0);
+    debug_return_int(LDAP_SUCCESS);
 }
 
 /*
@@ -2353,7 +2361,8 @@ sudo_ldap_result_add_search(struct ldap_result *lres, LDAP *ldap,
 }
 
 /*
- * Connect to the LDAP server specified by ld
+ * Connect to the LDAP server specified by ld.
+ * Returns LDAP_SUCCESS on success, else non-zero.
  */
 static int
 sudo_ldap_bind_s(LDAP *ld)
@@ -2408,7 +2417,7 @@ sudo_ldap_bind_s(LDAP *ld)
 	if (rc != LDAP_SUCCESS) {
 	    warningx("ldap_sasl_interactive_bind_s(): %s",
 		ldap_err2string(rc));
-	    debug_return_int(-1);
+	    goto done;
 	}
 	DPRINTF1("ldap_sasl_interactive_bind_s() ok");
     } else
@@ -2424,7 +2433,7 @@ sudo_ldap_bind_s(LDAP *ld)
 	    NULL, NULL, NULL);
 	if (rc != LDAP_SUCCESS) {
 	    warningx("ldap_sasl_bind_s(): %s", ldap_err2string(rc));
-	    debug_return_int(-1);
+	    goto done;
 	}
 	DPRINTF1("ldap_sasl_bind_s() ok");
     }
@@ -2433,12 +2442,13 @@ sudo_ldap_bind_s(LDAP *ld)
 	rc = ldap_simple_bind_s(ld, ldap_conf.binddn, ldap_conf.bindpw);
 	if (rc != LDAP_SUCCESS) {
 	    warningx("ldap_simple_bind_s(): %s", ldap_err2string(rc));
-	    debug_return_int(-1);
+	    goto done;
 	}
 	DPRINTF1("ldap_simple_bind_s() ok");
     }
 #endif
-    debug_return_int(0);
+done:
+    debug_return_int(rc);
 }
 
 /*
@@ -2449,13 +2459,20 @@ static int
 sudo_ldap_open(struct sudo_nss *nss)
 {
     LDAP *ld;
-    int rc;
+    int rc = -1;
+    sigaction_t sa, saved_sa_pipe;
     bool ldapnoinit = false;
     struct sudo_ldap_handle *handle;
     debug_decl(sudo_ldap_open, SUDO_DEBUG_LDAP)
 
+    /* Ignore SIGPIPE if we cannot bind to the server. */
+    memset(&sa, 0, sizeof(sa));
+    sigemptyset(&sa.sa_mask);
+    sa.sa_handler = SIG_IGN;
+    (void) sigaction(SIGPIPE, &sa, &saved_sa_pipe);
+
     if (!sudo_ldap_read_config())
-	debug_return_int(-1);
+	goto done;
 
     /* Prevent reading of user ldaprc and system defaults. */
     if (sudo_getenv("LDAPNOINIT") == NULL) {
@@ -2464,8 +2481,8 @@ sudo_ldap_open(struct sudo_nss *nss)
     }
 
     /* Set global LDAP options */
-    if (sudo_ldap_set_options_global() < 0)
-	debug_return_int(-1);
+    if (sudo_ldap_set_options_global() != LDAP_SUCCESS)
+	goto done;
 
     /* Connect to LDAP server */
 #ifdef HAVE_LDAP_INITIALIZE
@@ -2480,11 +2497,12 @@ sudo_ldap_open(struct sudo_nss *nss)
 #endif
 	rc = sudo_ldap_init(&ld, ldap_conf.host, ldap_conf.port);
     if (rc != LDAP_SUCCESS)
-	debug_return_int(-1);
+	goto done;
 
     /* Set LDAP per-connection options */
-    if (sudo_ldap_set_options_conn(ld) < 0)
-	debug_return_int(-1);
+    rc = sudo_ldap_set_options_conn(ld);
+    if (rc != LDAP_SUCCESS)
+	goto done;
 
     if (ldapnoinit)
 	sudo_unsetenv("LDAPNOINIT");
@@ -2494,7 +2512,7 @@ sudo_ldap_open(struct sudo_nss *nss)
 	rc = ldap_start_tls_s(ld, NULL, NULL);
 	if (rc != LDAP_SUCCESS) {
 	    warningx("ldap_start_tls_s(): %s", ldap_err2string(rc));
-	    debug_return_int(-1);
+	    goto done;
 	}
 	DPRINTF1("ldap_start_tls_s() ok");
 #elif defined(HAVE_LDAP_SSL_CLIENT_INIT) && defined(HAVE_LDAP_START_TLS_S_NP)
@@ -2504,12 +2522,12 @@ sudo_ldap_open(struct sudo_nss *nss)
 	if (rc != LDAP_SUCCESS) {
 	    warningx("ldap_ssl_client_init(): %s (SSL reason code %d)",
 		ldap_err2string(rc), sslrc);
-	    debug_return_int(-1);
+	    goto done;
 	}
 	rc = ldap_start_tls_s_np(ld, NULL);
 	if (rc != LDAP_SUCCESS) {
 	    warningx("ldap_start_tls_s_np(): %s", ldap_err2string(rc));
-	    debug_return_int(-1);
+	    goto done;
 	}
 	DPRINTF1("ldap_start_tls_s_np() ok");
 #else
@@ -2518,8 +2536,9 @@ sudo_ldap_open(struct sudo_nss *nss)
     }
 
     /* Actually connect */
-    if (sudo_ldap_bind_s(ld) != 0)
-	debug_return_int(-1);
+    rc = sudo_ldap_bind_s(ld);
+    if (rc != LDAP_SUCCESS)
+	goto done;
 
     /* Create a handle container. */
     handle = ecalloc(1, sizeof(struct sudo_ldap_handle));
@@ -2529,7 +2548,9 @@ sudo_ldap_open(struct sudo_nss *nss)
     /* handle->grlist = NULL; */
     nss->handle = handle;
 
-    debug_return_int(0);
+done:
+    (void) sigaction(SIGPIPE, &saved_sa_pipe, NULL);
+    debug_return_int(rc == LDAP_SUCCESS ? 0 : -1);
 }
 
 static int
