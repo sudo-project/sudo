@@ -1049,7 +1049,7 @@ static int yygrowstack()
 #else
 #define YY_SIZE_MAX 0x7fffffff
 #endif
-    if (YY_SIZE_MAX / newsize < sizeof *newss)
+    if (YY_SIZE_MAX / (unsigned int)newsize < sizeof *newss)
         goto bail;
     i = yyssp - yyss;
     newss = yyss ? (short *)realloc(yyss, newsize * sizeof *newss) :

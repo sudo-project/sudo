@@ -229,12 +229,12 @@ sudo_make_grlist_item(struct passwd *pw, char * const *unused1,
     char * const *unused2)
 {
     char *cp;
-    size_t i, nsize, ngroups, total, len;
+    size_t nsize, ngroups, total, len;
     struct cache_item_grlist *grlitem;
     struct group_list *grlist;
     GETGROUPS_T *gids;
     struct group *grp;
-    int ngids, groupname_len;
+    int i, ngids, groupname_len;
     debug_decl(sudo_make_grlist_item, SUDO_DEBUG_NSS)
 
     if (pw == sudo_user.pw && sudo_user.gids != NULL) {

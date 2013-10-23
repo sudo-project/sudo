@@ -198,7 +198,7 @@ do_logfile(char *msg)
 	    def_logfile, strerror(errno));
     } else {
 	time(&now);
-	if (def_loglinelen < sizeof(LOG_INDENT)) {
+	if ((size_t)def_loglinelen < sizeof(LOG_INDENT)) {
 	    /* Don't pretty-print long log file lines (hard to grep) */
 	    if (def_log_host) {
 		(void) fprintf(fp, "%s : %s : HOST=%s : %s\n",

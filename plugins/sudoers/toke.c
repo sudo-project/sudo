@@ -2500,7 +2500,7 @@ YY_RULE_SETUP
 #line 289 "toke.l"
 {
 			    /* Only return DIGEST if the length is correct. */
-			    size_t len;
+			    int len;
 			    if (sudoerstext[sudoersleng - 1] == '=') {
 				/* use padding */
 				len = 4 * ((digest_len + 2) / 3);

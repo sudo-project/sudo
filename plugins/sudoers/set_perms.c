@@ -79,9 +79,9 @@ static struct perm_state perm_stack[PERM_STACK_MAX];
 static int perm_stack_depth = 0;
 
 #undef ID
-#define ID(x) (state->x == ostate->x ? -1 : state->x)
+#define ID(x) (state->x == ostate->x ? (id_t)-1 : state->x)
 #undef OID
-#define OID(x) (ostate->x == state->x ? -1 : ostate->x)
+#define OID(x) (ostate->x == state->x ? (id_t)-1 : ostate->x)
 
 void
 rewind_perms(void)

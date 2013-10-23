@@ -168,7 +168,8 @@ lock_file(int fd, int lockit)
 ssize_t
 sudo_parseln(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp)
 {
-    size_t len, linesize = 0, total = 0;
+    size_t linesize = 0, total = 0;
+    ssize_t len;
     char *cp, *line = NULL;
     bool continued;
     debug_decl(sudo_parseln, SUDO_DEBUG_UTIL)

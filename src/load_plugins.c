@@ -74,8 +74,9 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 	}
 	status = stat(fullpath, sb);
     } else {
-	if (snprintf(fullpath, pathsize, "%s%s", _PATH_SUDO_PLUGIN_DIR,
-	    info->path) >= pathsize) {
+	int len = snprintf(fullpath, pathsize, "%s%s", _PATH_SUDO_PLUGIN_DIR,
+	    info->path);
+	if (len <= 0 || (size_t)len >= pathsize) {
 	    warningx(_("error in %s, line %d while loading plugin `%s'"),
 		_PATH_SUDO_CONF, info->lineno, info->symbol_name);
 	    warningx(_("%s%s: %s"), _PATH_SUDO_PLUGIN_DIR, info->path,

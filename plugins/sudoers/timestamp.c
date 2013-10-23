@@ -88,7 +88,7 @@ build_timestamp(struct passwd *pw)
     timestampfile[0] = '\0';
     len = snprintf(timestampdir, sizeof(timestampdir), "%s/%s", dirparent,
 	user_name);
-    if (len <= 0 || len >= sizeof(timestampdir))
+    if (len <= 0 || (size_t)len >= sizeof(timestampdir))
 	goto bad;
 
     /*
@@ -103,7 +103,7 @@ build_timestamp(struct passwd *pw)
 	    /* No tty, use parent pid. */
 	    len = snprintf(pidbuf, sizeof(pidbuf), "pid%u",
 		(unsigned int)getppid());
-	    if (len <= 0 || len >= sizeof(pidbuf))
+	    if (len <= 0 || (size_t)len >= sizeof(pidbuf))
 		goto bad;
 	    p = pidbuf;
 	} else if ((p = strrchr(user_tty, '/'))) {
@@ -118,12 +118,12 @@ build_timestamp(struct passwd *pw)
 	    len = snprintf(timestampfile, sizeof(timestampfile), "%s/%s/%s",
 		dirparent, user_name, p);
 	}
-	if (len <= 0 || len >= sizeof(timestampfile))
+	if (len <= 0 || (size_t)len >= sizeof(timestampfile))
 	    goto bad;
     } else if (def_targetpw) {
 	len = snprintf(timestampfile, sizeof(timestampfile), "%s/%s/%s",
 	    dirparent, user_name, runas_pw->pw_name);
-	if (len <= 0 || len >= sizeof(timestampfile))
+	if (len <= 0 || (size_t)len >= sizeof(timestampfile))
 	    goto bad;
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "using timestamp file %s", timestampfile);

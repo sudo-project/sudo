@@ -194,7 +194,7 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 	    break;
 	case 1:
 	    /* Trim trailing slashes from dir component. */
-	    while (dst - path - 1 > prelen && dst[-1] == '/')
+	    while (dst > path + prelen + 1 && dst[-1] == '/')
 		dst--;
 	    /* The NUL will be replaced with a '/' at the end. */
 	    if (dst + 1 >= pathend)

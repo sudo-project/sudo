@@ -119,6 +119,7 @@ static int sudo_debug_fd = -1;
 static int sudo_debug_mode;
 static char sudo_debug_pidstr[(((sizeof(int) * 8) + 2) / 3) + 3];
 static size_t sudo_debug_pidlen;
+static const int num_subsystems = NUM_SUBSYSTEMS;
 
 /*
  * Parse settings string from sudo.conf and open debugfile.
@@ -135,7 +136,7 @@ int sudo_debug_init(const char *debugfile, const char *settings)
 	return 1;
 
     /* Init per-subsystems settings to -1 since 0 is a valid priority. */
-    for (i = 0; i < NUM_SUBSYSTEMS; i++)
+    for (i = 0; i < num_subsystems; i++)
 	sudo_debug_settings[i] = -1;
 
     /* Open debug file if specified. */
@@ -442,7 +443,7 @@ sudo_debug_vprintf2(const char *func, const char *file, int lineno, int level,
     subsys = SUDO_DEBUG_SUBSYS(level);
 
     /* Make sure we want debug info at this level. */
-    if (subsys < NUM_SUBSYSTEMS && sudo_debug_settings[subsys] >= pri) {
+    if (subsys < num_subsystems && sudo_debug_settings[subsys] >= pri) {
 	buflen = fmt ? vasprintf(&buf, fmt, ap) : 0;
 	if (buflen != -1) {
 	    int errcode = ISSET(level, SUDO_DEBUG_ERRNO) ? saved_errno : 0;
@@ -484,7 +485,7 @@ sudo_debug_execve2(int level, const char *path, char *const argv[], char *const 
     subsys = SUDO_DEBUG_SUBSYS(level);
 
     /* Make sure we want debug info at this level. */
-    if (subsys >= NUM_SUBSYSTEMS || sudo_debug_settings[subsys] < pri)
+    if (subsys >= num_subsystems || sudo_debug_settings[subsys] < pri)
 	return;
 
     /* Log envp for debug level "debug". */

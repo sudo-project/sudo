@@ -38,7 +38,7 @@
  * Verify that path is the right type and not writable by other users.
  */
 int
-sudo_secure_path(const char *path, int type, uid_t uid, gid_t gid, struct stat *sbp)
+sudo_secure_path(const char *path, unsigned int type, uid_t uid, gid_t gid, struct stat *sbp)
 {
     struct stat sb;
     int rval = SUDO_PATH_MISSING;

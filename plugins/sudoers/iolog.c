@@ -176,7 +176,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
      * Open sequence file
      */
     len = snprintf(pathbuf, sizeof(pathbuf), "%s/seq", iolog_dir);
-    if (len <= 0 || len >= sizeof(pathbuf)) {
+    if (len <= 0 || (size_t)len >= sizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
 	log_fatal(USE_ERRNO, "%s/seq", pathbuf);
     }
@@ -196,7 +196,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 
 	len = snprintf(fallback, sizeof(fallback), "%s/seq",
 	    iolog_dir_fallback);
-	if (len > 0 && len < sizeof(fallback)) {
+	if (len > 0 && (size_t)len < sizeof(fallback)) {
 	    int fd2 = open(fallback, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
 	    if (fd2 != -1) {
 		nread = read(fd2, buf, sizeof(buf));

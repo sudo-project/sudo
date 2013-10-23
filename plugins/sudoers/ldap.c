@@ -398,10 +398,12 @@ sudo_ldap_conf_add_ports(void)
 
     char *host, *port, defport[13];
     char hostbuf[LINE_MAX * 2];
+    int len;
     debug_decl(sudo_ldap_conf_add_ports, SUDO_DEBUG_LDAP)
 
     hostbuf[0] = '\0';
-    if (snprintf(defport, sizeof(defport), ":%d", ldap_conf.port) >= sizeof(defport))
+    len = snprintf(defport, sizeof(defport), ":%d", ldap_conf.port);
+    if (len <= 0 || (size_t)len >= sizeof(defport))
 	fatalx(_("sudo_ldap_conf_add_ports: port too large"));
 
     for ((host = strtok(ldap_conf.host, " \t")); host; (host = strtok(NULL, " \t"))) {
@@ -1099,7 +1101,7 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
     /* Build filter. */
     bytes = snprintf(buffer, buffersize, "(&(|(!(sudoNotAfter=*))(sudoNotAfter>=%s))(|(!(sudoNotBefore=*))(sudoNotBefore<=%s)))",
 	timebuffer, timebuffer);
-    if (bytes < 0 || bytes >= buffersize) {
+    if (bytes <= 0 || (size_t)bytes >= buffersize) {
 	warning(_("unable to build time filter"));
 	bytes = 0;
     }

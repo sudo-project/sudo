@@ -34,7 +34,7 @@
 #define SUDO_DIGEST_INVALID	4
 
 struct sudo_digest {
-    int digest_type;
+    unsigned int digest_type;
     char *digest_str;
 };
 

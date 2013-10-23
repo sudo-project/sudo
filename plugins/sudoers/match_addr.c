@@ -55,9 +55,9 @@ addr_matches_if(char *n)
     union sudo_in_addr_un addr;
     struct interface *ifp;
 #ifdef HAVE_STRUCT_IN6_ADDR
-    int j;
+    unsigned int j;
 #endif
-    int family;
+    unsigned int family;
     debug_decl(addr_matches_if, SUDO_DEBUG_MATCH)
 
 #ifdef HAVE_STRUCT_IN6_ADDR
@@ -102,13 +102,13 @@ addr_matches_if(char *n)
 static bool
 addr_matches_if_netmask(char *n, char *m)
 {
-    int i;
+    unsigned int i;
     union sudo_in_addr_un addr, mask;
     struct interface *ifp;
 #ifdef HAVE_STRUCT_IN6_ADDR
-    int j;
+    unsigned int j;
 #endif
-    int family;
+    unsigned int family;
     debug_decl(addr_matches_if, SUDO_DEBUG_MATCH)
 
 #ifdef HAVE_STRUCT_IN6_ADDR

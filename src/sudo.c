@@ -767,7 +767,7 @@ sudo_check_suid(const char *sudo)
 		    if ((colon = strchr(cp, ':')))
 			*colon = '\0';
 		    len = snprintf(pathbuf, sizeof(pathbuf), "%s/%s", cp, sudo);
-		    if (len <= 0 || len >= sizeof(pathbuf))
+		    if (len <= 0 || (size_t)len >= sizeof(pathbuf))
 			continue;
 		    if (access(pathbuf, X_OK) == 0) {
 			sudo = pathbuf;

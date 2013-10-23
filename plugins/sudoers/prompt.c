@@ -110,14 +110,14 @@ expand_prompt(const char *old_prompt, const char *user, const char *host)
 		    case 'h':
 			p++;
 			n = strlcpy(np, user_shost, np - endp);
-			if (n >= np - endp)
+			if (n >= (size_t)(np - endp))
 			    goto oflow;
 			np += n;
 			continue;
 		    case 'H':
 			p++;
 			n = strlcpy(np, user_host, np - endp);
-			if (n >= np - endp)
+			if (n >= (size_t)(np - endp))
 			    goto oflow;
 			np += n;
 			continue;
@@ -129,21 +129,21 @@ expand_prompt(const char *old_prompt, const char *user, const char *host)
 				n = strlcpy(np, runas_pw->pw_name, np - endp);
 			else
 				n = strlcpy(np, user_name, np - endp);
-			if (n >= np - endp)
+			if (n >= (size_t)(np - endp))
 				goto oflow;
 			np += n;
 			continue;
 		    case 'u':
 			p++;
 			n = strlcpy(np, user_name, np - endp);
-			if (n >= np - endp)
+			if (n >= (size_t)(np - endp))
 			    goto oflow;
 			np += n;
 			continue;
 		    case 'U':
 			p++;
 			n = strlcpy(np,  runas_pw->pw_name, np - endp);
-			if (n >= np - endp)
+			if (n >= (size_t)(np - endp))
 			    goto oflow;
 			np += n;
 			continue;

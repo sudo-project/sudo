@@ -371,7 +371,7 @@ get_process_ttyname(void)
 	rc = sysctl(mib, sudo_kp_namelen, ki_proc, &size, NULL, 0);
     } while (rc == -1 && errno == ENOMEM);
     if (rc != -1) {
-	if (ki_proc->sudo_kp_tdev != (dev_t)-1) {
+	if ((dev_t)ki_proc->sudo_kp_tdev != (dev_t)-1) {
 	    tty = sudo_ttyname_dev(ki_proc->sudo_kp_tdev);
 	    if (tty == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_WARN,

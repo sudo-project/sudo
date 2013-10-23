@@ -77,7 +77,7 @@ lbuf_destroy(struct lbuf *lbuf)
 }
 
 static void
-lbuf_expand(struct lbuf *lbuf, size_t extra)
+lbuf_expand(struct lbuf *lbuf, int extra)
 {
     if (lbuf->len + extra + 1 >= lbuf->size) {
 	do {

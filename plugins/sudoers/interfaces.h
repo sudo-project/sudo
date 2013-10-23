@@ -37,7 +37,7 @@ union sudo_in_addr_un {
  */
 struct interface {
     SLIST_ENTRY(interface) entries;
-    int family;	/* AF_INET or AF_INET6 */
+    unsigned int family;	/* AF_INET or AF_INET6 */
     union sudo_in_addr_un addr;
     union sudo_in_addr_un netmask;
 };

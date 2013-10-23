@@ -194,7 +194,7 @@ static int open_io_fd(char *path, int len, struct io_log_file *iol);
 static int parse_timing(const char *buf, const char *decimal, int *idx, double *seconds, size_t *nbytes);
 static struct log_info *parse_logfile(char *logfile);
 static void free_log_info(struct log_info *li);
-static size_t atomic_writev(int fd, struct iovec *iov, int iovcnt);
+static ssize_t atomic_writev(int fd, struct iovec *iov, int iovcnt);
 static void sudoreplay_handler(int);
 static void sudoreplay_cleanup(void);
 
@@ -327,13 +327,13 @@ main(int argc, char *argv[])
     if (VALID_ID(id)) {
 	plen = snprintf(path, sizeof(path), "%s/%.2s/%.2s/%.2s/timing",
 	    session_dir, id, &id[2], &id[4]);
-	if (plen <= 0 || plen >= sizeof(path))
+	if (plen <= 0 || (size_t)plen >= sizeof(path))
 	    fatalx(_("%s/%.2s/%.2s/%.2s/timing: %s"), session_dir,
 		id, &id[2], &id[4], strerror(ENAMETOOLONG));
     } else {
 	plen = snprintf(path, sizeof(path), "%s/%s/timing",
 	    session_dir, id);
-	if (plen <= 0 || plen >= sizeof(path))
+	if (plen <= 0 || (size_t)plen >= sizeof(path))
 	    fatalx(_("%s/%s/timing: %s"), session_dir,
 		id, strerror(ENAMETOOLONG));
     }
@@ -469,7 +469,7 @@ main(int argc, char *argv[])
 		    cp = ep + 1;
 		    remainder -= linelen;
 		}
-		if (cp - buf != nread) {
+		if ((size_t)(cp - buf) != nread) {
 		    /*
 		     * Partial line without a linefeed or multiple lines
 		     * with \r\n pairs.
@@ -542,7 +542,7 @@ open_io_fd(char *path, int len, struct io_log_file *iol)
  * Call writev(), restarting as needed and handling EAGAIN since
  * fd may be in non-blocking mode.
  */
-static size_t
+static ssize_t
 atomic_writev(int fd, struct iovec *iov, int iovcnt)
 {
     ssize_t n, nwritten = 0;
@@ -945,7 +945,8 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
     struct dirent *dp;
     struct stat sb;
     size_t sdlen, sessions_len = 0, sessions_size = 36*36;
-    int i, len;
+    unsigned int i;
+    int len;
     char pathbuf[PATH_MAX], **sessions = NULL;
 #ifdef HAVE_STRUCT_DIRENT_D_TYPE
     bool checked_type = true;
@@ -999,7 +1000,7 @@ find_sessions(const char *dir, REGEX_T *re, const char *user, const char *tty)
     for (i = 0; i < sessions_len; i++) {
 	len = snprintf(&pathbuf[sdlen], sizeof(pathbuf) - sdlen,
 	    "%s/log", sessions[i]);
-	if (len <= 0 || len >= sizeof(pathbuf) - sdlen) {
+	if (len <= 0 || (size_t)len >= sizeof(pathbuf) - sdlen) {
 	    errno = ENAMETOOLONG;
 	    fatal("%s/%s/log", dir, sessions[i]);
 	}

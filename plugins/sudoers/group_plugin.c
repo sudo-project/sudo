@@ -86,7 +86,7 @@ group_plugin_load(char *plugin_info)
 	len = snprintf(path, sizeof(path), "%s%s",
 	    (*plugin_info != '/') ? _PATH_SUDO_PLUGIN_DIR : "", plugin_info);
     }
-    if (len <= 0 || len >= sizeof(path)) {
+    if (len <= 0 || (size_t)len >= sizeof(path)) {
 	errno = ENAMETOOLONG;
 	warning("%s%s",
 	    (*plugin_info != '/') ? _PATH_SUDO_PLUGIN_DIR : "", plugin_info);
