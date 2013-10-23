@@ -79,13 +79,13 @@ main(int argc, char *argv[])
 {
     const int ntests = (sizeof(test_strings) / sizeof(test_strings[0]));
     int i, errors = 0;
-    char buf[32];
+    unsigned char buf[32];
     size_t len;
 
     for (i = 0; i < ntests; i++) {
 	len = base64_decode(test_strings[i].encoded, buf, sizeof(buf));
 	buf[len] = '\0';
-	if (strcmp(test_strings[i].ascii, buf) != 0) {
+	if (strcmp(test_strings[i].ascii, (char *)buf) != 0) {
 	    fprintf(stderr, "check_base64: expected %s, got %s",
 		test_strings[i].ascii, buf);
 	    errors++;
