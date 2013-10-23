@@ -193,7 +193,7 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
     size_t sdlen, d_len, len, num_subdirs = 0, max_subdirs = 0;
     struct dirent *dp;
     struct stat sb;
-    int i;
+    unsigned int i;
     debug_decl(sudo_ttyname_scan, SUDO_DEBUG_UTIL)
 
     if (dir[0] == '\0' || (d = opendir(dir)) == NULL)
