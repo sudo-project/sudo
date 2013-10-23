@@ -46,6 +46,9 @@ datarootdir = @datarootdir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 
+# Directory to copy man pages from
+mansrcdir = @mansrcdir@
+
 # Directory in which to install the man page
 mantype = @MANTYPE@
 mansectsu = @mansectsu@
@@ -64,9 +67,10 @@ DEVEL = @DEVEL@
 
 SHELL = @SHELL@
 
-DOCS =	sudo.$(mantype) visudo.$(mantype) sudo.conf.$(mantype) \
-	sudoers.$(mantype) sudoers.ldap.$(mantype) sudoers.$(mantype) \
-	sudoreplay.$(mantype) sudo_plugin.$(mantype)
+DOCS =	$(mansrcdir)/sudo.$(mantype) $(mansrcdir)/visudo.$(mantype) \
+	$(mansrcdir)/sudo.conf.$(mantype) $(mansrcdir)/sudoers.$(mantype) \
+	$(mansrcdir)/sudoers.ldap.$(mantype) $(mansrcdir)/sudoers.$(mantype) \
+	$(mansrcdir)/sudoreplay.$(mantype) $(mansrcdir)/sudo_plugin.$(mantype)
 
 DEVDOCS = $(srcdir)/sudo.man.in $(srcdir)/sudo.cat \
 	  $(srcdir)/visudo.man.in $(srcdir)/visudo.cat \
@@ -114,13 +118,13 @@ $(srcdir)/sudo.man.in: $(srcdir)/sudo.mdoc.in
 sudo.man.sed: $(srcdir)/fixman.sh
 	BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixman.sh $@
 
-sudo.man: $(srcdir)/sudo.man.in sudo.man.sed
+$(mansrcdir)/sudo.man: $(srcdir)/sudo.man.in sudo.man.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
 
 sudo.mdoc.sed: $(srcdir)/fixmdoc.sh
 	BAMAN=@BAMAN@ LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixmdoc.sh $@
 
-sudo.mdoc: $(srcdir)/sudo.mdoc.in sudo.mdoc.sed
+$(mansrcdir)/sudo.mdoc: $(srcdir)/sudo.mdoc.in sudo.mdoc.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
 
 $(srcdir)/sudo.cat: varsub $(srcdir)/sudo.mdoc.in
@@ -128,8 +132,6 @@ $(srcdir)/sudo.cat: varsub $(srcdir)/sudo.mdoc.in
 	    echo "Generating $@"; \
 	    $(SED) -f varsub $(srcdir)/sudo.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
-
-sudo.cat: $(srcdir)/sudo.cat
 
 $(srcdir)/visudo.man.in: $(srcdir)/visudo.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -157,8 +159,6 @@ $(srcdir)/visudo.cat: varsub $(srcdir)/visudo.mdoc.in
 	    $(SED) -f varsub $(srcdir)/visudo.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
 
-visudo.cat: $(srcdir)/visudo.cat
-
 $(srcdir)/sudo.conf.man.in: $(srcdir)/sudo.conf.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
@@ -173,10 +173,10 @@ $(srcdir)/sudo.conf.man.in: $(srcdir)/sudo.conf.mdoc.in
 sudo.conf.man.sed: $(srcdir)/fixman.sh
 	$(SHELL) $(srcdir)/fixman.sh $@
 
-sudo.conf.man: $(srcdir)/sudo.conf.man.in sudo.conf.man.sed
+$(mansrcdir)/sudo.conf.man: $(srcdir)/sudo.conf.man.in sudo.conf.man.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
 
-sudo.conf.mdoc: $(srcdir)/sudo.conf.mdoc.in
+$(mansrcdir)/sudo.conf.mdoc: $(srcdir)/sudo.conf.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 $(srcdir)/sudo.conf.cat: varsub $(srcdir)/sudo.conf.mdoc.in
@@ -184,8 +184,6 @@ $(srcdir)/sudo.conf.cat: varsub $(srcdir)/sudo.conf.mdoc.in
 	    echo "Generating $@"; \
 	    $(SED) -f varsub $(srcdir)/sudo.conf.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
-
-sudo.conf.cat: $(srcdir)/sudo.conf.cat
 
 $(srcdir)/sudoers.man.in: $(srcdir)/sudoers.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -201,13 +199,13 @@ $(srcdir)/sudoers.man.in: $(srcdir)/sudoers.mdoc.in
 sudoers.man.sed: $(srcdir)/fixman.sh
 	LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixman.sh $@
 
-sudoers.man: $(srcdir)/sudoers.man.in sudoers.man.sed
+$(mansrcdir)/sudoers.man: $(srcdir)/sudoers.man.in sudoers.man.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
 
 sudoers.mdoc.sed: $(srcdir)/fixmdoc.sh
 	LCMAN=@LCMAN@ SEMAN=@SEMAN@ PSMAN=@PSMAN@ $(SHELL) $(srcdir)/fixmdoc.sh $@
 
-sudoers.mdoc: $(srcdir)/sudoers.mdoc.in sudoers.mdoc.sed
+$(mansrcdir)/sudoers.mdoc: $(srcdir)/sudoers.mdoc.in sudoers.mdoc.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
 
 $(srcdir)/sudoers.cat: varsub $(srcdir)/sudoers.mdoc.in
@@ -215,8 +213,6 @@ $(srcdir)/sudoers.cat: varsub $(srcdir)/sudoers.mdoc.in
 	    echo "Generating $@"; \
 	    $(SED) -f varsub $(srcdir)/sudoers.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
-
-sudoers.cat: $(srcdir)/sudoers.cat
 
 $(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -232,10 +228,10 @@ $(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.mdoc.in
 sudoers.ldap.man.sed: $(srcdir)/fixman.sh
 	$(SHELL) $(srcdir)/fixman.sh $@
 
-sudoers.ldap.man: $(srcdir)/sudoers.ldap.man.in sudoers.ldap.man.sed
+$(mansrcdir)/sudoers.ldap.man: $(srcdir)/sudoers.ldap.man.in sudoers.ldap.man.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
 
-sudoers.ldap.mdoc: $(srcdir)/sudoers.ldap.mdoc.in
+$(mansrcdir)/sudoers.ldap.mdoc: $(srcdir)/sudoers.ldap.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 $(srcdir)/sudoers.ldap.cat: varsub $(srcdir)/sudoers.ldap.mdoc.in
@@ -243,8 +239,6 @@ $(srcdir)/sudoers.ldap.cat: varsub $(srcdir)/sudoers.ldap.mdoc.in
 	    echo "Generating $@"; \
 	    $(SED) -f varsub $(srcdir)/sudoers.ldap.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
-
-sudoers.ldap.cat: $(srcdir)/sudoers.ldap.cat
 
 $(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -260,10 +254,10 @@ $(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.mdoc.in
 sudoreplay.man.sed: $(srcdir)/fixman.sh
 	$(SHELL) $(srcdir)/fixman.sh $@
 
-sudoreplay.man: $(srcdir)/sudoreplay.man.in sudoreplay.man.sed
+$(mansrcdir)/sudoreplay.man: $(srcdir)/sudoreplay.man.in sudoreplay.man.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
 
-sudoreplay.mdoc: $(srcdir)/sudoreplay.mdoc.in
+$(mansrcdir)/sudoreplay.mdoc: $(srcdir)/sudoreplay.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 $(srcdir)/sudoreplay.cat: varsub $(srcdir)/sudoreplay.mdoc.in
@@ -271,8 +265,6 @@ $(srcdir)/sudoreplay.cat: varsub $(srcdir)/sudoreplay.mdoc.in
 	    echo "Generating $@"; \
 	    $(SED) -f varsub $(srcdir)/sudoreplay.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
-
-sudoreplay.cat: $(srcdir)/sudoreplay.cat
 
 $(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
@@ -288,10 +280,10 @@ $(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.mdoc.in
 sudo_plugin.man.sed: $(srcdir)/fixman.sh
 	$(SHELL) $(srcdir)/fixman.sh $@
 
-sudo_plugin.man: $(srcdir)/sudo_plugin.man.in sudo_plugin.man.sed
+$(mansrcdir)/sudo_plugin.man: $(srcdir)/sudo_plugin.man.in sudo_plugin.man.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
 
-sudo_plugin.mdoc: $(srcdir)/sudo_plugin.mdoc.in
+$(mansrcdir)/sudo_plugin.mdoc: $(srcdir)/sudo_plugin.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 $(srcdir)/sudo_plugin.cat: varsub $(srcdir)/sudo_plugin.mdoc.in
@@ -299,8 +291,6 @@ $(srcdir)/sudo_plugin.cat: varsub $(srcdir)/sudo_plugin.mdoc.in
 	    echo "Generating $@"; \
 	    $(SED) -f varsub $(srcdir)/sudo_plugin.mdoc.in | $(MANDOC) -mdoc | $(SED) -e 's/ OpenBSD \([^ ].*  \)/     \1    /' -e 's/(5)/(4)/g' -e 's/(8)/(1m)/g' > $@; \
 	fi
-
-sudo_plugin.cat: $(srcdir)/sudo_plugin.cat
 
 pre-install:
 
@@ -317,13 +307,13 @@ install-includes:
 install-doc: install-dirs
 	for f in $(OTHER_DOCS); do $(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 $$f $(DESTDIR)$(docdir); done
 	@LDAP@for f in $(OTHER_DOCS_LDAP); do $(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 $$f $(DESTDIR)$(docdir); done
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 @mansrcdir@/sudo.$(mantype) $(DESTDIR)$(mandirsu)/sudo.$(mansectsu)
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 @mansrcdir@/sudo_plugin.$(mantype) $(DESTDIR)$(mandirsu)/sudo_plugin.$(mansectsu)
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 @mansrcdir@/sudoreplay.$(mantype) $(DESTDIR)$(mandirsu)/sudoreplay.$(mansectsu)
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 @mansrcdir@/visudo.$(mantype) $(DESTDIR)$(mandirsu)/visudo.$(mansectsu)
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 @mansrcdir@/sudo.conf.$(mantype) $(DESTDIR)$(mandirform)/sudo.conf.$(mansectform)
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 @mansrcdir@/sudoers.$(mantype) $(DESTDIR)$(mandirform)/sudoers.$(mansectform)
-	@LDAP@$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 @mansrcdir@/sudoers.ldap.$(mantype) $(DESTDIR)$(mandirform)/sudoers.ldap.$(mansectform)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 $(mansrcdir)/sudo.$(mantype) $(DESTDIR)$(mandirsu)/sudo.$(mansectsu)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 $(mansrcdir)/sudo_plugin.$(mantype) $(DESTDIR)$(mandirsu)/sudo_plugin.$(mansectsu)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 $(mansrcdir)/sudoreplay.$(mantype) $(DESTDIR)$(mandirsu)/sudoreplay.$(mansectsu)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 $(mansrcdir)/visudo.$(mantype) $(DESTDIR)$(mandirsu)/visudo.$(mansectsu)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 $(mansrcdir)/sudo.conf.$(mantype) $(DESTDIR)$(mandirform)/sudo.conf.$(mansectform)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 $(mansrcdir)/sudoers.$(mantype) $(DESTDIR)$(mandirform)/sudoers.$(mansectform)
+	@LDAP@$(INSTALL) -O $(install_uid) -G $(install_gid) -m 0644 $(mansrcdir)/sudoers.ldap.$(mantype) $(DESTDIR)$(mandirform)/sudoers.ldap.$(mansectform)
 	@if test -n "$(MANCOMPRESS)"; then \
 	    for f in $(mandirsu)/sudo.$(mansectsu) $(mandirsu)/sudo_plugin.$(mansectsu) $(mandirsu)/sudoreplay.$(mansectsu) $(mandirsu)/visudo.$(mansectsu) $(mandirform)/sudo.conf.$(mansectform) $(mandirform)/sudoers.$(mansectform) $(mandirform)/sudoers.ldap.$(mansectform); do \
 		if test -f $(DESTDIR)$$f; then \
