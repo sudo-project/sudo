@@ -493,10 +493,8 @@ sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
 		warningx(_("unable to mix ldap and ldaps URIs"));
 		goto done;
 	    }
-	    if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS) {
-		warningx(_("unable to mix ldaps and starttls"));
-		goto done;
-	    }
+	    if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS)
+		warningx(_("starttls not supported when using ldaps"));
 	    ldap_conf.ssl_mode = SUDO_LDAP_SSL;
 	}
 	efree(buf);
@@ -518,18 +516,18 @@ toobig:
 }
 #else
 static char *
-sudo_ldap_join_uri(struct ldap_config_str_list *uri_list, int ssl_mode)
+sudo_ldap_join_uri(struct ldap_config_str_list *uri_list)
 {
     struct ldap_config_str *uri;
     size_t len = 0;
-    char *cp, *buf = NULL;
+    char *buf, *cp;
     debug_decl(sudo_ldap_join_uri, SUDO_DEBUG_LDAP)
 
     STAILQ_FOREACH(uri, uri_list, entries) {
-	if (ssl_mode == SUDO_LDAP_STARTTLS) {
+	if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS) {
 	    if (strncasecmp(uri->val, "ldaps://", 8) == 0) {
-		warningx(_("unable to mix ldaps and starttls"));
-		goto done;
+		warningx(_("starttls not supported when using ldaps"));
+		ldap_conf.ssl_mode = SUDO_LDAP_SSL;
 	    }
 	}
 	len += strlen(uri->val) + 1;
@@ -541,7 +539,6 @@ sudo_ldap_join_uri(struct ldap_config_str_list *uri_list, int ssl_mode)
 	*cp++ = ' ';
     }
     cp[-1] = '\0';
-done:
     debug_return_str(buf);
 }
 #endif /* HAVE_LDAP_INITIALIZE */
@@ -2491,7 +2488,7 @@ sudo_ldap_open(struct sudo_nss *nss)
     /* Connect to LDAP server */
 #ifdef HAVE_LDAP_INITIALIZE
     if (!STAILQ_EMPTY(&ldap_conf.uri)) {
-	char *buf = sudo_ldap_join_uri(&ldap_conf.uri, ldap_conf.ssl_mode);
+	char *buf = sudo_ldap_join_uri(&ldap_conf.uri);
 	if (buf != NULL) {
 	    DPRINTF2("ldap_initialize(ld, %s)", buf);
 	    rc = ldap_initialize(&ld, buf);
