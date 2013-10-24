@@ -926,8 +926,7 @@ del_io_events(void)
 	    }
 	}
 	/* Flush any write buffers with data in them. */
-	if (iob->wevent != NULL &&
-	    (foreground || !USERTTY_EVENT(iob->wevent))) {
+	if (iob->wevent != NULL) {
 	    if (iob->len > iob->off) {
 		if (sudo_ev_add(evbase, iob->wevent, false) == -1)
 		    fatal(_("unable to add event to queue"));
