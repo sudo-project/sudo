@@ -1157,11 +1157,12 @@ mon_backchannel_cb(int fd, int what, void *v)
 	    /* short read or EOF, parent process died? */
 	}
 	sudo_ev_loopbreak(mc->evbase);
-    }
-    if (cstmp.type == CMD_SIGNO) {
-	deliver_signal(cmnd_pid, cstmp.val, true);
     } else {
-	warningx(_("unexpected reply type on backchannel: %d"), cstmp.type);
+	if (cstmp.type == CMD_SIGNO) {
+	    deliver_signal(cmnd_pid, cstmp.val, true);
+	} else {
+	    warningx(_("unexpected reply type on backchannel: %d"), cstmp.type);
+	}
     }
     debug_return;
 }
