@@ -518,19 +518,20 @@ toobig:
 }
 #else
 static char *
-sudo_ldap_join_uri(struct ldap_config_str_list *uri_list)
+sudo_ldap_join_uri(struct ldap_config_str_list *uri_list, int ssl_mode)
 {
     struct ldap_config_str *uri;
     size_t len = 0;
-    char *buf, *cp;
+    char *cp, *buf = NULL;
     debug_decl(sudo_ldap_join_uri, SUDO_DEBUG_LDAP)
 
-    /* Usually just a single entry. */
-    if (STAILQ_NEXT(STAILQ_FIRST(uri_list), entries) == NULL)
-	debug_return_str(estrdup(STAILQ_FIRST(uri_list)->val));
-
-    /* Multiple entries. */
     STAILQ_FOREACH(uri, uri_list, entries) {
+	if (ssl_mode == SUDO_LDAP_STARTTLS) {
+	    if (strncasecmp(uri->val, "ldaps://", 8) == 0) {
+		warningx(_("unable to mix ldaps and starttls"));
+		goto done;
+	    }
+	}
 	len += strlen(uri->val) + 1;
     }
     buf = cp = emalloc(len);
@@ -540,6 +541,7 @@ sudo_ldap_join_uri(struct ldap_config_str_list *uri_list)
 	*cp++ = ' ';
     }
     cp[-1] = '\0';
+done:
     debug_return_str(buf);
 }
 #endif /* HAVE_LDAP_INITIALIZE */
@@ -2489,12 +2491,16 @@ sudo_ldap_open(struct sudo_nss *nss)
     /* Connect to LDAP server */
 #ifdef HAVE_LDAP_INITIALIZE
     if (!STAILQ_EMPTY(&ldap_conf.uri)) {
-	char *buf = sudo_ldap_join_uri(&ldap_conf.uri);
-	DPRINTF2("ldap_initialize(ld, %s)", buf);
-	rc = ldap_initialize(&ld, buf);
-	efree(buf);
-	if (rc != LDAP_SUCCESS)
-	    warningx(_("unable to initialize LDAP: %s"), ldap_err2string(rc));
+	char *buf = sudo_ldap_join_uri(&ldap_conf.uri, ldap_conf.ssl_mode);
+	if (buf != NULL) {
+	    DPRINTF2("ldap_initialize(ld, %s)", buf);
+	    rc = ldap_initialize(&ld, buf);
+	    efree(buf);
+	    if (rc != LDAP_SUCCESS) {
+		warningx(_("unable to initialize LDAP: %s"),
+		    ldap_err2string(rc));
+	    }
+	}
     } else
 #endif
 	rc = sudo_ldap_init(&ld, ldap_conf.host, ldap_conf.port);
