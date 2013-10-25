@@ -133,7 +133,7 @@ pty_cleanup(void)
  * The other end of signal_pipe is checked in the monitor event loop.
  */
 #ifdef SA_SIGINFO
-void
+static void
 mon_handler(int s, siginfo_t *info, void *context)
 {
     unsigned char signo = (unsigned char)s;
@@ -154,7 +154,7 @@ mon_handler(int s, siginfo_t *info, void *context)
     ignore_result(write(signal_pipe[1], &signo, sizeof(signo)));
 }
 #else
-void
+static void
 mon_handler(int s)
 {
     unsigned char signo = (unsigned char)s;
