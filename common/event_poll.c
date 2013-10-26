@@ -138,58 +138,31 @@ sudo_ev_loop_impl(struct sudo_event_base *base, int flags)
     int nready;
     debug_decl(sudo_ev_loop_impl, SUDO_DEBUG_EVENT)
 
-rescan:
-    while (base->pfd_high != -1) {
-	nready = poll(base->pfds, base->pfd_high + 1, timeout);
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d fds ready",
-	    __func__, nready);
-	switch (nready) {
-	case -1:
-	    if (errno == EINTR || errno == ENOMEM)
-		continue;
-	    debug_return_int(-1);
-	case 0:
-	    /* timeout or no events */
-	    break;
-	default:
-	    /* Service each event that fired. */
-	    TAILQ_FOREACH_SAFE(ev, &base->events, entries, base->pending) {
-		if (ev->pfd_idx != -1 && base->pfds[ev->pfd_idx].revents) {
-		    int what = 0;
-		    if (base->pfds[ev->pfd_idx].revents & (POLLIN|POLLHUP|POLLNVAL|POLLERR))
-			what |= (ev->events & SUDO_EV_READ);
-		    if (base->pfds[ev->pfd_idx].revents & (POLLOUT|POLLHUP|POLLNVAL|POLLERR))
-			what |= (ev->events & SUDO_EV_WRITE);
-		    if (!ISSET(ev->events, SUDO_EV_PERSIST))
-			SET(ev->events, SUDO_EV_DELETE);
-		    ev->callback(ev->fd, what, ev->closure);
-		    if (ISSET(ev->events, SUDO_EV_DELETE))
-			sudo_ev_del(base, ev);
-		    if (ISSET(base->flags, SUDO_EVBASE_LOOPBREAK)) {
-			/* stop processing events immediately */
-			base->flags |= SUDO_EVBASE_GOT_BREAK;
-			base->pending = NULL;
-			goto done;
-		    }
-		    if (ISSET(base->flags, SUDO_EVBASE_LOOPCONT)) {
-			/* rescan events and start polling again */
-			CLR(base->flags, SUDO_EVBASE_LOOPCONT);
-			base->pending = NULL;
-			goto rescan;
-		    }
-		}
+    nready = poll(base->pfds, base->pfd_high + 1, timeout);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d fds ready", __func__, nready);
+    switch (nready) {
+    case -1:
+	/* error or interrupted by signal */
+	debug_return_int(-1);
+    case 0:
+	/* timeout or no events */
+	break;
+    default:
+	/* Activate each event that fired. */
+	TAILQ_FOREACH(ev, &base->events, entries) {
+	    if (ev->pfd_idx != -1 && base->pfds[ev->pfd_idx].revents) {
+		int what = 0;
+		if (base->pfds[ev->pfd_idx].revents & (POLLIN|POLLHUP|POLLNVAL|POLLERR))
+		    what |= (ev->events & SUDO_EV_READ);
+		if (base->pfds[ev->pfd_idx].revents & (POLLOUT|POLLHUP|POLLNVAL|POLLERR))
+		    what |= (ev->events & SUDO_EV_WRITE);
+		/* Make event active. */
+		ev->revents = what;
+		SET(ev->flags, SUDO_EV_ACTIVE);
+		TAILQ_INSERT_TAIL(&base->active, ev, active_entries);
 	    }
-	    base->pending = NULL;
-	    if (ISSET(base->flags, SUDO_EVBASE_LOOPEXIT)) {
-		/* exit loop after once through */
-		base->flags |= SUDO_EVBASE_GOT_EXIT;
-		goto done;
-	    }
-	    break;
 	}
-	if (flags & (SUDO_EVLOOP_ONCE | SUDO_EVLOOP_NONBLOCK))
-	    break;
+	break;
     }
-done:
     debug_return_int(0);
 }

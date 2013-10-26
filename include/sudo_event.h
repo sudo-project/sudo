@@ -20,10 +20,13 @@
 #include "queue.h"
 
 /* Event types */
-#define SUDO_EV_READ	0x01		/* fire when readable */
-#define SUDO_EV_WRITE	0x02		/* fire when writable */
-#define SUDO_EV_PERSIST	0x04		/* persist until deleted */
-#define SUDO_EV_DELETE	0x08		/* deletion pending */
+#define SUDO_EV_READ		0x01	/* fire when readable */
+#define SUDO_EV_WRITE		0x02	/* fire when writable */
+#define SUDO_EV_PERSIST		0x04	/* persist until deleted */
+
+/* Event flags (internal) */
+#define SUDO_EV_ACTIVE		0x01	/* event is on the active queue */
+#define SUDO_EV_DELETE		0x02	/* deletion pending */
 
 /* Event loop flags */
 #define SUDO_EVLOOP_ONCE	0x01	/* Only run once through the loop */
@@ -42,10 +45,13 @@ typedef void (*sudo_ev_callback_t)(int fd, int what, void *closure);
 /* Member of struct sudo_event_base. */
 struct sudo_event {
     TAILQ_ENTRY(sudo_event) entries;
+    TAILQ_ENTRY(sudo_event) active_entries;
     struct sudo_event_base *base; /* base this event belongs to */
     int fd;			/* fd we are interested in */
-    short events;		/* SUDO_EV_* flags */
-    short pfd_idx;		/* index into pfds array */
+    short events;		/* SUDO_EV_* flags (in) */
+    short revents;		/* SUDO_EV_* flags (out) */
+    short flags;		/* internal event flags */
+    short pfd_idx;		/* index into pfds array (XXX) */
     sudo_ev_callback_t callback;/* user-provided callback */
     void *closure;		/* user-provided data pointer */
 };
@@ -53,9 +59,10 @@ struct sudo_event {
 TAILQ_HEAD(sudo_event_list, sudo_event);
 
 struct sudo_event_base {
-    struct sudo_event_list events; /* tail queue of events */
-    /* XXX - also list of active events and timed events */
-    struct sudo_event *pending;	/* next event to be run in the event loop XXX */
+    struct sudo_event_list events; /* tail queue of all events */
+    struct sudo_event_list active; /* tail queue of active events */
+    struct sudo_event *cur;	/* current active event being serviced */
+    struct sudo_event *pending;	/* next active event to be serviced */
 #ifdef HAVE_POLL
     struct pollfd *pfds;	/* array of struct pollfd */
     int pfd_max;		/* size of the pfds array */
@@ -65,7 +72,6 @@ struct sudo_event_base {
     fd_set *readfds;		/* read I/O descriptor set */
     fd_set *writefds;		/* write I/O descriptor set */
     int maxfd;			/* max fd we can store in readfds/writefds */
-    int nevents;		/* number of events in the list */
 #endif /* HAVE_POLL */
     unsigned int flags;		/* SUDO_EVBASE_* */
 };

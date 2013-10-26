@@ -102,6 +102,10 @@ void
 sudo_ev_free(struct sudo_event *ev)
 {
     debug_decl(sudo_ev_free, SUDO_DEBUG_EVENT)
+
+    /* Make sure ev is not in use before freeing it. */
+    if (ev->base != NULL)
+	(void)sudo_ev_del(NULL, ev);
     free(ev);
     debug_return;
 }
@@ -123,7 +127,7 @@ sudo_ev_add(struct sudo_event_base *base, struct sudo_event *ev, bool tohead)
 	}
     }
     /* Clear pending delete so adding from callback works properly. */
-    CLR(ev->events, SUDO_EV_DELETE);
+    CLR(ev->flags, SUDO_EV_DELETE);
     debug_return_int(0);
 }
 
@@ -155,20 +159,30 @@ sudo_ev_del(struct sudo_event_base *base, struct sudo_event *ev)
     if (sudo_ev_del_impl(base, ev) != 0)
 	debug_return_int(-1);
 
-    /* Unlink from list. */
+    /* Unlink from event list. */
     TAILQ_REMOVE(&base->events, ev, entries);
 
-    /* If we removed the pending event, replace it with the next one. */
-    if (base->pending == ev)
-	base->pending = TAILQ_NEXT(ev, entries);
+    /* Unlink from active list and update base pointers as needed. */
+    if (ISSET(ev->flags, SUDO_EV_ACTIVE)) {
+	TAILQ_REMOVE(&base->active, ev, active_entries);
+	if (ev == base->pending)
+	    base->pending = TAILQ_NEXT(ev, active_entries);
+	if (ev == base->cur)
+	    base->cur = NULL;
+    }
 
     /* Mark event unused. */
-    ev->pfd_idx = -1;
     ev->base = NULL;
+    ev->flags = 0;
+    ev->pfd_idx = -1;
 
     debug_return_int(0);
 }
 
+/*
+ * Run main event loop.
+ * Returns 0 on success, 1 if no events registered  and -1 on error 
+ */
 int
 sudo_ev_loop(struct sudo_event_base *base, int flags)
 {
@@ -184,8 +198,62 @@ sudo_ev_loop(struct sudo_event_base *base, int flags)
 	flags |= SUDO_EVLOOP_ONCE;
     base->flags = 0;
 
-    /* Most work is done by the backend. */
-    rc = sudo_ev_loop_impl(base, flags);
+    for (;;) {
+rescan:
+	/* Make sure we have some events. */
+	if (TAILQ_EMPTY(&base->events)) {
+	    rc = 1;
+	    break;
+	}
+
+	/* Call backend to setup the active queue. */
+	TAILQ_INIT(&base->active);
+	rc = sudo_ev_loop_impl(base, flags);
+	if (rc == -1) {
+	    if (errno == EINTR || errno == ENOMEM)
+		continue;
+	    break;
+	}
+
+	/*
+	 * Service each event in the active queue.
+	 * We store the current event pointer in the base so that
+	 * it can be cleared by sudo_ev_del().  This prevents a use
+	 * after free if the callback frees its own event.
+	 */
+	TAILQ_FOREACH_SAFE(base->cur, &base->active, active_entries, base->pending) {
+	    if (!ISSET(base->cur->events, SUDO_EV_PERSIST))
+		SET(base->cur->flags, SUDO_EV_DELETE);
+	    base->cur->callback(base->cur->fd, base->cur->revents,
+		base->cur->closure);
+	    if (base->cur != NULL) {
+		CLR(base->cur->flags, SUDO_EV_ACTIVE);
+		if (ISSET(base->cur->flags, SUDO_EV_DELETE))
+		    sudo_ev_del(base, base->cur);
+	    }
+	    if (ISSET(base->flags, SUDO_EVBASE_LOOPBREAK)) {
+		/* stop processing events immediately */
+		base->flags |= SUDO_EVBASE_GOT_BREAK;
+		base->pending = NULL;
+		goto done;
+	    }
+	    if (ISSET(base->flags, SUDO_EVBASE_LOOPCONT)) {
+		/* rescan events and start polling again */
+		CLR(base->flags, SUDO_EVBASE_LOOPCONT);
+		base->pending = NULL;
+		goto rescan;
+	    }
+	}
+	base->pending = NULL;
+	if (ISSET(base->flags, SUDO_EVBASE_LOOPEXIT)) {
+	    /* exit loop after once through */
+	    base->flags |= SUDO_EVBASE_GOT_EXIT;
+	    goto done;
+	}
+	if (flags & (SUDO_EVLOOP_ONCE | SUDO_EVLOOP_NONBLOCK))
+	    break;
+    }
+done:
     base->flags &= SUDO_EVBASE_GOT_MASK;
     debug_return_int(rc);
 }
