@@ -69,9 +69,16 @@ sudo_ev_base_alloc(void)
 void
 sudo_ev_base_free(struct sudo_event_base *base)
 {
+    struct sudo_event *next;
     debug_decl(sudo_ev_base_free, SUDO_DEBUG_EVENT)
+
+    /* Remove any existing events before freeing the base. */
+    TAILQ_FOREACH_SAFE(base->cur, &base->events, entries, next) {
+	sudo_ev_del(base, base->cur);
+    }
     sudo_ev_base_free_impl(base);
     efree(base);
+
     debug_return;
 }
 
