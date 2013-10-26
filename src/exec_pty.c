@@ -936,13 +936,7 @@ del_io_events(void)
 
     (void) sudo_ev_loop(evbase, SUDO_EVLOOP_NONBLOCK);
 
-    /* Free temporary event base. */
-    SLIST_FOREACH(iob, &iobufs, entries) {
-	if (iob->revent != NULL)
-	    sudo_ev_del(evbase, iob->revent);
-	if (iob->wevent != NULL)
-	    sudo_ev_del(evbase, iob->wevent);
-    }
+    /* Free temporary event base, removing its events. */
     sudo_ev_base_free(evbase);
 
     debug_return;

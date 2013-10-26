@@ -494,10 +494,10 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 #endif
 
     /* Free things up. */
+    sudo_ev_base_free(evbase);
     sudo_ev_free(sigfwd_event);
     sudo_ev_free(signal_event);
     sudo_ev_free(backchannel_event);
-    sudo_ev_base_free(evbase);
     TAILQ_FOREACH_SAFE(sigfwd, &sigfwd_list, entries, sigfwd_next) {
 	efree(sigfwd);
     }
