@@ -305,7 +305,7 @@ exec_event_setup(int backchannel, struct exec_closure *ec)
 	SUDO_EV_READ|SUDO_EV_PERSIST, signal_pipe_cb, ec);
     if (signal_event == NULL)
 	fatal(NULL);
-    if (sudo_ev_add(evbase, signal_event, false) == -1)
+    if (sudo_ev_add(evbase, signal_event, NULL, false) == -1)
 	fatal(_("unable to add event to queue"));
 
     /* Event for command status via backchannel. */
@@ -313,7 +313,7 @@ exec_event_setup(int backchannel, struct exec_closure *ec)
 	SUDO_EV_READ|SUDO_EV_PERSIST, backchannel_cb, ec);
     if (backchannel_event == NULL)
 	fatal(NULL);
-    if (sudo_ev_add(evbase, backchannel_event, false) == -1)
+    if (sudo_ev_add(evbase, backchannel_event, NULL, false) == -1)
 	fatal(_("unable to add event to queue"));
 
     /* The signal forwarding event gets added on demand. */
@@ -837,7 +837,7 @@ schedule_signal(struct sudo_event_base *evbase, int signo)
     sigfwd->signo = signo;
     TAILQ_INSERT_TAIL(&sigfwd_list, sigfwd, entries);
 
-    if (sudo_ev_add(evbase, sigfwd_event, true) == -1)
+    if (sudo_ev_add(evbase, sigfwd_event, NULL, true) == -1)
 	fatal(_("unable to add event to queue"));
 
     debug_return;

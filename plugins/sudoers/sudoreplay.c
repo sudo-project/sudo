@@ -18,16 +18,10 @@
 
 #include <sys/types.h>
 #include <sys/uio.h>
-#ifdef HAVE_SYS_SYSMACROS_H
-# include <sys/sysmacros.h>
-#endif
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/wait.h>
 #include <sys/ioctl.h>
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif /* HAVE_SYS_SELECT_H */
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -105,6 +99,7 @@
 #include "sudo_plugin.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
+#include "sudo_event.h"
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048
@@ -123,6 +118,14 @@ struct log_info {
     time_t tstamp;
     int rows;
     int cols;
+};
+
+/* Closure for write_output */
+struct write_closure {
+    struct sudo_event *wevent;
+    struct iovec *iov;
+    unsigned int iovcnt;
+    size_t nbytes;
 };
 
 /*
@@ -162,7 +165,9 @@ struct search_node {
 
 static struct search_node_list search_expr = STAILQ_HEAD_INITIALIZER(search_expr);
 
-static int timing_idx_adj = 0;
+static int timing_idx_adj;
+
+static double speed_factor = 1.0;
 
 static const char *session_dir = _PATH_SUDO_IO_LOGDIR;
 
@@ -186,17 +191,16 @@ extern void get_ttysize(int *rowp, int *colp);
 
 static int list_sessions(int, char **, const char *, const char *, const char *);
 static int parse_expr(struct search_node_list *, char **, bool);
-static void check_input(int, double *);
-static void delay(double);
+static void check_input(int fd, int what, void *v);
 static void help(void) __attribute__((__noreturn__));
 static void usage(int);
 static int open_io_fd(char *path, int len, struct io_log_file *iol);
 static int parse_timing(const char *buf, const char *decimal, int *idx, double *seconds, size_t *nbytes);
 static struct log_info *parse_logfile(char *logfile);
 static void free_log_info(struct log_info *li);
-static ssize_t atomic_writev(int fd, struct iovec *iov, int iovcnt);
 static void sudoreplay_handler(int);
 static void sudoreplay_cleanup(void);
+static void write_output(int fd, int what, void *v);
 
 #ifdef HAVE_REGCOMP
 # define REGEX_T	regex_t
@@ -228,12 +232,16 @@ main(int argc, char *argv[])
     bool def_filter = true;
     const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
-    double seconds, to_wait, speed = 1.0, max_wait = 0;
+    double seconds, to_wait, max_wait = 0;
+    struct sudo_event_base *evbase;
+    struct sudo_event *input_ev, *output_ev;
+    struct timeval timeout;
     sigaction_t sa;
     size_t len, nbytes, nread;
     struct log_info *li;
     struct iovec *iov = NULL;
-    int iovcnt = 0, iovmax = 0;
+    unsigned int i, iovcnt = 0, iovmax = 0;
+    struct write_closure wc;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -291,7 +299,7 @@ main(int argc, char *argv[])
 	    break;
 	case 's':
 	    errno = 0;
-	    speed = strtod(optarg, &ep);
+	    speed_factor = strtod(optarg, &ep);
 	    if (*ep != '\0' || errno != 0)
 		fatalx(_("invalid speed factor: %s"), optarg);
 	    break;
@@ -392,6 +400,18 @@ main(int argc, char *argv[])
 	iov = ecalloc(iovmax, sizeof(*iov));
     }
 
+    /* Setup event base and input/output events. */
+    evbase = sudo_ev_base_alloc();
+    if (evbase == NULL)
+	fatal(NULL);
+    input_ev = sudo_ev_alloc(STDIN_FILENO, interactive ? SUDO_EV_READ :
+	SUDO_EV_TIMEOUT, check_input, sudo_ev_self_cbarg());
+    if (input_ev == NULL)
+        fatal(NULL);
+    output_ev = sudo_ev_alloc(STDIN_FILENO, SUDO_EV_WRITE, write_output, &wc);
+    if (output_ev == NULL)
+        fatal(NULL);
+
     /*
      * Timing file consists of line of the format: "%f %d\n"
      */
@@ -405,14 +425,18 @@ main(int argc, char *argv[])
 	if (!parse_timing(buf, decimal, &idx, &seconds, &nbytes))
 	    fatalx(_("invalid timing file line: %s"), buf);
 
-	if (interactive)
-	    check_input(STDIN_FILENO, &speed);
-
 	/* Adjust delay using speed factor and clamp to max_wait */
-	to_wait = seconds / speed;
+	to_wait = seconds / speed_factor;
 	if (max_wait && to_wait > max_wait)
 	    to_wait = max_wait;
-	delay(to_wait);
+
+	/* Convert delay to a timeval. */
+	timeout.tv_sec = to_wait;
+	timeout.tv_usec = (to_wait - timeout.tv_sec) * 1000000.0;
+
+	/* Run event event loop to delay and get keyboard input. */
+	sudo_ev_add(evbase, input_ev, &timeout, false);
+	sudo_ev_loop(evbase, 0);
 
 	/* Even if we are not replaying, we still have to delay. */
 	if (io_log_files[idx].fd.v == NULL)
@@ -423,6 +447,7 @@ main(int argc, char *argv[])
 	    need_nlcr = (idx == IOFD_STDOUT || idx == IOFD_STDERR);
 
 	/* All output is sent to stdout. */
+	/* XXX - assumes no wall clock time spent writing output. */
 	while (nbytes != 0) {
 	    if (nbytes > sizeof(buf))
 		len = sizeof(buf);
@@ -485,39 +510,25 @@ main(int argc, char *argv[])
 		iov[0].iov_len = nread;
 		iovcnt = 1;
 	    }
-	    if (atomic_writev(STDOUT_FILENO, iov, iovcnt) == -1)
-		fatal(_("writing to standard output"));
+
+	    /* Setup closure for write_output. */
+	    memset(&wc, 0, sizeof(wc));
+	    wc.wevent = output_ev;
+	    wc.iov = iov;
+	    wc.iovcnt = iovcnt;
+	    for (i = 0; i < iovcnt; i++)
+		wc.nbytes += iov[i].iov_len;
+
+	    /* Run event event loop to write output. */
+	    /* XXX - should use a single event loop with a circular buffer. */
+	    sudo_ev_add(evbase, output_ev, NULL, false);
+	    sudo_ev_loop(evbase, 0);
 	}
     }
     term_restore(STDIN_FILENO, 1);
 done:
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
     exit(exitcode);
-}
-
-static void
-delay(double secs)
-{
-    struct timespec ts, rts;
-    int rval;
-
-    /*
-     * Typical max resolution is 1/HZ but we can't portably check that.
-     * If the interval is small enough, just ignore it.
-     */
-    if (secs < 0.0001)
-	return;
-
-    rts.tv_sec = secs;
-    rts.tv_nsec = (secs - (double) rts.tv_sec) * 1000000000.0;
-    do {
-      memcpy(&ts, &rts, sizeof(ts));
-      rval = nanosleep(&ts, &rts);
-    } while (rval == -1 && errno == EINTR);
-    if (rval == -1) {
-	fatal_nodebug("nanosleep: tv_sec %lld, tv_nsec %ld",
-	    (long long)ts.tv_sec, (long)ts.tv_nsec);
-    }
 }
 
 static int
@@ -538,67 +549,55 @@ open_io_fd(char *path, int len, struct io_log_file *iol)
     debug_return_int(iol->fd.v ? 0 : -1);
 }
 
-/*
- * Call writev(), restarting as needed and handling EAGAIN since
- * fd may be in non-blocking mode.
- */
-static ssize_t
-atomic_writev(int fd, struct iovec *iov, int iovcnt)
+static void
+write_output(int fd, int what, void *v)
 {
-    ssize_t n, nwritten = 0;
-    size_t count, remainder, nbytes = 0;
-    int i;
-    debug_decl(atomic_writev, SUDO_DEBUG_UTIL)
+    struct write_closure *wc = v;
+    ssize_t nwritten;
+    size_t count, remainder;
+    unsigned int i;
+    debug_decl(write_output, SUDO_DEBUG_UTIL)
 
-    for (i = 0; i < iovcnt; i++)
-	nbytes += iov[i].iov_len;
+    nwritten = writev(STDOUT_FILENO, wc->iov, wc->iovcnt);
+    switch (nwritten) {
+    case -1:
+	if (errno != EINTR && errno != EAGAIN)
+	    fatal(_("unable to write to %s"), "stdout");
+	break;
+    case 0:
+	break;
+    default:
+	remainder = wc->nbytes - nwritten;
+	if (remainder == 0) {
+	    /* writev completed */
+	    debug_return;
+	}
 
-    for (;;) {
-	n = writev(STDOUT_FILENO, iov, iovcnt);
-	if (n > 0) {
-	    nwritten += n;
-	    remainder = nbytes - nwritten;
-	    if (remainder == 0)
+	/* short writev, adjust iov so we can write the remainder. */
+	count = 0;
+	i = wc->iovcnt;
+	while (i--) {
+	    count += wc->iov[i].iov_len;
+	    if (count == remainder) {
+		wc->iov += i;
+		wc->iovcnt -= i;
 		break;
-	    /* short writev, adjust iov and do the rest. */
-	    count = 0;
-	    i = iovcnt;
-	    while (i--) {
-		count += iov[i].iov_len;
-		if (count == remainder) {
-		    iov += i;
-		    iovcnt -= i;
-		    break;
-		}
-		if (count > remainder) {
-		    size_t off = (count - remainder);
-		    /* XXX - side effect prevents iov from being const */
-		    iov[i].iov_base = (char *)iov[i].iov_base + off;
-		    iov[i].iov_len -= off;
-		    iov += i;
-		    iovcnt -= i;
-		    break;
-		}
 	    }
-	    continue;
+	    if (count > remainder) {
+		size_t off = (count - remainder);
+		wc->iov[i].iov_base = (char *)wc->iov[i].iov_base + off;
+		wc->iov[i].iov_len -= off;
+		wc->iov += i;
+		wc->iovcnt -= i;
+		break;
+	    }
 	}
-	if (n == 0 || errno == EAGAIN) {
-	    int nready;
-	    fd_set fdsw;
-	    FD_ZERO(&fdsw);
-	    FD_SET(STDOUT_FILENO, &fdsw);
-	    do {
-		nready = select(STDOUT_FILENO + 1, NULL, &fdsw, NULL, NULL);
-	    } while (nready == -1 && errno == EINTR);
-	    if (nready == 1)
-		continue;
-	}
-	if (errno == EINTR)
-	    continue;
-	nwritten = -1;
 	break;
     }
-    debug_return_size_t(nwritten);
+
+    /* Reschedule event to write remainder. */
+    sudo_ev_add(sudo_ev_get_base(wc->wevent), wc->wevent, NULL, false);
+    debug_return;
 }
 
 /*
@@ -1051,44 +1050,58 @@ list_sessions(int argc, char **argv, const char *pattern, const char *user,
  * pause, slow, fast
  */
 static void
-check_input(int ttyfd, double *speed)
+check_input(int fd, int what, void *v)
 {
-    fd_set *fdsr;
-    int nready, paused = 0;
-    struct timeval tv;
+    struct sudo_event *ev = v;
+    struct sudo_event_base *evbase = sudo_ev_get_base(ev);
+    struct timeval tv, *timeout = NULL;
+    static bool paused = 0;
     char ch;
-    ssize_t n;
     debug_decl(check_input, SUDO_DEBUG_UTIL)
 
-    fdsr = ecalloc(howmany(ttyfd + 1, NFDBITS), sizeof(fd_mask));
-    for (;;) {
-	FD_SET(ttyfd, fdsr);
-	tv.tv_sec = 0;
-	tv.tv_usec = 0;
-
-	nready = select(ttyfd + 1, fdsr, NULL, NULL, paused ? NULL : &tv);
-	if (nready != 1)
+    if (ISSET(what, SUDO_EV_READ)) {
+	switch (read(fd, &ch, 1)) {
+	case -1:
+	    if (errno != EINTR && errno != EAGAIN)
+		fatal(_("unable to read %s"), "stdin");
 	    break;
-	n = read(ttyfd, &ch, 1);
-	if (n == 1) {
+	case 0:
+	    /* Ignore EOF. */
+	    break;
+	case 1:
 	    if (paused) {
-		paused = 0;
-		continue;
+		/* Any key will unpause, event is finished. */
+		/* XXX - pause time could be less than timeout */
+		paused = false;
+		debug_return;
 	    }
 	    switch (ch) {
 	    case ' ':
-		paused = 1;
+		paused = true;
 		break;
 	    case '<':
-		*speed /= 2;
+		speed_factor /= 2;
 		break;
 	    case '>':
-		*speed *= 2;
+		speed_factor *= 2;
 		break;
 	    }
+	    break;
 	}
+	if (!paused) {
+	    /* Determine remaining timeout, if any. */
+	    timeout = sudo_ev_get_timeout(ev);
+	    if (timeout != NULL) {
+		struct timeval now;
+		gettimeofday(&now, NULL);
+		tv = *timeout;
+		timevalsub(&tv, &now);
+		timeout = &tv;
+	    }
+	}
+	/* Re-enable event. */
+	sudo_ev_add(evbase, ev, timeout, false);
     }
-    free(fdsr);
     debug_return;
 }
 

@@ -80,7 +80,6 @@ compat/mksiglist.h
 compat/mksigname.c
 compat/mksigname.h
 compat/mktemp.c
-compat/nanosleep.c
 compat/nss_dbdefs.h
 compat/pw_dup.c
 compat/regress/fnmatch/fnm_test.c

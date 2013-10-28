@@ -2370,10 +2370,6 @@ SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)
 ])
 SUDO_FUNC_ISBLANK
 AC_REPLACE_FUNCS(memrchr memset_s pw_dup strlcpy strlcat)
-AC_CHECK_FUNCS(nanosleep, [], [
-    # On Solaris, nanosleep is in librt
-    AC_CHECK_LIB(rt, nanosleep, [REPLAY_LIBS="${REPLAY_LIBS} -lrt"], [AC_LIBOBJ(nanosleep)])
-])
 AC_CHECK_FUNCS(getopt_long, [], [AC_LIBOBJ(getopt_long)
     AC_MSG_CHECKING([for optreset])
     AC_CACHE_VAL(sudo_cv_optreset, [

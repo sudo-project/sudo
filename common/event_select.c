@@ -16,9 +16,10 @@
 
 #include <config.h>
 
-#include <sys/types.h>
+#include <sys/param.h>		/* for howmany() on Linux */
+#include <sys/time.h>
 #ifdef HAVE_SYS_SYSMACROS_H
-# include <sys/sysmacros.h>
+# include <sys/sysmacros.h>	/* for howmany() on Solaris */
 #endif
 #ifdef HAVE_SYS_SELECT_H
 # include <sys/select.h>
@@ -108,19 +109,27 @@ sudo_ev_del_impl(struct sudo_event_base *base, struct sudo_event *ev)
 }
 
 int
-sudo_ev_loop_impl(struct sudo_event_base *base, int flags)
+sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 {
-    struct timeval tv, *timeout;
+    struct timeval now, tv, *timeout;
     struct sudo_event *ev;
     int nready, highfd = 0;
     debug_decl(sudo_ev_loop, SUDO_DEBUG_EVENT)
 
-    if (ISSET(flags, SUDO_EVLOOP_NONBLOCK)) {
-	tv.tv_sec = 0;
-	tv.tv_usec = 0;
+    if ((ev = TAILQ_FIRST(&base->timeouts)) != NULL) {
+	gettimeofday(&now, NULL);
+	tv = ev->timeout;
+	timevalsub(&tv, &now);
+	if (tv.tv_sec < 0 || tv.tv_usec < 0)
+	    debug_return_int(0);
 	timeout = &tv;
     } else {
-	timeout = NULL;
+	if (ISSET(flags, SUDO_EVLOOP_NONBLOCK)) {
+	    timevalclear(&tv);
+	    timeout = &tv;
+	} else {
+	    timeout = NULL;
+	}
     }
 
     /* For select we need to redo readfds and writefds each time. */
@@ -148,13 +157,13 @@ sudo_ev_loop_impl(struct sudo_event_base *base, int flags)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d fds ready", __func__, nready);
     switch (nready) {
     case -1:
-	/* error or interrupted by signal */
+	/* Error or interrupted by signal. */
 	debug_return_int(-1);
     case 0:
-	/* timeout or no events */
+	/* Front end will activate timeout events. */
 	break;
     default:
-	/* Activate each event that fired. */
+	/* Activate each I/O event that fired. */
 	TAILQ_FOREACH(ev, &base->events, entries) {
 	    int what = 0;
 	    if (FD_ISSET(ev->fd, base->readfds))
@@ -170,5 +179,5 @@ sudo_ev_loop_impl(struct sudo_event_base *base, int flags)
 	}
 	break;
     }
-    debug_return_int(0);
+    debug_return_int(nready);
 }

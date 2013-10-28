@@ -187,13 +187,6 @@
 #define ISSET(t, f)     ((t) & (f))
 
 /*
- * Some systems define this in <sys/param.h> but we don't include that anymore.
- */
-#ifndef howmany
-# define howmany(x, y)	(((x) + ((y) - 1)) / (y))
-#endif
-
-/*
  * Older systems may be missing stddef.h and/or offsetof macro
  */
 #ifndef offsetof
@@ -412,9 +405,6 @@ char *mkdtemp(char *);
 #endif
 #ifndef HAVE_MKSTEMPS
 int mkstemps(char *, int);
-#endif
-#ifndef HAVE_NANOSLEEP
-int nanosleep(const struct timespec *, struct timespec *);
 #endif
 #ifndef HAVE_PW_DUP
 struct passwd *pw_dup(const struct passwd *);

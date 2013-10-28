@@ -20,9 +20,10 @@
 #include "queue.h"
 
 /* Event types */
-#define SUDO_EV_READ		0x01	/* fire when readable */
-#define SUDO_EV_WRITE		0x02	/* fire when writable */
-#define SUDO_EV_PERSIST		0x04	/* persist until deleted */
+#define SUDO_EV_TIMEOUT		0x01	/* fire after timeout */
+#define SUDO_EV_READ		0x02	/* fire when readable */
+#define SUDO_EV_WRITE		0x04	/* fire when writable */
+#define SUDO_EV_PERSIST		0x08	/* persist until deleted */
 
 /* Event flags (internal) */
 #define SUDO_EV_ACTIVE		0x01	/* event is on the active queue */
@@ -46,6 +47,7 @@ typedef void (*sudo_ev_callback_t)(int fd, int what, void *closure);
 struct sudo_event {
     TAILQ_ENTRY(sudo_event) entries;
     TAILQ_ENTRY(sudo_event) active_entries;
+    TAILQ_ENTRY(sudo_event) timeouts_entries;
     struct sudo_event_base *base; /* base this event belongs to */
     int fd;			/* fd we are interested in */
     short events;		/* SUDO_EV_* flags (in) */
@@ -53,6 +55,7 @@ struct sudo_event {
     short flags;		/* internal event flags */
     short pfd_idx;		/* index into pfds array (XXX) */
     sudo_ev_callback_t callback;/* user-provided callback */
+    struct timeval timeout;	/* for SUDO_EV_TIMEOUT */
     void *closure;		/* user-provided data pointer */
 };
 
@@ -61,6 +64,7 @@ TAILQ_HEAD(sudo_event_list, sudo_event);
 struct sudo_event_base {
     struct sudo_event_list events; /* tail queue of all events */
     struct sudo_event_list active; /* tail queue of active events */
+    struct sudo_event_list timeouts; /* tail queue of timeout events */
     struct sudo_event *cur;	/* current active event being serviced */
     struct sudo_event *pending;	/* next active event to be serviced */
 #ifdef HAVE_POLL
@@ -89,7 +93,7 @@ struct sudo_event *sudo_ev_alloc(int fd, short events, sudo_ev_callback_t callba
 void sudo_ev_free(struct sudo_event *ev);
 
 /* Add an event, returns 0 on success, -1 on error */
-int sudo_ev_add(struct sudo_event_base *head, struct sudo_event *ev, bool tohead);
+int sudo_ev_add(struct sudo_event_base *head, struct sudo_event *ev, struct timeval *timo, bool tohead);
 
 /* Delete an event, returns 0 on success, -1 on error */
 int sudo_ev_del(struct sudo_event_base *head, struct sudo_event *ev);
@@ -115,8 +119,15 @@ bool sudo_ev_got_break(struct sudo_event_base *base);
 /* Return the fd associated with an event. */
 #define sudo_ev_get_fd(_ev) ((_ev) ? (_ev)->fd : -1)
 
+/* Return the (absolute) timeout associated with an event or NULL. */
+#define sudo_ev_get_timeout(_ev) \
+    (((_ev) && timevalisset(&(_ev)->timeout)) ? &(_ev)->timeout : NULL)
+
 /* Return the base an event is associated with or NULL. */
 #define sudo_ev_get_base(_ev) ((_ev) ? (_ev)->base : NULL)
+
+/* Magic pointer value to use self pointer as callback arg. */
+#define sudo_ev_self_cbarg() ((void *)-1)
 
 /*
  * Backend implementation.
@@ -125,6 +136,6 @@ int sudo_ev_base_alloc_impl(struct sudo_event_base *base);
 void sudo_ev_base_free_impl(struct sudo_event_base *base);
 int sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev);
 int sudo_ev_del_impl(struct sudo_event_base *base, struct sudo_event *ev);
-int sudo_ev_loop_impl(struct sudo_event_base *base, int flags);
+int sudo_ev_scan_impl(struct sudo_event_base *base, int flags);
 
 #endif /* _SUDO_EVENT_H */

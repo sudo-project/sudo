@@ -503,12 +503,12 @@ io_callback(int fd, int what, void *v)
 		/* Enable writer if not /dev/tty or we are foreground pgrp. */
 		if (iob->wevent != NULL &&
 		    (foreground || !USERTTY_EVENT(iob->wevent))) {
-		    if (sudo_ev_add(evbase, iob->wevent, false) == -1)
+		    if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
 			fatal(_("unable to add event to queue"));
 		}
 		/* Re-enable reader if buffer is not full. */
 		if (iob->len != sizeof(iob->buf)) {
-		    if (sudo_ev_add(evbase, iob->revent, false) == -1)
+		    if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
 			fatal(_("unable to add event to queue"));
 		}
 		break;
@@ -566,14 +566,14 @@ io_callback(int fd, int what, void *v)
 	    }
 	    /* Re-enable writer if buffer is not empty. */
 	    if (iob->len > iob->off) {
-		if (sudo_ev_add(evbase, iob->wevent, false) == -1)
+		if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
 		    fatal(_("unable to add event to queue"));
 	    }
 	    /* Enable reader if buffer is not full. */
 	    if (iob->revent != NULL &&
 		(ttymode == TERM_RAW || !USERTTY_EVENT(iob->revent))) {
 		if (iob->len != sizeof(iob->buf)) {
-		    if (sudo_ev_add(evbase, iob->revent, false) == -1)
+		    if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
 			fatal(_("unable to add event to queue"));
 		}
 	    }
@@ -866,7 +866,7 @@ add_io_events(struct sudo_event_base *evbase)
 		sudo_debug_printf(SUDO_DEBUG_INFO,
 		    "added I/O revent %p, fd %d, events %d",
 		    iob->revent, iob->revent->fd, iob->revent->events);
-		if (sudo_ev_add(evbase, iob->revent, false) == -1)
+		if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
 		    fatal(_("unable to add event to queue"));
 	    }
 	}
@@ -876,7 +876,7 @@ add_io_events(struct sudo_event_base *evbase)
 		sudo_debug_printf(SUDO_DEBUG_INFO,
 		    "added I/O wevent %p, fd %d, events %d",
 		    iob->wevent, iob->wevent->fd, iob->wevent->events);
-		if (sudo_ev_add(evbase, iob->wevent, false) == -1)
+		if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
 		    fatal(_("unable to add event to queue"));
 	    }
 	}
@@ -921,14 +921,14 @@ del_io_events(void)
 	/* Don't read from /dev/tty while flushing. */
 	if (iob->revent != NULL && !USERTTY_EVENT(iob->revent)) {
 	    if (iob->len != sizeof(iob->buf)) {
-		if (sudo_ev_add(evbase, iob->revent, false) == -1)
+		if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
 		    fatal(_("unable to add event to queue"));
 	    }
 	}
 	/* Flush any write buffers with data in them. */
 	if (iob->wevent != NULL) {
 	    if (iob->len > iob->off) {
-		if (sudo_ev_add(evbase, iob->wevent, false) == -1)
+		if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
 		    fatal(_("unable to add event to queue"));
 	    }
 	}
@@ -1330,21 +1330,21 @@ exec_monitor(struct command_details *details, int backchannel)
 	SUDO_EV_READ|SUDO_EV_PERSIST, mon_signal_pipe_cb, &mc);
     if (mc.signal_pipe_event == NULL)
 	fatal(NULL);
-    if (sudo_ev_add(evbase, mc.signal_pipe_event, false) == -1)
+    if (sudo_ev_add(evbase, mc.signal_pipe_event, NULL, false) == -1)
 	fatal(_("unable to add event to queue"));
 
     mc.errpipe_event = sudo_ev_alloc(errpipe[0],
 	SUDO_EV_READ|SUDO_EV_PERSIST, mon_errpipe_cb, &mc);
     if (mc.errpipe_event == NULL)
 	fatal(NULL);
-    if (sudo_ev_add(evbase, mc.errpipe_event, false) == -1)
+    if (sudo_ev_add(evbase, mc.errpipe_event, NULL, false) == -1)
 	fatal(_("unable to add event to queue"));
 
     mc.backchannel_event = sudo_ev_alloc(backchannel,
 	SUDO_EV_READ|SUDO_EV_PERSIST, mon_backchannel_cb, &mc);
     if (mc.backchannel_event == NULL)
 	fatal(NULL);
-    if (sudo_ev_add(evbase, mc.backchannel_event, false) == -1)
+    if (sudo_ev_add(evbase, mc.backchannel_event, NULL, false) == -1)
 	fatal(_("unable to add event to queue"));
 
     /*

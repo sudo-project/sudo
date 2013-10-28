@@ -17,6 +17,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/time.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -133,22 +134,33 @@ sudo_ev_del_impl(struct sudo_event_base *base, struct sudo_event *ev)
 int
 sudo_ev_loop_impl(struct sudo_event_base *base, int flags)
 {
-    const int timeout = (flags & SUDO_EVLOOP_NONBLOCK) ? 0 : -1;
     struct sudo_event *ev;
-    int nready;
+    int nready, timeout;
+    struct timeval now;
     debug_decl(sudo_ev_loop_impl, SUDO_DEBUG_EVENT)
+
+    if ((ev = TAILQ_FIRST(&base->timeouts)) != NULL) {
+	struct timeval *timo = &ev->timeout;
+	gettimeofday(&now, NULL);
+	timeout = ((timo->tv_sec - now.tv_sec) * 1000) +
+	    ((timo->tv_usec - now.tv_usec) / 1000);
+	if (timeout <= 0)
+	    debug_return_int(0);
+    } else {
+	timeout = (flags & SUDO_EVLOOP_NONBLOCK) ? 0 : -1;
+    }
 
     nready = poll(base->pfds, base->pfd_high + 1, timeout);
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d fds ready", __func__, nready);
     switch (nready) {
     case -1:
-	/* error or interrupted by signal */
+	/* Error or interrupted by signal. */
 	debug_return_int(-1);
     case 0:
-	/* timeout or no events */
+	/* Front end will activate timeout events. */
 	break;
     default:
-	/* Activate each event that fired. */
+	/* Activate each I/O event that fired. */
 	TAILQ_FOREACH(ev, &base->events, entries) {
 	    if (ev->pfd_idx != -1 && base->pfds[ev->pfd_idx].revents) {
 		int what = 0;

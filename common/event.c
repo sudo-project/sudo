@@ -17,6 +17,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/time.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -58,6 +59,7 @@ sudo_ev_base_alloc(void)
 
     base = ecalloc(1, sizeof(*base));
     TAILQ_INIT(&base->events);
+    TAILQ_INIT(&base->timeouts);
     if (sudo_ev_base_alloc_impl(base) != 0) {
 	efree(base);
 	base = NULL;
@@ -88,6 +90,8 @@ sudo_ev_alloc(int fd, short events, sudo_ev_callback_t callback, void *closure)
     struct sudo_event *ev;
     debug_decl(sudo_ev_alloc, SUDO_DEBUG_EVENT)
 
+    /* XXX - sanity check events value */
+
     ev = ecalloc(1, sizeof(*ev));
     ev->fd = fd;
     ev->events = events;
@@ -111,11 +115,12 @@ sudo_ev_free(struct sudo_event *ev)
 }
 
 int
-sudo_ev_add(struct sudo_event_base *base, struct sudo_event *ev, bool tohead)
+sudo_ev_add(struct sudo_event_base *base, struct sudo_event *ev,
+    struct timeval *timo, bool tohead)
 {
     debug_decl(sudo_ev_add, SUDO_DEBUG_EVENT)
 
-    /* Don't add an event twice; revisit if we want to support timeouts. */
+    /* Only add new events to the events list. */
     if (ev->base == NULL) {
 	if (sudo_ev_add_impl(base, ev) != 0)
 	    debug_return_int(-1);
@@ -124,6 +129,37 @@ sudo_ev_add(struct sudo_event_base *base, struct sudo_event *ev, bool tohead)
 	    TAILQ_INSERT_HEAD(&base->events, ev, entries);
 	} else {
 	    TAILQ_INSERT_TAIL(&base->events, ev, entries);
+	}
+    } else {
+	/* If no base specified, use existing one. */
+	if (base == NULL)
+	    base = ev->base;
+
+	/* If event no longer has a timeout, remove from timeouts queue. */
+	if (timo == NULL && timevalisset(&ev->timeout)) {
+	    timevalclear(&ev->timeout);
+	    TAILQ_REMOVE(&base->timeouts, ev, timeouts_entries);
+	}
+    }
+    /* Timeouts can be changed for existing events. */
+    if (timo != NULL) {
+	struct sudo_event *evtmp;
+	if (timevalisset(&ev->timeout)) {
+	    /* Remove from timeouts list, then add back. */
+	    TAILQ_REMOVE(&base->timeouts, ev, timeouts_entries);
+	}
+	/* Convert to absolute time and insert in sorted order; O(n). */
+	gettimeofday(&ev->timeout, NULL);
+	ev->timeout.tv_sec += timo->tv_sec;
+	ev->timeout.tv_usec += timo->tv_usec;
+	TAILQ_FOREACH(evtmp, &base->timeouts, timeouts_entries) {
+	    if (timevalcmp(timo, &evtmp->timeout, <))
+		break;
+	}
+	if (evtmp != NULL) {
+	    TAILQ_INSERT_BEFORE(evtmp, ev, timeouts_entries);
+	} else {
+	    TAILQ_INSERT_TAIL(&base->timeouts, ev, timeouts_entries);
 	}
     }
     /* Clear pending delete so adding from callback works properly. */
@@ -162,6 +198,10 @@ sudo_ev_del(struct sudo_event_base *base, struct sudo_event *ev)
     /* Unlink from event list. */
     TAILQ_REMOVE(&base->events, ev, entries);
 
+    /* Unlink from timeouts list. */
+    if (ISSET(ev->events, SUDO_EV_TIMEOUT) && timevalisset(&ev->timeout))
+	TAILQ_REMOVE(&base->timeouts, ev, timeouts_entries);
+
     /* Unlink from active list and update base pointers as needed. */
     if (ISSET(ev->flags, SUDO_EV_ACTIVE)) {
 	TAILQ_REMOVE(&base->active, ev, active_entries);
@@ -186,7 +226,9 @@ sudo_ev_del(struct sudo_event_base *base, struct sudo_event *ev)
 int
 sudo_ev_loop(struct sudo_event_base *base, int flags)
 {
-    int rc;
+    struct timeval now;
+    struct sudo_event *ev;
+    int nready, rc = 0;
     debug_decl(sudo_ev_loop, SUDO_DEBUG_EVENT)
 
     /*
@@ -195,7 +237,7 @@ sudo_ev_loop(struct sudo_event_base *base, int flags)
      * All other base flags are ignored unless we are running events.
      */
     if (ISSET(base->flags, SUDO_EVBASE_LOOPEXIT))
-	flags |= SUDO_EVLOOP_ONCE;
+	SET(flags, SUDO_EVLOOP_ONCE);
     base->flags = 0;
 
     for (;;) {
@@ -206,12 +248,32 @@ rescan:
 	    break;
 	}
 
-	/* Call backend to setup the active queue. */
+	/* Call backend to scan for I/O events. */
 	TAILQ_INIT(&base->active);
-	rc = sudo_ev_loop_impl(base, flags);
-	if (rc == -1) {
+	nready = sudo_ev_scan_impl(base, flags);
+	switch (nready) {
+	case -1:
 	    if (errno == EINTR || errno == ENOMEM)
 		continue;
+	    rc = -1;
+	    goto done;
+	case 0:
+	    /* Timed out, activate timeout events. */
+	    gettimeofday(&now, NULL);
+	    while ((ev = TAILQ_FIRST(&base->timeouts)) != NULL) {
+		if (timevalcmp(&ev->timeout, &now, >))
+		    break;
+		/* Remove from timeouts list. */
+		timevalclear(&ev->timeout);
+		TAILQ_REMOVE(&base->timeouts, ev, timeouts_entries);
+		/* Make event active. */
+		ev->revents = SUDO_EV_TIMEOUT;
+		SET(ev->flags, SUDO_EV_ACTIVE);
+		TAILQ_INSERT_TAIL(&base->active, ev, active_entries);
+	    }
+	    break;
+	default:
+	    /* I/O events active, sudo_ev_scan_impl() already added them. */
 	    break;
 	}
 
@@ -225,7 +287,7 @@ rescan:
 	    if (!ISSET(base->cur->events, SUDO_EV_PERSIST))
 		SET(base->cur->flags, SUDO_EV_DELETE);
 	    base->cur->callback(base->cur->fd, base->cur->revents,
-		base->cur->closure);
+		base->cur->closure == sudo_ev_self_cbarg() ? base->cur : base->cur->closure);
 	    if (base->cur != NULL) {
 		CLR(base->cur->flags, SUDO_EV_ACTIVE);
 		if (ISSET(base->cur->flags, SUDO_EV_DELETE))
@@ -233,21 +295,23 @@ rescan:
 	    }
 	    if (ISSET(base->flags, SUDO_EVBASE_LOOPBREAK)) {
 		/* stop processing events immediately */
-		base->flags |= SUDO_EVBASE_GOT_BREAK;
+		SET(base->flags, SUDO_EVBASE_GOT_BREAK);
 		base->pending = NULL;
 		goto done;
 	    }
 	    if (ISSET(base->flags, SUDO_EVBASE_LOOPCONT)) {
 		/* rescan events and start polling again */
 		CLR(base->flags, SUDO_EVBASE_LOOPCONT);
-		base->pending = NULL;
-		goto rescan;
+		if (!ISSET(flags, SUDO_EVLOOP_ONCE)) {
+		    base->pending = NULL;
+		    goto rescan;
+		}
 	    }
 	}
 	base->pending = NULL;
 	if (ISSET(base->flags, SUDO_EVBASE_LOOPEXIT)) {
 	    /* exit loop after once through */
-	    base->flags |= SUDO_EVBASE_GOT_EXIT;
+	    SET(base->flags, SUDO_EVBASE_GOT_EXIT);
 	    goto done;
 	}
 	if (flags & (SUDO_EVLOOP_ONCE | SUDO_EVLOOP_NONBLOCK))
@@ -262,7 +326,7 @@ void
 sudo_ev_loopexit(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_loopexit, SUDO_DEBUG_EVENT)
-    base->flags |= SUDO_EVBASE_LOOPEXIT;
+    SET(base->flags, SUDO_EVBASE_LOOPEXIT);
     debug_return;
 }
 
@@ -270,7 +334,7 @@ void
 sudo_ev_loopbreak(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_loopbreak, SUDO_DEBUG_EVENT)
-    base->flags |= SUDO_EVBASE_LOOPBREAK;
+    SET(base->flags, SUDO_EVBASE_LOOPBREAK);
     debug_return;
 }
 
@@ -278,7 +342,7 @@ void
 sudo_ev_loopcontinue(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_loopcontinue, SUDO_DEBUG_EVENT)
-    base->flags |= SUDO_EVBASE_LOOPCONT;
+    SET(base->flags, SUDO_EVBASE_LOOPCONT);
     debug_return;
 }
 
