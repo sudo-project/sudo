@@ -132,12 +132,12 @@ sudo_ev_del_impl(struct sudo_event_base *base, struct sudo_event *ev)
 }
 
 int
-sudo_ev_loop_impl(struct sudo_event_base *base, int flags)
+sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 {
     struct sudo_event *ev;
     int nready, timeout;
     struct timeval now;
-    debug_decl(sudo_ev_loop_impl, SUDO_DEBUG_EVENT)
+    debug_decl(sudo_ev_scan_impl, SUDO_DEBUG_EVENT)
 
     if ((ev = TAILQ_FIRST(&base->timeouts)) != NULL) {
 	struct timeval *timo = &ev->timeout;
