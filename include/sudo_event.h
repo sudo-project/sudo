@@ -26,8 +26,9 @@
 #define SUDO_EV_PERSIST		0x08	/* persist until deleted */
 
 /* Event flags (internal) */
-#define SUDO_EV_ACTIVE		0x01	/* event is on the active queue */
-#define SUDO_EV_DELETE		0x02	/* deletion pending */
+#define SUDO_EVQ_INSERTED	0x01	/* event is on the event queue */
+#define SUDO_EVQ_ACTIVE		0x02	/* event is on the active queue */
+#define SUDO_EVQ_TIMEOUTS	0x04	/* event is on the timeouts queue */
 
 /* Event loop flags */
 #define SUDO_EVLOOP_ONCE	0x01	/* Only run once through the loop */
@@ -65,8 +66,6 @@ struct sudo_event_base {
     struct sudo_event_list events; /* tail queue of all events */
     struct sudo_event_list active; /* tail queue of active events */
     struct sudo_event_list timeouts; /* tail queue of timeout events */
-    struct sudo_event *cur;	/* current active event being serviced */
-    struct sudo_event *pending;	/* next active event to be serviced */
 #ifdef HAVE_POLL
     struct pollfd *pfds;	/* array of struct pollfd */
     int pfd_max;		/* size of the pfds array */

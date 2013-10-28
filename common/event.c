@@ -71,12 +71,12 @@ sudo_ev_base_alloc(void)
 void
 sudo_ev_base_free(struct sudo_event_base *base)
 {
-    struct sudo_event *next;
+    struct sudo_event *ev, *next;
     debug_decl(sudo_ev_base_free, SUDO_DEBUG_EVENT)
 
     /* Remove any existing events before freeing the base. */
-    TAILQ_FOREACH_SAFE(base->cur, &base->events, entries, next) {
-	sudo_ev_del(base, base->cur);
+    TAILQ_FOREACH_SAFE(ev, &base->events, entries, next) {
+	sudo_ev_del(base, ev);
     }
     sudo_ev_base_free_impl(base);
     efree(base);
@@ -108,7 +108,7 @@ sudo_ev_free(struct sudo_event *ev)
     debug_decl(sudo_ev_free, SUDO_DEBUG_EVENT)
 
     /* Make sure ev is not in use before freeing it. */
-    if (ev->base != NULL)
+    if (ISSET(ev->flags, SUDO_EVQ_INSERTED))
 	(void)sudo_ev_del(NULL, ev);
     free(ev);
     debug_return;
@@ -120,8 +120,29 @@ sudo_ev_add(struct sudo_event_base *base, struct sudo_event *ev,
 {
     debug_decl(sudo_ev_add, SUDO_DEBUG_EVENT)
 
+    /* If no base specified, use existing one. */
+    if (base == NULL) {
+	if (ev->base == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR, "%s: no base specified",
+		__func__);
+	    debug_return_int(-1);
+	}
+	base = ev->base;
+    }
+
     /* Only add new events to the events list. */
-    if (ev->base == NULL) {
+    if (ISSET(ev->flags, SUDO_EVQ_INSERTED)) {
+	/* If event no longer has a timeout, remove from timeouts queue. */
+	if (timo == NULL && ISSET(ev->flags, SUDO_EVQ_TIMEOUTS)) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"%s: removing event %p from timeouts queue", __func__, ev);
+	    CLR(ev->flags, SUDO_EVQ_TIMEOUTS);
+	    TAILQ_REMOVE(&base->timeouts, ev, timeouts_entries);
+	}
+    } else {
+	/* Add event to the base. */
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: adding event %p to base %p",
+	    __func__, ev, base);
 	if (sudo_ev_add_impl(base, ev) != 0)
 	    debug_return_int(-1);
 	ev->base = base;
@@ -130,21 +151,12 @@ sudo_ev_add(struct sudo_event_base *base, struct sudo_event *ev,
 	} else {
 	    TAILQ_INSERT_TAIL(&base->events, ev, entries);
 	}
-    } else {
-	/* If no base specified, use existing one. */
-	if (base == NULL)
-	    base = ev->base;
-
-	/* If event no longer has a timeout, remove from timeouts queue. */
-	if (timo == NULL && timevalisset(&ev->timeout)) {
-	    timevalclear(&ev->timeout);
-	    TAILQ_REMOVE(&base->timeouts, ev, timeouts_entries);
-	}
+	SET(ev->flags, SUDO_EVQ_INSERTED);
     }
     /* Timeouts can be changed for existing events. */
     if (timo != NULL) {
 	struct sudo_event *evtmp;
-	if (timevalisset(&ev->timeout)) {
+	if (ISSET(ev->flags, SUDO_EVQ_TIMEOUTS)) {
 	    /* Remove from timeouts list, then add back. */
 	    TAILQ_REMOVE(&base->timeouts, ev, timeouts_entries);
 	}
@@ -161,9 +173,8 @@ sudo_ev_add(struct sudo_event_base *base, struct sudo_event *ev,
 	} else {
 	    TAILQ_INSERT_TAIL(&base->timeouts, ev, timeouts_entries);
 	}
+	SET(ev->flags, SUDO_EVQ_TIMEOUTS);
     }
-    /* Clear pending delete so adding from callback works properly. */
-    CLR(ev->flags, SUDO_EV_DELETE);
     debug_return_int(0);
 }
 
@@ -173,7 +184,7 @@ sudo_ev_del(struct sudo_event_base *base, struct sudo_event *ev)
     debug_decl(sudo_ev_del, SUDO_DEBUG_EVENT)
 
     /* Make sure event is really in the queue. */
-    if (ev->base == NULL) {
+    if (!ISSET(ev->flags, SUDO_EVQ_INSERTED)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: event %p not in queue",
 	    __func__, ev);
 	debug_return_int(0);
@@ -181,6 +192,11 @@ sudo_ev_del(struct sudo_event_base *base, struct sudo_event *ev)
 
     /* Check for event base mismatch, if one is specified. */
     if (base == NULL) {
+	if (ev->base == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR, "%s: no base specified",
+		__func__);
+	    debug_return_int(-1);
+	}
 	base = ev->base;
     } else if (base != ev->base) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "%s: mismatch base %p, ev->base %p",
@@ -199,20 +215,14 @@ sudo_ev_del(struct sudo_event_base *base, struct sudo_event *ev)
     TAILQ_REMOVE(&base->events, ev, entries);
 
     /* Unlink from timeouts list. */
-    if (ISSET(ev->events, SUDO_EV_TIMEOUT) && timevalisset(&ev->timeout))
+    if (ISSET(ev->flags, SUDO_EVQ_TIMEOUTS))
 	TAILQ_REMOVE(&base->timeouts, ev, timeouts_entries);
 
     /* Unlink from active list and update base pointers as needed. */
-    if (ISSET(ev->flags, SUDO_EV_ACTIVE)) {
+    if (ISSET(ev->flags, SUDO_EVQ_ACTIVE))
 	TAILQ_REMOVE(&base->active, ev, active_entries);
-	if (ev == base->pending)
-	    base->pending = TAILQ_NEXT(ev, active_entries);
-	if (ev == base->cur)
-	    base->cur = NULL;
-    }
 
     /* Mark event unused. */
-    ev->base = NULL;
     ev->flags = 0;
     ev->pfd_idx = -1;
 
@@ -264,11 +274,11 @@ rescan:
 		if (timevalcmp(&ev->timeout, &now, >))
 		    break;
 		/* Remove from timeouts list. */
-		timevalclear(&ev->timeout);
+		CLR(ev->flags, SUDO_EVQ_TIMEOUTS);
 		TAILQ_REMOVE(&base->timeouts, ev, timeouts_entries);
 		/* Make event active. */
 		ev->revents = SUDO_EV_TIMEOUT;
-		SET(ev->flags, SUDO_EV_ACTIVE);
+		SET(ev->flags, SUDO_EVQ_ACTIVE);
 		TAILQ_INSERT_TAIL(&base->active, ev, active_entries);
 	    }
 	    break;
@@ -283,32 +293,27 @@ rescan:
 	 * it can be cleared by sudo_ev_del().  This prevents a use
 	 * after free if the callback frees its own event.
 	 */
-	TAILQ_FOREACH_SAFE(base->cur, &base->active, active_entries, base->pending) {
-	    if (!ISSET(base->cur->events, SUDO_EV_PERSIST))
-		SET(base->cur->flags, SUDO_EV_DELETE);
-	    base->cur->callback(base->cur->fd, base->cur->revents,
-		base->cur->closure == sudo_ev_self_cbarg() ? base->cur : base->cur->closure);
-	    if (base->cur != NULL) {
-		CLR(base->cur->flags, SUDO_EV_ACTIVE);
-		if (ISSET(base->cur->flags, SUDO_EV_DELETE))
-		    sudo_ev_del(base, base->cur);
-	    }
+	while ((ev = TAILQ_FIRST(&base->active)) != NULL) {
+	    /* Pop first event off the active queue. */
+	    CLR(ev->flags, SUDO_EVQ_ACTIVE);
+	    TAILQ_REMOVE(&base->active, ev, active_entries);
+	    /* Remove from base unless persistent. */
+	    if (!ISSET(ev->events, SUDO_EV_PERSIST))
+		sudo_ev_del(base, ev);
+	    ev->callback(ev->fd, ev->revents,
+		ev->closure == sudo_ev_self_cbarg() ? ev : ev->closure);
 	    if (ISSET(base->flags, SUDO_EVBASE_LOOPBREAK)) {
 		/* stop processing events immediately */
 		SET(base->flags, SUDO_EVBASE_GOT_BREAK);
-		base->pending = NULL;
 		goto done;
 	    }
 	    if (ISSET(base->flags, SUDO_EVBASE_LOOPCONT)) {
 		/* rescan events and start polling again */
 		CLR(base->flags, SUDO_EVBASE_LOOPCONT);
-		if (!ISSET(flags, SUDO_EVLOOP_ONCE)) {
-		    base->pending = NULL;
+		if (!ISSET(flags, SUDO_EVLOOP_ONCE))
 		    goto rescan;
-		}
 	    }
 	}
-	base->pending = NULL;
 	if (ISSET(base->flags, SUDO_EVBASE_LOOPEXIT)) {
 	    /* exit loop after once through */
 	    SET(base->flags, SUDO_EVBASE_GOT_EXIT);

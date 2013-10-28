@@ -173,7 +173,7 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 	    if (what != 0) {
 		/* Make event active. */
 		ev->revents = what;
-		SET(ev->flags, SUDO_EV_ACTIVE);
+		SET(ev->flags, SUDO_EVQ_ACTIVE);
 		TAILQ_INSERT_TAIL(&base->active, ev, active_entries);
 	    }
 	}
