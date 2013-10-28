@@ -183,23 +183,24 @@ static struct option long_opts[] = {
     { NULL,		no_argument,		NULL,	'\0' },
 };
 
-extern time_t get_date(char *);
 extern char *get_timestr(time_t, int);
 extern int term_raw(int, int);
 extern int term_restore(int, int);
+extern time_t get_date(char *);
 extern void get_ttysize(int *rowp, int *colp);
 
 static int list_sessions(int, char **, const char *, const char *, const char *);
-static int parse_expr(struct search_node_list *, char **, bool);
-static void check_input(int fd, int what, void *v);
-static void help(void) __attribute__((__noreturn__));
-static void usage(int);
 static int open_io_fd(char *path, int len, struct io_log_file *iol);
+static int parse_expr(struct search_node_list *, char **, bool);
 static int parse_timing(const char *buf, const char *decimal, int *idx, double *seconds, size_t *nbytes);
 static struct log_info *parse_logfile(char *logfile);
+static void check_input(int fd, int what, void *v);
 static void free_log_info(struct log_info *li);
-static void sudoreplay_handler(int);
+static void help(void) __attribute__((__noreturn__));
+static void replay_session(const double max_wait, const char *decimal);
 static void sudoreplay_cleanup(void);
+static void sudoreplay_handler(int);
+static void usage(int);
 static void write_output(int fd, int what, void *v);
 
 #ifdef HAVE_REGCOMP
@@ -228,20 +229,11 @@ int
 main(int argc, char *argv[])
 {
     int ch, idx, plen, exitcode = 0, rows = 0, cols = 0;
-    bool interactive = false, listonly = false, need_nlcr = false;
-    bool def_filter = true;
+    bool def_filter = true, listonly = false;
     const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
-    char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
-    double seconds, to_wait, max_wait = 0;
-    struct sudo_event_base *evbase;
-    struct sudo_event *input_ev, *output_ev;
-    struct timeval timeout;
-    sigaction_t sa;
-    size_t len, nbytes, nread;
+    char *cp, *ep, path[PATH_MAX];
     struct log_info *li;
-    struct iovec *iov = NULL;
-    unsigned int i, iovcnt = 0, iovmax = 0;
-    struct write_closure wc;
+    double max_wait = 0;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -373,6 +365,30 @@ main(int argc, char *argv[])
     free_log_info(li);
     li = NULL;
 
+    /* Replay session corresponding to io_log_files[]. */
+    replay_session(max_wait, decimal);
+
+    term_restore(STDIN_FILENO, 1);
+done:
+    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
+    exit(exitcode);
+}
+
+static void
+replay_session(const double max_wait, const char *decimal)
+{
+    struct sudo_event *input_ev, *output_ev;
+    unsigned int i, iovcnt = 0, iovmax = 0;
+    struct sudo_event_base *evbase;
+    struct iovec *iov = NULL;
+    bool interactive = false;
+    struct write_closure wc;
+    char buf[LINE_MAX];
+    sigaction_t sa;
+    int idx;
+    debug_decl(replay_session, SUDO_DEBUG_UTIL)
+
+    /* Restore tty settings if interupted. */
     fflush(stdout);
     memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
@@ -382,18 +398,20 @@ main(int argc, char *argv[])
     (void) sigaction(SIGKILL, &sa, NULL);
     (void) sigaction(SIGTERM, &sa, NULL);
     (void) sigaction(SIGHUP, &sa, NULL);
+    (void) sigaction(SIGQUIT, &sa, NULL);
+
+    /* Don't suspend as we cannot restore the screen on resume. */
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = SIG_IGN;
     (void) sigaction(SIGTSTP, &sa, NULL);
-    (void) sigaction(SIGQUIT, &sa, NULL);
 
     /* XXX - read user input from /dev/tty and set STDOUT to raw if not a pipe */
     /* Set stdin to raw mode if it is a tty */
     interactive = isatty(STDIN_FILENO);
     if (interactive) {
-	ch = fcntl(STDIN_FILENO, F_GETFL, 0);
-	if (ch != -1)
-	    (void) fcntl(STDIN_FILENO, F_SETFL, ch | O_NONBLOCK);
+	idx = fcntl(STDIN_FILENO, F_GETFL, 0);
+	if (idx != -1)
+	    (void) fcntl(STDIN_FILENO, F_SETFL, idx | O_NONBLOCK);
 	if (!term_raw(STDIN_FILENO, 1))
 	    fatal(_("unable to set tty to raw mode"));
 	iovmax = 32;
@@ -413,13 +431,17 @@ main(int argc, char *argv[])
         fatal(NULL);
 
     /*
-     * Timing file consists of line of the format: "%f %d\n"
+     * Read each line of the timing file, displaying the output streams.
      */
 #ifdef HAVE_ZLIB_H
     while (gzgets(io_log_files[IOFD_TIMING].fd.g, buf, sizeof(buf)) != NULL) {
 #else
     while (fgets(buf, sizeof(buf), io_log_files[IOFD_TIMING].fd.f) != NULL) {
 #endif
+	size_t len, nbytes, nread;
+	double seconds, to_wait;
+	struct timeval timeout;
+	bool need_nlcr = false;
 	char last_char = '\0';
 
 	if (!parse_timing(buf, decimal, &idx, &seconds, &nbytes))
@@ -464,14 +486,16 @@ main(int argc, char *argv[])
 	    if (need_nlcr) {
 		size_t remainder = nread;
 		size_t linelen;
-		iovcnt = 0;
-		cp = buf;
-		ep = cp - 1;
+		char *cp = buf;
+		char *ep = buf - 1;
+
 		/* Handle a "\r\n" pair that spans a buffer. */
 		if (last_char == '\r' && buf[0] == '\n') {
 		    ep++;
 		    remainder--;
 		}
+
+		iovcnt = 0;
 		while ((ep = memchr(ep + 1, '\n', remainder)) != NULL) {
 		    /* Is there already a carriage return? */
 		    if (cp != ep && ep[-1] == '\r') {
@@ -512,10 +536,10 @@ main(int argc, char *argv[])
 	    }
 
 	    /* Setup closure for write_output. */
-	    memset(&wc, 0, sizeof(wc));
 	    wc.wevent = output_ev;
 	    wc.iov = iov;
 	    wc.iovcnt = iovcnt;
+	    wc.nbytes = 0;
 	    for (i = 0; i < iovcnt; i++)
 		wc.nbytes += iov[i].iov_len;
 
@@ -525,10 +549,7 @@ main(int argc, char *argv[])
 	    sudo_ev_loop(evbase, 0);
 	}
     }
-    term_restore(STDIN_FILENO, 1);
-done:
-    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
-    exit(exitcode);
+    debug_return;
 }
 
 static int
