@@ -120,8 +120,8 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 	gettimeofday(&now, NULL);
 	tv = ev->timeout;
 	timevalsub(&tv, &now);
-	if (tv.tv_sec < 0 || tv.tv_usec < 0)
-	    debug_return_int(0);
+	if (tv.tv_sec < 0 || (tv.tv_sec == 0 && tv.tv_usec < 0))
+	    timevalclear(&tv);
 	timeout = &tv;
     } else {
 	if (ISSET(flags, SUDO_EVLOOP_NONBLOCK)) {
@@ -173,8 +173,8 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 	    if (what != 0) {
 		/* Make event active. */
 		ev->revents = what;
-		SET(ev->flags, SUDO_EVQ_ACTIVE);
 		TAILQ_INSERT_TAIL(&base->active, ev, active_entries);
+		SET(ev->flags, SUDO_EVQ_ACTIVE);
 	    }
 	}
 	break;

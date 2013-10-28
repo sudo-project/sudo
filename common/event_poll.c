@@ -145,7 +145,7 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 	timeout = ((timo->tv_sec - now.tv_sec) * 1000) +
 	    ((timo->tv_usec - now.tv_usec) / 1000);
 	if (timeout <= 0)
-	    debug_return_int(0);
+	    timeout = 0;
     } else {
 	timeout = (flags & SUDO_EVLOOP_NONBLOCK) ? 0 : -1;
     }
@@ -170,11 +170,11 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 		    what |= (ev->events & SUDO_EV_WRITE);
 		/* Make event active. */
 		ev->revents = what;
-		SET(ev->flags, SUDO_EVQ_ACTIVE);
 		TAILQ_INSERT_TAIL(&base->active, ev, active_entries);
+		SET(ev->flags, SUDO_EVQ_ACTIVE);
 	    }
 	}
 	break;
     }
-    debug_return_int(0);
+    debug_return_int(nready);
 }

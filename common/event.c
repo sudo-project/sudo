@@ -278,8 +278,8 @@ rescan:
 		TAILQ_REMOVE(&base->timeouts, ev, timeouts_entries);
 		/* Make event active. */
 		ev->revents = SUDO_EV_TIMEOUT;
-		SET(ev->flags, SUDO_EVQ_ACTIVE);
 		TAILQ_INSERT_TAIL(&base->active, ev, active_entries);
+		SET(ev->flags, SUDO_EVQ_ACTIVE);
 	    }
 	    break;
 	default:
@@ -303,15 +303,20 @@ rescan:
 	    ev->callback(ev->fd, ev->revents,
 		ev->closure == sudo_ev_self_cbarg() ? ev : ev->closure);
 	    if (ISSET(base->flags, SUDO_EVBASE_LOOPBREAK)) {
-		/* stop processing events immediately */
+		/* Stop processing events immediately. */
 		SET(base->flags, SUDO_EVBASE_GOT_BREAK);
+		while ((ev = TAILQ_FIRST(&base->active)) != NULL)
+		    CLR(ev->flags, SUDO_EVQ_ACTIVE);
 		goto done;
 	    }
 	    if (ISSET(base->flags, SUDO_EVBASE_LOOPCONT)) {
-		/* rescan events and start polling again */
+		/* Rescan events and start polling again. */
 		CLR(base->flags, SUDO_EVBASE_LOOPCONT);
-		if (!ISSET(flags, SUDO_EVLOOP_ONCE))
+		if (!ISSET(flags, SUDO_EVLOOP_ONCE)) {
+		    while ((ev = TAILQ_FIRST(&base->active)) != NULL)
+			CLR(ev->flags, SUDO_EVQ_ACTIVE);
 		    goto rescan;
+		}
 	    }
 	}
 	if (ISSET(base->flags, SUDO_EVBASE_LOOPEXIT)) {
