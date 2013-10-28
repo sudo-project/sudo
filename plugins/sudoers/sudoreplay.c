@@ -1067,8 +1067,8 @@ list_sessions(int argc, char **argv, const char *pattern, const char *user,
 }
 
 /*
- * Check input for ' ', '<', '>'
- * pause, slow, fast
+ * Check input for ' ', '<', '>', return
+ * pause, slow, fast, next
  */
 static void
 check_input(int fd, int what, void *v)
@@ -1094,7 +1094,7 @@ check_input(int fd, int what, void *v)
 		/* Any key will unpause, event is finished. */
 		/* XXX - pause time could be less than timeout */
 		paused = false;
-		debug_return;
+		debug_return; /* XXX */
 	    }
 	    switch (ch) {
 	    case ' ':
@@ -1106,6 +1106,9 @@ check_input(int fd, int what, void *v)
 	    case '>':
 		speed_factor *= 2;
 		break;
+	    case '\r':
+	    case '\n':
+		debug_return; /* XXX */
 	    }
 	    break;
 	}
@@ -1117,6 +1120,10 @@ check_input(int fd, int what, void *v)
 		gettimeofday(&now, NULL);
 		tv = *timeout;
 		timevalsub(&tv, &now);
+		if (tv.tv_sec < 0 || (tv.tv_sec == 0 && tv.tv_usec <= 0)) {
+		    /* No time left, event is done. */
+		    debug_return;
+		}
 		timeout = &tv;
 	    }
 	}
