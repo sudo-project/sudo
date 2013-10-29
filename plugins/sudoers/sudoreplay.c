@@ -395,7 +395,6 @@ replay_session(const double max_wait, const char *decimal)
     sa.sa_flags = SA_RESETHAND;
     sa.sa_handler = sudoreplay_handler;
     (void) sigaction(SIGINT, &sa, NULL);
-    (void) sigaction(SIGKILL, &sa, NULL);
     (void) sigaction(SIGTERM, &sa, NULL);
     (void) sigaction(SIGHUP, &sa, NULL);
     (void) sigaction(SIGQUIT, &sa, NULL);
@@ -1235,7 +1234,7 @@ sudoreplay_cleanup(void)
 }
 
 /*
- * Signal handler for SIGINT, SIGKILL, SIGTERM, SIGHUP
+ * Signal handler for SIGINT, SIGTERM, SIGHUP, SIGQUIT
  * Must be installed with SA_RESETHAND enabled.
  */
 static void
