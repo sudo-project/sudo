@@ -1114,18 +1114,12 @@ check_input(int fd, int what, void *v)
 	}
 	if (!paused) {
 	    /* Determine remaining timeout, if any. */
-	    timeout = sudo_ev_get_timeout(ev);
-	    if (timeout != NULL) {
-		struct timeval now;
-		gettimeofday(&now, NULL);
-		tv = *timeout;
-		timevalsub(&tv, &now);
-		if (tv.tv_sec < 0 || (tv.tv_sec == 0 && tv.tv_usec <= 0)) {
-		    /* No time left, event is done. */
-		    debug_return;
-		}
-		timeout = &tv;
+	    sudo_ev_get_timeleft(ev, &tv);
+	    if (!timevalisset(&tv)) {
+		/* No time left, event is done. */
+		debug_return;
 	    }
+	    timeout = &tv;
 	}
 	/* Re-enable event. */
 	sudo_ev_add(evbase, ev, timeout, false);

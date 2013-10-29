@@ -369,3 +369,22 @@ sudo_ev_got_break(struct sudo_event_base *base)
     debug_decl(sudo_ev_got_break, SUDO_DEBUG_EVENT)
     debug_return_bool(ISSET(base->flags, SUDO_EVBASE_GOT_BREAK));
 }
+
+int
+sudo_ev_get_timeleft(struct sudo_event *ev, struct timeval *tv)
+{
+    struct timeval now;
+    debug_decl(sudo_ev_get_timeleft, SUDO_DEBUG_EVENT)
+
+    if (!ISSET(ev->flags, SUDO_EVQ_TIMEOUTS)) {
+	timevalclear(tv);
+	debug_return_int(-1);
+    }
+
+    gettimeofday(&now, NULL);
+    *tv = ev->timeout;
+    timevalsub(tv, &now);
+    if (tv->tv_sec < 0 || (tv->tv_sec == 0 && tv->tv_usec < 0))
+	timevalclear(tv);
+    debug_return_int(0);
+}

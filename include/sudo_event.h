@@ -100,6 +100,9 @@ int sudo_ev_del(struct sudo_event_base *head, struct sudo_event *ev);
 /* Main event loop, returns SUDO_CB_SUCCESS, SUDO_CB_BREAK or SUDO_CB_ERROR */
 int sudo_ev_loop(struct sudo_event_base *head, int flags);
 
+/* Return the remaining timeout associated with an event. */
+int sudo_ev_get_timeleft(struct sudo_event *ev, struct timeval *tv);
+
 /* Cause the event loop to exit after one run through. */
 void sudo_ev_loopexit(struct sudo_event_base *base);
 
@@ -120,7 +123,7 @@ bool sudo_ev_got_break(struct sudo_event_base *base);
 
 /* Return the (absolute) timeout associated with an event or NULL. */
 #define sudo_ev_get_timeout(_ev) \
-    (((_ev) && timevalisset(&(_ev)->timeout)) ? &(_ev)->timeout : NULL)
+    (ISSET((_ev)->flags, SUDO_EVQ_TIMEOUTS) ? &(_ev)->timeout : NULL)
 
 /* Return the base an event is associated with or NULL. */
 #define sudo_ev_get_base(_ev) ((_ev) ? (_ev)->base : NULL)
