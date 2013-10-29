@@ -208,7 +208,7 @@ backchannel_cb(int fd, int what, void *v)
     debug_decl(backchannel_cb, SUDO_DEBUG_EXEC)
 
     /* read child status */
-    n = recv(fd, ec->cstat, sizeof(struct command_status), 0);
+    n = recv(fd, ec->cstat, sizeof(struct command_status), MSG_WAITALL);
     if (n != sizeof(struct command_status)) {
 	if (n == -1) {
 	    switch (errno) {

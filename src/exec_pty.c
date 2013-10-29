@@ -1141,7 +1141,7 @@ mon_backchannel_cb(int fd, int what, void *v)
     debug_decl(mon_backchannel_cb, SUDO_DEBUG_EXEC);
 
     /* read command from backchannel, should be a signal */
-    n = recv(fd, &cstmp, sizeof(cstmp), 0);
+    n = recv(fd, &cstmp, sizeof(cstmp), MSG_WAITALL);
     if (n != sizeof(cstmp)) {
 	if (n == -1) {
 	    if (errno == EINTR || errno == EAGAIN)
