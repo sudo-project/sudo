@@ -380,7 +380,7 @@ replay_session(const double max_wait, const char *decimal)
     struct sudo_event *input_ev, *output_ev;
     unsigned int i, iovcnt = 0, iovmax = 0;
     struct sudo_event_base *evbase;
-    struct iovec *iov = NULL;
+    struct iovec iovb, *iov = &iovb;
     bool interactive = false;
     struct write_closure wc;
     char buf[LINE_MAX];
@@ -413,8 +413,6 @@ replay_session(const double max_wait, const char *decimal)
 	    (void) fcntl(STDIN_FILENO, F_SETFL, idx | O_NONBLOCK);
 	if (!term_raw(STDIN_FILENO, 1))
 	    fatal(_("unable to set tty to raw mode"));
-	iovmax = 32;
-	iov = ecalloc(iovmax, sizeof(*iov));
     }
 
     /* Setup event base and input/output events. */
@@ -504,8 +502,9 @@ replay_session(const double max_wait, const char *decimal)
 
 		    /* Store the line in iov followed by \r\n pair. */
 		    if (iovcnt + 3 > iovmax) {
-			iovmax <<= 1;
-			iov = erealloc3(iov, iovmax, sizeof(*iov));
+			iov = iovmax ?
+			    erealloc3(iov, iovmax <<= 1, sizeof(*iov)) :
+			    emalloc2(iovmax = 32, sizeof(*iov));
 		    }
 		    linelen = (size_t)(ep - cp) + 1;
 		    iov[iovcnt].iov_base = cp;
