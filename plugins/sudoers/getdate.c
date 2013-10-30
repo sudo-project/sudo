@@ -389,7 +389,7 @@ YYSTYPE yylval;
 short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
-int yystacksize;
+unsigned int yystacksize;
 #line 326 "getdate.y"
 
 /* Month and day table. */
@@ -1035,7 +1035,8 @@ static int yygrowstack(void)
 static int yygrowstack()
 #endif
 {
-    int newsize, i;
+    unsigned int newsize;
+    long sslen;
     short *newss;
     YYSTYPE *newvs;
 
@@ -1047,23 +1048,27 @@ static int yygrowstack()
 #ifdef SIZE_MAX
 #define YY_SIZE_MAX SIZE_MAX
 #else
-#define YY_SIZE_MAX 0x7fffffff
+#ifdef __STDC__
+#define YY_SIZE_MAX 0xffffffffU
+#else
+#define YY_SIZE_MAX (unsigned int)0xffffffff
 #endif
-    if (YY_SIZE_MAX / (unsigned int)newsize < sizeof *newss)
+#endif
+    if (YY_SIZE_MAX / newsize < sizeof *newss)
         goto bail;
-    i = yyssp - yyss;
+    sslen = yyssp - yyss;
     newss = yyss ? (short *)realloc(yyss, newsize * sizeof *newss) :
       (short *)malloc(newsize * sizeof *newss); /* overflow check above */
     if (newss == NULL)
         goto bail;
     yyss = newss;
-    yyssp = newss + i;
+    yyssp = newss + sslen;
     newvs = yyvs ? (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs) :
       (YYSTYPE *)malloc(newsize * sizeof *newvs); /* overflow check above */
     if (newvs == NULL)
         goto bail;
     yyvs = newvs;
-    yyvsp = newvs + i;
+    yyvsp = newvs + sslen;
     yystacksize = newsize;
     yysslim = yyss + newsize - 1;
     return 0;
@@ -1519,7 +1524,7 @@ case 41:
 	    yyval.Meridian = yyvsp[0].Meridian;
 	}
 break;
-#line 1470 "getdate.c"
+#line 1475 "getdate.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
