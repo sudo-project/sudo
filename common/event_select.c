@@ -63,8 +63,10 @@ sudo_ev_base_alloc_impl(struct sudo_event_base *base)
     debug_decl(sudo_ev_base_alloc_impl, SUDO_DEBUG_EVENT)
 
     base->maxfd = NFDBITS - 1;
-    base->readfds = ecalloc(1, sizeof(fd_mask));
-    base->writefds = ecalloc(1, sizeof(fd_mask));
+    base->readfds_in = ecalloc(1, sizeof(fd_mask));
+    base->writefds_in = ecalloc(1, sizeof(fd_mask));
+    base->readfds_out = ecalloc(1, sizeof(fd_mask));
+    base->writefds_out = ecalloc(1, sizeof(fd_mask));
 
     debug_return_int(0);
 }
@@ -73,8 +75,10 @@ void
 sudo_ev_base_free_impl(struct sudo_event_base *base)
 {
     debug_decl(sudo_ev_base_free_impl, SUDO_DEBUG_EVENT)
-    efree(base->readfds);
-    efree(base->writefds);
+    efree(base->readfds_in);
+    efree(base->writefds_in);
+    efree(base->readfds_out);
+    efree(base->writefds_out);
     debug_return;
 }
 
@@ -85,13 +89,28 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
 
     /* If out of space in fd sets, realloc. */
     if (ev->fd > base->maxfd) {
+	const int o = (base->maxfd + 1) / NFDBITS;
 	const int n = howmany(ev->fd + 1, NFDBITS);
-	efree(base->readfds);
-	efree(base->writefds);
-	base->readfds = ecalloc(n, sizeof(fd_mask));
-	base->writefds = ecalloc(n, sizeof(fd_mask));
+	base->readfds_in = erecalloc(base->readfds_in, o, n, sizeof(fd_mask));
+	base->writefds_in = erecalloc(base->writefds_in, o, n, sizeof(fd_mask));
+	base->readfds_out = erecalloc(base->readfds_out, o, n, sizeof(fd_mask));
+	base->writefds_out = erecalloc(base->writefds_out, o, n, sizeof(fd_mask));
 	base->maxfd = (n * NFDBITS) - 1;
     }
+
+    /* Set events and adjust high fd as needed. */
+    if (ISSET(ev->events, SUDO_EV_READ)) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: added fd %d to readfs",
+	    __func__, ev->fd);
+	FD_SET(ev->fd, base->readfds_in);
+    }
+    if (ISSET(ev->events, SUDO_EV_WRITE)) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: added fd %d to writefds",
+	    __func__, ev->fd);
+	FD_SET(ev->fd, base->writefds_in);
+    }
+    if (ev->fd > base->highfd)
+	base->highfd = ev->fd;
 
     debug_return_int(0);
 }
@@ -101,9 +120,18 @@ sudo_ev_del_impl(struct sudo_event_base *base, struct sudo_event *ev)
 {
     debug_decl(sudo_ev_del_impl, SUDO_DEBUG_EVENT)
 
-    /* Remove from readfds and writefds and adjust event count. */
-    FD_CLR(ev->fd, base->readfds);
-    FD_CLR(ev->fd, base->writefds);
+    /* Remove from readfds and writefds and adjust high fd. */
+    FD_CLR(ev->fd, base->readfds_in);
+    FD_CLR(ev->fd, base->writefds_in);
+    if (base->highfd == ev->fd) {
+	for (;;) {
+	    if (--base->highfd < 0)
+		break;
+	    if (FD_ISSET(base->highfd, base->readfds_in) ||
+		FD_ISSET(base->highfd, base->writefds_in))
+		break;
+	}
+    }
 
     debug_return_int(0);
 }
@@ -113,7 +141,8 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 {
     struct timeval now, tv, *timeout;
     struct sudo_event *ev;
-    int nready, highfd = 0;
+    size_t setsize;
+    int nready;
     debug_decl(sudo_ev_loop, SUDO_DEBUG_EVENT)
 
     if ((ev = TAILQ_FIRST(&base->timeouts)) != NULL) {
@@ -132,28 +161,15 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 	}
     }
 
-    /* For select we need to redo readfds and writefds each time. */
-    memset(base->readfds, 0, howmany(base->maxfd + 1, NFDBITS) * sizeof(fd_mask));
-    memset(base->writefds, 0, howmany(base->maxfd + 1, NFDBITS) * sizeof(fd_mask));
-    TAILQ_FOREACH(ev, &base->events, entries) {
-	if (ISSET(ev->events, SUDO_EV_READ)) {
-	    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: added fd %d to readfs",
-		__func__, ev->fd);
-	    FD_SET(ev->fd, base->readfds);
-	    if (ev->fd > highfd)
-		highfd = ev->fd;
-	}
-	if (ISSET(ev->events, SUDO_EV_WRITE)) {
-	    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: added fd %d to writefds",
-		__func__, ev->fd);
-	    FD_SET(ev->fd, base->writefds);
-	    if (ev->fd > highfd)
-		highfd = ev->fd;
-	}
-    }
+    /* select() overwrites readfds/writefds so make a copy. */
+    setsize = howmany(base->highfd + 1, NFDBITS) * sizeof(fd_mask);
+    memcpy(base->readfds_out, base->readfds_in, setsize);
+    memcpy(base->writefds_out, base->writefds_in, setsize);
+
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: select high fd %d",
-	__func__, highfd);
-    nready = select(highfd + 1, base->readfds, base->writefds, NULL, timeout);
+	__func__, base->highfd);
+    nready = select(base->highfd + 1, base->readfds_out, base->writefds_out,
+	NULL, timeout);
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d fds ready", __func__, nready);
     switch (nready) {
     case -1:
@@ -166,9 +182,9 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 	/* Activate each I/O event that fired. */
 	TAILQ_FOREACH(ev, &base->events, entries) {
 	    int what = 0;
-	    if (FD_ISSET(ev->fd, base->readfds))
+	    if (FD_ISSET(ev->fd, base->readfds_out))
 		what |= (ev->events & SUDO_EV_READ);
-	    if (FD_ISSET(ev->fd, base->writefds))
+	    if (FD_ISSET(ev->fd, base->writefds_out))
 		what |= (ev->events & SUDO_EV_WRITE);
 	    if (what != 0) {
 		/* Make event active. */

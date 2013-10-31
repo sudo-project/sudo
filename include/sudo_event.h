@@ -72,9 +72,12 @@ struct sudo_event_base {
     int pfd_high;		/* highest slot used */
     int pfd_free;		/* idx of next free entry or pfd_max if full */
 #else
-    fd_set *readfds;		/* read I/O descriptor set */
-    fd_set *writefds;		/* write I/O descriptor set */
+    fd_set *readfds_in;		/* read I/O descriptor set (in) */
+    fd_set *writefds_in;	/* write I/O descriptor set (in) */
+    fd_set *readfds_out;	/* read I/O descriptor set (out) */
+    fd_set *writefds_out;	/* write I/O descriptor set (out) */
     int maxfd;			/* max fd we can store in readfds/writefds */
+    int highfd;			/* highest fd to pass as 1st arg to select */
 #endif /* HAVE_POLL */
     unsigned int flags;		/* SUDO_EVBASE_* */
 };

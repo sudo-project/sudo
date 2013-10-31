@@ -168,11 +168,10 @@ erealloc3(void *ptr, size_t nmemb, size_t size)
     return ptr;
 }
 
-#ifdef notyet
 /*
  * erecalloc() realloc(3)s nmemb * msize bytes and exits with an error
  * if overflow would occur or if the system malloc(3)/realloc(3) fails.
- * On success, the new space is zero-filled.  You can call ereallocz()
+ * On success, the new space is zero-filled.  You can call erealloc()
  * with a NULL pointer even if the system realloc(3) does not support this.
  */
 void *
@@ -195,7 +194,6 @@ erecalloc(void *ptr, size_t onmemb, size_t nmemb, size_t msize)
     }
     return ptr;
 }
-#endif
 
 /*
  * estrdup() is like strdup(3) except that it exits with an error if
