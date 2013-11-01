@@ -143,8 +143,10 @@ sudo_ev_add(struct sudo_event_base *base, struct sudo_event *ev,
 	/* Add event to the base. */
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: adding event %p to base %p",
 	    __func__, ev, base);
-	if (sudo_ev_add_impl(base, ev) != 0)
-	    debug_return_int(-1);
+	if (ev->events & (SUDO_EV_READ|SUDO_EV_WRITE)) {
+	    if (sudo_ev_add_impl(base, ev) != 0)
+		debug_return_int(-1);
+	}
 	ev->base = base;
 	if (tohead) {
 	    TAILQ_INSERT_HEAD(&base->events, ev, entries);
@@ -208,8 +210,10 @@ sudo_ev_del(struct sudo_event_base *base, struct sudo_event *ev)
 	__func__, ev, base);
 
     /* Call backend. */
-    if (sudo_ev_del_impl(base, ev) != 0)
-	debug_return_int(-1);
+    if (ev->events & (SUDO_EV_READ|SUDO_EV_WRITE)) {
+	if (sudo_ev_del_impl(base, ev) != 0)
+	    debug_return_int(-1);
+    }
 
     /* Unlink from event list. */
     TAILQ_REMOVE(&base->events, ev, entries);
