@@ -181,16 +181,18 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
     default:
 	/* Activate each I/O event that fired. */
 	TAILQ_FOREACH(ev, &base->events, entries) {
-	    int what = 0;
-	    if (FD_ISSET(ev->fd, base->readfds_out))
-		what |= (ev->events & SUDO_EV_READ);
-	    if (FD_ISSET(ev->fd, base->writefds_out))
-		what |= (ev->events & SUDO_EV_WRITE);
-	    if (what != 0) {
-		/* Make event active. */
-		ev->revents = what;
-		TAILQ_INSERT_TAIL(&base->active, ev, active_entries);
-		SET(ev->flags, SUDO_EVQ_ACTIVE);
+	    if (ev->fd >= 0) {
+		int what = 0;
+		if (FD_ISSET(ev->fd, base->readfds_out))
+		    what |= (ev->events & SUDO_EV_READ);
+		if (FD_ISSET(ev->fd, base->writefds_out))
+		    what |= (ev->events & SUDO_EV_WRITE);
+		if (what != 0) {
+		    /* Make event active. */
+		    ev->revents = what;
+		    TAILQ_INSERT_TAIL(&base->active, ev, active_entries);
+		    SET(ev->flags, SUDO_EVQ_ACTIVE);
+		}
 	    }
 	}
 	break;
