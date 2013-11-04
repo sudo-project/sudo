@@ -971,8 +971,9 @@ static int yygrowstack()
     short *newss;
     YYSTYPE *newvs;
 
-    newsize = yystacksize ? yystacksize : YYINITSTACKSIZE;
-    if (newsize >= YYMAXDEPTH)
+    if ((newsize = yystacksize) == 0)
+        newsize = YYINITSTACKSIZE;
+    else if (newsize >= YYMAXDEPTH)
         return -1;
     else if ((newsize *= 2) > YYMAXDEPTH)
         newsize = YYMAXDEPTH;
@@ -1849,7 +1850,7 @@ case 111:
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
-#line 1800 "gram.c"
+#line 1801 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

@@ -1016,8 +1016,9 @@ static int yygrowstack()
     short *newss;
     YYSTYPE *newvs;
 
-    newsize = yystacksize ? yystacksize : YYINITSTACKSIZE;
-    if (newsize >= YYMAXDEPTH)
+    if ((newsize = yystacksize) == 0)
+        newsize = YYINITSTACKSIZE;
+    else if (newsize >= YYMAXDEPTH)
         return -1;
     else if ((newsize *= 2) > YYMAXDEPTH)
         newsize = YYMAXDEPTH;
@@ -1500,7 +1501,7 @@ case 41:
 	    yyval.Meridian = yyvsp[0].Meridian;
 	}
 break;
-#line 1451 "getdate.c"
+#line 1452 "getdate.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
