@@ -169,6 +169,9 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 		if (base->pfds[ev->pfd_idx].revents & (POLLOUT|POLLHUP|POLLNVAL|POLLERR))
 		    what |= (ev->events & SUDO_EV_WRITE);
 		/* Make event active. */
+		sudo_debug_printf(SUDO_DEBUG_DEBUG,
+		    "%s: polled fd %d, events %d, activating %p",
+		    __func__, ev->fd, what, ev);
 		ev->revents = what;
 		TAILQ_INSERT_TAIL(&base->active, ev, active_entries);
 		SET(ev->flags, SUDO_EVQ_ACTIVE);
