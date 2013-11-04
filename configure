@@ -21751,7 +21751,7 @@ _ACEOF
 
 if test -n "$GCC"; then
     if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"; then
-	CFLAGS="${CFLAGS} -Wall -Wsign-compare"
+	CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wold-style-definition"
     fi
     if test X"$enable_werror" = X"yes"; then
 	CFLAGS="${CFLAGS} -Werror"
