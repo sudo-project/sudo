@@ -1133,12 +1133,8 @@ check_input(int fd, int what, void *v)
  * Returns 1 on success and 0 on failure.
  */
 static int
-parse_timing(buf, decimal, idx, seconds, nbytes)
-    const char *buf;
-    const char *decimal;
-    int *idx;
-    double *seconds;
-    size_t *nbytes;
+parse_timing(const char *buf, const char *decimal, int *idx, double *seconds,
+    size_t *nbytes)
 {
     unsigned long ul;
     long l;
