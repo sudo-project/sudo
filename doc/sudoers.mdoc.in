@@ -1826,7 +1826,7 @@ If the system is configured to use the
 file in preference to DNS, the
 .Dq canonical
 host name may not be fully-qualified.
-The order that sources are queried for hosts name resolution
+The order that sources are queried for host name resolution
 is usually specified in the
 .Pa @nsswitch_conf@ ,
 .Pa @netsvc_conf@ ,
