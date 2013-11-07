@@ -293,6 +293,7 @@ sudo_execve(path, argv, envp, uid, cstat, dowait, bgmode)
      * If we don't need to wait for the command to finish, just exec it.
      */
     if (!dowait) {
+	restore_signals();
 	exec_setup(FALSE, NULL, -1);
 	closefrom(def_closefrom);
 	my_execve(path, argv, envp);
