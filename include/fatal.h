@@ -104,7 +104,6 @@
 	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys,  \
 	(fmt), (ap));							       \
     vwarning_nodebug((fmt), (ap));					       \
-    warning_restore_locale();						       \
 } while (0)
 # define vwarningx(fmt, ap) do {					       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
