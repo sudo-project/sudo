@@ -59,10 +59,6 @@
 
 #include "sudoers.h"
 
-#ifndef va_copy
-# define va_copy(d, s) memcpy(&(d), &(s), sizeof(d));
-#endif
-
 /* Special message for log_warning() so we know to use ngettext() */
 #define INCORRECT_PASSWORD_ATTEMPT	((char *)0x01)
 

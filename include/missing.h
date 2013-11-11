@@ -100,6 +100,17 @@
 #endif
 
 /*
+ * Pre-C99 compilers may lack a va_copy macro.
+ */
+#ifndef va_copy
+# ifdef __va_copy
+#  define va_copy(d, s) __va_copy(d, s)
+# else
+#  define va_copy(d, s) memcpy(&(d), &(s), sizeof(d));
+# endif
+#endif
+
+/*
  * Some systems lack full limit definitions.
  */
 #ifndef OPEN_MAX
