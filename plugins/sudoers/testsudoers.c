@@ -492,7 +492,7 @@ print_defaults(void)
 {
     struct defaults *d;
     struct member *m;
-    debug_decl(print_member, SUDO_DEBUG_UTIL)
+    debug_decl(print_defaults, SUDO_DEBUG_UTIL)
 
     TAILQ_FOREACH(d, &defaults, entries) {
 	(void) fputs("Defaults", stdout);
