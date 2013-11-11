@@ -18393,6 +18393,13 @@ $as_echo "no" >&6; }
     if test X"$found" != X"no"; then
 	$as_echo "#define HAVE_GETADDRINFO 1" >>confdefs.h
 
+    else
+	case " $LIBOBJS " in
+  *" getaddrinfo.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS getaddrinfo.$ac_objext"
+ ;;
+esac
+
     fi
 
 fi

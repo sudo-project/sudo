@@ -2542,6 +2542,8 @@ AC_CHECK_FUNCS(getaddrinfo, [], [
     done
     if test X"$found" != X"no"; then
 	AC_DEFINE(HAVE_GETADDRINFO)
+    else
+	AC_LIBOBJ(getaddrinfo)
     fi
 ])
 dnl
