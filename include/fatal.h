@@ -88,26 +88,34 @@
     warningx_nodebug(__VA_ARGS__);					       \
 } while (0)
 # endif /* __GNUC__ == 2 */
-# define vfatal(fmt, ap) do {					       \
+# define vfatal(fmt, ap) do {						       \
+    va_list ap2;							       \
+    va_copy(ap2, (ap));							       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys, \
-	(fmt), (ap));							       \
+	(fmt), ap2);							       \
     vfatal_nodebug((fmt), (ap));				       \
 } while (0)
 # define vfatalx(fmt, ap) do {					       \
+    va_list ap2;							       \
+    va_copy(ap2, (ap));							       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
-	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), (ap));    \
+	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), ap2);     \
     vfatalx_nodebug((fmt), (ap));				       \
 } while (0)
 # define vwarning(fmt, ap) do {						       \
+    va_list ap2;							       \
+    va_copy(ap2, (ap));							       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys,  \
-	(fmt), (ap));							       \
+	(fmt), ap2);							       \
     vwarning_nodebug((fmt), (ap));					       \
 } while (0)
 # define vwarningx(fmt, ap) do {					       \
+    va_list ap2;							       \
+    va_copy(ap2, (ap));							       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
-	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), (ap));     \
+	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), ap2);      \
     vwarningx_nodebug((fmt), (ap));					       \
 } while (0)
 #endif /* SUDO_ERROR_WRAP */
