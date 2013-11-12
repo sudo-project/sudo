@@ -147,10 +147,10 @@ $(srcdir)/visudo.man.in: $(srcdir)/visudo.mdoc.in
 visudo.man.sed: $(srcdir)/fixman.sh
 	$(SHELL) $(srcdir)/fixman.sh $@
 
-visudo.man: $(srcdir)/visudo.man.in visudo.man.sed
+$(mansrcdir)/visudo.man: $(srcdir)/visudo.man.in visudo.man.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/$@.in | $(SED) -f $@.sed > $@
 
-visudo.mdoc: $(srcdir)/visudo.mdoc.in
+$(mansrcdir)/visudo.mdoc: $(srcdir)/visudo.mdoc.in
 	(cd $(top_builddir) && $(SHELL) config.status --file=doc/$@)
 
 $(srcdir)/visudo.cat: varsub $(srcdir)/visudo.mdoc.in
