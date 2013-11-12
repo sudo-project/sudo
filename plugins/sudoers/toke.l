@@ -699,10 +699,16 @@ sudoedit		{
 			    continued = true;
 			}			/* throw away EOL after \ */
 
-<INITIAL,STARTDEFS,INDEFS>#(-[^\n0-9].*|[^\n0-9-].*)?\n	{
-			    BEGIN INITIAL;
-			    sudolineno++;
-			    continued = false;
+<INITIAL,STARTDEFS,INDEFS>#(-[^\n0-9].*|[^\n0-9-].*)?\n?	{
+			    if (sudoerstext[sudoersleng - 1] == '\n') {
+				/* comment ending in a newline */
+				BEGIN INITIAL;
+				sudolineno++;
+				continued = false;
+			    } else if (!feof(yyin)) {
+				LEXTRACE("ERROR ");
+				LEXRETURN(ERROR);
+			    }
 			    LEXTRACE("#\n");
 			    LEXRETURN(COMMENT);
 			}			/* comment, not uid/gid */
