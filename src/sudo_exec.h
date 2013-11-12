@@ -18,6 +18,13 @@
 #define _SUDO_EXEC_H
 
 /*
+ * Older systems may not support MSG_WAITALL but it shouldn't really be needed.
+ */
+#ifndef MSG_WAITALL
+# define MSG_WAITALL 0
+#endif
+
+/*
  * Special values to indicate whether continuing in foreground or background.
  */
 #define SIGCONT_FG	-2
