@@ -15579,6 +15579,9 @@ fi
 
 done
 
+#
+# Check for large file support.
+#
 # Check whether --enable-largefile was given.
 if test "${enable_largefile+set}" = set; then :
   enableval=$enable_largefile;
@@ -15777,10 +15780,16 @@ rm -rf conftest*
   fi
 fi
 
+#
+# HP-UX may need to define _XOPEN_SOURCE_EXTENDED to expose MSG_WAITALL.
+# Also, HP-UX 11.23 has a broken sys/types.h when large files support
+# is enabled and _XOPEN_SOURCE_EXTENDED is not also defined.
+# The following test will define _XOPEN_SOURCE_EXTENDED in either case.
+#
 case "$host_os" in
-    hpux11.*)
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether sys/types.h needs _XOPEN_SOURCE_EXTENDED" >&5
-$as_echo_n "checking whether sys/types.h needs _XOPEN_SOURCE_EXTENDED... " >&6; }
+    hpux*)
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether sys/socket.h needs _XOPEN_SOURCE_EXTENDED for MSG_WAITALL" >&5
+$as_echo_n "checking whether sys/socket.h needs _XOPEN_SOURCE_EXTENDED for MSG_WAITALL... " >&6; }
 if ${sudo_cv_xopen_source_extended+:} false; then :
   $as_echo_n "(cached) " >&6
 else
@@ -15791,7 +15800,7 @@ $ac_includes_default
 int
 main ()
 {
-
+int a = MSG_WAITALL; return a;
   ;
   return 0;
 }
@@ -15808,7 +15817,7 @@ else
 int
 main ()
 {
-
+int a = MSG_WAITALL; return a;
   ;
   return 0;
 }

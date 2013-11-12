@@ -2113,19 +2113,26 @@ AC_CHECK_HEADERS([procfs.h] [sys/procfs.h], [AC_CHECK_MEMBERS(struct psinfo.pr_t
 #endif
 ])]
 break)
-dnl
-dnl Check for large file support.  HP-UX 11.23 has a broken sys/type.h
-dnl when large files support is enabled so work around it.
-dnl
+#
+# Check for large file support.
+#
 AC_SYS_LARGEFILE
+#
+# HP-UX may need to define _XOPEN_SOURCE_EXTENDED to expose MSG_WAITALL.
+# Also, HP-UX 11.23 has a broken sys/types.h when large files support
+# is enabled and _XOPEN_SOURCE_EXTENDED is not also defined.
+# The following test will define _XOPEN_SOURCE_EXTENDED in either case.
+#
 case "$host_os" in
-    hpux11.*)
-	AC_CACHE_CHECK([whether sys/types.h needs _XOPEN_SOURCE_EXTENDED], [sudo_cv_xopen_source_extended],
+    hpux*)
+	AC_CACHE_CHECK([whether sys/socket.h needs _XOPEN_SOURCE_EXTENDED for MSG_WAITALL], [sudo_cv_xopen_source_extended],
 	[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
-	#include <sys/socket.h>], [])], [sudo_cv_xopen_source_extended=no], [
+	#include <sys/socket.h>], [int a = MSG_WAITALL; return a;])],
+	[sudo_cv_xopen_source_extended=no], [
 	    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#define _XOPEN_SOURCE_EXTENDED
 	    AC_INCLUDES_DEFAULT
-	    #include <sys/socket.h>], [])], [sudo_cv_xopen_source_extended=yes],
+	    #include <sys/socket.h>], [int a = MSG_WAITALL; return a;])],
+	    [sudo_cv_xopen_source_extended=yes],
 	    [sudo_cv_xopen_source_extended=error])
 	])])
 	if test "$sudo_cv_xopen_source_extended" = "yes"; then
