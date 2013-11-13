@@ -1,4 +1,4 @@
-/* config.h.in.  Generated from configure.in by autoheader.  */
+/* config.h.in.  Generated from configure.ac by autoheader.  */
 
 #ifndef _SUDO_CONFIG_H
 #define _SUDO_CONFIG_H

@@ -181,7 +181,7 @@ update-pot:
 			echo "syntax error" > confstr.sh; \
 			sed -n -e 's/^badpass_message="/gettext "/p' \
 			    -e 's/^passprompt="/gettext "/p' \
-			    -e 's/^mailsub="/gettext "/p' configure.in \
+			    -e 's/^mailsub="/gettext "/p' configure.ac \
 			    >> confstr.sh; \
 			tmpfiles=confstr.sh; \
 			cfiles="plugins/sudoers/*.c plugins/sudoers/auth/*.c";; \

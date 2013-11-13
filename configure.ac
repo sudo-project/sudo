@@ -1,5 +1,5 @@
 dnl
-dnl Process this file with GNU autoconf to produce a configure script.
+dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
 dnl Copyright (c) 1994-1996,1998-2013 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl

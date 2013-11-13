@@ -98,10 +98,10 @@ Makefile: $(srcdir)/Makefile.in
 
 .SUFFIXES: .man
 
-varsub: $(top_srcdir)/configure.in
+varsub: $(top_srcdir)/configure.ac
 	@if [ -n "$(DEVEL)" ]; then \
 	    printf 's#@%s@#1#\ns#@%s@#1#\ns#@%s@#1#\ns#@%s@#1#\ns#@%s@#/etc#g\ns#@%s@#/usr/local#g\ns#@%s@#5#g\ns#@%s@#8#g\ns#@%s@#%s#\n' SEMAN BAMAN LCMAN PSMAN sysconfdir prefix mansectform mansectsu PACKAGE_VERSION $(VERSION) > $@; \
-	    $(SED) -n '/Begin initial values for man page substitution/,/End initial values for man page substitution/{;p;}' $(top_srcdir)/configure.in | $(SED) -e '/^#/d' -e 's/^/s#@/' -e 's/=[\\"]*/@#/' -e 's/[\\"]*$$/#g/' >> $@; \
+	    $(SED) -n '/Begin initial values for man page substitution/,/End initial values for man page substitution/{;p;}' $(top_srcdir)/configure.ac | $(SED) -e '/^#/d' -e 's/^/s#@/' -e 's/=[\\"]*/@#/' -e 's/[\\"]*$$/#g/' >> $@; \
 	fi
 
 $(srcdir)/sudo.man.in: $(srcdir)/sudo.mdoc.in

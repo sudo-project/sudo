@@ -102,7 +102,7 @@ config.guess
 config.h.in
 config.sub
 configure
-configure.in
+configure.ac
 doc/CONTRIBUTORS
 doc/HISTORY
 doc/LICENSE
