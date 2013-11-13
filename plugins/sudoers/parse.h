@@ -129,7 +129,6 @@ struct cmndspec {
     struct member_list *runasuserlist;	/* list of runas users */
     struct member_list *runasgrouplist;	/* list of runas groups */
     struct member *cmnd;		/* command to allow/deny */
-    char *digest;			/* optional command digest */
     struct cmndtag tags;		/* tag specificaion */
 #ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
