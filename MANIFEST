@@ -7,6 +7,7 @@ NEWS
 README
 README.LDAP
 aclocal.m4
+autogen.sh
 common/Makefile.in
 common/aix.c
 common/alloc.c
@@ -161,6 +162,7 @@ m4/ltoptions.m4
 m4/ltsugar.m4
 m4/ltversion.m4
 m4/lt~obsolete.m4
+m4/sudo.m4
 mkdep.pl
 mkinstalldirs
 mkpkg

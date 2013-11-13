@@ -3,8 +3,10 @@ dnl Process this file with GNU autoconf to produce a configure script.
 dnl
 dnl Copyright (c) 1994-1996,1998-2013 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
+AC_PREREQ([2.59])
 AC_INIT([sudo], [1.8.9], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
+AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
 dnl Note: this must come after AC_INIT
 dnl
@@ -2387,9 +2389,9 @@ AC_CHECK_FUNCS(getopt_long, [], [AC_LIBOBJ(getopt_long)
     AC_MSG_RESULT($sudo_cv_optreset)
 ])
 AC_CHECK_FUNCS(closefrom, [], [AC_LIBOBJ(closefrom)
-    AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [],
-	[ #include <limits.h>
-	  #include <fcntl.h> ])
+    AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [], [
+#	include <limits.h>
+#	include <fcntl.h> ])
 ])
 AC_CHECK_FUNCS(mkstemps mkdtemp, [], [
     AC_CHECK_FUNCS(random lrand48, [break])
@@ -3007,9 +3009,7 @@ if test ${with_kerb5-'no'} != "no"; then
     AC_CHECK_FUNCS(krb5_get_init_creds_opt_alloc, [
 	AC_CACHE_CHECK([whether krb5_get_init_creds_opt_free takes a context],
 	    sudo_cv_krb5_get_init_creds_opt_free_two_args, [
-		AC_COMPILE_IFELSE(
-		    [AC_LANG_PROGRAM(
-			[[#include <krb5.h>]],
+		AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <krb5.h>]],
 			[[krb5_get_init_creds_opt_free(NULL, NULL);]]
 		    )],
 		    [sudo_cv_krb5_get_init_creds_opt_free_two_args=yes],
@@ -3126,9 +3126,9 @@ if test "${with_skey-'no'}" = "yes"; then
 
     AC_MSG_CHECKING([for RFC1938-compliant skeychallenge])
     AC_COMPILE_IFELSE(
-	[AC_LANG_PROGRAM(
-	    [[#include <stdio.h>
-	    #include <skey.h>]],
+	[AC_LANG_PROGRAM([[
+#	    include <stdio.h>
+#	    include <skey.h>]],
 	    [[skeychallenge(NULL, NULL, NULL, 0);]]
 	)], [
 	    AC_DEFINE(HAVE_RFC1938_SKEYCHALLENGE)
