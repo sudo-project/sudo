@@ -15824,7 +15824,7 @@ else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 $ac_includes_default
-	#include <sys/socket.h>
+#	include <sys/socket.h>
 int
 main ()
 {
@@ -15841,7 +15841,7 @@ else
 /* end confdefs.h.  */
 #define _XOPEN_SOURCE_EXTENDED
 	    $ac_includes_default
-	    #include <sys/socket.h>
+#	    include <sys/socket.h>
 int
 main ()
 {
@@ -16502,8 +16502,8 @@ _CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS $OSDEFS"
 if test $ac_cv_header_utmpx_h = "yes"; then
     ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_id" "ac_cv_member_struct_utmpx_ut_id" "
-	#include <sys/types.h>
-	#include <utmpx.h>
+#	include <sys/types.h>
+#	include <utmpx.h>
 
 "
 if test "x$ac_cv_member_struct_utmpx_ut_id" = xyes; then :
@@ -16515,8 +16515,8 @@ _ACEOF
 
 fi
 ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_pid" "ac_cv_member_struct_utmpx_ut_pid" "
-	#include <sys/types.h>
-	#include <utmpx.h>
+#	include <sys/types.h>
+#	include <utmpx.h>
 
 "
 if test "x$ac_cv_member_struct_utmpx_ut_pid" = xyes; then :
@@ -16528,8 +16528,8 @@ _ACEOF
 
 fi
 ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_tv" "ac_cv_member_struct_utmpx_ut_tv" "
-	#include <sys/types.h>
-	#include <utmpx.h>
+#	include <sys/types.h>
+#	include <utmpx.h>
 
 "
 if test "x$ac_cv_member_struct_utmpx_ut_tv" = xyes; then :
@@ -16541,8 +16541,8 @@ _ACEOF
 
 fi
 ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_type" "ac_cv_member_struct_utmpx_ut_type" "
-	#include <sys/types.h>
-	#include <utmpx.h>
+#	include <sys/types.h>
+#	include <utmpx.h>
 
 "
 if test "x$ac_cv_member_struct_utmpx_ut_type" = xyes; then :
@@ -16555,8 +16555,8 @@ _ACEOF
 fi
 
                 ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_exit.__e_termination" "ac_cv_member_struct_utmpx_ut_exit___e_termination" "
-	#include <sys/types.h>
-	#include <utmpx.h>
+#	include <sys/types.h>
+#	include <utmpx.h>
 
 "
 if test "x$ac_cv_member_struct_utmpx_ut_exit___e_termination" = xyes; then :
@@ -16570,8 +16570,8 @@ $as_echo "#define HAVE_STRUCT_UTMPX_UT_EXIT 1" >>confdefs.h
 else
 
 	ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_exit.e_termination" "ac_cv_member_struct_utmpx_ut_exit_e_termination" "
-	    #include <sys/types.h>
-	    #include <utmpx.h>
+#	    include <sys/types.h>
+#	    include <utmpx.h>
 
 "
 if test "x$ac_cv_member_struct_utmpx_ut_exit_e_termination" = xyes; then :
@@ -16589,8 +16589,8 @@ fi
 
 else
     ac_fn_c_check_member "$LINENO" "struct utmp" "ut_id" "ac_cv_member_struct_utmp_ut_id" "
-	#include <sys/types.h>
-	#include <utmp.h>
+#	include <sys/types.h>
+#	include <utmp.h>
 
 "
 if test "x$ac_cv_member_struct_utmp_ut_id" = xyes; then :
@@ -16602,8 +16602,8 @@ _ACEOF
 
 fi
 ac_fn_c_check_member "$LINENO" "struct utmp" "ut_pid" "ac_cv_member_struct_utmp_ut_pid" "
-	#include <sys/types.h>
-	#include <utmp.h>
+#	include <sys/types.h>
+#	include <utmp.h>
 
 "
 if test "x$ac_cv_member_struct_utmp_ut_pid" = xyes; then :
@@ -16615,8 +16615,8 @@ _ACEOF
 
 fi
 ac_fn_c_check_member "$LINENO" "struct utmp" "ut_tv" "ac_cv_member_struct_utmp_ut_tv" "
-	#include <sys/types.h>
-	#include <utmp.h>
+#	include <sys/types.h>
+#	include <utmp.h>
 
 "
 if test "x$ac_cv_member_struct_utmp_ut_tv" = xyes; then :
@@ -16628,8 +16628,8 @@ _ACEOF
 
 fi
 ac_fn_c_check_member "$LINENO" "struct utmp" "ut_type" "ac_cv_member_struct_utmp_ut_type" "
-	#include <sys/types.h>
-	#include <utmp.h>
+#	include <sys/types.h>
+#	include <utmp.h>
 
 "
 if test "x$ac_cv_member_struct_utmp_ut_type" = xyes; then :
@@ -16641,8 +16641,8 @@ _ACEOF
 
 fi
 ac_fn_c_check_member "$LINENO" "struct utmp" "ut_user" "ac_cv_member_struct_utmp_ut_user" "
-	#include <sys/types.h>
-	#include <utmp.h>
+#	include <sys/types.h>
+#	include <utmp.h>
 
 "
 if test "x$ac_cv_member_struct_utmp_ut_user" = xyes; then :
@@ -16655,8 +16655,8 @@ _ACEOF
 fi
 
                 ac_fn_c_check_member "$LINENO" "struct utmp" "ut_exit.__e_termination" "ac_cv_member_struct_utmp_ut_exit___e_termination" "
-	#include <sys/types.h>
-	#include <utmp.h>
+#	include <sys/types.h>
+#	include <utmp.h>
 
 "
 if test "x$ac_cv_member_struct_utmp_ut_exit___e_termination" = xyes; then :
@@ -16670,8 +16670,8 @@ $as_echo "#define HAVE_STRUCT_UTMP_UT_EXIT 1" >>confdefs.h
 else
 
 	ac_fn_c_check_member "$LINENO" "struct utmp" "ut_exit.e_termination" "ac_cv_member_struct_utmp_ut_exit_e_termination" "
-	    #include <sys/types.h>
-	    #include <utmp.h>
+#	    include <sys/types.h>
+#	    include <utmp.h>
 
 "
 if test "x$ac_cv_member_struct_utmp_ut_exit_e_termination" = xyes; then :
@@ -17093,9 +17093,9 @@ if test "x$ac_cv_func_sysctl" = xyes; then :
 #define HAVE_SYSCTL 1
 _ACEOF
  ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "ki_tdev" "ac_cv_member_struct_kinfo_proc_ki_tdev" "
-	#include <sys/param.h>
-	#include <sys/sysctl.h>
-	#include <sys/user.h>
+#	include <sys/param.h>
+#	include <sys/sysctl.h>
+#	include <sys/user.h>
 
 "
 if test "x$ac_cv_member_struct_kinfo_proc_ki_tdev" = xyes; then :
@@ -17108,8 +17108,8 @@ _ACEOF
 else
 
 	ac_fn_c_check_member "$LINENO" "struct kinfo_proc2" "p_tdev" "ac_cv_member_struct_kinfo_proc2_p_tdev" "
-	    #include <sys/param.h>
-	    #include <sys/sysctl.h>
+#	    include <sys/param.h>
+#	    include <sys/sysctl.h>
 
 "
 if test "x$ac_cv_member_struct_kinfo_proc2_p_tdev" = xyes; then :
@@ -17122,8 +17122,8 @@ _ACEOF
 else
 
 	    ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "p_tdev" "ac_cv_member_struct_kinfo_proc_p_tdev" "
-		#include <sys/param.h>
-		#include <sys/sysctl.h>
+#		include <sys/param.h>
+#		include <sys/sysctl.h>
 
 "
 if test "x$ac_cv_member_struct_kinfo_proc_p_tdev" = xyes; then :
@@ -17136,8 +17136,8 @@ _ACEOF
 else
 
 		ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "kp_eproc.e_tdev" "ac_cv_member_struct_kinfo_proc_kp_eproc_e_tdev" "
-		    #include <sys/param.h>
-		    #include <sys/sysctl.h>
+#		    include <sys/param.h>
+#		    include <sys/sysctl.h>
 
 "
 if test "x$ac_cv_member_struct_kinfo_proc_kp_eproc_e_tdev" = xyes; then :
@@ -20582,7 +20582,7 @@ $as_echo_n "checking whether lber.h is needed... " >&6; }
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <sys/types.h>
-    #include <ldap.h>
+#   include <ldap.h>
 int
 main ()
 {

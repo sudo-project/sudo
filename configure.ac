@@ -2129,11 +2129,11 @@ case "$host_os" in
     hpux*)
 	AC_CACHE_CHECK([whether sys/socket.h needs _XOPEN_SOURCE_EXTENDED for MSG_WAITALL], [sudo_cv_xopen_source_extended],
 	[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
-	#include <sys/socket.h>], [int a = MSG_WAITALL; return a;])],
+#	include <sys/socket.h>], [int a = MSG_WAITALL; return a;])],
 	[sudo_cv_xopen_source_extended=no], [
 	    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#define _XOPEN_SOURCE_EXTENDED
 	    AC_INCLUDES_DEFAULT
-	    #include <sys/socket.h>], [int a = MSG_WAITALL; return a;])],
+#	    include <sys/socket.h>], [int a = MSG_WAITALL; return a;])],
 	    [sudo_cv_xopen_source_extended=yes],
 	    [sudo_cv_xopen_source_extended=error])
 	])])
@@ -2214,37 +2214,37 @@ _CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS $OSDEFS"
 if test $ac_cv_header_utmpx_h = "yes"; then
     AC_CHECK_MEMBERS([struct utmpx.ut_id, struct utmpx.ut_pid, struct utmpx.ut_tv, struct utmpx.ut_type], [], [], [
-	#include <sys/types.h>
-	#include <utmpx.h>
+#	include <sys/types.h>
+#	include <utmpx.h>
     ])
     dnl
     dnl Check for ut_exit.__e_termination first, then ut_exit.e_termination
     dnl
     AC_CHECK_MEMBERS([struct utmpx.ut_exit.__e_termination], [AC_DEFINE(HAVE_STRUCT_UTMPX_UT_EXIT)], [
 	AC_CHECK_MEMBERS([struct utmpx.ut_exit.e_termination], [AC_DEFINE(HAVE_STRUCT_UTMPX_UT_EXIT)], [], [
-	    #include <sys/types.h>
-	    #include <utmpx.h>
+#	    include <sys/types.h>
+#	    include <utmpx.h>
 	])
     ], [
-	#include <sys/types.h>
-	#include <utmpx.h>
+#	include <sys/types.h>
+#	include <utmpx.h>
     ])
 else
     AC_CHECK_MEMBERS([struct utmp.ut_id, struct utmp.ut_pid, struct utmp.ut_tv, struct utmp.ut_type, struct utmp.ut_user], [], [], [
-	#include <sys/types.h>
-	#include <utmp.h>
+#	include <sys/types.h>
+#	include <utmp.h>
     ])
     dnl
     dnl Check for ut_exit.__e_termination first, then ut_exit.e_termination
     dnl
     AC_CHECK_MEMBERS([struct utmp.ut_exit.__e_termination], [AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT)], [
 	AC_CHECK_MEMBERS([struct utmp.ut_exit.e_termination], [AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT)], [], [
-	    #include <sys/types.h>
-	    #include <utmp.h>
+#	    include <sys/types.h>
+#	    include <utmp.h>
 	])
     ], [
-	#include <sys/types.h>
-	#include <utmp.h>
+#	include <sys/types.h>
+#	include <utmp.h>
     ])
 fi
 CFLAGS="$_CFLAGS"
@@ -2314,23 +2314,23 @@ AC_CHECK_FUNCS(sysctl, [AC_CHECK_MEMBERS([struct kinfo_proc.ki_tdev], [],
 	AC_CHECK_MEMBERS([struct kinfo_proc2.p_tdev], [], [
 	    AC_CHECK_MEMBERS([struct kinfo_proc.p_tdev], [], [
 		AC_CHECK_MEMBERS([struct kinfo_proc.kp_eproc.e_tdev], [], [], [
-		    #include <sys/param.h>
-		    #include <sys/sysctl.h>
+#		    include <sys/param.h>
+#		    include <sys/sysctl.h>
 		])
 	    ], [
-		#include <sys/param.h>
-		#include <sys/sysctl.h>
+#		include <sys/param.h>
+#		include <sys/sysctl.h>
 	    ])
 	],
 	[
-	    #include <sys/param.h>
-	    #include <sys/sysctl.h>
+#	    include <sys/param.h>
+#	    include <sys/sysctl.h>
 	])
     ],
     [
-	#include <sys/param.h>
-	#include <sys/sysctl.h>
-	#include <sys/user.h>
+#	include <sys/param.h>
+#	include <sys/sysctl.h>
+#	include <sys/user.h>
     ])
 ])
 
@@ -3108,8 +3108,7 @@ if test "${with_skey-'no'}" = "yes"; then
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "/usr/local" "/usr/contrib"; do
 	    test -n "$dir" && CPPFLAGS="$O_CPPFLAGS -I${dir}/include"
-	    AC_CHECK_HEADER([skey.h], [found=yes; break], [],
-		[#include <stdio.h>])
+	    AC_CHECK_HEADER([skey.h], [found=yes; break], [], [#include <stdio.h>])
 	done
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
@@ -3281,7 +3280,7 @@ if test ${with_ldap-'no'} != "no"; then
     dnl check if ldap.h includes lber.h for us
     AC_MSG_CHECKING([whether lber.h is needed])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-    #include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [AC_MSG_RESULT([no])], [
+#   include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [AC_MSG_RESULT([no])], [
     AC_MSG_RESULT([yes])
     AC_DEFINE(HAVE_LBER_H)])
 
