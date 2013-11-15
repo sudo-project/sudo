@@ -138,7 +138,7 @@ SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo env.lo find_path.lo \
 	       policy.lo prompt.lo set_perms.lo sudo_nss.lo sudoers.lo \
 	       timestamp.lo @SUDOERS_OBJS@
 
-VISUDO_OBJS = find_path.o goodpath.o locale.o visudo.o
+VISUDO_OBJS = find_path.o goodpath.o locale.o visudo.o visudo_json.o
 
 REPLAY_OBJS = getdate.o locale.o sudoreplay.o
 
@@ -889,3 +889,12 @@ visudo.o: $(srcdir)/visudo.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(top_builddir)/pathnames.h $(top_srcdir)/compat/getopt.h \
           $(top_srcdir)/compat/stdbool.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/visudo.c
+visudo_json.o: $(srcdir)/visudo_json.c $(devdir)/def_data.h $(devdir)/gram.h \
+               $(incdir)/alloc.h $(incdir)/fatal.h $(incdir)/fileops.h \
+               $(incdir)/gettext.h $(incdir)/missing.h $(incdir)/queue.h \
+               $(incdir)/sudo_debug.h $(incdir)/sudo_plugin.h \
+               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(top_builddir)/config.h $(top_builddir)/pathnames.h \
+               $(top_srcdir)/compat/stdbool.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/visudo_json.c

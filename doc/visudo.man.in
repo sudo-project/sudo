@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "August 14, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "November 15, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -30,7 +30,7 @@
 .SH "SYNOPSIS"
 .HP 7n
 \fBvisudo\fR
-[\fB\-chqsV\fR]
+[\fB\-chqsVx\fR]
 [\fB\-f\fR\ \fIsudoers\fR]
 .SH "DESCRIPTION"
 \fBvisudo\fR
@@ -203,6 +203,19 @@ Print the
 and
 \fIsudoers\fR
 grammar versions and exit.
+.TP 12n
+\fB\-x\fR, \fB\--export\fR
+Export
+\fIsudoers\fR
+in JSON format to the standard output.
+The result is intended to be easier for third-party applications
+to parse that the normal
+\fIsudoers\fR
+format.
+The various values have explicit types which removes some of the
+ambiguity of the
+\fIsudoers\fR
+format.
 .SH "ENVIRONMENT"
 The following environment variables may be consulted depending on
 the value of the

@@ -114,6 +114,8 @@ static void help(void) __attribute__((__noreturn__));
 static void usage(int);
 static void visudo_cleanup(void);
 
+extern bool export_sudoers(char *, bool, bool);
+
 extern void sudoerserror(const char *);
 extern void sudoersrestart(FILE *);
 
@@ -134,9 +136,10 @@ struct passwd *list_pw;
 static struct sudoersfile_list sudoerslist = TAILQ_HEAD_INITIALIZER(sudoerslist);
 static struct rbtree *alias_freelist;
 static bool checkonly;
-static const char short_opts[] =  "cf:hqsV";
+static const char short_opts[] =  "cf:hqsVx";
 static struct option long_opts[] = {
     { "check",		no_argument,		NULL,	'c' },
+    { "export",		no_argument,		NULL,	'x' },
     { "file",		required_argument,	NULL,	'f' },
     { "help",		no_argument,		NULL,	'h' },
     { "quiet",		no_argument,		NULL,	'q' },
@@ -153,7 +156,7 @@ main(int argc, char *argv[])
     struct sudoersfile *sp;
     char *args, *editor, *sudoers_path;
     int ch, exitcode = 0;
-    bool quiet, strict, oldperms;
+    bool quiet, strict, oldperms, export;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -183,7 +186,7 @@ main(int argc, char *argv[])
     /*
      * Arg handling.
      */
-    checkonly = oldperms = quiet = strict = false;
+    checkonly = oldperms = quiet = strict = export = false;
     sudoers_path = _PATH_SUDOERS;
     while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
@@ -209,6 +212,9 @@ main(int argc, char *argv[])
 	    case 'q':
 		quiet = true;		/* quiet mode */
 		break;
+	    case 'x':
+		export = true;		/* export mode */
+		break;
 	    default:
 		usage(1);
 	}
@@ -221,7 +227,7 @@ main(int argc, char *argv[])
     sudo_setgrent();
 
     /* Mock up a fake sudo_user struct. */
-    user_cmnd = "";
+    user_cmnd = user_base = "";
     if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL)
 	fatalx(_("you do not exist in the %s database"), "passwd");
     get_hostname();
@@ -231,6 +237,10 @@ main(int argc, char *argv[])
 
     if (checkonly) {
 	exitcode = check_syntax(sudoers_path, quiet, strict, oldperms) ? 0 : 1;
+	goto done;
+    }
+    if (export) {
+	exitcode = export_sudoers(sudoers_path, quiet, strict) ? 0 : 1;
 	goto done;
     }
 
@@ -272,7 +282,7 @@ main(int argc, char *argv[])
     }
 
 done:
-    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);                
+    sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
     exit(exitcode);
 }
 
@@ -1319,7 +1329,7 @@ static void
 usage(int fatal)
 {
     (void) fprintf(fatal ? stderr : stdout,
-	"usage: %s [-chqsV] [-f sudoers]\n", getprogname());
+	"usage: %s [-chqsVx] [-f sudoers]\n", getprogname());
     if (fatal)
 	exit(1);
 }
@@ -1335,6 +1345,7 @@ help(void)
 	"  -h, --help       display help message and exit\n"
 	"  -q, --quiet      less verbose (quiet) syntax error messages\n"
 	"  -s, --strict     strict syntax checking\n"
-	"  -V, --version    display version information and exit"));
+	"  -V, --version    display version information and exit"
+	"  -x, --export     export sudoers in JSON format"));
     exit(0);
 }

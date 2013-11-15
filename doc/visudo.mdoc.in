@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd August 14, 2013
+.Dd November 15, 2013
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -27,7 +27,7 @@
 .Nd edit the sudoers file
 .Sh SYNOPSIS
 .Nm visudo
-.Op Fl chqsV
+.Op Fl chqsVx
 .Bk -words
 .Op Fl f Ar sudoers
 .Ek
@@ -197,6 +197,18 @@ Print the
 and
 .Em sudoers
 grammar versions and exit.
+.It Fl x , -export
+Export
+.Em sudoers
+in JSON format to the standard output.
+The result is intended to be easier for third-party applications
+to parse that the normal
+.Em sudoers
+format.
+The various values have explicit types which removes some of the
+ambiguity of the
+.Em sudoers
+format.
 .El
 .Sh ENVIRONMENT
 The following environment variables may be consulted depending on
