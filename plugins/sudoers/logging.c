@@ -446,6 +446,15 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 	evasprintf(&message, _(fmt), ap);
     }
 
+    /* Log to debug file. */
+    if (USE_ERRNO) {
+	sudo_debug_printf2(NULL, NULL, 0,
+	    SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|sudo_debug_subsys, "%s", message);
+    } else {
+	sudo_debug_printf2(NULL, NULL, 0,
+	    SUDO_DEBUG_WARN|sudo_debug_subsys, "%s", message);
+    }
+
     if (ISSET(flags, MSG_ONLY)) {
 	logline = message;
     } else {
@@ -482,16 +491,18 @@ vlog_warning(int flags, const char *fmt, va_list ap)
      * Tell the user (in their locale).
      */
     if (!ISSET(flags, NO_STDERR)) {
+	warning_set_locale();
 	if (fmt == INCORRECT_PASSWORD_ATTEMPT) {
 	    int tries = va_arg(ap2, int);
-	    warningx(ngettext("%d incorrect password attempt",
+	    warningx2(ngettext("%d incorrect password attempt",
 		"%d incorrect password attempts", tries), tries);
 	} else {
 	    if (ISSET(flags, USE_ERRNO))
-		vwarning(fmt, ap2);
+		vwarning2(_(fmt), ap2);
 	    else
-		vwarningx(fmt, ap2);
+		vwarningx2(_(fmt), ap2);
 	}
+	warning_restore_locale();
 	va_end(ap2);
     }
 
