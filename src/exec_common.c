@@ -127,7 +127,7 @@ disable_execute(char *const envp[])
     envp = nenvp;
 #endif /* _PATH_SUDO_NOEXEC */
 
-    debug_return_ptr(envp);
+    debug_return_const_ptr(envp);
 }
 
 /*

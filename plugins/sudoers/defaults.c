@@ -768,7 +768,7 @@ logfac2str(int n)
 
     for (fac = facilities; fac->name && fac->num != n; fac++)
 	;
-    debug_return_str(fac->name);
+    debug_return_const_str(fac->name);
 #else
     return "default";
 #endif /* LOG_NFACILITIES */
@@ -800,7 +800,7 @@ logpri2str(int n)
 
     for (pri = priorities; pri->name && pri->num != n; pri++)
 	;
-    debug_return_str(pri->name);
+    debug_return_const_str(pri->name);
 }
 
 static bool

@@ -145,26 +145,42 @@
 
 #define debug_return_str(rval)						       \
     do {								       \
+	char *sudo_debug_rval = (rval);					       \
+	sudo_debug_exit_str(__func__, __FILE__, __LINE__, sudo_debug_subsys,   \
+	    sudo_debug_rval);						       \
+	return sudo_debug_rval;						       \
+    } while (0)
+
+#define debug_return_const_str(rval)					       \
+    do {								       \
 	const char *sudo_debug_rval = (rval);				       \
 	sudo_debug_exit_str(__func__, __FILE__, __LINE__, sudo_debug_subsys,   \
 	    sudo_debug_rval);						       \
-	return (char *)sudo_debug_rval;					       \
+	return sudo_debug_rval;						       \
     } while (0)
 
-#define debug_return_str_masked(rval)						       \
+#define debug_return_str_masked(rval)					       \
     do {								       \
-	const char *sudo_debug_rval = (rval);				       \
+	char *sudo_debug_rval = (rval);					       \
 	sudo_debug_exit_str_masked(__func__, __FILE__, __LINE__,	       \
 	    sudo_debug_subsys, sudo_debug_rval);			       \
-	return (char *)sudo_debug_rval;					       \
+	return sudo_debug_rval;						       \
     } while (0)
 
 #define debug_return_ptr(rval)						       \
     do {								       \
+	void *sudo_debug_rval = (rval);					       \
+	sudo_debug_exit_ptr(__func__, __FILE__, __LINE__, sudo_debug_subsys,   \
+	    sudo_debug_rval);						       \
+	return sudo_debug_rval;						       \
+    } while (0)
+
+#define debug_return_const_ptr(rval)					       \
+    do {								       \
 	const void *sudo_debug_rval = (rval);				       \
 	sudo_debug_exit_ptr(__func__, __FILE__, __LINE__, sudo_debug_subsys,   \
 	    sudo_debug_rval);						       \
-	return (void *)sudo_debug_rval;					       \
+	return sudo_debug_rval;						       \
     } while (0)
 
 /*

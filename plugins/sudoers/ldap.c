@@ -1473,7 +1473,7 @@ sudo_krb5_ccname_path(const char *old_ccname)
 	"ccache %s -> %s", old_ccname, ccname);
 
     /* Credential cache must be a fully-qualified path name. */
-    debug_return_str(*ccname == '/' ? ccname : NULL);
+    debug_return_const_str(*ccname == '/' ? ccname : NULL);
 }
 
 static bool
