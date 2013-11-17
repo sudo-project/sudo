@@ -2205,6 +2205,7 @@ AC_CHECK_TYPE(rsize_t, size_t)
 AC_CHECK_TYPE(errno_t, int)
 SUDO_UID_T_LEN
 SUDO_SOCK_SA_LEN
+SUDO_SOCK_SIN_LEN
 dnl
 dnl Check for utmp/utmpx struct members.
 dnl We need to include OSDEFS for glibc which only has __e_termination

@@ -602,6 +602,9 @@
 /* Define to 1 if `pr_ttydev' is a member of `struct psinfo'. */
 #undef HAVE_STRUCT_PSINFO_PR_TTYDEV
 
+/* Define if your struct sockaddr_in has a sin_len field. */
+#undef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
+
 /* Define if your struct sockaddr has an sa_len field. */
 #undef HAVE_STRUCT_SOCKADDR_SA_LEN
 

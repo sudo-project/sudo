@@ -140,7 +140,7 @@ static const char * const gai_errors[] = {
 };
 
 /* Macro to set the len attribute of sockaddr_in. */
-#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
 # define sin_set_length(s) ((s)->sin_len = sizeof(struct sockaddr_in))
 #else
 # define sin_set_length(s) /* empty */

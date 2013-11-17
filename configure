@@ -16498,6 +16498,19 @@ $as_echo "#define HAVE_STRUCT_SOCKADDR_SA_LEN 1" >>confdefs.h
 fi
 
 
+
+    ac_fn_c_check_member "$LINENO" "struct sockaddr_in" "sin_len" "ac_cv_member_struct_sockaddr_in_sin_len" "
+#	  include <sys/types.h>
+#	  include <sys/socket.h>
+
+"
+if test "x$ac_cv_member_struct_sockaddr_in_sin_len" = xyes; then :
+
+$as_echo "#define HAVE_STRUCT_SOCKADDR_IN_SIN_LEN 1" >>confdefs.h
+
+fi
+
+
 _CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS $OSDEFS"
 if test $ac_cv_header_utmpx_h = "yes"; then

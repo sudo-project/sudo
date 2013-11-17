@@ -79,8 +79,8 @@ sudo_ev_base_free_impl(struct sudo_event_base *base)
 int
 sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
 {
-    debug_decl(sudo_ev_add_impl, SUDO_DEBUG_EVENT)
     struct pollfd *pfd;
+    debug_decl(sudo_ev_add_impl, SUDO_DEBUG_EVENT)
 
     /* If out of space in pfds array, realloc. */
     if (base->pfd_free == base->pfd_max) {

@@ -276,6 +276,18 @@ AC_DEFUN([SUDO_SOCK_SA_LEN], [
 )
 
 dnl
+dnl check for sin_len field in struct sockaddr_in
+dnl
+AC_DEFUN([SUDO_SOCK_SIN_LEN], [
+    AC_CHECK_MEMBER([struct sockaddr_in.sin_len],
+	[AC_DEFINE(HAVE_STRUCT_SOCKADDR_IN_SIN_LEN, 1, [Define if your struct sockaddr_in has a sin_len field.])],
+	[], [
+#	  include <sys/types.h>
+#	  include <sys/socket.h>]
+    )]
+)
+
+dnl
 dnl check for max length of uid_t in string representation.
 dnl we can't really trust UID_MAX or MAXUID since they may exist
 dnl only for backwards compatibility.
