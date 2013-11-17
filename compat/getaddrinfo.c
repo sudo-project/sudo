@@ -62,7 +62,7 @@
 #include "missing.h"
 
 /* We need access to h_errno to map errors from gethostbyname. */
-#if !HAVE_DECL_H_ERRNO
+#ifndef HAVE_DECL_H_ERRNO
 extern int h_errno;
 #endif
 
@@ -86,7 +86,7 @@ extern int h_errno;
  * with the system version.  Note that we don't rename the structures and
  * constants, but that should be okay (except possibly for gai_strerror).
  */
-#if TESTING
+#ifdef TESTING
 # define gai_strerror test_gai_strerror
 # define freeaddrinfo test_freeaddrinfo
 # define getaddrinfo  test_getaddrinfo
@@ -100,7 +100,7 @@ int test_getaddrinfo(const char *, const char *, const struct addrinfo *,
  * If the native platform doesn't support AI_NUMERICSERV or AI_NUMERICHOST,
  * pick some other values for them.
  */
-#if TESTING
+#ifdef TESTING
 # if AI_NUMERICSERV == 0
 #  undef AI_NUMERICSERV
 #  define AI_NUMERICSERV 0x0080
@@ -115,7 +115,7 @@ int test_getaddrinfo(const char *, const char *, const struct addrinfo *,
  * Value representing all of the hint flags set.  Linux uses flags up to
  * 0x0400, so be sure not to break when testing on that platform.
  */
-#if TESTING
+#ifdef TESTING
 # ifdef HAVE_GETADDRINFO
 #  define AI_INTERNAL_ALL 0x04ff
 # else

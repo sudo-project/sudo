@@ -458,7 +458,7 @@ get_process_ttyname(void)
 
     debug_return_str(tty);
 }
-#elif HAVE_PSTAT_GETPROC
+#elif defined(HAVE_PSTAT_GETPROC)
 /*
  * Return a string from ttyname() containing the tty to which the process is
  * attached or NULL if the process has no controlling tty.

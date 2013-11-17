@@ -2179,7 +2179,7 @@ AC_CHECK_TYPE([sig_atomic_t], [], [AC_DEFINE(sig_atomic_t, int)], [#include <sys
 AC_CHECK_TYPES([sigaction_t], [], [], [#include <sys/types.h>
 #include <signal.h>])
 AC_CHECK_TYPES([struct timespec], [], [], [#include <sys/types.h>
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h>
 #endif
 #include <time.h>])

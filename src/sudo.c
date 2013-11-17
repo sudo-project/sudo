@@ -54,7 +54,7 @@
 #include <signal.h>
 #include <grp.h>
 #include <pwd.h>
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
 #ifdef HAVE_LOGIN_CAP_H
@@ -991,7 +991,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	    details->euid);
 	goto done;
     }
-#elif HAVE_SETREUID
+#elif defined(HAVE_SETREUID)
     if (setreuid(details->uid, details->euid) != 0) {
 	warning(_("unable to change to runas uid (%u, %u)"),
 	    (unsigned int)details->uid, (unsigned int)details->euid);

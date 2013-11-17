@@ -56,7 +56,7 @@
 #else
 # include "compat/stdbool.h"
 #endif
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
 #ifndef HAVE_STRUCT_TIMESPEC
@@ -115,7 +115,7 @@ lock_file(int fd, int lockit)
     }
     debug_return_bool(lockf(fd, op, 0) == 0);
 }
-#elif HAVE_FLOCK
+#elif defined(HAVE_FLOCK)
 bool
 lock_file(int fd, int lockit)
 {
