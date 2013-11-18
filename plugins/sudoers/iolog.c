@@ -438,7 +438,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     if (runas_uid_str != NULL) {
 	id = atoid(runas_uid_str, NULL, NULL, &errstr);
 	if (errstr != NULL)
-	    warningx("runas uid %s: %s", runas_uid_str, _(errstr));
+	    warningx("runas uid %s: %s", runas_uid_str, U_(errstr));
 	else
 	    runas_uid = (uid_t)id;
     }
@@ -447,7 +447,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     if (runas_gid_str != NULL) {
 	id = atoid(runas_gid_str, NULL, NULL, &errstr);
 	if (errstr != NULL)
-	    warningx("runas gid %s: %s", runas_gid_str, _(errstr));
+	    warningx("runas gid %s: %s", runas_gid_str, U_(errstr));
 	else
 	    runas_gid = (gid_t)id;
     }

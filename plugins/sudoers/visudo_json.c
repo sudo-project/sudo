@@ -569,7 +569,7 @@ print_defaults_json(int indent, bool need_comma)
 		break;
 	}
 	if (!cur->name) {
-	    warningx(_("unknown defaults entry `%s'"), def->var);
+	    warningx(U_("unknown defaults entry `%s'"), def->var);
 	    /* XXX - just pass it through as a string anyway? */
 	    continue;
 	}
@@ -943,13 +943,13 @@ export_sudoers(char *sudoers_path, bool quiet, bool strict)
 	sudoers_path = "stdin";
     } else if ((sudoersin = fopen(sudoers_path, "r")) == NULL) {
 	if (!quiet)
-	    warning(_("unable to open %s"), sudoers_path);
+	    warning(U_("unable to open %s"), sudoers_path);
 	goto done;
     }
     init_parser(sudoers_path, quiet);
     if (sudoersparse() && !parse_error) {
 	if (!quiet)
-	    warningx(_("failed to parse %s file, unknown error"), sudoers_path);
+	    warningx(U_("failed to parse %s file, unknown error"), sudoers_path);
 	parse_error = true;
 	errorfile = sudoers_path;
     }

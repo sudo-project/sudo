@@ -252,14 +252,14 @@ static int sudo_sss_open(struct sudo_nss *nss)
     /* Load symbols */
     handle->ssslib = dlopen(path, RTLD_LAZY);
     if (handle->ssslib == NULL) {
-	warningx(_("unable to dlopen %s: %s"), path, dlerror());
-	warningx(_("unable to initialize SSS source. Is SSSD installed on your machine?"));
+	warningx(U_("unable to dlopen %s: %s"), path, dlerror());
+	warningx(U_("unable to initialize SSS source. Is SSSD installed on your machine?"));
 	debug_return_int(EFAULT);
     }
 
     handle->fn_send_recv = dlsym(handle->ssslib, "sss_sudo_send_recv");
     if (handle->fn_send_recv == NULL) {
-	warningx(_("unable to find symbol \"%s\" in %s"), path,
+	warningx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_send_recv");
 	debug_return_int(EFAULT);
     }
@@ -267,28 +267,28 @@ static int sudo_sss_open(struct sudo_nss *nss)
     handle->fn_send_recv_defaults =
 	dlsym(handle->ssslib, "sss_sudo_send_recv_defaults");
     if (handle->fn_send_recv_defaults == NULL) {
-	warningx(_("unable to find symbol \"%s\" in %s"), path,
+	warningx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_send_recv_defaults");
 	debug_return_int(EFAULT);
     }
 
     handle->fn_free_result = dlsym(handle->ssslib, "sss_sudo_free_result");
     if (handle->fn_free_result == NULL) {
-	warningx(_("unable to find symbol \"%s\" in %s"), path,
+	warningx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_free_result");
 	debug_return_int(EFAULT);
     }
 
     handle->fn_get_values = dlsym(handle->ssslib, "sss_sudo_get_values");
     if (handle->fn_get_values == NULL) {
-	warningx(_("unable to find symbol \"%s\" in %s"), path,
+	warningx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_get_values");
 	debug_return_int(EFAULT);
     }
 
     handle->fn_free_values = dlsym(handle->ssslib, "sss_sudo_free_values");
     if (handle->fn_free_values == NULL) {
-	warningx(_("unable to find symbol \"%s\" in %s"), path,
+	warningx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_free_values");
 	debug_return_int(EFAULT);
     }

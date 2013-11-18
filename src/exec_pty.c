@@ -181,7 +181,7 @@ pty_setup(uid_t uid, const char *tty, const char *utmp_user)
     if (io_fds[SFD_USERTTY] != -1) {
 	if (!get_pty(&io_fds[SFD_MASTER], &io_fds[SFD_SLAVE],
 	    slavename, sizeof(slavename), uid))
-	    fatal(_("unable to allocate pty"));
+	    fatal(U_("unable to allocate pty"));
 	/* Add entry to utmp/utmpx? */
 	if (utmp_user != NULL)
 	    utmp_login(tty, slavename, io_fds[SFD_SLAVE], utmp_user);
@@ -504,12 +504,12 @@ io_callback(int fd, int what, void *v)
 		if (iob->wevent != NULL &&
 		    (foreground || !USERTTY_EVENT(iob->wevent))) {
 		    if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
-			fatal(_("unable to add event to queue"));
+			fatal(U_("unable to add event to queue"));
 		}
 		/* Re-enable reader if buffer is not full. */
 		if (iob->len != sizeof(iob->buf)) {
 		    if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
-			fatal(_("unable to add event to queue"));
+			fatal(U_("unable to add event to queue"));
 		}
 		break;
 	}
@@ -567,14 +567,14 @@ io_callback(int fd, int what, void *v)
 	    /* Re-enable writer if buffer is not empty. */
 	    if (iob->len > iob->off) {
 		if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
-		    fatal(_("unable to add event to queue"));
+		    fatal(U_("unable to add event to queue"));
 	    }
 	    /* Enable reader if buffer is not full. */
 	    if (iob->revent != NULL &&
 		(ttymode == TERM_RAW || !USERTTY_EVENT(iob->revent))) {
 		if (iob->len != sizeof(iob->buf)) {
 		    if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
-			fatal(_("unable to add event to queue"));
+			fatal(U_("unable to add event to queue"));
 		}
 	    }
 	}
@@ -679,7 +679,7 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "stdin not a tty, creating a pipe");
 	pipeline = true;
 	if (pipe(io_pipe[STDIN_FILENO]) != 0)
-	    fatal(_("unable to create pipe"));
+	    fatal(U_("unable to create pipe"));
 	io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
 	    log_stdin, &iobufs);
 	io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
@@ -688,7 +688,7 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "stdout not a tty, creating a pipe");
 	pipeline = true;
 	if (pipe(io_pipe[STDOUT_FILENO]) != 0)
-	    fatal(_("unable to create pipe"));
+	    fatal(U_("unable to create pipe"));
 	io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
 	    log_stdout, &iobufs);
 	io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
@@ -696,7 +696,7 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
     if (io_fds[SFD_STDERR] == -1 || !isatty(STDERR_FILENO)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "stderr not a tty, creating a pipe");
 	if (pipe(io_pipe[STDERR_FILENO]) != 0)
-	    fatal(_("unable to create pipe"));
+	    fatal(U_("unable to create pipe"));
 	io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
 	    log_stderr, &iobufs);
 	io_fds[SFD_STDERR] = io_pipe[STDERR_FILENO][1];
@@ -732,7 +732,7 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
 		n = term_raw(io_fds[SFD_USERTTY], 0);
 	    } while (!n && errno == EINTR);
 	    if (!n)
-		fatal(_("unable to set terminal to raw mode"));
+		fatal(U_("unable to set terminal to raw mode"));
 	}
     }
 
@@ -741,7 +741,7 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
      * or certain pam modules won't be able to track their state.
      */
     if (policy_init_session(details) != true)
-	fatalx(_("policy plugin failed session initialization"));
+	fatalx(U_("policy plugin failed session initialization"));
 
     /*
      * Block some signals until cmnd_pid is set in the parent to avoid a
@@ -757,7 +757,7 @@ fork_pty(struct command_details *details, int sv[], sigset_t *omask)
     child = sudo_debug_fork();
     switch (child) {
     case -1:
-	fatal(_("unable to fork"));
+	fatal(U_("unable to fork"));
 	break;
     case 0:
 	/* child */
@@ -867,7 +867,7 @@ add_io_events(struct sudo_event_base *evbase)
 		    "added I/O revent %p, fd %d, events %d",
 		    iob->revent, iob->revent->fd, iob->revent->events);
 		if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
-		    fatal(_("unable to add event to queue"));
+		    fatal(U_("unable to add event to queue"));
 	    }
 	}
 	if (iob->wevent != NULL &&
@@ -877,7 +877,7 @@ add_io_events(struct sudo_event_base *evbase)
 		    "added I/O wevent %p, fd %d, events %d",
 		    iob->wevent, iob->wevent->fd, iob->wevent->events);
 		if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
-		    fatal(_("unable to add event to queue"));
+		    fatal(U_("unable to add event to queue"));
 	    }
 	}
     }
@@ -922,14 +922,14 @@ del_io_events(void)
 	if (iob->revent != NULL && !USERTTY_EVENT(iob->revent)) {
 	    if (iob->len != sizeof(iob->buf)) {
 		if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
-		    fatal(_("unable to add event to queue"));
+		    fatal(U_("unable to add event to queue"));
 	    }
 	}
 	/* Flush any write buffers with data in them. */
 	if (iob->wevent != NULL) {
 	    if (iob->len > iob->off) {
 		if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
-		    fatal(_("unable to add event to queue"));
+		    fatal(U_("unable to add event to queue"));
 	    }
 	}
     }
@@ -1088,7 +1088,7 @@ mon_signal_pipe_cb(int fd, int what, void *v)
     n = read(fd, &signo, sizeof(signo));
     if (n == -1) {
 	if (errno != EINTR && errno != EAGAIN) {
-	    warning(_("error reading from signal pipe"));
+	    warning(U_("error reading from signal pipe"));
 	    sudo_ev_loopbreak(mc->evbase);
 	}
     } else {
@@ -1121,7 +1121,7 @@ mon_errpipe_cb(int fd, int what, void *v)
     n = read(fd, mc->cstat, sizeof(struct command_status));
     if (n == -1) {
 	if (errno != EINTR && errno != EAGAIN) {
-	    warning(_("error reading from pipe"));
+	    warning(U_("error reading from pipe"));
 	    sudo_ev_loopbreak(mc->evbase);
 	}
     } else {
@@ -1146,7 +1146,7 @@ mon_backchannel_cb(int fd, int what, void *v)
 	if (n == -1) {
 	    if (errno == EINTR || errno == EAGAIN)
 		debug_return;
-	    warning(_("error reading from socketpair"));
+	    warning(U_("error reading from socketpair"));
 	} else {
 	    /* short read or EOF, parent process died? */
 	}
@@ -1155,7 +1155,7 @@ mon_backchannel_cb(int fd, int what, void *v)
 	if (cstmp.type == CMD_SIGNO) {
 	    deliver_signal(cmnd_pid, cstmp.val, true);
 	} else {
-	    warningx(_("unexpected reply type on backchannel: %d"), cstmp.type);
+	    warningx(U_("unexpected reply type on backchannel: %d"), cstmp.type);
 	}
     }
     debug_return;
@@ -1189,7 +1189,7 @@ exec_monitor(struct command_details *details, int backchannel)
      * the event loop.
      */
     if (pipe_nonblock(signal_pipe) != 0)
-	fatal(_("unable to create pipe"));
+	fatal(U_("unable to create pipe"));
 
     /* Reset SIGWINCH and SIGALRM. */
     memset(&sa, 0, sizeof(sa));
@@ -1245,7 +1245,7 @@ exec_monitor(struct command_details *details, int backchannel)
     if (io_fds[SFD_SLAVE] != -1) {
 #ifdef TIOCSCTTY
 	if (ioctl(io_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0)
-	    fatal(_("unable to set controlling tty"));
+	    fatal(U_("unable to set controlling tty"));
 #else
 	/* Set controlling tty by reopening slave. */
 	if ((n = open(slavename, O_RDWR)) >= 0)
@@ -1266,10 +1266,10 @@ exec_monitor(struct command_details *details, int backchannel)
 
     /* Start command and wait for it to stop or exit */
     if (pipe(errpipe) == -1)
-	fatal(_("unable to create pipe"));
+	fatal(U_("unable to create pipe"));
     cmnd_pid = sudo_debug_fork();
     if (cmnd_pid == -1) {
-	warning(_("unable to fork"));
+	warning(U_("unable to fork"));
 	goto bad;
     }
     if (cmnd_pid == 0) {
@@ -1331,21 +1331,21 @@ exec_monitor(struct command_details *details, int backchannel)
     if (mc.signal_pipe_event == NULL)
 	fatal(NULL);
     if (sudo_ev_add(evbase, mc.signal_pipe_event, NULL, false) == -1)
-	fatal(_("unable to add event to queue"));
+	fatal(U_("unable to add event to queue"));
 
     mc.errpipe_event = sudo_ev_alloc(errpipe[0],
 	SUDO_EV_READ|SUDO_EV_PERSIST, mon_errpipe_cb, &mc);
     if (mc.errpipe_event == NULL)
 	fatal(NULL);
     if (sudo_ev_add(evbase, mc.errpipe_event, NULL, false) == -1)
-	fatal(_("unable to add event to queue"));
+	fatal(U_("unable to add event to queue"));
 
     mc.backchannel_event = sudo_ev_alloc(backchannel,
 	SUDO_EV_READ|SUDO_EV_PERSIST, mon_backchannel_cb, &mc);
     if (mc.backchannel_event == NULL)
 	fatal(NULL);
     if (sudo_ev_add(evbase, mc.backchannel_event, NULL, false) == -1)
-	fatal(_("unable to add event to queue"));
+	fatal(U_("unable to add event to queue"));
 
     /*
      * Wait for errno on pipe, signal on backchannel or for SIGCHLD.

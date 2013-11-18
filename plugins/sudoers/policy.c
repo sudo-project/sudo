@@ -108,14 +108,14 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 		p = *cur + sizeof("sudoers_uid=") - 1;
 		sudoers_uid = (uid_t) atoid(p, NULL, NULL, &errstr);
 		if (errstr != NULL)
-		    fatalx(_("%s: %s"), *cur, _(errstr));
+		    fatalx(U_("%s: %s"), *cur, U_(errstr));
 		continue;
 	    }
 	    if (MATCHES(*cur, "sudoers_gid=")) {
 		p = *cur + sizeof("sudoers_gid=") - 1;
 		sudoers_gid = (gid_t) atoid(p, NULL, NULL, &errstr);
 		if (errstr != NULL)
-		    fatalx(_("%s: %s"), *cur, _(errstr));
+		    fatalx(U_("%s: %s"), *cur, U_(errstr));
 		continue;
 	    }
 	    if (MATCHES(*cur, "sudoers_mode=")) {
@@ -123,10 +123,10 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 		p = *cur + sizeof("sudoers_mode=") - 1;
 		lval = strtol(p, &ep, 8);
 		if (*p == '\0' || *ep != '\0')
-		    fatalx(_("%s: %s"), *cur, _("invalid value"));
+		    fatalx(U_("%s: %s"), *cur, U_("invalid value"));
 		if ((errno == ERANGE && (lval == LONG_MAX || lval == LONG_MIN))
 		    || (lval > 0777 || lval < 0))
-		    fatalx(_("%s: %s"), *cur, _("value out of range"));
+		    fatalx(U_("%s: %s"), *cur, U_("value out of range"));
 		sudoers_mode = (mode_t) lval;
 		continue;
 	    }
@@ -149,10 +149,10 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    p = *cur + sizeof("closefrom=") - 1;
 	    lval = strtol(p, &ep, 10);
 	    if (*p == '\0' || *ep != '\0')
-		fatalx(_("%s: %s"), *cur, _("invalid value"));
+		fatalx(U_("%s: %s"), *cur, U_("invalid value"));
 	    if ((errno == ERANGE && (lval == LONG_MAX || lval == LONG_MIN))
 		|| (lval > INT_MAX || lval < 3))
-		fatalx(_("%s: %s"), *cur, _("value out of range"));
+		fatalx(U_("%s: %s"), *cur, U_("value out of range"));
 	    user_closefrom = (int) lval;
 	    continue;
 	}
@@ -269,10 +269,10 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    p = *cur + sizeof("max_groups=") - 1;
 	    lval = strtol(p, &ep, 10);
 	    if (*p == '\0' || *ep != '\0')
-		fatalx(_("%s: %s"), *cur, _("invalid value"));
+		fatalx(U_("%s: %s"), *cur, U_("invalid value"));
 	    if ((errno == ERANGE && (lval == LONG_MAX || lval == LONG_MIN))
 		|| (lval > INT_MAX || lval <= 0))
-		fatalx(_("%s: %s"), *cur, _("value out of range"));
+		fatalx(U_("%s: %s"), *cur, U_("value out of range"));
 	    sudo_user.max_groups = (int) lval;
 	    continue;
 	}
@@ -291,14 +291,14 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    p = *cur + sizeof("uid=") - 1;
 	    user_uid = (uid_t) atoid(p, NULL, NULL, &errstr);
 	    if (errstr != NULL)
-		fatalx(_("%s: %s"), *cur, _(errstr));
+		fatalx(U_("%s: %s"), *cur, U_(errstr));
 	    continue;
 	}
 	if (MATCHES(*cur, "gid=")) {
 	    p = *cur + sizeof("gid=") - 1;
 	    user_gid = (gid_t) atoid(p, NULL, NULL, &errstr);
 	    if (errstr != NULL)
-		fatalx(_("%s: %s"), *cur, _(errstr));
+		fatalx(U_("%s: %s"), *cur, U_(errstr));
 	    continue;
 	}
 	if (MATCHES(*cur, "groups=")) {
@@ -326,10 +326,10 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    p = *cur + sizeof("lines=") - 1;
 	    lval = strtol(p, &ep, 10);
 	    if (*p == '\0' || *ep != '\0')
-		fatalx(_("%s: %s"), *cur, _("invalid value"));
+		fatalx(U_("%s: %s"), *cur, U_("invalid value"));
 	    if ((errno == ERANGE && (lval == LONG_MAX || lval == LONG_MIN))
 		|| (lval > INT_MAX || lval <= 0))
-		fatalx(_("%s: %s"), *cur, _("value out of range"));
+		fatalx(U_("%s: %s"), *cur, U_("value out of range"));
 	    sudo_user.lines = (int) lval;
 	    continue;
 	}
@@ -338,10 +338,10 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    p = *cur + sizeof("cols=") - 1;
 	    lval = strtol(p, &ep, 10);
 	    if (*p == '\0' || *ep != '\0')
-		fatalx(_("%s: %s"), *cur, _("invalid value"));
+		fatalx(U_("%s: %s"), *cur, U_("invalid value"));
 	    if ((errno == ERANGE && (lval == LONG_MAX || lval == LONG_MIN))
 		|| (lval > INT_MAX || lval <= 0))
-		fatalx(_("%s: %s"), *cur, _("value out of range"));
+		fatalx(U_("%s: %s"), *cur, U_("value out of range"));
 	    sudo_user.cols = (int) lval;
 	    continue;
 	}
@@ -349,7 +349,7 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 	    p = *cur + sizeof("sid=") - 1;
 	    sudo_user.sid = (pid_t) atoid(p, NULL, NULL, &errstr);
 	    if (errstr != NULL)
-		fatalx(_("%s: %s"), *cur, _(errstr));
+		fatalx(U_("%s: %s"), *cur, U_(errstr));
 	    continue;
 	}
     }
@@ -464,14 +464,14 @@ sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask,
 	    (unsigned int)runas_pw->pw_gid;
 	len = snprintf(cp, glsize - (cp - gid_list), "%u", egid);
 	if (len < 0 || (size_t)len >= glsize - (cp - gid_list))
-	    fatalx(_("internal error, %s overflow"), "runas_groups");
+	    fatalx(U_("internal error, %s overflow"), "runas_groups");
 	cp += len;
 	for (i = 0; i < grlist->ngids; i++) {
 	    if (grlist->gids[i] != egid) {
 		len = snprintf(cp, glsize - (cp - gid_list), ",%u",
 		     (unsigned int) grlist->gids[i]);
 		if (len < 0 || (size_t)len >= glsize - (cp - gid_list))
-		    fatalx(_("internal error, %s overflow"), "runas_groups");
+		    fatalx(U_("internal error, %s overflow"), "runas_groups");
 		cp += len;
 	    }
 	}
@@ -561,7 +561,7 @@ sudoers_policy_close(int exit_status, int error_code)
     /* We do not currently log the exit status. */
     if (error_code) {
 	errno = error_code;
-	warning(_("unable to execute %s"), safe_cmnd);
+	warning(U_("unable to execute %s"), safe_cmnd);
     }
 
     /* Close the session we opened in sudoers_policy_init_session(). */
@@ -679,7 +679,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
     if (list_user) {
 	list_pw = sudo_getpwnam(list_user);
 	if (list_pw == NULL) {
-	    warningx(_("unknown user: %s"), list_user);
+	    warningx(U_("unknown user: %s"), list_user);
 	    debug_return_bool(-1);
 	}
     }

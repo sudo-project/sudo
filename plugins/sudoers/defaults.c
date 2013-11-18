@@ -204,7 +204,7 @@ set_default(char *var, char *val, int op)
 	    break;
     }
     if (!cur->name) {
-	warningx(_("unknown defaults entry `%s'"), var);
+	warningx(U_("unknown defaults entry `%s'"), var);
 	debug_return_bool(false);
     }
 
@@ -212,20 +212,20 @@ set_default(char *var, char *val, int op)
 	case T_LOGFAC:
 	    if (!store_syslogfac(val, cur, op)) {
 		if (val)
-		    warningx(_("value `%s' is invalid for option `%s'"),
+		    warningx(U_("value `%s' is invalid for option `%s'"),
 			val, var);
 		else
-		    warningx(_("no value specified for `%s'"), var);
+		    warningx(U_("no value specified for `%s'"), var);
 		debug_return_bool(false);
 	    }
 	    break;
 	case T_LOGPRI:
 	    if (!store_syslogpri(val, cur, op)) {
 		if (val)
-		    warningx(_("value `%s' is invalid for option `%s'"),
+		    warningx(U_("value `%s' is invalid for option `%s'"),
 			val, var);
 		else
-		    warningx(_("no value specified for `%s'"), var);
+		    warningx(U_("no value specified for `%s'"), var);
 		debug_return_bool(false);
 	    }
 	    break;
@@ -233,16 +233,16 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    warningx(_("no value specified for `%s'"), var);
+		    warningx(U_("no value specified for `%s'"), var);
 		    debug_return_bool(false);
 		}
 	    }
 	    if (ISSET(cur->type, T_PATH) && val && *val != '/') {
-		warningx(_("values for `%s' must start with a '/'"), var);
+		warningx(U_("values for `%s' must start with a '/'"), var);
 		debug_return_bool(false);
 	    }
 	    if (!store_str(val, cur, op)) {
-		warningx(_("value `%s' is invalid for option `%s'"), val, var);
+		warningx(U_("value `%s' is invalid for option `%s'"), val, var);
 		debug_return_bool(false);
 	    }
 	    break;
@@ -250,12 +250,12 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    warningx(_("no value specified for `%s'"), var);
+		    warningx(U_("no value specified for `%s'"), var);
 		    debug_return_bool(false);
 		}
 	    }
 	    if (!store_int(val, cur, op)) {
-		warningx(_("value `%s' is invalid for option `%s'"), val, var);
+		warningx(U_("value `%s' is invalid for option `%s'"), val, var);
 		debug_return_bool(false);
 	    }
 	    break;
@@ -263,12 +263,12 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    warningx(_("no value specified for `%s'"), var);
+		    warningx(U_("no value specified for `%s'"), var);
 		    debug_return_bool(false);
 		}
 	    }
 	    if (!store_uint(val, cur, op)) {
-		warningx(_("value `%s' is invalid for option `%s'"), val, var);
+		warningx(U_("value `%s' is invalid for option `%s'"), val, var);
 		debug_return_bool(false);
 	    }
 	    break;
@@ -276,12 +276,12 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    warningx(_("no value specified for `%s'"), var);
+		    warningx(U_("no value specified for `%s'"), var);
 		    debug_return_bool(false);
 		}
 	    }
 	    if (!store_float(val, cur, op)) {
-		warningx(_("value `%s' is invalid for option `%s'"), val, var);
+		warningx(U_("value `%s' is invalid for option `%s'"), val, var);
 		debug_return_bool(false);
 	    }
 	    break;
@@ -289,18 +289,18 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    warningx(_("no value specified for `%s'"), var);
+		    warningx(U_("no value specified for `%s'"), var);
 		    debug_return_bool(false);
 		}
 	    }
 	    if (!store_mode(val, cur, op)) {
-		warningx(_("value `%s' is invalid for option `%s'"), val, var);
+		warningx(U_("value `%s' is invalid for option `%s'"), val, var);
 		debug_return_bool(false);
 	    }
 	    break;
 	case T_FLAG:
 	    if (val) {
-		warningx(_("option `%s' does not take a value"), var);
+		warningx(U_("option `%s' does not take a value"), var);
 		debug_return_bool(false);
 	    }
 	    cur->sd_un.flag = op;
@@ -309,22 +309,22 @@ set_default(char *var, char *val, int op)
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
 		if (!ISSET(cur->type, T_BOOL) || op != false) {
-		    warningx(_("no value specified for `%s'"), var);
+		    warningx(U_("no value specified for `%s'"), var);
 		    debug_return_bool(false);
 		}
 	    }
 	    if (!store_list(val, cur, op)) {
-		warningx(_("value `%s' is invalid for option `%s'"), val, var);
+		warningx(U_("value `%s' is invalid for option `%s'"), val, var);
 		debug_return_bool(false);
 	    }
 	    break;
 	case T_TUPLE:
 	    if (!val && !ISSET(cur->type, T_BOOL)) {
-		warningx(_("no value specified for `%s'"), var);
+		warningx(U_("no value specified for `%s'"), var);
 		debug_return_bool(false);
 	    }
 	    if (!store_tuple(val, cur, op)) {
-		warningx(_("value `%s' is invalid for option `%s'"), val, var);
+		warningx(U_("value `%s' is invalid for option `%s'"), val, var);
 		debug_return_bool(false);
 	    }
 	    break;
@@ -590,7 +590,7 @@ check_defaults(int what, bool quiet)
 	}
 	if (cur->name == NULL) {
 	    if (!quiet)
-		warningx(_("unknown defaults entry `%s'"), def->var);
+		warningx(U_("unknown defaults entry `%s'"), def->var);
 	    rc = false;
 	}
     }

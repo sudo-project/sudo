@@ -85,38 +85,38 @@ set_project(struct passwd *pw)
 	case SETPROJ_ERR_TASK:
 	    switch (errno) {
 	    case EAGAIN:
-		warningx(_("resource control limit has been reached"));
+		warningx(U_("resource control limit has been reached"));
 		break;
 	    case ESRCH:
-		warningx(_("user \"%s\" is not a member of project \"%s\""),
+		warningx(U_("user \"%s\" is not a member of project \"%s\""),
 		    pw->pw_name, proj.pj_name);
 		break;
 	    case EACCES:
-		warningx(_("the invoking task is final"));
+		warningx(U_("the invoking task is final"));
 		break;
 	    default:
-		warningx(_("could not join project \"%s\""), proj.pj_name);
+		warningx(U_("could not join project \"%s\""), proj.pj_name);
 	    }
 	case SETPROJ_ERR_POOL:
 	    switch (errno) {
 	    case EACCES:
-		warningx(_("no resource pool accepting default bindings "
+		warningx(U_("no resource pool accepting default bindings "
 		    "exists for project \"%s\""), proj.pj_name);
 		break;
 	    case ESRCH:
-		warningx(_("specified resource pool does not exist for "
+		warningx(U_("specified resource pool does not exist for "
 		    "project \"%s\""), proj.pj_name);
 		break;
 	    default:
-		warningx(_("could not bind to default resource pool for "
+		warningx(U_("could not bind to default resource pool for "
 		    "project \"%s\""), proj.pj_name);
 	    }
 	    break;
 	default:
 	    if (errval <= 0) {
-		warningx(_("setproject failed for project \"%s\""), proj.pj_name);
+		warningx(U_("setproject failed for project \"%s\""), proj.pj_name);
 	    } else {
-		warningx(_("warning, resource control assignment failed for "
+		warningx(U_("warning, resource control assignment failed for "
 		    "project \"%s\""), proj.pj_name);
 	    }
 	}

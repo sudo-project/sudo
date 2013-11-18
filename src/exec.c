@@ -130,12 +130,12 @@ static int fork_cmnd(struct command_details *details, int sv[2])
      * or certain pam modules won't be able to track their state.
      */
     if (policy_init_session(details) != true)
-	fatalx(_("policy plugin failed session initialization"));
+	fatalx(U_("policy plugin failed session initialization"));
 
     cmnd_pid = sudo_debug_fork();
     switch (cmnd_pid) {
     case -1:
-	fatal(_("unable to fork"));
+	fatal(U_("unable to fork"));
 	break;
     case 0:
 	/* child */
@@ -306,7 +306,7 @@ exec_event_setup(int backchannel, struct exec_closure *ec)
     if (signal_event == NULL)
 	fatal(NULL);
     if (sudo_ev_add(evbase, signal_event, NULL, false) == -1)
-	fatal(_("unable to add event to queue"));
+	fatal(U_("unable to add event to queue"));
 
     /* Event for command status via backchannel. */
     backchannel_event = sudo_ev_alloc(backchannel,
@@ -314,7 +314,7 @@ exec_event_setup(int backchannel, struct exec_closure *ec)
     if (backchannel_event == NULL)
 	fatal(NULL);
     if (sudo_ev_add(evbase, backchannel_event, NULL, false) == -1)
-	fatal(_("unable to add event to queue"));
+	fatal(U_("unable to add event to queue"));
 
     /* The signal forwarding event gets added on demand. */
     sigfwd_event = sudo_ev_alloc(backchannel,
@@ -391,7 +391,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
      * Parent sends signal info to child and child sends back wait status.
      */
     if (socketpair(PF_UNIX, SOCK_STREAM, 0, sv) == -1)
-	fatal(_("unable to create sockets"));
+	fatal(U_("unable to create sockets"));
 
     /*
      * Signals to forward to the child process (excluding SIGALRM and SIGCHLD).
@@ -474,7 +474,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     if (log_io)
 	add_io_events(evbase);
     if (sudo_ev_loop(evbase, 0) == -1)
-	warning(_("error in event loop"));
+	warning(U_("error in event loop"));
     if (sudo_ev_got_break(evbase)) {
 	/* error from callback */
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
@@ -489,7 +489,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     if (ISSET(details->flags, CD_RBAC_ENABLED)) {
 	/* This is probably not needed in log_io mode. */
 	if (selinux_restore_tty() != 0)
-	    warningx(_("unable to restore tty label"));
+	    warningx(U_("unable to restore tty label"));
     }
 #endif
 
@@ -838,7 +838,7 @@ schedule_signal(struct sudo_event_base *evbase, int signo)
     TAILQ_INSERT_TAIL(&sigfwd_list, sigfwd, entries);
 
     if (sudo_ev_add(evbase, sigfwd_event, NULL, true) == -1)
-	fatal(_("unable to add event to queue"));
+	fatal(U_("unable to add event to queue"));
 
     debug_return;
 }

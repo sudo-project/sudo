@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,16 +23,11 @@
 
 #include "missing.h"
 #include "fatal.h"
+#include "gettext.h"
 
 /* No need to swap locales in the front end. */
-void
-warning_set_locale(void)
+char *
+warning_gettext(const char *msgid)
 {
-    return;
-}
-
-void
-warning_restore_locale(void)
-{
-    return;
+    return gettext(msgid);
 }

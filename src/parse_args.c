@@ -243,7 +243,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    break;
 		case 'C':
 		    if (atoi(optarg) < 3) {
-			warningx(_("the argument to -C must be a number greater than or equal to 3"));
+			warningx(U_("the argument to -C must be a number greater than or equal to 3"));
 			usage(1);
 		    }
 		    sudo_settings[ARG_CLOSEFROM].value = optarg;
@@ -405,11 +405,11 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 
     if (ISSET(flags, MODE_LOGIN_SHELL)) {
 	if (ISSET(flags, MODE_SHELL)) {
-	    warningx(_("you may not specify both the `-i' and `-s' options"));
+	    warningx(U_("you may not specify both the `-i' and `-s' options"));
 	    usage(1);
 	}
 	if (ISSET(flags, MODE_PRESERVE_ENV)) {
-	    warningx(_("you may not specify both the `-i' and `-E' options"));
+	    warningx(U_("you may not specify both the `-i' and `-E' options"));
 	    usage(1);
 	}
 	SET(flags, MODE_SHELL);
@@ -419,9 +419,9 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     if (mode == MODE_EDIT &&
        (ISSET(flags, MODE_PRESERVE_ENV) || env_add[0] != NULL)) {
 	if (ISSET(mode, MODE_PRESERVE_ENV))
-	    warningx(_("the `-E' option is not valid in edit mode"));
+	    warningx(U_("the `-E' option is not valid in edit mode"));
 	if (env_add[0] != NULL)
-	    warningx(_("you may not specify environment variables in edit mode"));
+	    warningx(U_("you may not specify environment variables in edit mode"));
 	usage(1);
     }
     if ((runas_user != NULL || runas_group != NULL) &&
@@ -429,11 +429,11 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	usage(1);
     }
     if (list_user != NULL && mode != MODE_LIST && mode != MODE_CHECK) {
-	warningx(_("the `-U' option may only be used with the `-l' option"));
+	warningx(U_("the `-U' option may only be used with the `-l' option"));
 	usage(1);
     }
     if (ISSET(tgetpass_flags, TGP_STDIN) && ISSET(tgetpass_flags, TGP_ASKPASS)) {
-	warningx(_("the `-A' and `-S' options may not be used together"));
+	warningx(U_("the `-A' and `-S' options may not be used together"));
 	usage(1);
     }
     if ((argc == 0 && mode == MODE_EDIT) ||
@@ -516,7 +516,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	argv--;
 	argv[0] = "sudoedit";
 #else
-	fatalx(_("sudoedit is not supported on this platform"));
+	fatalx(U_("sudoedit is not supported on this platform"));
 #endif
     }
 
@@ -589,7 +589,7 @@ usage_excl(int fatal)
 {
     debug_decl(usage_excl, SUDO_DEBUG_ARGS)
 
-    warningx(_("Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"));
+    warningx(U_("Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"));
     usage(fatal);
 }
 

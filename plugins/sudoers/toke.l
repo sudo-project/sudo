@@ -920,19 +920,19 @@ _push_include(char *path, bool isdir)
 		debug_return_bool(false);
 	    case SUDO_PATH_WRONG_OWNER:
 		if (sudoers_warnings) {
-		    warningx(_("%s is owned by uid %u, should be %u"),   
+		    warningx(U_("%s is owned by uid %u, should be %u"),   
 			path, (unsigned int) sb.st_uid,
 			(unsigned int) sudoers_uid);
 		}
 		debug_return_bool(false);
 	    case SUDO_PATH_WORLD_WRITABLE:
 		if (sudoers_warnings) {
-		    warningx(_("%s is world writable"), path);
+		    warningx(U_("%s is world writable"), path);
 		}
 		debug_return_bool(false);
 	    case SUDO_PATH_GROUP_WRITABLE:
 		if (sudoers_warnings) {
-		    warningx(_("%s is owned by gid %u, should be %u"),
+		    warningx(U_("%s is owned by gid %u, should be %u"),
 			path, (unsigned int) sb.st_gid,
 			(unsigned int) sudoers_gid);
 		}

@@ -605,7 +605,7 @@ digest_matches(char *file, struct sudo_digest *sd)
 	}
     }
     if (func == NULL) {
-	warningx(_("unsupported digest type %d for %s"), sd->digest_type, file);
+	warningx(U_("unsupported digest type %d for %s"), sd->digest_type, file);
 	debug_return_bool(false);
     }
     if (strlen(sd->digest_str) == func->digest_len * 2) {
@@ -635,7 +635,7 @@ digest_matches(char *file, struct sudo_digest *sd)
 	func->update(&ctx, buf, nread);
     }
     if (ferror(fp)) {
-	warningx(_("%s: read error"), file);
+	warningx(U_("%s: read error"), file);
 	fclose(fp);
 	debug_return_bool(false);
     }
@@ -644,7 +644,7 @@ digest_matches(char *file, struct sudo_digest *sd)
 
     debug_return_bool(memcmp(file_digest, sudoers_digest, func->digest_len) == 0);
 bad_format:
-    warningx(_("digest for %s (%s) is not in %s form"), file,
+    warningx(U_("digest for %s (%s) is not in %s form"), file,
 	sd->digest_str, func->digest_name);
     debug_return_bool(false);
 }

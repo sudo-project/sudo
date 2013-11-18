@@ -160,7 +160,7 @@ sudoers_policy_init(void *info, char * const envp[])
         }
     }
     if (sources == 0) {
-	warningx(_("no valid sudoers sources found, quitting"));
+	warningx(U_("no valid sudoers sources found, quitting"));
 	debug_return_bool(-1);
     }
 
@@ -222,7 +222,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
-        warningx(_("sudoers specifies that root is not allowed to sudo"));
+        warningx(U_("sudoers specifies that root is not allowed to sudo"));
         goto bad;
     }    
 
@@ -261,7 +261,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Check for -C overriding def_closefrom. */
     if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
 	if (!def_closefrom_override) {
-	    warningx(_("you are not permitted to use the -C option"));
+	    warningx(U_("you are not permitted to use the -C option"));
 	    goto bad;
 	}
 	def_closefrom = user_closefrom;
@@ -325,7 +325,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Bail if a tty is required and we don't have one.  */
     if (def_requiretty && !tty_present()) {
 	audit_failure(NewArgv, N_("no tty"));
-	warningx(_("sorry, you must have a tty to run sudo"));
+	warningx(U_("sorry, you must have a tty to run sudo"));
 	goto bad;
     }
 
@@ -374,15 +374,15 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Finally tell the user if the command did not exist. */
     if (cmnd_status == NOT_FOUND_DOT) {
 	audit_failure(NewArgv, N_("command in current directory"));
-	warningx(_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
+	warningx(U_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
 	goto bad;
     } else if (cmnd_status == NOT_FOUND) {
 	if (ISSET(sudo_mode, MODE_CHECK)) {
 	    audit_failure(NewArgv, N_("%s: command not found"), NewArgv[0]);
-	    warningx(_("%s: command not found"), NewArgv[0]);
+	    warningx(U_("%s: command not found"), NewArgv[0]);
 	} else {
 	    audit_failure(NewArgv, N_("%s: command not found"), user_cmnd);
-	    warningx(_("%s: command not found"), user_cmnd);
+	    warningx(U_("%s: command not found"), user_cmnd);
 	}
 	goto bad;
     }
@@ -390,7 +390,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* If user specified env vars make sure sudoers allows it. */
     if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
 	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
-	    warningx(_("sorry, you are not allowed to preserve the environment"));
+	    warningx(U_("sorry, you are not allowed to preserve the environment"));
 	    goto bad;
 	} else
 	    validate_env_vars(sudo_user.env_vars);
@@ -558,7 +558,7 @@ init_vars(char * const envp[])
 	     * YP/NIS/NIS+/LDAP/etc daemon has died.
 	     */
 	    if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE)
-		fatalx(_("unknown uid: %u"), (unsigned int) user_uid);
+		fatalx(U_("unknown uid: %u"), (unsigned int) user_uid);
 
 	    /* Need to make a fake struct passwd for the call to log_fatal(). */
 	    sudo_user.pw = sudo_mkpwent(user_name, user_uid, user_gid, NULL, NULL);
@@ -652,7 +652,7 @@ set_cmnd(void)
 		for (to = user_args, av = NewArgv + 1; *av; av++) {
 		    n = strlcpy(to, *av, size - (to - user_args));
 		    if (n >= size - (to - user_args))
-			fatalx(_("internal error, %s overflow"), "set_cmnd()");
+			fatalx(U_("internal error, %s overflow"), "set_cmnd()");
 		    to += n;
 		    *to++ = ' ';
 		}
@@ -761,7 +761,7 @@ set_loginclass(struct passwd *pw)
     if (login_class && strcmp(login_class, "-") != 0) {
 	if (user_uid != 0 &&
 	    strcmp(runas_user ? runas_user : def_runas_default, "root") != 0)
-	    fatalx(_("only root can use `-c %s'"), login_class);
+	    fatalx(U_("only root can use `-c %s'"), login_class);
     } else {
 	login_class = pw->pw_class;
 	if (!login_class || !*login_class)
@@ -1001,7 +1001,7 @@ find_editor(int nfiles, char **files, char ***argv_out)
     }
     if (!editor_path) {
 	audit_failure(NewArgv, N_("%s: command not found"), editor);
-	warningx(_("%s: command not found"), editor);
+	warningx(U_("%s: command not found"), editor);
     }
     debug_return_str(editor_path);
 }

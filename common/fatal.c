@@ -63,7 +63,7 @@ do_cleanup(void)
 }
 
 void
-fatal2(const char *fmt, ...)
+fatal_nodebug(const char *fmt, ...)
 {
     va_list ap;
 
@@ -78,7 +78,7 @@ fatal2(const char *fmt, ...)
 }
 
 void
-fatalx2(const char *fmt, ...)
+fatalx_nodebug(const char *fmt, ...)
 {
     va_list ap;
 
@@ -93,7 +93,7 @@ fatalx2(const char *fmt, ...)
 }
 
 void
-vfatal2(const char *fmt, va_list ap)
+vfatal_nodebug(const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
     do_cleanup();
@@ -104,7 +104,7 @@ vfatal2(const char *fmt, va_list ap)
 }
 
 void
-vfatalx2(const char *fmt, va_list ap)
+vfatalx_nodebug(const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
     do_cleanup();
@@ -115,7 +115,7 @@ vfatalx2(const char *fmt, va_list ap)
 }
 
 void
-warning2(const char *fmt, ...)
+warning_nodebug(const char *fmt, ...)
 {
     va_list ap;
 
@@ -125,7 +125,7 @@ warning2(const char *fmt, ...)
 }
 
 void
-warningx2(const char *fmt, ...)
+warningx_nodebug(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -134,13 +134,13 @@ warningx2(const char *fmt, ...)
 }
 
 void
-vwarning2(const char *fmt, va_list ap)
+vwarning_nodebug(const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
 }
 
 void
-vwarningx2(const char *fmt, va_list ap)
+vwarningx_nodebug(const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
 }

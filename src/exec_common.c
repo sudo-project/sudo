@@ -67,7 +67,7 @@ disable_execute(char *const envp[])
     /* Solaris privileges, remove PRIV_PROC_EXEC post-execve. */
     if (priv_set(PRIV_OFF, PRIV_LIMIT, "PRIV_PROC_EXEC", NULL) == 0)
 	debug_return_ptr(envp);
-    warning(_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
+    warning(U_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
 #endif /* HAVE_PRIV_SET */
 
 #ifdef _PATH_SUDO_NOEXEC

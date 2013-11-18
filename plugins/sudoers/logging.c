@@ -332,9 +332,9 @@ log_failure(int status, int flags)
 	 * their path to just contain a single dir.
 	 */
 	if (flags == NOT_FOUND)
-	    warningx(_("%s: command not found"), user_cmnd);
+	    warningx(U_("%s: command not found"), user_cmnd);
 	else if (flags == NOT_FOUND_DOT)
-	    warningx(_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
+	    warningx(U_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
     }
 
     debug_return;
@@ -491,18 +491,18 @@ vlog_warning(int flags, const char *fmt, va_list ap)
      * Tell the user (in their locale).
      */
     if (!ISSET(flags, NO_STDERR)) {
-	warning_set_locale();
+	sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
 	if (fmt == INCORRECT_PASSWORD_ATTEMPT) {
 	    int tries = va_arg(ap2, int);
-	    warningx2(ngettext("%d incorrect password attempt",
+	    warningx_nodebug(ngettext("%d incorrect password attempt",
 		"%d incorrect password attempts", tries), tries);
 	} else {
 	    if (ISSET(flags, USE_ERRNO))
-		vwarning2(_(fmt), ap2);
+		vwarning_nodebug(_(fmt), ap2);
 	    else
-		vwarningx2(_(fmt), ap2);
+		vwarningx_nodebug(_(fmt), ap2);
 	}
-	warning_restore_locale();
+	sudoers_setlocale(oldlocale, NULL);
 	va_end(ap2);
     }
 
@@ -579,7 +579,7 @@ send_mail(const char *fmt, ...)
     switch (pid = sudo_debug_fork()) {
 	case -1:
 	    /* Error. */
-	    fatal(_("unable to fork"));
+	    fatal(U_("unable to fork"));
 	    break;
 	case 0:
 	    /* Child. */
@@ -911,5 +911,5 @@ new_logline(const char *message, int serrno)
 
     debug_return_str(line);
 toobig:
-    fatalx(_("internal error: insufficient space for log line"));
+    fatalx(U_("internal error: insufficient space for log line"));
 }

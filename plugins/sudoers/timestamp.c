@@ -410,7 +410,7 @@ remove_timestamp(bool remove)
 	if (!remove) {
 	    timevalclear(&tv);
 	    if (touch(-1, path, &tv) == -1 && errno != ENOENT)
-		fatal(_("unable to reset %s to the Unix epoch"), path);
+		fatal(U_("unable to reset %s to the Unix epoch"), path);
 	}
     }
 

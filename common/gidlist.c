@@ -77,7 +77,7 @@ parse_gid_list(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp)
 	do {
 	    gids[ngids] = (GETGROUPS_T) atoid(cp, ",", &ep, &errstr);
 	    if (errstr != NULL) {
-		warningx(_("%s: %s"), cp, _(errstr));
+		warningx(U_("%s: %s"), cp, U_(errstr));
 		free(gids);
 		debug_return_int(-1);
 	    }

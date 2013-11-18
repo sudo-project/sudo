@@ -212,7 +212,7 @@ main(int argc, char *argv[])
 	argc -= 2;
     }
     if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL)
-	fatalx(_("unknown user: %s"), user_name);
+	fatalx(U_("unknown user: %s"), user_name);
 
     if (user_host == NULL) {
 	if (gethostname(hbuf, sizeof(hbuf)) != 0)
@@ -242,7 +242,7 @@ main(int argc, char *argv[])
 	for (to = user_args, from = argv; *from; from++) {
 	    n = strlcpy(to, *from, size - (to - user_args));
 	    if (n >= size - (to - user_args))
-		fatalx(_("internal error, %s overflow"), "init_vars()");
+		fatalx(U_("internal error, %s overflow"), "init_vars()");
 	    to += n;
 	    *to++ = ' ';
 	}
@@ -360,7 +360,7 @@ set_runaspw(const char *user)
 	    runas_pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
     } else {
 	if ((runas_pw = sudo_getpwnam(user)) == NULL)
-	    fatalx(_("unknown user: %s"), user);
+	    fatalx(U_("unknown user: %s"), user);
     }
 
     debug_return;
@@ -378,7 +378,7 @@ set_runasgr(const char *group)
 	    runas_gr = sudo_fakegrnam(group);
     } else {
 	if ((runas_gr = sudo_getgrnam(group)) == NULL)
-	    fatalx(_("unknown group: %s"), group);
+	    fatalx(U_("unknown group: %s"), group);
     }
 
     debug_return;

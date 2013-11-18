@@ -63,6 +63,13 @@
 #  define __printf0like(f, v)
 # endif
 #endif
+#ifndef __format_arg
+# if __GNUC_PREREQ__(2, 7)
+#  define __format_arg(f) 	__attribute__((__format_arg__ (f)))
+# else
+#  define __format_arg(f)
+# endif
+#endif
 
 /* Hint to compiler that returned pointer is unique (malloc but not realloc). */
 #ifndef __malloc_like

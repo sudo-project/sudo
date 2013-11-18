@@ -174,7 +174,7 @@ set_var_group_source(const char *entry, const char *conf_file)
     } else if (strcasecmp(entry, "dynamic") == 0) {
 	sudo_conf_data.group_source = GROUP_SOURCE_DYNAMIC;
     } else {
-	warningx(_("unsupported group source `%s' in %s, line %d"), entry,
+	warningx(U_("unsupported group source `%s' in %s, line %d"), entry,
 	    conf_file, conf_lineno);
     }
 }
@@ -188,7 +188,7 @@ set_var_max_groups(const char *entry, const char *conf_file)
     lval = strtol(entry, &ep, 10);
     if (*entry == '\0' || *ep != '\0' || lval <= 0 || lval > INT_MAX ||
 	(errno == ERANGE && lval == LONG_MAX)) {
-	warningx(_("invalid max groups `%s' in %s, line %d"), entry,
+	warningx(U_("invalid max groups `%s' in %s, line %d"), entry,
 		    conf_file, conf_lineno);
     } else {
 	sudo_conf_data.max_groups = (int)lval;
@@ -390,20 +390,20 @@ sudo_conf_read(const char *conf_file)
 	    case SUDO_PATH_MISSING:
 		/* Root should always be able to read sudo.conf. */
 		if (errno != ENOENT && geteuid() == ROOT_UID)
-		    warning(_("unable to stat %s"), conf_file);
+		    warning(U_("unable to stat %s"), conf_file);
 		goto done;
 	    case SUDO_PATH_BAD_TYPE:
-		warningx(_("%s is not a regular file"), conf_file);
+		warningx(U_("%s is not a regular file"), conf_file);
 		goto done;
 	    case SUDO_PATH_WRONG_OWNER:
-		warningx(_("%s is owned by uid %u, should be %u"),
+		warningx(U_("%s is owned by uid %u, should be %u"),
 		    conf_file, (unsigned int) sb.st_uid, ROOT_UID);
 		goto done;
 	    case SUDO_PATH_WORLD_WRITABLE:
-		warningx(_("%s is world writable"), conf_file);
+		warningx(U_("%s is world writable"), conf_file);
 		goto done;
 	    case SUDO_PATH_GROUP_WRITABLE:
-		warningx(_("%s is group writable"), conf_file);
+		warningx(U_("%s is group writable"), conf_file);
 		goto done;
 	    default:
 		/* NOTREACHED */
@@ -413,7 +413,7 @@ sudo_conf_read(const char *conf_file)
 
     if ((fp = fopen(conf_file, "r")) == NULL) {
 	if (errno != ENOENT && geteuid() == ROOT_UID)
-	    warning(_("unable to open %s"), conf_file);
+	    warning(U_("unable to open %s"), conf_file);
 	goto done;
     }
 
