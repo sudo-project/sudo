@@ -551,16 +551,28 @@ print_defaults_list_json(struct defaults *def, int indent)
     debug_return;
 }
 
+static int
+get_defaults_type(struct defaults *def)
+{
+    struct sudo_defs_types *cur;
+
+    /* Look up def in table to find its type. */
+    for (cur = sudo_defs_table; cur->name; cur++) {
+	if (strcmp(def->var, cur->name) == 0)
+	    return cur->type;
+    }
+    return -1;
+}
+
 /*
  * Export all Defaults in JSON format.
  */
 static bool
 print_defaults_json(int indent, bool need_comma)
 {
-    struct sudo_defs_types *cur;
     struct json_value value;
     struct defaults *def, *next;
-    int num;
+    int type;
     debug_decl(print_defaults_json, SUDO_DEBUG_UTIL)
 
     if (TAILQ_EMPTY(&defaults))
@@ -569,12 +581,8 @@ print_defaults_json(int indent, bool need_comma)
     printf("%s\n%*s\"Defaults\": [\n", need_comma ? "," : "", indent, "");
 
     TAILQ_FOREACH_SAFE(def, &defaults, entries, next) {
-	/* Look up def in table to find its type. */
-	for (cur = sudo_defs_table, num = 0; cur->name; cur++, num++) {
-	    if (strcmp(def->var, cur->name) == 0)
-		break;
-	}
-	if (!cur->name) {
+	type = get_defaults_type(def);
+	if (type == -1) {
 	    warningx(U_("unknown defaults entry `%s'"), def->var);
 	    /* XXX - just pass it through as a string anyway? */
 	    continue;
@@ -594,11 +602,12 @@ print_defaults_json(int indent, bool need_comma)
 	indent += 4;
 	for (;;) {
 	    next = TAILQ_NEXT(def, entries);
-	    if ((cur->type & T_MASK) == T_FLAG || def->val == NULL) {
+	    /* XXX - need to update cur too */
+	    if ((type & T_MASK) == T_FLAG || def->val == NULL) {
 		value.type = JSON_BOOL;
 		value.u.boolean = def->op;
 		print_pair_json("{ ", def->var, &value, " }", indent);
-	    } else if ((cur->type & T_MASK) == T_LIST) {
+	    } else if ((type & T_MASK) == T_LIST) {
 		print_defaults_list_json(def, indent);
 	    } else {
 		value.type = JSON_STRING;
@@ -608,6 +617,12 @@ print_defaults_json(int indent, bool need_comma)
 	    if (next == NULL || def->binding != next->binding)
 		break;
 	    def = next;
+	    type = get_defaults_type(def);
+	    if (type == -1) {
+		warningx(U_("unknown defaults entry `%s'"), def->var);
+		/* XXX - just pass it through as a string anyway? */
+		break;;
+	    }
 	    fputs(",\n", stdout);
 	}
 	putchar('\n');
