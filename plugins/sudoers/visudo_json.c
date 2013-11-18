@@ -724,7 +724,7 @@ print_cmndspec_json(struct cmndspec *cs, struct cmndspec **nextp, int indent)
 
     /* Print runasgrouplist */
     if (cs->runasgrouplist != NULL) {
-	printf("%*s\"runasgroup\": [\n", indent, "");
+	printf("%*s\"runasgroups\": [\n", indent, "");
 	indent += 4;
 	TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
 	    print_member_json(m, TYPE_RUNASGROUP,
