@@ -452,7 +452,7 @@ print_alias_json(void *v1, void *v2)
     } else {
 	printf("%*s],\n", closure->indent, "");
     }
-    printstr_json(NULL, a->name, ": [\n", closure->indent);
+    printstr_json("\"", a->name, "\": [\n", closure->indent);
 
     closure->indent += 4;
     TAILQ_FOREACH(m, &a->members, entries) {
@@ -497,25 +497,31 @@ static void
 print_defaults_list_json(struct defaults *def, int indent)
 {
     char savech, *start, *end = def->val;
+    struct json_value value;
     debug_decl(print_defaults_list_json, SUDO_DEBUG_UTIL)
 
-    printstr_json("\"", def->var, "\": {\n", indent);
+    printf("%*s{\n", indent, "");
     indent += 4;
+    value.type = JSON_STRING;
     switch (def->op) {
     case '+':
-	printstr_json("\"", "list_add", "\": [\n", indent);
+	value.u.string = "list_add";
 	break;
     case '-':
-	printstr_json("\"", "list_remove", "\": [\n", indent);
+	value.u.string = "list_remove";
 	break;
     case true:
-	printstr_json("\"", "list_assign", "\": [\n", indent);
+	value.u.string = "list_assign";
 	break;
     default:
 	warningx("internal error: unexpected list op %d", def->op);
-	printstr_json("\"", "unsupported", "\": [\n", indent);
+	value.u.string = "unsupported";
 	break;
     }
+    print_pair_json(NULL, "operation", &value, ",\n", indent);
+    value.u.string = def->var;
+    print_pair_json(NULL, "name", &value, ",\n", indent);
+    printstr_json("\"", "value", "\": [\n", indent);
     indent += 4;
     print_indent(indent);
     /* Split value into multiple space-separated words. */
@@ -732,7 +738,7 @@ print_cmndspec_json(struct cmndspec *cs, struct cmndspec **nextp, int indent)
     if (cs->tags.nopasswd != UNSPEC || cs->tags.noexec != UNSPEC ||
 	cs->tags.setenv != UNSPEC || cs->tags.log_input != UNSPEC ||
 	cs->tags.log_output != UNSPEC) {
-	printf("%*s\"Options\": [\n", indent, "");
+	printf("%*s\"Options\": {\n", indent, "");
 	indent += 4;
 	if (cs->tags.nopasswd != UNSPEC) {
 	    value.type = JSON_BOOL;
@@ -772,7 +778,7 @@ print_cmndspec_json(struct cmndspec *cs, struct cmndspec **nextp, int indent)
 	    print_pair_json(NULL, "log_output", &value, "\n", indent);
 	}
 	indent -= 4;
-	printf("%*s],\n", indent, "");
+	printf("%*s},\n", indent, "");
     }
 
 #ifdef HAVE_SELINUX
@@ -876,7 +882,7 @@ print_userspec_json(struct userspec *us, int indent)
 		TAILQ_NEXT(m, entries) == NULL, indent);
 	}
 	indent -= 4;
-	printf("%*s]\n", indent, "");
+	printf("%*s],\n", indent, "");
 
 	/* Print hosts list. */
 	printf("%*s\"Host_List\": [\n", indent, "");
@@ -886,7 +892,7 @@ print_userspec_json(struct userspec *us, int indent)
 		TAILQ_NEXT(m, entries) == NULL, indent);
 	}
 	indent -= 4;
-	printf("%*s]\n", indent, "");
+	printf("%*s],\n", indent, "");
 
 	/* Print commands. */
 	printf("%*s\"Cmnd_Specs\": [\n", indent, "");
