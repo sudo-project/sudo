@@ -906,6 +906,9 @@
 /* Define to 1 if you want a single ticket file instead of per-tty files. */
 #undef NO_TTY_TICKETS
 
+/* Define if your C preprocessor does not support variadic macros. */
+#undef NO_VARIADIC_MACROS
+
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 

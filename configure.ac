@@ -2066,7 +2066,7 @@ dnl
 AC_PROG_GCC_TRADITIONAL
 AC_C_CONST
 AC_C_VOLATILE
-# Check for variadic macro support in cpp
+AC_MSG_CHECKING([for variadic macro support in cpp])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
 AC_INCLUDES_DEFAULT
 #if defined(__GNUC__) && __GNUC__ == 2
@@ -2074,7 +2074,10 @@ AC_INCLUDES_DEFAULT
 #else
 # define sudo_fprintf(fp, ...) fprintf((fp), __VA_ARGS__)
 #endif
-], [sudo_fprintf(stderr, "a %s", "test");])], [], [AC_MSG_ERROR([Your C compiler doesn't support variadic macros, try building with gcc instead])])
+], [sudo_fprintf(stderr, "a %s", "test");])], [AC_MSG_RESULT([yes])],
+[AC_MSG_RESULT([no])
+ AC_DEFINE([NO_VARIADIC_MACROS], [1], [Define if your C preprocessor does not support variadic macros.])
+ AC_MSG_WARN([Your C compiler doesn't support variadic macros, debugging support will be limited])])
 
 dnl
 dnl Program checks

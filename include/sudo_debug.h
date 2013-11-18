@@ -187,7 +187,9 @@
  * Variadic macros are a C99 feature but GNU cpp has supported
  * a (different) version of them for a long time.
  */
-#if defined(__GNUC__) && __GNUC__ == 2
+#if defined(NO_VARIADIC_MACROS)
+# define sudo_debug_printf sudo_debug_printf_nvm
+#elif defined(__GNUC__) && __GNUC__ == 2
 # define sudo_debug_printf(pri, fmt...) \
     sudo_debug_printf2(__func__, __FILE__, __LINE__, (pri)|sudo_debug_subsys, \
     fmt)
@@ -218,6 +220,7 @@ void sudo_debug_exit_str_masked(const char *func, const char *file, int line, in
 void sudo_debug_exit_ptr(const char *func, const char *file, int line, int subsys, const void *rval);
 int sudo_debug_fd_set(int fd);
 int sudo_debug_init(const char *debugfile, const char *settings);
+void sudo_debug_printf_nvm(int pri, const char *fmt, ...) __printf0like(2, 3);
 void sudo_debug_printf2(const char *func, const char *file, int line, int level, const char *fmt, ...) __printf0like(5, 6);
 void sudo_debug_vprintf2(const char *func, const char *file, int line, int level, const char *fmt, va_list ap) __printf0like(5, 0);
 void sudo_debug_write(const char *str, int len, int errno_val);

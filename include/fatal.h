@@ -24,18 +24,11 @@
  * We wrap fatal/fatalx and warning/warningx so that the same output can
  * go to the debug file, if there is one.
  */
-#if defined(SUDO_ERROR_WRAP) && SUDO_ERROR_WRAP == 0
-# if defined(__GNUC__) && __GNUC__ == 2
-#  define fatal(fmt...) fatal_nodebug(fmt)
-#  define fatalx(fmt...) fatalx_nodebug(fmt)
-#  define warning(fmt...) warning_nodebug(fmt)
-#  define warningx(fmt...) warningx_nodebug(fmt)
-# else
-#  define fatal(...) fatal_nodebug(__VA_ARGS__)
-#  define fatalx(...) fatalx_nodebug(__VA_ARGS__)
-#  define warning(...) warning_nodebug(__VA_ARGS__)
-#  define warningx(...) warningx_nodebug(__VA_ARGS__)
-# endif /* __GNUC__ == 2 */
+#if (defined(SUDO_ERROR_WRAP) && SUDO_ERROR_WRAP == 0) || defined(NO_VARIADIC_MACROS)
+# define fatal fatal_nodebug
+# define fatalx fatalx_nodebug
+# define warning warning_nodebug
+# define warningx warningx_nodebug
 # define vfatal(fmt, ap) fatal_nodebug((fmt), (ap))
 # define vfatalx(fmt, ap) fatalx_nodebug((fmt), (ap))
 # define vwarning(fmt, ap) warning_nodebug((fmt), (ap))

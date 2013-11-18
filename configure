@@ -14872,7 +14872,8 @@ $as_echo "#define volatile /**/" >>confdefs.h
 
 fi
 
-# Check for variadic macro support in cpp
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for variadic macro support in cpp" >&5
+$as_echo_n "checking for variadic macro support in cpp... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -14892,9 +14893,16 @@ sudo_fprintf(stderr, "a %s", "test");
 }
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
-
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
 else
-  as_fn_error $? "Your C compiler doesn't support variadic macros, try building with gcc instead" "$LINENO" 5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+$as_echo "#define NO_VARIADIC_MACROS 1" >>confdefs.h
+
+ { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Your C compiler doesn't support variadic macros, debugging support will be limited" >&5
+$as_echo "$as_me: WARNING: Your C compiler doesn't support variadic macros, debugging support will be limited" >&2;}
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
@@ -16132,7 +16140,7 @@ _ACEOF
 fi
 
 ac_fn_c_check_type "$LINENO" "struct timespec" "ac_cv_type_struct_timespec" "#include <sys/types.h>
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h>
 #endif
 #include <time.h>

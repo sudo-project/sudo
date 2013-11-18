@@ -458,6 +458,18 @@ sudo_debug_vprintf2(const char *func, const char *file, int lineno, int level,
     errno = saved_errno;
 }
 
+#ifdef NO_VARIADIC_MACROS
+void
+sudo_debug_printf_nvm(int pri, const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    sudo_debug_vprintf2(NULL, NULL, 0, pri, fmt, ap);
+    va_end(ap);
+}
+#endif /* NO_VARIADIC_MACROS */
+
 void
 sudo_debug_printf2(const char *func, const char *file, int lineno, int level,
     const char *fmt, ...)
