@@ -96,17 +96,3 @@ sudo_conf_dump(void)
 	putchar('\n');
     }
 }
-
-/* STUB */
-void
-warning_set_locale(void)
-{
-    return;
-}
-
-/* STUB */
-void
-warning_restore_locale(void)
-{
-    return;
-}

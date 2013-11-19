@@ -180,17 +180,3 @@ main(int argc, char *argv[])
 
     exit(errors);
 }
-
-/* STUB */
-void
-warning_set_locale(void)
-{
-    return;
-}
-
-/* STUB */
-void
-warning_restore_locale(void)
-{
-    return;
-}

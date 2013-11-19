@@ -64,17 +64,3 @@ main(int argc, char *argv[])
     free(line);
     exit(0);
 }
-
-/* STUB */
-void
-warning_set_locale(void)
-{
-    return;
-}
-
-/* STUB */
-void
-warning_restore_locale(void)
-{
-    return;
-}

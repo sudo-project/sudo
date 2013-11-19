@@ -238,8 +238,8 @@ load_plugins.o: $(srcdir)/load_plugins.c $(incdir)/alloc.h $(incdir)/fatal.h \
                 $(top_builddir)/pathnames.h $(top_srcdir)/compat/dlfcn.h \
                 $(top_srcdir)/compat/stdbool.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/load_plugins.c
-locale_stub.o: $(srcdir)/locale_stub.c $(incdir)/fatal.h $(incdir)/missing.h \
-               $(top_builddir)/config.h
+locale_stub.o: $(srcdir)/locale_stub.c $(incdir)/fatal.h $(incdir)/gettext.h \
+               $(incdir)/missing.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/locale_stub.c
 net_ifs.o: $(srcdir)/net_ifs.c $(incdir)/alloc.h $(incdir)/fatal.h \
            $(incdir)/gettext.h $(incdir)/missing.h $(incdir)/sudo_debug.h \
