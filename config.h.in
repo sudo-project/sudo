@@ -937,6 +937,9 @@
    ones. */
 #undef PC_INSULTS
 
+/* Enable replacement (v)snprintf if system (v)snprintf is broken. */
+#undef PREFER_PORTABLE_SNPRINTF
+
 /* The syslog priority sudo will use for unsuccessful attempts/errors. */
 #undef PRI_FAILURE
 

@@ -41,7 +41,9 @@
 
 #include <config.h>
 
-#if !defined(HAVE_VSNPRINTF) || !defined(HAVE_SNPRINTF) || !defined(HAVE_VASPRINTF) || !defined(HAVE_ASPRINTF)
+#if !defined(HAVE_VSNPRINTF) || !defined(HAVE_SNPRINTF) || \
+    !defined(HAVE_VASPRINTF) || !defined(HAVE_ASPRINTF) || \
+    defined(PREFER_PORTABLE_SNPRINTF)
 
 #include <sys/types.h>
 
@@ -668,16 +670,16 @@ done:
 	/* NOTREACHED */
 }
 
-#ifndef HAVE_VSNPRINTF
+#if !defined(HAVE_VSNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 int
 vsnprintf(char *str, size_t n, const char *fmt, va_list ap)
 {
 
 	return xxxprintf(&str, n, 0, fmt, ap);
 }
-#endif /* HAVE_VSNPRINTF */
+#endif /* !HAVE_VSNPRINTF || PREFER_PORTABLE_SNPRINTF */
 
-#ifndef HAVE_SNPRINTF
+#if !defined(HAVE_SNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 int
 snprintf(char *str, size_t n, char const *fmt, ...)
 {
@@ -689,18 +691,18 @@ snprintf(char *str, size_t n, char const *fmt, ...)
 	va_end(ap);
 	return ret;
 }
-#endif /* HAVE_SNPRINTF */
+#endif /* !HAVE_SNPRINTF || PREFER_PORTABLE_SNPRINTF */
 
-#ifndef HAVE_VASPRINTF
+#if !defined(HAVE_VASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 int
 vasprintf(char **str, const char *fmt, va_list ap)
 {
 
 	return xxxprintf(str, 0, 1, fmt, ap);
 }
-#endif /* HAVE_VASPRINTF */
+#endif /* !HAVE_VASPRINTF || PREFER_PORTABLE_SNPRINTF */
 
-#ifndef HAVE_ASPRINTF
+#if !defined(HAVE_ASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 int
 asprintf(char **str, char const *fmt, ...)
 {
@@ -712,6 +714,6 @@ asprintf(char **str, char const *fmt, ...)
 	va_end(ap);
 	return ret;
 }
-#endif /* HAVE_ASPRINTF */
+#endif /* !HAVE_ASPRINTF || PREFER_PORTABLE_SNPRINTF */
 
-#endif /* !HAVE_VSNPRINTF || !HAVE_SNPRINTF || !HAVE_VASPRINTF || !HAVE_ASPRINTF */
+#endif /* !HAVE_VSNPRINTF || !HAVE_SNPRINTF || !HAVE_VASPRINTF || !HAVE_ASPRINTF || PREFER_PORTABLE_SNPRINTF */

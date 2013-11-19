@@ -2401,7 +2401,14 @@ AC_CHECK_FUNCS(mkstemps mkdtemp, [], [
     AC_CHECK_FUNCS(random lrand48, [break])
     AC_LIBOBJ(mktemp)
 ])
-AC_CHECK_FUNCS(snprintf vsnprintf asprintf vasprintf, , [NEED_SNPRINTF=1])
+AX_FUNC_SNPRINTF
+AC_CHECK_FUNCS(asprintf vasprintf)
+if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"; then
+    # Don't add snprintf to LIBOBJS if it is already present.
+    if test X"$ac_cv_func_asprintf$ac_cv_func_vasprintf" != X"yesyes"; then
+	AC_LIBOBJ(snprintf)
+    fi
+fi
 if test X"$ac_cv_type_struct_timespec" != X"no"; then
     AC_CHECK_MEMBER([struct stat.st_mtim], [AC_DEFINE(HAVE_ST_MTIM)]
 	[AC_CHECK_MEMBER([struct stat.st_mtim.st__tim], AC_DEFINE(HAVE_ST__TIM))],
@@ -2465,13 +2472,6 @@ AC_CHECK_MEMBERS([struct dirent.d_type], [], [], [
 AC_INCLUDES_DEFAULT
 #include <$ac_header_dirent>
 ])
-dnl
-dnl If NEED_SNPRINTF is set, add snprintf.c to LIBOBJS
-dnl (it contains snprintf, vsnprintf, asprintf, and vasprintf)
-dnl
-if test -n "$NEED_SNPRINTF"; then
-    AC_LIBOBJ(snprintf)
-fi
 dnl
 dnl If socket(2) not in libc, check -lsocket and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols

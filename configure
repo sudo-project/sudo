@@ -17851,7 +17851,7 @@ esac
 fi
 done
 
-for ac_func in snprintf vsnprintf asprintf vasprintf
+for ac_func in snprintf vsnprintf
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -17860,11 +17860,134 @@ if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
 #define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
 
-else
-  NEED_SNPRINTF=1
 fi
 done
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for working snprintf" >&5
+$as_echo_n "checking for working snprintf... " >&6; }
+if ${ac_cv_have_working_snprintf+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "$cross_compiling" = yes; then :
+  ac_cv_have_working_snprintf=cross
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdio.h>
+
+int main(void)
+{
+    char bufs[5] = { 'x', 'x', 'x', '\0', '\0' };
+    char bufd[5] = { 'x', 'x', 'x', '\0', '\0' };
+    int i;
+    i = snprintf (bufs, 2, "%s", "111");
+    if (strcmp (bufs, "1")) exit (1);
+    if (i != 3) exit (1);
+    i = snprintf (bufd, 2, "%d", 111);
+    if (strcmp (bufd, "1")) exit (1);
+    if (i != 3) exit (1);
+    exit(0);
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  ac_cv_have_working_snprintf=yes
+else
+  ac_cv_have_working_snprintf=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_have_working_snprintf" >&5
+$as_echo "$ac_cv_have_working_snprintf" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for working vsnprintf" >&5
+$as_echo_n "checking for working vsnprintf... " >&6; }
+if ${ac_cv_have_working_vsnprintf+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "$cross_compiling" = yes; then :
+  ac_cv_have_working_vsnprintf=cross
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdio.h>
+#include <stdarg.h>
+
+int my_vsnprintf (char *buf, const char *tmpl, ...)
+{
+    int i;
+    va_list args;
+    va_start (args, tmpl);
+    i = vsnprintf (buf, 2, tmpl, args);
+    va_end (args);
+    return i;
+}
+
+int main(void)
+{
+    char bufs[5] = { 'x', 'x', 'x', '\0', '\0' };
+    char bufd[5] = { 'x', 'x', 'x', '\0', '\0' };
+    int i;
+    i = my_vsnprintf (bufs, "%s", "111");
+    if (strcmp (bufs, "1")) exit (1);
+    if (i != 3) exit (1);
+    i = my_vsnprintf (bufd, "%d", 111);
+    if (strcmp (bufd, "1")) exit (1);
+    if (i != 3) exit (1);
+    exit(0);
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  ac_cv_have_working_vsnprintf=yes
+else
+  ac_cv_have_working_vsnprintf=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_have_working_vsnprintf" >&5
+$as_echo "$ac_cv_have_working_vsnprintf" >&6; }
+if test x$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf != "xyesyes"; then
+  case " $LIBOBJS " in
+  *" snprintf.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS snprintf.$ac_objext"
+ ;;
+esac
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Replacing missing/broken (v)snprintf() with sudo's version." >&5
+$as_echo "$as_me: WARNING: Replacing missing/broken (v)snprintf() with sudo's version." >&2;}
+
+$as_echo "#define PREFER_PORTABLE_SNPRINTF 1" >>confdefs.h
+
+fi
+for ac_func in asprintf vasprintf
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+done
+
+if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"; then
+    # Don't add snprintf to LIBOBJS if it is already present.
+    if test X"$ac_cv_func_asprintf$ac_cv_func_vasprintf" != X"yesyes"; then
+	case " $LIBOBJS " in
+  *" snprintf.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS snprintf.$ac_objext"
+ ;;
+esac
+
+    fi
+fi
 if test X"$ac_cv_type_struct_timespec" != X"no"; then
     ac_fn_c_check_member "$LINENO" "struct stat" "st_mtim" "ac_cv_member_struct_stat_st_mtim" "$ac_includes_default"
 if test "x$ac_cv_member_struct_stat_st_mtim" = xyes; then :
@@ -18174,14 +18297,6 @@ _ACEOF
 
 fi
 
-if test -n "$NEED_SNPRINTF"; then
-    case " $LIBOBJS " in
-  *" snprintf.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS snprintf.$ac_objext"
- ;;
-esac
-
-fi
 ac_fn_c_check_func "$LINENO" "socket" "ac_cv_func_socket"
 if test "x$ac_cv_func_socket" = xyes; then :
 
