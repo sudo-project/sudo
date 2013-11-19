@@ -108,6 +108,7 @@ sudoers_setlocale(int newlocale, int *prevlocale)
     return res ? true : false;
 }
 
+#ifdef HAVE_LIBINTL_H
 char *
 warning_gettext(const char *msgid)
 {
@@ -120,3 +121,4 @@ warning_gettext(const char *msgid)
 
     return msg;
 }
+#endif /* HAVE_LIBINTL_H */

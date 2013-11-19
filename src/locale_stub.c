@@ -25,9 +25,11 @@
 #include "fatal.h"
 #include "gettext.h"
 
+#ifdef HAVE_LIBINTL_H
 /* No need to swap locales in the front end. */
 char *
 warning_gettext(const char *msgid)
 {
     return gettext(msgid);
 }
+#endif /* HAVE_LIBINTL_H */

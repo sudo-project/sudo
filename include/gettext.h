@@ -64,6 +64,7 @@
  */
 # define _(String) String 
 # define N_(String) String
+# define U_(String) String
 # define textdomain(Domain)
 # define bindtextdomain(Package, Directory)
 # define ngettext(String, String_Plural, N) \
