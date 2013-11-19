@@ -14901,8 +14901,8 @@ $as_echo "no" >&6; }
 
 $as_echo "#define NO_VARIADIC_MACROS 1" >>confdefs.h
 
- { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Your C compiler doesn't support variadic macros, debugging support will be limited" >&5
-$as_echo "$as_me: WARNING: Your C compiler doesn't support variadic macros, debugging support will be limited" >&2;}
+ { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Your C preprocessor doesn't support variadic macros, debugging support will be limited" >&5
+$as_echo "$as_me: WARNING: Your C preprocessor doesn't support variadic macros, debugging support will be limited" >&2;}
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 

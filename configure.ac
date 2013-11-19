@@ -2077,7 +2077,7 @@ AC_INCLUDES_DEFAULT
 ], [sudo_fprintf(stderr, "a %s", "test");])], [AC_MSG_RESULT([yes])],
 [AC_MSG_RESULT([no])
  AC_DEFINE([NO_VARIADIC_MACROS], [1], [Define if your C preprocessor does not support variadic macros.])
- AC_MSG_WARN([Your C compiler doesn't support variadic macros, debugging support will be limited])])
+ AC_MSG_WARN([Your C preprocessor doesn't support variadic macros, debugging support will be limited])])
 
 dnl
 dnl Program checks
