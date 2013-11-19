@@ -672,7 +672,7 @@ done:
 
 #if !defined(HAVE_VSNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 int
-vsnprintf(char *str, size_t n, const char *fmt, va_list ap)
+rpl_vsnprintf(char *str, size_t n, const char *fmt, va_list ap)
 {
 
 	return xxxprintf(&str, n, 0, fmt, ap);
@@ -681,7 +681,7 @@ vsnprintf(char *str, size_t n, const char *fmt, va_list ap)
 
 #if !defined(HAVE_SNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 int
-snprintf(char *str, size_t n, char const *fmt, ...)
+rpl_snprintf(char *str, size_t n, char const *fmt, ...)
 {
 	int ret;
 	va_list ap;
@@ -695,7 +695,7 @@ snprintf(char *str, size_t n, char const *fmt, ...)
 
 #if !defined(HAVE_VASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 int
-vasprintf(char **str, const char *fmt, va_list ap)
+rpl_vasprintf(char **str, const char *fmt, va_list ap)
 {
 
 	return xxxprintf(str, 0, 1, fmt, ap);
@@ -704,7 +704,7 @@ vasprintf(char **str, const char *fmt, va_list ap)
 
 #if !defined(HAVE_ASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 int
-asprintf(char **str, char const *fmt, ...)
+rpl_asprintf(char **str, char const *fmt, ...)
 {
 	int ret;
 	va_list ap;

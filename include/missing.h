@@ -394,17 +394,25 @@ int utimes(const char *, const struct timeval *);
 #ifdef HAVE_FUTIME
 int futimes(int, const struct timeval *);
 #endif
-#ifndef HAVE_SNPRINTF
-int snprintf(char *, size_t, const char *, ...) __printflike(3, 4);
+#if !defined(HAVE_SNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
+int rpl_snprintf(char *, size_t, const char *, ...) __printflike(3, 4);
+# undef snprintf
+# define snprintf rpl_snprintf
 #endif
-#ifndef HAVE_VSNPRINTF
-int vsnprintf(char *, size_t, const char *, va_list) __printflike(3, 0);
+#if !defined(HAVE_VSNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
+int rpl_vsnprintf(char *, size_t, const char *, va_list) __printflike(3, 0);
+# undef vsnprintf
+# define vsnprintf rpl_vsnprintf
 #endif
-#ifndef HAVE_ASPRINTF
-int asprintf(char **, const char *, ...) __printflike(2, 3);
+#if !defined(HAVE_ASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
+int rpl_asprintf(char **, const char *, ...) __printflike(2, 3);
+# undef asprintf
+# define asprintf rpl_asprintf
 #endif
-#ifndef HAVE_VASPRINTF
-int vasprintf(char **, const char *, va_list) __printflike(2, 0);
+#if !defined(HAVE_VASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
+int rpl_vasprintf(char **, const char *, va_list) __printflike(2, 0);
+# undef vasprintf
+# define vasprintf rpl_vasprintf
 #endif
 #ifndef HAVE_STRLCAT
 size_t strlcat(char *, const char *, size_t);
