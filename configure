@@ -18518,84 +18518,93 @@ $as_echo "no" >&6; }
 
 fi
 
-for ac_func in getaddrinfo
-do :
-  ac_fn_c_check_func "$LINENO" "getaddrinfo" "ac_cv_func_getaddrinfo"
-if test "x$ac_cv_func_getaddrinfo" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_GETADDRINFO 1
-_ACEOF
-
-else
-
-    found=no
-    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
-	_libs=
-	for lib in $libs; do
-	    case "$NET_LIBS" in
-		*"$lib"*)   ;;
-		*)	    _libs="$_libs $lib";;
-	    esac
-	done
-	libs="${_libs# }"
-	test -z "$libs" && continue
-	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
-	extralibs="`echo \"$libs\"|sed 's/^-l[^ ]*//'`"
-
-    _sudo_check_lib_extras=`echo "$extralibs"|sed -e 's/ 	*//g' -e 's/-l/_/g'`
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for getaddrinfo in -l$lib${5+ }$extralibs" >&5
-$as_echo_n "checking for getaddrinfo in -l$lib${5+ }$extralibs... " >&6; }
-    if { as_var=sudo_cv_lib_$lib''_getaddrinfo$_sudo_check_lib_extras; eval \${$as_var+:} false; }; then :
+#
+# Check for getaddrinfo and add any required libs to NET_LIBS
+#
+OLIBS="$LIBS"
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for getaddrinfo" >&5
+$as_echo_n "checking for getaddrinfo... " >&6; }
+if ${ax_cv_func_getaddrinfo+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-
-	SUDO_CHECK_LIB_OLIBS="$LIBS"
-	LIBS="$LIBS -l$lib${5+ }$extralibs"
-	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char getaddrinfo ();
-int
-main ()
-{
-return getaddrinfo ();
-  ;
-  return 0;
-}
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+int main() { return getaddrinfo(NULL, NULL, NULL, NULL); }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  eval sudo_cv_lib_$lib''_getaddrinfo$_sudo_check_lib_extras=yes
+  ax_cv_func_getaddrinfo=yes
 else
-  eval sudo_cv_lib_$lib''_getaddrinfo$_sudo_check_lib_extras=no
-
+  ax_cv_func_getaddrinfo=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-	LIBS="$SUDO_CHECK_LIB_OLIBS"
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_func_getaddrinfo" >&5
+$as_echo "$ax_cv_func_getaddrinfo" >&6; }
+if test X"$ax_cv_func_getaddrinfo" = X"yes"; then
+
+$as_echo "#define HAVE_GETADDRINFO 1" >>confdefs.h
+
+else
+    # Not found in libc, check libsocket and libinet
+    _found=no
+    for _libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
+	_cv="ax_cv_lib_getaddrinfo`echo \"$_libs\"|sed -e 's/-l/_/g' -e 's/ *//g'`"
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for getaddrinfo in $_libs" >&5
+$as_echo_n "checking for getaddrinfo in $_libs... " >&6; }
+	if eval \${$_cv+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+	    _nlibs=
+	    for _l in $_libs; do
+		case "$LIBS" in
+		    *"$_l"*)	;;
+		    *)		_nlibs="$_nlibs $_l";;
+		esac
+	    done
+	    _libs="${_nlibs# }"
+	    if test -z "$_libs"; then
+		# No new libs to check
+		eval $_cv=no
+	    else
+		AX_FUNC_GETADDRINFO_OLIBS="$LIBS"
+		LIBS="$LIBS $_libs"
+		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netdb.h>
+    int main() { return getaddrinfo(NULL, NULL, NULL, NULL); }
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  eval $_cv=yes
+else
+  eval $_cv=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+		LIBS="$AX_FUNC_GETADDRINFO_OLIBS"
+	    fi
 
 fi
 
-    if eval test \$sudo_cv_lib_$lib''_getaddrinfo$_sudo_check_lib_extras = "yes"; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+	if eval test \$$_cv = "yes"; then
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-	NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; found=yes; break
-    else
+	    $as_echo "#define HAVE_GETADDRINFO 1" >>confdefs.h
+
+	    test -n "$_libs" && LIBS="$LIBS $_libs"
+	    break
+	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-
-    fi
-
     done
-    if test X"$found" != X"no"; then
-	$as_echo "#define HAVE_GETADDRINFO 1" >>confdefs.h
-
-    else
+    if eval test \$$_cv != "yes"; then
 	case " $LIBOBJS " in
   *" getaddrinfo.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS getaddrinfo.$ac_objext"
@@ -18603,10 +18612,14 @@ $as_echo "no" >&6; }
 esac
 
     fi
-
 fi
-done
 
+for lib in $LIBS; do
+    case "$OLIBS" in
+	*"$lib"*)   ;;
+	*)	    NET_LIBS="$NET_LIBS $lib";;
+    esac
+done
 for ac_func in getprogname
 do :
   ac_fn_c_check_func "$LINENO" "getprogname" "ac_cv_func_getprogname"

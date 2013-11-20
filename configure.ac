@@ -2533,32 +2533,17 @@ AC_CHECK_FUNC(syslog, [], [
 	SUDO_CHECK_LIB($lib, syslog, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break], [], [$extralibs])
     done
 ])
-dnl
-dnl If getaddrinfo(3) not in libc, check -lsocket and -linet
-dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols.
-dnl
-AC_CHECK_FUNCS(getaddrinfo, [], [
-    found=no
-    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
-	_libs=
-	for lib in $libs; do
-	    case "$NET_LIBS" in
-		*"$lib"*)   ;;
-		*)	    _libs="$_libs $lib";;
-	    esac
-	done
-	libs="${_libs# }"
-	test -z "$libs" && continue
-	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
-	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	SUDO_CHECK_LIB($lib, getaddrinfo, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; found=yes; break], [], [$extralibs])
-    done
-    if test X"$found" != X"no"; then
-	AC_DEFINE(HAVE_GETADDRINFO)
-    else
-	AC_LIBOBJ(getaddrinfo)
-    fi
-])
+#
+# Check for getaddrinfo and add any required libs to NET_LIBS
+#
+OLIBS="$LIBS"
+AX_FUNC_GETADDRINFO
+for lib in $LIBS; do
+    case "$OLIBS" in
+	*"$lib"*)   ;;
+	*)	    NET_LIBS="$NET_LIBS $lib";;
+    esac
+done
 dnl
 dnl Check for getprogname() or __progname
 dnl
