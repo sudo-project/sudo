@@ -46,6 +46,10 @@
 #include "missing.h"
 #include "fatal.h"
 
+#ifndef RTLD_GLOBAL
+# define RTLD_GLOBAL	0
+#endif
+
 #ifndef LINE_MAX
 # define LINE_MAX 2048
 #endif

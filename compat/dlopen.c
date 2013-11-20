@@ -124,13 +124,17 @@ extern struct sudo_preload_table sudo_preload_table[];
 void *
 sudo_dlopen(const char *path, int mode)
 {
-    return (void *)path;
+    /* XXX - compare path against builtins */
+    return sudo_preload_table;
 }
 
 int
 sudo_dlclose(void *handle)
 {
-    return 0;
+    if (handle == sudo_preload_table)
+	return 0;
+    errno = ENOENT;
+    return -1;
 }
 
 void *
@@ -138,7 +142,7 @@ sudo_dlsym(void *handle, const char *symbol)
 {
     struct sudo_preload_table *sym;
 
-    if (symbol != RTLD_NEXT && symbol != RTLD_DEFAULT && symbol != RTLD_SELF) {
+    if (handle == sudo_preload_table || handle == RTLD_DEFAULT) {
 	for (sym = sudo_preload_table; sym->name != NULL; sym++) {
 	    if (strcmp(symbol, sym->name) == 0)
 		return sym->address;
