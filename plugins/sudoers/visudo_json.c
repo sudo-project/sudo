@@ -519,9 +519,7 @@ print_defaults_list_json(struct defaults *def, int indent)
 	break;
     }
     print_pair_json(NULL, "operation", &value, ",\n", indent);
-    value.u.string = def->var;
-    print_pair_json(NULL, "name", &value, ",\n", indent);
-    printstr_json("\"", "value", "\": [\n", indent);
+    printstr_json("\"", def->var, "\": [\n", indent);
     indent += 4;
     print_indent(indent);
     /* Split value into multiple space-separated words. */
