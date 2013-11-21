@@ -354,12 +354,23 @@ print_member_json(struct member *m, enum word_type word_type, bool last_one,
     switch (m->type) {
     case USERGROUP:
 	value.u.string++; /* skip leading '%' */
-	if (*value.u.string == '#') {
-	    value.type = JSON_NUMBER;
-	    value.u.number = atoi(m->name + 2); /* XXX - use atoid? */
-	    typestr = "usergid";
+	if (*value.u.string == ':') {
+	    value.u.string++;
+	    if (*value.u.string == '#') {
+		value.type = JSON_NUMBER;
+		value.u.number = atoi(m->name + 3); /* XXX - use atoid? */
+		typestr = "nonunixgid";
+	    } else {
+		typestr = "nonunixgroup";
+	    }
 	} else {
-	    typestr = "usergroup";
+	    if (*value.u.string == '#') {
+		value.type = JSON_NUMBER;
+		value.u.number = atoi(m->name + 2); /* XXX - use atoid? */
+		typestr = "usergid";
+	    } else {
+		typestr = "usergroup";
+	    }
 	}
 	break;
     case NETGROUP:
@@ -378,11 +389,9 @@ print_member_json(struct member *m, enum word_type word_type, bool last_one,
 	    typestr = "hostname";
 	    break;
 	case TYPE_RUNASGROUP:
-	    typestr = "runasgroup";
+	    typestr = "usergroup";
 	    break;
 	case TYPE_RUNASUSER:
-	    typestr = "runasuser";
-	    break;
 	case TYPE_USERNAME:
 	    if (*value.u.string == '#') {
 		value.type = JSON_NUMBER;
