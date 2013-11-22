@@ -79,12 +79,12 @@ struct sigforward {
 };
 TQ_DECLARE(sigforward)
 static struct sigforward_list sigfwd_list;
-static pid_t ppgrp = -1;
 static void forward_signals __P((int fd));
 static void schedule_signal __P((int signo));
 static int log_io;
 #endif /* _PATH_SUDO_IO_LOGDIR */
 
+static pid_t ppgrp = -1;
 volatile pid_t cmnd_pid = -1;
 
 static int handle_signals __P((int sv[2], pid_t child,
@@ -594,8 +594,8 @@ handle_signals(sv, child, cstat)
 			 * the child upon resume, potentially stopping sudo
 			 * with SIGTTOU while the command continues to run.
 			 */
-#ifdef HAVE_TCSETPGRP
 			sigaction_t sa, osa;
+#ifdef HAVE_TCSETPGRP
 			pid_t saved_pgrp = (pid_t)-1;
 			int signo = WSTOPSIG(status);
 			int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
