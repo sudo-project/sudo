@@ -191,8 +191,8 @@ conversation.o: $(srcdir)/conversation.c $(incdir)/alloc.h $(incdir)/fatal.h \
 env_hooks.o: $(srcdir)/env_hooks.c $(incdir)/alloc.h $(incdir)/fatal.h \
              $(incdir)/fileops.h $(incdir)/gettext.h $(incdir)/missing.h \
              $(incdir)/queue.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
-             $(incdir)/sudo_plugin.h $(srcdir)/sudo.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h $(top_srcdir)/compat/dlfcn.h \
+             $(incdir)/sudo_dso.h $(incdir)/sudo_plugin.h $(srcdir)/sudo.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h \
              $(top_srcdir)/compat/stdbool.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/env_hooks.c
 exec.o: $(srcdir)/exec.c $(incdir)/alloc.h $(incdir)/fatal.h \
@@ -233,10 +233,9 @@ hooks.o: $(srcdir)/hooks.c $(incdir)/alloc.h $(incdir)/fatal.h \
 load_plugins.o: $(srcdir)/load_plugins.c $(incdir)/alloc.h $(incdir)/fatal.h \
                 $(incdir)/fileops.h $(incdir)/gettext.h $(incdir)/missing.h \
                 $(incdir)/queue.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
-                $(incdir)/sudo_plugin.h $(srcdir)/sudo.h \
+                $(incdir)/sudo_dso.h $(incdir)/sudo_plugin.h $(srcdir)/sudo.h \
                 $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
-                $(top_builddir)/pathnames.h $(top_srcdir)/compat/dlfcn.h \
-                $(top_srcdir)/compat/stdbool.h
+                $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/load_plugins.c
 locale_stub.o: $(srcdir)/locale_stub.c $(incdir)/fatal.h $(incdir)/gettext.h \
                $(incdir)/missing.h $(top_builddir)/config.h
@@ -258,7 +257,8 @@ parse_args.o: $(srcdir)/parse_args.c $(incdir)/alloc.h $(incdir)/fatal.h \
               $(top_builddir)/pathnames.h $(top_srcdir)/compat/getopt.h \
               $(top_srcdir)/compat/stdbool.h ./sudo_usage.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/parse_args.c
-preload.o: $(srcdir)/preload.c $(incdir)/sudo_plugin.h $(top_builddir)/config.h
+preload.o: $(srcdir)/preload.c $(incdir)/sudo_dso.h $(incdir)/sudo_plugin.h \
+           $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/preload.c
 selinux.o: $(srcdir)/selinux.c $(incdir)/alloc.h $(incdir)/fatal.h \
            $(incdir)/fileops.h $(incdir)/gettext.h $(incdir)/missing.h \

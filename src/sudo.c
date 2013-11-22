@@ -303,6 +303,9 @@ os_init_common(int argc, char *argv[], char *envp[])
     if (argc > 0)
 	setprogname(argv[0]);
 #endif
+#ifdef STATIC_SUDOERS_PLUGIN
+    preload_static_symbols();
+#endif
     return 0;
 }
 

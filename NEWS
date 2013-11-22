@@ -3,6 +3,10 @@ What's new in Sudo 1.8.9?
  * Reworked sudo's main event loop to use a simple event subsystem
    using poll(2) or select(2) as the back end.
 
+ * It is now possible to statically compile the sudoers plugin into
+   the sudo binary without disabling shared library support.  The
+   sudo.conf file may still be used to configure other plugins.
+
 What's new in Sudo 1.8.8?
 
  * Removed a warning on PAM systems with stacked auth modules

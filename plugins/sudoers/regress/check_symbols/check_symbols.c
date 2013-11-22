@@ -35,20 +35,12 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_DLOPEN
-# include <dlfcn.h>
-#else
-# include "compat/dlfcn.h"
-#endif
 #include <errno.h>
 #include <limits.h>
 
 #include "missing.h"
+#include "sudo_dso.h"
 #include "fatal.h"
-
-#ifndef RTLD_GLOBAL
-# define RTLD_GLOBAL	0
-#endif
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048
@@ -82,9 +74,9 @@ main(int argc, char *argv[])
     plugin_path = argv[1];
     symbols_file = argv[2];
 
-    handle = dlopen(plugin_path, RTLD_LAZY|RTLD_GLOBAL);
+    handle = sudo_dso_load(plugin_path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
     if (handle == NULL)
-	fatalx_nodebug("unable to dlopen %s: %s", plugin_path, dlerror());
+	fatalx_nodebug("unable to load %s: %s", plugin_path, sudo_dso_strerror());
 
     fp = fopen(symbols_file, "r");
     if (fp == NULL)
@@ -94,10 +86,10 @@ main(int argc, char *argv[])
 	ntests++;
 	if ((cp = strchr(line, '\n')) != NULL)
 	    *cp = '\0';
-	sym = dlsym(handle, line);
+	sym = sudo_dso_findsym(handle, line);
 	if (sym == NULL) {
 	    printf("%s: test %d: unable to resolve symbol %s: %s\n",
-		getprogname(), ntests, line, dlerror());
+		getprogname(), ntests, line, sudo_dso_strerror());
 	    errors++;
 	}
     }
@@ -106,14 +98,14 @@ main(int argc, char *argv[])
      * Make sure unexported symbols are not available.
      */
     ntests++;
-    sym = dlsym(handle, "user_in_group");
+    sym = sudo_dso_findsym(handle, "user_in_group");
     if (sym != NULL) {
 	printf("%s: test %d: able to resolve local symbol user_in_group\n",
 	    getprogname(), ntests);
 	errors++;
     }
 
-    dlclose(handle);
+    sudo_dso_unload(handle);
 
     printf("%s: %d tests run, %d errors, %d%% success rate\n", getprogname(),
 	ntests, errors, (ntests - errors) * 100 / ntests);

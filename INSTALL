@@ -171,6 +171,14 @@ Compilation options:
         binary itself.  This will also disable the noexec option
         as it too relies on dynamic shared object support.
 
+  --enable-static-sudoers
+        By default, the sudoers plugin is built and installed as a
+        dynamic shared object.  When the --enable-static-sudoers
+        option is specified, the sudoers plugin is compiled directly
+        into the sudo binary.  Unlike --disable-shared, this does
+        not prevent other plugins from being used and the noexec
+        option will continue to function.
+
   --enable-zlib[=location]
 	Enable the use of the zlib compress library when storing
 	I/O log files.  If specified, location is the base directory

@@ -40,20 +40,12 @@
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#ifdef HAVE_DLOPEN
-# include <dlfcn.h>
-#else
-# include "compat/dlfcn.h"
-#endif
 #include <ctype.h>
 #include <errno.h>
 #include <pwd.h>
 
 #include "sudoers.h"
-
-#ifndef RTLD_GLOBAL
-# define RTLD_GLOBAL	0
-#endif
+#include "sudo_dso.h"
 
 #if defined(HAVE_DLOPEN) || defined(HAVE_SHL_LOAD)
 
@@ -108,12 +100,12 @@ group_plugin_load(char *plugin_info)
     }
 
     /* Open plugin and map in symbol. */
-    group_handle = dlopen(path, RTLD_LAZY|RTLD_GLOBAL);
+    group_handle = sudo_dso_load(path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
     if (!group_handle) {
-	warningx(U_("unable to dlopen %s: %s"), path, dlerror());
+	warningx(U_("unable to load %s: %s"), path, sudo_dso_strerror());
 	goto done;
     }
-    group_plugin = dlsym(group_handle, "group_plugin");
+    group_plugin = sudo_dso_findsym(group_handle, "group_plugin");
     if (group_plugin == NULL) {
 	warningx(U_("unable to find symbol \"group_plugin\" in %s"), path);
 	goto done;
@@ -157,7 +149,7 @@ done:
 
     if (rc != true) {
 	if (group_handle != NULL) {
-	    dlclose(group_handle);
+	    sudo_dso_unload(group_handle);
 	    group_handle = NULL;
 	    group_plugin = NULL;
 	}
@@ -176,7 +168,7 @@ group_plugin_unload(void)
 	group_plugin = NULL;
     }
     if (group_handle != NULL) {
-	dlclose(group_handle);
+	sudo_dso_unload(group_handle);
 	group_handle = NULL;
     }
     debug_return;

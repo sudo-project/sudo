@@ -45,11 +45,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_DLOPEN
-# include <dlfcn.h>
-#else
-# include "compat/dlfcn.h"
-#endif
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -59,10 +54,7 @@
 
 #include "sudo_plugin.h"
 #include "missing.h"
-
-#ifndef RTLD_DEFAULT
-# define RTLD_DEFAULT	NULL
-#endif
+#include "sudo_dso.h"
 
 /*
  * Sudoers group plugin that does group name-based lookups using the system
@@ -97,7 +89,7 @@ sysgroup_init(int version, sudo_printf_t sudo_printf, char *const argv[])
     }
 
     /* Share group cache with sudo if possible. */
-    handle = dlsym(RTLD_DEFAULT, "sudo_getgrnam");
+    handle = sudo_dso_findsym(SUDO_DSO_DEFAULT, "sudo_getgrnam");
     if (handle != NULL) {
 	sysgroup_getgrnam = (sysgroup_getgrnam_t)handle;
     } else {
@@ -105,7 +97,7 @@ sysgroup_init(int version, sudo_printf_t sudo_printf, char *const argv[])
 	need_setent = true;
     }
 
-    handle = dlsym(RTLD_DEFAULT, "sudo_getgrgid");
+    handle = sudo_dso_findsym(SUDO_DSO_DEFAULT, "sudo_getgrgid");
     if (handle != NULL) {
 	sysgroup_getgrgid = (sysgroup_getgrgid_t)handle;
     } else {
@@ -113,7 +105,7 @@ sysgroup_init(int version, sudo_printf_t sudo_printf, char *const argv[])
 	need_setent = true;
     }
 
-    handle = dlsym(RTLD_DEFAULT, "sudo_gr_delref");
+    handle = sudo_dso_findsym(SUDO_DSO_DEFAULT, "sudo_gr_delref");
     if (handle != NULL)
 	sysgroup_gr_delref = (sysgroup_gr_delref_t)handle;
 

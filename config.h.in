@@ -987,14 +987,15 @@
 /* The size of `long int', as computed by sizeof. */
 #undef SIZEOF_LONG_INT
 
+/* Define to 1 to compile the sudoers plugin statically into the sudo binary.
+   */
+#undef STATIC_SUDOERS_PLUGIN
+
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
 /* Define to 1 if the code in interfaces.c does not compile for you. */
 #undef STUB_LOAD_INTERFACES
-
-/* The name of the sudoers plugin, including extension. */
-#undef SUDOERS_PLUGIN
 
 /* An instance string to append to the username (separated by a slash) for
    Kerberos V authentication. */

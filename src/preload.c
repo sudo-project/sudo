@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010, 2011, 2013 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -28,18 +28,40 @@
 #endif
 
 #include "sudo_plugin.h"
+#include "sudo_dso.h"
+
+#ifdef STATIC_SUDOERS_PLUGIN
 
 extern struct policy_plugin sudoers_policy;
 extern struct io_plugin sudoers_io;
 
-struct sudo_preload_table {
-    const char *name;
-    void *address;
-} sudo_preload_table[] = {
-    { "sudoers_policy", (void *) &sudoers_policy},
-    { "sudoers_io", (void *) &sudoers_io},
-#ifdef HAVE_GSS_KRB5_CCACHE_NAME
-    { "gss_krb5_ccache_name", (void *) &gss_krb5_ccache_name},
-#endif
+static struct sudo_preload_symbol sudo_rtld_default_symbols[] = {
+# ifdef HAVE_GSS_KRB5_CCACHE_NAME
+    { "gss_krb5_ccache_name", (void *)&gss_krb5_ccache_name},
+# endif
     { (const char *)0, (void *)0 }
 };
+
+/* XXX - can we autogenerate these? */
+static struct sudo_preload_symbol sudo_sudoers_plugin_symbols[] = {
+    { "sudoers_policy", (void *)&sudoers_policy},
+    { "sudoers_io", (void *)&sudoers_io},
+    { (const char *)0, (void *)0 }
+};
+
+/*
+ * Statically compiled symbols indexed by handle.
+ */
+static struct sudo_preload_table sudo_preload_table[] = {
+    { (char *)0, SUDO_DSO_DEFAULT, sudo_rtld_default_symbols },
+    { "sudoers.so", &sudo_sudoers_plugin_symbols, sudo_sudoers_plugin_symbols },
+    { (char *)0, (void *)0, (struct sudo_preload_symbol *)0 }
+};
+
+void
+preload_static_symbols(void)
+{
+    sudo_dso_preload_table(sudo_preload_table);
+}
+
+#endif /* STATIC_SUDOERS_PLUGIN */

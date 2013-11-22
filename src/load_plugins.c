@@ -36,26 +36,17 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_DLOPEN
-# include <dlfcn.h>
-#else
-# include "compat/dlfcn.h"
-#endif
 #include <errno.h>
 
 #include "sudo.h"
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 #include "sudo_conf.h"
+#include "sudo_dso.h"
 #include "sudo_debug.h"
 
-#ifndef RTLD_GLOBAL
-# define RTLD_GLOBAL	0
-#endif
-
-#ifndef SUDOERS_PLUGIN
-# define SUDOERS_PLUGIN	"sudoers.la"
-#endif
+/* We always use the same name for the sudoers plugin, regardless of the OS */
+#define SUDOERS_PLUGIN	"sudoers.so"
 
 #ifdef _PATH_SUDO_PLUGIN_DIR
 static int
@@ -74,7 +65,27 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 	}
 	status = stat(fullpath, sb);
     } else {
-	int len = snprintf(fullpath, pathsize, "%s%s", _PATH_SUDO_PLUGIN_DIR,
+	int len;
+
+#ifdef STATIC_SUDOERS_PLUGIN
+	/* Check static symbols. */
+	if (strcmp(info->path, SUDOERS_PLUGIN) == 0) {
+	    if (strlcpy(fullpath, info->path, pathsize) >= pathsize) {
+		warningx(U_("error in %s, line %d while loading plugin `%s'"),
+		    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
+		warningx(U_("%s: %s"), info->path, strerror(ENAMETOOLONG));
+		goto done;
+	    }
+	    /* Plugin is static, fake up struct stat. */
+	    memset(sb, 0, sizeof(*sb));
+	    sb->st_uid = ROOT_UID;
+	    sb->st_mode = S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH;
+	    status = 0;
+	    goto done;
+	}
+#endif /* STATIC_SUDOERS_PLUGIN */
+
+	len = snprintf(fullpath, pathsize, "%s%s", _PATH_SUDO_PLUGIN_DIR,
 	    info->path);
 	if (len <= 0 || (size_t)len >= pathsize) {
 	    warningx(U_("error in %s, line %d while loading plugin `%s'"),
@@ -181,14 +192,14 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	goto done;
 
     /* Open plugin and map in symbol */
-    handle = dlopen(path, RTLD_LAZY|RTLD_GLOBAL);
+    handle = sudo_dso_load(path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
     if (!handle) {
 	warningx(U_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	warningx(U_("unable to dlopen %s: %s"), path, dlerror());
+	warningx(U_("unable to load %s: %s"), path, sudo_dso_strerror());
 	goto done;
     }
-    plugin = dlsym(handle, info->symbol_name);
+    plugin = sudo_dso_findsym(handle, info->symbol_name);
     if (!plugin) {
 	warningx(U_("error in %s, line %d while loading plugin `%s'"),
 	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
@@ -221,7 +232,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    }
 	    warningx(U_("ignoring duplicate policy plugin `%s' in %s, line %d"),
 		info->symbol_name, _PATH_SUDO_CONF, info->lineno);
-	    dlclose(handle);
+	    sudo_dso_unload(handle);
 	    handle = NULL;
 	}
 	if (handle != NULL) {
@@ -236,7 +247,7 @@ sudo_load_plugin(struct plugin_container *policy_plugin,
 	    if (strcmp(container->name, info->symbol_name) == 0) {
 		warningx(U_("ignoring duplicate I/O plugin `%s' in %s, line %d"),
 		    info->symbol_name, _PATH_SUDO_CONF, info->lineno);
-		dlclose(handle);
+		sudo_dso_unload(handle);
 		handle = NULL;
 		break;
 	    }

@@ -928,6 +928,7 @@ enable_poll
 enable_admin_flag
 enable_nls
 enable_rpath
+enable_static_sudoers
 with_selinux
 enable_gss_krb5_ccache_name
 enable_shared
@@ -1594,6 +1595,8 @@ Optional Features:
   --enable-admin-flag     Whether to create a Ubuntu-style admin flag file
   --disable-nls           Disable natural language support using gettext
   --disable-rpath         Disable passing of -Rpath to the linker
+  --enable-static-sudoers Build the sudoers policy module as part of the sudo
+                          binary instead as a plugin
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -5722,6 +5725,14 @@ if test "${enable_rpath+set}" = set; then :
   enableval=$enable_rpath;
 else
   enable_rpath=yes
+fi
+
+
+# Check whether --enable-static-sudoers was given.
+if test "${enable_static_sudoers+set}" = set; then :
+  enableval=$enable_static_sudoers;
+else
+  enable_static_sudoers=no
 fi
 
 
@@ -20991,20 +21002,32 @@ case "$lt_cv_dlopen" in
     dlopen)
 	$as_echo "#define HAVE_DLOPEN 1" >>confdefs.h
 
-	SUDO_OBJS="$SUDO_OBJS locale_stub.o"
-	LT_STATIC="--tag=disable-static"
+	if test "$enable_static_sudoers" = "yes"; then
+	    $as_echo "#define STATIC_SUDOERS_PLUGIN 1" >>confdefs.h
+
+	    SUDO_OBJS="${SUDO_OBJS} preload.o"
+	    SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
+	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
+	    LT_STATIC=""
+	else
+	    SUDO_OBJS="$SUDO_OBJS locale_stub.o"
+	    LT_STATIC="--tag=disable-static"
+	fi
 	;;
     shl_load)
 	$as_echo "#define HAVE_SHL_LOAD 1" >>confdefs.h
 
-	SUDO_OBJS="$SUDO_OBJS locale_stub.o"
-	LT_STATIC="--tag=disable-static"
-	case " $LIBOBJS " in
-  *" dlopen.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS dlopen.$ac_objext"
- ;;
-esac
+	if test "$enable_static_sudoers" = "yes"; then
+	    $as_echo "#define STATIC_SUDOERS_PLUGIN 1" >>confdefs.h
 
+	    SUDO_OBJS="${SUDO_OBJS} preload.o"
+	    SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
+	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
+	    LT_STATIC=""
+	else
+	    SUDO_OBJS="$SUDO_OBJS locale_stub.o"
+	    LT_STATIC="--tag=disable-static"
+	fi
 	;;
     *)
 	if test X"${ac_cv_func_dlopen}" = X"yes"; then
@@ -21014,12 +21037,6 @@ esac
 	SUDO_OBJS="${SUDO_OBJS} preload.o"
 	SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
 	LT_STATIC=""
-	case " $LIBOBJS " in
-  *" dlopen.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS dlopen.$ac_objext"
- ;;
-esac
-
 	;;
 esac
 
@@ -22026,10 +22043,6 @@ EOF
 	done
 	cat >>confdefs.h <<EOF
 #define _PATH_SUDO_PLUGIN_DIR "$PLUGINDIR/"
-EOF
-
-	cat >>confdefs.h <<EOF
-#define SUDOERS_PLUGIN "sudoers.so"
 EOF
 
     fi

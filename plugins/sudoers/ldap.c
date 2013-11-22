@@ -64,16 +64,12 @@
 # else
 #  include <sasl.h>
 # endif
-# ifdef HAVE_DLOPEN
-#  include <dlfcn.h>
-# else
-#  include "compat/dlfcn.h"
-# endif
 #endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
 
 #include "sudoers.h"
 #include "parse.h"
 #include "lbuf.h"
+#include "sudo_dso.h"
 
 /* Older Netscape LDAP SDKs don't prototype ldapssl_set_strength() */
 #if defined(HAVE_LDAPSSL_SET_STRENGTH) && !defined(HAVE_LDAP_SSL_H) && !defined(HAVE_MPS_LDAP_SSL_H)
@@ -2046,7 +2042,8 @@ sudo_set_krb5_ccache_name(const char *name, const char **old_name)
     debug_decl(sudo_set_krb5_ccache_name, SUDO_DEBUG_LDAP)
 
     if (!initialized) {
-	sudo_gss_krb5_ccache_name = dlsym(RTLD_DEFAULT, "gss_krb5_ccache_name");
+	sudo_gss_krb5_ccache_name =
+	    sudo_dso_findsym(SUDO_DSO_DEFAULT, "gss_krb5_ccache_name");
 	initialized = true;
     }
 

@@ -43,11 +43,6 @@
 #ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
-#ifdef HAVE_DLOPEN
-# include <dlfcn.h>
-#else
-# include "compat/dlfcn.h"
-#endif
 #include <ctype.h>
 #include <pwd.h>
 #include <grp.h>
@@ -58,6 +53,7 @@
 #include "sudoers.h"
 #include "parse.h"
 #include "lbuf.h"
+#include "sudo_dso.h"
 #include "sudo_debug.h"
 
 /* SSSD <--> SUDO interface - do not change */
@@ -250,14 +246,15 @@ static int sudo_sss_open(struct sudo_nss *nss)
     handle = emalloc(sizeof(struct sudo_sss_handle));
 
     /* Load symbols */
-    handle->ssslib = dlopen(path, RTLD_LAZY);
+    handle->ssslib = sudo_dso_load(path, SUDO_DSO_LAZY);
     if (handle->ssslib == NULL) {
-	warningx(U_("unable to dlopen %s: %s"), path, dlerror());
+	warningx(U_("unable to load %s: %s"), path, sudo_dso_strerror());
 	warningx(U_("unable to initialize SSS source. Is SSSD installed on your machine?"));
 	debug_return_int(EFAULT);
     }
 
-    handle->fn_send_recv = dlsym(handle->ssslib, "sss_sudo_send_recv");
+    handle->fn_send_recv =
+	sudo_dso_findsym(handle->ssslib, "sss_sudo_send_recv");
     if (handle->fn_send_recv == NULL) {
 	warningx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_send_recv");
@@ -265,28 +262,31 @@ static int sudo_sss_open(struct sudo_nss *nss)
     }
 
     handle->fn_send_recv_defaults =
-	dlsym(handle->ssslib, "sss_sudo_send_recv_defaults");
+	sudo_dso_findsym(handle->ssslib, "sss_sudo_send_recv_defaults");
     if (handle->fn_send_recv_defaults == NULL) {
 	warningx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_send_recv_defaults");
 	debug_return_int(EFAULT);
     }
 
-    handle->fn_free_result = dlsym(handle->ssslib, "sss_sudo_free_result");
+    handle->fn_free_result =
+	sudo_dso_findsym(handle->ssslib, "sss_sudo_free_result");
     if (handle->fn_free_result == NULL) {
 	warningx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_free_result");
 	debug_return_int(EFAULT);
     }
 
-    handle->fn_get_values = dlsym(handle->ssslib, "sss_sudo_get_values");
+    handle->fn_get_values =
+	sudo_dso_findsym(handle->ssslib, "sss_sudo_get_values");
     if (handle->fn_get_values == NULL) {
 	warningx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_get_values");
 	debug_return_int(EFAULT);
     }
 
-    handle->fn_free_values = dlsym(handle->ssslib, "sss_sudo_free_values");
+    handle->fn_free_values =
+	sudo_dso_findsym(handle->ssslib, "sss_sudo_free_values");
     if (handle->fn_free_values == NULL) {
 	warningx(U_("unable to find symbol \"%s\" in %s"), path,
 	   "sss_sudo_free_values");
@@ -310,7 +310,7 @@ static int sudo_sss_close(struct sudo_nss *nss)
 
     if (nss && nss->handle) {
 	handle = nss->handle;
-	dlclose(handle->ssslib);
+	sudo_dso_unload(handle->ssslib);
     }
 
     efree(nss->handle);

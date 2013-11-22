@@ -67,8 +67,8 @@ DEFS = @OSDEFS@ -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\"
 SHELL = @SHELL@
 
 LTOBJS = alloc.lo atobool.lo atoid.lo event.lo fatal.lo fileops.lo \
-	 fmt_string.lo gidlist.lo lbuf.lo secure_path.lo \
-	 setgroups.lo sudo_conf.lo sudo_debug.lo sudo_printf.lo term.lo \
+	 fmt_string.lo gidlist.lo lbuf.lo secure_path.lo setgroups.lo \
+	 sudo_conf.lo sudo_debug.lo sudo_dso.lo sudo_printf.lo term.lo \
 	 ttysize.lo @COMMON_OBJS@
 
 PARSELN_TEST_OBJS = parseln_test.lo locale_stub.lo
@@ -247,6 +247,9 @@ sudo_debug.lo: $(srcdir)/sudo_debug.c $(incdir)/alloc.h $(incdir)/fatal.h \
                $(incdir)/sudo_plugin.h $(top_builddir)/config.h \
                $(top_srcdir)/compat/stdbool.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudo_debug.c
+sudo_dso.lo: $(srcdir)/sudo_dso.c $(incdir)/missing.h $(incdir)/sudo_dso.h \
+             $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/sudo_dso.c
 sudo_printf.lo: $(srcdir)/sudo_printf.c $(incdir)/missing.h \
                 $(incdir)/sudo_debug.h $(incdir)/sudo_plugin.h \
                 $(top_builddir)/config.h

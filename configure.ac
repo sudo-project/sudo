@@ -1412,6 +1412,10 @@ AC_ARG_ENABLE(rpath,
 [AS_HELP_STRING([--disable-rpath], [Disable passing of -Rpath to the linker])],
 [], [enable_rpath=yes])
 
+AC_ARG_ENABLE(static-sudoers,
+[AS_HELP_STRING([--enable-static-sudoers], [Build the sudoers policy module as part of the sudo binary instead as a plugin])],
+[], [enable_static_sudoers=no])
+
 AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])],
 [case $with_selinux in
     yes)	SELINUX_USAGE="[[-r role]] [[-t type]] "
@@ -3320,14 +3324,29 @@ fi
 case "$lt_cv_dlopen" in
     dlopen)
 	AC_DEFINE(HAVE_DLOPEN)
-	SUDO_OBJS="$SUDO_OBJS locale_stub.o"
-	LT_STATIC="--tag=disable-static"
+	if test "$enable_static_sudoers" = "yes"; then
+	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
+	    SUDO_OBJS="${SUDO_OBJS} preload.o"
+	    SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
+	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
+	    LT_STATIC=""
+	else
+	    SUDO_OBJS="$SUDO_OBJS locale_stub.o"
+	    LT_STATIC="--tag=disable-static"
+	fi
 	;;
     shl_load)
 	AC_DEFINE(HAVE_SHL_LOAD)
-	SUDO_OBJS="$SUDO_OBJS locale_stub.o"
-	LT_STATIC="--tag=disable-static"
-	AC_LIBOBJ(dlopen)
+	if test "$enable_static_sudoers" = "yes"; then
+	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
+	    SUDO_OBJS="${SUDO_OBJS} preload.o"
+	    SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
+	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
+	    LT_STATIC=""
+	else
+	    SUDO_OBJS="$SUDO_OBJS locale_stub.o"
+	    LT_STATIC="--tag=disable-static"
+	fi
 	;;
     *)
 	if test X"${ac_cv_func_dlopen}" = X"yes"; then
@@ -3337,7 +3356,6 @@ case "$lt_cv_dlopen" in
 	SUDO_OBJS="${SUDO_OBJS} preload.o"
 	SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
 	LT_STATIC=""
-	AC_LIBOBJ(dlopen)
 	;;
 esac
 
@@ -3684,7 +3702,6 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no" -o "$enabled_share
 	    eval PLUGINDIR="$_PLUGINDIR"
 	done
 	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR/")
-	SUDO_DEFINE_UNQUOTED(SUDOERS_PLUGIN, "sudoers.so")
     fi
     exec_prefix="$oexec_prefix"
 fi
@@ -3752,7 +3769,6 @@ dnl
 AH_TEMPLATE(BROKEN_SYSLOG, [Define to 1 if the `syslog' function returns a non-zero int to denote failure.])
 AH_TEMPLATE(CLASSIC_INSULTS, [Define to 1 if you want the insults from the "classic" version sudo.])
 AH_TEMPLATE(CSOPS_INSULTS, [Define to 1 if you want insults culled from the twisted minds of CSOps.])
-AH_TEMPLATE(SUDOERS_PLUGIN, [The name of the sudoers plugin, including extension.])
 AH_TEMPLATE(DONT_LEAK_PATH_INFO, [Define to 1 if you want sudo to display "command not allowed" instead of "command not found" when a command cannot be found.])
 AH_TEMPLATE(ENV_DEBUG, [Define to 1 to enable environment function debugging.])
 AH_TEMPLATE(ENV_EDITOR, [Define to 1 if you want visudo to honor the EDITOR and VISUAL env variables.])
@@ -3824,6 +3840,7 @@ AH_TEMPLATE(SEND_MAIL_WHEN_NO_HOST, [Define to 1 to send mail when the user is n
 AH_TEMPLATE(SEND_MAIL_WHEN_NO_USER, [Define to 1 to send mail when the user is not in the sudoers file.])
 AH_TEMPLATE(SHELL_IF_NO_ARGS, [Define to 1 if you want sudo to start a shell if given no arguments.])
 AH_TEMPLATE(SHELL_SETS_HOME, [Define to 1 if you want sudo to set $HOME in shell mode.])
+AH_TEMPLATE(STATIC_SUDOERS_PLUGIN, [Define to 1 to compile the sudoers plugin statically into the sudo binary.])
 AH_TEMPLATE(STUB_LOAD_INTERFACES, [Define to 1 if the code in interfaces.c does not compile for you.])
 AH_TEMPLATE(UMASK_OVERRIDE, [Define to 1 to use the umask specified in sudoers even when it is less restrictive than the invoking user's.])
 AH_TEMPLATE(USE_ADMIN_FLAG, [Define to 1 if you want to create ~/.sudo_as_admin_successful if the user is in the admin group the first time they run sudo.])

@@ -70,7 +70,7 @@ sub mkdep {
     $makefile =~ s:\@SUDOERS_OBJS\@:bsm_audit.lo linux_audit.lo ldap.lo sssd.lo:;
     # XXX - fill in AUTH_OBJS from contents of the auth dir instead
     $makefile =~ s:\@AUTH_OBJS\@:afs.lo aix_auth.lo bsdauth.lo dce.lo fwtk.lo getspwuid.lo kerb5.lo pam.lo passwd.lo rfc1938.lo secureware.lo securid5.lo sia.lo:;
-    $makefile =~ s:\@LTLIBOBJS\@:closefrom.lo dlopen.lo fnmatch.lo getaddrinfo.lo getcwd.lo getgrouplist.lo getline.lo getprogname.lo getopt_long.lo glob.lo isblank.lo memrchr.lo memset_s.lo mksiglist.lo mksigname.lo mktemp.lo pw_dup.lo sig2str.lo siglist.lo signame.lo snprintf.lo strlcat.lo strlcpy.lo strsignal.lo utimes.lo globtest.o fnm_test.o:;
+    $makefile =~ s:\@LTLIBOBJS\@:closefrom.lo fnmatch.lo getaddrinfo.lo getcwd.lo getgrouplist.lo getline.lo getprogname.lo getopt_long.lo glob.lo isblank.lo memrchr.lo memset_s.lo mksiglist.lo mksigname.lo mktemp.lo pw_dup.lo sig2str.lo siglist.lo signame.lo snprintf.lo strlcat.lo strlcpy.lo strsignal.lo utimes.lo globtest.o fnm_test.o:;
 
     # Parse OBJS lines
     my %objs;
