@@ -23,7 +23,7 @@ AC_CACHE_VAL(ax_cv_func_getaddrinfo,
 [AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-int main() { return getaddrinfo(NULL, NULL, NULL, NULL); }]])], [ax_cv_func_getaddrinfo=yes], [ax_cv_func_getaddrinfo=no])])
+int main() { return getaddrinfo(0, 0, 0, 0); }]])], [ax_cv_func_getaddrinfo=yes], [ax_cv_func_getaddrinfo=no])])
 AC_MSG_RESULT([$ax_cv_func_getaddrinfo])
 if test X"$ax_cv_func_getaddrinfo" = X"yes"; then
     AC_DEFINE(HAVE_GETADDRINFO, 1, [Define to 1 if you have the `getaddrinfo' function.])
@@ -51,7 +51,7 @@ else
 		AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <sys/types.h>
     #include <sys/socket.h>
     #include <netdb.h>
-    int main() { return getaddrinfo(NULL, NULL, NULL, NULL); }]])], [eval $_cv=yes], [eval $_cv=no])
+    int main() { return getaddrinfo(0, 0, 0, 0); }]])], [eval $_cv=yes], [eval $_cv=no])
 		LIBS="$AX_FUNC_GETADDRINFO_OLIBS"
 	    fi
 	])
