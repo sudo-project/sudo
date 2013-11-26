@@ -49,7 +49,7 @@ INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 LT_LIBS = $(top_builddir)/common/libcommon.la $(LIBOBJDIR)libreplace.la
 LIBS = $(LT_LIBS) @LIBINTL@
 NET_LIBS = @NET_LIBS@
-SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(LIBS) $(NET_LIBS) @ZLIB@
+SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(LIBS) $(NET_LIBS) @ZLIB@ @LIBDL@
 REPLAY_LIBS = @REPLAY_LIBS@ @ZLIB@
 
 # C preprocessor flags
@@ -221,7 +221,7 @@ check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) $(LT_LIBS)
 
 check_symbols: $(CHECK_SYMBOLS_OBJS) $(LT_LIBS)
 	if [ X"$(soext)" != X"" ]; then \
-	    $(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_SYMBOLS_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @SUDO_LIBS@; \
+	    $(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_SYMBOLS_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @LIBDL@; \
 	fi
 
 check_wrap: $(CHECK_WRAP_OBJS) $(LT_LIBS)

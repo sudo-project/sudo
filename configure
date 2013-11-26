@@ -13747,6 +13747,8 @@ else
 	SHLIB_EXT="$_shrext"
     fi
 fi
+LIBDL="$lt_cv_dlopen_libs"
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking path to sudo_noexec.so" >&5
 $as_echo_n "checking path to sudo_noexec.so... " >&6; }
 
@@ -21039,15 +21041,6 @@ case "$lt_cv_dlopen" in
 	LT_STATIC=""
 	;;
 esac
-
-#
-# Add library needed for dynamic loading, if any.
-#
-LIBDL="$lt_cv_dlopen_libs"
-if test X"$LIBDL" != X""; then
-    SUDO_LIBS="${SUDO_LIBS} $LIBDL"
-    SUDOERS_LIBS="${SUDOERS_LIBS} $LIBDL"
-fi
 
 # On HP-UX, you cannot dlopen() a shared object that uses pthreads unless
 # the main program is linked against -lpthread.  We have no knowledge of
