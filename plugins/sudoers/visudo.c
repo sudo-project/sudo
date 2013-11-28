@@ -1345,7 +1345,7 @@ help(void)
 	"  -h, --help       display help message and exit\n"
 	"  -q, --quiet      less verbose (quiet) syntax error messages\n"
 	"  -s, --strict     strict syntax checking\n"
-	"  -V, --version    display version information and exit"
+	"  -V, --version    display version information and exit\n"
 	"  -x, --export     export sudoers in JSON format"));
     exit(0);
 }
