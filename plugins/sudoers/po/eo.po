@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudoers 1.8.8b3\n"
+"Project-Id-Version: sudoers 1.8.9b1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-09-03 14:48-0600\n"
-"PO-Revision-Date: 2013-09-04 20:47-0400\n"
+"POT-Creation-Date: 2013-11-24 16:32-0700\n"
+"PO-Revision-Date: 2013-11-27 20:47-0500\n"
 "Last-Translator: Felipe Castro <fefcas@gmail.com>\n"
 "Language-Team: Esperanto <translation-team-eo@lists.sourceforge.net>\n"
 "Language: eo\n"
@@ -51,18 +51,15 @@ msgid "unable to initialize BSD authentication"
 msgstr "ne eblas komenci BSD-aŭtentikigon"
 
 #: plugins/sudoers/auth/fwtk.c:59
-#, c-format
 msgid "unable to read fwtk config"
 msgstr "ne eblas legi fwtk-agordon"
 
 #: plugins/sudoers/auth/fwtk.c:64
-#, c-format
 msgid "unable to connect to authentication server"
 msgstr "ne eblas konektiĝi al aŭtentikiga servilo"
 
 #: plugins/sudoers/auth/fwtk.c:70 plugins/sudoers/auth/fwtk.c:94
 #: plugins/sudoers/auth/fwtk.c:127
-#, c-format
 msgid "lost connection to authentication server"
 msgstr "konekto al aŭtentikiga servilo perdita"
 
@@ -150,48 +147,40 @@ msgstr "Konto eksvalidiĝis aŭ PAM-agordon malhavas sekcion \"account\" por sud
 msgid "PAM authentication error: %s"
 msgstr "eraro de aŭtentikiga servilo: %s"
 
-#: plugins/sudoers/auth/rfc1938.c:103 plugins/sudoers/visudo.c:226
+#: plugins/sudoers/auth/rfc1938.c:103 plugins/sudoers/visudo.c:232
 #, c-format
 msgid "you do not exist in the %s database"
 msgstr "vi ne ekzistas en la datumbazo %s"
 
 #: plugins/sudoers/auth/securid5.c:80
-#, c-format
 msgid "failed to initialise the ACE API library"
 msgstr "malsukcesis ekigi la bibliotekon de la API ACE"
 
 #: plugins/sudoers/auth/securid5.c:106
-#, c-format
 msgid "unable to contact the SecurID server"
 msgstr "ne eblas kontakti la servilon de SecurID"
 
 #: plugins/sudoers/auth/securid5.c:115
-#, c-format
 msgid "User ID locked for SecurID Authentication"
 msgstr "Uzanto-identigilo ŝlosita pro Aŭtentikigo SecurID"
 
 #: plugins/sudoers/auth/securid5.c:119 plugins/sudoers/auth/securid5.c:170
-#, c-format
 msgid "invalid username length for SecurID"
 msgstr "nevalida salutnoma longo por SecurID"
 
 #: plugins/sudoers/auth/securid5.c:123 plugins/sudoers/auth/securid5.c:175
-#, c-format
 msgid "invalid Authentication Handle for SecurID"
 msgstr "nevalida Aŭtentikiga Traktilo por SecurID"
 
 #: plugins/sudoers/auth/securid5.c:127
-#, c-format
 msgid "SecurID communication failed"
 msgstr "Komunikiĝo kun SecurID malsukcesis"
 
 #: plugins/sudoers/auth/securid5.c:131 plugins/sudoers/auth/securid5.c:214
-#, c-format
 msgid "unknown SecurID error"
 msgstr "nekonata SecurID-eraro"
 
 #: plugins/sudoers/auth/securid5.c:165
-#, c-format
 msgid "invalid passcode length for SecurID"
 msgstr "nevalida paskoda longo por SecurID"
 
@@ -220,12 +209,10 @@ msgid "Authentication methods:"
 msgstr "Aŭtentikigaj metodoj:"
 
 #: plugins/sudoers/bsm_audit.c:91 plugins/sudoers/bsm_audit.c:158
-#, c-format
 msgid "Could not determine audit condition"
 msgstr "Ne eblis determini revizian kondiĉon"
 
 #: plugins/sudoers/bsm_audit.c:134 plugins/sudoers/bsm_audit.c:199
-#, c-format
 msgid "unable to commit audit record"
 msgstr "ne eblis konservi revizian rikordon"
 
@@ -250,14 +237,14 @@ msgstr ""
 "\n"
 
 #: plugins/sudoers/check.c:227 plugins/sudoers/check.c:233
-#: plugins/sudoers/sudoers.c:562 plugins/sudoers/sudoers.c:588
+#: plugins/sudoers/sudoers.c:561 plugins/sudoers/sudoers.c:587
 #, c-format
 msgid "unknown uid: %u"
 msgstr "nekonata uid: %u"
 
 #: plugins/sudoers/check.c:230 plugins/sudoers/policy.c:682
-#: plugins/sudoers/sudoers.c:847 plugins/sudoers/testsudoers.c:215
-#: plugins/sudoers/testsudoers.c:361
+#: plugins/sudoers/sudoers.c:846 plugins/sudoers/testsudoers.c:215
+#: plugins/sudoers/testsudoers.c:363
 #, c-format
 msgid "unknown user: %s"
 msgstr "nekonata uzanto: %s"
@@ -648,6 +635,7 @@ msgid "Maximum I/O log sequence number"
 msgstr "maksimuma sinsekva numero de la eneliga protokolo"
 
 #: plugins/sudoers/defaults.c:207 plugins/sudoers/defaults.c:593
+#: plugins/sudoers/visudo_json.c:593 plugins/sudoers/visudo_json.c:629
 #, c-format
 msgid "unknown defaults entry `%s'"
 msgstr "nekonata ero '%s' en defaults"
@@ -683,14 +671,13 @@ msgstr "parametro '%s' ne povas havi valoron"
 #: plugins/sudoers/env.c:288 plugins/sudoers/env.c:293
 #: plugins/sudoers/env.c:395 plugins/sudoers/linux_audit.c:82
 #: plugins/sudoers/policy.c:467 plugins/sudoers/policy.c:474
-#: plugins/sudoers/prompt.c:171 plugins/sudoers/sudoers.c:656
+#: plugins/sudoers/prompt.c:171 plugins/sudoers/sudoers.c:655
 #: plugins/sudoers/testsudoers.c:245
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "interna eraro, superfluo en %s"
 
 #: plugins/sudoers/env.c:367
-#, c-format
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr "sudo_putenv: medio tro granda"
 
@@ -699,32 +686,32 @@ msgstr "sudo_putenv: medio tro granda"
 msgid "sorry, you are not allowed to set the following environment variables: %s"
 msgstr "bedaŭre vi ne estas permesata valorizi la jenajn medivariablojn: %s"
 
-#: plugins/sudoers/group_plugin.c:102
+#: plugins/sudoers/group_plugin.c:94
 #, c-format
 msgid "%s must be owned by uid %d"
 msgstr "%s devas esti estrata de uid %d"
 
-#: plugins/sudoers/group_plugin.c:106
+#: plugins/sudoers/group_plugin.c:98
 #, c-format
 msgid "%s must only be writable by owner"
 msgstr "%s devas esti skribebla nur de estro"
 
-#: plugins/sudoers/group_plugin.c:113 plugins/sudoers/sssd.c:256
+#: plugins/sudoers/group_plugin.c:105 plugins/sudoers/sssd.c:251
 #, c-format
-msgid "unable to dlopen %s: %s"
-msgstr "ne eblas dlopen: %s: %s"
+msgid "unable to load %s: %s"
+msgstr "ne eblas ŝarĝi je %s: %s"
 
-#: plugins/sudoers/group_plugin.c:118
+#: plugins/sudoers/group_plugin.c:110
 #, c-format
 msgid "unable to find symbol \"group_plugin\" in %s"
 msgstr "ne eblas trovi simbolon \"group_plugin\" en %s"
 
-#: plugins/sudoers/group_plugin.c:123
+#: plugins/sudoers/group_plugin.c:115
 #, c-format
 msgid "%s: incompatible group plugin major version %d, expected %d"
 msgstr "%s: nekongrua grupa kromprogramo: ĉefa eldono %d, atendita %d"
 
-#: plugins/sudoers/interfaces.c:119
+#: plugins/sudoers/interfaces.c:118
 msgid "Local IP address and netmask pairs:\n"
 msgstr "Loka IP-adresa kaj retmaska paroj:\n"
 
@@ -741,20 +728,22 @@ msgstr "%s ekzistas sed ne dosierujo (0%o)"
 msgid "unable to mkdir %s"
 msgstr "ne eblas mkdir-i: %s"
 
-#: plugins/sudoers/iolog.c:185 plugins/sudoers/sudoers.c:710
-#: plugins/sudoers/sudoreplay.c:346 plugins/sudoers/sudoreplay.c:808
-#: plugins/sudoers/sudoreplay.c:971 plugins/sudoers/timestamp.c:155
-#: plugins/sudoers/visudo.c:824
+#: plugins/sudoers/iolog.c:185 plugins/sudoers/sudoers.c:709
+#: plugins/sudoers/sudoreplay.c:345 plugins/sudoers/sudoreplay.c:814
+#: plugins/sudoers/sudoreplay.c:978 plugins/sudoers/timestamp.c:155
+#: plugins/sudoers/visudo.c:834 plugins/sudoers/visudo_json.c:974
 #, c-format
 msgid "unable to open %s"
 msgstr "ne eblas malfermi: %s"
 
-#: plugins/sudoers/iolog.c:218 plugins/sudoers/sudoers.c:713
+#: plugins/sudoers/iolog.c:218 plugins/sudoers/sudoers.c:712
+#: plugins/sudoers/sudoreplay.c:1085
 #, c-format
 msgid "unable to read %s"
 msgstr "ne eblas legi %s"
 
-#: plugins/sudoers/iolog.c:242 plugins/sudoers/timestamp.c:159
+#: plugins/sudoers/iolog.c:242 plugins/sudoers/sudoreplay.c:584
+#: plugins/sudoers/timestamp.c:159
 #, c-format
 msgid "unable to write to %s"
 msgstr "ne eblas skribi al %s"
@@ -765,71 +754,57 @@ msgid "unable to create %s"
 msgstr "ne eblas krei: %s"
 
 #: plugins/sudoers/ldap.c:403
-#, c-format
 msgid "sudo_ldap_conf_add_ports: port too large"
 msgstr "sudo_ldap_conf_add_ports: pordo tro granda"
 
 #: plugins/sudoers/ldap.c:426
-#, c-format
 msgid "sudo_ldap_conf_add_ports: out of space expanding hostbuf"
 msgstr "sudo_ldap_conf_add_ports: eluzis spacon etendanta la bufron"
 
-#: plugins/sudoers/ldap.c:456
+#: plugins/sudoers/ldap.c:458
 #, c-format
 msgid "unsupported LDAP uri type: %s"
 msgstr "nekonata retadresa tipo de LDAP: %s"
 
-#: plugins/sudoers/ldap.c:485
-#, c-format
-msgid "invalid uri: %s"
-msgstr "nevalida retadreso: %s"
-
-#: plugins/sudoers/ldap.c:491
-#, c-format
+#: plugins/sudoers/ldap.c:489
 msgid "unable to mix ldap and ldaps URIs"
 msgstr "ne eblas miksi sekurajn kaj nesekurajn retadresojn de LDAP"
 
-#: plugins/sudoers/ldap.c:495
-#, c-format
-msgid "unable to mix ldaps and starttls"
-msgstr "ne eblas miksi protokolojn ldaps kaj starttls"
+#: plugins/sudoers/ldap.c:493 plugins/sudoers/ldap.c:525
+msgid "starttls not supported when using ldaps"
+msgstr "starttls ne estas regata dum uzo de ldaps"
 
-#: plugins/sudoers/ldap.c:514
-#, c-format
+#: plugins/sudoers/ldap.c:511
 msgid "sudo_ldap_parse_uri: out of space building hostbuf"
 msgstr "sudo_ldap_parse_uri: eluzis spacon muntanta la bufron"
 
-#: plugins/sudoers/ldap.c:588
+#: plugins/sudoers/ldap.c:592
 #, c-format
 msgid "unable to initialize SSL cert and key db: %s"
 msgstr "ne eblas ekigi SSL-asertilon kaj ŝlosilan datumbazon: %s"
 
-#: plugins/sudoers/ldap.c:591
+#: plugins/sudoers/ldap.c:595
 #, c-format
 msgid "you must set TLS_CERT in %s to use SSL"
 msgstr "TLS_CERT devas havi valoron en %s antaŭ ol SSL uzeblos"
 
-#: plugins/sudoers/ldap.c:1081
-#, c-format
+#: plugins/sudoers/ldap.c:1086
 msgid "unable to get GMT time"
 msgstr "ne eblas atingi GMT-tempon"
 
-#: plugins/sudoers/ldap.c:1087
-#, c-format
+#: plugins/sudoers/ldap.c:1092
 msgid "unable to format timestamp"
 msgstr "ne eblas aranĝi tempostampon"
 
-#: plugins/sudoers/ldap.c:1095
-#, c-format
+#: plugins/sudoers/ldap.c:1100
 msgid "unable to build time filter"
 msgstr "ne eblas munti tempan filtrilon"
 
-#: plugins/sudoers/ldap.c:1314
-#, c-format
+#: plugins/sudoers/ldap.c:1319
 msgid "sudo_ldap_build_pass1 allocation mismatch"
 msgstr "sudo_ldap_build_pass1: genra malkongruaĵo"
 
-#: plugins/sudoers/ldap.c:1887
+#: plugins/sudoers/ldap.c:1894
 #, c-format
 msgid ""
 "\n"
@@ -838,7 +813,7 @@ msgstr ""
 "\n"
 "LDAP-rolo: %s\n"
 
-#: plugins/sudoers/ldap.c:1889
+#: plugins/sudoers/ldap.c:1896
 #, c-format
 msgid ""
 "\n"
@@ -847,111 +822,108 @@ msgstr ""
 "\n"
 "LDAP-rolo: NEKONATA\n"
 
-#: plugins/sudoers/ldap.c:1936
+#: plugins/sudoers/ldap.c:1943
 #, c-format
 msgid "    Order: %s\n"
 msgstr "    Ordo: %s\n"
 
-#: plugins/sudoers/ldap.c:1944 plugins/sudoers/parse.c:515
-#: plugins/sudoers/sssd.c:1242
+#: plugins/sudoers/ldap.c:1951 plugins/sudoers/parse.c:512
+#: plugins/sudoers/sssd.c:1241
 #, c-format
 msgid "    Commands:\n"
 msgstr "    Komandoj:\n"
 
-#: plugins/sudoers/ldap.c:2481
+#: plugins/sudoers/ldap.c:2494
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr "ne eblas ekigi LDAP-on: %s"
 
-#: plugins/sudoers/ldap.c:2519
-#, c-format
+#: plugins/sudoers/ldap.c:2536
 msgid "start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"
 msgstr "start_tls specifita sed LDAP-bibliotekoj ne havas la funkciojn ldap_start_tls_s() kaj ldap_start_tls_s_np()"
 
-#: plugins/sudoers/ldap.c:2755
+#: plugins/sudoers/ldap.c:2769
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr "nevalida atributo de sudoOrdo: %s"
 
 #: plugins/sudoers/linux_audit.c:57
-#, c-format
 msgid "unable to open audit system"
 msgstr "ne eblas malfermi revizian sistemon"
 
 #: plugins/sudoers/linux_audit.c:93
-#, c-format
 msgid "unable to send audit message"
 msgstr "ne eblas sendi revizian mesaĝon"
 
-#: plugins/sudoers/logging.c:140
+#: plugins/sudoers/logging.c:136
 #, c-format
 msgid "%8s : %s"
 msgstr "%8s: %s"
 
-#: plugins/sudoers/logging.c:168
+#: plugins/sudoers/logging.c:164
 #, c-format
 msgid "%8s : (command continued) %s"
 msgstr "%8s: (komando ne trovita) %s"
 
-#: plugins/sudoers/logging.c:194
+#: plugins/sudoers/logging.c:190
 #, c-format
 msgid "unable to open log file: %s: %s"
 msgstr "ne eblas malfermi protokolon: %s: %s"
 
-#: plugins/sudoers/logging.c:197
+#: plugins/sudoers/logging.c:193
 #, c-format
 msgid "unable to lock log file: %s: %s"
 msgstr "ne eblas ŝlosi protokolon: %s: %s"
 
-#: plugins/sudoers/logging.c:249
+#: plugins/sudoers/logging.c:245
 msgid "No user or host"
 msgstr "Neniu uzanto aŭ gastiganto"
 
-#: plugins/sudoers/logging.c:251
+#: plugins/sudoers/logging.c:247
 msgid "validation failure"
 msgstr "validiga malsukceso"
 
-#: plugins/sudoers/logging.c:258
+#: plugins/sudoers/logging.c:254
 msgid "user NOT in sudoers"
 msgstr "uzanto NE estas en sudoers"
 
-#: plugins/sudoers/logging.c:260
+#: plugins/sudoers/logging.c:256
 msgid "user NOT authorized on host"
 msgstr "uzanto NE permesata en gastiganto"
 
-#: plugins/sudoers/logging.c:262
+#: plugins/sudoers/logging.c:258
 msgid "command not allowed"
 msgstr "komando ne permesata"
 
-#: plugins/sudoers/logging.c:292
+#: plugins/sudoers/logging.c:288
 #, c-format
 msgid "%s is not in the sudoers file.  This incident will be reported.\n"
 msgstr "%s ne estas en la dosiero sudoers. Ĉi tiu estos raportita.\n"
 
-#: plugins/sudoers/logging.c:295
+#: plugins/sudoers/logging.c:291
 #, c-format
 msgid "%s is not allowed to run sudo on %s.  This incident will be reported.\n"
 msgstr "%s ne estas permesata plenumigi sudo-on en %s. Ĉi tio estos raportita.\n"
 
-#: plugins/sudoers/logging.c:299
+#: plugins/sudoers/logging.c:295
 #, c-format
 msgid "Sorry, user %s may not run sudo on %s.\n"
 msgstr "Bedaŭre uzanto %s ne rajtas plenumigi sudo-on en %s.\n"
 
-#: plugins/sudoers/logging.c:302
+#: plugins/sudoers/logging.c:298
 #, c-format
 msgid "Sorry, user %s is not allowed to execute '%s%s%s' as %s%s%s on %s.\n"
 msgstr "Bedaŭre uzanto %s ne rajtas plenumigi '%s%s%s'-on kiel %s%s%s en %s.\n"
 
-#: plugins/sudoers/logging.c:339 plugins/sudoers/sudoers.c:382
-#: plugins/sudoers/sudoers.c:383 plugins/sudoers/sudoers.c:385
-#: plugins/sudoers/sudoers.c:386 plugins/sudoers/sudoers.c:1003
+#: plugins/sudoers/logging.c:335 plugins/sudoers/sudoers.c:381
+#: plugins/sudoers/sudoers.c:382 plugins/sudoers/sudoers.c:384
+#: plugins/sudoers/sudoers.c:385 plugins/sudoers/sudoers.c:1003
 #: plugins/sudoers/sudoers.c:1004
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: komando ne trovita"
 
-#: plugins/sudoers/logging.c:341 plugins/sudoers/sudoers.c:378
+#: plugins/sudoers/logging.c:337 plugins/sudoers/sudoers.c:377
 #, c-format
 msgid ""
 "ignoring `%s' found in '.'\n"
@@ -960,77 +932,75 @@ msgstr ""
 "Ignoranta '%s'-on trovita en '.'\n"
 "Uzu 'sudo ./%s'-on se tio estas la '%s', kiun vi volas plenumigi."
 
-#: plugins/sudoers/logging.c:357
+#: plugins/sudoers/logging.c:353
 msgid "authentication failure"
 msgstr "aŭtentiga malsukceso"
 
-#: plugins/sudoers/logging.c:383
+#: plugins/sudoers/logging.c:379
 msgid "a password is required"
 msgstr "pasvorto estas bezonata"
 
-#: plugins/sudoers/logging.c:447 plugins/sudoers/logging.c:491
+#: plugins/sudoers/logging.c:443 plugins/sudoers/logging.c:497
 #, c-format
 msgid "%d incorrect password attempt"
 msgid_plural "%d incorrect password attempts"
 msgstr[0] "%d malĝusta pasvorta provo"
 msgstr[1] "%d malĝustaj pasvortaj provoj"
 
-#: plugins/sudoers/logging.c:575
-#, c-format
+#: plugins/sudoers/logging.c:582
 msgid "unable to fork"
 msgstr "ne eblas forki"
 
-#: plugins/sudoers/logging.c:582 plugins/sudoers/logging.c:638
+#: plugins/sudoers/logging.c:589 plugins/sudoers/logging.c:645
 #, c-format
 msgid "unable to fork: %m"
 msgstr "ne eblas forki: %m"
 
-#: plugins/sudoers/logging.c:628
+#: plugins/sudoers/logging.c:635
 #, c-format
 msgid "unable to open pipe: %m"
 msgstr "ne eblas malfermi tubon: %m"
 
-#: plugins/sudoers/logging.c:653
+#: plugins/sudoers/logging.c:660
 #, c-format
 msgid "unable to dup stdin: %m"
 msgstr "ne eblas kopii enigon: %m"
 
-#: plugins/sudoers/logging.c:688
+#: plugins/sudoers/logging.c:695
 #, c-format
 msgid "unable to execute %s: %m"
 msgstr "ne eblas plenumigi %s-on: %m"
 
-#: plugins/sudoers/logging.c:907
-#, c-format
+#: plugins/sudoers/logging.c:914
 msgid "internal error: insufficient space for log line"
 msgstr "interna eraro: nesufiĉa spaco por protokola linio"
 
-#: plugins/sudoers/match.c:604
+#: plugins/sudoers/match.c:608
 #, c-format
 msgid "unsupported digest type %d for %s"
 msgstr "nekonata resuma tipo %d por %s"
 
-#: plugins/sudoers/match.c:634
+#: plugins/sudoers/match.c:638
 #, c-format
 msgid "%s: read error"
 msgstr "%s: lega eraro"
 
-#: plugins/sudoers/match.c:643
+#: plugins/sudoers/match.c:647
 #, c-format
 msgid "digest for %s (%s) is not in %s form"
 msgstr "resumo por %s (%s) ne estas laŭ la formo %s"
 
-#: plugins/sudoers/parse.c:124
+#: plugins/sudoers/parse.c:123
 #, c-format
 msgid "parse error in %s near line %d"
 msgstr "analiza eraro en %s proksime al linio %d"
 
-#: plugins/sudoers/parse.c:127
+#: plugins/sudoers/parse.c:126
 #, c-format
 msgid "parse error in %s"
 msgstr "analiza eraro en %s"
 
-#: plugins/sudoers/parse.c:462
+#: plugins/sudoers/parse.c:459
 #, c-format
 msgid ""
 "\n"
@@ -1039,17 +1009,17 @@ msgstr ""
 "\n"
 "Ero en sudoers:\n"
 
-#: plugins/sudoers/parse.c:463
+#: plugins/sudoers/parse.c:460
 #, c-format
 msgid "    RunAsUsers: "
 msgstr "    RunAsUsers: "
 
-#: plugins/sudoers/parse.c:477
+#: plugins/sudoers/parse.c:474
 #, c-format
 msgid "    RunAsGroups: "
 msgstr "    RunAsGroups: "
 
-#: plugins/sudoers/parse.c:486
+#: plugins/sudoers/parse.c:483
 #, c-format
 msgid "    Options: "
 msgstr "   Elektoj: "
@@ -1061,7 +1031,9 @@ msgstr "   Elektoj: "
 #: plugins/sudoers/policy.c:294 plugins/sudoers/policy.c:301
 #: plugins/sudoers/policy.c:329 plugins/sudoers/policy.c:332
 #: plugins/sudoers/policy.c:341 plugins/sudoers/policy.c:344
-#: plugins/sudoers/policy.c:352
+#: plugins/sudoers/policy.c:352 plugins/sudoers/set_perms.c:363
+#: plugins/sudoers/set_perms.c:702 plugins/sudoers/set_perms.c:1061
+#: plugins/sudoers/set_perms.c:1357 plugins/sudoers/set_perms.c:1525
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -1078,7 +1050,7 @@ msgstr "nevalida valoro"
 msgid "value out of range"
 msgstr "valoro ne en permesata skalo"
 
-#: plugins/sudoers/policy.c:564 plugins/sudoers/visudo.c:765
+#: plugins/sudoers/policy.c:564 plugins/sudoers/visudo.c:775
 #, c-format
 msgid "unable to execute %s"
 msgstr "ne eblas plenumigi: %s"
@@ -1147,56 +1119,55 @@ msgstr "ne eblas konservi grupan liston por %s, jam ekzistas"
 msgid "unable to parse groups for %s"
 msgstr "ne eblas trakti grupon en %s"
 
-#: plugins/sudoers/set_perms.c:124 plugins/sudoers/set_perms.c:447
-#: plugins/sudoers/set_perms.c:848 plugins/sudoers/set_perms.c:1143
-#: plugins/sudoers/set_perms.c:1433
+#: plugins/sudoers/set_perms.c:124 plugins/sudoers/set_perms.c:449
+#: plugins/sudoers/set_perms.c:852 plugins/sudoers/set_perms.c:1149
+#: plugins/sudoers/set_perms.c:1441
 msgid "perm stack overflow"
 msgstr "permeso-staka superfluo"
 
-#: plugins/sudoers/set_perms.c:132 plugins/sudoers/set_perms.c:455
-#: plugins/sudoers/set_perms.c:856 plugins/sudoers/set_perms.c:1151
-#: plugins/sudoers/set_perms.c:1441
+#: plugins/sudoers/set_perms.c:132 plugins/sudoers/set_perms.c:457
+#: plugins/sudoers/set_perms.c:860 plugins/sudoers/set_perms.c:1157
+#: plugins/sudoers/set_perms.c:1449
 msgid "perm stack underflow"
 msgstr "permeso-staka subfluo"
 
-#: plugins/sudoers/set_perms.c:191 plugins/sudoers/set_perms.c:502
-#: plugins/sudoers/set_perms.c:1202 plugins/sudoers/set_perms.c:1473
+#: plugins/sudoers/set_perms.c:191 plugins/sudoers/set_perms.c:504
+#: plugins/sudoers/set_perms.c:1208 plugins/sudoers/set_perms.c:1481
 msgid "unable to change to root gid"
 msgstr "ne eblas ŝanĝi al radika gid"
 
-#: plugins/sudoers/set_perms.c:280 plugins/sudoers/set_perms.c:599
-#: plugins/sudoers/set_perms.c:985 plugins/sudoers/set_perms.c:1279
+#: plugins/sudoers/set_perms.c:280 plugins/sudoers/set_perms.c:601
+#: plugins/sudoers/set_perms.c:989 plugins/sudoers/set_perms.c:1285
 msgid "unable to change to runas gid"
 msgstr "ne eblas ŝanĝi al plenumigkiela gid"
 
-#: plugins/sudoers/set_perms.c:292 plugins/sudoers/set_perms.c:611
-#: plugins/sudoers/set_perms.c:995 plugins/sudoers/set_perms.c:1289
+#: plugins/sudoers/set_perms.c:292 plugins/sudoers/set_perms.c:613
+#: plugins/sudoers/set_perms.c:999 plugins/sudoers/set_perms.c:1295
 msgid "unable to change to runas uid"
 msgstr "ne eblas ŝanĝi al plenumigkiela uid"
 
-#: plugins/sudoers/set_perms.c:310 plugins/sudoers/set_perms.c:629
-#: plugins/sudoers/set_perms.c:1011 plugins/sudoers/set_perms.c:1305
+#: plugins/sudoers/set_perms.c:310 plugins/sudoers/set_perms.c:631
+#: plugins/sudoers/set_perms.c:1015 plugins/sudoers/set_perms.c:1311
 msgid "unable to change to sudoers gid"
 msgstr "ne eblas ŝanĝi al gid de sudo-redaktantoj"
 
-#: plugins/sudoers/set_perms.c:363 plugins/sudoers/set_perms.c:700
-#: plugins/sudoers/set_perms.c:1057 plugins/sudoers/set_perms.c:1351
-#: plugins/sudoers/set_perms.c:1517
+#: plugins/sudoers/set_perms.c:363 plugins/sudoers/set_perms.c:702
+#: plugins/sudoers/set_perms.c:1061 plugins/sudoers/set_perms.c:1357
+#: plugins/sudoers/set_perms.c:1525
 msgid "too many processes"
 msgstr "tro da procezoj"
 
-#: plugins/sudoers/set_perms.c:1585
+#: plugins/sudoers/set_perms.c:1595
 msgid "unable to set runas group vector"
 msgstr "ne eblas elekti vektoron de plenumigkiela grupo"
 
-#: plugins/sudoers/sssd.c:257
-#, c-format
+#: plugins/sudoers/sssd.c:252
 msgid "unable to initialize SSS source. Is SSSD installed on your machine?"
 msgstr "ne eblas ekigi SSS-fonton. Ĉu SSSD estas instalita en via maŝino?"
 
-#: plugins/sudoers/sssd.c:263 plugins/sudoers/sssd.c:271
-#: plugins/sudoers/sssd.c:278 plugins/sudoers/sssd.c:285
-#: plugins/sudoers/sssd.c:292
+#: plugins/sudoers/sssd.c:259 plugins/sudoers/sssd.c:267
+#: plugins/sudoers/sssd.c:275 plugins/sudoers/sssd.c:283
+#: plugins/sudoers/sssd.c:291
 #, c-format
 msgid "unable to find symbol \"%s\" in %s"
 msgstr "ne eblas trovi simbolon \"%s\" en %s"
@@ -1221,217 +1192,202 @@ msgstr "Uzanto %s rajtas plenumigi la jenajn komandojn en %s:\n"
 msgid "User %s is not allowed to run sudo on %s.\n"
 msgstr "Uzanto %s ne rajtas plenumigi sudo-on en %s.\n"
 
-#: plugins/sudoers/sudoers.c:158 plugins/sudoers/sudoers.c:192
-#: plugins/sudoers/sudoers.c:675
+#: plugins/sudoers/sudoers.c:157 plugins/sudoers/sudoers.c:191
+#: plugins/sudoers/sudoers.c:674
 msgid "problem with defaults entries"
 msgstr "problemoj kun aŭtomataj eroj"
 
-#: plugins/sudoers/sudoers.c:164
-#, c-format
+#: plugins/sudoers/sudoers.c:163
 msgid "no valid sudoers sources found, quitting"
 msgstr "ne validaj fontotekstoj de sudoers trovita, ĉesiganta"
 
-#: plugins/sudoers/sudoers.c:226
-#, c-format
+#: plugins/sudoers/sudoers.c:225
 msgid "sudoers specifies that root is not allowed to sudo"
 msgstr "sudoers specifas, ke ĉefuzanto ne rajtas sudo-i"
 
-#: plugins/sudoers/sudoers.c:265
-#, c-format
+#: plugins/sudoers/sudoers.c:264
 msgid "you are not permitted to use the -C option"
 msgstr "vi ne rajtas uzi la parametron -C"
 
-#: plugins/sudoers/sudoers.c:314
+#: plugins/sudoers/sudoers.c:313
 #, c-format
 msgid "timestamp owner (%s): No such user"
 msgstr "tempindika posedanto (%s): neniu tia uzanto"
 
-#: plugins/sudoers/sudoers.c:328
+#: plugins/sudoers/sudoers.c:327
 msgid "no tty"
 msgstr "neniu tty"
 
-#: plugins/sudoers/sudoers.c:329
-#, c-format
+#: plugins/sudoers/sudoers.c:328
 msgid "sorry, you must have a tty to run sudo"
 msgstr "bedaŭre vi devas havi tty-on por plenumigi sudo-on"
 
-#: plugins/sudoers/sudoers.c:377
+#: plugins/sudoers/sudoers.c:376
 msgid "command in current directory"
 msgstr "komando en nuna dosierujo"
 
-#: plugins/sudoers/sudoers.c:394
-#, c-format
+#: plugins/sudoers/sudoers.c:393
 msgid "sorry, you are not allowed to preserve the environment"
 msgstr "bedaŭre vi ne rajtas konservi la medion"
 
-#: plugins/sudoers/sudoers.c:725 plugins/sudoers/timestamp.c:216
+#: plugins/sudoers/sudoers.c:724 plugins/sudoers/timestamp.c:216
 #: plugins/sudoers/timestamp.c:260 plugins/sudoers/timestamp.c:326
-#: plugins/sudoers/visudo.c:326 plugins/sudoers/visudo.c:591
+#: plugins/sudoers/visudo.c:336 plugins/sudoers/visudo.c:601
 #, c-format
 msgid "unable to stat %s"
 msgstr "ne eblas stat-i: %s"
 
-#: plugins/sudoers/sudoers.c:728
+#: plugins/sudoers/sudoers.c:727
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s ne estas normala dosiero"
 
-#: plugins/sudoers/sudoers.c:731 toke.l:913
+#: plugins/sudoers/sudoers.c:730 toke.l:923
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s estas estrita de uid %u, devas esti %u"
 
-#: plugins/sudoers/sudoers.c:735 toke.l:920
+#: plugins/sudoers/sudoers.c:734 toke.l:930
 #, c-format
 msgid "%s is world writable"
 msgstr "%s estas skribebla de ĉiuj"
 
-#: plugins/sudoers/sudoers.c:738 toke.l:925
+#: plugins/sudoers/sudoers.c:737 toke.l:935
 #, c-format
 msgid "%s is owned by gid %u, should be %u"
 msgstr "%s estas estrita de gid %u, devas esti %u"
 
-#: plugins/sudoers/sudoers.c:765
+#: plugins/sudoers/sudoers.c:764
 #, c-format
 msgid "only root can use `-c %s'"
 msgstr "nur ĉefuzanto rajtas uzi '-c %s'"
 
-#: plugins/sudoers/sudoers.c:782 plugins/sudoers/sudoers.c:784
+#: plugins/sudoers/sudoers.c:781 plugins/sudoers/sudoers.c:783
 #, c-format
 msgid "unknown login class: %s"
 msgstr "nekonata ensaluta klaso: %s"
 
-#: plugins/sudoers/sudoers.c:816
+#: plugins/sudoers/sudoers.c:815
 #, c-format
 msgid "unable to resolve host %s"
 msgstr "ne eblas trovi gastiganton %s"
 
-#: plugins/sudoers/sudoers.c:868 plugins/sudoers/testsudoers.c:379
+#: plugins/sudoers/sudoers.c:867 plugins/sudoers/testsudoers.c:381
 #, c-format
 msgid "unknown group: %s"
 msgstr "nekonata grupo: %s"
 
-#: plugins/sudoers/sudoreplay.c:278
+#: plugins/sudoers/sudoreplay.c:277
 #, c-format
 msgid "invalid filter option: %s"
 msgstr "nevalida filtrila elekto: %s"
 
-#: plugins/sudoers/sudoreplay.c:291
+#: plugins/sudoers/sudoreplay.c:290
 #, c-format
 msgid "invalid max wait: %s"
 msgstr "nevalida maksimuma atendo: %s"
 
-#: plugins/sudoers/sudoreplay.c:297
+#: plugins/sudoers/sudoreplay.c:296
 #, c-format
 msgid "invalid speed factor: %s"
 msgstr "nevalida rapida faktoro: %s"
 
-#: plugins/sudoers/sudoreplay.c:300 plugins/sudoers/visudo.c:191
+#: plugins/sudoers/sudoreplay.c:299 plugins/sudoers/visudo.c:194
 #, c-format
 msgid "%s version %s\n"
 msgstr "%s eldono %s\n"
 
-#: plugins/sudoers/sudoreplay.c:332
+#: plugins/sudoers/sudoreplay.c:331
 #, c-format
 msgid "%s/%.2s/%.2s/%.2s/timing: %s"
 msgstr "%s/%.2s/%.2s/%.2s tempo-registrado: %s"
 
-#: plugins/sudoers/sudoreplay.c:338
+#: plugins/sudoers/sudoreplay.c:337
 #, c-format
 msgid "%s/%s/timing: %s"
 msgstr "%s/%s/tempo-registrado: %s"
 
-#: plugins/sudoers/sudoreplay.c:354
+#: plugins/sudoers/sudoreplay.c:353
 #, c-format
 msgid "Replaying sudo session: %s\n"
 msgstr "Refaranta sudo-seancon: %s\n"
 
-#: plugins/sudoers/sudoreplay.c:360
+#: plugins/sudoers/sudoreplay.c:359
 #, c-format
 msgid "Warning: your terminal is too small to properly replay the log.\n"
 msgstr "Averto: via terminalo estas tro malgranda por konvene reskribi la protokolon.\n"
 
-#: plugins/sudoers/sudoreplay.c:361
+#: plugins/sudoers/sudoreplay.c:360
 #, c-format
 msgid "Log geometry is %d x %d, your terminal's geometry is %d x %d."
 msgstr "Protokola grando estas %dx%d, sed via terminala grando estas %dx%d."
 
-#: plugins/sudoers/sudoreplay.c:391
-#, c-format
+#: plugins/sudoers/sudoreplay.c:415
 msgid "unable to set tty to raw mode"
 msgstr "ne eblas elekti tty-on en nudan reĝimon"
 
-#: plugins/sudoers/sudoreplay.c:407
+#: plugins/sudoers/sudoreplay.c:445
 #, c-format
 msgid "invalid timing file line: %s"
 msgstr "nevalida linio en la tempo-registran dosieron: %s"
 
-#: plugins/sudoers/sudoreplay.c:490
-#, c-format
-msgid "writing to standard output"
-msgstr "skribanta al eligo"
-
-#: plugins/sudoers/sudoreplay.c:634 plugins/sudoers/sudoreplay.c:659
+#: plugins/sudoers/sudoreplay.c:651 plugins/sudoers/sudoreplay.c:676
 #, c-format
 msgid "ambiguous expression \"%s\""
 msgstr "ambigua esprimo \"%s\""
 
-#: plugins/sudoers/sudoreplay.c:676
-#, c-format
-msgid "too many parenthesized expressions, max %d"
-msgstr "tro da esprimoj en krampoj; maksimumo estas %d"
-
-#: plugins/sudoers/sudoreplay.c:687
-#, c-format
+#: plugins/sudoers/sudoreplay.c:698
 msgid "unmatched ')' in expression"
 msgstr "esprimo kun ')' sen samnivela '('"
 
-#: plugins/sudoers/sudoreplay.c:693
+#: plugins/sudoers/sudoreplay.c:702
 #, c-format
 msgid "unknown search term \"%s\""
 msgstr "nekonata serĉaĵo \"%s\""
 
-#: plugins/sudoers/sudoreplay.c:707
+#: plugins/sudoers/sudoreplay.c:716
 #, c-format
 msgid "%s requires an argument"
 msgstr "%s bezonas parametron"
 
-#: plugins/sudoers/sudoreplay.c:711 plugins/sudoers/sudoreplay.c:1051
+#: plugins/sudoers/sudoreplay.c:720 plugins/sudoers/sudoreplay.c:1058
 #, c-format
 msgid "invalid regular expression: %s"
 msgstr "nevalida regulesprimo: %s"
 
-#: plugins/sudoers/sudoreplay.c:717
+#: plugins/sudoers/sudoreplay.c:726
 #, c-format
 msgid "could not parse date \"%s\""
 msgstr "ne eblis analizi daton \"%s\""
 
-#: plugins/sudoers/sudoreplay.c:730
-#, c-format
+#: plugins/sudoers/sudoreplay.c:735
 msgid "unmatched '(' in expression"
 msgstr "esprimo kun '(' sen samnivela ')'"
 
-#: plugins/sudoers/sudoreplay.c:732
-#, c-format
+#: plugins/sudoers/sudoreplay.c:737
 msgid "illegal trailing \"or\""
 msgstr "nevalida posta \"or\""
 
-#: plugins/sudoers/sudoreplay.c:734
-#, c-format
+#: plugins/sudoers/sudoreplay.c:739
 msgid "illegal trailing \"!\""
 msgstr "nevalida posta \"!\""
 
-#: plugins/sudoers/sudoreplay.c:1179
+#: plugins/sudoers/sudoreplay.c:792
+#, c-format
+msgid "unknown search type %d"
+msgstr "nekonata serĉtipo %d"
+
+#: plugins/sudoers/sudoreplay.c:1197
 #, c-format
 msgid "usage: %s [-h] [-d dir] [-m num] [-s num] ID\n"
 msgstr "uzado: %s [-h] [-d dosierujo] [-m nombro] [-s nombro] identigilo\n"
 
-#: plugins/sudoers/sudoreplay.c:1182
+#: plugins/sudoers/sudoreplay.c:1200
 #, c-format
 msgid "usage: %s [-h] [-d dir] -l [search expression]\n"
 msgstr "uzado: %s [-h] [-d dosierujo] -l [serĉaĵo]\n"
 
-#: plugins/sudoers/sudoreplay.c:1191
+#: plugins/sudoers/sudoreplay.c:1209
 #, c-format
 msgid ""
 "%s - replay sudo session logs\n"
@@ -1440,7 +1396,7 @@ msgstr ""
 "%s - refari sudo-seancajn protokolojn\n"
 "\n"
 
-#: plugins/sudoers/sudoreplay.c:1193
+#: plugins/sudoers/sudoreplay.c:1211
 msgid ""
 "\n"
 "Options:\n"
@@ -1532,90 +1488,88 @@ msgid "unable to reset %s to the Unix epoch"
 msgstr "ne eblas restarigi la dosieron %s al la uniksa epoko"
 
 #: plugins/sudoers/toke_util.c:176
-#, c-format
 msgid "fill_args: buffer overflow"
 msgstr "fill_args: bufra superfluo"
 
-#: plugins/sudoers/visudo.c:193
+#: plugins/sudoers/visudo.c:196
 #, c-format
 msgid "%s grammar version %d\n"
 msgstr "%s gramatika eldono %d\n"
 
-#: plugins/sudoers/visudo.c:257 plugins/sudoers/visudo.c:544
+#: plugins/sudoers/visudo.c:267 plugins/sudoers/visudo.c:554
 #, c-format
 msgid "press return to edit %s: "
 msgstr "premu enen-klavon por redakti %s-on: "
 
-#: plugins/sudoers/visudo.c:342 plugins/sudoers/visudo.c:348
-#, c-format
+#: plugins/sudoers/visudo.c:352 plugins/sudoers/visudo.c:358
 msgid "write error"
 msgstr "skriba eraro"
 
-#: plugins/sudoers/visudo.c:430
+#: plugins/sudoers/visudo.c:440
 #, c-format
 msgid "unable to stat temporary file (%s), %s unchanged"
 msgstr "ne eblas stat-i provizoron dosieron (%s), %s neŝanĝita"
 
-#: plugins/sudoers/visudo.c:435
+#: plugins/sudoers/visudo.c:445
 #, c-format
 msgid "zero length temporary file (%s), %s unchanged"
 msgstr "nul-longa provizora dosiero (%s), %s neŝanĝita"
 
-#: plugins/sudoers/visudo.c:441
+#: plugins/sudoers/visudo.c:451
 #, c-format
 msgid "editor (%s) failed, %s unchanged"
 msgstr "redaktilo (%s) malsukcesis, %s neŝanĝita"
 
-#: plugins/sudoers/visudo.c:464
+#: plugins/sudoers/visudo.c:474
 #, c-format
 msgid "%s unchanged"
 msgstr "%s neŝanĝita"
 
-#: plugins/sudoers/visudo.c:489
+#: plugins/sudoers/visudo.c:499
 #, c-format
 msgid "unable to re-open temporary file (%s), %s unchanged."
 msgstr "ne eblas remalfermi provizoran dosieron (%s), %s neŝanĝita."
 
-#: plugins/sudoers/visudo.c:499
+#: plugins/sudoers/visudo.c:509
 #, c-format
 msgid "unabled to parse temporary file (%s), unknown error"
 msgstr "ne eblas analizi provizoran dosieron (%s), nekonata eraro"
 
-#: plugins/sudoers/visudo.c:535
+#: plugins/sudoers/visudo.c:545
 #, c-format
 msgid "internal error, unable to find %s in list!"
 msgstr "interna eraro, ne eblas trovi '%s'-on en listo!"
 
-#: plugins/sudoers/visudo.c:593 plugins/sudoers/visudo.c:602
+#: plugins/sudoers/visudo.c:603 plugins/sudoers/visudo.c:612
 #, c-format
 msgid "unable to set (uid, gid) of %s to (%u, %u)"
 msgstr "ne eblas ŝanĝi (uid, gid) de %s al (%u, %u)"
 
-#: plugins/sudoers/visudo.c:597 plugins/sudoers/visudo.c:607
+#: plugins/sudoers/visudo.c:607 plugins/sudoers/visudo.c:617
 #, c-format
 msgid "unable to change mode of %s to 0%o"
 msgstr "ne eblas ŝanĝi reĝimon de %s al 0%o"
 
-#: plugins/sudoers/visudo.c:624
+#: plugins/sudoers/visudo.c:634
 #, c-format
 msgid "%s and %s not on the same file system, using mv to rename"
 msgstr "%s kaj %s ne estas la sama dosiersistemo, uzanta mv-on por alinomi"
 
-#: plugins/sudoers/visudo.c:638
+#: plugins/sudoers/visudo.c:648
 #, c-format
 msgid "command failed: '%s %s %s', %s unchanged"
 msgstr "komando malsukcesis: '%s %s %s', %s neŝanĝita"
 
-#: plugins/sudoers/visudo.c:648
+#: plugins/sudoers/visudo.c:658
 #, c-format
 msgid "error renaming %s, %s unchanged"
 msgstr "eraro dum alinomi %s-on; %s neŝanĝita"
 
-#: plugins/sudoers/visudo.c:710
+#: plugins/sudoers/visudo.c:720
 msgid "What now? "
 msgstr "Kion nun? "
 
-#: plugins/sudoers/visudo.c:724
+#: plugins/sudoers/visudo.c:734
 msgid ""
 "Options are:\n"
 "  (e)dit sudoers file again\n"
@@ -1627,87 +1581,87 @@ msgstr ""
 "  x) eliri sen konservi ŝanĝojn al sudoers-dosiero\n"
 "  q) Eliri kaj konservi ŝanĝojn al sudoers-dosiero (DANĜERA!)\n"
 
-#: plugins/sudoers/visudo.c:772
+#: plugins/sudoers/visudo.c:782
 #, c-format
 msgid "unable to run %s"
 msgstr "ne eblas plenumigi: %s"
 
-#: plugins/sudoers/visudo.c:798
+#: plugins/sudoers/visudo.c:808
 #, c-format
 msgid "%s: wrong owner (uid, gid) should be (%u, %u)\n"
 msgstr "%s: malĝusta estro (uid, gid) devas esti (%u, %u)\n"
 
-#: plugins/sudoers/visudo.c:805
+#: plugins/sudoers/visudo.c:815
 #, c-format
 msgid "%s: bad permissions, should be mode 0%o\n"
 msgstr "%s: misaj permesoj, devas esti reĝimo 0%o\n"
 
-#: plugins/sudoers/visudo.c:830
+#: plugins/sudoers/visudo.c:840 plugins/sudoers/visudo_json.c:980
 #, c-format
 msgid "failed to parse %s file, unknown error"
 msgstr "malsukcesis analizi dosieron %s, nekonata eraro"
 
-#: plugins/sudoers/visudo.c:846
+#: plugins/sudoers/visudo.c:856 plugins/sudoers/visudo_json.c:989
 #, c-format
 msgid "parse error in %s near line %d\n"
 msgstr "analiza eraro en %s proksime al linio %d\n"
 
-#: plugins/sudoers/visudo.c:849
+#: plugins/sudoers/visudo.c:859 plugins/sudoers/visudo_json.c:992
 #, c-format
 msgid "parse error in %s\n"
 msgstr "analiza eraro en %s\n"
 
-#: plugins/sudoers/visudo.c:857 plugins/sudoers/visudo.c:864
+#: plugins/sudoers/visudo.c:867 plugins/sudoers/visudo.c:874
 #, c-format
 msgid "%s: parsed OK\n"
 msgstr "%s: analizita senerare\n"
 
-#: plugins/sudoers/visudo.c:912
+#: plugins/sudoers/visudo.c:920
 #, c-format
 msgid "%s busy, try again later"
 msgstr "%s okupata, reprovu pli malfrue"
 
-#: plugins/sudoers/visudo.c:956
+#: plugins/sudoers/visudo.c:964
 #, c-format
 msgid "specified editor (%s) doesn't exist"
 msgstr "specifita tekstoredaktilo (%s) ne ekzistas"
 
-#: plugins/sudoers/visudo.c:979
+#: plugins/sudoers/visudo.c:987
 #, c-format
 msgid "unable to stat editor (%s)"
 msgstr "ne eblas stat-i tekstoredaktilon (%s)"
 
-#: plugins/sudoers/visudo.c:1027
+#: plugins/sudoers/visudo.c:1035
 #, c-format
 msgid "no editor found (editor path = %s)"
 msgstr "neniu tekstoredaktilo trovita (pado = %s)"
 
-#: plugins/sudoers/visudo.c:1120
+#: plugins/sudoers/visudo.c:1128
 #, c-format
 msgid "Error: cycle in %s_Alias `%s'"
 msgstr "Eraro: ciklo en %s_Alias '%s'"
 
-#: plugins/sudoers/visudo.c:1121
+#: plugins/sudoers/visudo.c:1129
 #, c-format
 msgid "Warning: cycle in %s_Alias `%s'"
 msgstr "Averto: ciklo en %s_Alias '%s'"
 
-#: plugins/sudoers/visudo.c:1127
+#: plugins/sudoers/visudo.c:1135
 #, c-format
 msgid "Error: %s_Alias `%s' referenced but not defined"
 msgstr "Eraro: %s_Alias '%s' referinta sed ne difinita"
 
-#: plugins/sudoers/visudo.c:1128
+#: plugins/sudoers/visudo.c:1136
 #, c-format
 msgid "Warning: %s_Alias `%s' referenced but not defined"
 msgstr "Averto: %s_Alias '%s' referinta sed ne difinita"
 
-#: plugins/sudoers/visudo.c:1253
+#: plugins/sudoers/visudo.c:1278
 #, c-format
 msgid "%s: unused %s_Alias %s"
 msgstr "%s neuzata %s_Alias %s"
 
-#: plugins/sudoers/visudo.c:1315
+#: plugins/sudoers/visudo.c:1340
 #, c-format
 msgid ""
 "%s - safely edit the sudoers file\n"
@@ -1716,7 +1670,7 @@ msgstr ""
 "%s - sekure redakti la dosieron sudoers\n"
 "\n"
 
-#: plugins/sudoers/visudo.c:1317
+#: plugins/sudoers/visudo.c:1342
 msgid ""
 "\n"
 "Options:\n"
@@ -1725,7 +1679,7 @@ msgid ""
 "  -h, --help       display help message and exit\n"
 "  -q, --quiet      less verbose (quiet) syntax error messages\n"
 "  -s, --strict     strict syntax checking\n"
-"  -V, --version    display version information and exit"
+"  -V, --version    display version information and exit  -x, --export     export sudoers in JSON format"
 msgstr ""
 "\n"
 "Parametroj:\n"
@@ -1734,11 +1688,24 @@ msgstr ""
 "  -h, --help          montri helpan mesaĝon kaj eliri\n"
 "  -q, --quit          pli silenta pri sintaksaj eraroj\n"
 "  -s, --strict        malsevera kontrolado de sintakso\n"
-"  -V, --version       montri eldonon kaj eliri"
+"  -V, --version       montri eldonon kaj eliri\n"
+"  -x, --export        ekporti la dosieron sudoers en JSON-formon"
 
-#: toke.l:886
+#: toke.l:895
 msgid "too many levels of includes"
 msgstr "tro da niveloj de inkluzivaĵoj"
+
+#~ msgid "invalid uri: %s"
+#~ msgstr "nevalida retadreso: %s"
+
+#~ msgid "unable to mix ldaps and starttls"
+#~ msgstr "ne eblas miksi protokolojn ldaps kaj starttls"
+
+#~ msgid "writing to standard output"
+#~ msgstr "skribanta al eligo"
+
+#~ msgid "too many parenthesized expressions, max %d"
+#~ msgstr "tro da esprimoj en krampoj; maksimumo estas %d"
 
 #~ msgid "unable to setup authentication"
 #~ msgstr "ne eblas starigi aŭtentikigon"

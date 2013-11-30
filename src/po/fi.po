@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.8b3\n"
+"Project-Id-Version: sudo 1.8.9b1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-09-03 14:44-0600\n"
-"PO-Revision-Date: 2013-09-08 11:13+0300\n"
+"POT-Creation-Date: 2013-11-24 16:32-0700\n"
+"PO-Revision-Date: 2013-11-28 16:14+0200\n"
 "Last-Translator: Jorma Karvonen <karvonen.jorma@gmail.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
 "Language: fi\n"
@@ -17,8 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
-#: common/aix.c:150
-#, c-format
+#: common/aix.c:93 common/aix.c:150
 msgid "unable to open userdb"
 msgstr "userdb-käyttäjätietokannan avaaminen epäonnistui"
 
@@ -28,7 +27,6 @@ msgid "unable to switch to registry \"%s\" for %s"
 msgstr "vaihtaminen registeröitymiseen ”%s” käyttäjälle %s epäonnistui"
 
 #: common/aix.c:170
-#, c-format
 msgid "unable to restore registry"
 msgstr "rekisteröitymisen palauttaminen epäonnistui"
 
@@ -40,7 +38,7 @@ msgstr "sisäinen virhe, yritettiin suorittaa emalloc(0)"
 msgid "internal error, tried to emalloc2(0)"
 msgstr "sisäinen virhe, yritettiin suorittaa emalloc2(0)"
 
-#: common/alloc.c:100 common/alloc.c:122 common/alloc.c:162 common/alloc.c:186
+#: common/alloc.c:100 common/alloc.c:122 common/alloc.c:162 common/alloc.c:185
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "sisäinen virhe, %s-ylivuoto"
@@ -57,17 +55,17 @@ msgstr "sisäinen virhe, yritettiin suorittaa erealloc(0)"
 msgid "internal error, tried to erealloc3(0)"
 msgstr "sisäinen virhe, yritettiin suorittaa erealloc3(0)"
 
-#: common/alloc.c:184
+#: common/alloc.c:183
 msgid "internal error, tried to erecalloc(0)"
 msgstr "sisäinen virhe, yritettiin suorittaa erecalloc(0)"
 
-#: common/atoid.c:77 common/atoid.c:99 src/sudo.c:561 src/sudo.c:586
-#: src/sudo.c:694 src/sudo.c:710
+#: common/atoid.c:77 common/atoid.c:99 src/sudo.c:563 src/sudo.c:588
+#: src/sudo.c:696 src/sudo.c:712
 msgid "invalid value"
 msgstr "virheellinen arvo"
 
-#: common/atoid.c:84 src/sudo.c:565 src/sudo.c:590 src/sudo.c:698
-#: src/sudo.c:714
+#: common/atoid.c:84 src/sudo.c:567 src/sudo.c:592 src/sudo.c:700
+#: src/sudo.c:716
 msgid "value out of range"
 msgstr "arvo lukualueen ulkopuolella"
 
@@ -75,60 +73,61 @@ msgstr "arvo lukualueen ulkopuolella"
 msgid "value too large"
 msgstr "arvo on liian suuri"
 
-#: common/fatal.c:154
+#: common/fatal.c:158
 #, c-format
 msgid "%s: %s: %s\n"
 msgstr "%s: %s: %s\n"
 
-#: common/fatal.c:157 common/fatal.c:161
+#: common/fatal.c:161 common/fatal.c:165
 #, c-format
 msgid "%s: %s\n"
 msgstr "%s: %s\n"
 
-#: common/gidlist.c:80 src/load_plugins.c:72 src/sudo.c:561 src/sudo.c:565
-#: src/sudo.c:586 src/sudo.c:590 src/sudo.c:613 src/sudo.c:622 src/sudo.c:631
-#: src/sudo.c:646 src/sudo.c:694 src/sudo.c:698 src/sudo.c:710 src/sudo.c:714
+#: common/gidlist.c:80 src/load_plugins.c:63 src/load_plugins.c:76
+#: src/sudo.c:563 src/sudo.c:567 src/sudo.c:588 src/sudo.c:592 src/sudo.c:615
+#: src/sudo.c:624 src/sudo.c:633 src/sudo.c:648 src/sudo.c:696 src/sudo.c:700
+#: src/sudo.c:712 src/sudo.c:716
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: common/sudo_conf.c:176
+#: common/sudo_conf.c:177
 #, c-format
 msgid "unsupported group source `%s' in %s, line %d"
 msgstr "tukematon ryhmälähde ”%s” tiedostossa %s, rivi %d"
 
-#: common/sudo_conf.c:190
+#: common/sudo_conf.c:191
 #, c-format
 msgid "invalid max groups `%s' in %s, line %d"
 msgstr "virheellinen ryhmien ”%s” enimmäismäärä tiedostossa %s, rivi %d"
 
-#: common/sudo_conf.c:394
+#: common/sudo_conf.c:393
 #, c-format
 msgid "unable to stat %s"
 msgstr "käskyn stat %s suorittaminen epäonnistui"
 
-#: common/sudo_conf.c:397
+#: common/sudo_conf.c:396
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s ei ole tavallinen tiedosto"
 
 #  ensimmäinen parametri on path
-#: common/sudo_conf.c:400
+#: common/sudo_conf.c:399
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "polun %s omistaja on %u, pitäisi olla %u"
 
-#: common/sudo_conf.c:404
+#: common/sudo_conf.c:403
 #, c-format
 msgid "%s is world writable"
 msgstr "%s on yleiskirjoitettava"
 
-#: common/sudo_conf.c:407
+#: common/sudo_conf.c:406
 #, c-format
 msgid "%s is group writable"
 msgstr "%s on ryhmäkirjoitettava"
 
-#: common/sudo_conf.c:417 src/selinux.c:196 src/selinux.c:209 src/sudo.c:329
+#: common/sudo_conf.c:416 src/selinux.c:196 src/selinux.c:209 src/sudo.c:331
 #, c-format
 msgid "unable to open %s"
 msgstr "kohteen %s avaaminen epäonnistui"
@@ -137,201 +136,184 @@ msgstr "kohteen %s avaaminen epäonnistui"
 msgid "Unknown signal"
 msgstr "Tuntematon signaali"
 
-#: src/exec.c:127 src/exec_pty.c:685
-#, c-format
+#: src/exec.c:133 src/exec_pty.c:744
 msgid "policy plugin failed session initialization"
 msgstr "Menettelytapalisäosa epäonnistui istunnon alustamisessa"
 
-#: src/exec.c:132 src/exec_pty.c:701 src/exec_pty.c:1066 src/tgetpass.c:221
-#, c-format
+#: src/exec.c:138 src/exec_pty.c:760 src/exec_pty.c:1272 src/tgetpass.c:221
 msgid "unable to fork"
 msgstr "fork-kutsu epäonnistui"
 
-#: src/exec.c:259
-#, c-format
+#: src/exec.c:309 src/exec.c:317 src/exec.c:841 src/exec_pty.c:507
+#: src/exec_pty.c:512 src/exec_pty.c:570 src/exec_pty.c:577 src/exec_pty.c:870
+#: src/exec_pty.c:880 src/exec_pty.c:925 src/exec_pty.c:932
+#: src/exec_pty.c:1334 src/exec_pty.c:1341 src/exec_pty.c:1348
+msgid "unable to add event to queue"
+msgstr "tapahtuman lisääminen jonoon epäonnistui"
+
+#: src/exec.c:394
 msgid "unable to create sockets"
 msgstr "vastakkeiden luominen epäonnistui"
 
-#: src/exec.c:347 src/exec_pty.c:1130 src/exec_pty.c:1268
-#, c-format
-msgid "select failed"
-msgstr "select-funktio epäonnistui"
+#: src/exec.c:477
+msgid "error in event loop"
+msgstr "virhe tapahtumasilmukassa"
 
-#: src/exec.c:449
-#, c-format
+#: src/exec.c:492
 msgid "unable to restore tty label"
 msgstr "tty-nimiön palauttaminen epäonnistui"
 
 #  Solaris privileges, remove PRIV_PROC_EXEC post-execve.
 #: src/exec_common.c:70
-#, c-format
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "kohteen PRIV_PROC_EXEC poistaminen kohteesta PRIV_LIMIT epäonnistui"
 
-#: src/exec_pty.c:183
-#, c-format
+#: src/exec_pty.c:184
 msgid "unable to allocate pty"
 msgstr "pty:n varaaminen epäonnistui"
 
-#: src/exec_pty.c:623 src/exec_pty.c:632 src/exec_pty.c:640 src/exec_pty.c:986
-#: src/exec_pty.c:1063 src/signal.c:126 src/tgetpass.c:218
-#, c-format
+#: src/exec_pty.c:682 src/exec_pty.c:691 src/exec_pty.c:699
+#: src/exec_pty.c:1192 src/exec_pty.c:1269 src/signal.c:126 src/tgetpass.c:218
 msgid "unable to create pipe"
 msgstr "putken luominen epäonnistui"
 
-#: src/exec_pty.c:676
-#, c-format
+#: src/exec_pty.c:735
 msgid "unable to set terminal to raw mode"
 msgstr "pääteikkunan asentaminen raakatilaan epäonnistui"
 
-#  Istunnolla voi olla ohjaava tty. Istunnon yksi prosessiryhmä voi olla edustaprosessiryhmä ja toimia siten ohjaavana tty:nä, joka vastaanottaa tty-syötteen ja -signaalit.
-#: src/exec_pty.c:1042
-#, c-format
-msgid "unable to set controlling tty"
-msgstr "ohjaavan tty:n asettaminen epäonnistui"
-
-#: src/exec_pty.c:1139
-#, c-format
+#: src/exec_pty.c:1091
 msgid "error reading from signal pipe"
 msgstr "virhe luettaessa signaaliputkesta"
 
-#: src/exec_pty.c:1160
-#, c-format
+#: src/exec_pty.c:1124
 msgid "error reading from pipe"
 msgstr "virhe luettaessa putkesta"
 
-#: src/exec_pty.c:1176
-#, c-format
+#: src/exec_pty.c:1149
 msgid "error reading from socketpair"
 msgstr "virhe luettaessa vastakeparista"
 
-#: src/exec_pty.c:1180
+#: src/exec_pty.c:1158
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "odottamaton vastaustyyppi paluukanavalla: %d"
 
-#: src/load_plugins.c:70 src/load_plugins.c:79 src/load_plugins.c:132
-#: src/load_plugins.c:138 src/load_plugins.c:144 src/load_plugins.c:185
-#: src/load_plugins.c:192 src/load_plugins.c:199 src/load_plugins.c:205
+#  Istunnolla voi olla ohjaava tty. Istunnon yksi prosessiryhmä voi olla edustaprosessiryhmä ja toimia siten ohjaavana tty:nä, joka vastaanottaa tty-syötteen ja -signaalit.
+#: src/exec_pty.c:1248
+msgid "unable to set controlling tty"
+msgstr "ohjaavan tty:n asettaminen epäonnistui"
+
+#: src/load_plugins.c:61 src/load_plugins.c:74 src/load_plugins.c:91
+#: src/load_plugins.c:144 src/load_plugins.c:150 src/load_plugins.c:156
+#: src/load_plugins.c:197 src/load_plugins.c:204 src/load_plugins.c:211
+#: src/load_plugins.c:217
 #, c-format
 msgid "error in %s, line %d while loading plugin `%s'"
 msgstr "virhe tiedostossa %s, rivi %d alustettaessa lisäosaa ”%s”"
 
-#: src/load_plugins.c:81
+#: src/load_plugins.c:93
 #, c-format
 msgid "%s%s: %s"
 msgstr "%s%s: %s"
 
 #  ensimmäinen parametri on path
-#: src/load_plugins.c:140
+#: src/load_plugins.c:152
 #, c-format
 msgid "%s must be owned by uid %d"
 msgstr "polun %s omistajan on oltava uid %d"
 
 #  parametri on path
-#: src/load_plugins.c:146
+#: src/load_plugins.c:158
 #, c-format
 msgid "%s must be only be writable by owner"
 msgstr "polun %s on oltava vain omistajan kirjoitettava"
 
-#: src/load_plugins.c:187
+#: src/load_plugins.c:199
 #, c-format
-msgid "unable to dlopen %s: %s"
-msgstr "lisäosan avaaminen epäonnistui funktiolla dlopen %s: %s"
+msgid "unable to load %s: %s"
+msgstr "kohteen %s lataaminen epäonnistui: %s"
 
-#: src/load_plugins.c:194
+#: src/load_plugins.c:206
 #, c-format
 msgid "unable to find symbol `%s' in %s"
 msgstr "symbolin ”%s” löytäminen kohteesta %s epäonnistui"
 
-#: src/load_plugins.c:201
+#: src/load_plugins.c:213
 #, c-format
 msgid "unknown policy type %d found in %s"
 msgstr "tuntematon menettelytapatyyppi %d löytyi kohteesta %s"
 
-#: src/load_plugins.c:207
+#: src/load_plugins.c:219
 #, c-format
 msgid "incompatible plugin major version %d (expected %d) found in %s"
 msgstr "yhteensopimaton lisäosan major-versio %d (odotettiin %d) löytyi kohteesta %s"
 
-#: src/load_plugins.c:216
+#: src/load_plugins.c:228
 #, c-format
 msgid "ignoring policy plugin `%s' in %s, line %d"
 msgstr "ohitetaan menettelytapaliitännäinen ”%s” tiedostossa %s, rivi %d"
 
-#: src/load_plugins.c:218
-#, c-format
+#: src/load_plugins.c:230
 msgid "only a single policy plugin may be specified"
 msgstr "vain yksi menettelytapalisäosa voidaan määritellä"
 
-#: src/load_plugins.c:221
+#: src/load_plugins.c:233
 #, c-format
 msgid "ignoring duplicate policy plugin `%s' in %s, line %d"
 msgstr "ohitetaan menettelytapalisäosan ”%s” kaksoiskappale tiedostossa %s, rivi %d"
 
-#: src/load_plugins.c:236
+#: src/load_plugins.c:248
 #, c-format
 msgid "ignoring duplicate I/O plugin `%s' in %s, line %d"
 msgstr "ohitetaan siirräntälisäosan ”%s” kaksoiskappale tiedostossa %s, rivi %d"
 
-#: src/load_plugins.c:313
+#: src/load_plugins.c:319
 #, c-format
 msgid "policy plugin %s does not include a check_policy method"
 msgstr "menettelytapalisäosa %s ei sisällä check_policy-metodia"
 
 #: src/net_ifs.c:156 src/net_ifs.c:165 src/net_ifs.c:177 src/net_ifs.c:186
 #: src/net_ifs.c:297 src/net_ifs.c:321
-#, c-format
 msgid "load_interfaces: overflow detected"
 msgstr "load_interfaces: ylivuoto havaittu"
 
 #: src/net_ifs.c:226
-#, c-format
 msgid "unable to open socket"
 msgstr "vastakkeen avaaminen epäonnistui"
 
 #: src/parse_args.c:246
-#, c-format
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "valitsimen -C argumentin on oltava vähintään 3"
 
 #: src/parse_args.c:408
-#, c-format
 msgid "you may not specify both the `-i' and `-s' options"
 msgstr "sekä valitsimen ”-i” että valitsimen ”-s” määritteleminen ei ole sallittua"
 
 #: src/parse_args.c:412
-#, c-format
 msgid "you may not specify both the `-i' and `-E' options"
 msgstr "sekä valitsimen ”-i” että valitsimen ”-E” määritteleminen ei ole sallittua"
 
 #: src/parse_args.c:422
-#, c-format
 msgid "the `-E' option is not valid in edit mode"
 msgstr "valitsin ”-E” ei ole kelvollinen muokkaustilassa"
 
 #: src/parse_args.c:424
-#, c-format
 msgid "you may not specify environment variables in edit mode"
 msgstr "ympäristömuuttujien määritteleminen muokkaustilassa ei ole salittua"
 
 #: src/parse_args.c:432
-#, c-format
 msgid "the `-U' option may only be used with the `-l' option"
 msgstr "valitsinta ”-U” voidaan käyttää vain valitsimen ”-l” kanssa"
 
 #: src/parse_args.c:436
-#, c-format
 msgid "the `-A' and `-S' options may not be used together"
 msgstr "valitsimia ”-A” ja ”-S” ei voi käyttää yhdessä"
 
 #: src/parse_args.c:519
-#, c-format
 msgid "sudoedit is not supported on this platform"
 msgstr "sudoedit ei ole tuettu tällä alustalla"
 
 #: src/parse_args.c:592
-#, c-format
 msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr "Vain yksi valitsimista -e, -h, -i, -K, -l, -s, -v tai -V voidaan määritellä"
 
@@ -472,12 +454,10 @@ msgid "stop processing command line arguments"
 msgstr "lopeta komentoriviargumenttien käsittely"
 
 #: src/selinux.c:77
-#, c-format
 msgid "unable to open audit system"
 msgstr "audit-järjestelmän avaaminen epäonnistui"
 
 #: src/selinux.c:85
-#, c-format
 msgid "unable to send audit message"
 msgstr "audit-viestin lähettäminen epäonnistui"
 
@@ -502,17 +482,14 @@ msgid "unable to open %s, not relabeling tty"
 msgstr "kohteen %s avaaminen epäonnistui, ei nimiöidä uudelleen tty:tä"
 
 #: src/selinux.c:172
-#, c-format
 msgid "unable to get current tty context, not relabeling tty"
 msgstr "nykyisen tty-asiayhteyden hakeminen epäonnistui, ei nimiöidä uudelleen tty:tä"
 
 #: src/selinux.c:179
-#, c-format
 msgid "unable to get new tty context, not relabeling tty"
 msgstr "uuden tty-asiayhteyden hakeminen epäonnistui, ei nimiöidä uudelleen tty:tä"
 
 #: src/selinux.c:186
-#, c-format
 msgid "unable to set new tty context"
 msgstr "uuden tty-asiayhteyden asettaminen epäonnistui"
 
@@ -542,12 +519,10 @@ msgid "%s is not a valid context"
 msgstr "%s ei ole kelvollinen asiayhteys"
 
 #: src/selinux.c:324
-#, c-format
 msgid "failed to get old_context"
 msgstr "kohteen old_context hakeminen epäonnistui"
 
 #: src/selinux.c:330
-#, c-format
 msgid "unable to determine enforcing mode."
 msgstr "vahvistustilan määritteleminen epäonnistui."
 
@@ -567,17 +542,15 @@ msgid "unable to set key creation context to %s"
 msgstr "ei kyetä asettamaan avaimenluontiasiayhteydeksi %s"
 
 #: src/sesh.c:57
-#, c-format
 msgid "requires at least one argument"
 msgstr "vaatii vähintään yhden argumentin"
 
-#: src/sesh.c:78 src/sudo.c:1114
+#: src/sesh.c:78 src/sudo.c:1116
 #, c-format
 msgid "unable to execute %s"
 msgstr "kohteen %s suorittaminen epäonnistui"
 
 #: src/solaris.c:88
-#, c-format
 msgid "resource control limit has been reached"
 msgstr "resurssivalvontaraja saavutettu"
 
@@ -587,7 +560,6 @@ msgid "user \"%s\" is not a member of project \"%s\""
 msgstr "käyttäjä ”%s” ei ole hankkeen ”%s” jäsen"
 
 #: src/solaris.c:95
-#, c-format
 msgid "the invoking task is final"
 msgstr "kutsuttu tehtävä on final-tyyppinen"
 
@@ -632,119 +604,113 @@ msgid "Configure options: %s\n"
 msgstr "Asetusvalitsimet: %s\n"
 
 #: src/sudo.c:203
-#, c-format
 msgid "fatal error, unable to load plugins"
 msgstr "vakava virhe, lisäosien lataaminen epäonnistui"
 
 #: src/sudo.c:211
-#, c-format
 msgid "unable to initialize policy plugin"
 msgstr "menettelytapalisäosan alustaminen epäonnistui"
 
-#: src/sudo.c:268
+#: src/sudo.c:267
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "virhe alustettaessa siirräntälisäosaa %s"
 
-#: src/sudo.c:294
+#: src/sudo.c:293
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "odottamaton sudo-tila 0x%x"
 
-#: src/sudo.c:414
-#, c-format
+#: src/sudo.c:416
 msgid "unable to get group vector"
 msgstr "ei kyetä hakemaan ryhmävektoria"
 
-#: src/sudo.c:466
+#: src/sudo.c:468
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "tuntematon uid-käyttäjätunniste %u: kuka olet?"
 
 #  ensimmäinen parametri on path
-#: src/sudo.c:788
+#: src/sudo.c:790
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "polun %s omistajan on oltava uid %d ja setuid-bitin on oltava asetettu"
 
-#: src/sudo.c:791
+#: src/sudo.c:793
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "todellinen käyttäjätunniste ei ole %d, onko %s asetettu tiedostojärjestelmässä, jossa on ’nosuid’-valitsin vai onko tämä NFS-tiedostojärjestelmä ilman root-käyttöoikeuksia?"
 
-#: src/sudo.c:797
+#: src/sudo.c:799
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "todellinen käyttäjätunniste ei ole %d, onko sudo asennettu setuid root -käyttöoikeuksilla?"
 
-#: src/sudo.c:923
+#: src/sudo.c:925
 #, c-format
 msgid "unknown login class %s"
 msgstr "tuntematon kirjautumisluokka %s"
 
-#: src/sudo.c:936
-#, c-format
+#: src/sudo.c:938
 msgid "unable to set user context"
 msgstr "käyttäjäasiayhteyden asettaminen epäonnistui"
 
-#: src/sudo.c:950
-#, c-format
+#: src/sudo.c:952
 msgid "unable to set supplementary group IDs"
 msgstr "lisäryhmätunnisteiden asettaminen epäonnistui"
 
 #  tämän ymmärrän niin, että käyttöjärjestelmäydin luo tiedoston ja antaa tälle tavallaan tilapäisen effective gid-tunnisteen, joka vaihdetaan suorittamisen yhteydessä prosessin omistajan suoritettavaksi ryhmätunnisteeksi.
-#: src/sudo.c:957
+#: src/sudo.c:959
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "voimassaolevan gid-ryhmätunnisteen asettaminen suoritettavaksi gid-ryhmätunnisteeksi %u epäonnistui"
 
-#: src/sudo.c:963
+#: src/sudo.c:965
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "gid-ryhmätunnisteen asettaminen suoritettavaksi gid-ryhmätunnisteeksi %u epäonnistui"
 
-#: src/sudo.c:970
-#, c-format
+#: src/sudo.c:972
 msgid "unable to set process priority"
 msgstr "prosessiprioriteetin asettaminen epäonnistui"
 
-#: src/sudo.c:978
+#: src/sudo.c:980
 #, c-format
 msgid "unable to change root to %s"
 msgstr "root-käyttäjän vaihtaminen käyttäjäksi %s epäonnistui"
 
-#: src/sudo.c:991 src/sudo.c:997 src/sudo.c:1003
+#: src/sudo.c:993 src/sudo.c:999 src/sudo.c:1005
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "ei kyetä vaihtamaan suoritettavaksi uid-käyttäjätunnisteeksi (%u, %u)"
 
 #  parametrina on CWD- eli Change Working Directory- komennolla palautettava hakemisto
-#: src/sudo.c:1020
+#: src/sudo.c:1022
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "ei kyetä vaihtamaan hakemistoksi %s"
 
-#: src/sudo.c:1077
+#: src/sudo.c:1079
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "lapsiprosessin odottamaton päättymisehto: %d"
 
-#: src/sudo.c:1134
+#: src/sudo.c:1136
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr "menettelytapalisäosa %s ei sisällä ”check_policy”-metodia"
 
-#: src/sudo.c:1147
+#: src/sudo.c:1149
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "menettelytapalisäosa %s ei tue luettelointikäyttöoikeuksia"
 
-#: src/sudo.c:1159
+#: src/sudo.c:1161
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "menettelytapalisäosa %s ei tue valitsinta -v"
 
-#: src/sudo.c:1171
+#: src/sudo.c:1173
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "menettelytapalisäosa %s ei tue valitsimia -k/-K"
@@ -755,7 +721,6 @@ msgid "unable to change uid to root (%u)"
 msgstr "uid-käyttäjätunnisteen vaihtaminen root-tunnisteeksi (%u) epäonnistui"
 
 #: src/sudo_edit.c:142
-#, c-format
 msgid "plugin error: missing file list for sudoedit"
 msgstr "lisäosavirhe: puuttuu sudoedit-tiedostoluettelo"
 
@@ -790,17 +755,14 @@ msgid "contents of edit session left in %s"
 msgstr "muokkausistunnon sisältö jätetty kohteessa %s"
 
 #: src/sudo_edit.c:314
-#, c-format
 msgid "unable to read temporary file"
 msgstr "tilapäisen tiedoston lukeminen epäonnistui"
 
 #: src/tgetpass.c:90
-#, c-format
 msgid "no tty present and no askpass program specified"
 msgstr "ei tty:tä käytettävissä eikä salasanan kyselyohjelmaa määriteltynä"
 
 #: src/tgetpass.c:99
-#, c-format
 msgid "no askpass program specified, try setting SUDO_ASKPASS"
 msgstr "salasanan kyselyohjelma ei ole määritelty, yritä asettaa SUDO_ASKPASS"
 
@@ -820,19 +782,19 @@ msgid "unable to run %s"
 msgstr "salasanakyselyn %s suorittaminen epäonnistui"
 
 #: src/utmp.c:278
-#, c-format
 msgid "unable to save stdin"
 msgstr "vakiosyötteeseen tallentaminen epäonnistui"
 
 #: src/utmp.c:280
-#, c-format
 msgid "unable to dup2 stdin"
 msgstr "funktion dup2 kutsuminen vakiosyötteellä epäonnistui"
 
 #: src/utmp.c:283
-#, c-format
 msgid "unable to restore stdin"
 msgstr "vakiosyötteen palauttaminen epäonnistui"
+
+#~ msgid "select failed"
+#~ msgstr "select-funktio epäonnistui"
 
 #~ msgid "unknown user: %s"
 #~ msgstr "tuntematon käyttäjä: %s"

@@ -6,10 +6,10 @@
 # Yuri Kozlov <yuray@komyakino.ru>, 2011, 2012, 2013.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.8b3\n"
+"Project-Id-Version: sudo 1.8.9b1\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-09-03 14:44-0600\n"
-"PO-Revision-Date: 2013-09-05 11:12+0400\n"
+"POT-Creation-Date: 2013-11-24 16:32-0700\n"
+"PO-Revision-Date: 2013-11-28 20:01+0400\n"
 "Last-Translator: Yuri Kozlov <yuray@komyakino.ru>\n"
 "Language-Team: Russian <gnu@mx.ru>\n"
 "Language: ru\n"
@@ -19,8 +19,7 @@ msgstr ""
 "X-Generator: Lokalize 1.4\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: common/aix.c:150
-#, c-format
+#: common/aix.c:93 common/aix.c:150
 msgid "unable to open userdb"
 msgstr "не удаётся открыть userdb"
 
@@ -30,7 +29,6 @@ msgid "unable to switch to registry \"%s\" for %s"
 msgstr "не удаётся переключиться на реестр «%s» для %s"
 
 #: common/aix.c:170
-#, c-format
 msgid "unable to restore registry"
 msgstr "не удаётся восстановить реестр"
 
@@ -42,7 +40,7 @@ msgstr "внутренняя ошибка, попытка выполнить ema
 msgid "internal error, tried to emalloc2(0)"
 msgstr "внутренняя ошибка, попытка выполнить emalloc2(0)"
 
-#: common/alloc.c:100 common/alloc.c:122 common/alloc.c:162 common/alloc.c:186
+#: common/alloc.c:100 common/alloc.c:122 common/alloc.c:162 common/alloc.c:185
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "внутренняя ошибка, переполнение %s"
@@ -59,17 +57,17 @@ msgstr "внутренняя ошибка, попытка выполнить ere
 msgid "internal error, tried to erealloc3(0)"
 msgstr "внутренняя ошибка, попытка выполнить erealloc3(0)"
 
-#: common/alloc.c:184
+#: common/alloc.c:183
 msgid "internal error, tried to erecalloc(0)"
 msgstr "внутренняя ошибка, попытка выполнить ereсalloc(0)"
 
-#: common/atoid.c:77 common/atoid.c:99 src/sudo.c:561 src/sudo.c:586
-#: src/sudo.c:694 src/sudo.c:710
+#: common/atoid.c:77 common/atoid.c:99 src/sudo.c:563 src/sudo.c:588
+#: src/sudo.c:696 src/sudo.c:712
 msgid "invalid value"
 msgstr "недопустимое значение"
 
-#: common/atoid.c:84 src/sudo.c:565 src/sudo.c:590 src/sudo.c:698
-#: src/sudo.c:714
+#: common/atoid.c:84 src/sudo.c:567 src/sudo.c:592 src/sudo.c:700
+#: src/sudo.c:716
 msgid "value out of range"
 msgstr "значение за пределами диапазона"
 
@@ -77,59 +75,60 @@ msgstr "значение за пределами диапазона"
 msgid "value too large"
 msgstr "значение слишком велико"
 
-#: common/fatal.c:154
+#: common/fatal.c:158
 #, c-format
 msgid "%s: %s: %s\n"
 msgstr "%s: %s: %s\n"
 
-#: common/fatal.c:157 common/fatal.c:161
+#: common/fatal.c:161 common/fatal.c:165
 #, c-format
 msgid "%s: %s\n"
 msgstr "%s: %s\n"
 
-#: common/gidlist.c:80 src/load_plugins.c:72 src/sudo.c:561 src/sudo.c:565
-#: src/sudo.c:586 src/sudo.c:590 src/sudo.c:613 src/sudo.c:622 src/sudo.c:631
-#: src/sudo.c:646 src/sudo.c:694 src/sudo.c:698 src/sudo.c:710 src/sudo.c:714
+#: common/gidlist.c:80 src/load_plugins.c:63 src/load_plugins.c:76
+#: src/sudo.c:563 src/sudo.c:567 src/sudo.c:588 src/sudo.c:592 src/sudo.c:615
+#: src/sudo.c:624 src/sudo.c:633 src/sudo.c:648 src/sudo.c:696 src/sudo.c:700
+#: src/sudo.c:712 src/sudo.c:716
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: common/sudo_conf.c:176
+#: common/sudo_conf.c:177
 #, c-format
 msgid "unsupported group source `%s' in %s, line %d"
 msgstr "неподдерживаемый групповой источник «%s» в %s, строка %d"
 
-#: common/sudo_conf.c:190
+#: common/sudo_conf.c:191
 #, c-format
 msgid "invalid max groups `%s' in %s, line %d"
 msgstr "некорректное максимальное значение для групп «%s» в %s, строка %d"
 
-#: common/sudo_conf.c:394
+#: common/sudo_conf.c:393
 #, c-format
 msgid "unable to stat %s"
 msgstr "не удалось выполнить вызов stat %s"
 
-#: common/sudo_conf.c:397
+#: common/sudo_conf.c:396
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s не является обычным файлом"
 
-#: common/sudo_conf.c:400
+#: common/sudo_conf.c:399
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s принадлежит пользователю с uid %u, а должен принадлежать пользователю с uid %u"
 
-#: common/sudo_conf.c:404
+#: common/sudo_conf.c:403
 #, c-format
 msgid "%s is world writable"
 msgstr "доступ на запись в %s разрешена всем"
 
-#: common/sudo_conf.c:407
+#: common/sudo_conf.c:406
 #, c-format
 msgid "%s is group writable"
 msgstr "доступ на запись в %s разрешена группе"
 
-#: common/sudo_conf.c:417 src/selinux.c:196 src/selinux.c:209 src/sudo.c:329
+#: common/sudo_conf.c:416 src/selinux.c:196 src/selinux.c:209 src/sudo.c:331
 #, c-format
 msgid "unable to open %s"
 msgstr "не удаётся открыть %s"
@@ -138,197 +137,180 @@ msgstr "не удаётся открыть %s"
 msgid "Unknown signal"
 msgstr "Неизвестный сигнал"
 
-#: src/exec.c:127 src/exec_pty.c:685
-#, c-format
+#: src/exec.c:133 src/exec_pty.c:744
 msgid "policy plugin failed session initialization"
 msgstr "модулю политик не удалось инициализировать сеанс"
 
-#: src/exec.c:132 src/exec_pty.c:701 src/exec_pty.c:1066 src/tgetpass.c:221
-#, c-format
+#: src/exec.c:138 src/exec_pty.c:760 src/exec_pty.c:1272 src/tgetpass.c:221
 msgid "unable to fork"
 msgstr "не удаётся создать дочерний процесс"
 
-#: src/exec.c:259
-#, c-format
+#: src/exec.c:309 src/exec.c:317 src/exec.c:841 src/exec_pty.c:507
+#: src/exec_pty.c:512 src/exec_pty.c:570 src/exec_pty.c:577 src/exec_pty.c:870
+#: src/exec_pty.c:880 src/exec_pty.c:925 src/exec_pty.c:932
+#: src/exec_pty.c:1334 src/exec_pty.c:1341 src/exec_pty.c:1348
+msgid "unable to add event to queue"
+msgstr "не удаётся добавить событие в очередь"
+
+#: src/exec.c:394
 msgid "unable to create sockets"
 msgstr "не удаётся создать сокеты"
 
-#: src/exec.c:347 src/exec_pty.c:1130 src/exec_pty.c:1268
-#, c-format
-msgid "select failed"
-msgstr "ошибка select"
+#: src/exec.c:477
+msgid "error in event loop"
+msgstr "ошибка в событийном цикле"
 
-#: src/exec.c:449
-#, c-format
+#: src/exec.c:492
 msgid "unable to restore tty label"
 msgstr "не удаётся создать восстановить метку tty"
 
 #: src/exec_common.c:70
-#, c-format
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "не удаётся удалить PRIV_PROC_EXEC из PRIV_LIMIT"
 
-#: src/exec_pty.c:183
-#, c-format
+#: src/exec_pty.c:184
 msgid "unable to allocate pty"
 msgstr "не удаётся выделить pty"
 
-#: src/exec_pty.c:623 src/exec_pty.c:632 src/exec_pty.c:640 src/exec_pty.c:986
-#: src/exec_pty.c:1063 src/signal.c:126 src/tgetpass.c:218
-#, c-format
+#: src/exec_pty.c:682 src/exec_pty.c:691 src/exec_pty.c:699
+#: src/exec_pty.c:1192 src/exec_pty.c:1269 src/signal.c:126 src/tgetpass.c:218
 msgid "unable to create pipe"
 msgstr "не удаётся создать канал"
 
-#: src/exec_pty.c:676
-#, c-format
+#: src/exec_pty.c:735
 msgid "unable to set terminal to raw mode"
 msgstr "не удаётся перевести терминал в «сырой» режим"
 
-#: src/exec_pty.c:1042
-#, c-format
-msgid "unable to set controlling tty"
-msgstr "не удаётся установить управляющий tty"
-
-#: src/exec_pty.c:1139
-#, c-format
+#: src/exec_pty.c:1091
 msgid "error reading from signal pipe"
 msgstr "ошибка чтения из сигнального канала"
 
-#: src/exec_pty.c:1160
-#, c-format
+#: src/exec_pty.c:1124
 msgid "error reading from pipe"
 msgstr "ошибка чтения из канала"
 
-#: src/exec_pty.c:1176
-#, c-format
+#: src/exec_pty.c:1149
 msgid "error reading from socketpair"
 msgstr "ошибка чтения из пары сокетов"
 
-#: src/exec_pty.c:1180
+#: src/exec_pty.c:1158
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "неожиданный тип ответа в резервном канале: %d"
 
-#: src/load_plugins.c:70 src/load_plugins.c:79 src/load_plugins.c:132
-#: src/load_plugins.c:138 src/load_plugins.c:144 src/load_plugins.c:185
-#: src/load_plugins.c:192 src/load_plugins.c:199 src/load_plugins.c:205
+#: src/exec_pty.c:1248
+msgid "unable to set controlling tty"
+msgstr "не удаётся установить управляющий tty"
+
+#: src/load_plugins.c:61 src/load_plugins.c:74 src/load_plugins.c:91
+#: src/load_plugins.c:144 src/load_plugins.c:150 src/load_plugins.c:156
+#: src/load_plugins.c:197 src/load_plugins.c:204 src/load_plugins.c:211
+#: src/load_plugins.c:217
 #, c-format
 msgid "error in %s, line %d while loading plugin `%s'"
 msgstr "ошибка в %s, строка %d, при загрузке модуля «%s»"
 
-#: src/load_plugins.c:81
+#: src/load_plugins.c:93
 #, c-format
 msgid "%s%s: %s"
 msgstr "%s%s: %s"
 
-#: src/load_plugins.c:140
+#: src/load_plugins.c:152
 #, c-format
 msgid "%s must be owned by uid %d"
 msgstr "%s должен принадлежать пользователю с uid %d"
 
-#: src/load_plugins.c:146
+#: src/load_plugins.c:158
 #, c-format
 msgid "%s must be only be writable by owner"
 msgstr "%s должен быть доступен на запись только владельцу"
 
-#: src/load_plugins.c:187
+#: src/load_plugins.c:199
 #, c-format
-msgid "unable to dlopen %s: %s"
-msgstr "не удаётся выполнить dlopen для %s: %s"
+msgid "unable to load %s: %s"
+msgstr "не удаётся загрузить %s: %s"
 
-#: src/load_plugins.c:194
+#: src/load_plugins.c:206
 #, c-format
 msgid "unable to find symbol `%s' in %s"
 msgstr "не удаётся найти символ «%s» в %s"
 
-#: src/load_plugins.c:201
+#: src/load_plugins.c:213
 #, c-format
 msgid "unknown policy type %d found in %s"
 msgstr "найден неизвестный тип политики %d в %s"
 
-#: src/load_plugins.c:207
+#: src/load_plugins.c:219
 #, c-format
 msgid "incompatible plugin major version %d (expected %d) found in %s"
 msgstr "найдена несовместимая основная версия модуля %d (ожидалась %d) в %s"
 
-#: src/load_plugins.c:216
+#: src/load_plugins.c:228
 #, c-format
 msgid "ignoring policy plugin `%s' in %s, line %d"
 msgstr "игнорируется модуль политики «%s» в %s, строка %d"
 
-#: src/load_plugins.c:218
-#, c-format
+#: src/load_plugins.c:230
 msgid "only a single policy plugin may be specified"
 msgstr "может быть задан только один модуль политики"
 
-#: src/load_plugins.c:221
+#: src/load_plugins.c:233
 #, c-format
 msgid "ignoring duplicate policy plugin `%s' in %s, line %d"
 msgstr "игнорируется повторный модуль политики «%s» в %s, строка %d"
 
-#: src/load_plugins.c:236
+#: src/load_plugins.c:248
 #, c-format
 msgid "ignoring duplicate I/O plugin `%s' in %s, line %d"
 msgstr "игнорируется повторный модуль ввода-вывода «%s» в %s, строка %d"
 
-#: src/load_plugins.c:313
+#: src/load_plugins.c:319
 #, c-format
 msgid "policy plugin %s does not include a check_policy method"
 msgstr "модуль политики %s не содержит метод check_policy"
 
 #: src/net_ifs.c:156 src/net_ifs.c:165 src/net_ifs.c:177 src/net_ifs.c:186
 #: src/net_ifs.c:297 src/net_ifs.c:321
-#, c-format
 msgid "load_interfaces: overflow detected"
 msgstr "load_interfaces: обнаружено переполнение"
 
 #: src/net_ifs.c:226
-#, c-format
 msgid "unable to open socket"
 msgstr "не удаётся открыть сокет"
 
 #: src/parse_args.c:246
-#, c-format
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "аргумент для -C должен быть числом, которое больше или равно 3"
 
 #: src/parse_args.c:408
-#, c-format
 msgid "you may not specify both the `-i' and `-s' options"
 msgstr "параметры «-i» и «-s» являются взаимоисключающими"
 
 #: src/parse_args.c:412
-#, c-format
 msgid "you may not specify both the `-i' and `-E' options"
 msgstr "параметры «-i» и «-E» являются взаимоисключающими"
 
 #: src/parse_args.c:422
-#, c-format
 msgid "the `-E' option is not valid in edit mode"
 msgstr "параметр «-E» не действует в режиме редактирования"
 
 #: src/parse_args.c:424
-#, c-format
 msgid "you may not specify environment variables in edit mode"
 msgstr "переменные окружения нельзя определять в режиме редактирования"
 
 #: src/parse_args.c:432
-#, c-format
 msgid "the `-U' option may only be used with the `-l' option"
 msgstr "параметр «-U» можно использовать только с параметром «-l»"
 
 #: src/parse_args.c:436
-#, c-format
 msgid "the `-A' and `-S' options may not be used together"
 msgstr "параметры «-A» и «-S» являются взаимоисключающими"
 
 #: src/parse_args.c:519
-#, c-format
 msgid "sudoedit is not supported on this platform"
 msgstr "sudoedit не поддерживается на этой платформе"
 
 #: src/parse_args.c:592
-#, c-format
 msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr "Можно указать только параметры -e, -h, -i, -K, -l, -s, -v или -V"
 
@@ -468,12 +450,10 @@ msgid "stop processing command line arguments"
 msgstr "прекратить обработку аргументов командной строки"
 
 #: src/selinux.c:77
-#, c-format
 msgid "unable to open audit system"
 msgstr "не удаётся открыть систему аудита"
 
 #: src/selinux.c:85
-#, c-format
 msgid "unable to send audit message"
 msgstr "не удаётся отправить сообщение аудита"
 
@@ -498,17 +478,14 @@ msgid "unable to open %s, not relabeling tty"
 msgstr "не удаётся открыть %s, tty без возможности переименования"
 
 #: src/selinux.c:172
-#, c-format
 msgid "unable to get current tty context, not relabeling tty"
 msgstr "не удаётся получить контекст текущего tty, tty без возможности переименования"
 
 #: src/selinux.c:179
-#, c-format
 msgid "unable to get new tty context, not relabeling tty"
 msgstr "не удаётся получить контекст tty, tty без возможности переименования"
 
 #: src/selinux.c:186
-#, c-format
 msgid "unable to set new tty context"
 msgstr "не удаётся установить новый контекст tty"
 
@@ -538,12 +515,10 @@ msgid "%s is not a valid context"
 msgstr "%s не является допустимым контекстом"
 
 #: src/selinux.c:324
-#, c-format
 msgid "failed to get old_context"
 msgstr "не удалось получить old_context"
 
 #: src/selinux.c:330
-#, c-format
 msgid "unable to determine enforcing mode."
 msgstr "не удаётся определить принудительный режим"
 
@@ -563,17 +538,15 @@ msgid "unable to set key creation context to %s"
 msgstr "не удаётся установить для контекста создания ключа значение %s"
 
 #: src/sesh.c:57
-#, c-format
 msgid "requires at least one argument"
 msgstr "укажите не менее одного аргумента"
 
-#: src/sesh.c:78 src/sudo.c:1114
+#: src/sesh.c:78 src/sudo.c:1116
 #, c-format
 msgid "unable to execute %s"
 msgstr "не удаётся выполнить %s"
 
 #: src/solaris.c:88
-#, c-format
 msgid "resource control limit has been reached"
 msgstr "достигнут лимит управления ресурсами"
 
@@ -583,7 +556,6 @@ msgid "user \"%s\" is not a member of project \"%s\""
 msgstr "пользователь «%s» не является членом проекта «%s»"
 
 #: src/solaris.c:95
-#, c-format
 msgid "the invoking task is final"
 msgstr "вызывающе задание — последнее"
 
@@ -628,116 +600,110 @@ msgid "Configure options: %s\n"
 msgstr "Параметры настройки: %s\n"
 
 #: src/sudo.c:203
-#, c-format
 msgid "fatal error, unable to load plugins"
 msgstr "фатальная ошибка, не удалось загрузить модули"
 
 #: src/sudo.c:211
-#, c-format
 msgid "unable to initialize policy plugin"
 msgstr "не удаётся инициализировать модуль политики"
 
-#: src/sudo.c:268
+#: src/sudo.c:267
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "ошибка инициализации модуля ввода-вывода %s"
 
-#: src/sudo.c:294
+#: src/sudo.c:293
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "неожиданный режим sudo: 0x%x"
 
-#: src/sudo.c:414
-#, c-format
+#: src/sudo.c:416
 msgid "unable to get group vector"
 msgstr "не удаётся получить вектор группы"
 
-#: src/sudo.c:466
+#: src/sudo.c:468
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "неизвестный uid %u: кто вы?"
 
-#: src/sudo.c:788
+#: src/sudo.c:790
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s должен принадлежать пользователю с uid %d и иметь бит setuid"
 
-#: src/sudo.c:791
+#: src/sudo.c:793
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "эффективный uid не равен %d, возможно, %s находится в файловой системе, смонтированной с битом «nosuid» или в файловой системе NFS без прав суперпользователя?"
 
-#: src/sudo.c:797
+#: src/sudo.c:799
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "эффективный uid не равен %d, программа sudo установлена с битом setuid и принадлежит root?"
 
-#: src/sudo.c:923
+#: src/sudo.c:925
 #, c-format
 msgid "unknown login class %s"
 msgstr "неизвестный класс входа %s"
 
-#: src/sudo.c:936
-#, c-format
+#: src/sudo.c:938
 msgid "unable to set user context"
 msgstr "не удаётся назначить контекст пользователя"
 
-#: src/sudo.c:950
-#, c-format
+#: src/sudo.c:952
 msgid "unable to set supplementary group IDs"
 msgstr "не удаётся назначить дополнительные идентификаторы групп"
 
-#: src/sudo.c:957
+#: src/sudo.c:959
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "не удаётся назначить эффективный gid на runas gid %u"
 
-#: src/sudo.c:963
+#: src/sudo.c:965
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "не удаётся назначить gid на runas gid %u"
 
-#: src/sudo.c:970
-#, c-format
+#: src/sudo.c:972
 msgid "unable to set process priority"
 msgstr "не удаётся назначить приоритет процесса"
 
-#: src/sudo.c:978
+#: src/sudo.c:980
 #, c-format
 msgid "unable to change root to %s"
 msgstr "не удаётся изменить root на %s"
 
-#: src/sudo.c:991 src/sudo.c:997 src/sudo.c:1003
+#: src/sudo.c:993 src/sudo.c:999 src/sudo.c:1005
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "не удаётся изменить на runas uid (%u, %u)"
 
-#: src/sudo.c:1020
+#: src/sudo.c:1022
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "не удаётся сменить каталог на %s"
 
-#: src/sudo.c:1077
+#: src/sudo.c:1079
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "неожиданное условие завершения потомка: %d"
 
-#: src/sudo.c:1134
+#: src/sudo.c:1136
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr "модуль политики %s не содержит метод «check_policy»"
 
-#: src/sudo.c:1147
+#: src/sudo.c:1149
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "модуль политики %s не поддерживает списка прав"
 
-#: src/sudo.c:1159
+#: src/sudo.c:1161
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "модуль политики %s не поддерживает параметр -v"
 
-#: src/sudo.c:1171
+#: src/sudo.c:1173
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "модуль политики %s не поддерживает параметры -k/-K"
@@ -748,7 +714,6 @@ msgid "unable to change uid to root (%u)"
 msgstr "Не удалось изменить uid на root (%u)"
 
 #: src/sudo_edit.c:142
-#, c-format
 msgid "plugin error: missing file list for sudoedit"
 msgstr "ошибка модуля: отсутствует список файлов для sudoedit"
 
@@ -783,17 +748,14 @@ msgid "contents of edit session left in %s"
 msgstr "содержимое сеанса редактирования сохранено в %s"
 
 #: src/sudo_edit.c:314
-#, c-format
 msgid "unable to read temporary file"
 msgstr "не удаётся прочесть временный файл"
 
 #: src/tgetpass.c:90
-#, c-format
 msgid "no tty present and no askpass program specified"
 msgstr "нет tty и не указана программа askpass"
 
 #: src/tgetpass.c:99
-#, c-format
 msgid "no askpass program specified, try setting SUDO_ASKPASS"
 msgstr "не указана программа askpass, попробуйте задать значение в SUDO_ASKPASS"
 
@@ -813,19 +775,19 @@ msgid "unable to run %s"
 msgstr "не удаётся выполнить %s"
 
 #: src/utmp.c:278
-#, c-format
 msgid "unable to save stdin"
 msgstr "не удаётся сохранить стандартный ввод"
 
 #: src/utmp.c:280
-#, c-format
 msgid "unable to dup2 stdin"
 msgstr "не удаётся выполнить dup2 для стандартного ввода"
 
 #: src/utmp.c:283
-#, c-format
 msgid "unable to restore stdin"
 msgstr "не удаётся восстановить стандартный ввод"
+
+#~ msgid "select failed"
+#~ msgstr "ошибка select"
 
 #~ msgid "unknown user: %s"
 #~ msgstr "неизвестный пользователь: %s"
