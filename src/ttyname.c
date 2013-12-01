@@ -468,10 +468,15 @@ get_process_ttyname(void)
 {
     struct pst_status pstat;
     char *tty = NULL;
+    int rc;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
 
-    /* Try to determine the tty from psdev in struct pst_status. */
-    if (pstat_getproc(&pstat, sizeof(pstat), 0, (int)getpid()) != -1) {
+    /*
+     * Determine the tty from psdev in struct pst_status.
+     * We may get EOVERFLOW if the whole thing doesn't fit but that is OK.
+     */
+    rc = pstat_getproc(&pstat, sizeof(pstat), (size_t)0, (int)getpid());
+    if (rc != -1 || errno == EOVERFLOW) {
 	if (pstat.pst_term.psd_major != -1 && pstat.pst_term.psd_minor != -1) {
 	    tty = sudo_ttyname_dev(makedev(pstat.pst_term.psd_major,
 		pstat.pst_term.psd_minor));
