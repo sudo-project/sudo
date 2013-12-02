@@ -185,7 +185,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 
     env_add = emalloc2(env_size, sizeof(char *));
 
-    /* Pass progname to plugin so it can call setprogname() */
+    /* Pass progname to plugin so it can call initprogname() */
     sudo_settings[ARG_PROGNAME].value = getprogname();
 
     /* First, check to see if we were invoked as "sudoedit". */

@@ -2559,8 +2559,6 @@ AC_CHECK_FUNCS(getprogname, , [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern char *__progname; (void)puts(__progname);]])], [sudo_cv___progname=yes], [sudo_cv___progname=no])])
     if test "$sudo_cv___progname" = "yes"; then
 	AC_DEFINE(HAVE___PROGNAME)
-    else
-	AC_LIBOBJ(getprogname)
     fi
     AC_MSG_RESULT($sudo_cv___progname)
 ])

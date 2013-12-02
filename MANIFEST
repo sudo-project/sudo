@@ -21,6 +21,7 @@ common/fileops.c
 common/fmt_string.c
 common/gidlist.c
 common/lbuf.c
+common/progname.c
 common/regress/sudo_conf/conf_test.c
 common/regress/sudo_conf/test1.in
 common/regress/sudo_conf/test1.out.ok
@@ -69,7 +70,6 @@ compat/getgrouplist.c
 compat/getline.c
 compat/getopt.h
 compat/getopt_long.c
-compat/getprogname.c
 compat/glob.c
 compat/glob.h
 compat/isblank.c

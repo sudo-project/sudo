@@ -67,9 +67,9 @@ DEFS = @OSDEFS@ -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\"
 SHELL = @SHELL@
 
 LTOBJS = alloc.lo atobool.lo atoid.lo event.lo fatal.lo fileops.lo \
-	 fmt_string.lo gidlist.lo lbuf.lo secure_path.lo setgroups.lo \
-	 sudo_conf.lo sudo_debug.lo sudo_dso.lo sudo_printf.lo term.lo \
-	 ttysize.lo @COMMON_OBJS@
+	 fmt_string.lo gidlist.lo lbuf.lo progname.lo secure_path.lo \
+	 setgroups.lo sudo_conf.lo sudo_debug.lo sudo_dso.lo sudo_printf.lo \
+	 term.lo ttysize.lo @COMMON_OBJS@
 
 PARSELN_TEST_OBJS = parseln_test.lo locale_stub.lo
 
@@ -228,6 +228,8 @@ parseln_test.lo: $(srcdir)/regress/sudo_parseln/parseln_test.c \
                  $(incdir)/fileops.h $(incdir)/missing.h \
                  $(top_builddir)/config.h $(top_srcdir)/compat/stdbool.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/sudo_parseln/parseln_test.c
+progname.lo: $(srcdir)/progname.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/progname.c
 secure_path.lo: $(srcdir)/secure_path.c $(incdir)/missing.h \
                 $(incdir)/secure_path.h $(incdir)/sudo_debug.h \
                 $(top_builddir)/config.h

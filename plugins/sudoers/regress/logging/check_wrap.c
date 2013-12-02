@@ -49,7 +49,7 @@ __dso_public int main(int argc, char *argv[]);
 static void
 usage(void)
 {
-    fprintf(stderr, "usage: check_wrap inputfile\n");
+    fprintf(stderr, "usage: %s inputfile\n", getprogname());
     exit(1);
 }
 
@@ -61,9 +61,7 @@ main(int argc, char *argv[])
     char *cp, *dash, *line, lines[2][2048];
     int which = 0;
 
-#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
-    setprogname(argc > 0 ? argv[0] : "check_wrap");
-#endif
+    initprogname(argc > 0 ? argv[0] : "check_wrap");
 
     if (argc != 2)
 	usage();

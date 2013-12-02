@@ -138,9 +138,7 @@ main(int argc, char *argv[])
     sudoersdebug = 1;
 #endif
 
-#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
-    setprogname(argc > 0 ? argv[0] : "testsudoers");
-#endif
+    initprogname(argc > 0 ? argv[0] : "testsudoers");
 
     sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have own domain */

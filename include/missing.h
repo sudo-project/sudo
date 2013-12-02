@@ -282,7 +282,6 @@ extern const char *__progname;
 #  define getprogname()		(__progname)
 # else
 const char *getprogname(void);
-void setprogname(const char *);
 # endif /* HAVE___PROGNAME */
 #endif /* !HAVE_GETPROGNAME */
 
@@ -447,5 +446,6 @@ char *strsignal(int);
 #ifndef HAVE_SIG2STR
 int sig2str(int, char *);
 #endif
+void initprogname(const char *);
 
 #endif /* _SUDO_MISSING_H */

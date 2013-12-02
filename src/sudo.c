@@ -299,10 +299,7 @@ main(int argc, char *argv[], char *envp[])
 int
 os_init_common(int argc, char *argv[], char *envp[])
 {
-#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
-    if (argc > 0)
-	setprogname(argv[0]);
-#endif
+    initprogname(argc > 0 ? argv[0] : "sudo");
 #ifdef STATIC_SUDOERS_PLUGIN
     preload_static_symbols();
 #endif

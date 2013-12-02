@@ -18672,13 +18672,6 @@ fi
     if test "$sudo_cv___progname" = "yes"; then
 	$as_echo "#define HAVE___PROGNAME 1" >>confdefs.h
 
-    else
-	case " $LIBOBJS " in
-  *" getprogname.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS getprogname.$ac_objext"
- ;;
-esac
-
     fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sudo_cv___progname" >&5
 $as_echo "$sudo_cv___progname" >&6; }

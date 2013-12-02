@@ -51,7 +51,7 @@ __dso_public int main(int argc, char *argv[]);
 static void
 usage(void)
 {
-    fprintf(stderr, "usage: load_symbols plugin.so symbols_file\n");
+    fprintf(stderr, "usage: %s plugin.so symbols_file\n", getprogname());
     exit(1);
 }
 
@@ -65,9 +65,7 @@ main(int argc, char *argv[])
     FILE *fp;
     int ntests = 0, errors = 0;
 
-#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
-    setprogname(argc > 0 ? argv[0] : "check_symbols");
-#endif
+    initprogname(argc > 0 ? argv[0] : "check_symbols");
 
     if (argc != 3)
 	usage();

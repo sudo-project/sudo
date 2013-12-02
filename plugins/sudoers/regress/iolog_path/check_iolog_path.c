@@ -55,7 +55,7 @@ __dso_public int main(int argc, char *argv[]);
 static void
 usage(void)
 {
-    fprintf(stderr, "usage: check_iolog_path datafile\n");
+    fprintf(stderr, "usage: %s datafile\n", getprogname());
     exit(1);
 }
 
@@ -106,9 +106,7 @@ main(int argc, char *argv[])
     int errors = 0;
     int tests = 0;
 
-#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
-    setprogname(argc > 0 ? argv[0] : "check_iolog_path");
-#endif
+    initprogname(argc > 0 ? argv[0] : "check_iolog_path");
 
     if (argc != 2)
 	usage();
