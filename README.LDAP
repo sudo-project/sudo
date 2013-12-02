@@ -122,6 +122,11 @@ file to your LDAP Administrator.
   # ldapadd -f /tmp/sudoers.ldif -h ldapserver \
     -D cn=Manager,dc=example,dc=com -W -x
 
+Step 3:
+Verify the sudoers LDAP data:
+
+  # ldapsearch -b "$SUDOERS_BASE" -D cn=Manager,dc=example,dc=com -W -x
+
 Managing LDAP entries
 =====================
 Doing a one-time bulk load of your ldap entries is fine.  However what if you
