@@ -781,11 +781,13 @@ hostname_matches(char *shost, char *lhost, char *pattern)
 bool
 userpw_matches(char *sudoers_user, char *user, struct passwd *pw)
 {
+    const char *errstr;
+    uid_t uid;
     debug_decl(userpw_matches, SUDO_DEBUG_MATCH)
 
     if (pw != NULL && *sudoers_user == '#') {
-	uid_t uid = (uid_t) atoi(sudoers_user + 1);
-	if (uid == pw->pw_uid)
+	uid = (uid_t) atoid(sudoers_user + 1, NULL, NULL, &errstr);
+	if (errstr != NULL && uid == pw->pw_uid)
 	    debug_return_bool(true);
     }
     debug_return_bool(strcmp(sudoers_user, user) == 0);
@@ -798,11 +800,13 @@ userpw_matches(char *sudoers_user, char *user, struct passwd *pw)
 bool
 group_matches(char *sudoers_group, struct group *gr)
 {
+    const char *errstr;
+    gid_t gid;
     debug_decl(group_matches, SUDO_DEBUG_MATCH)
 
     if (*sudoers_group == '#') {
-	gid_t gid = (gid_t) atoi(sudoers_group + 1);
-	if (gid == gr->gr_gid)
+	gid = (gid_t) atoid(sudoers_group + 1, NULL, NULL, &errstr);
+	if (errstr != NULL && gid == gr->gr_gid)
 	    debug_return_bool(true);
     }
     debug_return_bool(strcmp(gr->gr_name, sudoers_group) == 0);
