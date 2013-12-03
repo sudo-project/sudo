@@ -664,7 +664,8 @@ sudo_sss_result_get(struct sudo_nss *nss, struct passwd *pw, uint32_t *state)
 	debug_return_ptr(NULL);
 
     sudo_debug_printf(SUDO_DEBUG_DIAG, "  username=%s", handle->pw->pw_name);
-    sudo_debug_printf(SUDO_DEBUG_DIAG, "domainname=%s", handle->domainname);
+    sudo_debug_printf(SUDO_DEBUG_DIAG, "domainname=%s",
+	handle->domainname ? handle->domainname : "NULL");
 
     u_sss_result = f_sss_result = NULL;
 
