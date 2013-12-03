@@ -532,30 +532,31 @@ sudo_sss_check_runas_group(struct sudo_sss_handle *handle, struct sss_sudo_rule 
  * Walk through search results and return true if we have a runas match,
  * else false.  RunAs info is optional.
  */
-static int
+static bool
 sudo_sss_check_runas(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
-    int ret;
+    bool ret;
     debug_decl(sudo_sss_check_runas, SUDO_DEBUG_SSSD);
 
     if (rule == NULL)
-	 debug_return_int(false);
+	 debug_return_bool(false);
 
     ret = sudo_sss_check_runas_user(handle, rule) != false &&
 	 sudo_sss_check_runas_group(handle, rule) != false;
 
-    debug_return_int(ret);
+    debug_return_bool(ret);
 }
 
-static int
+static bool
 sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
     char **val_array, *val;
-    int ret = false, i;
+    bool ret = false;
+    int i;
     debug_decl(sudo_sss_check_host, SUDO_DEBUG_SSSD);
 
     if (rule == NULL)
-	debug_return_int(ret);
+	debug_return_bool(ret);
 
     /* get the values from the rule */
     switch (handle->fn_get_values(rule, "sudoHost", &val_array))
@@ -564,10 +565,10 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 	break;
     case ENOENT:
 	sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
-	debug_return_int(false);
+	debug_return_bool(false);
     default:
 	sudo_debug_printf(SUDO_DEBUG_INFO, "handle->fn_get_values(sudoHost): != 0");
-	debug_return_int(ret);
+	debug_return_bool(ret);
     }
 
     /* walk through values */
@@ -587,7 +588,54 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 
     handle->fn_free_values(val_array);
 
-    debug_return_int(ret);
+    debug_return_bool(ret);
+}
+
+/*
+ * Look for netgroup specifcations in the sudoUser attribute and
+ * if found, filter according to netgroup membership.
+ *  returns:
+ *   true -> netgroup spec found && negroup member
+ *  false -> netgroup spec found && not a meber of netgroup
+ *   true -> netgroup spec not found (filtered by SSSD already, netgroups are an exception)
+ */
+static bool
+sudo_sss_filter_user_netgroup(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
+{
+    bool ret = false, netgroup_spec_found = false;
+    char **val_array, *val;
+    int i;
+    debug_decl(sudo_sss_filter_user_netgroup, SUDO_DEBUG_SSSD);
+
+    if (!handle || !rule)
+	debug_return_bool(ret);
+
+    switch (handle->fn_get_values(rule, "sudoUser", &val_array)) {
+	case 0:
+	    break;
+	case ENOENT:
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "No result.");
+	    debug_return_bool(ret);
+	default:
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"handle->fn_get_values(sudoUser): != 0");
+	    debug_return_bool(ret);
+    }
+
+    for (i = 0; val_array[i] != NULL && !ret; ++i) {
+	val = val_array[i];
+	if (*val == '+') {
+	    netgroup_spec_found = true;
+	}
+	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
+	if (strcmp(val, "ALL") == 0 || netgr_matches(val, NULL, NULL, user_name)) {
+	    ret = true;
+	    sudo_debug_printf(SUDO_DEBUG_DIAG,
+		"sssd/ldap sudoUser '%s' ... MATCH! (%s)", val, user_name);
+	}
+    }
+    handle->fn_free_values(val_array);
+    debug_return_bool(netgroup_spec_found ? ret : true);
 }
 
 static int
@@ -597,7 +645,8 @@ sudo_sss_result_filterp(struct sudo_sss_handle *handle,
     (void)unused;
     debug_decl(sudo_sss_result_filterp, SUDO_DEBUG_SSSD);
 
-    if (sudo_sss_check_host(handle, rule))
+    if (sudo_sss_check_host(handle, rule) &&
+        sudo_sss_filter_user_netgroup(handle, rule))
 	debug_return_int(1);
     else
 	debug_return_int(0);
