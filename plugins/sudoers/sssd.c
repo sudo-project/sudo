@@ -595,8 +595,8 @@ sudo_sss_check_host(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
  * Look for netgroup specifcations in the sudoUser attribute and
  * if found, filter according to netgroup membership.
  *  returns:
- *   true -> netgroup spec found && negroup member
- *  false -> netgroup spec found && not a meber of netgroup
+ *   true -> netgroup spec found && netgroup member
+ *  false -> netgroup spec found && not a member of netgroup
  *   true -> netgroup spec not found (filtered by SSSD already, netgroups are an exception)
  */
 static bool
@@ -631,7 +631,9 @@ sudo_sss_filter_user_netgroup(struct sudo_sss_handle *handle, struct sss_sudo_ru
 	if (strcmp(val, "ALL") == 0 || netgr_matches(val, NULL, NULL, handle->pw->pw_name)) {
 	    ret = true;
 	    sudo_debug_printf(SUDO_DEBUG_DIAG,
-		"sssd/ldap sudoUser '%s' ... MATCH! (%s)", val, handle->pw->pw_name);
+		"sssd/ldap sudoUser '%s' ... MATCH! (%s)",
+		val, handle->pw->pw_name);
+	    break;
 	}
     }
     handle->fn_free_values(val_array);
