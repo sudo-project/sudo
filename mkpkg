@@ -131,6 +131,10 @@ case "$osversion" in
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-pam-login"
 	    PPVARS="${PPVARS}${PPVARS+$space}linux_audit=1.4.0"
 	fi
+	if [ $osrelease -ge 60 ]; then
+	    # RHEL 6 and above builds sudo with SSSD support
+	    configure_opts="${configure_opts}${configure_opts+$tab}--with-sssd"
+	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	configure_opts="--prefix=/usr
 		--with-logging=syslog
