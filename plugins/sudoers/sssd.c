@@ -311,9 +311,8 @@ static int sudo_sss_close(struct sudo_nss *nss)
     if (nss && nss->handle) {
 	handle = nss->handle;
 	sudo_dso_unload(handle->ssslib);
+	efree(nss->handle);
     }
-
-    efree(nss->handle);
     debug_return_int(0);
 }
 
@@ -663,11 +662,14 @@ sudo_sss_result_get(struct sudo_nss *nss, struct passwd *pw, uint32_t *state)
 		*state |= _SUDO_SSS_STATE_HOSTMATCH;
 	    }
 	}
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "u_sss_result=(%p, %u) => f_sss_result=(%p, %u)", u_sss_result,
+	    u_sss_result->num_rules, f_sss_result, f_sss_result->num_rules);
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "u_sss_result=(%p, %u) => f_sss_result=NULL", u_sss_result,
+	    u_sss_result->num_rules);
     }
-
-    sudo_debug_printf(SUDO_DEBUG_DEBUG,
-	"u_sss_result=(%p, %u) => f_sss_result=(%p, %u)", u_sss_result,
-	u_sss_result->num_rules, f_sss_result, f_sss_result->num_rules);
 
     handle->fn_free_result(u_sss_result);
 
