@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "@mansectsu@" "August 31, 2013" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
+.TH "SUDOERS" "@mansectsu@" "December 3, 2013" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1964,7 +1964,7 @@ If the system is configured to use the
 file in preference to DNS, the
 ``canonical''
 host name may not be fully-qualified.
-The order that sources are queried for hosts name resolution
+The order that sources are queried for host name resolution
 is usually specified in the
 \fI@nsswitch_conf@\fR,
 \fI@netsvc_conf@\fR,
@@ -4544,6 +4544,9 @@ pseudo-tty related code
 .TP 10n
 \fIrbtree\fR
 redblack tree internals
+.TP 10n
+\fIsssd\fR
+SSSD-based sudoers
 .TP 10n
 \fIutil\fR
 utility functions
