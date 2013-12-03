@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO" "5" "August 13, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO" "5" "December 3, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -471,6 +471,9 @@ user conversation
 .TP 12n
 \fIedit\fR
 sudoedit
+.TP 12n
+\fIevent\fR
+event subsystem
 .TP 12n
 \fIexec\fR
 command execution

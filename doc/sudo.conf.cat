@@ -237,6 +237,8 @@ DDEESSCCRRIIPPTTIIOONN
 
      _e_d_i_t        sudoedit
 
+     _e_v_e_n_t       event subsystem
+
      _e_x_e_c        command execution
 
      _m_a_i_n        ssuuddoo main function
@@ -367,4 +369,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.8                      August 13, 2013                     Sudo 1.8.8
+Sudo 1.8.9                     December 3, 2013                     Sudo 1.8.9

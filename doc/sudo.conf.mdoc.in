@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd August 13, 2013
+.Dd December 3, 2013
 .Dt SUDO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -424,6 +424,8 @@ command line argument processing
 user conversation
 .It Em edit
 sudoedit
+.It Em event
+event subsystem
 .It Em exec
 command execution
 .It Em main
