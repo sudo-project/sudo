@@ -628,10 +628,10 @@ sudo_sss_filter_user_netgroup(struct sudo_sss_handle *handle, struct sss_sudo_ru
 	    netgroup_spec_found = true;
 	}
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
-	if (strcmp(val, "ALL") == 0 || netgr_matches(val, NULL, NULL, user_name)) {
+	if (strcmp(val, "ALL") == 0 || netgr_matches(val, NULL, NULL, handle->pw->pw_name)) {
 	    ret = true;
 	    sudo_debug_printf(SUDO_DEBUG_DIAG,
-		"sssd/ldap sudoUser '%s' ... MATCH! (%s)", val, user_name);
+		"sssd/ldap sudoUser '%s' ... MATCH! (%s)", val, handle->pw->pw_name);
 	}
     }
     handle->fn_free_values(val_array);
