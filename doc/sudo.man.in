@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDO" "@mansectsu@" "August 14, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "December 4, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -788,9 +788,15 @@ run in a new pty,
 \fBsudo\fR
 may execute the command directly instead of running it as a child process.
 .SS "Plugins"
-Plugins are dynamically loaded based on the contents of the
+Plugins may be specified via
+\fRPlugin\fR
+directives in the
 sudo.conf(@mansectform@)
 file.
+They may be loaded as dynamic shared objects (on systems that support them),
+or compiled directly into the
+\fBsudo\fR
+binary.
 If no
 sudo.conf(@mansectform@)
 file is present, or it contains no

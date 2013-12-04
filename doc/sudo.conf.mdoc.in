@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd December 3, 2013
+.Dd December 4, 2013
 .Dt SUDO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -96,14 +96,14 @@ keyword, followed by the
 .Em symbol_name
 and the
 .Em path
-to the shared object containing the plugin.
+to the dynamic shared object that contains the plugin.
 The
 .Em symbol_name
 is the name of the
 .Li struct policy_plugin
 or
 .Li struct io_plugin
-in the plugin shared object.
+symbol contained in the plugin.
 The
 .Em path
 may be fully qualified or relative.
@@ -123,6 +123,17 @@ is equivalent to:
 Plugin sudoers_policy @PLUGINDIR@/sudoers.so
 .Ed
 .Pp
+If the plugin was compiled statically into the
+.Nm sudo
+binary instead of being installed as a dynamic shared object, the
+.Em path
+should be specified without a leading directory,
+as it does not actually exist in the file system.
+For example:
+.Bd -literal -offset indent
+Plugin sudoers_policy sudoers.so
+.Ed
+.Pp
 Starting with
 .Nm sudo
 1.8.5, any additional parameters after the
@@ -135,9 +146,9 @@ For example, to override the compile-time default sudoers file mode:
 Plugin sudoers_policy sudoers.so sudoers_mode=0440
 .Ed
 .Pp
-The same shared object may contain multiple plugins, each with a
-different symbol name.
-The shared object file must be owned by uid 0 and only writable by its owner.
+The same dynamic shared object may contain multiple plugins,
+each with a different symbol name.
+The file must be owned by uid 0 and only writable by its owner.
 Because of ambiguities that arise from composite policies, only a single
 policy plugin may be specified.
 This limitation does not apply to I/O plugins.

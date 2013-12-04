@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "August 16, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO_PLUGIN" "5" "December 4, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -27,6 +27,10 @@ Starting with version 1.8,
 \fBsudo\fR
 supports a plugin API
 for policy and session logging.
+Plugins may be compiled as dynamic shared objects (the default on
+systems that support them) or compiled statically into the
+\fBsudo\fR
+binary itself.
 By default, the
 \fBsudoers\fR
 policy plugin and an associated I/O logging plugin are used.

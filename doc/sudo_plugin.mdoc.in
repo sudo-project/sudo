@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd August 16, 2013
+.Dd December 4, 2013
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -25,6 +25,10 @@ Starting with version 1.8,
 .Nm sudo
 supports a plugin API
 for policy and session logging.
+Plugins may be compiled as dynamic shared objects (the default on
+systems that support them) or compiled statically into the
+.Nm sudo
+binary itself.
 By default, the
 .Nm sudoers
 policy plugin and an associated I/O logging plugin are used.

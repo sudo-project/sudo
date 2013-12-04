@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO" "5" "December 3, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO" "5" "December 4, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -100,14 +100,14 @@ keyword, followed by the
 \fIsymbol_name\fR
 and the
 \fIpath\fR
-to the shared object containing the plugin.
+to the dynamic shared object that contains the plugin.
 The
 \fIsymbol_name\fR
 is the name of the
 \fRstruct policy_plugin\fR
 or
 \fRstruct io_plugin\fR
-in the plugin shared object.
+symbol contained in the plugin.
 The
 \fIpath\fR
 may be fully qualified or relative.
@@ -133,6 +133,20 @@ Plugin sudoers_policy @PLUGINDIR@/sudoers.so
 .RE
 .fi
 .PP
+If the plugin was compiled statically into the
+\fBsudo\fR
+binary instead of being installed as a dynamic shared object, the
+\fIpath\fR
+should be specified without a leading directory,
+as it does not actually exist in the file system.
+For example:
+.nf
+.sp
+.RS 6n
+Plugin sudoers_policy sudoers.so
+.RE
+.fi
+.PP
 Starting with
 \fBsudo\fR
 1.8.5, any additional parameters after the
@@ -148,9 +162,9 @@ Plugin sudoers_policy sudoers.so sudoers_mode=0440
 .RE
 .fi
 .PP
-The same shared object may contain multiple plugins, each with a
-different symbol name.
-The shared object file must be owned by uid 0 and only writable by its owner.
+The same dynamic shared object may contain multiple plugins,
+each with a different symbol name.
+The file must be owned by uid 0 and only writable by its owner.
 Because of ambiguities that arise from composite policies, only a single
 policy plugin may be specified.
 This limitation does not apply to I/O plugins.
