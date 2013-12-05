@@ -102,6 +102,7 @@ main(int argc, char *argv[])
     char line[2048];
     char *file_in = NULL, *file_out = NULL;
     char *dir_in = NULL, *dir_out = NULL;
+    const char *errstr;
     int state = 0;
     int errors = 0;
     int tests = 0;
@@ -149,7 +150,9 @@ main(int argc, char *argv[])
 	    user_name = strdup(line);
 	    break;
 	case 2:
-	    user_gid = atoi(line);
+	    user_gid = (gid_t)atoid(line, NULL, NULL, &errstr);
+	    if (errstr != NULL)
+		fatalx("group ID %s: %s", line, errstr);
 	    break;
 	case 3:
 	    if (runas_pw->pw_name != NULL)
@@ -157,7 +160,9 @@ main(int argc, char *argv[])
 	    runas_pw->pw_name = strdup(line);
 	    break;
 	case 4:
-	    runas_pw->pw_gid = atoi(line);
+	    runas_pw->pw_gid = (gid_t)atoid(line, NULL, NULL, &errstr);
+	    if (errstr != NULL)
+		fatalx("group ID %s: %s", line, errstr);
 	    break;
 	case 5:
 	    user_shost = strdup(line);

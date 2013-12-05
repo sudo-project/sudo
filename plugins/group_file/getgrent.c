@@ -64,6 +64,8 @@ struct group *mygetgrent(void);
 struct group *mygetgrnam(const char *);
 struct group *mygetgrgid(gid_t);
 
+extern id_t atoid(const char *str, const char *sep, char **endp, const char **errstr);
+
 void
 mysetgrfile(const char *file)
 {
@@ -101,25 +103,31 @@ mygetgrent(void)
     static struct group gr;
     static char grbuf[LINE_MAX], *gr_mem[GRMEM_MAX+1];
     size_t len;
+    id_t id;
     char *cp, *colon;
+    const char *errstr;
     int n;
 
+next_entry:
     if ((colon = fgets(grbuf, sizeof(grbuf), grf)) == NULL)
 	return NULL;
 
     memset(&gr, 0, sizeof(gr));
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return NULL;
+	goto next_entry;
     *colon++ = '\0';
     gr.gr_name = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return NULL;
+	goto next_entry;
     *colon++ = '\0';
     gr.gr_passwd = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
-	return NULL;
+	goto next_entry;
     *colon++ = '\0';
-    gr.gr_gid = atoi(cp);
+    id = atoid(cp, NULL, NULL, &errstr);
+    if (errstr != NULL)
+	goto next_entry;
+    gr.gr_gid = (gid_t)id;
     len = strlen(colon);
     if (len > 0 && colon[len - 1] == '\n')
 	colon[len - 1] = '\0';

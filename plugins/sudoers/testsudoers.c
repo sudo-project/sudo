@@ -127,6 +127,7 @@ main(int argc, char *argv[])
     struct userspec *us;
     char *p, *grfile, *pwfile;
     char hbuf[HOST_NAME_MAX + 1];
+    const char *errstr;
     int match, host_match, runas_match, cmnd_match;
     int ch, dflag, exitcode = 0;
     debug_decl(main, SUDO_DEBUG_MAIN)
@@ -158,7 +159,9 @@ main(int argc, char *argv[])
 		user_host = optarg;
 		break;
 	    case 'G':
-		sudoers_gid = (gid_t)atoi(optarg);
+		sudoers_gid = (gid_t)atoid(optarg, NULL, NULL, &errstr);
+		if (errstr != NULL)
+		    fatalx("group ID %s: %s", optarg, errstr);
 		break;
 	    case 'g':
 		runas_group = optarg;
@@ -173,7 +176,9 @@ main(int argc, char *argv[])
 		trace_print = testsudoers_print;
 		break;
 	    case 'U':
-		sudoers_uid = (uid_t)atoi(optarg);
+		sudoers_uid = (uid_t)atoid(optarg, NULL, NULL, &errstr);
+		if (errstr != NULL)
+		    fatalx("user ID %s: %s", optarg, errstr);
 		break;
 	    case 'u':
 		runas_user = optarg;
@@ -349,36 +354,48 @@ done:
 static void
 set_runaspw(const char *user)
 {
-    debug_decl(main, SUDO_DEBUG_UTIL)
+    struct passwd *pw = NULL;
+    debug_decl(set_runaspw, SUDO_DEBUG_UTIL)
 
-    if (runas_pw != NULL)
-	sudo_pw_delref(runas_pw);
     if (*user == '#') {
-	if ((runas_pw = sudo_getpwuid(atoi(user + 1))) == NULL)
-	    runas_pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
-    } else {
-	if ((runas_pw = sudo_getpwnam(user)) == NULL)
+	const char *errstr;
+	uid_t uid = atoid(user + 1, NULL, NULL, &errstr);
+	if (errstr == NULL) {
+	    if ((pw = sudo_getpwuid(uid)) == NULL)
+		pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
+	}
+    }
+    if (pw == NULL) {
+	if ((pw = sudo_getpwnam(user)) == NULL)
 	    fatalx(U_("unknown user: %s"), user);
     }
-
+    if (runas_pw != NULL)
+	sudo_pw_delref(runas_pw);
+    runas_pw = pw;
     debug_return;
 }
 
 static void
 set_runasgr(const char *group)
 {
-    debug_decl(main, SUDO_DEBUG_UTIL)
+    struct group *gr = NULL;
+    debug_decl(set_runasgr, SUDO_DEBUG_UTIL)
 
-    if (runas_gr != NULL)
-	sudo_gr_delref(runas_gr);
     if (*group == '#') {
-	if ((runas_gr = sudo_getgrgid(atoi(group + 1))) == NULL)
-	    runas_gr = sudo_fakegrnam(group);
-    } else {
-	if ((runas_gr = sudo_getgrnam(group)) == NULL)
+	const char *errstr;
+	gid_t gid = atoid(group + 1, NULL, NULL, &errstr);
+	if (errstr == NULL) {
+	    if ((gr = sudo_getgrgid(gid)) == NULL)
+		gr = sudo_fakegrnam(group);
+	}
+    }
+    if (gr == NULL) {
+	if ((gr = sudo_getgrnam(group)) == NULL)
 	    fatalx(U_("unknown group: %s"), group);
     }
-
+    if (runas_gr != NULL)
+	sudo_gr_delref(runas_gr);
+    runas_gr = gr;
     debug_return;
 }
 

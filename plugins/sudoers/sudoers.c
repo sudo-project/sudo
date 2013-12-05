@@ -300,11 +300,15 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      * Look up the timestamp dir owner if one is specified.
      */
     if (def_timestampowner) {
-	struct passwd *pw;
+	struct passwd *pw = NULL;
 
-	if (*def_timestampowner == '#')
-	    pw = sudo_getpwuid(atoi(def_timestampowner + 1));
-	else
+	if (*def_timestampowner == '#') {
+	    const char *errstr;
+	    uid_t uid = atoid(def_timestampowner + 1, NULL, NULL, &errstr);
+	    if (errstr == NULL)
+		pw = sudo_getpwuid(uid);
+	}
+	if (pw == NULL)
 	    pw = sudo_getpwnam(def_timestampowner);
 	if (pw != NULL) {
 	    timestamp_uid = pw->pw_uid;
@@ -834,17 +838,24 @@ set_fqdn(void)
 static void
 set_runaspw(const char *user)
 {
+    struct passwd *pw = NULL;
     debug_decl(set_runaspw, SUDO_DEBUG_PLUGIN)
 
-    if (runas_pw != NULL)
-	sudo_pw_delref(runas_pw);
     if (*user == '#') {
-	if ((runas_pw = sudo_getpwuid(atoi(user + 1))) == NULL)
-	    runas_pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
-    } else {
-	if ((runas_pw = sudo_getpwnam(user)) == NULL)
+	const char *errstr;
+	uid_t uid = atoid(user + 1, NULL, NULL, &errstr);
+	if (errstr == NULL) {
+	    if ((pw = sudo_getpwuid(uid)) == NULL)
+		pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
+	}
+    }
+    if (pw == NULL) {
+	if ((pw = sudo_getpwnam(user)) == NULL)
 	    log_fatal(NO_MAIL|MSG_ONLY, N_("unknown user: %s"), user);
     }
+    if (runas_pw != NULL)
+	sudo_pw_delref(runas_pw);
+    runas_pw = pw;
     debug_return;
 }
 
@@ -855,17 +866,24 @@ set_runaspw(const char *user)
 static void
 set_runasgr(const char *group)
 {
+    struct group *gr = NULL;
     debug_decl(set_runasgr, SUDO_DEBUG_PLUGIN)
 
-    if (runas_gr != NULL)
-	sudo_gr_delref(runas_gr);
     if (*group == '#') {
-	if ((runas_gr = sudo_getgrgid(atoi(group + 1))) == NULL)
-	    runas_gr = sudo_fakegrnam(group);
-    } else {
-	if ((runas_gr = sudo_getgrnam(group)) == NULL)
+	const char *errstr;
+	gid_t gid = atoid(group + 1, NULL, NULL, &errstr);
+	if (errstr == NULL) {
+	    if ((gr = sudo_getgrgid(gid)) == NULL)
+		gr = sudo_fakegrnam(group);
+	}
+    }
+    if (gr == NULL) {
+	if ((gr = sudo_getgrnam(group)) == NULL)
 	    log_fatal(NO_MAIL|MSG_ONLY, N_("unknown group: %s"), group);
     }
+    if (runas_gr != NULL)
+	sudo_gr_delref(runas_gr);
+    runas_gr = gr;
     debug_return;
 }
 

@@ -69,9 +69,10 @@ getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroupsp)
     aix_setauthdb((char *) name);
 #endif
     if ((grset = getgrset(name)) != NULL) {
+	const char *errstr;
 	for (cp = strtok(grset, ","); cp != NULL; cp = strtok(NULL, ",")) {
-	    gid = atoi(cp);
-	    if (gid != basegid) {
+	    gid = atoid(cp, NULL, NULL, &errstr);
+	    if (errstr == NULL && gid != basegid) {
 		if (ngroups == grpsize)
 		    goto done;
 		groups[ngroups++] = gid;
