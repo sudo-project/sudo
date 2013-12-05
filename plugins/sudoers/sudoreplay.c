@@ -804,6 +804,11 @@ parse_logfile(char *logfile)
     char *buf = NULL, *cp, *ep;
     size_t bufsize = 0, cwdsize = 0, cmdsize = 0;
     struct log_info *li = NULL;
+#ifdef HAVE_STRTOLL
+    long long llval;
+#else
+    long lval;
+#endif
     debug_decl(parse_logfile, SUDO_DEBUG_UTIL)
 
     fp = fopen(logfile, "r");
@@ -836,10 +841,22 @@ parse_logfile(char *logfile)
     buf[strcspn(buf, "\n")] = '\0';
 
     /* timestamp */
-    if ((ep = strchr(buf, ':')) == NULL)
+    errno = 0;
+#ifdef HAVE_STRTOLL
+    llval = strtoll(buf, &ep, 10);
+    if (buf[0] == '\0' || *ep != ':')
 	goto bad;
-    if ((li->tstamp = atoi(buf)) == 0)
+    if (errno == ERANGE && (llval == LLONG_MAX || llval == LLONG_MIN))
 	goto bad;
+    li->tstamp = (time_t)llval;
+#else
+    lval = strtol(buf, &ep, 10);
+    if (buf[0] == '\0' || *ep != ':')
+	goto bad;
+    if (errno == ERANGE && (lval == LONG_MAX || lval == LONG_MIN))
+	goto bad;
+    li->tstamp = (time_t)lval;
+#endif /* HAVE_STRTOLL */
 
     /* user */
     cp = ep + 1;
