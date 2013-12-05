@@ -549,7 +549,7 @@ sudo_endgrent(void)
 }
 
 struct group_list *
-sudo_get_grlist(struct passwd *pw)
+sudo_get_grlist(const struct passwd *pw)
 {
     struct cache_item key, *item;
     struct rbnode *node;
@@ -604,7 +604,7 @@ sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids)
 }
 
 bool
-user_in_group(struct passwd *pw, const char *group)
+user_in_group(const struct passwd *pw, const char *group)
 {
     struct group_list *grlist;
     struct group *grp = NULL;

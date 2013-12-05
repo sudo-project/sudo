@@ -50,7 +50,7 @@
 #include "interfaces.h"
 
 static bool
-addr_matches_if(char *n)
+addr_matches_if(const char *n)
 {
     union sudo_in_addr_un addr;
     struct interface *ifp;
@@ -100,7 +100,7 @@ addr_matches_if(char *n)
 }
 
 static bool
-addr_matches_if_netmask(char *n, char *m)
+addr_matches_if_netmask(const char *n, const char *m)
 {
     unsigned int i;
     union sudo_in_addr_un addr, mask;
@@ -185,16 +185,18 @@ bool
 addr_matches(char *n)
 {
     char *m;
-    bool retval;
+    bool rc;
     debug_decl(addr_matches, SUDO_DEBUG_MATCH)
 
     /* If there's an explicit netmask, use it. */
     if ((m = strchr(n, '/'))) {
 	*m++ = '\0';
-	retval = addr_matches_if_netmask(n, m);
+	rc = addr_matches_if_netmask(n, m);
 	*(m - 1) = '/';
     } else
-	retval = addr_matches_if(n);
+	rc = addr_matches_if(n);
 
-    debug_return_bool(retval);
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"IP address %s matches local host: %s", n, rc ? "true" : "false");
+    debug_return_bool(rc);
 }

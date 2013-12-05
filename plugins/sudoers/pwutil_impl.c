@@ -225,7 +225,7 @@ sudo_make_gritem(gid_t gid, const char *name)
  * elements.  Fills in datum from user_gids or from getgrouplist(3).
  */
 struct cache_item *
-sudo_make_grlist_item(struct passwd *pw, char * const *unused1,
+sudo_make_grlist_item(const struct passwd *pw, char * const *unused1,
     char * const *unused2)
 {
     char *cp;

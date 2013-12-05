@@ -200,17 +200,17 @@ void init_parser(const char *, bool);
 bool addr_matches(char *n);
 
 /* match.c */
-bool command_matches(char *sudoers_cmnd, char *sudoers_args, struct sudo_digest *digest);
-bool group_matches(char *sudoers_group, struct group *gr);
-bool hostname_matches(char *shost, char *lhost, char *pattern);
-bool netgr_matches(char *netgr, char *lhost, char *shost, char *user);
-bool usergr_matches(char *group, char *user, struct passwd *pw);
-bool userpw_matches(char *sudoers_user, char *user, struct passwd *pw);
-int cmnd_matches(struct member *m);
-int cmndlist_matches(struct member_list *list);
-int hostlist_matches(struct member_list *list);
-int runaslist_matches(struct member_list *user_list, struct member_list *group_list, struct member **matching_user, struct member **matching_group);
-int userlist_matches(struct passwd *pw, struct member_list *list);
+bool command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest);
+bool group_matches(const char *sudoers_group, const struct group *gr);
+bool hostname_matches(const char *shost, const char *lhost, const char *pattern);
+bool netgr_matches(const char *netgr, const char *lhost, const char *shost, const char *user);
+bool usergr_matches(const char *group, const char *user, const struct passwd *pw);
+bool userpw_matches(const char *sudoers_user, const char *user, const struct passwd *pw);
+int cmnd_matches(const struct member *m);
+int cmndlist_matches(const struct member_list *list);
+int hostlist_matches(const struct member_list *list);
+int runaslist_matches(const struct member_list *user_list, const struct member_list *group_list, struct member **matching_user, struct member **matching_group);
+int userlist_matches(const struct passwd *pw, const struct member_list *list);
 
 /* toke.c */
 void init_lexer(void);
