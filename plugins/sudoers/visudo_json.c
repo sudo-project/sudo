@@ -56,6 +56,7 @@ extern bool parse_error;
  */
 enum json_value_type {
     JSON_STRING,
+    JSON_ID,
     JSON_NUMBER,
     JSON_OBJECT,
     JSON_ARRAY,
@@ -72,6 +73,7 @@ struct json_value {
     union {
 	char *string;
 	int number;
+	id_t id;
 	bool boolean;
     } u;
 };
@@ -197,6 +199,9 @@ print_pair_json(const char *pre, const char *name,
     switch (value->type) {
     case JSON_STRING:
 	print_string_json(value->u.string);
+	break;
+    case JSON_ID:
+	printf("%u", (unsigned int)value->u.id);
 	break;
     case JSON_NUMBER:
 	printf("%d", value->u.number);
@@ -345,6 +350,8 @@ print_member_json(struct member *m, enum word_type word_type, bool last_one,
 {
     struct json_value value;
     const char *typestr;
+    const char *errstr;
+    id_t id;
     debug_decl(print_member_json, SUDO_DEBUG_UTIL)
 
     /* Most of the time we print a string. */
@@ -356,20 +363,30 @@ print_member_json(struct member *m, enum word_type word_type, bool last_one,
 	value.u.string++; /* skip leading '%' */
 	if (*value.u.string == ':') {
 	    value.u.string++;
+	    typestr = "nonunixgroup";
 	    if (*value.u.string == '#') {
-		value.type = JSON_NUMBER;
-		value.u.number = atoi(m->name + 3); /* XXX - use atoid? */
-		typestr = "nonunixgid";
-	    } else {
-		typestr = "nonunixgroup";
+		id = atoid(m->name + 3, NULL, NULL, &errstr);
+		if (errstr != NULL) {
+		    warningx("internal error: non-Unix group ID %s: \"%s\"",
+			errstr, m->name);
+		} else {
+		    value.type = JSON_ID;
+		    value.u.id = id;
+		    typestr = "nonunixgid";
+		}
 	    }
 	} else {
+	    typestr = "usergroup";
 	    if (*value.u.string == '#') {
-		value.type = JSON_NUMBER;
-		value.u.number = atoi(m->name + 2); /* XXX - use atoid? */
-		typestr = "usergid";
-	    } else {
-		typestr = "usergroup";
+		id = atoid(m->name + 2, NULL, NULL, &errstr);
+		if (errstr != NULL) {
+		    warningx("internal error: group ID %s: \"%s\"",
+			errstr, m->name);
+		} else {
+		    value.type = JSON_ID;
+		    value.u.id = id;
+		    typestr = "usergid";
+		}
 	    }
 	}
 	break;
@@ -393,12 +410,17 @@ print_member_json(struct member *m, enum word_type word_type, bool last_one,
 	    break;
 	case TYPE_RUNASUSER:
 	case TYPE_USERNAME:
+	    typestr = "username";
 	    if (*value.u.string == '#') {
-		value.type = JSON_NUMBER;
-		value.u.number = atoi(m->name + 1); /* XXX - use atoid? */
-		typestr = "userid";
-	    } else {
-		typestr = "username";
+		id = atoid(m->name + 1, NULL, NULL, &errstr);
+		if (errstr != NULL) {
+		    warningx("internal error: user ID %s: \"%s\"",
+			errstr, m->name);
+		} else {
+		    value.type = JSON_ID;
+		    value.u.id = id;
+		    typestr = "userid";
+		}
 	    }
 	    break;
 	default:
