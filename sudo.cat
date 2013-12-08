@@ -64,15 +64,16 @@ DDEESSCCRRIIPPTTIIOONN
                  only available when the administrator has enabled the
                  _c_l_o_s_e_f_r_o_m___o_v_e_r_r_i_d_e option in sudoers(4).
 
-     --cc _c_l_a_s_s    The --cc (_c_l_a_s_s) option causes ssuuddoo to run the specified
-                 command with resources limited by the specified login class.
-                 The _c_l_a_s_s argument can be either a class name as defined in
-                 _/_e_t_c_/_l_o_g_i_n_._c_o_n_f, or a single `-' character.  Specifying a
-                 _c_l_a_s_s of - indicates that the command should be run
-                 restricted by the default login capabilities for the user the
-                 command is run as.  If the _c_l_a_s_s argument specifies an
-                 existing user class, the command must be run as root, or the
-                 ssuuddoo command must be run from a shell that is already root.
+     --cc _c_l_a_s_s    The --cc (_c_l_a_s_s) option causes ssuuddoo to run the command with
+                 resource limits and scheduling priority of the specified
+                 login _c_l_a_s_s.  The _c_l_a_s_s argument can be either a class name
+                 as defined in _/_e_t_c_/_l_o_g_i_n_._c_o_n_f, or a single `-' character.  If
+                 _c_l_a_s_s is -, the default login class of the target user will
+                 be used.  Otherwise, the command must be run as the superuser
+                 (user ID 0), or ssuuddoo must be run from a shell that is already
+                 running as the superuser.  If the command is being run as a
+                 login shell, additional _/_e_t_c_/_l_o_g_i_n_._c_o_n_f settings, such as the
+                 umask and environment variables, will be applied, if present.
                  This option is only available on systems with BSD login
                  classes.
 
@@ -815,4 +816,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.7.10                      July 10, 2012                     Sudo 1.7.10
+Sudo 1.7.10                    December 8, 2013                    Sudo 1.7.10
