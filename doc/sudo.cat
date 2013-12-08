@@ -92,11 +92,12 @@ DDEESSCCRRIIPPTTIIOONN
                  either a class name as defined in _/_e_t_c_/_l_o_g_i_n_._c_o_n_f, or a
                  single `-' character.  If _c_l_a_s_s is -, the default login class
                  of the target user will be used.  Otherwise, the command must
-                 be run as root, or ssuuddoo must be run from a shell that is
-                 already root.  If the command is being run as a login shell,
-                 additional _/_e_t_c_/_l_o_g_i_n_._c_o_n_f settings, such as the umask and
-                 environment variables, will be applied if present.  This
-                 option is only available on systems with BSD login classes.
+                 be run as the superuser (user ID 0), or ssuuddoo must be run from
+                 a shell that is already running as the superuser.  If the
+                 command is being run as a login shell, additional
+                 _/_e_t_c_/_l_o_g_i_n_._c_o_n_f settings, such as the umask and environment
+                 variables, will be applied if present.  This option is only
+                 available on systems with BSD login classes.
 
      --EE, ----pprreesseerrvvee--eennvv
                  Indicates to the security policy that the user wishes to

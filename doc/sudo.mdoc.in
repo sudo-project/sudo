@@ -277,9 +277,9 @@ If
 is
 .Li - ,
 the default login class of the target user will be used.
-Otherwise, the command must be run as root, or
+Otherwise, the command must be run as the superuser (user ID 0), or
 .Nm sudo
-must be run from a shell that is already root.
+must be run from a shell that is already running as the superuser.
 If the command is being run as a login shell, additional
 .Pa /etc/login.conf
 settings, such as the umask and environment variables, will
