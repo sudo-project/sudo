@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd December 4, 2013
+.Dd December 8, 2013
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -283,7 +283,7 @@ must be run from a shell that is already running as the superuser.
 If the command is being run as a login shell, additional
 .Pa /etc/login.conf
 settings, such as the umask and environment variables, will
-be applied if present.
+be applied, if present.
 This option is only available on systems with BSD login classes.
 .It Fl E , -preserve-env
 Indicates to the security policy that the user wishes to
