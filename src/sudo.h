@@ -189,6 +189,9 @@ bool atobool(const char *str);
 /* atoid.c */
 id_t atoid(const char *str, const char *sep, char **endp, const char **errstr);
 
+/* atomode.c */
+int atomode(const char *cp, const char **errstr);
+
 /* parse_args.c */
 int parse_args(int argc, char **argv, int *nargc, char ***nargv,
     char ***settingsp, char ***env_addp);

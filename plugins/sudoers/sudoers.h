@@ -321,6 +321,9 @@ int atobool(const char *str);
 /* atoid.c */
 int atoid(const char *str, const char *sep, char **endp, const char **errstr);
 
+/* atomode.c */
+int atomode(const char *cp, const char **errstr);
+
 /* boottime.c */
 int get_boottime(struct timeval *);
 

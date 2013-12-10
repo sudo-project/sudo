@@ -13,6 +13,7 @@ common/aix.c
 common/alloc.c
 common/atobool.c
 common/atoid.c
+common/atomode.c
 common/event.c
 common/event_poll.c
 common/event_select.c

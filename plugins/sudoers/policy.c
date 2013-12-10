@@ -91,7 +91,6 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     const char *debug_flags = NULL;
     const char *remhost = NULL;
     int flags = 0;
-    char *ep;
     debug_decl(sudoers_policy_deserialize_info, SUDO_DEBUG_PLUGIN)
 
 #define MATCHES(s, v) (strncmp(s, v, sizeof(v) - 1) == 0)
@@ -118,17 +117,10 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
 		continue;
 	    }
 	    if (MATCHES(*cur, "sudoers_mode=")) {
-		long lval;
-		errno = 0;
 		p = *cur + sizeof("sudoers_mode=") - 1;
-		lval = strtol(p, &ep, 8);
-		if (ep == p || *ep != '\0')
-		    fatalx(U_("%s: %s"), *cur, U_("invalid"));
-		if (lval < 0)
-		    fatalx(U_("%s: %s"), *cur, U_("too small"));
-		if (lval > 0777)
-		    fatalx(U_("%s: %s"), *cur, U_("too large"));
-		sudoers_mode = (mode_t) lval;
+		sudoers_mode = atomode(p, &errstr);
+		if (errstr != NULL)
+		    fatalx(U_("%s: %s"), *cur, U_(errstr));
 		continue;
 	    }
 	    if (MATCHES(*cur, "ldap_conf=")) {

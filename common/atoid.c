@@ -74,18 +74,24 @@ atoid(const char *p, const char *sep, char **endp, const char **errstr)
 	    } while (*sep++ != '\0');
 	}
 	if (!valid) {
-	    *errstr = N_("invalid value");
+	    if (errstr != NULL)
+		*errstr = N_("invalid");
 	    errno = EINVAL;
 	    goto done;
 	}
-	if ((errno == ERANGE && (lval == LONG_MAX || lval == LONG_MIN)) ||
-	    (lval > INT_MAX || lval < INT_MIN)) {
+	if ((errno == ERANGE && lval == LONG_MAX) || lval > INT_MAX) {
 	    errno = ERANGE;
-	    *errstr = N_("value out of range");
+	    if (errstr != NULL)
+		*errstr = N_("too large");
+	    goto done;
+	}
+	if ((errno == ERANGE && lval == LONG_MIN) || lval < INT_MIN) {
+	    errno = ERANGE;
+	    if (errstr != NULL)
+		*errstr = N_("too small");
 	    goto done;
 	}
 	rval = (id_t)lval;
-	*errstr = NULL;
     } else {
 	unsigned long ulval = strtoul(p, &ep, 10);
 	if (ep != p) {
@@ -96,18 +102,21 @@ atoid(const char *p, const char *sep, char **endp, const char **errstr)
 	    } while (*sep++ != '\0');
 	}
 	if (!valid) {
-	    *errstr = N_("invalid value");
+	    if (errstr != NULL)
+		*errstr = N_("invalid");
 	    errno = EINVAL;
 	    goto done;
 	}
 	if ((errno == ERANGE && ulval == ULONG_MAX) || ulval > UINT_MAX) {
 	    errno = ERANGE;
-	    *errstr = N_("value too large");
+	    if (errstr != NULL)
+		*errstr = N_("too large");
 	    goto done;
 	}
 	rval = (id_t)ulval;
-	*errstr = NULL;
     }
+    if (errstr != NULL)
+	*errstr = NULL;
     if (endp != NULL)
 	*endp = ep;
 done:

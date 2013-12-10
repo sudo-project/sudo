@@ -555,7 +555,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    cp = info[i] + sizeof("closefrom=") - 1;
 		    details->closefrom = strtonum(cp, 0, INT_MAX, &errstr);
 		    if (errstr != NULL)
-			fatalx(U_("%s: %s"), cp, U_(errstr));
+			fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    break;
 		}
 		break;
@@ -574,7 +574,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    cp = info[i] + sizeof("nice=") - 1;
 		    details->priority = strtonum(cp, INT_MIN, INT_MAX, &errstr);
 		    if (errstr != NULL)
-			fatalx(U_("%s: %s"), cp, U_(errstr));
+			fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    SET(details->flags, CD_SET_PRIORITY);
 		    break;
 		}
@@ -676,25 +676,17 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    cp = info[i] + sizeof("timeout=") - 1;
 		    details->timeout = strtonum(cp, 0, INT_MAX, &errstr);
 		    if (errstr != NULL)
-			fatalx(U_("%s: %s"), cp, U_(errstr));
+			fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    SET(details->flags, CD_SET_TIMEOUT);
 		    break;
 		}
 		break;
 	    case 'u':
 		if (strncmp("umask=", info[i], sizeof("umask=") - 1) == 0) {
-		    long lval;
-		    char *ep;
-		    errno = 0;
 		    cp = info[i] + sizeof("umask=") - 1;
-		    lval = strtol(cp, &ep, 8);
-		    if (ep == cp || *ep != '\0')
-			fatalx(U_("%s: %s"), info[i], U_("invalid"));
-		    if (lval < 0)
-			fatalx(U_("%s: %s"), info[i], U_("too small"));
-		    if (lval > 0777)
-			fatalx(U_("%s: %s"), info[i], U_("too large"));
-		    details->umask = (mode_t)lval;
+		    details->umask = atomode(cp, &errstr);
+		    if (errstr != NULL)
+			fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    SET(details->flags, CD_SET_UMASK);
 		    break;
 		}

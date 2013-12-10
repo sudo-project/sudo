@@ -66,7 +66,7 @@ DEFS = @OSDEFS@ -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\"
 
 SHELL = @SHELL@
 
-LTOBJS = alloc.lo atobool.lo atoid.lo event.lo fatal.lo fileops.lo \
+LTOBJS = alloc.lo atobool.lo atoid.lo atomode.lo event.lo fatal.lo fileops.lo \
 	 fmt_string.lo gidlist.lo lbuf.lo progname.lo secure_path.lo \
 	 setgroups.lo sudo_conf.lo sudo_debug.lo sudo_dso.lo sudo_printf.lo \
 	 term.lo ttysize.lo @COMMON_OBJS@
@@ -179,6 +179,9 @@ atoid.lo: $(srcdir)/atoid.c $(incdir)/gettext.h $(incdir)/missing.h \
           $(incdir)/sudo_debug.h $(top_builddir)/config.h \
           $(top_srcdir)/compat/stdbool.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/atoid.c
+atomode.lo: $(srcdir)/atomode.c $(incdir)/gettext.h $(incdir)/missing.h \
+            $(incdir)/sudo_debug.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/atomode.c
 conf_test.lo: $(srcdir)/regress/sudo_conf/conf_test.c $(incdir)/missing.h \
               $(incdir)/queue.h $(incdir)/sudo_conf.h $(top_builddir)/config.h \
               $(top_srcdir)/compat/stdbool.h

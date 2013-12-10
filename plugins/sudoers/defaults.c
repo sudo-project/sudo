@@ -811,17 +811,20 @@ logpri2str(int n)
 static bool
 store_mode(char *val, struct sudo_defs_types *def, int op)
 {
-    char *endp;
-    long l;
+    mode_t mode;
+    const char *errstr;
     debug_decl(store_mode, SUDO_DEBUG_DEFAULTS)
 
     if (op == false) {
-	def->sd_un.mode = (mode_t)0777;
+	def->sd_un.mode = 0777;
     } else {
-	l = strtol(val, &endp, 8);
-	if (endp == val || *endp != '\0' || l < 0 || l > 0777)
+	mode = atomode(val, &errstr);
+	if (errstr != NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"%s is %s", val, errstr);
 	    debug_return_bool(false);
-	def->sd_un.mode = (mode_t)l;
+	}
+	def->sd_un.mode = mode;
     }
     if (def->callback)
 	debug_return_bool(def->callback(val));
