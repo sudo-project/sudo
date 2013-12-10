@@ -222,6 +222,8 @@ strlcpy.lo: $(srcdir)/strlcpy.c $(incdir)/missing.h $(top_builddir)/config.h
 strsignal.lo: $(srcdir)/strsignal.c $(incdir)/gettext.h $(incdir)/missing.h \
               $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strsignal.c
+strtonum.lo: $(srcdir)/strtonum.c $(incdir)/missing.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/strtonum.c
 utimes.lo: $(srcdir)/utimes.c $(incdir)/missing.h $(top_builddir)/config.h \
            $(top_srcdir)/compat/utime.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/utimes.c

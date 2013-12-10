@@ -94,6 +94,7 @@ compat/stdbool.h
 compat/strlcat.c
 compat/strlcpy.c
 compat/strsignal.c
+compat/strtonum.c
 compat/timespec.h
 compat/utime.h
 compat/utimes.c

@@ -2388,7 +2388,7 @@ SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }fnm_test"
 ])
 SUDO_FUNC_ISBLANK
-AC_REPLACE_FUNCS(memrchr memset_s pw_dup strlcpy strlcat)
+AC_REPLACE_FUNCS(memrchr memset_s pw_dup strlcpy strlcat strtonum)
 AC_CHECK_FUNCS(getopt_long, [], [AC_LIBOBJ(getopt_long)
     AC_MSG_CHECKING([for optreset])
     AC_CACHE_VAL(sudo_cv_optreset, [

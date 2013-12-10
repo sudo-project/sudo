@@ -446,6 +446,9 @@ char *strsignal(int);
 #ifndef HAVE_SIG2STR
 int sig2str(int, char *);
 #endif
+#ifndef HAVE_STRTONUM
+long long strtonum(const char *, long long, long long, const char **);
+#endif
 void initprogname(const char *);
 
 #endif /* _SUDO_MISSING_H */
