@@ -600,18 +600,20 @@ check_defaults(int what, bool quiet)
 static bool
 store_int(char *val, struct sudo_defs_types *def, int op)
 {
-    char *endp;
-    long l;
+    const char *errstr;
+    int i;
     debug_decl(store_int, SUDO_DEBUG_DEFAULTS)
 
     if (op == false) {
 	def->sd_un.ival = 0;
     } else {
-	l = strtol(val, &endp, 10);
-	if (*endp != '\0')
+	i = strtonum(val, INT_MIN, INT_MAX, &errstr);
+	if (errstr != NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"%s is %s", val, errstr);
 	    debug_return_bool(false);
-	/* XXX - should check against INT_MAX */
-	def->sd_un.ival = (int)l;
+	}
+	def->sd_un.ival = i;
     }
     if (def->callback)
 	debug_return_bool(def->callback(val));
@@ -621,18 +623,21 @@ store_int(char *val, struct sudo_defs_types *def, int op)
 static bool
 store_uint(char *val, struct sudo_defs_types *def, int op)
 {
-    char *endp;
-    long l;
+    const char *errstr;
+    unsigned int u;
     debug_decl(store_uint, SUDO_DEBUG_DEFAULTS)
 
     if (op == false) {
 	def->sd_un.ival = 0;
     } else {
-	l = strtol(val, &endp, 10);
-	if (*endp != '\0' || l < 0)
+	u = strtonum(val, 0, UINT_MAX, &errstr);
+	if (errstr != NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"%s is %s", val, errstr);
 	    debug_return_bool(false);
-	/* XXX - should check against INT_MAX */
-	def->sd_un.ival = (unsigned int)l;
+	}
+	/* XXX - should have uival */
+	def->sd_un.ival = u;
     }
     if (def->callback)
 	debug_return_bool(def->callback(val));
@@ -814,7 +819,7 @@ store_mode(char *val, struct sudo_defs_types *def, int op)
 	def->sd_un.mode = (mode_t)0777;
     } else {
 	l = strtol(val, &endp, 8);
-	if (*endp != '\0' || l < 0 || l > 0777)
+	if (endp == val || *endp != '\0' || l < 0 || l > 0777)
 	    debug_return_bool(false);
 	def->sd_un.mode = (mode_t)l;
     }

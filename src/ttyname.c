@@ -441,11 +441,16 @@ get_process_ttyname(void)
 	if (len != -1) {
 	    /* Field 7 is the tty dev (0 if no tty) */
 	    char *cp = line;
+	    const char *errstr;
 	    int field = 1;
 	    while (*cp != '\0') {
 		if (*cp++ == ' ') {
 		    if (++field == 7) {
-			dev_t tdev = (dev_t)atoi(cp);
+			dev_t tdev = strtonum(cp, INT_MIN, INT_MAX, &errstr);
+			if (errstr) {
+			    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+				"%s: tty device number %s", path, errstr);
+			}
 			if (tdev > 0)
 			    tty = sudo_ttyname_dev(tdev);
 			break;

@@ -74,21 +74,12 @@ get_boottime(struct timeval *tv)
     if (fp != NULL) {
 	while ((len = getline(&line, &linesize, fp)) != -1) {
 	    if (strncmp(line, "btime ", 6) == 0) {
-#ifdef HAVE_STRTOLL
-		long long llval = strtoll(line + 6, &ep, 10);
-		if (line[6] != '\0' && *ep == '\0' && (time_t)llval == llval) {
+		long long llval = strtonum(line + 6, 1, LLONG_MAX, NULL);
+		if (llval > 0) {
 		    tv->tv_sec = (time_t)llval;
 		    tv->tv_usec = 0;
 		    debug_return_bool(1);
 		}
-#else
-		long lval = strtol(line + 6, &ep, 10);
-		if (line[6] != '\0' && *ep == '\0' && (time_t)lval == lval) {
-		    tv->tv_sec = (time_t)llval;
-		    tv->tv_usec = 0;
-		    debug_return_bool(1);
-		}
-#endif
 	    }
 	}
 	fclose(fp);

@@ -77,10 +77,14 @@ get_ttysize(int *rowp, int *colp)
 	char *p;
 
 	/* Fall back on $LINES and $COLUMNS. */
-	if ((p = getenv("LINES")) == NULL || (*rowp = atoi(p)) <= 0)
+	if ((p = getenv("LINES")) == NULL ||
+	    (*rowp = strtonum(p, 1, INT_MAX, NULL)) <= 0) {
 	    *rowp = 24;
-	if ((p = getenv("COLUMNS")) == NULL || (*colp = atoi(p)) <= 0)
+	}
+	if ((p = getenv("COLUMNS")) == NULL ||
+	    (*colp = strtonum(p, 1, INT_MAX, NULL)) <= 0) {
 	    *colp = 80;
+	}
     }
 
     debug_return;

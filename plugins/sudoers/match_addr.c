@@ -109,6 +109,7 @@ addr_matches_if_netmask(const char *n, const char *m)
     unsigned int j;
 #endif
     unsigned int family;
+    const char *errstr;
     debug_decl(addr_matches_if, SUDO_DEBUG_MATCH)
 
 #ifdef HAVE_STRUCT_IN6_ADDR
@@ -125,7 +126,12 @@ addr_matches_if_netmask(const char *n, const char *m)
 	if (strchr(m, '.')) {
 	    mask.ip4.s_addr = inet_addr(m);
 	} else {
-	    i = atoi(m);
+	    i = strtonum(m, 0, 32, &errstr);
+	    if (errstr != NULL) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "IPv4 netmask %s: %s", m, errstr);
+		debug_return_bool(false);
+	    }
 	    if (i == 0)
 		mask.ip4.s_addr = 0;
 	    else if (i == 32)
@@ -139,7 +145,12 @@ addr_matches_if_netmask(const char *n, const char *m)
 #ifdef HAVE_STRUCT_IN6_ADDR
     else {
 	if (inet_pton(AF_INET6, m, &mask.ip6) <= 0) {
-	    j = atoi(m);
+	    j = strtonum(m, 0, 128, &errstr);
+	    if (errstr != NULL) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "IPv6 netmask %s: %s", m, errstr);
+		debug_return_bool(false);
+	    }
 	    for (i = 0; i < sizeof(addr.ip6.s6_addr); i++) {
 		if (j < i * 8)
 		    mask.ip6.s6_addr[i] = 0;

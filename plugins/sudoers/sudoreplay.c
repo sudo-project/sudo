@@ -438,6 +438,7 @@ replay_session(const double max_wait, const char *decimal)
 	bool need_nlcr = false;
 	char last_char = '\0';
 
+	buf[strcspn(buf, "\n")] = '\0';
 	if (!parse_timing(buf, decimal, &idx, &seconds, &nbytes))
 	    fatalx(U_("invalid timing file line: %s"), buf);
 
@@ -802,13 +803,9 @@ parse_logfile(char *logfile)
 {
     FILE *fp;
     char *buf = NULL, *cp, *ep;
+    const char *errstr;
     size_t bufsize = 0, cwdsize = 0, cmdsize = 0;
     struct log_info *li = NULL;
-#ifdef HAVE_STRTOLL
-    long long llval;
-#else
-    long lval;
-#endif
     debug_decl(parse_logfile, SUDO_DEBUG_UTIL)
 
     fp = fopen(logfile, "r");
@@ -837,26 +834,21 @@ parse_logfile(char *logfile)
     /*
      * Crack the log line (rows and cols not present in old versions).
      *	timestamp:user:runas_user:runas_group:tty:rows:cols
+     * XXX - probably better to use strtok and switch on the state.
      */
     buf[strcspn(buf, "\n")] = '\0';
+    cp = buf;
 
     /* timestamp */
-    errno = 0;
-#ifdef HAVE_STRTOLL
-    llval = strtoll(buf, &ep, 10);
-    if (buf[0] == '\0' || *ep != ':')
+    if ((ep = strchr(cp, ':')) == NULL)
 	goto bad;
-    if (errno == ERANGE && (llval == LLONG_MAX || llval == LLONG_MIN))
+    *ep = '\0';
+    li->tstamp = strtonum(cp, LLONG_MIN, LLONG_MAX, &errstr);
+    if (errstr != NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "%s: timestamp %s is %s", logfile, cp, errstr);
 	goto bad;
-    li->tstamp = (time_t)llval;
-#else
-    lval = strtol(buf, &ep, 10);
-    if (buf[0] == '\0' || *ep != ':')
-	goto bad;
-    if (errno == ERANGE && (lval == LONG_MAX || lval == LONG_MIN))
-	goto bad;
-    li->tstamp = (time_t)lval;
-#endif /* HAVE_STRTOLL */
+    }
 
     /* user */
     cp = ep + 1;
@@ -880,14 +872,28 @@ parse_logfile(char *logfile)
     /* tty, followed by optional rows + columns */
     cp = ep + 1;
     if ((ep = strchr(cp, ':')) == NULL) {
+	/* just the tty */
 	li->tty = estrdup(cp);
     } else {
+	/* tty followed by rows + columns */
 	li->tty = estrndup(cp, (size_t)(ep - cp));
 	cp = ep + 1;
-	li->rows = atoi(cp);
+	/* need to NULL out separator to use strtonum() */
 	if ((ep = strchr(cp, ':')) != NULL) {
+	    *ep = '\0';
+	}
+	li->rows = strtonum(cp, 1, INT_MAX, &errstr);
+	if (errstr != NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"%s: tty rows %s is %s", logfile, cp, errstr);
+	}
+	if (ep != NULL) {
 	    cp = ep + 1;
-	    li->cols = atoi(cp);
+	    li->cols = strtonum(cp, 1, INT_MAX, &errstr);
+	    if (errstr != NULL) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "%s: tty cols %s is %s", logfile, cp, errstr);
+	    }
 	}
     }
     fclose(fp);
@@ -1158,6 +1164,8 @@ parse_timing(const char *buf, const char *decimal, int *idx, double *seconds,
 
     /* Parse index */
     ul = strtoul(buf, &ep, 10);
+    if (ep == buf || !isspace((unsigned char) *ep))
+	goto bad;
     if (ul >= IOFD_TIMING) {
 	if (ul != 6)
 	    goto bad;
@@ -1176,11 +1184,10 @@ parse_timing(const char *buf, const char *decimal, int *idx, double *seconds,
      */
     errno = 0;
     l = strtol(cp, &ep, 10);
-    if ((errno == ERANGE && (l == LONG_MAX || l == LONG_MIN)) ||
-	l < 0 || l > INT_MAX ||
-	(*ep != '.' && strncmp(ep, decimal, strlen(decimal)) != 0)) {
+    if (ep == cp || (*ep != '.' && strncmp(ep, decimal, strlen(decimal)) != 0))
 	goto bad;
-    }
+    if (l < 0 || l > INT_MAX || (errno == ERANGE && l == LONG_MAX))
+	goto bad;
     *seconds = (double)l;
     cp = ep + (*ep == '.' ? 1 : strlen(decimal));
     d = 10.0;
@@ -1195,7 +1202,7 @@ parse_timing(const char *buf, const char *decimal, int *idx, double *seconds,
 
     errno = 0;
     ul = strtoul(cp, &ep, 10);
-    if (errno == ERANGE && ul == ULONG_MAX)
+    if (ep == cp || *ep != '\0' || (errno == ERANGE && ul == ULONG_MAX))
 	goto bad;
     *nbytes = (size_t)ul;
 

@@ -54,6 +54,7 @@ static int
 check_addr(char *input)
 {
     int expected, matched;
+    const char *errstr;
     size_t len;
     char *cp;
 
@@ -65,7 +66,9 @@ check_addr(char *input)
     cp = input + len;
     while (isspace((unsigned char)*cp))
 	cp++;
-    expected = atoi(cp);
+    expected = strtonum(cp, 0, 1, &errstr);
+    if (errstr != NULL)
+	fatalx("expecting 0 or 1, got %s", cp);
     input[len] = '\0';
 
     matched = addr_matches(input);

@@ -136,17 +136,22 @@ io_mkdirs(char *path, mode_t mode, bool is_temp)
 int
 io_set_max_sessid(const char *maxval)
 {
-    unsigned long ulval;
-    char *ep;
+    const char *errstr;
+    unsigned int value;
+    debug_decl(io_set_max_sessid, SUDO_DEBUG_UTIL)
 
-    errno = 0;
-    ulval = strtoul(maxval, &ep, 0);
-    if (*maxval != '\0' && *ep == '\0' &&
-	(errno != ERANGE || ulval != ULONG_MAX)) {
-	sessid_max = MIN((unsigned int)ulval, SESSID_MAX);
-	return true;
+    value = strtonum(maxval, 0, SESSID_MAX, &errstr);
+    if (errstr != NULL) {
+	if (errno != ERANGE) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"bad maxseq: %s is %s", maxval, errstr);
+	    debug_return_bool(false);
+	}
+	/* Out of range, clamp to SESSID_MAX as documented. */
+	value = SESSID_MAX;
     }
-    return false;
+    sessid_max = value;
+    debug_return_bool(true);
 }
 
 /*
@@ -202,7 +207,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 		nread = read(fd2, buf, sizeof(buf));
 		if (nread > 0) {
 		    id = strtoul(buf, &ep, 36);
-		    if (buf == ep || id >= sessid_max)
+		    if (ep == buf || *ep != '\0' || id >= sessid_max)
 			id = 0;
 		}
 		close(fd2);
@@ -217,7 +222,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	    if (nread == -1)
 		log_fatal(USE_ERRNO, N_("unable to read %s"), pathbuf);
 	    id = strtoul(buf, &ep, 36);
-	    if (buf == ep || id >= sessid_max)
+	    if (ep == buf || *ep != '\0' || id >= sessid_max)
 		id = 0;
 	}
     }
@@ -237,7 +242,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     memcpy(sessid, buf, 6);
     sessid[6] = '\0';
 
-    /* Rewind and overwrite old seq file. */
+    /* Rewind and overwrite old seq file, including the NUL byte. */
     if (lseek(fd, (off_t)0, SEEK_SET) == (off_t)-1 || write(fd, buf, 7) != 7)
 	log_fatal(USE_ERRNO, N_("unable to write to %s"), pathbuf);
     close(fd);
@@ -332,7 +337,9 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	switch (**cur) {
 	case 'c':
 	    if (strncmp(*cur, "cols=", sizeof("cols=") - 1) == 0) {
-		details->cols = atoi(*cur + sizeof("cols=") - 1);
+		int n = strtonum(*cur + sizeof("cols=") - 1, 1, INT_MAX, NULL);
+		if (n > 0)
+		    details->cols = n;
 		continue;
 	    }
 	    if (strncmp(*cur, "cwd=", sizeof("cwd=") - 1) == 0) {
@@ -342,7 +349,9 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	    break;
 	case 'l':
 	    if (strncmp(*cur, "lines=", sizeof("lines=") - 1) == 0) {
-		details->lines = atoi(*cur + sizeof("lines=") - 1);
+		int n = strtonum(*cur + sizeof("lines=") - 1, 1, INT_MAX, NULL);
+		if (n > 0)
+		    details->lines = n;
 		continue;
 	    }
 	    break;

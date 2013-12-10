@@ -124,8 +124,36 @@
 # define OPEN_MAX	256
 #endif
 
+#ifndef USHRT_MAX
+# define USHRT_MAX	0xffff
+#endif
+
 #ifndef INT_MAX
 # define INT_MAX	0x7fffffff
+#endif
+
+#ifndef INT_MIN
+# define INT_MIN	(-0x7fffffff-1)
+#endif
+
+#ifndef UINT_MAX
+# define UINT_MAX	0xffffffffU
+#endif
+
+#ifndef LLONG_MAX
+# if defined(QUAD_MAX)
+#  define LLONG_MAX	QUAD_MAX
+# else
+#  define LLONG_MAX	0x7fffffffffffffffLL
+# endif
+#endif
+
+#ifndef LLONG_MIN
+# if defined(QUAD_MIN)
+#  define LLONG_MIN	QUAD_MIN
+# else
+#  define LLONG_MIN	(-0x7fffffffffffffffLL-1)
+# endif
 #endif
 
 #ifndef PATH_MAX

@@ -73,6 +73,8 @@ static sysgroup_getgrgid_t sysgroup_getgrgid;
 static sysgroup_gr_delref_t sysgroup_gr_delref;
 static bool need_setent;
 
+extern id_t atoid(const char *str, const char *sep, char **endp, const char **errstr);
+
 static int
 sysgroup_init(int version, sudo_printf_t sudo_printf, char *const argv[])
 {
@@ -128,16 +130,15 @@ sysgroup_cleanup(void)
 static int
 sysgroup_query(const char *user, const char *group, const struct passwd *pwd)
 {
-    char **member, *ep = '\0';
+    char **member;
     struct group *grp;
 
     grp = sysgroup_getgrnam(group);
     if (grp == NULL && group[0] == '#' && group[1] != '\0') {
-	long lval = strtol(group + 1, &ep, 10);
-	if (*ep == '\0') {
-	    if ((lval != LONG_MAX && lval != LONG_MIN) || errno != ERANGE)
-		grp = sysgroup_getgrgid((gid_t)lval);
-	}
+	const char *errstr;
+	gid_t gid = atoid(group + 1, NULL, NULL, &errstr);
+	if (errstr == NULL)
+	    grp = sysgroup_getgrgid(gid);
     }
     if (grp != NULL) {
 	for (member = grp->gr_mem; *member != NULL; member++) {

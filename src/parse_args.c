@@ -178,7 +178,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     char *cp, **env_add, **settings;
     const char *runas_user = NULL;
     const char *runas_group = NULL;
-    const char *debug_flags;
+    const char *debug_flags, *errstr;
     int nenv = 0;
     int env_size = 32;
     debug_decl(parse_args, SUDO_DEBUG_ARGS)
@@ -242,8 +242,9 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    SET(flags, MODE_BACKGROUND);
 		    break;
 		case 'C':
-		    if (atoi(optarg) < 3) {
-			warningx(U_("the argument to -C must be a number greater than or equal to 3"));
+		    strtonum(optarg, 4, INT_MAX, &errstr);
+		    if (errstr != NULL) {
+			warningx(U_("the argument to -C was %s"), U_(errstr));
 			usage(1);
 		    }
 		    sudo_settings[ARG_CLOSEFROM].value = optarg;

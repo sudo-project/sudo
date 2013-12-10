@@ -86,7 +86,7 @@ closefrom_fallback(int lowfd)
     for (fd = lowfd; fd < maxfd; fd++) {
 #ifdef __APPLE__
 	/* Avoid potential crash with libdispatch when we close its fds. */
-	(void) fcntl(fd, F_SETFD, FD_CLOEXEC);
+	(void) fcntl((int) fd, F_SETFD, FD_CLOEXEC);
 #else
 	(void) close((int) fd);
 #endif
@@ -123,17 +123,17 @@ void
 closefrom(int lowfd)
 {
     struct dirent *dent;
+    const char *errstr;
     DIR *dirp;
-    char *endp;
-    long fd;
+    int fd;
 
     /* Use /proc/self/fd directory if it exists. */
     if ((dirp = opendir("/proc/self/fd")) != NULL) {
 	while ((dent = readdir(dirp)) != NULL) {
-	    fd = strtol(dent->d_name, &endp, 10);
-	    if (dent->d_name != endp && *endp == '\0' &&
-		fd >= 0 && fd < INT_MAX && fd >= lowfd && fd != dirfd(dirp))
-		(void) close((int) fd);
+	    fd = strtonum(dent->d_name, lowfd, INT_MAX, &errstr);
+	    if (errstr == NULL && fd != dirfd(dirp)) {
+		(void) close(fd);
+	    }
 	}
 	(void) closedir(dirp);
     } else

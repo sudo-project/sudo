@@ -182,16 +182,14 @@ set_var_group_source(const char *entry, const char *conf_file)
 static void
 set_var_max_groups(const char *entry, const char *conf_file)
 {
-    long lval;
-    char *ep;
+    int max_groups;
 
-    lval = strtol(entry, &ep, 10);
-    if (*entry == '\0' || *ep != '\0' || lval <= 0 || lval > INT_MAX ||
-	(errno == ERANGE && lval == LONG_MAX)) {
-	warningx(U_("invalid max groups `%s' in %s, line %d"), entry,
-		    conf_file, conf_lineno);
+    max_groups = strtonum(entry, 1, INT_MAX, NULL);
+    if (max_groups > 0) {
+	sudo_conf_data.max_groups = max_groups;
     } else {
-	sudo_conf_data.max_groups = (int)lval;
+	warningx(U_("invalid max groups `%s' in %s, line %d"), entry,
+	    conf_file, conf_lineno);
     }
 }
 

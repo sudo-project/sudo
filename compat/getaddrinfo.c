@@ -188,29 +188,6 @@ freeaddrinfo(struct addrinfo *ai)
 
 
 /*
- * Convert a numeric service string to a number with error checking, returning
- * true if the number was parsed correctly and false otherwise.  Stores the
- * converted number in the second argument.  Equivalent to calling strtol, but
- * with the base always fixed at 10, with checking of errno, ensuring that all
- * of the string is consumed, and checking that the resulting number is
- * positive.
- */
-static int
-convert_service(const char *string, long *result)
-{
-    char *end;
-
-    if (*string == '\0')
-        return 0;
-    errno = 0;
-    *result = strtol(string, &end, 10);
-    if (errno != 0 || *end != '\0' || *result < 0)
-        return 0;
-    return 1;
-}
-
-
-/*
  * Allocate a new addrinfo struct, setting some defaults given that this
  * implementation is IPv4 only.  Also allocates an attached sockaddr_in and
  * zeroes it, per the requirement for getaddrinfo.  Takes the socktype,
@@ -268,12 +245,14 @@ gai_service(const char *servname, int flags, int *type, unsigned short *port)
 {
     struct servent *servent;
     const char *protocol;
-    long value;
+    const char *errstr;
+    unsigned short value;
 
-    if (convert_service(servname, &value)) {
-        if (value > (1L << 16) - 1)
-            return EAI_SERVICE;
+    value = strtonum(servname, 0, USHRT_MAX, &errstr);
+    if (errstr == NULL) {
         *port = value;
+    } else if (errno == ERANGE) {
+	return EAI_SERVICE;
     } else {
         if (flags & AI_NUMERICSERV)
             return EAI_NONAME;

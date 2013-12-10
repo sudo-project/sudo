@@ -530,8 +530,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 {
     int i;
     id_t id;
-    long lval;
-    char *cp, *ep;
+    char *cp;
     const char *errstr;
     debug_decl(command_info_to_details, SUDO_DEBUG_PCOMM)
 
@@ -553,16 +552,10 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_STRING("command=", command)
 		SET_STRING("cwd=", cwd)
 		if (strncmp("closefrom=", info[i], sizeof("closefrom=") - 1) == 0) {
-		    errno = 0;
 		    cp = info[i] + sizeof("closefrom=") - 1;
-		    lval = strtol(cp, &ep, 10);
-		    if (*cp == '\0' || *ep != '\0')
-			fatalx(U_("%s: %s"), info[i], U_("invalid value"));
-		    if ((errno == ERANGE &&
-			(lval == LONG_MAX || lval == LONG_MIN)) ||
-			(lval > INT_MAX || lval < 0))
-			fatalx(U_("%s: %s"), info[i], U_("value out of range"));
-		    details->closefrom = (int)lval;
+		    details->closefrom = strtonum(cp, 0, INT_MAX, &errstr);
+		    if (errstr != NULL)
+			fatalx(U_("%s: %s"), cp, U_(errstr));
 		    break;
 		}
 		break;
@@ -578,16 +571,10 @@ command_info_to_details(char * const info[], struct command_details *details)
 		break;
 	    case 'n':
 		if (strncmp("nice=", info[i], sizeof("nice=") - 1) == 0) {
-		    errno = 0;
 		    cp = info[i] + sizeof("nice=") - 1;
-		    lval = strtol(cp, &ep, 10);
-		    if (*cp == '\0' || *ep != '\0')
-			fatalx(U_("%s: %s"), info[i], U_("invalid value"));
-		    if ((errno == ERANGE &&
-			(lval == LONG_MAX || lval == LONG_MIN)) ||
-			(lval > INT_MAX || lval < INT_MIN))
-			fatalx(U_("%s: %s"), info[i], U_("value out of range"));
-		    details->priority = (int)lval;
+		    details->priority = strtonum(cp, INT_MIN, INT_MAX, &errstr);
+		    if (errstr != NULL)
+			fatalx(U_("%s: %s"), cp, U_(errstr));
 		    SET(details->flags, CD_SET_PRIORITY);
 		    break;
 		}
@@ -686,31 +673,27 @@ command_info_to_details(char * const info[], struct command_details *details)
 		break;
 	    case 't':
 		if (strncmp("timeout=", info[i], sizeof("timeout=") - 1) == 0) {
-		    errno = 0;
 		    cp = info[i] + sizeof("timeout=") - 1;
-		    lval = strtol(cp, &ep, 10);
-		    if (*cp == '\0' || *ep != '\0')
-			fatalx(U_("%s: %s"), info[i], U_("invalid value"));
-		    if ((errno == ERANGE &&
-			(lval == LONG_MAX || lval == LONG_MIN)) ||
-			(lval > INT_MAX || lval < 0))
-			fatalx(U_("%s: %s"), info[i], U_("value out of range"));
-		    details->timeout = (int)lval;
+		    details->timeout = strtonum(cp, 0, INT_MAX, &errstr);
+		    if (errstr != NULL)
+			fatalx(U_("%s: %s"), cp, U_(errstr));
 		    SET(details->flags, CD_SET_TIMEOUT);
 		    break;
 		}
 		break;
 	    case 'u':
 		if (strncmp("umask=", info[i], sizeof("umask=") - 1) == 0) {
+		    long lval;
+		    char *ep;
 		    errno = 0;
 		    cp = info[i] + sizeof("umask=") - 1;
 		    lval = strtol(cp, &ep, 8);
-		    if (*cp == '\0' || *ep != '\0')
-			fatalx(U_("%s: %s"), info[i], U_("invalid value"));
-		    if ((errno == ERANGE &&
-			(lval == LONG_MAX || lval == LONG_MIN)) ||
-			(lval > 0777 || lval < 0))
-			fatalx(U_("%s: %s"), info[i], U_("value out of range"));
+		    if (ep == cp || *ep != '\0')
+			fatalx(U_("%s: %s"), info[i], U_("invalid"));
+		    if (lval < 0)
+			fatalx(U_("%s: %s"), info[i], U_("too small"));
+		    if (lval > 0777)
+			fatalx(U_("%s: %s"), info[i], U_("too large"));
 		    details->umask = (mode_t)lval;
 		    SET(details->flags, CD_SET_UMASK);
 		    break;

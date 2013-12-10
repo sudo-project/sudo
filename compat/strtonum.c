@@ -28,6 +28,9 @@
 
 #include "missing.h"
 
+#define DEFAULT_TEXT_DOMAIN	"sudo"
+#include "gettext.h"
+
 enum strtonum_err {
     STN_VALID,
     STN_INVALID,
@@ -133,19 +136,19 @@ done:
 	result = 0;
 	errno = EINVAL;
 	if (errstrp != NULL)
-	    *errstrp = "invalid";
+	    *errstrp = N_("invalid");
 	break;
     case STN_TOOSMALL:
 	result = 0;
 	errno = ERANGE;
 	if (errstrp != NULL)
-	    *errstrp = "too small";
+	    *errstrp = N_("too small");
 	break;
     case STN_TOOBIG:
 	result = 0;
 	errno = ERANGE;
 	if (errstrp != NULL)
-	    *errstrp = "too large";
+	    *errstrp = N_("too large");
 	break;
     }
     return result;

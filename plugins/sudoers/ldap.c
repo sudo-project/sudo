@@ -1398,6 +1398,7 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
     struct ldap_config_table *table)
 {
     struct ldap_config_table *cur;
+    const char *errstr;
     debug_decl(sudo_ldap_parse_keyword, SUDO_DEBUG_LDAP)
 
     /* Look up keyword in config tables */
@@ -1418,7 +1419,11 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 		*(int *)(cur->valp) = atobool(value) == true;
 		break;
 	    case CONF_INT:
-		*(int *)(cur->valp) = atoi(value);
+		*(int *)(cur->valp) = strtonum(value, INT_MIN, INT_MAX, &errstr);
+		if (errstr != NULL) {
+		    warningx(U_("%s: %s: value %s out of range)"),
+			path_ldap_conf, keyword, value);
+		}
 		break;
 	    case CONF_STR:
 		efree(*(char **)(cur->valp));

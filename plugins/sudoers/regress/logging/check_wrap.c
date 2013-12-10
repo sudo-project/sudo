@@ -59,6 +59,7 @@ main(int argc, char *argv[])
     size_t len;
     FILE *fp;
     char *cp, *dash, *line, lines[2][2048];
+    int lineno = 0;
     int which = 0;
 
     initprogname(argc > 0 ? argv[0] : "check_wrap");
@@ -83,13 +84,20 @@ main(int argc, char *argv[])
 
 	/* If we read the 2nd line, parse list of line lengths and check. */
 	if (which) {
+	    lineno++;
 	    for (cp = strtok(lines[1], ","); cp != NULL; cp = strtok(NULL, ",")) {
 		size_t maxlen;
 		/* May be either a number or a range. */
-		len = maxlen = atoi(cp);
 		dash = strchr(cp, '-');
-		if (dash)
-		    maxlen = atoi(dash + 1);
+		if (dash != NULL) {
+		    *dash = '\0';
+		    len = strtonum(cp, 1, INT_MAX, NULL);
+		    maxlen = strtonum(dash + 1, 1, INT_MAX, NULL);
+		} else {
+		    len = maxlen = strtonum(cp, 1, INT_MAX, NULL);
+		}
+		if (len == 0 || maxlen == 0)
+		    fatalx("%s: invalid length on line %d\n", argv[1], lineno);
 		while (len <= maxlen) {
 		    printf("# word wrap at %d characters\n", (int)len);
 		    writeln_wrap(stdout, lines[0], strlen(lines[0]), len);

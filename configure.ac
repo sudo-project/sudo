@@ -2196,7 +2196,7 @@ AC_CHECK_TYPES([struct in6_addr], [], [], [#include <sys/types.h>
 #include <netinet/in.h>])
 AC_TYPE_LONG_LONG_INT
 if test X"$ac_cv_type_long_long_int" != X"yes"; then
-    AC_MSG_ERROR(["C compiler does not appear have required long long support"])
+    AC_MSG_ERROR(["C compiler does not appear to support the long long int type"])
 fi
 AC_CHECK_SIZEOF([long int])
 AC_CHECK_TYPE(id_t, unsigned int)
