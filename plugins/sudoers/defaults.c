@@ -172,7 +172,7 @@ dump_defaults(void)
 		    break;
 		case T_TUPLE:
 		    for (def = cur->values; def->sval; def++) {
-			if (cur->sd_un.ival == def->ival) {
+			if (cur->sd_un.tuple == def->nval) {
 			    sudo_printf(SUDO_CONV_INFO_MSG, desc, def->sval);
 			    break;
 			}
@@ -672,18 +672,16 @@ store_tuple(char *val, struct sudo_defs_types *def, int op)
     debug_decl(store_tuple, SUDO_DEBUG_DEFAULTS)
 
     /*
-     * Since enums are really just ints we store the value as an ival.
-     * In the future, there may be multiple enums for different tuple
-     * types we want to avoid and special knowledge of the tuple type.
-     * This does assume that the first entry in the tuple enum will
-     * be the equivalent to a boolean "false".
+     * Look up tuple value by name to find enum def_tuple value.
+     * For negation to work the first element of enum def_tuple
+     * must be equivalent to boolean false.
      */
     if (!val) {
 	def->sd_un.ival = (op == false) ? 0 : 1;
     } else {
 	for (v = def->values; v->sval != NULL; v++) {
 	    if (strcmp(v->sval, val) == 0) {
-		def->sd_un.ival = v->ival;
+		def->sd_un.tuple = v->nval;
 		break;
 	    }
 	}

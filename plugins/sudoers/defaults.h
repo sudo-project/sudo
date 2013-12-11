@@ -31,15 +31,16 @@ struct list_member {
 
 SLIST_HEAD(list_members, list_member);
 
-struct def_values {
-    char *sval;		/* string value */
-    int ival;		/* actually an enum */
-};
-
 enum list_ops {
     add,
     delete,
     freeall
+};
+
+/* Mapping of tuple string value to enum def_tuple. */
+struct def_values {
+    char *sval;		/* string value */
+    enum def_tuple nval;/* numeric value */
 };
 
 /*
