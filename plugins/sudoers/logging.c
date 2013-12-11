@@ -344,7 +344,7 @@ log_failure(int status, int flags)
  * Log and audit that user was not able to authenticate themselves.
  */
 void
-log_auth_failure(int status, int tries)
+log_auth_failure(int status, unsigned int tries)
 {
     int flags = NO_MAIL;
     debug_decl(log_auth_failure, SUDO_DEBUG_LOGGING)
@@ -439,9 +439,9 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 
     /* Expand printf-style format + args (with a special case). */
     if (fmt == INCORRECT_PASSWORD_ATTEMPT) {
-	int tries = va_arg(ap, int);
-	easprintf(&message, ngettext("%d incorrect password attempt",
-	    "%d incorrect password attempts", tries), tries);
+	unsigned int tries = va_arg(ap, unsigned int);
+	easprintf(&message, ngettext("%u incorrect password attempt",
+	    "%u incorrect password attempts", tries), tries);
     } else {
 	evasprintf(&message, _(fmt), ap);
     }
@@ -493,9 +493,9 @@ vlog_warning(int flags, const char *fmt, va_list ap)
     if (!ISSET(flags, NO_STDERR)) {
 	sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
 	if (fmt == INCORRECT_PASSWORD_ATTEMPT) {
-	    int tries = va_arg(ap2, int);
-	    warningx_nodebug(ngettext("%d incorrect password attempt",
-		"%d incorrect password attempts", tries), tries);
+	    unsigned int tries = va_arg(ap2, unsigned int);
+	    warningx_nodebug(ngettext("%u incorrect password attempt",
+		"%u incorrect password attempts", tries), tries);
 	} else {
 	    if (ISSET(flags, USE_ERRNO))
 		vwarning_nodebug(_(fmt), ap2);

@@ -55,6 +55,7 @@ struct sudo_defs_types {
     union {
 	int flag;
 	int ival;
+	unsigned int uival;
 	double fval;
 	enum def_tuple tuple;
 	char *str;

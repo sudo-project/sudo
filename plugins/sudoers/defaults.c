@@ -148,9 +148,12 @@ dump_defaults(void)
 			sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    }
 		    break;
-		case T_UINT:
 		case T_INT:
 		    sudo_printf(SUDO_CONV_INFO_MSG, desc, cur->sd_un.ival);
+		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
+		    break;
+		case T_UINT:
+		    sudo_printf(SUDO_CONV_INFO_MSG, desc, cur->sd_un.uival);
 		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    break;
 		case T_FLOAT:
@@ -628,7 +631,7 @@ store_uint(char *val, struct sudo_defs_types *def, int op)
     debug_decl(store_uint, SUDO_DEBUG_DEFAULTS)
 
     if (op == false) {
-	def->sd_un.ival = 0;
+	def->sd_un.uival = 0;
     } else {
 	u = strtonum(val, 0, UINT_MAX, &errstr);
 	if (errstr != NULL) {
@@ -636,8 +639,7 @@ store_uint(char *val, struct sudo_defs_types *def, int op)
 		"%s: %s", val, errstr);
 	    debug_return_bool(false);
 	}
-	/* XXX - should have uival */
-	def->sd_un.ival = u;
+	def->sd_un.uival = u;
     }
     if (def->callback)
 	debug_return_bool(def->callback(val));

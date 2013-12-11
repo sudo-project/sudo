@@ -183,7 +183,7 @@ sudo_auth_cleanup(struct passwd *pw)
 int
 verify_user(struct passwd *pw, char *prompt, int validated)
 {
-    int counter = def_passwd_tries + 1;
+    unsigned int counter = def_passwd_tries + 1;
     int success = AUTH_FAILURE;
     int status, rval;
     char *p;

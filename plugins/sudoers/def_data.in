@@ -109,7 +109,7 @@ preserve_groups
 	"Don't initialize the group vector to that of the target user"
 loglinelen
 	T_UINT|T_BOOL
-	"Length at which to wrap log file lines (0 for no wrap): %d"
+	"Length at which to wrap log file lines (0 for no wrap): %u"
 timestamp_timeout
 	T_FLOAT|T_BOOL
 	"Authentication timestamp timeout: %.1f minutes"
@@ -118,7 +118,7 @@ passwd_timeout
 	"Password prompt timeout: %.1f minutes"
 passwd_tries
 	T_UINT
-	"Number of tries to enter a password: %d"
+	"Number of tries to enter a password: %u"
 umask
 	T_MODE|T_BOOL
 	"Umask to use or 0777 to use user's: 0%o"
@@ -276,4 +276,4 @@ pam_session
 	"Create a new PAM session for the command to run in"
 maxseq
 	T_UINT
-	"Maximum I/O log sequence number"
+	"Maximum I/O log sequence number: %u"

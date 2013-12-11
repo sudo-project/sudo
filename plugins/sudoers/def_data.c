@@ -152,7 +152,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"loglinelen", T_UINT|T_BOOL,
-	N_("Length at which to wrap log file lines (0 for no wrap): %d"),
+	N_("Length at which to wrap log file lines (0 for no wrap): %u"),
 	NULL,
     }, {
 	"timestamp_timeout", T_FLOAT|T_BOOL,
@@ -164,7 +164,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"passwd_tries", T_UINT,
-	N_("Number of tries to enter a password: %d"),
+	N_("Number of tries to enter a password: %u"),
 	NULL,
     }, {
 	"umask", T_MODE|T_BOOL,
@@ -372,7 +372,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"maxseq", T_UINT,
-	N_("Maximum I/O log sequence number"),
+	N_("Maximum I/O log sequence number: %u"),
 	NULL,
     }, {
 	NULL, 0, NULL
