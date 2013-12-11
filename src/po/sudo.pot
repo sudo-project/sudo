@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.8.9\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-11-24 16:32-0700\n"
+"POT-Creation-Date: 2013-12-11 13:41-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,18 +58,19 @@ msgstr ""
 msgid "internal error, tried to erecalloc(0)"
 msgstr ""
 
-#: common/atoid.c:77 common/atoid.c:99 src/sudo.c:563 src/sudo.c:588
-#: src/sudo.c:696 src/sudo.c:712
+#: common/atoid.c:78 common/atoid.c:106 common/atomode.c:54
+#: compat/strtonum.c:65 compat/strtonum.c:183
 msgid "invalid value"
 msgstr ""
 
-#: common/atoid.c:84 src/sudo.c:567 src/sudo.c:592 src/sudo.c:700
-#: src/sudo.c:716
-msgid "value out of range"
+#: common/atoid.c:85 common/atoid.c:113 common/atomode.c:60
+#: compat/strtonum.c:68 compat/strtonum.c:195
+msgid "value too large"
 msgstr ""
 
-#: common/atoid.c:105
-msgid "value too large"
+#: common/atoid.c:91 common/atomode.c:60 compat/strtonum.c:68
+#: compat/strtonum.c:189
+msgid "value too small"
 msgstr ""
 
 #: common/fatal.c:158
@@ -83,9 +84,8 @@ msgid "%s: %s\n"
 msgstr ""
 
 #: common/gidlist.c:80 src/load_plugins.c:63 src/load_plugins.c:76
-#: src/sudo.c:563 src/sudo.c:567 src/sudo.c:588 src/sudo.c:592 src/sudo.c:615
-#: src/sudo.c:624 src/sudo.c:633 src/sudo.c:648 src/sudo.c:696 src/sudo.c:700
-#: src/sudo.c:712 src/sudo.c:716
+#: src/sudo.c:558 src/sudo.c:577 src/sudo.c:599 src/sudo.c:608 src/sudo.c:617
+#: src/sudo.c:632 src/sudo.c:679 src/sudo.c:689
 #, c-format
 msgid "%s: %s"
 msgstr ""
@@ -100,32 +100,32 @@ msgstr ""
 msgid "invalid max groups `%s' in %s, line %d"
 msgstr ""
 
-#: common/sudo_conf.c:393
+#: common/sudo_conf.c:391
 #, c-format
 msgid "unable to stat %s"
 msgstr ""
 
-#: common/sudo_conf.c:396
+#: common/sudo_conf.c:394
 #, c-format
 msgid "%s is not a regular file"
 msgstr ""
 
-#: common/sudo_conf.c:399
+#: common/sudo_conf.c:397
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr ""
 
-#: common/sudo_conf.c:403
+#: common/sudo_conf.c:401
 #, c-format
 msgid "%s is world writable"
 msgstr ""
 
-#: common/sudo_conf.c:406
+#: common/sudo_conf.c:404
 #, c-format
 msgid "%s is group writable"
 msgstr ""
 
-#: common/sudo_conf.c:416 src/selinux.c:196 src/selinux.c:209 src/sudo.c:331
+#: common/sudo_conf.c:414 src/selinux.c:196 src/selinux.c:209 src/sudo.c:328
 #, c-format
 msgid "unable to open %s"
 msgstr ""
@@ -161,7 +161,7 @@ msgstr ""
 msgid "unable to restore tty label"
 msgstr ""
 
-#: src/exec_common.c:70
+#: src/exec_common.c:73
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr ""
 
@@ -276,6 +276,7 @@ msgid "unable to open socket"
 msgstr ""
 
 #: src/parse_args.c:246
+#, c-format
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr ""
 
@@ -535,7 +536,7 @@ msgstr ""
 msgid "requires at least one argument"
 msgstr ""
 
-#: src/sesh.c:78 src/sudo.c:1116
+#: src/sesh.c:78 src/sudo.c:1088
 #, c-format
 msgid "unable to execute %s"
 msgstr ""
@@ -611,95 +612,95 @@ msgstr ""
 msgid "unexpected sudo mode 0x%x"
 msgstr ""
 
-#: src/sudo.c:416
+#: src/sudo.c:413
 msgid "unable to get group vector"
 msgstr ""
 
-#: src/sudo.c:468
+#: src/sudo.c:465
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr ""
 
-#: src/sudo.c:790
+#: src/sudo.c:762
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr ""
 
-#: src/sudo.c:793
+#: src/sudo.c:765
 #, c-format
 msgid ""
 "effective uid is not %d, is %s on a file system with the 'nosuid' option set "
 "or an NFS file system without root privileges?"
 msgstr ""
 
-#: src/sudo.c:799
+#: src/sudo.c:771
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr ""
 
-#: src/sudo.c:925
+#: src/sudo.c:897
 #, c-format
 msgid "unknown login class %s"
 msgstr ""
 
-#: src/sudo.c:938
+#: src/sudo.c:910
 msgid "unable to set user context"
 msgstr ""
 
-#: src/sudo.c:952
+#: src/sudo.c:924
 msgid "unable to set supplementary group IDs"
 msgstr ""
 
-#: src/sudo.c:959
+#: src/sudo.c:931
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:965
+#: src/sudo.c:937
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr ""
 
-#: src/sudo.c:972
+#: src/sudo.c:944
 msgid "unable to set process priority"
 msgstr ""
 
-#: src/sudo.c:980
+#: src/sudo.c:952
 #, c-format
 msgid "unable to change root to %s"
 msgstr ""
 
-#: src/sudo.c:993 src/sudo.c:999 src/sudo.c:1005
+#: src/sudo.c:965 src/sudo.c:971 src/sudo.c:977
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr ""
 
-#: src/sudo.c:1022
+#: src/sudo.c:994
 #, c-format
 msgid "unable to change directory to %s"
 msgstr ""
 
-#: src/sudo.c:1079
+#: src/sudo.c:1051
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr ""
 
-#: src/sudo.c:1136
+#: src/sudo.c:1108
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr ""
 
-#: src/sudo.c:1149
+#: src/sudo.c:1121
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr ""
 
-#: src/sudo.c:1161
+#: src/sudo.c:1133
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr ""
 
-#: src/sudo.c:1173
+#: src/sudo.c:1145
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr ""
