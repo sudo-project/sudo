@@ -22,14 +22,58 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
-#ifdef HAVE_STDLIB_H
+#ifdef STDC_HEADERS
 # include <stdlib.h>
-#endif
+# include <stddef.h>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif /* STDC_HEADERS */
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif /* HAVE_STRINGS_H */
 
 #include "missing.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "gettext.h"
+
+#ifdef HAVE_STRTONUM
+
+/*
+ * The OpenBSD strtonum error string too short to be translated sensibly.
+ * This wrapper just changes errstr as follows:
+ *  invalid -> invalid value
+ *  too large -> value too large
+ *  too small -> value too small
+ */
+long long
+rpl_strtonum(const char *str, long long minval, long long maxval,
+    const char **errstrp)
+{
+    long long retval;
+    const char *errstr;
+
+# undef strtonum
+    retval = strtonum(str, minval, maxval, &errstr);
+    if (errstr != NULL) {
+	if (errno == EINVAL) {
+	    errstr = N_("invalid value");
+	} else if (errno == ERANGE) {
+	    errstr = strcmp(errstr, "too large") == 0 ?
+		N_("value too large") : N_("value too small");
+	}
+    }
+    if (errstrp != NULL)
+	*errstrp = errstr;
+    return retval;
+}
+
+#else
 
 enum strtonum_err {
     STN_VALID,
@@ -42,7 +86,7 @@ enum strtonum_err {
  * Convert a string to a number in the range [minval, maxval]
  */
 long long
-strtonum(const char *str, long long minval, long long maxval,
+rpl_strtonum(const char *str, long long minval, long long maxval,
     const char **errstrp)
 {
     const unsigned char *ustr = (const unsigned char *)str;
@@ -136,20 +180,21 @@ done:
 	result = 0;
 	errno = EINVAL;
 	if (errstrp != NULL)
-	    *errstrp = N_("invalid");
+	    *errstrp = N_("invalid value");
 	break;
     case STN_TOOSMALL:
 	result = 0;
 	errno = ERANGE;
 	if (errstrp != NULL)
-	    *errstrp = N_("too small");
+	    *errstrp = N_("value too small");
 	break;
     case STN_TOOBIG:
 	result = 0;
 	errno = ERANGE;
 	if (errstrp != NULL)
-	    *errstrp = N_("too large");
+	    *errstrp = N_("value too large");
 	break;
     }
     return result;
 }
+#endif /* HAVE_STRTONUM */

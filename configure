@@ -18014,6 +18014,24 @@ esac
 
     fi
 fi
+# We wrap OpenBSD's strtonum() to get translatable error strings.
+for ac_func in strtonum
+do :
+  ac_fn_c_check_func "$LINENO" "strtonum" "ac_cv_func_strtonum"
+if test "x$ac_cv_func_strtonum" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_STRTONUM 1
+_ACEOF
+
+fi
+done
+
+case " $LIBOBJS " in
+  *" strtonum.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS strtonum.$ac_objext"
+ ;;
+esac
+
 if test X"$ac_cv_type_struct_timespec" != X"no"; then
     ac_fn_c_check_member "$LINENO" "struct stat" "st_mtim" "ac_cv_member_struct_stat_st_mtim" "$ac_includes_default"
 if test "x$ac_cv_member_struct_stat_st_mtim" = xyes; then :

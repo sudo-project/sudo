@@ -2415,6 +2415,9 @@ if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"
 	AC_LIBOBJ(snprintf)
     fi
 fi
+# We wrap OpenBSD's strtonum() to get translatable error strings.
+AC_CHECK_FUNCS(strtonum)
+AC_LIBOBJ(strtonum)
 if test X"$ac_cv_type_struct_timespec" != X"no"; then
     AC_CHECK_MEMBER([struct stat.st_mtim], [AC_DEFINE(HAVE_ST_MTIM)]
 	[AC_CHECK_MEMBER([struct stat.st_mtim.st__tim], AC_DEFINE(HAVE_ST__TIM))],

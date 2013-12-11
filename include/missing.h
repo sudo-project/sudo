@@ -475,7 +475,9 @@ char *strsignal(int);
 int sig2str(int, char *);
 #endif
 #ifndef HAVE_STRTONUM
-long long strtonum(const char *, long long, long long, const char **);
+long long rpl_strtonum(const char *, long long, long long, const char **);
+# undef strtonum
+# define strtonum rpl_strtonum
 #endif
 void initprogname(const char *);
 

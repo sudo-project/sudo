@@ -846,7 +846,7 @@ parse_logfile(char *logfile)
     li->tstamp = strtonum(cp, LLONG_MIN, LLONG_MAX, &errstr);
     if (errstr != NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "%s: timestamp %s is %s", logfile, cp, errstr);
+	    "%s: timestamp %s: %s", logfile, cp, errstr);
 	goto bad;
     }
 
@@ -885,14 +885,14 @@ parse_logfile(char *logfile)
 	li->rows = strtonum(cp, 1, INT_MAX, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"%s: tty rows %s is %s", logfile, cp, errstr);
+		"%s: tty rows %s: %s", logfile, cp, errstr);
 	}
 	if (ep != NULL) {
 	    cp = ep + 1;
 	    li->cols = strtonum(cp, 1, INT_MAX, &errstr);
 	    if (errstr != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "%s: tty cols %s is %s", logfile, cp, errstr);
+		    "%s: tty cols %s: %s", logfile, cp, errstr);
 	    }
 	}
     }

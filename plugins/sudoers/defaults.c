@@ -610,7 +610,7 @@ store_int(char *val, struct sudo_defs_types *def, int op)
 	i = strtonum(val, INT_MIN, INT_MAX, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"%s is %s", val, errstr);
+		"%s: %s", val, errstr);
 	    debug_return_bool(false);
 	}
 	def->sd_un.ival = i;
@@ -633,7 +633,7 @@ store_uint(char *val, struct sudo_defs_types *def, int op)
 	u = strtonum(val, 0, UINT_MAX, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"%s is %s", val, errstr);
+		"%s: %s", val, errstr);
 	    debug_return_bool(false);
 	}
 	/* XXX - should have uival */

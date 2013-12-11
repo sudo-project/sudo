@@ -449,7 +449,7 @@ get_process_ttyname(void)
 			dev_t tdev = strtonum(cp, INT_MIN, INT_MAX, &errstr);
 			if (errstr) {
 			    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-				"%s: tty device number %s", path, errstr);
+				"%s: tty device %s: %s", path, cp, errstr);
 			}
 			if (tdev > 0)
 			    tty = sudo_ttyname_dev(tdev);

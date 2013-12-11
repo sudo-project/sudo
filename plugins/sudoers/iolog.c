@@ -144,7 +144,7 @@ io_set_max_sessid(const char *maxval)
     if (errstr != NULL) {
 	if (errno != ERANGE) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"bad maxseq: %s is %s", maxval, errstr);
+		"bad maxseq: %s: %s", maxval, errstr);
 	    debug_return_bool(false);
 	}
 	/* Out of range, clamp to SESSID_MAX as documented. */

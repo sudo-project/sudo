@@ -51,13 +51,13 @@ atomode(const char *cp, const char **errstr)
     lval = strtol(cp, &ep, 8);
     if (ep == cp || *ep != '\0') {
 	if (errstr != NULL)
-	    *errstr = N_("invalid");
+	    *errstr = N_("invalid value");
 	errno = EINVAL;
 	debug_return_int(0);
     }
     if (lval < 0 || lval > 0777) {
 	if (errstr != NULL)
-	    *errstr = lval < 0 ? N_("too small") : N_("too large");
+	    *errstr = lval < 0 ? N_("value too small") : N_("value too large");
 	errno = ERANGE;
 	debug_return_int(0);
     }

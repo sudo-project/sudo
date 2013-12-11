@@ -1421,8 +1421,8 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 	    case CONF_INT:
 		*(int *)(cur->valp) = strtonum(value, INT_MIN, INT_MAX, &errstr);
 		if (errstr != NULL) {
-		    warningx(U_("%s: %s: value %s out of range)"),
-			path_ldap_conf, keyword, value);
+		    warningx(U_("%s: %s: %s: %s"),
+			path_ldap_conf, keyword, value, U_(errstr));
 		}
 		break;
 	    case CONF_STR:

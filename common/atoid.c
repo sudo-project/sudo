@@ -75,20 +75,20 @@ atoid(const char *p, const char *sep, char **endp, const char **errstr)
 	}
 	if (!valid) {
 	    if (errstr != NULL)
-		*errstr = N_("invalid");
+		*errstr = N_("invalid value");
 	    errno = EINVAL;
 	    goto done;
 	}
 	if ((errno == ERANGE && lval == LONG_MAX) || lval > INT_MAX) {
 	    errno = ERANGE;
 	    if (errstr != NULL)
-		*errstr = N_("too large");
+		*errstr = N_("value too large");
 	    goto done;
 	}
 	if ((errno == ERANGE && lval == LONG_MIN) || lval < INT_MIN) {
 	    errno = ERANGE;
 	    if (errstr != NULL)
-		*errstr = N_("too small");
+		*errstr = N_("value too small");
 	    goto done;
 	}
 	rval = (id_t)lval;
@@ -103,14 +103,14 @@ atoid(const char *p, const char *sep, char **endp, const char **errstr)
 	}
 	if (!valid) {
 	    if (errstr != NULL)
-		*errstr = N_("invalid");
+		*errstr = N_("invalid value");
 	    errno = EINVAL;
 	    goto done;
 	}
 	if ((errno == ERANGE && ulval == ULONG_MAX) || ulval > UINT_MAX) {
 	    errno = ERANGE;
 	    if (errstr != NULL)
-		*errstr = N_("too large");
+		*errstr = N_("value too large");
 	    goto done;
 	}
 	rval = (id_t)ulval;
