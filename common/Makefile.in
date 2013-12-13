@@ -77,7 +77,7 @@ CONF_TEST_OBJS = conf_test.lo locale_stub.lo
 
 HLTQ_TEST_OBJS = hltq_test.lo locale_stub.lo
 
-all: libcommon.la
+all: libsudo_util.la
 
 Makefile: $(srcdir)/Makefile.in
 	(cd $(top_builddir) && ./config.status --file common/Makefile)
@@ -87,17 +87,17 @@ Makefile: $(srcdir)/Makefile.in
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $<
 
-libcommon.la: $(LTOBJS)
+libsudo_util.la: $(LTOBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LTOBJS) -no-install
 
-conf_test: $(CONF_TEST_OBJS) libcommon.la
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(CONF_TEST_OBJS) libcommon.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+conf_test: $(CONF_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(CONF_TEST_OBJS) libsudo_util.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
-parseln_test: $(PARSELN_TEST_OBJS) libcommon.la
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(PARSELN_TEST_OBJS) libcommon.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+parseln_test: $(PARSELN_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(PARSELN_TEST_OBJS) libsudo_util.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
-hltq_test: $(HLTQ_TEST_OBJS) libcommon.la
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(HLTQ_TEST_OBJS) libcommon.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+hltq_test: $(HLTQ_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(HLTQ_TEST_OBJS) libsudo_util.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 pre-install:
 

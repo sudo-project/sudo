@@ -34,7 +34,7 @@ LIBTOOL = @LIBTOOL@ @LT_STATIC@
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 
 # Libraries
-LT_LIBS = $(top_builddir)/common/libcommon.la $(LIBOBJDIR)libreplace.la
+LT_LIBS = $(top_builddir)/common/libsudo_util.la $(LIBOBJDIR)libreplace.la
 LIBS = @LIBS@ @SUDO_LIBS@ @GETGROUPS_LIB@ @NET_LIBS@ @LIBINTL@ $(LT_LIBS) @LIBDL@
 
 # C preprocessor flags
@@ -126,7 +126,7 @@ libsudo_noexec.la: sudo_noexec.lo
 sesh: $(SESH_OBJS) @LIBINTL@ $(LT_LIBS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(SESH_OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) @LIBINTL@ $(LIBS)
 
-check_ttyname: $(CHECK_TTYNAME_OBJS) $(top_builddir)/common/libcommon.la $(LIBOBJDIR)libreplace.la
+check_ttyname: $(CHECK_TTYNAME_OBJS) $(top_builddir)/common/libsudo_util.la $(LIBOBJDIR)libreplace.la
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(CHECK_TTYNAME_OBJS) $(TEST_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LIBS)
 
 pre-install:
