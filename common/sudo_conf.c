@@ -55,6 +55,7 @@
 #include "sudo_plugin.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
+#include "sudo_util.h"
 #include "secure_path.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
@@ -65,8 +66,6 @@
 #else
 # define ROOT_UID	0
 #endif
-
-extern bool atobool(const char *str); /* atobool.c */
 
 struct sudo_conf_table {
     const char *name;

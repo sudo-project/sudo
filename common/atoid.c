@@ -45,6 +45,7 @@
 
 #include "missing.h"
 #include "sudo_debug.h"
+#include "sudo_util.h"
 
 /*
  * Parse a uid/gid in string form.

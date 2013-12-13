@@ -45,6 +45,7 @@
 #include <grp.h>
 
 #include "missing.h"
+#include "sudo_util.h"
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048
@@ -63,8 +64,6 @@ void myendgrent(void);
 struct group *mygetgrent(void);
 struct group *mygetgrnam(const char *);
 struct group *mygetgrgid(gid_t);
-
-extern id_t atoid(const char *str, const char *sep, char **endp, const char **errstr);
 
 void
 mysetgrfile(const char *file)

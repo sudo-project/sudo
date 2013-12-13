@@ -35,6 +35,7 @@
 #include "alloc.h"
 #include "fatal.h"
 #include "sudo_debug.h"
+#include "sudo_util.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "gettext.h"

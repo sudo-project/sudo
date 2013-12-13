@@ -52,9 +52,10 @@
 #include <grp.h>
 #include <pwd.h>
 
-#include "sudo_plugin.h"
 #include "missing.h"
 #include "sudo_dso.h"
+#include "sudo_plugin.h"
+#include "sudo_util.h"
 
 /*
  * Sudoers group plugin that does group name-based lookups using the system
@@ -72,8 +73,6 @@ static sysgroup_getgrnam_t sysgroup_getgrnam;
 static sysgroup_getgrgid_t sysgroup_getgrgid;
 static sysgroup_gr_delref_t sysgroup_gr_delref;
 static bool need_setent;
-
-extern id_t atoid(const char *str, const char *sep, char **endp, const char **errstr);
 
 static int
 sysgroup_init(int version, sudo_printf_t sudo_printf, char *const argv[])

@@ -52,6 +52,7 @@
 #include <fcntl.h>
 
 #include "missing.h"
+#include "sudo_util.h"
 
 #if defined(HAVE_GETPROGNAME) || defined(HAVE___PROGNAME)
 

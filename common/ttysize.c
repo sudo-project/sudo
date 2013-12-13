@@ -36,6 +36,7 @@
 
 #include "missing.h"
 #include "sudo_debug.h"
+#include "sudo_util.h"
 
 /* Compatibility with older tty systems. */
 #if !defined(TIOCGWINSZ) && defined(TIOCGSIZE)

@@ -37,6 +37,7 @@
 
 #include "missing.h"
 #include "sudo_debug.h"
+#include "sudo_util.h"
 
 int
 sudo_setgroups(int ngids, const GETGROUPS_T *gids)

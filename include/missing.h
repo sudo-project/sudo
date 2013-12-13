@@ -479,6 +479,5 @@ long long rpl_strtonum(const char *, long long, long long, const char **);
 # undef strtonum
 # define strtonum rpl_strtonum
 #endif
-void initprogname(const char *);
 
 #endif /* _SUDO_MISSING_H */

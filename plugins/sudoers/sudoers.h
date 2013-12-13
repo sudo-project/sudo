@@ -40,6 +40,7 @@
 #include "sudo_nss.h"
 #include "sudo_plugin.h"
 #include "sudo_debug.h"
+#include "sudo_util.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudoers"
 #include "gettext.h"
@@ -315,15 +316,6 @@ void sudo_setspent(void);
 /* timestr.c */
 char *get_timestr(time_t, int);
 
-/* atobool.c */
-int atobool(const char *str);
-
-/* atoid.c */
-int atoid(const char *str, const char *sep, char **endp, const char **errstr);
-
-/* atomode.c */
-int atomode(const char *cp, const char **errstr);
-
 /* boottime.c */
 int get_boottime(struct timeval *);
 
@@ -352,9 +344,6 @@ int sudoers_hook_putenv(char *string, void *closure);
 int sudoers_hook_setenv(const char *name, const char *value, int overwrite, void *closure);
 int sudoers_hook_unsetenv(const char *name, void *closure);
 
-/* fmt_string.c */
-char *fmt_string(const char *, const char *);
-
 /* sudoers.c */
 FILE *open_sudoers(const char *, bool, bool *);
 int sudoers_policy_init(void *info, char * const envp[]);
@@ -367,21 +356,11 @@ int sudoers_policy_exec_setup(char *argv[], char *envp[], mode_t cmnd_umask, cha
 extern const char *path_ldap_conf;
 extern const char *path_ldap_secret;
 
-/* aix.c */
-void aix_restoreauthdb(void);
-void aix_setauthdb(char *user);
-
 /* group_plugin.c */
 int group_plugin_load(char *plugin_info);
 void group_plugin_unload(void);
 int group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd);
-
-/* setgroups.c */
-int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
-
-/* gidlist.c */
-int parse_gid_list(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
 
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;

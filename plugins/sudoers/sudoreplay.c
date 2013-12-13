@@ -100,6 +100,7 @@
 #include "sudo_conf.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
+#include "sudo_util.h"
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048
@@ -184,10 +185,7 @@ static struct option long_opts[] = {
 };
 
 extern char *get_timestr(time_t, int);
-extern int term_raw(int, int);
-extern int term_restore(int, int);
 extern time_t get_date(char *);
-extern void get_ttysize(int *rowp, int *colp);
 
 static int list_sessions(int, char **, const char *, const char *, const char *);
 static int open_io_fd(char *path, int len, struct io_log_file *iol);

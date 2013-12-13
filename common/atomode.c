@@ -34,6 +34,7 @@
 
 #include "missing.h"
 #include "sudo_debug.h"
+#include "sudo_util.h"
 
 /*
  * Parse an octal file mode in the range [0, 0777].

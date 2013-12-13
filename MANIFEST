@@ -154,6 +154,7 @@ include/sudo_debug.h
 include/sudo_dso.h
 include/sudo_event.h
 include/sudo_plugin.h
+include/sudo_util.h
 indent.pro
 install-sh
 ltmain.sh
