@@ -822,6 +822,7 @@ parse_logfile(char *logfile)
     if (getline(&buf, &bufsize, fp) == -1 ||
 	getline(&li->cwd, &cwdsize, fp) == -1 ||
 	getline(&li->cmd, &cmdsize, fp) == -1) {
+	warning(U_("%s: invalid log file"), logfile);
 	goto bad;
     }
 
@@ -838,32 +839,40 @@ parse_logfile(char *logfile)
     cp = buf;
 
     /* timestamp */
-    if ((ep = strchr(cp, ':')) == NULL)
+    if ((ep = strchr(cp, ':')) == NULL) {
+	warning(U_("%s: time stamp field is missing"), logfile);
 	goto bad;
+    }
     *ep = '\0';
-    li->tstamp = strtonum(cp, LLONG_MIN, LLONG_MAX, &errstr);
+    li->tstamp = sizeof(time_t) == 4 ? strtonum(cp, INT_MIN, INT_MAX, &errstr) :
+	strtonum(cp, LLONG_MIN, LLONG_MAX, &errstr);
     if (errstr != NULL) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "%s: timestamp %s: %s", logfile, cp, errstr);
+	warning(U_("%s: time stamp %s: %s"), logfile, cp, errstr);
 	goto bad;
     }
 
     /* user */
     cp = ep + 1;
-    if ((ep = strchr(cp, ':')) == NULL)
+    if ((ep = strchr(cp, ':')) == NULL) {
+	warning(U_("%s: user field is missing"), logfile);
 	goto bad;
+    }
     li->user = estrndup(cp, (size_t)(ep - cp));
 
     /* runas user */
     cp = ep + 1;
-    if ((ep = strchr(cp, ':')) == NULL)
+    if ((ep = strchr(cp, ':')) == NULL) {
+	warning(U_("%s: runas user field is missing"), logfile);
 	goto bad;
+    }
     li->runas_user = estrndup(cp, (size_t)(ep - cp));
 
     /* runas group */
     cp = ep + 1;
-    if ((ep = strchr(cp, ':')) == NULL)
+    if ((ep = strchr(cp, ':')) == NULL) {
+	warning(U_("%s: runas group field is missing"), logfile);
 	goto bad;
+    }
     if (cp != ep)
 	li->runas_group = estrndup(cp, (size_t)(ep - cp));
 
