@@ -40,6 +40,7 @@
 
 #include "missing.h"
 #include "sudo_dso.h"
+#include "sudo_util.h"
 #include "fatal.h"
 
 #ifndef LINE_MAX

@@ -41,6 +41,7 @@
 #include "missing.h"
 #include "fatal.h"
 #include "sudo_plugin.h"
+#include "sudo_util.h"
 
 extern void writeln_wrap(FILE *fp, char *line, size_t len, size_t maxlen);
 
