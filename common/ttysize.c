@@ -33,6 +33,7 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <termios.h>
+#include <limits.h>
 
 #include "missing.h"
 #include "sudo_debug.h"
