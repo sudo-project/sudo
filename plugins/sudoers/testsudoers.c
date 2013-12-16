@@ -102,13 +102,6 @@ extern int (*trace_print)(const char *msg);
 struct sudo_user sudo_user;
 struct passwd *list_pw;
 static char *runas_group, *runas_user;
-extern int errorlineno;
-extern bool parse_error;
-extern char *errorfile;
-
-/* For getopt(3) */
-extern char *optarg;
-extern int optind;
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
 extern char *malloc_options;

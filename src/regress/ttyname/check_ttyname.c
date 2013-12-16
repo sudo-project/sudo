@@ -41,6 +41,7 @@
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
+#include "sudo_util.h"
 
 __dso_public int main(int argc, char *argv[]);
 

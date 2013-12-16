@@ -79,12 +79,9 @@
 #include "sha2.h"
 #include "secure_path.h"
 
-extern YYSTYPE sudoerslval;
-extern bool parse_error;
-extern bool sudoers_warnings;
-int sudolineno;
-int last_token;
-char *sudoers;
+int sudolineno;			/* current sudoers line number. */
+int last_token;			/* last token that was parsed. */
+char *sudoers;			/* sudoers file being parsed. */
 
 /* Default sudoers path, mode and owner (may be set via sudo.conf) */
 const char *sudoers_file = _PATH_SUDOERS;

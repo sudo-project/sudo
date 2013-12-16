@@ -71,13 +71,10 @@
 /*
  * Globals
  */
-extern int sudolineno;
-extern int last_token;
-extern char *sudoers;
 bool sudoers_warnings = true;
 bool parse_error = false;
 int errorlineno = -1;
-char *errorfile = NULL;
+const char *errorfile = NULL;
 
 struct defaults_list defaults = TAILQ_HEAD_INITIALIZER(defaults);
 struct userspec_list userspecs = TAILQ_HEAD_INITIALIZER(userspecs);

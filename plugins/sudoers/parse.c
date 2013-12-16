@@ -64,14 +64,6 @@ struct sudo_nss sudo_nss_file = {
 };
 
 /*
- * Parser externs.
- */
-extern FILE *sudoersin;
-extern char *errorfile;
-extern int errorlineno;
-extern bool parse_error;
-
-/*
  * Local prototypes.
  */
 static int display_bound_defaults(int dtype, struct lbuf *lbuf);

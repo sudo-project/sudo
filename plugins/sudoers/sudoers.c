@@ -100,9 +100,6 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 int long_list;
 uid_t timestamp_uid;
-extern int errorlineno;
-extern bool parse_error;
-extern char *errorfile;
 #ifdef HAVE_BSD_AUTH_H
 char *login_style;
 #endif /* HAVE_BSD_AUTH_H */

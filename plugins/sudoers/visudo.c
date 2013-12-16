@@ -114,19 +114,10 @@ static void help(void) __attribute__((__noreturn__));
 static void usage(int);
 static void visudo_cleanup(void);
 
-extern bool export_sudoers(char *, bool, bool);
+extern bool export_sudoers(const char *, bool, bool);
 
 extern void sudoerserror(const char *);
 extern void sudoersrestart(FILE *);
-
-/*
- * External globals exported by the parser
- */
-extern struct rbtree *aliases;
-extern FILE *sudoersin;
-extern char *sudoers, *errorfile;
-extern int errorlineno;
-extern bool parse_error;
 
 /*
  * Globals

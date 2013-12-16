@@ -44,14 +44,6 @@
 #include <gram.h>
 
 /*
- * External globals exported by the parser
- */
-extern FILE *sudoersin;
-extern char *sudoers, *errorfile;
-extern int errorlineno;
-extern bool parse_error;
-
-/*
  * JSON values may be of the following types.
  */
 enum json_value_type {

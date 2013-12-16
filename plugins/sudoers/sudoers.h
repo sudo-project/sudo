@@ -269,13 +269,22 @@ int pam_prep_user(struct passwd *);
 
 /* gram.y */
 int sudoersparse(void);
+extern char *login_style;
+extern const char *errorfile;
+extern int errorlineno;
+extern bool parse_error;
+extern bool sudoers_warnings;
 
 /* toke.l */
 YY_DECL;
+extern FILE *sudoersin;
 extern const char *sudoers_file;
+extern char *sudoers;
 extern mode_t sudoers_mode;
 extern uid_t sudoers_uid;
 extern gid_t sudoers_gid;
+extern int sudolineno;
+extern int last_token;
 
 /* defaults.c */
 void dump_defaults(void);
