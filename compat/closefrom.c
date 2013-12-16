@@ -31,6 +31,7 @@
 # endif
 #endif /* STDC_HEADERS */
 #include <fcntl.h>
+#include <limits.h>
 #ifdef HAVE_PSTAT_GETPROC
 # include <sys/param.h>
 # include <sys/pstat.h>
@@ -55,15 +56,13 @@
 
 #include "missing.h"
 
-#ifndef HAVE_FCNTL_CLOSEM
-# ifndef HAVE_DIRFD
-#   define closefrom_fallback	closefrom
-# endif
+#if defined(HAVE_FCNTL_CLOSEM) && !defined(HAVE_DIRFD)
+# define closefrom	closefrom_fallback
 #endif
 
 /*
  * Close all file descriptors greater than or equal to lowfd.
- * This is the expensive (ballback) method.
+ * This is the expensive (fallback) method.
  */
 void
 closefrom_fallback(int lowfd)
@@ -85,7 +84,7 @@ closefrom_fallback(int lowfd)
 
     for (fd = lowfd; fd < maxfd; fd++) {
 #ifdef __APPLE__
-	/* Avoid potential crash with libdispatch when we close its fds. */
+	/* Avoid potential libdispatch crash when we close its fds. */
 	(void) fcntl((int) fd, F_SETFD, FD_CLOEXEC);
 #else
 	(void) close((int) fd);
@@ -122,17 +121,27 @@ closefrom(int lowfd)
 void
 closefrom(int lowfd)
 {
-    struct dirent *dent;
-    const char *errstr;
+    char path[PATH_MAX];
     DIR *dirp;
-    int fd;
 
-    /* Use /proc/self/fd directory if it exists. */
-    if ((dirp = opendir("/proc/self/fd")) != NULL) {
+    /* Use /proc/$$/fd (or /dev/fd on FreeBSD) if it exists. */
+# if defined(__FreeBSD__) || defined(__APPLE__)
+    snprintf(path, sizeof(path), "/dev/fd");
+# else
+    snprintf(path, sizeof(path), "/proc/%u/fd", (unsigned int)getpid());
+# endif
+    if ((dirp = opendir(path)) != NULL) {
+	struct dirent *dent;
 	while ((dent = readdir(dirp)) != NULL) {
-	    fd = strtonum(dent->d_name, lowfd, INT_MAX, &errstr);
+	    const char *errstr;
+	    int fd = strtonum(dent->d_name, lowfd, INT_MAX, &errstr);
 	    if (errstr == NULL && fd != dirfd(dirp)) {
+# ifdef __APPLE__
+		/* Avoid potential libdispatch crash when we close its fds. */
+		(void) fcntl(fd, F_SETFD, FD_CLOEXEC);
+# else
 		(void) close(fd);
+# endif
 	    }
 	}
 	(void) closedir(dirp);
