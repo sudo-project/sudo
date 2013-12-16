@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "November 15, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "December 16, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -30,8 +30,9 @@
 .SH "SYNOPSIS"
 .HP 7n
 \fBvisudo\fR
-[\fB\-chqsVx\fR]
+[\fB\-chqsV\fR]
 [\fB\-f\fR\ \fIsudoers\fR]
+[\fB\-x\fR\ \fIfile\fR]
 .SH "DESCRIPTION"
 \fBvisudo\fR
 edits the
@@ -204,15 +205,23 @@ and
 \fIsudoers\fR
 grammar versions and exit.
 .TP 12n
-\fB\-x\fR, \fB\--export\fR
+\fB\-x\fR \fIfile\fR, \fB\--export\fR=\fIfile\fR
 Export
 \fIsudoers\fR
-in JSON format to the standard output.
-The result is intended to be easier for third-party applications
-to parse that the normal
+in JSON format and write it to
+\fIfile\fR.
+If
+\fIfile\fR
+is
+`-',
+the exported
+\fIsudoers\fR
+policy will to be written to the standard output.
+The exported format is intended to be easier for third-party
+applications to parse that the traditional
 \fIsudoers\fR
 format.
-The various values have explicit types which removes some of the
+The various values have explicit types which removes much of the
 ambiguity of the
 \fIsudoers\fR
 format.

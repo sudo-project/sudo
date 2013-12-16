@@ -4,7 +4,7 @@ NNAAMMEE
      vviissuuddoo - edit the sudoers file
 
 SSYYNNOOPPSSIISS
-     vviissuuddoo [--cchhqqssVVxx] [--ff _s_u_d_o_e_r_s]
+     vviissuuddoo [--cchhqqssVV] [--ff _s_u_d_o_e_r_s] [--xx _f_i_l_e]
 
 DDEESSCCRRIIPPTTIIOONN
      vviissuuddoo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous to vipw(1m).
@@ -72,12 +72,14 @@ DDEESSCCRRIIPPTTIIOONN
      --VV, ----vveerrssiioonn
                  Print the vviissuuddoo and _s_u_d_o_e_r_s grammar versions and exit.
 
-     --xx, ----eexxppoorrtt
-                 Export _s_u_d_o_e_r_s in JSON format to the standard output.  The
-                 result is intended to be easier for third-party applications
-                 to parse that the normal _s_u_d_o_e_r_s format.  The various values
-                 have explicit types which removes some of the ambiguity of
-                 the _s_u_d_o_e_r_s format.
+     --xx _f_i_l_e, ----eexxppoorrtt=_f_i_l_e
+                 Export _s_u_d_o_e_r_s in JSON format and write it to _f_i_l_e.  If _f_i_l_e
+                 is `-', the exported _s_u_d_o_e_r_s policy will to be written to the
+                 standard output.  The exported format is intended to be
+                 easier for third-party applications to parse that the
+                 traditional _s_u_d_o_e_r_s format.  The various values have explicit
+                 types which removes much of the ambiguity of the _s_u_d_o_e_r_s
+                 format.
 
 EENNVVIIRROONNMMEENNTT
      The following environment variables may be consulted depending on the
@@ -154,4 +156,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.9                     November 15, 2013                    Sudo 1.8.9
+Sudo 1.8.9                     December 16, 2013                    Sudo 1.8.9
