@@ -16115,21 +16115,6 @@ $as_echo "#define gid_t int" >>confdefs.h
 
 fi
 
-ac_fn_c_check_type "$LINENO" "__signed char" "ac_cv_type___signed_char" "$ac_includes_default"
-if test "x$ac_cv_type___signed_char" = xyes; then :
-
-else
-  ac_fn_c_check_type "$LINENO" "signed char" "ac_cv_type_signed_char" "$ac_includes_default"
-if test "x$ac_cv_type_signed_char" = xyes; then :
-  $as_echo "#define __signed signed" >>confdefs.h
-
-else
-  $as_echo "#define __signed /**/" >>confdefs.h
-
-fi
-
-fi
-
 ac_fn_c_check_type "$LINENO" "sig_atomic_t" "ac_cv_type_sig_atomic_t" "#include <sys/types.h>
 #include <signal.h>
 "
@@ -24326,7 +24311,6 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
-
 
 
 

@@ -53,11 +53,11 @@ struct sudo_command {
  * Possible values: true, false, IMPLIED, UNSPEC.
  */
 struct cmndtag {
-    __signed int nopasswd: 3;
-    __signed int noexec: 3;
-    __signed int setenv: 3;
-    __signed int log_input: 3;
-    __signed int log_output: 3;
+    int nopasswd: 3;
+    int noexec: 3;
+    int setenv: 3;
+    int log_input: 3;
+    int log_output: 3;
 };
 
 /*

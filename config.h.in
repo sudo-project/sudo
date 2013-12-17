@@ -1052,10 +1052,6 @@
    __func__ */
 #undef __func__
 
-/* Define to `signed' or nothing if compiler does not support a signed type
-   qualifier. */
-#undef __signed
-
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
 
