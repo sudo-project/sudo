@@ -31,7 +31,6 @@
 # endif
 #endif /* STDC_HEADERS */
 #include <fcntl.h>
-#include <limits.h>
 #ifdef HAVE_PSTAT_GETPROC
 # include <sys/param.h>
 # include <sys/pstat.h>
@@ -121,14 +120,14 @@ closefrom(int lowfd)
 void
 closefrom(int lowfd)
 {
-    char path[PATH_MAX];
+    const char *path;
     DIR *dirp;
 
-    /* Use /proc/$$/fd (or /dev/fd on FreeBSD) if it exists. */
+    /* Use /proc/self/fd (or /dev/fd on FreeBSD) if it exists. */
 # if defined(__FreeBSD__) || defined(__APPLE__)
-    snprintf(path, sizeof(path), "/dev/fd");
+    path = "/dev/fd";
 # else
-    snprintf(path, sizeof(path), "/proc/%u/fd", (unsigned int)getpid());
+    path = "/proc/self/fd";
 # endif
     if ((dirp = opendir(path)) != NULL) {
 	struct dirent *dent;
