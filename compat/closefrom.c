@@ -31,6 +31,7 @@
 # endif
 #endif /* STDC_HEADERS */
 #include <fcntl.h>
+#include <limits.h>
 #ifdef HAVE_PSTAT_GETPROC
 # include <sys/param.h>
 # include <sys/pstat.h>
