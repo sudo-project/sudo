@@ -35,6 +35,7 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <limits.h>
 
 #define SUDO_ERROR_WRAP 0
 
