@@ -94,18 +94,6 @@ enum word_type {
 };
 
 /*
- * SUDO_DIGEST_* number to name mapping.
- * XXX - should go somewhere else.
- */
-static const char *digest_names[] = {
-    "sha224",
-    "sha256",
-    "sha384",
-    "sha512",
-    "invalid digest"
-};
-
-/*
  * Print "indent" number of blank characters.
  */
 static void
@@ -250,21 +238,33 @@ static void
 print_command_json(FILE *fp, struct sudo_command *c, int indent, bool last_one)
 {
     struct json_value value;
-    const char *digest_type;
+    const char *digest_name;
     debug_decl(print_command_json, SUDO_DEBUG_UTIL)
 
     printstr_json(fp, "{", NULL, NULL, indent);
     if (c->digest != NULL) {
 	putc('\n', fp);
 	indent += 4;
-	if (c->digest->digest_type < SUDO_DIGEST_INVALID) {
-	    digest_type = digest_names[c->digest->digest_type];
-	} else {
-	    digest_type = digest_names[SUDO_DIGEST_INVALID];
+	switch (c->digest->digest_type) {
+	case SUDO_DIGEST_SHA224:
+	    digest_name = "sha224";
+	    break;
+	case SUDO_DIGEST_SHA256:
+	    digest_name = "sha256";
+	    break;
+	case SUDO_DIGEST_SHA384:
+	    digest_name = "sha384";
+	    break;
+	case SUDO_DIGEST_SHA512:
+	    digest_name = "sha512";
+	    break;
+	default:
+	    digest_name = "invalid digest";
+	    break;
 	}
 	value.type = JSON_STRING;
 	value.u.string = c->digest->digest_str;
-	print_pair_json(fp, NULL, digest_type, &value, ",\n", indent);
+	print_pair_json(fp, NULL, digest_name, &value, ",\n", indent);
     } else {
 	putc(' ', fp);
 	indent = 0;
