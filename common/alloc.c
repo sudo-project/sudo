@@ -46,6 +46,7 @@
 #ifdef HAVE_INTTYPES_H
 # include <inttypes.h>
 #endif
+#include <limits.h>
 
 #include "missing.h"
 #include "alloc.h"
