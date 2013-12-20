@@ -407,6 +407,7 @@ src/locale_stub.c
 src/net_ifs.c
 src/openbsd.c
 src/parse_args.c
+src/preserve_fds.c
 src/po/README
 src/po/cs.mo
 src/po/cs.po

@@ -143,7 +143,7 @@ static int fork_cmnd(struct command_details *details, int sv[2])
 	close(signal_pipe[0]);
 	close(signal_pipe[1]);
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
-	exec_cmnd(details, &cstat, &sv[1]);
+	exec_cmnd(details, &cstat, sv[1]);
 	send(sv[1], &cstat, sizeof(cstat), 0);
 	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);
 	_exit(1);
@@ -161,7 +161,7 @@ static int fork_cmnd(struct command_details *details, int sv[2])
  */
 void
 exec_cmnd(struct command_details *details, struct command_status *cstat,
-    int *errfd)
+    int errfd)
 {
     debug_decl(exec_cmnd, SUDO_DEBUG_EXEC)
 
@@ -171,16 +171,15 @@ exec_cmnd(struct command_details *details, struct command_status *cstat,
 	sudo_debug_execve(SUDO_DEBUG_INFO, details->command,
 	    details->argv, details->envp);
 	if (details->closefrom >= 0) {
-	    int maxfd = details->closefrom;
-	    /* Preserve back channel if present. */
-	    if (errfd != NULL) {
-		dup2(*errfd, maxfd);
-		(void)fcntl(maxfd, F_SETFD, FD_CLOEXEC);
-		*errfd = maxfd++;
-	    }
-	    if (sudo_debug_fd_set(maxfd) != -1)
-		maxfd++;
-	    closefrom(maxfd);
+	    /* Preserve debug fd and error pipe as needed. */
+	    int debug_fd = sudo_debug_fd_get();
+	    if (debug_fd != -1)
+		add_preserved_fd(&details->preserved_fds, debug_fd);
+	    if (errfd != -1)
+		add_preserved_fd(&details->preserved_fds, errfd);
+
+	    /* Close all fds except those explicitly preserved. */
+	    closefrom_except(details->closefrom, &details->preserved_fds);
 	}
 #ifdef HAVE_SELINUX
 	if (ISSET(details->flags, CD_RBAC_ENABLED)) {
@@ -382,7 +381,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     } else if (!ISSET(details->flags, CD_SET_TIMEOUT) &&
 	policy_plugin.u.policy->close == NULL) {
 	/* If no I/O logging, timeout or policy close we can exec directly. */
-	exec_cmnd(details, cstat, NULL);
+	exec_cmnd(details, cstat, -1);
 	goto done;
     }
 

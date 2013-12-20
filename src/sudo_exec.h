@@ -62,7 +62,7 @@ struct command_status;
 int fork_pty(struct command_details *details, int sv[], sigset_t *omask);
 int suspend_parent(int signo);
 void exec_cmnd(struct command_details *details, struct command_status *cstat,
-    int *errfd);
+    int errfd);
 void add_io_events(struct sudo_event_base *evbase);
 #ifdef SA_SIGINFO
 void handler(int s, siginfo_t *info, void *context);

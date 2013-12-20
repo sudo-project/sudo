@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDO_PLUGIN" "5" "December 4, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+.TH "SUDO_PLUGIN" "5" "December 20, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -913,6 +913,13 @@ on BSD systems.
 .TP 6n
 noexec=bool
 If set, prevent the command from executing other programs.
+.TP 6n
+preserve_fds=list
+A comma-separated list of file descriptors that should be
+preserved, regardless of the value of the
+\fIclosefrom\fR
+setting.
+Only available starting with API version 1.5.
 .TP 6n
 preserve_groups=bool
 If set,
@@ -2598,6 +2605,12 @@ The
 \fIremote_host\fR
 entry was added to the
 \fRsettings\fR
+list.
+.TP 6n
+Version 1.5 (sudo 1.8.9)
+The
+entry was added to the
+\fRcommand_info\fR
 list.
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),

@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd December 4, 2013
+.Dd December 20, 2013
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -808,6 +808,12 @@ The nice value, if specified, overrides the priority associated with the
 on BSD systems.
 .It noexec=bool
 If set, prevent the command from executing other programs.
+.It preserve_fds=list
+A comma-separated list of file descriptors that should be
+preserved, regardless of the value of the
+.Em closefrom
+setting.
+Only available starting with API version 1.5.
 .It preserve_groups=bool
 If set,
 .Nm sudo
@@ -2252,6 +2258,12 @@ The
 .Em remote_host
 entry was added to the
 .Li settings
+list.
+.It Version 1.5 (sudo 1.8.9)
+The
+.em preserve_fds
+entry was added to the
+.Li command_info
 list.
 .El
 .Sh SEE ALSO

@@ -536,6 +536,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 
     memset(details, 0, sizeof(*details));
     details->closefrom = -1;
+    details->preserved_fds.maxfd = -1;
 
 #define SET_STRING(s, n) \
     if (strncmp(s, info[i], sizeof(s) - 1) == 0 && info[i][sizeof(s) - 1]) { \
@@ -588,6 +589,11 @@ command_info_to_details(char * const info[], struct command_details *details)
 		if (strncmp("preserve_groups=", info[i], sizeof("preserve_groups=") - 1) == 0) {
 		    if (atobool(info[i] + sizeof("preserve_groups=") - 1) == true)
 			SET(details->flags, CD_PRESERVE_GROUPS);
+		    break;
+		}
+		if (strncmp("preserve_fds=", info[i], sizeof("preserve_fds=") - 1) == 0) {
+		    parse_preserved_fds(&details->preserved_fds,
+			info[i] + sizeof("preserve_fds=") - 1);
 		    break;
 		}
 		break;

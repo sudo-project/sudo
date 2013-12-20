@@ -563,18 +563,10 @@ sudo_debug_execve2(int level, const char *path, char *const argv[], char *const 
 }
 
 /*
- * Dup sudo_debug_fd to the specified value so we don't
- * close it when calling closefrom().
+ * Getter for the debug descriptor.
  */
 int
-sudo_debug_fd_set(int fd)
+sudo_debug_fd_get(void)
 {
-    if (sudo_debug_fd != -1 && fd != sudo_debug_fd) {
-	if (dup2(sudo_debug_fd, fd) == -1)
-	    return -1;
-	(void)fcntl(fd, F_SETFD, FD_CLOEXEC);
-	close(sudo_debug_fd);
-	sudo_debug_fd = fd;
-    }
     return sudo_debug_fd;
 }

@@ -99,7 +99,7 @@ static struct io_buffer_list iobufs;
 static void del_io_events(void);
 static int exec_monitor(struct command_details *details, int backchannel);
 static void exec_pty(struct command_details *details,
-    struct command_status *cstat, int *errfd);
+    struct command_status *cstat, int errfd);
 static void sigwinch(int s);
 static void sync_ttysize(int src, int dst);
 static void deliver_signal(pid_t pid, int signo, bool from_parent);
@@ -1282,7 +1282,7 @@ exec_monitor(struct command_details *details, int backchannel)
 	restore_signals();
 
 	/* setup tty and exec command */
-	exec_pty(details, &cstat, &errpipe[1]);
+	exec_pty(details, &cstat, errpipe[1]);
 	ignore_result(write(errpipe[1], &cstat, sizeof(cstat)));
 	_exit(1);
     }
@@ -1375,7 +1375,7 @@ bad:
  */
 static void
 exec_pty(struct command_details *details,
-    struct command_status *cstat, int *errfd)
+    struct command_status *cstat, int errfd)
 {
     pid_t self = getpid();
     debug_decl(exec_pty, SUDO_DEBUG_EXEC);

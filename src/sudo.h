@@ -122,6 +122,11 @@ struct user_details {
 #define CD_SET_UTMP		0x2000
 #define CD_EXEC_BG		0x4000
 
+struct preserved_fds {
+    int maxfd;
+    fd_set *fds;
+};
+
 struct command_details {
     uid_t uid;
     uid_t euid;
@@ -133,6 +138,7 @@ struct command_details {
     int ngroups;
     int closefrom;
     int flags;
+    struct preserved_fds preserved_fds;
     struct passwd *pw;
     GETGROUPS_T *groups;
     const char *command;
@@ -239,5 +245,10 @@ void save_signals(void);
 
 /* preload.c */
 void preload_static_symbols(void);
+
+/* preserve_fds.c */
+void add_preserved_fd(struct preserved_fds *pfds, int fd);
+void closefrom_except(int startfd, struct preserved_fds *pfds);
+void parse_preserved_fds(struct preserved_fds *pfds, const char *fdstr);
 
 #endif /* _SUDO_SUDO_H */
