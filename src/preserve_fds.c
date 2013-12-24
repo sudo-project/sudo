@@ -16,13 +16,7 @@
 
 #include <config.h>
 
-#include <sys/param.h>          /* for howmany() on Linux */
-#ifdef HAVE_SYS_SYSMACROS_H
-# include <sys/sysmacros.h>     /* for howmany() on Solaris */
-#endif
-#ifdef HAVE_SYS_SELECT_H
-# include <sys/select.h>	/* for FD_* macros */
-#endif /* HAVE_SYS_SELECT_H */
+#include <sys/types.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -53,21 +47,62 @@
 /*
  * Add an fd to preserve.
  */
-void
-add_preserved_fd(struct preserved_fds *pfds, int fd)
+int
+add_preserved_fd(struct preserved_fd_list *pfds, int fd)
 {
+    struct preserved_fd *pfd, *pfd_new;
     debug_decl(add_preserved_fd, SUDO_DEBUG_UTIL)
 
-    /* Reallocate as needed before adding. */
-    if (fd > pfds->maxfd) {
-	int osize = howmany(pfds->maxfd + 1, NFDBITS);
-	int nsize = howmany(fd + 1, NFDBITS);
-	if (nsize > osize)
-	    pfds->fds = erecalloc(pfds->fds, osize, nsize, sizeof(fd_mask));
-	pfds->maxfd = fd;
+    pfd_new = emalloc(sizeof(*pfd));
+    pfd_new->lowfd = fd;
+    pfd_new->highfd = fd;
+    pfd_new->flags = fcntl(fd, F_GETFD);
+    if (pfd_new->flags == -1) {
+	efree(pfd_new);
+	debug_return_int(-1);
     }
-    FD_SET(fd, pfds->fds);
 
+    TAILQ_FOREACH(pfd, pfds, entries) {
+	if (fd == pfd->highfd) {
+	    /* already preserved */
+	    efree(pfd_new);
+	    break;
+	}
+	if (fd < pfd->highfd) {
+	    TAILQ_INSERT_BEFORE(pfd, pfd_new, entries);
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"preserving fd %d", fd);
+	    break;
+	}
+    }
+    if (pfd == NULL) {
+	TAILQ_INSERT_TAIL(pfds, pfd_new, entries);
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "preserving fd %d", fd);
+    }
+
+    debug_return_int(0);
+}
+
+/*
+ * Close fds in the range [from,to]
+ */
+static void
+closefrom_range(int from, int to)
+{
+    debug_decl(closefrom_range, SUDO_DEBUG_UTIL)
+
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"closing fds [%d, %d]", from, to);
+    while (from <= to) {
+#ifdef __APPLE__
+	/* Avoid potential libdispatch crash when we close its fds. */
+	(void) fcntl(from, F_SETFD, FD_CLOEXEC);
+#else
+	(void) close(from);
+#endif
+	from++;
+    }
     debug_return;
 }
 
@@ -76,27 +111,82 @@ add_preserved_fd(struct preserved_fds *pfds, int fd)
  * in pfds.
  */
 void
-closefrom_except(int startfd, struct preserved_fds *pfds)
+closefrom_except(int startfd, struct preserved_fd_list *pfds)
 {
-    int fd;
+    int tmpfd;
+    struct preserved_fd *pfd, *pfd_next;
     debug_decl(closefrom_except, SUDO_DEBUG_UTIL)
 
-    /* First handle the preserved fds. */
-    if (startfd <= pfds->maxfd) {
-	for (fd = startfd; fd <= pfds->maxfd; fd++) {
-	    if (!FD_ISSET(fd, pfds->fds)) {
-#ifdef __APPLE__
-		/* Avoid potential libdispatch crash when we close its fds. */
-		(void) fcntl(fd, F_SETFD, FD_CLOEXEC);
-#else
-		(void) close(fd);
-#endif
+    /*
+     * First, relocate preserved fds to be as contiguous as possible.
+     */
+    TAILQ_FOREACH_SAFE(pfd, pfds, entries, pfd_next) {
+	if (pfd->highfd < startfd)
+	    continue;
+	tmpfd = dup(pfd->highfd);
+	if (tmpfd < pfd->highfd) {
+	    if (tmpfd == -1) {
+		if (errno == EBADF)
+		    TAILQ_REMOVE(pfds, pfd, entries);
+		continue;
 	    }
+	    pfd->lowfd = tmpfd;
+	    tmpfd = pfd->highfd;
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"dup %d -> %d", pfd->highfd, pfd->lowfd);
 	}
-	startfd = pfds->maxfd + 1;
+	(void) close(tmpfd);
     }
+
+    if (TAILQ_EMPTY(pfds)) {
+	/* No fds to preserve. */
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "closefrom(%d)", startfd);
+	closefrom(startfd);
+	debug_return;
+    }
+
+    /* Close any fds [startfd,TAILQ_FIRST(pfds)->lowfd) */
+    closefrom_range(startfd, TAILQ_FIRST(pfds)->lowfd - 1);
+
+    /* Close any unpreserved fds (TAILQ_LAST(pfds)->lowfd,startfd) */
+    TAILQ_FOREACH_SAFE(pfd, pfds, entries, pfd_next) {
+	if (pfd->lowfd < startfd)
+	    continue;
+	if (pfd_next != NULL && pfd->lowfd + 1 != pfd_next->lowfd)
+	    closefrom_range(pfd->lowfd + 1, pfd_next->lowfd);
+    }
+
+    /* Let closefrom() do the rest for us. */
+    pfd = TAILQ_LAST(pfds, preserved_fd_list);
+    if (pfd != NULL && pfd->lowfd + 1 > startfd)
+	startfd = pfd->lowfd + 1;
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"closefrom(%d)", startfd);
     closefrom(startfd);
 
+    /* Restore preserved fds and set flags. */
+    TAILQ_FOREACH(pfd, pfds, entries) {
+	if (pfd->lowfd != pfd->highfd) {
+	    if (dup2(pfd->lowfd, pfd->highfd) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "dup2(%d, %d): %s", pfd->lowfd, pfd->highfd,
+		    strerror(errno));
+	    } else {
+		sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		    "dup2(%d, %d)", pfd->lowfd, pfd->highfd);
+	    }
+	    if (fcntl(pfd->highfd, F_SETFL, pfd->flags) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "fcntl(%d, F_SETFL, %d): %s", pfd->highfd,
+		    pfd->flags, strerror(errno));
+	    } else {
+		sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		    "fcntl(%d, F_SETFL, %d)", pfd->highfd, pfd->flags);
+	    }
+	    (void) close(pfd->lowfd);
+	}
+    }
     debug_return;
 }
 
@@ -104,7 +194,7 @@ closefrom_except(int startfd, struct preserved_fds *pfds)
  * Parse a comma-separated list of fds and add them to preserved_fds.
  */
 void
-parse_preserved_fds(struct preserved_fds *pfds, const char *fdstr)
+parse_preserved_fds(struct preserved_fd_list *pfds, const char *fdstr)
 {
     const char *cp = fdstr;
     long lval;

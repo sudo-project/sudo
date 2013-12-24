@@ -536,7 +536,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 
     memset(details, 0, sizeof(*details));
     details->closefrom = -1;
-    details->preserved_fds.maxfd = -1;
+    TAILQ_INIT(&details->preserved_fds);
 
 #define SET_STRING(s, n) \
     if (strncmp(s, info[i], sizeof(s) - 1) == 0 && info[i][sizeof(s) - 1]) { \
