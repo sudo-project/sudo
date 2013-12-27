@@ -242,7 +242,7 @@ main(int argc, char *argv[])
 #endif
 
     initprogname(argc > 0 ? argv[0] : "sudoreplay");
-    sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
+    setlocale(LC_ALL, NULL);
     decimal = localeconv()->decimal_point;
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have sudoreplay domain */
     textdomain("sudoers");
