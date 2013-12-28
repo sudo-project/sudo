@@ -7,6 +7,33 @@ What's new in Sudo 1.8.9?
    the sudo binary without disabling shared library support.  The
    sudo.conf file may still be used to configure other plugins.
 
+ * Sudo can now be compiled again with a C preprocessor that does
+   not support variadic macros.
+
+ * Visudo can now export a sudoers file in JSON format using the
+   new -x flag.
+
+ * The locale is now set correctly again for visudo and sudoreplay.
+
+ * The plugin API has been extended to allow the plugin to exclude
+   specific file descriptors from the "closefrom" range.
+
+ * There is now a workaround for a Solaris-specific problem where
+   NOEXEC was overriding traditional root DAC behavior.
+
+ * Add user netgroup filtering for SSSD. Previously, rules for
+   a netgroup were applied to all even when they did not belong
+   to the specified netgroup.
+
+ * On systems with BSD login classes, if the user specified a group
+   (not a user) to run the command as, it was possible to specify
+   a different login class even when the command was not run as the
+   super user.
+
+ * The closefrom() emulation on Mac OS X now uses /dev/fd if possible.
+
+ * Fixes bugs #621, #622, #623, #624, #625, #626
+
 What's new in Sudo 1.8.8?
 
  * Removed a warning on PAM systems with stacked auth modules
