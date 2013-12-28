@@ -159,7 +159,7 @@ main(int argc, char *argv[])
 #endif
 
     initprogname(argc > 0 ? argv[0] : "visudo");
-    sudoers_initlocale(setlocale(LC_ALL, NULL), def_sudoers_locale);
+    sudoers_initlocale(setlocale(LC_ALL, ""), def_sudoers_locale);
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have visudo domain */
     textdomain("sudoers");
 
