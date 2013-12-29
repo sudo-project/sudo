@@ -6,10 +6,10 @@
 # Yuri Kozlov <yuray@komyakino.ru>, 2011, 2012, 2013.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.9b1\n"
+"Project-Id-Version: sudo 1.8.9b2\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-11-24 16:32-0700\n"
-"PO-Revision-Date: 2013-11-28 20:01+0400\n"
+"POT-Creation-Date: 2013-12-11 13:41-0700\n"
+"PO-Revision-Date: 2013-12-29 12:59+0400\n"
 "Last-Translator: Yuri Kozlov <yuray@komyakino.ru>\n"
 "Language-Team: Russian <gnu@mx.ru>\n"
 "Language: ru\n"
@@ -61,19 +61,20 @@ msgstr "внутренняя ошибка, попытка выполнить ere
 msgid "internal error, tried to erecalloc(0)"
 msgstr "внутренняя ошибка, попытка выполнить ereсalloc(0)"
 
-#: common/atoid.c:77 common/atoid.c:99 src/sudo.c:563 src/sudo.c:588
-#: src/sudo.c:696 src/sudo.c:712
+#: common/atoid.c:78 common/atoid.c:106 common/atomode.c:54
+#: compat/strtonum.c:65 compat/strtonum.c:183
 msgid "invalid value"
 msgstr "недопустимое значение"
 
-#: common/atoid.c:84 src/sudo.c:567 src/sudo.c:592 src/sudo.c:700
-#: src/sudo.c:716
-msgid "value out of range"
-msgstr "значение за пределами диапазона"
-
-#: common/atoid.c:105
+#: common/atoid.c:85 common/atoid.c:113 common/atomode.c:60
+#: compat/strtonum.c:68 compat/strtonum.c:195
 msgid "value too large"
 msgstr "значение слишком велико"
+
+#: common/atoid.c:91 common/atomode.c:60 compat/strtonum.c:68
+#: compat/strtonum.c:189
+msgid "value too small"
+msgstr "значение слишком мало"
 
 #: common/fatal.c:158
 #, c-format
@@ -86,9 +87,8 @@ msgid "%s: %s\n"
 msgstr "%s: %s\n"
 
 #: common/gidlist.c:80 src/load_plugins.c:63 src/load_plugins.c:76
-#: src/sudo.c:563 src/sudo.c:567 src/sudo.c:588 src/sudo.c:592 src/sudo.c:615
-#: src/sudo.c:624 src/sudo.c:633 src/sudo.c:648 src/sudo.c:696 src/sudo.c:700
-#: src/sudo.c:712 src/sudo.c:716
+#: src/sudo.c:558 src/sudo.c:577 src/sudo.c:599 src/sudo.c:608 src/sudo.c:617
+#: src/sudo.c:632 src/sudo.c:679 src/sudo.c:689
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -103,32 +103,32 @@ msgstr "неподдерживаемый групповой источник «%
 msgid "invalid max groups `%s' in %s, line %d"
 msgstr "некорректное максимальное значение для групп «%s» в %s, строка %d"
 
-#: common/sudo_conf.c:393
+#: common/sudo_conf.c:391
 #, c-format
 msgid "unable to stat %s"
 msgstr "не удалось выполнить вызов stat %s"
 
-#: common/sudo_conf.c:396
+#: common/sudo_conf.c:394
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s не является обычным файлом"
 
-#: common/sudo_conf.c:399
+#: common/sudo_conf.c:397
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s принадлежит пользователю с uid %u, а должен принадлежать пользователю с uid %u"
 
-#: common/sudo_conf.c:403
+#: common/sudo_conf.c:401
 #, c-format
 msgid "%s is world writable"
 msgstr "доступ на запись в %s разрешена всем"
 
-#: common/sudo_conf.c:406
+#: common/sudo_conf.c:404
 #, c-format
 msgid "%s is group writable"
 msgstr "доступ на запись в %s разрешена группе"
 
-#: common/sudo_conf.c:416 src/selinux.c:196 src/selinux.c:209 src/sudo.c:331
+#: common/sudo_conf.c:414 src/selinux.c:196 src/selinux.c:209 src/sudo.c:328
 #, c-format
 msgid "unable to open %s"
 msgstr "не удаётся открыть %s"
@@ -164,7 +164,7 @@ msgstr "ошибка в событийном цикле"
 msgid "unable to restore tty label"
 msgstr "не удаётся создать восстановить метку tty"
 
-#: src/exec_common.c:70
+#: src/exec_common.c:73
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "не удаётся удалить PRIV_PROC_EXEC из PRIV_LIMIT"
 
@@ -279,6 +279,7 @@ msgid "unable to open socket"
 msgstr "не удаётся открыть сокет"
 
 #: src/parse_args.c:246
+#, c-format
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "аргумент для -C должен быть числом, которое больше или равно 3"
 
@@ -541,7 +542,7 @@ msgstr "не удаётся установить для контекста со�
 msgid "requires at least one argument"
 msgstr "укажите не менее одного аргумента"
 
-#: src/sesh.c:78 src/sudo.c:1116
+#: src/sesh.c:78 src/sudo.c:1088
 #, c-format
 msgid "unable to execute %s"
 msgstr "не удаётся выполнить %s"
@@ -617,93 +618,93 @@ msgstr "ошибка инициализации модуля ввода-выво
 msgid "unexpected sudo mode 0x%x"
 msgstr "неожиданный режим sudo: 0x%x"
 
-#: src/sudo.c:416
+#: src/sudo.c:413
 msgid "unable to get group vector"
 msgstr "не удаётся получить вектор группы"
 
-#: src/sudo.c:468
+#: src/sudo.c:465
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "неизвестный uid %u: кто вы?"
 
-#: src/sudo.c:790
+#: src/sudo.c:762
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s должен принадлежать пользователю с uid %d и иметь бит setuid"
 
-#: src/sudo.c:793
+#: src/sudo.c:765
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "эффективный uid не равен %d, возможно, %s находится в файловой системе, смонтированной с битом «nosuid» или в файловой системе NFS без прав суперпользователя?"
 
-#: src/sudo.c:799
+#: src/sudo.c:771
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "эффективный uid не равен %d, программа sudo установлена с битом setuid и принадлежит root?"
 
-#: src/sudo.c:925
+#: src/sudo.c:897
 #, c-format
 msgid "unknown login class %s"
 msgstr "неизвестный класс входа %s"
 
-#: src/sudo.c:938
+#: src/sudo.c:910
 msgid "unable to set user context"
 msgstr "не удаётся назначить контекст пользователя"
 
-#: src/sudo.c:952
+#: src/sudo.c:924
 msgid "unable to set supplementary group IDs"
 msgstr "не удаётся назначить дополнительные идентификаторы групп"
 
-#: src/sudo.c:959
+#: src/sudo.c:931
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "не удаётся назначить эффективный gid на runas gid %u"
 
-#: src/sudo.c:965
+#: src/sudo.c:937
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "не удаётся назначить gid на runas gid %u"
 
-#: src/sudo.c:972
+#: src/sudo.c:944
 msgid "unable to set process priority"
 msgstr "не удаётся назначить приоритет процесса"
 
-#: src/sudo.c:980
+#: src/sudo.c:952
 #, c-format
 msgid "unable to change root to %s"
 msgstr "не удаётся изменить root на %s"
 
-#: src/sudo.c:993 src/sudo.c:999 src/sudo.c:1005
+#: src/sudo.c:965 src/sudo.c:971 src/sudo.c:977
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "не удаётся изменить на runas uid (%u, %u)"
 
-#: src/sudo.c:1022
+#: src/sudo.c:994
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "не удаётся сменить каталог на %s"
 
-#: src/sudo.c:1079
+#: src/sudo.c:1051
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "неожиданное условие завершения потомка: %d"
 
-#: src/sudo.c:1136
+#: src/sudo.c:1108
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr "модуль политики %s не содержит метод «check_policy»"
 
-#: src/sudo.c:1149
+#: src/sudo.c:1121
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "модуль политики %s не поддерживает списка прав"
 
-#: src/sudo.c:1161
+#: src/sudo.c:1133
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "модуль политики %s не поддерживает параметр -v"
 
-#: src/sudo.c:1173
+#: src/sudo.c:1145
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "модуль политики %s не поддерживает параметры -k/-K"
@@ -785,6 +786,9 @@ msgstr "не удаётся выполнить dup2 для стандартно�
 #: src/utmp.c:283
 msgid "unable to restore stdin"
 msgstr "не удаётся восстановить стандартный ввод"
+
+#~ msgid "value out of range"
+#~ msgstr "значение за пределами диапазона"
 
 #~ msgid "select failed"
 #~ msgstr "ошибка select"
