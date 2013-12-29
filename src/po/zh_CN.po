@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo-1.8.9b1\n"
+"Project-Id-Version: sudo-1.8.9b2\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-11-24 16:32-0700\n"
-"PO-Revision-Date: 2013-11-28 09:39+0800\n"
+"POT-Creation-Date: 2013-12-11 13:41-0700\n"
+"PO-Revision-Date: 2013-12-27 09:14+0800\n"
 "Last-Translator: Wylmer Wang <wantinghard@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -58,19 +58,20 @@ msgstr "内部错误，试图 erealloc3(0)"
 msgid "internal error, tried to erecalloc(0)"
 msgstr "内部错误，试图 erecalloc(0)"
 
-#: common/atoid.c:77 common/atoid.c:99 src/sudo.c:563 src/sudo.c:588
-#: src/sudo.c:696 src/sudo.c:712
+#: common/atoid.c:78 common/atoid.c:106 common/atomode.c:54
+#: compat/strtonum.c:65 compat/strtonum.c:183
 msgid "invalid value"
 msgstr "值无效"
 
-#: common/atoid.c:84 src/sudo.c:567 src/sudo.c:592 src/sudo.c:700
-#: src/sudo.c:716
-msgid "value out of range"
-msgstr "值超出范围"
-
-#: common/atoid.c:105
+#: common/atoid.c:85 common/atoid.c:113 common/atomode.c:60
+#: compat/strtonum.c:68 compat/strtonum.c:195
 msgid "value too large"
 msgstr "值过大"
+
+#: common/atoid.c:91 common/atomode.c:60 compat/strtonum.c:68
+#: compat/strtonum.c:189
+msgid "value too small"
+msgstr "值过小"
 
 #: common/fatal.c:158
 #, c-format
@@ -83,9 +84,8 @@ msgid "%s: %s\n"
 msgstr "%s：%s\n"
 
 #: common/gidlist.c:80 src/load_plugins.c:63 src/load_plugins.c:76
-#: src/sudo.c:563 src/sudo.c:567 src/sudo.c:588 src/sudo.c:592 src/sudo.c:615
-#: src/sudo.c:624 src/sudo.c:633 src/sudo.c:648 src/sudo.c:696 src/sudo.c:700
-#: src/sudo.c:712 src/sudo.c:716
+#: src/sudo.c:558 src/sudo.c:577 src/sudo.c:599 src/sudo.c:608 src/sudo.c:617
+#: src/sudo.c:632 src/sudo.c:679 src/sudo.c:689
 #, c-format
 msgid "%s: %s"
 msgstr "%s：%s"
@@ -100,32 +100,32 @@ msgstr "不支持 %2$s 第 %3$d 行的组来源“%1$s”"
 msgid "invalid max groups `%s' in %s, line %d"
 msgstr "%2$s 第 %3$d 行的最大组数“%1$s”无效"
 
-#: common/sudo_conf.c:393
+#: common/sudo_conf.c:391
 #, c-format
 msgid "unable to stat %s"
 msgstr "无法 stat %s"
 
-#: common/sudo_conf.c:396
+#: common/sudo_conf.c:394
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s 不是常规文件"
 
-#: common/sudo_conf.c:399
+#: common/sudo_conf.c:397
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s 属于用户 ID %u，应为 %u"
 
-#: common/sudo_conf.c:403
+#: common/sudo_conf.c:401
 #, c-format
 msgid "%s is world writable"
 msgstr "%s 可被任何人写"
 
-#: common/sudo_conf.c:406
+#: common/sudo_conf.c:404
 #, c-format
 msgid "%s is group writable"
 msgstr "%s 可被用户组写"
 
-#: common/sudo_conf.c:416 src/selinux.c:196 src/selinux.c:209 src/sudo.c:331
+#: common/sudo_conf.c:414 src/selinux.c:196 src/selinux.c:209 src/sudo.c:328
 #, c-format
 msgid "unable to open %s"
 msgstr "打不开 %s"
@@ -161,7 +161,7 @@ msgstr "事件循环中有错误"
 msgid "unable to restore tty label"
 msgstr "无法恢复终端标签"
 
-#: src/exec_common.c:70
+#: src/exec_common.c:73
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "无法从 PRIV_LIMIT 中移除 PRIV_PROC_EXEC"
 
@@ -276,6 +276,7 @@ msgid "unable to open socket"
 msgstr "无法打开套接字"
 
 #: src/parse_args.c:246
+#, c-format
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "-C 选项的参数必须是一个大于等于 3 的数字"
 
@@ -538,7 +539,7 @@ msgstr "无法向 %s 设置键创建环境"
 msgid "requires at least one argument"
 msgstr "要求至少有一个参数"
 
-#: src/sesh.c:78 src/sudo.c:1116
+#: src/sesh.c:78 src/sudo.c:1088
 #, c-format
 msgid "unable to execute %s"
 msgstr "无法执行 %s"
@@ -614,93 +615,93 @@ msgstr "初始化 I/O 插件 %s 出错"
 msgid "unexpected sudo mode 0x%x"
 msgstr "异常的 sudo 模式 0x%x"
 
-#: src/sudo.c:416
+#: src/sudo.c:413
 msgid "unable to get group vector"
 msgstr "无法获取组向量"
 
-#: src/sudo.c:468
+#: src/sudo.c:465
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "未知的用户 ID %u：您是？"
 
-#: src/sudo.c:790
+#: src/sudo.c:762
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s 必须属于用户 ID %d(的用户)并且设置 setuid 位"
 
-#: src/sudo.c:793
+#: src/sudo.c:765
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "有效用户 ID 不是 %d，%s 位于一个设置了“nosuid”选项的文件系统或没有 root 权限的 NFS 文件系统中吗？"
 
-#: src/sudo.c:799
+#: src/sudo.c:771
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "有效用户 ID 不是 %d，sudo 属于 root 并设置了 setuid 位吗？"
 
-#: src/sudo.c:925
+#: src/sudo.c:897
 #, c-format
 msgid "unknown login class %s"
 msgstr "未知的登录类别 %s"
 
-#: src/sudo.c:938
+#: src/sudo.c:910
 msgid "unable to set user context"
 msgstr "无法设置用户环境"
 
-#: src/sudo.c:952
+#: src/sudo.c:924
 msgid "unable to set supplementary group IDs"
 msgstr "无法设置补充组 ID"
 
-#: src/sudo.c:959
+#: src/sudo.c:931
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "无法设置有效组 ID 来以组 ID %u 运行"
 
-#: src/sudo.c:965
+#: src/sudo.c:937
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "无法设置组 ID 来以组 ID %u 运行"
 
-#: src/sudo.c:972
+#: src/sudo.c:944
 msgid "unable to set process priority"
 msgstr "无法设置进程优先级"
 
-#: src/sudo.c:980
+#: src/sudo.c:952
 #, c-format
 msgid "unable to change root to %s"
 msgstr "无法从 root 切换到 %s"
 
-#: src/sudo.c:993 src/sudo.c:999 src/sudo.c:1005
+#: src/sudo.c:965 src/sudo.c:971 src/sudo.c:977
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "无法切换到以用户 ID(%u，%u)运行"
 
-#: src/sudo.c:1022
+#: src/sudo.c:994
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "无法将目录切换到 %s"
 
-#: src/sudo.c:1079
+#: src/sudo.c:1051
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "异常的子进程终止条件：%d"
 
-#: src/sudo.c:1136
+#: src/sudo.c:1108
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr "“check_policy”方法中缺少策略插件 %s"
 
-#: src/sudo.c:1149
+#: src/sudo.c:1121
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "策略插件 %s 不支持列出权限"
 
-#: src/sudo.c:1161
+#: src/sudo.c:1133
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "策略插件 %s不支持 -v 选项"
 
-#: src/sudo.c:1173
+#: src/sudo.c:1145
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "策略插件 %s 不支持 -k/-K 选项"
@@ -782,6 +783,9 @@ msgstr "无法 dup2 stdin"
 #: src/utmp.c:283
 msgid "unable to restore stdin"
 msgstr "无法恢复 stdin"
+
+#~ msgid "value out of range"
+#~ msgstr "值超出范围"
 
 #~ msgid "select failed"
 #~ msgstr "select 失败"

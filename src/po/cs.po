@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.9b1\n"
+"Project-Id-Version: sudo 1.8.9b2\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-11-24 16:32-0700\n"
-"PO-Revision-Date: 2013-11-27 21:21+0100\n"
+"POT-Creation-Date: 2013-12-11 13:41-0700\n"
+"PO-Revision-Date: 2013-12-27 17:44+0100\n"
 "Last-Translator: Petr Pisar <petr.pisar@atlas.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -58,19 +58,20 @@ msgstr "vnitřní chyba, pokus o erealloc3(0)"
 msgid "internal error, tried to erecalloc(0)"
 msgstr "vnitřní chyba, pokus o erecalloc(0)"
 
-#: common/atoid.c:77 common/atoid.c:99 src/sudo.c:563 src/sudo.c:588
-#: src/sudo.c:696 src/sudo.c:712
+#: common/atoid.c:78 common/atoid.c:106 common/atomode.c:54
+#: compat/strtonum.c:65 compat/strtonum.c:183
 msgid "invalid value"
 msgstr "neplatná hodnota"
 
-#: common/atoid.c:84 src/sudo.c:567 src/sudo.c:592 src/sudo.c:700
-#: src/sudo.c:716
-msgid "value out of range"
-msgstr "hodnota je mimo rozsah"
-
-#: common/atoid.c:105
+#: common/atoid.c:85 common/atoid.c:113 common/atomode.c:60
+#: compat/strtonum.c:68 compat/strtonum.c:195
 msgid "value too large"
 msgstr "hodnota je příliš velká"
+
+#: common/atoid.c:91 common/atomode.c:60 compat/strtonum.c:68
+#: compat/strtonum.c:189
+msgid "value too small"
+msgstr "hodnota je příliš malá"
 
 #: common/fatal.c:158
 #, c-format
@@ -83,9 +84,8 @@ msgid "%s: %s\n"
 msgstr "%s: %s\n"
 
 #: common/gidlist.c:80 src/load_plugins.c:63 src/load_plugins.c:76
-#: src/sudo.c:563 src/sudo.c:567 src/sudo.c:588 src/sudo.c:592 src/sudo.c:615
-#: src/sudo.c:624 src/sudo.c:633 src/sudo.c:648 src/sudo.c:696 src/sudo.c:700
-#: src/sudo.c:712 src/sudo.c:716
+#: src/sudo.c:558 src/sudo.c:577 src/sudo.c:599 src/sudo.c:608 src/sudo.c:617
+#: src/sudo.c:632 src/sudo.c:679 src/sudo.c:689
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -100,32 +100,32 @@ msgstr "nepodporovaný zdroj skupin „%s“ v %s, řádek %d"
 msgid "invalid max groups `%s' in %s, line %d"
 msgstr "neplatné maximum skupin „%s“ v %s, řádek %d"
 
-#: common/sudo_conf.c:393
+#: common/sudo_conf.c:391
 #, c-format
 msgid "unable to stat %s"
 msgstr "nelze získat údaje o %s"
 
-#: common/sudo_conf.c:396
+#: common/sudo_conf.c:394
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s není obyčejný soubor"
 
-#: common/sudo_conf.c:399
+#: common/sudo_conf.c:397
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s je vlastněn UID %u, avšak UID by mělo být %u"
 
-#: common/sudo_conf.c:403
+#: common/sudo_conf.c:401
 #, c-format
 msgid "%s is world writable"
 msgstr "%s je zapisovatelný pro všechny"
 
-#: common/sudo_conf.c:406
+#: common/sudo_conf.c:404
 #, c-format
 msgid "%s is group writable"
 msgstr "%s je zapisovatelný pro skupinu"
 
-#: common/sudo_conf.c:416 src/selinux.c:196 src/selinux.c:209 src/sudo.c:331
+#: common/sudo_conf.c:414 src/selinux.c:196 src/selinux.c:209 src/sudo.c:328
 #, c-format
 msgid "unable to open %s"
 msgstr "%s nelze otevřít"
@@ -161,7 +161,7 @@ msgstr "chyba ve smyčce s událostmi"
 msgid "unable to restore tty label"
 msgstr "nelze obnovit značku TTY"
 
-#: src/exec_common.c:70
+#: src/exec_common.c:73
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "z PRIV_LIMIT nelze odstranit PRIV_PROC_EXEC"
 
@@ -276,6 +276,7 @@ msgid "unable to open socket"
 msgstr "nelze otevřít socket"
 
 #: src/parse_args.c:246
+#, c-format
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "argument u -C musí být číslo větší nebo rovno 3"
 
@@ -538,7 +539,7 @@ msgstr "nepodařilo se nastavit kontext pro vytváření klíčů na %s"
 msgid "requires at least one argument"
 msgstr "je třeba alespoň jeden argument"
 
-#: src/sesh.c:78 src/sudo.c:1116
+#: src/sesh.c:78 src/sudo.c:1088
 #, c-format
 msgid "unable to execute %s"
 msgstr "%s nelze spustit"
@@ -614,93 +615,93 @@ msgstr "chyba při inicializaci vstupně-výstupního modulu %s"
 msgid "unexpected sudo mode 0x%x"
 msgstr "neočekávaný režim programu sudo 0x%x"
 
-#: src/sudo.c:416
+#: src/sudo.c:413
 msgid "unable to get group vector"
 msgstr "nelze získat vektor skupin"
 
-#: src/sudo.c:468
+#: src/sudo.c:465
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "neznámé UID %u: kdo jsi?"
 
-#: src/sudo.c:790
+#: src/sudo.c:762
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s musí být vlastněn UID %d a mít nastaven bit setuid"
 
-#: src/sudo.c:793
+#: src/sudo.c:765
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "efektivní UID není %d, nalézá se %s na souborovém systému s nastavenou volbou „nosuid“ nebo na souborovém systému NFS bez práv roota?"
 
-#: src/sudo.c:799
+#: src/sudo.c:771
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "efektivní UID není %d, je sudo nainstalované jako setuid vlastněné rootem?"
 
-#: src/sudo.c:925
+#: src/sudo.c:897
 #, c-format
 msgid "unknown login class %s"
 msgstr "neznámá přihlašovací třída %s"
 
-#: src/sudo.c:938
+#: src/sudo.c:910
 msgid "unable to set user context"
 msgstr "nelze nastavit kontext uživatele"
 
-#: src/sudo.c:952
+#: src/sudo.c:924
 msgid "unable to set supplementary group IDs"
 msgstr "nelze nastavit ID doplňkových skupin"
 
-#: src/sudo.c:959
+#: src/sudo.c:931
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "efektivní GID nelze nastavit na %u"
 
-#: src/sudo.c:965
+#: src/sudo.c:937
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "GID nelze nastavit na %u"
 
-#: src/sudo.c:972
+#: src/sudo.c:944
 msgid "unable to set process priority"
 msgstr "nelze nastavit prioritu procesu"
 
-#: src/sudo.c:980
+#: src/sudo.c:952
 #, c-format
 msgid "unable to change root to %s"
 msgstr "kořenový adresář nelze změnit na %s"
 
-#: src/sudo.c:993 src/sudo.c:999 src/sudo.c:1005
+#: src/sudo.c:965 src/sudo.c:971 src/sudo.c:977
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "nelze změnit UID na (%u, %u)"
 
-#: src/sudo.c:1022
+#: src/sudo.c:994
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "pracovní adresář nelze změnit na %s"
 
-#: src/sudo.c:1079
+#: src/sudo.c:1051
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "neočekávaný důvod ukončení potomka: %d"
 
-#: src/sudo.c:1136
+#: src/sudo.c:1108
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr "modulu s politikami %s chybí metoda „check_policy“"
 
-#: src/sudo.c:1149
+#: src/sudo.c:1121
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "modul s politikami %s nepodporuje získání seznamu oprávnění"
 
-#: src/sudo.c:1161
+#: src/sudo.c:1133
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "modul s politikami %s nepodporuje přepínač -v"
 
-#: src/sudo.c:1173
+#: src/sudo.c:1145
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "modul s politikami %s nepodporuje přepínače -k/-K"
@@ -782,6 +783,9 @@ msgstr "standardní vstup nelze zduplikovat voláním dup2"
 #: src/utmp.c:283
 msgid "unable to restore stdin"
 msgstr "standardní vstup nelze obnovit"
+
+#~ msgid "value out of range"
+#~ msgstr "hodnota je mimo rozsah"
 
 #~ msgid "select failed"
 #~ msgstr "volání select selhalo"

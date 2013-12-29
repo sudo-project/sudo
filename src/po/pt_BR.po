@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.8.9b1\n"
+"Project-Id-Version: sudo 1.8.9b2\n"
 "Report-Msgid-Bugs-To: http://www.sudo.ws/bugs\n"
-"POT-Creation-Date: 2013-11-24 16:32-0700\n"
-"PO-Revision-Date: 2013-11-27 18:18-0300\n"
+"POT-Creation-Date: 2013-12-11 13:41-0700\n"
+"PO-Revision-Date: 2013-12-26 18:18-0300\n"
 "Last-Translator: Rafael Ferreira <rafael.f.f1@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <ldpbr-translation@lists.sourceforge.net>\n"
 "Language: pt_BR\n"
@@ -60,19 +60,20 @@ msgstr "erro interno, tentou fazer erealloc3(0)"
 msgid "internal error, tried to erecalloc(0)"
 msgstr "erro interno, tentou fazer erecalloc(0)"
 
-#: common/atoid.c:77 common/atoid.c:99 src/sudo.c:563 src/sudo.c:588
-#: src/sudo.c:696 src/sudo.c:712
+#: common/atoid.c:78 common/atoid.c:106 common/atomode.c:54
+#: compat/strtonum.c:65 compat/strtonum.c:183
 msgid "invalid value"
 msgstr "valor inválido"
 
-#: common/atoid.c:84 src/sudo.c:567 src/sudo.c:592 src/sudo.c:700
-#: src/sudo.c:716
-msgid "value out of range"
-msgstr "valor fora de faixa"
-
-#: common/atoid.c:105
+#: common/atoid.c:85 common/atoid.c:113 common/atomode.c:60
+#: compat/strtonum.c:68 compat/strtonum.c:195
 msgid "value too large"
 msgstr "valor grande demais"
+
+#: common/atoid.c:91 common/atomode.c:60 compat/strtonum.c:68
+#: compat/strtonum.c:189
+msgid "value too small"
+msgstr "valor pequeno demais"
 
 #: common/fatal.c:158
 #, c-format
@@ -85,9 +86,8 @@ msgid "%s: %s\n"
 msgstr "%s: %s\n"
 
 #: common/gidlist.c:80 src/load_plugins.c:63 src/load_plugins.c:76
-#: src/sudo.c:563 src/sudo.c:567 src/sudo.c:588 src/sudo.c:592 src/sudo.c:615
-#: src/sudo.c:624 src/sudo.c:633 src/sudo.c:648 src/sudo.c:696 src/sudo.c:700
-#: src/sudo.c:712 src/sudo.c:716
+#: src/sudo.c:558 src/sudo.c:577 src/sudo.c:599 src/sudo.c:608 src/sudo.c:617
+#: src/sudo.c:632 src/sudo.c:679 src/sudo.c:689
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
@@ -102,32 +102,32 @@ msgstr "fonte de grupo sem suporte \"%s\" em %s, linha %d"
 msgid "invalid max groups `%s' in %s, line %d"
 msgstr "máximo de grupos inválido \"%s\" em %s, linha %d"
 
-#: common/sudo_conf.c:393
+#: common/sudo_conf.c:391
 #, c-format
 msgid "unable to stat %s"
 msgstr "não foi possível obter o estado de %s"
 
-#: common/sudo_conf.c:396
+#: common/sudo_conf.c:394
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s não é um arquivo comum"
 
-#: common/sudo_conf.c:399
+#: common/sudo_conf.c:397
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s tem como dono o uid %u, deveria ser %u"
 
-#: common/sudo_conf.c:403
+#: common/sudo_conf.c:401
 #, c-format
 msgid "%s is world writable"
 msgstr "%s é gravável globalmente"
 
-#: common/sudo_conf.c:406
+#: common/sudo_conf.c:404
 #, c-format
 msgid "%s is group writable"
 msgstr "%s é gravável pelo grupo"
 
-#: common/sudo_conf.c:416 src/selinux.c:196 src/selinux.c:209 src/sudo.c:331
+#: common/sudo_conf.c:414 src/selinux.c:196 src/selinux.c:209 src/sudo.c:328
 #, c-format
 msgid "unable to open %s"
 msgstr "não foi possível abrir %s"
@@ -153,7 +153,7 @@ msgstr "não foi possível adicionar um evento à fila"
 
 #: src/exec.c:394
 msgid "unable to create sockets"
-msgstr "não foi possível criar sockets"
+msgstr "não foi possível criar soquetes"
 
 #: src/exec.c:477
 msgid "error in event loop"
@@ -163,7 +163,7 @@ msgstr "erro em loop de evento"
 msgid "unable to restore tty label"
 msgstr "não foi possível restaurar rótulo de tty"
 
-#: src/exec_common.c:70
+#: src/exec_common.c:73
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "não foi possível remover PRIV_PROC_EXEC de PRIV_LIMIT"
 
@@ -190,12 +190,12 @@ msgstr "erro ao ler de redirecionamento (pipe)"
 
 #: src/exec_pty.c:1149
 msgid "error reading from socketpair"
-msgstr "erro ao ler do par de sockets"
+msgstr "erro ao ler do par de soquetes"
 
 #: src/exec_pty.c:1158
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
-msgstr "tipo de resposta inesperada no backchannel: %d"
+msgstr "tipo de resposta inesperada no canal de retorno: %d"
 
 #: src/exec_pty.c:1248
 msgid "unable to set controlling tty"
@@ -275,9 +275,10 @@ msgstr "load_interfaces: estouro de pilha detectado"
 
 #: src/net_ifs.c:226
 msgid "unable to open socket"
-msgstr "não foi possível abrir socket"
+msgstr "não foi possível abrir soquete"
 
 #: src/parse_args.c:246
+#, c-format
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "o argumento do -C deve ser um número maior ou igual a 3"
 
@@ -431,7 +432,7 @@ msgstr "cria um contexto de segurança SELinux com o tipo especificado"
 
 #: src/parse_args.c:667
 msgid "in list mode, display privileges for user"
-msgstr "no modo lista, exibe so privilégios por usuário"
+msgstr "no modo lista, exibe os privilégios por usuário"
 
 #: src/parse_args.c:669
 msgid "run command (or edit file) as specified user name or ID"
@@ -541,7 +542,7 @@ msgstr "não foi possível definir contexto de criação de chave para %s"
 msgid "requires at least one argument"
 msgstr "requer ao menos um argumento"
 
-#: src/sesh.c:78 src/sudo.c:1116
+#: src/sesh.c:78 src/sudo.c:1088
 #, c-format
 msgid "unable to execute %s"
 msgstr "não foi possível executar %s"
@@ -617,93 +618,93 @@ msgstr "erro ao inicializar o plug-in de E/S %s"
 msgid "unexpected sudo mode 0x%x"
 msgstr "modo de sudo inesperado 0x%x"
 
-#: src/sudo.c:416
+#: src/sudo.c:413
 msgid "unable to get group vector"
 msgstr "não foi possível obter vetor de grupos"
 
-#: src/sudo.c:468
+#: src/sudo.c:465
 #, c-format
 msgid "unknown uid %u: who are you?"
 msgstr "uid desconhecido %u: quem é você?"
 
-#: src/sudo.c:790
+#: src/sudo.c:762
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s deve ter como dono o uid %d e tem definido o bit setuid"
 
-#: src/sudo.c:793
+#: src/sudo.c:765
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "uid efetivo não é %d, é %s em um sistema de arquivos com a opção \"nosuid\" defina ou um sistema de arquivos NFS sem privilégios de root?"
 
-#: src/sudo.c:799
+#: src/sudo.c:771
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "uid efetivo não é %d, sudo está instalado em uma raiz com setuid?"
 
-#: src/sudo.c:925
+#: src/sudo.c:897
 #, c-format
 msgid "unknown login class %s"
 msgstr "classe de login desconhecida %s"
 
-#: src/sudo.c:938
+#: src/sudo.c:910
 msgid "unable to set user context"
 msgstr "não foi possível definir contexto de usuário"
 
-#: src/sudo.c:952
+#: src/sudo.c:924
 msgid "unable to set supplementary group IDs"
 msgstr "não foi possível definir IDs de grupo suplementares"
 
-#: src/sudo.c:959
+#: src/sudo.c:931
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "não foi possível definir gid efetivo para executar como gid %u"
 
-#: src/sudo.c:965
+#: src/sudo.c:937
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "não foi possível definir gid para executar como gid %u"
 
-#: src/sudo.c:972
+#: src/sudo.c:944
 msgid "unable to set process priority"
 msgstr "não foi possível definir prioridade do processo"
 
-#: src/sudo.c:980
+#: src/sudo.c:952
 #, c-format
 msgid "unable to change root to %s"
 msgstr "não foi possível alterar a raiz para %s"
 
-#: src/sudo.c:993 src/sudo.c:999 src/sudo.c:1005
+#: src/sudo.c:965 src/sudo.c:971 src/sudo.c:977
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "não foi possível alterar para uid de \"runas\" (%u, %u)"
 
-#: src/sudo.c:1022
+#: src/sudo.c:994
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "não foi possível alterar diretório para %s"
 
-#: src/sudo.c:1079
+#: src/sudo.c:1051
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "condição inesperada de término de filho: %d"
 
-#: src/sudo.c:1136
+#: src/sudo.c:1108
 #, c-format
 msgid "policy plugin %s is missing the `check_policy' method"
 msgstr "plug-in de política %s é sem o método \"check_policy\""
 
-#: src/sudo.c:1149
+#: src/sudo.c:1121
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "plug-in de política %s não tem suporte a listagem de privilégios"
 
-#: src/sudo.c:1161
+#: src/sudo.c:1133
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "plug-in de política %s não tem suporte à opção -v"
 
-#: src/sudo.c:1173
+#: src/sudo.c:1145
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "plug-in de política %s não tem suporte às opções -k/-K"
@@ -785,6 +786,9 @@ msgstr "não foi possível realizar dup2 da entrada padrão"
 #: src/utmp.c:283
 msgid "unable to restore stdin"
 msgstr "não foi possível restaurar a entrada padrão"
+
+#~ msgid "value out of range"
+#~ msgstr "valor fora de faixa"
 
 #~ msgid "select failed"
 #~ msgstr "seleção falhou"
