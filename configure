@@ -21761,7 +21761,83 @@ fi
 
 if test "$enable_hardening" != "no"; then
     if test -n "$GCC"; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fstack-protector-all" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fstack-protector-strong" >&5
+$as_echo_n "checking whether C compiler accepts -fstack-protector-strong... " >&6; }
+if ${ax_cv_check_cflags___fstack_protector_strong+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -fstack-protector-strong"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ax_cv_check_cflags___fstack_protector_strong=yes
+else
+  ax_cv_check_cflags___fstack_protector_strong=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fstack_protector_strong" >&5
+$as_echo "$ax_cv_check_cflags___fstack_protector_strong" >&6; }
+if test x"$ax_cv_check_cflags___fstack_protector_strong" = xyes; then :
+
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fstack-protector-strong" >&5
+$as_echo_n "checking whether the linker accepts -fstack-protector-strong... " >&6; }
+if ${ax_cv_check_ldflags___fstack_protector_strong+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -fstack-protector-strong"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ax_cv_check_ldflags___fstack_protector_strong=yes
+else
+  ax_cv_check_ldflags___fstack_protector_strong=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fstack_protector_strong" >&5
+$as_echo "$ax_cv_check_ldflags___fstack_protector_strong" >&6; }
+if test x"$ax_cv_check_ldflags___fstack_protector_strong" = xyes; then :
+
+		SSP_CFLAGS="-fstack-protector-strong"
+		SSP_LDFLAGS="-Wc,-fstack-protector-strong"
+
+else
+  :
+fi
+
+
+else
+  :
+fi
+
+	if test -z "$SSP_CFLAGS"; then
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fstack-protector-all" >&5
 $as_echo_n "checking whether C compiler accepts -fstack-protector-all... " >&6; }
 if ${ax_cv_check_cflags___fstack_protector_all+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -21792,7 +21868,7 @@ fi
 $as_echo "$ax_cv_check_cflags___fstack_protector_all" >&6; }
 if test x"$ax_cv_check_cflags___fstack_protector_all" = xyes; then :
 
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fstack-protector-all" >&5
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fstack-protector-all" >&5
 $as_echo_n "checking whether the linker accepts -fstack-protector-all... " >&6; }
 if ${ax_cv_check_ldflags___fstack_protector_all+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -21824,8 +21900,8 @@ fi
 $as_echo "$ax_cv_check_ldflags___fstack_protector_all" >&6; }
 if test x"$ax_cv_check_ldflags___fstack_protector_all" = xyes; then :
 
-		SSP_CFLAGS="-fstack-protector-all"
-		SSP_LDFLAGS="-Wc,-fstack-protector-all"
+		    SSP_CFLAGS="-fstack-protector-all"
+		    SSP_LDFLAGS="-Wc,-fstack-protector-all"
 
 else
   :
@@ -21836,8 +21912,8 @@ else
   :
 fi
 
-	if test -z "$SSP_CFLAGS"; then
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fstack-protector" >&5
+	    if test -z "$SSP_CFLAGS"; then
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fstack-protector" >&5
 $as_echo_n "checking whether C compiler accepts -fstack-protector... " >&6; }
 if ${ax_cv_check_cflags___fstack_protector+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -21868,7 +21944,7 @@ fi
 $as_echo "$ax_cv_check_cflags___fstack_protector" >&6; }
 if test x"$ax_cv_check_cflags___fstack_protector" = xyes; then :
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fstack-protector" >&5
+		    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fstack-protector" >&5
 $as_echo_n "checking whether the linker accepts -fstack-protector... " >&6; }
 if ${ax_cv_check_ldflags___fstack_protector+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -21900,8 +21976,8 @@ fi
 $as_echo "$ax_cv_check_ldflags___fstack_protector" >&6; }
 if test x"$ax_cv_check_ldflags___fstack_protector" = xyes; then :
 
-		    SSP_CFLAGS="-fstack-protector"
-		    SSP_LDFLAGS="-Wc,-fstack-protector"
+			SSP_CFLAGS="-fstack-protector"
+			SSP_LDFLAGS="-Wc,-fstack-protector"
 
 else
   :
@@ -21912,6 +21988,7 @@ else
   :
 fi
 
+	    fi
 	fi
     fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-z,relro" >&5

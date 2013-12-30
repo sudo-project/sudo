@@ -3575,19 +3575,27 @@ dnl This test relies on AC_LANG_WERROR
 dnl
 if test "$enable_hardening" != "no"; then
     if test -n "$GCC"; then
-	AX_CHECK_COMPILE_FLAG([-fstack-protector-all], [
-	    AX_CHECK_LINK_FLAG([-fstack-protector-all], [
-		SSP_CFLAGS="-fstack-protector-all"
-		SSP_LDFLAGS="-Wc,-fstack-protector-all"
+	AX_CHECK_COMPILE_FLAG([-fstack-protector-strong], [
+	    AX_CHECK_LINK_FLAG([-fstack-protector-strong], [
+		SSP_CFLAGS="-fstack-protector-strong"
+		SSP_LDFLAGS="-Wc,-fstack-protector-strong"
 	    ])
 	])
 	if test -z "$SSP_CFLAGS"; then
-	    AX_CHECK_COMPILE_FLAG([-fstack-protector], [
-		AX_CHECK_LINK_FLAG([-fstack-protector], [
-		    SSP_CFLAGS="-fstack-protector"
-		    SSP_LDFLAGS="-Wc,-fstack-protector"
+	    AX_CHECK_COMPILE_FLAG([-fstack-protector-all], [
+		AX_CHECK_LINK_FLAG([-fstack-protector-all], [
+		    SSP_CFLAGS="-fstack-protector-all"
+		    SSP_LDFLAGS="-Wc,-fstack-protector-all"
 		])
 	    ])
+	    if test -z "$SSP_CFLAGS"; then
+		AX_CHECK_COMPILE_FLAG([-fstack-protector], [
+		    AX_CHECK_LINK_FLAG([-fstack-protector], [
+			SSP_CFLAGS="-fstack-protector"
+			SSP_LDFLAGS="-Wc,-fstack-protector"
+		    ])
+		])
+	    fi
 	fi
     fi
     AX_CHECK_LINK_FLAG([-Wl,-z,relro], [LDFLAGS="${LDFLAGS} -Wl,-z,relro"])
