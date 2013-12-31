@@ -332,9 +332,9 @@ sudoers_policy_deserialize_info(void *v, char **runas_user, char **runas_group)
     if ((p = strchr(user_runhost, '.')))
 	user_srunhost = estrndup(user_runhost, (size_t)(p - user_runhost));
     if (user_cwd == NULL)
-	user_cwd = "unknown";
+	user_cwd = estrdup("unknown");
     if (user_tty == NULL)
-	user_tty = "unknown"; /* user_ttypath remains NULL */
+	user_tty = estrdup("unknown"); /* user_ttypath remains NULL */
 
     if (groups != NULL && groups[0] != '\0') {
 	/* parse_gid_list() will call fatalx() on error. */
