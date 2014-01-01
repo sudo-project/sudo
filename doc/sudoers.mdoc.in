@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2013
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2014
 .\"	Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd December 3, 2013
+.Dd January 1, 2014
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2680,7 +2680,7 @@ it will
 .Dq roll over
 to zero, after which
 .Nm sudoers
-will truncate and re-use any existing I/O log pathnames.
+will truncate and re-use any existing I/O log path names.
 .Pp
 This setting is only supported by version 1.8.7 or higher.
 .It noexec_file
@@ -4035,6 +4035,38 @@ to unintended privilege escalation.
 In the specific case of an editor, a safer approach is to give the
 user permission to run
 .Nm sudoedit .
+.Ss Secure editing
+The
+.Em sudoers
+plugin includes
+.Nm sudoedit
+support which allows users to securely edit files with the editor
+of their choice.
+As
+.Nm sudoedit
+is a built-in command, it must be specified in
+.Em sudoers
+without a leading path.
+However, it may take command line arguments just as a normal command does.
+For example, to allow user operator to edit the
+.Dq message of the day
+file:
+.Bd -literal -offset indent
+operator	sudoedit /etc/motd
+.Ed
+.Pp
+The operator user then runs
+.Nm sudoedit
+as follows:
+.Bd -literal -offset indent
+$ sudoedit /etc/motd
+.Ed
+.Pp
+The editor will run as the operator user, not root, on a temporary copy of
+.Pa /etc/motd .
+After the file has been edited,
+.Pa /etc/motd
+will be updated with the contents of the temporary copy.
 .Ss Time stamp file checks
 .Em sudoers
 will check the ownership of its time stamp directory
