@@ -4387,7 +4387,8 @@ operations (such as changing or overwriting files) that could lead
 to unintended privilege escalation.
 In the specific case of an editor, a safer approach is to give the
 user permission to run
-\fBsudoedit\fR.
+\fBsudoedit\fR
+(see below).
 .SS "Secure editing"
 The
 \fIsudoers\fR

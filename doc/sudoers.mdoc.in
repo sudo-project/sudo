@@ -4034,7 +4034,8 @@ operations (such as changing or overwriting files) that could lead
 to unintended privilege escalation.
 In the specific case of an editor, a safer approach is to give the
 user permission to run
-.Nm sudoedit .
+.Nm sudoedit
+(see below).
 .Ss Secure editing
 The
 .Em sudoers

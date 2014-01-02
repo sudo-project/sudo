@@ -2145,7 +2145,7 @@ SSEECCUURRIITTYY NNOOTTEESS
      as root are still capable of many potentially hazardous operations (such
      as changing or overwriting files) that could lead to unintended privilege
      escalation.  In the specific case of an editor, a safer approach is to
-     give the user permission to run ssuuddooeeddiitt.
+     give the user permission to run ssuuddooeeddiitt (see below).
 
    SSeeccuurree eeddiittiinngg
      The _s_u_d_o_e_r_s plugin includes ssuuddooeeddiitt support which allows users to
