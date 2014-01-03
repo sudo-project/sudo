@@ -176,13 +176,13 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
 		sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		    "dup2(%d, %d)", pfd->lowfd, pfd->highfd);
 	    }
-	    if (fcntl(pfd->highfd, F_SETFL, pfd->flags) == -1) {
+	    if (fcntl(pfd->highfd, F_SETFD, pfd->flags) == -1) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "fcntl(%d, F_SETFL, %d): %s", pfd->highfd,
+		    "fcntl(%d, F_SETFD, %d): %s", pfd->highfd,
 		    pfd->flags, strerror(errno));
 	    } else {
 		sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-		    "fcntl(%d, F_SETFL, %d)", pfd->highfd, pfd->flags);
+		    "fcntl(%d, F_SETFD, %d)", pfd->highfd, pfd->flags);
 	    }
 	    (void) close(pfd->lowfd);
 	}
