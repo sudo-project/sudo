@@ -378,9 +378,12 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
 	    utmp_user = details->utmp_user ? details->utmp_user : user_details.username;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "allocate pty for I/O logging");
 	pty_setup(details->euid, user_details.tty, utmp_user);
-    } else if (!ISSET(details->flags, CD_SET_TIMEOUT) &&
+    } else if (!ISSET(details->flags, CD_SET_TIMEOUT|CD_SUDOEDIT) &&
 	policy_plugin.u.policy->close == NULL) {
-	/* If no I/O logging, timeout or policy close we can exec directly. */
+	/*
+	 * If there is no policy close function, no I/O logging or pty,
+	 * and we were not invoked as sudoedit, just exec directly.
+	 */
 	exec_cmnd(details, cstat, -1);
 	goto done;
     }
