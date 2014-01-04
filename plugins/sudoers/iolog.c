@@ -301,7 +301,7 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
     pathbuf[len] = '\0';
     strlcat(pathbuf, iol->suffix, PATH_MAX);
     if (iol->enabled) {
-	fd = open(pathbuf, O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR);
+	fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
 	if (fd != -1) {
 	    fcntl(fd, F_SETFD, FD_CLOEXEC);
 #ifdef HAVE_ZLIB_H
@@ -503,7 +503,7 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
 
     pathbuf[len] = '\0';
     strlcat(pathbuf, "/log", PATH_MAX);
-    fd = open(pathbuf, O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR);
+    fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL)
 	log_fatal(USE_ERRNO, N_("unable to create %s"), pathbuf);
 
@@ -598,7 +598,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     gettimeofday(&last_time, NULL);
     write_info_log(pathbuf, len, &details, argv, &last_time);
 
-    /* Create the timing I/O log files. */
+    /* Create the timing and I/O log files. */
     for (i = 0; i < IOFD_MAX; i++)
 	open_io_fd(pathbuf, len, &io_log_files[i], iolog_compress);
 
