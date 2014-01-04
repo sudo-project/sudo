@@ -204,11 +204,15 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	if (len > 0 && (size_t)len < sizeof(fallback)) {
 	    int fd2 = open(fallback, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
 	    if (fd2 != -1) {
-		nread = read(fd2, buf, sizeof(buf));
+		nread = read(fd2, buf, sizeof(buf) - 1);
 		if (nread > 0) {
+		    buf[nread] = '\0';
 		    id = strtoul(buf, &ep, 36);
-		    if (ep == buf || *ep != '\0' || id >= sessid_max)
+		    if (ep == buf || *ep != '\n' || id >= sessid_max) {
+			sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			    "%s: bad sequence number: %s", fallback, buf);
 			id = 0;
+		    }
 		}
 		close(fd2);
 	    }
@@ -217,13 +221,17 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 
     /* Read current seq number (base 36). */
     if (id == 0) {
-	nread = read(fd, buf, sizeof(buf));
+	nread = read(fd, buf, sizeof(buf) - 1);
 	if (nread != 0) {
 	    if (nread == -1)
 		log_fatal(USE_ERRNO, N_("unable to read %s"), pathbuf);
+	    buf[nread] = '\0';
 	    id = strtoul(buf, &ep, 36);
-	    if (ep == buf || *ep != '\0' || id >= sessid_max)
+	    if (ep == buf || *ep != '\n' || id >= sessid_max) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "%s: bad sequence number: %s", pathbuf, buf);
 		id = 0;
+	    }
 	}
     }
     id++;
