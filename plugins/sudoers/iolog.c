@@ -206,9 +206,11 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	    if (fd2 != -1) {
 		nread = read(fd2, buf, sizeof(buf) - 1);
 		if (nread > 0) {
+		    if (buf[nread - 1] == '\n')
+			nread--;
 		    buf[nread] = '\0';
 		    id = strtoul(buf, &ep, 36);
-		    if (ep == buf || *ep != '\n' || id >= sessid_max) {
+		    if (ep == buf || *ep != '\0' || id >= sessid_max) {
 			sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			    "%s: bad sequence number: %s", fallback, buf);
 			id = 0;
@@ -225,9 +227,11 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 	if (nread != 0) {
 	    if (nread == -1)
 		log_fatal(USE_ERRNO, N_("unable to read %s"), pathbuf);
+	    if (buf[nread - 1] == '\n')
+		nread--;
 	    buf[nread] = '\0';
 	    id = strtoul(buf, &ep, 36);
-	    if (ep == buf || *ep != '\n' || id >= sessid_max) {
+	    if (ep == buf || *ep != '\0' || id >= sessid_max) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "%s: bad sequence number: %s", pathbuf, buf);
 		id = 0;
