@@ -32,6 +32,11 @@ What's new in Sudo 1.8.9?
 
  * The closefrom() emulation on Mac OS X now uses /dev/fd if possible.
 
+ * Fixed a bug where sudoedit would not update the original file
+   from the temporary when PAM or I/O logging is not enabled.
+
+ * When recycling I/O logs, the log files are now truncated properly.
+
  * Fixes bugs #621, #622, #623, #624, #625, #626
 
 What's new in Sudo 1.8.8?
