@@ -65,9 +65,12 @@ disable_execute(char *const envp[])
 
 #ifdef HAVE_PRIV_SET
     /* Solaris privileges, remove PRIV_PROC_EXEC post-execve. */
+    (void)priv_set(PRIV_ON, PRIV_INHERITABLE, "PRIV_FILE_DAC_READ", NULL);
+    (void)priv_set(PRIV_ON, PRIV_INHERITABLE, "PRIV_FILE_DAC_WRITE", NULL);
+    (void)priv_set(PRIV_ON, PRIV_INHERITABLE, "PRIV_FILE_DAC_SEARCH", NULL);
     if (priv_set(PRIV_OFF, PRIV_LIMIT, "PRIV_PROC_EXEC", NULL) == 0)
-	debug_return_ptr(envp);
-    warning(_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
+	debug_return_const_ptr(envp);
+    warning(U_("unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"));
 #endif /* HAVE_PRIV_SET */
 
 #ifdef _PATH_SUDO_NOEXEC
@@ -127,7 +130,7 @@ disable_execute(char *const envp[])
     envp = nenvp;
 #endif /* _PATH_SUDO_NOEXEC */
 
-    debug_return_ptr(envp);
+    debug_return_const_ptr(envp);
 }
 
 /*

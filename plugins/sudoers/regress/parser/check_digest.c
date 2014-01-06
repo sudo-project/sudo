@@ -81,6 +81,19 @@ static struct digest_function {
     }
 };
 
+#define NUM_TESTS	8
+static const char *test_strings[NUM_TESTS] = {
+    "",
+    "a",
+    "abc",
+    "message digest",
+    "abcdefghijklmnopqrstuvwxyz",
+    "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+    "12345678901234567890123456789012345678901234567890123456789"
+	"012345678901234567890",
+};
+
 int
 main(int argc, char *argv[])
 {
@@ -90,23 +103,12 @@ main(int argc, char *argv[])
     unsigned char digest[SHA512_DIGEST_LENGTH];
     static const char hex[] = "0123456789abcdef";
     unsigned char buf[1000];
-    unsigned const char *test_strings[] = {
-	"",
-	"a",
-	"abc",
-	"message digest",
-	"abcdefghijklmnopqrstuvwxyz",
-	"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-	    "0123456789",
-	"12345678901234567890123456789012345678901234567890123456789"
-	    "012345678901234567890",
-    };
 
     for (func = digest_functions; func->digest_name != NULL; func++) {
-	for (i = 0; i < 8; i++) {
+	for (i = 0; i < NUM_TESTS; i++) {
 	    func->init(&ctx);
-	    func->update(&ctx, test_strings[i], strlen(test_strings[i]));
+	    func->update(&ctx, (unsigned char *)test_strings[i],
+		strlen(test_strings[i]));
 	    func->final(digest, &ctx);
 	    printf("%s (\"%s\") = ", func->digest_name, test_strings[i]);
 	    for (j = 0; j < func->digest_len; j++) {

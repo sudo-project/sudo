@@ -55,6 +55,7 @@
 #include "sudo_plugin.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
+#include "sudo_util.h"
 #include "secure_path.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
@@ -65,8 +66,6 @@
 #else
 # define ROOT_UID	0
 #endif
-
-extern bool atobool(const char *str); /* atobool.c */
 
 struct sudo_conf_table {
     const char *name;
@@ -110,13 +109,14 @@ static struct sudo_conf_data {
     int group_source;
     int max_groups;
     const char *debug_flags;
-    struct sudo_conf_paths paths[5];
     struct plugin_info_list plugins;
+    struct sudo_conf_paths paths[5];
 } sudo_conf_data = {
     true,
     GROUP_SOURCE_ADAPTIVE,
     -1,
     NULL,
+    TAILQ_HEAD_INITIALIZER(sudo_conf_data.plugins),
     {
 #define SUDO_CONF_ASKPASS_IDX	0
 	{ "askpass", sizeof("askpass") - 1, _PATH_SUDO_ASKPASS },
@@ -173,7 +173,7 @@ set_var_group_source(const char *entry, const char *conf_file)
     } else if (strcasecmp(entry, "dynamic") == 0) {
 	sudo_conf_data.group_source = GROUP_SOURCE_DYNAMIC;
     } else {
-	warningx(_("unsupported group source `%s' in %s, line %d"), entry,
+	warningx(U_("unsupported group source `%s' in %s, line %d"), entry,
 	    conf_file, conf_lineno);
     }
 }
@@ -181,16 +181,14 @@ set_var_group_source(const char *entry, const char *conf_file)
 static void
 set_var_max_groups(const char *entry, const char *conf_file)
 {
-    long lval;
-    char *ep;
+    int max_groups;
 
-    lval = strtol(entry, &ep, 10);
-    if (*entry == '\0' || *ep != '\0' || lval <= 0 || lval > INT_MAX ||
-	(errno == ERANGE && lval == LONG_MAX)) {
-	warningx(_("invalid max groups `%s' in %s, line %d"), entry,
-		    conf_file, conf_lineno);
+    max_groups = strtonum(entry, 1, INT_MAX, NULL);
+    if (max_groups > 0) {
+	sudo_conf_data.max_groups = max_groups;
     } else {
-	sudo_conf_data.max_groups = (int)lval;
+	warningx(U_("invalid max groups `%s' in %s, line %d"), entry,
+	    conf_file, conf_lineno);
     }
 }
 
@@ -302,10 +300,8 @@ set_plugin(const char *entry, const char *conf_file)
     info->symbol_name = estrndup(name, namelen);
     info->path = estrndup(path, pathlen);
     info->options = options;
-    info->prev = info;
-    /* info->next = NULL; */
     info->lineno = conf_lineno;
-    tq_append(&sudo_conf_data.plugins, info);
+    TAILQ_INSERT_TAIL(&sudo_conf_data.plugins, info, entries);
 }
 
 const char *
@@ -391,20 +387,20 @@ sudo_conf_read(const char *conf_file)
 	    case SUDO_PATH_MISSING:
 		/* Root should always be able to read sudo.conf. */
 		if (errno != ENOENT && geteuid() == ROOT_UID)
-		    warning(_("unable to stat %s"), conf_file);
+		    warning(U_("unable to stat %s"), conf_file);
 		goto done;
 	    case SUDO_PATH_BAD_TYPE:
-		warningx(_("%s is not a regular file"), conf_file);
+		warningx(U_("%s is not a regular file"), conf_file);
 		goto done;
 	    case SUDO_PATH_WRONG_OWNER:
-		warningx(_("%s is owned by uid %u, should be %u"),
+		warningx(U_("%s is owned by uid %u, should be %u"),
 		    conf_file, (unsigned int) sb.st_uid, ROOT_UID);
 		goto done;
 	    case SUDO_PATH_WORLD_WRITABLE:
-		warningx(_("%s is world writable"), conf_file);
+		warningx(U_("%s is world writable"), conf_file);
 		goto done;
 	    case SUDO_PATH_GROUP_WRITABLE:
-		warningx(_("%s is group writable"), conf_file);
+		warningx(U_("%s is group writable"), conf_file);
 		goto done;
 	    default:
 		/* NOTREACHED */
@@ -414,7 +410,7 @@ sudo_conf_read(const char *conf_file)
 
     if ((fp = fopen(conf_file, "r")) == NULL) {
 	if (errno != ENOENT && geteuid() == ROOT_UID)
-	    warning(_("unable to open %s"), conf_file);
+	    warning(U_("unable to open %s"), conf_file);
 	goto done;
     }
 

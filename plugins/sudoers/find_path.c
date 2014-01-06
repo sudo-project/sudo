@@ -105,7 +105,7 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
 	 * Resolve the path and exit the loop if found.
 	 */
 	len = snprintf(command, sizeof(command), "%s/%s", path, infile);
-	if (len <= 0 || len >= sizeof(command)) {
+	if (len <= 0 || (size_t)len >= sizeof(command)) {
 	    errno = ENAMETOOLONG;
 	    fatal("%s", infile);
 	}
@@ -122,7 +122,7 @@ find_path(char *infile, char **outfile, struct stat *sbp, char *path,
      */
     if (!found && checkdot) {
 	len = snprintf(command, sizeof(command), "./%s", infile);
-	if (len <= 0 || len >= sizeof(command)) {
+	if (len <= 0 || (size_t)len >= sizeof(command)) {
 	    errno = ENAMETOOLONG;
 	    fatal("%s", infile);
 	}

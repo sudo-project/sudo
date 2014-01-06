@@ -246,6 +246,7 @@ sudo_pam_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 	    (void) pam_end(pamh, *pam_status | PAM_DATA_SILENT);
 	    pamh = NULL;
 	    status = AUTH_FAILURE;
+	    goto done;
 	}
     }
 

@@ -65,12 +65,12 @@ sub mkdep {
 
     # Expand some configure bits
     $makefile =~ s:\@DEV\@::g;
-    $makefile =~ s:\@COMMON_OBJS\@:aix.lo:;
+    $makefile =~ s:\@COMMON_OBJS\@:aix.lo event_poll.lo event_select.lo:;
     $makefile =~ s:\@SUDO_OBJS\@:openbsd.o preload.o selinux.o sesh.o solaris.o sudo_noexec.lo:;
     $makefile =~ s:\@SUDOERS_OBJS\@:bsm_audit.lo linux_audit.lo ldap.lo sssd.lo:;
     # XXX - fill in AUTH_OBJS from contents of the auth dir instead
     $makefile =~ s:\@AUTH_OBJS\@:afs.lo aix_auth.lo bsdauth.lo dce.lo fwtk.lo getspwuid.lo kerb5.lo pam.lo passwd.lo rfc1938.lo secureware.lo securid5.lo sia.lo:;
-    $makefile =~ s:\@LTLIBOBJS\@:closefrom.lo dlopen.lo fnmatch.lo getcwd.lo getgrouplist.lo getline.lo getprogname.lo getopt_long.lo glob.lo isblank.lo memrchr.lo memset_s.lo mksiglist.lo mksigname.lo mktemp.lo nanosleep.lo pw_dup.lo sig2str.lo siglist.lo signame.lo snprintf.lo strlcat.lo strlcpy.lo strsignal.lo utimes.lo globtest.o fnm_test.o:;
+    $makefile =~ s:\@LTLIBOBJS\@:closefrom.lo fnmatch.lo getaddrinfo.lo getcwd.lo getgrouplist.lo getline.lo getopt_long.lo glob.lo isblank.lo memrchr.lo memset_s.lo mksiglist.lo mksigname.lo mktemp.lo pw_dup.lo sig2str.lo siglist.lo signame.lo snprintf.lo strlcat.lo strlcpy.lo strsignal.lo strtonum.lo utimes.lo globtest.o fnm_test.o:;
 
     # Parse OBJS lines
     my %objs;
@@ -104,7 +104,7 @@ sub mkdep {
     #$dir_vars{'top_builddir'} = '.';
     $dir_vars{'incdir'} = 'include';
 
-    # Find implicit rules for generate .o and .lo files
+    # Find implicit rules for generated .o and .lo files
     %implicit = ();
     while ($makefile =~ /^\.c\.(l?o):\s*\n\t+(.*)$/mg) {
 	$implicit{$1} = $2;
@@ -180,7 +180,7 @@ exit(0);
 
 sub find_depends {
     my $src = $_[0];
-    my ($deps, $code, @headers);
+    my ($deps, $code, %headers);
 
     if ($src !~ /\//) {
 	# XXX - want build dir not src dir
@@ -205,13 +205,15 @@ sub find_depends {
     while ($code =~ /^#\s*include\s+["<](\S+)[">]/mg) {
 	my ($hdr, $hdr_path) = find_header($1);
 	if (defined($hdr)) {
-	    push(@headers, $hdr);
+	    $headers{$hdr} = 1;
 	    # Look for other includes in the .h file
-	    push(@headers, find_depends($hdr_path));
+	    foreach (find_depends($hdr_path)) {
+		$headers{$_} = 1;
+	    }
 	}
     }
 
-    @headers;
+    sort keys %headers;
 }
 
 # find the path to a header file

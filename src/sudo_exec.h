@@ -18,6 +18,13 @@
 #define _SUDO_EXEC_H
 
 /*
+ * Older systems may not support MSG_WAITALL but it shouldn't really be needed.
+ */
+#ifndef MSG_WAITALL
+# define MSG_WAITALL 0
+#endif
+
+/*
  * Special values to indicate whether continuing in foreground or background.
  */
 #define SIGCONT_FG	-2
@@ -45,18 +52,18 @@
  */
 
 /* exec.c */
+struct sudo_event_base;
 int sudo_execve(const char *path, char *const argv[], char *const envp[], int noexec);
 extern volatile pid_t cmnd_pid;
 
 /* exec_pty.c */
 struct command_details;
 struct command_status;
-int fork_pty(struct command_details *details, int sv[], int *maxfd, sigset_t *omask);
-int perform_io(fd_set *fdsr, fd_set *fdsw, struct command_status *cstat);
+int fork_pty(struct command_details *details, int sv[], sigset_t *omask);
 int suspend_parent(int signo);
 void exec_cmnd(struct command_details *details, struct command_status *cstat,
-    int *errfd);
-void fd_set_iobs(fd_set *fdsr, fd_set *fdsw);
+    int errfd);
+void add_io_events(struct sudo_event_base *evbase);
 #ifdef SA_SIGINFO
 void handler(int s, siginfo_t *info, void *context);
 #else

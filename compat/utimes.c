@@ -22,7 +22,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <stdio.h>
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
 

@@ -88,7 +88,7 @@ bsm_audit_success(char **exec_args)
 	if (auditon(A_GETCOND, (caddr_t)&au_cond, sizeof(long)) < 0) {
 		if (errno == AUDIT_NOT_CONFIGURED)
 			return;
-		fatal(_("Could not determine audit condition"));
+		fatal(U_("Could not determine audit condition"));
 	}
 	if (au_cond == AUC_NOAUDIT)
 		debug_return;
@@ -131,7 +131,7 @@ bsm_audit_success(char **exec_args)
 #else
 	if (au_close(aufd, 1, AUE_sudo) == -1)
 #endif
-		fatal(_("unable to commit audit record"));
+		fatal(U_("unable to commit audit record"));
 	debug_return;
 }
 
@@ -155,7 +155,7 @@ bsm_audit_failure(char **exec_args, char const *const fmt, va_list ap)
 	if (auditon(A_GETCOND, (caddr_t)&au_cond, sizeof(long)) < 0) {
 		if (errno == AUDIT_NOT_CONFIGURED)
 			debug_return;
-		fatal(_("Could not determine audit condition"));
+		fatal(U_("Could not determine audit condition"));
 	}
 	if (au_cond == AUC_NOAUDIT)
 		debug_return;
@@ -196,6 +196,6 @@ bsm_audit_failure(char **exec_args, char const *const fmt, va_list ap)
 #else
 	if (au_close(aufd, 1, AUE_sudo) == -1)
 #endif
-		fatal(_("unable to commit audit record"));
+		fatal(U_("unable to commit audit record"));
 	debug_return;
 }

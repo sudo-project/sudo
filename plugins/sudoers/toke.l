@@ -79,12 +79,9 @@
 #include "sha2.h"
 #include "secure_path.h"
 
-extern YYSTYPE sudoerslval;
-extern bool parse_error;
-extern bool sudoers_warnings;
-int sudolineno;
-int last_token;
-char *sudoers;
+int sudolineno;			/* current sudoers line number. */
+int last_token;			/* last token that was parsed. */
+char *sudoers;			/* sudoers file being parsed. */
 
 /* Default sudoers path, mode and owner (may be set via sudo.conf) */
 const char *sudoers_file = _PATH_SUDOERS;
@@ -288,7 +285,7 @@ DEFVAR			[a-z_]+
 
 <WANTDIGEST>[A-Za-z0-9\+/=]+ {
 			    /* Only return DIGEST if the length is correct. */
-			    size_t len;
+			    int len;
 			    if (sudoerstext[sudoersleng - 1] == '=') {
 				/* use padding */
 				len = 4 * ((digest_len + 2) / 3);
@@ -699,10 +696,16 @@ sudoedit		{
 			    continued = true;
 			}			/* throw away EOL after \ */
 
-<INITIAL,STARTDEFS,INDEFS>#(-[^\n0-9].*|[^\n0-9-].*)?\n	{
-			    BEGIN INITIAL;
-			    sudolineno++;
-			    continued = false;
+<INITIAL,STARTDEFS,INDEFS>#(-[^\n0-9].*|[^\n0-9-].*)?\n?	{
+			    if (sudoerstext[sudoersleng - 1] == '\n') {
+				/* comment ending in a newline */
+				BEGIN INITIAL;
+				sudolineno++;
+				continued = false;
+			    } else if (!feof(yyin)) {
+				LEXTRACE("ERROR ");
+				LEXRETURN(ERROR);
+			    }
 			    LEXTRACE("#\n");
 			    LEXRETURN(COMMENT);
 			}			/* comment, not uid/gid */
@@ -724,37 +727,42 @@ sudoedit		{
 
 %%
 struct path_list {
+    SLIST_ENTRY(path_list) entries;
     char *path;
-    struct path_list *next;
 };
+
+SLIST_HEAD(path_list_head, path_list);
 
 struct include_stack {
     YY_BUFFER_STATE bs;
     char *path;
-    struct path_list *more; /* more files in case of includedir */
+    struct path_list_head more; /* more files in case of includedir */
     int lineno;
     bool keepopen;
 };
 
+/*
+ * Compare two struct path_list structs in reverse order.
+ */
 static int
 pl_compare(const void *v1, const void *v2)
 {
     const struct path_list * const *p1 = v1;
     const struct path_list * const *p2 = v2;
 
-    return strcmp((*p1)->path, (*p2)->path);
+    return strcmp((*p2)->path, (*p1)->path);
 }
 
 static char *
 switch_dir(struct include_stack *stack, char *dirpath)
 {
     DIR *dir;
-    int i, count = 0;
+    unsigned int i, count = 0;
+    unsigned int max_paths = 32;
     char *path = NULL;
     struct dirent *dent;
     struct stat sb;
-    struct path_list *pl, *first = NULL;
-    struct path_list **sorted = NULL;
+    struct path_list *pl, **paths = NULL;
     debug_decl(switch_dir, SUDO_DEBUG_PARSER)
 
     if (!(dir = opendir(dirpath))) {
@@ -763,6 +771,11 @@ switch_dir(struct include_stack *stack, char *dirpath)
 	    sudoerserror(NULL);
 	}
 	goto done;
+    }
+    paths = malloc(sizeof(*paths) * max_paths);
+    if (paths == NULL) {
+	closedir(dir);
+	goto bad;
     }
     while ((dent = readdir(dir))) {
 	/* Ignore files that end in '~' or have a '.' in them. */
@@ -783,54 +796,47 @@ switch_dir(struct include_stack *stack, char *dirpath)
 	if (pl == NULL)
 	    goto bad;
 	pl->path = path;
-	pl->next = first;
-	first = pl;
+	if (count >= max_paths) {
+	    struct path_list **tmp;
+	    max_paths <<= 1;
+	    tmp = realloc(paths, sizeof(*paths) * max_paths);
+	    if (tmp == NULL) {
+		closedir(dir);
+		goto bad;
+	    }
+	    paths = tmp;
+	}
+	paths[count++] = pl;
 	path = NULL;
-	count++;
     }
     closedir(dir);
 
     if (count == 0)
 	goto done;
 
-    /* Sort the list as an array. */
-    sorted = malloc(sizeof(*sorted) * count);
-    if (sorted == NULL)
-	goto bad;
-    pl = first;
-    for (i = 0; i < count; i++) {
-	sorted[i] = pl;
-	pl = pl->next;
-    }
-    qsort(sorted, count, sizeof(*sorted), pl_compare);
+    /* Sort the list as an array in reverse order. */
+    qsort(paths, count, sizeof(*paths), pl_compare);
 
-    /* Apply sorting to the list. */
-    first = sorted[0];
-    sorted[count - 1]->next = NULL;
-    for (i = 1; i < count; i++)
-	sorted[i - 1]->next = sorted[i];
-    efree(sorted);
+    /* Build up the list in sorted order. */
+    for (i = 0; i < count; i++) {
+	SLIST_INSERT_HEAD(&stack->more, paths[i], entries);
+    }
 
     /* Pull out the first element for parsing, leave the rest for later. */
-    if (count) {
-	path = first->path;
-	pl = first->next;
-	efree(first);
-	stack->more = pl;
-    } else {
-	path = NULL;
-    }
+    pl = SLIST_FIRST(&stack->more);
+    SLIST_REMOVE_HEAD(&stack->more, entries);
+    path = pl->path;
+    efree(pl);
 done:
+    efree(paths);
     efree(dirpath);
     debug_return_str(path);
 bad:
-    while (first != NULL) {
-	pl = first;
-	first = pl->next;
-	efree(pl->path);
-	efree(pl);
+    for (i = 0; i < count; i++) {
+	efree(paths[i]->path);
+	efree(paths[i]);
     }
-    efree(sorted);
+    efree(paths);
     efree(dirpath);
     efree(path);
     debug_return_str(NULL);
@@ -851,8 +857,8 @@ init_lexer(void)
 
     while (idepth) {
 	idepth--;
-	while ((pl = istack[idepth].more) != NULL) {
-	    istack[idepth].more = pl->next;
+	while ((pl = SLIST_FIRST(&istack[idepth].more)) != NULL) {
+	    SLIST_REMOVE_HEAD(&istack[idepth].more, entries);
 	    efree(pl->path);
 	    efree(pl);
 	}
@@ -895,6 +901,7 @@ _push_include(char *path, bool isdir)
 	    debug_return_bool(false);
 	}
     }
+    SLIST_INIT(&istack[idepth].more);
     if (isdir) {
 	struct stat sb;
 	switch (sudo_secure_dir(path, sudoers_uid, sudoers_gid, &sb)) {
@@ -910,19 +917,19 @@ _push_include(char *path, bool isdir)
 		debug_return_bool(false);
 	    case SUDO_PATH_WRONG_OWNER:
 		if (sudoers_warnings) {
-		    warningx(_("%s is owned by uid %u, should be %u"),   
+		    warningx(U_("%s is owned by uid %u, should be %u"),   
 			path, (unsigned int) sb.st_uid,
 			(unsigned int) sudoers_uid);
 		}
 		debug_return_bool(false);
 	    case SUDO_PATH_WORLD_WRITABLE:
 		if (sudoers_warnings) {
-		    warningx(_("%s is world writable"), path);
+		    warningx(U_("%s is world writable"), path);
 		}
 		debug_return_bool(false);
 	    case SUDO_PATH_GROUP_WRITABLE:
 		if (sudoers_warnings) {
-		    warningx(_("%s is owned by gid %u, should be %u"),
+		    warningx(U_("%s is owned by gid %u, should be %u"),
 			path, (unsigned int) sb.st_gid,
 			(unsigned int) sudoers_gid);
 		}
@@ -938,10 +945,10 @@ _push_include(char *path, bool isdir)
 	while ((fp = open_sudoers(path, false, &keepopen)) == NULL) {
 	    /* Unable to open path in includedir, go to next one, if any. */
 	    efree(path);
-	    if ((pl = istack[idepth].more) == NULL)
+	    if ((pl = SLIST_FIRST(&istack[idepth].more)) == NULL)
 		debug_return_bool(false);
+	    SLIST_REMOVE_HEAD(&istack[idepth].more, entries);
 	    path = pl->path;
-	    istack[idepth].more = pl->next;
 	    efree(pl);
 	}
     } else {
@@ -950,7 +957,6 @@ _push_include(char *path, bool isdir)
 	    sudoerserror(NULL);
 	    debug_return_bool(false);
 	}
-	istack[idepth].more = NULL;
     }
     /* Push the old (current) file and open the new one. */
     istack[idepth].path = sudoers; /* push old path */
@@ -979,10 +985,10 @@ pop_include(void)
 	fclose(YY_CURRENT_BUFFER->yy_input_file);
     sudoers_delete_buffer(YY_CURRENT_BUFFER);
     /* If we are in an include dir, move to the next file. */
-    while ((pl = istack[idepth - 1].more) != NULL) {
+    while ((pl = SLIST_FIRST(&istack[idepth - 1].more)) != NULL) {
+	SLIST_REMOVE_HEAD(&istack[idepth - 1].more, entries);
 	fp = open_sudoers(pl->path, false, &keepopen);
 	if (fp != NULL) {
-	    istack[idepth - 1].more = pl->next;
 	    efree(sudoers);
 	    sudoers = pl->path;
 	    sudolineno = 1;
@@ -991,7 +997,6 @@ pop_include(void)
 	    break;
 	}
 	/* Unable to open path in include dir, go to next one. */
-	istack[idepth - 1].more = pl->next;
 	efree(pl->path);
 	efree(pl);
     }

@@ -31,17 +31,21 @@
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
+#include "queue.h"
 #include "sudo_plugin.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 #include "gettext.h"
 
+struct sudo_fatal_callback {
+    SLIST_ENTRY(sudo_fatal_callback) entries;
+    void (*func)(void);
+};
+SLIST_HEAD(sudo_fatal_callback_list, sudo_fatal_callback);
+
 sigjmp_buf fatal_jmp;
 static bool setjmp_enabled = false;
-static struct sudo_fatal_callback {
-    void (*func)(void);
-    struct sudo_fatal_callback *next;
-} *callbacks;
+static struct sudo_fatal_callback_list callbacks;
 
 static void _warning(int, const char *, va_list);
 
@@ -51,15 +55,15 @@ do_cleanup(void)
     struct sudo_fatal_callback *cb;
 
     /* Run callbacks, removing them from the list as we go. */
-    while ((cb = callbacks) != NULL) {
-	callbacks = cb->next;
+    while ((cb = SLIST_FIRST(&callbacks)) != NULL) {
+	SLIST_REMOVE_HEAD(&callbacks, entries);
 	cb->func();
 	free(cb);
     }
 }
 
 void
-fatal2(const char *fmt, ...)
+fatal_nodebug(const char *fmt, ...)
 {
     va_list ap;
 
@@ -74,7 +78,7 @@ fatal2(const char *fmt, ...)
 }
 
 void
-fatalx2(const char *fmt, ...)
+fatalx_nodebug(const char *fmt, ...)
 {
     va_list ap;
 
@@ -89,7 +93,7 @@ fatalx2(const char *fmt, ...)
 }
 
 void
-vfatal2(const char *fmt, va_list ap)
+vfatal_nodebug(const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
     do_cleanup();
@@ -100,7 +104,7 @@ vfatal2(const char *fmt, va_list ap)
 }
 
 void
-vfatalx2(const char *fmt, va_list ap)
+vfatalx_nodebug(const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
     do_cleanup();
@@ -111,7 +115,7 @@ vfatalx2(const char *fmt, va_list ap)
 }
 
 void
-warning2(const char *fmt, ...)
+warning_nodebug(const char *fmt, ...)
 {
     va_list ap;
 
@@ -121,7 +125,7 @@ warning2(const char *fmt, ...)
 }
 
 void
-warningx2(const char *fmt, ...)
+warningx_nodebug(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -130,13 +134,13 @@ warningx2(const char *fmt, ...)
 }
 
 void
-vwarning2(const char *fmt, va_list ap)
+vwarning_nodebug(const char *fmt, va_list ap)
 {
     _warning(1, fmt, ap);
 }
 
 void
-vwarningx2(const char *fmt, va_list ap)
+vwarningx_nodebug(const char *fmt, va_list ap)
 {
     _warning(0, fmt, ap);
 }
@@ -173,8 +177,7 @@ fatal_callback_register(void (*func)(void))
     if (cb == NULL)
 	return -1;
     cb->func = func;
-    cb->next = callbacks;
-    callbacks = cb;
+    SLIST_INSERT_HEAD(&callbacks, cb, entries);
 
     return 0;
 }

@@ -1,4 +1,4 @@
-/* config.h.in.  Generated from configure.in by autoheader.  */
+/* config.h.in.  Generated from configure.ac by autoheader.  */
 
 #ifndef _SUDO_CONFIG_H
 #define _SUDO_CONFIG_H
@@ -364,7 +364,7 @@
 /* Define to 1 if you have the <login_cap.h> header file. */
 #undef HAVE_LOGIN_CAP_H
 
-/* Define to 1 if the system has the type `long long int'. */
+/* Define to 1 if the system has the type 'long long int'. */
 #undef HAVE_LONG_LONG_INT
 
 /* Define to 1 if you have the `lrand48' function. */
@@ -396,9 +396,6 @@
 
 /* Define to 1 if you have the <mps/ldap_ssl.h> header file. */
 #undef HAVE_MPS_LDAP_SSL_H
-
-/* Define to 1 if you have the `nanosleep' function. */
-#undef HAVE_NANOSLEEP
 
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 #undef HAVE_NDIR_H
@@ -441,6 +438,9 @@
 
 /* Define to 1 if you have the <paths.h> header file. */
 #undef HAVE_PATHS_H
+
+/* Define to 1 if you have the `poll' function. */
+#undef HAVE_POLL
 
 /* Define to 1 if you have the `posix_openpt' function. */
 #undef HAVE_POSIX_OPENPT
@@ -581,6 +581,9 @@
 /* Define to 1 if you have the `strtoll' function. */
 #undef HAVE_STRTOLL
 
+/* Define to 1 if you have the `strtonum' function. */
+#undef HAVE_STRTONUM
+
 /* Define to 1 if `d_type' is a member of `struct dirent'. */
 #undef HAVE_STRUCT_DIRENT_D_TYPE
 
@@ -602,7 +605,10 @@
 /* Define to 1 if `pr_ttydev' is a member of `struct psinfo'. */
 #undef HAVE_STRUCT_PSINFO_PR_TTYDEV
 
-/* Define if your struct sockadr has an sa_len field. */
+/* Define if your struct sockaddr_in has a sin_len field. */
+#undef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
+
+/* Define if your struct sockaddr has an sa_len field. */
 #undef HAVE_STRUCT_SOCKADDR_SA_LEN
 
 /* Define to 1 if the system has the type `struct timespec'. */
@@ -717,6 +723,9 @@
 
 /* Define to 1 if you have the `unsetenv' function. */
 #undef HAVE_UNSETENV
+
+/* Define to 1 if the system has the type 'unsigned long long int'. */
+#undef HAVE_UNSIGNED_LONG_LONG_INT
 
 /* Define to 1 if you have the <util.h> header file. */
 #undef HAVE_UTIL_H
@@ -900,6 +909,9 @@
 /* Define to 1 if you want a single ticket file instead of per-tty files. */
 #undef NO_TTY_TICKETS
 
+/* Define if your C preprocessor does not support variadic macros. */
+#undef NO_VARIADIC_MACROS
+
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 
@@ -927,6 +939,9 @@
 /* Define to 1 to replace politically incorrect insults with less offensive
    ones. */
 #undef PC_INSULTS
+
+/* Enable replacement (v)snprintf if system (v)snprintf is broken. */
+#undef PREFER_PORTABLE_SNPRINTF
 
 /* The syslog priority sudo will use for unsuccessful attempts/errors. */
 #undef PRI_FAILURE
@@ -975,14 +990,15 @@
 /* The size of `long int', as computed by sizeof. */
 #undef SIZEOF_LONG_INT
 
+/* Define to 1 to compile the sudoers plugin statically into the sudo binary.
+   */
+#undef STATIC_SUDOERS_PLUGIN
+
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
 /* Define to 1 if the code in interfaces.c does not compile for you. */
 #undef STUB_LOAD_INTERFACES
-
-/* The name of the sudoers plugin, including extension. */
-#undef SUDOERS_PLUGIN
 
 /* An instance string to append to the username (separated by a slash) for
    Kerberos V authentication. */
@@ -1021,6 +1037,11 @@
 /* Define to avoid using the passwd/shadow file for authentication. */
 #undef WITHOUT_PASSWD
 
+/* Enable large inode numbers on Mac OS X 10.5.  */
+#ifndef _DARWIN_USE_64_BIT_INODE
+# define _DARWIN_USE_64_BIT_INODE 1
+#endif
+
 /* Number of bits in a file offset, on hosts where this is settable. */
 #undef _FILE_OFFSET_BITS
 
@@ -1030,10 +1051,6 @@
 /* Define to __FUNCTION__ if your compiler supports __FUNCTION__ but not
    __func__ */
 #undef __func__
-
-/* Define to `signed' or nothing if compiler does not support a signed type
-   qualifier. */
-#undef __signed
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const

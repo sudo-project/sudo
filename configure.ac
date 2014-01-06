@@ -1,10 +1,12 @@
 dnl
-dnl Process this file with GNU autoconf to produce a configure script.
+dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
 dnl Copyright (c) 1994-1996,1998-2013 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
-AC_INIT([sudo], [1.8.8], [http://www.sudo.ws/bugs/], [sudo])
+AC_PREREQ([2.59])
+AC_INIT([sudo], [1.8.9], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
+AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
 dnl Note: this must come after AC_INIT
 dnl
@@ -1388,6 +1390,9 @@ AC_ARG_ENABLE(hardening,
 AC_ARG_ENABLE(pie,
 [AS_HELP_STRING([--enable-pie], [Build sudo as a position independent executable.])])
 
+AC_ARG_ENABLE(poll,
+[AS_HELP_STRING([--disable-poll], [Use select() instead of poll().])])
+
 AC_ARG_ENABLE(admin-flag,
 [AS_HELP_STRING([--enable-admin-flag], [Whether to create a Ubuntu-style admin flag file])],
 [ case "$enableval" in
@@ -1406,6 +1411,10 @@ AC_ARG_ENABLE(nls,
 AC_ARG_ENABLE(rpath,
 [AS_HELP_STRING([--disable-rpath], [Disable passing of -Rpath to the linker])],
 [], [enable_rpath=yes])
+
+AC_ARG_ENABLE(static-sudoers,
+[AS_HELP_STRING([--enable-static-sudoers], [Build the sudoers policy module as part of the sudo binary instead as a plugin])],
+[], [enable_static_sudoers=no])
 
 AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])],
 [case $with_selinux in
@@ -1498,6 +1507,8 @@ else
 	SHLIB_EXT="$_shrext"
     fi
 fi
+LIBDL="$lt_cv_dlopen_libs"
+
 AC_MSG_CHECKING(path to sudo_noexec.so)
 AC_ARG_WITH(noexec, [AS_HELP_STRING([--with-noexec[=PATH]], [fully qualified pathname of sudo_noexec.so])],
 [case $with_noexec in
@@ -1646,7 +1657,7 @@ case "$host" in
 
 		# AIX-specific functions
 		AC_CHECK_FUNCS(getuserattr setauthdb setrlimit64)
-		COMMON_OBJS="$COMMON_OBJS aix.lo"
+		COMMON_OBJS="${COMMON_OBJS} aix.lo"
 		;;
     *-*-hiuxmpp*)
 		: ${mansectsu='1m'}
@@ -1963,6 +1974,8 @@ case "$host" in
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
+		# Darwin has a broken poll()
+		: ${enable_poll='no'}
 		# Darwin 8 and above can interpose library symbols cleanly
 		if test $OSMAJOR -ge 8; then
 		    AC_DEFINE(HAVE___INTERPOSE)
@@ -2059,7 +2072,7 @@ dnl
 AC_PROG_GCC_TRADITIONAL
 AC_C_CONST
 AC_C_VOLATILE
-# Check for variadic macro support in cpp
+AC_MSG_CHECKING([for variadic macro support in cpp])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
 AC_INCLUDES_DEFAULT
 #if defined(__GNUC__) && __GNUC__ == 2
@@ -2067,7 +2080,10 @@ AC_INCLUDES_DEFAULT
 #else
 # define sudo_fprintf(fp, ...) fprintf((fp), __VA_ARGS__)
 #endif
-], [sudo_fprintf(stderr, "a %s", "test");])], [], [AC_MSG_ERROR([Your C compiler doesn't support variadic macros, try building with gcc instead])])
+], [sudo_fprintf(stderr, "a %s", "test");])], [AC_MSG_RESULT([yes])],
+[AC_MSG_RESULT([no])
+ AC_DEFINE([NO_VARIADIC_MACROS], [1], [Define if your C preprocessor does not support variadic macros.])
+ AC_MSG_WARN([Your C preprocessor doesn't support variadic macros, debugging support will be limited])])
 
 dnl
 dnl Program checks
@@ -2108,19 +2124,26 @@ AC_CHECK_HEADERS([procfs.h] [sys/procfs.h], [AC_CHECK_MEMBERS(struct psinfo.pr_t
 #endif
 ])]
 break)
-dnl
-dnl Check for large file support.  HP-UX 11.23 has a broken sys/type.h
-dnl when large files support is enabled so work around it.
-dnl
+#
+# Check for large file support.
+#
 AC_SYS_LARGEFILE
+#
+# HP-UX may need to define _XOPEN_SOURCE_EXTENDED to expose MSG_WAITALL.
+# Also, HP-UX 11.23 has a broken sys/types.h when large files support
+# is enabled and _XOPEN_SOURCE_EXTENDED is not also defined.
+# The following test will define _XOPEN_SOURCE_EXTENDED in either case.
+#
 case "$host_os" in
-    hpux11.*)
-	AC_CACHE_CHECK([whether sys/types.h needs _XOPEN_SOURCE_EXTENDED], [sudo_cv_xopen_source_extended],
+    hpux*)
+	AC_CACHE_CHECK([whether sys/socket.h needs _XOPEN_SOURCE_EXTENDED for MSG_WAITALL], [sudo_cv_xopen_source_extended],
 	[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
-	#include <sys/socket.h>], [])], [sudo_cv_xopen_source_extended=no], [
+#	include <sys/socket.h>], [int a = MSG_WAITALL; return a;])],
+	[sudo_cv_xopen_source_extended=no], [
 	    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#define _XOPEN_SOURCE_EXTENDED
 	    AC_INCLUDES_DEFAULT
-	    #include <sys/socket.h>], [])], [sudo_cv_xopen_source_extended=yes],
+#	    include <sys/socket.h>], [int a = MSG_WAITALL; return a;])],
+	    [sudo_cv_xopen_source_extended=yes],
 	    [sudo_cv_xopen_source_extended=error])
 	])])
 	if test "$sudo_cv_xopen_source_extended" = "yes"; then
@@ -2159,13 +2182,12 @@ dnl
 SUDO_APPEND_CPPFLAGS(-D__STDC_WANT_LIB_EXT1__=1)
 AC_TYPE_MODE_T
 AC_TYPE_UID_T
-AC_CHECK_TYPE([__signed char], [], [AC_CHECK_TYPE([signed char], [AC_DEFINE(__signed, signed)], [AC_DEFINE(__signed, [])])])
 AC_CHECK_TYPE([sig_atomic_t], [], [AC_DEFINE(sig_atomic_t, int)], [#include <sys/types.h>
 #include <signal.h>])
 AC_CHECK_TYPES([sigaction_t], [], [], [#include <sys/types.h>
 #include <signal.h>])
 AC_CHECK_TYPES([struct timespec], [], [], [#include <sys/types.h>
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h>
 #endif
 #include <time.h>])
@@ -2173,7 +2195,7 @@ AC_CHECK_TYPES([struct in6_addr], [], [], [#include <sys/types.h>
 #include <netinet/in.h>])
 AC_TYPE_LONG_LONG_INT
 if test X"$ac_cv_type_long_long_int" != X"yes"; then
-    AC_MSG_ERROR(["C compiler does not appear have required long long support"])
+    AC_MSG_ERROR(["C compiler does not appear to support the long long int type"])
 fi
 AC_CHECK_SIZEOF([long int])
 AC_CHECK_TYPE(id_t, unsigned int)
@@ -2191,6 +2213,7 @@ AC_CHECK_TYPE(rsize_t, size_t)
 AC_CHECK_TYPE(errno_t, int)
 SUDO_UID_T_LEN
 SUDO_SOCK_SA_LEN
+SUDO_SOCK_SIN_LEN
 dnl
 dnl Check for utmp/utmpx struct members.
 dnl We need to include OSDEFS for glibc which only has __e_termination
@@ -2200,37 +2223,37 @@ _CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS $OSDEFS"
 if test $ac_cv_header_utmpx_h = "yes"; then
     AC_CHECK_MEMBERS([struct utmpx.ut_id, struct utmpx.ut_pid, struct utmpx.ut_tv, struct utmpx.ut_type], [], [], [
-	#include <sys/types.h>
-	#include <utmpx.h>
+#	include <sys/types.h>
+#	include <utmpx.h>
     ])
     dnl
     dnl Check for ut_exit.__e_termination first, then ut_exit.e_termination
     dnl
     AC_CHECK_MEMBERS([struct utmpx.ut_exit.__e_termination], [AC_DEFINE(HAVE_STRUCT_UTMPX_UT_EXIT)], [
 	AC_CHECK_MEMBERS([struct utmpx.ut_exit.e_termination], [AC_DEFINE(HAVE_STRUCT_UTMPX_UT_EXIT)], [], [
-	    #include <sys/types.h>
-	    #include <utmpx.h>
+#	    include <sys/types.h>
+#	    include <utmpx.h>
 	])
     ], [
-	#include <sys/types.h>
-	#include <utmpx.h>
+#	include <sys/types.h>
+#	include <utmpx.h>
     ])
 else
     AC_CHECK_MEMBERS([struct utmp.ut_id, struct utmp.ut_pid, struct utmp.ut_tv, struct utmp.ut_type, struct utmp.ut_user], [], [], [
-	#include <sys/types.h>
-	#include <utmp.h>
+#	include <sys/types.h>
+#	include <utmp.h>
     ])
     dnl
     dnl Check for ut_exit.__e_termination first, then ut_exit.e_termination
     dnl
     AC_CHECK_MEMBERS([struct utmp.ut_exit.__e_termination], [AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT)], [
 	AC_CHECK_MEMBERS([struct utmp.ut_exit.e_termination], [AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT)], [], [
-	    #include <sys/types.h>
-	    #include <utmp.h>
+#	    include <sys/types.h>
+#	    include <utmp.h>
 	])
     ], [
-	#include <sys/types.h>
-	#include <utmp.h>
+#	include <sys/types.h>
+#	include <utmp.h>
     ])
 fi
 CFLAGS="$_CFLAGS"
@@ -2300,23 +2323,23 @@ AC_CHECK_FUNCS(sysctl, [AC_CHECK_MEMBERS([struct kinfo_proc.ki_tdev], [],
 	AC_CHECK_MEMBERS([struct kinfo_proc2.p_tdev], [], [
 	    AC_CHECK_MEMBERS([struct kinfo_proc.p_tdev], [], [
 		AC_CHECK_MEMBERS([struct kinfo_proc.kp_eproc.e_tdev], [], [], [
-		    #include <sys/param.h>
-		    #include <sys/sysctl.h>
+#		    include <sys/param.h>
+#		    include <sys/sysctl.h>
 		])
 	    ], [
-		#include <sys/param.h>
-		#include <sys/sysctl.h>
+#		include <sys/param.h>
+#		include <sys/sysctl.h>
 	    ])
 	],
 	[
-	    #include <sys/param.h>
-	    #include <sys/sysctl.h>
+#	    include <sys/param.h>
+#	    include <sys/sysctl.h>
 	])
     ],
     [
-	#include <sys/param.h>
-	#include <sys/sysctl.h>
-	#include <sys/user.h>
+#	include <sys/param.h>
+#	include <sys/sysctl.h>
+#	include <sys/user.h>
     ])
 ])
 
@@ -2364,11 +2387,7 @@ SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }fnm_test"
 ])
 SUDO_FUNC_ISBLANK
-AC_REPLACE_FUNCS(memrchr memset_s pw_dup strlcpy strlcat)
-AC_CHECK_FUNCS(nanosleep, [], [
-    # On Solaris, nanosleep is in librt
-    AC_CHECK_LIB(rt, nanosleep, [REPLAY_LIBS="${REPLAY_LIBS} -lrt"], [AC_LIBOBJ(nanosleep)])
-])
+AC_REPLACE_FUNCS(memrchr memset_s pw_dup strlcpy strlcat strtonum)
 AC_CHECK_FUNCS(getopt_long, [], [AC_LIBOBJ(getopt_long)
     AC_MSG_CHECKING([for optreset])
     AC_CACHE_VAL(sudo_cv_optreset, [
@@ -2379,15 +2398,25 @@ AC_CHECK_FUNCS(getopt_long, [], [AC_LIBOBJ(getopt_long)
     AC_MSG_RESULT($sudo_cv_optreset)
 ])
 AC_CHECK_FUNCS(closefrom, [], [AC_LIBOBJ(closefrom)
-    AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [],
-	[ #include <limits.h>
-	  #include <fcntl.h> ])
+    AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [], [
+#	include <limits.h>
+#	include <fcntl.h> ])
 ])
 AC_CHECK_FUNCS(mkstemps mkdtemp, [], [
     AC_CHECK_FUNCS(random lrand48, [break])
     AC_LIBOBJ(mktemp)
 ])
-AC_CHECK_FUNCS(snprintf vsnprintf asprintf vasprintf, , [NEED_SNPRINTF=1])
+AX_FUNC_SNPRINTF
+AC_CHECK_FUNCS(asprintf vasprintf)
+if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"; then
+    # Don't add snprintf to LIBOBJS if it is already present.
+    if test X"$ac_cv_func_asprintf$ac_cv_func_vasprintf" != X"yesyes"; then
+	AC_LIBOBJ(snprintf)
+    fi
+fi
+# We wrap OpenBSD's strtonum() to get translatable error strings.
+AC_CHECK_FUNCS(strtonum)
+AC_LIBOBJ(strtonum)
 if test X"$ac_cv_type_struct_timespec" != X"no"; then
     AC_CHECK_MEMBER([struct stat.st_mtim], [AC_DEFINE(HAVE_ST_MTIM)]
 	[AC_CHECK_MEMBER([struct stat.st_mtim.st__tim], AC_DEFINE(HAVE_ST__TIM))],
@@ -2452,13 +2481,6 @@ AC_INCLUDES_DEFAULT
 #include <$ac_header_dirent>
 ])
 dnl
-dnl If NEED_SNPRINTF is set, add snprintf.c to LIBOBJS
-dnl (it contains snprintf, vsnprintf, asprintf, and vasprintf)
-dnl
-if test -n "$NEED_SNPRINTF"; then
-    AC_LIBOBJ(snprintf)
-fi
-dnl
 dnl If socket(2) not in libc, check -lsocket and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl
@@ -2519,30 +2541,17 @@ AC_CHECK_FUNC(syslog, [], [
 	SUDO_CHECK_LIB($lib, syslog, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break], [], [$extralibs])
     done
 ])
-dnl
-dnl If getaddrinfo(3) not in libc, check -lsocket and -linet
-dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols.
-dnl
-AC_CHECK_FUNCS(getaddrinfo, [], [
-    found=no
-    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
-	_libs=
-	for lib in $libs; do
-	    case "$NET_LIBS" in
-		*"$lib"*)   ;;
-		*)	    _libs="$_libs $lib";;
-	    esac
-	done
-	libs="${_libs# }"
-	test -z "$libs" && continue
-	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
-	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	SUDO_CHECK_LIB($lib, getaddrinfo, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; found=yes; break], [], [$extralibs])
-    done
-    if test X"$found" != X"no"; then
-	AC_DEFINE(HAVE_GETADDRINFO)
-    fi
-])
+#
+# Check for getaddrinfo and add any required libs to NET_LIBS
+#
+OLIBS="$LIBS"
+AX_FUNC_GETADDRINFO
+for lib in $LIBS; do
+    case "$OLIBS" in
+	*"$lib"*)   ;;
+	*)	    NET_LIBS="$NET_LIBS $lib";;
+    esac
+done
 dnl
 dnl Check for getprogname() or __progname
 dnl
@@ -2552,8 +2561,6 @@ AC_CHECK_FUNCS(getprogname, , [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern char *__progname; (void)puts(__progname);]])], [sudo_cv___progname=yes], [sudo_cv___progname=no])])
     if test "$sudo_cv___progname" = "yes"; then
 	AC_DEFINE(HAVE___PROGNAME)
-    else
-	AC_LIBOBJ(getprogname)
     fi
     AC_MSG_RESULT($sudo_cv___progname)
 ])
@@ -2997,9 +3004,7 @@ if test ${with_kerb5-'no'} != "no"; then
     AC_CHECK_FUNCS(krb5_get_init_creds_opt_alloc, [
 	AC_CACHE_CHECK([whether krb5_get_init_creds_opt_free takes a context],
 	    sudo_cv_krb5_get_init_creds_opt_free_two_args, [
-		AC_COMPILE_IFELSE(
-		    [AC_LANG_PROGRAM(
-			[[#include <krb5.h>]],
+		AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <krb5.h>]],
 			[[krb5_get_init_creds_opt_free(NULL, NULL);]]
 		    )],
 		    [sudo_cv_krb5_get_init_creds_opt_free_two_args=yes],
@@ -3098,8 +3103,7 @@ if test "${with_skey-'no'}" = "yes"; then
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "/usr/local" "/usr/contrib"; do
 	    test -n "$dir" && CPPFLAGS="$O_CPPFLAGS -I${dir}/include"
-	    AC_CHECK_HEADER([skey.h], [found=yes; break], [],
-		[#include <stdio.h>])
+	    AC_CHECK_HEADER([skey.h], [found=yes; break], [], [#include <stdio.h>])
 	done
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
@@ -3116,9 +3120,9 @@ if test "${with_skey-'no'}" = "yes"; then
 
     AC_MSG_CHECKING([for RFC1938-compliant skeychallenge])
     AC_COMPILE_IFELSE(
-	[AC_LANG_PROGRAM(
-	    [[#include <stdio.h>
-	    #include <skey.h>]],
+	[AC_LANG_PROGRAM([[
+#	    include <stdio.h>
+#	    include <skey.h>]],
 	    [[skeychallenge(NULL, NULL, NULL, 0);]]
 	)], [
 	    AC_DEFINE(HAVE_RFC1938_SKEYCHALLENGE)
@@ -3218,6 +3222,20 @@ if test ${with_passwd-'no'} != "no"; then
 fi
 
 dnl
+dnl Choose event subsystem backend: poll or select
+dnl
+if test X"$enable_poll" = X""; then
+    AC_CHECK_FUNCS(poll, [enable_poll=yes], [enable_poll=no])
+elif test X"$enable_poll" = X"yes"; then
+    AC_DEFINE(HAVE_POLL)
+fi
+if test "$enable_poll" = "yes"; then
+    COMMON_OBJS="${COMMON_OBJS} event_poll.lo"
+else
+    COMMON_OBJS="${COMMON_OBJS} event_select.lo"
+fi
+
+dnl
 dnl extra lib and .o file for LDAP support
 dnl
 if test ${with_ldap-'no'} != "no"; then
@@ -3257,7 +3275,7 @@ if test ${with_ldap-'no'} != "no"; then
     dnl check if ldap.h includes lber.h for us
     AC_MSG_CHECKING([whether lber.h is needed])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-    #include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [AC_MSG_RESULT([no])], [
+#   include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [AC_MSG_RESULT([no])], [
     AC_MSG_RESULT([yes])
     AC_DEFINE(HAVE_LBER_H)])
 
@@ -3308,14 +3326,29 @@ fi
 case "$lt_cv_dlopen" in
     dlopen)
 	AC_DEFINE(HAVE_DLOPEN)
-	SUDO_OBJS="$SUDO_OBJS locale_stub.o"
-	LT_STATIC="--tag=disable-static"
+	if test "$enable_static_sudoers" = "yes"; then
+	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
+	    SUDO_OBJS="${SUDO_OBJS} preload.o"
+	    SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
+	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
+	    LT_STATIC=""
+	else
+	    SUDO_OBJS="$SUDO_OBJS locale_stub.o"
+	    LT_STATIC="--tag=disable-static"
+	fi
 	;;
     shl_load)
 	AC_DEFINE(HAVE_SHL_LOAD)
-	SUDO_OBJS="$SUDO_OBJS locale_stub.o"
-	LT_STATIC="--tag=disable-static"
-	AC_LIBOBJ(dlopen)
+	if test "$enable_static_sudoers" = "yes"; then
+	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
+	    SUDO_OBJS="${SUDO_OBJS} preload.o"
+	    SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
+	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
+	    LT_STATIC=""
+	else
+	    SUDO_OBJS="$SUDO_OBJS locale_stub.o"
+	    LT_STATIC="--tag=disable-static"
+	fi
 	;;
     *)
 	if test X"${ac_cv_func_dlopen}" = X"yes"; then
@@ -3325,18 +3358,8 @@ case "$lt_cv_dlopen" in
 	SUDO_OBJS="${SUDO_OBJS} preload.o"
 	SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
 	LT_STATIC=""
-	AC_LIBOBJ(dlopen)
 	;;
 esac
-
-#
-# Add library needed for dynamic loading, if any.
-#
-LIBDL="$lt_cv_dlopen_libs"
-if test X"$LIBDL" != X""; then
-    SUDO_LIBS="${SUDO_LIBS} $LIBDL"
-    SUDOERS_LIBS="${SUDOERS_LIBS} $LIBDL"
-fi
 
 # On HP-UX, you cannot dlopen() a shared object that uses pthreads unless
 # the main program is linked against -lpthread.  We have no knowledge of
@@ -3552,19 +3575,27 @@ dnl This test relies on AC_LANG_WERROR
 dnl
 if test "$enable_hardening" != "no"; then
     if test -n "$GCC"; then
-	AX_CHECK_COMPILE_FLAG([-fstack-protector-all], [
-	    AX_CHECK_LINK_FLAG([-fstack-protector-all], [
-		SSP_CFLAGS="-fstack-protector-all"
-		SSP_LDFLAGS="-Wc,-fstack-protector-all"
+	AX_CHECK_COMPILE_FLAG([-fstack-protector-strong], [
+	    AX_CHECK_LINK_FLAG([-fstack-protector-strong], [
+		SSP_CFLAGS="-fstack-protector-strong"
+		SSP_LDFLAGS="-Wc,-fstack-protector-strong"
 	    ])
 	])
 	if test -z "$SSP_CFLAGS"; then
-	    AX_CHECK_COMPILE_FLAG([-fstack-protector], [
-		AX_CHECK_LINK_FLAG([-fstack-protector], [
-		    SSP_CFLAGS="-fstack-protector"
-		    SSP_LDFLAGS="-Wc,-fstack-protector"
+	    AX_CHECK_COMPILE_FLAG([-fstack-protector-all], [
+		AX_CHECK_LINK_FLAG([-fstack-protector-all], [
+		    SSP_CFLAGS="-fstack-protector-all"
+		    SSP_LDFLAGS="-Wc,-fstack-protector-all"
 		])
 	    ])
+	    if test -z "$SSP_CFLAGS"; then
+		AX_CHECK_COMPILE_FLAG([-fstack-protector], [
+		    AX_CHECK_LINK_FLAG([-fstack-protector], [
+			SSP_CFLAGS="-fstack-protector"
+			SSP_LDFLAGS="-Wc,-fstack-protector"
+		    ])
+		])
+	    fi
 	fi
     fi
     AX_CHECK_LINK_FLAG([-Wl,-z,relro], [LDFLAGS="${LDFLAGS} -Wl,-z,relro"])
@@ -3613,7 +3644,7 @@ dnl We add -Wall and -Werror after all tests so they don't cause failures
 dnl
 if test -n "$GCC"; then
     if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"; then
-	CFLAGS="${CFLAGS} -Wall"
+	CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wold-style-definition -Wpointer-arith"
     fi
     if test X"$enable_werror" = X"yes"; then
 	CFLAGS="${CFLAGS} -Werror"
@@ -3672,7 +3703,6 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no" -o "$enabled_share
 	    eval PLUGINDIR="$_PLUGINDIR"
 	done
 	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR/")
-	SUDO_DEFINE_UNQUOTED(SUDOERS_PLUGIN, "sudoers.so")
     fi
     exec_prefix="$oexec_prefix"
 fi
@@ -3740,7 +3770,6 @@ dnl
 AH_TEMPLATE(BROKEN_SYSLOG, [Define to 1 if the `syslog' function returns a non-zero int to denote failure.])
 AH_TEMPLATE(CLASSIC_INSULTS, [Define to 1 if you want the insults from the "classic" version sudo.])
 AH_TEMPLATE(CSOPS_INSULTS, [Define to 1 if you want insults culled from the twisted minds of CSOps.])
-AH_TEMPLATE(SUDOERS_PLUGIN, [The name of the sudoers plugin, including extension.])
 AH_TEMPLATE(DONT_LEAK_PATH_INFO, [Define to 1 if you want sudo to display "command not allowed" instead of "command not found" when a command cannot be found.])
 AH_TEMPLATE(ENV_DEBUG, [Define to 1 to enable environment function debugging.])
 AH_TEMPLATE(ENV_EDITOR, [Define to 1 if you want visudo to honor the EDITOR and VISUAL env variables.])
@@ -3812,6 +3841,7 @@ AH_TEMPLATE(SEND_MAIL_WHEN_NO_HOST, [Define to 1 to send mail when the user is n
 AH_TEMPLATE(SEND_MAIL_WHEN_NO_USER, [Define to 1 to send mail when the user is not in the sudoers file.])
 AH_TEMPLATE(SHELL_IF_NO_ARGS, [Define to 1 if you want sudo to start a shell if given no arguments.])
 AH_TEMPLATE(SHELL_SETS_HOME, [Define to 1 if you want sudo to set $HOME in shell mode.])
+AH_TEMPLATE(STATIC_SUDOERS_PLUGIN, [Define to 1 to compile the sudoers plugin statically into the sudo binary.])
 AH_TEMPLATE(STUB_LOAD_INTERFACES, [Define to 1 if the code in interfaces.c does not compile for you.])
 AH_TEMPLATE(UMASK_OVERRIDE, [Define to 1 to use the umask specified in sudoers even when it is less restrictive than the invoking user's.])
 AH_TEMPLATE(USE_ADMIN_FLAG, [Define to 1 if you want to create ~/.sudo_as_admin_successful if the user is in the admin group the first time they run sudo.])
@@ -3819,7 +3849,6 @@ AH_TEMPLATE(USE_INSULTS, [Define to 1 if you want to insult the user for enterin
 AH_TEMPLATE(USE_STOW, [Define to 1 if you use GNU stow packaging.])
 AH_TEMPLATE(WITHOUT_PASSWD, [Define to avoid using the passwd/shadow file for authentication.])
 AH_TEMPLATE(sig_atomic_t, [Define to `int' if <signal.h> does not define.])
-AH_TEMPLATE(__signed, [Define to `signed' or nothing if compiler does not support a signed type qualifier.])
 AH_TEMPLATE(socklen_t, [Define to `unsigned int' if <sys/socket.h> doesn't define.])
 AH_TEMPLATE(HAVE_STRUCT_UTMP_UT_EXIT, [Define to 1 if `ut_exit' is a member of `struct utmp'.])
 AH_TEMPLATE(HAVE_STRUCT_UTMPX_UT_EXIT, [Define to 1 if `ut_exit' is a member of `struct utmpx'.])

@@ -34,9 +34,9 @@
 #include "alloc.h"
 #include "fatal.h"
 #include "fileops.h"
-#include "list.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
+#include "sudo_util.h"
 #include "gettext.h"
 
 #ifdef HAVE_PRIV_SET
@@ -122,6 +122,14 @@ struct user_details {
 #define CD_SET_UTMP		0x2000
 #define CD_EXEC_BG		0x4000
 
+struct preserved_fd {
+    TAILQ_ENTRY(preserved_fd) entries;
+    int lowfd;
+    int highfd;
+    int flags;
+};
+TAILQ_HEAD(preserved_fd_list, preserved_fd);
+
 struct command_details {
     uid_t uid;
     uid_t euid;
@@ -133,6 +141,7 @@ struct command_details {
     int ngroups;
     int closefrom;
     int flags;
+    struct preserved_fd_list preserved_fds;
     struct passwd *pw;
     GETGROUPS_T *groups;
     const char *command;
@@ -174,22 +183,6 @@ int tty_present(void);
 int pipe_nonblock(int fds[2]);
 int sudo_execute(struct command_details *details, struct command_status *cstat);
 
-/* term.c */
-int term_cbreak(int);
-int term_copy(int, int);
-int term_noecho(int);
-int term_raw(int, int);
-int term_restore(int, int);
-
-/* fmt_string.h */
-char *fmt_string(const char *var, const char *value);
-
-/* atobool.c */
-bool atobool(const char *str);
-
-/* atoid.c */
-id_t atoid(const char *str, const char *sep, char **endp, const char **errstr);
-
 /* parse_args.c */
 int parse_args(int argc, char **argv, int *nargc, char ***nargv,
     char ***settingsp, char ***env_addp);
@@ -197,9 +190,6 @@ extern int tgetpass_flags;
 
 /* get_pty.c */
 int get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid);
-
-/* ttysize.c */
-void get_ttysize(int *rowp, int *colp);
 
 /* sudo.c */
 bool exec_setup(struct command_details *details, const char *ptyname, int ptyfd);
@@ -229,11 +219,6 @@ void selinux_execve(const char *path, char *const argv[], char *const envp[],
 void set_project(struct passwd *);
 int os_init_solaris(int argc, char *argv[], char *envp[]);
 
-/* aix.c */
-void aix_prep_user(char *user, const char *tty);
-void aix_restoreauthdb(void);
-void aix_setauthdb(char *user);
-
 /* hooks.c */
 /* XXX - move to sudo_plugin_int.h? */
 struct sudo_hook;
@@ -250,9 +235,6 @@ char *getenv_unhooked(const char *name);
 /* interfaces.c */
 int get_net_ifs(char **addrinfo);
 
-/* setgroups.c */
-int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
-
 /* ttyname.c */
 char *get_process_ttyname(void);
 
@@ -264,7 +246,12 @@ void init_signals(void);
 void restore_signals(void);
 void save_signals(void);
 
-/* gidlist.c */
-int parse_gid_list(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp);
+/* preload.c */
+void preload_static_symbols(void);
+
+/* preserve_fds.c */
+int add_preserved_fd(struct preserved_fd_list *pfds, int fd);
+void closefrom_except(int startfd, struct preserved_fd_list *pfds);
+void parse_preserved_fds(struct preserved_fd_list *pfds, const char *fdstr);
 
 #endif /* _SUDO_SUDO_H */

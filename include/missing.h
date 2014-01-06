@@ -63,6 +63,13 @@
 #  define __printf0like(f, v)
 # endif
 #endif
+#ifndef __format_arg
+# if __GNUC_PREREQ__(2, 7)
+#  define __format_arg(f) 	__attribute__((__format_arg__ (f)))
+# else
+#  define __format_arg(f)
+# endif
+#endif
 
 /* Hint to compiler that returned pointer is unique (malloc but not realloc). */
 #ifndef __malloc_like
@@ -71,6 +78,14 @@
 # else
 #  define __malloc_like
 # endif
+#endif
+
+/*
+ * Given the pointer x to the member m of the struct s, return
+ * a pointer to the containing structure.
+ */
+#ifndef __containerof
+# define __containerof(x, s, m)	((s *)((char *)(x) - offsetof(s, m)))
 #endif
 
 #ifndef __dso_public
@@ -92,14 +107,45 @@
 #endif
 
 /*
+ * Pre-C99 compilers may lack a va_copy macro.
+ */
+#ifndef va_copy
+# ifdef __va_copy
+#  define va_copy(d, s) __va_copy(d, s)
+# else
+#  define va_copy(d, s) memcpy(&(d), &(s), sizeof(d));
+# endif
+#endif
+
+/*
  * Some systems lack full limit definitions.
  */
 #ifndef OPEN_MAX
 # define OPEN_MAX	256
 #endif
 
-#ifndef INT_MAX
-# define INT_MAX	0x7fffffff
+#ifndef LLONG_MAX
+# if defined(QUAD_MAX)
+#  define LLONG_MAX	QUAD_MAX
+# else
+#  define LLONG_MAX	0x7fffffffffffffffLL
+# endif
+#endif
+
+#ifndef LLONG_MIN
+# if defined(QUAD_MIN)
+#  define LLONG_MIN	QUAD_MIN
+# else
+#  define LLONG_MIN	(-0x7fffffffffffffffLL-1)
+# endif
+#endif
+
+#ifndef ULONG_MAX
+# if defined(UQUAD_MAX)
+#  define ULLONG_MAX	UQUAD_MAX
+# else
+#  define ULLONG_MAX	0xffffffffffffffffULL
+# endif
 #endif
 
 #ifndef PATH_MAX
@@ -179,13 +225,6 @@
 #define ISSET(t, f)     ((t) & (f))
 
 /*
- * Some systems define this in <sys/param.h> but we don't include that anymore.
- */
-#ifndef howmany
-# define howmany(x, y)	(((x) + ((y) - 1)) / (y))
-#endif
-
-/*
  * Older systems may be missing stddef.h and/or offsetof macro
  */
 #ifndef offsetof
@@ -263,7 +302,6 @@ extern const char *__progname;
 #  define getprogname()		(__progname)
 # else
 const char *getprogname(void);
-void setprogname(const char *);
 # endif /* HAVE___PROGNAME */
 #endif /* !HAVE_GETPROGNAME */
 
@@ -375,17 +413,25 @@ int utimes(const char *, const struct timeval *);
 #ifdef HAVE_FUTIME
 int futimes(int, const struct timeval *);
 #endif
-#ifndef HAVE_SNPRINTF
-int snprintf(char *, size_t, const char *, ...) __printflike(3, 4);
+#if !defined(HAVE_SNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
+int rpl_snprintf(char *, size_t, const char *, ...) __printflike(3, 4);
+# undef snprintf
+# define snprintf rpl_snprintf
 #endif
-#ifndef HAVE_VSNPRINTF
-int vsnprintf(char *, size_t, const char *, va_list) __printflike(3, 0);
+#if !defined(HAVE_VSNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
+int rpl_vsnprintf(char *, size_t, const char *, va_list) __printflike(3, 0);
+# undef vsnprintf
+# define vsnprintf rpl_vsnprintf
 #endif
-#ifndef HAVE_ASPRINTF
-int asprintf(char **, const char *, ...) __printflike(2, 3);
+#if !defined(HAVE_ASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
+int rpl_asprintf(char **, const char *, ...) __printflike(2, 3);
+# undef asprintf
+# define asprintf rpl_asprintf
 #endif
-#ifndef HAVE_VASPRINTF
-int vasprintf(char **, const char *, va_list) __printflike(2, 0);
+#if !defined(HAVE_VASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
+int rpl_vasprintf(char **, const char *, va_list) __printflike(2, 0);
+# undef vasprintf
+# define vasprintf rpl_vasprintf
 #endif
 #ifndef HAVE_STRLCAT
 size_t strlcat(char *, const char *, size_t);
@@ -405,9 +451,6 @@ char *mkdtemp(char *);
 #ifndef HAVE_MKSTEMPS
 int mkstemps(char *, int);
 #endif
-#ifndef HAVE_NANOSLEEP
-int nanosleep(const struct timespec *, struct timespec *);
-#endif
 #ifndef HAVE_PW_DUP
 struct passwd *pw_dup(const struct passwd *);
 #endif
@@ -422,6 +465,11 @@ char *strsignal(int);
 #endif
 #ifndef HAVE_SIG2STR
 int sig2str(int, char *);
+#endif
+#ifndef HAVE_STRTONUM
+long long rpl_strtonum(const char *, long long, long long, const char **);
+# undef strtonum
+# define strtonum rpl_strtonum
 #endif
 
 #endif /* _SUDO_MISSING_H */

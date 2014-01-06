@@ -40,7 +40,7 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
 #ifdef HAVE_UTMPX_H
@@ -275,12 +275,12 @@ utmp_slot(const char *line, int ttyfd)
      * doesn't take an argument.
      */
     if ((sfd = dup(STDIN_FILENO)) == -1)
-	fatal(_("unable to save stdin"));
+	fatal(U_("unable to save stdin"));
     if (dup2(ttyfd, STDIN_FILENO) == -1)
-	fatal(_("unable to dup2 stdin"));
+	fatal(U_("unable to dup2 stdin"));
     slot = ttyslot();
     if (dup2(sfd, STDIN_FILENO) == -1)
-	fatal(_("unable to restore stdin"));
+	fatal(U_("unable to restore stdin"));
     close(sfd);
 
     debug_return_int(slot);

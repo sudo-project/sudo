@@ -54,7 +54,7 @@ static linux_audit_open(void)
     if (au_fd == -1) {
 	/* Kernel may not have audit support. */
 	if (errno != EINVAL && errno != EPROTONOSUPPORT && errno != EAFNOSUPPORT)
-	    fatal(_("unable to open audit system"));
+	    fatal(U_("unable to open audit system"));
     } else {
 	(void)fcntl(au_fd, F_SETFD, FD_CLOEXEC);
     }
@@ -79,7 +79,7 @@ linux_audit_command(char *argv[], int result)
     for (av = argv; *av != NULL; av++) {
 	n = strlcpy(cp, *av, size - (cp - command));
 	if (n >= size - (cp - command)) {
-	    fatalx(_("internal error, %s overflow"),
+	    fatalx(U_("internal error, %s overflow"),
 		"linux_audit_command()");
 	}
 	cp += n;
@@ -90,7 +90,7 @@ linux_audit_command(char *argv[], int result)
     /* Log command, ignoring ECONNREFUSED on error. */
     rc = audit_log_user_command(au_fd, AUDIT_USER_CMD, command, NULL, result);
     if (rc <= 0 && errno != ECONNREFUSED)
-	warning(_("unable to send audit message"));
+	warning(U_("unable to send audit message"));
 
     efree(command);
 

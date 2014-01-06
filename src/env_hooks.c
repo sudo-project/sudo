@@ -37,14 +37,10 @@
 # include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <errno.h>
-#ifdef HAVE_DLOPEN
-# include <dlfcn.h>
-#else
-# include "compat/dlfcn.h"
-#endif
 
 #include "sudo.h"
 #include "sudo_plugin.h"
+#include "sudo_dso.h"
 
 extern char **environ;		/* global environment pointer */
 static char **priv_environ;	/* private environment pointer */
@@ -72,13 +68,11 @@ typedef char * (*sudo_fn_getenv_t)(const char *);
 char *
 getenv_unhooked(const char *name)
 {
-#if defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
     sudo_fn_getenv_t fn;
 
-    fn = (sudo_fn_getenv_t)dlsym(RTLD_NEXT, "getenv");
+    fn = (sudo_fn_getenv_t)sudo_dso_findsym(SUDO_DSO_NEXT, "getenv");
     if (fn != NULL)
 	return fn(name);
-#endif /* HAVE_DLOPEN && RTLD_NEXT */
     return rpl_getenv(name);
 }
 
@@ -144,13 +138,11 @@ typedef int (*sudo_fn_putenv_t)(PUTENV_CONST char *);
 static int
 putenv_unhooked(PUTENV_CONST char *string)
 {
-#if defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
     sudo_fn_putenv_t fn;
 
-    fn = (sudo_fn_putenv_t)dlsym(RTLD_NEXT, "putenv");
+    fn = (sudo_fn_putenv_t)sudo_dso_findsym(SUDO_DSO_NEXT, "putenv");
     if (fn != NULL)
 	return fn(string);
-#endif /* HAVE_DLOPEN && RTLD_NEXT */
     return rpl_putenv(string);
 }
 
@@ -214,13 +206,11 @@ typedef int (*sudo_fn_setenv_t)(const char *, const char *, int);
 static int
 setenv_unhooked(const char *var, const char *val, int overwrite)
 {
-#if defined(HAVE_SETENV) && defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
     sudo_fn_setenv_t fn;
 
-    fn = (sudo_fn_setenv_t)dlsym(RTLD_NEXT, "setenv");
+    fn = (sudo_fn_setenv_t)sudo_dso_findsym(SUDO_DSO_NEXT, "setenv");
     if (fn != NULL)
 	return fn(var, val, overwrite);
-#endif /* HAVE_SETENV && HAVE_DLOPEN && RTLD_NEXT */
     return rpl_setenv(var, val, overwrite);
 }
 
@@ -273,19 +263,16 @@ static int
 unsetenv_unhooked(const char *var)
 {
     int rval = 0;
-#if defined(HAVE_UNSETENV) && defined(HAVE_DLOPEN) && defined(RTLD_NEXT)
     sudo_fn_unsetenv_t fn;
 
-    fn = (sudo_fn_unsetenv_t)dlsym(RTLD_NEXT, "unsetenv");
+    fn = (sudo_fn_unsetenv_t)sudo_dso_findsym(SUDO_DSO_NEXT, "unsetenv");
     if (fn != NULL) {
 # ifdef UNSETENV_VOID
 	fn(var);
 # else
 	rval = fn(var);
 # endif
-    } else
-#endif /* HAVE_UNSETENV && HAVE_DLOPEN && RTLD_NEXT */
-    {
+    } else {
 	rval = rpl_unsetenv(var);
     }
     return rval;

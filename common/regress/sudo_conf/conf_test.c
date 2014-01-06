@@ -86,7 +86,7 @@ sudo_conf_dump(void)
     if (sudo_conf_noexec_path() != NULL)
 	printf("Path noexec %s\n", sudo_conf_noexec_path());
 #endif
-    tq_foreach_fwd(plugins, info) {
+    TAILQ_FOREACH(info, plugins, entries) {
 	printf("Plugin %s %s", info->symbol_name, info->path);
 	if (info->options) {
 	    char * const * op;
@@ -95,18 +95,4 @@ sudo_conf_dump(void)
 	}
 	putchar('\n');
     }
-}
-
-/* STUB */
-void
-warning_set_locale(void)
-{
-    return;
-}
-
-/* STUB */
-void
-warning_restore_locale(void)
-{
-    return;
 }

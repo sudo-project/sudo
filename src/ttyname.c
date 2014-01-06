@@ -193,7 +193,7 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, bool builtin)
     size_t sdlen, d_len, len, num_subdirs = 0, max_subdirs = 0;
     struct dirent *dp;
     struct stat sb;
-    int i;
+    unsigned int i;
     debug_decl(sudo_ttyname_scan, SUDO_DEBUG_UTIL)
 
     if (dir[0] == '\0' || (d = opendir(dir)) == NULL)
@@ -371,7 +371,7 @@ get_process_ttyname(void)
 	rc = sysctl(mib, sudo_kp_namelen, ki_proc, &size, NULL, 0);
     } while (rc == -1 && errno == ENOMEM);
     if (rc != -1) {
-	if (ki_proc->sudo_kp_tdev != (dev_t)-1) {
+	if ((dev_t)ki_proc->sudo_kp_tdev != (dev_t)-1) {
 	    tty = sudo_ttyname_dev(ki_proc->sudo_kp_tdev);
 	    if (tty == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_WARN,
@@ -441,11 +441,16 @@ get_process_ttyname(void)
 	if (len != -1) {
 	    /* Field 7 is the tty dev (0 if no tty) */
 	    char *cp = line;
+	    const char *errstr;
 	    int field = 1;
 	    while (*cp != '\0') {
 		if (*cp++ == ' ') {
 		    if (++field == 7) {
-			dev_t tdev = (dev_t)atoi(cp);
+			dev_t tdev = strtonum(cp, INT_MIN, INT_MAX, &errstr);
+			if (errstr) {
+			    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+				"%s: tty device %s: %s", path, cp, errstr);
+			}
 			if (tdev > 0)
 			    tty = sudo_ttyname_dev(tdev);
 			break;
@@ -458,7 +463,7 @@ get_process_ttyname(void)
 
     debug_return_str(tty);
 }
-#elif HAVE_PSTAT_GETPROC
+#elif defined(HAVE_PSTAT_GETPROC)
 /*
  * Return a string from ttyname() containing the tty to which the process is
  * attached or NULL if the process has no controlling tty.
@@ -468,10 +473,15 @@ get_process_ttyname(void)
 {
     struct pst_status pstat;
     char *tty = NULL;
+    int rc;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL)
 
-    /* Try to determine the tty from psdev in struct pst_status. */
-    if (pstat_getproc(&pstat, sizeof(pstat), 0, (int)getpid()) != -1) {
+    /*
+     * Determine the tty from psdev in struct pst_status.
+     * We may get EOVERFLOW if the whole thing doesn't fit but that is OK.
+     */
+    rc = pstat_getproc(&pstat, sizeof(pstat), (size_t)0, (int)getpid());
+    if (rc != -1 || errno == EOVERFLOW) {
 	if (pstat.pst_term.psd_major != -1 && pstat.pst_term.psd_minor != -1) {
 	    tty = sudo_ttyname_dev(makedev(pstat.pst_term.psd_major,
 		pstat.pst_term.psd_minor));

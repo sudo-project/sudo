@@ -70,7 +70,7 @@ LOCALEDIR_SUFFIX = @LOCALEDIR_SUFFIX@
 MSGFMT = msgfmt
 MSGMERGE = msgmerge
 XGETTEXT = xgettext
-XGETTEXT_OPTS = -F -k_ -kN_ --copyright-holder="Todd C. Miller" \
+XGETTEXT_OPTS = -F -k_ -kN_ -kU_ --copyright-holder="Todd C. Miller" \
 		"--msgid-bugs-address=http://www.sudo.ws/bugs" \
 		--package-name=@PACKAGE_NAME@ --package-version=$(VERSION) \
 		--flag warning:1:c-format --flag warningx:1:c-format \
@@ -181,7 +181,7 @@ update-pot:
 			echo "syntax error" > confstr.sh; \
 			sed -n -e 's/^badpass_message="/gettext "/p' \
 			    -e 's/^passprompt="/gettext "/p' \
-			    -e 's/^mailsub="/gettext "/p' configure.in \
+			    -e 's/^mailsub="/gettext "/p' configure.ac \
 			    >> confstr.sh; \
 			tmpfiles=confstr.sh; \
 			cfiles="plugins/sudoers/*.c plugins/sudoers/auth/*.c";; \

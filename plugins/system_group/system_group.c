@@ -45,11 +45,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_DLOPEN
-# include <dlfcn.h>
-#else
-# include "compat/dlfcn.h"
-#endif
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -57,12 +52,10 @@
 #include <grp.h>
 #include <pwd.h>
 
-#include "sudo_plugin.h"
 #include "missing.h"
-
-#ifndef RTLD_DEFAULT
-# define RTLD_DEFAULT	NULL
-#endif
+#include "sudo_dso.h"
+#include "sudo_plugin.h"
+#include "sudo_util.h"
 
 /*
  * Sudoers group plugin that does group name-based lookups using the system
@@ -97,7 +90,7 @@ sysgroup_init(int version, sudo_printf_t sudo_printf, char *const argv[])
     }
 
     /* Share group cache with sudo if possible. */
-    handle = dlsym(RTLD_DEFAULT, "sudo_getgrnam");
+    handle = sudo_dso_findsym(SUDO_DSO_DEFAULT, "sudo_getgrnam");
     if (handle != NULL) {
 	sysgroup_getgrnam = (sysgroup_getgrnam_t)handle;
     } else {
@@ -105,7 +98,7 @@ sysgroup_init(int version, sudo_printf_t sudo_printf, char *const argv[])
 	need_setent = true;
     }
 
-    handle = dlsym(RTLD_DEFAULT, "sudo_getgrgid");
+    handle = sudo_dso_findsym(SUDO_DSO_DEFAULT, "sudo_getgrgid");
     if (handle != NULL) {
 	sysgroup_getgrgid = (sysgroup_getgrgid_t)handle;
     } else {
@@ -113,7 +106,7 @@ sysgroup_init(int version, sudo_printf_t sudo_printf, char *const argv[])
 	need_setent = true;
     }
 
-    handle = dlsym(RTLD_DEFAULT, "sudo_gr_delref");
+    handle = sudo_dso_findsym(SUDO_DSO_DEFAULT, "sudo_gr_delref");
     if (handle != NULL)
 	sysgroup_gr_delref = (sysgroup_gr_delref_t)handle;
 
@@ -136,16 +129,15 @@ sysgroup_cleanup(void)
 static int
 sysgroup_query(const char *user, const char *group, const struct passwd *pwd)
 {
-    char **member, *ep = '\0';
+    char **member;
     struct group *grp;
 
     grp = sysgroup_getgrnam(group);
     if (grp == NULL && group[0] == '#' && group[1] != '\0') {
-	long lval = strtol(group + 1, &ep, 10);
-	if (*ep == '\0') {
-	    if ((lval != LONG_MAX && lval != LONG_MIN) || errno != ERANGE)
-		grp = sysgroup_getgrgid((gid_t)lval);
-	}
+	const char *errstr;
+	gid_t gid = atoid(group + 1, NULL, NULL, &errstr);
+	if (errstr == NULL)
+	    grp = sysgroup_getgrgid(gid);
     }
     if (grp != NULL) {
 	for (member = grp->gr_mem; *member != NULL; member++) {

@@ -17,21 +17,20 @@
 #ifndef _SUDO_CONF_H
 #define _SUDO_CONF_H
 
-#include "list.h"
+#include "queue.h"
 
 #define GROUP_SOURCE_ADAPTIVE	0
 #define GROUP_SOURCE_STATIC	1
 #define GROUP_SOURCE_DYNAMIC	2
 
 struct plugin_info {
-    struct plugin_info *prev; /* required */
-    struct plugin_info *next; /* required */
+    TAILQ_ENTRY(plugin_info) entries;
     const char *path;
     const char *symbol_name;
     char * const * options;
     int lineno;
 };
-TQ_DECLARE(plugin_info)
+TAILQ_HEAD(plugin_info_list, plugin_info);
 
 /* Read main sudo.conf file. */
 void sudo_conf_read(const char *);

@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOREPLAY" "@mansectsu@" "September 11, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDOREPLAY" "@mansectsu@" "October 28, 2013" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -81,6 +81,9 @@ such as the user, tty or command run.
 In replay mode, if the standard output has not been redirected,
 \fBsudoreplay\fR
 will act on the following keys:
+.TP 14n
+`\fR\en\fR' or `\fR\er\fR'
+Skip to the next replay event; useful for long pauses.
 .TP 14n
 `\fR\ \fR' (space)
 Pause output; press any key to resume.

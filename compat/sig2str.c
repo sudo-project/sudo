@@ -37,6 +37,7 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <signal.h>
+#include <unistd.h>
 
 #include "missing.h"
 

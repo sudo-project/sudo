@@ -145,7 +145,7 @@ sudo_getpwuid(uid_t uid)
 	/* item->d.pw = NULL; */
     }
     if (rbinsert(pwcache_byuid, item) != NULL)
-	fatalx(_("unable to cache uid %u, already exists"),
+	fatalx(U_("unable to cache uid %u, already exists"),
 	    (unsigned int) uid);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
@@ -187,7 +187,7 @@ sudo_getpwnam(const char *name)
 	/* item->d.pw = NULL; */
     }
     if (rbinsert(pwcache_byname, item) != NULL)
-	fatalx(_("unable to cache user %s, already exists"), name);
+	fatalx(U_("unable to cache user %s, already exists"), name);
 #ifdef HAVE_SETAUTHDB
     aix_restoreauthdb();
 #endif
@@ -270,10 +270,17 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
 struct passwd *
 sudo_fakepwnam(const char *user, gid_t gid)
 {
+    const char *errstr;
     uid_t uid;
+    debug_decl(sudo_fakepwnam, SUDO_DEBUG_NSS)
 
-    uid = (uid_t) atoi(user + 1);
-    return sudo_mkpwent(user, uid, gid, NULL, NULL);
+    uid = (uid_t) atoid(user + 1, NULL, NULL, &errstr);
+    if (errstr != NULL) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_DIAG,
+	    "uid %s %s", user, errstr);
+	debug_return_ptr(NULL);
+    }
+    debug_return_ptr(sudo_mkpwent(user, uid, gid, NULL, NULL));
 }
 
 void
@@ -383,7 +390,7 @@ sudo_getgrgid(gid_t gid)
 	/* item->d.gr = NULL; */
     }
     if (rbinsert(grcache_bygid, item) != NULL)
-	fatalx(_("unable to cache gid %u, already exists"),
+	fatalx(U_("unable to cache gid %u, already exists"),
 	    (unsigned int) gid);
 done:
     item->refcnt++;
@@ -419,7 +426,7 @@ sudo_getgrnam(const char *name)
 	/* item->d.gr = NULL; */
     }
     if (rbinsert(grcache_byname, item) != NULL)
-	fatalx(_("unable to cache group %s, already exists"), name);
+	fatalx(U_("unable to cache group %s, already exists"), name);
 done:
     item->refcnt++;
     debug_return_ptr(item->d.gr);
@@ -432,6 +439,7 @@ struct group *
 sudo_fakegrnam(const char *group)
 {
     struct cache_item_gr *gritem;
+    const char *errstr;
     struct group *gr;
     struct rbnode *node;
     size_t len, name_len;
@@ -444,9 +452,15 @@ sudo_fakegrnam(const char *group)
     for (i = 0; i < 2; i++) {
 	gritem = ecalloc(1, len);
 	gr = &gritem->gr;
-	gr->gr_gid = (gid_t) atoi(group + 1);
+	gr->gr_gid = (gid_t) atoid(group + 1, NULL, NULL, &errstr);
 	gr->gr_name = (char *)(gritem + 1);
 	memcpy(gr->gr_name, group, name_len + 1);
+	if (errstr != NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_DIAG,
+		"gid %s %s", group, errstr);
+	    efree(gritem);
+	    debug_return_ptr(NULL);
+	}
 
 	gritem->cache.refcnt = 1;
 	gritem->cache.d.gr = gr;
@@ -549,7 +563,7 @@ sudo_endgrent(void)
 }
 
 struct group_list *
-sudo_get_grlist(struct passwd *pw)
+sudo_get_grlist(const struct passwd *pw)
 {
     struct cache_item key, *item;
     struct rbnode *node;
@@ -575,7 +589,7 @@ sudo_get_grlist(struct passwd *pw)
 	/* item->d.grlist = NULL; */
     }
     if (rbinsert(grlist_cache, item) != NULL)
-	fatalx(_("unable to cache group list for %s, already exists"),
+	fatalx(U_("unable to cache group list for %s, already exists"),
 	    pw->pw_name);
 done:
     item->refcnt++;
@@ -595,19 +609,20 @@ sudo_set_grlist(struct passwd *pw, char * const *groups, char * const *gids)
     key.k.name = pw->pw_name;
     if ((node = rbfind(grlist_cache, &key)) == NULL) {
 	if ((item = sudo_make_grlist_item(pw, groups, gids)) == NULL)
-	    fatalx(_("unable to parse groups for %s"), pw->pw_name);
+	    fatalx(U_("unable to parse groups for %s"), pw->pw_name);
 	if (rbinsert(grlist_cache, item) != NULL)
-	    fatalx(_("unable to cache group list for %s, already exists"),
+	    fatalx(U_("unable to cache group list for %s, already exists"),
 		pw->pw_name);
     }
     debug_return;
 }
 
 bool
-user_in_group(struct passwd *pw, const char *group)
+user_in_group(const struct passwd *pw, const char *group)
 {
     struct group_list *grlist;
     struct group *grp = NULL;
+    const char *errstr;
     int i;
     bool matched = false;
     debug_decl(user_in_group, SUDO_DEBUG_NSS)
@@ -617,15 +632,20 @@ user_in_group(struct passwd *pw, const char *group)
 	 * If it could be a sudo-style group ID check gids first.
 	 */
 	if (group[0] == '#') {
-	    gid_t gid = atoi(group + 1);
-	    if (gid == pw->pw_gid) {
-		matched = true;
-		goto done;
-	    }
-	    for (i = 0; i < grlist->ngids; i++) {
-		if (gid == grlist->gids[i]) {
+	    gid_t gid = (gid_t) atoid(group + 1, NULL, NULL, &errstr);
+	    if (errstr != NULL) {
+		sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_DIAG,
+		    "gid %s %s", group, errstr);
+	    } else {
+		if (gid == pw->pw_gid) {
 		    matched = true;
 		    goto done;
+		}
+		for (i = 0; i < grlist->ngids; i++) {
+		    if (gid == grlist->gids[i]) {
+			matched = true;
+			goto done;
+		    }
 		}
 	    }
 	}

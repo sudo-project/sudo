@@ -54,7 +54,7 @@
 #include <signal.h>
 #include <grp.h>
 #include <pwd.h>
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
 #ifdef HAVE_LOGIN_CAP_H
@@ -92,7 +92,7 @@
  * Local variables
  */
 struct plugin_container policy_plugin;
-struct plugin_container_list io_plugins;
+struct plugin_container_list io_plugins = TAILQ_HEAD_INITIALIZER(io_plugins);
 struct user_details user_details;
 const char *list_user; /* extern for parse_args.c */
 static struct command_details command_details;
@@ -200,7 +200,7 @@ main(int argc, char *argv[], char *envp[])
 
     /* Load plugins. */
     if (!sudo_load_plugins(&policy_plugin, &io_plugins))
-	fatalx(_("fatal error, unable to load plugins"));
+	fatalx(U_("fatal error, unable to load plugins"));
 
     /* Open policy plugin. */
     ok = policy_open(&policy_plugin, settings, user_info, envp);
@@ -208,7 +208,7 @@ main(int argc, char *argv[], char *envp[])
 	if (ok == -2)
 	    usage(1);
 	else
-	    fatalx(_("unable to initialize policy plugin"));
+	    fatalx(U_("unable to initialize policy plugin"));
     }
 
     init_signals();
@@ -216,7 +216,7 @@ main(int argc, char *argv[], char *envp[])
     switch (sudo_mode & MODE_MASK) {
 	case MODE_VERSION:
 	    policy_show_version(&policy_plugin, !user_details.uid);
-	    tq_foreach_fwd(&io_plugins, plugin) {
+	    TAILQ_FOREACH(plugin, &io_plugins, entries) {
 		ok = iolog_open(plugin, settings, user_info, NULL,
 		    nargc, nargv, envp);
 		if (ok != -1)
@@ -250,8 +250,7 @@ main(int argc, char *argv[], char *envp[])
 		exit(1); /* plugin printed error message */
 	    }
 	    /* Open I/O plugins once policy plugin succeeds. */
-	    for (plugin = io_plugins.first; plugin != NULL; plugin = next) {
-		next = plugin->next;
+	    TAILQ_FOREACH_SAFE(plugin, &io_plugins, entries, next) {
 		ok = iolog_open(plugin, settings, user_info,
 		    command_info, nargc, nargv, envp);
 		switch (ok) {
@@ -265,7 +264,7 @@ main(int argc, char *argv[], char *envp[])
 		    usage(1);
 		    break;
 		default:
-		    fatalx(_("error initializing I/O plugin %s"),
+		    fatalx(U_("error initializing I/O plugin %s"),
 			plugin->name);
 		}
 	    }
@@ -291,7 +290,7 @@ main(int argc, char *argv[], char *envp[])
 	    /* The close method was called by sudo_edit/run_command. */
 	    break;
 	default:
-	    fatalx(_("unexpected sudo mode 0x%x"), sudo_mode);
+	    fatalx(U_("unexpected sudo mode 0x%x"), sudo_mode);
     }
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);                
     exit(exitcode);
@@ -300,9 +299,9 @@ main(int argc, char *argv[], char *envp[])
 int
 os_init_common(int argc, char *argv[], char *envp[])
 {
-#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
-    if (argc > 0)
-	setprogname(argv[0]);
+    initprogname(argc > 0 ? argv[0] : "sudo");
+#ifdef STATIC_SUDOERS_PLUGIN
+    preload_static_symbols();
 #endif
     return 0;
 }
@@ -326,7 +325,7 @@ fix_fds(void)
     miss[STDERR_FILENO] = fcntl(STDERR_FILENO, F_GETFL, 0) == -1;
     if (miss[STDIN_FILENO] || miss[STDOUT_FILENO] || miss[STDERR_FILENO]) {
 	if ((devnull = open(_PATH_DEVNULL, O_RDWR, 0644)) == -1)
-	    fatal(_("unable to open %s"), _PATH_DEVNULL);
+	    fatal(U_("unable to open %s"), _PATH_DEVNULL);
 	if (miss[STDIN_FILENO] && dup2(devnull, STDIN_FILENO) == -1)
 	    fatal("dup2");
 	if (miss[STDOUT_FILENO] && dup2(devnull, STDOUT_FILENO) == -1)
@@ -411,7 +410,7 @@ get_user_groups(struct user_details *ud)
 	 * Typically, this is because NFS can only support up to 16 groups.
 	 */
 	if (fill_group_list(ud, maxgroups) == -1)
-	    fatal(_("unable to get group vector"));
+	    fatal(U_("unable to get group vector"));
     }
 
     /*
@@ -463,7 +462,7 @@ get_user_info(struct user_details *ud)
 
     pw = getpwuid(ud->uid);
     if (pw == NULL)
-	fatalx(_("unknown uid %u: who are you?"), (unsigned int)ud->uid);
+	fatalx(U_("unknown uid %u: who are you?"), (unsigned int)ud->uid);
 
     user_info[i] = fmt_string("user", pw->pw_name);
     if (user_info[i] == NULL)
@@ -531,13 +530,13 @@ command_info_to_details(char * const info[], struct command_details *details)
 {
     int i;
     id_t id;
-    long lval;
-    char *cp, *ep;
+    char *cp;
     const char *errstr;
     debug_decl(command_info_to_details, SUDO_DEBUG_PCOMM)
 
     memset(details, 0, sizeof(*details));
     details->closefrom = -1;
+    TAILQ_INIT(&details->preserved_fds);
 
 #define SET_STRING(s, n) \
     if (strncmp(s, info[i], sizeof(s) - 1) == 0 && info[i][sizeof(s) - 1]) { \
@@ -554,16 +553,10 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_STRING("command=", command)
 		SET_STRING("cwd=", cwd)
 		if (strncmp("closefrom=", info[i], sizeof("closefrom=") - 1) == 0) {
-		    errno = 0;
 		    cp = info[i] + sizeof("closefrom=") - 1;
-		    lval = strtol(cp, &ep, 10);
-		    if (*cp == '\0' || *ep != '\0')
-			fatalx(_("%s: %s"), info[i], _("invalid value"));
-		    if ((errno == ERANGE &&
-			(lval == LONG_MAX || lval == LONG_MIN)) ||
-			(lval > INT_MAX || lval < 0))
-			fatalx(_("%s: %s"), info[i], _("value out of range"));
-		    details->closefrom = (int)lval;
+		    details->closefrom = strtonum(cp, 0, INT_MAX, &errstr);
+		    if (errstr != NULL)
+			fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    break;
 		}
 		break;
@@ -579,16 +572,10 @@ command_info_to_details(char * const info[], struct command_details *details)
 		break;
 	    case 'n':
 		if (strncmp("nice=", info[i], sizeof("nice=") - 1) == 0) {
-		    errno = 0;
 		    cp = info[i] + sizeof("nice=") - 1;
-		    lval = strtol(cp, &ep, 10);
-		    if (*cp == '\0' || *ep != '\0')
-			fatalx(_("%s: %s"), info[i], _("invalid value"));
-		    if ((errno == ERANGE &&
-			(lval == LONG_MAX || lval == LONG_MIN)) ||
-			(lval > INT_MAX || lval < INT_MIN))
-			fatalx(_("%s: %s"), info[i], _("value out of range"));
-		    details->priority = (int)lval;
+		    details->priority = strtonum(cp, INT_MIN, INT_MAX, &errstr);
+		    if (errstr != NULL)
+			fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    SET(details->flags, CD_SET_PRIORITY);
 		    break;
 		}
@@ -604,13 +591,18 @@ command_info_to_details(char * const info[], struct command_details *details)
 			SET(details->flags, CD_PRESERVE_GROUPS);
 		    break;
 		}
+		if (strncmp("preserve_fds=", info[i], sizeof("preserve_fds=") - 1) == 0) {
+		    parse_preserved_fds(&details->preserved_fds,
+			info[i] + sizeof("preserve_fds=") - 1);
+		    break;
+		}
 		break;
 	    case 'r':
 		if (strncmp("runas_egid=", info[i], sizeof("runas_egid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_egid=") - 1;
 		    id = atoid(cp, NULL, NULL, &errstr);
 		    if (errstr != NULL)
-			fatalx(_("%s: %s"), info[i], _(errstr));
+			fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->egid = (gid_t)id;
 		    SET(details->flags, CD_SET_EGID);
 		    break;
@@ -619,7 +611,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    cp = info[i] + sizeof("runas_euid=") - 1;
 		    id = atoid(cp, NULL, NULL, &errstr);
 		    if (errstr != NULL)
-			fatalx(_("%s: %s"), info[i], _(errstr));
+			fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->euid = (uid_t)id;
 		    SET(details->flags, CD_SET_EUID);
 		    break;
@@ -628,7 +620,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    cp = info[i] + sizeof("runas_gid=") - 1;
 		    id = atoid(cp, NULL, NULL, &errstr);
 		    if (errstr != NULL)
-			fatalx(_("%s: %s"), info[i], _(errstr));
+			fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->gid = (gid_t)id;
 		    SET(details->flags, CD_SET_GID);
 		    break;
@@ -643,7 +635,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    cp = info[i] + sizeof("runas_uid=") - 1;
 		    id = atoid(cp, NULL, NULL, &errstr);
 		    if (errstr != NULL)
-			fatalx(_("%s: %s"), info[i], _(errstr));
+			fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    details->uid = (uid_t)id;
 		    SET(details->flags, CD_SET_UID);
 		    break;
@@ -687,32 +679,20 @@ command_info_to_details(char * const info[], struct command_details *details)
 		break;
 	    case 't':
 		if (strncmp("timeout=", info[i], sizeof("timeout=") - 1) == 0) {
-		    errno = 0;
 		    cp = info[i] + sizeof("timeout=") - 1;
-		    lval = strtol(cp, &ep, 10);
-		    if (*cp == '\0' || *ep != '\0')
-			fatalx(_("%s: %s"), info[i], _("invalid value"));
-		    if ((errno == ERANGE &&
-			(lval == LONG_MAX || lval == LONG_MIN)) ||
-			(lval > INT_MAX || lval < 0))
-			fatalx(_("%s: %s"), info[i], _("value out of range"));
-		    details->timeout = (int)lval;
+		    details->timeout = strtonum(cp, 0, INT_MAX, &errstr);
+		    if (errstr != NULL)
+			fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    SET(details->flags, CD_SET_TIMEOUT);
 		    break;
 		}
 		break;
 	    case 'u':
 		if (strncmp("umask=", info[i], sizeof("umask=") - 1) == 0) {
-		    errno = 0;
 		    cp = info[i] + sizeof("umask=") - 1;
-		    lval = strtol(cp, &ep, 8);
-		    if (*cp == '\0' || *ep != '\0')
-			fatalx(_("%s: %s"), info[i], _("invalid value"));
-		    if ((errno == ERANGE &&
-			(lval == LONG_MAX || lval == LONG_MIN)) ||
-			(lval > 0777 || lval < 0))
-			fatalx(_("%s: %s"), info[i], _("value out of range"));
-		    details->umask = (mode_t)lval;
+		    details->umask = atomode(cp, &errstr);
+		    if (errstr != NULL)
+			fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    SET(details->flags, CD_SET_UMASK);
 		    break;
 		}
@@ -768,7 +748,7 @@ sudo_check_suid(const char *sudo)
 		    if ((colon = strchr(cp, ':')))
 			*colon = '\0';
 		    len = snprintf(pathbuf, sizeof(pathbuf), "%s/%s", cp, sudo);
-		    if (len <= 0 || len >= sizeof(pathbuf))
+		    if (len <= 0 || (size_t)len >= sizeof(pathbuf))
 			continue;
 		    if (access(pathbuf, X_OK) == 0) {
 			sudo = pathbuf;
@@ -785,16 +765,16 @@ sudo_check_suid(const char *sudo)
 	    /* Try to determine why sudo was not running as root. */
 	    if (sb.st_uid != ROOT_UID || !ISSET(sb.st_mode, S_ISUID)) {
 		fatalx(
-		    _("%s must be owned by uid %d and have the setuid bit set"),
+		    U_("%s must be owned by uid %d and have the setuid bit set"),
 		    sudo, ROOT_UID);
 	    } else {
-		fatalx(_("effective uid is not %d, is %s on a file system "
+		fatalx(U_("effective uid is not %d, is %s on a file system "
 		    "with the 'nosuid' option set or an NFS file system without"
 		    " root privileges?"), ROOT_UID, sudo);
 	    }
 	} else {
 	    fatalx(
-		_("effective uid is not %d, is sudo installed setuid root?"),
+		U_("effective uid is not %d, is sudo installed setuid root?"),
 		ROOT_UID);
 	}
     }
@@ -920,7 +900,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	     */
 	    lc = login_getclass((char *)details->login_class);
 	    if (!lc) {
-		warningx(_("unknown login class %s"), details->login_class);
+		warningx(U_("unknown login class %s"), details->login_class);
 		errno = ENOENT;
 		goto done;
 	    }
@@ -933,7 +913,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 		flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
 	    }
 	    if (setusercontext(lc, details->pw, details->pw->pw_uid, flags)) {
-		warning(_("unable to set user context"));
+		warning(U_("unable to set user context"));
 		if (details->pw->pw_uid != ROOT_UID)
 		    goto done;
 	    }
@@ -947,27 +927,27 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
     if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
 	if (details->ngroups >= 0) {
 	    if (sudo_setgroups(details->ngroups, details->groups) < 0) {
-		warning(_("unable to set supplementary group IDs"));
+		warning(U_("unable to set supplementary group IDs"));
 		goto done;
 	    }
 	}
     }
 #ifdef HAVE_SETEUID
     if (ISSET(details->flags, CD_SET_EGID) && setegid(details->egid)) {
-	warning(_("unable to set effective gid to runas gid %u"),
+	warning(U_("unable to set effective gid to runas gid %u"),
 	    (unsigned int)details->egid);
 	goto done;
     }
 #endif
     if (ISSET(details->flags, CD_SET_GID) && setgid(details->gid)) {
-	warning(_("unable to set gid to runas gid %u"),
+	warning(U_("unable to set gid to runas gid %u"),
 	    (unsigned int)details->gid);
 	goto done;
     }
 
     if (ISSET(details->flags, CD_SET_PRIORITY)) {
 	if (setpriority(PRIO_PROCESS, 0, details->priority) != 0) {
-	    warning(_("unable to set process priority"));
+	    warning(U_("unable to set process priority"));
 	    goto done;
 	}
     }
@@ -975,7 +955,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	(void) umask(details->umask);
     if (details->chroot) {
 	if (chroot(details->chroot) != 0 || chdir("/") != 0) {
-	    warning(_("unable to change root to %s"), details->chroot);
+	    warning(U_("unable to change root to %s"), details->chroot);
 	    goto done;
 	}
     }
@@ -988,19 +968,19 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 
 #ifdef HAVE_SETRESUID
     if (setresuid(details->uid, details->euid, details->euid) != 0) {
-	warning(_("unable to change to runas uid (%u, %u)"), details->uid,
+	warning(U_("unable to change to runas uid (%u, %u)"), details->uid,
 	    details->euid);
 	goto done;
     }
-#elif HAVE_SETREUID
+#elif defined(HAVE_SETREUID)
     if (setreuid(details->uid, details->euid) != 0) {
-	warning(_("unable to change to runas uid (%u, %u)"),
+	warning(U_("unable to change to runas uid (%u, %u)"),
 	    (unsigned int)details->uid, (unsigned int)details->euid);
 	goto done;
     }
 #else
     if (seteuid(details->euid) != 0 || setuid(details->euid) != 0) {
-	warning(_("unable to change to runas uid (%u, %u)"), details->uid,
+	warning(U_("unable to change to runas uid (%u, %u)"), details->uid,
 	    details->euid);
 	goto done;
     }
@@ -1017,7 +997,7 @@ exec_setup(struct command_details *details, const char *ptyname, int ptyfd)
 	if (details->chroot || strcmp(details->cwd, user_details.cwd) != 0) {
 	    /* Note: cwd is relative to the new root, if any. */
 	    if (chdir(details->cwd) != 0) {
-		warning(_("unable to change directory to %s"), details->cwd);
+		warning(U_("unable to change directory to %s"), details->cwd);
 		goto done;
 	    }
 	}
@@ -1051,7 +1031,7 @@ run_command(struct command_details *details)
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
 	    "calling policy close with errno %d", cstat.val);
 	policy_close(&policy_plugin, 0, cstat.val);
-	tq_foreach_fwd(&io_plugins, plugin) {
+	TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
 		"calling I/O close with errno %d", cstat.val);
 	    iolog_close(plugin, 0, cstat.val);
@@ -1063,7 +1043,7 @@ run_command(struct command_details *details)
 	sudo_debug_printf(SUDO_DEBUG_DEBUG,
 	    "calling policy close with wait status %d", cstat.val);
 	policy_close(&policy_plugin, cstat.val, 0);
-	tq_foreach_fwd(&io_plugins, plugin) {
+	TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
 		"calling I/O close with wait status %d", cstat.val);
 	    iolog_close(plugin, cstat.val, 0);
@@ -1074,7 +1054,7 @@ run_command(struct command_details *details)
 	    exitcode = WTERMSIG(cstat.val) | 128;
 	break;
     default:
-	warningx(_("unexpected child termination condition: %d"), cstat.type);
+	warningx(U_("unexpected child termination condition: %d"), cstat.type);
 	break;
     }
     debug_return_int(exitcode);
@@ -1111,7 +1091,7 @@ policy_close(struct plugin_container *plugin, int exit_status, int error)
     if (plugin->u.policy->close != NULL)
 	plugin->u.policy->close(exit_status, error);
     else
-	warning(_("unable to execute %s"), command_details.command);
+	warning(U_("unable to execute %s"), command_details.command);
     debug_return;
 }
 
@@ -1131,7 +1111,7 @@ policy_check(struct plugin_container *plugin, int argc, char * const argv[],
 {
     debug_decl(policy_check, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->check_policy == NULL) {
-	fatalx(_("policy plugin %s is missing the `check_policy' method"),
+	fatalx(U_("policy plugin %s is missing the `check_policy' method"),
 	    plugin->name);
     }
     debug_return_bool(plugin->u.policy->check_policy(argc, argv, env_add,
@@ -1144,7 +1124,7 @@ policy_list(struct plugin_container *plugin, int argc, char * const argv[],
 {
     debug_decl(policy_list, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->list == NULL) {
-	warningx(_("policy plugin %s does not support listing privileges"),
+	warningx(U_("policy plugin %s does not support listing privileges"),
 	    plugin->name);
 	debug_return_bool(false);
     }
@@ -1156,7 +1136,7 @@ policy_validate(struct plugin_container *plugin)
 {
     debug_decl(policy_validate, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->validate == NULL) {
-	warningx(_("policy plugin %s does not support the -v option"),
+	warningx(U_("policy plugin %s does not support the -v option"),
 	    plugin->name);
 	debug_return_bool(false);
     }
@@ -1168,7 +1148,7 @@ policy_invalidate(struct plugin_container *plugin, int remove)
 {
     debug_decl(policy_invalidate, SUDO_DEBUG_PCOMM)
     if (plugin->u.policy->invalidate == NULL) {
-	fatalx(_("policy plugin %s does not support the -k/-K options"),
+	fatalx(U_("policy plugin %s does not support the -k/-K options"),
 	    plugin->name);
     }
     plugin->u.policy->invalidate(remove);
@@ -1262,7 +1242,7 @@ iolog_unlink(struct plugin_container *plugin)
 		deregister_hook);
     }
     /* Remove from io_plugins list and free. */
-    tq_remove(&io_plugins, plugin);
+    TAILQ_REMOVE(&io_plugins, plugin, entries);
     efree(plugin);
 
     debug_return;

@@ -150,6 +150,13 @@ Compilation options:
         option may be needed on some Linux systems where PIE binaries
         are not fully supported.
 
+  --disable-poll
+        Use select() instead of poll() in the event loop.  By default,
+	sudo will use poll() on systems that support it.  Some systems
+	have a broken poll() implementation and need to use select instead.
+	On Mac OS X, select() is always used since its poll() doesn't
+	support devices.
+
   --disable-rpath
         By default, configure will use -Rpath in addition to -Lpath
         when passing library paths to the loader.  This option will
@@ -163,6 +170,14 @@ Compilation options:
         sudoers policy and I/O plugins are embedded in the sudo
         binary itself.  This will also disable the noexec option
         as it too relies on dynamic shared object support.
+
+  --enable-static-sudoers
+        By default, the sudoers plugin is built and installed as a
+        dynamic shared object.  When the --enable-static-sudoers
+        option is specified, the sudoers plugin is compiled directly
+        into the sudo binary.  Unlike --disable-shared, this does
+        not prevent other plugins from being used and the noexec
+        option will continue to function.
 
   --enable-zlib[=location]
 	Enable the use of the zlib compress library when storing

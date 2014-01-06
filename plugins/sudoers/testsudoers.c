@@ -102,13 +102,6 @@ extern int (*trace_print)(const char *msg);
 struct sudo_user sudo_user;
 struct passwd *list_pw;
 static char *runas_group, *runas_user;
-extern int errorlineno;
-extern bool parse_error;
-extern char *errorfile;
-
-/* For getopt(3) */
-extern char *optarg;
-extern int optind;
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
 extern char *malloc_options;
@@ -127,6 +120,7 @@ main(int argc, char *argv[])
     struct userspec *us;
     char *p, *grfile, *pwfile;
     char hbuf[HOST_NAME_MAX + 1];
+    const char *errstr;
     int match, host_match, runas_match, cmnd_match;
     int ch, dflag, exitcode = 0;
     debug_decl(main, SUDO_DEBUG_MAIN)
@@ -138,11 +132,9 @@ main(int argc, char *argv[])
     sudoersdebug = 1;
 #endif
 
-#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
-    setprogname(argc > 0 ? argv[0] : "testsudoers");
-#endif
+    initprogname(argc > 0 ? argv[0] : "testsudoers");
 
-    sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
+    sudoers_initlocale(setlocale(LC_ALL, ""), def_sudoers_locale);
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have own domain */
     textdomain("sudoers");
 
@@ -160,7 +152,9 @@ main(int argc, char *argv[])
 		user_host = optarg;
 		break;
 	    case 'G':
-		sudoers_gid = (gid_t)atoi(optarg);
+		sudoers_gid = (gid_t)atoid(optarg, NULL, NULL, &errstr);
+		if (errstr != NULL)
+		    fatalx("group ID %s: %s", optarg, errstr);
 		break;
 	    case 'g':
 		runas_group = optarg;
@@ -175,7 +169,9 @@ main(int argc, char *argv[])
 		trace_print = testsudoers_print;
 		break;
 	    case 'U':
-		sudoers_uid = (uid_t)atoi(optarg);
+		sudoers_uid = (uid_t)atoid(optarg, NULL, NULL, &errstr);
+		if (errstr != NULL)
+		    fatalx("user ID %s: %s", optarg, errstr);
 		break;
 	    case 'u':
 		runas_user = optarg;
@@ -212,7 +208,7 @@ main(int argc, char *argv[])
 	argc -= 2;
     }
     if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL)
-	fatalx(_("unknown user: %s"), user_name);
+	fatalx(U_("unknown user: %s"), user_name);
 
     if (user_host == NULL) {
 	if (gethostname(hbuf, sizeof(hbuf)) != 0)
@@ -242,7 +238,7 @@ main(int argc, char *argv[])
 	for (to = user_args, from = argv; *from; from++) {
 	    n = strlcpy(to, *from, size - (to - user_args));
 	    if (n >= size - (to - user_args))
-		fatalx(_("internal error, %s overflow"), "init_vars()");
+		fatalx(U_("internal error, %s overflow"), "init_vars()");
 	    to += n;
 	    *to++ = ' ';
 	}
@@ -304,19 +300,19 @@ main(int argc, char *argv[])
     /* This loop must match the one in sudo_file_lookup() */
     printf("\nEntries for user %s:\n", user_name);
     match = UNSPEC;
-    tq_foreach_rev(&userspecs, us) {
+    TAILQ_FOREACH_REVERSE(us, &userspecs, userspec_list, entries) {
 	if (userlist_matches(sudo_user.pw, &us->users) != ALLOW)
 	    continue;
-	tq_foreach_rev(&us->privileges, priv) {
+	TAILQ_FOREACH_REVERSE(priv, &us->privileges, privilege_list, entries) {
 	    putchar('\n');
-	    print_privilege(priv); /* XXX */
+	    print_privilege(priv);
 	    putchar('\n');
 	    host_match = hostlist_matches(&priv->hostlist);
 	    if (host_match == ALLOW) {
 		puts("\thost  matched");
-		tq_foreach_rev(&priv->cmndlist, cs) {
-		    runas_match = runaslist_matches(&cs->runasuserlist,
-			&cs->runasgrouplist, NULL, NULL);
+		TAILQ_FOREACH_REVERSE(cs, &priv->cmndlist, cmndspec_list, entries) {
+		    runas_match = runaslist_matches(cs->runasuserlist,
+			cs->runasgrouplist, NULL, NULL);
 		    if (runas_match == ALLOW) {
 			puts("\trunas matched");
 			cmnd_match = cmnd_matches(cs->cmnd);
@@ -342,6 +338,8 @@ main(int argc, char *argv[])
      */
     exitcode = parse_error ? 1 : (match == ALLOW ? 0 : match + 3);
 done:
+    sudo_endpwent();
+    sudo_endgrent();
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
     exit(exitcode);
 }
@@ -349,36 +347,48 @@ done:
 static void
 set_runaspw(const char *user)
 {
-    debug_decl(main, SUDO_DEBUG_UTIL)
+    struct passwd *pw = NULL;
+    debug_decl(set_runaspw, SUDO_DEBUG_UTIL)
 
+    if (*user == '#') {
+	const char *errstr;
+	uid_t uid = atoid(user + 1, NULL, NULL, &errstr);
+	if (errstr == NULL) {
+	    if ((pw = sudo_getpwuid(uid)) == NULL)
+		pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
+	}
+    }
+    if (pw == NULL) {
+	if ((pw = sudo_getpwnam(user)) == NULL)
+	    fatalx(U_("unknown user: %s"), user);
+    }
     if (runas_pw != NULL)
 	sudo_pw_delref(runas_pw);
-    if (*user == '#') {
-	if ((runas_pw = sudo_getpwuid(atoi(user + 1))) == NULL)
-	    runas_pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
-    } else {
-	if ((runas_pw = sudo_getpwnam(user)) == NULL)
-	    fatalx(_("unknown user: %s"), user);
-    }
-
+    runas_pw = pw;
     debug_return;
 }
 
 static void
 set_runasgr(const char *group)
 {
-    debug_decl(main, SUDO_DEBUG_UTIL)
+    struct group *gr = NULL;
+    debug_decl(set_runasgr, SUDO_DEBUG_UTIL)
 
+    if (*group == '#') {
+	const char *errstr;
+	gid_t gid = atoid(group + 1, NULL, NULL, &errstr);
+	if (errstr == NULL) {
+	    if ((gr = sudo_getgrgid(gid)) == NULL)
+		gr = sudo_fakegrnam(group);
+	}
+    }
+    if (gr == NULL) {
+	if ((gr = sudo_getgrnam(group)) == NULL)
+	    fatalx(U_("unknown group: %s"), group);
+    }
     if (runas_gr != NULL)
 	sudo_gr_delref(runas_gr);
-    if (*group == '#') {
-	if ((runas_gr = sudo_getgrgid(atoi(group + 1))) == NULL)
-	    runas_gr = sudo_fakegrnam(group);
-    } else {
-	if ((runas_gr = sudo_getgrnam(group)) == NULL)
-	    fatalx(_("unknown group: %s"), group);
-    }
-
+    runas_gr = gr;
     debug_return;
 }
 
@@ -490,9 +500,9 @@ print_defaults(void)
 {
     struct defaults *d;
     struct member *m;
-    debug_decl(print_member, SUDO_DEBUG_UTIL)
+    debug_decl(print_defaults, SUDO_DEBUG_UTIL)
 
-    tq_foreach_fwd(&defaults, d) {
+    TAILQ_FOREACH(d, &defaults, entries) {
 	(void) fputs("Defaults", stdout);
 	switch (d->type) {
 	    case DEFAULTS_HOST:
@@ -508,8 +518,8 @@ print_defaults(void)
 		putchar('!');
 		break;
 	}
-	tq_foreach_fwd(&d->binding, m) {
-	    if (m != tq_first(&d->binding))
+	TAILQ_FOREACH(m, d->binding, entries) {
+	    if (m != TAILQ_FIRST(d->binding))
 		putchar(',');
 	    print_member(m);
 	}
@@ -545,8 +555,8 @@ print_alias(void *v1, void *v2)
 	    (void) printf("Runas_Alias\t%s = ", a->name);
 	    break;
     }
-    tq_foreach_fwd(&a->members, m) {
-	if (m != tq_first(&a->members))
+    TAILQ_FOREACH(m, &a->members, entries) {
+	if (m != TAILQ_FIRST(&a->members))
 	    fputs(", ", stdout);
 	if (m->type == COMMAND) {
 	    c = (struct sudo_command *) m->name;
@@ -567,66 +577,61 @@ print_privilege(struct privilege *priv)
 {
     struct cmndspec *cs;
     struct member *m;
-    struct privilege *p;
     struct cmndtag tags;
     debug_decl(print_privilege, SUDO_DEBUG_UTIL)
 
-    for (p = priv; p != NULL; p = p->next) {
-	if (p != priv)
-	    fputs(" : ", stdout);
-	tq_foreach_fwd(&p->hostlist, m) {
-	    if (m != tq_first(&p->hostlist))
-		fputs(", ", stdout);
-	    print_member(m);
-	}
-	fputs(" = ", stdout);
-	tags.nopasswd = UNSPEC;
-	tags.noexec = UNSPEC;
-	tq_foreach_fwd(&p->cmndlist, cs) {
-	    if (cs != tq_first(&p->cmndlist))
-		fputs(", ", stdout);
-	    if (!tq_empty(&cs->runasuserlist) || !tq_empty(&cs->runasgrouplist)) {
-		fputs("(", stdout);
-		if (!tq_empty(&cs->runasuserlist)) {
-		    tq_foreach_fwd(&cs->runasuserlist, m) {
-			if (m != tq_first(&cs->runasuserlist))
-			    fputs(", ", stdout);
-			print_member(m);
-		    }  
-		} else if (tq_empty(&cs->runasgrouplist)) {
-		    fputs(def_runas_default, stdout);
-		} else {
-		    fputs(sudo_user.pw->pw_name, stdout);
-		}
-		if (!tq_empty(&cs->runasgrouplist)) {
-		    fputs(" : ", stdout);
-		    tq_foreach_fwd(&cs->runasgrouplist, m) {
-			if (m != tq_first(&cs->runasgrouplist))
-			    fputs(", ", stdout);
-			print_member(m);
-		    }
-		}
-		fputs(") ", stdout);
+    TAILQ_FOREACH(m, &priv->hostlist, entries) {
+	if (m != TAILQ_FIRST(&priv->hostlist))
+	    fputs(", ", stdout);
+	print_member(m);
+    }
+    fputs(" = ", stdout);
+    tags.nopasswd = UNSPEC;
+    tags.noexec = UNSPEC;
+    TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
+	if (cs != TAILQ_FIRST(&priv->cmndlist))
+	    fputs(", ", stdout);
+	if (cs->runasuserlist != NULL || cs->runasgrouplist != NULL) {
+	    fputs("(", stdout);
+	    if (cs->runasuserlist != NULL) {
+		TAILQ_FOREACH(m, cs->runasuserlist, entries) {
+		    if (m != TAILQ_FIRST(cs->runasuserlist))
+			fputs(", ", stdout);
+		    print_member(m);
+		}  
+	    } else if (cs->runasgrouplist == NULL) {
+		fputs(def_runas_default, stdout);
+	    } else {
+		fputs(sudo_user.pw->pw_name, stdout);
 	    }
+	    if (cs->runasgrouplist != NULL) {
+		fputs(" : ", stdout);
+		TAILQ_FOREACH(m, cs->runasgrouplist, entries) {
+		    if (m != TAILQ_FIRST(cs->runasgrouplist))
+			fputs(", ", stdout);
+		    print_member(m);
+		}
+	    }
+	    fputs(") ", stdout);
+	}
 #ifdef HAVE_SELINUX
-	    if (cs->role)
-		printf("ROLE=%s ", cs->role);
-	    if (cs->type)
-		printf("TYPE=%s ", cs->type);
+	if (cs->role)
+	    printf("ROLE=%s ", cs->role);
+	if (cs->type)
+	    printf("TYPE=%s ", cs->type);
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_PRIV_SET
-	    if (cs->privs)
-		printf("PRIVS=%s ", cs->privs);
-	    if (cs->limitprivs)
-		printf("LIMITPRIVS=%s ", cs->limitprivs);
+	if (cs->privs)
+	    printf("PRIVS=%s ", cs->privs);
+	if (cs->limitprivs)
+	    printf("LIMITPRIVS=%s ", cs->limitprivs);
 #endif /* HAVE_PRIV_SET */
-	    if (cs->tags.nopasswd != UNSPEC && cs->tags.nopasswd != tags.nopasswd)
-		printf("%sPASSWD: ", cs->tags.nopasswd ? "NO" : "");
-	    if (cs->tags.noexec != UNSPEC && cs->tags.noexec != tags.noexec)
-		printf("%sEXEC: ", cs->tags.noexec ? "NO" : "");
-	    print_member(cs->cmnd);
-	    memcpy(&tags, &cs->tags, sizeof(tags));
-	}
+	if (cs->tags.nopasswd != UNSPEC && cs->tags.nopasswd != tags.nopasswd)
+	    printf("%sPASSWD: ", cs->tags.nopasswd ? "NO" : "");
+	if (cs->tags.noexec != UNSPEC && cs->tags.noexec != tags.noexec)
+	    printf("%sEXEC: ", cs->tags.noexec ? "NO" : "");
+	print_member(cs->cmnd);
+	memcpy(&tags, &cs->tags, sizeof(tags));
     }
     debug_return;
 }
@@ -636,16 +641,21 @@ print_userspecs(void)
 {
     struct member *m;
     struct userspec *us;
+    struct privilege *priv;
     debug_decl(print_userspecs, SUDO_DEBUG_UTIL)
 
-    tq_foreach_fwd(&userspecs, us) {
-	tq_foreach_fwd(&us->users, m) {
-	    if (m != tq_first(&us->users))
+    TAILQ_FOREACH(us, &userspecs, entries) {
+	TAILQ_FOREACH(m, &us->users, entries) {
+	    if (m != TAILQ_FIRST(&us->users))
 		fputs(", ", stdout);
 	    print_member(m);
 	}
 	putchar('\t');
-	print_privilege(us->privileges.first); /* XXX */
+	TAILQ_FOREACH(priv, &us->privileges, entries) {
+	    if (priv != TAILQ_FIRST(&us->privileges))
+		fputs(" : ", stdout);
+	    print_privilege(priv);
+	}
 	putchar('\n');
     }
     debug_return;

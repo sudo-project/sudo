@@ -72,6 +72,7 @@
 #define SUDO_DEBUG_PLUGIN	(24<<6)	/* main plugin functions */
 #define SUDO_DEBUG_HOOKS	(25<<6)	/* hook functions */
 #define SUDO_DEBUG_SSSD		(26<<6) /* sudoers SSSD */
+#define SUDO_DEBUG_EVENT	(27<<6) /* event handling */
 #define SUDO_DEBUG_ALL		0xfff0	/* all subsystems */
 
 /* Flag to include string version of errno in debug info. */
@@ -144,33 +145,51 @@
 
 #define debug_return_str(rval)						       \
     do {								       \
+	char *sudo_debug_rval = (rval);					       \
+	sudo_debug_exit_str(__func__, __FILE__, __LINE__, sudo_debug_subsys,   \
+	    sudo_debug_rval);						       \
+	return sudo_debug_rval;						       \
+    } while (0)
+
+#define debug_return_const_str(rval)					       \
+    do {								       \
 	const char *sudo_debug_rval = (rval);				       \
 	sudo_debug_exit_str(__func__, __FILE__, __LINE__, sudo_debug_subsys,   \
 	    sudo_debug_rval);						       \
-	return (char *)sudo_debug_rval;					       \
+	return sudo_debug_rval;						       \
     } while (0)
 
-#define debug_return_str_masked(rval)						       \
+#define debug_return_str_masked(rval)					       \
     do {								       \
-	const char *sudo_debug_rval = (rval);				       \
+	char *sudo_debug_rval = (rval);					       \
 	sudo_debug_exit_str_masked(__func__, __FILE__, __LINE__,	       \
 	    sudo_debug_subsys, sudo_debug_rval);			       \
-	return (char *)sudo_debug_rval;					       \
+	return sudo_debug_rval;						       \
     } while (0)
 
 #define debug_return_ptr(rval)						       \
     do {								       \
+	void *sudo_debug_rval = (rval);					       \
+	sudo_debug_exit_ptr(__func__, __FILE__, __LINE__, sudo_debug_subsys,   \
+	    sudo_debug_rval);						       \
+	return sudo_debug_rval;						       \
+    } while (0)
+
+#define debug_return_const_ptr(rval)					       \
+    do {								       \
 	const void *sudo_debug_rval = (rval);				       \
 	sudo_debug_exit_ptr(__func__, __FILE__, __LINE__, sudo_debug_subsys,   \
 	    sudo_debug_rval);						       \
-	return (void *)sudo_debug_rval;					       \
+	return sudo_debug_rval;						       \
     } while (0)
 
 /*
  * Variadic macros are a C99 feature but GNU cpp has supported
  * a (different) version of them for a long time.
  */
-#if defined(__GNUC__) && __GNUC__ == 2
+#if defined(NO_VARIADIC_MACROS)
+# define sudo_debug_printf sudo_debug_printf_nvm
+#elif defined(__GNUC__) && __GNUC__ == 2
 # define sudo_debug_printf(pri, fmt...) \
     sudo_debug_printf2(__func__, __FILE__, __LINE__, (pri)|sudo_debug_subsys, \
     fmt)
@@ -199,8 +218,9 @@ void sudo_debug_exit_bool(const char *func, const char *file, int line, int subs
 void sudo_debug_exit_str(const char *func, const char *file, int line, int subsys, const char *rval);
 void sudo_debug_exit_str_masked(const char *func, const char *file, int line, int subsys, const char *rval);
 void sudo_debug_exit_ptr(const char *func, const char *file, int line, int subsys, const void *rval);
-int sudo_debug_fd_set(int fd);
+int sudo_debug_fd_get(void);
 int sudo_debug_init(const char *debugfile, const char *settings);
+void sudo_debug_printf_nvm(int pri, const char *fmt, ...) __printf0like(2, 3);
 void sudo_debug_printf2(const char *func, const char *file, int line, int level, const char *fmt, ...) __printf0like(5, 6);
 void sudo_debug_vprintf2(const char *func, const char *file, int line, int level, const char *fmt, va_list ap) __printf0like(5, 0);
 void sudo_debug_write(const char *str, int len, int errno_val);

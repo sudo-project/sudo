@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd September 11, 2013
+.Dd October 28, 2013
 .Dt SUDOREPLAY @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -89,6 +89,8 @@ In replay mode, if the standard output has not been redirected,
 .Nm sudoreplay
 will act on the following keys:
 .Bl -tag -width 12n
+.It So Li \en Sc No or So Li \er Sc
+Skip to the next replay event; useful for long pauses.
 .It So Li \  Sc No (space)
 Pause output; press any key to resume.
 .It Ql <

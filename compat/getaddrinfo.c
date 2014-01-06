@@ -55,13 +55,14 @@
 #include <netdb.h>
 #include <errno.h>
 
+#include <arpa/inet.h>
 #include <netinet/in.h>
 
 #include "compat/getaddrinfo.h"
 #include "missing.h"
 
 /* We need access to h_errno to map errors from gethostbyname. */
-#if !HAVE_DECL_H_ERRNO
+#ifndef HAVE_DECL_H_ERRNO
 extern int h_errno;
 #endif
 
@@ -85,7 +86,7 @@ extern int h_errno;
  * with the system version.  Note that we don't rename the structures and
  * constants, but that should be okay (except possibly for gai_strerror).
  */
-#if TESTING
+#ifdef TESTING
 # define gai_strerror test_gai_strerror
 # define freeaddrinfo test_freeaddrinfo
 # define getaddrinfo  test_getaddrinfo
@@ -99,7 +100,7 @@ int test_getaddrinfo(const char *, const char *, const struct addrinfo *,
  * If the native platform doesn't support AI_NUMERICSERV or AI_NUMERICHOST,
  * pick some other values for them.
  */
-#if TESTING
+#ifdef TESTING
 # if AI_NUMERICSERV == 0
 #  undef AI_NUMERICSERV
 #  define AI_NUMERICSERV 0x0080
@@ -114,7 +115,7 @@ int test_getaddrinfo(const char *, const char *, const struct addrinfo *,
  * Value representing all of the hint flags set.  Linux uses flags up to
  * 0x0400, so be sure not to break when testing on that platform.
  */
-#if TESTING
+#ifdef TESTING
 # ifdef HAVE_GETADDRINFO
 #  define AI_INTERNAL_ALL 0x04ff
 # else
@@ -139,7 +140,7 @@ static const char * const gai_errors[] = {
 };
 
 /* Macro to set the len attribute of sockaddr_in. */
-#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
 # define sin_set_length(s) ((s)->sin_len = sizeof(struct sockaddr_in))
 #else
 # define sin_set_length(s) /* empty */
@@ -183,29 +184,6 @@ freeaddrinfo(struct addrinfo *ai)
         free(ai);
         ai = next;
     }
-}
-
-
-/*
- * Convert a numeric service string to a number with error checking, returning
- * true if the number was parsed correctly and false otherwise.  Stores the
- * converted number in the second argument.  Equivalent to calling strtol, but
- * with the base always fixed at 10, with checking of errno, ensuring that all
- * of the string is consumed, and checking that the resulting number is
- * positive.
- */
-static int
-convert_service(const char *string, long *result)
-{
-    char *end;
-
-    if (*string == '\0')
-        return 0;
-    errno = 0;
-    *result = strtol(string, &end, 10);
-    if (errno != 0 || *end != '\0' || *result < 0)
-        return 0;
-    return 1;
 }
 
 
@@ -267,12 +245,14 @@ gai_service(const char *servname, int flags, int *type, unsigned short *port)
 {
     struct servent *servent;
     const char *protocol;
-    long value;
+    const char *errstr;
+    unsigned short value;
 
-    if (convert_service(servname, &value)) {
-        if (value > (1L << 16) - 1)
-            return EAI_SERVICE;
+    value = strtonum(servname, 0, USHRT_MAX, &errstr);
+    if (errstr == NULL) {
         *port = value;
+    } else if (errno == ERANGE) {
+	return EAI_SERVICE;
     } else {
         if (flags & AI_NUMERICSERV)
             return EAI_NONAME;

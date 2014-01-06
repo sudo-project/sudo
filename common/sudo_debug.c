@@ -103,6 +103,7 @@ const char *const sudo_debug_subsystems[] = {
     "plugin",
     "hooks",
     "sssd",
+    "event",
     NULL
 };
 
@@ -118,6 +119,7 @@ static int sudo_debug_fd = -1;
 static int sudo_debug_mode;
 static char sudo_debug_pidstr[(((sizeof(int) * 8) + 2) / 3) + 3];
 static size_t sudo_debug_pidlen;
+static const int num_subsystems = NUM_SUBSYSTEMS;
 
 /*
  * Parse settings string from sudo.conf and open debugfile.
@@ -129,8 +131,12 @@ int sudo_debug_init(const char *debugfile, const char *settings)
     char *buf, *cp, *subsys, *pri;
     int i, j;
 
+    /* Make sure we are not already initialized. */
+    if (sudo_debug_mode != SUDO_DEBUG_MODE_DISABLED)
+	return 1;
+
     /* Init per-subsystems settings to -1 since 0 is a valid priority. */
-    for (i = 0; i < NUM_SUBSYSTEMS; i++)
+    for (i = 0; i < num_subsystems; i++)
 	sudo_debug_settings[i] = -1;
 
     /* Open debug file if specified. */
@@ -339,12 +345,12 @@ sudo_debug_write_file(const char *func, const char *file, int lineno,
     iov[2].iov_base = sudo_debug_pidstr;
     iov[2].iov_len = sudo_debug_pidlen;
 
-    /* Add string along with newline if it doesn't have one. */
+    /* Add string, trimming any trailing newlines. */
+    while (len > 0 && str[len - 1] == '\n')
+	len--;
     if (len > 0) {
 	iov[iovcnt].iov_base = (char *)str;
 	iov[iovcnt].iov_len = len;
-	while (len > 0 && str[len - 1] == '\n')
-	    iov[iovcnt].iov_len--;
 	iovcnt++;
     }
 
@@ -437,7 +443,7 @@ sudo_debug_vprintf2(const char *func, const char *file, int lineno, int level,
     subsys = SUDO_DEBUG_SUBSYS(level);
 
     /* Make sure we want debug info at this level. */
-    if (subsys < NUM_SUBSYSTEMS && sudo_debug_settings[subsys] >= pri) {
+    if (subsys < num_subsystems && sudo_debug_settings[subsys] >= pri) {
 	buflen = fmt ? vasprintf(&buf, fmt, ap) : 0;
 	if (buflen != -1) {
 	    int errcode = ISSET(level, SUDO_DEBUG_ERRNO) ? saved_errno : 0;
@@ -451,6 +457,18 @@ sudo_debug_vprintf2(const char *func, const char *file, int lineno, int level,
 
     errno = saved_errno;
 }
+
+#ifdef NO_VARIADIC_MACROS
+void
+sudo_debug_printf_nvm(int pri, const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    sudo_debug_vprintf2(NULL, NULL, 0, pri, fmt, ap);
+    va_end(ap);
+}
+#endif /* NO_VARIADIC_MACROS */
 
 void
 sudo_debug_printf2(const char *func, const char *file, int lineno, int level,
@@ -479,7 +497,7 @@ sudo_debug_execve2(int level, const char *path, char *const argv[], char *const 
     subsys = SUDO_DEBUG_SUBSYS(level);
 
     /* Make sure we want debug info at this level. */
-    if (subsys >= NUM_SUBSYSTEMS || sudo_debug_settings[subsys] < pri)
+    if (subsys >= num_subsystems || sudo_debug_settings[subsys] < pri)
 	return;
 
     /* Log envp for debug level "debug". */
@@ -545,18 +563,10 @@ sudo_debug_execve2(int level, const char *path, char *const argv[], char *const 
 }
 
 /*
- * Dup sudo_debug_fd to the specified value so we don't
- * close it when calling closefrom().
+ * Getter for the debug descriptor.
  */
 int
-sudo_debug_fd_set(int fd)
+sudo_debug_fd_get(void)
 {
-    if (sudo_debug_fd != -1 && fd != sudo_debug_fd) {
-	if (dup2(sudo_debug_fd, fd) == -1)
-	    return -1;
-	(void)fcntl(fd, F_SETFD, FD_CLOEXEC);
-	close(sudo_debug_fd);
-	sudo_debug_fd = fd;
-    }
     return sudo_debug_fd;
 }

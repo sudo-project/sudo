@@ -54,8 +54,6 @@
 #  define LOGIN_DEFROOTCLASS	"daemon"
 # endif
 
-extern char *login_style;		/* from sudoers.c */
-
 struct bsdauth_state {
     auth_session_t *as;
     login_cap_t *lc;

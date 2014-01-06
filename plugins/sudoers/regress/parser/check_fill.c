@@ -43,7 +43,7 @@
 #define SUDO_ERROR_WRAP 0
 
 #include "missing.h"
-#include "list.h"
+#include "queue.h"
 #include "parse.h"
 #include "toke.h"
 #include "sudo_plugin.h"
@@ -133,8 +133,8 @@ static int
 do_tests(int (*checker)(const char *, int, int, const char *, char **),
     struct fill_test *data, size_t ntests)
 {
-    int i, len;
-    int errors = 0;
+    int len, errors = 0;
+    unsigned int i;
     char *result;
 
     for (i = 0; i < ntests; i++) {

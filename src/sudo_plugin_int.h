@@ -81,8 +81,7 @@ struct io_plugin_1_1 {
  * Sudo plugin internals.
  */
 struct plugin_container {
-    struct plugin_container *prev; /* required */
-    struct plugin_container *next; /* required */
+    TAILQ_ENTRY(plugin_container) entries;
     const char *name;
     char * const *options;
     void *handle;
@@ -95,7 +94,7 @@ struct plugin_container {
 	struct io_plugin_1_1 *io_1_1;
     } u;
 };
-TQ_DECLARE(plugin_container)
+TAILQ_HEAD(plugin_container_list, plugin_container);
 
 extern struct plugin_container policy_plugin;
 extern struct plugin_container_list io_plugins;

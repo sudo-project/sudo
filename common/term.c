@@ -39,6 +39,7 @@
 
 #include "missing.h"
 #include "sudo_debug.h"
+#include "sudo_util.h"
 
 #ifndef TCSASOFT
 # define TCSASOFT	0

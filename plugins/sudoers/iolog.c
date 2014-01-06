@@ -37,7 +37,7 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
 #include <errno.h>
@@ -136,17 +136,22 @@ io_mkdirs(char *path, mode_t mode, bool is_temp)
 int
 io_set_max_sessid(const char *maxval)
 {
-    unsigned long ulval;
-    char *ep;
+    const char *errstr;
+    unsigned int value;
+    debug_decl(io_set_max_sessid, SUDO_DEBUG_UTIL)
 
-    errno = 0;
-    ulval = strtoul(maxval, &ep, 0);
-    if (*maxval != '\0' && *ep == '\0' &&
-	(errno != ERANGE || ulval != ULONG_MAX)) {
-	sessid_max = MIN((unsigned int)ulval, SESSID_MAX);
-	return true;
+    value = strtonum(maxval, 0, SESSID_MAX, &errstr);
+    if (errstr != NULL) {
+	if (errno != ERANGE) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"bad maxseq: %s: %s", maxval, errstr);
+	    debug_return_bool(false);
+	}
+	/* Out of range, clamp to SESSID_MAX as documented. */
+	value = SESSID_MAX;
     }
-    return false;
+    sessid_max = value;
+    debug_return_bool(true);
 }
 
 /*
@@ -176,7 +181,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
      * Open sequence file
      */
     len = snprintf(pathbuf, sizeof(pathbuf), "%s/seq", iolog_dir);
-    if (len <= 0 || len >= sizeof(pathbuf)) {
+    if (len <= 0 || (size_t)len >= sizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
 	log_fatal(USE_ERRNO, "%s/seq", pathbuf);
     }
@@ -196,14 +201,20 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 
 	len = snprintf(fallback, sizeof(fallback), "%s/seq",
 	    iolog_dir_fallback);
-	if (len > 0 && len < sizeof(fallback)) {
+	if (len > 0 && (size_t)len < sizeof(fallback)) {
 	    int fd2 = open(fallback, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
 	    if (fd2 != -1) {
-		nread = read(fd2, buf, sizeof(buf));
+		nread = read(fd2, buf, sizeof(buf) - 1);
 		if (nread > 0) {
+		    if (buf[nread - 1] == '\n')
+			nread--;
+		    buf[nread] = '\0';
 		    id = strtoul(buf, &ep, 36);
-		    if (buf == ep || id >= sessid_max)
+		    if (ep == buf || *ep != '\0' || id >= sessid_max) {
+			sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			    "%s: bad sequence number: %s", fallback, buf);
 			id = 0;
+		    }
 		}
 		close(fd2);
 	    }
@@ -212,13 +223,19 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
 
     /* Read current seq number (base 36). */
     if (id == 0) {
-	nread = read(fd, buf, sizeof(buf));
+	nread = read(fd, buf, sizeof(buf) - 1);
 	if (nread != 0) {
 	    if (nread == -1)
 		log_fatal(USE_ERRNO, N_("unable to read %s"), pathbuf);
+	    if (buf[nread - 1] == '\n')
+		nread--;
+	    buf[nread] = '\0';
 	    id = strtoul(buf, &ep, 36);
-	    if (buf == ep || id >= sessid_max)
+	    if (ep == buf || *ep != '\0' || id >= sessid_max) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "%s: bad sequence number: %s", pathbuf, buf);
 		id = 0;
+	    }
 	}
     }
     id++;
@@ -237,7 +254,7 @@ io_nextid(char *iolog_dir, char *iolog_dir_fallback, char sessid[7])
     memcpy(sessid, buf, 6);
     sessid[6] = '\0';
 
-    /* Rewind and overwrite old seq file. */
+    /* Rewind and overwrite old seq file, including the NUL byte. */
     if (lseek(fd, (off_t)0, SEEK_SET) == (off_t)-1 || write(fd, buf, 7) != 7)
 	log_fatal(USE_ERRNO, N_("unable to write to %s"), pathbuf);
     close(fd);
@@ -288,7 +305,7 @@ open_io_fd(char *pathbuf, size_t len, struct io_log_file *iol, bool docompress)
     pathbuf[len] = '\0';
     strlcat(pathbuf, iol->suffix, PATH_MAX);
     if (iol->enabled) {
-	fd = open(pathbuf, O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR);
+	fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
 	if (fd != -1) {
 	    fcntl(fd, F_SETFD, FD_CLOEXEC);
 #ifdef HAVE_ZLIB_H
@@ -332,7 +349,9 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	switch (**cur) {
 	case 'c':
 	    if (strncmp(*cur, "cols=", sizeof("cols=") - 1) == 0) {
-		details->cols = atoi(*cur + sizeof("cols=") - 1);
+		int n = strtonum(*cur + sizeof("cols=") - 1, 1, INT_MAX, NULL);
+		if (n > 0)
+		    details->cols = n;
 		continue;
 	    }
 	    if (strncmp(*cur, "cwd=", sizeof("cwd=") - 1) == 0) {
@@ -342,7 +361,9 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
 	    break;
 	case 'l':
 	    if (strncmp(*cur, "lines=", sizeof("lines=") - 1) == 0) {
-		details->lines = atoi(*cur + sizeof("lines=") - 1);
+		int n = strtonum(*cur + sizeof("lines=") - 1, 1, INT_MAX, NULL);
+		if (n > 0)
+		    details->lines = n;
 		continue;
 	    }
 	    break;
@@ -438,7 +459,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     if (runas_uid_str != NULL) {
 	id = atoid(runas_uid_str, NULL, NULL, &errstr);
 	if (errstr != NULL)
-	    warningx("runas uid %s: %s", runas_uid_str, _(errstr));
+	    warningx("runas uid %s: %s", runas_uid_str, U_(errstr));
 	else
 	    runas_uid = (uid_t)id;
     }
@@ -447,7 +468,7 @@ iolog_deserialize_info(struct iolog_details *details, char * const user_info[],
     if (runas_gid_str != NULL) {
 	id = atoid(runas_gid_str, NULL, NULL, &errstr);
 	if (errstr != NULL)
-	    warningx("runas gid %s: %s", runas_gid_str, _(errstr));
+	    warningx("runas gid %s: %s", runas_gid_str, U_(errstr));
 	else
 	    runas_gid = (gid_t)id;
     }
@@ -486,7 +507,7 @@ write_info_log(char *pathbuf, size_t len, struct iolog_details *details,
 
     pathbuf[len] = '\0';
     strlcat(pathbuf, "/log", PATH_MAX);
-    fd = open(pathbuf, O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR);
+    fd = open(pathbuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL)
 	log_fatal(USE_ERRNO, N_("unable to create %s"), pathbuf);
 
@@ -581,7 +602,7 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     gettimeofday(&last_time, NULL);
     write_info_log(pathbuf, len, &details, argv, &last_time);
 
-    /* Create the timing I/O log files. */
+    /* Create the timing and I/O log files. */
     for (i = 0; i < IOFD_MAX; i++)
 	open_io_fd(pathbuf, len, &io_log_files[i], iolog_compress);
 

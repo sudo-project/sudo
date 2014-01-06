@@ -36,8 +36,7 @@
 #include "alloc.h"
 #include "fatal.h"
 #include "sudo_debug.h"
-
-extern id_t atoid(const char *p, const char *sep, char **endp, const char **errstr);
+#include "sudo_util.h"
 
 /*
  * Parse a comma-separated list of gids into an allocated array of GETGROUPS_T.
@@ -77,7 +76,7 @@ parse_gid_list(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp)
 	do {
 	    gids[ngids] = (GETGROUPS_T) atoid(cp, ",", &ep, &errstr);
 	    if (errstr != NULL) {
-		warningx(_("%s: %s"), cp, _(errstr));
+		warningx(U_("%s: %s"), cp, U_(errstr));
 		free(gids);
 		debug_return_int(-1);
 	    }

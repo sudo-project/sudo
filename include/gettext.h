@@ -54,6 +54,7 @@
 # define _(String) gettext(String)
 # define gettext_noop(String) String
 # define N_(String) gettext_noop(String)
+# define U_(String) warning_gettext(String)
 
 #else /* !HAVE_LIBINTL_H */
 
@@ -63,6 +64,7 @@
  */
 # define _(String) String 
 # define N_(String) String
+# define U_(String) String
 # define textdomain(Domain)
 # define bindtextdomain(Package, Directory)
 # define ngettext(String, String_Plural, N) \

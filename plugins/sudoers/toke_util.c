@@ -172,8 +172,8 @@ fill_args(const char *s, int len, int addspace)
     p = sudoerslval.command.args + arg_len;
     if (addspace)
 	*p++ = ' ';
-    if (strlcpy(p, s, arg_size - (p - sudoerslval.command.args)) != len) {
-	warningx(_("fill_args: buffer overflow"));	/* paranoia */
+    if (strlcpy(p, s, arg_size - (p - sudoerslval.command.args)) != (size_t)len) {
+	warningx(U_("fill_args: buffer overflow"));	/* paranoia */
 	sudoerserror(NULL);
 	debug_return_bool(false);
     }

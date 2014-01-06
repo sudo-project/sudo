@@ -34,7 +34,7 @@
 #define SUDO_DIGEST_INVALID	4
 
 struct sudo_digest {
-    int digest_type;
+    unsigned int digest_type;
     char *digest_str;
 };
 
@@ -53,11 +53,11 @@ struct sudo_command {
  * Possible values: true, false, IMPLIED, UNSPEC.
  */
 struct cmndtag {
-    __signed int nopasswd: 3;
-    __signed int noexec: 3;
-    __signed int setenv: 3;
-    __signed int log_input: 3;
-    __signed int log_output: 3;
+    int nopasswd: 3;
+    int noexec: 3;
+    int setenv: 3;
+    int log_input: 3;
+    int log_output: 3;
 };
 
 /*
@@ -84,31 +84,30 @@ struct solaris_privs_info {
  * modelled after the yacc grammar.
  *
  * Other than the alias struct, which is stored in a red-black tree,
- * the data structure used is basically a doubly-linked tail queue without
- * a separate head struct--the first entry acts as the head where the prev
- * pointer does double duty as the tail pointer.  This makes it possible
- * to trivally append sub-lists.  In addition, the prev pointer is always
- * valid (even if it points to itself).  Unlike a circle queue, the next
- * pointer of the last entry is NULL and does not point back to the head.
- *
- * Note that each list struct must contain a "prev" and "next" pointer as
- * the first two members of the struct (in that order).
+ * the data structure used is a doubly-linked tail queue.  While sudoers
+ * is being parsed, a headless tail queue is used where the first entry
+ * acts as the head and the prev pointer does double duty as the tail pointer.
+ * This makes it possible to trivally append sub-lists.  In addition, the prev
+ * pointer is always valid (even if it points to itself).  Unlike a circle
+ * queue, the next pointer of the last entry is NULL and does not point back
+ * to the head.  When the tail queue is finalized, it is converted to a
+ * normal BSD tail queue.
  */
 
 /*
  * Tail queue list head structure.
  */
-TQ_DECLARE(defaults)
-TQ_DECLARE(userspec)
-TQ_DECLARE(member)
-TQ_DECLARE(privilege)
-TQ_DECLARE(cmndspec)
+TAILQ_HEAD(defaults_list, defaults);
+TAILQ_HEAD(userspec_list, userspec);
+TAILQ_HEAD(member_list, member);
+TAILQ_HEAD(privilege_list, privilege);
+TAILQ_HEAD(cmndspec_list, cmndspec);
 
 /*
  * Structure describing a user specification and list thereof.
  */
 struct userspec {
-    struct userspec *prev, *next;
+    TAILQ_ENTRY(userspec) entries;
     struct member_list users;		/* list of users */
     struct privilege_list privileges;	/* list of privileges */
 };
@@ -117,7 +116,7 @@ struct userspec {
  * Structure describing a privilege specification.
  */
 struct privilege {
-    struct privilege *prev, *next;
+    TAILQ_ENTRY(privilege) entries;
     struct member_list hostlist;	/* list of hosts */
     struct cmndspec_list cmndlist;	/* list of Cmnd_Specs */
 };
@@ -126,11 +125,10 @@ struct privilege {
  * Structure describing a linked list of Cmnd_Specs.
  */
 struct cmndspec {
-    struct cmndspec *prev, *next;
-    struct member_list runasuserlist;	/* list of runas users */
-    struct member_list runasgrouplist;	/* list of runas groups */
+    TAILQ_ENTRY(cmndspec) entries;
+    struct member_list *runasuserlist;	/* list of runas users */
+    struct member_list *runasgrouplist;	/* list of runas groups */
     struct member *cmnd;		/* command to allow/deny */
-    char *digest;			/* optional command digest */
     struct cmndtag tags;		/* tag specificaion */
 #ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
@@ -144,7 +142,7 @@ struct cmndspec {
  * Generic structure to hold users, hosts, commands.
  */
 struct member {
-    struct member *prev, *next;
+    TAILQ_ENTRY(member) entries;
     char *name;				/* member name */
     short type;				/* type (see gram.h) */
     short negated;			/* negated via '!'? */
@@ -170,10 +168,10 @@ struct alias {
  * Structure describing a Defaults entry and a list thereof.
  */
 struct defaults {
-    struct defaults *prev, *next;
+    TAILQ_ENTRY(defaults) entries;
     char *var;				/* variable name */
     char *val;				/* variable value */
-    struct member_list binding;		/* user/host/runas binding */
+    struct member_list *binding;	/* user/host/runas binding */
     int type;				/* DEFAULTS{,_USER,_RUNAS,_HOST} */
     int op;				/* true, false, '+', '-' */
 };
@@ -202,17 +200,17 @@ void init_parser(const char *, bool);
 bool addr_matches(char *n);
 
 /* match.c */
-bool command_matches(char *sudoers_cmnd, char *sudoers_args, struct sudo_digest *digest);
-bool group_matches(char *sudoers_group, struct group *gr);
-bool hostname_matches(char *shost, char *lhost, char *pattern);
-bool netgr_matches(char *netgr, char *lhost, char *shost, char *user);
-bool usergr_matches(char *group, char *user, struct passwd *pw);
-bool userpw_matches(char *sudoers_user, char *user, struct passwd *pw);
-int cmnd_matches(struct member *m);
-int cmndlist_matches(struct member_list *list);
-int hostlist_matches(struct member_list *list);
-int runaslist_matches(struct member_list *user_list, struct member_list *group_list, struct member **matching_user, struct member **matching_group);
-int userlist_matches(struct passwd *pw, struct member_list *list);
+bool command_matches(const char *sudoers_cmnd, const char *sudoers_args, const struct sudo_digest *digest);
+bool group_matches(const char *sudoers_group, const struct group *gr);
+bool hostname_matches(const char *shost, const char *lhost, const char *pattern);
+bool netgr_matches(const char *netgr, const char *lhost, const char *shost, const char *user);
+bool usergr_matches(const char *group, const char *user, const struct passwd *pw);
+bool userpw_matches(const char *sudoers_user, const char *user, const struct passwd *pw);
+int cmnd_matches(const struct member *m);
+int cmndlist_matches(const struct member_list *list);
+int hostlist_matches(const struct member_list *list);
+int runaslist_matches(const struct member_list *user_list, const struct member_list *group_list, struct member **matching_user, struct member **matching_group);
+int userlist_matches(const struct passwd *pw, const struct member_list *list);
 
 /* toke.c */
 void init_lexer(void);

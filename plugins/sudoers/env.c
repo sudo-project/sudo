@@ -285,12 +285,12 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 	size_t nsize;
 
 	if (env.env_size > SIZE_MAX - 128) {
-	    fatalx_nodebug(_("internal error, %s overflow"),
+	    fatalx_nodebug(U_("internal error, %s overflow"),
 		"sudo_putenv_nodebug()");
 	}
 	nsize = env.env_size + 128;
 	if (nsize > SIZE_MAX / sizeof(char *)) {
-	    fatalx_nodebug(_("internal error, %s overflow"),
+	    fatalx_nodebug(U_("internal error, %s overflow"),
 		"sudo_putenv_nodebug()");
 	}
 	nenvp = realloc(env.envp, nsize * sizeof(char *));
@@ -364,7 +364,7 @@ sudo_putenv(char *str, bool dupcheck, bool overwrite)
     if (rval == -1) {
 #ifdef ENV_DEBUG
 	if (env.envp[env.env_len] != NULL)
-	    fatalx(_("sudo_putenv: corrupted envp, length mismatch"));
+	    fatalx(U_("sudo_putenv: corrupted envp, length mismatch"));
 #endif
 	fatal(NULL);
     }
@@ -392,7 +392,7 @@ sudo_setenv2(const char *var, const char *val, bool dupcheck, bool overwrite)
 	strlcat(estring, "=", esize) >= esize ||
 	strlcat(estring, val, esize) >= esize) {
 
-	fatalx(_("internal error, %s overflow"), "sudo_setenv2()");
+	fatalx(U_("internal error, %s overflow"), "sudo_setenv2()");
     }
     rval = sudo_putenv(estring, dupcheck, overwrite);
     if (rval == -1)
@@ -558,7 +558,7 @@ matches_env_delete(const char *var)
     debug_decl(matches_env_delete, SUDO_DEBUG_ENV)
 
     /* Skip anything listed in env_delete. */
-    for (cur = def_env_delete; cur; cur = cur->next) {
+    SLIST_FOREACH(cur, &def_env_delete, entries) {
 	len = strlen(cur->value);
 	/* Deal with '*' wildcard */
 	if (cur->value[len - 1] == '*') {
@@ -589,7 +589,7 @@ matches_env_check(const char *var)
     int keepit = -1;
     debug_decl(matches_env_check, SUDO_DEBUG_ENV)
 
-    for (cur = def_env_check; cur; cur = cur->next) {
+    SLIST_FOREACH(cur, &def_env_check, entries) {
 	len = strlen(cur->value);
 	/* Deal with '*' wildcard */
 	if (cur->value[len - 1] == '*') {
@@ -624,7 +624,7 @@ matches_env_keep(const char *var)
 	goto done;
     }
 
-    for (cur = def_env_keep; cur; cur = cur->next) {
+    SLIST_FOREACH(cur, &def_env_keep, entries) {
 	len = strlen(cur->value);
 	/* Deal with '*' wildcard */
 	if (cur->value[len - 1] == '*') {
@@ -1085,24 +1085,21 @@ init_envtables(void)
     for (p = initial_badenv_table; *p; p++) {
 	cur = ecalloc(1, sizeof(struct list_member));
 	cur->value = estrdup(*p);
-	cur->next = def_env_delete;
-	def_env_delete = cur;
+	SLIST_INSERT_HEAD(&def_env_delete, cur, entries);
     }
 
     /* Fill in the "env_check" list. */
     for (p = initial_checkenv_table; *p; p++) {
 	cur = ecalloc(1, sizeof(struct list_member));
 	cur->value = estrdup(*p);
-	cur->next = def_env_check;
-	def_env_check = cur;
+	SLIST_INSERT_HEAD(&def_env_check, cur, entries);
     }
 
     /* Fill in the "env_keep" list. */
     for (p = initial_keepenv_table; *p; p++) {
 	cur = ecalloc(1, sizeof(struct list_member));
 	cur->value = estrdup(*p);
-	cur->next = def_env_keep;
-	def_env_keep = cur;
+	SLIST_INSERT_HEAD(&def_env_keep, cur, entries);
     }
 }
 

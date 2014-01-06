@@ -59,10 +59,6 @@
 
 #include "sudoers.h"
 
-#ifndef va_copy
-# define va_copy(d, s) memcpy(&(d), &(s), sizeof(d));
-#endif
-
 /* Special message for log_warning() so we know to use ngettext() */
 #define INCORRECT_PASSWORD_ATTEMPT	((char *)0x01)
 
@@ -198,7 +194,7 @@ do_logfile(char *msg)
 	    def_logfile, strerror(errno));
     } else {
 	time(&now);
-	if (def_loglinelen < sizeof(LOG_INDENT)) {
+	if ((size_t)def_loglinelen < sizeof(LOG_INDENT)) {
 	    /* Don't pretty-print long log file lines (hard to grep) */
 	    if (def_log_host) {
 		(void) fprintf(fp, "%s : %s : HOST=%s : %s\n",
@@ -336,9 +332,9 @@ log_failure(int status, int flags)
 	 * their path to just contain a single dir.
 	 */
 	if (flags == NOT_FOUND)
-	    warningx(_("%s: command not found"), user_cmnd);
+	    warningx(U_("%s: command not found"), user_cmnd);
 	else if (flags == NOT_FOUND_DOT)
-	    warningx(_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
+	    warningx(U_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
     }
 
     debug_return;
@@ -348,7 +344,7 @@ log_failure(int status, int flags)
  * Log and audit that user was not able to authenticate themselves.
  */
 void
-log_auth_failure(int status, int tries)
+log_auth_failure(int status, unsigned int tries)
 {
     int flags = NO_MAIL;
     debug_decl(log_auth_failure, SUDO_DEBUG_LOGGING)
@@ -443,11 +439,20 @@ vlog_warning(int flags, const char *fmt, va_list ap)
 
     /* Expand printf-style format + args (with a special case). */
     if (fmt == INCORRECT_PASSWORD_ATTEMPT) {
-	int tries = va_arg(ap, int);
-	easprintf(&message, ngettext("%d incorrect password attempt",
-	    "%d incorrect password attempts", tries), tries);
+	unsigned int tries = va_arg(ap, unsigned int);
+	easprintf(&message, ngettext("%u incorrect password attempt",
+	    "%u incorrect password attempts", tries), tries);
     } else {
 	evasprintf(&message, _(fmt), ap);
+    }
+
+    /* Log to debug file. */
+    if (USE_ERRNO) {
+	sudo_debug_printf2(NULL, NULL, 0,
+	    SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|sudo_debug_subsys, "%s", message);
+    } else {
+	sudo_debug_printf2(NULL, NULL, 0,
+	    SUDO_DEBUG_WARN|sudo_debug_subsys, "%s", message);
     }
 
     if (ISSET(flags, MSG_ONLY)) {
@@ -486,16 +491,18 @@ vlog_warning(int flags, const char *fmt, va_list ap)
      * Tell the user (in their locale).
      */
     if (!ISSET(flags, NO_STDERR)) {
+	sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
 	if (fmt == INCORRECT_PASSWORD_ATTEMPT) {
-	    int tries = va_arg(ap2, int);
-	    warningx(ngettext("%d incorrect password attempt",
-		"%d incorrect password attempts", tries), tries);
+	    unsigned int tries = va_arg(ap2, unsigned int);
+	    warningx_nodebug(ngettext("%u incorrect password attempt",
+		"%u incorrect password attempts", tries), tries);
 	} else {
 	    if (ISSET(flags, USE_ERRNO))
-		vwarning(fmt, ap2);
+		vwarning_nodebug(_(fmt), ap2);
 	    else
-		vwarningx(fmt, ap2);
+		vwarningx_nodebug(_(fmt), ap2);
 	}
+	sudoers_setlocale(oldlocale, NULL);
 	va_end(ap2);
     }
 
@@ -572,7 +579,7 @@ send_mail(const char *fmt, ...)
     switch (pid = sudo_debug_fork()) {
 	case -1:
 	    /* Error. */
-	    fatal(_("unable to fork"));
+	    fatal(U_("unable to fork"));
 	    break;
 	case 0:
 	    /* Child. */
@@ -904,5 +911,5 @@ new_logline(const char *message, int serrno)
 
     debug_return_str(line);
 toobig:
-    fatalx(_("internal error: insufficient space for log line"));
+    fatalx(U_("internal error: insufficient space for log line"));
 }

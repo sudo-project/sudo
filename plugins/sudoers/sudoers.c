@@ -100,9 +100,6 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 int long_list;
 uid_t timestamp_uid;
-extern int errorlineno;
-extern bool parse_error;
-extern char *errorfile;
 #ifdef HAVE_BSD_AUTH_H
 char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
@@ -150,18 +147,17 @@ sudoers_policy_init(void *info, char * const envp[])
     set_perms(PERM_ROOT);
 
     /* Open and parse sudoers, set global defaults */
-    for (nss = snl->first; nss != NULL; nss = nss_next) {
-        nss_next = nss->next;
+    TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
         if (nss->open(nss) == 0 && nss->parse(nss) == 0) {
             sources++;
             if (nss->setdefs(nss) != 0)
                 log_warning(NO_STDERR, N_("problem with defaults entries"));
         } else {
-            tq_remove(snl, nss);
+	    TAILQ_REMOVE(snl, nss, entries);
         }
     }
     if (sources == 0) {
-	warningx(_("no valid sudoers sources found, quitting"));
+	warningx(U_("no valid sudoers sources found, quitting"));
 	debug_return_bool(-1);
     }
 
@@ -223,7 +219,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
-        warningx(_("sudoers specifies that root is not allowed to sudo"));
+        warningx(U_("sudoers specifies that root is not allowed to sudo"));
         goto bad;
     }    
 
@@ -262,7 +258,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Check for -C overriding def_closefrom. */
     if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
 	if (!def_closefrom_override) {
-	    warningx(_("you are not permitted to use the -C option"));
+	    warningx(U_("you are not permitted to use the -C option"));
 	    goto bad;
 	}
 	def_closefrom = user_closefrom;
@@ -273,7 +269,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     validated = FLAG_NO_USER | FLAG_NO_HOST;
-    tq_foreach_fwd(snl, nss) {
+    TAILQ_FOREACH(nss, snl, entries) {
 	validated = nss->lookup(nss, validated, pwflag);
 
 	if (ISSET(validated, VALIDATE_OK)) {
@@ -301,11 +297,15 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      * Look up the timestamp dir owner if one is specified.
      */
     if (def_timestampowner) {
-	struct passwd *pw;
+	struct passwd *pw = NULL;
 
-	if (*def_timestampowner == '#')
-	    pw = sudo_getpwuid(atoi(def_timestampowner + 1));
-	else
+	if (*def_timestampowner == '#') {
+	    const char *errstr;
+	    uid_t uid = atoid(def_timestampowner + 1, NULL, NULL, &errstr);
+	    if (errstr == NULL)
+		pw = sudo_getpwuid(uid);
+	}
+	if (pw == NULL)
 	    pw = sudo_getpwnam(def_timestampowner);
 	if (pw != NULL) {
 	    timestamp_uid = pw->pw_uid;
@@ -326,7 +326,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Bail if a tty is required and we don't have one.  */
     if (def_requiretty && !tty_present()) {
 	audit_failure(NewArgv, N_("no tty"));
-	warningx(_("sorry, you must have a tty to run sudo"));
+	warningx(U_("sorry, you must have a tty to run sudo"));
 	goto bad;
     }
 
@@ -375,15 +375,15 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* Finally tell the user if the command did not exist. */
     if (cmnd_status == NOT_FOUND_DOT) {
 	audit_failure(NewArgv, N_("command in current directory"));
-	warningx(_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
+	warningx(U_("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run."), user_cmnd, user_cmnd, user_cmnd);
 	goto bad;
     } else if (cmnd_status == NOT_FOUND) {
 	if (ISSET(sudo_mode, MODE_CHECK)) {
 	    audit_failure(NewArgv, N_("%s: command not found"), NewArgv[0]);
-	    warningx(_("%s: command not found"), NewArgv[0]);
+	    warningx(U_("%s: command not found"), NewArgv[0]);
 	} else {
 	    audit_failure(NewArgv, N_("%s: command not found"), user_cmnd);
-	    warningx(_("%s: command not found"), user_cmnd);
+	    warningx(U_("%s: command not found"), user_cmnd);
 	}
 	goto bad;
     }
@@ -391,7 +391,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* If user specified env vars make sure sudoers allows it. */
     if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
 	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
-	    warningx(_("sorry, you are not allowed to preserve the environment"));
+	    warningx(U_("sorry, you are not allowed to preserve the environment"));
 	    goto bad;
 	} else
 	    validate_env_vars(sudo_user.env_vars);
@@ -413,7 +413,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	display_privs(snl, list_pw ? list_pw : sudo_user.pw); /* XXX - return val */
 
     /* Cleanup sudoers sources */
-    tq_foreach_fwd(snl, nss) {
+    TAILQ_FOREACH(nss, snl, entries) {
 	nss->close(nss);
     }
     if (def_group_plugin)
@@ -559,7 +559,7 @@ init_vars(char * const envp[])
 	     * YP/NIS/NIS+/LDAP/etc daemon has died.
 	     */
 	    if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE)
-		fatalx(_("unknown uid: %u"), (unsigned int) user_uid);
+		fatalx(U_("unknown uid: %u"), (unsigned int) user_uid);
 
 	    /* Need to make a fake struct passwd for the call to log_fatal(). */
 	    sudo_user.pw = sudo_mkpwent(user_name, user_uid, user_gid, NULL, NULL);
@@ -653,7 +653,7 @@ set_cmnd(void)
 		for (to = user_args, av = NewArgv + 1; *av; av++) {
 		    n = strlcpy(to, *av, size - (to - user_args));
 		    if (n >= size - (to - user_args))
-			fatalx(_("internal error, %s overflow"), "set_cmnd()");
+			fatalx(U_("internal error, %s overflow"), "set_cmnd()");
 		    to += n;
 		    *to++ = ' ';
 		}
@@ -760,9 +760,8 @@ set_loginclass(struct passwd *pw)
 	debug_return;
 
     if (login_class && strcmp(login_class, "-") != 0) {
-	if (user_uid != 0 &&
-	    strcmp(runas_user ? runas_user : def_runas_default, "root") != 0)
-	    fatalx(_("only root can use `-c %s'"), login_class);
+	if (user_uid != 0 && pw->pw_uid != 0)
+	    fatalx(U_("only root can use `-c %s'"), login_class);
     } else {
 	login_class = pw->pw_class;
 	if (!login_class || !*login_class)
@@ -835,17 +834,24 @@ set_fqdn(void)
 static void
 set_runaspw(const char *user)
 {
+    struct passwd *pw = NULL;
     debug_decl(set_runaspw, SUDO_DEBUG_PLUGIN)
 
-    if (runas_pw != NULL)
-	sudo_pw_delref(runas_pw);
     if (*user == '#') {
-	if ((runas_pw = sudo_getpwuid(atoi(user + 1))) == NULL)
-	    runas_pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
-    } else {
-	if ((runas_pw = sudo_getpwnam(user)) == NULL)
+	const char *errstr;
+	uid_t uid = atoid(user + 1, NULL, NULL, &errstr);
+	if (errstr == NULL) {
+	    if ((pw = sudo_getpwuid(uid)) == NULL)
+		pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
+	}
+    }
+    if (pw == NULL) {
+	if ((pw = sudo_getpwnam(user)) == NULL)
 	    log_fatal(NO_MAIL|MSG_ONLY, N_("unknown user: %s"), user);
     }
+    if (runas_pw != NULL)
+	sudo_pw_delref(runas_pw);
+    runas_pw = pw;
     debug_return;
 }
 
@@ -856,17 +862,24 @@ set_runaspw(const char *user)
 static void
 set_runasgr(const char *group)
 {
+    struct group *gr = NULL;
     debug_decl(set_runasgr, SUDO_DEBUG_PLUGIN)
 
-    if (runas_gr != NULL)
-	sudo_gr_delref(runas_gr);
     if (*group == '#') {
-	if ((runas_gr = sudo_getgrgid(atoi(group + 1))) == NULL)
-	    runas_gr = sudo_fakegrnam(group);
-    } else {
-	if ((runas_gr = sudo_getgrnam(group)) == NULL)
+	const char *errstr;
+	gid_t gid = atoid(group + 1, NULL, NULL, &errstr);
+	if (errstr == NULL) {
+	    if ((gr = sudo_getgrgid(gid)) == NULL)
+		gr = sudo_fakegrnam(group);
+	}
+    }
+    if (gr == NULL) {
+	if ((gr = sudo_getgrnam(group)) == NULL)
 	    log_fatal(NO_MAIL|MSG_ONLY, N_("unknown group: %s"), group);
     }
+    if (runas_gr != NULL)
+	sudo_gr_delref(runas_gr);
+    runas_gr = gr;
     debug_return;
 }
 
@@ -902,8 +915,9 @@ sudoers_cleanup(void)
     debug_decl(sudoers_cleanup, SUDO_DEBUG_PLUGIN)
 
     if (snl != NULL) {
-	tq_foreach_fwd(snl, nss)
+	TAILQ_FOREACH(nss, snl, entries) {
 	    nss->close(nss);
+	}
     }
     if (def_group_plugin)
 	group_plugin_unload();
@@ -1001,7 +1015,7 @@ find_editor(int nfiles, char **files, char ***argv_out)
     }
     if (!editor_path) {
 	audit_failure(NewArgv, N_("%s: command not found"), editor);
-	warningx(_("%s: command not found"), editor);
+	warningx(U_("%s: command not found"), editor);
     }
     debug_return_str(editor_path);
 }
@@ -1022,7 +1036,7 @@ create_admin_success_flag(void)
     /* Build path to flag file. */
     n = snprintf(flagfile, sizeof(flagfile), "%s/.sudo_as_admin_successful",
 	user_dir);
-    if (n <= 0 || n >= sizeof(flagfile))
+    if (n <= 0 || (size_t)n >= sizeof(flagfile))
 	debug_return;
 
     /* Create admin flag file if it doesn't already exist. */

@@ -24,18 +24,11 @@
  * We wrap fatal/fatalx and warning/warningx so that the same output can
  * go to the debug file, if there is one.
  */
-#if defined(SUDO_ERROR_WRAP) && SUDO_ERROR_WRAP == 0
-# if defined(__GNUC__) && __GNUC__ == 2
-#  define fatal(fmt...) fatal_nodebug(fmt)
-#  define fatalx(fmt...) fatalx_nodebug(fmt)
-#  define warning(fmt...) warning_nodebug(fmt)
-#  define warningx(fmt...) warningx_nodebug(fmt)
-# else
-#  define fatal(...) fatal_nodebug(__VA_ARGS__)
-#  define fatalx(...) fatalx_nodebug(__VA_ARGS__)
-#  define warning(...) warning_nodebug(__VA_ARGS__)
-#  define warningx(...) warningx_nodebug(__VA_ARGS__)
-# endif /* __GNUC__ == 2 */
+#if (defined(SUDO_ERROR_WRAP) && SUDO_ERROR_WRAP == 0) || defined(NO_VARIADIC_MACROS)
+# define fatal fatal_nodebug
+# define fatalx fatalx_nodebug
+# define warning warning_nodebug
+# define warningx warningx_nodebug
 # define vfatal(fmt, ap) fatal_nodebug((fmt), (ap))
 # define vfatalx(fmt, ap) fatalx_nodebug((fmt), (ap))
 # define vwarning(fmt, ap) warning_nodebug((fmt), (ap))
@@ -88,88 +81,37 @@
     warningx_nodebug(__VA_ARGS__);					       \
 } while (0)
 # endif /* __GNUC__ == 2 */
-# define vfatal(fmt, ap) do {					       \
+# define vfatal(fmt, ap) do {						       \
+    va_list ap2;							       \
+    va_copy(ap2, (ap));							       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys, \
-	(fmt), (ap));							       \
+	(fmt), ap2);							       \
     vfatal_nodebug((fmt), (ap));				       \
 } while (0)
 # define vfatalx(fmt, ap) do {					       \
+    va_list ap2;							       \
+    va_copy(ap2, (ap));							       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
-	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), (ap));    \
+	SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), ap2);     \
     vfatalx_nodebug((fmt), (ap));				       \
 } while (0)
 # define vwarning(fmt, ap) do {						       \
+    va_list ap2;							       \
+    va_copy(ap2, (ap));							       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
 	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO|sudo_debug_subsys,  \
-	(fmt), (ap));							       \
+	(fmt), ap2);							       \
     vwarning_nodebug((fmt), (ap));					       \
-    warning_restore_locale();						       \
 } while (0)
 # define vwarningx(fmt, ap) do {					       \
+    va_list ap2;							       \
+    va_copy(ap2, (ap));							       \
     sudo_debug_vprintf2(__func__, __FILE__, __LINE__,			       \
-	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), (ap));     \
+	SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|sudo_debug_subsys, (fmt), ap2);      \
     vwarningx_nodebug((fmt), (ap));					       \
 } while (0)
 #endif /* SUDO_ERROR_WRAP */
-
-#if defined(__GNUC__) && __GNUC__ == 2
-# define fatal_nodebug(fmt...) do {				       \
-    warning_set_locale();						       \
-    fatal2(fmt);						       \
-} while (0)
-# define fatalx_nodebug(fmt...) do {				       \
-    warning_set_locale();						       \
-    fatalx2(fmt);						       \
-} while (0)
-# define warning_nodebug(fmt...) do {					       \
-    warning_set_locale();						       \
-    warning2(fmt);							       \
-    warning_restore_locale();						       \
-} while (0)
-# define warningx_nodebug(fmt...) do {					       \
-    warning_set_locale();						       \
-    warningx2(fmt);							       \
-    warning_restore_locale();						       \
-} while (0)
-#else
-# define fatal_nodebug(...) do {					       \
-    warning_set_locale();						       \
-    fatal2(__VA_ARGS__);					       \
-} while (0)
-# define fatalx_nodebug(...) do {					       \
-    warning_set_locale();						       \
-    fatalx2(__VA_ARGS__);					       \
-} while (0)
-# define warning_nodebug(...) do {					       \
-    warning_set_locale();						       \
-    warning2(__VA_ARGS__);						       \
-    warning_restore_locale();						       \
-} while (0)
-# define warningx_nodebug(...) do {					       \
-    warning_set_locale();						       \
-    warningx2(__VA_ARGS__);						       \
-    warning_restore_locale();						       \
-} while (0)
-#endif /* __GNUC__ == 2 */
-#define vfatal_nodebug(fmt, ap) do {				       \
-    warning_set_locale();						       \
-    vfatal2((fmt), (ap));					       \
-} while (0)
-#define vfatalx_nodebug(fmt, ap) do {				       \
-    warning_set_locale();						       \
-    vfatalx2((fmt), (ap));					       \
-} while (0)
-#define vwarning_nodebug(fmt, ap) do {					       \
-    warning_set_locale();						       \
-    vwarning2((fmt), (ap));						       \
-    warning_restore_locale();						       \
-} while (0)
-#define vwarningx_nodebug(fmt, ap) do {					       \
-    warning_set_locale();						       \
-    vwarningx2((fmt), (ap));						       \
-    warning_restore_locale();						       \
-} while (0)
 
 #define fatal_setjmp()		(fatal_enable_setjmp(), sigsetjmp(fatal_jmp, 1))
 #define fatal_longjmp(val)	siglongjmp(fatal_jmp, val)
@@ -177,18 +119,17 @@
 extern int (*sudo_printf)(int msg_type, const char *fmt, ...);
 extern sigjmp_buf fatal_jmp;
 
-int     fatal_callback_register(void (*func)(void));
+int	fatal_callback_register(void (*func)(void));
+char   *warning_gettext(const char *msgid) __format_arg(1);
 void	fatal_disable_setjmp(void);
 void	fatal_enable_setjmp(void);
-void	fatal2(const char *, ...) __printf0like(1, 2) __attribute__((__noreturn__));
-void	fatalx2(const char *, ...) __printflike(1, 2) __attribute__((__noreturn__));
-void	vfatal2(const char *, va_list ap) __printf0like(1, 0) __attribute__((__noreturn__));
-void	vfatalx2(const char *, va_list ap) __printflike(1, 0) __attribute__((__noreturn__));
-void	warning2(const char *, ...) __printf0like(1, 2);
-void	warningx2(const char *, ...) __printflike(1, 2);
-void	vwarning2(const char *, va_list ap) __printf0like(1, 0);
-void	vwarningx2(const char *, va_list ap) __printflike(1, 0);
-void    warning_set_locale(void);
-void    warning_restore_locale(void);
+void	fatal_nodebug(const char *, ...) __printf0like(1, 2) __attribute__((__noreturn__));
+void	fatalx_nodebug(const char *, ...) __printflike(1, 2) __attribute__((__noreturn__));
+void	vfatal_nodebug(const char *, va_list ap) __printf0like(1, 0) __attribute__((__noreturn__));
+void	vfatalx_nodebug(const char *, va_list ap) __printflike(1, 0) __attribute__((__noreturn__));
+void	warning_nodebug(const char *, ...) __printf0like(1, 2);
+void	warningx_nodebug(const char *, ...) __printflike(1, 2);
+void	vwarning_nodebug(const char *, va_list ap) __printf0like(1, 0);
+void	vwarningx_nodebug(const char *, va_list ap) __printflike(1, 0);
 
 #endif /* _SUDO_FATAL_H_ */

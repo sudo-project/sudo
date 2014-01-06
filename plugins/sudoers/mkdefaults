@@ -125,7 +125,8 @@ sub print_record {
     my ($i, $v, $defname);
     # each variable gets a macro to access its value
     for ($rec->[1]) {
-	if    (/^T_U?INT/)  { $v = "ival"; }
+	if    (/^T_INT/)    { $v = "ival"; }
+	elsif (/^T_UINT/)   { $v = "uival"; }
 	elsif (/^T_STR/)    { $v = "str"; }
 	elsif (/^T_FLAG/)   { $v = "flag"; }
 	elsif (/^T_MODE/)   { $v = "mode"; }
