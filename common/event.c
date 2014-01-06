@@ -309,16 +309,20 @@ rescan:
 	    if (ISSET(base->flags, SUDO_EVBASE_LOOPBREAK)) {
 		/* Stop processing events immediately. */
 		SET(base->flags, SUDO_EVBASE_GOT_BREAK);
-		while ((ev = TAILQ_FIRST(&base->active)) != NULL)
+		while ((ev = TAILQ_FIRST(&base->active)) != NULL) {
 		    CLR(ev->flags, SUDO_EVQ_ACTIVE);
+		    TAILQ_REMOVE(&base->active, ev, active_entries);
+		}
 		goto done;
 	    }
 	    if (ISSET(base->flags, SUDO_EVBASE_LOOPCONT)) {
 		/* Rescan events and start polling again. */
 		CLR(base->flags, SUDO_EVBASE_LOOPCONT);
 		if (!ISSET(flags, SUDO_EVLOOP_ONCE)) {
-		    while ((ev = TAILQ_FIRST(&base->active)) != NULL)
+		    while ((ev = TAILQ_FIRST(&base->active)) != NULL) {
 			CLR(ev->flags, SUDO_EVQ_ACTIVE);
+			TAILQ_REMOVE(&base->active, ev, active_entries);
+		    }
 		    goto rescan;
 		}
 	    }
