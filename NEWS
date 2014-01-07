@@ -1,3 +1,12 @@
+What's new in Sudo 1.8.9p1?
+
+ * Fixed a problem with gcc 4.8's handling of bit fields that could
+   lead to the noexec flag being enabled even when it was not
+   explicitly set.
+
+ * Fixed a potential hang for some commands when I/O logging is
+   enabled.
+
 What's new in Sudo 1.8.9?
 
  * Reworked sudo's main event loop to use a simple event subsystem
