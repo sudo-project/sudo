@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2000, 2004, 2007-2013
+ * Copyright (c) 1996, 1998-2000, 2004, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -53,11 +53,11 @@ struct sudo_command {
  * Possible values: true, false, IMPLIED, UNSPEC.
  */
 struct cmndtag {
-    int nopasswd: 3;
-    int noexec: 3;
-    int setenv: 3;
-    int log_input: 3;
-    int log_output: 3;
+    signed int nopasswd: 3;
+    signed int noexec: 3;
+    signed int setenv: 3;
+    signed int log_input: 3;
+    signed int log_output: 3;
 };
 
 /*
