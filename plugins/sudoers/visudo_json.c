@@ -984,7 +984,7 @@ export_sudoers(const char *sudoers_path, const char *export_path,
 {
     bool ok = false, need_comma = false;
     const int indent = 4;
-    FILE *export_fp;
+    FILE *export_fp = stdout;
     debug_decl(export_sudoers, SUDO_DEBUG_UTIL)
 
     if (strcmp(sudoers_path, "-") == 0) {
@@ -996,7 +996,6 @@ export_sudoers(const char *sudoers_path, const char *export_path,
 	goto done;
     }
     if (strcmp(export_path, "-") == 0) {
-	export_fp = stdout;
 	export_path = "stdout";
     } else if ((export_fp = fopen(export_path, "w")) == NULL) {
 	if (!quiet)
@@ -1037,8 +1036,9 @@ export_sudoers(const char *sudoers_path, const char *export_path,
 
     /* Close JSON output. */
     fputs("\n}\n", export_fp);
-    fclose(export_fp);
 
 done:
+    if (export_fp != stdout)
+	fclose(export_fp);
     debug_return_bool(ok);
 }
