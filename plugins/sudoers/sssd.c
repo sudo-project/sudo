@@ -175,7 +175,7 @@ sudo_sss_filter_result(struct sudo_sss_handle *handle,
     debug_decl(sudo_sss_filter_result, SUDO_DEBUG_SSSD)
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "in_res=%p, count=%u, act=%s",
-	in_res, in_res->num_rules,
+	in_res ? in_res : "NULL", in_res ? in_res->num_rules : 0,
 	act == _SUDO_SSS_FILTER_EXCLUDE ? "EXCLUDE" : "INCLUDE");
 
     if (in_res == NULL)
