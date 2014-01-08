@@ -43,7 +43,7 @@ What's new in Sudo 1.8.9?
 
  * When recycling I/O logs, the log files are now truncated properly.
 
- * Fixes bugs #621, #622, #623, #624, #625, #626
+ * Fixes bugs #617, #621, #622, #623, #624, #625, #626
 
 What's new in Sudo 1.8.8?
 
