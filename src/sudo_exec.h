@@ -53,7 +53,7 @@
 
 /* exec.c */
 struct sudo_event_base;
-int sudo_execve(const char *path, char *const argv[], char *const envp[], int noexec);
+int sudo_execve(const char *path, char *const argv[], char *const envp[], bool noexec);
 extern volatile pid_t cmnd_pid;
 
 /* exec_pty.c */

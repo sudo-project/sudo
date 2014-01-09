@@ -138,7 +138,7 @@ disable_execute(char *const envp[])
  * ala execvp(3) if we get ENOEXEC.
  */
 int
-sudo_execve(const char *path, char *const argv[], char *const envp[], int noexec)
+sudo_execve(const char *path, char *const argv[], char *const envp[], bool noexec)
 {
     /* Modify the environment as needed to disable further execve(). */
     if (noexec)

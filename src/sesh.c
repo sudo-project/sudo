@@ -46,7 +46,7 @@ int
 main(int argc, char *argv[], char *envp[])
 {
     char *cp, *cmnd;
-    int noexec = 0;
+    bool noexec = false;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
     setlocale(LC_ALL, "");
