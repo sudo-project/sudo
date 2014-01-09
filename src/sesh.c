@@ -46,7 +46,7 @@ int
 main(int argc, char *argv[], char *envp[])
 {
     char *cp, *cmnd;
-    bool noexec = false;
+    bool login_shell, noexec = false;
     debug_decl(main, SUDO_DEBUG_MAIN)
 
     setlocale(LC_ALL, "");
@@ -59,6 +59,9 @@ main(int argc, char *argv[], char *envp[])
     /* Read sudo.conf. */
     sudo_conf_read(NULL);
 
+    /* If the first char of argv[0] is '-', we are running as a login shell. */
+    login_shell = argv[0][0] == '-';
+
     /* If argv[0] ends in -noexec, pass the flag to sudo_execve() */
     if ((cp = strrchr(argv[0], '-')) != NULL && cp != argv[0])
 	noexec = strcmp(cp, "-noexec") == 0;
@@ -69,7 +72,7 @@ main(int argc, char *argv[], char *envp[])
     cmnd = estrdup(argv[0]);
 
     /* If invoked as a login shell, modify argv[0] accordingly. */
-    if (argv[-1][0] == '-') {
+    if (login_shell) {
 	if ((cp = strrchr(argv[0], '/')) == NULL)
 	    cp = argv[0];
 	*cp = '-';
