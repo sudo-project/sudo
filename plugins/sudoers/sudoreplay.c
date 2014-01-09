@@ -151,12 +151,13 @@ struct search_node {
     union {
 #ifdef HAVE_REGCOMP
 	regex_t cmdre;
+#else
+	char *pattern;
 #endif
 	time_t tstamp;
 	char *cwd;
 	char *tty;
 	char *user;
-	char *pattern;
 	char *runas_group;
 	char *runas_user;
 	struct search_node_list expr;
@@ -376,7 +377,7 @@ replay_session(const double max_wait, const char *decimal)
     unsigned int i, iovcnt = 0, iovmax = 0;
     struct sudo_event_base *evbase;
     struct iovec iovb, *iov = &iovb;
-    bool interactive = false;
+    bool interactive;
     struct write_closure wc;
     char buf[LINE_MAX];
     sigaction_t sa;
