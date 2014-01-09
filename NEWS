@@ -1,3 +1,8 @@
+What's new in Sudo 1.8.9p2?
+
+ * Updated config.guess, config.sub and libtool to support the ppc64le
+   architecture (IBM PowerPC Little Endian).
+
 What's new in Sudo 1.8.9p1?
 
  * Fixed a problem with gcc 4.8's handling of bit fields that could
