@@ -78,39 +78,50 @@ XGETTEXT_OPTS = -F -k_ -kN_ -kU_ --copyright-holder="Todd C. Miller" \
 		--flag easprintf:3:c-format --flag lbuf_append:2:c-format \
 		--flag lbuf_append_quoted:3:c-format --foreign-user
 
+# Default cppcheck options when run from the top-level Makefile
+CPPCHECK_OPTS = -q --force --enable=warning,performance,portability --suppress=constStatement --error-exitcode=1 --inline-suppr -U__cplusplus -UQUAD_MAX -UQUAD_MIN -UUQUAD_MAX -U_POSIX_HOST_NAME_MAX -U_POSIX_PATH_MAX
+
 all: config.status
-	for d in $(SUBDIRS); \
-	    do (cd $$d && exec $(MAKE) $@) && continue; \
+	for d in $(SUBDIRS); do \
+	    (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
 	done
 
 check pre-install: config.status
-	for d in $(SUBDIRS); \
-	    do (cd $$d && exec $(MAKE) $@) && continue; \
+	for d in $(SUBDIRS); do \
+	    (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
 	done
 
+cppcheck: config.status
+	rval=0; \
+	for d in $(SUBDIRS); do \
+	    echo checking $$d; \
+	    (cd $$d && exec $(MAKE) CPPCHECK_OPTS="$(CPPCHECK_OPTS)" $@) || rval=`expr $$rval + $$?`; \
+	done; \
+	exit $$rval
+
 install-dirs install-binaries install-includes install-plugin: config.status pre-install
-	for d in $(SUBDIRS); \
-	    do (cd $$d && exec $(MAKE) $@) && continue; \
+	for d in $(SUBDIRS); do \
+	    (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
 	done
 
 install-doc: config.status ChangeLog
-	for d in $(SUBDIRS); \
-	    do (cd $$d && exec $(MAKE) $@) && continue; \
+	for d in $(SUBDIRS); do \
+	    (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
 	done
 
 install: config.status ChangeLog pre-install install-nls
-	for d in $(SUBDIRS); \
-	    do (cd $$d && exec $(MAKE) $@) && continue; \
+	for d in $(SUBDIRS); do \
+	    (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
 	done
 
 uninstall: uninstall-nls
-	for d in $(SUBDIRS); \
-	    do (cd $$d && exec $(MAKE) $@) && continue; \
+	for d in $(SUBDIRS); do \
+	    (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
 	done
 

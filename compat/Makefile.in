@@ -54,6 +54,9 @@ PIE_LDFLAGS = @PIE_LDFLAGS@
 SSP_CFLAGS = @SSP_CFLAGS@
 SSP_LDFLAGS = @SSP_LDFLAGS@
 
+# cppcheck options, usually set in the top-level Makefile
+CPPCHECK_OPTS = -q --force --enable=warning,performance,portability --suppress=constStatement --error-exitcode=1 --inline-suppr -U__cplusplus -UQUAD_MAX -UQUAD_MIN -UUQUAD_MAX -U_POSIX_HOST_NAME_MAX -U_POSIX_PATH_MAX
+
 # OS dependent defines
 DEFS = @OSDEFS@
 
@@ -129,6 +132,9 @@ install-doc:
 install-plugin:
 
 uninstall:
+
+cppcheck:
+	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I$(top_srcdir) $(srcdir)/*.c
 
 check: $(TEST_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \

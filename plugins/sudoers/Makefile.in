@@ -70,6 +70,9 @@ PIE_LDFLAGS = @PIE_LDFLAGS@
 SSP_CFLAGS = @SSP_CFLAGS@
 SSP_LDFLAGS = @SSP_LDFLAGS@
 
+# cppcheck options, usually set in the top-level Makefile
+CPPCHECK_OPTS = -q --force --enable=warning,performance,portability --suppress=constStatement --error-exitcode=1 --inline-suppr -U__cplusplus -UQUAD_MAX -UQUAD_MIN -UUQUAD_MAX -U_POSIX_HOST_NAME_MAX -U_POSIX_PATH_MAX
+
 # Where to install things...
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -317,6 +320,9 @@ uninstall:
 	-rm -f $(DESTDIR)$(visudodir)/visudo
 	-cmp $(DESTDIR)$(sudoersdir)/sudoers $(srcdir)/sudoers >/dev/null && \
 	    rm -f $(DESTDIR)$(sudoersdir)/sudoers
+
+cppcheck:
+	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I$(devdir) -I$(srcdir) -I$(top_srcdir) $(srcdir)/*.c $(srcdir)/auth/*.c
 
 check: $(TEST_PROGS) visudo testsudoers
 	@if test X"$(cross_compiling)" != X"yes"; then \

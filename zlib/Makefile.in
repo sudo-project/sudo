@@ -74,6 +74,8 @@ install-plugin:
 
 uninstall:
 
+cppcheck:
+
 check:
 
 clean:

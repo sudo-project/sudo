@@ -72,6 +72,8 @@ install-plugin:
 uninstall:
 	-rm -f $(DESTDIR)$(includedir)/sudo_plugin.h
 
+cppcheck:
+
 check:
 
 clean:
