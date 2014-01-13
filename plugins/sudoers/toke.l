@@ -888,18 +888,21 @@ _push_include(char *path, bool isdir)
 
     /* push current state onto stack */
     if (idepth >= istacksize) {
+	struct include_stack *new_istack;
+
 	if (idepth > MAX_SUDOERS_DEPTH) {
 	    sudoerserror(N_("too many levels of includes"));
 	    debug_return_bool(false);
 	}
 	istacksize += SUDOERS_STACK_INCREMENT;
-	istack = (struct include_stack *) realloc(istack,
+	new_istack = (struct include_stack *) realloc(istack,
 	    sizeof(*istack) * istacksize);
-	if (istack == NULL) {
+	if (new_istack == NULL) {
 	    warning(NULL);
 	    sudoerserror(NULL);
 	    debug_return_bool(false);
 	}
+	istack = new_istack;
     }
     SLIST_INIT(&istack[idepth].more);
     if (isdir) {
