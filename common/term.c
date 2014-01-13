@@ -136,7 +136,9 @@ term_cbreak(int fd)
     /* Set terminal to half-cooked mode */
     term.c_cc[VMIN] = 1;
     term.c_cc[VTIME] = 0;
+    /* cppcheck-suppress redundantAssignment */
     CLR(term.c_lflag, ECHO | ECHONL | ICANON | IEXTEN);
+    /* cppcheck-suppress redundantAssignment */
     SET(term.c_lflag, ISIG);
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
