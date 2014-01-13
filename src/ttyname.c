@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2012-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -441,10 +441,12 @@ get_process_ttyname(void)
 	if (len != -1) {
 	    /* Field 7 is the tty dev (0 if no tty) */
 	    char *cp = line;
+	    char *ep = line;
 	    const char *errstr;
-	    int field = 1;
-	    while (*cp != '\0') {
-		if (*cp++ == ' ') {
+	    int field = 0;
+	    while (*++ep != '\0') {
+		if (*ep == ' ') {
+		    *ep = '\0';
 		    if (++field == 7) {
 			dev_t tdev = strtonum(cp, INT_MIN, INT_MAX, &errstr);
 			if (errstr) {
@@ -455,6 +457,7 @@ get_process_ttyname(void)
 			    tty = sudo_ttyname_dev(tdev);
 			break;
 		    }
+		    cp = ep + 1;
 		}
 	    }
 	}
