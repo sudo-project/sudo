@@ -230,11 +230,14 @@ backchannel_cb(int fd, int what, void *v)
 	    /* Short read or EOF. */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR,
 		"failed to read child status: %s", n ? "short read" : "EOF");
-	    /*
-	     * If not logging I/O we may get EOF when the command is
-	     * executed and sv is closed.  It is safe to ignore this.
-	     */
-	    if (ec->log_io || n != 0) {
+	    if (!ec->log_io && n == 0) {
+		/*
+		 * If not logging I/O we may get EOF when the command is
+		 * executed and the other end of the backchannel is closed.
+		 * Just remove the event in this case.
+		 */
+		(void)sudo_ev_del(ec->evbase, backchannel_event);
+	    } else {
 		/* XXX - need new CMD_ type for monitor errors. */
 		errno = n ? EIO : ECONNRESET;
 		ec->cstat->type = CMD_ERRNO;
