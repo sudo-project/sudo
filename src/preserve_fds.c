@@ -166,7 +166,7 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
     closefrom(startfd);
 
     /* Restore preserved fds and set flags. */
-    TAILQ_FOREACH(pfd, pfds, entries) {
+    TAILQ_FOREACH_REVERSE(pfd, pfds, preserved_fd_list, entries) {
 	if (pfd->lowfd != pfd->highfd) {
 	    if (dup2(pfd->lowfd, pfd->highfd) == -1) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
