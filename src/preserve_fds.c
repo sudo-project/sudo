@@ -16,7 +16,13 @@
 
 #include <config.h>
 
-#include <sys/types.h>
+#include <sys/param.h>		/* for howmany() on Linux */
+#ifdef HAVE_SYS_SYSMACROS_H
+# include <sys/sysmacros.h>	/* for howmany() on Solaris */
+#endif /* HAVE_SYS_SYSMACROS_H */
+#ifdef HAVE_SYS_SELECT_H
+# include <sys/select.h>	/* for FD_* macros */
+#endif /* HAVE_SYS_SELECT_H */
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -65,6 +71,8 @@ add_preserved_fd(struct preserved_fd_list *pfds, int fd)
     TAILQ_FOREACH(pfd, pfds, entries) {
 	if (fd == pfd->highfd) {
 	    /* already preserved */
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"fd %d already preserved", fd);
 	    efree(pfd_new);
 	    break;
 	}
@@ -85,57 +93,37 @@ add_preserved_fd(struct preserved_fd_list *pfds, int fd)
 }
 
 /*
- * Close fds in the range [from,to]
- */
-static void
-closefrom_range(int from, int to)
-{
-    debug_decl(closefrom_range, SUDO_DEBUG_UTIL)
-
-    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	"closing fds [%d, %d]", from, to);
-    while (from <= to) {
-#ifdef __APPLE__
-	/* Avoid potential libdispatch crash when we close its fds. */
-	(void) fcntl(from, F_SETFD, FD_CLOEXEC);
-#else
-	(void) close(from);
-#endif
-	from++;
-    }
-    debug_return;
-}
-
-/*
  * Close all descriptors, startfd and higher except those listed
  * in pfds.
  */
 void
 closefrom_except(int startfd, struct preserved_fd_list *pfds)
 {
-    int tmpfd;
+    int fd, lastfd = -1;
     struct preserved_fd *pfd, *pfd_next;
+    fd_set *fdsp;
     debug_decl(closefrom_except, SUDO_DEBUG_UTIL)
 
-    /*
-     * First, relocate preserved fds to be as contiguous as possible.
-     */
-    TAILQ_FOREACH_SAFE(pfd, pfds, entries, pfd_next) {
+    /* First, relocate preserved fds to be as contiguous as possible.  */
+    TAILQ_FOREACH_REVERSE_SAFE(pfd, pfds, preserved_fd_list, entries, pfd_next) {
 	if (pfd->highfd < startfd)
 	    continue;
-	tmpfd = dup(pfd->highfd);
-	if (tmpfd < pfd->highfd) {
-	    if (tmpfd == -1) {
+	fd = dup(pfd->highfd);
+	if (fd < pfd->highfd) {
+	    if (fd == -1) {
 		if (errno == EBADF)
 		    TAILQ_REMOVE(pfds, pfd, entries);
 		continue;
 	    }
-	    pfd->lowfd = tmpfd;
-	    tmpfd = pfd->highfd;
+	    pfd->lowfd = fd;
+	    fd = pfd->highfd;
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"dup %d -> %d", pfd->highfd, pfd->lowfd);
 	}
-	(void) close(tmpfd);
+	(void) close(fd);
+
+	if (pfd->lowfd > lastfd)
+	    lastfd = pfd->lowfd;	/* highest (relocated) preserved fd */
     }
 
     if (TAILQ_EMPTY(pfds)) {
@@ -146,24 +134,34 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
 	debug_return;
     }
 
-    /* Close any fds [startfd,TAILQ_FIRST(pfds)->lowfd) */
-    closefrom_range(startfd, TAILQ_FIRST(pfds)->lowfd - 1);
-
-    /* Close any unpreserved fds (TAILQ_LAST(pfds)->lowfd,startfd) */
-    TAILQ_FOREACH_SAFE(pfd, pfds, entries, pfd_next) {
-	if (pfd->lowfd < startfd)
-	    continue;
-	if (pfd_next != NULL && pfd->lowfd + 1 != pfd_next->lowfd)
-	    closefrom_range(pfd->lowfd + 1, pfd_next->lowfd);
+    /* Create bitmap of preserved (relocated) fds.  */
+    fdsp = ecalloc(howmany(lastfd + 1, NFDBITS), sizeof(fd_mask));
+    TAILQ_FOREACH(pfd, pfds, entries) {
+	FD_SET(pfd->lowfd, fdsp);
     }
 
+    /*
+     * Close any unpreserved fds [startfd,lastfd]
+     * NOTE: this could relocate the debug fd, breaking the debug subsystem.
+     */
+    for (fd = startfd; fd <= lastfd; fd++) {
+	if (!FD_ISSET(fd, fdsp)) {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"closing fd %d", fd);
+#ifdef __APPLE__
+	    /* Avoid potential libdispatch crash when we close its fds. */
+	    (void) fcntl(fd, F_SETFD, FD_CLOEXEC);
+#else
+	    (void) close(fd);
+#endif
+	}
+    }
+    free(fdsp);
+
     /* Let closefrom() do the rest for us. */
-    pfd = TAILQ_LAST(pfds, preserved_fd_list);
-    if (pfd != NULL && pfd->lowfd + 1 > startfd)
-	startfd = pfd->lowfd + 1;
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	"closefrom(%d)", startfd);
-    closefrom(startfd);
+	"closefrom(%d)", lastfd + 1);
+    closefrom(lastfd + 1);
 
     /* Restore preserved fds and set flags. */
     TAILQ_FOREACH_REVERSE(pfd, pfds, preserved_fd_list, entries) {
