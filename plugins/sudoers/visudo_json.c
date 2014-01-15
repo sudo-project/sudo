@@ -995,12 +995,12 @@ export_sudoers(const char *sudoers_path, const char *export_path,
 	    warning(U_("unable to open %s"), sudoers_path);
 	goto done;
     }
-    if (strcmp(export_path, "-") == 0) {
-	export_path = "stdout";
-    } else if ((export_fp = fopen(export_path, "w")) == NULL) {
-	if (!quiet)
-	    warning(U_("unable to open %s"), export_path);
-	goto done;
+    if (strcmp(export_path, "-") != 0) {
+	if ((export_fp = fopen(export_path, "w")) == NULL) {
+	    if (!quiet)
+		warning(U_("unable to open %s"), export_path);
+	    goto done;
+	}
     }
     init_parser(sudoers_path, quiet);
     if (sudoersparse() && !parse_error) {
