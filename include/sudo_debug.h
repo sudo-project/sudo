@@ -219,6 +219,7 @@ void sudo_debug_exit_str(const char *func, const char *file, int line, int subsy
 void sudo_debug_exit_str_masked(const char *func, const char *file, int line, int subsys, const char *rval);
 void sudo_debug_exit_ptr(const char *func, const char *file, int line, int subsys, const void *rval);
 int sudo_debug_fd_get(void);
+int sudo_debug_fd_set(int fd);
 int sudo_debug_init(const char *debugfile, const char *settings);
 void sudo_debug_printf_nvm(int pri, const char *fmt, ...) __printf0like(2, 3);
 void sudo_debug_printf2(const char *func, const char *file, int line, int level, const char *fmt, ...) __printf0like(5, 6);
