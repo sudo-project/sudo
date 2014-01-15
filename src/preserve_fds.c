@@ -99,10 +99,12 @@ add_preserved_fd(struct preserved_fd_list *pfds, int fd)
 void
 closefrom_except(int startfd, struct preserved_fd_list *pfds)
 {
-    int fd, lastfd = -1;
+    int debug_fd, fd, lastfd = -1;
     struct preserved_fd *pfd, *pfd_next;
     fd_set *fdsp;
     debug_decl(closefrom_except, SUDO_DEBUG_UTIL)
+
+    debug_fd = sudo_debug_fd_get();
 
     /* First, relocate preserved fds to be as contiguous as possible.  */
     TAILQ_FOREACH_REVERSE_SAFE(pfd, pfds, preserved_fd_list, entries, pfd_next) {
@@ -117,6 +119,8 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
 	    }
 	    pfd->lowfd = fd;
 	    fd = pfd->highfd;
+	    if (fd == debug_fd)
+		debug_fd = sudo_debug_fd_set(pfd->lowfd);
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"dup %d -> %d", pfd->highfd, pfd->lowfd);
 	}
@@ -182,6 +186,8 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
 		sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		    "fcntl(%d, F_SETFD, %d)", pfd->highfd, pfd->flags);
 	    }
+	    if (pfd->lowfd == debug_fd)
+		debug_fd = sudo_debug_fd_set(pfd->highfd);
 	    (void) close(pfd->lowfd);
 	}
     }
