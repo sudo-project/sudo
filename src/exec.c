@@ -483,6 +483,9 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     if (sudo_ev_got_break(evbase)) {
 	/* error from callback */
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
+	/* kill command if still running and not I/O logging */
+	if (!log_io && kill(child, 0) == 0)
+	    terminate_command(child, true);
     }
 
     if (log_io) {
