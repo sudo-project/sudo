@@ -250,7 +250,8 @@ expand_iolog_path(const char *prefix, const char *dir, const char *file,
 	    struct tm *timeptr;
 
 	    time(&now);
-	    timeptr = localtime(&now);
+	    if ((timeptr = localtime(&now)) == NULL)
+		goto bad;
 
 	    /* Use sudoers locale for strftime() */
 	    sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);

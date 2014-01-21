@@ -559,6 +559,7 @@ Convert(time_t Month, time_t Day, time_t Year, time_t Hours, time_t Minutes,
     static int DaysInMonth[12] = {
 	31, 0, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
     };
+    struct tm	*tm;
     time_t	tod;
     time_t	Julian;
     int		i;
@@ -591,7 +592,7 @@ Convert(time_t Month, time_t Day, time_t Year, time_t Hours, time_t Minutes,
 	return -1;
     Julian += tod;
     if (DSTmode == DSTon
-     || (DSTmode == DSTmaybe && localtime(&Julian)->tm_isdst))
+     || (DSTmode == DSTmaybe && (tm = localtime(&Julian)) && tm->tm_isdst))
 	Julian -= 60 * 60;
     return Julian;
 }
@@ -600,11 +601,18 @@ Convert(time_t Month, time_t Day, time_t Year, time_t Hours, time_t Minutes,
 static time_t
 DSTcorrect(time_t Start, time_t Future)
 {
+    struct tm	*start_tm;
+    struct tm	*future_tm;
     time_t	StartDay;
     time_t	FutureDay;
 
-    StartDay = (localtime(&Start)->tm_hour + 1) % 24;
-    FutureDay = (localtime(&Future)->tm_hour + 1) % 24;
+    start_tm = localtime(&Start);
+    future_tm = localtime(&Future);
+    if (!start_tm || !future_tm)
+	return -1;
+
+    StartDay = (start_tm->tm_hour + 1) % 24;
+    FutureDay = (future_tm->tm_hour + 1) % 24;
     return (Future - Start) + (StartDay - FutureDay) * 60L * 60L;
 }
 
@@ -616,7 +624,8 @@ RelativeDate(time_t Start, time_t DayOrdinal, time_t DayNumber)
     time_t	now;
 
     now = Start;
-    tm = localtime(&now);
+    if (!(tm = localtime(&now)))
+	return -1;
     now += SECSPERDAY * ((DayNumber - tm->tm_wday + 7) % 7);
     now += 7 * SECSPERDAY * (DayOrdinal <= 0 ? DayOrdinal : DayOrdinal - 1);
     return DSTcorrect(Start, now);
@@ -632,7 +641,8 @@ RelativeMonth(time_t Start, time_t RelMonth)
 
     if (RelMonth == 0)
 	return 0;
-    tm = localtime(&Start);
+    if (!(tm = localtime(&Start)))
+	return -1;
     Month = 12 * (tm->tm_year + 1900) + tm->tm_mon + RelMonth;
     Year = Month / 12;
     Month = Month % 12 + 1;
@@ -863,7 +873,6 @@ get_date(char *p)
     if(tm->tm_isdst)
 	timezone += 60;
 
-    tm = localtime(&now);
     yyYear = tm->tm_year + 1900;
     yyMonth = tm->tm_mon + 1;
     yyDay = tm->tm_mday;

@@ -185,6 +185,7 @@ static struct option long_opts[] = {
     { NULL,		no_argument,		NULL,	'\0' },
 };
 
+/* XXX move to separate header? */
 extern char *get_timestr(time_t, int);
 extern time_t get_date(char *);
 
@@ -934,6 +935,7 @@ static int
 list_session(char *logfile, REGEX_T *re, const char *user, const char *tty)
 {
     char idbuf[7], *idstr, *cp;
+    const char *timestr;
     struct log_info *li;
     int rval = -1;
     debug_decl(list_session, SUDO_DEBUG_UTIL)
@@ -962,8 +964,10 @@ list_session(char *logfile, REGEX_T *re, const char *user, const char *tty)
 	idstr = cp;
     }
     /* XXX - print rows + cols? */
+    timestr = get_timestr(li->tstamp, 1);
     printf("%s : %s : TTY=%s ; CWD=%s ; USER=%s ; ",
-	get_timestr(li->tstamp, 1), li->user, li->tty, li->cwd, li->runas_user);
+	timestr ? timestr : "invalid date",
+	li->user, li->tty, li->cwd, li->runas_user);
     if (li->runas_group)
 	printf("GROUP=%s ; ", li->runas_group);
     printf("TSID=%s ; COMMAND=%s\n", idstr, li->cmd);

@@ -74,6 +74,8 @@ do_check(char *dir_in, char *file_in, char *tdir_out, char *tfile_out)
      */
     time(&now);
     timeptr = localtime(&now);
+    if (timeptr == NULL)
+	fatalx("localtime returned NULL");
     strftime(dir_out, sizeof(dir_out), tdir_out, timeptr);
     strftime(file_out, sizeof(file_out), tfile_out, timeptr);
 

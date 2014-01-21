@@ -176,7 +176,6 @@ do_logfile(char *msg)
     char *full_line;
     size_t len;
     mode_t oldmask;
-    time_t now;
     int oldlocale;
     FILE *fp;
     debug_decl(do_logfile, SUDO_DEBUG_LOGGING)
@@ -193,25 +192,24 @@ do_logfile(char *msg)
 	send_mail(_("unable to lock log file: %s: %s"),
 	    def_logfile, strerror(errno));
     } else {
-	time(&now);
+	const char *timestr = get_timestr(time(NULL), def_log_year);
+	if (timestr == NULL)
+	    timestr = "invalid date";
 	if ((size_t)def_loglinelen < sizeof(LOG_INDENT)) {
 	    /* Don't pretty-print long log file lines (hard to grep) */
 	    if (def_log_host) {
 		(void) fprintf(fp, "%s : %s : HOST=%s : %s\n",
-		    get_timestr(now, def_log_year), user_name, user_srunhost,
-		    msg);
+		    timestr, user_name, user_srunhost, msg);
 	    } else {
-		(void) fprintf(fp, "%s : %s : %s\n",
-		    get_timestr(now, def_log_year), user_name, msg);
+		(void) fprintf(fp, "%s : %s : %s\n", timestr, user_name, msg);
 	    }
 	} else {
 	    if (def_log_host) {
 		len = easprintf(&full_line, "%s : %s : HOST=%s : %s",
-		    get_timestr(now, def_log_year), user_name, user_srunhost,
-		    msg);
+		    timestr, user_name, user_srunhost, msg);
 	    } else {
 		len = easprintf(&full_line, "%s : %s : %s",
-		    get_timestr(now, def_log_year), user_name, msg);
+		    timestr, user_name, msg);
 	    }
 
 	    /*
@@ -550,6 +548,7 @@ send_mail(const char *fmt, ...)
 {
     FILE *mail;
     char *p;
+    const char *timestr;
     int fd, pfd[2], status;
     pid_t pid, rv;
     sigaction_t sa;
@@ -729,8 +728,9 @@ send_mail(const char *fmt, ...)
 	(void) fprintf(mail, "\nContent-Type: text/plain; charset=\"%s\"\nContent-Transfer-Encoding: 8bit", nl_langinfo(CODESET));
 #endif /* HAVE_NL_LANGINFO */
 
-    (void) fprintf(mail, "\n\n%s : %s : %s : ", user_host,
-	get_timestr(time(NULL), def_log_year), user_name);
+    if ((timestr = get_timestr(time(NULL), def_log_year)) == NULL)
+	timestr = "invalid date";
+    (void) fprintf(mail, "\n\n%s : %s : %s : ", user_host, timestr, user_name);
     va_start(ap, fmt);
     (void) vfprintf(mail, fmt, ap);
     va_end(ap);
