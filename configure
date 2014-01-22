@@ -770,6 +770,7 @@ GETGROUPS_LIB
 REPLAY_LIBS
 AFS_LIBS
 NET_LIBS
+STATIC_SUDOERS
 SUDOERS_LIBS
 SUDO_LIBS
 SUDO_OBJS
@@ -2855,6 +2856,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring Sudo version $PACKAGE_VERSION" >&5
 $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -21116,7 +21118,7 @@ case "$lt_cv_dlopen" in
 	    $as_echo "#define STATIC_SUDOERS_PLUGIN 1" >>confdefs.h
 
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
-	    SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
+	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
 	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
 	    LT_STATIC=""
 	else
@@ -21131,7 +21133,7 @@ case "$lt_cv_dlopen" in
 	    $as_echo "#define STATIC_SUDOERS_PLUGIN 1" >>confdefs.h
 
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
-	    SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
+	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
 	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
 	    LT_STATIC=""
 	else
@@ -21145,7 +21147,7 @@ case "$lt_cv_dlopen" in
 	fi
 	# Preload sudoers module symbols
 	SUDO_OBJS="${SUDO_OBJS} preload.o"
-	SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
+	STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
 	LT_STATIC=""
 	;;
 esac

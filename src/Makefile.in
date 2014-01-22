@@ -121,8 +121,8 @@ Makefile: $(srcdir)/Makefile.in
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $<
 
-sudo: $(OBJS) $(LT_LIBS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
+sudo: $(OBJS) $(LT_LIBS) @STATIC_SUDOERS@
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS) $(LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS) @STATIC_SUDOERS@
 
 libsudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LT_LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)

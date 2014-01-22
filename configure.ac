@@ -33,6 +33,7 @@ AC_SUBST([SUDO_OBJS])
 AC_SUBST([LIBS])
 AC_SUBST([SUDO_LIBS])
 AC_SUBST([SUDOERS_LIBS])
+AC_SUBST([STATIC_SUDOERS])
 AC_SUBST([NET_LIBS])
 AC_SUBST([AFS_LIBS])
 AC_SUBST([REPLAY_LIBS])
@@ -3329,7 +3330,7 @@ case "$lt_cv_dlopen" in
 	if test "$enable_static_sudoers" = "yes"; then
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
-	    SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
+	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
 	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
 	    LT_STATIC=""
 	else
@@ -3342,7 +3343,7 @@ case "$lt_cv_dlopen" in
 	if test "$enable_static_sudoers" = "yes"; then
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
-	    SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
+	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
 	    SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} --tag=disable-shared -static"
 	    LT_STATIC=""
 	else
@@ -3356,7 +3357,7 @@ case "$lt_cv_dlopen" in
 	fi
 	# Preload sudoers module symbols
 	SUDO_OBJS="${SUDO_OBJS} preload.o"
-	SUDO_LIBS="${SUDO_LIBS} \$(top_builddir)/plugins/sudoers/sudoers.la"
+	STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
 	LT_STATIC=""
 	;;
 esac
