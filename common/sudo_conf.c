@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -86,6 +86,7 @@ static void set_variable(const char *entry, const char *conf_file);
 static void set_var_disable_coredump(const char *entry, const char *conf_file);
 static void set_var_group_source(const char *entry, const char *conf_file);
 static void set_var_max_groups(const char *entry, const char *conf_file);
+static void set_var_probe_interfaces(const char *entry, const char *conf_file);
 
 static unsigned int conf_lineno;
 
@@ -101,17 +102,20 @@ static struct sudo_conf_table sudo_conf_table_vars[] = {
     { "disable_coredump", sizeof("disable_coredump") - 1, set_var_disable_coredump },
     { "group_source", sizeof("group_source") - 1, set_var_group_source },
     { "max_groups", sizeof("max_groups") - 1, set_var_max_groups },
+    { "probe_interfaces", sizeof("probe_interfaces") - 1, set_var_probe_interfaces },
     { NULL }
 };
 
 static struct sudo_conf_data {
     bool disable_coredump;
+    bool probe_interfaces;
     int group_source;
     int max_groups;
     const char *debug_flags;
     struct plugin_info_list plugins;
     struct sudo_conf_paths paths[5];
 } sudo_conf_data = {
+    true,
     true,
     GROUP_SOURCE_ADAPTIVE,
     -1,
@@ -190,6 +194,15 @@ set_var_max_groups(const char *entry, const char *conf_file)
 	warningx(U_("invalid max groups `%s' in %s, line %d"), entry,
 	    conf_file, conf_lineno);
     }
+}
+
+static void
+set_var_probe_interfaces(const char *entry, const char *conf_file)
+{
+    int val = atobool(entry);
+
+    if (val != -1)
+	sudo_conf_data.probe_interfaces = val;
 }
 
 /*
@@ -360,6 +373,12 @@ bool
 sudo_conf_disable_coredump(void)
 {
     return sudo_conf_data.disable_coredump;
+}
+
+bool
+sudo_conf_probe_interfaces(void)
+{
+    return sudo_conf_data.probe_interfaces;
 }
 
 /*

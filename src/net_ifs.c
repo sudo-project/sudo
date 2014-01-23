@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2013
+ * Copyright (c) 1996, 1998-2005, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -55,6 +55,11 @@ struct rtentry;
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
@@ -82,6 +87,7 @@ struct rtentry;
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
+#include "sudo_conf.h"
 #include "sudo_debug.h"
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
@@ -115,7 +121,7 @@ get_net_ifs(char **addrinfo)
     char *cp;
     debug_decl(get_net_ifs, SUDO_DEBUG_NETIF)
 
-    if (getifaddrs(&ifaddrs))
+    if (!sudo_conf_probe_interfaces() || getifaddrs(&ifaddrs) != 0)
 	debug_return_int(0);
 
     /* Allocate space for the interfaces info string. */
@@ -220,6 +226,9 @@ get_net_ifs(char **addrinfo)
     struct strioctl strioctl;
 #endif /* _ISC */
     debug_decl(get_net_ifs, SUDO_DEBUG_NETIF)
+
+    if (!sudo_conf_probe_interfaces())
+	debug_return_int(0);
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0)
