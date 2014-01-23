@@ -66,8 +66,10 @@ addr_matches_if(const char *n)
     } else
 #endif /* HAVE_STRUCT_IN6_ADDR */
     {
-	family = AF_INET;
 	addr.ip4.s_addr = inet_addr(n);
+	if (addr.ip4.s_addr == INADDR_NONE)
+	    debug_return_bool(false);
+	family = AF_INET;
     }
 
     SLIST_FOREACH(ifp, get_interfaces(), entries) {
@@ -118,8 +120,10 @@ addr_matches_if_netmask(const char *n, const char *m)
     else
 #endif /* HAVE_STRUCT_IN6_ADDR */
     {
-	family = AF_INET;
 	addr.ip4.s_addr = inet_addr(n);
+	if (addr.ip4.s_addr == INADDR_NONE)
+	    debug_return_bool(false);
+	family = AF_INET;
     }
 
     if (family == AF_INET) {
