@@ -212,7 +212,7 @@ sudo_read_nss(void)
 nomatch:
     /* Default to files only if no matches */
     if (TAILQ_EMPTY(&snl))
-	TAILQ_INSERT_TAIL(&snl, &sudo_nss_files, entries);
+	TAILQ_INSERT_TAIL(&snl, &sudo_nss_file, entries);
 
     debug_return_ptr(&snl);
 }
