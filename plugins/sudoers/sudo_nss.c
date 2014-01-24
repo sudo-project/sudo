@@ -137,7 +137,7 @@ sudo_read_nss(void)
 {
     FILE *fp;
     char *cp, *ep, *line = NULL;
-    ssize_t linesize = 0;
+    size_t linesize = 0;
 #ifdef HAVE_SSSD
     bool saw_sss = false;
 #endif
