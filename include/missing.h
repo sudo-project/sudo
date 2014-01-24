@@ -140,7 +140,7 @@
 # endif
 #endif
 
-#ifndef ULONG_MAX
+#ifndef ULLONG_MAX
 # if defined(UQUAD_MAX)
 #  define ULLONG_MAX	UQUAD_MAX
 # else
