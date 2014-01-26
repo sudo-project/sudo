@@ -18498,33 +18498,28 @@ $as_echo "no" >&6; }
 
 fi
 
-ac_fn_c_check_func "$LINENO" "inet_addr" "ac_cv_func_inet_addr"
-if test "x$ac_cv_func_inet_addr" = xyes; then :
+ac_fn_c_check_func "$LINENO" "inet_aton" "ac_cv_func_inet_aton"
+if test "x$ac_cv_func_inet_aton" = xyes; then :
 
 else
 
-    ac_fn_c_check_func "$LINENO" "__inet_addr" "ac_cv_func___inet_addr"
-if test "x$ac_cv_func___inet_addr" = xyes; then :
-
-else
-
-	for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
-	    _libs=
-	    for lib in $libs; do
-		case "$NET_LIBS" in
-		    *"$lib"*)   ;;
-		    *)		_libs="$_libs $lib";;
-		esac
-	    done
-	    libs="${_libs# }"
-	    test -z "$libs" && continue
-	    lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
-	    extralibs="`echo \"$libs\"|sed 's/^-l[^ ]*//'`"
+    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
+	_libs=
+	for lib in $libs; do
+	    case "$NET_LIBS" in
+		*"$lib"*)   ;;
+		*)		_libs="$_libs $lib";;
+	    esac
+	done
+	libs="${_libs# }"
+	test -z "$libs" && continue
+	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
+	extralibs="`echo \"$libs\"|sed 's/^-l[^ ]*//'`"
 
     _sudo_check_lib_extras=`echo "$extralibs"|sed -e 's/ 	*//g' -e 's/-l/_/g'`
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for inet_addr in -l$lib${5+ }$extralibs" >&5
-$as_echo_n "checking for inet_addr in -l$lib${5+ }$extralibs... " >&6; }
-    if { as_var=sudo_cv_lib_$lib''_inet_addr$_sudo_check_lib_extras; eval \${$as_var+:} false; }; then :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for inet_aton in -l$lib${5+ }$extralibs" >&5
+$as_echo_n "checking for inet_aton in -l$lib${5+ }$extralibs... " >&6; }
+    if { as_var=sudo_cv_lib_$lib''_inet_aton$_sudo_check_lib_extras; eval \${$as_var+:} false; }; then :
   $as_echo_n "(cached) " >&6
 else
 
@@ -18539,19 +18534,19 @@ else
 #ifdef __cplusplus
 extern "C"
 #endif
-char inet_addr ();
+char inet_aton ();
 int
 main ()
 {
-return inet_addr ();
+return inet_aton ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  eval sudo_cv_lib_$lib''_inet_addr$_sudo_check_lib_extras=yes
+  eval sudo_cv_lib_$lib''_inet_aton$_sudo_check_lib_extras=yes
 else
-  eval sudo_cv_lib_$lib''_inet_addr$_sudo_check_lib_extras=no
+  eval sudo_cv_lib_$lib''_inet_aton$_sudo_check_lib_extras=no
 
 fi
 rm -f core conftest.err conftest.$ac_objext \
@@ -18560,7 +18555,7 @@ rm -f core conftest.err conftest.$ac_objext \
 
 fi
 
-    if eval test \$sudo_cv_lib_$lib''_inet_addr$_sudo_check_lib_extras = "yes"; then
+    if eval test \$sudo_cv_lib_$lib''_inet_aton$_sudo_check_lib_extras = "yes"; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 	NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break
@@ -18570,10 +18565,7 @@ $as_echo "no" >&6; }
 
     fi
 
-	done
-
-fi
-
+    done
 
 fi
 

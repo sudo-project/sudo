@@ -61,15 +61,14 @@ addr_matches_if(const char *n)
     debug_decl(addr_matches_if, SUDO_DEBUG_MATCH)
 
 #ifdef HAVE_STRUCT_IN6_ADDR
-    if (inet_pton(AF_INET6, n, &addr.ip6) > 0) {
+    if (inet_pton(AF_INET6, n, &addr.ip6) == 1) {
 	family = AF_INET6;
     } else
 #endif /* HAVE_STRUCT_IN6_ADDR */
-    {
-	addr.ip4.s_addr = inet_addr(n);
-	if (addr.ip4.s_addr == INADDR_NONE)
-	    debug_return_bool(false);
+    if (inet_aton(n, &addr.ip4) == 1) {
 	family = AF_INET;
+    } else {
+	debug_return_bool(false);
     }
 
     SLIST_FOREACH(ifp, get_interfaces(), entries) {
@@ -115,20 +114,23 @@ addr_matches_if_netmask(const char *n, const char *m)
     debug_decl(addr_matches_if, SUDO_DEBUG_MATCH)
 
 #ifdef HAVE_STRUCT_IN6_ADDR
-    if (inet_pton(AF_INET6, n, &addr.ip6) > 0)
+    if (inet_pton(AF_INET6, n, &addr.ip6) == 1)
 	family = AF_INET6;
     else
 #endif /* HAVE_STRUCT_IN6_ADDR */
-    {
-	addr.ip4.s_addr = inet_addr(n);
-	if (addr.ip4.s_addr == INADDR_NONE)
-	    debug_return_bool(false);
+    if (inet_aton(n, &addr.ip4) == 1) {
 	family = AF_INET;
+    } else {
+	debug_return_bool(false);
     }
 
     if (family == AF_INET) {
 	if (strchr(m, '.')) {
-	    mask.ip4.s_addr = inet_addr(m);
+	    if (inet_aton(m, &mask.ip4) != 1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "IPv4 netmask %s: %s", m, "invalid value");
+		debug_return_bool(false);
+	    }
 	} else {
 	    i = strtonum(m, 0, 32, &errstr);
 	    if (errstr != NULL) {
@@ -148,7 +150,7 @@ addr_matches_if_netmask(const char *n, const char *m)
     }
 #ifdef HAVE_STRUCT_IN6_ADDR
     else {
-	if (inet_pton(AF_INET6, m, &mask.ip6) <= 0) {
+	if (inet_pton(AF_INET6, m, &mask.ip6) != 1) {
 	    j = strtonum(m, 0, 128, &errstr);
 	    if (errstr != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
