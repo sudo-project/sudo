@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 1, 2014
+.Dd January 29, 2014
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2209,7 +2209,8 @@ by default.
 .It rootpw
 If set,
 .Nm sudo
-will prompt for the root password instead of the password of the invoking user.
+will prompt for the root password instead of the password of the invoking user
+when running a command or editing a file.
 This flag is
 .Em off
 by default.
@@ -2220,7 +2221,8 @@ will prompt for the password of the user defined by the
 .Em runas_default
 option (defaults to
 .Li @runas_default@ )
-instead of the password of the invoking user.
+instead of the password of the invoking user
+when running a command or editing a file.
 This flag is
 .Em off
 by default.
@@ -2356,7 +2358,8 @@ by the
 .Fl u
 option (defaults to
 .Li root )
-instead of the password of the invoking user.
+instead of the password of the invoking user
+when running a command or editing a file.
 In addition, the time stamp file name will include the target user's name.
 Note that this flag precludes the use of a uid not listed in the passwd
 database as an argument to the

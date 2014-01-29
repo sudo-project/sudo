@@ -4,6 +4,10 @@ What's new in Sudo 1.8.10?
    sudo.conf by changing the value of the probe_interfaces
    setting.
 
+ * When listing a user's privileges (sudo -l), the sudoers plugin
+   will now prompt for the user's password even if the targetpw,
+   rootpw or runaspw options are set.
+
 What's new in Sudo 1.8.9p4?
 
  * Fixed a bug where sudo could consume large amounts of CPU while

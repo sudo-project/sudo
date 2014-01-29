@@ -53,7 +53,7 @@
 #include "check.h"
 
 static bool display_lecture(int);
-static struct passwd *get_authpw(void);
+static struct passwd *get_authpw(int);
 
 /*
  * Returns true if the user successfully authenticates, false if not
@@ -123,7 +123,7 @@ check_user(int validated, int mode)
      * Init authentication system regardless of whether we need a password.
      * Required for proper PAM session support.
      */
-    auth_pw = get_authpw();
+    auth_pw = get_authpw(mode);
     if (sudo_auth_init(auth_pw) == -1) {
 	rval = -1;
 	goto done;
@@ -217,26 +217,32 @@ user_is_exempt(void)
  * case, this matches sudo_user.pw or runas_pw.
  */
 static struct passwd *
-get_authpw(void)
+get_authpw(int mode)
 {
     struct passwd *pw;
     debug_decl(get_authpw, SUDO_DEBUG_AUTH)
 
-    if (def_rootpw) {
-	if ((pw = sudo_getpwuid(ROOT_UID)) == NULL)
-	    log_fatal(0, N_("unknown uid: %u"), ROOT_UID);
-    } else if (def_runaspw) {
-	if ((pw = sudo_getpwnam(def_runas_default)) == NULL)
-	    log_fatal(0, N_("unknown user: %s"), def_runas_default);
-    } else if (def_targetpw) {
-	if (runas_pw->pw_name == NULL)
-	    log_fatal(NO_MAIL|MSG_ONLY, N_("unknown uid: %u"),
-		(unsigned int) runas_pw->pw_uid);
-	sudo_pw_addref(runas_pw);
-	pw = runas_pw;
-    } else {
+    if (ISSET(mode, (MODE_CHECK|MODE_LIST))) {
+	/* In list mode we always prompt for the user's password. */
 	sudo_pw_addref(sudo_user.pw);
 	pw = sudo_user.pw;
+    } else {
+	if (def_rootpw) {
+	    if ((pw = sudo_getpwuid(ROOT_UID)) == NULL)
+		log_fatal(0, N_("unknown uid: %u"), ROOT_UID);
+	} else if (def_runaspw) {
+	    if ((pw = sudo_getpwnam(def_runas_default)) == NULL)
+		log_fatal(0, N_("unknown user: %s"), def_runas_default);
+	} else if (def_targetpw) {
+	    if (runas_pw->pw_name == NULL)
+		log_fatal(NO_MAIL|MSG_ONLY, N_("unknown uid: %u"),
+		    (unsigned int) runas_pw->pw_uid);
+	    sudo_pw_addref(runas_pw);
+	    pw = runas_pw;
+	} else {
+	    sudo_pw_addref(sudo_user.pw);
+	    pw = sudo_user.pw;
+	}
     }
 
     debug_return_ptr(pw);

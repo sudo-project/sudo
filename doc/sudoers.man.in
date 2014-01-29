@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "@mansectsu@" "January 1, 2014" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
+.TH "SUDOERS" "@mansectsu@" "January 29, 2014" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2366,7 +2366,8 @@ by default.
 rootpw
 If set,
 \fBsudo\fR
-will prompt for the root password instead of the password of the invoking user.
+will prompt for the root password instead of the password of the invoking user
+when running a command or editing a file.
 This flag is
 \fIoff\fR
 by default.
@@ -2378,7 +2379,8 @@ will prompt for the password of the user defined by the
 \fIrunas_default\fR
 option (defaults to
 \fR@runas_default@\fR)
-instead of the password of the invoking user.
+instead of the password of the invoking user
+when running a command or editing a file.
 This flag is
 \fIoff\fR
 by default.
@@ -2521,7 +2523,8 @@ by the
 \fB\-u\fR
 option (defaults to
 \fRroot\fR)
-instead of the password of the invoking user.
+instead of the password of the invoking user
+when running a command or editing a file.
 In addition, the time stamp file name will include the target user's name.
 Note that this flag precludes the use of a uid not listed in the passwd
 database as an argument to the

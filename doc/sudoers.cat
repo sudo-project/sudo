@@ -1120,13 +1120,15 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        This flag is _o_n by default.
 
      rootpw            If set, ssuuddoo will prompt for the root password instead
-                       of the password of the invoking user.  This flag is _o_f_f
-                       by default.
+                       of the password of the invoking user when running a
+                       command or editing a file.  This flag is _o_f_f by
+                       default.
 
      runaspw           If set, ssuuddoo will prompt for the password of the user
                        defined by the _r_u_n_a_s___d_e_f_a_u_l_t option (defaults to root)
-                       instead of the password of the invoking user.  This
-                       flag is _o_f_f by default.
+                       instead of the password of the invoking user when
+                       running a command or editing a file.  This flag is _o_f_f
+                       by default.
 
      set_home          If enabled and ssuuddoo is invoked with the --ss option the
                        HOME environment variable will be set to the home
@@ -1185,11 +1187,12 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
      targetpw          If set, ssuuddoo will prompt for the password of the user
                        specified by the --uu option (defaults to root) instead
-                       of the password of the invoking user.  In addition, the
-                       time stamp file name will include the target user's
-                       name.  Note that this flag precludes the use of a uid
-                       not listed in the passwd database as an argument to the
-                       --uu option.  This flag is _o_f_f by default.
+                       of the password of the invoking user when running a
+                       command or editing a file.  In addition, the time stamp
+                       file name will include the target user's name.  Note
+                       that this flag precludes the use of a uid not listed in
+                       the passwd database as an argument to the --uu option.
+                       This flag is _o_f_f by default.
 
      tty_tickets       If set, users must authenticate on a per-tty basis.
                        With this flag enabled, ssuuddoo will use a file named for
@@ -2292,4 +2295,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.9                      January 1, 2014                     Sudo 1.8.9
+Sudo 1.8.10                    January 29, 2014                    Sudo 1.8.10
