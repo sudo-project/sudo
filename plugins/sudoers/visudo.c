@@ -442,16 +442,15 @@ edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 	goto done;
     }
 
-    /* Set modified bit if use changed the file. */
+    /* Set modified bit if the user changed the file. */
     modified = true;
     mtim_get(&sb, &tv);
-    if (orig_size == sb.st_size && timevalcmp(&orig_mtim, &tv, ==)) {
+    if (orig_size == sb.st_size && sudo_timevalcmp(&orig_mtim, &tv, ==)) {
 	/*
 	 * If mtime and size match but the user spent no measurable
 	 * time in the editor we can't tell if the file was changed.
 	 */
-	timevalsub(&tv1, &tv2);
-	if (timevalisset(&tv2))
+	if (sudo_timevalcmp(&tv1, &tv2, !=))
 	    modified = false;
     }
 

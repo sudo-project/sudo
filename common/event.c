@@ -48,6 +48,7 @@
 #include "fatal.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
+#include "sudo_util.h"
 
 /* XXX - use non-exiting allocators? */
 
@@ -167,7 +168,7 @@ sudo_ev_add(struct sudo_event_base *base, struct sudo_event *ev,
 	ev->timeout.tv_sec += timo->tv_sec;
 	ev->timeout.tv_usec += timo->tv_usec;
 	TAILQ_FOREACH(evtmp, &base->timeouts, timeouts_entries) {
-	    if (timevalcmp(timo, &evtmp->timeout, <))
+	    if (sudo_timevalcmp(timo, &evtmp->timeout, <))
 		break;
 	}
 	if (evtmp != NULL) {
@@ -275,7 +276,7 @@ rescan:
 	    /* Timed out, activate timeout events. */
 	    gettimeofday(&now, NULL);
 	    while ((ev = TAILQ_FIRST(&base->timeouts)) != NULL) {
-		if (timevalcmp(&ev->timeout, &now, >))
+		if (sudo_timevalcmp(&ev->timeout, &now, >))
 		    break;
 		/* Remove from timeouts list. */
 		CLR(ev->flags, SUDO_EVQ_TIMEOUTS);
@@ -385,14 +386,13 @@ sudo_ev_get_timeleft(struct sudo_event *ev, struct timeval *tv)
     debug_decl(sudo_ev_get_timeleft, SUDO_DEBUG_EVENT)
 
     if (!ISSET(ev->flags, SUDO_EVQ_TIMEOUTS)) {
-	timevalclear(tv);
+	sudo_timevalclear(tv);
 	debug_return_int(-1);
     }
 
     gettimeofday(&now, NULL);
-    *tv = ev->timeout;
-    timevalsub(tv, &now);
+    sudo_timevalsub(&ev->timeout, &now, tv);
     if (tv->tv_sec < 0 || (tv->tv_sec == 0 && tv->tv_usec < 0))
-	timevalclear(tv);
+	sudo_timevalclear(tv);
     debug_return_int(0);
 }

@@ -274,13 +274,12 @@ sudo_edit(struct command_details *command_details)
 	    continue;
 	}
 	mtim_get(&sb, &tv);
-	if (tf[i].osize == sb.st_size && timevalcmp(&tf[i].omtim, &tv, ==)) {
+	if (tf[i].osize == sb.st_size && sudo_timevalcmp(&tf[i].omtim, &tv, ==)) {
 	    /*
 	     * If mtime and size match but the user spent no measurable
 	     * time in the editor we can't tell if the file was changed.
 	     */
-	    timevalsub(&tv1, &tv2);
-	    if (timevalisset(&tv2)) {
+	    if (sudo_timevalcmp(&tv1, &tv2, !=)) {
 		warningx(U_("%s unchanged"), tf[i].ofile);
 		unlink(tf[i].tfile);
 		close(tfd);

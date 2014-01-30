@@ -312,41 +312,6 @@ const char *getprogname(void);
 extern int errno;
 #endif /* !HAVE_DECL_ERRNO */
 
-#ifndef timevalclear
-# define timevalclear(tv)	((tv)->tv_sec = (tv)->tv_usec = 0)
-#endif
-#ifndef timevalisset
-# define timevalisset(tv)	((tv)->tv_sec || (tv)->tv_usec)
-#endif
-#ifndef timevalcmp
-# define timevalcmp(tv1, tv2, op)					       \
-    (((tv1)->tv_sec == (tv2)->tv_sec) ?					       \
-	((tv1)->tv_usec op (tv2)->tv_usec) :				       \
-	((tv1)->tv_sec op (tv2)->tv_sec))
-#endif
-#ifndef timevaladd
-# define timevaladd(tv1, tv2)						       \
-    do {								       \
-	(tv1)->tv_sec += (tv2)->tv_sec;					       \
-	(tv1)->tv_usec += (tv2)->tv_usec;				       \
-	if ((tv1)->tv_usec >= 1000000) {				       \
-	    (tv1)->tv_sec++;						       \
-	    (tv1)->tv_usec -= 1000000;					       \
-	}								       \
-    } while (0)
-#endif
-#ifndef timevalsub
-# define timevalsub(tv1, tv2)						       \
-    do {								       \
-	(tv1)->tv_sec -= (tv2)->tv_sec;					       \
-	(tv1)->tv_usec -= (tv2)->tv_usec;				       \
-	if ((tv1)->tv_usec < 0) {					       \
-	    (tv1)->tv_sec--;						       \
-	    (tv1)->tv_usec += 1000000;					       \
-	}								       \
-    } while (0)
-#endif
-
 /* Not all systems define NSIG in signal.h */
 #if !defined(NSIG)
 # if defined(_NSIG)

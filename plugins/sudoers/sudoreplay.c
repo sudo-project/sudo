@@ -1145,7 +1145,7 @@ check_input(int fd, int what, void *v)
 	if (!paused) {
 	    /* Determine remaining timeout, if any. */
 	    sudo_ev_get_timeleft(ev, &tv);
-	    if (!timevalisset(&tv)) {
+	    if (!sudo_timevalisset(&tv)) {
 		/* No time left, event is done. */
 		debug_return;
 	    }
