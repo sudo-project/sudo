@@ -4,7 +4,7 @@ dnl
 dnl Copyright (c) 1994-1996,1998-2014 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_PREREQ([2.59])
-AC_INIT([sudo], [1.8.9p4], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.8.10], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 dnl
@@ -91,6 +91,7 @@ dnl Variables that get substituted in docs (not overridden by environment)
 dnl
 AC_SUBST([iolog_dir])dnl real initial value from SUDO_IO_LOGDIR
 AC_SUBST([timedir])dnl real initial value from SUDO_TIMEDIR
+AC_SUBST([lecture_dir])dnl real initial value from SUDO_LECTURE_DIR
 AC_SUBST([timeout])
 AC_SUBST([password_timeout])
 AC_SUBST([sudo_umask])
@@ -132,7 +133,8 @@ AC_SUBST([PLUGINDIR])
 # Begin initial values for man page substitution
 #
 iolog_dir=/var/log/sudo-io
-timedir=/var/adm/sudo
+timedir=/var/adm/sudo/ts
+lecture_dir=/var/adm/sudo/lectured
 timeout=5
 password_timeout=5
 sudo_umask=0022
@@ -779,11 +781,19 @@ else
     AC_MSG_RESULT(no)
 fi
 
-AC_ARG_WITH(timedir, [AS_HELP_STRING([--with-timedir], [path to the sudo timestamp dir])],
+AC_ARG_WITH(timedir, [AS_HELP_STRING([--with-timedir=DIR], [path to the sudo time stamp dir])],
 [case $with_timedir in
     yes)	AC_MSG_ERROR(["must give --with-timedir an argument."])
 		;;
     no)		AC_MSG_ERROR(["--without-timedir not supported."])
+		;;
+esac])
+
+AC_ARG_WITH(lecture-dir, [AS_HELP_STRING([--with-lecture-dir=DIR], [path to the sudo lecture status dir])],
+[case $with_lecture_dir in
+    yes)	AC_MSG_ERROR(["must give --with-lecture-dir an argument."])
+		;;
+    no)		AC_MSG_ERROR(["--without-lecture-dir not supported."])
 		;;
 esac])
 
@@ -2183,6 +2193,8 @@ dnl
 SUDO_APPEND_CPPFLAGS(-D__STDC_WANT_LIB_EXT1__=1)
 AC_TYPE_MODE_T
 AC_TYPE_UID_T
+AC_CHECK_TYPE([clockid_t], [], [AC_DEFINE(clockid_t, int)], [#include <sys/types.h>
+#include <time.h>])
 AC_CHECK_TYPE([sig_atomic_t], [], [AC_DEFINE(sig_atomic_t, int)], [#include <sys/types.h>
 #include <signal.h>])
 AC_CHECK_TYPES([sigaction_t], [], [], [#include <sys/types.h>
@@ -2389,6 +2401,10 @@ SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)
 ])
 SUDO_FUNC_ISBLANK
 AC_REPLACE_FUNCS(memrchr memset_s pw_dup strlcpy strlcat strtonum)
+AC_CHECK_FUNCS(clock_gettime, [], [
+    # On Solaris, clock_gettime is in librt
+    AC_CHECK_LIB(rt, clock_gettime, [SUDOERS_LIBS="${SUDOERS_LIBS} -lrt"], [AC_LIBOBJ(clock_gettime)])
+])
 AC_CHECK_FUNCS(getopt_long, [], [AC_LIBOBJ(getopt_long)
     AC_MSG_CHECKING([for optreset])
     AC_CACHE_VAL(sudo_cv_optreset, [
@@ -3380,6 +3396,7 @@ if test "$utmp_style" = "LEGACY"; then
 fi
 SUDO_LOGFILE
 SUDO_TIMEDIR
+SUDO_LECTURE_DIR
 SUDO_IO_LOGDIR
 
 dnl
@@ -3847,6 +3864,7 @@ AH_TEMPLATE(USE_ADMIN_FLAG, [Define to 1 if you want to create ~/.sudo_as_admin_
 AH_TEMPLATE(USE_INSULTS, [Define to 1 if you want to insult the user for entering an incorrect password.])
 AH_TEMPLATE(USE_STOW, [Define to 1 if you use GNU stow packaging.])
 AH_TEMPLATE(WITHOUT_PASSWD, [Define to avoid using the passwd/shadow file for authentication.])
+AH_TEMPLATE(clockid_t, [Define to `int' if <time.h> does not define.])
 AH_TEMPLATE(sig_atomic_t, [Define to `int' if <signal.h> does not define.])
 AH_TEMPLATE(socklen_t, [Define to `unsigned int' if <sys/socket.h> doesn't define.])
 AH_TEMPLATE(HAVE_STRUCT_UTMP_UT_EXIT, [Define to 1 if `ut_exit' is a member of `struct utmp'.])

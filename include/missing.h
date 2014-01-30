@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2008, 2009-2013
+ * Copyright (c) 1996, 1998-2005, 2008, 2009-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -470,6 +470,13 @@ int sig2str(int, char *);
 long long rpl_strtonum(const char *, long long, long long, const char **);
 # undef strtonum
 # define strtonum rpl_strtonum
+#endif
+#ifndef HAVE_CLOCK_GETTIME
+# define CLOCK_REALTIME 0
+# ifdef __MACH__
+#  define CLOCK_MONOTONIC 1
+# endif
+int clock_gettime(clockid_t clock_id, struct timespec *tp);
 #endif
 
 #endif /* _SUDO_MISSING_H */

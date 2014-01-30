@@ -1,6 +1,6 @@
 dnl Local m4 macros for autoconf (used by sudo)
 dnl
-dnl Copyright (c) 1994-1996, 1998-2005, 2007-2013
+dnl Copyright (c) 1994-1996, 1998-2005, 2007-2014
 dnl	Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 dnl XXX - should cache values in all cases!!!
@@ -121,18 +121,35 @@ fi
 dnl
 dnl Where the timestamp files go.
 dnl
-AC_DEFUN([SUDO_TIMEDIR], [AC_MSG_CHECKING(for timestamp file location)
+AC_DEFUN([SUDO_TIMEDIR], [AC_MSG_CHECKING(for time stamp file location)
 timedir="$with_timedir"
 if test -z "$timedir"; then
-    for d in /var/db /var/lib /var/adm /usr/adm; do
+    for d in /var/run /var/db /var/lib /var/adm /usr/adm; do
 	if test -d "$d"; then
-	    timedir="$d/sudo"
+	    timedir="$d/sudo/ts"
 	    break
 	fi
     done
 fi
 AC_MSG_RESULT([$timedir])
 SUDO_DEFINE_UNQUOTED(_PATH_SUDO_TIMEDIR, "$timedir")
+])dnl
+
+dnl
+dnl Where the lecture status files go.
+dnl
+AC_DEFUN([SUDO_LECTURE_DIR], [AC_MSG_CHECKING(for lecture status file location)
+lecture_dir="$with_lecture_dir"
+if test -z "$lecture_dir"; then
+    for d in /var/db /var/lib /var/adm /usr/adm; do
+	if test -d "$d"; then
+	    lecture_dir="$d/sudo/lectured"
+	    break
+	fi
+    done
+fi
+AC_MSG_RESULT([$lecture_dir])
+SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LECTURE_DIR, "$lecture_dir")
 ])dnl
 
 dnl

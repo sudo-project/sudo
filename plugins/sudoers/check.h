@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996,1998-2005, 2007-2013
+ * Copyright (c) 1993-1996,1998-2005, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -29,21 +29,38 @@
 #define TS_NOFILE		3
 #define TS_ERROR		4
 
-/* This may be a function in some implementations. */
-#define already_lectured(s)	(s != TS_MISSING && s != TS_ERROR)
-
 /*
- * Info stored in tty ticket from stat(2) to help with tty matching.
+ * Time stamps are now stored in a single file which contains multiple
+ * records.  Each record starts with a 16-bit version number and a 16-bit
+ * record size.  Multiple record types can coexist in the same file.
  */
-struct sudo_tty_info {
-    dev_t dev;			/* ID of device tty resides on */
-    dev_t rdev;			/* tty device ID */
-    ino_t ino;			/* tty inode number */
-    uid_t uid;			/* tty owner */
-    gid_t gid;			/* tty group */
-    pid_t sid;			/* ID of session with controlling tty */
+#define	TS_VERSION		1
+
+/* Time stamp entry types */
+#define TS_GLOBAL		0x01
+#define TS_TTY			0x02
+#define TS_PPID			0x03
+
+/* Time stamp flags */
+#define TS_DISABLED		0x01	/* entry disabled */
+#define TS_ANYUID		0x02	/* ignore uid, only valid in the key */
+
+/* XXX - may also want to store uid/gid of tty device */
+struct timestamp_entry {
+    unsigned short version;	/* version number */
+    unsigned short size;	/* entry size */
+    unsigned short type;	/* TS_GLOBAL, TS_TTY, TS_PPID */
+    unsigned short flags;	/* TS_DISABLED, TS_ANYUID */
+    uid_t auth_uid;		/* uid to authenticate as */
+    pid_t sid;			/* session ID associated with tty/ppid */
+    struct timespec ts;		/* timestamp (CLOCK_MONOTONIC) */
+    union {
+	dev_t ttydev;		/* tty device number */
+	pid_t ppid;		/* parent pid */
+    } u;
 };
 
+bool  already_lectured(int status);
 bool  update_timestamp(struct passwd *pw);
 int   build_timestamp(struct passwd *pw);
 int   timestamp_status(struct passwd *pw);

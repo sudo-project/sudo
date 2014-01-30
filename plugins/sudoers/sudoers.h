@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2005, 2007-2013
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -324,9 +324,6 @@ void sudo_setspent(void);
 
 /* timestr.c */
 char *get_timestr(time_t, int);
-
-/* boottime.c */
-int get_boottime(struct timeval *);
 
 /* iolog.c */
 int io_set_max_sessid(const char *sessid);

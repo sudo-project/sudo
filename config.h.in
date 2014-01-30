@@ -70,6 +70,9 @@
 /* Define to 1 to enable BSM audit support. */
 #undef HAVE_BSM_AUDIT
 
+/* Define to 1 if you have the `clock_gettime' function. */
+#undef HAVE_CLOCK_GETTIME
+
 /* Define to 1 if you have the `closefrom' function. */
 #undef HAVE_CLOSEFROM
 
@@ -1050,6 +1053,9 @@
 /* Define to __FUNCTION__ if your compiler supports __FUNCTION__ but not
    __func__ */
 #undef __func__
+
+/* Define to `int' if <time.h> does not define. */
+#undef clockid_t
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const

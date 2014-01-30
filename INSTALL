@@ -128,8 +128,19 @@ Directory and file names:
 
   --with-timedir=PATH
         Use PATH to store the sudo time stamp files.  By default,
-        the first existing directory in the following list is used:
+        configure will use the first existing directory in the
+        following list to construct the time stamp directory:
+        /var/run, /var/db, /var/lib, /var/adm, /usr/adm.
+	For example: /var/run/sudo/ts
+	This directory should be cleared when the system reboots.
+
+  --with-lecture-dir=PATH
+        Use PATH to store the sudo time stamp files.  By default,
+        configure will use the first existing directory in the
+        following list to construct the lecture status directory:
         /var/db, /var/lib, /var/adm, /usr/adm.
+	For example: /var/db/sudo/lectured
+	This directory should not be cleared when the system reboots.
 
 Compilation options:
   --disable-hardening

@@ -135,7 +135,7 @@ LIBPARSESUDOERS_OBJS = alias.lo audit.lo base64.lo defaults.lo hexchar.lo \
 		       gram.lo match.lo match_addr.lo pwutil.lo pwutil_impl.lo \
 		       timestr.lo toke.lo toke_util.lo redblack.lo sha2.lo
 
-SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo env.lo find_path.lo \
+SUDOERS_OBJS = $(AUTH_OBJS) check.lo env.lo find_path.lo \
 	       goodpath.lo group_plugin.lo interfaces.lo iolog.lo \
 	       iolog_path.lo locale.lo logging.lo logwrap.lo parse.lo \
 	       policy.lo prompt.lo set_perms.lo sudo_nss.lo sudoers.lo \
@@ -470,9 +470,6 @@ base64.lo: $(srcdir)/base64.c $(incdir)/missing.h $(incdir)/sudo_debug.h \
            $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/base64.c
 base64.o: base64.lo
-boottime.lo: $(srcdir)/boottime.c $(incdir)/missing.h $(incdir)/sudo_debug.h \
-             $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/boottime.c
 bsdauth.lo: $(authdir)/bsdauth.c $(devdir)/def_data.h $(incdir)/alloc.h \
             $(incdir)/fatal.h $(incdir)/fileops.h $(incdir)/gettext.h \
             $(incdir)/missing.h $(incdir)/queue.h $(incdir)/sudo_debug.h \
@@ -708,8 +705,9 @@ match_addr.lo: $(srcdir)/match_addr.c $(devdir)/def_data.h $(incdir)/alloc.h \
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/match_addr.c
 match_addr.o: match_addr.lo
 net_ifs.o: $(top_srcdir)/src/net_ifs.c $(incdir)/alloc.h $(incdir)/fatal.h \
-           $(incdir)/gettext.h $(incdir)/missing.h $(incdir)/sudo_debug.h \
-           $(top_builddir)/config.h
+           $(incdir)/gettext.h $(incdir)/missing.h $(incdir)/queue.h \
+           $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+           $(top_builddir)/config.h $(top_srcdir)/compat/stdbool.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(top_srcdir)/src/net_ifs.c
 pam.lo: $(authdir)/pam.c $(devdir)/def_data.h $(incdir)/alloc.h \
         $(incdir)/fatal.h $(incdir)/fileops.h $(incdir)/gettext.h \
@@ -885,7 +883,8 @@ timestamp.lo: $(srcdir)/timestamp.c $(devdir)/def_data.h $(incdir)/alloc.h \
               $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h $(srcdir)/check.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/sudo_nss.h \
               $(srcdir)/sudoers.h $(top_builddir)/config.h \
-              $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h
+              $(top_builddir)/pathnames.h $(top_srcdir)/compat/stdbool.h \
+              $(top_srcdir)/compat/timespec.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/timestamp.c
 timestr.lo: $(srcdir)/timestr.c $(incdir)/missing.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/timestr.c

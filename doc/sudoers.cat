@@ -87,13 +87,15 @@ DDEESSCCRRIIPPTTIIOONN
      the _s_u_d_o_e_r_s lookup is still done for root, not the user specified by
      SUDO_USER.
 
-     _s_u_d_o_e_r_s uses time stamp files for credential caching.  Once a user has
-     been authenticated, the time stamp is updated and the user may then use
-     sudo without a password for a short period of time (5 minutes unless
-     overridden by the _t_i_m_e_o_u_t option).  By default, _s_u_d_o_e_r_s uses a tty-based
-     time stamp which means that there is a separate time stamp for each of a
-     user's login sessions.  The _t_t_y___t_i_c_k_e_t_s option can be disabled to force
-     the use of a single time stamp for all of a user's sessions.
+     _s_u_d_o_e_r_s uses per-user time stamp files for credential caching.  Once a
+     user has been authenticated, record is written containing the uid that
+     was used to authenticate, the terminal session ID, and a time stamp
+     (using a monotonic clock if one is available).  The user may then use
+     ssuuddoo without a password for a short period of time (5 minutes unless
+     overridden by the _t_i_m_e_o_u_t option).  By default, _s_u_d_o_e_r_s uses a separate
+     record for each tty, which means that a user's login sessions are
+     authenticated separately.  The _t_t_y___t_i_c_k_e_t_s option can be disabled to
+     force the use of a single time stamp for all of a user's sessions.
 
      _s_u_d_o_e_r_s can log both successful and unsuccessful attempts (as well as
      errors) to syslog(3), a log file, or both.  By default, _s_u_d_o_e_r_s will log
@@ -1188,17 +1190,16 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
      targetpw          If set, ssuuddoo will prompt for the password of the user
                        specified by the --uu option (defaults to root) instead
                        of the password of the invoking user when running a
-                       command or editing a file.  In addition, the time stamp
-                       file name will include the target user's name.  Note
-                       that this flag precludes the use of a uid not listed in
-                       the passwd database as an argument to the --uu option.
-                       This flag is _o_f_f by default.
+                       command or editing a file.  Note that this flag
+                       precludes the use of a uid not listed in the passwd
+                       database as an argument to the --uu option.  This flag is
+                       _o_f_f by default.
 
      tty_tickets       If set, users must authenticate on a per-tty basis.
-                       With this flag enabled, ssuuddoo will use a file named for
-                       the tty the user is logged in on in the user's time
-                       stamp directory.  If disabled, the time stamp of the
-                       directory is used instead.  This flag is _o_n by default.
+                       With this flag enabled, ssuuddoo will use a separate record
+                       in the time stamp file for each tty.  If disabled, a
+                       single record is used for all login sessions.  This
+                       flag is _o_n by default.
 
      umask_override    If set, ssuuddoo will set the umask as specified by _s_u_d_o_e_r_s
                        without modification.  This makes it possible to
@@ -1360,6 +1361,14 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        will be truncated and overwritten unless _i_o_l_o_g___f_i_l_e
                        ends in six or more Xs.
 
+     lecture_status_dir
+                       The directory in which ssuuddoo stores per-user lecture
+                       status files.  Once a user has received the lecture, a
+                       zero-length file is created in this directory so that
+                       ssuuddoo will not lecture the user again.  This directory
+                       should _n_o_t be cleared when the system reboots.  The
+                       default is _/_v_a_r_/_a_d_m_/_s_u_d_o_/_l_e_c_t_u_r_e_d.
+
      limitprivs        The default Solaris limit privileges to use when
                        constructing a new privilege set for a command.  This
                        bounds all privileges of the executing process.  The
@@ -1475,10 +1484,12 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        to ``C''.
 
      timestampdir      The directory in which ssuuddoo stores its time stamp
-                       files.  The default is _/_v_a_r_/_a_d_m_/_s_u_d_o.
+                       files.  This directory should be cleared when the
+                       system reboots.  The default is _/_v_a_r_/_a_d_m_/_s_u_d_o_/_t_s.
 
-     timestampowner    The owner of the time stamp directory and the time
-                       stamps stored therein.  The default is root.
+     timestampowner    The owner of the lecture status directory, time stamp
+                       directory and the time stamps stored therein.  The
+                       default is root.
 
      type              The default SELinux type to use when constructing a new
                        security context to run the command.  The default type
@@ -1813,13 +1824,13 @@ LLOOGG FFOORRMMAATT
         `N' is the group ID that owns the _s_u_d_o_e_r_s file) to the ssuuddooeerrss Plugin
         line in the sudo.conf(4) file.
 
-     unable to open /var/adm/sudo/username/ttyname
+     unable to open /var/adm/sudo/ts/username/ttyname
         _s_u_d_o_e_r_s was unable to read or create the user's time stamp file.
 
-     unable to write to /var/adm/sudo/username/ttyname
+     unable to write to /var/adm/sudo/ts/username/ttyname
         _s_u_d_o_e_r_s was unable to write to the user's time stamp file.
 
-     unable to mkdir to /var/adm/sudo/username
+     unable to mkdir to /var/adm/sudo/ts/username
         _s_u_d_o_e_r_s was unable to create the user's time stamp directory.
 
    NNootteess oonn llooggggiinngg vviiaa ssyysslloogg
@@ -1862,7 +1873,7 @@ FFIILLEESS
 
      _/_v_a_r_/_l_o_g_/_s_u_d_o_-_i_o          I/O log files
 
-     _/_v_a_r_/_a_d_m_/_s_u_d_o             Directory containing time stamps for the
+     _/_v_a_r_/_a_d_m_/_s_u_d_o_/_t_s          Directory containing time stamps for the
                                _s_u_d_o_e_r_s security policy
 
      _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t          Initial environment for --ii mode on AIX and
@@ -2170,41 +2181,37 @@ SSEECCUURRIITTYY NNOOTTEESS
 
    TTiimmee ssttaammpp ffiillee cchheecckkss
      _s_u_d_o_e_r_s will check the ownership of its time stamp directory
-     (_/_v_a_r_/_a_d_m_/_s_u_d_o by default) and ignore the directory's contents if it is
-     not owned by root or if it is writable by a user other than root.  On
-     systems that allow non-root users to give away files via chown(2), if the
-     time stamp directory is located in a world-writable directory (e.g.,
-     _/_t_m_p), it is possible for a user to create the time stamp directory
-     before ssuuddoo is run.  However, because _s_u_d_o_e_r_s checks the ownership and
-     mode of the directory and its contents, the only damage that can be done
-     is to ``hide'' files by putting them in the time stamp dir.  This is
-     unlikely to happen since once the time stamp dir is owned by root and
-     inaccessible by any other user, the user placing files there would be
-     unable to get them back out.
+     (_/_v_a_r_/_a_d_m_/_s_u_d_o_/_t_s by default) and ignore the directory's contents if it
+     is not owned by root or if it is writable by a user other than root.
+     Older versions of ssuuddoo stored time stamp files in _/_t_m_p; this is no longer
+     recommended as it may be possible for a user to create the time stamp
+     themselves on systems that allow unprivileged users to change the
+     ownership of files they create.
+
+     Some systems with graphical desktop environments allow unprivileged users
+     to change the system clock.  Since _s_u_d_o_e_r_s relies on the system clock for
+     time stamp validation, it may be possible on such systems for a user to
+     run ssuuddoo for longer than _t_i_m_e_s_t_a_m_p___t_i_m_e_o_u_t by setting the clock back.  To
+     combat this, _s_u_d_o_e_r_s uses a monotonic clock (which never moves backwards)
+     for its time stamps if the system supports it.
 
      _s_u_d_o_e_r_s will not honor time stamps set far in the future.  Time stamps
      with a date greater than current_time + 2 * TIMEOUT will be ignored and
-     sudo will log and complain.  This is done to keep a user from creating
-     his/her own time stamp with a bogus date on systems that allow users to
-     give away files if the time stamp directory is located in a world-
-     writable directory.
-
-     On systems where the boot time is available, _s_u_d_o_e_r_s will ignore time
-     stamps that date from before the machine booted.
+     _s_u_d_o_e_r_s will log and complain.
 
      Since time stamp files live in the file system, they can outlive a user's
      login session.  As a result, a user may be able to login, run a command
      with ssuuddoo after authenticating, logout, login again, and run ssuuddoo without
-     authenticating so long as the time stamp file's modification time is
-     within 5 minutes (or whatever the timeout is set to in _s_u_d_o_e_r_s).  When
-     the _t_t_y___t_i_c_k_e_t_s option is enabled, the time stamp has per-tty granularity
-     but still may outlive the user's session.  On Linux systems where the
-     devpts filesystem is used, Solaris systems with the devices filesystem,
-     as well as other systems that utilize a devfs filesystem that
-     monotonically increase the inode number of devices as they are created
-     (such as Mac OS X), _s_u_d_o_e_r_s is able to determine when a tty-based time
-     stamp file is stale and will ignore it.  Administrators should not rely
-     on this feature as it is not universally available.
+     authenticating so long as the record's time stamp is within 5 minutes (or
+     whatever value the timeout is set to in _s_u_d_o_e_r_s).  When the _t_t_y___t_i_c_k_e_t_s
+     option is enabled, the time stamp record includes the device number of
+     the terminal the user authenticated with.  This provides per-tty
+     granularity but time stamp records still may outlive the user's session.
+     The time stamp record also includes the session ID of the process that
+     last authenticated.  This prevents processes in different terminal
+     sessions from using the same time stamp record.  It also helps reduce the
+     chance that a user will be able to run ssuuddoo without entering a password
+     when logging out and back in again on the same terminal.
 
 DDEEBBUUGGGGIINNGG
      Versions 1.8.4 and higher of the ssuuddooeerrss plugin support a flexible

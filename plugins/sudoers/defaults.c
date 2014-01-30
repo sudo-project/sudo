@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2007-2013
+ * Copyright (c) 1999-2005, 2007-2014
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -467,6 +467,7 @@ init_defaults(void)
     def_mailto = estrdup(MAILTO);
     def_mailsub = estrdup(N_(MAILSUBJECT));
     def_badpass_message = estrdup(_(INCORRECT_PASSWORD));
+    def_lecture_status_dir = estrdup(_PATH_SUDO_LECTURE_DIR);
     def_timestampdir = estrdup(_PATH_SUDO_TIMEDIR);
     def_passprompt = estrdup(_(PASSPROMPT));
     def_runas_default = estrdup(RUNAS_DEFAULT);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,6 +22,86 @@
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
+
+/*
+ * Macros for operating on struct timeval.
+ */
+#define sudo_timevalclear(tv)	((tv)->tv_sec = (tv)->tv_usec = 0)
+
+#define sudo_timevalisset(tv)	((tv)->tv_sec || (tv)->tv_usec)
+
+#define sudo_timevalcmp(tv1, tv2, op)					       \
+    (((tv1)->tv_sec == (tv2)->tv_sec) ?					       \
+	((tv1)->tv_usec op (tv2)->tv_usec) :				       \
+	((tv1)->tv_sec op (tv2)->tv_sec))
+
+#define sudo_timevaladd(tv1, tv2, tv3)					       \
+    do {								       \
+	(tv3)->tv_sec = (tv1)->tv_sec + (tv2)->tv_sec;			       \
+	(tv3)->tv_usec = (tv1)->tv_usec + (tv2)->tv_usec;		       \
+	if ((tv3)->tv_usec >= 1000000) {				       \
+	    (tv3)->tv_sec++;						       \
+	    (tv3)->tv_usec -= 1000000;					       \
+	}								       \
+    } while (0)
+
+#define sudo_timevalsub(tv1, tv2, tv3)					       \
+    do {								       \
+	(tv3)->tv_sec = (tv1)->tv_sec - (tv2)->tv_sec;			       \
+	(tv3)->tv_usec = (tv1)->tv_usec - (tv2)->tv_usec;		       \
+	if ((tv3)->tv_usec < 0) {					       \
+	    (tv3)->tv_sec--;						       \
+	    (tv3)->tv_usec += 1000000;					       \
+	}								       \
+    } while (0)
+
+#ifndef TIMEVAL_TO_TIMESPEC
+# define TIMEVAL_TO_TIMESPEC(tv, ts)					       \
+    do {								       \
+	(ts)->tv_sec = (tv)->tv_sec;					       \
+	(ts)->tv_nsec = (tv)->tv_usec * 1000;				       \
+    } while (0)
+#endif
+
+/*
+ * Macros for operating on struct timespec.
+ */
+#define sudo_timespecclear(ts)	((ts)->tv_sec = (ts)->tv_nsec = 0)
+
+#define sudo_timespecisset(ts)	((ts)->tv_sec || (ts)->tv_nsec)
+
+#define sudo_timespeccmp(ts1, ts2, op)					       \
+    (((ts1)->tv_sec == (ts2)->tv_sec) ?					       \
+	((ts1)->tv_nsec op (ts2)->tv_nsec) :				       \
+	((ts1)->tv_sec op (ts2)->tv_sec))
+
+#define sudo_timespecadd(ts1, ts2, ts3)					       \
+    do {								       \
+	(ts3)->tv_sec = (ts1)->tv_sec + (ts2)->tv_sec;			       \
+	(ts3)->tv_nsec = (ts1)->tv_nsec + (ts2)->tv_nsec;		       \
+	while ((ts3)->tv_nsec >= 1000000000) {				       \
+	    (ts3)->tv_sec++;						       \
+	    (ts3)->tv_nsec -= 1000000000;				       \
+	}								       \
+    } while (0)
+
+#define sudo_timespecsub(ts1, ts2, ts3)					       \
+    do {								       \
+	(ts3)->tv_sec = (ts1)->tv_sec - (ts2)->tv_sec;			       \
+	(ts3)->tv_nsec = (ts1)->tv_nsec - (ts2)->tv_nsec;		       \
+	while ((ts3)->tv_nsec < 0) {					       \
+	    (ts3)->tv_sec--;						       \
+	    (ts3)->tv_nsec += 1000000000;				       \
+	}								       \
+    } while (0)
+
+#ifndef TIMESPEC_TO_TIMEVAL
+# define TIMESPEC_TO_TIMEVAL(tv, ts)					       \
+    do {								       \
+	(tv)->tv_sec = (ts)->tv_sec;					       \
+	(tv)->tv_usec = (ts)->tv_nsec / 1000;				       \
+    } while (0)
+#endif
 
 /* aix.c */
 void aix_prep_user(char *user, const char *tty);

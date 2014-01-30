@@ -194,10 +194,14 @@ lookup is still done for root, not the user specified by
 .Ev SUDO_USER .
 .Pp
 .Em sudoers
-uses time stamp files for credential caching.
-Once a
-user has been authenticated, the time stamp is updated and the user
-may then use sudo without a password for a short period of time
+uses per-user time stamp files for credential caching.
+Once a user has been authenticated, record is written
+containing the uid that was used to authenticate, the
+terminal session ID, and a time stamp
+(using a monotonic clock if one is available).
+The user may then use
+.Nm sudo
+without a password for a short period of time
 .Po
 .Li @timeout@
 minutes unless overridden by the
@@ -206,8 +210,8 @@ option
 .Pc .
 By default,
 .Em sudoers
-uses a tty-based time stamp which means that
-there is a separate time stamp for each of a user's login sessions.
+uses a separate record for each tty, which means that
+a user's login sessions are authenticated separately.
 The
 .Em tty_tickets
 option can be disabled to force the use of a
@@ -2360,7 +2364,6 @@ option (defaults to
 .Li root )
 instead of the password of the invoking user
 when running a command or editing a file.
-In addition, the time stamp file name will include the target user's name.
 Note that this flag precludes the use of a uid not listed in the passwd
 database as an argument to the
 .Fl u
@@ -2372,9 +2375,8 @@ by default.
 If set, users must authenticate on a per-tty basis.
 With this flag enabled,
 .Nm sudo
-will use a file named for the tty the user is
-logged in on in the user's time stamp directory.
-If disabled, the time stamp of the directory is used instead.
+will use a separate record in the time stamp file for each tty.
+If disabled, a single record is used for all login sessions.
 This flag is
 .Em @tty_tickets@
 by default.
@@ -2642,6 +2644,19 @@ overwritten unless
 ends in six or
 more
 .Li X Ns No s .
+.It lecture_status_dir
+The directory in which
+.Nm sudo
+stores per-user lecture status files.
+Once a user has received the lecture, a zero-length file is
+created in this directory so that
+.Nm sudo
+will not lecture the user again.
+This directory should
+.Em not
+be cleared when the system reboots.
+The default is
+.Pa @lecture_dir@ .
 .It limitprivs
 The default Solaris limit privileges to use when constructing a new
 privilege set for a command.
@@ -2821,10 +2836,12 @@ Defaults to
 The directory in which
 .Nm sudo
 stores its time stamp files.
+This directory should be cleared when the system reboots.
 The default is
 .Pa @timedir@ .
 .It timestampowner
-The owner of the time stamp directory and the time stamps stored therein.
+The owner of the lecture status directory, time stamp directory and the
+time stamps stored therein.
 The default is
 .Li root .
 .It type
@@ -4080,36 +4097,36 @@ by default
 .Pc
 and ignore the directory's contents if it is not owned by root or
 if it is writable by a user other than root.
-On systems that allow non-root users to give away files via
-.Xr chown 2 ,
-if the time stamp directory is located in a world-writable
-directory (e.g.\&,
-.Pa /tmp ) ,
-it is possible for a user to create the time stamp directory before
+Older versions of
 .Nm sudo
-is run.
-However, because
+stored time stamp files in
+.Pa /tmp ;
+this is no longer recommended as it may be possible for a user
+to create the time stamp themselves on systems that allow
+unprivileged users to change the ownership of files they create.
+.Pp
+Some systems with graphical desktop environments allow unprivileged
+users to change the system clock.
+Since
 .Em sudoers
-checks the ownership and mode of the directory and its
-contents, the only damage that can be done is to
-.Dq hide
-files by putting them in the time stamp dir.
-This is unlikely to happen since once the time stamp dir is owned by root
-and inaccessible by any other user, the user placing files there would be
-unable to get them back out.
+relies on the system clock for time stamp validation, it may be
+possible on such systems for a user to run
+.Nm sudo
+for longer than
+.Em timestamp_timeout
+by setting the clock back.
+To combat this,
+.Em sudoers
+uses a monotonic clock (which never moves backwards) for its time stamps
+if the system supports it.
 .Pp
 .Em sudoers
 will not honor time stamps set far in the future.
 Time stamps with a date greater than current_time + 2 *
 .Li TIMEOUT
-will be ignored and sudo will log and complain.
-This is done to keep a user from creating his/her own time stamp with a
-bogus date on systems that allow users to give away files if the time
-stamp directory is located in a world-writable directory.
-.Pp
-On systems where the boot time is available,
+will be ignored and
 .Em sudoers
-will ignore time stamps that date from before the machine booted.
+will log and complain.
 .Pp
 Since time stamp files live in the file system, they can outlive a
 user's login session.
@@ -4117,24 +4134,24 @@ As a result, a user may be able to login, run a command with
 .Nm sudo
 after authenticating, logout, login again, and run
 .Nm sudo
-without authenticating so long as the time stamp file's modification
-time is within
+without authenticating so long as the record's time stamp is within
 .Li @timeout@
-minutes (or whatever the timeout is set to in
+minutes (or whatever value the timeout is set to in
 .Em sudoers ) .
 When the
 .Em tty_tickets
-option is enabled, the time stamp has per-tty granularity but still
+option is enabled, the time stamp record includes the device
+number of the terminal the user authenticated with.
+This provides per-tty granularity but time stamp records still
 may outlive the user's session.
-On Linux systems where the devpts filesystem is used, Solaris systems
-with the devices filesystem, as well as other systems that utilize a
-devfs filesystem that monotonically increase the inode number of devices
-as they are created (such as Mac OS X),
-.Em sudoers
-is able to determine when a tty-based time stamp file is stale and will
-ignore it.
-Administrators should not rely on this feature as it is not universally
-available.
+The time stamp record also includes the session ID of the process
+that last authenticated.
+This prevents processes in different terminal sessions from using
+the same time stamp record.
+It also helps reduce the chance that a user will be able to run
+.Nm sudo
+without entering a password when logging out and back in again
+on the same terminal.
 .Sh DEBUGGING
 Versions 1.8.4 and higher of the
 .Nm sudoers

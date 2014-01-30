@@ -60,6 +60,7 @@ common/term.c
 common/ttysize.c
 compat/Makefile.in
 compat/charclass.h
+compat/clock_gettime.c
 compat/closefrom.c
 compat/endian.h
 compat/fnmatch.c
@@ -200,7 +201,6 @@ plugins/sudoers/auth/sia.c
 plugins/sudoers/auth/sudo_auth.c
 plugins/sudoers/auth/sudo_auth.h
 plugins/sudoers/base64.c
-plugins/sudoers/boottime.c
 plugins/sudoers/bsm_audit.c
 plugins/sudoers/bsm_audit.h
 plugins/sudoers/check.c
