@@ -212,7 +212,6 @@ case "$osversion" in
 		--with-timeout=15
 		--with-password-timeout=0
 		--with-passprompt=[sudo] password for %p: 
-		--with-timedir=/var/lib/sudo
 		--disable-root-mailer
 		--disable-setresuid
 		--with-sendmail=/usr/sbin/sendmail
