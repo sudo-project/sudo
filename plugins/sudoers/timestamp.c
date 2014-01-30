@@ -503,20 +503,21 @@ done:
 bool
 already_lectured(int unused)
 {
-    char lecture_status[PATH_MAX];
+    char status_file[PATH_MAX];
     struct stat sb;
     int len;
     debug_decl(already_lectured, SUDO_DEBUG_AUTH)
 
-    len = snprintf(lecture_status, sizeof(lecture_status), "%s/%s",
-	def_lecture_status_dir, user_name);
-    if (len <= 0 || (size_t)len >= sizeof(lecture_status)) {
-	log_fatal(0, N_("lecture status path too long: %s/%s"),
+    if (ts_secure_dir(def_lecture_status_dir, false)) {
+	len = snprintf(status_file, sizeof(status_file), "%s/%s",
 	    def_lecture_status_dir, user_name);
+	if (len <= 0 || (size_t)len >= sizeof(status_file)) {
+	    log_fatal(0, N_("lecture status path too long: %s/%s"),
+		def_lecture_status_dir, user_name);
+	}
+	debug_return_bool(stat(status_file, &sb) == 0);
     }
-
-    debug_return_bool(ts_secure_dir(def_lecture_status_dir, false) &&
-	stat(lecture_status, &sb) == 0);
+    debug_return_bool(false);
 }
 
 /*
