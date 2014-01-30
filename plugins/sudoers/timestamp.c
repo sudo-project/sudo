@@ -156,8 +156,12 @@ found_it:
 	debug_return_bool(true);
 
     /* Truncate on partial write to be safe. */
-    if (nwritten > 0 && old_eof != (off_t)-1)
-	ftruncate(fd, old_eof);
+    if (nwritten > 0 && old_eof != (off_t)-1) {
+	if (ftruncate(fd, old_eof) != 0) {
+	    warning(N_("unable to truncate time stamp file to %lld bytes"),
+		old_eof);
+	}
+    }
 
     debug_return_bool(false);
 }
