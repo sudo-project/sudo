@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -62,5 +62,7 @@ atomode(const char *cp, const char **errstr)
 	errno = ERANGE;
 	debug_return_int(0);
     }
+    if (errstr != NULL)
+	*errstr = NULL;
     debug_return_int((int)lval);
 }
