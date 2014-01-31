@@ -55,6 +55,7 @@
 
 #include <pathnames.h>
 #include "sudo_plugin.h"
+#include "sudo_util.h"
 #include "missing.h"
 
 /*

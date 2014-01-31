@@ -103,6 +103,39 @@
     } while (0)
 #endif
 
+/*
+ * Macros to extract ctime and mtime as timevals.
+ */
+#ifdef HAVE_ST_MTIM
+# ifdef HAVE_ST__TIM
+#  define ctim_get(_x, _y)	TIMESPEC_TO_TIMEVAL((_y), &(_x)->st_ctim.st__tim)
+#  define mtim_get(_x, _y)	TIMESPEC_TO_TIMEVAL((_y), &(_x)->st_mtim.st__tim)
+# else
+#  define ctim_get(_x, _y)	TIMESPEC_TO_TIMEVAL((_y), &(_x)->st_ctim)
+#  define mtim_get(_x, _y)	TIMESPEC_TO_TIMEVAL((_y), &(_x)->st_mtim)
+# endif
+#else
+# ifdef HAVE_ST_MTIMESPEC
+#  define ctim_get(_x, _y)	TIMESPEC_TO_TIMEVAL((_y), &(_x)->st_ctimespec)
+#  define mtim_get(_x, _y)	TIMESPEC_TO_TIMEVAL((_y), &(_x)->st_mtimespec)
+# else
+#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctime; (_y)->tv_usec = 0; } while (0)
+#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtime; (_y)->tv_usec = 0; } while (0)
+# endif /* HAVE_ST_MTIMESPEC */
+#endif /* HAVE_ST_MTIM */
+
+/*
+ * Macros to quiet gcc's warn_unused_result attribute.
+ */
+#ifdef __GNUC__
+# define ignore_result(x) do {						       \
+    __typeof__(x) y = (x);						       \
+    (void)y;								       \
+} while(0)
+#else
+# define ignore_result(x)	(void)(x)
+#endif
+
 /* aix.c */
 void aix_prep_user(char *user, const char *tty);
 void aix_restoreauthdb(void);
