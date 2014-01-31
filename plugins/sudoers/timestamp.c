@@ -65,6 +65,9 @@ static char timestamp_file[PATH_MAX];
 static off_t timestamp_hint = (off_t)-1;
 static struct timestamp_entry timestamp_key;
 
+/*
+ * Returns true if entry matches key, else false.
+ */
 static bool
 ts_match_record(struct timestamp_entry *key, struct timestamp_entry *entry)
 {
@@ -96,6 +99,14 @@ ts_match_record(struct timestamp_entry *key, struct timestamp_entry *entry)
     debug_return_bool(true);
 }
 
+/*
+ * Searches the time stamp file descriptor for a record that matches key.
+ * On success, fills in entry with the matching record and returns true.
+ * On failure, returns false.
+ *
+ * Note that records are searched starting at the current file offset,
+ * which may not be the beginning of the file.
+ */
 static bool
 ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entry)
 {
@@ -109,6 +120,9 @@ ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entr
     while (read(fd, &cur, sizeof(cur)) == sizeof(cur)) {
 	if (cur.size != sizeof(cur)) {
 	    /* wrong size, seek to next record */
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"wrong sized record, got %hu, expected %zu",
+		cur.size, sizeof(cur));
 	    lseek(fd, (off_t)cur.size - (off_t)sizeof(cur), SEEK_CUR);
 	    continue;
 	}
@@ -120,7 +134,10 @@ ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entr
     debug_return_bool(false);
 }
 
-/* Find matching record to update or append a new one. */
+/*
+ * Find matching record to update or append a new one.
+ * Returns true if the entry was written successfully, else false.
+ */
 static bool
 ts_update_record(int fd, struct timestamp_entry *entry, off_t timestamp_hint)
 {
@@ -134,6 +151,8 @@ ts_update_record(int fd, struct timestamp_entry *entry, off_t timestamp_hint)
 	if (lseek(fd, timestamp_hint, SEEK_SET) != -1) {
 	    if (read(fd, &cur, sizeof(cur)) == sizeof(cur)) {
 		if (ts_match_record(entry, &cur)) {
+		    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+			"found existing time stamp record using hint");
 		    goto found_it;
 		}
 	    }
@@ -141,12 +160,18 @@ ts_update_record(int fd, struct timestamp_entry *entry, off_t timestamp_hint)
     }
 
     /* Search for matching record. */
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"searching for time stamp record");
     lseek(fd, (off_t)0, SEEK_SET);
     if (ts_find_record(fd, entry, &cur)) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "found existing time stamp record");
 found_it:
 	/* back up over old record */
 	lseek(fd, (off_t)0 - (off_t)cur.size, SEEK_CUR);
     } else {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "appending new time stamp record");
 	old_eof = lseek(fd, (off_t)0, SEEK_CUR);
     }
 
@@ -157,6 +182,8 @@ found_it:
 
     /* Truncate on partial write to be safe. */
     if (nwritten > 0 && old_eof != (off_t)-1) {
+	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    "short write, truncating partial time stamp record");
 	if (ftruncate(fd, old_eof) != 0) {
 	    warning(N_("unable to truncate time stamp file to %lld bytes"),
 		old_eof);
@@ -166,7 +193,12 @@ found_it:
     debug_return_bool(false);
 }
 
-/* XXX - somewhat duplicated in io_mkdirs */
+/*
+ * Create a directory and any missing parent directories with the
+ * specified mode.
+ * Returns true on success.
+ * Returns false on failure and displays a warning to stderr.
+ */
 static bool
 ts_mkdirs(char *path, mode_t mode)
 {
@@ -179,6 +211,8 @@ ts_mkdirs(char *path, mode_t mode)
     while ((slash = strchr(slash + 1, '/')) != NULL) {
 	*slash = '\0';
 	if (stat(path, &sb) != 0) {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+		"mkdir %s, mode 0%o", path, mode);
 	    if (mkdir(path, mode) != 0) {
 		warning(N_("unable to mkdir %s"), path);
 		goto done;
@@ -195,6 +229,8 @@ ts_mkdirs(char *path, mode_t mode)
 	*slash = '/';
     }
     /* Create final path component. */
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"mkdir %s, mode 0%o", path, mode);
     if (mkdir(path, mode) != 0 && errno != EEXIST) {
 	warning(N_("unable to mkdir %s"), path);
 	goto done;
@@ -205,6 +241,12 @@ done:
     debug_return_bool(rval);
 }
 
+/*
+ * Check that path is owned by timestamp_uid and not writable by
+ * group or other.  If path is missing and make_it is true, create
+ * the directory and its parent dirs.
+ * Returns true on success or false on failure, setting errno.
+ */
 static bool
 ts_secure_dir(char *path, bool make_it)
 {
@@ -243,7 +285,8 @@ ts_secure_dir(char *path, bool make_it)
 }
 
 /*
- * Fills in timestamp_file[].
+ * Fills in the timestamp_file[] global variable.
+ * Returns the length of timestamp_file.
  */
 int
 build_timestamp(struct passwd *pw)
@@ -263,6 +306,7 @@ build_timestamp(struct passwd *pw)
 
 /*
  * Update the time on the timestamp file/dir or create it if necessary.
+ * Returns true on success or false on failure.
  */
 bool
 update_timestamp(struct passwd *pw)
@@ -305,6 +349,7 @@ done:
 
 /*
  * Check the timestamp file and directory and return their status.
+ * Returns one of TS_CURRENT, TS_OLD, TS_MISSING, TS_NOFILE, TS_ERROR.
  */
 int
 timestamp_status(struct passwd *pw)
@@ -445,7 +490,7 @@ done:
 }
 
 /*
- * Remove the timestamp entry or file.
+ * Remove the timestamp entry or file if unlink_it is set.
  */
 void
 remove_timestamp(bool unlink_it)
@@ -539,6 +584,7 @@ already_lectured(int unused)
 
 /*
  * Create the lecture status file.
+ * Returns true on success or false on failure.
  */
 bool
 set_lectured(void)
