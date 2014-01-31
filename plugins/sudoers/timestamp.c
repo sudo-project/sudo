@@ -212,15 +212,17 @@ ts_secure_dir(char *path, bool make_it)
     bool rval = false;
     debug_decl(ts_secure_dir, SUDO_DEBUG_AUTH)
 
+    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO, "checking %s", path);
     switch (sudo_secure_dir(path, timestamp_uid, -1, &sb)) {
     case SUDO_PATH_SECURE:
 	rval = true;
 	break;
     case SUDO_PATH_MISSING:
-	if (make_it) {
-	    ts_mkdirs(path, 0700);
+	if (make_it && ts_mkdirs(path, 0700)) {
 	    rval = true;
+	    break;
 	}
+	errno = ENOENT;
 	break;
     case SUDO_PATH_BAD_TYPE:
 	errno = ENOTDIR;
@@ -230,9 +232,11 @@ ts_secure_dir(char *path, bool make_it)
 	warningx(U_("%s is owned by uid %u, should be %u"),
 	    path, (unsigned int) sb.st_uid,
 	    (unsigned int) timestamp_uid);
+	errno = EACCES;
 	break;
     case SUDO_PATH_GROUP_WRITABLE:
 	warningx(U_("%s is group writable"), path);
+	errno = EACCES;
 	break;
     }
     debug_return_bool(rval);
@@ -311,6 +315,9 @@ timestamp_status(struct passwd *pw)
     int fd = -1;
     debug_decl(timestamp_status, SUDO_DEBUG_AUTH)
 
+    /* Reset time stamp offset hint. */
+    timestamp_hint = (off_t)-1;
+
     if (timestamp_uid != 0)
 	set_perms(PERM_TIMESTAMP);
 
@@ -322,8 +329,11 @@ timestamp_status(struct passwd *pw)
 
     /* Ignore time stamp files in an insecure directory. */
     if (!ts_secure_dir(def_timestampdir, false)) {
-	status = TS_ERROR;
-	goto done;
+	if (errno != ENOENT) {
+	    status = TS_ERROR;
+	    goto done;
+	}
+	status = TS_MISSING;	/* not insecure, just missing */
     }
 
     /*
@@ -354,6 +364,10 @@ timestamp_status(struct passwd *pw)
     }
     clock_gettime(SUDO_CLOCK_MONOTONIC, &timestamp_key.ts);
 
+    /* If the time stamp dir is missing there is nothing to do. */
+    if (status == TS_MISSING)
+	goto done;
+
     /* Open time stamp file and lock it for exclusive access. */
     fd = open(timestamp_file, O_RDONLY);
     if (fd == -1) {
@@ -364,7 +378,6 @@ timestamp_status(struct passwd *pw)
     /* Read existing record, if any. */
     lock_file(fd, SUDO_LOCK);
     if (!ts_find_record(fd, &timestamp_key, &entry)) {
-	timestamp_hint = (off_t)-1;
 	status = TS_MISSING;
 	goto done;
     }
