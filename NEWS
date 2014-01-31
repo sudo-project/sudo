@@ -12,8 +12,12 @@ What's new in Sudo 1.8.10?
    Each user now has a single file which may contain multiple records
    when per-tty time stamps are in use (the default).  The time
    stamps use a monotonic timer where available and are once again
-   stored in /var/run/sudo.  The lecture status is now stored
-   separately from the time stamps in a different directory.
+   located in a directory under /var/run.  The lecture status is
+   now stored separately from the time stamps in a different directory.
+
+ * sudo's -K option will now remove all of the user's time stamps,
+   not just the time stamp for the current terminal.  The -k option
+   can be used to only disable time stamps for the current terminal.
 
 What's new in Sudo 1.8.9p4?
 
