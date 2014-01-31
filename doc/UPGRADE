@@ -1,6 +1,27 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.8.10:
+
+    The time stamp file format has changed in sudo 1.8.10.  There
+    is now a single time stamp file for each user, even when tty-based
+    time stamps are used.  Each time stamp file may contain multiple
+    records to support tty-based time stamps as well as multiple
+    authentication users.  On systems that support it, monotonic
+    time is stored instead of wall clock time.  As a result, it is
+    important that the time stamp files not persist when the system
+    reboots.  For this reason, ther default location for the time
+    stamp files has changed back to a directory located in /var/run.
+
+    Because there is now a single time stamp file per user, the -K
+    option will remove all of the user's time stamps, not just the
+    time stamp for the current terminal.
+
+    Lecture status is now stored separatedly from the time stamps
+    in a separate directory: /var/db/sudo/lectured, /var/lib/sudo/lectured
+    or /var/adm/sudo/lectured depending on what is present on the
+    system.
+
 o Upgrading from a version prior to 1.8.7:
 
     Sudo now stores its libexec files in a "sudo" sub-directory
