@@ -88,7 +88,7 @@ DDEESSCCRRIIPPTTIIOONN
      SUDO_USER.
 
      _s_u_d_o_e_r_s uses per-user time stamp files for credential caching.  Once a
-     user has been authenticated, record is written containing the uid that
+     user has been authenticated, a record is written containing the uid that
      was used to authenticate, the terminal session ID, and a time stamp
      (using a monotonic clock if one is available).  The user may then use
      ssuuddoo without a password for a short period of time (5 minutes unless

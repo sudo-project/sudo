@@ -195,7 +195,7 @@ lookup is still done for root, not the user specified by
 .Pp
 .Em sudoers
 uses per-user time stamp files for credential caching.
-Once a user has been authenticated, record is written
+Once a user has been authenticated, a record is written
 containing the uid that was used to authenticate, the
 terminal session ID, and a time stamp
 (using a monotonic clock if one is available).
