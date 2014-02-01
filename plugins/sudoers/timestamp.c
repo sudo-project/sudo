@@ -180,6 +180,9 @@ found_it:
     if ((size_t)nwritten == sizeof(struct timestamp_entry))
 	debug_return_bool(true);
 
+    log_warning(nwritten == -1 ? USE_ERRNO : 0,
+	N_("unable to write to %s"), timestamp_file);
+
     /* Truncate on partial write to be safe. */
     if (nwritten > 0 && old_eof != (off_t)-1) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
