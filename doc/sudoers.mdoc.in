@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 31, 2014
+.Dd February 1, 2014
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2656,7 +2656,7 @@ This directory should
 .Em not
 be cleared when the system reboots.
 The default is
-.Pa @libdir@/lectured .
+.Pa @vardir@/lectured .
 .It limitprivs
 The default Solaris limit privileges to use when constructing a new
 privilege set for a command.
@@ -3445,6 +3445,21 @@ was unable to read or create the user's time stamp file.
 .It unable to write to @rundir@/ts/username
 .Em sudoers
 was unable to write to the user's time stamp file.
+.It @rundir@/ts is owned by uid X, should be Y
+The time stamp directory is owned by a user other than
+.Em timestampowner .
+This can occur when the value of
+.Em timestampowner
+has been changed.
+.Em sudoers
+will ignore the time stamp directory until the owner is corrected.
+This can occur when 
+.It @rundir@/ts is group writable
+The time stamp directory is group-writable; it should be writable only by
+.Em timestampowner .
+The default mode for the time stamp directory is 0700.
+.Em sudoers
+will ignore the time stamp directory until the mode is corrected.
 .El
 .Ss Notes on logging via syslog
 By default,
@@ -3527,7 +3542,7 @@ I/O log files
 Directory containing time stamps for the
 .Em sudoers
 security policy
-.It Pa @libdir@/lectured
+.It Pa @vardir@/lectured
 Directory containing lecture status files for the
 .Em sudoers
 security policy

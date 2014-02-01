@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "@mansectsu@" "January 29, 2014" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
+.TH "SUDOERS" "@mansectsu@" "February 1, 2014" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -2843,7 +2843,7 @@ This directory should
 \fInot\fR
 be cleared when the system reboots.
 The default is
-\fI@lecture_dir@\fR.
+\fI@vardir@/lectured\fR.
 .TP 18n
 limitprivs
 The default Solaris limit privileges to use when constructing a new
@@ -3049,7 +3049,7 @@ The directory in which
 stores its time stamp files.
 This directory should be cleared when the system reboots.
 The default is
-\fI@timedir@\fR.
+\fI@rundir@/ts\fR.
 .TP 18n
 timestampowner
 The owner of the lecture status directory, time stamp directory and the
@@ -3719,17 +3719,30 @@ line in the
 sudo.conf(@mansectform@)
 file.
 .TP 3n
-unable to open @timedir@/username/ttyname
+unable to open @rundir@/ts/username
 \fIsudoers\fR
 was unable to read or create the user's time stamp file.
 .TP 3n
-unable to write to @timedir@/username/ttyname
+unable to write to @rundir@/ts/username
 \fIsudoers\fR
 was unable to write to the user's time stamp file.
 .TP 3n
-unable to mkdir to @timedir@/username
+@rundir@/ts is owned by uid X, should be Y
+The time stamp directory is owned by a user other than
+\fItimestampowner\fR.
+This can occur when the value of
+\fItimestampowner\fR
+has been changed.
 \fIsudoers\fR
-was unable to create the user's time stamp directory.
+will ignore the time stamp directory until the owner is corrected.
+This can occur when
+.TP 3n
+@rundir@/ts is group writable
+The time stamp directory is group-writable; it should be writable only by
+\fItimestampowner\fR.
+The default mode for the time stamp directory is 0700.
+\fIsudoers\fR
+will ignore the time stamp directory until the mode is corrected.
 .SS "Notes on logging via syslog"
 By default,
 \fIsudoers\fR
@@ -3813,8 +3826,13 @@ List of network groups
 \fI@iolog_dir@\fR
 I/O log files
 .TP 26n
-\fI@timedir@\fR
+\fI@rundir@/ts\fR
 Directory containing time stamps for the
+\fIsudoers\fR
+security policy
+.TP 26n
+\fI@vardir@/lectured\fR
+Directory containing lecture status files for the
 \fIsudoers\fR
 security policy
 .TP 26n
@@ -4451,7 +4469,7 @@ will be updated with the contents of the temporary copy.
 .SS "Time stamp file checks"
 \fIsudoers\fR
 will check the ownership of its time stamp directory
-(\fI@timedir@\fR
+(\fI@rundir@/ts\fR
 by default)
 and ignore the directory's contents if it is not owned by root or
 if it is writable by a user other than root.
