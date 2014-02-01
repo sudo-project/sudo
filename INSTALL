@@ -122,24 +122,24 @@ Directory and file names:
   --docdir=DIR
 	Install other sudo documentation in DIR [DATAROOTDIR/doc/sudo]
 
-  --with-plugindir=PATH
+  --with-plugindir=DIR
 	Set the directory that sudo looks in to find the policy and I/O
 	logging plugins.  Defaults to the LIBEXEC/sudo.
 
-  --with-timedir=PATH
-        Use PATH to store the sudo time stamp files.  By default,
-        configure will use the first existing directory in the
-        following list to construct the time stamp directory:
-        /var/run, /var/db, /var/lib, /var/adm, /usr/adm.
-	For example: /var/run/sudo/ts
+  --with-rundir=DIR
+        Set the directory to be used for sudo-specific files that
+        do not survive a system reboot.  This is typically where
+        the time stamp directory is located.  By default, configure
+        will use the first existing directory in the following list:
+	    /var/run, /var/db, /var/lib, /var/adm, /usr/adm
 	This directory should be cleared when the system reboots.
 
-  --with-lecture-dir=PATH
-        Use PATH to store the sudo time stamp files.  By default,
-        configure will use the first existing directory in the
-        following list to construct the lecture status directory:
-        /var/db, /var/lib, /var/adm, /usr/adm.
-	For example: /var/db/sudo/lectured
+  --with-vardir=DIR
+        Set the directory to be used for sudo-specific files that
+        survive a system reboot.  This is typically where the lecture
+        status directory is stored.  By default, configure will use
+        the first existing directory in the following list:
+	    /var/db, /var/lib, /var/adm, /usr/adm
 	This directory should not be cleared when the system reboots.
 
 Compilation options:

@@ -33,7 +33,8 @@ localedir = @localedir@
 localstatedir = @localstatedir@
 docdir = @docdir@
 mandir = @mandir@
-timedir = @timedir@
+rundir = @rundir@
+vardir = @vardir@
 
 # User and group ids the installed files should be "owned" by
 install_uid = 0
@@ -296,7 +297,8 @@ package: sudo.pp
 	    sbindir=$(sbindir) \
 	    libexecdir=$(libexecdir) \
 	    includedir=$(includedir) \
-	    timedir=$(timedir) \
+	    vardir=$(vardir) \
+	    rundir=$(rundir) \
 	    mandir=$(mandir) \
 	    localedir=$(localedir) \
 	    docdir=$(docdir) \

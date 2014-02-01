@@ -225,7 +225,7 @@ still allow people to get their work done."
 
 	# OS-level directories that should generally exist but might not.
 	extradirs=`echo ${pp_destdir}/${mandir}/[mc]* | sed "s#${pp_destdir}/##g"`
-	extradirs="$extradirs `dirname $docdir` `dirname $timedir`"
+	extradirs="$extradirs `dirname $docdir` `dirname $rundir` `dirname $vardir`"
 	test -d ${pp_destdir}${localedir} && extradirs="$extradirs $localedir"
 	test -d ${pp_destdir}/etc/pam.d && extradirs="${extradirs} /etc/pam.d"
 	for dir in $bindir $sbindir $libexecdir $includedir $extradirs; do
@@ -266,7 +266,8 @@ still allow people to get their work done."
 	$libexecdir/sudo/sesh	0755 optional,ignore-others
 	$libexecdir/sudo/*	$shlib_mode optional
 	$sudoersdir/sudoers.d/	0750 $sudoers_uid:$sudoers_gid
-	$timedir/		0700 root:
+	$rundir/		0711 root:
+	$vardir/		0711 root:
 	$docdir/		0755
 	$docdir/sudoers2ldif	0755 optional,ignore-others
 %if [deb]

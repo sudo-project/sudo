@@ -90,8 +90,8 @@ dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
 AC_SUBST([iolog_dir])dnl real initial value from SUDO_IO_LOGDIR
-AC_SUBST([timedir])dnl real initial value from SUDO_TIMEDIR
-AC_SUBST([lecture_dir])dnl real initial value from SUDO_LECTURE_DIR
+AC_SUBST([rundir])dnl real initial value from SUDO_RUNDIR
+AC_SUBST([vardir])dnl real initial value from SUDO_VARDIR
 AC_SUBST([timeout])
 AC_SUBST([password_timeout])
 AC_SUBST([sudo_umask])
@@ -133,8 +133,8 @@ AC_SUBST([PLUGINDIR])
 # Begin initial values for man page substitution
 #
 iolog_dir=/var/log/sudo-io
-timedir=/var/adm/sudo/ts
-lecture_dir=/var/adm/sudo/lectured
+rundir=/var/run/sudo
+vardir=/var/adm/sudo
 timeout=5
 password_timeout=5
 sudo_umask=0022
@@ -781,19 +781,25 @@ else
     AC_MSG_RESULT(no)
 fi
 
-AC_ARG_WITH(timedir, [AS_HELP_STRING([--with-timedir=DIR], [path to the sudo time stamp dir])],
+AC_ARG_WITH(timedir, [AS_HELP_STRING([--with-timedir=DIR], [deprecated])],
 [case $with_timedir in
-    yes)	AC_MSG_ERROR(["must give --with-timedir an argument."])
-		;;
-    no)		AC_MSG_ERROR(["--without-timedir not supported."])
+    *)		AC_MSG_ERROR(["--without-timedir no longer supported, see --with-rundir."])
 		;;
 esac])
 
-AC_ARG_WITH(lecture-dir, [AS_HELP_STRING([--with-lecture-dir=DIR], [path to the sudo lecture status dir])],
-[case $with_lecture_dir in
-    yes)	AC_MSG_ERROR(["must give --with-lecture-dir an argument."])
+AC_ARG_WITH(rundir, [AS_HELP_STRING([--with-rundir=DIR], [path to the sudo time stamp parent dir])],
+[case $with_rundir in
+    yes)	AC_MSG_ERROR(["must give --with-rundir an argument."])
 		;;
-    no)		AC_MSG_ERROR(["--without-lecture-dir not supported."])
+    no)		AC_MSG_ERROR(["--without-rundir not supported."])
+		;;
+esac])
+
+AC_ARG_WITH(vardir, [AS_HELP_STRING([--with-vardir=DIR], [path to the sudo var dir])],
+[case $with_vardir in
+    yes)	AC_MSG_ERROR(["must give --with-vardirdir an argument."])
+		;;
+    no)		AC_MSG_ERROR(["--without-vardirdir not supported."])
 		;;
 esac])
 
@@ -1164,7 +1170,7 @@ else
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_ASKPASS, NULL)
 fi
 
-AC_ARG_WITH(plugindir, [AS_HELP_STRING([--with-plugindir], [set directory to load plugins from])],
+AC_ARG_WITH(plugindir, [AS_HELP_STRING([--with-plugindir=DIR], [set directory to load plugins from])],
 [case $with_plugindir in
     no)		AC_MSG_ERROR(["illegal argument: --without-plugindir."])
 		;;
@@ -3395,8 +3401,8 @@ if test "$utmp_style" = "LEGACY"; then
     SUDO_PATH_UTMP
 fi
 SUDO_LOGFILE
-SUDO_TIMEDIR
-SUDO_LECTURE_DIR
+SUDO_RUNDIR
+SUDO_VARDIR
 SUDO_IO_LOGDIR
 
 dnl
@@ -3890,42 +3896,7 @@ dnl
 AH_TOP([#ifndef _SUDO_CONFIG_H
 #define _SUDO_CONFIG_H])
 
-AH_BOTTOM([/*
- * Macros to convert ctime and mtime into timevals.
- */
-#define timespec2timeval(_ts, _tv) do {					\
-    (_tv)->tv_sec = (_ts)->tv_sec;					\
-    (_tv)->tv_usec = (_ts)->tv_nsec / 1000;				\
-} while (0)
-
-#ifdef HAVE_ST_MTIM
-# ifdef HAVE_ST__TIM
-#  define ctim_get(_x, _y)	timespec2timeval(&(_x)->st_ctim.st__tim, (_y))
-#  define mtim_get(_x, _y)	timespec2timeval(&(_x)->st_mtim.st__tim, (_y))
-# else
-#  define ctim_get(_x, _y)	timespec2timeval(&(_x)->st_ctim, (_y))
-#  define mtim_get(_x, _y)	timespec2timeval(&(_x)->st_mtim, (_y))
-# endif
-#else
-# ifdef HAVE_ST_MTIMESPEC
-#  define ctim_get(_x, _y)	timespec2timeval(&(_x)->st_ctimespec, (_y))
-#  define mtim_get(_x, _y)	timespec2timeval(&(_x)->st_mtimespec, (_y))
-# else
-#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctime; (_y)->tv_usec = 0; } while (0)
-#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtime; (_y)->tv_usec = 0; } while (0)
-# endif /* HAVE_ST_MTIMESPEC */
-#endif /* HAVE_ST_MTIM */
-
-#ifdef __GNUC__
-# define ignore_result(x) do {						       \
-    __typeof__(x) y = (x);						       \
-    (void)y;								       \
-} while(0)
-#else
-# define ignore_result(x)	(void)(x)
-#endif
-
-/* BSD compatibility on some SVR4 systems. */
+AH_BOTTOM([/* BSD compatibility on some SVR4 systems. */
 #ifdef __svr4__
 # define BSD_COMP
 #endif /* __svr4__ */

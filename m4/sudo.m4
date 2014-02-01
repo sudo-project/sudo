@@ -119,37 +119,37 @@ fi
 ])dnl
 
 dnl
-dnl Where the timestamp files go.
+dnl Parent directory for time stamp dir.
 dnl
-AC_DEFUN([SUDO_TIMEDIR], [AC_MSG_CHECKING(for time stamp file location)
-timedir="$with_timedir"
-if test -z "$timedir"; then
+AC_DEFUN([SUDO_RUNDIR], [AC_MSG_CHECKING(for sudo run dir location)
+rundir="$with_rundir"
+if test -z "$rundir"; then
     for d in /var/run /var/db /var/lib /var/adm /usr/adm; do
 	if test -d "$d"; then
-	    timedir="$d/sudo/ts"
+	    rundir="$d/sudo"
 	    break
 	fi
     done
 fi
-AC_MSG_RESULT([$timedir])
-SUDO_DEFINE_UNQUOTED(_PATH_SUDO_TIMEDIR, "$timedir")
+AC_MSG_RESULT([$rundir])
+SUDO_DEFINE_UNQUOTED(_PATH_SUDO_TIMEDIR, "$rundir/ts")
 ])dnl
 
 dnl
-dnl Where the lecture status files go.
+dnl Parent directory for the lecture status dir.
 dnl
-AC_DEFUN([SUDO_LECTURE_DIR], [AC_MSG_CHECKING(for lecture status file location)
-lecture_dir="$with_lecture_dir"
-if test -z "$lecture_dir"; then
+AC_DEFUN([SUDO_VARDIR], [AC_MSG_CHECKING(for sudo var dir location)
+vardir="$with_vardir"
+if test -z "$vardir"; then
     for d in /var/db /var/lib /var/adm /usr/adm; do
 	if test -d "$d"; then
-	    lecture_dir="$d/sudo/lectured"
+	    vardir="$d/sudo"
 	    break
 	fi
     done
 fi
-AC_MSG_RESULT([$lecture_dir])
-SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LECTURE_DIR, "$lecture_dir")
+AC_MSG_RESULT([$vardir])
+SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LECTURE_DIR, "$vardir/lectured")
 ])dnl
 
 dnl

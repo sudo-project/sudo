@@ -716,8 +716,8 @@ umask_override
 sudo_umask
 password_timeout
 timeout
-lecture_dir
-timedir
+vardir
+rundir
 iolog_dir
 NO_VIZ
 SSP_CFLAGS
@@ -876,7 +876,8 @@ with_passprompt
 with_badpass_message
 with_fqdn
 with_timedir
-with_lecture_dir
+with_rundir
+with_vardir
 with_iologdir
 with_sendmail
 with_sudoers_mode
@@ -1662,8 +1663,9 @@ Optional Packages:
   --with-passprompt       default password prompt
   --with-badpass-message  message the user sees when the password is wrong
   --with-fqdn             expect fully qualified hosts in sudoers
-  --with-timedir=DIR      path to the sudo time stamp dir
-  --with-lecture-dir=DIR  path to the sudo lecture status dir
+  --with-timedir=DIR      deprecated
+  --with-rundir=DIR       path to the sudo time stamp parent dir
+  --with-vardir=DIR       path to the sudo var dir
   --with-iologdir=DIR     directory to store sudo I/O log files in
   --with-sendmail         set path to sendmail
   --without-sendmail      do not send mail at all
@@ -2972,8 +2974,8 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 # Begin initial values for man page substitution
 #
 iolog_dir=/var/log/sudo-io
-timedir=/var/adm/sudo/ts
-lecture_dir=/var/adm/sudo/lectured
+rundir=/var/run/sudo
+vardir=/var/adm/sudo
 timeout=5
 password_timeout=5
 sudo_umask=0022
@@ -4720,21 +4722,31 @@ fi
 # Check whether --with-timedir was given.
 if test "${with_timedir+set}" = set; then :
   withval=$with_timedir; case $with_timedir in
-    yes)	as_fn_error $? "\"must give --with-timedir an argument.\"" "$LINENO" 5
-		;;
-    no)		as_fn_error $? "\"--without-timedir not supported.\"" "$LINENO" 5
+    *)		as_fn_error $? "\"--without-timedir no longer supported, see --with-rundir.\"" "$LINENO" 5
 		;;
 esac
 fi
 
 
 
-# Check whether --with-lecture-dir was given.
-if test "${with_lecture_dir+set}" = set; then :
-  withval=$with_lecture_dir; case $with_lecture_dir in
-    yes)	as_fn_error $? "\"must give --with-lecture-dir an argument.\"" "$LINENO" 5
+# Check whether --with-rundir was given.
+if test "${with_rundir+set}" = set; then :
+  withval=$with_rundir; case $with_rundir in
+    yes)	as_fn_error $? "\"must give --with-rundir an argument.\"" "$LINENO" 5
 		;;
-    no)		as_fn_error $? "\"--without-lecture-dir not supported.\"" "$LINENO" 5
+    no)		as_fn_error $? "\"--without-rundir not supported.\"" "$LINENO" 5
+		;;
+esac
+fi
+
+
+
+# Check whether --with-vardir was given.
+if test "${with_vardir+set}" = set; then :
+  withval=$with_vardir; case $with_vardir in
+    yes)	as_fn_error $? "\"must give --with-vardirdir an argument.\"" "$LINENO" 5
+		;;
+    no)		as_fn_error $? "\"--without-vardirdir not supported.\"" "$LINENO" 5
 		;;
 esac
 fi
@@ -21334,39 +21346,39 @@ else
 $as_echo "unknown" >&6; }
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for time stamp file location" >&5
-$as_echo_n "checking for time stamp file location... " >&6; }
-timedir="$with_timedir"
-if test -z "$timedir"; then
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sudo run dir location" >&5
+$as_echo_n "checking for sudo run dir location... " >&6; }
+rundir="$with_rundir"
+if test -z "$rundir"; then
     for d in /var/run /var/db /var/lib /var/adm /usr/adm; do
 	if test -d "$d"; then
-	    timedir="$d/sudo/ts"
+	    rundir="$d/sudo"
 	    break
 	fi
     done
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $timedir" >&5
-$as_echo "$timedir" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $rundir" >&5
+$as_echo "$rundir" >&6; }
 cat >>confdefs.h <<EOF
-#define _PATH_SUDO_TIMEDIR "$timedir"
+#define _PATH_SUDO_TIMEDIR "$rundir/ts"
 EOF
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for lecture status file location" >&5
-$as_echo_n "checking for lecture status file location... " >&6; }
-lecture_dir="$with_lecture_dir"
-if test -z "$lecture_dir"; then
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sudo var dir location" >&5
+$as_echo_n "checking for sudo var dir location... " >&6; }
+vardir="$with_vardir"
+if test -z "$vardir"; then
     for d in /var/db /var/lib /var/adm /usr/adm; do
 	if test -d "$d"; then
-	    lecture_dir="$d/sudo/lectured"
+	    vardir="$d/sudo"
 	    break
 	fi
     done
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $lecture_dir" >&5
-$as_echo "$lecture_dir" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $vardir" >&5
+$as_echo "$vardir" >&6; }
 cat >>confdefs.h <<EOF
-#define _PATH_SUDO_LECTURE_DIR "$lecture_dir"
+#define _PATH_SUDO_LECTURE_DIR "$vardir/lectured"
 EOF
 
 
