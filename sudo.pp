@@ -365,7 +365,11 @@ still allow people to get their work done."
 		exit 0;
 	'
 
-%preun [deb]
+%preun
+	# Remove the time stamp dir and its contents
+	# We currently leave the lecture status files installed
+	rm -rf %{rundir}/ts
+%if [deb]
 	set -e
 
 	# Remove the /etc/ldap/ldap.conf -> /etc/sudo-ldap.conf symlink if
@@ -374,3 +378,4 @@ still allow people to get their work done."
 	    X"`readlink /etc/sudo-ldap.conf 2>/dev/null`" = X"/etc/ldap/ldap.conf"; then
 		rm -f /etc/sudo-ldap.conf
 	fi
+%endif
