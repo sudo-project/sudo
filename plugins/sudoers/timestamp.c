@@ -200,7 +200,7 @@ found_it:
  * Returns false on failure and displays a warning to stderr.
  */
 static bool
-ts_mkdirs(char *path, mode_t mode)
+ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode)
 {
     struct stat sb;
     gid_t parent_gid = 0;
@@ -212,8 +212,8 @@ ts_mkdirs(char *path, mode_t mode)
 	*slash = '\0';
 	if (stat(path, &sb) != 0) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-		"mkdir %s, mode 0%o", path, mode);
-	    if (mkdir(path, mode) != 0) {
+		"mkdir %s, mode 0%o", path, parent_mode);
+	    if (mkdir(path, parent_mode) != 0) {
 		warning(N_("unable to mkdir %s"), path);
 		goto done;
 	    }
@@ -235,7 +235,7 @@ ts_mkdirs(char *path, mode_t mode)
 	warning(N_("unable to mkdir %s"), path);
 	goto done;
     }
-    ignore_result(chown(path, (uid_t)-1, parent_gid));
+    ignore_result(chown(path, owner, parent_gid));
     rval = true;
 done:
     debug_return_bool(rval);
@@ -260,7 +260,7 @@ ts_secure_dir(char *path, bool make_it)
 	rval = true;
 	break;
     case SUDO_PATH_MISSING:
-	if (make_it && ts_mkdirs(path, 0700)) {
+	if (make_it && ts_mkdirs(path, timestamp_uid, 0700, 0711)) {
 	    rval = true;
 	    break;
 	}
@@ -316,9 +316,6 @@ update_timestamp(struct passwd *pw)
     int fd;
     debug_decl(update_timestamp, SUDO_DEBUG_AUTH)
 
-    if (timestamp_uid != 0)
-	set_perms(PERM_TIMESTAMP);
-
     /* Check/create parent directories as needed. */
     if (!ts_secure_dir(def_timestampdir, true))
 	goto done;
@@ -328,7 +325,11 @@ update_timestamp(struct passwd *pw)
     clock_gettime(SUDO_CLOCK_MONOTONIC, &entry.ts);
 
     /* Open time stamp file and lock it for exclusive access. */
+    if (timestamp_uid != 0)
+	set_perms(PERM_TIMESTAMP);
     fd = open(timestamp_file, O_RDWR|O_CREAT, 0600);
+    if (timestamp_uid != 0)
+	restore_perms();
     if (fd == -1) {
 	log_warning(USE_ERRNO, N_("unable to open %s"), timestamp_file);
 	goto done;
@@ -342,8 +343,6 @@ update_timestamp(struct passwd *pw)
     rval = true;
 
 done:
-    if (timestamp_uid != 0)
-	restore_perms();
     debug_return_bool(rval);
 }
 
@@ -362,9 +361,6 @@ timestamp_status(struct passwd *pw)
 
     /* Reset time stamp offset hint. */
     timestamp_hint = (off_t)-1;
-
-    if (timestamp_uid != 0)
-	set_perms(PERM_TIMESTAMP);
 
     /* Zero timeout means ignore time stamp files. */
     if (def_timestamp_timeout == 0) {
@@ -414,7 +410,11 @@ timestamp_status(struct passwd *pw)
 	goto done;
 
     /* Open time stamp file and lock it for exclusive access. */
+    if (timestamp_uid != 0)
+	set_perms(PERM_TIMESTAMP);
     fd = open(timestamp_file, O_RDONLY);
+    if (timestamp_uid != 0)
+	restore_perms();
     if (fd == -1) {
 	status = TS_MISSING;
 	goto done;
@@ -484,8 +484,6 @@ timestamp_status(struct passwd *pw)
 done:
     if (fd != -1)
 	close(fd);
-    if (timestamp_uid != 0)
-	restore_perms();
     debug_return_int(status);
 }
 
@@ -509,12 +507,6 @@ remove_timestamp(bool unlink_it)
     }
 
     /*
-     * For "sudo -k" find matching entries and invalidate them.
-     */
-    if (timestamp_uid != 0)
-	set_perms(PERM_TIMESTAMP);
-
-    /*
      * Create a key used for matching entries in the time stamp file.
      */
     memset(&timestamp_key, 0, sizeof(timestamp_key));
@@ -536,11 +528,18 @@ remove_timestamp(bool unlink_it)
     }
 
     /* Open time stamp file and lock it for exclusive access. */
+    if (timestamp_uid != 0)
+	set_perms(PERM_TIMESTAMP);
     fd = open(timestamp_file, O_RDWR);
+    if (timestamp_uid != 0)
+	restore_perms();
     if (fd == -1)
 	goto done;
     lock_file(fd, SUDO_LOCK);
 
+    /*
+     * Find matching entries and invalidate them.
+     */
     while (ts_find_record(fd, &timestamp_key, &entry)) {
 	/* Set record position hint for use by update_timestamp() */
 	timestamp_hint = lseek(fd, (off_t)0, SEEK_CUR);
@@ -553,9 +552,6 @@ remove_timestamp(bool unlink_it)
     close(fd);
 
 done:
-    if (timestamp_uid != 0)
-	restore_perms();
-
     debug_return;
 }
 
@@ -600,21 +596,19 @@ set_lectured(void)
 	    def_lecture_status_dir, user_name);
     }
 
-    if (timestamp_uid != 0)
-	set_perms(PERM_TIMESTAMP);
-
     /* Sanity check lecture dir and create if missing. */
     if (!ts_secure_dir(def_lecture_status_dir, true))
 	goto done;
 
     /* Create lecture file. */
+    if (timestamp_uid != 0)
+	set_perms(PERM_TIMESTAMP);
     fd = open(lecture_status, O_WRONLY|O_CREAT|O_TRUNC, 0600);
+    if (timestamp_uid != 0)
+	restore_perms();
     if (fd != -1)
 	close(fd);
 
 done:
-    if (timestamp_uid != 0)
-	restore_perms();
-
     debug_return_bool(fd != -1 ? true : false);
 }
