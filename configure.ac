@@ -2409,7 +2409,10 @@ SUDO_FUNC_ISBLANK
 AC_REPLACE_FUNCS(memrchr memset_s pw_dup strlcpy strlcat strtonum)
 AC_CHECK_FUNCS(clock_gettime, [], [
     # On Solaris, clock_gettime is in librt
-    AC_CHECK_LIB(rt, clock_gettime, [SUDOERS_LIBS="${SUDOERS_LIBS} -lrt"], [AC_LIBOBJ(clock_gettime)])
+    AC_CHECK_LIB(rt, clock_gettime, [
+	AC_DEFINE(HAVE_CLOCK_GETTIME)
+	SUDOERS_LIBS="${SUDOERS_LIBS} -lrt"
+    ], [AC_LIBOBJ(clock_gettime)])
 ])
 AC_CHECK_FUNCS(getopt_long, [], [AC_LIBOBJ(getopt_long)
     AC_MSG_CHECKING([for optreset])
@@ -2526,9 +2529,10 @@ AC_CHECK_FUNC(socket, [], [
 dnl
 dnl If inet_aton(3) not in libc, check -lnsl and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
+dnl Some systems have inet_aton() in libresolv (older Solaris).
 dnl
 AC_CHECK_FUNC(inet_aton, [], [
-    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
+    for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
 	_libs=
 	for lib in $libs; do
 	    case "$NET_LIBS" in

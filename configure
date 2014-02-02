@@ -1703,7 +1703,7 @@ Optional Packages:
   --without-interfaces    don't try to read the ip addr of ether interfaces
   --with-stow             deprecated
   --with-askpass=PATH     Fully qualified pathname of askpass helper
-  --with-plugindir        set directory to load plugins from
+  --with-plugindir=DIR    set directory to load plugins from
   --with-man              manual pages use man macros
   --with-mdoc             manual pages use mdoc macros
   --with-selinux          enable SELinux support
@@ -17937,7 +17937,11 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_rt_clock_gettime" >&5
 $as_echo "$ac_cv_lib_rt_clock_gettime" >&6; }
 if test "x$ac_cv_lib_rt_clock_gettime" = xyes; then :
-  SUDOERS_LIBS="${SUDOERS_LIBS} -lrt"
+
+	$as_echo "#define HAVE_CLOCK_GETTIME 1" >>confdefs.h
+
+	SUDOERS_LIBS="${SUDOERS_LIBS} -lrt"
+
 else
   case " $LIBOBJS " in
   *" clock_gettime.$ac_objext "* ) ;;
@@ -18603,7 +18607,7 @@ if test "x$ac_cv_func_inet_aton" = xyes; then :
 
 else
 
-    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
+    for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
 	_libs=
 	for lib in $libs; do
 	    case "$NET_LIBS" in
