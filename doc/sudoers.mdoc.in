@@ -2840,8 +2840,8 @@ This directory should be cleared when the system reboots.
 The default is
 .Pa @rundir@/ts .
 .It timestampowner
-The owner of the lecture status directory, time stamp directory and the
-time stamps stored therein.
+The owner of the lecture status directory, time stamp directory and all
+files stored therein.
 The default is
 .Li root .
 .It type
@@ -3442,6 +3442,14 @@ file.
 .It unable to open @rundir@/ts/username
 .Em sudoers
 was unable to read or create the user's time stamp file.
+This can happen when
+.Em timestampowner
+is set to a user other than root and the mode on
+.Pa @rundir@
+is not searchable by group or other.
+The default mode for
+.Pa @rundir@
+is 0711.
 .It unable to write to @rundir@/ts/username
 .Em sudoers
 was unable to write to the user's time stamp file.
@@ -3453,7 +3461,6 @@ This can occur when the value of
 has been changed.
 .Em sudoers
 will ignore the time stamp directory until the owner is corrected.
-This can occur when 
 .It @rundir@/ts is group writable
 The time stamp directory is group-writable; it should be writable only by
 .Em timestampowner .

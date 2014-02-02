@@ -3052,8 +3052,8 @@ The default is
 \fI@rundir@/ts\fR.
 .TP 18n
 timestampowner
-The owner of the lecture status directory, time stamp directory and the
-time stamps stored therein.
+The owner of the lecture status directory, time stamp directory and all
+files stored therein.
 The default is
 \fRroot\fR.
 .TP 18n
@@ -3722,6 +3722,14 @@ file.
 unable to open @rundir@/ts/username
 \fIsudoers\fR
 was unable to read or create the user's time stamp file.
+This can happen when
+\fItimestampowner\fR
+is set to a user other than root and the mode on
+\fI@rundir@\fR
+is not searchable by group or other.
+The default mode for
+\fI@rundir@\fR
+is 0711.
 .TP 3n
 unable to write to @rundir@/ts/username
 \fIsudoers\fR
@@ -3735,7 +3743,6 @@ This can occur when the value of
 has been changed.
 \fIsudoers\fR
 will ignore the time stamp directory until the owner is corrected.
-This can occur when
 .TP 3n
 @rundir@/ts is group writable
 The time stamp directory is group-writable; it should be writable only by

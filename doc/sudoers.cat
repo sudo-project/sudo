@@ -1488,8 +1488,8 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        system reboots.  The default is _/_v_a_r_/_r_u_n_/_s_u_d_o_/_t_s.
 
      timestampowner    The owner of the lecture status directory, time stamp
-                       directory and the time stamps stored therein.  The
-                       default is root.
+                       directory and all files stored therein.  The default is
+                       root.
 
      type              The default SELinux type to use when constructing a new
                        security context to run the command.  The default type
@@ -1825,7 +1825,10 @@ LLOOGG FFOORRMMAATT
         line in the sudo.conf(4) file.
 
      unable to open /var/run/sudo/ts/username
-        _s_u_d_o_e_r_s was unable to read or create the user's time stamp file.
+        _s_u_d_o_e_r_s was unable to read or create the user's time stamp file.  This
+        can happen when _t_i_m_e_s_t_a_m_p_o_w_n_e_r is set to a user other than root and
+        the mode on _/_v_a_r_/_r_u_n_/_s_u_d_o is not searchable by group or other.  The
+        default mode for _/_v_a_r_/_r_u_n_/_s_u_d_o is 0711.
 
      unable to write to /var/run/sudo/ts/username
         _s_u_d_o_e_r_s was unable to write to the user's time stamp file.
@@ -1834,7 +1837,7 @@ LLOOGG FFOORRMMAATT
         The time stamp directory is owned by a user other than _t_i_m_e_s_t_a_m_p_o_w_n_e_r.
         This can occur when the value of _t_i_m_e_s_t_a_m_p_o_w_n_e_r has been changed.
         _s_u_d_o_e_r_s will ignore the time stamp directory until the owner is
-        corrected.  This can occur when
+        corrected.
 
      /var/run/sudo/ts is group writable
         The time stamp directory is group-writable; it should be writable only
