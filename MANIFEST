@@ -23,6 +23,7 @@ common/fmt_string.c
 common/gidlist.c
 common/lbuf.c
 common/progname.c
+common/regress/atofoo/atofoo_test.c
 common/regress/sudo_conf/conf_test.c
 common/regress/sudo_conf/test1.in
 common/regress/sudo_conf/test1.out.ok

@@ -58,7 +58,7 @@ SSP_LDFLAGS = @SSP_LDFLAGS@
 CPPCHECK_OPTS = -q --force --enable=warning,performance,portability --suppress=constStatement --error-exitcode=1 --inline-suppr -U__cplusplus -UQUAD_MAX -UQUAD_MIN -UUQUAD_MAX -U_POSIX_HOST_NAME_MAX -U_POSIX_PATH_MAX
 
 # Regression tests
-TEST_PROGS = conf_test parseln_test hltq_test
+TEST_PROGS = atofoo_test conf_test hltq_test parseln_test
 TEST_LIBS = @LIBS@ @LIBINTL@ ../compat/libreplace.la
 TEST_LDFLAGS = @LDFLAGS@
 
@@ -73,6 +73,8 @@ LTOBJS = alloc.lo atobool.lo atoid.lo atomode.lo event.lo fatal.lo fileops.lo \
 	 fmt_string.lo gidlist.lo lbuf.lo progname.lo secure_path.lo \
 	 setgroups.lo sudo_conf.lo sudo_debug.lo sudo_dso.lo sudo_printf.lo \
 	 term.lo ttysize.lo @COMMON_OBJS@
+
+ATOFOO_TEST_OBJS = atofoo_test.lo locale_stub.lo
 
 PARSELN_TEST_OBJS = parseln_test.lo locale_stub.lo
 
@@ -92,6 +94,9 @@ Makefile: $(srcdir)/Makefile.in
 
 libsudo_util.la: $(LTOBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LTOBJS) -no-install
+
+atofoo_test: $(ATOFOO_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(ATOFOO_TEST_OBJS) libsudo_util.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 conf_test: $(CONF_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(CONF_TEST_OBJS) libsudo_util.la $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
@@ -125,6 +130,11 @@ check: $(TEST_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
 	    passed=0; failed=0; total=0; \
 	    total=1; \
+	    if ./atofoo_test; then \
+		passed=`expr $$passed + 1`; \
+	    else \
+		failed=`expr $$failed + 1`; \
+	    fi; \
 	    if ./hltq_test; then \
 		passed=`expr $$passed + 1`; \
 	    else \
@@ -183,6 +193,10 @@ atobool.lo: $(srcdir)/atobool.c $(incdir)/missing.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_util.h $(top_builddir)/config.h \
             $(top_srcdir)/compat/stdbool.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/atobool.c
+atofoo_test.lo: $(srcdir)/regress/atofoo/atofoo_test.c $(incdir)/fatal.h \
+                $(incdir)/missing.h $(incdir)/sudo_util.h \
+                $(top_builddir)/config.h $(top_srcdir)/compat/stdbool.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(DEFS) $(srcdir)/regress/atofoo/atofoo_test.c
 atoid.lo: $(srcdir)/atoid.c $(incdir)/gettext.h $(incdir)/missing.h \
           $(incdir)/sudo_debug.h $(incdir)/sudo_util.h \
           $(top_builddir)/config.h $(top_srcdir)/compat/stdbool.h
