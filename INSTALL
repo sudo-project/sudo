@@ -133,6 +133,9 @@ Directory and file names:
         will use the first existing directory in the following list:
 	    /var/run, /var/db, /var/lib, /var/adm, /usr/adm
 	This directory should be cleared when the system reboots.
+	On systems that lack /var/run, the default rundir and vardir
+	may be the same.  In this case, only the ts directory inside
+	the rundir needs to be cleared at reboot time.
 
   --with-vardir=DIR
         Set the directory to be used for sudo-specific files that
