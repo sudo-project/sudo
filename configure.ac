@@ -2527,6 +2527,26 @@ AC_CHECK_FUNC(socket, [], [
     done
 ])
 dnl
+dnl If inet_pton(3) not in libc, check -lnsl and -linet
+dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
+dnl
+AC_CHECK_FUNC(inet_pton, [], [
+    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
+	_libs=
+	for lib in $libs; do
+	    case "$NET_LIBS" in
+		*"$lib"*)   ;;
+		*)		_libs="$_libs $lib";;
+	    esac
+	done
+	libs="${_libs# }"
+	test -z "$libs" && continue
+	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
+	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
+	SUDO_CHECK_LIB($lib, inet_pton, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break], [], [$extralibs])
+    done
+])
+dnl
 dnl If inet_aton(3) not in libc, check -lnsl and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl Some systems have inet_aton() in libresolv (older Solaris).
