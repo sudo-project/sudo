@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2012 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2011-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -35,6 +35,7 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <errno.h>
 #include <termios.h>
 
 #include "missing.h"
@@ -64,24 +65,46 @@
 
 static struct termios term, oterm;
 static int changed;
+
+/* tgetpass() needs to know the erase and kill chars for cbreak mode. */
 int term_erase;
 int term_kill;
 
+/*
+ * Like tcsetattr() but restarts on EINTR.
+ */
+static int
+tcsetattr_nointr(int fd, int flags, struct termios *tp)
+{
+    int rc;
+
+    do {
+	rc = tcsetattr(fd, flags, tp);
+    } while (rc != 0 && errno == EINTR);
+
+    return rc;
+}
+
+/*
+ * Restore saved terminal settings.
+ */
 int
 term_restore(int fd, int flush)
 {
     debug_decl(term_restore, SUDO_DEBUG_UTIL)
 
     if (changed) {
-	int flags = TCSASOFT;
-	flags |= flush ? TCSAFLUSH : TCSADRAIN;
-	if (tcsetattr(fd, flags, &oterm) != 0)
+	const int flags = flush ? (TCSASOFT|TCSAFLUSH) : (TCSASOFT|TCSADRAIN);
+	if (tcsetattr_nointr(fd, flags, &oterm) != 0)
 	    debug_return_int(0);
 	changed = 0;
     }
     debug_return_int(1);
 }
 
+/*
+ * Disable terminal echo.
+ */
 int
 term_noecho(int fd)
 {
@@ -94,13 +117,16 @@ term_noecho(int fd)
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
+    if (tcsetattr_nointr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
 	debug_return_int(1);
     }
     debug_return_int(0);
 }
 
+/*
+ * Set terminal to raw mode.
+ */
 int
 term_raw(int fd, int isig)
 {
@@ -118,13 +144,16 @@ term_raw(int fd, int isig)
     CLR(term.c_lflag, ECHO | ICANON | ISIG | IEXTEN);
     if (isig)
 	SET(term.c_lflag, ISIG);
-    if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
+    if (tcsetattr_nointr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
     	debug_return_int(1);
     }
     debug_return_int(0);
 }
 
+/*
+ * Set terminal to cbreak mode.
+ */
 int
 term_cbreak(int fd)
 {
@@ -143,7 +172,7 @@ term_cbreak(int fd)
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
+    if (tcsetattr_nointr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	term_erase = term.c_cc[VERASE];
 	term_kill = term.c_cc[VKILL];
 	changed = 1;
@@ -152,6 +181,9 @@ term_cbreak(int fd)
     debug_return_int(0);
 }
 
+/*
+ * Copy terminal settings from one descriptor to another.
+ */
 int
 term_copy(int src, int dst)
 {
@@ -160,7 +192,7 @@ term_copy(int src, int dst)
 
     if (tcgetattr(src, &tt) != 0)
 	debug_return_int(0);
-    if (tcsetattr(dst, TCSANOW|TCSASOFT, &tt) != 0)
+    if (tcsetattr_nointr(dst, TCSANOW|TCSASOFT, &tt) != 0)
 	debug_return_int(0);
     debug_return_int(1);
 }
