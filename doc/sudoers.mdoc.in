@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 1, 2014
+.Dd February 3, 2014
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -4127,6 +4127,16 @@ stored time stamp files in
 this is no longer recommended as it may be possible for a user
 to create the time stamp themselves on systems that allow
 unprivileged users to change the ownership of files they create.
+.Pp
+While the time stamp directory
+.Em should
+be cleared at reboot time, not all systems contain a
+.Pa /var/run
+directory.
+To avoid potential problems,
+.Em sudoers
+will ignore time stamp files that date from before the machine booted
+on systems where the boot time is available.
 .Pp
 Some systems with graphical desktop environments allow unprivileged
 users to change the system clock.

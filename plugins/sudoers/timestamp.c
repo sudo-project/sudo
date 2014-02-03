@@ -359,6 +359,7 @@ timestamp_status(struct passwd *pw)
     struct timestamp_entry entry;
     struct timespec diff, timeout;
     int status = TS_ERROR;		/* assume the worst */
+    struct stat sb;
     int fd = -1;
     debug_decl(timestamp_status, SUDO_DEBUG_AUTH)
 
@@ -395,7 +396,6 @@ timestamp_status(struct passwd *pw)
     }
     timestamp_key.sid = user_sid;
     if (def_timestampdir) {
-	struct stat sb;
 	if (user_ttypath != NULL && stat(user_ttypath, &sb) == 0) {
 	    /* tty-based time stamp */
 	    timestamp_key.type = TS_TTY;
@@ -415,16 +415,28 @@ timestamp_status(struct passwd *pw)
     /* Open time stamp file and lock it for exclusive access. */
     if (timestamp_uid != 0)
 	set_perms(PERM_TIMESTAMP);
-    fd = open(timestamp_file, O_RDONLY);
+    fd = open(timestamp_file, O_RDWR);
     if (timestamp_uid != 0)
 	restore_perms();
     if (fd == -1) {
 	status = TS_MISSING;
 	goto done;
     }
+    lock_file(fd, SUDO_LOCK);
+
+    /* Ignore and clear time stamp file if mtime predates boot time. */
+    if (fstat(fd, &sb) == 0) {
+	struct timeval boottime, mtime;
+
+	mtim_get(&sb, &mtime);
+	if (get_boottime(&boottime) && sudo_timevalcmp(&mtime, &boottime, <)) {
+	    ignore_result(ftruncate(fd, (off_t)0));
+	    status = TS_MISSING;
+	    goto done;
+	}
+    }
 
     /* Read existing record, if any. */
-    lock_file(fd, SUDO_LOCK);
     if (!ts_find_record(fd, &timestamp_key, &entry)) {
 	status = TS_MISSING;
 	goto done;
