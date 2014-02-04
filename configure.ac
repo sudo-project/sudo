@@ -3809,6 +3809,29 @@ if test "$with_pam" = "yes"; then
 	    ;;
     esac
 fi
+dnl
+dnl AIX and HP-UX do not clear /var/run
+dnl Also point out other non-cleared dirs
+dnl
+clear_rundir=0
+case $host_os in
+    hpux*|aix*)
+	clear_rundir=1
+	;;
+    *)
+	case "$rundir" in
+	    /var/run*)
+		;;
+	    *)
+		clear_rundir=1
+		;;
+	esac
+	;;
+esac
+if test $clear_rundir -eq 1; then
+    AC_MSG_NOTICE([Warning: the $rundir/ts directory must be cleared at boot time.])
+    AC_MSG_NOTICE([         You may need to create a startup item to do this.])
+fi
 
 dnl
 dnl Autoheader templates

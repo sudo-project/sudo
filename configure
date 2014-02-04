@@ -24522,6 +24522,27 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
+clear_rundir=0
+case $host_os in
+    hpux*|aix*)
+	clear_rundir=1
+	;;
+    *)
+	case "$rundir" in
+	    /var/run*)
+		;;
+	    *)
+		clear_rundir=1
+		;;
+	esac
+	;;
+esac
+if test $clear_rundir -eq 1; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Warning: the $rundir/ts directory must be cleared at boot time." >&5
+$as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time." >&6;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
+$as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
+fi
 
 
 
