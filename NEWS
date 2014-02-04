@@ -19,6 +19,15 @@ What's new in Sudo 1.8.10?
    not just the time stamp for the current terminal.  The -k option
    can be used to only disable time stamps for the current terminal.
 
+What's new in Sudo 1.8.9p5?
+
+ * Fixed a compilation error on AIX when LDAP support is enabled.
+
+ * Fixed parsing of the "umask" defaults setting in sudoers.  Bug #632.
+
+ * Fixed a failed assertion when the "closefrom_override" defaults
+   setting is enabled in sudoers and sudo's -C flag is used.  Bug #633.
+
 What's new in Sudo 1.8.9p4?
 
  * Fixed a bug where sudo could consume large amounts of CPU while
