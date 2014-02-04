@@ -367,11 +367,8 @@ suspend_parent(int signo)
 	del_io_events();
 
 	/* Restore original tty mode before suspending. */
-	if (ttymode != TERM_COOKED) {
-	    do {
-		n = term_restore(io_fds[SFD_USERTTY], 0);
-	    } while (!n && errno == EINTR);
-	}
+	if (ttymode != TERM_COOKED)
+	    term_restore(io_fds[SFD_USERTTY], 0);
 
 	if (sig2str(signo, signame) == -1)
 	    snprintf(signame, sizeof(signame), "%d", signo);
@@ -817,11 +814,8 @@ pty_close(struct command_status *cstat)
     /* Restore terminal settings. */
     if (io_fds[SFD_USERTTY] != -1) {
 	check_foreground();
-	if (foreground) {
-	    do {
-		n = term_restore(io_fds[SFD_USERTTY], 0);
-	    } while (!n && errno == EINTR);
-	}
+	if (foreground)
+	    term_restore(io_fds[SFD_USERTTY], 0);
     }
 
     /* If child was signalled, write the reason to stdout like the shell. */
