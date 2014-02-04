@@ -111,12 +111,15 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
 	if (pfd->highfd < startfd)
 	    continue;
 	fd = dup(pfd->highfd);
-	if (fd < pfd->highfd) {
-	    if (fd == -1) {
-		if (errno == EBADF)
-		    TAILQ_REMOVE(pfds, pfd, entries);
+	if (fd == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"dup %d", pfd->highfd);
+	    if (errno == EBADF) {
+		TAILQ_REMOVE(pfds, pfd, entries);
 		continue;
 	    }
+	    /* NOTE: still need to adjust lastfd below with unchanged lowfd. */
+	} else if (fd < pfd->highfd) {
 	    pfd->lowfd = fd;
 	    fd = pfd->highfd;
 	    if (fd == debug_fd)
@@ -124,13 +127,14 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"dup %d -> %d", pfd->highfd, pfd->lowfd);
 	}
-	(void) close(fd);
+	if (fd != -1)
+	    (void) close(fd);
 
 	if (pfd->lowfd > lastfd)
 	    lastfd = pfd->lowfd;	/* highest (relocated) preserved fd */
     }
 
-    if (TAILQ_EMPTY(pfds)) {
+    if (lastfd == -1) {
 	/* No fds to preserve. */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "closefrom(%d)", startfd);
@@ -146,7 +150,6 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
 
     /*
      * Close any unpreserved fds [startfd,lastfd]
-     * NOTE: this could relocate the debug fd, breaking the debug subsystem.
      */
     for (fd = startfd; fd <= lastfd; fd++) {
 	if (!FD_ISSET(fd, fdsp)) {
@@ -189,6 +192,7 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
 	    if (pfd->lowfd == debug_fd)
 		debug_fd = sudo_debug_fd_set(pfd->highfd);
 	    (void) close(pfd->lowfd);
+	    pfd->lowfd = pfd->highfd;
 	}
     }
     debug_return;
