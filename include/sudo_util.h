@@ -163,11 +163,11 @@ void initprogname(const char *);
 int sudo_setgroups(int ngids, const GETGROUPS_T *gids);
 
 /* term.c */
-int term_cbreak(int);
-int term_copy(int, int);
-int term_noecho(int);
-int term_raw(int, int);
-int term_restore(int, int);
+bool term_cbreak(int);
+bool term_copy(int, int);
+bool term_noecho(int);
+bool term_raw(int, int);
+bool term_restore(int, bool);
 
 /* ttysize.c */
 void get_ttysize(int *rowp, int *colp);

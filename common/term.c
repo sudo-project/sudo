@@ -88,33 +88,33 @@ tcsetattr_nointr(int fd, int flags, struct termios *tp)
 
 /*
  * Restore saved terminal settings.
- * Returns 1 on success or 0 on failure.
+ * Returns true on success or false on failure.
  */
-int
-term_restore(int fd, int flush)
+bool
+term_restore(int fd, bool flush)
 {
     debug_decl(term_restore, SUDO_DEBUG_UTIL)
 
     if (changed) {
 	const int flags = flush ? (TCSASOFT|TCSAFLUSH) : (TCSASOFT|TCSADRAIN);
 	if (tcsetattr_nointr(fd, flags, &oterm) != 0)
-	    debug_return_int(0);
+	    debug_return_bool(false);
 	changed = 0;
     }
-    debug_return_int(1);
+    debug_return_bool(true);
 }
 
 /*
  * Disable terminal echo.
- * Returns 1 on success or 0 on failure.
+ * Returns true on success or false on failure.
  */
-int
+bool
 term_noecho(int fd)
 {
     debug_decl(term_noecho, SUDO_DEBUG_UTIL)
 
     if (!changed && tcgetattr(fd, &oterm) != 0)
-	debug_return_int(0);
+	debug_return_bool(false);
     (void) memcpy(&term, &oterm, sizeof(term));
     CLR(term.c_lflag, ECHO|ECHONL);
 #ifdef VSTATUS
@@ -122,16 +122,16 @@ term_noecho(int fd)
 #endif
     if (tcsetattr_nointr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
-	debug_return_int(1);
+	debug_return_bool(true);
     }
-    debug_return_int(0);
+    debug_return_bool(false);
 }
 
 /*
  * Set terminal to raw mode.
- * Returns 1 on success or 0 on failure.
+ * Returns true on success or false on failure.
  */
-int
+bool
 term_raw(int fd, int isig)
 {
     struct termios term;
@@ -150,16 +150,16 @@ term_raw(int fd, int isig)
 	SET(term.c_lflag, ISIG);
     if (tcsetattr_nointr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
-    	debug_return_int(1);
+    	debug_return_bool(true);
     }
-    debug_return_int(0);
+    debug_return_bool(false);
 }
 
 /*
  * Set terminal to cbreak mode.
- * Returns 1 on success or 0 on failure.
+ * Returns true on success or false on failure.
  */
-int
+bool
 term_cbreak(int fd)
 {
     debug_decl(term_cbreak, SUDO_DEBUG_UTIL)
@@ -181,24 +181,24 @@ term_cbreak(int fd)
 	term_erase = term.c_cc[VERASE];
 	term_kill = term.c_cc[VKILL];
 	changed = 1;
-	debug_return_int(1);
+	debug_return_bool(true);
     }
-    debug_return_int(0);
+    debug_return_bool(false);
 }
 
 /*
  * Copy terminal settings from one descriptor to another.
- * Returns 1 on success or 0 on failure.
+ * Returns true on success or false on failure.
  */
-int
+bool
 term_copy(int src, int dst)
 {
     struct termios tt;
     debug_decl(term_copy, SUDO_DEBUG_UTIL)
 
     if (tcgetattr(src, &tt) != 0)
-	debug_return_int(0);
+	debug_return_bool(false);
     if (tcsetattr_nointr(dst, TCSANOW|TCSASOFT, &tt) != 0)
-	debug_return_int(0);
-    debug_return_int(1);
+	debug_return_bool(false);
+    debug_return_bool(true);
 }
