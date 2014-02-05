@@ -52,6 +52,7 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <limits.h>
 #include <netdb.h>
 #include <errno.h>
 
