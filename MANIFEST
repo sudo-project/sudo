@@ -75,6 +75,7 @@ compat/getopt.h
 compat/getopt_long.c
 compat/glob.c
 compat/glob.h
+compat/inet_pton.c
 compat/isblank.c
 compat/memrchr.c
 compat/memset_s.c

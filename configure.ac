@@ -2529,29 +2529,9 @@ AC_CHECK_FUNC(socket, [], [
 dnl
 dnl If inet_pton(3) not in libc, check -lnsl and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
+dnl Some systems may have inet_pton() in libresolv.
 dnl
 AC_CHECK_FUNC(inet_pton, [], [
-    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
-	_libs=
-	for lib in $libs; do
-	    case "$NET_LIBS" in
-		*"$lib"*)   ;;
-		*)		_libs="$_libs $lib";;
-	    esac
-	done
-	libs="${_libs# }"
-	test -z "$libs" && continue
-	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
-	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	SUDO_CHECK_LIB($lib, inet_pton, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break], [], [$extralibs])
-    done
-])
-dnl
-dnl If inet_aton(3) not in libc, check -lnsl and -linet
-dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
-dnl Some systems have inet_aton() in libresolv (older Solaris).
-dnl
-AC_CHECK_FUNC(inet_aton, [], [
     for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
 	_libs=
 	for lib in $libs; do
@@ -2564,9 +2544,17 @@ AC_CHECK_FUNC(inet_aton, [], [
 	test -z "$libs" && continue
 	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
 	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	SUDO_CHECK_LIB($lib, inet_aton, [NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break], [], [$extralibs])
+	SUDO_CHECK_LIB($lib, inet_pton, [
+	    AC_DEFINE(HAVE_INET_PTON)
+	    NET_LIBS="${NET_LIBS} $libs"
+	    LIBS="${LIBS} $libs"
+	    break
+	], [], [$extralibs])
     done
 ])
+if test X"$ac_cv_func_inet_pton" != X"yes"; then
+    AC_LIBOBJ(inet_pton)
+fi
 dnl
 dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
 dnl
@@ -3865,6 +3853,7 @@ AH_TEMPLATE(HAVE_GETSPNAM, [Define to 1 if you have the `getspnam' function (SVR
 AH_TEMPLATE(HAVE_GETSPWUID, [Define to 1 if you have the `getspwuid' function. (HP-UX <= 9.X shadow passwords).])
 AH_TEMPLATE(HAVE_GSS_KRB5_CCACHE_NAME, [Define to 1 if you have the `gss_krb5_ccache_name' function.])
 AH_TEMPLATE(HAVE_HEIMDAL, [Define to 1 if your Kerberos is Heimdal.])
+AH_TEMPLATE(HAVE_INET_PTON, [Define to 1 if you have the `inet_pton' function.])
 AH_TEMPLATE(HAVE_ISCOMSEC, [Define to 1 if you have the `iscomsec' function. (HP-UX >= 10.x check for shadow enabled).])
 AH_TEMPLATE(HAVE_ISSECURE, [Define to 1 if you have the `issecure' function. (SunOS 4.x check for shadow enabled).])
 AH_TEMPLATE(HAVE_KERB5, [Define to 1 if you use Kerberos V.])

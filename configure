@@ -18607,7 +18607,7 @@ if test "x$ac_cv_func_inet_pton" = xyes; then :
 
 else
 
-    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
+    for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
 	_libs=
 	for lib in $libs; do
 	    case "$NET_LIBS" in
@@ -18662,7 +18662,13 @@ fi
     if eval test \$sudo_cv_lib_$lib''_inet_pton$_sudo_check_lib_extras = "yes"; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-	NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break
+
+	    $as_echo "#define HAVE_INET_PTON 1" >>confdefs.h
+
+	    NET_LIBS="${NET_LIBS} $libs"
+	    LIBS="${LIBS} $libs"
+	    break
+
     else
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -18673,77 +18679,14 @@ $as_echo "no" >&6; }
 
 fi
 
-ac_fn_c_check_func "$LINENO" "inet_aton" "ac_cv_func_inet_aton"
-if test "x$ac_cv_func_inet_aton" = xyes; then :
-
-else
-
-    for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
-	_libs=
-	for lib in $libs; do
-	    case "$NET_LIBS" in
-		*"$lib"*)   ;;
-		*)		_libs="$_libs $lib";;
-	    esac
-	done
-	libs="${_libs# }"
-	test -z "$libs" && continue
-	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
-	extralibs="`echo \"$libs\"|sed 's/^-l[^ ]*//'`"
-
-    _sudo_check_lib_extras=`echo "$extralibs"|sed -e 's/ 	*//g' -e 's/-l/_/g'`
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for inet_aton in -l$lib${5+ }$extralibs" >&5
-$as_echo_n "checking for inet_aton in -l$lib${5+ }$extralibs... " >&6; }
-    if { as_var=sudo_cv_lib_$lib''_inet_aton$_sudo_check_lib_extras; eval \${$as_var+:} false; }; then :
-  $as_echo_n "(cached) " >&6
-else
-
-	SUDO_CHECK_LIB_OLIBS="$LIBS"
-	LIBS="$LIBS -l$lib${5+ }$extralibs"
-	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char inet_aton ();
-int
-main ()
-{
-return inet_aton ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  eval sudo_cv_lib_$lib''_inet_aton$_sudo_check_lib_extras=yes
-else
-  eval sudo_cv_lib_$lib''_inet_aton$_sudo_check_lib_extras=no
+if test X"$ac_cv_func_inet_pton" != X"yes"; then
+    case " $LIBOBJS " in
+  *" inet_pton.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS inet_pton.$ac_objext"
+ ;;
+esac
 
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-	LIBS="$SUDO_CHECK_LIB_OLIBS"
-
-fi
-
-    if eval test \$sudo_cv_lib_$lib''_inet_aton$_sudo_check_lib_extras = "yes"; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-	NET_LIBS="${NET_LIBS} $libs"; LIBS="${LIBS} $libs"; break
-    else
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-
-    fi
-
-    done
-
-fi
-
 ac_fn_c_check_func "$LINENO" "syslog" "ac_cv_func_syslog"
 if test "x$ac_cv_func_syslog" = xyes; then :
 
@@ -24543,6 +24486,7 @@ $as_echo "$as_me: Warning: the $rundir/ts directory must be cleared at boot time
     { $as_echo "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 $as_echo "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
 
 
 

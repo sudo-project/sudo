@@ -65,7 +65,7 @@ addr_matches_if(const char *n)
 	family = AF_INET6;
     } else
 #endif /* HAVE_STRUCT_IN6_ADDR */
-    if (inet_aton(n, &addr.ip4) == 1) {
+    if (inet_pton(AF_INET, n, &addr.ip4) == 1) {
 	family = AF_INET;
     } else {
 	debug_return_bool(false);
@@ -118,7 +118,7 @@ addr_matches_if_netmask(const char *n, const char *m)
 	family = AF_INET6;
     else
 #endif /* HAVE_STRUCT_IN6_ADDR */
-    if (inet_aton(n, &addr.ip4) == 1) {
+    if (inet_pton(AF_INET, n, &addr.ip4) == 1) {
 	family = AF_INET;
     } else {
 	debug_return_bool(false);
@@ -126,7 +126,7 @@ addr_matches_if_netmask(const char *n, const char *m)
 
     if (family == AF_INET) {
 	if (strchr(m, '.')) {
-	    if (inet_aton(m, &mask.ip4) != 1) {
+	    if (inet_pton(AF_INET, m, &mask.ip4) != 1) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "IPv4 netmask %s: %s", m, "invalid value");
 		debug_return_bool(false);

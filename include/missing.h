@@ -443,5 +443,8 @@ long long rpl_strtonum(const char *, long long, long long, const char **);
 # endif
 int clock_gettime(clockid_t clock_id, struct timespec *tp);
 #endif
+#ifndef HAVE_INET_PTON
+int inet_pton(int af, const char *src, void *dst);
+#endif
 
 #endif /* _SUDO_MISSING_H */

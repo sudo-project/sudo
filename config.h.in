@@ -262,6 +262,9 @@
 /* Define to 1 if your Kerberos is Heimdal. */
 #undef HAVE_HEIMDAL
 
+/* Define to 1 if you have the `inet_pton' function. */
+#undef HAVE_INET_PTON
+
 /* Define to 1 if you have the `initprivs' function. */
 #undef HAVE_INITPRIVS
 

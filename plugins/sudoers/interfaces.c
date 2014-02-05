@@ -87,8 +87,8 @@ set_interfaces(const char *ai)
 	} else {
 	    /* IPv4 */
 	    ifp->family = AF_INET;
-	    if (inet_aton(addr, &ifp->addr.ip4) != 1 ||
-		inet_aton(mask, &ifp->netmask.ip4) != 1) {
+	    if (inet_pton(AF_INET, addr, &ifp->addr.ip4) != 1 ||
+		inet_pton(AF_INET, mask, &ifp->netmask.ip4) != 1) {
 		efree(ifp);
 		continue;
 	    }
