@@ -19,6 +19,10 @@ What's new in Sudo 1.8.10?
    not just the time stamp for the current terminal.  The -k option
    can be used to only disable time stamps for the current terminal.
 
+ * If sudo was started in the background and needed to prompt for
+   a password, it was not possible to suspend it at the password
+   prompt.  This now works properly.
+
 What's new in Sudo 1.8.9p5?
 
  * Fixed a compilation error on AIX when LDAP support is enabled.
