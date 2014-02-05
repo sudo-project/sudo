@@ -115,11 +115,8 @@ pty_cleanup(void)
 {
     debug_decl(cleanup, SUDO_DEBUG_EXEC);
 
-    if (!TAILQ_EMPTY(&io_plugins) && io_fds[SFD_USERTTY] != -1) {
-	check_foreground();
-	if (foreground)
-	    term_restore(io_fds[SFD_USERTTY], 0);
-    }
+    if (!TAILQ_EMPTY(&io_plugins) && io_fds[SFD_USERTTY] != -1)
+	term_restore(io_fds[SFD_USERTTY], 0);
 #ifdef HAVE_SELINUX
     selinux_restore_tty();
 #endif
@@ -812,11 +809,8 @@ pty_close(struct command_status *cstat)
     }
 
     /* Restore terminal settings. */
-    if (io_fds[SFD_USERTTY] != -1) {
-	check_foreground();
-	if (foreground)
-	    term_restore(io_fds[SFD_USERTTY], 0);
-    }
+    if (io_fds[SFD_USERTTY] != -1)
+	term_restore(io_fds[SFD_USERTTY], 0);
 
     /* If child was signalled, write the reason to stdout like the shell. */
     if (cstat->type == CMD_WSTATUS && WIFSIGNALED(cstat->val)) {
