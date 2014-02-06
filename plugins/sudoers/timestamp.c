@@ -188,7 +188,7 @@ found_it:
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "short write, truncating partial time stamp record");
 	if (ftruncate(fd, old_eof) != 0) {
-	    warning(N_("unable to truncate time stamp file to %lld bytes"),
+	    warning(U_("unable to truncate time stamp file to %lld bytes"),
 		old_eof);
 	}
     }
@@ -203,7 +203,7 @@ found_it:
  * Returns false on failure and displays a warning to stderr.
  */
 static bool
-ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode)
+ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode, bool quiet)
 {
     struct stat sb;
     gid_t parent_gid = 0;
@@ -217,13 +217,16 @@ ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode)
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"mkdir %s, mode 0%o", path, parent_mode);
 	    if (mkdir(path, parent_mode) != 0) {
-		warning(N_("unable to mkdir %s"), path);
+		if (!quiet)
+		    warning(U_("unable to mkdir %s"), path);
 		goto done;
 	    }
 	    ignore_result(chown(path, (uid_t)-1, parent_gid));
 	} else if (!S_ISDIR(sb.st_mode)) {
-	    warningx(N_("%s exists but is not a directory (0%o)"),
-		path, (unsigned int) sb.st_mode);
+	    if (!quiet) {
+		warningx(U_("%s exists but is not a directory (0%o)"),
+		    path, (unsigned int) sb.st_mode);
+	    }
 	    goto done;
 	} else {
 	    /* Inherit gid of parent dir for ownership. */
@@ -235,7 +238,8 @@ ts_mkdirs(char *path, uid_t owner, mode_t mode, mode_t parent_mode)
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	"mkdir %s, mode 0%o", path, mode);
     if (mkdir(path, mode) != 0 && errno != EEXIST) {
-	warning(N_("unable to mkdir %s"), path);
+	if (!quiet)
+	    warning(U_("unable to mkdir %s"), path);
 	goto done;
     }
     ignore_result(chown(path, owner, parent_gid));
@@ -251,7 +255,7 @@ done:
  * Returns true on success or false on failure, setting errno.
  */
 static bool
-ts_secure_dir(char *path, bool make_it)
+ts_secure_dir(char *path, bool make_it, bool quiet)
 {
     struct stat sb;
     bool rval = false;
@@ -263,7 +267,7 @@ ts_secure_dir(char *path, bool make_it)
 	rval = true;
 	break;
     case SUDO_PATH_MISSING:
-	if (make_it && ts_mkdirs(path, timestamp_uid, 0700, 0711)) {
+	if (make_it && ts_mkdirs(path, timestamp_uid, 0700, 0711, quiet)) {
 	    rval = true;
 	    break;
 	}
@@ -271,16 +275,20 @@ ts_secure_dir(char *path, bool make_it)
 	break;
     case SUDO_PATH_BAD_TYPE:
 	errno = ENOTDIR;
-	warning("%s", path);
+	if (!quiet)
+	    warning("%s", path);
 	break;
     case SUDO_PATH_WRONG_OWNER:
-	warningx(U_("%s is owned by uid %u, should be %u"),
-	    path, (unsigned int) sb.st_uid,
-	    (unsigned int) timestamp_uid);
+	if (!quiet) {
+	    warningx(U_("%s is owned by uid %u, should be %u"),
+		path, (unsigned int) sb.st_uid,
+		(unsigned int) timestamp_uid);
+	}
 	errno = EACCES;
 	break;
     case SUDO_PATH_GROUP_WRITABLE:
-	warningx(U_("%s is group writable"), path);
+	if (!quiet)
+	    warningx(U_("%s is group writable"), path);
 	errno = EACCES;
 	break;
     }
@@ -320,7 +328,7 @@ update_timestamp(struct passwd *pw)
     debug_decl(update_timestamp, SUDO_DEBUG_AUTH)
 
     /* Check/create parent directories as needed. */
-    if (!ts_secure_dir(def_timestampdir, true))
+    if (!ts_secure_dir(def_timestampdir, true, false))
 	goto done;
 
     /* Fill in time stamp. */
@@ -373,7 +381,7 @@ timestamp_status(struct passwd *pw)
     }
 
     /* Ignore time stamp files in an insecure directory. */
-    if (!ts_secure_dir(def_timestampdir, false)) {
+    if (!ts_secure_dir(def_timestampdir, false, false)) {
 	if (errno != ENOENT) {
 	    status = TS_ERROR;
 	    goto done;
@@ -581,7 +589,7 @@ already_lectured(int unused)
     int len;
     debug_decl(already_lectured, SUDO_DEBUG_AUTH)
 
-    if (ts_secure_dir(def_lecture_status_dir, false)) {
+    if (ts_secure_dir(def_lecture_status_dir, false, true)) {
 	len = snprintf(status_file, sizeof(status_file), "%s/%s",
 	    def_lecture_status_dir, user_name);
 	if (len <= 0 || (size_t)len >= sizeof(status_file)) {
@@ -612,7 +620,7 @@ set_lectured(void)
     }
 
     /* Sanity check lecture dir and create if missing. */
-    if (!ts_secure_dir(def_lecture_status_dir, true))
+    if (!ts_secure_dir(def_lecture_status_dir, true, false))
 	goto done;
 
     /* Create lecture file. */
