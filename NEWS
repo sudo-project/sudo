@@ -14,6 +14,7 @@ What's new in Sudo 1.8.10?
    stamps use a monotonic timer where available and are once again
    located in a directory under /var/run.  The lecture status is
    now stored separately from the time stamps in a different directory.
+   Bug #616
 
  * sudo's -K option will now remove all of the user's time stamps,
    not just the time stamp for the current terminal.  The -k option
@@ -22,6 +23,11 @@ What's new in Sudo 1.8.10?
  * If sudo was started in the background and needed to prompt for
    a password, it was not possible to suspend it at the password
    prompt.  This now works properly.
+
+ * LDAP-based sudoers now uses a default search filter of
+   (objectClass=sudoRole) for more efficient queries.  The netgroup
+   query has been modified to avoid falling below the minimum length
+   for OpenLDAP substring indices.
 
 What's new in Sudo 1.8.9p5?
 
