@@ -145,6 +145,9 @@ extern int ldapssl_set_strength(LDAP *ldap, int strength);
 #define SUDO_LDAP_SSL		1
 #define SUDO_LDAP_STARTTLS	2
 
+/* Default search filter. */
+#define DEFAULT_SEARCH_FILTER	"(objectClass=sudoRole)"
+
 /* The TIMEFILTER_LENGTH is the length of the filter when timed entries
    are used. The length is computed as follows:
        81       for the filter itself
@@ -1356,7 +1359,7 @@ sudo_ldap_build_pass2(void)
 	    ldap_conf.timed ? timebuffer : "",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? ")" : "");
     } else {
-	easprintf(&filt, "%s%s(sudoUser=+*)%s%s",
+	easprintf(&filt, "%s%s(sudoUser=*)(sudoUser=+*)%s%s",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? "(&" : "",
 	    ldap_conf.search_filter ? ldap_conf.search_filter : "",
 	    ldap_conf.timed ? timebuffer : "",
@@ -1427,7 +1430,7 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 		break;
 	    case CONF_STR:
 		efree(*(char **)(cur->valp));
-		*(char **)(cur->valp) = estrdup(value);
+		*(char **)(cur->valp) = *value ? estrdup(value) : NULL;
 		break;
 	    case CONF_LIST_STR:
 		{
@@ -1523,6 +1526,7 @@ sudo_ldap_read_config(void)
     ldap_conf.use_sasl = -1;
     ldap_conf.rootuse_sasl = -1;
     ldap_conf.deref = -1;
+    ldap_conf.search_filter = estrdup(DEFAULT_SEARCH_FILTER);
     STAILQ_INIT(&ldap_conf.uri);
     STAILQ_INIT(&ldap_conf.base);
 
