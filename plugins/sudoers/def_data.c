@@ -379,6 +379,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Maximum I/O log sequence number: %u"),
 	NULL,
     }, {
+	"use_netgroups", T_FLAG,
+	N_("Enable sudoers netgroup support"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

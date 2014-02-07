@@ -940,6 +940,11 @@ netgr_matches(const char *netgr, const char *lhost, const char *shost, const cha
     bool rc = false;
     debug_decl(netgr_matches, SUDO_DEBUG_MATCH)
 
+    if (!def_use_netgroups) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "netgroups are disabled");
+	debug_return_bool(false);
+    }
+
 #ifdef HAVE_INNETGR
     /* make sure we have a valid netgroup, sudo style */
     if (*netgr++ != '+') {

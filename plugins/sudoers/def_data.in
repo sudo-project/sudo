@@ -280,3 +280,6 @@ pam_session
 maxseq
 	T_UINT
 	"Maximum I/O log sequence number: %u"
+use_netgroups
+	T_FLAG
+	"Enable sudoers netgroup support"

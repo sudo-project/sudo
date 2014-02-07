@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "SUDOERS" "@mansectsu@" "February 3, 2014" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
+.TH "SUDOERS" "@mansectsu@" "February 7, 2014" "Sudo @PACKAGE_VERSION@" "Programmer's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1783,6 +1783,18 @@ is compiled with
 \fBzlib\fR
 support.
 .TP 18n
+use_netgroups
+If set, netgroups (prefixed with
+`+'),
+may be used in place of a user or host.
+For LDAP-based sudoers, netgroup support requires an expensive
+substring match on the server.
+If netgroups are not needed, this option can be disabled to reduce the
+load on the LDAP server.
+This flag is
+\fIon\fR
+by default.
+.TP 18n
 exec_background
 By default,
 \fBsudo\fR
@@ -1864,8 +1876,7 @@ if they match a value specified in
 \fReditor\fR.
 This flag is
 \fI@env_editor@\fR
-by
-default.
+by default.
 .TP 18n
 env_reset
 If set,

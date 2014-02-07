@@ -1344,6 +1344,11 @@ sudo_ldap_build_pass2(void)
     char *filt, timebuffer[TIMEFILTER_LENGTH + 1];
     debug_decl(sudo_ldap_build_pass2, SUDO_DEBUG_LDAP)
 
+    /* Short circuit if no non-Unix group support. */
+    if (!def_use_netgroups && !def_group_plugin) {
+	debug_return_str(NULL);
+    }
+
     if (ldap_conf.timed)
 	sudo_ldap_timefilter(timebuffer, sizeof(timebuffer));
 
@@ -1353,9 +1358,10 @@ sudo_ldap_build_pass2(void)
      * those get ANDed in to the expression.
      */
     if (def_group_plugin) {
-	easprintf(&filt, "%s%s(|(sudoUser=+*)(sudoUser=%%:*))%s%s",
+	easprintf(&filt, "%s%s(|(sudoUser=%s*)(sudoUser=%%:*))%s%s",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? "(&" : "",
 	    ldap_conf.search_filter ? ldap_conf.search_filter : "",
+	    def_use_netgroups ? "+" : "",
 	    ldap_conf.timed ? timebuffer : "",
 	    (ldap_conf.timed || ldap_conf.search_filter) ? ")" : "");
     } else {
@@ -2877,38 +2883,40 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
     lres = sudo_ldap_result_alloc();
     for (pass = 0; pass < 2; pass++) {
 	filt = pass ? sudo_ldap_build_pass2() : sudo_ldap_build_pass1(pw);
-	DPRINTF1("ldap search '%s'", filt);
-	STAILQ_FOREACH(base, &ldap_conf.base, entries) {
-	    DPRINTF1("searching from base '%s'",
-		base->val);
-	    if (ldap_conf.timeout > 0) {
-		tv.tv_sec = ldap_conf.timeout;
-		tv.tv_usec = 0;
-		tvp = &tv;
-	    }
-	    result = NULL;
-	    rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE, filt,
-		NULL, 0, NULL, NULL, tvp, 0, &result);
-	    if (rc != LDAP_SUCCESS) {
-		DPRINTF1("nothing found for '%s'", filt);
-		continue;
-	    }
-	    lres->user_matches = true;
-
-	    /* Add the seach result to list of search results. */
-	    DPRINTF1("adding search result");
-	    sudo_ldap_result_add_search(lres, ld, result);
-	    LDAP_FOREACH(entry, ld, result) {
-		if ((!pass ||
-		    sudo_ldap_check_non_unix_group(ld, entry, pw)) &&
-		    sudo_ldap_check_host(ld, entry)) {
-		    lres->host_matches = true;
-		    sudo_ldap_result_add_entry(lres, entry);
+	if (filt != NULL) {
+	    DPRINTF1("ldap search '%s'", filt);
+	    STAILQ_FOREACH(base, &ldap_conf.base, entries) {
+		DPRINTF1("searching from base '%s'",
+		    base->val);
+		if (ldap_conf.timeout > 0) {
+		    tv.tv_sec = ldap_conf.timeout;
+		    tv.tv_usec = 0;
+		    tvp = &tv;
 		}
+		result = NULL;
+		rc = ldap_search_ext_s(ld, base->val, LDAP_SCOPE_SUBTREE, filt,
+		    NULL, 0, NULL, NULL, tvp, 0, &result);
+		if (rc != LDAP_SUCCESS) {
+		    DPRINTF1("nothing found for '%s'", filt);
+		    continue;
+		}
+		lres->user_matches = true;
+
+		/* Add the seach result to list of search results. */
+		DPRINTF1("adding search result");
+		sudo_ldap_result_add_search(lres, ld, result);
+		LDAP_FOREACH(entry, ld, result) {
+		    if ((!pass ||
+			sudo_ldap_check_non_unix_group(ld, entry, pw)) &&
+			sudo_ldap_check_host(ld, entry)) {
+			lres->host_matches = true;
+			sudo_ldap_result_add_entry(lres, entry);
+		    }
+		}
+		DPRINTF1("result now has %d entries", lres->nentries);
 	    }
-	    DPRINTF1("result now has %d entries", lres->nentries);
+	    efree(filt);
 	}
-	efree(filt);
     }
 
     /* Sort the entries by the sudoOrder attribute. */

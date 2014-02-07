@@ -29,6 +29,12 @@ What's new in Sudo 1.8.10?
    query has been modified to avoid falling below the minimum length
    for OpenLDAP substring indices.
 
+ * The new "use_netgroups" sudoers option can be used to explicitly
+   enable or disable netgroups support.  For LDAP-based sudoers,
+   netgroup support requires an expensive substring match on the
+   server.  If netgroups are not needed, this option can be disabled
+   to reduce the load on the LDAP server.
+
 What's new in Sudo 1.8.9p5?
 
  * Fixed a compilation error on AIX when LDAP support is enabled.

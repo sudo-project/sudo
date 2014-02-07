@@ -817,6 +817,13 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        This flag is _o_n by default when ssuuddoo is compiled with
                        zzlliibb support.
 
+     use_netgroups     If set, netgroups (prefixed with `+'), may be used in
+                       place of a user or host.  For LDAP-based sudoers,
+                       netgroup support requires an expensive substring match
+                       on the server.  If netgroups are not needed, this
+                       option can be disabled to reduce the load on the LDAP
+                       server.  This flag is _o_n by default.
+
      exec_background   By default, ssuuddoo runs a command as the foreground
                        process as long as ssuuddoo itself is running in the
                        foreground.  When the _e_x_e_c___b_a_c_k_g_r_o_u_n_d flag is enabled
@@ -2322,4 +2329,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.10                    February 3, 2014                    Sudo 1.8.10
+Sudo 1.8.10                    February 7, 2014                    Sudo 1.8.10

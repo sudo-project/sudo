@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd February 3, 2014
+.Dd February 7, 2014
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1649,6 +1649,17 @@ by default when
 is compiled with
 .Sy zlib
 support.
+.It use_netgroups
+If set, netgroups (prefixed with
+.Ql + ) ,
+may be used in place of a user or host.
+For LDAP-based sudoers, netgroup support requires an expensive
+substring match on the server.
+If netgroups are not needed, this option can be disabled to reduce the
+load on the LDAP server.
+This flag is
+.Em on
+by default.
 .It exec_background
 By default,
 .Nm sudo
@@ -1729,8 +1740,7 @@ if they match a value specified in
 .Li editor .
 This flag is
 .Em @env_editor@
-by
-default.
+by default.
 .It env_reset
 If set,
 .Nm sudo

@@ -435,6 +435,9 @@ init_defaults(void)
 #else
     def_pam_session = true;
 #endif
+#ifdef HAVE_INNETGR
+    def_use_netgroups = true;
+#endif
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)

@@ -176,6 +176,8 @@
 #define I_PAM_SESSION           87
 #define def_maxseq              (sudo_defs_table[88].sd_un.uival)
 #define I_MAXSEQ                88
+#define def_use_netgroups       (sudo_defs_table[89].sd_un.flag)
+#define I_USE_NETGROUPS         89
 
 enum def_tuple {
 	never,
