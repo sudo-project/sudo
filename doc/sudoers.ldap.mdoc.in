@@ -14,7 +14,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd February 6, 2014
+.Dd February 7, 2014
 .Dt SUDOERS.LDAP @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -608,7 +608,7 @@ The default search filter is:
 .Li objectClass=sudoRole .
 If
 .Ar ldap_filter
-is not present, no search filter will be used.
+is omitted, no search filter will be used.
 .It Sy SUDOERS_TIMED Ar on/true/yes/off/false/no
 Whether or not to evaluate the
 .Li sudoNotBefore

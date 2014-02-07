@@ -347,7 +347,7 @@ DDEESSCCRRIIPPTTIIOONN
            returned when performing a ssuuddoo LDAP query.  Typically, this is of
            the form attribute=value or
            (&(attribute=value)(attribute2=value2)).  The default search filter
-           is: objectClass=sudoRole.  If _l_d_a_p___f_i_l_t_e_r is not present, no search
+           is: objectClass=sudoRole.  If _l_d_a_p___f_i_l_t_e_r is omitted, no search
            filter will be used.
 
      SSUUDDOOEERRSS__TTIIMMEEDD _o_n_/_t_r_u_e_/_y_e_s_/_o_f_f_/_f_a_l_s_e_/_n_o
@@ -812,4 +812,4 @@ DDIISSCCLLAAIIMMEERR
      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
      complete details.
 
-Sudo 1.8.10b2                  February 6, 2014                  Sudo 1.8.10b2
+Sudo 1.8.10                    February 7, 2014                    Sudo 1.8.10

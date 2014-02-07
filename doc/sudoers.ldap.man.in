@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.TH "SUDOERS.LDAP" "8" "February 6, 2014" "Sudo @PACKAGE_VERSION@" "OpenBSD System Manager's Manual"
+.TH "SUDOERS.LDAP" "8" "February 7, 2014" "Sudo @PACKAGE_VERSION@" "OpenBSD System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -647,7 +647,7 @@ The default search filter is:
 \fRobjectClass=sudoRole\fR.
 If
 \fIldap_filter\fR
-is not present, no search filter will be used.
+is omitted, no search filter will be used.
 .TP 6n
 \fBSUDOERS_TIMED\fR \fIon/true/yes/off/false/no\fR
 Whether or not to evaluate the
