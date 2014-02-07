@@ -22,6 +22,11 @@ o Upgrading from a version prior to 1.8.10:
     or /var/adm/sudo/lectured depending on what is present on the
     system.
 
+    LDAP-based sudoers now uses a default search filter of
+    (objectClass=sudoRole) for more efficient queries.  It is
+    possible to disable the default search filter by specifying
+    SUDOERS_SEARCH_FILTER in ldap.conf but omitting a value.
+
 o Upgrading from a version prior to 1.8.7:
 
     Sudo now stores its libexec files in a "sudo" sub-directory
