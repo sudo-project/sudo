@@ -47,6 +47,7 @@
 #include "parse.h"
 #include "toke.h"
 #include "sudo_plugin.h"
+#include "sudo_util.h"
 #include <gram.h>
 
 __dso_public int main(int argc, char *argv[]);
@@ -170,6 +171,8 @@ main(int argc, char *argv[])
 {
     int ntests, errors = 0;
 
+    initprogname(argc > 0 ? argv[0] : "check_fill");
+
     errors += do_tests(check_fill, txt_data, sizeof(txt_data) / sizeof(txt_data[0]));
     errors += do_tests(check_fill_cmnd, cmd_data, sizeof(cmd_data) / sizeof(cmd_data[0]));
     errors += do_tests(check_fill_args, args_data, sizeof(args_data) / sizeof(args_data[0]));
@@ -177,7 +180,7 @@ main(int argc, char *argv[])
     ntests = sizeof(txt_data) / sizeof(txt_data[0]) +
 	sizeof(cmd_data) / sizeof(cmd_data[0]) +
 	sizeof(args_data) / sizeof(args_data[0]);
-    printf("check_fill: %d tests run, %d errors, %d%% success rate\n",
+    printf("%s: %d tests run, %d errors, %d%% success rate\n", getprogname(),
 	ntests, errors, (ntests - errors) * 100 / ntests);
 
     exit(errors);

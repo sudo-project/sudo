@@ -168,6 +168,8 @@ main(int argc, char *argv[])
 {
     int errors = 0;
 
+    initprogname(argc > 0 ? argv[0] : "atofoo");
+
     errors += test_atobool();
     errors += test_atoid();
     errors += test_atomode();

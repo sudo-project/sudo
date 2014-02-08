@@ -44,6 +44,7 @@
 #include "missing.h"
 #include "fatal.h"
 #include "queue.h"
+#include "sudo_util.h"
 
 __dso_public int main(int argc, char *argv[]);
 
@@ -69,6 +70,8 @@ main(int argc, char *argv[])
     struct test_data *hltq;
     struct test_data_list tq;
     int errors = 0;
+
+    initprogname(argc > 0 ? argv[0] : "hltq_test");
 
     /*
      * Initialize three data elements and concatenate them in order.
