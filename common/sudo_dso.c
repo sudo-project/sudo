@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2012-2013 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010, 2012-2014 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -131,9 +131,16 @@ sudo_dso_findsym(void *vhandle, const char *symbol)
      */
     if (vhandle == SUDO_DSO_NEXT) {
 	/* Iterate over all shared libs looking for symbol. */
+	shl_t myhandle = PROG_HANDLE;
 	struct shl_descriptor *desc;
 	int idx = 0;
+
+	/* Find program's real handle. */
+	if (shl_gethandle(PROG_HANDLE, &desc) == 0)
+	    myhandle = desc->handle;
 	while (shl_get(idx++, &desc) == 0) {
+	    if (desc->handle == myhandle)
+		continue;
 	    if (shl_findsym(&desc->handle, symbol, TYPE_UNDEFINED, &value) == 0)
 		break;
 	}
