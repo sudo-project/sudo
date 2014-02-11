@@ -31,10 +31,12 @@
 #include <string.h>
 #include <libaudit.h>
 
+#define DEFAULT_TEXT_DOMAIN	"sudoers"
+#include "gettext.h"		/* must be included before missing.h */
+
 #include "missing.h"
 #include "fatal.h"
 #include "alloc.h"
-#include "gettext.h"
 #include "sudo_debug.h"
 #include "linux_audit.h"
 

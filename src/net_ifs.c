@@ -84,14 +84,14 @@ struct rtentry;
 # include <ifaddrs.h>
 #endif
 
+#define DEFAULT_TEXT_DOMAIN	"sudo"
+#include "gettext.h"		/* must be included before missing.h */
+
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
-
-#define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "gettext.h"
 
 /* Minix apparently lacks IFF_LOOPBACK */
 #ifndef IFF_LOOPBACK

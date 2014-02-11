@@ -89,10 +89,11 @@
 
 #include <pathnames.h>
 
+#include "gettext.h"		/* must be included before missing.h */
+
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
-#include "gettext.h"
 #include "logging.h"
 #include "iolog.h"
 #include "queue.h"

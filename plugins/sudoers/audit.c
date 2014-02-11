@@ -33,6 +33,9 @@
 #endif /* HAVE_STDBOOL_H */
 #include <stdarg.h>
 
+#define DEFAULT_TEXT_DOMAIN	"sudoers"
+#include "gettext.h"		/* must be included before missing.h */
+
 #include "missing.h"
 #include "logging.h"
 #include "sudo_debug.h"
@@ -43,9 +46,6 @@
 #ifdef HAVE_LINUX_AUDIT
 # include "linux_audit.h"
 #endif
-
-#define DEFAULT_TEXT_DOMAIN	"sudoers"
-#include "gettext.h"
 
 void
 audit_success(char *exec_args[])

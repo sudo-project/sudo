@@ -40,7 +40,6 @@
 
 #include "sudoers.h"
 #include "parse.h"
-#include "gettext.h"
 #include <gram.h>
 
 /*

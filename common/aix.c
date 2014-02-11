@@ -31,14 +31,14 @@
 #include <usersec.h>
 #include <uinfo.h>
 
+#define DEFAULT_TEXT_DOMAIN	"sudo"
+#include "gettext.h"		/* must be included before missing.h */
+
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
 #include "sudo_debug.h"
 #include "sudo_util.h"
-
-#define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "gettext.h"
 
 #ifdef HAVE_GETUSERATTR
 

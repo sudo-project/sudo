@@ -23,10 +23,10 @@
 #include <stdio.h>
 #include <signal.h>
 
-#include "missing.h"
-
 #define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "gettext.h"
+#include "gettext.h"		/* must be included before missing.h */
+
+#include "missing.h"
 
 #if defined(HAVE_DECL_SYS_SIGLIST) && HAVE_DECL_SYS_SIGLIST == 1
 # define sudo_sys_siglist	sys_siglist

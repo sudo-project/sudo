@@ -21,9 +21,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define DEFAULT_TEXT_DOMAIN	"sudo"
+#include "gettext.h"		/* must be included before missing.h */
+
 #include "missing.h"
 #include "fatal.h"
-#include "gettext.h"
 
 #ifdef HAVE_LIBINTL_H
 /* No need to swap locales in the front end. */

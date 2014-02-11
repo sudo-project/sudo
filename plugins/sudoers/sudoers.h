@@ -29,6 +29,9 @@
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
 
+#define DEFAULT_TEXT_DOMAIN	"sudoers"
+#include "gettext.h"		/* must be included before missing.h */
+
 #include <pathnames.h>
 #include "missing.h"
 #include "fatal.h"
@@ -41,9 +44,6 @@
 #include "sudo_plugin.h"
 #include "sudo_debug.h"
 #include "sudo_util.h"
-
-#define DEFAULT_TEXT_DOMAIN	"sudoers"
-#include "gettext.h"
 
 /*
  * Password db and supplementary group IDs with associated group names.

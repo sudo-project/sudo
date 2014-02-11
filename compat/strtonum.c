@@ -37,10 +37,10 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 
-#include "missing.h"
-
 #define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "gettext.h"
+#include "gettext.h"		/* must be included before missing.h */
+
+#include "missing.h"
 
 #ifdef HAVE_STRTONUM
 

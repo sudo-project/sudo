@@ -45,6 +45,9 @@
 #include <errno.h>
 #include <limits.h>
 
+#define DEFAULT_TEXT_DOMAIN	"sudo"
+#include "gettext.h"		/* must be included before missing.h */
+
 #define SUDO_ERROR_WRAP	0
 
 #include "missing.h"
@@ -57,9 +60,6 @@
 #include "sudo_debug.h"
 #include "sudo_util.h"
 #include "secure_path.h"
-
-#define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "gettext.h"
 
 #ifdef __TANDEM
 # define ROOT_UID	65535

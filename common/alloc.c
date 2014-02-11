@@ -48,12 +48,12 @@
 #endif
 #include <limits.h>
 
+#define DEFAULT_TEXT_DOMAIN	"sudo"
+#include "gettext.h"		/* must be included before missing.h */
+
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
-
-#define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "gettext.h"
 
 /*
  * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t

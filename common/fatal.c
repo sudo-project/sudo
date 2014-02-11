@@ -28,14 +28,14 @@
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
 
+#define DEFAULT_TEXT_DOMAIN	"sudo"
+#include "gettext.h"		/* must be included before missing.h */
+
 #include "missing.h"
 #include "alloc.h"
 #include "fatal.h"
 #include "queue.h"
 #include "sudo_plugin.h"
-
-#define DEFAULT_TEXT_DOMAIN	"sudo"
-#include "gettext.h"
 
 struct sudo_fatal_callback {
     SLIST_ENTRY(sudo_fatal_callback) entries;
