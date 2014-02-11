@@ -76,6 +76,8 @@ getenv_unhooked(const char *name)
     return rpl_getenv(name);
 }
 
+__dso_public char *getenv(const char *);
+
 char *
 getenv(const char *name)
 {
