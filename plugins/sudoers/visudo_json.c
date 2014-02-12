@@ -603,6 +603,7 @@ print_defaults_json(FILE *fp, int indent, bool need_comma)
 	debug_return_bool(need_comma);
 
     fprintf(fp, "%s\n%*s\"Defaults\": [\n", need_comma ? "," : "", indent, "");
+    indent += 4;
 
     TAILQ_FOREACH_SAFE(def, &defaults, entries, next) {
 	type = get_defaults_type(def);
@@ -613,7 +614,6 @@ print_defaults_json(FILE *fp, int indent, bool need_comma)
 	}
 
 	/* Found it, print object container and binding (if any). */
-	indent += 4;
 	fprintf(fp, "%*s{\n", indent, "");
 	indent += 4;
 	print_binding_json(fp, def->binding, def->type, indent);
