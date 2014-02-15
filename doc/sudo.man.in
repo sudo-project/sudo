@@ -67,7 +67,7 @@
 [\fB\-r\fR\ \fIrole\fR]
 [\fB\-t\fR\ \fItype\fR]
 [\fB\-u\fR\ \fIuser\fR]
-[\fBVAR\fR=\fIvalue\fR]
+[\fIVAR\fR=\fIvalue\fR]
 [\fB\-i\fR\ |\ \fB\-s\fR]
 [\fIcommand\fR]
 .br
@@ -604,9 +604,9 @@ should stop processing command line arguments.
 .PP
 Environment variables to be set for the command may also be passed
 on the command line in the form of
-\fBVAR\fR=\fIvalue\fR,
+\fIVAR\fR=\fIvalue\fR,
 e.g.\&
-\fBLD_LIBRARY_PATH\fR=\fI/usr/local/pkg/lib\fR.
+\fRLD_LIBRARY_PATH\fR=\fI/usr/local/pkg/lib\fR.
 Variables passed on the command line are subject to restrictions
 imposed by the security policy plugin.
 The

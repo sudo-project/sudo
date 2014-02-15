@@ -99,7 +99,7 @@
 .Op Fl u Ar user
 .Ek
 .Bk -words
-.Op Sy VAR Ns = Ns Ar value
+.Op Ar VAR Ns = Ns Ar value
 .Ek
 .Bk -words
 .Op Fl i No | Fl s
@@ -604,9 +604,9 @@ should stop processing command line arguments.
 .Pp
 Environment variables to be set for the command may also be passed
 on the command line in the form of
-.Sy VAR Ns No = Ns Em value ,
+.Ar VAR Ns No = Ns Ar value ,
 e.g.\&
-.Sy LD_LIBRARY_PATH Ns No = Ns Em /usr/local/pkg/lib .
+.Ev LD_LIBRARY_PATH Ns No = Ns Pa /usr/local/pkg/lib .
 Variables passed on the command line are subject to restrictions
 imposed by the security policy plugin.
 The
