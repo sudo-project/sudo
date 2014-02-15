@@ -70,7 +70,7 @@
 .Op Fl h Ar host
 .Op Fl p Ar prompt
 .Op Fl u Ar user
-file ...
+.Ar
 .Sh DESCRIPTION
 .Nm sudo
 allows a permitted user to execute a
@@ -215,7 +215,7 @@ character.
 If
 .Ar class
 is
-.Li - ,
+.Cm - ,
 the default login class of the target user will be used.
 Otherwise, the command must be run as the superuser (user ID 0), or
 .Nm sudo

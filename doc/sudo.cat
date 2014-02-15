@@ -12,7 +12,7 @@ SSYYNNOOPPSSIISS
           [--pp _p_r_o_m_p_t] [--rr _r_o_l_e] [--tt _t_y_p_e] [--uu _u_s_e_r] [_V_A_R=_v_a_l_u_e] [--ii | --ss]
           [_c_o_m_m_a_n_d]
      ssuuddooeeddiitt [--AAkknnSS] [--aa _t_y_p_e] [--CC _n_u_m] [--cc _c_l_a_s_s] [--gg _g_r_o_u_p] [--hh _h_o_s_t]
-              [--pp _p_r_o_m_p_t] [--uu _u_s_e_r] file ...
+              [--pp _p_r_o_m_p_t] [--uu _u_s_e_r] _f_i_l_e _._._.
 
 DDEESSCCRRIIPPTTIIOONN
      ssuuddoo allows a permitted user to execute a _c_o_m_m_a_n_d as the superuser or
@@ -90,7 +90,7 @@ DDEESSCCRRIIPPTTIIOONN
                  Run the command with resource limits and scheduling priority
                  of the specified login _c_l_a_s_s.  The _c_l_a_s_s argument can be
                  either a class name as defined in _/_e_t_c_/_l_o_g_i_n_._c_o_n_f, or a
-                 single `-' character.  If _c_l_a_s_s is -, the default login class
+                 single `-' character.  If _c_l_a_s_s is --, the default login class
                  of the target user will be used.  Otherwise, the command must
                  be run as the superuser (user ID 0), or ssuuddoo must be run from
                  a shell that is already running as the superuser.  If the

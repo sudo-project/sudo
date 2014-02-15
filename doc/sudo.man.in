@@ -81,7 +81,7 @@
 [\fB\-h\fR\ \fIhost\fR]
 [\fB\-p\fR\ \fIprompt\fR]
 [\fB\-u\fR\ \fIuser\fR]
-file ...
+\fIfile\ ...\fR
 .PD
 .SH "DESCRIPTION"
 \fBsudo\fR
@@ -236,7 +236,7 @@ character.
 If
 \fIclass\fR
 is
-\fR-\fR,
+\fB-\fR,
 the default login class of the target user will be used.
 Otherwise, the command must be run as the superuser (user ID 0), or
 \fBsudo\fR
