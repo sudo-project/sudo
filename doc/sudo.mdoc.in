@@ -28,7 +28,7 @@
 .Nd execute a command as another user
 .Sh SYNOPSIS
 .Nm sudo
-.Fl h No | Fl K No | Fl k No | Fl V
+.Fl h | K | k | V
 .Nm sudo
 .Fl v
 .Op Fl AknS
@@ -59,7 +59,7 @@
 .Op Fl t Ar type
 .Op Fl u Ar user
 .Op Ar VAR Ns = Ns Ar value
-.Op Fl i No | Fl s
+.Op Fl i | s
 .Op Ar command
 .Nm sudoedit
 .Op Fl AknS
@@ -145,7 +145,7 @@ Normally, if
 .Nm sudo
 requires a password, it will read it from the user's terminal.
 If the
-.Fl A No ( Em askpass Ns No )
+.Fl A Pq Em askpass
 option is specified, a (possibly graphical) helper program is
 executed to read the user's password and output the password to the
 standard output.
@@ -166,7 +166,7 @@ Path askpass /usr/X11R6/bin/ssh-askpass
 If no askpass program is available,
 .Nm sudo
 will exit with an error.
-.It Fl a Ar type , Fl -auth-type Ns No = Ns Ar type
+.It Fl a Ar type , Fl -auth-type Ns = Ns Ar type
 Use the specified BSD authentication
 .Ar type
 when validating the user, if allowed by
@@ -184,7 +184,7 @@ background processes started by
 .Nm sudo .
 Most interactive commands will fail to work properly in background
 mode.
-.It Fl C Ar num , Fl -close-from Ns No = Ns Ar num
+.It Fl C Ar num , Fl -close-from Ns = Ns Ar num
 Close all file descriptors greater than or equal to
 .Ar num
 before executing a command.
@@ -201,7 +201,7 @@ policy only permits use of the
 option when the administrator has enabled the
 .Em closefrom_override
 option.
-.It Fl c Ar class , Fl -login-class Ns No = Ns Ar class
+.It Fl c Ar class , Fl -login-class Ns = Ns Ar class
 Run the command with resource limits and scheduling priority of
 the specified login
 .Ar class .
@@ -274,7 +274,7 @@ If, for some reason,
 is unable to update a file with its edited version, the user will
 receive a warning and the edited copy will remain in a temporary
 file.
-.It Fl g Ar group , Fl -group Ns No = Ns Ar group
+.It Fl g Ar group , Fl -group Ns = Ns Ar group
 Run the command with the primary group set to
 .Ar group
 instead of the primary group specified by the target
@@ -305,7 +305,7 @@ user's password database entry.
 Depending on the policy, this may be the default behavior.
 .It Fl h , -help
 Display a short help message to the standard output and exit.
-.It Fl h Ar host , Fl -host Ns No = Ns Ar host
+.It Fl h Ar host , Fl -host Ns = Ns Ar host
 Run the command on the specified
 .Ar host
 if the security policy plugin supports remote commands.
@@ -405,7 +405,7 @@ policy will initialize the group vector to the list of groups the
 target user is a member of.
 The real and effective group IDs, however, are still set to match
 the target user.
-.It Fl p Ar prompt , Fl -prompt Ns No = Ns Ar prompt
+.It Fl p Ar prompt , Fl -prompt Ns = Ns Ar prompt
 Use a custom password prompt with optional escape sequences.
 The following percent
 .Pq Ql %
@@ -450,7 +450,7 @@ support PAM unless the
 .Em passprompt_override
 flag is disabled in
 .Em sudoers .
-.It Fl r Ar role , Fl -role Ns No = Ns Ar role
+.It Fl r Ar role , Fl -role Ns = Ns Ar role
 Run the command with an SELinux security context that includes
 the specified
 .Ar role .
@@ -468,14 +468,14 @@ via the shell's
 .Fl c
 option.
 If no command is specified, an interactive shell is executed.
-.It Fl t Ar type , Fl -type Ns No = Ns Ar type
+.It Fl t Ar type , Fl -type Ns = Ns Ar type
 Run the command with an SELinux security context that includes
 the specified
 .Ar type .
 If no
 .Ar type
 is specified, the default type is derived from the role.
-.It Fl U Ar user , Fl -other-user Ns No = Ns Ar user
+.It Fl U Ar user , Fl -other-user Ns = Ns Ar user
 Used in conjunction with the
 .Fl l
 option to list the privileges for
@@ -487,7 +487,7 @@ The
 policy only allows root or a user with the
 .Li ALL
 privilege on the current host to use this option.
-.It Fl u Ar user , Fl -user Ns No = Ns Ar user
+.It Fl u Ar user , Fl -user Ns = Ns Ar user
 Run the command as a user other than the default target user
 (usually
 .Em root ).
@@ -544,9 +544,9 @@ should stop processing command line arguments.
 .Pp
 Environment variables to be set for the command may also be passed
 on the command line in the form of
-.Ar VAR Ns No = Ns Ar value ,
+.Ar VAR Ns = Ns Ar value ,
 e.g.\&
-.Ev LD_LIBRARY_PATH Ns No = Ns Pa /usr/local/pkg/lib .
+.Ev LD_LIBRARY_PATH Ns = Ns Pa /usr/local/pkg/lib .
 Variables passed on the command line are subject to restrictions
 imposed by the security policy plugin.
 The
@@ -803,7 +803,7 @@ If a user runs a command such as
 or
 .Li sudo sh ,
 subsequent commands run from that shell are not subject to
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 security policy.
 The same is true for commands that offer shell escapes (including
 most editors).
@@ -1000,7 +1000,7 @@ if that user is allowed to run arbitrary commands via
 .Nm sudo .
 Also, many programs (such as editors) allow the user to run commands
 via shell escapes, thus avoiding
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 checks.
 However, on most systems it is possible to prevent shell escapes with the
 .Xr sudoers @mansectform@

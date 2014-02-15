@@ -397,7 +397,7 @@ debug flag syntax used by
 and the
 .Nm sudoers
 plugin is
-.Em subsystem Ns No @ Ns Em priority
+.Em subsystem Ns @ Ns Em priority
 but a plugin is free to use a different format so long as it does
 not include a comma
 .Pq Ql \&, .

@@ -67,7 +67,7 @@ log file.
 The
 .Em ID
 may also be determined using
-.Nm sudoreplay Ns No 's
+.Nm sudoreplay Ns 's
 list mode.
 .Pp
 In list mode,
@@ -81,7 +81,7 @@ will act on the following keys:
 .Bl -tag -width 12n
 .It So Li \en Sc No or So Li \er Sc
 Skip to the next replay event; useful for long pauses.
-.It So Li \  Sc No (space)
+.It So Li \  Sc Pq space
 Pause output; press any key to resume.
 .It Ql <
 Reduce the playback speed by one half.
@@ -91,12 +91,12 @@ Double the playback speed.
 .Pp
 The options are as follows:
 .Bl -tag -width Fl
-.It Fl d Ar dir , Fl -directory Ns No = Ns Ar dir
+.It Fl d Ar dir , Fl -directory Ns = Ns Ar dir
 Store session logs in
 .Ar dir
 instead of the default,
 .Pa @iolog_dir@ .
-.It Fl f Ar filter , Fl -filter Ns No = Ns Ar filter
+.It Fl f Ar filter , Fl -filter Ns = Ns Ar filter
 Select which I/O type(s) to display.
 By default,
 .Nm sudoreplay

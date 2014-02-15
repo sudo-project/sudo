@@ -140,7 +140,7 @@ will exit with a value of 0.
 If an error is encountered,
 .Nm visudo
 will exit with a value of 1.
-.It Fl f Ar sudoers , Fl -file Ns No = Ns Ar sudoers
+.It Fl f Ar sudoers , Fl -file Ns = Ns Ar sudoers
 Specify an alternate
 .Em sudoers
 file location.
@@ -196,7 +196,7 @@ Print the
 and
 .Em sudoers
 grammar versions and exit.
-.It Fl x Ar file , Fl -export Ns No = Ns Ar file
+.It Fl x Ar file , Fl -export Ns = Ns Ar file
 Export
 .Em sudoers
 in JSON format and write it to

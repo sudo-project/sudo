@@ -139,7 +139,7 @@ function that can be used by the plugin to interact with the user (see below).
 Returns 0 on success and \-1 on failure.
 .It plugin_printf
 A pointer to a
-.Fn printf Ns No -style
+.Fn printf Ns -style
 function that may be used to display informational or error messages
 (see below).
 Returns the number of characters printed on success and \-1 on failure.
@@ -188,7 +188,7 @@ The plugin may optionally pass this, or another value, back in the
 list.
 .It debug_flags=string
 A comma-separated list of debug flags that correspond to
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 .Li Debug
 entry in
 .Xr sudo.conf @mansectform@ ,
@@ -200,7 +200,7 @@ The syntax used by
 and the
 .Nm sudoers
 plugin is
-.Em subsystem Ns No @ Ns Em priority
+.Em subsystem Ns @ Ns Em priority
 but the plugin is free to use a different
 format so long as it does not include a comma
 .Pq Ql ,\& .
@@ -417,7 +417,7 @@ Any (non-comment) strings immediately after the plugin path are
 passed as arguments to the plugin.
 These arguments are split on a white space boundary and are passed to
 the plugin in the form of a
-.Dv NULL Ns No -terminated
+.Dv NULL Ns -terminated
 array of strings.
 If no arguments were
 specified,
@@ -471,7 +471,7 @@ The name of the user invoking
 .El
 .It user_env
 The user's environment in the form of a
-.Dv NULL Ns No -terminated vector of
+.Dv NULL Ns -terminated vector of
 .Dq name=value
 strings.
 .Pp
@@ -658,7 +658,7 @@ pointer.
 .It env_add
 Additional environment variables specified by the user on the command
 line in the form of a
-.Dv NULL Ns No -terminated
+.Dv NULL Ns -terminated
 vector of
 .Dq name=value
 strings.
@@ -889,14 +889,14 @@ the invoking user's existing entry.
 Unsupported values will be ignored.
 .It argv_out
 The
-.Dv NULL Ns No -terminated
+.Dv NULL Ns -terminated
 argument vector to pass to the
 .Xr execve 2
 system call when executing the command.
 The plugin is responsible for allocating and populating the vector.
 .It user_env_out
 The
-.Dv NULL Ns No -terminated
+.Dv NULL Ns -terminated
 environment vector to use when executing the command.
 The plugin is responsible for allocating and populating the vector.
 .El
@@ -1046,7 +1046,7 @@ The
 .Em user_env
 argument points to the environment the command will
 run in, in the form of a
-.Dv NULL Ns No -terminated
+.Dv NULL Ns -terminated
 vector of
 .Dq name=value
 strings.
@@ -1330,7 +1330,7 @@ The
 function returns 0 on success and \-1 on failure.
 .It plugin_printf
 A pointer to a
-.Fn printf Ns No -style
+.Fn printf Ns -style
 function that may be used by the
 .Fn show_version
 function to display version information (see
@@ -1410,7 +1410,7 @@ wishes to run in the same form as what would be passed to the
 system call.
 .It user_env
 The user's environment in the form of a
-.Dv NULL Ns No -terminated
+.Dv NULL Ns -terminated
 vector of
 .Dq name=value
 strings.
@@ -1432,7 +1432,7 @@ Any (non-comment) strings immediately after the plugin path are
 treated as arguments to the plugin.
 These arguments are split on a white space boundary and are passed to
 the plugin in the form of a
-.Dv NULL Ns No -terminated
+.Dv NULL Ns -terminated
 array of strings.
 If no arguments were specified,
 .Em plugin_options
@@ -1926,7 +1926,7 @@ The caller must include a trailing newline in
 if one is to be printed.
 .Pp
 A
-.Fn printf Ns No -style
+.Fn printf Ns -style
 function is also available that can be used to display informational
 or error messages to the user, which is usually more convenient for
 simple messages where no use input is required.
@@ -1960,7 +1960,7 @@ typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
 Pointers to the
 .Fn conversation
 and
-.Fn printf Ns No -style
+.Fn printf Ns -style
 functions are passed
 in to the plugin's
 .Fn open
@@ -1994,7 +1994,7 @@ It is also useful as a maximum value for the
 function when clearing passwords filled in by the conversation function.
 .Pp
 The
-.Fn printf Ns No -style
+.Fn printf Ns -style
 function uses the same underlying mechanism as the
 .Fn conversation
 function but only supports
@@ -2110,12 +2110,12 @@ major and minor version number of the group plugin API supported by
 .Nm sudoers .
 .It plugin_printf
 A pointer to a
-.Fn printf Ns No -style
+.Fn printf Ns -style
 function that may be used to display informational or error message to the user.
 Returns the number of characters printed on success and \-1 on failure.
 .It argv
 A
-.Dv NULL Ns No -terminated
+.Dv NULL Ns -terminated
 array of arguments generated from the
 .Em group_plugin
 option in

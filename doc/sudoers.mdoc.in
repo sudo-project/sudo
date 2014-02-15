@@ -348,7 +348,7 @@ and, as such, it is not possible for
 to preserve them.
 .Pp
 As a special case, if
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 .Fl i
 option (initial login) is
 specified,
@@ -533,7 +533,7 @@ non-Unix group names and IDs (prefixed with
 and
 .Ql %:#
 respectively) and
-.Li User_Alias Ns No es.
+.Li User_Alias Ns es.
 Each list item may be prefixed with zero or more
 .Ql \&!
 operators.
@@ -607,9 +607,9 @@ is similar to a
 .Li User_List
 except that instead
 of
-.Li User_Alias Ns No es
+.Li User_Alias Ns es
 it can contain
-.Li Runas_Alias Ns No es .
+.Li Runas_Alias Ns es .
 Note that
 user names and groups are matched as strings.
 In other words, two
@@ -875,7 +875,7 @@ may be run as.
 A fully-specified
 .Li Runas_Spec
 consists of two
-.Li Runas_List Ns No s
+.Li Runas_List Ns s
 (as defined above) separated by a colon
 .Pq Ql :\&
 and enclosed in a set of parentheses.
@@ -883,18 +883,18 @@ The first
 .Li Runas_List
 indicates
 which users the command may be run as via
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 .Fl u
 option.
 The second defines a list of groups that can be specified via
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 .Fl g
 option.
 If both
-.Li Runas_List Ns No s
+.Li Runas_List Ns s
 are specified, the command may be run with any combination of users
 and groups listed in their respective
-.Li Runas_List Ns No s.
+.Li Runas_List Ns s.
 If only the first is specified, the command may be run as any user
 in the list but no
 .Fl g
@@ -907,7 +907,7 @@ second is specified, the command may be run as the invoking user
 with the group set to any listed in the
 .Li Runas_List .
 If both
-.Li Runas_List Ns No s
+.Li Runas_List Ns s
 are empty, the command may only be run as the invoking user.
 If no
 .Li Runas_Spec
@@ -930,7 +930,7 @@ may run
 .Pa /bin/ls ,
 .Pa /bin/kill ,
 and
-.Pa /usr/bin/lprm Ns No \(em Ns but
+.Pa /usr/bin/lprm Ns \(em Ns but
 only as
 .Sy operator .
 E.g.,
@@ -1087,7 +1087,7 @@ and
 Once a tag is set on a
 .Li Cmnd ,
 subsequent
-.Li Cmnd Ns No s
+.Li Cmnd Ns s
 in the
 .Li Cmnd_Spec_List ,
 inherit the tag unless it is overridden by the opposite tag (in other words,
@@ -1579,7 +1579,7 @@ when used as part of a word (e.g.\& a user name or host name):
 .Ql )\& ,
 .Ql \e .
 .Sh SUDOERS OPTIONS
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 behavior can be modified by
 .Li Default_Entry
 lines, as explained earlier.
@@ -1628,7 +1628,7 @@ This flag is
 by default.
 .It closefrom_override
 If set, the user may use
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 .Fl C
 option which overrides the default starting point at which
 .Nm sudo
@@ -2637,9 +2637,9 @@ escape sequences.
 .Pp
 In addition to the escape sequences, path names that end in six or
 more
-.Li X Ns No s
+.Li X Ns s
 will have the
-.Li X Ns No s
+.Li X Ns s
 replaced with a unique combination of digits and letters, similar to the
 .Xr mktemp 3
 function.
@@ -2653,7 +2653,7 @@ overwritten unless
 .Em iolog_file
 ends in six or
 more
-.Li X Ns No s .
+.Li X Ns s .
 .It lecture_status_dir
 The directory in which
 .Nm sudo
@@ -3150,7 +3150,7 @@ Environment variables to be preserved in the user's environment when the
 .Em env_reset
 option is in effect.
 This allows fine-grained control over the environment
-.Nm sudo Ns No -spawned
+.Nm sudo Ns -spawned
 processes will receive.
 The argument may be a double-quoted, space-separated list or a
 single value without double-quotes.
@@ -3328,7 +3328,7 @@ failed attempts and the value of the
 .Em passwd_tries
 option.
 .It a password is required
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 .Fl n
 option was specified but a password was required.
 .It sorry, you are not allowed to set the following environment variables
@@ -3998,7 +3998,7 @@ executes a program, that program is free to do whatever
 it pleases, including run other programs.
 This can be a security issue since it is not uncommon for a program to
 allow shell escapes, which lets a user bypass
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 access control and logging.
 Common programs that permit shell escapes include shells (obviously),
 editors, paginators, mail and terminal programs.
@@ -4024,7 +4024,7 @@ variable (usually
 .Ev LD_PRELOAD )
 to an alternate shared library.
 On such systems,
-.Nm sudo Ns No 's
+.Nm sudo Ns 's
 .Em noexec
 functionality can be used to prevent a program run by
 .Nm sudo
@@ -4209,7 +4209,7 @@ The
 plugin uses the same debug flag format as the
 .Nm sudo
 front-end:
-.Em subsystem Ns No @ Ns Em priority .
+.Em subsystem Ns @ Ns Em priority .
 .Pp
 The priorities used by
 .Nm sudoers ,
