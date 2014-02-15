@@ -1388,7 +1388,7 @@ For example:
 .nf
 .sp
 .RS 4n
-/bin/ls [[\&:alpha\&:]]*
+/bin/ls [[:\&alpha:\&]]*
 .RE
 .fi
 .PP
