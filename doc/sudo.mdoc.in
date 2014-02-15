@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2013
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2014
 .\"	Todd C. Miller <Todd.Miller@courtesan.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd December 8, 2013
+.Dd February 15, 2014
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -32,105 +32,45 @@
 .Nm sudo
 .Fl v
 .Op Fl AknS
-.Bk -words
 .Op Fl a Ar type
-.Ek
-.Bk -words
 .Op Fl g Ar group
-.Ek
-.Bk -words
 .Op Fl h Ar host
-.Ek
-.Bk -words
 .Op Fl p Ar prompt
-.Ek
-.Bk -words
 .Op Fl u Ar user
-.Ek
 .Nm sudo
 .Fl l
 .Op Fl AknS
-.Bk -words
 .Op Fl a Ar type
-.Ek
-.Bk -words
 .Op Fl g Ar group
-.Ek
-.Bk -words
 .Op Fl h Ar host
-.Ek
-.Bk -words
 .Op Fl p Ar prompt
-.Ek
-.Bk -words
 .Op Fl U Ar user
-.Ek
-.Bk -words
 .Op Fl u Ar user
-.Ek
 .Op Ar command
 .Nm sudo
 .Op Fl AbEHnPS
-.Bk -words
 .Op Fl a Ar type
-.Ek
-.Bk -words
 .Op Fl C Ar num
-.Ek
-.Bk -words
 .Op Fl c Ar class
-.Ek
-.Bk -words
 .Op Fl g Ar group
-.Ek
-.Bk -words
 .Op Fl h Ar host
-.Ek
-.Bk -words
 .Op Fl p Ar prompt
-.Ek
-.Bk -words
 .Op Fl r Ar role
-.Ek
-.Bk -words
 .Op Fl t Ar type
-.Ek
-.Bk -words
 .Op Fl u Ar user
-.Ek
-.Bk -words
 .Op Ar VAR Ns = Ns Ar value
-.Ek
-.Bk -words
 .Op Fl i No | Fl s
-.Ek
 .Op Ar command
 .Nm sudoedit
 .Op Fl AknS
-.Bk -words
 .Op Fl a Ar type
-.Ek
-.Bk -words
 .Op Fl C Ar num
-.Ek
-.Bk -words
 .Op Fl c Ar class
-.Ek
-.Bk -words
 .Op Fl g Ar group
-.Ek
-.Bk -words
 .Op Fl h Ar host
-.Ek
-.Bk -words
 .Op Fl p Ar prompt
-.Ek
-.Bk -words
 .Op Fl u Ar user
-.Ek
-.Bk -words
 file ...
-.Ek
 .Sh DESCRIPTION
 .Nm sudo
 allows a permitted user to execute a
