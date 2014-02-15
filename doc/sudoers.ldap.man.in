@@ -138,17 +138,17 @@ It consists of the following attributes:
 .TP 6n
 \fBsudoUser\fR
 A user name, user ID (prefixed with
-`#'),
+\(oq#\(cq),
 Unix group name or ID (prefixed with
-`%'
+\(oq%\(cq
 or
-`%#'
+\(oq%#\(cq
 respectively), user netgroup (prefixed with
-`+'),
+\(oq+\(cq),
 or non-Unix group name or ID (prefixed with
-`%:'
+\(oq%:\(cq
 or
-`%:#'
+\(oq%:#\(cq
 respectively).
 Non-Unix group support is only available when an appropriate
 \fIgroup_plugin\fR
@@ -159,7 +159,7 @@ object.
 .TP 6n
 \fBsudoHost\fR
 A host name, IP address, IP network, or host netgroup (prefixed with a
-`+').
+\(oq+\(cq).
 The special value
 \fRALL\fR
 will match any host.
@@ -168,11 +168,11 @@ will match any host.
 A fully-qualified Unix command name with optional command line arguments,
 potentially including globbing characters (aka wild cards).
 If a command name is preceded by an exclamation point,
-`\&!',
+\(oq\&!\(cq,
 the user will be prohibited from running that command.
 .sp
 The built-in command
-``\fRsudoedit\fR''
+\(lq\fRsudoedit\fR\(rq
 is used to permit a user to run
 \fBsudo\fR
 with the
@@ -181,7 +181,7 @@ option (or as
 \fBsudoedit\fR).
 It may take command line arguments just as a normal command does.
 Note that
-``\fRsudoedit\fR''
+\(lq\fRsudoedit\fR\(rq
 is a command built into
 \fBsudo\fR
 itself and must be specified in without a leading path.
@@ -197,39 +197,36 @@ This may be useful in situations where the user invoking
 has write access to the command or its parent directory.
 The following digest formats are supported: sha224, sha256, sha384 and sha512.
 The digest name must be followed by a colon
-(`:\&')
+(\(oq:\&\(cq)
 and then the actual digest, in either hex or base64 format.
 For example, given the following value for sudoCommand:
-.RS
 .nf
 .sp
-.RS 4n
+.RS 10n
 sha224:0GomF8mNN3wlDt1HD9XldjJ3SNgpFdbjO1+NsQ /bin/ls
 .RE
 .fi
+.RS 6n
 .sp
 The user may only run
 \fI/bin/ls\fR
 if its sha224 digest matches the specified value.
 Command digests are only supported by version 1.8.7 or higher.
-.PP
 .RE
-.PD 0
 .TP 6n
 \fBsudoOption\fR
 Identical in function to the global options described above, but
 specific to the
 \fRsudoRole\fR
 in which it resides.
-.PD
 .TP 6n
 \fBsudoRunAsUser\fR
 A user name or uid (prefixed with
-`#')
+\(oq#\(cq)
 that commands may be run as or a Unix group (prefixed with a
-`%')
+\(oq%\(cq)
 or user netgroup (prefixed with a
-`+')
+\(oq+\(cq)
 that contains a list of users that commands may be run as.
 The special value
 \fRALL\fR
@@ -249,7 +246,7 @@ attribute instead.
 .TP 6n
 \fBsudoRunAsGroup\fR
 A Unix group or gid (prefixed with
-`#')
+\(oq#\(cq)
 that commands may be run as.
 The special value
 \fRALL\fR
@@ -323,7 +320,7 @@ If multiple entries match, the entry with the highest
 \fRsudoOrder\fR
 attribute is chosen.
 This corresponds to the
-``last match''
+\(lqlast match\(rq
 behavior of the sudoers file.
 If the
 \fRsudoOrder\fR
@@ -514,12 +511,12 @@ Configuration options are listed below in upper case but are parsed
 in a case-independent manner.
 .PP
 The pound sign
-(`#')
+(\(oq#\(cq)
 is used to indicate a comment.
 Both the comment character and any text after it, up to the end of
 the line, are ignored.
 Long lines can be continued with a backslash
-(`\e')
+(\(oq\e\(cq)
 as the last character on the line.
 Note that leading white space is removed from the beginning of lines
 even when the continuation character is used.
@@ -567,7 +564,7 @@ parameter specifies a white space-delimited list of LDAP servers to connect to.
 Each host may include an optional
 \fIport\fR
 separated by a colon
-(`:\&').
+(\(oq:\&\(cq).
 The
 \fBHOST\fR
 parameter is deprecated in favor of the
@@ -672,7 +669,7 @@ parameter is deprecated and will be removed in a future release.
 The same information is now logged via the
 \fBsudo\fR
 debugging framework using the
-``ldap''
+\(lqldap\(rq
 subsystem at priorities
 \fIdiag\fR
 and
@@ -797,10 +794,13 @@ This option is only supported by the OpenLDAP libraries.
 The path to a file containing the client certificate which can
 be used to authenticate the client to the LDAP server.
 The certificate type depends on the LDAP libraries used.
-.RS
+.PP
+.RS 6n
+.PD 0
 .TP 6n
 OpenLDAP:
 \fRtls_cert /etc/ssl/client_cert.pem\fR
+.PD
 .TP 6n
 Netscape-derived:
 \fRtls_cert /var/ldap/cert7.db\fR
@@ -812,9 +812,10 @@ contains both keys and certificates.
 .sp
 When using Netscape-derived libraries, this file may also contain
 Certificate Authority certificates.
+.PD 0
 .PP
 .RE
-.PD 0
+.PD
 .TP 6n
 \fBTLS_KEY\fR \fIfile name\fR
 The path to a file containing the private key which matches the
@@ -822,11 +823,13 @@ certificate specified by
 \fBTLS_CERT\fR.
 The private key must not be password-protected.
 The key type depends on the LDAP libraries used.
-.RS
-.PD
+.PP
+.RS 6n
+.PD 0
 .TP 6n
 OpenLDAP:
 \fRtls_key /etc/ssl/client_key.pem\fR
+.PD
 .TP 6n
 Netscape-derived:
 \fRtls_key /var/ldap/key3.db\fR
@@ -835,12 +838,10 @@ Tivoli Directory Server:
 \fRtls_key /usr/ldap/ldapkey.kdb\fR
 .PD 0
 .PP
-.PD
 When using Tivoli LDAP libraries, this file may also contain
 Certificate Authority and client certificates and may be encrypted.
-.PP
 .RE
-.PD 0
+.PD
 .TP 6n
 \fBTLS_KEYPW\fR \fIsecret\fR
 The
@@ -849,9 +850,9 @@ contains the password used to decrypt the key database on clients
 using the Tivoli Directory Server LDAP library.
 This should be a simple string without quotes.
 The password may not include the comment character
-(`#')
+(\(oq#\(cq)
 and escaping of special characters with a backslash
-(`\e')
+(\(oq\e\(cq)
 is not supported.
 If this option is used,
 \fI@ldap_conf@\fR
@@ -884,7 +885,6 @@ The
 utility can be used to manage the key database and create a
 \fIstash file\fR.
 This option is only supported by the Tivoli LDAP libraries.
-.PD
 .TP 6n
 \fBTLS_RANDFILE\fR \fIfile name\fR
 The
@@ -967,14 +967,17 @@ does
 not stop searching after the first match and later matches take
 precedence over earlier ones.
 The following sources are recognized:
+.PP
+.RS 4n
+.PD 0
 .TP 10n
 files
 read sudoers from
 \fI@sysconfdir@/sudoers\fR
-.PD 0
 .TP 10n
 ldap
 read sudoers from LDAP
+.RE
 .PD
 .PP
 In addition, the entry
@@ -1311,7 +1314,7 @@ search the archives.
 .SH "DISCLAIMER"
 \fBsudo\fR
 is provided
-``AS IS''
+\(lqAS IS\(rq
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.

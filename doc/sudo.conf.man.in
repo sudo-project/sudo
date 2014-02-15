@@ -57,13 +57,13 @@ and the
 plugin.
 .PP
 The pound sign
-(`#')
+(\(oq#\(cq)
 is used to indicate a comment.
 Both the comment character and any text after it, up to the end of
 the line, are ignored.
 .PP
 Long lines can be continued with a backslash
-(`\e')
+(\(oq\e\(cq)
 as the last character on the line.
 Note that leading white space is removed from the beginning of lines
 even when the continuation character is used.
@@ -79,7 +79,7 @@ are silently ignored.
 The
 \fBsudo.conf\fR
 file is always parsed in the
-``\fRC\fR''
+\(lq\fRC\fR\(rq
 locale.
 .SS "Plugin configuration"
 \fBsudo\fR
@@ -269,17 +269,17 @@ itself are disabled by default.
 To aid in debugging
 \fBsudo\fR
 crashes, you may wish to re-enable core dumps by setting
-``disable_coredump''
+\(lqdisable_coredump\(rq
 to false in
 \fBsudo.conf\fR
 as follows:
-.RS
 .nf
 .sp
-.RS 6n
+.RS 16n
 Set disable_coredump false
 .RE
 .fi
+.RS 10n
 .sp
 Note that most operating systems disable core dumps from setuid programs,
 including
@@ -297,9 +297,7 @@ command is used to configure core dump behavior.
 This setting is only available in
 \fBsudo\fR
 version 1.8.4 and higher.
-.PP
 .RE
-.PD 0
 .TP 10n
 group_source
 \fBsudo\fR
@@ -310,9 +308,10 @@ with NFS).
 On systems with the
 getconf(1)
 utility, running:
-.RS 6n
+.RS 16n
 getconf NGROUPS_MAX
 .RE
+.RS 10n
 will return the maximum number of groups.
 .sp
 However, it is still possible to be a member of a larger number of
@@ -333,15 +332,13 @@ setting allows the administrator to change this default behavior.
 Supported values for
 \fIgroup_source\fR
 are:
-.RS
-.PD
 .TP 10n
 static
 Use the static group list that the kernel returns.
 Retrieving the group list this way is very fast but it is subject
 to an upper limit as described above.
 It is
-``static''
+\(lqstatic\(rq
 in that it does not reflect changes to the group database made
 after the user logs in.
 This was the default behavior prior to
@@ -351,7 +348,7 @@ This was the default behavior prior to
 dynamic
 Always query the group database directly.
 It is
-``dynamic''
+\(lqdynamic\(rq
 in that changes made to the group database after the user logs in
 will be reflected in the group list.
 On some systems, querying the group database for all of a user's
@@ -376,7 +373,7 @@ For example, to cause
 to only use the kernel's static list of groups for the user:
 .nf
 .sp
-.RS 6n
+.RS 16n
 Set group_source static
 .RE
 .fi
@@ -384,9 +381,7 @@ Set group_source static
 This setting is only available in
 \fBsudo\fR
 version 1.8.7 and higher.
-.PP
 .RE
-.PD 0
 .TP 10n
 max_groups
 The maximum number of user groups to retrieve from the group database.
@@ -404,7 +399,6 @@ do not indicate an error when there is a lack of space.
 This setting is only available in
 \fBsudo\fR
 version 1.8.7 and higher.
-.PD
 .TP 10n
 probe_interfaces
 By default,
@@ -416,13 +410,13 @@ without having to query DNS.  On Linux systems with a large number
 of virtual interfaces, this may take a non-negligible amount of time.
 If IP-based matching is not required, network interface probing
 can be disabled as follows:
-.RS
 .nf
 .sp
-.RS 6n
+.RS 16n
 Set probe_interfaces false
 .RE
 .fi
+.RS 10n
 .sp
 This setting is only available in
 \fBsudo\fR
@@ -450,7 +444,7 @@ plugin is
 \fIsubsystem\fR@\fIpriority\fR
 but a plugin is free to use a different format so long as it does
 not include a comma
-(`\&,').
+(\(oq\&,\(cq).
 .PP
 For example:
 .nf
@@ -659,7 +653,7 @@ search the archives.
 .SH "DISCLAIMER"
 \fBsudo\fR
 is provided
-``AS IS''
+\(lqAS IS\(rq
 and any express or implied warranties, including, but not limited
 to, the implied warranties of merchantability and fitness for a
 particular purpose are disclaimed.
