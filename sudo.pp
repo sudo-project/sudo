@@ -291,6 +291,12 @@ still allow people to get their work done."
 	/usr/bin/sudoreplay    	0755 root: symlink $bindir/sudoreplay
 	/usr/sbin/visudo    	0755 root: symlink $sbindir/visudo
 %endif
+%if [aix]
+	/etc/rc.d/init.d/sudo	0755 root:
+%endif
+%if [sd]
+	/sbin/init.d/sudo	0755 root:
+%endif
 
 %files [!aix]
 	$sudoedit_man		0644 symlink,ignore-others $sudoedit_man_target
@@ -365,6 +371,18 @@ still allow people to get their work done."
 		exit 0;
 	'
 
+%post [aix]
+	# Create /etc/rc.d/rc2.d/S90sudo link if /etc/rc.d exists
+	if [ -d /etc/rc.d ]; then
+		rm -f /etc/rc.d/rc2.d/S90sudo
+		ln -s /etc/rc.d/init.d/sudo /etc/rc.d/rc2.d/S90sudo
+	fi
+%endif
+%post [sd]
+	# Create /sbin/rc2.d/S900sudo link
+	rm -f /sbin/rc2.d/S900sudo
+	ln -s /sbin/init.d/sudo /sbin/rc2.d/S900sudo
+%endif
 %preun
 	# Remove the time stamp dir and its contents
 	# We currently leave the lecture status files installed
@@ -378,4 +396,12 @@ still allow people to get their work done."
 	    X"`readlink /etc/sudo-ldap.conf 2>/dev/null`" = X"/etc/ldap/ldap.conf"; then
 		rm -f /etc/sudo-ldap.conf
 	fi
+%endif
+%if [aix]
+	# Remove /etc/rc.d/rc2.d/S90sudo link
+	rm -f /etc/rc.d/rc2.d/S90sudo
+%endif
+%if [sd]
+	# Remove /sbin/rc2.d/S900sudo link
+	rm -f /sbin/rc2.d/S900sudo
 %endif

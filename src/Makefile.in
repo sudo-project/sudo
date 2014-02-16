@@ -79,6 +79,11 @@ install_gid = 0
 shlib_ext = @SHLIB_EXT@
 shlib_mode = @SHLIB_MODE@
 
+# Optional init script and rc.d link
+INIT_DIR=@INIT_DIR@
+INIT_SCRIPT=@INIT_SCRIPT@
+RC_LINK=@RC_LINK@
+
 TEST_PROGS = check_ttyname
 TEST_LIBS = @LIBS@ @LIBINTL@ $(LT_LIBS)
 TEST_LDFLAGS = @LDFLAGS@
@@ -135,11 +140,20 @@ check_ttyname: $(CHECK_TTYNAME_OBJS) $(top_builddir)/common/libsudo_util.la $(LI
 
 pre-install:
 
-install: install-binaries @INSTALL_NOEXEC@
+install: install-binaries install-rc @INSTALL_NOEXEC@
 
 install-dirs:
 	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(bindir) \
 	    $(DESTDIR)$(libexecdir)/sudo $(DESTDIR)$(noexecdir)
+
+install-rc:
+	@if [ -n "$(INIT_SCRIPT)" ]; then \
+	    $(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(INIT_DIR) \
+		`echo $(DESTDIR)$(RC_LINK)|sed 's,/[^/]*$$,,'`; \
+	    $(INSTALL) -O $(install_uid) -G $(install_gid) -m 0755 $(top_srcdir)/init.d/$(INIT_SCRIPT) $(DESTDIR)$(INIT_DIR)/sudo; \
+	    rm -f $(DESTDIR)$(RC_LINK); \
+	    ln -s $(INIT_DIR)/sudo $(DESTDIR)$(RC_LINK); \
+	fi
 
 install-binaries: install-dirs $(PROGS)
 	$(INSTALL) -b~ -O $(install_uid) -G $(install_gid) -m 04755 sudo $(DESTDIR)$(bindir)/sudo

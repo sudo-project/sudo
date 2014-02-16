@@ -159,6 +159,8 @@ include/sudo_event.h
 include/sudo_plugin.h
 include/sudo_util.h
 indent.pro
+init.d/aix.sh.in
+init.d/hpux.sh.in
 install-sh
 ltmain.sh
 m4/ax_check_compile_flag.m4
@@ -410,7 +412,6 @@ src/locale_stub.c
 src/net_ifs.c
 src/openbsd.c
 src/parse_args.c
-src/preserve_fds.c
 src/po/README
 src/po/cs.mo
 src/po/cs.po
@@ -460,6 +461,7 @@ src/po/vi.po
 src/po/zh_CN.mo
 src/po/zh_CN.po
 src/preload.c
+src/preserve_fds.c
 src/regress/ttyname/check_ttyname.c
 src/selinux.c
 src/sesh.c

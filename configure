@@ -719,6 +719,9 @@ timeout
 vardir
 rundir
 iolog_dir
+RC_LINK
+INIT_DIR
+INIT_SCRIPT
 NO_VIZ
 SSP_CFLAGS
 SSP_LDFLAGS
@@ -2970,6 +2973,9 @@ $as_echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
+
+
 #
 # Begin initial values for man page substitution
 #
@@ -3046,6 +3052,9 @@ LT_LDEXPORTS="-export-symbols \$(shlib_exp)"
 LT_LDDEP="\$(shlib_exp)"
 NO_VIZ="-DNO_VIZ"
 OS_INIT=os_init_common
+INIT_SCRIPT=
+INIT_DIR=
+RC_LINK=
 
 CHECKSHADOW=true
 shadow_defs=
@@ -14223,6 +14232,11 @@ fi
 		    RTLD_PRELOAD_VAR="LDR_PRELOAD"
 		fi
 
+		# Remove timedir on boot, AIX does not have /var/run
+		INIT_SCRIPT=aix.sh
+		INIT_DIR=/etc/rc.d/init.d
+		RC_LINK=/etc/rc.d/rc2.d/S90sudo
+
 		# AIX-specific functions
 		for ac_func in getuserattr setauthdb setrlimit64
 do :
@@ -14252,6 +14266,11 @@ done
 		fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+
+		# HP-UX does not clear /var/run so we need to do it
+		INIT_SCRIPT=hpux.sh
+		INIT_DIR=/etc/rc.d/init.d
+		RC_LINK=/sbin/rc2.d/S900sudo
 
 		# HP-UX shared libs must be executable
 		SHLIB_MODE=0755
@@ -22388,7 +22407,7 @@ test "$localedir" = '${datarootdir}/locale' && localedir='$(datarootdir)/locale'
 test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
 test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
 
-ac_config_files="$ac_config_files Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
+ac_config_files="$ac_config_files Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -23376,6 +23395,8 @@ do
     "compat/Makefile") CONFIG_FILES="$CONFIG_FILES compat/Makefile" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "include/Makefile") CONFIG_FILES="$CONFIG_FILES include/Makefile" ;;
+    "init.d/aix.sh") CONFIG_FILES="$CONFIG_FILES init.d/aix.sh" ;;
+    "init.d/hpux.sh") CONFIG_FILES="$CONFIG_FILES init.d/hpux.sh" ;;
     "src/sudo_usage.h") CONFIG_FILES="$CONFIG_FILES src/sudo_usage.h" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "plugins/sample/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/sample/Makefile" ;;
@@ -24465,19 +24486,12 @@ $as_echo "$as_me: You will need to customize sample.pam and install it as /etc/p
 	    ;;
     esac
 fi
-clear_rundir=0
-case $host_os in
-    hpux*|aix*)
-	clear_rundir=1
+case "$rundir" in
+    /var/run*)
+	clear_rundir=0
 	;;
     *)
-	case "$rundir" in
-	    /var/run*)
-		;;
-	    *)
-		clear_rundir=1
-		;;
-	esac
+	clear_rundir=1
 	;;
 esac
 if test $clear_rundir -eq 1; then

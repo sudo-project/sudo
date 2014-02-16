@@ -86,6 +86,9 @@ AC_SUBST([PIE_CFLAGS])
 AC_SUBST([SSP_LDFLAGS])
 AC_SUBST([SSP_CFLAGS])
 AC_SUBST([NO_VIZ])
+AC_SUBST([INIT_SCRIPT])
+AC_SUBST([INIT_DIR])
+AC_SUBST([RC_LINK])
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -209,6 +212,9 @@ LT_LDEXPORTS="-export-symbols \$(shlib_exp)"
 LT_LDDEP="\$(shlib_exp)"
 NO_VIZ="-DNO_VIZ"
 OS_INIT=os_init_common
+INIT_SCRIPT=
+INIT_DIR=
+RC_LINK=
 
 dnl
 dnl Other vaiables
@@ -1672,6 +1678,11 @@ case "$host" in
 		    RTLD_PRELOAD_VAR="LDR_PRELOAD"
 		fi
 
+		# Remove timedir on boot, AIX does not have /var/run
+		INIT_SCRIPT=aix.sh
+		INIT_DIR=/etc/rc.d/init.d
+		RC_LINK=/etc/rc.d/rc2.d/S90sudo
+
 		# AIX-specific functions
 		AC_CHECK_FUNCS(getuserattr setauthdb setrlimit64)
 		COMMON_OBJS="${COMMON_OBJS} aix.lo"
@@ -1690,6 +1701,11 @@ case "$host" in
 		fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+
+		# HP-UX does not clear /var/run so we need to do it
+		INIT_SCRIPT=hpux.sh
+		INIT_DIR=/etc/rc.d/init.d
+		RC_LINK=/sbin/rc2.d/S900sudo
 
 		# HP-UX shared libs must be executable
 		SHLIB_MODE=0755
@@ -3778,7 +3794,7 @@ test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/
 dnl
 dnl Substitute into the Makefile and man pages
 dnl
-AC_CONFIG_FILES([Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
+AC_CONFIG_FILES([Makefile common/Makefile compat/Makefile doc/Makefile include/Makefile init.d/aix.sh init.d/hpux.sh src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/sudoers])
 AC_OUTPUT
 
 dnl
@@ -3798,22 +3814,14 @@ if test "$with_pam" = "yes"; then
     esac
 fi
 dnl
-dnl AIX and HP-UX do not clear /var/run
-dnl Also point out other non-cleared dirs
+dnl Warn user if they may need to clear rundir manually.
 dnl
-clear_rundir=0
-case $host_os in
-    hpux*|aix*)
-	clear_rundir=1
+case "$rundir" in
+    /var/run*)
+	clear_rundir=0
 	;;
     *)
-	case "$rundir" in
-	    /var/run*)
-		;;
-	    *)
-		clear_rundir=1
-		;;
-	esac
+	clear_rundir=1
 	;;
 esac
 if test $clear_rundir -eq 1; then
