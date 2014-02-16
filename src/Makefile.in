@@ -176,6 +176,9 @@ uninstall:
 	-rm -f	$(DESTDIR)$(bindir)/sudo $(DESTDIR)$(bindir)/sudoedit \
 		$(DESTDIR)$(libexecdir)/sudo/sesh \
 		$(DESTDIR)$(noexecdir)/$(noexecfile)
+	@if [ -n "$(INIT_SCRIPT)" ]; then \
+	    rm -f $(DESTDIR)$(RC_LINK) $(DESTDIR)$(INIT_DIR)/sudo; \
+	fi
 
 cppcheck:
 	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) -I$(top_srcdir) $(srcdir)/*.c
