@@ -1693,7 +1693,7 @@ case "$host" in
 
 		# HP-UX does not clear /var/run so we need to do it
 		INIT_SCRIPT=hpux.sh
-		INIT_DIR=/sbin/rc.d/init.d
+		INIT_DIR=/sbin/init.d
 		RC_LINK=/sbin/rc2.d/S900sudo
 
 		# HP-UX shared libs must be executable
@@ -1711,7 +1711,7 @@ case "$host" in
 
 		# HP-UX does not clear /var/run so we need to do it
 		INIT_SCRIPT=hpux.sh
-		INIT_DIR=/sbin/rc.d/init.d
+		INIT_DIR=/sbin/init.d
 		RC_LINK=/sbin/rc2.d/S900sudo
 
 		# HP-UX shared libs must be executable

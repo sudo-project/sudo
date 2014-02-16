@@ -299,6 +299,7 @@ still allow people to get their work done."
 	/etc/rc.d/init.d/sudo	0755 root:
 %endif
 %if [sd]
+	/sbin/			ignore
 	/sbin/rc2.d/		ignore
 	/sbin/rc2.d/**		ignore
 	/sbin/init.d/		ignore
