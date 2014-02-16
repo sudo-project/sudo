@@ -14256,8 +14256,25 @@ done
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 
+		# HP-UX does not clear /var/run so we need to do it
+		INIT_SCRIPT=hpux.sh
+		INIT_DIR=/sbin/rc.d/init.d
+		RC_LINK=/sbin/rc2.d/S900sudo
+
 		# HP-UX shared libs must be executable
 		SHLIB_MODE=0755
+
+		for ac_func in pstat_getproc
+do :
+  ac_fn_c_check_func "$LINENO" "pstat_getproc" "ac_cv_func_pstat_getproc"
+if test "x$ac_cv_func_pstat_getproc" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PSTAT_GETPROC 1
+_ACEOF
+
+fi
+done
+
 		;;
     *-*-hpux*)
 		# AFS support needs -lBSD
@@ -14269,7 +14286,7 @@ done
 
 		# HP-UX does not clear /var/run so we need to do it
 		INIT_SCRIPT=hpux.sh
-		INIT_DIR=/etc/rc.d/init.d
+		INIT_DIR=/sbin/rc.d/init.d
 		RC_LINK=/sbin/rc2.d/S900sudo
 
 		# HP-UX shared libs must be executable

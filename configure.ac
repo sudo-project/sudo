@@ -1691,8 +1691,15 @@ case "$host" in
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 
+		# HP-UX does not clear /var/run so we need to do it
+		INIT_SCRIPT=hpux.sh
+		INIT_DIR=/sbin/rc.d/init.d
+		RC_LINK=/sbin/rc2.d/S900sudo
+
 		# HP-UX shared libs must be executable
 		SHLIB_MODE=0755
+
+		AC_CHECK_FUNCS(pstat_getproc)
 		;;
     *-*-hpux*)
 		# AFS support needs -lBSD
@@ -1704,7 +1711,7 @@ case "$host" in
 
 		# HP-UX does not clear /var/run so we need to do it
 		INIT_SCRIPT=hpux.sh
-		INIT_DIR=/etc/rc.d/init.d
+		INIT_DIR=/sbin/rc.d/init.d
 		RC_LINK=/sbin/rc2.d/S900sudo
 
 		# HP-UX shared libs must be executable
