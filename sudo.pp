@@ -291,6 +291,9 @@ still allow people to get their work done."
 	/usr/bin/sudoreplay    	0755 root: symlink $bindir/sudoreplay
 	/usr/sbin/visudo    	0755 root: symlink $sbindir/visudo
 %endif
+%if [rpm]
+	/etc/rc.d/init.d/sudo	0755 root: optional
+%endif
 %if [aix]
 	/etc/rc.d/		ignore
 	/etc/rc.d/rc2.d/	ignore
@@ -379,6 +382,17 @@ still allow people to get their work done."
 		exit 0;
 	'
 
+%post [rpm]
+	case "%{pp_rpm_distro}" in
+	aix*)
+		# Create /etc/rc.d/rc2.d/S90sudo link if /etc/rc.d exists
+		if [ -d /etc/rc.d ]; then
+			rm -f /etc/rc.d/rc2.d/S90sudo
+			ln -s /etc/rc.d/init.d/sudo /etc/rc.d/rc2.d/S90sudo
+		fi
+		;;
+	esac
+
 %post [aix]
 	# Create /etc/rc.d/rc2.d/S90sudo link if /etc/rc.d exists
 	if [ -d /etc/rc.d ]; then
@@ -404,6 +418,14 @@ still allow people to get their work done."
 	    X"`readlink /etc/sudo-ldap.conf 2>/dev/null`" = X"/etc/ldap/ldap.conf"; then
 		rm -f /etc/sudo-ldap.conf
 	fi
+%endif
+%if [rpm]
+	case "%{pp_rpm_distro}" in
+	aix*)
+		# Remove /etc/rc.d/rc2.d/S90sudo link
+		rm -f /etc/rc.d/rc2.d/S90sudo
+		;;
+	esac
 %endif
 %if [aix]
 	# Remove /etc/rc.d/rc2.d/S90sudo link
