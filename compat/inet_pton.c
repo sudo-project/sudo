@@ -89,6 +89,7 @@ inet_pton4(const char *src, u_char *dst)
 
 	saw_digit = 0;
 	octets = 0;
+	/* cppcheck-suppress uninitvar */
 	*(tp = tmp) = '\0';
 	while ((ch = (unsigned char)*src++) != '\0') {
 		const char *pch;
@@ -142,6 +143,7 @@ inet_pton6(const char *src, u_char *dst)
 	int ch, saw_xdigit, count_xdigit;
 	u_int val;
 
+	/* cppcheck-suppress uninitvar */
 	memset((tp = tmp), 0, NS_IN6ADDRSZ);
 	endp = tp + NS_IN6ADDRSZ;
 	colonp = NULL;
