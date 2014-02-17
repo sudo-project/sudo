@@ -35,6 +35,14 @@ What's new in Sudo 1.8.10?
    server.  If netgroups are not needed, this option can be disabled
    to reduce the load on the LDAP server.
 
+ * Sudo is once again able to open the sudoers file when the group
+   on sudoers doesn't match the expected value, so long as the file
+   is not group writable.
+
+ * Sudo now installs an init.d script to clear the time stamp
+   directory at boot time on AIX and HP-UX systems.  These systems
+   either lack /var/run or do not clear it on boot.
+
 What's new in Sudo 1.8.9p5?
 
  * Fixed a compilation error on AIX when LDAP support is enabled.

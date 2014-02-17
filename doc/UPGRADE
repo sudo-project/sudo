@@ -12,6 +12,10 @@ o Upgrading from a version prior to 1.8.10:
     important that the time stamp files not persist when the system
     reboots.  For this reason, ther default location for the time
     stamp files has changed back to a directory located in /var/run.
+    Systems that do not have /var/run (e.g. AIX) or that do not clear
+    it on boot (e.g. HP-UX) will need to clear the time stamp
+    directory via a startup script.  Such a script is installed by
+    default on AIX and HP-UX systems.
 
     Because there is now a single time stamp file per user, the -K
     option will remove all of the user's time stamps, not just the
