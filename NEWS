@@ -43,6 +43,9 @@ What's new in Sudo 1.8.10?
    directory at boot time on AIX and HP-UX systems.  These systems
    either lack /var/run or do not clear it on boot.
 
+ * The JSON format used by "visudo -x" now uses the same type of
+   Options object for both Defaults and Cmnd_Specs.
+
 What's new in Sudo 1.8.9p5?
 
  * Fixed a compilation error on AIX when LDAP support is enabled.

@@ -779,7 +779,7 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
     if (cs->tags.nopasswd != UNSPEC || cs->tags.noexec != UNSPEC ||
 	cs->tags.setenv != UNSPEC || cs->tags.log_input != UNSPEC ||
 	cs->tags.log_output != UNSPEC) {
-	fprintf(fp, "%*s\"Options\": {\n", indent, "");
+	fprintf(fp, "%*s\"Options\": [\n", indent, "");
 	indent += 4;
 	if (cs->tags.nopasswd != UNSPEC) {
 	    value.type = JSON_BOOL;
@@ -787,39 +787,39 @@ print_cmndspec_json(FILE *fp, struct cmndspec *cs, struct cmndspec **nextp,
 	    last_one = cs->tags.noexec == UNSPEC &&
 		cs->tags.setenv == UNSPEC && cs->tags.log_input == UNSPEC &&
 		cs->tags.log_output == UNSPEC;
-	    print_pair_json(fp, NULL, "authenticate", &value,
-		last_one ? "\n" : ",\n", indent);
+	    print_pair_json(fp, "{ ", "authenticate", &value,
+		last_one ? " }\n" : " },\n", indent);
 	}
 	if (cs->tags.noexec != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = cs->tags.noexec;
 	    last_one = cs->tags.setenv == UNSPEC &&
 		cs->tags.log_input == UNSPEC && cs->tags.log_output == UNSPEC;
-	    print_pair_json(fp, NULL, "noexec", &value,
-		last_one ? "\n" : ",\n", indent);
+	    print_pair_json(fp, "{ ", "noexec", &value,
+		last_one ? " }\n" : " },\n", indent);
 	}
 	if (cs->tags.setenv != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = cs->tags.setenv;
 	    last_one = cs->tags.log_input == UNSPEC &&
 		cs->tags.log_output == UNSPEC;
-	    print_pair_json(fp, NULL, "setenv", &value,
-		last_one ? "\n" : ",\n", indent);
+	    print_pair_json(fp, "{ ", "setenv", &value,
+		last_one ? " }\n" : " },\n", indent);
 	}
 	if (cs->tags.log_input != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = cs->tags.log_input;
 	    last_one = cs->tags.log_output == UNSPEC;
-	    print_pair_json(fp, NULL, "log_input", &value,
-		last_one ? "\n" : ",\n", indent);
+	    print_pair_json(fp, "{ ", "log_input", &value,
+		last_one ? " }\n" : " },\n", indent);
 	}
 	if (cs->tags.log_output != UNSPEC) {
 	    value.type = JSON_BOOL;
 	    value.u.boolean = cs->tags.log_output;
-	    print_pair_json(fp, NULL, "log_output", &value, "\n", indent);
+	    print_pair_json(fp, "{ ", "log_output", &value, " }\n", indent);
 	}
 	indent -= 4;
-	fprintf(fp, "%*s},\n", indent, "");
+	fprintf(fp, "%*s],\n", indent, "");
     }
 
 #ifdef HAVE_SELINUX
