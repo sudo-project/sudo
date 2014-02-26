@@ -189,7 +189,7 @@ found_it:
 	    "short write, truncating partial time stamp record");
 	if (ftruncate(fd, old_eof) != 0) {
 	    warning(U_("unable to truncate time stamp file to %lld bytes"),
-		old_eof);
+		(long long)old_eof);
 	}
     }
 
@@ -474,8 +474,8 @@ timestamp_status(struct passwd *pw)
     /* Compare stored time stamp with current time. */
     sudo_timespecsub(&timestamp_key.ts, &entry.ts, &diff);
     timeout.tv_sec = 60 * def_timestamp_timeout;
-    timeout.tv_nsec =
-	((60.0 * def_timestamp_timeout) - timeout.tv_sec) * 1000000000000000000;
+    timeout.tv_nsec = ((60.0 * def_timestamp_timeout) - (double)timeout.tv_sec)
+	* 1000000000.0;
     if (sudo_timespeccmp(&diff, &timeout, <)) {
 	status = TS_CURRENT;
 #ifdef CLOCK_MONOTONIC
