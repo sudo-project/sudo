@@ -37,13 +37,11 @@ typedef struct sudo_auth {
 } sudo_auth;
 
 /* Values for sudo_auth.flags.  */
-#define FLAG_USER	0x01	/* functions must run as the user, not root */
 #define FLAG_DISABLED	0x02	/* method disabled */
 #define FLAG_STANDALONE	0x04	/* standalone auth method */
 #define FLAG_ONEANDONLY	0x08	/* one and only auth method */
 
 /* Shortcuts for using the flags above. */
-#define NEEDS_USER(x)		((x)->flags & FLAG_USER)
 #define IS_DISABLED(x)		((x)->flags & FLAG_DISABLED)
 #define IS_STANDALONE(x)	((x)->flags & FLAG_STANDALONE)
 #define IS_ONEANDONLY(x)	((x)->flags & FLAG_ONEANDONLY)

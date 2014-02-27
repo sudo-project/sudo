@@ -129,15 +129,8 @@ sudo_auth_init(struct passwd *pw)
     /* Initialize auth methods and unconfigure the method if necessary. */
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->init && !IS_DISABLED(auth)) {
-	    if (NEEDS_USER(auth))
-		set_perms(PERM_USER);
-
-	    status = (auth->init)(pw, auth);
-
-	    if (NEEDS_USER(auth))
-		restore_perms();
-
 	    /* Disable if it failed to init unless there was a fatal error. */
+	    status = (auth->init)(pw, auth);
 	    if (status == AUTH_FAILURE)
 		SET(auth->flags, FLAG_DISABLED);
 	    else if (status == AUTH_FATAL)
@@ -161,14 +154,7 @@ sudo_auth_cleanup(struct passwd *pw)
     /* Call cleanup routines. */
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->cleanup && !IS_DISABLED(auth)) {
-	    if (NEEDS_USER(auth))
-		set_perms(PERM_USER);
-
 	    status = (auth->cleanup)(pw, auth);
-
-	    if (NEEDS_USER(auth))
-		restore_perms();
-
 	    if (status == AUTH_FATAL)
 		break;		/* assume error msg already printed */
 	}
@@ -212,14 +198,7 @@ verify_user(struct passwd *pw, char *prompt, int validated)
 	/* Do any per-method setup and unconfigure the method if needed */
 	for (auth = auth_switch; auth->name; auth++) {
 	    if (auth->setup && !IS_DISABLED(auth)) {
-		if (NEEDS_USER(auth))
-		    set_perms(PERM_USER);
-
 		status = (auth->setup)(pw, &prompt, auth);
-
-		if (NEEDS_USER(auth))
-		    restore_perms();
-
 		if (status == AUTH_FAILURE)
 		    SET(auth->flags, FLAG_DISABLED);
 		else if (status == AUTH_FATAL)
@@ -242,14 +221,7 @@ verify_user(struct passwd *pw, char *prompt, int validated)
 	    if (IS_DISABLED(auth))
 		continue;
 
-	    if (NEEDS_USER(auth))
-		set_perms(PERM_USER);
-
 	    success = auth->status = (auth->verify)(pw, p, auth);
-
-	    if (NEEDS_USER(auth))
-		restore_perms();
-
 	    if (auth->status != AUTH_FAILURE)
 		goto done;
 	}
