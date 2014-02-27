@@ -213,7 +213,6 @@ case "$osversion" in
 		--with-password-timeout=0
 		--with-passprompt=[sudo] password for %p: 
 		--disable-root-mailer
-		--disable-setresuid
 		--with-sendmail=/usr/sbin/sendmail
 		--mandir=/usr/share/man
 		--libexecdir=/usr/lib
