@@ -30,6 +30,7 @@
 # endif
 #endif /* STDC_HEADERS */
 #include <fcntl.h>
+#include <limits.h>
 #ifdef HAVE_PSTAT_GETPROC
 # include <sys/param.h>
 # include <sys/pstat.h>
@@ -62,7 +63,7 @@
 
 /*
  * Close all file descriptors greater than or equal to lowfd.
- * This is the expensive (ballback) method.
+ * This is the expensive (fallback) method.
  */
 void
 closefrom_fallback(lowfd)
