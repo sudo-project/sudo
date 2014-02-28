@@ -3313,7 +3313,7 @@ if test ${with_ldap-'no'} != "no"; then
     case "$host_os" in
 	hpux*) AC_CHECK_LIB(Csup, main, [IBMLDAP_EXTRA=" -lCsup"]);;
     esac
-    AC_SEARCH_LIBS(ldap_init, "ldap" "ldap -llber" "ldap -llber -lssl -lcrypto" "ibmldap${IBMLDAP_EXTRA}" "ibmldap -lidsldif${IBMLDAP_EXTRA}", [
+    AC_SEARCH_LIBS(ldap_init, "ibmldap${IBMLDAP_EXTRA}" "ibmldap -lidsldif${IBMLDAP_EXTRA}" "ldap" "ldap -llber" "ldap -llber -lssl -lcrypto" "ibmldap${IBMLDAP_EXTRA}", [
 	test "$ac_res" != "none required" && LDAP_LIBS="$ac_res"
 	found=yes
     ])
@@ -3324,16 +3324,23 @@ if test ${with_ldap-'no'} != "no"; then
     LIBS="${_LIBS} ${LDAP_LIBS}"
     dnl check if we need to link with -llber for ber_set_option
     OLIBS="$LIBS"
-    AC_SEARCH_LIBS([ber_set_option], [lber], [found=yes], [found=no])
-    if test X"$found" = X"yes" -a X"$LIBS" != X"$OLIBS"; then
-	LDAP_LIBS="$LDAP_LIBS -llber"
-    fi
-    dnl check if ldap.h includes lber.h for us
-    AC_MSG_CHECKING([whether lber.h is needed])
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#   include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [AC_MSG_RESULT([no])], [
-    AC_MSG_RESULT([yes])
-    AC_DEFINE(HAVE_LBER_H)])
+    AC_MSG_CHECKING([whether lber.h defines LBER_OPT_DEBUG_LEVEL])
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
+#   include <lber.h>]], [[int opt=LBER_OPT_DEBUG_LEVEL;]])], [
+	AC_MSG_RESULT([yes])
+	AC_SEARCH_LIBS([ber_set_option], [lber], [found=yes], [found=no])
+	if test X"$found" = X"yes" -a X"$LIBS" != X"$OLIBS"; then
+	    LDAP_LIBS="$LDAP_LIBS -llber"
+	fi
+	dnl check if ldap.h includes lber.h for us
+	AC_MSG_CHECKING([whether lber.h is needed])
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
+#       include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [AC_MSG_RESULT([no])], [
+	AC_MSG_RESULT([yes])
+	AC_DEFINE(HAVE_LBER_H)])
+    ], [
+	AC_MSG_RESULT([no])
+    ])
 
     AC_CHECK_HEADERS([sasl/sasl.h] [sasl.h], [
 	AC_CHECK_FUNCS(ldap_sasl_interactive_bind_s)
