@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007, 2010
+ * Copyright (c) 2004-2005, 2007, 2010, 2012-2013
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -83,8 +83,14 @@ closefrom_fallback(lowfd)
     if (maxfd < 0)
 	maxfd = OPEN_MAX;
 
-    for (fd = lowfd; fd < maxfd; fd++)
+    for (fd = lowfd; fd < maxfd; fd++) {
+#ifdef __APPLE__
+	/* Avoid potential libdispatch crash when we close its fds. */
+	(void) fcntl((int) fd, F_SETFD, FD_CLOEXEC);
+#else
 	(void) close((int) fd);
+#endif
+    }
 }
 
 /*
@@ -129,8 +135,14 @@ closefrom(lowfd)
 	while ((dent = readdir(dirp)) != NULL) {
 	    fd = strtol(dent->d_name, &endp, 10);
 	    if (dent->d_name != endp && *endp == '\0' &&
-		fd >= 0 && fd < INT_MAX && fd >= lowfd && fd != dirfd(dirp))
+		fd >= 0 && fd < INT_MAX && fd >= lowfd && fd != dirfd(dirp)) {
+# ifdef __APPLE__
+		/* Avoid potential libdispatch crash when we close its fds. */
+		(void) fcntl((int) fd, F_SETFD, FD_CLOEXEC);
+# else
 		(void) close((int) fd);
+# endif
+	    }
 	}
 	(void) closedir(dirp);
     } else
