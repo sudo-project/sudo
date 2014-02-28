@@ -125,13 +125,19 @@ void
 closefrom(lowfd)
     int lowfd;
 {
-    struct dirent *dent;
+    const char *path;
     DIR *dirp;
     char *endp;
     long fd;
 
-    /* Use /proc/self/fd directory if it exists. */
-    if ((dirp = opendir("/proc/self/fd")) != NULL) {
+    /* Use /proc/self/fd (or /dev/fd on FreeBSD) if it exists. */
+# if defined(__FreeBSD__) || defined(__APPLE__)
+    path = "/dev/fd";
+# else
+    path = "/proc/self/fd";
+# endif
+    if ((dirp = opendir(path)) != NULL) {
+	struct dirent *dent;
 	while ((dent = readdir(dirp)) != NULL) {
 	    fd = strtol(dent->d_name, &endp, 10);
 	    if (dent->d_name != endp && *endp == '\0' &&
